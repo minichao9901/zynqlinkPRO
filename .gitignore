@@ -12,3 +12,20 @@ releases/
 *.log
 .vivado/
 .Xil/
+
+# Local experiments and third-party reference trees
+NA/
+reference/
+firmware/cdc_bench/
+firmware/xusbps_cdc/
+firmware/xusbps_composite_bench/
+firmware/xusbps_daplink/
+usage_statistics_webtalk.*
+resultsdaplinksanity.bin
+__pycache__/
+*.pyc
+
+# Prebuilt release binaries are part of the repository
+!prebuilt/
+!prebuilt/*.bit
+!prebuilt/*.elf

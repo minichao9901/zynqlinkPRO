@@ -14,12 +14,21 @@ def main():
     ap.add_argument('--project', choices=['xusbps_daplink', 'xusbps_daplink_dma'], default='xusbps_daplink')
     ap.add_argument('--trace', action='store_true', help='Enable DMA firmware timing trace and MMIO diagnostics')
     ap.add_argument('--usb-trace', action='store_true', help='Trace USB events without per-MMIO diagnostics')
+    ap.add_argument('--bsp', default=None,
+                    help='BSP directory (default: reference/legacy_zynq/.../usb_bsp/ps7_cortexa9_0); '
+                         'a BSP root containing ps7_cortexa9_0 is also accepted')
+    ap.add_argument('--gcc', default=r'E:\Xilinx\SDK\2018.3\gnu\aarch32\nt\gcc-arm-none-eabi\bin\arm-none-eabi-gcc.exe')
     args = ap.parse_args()
     src = ROOT / 'firmware' / args.project
-    bsp = ROOT / 'reference/legacy_zynq/ZYNQ_DAPLINK_RTL_100TO50MHz/ZYNQ_DAPLINK_RTL_100TO50MHz.sdk/usb_bsp/ps7_cortexa9_0'
+    if args.bsp:
+        bsp = Path(args.bsp)
+        if (bsp / 'ps7_cortexa9_0').is_dir():
+            bsp = bsp / 'ps7_cortexa9_0'
+    else:
+        bsp = ROOT / 'reference/legacy_zynq/ZYNQ_DAPLINK_RTL_100TO50MHz/ZYNQ_DAPLINK_RTL_100TO50MHz.sdk/usb_bsp/ps7_cortexa9_0'
     out = ROOT / 'build' / args.project / f'O{args.opt}'
     out.mkdir(parents=True, exist_ok=True)
-    gcc = Path(r'E:\Xilinx\SDK\2018.3\gnu\aarch32\nt\gcc-arm-none-eabi\bin\arm-none-eabi-gcc.exe')
+    gcc = Path(args.gcc)
     flags = ['-mcpu=cortex-a9', '-mfpu=vfpv3', '-mfloat-abi=hard']
     verified_clock = None
     if args.project == 'xusbps_daplink_dma':
