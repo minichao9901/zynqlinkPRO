@@ -12,8 +12,11 @@ PS 跑 XUsbPs USB + CMSIS-DAP 协议，PL 里做 SWD 批量引擎和 CDMA 数据
 见 [prebuilt/README.md](prebuilt/README.md)。简要步骤：
 
 ```powershell
-# JTAG 加载 bit + ELF（需要 xsct / Vivado 2018.3）
-python tools\run_xsct.py tools\download_dap_fpga.tcl `
+# 方式 A：xsct 在 PATH 里（Vivado/SDK 2018.3 自带）
+xsct tools\download_dap_fpga.tcl prebuilt\zynqlink_packet.elf prebuilt\zynqlink_packet.bit
+
+# 方式 B：用仓库封装（需要 pip install pefile；--sdk 指向本机 SDK）
+python tools\run_xsct.py --sdk E:\Xilinx\SDK\2018.3 tools\download_dap_fpga.tcl `
     prebuilt\zynqlink_packet.elf prebuilt\zynqlink_packet.bit
 
 # OpenOCD 连接（60 MHz）
@@ -28,7 +31,7 @@ openocd -s <openocd>/share/openocd/scripts -f tools/openocd_dap.cfg `
 ### 1. 环境
 
 - Vivado / SDK **2018.3**（含 `xsct`、`arm-none-eabi-gcc`）
-- Python 3.10+，`pip install pyusb libusb-package pyserial`
+- Python 3.10+，`pip install pyusb libusb-package pyserial pefile`
 - （可选）OpenOCD 0.12 用于测速
 
 ### 2. 生成 bitstream
@@ -106,4 +109,5 @@ F103（HCLK=64 MHz）20 KiB SRAM 基准，三会话 ×100 轮，数据与 SRAM �
 - 固件通过 JTAG 加载到 OCM/DDR 运行，不修改 Flash；适合开发与测试。
 - 目标板测试使用 STM32F103（HCLK 64 MHz）；其它目标请自行验证时序。
 - 仓库不含 Xilinx BSP 二进制，需按上面的步骤从导出的 HDF 生成。
+
 

@@ -7,6 +7,7 @@
 |---|---|
 | `zynqlink_packet.bit` | PL 比特流（含 SWD 批量引擎、CDMA、命令/响应 BRAM） |
 | `zynqlink_packet.elf` | PS 固件（XUsbPs CMSIS-DAP v2 + CDC） |
+| `ps7_init.tcl` | PS 时钟/DDR 初始化（加载 ELF 前必须执行） |
 | `SHA256SUMS` | 校验值 |
 
 ## 加载
@@ -14,21 +15,15 @@
 需要 JTAG 探针（Digilent HS3 等）+ Xilinx `xsct`（Vivado/SDK 2018.3 自带）：
 
 ```powershell
-python tools\run_xsct.py tools\download_dap_fpga.tcl `
+# 方式 A：xsct 在 PATH 里
+xsct tools/download_dap_fpga.tcl prebuilt/zynqlink_packet.elf prebuilt/zynqlink_packet.bit
+
+# 方式 B：用仓库封装（需要 pip install pefile）
+python tools\run_xsct.py --sdk E:\Xilinx\SDK\2018.3 tools\download_dap_fpga.tcl `
     prebuilt\zynqlink_packet.elf prebuilt\zynqlink_packet.bit
 ```
 
-或者直接用 xsct：
-
-```tcl
-connect
-targets -set -filter {name =~ "APU"}
-rst -system
-fpga -file prebuilt/zynqlink_packet.bit
-targets -set -filter {name =~ "ARM Cortex-A9 MPCore #0*"}
-dow prebuilt/zynqlink_packet.elf
-con
-```
+脚本会依次执行 `ps7_init`、`fpga -f`、`dow`、`con`，最后打印 PC。
 
 加载成功后 USB 会出现：
 
