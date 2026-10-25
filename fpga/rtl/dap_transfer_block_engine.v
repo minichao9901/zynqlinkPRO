@@ -163,8 +163,11 @@ module dap_transfer_block_engine #(
                     end else if (seen_core_busy) begin
                         last_ack <= core_ack;
                         last_data <= core_rdata;
-                        if (core_parity_err || core_ack != 3'b001) begin
-                            status_code <= core_parity_err ? 8'h08 : {5'd0,core_ack};
+                        // SWD write transfers have no target-to-host parity
+                        // phase; ignore a stale parity flag left by a prior
+                        // read.  Only read completions can report parity.
+                        if ((is_read && core_parity_err) || core_ack != 3'b001) begin
+                            status_code <= (is_read && core_parity_err) ? 8'h08 : {5'd0,core_ack};
                             error <= 1;
                             state <= ST_WRITE_STATUS;
                         end else if (final_phase) begin
