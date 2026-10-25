@@ -12,6 +12,7 @@ module swd_controller #(
 )(
     input  wire                                    clk,
     input  wire                                    rst_n,
+    input  wire                                    ref_clk,   // 200 MHz for IDELAYCTRL
     
     // AXI-Lite Slave Interface
     input  wire [C_S_AXI_ADDR_WIDTH-1:0]           s_axi_awaddr,
@@ -90,12 +91,54 @@ module swd_controller #(
         .O (swdio_i_raw),
         .T (swdio_t)
     );
+
+    // Input delay line: moves the SWDIO sampling point later by N x ~78 ps.
+    // SWDIO (D19) is in HP bank 35, so IDELAYE2 is available; IDELAYCTRL
+    // needs the 200 MHz reference clock from PS FCLK1.
+    wire        swdio_idelay_out;
+    reg  [4:0]  cfg_in_delay;
+    reg  [4:0]  cfg_in_delay_q;
+    wire        idelay_ld = (cfg_in_delay != cfg_in_delay_q);
+
+    IDELAYCTRL u_idelayctrl (
+        .RDY(),
+        .REFCLK(ref_clk),
+        .RST(~rst_n)
+    );
+
+    IDELAYE2 #(
+        .IDELAY_TYPE("VAR_LOAD"),
+        .DELAY_SRC("IDATAIN"),
+        .IDELAY_VALUE(0),
+        .REFCLK_FREQUENCY(200.0),
+        .HIGH_PERFORMANCE_MODE("TRUE"),
+        .SIGNAL_PATTERN("DATA")
+    ) u_swdio_idelay (
+        .IDATAIN(swdio_i_raw),
+        .DATAOUT(swdio_idelay_out),
+        .DATAIN(1'b0),
+        .CE(1'b0),
+        .INC(1'b0),
+        .LD(idelay_ld),
+        .LDPIPEEN(1'b0),
+        .CINVCTRL(1'b0),
+        .CNTVALUEIN(cfg_in_delay),
+        .CNTVALUEOUT(),
+        .REGRST(1'b0),
+        .C(clk)
+    );
+
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) cfg_in_delay_q <= 5'd0;
+        else cfg_in_delay_q <= cfg_in_delay;
+    end
+
     `ifndef SYNTHESIS
-        assign #(SWDIO_IN_DELAY_NS) swdio_i = swdio_i_raw;
+        assign #(SWDIO_IN_DELAY_NS) swdio_i = swdio_idelay_out;
         assign swdio_i_iddr = swdio_i;
     `else
-        assign swdio_i = swdio_i_raw;
-        assign swdio_i_iddr = swdio_i_raw;
+        assign swdio_i = swdio_idelay_out;
+        assign swdio_i_iddr = swdio_idelay_out;
     `endif
 
     // Keep sampling in the FCLK domain. A second global clock tree on the
@@ -168,6 +211,7 @@ module swd_controller #(
     reg         cfg_data_phase;
     reg  [3:0]  cfg_clock_delay;
     reg  [3:0]  cfg_delay_fast;
+    reg  [1:0]  cfg_turn_extra;
     reg  [255:0] swj_data;
     reg  [7:0]   swj_count;
     reg  [7:0]   xfer_request;
@@ -255,7 +299,9 @@ module swd_controller #(
             cfg_data_phase <= 1'b0;
             cfg_clock_delay <= 4'd5;
             cfg_delay_fast <= 4'd2;
+    cfg_turn_extra <= 2'd0;
             cfg_sample_rise <= 1'b1;
+    cfg_in_delay <= 5'd0;
             packet_len_reg <= 16'd0;
             packet_start_pulse <= 1'b0;
             swj_data <= 256'd0;
@@ -294,6 +340,8 @@ module swd_controller #(
                         cfg_clock_delay <= s_axi_wdata[12:9];
                         cfg_delay_fast <= s_axi_wdata[16:13];
                         cfg_sample_rise <= s_axi_wdata[17];
+                        cfg_in_delay <= s_axi_wdata[22:18];
+                        cfg_turn_extra <= s_axi_wdata[24:23];
                     end
                     ADDR_SWJ_DATA0: begin
                         swj_data[31:0] <= s_axi_wdata;
@@ -501,6 +549,7 @@ module swd_controller #(
         .data_phase    (cfg_data_phase),
         .clock_delay   (cfg_clock_delay),
         .delay_fast    (cfg_delay_fast),
+        .turn_extra    (cfg_turn_extra),
         .swj_data      (core_swj_data_sel),
         .swj_count     (core_swj_count_sel),
         .xfer_request  (core_req_sel),

@@ -105,9 +105,41 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
         num = (2U << 16) | 82U;
       }
       break;
-    case ID_DAP_Vendor2:  break;
-    case ID_DAP_Vendor3:  break;
-    case ID_DAP_Vendor4:  break;
+    case ID_DAP_Vendor3:
+      { // Extra turnaround cycles before ACK (0..3), 255 to query.
+        uint32_t cfg = swd_read32(SWD_CFG);
+        uint8_t status = DAP_OK;
+        if (*request <= 3U) {
+          if ((swd_read32(SWD_BASE_ADDR + 4U) & 1U) ||
+              (swd_read32(SWD_BASE_ADDR + 0x34U) & 1U)) status = DAP_ERROR;
+          else {
+            cfg = (cfg & ~(0x3U << 23)) | ((uint32_t)*request << 23);
+            swd_write32(SWD_CFG, cfg);
+          }
+        } else if (*request != 255U) status = DAP_ERROR;
+        *response++ = status;
+        *response++ = (uint8_t)((cfg >> 23) & 0x3U);
+        num = (2U << 16) | 3U;
+      }
+      break;
+    case ID_DAP_Vendor2:
+      { // SWDIO input delay (IDELAY taps 0..31), 255 to query without change.
+        uint32_t cfg = swd_read32(SWD_CFG);
+        uint8_t status = DAP_OK;
+        if (*request <= 31U) {
+          if ((swd_read32(SWD_BASE_ADDR + 4U) & 1U) ||
+              (swd_read32(SWD_BASE_ADDR + 0x34U) & 1U)) status = DAP_ERROR;
+          else {
+            cfg = (cfg & ~(0x1FU << 18)) | ((uint32_t)*request << 18);
+            swd_write32(SWD_CFG, cfg);
+          }
+        } else if (*request != 255U) status = DAP_ERROR;
+        *response++ = status;
+        *response++ = (uint8_t)((cfg >> 18) & 0x1FU);
+        num = (2U << 16) | 3U;
+      }
+      break;
+        case ID_DAP_Vendor4:  break;
     case ID_DAP_Vendor5:  break;
     case ID_DAP_Vendor6:  break;
     case ID_DAP_Vendor7:  break;

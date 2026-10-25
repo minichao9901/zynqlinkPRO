@@ -22,6 +22,7 @@ module swd_core (
     input  wire        data_phase,
     input  wire [3:0]  clock_delay,
     input  wire [3:0]  delay_fast,
+    input  wire [1:0]  turn_extra,
 
     // SWJ Sequence
     input  wire [255:0] swj_data,
@@ -67,6 +68,7 @@ module swd_core (
     reg  [15:0] delay_cnt;
     reg         is_read_op;
     reg  [2:0]  ack_samples;
+    reg  [1:0]  turn_wait;
     reg  [32:0] rd_samples;
     reg  [32:0] wr_shift;
     reg  [255:0] swj_shift;
@@ -253,6 +255,7 @@ module swd_core (
                             8'd15: begin
                                 // PARK high phase done, move to dedicated ACK turnaround.
                                 swclk <= 1'b1;
+                                turn_wait <= turn_extra;
                                 state <= ST_TURN1;
                                 lsm_cnt <= 8'd0;
                                 ack_samples <= 3'd0;
@@ -272,6 +275,11 @@ module swd_core (
                     end else begin
                         delay_cnt <= 16'd0;
                         swdio_t   <= 1'b1;
+                        if (turn_wait != 2'd0) begin
+                            // Optional extra turnaround cycles before ACK.
+                            turn_wait <= turn_wait - 1'b1;
+                            swclk     <= 1'b0;
+                        end else begin
                         case (lsm_cnt)
                             8'd0: begin
                                 swclk   <= 1'b0;
@@ -290,6 +298,7 @@ module swd_core (
                                 lsm_cnt <= 8'd0;
                             end
                         endcase
+                        end
                     end
                 end
 

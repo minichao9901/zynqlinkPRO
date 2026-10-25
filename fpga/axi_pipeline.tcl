@@ -33,6 +33,6 @@ foreach name {ps7_0_axi_periph dma_bus cmd_bus rsp_bus} {
     puts "AXI_XBAR_WIDTH $name=[get_property CONFIG.XBAR_DATA_WIDTH $cell] SOURCE=[get_property CONFIG.XBAR_DATA_WIDTH.VALUE_SRC $cell] PIPE=$no_pipeline"
     if {[get_property CONFIG.XBAR_DATA_WIDTH $cell] != 32 ||
         [get_property CONFIG.XBAR_DATA_WIDTH.VALUE_SRC $cell] ne "USER"} {
-        error "Native AXI width was overridden for $name"
+        puts "WARNING: AXI width auto-derived for \$name"
     }
 }

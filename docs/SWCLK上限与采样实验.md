@@ -71,3 +71,38 @@ turnaround、park、状态机切换）。这部分没有 LA 无法逐项定位�
 python tools/swclk_sweep.py --freqs 60000,66000,69000,70000,75000,80000 `
     --address 0x24010000 --output results/optimization/swclk_sweep.json
 ```
+
+## IDELAY 实测（分支 feature/swdio-idelay）
+
+实现：
+
+- BD 使能 PS FCLK1 = 200 MHz，接到 `swd_controller/ref_clk`；
+- 控制器内 `IDELAYCTRL` + `IDELAYE2`（VAR_LOAD，78 ps/抽头，31 抽头 ≈ 2.4 ns），
+  插在 `IOBUF.O` 与 `IDDR.D` 之间；
+- `SWD_CFG[22:18]` = 延迟抽头，vendor 0x82 运行时可写；
+- 另加 `SWD_CFG[24:23]` = ACK 前额外 turnaround 周期，vendor 0x83。
+
+结果（H743，480 MHz 固件，64 KiB 基准）：
+
+| 条件 | 结果 |
+|---|---|
+| 60 MHz，抽头 0–16 | 正常；抽头 18/26 偶发错块（过延迟） |
+| 60 MHz，OpenOCD nightly 64 KiB | 读 3.59 / 写 4.06 MB/s（与无 IDELAY 版本一致，**无回退**） |
+| 64.3 / 69.2 MHz，抽头 0–12 | DP IDCODE 正常、AP 写（CSW）正常、**AP 读一律 NO ACK**（status 7） |
+| 64.3 / 69.2 MHz，抽头 ≥16 | 连 IDCODE 都失败（DP 过延迟） |
+| 64.3 / 69.2 MHz，turnaround +0..3 | AP 读仍然 NO ACK，无改善 |
+| 75 MHz | 所有抽头 IDCODE 都失败 |
+
+结论：
+
+1. **输入延迟确实生效**（抽头过大能破坏链路），但 AP 读需要的采样点比 DP 晚
+   约 1–2 ns，而 DP 只容忍 ~1 ns —— 单一全局延迟没有交叠窗口。
+2. 加长 ACK 前 turnaround 无效：它整体平移 ACK 相位，不改变"采样点落在 ACK
+   边沿后 0.5 周期"这一事实。
+3. 根因仍是 `SWCLK = FCLK/2` 下只有 0.5 / 1.0 两个采样点，AP 读的 ACK 落在
+   两者之间。要真正解决，需要：
+   - 把 ACK/数据的采样整体延后**一个 bit**（在每个 bit 的下一高相位采样，
+     相当于 T+1.5），或
+   - 提高 FCLK / 用输出侧延迟改变 SWCLK 与数据的相对相位。
+
+IDELAY 版本保留在分支上供后续使用；60 MHz 基线未受影响。
