@@ -80,3 +80,33 @@ python tools\benchmark_sram_optimized.py --tag cmp_p --target-clock 64 --speed 6
   --openocd-exe releases\openocd_pipeline_20261025\openocd.exe `
   --scripts releases\openocd_pipeline_20261025\scripts
 ```
+
+## 255 字非块批次的调查（结论：不能全局去掉）
+
+补丁后 `-d3` 仍能看到交替的批次：
+
+```
+submit n=255 block=0 cmd=3c differ=1   <- 混合批次（含 TAR 写）
+submit n=771 block=1 cmd=1e differ=0   <- 纯块
+```
+
+原因：OpenOCD 对 Cortex-M3/M4 假定 `tar_autoincr_block = 4096`，每 4 KiB 重写一次
+TAR；TAR 写和读命令不同，整个批次就退化成 `DAP_Transfer`（非块，最多 255 ops）。
+
+实测了 F103 的真实自增范围：
+
+- **读**：连续 5 个 1023 字块（20460 字节）不重写 TAR，数据与 20 KiB pattern
+  逐字节一致，跨 4 KiB/20 KiB 边界都正确 → 读的自增范围远大于 4 KiB；
+- **写**：同样 1023 字块写跨 4 KiB 后回读不一致；把 `tar_autoincr_block` 直接改
+  成 64 KiB 后，20 KiB 基准的数据校验失败 → **写必须每 4 KiB 重写 TAR**。
+
+因此：
+
+1. 不能把 `tar_autoincr_block` 全局调大（写会错）；
+2. 试过“遇到不同命令先 flush 当前块、让 TAR 写单独一发”的补丁，实测无收益
+   （3.75 → 3.75）——每 4 KiB 一次的 TAR 往返被流水线掩盖了；
+3. 要进一步提速，需要**按方向区分自增块**（读用大块、写保持 4 KiB），改动在
+   `mem_ap` 的 TAR cache 层，侵入性较大，暂未做。
+
+剩余差距（3.75 vs raw 4.46）主要来自每个批次的 USB 往返和 TAR 批次，不是 SWD 本身。
+
