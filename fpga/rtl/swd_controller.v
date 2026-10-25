@@ -420,7 +420,9 @@ module swd_controller #(
     assign batch_host_addr  = batch_wr_en ? write_addr[3:2] : s_axi_araddr[3:2];
     assign batch_host_wdata = s_axi_wdata;
     assign batch_host_wstrb = s_axi_wstrb;
-    assign packet_active = packet_busy;
+    // Include the one-cycle start pulse so the BRAM read issued on the
+    // launch edge is not lost while packet_busy is still being registered.
+    assign packet_active = packet_busy | packet_start_pulse;
 
     //=========================================================================
     // Batch Engine

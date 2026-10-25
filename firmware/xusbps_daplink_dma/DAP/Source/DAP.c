@@ -1506,7 +1506,7 @@ static uint32_t DAP_SWD_TransferBlock(const uint8_t *request, uint8_t *response)
     uint8_t *raw = (uint8_t *)swd_dma_cmd;
     uint32_t raw_len = 4U + ((req & DAP_TRANSFER_RnW) ? 0U : remaining * 4U);
     uint32_t words = (raw_len + 3U) / 4U;
-    uint32_t pstatus, rsp_words;
+    uint32_t pstatus, rsp_words, packet_wait;
     raw[0] = ID_DAP_TransferBlock;
     raw[1] = (uint8_t)remaining;
     raw[2] = (uint8_t)(remaining >> 8);
@@ -1516,7 +1516,15 @@ static uint32_t DAP_SWD_TransferBlock(const uint8_t *request, uint8_t *response)
     if (swd_dma_upload(words)) goto packet_fallback;
     swd_write32(SWD_PACKET_LEN, raw_len);
     swd_write32(SWD_PACKET_CTRL, 1U);
-    do { pstatus = swd_read32(SWD_PACKET_STATUS); } while (pstatus & 1U);
+    packet_wait = 0;
+    do {
+      pstatus = swd_read32(SWD_PACKET_STATUS);
+      if (++packet_wait > 2000000U) {
+        printf("[DAP] PACKET_TIMEOUT st=0x%08lx len=%lu req=0x%02lx\\r\\n",
+               (unsigned long)pstatus, (unsigned long)raw_len, (unsigned long)req);
+        goto packet_fallback;
+      }
+    } while (pstatus & 1U);
     if ((pstatus & 4U) || !(pstatus & 2U)) goto packet_fallback;
     rsp_words = (pstatus >> 16) & 0xFFFFU;
     if (rsp_words > 1024U || swd_dma_download(0, rsp_words)) goto packet_fallback;
