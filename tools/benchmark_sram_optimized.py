@@ -19,12 +19,14 @@ ap.add_argument('--speed',type=int,default=50000,help='SWCLK in kHz')
 ap.add_argument('--bootstrap-speed',type=int,default=50000,
                 help='connect and restore at this rate, then switch after HCLK setup')
 ap.add_argument('--target-clock',choices=['64','72','96'],default='64')
+ap.add_argument('--openocd-exe',default=r'E:\Share\env-windows\openocd-nightly\bin\openocd.exe')
+ap.add_argument('--scripts',default=r'E:\Share\env-windows\openocd-nightly\share\openocd\scripts')
 args=ap.parse_args()
 root=Path(__file__).resolve().parents[1]
 out=root/'results/optimization'/args.tag
 out.mkdir(parents=True,exist_ok=True)
 pat=out/'pattern.bin';pat.write_bytes(random.Random(0x20261025).randbytes(20480))
-ocd=Path(r'E:\Share\env-windows\openocd-nightly')
+ocd=None
 rows=[]
 for j in range(args.sessions):
     prefix=out/f'session{j}'
@@ -56,7 +58,7 @@ if {{$bench_error}} {{error $bench_message}}
 echo "BENCH_COMPLETE"
 shutdown
 ''')
-    p=subprocess.run([str(ocd/'bin/openocd.exe'),'-s',str(ocd/'share/openocd/scripts'),
+    p=subprocess.run([args.openocd_exe,'-s',args.scripts,
         '-f','tools/openocd_dap.cfg','-c',f'adapter speed {min(args.speed,args.bootstrap_speed)}', '-f',str(script)],
         cwd=root,capture_output=True,text=True,errors='replace',timeout=60,
         creationflags=subprocess.CREATE_NO_WINDOW)
@@ -78,3 +80,4 @@ result={'requested_SWCLK_kHz':args.speed,'target_HCLK_MHz':int(args.target_clock
         'write_MB_s':sum(x['bytes_per_direction'] for x in rows)/sum(x['write_ms'] for x in rows)/1000}
 (out/'results.json').write_text(json.dumps(result,indent=2))
 print(json.dumps(result,indent=2))
+
