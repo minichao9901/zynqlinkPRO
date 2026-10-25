@@ -1,0 +1,288 @@
+[
+  {
+    "directory": "19_vdma_lcd",
+    "xpr": [
+      "19_vdma_lcd\\vdma_lcd.xpr"
+    ],
+    "rtl": [],
+    "dap_configs": []
+  },
+  {
+    "directory": "DAPLINK_TXFER_FUNC_64B_TEST_FAIL",
+    "xpr": [
+      "DAPLINK_TXFER_FUNC_64B_TEST_FAIL\\DAPLINK_TXFER_FUNC_64B_TEST.xpr"
+    ],
+    "rtl": [
+      {
+        "path": "DAPLINK_TXFER_FUNC_64B_TEST_FAIL\\DAPLINK_TXFER_FUNC_64B_TEST.srcs\\sources_1\\imports\\rtl\\swd_controller.v",
+        "sha256": "47ebced2c9802f9546953bcbfdd7cbdbec3677cdf37e6b32c78dcf441aed88a1"
+      },
+      {
+        "path": "DAPLINK_TXFER_FUNC_64B_TEST_FAIL\\DAPLINK_TXFER_FUNC_64B_TEST.srcs\\sources_1\\imports\\rtl\\swd_core.v",
+        "sha256": "2363b5b8bd8e90ddbcd977e5a91014da08a8376042834c2f253f2259a4655522"
+      }
+    ],
+    "dap_configs": []
+  },
+  {
+    "directory": "PS_CherryUSB_Minichao",
+    "xpr": [
+      "PS_CherryUSB_Minichao\\PS_CherryUSB_Minichao.xpr"
+    ],
+    "rtl": [],
+    "dap_configs": []
+  },
+  {
+    "directory": "vdma_lcd",
+    "xpr": [],
+    "rtl": [],
+    "dap_configs": []
+  },
+  {
+    "directory": "ZYNQ_DAPLINK",
+    "xpr": [
+      "ZYNQ_DAPLINK\\ZYNQ_DAPLINK.xpr"
+    ],
+    "rtl": [],
+    "dap_configs": [
+      {
+        "path": "ZYNQ_DAPLINK\\ZYNQ_DAPLINK.sdk\\usb_bsp_xusbps_daplink\\src\\DAP\\Config\\DAP_config.h",
+        "CPU_CLOCK": "100000000U",
+        "DAP_PACKET_SIZE": "512U",
+        "DAP_PACKET_COUNT": "8U"
+      },
+      {
+        "path": "ZYNQ_DAPLINK\\ZYNQ_DAPLINK.sdk\\usb_bsp_xusbps_daplink\\src\\DAP\\Include\\DAP_config.h",
+        "CPU_CLOCK": "100000000U",
+        "DAP_PACKET_SIZE": "512U",
+        "DAP_PACKET_COUNT": "8U"
+      }
+    ]
+  },
+  {
+    "directory": "ZYNQ_DAPLINK_RTL",
+    "xpr": [
+      "ZYNQ_DAPLINK_RTL\\ZYNQ_DAPLINK_RTL.xpr"
+    ],
+    "rtl": [
+      {
+        "path": "ZYNQ_DAPLINK_RTL\\ZYNQ_DAPLINK_RTL.srcs\\sources_1\\imports\\rtl\\swd_controller.v",
+        "sha256": "3093d1307b7986f773b61650f9040996d3b9c4678cdbc90182b32fd83cb7477a"
+      },
+      {
+        "path": "ZYNQ_DAPLINK_RTL\\ZYNQ_DAPLINK_RTL.srcs\\sources_1\\imports\\rtl\\swd_core.v",
+        "sha256": "2363b5b8bd8e90ddbcd977e5a91014da08a8376042834c2f253f2259a4655522"
+      }
+    ],
+    "dap_configs": [
+      {
+        "path": "ZYNQ_DAPLINK_RTL\\ZYNQ_DAPLINK_RTL.sdk\\usb_bsp_xusbps_daplink_2\\src\\DAP\\Include\\DAP_config.h",
+        "CPU_CLOCK": "667000000U",
+        "DAP_PACKET_SIZE": "4096U",
+        "DAP_PACKET_COUNT": "16U"
+      },
+      {
+        "path": "ZYNQ_DAPLINK_RTL\\ZYNQ_DAPLINK_RTL.sdk\\usb_bsp_xusbps_daplink\\src\\DAP\\Include\\DAP_config.h",
+        "CPU_CLOCK": "667000000U",
+        "DAP_PACKET_SIZE": "512U",
+        "DAP_PACKET_COUNT": "16U"
+      },
+      {
+        "path": "ZYNQ_DAPLINK_RTL\\ZYNQ_DAPLINK_RTL.sdk\\usb_bsp_xusbps_cherryusb_daplink_opt\\src\\DAP\\Include\\DAP_config.h",
+        "CPU_CLOCK": "667000000U",
+        "DAP_PACKET_SIZE": "4096U",
+        "DAP_PACKET_COUNT": "16U"
+      },
+      {
+        "path": "ZYNQ_DAPLINK_RTL\\ZYNQ_DAPLINK_RTL.sdk\\usb_bsp_xusbps_cherryusb_daplink\\src\\DAP\\Config\\DAP_config.h",
+        "CPU_CLOCK": "100000000U",
+        "DAP_PACKET_SIZE": "512U",
+        "DAP_PACKET_COUNT": "128U"
+      },
+      {
+        "path": "ZYNQ_DAPLINK_RTL\\ZYNQ_DAPLINK_RTL.sdk\\usb_bsp_xusbps_cherryusb_daplink\\src\\DAP\\Include\\DAP_config.h",
+        "CPU_CLOCK": "100000000U",
+        "DAP_PACKET_SIZE": "512U",
+        "DAP_PACKET_COUNT": "32U"
+      }
+    ]
+  },
+  {
+    "directory": "ZYNQ_DAPLINK_RTL_100TO50MHz",
+    "xpr": [
+      "ZYNQ_DAPLINK_RTL_100TO50MHz\\ZYNQ_DAPLINK_RTL_100TO50MHz.xpr"
+    ],
+    "rtl": [
+      {
+        "path": "ZYNQ_DAPLINK_RTL_100TO50MHz\\ZYNQ_DAPLINK_RTL_100TO50MHz.srcs\\sources_1\\imports\\rtl\\swd_batch_engine.v",
+        "sha256": "c2e7dcbb05454ad68adf7b31993e625051a8a5bad6a0130a592a7210b4ef2bd7"
+      },
+      {
+        "path": "ZYNQ_DAPLINK_RTL_100TO50MHz\\ZYNQ_DAPLINK_RTL_100TO50MHz.srcs\\sources_1\\imports\\rtl\\swd_controller.v",
+        "sha256": "3d318c14d1a03044b7ae0850fe73fe307163cf8f8b84776f89bc57a3bf55c69a"
+      },
+      {
+        "path": "ZYNQ_DAPLINK_RTL_100TO50MHz\\ZYNQ_DAPLINK_RTL_100TO50MHz.srcs\\sources_1\\imports\\rtl\\swd_core.v",
+        "sha256": "f6573fbc4d3bdb25615b848074c68495736fe28e2c1464ab4a883978d8987d70"
+      }
+    ],
+    "dap_configs": [
+      {
+        "path": "ZYNQ_DAPLINK_RTL_100TO50MHz\\ZYNQ_DAPLINK_RTL_100TO50MHz.sdk\\usb_bsp_xusbps_daplink_rtt\\src\\DAP\\Include\\DAP_config.h",
+        "CPU_CLOCK": "667000000U",
+        "DAP_PACKET_SIZE": "4096U",
+        "DAP_PACKET_COUNT": "16U"
+      },
+      {
+        "path": "ZYNQ_DAPLINK_RTL_100TO50MHz\\ZYNQ_DAPLINK_RTL_100TO50MHz.sdk\\usb_bsp_xusbps_daplink_2\\src\\DAP\\Include\\DAP_config.h",
+        "CPU_CLOCK": "667000000U",
+        "DAP_PACKET_SIZE": "4096U",
+        "DAP_PACKET_COUNT": "16U"
+      }
+    ]
+  },
+  {
+    "directory": "ZYNQ_DAPLINK_RTL_120MHz",
+    "xpr": [
+      "ZYNQ_DAPLINK_RTL_120MHz\\ZYNQ_DAPLINK_RTL_120MHz.xpr"
+    ],
+    "rtl": [
+      {
+        "path": "ZYNQ_DAPLINK_RTL_120MHz\\ZYNQ_DAPLINK_RTL_120MHz.srcs\\sources_1\\imports\\rtl\\swd_controller.v",
+        "sha256": "3093d1307b7986f773b61650f9040996d3b9c4678cdbc90182b32fd83cb7477a"
+      },
+      {
+        "path": "ZYNQ_DAPLINK_RTL_120MHz\\ZYNQ_DAPLINK_RTL_120MHz.srcs\\sources_1\\imports\\rtl\\swd_core.v",
+        "sha256": "2363b5b8bd8e90ddbcd977e5a91014da08a8376042834c2f253f2259a4655522"
+      }
+    ],
+    "dap_configs": [
+      {
+        "path": "ZYNQ_DAPLINK_RTL_120MHz\\ZYNQ_DAPLINK_RTL_120MHz.sdk\\usb_bsp_xusbps_daplink_2\\src\\DAP\\Include\\DAP_config.h",
+        "CPU_CLOCK": "667000000U",
+        "DAP_PACKET_SIZE": "4096U",
+        "DAP_PACKET_COUNT": "16U"
+      }
+    ]
+  },
+  {
+    "directory": "ZYNQ_DAPLINK_RTL_64B_FAIL",
+    "xpr": [
+      "ZYNQ_DAPLINK_RTL_64B_FAIL\\ZYNQ_DAPLINK_RTL_64B.xpr"
+    ],
+    "rtl": [
+      {
+        "path": "ZYNQ_DAPLINK_RTL_64B_FAIL\\ZYNQ_DAPLINK_RTL_64B.srcs\\sources_1\\imports\\rtl\\swd_controller.v",
+        "sha256": "47ebced2c9802f9546953bcbfdd7cbdbec3677cdf37e6b32c78dcf441aed88a1"
+      },
+      {
+        "path": "ZYNQ_DAPLINK_RTL_64B_FAIL\\ZYNQ_DAPLINK_RTL_64B.srcs\\sources_1\\imports\\rtl\\swd_core.v",
+        "sha256": "2363b5b8bd8e90ddbcd977e5a91014da08a8376042834c2f253f2259a4655522"
+      }
+    ],
+    "dap_configs": [
+      {
+        "path": "ZYNQ_DAPLINK_RTL_64B_FAIL\\ZYNQ_DAPLINK_RTL_64B.sdk\\usb_bsp_xusbps_daplink\\src\\DAP\\Config\\DAP_config.h",
+        "CPU_CLOCK": "100000000U",
+        "DAP_PACKET_SIZE": "512U",
+        "DAP_PACKET_COUNT": "8U"
+      },
+      {
+        "path": "ZYNQ_DAPLINK_RTL_64B_FAIL\\ZYNQ_DAPLINK_RTL_64B.sdk\\usb_bsp_xusbps_daplink\\src\\DAP\\Include\\DAP_config.h",
+        "CPU_CLOCK": "100000000U",
+        "DAP_PACKET_SIZE": "512U",
+        "DAP_PACKET_COUNT": "32U"
+      },
+      {
+        "path": "ZYNQ_DAPLINK_RTL_64B_FAIL\\ZYNQ_DAPLINK_RTL_64B.sdk\\usb_bsp_xusbps_cherryusb_daplink\\src\\DAP\\Config\\DAP_config.h",
+        "CPU_CLOCK": "100000000U",
+        "DAP_PACKET_SIZE": "512U",
+        "DAP_PACKET_COUNT": "128U"
+      },
+      {
+        "path": "ZYNQ_DAPLINK_RTL_64B_FAIL\\ZYNQ_DAPLINK_RTL_64B.sdk\\usb_bsp_xusbps_cherryusb_daplink\\src\\DAP\\Include\\DAP_config.h",
+        "CPU_CLOCK": "100000000U",
+        "DAP_PACKET_SIZE": "512U",
+        "DAP_PACKET_COUNT": "32U"
+      }
+    ]
+  },
+  {
+    "directory": "ZYNQ_DAPLINK_RTL_NEW",
+    "xpr": [
+      "ZYNQ_DAPLINK_RTL_NEW\\ZYNQ_DAPLINK_RTL\\ZYNQ_DAPLINK_RTL.xpr"
+    ],
+    "rtl": [
+      {
+        "path": "ZYNQ_DAPLINK_RTL_NEW\\ZYNQ_DAPLINK_RTL\\ZYNQ_DAPLINK_RTL.srcs\\sources_1\\imports\\rtl\\swd_controller.v",
+        "sha256": "3a367ed60829c877db301407f00336fa224fa99841789693a427c5fab798efbc"
+      },
+      {
+        "path": "ZYNQ_DAPLINK_RTL_NEW\\ZYNQ_DAPLINK_RTL\\ZYNQ_DAPLINK_RTL.srcs\\sources_1\\imports\\rtl\\swd_core.v",
+        "sha256": "2363b5b8bd8e90ddbcd977e5a91014da08a8376042834c2f253f2259a4655522"
+      }
+    ],
+    "dap_configs": [
+      {
+        "path": "ZYNQ_DAPLINK_RTL_NEW\\ZYNQ_DAPLINK_RTL\\ZYNQ_DAPLINK_RTL.sdk\\usb_bsp_xusbps_daplink\\src\\DAP\\Config\\DAP_config.h",
+        "CPU_CLOCK": "100000000U",
+        "DAP_PACKET_SIZE": "512U",
+        "DAP_PACKET_COUNT": "8U"
+      },
+      {
+        "path": "ZYNQ_DAPLINK_RTL_NEW\\ZYNQ_DAPLINK_RTL\\ZYNQ_DAPLINK_RTL.sdk\\usb_bsp_xusbps_daplink\\src\\DAP\\Include\\DAP_config.h",
+        "CPU_CLOCK": "667000000U",
+        "DAP_PACKET_SIZE": "4096U",
+        "DAP_PACKET_COUNT": "16U"
+      },
+      {
+        "path": "ZYNQ_DAPLINK_RTL_NEW\\ZYNQ_DAPLINK_RTL\\ZYNQ_DAPLINK_RTL.sdk\\usb_bsp_xusbps_cherryusb_daplink_opt\\src\\DAP\\Include\\DAP_config.h",
+        "CPU_CLOCK": "667000000U",
+        "DAP_PACKET_SIZE": "4096U",
+        "DAP_PACKET_COUNT": "16U"
+      },
+      {
+        "path": "ZYNQ_DAPLINK_RTL_NEW\\ZYNQ_DAPLINK_RTL\\ZYNQ_DAPLINK_RTL.sdk\\usb_bsp_xusbps_cherryusb_daplink\\src\\DAP\\Config\\DAP_config.h",
+        "CPU_CLOCK": "100000000U",
+        "DAP_PACKET_SIZE": "512U",
+        "DAP_PACKET_COUNT": "128U"
+      },
+      {
+        "path": "ZYNQ_DAPLINK_RTL_NEW\\ZYNQ_DAPLINK_RTL\\ZYNQ_DAPLINK_RTL.sdk\\usb_bsp_xusbps_cherryusb_daplink\\src\\DAP\\Include\\DAP_config.h",
+        "CPU_CLOCK": "100000000U",
+        "DAP_PACKET_SIZE": "512U",
+        "DAP_PACKET_COUNT": "32U"
+      }
+    ]
+  },
+  {
+    "directory": "zynq_daplink_src_from_lizimu",
+    "xpr": [],
+    "rtl": [],
+    "dap_configs": [
+      {
+        "path": "zynq_daplink_src_from_lizimu\\DAP_config.h",
+        "CPU_CLOCK": "667000000U",
+        "DAP_PACKET_SIZE": "4096U",
+        "DAP_PACKET_COUNT": "16U"
+      }
+    ]
+  },
+  {
+    "directory": "ZYNQ_DAPLINK_TRANSFER_FUNC_TEST",
+    "xpr": [
+      "ZYNQ_DAPLINK_TRANSFER_FUNC_TEST\\ZYNQ_DAPLINK_TRANSFER_FUNC_TEST.xpr"
+    ],
+    "rtl": [
+      {
+        "path": "ZYNQ_DAPLINK_TRANSFER_FUNC_TEST\\ZYNQ_DAPLINK_TRANSFER_FUNC_TEST.srcs\\sources_1\\imports\\rtl\\swd_controller.v",
+        "sha256": "a68d4ef89b9706960020ae4fe0651f505db24a82a8511406387250cbd3c21b37"
+      },
+      {
+        "path": "ZYNQ_DAPLINK_TRANSFER_FUNC_TEST\\ZYNQ_DAPLINK_TRANSFER_FUNC_TEST.srcs\\sources_1\\imports\\rtl\\swd_core.v",
+        "sha256": "2363b5b8bd8e90ddbcd977e5a91014da08a8376042834c2f253f2259a4655522"
+      }
+    ],
+    "dap_configs": []
+  }
+]
