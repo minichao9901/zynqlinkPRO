@@ -146,6 +146,9 @@ module swd_controller #(
     localparam ADDR_BATCH_STATUS  = 6'h34;
     localparam ADDR_BATCH_ADDR    = 6'h38;
     localparam ADDR_BATCH_DATA    = 6'h3C;
+    localparam ADDR_PACKET_CTRL   = 6'h40;
+    localparam ADDR_PACKET_LEN    = 6'h44;
+    localparam ADDR_PACKET_STATUS = 6'h48;
 
     // ADDR_CFG (0x08) bit definition:
     //   [3:0]   turnaround_fixed      SWD turnaround cycles (fixed to 1)
@@ -169,6 +172,8 @@ module swd_controller #(
     reg  [7:0]   swj_count;
     reg  [7:0]   xfer_request;
     reg  [31:0]  xfer_wdata;
+    reg  [15:0]  packet_len_reg;
+    reg          packet_start_pulse;
     
     //=========================================================================
     // AXI-Lite Internal Signals
@@ -189,6 +194,15 @@ module swd_controller #(
     wire [31:0] core_rdata;
     wire        batch_active;
     wire [31:0] batch_host_rdata;
+    wire         packet_active, packet_busy, packet_done, packet_error;
+    wire [15:0]  packet_response_words;
+    wire         packet_cmd_en, packet_rsp_en;
+    wire [9:0]   packet_cmd_addr, packet_rsp_addr;
+    wire [31:0]  packet_cmd_data, packet_rsp_data;
+    wire [3:0]   packet_rsp_we;
+    wire         packet_core_start, packet_core_mode;
+    wire [7:0]   packet_core_req;
+    wire [31:0]  packet_core_wdata;
     wire        batch_core_start;
     wire        batch_core_mode;
     wire [255:0] batch_core_swj_data;
@@ -241,12 +255,15 @@ module swd_controller #(
             cfg_clock_delay <= 4'd5;
             cfg_delay_fast <= 4'd2;
             cfg_sample_rise <= 1'b1;
+            packet_len_reg <= 16'd0;
+            packet_start_pulse <= 1'b0;
             swj_data <= 256'd0;
             swj_count <= 8'd0;
             xfer_request <= 8'd0;
             xfer_wdata <= 32'd0;
         end
         else begin
+            packet_start_pulse <= 1'b0;
             // BRESP/BVALID handshake
             if (s_axi_bready && bvalid_reg) begin
                 bvalid_reg <= 1'b0;
@@ -294,6 +311,9 @@ module swd_controller #(
                     ADDR_SWJ_DATA6: swj_data[223:192] <= s_axi_wdata;
                     ADDR_SWJ_DATA7: swj_data[255:224] <= s_axi_wdata;
                     ADDR_SWJ_COUNT: swj_count <= s_axi_wdata[7:0];
+                    ADDR_PACKET_LEN: packet_len_reg <= s_axi_wdata[15:0];
+                    ADDR_PACKET_CTRL: if (s_axi_wdata[0] && !packet_busy && !batch_active && !core_busy)
+                        packet_start_pulse <= 1'b1;
                     default: ;
                 endcase
             end
@@ -362,6 +382,8 @@ module swd_controller #(
                     ADDR_BATCH_DATA: begin
                         rdata_reg <= batch_host_rdata;
                     end
+                    ADDR_PACKET_LEN: rdata_reg <= {16'd0,packet_len_reg};
+                    ADDR_PACKET_STATUS: rdata_reg <= {packet_response_words,11'd0,packet_error,packet_done,packet_busy};
                     default: begin
                         rdata_reg <= 32'd0;
                     end
@@ -398,6 +420,7 @@ module swd_controller #(
     assign batch_host_addr  = batch_wr_en ? write_addr[3:2] : s_axi_araddr[3:2];
     assign batch_host_wdata = s_axi_wdata;
     assign batch_host_wstrb = s_axi_wstrb;
+    assign packet_active = packet_busy;
 
     //=========================================================================
     // Batch Engine
@@ -431,15 +454,35 @@ module swd_controller #(
         .core_busy    (core_busy),
         .core_ack     (core_ack),
         .core_parity_err(core_parity_err),
-        .core_rdata   (core_rdata)
+        .core_rdata   (core_rdata),
+        .packet_active(packet_active),
+        .packet_cmd_en(packet_cmd_en),
+        .packet_cmd_addr(packet_cmd_addr),
+        .packet_cmd_data(packet_cmd_data),
+        .packet_rsp_en(packet_rsp_en),
+        .packet_rsp_we(packet_rsp_we),
+        .packet_rsp_addr(packet_rsp_addr),
+        .packet_rsp_data(packet_rsp_data)
     );
 
-    assign core_start_sel    = batch_active ? batch_core_start    : start_pulse;
-    assign core_mode_sel     = batch_active ? batch_core_mode     : ctrl_mode;
+    dap_transfer_block_engine u_dap_packet_engine (
+        .clk(clk), .rst_n(rst_n), .start(packet_start_pulse),
+        .packet_len(packet_len_reg), .busy(packet_busy), .done(packet_done),
+        .error(packet_error), .response_words(packet_response_words),
+        .cmd_en(packet_cmd_en), .cmd_addr(packet_cmd_addr), .cmd_data(packet_cmd_data),
+        .rsp_en(packet_rsp_en), .rsp_we(packet_rsp_we), .rsp_addr(packet_rsp_addr),
+        .rsp_data(packet_rsp_data), .core_start(packet_core_start),
+        .core_mode(packet_core_mode), .core_req(packet_core_req),
+        .core_wdata(packet_core_wdata), .core_busy(core_busy),
+        .core_ack(core_ack), .core_parity_err(core_parity_err), .core_rdata(core_rdata)
+    );
+
+    assign core_start_sel    = packet_active ? packet_core_start : (batch_active ? batch_core_start    : start_pulse);
+    assign core_mode_sel     = packet_active ? packet_core_mode  : (batch_active ? batch_core_mode     : ctrl_mode);
     assign core_swj_data_sel = batch_active ? batch_core_swj_data : swj_data;
     assign core_swj_count_sel= batch_active ? batch_core_swj_count: swj_count;
-    assign core_req_sel      = batch_active ? batch_core_req      : xfer_request;
-    assign core_wdata_sel    = batch_active ? batch_core_wdata    : xfer_wdata;
+    assign core_req_sel      = packet_active ? packet_core_req   : (batch_active ? batch_core_req      : xfer_request);
+    assign core_wdata_sel    = packet_active ? packet_core_wdata : (batch_active ? batch_core_wdata    : xfer_wdata);
 
     //=========================================================================
     // SWD Core Instance

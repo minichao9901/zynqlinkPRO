@@ -33,7 +33,15 @@ module swd_batch_engine #(
     input  wire                   core_busy,
     input  wire [2:0]             core_ack,
     input  wire                   core_parity_err,
-    input  wire [31:0]            core_rdata
+    input  wire [31:0]            core_rdata,
+    input  wire                   packet_active,
+    input  wire                   packet_cmd_en,
+    input  wire [BRAM_ADDR_W-1:0] packet_cmd_addr,
+    output wire [31:0]            packet_cmd_data,
+    input  wire                   packet_rsp_en,
+    input  wire [3:0]             packet_rsp_we,
+    input  wire [BRAM_ADDR_W-1:0] packet_rsp_addr,
+    input  wire [31:0]            packet_rsp_data
 );
     localparam [1:0] HOST_CTRL   = 2'd0;
     localparam [1:0] HOST_STATUS = 2'd1;
@@ -113,6 +121,7 @@ module swd_batch_engine #(
     wire [3:0]           cmd_wea;
     wire [3:0]           rsp_wea;
     wire [31:0]          cmd_douta, cmd_doutb, rsp_douta, rsp_doutb;
+    assign packet_cmd_data = cmd_doutb;
 
     assign axibram_wr = host_wr_en && (host_addr == HOST_DATA);
     assign cmd_bram_rddata = cmd_douta;
@@ -136,7 +145,8 @@ module swd_batch_engine #(
     ) u_cmd_bram (
         .clka(clk), .ena(1'b1), .wea(cmd_wea), .addra(cmd_bram_en ? cmd_bram_addr[BRAM_ADDR_W+1:2] : bram_addr_reg), .dina(cmd_bram_en ? cmd_bram_wrdata : host_wdata), .douta(cmd_douta),
         .rsta(1'b0), .regcea(1'b1),
-        .clkb(clk), .enb(cmd_en_b), .web(4'b0000), .addrb(cmd_addr_b), .dinb(32'd0), .doutb(cmd_doutb),
+        .clkb(clk), .enb(packet_active ? packet_cmd_en : cmd_en_b), .web(4'b0000),
+        .addrb(packet_active ? packet_cmd_addr : cmd_addr_b), .dinb(32'd0), .doutb(cmd_doutb),
         .rstb(1'b0), .regceb(1'b1)
     );
 
@@ -155,7 +165,10 @@ module swd_batch_engine #(
     ) u_rsp_bram (
         .clka(clk), .ena(1'b1), .wea(rsp_wea), .addra(rsp_bram_en ? rsp_bram_addr[BRAM_ADDR_W+1:2] : bram_addr_reg), .dina(rsp_bram_en ? rsp_bram_wrdata : host_wdata), .douta(rsp_douta),
         .rsta(1'b0), .regcea(1'b1),
-        .clkb(clk), .enb(rsp_en_b), .web(rsp_web_b), .addrb(rsp_addr_b), .dinb(rsp_din_b), .doutb(rsp_doutb),
+        .clkb(clk), .enb(packet_active ? packet_rsp_en : rsp_en_b),
+        .web(packet_active ? packet_rsp_we : rsp_web_b),
+        .addrb(packet_active ? packet_rsp_addr : rsp_addr_b),
+        .dinb(packet_active ? packet_rsp_data : rsp_din_b), .doutb(rsp_doutb),
         .rstb(1'b0), .regceb(1'b1)
     );
 

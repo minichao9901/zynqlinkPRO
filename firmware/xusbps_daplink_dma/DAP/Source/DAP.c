@@ -1497,6 +1497,37 @@ static uint32_t DAP_SWD_TransferBlock(const uint8_t *request, uint8_t *response)
   request += 4;
   if (req & (DAP_TRANSFER_MATCH_VALUE | DAP_TRANSFER_MATCH_MASK | DAP_TRANSFER_TIMESTAMP))
     return DAP_SWD_TransferBlock_Legacy(head, response);
+
+  /* Fast packet-engine path.  The RTL receives a compact four-byte header
+   * {0x06,count_lo,count_hi,request}; the DAP index is fixed to zero by this
+   * single-target device.  The old DMA batch path remains the fallback. */
+  if (remaining <= 1023U && ((req & 0xF0U) == 0U) &&
+      (req & DAP_TRANSFER_APnDP)) {
+    uint8_t *raw = (uint8_t *)swd_dma_cmd;
+    uint32_t raw_len = 4U + ((req & DAP_TRANSFER_RnW) ? 0U : remaining * 4U);
+    uint32_t words = (raw_len + 3U) / 4U;
+    uint32_t pstatus, rsp_words;
+    raw[0] = ID_DAP_TransferBlock;
+    raw[1] = (uint8_t)remaining;
+    raw[2] = (uint8_t)(remaining >> 8);
+    raw[3] = (uint8_t)req;
+    if (!(req & DAP_TRANSFER_RnW)) memcpy(raw + 4, request + 4, remaining * 4U);
+    DAP_SWD_BatchClear();
+    if (swd_dma_upload(words)) goto packet_fallback;
+    swd_write32(SWD_PACKET_LEN, raw_len);
+    swd_write32(SWD_PACKET_CTRL, 1U);
+    do { pstatus = swd_read32(SWD_PACKET_STATUS); } while (pstatus & 1U);
+    if ((pstatus & 4U) || !(pstatus & 2U)) goto packet_fallback;
+    rsp_words = (pstatus >> 16) & 0xFFFFU;
+    if (rsp_words > 1024U || swd_dma_download(0, rsp_words)) goto packet_fallback;
+    response[0] = (uint8_t)swd_dma_rsp[0];
+    response[1] = (uint8_t)(swd_dma_rsp[0] >> 8);
+    response[2] = (uint8_t)(swd_dma_rsp[0] >> 16);
+    if (req & DAP_TRANSFER_RnW) memcpy(response + 3, &swd_dma_rsp[1], remaining * 4U);
+    return (uint32_t)(3U + ((req & DAP_TRANSFER_RnW) ? remaining * 4U : 0U));
+packet_fallback:
+    ;
+  }
   DAP_TransferAbort = 0;
   while (remaining && !DAP_TransferAbort) {
     // One repeat header replaces hundreds of individually written commands.
