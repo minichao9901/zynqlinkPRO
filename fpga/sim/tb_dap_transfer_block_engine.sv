@@ -10,7 +10,7 @@ module tb_dap_transfer_block_engine;
  reg core_busy=0; reg [2:0] core_ack=0; reg core_parity_err=0; reg [31:0] core_rdata=0;
  wire core_start; wire [7:0] core_req; wire [31:0] core_wdata;
  integer i;
- dap_transfer_block_engine dut(.*, .core_mode());
+ dap_transfer_block_engine dut(.*, .core_mode(), .state_dbg());
  always @(posedge clk) begin
    if(rsp_en) begin
      for(i=0;i<4;i=i+1) if(rsp_we[i]) rsp_mem[rsp_addr][i*8 +: 8] <= rsp_data[i*8 +: 8];
