@@ -1,0 +1,56 @@
+"""Build the isolated XUsbPs CMSIS-DAP/CDC application."""
+import argparse
+import hashlib
+import json
+from pathlib import Path
+import subprocess
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument('--opt', choices=['0', '3'], default='3')
+    ap.add_argument('--project', choices=['xusbps_daplink', 'xusbps_daplink_dma'], default='xusbps_daplink')
+    ap.add_argument('--trace', action='store_true', help='Enable DMA firmware timing trace and MMIO diagnostics')
+    args = ap.parse_args()
+    src = ROOT / 'firmware' / args.project
+    bsp = ROOT / 'reference/legacy_zynq/ZYNQ_DAPLINK_RTL_100TO50MHz/ZYNQ_DAPLINK_RTL_100TO50MHz.sdk/usb_bsp/ps7_cortexa9_0'
+    out = ROOT / 'build' / args.project / f'O{args.opt}'
+    out.mkdir(parents=True, exist_ok=True)
+    gcc = Path(r'E:\Xilinx\SDK\2018.3\gnu\aarch32\nt\gcc-arm-none-eabi\bin\arm-none-eabi-gcc.exe')
+    flags = ['-mcpu=cortex-a9', '-mfpu=vfpv3', '-mfloat-abi=hard']
+    if args.project == 'xusbps_daplink_dma':
+        flags += ['-DDAP_ENABLE_TRACE=' + str(int(args.trace)), '-DDAP_MMIO_DIAGNOSTICS=' + str(int(args.trace))]
+    includes = [src, src / 'DAP/Include', src / 'DAP/Source', bsp / 'include']
+    cfiles = sorted(src.rglob('*.c'))
+    objects = []
+    logs = []
+
+    def run(cmd):
+        p = subprocess.run([str(x) for x in cmd], capture_output=True, text=True, errors='replace')
+        logs.append(subprocess.list2cmdline([str(x) for x in cmd]) + '\n' + p.stdout + p.stderr)
+        (out / 'build.log').write_text('\n'.join(logs), encoding='utf-8')
+        if p.returncode:
+            raise RuntimeError(p.stdout + p.stderr)
+
+    for p in cfiles:
+        obj = out / (p.relative_to(src).with_suffix('.o'))
+        obj.parent.mkdir(parents=True, exist_ok=True)
+        run([gcc, *flags, '-O' + args.opt, '-g3', '-Wall', '-Wextra', *sum((['-I', str(x)] for x in includes), []), '-c', p, '-o', obj])
+        objects.append(obj)
+
+    elf = out / (args.project + '.elf')
+    run([gcc, *flags, '-specs=' + str(src / 'Xilinx.spec'), '-Wl,-build-id=none', '-Wl,-T,' + str(src / 'lscript.ld'), '-Wl,-Map,' + str(out / 'xusbps_daplink.map'), '-L' + str(bsp / 'lib'), '-o', elf, *objects, '-Wl,--start-group', '-lxil', '-lgcc', '-lc', '-Wl,--end-group'])
+    manifest = {
+        'options': vars(args),
+        'source_sha256': {str(p.relative_to(src)): hashlib.sha256(p.read_bytes()).hexdigest() for p in src.rglob('*') if p.is_file()},
+        'bsp_sha256': hashlib.sha256((bsp / 'lib/libxil.a').read_bytes()).hexdigest(),
+        'elf_sha256': hashlib.sha256(elf.read_bytes()).hexdigest(),
+    }
+    (out / 'manifest.json').write_text(json.dumps(manifest, indent=2), encoding='utf-8')
+    print(elf)
+
+
+if __name__ == '__main__':
+    main()
