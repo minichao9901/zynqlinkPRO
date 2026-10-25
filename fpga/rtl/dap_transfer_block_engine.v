@@ -81,12 +81,12 @@ module dap_transfer_block_engine #(
             rsp_en <= 0;
             rsp_we <= 0;
             core_start <= 0;
-            done <= 0;
             case (state)
                 ST_IDLE: begin
                     busy <= 0;
                     if (start) begin
                         busy <= 1;
+                        done <= 0;
                         error <= 0;
                         response_words <= 0;
                         cmd_addr <= 0;

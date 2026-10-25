@@ -12,6 +12,10 @@ if {!$impl_only} {
     # subsequent builds retain unchanged IPs, including CDMA and interconnects.
     set_property synth_checkpoint_mode Hierarchical [get_files system.bd]
     open_bd_design [get_files system.bd]
+    # New helper RTL files must be added to the module-reference source set
+    # explicitly; Vivado 2018.3 does not discover them from the old XCI.
+    set packet_rtl [file join $root fpga rtl dap_transfer_block_engine.v]
+    if {[file exists $packet_rtl]} {add_files -norecurse $packet_rtl}
     source [file join $root fpga axi_pipeline.tcl]
     if {$axi_pipeline_changed} {set fresh_impl 1}
     # Vivado 2018.3 does not reliably invalidate an OOC module-reference
