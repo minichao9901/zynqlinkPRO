@@ -13,6 +13,8 @@ Zynq-7020 高性能 DAP 的恢复与 USB 实验工作区。
 - [复合 USB CDC/WinUSB 基准](docs/复合USB基准.md)
 - [OpenOCD 环境（nightly + 异步 CMSIS-DAP）](docs/OpenOCD环境.md)
 - [给 Codex 的交接总结](docs/Codex交接总结.md)
+- [SWD 采样相位与 50/60 MHz 实测](docs/SWD采样相位与升频优化.md)
+- [CMSIS-DAP 协议层 RTL 化计划](docs/RTL协议层重构计划.md)
 - [Kingst LA 使用说明](docs/LA使用说明.md)
 - [构建、RAM 下载和测速说明](docs/CDC测试使用说明.md)
 
