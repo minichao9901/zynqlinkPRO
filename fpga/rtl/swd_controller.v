@@ -7,7 +7,7 @@
 `timescale 1ns/1ps
 module swd_controller #(
     parameter C_S_AXI_DATA_WIDTH = 32,
-    parameter C_S_AXI_ADDR_WIDTH = 6,
+    parameter C_S_AXI_ADDR_WIDTH = 7,
     parameter integer SWDIO_IN_DELAY_NS = 0
 )(
     input  wire                                    clk,
@@ -130,25 +130,25 @@ module swd_controller #(
     //=========================================================================
     // Address Map
     //=========================================================================
-    localparam ADDR_CTRL          = 6'h00;
-    localparam ADDR_STATUS        = 6'h04;
-    localparam ADDR_CFG           = 6'h08;
-    localparam ADDR_SWJ_COUNT     = 6'h0C;
-    localparam ADDR_SWJ_DATA0     = 6'h10;
-    localparam ADDR_SWJ_DATA1     = 6'h14;
-    localparam ADDR_SWJ_DATA2     = 6'h18;
-    localparam ADDR_SWJ_DATA3     = 6'h1C;
-    localparam ADDR_SWJ_DATA4     = 6'h20;
-    localparam ADDR_SWJ_DATA5     = 6'h24;
-    localparam ADDR_SWJ_DATA6     = 6'h28;
-    localparam ADDR_SWJ_DATA7     = 6'h2C;
-    localparam ADDR_BATCH_CTRL    = 6'h30;
-    localparam ADDR_BATCH_STATUS  = 6'h34;
-    localparam ADDR_BATCH_ADDR    = 6'h38;
-    localparam ADDR_BATCH_DATA    = 6'h3C;
-    localparam ADDR_PACKET_CTRL   = 6'h40;
-    localparam ADDR_PACKET_LEN    = 6'h44;
-    localparam ADDR_PACKET_STATUS = 6'h48;
+    localparam ADDR_CTRL          = 7'h00;
+    localparam ADDR_STATUS        = 7'h04;
+    localparam ADDR_CFG           = 7'h08;
+    localparam ADDR_SWJ_COUNT     = 7'h0C;
+    localparam ADDR_SWJ_DATA0     = 7'h10;
+    localparam ADDR_SWJ_DATA1     = 7'h14;
+    localparam ADDR_SWJ_DATA2     = 7'h18;
+    localparam ADDR_SWJ_DATA3     = 7'h1C;
+    localparam ADDR_SWJ_DATA4     = 7'h20;
+    localparam ADDR_SWJ_DATA5     = 7'h24;
+    localparam ADDR_SWJ_DATA6     = 7'h28;
+    localparam ADDR_SWJ_DATA7     = 7'h2C;
+    localparam ADDR_BATCH_CTRL    = 7'h30;
+    localparam ADDR_BATCH_STATUS  = 7'h34;
+    localparam ADDR_BATCH_ADDR    = 7'h38;
+    localparam ADDR_BATCH_DATA    = 7'h3C;
+    localparam ADDR_PACKET_CTRL   = 7'h40;
+    localparam ADDR_PACKET_LEN    = 7'h44;
+    localparam ADDR_PACKET_STATUS = 7'h48;
 
     // ADDR_CFG (0x08) bit definition:
     //   [3:0]   turnaround_fixed      SWD turnaround cycles (fixed to 1)
@@ -518,3 +518,6 @@ module swd_controller #(
     );
 
 endmodule
+
+
+
