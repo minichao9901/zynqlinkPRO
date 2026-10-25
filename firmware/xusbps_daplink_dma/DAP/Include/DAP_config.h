@@ -462,7 +462,9 @@ __STATIC_INLINE void PORT_SWD_SETUP (void) {
   //   [8]     cfg_data_phase        Enable WAIT/FAULT data phase handling
   //   [12:9]  cfg_clock_delay       SWJ sequence half-cycle delay
   //   [16:13] cfg_delay_fast        Transfer half-cycle delay
-  //   [31:17] Reserved
+  //   [27:25] cfg_ack_delay        Extra FCLK steps while each ACK bit is high
+  //   [24:23] cfg_turn_extra       Extra turnaround cycles before ACK
+  //   [31:28] Reserved
   //
   // Current setup:
   // turnaround=1, idle=1, data_phase=0, clock_delay=5, delay_fast=0
@@ -472,6 +474,8 @@ __STATIC_INLINE void PORT_SWD_SETUP (void) {
               (0U << 8)  |  // data_phase
               (5U << 9)  |  // clock_delay
               (0U << 13) |  // delay_fast
+              (0U << 23) |  // turn_extra
+              (0U << 25) |  // ack_delay
               (0U << 17));  // late FCLK sample at the default 50 MHz
 
   ps_set_fclk0_hz(100000000U);  // 100 MHz
