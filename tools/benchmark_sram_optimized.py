@@ -27,6 +27,8 @@ ap.add_argument('--clock-script', default='',
 ap.add_argument('--address', default='0x20000000', help='benchmark base address')
 ap.add_argument('--size', type=lambda x: int(x, 0), default=20480, help='bytes per direction')
 ap.add_argument('--config', default='tools/openocd_dap.cfg', help='OpenOCD board/target config')
+ap.add_argument('--no-reset', action='store_true',
+                help='halt without resetting, so firmware-configured PLL/clock stays active')
 ap.add_argument('--openocd-exe', default=r'E:\Share\env-windows\openocd-nightly\bin\openocd.exe')
 ap.add_argument('--scripts', default=r'E:\Share\env-windows\openocd-nightly\share\openocd\scripts')
 args = ap.parse_args()
@@ -43,6 +45,7 @@ elif args.clock_script:
     clock_line = f'source {args.clock_script}'
 else:
     clock_line = f'source tools/f103_clock{args.target_clock}.tcl'
+reset_line = 'halt' if args.no_reset else 'reset halt'
 
 pat = out / 'pattern.bin'
 pat.write_bytes(random.Random(0x20261025).randbytes(size))
@@ -56,7 +59,7 @@ for j in range(args.sessions):
     script = prefix.with_suffix('.tcl')
     script.write_text(f'''
 init
-reset halt
+{reset_line}
 {clock_line}
 dump_image {backup.as_posix()} {addr} {size_hex}
 adapter speed {args.speed}
@@ -109,3 +112,5 @@ result = {'requested_SWCLK_kHz': args.speed,
           'write_MB_s': sum(x['bytes_per_direction'] for x in rows) / sum(x['write_ms'] for x in rows) / 1000}
 (out / 'results.json').write_text(json.dumps(result, indent=2))
 print(json.dumps(result, indent=2))
+
+
