@@ -37,6 +37,10 @@ openocd -s <openocd>/share/openocd/scripts -f tools/openocd_dap.cfg `
 ### 2. 生成 bitstream
 
 ```powershell
+# 标准 Vivado 2018.3
+vivado -mode batch -nojournal -log build\fpga_build.log -source fpga/build_dma.tcl
+
+# 可选封装：本机 Vivado 启动缺 DLL 时用（需改 tools/run_vivado.py 里的安装路径）
 python tools\run_vivado.py -mode batch -nojournal -log build\fpga_build.log `
     -source fpga/build_dma.tcl
 ```
@@ -46,18 +50,18 @@ python tools\run_vivado.py -mode batch -nojournal -log build\fpga_build.log `
 ### 3. 生成 BSP 并编译固件
 
 用 Vivado 打开 `build/fpga_dma_global/zynqlink_dma.xpr`，
-`File > Export > Export Hardware`（勾选 include bitstream）导出 `.hdf`，然后在 SDK 中
-`File > New > Board Support Package` 基于该 hdf 生成 `usb_bsp`；或用 `xsct`：
+`File > Export > Export Hardware`（勾选 include bitstream）导出 `.hdf`，然后用 `xsct`
+生成 BSP：
 
-```tcl
+```powershell
 xsct tools/create_bsp.tcl build/system.hdf build/sdk usb_bsp
 ```
 
-然后编译 ELF（`--bsp` 指向生成的 BSP 目录）：
+然后编译 ELF（`--bsp` 指向生成的 BSP；`--gcc` 可指定交叉编译器）：
 
 ```powershell
 python tools\build_xusbps_daplink.py --project xusbps_daplink_dma --opt 3 `
-    --bsp <sdk_workspace>/usb_bsp
+    --bsp build\sdk\usb_bsp
 ```
 
 产物：`build/xusbps_daplink_dma/O3/xusbps_daplink_dma.elf`。
@@ -65,7 +69,12 @@ python tools\build_xusbps_daplink.py --project xusbps_daplink_dma --opt 3 `
 ### 4. 加载
 
 ```powershell
-python tools\run_xsct.py tools\download_dap_fpga.tcl `
+xsct tools\download_dap_fpga.tcl `
+    build\xusbps_daplink_dma\O3\xusbps_daplink_dma.elf `
+    build\fpga_dma_global\system_wrapper.bit
+
+# 或
+python tools\run_xsct.py --sdk E:\Xilinx\SDK\2018.3 tools\download_dap_fpga.tcl `
     build\xusbps_daplink_dma\O3\xusbps_daplink_dma.elf `
     build\fpga_dma_global\system_wrapper.bit
 ```
