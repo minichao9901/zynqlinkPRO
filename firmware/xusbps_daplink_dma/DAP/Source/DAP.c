@@ -1487,6 +1487,16 @@ static uint32_t DAP_Transfer(const uint8_t *request, uint8_t *response) {
 #if (DAP_SWD != 0)
 #include "swd_dma.h"
 #include <string.h>
+#include "xil_cache.h"
+
+/* Debug counters for the RTL packet-engine path (readable over JTAG). */
+volatile uint32_t dbg_pkt_taken, dbg_pkt_fallback, dbg_pkt_status,
+                  dbg_pkt_rsp0, dbg_pkt_req, dbg_pkt_count;
+
+static void dbg_pkt_flush(void)
+{
+  Xil_DCacheFlushRange((UINTPTR)&dbg_pkt_req, 128);
+}
 
 static uint32_t DAP_SWD_TransferBlock(const uint8_t *request, uint8_t *response) {
   const uint8_t *head = request;
@@ -1507,27 +1517,42 @@ static uint32_t DAP_SWD_TransferBlock(const uint8_t *request, uint8_t *response)
     uint32_t raw_len = 4U + ((req & DAP_TRANSFER_RnW) ? 0U : remaining * 4U);
     uint32_t words = (raw_len + 3U) / 4U;
     uint32_t pstatus, rsp_words, packet_wait;
+    dbg_pkt_taken++;
+    dbg_pkt_req = req;
+    dbg_pkt_count = remaining;
     raw[0] = ID_DAP_TransferBlock;
     raw[1] = (uint8_t)remaining;
     raw[2] = (uint8_t)(remaining >> 8);
     raw[3] = (uint8_t)req;
-    if (!(req & DAP_TRANSFER_RnW)) memcpy(raw + 4, request + 4, remaining * 4U);
+    if (!(req & DAP_TRANSFER_RnW)) memcpy(raw + 4, request, remaining * 4U);
     DAP_SWD_BatchClear();
-    if (swd_dma_upload(words)) goto packet_fallback;
+    if (swd_dma_upload(words)) { dbg_pkt_fallback++; dbg_pkt_flush(); goto packet_fallback; }
     swd_write32(SWD_PACKET_LEN, raw_len);
     swd_write32(SWD_PACKET_CTRL, 1U);
     packet_wait = 0;
     do {
       pstatus = swd_read32(SWD_PACKET_STATUS);
       if (++packet_wait > 2000000U) {
+        dbg_pkt_status = pstatus;
+        dbg_pkt_fallback++;
+        dbg_pkt_flush();
         printf("[DAP] PACKET_TIMEOUT st=0x%08lx len=%lu req=0x%02lx\\r\\n",
                (unsigned long)pstatus, (unsigned long)raw_len, (unsigned long)req);
         goto packet_fallback;
       }
     } while (pstatus & 1U);
-    if ((pstatus & 4U) || !(pstatus & 2U)) goto packet_fallback;
+    dbg_pkt_status = pstatus;
+    if ((pstatus & 4U) || !(pstatus & 2U)) {
+      dbg_pkt_fallback++;
+      dbg_pkt_flush();
+      printf("[DAP] PACKET_ERROR st=0x%08lx count=%lu req=0x%02lx\\r\\n",
+             (unsigned long)pstatus, (unsigned long)remaining, (unsigned long)req);
+      goto packet_fallback;
+    }
     rsp_words = (pstatus >> 16) & 0xFFFFU;
-    if (rsp_words > 1024U || swd_dma_download(0, rsp_words)) goto packet_fallback;
+    if (rsp_words > 1024U || swd_dma_download(0, rsp_words)) { dbg_pkt_fallback++; dbg_pkt_flush(); goto packet_fallback; }
+    dbg_pkt_rsp0 = swd_dma_rsp[0];
+    dbg_pkt_flush();
     response[0] = (uint8_t)swd_dma_rsp[0];
     response[1] = (uint8_t)(swd_dma_rsp[0] >> 8);
     response[2] = (uint8_t)(swd_dma_rsp[0] >> 16);

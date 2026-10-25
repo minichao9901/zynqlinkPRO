@@ -11,7 +11,8 @@
 // This first version deliberately accepts only ordinary 32-bit SWD memory
 // AP reads/writes. Match/timestamp/JTAG/control commands remain on fallback.
 module dap_transfer_block_engine #(
-    parameter ADDR_W = 10
+    parameter ADDR_W = 10,
+    parameter integer RETRY_MAX = 64
 )(
     input  wire             clk,
     input  wire             rst_n,
@@ -21,6 +22,7 @@ module dap_transfer_block_engine #(
     output reg              done,
     output reg              error,
     output reg  [15:0]      response_words,
+    output wire [4:0]       state_dbg,
 
     output reg              cmd_en,
     output reg  [ADDR_W-1:0] cmd_addr,
@@ -43,7 +45,8 @@ module dap_transfer_block_engine #(
                      ST_DECODE=3, ST_WRITE_HEADER=4, ST_NEXT=5,
                      ST_FETCH_DATA=6, ST_FETCH_DATA_WAIT=7,
                      ST_START_CORE=8, ST_WAIT_CORE=9, ST_STORE_READ=10,
-                     ST_FINAL_RDBUFF=11, ST_WRITE_STATUS=12, ST_DONE=13;
+                     ST_FINAL_RDBUFF=11, ST_WRITE_STATUS=12, ST_DONE=13,
+                     ST_FETCH_DATA_SAMPLE=14;
     reg [4:0] state;
     reg [31:0] hdr;
     reg [15:0] count, index, result_index;
@@ -55,10 +58,15 @@ module dap_transfer_block_engine #(
     reg [7:0] status_code;
     reg need_final_read;
     reg final_phase;
+    reg [23:0] core_wait_cnt;
+    reg [7:0] retry_left;
+
+    initial state = ST_IDLE;
 
     wire [7:0] dap_cmd = hdr[7:0];
     wire [15:0] dap_count = hdr[23:8];
     wire [7:0] dap_req = hdr[31:24];
+    assign state_dbg = state;
     wire supported_req = ((dap_req & 8'hF0) == 8'h00) &&
                          ((dap_req & 8'h0C) == 8'h00 ||
                           (dap_req & 8'h0C) == 8'h04 ||
@@ -76,6 +84,8 @@ module dap_transfer_block_engine #(
             last_ack <= 0; last_data <= 0; status_code <= 0;
             need_final_read <= 0;
             final_phase <= 0;
+            core_wait_cnt <= 24'hFFFFFF;
+            retry_left <= 0;
         end else begin
             cmd_en <= 0;
             rsp_en <= 0;
@@ -124,7 +134,8 @@ module dap_transfer_block_engine #(
                     rsp_we <= 4'b0111;
                     rsp_addr <= 0;
                     rsp_data <= {8'd0, status_code, count};
-                    response_words <= count + 1'b1;
+                    // Only reads carry data words behind the three-byte header.
+                    response_words <= is_read ? (count + 1'b1) : 16'd1;
                     if (error || count == 0) state <= ST_DONE;
                     else state <= ST_NEXT;
                 end
@@ -134,11 +145,13 @@ module dap_transfer_block_engine #(
                         // Complete the posted-read pipeline with DP RDBUFF.
                         core_req <= 8'h0E;
                         final_phase <= 1;
+                        retry_left <= RETRY_MAX;
                         state <= ST_FINAL_RDBUFF;
                     end else if (index == count) begin
                         state <= ST_WRITE_STATUS;
                     end else if (is_read) begin
                         core_req <= request;
+                        retry_left <= RETRY_MAX;
                         state <= ST_START_CORE;
                     end else begin
                         cmd_addr <= index + 1'b1;
@@ -147,26 +160,48 @@ module dap_transfer_block_engine #(
                     end
                 end
                 ST_FETCH_DATA_WAIT: begin
+                    // BRAM data becomes valid one cycle after cmd_en; sample in
+                    // the following state, otherwise the header word is used.
+                    state <= ST_FETCH_DATA_SAMPLE;
+                end
+                ST_FETCH_DATA_SAMPLE: begin
                     core_wdata <= cmd_data;
                     core_req <= request;
+                    retry_left <= RETRY_MAX;
                     state <= ST_START_CORE;
                 end
                 ST_START_CORE: begin
-                    core_mode <= 1;
-                    core_start <= 1;
-                    seen_core_busy <= 0;
-                    state <= ST_WAIT_CORE;
+                    if (core_busy) begin
+                        // Never restart the core in the middle of a frame.
+                        core_wait_cnt <= core_wait_cnt - 1'b1;
+                        if (core_wait_cnt == 24'd0) begin
+                            error <= 1; status_code <= 8'h09;
+                            state <= ST_WRITE_STATUS;
+                        end
+                    end else begin
+                        core_mode <= 1;
+                        core_start <= 1;
+                        seen_core_busy <= 0;
+                        core_wait_cnt <= 24'hFFFFFF;
+                        state <= ST_WAIT_CORE;
+                    end
                 end
                 ST_WAIT_CORE: begin
                     if (core_busy) begin
                         seen_core_busy <= 1;
+                        core_wait_cnt <= core_wait_cnt - 1'b1;
+                        if (core_wait_cnt == 24'd0) begin
+                            error <= 1; status_code <= 8'h09;
+                            state <= ST_WRITE_STATUS;
+                        end
                     end else if (seen_core_busy) begin
                         last_ack <= core_ack;
                         last_data <= core_rdata;
-                        // SWD write transfers have no target-to-host parity
-                        // phase; ignore a stale parity flag left by a prior
-                        // read.  Only read completions can report parity.
-                        if ((is_read && core_parity_err) || core_ack != 3'b001) begin
+                        if (core_ack == 3'b010 && retry_left != 8'd0) begin
+                            // Target busy: re-issue the same transfer.
+                            retry_left <= retry_left - 1'b1;
+                            state <= ST_START_CORE;
+                        end else if ((is_read && core_parity_err) || core_ack != 3'b001) begin
                             status_code <= (is_read && core_parity_err) ? 8'h08 : {5'd0,core_ack};
                             error <= 1;
                             state <= ST_WRITE_STATUS;
@@ -195,12 +230,10 @@ module dap_transfer_block_engine #(
                     end
                 end
                 ST_FINAL_RDBUFF: begin
-                    core_start <= 1;
-                    core_mode <= 1;
-                    seen_core_busy <= 0;
-                    // The request was presented in ST_NEXT; this state only
-                    // delays one cycle so the normal completion path can run.
-                    state <= ST_WAIT_CORE;
+                    // The request (DP RDBUFF) was presented in ST_NEXT; start it
+                    // through the same core-idle guard as ordinary transfers.
+                    retry_left <= RETRY_MAX;
+                    state <= ST_START_CORE;
                 end
                 ST_WRITE_STATUS: begin
                     rsp_en <= 1;

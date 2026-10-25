@@ -196,6 +196,7 @@ module swd_controller #(
     wire [31:0] batch_host_rdata;
     wire         packet_active, packet_busy, packet_done, packet_error;
     wire [15:0]  packet_response_words;
+    wire [4:0]   packet_state;
     wire         packet_cmd_en, packet_rsp_en;
     wire [9:0]   packet_cmd_addr, packet_rsp_addr;
     wire [31:0]  packet_cmd_data, packet_rsp_data;
@@ -383,7 +384,7 @@ module swd_controller #(
                         rdata_reg <= batch_host_rdata;
                     end
                     ADDR_PACKET_LEN: rdata_reg <= {16'd0,packet_len_reg};
-                    ADDR_PACKET_STATUS: rdata_reg <= {packet_response_words,11'd0,packet_error,packet_done,packet_busy};
+                    ADDR_PACKET_STATUS: rdata_reg <= {packet_response_words,8'd0,packet_state,packet_error,packet_done,packet_busy};
                     default: begin
                         rdata_reg <= 32'd0;
                     end
@@ -471,6 +472,7 @@ module swd_controller #(
         .clk(clk), .rst_n(rst_n), .start(packet_start_pulse),
         .packet_len(packet_len_reg), .busy(packet_busy), .done(packet_done),
         .error(packet_error), .response_words(packet_response_words),
+        .state_dbg(packet_state),
         .cmd_en(packet_cmd_en), .cmd_addr(packet_cmd_addr), .cmd_data(packet_cmd_data),
         .rsp_en(packet_rsp_en), .rsp_we(packet_rsp_we), .rsp_addr(packet_rsp_addr),
         .rsp_data(packet_rsp_data), .core_start(packet_core_start),
