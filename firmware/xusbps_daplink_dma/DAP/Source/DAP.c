@@ -1527,6 +1527,16 @@ static uint32_t DAP_SWD_TransferBlock(const uint8_t *request, uint8_t *response)
     if (!(req & DAP_TRANSFER_RnW)) memcpy(raw + 4, request, remaining * 4U);
     DAP_SWD_BatchClear();
     if (swd_dma_upload(words)) { dbg_pkt_fallback++; dbg_pkt_flush(); goto packet_fallback; }
+    /* The controller silently drops a launch while the previous packet is
+     * still busy, so wait for idle before handing over the new command. */
+    packet_wait = 0;
+    while (swd_read32(SWD_PACKET_STATUS) & 1U) {
+      if (++packet_wait > 2000000U) {
+        dbg_pkt_fallback++; dbg_pkt_flush();
+        xil_printf("[DAP] PACKET_BUSY_STUCK\r\n");
+        goto packet_fallback;
+      }
+    }
     swd_write32(SWD_PACKET_LEN, raw_len);
     swd_write32(SWD_PACKET_CTRL, 1U);
     packet_wait = 0;
@@ -1536,8 +1546,8 @@ static uint32_t DAP_SWD_TransferBlock(const uint8_t *request, uint8_t *response)
         dbg_pkt_status = pstatus;
         dbg_pkt_fallback++;
         dbg_pkt_flush();
-        printf("[DAP] PACKET_TIMEOUT st=0x%08lx len=%lu req=0x%02lx\\r\\n",
-               (unsigned long)pstatus, (unsigned long)raw_len, (unsigned long)req);
+        xil_printf("[DAP] PACKET_TIMEOUT st=0x%08x len=%d req=0x%02x\r\n",
+               (unsigned)pstatus, (int)raw_len, (unsigned)req);
         goto packet_fallback;
       }
     } while (pstatus & 1U);
@@ -1545,8 +1555,8 @@ static uint32_t DAP_SWD_TransferBlock(const uint8_t *request, uint8_t *response)
     if ((pstatus & 4U) || !(pstatus & 2U)) {
       dbg_pkt_fallback++;
       dbg_pkt_flush();
-      printf("[DAP] PACKET_ERROR st=0x%08lx count=%lu req=0x%02lx\\r\\n",
-             (unsigned long)pstatus, (unsigned long)remaining, (unsigned long)req);
+      xil_printf("[DAP] PACKET_ERROR st=0x%08x count=%d req=0x%02x\r\n",
+             (unsigned)pstatus, (int)remaining, (unsigned)req);
       goto packet_fallback;
     }
     rsp_words = (pstatus >> 16) & 0xFFFFU;

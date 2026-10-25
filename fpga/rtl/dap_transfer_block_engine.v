@@ -146,12 +146,14 @@ module dap_transfer_block_engine #(
                         core_req <= 8'h0E;
                         final_phase <= 1;
                         retry_left <= RETRY_MAX;
+                        core_wait_cnt <= 24'h03FFFF;
                         state <= ST_FINAL_RDBUFF;
                     end else if (index == count) begin
                         state <= ST_WRITE_STATUS;
                     end else if (is_read) begin
                         core_req <= request;
                         retry_left <= RETRY_MAX;
+                        core_wait_cnt <= 24'h03FFFF;
                         state <= ST_START_CORE;
                     end else begin
                         cmd_addr <= index + 1'b1;
@@ -168,6 +170,7 @@ module dap_transfer_block_engine #(
                     core_wdata <= cmd_data;
                     core_req <= request;
                     retry_left <= RETRY_MAX;
+                    core_wait_cnt <= 24'h03FFFF;
                     state <= ST_START_CORE;
                 end
                 ST_START_CORE: begin
@@ -182,7 +185,7 @@ module dap_transfer_block_engine #(
                         core_mode <= 1;
                         core_start <= 1;
                         seen_core_busy <= 0;
-                        core_wait_cnt <= 24'hFFFFFF;
+                        core_wait_cnt <= 24'h03FFFF;
                         state <= ST_WAIT_CORE;
                     end
                 end
@@ -194,12 +197,21 @@ module dap_transfer_block_engine #(
                             error <= 1; status_code <= 8'h09;
                             state <= ST_WRITE_STATUS;
                         end
+                    end else if (!seen_core_busy) begin
+                        // The core never accepted the start: time out instead
+                        // of holding the engine (and the core mux) forever.
+                        core_wait_cnt <= core_wait_cnt - 1'b1;
+                        if (core_wait_cnt == 24'd0) begin
+                            error <= 1; status_code <= 8'h09;
+                            state <= ST_WRITE_STATUS;
+                        end
                     end else if (seen_core_busy) begin
                         last_ack <= core_ack;
                         last_data <= core_rdata;
                         if (core_ack == 3'b010 && retry_left != 8'd0) begin
                             // Target busy: re-issue the same transfer.
                             retry_left <= retry_left - 1'b1;
+                            core_wait_cnt <= 24'h03FFFF;
                             state <= ST_START_CORE;
                         end else if ((is_read && core_parity_err) || core_ack != 3'b001) begin
                             status_code <= (is_read && core_parity_err) ? 8'h08 : {5'd0,core_ack};
@@ -254,3 +266,4 @@ module dap_transfer_block_engine #(
         end
     end
 endmodule
+
