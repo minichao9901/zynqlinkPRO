@@ -419,6 +419,9 @@ static uint32_t DAP_SWJ_Pins(const uint8_t *request, uint8_t *response) {
 //   response: pointer to response data
 //   return:   number of bytes in response (lower 16 bits)
 //             number of bytes in request (upper 16 bits)
+#ifndef DAP_MAX_SWCLK_HZ
+#define DAP_MAX_SWCLK_HZ 60000000U
+#endif
 static uint32_t DAP_SWJ_Clock(const uint8_t *request, uint8_t *response) {
 #if ((DAP_SWD != 0) || (DAP_JTAG != 0))
   uint32_t clock;
@@ -437,7 +440,7 @@ static uint32_t DAP_SWJ_Clock(const uint8_t *request, uint8_t *response) {
   /* Keep the core's two-beat waveform intact at all rates. Dividing FCLK
    * avoids changing half-cycle step counts. Frequencies above 50 MHz are
    * experimental until timing closure and board validation are complete. */
-  if ((clock > 90000000U) || (clock < 250000U)) {
+  if ((clock > DAP_MAX_SWCLK_HZ) || (clock < 250000U)) {
     *response = DAP_ERROR;
     return ((4U << 16) | 1U);
   }

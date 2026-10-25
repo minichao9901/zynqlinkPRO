@@ -20,8 +20,15 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     gcc = Path(r'E:\Xilinx\SDK\2018.3\gnu\aarch32\nt\gcc-arm-none-eabi\bin\arm-none-eabi-gcc.exe')
     flags = ['-mcpu=cortex-a9', '-mfpu=vfpv3', '-mfloat-abi=hard']
+    verified_clock = None
     if args.project == 'xusbps_daplink_dma':
         flags += ['-DDAP_ENABLE_TRACE=' + str(int(args.trace)), '-DDAP_MMIO_DIAGNOSTICS=' + str(int(args.trace))]
+        timing_path = ROOT / 'build/fpga_dma_global/verified_clock.json'
+        max_swclk = 60000000
+        if timing_path.exists():
+            verified_clock = json.loads(timing_path.read_text())
+            max_swclk = min(90000000, int(verified_clock['FCLK_max_Hz']) // 2)
+        flags += ['-DDAP_MAX_SWCLK_HZ=' + str(max_swclk)]
     includes = [src, src / 'DAP/Include', src / 'DAP/Source', bsp / 'include']
     cfiles = sorted(src.rglob('*.c'))
     objects = []
@@ -44,6 +51,7 @@ def main():
     run([gcc, *flags, '-specs=' + str(src / 'Xilinx.spec'), '-Wl,-build-id=none', '-Wl,-T,' + str(src / 'lscript.ld'), '-Wl,-Map,' + str(out / 'xusbps_daplink.map'), '-L' + str(bsp / 'lib'), '-o', elf, *objects, '-Wl,--start-group', '-lxil', '-lgcc', '-lc', '-Wl,--end-group'])
     manifest = {
         'options': vars(args),
+        'verified_fpga_clock': verified_clock,
         'source_sha256': {str(p.relative_to(src)): hashlib.sha256(p.read_bytes()).hexdigest() for p in src.rglob('*') if p.is_file()},
         'bsp_sha256': hashlib.sha256((bsp / 'lib/libxil.a').read_bytes()).hexdigest(),
         'elf_sha256': hashlib.sha256(elf.read_bytes()).hexdigest(),
