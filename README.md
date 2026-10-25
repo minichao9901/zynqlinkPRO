@@ -2,6 +2,7 @@
 
 Zynq-7020 高性能 DAP 的恢复与 USB 实验工作区。
 
+- [RTL TransferBlock 修复与验收：60 MHz 读 3.26、写 4.07 MB/s](docs/RTLTransferBlock修复与验收.md)
 - [50 MHz 批量 RTL/CDMA 优化：SRAM 读 3.052、写 3.367 MB/s](docs/RTL批量与DMA优化.md)
 - [LA 微时序测量与优化对照](docs/LA微时序分析.md)
 - [已验证 bit/ELF 与源码快照](releases/dma50_20261025/README.md)

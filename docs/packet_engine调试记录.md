@@ -1,5 +1,9 @@
 # RTL TransferBlock 引擎调试记录（2026-10-25）
 
+> 本文是早期调试记录，下面的初步根因和硬件阻塞状态已被后续工作更新。
+> 当前 packet 路径已上板通过，新增根因包括地址译码截断、成功 status=0、
+> 缺少写后 RDBUFF 和错误整包重放。详见 [修复与验收](RTLTransferBlock修复与验收.md)。
+
 ## 现象
 
 `dap_transfer_block_engine` 接入后，第一次 0x06 块读就失败：
