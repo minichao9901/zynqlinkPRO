@@ -23,6 +23,7 @@ module swd_core (
     input  wire [3:0]  clock_delay,
     input  wire [3:0]  delay_fast,
     input  wire [1:0]  turn_extra,
+    input  wire [2:0]  ack_delay,
 
     // SWJ Sequence
     input  wire [255:0] swj_data,
@@ -69,6 +70,7 @@ module swd_core (
     reg         is_read_op;
     reg  [2:0]  ack_samples;
     reg  [1:0]  turn_wait;
+    reg  [2:0]  ack_hold;
     reg  [32:0] rd_samples;
     reg  [32:0] wr_shift;
     reg  [255:0] swj_shift;
@@ -292,6 +294,7 @@ module swd_core (
                                 lsm_cnt <= 8'd0;
                                 state   <= ST_XFER_ACK;
                                 ack_samples <= 3'd0;
+                                ack_hold <= 3'd0;
                             end
                             default: begin
                                 swclk   <= 1'b0;
@@ -315,9 +318,11 @@ module swd_core (
                                 lsm_cnt <= 8'd1;
                             end
                             8'd1: begin
-                                // ACK[0] high phase.
+                                // ACK[0] high phase; optional hold delays the
+                                // effective sampling point.
                                 swclk <= 1'b1;
-                                lsm_cnt <= 8'd2;
+                                if (ack_hold < ack_delay) ack_hold <= ack_hold + 1'b1;
+                                else begin ack_hold <= 3'd0; lsm_cnt <= 8'd2; end
                             end
                             8'd2: begin
                                 // ACK[0] falling edge occurs in SWCLK domain here.
@@ -325,11 +330,14 @@ module swd_core (
                                 lsm_cnt <= 8'd3;
                             end
                             8'd3: begin
-                                // ACK[1] high phase and consume ACK[0] sampled on
-                                // the previous SWCLK falling edge.
+                                // ACK[1] high phase and consume ACK[0].
                                 swclk <= 1'b1;
-                                ack_samples[0] <= swdio_sample_fsm;
-                                lsm_cnt <= 8'd4;
+                                if (ack_hold < ack_delay) ack_hold <= ack_hold + 1'b1;
+                                else begin
+                                    ack_hold <= 3'd0;
+                                    ack_samples[0] <= swdio_sample_fsm;
+                                    lsm_cnt <= 8'd4;
+                                end
                             end
                             8'd4: begin
                                 // ACK[1] falling edge occurs in SWCLK domain here.
@@ -339,8 +347,12 @@ module swd_core (
                             8'd5: begin
                                 // ACK[2] high phase and consume ACK[1].
                                 swclk <= 1'b1;
-                                ack_samples[1] <= swdio_sample_fsm;
-                                lsm_cnt <= 8'd6;
+                                if (ack_hold < ack_delay) ack_hold <= ack_hold + 1'b1;
+                                else begin
+                                    ack_hold <= 3'd0;
+                                    ack_samples[1] <= swdio_sample_fsm;
+                                    lsm_cnt <= 8'd6;
+                                end
                             end
                             8'd6: begin
                                 // ACK[2] falling edge occurs in SWCLK domain here.

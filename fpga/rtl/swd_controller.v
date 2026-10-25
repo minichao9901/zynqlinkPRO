@@ -212,6 +212,7 @@ module swd_controller #(
     reg  [3:0]  cfg_clock_delay;
     reg  [3:0]  cfg_delay_fast;
     reg  [1:0]  cfg_turn_extra;
+    reg  [2:0]  cfg_ack_delay;
     reg  [255:0] swj_data;
     reg  [7:0]   swj_count;
     reg  [7:0]   xfer_request;
@@ -300,6 +301,7 @@ module swd_controller #(
             cfg_clock_delay <= 4'd5;
             cfg_delay_fast <= 4'd2;
     cfg_turn_extra <= 2'd0;
+    cfg_ack_delay <= 3'd0;
             cfg_sample_rise <= 1'b1;
     cfg_in_delay <= 5'd0;
             packet_len_reg <= 16'd0;
@@ -342,6 +344,7 @@ module swd_controller #(
                         cfg_sample_rise <= s_axi_wdata[17];
                         cfg_in_delay <= s_axi_wdata[22:18];
                         cfg_turn_extra <= s_axi_wdata[24:23];
+                        cfg_ack_delay <= s_axi_wdata[27:25];
                     end
                     ADDR_SWJ_DATA0: begin
                         swj_data[31:0] <= s_axi_wdata;
@@ -550,6 +553,7 @@ module swd_controller #(
         .clock_delay   (cfg_clock_delay),
         .delay_fast    (cfg_delay_fast),
         .turn_extra    (cfg_turn_extra),
+        .ack_delay     (cfg_ack_delay),
         .swj_data      (core_swj_data_sel),
         .swj_count     (core_swj_count_sel),
         .xfer_request  (core_req_sel),
