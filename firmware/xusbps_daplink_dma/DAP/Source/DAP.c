@@ -1495,7 +1495,9 @@ volatile uint32_t dbg_pkt_taken, dbg_pkt_fallback, dbg_pkt_status,
 
 static void dbg_pkt_flush(void)
 {
+#if DAP_MMIO_DIAGNOSTICS
   Xil_DCacheFlushRange((UINTPTR)&dbg_pkt_req, 128);
+#endif
 }
 
 static uint32_t DAP_SWD_TransferBlock(const uint8_t *request, uint8_t *response) {
@@ -1511,12 +1513,12 @@ static uint32_t DAP_SWD_TransferBlock(const uint8_t *request, uint8_t *response)
   /* Fast packet-engine path.  The RTL receives a compact four-byte header
    * {0x06,count_lo,count_hi,request}; the DAP index is fixed to zero by this
    * single-target device.  The old DMA batch path remains the fallback. */
-  if (remaining <= 1023U && ((req & 0xF0U) == 0U) &&
+  if (remaining && remaining <= 1023U && ((req & 0xF0U) == 0U) &&
       (req & DAP_TRANSFER_APnDP)) {
     uint8_t *raw = (uint8_t *)swd_dma_cmd;
     uint32_t raw_len = 4U + ((req & DAP_TRANSFER_RnW) ? 0U : remaining * 4U);
     uint32_t words = (raw_len + 3U) / 4U;
-    uint32_t pstatus, rsp_words, packet_wait;
+    uint32_t pstatus, rsp_words, packet_wait, packet_completed;
     dbg_pkt_taken++;
     dbg_pkt_req = req;
     dbg_pkt_count = remaining;
@@ -1526,7 +1528,6 @@ static uint32_t DAP_SWD_TransferBlock(const uint8_t *request, uint8_t *response)
     raw[3] = (uint8_t)req;
     if (!(req & DAP_TRANSFER_RnW)) memcpy(raw + 4, request, remaining * 4U);
     DAP_SWD_BatchClear();
-    if (swd_dma_upload(words)) { dbg_pkt_fallback++; dbg_pkt_flush(); goto packet_fallback; }
     /* The controller silently drops a launch while the previous packet is
      * still busy, so wait for idle before handing over the new command. */
     packet_wait = 0;
@@ -1534,9 +1535,10 @@ static uint32_t DAP_SWD_TransferBlock(const uint8_t *request, uint8_t *response)
       if (++packet_wait > 2000000U) {
         dbg_pkt_fallback++; dbg_pkt_flush();
         xil_printf("[DAP] PACKET_BUSY_STUCK\r\n");
-        goto packet_fallback;
+        goto packet_failed;
       }
     }
+    if (swd_dma_upload(words)) { dbg_pkt_fallback++; dbg_pkt_flush(); goto packet_fallback; }
     swd_write32(SWD_PACKET_LEN, raw_len);
     swd_write32(SWD_PACKET_CTRL, 1U);
     packet_wait = 0;
@@ -1548,26 +1550,29 @@ static uint32_t DAP_SWD_TransferBlock(const uint8_t *request, uint8_t *response)
         dbg_pkt_flush();
         xil_printf("[DAP] PACKET_TIMEOUT st=0x%08x len=%d req=0x%02x\r\n",
                (unsigned)pstatus, (int)raw_len, (unsigned)req);
-        goto packet_fallback;
+        goto packet_failed;
       }
     } while (pstatus & 1U);
     dbg_pkt_status = pstatus;
-    if ((pstatus & 4U) || !(pstatus & 2U)) {
-      dbg_pkt_fallback++;
-      dbg_pkt_flush();
-      xil_printf("[DAP] PACKET_ERROR st=0x%08x count=%d req=0x%02x\r\n",
-             (unsigned)pstatus, (int)remaining, (unsigned)req);
-      goto packet_fallback;
-    }
+    if (!(pstatus & 2U)) goto packet_failed;
     rsp_words = (pstatus >> 16) & 0xFFFFU;
-    if (rsp_words > 1024U || swd_dma_download(0, rsp_words)) { dbg_pkt_fallback++; dbg_pkt_flush(); goto packet_fallback; }
+    if (!rsp_words || rsp_words > 1024U || swd_dma_download(0, rsp_words)) goto packet_failed;
     dbg_pkt_rsp0 = swd_dma_rsp[0];
     dbg_pkt_flush();
+    packet_completed = swd_dma_rsp[0] & 0xFFFFU;
+    if (packet_completed > remaining ||
+        rsp_words != ((req & DAP_TRANSFER_RnW) ? packet_completed + 1U : 1U)) goto packet_failed;
     response[0] = (uint8_t)swd_dma_rsp[0];
     response[1] = (uint8_t)(swd_dma_rsp[0] >> 8);
     response[2] = (uint8_t)(swd_dma_rsp[0] >> 16);
-    if (req & DAP_TRANSFER_RnW) memcpy(response + 3, &swd_dma_rsp[1], remaining * 4U);
-    return (uint32_t)(3U + ((req & DAP_TRANSFER_RnW) ? remaining * 4U : 0U));
+    if (req & DAP_TRANSFER_RnW) memcpy(response + 3, &swd_dma_rsp[1], packet_completed * 4U);
+    return (uint32_t)(3U + ((req & DAP_TRANSFER_RnW) ? packet_completed * 4U : 0U));
+packet_failed:
+    // After launch the target may have advanced TAR or accepted writes. Never
+    // replay the packet from its beginning on the batch path.
+    response[0] = response[1] = 0;
+    response[2] = DAP_TRANSFER_ERROR;
+    return 3U;
 packet_fallback:
     ;
   }

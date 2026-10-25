@@ -98,6 +98,12 @@ module dap_transfer_block_engine #(
                         busy <= 1;
                         done <= 0;
                         error <= 0;
+                        count <= 0;
+                        index <= 0;
+                        result_index <= 0;
+                        is_read <= 0;
+                        is_ap <= 0;
+                        final_phase <= 0;
                         response_words <= 0;
                         cmd_addr <= 0;
                         cmd_en <= 1;
@@ -113,7 +119,8 @@ module dap_transfer_block_engine #(
                     // cmd_data is the first four packet bytes in little endian.
                     if (cmd_data[7:0] != 8'h06 || packet_len < 4 ||
                         cmd_data[23:8] == 0 || cmd_data[23:8] > 1023 ||
-                        (cmd_data[31:24] & 8'hF0) != 0) begin
+                        (cmd_data[31:24] & 8'hF0) != 0 || !cmd_data[24] ||
+                        (!cmd_data[25] && packet_len < (4 + {cmd_data[23:8],2'b00}))) begin
                         error <= 1; status_code <= 8'h07; state <= ST_WRITE_HEADER;
                     end else begin
                         count <= cmd_data[23:8];
@@ -125,7 +132,7 @@ module dap_transfer_block_engine #(
                         // AP reads have one posted dummy and a final RDBUFF.
                         need_final_read <= cmd_data[25] && cmd_data[24];
                         final_phase <= 0;
-                        status_code <= 0;
+                        status_code <= 8'h01;
                         state <= ST_WRITE_HEADER;
                     end
                 end
@@ -141,8 +148,8 @@ module dap_transfer_block_engine #(
                 end
                 ST_NEXT: begin
                     if (error) state <= ST_WRITE_STATUS;
-                    else if (is_read && is_ap && index == count) begin
-                        // Complete the posted-read pipeline with DP RDBUFF.
+                    else if (is_ap && index == count) begin
+                        // Drain posted reads and check completion of AP writes.
                         core_req <= 8'h0E;
                         final_phase <= 1;
                         retry_left <= RETRY_MAX;
@@ -213,16 +220,18 @@ module dap_transfer_block_engine #(
                             retry_left <= retry_left - 1'b1;
                             core_wait_cnt <= 24'h03FFFF;
                             state <= ST_START_CORE;
-                        end else if ((is_read && core_parity_err) || core_ack != 3'b001) begin
-                            status_code <= (is_read && core_parity_err) ? 8'h08 : {5'd0,core_ack};
+                        end else if ((core_req[1] && core_parity_err) || core_ack != 3'b001) begin
+                            status_code <= (core_req[1] && core_parity_err) ? 8'h08 : {5'd0,core_ack};
                             error <= 1;
                             state <= ST_WRITE_STATUS;
                         end else if (final_phase) begin
-                            rsp_en <= 1;
-                            rsp_we <= 4'hF;
-                            rsp_addr <= result_index + 1'b1;
-                            rsp_data <= core_rdata;
-                            result_index <= result_index + 1'b1;
+                            if (is_read) begin
+                                rsp_en <= 1;
+                                rsp_we <= 4'hF;
+                                rsp_addr <= result_index + 1'b1;
+                                rsp_data <= core_rdata;
+                                result_index <= result_index + 1'b1;
+                            end
                             final_phase <= 0;
                             state <= ST_WRITE_STATUS;
                         end else if (is_read) begin
@@ -249,9 +258,12 @@ module dap_transfer_block_engine #(
                 end
                 ST_WRITE_STATUS: begin
                     rsp_en <= 1;
-                    rsp_we <= 4'b0100;
+                    rsp_we <= 4'b1111;
                     rsp_addr <= 0;
-                    rsp_data <= {8'd0,status_code,16'd0};
+                    // Report only words actually completed, including partial
+                    // reads when the posted pipeline fails before RDBUFF.
+                    rsp_data <= {8'd0,status_code,(is_read ? result_index : index)};
+                    response_words <= is_read ? result_index + 1'b1 : 16'd1;
                     state <= ST_DONE;
                 end
                 ST_DONE: begin

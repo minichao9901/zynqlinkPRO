@@ -29,12 +29,12 @@ module tb_dap_transfer_block_engine;
    for(i=0;i<1024;i=i+1)begin cmd_mem[i]=0; rsp_mem[i]=0;end
    // DAP TransferBlock AP read, 2 words: 06 02 00 0f.
    cmd_mem[0]=32'h0f000206; packet_len=4; run;
-   if(error || rsp_mem[0][15:0]!==2 || rsp_mem[0][23:16]!==0)
+   if(error || rsp_mem[0][15:0]!==2 || rsp_mem[0][23:16]!==1)
      $fatal(1,"read header %h error=%b",rsp_mem[0],error);
    $display("PASS packet AP read response=%h %h",rsp_mem[0],rsp_mem[1]);
    // DAP TransferBlock AP write, one payload word at cmd word1.
    cmd_mem[0]=32'h0d000106; cmd_mem[1]=32'h12345678; packet_len=8; run;
-   if(error || rsp_mem[0][15:0]!==1 || rsp_mem[0][23:16]!==0)
+   if(error || rsp_mem[0][15:0]!==1 || rsp_mem[0][23:16]!==1)
      $fatal(1,"write header %h error=%b",rsp_mem[0],error);
    $display("PASS packet AP write response=%h",rsp_mem[0]);
    $display("ALL DAP PACKET ENGINE TESTS PASSED"); $finish;
