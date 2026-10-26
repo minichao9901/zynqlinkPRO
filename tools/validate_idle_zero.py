@@ -37,6 +37,9 @@ try:
             write(0,0x1e)
             expected=[read(addr,True) for addr in addresses]
             xfer(o,i,[4,idle,0x40,0,0,0])
+            cfg=xfer(o,i,[0x80,255])
+            row['actual_idle']=(struct.unpack_from('<I',cfg,8)[0]>>4)&15
+            assert row['actual_idle']==idle,'Firmware clamped zero idle; experimental build required'
             for n in range(a.rounds):
                 address=addresses[n%len(addresses)]
                 got=read(address,bool((n//len(addresses))%2))

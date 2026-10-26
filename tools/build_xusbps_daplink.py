@@ -14,6 +14,8 @@ def main():
     ap.add_argument('--project', choices=['xusbps_daplink', 'xusbps_daplink_dma'], default='xusbps_daplink')
     ap.add_argument('--trace', action='store_true', help='Enable DMA firmware timing trace and MMIO diagnostics')
     ap.add_argument('--usb-trace', action='store_true', help='Trace USB events without per-MMIO diagnostics')
+    ap.add_argument('--experimental-zero-idle',action='store_true',
+                    help='DMA firmware only: allow unproven zero-idle timing; default clamps to one')
     ap.add_argument('--max-swclk-hz', type=int,
                     help='Conservative firmware limit; cannot exceed the verified timing limit')
     ap.add_argument('--bsp', default=None,
@@ -34,6 +36,7 @@ def main():
     flags = ['-mcpu=cortex-a9', '-mfpu=vfpv3', '-mfloat-abi=hard']
     verified_clock = None
     if args.project == 'xusbps_daplink_dma':
+        flags += ['-DDAP_ALLOW_ZERO_IDLE='+str(int(args.experimental_zero_idle))]
         flags += ['-DDAP_ENABLE_TRACE=' + str(int(args.trace or args.usb_trace)), '-DDAP_MMIO_DIAGNOSTICS=' + str(int(args.trace))]
         timing_path = ROOT / 'build/fpga_dma_global/verified_clock.json'
         max_swclk = 60000000

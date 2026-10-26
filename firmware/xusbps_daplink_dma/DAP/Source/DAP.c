@@ -699,7 +699,12 @@ static uint32_t DAP_TransferConfigure(const uint8_t *request, uint8_t *response)
     uint32_t cfg = swd_read32(SWD_CFG);
     uint32_t idle = DAP_Data.transfer.idle_cycles;
     if (idle > 15U) idle = 15U;
-    /* Honor the requested idle count; zero-idle bring-up is under test. */
+    /* Zero idle still fails random F103 blocks. Keep release builds safe;
+     * diagnostic builds must explicitly opt into the experiment. */
+#if !defined(DAP_ALLOW_ZERO_IDLE) || !DAP_ALLOW_ZERO_IDLE
+    if (idle == 0U) idle = 1U;
+#endif
+    DAP_Data.transfer.idle_cycles = (uint8_t)idle;
     swd_write32(SWD_CFG, (cfg & ~0xF0U) | (idle << 4));
   }
   DAP_Data.transfer.retry_count = (uint16_t) *(request+1) |

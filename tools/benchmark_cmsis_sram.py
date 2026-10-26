@@ -21,7 +21,7 @@ ap.add_argument('--size',type=int,default=20480)
 ap.add_argument('--loops',type=int,default=100)
 ap.add_argument('--sessions',type=int,default=3)
 ap.add_argument('--depth',type=int,default=16)
-ap.add_argument('--idle',type=int,choices=[0,1,2],default=0)
+ap.add_argument('--idle',type=int,choices=[0,1,2],default=1)
 ap.add_argument('--prefix-words',type=int,choices=[0,2],default=0,
                 help='Merge TAR plus two data words in 0x05 to avoid a tail USB command')
 ap.add_argument('--output',type=Path,required=True)
@@ -67,6 +67,9 @@ try:
     try:
         setup(out,inp,a.speed)
         assert xfer(out,inp,[4,a.idle,0x40,0,0,0])==bytes([4,0])
+        row['configuration']=xfer(out,inp,[0x80,255]).hex()
+        row['actual_idle']=(struct.unpack_from('<I',bytes.fromhex(row['configuration']),8)[0]>>4)&15
+        assert row['actual_idle']==a.idle,'Firmware clamped requested idle; zero requires an experimental build'
         def read_reg(addr):
             assert xfer(out,inp,[5,0,1,5]+le(addr))==bytes([5,1,1])
             r=xfer(out,inp,[6,0,1,0,15]);assert r[:4]==bytes([6,1,0,1]),r.hex()

@@ -23,7 +23,7 @@ def main():
     ap.add_argument('--words', type=int, default=1022)
     ap.add_argument('--loops', type=int, default=500)
     ap.add_argument('--depths', default='1,4,16')
-    ap.add_argument('--idle',type=int,choices=[0,1,2],default=0)
+    ap.add_argument('--idle',type=int,choices=[0,1,2],default=1)
     ap.add_argument('--ack-hold',type=int,choices=range(8),
                     help='Diagnostic ACK capture hold, applied AFTER Connect resets CFG')
     ap.add_argument('--output', type=Path, required=True)
@@ -64,6 +64,8 @@ def main():
         if a.ack_hold is not None:
             assert xfer(out,inp,[0x84,a.ack_hold])==bytes([0x84,0,a.ack_hold])
         result['configuration']=xfer(out,inp,[0x80,255]).hex()
+        result['actual_idle']=(struct.unpack_from('<I',bytes.fromhex(result['configuration']),8)[0]>>4)&15
+        assert result['actual_idle']==a.idle, 'Requested idle was clamped by firmware; use a matching diagnostic build'
         dhcsr = read32(0xe000edf0)
         if not dhcsr & (1 << 17):
             tar(0xe000edf0)
