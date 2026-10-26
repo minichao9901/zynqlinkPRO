@@ -10,9 +10,26 @@
 | `ps7_init.tcl` | PS 时钟/DDR 初始化（加载 ELF 前必须执行） |
 | `SHA256SUMS` | 校验值 |
 
-## 本分支最终配对（2026-10-26，codex/main-continuous-scheduler）
+## 当前配对（2026-10-27，codex/main-continuous-scheduler）
 
-当前 bit/ELF 包含 packet 连续启动/写预取、读响应直接 DMA、USB 队列所有权修复，
+包含连续完成握手、读收尾/ACK状态合并、混合Transfer写压缩，以及既有USB/执行引擎恢复。
+默认idle≥1，SWCLK上限60MHz；零空闲只允许显式实验构建。FCLK120MHz routed
+setup+0.300ns、hold+0.050ns，bitgen/DRC通过。
+
+F103@96MHz，20KiB线性SRAM，新版两段合计每频率20会话：
+
+| SWCLK | OpenOCD读/写 MB/s | 标准CMSIS线性API读/写 MB/s |
+|---|---:|---:|
+| 50MHz | 3.632 / 3.641 | 3.847 / 3.791 |
+| 60MHz | 4.265 / 4.305 | 4.562 / 4.485 |
+
+完整数据及原始SRAM恢复通过。50MHz raw为4.066/4.017MB/s，**线性双向4MB/s目标尚未达成**。
+详见[`交接与验收`](../docs/交接-20261027-连续握手与50MHz优化.md)。
+`build_manifest.json`记录当前bit/ELF和RTL哈希；`SHA256SUMS`校验当前文件。
+
+## 历史冻结对照配对（2026-10-26）
+
+该冻结 bit/ELF 包含 packet 连续启动/写预取、读响应直接 DMA、USB 队列所有权修复，
 以及 core/batch/packet 软复位恢复。固件 SWCLK 上限显式限制为 **60 MHz**。
 最终 bit 的 routed FCLK 上限为 138.46 MHz（setup +0.488ns / hold +0.016ns）；
 150 MHz setup=-0.068ns，不算通过。下方 main 的 75 MHz 是历史配置。

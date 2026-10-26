@@ -4,15 +4,16 @@
     "project": "xusbps_daplink_dma",
     "trace": false,
     "usb_trace": false,
+    "experimental_zero_idle": false,
     "max_swclk_hz": 60000000,
     "bsp": "E:/zynqlinkPRO/reference/legacy_zynq/ZYNQ_DAPLINK_RTL_100TO50MHz/ZYNQ_DAPLINK_RTL_100TO50MHz.sdk/usb_bsp/ps7_cortexa9_0",
     "gcc": "E:\\Xilinx\\SDK\\2018.3\\gnu\\aarch32\\nt\\gcc-arm-none-eabi\\bin\\arm-none-eabi-gcc.exe"
   },
   "verified_fpga_clock": {
-    "FCLK_max_Hz": 138461539,
-    "SWCLK_max_Hz": 69230769,
-    "setup_slack_ns": 0.488,
-    "hold_slack_ns": 0.016
+    "FCLK_max_Hz": 120000000,
+    "SWCLK_max_Hz": 60000000,
+    "setup_slack_ns": 0.3,
+    "hold_slack_ns": 0.05
   },
   "source_sha256": {
     "chry_ringbuffer.c": "e719548c6dd08de32f961d66fbfe7f071fd44b8650d7ab0074621b1892a08b16",
@@ -36,9 +37,9 @@
     "DAP\\Include\\DAP_config.h": "02f80686e5f4c9776dd03d93a0e0f2bbd8015a25d22a98372912c875aadffaf1",
     "DAP\\Include\\dap_metrics.h": "22c76479f5aeda5ee0b037b6577e074b8a22836e9839f55235ac72adb50796fd",
     "DAP\\Include\\swd_dma.h": "a36819ab5c3186c3b6c04a11b9cbe35143a6456afa6ec1cc36ee0749f35bf613",
-    "DAP\\Source\\DAP.c": "a28b32ff2d23a5617c9d976088077a888ceda18576ecdff1394c4ac3310cd2ed",
+    "DAP\\Source\\DAP.c": "19f7721c306e370d16b79221e9d084ac1af58f7d7998f914f9e052a8bfb0b290",
     "DAP\\Source\\dap_metrics.c": "baaf688320008d478857959ac94552f96179b69d3d32bebf3db91a05898e6865",
-    "DAP\\Source\\DAP_vendor.c": "09b100bebc4d6137fb7f2ee2ec8e45598d4857d90ae4542f8c90e14f02154077",
+    "DAP\\Source\\DAP_vendor.c": "e1cf097697c6e7399168f82bd9eb43b80da1d47fdc39c6a6ccd18cb118817d33",
     "DAP\\Source\\JTAG_DP.c": "b9ba22e29688ec1ba5d3d5b007798f557ef1a116b4a173ac4968e9d78ac8fee8",
     "DAP\\Source\\swd_dma.c": "261bdbd3036f458896c275a13445292a4405bd6c8415d98f9d98ba13d2f9c31f",
     "DAP\\Source\\SWO.c": "3c2d788c229ed27bc7062854adc740ba299efffdf6a4b053b32bc177f69fde00",
@@ -46,7 +47,14 @@
     "DAP\\Source\\UART.c": "a9d143bc67a93a6e652c0ea15acf5f343966434c4225c5e89959cc5854271a5b"
   },
   "bsp_sha256": "b31bd5a75096dfdba14dca67c78629983985ba55a9984c0afa6062d1030859e5",
-  "elf_sha256": "6c078fccd76b4d8a73df180b0589ab27f091d447c0982c1bcc476c4baa0ff787",
-  "paired_bit_sha256": "0afb0d30cb6c08e14636f762c1916c4ac8ca8d267d19b2fd366fd8842787aefa",
-  "source_commit": "456d3dbccc806d131b6631f8654e70253ccf6c20"
+  "elf_sha256": "8c2b37b1e8bd0e4c95503b67325d413381768dbbc3153095a761338492c1d456",
+  "source_commit": "3d1c837c8f290266e901aa54be9be621d990410a",
+  "rtl_source_sha256": {
+    "fpga/rtl/dap_transfer_block_engine.v": "85d03fa03966ecf2ae8599ba49ce21699060ab7bcdb27fc69f772bd492eed319",
+    "fpga/rtl/swd_batch_engine.v": "2147786073a8ed8aa4a66c0c6c16a4e7ba34e222789af20cd84e24b74df70c41",
+    "fpga/rtl/swd_controller.v": "471ac6fc763e6131392fd129b9eaa1127ff0b1204929699ff4f734d292626eaf",
+    "fpga/rtl/swd_core.v": "1b997ef6870748e743deae38af3ed06b3e0545b755edc801fa8b492b2d008fd0"
+  },
+  "bit_sha256": "0c5afafd480f9d6eb18002510be9f7996a260fb3d795937fd7f80bb5ec7a2f63",
+  "validation": "docs/measurements/20261027-chain-acceptance.json"
 }

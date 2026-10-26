@@ -2,9 +2,11 @@
 
 Zynq-7020（xc7z020）上的高性能 **CMSIS-DAP v2 / DAPLink** 固件：
 PS 跑 XUsbPs USB + CMSIS-DAP 协议，PL 里做 SWD 批量引擎和 CDMA 数据搬运，
-支持 50/60 MHz SWCLK，F103 目标实测读 3.3–3.4 MB/s、写 4.1 MB/s。
+支持50/60MHz SWCLK；F103@96MHz的20KiB OpenOCD读/写实测为
+50MHz下3.632/3.641MB/s、60MHz下4.265/4.305MB/s。
 
 - 预编译固件：[`prebuilt/`](prebuilt/)（bit + ELF，JTAG 加载即用）
+- 最新验收：[`连续握手与50MHz优化`](docs/交接-20261027-连续握手与50MHz优化.md)
 - 打补丁的 OpenOCD（块读流水线，读 +18%）：[`docs/openocd流水线补丁.md`](docs/openocd流水线补丁.md)
 
 ## 直接使用（推荐）
@@ -60,7 +62,7 @@ xsct tools/create_bsp.tcl build/system.hdf build/sdk usb_bsp
 然后编译 ELF（`--bsp` 指向生成的 BSP；`--gcc` 可指定交叉编译器）：
 
 ```powershell
-python tools\build_xusbps_daplink.py --project xusbps_daplink_dma --opt 3 `
+python tools\build_xusbps_daplink.py --project xusbps_daplink_dma --opt 3 --max-swclk-hz 60000000 `
     --bsp build\sdk\usb_bsp
 ```
 
