@@ -3,7 +3,9 @@ module tb_swd_stream #(
  parameter SAMPLE_RISE=1,
  parameter TCO_NS=1,
  parameter CLK_HALF_NS=5.0,
- parameter IDLE_CYCLES=0
+ parameter IDLE_CYCLES=0,
+ parameter ACK_DELAY=0,
+ parameter TURN_EXTRA=0
 );
 reg clk=0; always #(CLK_HALF_NS) clk=~clk;
 reg rst_n=0, host_wr_en=0, host_rd_en=0;
@@ -20,6 +22,11 @@ wire [7:0] core_swj_count,core_req;
 wire [31:0] core_wdata;
 wire core_busy; wire [2:0] core_ack; wire [31:0] core_rdata;
 wire core_parity_err;
+reg packet_active=0, packet_cmd_en=0, packet_rsp_en=0;
+reg [9:0] packet_cmd_addr=0, packet_rsp_addr=0;
+wire [31:0] packet_cmd_data;
+reg [3:0] packet_rsp_we=0;
+reg [31:0] packet_rsp_data=0;
 integer busy_left=0, ok_count=0, attempts=0, reads=0, writes=0;
 reg inject_wait=0, inject_fault=0;
 reg [31:0] write_sum=0;
@@ -43,6 +50,7 @@ always @(posedge clk) begin
 end
 swd_core core(.clk(clk),.rst_n(rst_n),.start(core_start),.mode(core_mode),
  .timestamp_en(1'b0),.idle_cycles(4'(IDLE_CYCLES)),.data_phase(1'b0),.clock_delay(4'd5),.delay_fast(4'd0),
+ .turn_extra(2'(TURN_EXTRA)),.ack_delay(3'(ACK_DELAY)),
  .swj_data(core_swj_data),.swj_count(core_swj_count),.xfer_request(core_req),.xfer_wdata(core_wdata),
  .xfer_rdata(core_rdata),.ack(core_ack),.parity_err(core_parity_err),.busy(core_busy),.timestamp(),
  .swclk(swclk),.swdio_o(dio_o),.swdio_i(swdio),.swdio_i_fall(SAMPLE_RISE ? sample_rise : sample_fall),.swdio_t(dio_t));

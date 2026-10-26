@@ -33,8 +33,14 @@ groups = defaultdict(list)
 requests, responses, submitted = deque(), deque(), deque()
 commands = []
 pending = None
+request_words = {}
+response_words = {}
 for t, ev, arg in events:
-    if ev == 1:
+    if 16 <= ev < 32:
+        request_words[ev - 16] = arg
+    elif 32 <= ev < 48:
+        response_words[ev - 32] = arg
+    elif ev == 1:
         requests.append(t)
     elif ev == 2:
         pending = {'cmd': arg, 'start': t}
@@ -42,6 +48,10 @@ for t, ev, arg in events:
             pending['out'] = requests.popleft()
     elif ev == 3 and pending:
         pending.update(done=t, response_bytes=arg)
+        pending['request_words'] = [request_words.get(i, 0) for i in sorted(request_words)]
+        pending['response_words'] = [response_words.get(i, 0) for i in sorted(response_words)]
+        request_words.clear()
+        response_words.clear()
         commands.append(pending)
         responses.append(pending)
         pending = None

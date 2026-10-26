@@ -445,7 +445,9 @@ static uint32_t DAP_SWJ_Clock(const uint8_t *request, uint8_t *response) {
     return ((4U << 16) | 1U);
   }
   ps_set_fclk0_hz(clock * 2U);
-  swd_write32(SWD_CFG, (swd_read32(SWD_CFG) & ~(1U << 17)) |
+  /* FCLK runs at 2x SWCLK, so the transfer half-cycle must be one FCLK
+   * cycle (delay_fast=0).  The RTL reset value is slow; program it here. */
+  swd_write32(SWD_CFG, (swd_read32(SWD_CFG) & ~((0xFU << 13) | (1U << 17))) |
               ((clock <= 35000000U) ? (1U << 17) : 0U));
   Set_Clock_Delay(clock);
 
@@ -696,6 +698,9 @@ static uint32_t DAP_TransferConfigure(const uint8_t *request, uint8_t *response)
     uint32_t cfg = swd_read32(SWD_CFG);
     uint32_t idle = DAP_Data.transfer.idle_cycles;
     if (idle > 15U) idle = 15U;
+    /* The RTL needs at least one idle half-cycle between transfers; with
+     * zero the target DP sees back-to-back frames and answers NO ACK. */
+    if (idle == 0U) idle = 1U;
     swd_write32(SWD_CFG, (cfg & ~0xF0U) | (idle << 4));
   }
   DAP_Data.transfer.retry_count = (uint16_t) *(request+1) |

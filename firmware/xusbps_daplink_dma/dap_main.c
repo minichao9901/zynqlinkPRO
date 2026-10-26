@@ -39,6 +39,29 @@ static inline void dap_trace_add(uint32_t ev, uint32_t arg)
 #endif
 }
 
+/* Raw CMSIS-DAP payload snapshots. Events 16..31 are request words and
+ * 32..47 are response words. Keeping the first 64 bytes is enough to decode
+ * DAP_Transfer/TransferBlock initialization commands without blowing the
+ * small noncached trace ring. */
+static inline void dap_trace_bytes(uint32_t event_base, const uint8_t *data,
+                                   uint32_t len)
+{
+#if DAP_ENABLE_TRACE
+  uint32_t words = (len + 3U) / 4U;
+  uint32_t i;
+  if (words > 16U) words = 16U;
+  for (i = 0; i < words; ++i) {
+    uint32_t value = 0U;
+    uint32_t left = len - i * 4U;
+    if (left > 4U) left = 4U;
+    memcpy(&value, data + i * 4U, left);
+    dap_trace_add(event_base + i, value);
+  }
+#else
+  (void)event_base; (void)data; (void)len;
+#endif
+}
+
 static volatile uint16_t USB_RequestIndexI;
 static volatile uint16_t USB_RequestIndexO;
 static volatile uint16_t USB_RequestCountI;
@@ -138,6 +161,7 @@ void usbd_dap_bulk_out(XUsbPs *InstancePtr, u8 EpNum, u32 nbytes, u8 *Buffer)
   dap_trace_add(1U, nbytes);
   
   memcpy(USB_Request[USB_RequestIndexI], Buffer, nbytes);
+  dap_trace_bytes(16U, Buffer, nbytes);
   dap_dbg_usb_rx++;
   if (dap_dbg_usb_rx <= 8U) {
     xil_printf("[DAP] USB OUT ep=%d len=%d cmd=0x%02x\r\n",
@@ -173,6 +197,12 @@ static void dap_start_response(uint16_t idx)
   uint16_t len = USB_RespSize[idx];
 
   dap_trace_add(4U, len);
+  /* USB_Response is cacheable for CPU command handling; make the completed
+   * response visible to XUsbPs DMA before priming EP1. */
+  if (len != 0U) {
+    Xil_DCacheFlushRange((UINTPTR)USB_Response[idx],
+                         ((UINTPTR)len + 31U) & ~(UINTPTR)31U);
+  }
   /* A bulk IN transfer that ends on an exact max-packet boundary needs a ZLP,
    * otherwise the host keeps waiting for the rest of its buffer.  Responses
    * with 4 + 4*N bytes hit this for N = 127, 255, ... */
@@ -224,6 +254,14 @@ static void chry_dap_state_init(void)
   // Xil_MemMap((uint32_t)&USB_Response, DAP_PACKET_COUNT * DAP_PACKET_SIZE, NORM_NONCACHE);
 }
 
+/* USB SET_CONFIGURATION/reset starts a new CMSIS-DAP session. Do not let a
+ * response from the previous host session satisfy the first transfer. */
+void chry_dap_usb_session_reset(void)
+{
+  chry_dap_state_init();
+  memset((void *)USB_RespSize, 0, sizeof USB_RespSize);
+}
+
 
 void chry_dap_init(void)
 {
@@ -270,6 +308,8 @@ void chry_dap_handle(void)
     dap_trace_add(2U, USB_Request[USB_RequestIndexO][0]);
     USB_RespSize[USB_ResponseIndexI] =
         (uint16_t)DAP_ExecuteCommand(USB_Request[USB_RequestIndexO], USB_Response[USB_ResponseIndexI]);
+    dap_trace_bytes(32U, USB_Response[USB_ResponseIndexI],
+                    USB_RespSize[USB_ResponseIndexI]);
     dap_trace_add(3U, USB_RespSize[USB_ResponseIndexI]);
 
     if (dap_dbg_exec_count < 8U) {

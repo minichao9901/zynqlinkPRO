@@ -22,6 +22,11 @@ module swd_core (
     input  wire        data_phase,
     input  wire [3:0]  clock_delay,
     input  wire [3:0]  delay_fast,
+    // Extra transfer half-cycle steps held low before turnaround's rise.
+    input  wire [1:0]  turn_extra,
+    // 0=legacy pipeline; 1..7=non-overlapping ACK capture with configurable
+    // high-phase hold. The next rise is emitted only after bit capture.
+    input  wire [2:0]  ack_delay,
 
     // SWJ Sequence
     input  wire [255:0] swj_data,
@@ -46,27 +51,31 @@ module swd_core (
     output reg         swdio_t       // 1=input, 0=output
 );
 
-    localparam [3:0] ST_IDLE      = 4'd0;
-    localparam [3:0] ST_SWJ       = 4'd1;
-    localparam [3:0] ST_XFER_REQ  = 4'd2;
-    localparam [3:0] ST_TURN1     = 4'd3;
-    localparam [3:0] ST_XFER_ACK  = 4'd4;
-    localparam [3:0] ST_TURN_WR   = 4'd5;
-    localparam [3:0] ST_XFER_RD   = 4'd6;
-    localparam [3:0] ST_XFER_WR   = 4'd7;
-    localparam [3:0] ST_XFER_WFRD = 4'd8;
-    localparam [3:0] ST_XFER_WFWR = 4'd9;
-    localparam [3:0] ST_TURN2     = 4'd10;
-    localparam [3:0] ST_IDLE_CLK  = 4'd11;
-    localparam [3:0] ST_DONE      = 4'd12;
-    localparam [3:0] ST_TURN_WFWR = 4'd13;
-    localparam [3:0] ST_RD_FINAL = 4'd14;
+    localparam [4:0] ST_IDLE      = 5'd0;
+    localparam [4:0] ST_SWJ       = 4'd1;
+    localparam [4:0] ST_XFER_REQ  = 4'd2;
+    localparam [4:0] ST_TURN1     = 4'd3;
+    localparam [4:0] ST_XFER_ACK  = 4'd4;
+    localparam [4:0] ST_TURN_WR   = 4'd5;
+    localparam [4:0] ST_XFER_RD   = 4'd6;
+    localparam [4:0] ST_XFER_WR   = 4'd7;
+    localparam [4:0] ST_XFER_WFRD = 4'd8;
+    localparam [4:0] ST_XFER_WFWR = 4'd9;
+    localparam [4:0] ST_TURN2     = 4'd10;
+    localparam [4:0] ST_IDLE_CLK  = 4'd11;
+    localparam [4:0] ST_DONE      = 4'd12;
+    localparam [4:0] ST_TURN_WFWR = 4'd13;
+    localparam [4:0] ST_RD_FINAL = 4'd14;
+    localparam [4:0] ST_ACK_EXT  = 5'd15;
+    localparam [4:0] ST_WTURN    = 5'd16;
 
-    reg  [3:0] state;
+    reg  [4:0] state;
     reg  [8:0] lsm_cnt;
     reg  [15:0] delay_cnt;
     reg         is_read_op;
     reg  [2:0]  ack_samples;
+    reg  [2:0]  ack_hold;
+    reg  [1:0]  turn_wait;
     reg  [32:0] rd_samples;
     reg  [32:0] wr_shift;
     reg  [255:0] swj_shift;
@@ -150,6 +159,8 @@ module swd_core (
             is_read_op      <= 1'b0;
             ack_samples     <= 3'd0;
             rd_samples      <= 33'd0;
+            ack_hold        <= 3'd0;
+            turn_wait       <= 2'd0;
             wr_shift        <= 33'd0;
             swj_shift       <= 256'd0;
             idle_cnt        <= 4'd0;
@@ -253,6 +264,7 @@ module swd_core (
                             8'd15: begin
                                 // PARK high phase done, move to dedicated ACK turnaround.
                                 swclk <= 1'b1;
+                                turn_wait <= turn_extra;
                                 state <= ST_TURN1;
                                 lsm_cnt <= 8'd0;
                                 ack_samples <= 3'd0;
@@ -272,7 +284,12 @@ module swd_core (
                     end else begin
                         delay_cnt <= 16'd0;
                         swdio_t   <= 1'b1;
-                        case (lsm_cnt)
+                        if (turn_wait != 2'd0) begin
+                            // Keep the line released and SWCLK low while a
+                            // slow target finishes its turnaround response.
+                            turn_wait <= turn_wait - 1'b1;
+                            swclk <= 1'b0;
+                        end else case (lsm_cnt)
                             8'd0: begin
                                 swclk   <= 1'b0;
                                 swdio_t <= 1'b1;
@@ -282,8 +299,9 @@ module swd_core (
                                 swclk   <= 1'b1;
                                 swdio_t <= 1'b1;
                                 lsm_cnt <= 8'd0;
-                                state   <= ST_XFER_ACK;
+                                state   <= (ack_delay == 0) ? ST_XFER_ACK : ST_ACK_EXT;
                                 ack_samples <= 3'd0;
+                                ack_hold <= 3'd0;
                             end
                             default: begin
                                 swclk   <= 1'b0;
@@ -306,7 +324,7 @@ module swd_core (
                                 lsm_cnt <= 8'd1;
                             end
                             8'd1: begin
-                                // ACK[0] high phase.
+                                // Legacy receive pipeline (ack_delay=0).
                                 swclk <= 1'b1;
                                 lsm_cnt <= 8'd2;
                             end
@@ -316,8 +334,7 @@ module swd_core (
                                 lsm_cnt <= 8'd3;
                             end
                             8'd3: begin
-                                // ACK[1] high phase and consume ACK[0] sampled on
-                                // the previous SWCLK falling edge.
+                                // ACK[1] high phase and consume ACK[0].
                                 swclk <= 1'b1;
                                 ack_samples[0] <= swdio_sample_fsm;
                                 lsm_cnt <= 8'd4;
@@ -356,10 +373,17 @@ module swd_core (
                                         // The previous falling edge already
                                         // began D0. Raise it on this beat.
                                         swclk <= 1'b1;
-                                        lsm_cnt <= 8'd2;
+                                        lsm_cnt <= (ack_delay == 0) ? 8'd2 : 8'd0;
                                         state <= ST_XFER_RD;
                                     end else begin
-                                        if (delay_fast == 0) begin
+                                        if (ack_delay != 0) begin
+                                            // The non-overlapping ACK sampler
+                                            // has not clocked the ACK-to-write
+                                            // turnaround yet. Keep both edges
+                                            // before enabling host data output.
+                                            swclk <= 1'b1;
+                                            state <= ST_TURN_WR;
+                                        end else if (delay_fast == 0) begin
                                             // Beat 6 began write turnaround;
                                             // complete it here without another
                                             // TURN_WR pair of half-cycles.
@@ -382,6 +406,65 @@ module swd_core (
                                 swclk   <= 1'b0;
                                 lsm_cnt <= 8'd0;
                             end
+                        endcase
+                    end
+                end
+
+                ST_ACK_EXT: begin
+                    if (!step_tick) begin
+                        delay_cnt <= delay_cnt + 1'b1;
+                    end else begin
+                        delay_cnt <= 0;
+                        swdio_t <= 1'b1;
+                        // Turnaround's rising edge launched ACK0. Hold that
+                        // high phase, fall, then capture before the NEXT rising
+                        // edge launches ACK1. No sample is overwritten during
+                        // a hold. Repeat the same schedule for all three bits.
+                        case (lsm_cnt)
+                            0,3,6: begin
+                                swclk <= 1'b1;
+                                if (ack_hold < ack_delay) ack_hold <= ack_hold + 1'b1;
+                                else begin
+                                    ack_hold <= 0;
+                                    lsm_cnt <= lsm_cnt + 1'b1;
+                                end
+                            end
+                            1,4,7: begin
+                                swclk <= 1'b0;
+                                lsm_cnt <= lsm_cnt + 1'b1;
+                            end
+                            2: begin
+                                ack_samples[0] <= swdio_sample_fsm;
+                                swclk <= 1'b1;
+                                lsm_cnt <= 3;
+                            end
+                            5: begin
+                                ack_samples[1] <= swdio_sample_fsm;
+                                swclk <= 1'b1;
+                                lsm_cnt <= 6;
+                            end
+                            8: begin
+                                ack_samples[2] <= swdio_sample_fsm;
+                                swclk <= 1'b0;
+                                // Reuse registered ACK decode with a full
+                                // logic cycle. Its next rise launches D0 or
+                                // the write turnaround, not another ACK bit.
+                                // WAIT/FAULT take a dedicated turnaround cycle:
+                                // the target needs a full clock after ACK2
+                                // before it can accept the next header.
+                                if (!data_phase &&
+                                    (({swdio_sample_fsm, ack_samples[1:0]} == 3'b010) ||
+                                     ({swdio_sample_fsm, ack_samples[1:0]} == 3'b100))) begin
+                                    // WAIT/FAULT: two-turnaround cycle before the
+                                    // next header, then decode the stored bits.
+                                    state   <= ST_WTURN;
+                                    lsm_cnt <= 8'd0;
+                                end else begin
+                                    state   <= ST_XFER_ACK;
+                                    lsm_cnt <= 8'd8;
+                                end
+                            end
+                            default: begin state <= ST_DONE; end
                         endcase
                     end
                 end
@@ -626,6 +709,31 @@ module swd_core (
                     state <= ST_DONE;
                 end
 
+                ST_WTURN: begin
+                    if (!step_tick) begin
+                        delay_cnt <= delay_cnt + 1'b1;
+                    end else begin
+                        delay_cnt <= 16'd0;
+                        swdio_t   <= 1'b1;
+                        case (lsm_cnt)
+                            8'd0: begin
+                                swclk   <= 1'b1;
+                                lsm_cnt <= 8'd1;
+                            end
+                            8'd1: begin
+                                swclk   <= 1'b0;
+                                lsm_cnt <= 8'd8;
+                                state   <= ST_XFER_ACK;
+                            end
+                            default: begin
+                                swclk   <= 1'b0;
+                                lsm_cnt <= 8'd8;
+                                state   <= ST_XFER_ACK;
+                            end
+                        endcase
+                    end
+                end
+
                 ST_DONE: begin
                     swclk   <= 1'b1;
                     swdio_t <= 1'b0;
@@ -640,5 +748,9 @@ module swd_core (
             endcase
         end
     end
+
+`ifndef SYNTHESIS
+always @(posedge clk) if ($test$plusargs("sttrace")) $display("ST t=%0t st=%0d lsm=%0d ack=%b", $time, state, lsm_cnt, ack_samples);
+`endif
 
 endmodule
