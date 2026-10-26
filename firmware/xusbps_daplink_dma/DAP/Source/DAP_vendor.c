@@ -184,7 +184,20 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
         num=(1U<<16)|(2U+sizeof state);
       }
       break;
-    case ID_DAP_Vendor8:  break;
+    case ID_DAP_Vendor8:
+      {
+        uint32_t state,i;
+        if(*request==1)swd_write32(SWD_BASE_ADDR+0x54U,1U);
+        state=swd_read32(SWD_BASE_ADDR+0x54U);
+        *response++=DAP_OK;memcpy(response,&state,4);response+=4;
+        for(i=0;i<16;i++){
+          swd_write32(SWD_BASE_ADDR+0x58U,i);
+          state=swd_read32(SWD_BASE_ADDR+0x5cU);
+          memcpy(response,&state,4);response+=4;
+        }
+        num=(2U<<16)|70U;
+      }
+      break;
     case ID_DAP_Vendor9:  break;
     case ID_DAP_Vendor10: break;
     case ID_DAP_Vendor11: break;

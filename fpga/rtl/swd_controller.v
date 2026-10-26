@@ -151,6 +151,30 @@ module swd_controller #(
     localparam ADDR_PACKET_STATUS = 7'h48;
     localparam ADDR_FEATURES      = 7'h4C;
     localparam ADDR_ENGINE_RESET  = 7'h50;
+    localparam ADDR_TRACE_CTRL    = 7'h54;
+    localparam ADDR_TRACE_INDEX   = 7'h58;
+    localparam ADDR_TRACE_DATA    = 7'h5C;
+    reg [31:0] transfer_trace [0:15];
+    reg [3:0] trace_head,trace_index;
+    reg [15:0] trace_count;
+    reg trace_frozen,trace_was_busy;
+    wire trace_clear = s_axi_wvalid && s_axi_wready &&
+                       write_addr == ADDR_TRACE_CTRL && s_axi_wdata[0];
+    // Out-of-band forensic history; freeze on an invalid ACK/parity failure.
+    // Do not log at request publication: preserve the result actually completed.
+    always @(posedge clk or negedge rst_n) begin
+        if(!rst_n) begin
+            trace_head<=0;trace_count<=0;trace_frozen<=0;trace_was_busy<=0;
+        end else begin
+            trace_was_busy<=core_busy;
+            if(trace_clear) begin trace_head<=0;trace_count<=0;trace_frozen<=0;end
+            else if(trace_was_busy && !core_busy && core_mode_sel && !trace_frozen) begin
+                transfer_trace[trace_head]<={trace_count,core_req_sel,4'd0,core_parity_err,core_ack};
+                trace_head<=trace_head+1'b1;trace_count<=trace_count+1'b1;
+                if(core_parity_err || (core_ack!=1 && core_ack!=2 && core_ack!=4))trace_frozen<=1;
+            end
+        end
+    end
     reg engine_reset;
     reg [31:0] engine_reset_count;
     wire engine_rst_n = rst_n & ~engine_reset;
@@ -271,6 +295,7 @@ module swd_controller #(
             packet_start_pulse <= 1'b0;
             engine_reset <= 1'b0;
             engine_reset_count <= 0;
+            trace_index <= 0;
             swj_data <= 256'd0;
             swj_count <= 8'd0;
             xfer_request <= 8'd0;
@@ -337,6 +362,7 @@ module swd_controller #(
                         engine_reset <= 1'b1;
                         engine_reset_count <= engine_reset_count + 1'b1;
                     end
+                    ADDR_TRACE_INDEX: trace_index<=s_axi_wdata[3:0];
                     default: ;
                 endcase
             end
@@ -366,6 +392,9 @@ module swd_controller #(
                     end
                     ADDR_FEATURES: rdata_reg <= 32'h4450_0001;
                     ADDR_ENGINE_RESET: rdata_reg <= engine_reset_count;
+                    ADDR_TRACE_CTRL: rdata_reg <= {trace_frozen,11'd0,trace_count,trace_head};
+                    ADDR_TRACE_INDEX: rdata_reg <= {28'd0,trace_index};
+                    ADDR_TRACE_DATA: rdata_reg <= transfer_trace[trace_index];
                     ADDR_STATUS: begin
                         // 32-bit STATUS layout: [31:16] timestamp, [7] parity_err,
                         // [3:1] ack, [0] busy. Reserved bits read as 0.

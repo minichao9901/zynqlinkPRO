@@ -134,7 +134,18 @@ def main():
                         if isinstance(exc, usb.core.USBTimeoutError):
                             break
                         raise
-                write_window(backup)
+                try:
+                    write_window(backup)
+                except Exception as restore_error:
+                    # A failed zero-idle experiment can leave the DP out of
+                    # framing. Recover conservatively solely to restore SRAM;
+                    # the original test exception remains a failure.
+                    result['restore_recovery_reason']=str(restore_error)
+                    setup(out,inp,a.speed)
+                    assert xfer(out,inp,[4,1,64,0,0,0])==bytes([4,0])
+                    write_reg(0,0x1e)
+                    write_window(backup)
+                    result['restore_used_idle1_reconnect']=True
                 result['restore_match'] = read_window() == backup
                 assert result['restore_match'], 'SRAM restoration mismatch'
                 result['backup_sha256'] = hashlib.sha256(backup).hexdigest()
