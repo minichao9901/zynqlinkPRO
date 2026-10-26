@@ -105,16 +105,36 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
         num = (2U << 16) | 82U;
       }
       break;
+    case ID_DAP_Vendor5:
+      { // Data receive window: 0=legacy, 1=early, 255=query.
+        uint32_t cfg = swd_read32(SWD_CFG);
+        uint8_t status = DAP_OK;
+        if (*request <= 1U) {
+          if ((swd_read32(SWD_BASE_ADDR + 4U) & 1U) ||
+              (swd_read32(SWD_BASE_ADDR + 0x34U) & 1U) ||
+              (swd_read32(SWD_BASE_ADDR + 0x48U) & 1U)) status = DAP_ERROR;
+          else {
+            swd_write32(SWD_CFG, (cfg & ~(1U << 28)) | ((uint32_t)*request << 28));
+            cfg = swd_read32(SWD_CFG);
+          }
+        } else if (*request != 255U) status = DAP_ERROR;
+        *response++ = status;
+        *response++ = (uint8_t)((cfg >> 28) & 1U);
+        num = (2U << 16) | 3U;
+      }
+      break;
     case ID_DAP_Vendor4:
       { // ACK high-phase hold in FCLK cycles (0..7), 255 to query.
         uint32_t cfg = swd_read32(SWD_CFG);
         uint8_t status = DAP_OK;
         if (*request <= 7U) {
           if ((swd_read32(SWD_BASE_ADDR + 4U) & 1U) ||
-              (swd_read32(SWD_BASE_ADDR + 0x34U) & 1U)) status = DAP_ERROR;
+              (swd_read32(SWD_BASE_ADDR + 0x34U) & 1U) ||
+              (swd_read32(SWD_BASE_ADDR + 0x48U) & 1U)) status = DAP_ERROR;
           else {
             cfg = (cfg & ~(0x7U << 25)) | ((uint32_t)*request << 25);
             swd_write32(SWD_CFG, cfg);
+            cfg = swd_read32(SWD_CFG);
           }
         } else if (*request != 255U) status = DAP_ERROR;
         *response++ = status;
@@ -140,7 +160,6 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
       }
       break;
     case ID_DAP_Vendor2:  break;
-    case ID_DAP_Vendor5:  break;
     case ID_DAP_Vendor6:  break;
     case ID_DAP_Vendor7:  break;
     case ID_DAP_Vendor8:  break;

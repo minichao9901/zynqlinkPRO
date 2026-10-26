@@ -51,6 +51,7 @@ end
 swd_core core(.clk(clk),.rst_n(rst_n),.start(core_start),.mode(core_mode),
  .timestamp_en(1'b0),.idle_cycles(4'(IDLE_CYCLES)),.data_phase(1'b0),.clock_delay(4'd5),.delay_fast(4'd0),
  .turn_extra(2'(TURN_EXTRA)),.ack_delay(3'(ACK_DELAY)),
+ .rx_early(1'b0),
  .swj_data(core_swj_data),.swj_count(core_swj_count),.xfer_request(core_req),.xfer_wdata(core_wdata),
  .xfer_rdata(core_rdata),.ack(core_ack),.parity_err(core_parity_err),.busy(core_busy),.timestamp(),
  .swclk(swclk),.swdio_o(dio_o),.swdio_i(swdio),.swdio_i_fall(SAMPLE_RISE ? sample_rise : sample_fall),.swdio_t(dio_t));

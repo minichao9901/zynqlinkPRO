@@ -462,9 +462,11 @@ __STATIC_INLINE void PORT_SWD_SETUP (void) {
   //   [8]     cfg_data_phase        Enable WAIT/FAULT data phase handling
   //   [12:9]  cfg_clock_delay       SWJ sequence half-cycle delay
   //   [16:13] cfg_delay_fast        Transfer half-cycle delay
-  //   [27:25] cfg_ack_delay        Extra FCLK steps while each ACK bit is high
-  //   [24:23] cfg_turn_extra       Extra turnaround cycles before ACK
-  //   [31:28] Reserved
+  //   [17]    cfg_sample_rise      Input capture phase (Q1/Q2)
+  //   [24:23] cfg_turn_extra       Extra low half-cycle steps before ACK
+  //   [27:25] cfg_ack_delay        0=legacy; 1..7=ACK hold/capture schedule
+  //   [28]    cfg_rx_early         First data receive window (0=legacy)
+  //   [31:29] Reserved
   //
   // Current setup:
   // turnaround=1, idle=1, data_phase=0, clock_delay=5, delay_fast=0
