@@ -95,7 +95,18 @@ try:
     finally:
         try:
             if original is not None:
-                execute(commands(False,original))
+                try:
+                    execute(commands(False,original))
+                except Exception as restore_error:
+                    row['restore_recovery_reason']=str(restore_error)
+                    import usb.core
+                    for _ in range(64):
+                        try:inp.read(4096,timeout=50)
+                        except usb.core.USBTimeoutError:break
+                    setup(out,inp,a.speed)
+                    assert xfer(out,inp,[4,1,64,0,0,0])==bytes([4,0])
+                    execute(commands(False,original))
+                    row['restore_used_idle1_reconnect']=True
                 row['restore_match']=execute(commands(True))==original
                 assert row['restore_match'],'Original SRAM restoration mismatch'
                 row['RCC_after']=[hex(read_reg(0x40021000)),hex(read_reg(0x40021004))]

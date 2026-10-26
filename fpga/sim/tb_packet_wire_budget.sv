@@ -27,6 +27,12 @@ reg [31:0] write_sum=0;
 // A host-driven parity bit must remain stable for the rest of its high phase,
 // even after busy deasserts. Gating the target on busy would hide this violation.
 reg hold_parity=0,held_parity=0;
+reg previous_t=0;
+always @(dio_t) begin
+ if(rst_n && previous_t===1'b1 && dio_t===1'b0 && swclk)
+  $fatal(1,"host reclaimed SWDIO while SWCLK high");
+ previous_t=dio_t;
+end
 always @(negedge swclk) hold_parity=0;
 always @(posedge clk) begin
  #0.001;

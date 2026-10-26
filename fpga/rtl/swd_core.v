@@ -181,7 +181,7 @@ module swd_core (
                     // A zero-idle write may have just raised its parity bit;
                     // forcing PARK here violates its hold time. The next
                     // accepted header drives START on a falling edge below.
-                    swdio_t    <= 1'b0;
+                    // Keep a released bus released until the next falling edge.
                     delay_cnt  <= 16'd0;
                     lsm_cnt    <= 8'd0;
                     idle_cnt   <= 4'd0;
@@ -205,6 +205,7 @@ module swd_core (
                                 // Launch the first request half-cycle while
                                 // accepting start, rather than an empty beat.
                                 swclk <= 1'b0;
+                                swdio_t <= 1'b0;
                                 swdio_o <= req_hdr[0];
                                 lsm_cnt <= 9'd1;
                             end
@@ -739,10 +740,10 @@ module swd_core (
 
                 ST_DONE: begin
                     swclk   <= 1'b1;
-                    swdio_t <= 1'b0;
-                    // Reclaim a released line low, but do not overwrite the
-                    // host's final parity during its still-high clock phase.
-                    if (swdio_t) swdio_o <= 1'b0;
+                    // Preserve output data AND direction throughout high idle.
+                    // Reclaiming after a zero-idle read here can contend with
+                    // the target's delayed final bit/turnaround. START below
+                    // reclaims on the next falling edge instead.
                     busy    <= 1'b0;
                     state   <= ST_IDLE;
                 end

@@ -75,6 +75,9 @@ def setup(out, inp, speed_khz):
     r = cmd(out, inp, [0x05, 0x00, 0x01, 0x02])
     if len(r) < 7 or r[2] != 0x01:
         raise RuntimeError("IDCODE read failed: %s" % r.hex(" "))
+    # A previous failed experiment can leave sticky MEM-AP errors. A line
+    # reset restores framing but does not clear those flags.
+    cmd(out, inp, [0x05, 0x00, 0x01, 0x00] + le(0x1E))
     cmd(out, inp, [0x05, 0x00, 0x01, 0x04] + le(0x50000000))
     cmd(out, inp, [0x05, 0x00, 0x01, 0x08] + le(0x00000000))
     cmd(out, inp, [0x05, 0x00, 0x01, 0x01] + le(0x23000052))

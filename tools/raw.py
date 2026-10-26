@@ -23,6 +23,8 @@ def main():
     ap.add_argument('--words', type=int, default=1022)
     ap.add_argument('--loops', type=int, default=500)
     ap.add_argument('--depths', default='1,4,16')
+    ap.add_argument('--ack-hold',type=int,choices=range(8),
+                    help='Diagnostic ACK capture hold, applied AFTER Connect resets CFG')
     ap.add_argument('--output', type=Path, required=True)
     a = ap.parse_args()
     depths = [int(x) for x in a.depths.split(',')]
@@ -57,6 +59,9 @@ def main():
 
     try:
         setup(out, inp, a.speed)
+        if a.ack_hold is not None:
+            assert xfer(out,inp,[0x84,a.ack_hold])==bytes([0x84,0,a.ack_hold])
+        result['configuration']=xfer(out,inp,[0x80,255]).hex()
         dhcsr = read32(0xe000edf0)
         if not dhcsr & (1 << 17):
             tar(0xe000edf0)
