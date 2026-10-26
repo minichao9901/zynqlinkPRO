@@ -177,3 +177,23 @@ Vivado's in-memory project probe accepted the selected cache location. Vivado
 checks configuration fingerprints, so modified module RTL is still synthesized.
 The reference cache/project is read only during seeding; existing destination
 entries are never overwritten. No completed implementation is fabricated.
+
+
+## First packet-pipeline board checkpoint
+
+Routed timing passes at FCLK150MHz (setup +0.173ns, hold +0.016ns). Firmware still
+caps requested SWCLK at the tested 60MHz. Physical F103, existing HCLK96MHz:
+- 60MHz, 6 sessions x300 operations of 20KiB: read 3.966 / write 4.084 MB/s.
+- 50MHz, same test: read 3.364 / write 3.447 MB/s.
+- Full byte comparisons and SRAM restore checks pass each session.
+- Small mixed/nested transfer validation passes 1200 commands plus boundaries.
+- RTL packet mean read 651.30us / write 631.29us (was 665.82 / 657.70).
+  Full 0x06 processing 668.33 / 655.80us. Ordinary block response copy remains zero.
+
+Controlled host-load retest: before/after Vivado exit, same loaded bit/ELF and
+same USB session_epoch=3, no queue recovery or target reset between those two
+samples. Read 3.606 -> 3.913; write 3.781 -> 4.016 MB/s. This proves the measured
+wall-throughput reduction in this experiment recovers without device reload.
+It does not prove that every historical 2.1MB/s report has the same cause.
+
+This checkpoint predates the upcoming explicit execution-engine soft-reset CSR.

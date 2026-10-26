@@ -14,11 +14,14 @@
 
 本分支 ELF 修正响应 DMA 所有权、ZLP、队列背压及 USB 会话恢复；读响应可直接
 DMA 到 USB 缓冲区，取消重复 cache flush。当前本地构建将 SWCLK 上限保守设为
-60 MHz，已实测 60 MHz；此软件检查点使用 main 的原 bit。下方 main 的 75 MHz 是历史构建配置。
+60 MHz，已实测 60 MHz；当前 bit 已包含 packet 事务连续启动和写预取。下方 main 的 75 MHz 是历史构建配置。
 
 交替部署 A/B：20 KiB、每会话 300 次读写、每个版本 12 个会话，全部校验和恢复通过。
 读 3.869 → 3.946 MB/s，写 4.013 → 4.029 MB/s。完整记录见
 `docs/Continuous-scheduler-progress.md` 和 `docs/measurements/20261026-software-ab.json`。
+
+本分支 RTL 上板检查点：60 MHz 读 3.966 / 写 4.084 MB/s；50 MHz 读 3.364 / 写 3.447 MB/s。
+150 MHz FCLK 的 routed setup +0.173 ns、hold +0.016 ns；运行测试仍限制在 50/60 MHz SWCLK。
 
 ## 版本（2026-10-26 21:09，main `6a628c9`）
 
