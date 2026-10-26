@@ -226,3 +226,42 @@ pass (engine_reset_full). The TB's HRDATA adapter was also refreshed each target
 half-cycle: its earlier continuous function could retain stale data after a
 same-address SRAM write; no licensed external model source was edited.
 Physical-board validation and final prebuilt refresh remain separate next gates.
+
+
+## Final recovery board validation
+
+Final recovery bit routed at FCLK138.461539MHz: setup +0.488ns, hold +0.016ns.
+150MHz failed setup (-0.068ns); it is NOT a supported timing point for this bit.
+The operational firmware cap remains 60MHz SWCLK (120MHz FCLK).
+
+- 100 packet/AP read abort/reconnect rounds pass; 74 snapshots prove RTL busy
+  immediately before recovery. Reset acknowledged, all engines idle afterwards,
+  no recovery errors and no USB submit errors; F103 reconnects each round.
+- 100 ordinary 0x05 batch abort/reconnect rounds pass; 46 busy snapshots, same
+  zero-error result. This also exercises the corrected BATCH_STATUS.busy bit.
+- Another 57,600 queued short/ZLP/4096B requests pass on the final recovery pair.
+- Mixed/nested commands: 1200 +8 boundary cases pass.
+- 60MHz SRAM: 6 sessions x300 reads/writes of 20KiB, read 3.98702 and write
+  4.11566 MB/s; full data and original SRAM restore checks pass.
+- 50MHz initial final-pair sample: read 3.32048 / write 3.43528 MB/s, same checks.
+  Fresh main/final comparison under the identical runtime follows separately.
+
+At the new turn boundary, patched OpenOCD failed before emitting any output
+(exit 0xc0000135). The matching x64 DLLs were absent beside it. Creating an
+application-local runtime with the unchanged EXE plus MSYS64 x64 libusb/hidapi
+restored launch. The nightly distribution's DLLs are x86 and must not be mixed
+with this x64 EXE. tools/prepare_openocd_runtime.py checks PE architecture,
+records hashes, and tests --version; no system PATH or DLL installation changes.
+The benchmark now reports process exit code even if stdout/stderr are empty.
+
+```powershell
+python tools/prepare_openocd_runtime.py --exe E:/zynqlinkPRO/build/openocd-src/src/openocd.exe
+python tools/stress_dap_sessions.py --rtl --rounds 100 --output results/optimization/packet_reset.json
+python tools/stress_dap_sessions.py --batch --rounds 100 --output results/optimization/batch_reset.json
+```
+
+Recovery verification does not claim automatic retry in stock OpenOCD: after
+an actual host timeout, close that process and run the EP0 recovery utility,
+then reconnect. Truncated SWD frames require SWJ line reset/reconnect. The
+original historical long-term 2.1MB/s condition is still not proven reproduced
+as persistent firmware degradation; do not describe it as comprehensively fixed.

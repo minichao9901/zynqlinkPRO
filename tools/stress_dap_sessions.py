@@ -12,7 +12,8 @@ def bounded_drain(inp):
  raise RuntimeError("64 stale responses after recovery")
 def snapshot(dev):
  return struct.unpack("<8I",dev.ctrl_transfer(0xc0,0x5b,0x4441,0x5052,32,timeout=3000))
-ap=argparse.ArgumentParser();ap.add_argument('--rounds',type=int,default=100);ap.add_argument('--rtl',action='store_true',help='Abandon active AP reads and verify execution-engine reset');ap.add_argument('--output',type=Path,required=True);a=ap.parse_args()
+ap=argparse.ArgumentParser();ap.add_argument('--rounds',type=int,default=100);ap.add_argument('--rtl',action='store_true',help='Abandon active AP reads and verify execution-engine reset');ap.add_argument('--batch',action='store_true',help='Interrupt 255-read 0x05 batches (implies --rtl)');ap.add_argument('--output',type=Path,required=True);a=ap.parse_args()
+if a.batch:a.rtl=True
 d,o,i=open_dap();rows=[]
 try:
  bounded_drain(i)
@@ -23,7 +24,8 @@ try:
  for k in range(a.rounds):
   # Leave several old responses behind on the device, then begin a new
   # session. Vary the delay to cover reset-before-execution and in-flight IN.
-  for j in range(8):send(o,[6,0,255,3,15] if a.rtl else [0,0xff])
+  payload=([5,0,255]+[2]*255) if a.batch else ([6,0,255,3,15] if a.rtl else [0,0xff])
+  for j in range(8):send(o,payload)
   time.sleep((0,.0001,.001,.02)[k%4])
   before=snapshot(d)
   engines=struct.unpack('<6I',d.ctrl_transfer(0xc0,0x5c,0x4441,0x5052,24,timeout=3000)) if a.rtl else None

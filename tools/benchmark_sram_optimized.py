@@ -91,7 +91,8 @@ shutdown
     prefix.with_suffix('.log').write_text(text, encoding='utf-8')
     m = re.search(r'MEASURE read_ms=(\d+) write_ms=(\d+)', text)
     if p.returncode or not m or 'BENCH_COMPLETE' not in text:
-        raise RuntimeError(text)
+        raise RuntimeError(f'OpenOCD exited 0x{p.returncode & 0xffffffff:08x}; '
+                           f'log: {prefix.with_suffix(".log")}\n{text}')
     if read.read_bytes() != pat.read_bytes() or written.read_bytes() != pat.read_bytes():
         raise RuntimeError('SRAM data mismatch')
     if restored.read_bytes() != backup.read_bytes():
