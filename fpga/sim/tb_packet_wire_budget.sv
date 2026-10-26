@@ -24,6 +24,15 @@ swd_core core(.clk(clk),.rst_n(rst_n),.start(core_start),.mode(core_mode),
  .swclk(swclk),.swdio_o(dio_o),.swdio_i(swdio),.swdio_i_fall(sample_fall),.swdio_t(dio_t));
 integer attempts=0,ok_count=0,reads=0,writes=0;reg inject_wait=0,inject_fault=0;
 reg [31:0] write_sum=0;
+// A host-driven parity bit must remain stable for the rest of its high phase,
+// even after busy deasserts. Gating the target on busy would hide this violation.
+reg hold_parity=0,held_parity=0;
+always @(negedge swclk) hold_parity=0;
+always @(posedge clk) begin
+ #0.001;
+ if(hold_parity && swclk && !dio_t && dio_o!==held_parity)
+   $fatal(1,"host changed final write parity while SWCLK remained high");
+end
 integer cycles=0,wire_rises=0,launches=0;
 always @(posedge clk)begin cycles<=cycles+1;if(core_start&&!core_busy)launches<=launches+1;end
 always @(posedge swclk)wire_rises=wire_rises+1;
@@ -76,7 +85,8 @@ initial forever begin
   target_enable<=0;@(posedge swclk); // write turnaround
   for(bitno=0;bitno<33;bitno=bitno+1)begin
    @(posedge swclk);
-   if(bitno<32)word[bitno]=swdio;else par=swdio;
+   if(bitno<32)word[bitno]=swdio;
+   else begin par=swdio;held_parity=swdio;hold_parity=1;end
   end
   if((^word)!=par)$fatal(1,"write parity mismatch %h %b",word,par);
   writes=writes+1;write_sum=write_sum+word;ok_count=ok_count+1;

@@ -177,7 +177,10 @@ module swd_core (
             case (state)
                 ST_IDLE: begin
                     swclk      <= 1'b1;
-                    swdio_o    <= 1'b1;
+                    // Preserve the last driven bit while SWCLK is high.
+                    // A zero-idle write may have just raised its parity bit;
+                    // forcing PARK here violates its hold time. The next
+                    // accepted header drives START on a falling edge below.
                     swdio_t    <= 1'b0;
                     delay_cnt  <= 16'd0;
                     lsm_cnt    <= 8'd0;
@@ -737,7 +740,9 @@ module swd_core (
                 ST_DONE: begin
                     swclk   <= 1'b1;
                     swdio_t <= 1'b0;
-                    swdio_o <= 1'b1;
+                    // Reclaim a released line low, but do not overwrite the
+                    // host's final parity during its still-high clock phase.
+                    if (swdio_t) swdio_o <= 1'b0;
                     busy    <= 1'b0;
                     state   <= ST_IDLE;
                 end

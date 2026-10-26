@@ -699,9 +699,7 @@ static uint32_t DAP_TransferConfigure(const uint8_t *request, uint8_t *response)
     uint32_t cfg = swd_read32(SWD_CFG);
     uint32_t idle = DAP_Data.transfer.idle_cycles;
     if (idle > 15U) idle = 15U;
-    /* The RTL needs at least one idle half-cycle between transfers; with
-     * zero the target DP sees back-to-back frames and answers NO ACK. */
-    if (idle == 0U) idle = 1U;
+    /* Honor the requested idle count; zero-idle bring-up is under test. */
     swd_write32(SWD_CFG, (cfg & ~0xF0U) | (idle << 4));
   }
   DAP_Data.transfer.retry_count = (uint16_t) *(request+1) |
