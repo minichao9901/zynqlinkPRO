@@ -258,7 +258,7 @@ module swd_controller #(
             cfg_idle_cycles <= 4'd0;
             cfg_data_phase <= 1'b0;
             cfg_clock_delay <= 4'd5;
-            cfg_delay_fast <= 4'd2;
+            cfg_delay_fast <= 4'd0;
             cfg_turn_extra <= 2'd0;
             cfg_ack_delay <= 3'd0;
             cfg_sample_rise <= 1'b1;
