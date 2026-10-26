@@ -70,7 +70,7 @@ def setup(out, inp, speed_khz):
     cmd(out, inp, [0x02, 0x01])
     cmd(out, inp, [0x11] + le(speed_khz * 1000))
     cmd(out, inp, [0x13, 0x00])
-    cmd(out, inp, [0x12, 88] + [0x9E, 0xE7] + [0xFF] * 8 + [0x00])
+    cmd(out, inp, [0x12, 152] + [0xFF] * 8 + [0x9E, 0xE7] + [0xFF] * 8 + [0x00])
     cmd(out, inp, [0x04, 0x00, 0x40, 0x00, 0x00, 0x00])
     r = cmd(out, inp, [0x05, 0x00, 0x01, 0x02])
     if len(r) < 7 or r[2] != 0x01:
@@ -82,6 +82,16 @@ def setup(out, inp, speed_khz):
     return r
 
 
+def read_exact(inp, n):
+    buf = b''
+    while len(buf) < n:
+        chunk = bytes(inp.read(PKT, timeout=5000))
+        if not chunk:
+            break
+        buf += chunk
+    return buf
+
+
 def block_read_req(words):
     # CMSIS-DAP TransferBlock: command, DAP index, count(2), request.
     return [0x06, 0x00, words & 0xFF, (words >> 8) & 0xFF, 0x0F]
@@ -90,8 +100,9 @@ def block_read_req(words):
 def bench_sequential(out, inp, words, loops):
     t0 = time.perf_counter()
     for _ in range(loops):
-        r = xfer(out, inp, block_read_req(words))
-        if len(r) < 3 + words * 4:
+        send(out, block_read_req(words))
+        r = read_exact(inp, 4 + words * 4)
+        if len(r) < 4 + words * 4:
             raise RuntimeError("short read %d" % len(r))
     dt = time.perf_counter() - t0
     return dt, loops * words * 4
@@ -106,8 +117,8 @@ def bench_pipelined(out, inp, words, loops, depth):
         for _ in range(n):
             send(out, block_read_req(words))
         for _ in range(n):
-            r = bytes(inp.read(PKT, timeout=5000))
-            if len(r) < 3 + words * 4:
+            r = read_exact(inp, 4 + words * 4)
+            if len(r) < 4 + words * 4:
                 raise RuntimeError("short read %d" % len(r))
         done += n
     dt = time.perf_counter() - t0
