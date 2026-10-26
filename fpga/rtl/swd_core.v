@@ -27,9 +27,6 @@ module swd_core (
     // 0=legacy pipeline; 1..7=non-overlapping ACK capture with configurable
     // high-phase hold. The next rise is emitted only after bit capture.
     input  wire [2:0]  ack_delay,
-    // Select data from the first receive window instead of the legacy
-    // one-bit-later pipeline. Intended for low return-delay targets.
-    input  wire        rx_early,
 
     // SWJ Sequence
     input  wire [255:0] swj_data,
@@ -455,8 +452,9 @@ module swd_core (
                                 // WAIT/FAULT take a dedicated turnaround cycle:
                                 // the target needs a full clock after ACK2
                                 // before it can accept the next header.
-                                if (({swdio_sample_fsm, ack_samples[1:0]} == 3'b010) ||
-                                    ({swdio_sample_fsm, ack_samples[1:0]} == 3'b100)) begin
+                                if (!data_phase &&
+                                    (({swdio_sample_fsm, ack_samples[1:0]} == 3'b010) ||
+                                     ({swdio_sample_fsm, ack_samples[1:0]} == 3'b100))) begin
                                     // WAIT/FAULT: two-turnaround cycle before the
                                     // next header, then decode the stored bits.
                                     state   <= ST_WTURN;
@@ -514,11 +512,8 @@ module swd_core (
                                 // current synchronized sample belongs to the
                                 // previous SWCLK falling edge.
                                 swclk <= 1'b1;
-                                if ((!rx_early && lsm_cnt != 8'd1) ||
-                                    (rx_early && lsm_cnt <= 8'd63)) begin
+                                if (lsm_cnt != 8'd1) begin
                                     rd_samples[31:0] <= {swdio_sample_fsm,rd_samples[31:1]};
-                                end else if (rx_early && lsm_cnt == 8'd65) begin
-                                    rd_samples[32] <= swdio_sample_fsm;
                                 end
                             end else begin
                                 // Low phases: SWCLK falling edge occurs here.
@@ -531,7 +526,7 @@ module swd_core (
                         end else if (lsm_cnt == 8'd67) begin
                             // Consume the final parity bit and finish.
                             swclk      <= (idle_cycles == 0 && delay_fast == 0);
-                            if (!rx_early) rd_samples[32] <= swdio_sample_fsm;
+                            rd_samples[32] <= swdio_sample_fsm;
                             if (idle_cycles == 0 && delay_fast == 0) begin
                                 // Parity fell on beat 66; this rising edge
                                 // clocks the target-to-host turnaround.

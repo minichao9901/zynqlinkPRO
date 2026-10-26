@@ -11,7 +11,6 @@ module tb_cortexm0_link #(
 );
   real half_ns=FCLK_HALF_NS, return_ns=RETURN_NS;
   integer phase=SAMPLE_RISE, ack_delay=ACK_DELAY, turn_extra=TURN_EXTRA, words=TEST_WORDS;
-  integer rx_early=0;
   reg clk=0;
   initial begin
     if($value$plusargs("half_ns=%f",half_ns))begin end
@@ -153,10 +152,9 @@ module tb_cortexm0_link #(
     if($value$plusargs("ack_delay=%d",ack_delay))begin end
     if($value$plusargs("turn_extra=%d",turn_extra))begin end
     if($value$plusargs("words=%d",words))begin end
-    if($value$plusargs("rx_early=%d",rx_early))begin end
     if($test$plusargs("vcd"))begin $dumpfile("cortexm0_link.vcd");$dumpvars(0,dut,target.swdo,target.swdoen);end
     #1;rst_n=0;#100;rst_n=1;repeat(30)@(negedge clk);
-    wr(8,1 | (5<<9) | (phase<<17) | (turn_extra<<23) | (ack_delay<<25) | (rx_early<<28));
+    wr(8,1 | (5<<9) | (phase<<17) | (turn_extra<<23) | (ack_delay<<25));
     swj(64,256'hffffffffffffffff);
     swj(16,256'he79e);
     swj(64,256'hffffffffffffffff);
