@@ -1,4 +1,5 @@
 #include "swd_dma.h"
+#include "dap_metrics.h"
 #include "xil_io.h"
 #include "xil_cache.h"
 #include "xtime_l.h"
@@ -52,6 +53,7 @@ fail:
 
 int swd_dma_upload(uint32_t words) {
     XTime start, end;
+    XTime metric_start=dap_metric_start();
     uint32_t profiling=dap_profile.enabled;
     int rc;
     if (words > 1024U) return -1;
@@ -64,12 +66,14 @@ int swd_dma_upload(uint32_t words) {
         dap_profile.upload_calls++;
         dap_profile.upload_bytes += words*4U;
     }
+    dap_metric_end(MET_DMA_UPLOAD, metric_start, words*4U);
     return rc;
 }
 
 int swd_dma_download(uint32_t first, uint32_t words) {
     int rc;
     XTime start, end;
+    XTime metric_start=dap_metric_start();
     uint32_t profiling=dap_profile.enabled;
     if (first + words > 1024U) return -1;
     if (profiling) XTime_GetTime(&start);
@@ -82,6 +86,7 @@ int swd_dma_download(uint32_t first, uint32_t words) {
         dap_profile.download_calls++;
         dap_profile.download_bytes += words*4U;
     }
+    dap_metric_end(MET_DMA_DOWNLOAD, metric_start, words*4U);
     return rc;
 }
 

@@ -30,6 +30,7 @@
 #include "DAP.h"
 #include "xil_printf.h"
 #include "swd_dma.h"
+#include "dap_metrics.h"
 #include "xtime_l.h"
 
 #define DAP_HOT_CODE __attribute__((section(".ocm_text")))
@@ -1494,6 +1495,7 @@ static uint32_t DAP_Transfer(const uint8_t *request, uint8_t *response) {
 //   return:   number of bytes in response
 #if (DAP_SWD != 0)
 #include "swd_dma.h"
+#include "dap_metrics.h"
 #include <string.h>
 #include "xil_cache.h"
 
@@ -1527,6 +1529,7 @@ static uint32_t DAP_SWD_TransferBlock(const uint8_t *request, uint8_t *response)
     uint32_t raw_len = 4U + ((req & DAP_TRANSFER_RnW) ? 0U : remaining * 4U);
     uint32_t words = (raw_len + 3U) / 4U;
     uint32_t pstatus, rsp_words, packet_wait, packet_completed;
+    XTime metric_start;
     dbg_pkt_taken++;
     dbg_pkt_req = req;
     dbg_pkt_count = remaining;
@@ -1547,6 +1550,7 @@ static uint32_t DAP_SWD_TransferBlock(const uint8_t *request, uint8_t *response)
       }
     }
     if (swd_dma_upload(words)) { dbg_pkt_fallback++; dbg_pkt_flush(); goto packet_fallback; }
+    metric_start=dap_metric_start();
     swd_write32(SWD_PACKET_LEN, raw_len);
     swd_write32(SWD_PACKET_CTRL, 1U);
     packet_wait = 0;
@@ -1561,6 +1565,7 @@ static uint32_t DAP_SWD_TransferBlock(const uint8_t *request, uint8_t *response)
         goto packet_failed;
       }
     } while (pstatus & 1U);
+    dap_metric_end((req & DAP_TRANSFER_RnW)?MET_PACKET_READ:MET_PACKET_WRITE, metric_start, remaining*4U);
     dbg_pkt_status = pstatus;
     if (!(pstatus & 2U)) goto packet_failed;
     rsp_words = (pstatus >> 16) & 0xFFFFU;
@@ -1573,7 +1578,9 @@ static uint32_t DAP_SWD_TransferBlock(const uint8_t *request, uint8_t *response)
     response[0] = (uint8_t)swd_dma_rsp[0];
     response[1] = (uint8_t)(swd_dma_rsp[0] >> 8);
     response[2] = (uint8_t)(swd_dma_rsp[0] >> 16);
+    metric_start=dap_metric_start();
     if (req & DAP_TRANSFER_RnW) memcpy(response + 3, &swd_dma_rsp[1], packet_completed * 4U);
+    dap_metric_end(MET_COPY,metric_start,packet_completed*4U);
     return (uint32_t)(3U + ((req & DAP_TRANSFER_RnW) ? packet_completed * 4U : 0U));
 packet_failed:
     // After launch the target may have advanced TAR or accepted writes. Never

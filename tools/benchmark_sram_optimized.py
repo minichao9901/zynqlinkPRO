@@ -14,6 +14,7 @@ import subprocess
 
 ap = argparse.ArgumentParser(description=__doc__)
 ap.add_argument('--tag', required=True)
+ap.add_argument('--output-dir', type=Path, help='Override the results directory')
 ap.add_argument('--sessions', type=int, default=3)
 ap.add_argument('--loops', type=int, default=50)
 ap.add_argument('--speed', type=int, default=50000, help='SWCLK in kHz')
@@ -34,7 +35,7 @@ ap.add_argument('--scripts', default=r'E:\Share\env-windows\openocd-nightly\shar
 args = ap.parse_args()
 
 root = Path(__file__).resolve().parents[1]
-out = root / 'results/optimization' / args.tag
+out = args.output_dir.resolve() if args.output_dir else root / 'results/optimization' / args.tag
 out.mkdir(parents=True, exist_ok=True)
 size = args.size
 addr = args.address

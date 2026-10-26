@@ -28,6 +28,7 @@
 #include "DAP_config.h"
 #include "DAP.h"
 #include "swd_dma.h"
+#include "dap_metrics.h"
 #include "xtime_l.h"
 #include <string.h>
 
@@ -87,6 +88,7 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
         if (*request == 1U) {
           memset((void *)&dap_profile, 0, sizeof dap_profile);
           DAP_SWD_StatsClear();
+          memset((void *)dap_metrics,0,sizeof dap_metrics);
           dap_profile.enabled = 1;
         } else if (*request == 0U) dap_profile.enabled = 0;
         *response++ = (*request <= 2U) ? DAP_OK : DAP_ERROR;
@@ -160,7 +162,15 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
       }
       break;
     case ID_DAP_Vendor2:  break;
-    case ID_DAP_Vendor6:  break;
+    case ID_DAP_Vendor6:
+      { // v1 stage metrics; record={ticks64,calls32,bytes32}.
+        uint32_t hz=COUNTS_PER_SECOND;
+        *response++=DAP_OK;*response++=1;*response++=MET_COUNT;
+        memcpy(response,&hz,4);response+=4;
+        memcpy(response,(const void *)dap_metrics,sizeof dap_metrics);
+        num=(1U<<16)|(8U+sizeof dap_metrics);
+      }
+      break;
     case ID_DAP_Vendor7:  break;
     case ID_DAP_Vendor8:  break;
     case ID_DAP_Vendor9:  break;

@@ -1,5 +1,6 @@
 #include "stdint.h"
 #include "DAP.h"
+#include "dap_metrics.h"
 #include "xusbps.h"
 #include "xil_cache.h"
 #include "xil_mmu.h"
@@ -79,6 +80,7 @@ static volatile uint8_t USB_ResponseIdle;
 static __attribute__((aligned(32))) uint8_t USB_Request[DAP_PACKET_COUNT][DAP_PACKET_SIZE];
 static __attribute__((aligned(32))) uint8_t USB_Response[DAP_PACKET_COUNT][DAP_PACKET_SIZE];
 static uint16_t USB_RespSize[DAP_PACKET_COUNT];
+static XTime request_time[DAP_PACKET_COUNT], in_start;
 
 extern XUsbPs *g_dap_usb_instance;
 
@@ -158,6 +160,7 @@ void usbd_dap_bulk_out(XUsbPs *InstancePtr, u8 EpNum, u32 nbytes, u8 *Buffer)
   // xil_printf("o:%d\n", nbytes);
   // xil_printf("dap_out_callback: ep=%02x, nbytes=%d\n", EpNum, nbytes);
   // debug_blink(nbytes, 0x1U);
+  request_time[USB_RequestIndexI]=dap_metric_start();
   dap_trace_add(1U, nbytes);
   
   memcpy(USB_Request[USB_RequestIndexI], Buffer, nbytes);
@@ -195,6 +198,8 @@ void usbd_dap_bulk_out(XUsbPs *InstancePtr, u8 EpNum, u32 nbytes, u8 *Buffer)
 static void dap_start_response(uint16_t idx)
 {
   uint16_t len = USB_RespSize[idx];
+  XTime metric_start=dap_metric_start();
+  in_start=metric_start;
 
   dap_trace_add(4U, len);
   /* USB_Response is cacheable for CPU command handling; make the completed
@@ -211,11 +216,13 @@ static void dap_start_response(uint16_t idx)
   } else {
     (void)XUsbPs_EpBufferSend(g_dap_usb_instance, 1, USB_Response[idx], len);
   }
+  dap_metric_end(MET_USB_SUBMIT,metric_start,len);
 }
 
 void usbd_dap_bulk_in(XUsbPs *InstancePtr, u8 EpNum, u32 nbytes)
 {
   // xil_printf("dap_in_callback: ep=%02x, nbytes=%d\n", EpNum, nbytes);
+  dap_metric_end(MET_USB_IN,in_start,0);
   dap_trace_add(5U, nbytes);
   if (USB_ResponseCountI != USB_ResponseCountO)
   {
@@ -305,9 +312,14 @@ void chry_dap_handle(void)
       }
     }
 
+    XTime metric_start=dap_metric_start();
+    uint32_t metric_id=USB_Request[USB_RequestIndexO][0]==6 ?
+      ((USB_Request[USB_RequestIndexO][4]&2)?MET_EXEC06_READ:MET_EXEC06_WRITE):MET_EXEC05;
+    dap_metric_end(MET_QUEUE_WAIT,request_time[USB_RequestIndexO],0);
     dap_trace_add(2U, USB_Request[USB_RequestIndexO][0]);
     USB_RespSize[USB_ResponseIndexI] =
         (uint16_t)DAP_ExecuteCommand(USB_Request[USB_RequestIndexO], USB_Response[USB_ResponseIndexI]);
+    dap_metric_end(metric_id,metric_start,USB_RespSize[USB_ResponseIndexI]);
     dap_trace_bytes(32U, USB_Response[USB_ResponseIndexI],
                     USB_RespSize[USB_ResponseIndexI]);
     dap_trace_add(3U, USB_RespSize[USB_ResponseIndexI]);
