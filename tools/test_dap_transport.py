@@ -30,7 +30,7 @@ typedef struct {int unused;} XUsbPs;
 #define MET_QUEUE_WAIT 5
 static uint32_t cpsr=0;
 static int reset_before_lock;
-void chry_dap_usb_session_reset(void);
+int chry_dap_usb_session_reset(void);
 static inline uint32_t test_cpsr(void){if(reset_before_lock){reset_before_lock=0;chry_dap_usb_session_reset();}return cpsr;}
 #define mfcpsr() test_cpsr()
 #define mtcpsr(v) (cpsr=(v))
@@ -51,7 +51,8 @@ static int send_buf(XUsbPs *d,u8 ep,u8 *buf,unsigned len){(void)d;(void)ep;if(se
 void DAP_Setup(void){}
 uint32_t DAP_ExecuteCommand(const uint8_t *p,uint8_t *r);
 void XUsbPs_DapResumeRx(XUsbPs *i){(void)i;}
-void chry_dap_usb_session_reset(void);
+int chry_dap_usb_session_reset(void);
+int swd_abort_engines(void){return 0;}
 #endif
 '''
 (out/'shim.h').write_text(shim)

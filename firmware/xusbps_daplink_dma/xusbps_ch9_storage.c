@@ -583,8 +583,9 @@ int XUsbPs_DapResetEndpoints(XUsbPs *InstancePtr)
     u32 flush = (1U << DAP_BULKOUT_EP) | (1U << (16 + DAP_BULKIN_EP));
     u32 timeout = 1000000U;
     u32 td;
+    int engine_status;
     XUsbPs_EpIn *in = &InstancePtr->DeviceConfig.Ep[DAP_BULKIN_EP].In;
-    extern void chry_dap_usb_session_reset(void);
+    extern int chry_dap_usb_session_reset(void);
 
     XUsbPs_EpDisable(InstancePtr, DAP_BULKOUT_EP, XUSBPS_EP_DIRECTION_OUT);
     XUsbPs_EpDisable(InstancePtr, DAP_BULKIN_EP, XUSBPS_EP_DIRECTION_IN);
@@ -616,13 +617,13 @@ int XUsbPs_DapResetEndpoints(XUsbPs *InstancePtr)
     XUsbPs_WritedQH(InstancePtr->DeviceConfig.Ep[DAP_BULKOUT_EP].Out.dQH,
                    XUSBPS_dQHdTDTOKEN, 0U);
     XUsbPs_dQHFlushCache(InstancePtr->DeviceConfig.Ep[DAP_BULKOUT_EP].Out.dQH);
-    chry_dap_usb_session_reset();
+    engine_status=chry_dap_usb_session_reset();
     XUsbPs_EpEnable(InstancePtr, DAP_BULKOUT_EP, XUSBPS_EP_DIRECTION_OUT);
     XUsbPs_EpEnable(InstancePtr, DAP_BULKIN_EP, XUSBPS_EP_DIRECTION_IN);
     XUsbPs_SetBits(InstancePtr, XUSBPS_EPCRn_OFFSET(DAP_BULKOUT_EP), XUSBPS_EPCR_RXR_MASK);
     XUsbPs_SetBits(InstancePtr, XUSBPS_EPCRn_OFFSET(DAP_BULKIN_EP), XUSBPS_EPCR_TXR_MASK);
     XUsbPs_EpPrime(InstancePtr, DAP_BULKOUT_EP, XUSBPS_EP_DIRECTION_OUT);
-    return XST_SUCCESS;
+    return engine_status<0 ? XST_FAILURE : XST_SUCCESS;
 }
 
 void XUsbPs_SetConfiguration(XUsbPs *InstancePtr, int ConfigIdx)

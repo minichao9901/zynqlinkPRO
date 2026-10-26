@@ -96,7 +96,7 @@ module swd_batch_engine #(
     localparam [5:0] ST_MEM_RD_STORE_POST  = 6'd29;
     localparam [5:0] ST_MEM_RD_STORE_LAST  = 6'd30;
 
-    reg                  busy_reg, done_reg, error_reg;
+    reg                  done_reg, error_reg;
     reg  [2:0]           last_ack_reg;
     reg  [7:0]           retry_max_reg;
     reg                  bram_sel_reg;
@@ -174,7 +174,7 @@ module swd_batch_engine #(
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            busy_reg <= 1'b0;
+
             done_reg <= 1'b0;
             error_reg <= 1'b0;
             last_ack_reg <= 3'b000;
@@ -234,7 +234,7 @@ module swd_batch_engine #(
                             rsp_count_reg <= 16'd0;
                         end
                         if (host_wdata[0] && (state == ST_IDLE) && !core_busy) begin
-                            busy_reg <= 1'b1;
+
                             done_reg <= 1'b0;
                             error_reg <= 1'b0;
                             last_ack_reg <= 3'b000;
@@ -263,7 +263,7 @@ module swd_batch_engine #(
 
             case (state)
                 ST_IDLE: begin
-                    busy_reg <= 1'b0;
+
                 end
                 ST_FETCH_HDR: begin
                     cmd_en_b <= 1'b1;
@@ -284,7 +284,7 @@ module swd_batch_engine #(
                     repeat_write <= 0;
                     case (opcode_reg)
                         CMD_END: begin
-                            busy_reg <= 1'b0;
+
                             done_reg <= 1'b1;
                             state <= ST_IDLE;
                         end
@@ -294,7 +294,7 @@ module swd_batch_engine #(
                             index_reg <= 16'd0;
                             core_swj_data <= 256'd0;
                             if (hdr_reg[15:0] > 16'd255) begin
-                                busy_reg <= 1'b0;
+
                                 done_reg <= 1'b1;
                                 error_reg <= 1'b1;
                                 state <= ST_IDLE;
@@ -340,7 +340,7 @@ module swd_batch_engine #(
                             end
                         end
                         default: begin
-                            busy_reg <= 1'b0;
+
                             done_reg <= 1'b1;
                             error_reg <= 1'b1;
                             state <= ST_IDLE;
@@ -557,7 +557,7 @@ module swd_batch_engine #(
                             state <= ST_RAW_START;
                         end else if (core_ack != 3'b001 || core_parity_err) begin
                             if (core_parity_err) last_ack_reg <= 0;
-                            busy_reg <= 1'b0;
+
                             done_reg <= 1'b1;
                             error_reg <= 1'b1;
                             state <= ST_IDLE;
@@ -581,7 +581,7 @@ module swd_batch_engine #(
                     end
                 end
                 default: begin
-                    busy_reg <= 1'b0;
+
                     done_reg <= 1'b1;
                     error_reg <= 1'b1;
                     state <= ST_IDLE;
@@ -591,7 +591,7 @@ module swd_batch_engine #(
     end
 
     assign host_rdata = (host_addr == HOST_CTRL)   ? {16'd0, retry_max_reg, 6'd0, done_reg, 1'b0} :
-                        (host_addr == HOST_STATUS) ? {2'd0, rsp_count_reg, retry_max_reg, last_ack_reg, error_reg, done_reg, busy_reg} :
+                        (host_addr == HOST_STATUS) ? {2'd0, rsp_count_reg, retry_max_reg, last_ack_reg, error_reg, done_reg, active} :
                         (host_addr == HOST_ADDR)   ? {15'd0, bram_sel_reg, 6'd0, bram_addr_reg} :
                         (host_addr == HOST_DATA)   ? (bram_sel_reg ? rsp_douta : cmd_douta) :
                                                      32'd0;

@@ -621,6 +621,14 @@ static u8	Reply[XUSBPS_REQ_REPLY_LEN];
 	Direction = SetupData->bmRequestType & (1 << 7);
     /* Explicit bulk-session recovery via EP0, which remains usable even
      * when a host abandoned a bulk IN transfer. Magic avoids collisions. */
+    if(SetupData->bmRequestType==0xc0 && SetupData->bRequest==0x5c &&
+       SetupData->wValue==0x4441 && SetupData->wIndex==0x5052 && SetupData->wLength==24){
+        uint32_t snapshot[6];
+        extern void swd_recovery_snapshot(uint32_t out[6]);
+        swd_recovery_snapshot(snapshot);
+        memcpy(Reply,snapshot,sizeof snapshot);
+        return XUsbPs_EpBufferSend(InstancePtr,0,Reply,sizeof snapshot);
+    }
     if(SetupData->bmRequestType==0xc0 && SetupData->bRequest==0x5b &&
        SetupData->wValue==0x4441 && SetupData->wIndex==0x5052 && SetupData->wLength==32){
         uint32_t snapshot[8];

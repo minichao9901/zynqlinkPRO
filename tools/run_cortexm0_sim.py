@@ -66,7 +66,7 @@ def main():
     args = ap.parse_args()
     # XSim silently accepts misspelled plusargs. Reject them here so a requested
     # delay sweep cannot accidentally rerun the default target timing.
-    flags = {'packets', 'errors', 'trace', 'vcd'}
+    flags = {'packets', 'errors', 'trace', 'vcd', 'recovery'}
     values = {'half_ns', 'return_ns', 'phase', 'ack_delay', 'turn_extra', 'words'}
     for arg in args.plusargs:
         name, sep, value = arg.lstrip('+').partition('=')

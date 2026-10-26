@@ -9,6 +9,9 @@ int swd_dma_download(uint32_t first, uint32_t words);
 /* Destination must own the complete cache lines and be 32-byte aligned. */
 int swd_dma_download_to(uint32_t first, uint32_t words, uint32_t *destination);
 int swd_dma_selftest(void);
+/* 0: reset confirmed, 1: old bit without this feature, -1: reset failed. */
+int swd_abort_engines(void);
+void swd_recovery_snapshot(uint32_t values[6]);
 typedef struct {
     uint32_t enabled, batch_calls, upload_calls, download_calls;
     uint32_t upload_bytes, download_bytes;

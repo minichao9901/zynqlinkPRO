@@ -197,3 +197,32 @@ wall-throughput reduction in this experiment recovers without device reload.
 It does not prove that every historical 2.1MB/s report has the same cause.
 
 This checkpoint predates the upcoming explicit execution-engine soft-reset CSR.
+
+
+## Execution-engine recovery checkpoint (simulation)
+
+New CSRs: +0x4c FEATURES=0x44500001; +0x50 write bit0 resets the SWD core,
+batch and packet execution FSMs; reading +0x50 returns a monotonic reset count.
+AXI/configuration, FCLK selection and BRAM are preserved. Firmware detects the
+feature before using it, so older bits retain USB-only recovery. EP0 recovery
+and USB session reset now also cancel execution on a matching bit. Batch aborts
+and packet-error cleanup use the same recovery mechanism; accepted target
+operations are never replayed automatically. This is not target nRESET.
+EP0 request 0x5c with the same magic and length24 exposes features/reset count,
+core/batch/packet status and recovery errors even when bulk is blocked.
+
+A newly proven status bug: busy_reg was set in HOST_CTRL but overwritten by
+ST_IDLE in the same clock, so BATCH_STATUS.busy could stay zero while state was
+active. START already used state==IDLE, so do not claim it accepted duplicate
+starts. The redundant register is removed; status now uses the same state-derived
+active signal as core ownership. This improves diagnostics/recovery checks; it
+is not proven to be the cause of historical throughput degradation.
+
+Native queue tests pass with the new reset callback. AXI test stalls packet and
+batch core completions, resets each while busy, checks counter/configuration and
+runs another data-checked packet. Full real Cortex-M0 packet regression plus a
+reset during a stalled posted AP read, SWJ reconnect and two-word SRAM read/write
+pass (engine_reset_full). The TB's HRDATA adapter was also refreshed each target
+half-cycle: its earlier continuous function could retain stale data after a
+same-address SRAM write; no licensed external model source was edited.
+Physical-board validation and final prebuilt refresh remain separate next gates.

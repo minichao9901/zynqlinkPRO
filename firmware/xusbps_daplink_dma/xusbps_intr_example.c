@@ -426,7 +426,7 @@ out:
 static void UsbIntrHandler(void *CallBackRef, u32 Mask)
 {
     if(Mask & XUSBPS_IXR_UR_MASK){
-        extern void chry_dap_usb_session_reset(void);
+        extern int chry_dap_usb_session_reset(void);
         chry_dap_usb_session_reset();
     }
 	NumIrqs++;

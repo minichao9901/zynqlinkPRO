@@ -794,6 +794,11 @@ static uint32_t DAP_SWD_BatchRun(void) {
     status = swd_read32(SWD_BATCH_STATUS);
   } while (((status & 0x2U) == 0U) && !DAP_TransferAbort);
 
+  if (!(status & SWD_BATCH_STATUS_DONE) && DAP_TransferAbort) {
+    (void)swd_abort_engines();
+    status=SWD_BATCH_STATUS_DONE|SWD_BATCH_STATUS_ERROR;
+  }
+
   if (profiling) {
     XTime_GetTime(&end);
     dap_profile.batch_ticks += end-start;
@@ -1599,6 +1604,7 @@ static uint32_t DAP_SWD_TransferBlock(const uint8_t *request, uint8_t *response)
     }
     return (uint32_t)(3U + ((req & DAP_TRANSFER_RnW) ? packet_completed * 4U : 0U));
 packet_failed:
+    (void)swd_abort_engines();
     if (direct_rsp) ((uint8_t *)direct_rsp)[0]=ID_DAP_TransferBlock;
     // After launch the target may have advanced TAR or accepted writes. Never
     // replay the packet from its beginning on the batch path.

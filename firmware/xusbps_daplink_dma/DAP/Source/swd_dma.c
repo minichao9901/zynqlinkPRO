@@ -1,4 +1,5 @@
 #include "swd_dma.h"
+#include "DAP.h"
 #include "dap_metrics.h"
 #include "xil_io.h"
 #include "xil_cache.h"
@@ -23,6 +24,34 @@ uint32_t swd_dma_cmd[1024] __attribute__((aligned(32)));
 uint32_t swd_dma_rsp[1024] __attribute__((aligned(32)));
 volatile uint32_t swd_dma_errors, swd_dma_last_status;
 volatile dap_profile_t dap_profile;
+static uint32_t recovery_errors;
+
+int swd_abort_engines(void) {
+    uint32_t before,n;
+    if ((swd_read32(SWD_FEATURES)&0xFFFF0001U)!=0x44500001U) return 1;
+    before=swd_read32(SWD_ENGINE_RESET);
+    swd_write32(SWD_ENGINE_RESET,1U);
+    __asm__ volatile("dsb sy" ::: "memory");
+    for(n=0;n<1000U;++n) {
+        // An EP0 reset may interrupt a main-loop error cleanup and reset
+        // again. Any counter advance confirms a reset, including that case.
+        if(swd_read32(SWD_ENGINE_RESET)!=before &&
+           !(swd_read32(SWD_STATUS)&1U) &&
+           !(swd_read32(SWD_BATCH_STATUS)&1U) &&
+           !(swd_read32(SWD_PACKET_STATUS)&1U)) return 0;
+    }
+    recovery_errors++;
+    return -1;
+}
+
+void swd_recovery_snapshot(uint32_t values[6]) {
+    values[0]=swd_read32(SWD_FEATURES);
+    values[1]=swd_read32(SWD_ENGINE_RESET);
+    values[2]=swd_read32(SWD_STATUS);
+    values[3]=swd_read32(SWD_BATCH_STATUS);
+    values[4]=swd_read32(SWD_PACKET_STATUS);
+    values[5]=recovery_errors;
+}
 
 static int copy(uint32_t src, uint32_t dst, uint32_t bytes) {
     XTime start, now;

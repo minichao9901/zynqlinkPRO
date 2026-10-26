@@ -47,7 +47,10 @@ module tb_cortexm0_link #(
   // The archived wrapper adds an extra register to AHB read data, although
   // HREADY is permanently high. Present the accepted address's data during
   // its data phase. Keep the original ARM logic and wrapper files intact.
-  wire [31:0] ahb_data_phase = target.ahb_read_data(target.rd_addr);
+  // Re-evaluate on every target half-cycle as well as address changes: a
+  // continuous function call can miss SRAM writes when rd_addr stays equal.
+  reg [31:0] ahb_data_phase;
+  always @(negedge target_clk) ahb_data_phase <= target.ahb_read_data(target.rd_addr);
   initial force target.hrdata = ahb_data_phase;
   reg return_oe=0,return_data=1;
   always @(target.swdoen or target.swdo) begin
@@ -185,6 +188,28 @@ module tb_cortexm0_link #(
       packet(256,0);packet(256,1);
       packet(770,0);packet(770,1);
       packet(1023,0);packet(1023,1);
+    end
+    if($test$plusargs("recovery"))begin
+      // Abort a real posted AP read while the target's AHB is stalled.
+      // The AXI transport/configuration must survive execution-engine reset.
+      xfer(8'h05,32'h20000000,value);
+      put(0,32'h0f002006);wr(7'h44,4);
+      force target.hready=1'b0;
+      wr(7'h40,1);repeat(20)@(negedge clk);
+      rd(7'h48,value);if(!value[0])$fatal(1,"packet not active for abort");
+      wr(7'h50,1);rd(7'h48,value);
+      if(value[0])$fatal(1,"packet reset left busy set");
+      rd(7'h50,value);if(value!=1)$fatal(1,"execution reset not counted");
+      release target.hready;
+      // Truncating a frame requires the host's normal SWJ reconnect sequence.
+      swj(64,256'hffffffffffffffff);swj(16,256'he79e);
+      swj(64,256'hffffffffffffffff);swj(8,0);
+      xfer(8'h02,0,value);if(value!==32'h0bb11477)$fatal(1,"DPIDR after abort");
+      xfer(8'h00,32'h1e,value);xfer(8'h04,32'h50000000,value);
+      repeat(5)xfer(8'h06,0,value);
+      xfer(8'h08,0,value);xfer(8'h01,32'h23000052,value);
+      packet(2,0);packet(2,1);
+      $display("RECOVERY_PASS active packet reset, SWJ reconnect and target SRAM");
     end
     if($test$plusargs("errors"))begin
       xfer(8'h05,32'h20000000,value);

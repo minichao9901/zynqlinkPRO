@@ -149,6 +149,11 @@ module swd_controller #(
     localparam ADDR_PACKET_CTRL   = 7'h40;
     localparam ADDR_PACKET_LEN    = 7'h44;
     localparam ADDR_PACKET_STATUS = 7'h48;
+    localparam ADDR_FEATURES      = 7'h4C;
+    localparam ADDR_ENGINE_RESET  = 7'h50;
+    reg engine_reset;
+    reg [31:0] engine_reset_count;
+    wire engine_rst_n = rst_n & ~engine_reset;
 
     // ADDR_CFG (0x08) bit definition:
     //   [3:0]   turnaround_fixed      SWD turnaround cycles (fixed to 1)
@@ -264,6 +269,8 @@ module swd_controller #(
             cfg_sample_rise <= 1'b1;
             packet_len_reg <= 16'd0;
             packet_start_pulse <= 1'b0;
+            engine_reset <= 1'b0;
+            engine_reset_count <= 0;
             swj_data <= 256'd0;
             swj_count <= 8'd0;
             xfer_request <= 8'd0;
@@ -271,6 +278,7 @@ module swd_controller #(
         end
         else begin
             packet_start_pulse <= 1'b0;
+            engine_reset <= 1'b0;
             // BRESP/BVALID handshake
             if (s_axi_bready && bvalid_reg) begin
                 bvalid_reg <= 1'b0;
@@ -323,6 +331,12 @@ module swd_controller #(
                     ADDR_PACKET_LEN: packet_len_reg <= s_axi_wdata[15:0];
                     ADDR_PACKET_CTRL: if (s_axi_wdata[0] && !packet_busy && !batch_active && !core_busy)
                         packet_start_pulse <= 1'b1;
+                    ADDR_ENGINE_RESET: if (s_axi_wstrb[0] && s_axi_wdata[0]) begin
+                        // Keep AXI, clocks, configuration and BRAM alive. Reset
+                        // only the execution state machines, even while busy.
+                        engine_reset <= 1'b1;
+                        engine_reset_count <= engine_reset_count + 1'b1;
+                    end
                     default: ;
                 endcase
             end
@@ -350,6 +364,8 @@ module swd_controller #(
                     ADDR_CTRL: begin
                         rdata_reg <= {16'd0, xfer_request, 5'd0, ctrl_timestamp_en, ctrl_mode, core_busy};
                     end
+                    ADDR_FEATURES: rdata_reg <= 32'h4450_0001;
+                    ADDR_ENGINE_RESET: rdata_reg <= engine_reset_count;
                     ADDR_STATUS: begin
                         // 32-bit STATUS layout: [31:16] timestamp, [7] parity_err,
                         // [3:1] ack, [0] busy. Reserved bits read as 0.
@@ -438,7 +454,7 @@ module swd_controller #(
     //=========================================================================
     swd_batch_engine u_swd_batch_engine (
         .clk          (clk),
-        .rst_n        (rst_n),
+        .rst_n        (engine_rst_n),
         .host_wr_en   (batch_wr_en),
         .host_rd_en   (batch_rd_en),
         .host_addr    (batch_host_addr),
@@ -477,7 +493,7 @@ module swd_controller #(
     );
 
     dap_transfer_block_engine u_dap_packet_engine (
-        .clk(clk), .rst_n(rst_n), .start(packet_start_pulse),
+        .clk(clk), .rst_n(engine_rst_n), .start(packet_start_pulse),
         .packet_len(packet_len_reg), .busy(packet_busy), .done(packet_done),
         .error(packet_error), .response_words(packet_response_words),
         .state_dbg(packet_state),
@@ -501,7 +517,7 @@ module swd_controller #(
     //=========================================================================
     swd_core u_swd_core (
         .clk           (clk),
-        .rst_n         (rst_n),
+        .rst_n         (engine_rst_n),
         .start         (core_start_sel),
         .mode          (core_mode_sel),
         .timestamp_en  (ctrl_timestamp_en),

@@ -163,11 +163,13 @@ void chry_dap_queue_snapshot(uint32_t out[8])
     irq_restore(flags);
 }
 
-void chry_dap_usb_session_reset(void)
+int chry_dap_usb_session_reset(void)
 {
     session_epoch++;
     DAP_TransferAbort=1;
     chry_dap_state_init();
+    extern int swd_abort_engines(void);
+    return swd_abort_engines();
 }
 
 void chry_dap_init(void)

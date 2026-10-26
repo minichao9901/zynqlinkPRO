@@ -23,19 +23,20 @@ module tb_packet_axi;
    .rsp_bram_clk(clk),.rsp_bram_rst(1'b0),.rsp_bram_en(rsp_en),.rsp_bram_we(4'd0),
    .rsp_bram_addr(rsp_addr),.rsp_bram_wrdata(32'd0),.rsp_bram_rddata(rsp_data),
    .swclk(swclk),.swdio(swdio));
- reg mock_busy=0;reg [31:0] mock_data=0;integer remaining=0,accepted=0;
+ reg mock_busy=0,stall=0,allow_batch=0;reg [31:0] mock_data=0;integer remaining=0,accepted=0;
  initial begin
    force dut.core_busy=mock_busy;force dut.core_ack=3'd1;
    force dut.core_parity_err=1'b0;force dut.core_rdata=mock_data;
  end
  always @(posedge clk)begin
-   if(dut.core_start_sel && !mock_busy)begin
-     if(!dut.packet_active)$fatal(1,"packet register alias started legacy core");
+   if(!dut.engine_rst_n)begin mock_busy<=0;remaining<=0;end
+   else if(dut.core_start_sel && !mock_busy)begin
+     if(!dut.packet_active && !(allow_batch && dut.batch_active))$fatal(1,"packet register alias started legacy core");
      mock_busy<=1;remaining<=3;mock_data<=32'ha5000000+accepted;
      if(!dut.core_req_sel[1] && dut.core_wdata_sel!==32'h12340000+accepted)
        $fatal(1,"BRAM data/mux mismatch %h",dut.core_wdata_sel);
      accepted<=accepted+1;
-   end else if(mock_busy)begin
+   end else if(mock_busy && !stall)begin
      if(remaining==0)mock_busy<=0;else remaining<=remaining-1;
    end
  end
@@ -76,6 +77,24 @@ module tb_packet_axi;
      $fatal(1,"status=%h core calls=%d",status,accepted);
    @(negedge clk);rsp_en=1;rsp_addr=0;@(negedge clk);
    if(rsp_data!==32'h00010003)$fatal(1,"response BRAM %h",rsp_data);
+   rd(7'h4c,status);if(status!==32'h44500001)$fatal(1,"reset feature %h",status);
+   stall=1;accepted=0;wr(7'h40,1);repeat(12)@(negedge clk);
+   rd(7'h48,status);if(!status[0])$fatal(1,"packet did not stall");
+   wr(7'h50,1);rd(7'h50,status);if(status!==1)$fatal(1,"packet reset counter %h",status);
+   rd(7'h48,status);if(status[0] || mock_busy)$fatal(1,"packet reset failed %h",status);
+   rd(8,check_cfg);if(check_cfg!==old_cfg)$fatal(1,"engine reset altered configuration");
+   // A stalled legacy batch must not retain ownership of the core mux either.
+   allow_batch=1;put(0,32'h04000402);put(1,0);wr(7'h30,32'h4001);
+   repeat(15)@(negedge clk);rd(7'h34,status);
+   if(!status[0])$fatal(1,"batch did not stall status=%h state=%d hdr=%h active=%b busy=%b accepted=%d",status,dut.u_swd_batch_engine.state,dut.u_swd_batch_engine.hdr_reg,dut.batch_active,mock_busy,accepted);
+   wr(7'h50,1);rd(7'h50,status);if(status!==2)$fatal(1,"batch reset counter");
+   rd(7'h34,status);if(status[0] || mock_busy)$fatal(1,"batch reset failed");
+   // Start another real packet after both aborts and check data/mux recovery.
+   stall=0;accepted=0;put(0,32'h0d000306);
+   for(n=0;n<3;n=n+1)put(n+1,32'h12340000+n);
+   wr(7'h40,1);status=1;while(!status[1])rd(7'h48,status);
+   if(status[2:0]!=2 || accepted!=4)$fatal(1,"packet after recovery %h %d",status,accepted);
+   $display("PASS packet/batch stuck-core soft reset, reset counter, preserved configuration and restart");
    $display("PASS AXI 0x40/44/48 decode, no legacy alias, shared synchronous BRAM and core mux");
    $finish;
  end

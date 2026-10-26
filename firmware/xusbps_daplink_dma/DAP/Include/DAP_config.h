@@ -341,6 +341,8 @@ Configures the DAP Hardware I/O pins for JTAG mode:
 #define SWD_PACKET_CTRL     (SWD_BASE_ADDR + 0x40)
 #define SWD_PACKET_LEN      (SWD_BASE_ADDR + 0x44)
 #define SWD_PACKET_STATUS   (SWD_BASE_ADDR + 0x48)
+#define SWD_FEATURES        (SWD_BASE_ADDR + 0x4C)
+#define SWD_ENGINE_RESET    (SWD_BASE_ADDR + 0x50)
 
 /* Low-rate bring-up counters.  Defined in dap_main.c and deliberately kept
  * separate from the USB DMA buffers so JTAG/UART inspection is harmless. */

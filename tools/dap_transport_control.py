@@ -1,8 +1,8 @@
 """Inspect/recover DAP USB queues through EP0 without reloading bit/ELF.
 
 Close OpenOCD first so this process can claim the WinUSB DAP interface.
-Recovery discards pending DAP requests/responses. It does not reprogram target
-flash or reset the target, and does not claim to reset a stuck RTL engine.
+Recovery discards pending DAP requests/responses. With the matching reset-capable
+bitstream it also resets execution engines; target flash and nRESET are untouched.
 """
 import argparse
 import json
@@ -19,13 +19,21 @@ def snapshot(dev):
     raw = dev.ctrl_transfer(0xc0, 0x5b, 0x4441, 0x5052, 32, timeout=3000)
     return dict(zip(FIELDS, struct.unpack('<8I', raw)))
 
+def engine_snapshot(dev):
+    try:
+        raw = dev.ctrl_transfer(0xc0, 0x5c, 0x4441, 0x5052, 24, timeout=3000)
+        return dict(zip(['features', 'reset_count', 'core_status', 'batch_status',
+                         'packet_status', 'recovery_errors'], struct.unpack('<6I', raw)))
+    except usb.core.USBError:
+        return None  # Older firmware has no out-of-band RTL snapshot.
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('action', choices=['state', 'recover'])
     a = ap.parse_args()
     dev, out, inp = open_dap()
     try:
-        result = {'before': snapshot(dev)}
+        result = {'before': snapshot(dev), 'engines_before': engine_snapshot(dev)}
         if a.action == 'recover':
             r = bytes(dev.ctrl_transfer(0xc0, 0x5a, 0x4441, 0x5052, 4, timeout=3000))
             if r != b'DAP\0':
@@ -42,6 +50,13 @@ def main():
             result['drained_prefetched_responses'] = n
             result['capabilities'] = xfer(out, inp, [0, 0xf0]).hex()
         result['after'] = snapshot(dev)
+        result['engines_after'] = engine_snapshot(dev)
+        before, after = result['engines_before'], result['engines_after']
+        if a.action == 'recover' and before and (before['features'] & 0xffff0001) == 0x44500001:
+            if not after or after['reset_count'] == before['reset_count']:
+                raise RuntimeError('Execution-engine reset was not acknowledged')
+            if any(after[k] & 1 for k in ['core_status', 'batch_status', 'packet_status']):
+                raise RuntimeError(f'Execution engine remains busy: {after}')
         print(json.dumps(result, indent=2))
     finally:
         usb.util.release_interface(dev, 0)
