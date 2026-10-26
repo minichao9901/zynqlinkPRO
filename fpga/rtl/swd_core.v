@@ -116,6 +116,7 @@ module swd_core (
 
     assign result_valid = (state == ST_DONE) && mode;
     assign next_ready = result_valid && delay_fast == 0 && ack == 1 && !parity_err;
+    wire compact_ack = delay_fast == 0 && ack_delay == 0 && !data_phase;
     // The wrapper chooses early/late FCLK-domain input sampling.
     assign active_delay       = (state == ST_SWJ) ? clock_delay : delay_fast;
     assign step_tick          = (delay_cnt == {12'd0, active_delay});
@@ -374,7 +375,11 @@ module swd_core (
                             8'd7: begin
                                 // Capture only: keep the half-cycle input path
                                 // out of ACK decode and clock-control logic.
-                                swclk   <= 1'b0;
+                                // All valid no-data-phase ACKs need this rise:
+                                // read D0, write turnaround, or error turnaround.
+                                // Emit it while registering ACK2; decode remains
+                                // on the following full-cycle register path.
+                                swclk   <= compact_ack;
                                 ack_samples[2] <= swdio_sample_fsm;
                                 lsm_cnt <= 8'd8;
                             end
@@ -386,10 +391,11 @@ module swd_core (
                                 if (ack_samples == 3'b001) begin
                                     if (is_read_op) begin
                                         rd_samples <= 33'd0;
-                                        // The previous falling edge already
-                                        // began D0. Raise it on this beat.
-                                        swclk <= 1'b1;
-                                        lsm_cnt <= (ack_delay == 0) ? 8'd2 : 8'd0;
+                                        // In compact mode the preceding beat
+                                        // already raised D0. Fall now, then
+                                        // capture it on the next high phase.
+                                        swclk <= !compact_ack;
+                                        lsm_cnt <= compact_ack ? 8'd3 : ((ack_delay == 0) ? 8'd2 : 8'd0);
                                         state <= ST_XFER_RD;
                                     end else begin
                                         if (ack_delay != 0) begin
@@ -399,6 +405,14 @@ module swd_core (
                                             // before enabling host data output.
                                             swclk <= 1'b1;
                                             state <= ST_TURN_WR;
+                                        end else if (compact_ack) begin
+                                            // The preceding rise completed
+                                            // turnaround. Launch D0 now.
+                                            swclk <= 0; swdio_t <= 0;
+                                            swdio_o <= wr_shift[0];
+                                            wr_shift <= {1'b0,wr_shift[32:1]};
+                                            lsm_cnt <= 1;
+                                            state <= ST_XFER_WR;
                                         end else if (delay_fast == 0) begin
                                             // Beat 6 began write turnaround;
                                             // complete it here without another
@@ -411,10 +425,12 @@ module swd_core (
                                     if (data_phase) begin
                                         state <= is_read_op ? ST_XFER_WFRD : ST_TURN_WFWR;
                                     end else begin
+                                        if (compact_ack) swclk <= 1;
                                         state <= ST_DONE;
                                     end
                                 end else begin
                                     // Protocol error ACK: exit immediately.
+                                    if (compact_ack) swclk <= 1;
                                     state <= ST_DONE;
                                 end
                             end
