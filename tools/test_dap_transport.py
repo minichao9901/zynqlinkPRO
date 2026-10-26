@@ -4,7 +4,12 @@ Checks ownership through ZLP completion, response-full backpressure, failed
 submissions, counter wrap, and a reset interrupt during command execution.
 """
 from pathlib import Path
+import argparse
 import subprocess
+ap=argparse.ArgumentParser(description=__doc__)
+ap.add_argument('--cc',default='gcc',help='Native C compiler; Clang also supports the MinGW sysroot below')
+ap.add_argument('--mingw-root',type=Path,default=Path('C:/msys64/mingw64'))
+args=ap.parse_args()
 root=Path(__file__).resolve().parents[1];out=root/'build/test_transport';out.mkdir(parents=True,exist_ok=True)
 shim=r'''
 #ifndef TEST_SHIM_H
@@ -102,5 +107,11 @@ int main(void){
 '''
 # Location under build/ keeps all native artifacts out of sources.
 (out/'test.c').write_text(source.replace('../../firmware/','../../firmware/').replace('#include "../../firmware/', '#include "'+(root/'firmware').as_posix()+'/'))
-subprocess.run(['gcc','-std=gnu11','-Wall','-Wextra','-Werror','-I',str(out),str(out/'test.c'),'-o',str(out/'test.exe')],check=True)
+extra=[]
+if Path(args.cc).stem.lower()=='clang':
+    versions=list((args.mingw_root/'lib/gcc/x86_64-w64-mingw32').iterdir())
+    gcc_lib=max(versions,key=lambda p:tuple(int(n) for n in p.name.split('.')))
+    extra=['--target=x86_64-w64-windows-gnu','--sysroot='+str(args.mingw_root),
+           '-B',str(args.mingw_root/'bin'),'-L',str(gcc_lib)]
+subprocess.run([args.cc,*extra,'-std=gnu11','-Wall','-Wextra','-Werror','-I',str(out),str(out/'test.c'),'-o',str(out/'test.exe')],check=True)
 subprocess.run([str(out/'test.exe')],check=True)

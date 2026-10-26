@@ -265,3 +265,21 @@ an actual host timeout, close that process and run the EP0 recovery utility,
 then reconnect. Truncated SWD frames require SWJ line reset/reconnect. The
 original historical long-term 2.1MB/s condition is still not proven reproduced
 as persistent firmware degradation; do not describe it as comprehensively fixed.
+
+
+## Final package / same-runtime comparison
+
+The Chinese handover docs/交接-20261026-main连续执行与恢复.md is the concise entry point.
+Final live pair and firmware hashes are in prebuilt/SHA256SUMS and build_manifest.json.
+Final same-runtime comparison (each leg6 sessions x300 operations, 20KiB):
+- 50MHz: main3.242216/3.349446 -> final3.325875/3.417130 MB/s (+2.58/+2.02%).
+- 60MHz: main3.765475/3.958338 -> final3.898889/4.067976 MB/s (+3.54/+2.77%).
+All 24 sessions passed byte comparisons and original SRAM restoration.
+Full evidence: docs/measurements/20261026-final-comparison.json.
+No FPGA or firmware work remains pending for this checkpoint. Cross-packet descriptor
+queues and broader input sampling-window improvements are future work, not claimed done.
+
+The final native transport recheck used LLVM Clang with the installed MinGW sysroot:
+MSYS GCC's cc1 failed to load DLLs in the current session. The identical real C transport
+passes all ownership, failed-send, wrap and reset-race assertions with Clang. The script
+now accepts --cc explicitly; packet mock/AXI simulation also passed again.

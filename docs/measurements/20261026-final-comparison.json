@@ -1,0 +1,423 @@
+{
+  "conditions": {
+    "target": "STM32F103",
+    "target_HCLK_MHz": 96,
+    "size_bytes": 20480,
+    "loops_per_session": 300,
+    "sessions_per_sample": 6,
+    "reset_target": false,
+    "host_runtime": {
+      "openocd.exe": "cb0d4ef35ce090b4ca59281eb5d4ef34b4f64efcbedebe484c2b6f3ce2a182bc",
+      "libhidapi-0.dll": "0133795f06c3ba6c5a21eb1a1b24cfcc80b38f979719d5bd29a5786ae87ed744",
+      "libusb-1.0.dll": "eddd25df84b078158f477dfce80b26500f91ecdb5af850581d2f5d09d6f21c26"
+    },
+    "main_ref": "74902be",
+    "final_source_ref": "456d3db"
+  },
+  "comparison": {
+    "50000": {
+      "main": {
+        "requested_SWCLK_kHz": 50000,
+        "target_HCLK_MHz": null,
+        "address": "0x20000000",
+        "size_bytes": 20480,
+        "loops": 300,
+        "pattern_sha256": "41b4e6d85b3a0d7ea0e57049eae0d11cfa8990987a75588095e930dd19b0329e",
+        "sessions": [
+          {
+            "session": 0,
+            "bytes_per_direction": 6144000,
+            "read_ms": 1923,
+            "write_ms": 1832,
+            "read_MB_s": 3.1950078003120126,
+            "write_MB_s": 3.353711790393013,
+            "data_match": true,
+            "restore_match": true
+          },
+          {
+            "session": 1,
+            "bytes_per_direction": 6144000,
+            "read_ms": 1894,
+            "write_ms": 1831,
+            "read_MB_s": 3.2439281942977822,
+            "write_MB_s": 3.355543418896778,
+            "data_match": true,
+            "restore_match": true
+          },
+          {
+            "session": 2,
+            "bytes_per_direction": 6144000,
+            "read_ms": 1854,
+            "write_ms": 1846,
+            "read_MB_s": 3.313915857605178,
+            "write_MB_s": 3.3282773564463706,
+            "data_match": true,
+            "restore_match": true
+          },
+          {
+            "session": 3,
+            "bytes_per_direction": 6144000,
+            "read_ms": 1895,
+            "write_ms": 1837,
+            "read_MB_s": 3.24221635883905,
+            "write_MB_s": 3.3445835601524223,
+            "data_match": true,
+            "restore_match": true
+          },
+          {
+            "session": 4,
+            "bytes_per_direction": 6144000,
+            "read_ms": 1911,
+            "write_ms": 1833,
+            "read_MB_s": 3.2150706436420724,
+            "write_MB_s": 3.3518821603927984,
+            "data_match": true,
+            "restore_match": true
+          },
+          {
+            "session": 5,
+            "bytes_per_direction": 6144000,
+            "read_ms": 1893,
+            "write_ms": 1827,
+            "read_MB_s": 3.2456418383518226,
+            "write_MB_s": 3.3628899835796386,
+            "data_match": true,
+            "restore_match": true
+          }
+        ],
+        "read_MB_s": 3.24221635883905,
+        "write_MB_s": 3.3494457568598945
+      },
+      "final": {
+        "requested_SWCLK_kHz": 50000,
+        "target_HCLK_MHz": null,
+        "address": "0x20000000",
+        "size_bytes": 20480,
+        "loops": 300,
+        "pattern_sha256": "41b4e6d85b3a0d7ea0e57049eae0d11cfa8990987a75588095e930dd19b0329e",
+        "sessions": [
+          {
+            "session": 0,
+            "bytes_per_direction": 6144000,
+            "read_ms": 1882,
+            "write_ms": 1862,
+            "read_MB_s": 3.26461211477152,
+            "write_MB_s": 3.299677765843179,
+            "data_match": true,
+            "restore_match": true
+          },
+          {
+            "session": 1,
+            "bytes_per_direction": 6144000,
+            "read_ms": 1839,
+            "write_ms": 1782,
+            "read_MB_s": 3.34094616639478,
+            "write_MB_s": 3.447811447811448,
+            "data_match": true,
+            "restore_match": true
+          },
+          {
+            "session": 2,
+            "bytes_per_direction": 6144000,
+            "read_ms": 1839,
+            "write_ms": 1783,
+            "read_MB_s": 3.34094616639478,
+            "write_MB_s": 3.4458777341559172,
+            "data_match": true,
+            "restore_match": true
+          },
+          {
+            "session": 3,
+            "bytes_per_direction": 6144000,
+            "read_ms": 1841,
+            "write_ms": 1788,
+            "read_MB_s": 3.337316675719718,
+            "write_MB_s": 3.436241610738255,
+            "data_match": true,
+            "restore_match": true
+          },
+          {
+            "session": 4,
+            "bytes_per_direction": 6144000,
+            "read_ms": 1834,
+            "write_ms": 1792,
+            "read_MB_s": 3.3500545256270446,
+            "write_MB_s": 3.4285714285714284,
+            "data_match": true,
+            "restore_match": true
+          },
+          {
+            "session": 5,
+            "bytes_per_direction": 6144000,
+            "read_ms": 1849,
+            "write_ms": 1781,
+            "read_MB_s": 3.322877230935641,
+            "write_MB_s": 3.449747332959012,
+            "data_match": true,
+            "restore_match": true
+          }
+        ],
+        "read_MB_s": 3.325875135330206,
+        "write_MB_s": 3.4171301446051165
+      },
+      "gain_percent": {
+        "read": 2.5802959220498245,
+        "write": 2.0207638116425564
+      }
+    },
+    "60000": {
+      "main": {
+        "requested_SWCLK_kHz": 60000,
+        "target_HCLK_MHz": null,
+        "address": "0x20000000",
+        "size_bytes": 20480,
+        "loops": 300,
+        "pattern_sha256": "41b4e6d85b3a0d7ea0e57049eae0d11cfa8990987a75588095e930dd19b0329e",
+        "sessions": [
+          {
+            "session": 0,
+            "bytes_per_direction": 6144000,
+            "read_ms": 1617,
+            "write_ms": 1548,
+            "read_MB_s": 3.799628942486085,
+            "write_MB_s": 3.9689922480620154,
+            "data_match": true,
+            "restore_match": true
+          },
+          {
+            "session": 1,
+            "bytes_per_direction": 6144000,
+            "read_ms": 1648,
+            "write_ms": 1551,
+            "read_MB_s": 3.7281553398058254,
+            "write_MB_s": 3.9613152804642167,
+            "data_match": true,
+            "restore_match": true
+          },
+          {
+            "session": 2,
+            "bytes_per_direction": 6144000,
+            "read_ms": 1622,
+            "write_ms": 1553,
+            "read_MB_s": 3.7879161528976573,
+            "write_MB_s": 3.9562137797810686,
+            "data_match": true,
+            "restore_match": true
+          },
+          {
+            "session": 3,
+            "bytes_per_direction": 6144000,
+            "read_ms": 1611,
+            "write_ms": 1562,
+            "read_MB_s": 3.813780260707635,
+            "write_MB_s": 3.933418693982074,
+            "data_match": true,
+            "restore_match": true
+          },
+          {
+            "session": 4,
+            "bytes_per_direction": 6144000,
+            "read_ms": 1670,
+            "write_ms": 1551,
+            "read_MB_s": 3.6790419161676646,
+            "write_MB_s": 3.9613152804642167,
+            "data_match": true,
+            "restore_match": true
+          },
+          {
+            "session": 5,
+            "bytes_per_direction": 6144000,
+            "read_ms": 1622,
+            "write_ms": 1548,
+            "read_MB_s": 3.7879161528976573,
+            "write_MB_s": 3.9689922480620154,
+            "data_match": true,
+            "restore_match": true
+          }
+        ],
+        "read_MB_s": 3.7654749744637384,
+        "write_MB_s": 3.9583378073660476
+      },
+      "final": {
+        "requested_SWCLK_kHz": 60000,
+        "target_HCLK_MHz": null,
+        "address": "0x20000000",
+        "size_bytes": 20480,
+        "loops": 300,
+        "pattern_sha256": "41b4e6d85b3a0d7ea0e57049eae0d11cfa8990987a75588095e930dd19b0329e",
+        "sessions": [
+          {
+            "session": 0,
+            "bytes_per_direction": 6144000,
+            "read_ms": 1574,
+            "write_ms": 1512,
+            "read_MB_s": 3.903430749682338,
+            "write_MB_s": 4.063492063492063,
+            "data_match": true,
+            "restore_match": true
+          },
+          {
+            "session": 1,
+            "bytes_per_direction": 6144000,
+            "read_ms": 1581,
+            "write_ms": 1513,
+            "read_MB_s": 3.886148007590133,
+            "write_MB_s": 4.060806345009914,
+            "data_match": true,
+            "restore_match": true
+          },
+          {
+            "session": 2,
+            "bytes_per_direction": 6144000,
+            "read_ms": 1571,
+            "write_ms": 1508,
+            "read_MB_s": 3.9108847867600254,
+            "write_MB_s": 4.074270557029178,
+            "data_match": true,
+            "restore_match": true
+          },
+          {
+            "session": 3,
+            "bytes_per_direction": 6144000,
+            "read_ms": 1589,
+            "write_ms": 1500,
+            "read_MB_s": 3.866582756450598,
+            "write_MB_s": 4.096,
+            "data_match": true,
+            "restore_match": true
+          },
+          {
+            "session": 4,
+            "bytes_per_direction": 6144000,
+            "read_ms": 1568,
+            "write_ms": 1521,
+            "read_MB_s": 3.9183673469387754,
+            "write_MB_s": 4.039447731755424,
+            "data_match": true,
+            "restore_match": true
+          },
+          {
+            "session": 5,
+            "bytes_per_direction": 6144000,
+            "read_ms": 1572,
+            "write_ms": 1508,
+            "read_MB_s": 3.908396946564886,
+            "write_MB_s": 4.074270557029178,
+            "data_match": true,
+            "restore_match": true
+          }
+        ],
+        "read_MB_s": 3.8988894764674775,
+        "write_MB_s": 4.067976164202163
+      },
+      "gain_percent": {
+        "read": 3.5430988894764814,
+        "write": 2.7698079894063143
+      }
+    }
+  },
+  "timing": {
+    "FCLK_max_Hz": 138461539,
+    "SWCLK_max_Hz": 69230769,
+    "setup_slack_ns": 0.488,
+    "hold_slack_ns": 0.016
+  },
+  "stages60": {
+    "timer_Hz": 333333343,
+    "stages": {
+      "execute_05_or_control": {
+        "calls": 20538,
+        "bytes": 9306108,
+        "total_ms": 4410.97998108158,
+        "mean_us": 214.77164188731038
+      },
+      "execute_06_read": {
+        "calls": 9090,
+        "bytes": 28063032,
+        "total_ms": 6075.360312814551,
+        "mean_us": 668.3564700566063
+      },
+      "execute_06_write": {
+        "calls": 9060,
+        "bytes": 36240,
+        "total_ms": 5937.267976819228,
+        "mean_us": 655.3275912604005
+      },
+      "packet_read": {
+        "calls": 9090,
+        "bytes": 28026672,
+        "total_ms": 5920.011695319661,
+        "mean_us": 651.2664131264753
+      },
+      "packet_write": {
+        "calls": 9060,
+        "bytes": 27905160,
+        "total_ms": 5719.1951691433405,
+        "mean_us": 631.2577449385585
+      },
+      "dma_upload": {
+        "calls": 36306,
+        "bytes": 46744680,
+        "total_ms": 285.5641687186391,
+        "mean_us": 7.86548142782568
+      },
+      "dma_download": {
+        "calls": 27246,
+        "bytes": 37370856,
+        "total_ms": 208.52334595282295,
+        "mean_us": 7.653356307451478
+      },
+      "response_copy": {
+        "calls": 0,
+        "bytes": 0,
+        "total_ms": 0.0,
+        "mean_us": 0
+      },
+      "request_queue_wait": {
+        "calls": 38689,
+        "bytes": 0,
+        "total_ms": 62501.24613846386,
+        "mean_us": 1615.4784599876932
+      },
+      "usb_in_submit_to_complete": {
+        "calls": 38689,
+        "bytes": 37405462,
+        "total_ms": 1480.4772650661594,
+        "mean_us": 38.26610315764582
+      },
+      "usb_in_submit": {
+        "calls": 38689,
+        "bytes": 37405462,
+        "total_ms": 122.20541945604283,
+        "mean_us": 3.1586605871447397
+      }
+    }
+  },
+  "recovery": {
+    "engine_recovery_board100": {
+      "rounds": 100,
+      "active_engine_resets": 74,
+      "max_recovery_errors": 0,
+      "max_submit_errors": 0,
+      "all_passed": true,
+      "evidence_sha256": "b69bf2a812830977fae5d1eddbbc70be3e16e3f8534253a1e892401cb92491b8"
+    },
+    "engine_recovery_batch100": {
+      "rounds": 100,
+      "active_engine_resets": 46,
+      "max_recovery_errors": 0,
+      "max_submit_errors": 0,
+      "all_passed": true,
+      "evidence_sha256": "8ae626d4746e5efec58d659073787cc95f241d2eb087fb1b1ed4e7441d75dd94"
+    }
+  },
+  "queued_validation": {
+    "passed": true,
+    "requests": 57600,
+    "outstanding": 16
+  },
+  "artifacts": {
+    "zynqlink_packet.bit": "0afb0d30cb6c08e14636f762c1916c4ac8ca8d267d19b2fd366fd8842787aefa",
+    "zynqlink_packet.elf": "6c078fccd76b4d8a73df180b0589ab27f091d447c0982c1bcc476c4baa0ff787"
+  }
+}

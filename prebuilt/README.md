@@ -10,18 +10,30 @@
 | `ps7_init.tcl` | PS 时钟/DDR 初始化（加载 ELF 前必须执行） |
 | `SHA256SUMS` | 校验值 |
 
-## 本分支更新（2026-10-26，codex/main-continuous-scheduler）
+## 本分支最终配对（2026-10-26，codex/main-continuous-scheduler）
 
-本分支 ELF 修正响应 DMA 所有权、ZLP、队列背压及 USB 会话恢复；读响应可直接
-DMA 到 USB 缓冲区，取消重复 cache flush。当前本地构建将 SWCLK 上限保守设为
-60 MHz，已实测 60 MHz；当前 bit 已包含 packet 事务连续启动和写预取。下方 main 的 75 MHz 是历史构建配置。
+当前 bit/ELF 包含 packet 连续启动/写预取、读响应直接 DMA、USB 队列所有权修复，
+以及 core/batch/packet 软复位恢复。固件 SWCLK 上限显式限制为 **60 MHz**。
+最终 bit 的 routed FCLK 上限为 138.46 MHz（setup +0.488ns / hold +0.016ns）；
+150 MHz setup=-0.068ns，不算通过。下方 main 的 75 MHz 是历史配置。
 
-交替部署 A/B：20 KiB、每会话 300 次读写、每个版本 12 个会话，全部校验和恢复通过。
-读 3.869 → 3.946 MB/s，写 4.013 → 4.029 MB/s。完整记录见
-`docs/Continuous-scheduler-progress.md` 和 `docs/measurements/20261026-software-ab.json`。
+最后同环境对照，F103@96MHz、20KiB、每配置6会话×300次读写：
 
-本分支 RTL 上板检查点：60 MHz 读 3.966 / 写 4.084 MB/s；50 MHz 读 3.364 / 写 3.447 MB/s。
-150 MHz FCLK 的 routed setup +0.173 ns、hold +0.016 ns；运行测试仍限制在 50/60 MHz SWCLK。
+| SWCLK | main 读/写 MB/s | 本分支读/写 MB/s |
+|---|---:|---:|
+| 50MHz | 3.242 / 3.349 | 3.326 / 3.417 |
+| 60MHz | 3.765 / 3.958 | 3.899 / 4.068 |
+
+全部数据和 SRAM 恢复校验通过。此前本分支另一组60MHz结果为3.987/4.116，
+性能存在主机调度波动，不把高样本当保证值。恢复验证：packet/batch各100轮，
+分别74/46次确认引擎忙；最终57,600条队列请求通过。
+
+文件校验见 `SHA256SUMS`，构建信息见 `build_manifest.json`。
+完整交接：`docs/交接-20261026-main连续执行与恢复.md`。
+
+关闭 OpenOCD 后可用 `python tools/dap_transport_control.py recover` 恢复USB和执行引擎，
+再正常连接目标；stock OpenOCD不会自动发出该请求。历史持续降速尚未稳定复现，
+不声称全面解决。更高SWCLK与跨包硬件描述符队列没有作为本轮完成项。
 
 ## 版本（2026-10-26 21:09，main `6a628c9`）
 
