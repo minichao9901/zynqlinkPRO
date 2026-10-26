@@ -116,9 +116,44 @@ is about 2 FCLK cycles/read and 4 cycles/write.
 
 Real user-supplied Cortex-M0 DesignStart model via XSim:
 - packet_pipeline: packet reads/writes 1/2/127/256/770/1023 words pass.
-- pipeline_tco8: same packets with 8ns target delay plus WAIT/release/ABORT
-  recovery pass. This target model does not report injected AHB FAULT in the
+- pipeline_tco8: packets plus WAIT/release/ABORT recovery pass at the default
+  16ns return delay. The supplied tco=8 argument was not a recognized TB option;
+  this run is NOT evidence for 8ns timing. The runner now rejects unknown
+  plusargs. This target model does not report injected AHB FAULT in the
   forced-error case (explicit FAULT_SKIP); RTL mock tests cover partial FAULT.
 - All model sources remain outside the repository.
 
 Implementation/timing and physical F103 validation are separate next gates.
+
+
+Timing sweep correction: the testbench's actual option is return_ns, not tco.
+An explicit return_ns=8 run fails on the first legacy DPIDR before packet mode
+is used. This matches the pre-existing narrow return-delay sampling window
+reported in docs/交接-20261026-SWD高速与M0+仿真.md (about 12..24ns at 60MHz,
+phase-dependent). It is not claimed fixed by the packet scheduler. Preserve
+negative tests in the handover instead of counting them as covered successes.
+
+
+Explicit return_ns=24 at FCLK=120MHz also passes all packet lengths. The default
+return_ns=16 run includes WAIT recovery. Return_ns=8 is a retained negative test.
+For USB-only recovery without FPGA/ELF reload, close OpenOCD then run:
+`python tools/dap_transport_control.py state` or
+`python tools/dap_transport_control.py recover`.
+This resets USB queue ownership, not a stuck RTL engine; no host-side automatic
+OpenOCD recovery is claimed.
+
+A 100-session stress run during parallel Vivado synthesis passed all byte and
+restore checks, but wall throughput varied down to 2.31 MB/s transiently and
+recovered without a reload. Concurrent profiling still measured RTL read/write
+665.83/657.81 us while USB submit-to-complete increased to 75.16 us (from about
+44 us). Aggregate read/write 3.51/3.75 MB/s in that host-load run is not a fair
+performance comparison with the quiet A/B runs. Re-test without any reflash once
+the Vivado load ends to distinguish persistent device state from host scheduling.
+RCC readback: CR=0x03035983, CFGR=0x0029250a, matching the existing HSE x12 PLL
+configuration used by the board's 96MHz firmware; it was not reset or changed.
+
+
+Build the tested 60MHz firmware cap explicitly, independent of a higher routed
+STA limit: `python tools/build_xusbps_daplink.py --project xusbps_daplink_dma
+--max-swclk-hz 60000000 --bsp <usb_bsp/ps7_cortexa9_0>`. The new limit option
+rejects a value above routed timing (or the conservative 60MHz fallback).

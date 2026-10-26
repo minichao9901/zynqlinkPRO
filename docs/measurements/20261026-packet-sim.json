@@ -162,5 +162,23 @@
         "errors"
       ]
     }
-  ]
+  ],
+  "timing_correction": "tco=8 was ignored by the TB; that run used its default return_ns=16. Runner now rejects unknown plusargs.",
+  "negative_return8": {
+    "passed": false,
+    "returncode": 0,
+    "plusargs": [
+      "packets",
+      "return_ns=8",
+      "errors"
+    ]
+  },
+  "explicit_return24": {
+    "passed": true,
+    "returncode": 0,
+    "plusargs": [
+      "packets",
+      "return_ns=24"
+    ]
+  }
 }

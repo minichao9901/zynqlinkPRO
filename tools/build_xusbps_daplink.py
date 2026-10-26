@@ -14,6 +14,8 @@ def main():
     ap.add_argument('--project', choices=['xusbps_daplink', 'xusbps_daplink_dma'], default='xusbps_daplink')
     ap.add_argument('--trace', action='store_true', help='Enable DMA firmware timing trace and MMIO diagnostics')
     ap.add_argument('--usb-trace', action='store_true', help='Trace USB events without per-MMIO diagnostics')
+    ap.add_argument('--max-swclk-hz', type=int,
+                    help='Conservative firmware limit; cannot exceed the verified timing limit')
     ap.add_argument('--bsp', default=None,
                     help='BSP directory (default: reference/legacy_zynq/.../usb_bsp/ps7_cortexa9_0); '
                          'a BSP root containing ps7_cortexa9_0 is also accepted')
@@ -38,6 +40,10 @@ def main():
         if timing_path.exists():
             verified_clock = json.loads(timing_path.read_text())
             max_swclk = min(90000000, int(verified_clock['FCLK_max_Hz']) // 2)
+        if args.max_swclk_hz is not None:
+            if args.max_swclk_hz <= 0 or args.max_swclk_hz > max_swclk:
+                ap.error(f'--max-swclk-hz must be between 1 and {max_swclk}')
+            max_swclk = args.max_swclk_hz
         flags += ['-DDAP_MAX_SWCLK_HZ=' + str(max_swclk)]
     includes = [src, src / 'DAP/Include', src / 'DAP/Source', bsp / 'include']
     cfiles = sorted(src.rglob('*.c'))

@@ -64,6 +64,14 @@ def main():
     ap.add_argument('--tag', default='baseline')
     ap.add_argument('plusargs', nargs='*')
     args = ap.parse_args()
+    # XSim silently accepts misspelled plusargs. Reject them here so a requested
+    # delay sweep cannot accidentally rerun the default target timing.
+    flags = {'packets', 'errors', 'trace', 'vcd'}
+    values = {'half_ns', 'return_ns', 'phase', 'ack_delay', 'turn_extra', 'words'}
+    for arg in args.plusargs:
+        name, sep, value = arg.lstrip('+').partition('=')
+        if (sep and name not in values) or (not sep and name not in flags):
+            ap.error(f'Unknown testbench plusarg: {arg}')
     if args.build:
         cmd = [sys.executable, str(ROOT/'tools/run_vivado.py'), '-mode', 'batch',
                '-nojournal', '-log', str(ROOT/'build/cortexm0_sim.log'),
