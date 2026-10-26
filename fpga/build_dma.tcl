@@ -6,6 +6,7 @@ if {[file exists [file join $out zynqlink_dma.xpr]] && [lsearch -exact $argv --r
     exit
 }
 create_project -force zynqlink_dma $out -part xc7z020clg400-2
+source [file join $root fpga configure_ip_cache.tcl]
 set_param general.maxThreads 8
 set_property target_language Verilog [current_project]
 set_property XPM_LIBRARIES {XPM_MEMORY} [current_project]

@@ -157,3 +157,23 @@ Build the tested 60MHz firmware cap explicitly, independent of a higher routed
 STA limit: `python tools/build_xusbps_daplink.py --project xusbps_daplink_dma
 --max-swclk-hz 60000000 --bsp <usb_bsp/ps7_cortexa9_0>`. The new limit option
 rejects a value above routed timing (or the conservative 60MHz fallback).
+
+
+## Isolated-build IP cache reuse
+
+This isolated worktree's first build already uses Hierarchical/OOC synthesis,
+but had no local IP cache. The unchanged CDMA IP is expensive in Vivado 2018.3
+(original project's log: about 11 minutes in RTL elaboration). It is not a reason
+to rerun this core on every SWD RTL edit. Ordinary incremental builds already
+retain the OOC runs; new isolated projects can now seed a separate cache:
+
+```powershell
+python tools/prepare_ip_cache.py --source E:/zynqlinkPRO/build/fpga_dma_global/zynqlink_dma.cache/ip --destination build/shared_ip_cache
+python tools/run_vivado.py -mode batch -nojournal -source fpga/build_dma.tcl -tclargs --ip-cache build/shared_ip_cache
+```
+
+Seeding copied 27 entries; repeating it copied zero and retained all entries.
+Vivado's in-memory project probe accepted the selected cache location. Vivado
+checks configuration fingerprints, so modified module RTL is still synthesized.
+The reference cache/project is read only during seeding; existing destination
+entries are never overwritten. No completed implementation is fabricated.

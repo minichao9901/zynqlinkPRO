@@ -3,6 +3,7 @@ set root [file normalize [file join [file dirname [info script]] ..]]
 set ::zynqlink_no_pipeline [expr {[lsearch -exact $argv --no-pipeline] >= 0}]
 set out [file join $root build fpga_dma_global]
 open_project [file join $out zynqlink_dma.xpr]
+source [file join $root fpga configure_ip_cache.tcl]
 set_param general.maxThreads 8
 set impl_only [expr {[lsearch -exact $argv --impl-only] >= 0}]
 set fresh_impl [expr {[lsearch -exact $argv --fresh] >= 0}]
