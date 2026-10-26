@@ -9,7 +9,7 @@
 
   默认板的产物固定落在 build\ —— check.py / flash.ps1 / 文档都按这个路径找。
 #>
-param([switch]$Clean, [ValidateSet('c8', 'cb', 'ze')][string]$Board = 'ze', [ValidateSet(60,72,96)][int]$CpuMhz = 96)
+param([switch]$Clean, [ValidateSet('c8', 'cb', 'ze')][string]$Board = 'ze', [ValidateSet(60,64,72,96)][int]$CpuMhz = 96)
 
 $ErrorActionPreference = 'Stop'
 [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new()
