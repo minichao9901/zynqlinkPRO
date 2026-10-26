@@ -29,3 +29,9 @@ __pycache__/
 !prebuilt/
 !prebuilt/*.bit
 !prebuilt/*.elf
+
+# Target firmware ELFs are shipped (avoid rebuilding)
+!firmware/target/stm32f103_scope/build-cb/fw.elf
+!firmware/target/stm32f103_scope/build-cb-60mhz/fw.elf
+!firmware/target/stm32f103_scope/build-cb-64mhz/fw.elf
+!firmware/target/stm32f103_scope/build-cb-72mhz/fw.elf
