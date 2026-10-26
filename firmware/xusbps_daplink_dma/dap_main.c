@@ -120,7 +120,7 @@ static void dap_service_tx(void)
     if(tx_active || response_in==response_out){irq_restore(flags);return;}
     slot=response_out % DAP_PACKET_COUNT;len=USB_RespSize[slot];
     t=dap_metric_start();
-    Xil_DCacheFlushRange((UINTPTR)USB_Response[slot],(len+31U)&~31U);
+    // XUsbPs_EpQueueRequest flushes the payload before publishing its dTD.
     // Serialize publication/submission against the completion ISR. Failed
     // submissions keep ownership and are retried by the main loop.
 

@@ -15,6 +15,10 @@
 #define IDLE 0x2U
 #define ERRORS 0x70U
 
+/* AXI BRAM is uncached device memory. Tiny headers/status words cost less
+ * as a few direct accesses than setting up an entire CDMA transaction. */
+#define PIO_MAX_WORDS 8U
+
 uint32_t swd_dma_cmd[1024] __attribute__((aligned(32)));
 uint32_t swd_dma_rsp[1024] __attribute__((aligned(32)));
 volatile uint32_t swd_dma_errors, swd_dma_last_status;
@@ -58,8 +62,15 @@ int swd_dma_upload(uint32_t words) {
     int rc;
     if (words > 1024U) return -1;
     if (profiling) XTime_GetTime(&start);
-    Xil_DCacheFlushRange((UINTPTR)swd_dma_cmd, words*4U);
-    rc=copy((uint32_t)swd_dma_cmd, CMD_RAM, words*4U);
+    if (words <= PIO_MAX_WORDS) {
+        uint32_t n;
+        for (n=0; n<words; ++n) Xil_Out32(CMD_RAM+n*4U,swd_dma_cmd[n]);
+        __asm__ volatile("dsb sy" ::: "memory");
+        rc=0;
+    } else {
+        Xil_DCacheFlushRange((UINTPTR)swd_dma_cmd, words*4U);
+        rc=copy((uint32_t)swd_dma_cmd, CMD_RAM, words*4U);
+    }
     if (profiling) {
         XTime_GetTime(&end);
         dap_profile.upload_ticks += end-start;
@@ -70,16 +81,22 @@ int swd_dma_upload(uint32_t words) {
     return rc;
 }
 
-int swd_dma_download(uint32_t first, uint32_t words) {
+int swd_dma_download_to(uint32_t first, uint32_t words, uint32_t *destination) {
     int rc;
     XTime start, end;
     XTime metric_start=dap_metric_start();
     uint32_t profiling=dap_profile.enabled;
-    if (first + words > 1024U) return -1;
+    if (first > 1024U || words > 1024U-first || ((UINTPTR)destination & 31U)) return -1;
     if (profiling) XTime_GetTime(&start);
-    Xil_DCacheFlushRange((UINTPTR)swd_dma_rsp, words*4U);
-    rc = copy(RSP_RAM + first*4U, (uint32_t)swd_dma_rsp, words*4U);
-    Xil_DCacheInvalidateRange((UINTPTR)swd_dma_rsp, words*4U);
+    if (words <= PIO_MAX_WORDS) {
+        uint32_t n;
+        for (n=0; n<words; ++n) destination[n]=Xil_In32(RSP_RAM+(first+n)*4U);
+        rc=0;
+    } else {
+        Xil_DCacheFlushRange((UINTPTR)destination, words*4U);
+        rc = copy(RSP_RAM + first*4U, (uint32_t)destination, words*4U);
+        Xil_DCacheInvalidateRange((UINTPTR)destination, words*4U);
+    }
     if (profiling) {
         XTime_GetTime(&end);
         dap_profile.download_ticks += end-start;
@@ -88,6 +105,10 @@ int swd_dma_download(uint32_t first, uint32_t words) {
     }
     dap_metric_end(MET_DMA_DOWNLOAD, metric_start, words*4U);
     return rc;
+}
+
+int swd_dma_download(uint32_t first, uint32_t words) {
+    return swd_dma_download_to(first,words,swd_dma_rsp);
 }
 
 int swd_dma_selftest(void) {

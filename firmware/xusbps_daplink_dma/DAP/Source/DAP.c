@@ -1528,7 +1528,10 @@ static uint32_t DAP_SWD_TransferBlock(const uint8_t *request, uint8_t *response)
     uint8_t *raw = (uint8_t *)swd_dma_cmd;
     uint32_t raw_len = 4U + ((req & DAP_TRANSFER_RnW) ? 0U : remaining * 4U);
     uint32_t words = (raw_len + 3U) / 4U;
-    uint32_t pstatus, rsp_words, packet_wait, packet_completed;
+    uint32_t pstatus, rsp_words, packet_wait, packet_completed, rsp_header;
+    uint32_t *direct_rsp = ((req & DAP_TRANSFER_RnW) &&
+                           (((uintptr_t)(response-1) & 31U)==0U)) ?
+                           (uint32_t *)(response-1) : NULL;
     XTime metric_start;
     dbg_pkt_taken++;
     dbg_pkt_req = req;
@@ -1569,20 +1572,34 @@ static uint32_t DAP_SWD_TransferBlock(const uint8_t *request, uint8_t *response)
     dbg_pkt_status = pstatus;
     if (!(pstatus & 2U)) goto packet_failed;
     rsp_words = (pstatus >> 16) & 0xFFFFU;
-    if (!rsp_words || rsp_words > 1024U || swd_dma_download(0, rsp_words)) goto packet_failed;
-    dbg_pkt_rsp0 = swd_dma_rsp[0];
+    if (!rsp_words || rsp_words > 1024U) goto packet_failed;
+    if (direct_rsp) {
+      // RTL word0 is count/status, followed by the aligned data. DMA the whole
+      // result into the USB slot, then replace word0 with the CMSIS-DAP header.
+      // Nested ExecuteCommands may be unaligned and retain the private buffer.
+      if (swd_dma_download_to(0,rsp_words,direct_rsp)) goto packet_failed;
+      rsp_header=direct_rsp[0];
+      ((uint8_t *)direct_rsp)[0]=ID_DAP_TransferBlock;
+    } else {
+      if (swd_dma_download(0,rsp_words)) goto packet_failed;
+      rsp_header=swd_dma_rsp[0];
+    }
+    dbg_pkt_rsp0 = rsp_header;
     dbg_pkt_flush();
-    packet_completed = swd_dma_rsp[0] & 0xFFFFU;
+    packet_completed = rsp_header & 0xFFFFU;
     if (packet_completed > remaining ||
         rsp_words != ((req & DAP_TRANSFER_RnW) ? packet_completed + 1U : 1U)) goto packet_failed;
-    response[0] = (uint8_t)swd_dma_rsp[0];
-    response[1] = (uint8_t)(swd_dma_rsp[0] >> 8);
-    response[2] = (uint8_t)(swd_dma_rsp[0] >> 16);
-    metric_start=dap_metric_start();
-    if (req & DAP_TRANSFER_RnW) memcpy(response + 3, &swd_dma_rsp[1], packet_completed * 4U);
-    dap_metric_end(MET_COPY,metric_start,packet_completed*4U);
+    response[0] = (uint8_t)rsp_header;
+    response[1] = (uint8_t)(rsp_header >> 8);
+    response[2] = (uint8_t)(rsp_header >> 16);
+    if ((req & DAP_TRANSFER_RnW) && !direct_rsp) {
+      metric_start=dap_metric_start();
+      memcpy(response + 3, &swd_dma_rsp[1], packet_completed * 4U);
+      dap_metric_end(MET_COPY,metric_start,packet_completed*4U);
+    }
     return (uint32_t)(3U + ((req & DAP_TRANSFER_RnW) ? packet_completed * 4U : 0U));
 packet_failed:
+    if (direct_rsp) ((uint8_t *)direct_rsp)[0]=ID_DAP_TransferBlock;
     // After launch the target may have advanced TAR or accepted writes. Never
     // replay the packet from its beginning on the batch path.
     response[0] = response[1] = 0;

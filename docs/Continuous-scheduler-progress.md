@@ -68,3 +68,31 @@ Validation:
   checks passed. Baseline 3.857/4.016: differences -0.37%/-0.24%, within measured
   session variation. The originally reported long-term 2.1 MB/s degradation is
   still not reproduced and is not claimed fixed by these tests alone.
+
+
+## Software copy/cache optimization
+
+Large aligned 0x06 read responses DMA directly into the owned USB response slot.
+The first DMA word is rewritten to the CMSIS-DAP header. Nested ExecuteCommands
+with an unaligned response retain the private aligned DMA buffer. Only the owning
+slot is maintained in cache; XUsbPs already flushes payload before publishing
+its dTD, so the second application flush was removed. Transfers <=8 words use
+PIO to the uncached AXI BRAM window, avoiding CDMA setup for headers/status.
+
+A measured attempt to batch 2..7 ordinary 0x05 transfers was withdrawn: mixed
+command execution averaged 11.83 us versus legacy 10.68 us. Threshold remains 8.
+
+A/B/A/B deployment, same bitstream, 60 MHz requested SWCLK, no target reset,
+randomized 20 KiB, 6 sessions x300 reads and writes per leg:
+- stable1: 3.8686 / 4.0166 MB/s; optimized1: 3.9465 / 4.0324
+- stable2: 3.8698 / 4.0100 MB/s; optimized2: 3.9461 / 4.0258
+- aggregate: read 3.86922 -> 3.94626 (+1.99%); write 4.01328 -> 4.02907 (+0.39%).
+- each version 12 sessions, all data and restore checks passed.
+- optimized 0x06 read mean 682.8 us versus baseline 692.6 us;
+  application response-copy calls became zero for the ordinary block workload;
+  USB submission mean 3.14 us versus 5.2 us.
+- 300 varied-delay EP0 recoveries and another 57,600 queued boundary requests
+  passed on the optimized firmware. Native ownership tests also passed.
+
+The copy/cache software artifact uses the original main bitstream. A separate
+RTL scheduling experiment follows; do not confuse it with these A/B results.
