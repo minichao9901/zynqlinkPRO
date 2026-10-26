@@ -809,9 +809,10 @@ static uint32_t DAP_SWD_BatchRun(void) {
  * the result indices so pipeline dummy words never enter the USB response. */
 static uint16_t transfer_read_map[255];
 static uint32_t transfer_cmd_words, transfer_raw_reads;
-static int32_t transfer_read_header;
+static int32_t transfer_read_header, transfer_write_header;
 
 static uint32_t transfer_emit_read(uint32_t req) {
+  transfer_write_header = -1;
   if (transfer_read_header >= 0 && (swd_dma_cmd[transfer_read_header] & 0xFFU) == req) {
     swd_dma_cmd[transfer_read_header] += 1U << 8;
   } else {
@@ -819,6 +820,18 @@ static uint32_t transfer_emit_read(uint32_t req) {
     swd_dma_cmd[transfer_cmd_words++] = (4U << 24) | (1U << 8) | req;
   }
   return transfer_raw_reads++;
+}
+
+static void transfer_emit_write(uint32_t req, uint32_t value) {
+  transfer_read_header = -1;
+  if (transfer_write_header >= 0 &&
+      (swd_dma_cmd[transfer_write_header] & 0xFFU) == req) {
+    swd_dma_cmd[transfer_write_header] += 1U << 8;
+  } else {
+    transfer_write_header = (int32_t)transfer_cmd_words;
+    swd_dma_cmd[transfer_cmd_words++] = (5U << 24) | (1U << 8) | req;
+  }
+  swd_dma_cmd[transfer_cmd_words++] = value;
 }
 
 static uint32_t DAP_HOT_CODE DAP_SWD_Transfer(const uint8_t *request, uint8_t *response) {
@@ -829,6 +842,7 @@ static uint32_t DAP_HOT_CODE DAP_SWD_Transfer(const uint8_t *request, uint8_t *r
   if (count < 8U) goto legacy;
   transfer_cmd_words = transfer_raw_reads = 0;
   transfer_read_header = -1;
+  transfer_write_header = -1;
   for (n = 0; n < count; n++) {
     req = *p++;
     if (req & 0xF0U) goto legacy; /* Match/timestamp semantics retain CMSIS code. */
@@ -848,9 +862,7 @@ static uint32_t DAP_HOT_CODE DAP_SWD_Transfer(const uint8_t *request, uint8_t *r
         check_write = 0;
       } else {
         memcpy(&value, p, 4); p += 4;
-        transfer_read_header = -1;
-        swd_dma_cmd[transfer_cmd_words++] = (SWD_BATCH_OP_XFER_WRITE << 24) | req;
-        swd_dma_cmd[transfer_cmd_words++] = value;
+        transfer_emit_write(req, value);
         check_write = 1;
       }
     }
