@@ -218,7 +218,7 @@ __attribute__((weak)) void usbd_dap_bulk_out(XUsbPs *InstancePtr, u8 EpNum, u32 
 * DAP Bulk IN callback - called when data transmission is complete on DAP EP
 *
 ******************************************************************************/
-__attribute__((weak)) void usbd_dap_bulk_in(XUsbPs *InstancePtr, u8 EpNum, u32 nbytes)
+__attribute__((weak)) void usbd_dap_bulk_in(XUsbPs *InstancePtr, u8 EpNum, void *buffer)
 {
 	/* DAP TX complete - nbytes bytes sent */
 	dap_tx_busy = 0;  /* 清除忙标志 */

@@ -30,3 +30,41 @@ before a large RTL descriptor-ring redesign: bulk DMA overhead is already small.
 
 Raw evidence is under results/optimization (ignored local artifacts).
 No target flash programming was performed; SRAM tests back up and restore data.
+
+
+## USB ownership/recovery checkpoint
+
+Transport now owns each response until its last DMA descriptor completes,
+including an explicit ZLP. Failed submissions retain ownership for retry. RX
+applies backpressure instead of overwriting unread requests. Sequence counters
+are uint32 with bounded modulo differences. QueueCommands scans only occupied
+slots. The main loop revalidates queue state after masking IRQs: a reset between
+the outer condition and the lock must not create a phantom request.
+
+The application overrides the SDK interrupt object locally (xusbps_intr.c),
+leaving the shared reference BSP unchanged. TX retires a dTD before invoking the
+application callback, allowing the next response to be submitted from that IRQ.
+SET_CONFIGURATION flushes DMA before resetting software ownership. SDK v2.4 IN
+reconfiguration leaves ACTIVE tokens intact, so these tokens are explicitly
+cleared after endpoint flush. Queue-head overlays are reset too.
+
+EP0 recovery: vendor IN request 0x5a, wValue=0x4441, wIndex=0x5052, wLength=4,
+returns DAP + status (zero on success). Request 0x5b with the same magic and
+wLength=32 returns eight uint32 queue diagnostic fields. Host clears both pipes
+and drains any already-prefetched bytes. This explicit recovery is a diagnostic
+and recovery facility; stock OpenOCD does not automatically issue it. On Windows,
+setting the already-active configuration is not a reliable on-wire reset.
+
+Validation:
+- Native transport tests compile the real dap_main.c with a mock USB DMA driver:
+  response/request-full, delayed ZLP completion, failed submit retry, 70,000
+  completions including uint32 wrap, reset during execution and before lock.
+- Board: 100 consecutive EP0 recoveries with eight abandoned IN responses each;
+  no stale responses after recovery, no submit failures. An earlier revision
+  reproduced phantom commands during reset and was corrected before this test.
+- Earlier queue stress: 57,600 legal requests across six short/ZLP/full sizes.
+- After 100 recoveries, 12 OpenOCD sessions x 60 loads/dumps of randomized 20 KiB
+  at requested 60 MHz: read 3.843 MB/s, write 4.006 MB/s. All data and SRAM restore
+  checks passed. Baseline 3.857/4.016: differences -0.37%/-0.24%, within measured
+  session variation. The originally reported long-term 2.1 MB/s degradation is
+  still not reproduced and is not claimed fixed by these tests alone.

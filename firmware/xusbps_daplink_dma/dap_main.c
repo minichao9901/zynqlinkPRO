@@ -7,6 +7,7 @@
 #include "xil_printf.h"
 #include "xtime_l.h"
 #include "sleep.h"
+#include "xil_exception.h"
 // #include "ch32h417_usbhs_device.h"
 
 /* Timing trace for USB/SWD bottleneck analysis.  The buffer lives in a
@@ -63,24 +64,31 @@ static inline void dap_trace_bytes(uint32_t event_base, const uint8_t *data,
 #endif
 }
 
-static volatile uint16_t USB_RequestIndexI;
-static volatile uint16_t USB_RequestIndexO;
-static volatile uint16_t USB_RequestCountI;
-static volatile uint16_t USB_RequestCountO;
-static volatile uint8_t USB_RequestIdle=0;
-
-static volatile uint16_t USB_ResponseIndexI;
-static volatile uint16_t USB_ResponseIndexO;
-static volatile uint16_t USB_ResponseCountI;
-static volatile uint16_t USB_ResponseCountO;
-static volatile uint8_t USB_ResponseIdle;
-
-// static __attribute__((section(".noncacheable"))) __attribute__((aligned(4))) uint8_t USB_Request[DAP_PACKET_COUNT][DAP_PACKET_SIZE];
-// static __attribute__((section(".noncacheable"))) __attribute__((aligned(4))) uint8_t USB_Response[DAP_PACKET_COUNT][DAP_PACKET_SIZE];
-static __attribute__((aligned(32))) uint8_t USB_Request[DAP_PACKET_COUNT][DAP_PACKET_SIZE];
-static __attribute__((aligned(32))) uint8_t USB_Response[DAP_PACKET_COUNT][DAP_PACKET_SIZE];
-static uint16_t USB_RespSize[DAP_PACKET_COUNT];
+/* Request producer: USB IRQ; request consumer: main loop.
+ * Response producer: main loop; response consumer: final USB dTD completion.
+ * Slots remain owned until DMA completes, including a terminating ZLP. */
+static volatile uint32_t request_in, request_out, response_in, response_out;
+static volatile uint32_t session_epoch;
+static volatile uint8_t tx_active;
+static uint8_t USB_Request[DAP_PACKET_COUNT][DAP_PACKET_SIZE] __attribute__((aligned(32)));
+static uint8_t USB_Response[DAP_PACKET_COUNT][DAP_PACKET_SIZE] __attribute__((aligned(32)));
+static uint16_t USB_RespSize[DAP_PACKET_COUNT], request_size[DAP_PACKET_COUNT];
+static uint8_t execute_request[DAP_PACKET_SIZE] __attribute__((aligned(32)));
 static XTime request_time[DAP_PACKET_COUNT], in_start;
+static volatile uintptr_t tx_final_buffer;
+volatile uint32_t dap_rx_deferred;
+volatile uint32_t dap_queue_backpressure, dap_tx_submit_errors, dap_tx_extra_callbacks;
+static uint32_t irq_save(void) {uint32_t s=mfcpsr();mtcpsr(s|0x80U);return s;}
+static void irq_restore(uint32_t s) {mtcpsr(s);}
+static void barrier(void) {
+#ifdef __arm__
+    __asm__ volatile("dmb sy" ::: "memory");
+#else
+    __sync_synchronize();
+#endif
+}
+int chry_dap_rx_ready(void) {return (uint32_t)(request_in-request_out)<DAP_PACKET_COUNT;}
+extern void XUsbPs_DapResumeRx(XUsbPs *instance);
 
 extern XUsbPs *g_dap_usb_instance;
 
@@ -90,185 +98,77 @@ dap_dbg_last_write_value, dap_dbg_last_read_addr, dap_dbg_last_read_value;
 __attribute__((section(".dap_debug"), aligned(32))) volatile uint32_t
 dap_dbg_usb_rx, dap_dbg_exec_count;
 
-// volatile struct cdc_line_coding g_cdc_lincoding;
-// volatile uint8_t config_uart = 0;
-// volatile uint8_t config_uart_transfer = 0;
-
-// static __attribute__((section(".noncacheable"))) __attribute__((aligned(4))) uint8_t uartrx_ringbuffer[(8 * 1024)];
-// static __attribute__((section(".noncacheable"))) __attribute__((aligned(4))) uint8_t usbrx_ringbuffer[(8 * 1024)];
-// static __attribute__((section(".noncacheable"))) __attribute__((aligned(4))) uint8_t usb_tmpbuffer[512U];
-
-// static volatile uint8_t usbrx_idle_flag = 0;
-// static volatile uint8_t usbtx_idle_flag = 0;
-// static volatile uint8_t uarttx_idle_flag = 0;
-
-// chry_ringbuffer_t g_uartrx;
-// chry_ringbuffer_t g_usbrx;
-
-// extern uint8_t RxBuffer1[512];
-
-
-
-
-
-
-void usbd_event_handler(uint8_t event)
+void usbd_dap_bulk_out(XUsbPs *instance, u8 ep, u32 nbytes, u8 *buffer)
 {
-  // printf("usbd_event_handler: %d\n", event);
-  switch (event)
-  {
-  case 1:
-    // usbrx_idle_flag = 0;
-    // usbtx_idle_flag = 0;
-    // uarttx_idle_flag = 0;
-    // config_uart_transfer = 0;
-    break;
-  case 7:
-
-    USB_RequestIdle = 0U;
-    // usbd_ep_start_read(0x02, USB_Request[0], 512U);
-    // usbd_ep_start_read(0x04, usb_tmpbuffer, 512U);
-    // XUsbPs_EpPrime(g_dap_usb_instance, 2, XUSBPS_EP_DIRECTION_OUT);
-
-    break;
-
-  default:
-    break;
-  }
+    uint32_t slot=request_in % DAP_PACKET_COUNT;
+    (void)instance;(void)ep;
+    // A ZLP terminates the preceding USB OUT; it is not a new DAP command.
+    if(!nbytes || nbytes>DAP_PACKET_SIZE)return;
+    if(buffer[0]==0x07U){DAP_TransferAbort=1U;return;}
+    if(!chry_dap_rx_ready()){dap_queue_backpressure++;return;}
+    request_time[slot]=dap_metric_start();dap_trace_add(1U,nbytes);
+    memcpy(USB_Request[slot],buffer,nbytes);request_size[slot]=(uint16_t)nbytes;
+    dap_trace_bytes(16U,buffer,nbytes);dap_dbg_usb_rx++;
+    barrier();request_in++;
 }
 
-void debug_blink(uint32_t size, uint8_t led)
-{  
-  if(size > 512U){ 
-    Xil_Out32(0x40000000, Xil_In32(0x40000000) | led);
-    Xil_Out32(0x40000000, Xil_In32(0x40000000) & ~led);
-    if(led == 0x1U)
-    {
-      xil_printf("o:%d\n", size);
-    }
-    else if(led == 0x2U)
-    {
-      xil_printf("i:%d\n", size);
-    }
-  }
-}
-
-void usbd_dap_bulk_out(XUsbPs *InstancePtr, u8 EpNum, u32 nbytes, u8 *Buffer)
+static void dap_service_tx(void)
 {
-  // Xil_Out32(0x40000000, Xil_In32(0x40000000) | 0x1U);
-  // Xil_Out32(0x40000000, Xil_In32(0x40000000) & ~0x1U);
-  // xil_printf("o:%d\n", nbytes);
-  // xil_printf("dap_out_callback: ep=%02x, nbytes=%d\n", EpNum, nbytes);
-  // debug_blink(nbytes, 0x1U);
-  request_time[USB_RequestIndexI]=dap_metric_start();
-  dap_trace_add(1U, nbytes);
-  
-  memcpy(USB_Request[USB_RequestIndexI], Buffer, nbytes);
-  dap_trace_bytes(16U, Buffer, nbytes);
-  dap_dbg_usb_rx++;
-  if (dap_dbg_usb_rx <= 8U) {
-    xil_printf("[DAP] USB OUT ep=%d len=%d cmd=0x%02x\r\n",
-               EpNum, nbytes, USB_Request[USB_RequestIndexI][0]);
-  }
-  if (USB_Request[USB_RequestIndexI][0] == 0x07U)
-  {
-    DAP_TransferAbort = 1U;
-  }
-  else
-  {
-    USB_RequestIndexI++;
-    if (USB_RequestIndexI == DAP_PACKET_COUNT)
-    {
-      USB_RequestIndexI = 0U;
-    }
-    USB_RequestCountI++;
-  }
+    uint32_t slot,flags;uint16_t len;int status;XTime t;
+    if(tx_active || response_in==response_out)return;
+    flags=irq_save();
+    if(tx_active || response_in==response_out){irq_restore(flags);return;}
+    slot=response_out % DAP_PACKET_COUNT;len=USB_RespSize[slot];
+    t=dap_metric_start();
+    Xil_DCacheFlushRange((UINTPTR)USB_Response[slot],(len+31U)&~31U);
+    // Serialize publication/submission against the completion ISR. Failed
+    // submissions keep ownership and are retried by the main loop.
 
-  if ((uint16_t)(USB_RequestCountI - USB_RequestCountO) != DAP_PACKET_COUNT)
-  {
-    // usbd_ep_start_read(0x02, USB_Request[USB_RequestIndexI], 512U);
-    // XUsbPs_EpPrime(g_dap_usb_instance, 2, XUSBPS_EP_DIRECTION_OUT);
-  }
-  else
-  {
-    USB_RequestIdle = 1U;
-  }
+    tx_final_buffer=(uintptr_t)USB_Response[slot];
+    if(len && len<DAP_PACKET_SIZE && len%512U==0U)tx_final_buffer+=len;
+    tx_active=1;in_start=t;barrier();
+    if(tx_final_buffer!=(uintptr_t)USB_Response[slot])
+        status=XUsbPs_EpBufferSendWithZLT(g_dap_usb_instance,1,USB_Response[slot],len);
+    else status=XUsbPs_EpBufferSend(g_dap_usb_instance,1,USB_Response[slot],len);
+    if(status!=XST_SUCCESS){tx_active=0;dap_tx_submit_errors++;}
+    else dap_trace_add(4U,len);
+    irq_restore(flags);dap_metric_end(MET_USB_SUBMIT,t,len);
 }
 
-static void dap_start_response(uint16_t idx)
+void usbd_dap_bulk_in(XUsbPs *instance, u8 ep, void *buffer)
 {
-  uint16_t len = USB_RespSize[idx];
-  XTime metric_start=dap_metric_start();
-  in_start=metric_start;
-
-  dap_trace_add(4U, len);
-  /* USB_Response is cacheable for CPU command handling; make the completed
-   * response visible to XUsbPs DMA before priming EP1. */
-  if (len != 0U) {
-    Xil_DCacheFlushRange((UINTPTR)USB_Response[idx],
-                         ((UINTPTR)len + 31U) & ~(UINTPTR)31U);
-  }
-  /* A bulk IN transfer that ends on an exact max-packet boundary needs a ZLP,
-   * otherwise the host keeps waiting for the rest of its buffer.  Responses
-   * with 4 + 4*N bytes hit this for N = 127, 255, ... */
-  if ((len != 0U) && (len < DAP_PACKET_SIZE) && ((len % 512U) == 0U)) {
-    (void)XUsbPs_EpBufferSendWithZLT(g_dap_usb_instance, 1, USB_Response[idx], len);
-  } else {
-    (void)XUsbPs_EpBufferSend(g_dap_usb_instance, 1, USB_Response[idx], len);
-  }
-  dap_metric_end(MET_USB_SUBMIT,metric_start,len);
+    (void)instance;(void)ep;
+    // The BSP reports EVERY completed dTD. Only the final dTD releases
+    // the application slot; the data callback of a ZLP transfer is ignored.
+    if(!tx_active || (uintptr_t)buffer!=tx_final_buffer){dap_tx_extra_callbacks++;return;}
+    dap_metric_end(MET_USB_IN,in_start,USB_RespSize[response_out%DAP_PACKET_COUNT]);
+    dap_trace_add(5U,USB_RespSize[response_out%DAP_PACKET_COUNT]);
+    barrier();response_out++;tx_active=0;
+    dap_service_tx();
 }
-
-void usbd_dap_bulk_in(XUsbPs *InstancePtr, u8 EpNum, u32 nbytes)
-{
-  // xil_printf("dap_in_callback: ep=%02x, nbytes=%d\n", EpNum, nbytes);
-  dap_metric_end(MET_USB_IN,in_start,0);
-  dap_trace_add(5U, nbytes);
-  if (USB_ResponseCountI != USB_ResponseCountO)
-  {
-
-    // usbd_ep_start_write(0x82, USB_Response[USB_ResponseIndexO], USB_RespSize[USB_ResponseIndexO]);
-    dap_start_response(USB_ResponseIndexO);
-    USB_ResponseIndexO++;
-    if (USB_ResponseIndexO == DAP_PACKET_COUNT)
-    {
-      USB_ResponseIndexO = 0U;
-    }
-    USB_ResponseCountO++;
-  }
-  else
-  {
-    USB_ResponseIdle = 1U;
-  }
-}
-
 
 static void chry_dap_state_init(void)
 {
-
-  USB_RequestIndexI = 0U;
-  USB_RequestIndexO = 0U;
-  USB_RequestCountI = 0U;
-  USB_RequestCountO = 0U;
-  USB_RequestIdle = 1U;
-  USB_ResponseIndexI = 0U;
-  USB_ResponseIndexO = 0U;
-  USB_ResponseCountI = 0U;
-  USB_ResponseCountO = 0U;
-  USB_ResponseIdle = 1U;
-
-  // Xil_MemMap((uint32_t)&USB_Request, DAP_PACKET_COUNT * DAP_PACKET_SIZE, NORM_NONCACHE);
-  // Xil_MemMap((uint32_t)&USB_Response, DAP_PACKET_COUNT * DAP_PACKET_SIZE, NORM_NONCACHE);
+    request_in=request_out=response_in=response_out=0;
+    tx_active=0;tx_final_buffer=0;dap_rx_deferred=0;
+    memset(USB_RespSize,0,sizeof USB_RespSize);
 }
 
-/* USB SET_CONFIGURATION/reset starts a new CMSIS-DAP session. Do not let a
- * response from the previous host session satisfy the first transfer. */
+void chry_dap_queue_snapshot(uint32_t out[8])
+{
+    uint32_t flags=irq_save();
+    out[0]=request_in-request_out;out[1]=response_in-response_out;
+    out[2]=tx_active;out[3]=session_epoch;out[4]=dap_queue_backpressure;
+    out[5]=dap_tx_submit_errors;out[6]=dap_tx_extra_callbacks;out[7]=dap_rx_deferred;
+    irq_restore(flags);
+}
+
 void chry_dap_usb_session_reset(void)
 {
-  chry_dap_state_init();
-  memset((void *)USB_RespSize, 0, sizeof USB_RespSize);
+    session_epoch++;
+    DAP_TransferAbort=1;
+    chry_dap_state_init();
 }
-
 
 void chry_dap_init(void)
 {
@@ -293,86 +193,53 @@ void chry_dap_init(void)
 
 void chry_dap_handle(void)
 {
-  uint32_t n;
-
-  while (USB_RequestCountI != USB_RequestCountO)
-  {
-
-    n = USB_RequestIndexO;
-    while (USB_Request[n][0] == 0x7EU)
-    {
-      USB_Request[n][0] = 0x7FU;
-      n++;
-      if (n == DAP_PACKET_COUNT)
-      {
-        n = 0U;
-      }
-      if (n == USB_RequestIndexI)
-      {
-      }
+    uint32_t req_slot,rsp_slot,epoch,flags,metric_id;
+    XTime t;
+    dap_service_tx();
+    if(dap_rx_deferred && chry_dap_rx_ready()){
+        flags=irq_save();dap_rx_deferred=0;
+        XUsbPs_DapResumeRx(g_dap_usb_instance);irq_restore(flags);
     }
-
-    XTime metric_start=dap_metric_start();
-    uint32_t metric_id=USB_Request[USB_RequestIndexO][0]==6 ?
-      ((USB_Request[USB_RequestIndexO][4]&2)?MET_EXEC06_READ:MET_EXEC06_WRITE):MET_EXEC05;
-    dap_metric_end(MET_QUEUE_WAIT,request_time[USB_RequestIndexO],0);
-    dap_trace_add(2U, USB_Request[USB_RequestIndexO][0]);
-    USB_RespSize[USB_ResponseIndexI] =
-        (uint16_t)DAP_ExecuteCommand(USB_Request[USB_RequestIndexO], USB_Response[USB_ResponseIndexI]);
-    dap_metric_end(metric_id,metric_start,USB_RespSize[USB_ResponseIndexI]);
-    dap_trace_bytes(32U, USB_Response[USB_ResponseIndexI],
-                    USB_RespSize[USB_ResponseIndexI]);
-    dap_trace_add(3U, USB_RespSize[USB_ResponseIndexI]);
-
-    if (dap_dbg_exec_count < 8U) {
-      xil_printf("[DAP] EXEC cmd=0x%02x resp=%d rtlW=%d rtlR=%d lastW=0x%08x lastR=0x%08x\r\n",
-                 USB_Request[USB_RequestIndexO][0], USB_RespSize[USB_ResponseIndexI],
-                 dap_dbg_rtl_writes, dap_dbg_rtl_reads,
-                 dap_dbg_last_write_value, dap_dbg_last_read_value);
-    }
-    dap_dbg_exec_count++;
-
-    USB_RequestIndexO++;
-    if (USB_RequestIndexO == DAP_PACKET_COUNT)
-    {
-      USB_RequestIndexO = 0U;
-    }
-    USB_RequestCountO++;
-
-    if (USB_RequestIdle)
-    {
-      if ((uint16_t)(USB_RequestCountI - USB_RequestCountO) != DAP_PACKET_COUNT)
-      {
-        USB_RequestIdle = 0U;
-        // usbd_ep_start_read(0x02, USB_Request[USB_RequestIndexI], 512U);
-        XUsbPs_EpPrime(g_dap_usb_instance, 2, XUSBPS_EP_DIRECTION_OUT);
-      }
-    }
-
-    USB_ResponseIndexI++;
-    if (USB_ResponseIndexI == DAP_PACKET_COUNT)
-    {
-      USB_ResponseIndexI = 0U;
-    }
-    USB_ResponseCountI++;
-
-    if (USB_ResponseIdle)
-    {
-      if (USB_ResponseCountI != USB_ResponseCountO)
-      {
-
-        n = USB_ResponseIndexO++;
-        if (USB_ResponseIndexO == DAP_PACKET_COUNT)
-        {
-          USB_ResponseIndexO = 0U;
+    while(request_in!=request_out){
+        if((uint32_t)(response_in-response_out)>=DAP_PACKET_COUNT){
+            dap_queue_backpressure++;break;
         }
-        USB_ResponseCountO++;
-        USB_ResponseIdle = 0U;
-        // usbd_ep_start_write(0x82, USB_Response[n], USB_RespSize[n]);
-        // XUsbPs_EpBufferSendWithZLT(g_dap_usb_instance, 1, USB_Response[n], USB_RespSize[n]);
-        dap_start_response((uint16_t)n);
-        // debug_blink(USB_RespSize[n], 0x2U);
-      }
+        flags=irq_save();
+        // RESET may preempt the while/full checks before this critical section.
+        // Revalidate against the new session before consuming any slot.
+        if(request_in==request_out ||
+           (uint32_t)(response_in-response_out)>=DAP_PACKET_COUNT){
+            irq_restore(flags);break;
+        }
+        epoch=session_epoch;req_slot=request_out%DAP_PACKET_COUNT;
+        if(USB_Request[req_slot][0]==0x7eU){
+            uint32_t q=request_out;
+            while(q!=request_in && USB_Request[q%DAP_PACKET_COUNT][0]==0x7eU)q++;
+            if(q==request_in){irq_restore(flags);break;}
+        }
+        memcpy(execute_request,USB_Request[req_slot],request_size[req_slot]);
+        if(execute_request[0]==0x7eU)execute_request[0]=0x7fU;
+        rsp_slot=response_in%DAP_PACKET_COUNT;
+        irq_restore(flags);
+        t=dap_metric_start();
+        metric_id=execute_request[0]==6 ?
+            ((execute_request[4]&2)?MET_EXEC06_READ:MET_EXEC06_WRITE):MET_EXEC05;
+        dap_metric_end(MET_QUEUE_WAIT,request_time[req_slot],0);
+        dap_trace_add(2U,execute_request[0]);
+        USB_RespSize[rsp_slot]=(uint16_t)DAP_ExecuteCommand(execute_request,USB_Response[rsp_slot]);
+        dap_metric_end(metric_id,t,USB_RespSize[rsp_slot]);
+        dap_trace_bytes(32U,USB_Response[rsp_slot],USB_RespSize[rsp_slot]);
+        dap_trace_add(3U,USB_RespSize[rsp_slot]);dap_dbg_exec_count++;
+        flags=irq_save();
+        // A bus reset may occur during SWD execution. Discard its old result
+        // instead of inserting it into the newly configured USB session.
+        if(epoch==session_epoch){barrier();request_out++;response_in++;}
+        irq_restore(flags);
+        if(epoch!=session_epoch)break;
+        dap_service_tx();
+        if(dap_rx_deferred && chry_dap_rx_ready()){
+            flags=irq_save();dap_rx_deferred=0;
+            XUsbPs_DapResumeRx(g_dap_usb_instance);irq_restore(flags);
+        }
     }
-  }
 }

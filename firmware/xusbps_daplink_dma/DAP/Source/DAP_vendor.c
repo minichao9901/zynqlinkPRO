@@ -171,7 +171,19 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
         num=(1U<<16)|(8U+sizeof dap_metrics);
       }
       break;
-    case ID_DAP_Vendor7:  break;
+    case ID_DAP_Vendor7:
+      {
+        uint32_t state[12];
+        extern void chry_dap_queue_snapshot(uint32_t out[8]);
+        chry_dap_queue_snapshot(state);
+        state[8]=swd_read32(SWD_STATUS);
+        state[9]=swd_read32(SWD_BATCH_STATUS);
+        state[10]=swd_read32(SWD_PACKET_STATUS);
+        state[11]=swd_read32(SWD_CFG);
+        *response++=DAP_OK;memcpy(response,state,sizeof state);
+        num=(1U<<16)|(2U+sizeof state);
+      }
+      break;
     case ID_DAP_Vendor8:  break;
     case ID_DAP_Vendor9:  break;
     case ID_DAP_Vendor10: break;

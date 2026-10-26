@@ -71,7 +71,7 @@ void usbd_cdc_process_pending_tx(XUsbPs *InstancePtr);
 
 /* DAP functions */
 void usbd_dap_bulk_out(XUsbPs *InstancePtr, u8 EpNum, u32 nbytes, u8 *Buffer);
-void usbd_dap_bulk_in(XUsbPs *InstancePtr, u8 EpNum, u32 nbytes);
+void usbd_dap_bulk_in(XUsbPs *InstancePtr, u8 EpNum, void *buffer);
 void usbd_dap_process_pending_tx(void);
 
 void usbd_dap_set_instance(XUsbPs *InstancePtr);

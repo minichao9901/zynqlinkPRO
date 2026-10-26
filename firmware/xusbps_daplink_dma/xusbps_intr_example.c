@@ -425,6 +425,10 @@ out:
  ******************************************************************************/
 static void UsbIntrHandler(void *CallBackRef, u32 Mask)
 {
+    if(Mask & XUSBPS_IXR_UR_MASK){
+        extern void chry_dap_usb_session_reset(void);
+        chry_dap_usb_session_reset();
+    }
 	NumIrqs++;
 	if (NumIrqs <= 8) {
 		xil_printf("[DAP] USB_IRQ n=%d mask=0x%08x\r\n", NumIrqs, Mask);
@@ -472,11 +476,7 @@ static void XUsbPs_Ep0EventHandler(void *CallBackRef, u8 EpNum,
 			/* Handle the setup packet. */
 			(int) XUsbPs_Ch9HandleSetupPacket(InstancePtr,
 							   &SetupData);
-			/* A new configuration is a new CMSIS-DAP host session. */
-			if (SetupData.bRequest == XUSBPS_REQ_SET_CONFIGURATION) {
-				extern void chry_dap_usb_session_reset(void);
-				chry_dap_usb_session_reset();
-			}
+
 		}
 		break;
 
@@ -542,21 +542,17 @@ static void XUsbPs_EpDapEventHandler(void *CallBackRef, u8 EpNum,
 		/* DAP Bulk OUT - EP 2 */
 		Status = XUsbPs_EpBufferReceive(InstancePtr, EpNum,
 					&BufferPtr, &BufferLen, &Handle);
-		InavalidateLen = BufferLen;
-		if (BufferLen % 32) {
-			InavalidateLen = (BufferLen/32) * 32 + 32;
-		}
-
-		Xil_DCacheInvalidateRange((unsigned int)BufferPtr, InavalidateLen);
-		if (XST_SUCCESS == Status) {
-			usbd_dap_bulk_out(InstancePtr, EpNum, BufferLen, BufferPtr);
-			XUsbPs_EpBufferRelease(Handle);
-		}
+        if (XST_SUCCESS == Status) {
+            InavalidateLen=(BufferLen+31U)&~31U;
+            Xil_DCacheInvalidateRange((UINTPTR)BufferPtr,InavalidateLen);
+            usbd_dap_bulk_out(InstancePtr,EpNum,BufferLen,BufferPtr);
+            XUsbPs_EpBufferRelease(Handle);
+        }
 		break;
 
 	case XUSBPS_EP_EVENT_DATA_TX:
 		/* DAP Bulk IN - EP 1 */
-		usbd_dap_bulk_in(InstancePtr, EpNum, 0);
+		usbd_dap_bulk_in(InstancePtr, EpNum, Data);
 		break;
 
 	default:

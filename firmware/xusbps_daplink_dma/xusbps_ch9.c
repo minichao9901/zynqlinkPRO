@@ -619,6 +619,24 @@ static u8	Reply[XUSBPS_REQ_REPLY_LEN];
 
 	/* Check the direction, USB 2.0 section 9.3 */
 	Direction = SetupData->bmRequestType & (1 << 7);
+    /* Explicit bulk-session recovery via EP0, which remains usable even
+     * when a host abandoned a bulk IN transfer. Magic avoids collisions. */
+    if(SetupData->bmRequestType==0xc0 && SetupData->bRequest==0x5b &&
+       SetupData->wValue==0x4441 && SetupData->wIndex==0x5052 && SetupData->wLength==32){
+        uint32_t snapshot[8];
+        extern void chry_dap_queue_snapshot(uint32_t out[8]);
+        chry_dap_queue_snapshot(snapshot);
+        memcpy(Reply,snapshot,sizeof snapshot);
+        return XUsbPs_EpBufferSend(InstancePtr,0,Reply,sizeof snapshot);
+    }
+    if(SetupData->bmRequestType==0xc0 && SetupData->bRequest==0x5a &&
+       SetupData->wValue==0x4441 && SetupData->wIndex==0x5052 && SetupData->wLength==4){
+        extern int XUsbPs_DapResetEndpoints(XUsbPs *instance);
+        Status=XUsbPs_DapResetEndpoints(InstancePtr);
+        Reply[0]='D';Reply[1]='A';Reply[2]='P';Reply[3]=(Status==XST_SUCCESS)?0:1;
+        return XUsbPs_EpBufferSend(InstancePtr,0,Reply,4);
+    }
+
 
 	/* Check for Microsoft OS 2.0 Descriptor request
 	 * bRequest = Vendor Code (0x20)

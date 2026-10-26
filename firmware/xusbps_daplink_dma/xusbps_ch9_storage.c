@@ -39,6 +39,7 @@
 #include <string.h>
 
 #include "xparameters.h"	/* XPAR parameters */
+#include "xusbps_endpoint.h"
 #include "xusbps.h"		/* USB controller driver */
 
 #include "xusbps_ch9.h"
@@ -577,6 +578,53 @@ u32 XUsbPs_Ch9SetupStrDescReply(u8 *BufPtr, u32 BufLen, u8 Index)
 * @return	None
 *
 ******************************************************************************/
+int XUsbPs_DapResetEndpoints(XUsbPs *InstancePtr)
+{
+    u32 flush = (1U << DAP_BULKOUT_EP) | (1U << (16 + DAP_BULKIN_EP));
+    u32 timeout = 1000000U;
+    u32 td;
+    XUsbPs_EpIn *in = &InstancePtr->DeviceConfig.Ep[DAP_BULKIN_EP].In;
+    extern void chry_dap_usb_session_reset(void);
+
+    XUsbPs_EpDisable(InstancePtr, DAP_BULKOUT_EP, XUSBPS_EP_DIRECTION_OUT);
+    XUsbPs_EpDisable(InstancePtr, DAP_BULKIN_EP, XUSBPS_EP_DIRECTION_IN);
+    XUsbPs_WriteReg(InstancePtr->Config.BaseAddress, XUSBPS_EPFLUSH_OFFSET, flush);
+    while ((XUsbPs_ReadReg(InstancePtr->Config.BaseAddress,
+                          XUSBPS_EPFLUSH_OFFSET) & flush) && --timeout) {}
+    if (!timeout) return XST_FAILURE;
+    XUsbPs_WriteReg(InstancePtr->Config.BaseAddress, XUSBPS_EPCOMPL_OFFSET, flush);
+
+    /* Flush stops DMA, but does not clear descriptor ACTIVE tokens in DDR.
+     * SDK 2018.3 ReconfigureEp only restores IN links/termination. A transfer
+     * abandoned by the host would therefore make the next send fail forever.
+     * Clear tokens after DMA is quiescent, before rebuilding either ring. */
+    for (td = 0; td < InstancePtr->DeviceConfig.EpCfg[DAP_BULKIN_EP].In.NumBufs; ++td) {
+        XUsbPs_dTDInvalidateCache(&in->dTDs[td]);
+        XUsbPs_WritedTD(&in->dTDs[td], XUSBPS_dTDTOKEN, 0U);
+        XUsbPs_dTDFlushCache(&in->dTDs[td]);
+    }
+    if (XUsbPs_ReconfigureEp(InstancePtr, &InstancePtr->DeviceConfig,
+            DAP_BULKOUT_EP, XUSBPS_EP_DIRECTION_OUT, 0) != XST_SUCCESS ||
+        XUsbPs_ReconfigureEp(InstancePtr, &InstancePtr->DeviceConfig,
+            DAP_BULKIN_EP, XUSBPS_EP_DIRECTION_IN, 0) != XST_SUCCESS)
+        return XST_FAILURE;
+    XUsbPs_dQHInvalidateCache(in->dQH);
+    XUsbPs_WritedQH(in->dQH, XUSBPS_dQHdTDTOKEN, 0U);
+    XUsbPs_WritedQH(in->dQH, XUSBPS_dQHdTDNLP, 1U);
+    XUsbPs_dQHFlushCache(in->dQH);
+    XUsbPs_dQHInvalidateCache(InstancePtr->DeviceConfig.Ep[DAP_BULKOUT_EP].Out.dQH);
+    XUsbPs_WritedQH(InstancePtr->DeviceConfig.Ep[DAP_BULKOUT_EP].Out.dQH,
+                   XUSBPS_dQHdTDTOKEN, 0U);
+    XUsbPs_dQHFlushCache(InstancePtr->DeviceConfig.Ep[DAP_BULKOUT_EP].Out.dQH);
+    chry_dap_usb_session_reset();
+    XUsbPs_EpEnable(InstancePtr, DAP_BULKOUT_EP, XUSBPS_EP_DIRECTION_OUT);
+    XUsbPs_EpEnable(InstancePtr, DAP_BULKIN_EP, XUSBPS_EP_DIRECTION_IN);
+    XUsbPs_SetBits(InstancePtr, XUSBPS_EPCRn_OFFSET(DAP_BULKOUT_EP), XUSBPS_EPCR_RXR_MASK);
+    XUsbPs_SetBits(InstancePtr, XUSBPS_EPCRn_OFFSET(DAP_BULKIN_EP), XUSBPS_EPCR_TXR_MASK);
+    XUsbPs_EpPrime(InstancePtr, DAP_BULKOUT_EP, XUSBPS_EP_DIRECTION_OUT);
+    return XST_SUCCESS;
+}
+
 void XUsbPs_SetConfiguration(XUsbPs *InstancePtr, int ConfigIdx)
 {
 	Xil_AssertVoid(InstancePtr != NULL);
@@ -584,6 +632,8 @@ void XUsbPs_SetConfiguration(XUsbPs *InstancePtr, int ConfigIdx)
 	if (1 != ConfigIdx) {
 		return;
 	}
+    if(XUsbPs_DapResetEndpoints(InstancePtr)!=XST_SUCCESS)return;
+
 	xil_printf("[DAP] SET_CONFIGURATION 1\r\n");
 
 	/* Enable DAP Endpoints */
