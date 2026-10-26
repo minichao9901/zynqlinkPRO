@@ -52,9 +52,12 @@ if {!$impl_only} {
 }
 set ref [file join $root build checkpoints dma_routed_reference.dcp]
 source [file join $root fpga configure_runs.tcl]
+set verified_bit [file join $out system_wrapper_verified.bit]
+set routed_dcp [file join $out zynqlink_dma.runs impl_1 system_wrapper_routed.dcp]
 if {!$fresh_impl && ![get_property NEEDS_REFRESH [get_runs impl_1]] &&
     [get_property PROGRESS [get_runs impl_1]] == "100%" &&
-    [file exists [file join $out system_wrapper_verified.bit]]} {
+    [file exists $verified_bit] && [file exists $routed_dcp] &&
+    [file mtime $verified_bit] >= [file mtime $routed_dcp]} {
     puts "FPGA_UP_TO_DATE: existing verified bitstream retained"
     return
 }
@@ -70,10 +73,13 @@ launch_runs impl_1 -to_step route_design -jobs 4
 wait_on_run impl_1
 if {[get_property PROGRESS [get_runs impl_1]] != "100%"} {error "Implementation failed"}
 if {[catch {source [file join $root fpga verify_routed.tcl]} timing_error]} {
-    if {![string match {*Routed timing failed*} $timing_error]} {error $timing_error}
+    if {$fresh_impl || (![string match {*Routed timing failed*} $timing_error] &&
+                       ![string match {*write_bitstream*} $timing_error])} {error $timing_error}
     # A changed timing-critical block may not fit the reference placement.
     # Reuse every synthesis DCP, but allow a fresh implementation once.
-    puts "INCREMENTAL_TIMING_FAILED: retrying fresh placement with cached synthesis"
+    # Incremental routing can also leave partial antennas that only bitgen's
+    # DRC rejects. Never suppress DRC: retry fresh once, then propagate failure.
+    puts "INCREMENTAL_VERIFICATION_FAILED: $timing_error; retrying fresh placement with cached synthesis"
     close_design
     reset_run impl_1
     set_property INCREMENTAL_CHECKPOINT {} [get_runs impl_1]

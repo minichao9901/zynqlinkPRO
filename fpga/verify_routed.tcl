@@ -23,9 +23,6 @@ set worst [get_property SLACK [get_timing_paths -max_paths 1 -delay_type max]]
 set hold [get_property SLACK [get_timing_paths -max_paths 1 -delay_type min]]
 puts "VERIFIED_SETUP_SLACK=$worst VERIFIED_HOLD_SLACK=$hold"
 if {$worst < 0 || $hold < 0} {error "Routed timing failed with all FCLK input sampling paths constrained"}
-set fd [open [file join $out verified_clock.json] w]
-puts $fd "{\"FCLK_max_Hz\":$verified_fclk,\"SWCLK_max_Hz\":[expr {$verified_fclk/2}],\"setup_slack_ns\":$worst,\"hold_slack_ns\":$hold}"
-close $fd
 write_checkpoint -force [file join $out system_wrapper_verified.dcp]
 set run_bit [file join $out zynqlink_dma.runs impl_1 system_wrapper.bit]
 set run_dcp [file join $out zynqlink_dma.runs impl_1 system_wrapper_routed.dcp]
@@ -37,6 +34,11 @@ if {[file exists $run_bit] && [file mtime $run_bit] >= [file mtime $run_dcp]} {
     write_bitstream -force [file join $out system_wrapper_verified.bit]
 }
 file copy -force [file join $out system_wrapper_verified.bit] [file join $out system_wrapper.bit]
+# Publish timing metadata only after bitgen and its DRC succeed. A failed new
+# route must not relabel the old bitstream with a new verified clock limit.
+set fd [open [file join $out verified_clock.json] w]
+puts $fd "{\"FCLK_max_Hz\":$verified_fclk,\"SWCLK_max_Hz\":[expr {$verified_fclk/2}],\"setup_slack_ns\":$worst,\"hold_slack_ns\":$hold}"
+close $fd
 file mkdir [file join $root build checkpoints]
 file copy -force [file join $out system_wrapper_verified.dcp] [file join $root build checkpoints dma_routed_reference.dcp]
 puts "VERIFIED_BITSTREAM_READY"
