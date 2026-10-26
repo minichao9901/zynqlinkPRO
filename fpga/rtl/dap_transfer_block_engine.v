@@ -12,6 +12,7 @@
 // AP reads/writes. Match/timestamp/JTAG/control commands remain on fallback.
 module dap_transfer_block_engine #(
     parameter ADDR_W = 10,
+    parameter ENABLE_CHAIN = 0,
     parameter integer RETRY_MAX = 64
 )(
     input  wire             clk,
@@ -37,6 +38,11 @@ module dap_transfer_block_engine #(
     output reg  [7:0]       core_req,
     output reg  [31:0]      core_wdata,
     input  wire              core_busy,
+    input  wire              core_result_valid,
+    input  wire              core_next_ready,
+    output wire              core_next_valid,
+    output wire [7:0]        core_next_request,
+    output wire [31:0]       core_next_wdata,
     input  wire [2:0]        core_ack,
     input  wire              core_parity_err,
     input  wire [31:0]       core_rdata
@@ -64,6 +70,12 @@ module dap_transfer_block_engine #(
     reg [1:0] prefetch_wait;
     reg prefetch_valid;
 
+    assign core_next_valid = ENABLE_CHAIN && state == ST_WAIT_CORE &&
+                             seen_core_busy && !final_phase &&
+                             (is_read || index+1'b1 == count || prefetch_valid);
+    assign core_next_request = (index+1'b1 == count) ? 8'h0E : request;
+    assign core_next_wdata = prefetched_data;
+    wire chain_accept = core_next_valid && core_next_ready;
     initial state = ST_IDLE;
 
     wire [7:0] dap_cmd = hdr[7:0];
@@ -220,22 +232,8 @@ module dap_transfer_block_engine #(
                     end
                 end
                 ST_WAIT_CORE: begin
-                    if (core_busy) begin
-                        seen_core_busy <= 1;
-                        core_wait_cnt <= core_wait_cnt - 1'b1;
-                        if (core_wait_cnt == 24'd0) begin
-                            error <= 1; status_code <= 8'h09;
-                            state <= ST_WRITE_STATUS;
-                        end
-                    end else if (!seen_core_busy) begin
-                        // The core never accepted the start: time out instead
-                        // of holding the engine (and the core mux) forever.
-                        core_wait_cnt <= core_wait_cnt - 1'b1;
-                        if (core_wait_cnt == 24'd0) begin
-                            error <= 1; status_code <= 8'h09;
-                            state <= ST_WRITE_STATUS;
-                        end
-                    end else if (seen_core_busy) begin
+                    if ((ENABLE_CHAIN && core_result_valid) ||
+                        (!core_busy && seen_core_busy)) begin
                         last_ack <= core_ack;
                         last_data <= core_rdata;
                         if (core_ack == 3'b010 && retry_left != 8'd0) begin
@@ -270,8 +268,8 @@ module dap_transfer_block_engine #(
                             // the next read directly, avoiding NEXT/START bubbles.
                             core_req <= (index + 1'b1 == count) ? 8'h0E : request;
                             final_phase <= (index + 1'b1 == count);
-                            core_start <= 1;
-                            seen_core_busy <= 0;
+                            core_start <= !chain_accept;
+                            seen_core_busy <= chain_accept;
                             retry_left <= RETRY_MAX;
                             core_wait_cnt <= 24'h03FFFF;
                         end else begin
@@ -280,8 +278,8 @@ module dap_transfer_block_engine #(
                                 core_req <= (index + 1'b1 == count) ? 8'h0E : request;
                                 final_phase <= (index + 1'b1 == count);
                                 core_wdata <= prefetched_data;
-                                core_start <= 1;
-                                seen_core_busy <= 0;
+                                core_start <= !chain_accept;
+                                seen_core_busy <= chain_accept;
                                 retry_left <= RETRY_MAX;
                                 core_wait_cnt <= 24'h03FFFF;
                                 prefetch_valid <= 0;
@@ -291,6 +289,17 @@ module dap_transfer_block_engine #(
                                     prefetch_wait <= 2;
                                 end
                             end else state <= ST_NEXT;
+                        end
+                    end else if (core_busy) begin
+                        seen_core_busy <= 1;
+                        core_wait_cnt <= core_wait_cnt-1'b1;
+                        if (core_wait_cnt == 0) begin
+                            error <= 1; status_code <= 8'h09; state <= ST_WRITE_STATUS;
+                        end
+                    end else begin
+                        core_wait_cnt <= core_wait_cnt-1'b1;
+                        if (core_wait_cnt == 0) begin
+                            error <= 1; status_code <= 8'h09; state <= ST_WRITE_STATUS;
                         end
                     end
                 end

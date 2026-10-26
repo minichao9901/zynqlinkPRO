@@ -14,6 +14,11 @@ module swd_core (
 
     // Control interface
     input  wire        start,
+    input  wire        next_valid,
+    input  wire [7:0]  next_request,
+    input  wire [31:0] next_wdata,
+    output wire        next_ready,
+    output wire        result_valid,
     input  wire        mode,           // 0=SWJ, 1=Transfer
     input  wire        timestamp_en,
 
@@ -69,6 +74,7 @@ module swd_core (
     localparam [4:0] ST_ACK_EXT  = 5'd15;
     localparam [4:0] ST_WTURN    = 5'd16;
 
+    reg [7:0] active_request;
     reg  [4:0] state;
     reg  [8:0] lsm_cnt;
     reg  [15:0] delay_cnt;
@@ -77,6 +83,7 @@ module swd_core (
     reg  [2:0]  ack_hold;
     reg  [1:0]  turn_wait;
     reg  [32:0] rd_samples;
+    reg         rd_data_parity;
     reg  [32:0] wr_shift;
     reg  [255:0] swj_shift;
     reg  [3:0]  idle_cnt;
@@ -107,11 +114,13 @@ module swd_core (
     wire        dbg_swdio_i;
     wire        dbg_swdio_t;
 
+    assign result_valid = (state == ST_DONE) && mode;
+    assign next_ready = result_valid && delay_fast == 0 && ack == 1 && !parity_err;
     // The wrapper chooses early/late FCLK-domain input sampling.
     assign active_delay       = (state == ST_SWJ) ? clock_delay : delay_fast;
     assign step_tick          = (delay_cnt == {12'd0, active_delay});
-    assign req_parity         = xfer_request[0] ^ xfer_request[1] ^ xfer_request[2] ^ xfer_request[3];
-    assign req_hdr            = {1'b1, 1'b0, req_parity, xfer_request[3], xfer_request[2], xfer_request[1], xfer_request[0], 1'b1};
+    assign req_parity         = active_request[0] ^ active_request[1] ^ active_request[2] ^ active_request[3];
+    assign req_hdr            = {1'b1, 1'b0, req_parity, active_request[3], active_request[2], active_request[1], active_request[0], 1'b1};
     assign wr_parity          = ^xfer_wdata;
     assign ack_aligned        = ack_samples;
     assign ack_aligned_next   = {swdio_sample_fsm, ack_samples[1:0]};
@@ -153,12 +162,14 @@ module swd_core (
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
+            active_request <= 0;
             state           <= ST_IDLE;
             lsm_cnt         <= 8'd0;
             delay_cnt       <= 16'd0;
             is_read_op      <= 1'b0;
             ack_samples     <= 3'd0;
             rd_samples      <= 33'd0;
+            rd_data_parity  <= 1'b0;
             ack_hold        <= 3'd0;
             turn_wait       <= 2'd0;
             wr_shift        <= 33'd0;
@@ -181,13 +192,14 @@ module swd_core (
                     // A zero-idle write may have just raised its parity bit;
                     // forcing PARK here violates its hold time. The next
                     // accepted header drives START on a falling edge below.
-                    // Keep a released bus released until the next falling edge.
+                    // Keep direction until the next falling edge.
                     delay_cnt  <= 16'd0;
                     lsm_cnt    <= 8'd0;
                     idle_cnt   <= 4'd0;
                     busy       <= 1'b0;
 
                     if (start) begin
+                        active_request <= xfer_request;
                         busy       <= 1'b1;
                         ack        <= 3'd0;
                         parity_err <= 1'b0;
@@ -526,15 +538,24 @@ module swd_core (
                             lsm_cnt <= lsm_cnt + 1'b1;
                         end else if (lsm_cnt == 8'd66) begin
                             swclk   <= 1'b0;
+                            // All 32 data bits are already registered. Reduce
+                            // their parity a full FCLK before the final sample,
+                            // leaving only one XOR on the half-cycle input path.
+                            rd_data_parity <= ^rd_samples[31:0];
                             lsm_cnt <= 8'd67;
                         end else if (lsm_cnt == 8'd67) begin
                             // Consume the final parity bit and finish.
-                            swclk      <= (idle_cycles == 0 && delay_fast == 0);
+                            swclk      <= (delay_fast == 0);
                             rd_samples[32] <= swdio_sample_fsm;
-                            if (idle_cycles == 0 && delay_fast == 0) begin
-                                // Parity fell on beat 66; this rising edge
-                                // clocks the target-to-host turnaround.
-                                state <= ST_RD_FINAL;
+                            if (delay_fast == 0) begin
+                                // Complete the mandatory turnaround here. Keep
+                                // SWDIO released until the next falling edge;
+                                // the first idle clock can then drive low.
+                                xfer_rdata <= rd_samples[31:0];
+                                parity_err <= rd_data_parity ^ swdio_sample_fsm;
+                                if (timestamp_en) timestamp <= timestamp_reg;
+                                state <= (idle_cycles == 0) ? ST_DONE : ST_IDLE_CLK;
+                                idle_cnt <= 0;
                                 lsm_cnt <= 0;
                             end else lsm_cnt <= 8'd68;
                         end else if (lsm_cnt == 8'd68) begin
@@ -569,9 +590,14 @@ module swd_core (
                                 wr_shift <= {1'b0,wr_shift[32:1]};
                             end else begin
                                 swclk <= 1'b1;
-                                if (lsm_cnt == 65 && idle_cycles == 0 && delay_fast == 0) begin
+                                if (lsm_cnt == 65 && delay_fast == 0) begin
                                     if (timestamp_en) timestamp <= timestamp_reg;
-                                    state <= ST_DONE;
+                                    // The next falling edge is the first idle
+                                    // bit, or the next accepted START. No empty
+                                    // high beat is needed after parity.
+                                    state <= (idle_cycles == 0) ? ST_DONE : ST_IDLE_CLK;
+                                    idle_cnt <= 0;
+                                    lsm_cnt <= 0;
                                 end
                             end
                         end else begin
@@ -583,7 +609,7 @@ module swd_core (
                             state     <= ST_IDLE_CLK;
                         end
 
-                        if (lsm_cnt < 8'd66) begin
+                        if (lsm_cnt < 8'd66 && !(lsm_cnt == 65 && delay_fast == 0)) begin
                             lsm_cnt <= lsm_cnt + 1'b1;
                         end
                     end
@@ -739,13 +765,23 @@ module swd_core (
                 end
 
                 ST_DONE: begin
-                    swclk   <= 1'b1;
-                    // Preserve output data AND direction throughout high idle.
-                    // Reclaiming after a zero-idle read here can contend with
-                    // the target's delayed final bit/turnaround. START below
-                    // reclaims on the next falling edge instead.
-                    busy    <= 1'b0;
-                    state   <= ST_IDLE;
+                    if (next_valid && next_ready) begin
+                        // The previous result is consumed on this edge. Its
+                        // registered ACK/parity gate acceptance of the next
+                        // prefetched command; no speculative transfer on error.
+                        active_request <= next_request;
+                        is_read_op <= next_request[1];
+                        ack <= 0; parity_err <= 0;
+                        ack_samples <= 0; rd_samples <= 0;
+                        wr_shift <= {^next_wdata,next_wdata};
+                        busy <= 1; state <= ST_XFER_REQ;
+                        delay_cnt <= 0; lsm_cnt <= 1; idle_cnt <= 0;
+                        swclk <= 0; swdio_t <= 0; swdio_o <= 1;
+                    end else begin
+                        swclk <= 1;
+                        // Keep a released input released throughout high idle.
+                        busy <= 0; state <= ST_IDLE;
+                    end
                 end
 
                 default: begin

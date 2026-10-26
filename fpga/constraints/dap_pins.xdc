@@ -22,9 +22,10 @@ set_property PULLUP true [get_ports swdio_0]
 set_property SLEW FAST [get_ports swdio_0]
 set_property DRIVE 8 [get_ports swdio_0]
 
-# Experimental upper bound: FCLK 180 MHz -> SWCLK 90 MHz. Firmware may
-# select slower integer PLL divisors; all fabric paths must meet this bound.
-create_clock -name clk_fpga_0 -period 5.555556 [get_pins {system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]}]
+# Production target: FCLK 120 MHz -> SWCLK 60 MHz. Place/route for the
+# frequency actually used by this branch; verify_routed still checks both
+# setup and hold and records the routed design's safe upper bound.
+create_clock -name clk_fpga_0 -period 8.333333 [get_pins {system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]}]
 
 
 # Input sampling uses FCLK directly; no gated SWCLK clock domain remains.

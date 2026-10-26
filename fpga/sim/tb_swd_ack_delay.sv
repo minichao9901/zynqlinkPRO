@@ -28,6 +28,7 @@ module tb_swd_ack_delay #(
   always @(negedge clk) sample_fall <= swdio;
 
   swd_core core(
+    .next_valid(1'b0),.next_request(8'd0),.next_wdata(32'd0),.next_ready(),.result_valid(),
     .clk(clk), .rst_n(rst_n), .start(start), .mode(1'b1),
     .timestamp_en(1'b0), .idle_cycles(4'd0), .data_phase(1'b0),
     .clock_delay(4'd0), .delay_fast(4'd0),

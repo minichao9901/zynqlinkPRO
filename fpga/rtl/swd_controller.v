@@ -157,18 +157,17 @@ module swd_controller #(
     reg [31:0] transfer_trace [0:15];
     reg [3:0] trace_head,trace_index;
     reg [15:0] trace_count;
-    reg trace_frozen,trace_was_busy;
+    reg trace_frozen;
     wire trace_clear = s_axi_wvalid && s_axi_wready &&
                        write_addr == ADDR_TRACE_CTRL && s_axi_wdata[0];
     // Out-of-band forensic history; freeze on an invalid ACK/parity failure.
     // Do not log at request publication: preserve the result actually completed.
     always @(posedge clk or negedge rst_n) begin
         if(!rst_n) begin
-            trace_head<=0;trace_count<=0;trace_frozen<=0;trace_was_busy<=0;
+            trace_head<=0;trace_count<=0;trace_frozen<=0;
         end else begin
-            trace_was_busy<=core_busy;
             if(trace_clear) begin trace_head<=0;trace_count<=0;trace_frozen<=0;end
-            else if(trace_was_busy && !core_busy && core_mode_sel && !trace_frozen) begin
+            else if(core_result_valid && !trace_frozen) begin
                 transfer_trace[trace_head]<={trace_count,core_req_sel,4'd0,core_parity_err,core_ack};
                 trace_head<=trace_head+1'b1;trace_count<=trace_count+1'b1;
                 if(core_parity_err || (core_ack!=1 && core_ack!=2 && core_ack!=4))trace_frozen<=1;
@@ -223,6 +222,10 @@ module swd_controller #(
     wire [2:0]  core_ack;
     wire        core_parity_err;
     wire        core_busy;
+    wire        core_result_valid, core_next_ready;
+    wire        packet_core_next_valid;
+    wire [7:0]  packet_core_next_request;
+    wire [31:0] packet_core_next_wdata;
     wire [15:0] core_timestamp;
     wire [31:0] core_rdata;
     wire        batch_active;
@@ -521,7 +524,7 @@ module swd_controller #(
         .packet_rsp_data(packet_rsp_data)
     );
 
-    dap_transfer_block_engine u_dap_packet_engine (
+    dap_transfer_block_engine #(.ENABLE_CHAIN(1)) u_dap_packet_engine (
         .clk(clk), .rst_n(engine_rst_n), .start(packet_start_pulse),
         .packet_len(packet_len_reg), .busy(packet_busy), .done(packet_done),
         .error(packet_error), .response_words(packet_response_words),
@@ -531,6 +534,9 @@ module swd_controller #(
         .rsp_data(packet_rsp_data), .core_start(packet_core_start),
         .core_mode(packet_core_mode), .core_req(packet_core_req),
         .core_wdata(packet_core_wdata), .core_busy(core_busy),
+        .core_result_valid(core_result_valid), .core_next_ready(core_next_ready),
+        .core_next_valid(packet_core_next_valid),
+        .core_next_request(packet_core_next_request), .core_next_wdata(packet_core_next_wdata),
         .core_ack(core_ack), .core_parity_err(core_parity_err), .core_rdata(core_rdata)
     );
 
@@ -548,6 +554,11 @@ module swd_controller #(
         .clk           (clk),
         .rst_n         (engine_rst_n),
         .start         (core_start_sel),
+        .next_valid    (packet_active && packet_core_next_valid),
+        .next_request  (packet_core_next_request),
+        .next_wdata    (packet_core_next_wdata),
+        .next_ready    (core_next_ready),
+        .result_valid  (core_result_valid),
         .mode          (core_mode_sel),
         .timestamp_en  (ctrl_timestamp_en),
         .idle_cycles   (cfg_idle_cycles),

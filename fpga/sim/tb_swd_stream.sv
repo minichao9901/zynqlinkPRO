@@ -48,7 +48,8 @@ always @(posedge clk) begin
      (core.state==6 && core.lsm_cnt>=3 && core.lsm_cnt<=67 && core.lsm_cnt[0])))
   if(fclk_cycle-last_rise_cycle<2)$fatal(1,"early sample consumed before two FCLK beats");
 end
-swd_core core(.clk(clk),.rst_n(rst_n),.start(core_start),.mode(core_mode),
+swd_core core(.next_valid(1'b0),.next_request(8'd0),.next_wdata(32'd0),.next_ready(),.result_valid(),
+ .clk(clk),.rst_n(rst_n),.start(core_start),.mode(core_mode),
  .timestamp_en(1'b0),.idle_cycles(4'(IDLE_CYCLES)),.data_phase(1'b0),.clock_delay(4'd5),.delay_fast(4'd0),
  .turn_extra(2'(TURN_EXTRA)),.ack_delay(3'(ACK_DELAY)),
  .swj_data(core_swj_data),.swj_count(core_swj_count),.xfer_request(core_req),.xfer_wdata(core_wdata),

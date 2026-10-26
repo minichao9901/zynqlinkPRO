@@ -1,7 +1,7 @@
 """Compare SWD framing limits with the real core/packet FSM cycle budget.
 
-Simulation excludes USB, DMA, PS and target WAIT responses. Current firmware
-clamps requested idle=0 to one idle clock; pyOCD 0.46 defaults to two.
+Simulation excludes USB, DMA, PS and target WAIT responses. Zero idle remains
+experimental pending board verification; pyOCD 0.46 defaults to two.
 """
 import json
 from pathlib import Path
@@ -30,7 +30,7 @@ for idle in [0,1,2]:
 result={'frame':{'request':8,'request_turnaround':1,'ACK':3,'data':32,'parity':1,'direction_turnaround':1,'total_SWCLK':46},
         'ideal_MB_s':{str(mhz):{'idle0':4*mhz/46,'idle1':4*mhz/47,'idle2':4*mhz/48} for mhz in [50,60]},
         'simulated_real_RTL':rows,
-        'limits':'No USB/PS/DMA, no target WAIT. FCLK=2*SWCLK; 1022 data words plus final AP drain. RTL unchanged.'}
+        'limits':'No USB/PS/DMA, no target WAIT. FCLK=2*SWCLK; 1022 data words plus final AP drain. Uses current working-tree RTL.'}
 dest=root/'results/optimization/swd_throughput_budget.json'
 dest.parent.mkdir(parents=True,exist_ok=True)
 dest.write_text(json.dumps(result,indent=2))

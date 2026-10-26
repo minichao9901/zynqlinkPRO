@@ -23,6 +23,7 @@ def main():
     ap.add_argument('--words', type=int, default=1022)
     ap.add_argument('--loops', type=int, default=500)
     ap.add_argument('--depths', default='1,4,16')
+    ap.add_argument('--idle',type=int,choices=[0,1,2],default=0)
     ap.add_argument('--ack-hold',type=int,choices=range(8),
                     help='Diagnostic ACK capture hold, applied AFTER Connect resets CFG')
     ap.add_argument('--output', type=Path, required=True)
@@ -34,7 +35,7 @@ def main():
     backup = None
     modified = False
     result = {'kind': 'raw_DRW_stream_auto_increment_wrap', 'speed_kHz': a.speed,
-              'words': a.words, 'loops': a.loops, 'rows': [], 'restore_match': False}
+              'words': a.words, 'idle':a.idle, 'loops': a.loops, 'rows': [], 'restore_match': False}
 
     def write_reg(req, value):
         r = xfer(out, inp, [5, 0, 1, req]+le(value))
@@ -59,6 +60,7 @@ def main():
 
     try:
         setup(out, inp, a.speed)
+        assert xfer(out,inp,[4,a.idle,64,0,0,0])==bytes([4,0])
         if a.ack_hold is not None:
             assert xfer(out,inp,[0x84,a.ack_hold])==bytes([0x84,0,a.ack_hold])
         result['configuration']=xfer(out,inp,[0x80,255]).hex()

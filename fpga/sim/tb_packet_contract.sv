@@ -17,7 +17,9 @@ module tb_packet_contract;
  integer wait_at=-1,wait_injected=0,wall_cycles=0,started;
  reg [31:0] posted;
  reg [31:0] writes[0:1023];
- dap_transfer_block_engine dut(.*, .state_dbg());
+ dap_transfer_block_engine dut(.*, .state_dbg(),
+   .core_result_valid(1'b0),.core_next_ready(1'b0),
+   .core_next_valid(),.core_next_request(),.core_next_wdata());
  always @(posedge clk) begin
    wall_cycles <= wall_cycles+1;
    if(rsp_en) for(b=0;b<4;b=b+1)

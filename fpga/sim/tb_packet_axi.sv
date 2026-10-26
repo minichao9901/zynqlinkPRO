@@ -26,6 +26,7 @@ module tb_packet_axi;
  reg mock_busy=0,stall=0,allow_batch=0;reg [31:0] mock_data=0;integer remaining=0,accepted=0;
  initial begin
    force dut.core_busy=mock_busy;force dut.core_ack=3'd1;
+   force dut.core_result_valid=1'b0;force dut.core_next_ready=1'b0;
    force dut.core_parity_err=1'b0;force dut.core_rdata=mock_data;
  end
  always @(posedge clk)begin
