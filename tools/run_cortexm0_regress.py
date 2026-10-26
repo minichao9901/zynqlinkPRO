@@ -13,12 +13,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_MODEL = Path('E:/Share/github/ZYNQ7020_YuanZi/ZYNQ_DAPLINK_RTL_100TO50MHz/'
                      'ZYNQ_DAPLINK_RTL_100TO50MHz.srcs/sim_1/imports/cortexm0')
-RTL = ['swd_core.v', 'swd_controller.v', 'swd_batch_engine.v', 'dap_transfer_block_engine.v']
+RTL = ['swd_core.v', 'probe_sample_engine.v', 'swd_controller.v', 'swd_batch_engine.v', 'dap_transfer_block_engine.v']
 SIM = ['sim_primitives.v', 'xpm_memory_tdpram.sv', 'tb_cortexm0_link.sv']
 MODEL = ['swd_cortexm0_target.v', 'CORTEXM0INTEGRATION.v', 'cortexm0ds_logic.v']
 
 MATRIX = [
     ('base', ['+words=16']),
+    ('sampler', ['+words=16', '+sampler']),
     ('words64', ['+words=64']),
     ('packets', ['+packets']),
     ('packets_err', ['+packets', '+errors']),

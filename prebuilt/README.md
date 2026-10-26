@@ -10,6 +10,18 @@
 | `ps7_init.tcl` | PS 时钟/DDR 初始化（加载 ELF 前必须执行） |
 | `SHA256SUMS` | 校验值 |
 
+## Probe RTT/CDC + RTL HSS 配对（2026-10-27）
+
+新增可选 `zynqlink_probe.bit` + `zynqlink_probe.elf`，保持下方原 packet 配对。
+含 HID 控制、RTT→CDC、RTL HSS定时/采样/FIFO与独立Bulk IN，SWCLK上限60 MHz，默认50 MHz。
+F103CB实板RTT与HSS v1/v2、8个未对齐变量、DAP并发与SRAM恢复通过。
+完整协议、端点、测试结果见[Probe功能文档](../docs/probe-rtt-hss.md)，源文件与产物哈希见
+`probe_build_manifest.json`。
+
+```powershell
+python tools/run_xsct.py tools/download_dap_fpga.tcl prebuilt/zynqlink_probe.elf prebuilt/zynqlink_probe.bit
+```
+
 ## 当前配对（2026-10-27，codex/main-continuous-scheduler）
 
 包含连续完成握手、读收尾/ACK状态合并、混合Transfer写压缩，以及既有USB/执行引擎恢复。

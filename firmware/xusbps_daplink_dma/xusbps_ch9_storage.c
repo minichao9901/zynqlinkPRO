@@ -37,6 +37,7 @@
 /***************************** Include Files *********************************/
 
 #include <string.h>
+#include "probe_stream.h"
 
 #include "xparameters.h"	/* XPAR parameters */
 #include "xusbps_endpoint.h"
@@ -294,7 +295,7 @@ u32 XUsbPs_Ch9SetupDevDescReply(u8 *BufPtr, u32 BufLen)
 		USB_ENDPOINT0_MAXP,		/* bMaxPacketSize0: 64 */
 		be2les(DAPLINK_VID),		/* idVendor: 0x0D28 (ARM) */
 		be2les(DAPLINK_PID),		/* idProduct: 0x0204 (CMSIS-DAP) */
-		be2les(0x0100),			/* bcdDevice: 1.00 */
+		be2les(0x0101),			/* bcdDevice: 1.00 */
 		0x01,				/* iManufacturer */
 		0x02,				/* iProduct */
 		0x03,				/* iSerialNumber */
@@ -354,7 +355,7 @@ u32 XUsbPs_Ch9SetupCfgDescReply(u8 *BufPtr, u32 BufLen)
 	u16 totalLengthOffset = offset;
 	configDesc[offset++] = 0x00;
 	configDesc[offset++] = 0x00;
-	configDesc[offset++] = 0x03;		/* bNumInterfaces: 3 */
+	configDesc[offset++] = 0x04;		/* bNumInterfaces: 4 */
 	configDesc[offset++] = 0x01;		/* bConfigurationValue */
 	configDesc[offset++] = 0x00;		/* iConfiguration */
 	configDesc[offset++] = 0x80;		/* bmAttributes: Bus powered */
@@ -366,7 +367,7 @@ u32 XUsbPs_Ch9SetupCfgDescReply(u8 *BufPtr, u32 BufLen)
 	configDesc[offset++] = USB_INTERFACE_CFG_DESC;	/* bDescriptorType */
 	configDesc[offset++] = 0x00;		/* bInterfaceNumber: 0 */
 	configDesc[offset++] = 0x00;		/* bAlternateSetting */
-	configDesc[offset++] = 0x02;		/* bNumEndpoints: 2 */
+	configDesc[offset++] = 0x03;		/* DAP IN/OUT + HSS IN */
 	configDesc[offset++] = USB_CLASS_VENDOR;	/* bInterfaceClass: Vendor Specific */
 	configDesc[offset++] = 0x00;		/* bInterfaceSubClass */
 	configDesc[offset++] = 0x00;		/* bInterfaceProtocol */
@@ -389,6 +390,9 @@ u32 XUsbPs_Ch9SetupCfgDescReply(u8 *BufPtr, u32 BufLen)
 	configDesc[offset++] = 0x00;		/* wMaxPacketSize LSB: 512 */
 	configDesc[offset++] = 0x02;		/* wMaxPacketSize MSB: 512 */
 	configDesc[offset++] = 0x00;		/* bInterval */
+
+    { const u8 hss[] = {7,5,0x87,2,0,2,0};
+      memcpy(configDesc+offset,hss,sizeof(hss)); offset+=sizeof(hss); }
 
 	/* ==================== CDC ACM Interface (Interfaces 1 & 2) ==================== */
 	/* IAD (Interface Association Descriptor) for CDC */
@@ -477,6 +481,17 @@ u32 XUsbPs_Ch9SetupCfgDescReply(u8 *BufPtr, u32 BufLen)
 	configDesc[offset++] = 0x02;		/* wMaxPacketSize MSB: 512 */
 	configDesc[offset++] = 0x00;		/* bInterval */
 
+    { const u8 hid[] = {
+        9,4,PROBE_HID_INTERFACE,0,2,3,0,0,4,
+        9,0x21,0x11,1,0,1,0x22,0,0,
+        7,5,0x86,3,64,0,4,
+        7,5,0x06,3,64,0,4
+      };
+      memcpy(configDesc+offset,hid,sizeof(hid));
+      configDesc[offset+16]=(u8)probe_hid_report_size;
+      configDesc[offset+17]=(u8)(probe_hid_report_size>>8);
+      offset+=sizeof(hid); }
+
 	/* Update wTotalLength */
 	wTotalLength = offset;
 	configDesc[totalLengthOffset] = wTotalLength & 0xFF;
@@ -520,6 +535,7 @@ u32 XUsbPs_Ch9SetupStrDescReply(u8 *BufPtr, u32 BufLen, u8 Index)
 		"CherryUSB",            /* iManufacturer */
 		"CMSIS-DAP",            /* iProduct */
 		"12345678",             /* iSerialNumber */
+        "ZynqLink probe control",
 	};
 	char *String;
 	u32 StringLen;
@@ -630,13 +646,21 @@ void XUsbPs_SetConfiguration(XUsbPs *InstancePtr, int ConfigIdx)
 {
 	Xil_AssertVoid(InstancePtr != NULL);
 
-	if (1 != ConfigIdx) {
-		return;
-	}
+	if (0 == ConfigIdx) {
+        unsigned ep;
+        probe_usb_reset();
+        for(ep=1;ep<8;ep++) {
+            XUsbPs_EpDisable(InstancePtr,ep,XUSBPS_EP_DIRECTION_IN|XUSBPS_EP_DIRECTION_OUT);
+            XUsbPs_EpFlush(InstancePtr,ep,XUSBPS_EP_DIRECTION_IN|XUSBPS_EP_DIRECTION_OUT);
+        }
+        return;
+    }
+    if(1 != ConfigIdx) return;
     if(XUsbPs_DapResetEndpoints(InstancePtr)!=XST_SUCCESS)return;
 
 	xil_printf("[DAP] SET_CONFIGURATION 1\r\n");
 
+	probe_usb_configured(InstancePtr);
 	/* Enable DAP Endpoints */
 	XUsbPs_EpEnable(InstancePtr, DAP_BULKOUT_EP, XUSBPS_EP_DIRECTION_OUT);
 	XUsbPs_EpEnable(InstancePtr, DAP_BULKIN_EP, XUSBPS_EP_DIRECTION_IN);

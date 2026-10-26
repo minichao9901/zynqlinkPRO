@@ -1,0 +1,242 @@
+{
+  "base_commit": "35f7cf631d1510259bfd0da2f616dca28488e995",
+  "branch": "codex/probe-rtt-hss",
+  "artifacts": {
+    "zynqlink_probe.bit": "2bc4781e5ea49553baed5a80645ee97c9aeee9a4ce0d91d19c209ef09eb1a05a",
+    "zynqlink_probe.elf": "bee9ef28828584884e97d4f5e5ac3e2f4f4f5f9a56a06819343f590ed3e64be4"
+  },
+  "fpga_timing": {
+    "FCLK_max_Hz": 128571429,
+    "SWCLK_max_Hz": 64285714,
+    "setup_slack_ns": 0.227,
+    "hold_slack_ns": 0.04
+  },
+  "sampler_synthesis": {
+    "LUTs": 1508,
+    "LUT_RAM": 352,
+    "FFs": 1154
+  },
+  "tests": {
+    "native_probe_C": true,
+    "USB_descriptors": true,
+    "native_target_adapter": true,
+    "sampler_RTL": true,
+    "packet_AXI_regressions": true,
+    "USB_transport_70000_completions": true,
+    "CortexM0_MEM_AP": {
+      "passed": true,
+      "returncode": 0,
+      "plusargs": [
+        "+sampler"
+      ]
+    }
+  },
+  "board": {
+    "target": "F103CB",
+    "speed_hz": 50000000,
+    "RAM_base": "0x20004000",
+    "IDCODE": "0501017714a01b",
+    "backup_sha256": "c5779b6ebc41df2cc1ff89941ce41408ce774de9102212f6ffaef1defa7c7b05",
+    "rtt": {
+      "bytes": 19965,
+      "rounds": 21,
+      "byte_exact": true,
+      "cold_probe_initialization": true,
+      "status": [
+        65537,
+        536887296,
+        536887320,
+        19965,
+        2294968,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        822084608
+      ],
+      "elapsed_including_host_producer_s": 0.08061869999801274
+    },
+    "hss": [
+      {
+        "version": 1,
+        "variables": 1,
+        "samples": 20076,
+        "packets": 211,
+        "byte_exact": true,
+        "DAP_context_reads": 8,
+        "metrics": [
+          827544392,
+          3560235296,
+          24000000,
+          20076,
+          495,
+          0,
+          0,
+          8,
+          211,
+          108032,
+          2400,
+          0
+        ],
+        "backpressure_skipped": 495
+      },
+      {
+        "version": 2,
+        "variables": 1,
+        "samples": 20062,
+        "packets": 210,
+        "byte_exact": true,
+        "DAP_context_reads": 8,
+        "metrics": [
+          827544392,
+          3611638520,
+          24000000,
+          20062,
+          489,
+          0,
+          0,
+          8,
+          210,
+          107520,
+          2400,
+          0
+        ],
+        "backpressure_skipped": 489
+      },
+      {
+        "version": 2,
+        "variables": 8,
+        "samples": 20062,
+        "packets": 1283,
+        "byte_exact": true,
+        "DAP_context_reads": 8,
+        "metrics": [
+          827544392,
+          3663113741,
+          24000000,
+          20062,
+          495,
+          0,
+          0,
+          8,
+          1283,
+          656896,
+          2400,
+          0
+        ],
+        "backpressure_skipped": 495
+      }
+    ],
+    "restore_sha256": "c5779b6ebc41df2cc1ff89941ce41408ce774de9102212f6ffaef1defa7c7b05",
+    "restore_match": true
+  },
+  "USB": {
+    "bcdDevice": 257,
+    "interfaces": [
+      {
+        "number": 0,
+        "class": 255,
+        "endpoints": [
+          {
+            "address": 2,
+            "type": 2,
+            "mps": 512
+          },
+          {
+            "address": 129,
+            "type": 2,
+            "mps": 512
+          },
+          {
+            "address": 135,
+            "type": 2,
+            "mps": 512
+          }
+        ]
+      },
+      {
+        "number": 1,
+        "class": 2,
+        "endpoints": [
+          {
+            "address": 133,
+            "type": 3,
+            "mps": 64
+          }
+        ]
+      },
+      {
+        "number": 2,
+        "class": 10,
+        "endpoints": [
+          {
+            "address": 4,
+            "type": 2,
+            "mps": 512
+          },
+          {
+            "address": 131,
+            "type": 2,
+            "mps": 512
+          }
+        ]
+      },
+      {
+        "number": 3,
+        "class": 3,
+        "endpoints": [
+          {
+            "address": 134,
+            "type": 3,
+            "mps": 64
+          },
+          {
+            "address": 6,
+            "type": 3,
+            "mps": 64
+          }
+        ]
+      }
+    ],
+    "hid_queries": 100,
+    "hid_mean_ms": 2.0010830003593583,
+    "hid_max_ms": 3.0420999974012375
+  },
+  "DAP_sanity": {
+    "kind": "linear_SRAM_standard_CMSIS_DAP",
+    "speed_kHz": 50000,
+    "idle": 1,
+    "size_bytes": 20480,
+    "depth": 16,
+    "loops": 10,
+    "sessions": [
+      {
+        "session": 0,
+        "configuration": "80000000ffe0f505110a0000",
+        "actual_idle": 1,
+        "RCC_before": [
+          "0x3035983",
+          "0x29250a"
+        ],
+        "backup_sha256": "df4d3d59729a5ed2a054e3014a2d54cb510211bdd53e1c04e3532e84b1ed14f9",
+        "read_s": 0.053413100002217107,
+        "write_s": 0.05422169998928439,
+        "read_MB_s": 3.8342653766866,
+        "write_MB_s": 3.777085558742603,
+        "data_match": true,
+        "CMSIS_commands_per_access": 10,
+        "restore_match": true,
+        "RCC_after": [
+          "0x3035983",
+          "0x29250a"
+        ]
+      }
+    ],
+    "page_bytes": 4096,
+    "prefix_words": 2,
+    "read_MB_s": 3.8342653766866,
+    "write_MB_s": 3.777085558742603
+  }
+}

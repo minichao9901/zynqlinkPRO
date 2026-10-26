@@ -1,0 +1,67 @@
+{
+  "feature": "probe RTT/CDC and RTL HSS",
+  "built_at": "2026-10-27T07:11:22.918241+08:00",
+  "base_commit": "35f7cf631d1510259bfd0da2f616dca28488e995",
+  "branch": "codex/probe-rtt-hss",
+  "artifacts": {
+    "zynqlink_probe.bit": "2bc4781e5ea49553baed5a80645ee97c9aeee9a4ce0d91d19c209ef09eb1a05a",
+    "zynqlink_probe.elf": "bee9ef28828584884e97d4f5e5ac3e2f4f4f5f9a56a06819343f590ed3e64be4"
+  },
+  "fpga_timing": {
+    "FCLK_max_Hz": 128571429,
+    "SWCLK_max_Hz": 64285714,
+    "setup_slack_ns": 0.227,
+    "hold_slack_ns": 0.04
+  },
+  "firmware_options": {
+    "opt": "3",
+    "project": "xusbps_daplink_dma",
+    "trace": false,
+    "usb_trace": false,
+    "experimental_zero_idle": false,
+    "max_swclk_hz": 60000000,
+    "bsp": "E:/zynqlinkPRO/reference/legacy_zynq/ZYNQ_DAPLINK_RTL_100TO50MHz/ZYNQ_DAPLINK_RTL_100TO50MHz.sdk/usb_bsp/ps7_cortexa9_0",
+    "gcc": "E:\\Xilinx\\SDK\\2018.3\\gnu\\aarch32\\nt\\gcc-arm-none-eabi\\bin\\arm-none-eabi-gcc.exe"
+  },
+  "rtl_source_sha256": {
+    "fpga/rtl/dap_transfer_block_engine.v": "85d03fa03966ecf2ae8599ba49ce21699060ab7bcdb27fc69f772bd492eed319",
+    "fpga/rtl/probe_sample_engine.v": "187bfcf531be069f0ec41618b0180cc3a7b5e5dd5fb527e9515028616552dec3",
+    "fpga/rtl/swd_batch_engine.v": "2147786073a8ed8aa4a66c0c6c16a4e7ba34e222789af20cd84e24b74df70c41",
+    "fpga/rtl/swd_controller.v": "bc5ea3b9e183618d16f723b7c1a290329dc9799bf2aaffa396c986a0cc802b14",
+    "fpga/rtl/swd_core.v": "1b997ef6870748e743deae38af3ed06b3e0545b755edc801fa8b492b2d008fd0"
+  },
+  "firmware_source_sha256": {
+    "firmware/xusbps_daplink_dma/chry_ringbuffer.c": "e719548c6dd08de32f961d66fbfe7f071fd44b8650d7ab0074621b1892a08b16",
+    "firmware/xusbps_daplink_dma/chry_ringbuffer.h": "e267cf8eef1f4649f5b7f33f20bcbb76f1cb791381dfaa6f1d9a57cd00ef8600",
+    "firmware/xusbps_daplink_dma/DAP/Include/DAP.h": "cfa6eaf0030f7c4e449830f3cc7843fb305b4e61ccf0f3aa815dd9556cffd560",
+    "firmware/xusbps_daplink_dma/DAP/Include/DAP_config.h": "02f80686e5f4c9776dd03d93a0e0f2bbd8015a25d22a98372912c875aadffaf1",
+    "firmware/xusbps_daplink_dma/DAP/Include/dap_metrics.h": "754d5f29cd1e366a0999e41e9e754ca2381c2b3bded5fbed2461698ec84eb0bf",
+    "firmware/xusbps_daplink_dma/DAP/Include/swd_dma.h": "a36819ab5c3186c3b6c04a11b9cbe35143a6456afa6ec1cc36ee0749f35bf613",
+    "firmware/xusbps_daplink_dma/DAP/Source/DAP.c": "fe4a7957fe7b4afea21f3f6b05ee74771509900adb91e95283c471f1c39709f6",
+    "firmware/xusbps_daplink_dma/DAP/Source/dap_metrics.c": "e55609499f405df7e40b5bf4465180e929fb16c783d08198f461f09f853610dd",
+    "firmware/xusbps_daplink_dma/DAP/Source/DAP_vendor.c": "e1cf097697c6e7399168f82bd9eb43b80da1d47fdc39c6a6ccd18cb118817d33",
+    "firmware/xusbps_daplink_dma/DAP/Source/JTAG_DP.c": "b9ba22e29688ec1ba5d3d5b007798f557ef1a116b4a173ac4968e9d78ac8fee8",
+    "firmware/xusbps_daplink_dma/DAP/Source/SW_DP.c": "d4112b2936ae66f69279f973410a66afc3707a31cfb172b2e0512d135e1fb68c",
+    "firmware/xusbps_daplink_dma/DAP/Source/swd_dma.c": "261bdbd3036f458896c275a13445292a4405bd6c8415d98f9d98ba13d2f9c31f",
+    "firmware/xusbps_daplink_dma/DAP/Source/SWO.c": "3c2d788c229ed27bc7062854adc740ba299efffdf6a4b053b32bc177f69fde00",
+    "firmware/xusbps_daplink_dma/DAP/Source/UART.c": "a9d143bc67a93a6e652c0ea15acf5f343966434c4225c5e89959cc5854271a5b",
+    "firmware/xusbps_daplink_dma/dap_main.c": "7c7edf60694a84ae44d48a9f3a4164be509c75a2b7a722b60c3f0156b5fce4bf",
+    "firmware/xusbps_daplink_dma/dap_main.h": "7d50e487a1fdb194b1e6aaac8db9b6a01f3fcc4556858b4ed9ebfdd468500a28",
+    "firmware/xusbps_daplink_dma/lscript.ld": "a24bcde2a23ed75abfe847474c07007809f231df7529bd66253782e416cc2179",
+    "firmware/xusbps_daplink_dma/probe_stream.c": "89c9a855357e21b21db534adf3534b4c12cee0911c3b364e847b2fd90a4a68e7",
+    "firmware/xusbps_daplink_dma/probe_stream.h": "2a815a6bbb747d9a905c025e70de8b2b941526ca0648c3242c946d5fba433d94",
+    "firmware/xusbps_daplink_dma/probe_target.c": "90f41920420cf794345ebf396ff6a2fe116ac2a57864c02c5e7d5618c7345731",
+    "firmware/xusbps_daplink_dma/Xilinx.spec": "f100af82b444989adf5aad4ad612b9ae3b4ddac007f5d9653f1abf254235b085",
+    "firmware/xusbps_daplink_dma/xusbps_bos_desc.c": "4e1f078ec5cf74e30423dad5780dae783b8e1c4fa9be02ebb08c704f11139848",
+    "firmware/xusbps_daplink_dma/xusbps_bos_desc.h": "8ba193e5cf85cf1dd12fd3d9822cfa47a20cbac1c60d1f24852c65a04de75dfd",
+    "firmware/xusbps_daplink_dma/xusbps_ch9.c": "f3babbb22bf8a6f7e37b93ebd2478ce62fd1ced2c59f70b0ea4215cc8fa128c5",
+    "firmware/xusbps_daplink_dma/xusbps_ch9.h": "cf64a89830c2d4a6415a81995847a6577f8821ab9f81d5f8beb53063a8ac47b1",
+    "firmware/xusbps_daplink_dma/xusbps_ch9_storage.c": "ad1e3d8b7f7d66f669cfb786b403da3744feb69f84db06622a41cee176ba27b1",
+    "firmware/xusbps_daplink_dma/xusbps_ch9_storage.h": "1c6af0f1fb94d653cc2a5ed92ae4e105cfbb68b42dee93ce72f963f8459bacfc",
+    "firmware/xusbps_daplink_dma/xusbps_class_cdc.c": "565aa0cef1d3338518c71aee34c04ec64ce208dc75f5e7989fa2a3d45efc16d3",
+    "firmware/xusbps_daplink_dma/xusbps_class_cdc.h": "38f45f6b7f6fba99edbdb1581bac9baa818ab461c6734cbd6a370d1c9fb7949f",
+    "firmware/xusbps_daplink_dma/xusbps_intr.c": "9019a0bf69e6c5fdc4e93eae3972e79120201ff985d1e6b7f582d14cf6892353",
+    "firmware/xusbps_daplink_dma/xusbps_intr_example.c": "df38c46c7dc2fd07510916063dde183d368a42acb2ee2a2fd9609d172e25af2b"
+  },
+  "bsp_sha256": "b31bd5a75096dfdba14dca67c78629983985ba55a9984c0afa6062d1030859e5"
+}

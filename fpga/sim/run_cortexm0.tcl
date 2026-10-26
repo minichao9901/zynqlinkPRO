@@ -10,7 +10,7 @@ if {[file exists [file join $out cortexm0_sim.xpr]]} {
     create_project cortexm0_sim $out -part xc7z020clg400-2
 }
 set_property target_simulator XSim [current_project]
-foreach f {swd_core.v swd_controller.v swd_batch_engine.v dap_transfer_block_engine.v} {
+foreach f {swd_core.v probe_sample_engine.v swd_controller.v swd_batch_engine.v dap_transfer_block_engine.v} {
     add_files -fileset sim_1 [file join $root fpga rtl $f]
 }
 foreach f {xpm_memory_tdpram.sv tb_packet_axi.sv tb_cortexm0_link.sv} {

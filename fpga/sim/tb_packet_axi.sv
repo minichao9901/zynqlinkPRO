@@ -78,7 +78,7 @@ module tb_packet_axi;
      $fatal(1,"status=%h core calls=%d",status,accepted);
    @(negedge clk);rsp_en=1;rsp_addr=0;@(negedge clk);
    if(rsp_data!==32'h00010003)$fatal(1,"response BRAM %h",rsp_data);
-   rd(7'h4c,status);if(status!==32'h44500001)$fatal(1,"reset feature %h",status);
+   rd(7'h4c,status);if(status!==32'h44500003)$fatal(1,"reset feature %h",status);
    stall=1;accepted=0;wr(7'h40,1);repeat(12)@(negedge clk);
    rd(7'h48,status);if(!status[0])$fatal(1,"packet did not stall");
    wr(7'h50,1);rd(7'h50,status);if(status!==1)$fatal(1,"packet reset counter %h",status);

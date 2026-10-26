@@ -393,6 +393,8 @@ uint8_t DAP_HOT_CODE SWD_Transfer(uint32_t request, uint32_t *data)
   }
 
   if (status & 0x80U) ack = DAP_TRANSFER_ERROR;
+  extern void probe_target_observe(uint32_t, uint32_t, uint8_t);
+  probe_target_observe(request, data ? *data : 0U, ack);
 
   // xil_printf("%x, %x\n", ack, *data);
   return ack;
