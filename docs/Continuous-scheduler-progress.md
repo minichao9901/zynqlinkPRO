@@ -96,3 +96,29 @@ randomized 20 KiB, 6 sessions x300 reads and writes per leg:
 
 The copy/cache software artifact uses the original main bitstream. A separate
 RTL scheduling experiment follows; do not confuse it with these A/B results.
+
+
+## Packet RTL scheduling checkpoint (simulation)
+
+The packet engine starts the next transfer directly when the previous core
+completion is observed. Write data is prefetched from synchronous BRAM while
+the current serial frame is executing. WAIT retries retain the current write
+word; prefetched words are not committed after FAULT/parity errors. Final DP
+RDBUFF draining and partial completion counts remain in place.
+
+`tools/test_packet_engine.py --compare-ref 74902be` passes basic cases,
+synchronous BRAM, stalled core, retry/error/partial results, full 1023-word
+boundary, and AXI/mux integration. Added a WAIT at the sixth write to check that
+retry cannot consume the prefetched next word. Mock-core cycles for a 1023-word
+read fall 9225 -> 7178; 1022-word write 11260 -> 7173. These numbers describe the
+short mock core, NOT physical SWD throughput. The actual saved scheduling time
+is about 2 FCLK cycles/read and 4 cycles/write.
+
+Real user-supplied Cortex-M0 DesignStart model via XSim:
+- packet_pipeline: packet reads/writes 1/2/127/256/770/1023 words pass.
+- pipeline_tco8: same packets with 8ns target delay plus WAIT/release/ABORT
+  recovery pass. This target model does not report injected AHB FAULT in the
+  forced-error case (explicit FAULT_SKIP); RTL mock tests cover partial FAULT.
+- All model sources remain outside the repository.
+
+Implementation/timing and physical F103 validation are separate next gates.

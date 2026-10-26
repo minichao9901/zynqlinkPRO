@@ -60,6 +60,9 @@ module dap_transfer_block_engine #(
     reg final_phase;
     reg [23:0] core_wait_cnt;
     reg [7:0] retry_left;
+    reg [31:0] prefetched_data;
+    reg [1:0] prefetch_wait;
+    reg prefetch_valid;
 
     initial state = ST_IDLE;
 
@@ -86,11 +89,23 @@ module dap_transfer_block_engine #(
             final_phase <= 0;
             core_wait_cnt <= 24'hFFFFFF;
             retry_left <= 0;
+            prefetched_data <= 0;
+            prefetch_wait <= 0;
+            prefetch_valid <= 0;
         end else begin
             cmd_en <= 0;
             rsp_en <= 0;
             rsp_we <= 0;
             core_start <= 0;
+            // Fetch the next write while the current serial transfer runs.
+            // Two edges cover the registered BRAM enable and its read latency.
+            if (prefetch_wait != 0) begin
+                prefetch_wait <= prefetch_wait - 1'b1;
+                if (prefetch_wait == 1) begin
+                    prefetched_data <= cmd_data;
+                    prefetch_valid <= 1;
+                end
+            end
             case (state)
                 ST_IDLE: begin
                     busy <= 0;
@@ -105,6 +120,8 @@ module dap_transfer_block_engine #(
                         is_ap <= 0;
                         final_phase <= 0;
                         response_words <= 0;
+                        prefetch_wait <= 0;
+                        prefetch_valid <= 0;
                         cmd_addr <= 0;
                         cmd_en <= 1;
                         state <= ST_HDR_WAIT;
@@ -178,6 +195,12 @@ module dap_transfer_block_engine #(
                     core_req <= request;
                     retry_left <= RETRY_MAX;
                     core_wait_cnt <= 24'h03FFFF;
+                    if (index + 1'b1 < count) begin
+                        cmd_en <= 1;
+                        cmd_addr <= index + 2'd2;
+                        prefetch_wait <= 2;
+                        prefetch_valid <= 0;
+                    end
                     state <= ST_START_CORE;
                 end
                 ST_START_CORE: begin
@@ -243,10 +266,31 @@ module dap_transfer_block_engine #(
                                 result_index <= result_index + 1'b1;
                             end
                             index <= index + 1'b1;
-                            state <= ST_NEXT;
+                            // Completion already proves the core is idle. Start
+                            // the next read directly, avoiding NEXT/START bubbles.
+                            core_req <= (index + 1'b1 == count) ? 8'h0E : request;
+                            final_phase <= (index + 1'b1 == count);
+                            core_start <= 1;
+                            seen_core_busy <= 0;
+                            retry_left <= RETRY_MAX;
+                            core_wait_cnt <= 24'h03FFFF;
                         end else begin
                             index <= index + 1'b1;
-                            state <= ST_NEXT;
+                            if (index + 1'b1 == count || prefetch_valid) begin
+                                core_req <= (index + 1'b1 == count) ? 8'h0E : request;
+                                final_phase <= (index + 1'b1 == count);
+                                core_wdata <= prefetched_data;
+                                core_start <= 1;
+                                seen_core_busy <= 0;
+                                retry_left <= RETRY_MAX;
+                                core_wait_cnt <= 24'h03FFFF;
+                                prefetch_valid <= 0;
+                                if (index + 2'd2 < count) begin
+                                    cmd_en <= 1;
+                                    cmd_addr <= index + 2'd3;
+                                    prefetch_wait <= 2;
+                                end
+                            end else state <= ST_NEXT;
                         end
                     end
                 end

@@ -14,16 +14,20 @@ module tb_packet_contract;
  wire core_start,core_mode; wire [7:0] core_req; wire [31:0] core_wdata;
  integer i,b,cycles=0,accepted=0,attempts=0,rdbuffs=0,waits=0;
  integer fault_after=-1; reg parity_final=0;
+ integer wait_at=-1,wait_injected=0,wall_cycles=0,started;
  reg [31:0] posted;
  reg [31:0] writes[0:1023];
  dap_transfer_block_engine dut(.*, .state_dbg());
  always @(posedge clk) begin
+   wall_cycles <= wall_cycles+1;
    if(rsp_en) for(b=0;b<4;b=b+1)
      if(rsp_we[b]) rsp_mem[rsp_addr][b*8 +: 8] <= rsp_data[b*8 +: 8];
    if(core_start && !core_busy) begin
      core_busy <= 1; cycles <= 4; attempts <= attempts+1;
      core_parity_err <= 0;
-     if(waits>0) begin
+     if(accepted==wait_at && !wait_injected) begin
+       core_ack <= 2;wait_injected <= 1;
+     end else if(waits>0) begin
        core_ack <= 2; waits <= waits-1;
      end else if(fault_after>=0 && accepted>=fault_after) core_ack<=4;
      else begin
@@ -46,6 +50,7 @@ module tb_packet_contract;
  task prepare(input integer n,input bit reading);
    begin
      accepted=0; attempts=0; rdbuffs=0; waits=0; fault_after=-1;
+     wait_at=-1;wait_injected=0;
      posted=32'hdeadbeef; parity_final=0;
      cmd_mem[0]=((reading?32'h0f:32'h0d)<<24)|(n<<8)|6;
      packet_len=reading?4:4+4*n;
@@ -54,9 +59,10 @@ module tb_packet_contract;
  endtask
  task run;
    begin
-     @(negedge clk);start=1;@(negedge clk);start=0;
+     @(negedge clk);started=wall_cycles;start=1;@(negedge clk);start=0;
      wait(done);repeat(3)@(negedge clk);
      if(!done || busy)$fatal(1,"done is not sticky");
+     $display("CYCLES count=%0d read=%0d cycles=%0d",cmd_mem[0][23:8],cmd_mem[0][25],wall_cycles-started);
    end
  endtask
  task header(input integer n,input integer status,input integer words);
@@ -74,6 +80,9 @@ module tb_packet_contract;
    prepare(3,1);waits=2;run;header(3,1,4);
    for(i=0;i<3;i=i+1)if(rsp_mem[i+1]!==32'ha5000000+i)$fatal(1,"posted map %d",i);
    if(rdbuffs!=1 || attempts!=6)$fatal(1,"posted/retry sequence");
+   prepare(32,0);wait_at=5;run;header(32,1,1);
+   if(!wait_injected || attempts!=34)$fatal(1,"write WAIT/retry not exercised");
+   for(i=0;i<32;i=i+1)if(writes[i]!==32'h13570000+i)$fatal(1,"prefetched retry data %d",i);
    prepare(1022,0);run;header(1022,1,1);
    for(i=0;i<1022;i=i+1)if(writes[i]!==32'h13570000+i)$fatal(1,"write data %d",i);
    prepare(1023,1);run;header(1023,1,1024);
