@@ -63,6 +63,6 @@ module IDELAYE2 #(
   assign CNTVALUEOUT = taps;
   // One tap is 78 ps at a 200 MHz reference clock.
   reg dout = 1'b0;
-  always @(IDATAIN) dout <= #(taps * 0.078) IDATAIN;
+  always @(IDATAIN) dout <= #(taps * 0.078 + 0.001) IDATAIN; // +1 ps avoids zero-delay loops
   assign DATAOUT = dout;
 endmodule
