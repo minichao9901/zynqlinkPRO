@@ -472,6 +472,11 @@ static void XUsbPs_Ep0EventHandler(void *CallBackRef, u8 EpNum,
 			/* Handle the setup packet. */
 			(int) XUsbPs_Ch9HandleSetupPacket(InstancePtr,
 							   &SetupData);
+			/* A new configuration is a new CMSIS-DAP host session. */
+			if (SetupData.bRequest == XUSBPS_REQ_SET_CONFIGURATION) {
+				extern void chry_dap_usb_session_reset(void);
+				chry_dap_usb_session_reset();
+			}
 		}
 		break;
 

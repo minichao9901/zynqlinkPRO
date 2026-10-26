@@ -197,6 +197,12 @@ static void dap_start_response(uint16_t idx)
   uint16_t len = USB_RespSize[idx];
 
   dap_trace_add(4U, len);
+  /* USB_Response is cacheable for CPU command handling; make the completed
+   * response visible to XUsbPs DMA before priming EP1. */
+  if (len != 0U) {
+    Xil_DCacheFlushRange((UINTPTR)USB_Response[idx],
+                         ((UINTPTR)len + 31U) & ~(UINTPTR)31U);
+  }
   /* A bulk IN transfer that ends on an exact max-packet boundary needs a ZLP,
    * otherwise the host keeps waiting for the rest of its buffer.  Responses
    * with 4 + 4*N bytes hit this for N = 127, 255, ... */
@@ -246,6 +252,14 @@ static void chry_dap_state_init(void)
 
   // Xil_MemMap((uint32_t)&USB_Request, DAP_PACKET_COUNT * DAP_PACKET_SIZE, NORM_NONCACHE);
   // Xil_MemMap((uint32_t)&USB_Response, DAP_PACKET_COUNT * DAP_PACKET_SIZE, NORM_NONCACHE);
+}
+
+/* USB SET_CONFIGURATION/reset starts a new CMSIS-DAP session. Do not let a
+ * response from the previous host session satisfy the first transfer. */
+void chry_dap_usb_session_reset(void)
+{
+  chry_dap_state_init();
+  memset((void *)USB_RespSize, 0, sizeof USB_RespSize);
 }
 
 
