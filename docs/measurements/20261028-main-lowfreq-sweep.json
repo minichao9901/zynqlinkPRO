@@ -1,0 +1,35 @@
+{
+  "main_commit": "d42b60180e82fccb428c51613a0316776c2bc4fc",
+  "simulator": "Vivado XSim 2018.3",
+  "target_model": "ARM DesignStart Cortex-M0 SWD target",
+  "test": "main RTL low-frequency SWD packet/AP sweep",
+  "clock_mapping": "FCLK=1/(2*half_ns), SWCLK=FCLK/2 when delay_fast=0",
+  "results": [
+    {"half_ns": 5.0, "fclk_mhz": 100.0, "swclk_mhz": 50.0, "passed": true},
+    {"half_ns": 10.0, "fclk_mhz": 50.0, "swclk_mhz": 25.0, "passed": false, "failure": "first DPIDR transfer ACK=4"},
+    {"half_ns": 25.0, "fclk_mhz": 20.0, "swclk_mhz": 10.0, "passed": false, "failure": "first DPIDR transfer ACK=4"},
+    {"half_ns": 50.0, "fclk_mhz": 10.0, "swclk_mhz": 5.0, "passed": false, "failure": "first DPIDR transfer ACK=4"},
+    {"half_ns": 100.0, "fclk_mhz": 5.0, "swclk_mhz": 2.5, "passed": false, "failure": "first DPIDR transfer ACK=4"},
+    {"half_ns": 250.0, "fclk_mhz": 2.0, "swclk_mhz": 1.0, "passed": false, "failure": "first DPIDR transfer ACK=4"}
+  ],
+  "return_ns_sweep": {
+    "half_ns": [10.0, 25.0, 50.0],
+    "return_ns": [4.0, 8.0, 12.0, 16.0],
+    "all_failed_with": "ACK=4 on first DPIDR transfer"
+  },
+  "phase_sweep": {
+    "half_ns": [10.0, 25.0, 50.0],
+    "phase": [0, 1],
+    "all_failed_with": "ACK=4 on first DPIDR transfer"
+  },
+  "trace_observation": {
+    "expected_ack_lsb_first": "001",
+    "sampled_ack": "100",
+    "interpretation": "main's fixed IDDR Q2/Q1 sampling slot loses alignment with target ACK updates as FCLK is reduced; this is a sampling-window/phase issue rather than a simple divider arithmetic failure"
+  },
+  "hardware_programmed": false,
+  "notes": [
+    "This is an RTL/XSim reproduction using the main RTL and main testbench; it is not a board measurement.",
+    "The 50 MHz SWCLK point passes while 25 MHz and below fail in the same target transaction, matching the previously documented low-frequency concern."
+  ]
+}
