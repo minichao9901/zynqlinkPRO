@@ -425,6 +425,14 @@ static uint32_t DAP_SWJ_Pins(const uint8_t *request, uint8_t *response) {
 #ifndef DAP_MAX_SWCLK_HZ
 #define DAP_MAX_SWCLK_HZ 60000000U
 #endif
+/* The target's JTAG-DP needs about 0.83 us to complete one AP access. Above
+ * roughly 50 MHz TCK it answers WAIT and every word costs two DR scans, which
+ * cancels the extra clock: measured block reads peak at 45 MHz (2.53 MB/s) and
+ * fall back to 2.30 MB/s at 60 MHz. Clocks are a maximum, so clamp JTAG here;
+ * SWD keeps the full DAP_MAX_SWCLK_HZ. */
+#ifndef DAP_MAX_JTAG_TCK_HZ
+#define DAP_MAX_JTAG_TCK_HZ 45000000U
+#endif
 static uint32_t DAP_SWJ_Clock(const uint8_t *request, uint8_t *response) {
 #if ((DAP_SWD != 0) || (DAP_JTAG != 0))
   uint32_t clock;
@@ -447,6 +455,8 @@ static uint32_t DAP_SWJ_Clock(const uint8_t *request, uint8_t *response) {
     *response = DAP_ERROR;
     return ((4U << 16) | 1U);
   }
+  if ((DAP_Data.debug_port == DAP_PORT_JTAG) && (clock > DAP_MAX_JTAG_TCK_HZ))
+    clock = DAP_MAX_JTAG_TCK_HZ;
   ps_set_fclk0_hz(clock * 2U);
   /* FCLK runs at 2x SWCLK, so the transfer half-cycle must be one FCLK
    * cycle (delay_fast=0).  The RTL reset value is slow; program it here. */
