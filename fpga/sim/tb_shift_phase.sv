@@ -17,7 +17,7 @@ module tb_shift_phase;
         .tck(tck_o),.tms(),.tdi(),.busy(busy_o),.done(done_o),.rx_data(rx_o));
 
     jtag_shift u_new(.clk(clk),.rst_n(rst_n),.start(start),.count(12'd43),
-        .half_q(half_q),.mult(2'd0),.variable_tms(0),.tms_value(0),.exit_last(0),
+        .half_q(half_q),.sample_off(16'hFFFF),.mult(2'd0),.variable_tms(0),.tms_value(0),.exit_last(0),
         .capture(0),.capture_rise(0),.tdi_mode(2'd0),.tms_data(256'd0),
         .tdi_data(256'd0),.tdo(1'b1),
         .tck(tck_n),.tms(),.tdi(),.busy(busy_n),.done(done_n),.rx_data(rx_n));

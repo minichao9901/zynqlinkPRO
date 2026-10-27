@@ -50,6 +50,8 @@ module tb_jtag_timing;
     // which is why simulation looked better than the board. Delay all three
     // together so their relative timing stays correct.
     real tckout_ns = 0.0;
+    reg [15:0] tb_sample_off = 16'd0;
+    initial begin $value$plusargs("sampleoff=%d", tb_sample_off); end
     initial begin $value$plusargs("tckout=%f", tckout_ns); end
     wire tck_pin, tms_pin, tdi_pin;
     assign #(tckout_ns) tck_pin = tck;
@@ -71,7 +73,7 @@ module tb_jtag_timing;
     jtag_core dut(.clk(clk),.rst_n(rst_n),.start(start),.invalidate(invalidate),
         .operation(op),.request(req),.wdata(wd),.seq_count(9'd0),.seq_data(256'd0),
         .seq_tms(1'b0),.ir_length(8'd4),.ir_before(11'd0),.ir_after(11'd5),
-        .dr_before(8'd0),.dr_after(8'd1),.half_q(tb_half_q),.idle_cycles(4'd1),
+        .dr_before(8'd0),.dr_after(8'd1),.half_q(tb_half_q),.sample_off(tb_sample_off),.idle_cycles(4'd1),
         .late_return(mode[4]),.tdo(mode[0] ? tdo_rise : tdo_fall),.next_valid(1'b0),.next_request(8'd0),
         .next_wdata(32'd0),.next_ready(),.result_valid(valid),.busy(busy),
         .ack(ack),.rdata(data),.tck(tck),.tms(tms),.tdi(tdi),

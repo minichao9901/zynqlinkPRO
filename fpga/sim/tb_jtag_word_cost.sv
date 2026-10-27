@@ -44,7 +44,7 @@ module tb_jtag_word_cost;
     jtag_core dut(.clk(clk),.rst_n(rst_n),.start(start),.invalidate(invalidate),
         .operation(op),.request(req),.wdata(wd),.seq_count(9'd0),.seq_data(256'd0),
         .seq_tms(1'b0),.ir_length(8'd4),.ir_before(11'd0),.ir_after(11'd5),
-        .dr_before(8'd0),.dr_after(8'd1),.half_q(40'd65536),.idle_cycles(idle[3:0]),
+        .dr_before(8'd0),.dr_after(8'd1),.half_q(40'd65536),.sample_off(16'hFFFF),.idle_cycles(idle[3:0]),
         .late_return(late[0]),.tdo(tdo),.next_valid(next_valid),
         .next_request(next_request),.next_wdata(next_wdata),
         .next_ready(next_ready),.result_valid(valid),.busy(busy),

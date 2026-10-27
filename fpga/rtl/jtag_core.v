@@ -15,6 +15,7 @@ module jtag_core (
     input wire [10:0] ir_before,ir_after,
     input wire [7:0] dr_before,dr_after,
     input wire [39:0] half_q,    // base half period, Q16 FCLK cycles
+    input wire [15:0] sample_off, // capture offset from the rising edge
     input wire [3:0] idle_cycles,
     input wire late_return,
     input wire tdo,
@@ -70,7 +71,7 @@ module jtag_core (
     assign cache_valid=ir_valid;
     assign sequence_result=phy_rx;
     jtag_shift u_shift(.clk(clk),.rst_n(rst_n),.start(phy_start),.count(phy_count),
-        .half_q(half_q),.mult(phy_mult),.variable_tms(phy_variable_tms),.tms_value(phy_tms),
+        .half_q(half_q),.sample_off(sample_off),.mult(phy_mult),.variable_tms(phy_variable_tms),.tms_value(phy_tms),
         .exit_last(phy_exit),.capture(phy_capture),.tdi_mode(phy_tdi_mode),
         .capture_rise(phy_capture_rise),
         .tms_data(phy_tms_data),.tdi_data(phy_tdi_data),.tdo(tdo),

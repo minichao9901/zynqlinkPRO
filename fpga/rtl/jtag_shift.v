@@ -10,7 +10,8 @@
 module jtag_shift (
     input wire clk,rst_n,start,
     input wire [11:0] count,
-    input wire [39:0] half_q,   // base half period, Q16 FCLK cycles
+    input wire [39:0] half_q,
+    input wire [15:0] sample_off, // capture offset from the rising edge
     input wire [1:0] mult,      // 0: x1, 1: x2, 3: x4
     input wire variable_tms,tms_value,exit_last,capture,
     input wire capture_rise,
@@ -36,9 +37,19 @@ module jtag_shift (
     // compress the final half period of every segment.
     wire gen_en = busy || (start && count != 0);
 
+    // When the segment samples at the rising edge (raw sequences) the sample
+    // point is the edge itself, so the offset must be zero; otherwise the
+    // offset places the capture inside the high phase, which is the knob that
+    // lets calibration move the sample in whole FCLK cycles.
+    // 0xFFFF keeps the legacy behaviour of capturing on the falling edge; any
+    // other value captures sample_off FCLK cycles after the rising edge instead.
+    wire use_sample = (sample_off != 16'hFFFF) && !cap_rise;
+
     swj_clk_gen u_clk_gen(.clk(clk),.rst_n(rst_n),.enable(gen_en),
-        .half_q(eff_half_q),.sample_off(16'd0),
-        .clk_out(),.edge_tick(tick),.sample_tick());
+        .half_q(eff_half_q),.sample_off(use_sample ? sample_off : 16'h7FFF),
+        .clk_out(),.edge_tick(tick),.sample_tick(sample_tick));
+
+    wire sample_tick;
 
     always @(posedge clk or negedge rst_n) begin
         if(!rst_n) begin
@@ -64,7 +75,7 @@ module jtag_shift (
                 end
                 else begin
                     tck<=0;
-                    if(cap && !cap_rise) rx_data[bit_index]<=tdo;
+                    if(cap && !cap_rise && !use_sample) rx_data[bit_index]<=tdo;
                     if(remaining==1) begin busy<=0;done<=1;end
                     else begin
                         remaining<=remaining-1'b1;bit_index<=bit_index+1'b1;
@@ -73,6 +84,9 @@ module jtag_shift (
                         tdi<=dm==2 ? ds[1] : dm==1;
                     end
                 end
+                // Capture inside the high phase, sample_off FCLK cycles after
+                // the rising edge, instead of at the falling edge itself.
+                if(sample_tick && cap && use_sample) rx_data[bit_index]<=tdo;
             end
         end
     end

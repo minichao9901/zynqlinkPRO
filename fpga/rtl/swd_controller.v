@@ -235,6 +235,7 @@ module swd_controller #(
     wire [31:0] jtag_stat_cycles,jtag_stat_bits,jtag_stat_transfers;
     reg  [39:0] jtag_half_q;   // base JTAG half period, Q16 FCLK cycles
     reg  [3:0]  jtag_idle;     // Run-Test/Idle TCK at the end of each DR frame
+    reg  [15:0] jtag_sample;   // TDO capture offset from the rising edge
     wire jtag_invalidate=s_axi_wvalid && s_axi_wready &&
         ((write_addr==8'h80 && s_axi_wdata!=jtag_config) ||
          (write_addr==8'h84 && s_axi_wdata!=jtag_ir_config) ||
@@ -425,7 +426,7 @@ module swd_controller #(
             engine_reset_count <= 0;
             trace_index <= 0;
             jtag_config<=2;jtag_ir_config<=4;jtag_dr_config<=0;jtag_operation<=0;
-            jtag_half_q<=40'd65536;jtag_idle<=4'd1;
+            jtag_half_q<=40'd65536;jtag_idle<=4'd1;jtag_sample<=16'hffff;
             jtag_seq_tms<=0;jtag_sample_early<=0;jtag_return_late<=0;manual_pins<=0;
             swj_data <= 256'd0;
             swj_count <= 8'd0;
@@ -504,6 +505,7 @@ module swd_controller #(
                     8'h98: if(!core_busy) begin jtag_sample_early<=s_axi_wdata[0];jtag_return_late<=s_axi_wdata[4];end
                     8'hcc: if(!core_busy) jtag_half_q<=s_axi_wdata;
                     8'hd0: if(!core_busy) jtag_idle<=s_axi_wdata[3:0];
+                    8'hd4: if(!core_busy) jtag_sample<=s_axi_wdata[15:0];
                     default: ;
                 endcase
             end
@@ -598,6 +600,7 @@ module swd_controller #(
                     8'hbc:rdata_reg<=jtag_sequence_data[255:224];
                     8'hcc:rdata_reg<=jtag_half_q;
                     8'hd0:rdata_reg<={28'd0,jtag_idle};
+                    8'hd4:rdata_reg<={16'd0,jtag_sample};
                     8'hc0:rdata_reg<=jtag_stat_cycles;
                     8'hc4:rdata_reg<=jtag_stat_bits;
                     8'hc8:rdata_reg<=jtag_stat_transfers;
@@ -753,7 +756,7 @@ module swd_controller #(
         .seq_data(swj_data),.seq_tms(jtag_seq_tms),.ir_length(jtag_ir_config[7:0]),
         .ir_before(jtag_ir_config[18:8]),.ir_after(jtag_ir_config[29:19]),
         .dr_before(jtag_dr_config[7:0]),.dr_after(jtag_dr_config[15:8]),
-        .half_q(jtag_half_q),.idle_cycles(jtag_idle),
+        .half_q(jtag_half_q),.sample_off(jtag_sample),.idle_cycles(jtag_idle),
         .late_return(jtag_return_late),
         // Both phases use the IOB IDDR. Q1 is consumed one FCLK after its
         // rising sample, Q2 half an FCLK after its falling sample. The DR

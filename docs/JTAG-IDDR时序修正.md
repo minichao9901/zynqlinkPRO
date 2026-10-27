@@ -313,3 +313,24 @@ idle 修掉之后重试不再是瓶颈，但 60 MHz 的**数据**仍不可靠，
 - **不可用**：FCLK 70 / 80 / 90 / 100（TCK 35–50）
 
 重构前 FCLK 90 是好的（45 MHz、2.53 MB/s 就发生在那里），重构后 TCK 输出延迟多了约 2–3 ns，把这个窗口推走了。所以"恢复 45 MHz"不是调比例，而是要把采样相位整体挪回 2–3 ns——也就是相位可移采样时钟那件事。
+## 试过并否掉：FCLK 粒度的采样偏移
+
+参考 HFLink 的做法（`REG_TIMING_SIMPLING` 独立采样比较值 + 延迟链），把 `swj_clk_gen` 里早就留好但一直接 0 的 `sample_off` 接了出来：
+
+- `jtag_shift` 新增 `sample_off` 端口，非 `0xFFFF` 时在**上升沿之后第 N 个 FCLK** 采 TDO，`0xFFFF` 保持原来的"下降沿采样"；
+- `jtag_core` 透传，`swd_controller` 新增 CSR `0xD4`，复位值 `0xFFFF`；
+- `tb_jtag_timing` 增加 `+sampleoff=`，`run_jtag_timing_sweep.py` 增加 `--sampleoff`。
+
+仿真结果（tckout=7、往返 22–26 ns、四个相位）：
+
+| 配置 | legacy（下降沿） | 上升沿采 | 上升沿+1 |
+| --- | ---: | ---: | ---: |
+| 45 MHz，FCLK 90，半周期 1.0 | **6/12** | 0/12 | – |
+| 45 MHz，FCLK 120，半周期 1.333 | **6/12** | 1/12 | 0/12 |
+| 50 MHz，FCLK 100，半周期 1.0 | **4/12** | 0/12 | – |
+
+**粗调无效，而且比现状更差。** 原因是纯算术的：45–60 MHz 时一个 bit 周期只有 11–17 ns，而这里最小可调步长是 **一个 FCLK = 8.33 ns**，半周期本身又只有 1.0–1.33 个 FCLK——根本没有"中间采样点"可放。这个旋钮只在半周期 ≥2 个 FCLK（≤31 MHz，本来就正常）时才有意义。
+
+所以 HFLink 的三层里，我们缺的是**最细的那层**：它的 IODELAY 是亚纳秒级（8 位 DLYSTEP），而 `REG_TIMING_SIMPLING` 和延迟链都只是 FCLK 粒度。要挪 2–3 ns，只能上 `IDELAYE2`（7 系列约 78 ps/tap）。
+
+保留代码：`sample_off` 默认 `0xFFFF` 等于旧行为，全部回归（core + 三个 pipeline）通过，不影响现有验收。
