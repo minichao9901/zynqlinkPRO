@@ -23,5 +23,6 @@ void DAP_JTAG_ClockChanged(void);
 void DAP_JTAG_SetTiming(uint32_t value);
 void DAP_JTAG_SetClock(uint32_t hz);
 void DAP_JTAG_ProgramHalfQ(void);
+int DAP_JTAG_ChainProbe(uint32_t expect);
 uint8_t DAP_JTAG_MemTransfer(uint32_t request,uint32_t *data);
 #endif

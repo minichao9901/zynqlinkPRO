@@ -100,20 +100,30 @@ static int calibrate(void) {
      * chained packet path has to be validated too before this can be trusted
      * at high TCK. */
     const uint32_t modes[4]={0U,1U,17U,16U};
-    for(unsigned mode=0;mode<4;mode++) {
-        uint32_t value=0U;
-        swd_write32(JTAG_TIMING,modes[mode]);
-        if((swd_read32(JTAG_TIMING)&17U)!=modes[mode]) continue;
-        /* A pins write invalidates the IR cache, forcing a TAP reset before
-         * the scan: clock changes can leave the TAP mid-scan. */
-        swd_write32(JTAG_PINS,swd_read32(JTAG_PINS));
-        if(run(3,2,&value)!=1 || (value&0x0fff0fffU)!=0x0ba00477U) continue;
-        if(dp_roundtrip_ok(&context)) {
-            uint32_t clock=Xil_In32(SLCR_FPGA0_CLK_CTRL);
-            int restored=context_restore(&context);
-            clock_restore(clock);swd_write32(JTAG_TIMING,modes[mode]);
-            timing_dirty=!restored;swd_write32(JTAG_OPERATION,0);return restored ? 0 : -1;
+    for(unsigned attempt=0;attempt<8U;attempt++) {
+        for(unsigned mode=0;mode<4;mode++) {
+            uint32_t value=0U;
+            swd_write32(JTAG_TIMING,modes[mode]);
+            if((swd_read32(JTAG_TIMING)&17U)!=modes[mode]) continue;
+            /* A pins write invalidates the IR cache, forcing a TAP reset before
+             * the scan: clock changes can leave the TAP mid-scan. */
+            swd_write32(JTAG_PINS,swd_read32(JTAG_PINS));
+            if(run(3,2,&value)!=1 || (value&0x0fff0fffU)!=0x0ba00477U) continue;
+            if(dp_roundtrip_ok(&context) && DAP_JTAG_ChainProbe(context.cpuid)) {
+                uint32_t clock=Xil_In32(SLCR_FPGA0_CLK_CTRL);
+                int restored=context_restore(&context);
+                clock_restore(clock);swd_write32(JTAG_TIMING,modes[mode]);
+                timing_dirty=!restored;swd_write32(JTAG_OPERATION,0);
+                return restored ? 0 : -1;
+            }
         }
+        /* No phase produced a correct chained read. Serve a lower rate instead
+         * of a link that validates and then corrupts block data. */
+        uint32_t next=jtag_req_hz*4U/5U;
+        if(!jtag_req_hz || next<1000000U) break;
+        DAP_JTAG_SetClock(next);
+        swd_write32(JTAG_PINS,swd_read32(JTAG_PINS));
+        swd_write32(JTAG_OPERATION,0);
     }
     /* No clock stepping here any more: FCLK is fixed and the half period
      * carries the frequency, so a rate that does not validate is reported

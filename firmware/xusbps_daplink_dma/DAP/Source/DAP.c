@@ -1556,6 +1556,33 @@ static void dbg_pkt_flush(void)
 #endif
 }
 
+#if (DAP_JTAG != 0) && (DAP_SWD != 0)
+/* Read two consecutive words through the packet engine so the calibration
+ * exercises the chained path the host actually uses: back-to-back AP scans
+ * with no gap between them, unlike the single-transfer check. TAR and CSW are
+ * already set by the caller. */
+static uint32_t DAP_SWD_TransferBlock(const uint8_t *request, uint8_t *response);
+int DAP_JTAG_ChainProbe(uint32_t expect) {
+  /* 256 chained reads of the read-only CPUID (AddrInc is zero, so every word
+   * is the same register). That is long enough to reproduce the rare single
+   * bit error that a two-word probe misses, and it never writes target memory. */
+  static uint8_t req[4] __attribute__((aligned(4)));
+  static uint32_t rsp[280] __attribute__((aligned(32)));
+  uint8_t *p = (uint8_t *)rsp;
+  uint32_t n, i;
+  memset(rsp, 0, sizeof rsp);
+  req[0] = ID_DAP_TransferBlock; req[1] = 0U; req[2] = 1U; req[3] = 0x0FU;  /* 256 words */
+  n = DAP_SWD_TransferBlock(req, rsp);
+  if (n != 3U + 256U * 4U) return 0;
+  if (p[0] != 0U || p[1] != 1U || p[2] != DAP_TRANSFER_OK) return 0;
+  for (i = 0; i < 256U; ++i) {
+    uint32_t w;
+    memcpy(&w, p + 3 + i * 4U, 4);
+    if (w != expect) return 0;
+  }
+  return 1;
+}
+#endif
 static uint32_t DAP_SWD_TransferBlock(const uint8_t *request, uint8_t *response) {
   const uint8_t *head = request;
   uint8_t *out = response + 3;

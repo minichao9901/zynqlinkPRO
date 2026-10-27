@@ -32,6 +32,9 @@ void Xil_Out32(uintptr_t a,uint32_t d) {
     assert(a>=JTAG_ROUTE && a<JTAG_LIMIT);regs[(a-JTAG_ROUTE)/4]=d;
 }
 uint32_t probe_target_dp_select(void) {return selected;}
+/* The chained-path probe lives in DAP.c and drives the packet engine; this
+ * harness models only the core, so it always reports a good chain. */
+int DAP_JTAG_ChainProbe(uint32_t expect) {(void)expect;return 1;}
 static int ps_set_fclk0_hz(uint32_t hz) {
     assert(hz==20000000U);clock_value=(1U<<20)|(50U<<8);return (int)hz;
 }
