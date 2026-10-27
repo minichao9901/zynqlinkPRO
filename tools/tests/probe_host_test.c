@@ -112,6 +112,10 @@ int main(void) {
     fail_send=0;kick(&usb,&cdc);assert(cdc.busy && sent_len[3]==512);
     probe_usb_event(&usb,3,XUSBPS_EP_EVENT_DATA_TX,(void *)sent_buffer[3]);assert(!cdc.busy && cdc.out==1);
     probe_usb_event(&usb,3,XUSBPS_EP_EVENT_DATA_TX,(void *)(sent_buffer[3]+512));assert(!cdc.busy && cdc.out==1);
+    kick(&usb,&cdc);assert(!cdc.busy && sent_len[3]==512); // No per-chunk ZLP.
+    timer+=2000;kick(&usb,&cdc);assert(cdc.busy && cdc.zlp && sent_len[3]==0 && cdc.out==1);
+    probe_usb_event(&usb,3,XUSBPS_EP_EVENT_DATA_TX,(void *)sent_buffer[3]);
+    assert(!cdc.busy && !cdc_needs_zlp && cdc.out==1); // ZLP owns no payload slot.
     // Reset invalidates every old queue and stops sampling, including late completions.
     probe_usb_reset();probe_poll(&usb);assert(mode==0 && cdc.in==cdc.out && hss.in==hss.out && pending_len==0);
     probe_usb_event(&usb,3,XUSBPS_EP_EVENT_DATA_TX,(void *)(sent_buffer[3]+512));assert(cdc.out==0);

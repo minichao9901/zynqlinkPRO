@@ -183,7 +183,9 @@ def test_hss(probe, mem, dev, base, version, wide, seconds):
             assert reply[:4] == b'\x06\x01\x00\x01'
             assert reply[4:] == fixture[0x900+4*i:0x904+4*i], 'DAP TAR/CSW context was not restored'
         # Intentional host pause must fill queues and count skipped samples.
-        time.sleep(0.05)
+        # PL now adds eight packet banks ahead of the eight DDR USB slots.
+        # At 10 kHz/u32 they hold about 0.2 s; exceed that capacity explicitly.
+        time.sleep(0.3)
         deadline = time.monotonic()+seconds
         while time.monotonic() < deadline:
             accept(bytes(dev.read(0x87, 512, timeout=1000)))

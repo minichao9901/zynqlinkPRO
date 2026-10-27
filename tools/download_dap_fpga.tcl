@@ -30,10 +30,10 @@ fpga -f $bit
 after 300
 targets -set -filter {name =~ "ARM*#0"}
 rst -processor
-puts "LOADED_SWD_FEATURES=[mrd -value 0x4001004c]"
-set feature_hex [mrd -value 0x4001004c]
-scan $feature_hex %x feature_value
-if {$feature_value & 4} {puts "LOADED_PACKET_SIGNATURE=[mrd -value 0x42020000]"}
+configparams force-mem-access 1
+set feature_value [mrd -value 0x4001004c]
+puts [format "LOADED_SWD_FEATURES=0x%08X" $feature_value]
+if {$feature_value & 4} {puts [format "LOADED_PACKET_SIGNATURE=0x%08X" [mrd -value 0x42020000]]}
 dow -chunksize 4096 $elf
 con
 after 2000

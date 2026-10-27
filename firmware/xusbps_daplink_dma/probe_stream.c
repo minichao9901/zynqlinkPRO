@@ -36,6 +36,7 @@ typedef struct {
     uint16_t len[QSIZE];
     volatile uint32_t in, out;
     volatile uint8_t busy;
+    uint8_t zlp;
     uintptr_t final;
     uint32_t completed;
     uint8_t ep;
@@ -52,6 +53,9 @@ static tx_queue hid = {.data = &hid_data[0][0], .stride = 64, .ep = 6};
 static tx_queue cdc = {.ep = 3}, hss = {.ep = 7}, hid = {.ep = 6};
 #endif
 static uint8_t hid_rx[QSIZE][64];
+static uint8_t cdc_zlp[32] __attribute__((aligned(32)));
+static uint8_t cdc_needs_zlp;
+static uint32_t cdc_activity;
 static volatile uint32_t rx_in, rx_out, epoch;
 static volatile uint8_t configured, reset_pending;
 static uint32_t current_epoch;
@@ -109,9 +113,19 @@ static void kick(XUsbPs *usb, tx_queue *q) {
     int rc;
     uint8_t *p;
     uint32_t len;
-    if (!probe_session_live() || q->busy || q->in == q->out) {
+    if (!probe_session_live() || q->busy) {
         irq_restore(f);
         return;
+    }
+    if(q->in==q->out) {
+        // Windows CDC may retain an integral max-packet tail until a short
+        // packet terminates its URB. Flush once after 1 ms of inactivity;
+        // never add a ZLP between chunks of a sustained transfer.
+        if(q==&cdc && cdc_needs_zlp && (uint32_t)(now()-cdc_activity)>=24000) {
+            q->busy=1;q->zlp=1;q->final=(uintptr_t)cdc_zlp;
+            if(XUsbPs_EpBufferSend(usb,q->ep,cdc_zlp,0)!=XST_SUCCESS) q->busy=q->zlp=0;
+        }
+        irq_restore(f);return;
     }
 #ifdef __arm__
     p = q->data + (q->out % QSIZE) * q->stride;
@@ -121,10 +135,16 @@ static void kick(XUsbPs *usb, tx_queue *q) {
     len = q->len[q->out % QSIZE];
     q->final = (uintptr_t)p;
     q->busy = 1;
+    q->zlp=0;
     // CDC is a byte stream; don't append a ZLP to every internal chunk.
     rc = XUsbPs_EpBufferSend(usb, q->ep, p, len);
     if (rc != XST_SUCCESS)
         q->busy = 0; // Keep the same slot for retry.
+    else if(q==&cdc) {
+        uint32_t mps=usb->DeviceConfig.EpCfg[q->ep].In.MaxPacketSize;
+        if(!mps) mps=512;
+        cdc_needs_zlp=(len%mps)==0;cdc_activity=now();
+    }
     irq_restore(f);
 }
 const uint8_t probe_hid_report[] = {0x06, 0x00, 0xff, 0x09, 0x01, 0xa1, 0x01, 0x15, 0x00, 0x26,
@@ -145,9 +165,9 @@ void probe_usb_event(void *ref, u8 ep, u8 event, void *data) {
     if (event == XUSBPS_EP_EVENT_DATA_TX) {
         q = ep == 3 ? &cdc : ep == 7 ? &hss : &hid;
         if (configured && q->busy && q->final == (uintptr_t)data) {
-            q->out++;
+            if(q->zlp) {q->zlp=0;cdc_needs_zlp=0;}
+            else {q->out++;q->completed++;}
             q->busy = 0;
-            q->completed++;
         }
     } else if (event == XUSBPS_EP_EVENT_DATA_RX && ep == 6) {
         uint8_t *p;
@@ -900,6 +920,7 @@ void probe_poll(XUsbPs *usb) {
         if(pl_packets && PR(0)!=0x53545232U) { pl_packets=0;result=-10; }
         rtt_pl_running=rtt_paused=dma_pending=0;
         cdc.in = cdc.out = cdc.busy = 0;
+        cdc.zlp=cdc_needs_zlp=0;
         hss.in = hss.out = hss.busy = 0;
         hid.in = hid.out = hid.busy = 0;
         rx_out = rx_in;
