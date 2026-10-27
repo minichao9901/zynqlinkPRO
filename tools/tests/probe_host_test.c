@@ -63,15 +63,16 @@ int main(void) {
     for(i=0;i<8;i++) {put32(req+10+6*i,0x20000001+16*i);req[14+6*i]=8;req[15+6*i]=7;}
     control(req,res);assert(res[3]==0 && nvars==8 && nwords==24 && frame_size==64 && version==2);
     req[14]=255;control(req,res);assert((int8_t)res[3]==-6);
-    // One u32 plan: DEF is queued before DATA; gaps create packet boundaries.
+    // One u32 plan: DEF is queued before DATA; timestamp gaps stay in the
+    // fixed-period packet and are accounted for by the STAT skipped counter.
     command_req(req,0x32,10,14);put32(req+4,48);req[9]=1;put32(req+10,0x20000100);req[14]=4;req[15]=4;
     control(req,res);assert(res[3]==0 && nwords==1);
     command_req(req,0x32,1,2);control(req,res);assert(mode==2 && hss.in==1);
     p=hss.data[0];assert(p[3]==1 && p[2]==2 && get32(p+20)==48 && p[26]==1);
     queue_sample(1000,0x12345678);queue_sample(1048,0xabcdef01);queue_sample(1144,0x76543210);
-    hss_poll();assert(hss.in==2 && fill_count==1 && produced==3);
-    p=hss.data[1];assert(p[3]==2 && get32(p+8)==1000 && p[12]==2 && get32(p+16)==0x12345678 && get32(p+20)==0xabcdef01);
-    timer+=11000;hss_poll();assert(hss.in==3 && fill_count==0 && hss.data[2][12]==1);
+    hss_poll();assert(hss.in==1 && fill_count==3 && produced==3);
+    timer+=11000;hss_poll();assert(hss.in==2 && fill_count==0);
+    p=hss.data[1];assert(p[3]==2 && get32(p+8)==1000 && p[12]==3 && get32(p+16)==0x12345678 && get32(p+20)==0xabcdef01 && get32(p+24)==0x76543210);
     // FIFO remains untouched with a blocked USB queue.
     hss.in=hss.out+QSIZE;queue_sample(1192,0x55555555);before=sample_read;hss_poll();assert(sample_read==before);
     hss.out=hss.in;samples=0;sample_read=sample_write=0;
@@ -89,11 +90,12 @@ int main(void) {
     rtt_poll();assert(cdc.in==2 && get32(memory+0x118)==3 && !memcmp(cdc.data[1],memory+0x300,3));
     cdc.in=cdc.out+QSIZE;before=read_calls;rtt_poll();assert(read_calls==before);
     cdc.out=cdc.in;host_dtr=0;rtt_poll();assert(read_calls==before);host_dtr=1;
-    // Submission failure retains a slot; a data dTD does not free a pending ZLP.
+    // Submission failure retains a slot; CDC stream chunks no longer carry a
+    // per-chunk ZLP, so the data completion releases the slot immediately.
     mode=0;cdc.in=1;cdc.out=0;cdc.busy=0;cdc.len[0]=512;
     fail_send=1;kick(&usb,&cdc);assert(!cdc.busy && cdc.out==0);
     fail_send=0;kick(&usb,&cdc);assert(cdc.busy && sent_len[3]==512);
-    probe_usb_event(&usb,3,XUSBPS_EP_EVENT_DATA_TX,(void *)sent_buffer[3]);assert(cdc.busy && cdc.out==0);
+    probe_usb_event(&usb,3,XUSBPS_EP_EVENT_DATA_TX,(void *)sent_buffer[3]);assert(!cdc.busy && cdc.out==1);
     probe_usb_event(&usb,3,XUSBPS_EP_EVENT_DATA_TX,(void *)(sent_buffer[3]+512));assert(!cdc.busy && cdc.out==1);
     // Reset invalidates every old queue and stops sampling, including late completions.
     probe_usb_reset();probe_poll(&usb);assert(mode==0 && cdc.in==cdc.out && hss.in==hss.out && pending_len==0);

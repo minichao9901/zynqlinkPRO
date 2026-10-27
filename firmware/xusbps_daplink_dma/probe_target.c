@@ -15,9 +15,10 @@ static void restore_clock(void) {
     DAP_Data = saved_dap;
 }
 void probe_target_forget(void) { claimed = saved = link_ready = 0; }
-static uint8_t command[1040] __attribute__((aligned(32)));
-static uint8_t response[1040] __attribute__((aligned(32)));
-static uint8_t scratch[1024] __attribute__((aligned(32)));
+int probe_target_claimed(void) { return claimed && probe_session_live(); }
+static uint8_t command[4112] __attribute__((aligned(32)));
+static uint8_t response[4112] __attribute__((aligned(32)));
+static uint8_t scratch[4096] __attribute__((aligned(32)));
 void probe_target_observe(uint32_t req, uint32_t data, uint8_t ack) {
     if (ack == 1 && (req & 15) == 8)
         select_shadow = data;
@@ -130,7 +131,9 @@ void probe_target_release(void) {
 }
 static int read_words(uint32_t addr, uint8_t *out, uint32_t count) {
     uint32_t n;
-    if (write_reg(8, 0) || write_reg(1, 0x23000052) || write_reg(5, addr))
+    // claim() leaves SELECT/CSW cached for the stream.  Only TAR changes at
+    // an AP page boundary; repeating SELECT+CSW here was a major RTT cost.
+    if (write_reg(5, addr))
         return -4;
     command[0] = 6;
     command[1] = 0;

@@ -17,15 +17,22 @@ module probe_sample_engine #(
     output reg core_start,
     output reg [7:0] core_req,
     output reg [31:0] core_wdata,
+    output wire core_next_valid,
+    output wire [7:0] core_next_req,
+    output wire [31:0] core_next_wdata,
     input wire core_busy, core_result_valid,
     input wire [2:0] core_ack,
     input wire core_parity_err,
     input wire [31:0] core_rdata
 );
     localparam IDLE=0, ISSUE=1, WAIT=2, ADVANCE=3, COMMIT=4, PUBLISH=5;
+    localparam FAST_DRW=5, FAST_LAST=6;
     reg [2:0] state;
     reg enabled, fault;
     reg [4:0] count, plan_index, item;
+    // Contiguous plans use the SWD posted-read pipeline. Sparse plans keep
+    // the TAR-per-word path because their addresses cannot be auto-incremented.
+    reg fast_span;
     reg [31:0] plan[0:23];
     // Slot stride is 32 words: timestamp followed by up to 24 data words.
     localparam FIFO_ADDR_W=$clog2(FIFO_SAMPLES)+5;
@@ -52,6 +59,14 @@ module probe_sample_engine #(
     wire ctrl = wr && waddr==0;
     wire finishing = state!=IDLE || (fault && core_busy);
     assign active = enabled || finishing;
+    // Consume the current result and launch the next posted transfer on the
+    // same ST_DONE edge of swd_core.  This removes the idle gap between DRW
+    // transactions while retaining the old retry path for WAIT/FAULT.
+    assign core_next_valid = (state==WAIT) && fast_span && core_result_valid &&
+                             core_ack==3'd1 && !core_parity_err && phase!=FAST_LAST;
+    assign core_next_req = (phase==3) ? ((count==1) ? 8'h0e : 8'h0f) :
+                           (phase==FAST_DRW && (item+1==count-1) ? 8'h0e : 8'h0f);
+    assign core_next_wdata = 0;
     always @* begin
         case(raddr)
         0: rdata={16'h4853,3'd0,count,7'd0,enabled};
@@ -60,6 +75,9 @@ module probe_sample_engine #(
         3: rdata=plan[plan_index<24 ? plan_index : 0];
         4: rdata=period;
         5: rdata=used!=0 ? fifo[(tail%FIFO_SAMPLES)*32+read_word] : 0;
+        // Data-only window: skip the timestamp word and advance the same
+        // FIFO cursor.  Version-2 HSS uses nominal period timestamps, so a
+        // sample needs one AXI read per value instead of timestamp+value.
         6: rdata=tick;
         7: rdata=skipped;
         default: rdata=0;
@@ -67,7 +85,7 @@ module probe_sample_engine #(
     end
     always @(posedge clk or negedge rst_n) begin
         if(!rst_n) begin
-            state<=IDLE; enabled<=0; fault<=0; count<=0; plan_index<=0;
+            state<=IDLE; enabled<=0; fault<=0; count<=0; plan_index<=0; fast_span<=0;
             item<=0; head<=0; tail<=0; read_word<=0; tick<=0; deadline<=0;
             sample_time<=0; period<=2400; skipped<=0; errors<=0;
             clock_hz<=100000000; fraction<=0; phase<=0; retries<=0;
@@ -86,7 +104,7 @@ module probe_sample_engine #(
                 case(waddr)
                 2: plan_index<=wdata[4:0];
                 3: if(plan_index<24) plan[plan_index]<={wdata[31:2],2'b00};
-                4: period<=wdata<48 ? 48 : (wdata>24000000 ? 24000000 : wdata);
+                4: period<=wdata<24 ? 24 : (wdata>24000000 ? 24000000 : wdata);
                 6: begin clock_hz<=wdata<24000000 ? 24000000 : wdata; fraction<=0; end
                 7: begin tick<=wdata; deadline<=wdata; fraction<=0; end
                 default: ;
@@ -100,6 +118,10 @@ module probe_sample_engine #(
                 if(!wdata[0]) enabled<=0;
                 else if(!active && wdata[12:8]!=0 && wdata[12:8]<=24 && available) begin
                     enabled<=1; count<=wdata[12:8]; setup_needed<=1;
+                    fast_span<=1;
+                    for (integer ci=1; ci<24; ci=ci+1)
+                        if (ci < wdata[12:8] && plan[ci] != plan[0] + (ci*4))
+                            fast_span<=0;
                     deadline<=tick; fault<=0;
                 end
             end
@@ -122,6 +144,8 @@ module probe_sample_engine #(
                 2: begin core_req<=8'h05; core_wdata<=plan[item]; end // TAR
                 3: begin core_req<=8'h0f; core_wdata<=0; end // prime posted DRW
                 4: begin core_req<=8'h0e; core_wdata<=0; end // RDBUFF
+                FAST_DRW: begin core_req<=8'h0f; core_wdata<=0; end
+                FAST_LAST: begin core_req<=8'h0e; core_wdata<=0; end
                 default: ;
                 endcase
                 core_start<=1; watchdog<=TIMEOUT; state<=WAIT;
@@ -133,11 +157,23 @@ module probe_sample_engine #(
                     end else if(core_ack!=1 || core_parity_err) begin
                         errors<=errors+1'b1; fault<=1; enabled<=0; state<=IDLE;
                     end else begin
-                        if(phase==4) begin
+                        if(phase==4 || phase==FAST_DRW || phase==FAST_LAST) begin
                             fifo_wen<=1; fifo_waddr<=(head%FIFO_SAMPLES)*32+item+1;
                             fifo_wdata<=core_rdata;
                         end
-                        state<=ADVANCE;
+                        if (fast_span && phase==3) begin
+                            if (count==1) phase<=FAST_LAST;
+                            else begin item<=0; phase<=FAST_DRW; end
+                            // core_next_valid keeps the SWD core busy with
+                            // the next transfer; remain in WAIT for its result.
+                            state<=WAIT;
+                        end else if (fast_span && phase==FAST_DRW) begin
+                            if (item+1==count-1) phase<=FAST_LAST;
+                            else item<=item+1'b1;
+                            state<=WAIT;
+                        end else if (fast_span && phase==FAST_LAST) begin
+                            state<=COMMIT;
+                        end else state<=ADVANCE;
                     end
                 end else if(watchdog==0) begin
                     errors<=errors+1'b1; fault<=1; enabled<=0; state<=IDLE;

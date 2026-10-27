@@ -17,6 +17,7 @@ void probe_before_dap(void);
 void probe_after_dap(void);
 void probe_target_observe(uint32_t request, uint32_t data, uint8_t ack);
 int probe_target_claim(uint32_t hz);
+int probe_target_claimed(void);
 void probe_target_release(void);
 void probe_target_forget(void);
 int probe_target_read(uint32_t addr, uint8_t *out, uint32_t size);

@@ -10,12 +10,23 @@
 #include "xusbps_endpoint.h"
 #include <string.h>
 
+// The standalone host state-machine harness supplies claim/release stubs but
+// does not link probe_target.c.  The ARM target provides the strong version.
+__attribute__((weak)) int probe_target_claimed(void) { return 0; }
+
 #define REG(n) (0x40010060U + 4U * (n))
 #define R(n) Xil_In32(REG(n))
 #define W(n, v) Xil_Out32(REG(n), (v))
 #define QSIZE 8U
 typedef struct {
-    uint8_t data[QSIZE][1024] __attribute__((aligned(32)));
+#ifdef __arm__
+    uint8_t *data;
+    uint32_t stride;
+#else
+    // Keep the deterministic host harness layout intact; the ARM build uses
+    // right-sized endpoint storage below to avoid wasting OCM on HSS/HID.
+    uint8_t data[QSIZE][1024];
+#endif
     uint16_t len[QSIZE];
     volatile uint32_t in, out;
     volatile uint8_t busy;
@@ -23,7 +34,17 @@ typedef struct {
     uint32_t completed;
     uint8_t ep;
 } tx_queue;
+#define CDC_SLOT_SIZE 2048U
+static uint8_t cdc_data[QSIZE][CDC_SLOT_SIZE] __attribute__((aligned(32)));
+static uint8_t hss_data[QSIZE][512] __attribute__((aligned(32)));
+static uint8_t hid_data[QSIZE][64] __attribute__((aligned(32)));
+#ifdef __arm__
+static tx_queue cdc = {.data = &cdc_data[0][0], .stride = CDC_SLOT_SIZE, .ep = 3};
+static tx_queue hss = {.data = &hss_data[0][0], .stride = 512, .ep = 7};
+static tx_queue hid = {.data = &hid_data[0][0], .stride = 64, .ep = 6};
+#else
 static tx_queue cdc = {.ep = 3}, hss = {.ep = 7}, hid = {.ep = 6};
+#endif
 static uint8_t hid_rx[QSIZE][64];
 static volatile uint32_t rx_in, rx_out, epoch;
 static volatile uint8_t configured, reset_pending;
@@ -58,7 +79,13 @@ static uint32_t now(void) {
 }
 int probe_session_live(void) { return configured && !reset_pending && current_epoch == epoch; }
 static int space(tx_queue *q) { return (uint32_t)(q->in - q->out) < QSIZE; }
-static uint8_t *slot(tx_queue *q) { return q->data[q->in % QSIZE]; }
+static uint8_t *slot(tx_queue *q) {
+#ifdef __arm__
+    return q->data + (q->in % QSIZE) * q->stride;
+#else
+    return q->data[q->in % QSIZE];
+#endif
+}
 static int publish(tx_queue *q, uint32_t len) {
     uint32_t f = irq_save();
     if (!probe_session_live() || !space(q)) {
@@ -80,17 +107,16 @@ static void kick(XUsbPs *usb, tx_queue *q) {
         irq_restore(f);
         return;
     }
+#ifdef __arm__
+    p = q->data + (q->out % QSIZE) * q->stride;
+#else
     p = q->data[q->out % QSIZE];
+#endif
     len = q->len[q->out % QSIZE];
     q->final = (uintptr_t)p;
-    // CDC reads must finish even when the last chunk is a multiple of MPS.
-    if (q == &cdc && len && !(len % 512))
-        q->final += len;
     q->busy = 1;
-    if (q->final != (uintptr_t)p)
-        rc = XUsbPs_EpBufferSendWithZLT(usb, q->ep, p, len);
-    else
-        rc = XUsbPs_EpBufferSend(usb, q->ep, p, len);
+    // CDC is a byte stream; don't append a ZLP to every internal chunk.
+    rc = XUsbPs_EpBufferSend(usb, q->ep, p, len);
     if (rc != XST_SUCCESS)
         q->busy = 0; // Keep the same slot for retry.
     irq_restore(f);
@@ -178,7 +204,7 @@ typedef struct {
 } variable;
 static variable vars[8];
 static uint32_t addresses[24], period = 2400, step = 100, plan_hash;
-static uint8_t nvars, nwords, frame_size, version = 1, flags;
+static uint8_t nvars, nwords, frame_size, version = 1, flags, direct_layout;
 static uint32_t produced, seq, formatted, fill_count, fill_time, last_stamp;
 static uint32_t skipped_base, tx_done_base, fill_started;
 static uint64_t elapsed;
@@ -186,7 +212,7 @@ static uint8_t fill[512] __attribute__((aligned(32)));
 static int have_stamp;
 static uint32_t rtt_base = 0x20000000, rtt_size = 65536, scan, cb, up, drained, polls, drains,
                 write_errors;
-static uint32_t pending_rd, pending_len, chunk = 1024;
+static uint32_t pending_rd, pending_len, chunk = 4096;
 static uint8_t channel, discard;
 static uint32_t backoff;
 
@@ -204,7 +230,6 @@ static int sampler_stop(void) {
     return 0;
 }
 static void header(uint8_t *p, uint8_t kind, uint32_t t, uint16_t n, uint16_t aux) {
-    memset(p, 0, 512);
     put16(p, 0x4a53);
     p[2] = version;
     p[3] = kind;
@@ -318,8 +343,6 @@ static void hss_poll(void) {
         if (!space(&hss))
             break;
         stamp = R(5);
-        for (i = 0; i < nwords; i++)
-            sample[i] = R(5);
         if (!have_stamp) {
             have_stamp = 1;
             last_stamp = stamp;
@@ -329,18 +352,28 @@ static void hss_poll(void) {
             last_stamp = stamp;
         }
         t = version == 2 ? stamp : (uint32_t)(elapsed / 24);
-        if (fill_count && t != fill_time + fill_count * step) {
-            if (flush_data())
-                break;
-        }
+        // A missed deadline is represented by the RTL skipped counter.  Keep
+        // packing the valid samples into the same fixed-period frame instead
+        // of flushing a one-sample USB packet on every timestamp gap.  The
+        // STAT stream reports the accumulated jump count separately.
         if (!fill_count) {
             fill_time = t;
             fill_started = now();
         }
         k = 16 + fill_count * frame_size;
-        for (i = 0; i < nvars; i++) {
-            memcpy(fill + k, ((uint8_t *)sample) + vars[i].word * 4 + vars[i].offset, vars[i].size);
-            k += vars[i].size;
+        if (direct_layout) {
+            // The common scope case is a contiguous list of aligned u32s.
+            // Read straight into the packet staging area and avoid the
+            // sample[] gather plus a second memcpy per variable.
+            for (i = 0; i < nwords; i++)
+                put32(fill + k + 4 * i, R(5));
+        } else {
+            for (i = 0; i < nwords; i++)
+                sample[i] = R(5);
+            for (i = 0; i < nvars; i++) {
+                memcpy(fill + k, ((uint8_t *)sample) + vars[i].word * 4 + vars[i].offset, vars[i].size);
+                k += vars[i].size;
+            }
         }
         produced++;
         fill_count++;
@@ -399,12 +432,17 @@ static void rtt_poll(void) {
         return;
     if (!discard && (!usbd_cdc_acm_get_dtr() || !space(&cdc)))
         return;
-    rc = probe_target_claim(requested_hz);
-    if (rc) {
-        swd_errors++;
-        result = (int8_t)rc;
-        backoff = now() + 240000;
-        return;
+    // Keep the SWD context claimed between polls.  probe_before_dap() still
+    // releases it when a real DAP command arrives, so ownership remains
+    // safe while the steady RTT path avoids a full save/restore per chunk.
+    if (!probe_target_claimed()) {
+        rc = probe_target_claim(requested_hz);
+        if (rc) {
+            swd_errors++;
+            result = (int8_t)rc;
+            backoff = now() + 240000;
+            return;
+        }
     }
     actual_hz = probe_target_fclk() / 2;
     if (pending_len) {
@@ -470,7 +508,8 @@ static void rtt_poll(void) {
         pending_rd = 0;
     rc = rtt_commit();
 end:
-    probe_target_release();
+    if (rc)
+        probe_target_release();
     if (rc) {
         swd_errors++;
         result = (int8_t)rc;
@@ -575,12 +614,17 @@ static int configure_hss(const uint8_t *req) {
         step = p;
         period = p * 24;
     } else {
-        if (p < 48)
-            p = 48;
+        if (p < 24)
+            p = 24;
         if (p > 24000000)
             p = 24000000;
         step = period = p;
     }
+    direct_layout = 1;
+    for (i = 0; i < n; i++)
+        if (plan[i].size != 4 || (plan[i].addr & 3) ||
+            (i && plan[i].addr != plan[i - 1].addr + 4))
+            direct_layout = 0;
     plan_hash = hash;
     return 0;
 }
@@ -698,8 +742,8 @@ static void control(const uint8_t *req, uint8_t *res) {
             if (hz)
                 requested_hz = hz;
             chunk = req[8] | ((uint32_t)req[9] << 8);
-            if (!chunk || chunk > 1024)
-                chunk = 1024;
+            if (!chunk || chunk > CDC_SLOT_SIZE)
+                chunk = CDC_SLOT_SIZE;
             discard = req[10] & 1;
         }
         break;

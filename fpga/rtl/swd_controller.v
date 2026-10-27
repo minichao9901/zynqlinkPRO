@@ -257,6 +257,9 @@ module swd_controller #(
     wire [7:0]  core_swj_count_sel;
     wire [7:0]  core_req_sel;
     wire [31:0] core_wdata_sel;
+    wire        core_next_valid_sel;
+    wire [7:0]  core_next_req_sel;
+    wire [31:0] core_next_wdata_sel;
 
     //=========================================================================
     // Start Pulse Generation
@@ -265,6 +268,9 @@ module swd_controller #(
     wire stream_active, stream_start;
     wire [7:0] stream_req;
     wire [31:0] stream_wdata, stream_rdata;
+    wire stream_next_valid;
+    wire [7:0] stream_next_req;
+    wire [31:0] stream_next_wdata;
     wire stream_wr = s_axi_wvalid && s_axi_wready && write_addr[6:5]==2'b11 && &s_axi_wstrb;
     wire stream_rd = s_axi_arvalid && s_axi_arready && s_axi_araddr[6:5]==2'b11;
     probe_sample_engine u_probe_sampler (
@@ -273,7 +279,8 @@ module swd_controller #(
         .wdata(s_axi_wdata), .rdata(stream_rdata),
         .available(!core_busy && !batch_active && !packet_active && !start_pulse),
         .active(stream_active), .core_start(stream_start), .core_req(stream_req),
-        .core_wdata(stream_wdata), .core_busy(core_busy),
+        .core_wdata(stream_wdata), .core_next_valid(stream_next_valid),
+        .core_next_req(stream_next_req), .core_next_wdata(stream_next_wdata), .core_busy(core_busy),
         .core_result_valid(core_result_valid), .core_ack(core_ack),
         .core_parity_err(core_parity_err), .core_rdata(core_rdata)
     );
@@ -561,6 +568,10 @@ module swd_controller #(
     assign core_swj_count_sel= batch_active ? batch_core_swj_count: swj_count;
     assign core_req_sel      = stream_active ? stream_req : packet_active ? packet_core_req   : (batch_active ? batch_core_req      : xfer_request);
     assign core_wdata_sel    = stream_active ? stream_wdata : packet_active ? packet_core_wdata : (batch_active ? batch_core_wdata    : xfer_wdata);
+    assign core_next_valid_sel = stream_active ? stream_next_valid :
+                                 packet_active ? packet_core_next_valid : 1'b0;
+    assign core_next_req_sel = stream_active ? stream_next_req : packet_core_next_request;
+    assign core_next_wdata_sel = stream_active ? stream_next_wdata : packet_core_next_wdata;
 
     //=========================================================================
     // SWD Core Instance
@@ -569,9 +580,9 @@ module swd_controller #(
         .clk           (clk),
         .rst_n         (engine_rst_n),
         .start         (core_start_sel),
-        .next_valid    (packet_active && packet_core_next_valid),
-        .next_request  (packet_core_next_request),
-        .next_wdata    (packet_core_next_wdata),
+        .next_valid    (core_next_valid_sel),
+        .next_request  (core_next_req_sel),
+        .next_wdata    (core_next_wdata_sel),
         .next_ready    (core_next_ready),
         .result_valid  (core_result_valid),
         .mode          (core_mode_sel),
