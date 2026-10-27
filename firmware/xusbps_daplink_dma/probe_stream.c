@@ -478,7 +478,14 @@ static int stop(void) {
     if(pl_packets && mode) {
         stopping=1;PW(0,0);
         if(mode==2) { W(0,0);hss_poll(); }
-        else if(rtt_pl_running) packet_poll();
+        else if(rtt_pl_running) {
+            uint32_t budget=10000;
+            do {
+                packet_poll();
+                if(!(PR(1)&8U) && !(PR(2)&0xfffU) && !dma_pending) break;
+                if(!space(&cdc)) break;
+            } while(--budget && probe_session_live());
+        }
         if((PR(1)&12U) || (PR(2)&0xfffU) || dma_pending ||
            (mode==2 && (R(1)>>16))) return -7;
         // A partial HSS packet is flushed autonomously after sampler stop.
