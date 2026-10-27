@@ -41,14 +41,25 @@ module tb_jtag_timing;
     // board's DAP_JTAG_AutoConfigure reports (IR 4 then 5, one bypass DR bit).
     wire chain=1'b1,dummy_first=1'b0;
     wire tdummy,tdap;
-    wire dap_in = chain && !dummy_first ? tdummy : tdi;
-    wire dummy_in = dummy_first ? tdap : tdi;
+    wire dap_in = chain && !dummy_first ? tdummy : tdi_pin;
+    wire dummy_in = dummy_first ? tdap : tdi_pin;
     wire tap_output = chain && dummy_first ? tdummy : tdap;
 
+    // TCK/TMS/TDI leave the fabric some nanoseconds after the FCLK edge that
+    // changes them. Without this the model lets the target react instantly,
+    // which is why simulation looked better than the board. Delay all three
+    // together so their relative timing stays correct.
+    real tckout_ns = 0.0;
+    initial begin $value$plusargs("tckout=%f", tckout_ns); end
+    wire tck_pin, tms_pin, tdi_pin;
+    assign #(tckout_ns) tck_pin = tck;
+    assign #(tckout_ns) tms_pin = tms;
+    assign #(tckout_ns) tdi_pin = tdi;
+
     jtag_dp_model #(.RETURN_NS(0)) ap(
-        .rst_n(rst_n),.tck(tck),.tms(tms),.tdi(dap_in),.tdo(tdap));
+        .rst_n(rst_n),.tck(tck_pin),.tms(tms_pin),.tdi(dap_in),.tdo(tdap));
     jtag_dp_model #(.IRLEN(5),.DUMMY(1),.RETURN_NS(0)) dummy(
-        .rst_n(rst_n),.tck(tck),.tms(tms),.tdi(dummy_in),.tdo(tdummy));
+        .rst_n(rst_n),.tck(tck_pin),.tms(tms_pin),.tdi(dummy_in),.tdo(tdummy));
 
     reg tdo_q = 1;
     always @(tap_output) tdo_q <= #(tdons) tap_output;

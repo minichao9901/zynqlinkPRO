@@ -239,3 +239,33 @@ idle 修掉之后重试不再是瓶颈，但 60 MHz 的**数据**仍不可靠，
 上限用 `jtag_block_bench` 复测：读 2.32 MB/s、写 1.86 MB/s @31.03 MHz。
 
 把上限解开的唯一途径是加宽采样余量（IDELAY 或接上 `sample_tick`）。由于重试已经被 idle 消除，一旦 60 MHz 的捕获可靠，吞吐就能接近帧受限的 5 MB/s，而不是被重试压回 2.8。
+## 仿真定位：不是相位选错，是 TCK 输出延迟
+
+给 `tb_jtag_timing` 加了 `tckout` 参数（TCK/TMS/TDI 离开 fabric 的延迟，默认 0）。之前的模型让目标在 FCLK 沿瞬间就响应，所以仿真一直比实板乐观。
+
+60 MHz（`half_q=65536`，FCLK 120 MHz）扫描结果：
+
+| tckout | TDO 往返 ≤22 ns | TDO 往返 ≥24 ns |
+| ---: | --- | --- |
+| 0 ns | mode 16/17 通过 | mode 16 通过、17 失败 |
+| 7 ns | mode 16 通过 | **四个模式全部失败** |
+
+30 MHz（`half_q=131072`）在 tckout=7、往返 22–26 ns 时始终至少有一个模式通过。
+
+结论：**真实 TDO 往返约 24 ns**，而 60 MHz 的位周期只有 16.7 ns；再叠加 TCK 输出延迟，60 MHz 在物理上不可捕获。重构前能过，是因为当时 TCK 输出路径更浅，余量刚好为正；新发生器加深了这条路径（`half_q` 多路选择 + 40 位计数器 → `tick` → `tck`），把它推成负数。这也解释了为什么加一根 LA 探头就能把可用频率从 60 拉到 35 MHz。
+
+## 下一步：把 SWJ 输出打进 IOB
+
+routed 报告显示三个输出寄存器都在 SLICE，不在 IOB：
+
+```
+u_jtag_core/u_shift/tck_reg  site=SLICE_X89Y127
+u_jtag_core/u_shift/tms_reg  site=SLICE_X85Y115
+u_jtag_core/u_shift/tdi_reg  site=SLICE_X83Y114
+```
+
+原因是端口 `swclk` 前有一个三选一 mux（`manual_pins[8]` / `jtag_tck` / `swclk_buf`），寄存器到焊盘之间多了 LUT 与走线延迟。
+
+修法：在 mux 之后加一级输出寄存器（`swclk_out <= mux(...)`），并对其 `set_property IOB TRUE`，让这一级落进 IOB。IOB 的 Tco 约 1–2 ns，比现在少 3–5 ns，正好是 60 MHz 缺的余量。代价是 TCK 相对采样逻辑整体后移一个 FCLK，需要让校准或相位选择补偿（现有 4 个相位提供半周期粒度，够表达一个周期）。
+
+实施顺序：改 RTL → 仿真重跑 `tckout` 扫描（预期 60 MHz 在往返 24 ns 时恢复通过）→ 加 IOB 约束 → 综合实现 → 上板验证。
