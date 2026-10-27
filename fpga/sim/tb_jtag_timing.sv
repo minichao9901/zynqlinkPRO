@@ -25,6 +25,10 @@ module tb_jtag_timing;
         forever #(clkns/2.0) clk = ~clk;
     end
 
+    reg [39:0] tb_half_q = 40'd65536;
+    integer hq_arg = 0;
+    initial begin if($value$plusargs("halfq=%d", hq_arg)) tb_half_q = hq_arg; end
+
     reg rst_n=0,start=0,invalidate=0;
     reg [2:0] op=0;
     reg [7:0] req=0;
@@ -56,7 +60,7 @@ module tb_jtag_timing;
     jtag_core dut(.clk(clk),.rst_n(rst_n),.start(start),.invalidate(invalidate),
         .operation(op),.request(req),.wdata(wd),.seq_count(9'd0),.seq_data(256'd0),
         .seq_tms(1'b0),.ir_length(8'd4),.ir_before(11'd0),.ir_after(11'd5),
-        .dr_before(8'd0),.dr_after(8'd1),.half_delay(4'd0),.idle_cycles(4'd1),
+        .dr_before(8'd0),.dr_after(8'd1),.half_q(tb_half_q),.idle_cycles(4'd1),
         .late_return(mode[4]),.tdo(mode[0] ? tdo_rise : tdo_fall),.next_valid(1'b0),.next_request(8'd0),
         .next_wdata(32'd0),.next_ready(),.result_valid(valid),.busy(busy),
         .ack(ack),.rdata(data),.tck(tck),.tms(tms),.tdi(tdi),

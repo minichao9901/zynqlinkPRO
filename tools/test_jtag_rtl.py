@@ -9,7 +9,7 @@ for top,extra in [
     ('tb_jtag_pipeline',['swd_core.v','swd_controller.v','swd_batch_engine.v',
       'dap_transfer_block_engine.v','probe_sample_engine.v','probe_rtt_engine.v','probe_stream_engine.v']),
 ]:
-    files=[root/'fpga/rtl'/s for s in ['jtag_shift.v','jtag_core.v']+extra]
+    files=[root/'fpga/rtl'/s for s in ['jtag_shift.v','jtag_core.v','swj_clk_gen.v']+extra]
     files+=[root/'fpga/sim/jtag_dp_model.sv',root/'fpga/sim'/f'{top}.sv']
     if extra:files+=[root/'fpga/sim/xpm_memory_tdpram.sv',root/'fpga/sim/tb_packet_axi.sv']
     exe=dest/(top+'.vvp')

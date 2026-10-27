@@ -14,7 +14,8 @@ module jtag_core (
     input wire [7:0] ir_length,
     input wire [10:0] ir_before,ir_after,
     input wire [7:0] dr_before,dr_after,
-    input wire [3:0] half_delay,idle_cycles,
+    input wire [39:0] half_q,    // base half period, Q16 FCLK cycles
+    input wire [3:0] idle_cycles,
     input wire late_return,
     input wire tdo,
     input wire next_valid,input wire [7:0] next_request,input wire [31:0] next_wdata,
@@ -55,8 +56,8 @@ module jtag_core (
     reg [3:0] capture_offset;
     reg phy_slow;
     reg phy_capture_rise;
-    wire [3:0] phy_min_delay=phy_capture_rise ? 4'd3 : phy_slow ? 4'd1 : 4'd0;
-    wire [3:0] phy_delay=half_delay<phy_min_delay ? phy_min_delay : half_delay;
+    // Half-period multiplier for segments that need a slower clock.
+    wire [1:0] phy_mult = phy_capture_rise ? 2'd3 : phy_slow ? 2'd1 : 2'd0;
     wire [2:0] scan_ack={scan_result[2],scan_result[0],scan_result[1]};
     wire [31:0] scan_data=scan_result[34:3];
     wire [31:0] normal_data=fenced_result_valid ? fenced_result : scan_data;
@@ -69,7 +70,7 @@ module jtag_core (
     assign cache_valid=ir_valid;
     assign sequence_result=phy_rx;
     jtag_shift u_shift(.clk(clk),.rst_n(rst_n),.start(phy_start),.count(phy_count),
-        .half_delay(phy_delay),.variable_tms(phy_variable_tms),.tms_value(phy_tms),
+        .half_q(half_q),.mult(phy_mult),.variable_tms(phy_variable_tms),.tms_value(phy_tms),
         .exit_last(phy_exit),.capture(phy_capture),.tdi_mode(phy_tdi_mode),
         .capture_rise(phy_capture_rise),
         .tms_data(phy_tms_data),.tdi_data(phy_tdi_data),.tdo(tdo),

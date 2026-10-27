@@ -9,9 +9,10 @@ module tb_jtag_core;
     reg late_return=0;
     wire [2:0] ack;wire [31:0] data;reg chain=0;
     wire [255:0] seq_result;
+    wire [39:0] tb_half_q = 40'd65536 << delay[1:0];
     jtag_core dut(.clk(clk),.rst_n(rst_n),.start(start),.invalidate(invalidate),.operation(op),.request(req),.wdata(wd),
         .seq_count(seq_count),.seq_data(seq_data),.seq_tms(seq_tms),.ir_length(irlen),.ir_before(ib),.ir_after(ia),
-        .dr_before(db),.dr_after(da),.half_delay(delay),.idle_cycles(4'd1),.late_return(late_return),.tdo(tdo),.next_valid(1'b0),
+        .dr_before(db),.dr_after(da),.half_q(tb_half_q),.idle_cycles(4'd1),.late_return(late_return),.tdo(tdo),.next_valid(1'b0),
         .next_request(8'd0),.next_wdata(32'd0),.next_ready(nready),.result_valid(valid),.busy(busy),
         .ack(ack),.rdata(data),.tck(tck),.tms(tms),.tdi(tdi),.sequence_result(seq_result),
         .fence_req(fence),.fence_done(fd),.fence_error(fe));

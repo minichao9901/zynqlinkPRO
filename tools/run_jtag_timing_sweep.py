@@ -18,7 +18,7 @@ RTL = ROOT / 'fpga/rtl'
 OUT = ROOT / 'build/jtag_timing'
 VIVADO = Path('E:/Xilinx/Vivado/2018.3/bin')
 
-SOURCES = [RTL / 'jtag_core.v', RTL / 'jtag_shift.v',
+SOURCES = [RTL / 'jtag_core.v', RTL / 'jtag_shift.v', RTL / 'swj_clk_gen.v',
            SIM / 'jtag_dp_model.sv', SIM / 'tb_jtag_timing.sv']
 
 
@@ -32,6 +32,7 @@ def main():
                     help='FCLK periods in ns')
     ap.add_argument('--tdons', default='12', help='TDO round trip in ns')
     ap.add_argument('--modes', default='0,1,16,17',help='IDDR phase bit0, previous-bit window bit4')
+    ap.add_argument('--halfq',type=int,default=65536,help='base half period, Q16 FCLK cycles')
     ap.add_argument('--output',type=Path,default=ROOT/'results/jtag/iddr_timing_sweep.json')
     a = ap.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
@@ -45,7 +46,7 @@ def main():
         clk_ps = int(round(float(clkns) * 1000))
         tdo_ps = int(round(float(tdons) * 1000))
         (OUT / 'sim_cfg.txt').write_text('%d %d %d\n' % (clk_ps, tdo_ps, int(late)))
-        sim = run(['vvp',str(exe)])
+        sim = run(['vvp',str(exe),'+halfq=%d'%a.halfq])
         text = (sim.stdout or '') + (sim.stderr or '')
         m = re.search(r'RESULT .*', text)
         line = m.group(0).strip() if m else 'RESULT(no output) %s' % text[-200:]
