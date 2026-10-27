@@ -94,6 +94,11 @@ static int dp_roundtrip_ok(const timing_context *c) {
 static int calibrate(void) {
     timing_context context;
     if(!context_capture(&context)) {swd_write32(JTAG_OPERATION,0);return -1;}
+    /* Mode preference is FCLK-dependent, not universal: mode 0 is correct at
+     * 30 MHz while 60 MHz needs 17. Ordering the list cannot express that, so
+     * the single-transfer check below is not sufficient to pick a mode; the
+     * chained packet path has to be validated too before this can be trusted
+     * at high TCK. */
     const uint32_t modes[4]={0U,1U,17U,16U};
     for(unsigned mode=0;mode<4;mode++) {
         uint32_t value=0U;
