@@ -12,20 +12,24 @@ void JTAG_Sequence(uint32_t,const uint8_t *,uint8_t *);
 #include "../../firmware/xusbps_daplink_dma/DAP/Source/JTAG_RTL.c"
 
 DAP_Data_t DAP_Data={.debug_port=2,.jtag_dev={.count=2,.ir_length={4,5},.ir_after={5,0}}};
-static uint32_t regs[8]={3,4|(5U<<19),256,0,0,0,0,14};
+/* The JTAG register window now extends past RX_DATA (scan statistics, half
+ * period), so model the whole 0x80..0xCF block. */
+#define JTAG_LIMIT 0x400100d0U
+static uint32_t regs[20]={3,4|(5U<<19),256,0,0,0,0,14,0,0,0,0,0,0,0,0,0,0,0,65536};
 static uint32_t selected=0x01000030U,posted;
 static uint32_t clock_value=(1U<<20)|(10U<<8),csw_value=0x23000052U,tar_value=0x20004a10U;
 static unsigned scans,valid_mode=17,mode_seen,ap_reads;
 uint32_t Xil_In32(uintptr_t a) {
     if(a==SWD_FEATURES)return 15;
     if(a==SLCR_FPGA0_CLK_CTRL)return clock_value;
-    assert(a>=JTAG_ROUTE && a<JTAG_RX_DATA);
+    if(a==0xF8000108U)return 54U<<12;   /* IO PLL FBDIV: 1.8 GHz */
+    assert(a>=JTAG_ROUTE && a<JTAG_LIMIT);
     return regs[(a-JTAG_ROUTE)/4] | (a==JTAG_TIMING ? 4U : 0U);
 }
 void Xil_Out32(uintptr_t a,uint32_t d) {
     if(a==SLCR_FPGA0_CLK_CTRL) {clock_value=d;return;}
     if(a==XSLCR_UNLOCK_ADDR || a==SLCR_LOCK_ADDR)return;
-    assert(a>=JTAG_ROUTE && a<JTAG_RX_DATA);regs[(a-JTAG_ROUTE)/4]=d;
+    assert(a>=JTAG_ROUTE && a<JTAG_LIMIT);regs[(a-JTAG_ROUTE)/4]=d;
 }
 uint32_t probe_target_dp_select(void) {return selected;}
 static int ps_set_fclk0_hz(uint32_t hz) {

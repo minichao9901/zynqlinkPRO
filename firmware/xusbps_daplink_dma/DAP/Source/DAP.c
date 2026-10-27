@@ -454,7 +454,14 @@ static uint32_t DAP_SWJ_Clock(const uint8_t *request, uint8_t *response) {
     *response = DAP_ERROR;
     return ((4U << 16) | 1U);
   }
-  ps_set_fclk0_hz(clock * 2U);
+  if (DAP_Data.debug_port == DAP_PORT_JTAG) {
+    /* JTAG keeps FCLK fixed and programs the half period instead, so every
+     * requested TCK comes from the same timing-closed clock and the capture
+     * margin no longer moves with the rate. */
+    DAP_JTAG_SetClock(clock);
+  } else {
+    ps_set_fclk0_hz(clock * 2U);
+  }
   /* FCLK runs at 2x SWCLK, so the transfer half-cycle must be one FCLK
    * cycle (delay_fast=0).  The RTL reset value is slow; program it here. */
   swd_write32(SWD_CFG, (swd_read32(SWD_CFG) & ~((0xFU << 13) | (1U << 17))) |

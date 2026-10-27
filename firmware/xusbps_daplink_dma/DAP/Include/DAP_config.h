@@ -452,7 +452,7 @@ __STATIC_INLINE void PORT_JTAG_SETUP (void) {
   swd_write32(JTAG_OPERATION,0);
   swd_write32(JTAG_TIMING,0);DAP_JTAG_ClockChanged();
   swd_write32(SWD_CFG,(1U<<0)|(1U<<4));
-  ps_set_fclk0_hz(100000000U);
+  ps_set_fclk0_hz(DAP_JTAG_FCLK_HZ);  // JTAG keeps FCLK fixed
 }
 
 /** Setup SWD I/O pins: SWCLK, SWDIO, and nRESET.

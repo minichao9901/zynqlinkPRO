@@ -16,6 +16,22 @@ static uint32_t fclk_now(void) {
     uint32_t d0=(reg>>8)&63U,d1=(reg>>20)&63U;
     return (d0 && d1) ? IO_PLL_HZ/d0/d1 : 0U;
 }
+/* JTAG keeps FCLK fixed and programs the half period in Q16 FCLK cycles, so
+ * every requested TCK is produced from the same timing-closed clock and the
+ * TDO capture margin stops moving with the rate. */
+static uint32_t jtag_req_hz=1000000U;
+void DAP_JTAG_ProgramHalfQ(void) {
+    uint32_t fclk=fclk_now();
+    if(!fclk) return;
+    uint32_t hq=(uint32_t)((((uint64_t)fclk<<16)+jtag_req_hz)/(2ULL*jtag_req_hz));
+    if(hq<65536U) hq=65536U;                 /* never exceed FCLK/2 */
+    swd_write32(JTAG_HALF_Q,hq);
+}
+void DAP_JTAG_SetClock(uint32_t hz) {
+    jtag_req_hz=hz ? hz : 1000000U;
+    ps_set_fclk0_hz(DAP_JTAG_FCLK_HZ);
+    DAP_JTAG_ProgramHalfQ();
+}
 /* Exercise DP/AP IR transitions with saved/restored CSW and TAR patterns,
  * plus reads of the read-only CPUID. SELECT is write-only on DPv0: preserve
  * its observed shadow. Calibration must never write through AP DRW. */
@@ -27,6 +43,7 @@ static void clock_restore(uint32_t value) {
     Xil_Out32(XSLCR_UNLOCK_ADDR,XSLCR_UNLOCK_CODE);
     Xil_Out32(SLCR_FPGA0_CLK_CTRL,value);
     Xil_Out32(SLCR_LOCK_ADDR,0x767bU);
+    DAP_JTAG_ProgramHalfQ();   /* the half period is expressed in FCLK cycles */
 }
 typedef struct {uint32_t clock,safe_clock,select,csw,tar,cpuid;unsigned saved;} timing_context;
 static int context_restore(timing_context *c) {
@@ -41,6 +58,7 @@ static int context_capture(timing_context *c) {
     extern uint32_t probe_target_dp_select(void);
     memset(c,0,sizeof(*c));c->clock=Xil_In32(SLCR_FPGA0_CLK_CTRL);c->select=probe_target_dp_select();
     uint32_t hz=fclk_now();ps_set_fclk0_hz(hz<20000000U ? hz : 20000000U);
+    DAP_JTAG_ProgramHalfQ();   /* keep the requested TCK across the slow window */
     c->safe_clock=Xil_In32(SLCR_FPGA0_CLK_CTRL);swd_write32(JTAG_TIMING,0);
     swd_write32(JTAG_PINS,swd_read32(JTAG_PINS));
     int ok=reg_write(4,0x50000032U) && reg_write(8,0) && ap_read(3,&c->csw) && ap_read(7,&c->tar);
@@ -63,40 +81,31 @@ static int dp_roundtrip_ok(const timing_context *c) {
     for(unsigned i=0;i<4;i++) if(!ap_read(15,&value) || value!=c->cpuid) return 0;
     return 1;
 }
-/* TDO arrives back through a fixed physical delay, so at TCK = FCLK/2 only
- * some FCLK settings can capture it. Verify both the IDCODE and a data
- * round trip, and if neither sampling mode works step the clock to the next
- * lower achievable FCLK until one does. Clocks are a maximum, so a lower
- * validated rate is acceptable; stepping one divider at a time keeps the
- * fallback as close to the request as the hardware allows. */
-#define JTAG_VALIDATE_ATTEMPTS 16U
-#define JTAG_VALIDATE_FLOOR_HZ 500000U
+/* TDO arrives back through a fixed physical delay. With FCLK fixed, the only
+ * remaining freedom is which edge samples it, so verify the IDCODE plus a data
+ * round trip for each IDDR phase and keep the first one that passes. */
 static int calibrate(void) {
     timing_context context;
     if(!context_capture(&context)) {swd_write32(JTAG_OPERATION,0);return -1;}
     const uint32_t modes[4]={0U,1U,17U,16U};
-    for(unsigned attempt=0;attempt<JTAG_VALIDATE_ATTEMPTS;attempt++) {
-        for(unsigned mode=0;mode<4;mode++) {
-            uint32_t value=0U;
-            swd_write32(JTAG_TIMING,modes[mode]);
-            if((swd_read32(JTAG_TIMING)&17U)!=modes[mode]) continue;
-            /* A pins write invalidates the IR cache, forcing a TAP reset
-             * before the scan: clock changes can leave the TAP mid-scan. */
-            swd_write32(JTAG_PINS,swd_read32(JTAG_PINS));
-            if(run(3,2,&value)!=1 || (value&0x0fff0fffU)!=0x0ba00477U) continue;
-            if(dp_roundtrip_ok(&context)) {
-                uint32_t clock=Xil_In32(SLCR_FPGA0_CLK_CTRL);
-                int restored=context_restore(&context);
-                clock_restore(clock);swd_write32(JTAG_TIMING,modes[mode]);
-                timing_dirty=!restored;swd_write32(JTAG_OPERATION,0);return restored ? 0 : -1;
-            }
+    for(unsigned mode=0;mode<4;mode++) {
+        uint32_t value=0U;
+        swd_write32(JTAG_TIMING,modes[mode]);
+        if((swd_read32(JTAG_TIMING)&17U)!=modes[mode]) continue;
+        /* A pins write invalidates the IR cache, forcing a TAP reset before
+         * the scan: clock changes can leave the TAP mid-scan. */
+        swd_write32(JTAG_PINS,swd_read32(JTAG_PINS));
+        if(run(3,2,&value)!=1 || (value&0x0fff0fffU)!=0x0ba00477U) continue;
+        if(dp_roundtrip_ok(&context)) {
+            uint32_t clock=Xil_In32(SLCR_FPGA0_CLK_CTRL);
+            int restored=context_restore(&context);
+            clock_restore(clock);swd_write32(JTAG_TIMING,modes[mode]);
+            timing_dirty=!restored;swd_write32(JTAG_OPERATION,0);return restored ? 0 : -1;
         }
-        uint32_t fclk=fclk_now();
-        if(!fclk || fclk<=JTAG_VALIDATE_FLOOR_HZ) break;
-        /* Ask for anything below the current rate: ps_set_fclk0_hz returns the
-         * highest achievable value not above the target, i.e. one divider step. */
-        ps_set_fclk0_hz(fclk-1U);
     }
+    /* No clock stepping here any more: FCLK is fixed and the half period
+     * carries the frequency, so a rate that does not validate is reported
+     * instead of being silently served slower. */
     (void)context_restore(&context);clock_restore(context.clock);
     swd_write32(JTAG_TIMING,0);swd_write32(JTAG_OPERATION,0);return -1;
 }
