@@ -26,6 +26,7 @@ if {!$impl_only} {
     # explicitly; Vivado 2018.3 does not discover them from the old XCI.
     set packet_rtl [file join $root fpga rtl dap_transfer_block_engine.v]
     if {[file exists $packet_rtl]} {add_files -norecurse $packet_rtl}
+    add_files -norecurse [file join $root fpga rtl swj_clk_gen.v]
     add_files -norecurse [file join $root fpga rtl probe_sample_engine.v]
     add_files -norecurse [file join $root fpga rtl probe_rtt_engine.v]
     add_files -norecurse [file join $root fpga rtl probe_stream_engine.v]

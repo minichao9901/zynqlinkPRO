@@ -13,7 +13,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_MODEL = Path('E:/Share/github/ZYNQ7020_YuanZi/ZYNQ_DAPLINK_RTL_100TO50MHz/'
                      'ZYNQ_DAPLINK_RTL_100TO50MHz.srcs/sim_1/imports/cortexm0')
-RTL = ['swd_core.v', 'probe_sample_engine.v', 'probe_rtt_engine.v', 'probe_stream_engine.v', 'swd_controller.v', 'swd_batch_engine.v', 'dap_transfer_block_engine.v']
+RTL = ['swj_clk_gen.v', 'swd_core.v', 'probe_sample_engine.v', 'probe_rtt_engine.v', 'probe_stream_engine.v', 'swd_controller.v', 'swd_batch_engine.v', 'dap_transfer_block_engine.v']
 SIM = ['sim_primitives.v', 'xpm_memory_tdpram.sv', 'tb_cortexm0_link.sv']
 MODEL = ['swd_cortexm0_target.v', 'CORTEXM0INTEGRATION.v', 'cortexm0ds_logic.v']
 
@@ -38,7 +38,8 @@ MATRIX = [
     ('ret30', ['+return_ns=30.0', '+packets']),
     ('ret50', ['+return_ns=50.0', '+packets']),
     ('phase1', ['+phase=1', '+packets']),
-    ('rxearly', ['+rx_early=1', '+packets']),
+    # rx_early was never consumed by this testbench/current main CSR. Do not
+    # count an ignored plusarg as coverage of an extra sampling mode.
 ]
 
 
@@ -86,6 +87,8 @@ def main():
               f'{"" if passed else "  " + fatal}', flush=True)
     (out / 'summary.json').write_text(json.dumps(rows, indent=2), encoding='utf-8')
     failed = [r['name'] for r in rows if not r['passed']]
+    if not rows:
+        raise SystemExit('No test cases selected')
     print(f'\n{len(rows) - len(failed)}/{len(rows)} passed')
     if failed:
         raise SystemExit('failed: ' + ', '.join(failed))

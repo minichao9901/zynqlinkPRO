@@ -31,29 +31,36 @@ module tb_engine_cases;
  task run; begin @(negedge clk);start=1;@(negedge clk);start=0; wait(done); @(negedge clk); end endtask
  initial begin
    rst_n=1;
-   for(i=0;i<1200;i=i+1)begin cmd_mem[i]=0; rsp_mem[i]=0; end
+   for(i=0;i<1024;i=i+1)cmd_mem[i]=0;
+   for(i=0;i<1200;i=i+1)rsp_mem[i]=0;
    // 1) read 1
    wait_left=0; fault_mode=0; wr_idx=0;
    cmd_mem[0]=32'h0f000106; packet_len=4; run;
    $display("read1: err=%b words=%0d hdr=%h d1=%h",error,response_words,rsp_mem[0],rsp_mem[1]);
+   if(error || response_words!=2 || rsp_mem[0]!==32'h00010001 || rsp_mem[1]!==32'h5a00000e)$fatal(1,"read1 contract");
    // 2) read 4 with 2 wait each
    wait_left=8;
    cmd_mem[0]=32'h0f000406; packet_len=4; run;
    $display("read4w: err=%b words=%0d hdr=%h d1=%h d4=%h",error,response_words,rsp_mem[0],rsp_mem[1],rsp_mem[4]);
+   if(error || response_words!=5 || rsp_mem[0]!==32'h00010004 || rsp_mem[1]!==32'h5a00000f || rsp_mem[4]!==32'h5a00000e || wait_left!=0)$fatal(1,"read retry contract");
    // 3) write 3 words
    wait_left=6; wr_idx=0;
    cmd_mem[0]=32'h0d000306; cmd_mem[1]=32'h11111111; cmd_mem[2]=32'h22222222; cmd_mem[3]=32'h33333333; packet_len=16; run;
    $display("write3: err=%b words=%0d hdr=%h w0=%h w1=%h w2=%h",error,response_words,rsp_mem[0],wr_cap[0],wr_cap[1],wr_cap[2]);
+   if(error || response_words!=1 || rsp_mem[0]!==32'h00010003 || wr_idx!=3 || wr_cap[0]!==32'h11111111 || wr_cap[1]!==32'h22222222 || wr_cap[2]!==32'h33333333)$fatal(1,"write retry/prefetch contract");
    // 4) FAULT
    fault_mode=1;
    cmd_mem[0]=32'h0f000206; packet_len=4; run;
    $display("fault: err=%b words=%0d hdr=%h state=%0d",error,response_words,rsp_mem[0],state_dbg);
+   if(!error || response_words!=1 || rsp_mem[0]!==32'h00040000)$fatal(1,"FAULT status");
    // 5) stuck core -> watchdog
    fault_mode=0; stuck_mode=1;
    cmd_mem[0]=32'h0f000106; packet_len=4; run;
    $display("stuck: err=%b words=%0d hdr=%h state=%0d",error,response_words,rsp_mem[0],state_dbg);
+   if(!error || response_words!=1 || rsp_mem[0]!==32'h00090000)$fatal(1,"watchdog status");
+   $display("PASS packet retry/error/watchdog contracts");
    $finish;
  end
- initial begin #4000000; $display("TIMEOUT state=%0d",state_dbg); $finish; end
+ initial begin #4000000; $fatal(1,"TIMEOUT state=%0d",state_dbg); end
 endmodule
 

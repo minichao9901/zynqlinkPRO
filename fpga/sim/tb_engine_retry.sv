@@ -9,6 +9,8 @@ module tb_dap_transfer_block_engine;
  reg [31:0] rsp_mem[0:1023];
  reg core_busy=0; reg [2:0] core_ack=0; reg core_parity_err=0; reg [31:0] core_rdata=0;
  wire core_start; wire [7:0] core_req; wire [31:0] core_wdata; wire core_mode;
+ reg [31:0] accepted_write;
+ always @(posedge clk)if(core_start && !core_busy && !core_req[1] && wait_left==0)accepted_write<=core_wdata;
  integer i; integer wait_left=2;
  dap_transfer_block_engine dut(.clk(clk),.rst_n(rst_n),.start(start),.packet_len(packet_len),
    .busy(busy),.done(done),.error(error),.response_words(response_words),.state_dbg(state_dbg),
@@ -31,10 +33,13 @@ module tb_dap_transfer_block_engine;
    for(i=0;i<1024;i=i+1)begin cmd_mem[i]=0; rsp_mem[i]=0; end
    cmd_mem[0]=32'h0f000206; packet_len=4; run;
    $display("read: err=%b words=%0d hdr=%h d1=%h d2=%h wait_left=%0d",error,response_words,rsp_mem[0],rsp_mem[1],rsp_mem[2],wait_left);
+   if(error || response_words!=3 || rsp_mem[0]!==32'h00010002 || rsp_mem[1]!==32'ha500000f || rsp_mem[2]!==32'ha500000e)$fatal(1,"posted read/retry data");
    wait_left=0;
    cmd_mem[0]=32'h0d000106; cmd_mem[1]=32'h12345678; packet_len=8; run;
    $display("write: err=%b words=%0d hdr=%h wdata=%h",error,response_words,rsp_mem[0],core_wdata);
+   if(error || response_words!=1 || rsp_mem[0]!==32'h00010001 || accepted_write!==32'h12345678)$fatal(1,"write payload/status");
+   $display("PASS synchronous BRAM/retry read/write payload");
    $finish;
  end
- initial begin #200000; $display("TIMEOUT state=%0d busy=%b done=%b",state_dbg,busy,done); $finish; end
+ initial begin #200000; $fatal(1,"packet test watchdog"); end
 endmodule

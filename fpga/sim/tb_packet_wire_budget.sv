@@ -1,7 +1,8 @@
 `timescale 1ns/1ps
 // Serial-frame budget with the real packet FSM and SWD core; no USB/PS/DMA.
 module tb_packet_wire_budget #(
- parameter integer CLK_HALF_NS=5, IDLE_CYCLES=1, TCO_NS=16
+ parameter real CLK_HALF_NS=5.0,
+ parameter integer IDLE_CYCLES=1, TCO_NS=16
 );
 reg clk=0;always #(CLK_HALF_NS) clk=~clk;
 reg rst_n=0,start=0;reg [15:0] packet_len=0;

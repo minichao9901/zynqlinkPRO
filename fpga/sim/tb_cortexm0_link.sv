@@ -26,6 +26,8 @@ module tb_cortexm0_link #(
   reg cmd_en=0; reg [3:0] cmd_we=0;
   reg [31:0] cmd_addr=0,cmd_data=0;
   reg rsp_en=0; reg [31:0] rsp_addr=0; wire [31:0] rsp_data;
+  reg pkt_en=0; reg [3:0] pkt_we=0;
+  reg [31:0] pkt_addr=0,pkt_wdata=0; wire [31:0] pkt_rdata;
   wire swclk; tri1 swdio;
   swd_controller dut(.clk(clk),.rst_n(rst_n),
     .s_axi_awaddr(awaddr),.s_axi_awprot(3'd0),.s_axi_awvalid(awvalid),.s_axi_awready(awready),
@@ -37,8 +39,8 @@ module tb_cortexm0_link #(
     .cmd_bram_addr(cmd_addr),.cmd_bram_wrdata(cmd_data),
     .rsp_bram_clk(clk),.rsp_bram_rst(1'b0),.rsp_bram_en(rsp_en),.rsp_bram_we(4'd0),
     .rsp_bram_addr(rsp_addr),.rsp_bram_wrdata(32'd0),.rsp_bram_rddata(rsp_data),
-    .pkt_bram_clk(clk),.pkt_bram_rst(1'b0),.pkt_bram_en(1'b0),.pkt_bram_we(4'd0),
-    .pkt_bram_addr(32'd0),.pkt_bram_wrdata(32'd0),
+    .pkt_bram_clk(clk),.pkt_bram_rst(1'b0),.pkt_bram_en(pkt_en),.pkt_bram_we(pkt_we),
+    .pkt_bram_addr(pkt_addr),.pkt_bram_wrdata(pkt_wdata),.pkt_bram_rddata(pkt_rdata),
     .swclk(swclk),.swdio(swdio));
 
   // Direction-aware return path prevents a delayed inout feedback loop.
@@ -71,6 +73,122 @@ module tb_cortexm0_link #(
       @(posedge clk);if(!awready||!wready)$fatal(1,"AXI write stalled");
       @(negedge clk);awvalid=0;wvalid=0;
       wait(bvalid);repeat(2)@(negedge clk);
+    end
+  endtask
+  // Full service path: real SWD pins -> real ARM MEM-AP -> sampler/RTT ->
+  // packet BRAM -> simulated DMA read/ACK. No forced core transaction results.
+  task pw(input integer addr,input [31:0] data);
+    @(negedge clk);pkt_addr=addr;pkt_wdata=data;pkt_en=1;pkt_we=15;
+    @(negedge clk);pkt_en=0;pkt_we=0;
+  endtask
+  task pr(input integer addr,output [31:0] data);
+    @(negedge clk);pkt_addr=addr;pkt_en=1;pkt_we=0;
+    repeat(2)@(negedge clk);data=pkt_rdata;pkt_en=0;
+  endtask
+  task pcfg(input integer idx,input [31:0] data);pw(24,idx);pw(28,data);endtask
+  task service_packet(output [31:0] descriptor);
+    integer n;
+    begin
+      descriptor=0;n=0;
+      while(descriptor==0 && n<200000)begin pr(8,descriptor);n=n+1;end
+      if(descriptor==0)$fatal(1,"service packet timeout sampler=%d rtt=%d stream=%d",
+          dut.u_probe_sampler.state,dut.u_probe_stream.u_rtt.state,dut.u_probe_stream.state);
+      if(dut.u_probe_stream.rtt_fault || dut.u_probe_sampler.fault)
+          $fatal(1,"service target error");
+    end
+  endtask
+  task service_idle;
+    integer n;reg [31:0] desc;
+    begin
+      n=0;
+      while(dut.stream_active && n<20000)begin @(negedge clk);n=n+1;end
+      if(dut.stream_active)$fatal(1,"service stop did not flush posted result");
+      // Finish an HSS partial bank after the sampler has flushed its tail.
+      pw(0,0);repeat(100)@(negedge clk);pr(8,desc);
+      while(desc!=0)begin pw(12,1);repeat(40)@(negedge clk);pr(8,desc);end
+    end
+  endtask
+  task hss_service(input integer count,input integer period_ticks);
+    integer i,bank,n,total,packets,capacity;reg [31:0] desc,v,tail,stamp,expected;
+    begin
+      pw(0,256);wr(7'h60,2);
+      target.sram[255]=32'ha1b2c3d4;target.sram[256]=32'he5f60718;
+      pcfg(0,count*4);pcfg(1,2);pcfg(2,period_ticks);pcfg(5,count);
+      for(i=0;i<count*4;i=i+1)pcfg(16+i,i);
+      wr(7'h78,$rtoi(500000000.0/half_ns));wr(7'h70,period_ticks);
+      for(i=0;i<count;i=i+1)begin wr(7'h68,i);wr(7'h6c,32'h200003fc+i*4);end
+      pw(0,1);wr(7'h60,(count<<8)|1);
+      capacity=496/(count*4);total=0;packets=0;n=0;
+      // Startup deadlines and overload can produce a partial packet. Verify
+      // its payload and acknowledge it; do not mistake a legal time gap for
+      // corruption. Moderate-rate cases must eventually fill an entire bank.
+      while((period_ticks>=48 ? n!=capacity : total<32) && packets<64)begin
+        service_packet(desc);bank=4096+desc[18:16]*2048;
+        pr(bank,v);if(v!==32'h02024a53)$fatal(1,"HSS header %h",v);
+        pr(bank+12,v);n=v[15:0];
+        if(n<1 || n>capacity)$fatal(1,"HSS sample count %d",n);
+        for(i=0;i<n*count;i=i+1)begin
+          pr(bank+16+i*4,v);expected=(i%count==0)?32'ha1b2c3d4:32'he5f60718;
+          if(v!==expected)$fatal(1,"HSS posted payload %d %h",i,v);
+        end
+        total=total+n;packets=packets+1;
+        if(period_ticks>=48 ? n!=capacity : total<32)pw(12,1);
+      end
+      if(packets==64)$fatal(1,"HSS did not reach requested sample coverage");
+      pr(12,tail);pr(bank+8,stamp);repeat(200)@(negedge clk);
+      pr(bank+8,v);if(v!==stamp)$fatal(1,"HSS bank changed before DMA ACK");
+      pr(12,v);if(v!==tail)$fatal(1,"HSS bank released before DMA ACK");
+      wr(7'h60,0);pw(12,1);service_idle();
+      xfer(8'h08,0,v);xfer(8'h05,32'h200003fc,v);
+      xfer(8'h0f,0,v);xfer(8'h0e,0,v);
+      if(v!==32'ha1b2c3d4)$fatal(1,"DAP context after HSS %h",v);
+      $display("SERVICES_HSS_PASS words=%0d period=%0d samples=%0d cross_1KiB=%0d",count,period_ticks,n,count>1);
+    end
+  endtask
+  task rtt_payload(input integer bank,input integer offset,input integer length);
+    integer i,j;reg [31:0] v,expected;
+    begin
+      for(i=0;i<(length+3)/4;i=i+1)begin
+        expected=0;
+        for(j=0;j<4;j=j+1)if(i*4+j<length)
+          expected[j*8+:8]=target.sram[(offset+i*4+j)/4][((offset+i*4+j)%4)*8+:8];
+        pr(bank+4*i,v);
+        for(j=0;j<4;j=j+1)if(i*4+j<length && v[j*8+:8]!==expected[j*8+:8])
+          $fatal(1,"RTT byte %d %h != %h",i*4+j,v,expected);
+      end
+    end
+  endtask
+  task rtt_service;
+    integer i,n,bank;reg [31:0] desc;
+    begin
+      pw(0,256);
+      for(i='h3f0/4;i<('h3f1+4093+3)/4;i=i+1)
+        target.sram[i]=32'h03020100+((i*4-'h3f0)*32'h01010101);
+      target.sram['h23fc/4]=32'h200003f1;target.sram['h2400/4]=4093;
+      target.sram['h2404/4]=2500;target.sram['h2408/4]=2;
+      pw(32,32'h200023f8);pw(36,32'h200003f1);pw(40,4093);pw(44,2);pw(48,2048);
+      pw(0,2);service_packet(desc);bank=4096+desc[18:16]*2048;
+      if(desc[11:0]!=2048 || !desc[24])$fatal(1,"RTT descriptor %h",desc);
+      rtt_payload(bank,'h3f3,2048);
+      repeat(200)@(negedge clk);
+      if(target.sram['h2408/4]!=2)$fatal(1,"RTT RdOff advanced before DMA");
+      pw(12,1);n=0;
+      while(dut.u_probe_stream.tail!=1 && n<20000)begin @(negedge clk);n=n+1;end
+      if(target.sram['h2408/4]!=2050)$fatal(1,"RTT release before RdOff completion");
+      service_packet(desc);bank=4096+desc[18:16]*2048;
+      if(desc[11:0]!=450)$fatal(1,"RTT remainder %h",desc);
+      rtt_payload(bank,'h3f1+2050,450);pw(0,0);pw(12,1);service_idle();
+      if(target.sram['h2408/4]!=2500)$fatal(1,"RTT final RdOff");
+      // Unaligned ring tail, then wrap to its head, with a new session.
+      pw(0,256);target.sram['h2404/4]=20;target.sram['h2408/4]=4050;
+      pw(44,4050);pw(48,128);pw(0,2);service_packet(desc);
+      if(desc[11:0]!=43)$fatal(1,"RTT ring tail %h",desc);
+      rtt_payload(4096+desc[18:16]*2048,'h3f1+4050,43);pw(12,1);
+      wait(dut.u_probe_stream.tail==1);service_packet(desc);
+      if(desc[11:0]!=20)$fatal(1,"RTT ring head %h",desc);
+      rtt_payload(4096+desc[18:16]*2048,'h3f1,20);pw(0,0);pw(12,1);service_idle();
+      if(target.sram['h2408/4]!=20)$fatal(1,"RTT ring wrap commit");
+      $display("SERVICES_RTT_PASS real MEM-AP unaligned 2048B/1KiB split, descriptor split, immutable bank, DMA-before-RdOff, ring tail/head");
     end
   endtask
   task rd(input [6:0] addr,output [31:0] data);
@@ -235,6 +353,10 @@ module tb_cortexm0_link #(
       xfer(8'h08,0,value);xfer(8'h01,32'h23000052,value);
       packet(2,0);packet(2,1);
       $display("RECOVERY_PASS active packet reset, SWJ reconnect and target SRAM");
+    end
+    if($test$plusargs("services"))begin
+      hss_service(1,24);hss_service(1,48);hss_service(2,240);rtt_service();
+      $display("SERVICES_PASS full physical SWD/HSS/RTT pipeline");
     end
     if($test$plusargs("errors"))begin
       xfer(8'h05,32'h20000000,value);

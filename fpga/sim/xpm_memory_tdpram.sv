@@ -1,4 +1,5 @@
 // Portable test model for the exact synchronous read/byte-write mode used here.
+`timescale 1ns/1ps
 module xpm_memory_tdpram #(
  parameter ADDR_WIDTH_A=10, ADDR_WIDTH_B=10, AUTO_SLEEP_TIME=0,
  BYTE_WRITE_WIDTH_A=8, BYTE_WRITE_WIDTH_B=8, CLOCKING_MODE="common_clock",

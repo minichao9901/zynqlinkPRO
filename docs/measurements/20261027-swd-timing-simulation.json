@@ -1,0 +1,1468 @@
+{
+  "baseline": "d42b60180e82fccb428c51613a0316776c2bc4fc",
+  "branch": "codex/swd-timing-generator",
+  "scope": "RTL simulation only; no synthesis, bitstream load, board access or board throughput claim",
+  "total_cases": 58,
+  "all_expectations_matched": true,
+  "functional_passes": 51,
+  "expected_rejections": [
+    "ack_t40_h0_a2",
+    "m0_ret8",
+    "m0_ret30",
+    "m0_ret50",
+    "main_ret8",
+    "main_ret30",
+    "main_ret50"
+  ],
+  "equivalence_half_edges": 36516557,
+  "control_matrix": {
+    "transactions": 8208,
+    "chains": 512,
+    "active_resets": 128,
+    "compared_half_edges": 22065302,
+    "reachable_state_mask": "0x1bfff",
+    "legacy_unreachable_state": "ST_RD_FINAL"
+  },
+  "production_rtl_sha256": {
+    "fpga/rtl/dap_transfer_block_engine.v": "85d03fa03966ecf2ae8599ba49ce21699060ab7bcdb27fc69f772bd492eed319",
+    "fpga/rtl/probe_rtt_engine.v": "10136ba15bbf387677053d95226703ac7563998843c0fc55d8082eee40f60bea",
+    "fpga/rtl/probe_sample_engine.v": "8200bed3b8248bc49dd277f0940703bd1154976a38ea0379f802d00089baf2b6",
+    "fpga/rtl/probe_stream_engine.v": "b9cf2be4ee3b9b6635516f66a108e6ea7e6e8672695cbff9455f43ff90be0ef1",
+    "fpga/rtl/swd_batch_engine.v": "2147786073a8ed8aa4a66c0c6c16a4e7ba34e222789af20cd84e24b74df70c41",
+    "fpga/rtl/swd_controller.v": "d135a25205afc7e8b014b8540072e7727005756f17c110f82cf6bb2ca7fdecd3",
+    "fpga/rtl/swd_core.v": "7246e1e69f88068c1cbf89ea052e29eca2875ae242b60c557a622a69fff47b48",
+    "fpga/rtl/swj_clk_gen.v": "79063dc850ba24e64fa676acfcd51cd0623bb71accb9ceeca3ce00dfc1d9f6fe"
+  },
+  "baseline_core_sha256": "173293c9da9ec0fcb0daec40f4e63c78e91eca2c3de800ffd3c5af187df16246",
+  "licensed_model_sha256": {
+    "swd_cortexm0_target.v": "49c9a05c6dfb0d2d8b6b725c73f4e44760873b9545f4da6aeb8d077e4475bfc3",
+    "CORTEXM0INTEGRATION.v": "066a627de2eb68a9d658c9ead936450c5c4ddf5812f300cb842e8d388c16b0f6",
+    "cortexm0ds_logic.v": "9a84f8fb641e3f0d5fb2f51b77c67b4e3c20f6f99b03c803948940d85a617d84"
+  },
+  "caveats": [
+    "Integer compatibility adapter and original FCLK/CSR policy retained; fractional timings tested on generator only.",
+    "8/30/50 ns default-Q2 connection failures reproduced on frozen main; expected rejection tests, not working configurations.",
+    "DesignStart AHB FAULT injection has an existing FAULT_SKIP limitation; wire/control tests independently cover FAULT.",
+    "DMA/USB are simulated drivers/production C mocks, not complete vendor hardware models.",
+    "No post-route STA or physical timing acceptance."
+  ],
+  "rows": [
+    {
+      "name": "generator",
+      "passed": true,
+      "expected_pass": true,
+      "matched": true,
+      "seconds": 1.981,
+      "equivalence": [],
+      "budget": [],
+      "report": "build/swd_timing_sim/summary_control_unit.json",
+      "log_sha256": "33e1cb6292d989b2e1a3f090908edabf755eb41a026192b9316c2b74689854f6"
+    },
+    {
+      "name": "control",
+      "passed": true,
+      "expected_pass": true,
+      "matched": true,
+      "seconds": 217.844,
+      "equivalence": [
+        [
+          "22065302",
+          "1bfff"
+        ]
+      ],
+      "budget": [],
+      "report": "build/swd_timing_sim/summary_control_unit.json",
+      "log_sha256": "937306f1749e9d75d4fbca79c4468f488f3cf9d8dd263a45157100eb5d8cb7e4"
+    },
+    {
+      "name": "wave_example",
+      "passed": true,
+      "expected_pass": true,
+      "matched": true,
+      "seconds": 3.617,
+      "equivalence": [
+        [
+          "169278",
+          "0bfff"
+        ]
+      ],
+      "budget": [],
+      "report": "build/swd_timing_sim/summary_budget_wave_wire.json",
+      "log_sha256": "00c7dddfb483b5935ea136d20415e8d0eb3b9bea30a845e43e9ec1cb0dc53037"
+    },
+    {
+      "name": "wire_p0_t16",
+      "passed": true,
+      "expected_pass": true,
+      "matched": true,
+      "seconds": 14.795,
+      "equivalence": [
+        [
+          "550343",
+          "010df"
+        ]
+      ],
+      "budget": [],
+      "report": "build/swd_timing_sim/summary_budget_wave_wire.json",
+      "log_sha256": "e0f0205c3fcd3d0a5d9fa3afd5a906e66f479de3356f300a088581ff03460c3c"
+    },
+    {
+      "name": "ack_t16_h0_a1",
+      "passed": true,
+      "expected_pass": true,
+      "matched": true,
+      "seconds": 0.107,
+      "equivalence": [
+        [
+          "185",
+          "0105d"
+        ]
+      ],
+      "budget": [],
+      "report": "build/swd_timing_sim/summary_budget_wave_wire.json",
+      "log_sha256": "4bc743f3de655103e3d8684ea57a38bac103129a07e6ed34e32b21f8d0f10ff5"
+    },
+    {
+      "name": "ack_t16_h0_a2",
+      "passed": true,
+      "expected_pass": true,
+      "matched": true,
+      "seconds": 0.098,
+      "equivalence": [
+        [
+          "55",
+          "0101d"
+        ]
+      ],
+      "budget": [],
+      "report": "build/swd_timing_sim/summary_budget_wave_wire.json",
+      "log_sha256": "03f703601a2392c14d913ca33900a998192387f80c29b7c55013face3120c1eb"
+    },
+    {
+      "name": "ack_t40_h0_a2",
+      "passed": false,
+      "expected_pass": false,
+      "matched": true,
+      "seconds": 0.107,
+      "equivalence": [
+        [
+          "55",
+          "0101d"
+        ]
+      ],
+      "budget": [],
+      "report": "build/swd_timing_sim/summary_budget_wave_wire.json",
+      "log_sha256": "b116590302812cc00b885843cb90c94d1b07481b2d1d82a4d198d283c8312120"
+    },
+    {
+      "name": "ack_t40_h2_a2",
+      "passed": true,
+      "expected_pass": true,
+      "matched": true,
+      "seconds": 0.103,
+      "equivalence": [
+        [
+          "73",
+          "1901d"
+        ]
+      ],
+      "budget": [],
+      "report": "build/swd_timing_sim/summary_budget_wave_wire.json",
+      "log_sha256": "71faebdb83e9f1e8023c14d616c8003945b9286ee1fc5469265723b3a3c8d516"
+    },
+    {
+      "name": "budget_50_idle0",
+      "passed": true,
+      "expected_pass": true,
+      "matched": true,
+      "seconds": 8.123,
+      "equivalence": [
+        [
+          "476665",
+          "010dd"
+        ]
+      ],
+      "budget": [
+        {
+          "words": 256,
+          "read": 0,
+          "idle": 0,
+          "half_ns": 5,
+          "cycles": 23655,
+          "rises": 11822,
+          "launches": 257
+        },
+        {
+          "words": 256,
+          "read": 1,
+          "idle": 0,
+          "half_ns": 5,
+          "cycles": 23653,
+          "rises": 11822,
+          "launches": 257
+        },
+        {
+          "words": 1022,
+          "read": 0,
+          "idle": 0,
+          "half_ns": 5,
+          "cycles": 94127,
+          "rises": 47058,
+          "launches": 1023
+        },
+        {
+          "words": 1022,
+          "read": 1,
+          "idle": 0,
+          "half_ns": 5,
+          "cycles": 94125,
+          "rises": 47058,
+          "launches": 1023
+        },
+        {
+          "words": 8,
+          "read": 0,
+          "idle": 0,
+          "half_ns": 5,
+          "cycles": 868,
+          "rises": 428,
+          "launches": 10
+        },
+        {
+          "words": 8,
+          "read": 1,
+          "idle": 0,
+          "half_ns": 5,
+          "cycles": 866,
+          "rises": 428,
+          "launches": 10
+        }
+      ],
+      "budget_matches_main": true,
+      "SWCLK_MHz": 50,
+      "report": "build/swd_timing_sim/summary_budget_wave_wire.json",
+      "log_sha256": "dbda71dee885d74f257d4ef12a53a79486799103a72f0a7dc39e019f5732706f"
+    },
+    {
+      "name": "budget_50_idle0_main",
+      "passed": true,
+      "expected_pass": true,
+      "matched": true,
+      "seconds": 3.332,
+      "equivalence": [],
+      "budget": [
+        {
+          "words": 256,
+          "read": 0,
+          "idle": 0,
+          "half_ns": 5,
+          "cycles": 23655,
+          "rises": 11822,
+          "launches": 257
+        },
+        {
+          "words": 256,
+          "read": 1,
+          "idle": 0,
+          "half_ns": 5,
+          "cycles": 23653,
+          "rises": 11822,
+          "launches": 257
+        },
+        {
+          "words": 1022,
+          "read": 0,
+          "idle": 0,
+          "half_ns": 5,
+          "cycles": 94127,
+          "rises": 47058,
+          "launches": 1023
+        },
+        {
+          "words": 1022,
+          "read": 1,
+          "idle": 0,
+          "half_ns": 5,
+          "cycles": 94125,
+          "rises": 47058,
+          "launches": 1023
+        },
+        {
+          "words": 8,
+          "read": 0,
+          "idle": 0,
+          "half_ns": 5,
+          "cycles": 868,
+          "rises": 428,
+          "launches": 10
+        },
+        {
+          "words": 8,
+          "read": 1,
+          "idle": 0,
+          "half_ns": 5,
+          "cycles": 866,
+          "rises": 428,
+          "launches": 10
+        }
+      ],
+      "report": "build/swd_timing_sim/summary_budget_wave_wire.json",
+      "log_sha256": "e3c60c6cf833fa08dbade494fd0bb239ac523596a4859ab0888d40d5b816f2ff"
+    },
+    {
+      "name": "budget_50_idle1",
+      "passed": true,
+      "expected_pass": true,
+      "matched": true,
+      "seconds": 7.869,
+      "equivalence": [
+        [
+          "487017",
+          "018dd"
+        ]
+      ],
+      "budget": [
+        {
+          "words": 256,
+          "read": 0,
+          "idle": 1,
+          "half_ns": 5,
+          "cycles": 24169,
+          "rises": 12079,
+          "launches": 257
+        },
+        {
+          "words": 256,
+          "read": 1,
+          "idle": 1,
+          "half_ns": 5,
+          "cycles": 24167,
+          "rises": 12079,
+          "launches": 257
+        },
+        {
+          "words": 1022,
+          "read": 0,
+          "idle": 1,
+          "half_ns": 5,
+          "cycles": 96173,
+          "rises": 48081,
+          "launches": 1023
+        },
+        {
+          "words": 1022,
+          "read": 1,
+          "idle": 1,
+          "half_ns": 5,
+          "cycles": 96171,
+          "rises": 48081,
+          "launches": 1023
+        },
+        {
+          "words": 8,
+          "read": 0,
+          "idle": 1,
+          "half_ns": 5,
+          "cycles": 886,
+          "rises": 437,
+          "launches": 10
+        },
+        {
+          "words": 8,
+          "read": 1,
+          "idle": 1,
+          "half_ns": 5,
+          "cycles": 884,
+          "rises": 437,
+          "launches": 10
+        }
+      ],
+      "budget_matches_main": true,
+      "SWCLK_MHz": 50,
+      "report": "build/swd_timing_sim/summary_budget_wave_wire.json",
+      "log_sha256": "bf8bab0b14ed4e3271c1623551b2a30b92e559121a15a8418db52fa660ddcc4e"
+    },
+    {
+      "name": "budget_50_idle1_main",
+      "passed": true,
+      "expected_pass": true,
+      "matched": true,
+      "seconds": 3.066,
+      "equivalence": [],
+      "budget": [
+        {
+          "words": 256,
+          "read": 0,
+          "idle": 1,
+          "half_ns": 5,
+          "cycles": 24169,
+          "rises": 12079,
+          "launches": 257
+        },
+        {
+          "words": 256,
+          "read": 1,
+          "idle": 1,
+          "half_ns": 5,
+          "cycles": 24167,
+          "rises": 12079,
+          "launches": 257
+        },
+        {
+          "words": 1022,
+          "read": 0,
+          "idle": 1,
+          "half_ns": 5,
+          "cycles": 96173,
+          "rises": 48081,
+          "launches": 1023
+        },
+        {
+          "words": 1022,
+          "read": 1,
+          "idle": 1,
+          "half_ns": 5,
+          "cycles": 96171,
+          "rises": 48081,
+          "launches": 1023
+        },
+        {
+          "words": 8,
+          "read": 0,
+          "idle": 1,
+          "half_ns": 5,
+          "cycles": 886,
+          "rises": 437,
+          "launches": 10
+        },
+        {
+          "words": 8,
+          "read": 1,
+          "idle": 1,
+          "half_ns": 5,
+          "cycles": 884,
+          "rises": 437,
+          "launches": 10
+        }
+      ],
+      "report": "build/swd_timing_sim/summary_budget_wave_wire.json",
+      "log_sha256": "523fbb3085873a8acda34845901e6505865e639f7ad67e97459c5ad316dc9702"
+    },
+    {
+      "name": "budget_50_idle2",
+      "passed": true,
+      "expected_pass": true,
+      "matched": true,
+      "seconds": 8.075,
+      "equivalence": [
+        [
+          "497369",
+          "018dd"
+        ]
+      ],
+      "budget": [
+        {
+          "words": 256,
+          "read": 0,
+          "idle": 2,
+          "half_ns": 5,
+          "cycles": 24683,
+          "rises": 12336,
+          "launches": 257
+        },
+        {
+          "words": 256,
+          "read": 1,
+          "idle": 2,
+          "half_ns": 5,
+          "cycles": 24681,
+          "rises": 12336,
+          "launches": 257
+        },
+        {
+          "words": 1022,
+          "read": 0,
+          "idle": 2,
+          "half_ns": 5,
+          "cycles": 98219,
+          "rises": 49104,
+          "launches": 1023
+        },
+        {
+          "words": 1022,
+          "read": 1,
+          "idle": 2,
+          "half_ns": 5,
+          "cycles": 98217,
+          "rises": 49104,
+          "launches": 1023
+        },
+        {
+          "words": 8,
+          "read": 0,
+          "idle": 2,
+          "half_ns": 5,
+          "cycles": 904,
+          "rises": 446,
+          "launches": 10
+        },
+        {
+          "words": 8,
+          "read": 1,
+          "idle": 2,
+          "half_ns": 5,
+          "cycles": 902,
+          "rises": 446,
+          "launches": 10
+        }
+      ],
+      "budget_matches_main": true,
+      "SWCLK_MHz": 50,
+      "report": "build/swd_timing_sim/summary_budget_wave_wire.json",
+      "log_sha256": "340ca7c199f7971234cbf042a3eb050c276dbddde602fe8d27e3a82bab788534"
+    },
+    {
+      "name": "budget_50_idle2_main",
+      "passed": true,
+      "expected_pass": true,
+      "matched": true,
+      "seconds": 3.287,
+      "equivalence": [],
+      "budget": [
+        {
+          "words": 256,
+          "read": 0,
+          "idle": 2,
+          "half_ns": 5,
+          "cycles": 24683,
+          "rises": 12336,
+          "launches": 257
+        },
+        {
+          "words": 256,
+          "read": 1,
+          "idle": 2,
+          "half_ns": 5,
+          "cycles": 24681,
+          "rises": 12336,
+          "launches": 257
+        },
+        {
+          "words": 1022,
+          "read": 0,
+          "idle": 2,
+          "half_ns": 5,
+          "cycles": 98219,
+          "rises": 49104,
+          "launches": 1023
+        },
+        {
+          "words": 1022,
+          "read": 1,
+          "idle": 2,
+          "half_ns": 5,
+          "cycles": 98217,
+          "rises": 49104,
+          "launches": 1023
+        },
+        {
+          "words": 8,
+          "read": 0,
+          "idle": 2,
+          "half_ns": 5,
+          "cycles": 904,
+          "rises": 446,
+          "launches": 10
+        },
+        {
+          "words": 8,
+          "read": 1,
+          "idle": 2,
+          "half_ns": 5,
+          "cycles": 902,
+          "rises": 446,
+          "launches": 10
+        }
+      ],
+      "report": "build/swd_timing_sim/summary_budget_wave_wire.json",
+      "log_sha256": "c4fd2f8e0fe4da3e0c419c96510b0cd5facbc9c62705980cbcb5461b2d46b5d7"
+    },
+    {
+      "name": "budget_60_idle1",
+      "passed": true,
+      "expected_pass": true,
+      "matched": true,
+      "seconds": 7.793,
+      "equivalence": [
+        [
+          "487016",
+          "018dd"
+        ]
+      ],
+      "budget": [
+        {
+          "words": 256,
+          "read": 0,
+          "idle": 1,
+          "half_ns": 4,
+          "cycles": 24169,
+          "rises": 12079,
+          "launches": 257
+        },
+        {
+          "words": 256,
+          "read": 1,
+          "idle": 1,
+          "half_ns": 4,
+          "cycles": 24167,
+          "rises": 12079,
+          "launches": 257
+        },
+        {
+          "words": 1022,
+          "read": 0,
+          "idle": 1,
+          "half_ns": 4,
+          "cycles": 96173,
+          "rises": 48081,
+          "launches": 1023
+        },
+        {
+          "words": 1022,
+          "read": 1,
+          "idle": 1,
+          "half_ns": 4,
+          "cycles": 96171,
+          "rises": 48081,
+          "launches": 1023
+        },
+        {
+          "words": 8,
+          "read": 0,
+          "idle": 1,
+          "half_ns": 4,
+          "cycles": 886,
+          "rises": 437,
+          "launches": 10
+        },
+        {
+          "words": 8,
+          "read": 1,
+          "idle": 1,
+          "half_ns": 4,
+          "cycles": 884,
+          "rises": 437,
+          "launches": 10
+        }
+      ],
+      "budget_matches_main": true,
+      "SWCLK_MHz": 60,
+      "report": "build/swd_timing_sim/summary_budget_wave_wire.json",
+      "log_sha256": "0b1bb42b57009acde473a51fd440aa71a68f2923db22e5cb65862790a8dca53e"
+    },
+    {
+      "name": "budget_60_idle1_main",
+      "passed": true,
+      "expected_pass": true,
+      "matched": true,
+      "seconds": 3.046,
+      "equivalence": [],
+      "budget": [
+        {
+          "words": 256,
+          "read": 0,
+          "idle": 1,
+          "half_ns": 4,
+          "cycles": 24169,
+          "rises": 12079,
+          "launches": 257
+        },
+        {
+          "words": 256,
+          "read": 1,
+          "idle": 1,
+          "half_ns": 4,
+          "cycles": 24167,
+          "rises": 12079,
+          "launches": 257
+        },
+        {
+          "words": 1022,
+          "read": 0,
+          "idle": 1,
+          "half_ns": 4,
+          "cycles": 96173,
+          "rises": 48081,
+          "launches": 1023
+        },
+        {
+          "words": 1022,
+          "read": 1,
+          "idle": 1,
+          "half_ns": 4,
+          "cycles": 96171,
+          "rises": 48081,
+          "launches": 1023
+        },
+        {
+          "words": 8,
+          "read": 0,
+          "idle": 1,
+          "half_ns": 4,
+          "cycles": 886,
+          "rises": 437,
+          "launches": 10
+        },
+        {
+          "words": 8,
+          "read": 1,
+          "idle": 1,
+          "half_ns": 4,
+          "cycles": 884,
+          "rises": 437,
+          "launches": 10
+        }
+      ],
+      "report": "build/swd_timing_sim/summary_budget_wave_wire.json",
+      "log_sha256": "894f72f0474ad05c9ff7bb8e4dae2d7402d5f466d73ed7785cc60bf6212c565c"
+    },
+    {
+      "name": "budget_60_idle2",
+      "passed": true,
+      "expected_pass": true,
+      "matched": true,
+      "seconds": 8.138,
+      "equivalence": [
+        [
+          "497368",
+          "018dd"
+        ]
+      ],
+      "budget": [
+        {
+          "words": 256,
+          "read": 0,
+          "idle": 2,
+          "half_ns": 4,
+          "cycles": 24683,
+          "rises": 12336,
+          "launches": 257
+        },
+        {
+          "words": 256,
+          "read": 1,
+          "idle": 2,
+          "half_ns": 4,
+          "cycles": 24681,
+          "rises": 12336,
+          "launches": 257
+        },
+        {
+          "words": 1022,
+          "read": 0,
+          "idle": 2,
+          "half_ns": 4,
+          "cycles": 98219,
+          "rises": 49104,
+          "launches": 1023
+        },
+        {
+          "words": 1022,
+          "read": 1,
+          "idle": 2,
+          "half_ns": 4,
+          "cycles": 98217,
+          "rises": 49104,
+          "launches": 1023
+        },
+        {
+          "words": 8,
+          "read": 0,
+          "idle": 2,
+          "half_ns": 4,
+          "cycles": 904,
+          "rises": 446,
+          "launches": 10
+        },
+        {
+          "words": 8,
+          "read": 1,
+          "idle": 2,
+          "half_ns": 4,
+          "cycles": 902,
+          "rises": 446,
+          "launches": 10
+        }
+      ],
+      "budget_matches_main": true,
+      "SWCLK_MHz": 60,
+      "report": "build/swd_timing_sim/summary_budget_wave_wire.json",
+      "log_sha256": "7e81b518fc241c4abcdf1a45933fb87ef7bce4d359732f12dc72c91e9166dbcc"
+    },
+    {
+      "name": "budget_60_idle2_main",
+      "passed": true,
+      "expected_pass": true,
+      "matched": true,
+      "seconds": 4.467,
+      "equivalence": [],
+      "budget": [
+        {
+          "words": 256,
+          "read": 0,
+          "idle": 2,
+          "half_ns": 4,
+          "cycles": 24683,
+          "rises": 12336,
+          "launches": 257
+        },
+        {
+          "words": 256,
+          "read": 1,
+          "idle": 2,
+          "half_ns": 4,
+          "cycles": 24681,
+          "rises": 12336,
+          "launches": 257
+        },
+        {
+          "words": 1022,
+          "read": 0,
+          "idle": 2,
+          "half_ns": 4,
+          "cycles": 98219,
+          "rises": 49104,
+          "launches": 1023
+        },
+        {
+          "words": 1022,
+          "read": 1,
+          "idle": 2,
+          "half_ns": 4,
+          "cycles": 98217,
+          "rises": 49104,
+          "launches": 1023
+        },
+        {
+          "words": 8,
+          "read": 0,
+          "idle": 2,
+          "half_ns": 4,
+          "cycles": 904,
+          "rises": 446,
+          "launches": 10
+        },
+        {
+          "words": 8,
+          "read": 1,
+          "idle": 2,
+          "half_ns": 4,
+          "cycles": 902,
+          "rises": 446,
+          "launches": 10
+        }
+      ],
+      "report": "build/swd_timing_sim/summary_budget_wave_wire.json",
+      "log_sha256": "5715b626df18ab253e352bd01eeb4aeea02cf926813147d7ab58070abade9e84"
+    },
+    {
+      "name": "tb_dap_transfer_block_engine",
+      "passed": true,
+      "expected_pass": true,
+      "matched": true,
+      "seconds": 0.146,
+      "equivalence": [],
+      "budget": [],
+      "report": "build/swd_timing_sim/summary_host_packet_probe.json",
+      "log_sha256": "2e8b6992d8e234dfbf852883d8c0fc960698ace66c5e9f70a5900c7e3f9b76e1"
+    },
+    {
+      "name": "tb_engine_cases",
+      "passed": true,
+      "expected_pass": true,
+      "matched": true,
+      "seconds": 1.668,
+      "equivalence": [],
+      "budget": [],
+      "report": "build/swd_timing_sim/summary_host_packet_probe.json",
+      "log_sha256": "716943afa62cccc828c9e5e2a2bc4eeeaf56032fa2d759fa5f3fbbbcae314031"
+    },
+    {
+      "name": "tb_engine_retry",
+      "passed": true,
+      "expected_pass": true,
+      "matched": true,
+      "seconds": 0.102,
+      "equivalence": [],
+      "budget": [],
+      "report": "build/swd_timing_sim/summary_host_packet_probe.json",
+      "log_sha256": "951fd2c87424dedfb497fb6808219069e5934769757f31977607e1643c254f3a"
+    },
+    {
+      "name": "tb_engine_lat1",
+      "passed": true,
+      "expected_pass": true,
+      "matched": true,
+      "seconds": 0.099,
+      "equivalence": [],
+      "budget": [],
+      "report": "build/swd_timing_sim/summary_host_packet_probe.json",
+      "log_sha256": "4586b43dfdf0e1d9f91edf8372f9408e7398addec4f5104000b0ee2e0c27adc7"
+    },
+    {
+      "name": "tb_packet_contract",
+      "passed": true,
+      "expected_pass": true,
+      "matched": true,
+      "seconds": 0.249,
+      "equivalence": [],
+      "budget": [],
+      "report": "build/swd_timing_sim/summary_host_packet_probe.json",
+      "log_sha256": "457503138f52324d60cfadc78a448e21a24b807dede8e948caf7cc4643e985f4"
+    },
+    {
+      "name": "packet_axi",
+      "passed": true,
+      "expected_pass": true,
+      "matched": true,
+      "seconds": 0.141,
+      "equivalence": [],
+      "budget": [],
+      "report": "build/swd_timing_sim/summary_host_packet_probe.json",
+      "log_sha256": "f1a4ce48220367d55fb43337aaa71bc42b95f86b1d766097b1612a066d399b81"
+    },
+    {
+      "name": "batch_dma",
+      "passed": true,
+      "expected_pass": true,
+      "matched": true,
+      "seconds": 0.61,
+      "equivalence": [],
+      "budget": [],
+      "report": "build/swd_timing_sim/summary_host_packet_probe.json",
+      "log_sha256": "8f1ff3f3147d21f727355c2409582c9efee0ccf37740d8278016a1bb773d00ce"
+    },
+    {
+      "name": "probe_sample",
+      "passed": true,
+      "expected_pass": true,
+      "matched": true,
+      "seconds": 0.185,
+      "equivalence": [],
+      "budget": [],
+      "report": "build/swd_timing_sim/summary_host_packet_probe.json",
+      "log_sha256": "627b237197438ab6e07e62a74bd6b3b8bd3ec49cf0aec3a25d77c37e935f00ef"
+    },
+    {
+      "name": "probe_pipe",
+      "passed": true,
+      "expected_pass": true,
+      "matched": true,
+      "seconds": 0.238,
+      "equivalence": [],
+      "budget": [],
+      "report": "build/swd_timing_sim/summary_host_packet_probe.json",
+      "log_sha256": "03cf2f08daf560ec8e6f134e07301d4b26b5a457920894ee818169c208880d09"
+    },
+    {
+      "name": "probe_stream_dma",
+      "passed": true,
+      "expected_pass": true,
+      "matched": true,
+      "seconds": 0.523,
+      "equivalence": [],
+      "budget": [],
+      "report": "build/swd_timing_sim/summary_host_packet_probe.json",
+      "log_sha256": "aa8d48b68756dd529c8bd05195d52ce841fea4bde425be98b2045ae7f5aaf5ce"
+    },
+    {
+      "name": "test_probe_host.py",
+      "matched": true,
+      "passed": true,
+      "report": "build/swd_timing_sim/summary_host_packet_probe.json",
+      "log_sha256": "ea73414f22c4a19f18f1cd19143a686efe9fea6a74cbb923edf5740860f00b9a"
+    },
+    {
+      "name": "test_dap_transport.py",
+      "matched": true,
+      "passed": true,
+      "report": "build/swd_timing_sim/summary_host_packet_probe.json",
+      "log_sha256": "93c6152de03079719602cda953973c5de8e127cce65dbdb31f5c431e485e933e"
+    },
+    {
+      "name": "m0_base",
+      "passed": true,
+      "matched": true,
+      "simulator": "XSim",
+      "seconds": 4.342,
+      "equivalence": [
+        [
+          "13903",
+          "010df"
+        ]
+      ],
+      "fault_model_skip": false,
+      "report": "build/swd_timing_sim/summary_m0.json",
+      "log_sha256": "bb33bd1aa2a1c74e6819585986fccad4804862c8af63d2da10b057368cad0c44"
+    },
+    {
+      "name": "m0_sampler",
+      "passed": true,
+      "matched": true,
+      "simulator": "XSim",
+      "seconds": 7.34,
+      "equivalence": [
+        [
+          "73147",
+          "010df"
+        ]
+      ],
+      "fault_model_skip": false,
+      "report": "build/swd_timing_sim/summary_m0.json",
+      "log_sha256": "5cce88a6082ae0fd938d6e9ca999917c133cee56a8829c53298331bbfad5aa62"
+    },
+    {
+      "name": "m0_words64",
+      "passed": true,
+      "matched": true,
+      "simulator": "XSim",
+      "seconds": 5.085,
+      "equivalence": [
+        [
+          "34447",
+          "010df"
+        ]
+      ],
+      "fault_model_skip": false,
+      "report": "build/swd_timing_sim/summary_m0.json",
+      "log_sha256": "d1bea0cf11d6f4e59f418a1a7778225fc618cc44e6619c7e0e4c74683681d683"
+    },
+    {
+      "name": "m0_packets",
+      "passed": true,
+      "matched": true,
+      "simulator": "XSim",
+      "seconds": 76.712,
+      "equivalence": [
+        [
+          "842915",
+          "010df"
+        ]
+      ],
+      "fault_model_skip": false,
+      "report": "build/swd_timing_sim/summary_m0.json",
+      "log_sha256": "3da494c5052bb630277175d3954fc5e1f0e75eff68909a1ef1c2067cb7edb6a3"
+    },
+    {
+      "name": "m0_packets_err",
+      "passed": true,
+      "matched": true,
+      "simulator": "XSim",
+      "seconds": 70.555,
+      "equivalence": [
+        [
+          "845681",
+          "010df"
+        ]
+      ],
+      "fault_model_skip": true,
+      "report": "build/swd_timing_sim/summary_m0.json",
+      "log_sha256": "096ba065789b13e37f25e452771a40b9903f8fa5575e872be838a6eb75aba7fb"
+    },
+    {
+      "name": "m0_ack1",
+      "passed": true,
+      "matched": true,
+      "simulator": "XSim",
+      "seconds": 3.717,
+      "equivalence": [
+        [
+          "14731",
+          "090ff"
+        ]
+      ],
+      "fault_model_skip": false,
+      "report": "build/swd_timing_sim/summary_m0.json",
+      "log_sha256": "d4932a6f58455398e98ac8e964831b9e5f92122090220788558cd823c6317773"
+    },
+    {
+      "name": "m0_ack2",
+      "passed": true,
+      "matched": true,
+      "simulator": "XSim",
+      "seconds": 3.66,
+      "equivalence": [
+        [
+          "15007",
+          "090ff"
+        ]
+      ],
+      "fault_model_skip": false,
+      "report": "build/swd_timing_sim/summary_m0.json",
+      "log_sha256": "7dc6059e95b5f7660a9df57764c371e16527599509c4bc2d33c3f52dc6369107"
+    },
+    {
+      "name": "m0_ack3",
+      "passed": true,
+      "matched": true,
+      "simulator": "XSim",
+      "seconds": 3.609,
+      "equivalence": [
+        [
+          "15283",
+          "090ff"
+        ]
+      ],
+      "fault_model_skip": false,
+      "report": "build/swd_timing_sim/summary_m0.json",
+      "log_sha256": "9dbdb1b58a86775933154bb1c988f69ffbbff48b33641bdb4dd4aeedcd010200"
+    },
+    {
+      "name": "m0_ack5",
+      "passed": true,
+      "matched": true,
+      "simulator": "XSim",
+      "seconds": 3.687,
+      "equivalence": [
+        [
+          "15835",
+          "090ff"
+        ]
+      ],
+      "fault_model_skip": false,
+      "report": "build/swd_timing_sim/summary_m0.json",
+      "log_sha256": "2823ff8a45c229ec4f61aa1985011c4ac302246d45fe2ddd1cafe5cad2279aaa"
+    },
+    {
+      "name": "m0_ack7",
+      "passed": true,
+      "matched": true,
+      "simulator": "XSim",
+      "seconds": 3.805,
+      "equivalence": [
+        [
+          "16387",
+          "090ff"
+        ]
+      ],
+      "fault_model_skip": false,
+      "report": "build/swd_timing_sim/summary_m0.json",
+      "log_sha256": "be41710c98caf25f24a42febd371739d1b606416d29dd59adfa5f868a77b4696"
+    },
+    {
+      "name": "m0_ack1_pkt_err",
+      "passed": true,
+      "matched": true,
+      "simulator": "XSim",
+      "seconds": 77.548,
+      "equivalence": [
+        [
+          "908141",
+          "190ff"
+        ]
+      ],
+      "fault_model_skip": true,
+      "report": "build/swd_timing_sim/summary_m0.json",
+      "log_sha256": "dbb2914a3111eed8be6912c806db893f1d0c51b049e9b31dcae90be701e9ecdf"
+    },
+    {
+      "name": "m0_ack3_pkt_err",
+      "passed": true,
+      "matched": true,
+      "simulator": "XSim",
+      "seconds": 91.026,
+      "equivalence": [
+        [
+          "961457",
+          "190ff"
+        ]
+      ],
+      "fault_model_skip": true,
+      "report": "build/swd_timing_sim/summary_m0.json",
+      "log_sha256": "9b37930dafbd4ae7e8a24b7c1afd90727367e3b7b142bd76c8490e4e82288400"
+    },
+    {
+      "name": "m0_ack7_pkt_err",
+      "passed": true,
+      "matched": true,
+      "simulator": "XSim",
+      "seconds": 114.951,
+      "equivalence": [
+        [
+          "1068089",
+          "190ff"
+        ]
+      ],
+      "fault_model_skip": true,
+      "report": "build/swd_timing_sim/summary_m0.json",
+      "log_sha256": "152688b56e5b1e84afc1eaf05deeca361807ac19481728ad8545bec424c95263"
+    },
+    {
+      "name": "m0_turn1",
+      "passed": true,
+      "matched": true,
+      "simulator": "XSim",
+      "seconds": 84.549,
+      "equivalence": [
+        [
+          "851993",
+          "010df"
+        ]
+      ],
+      "fault_model_skip": false,
+      "report": "build/swd_timing_sim/summary_m0.json",
+      "log_sha256": "3a14d670573206e925b2636875e046bfba15622b64a8939fd933b052a5e1bd8f"
+    },
+    {
+      "name": "m0_turn2",
+      "passed": true,
+      "matched": true,
+      "simulator": "XSim",
+      "seconds": 100.757,
+      "equivalence": [
+        [
+          "860747",
+          "010df"
+        ]
+      ],
+      "fault_model_skip": false,
+      "report": "build/swd_timing_sim/summary_m0.json",
+      "log_sha256": "409deb36161338cd5ca94bc1f389b8d8d35e815a858f38e0cab089e3bdb79b78"
+    },
+    {
+      "name": "m0_turn3",
+      "passed": true,
+      "matched": true,
+      "simulator": "XSim",
+      "seconds": 93.275,
+      "equivalence": [
+        [
+          "869483",
+          "010df"
+        ]
+      ],
+      "fault_model_skip": false,
+      "report": "build/swd_timing_sim/summary_m0.json",
+      "log_sha256": "6c5f7867f70e3609c319f961c94a8f9d924a450b42d7a53bc25f4abb00d43f1e"
+    },
+    {
+      "name": "m0_ret8",
+      "passed": false,
+      "matched": true,
+      "simulator": "XSim",
+      "args": [
+        "+return_ns=8.0",
+        "+packets"
+      ],
+      "expected_pass": false,
+      "expected_ack": "4",
+      "seconds": 4.284,
+      "equivalence": [
+        [
+          "4147",
+          "0101f"
+        ]
+      ],
+      "fault_model_skip": false,
+      "report": "build/swd_timing_sim/summary_m0.json",
+      "log_sha256": "4b1e522bf3d971c5fb7bea4129f90bb31583c1ad0761f2cca714837689d06124"
+    },
+    {
+      "name": "m0_ret30",
+      "passed": false,
+      "matched": true,
+      "simulator": "XSim",
+      "args": [
+        "+return_ns=30.0",
+        "+packets"
+      ],
+      "expected_pass": false,
+      "expected_ack": "3",
+      "seconds": 2.715,
+      "equivalence": [
+        [
+          "4147",
+          "0101f"
+        ]
+      ],
+      "fault_model_skip": false,
+      "report": "build/swd_timing_sim/summary_m0.json",
+      "log_sha256": "ccf4178eb8b1c011dc4b22f49606b942809ed5c71e6da341c84a9e6b20ba096a"
+    },
+    {
+      "name": "m0_ret50",
+      "passed": false,
+      "matched": true,
+      "simulator": "XSim",
+      "args": [
+        "+return_ns=50.0",
+        "+packets"
+      ],
+      "expected_pass": false,
+      "expected_ack": "7",
+      "seconds": 2.624,
+      "equivalence": [
+        [
+          "4147",
+          "0101f"
+        ]
+      ],
+      "fault_model_skip": false,
+      "report": "build/swd_timing_sim/summary_m0.json",
+      "log_sha256": "2318ae1d70f40c7792327b6e9ccbd1307d8da25c36521df1e66646681c305400"
+    },
+    {
+      "name": "m0_phase1",
+      "passed": true,
+      "matched": true,
+      "simulator": "XSim",
+      "seconds": 86.33,
+      "equivalence": [
+        [
+          "842915",
+          "010df"
+        ]
+      ],
+      "fault_model_skip": false,
+      "report": "build/swd_timing_sim/summary_m0.json",
+      "log_sha256": "3c6fd7067b60db0d7e2728e15a6cac31d5bc8a6eccf354767f54e6eba666b985"
+    },
+    {
+      "name": "m0_recovery",
+      "passed": true,
+      "matched": true,
+      "simulator": "XSim",
+      "seconds": 6.514,
+      "equivalence": [
+        [
+          "22357",
+          "018df"
+        ]
+      ],
+      "fault_model_skip": false,
+      "report": "build/swd_timing_sim/summary_m0.json",
+      "log_sha256": "df8c63557f4aa9ebfb457f66dbdf2cd8751162ffdeaf6630bac590bfe3721b6c"
+    },
+    {
+      "name": "m0_idle1",
+      "passed": true,
+      "matched": true,
+      "simulator": "XSim",
+      "seconds": 121.729,
+      "equivalence": [
+        [
+          "860747",
+          "018df"
+        ]
+      ],
+      "fault_model_skip": false,
+      "report": "build/swd_timing_sim/summary_m0.json",
+      "log_sha256": "97406c167bb5eab5f7b1928dfe9d54b8e7a26f3f771d8941a10a997117bb7927"
+    },
+    {
+      "name": "m0_idle2",
+      "passed": true,
+      "matched": true,
+      "simulator": "XSim",
+      "seconds": 83.032,
+      "equivalence": [
+        [
+          "878561",
+          "018df"
+        ]
+      ],
+      "fault_model_skip": false,
+      "report": "build/swd_timing_sim/summary_m0.json",
+      "log_sha256": "71142db02edd4e91985c6c8b15377ad2ecad151806d2b7672cbfd4dcf20e7da7"
+    },
+    {
+      "name": "m0_swd50",
+      "passed": true,
+      "matched": true,
+      "simulator": "XSim",
+      "seconds": 82.02,
+      "equivalence": [
+        [
+          "860747",
+          "018df"
+        ]
+      ],
+      "fault_model_skip": false,
+      "report": "build/swd_timing_sim/summary_m0.json",
+      "log_sha256": "09f20c97a310f0f48d2487a2e9bcdcc1c49226ae801e3a4a0dc8c7e8bdd2575a"
+    },
+    {
+      "name": "m0_services",
+      "passed": true,
+      "matched": true,
+      "simulator": "XSim",
+      "args": [
+        "+services",
+        "+idle=1"
+      ],
+      "expected_pass": true,
+      "expected_ack": null,
+      "seconds": 31.285,
+      "equivalence": [
+        [
+          "400817",
+          "018df"
+        ]
+      ],
+      "fault_model_skip": false,
+      "report": "build/swd_timing_sim/summary_m0.json",
+      "log_sha256": "74756c6383ba1b16c329b5c28d7ba019930da1a58936ad33748683efa1f73525"
+    },
+    {
+      "name": "main_ret8",
+      "passed": false,
+      "matched": true,
+      "simulator": "XSim",
+      "args": [
+        "+return_ns=8.0",
+        "+packets"
+      ],
+      "expected_pass": false,
+      "expected_ack": "4",
+      "seconds": 4.299,
+      "equivalence": [],
+      "fault_model_skip": false,
+      "report": "build/swd_timing_sim/baseline_windows/summary.json",
+      "log_sha256": "52fda256f46631588d5928d4537d98268b76f0f634e7ac186953048f7c22b8d8"
+    },
+    {
+      "name": "main_ret30",
+      "passed": false,
+      "matched": true,
+      "simulator": "XSim",
+      "args": [
+        "+return_ns=30.0",
+        "+packets"
+      ],
+      "expected_pass": false,
+      "expected_ack": "3",
+      "seconds": 3.262,
+      "equivalence": [],
+      "fault_model_skip": false,
+      "report": "build/swd_timing_sim/baseline_windows/summary.json",
+      "log_sha256": "c639b3d4d5a8bc3298d46bae50fea6b12e3dfcd0a82f5825e40ea63c5e593609"
+    },
+    {
+      "name": "main_ret50",
+      "passed": false,
+      "matched": true,
+      "simulator": "XSim",
+      "args": [
+        "+return_ns=50.0",
+        "+packets"
+      ],
+      "expected_pass": false,
+      "expected_ack": "7",
+      "seconds": 3.524,
+      "equivalence": [],
+      "fault_model_skip": false,
+      "report": "build/swd_timing_sim/baseline_windows/summary.json",
+      "log_sha256": "96dc6644f327e3947c4539a178c08c17082a08a86b52725c25c3ebfc0cd2eb27"
+    }
+  ]
+}

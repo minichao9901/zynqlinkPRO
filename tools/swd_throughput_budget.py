@@ -17,7 +17,7 @@ for idle in [0,1,2]:
     subprocess.run(['iverilog','-g2012','-s','tb_packet_wire_budget',
                     '-P',f'tb_packet_wire_budget.IDLE_CYCLES={idle}',
                     '-o',str(exe),'fpga/rtl/dap_transfer_block_engine.v',
-                    'fpga/rtl/swd_core.v','fpga/sim/tb_packet_wire_budget.sv'],cwd=root,check=True)
+                    'fpga/rtl/swj_clk_gen.v','fpga/rtl/swd_core.v','fpga/sim/tb_packet_wire_budget.sv'],cwd=root,check=True)
     r=subprocess.run(['vvp',str(exe)],capture_output=True,text=True,timeout=30)
     (out/f'idle{idle}.log').write_text(r.stdout+r.stderr)
     assert r.returncode==0 and 'PASS' in r.stdout,r.stdout+r.stderr

@@ -4,7 +4,7 @@
 // even while SWDIO has its pull-up.
 module tb_swd_ack_delay #(
   parameter integer CLK_HALF_NS = 5,
-  parameter integer TARGET_TCO_NS = 1,
+  parameter integer TARGET_TCO_NS = 16,
   parameter integer ACK_DELAY = 0,
   parameter integer TURN_EXTRA = 0,
   parameter integer EXPECT_ACK = 2
@@ -44,20 +44,31 @@ module tb_swd_ack_delay #(
     @(negedge clk); start=1;
     @(negedge clk); start=0;
 
-    // Wait until the core has released SWDIO after the request, then mirror a
-    // target that launches each ACK bit on the next rising edge.
-    wait(core.state == 4'd4);
-    @(negedge swclk);
+    // Observe the actual ownership/turnaround edge. Waiting for a private ACK
+    // FSM state deadlocked the extended-ACK path and launched normal ACK late.
+    wait(swdio_t);
+    @(posedge swclk);
     target_oe <= 1'b1;
     target_out <= EXPECT_ACK[0];
-    @(posedge swclk); // ACK[0] high phase
     @(posedge swclk); target_out <= EXPECT_ACK[1];
     @(posedge swclk); target_out <= EXPECT_ACK[2];
-    @(posedge swclk); target_oe <= 1'b0;
+    @(posedge swclk);
+    if(EXPECT_ACK==1)begin
+      // Complete a real read, including nontrivial data and parity.
+      target_out <= 1'b1; // D0 of 0xa5963cc3
+      for(integer i=0;i<33;i=i+1)begin
+        @(posedge swclk);
+        if(i<31)target_out <= (32'ha5963cc3 >> (i+1)) & 1;
+        else if(i==31)target_out <= ^32'ha5963cc3;
+        else target_oe <= 0;
+      end
+    end else target_oe <= 1'b0;
 
     wait(!busy);
     $display("RESULT ack=%b delay=%0d turn=%0d tco=%0d",ack,ACK_DELAY,TURN_EXTRA,TARGET_TCO_NS);
     if (ack !== EXPECT_ACK[2:0]) $fatal(1,"ACK failed");
+    if(EXPECT_ACK==1 && (rdata!==32'ha5963cc3 || parity_err))
+      $fatal(1,"read data/parity failed %h",rdata);
     $display("PASS");
     $finish;
   end

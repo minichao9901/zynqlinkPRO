@@ -1,6 +1,6 @@
 """Verify configurable SWD ACK timing against a delayed target model.
 
-The target changes SWDIO on SWCLK falling edges and can delay its output
+The target changes SWDIO on SWCLK rising edges and can delay its output
 transitions.  ACK=WAIT (010) is used for the timing sweep because ACK=OK has a
 pull-up-compatible first bit and would hide a late target response.
 """
@@ -13,6 +13,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCES = [
+    ROOT / "fpga/rtl/swj_clk_gen.v",
     ROOT / "fpga/rtl/swd_core.v",
     ROOT / "fpga/sim/tb_swd_ack_delay.sv",
 ]
@@ -57,26 +58,25 @@ def main() -> None:
     rows = []
     # Baseline includes a complete DP read and checks data/parity. The sweep
     # uses WAIT so a late ACK cannot be mistaken for the line pull-up.
-    rows.append(run_case(build_dir, tco=1, ack_delay=0, turn_extra=0,
+    rows.append(run_case(build_dir, tco=16, ack_delay=0, turn_extra=0,
                          expect_ack=1))
     for tco, ack_delay, turn_extra in (
-        (8, 0, 0),       # normal margin
-        (20, 0, 0),      # deliberately late: wrong ACK
-        (20, 1, 0),      # one extended high phase: recovered ACK
+        (16, 0, 0),      # normal return window of main's registered input path
+        (40, 0, 0),      # deliberately late: wrong ACK
+        (40, 2, 0),      # extended high phase recovers ACK
     ):
         rows.append(run_case(build_dir, tco=tco, ack_delay=ack_delay,
                              turn_extra=turn_extra, expect_ack=2))
 
-    # In this model a 20 ns target response requires at least one extended
-    # high phase; turnaround-only stretching does not fix the ACK bit that was
-    # already launched on the first falling edge.
+    # A 40 ns return needs the extended high phase. The target launches on the
+    # turnaround rising edge; do not shift that launch to make a test pass.
     for row in rows:
         if row["expect_ack"] == 1:
             row["expected"] = True
-        elif row["tco"] < 20:
+        elif row["tco"] < 40:
             row["expected"] = True
         else:
-            row["expected"] = row["ack_delay"] >= 1
+            row["expected"] = row["ack_delay"] >= 2
         row["matches_expectation"] = row["passed"] == row["expected"]
         print(json.dumps({k: row[k] for k in (
             "tco", "ack_delay", "turn_extra", "expect_ack", "passed",
