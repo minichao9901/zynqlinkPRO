@@ -226,6 +226,7 @@ static void packet_config(uint32_t index,uint32_t value) { PW(6,index);PW(7,valu
 static void packet_poll(void) {
     tx_queue *q=mode==1 ? &cdc : &hss;
     uint32_t d,tail;
+    if(!probe_session_live()) return;
     if(dma_pending) {
         // RTT ACK means DDR is durable. Publish to USB only after the target
         // RdOff write and DP RDBUFF completion advance the PL consumer index.
@@ -244,6 +245,8 @@ static void packet_poll(void) {
        swd_dma_packet_to((d>>16)&7U,bytes,slot(q))) {
         result=-4;swd_errors++;return; // No ACK: immutable bank can be retried.
     }
+    uint32_t irq_flags=irq_save();
+    if(!probe_session_live()) { irq_restore(irq_flags);return; }
     if(mode==1) {
         dma_length=bytes;dma_tail=PR(3);dma_pending=1;PW(3,1);
     } else {
@@ -251,6 +254,7 @@ static void packet_poll(void) {
         if(!(flags&2)) publish(&hss,bytes);
         formatted+=bytes;
     }
+    irq_restore(irq_flags);
 }
 
 static int sampler_stop(void) {

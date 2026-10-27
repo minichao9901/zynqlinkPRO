@@ -9,10 +9,11 @@ static int fail_send,fail_read,fail_write,host_dtr=1;
 static uintptr_t sent_buffer[8];
 static uint32_t sent_len[8];
 static uint32_t packet_regs[16],dma_calls,packet_acks;
-static int fail_dma;
+static int fail_dma,reset_in_dma;
 int swd_dma_packet_to(uint32_t bank,uint32_t bytes,uint8_t *destination) {
     assert(bank<8 && bytes<=2048);dma_calls++;
     if(fail_dma) return -1;
+    if(reset_in_dma) probe_usb_reset();
     memset(destination,0xa5,bytes);return 0;
 }
 void XTime_GetTime(XTime *p) {*p=timer;}
@@ -129,6 +130,8 @@ int main(void) {
     mode=2;flags=0;hss.in=hss.out=0;packet_regs[2]=(3U<<16)|512;
     packet_poll();assert(hss.in==1 && hss.data[0][0]==0xa5 && packet_acks==2);
     hss.in=hss.out+QSIZE;packet_regs[2]=512;before=dma_calls;packet_poll();assert(dma_calls==before && packet_acks==2);
+    hss.in=hss.out=0;reset_in_dma=1;packet_poll();
+    assert(reset_pending && hss.in==0 && packet_acks==2); // Reset during copy cannot ACK/consume.
     puts("PASS production probe C: HID, 8 variables, HSS DEF/DATA/gaps, backpressure, RTT wrap/RdOff retry, DAP handoff, ZLP, reset");
     return 0;
 }
