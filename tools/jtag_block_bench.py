@@ -55,6 +55,12 @@ def bench_write_pipe(out, inp, words, loops, depth, payload):
     return time.perf_counter() - t0, loops * words * 4
 
 
+def read_clock(out, inp):
+    """FCLK the firmware currently has programmed (vendor 0x80, query only)."""
+    r = xfer(out, inp, [0x80, 255])
+    return int.from_bytes(r[4:8], 'little'), int.from_bytes(r[8:12], 'little')
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--speed', type=int, default=60000, help='kHz')
@@ -73,6 +79,7 @@ def main():
         setup(out, inp, a.speed, a.transport)
         if a.timing is not None:
             xfer(out, inp, [0x89, a.timing])
+        fclk0, _ = read_clock(out, inp)
         payload = bytes((i * 7 + 3) & 0xFF for i in range(a.words * 4))
         for name, fn in (('read_seq', lambda: bench_read_seq(out, inp, a.words, a.loops)),
                          ('read_pipe', lambda: bench_read_pipe(out, inp, a.words, a.loops, a.depth)),
@@ -84,9 +91,13 @@ def main():
             rows.append(row)
             print('%-6s %6d kHz  %-11s %7.3f MB/s' % (a.transport, a.speed, name, row['MB_s']), flush=True)
     finally:
+        fclk1, _ = read_clock(out, inp)
+        print('FCLK after setup = %d Hz (TCK %d), FCLK after bursts = %d Hz (TCK %d)'
+              % (fclk0, fclk0 // 2, fclk1, fclk1 // 2))
         if a.output:
             a.output.parent.mkdir(parents=True, exist_ok=True)
-            a.output.write_text(json.dumps(rows, indent=2))
+            a.output.write_text(json.dumps(rows + [{'fclk_before': fclk0, 'fclk_after': fclk1}],
+                                           indent=2))
 
 
 if __name__ == '__main__':

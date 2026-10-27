@@ -229,6 +229,18 @@ module swd_controller #(
         if(!rst_n) jtag_timestamp<=0;else jtag_timestamp<=jtag_timestamp+1'b1;
     IDDR #(.DDR_CLK_EDGE("OPPOSITE_EDGE"),.INIT_Q1(0),.INIT_Q2(0),.SRTYPE("SYNC")) u_tdo_iddr(
         .C(clk),.CE(1'b1),.D(gpio_in[1]),.Q1(jtag_tdo_rise),.Q2(jtag_tdo_fall),.R(1'b0),.S(1'b0));
+    // Free-running TCK rising-edge count. Software reads it before and after a
+    // timed burst to derive the TCK rate the PHY actually used, which need not
+    // equal the CMSIS-DAP clock that was requested.
+    reg jtag_tck_d;
+    reg [31:0] jtag_tck_edges;
+    always @(posedge clk or negedge rst_n) begin
+        if(!rst_n) begin jtag_tck_d<=1'b0;jtag_tck_edges<=32'd0;end
+        else begin
+            jtag_tck_d<=jtag_tck;
+            if(jtag_tck && !jtag_tck_d) jtag_tck_edges<=jtag_tck_edges+1'b1;
+        end
+    end
     wire jtag_invalidate=s_axi_wvalid && s_axi_wready &&
         ((write_addr==8'h80 && s_axi_wdata!=jtag_config) ||
          (write_addr==8'h84 && s_axi_wdata!=jtag_ir_config) ||
@@ -587,6 +599,7 @@ module swd_controller #(
                     8'hb4:rdata_reg<=jtag_sequence_data[191:160];
                     8'hb8:rdata_reg<=jtag_sequence_data[223:192];
                     8'hbc:rdata_reg<=jtag_sequence_data[255:224];
+                    8'hc0:rdata_reg<=jtag_tck_edges;
                     default: begin
                         rdata_reg <= !s_axi_araddr[7] && s_axi_araddr[6:5]==2'b11 ? stream_rdata : 32'd0;
                     end

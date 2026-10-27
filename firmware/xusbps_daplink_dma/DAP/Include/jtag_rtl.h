@@ -10,6 +10,7 @@
 #define JTAG_TIMING 0x40010098U
 #define JTAG_CACHED_IR 0x4001009cU
 #define JTAG_RX_DATA 0x400100a0U
+#define JTAG_TCK_EDGES 0x400100c0U
 int DAP_JTAG_Select(uint32_t index);
 int DAP_JTAG_AutoConfigure(void);
 void DAP_JTAG_ClockChanged(void);
