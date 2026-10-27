@@ -24,7 +24,12 @@ module jtag_core (
     output wire [31:0] cached_instruction,
     output wire cache_valid,
     output wire [255:0] sequence_result,
-    input wire fence_req,output reg fence_done,output reg fence_error
+    input wire fence_req,output reg fence_done,output reg fence_error,
+    // Scan statistics: FCLK cycles spent waiting on the physical shifter, the
+    // bits scanned and the number of completed scans. cycles/(2*bits) yields
+    // half_delay+1, so software can confirm the clock the PHY really used.
+    output reg [31:0] stat_cycles,output reg [31:0] stat_bits,
+    output reg [31:0] stat_transfers
 );
     localparam IDLE=0,ROUTE=1,RESET_TAP=2,IR_NAV=3,IR_PRE=4,IR_VALUE=5,IR_POST=6,IR_EXIT=7,
                DR_NAV=8,DR_PRE=9,DR_VALUE=10,DR_POST=11,DR_EXIT=12,EVALUATE=13,DONE=14,PHY_WAIT=15;
@@ -101,6 +106,7 @@ module jtag_core (
             fenced_result<=0;fenced_result_valid<=0;
             phy_variable_tms<=0;phy_tms<=0;phy_exit<=0;phy_capture<=0;phy_tdi_mode<=0;
             phy_tms_data<=0;phy_tdi_data<=0;fence_done<=0;fence_error<=0;
+            stat_cycles<=0;stat_bits<=0;stat_transfers<=0;
             dr_tms_bits<=0;dr_tdi_bits<=0;dr_count<=0;capture_offset<=0;
             phy_slow<=0;phy_capture_rise<=0;
         end else begin
@@ -159,10 +165,15 @@ module jtag_core (
                 capture_offset<=3+dr_before+(late_return ? 1 : 0);state<=DR_PRE;
             end
             DR_PRE: shift_segment({5'd0,dr_count},1,0,0,1,2,{192'd0,dr_tms_bits},{192'd0,dr_tdi_bits},EVALUATE);
-            PHY_WAIT: if(phy_done) begin
-                if(return_state==EVALUATE) scan_result<=phy_rx >> capture_offset;
-                if(return_state==DONE && (op==5 || op==6)) rdata<=phy_rx[31:0];
-                state<=return_state;
+            PHY_WAIT: begin
+                stat_cycles<=stat_cycles+1'b1;
+                if(phy_done) begin
+                    stat_bits<=stat_bits+{20'd0,phy_count};
+                    stat_transfers<=stat_transfers+1'b1;
+                    if(return_state==EVALUATE) scan_result<=phy_rx >> capture_offset;
+                    if(return_state==DONE && (op==5 || op==6)) rdata<=phy_rx[31:0];
+                    state<=return_state;
+                end
             end
             EVALUATE: begin
                 if(op==3) begin ack<=1;rdata<=scan_result[31:0];state<=DONE;end

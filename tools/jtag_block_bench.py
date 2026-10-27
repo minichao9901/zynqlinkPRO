@@ -10,7 +10,7 @@ import time
 from pathlib import Path
 
 from dap_pipeline_bench import (open_dap, setup, send, xfer, read_exact,
-                                block_read_req)
+                                block_read_req, cmd)
 
 
 def bench_read_seq(out, inp, words, loops):
@@ -68,6 +68,7 @@ def main():
     ap.add_argument('--words', type=int, default=256, help='words per block')
     ap.add_argument('--loops', type=int, default=64)
     ap.add_argument('--depth', type=int, default=4)
+    ap.add_argument('--idle', type=int, default=None, help='DAP idle cycles between scans')
     ap.add_argument('--timing', type=int, default=None,
                     help='pin the RTL TDO sampling mode instead of auto calibration')
     ap.add_argument('--output', type=Path)
@@ -79,6 +80,8 @@ def main():
         setup(out, inp, a.speed, a.transport)
         if a.timing is not None:
             xfer(out, inp, [0x89, a.timing])
+        if a.idle is not None:
+            cmd(out, inp, [0x13, a.idle])
         fclk0, _ = read_clock(out, inp)
         payload = bytes((i * 7 + 3) & 0xFF for i in range(a.words * 4))
         for name, fn in (('read_seq', lambda: bench_read_seq(out, inp, a.words, a.loops)),

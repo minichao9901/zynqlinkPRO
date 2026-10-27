@@ -207,11 +207,15 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
               (swd_read32(SWD_BASE_ADDR + 0x48U) & 1U)) status = DAP_ERROR;
           else DAP_JTAG_SetTiming((uint32_t)*request & 0x11U);
         }
-        uint32_t edges = swd_read32(JTAG_TCK_EDGES), i;
+        uint32_t scan[3], i, j;
+        scan[0] = swd_read32(JTAG_STAT_CYCLES);
+        scan[1] = swd_read32(JTAG_STAT_BITS);
+        scan[2] = swd_read32(JTAG_STAT_TRANSFERS);
         *response++ = status;
         *response++ = (uint8_t)(swd_read32(JTAG_TIMING) & 0x11U);
-        for (i = 0; i < 4U; ++i) *response++ = (uint8_t)(edges >> (8 * i));
-        num = (2U << 16) | 7U;
+        for (i = 0; i < 3U; ++i)
+          for (j = 0; j < 4U; ++j) *response++ = (uint8_t)(scan[i] >> (8 * j));
+        num = (2U << 16) | 15U;
       }
       break;
     case ID_DAP_Vendor10: break;

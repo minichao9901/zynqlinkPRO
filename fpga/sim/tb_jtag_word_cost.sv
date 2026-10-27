@@ -95,6 +95,9 @@ module tb_jtag_word_cost;
             state_cycles[4],state_cycles[5],state_cycles[6],state_cycles[7],
             state_cycles[8],state_cycles[9],state_cycles[10],state_cycles[11],
             state_cycles[12],state_cycles[13],state_cycles[14],state_cycles[15]);
+        $display("stats: cycles=%0d bits=%0d transfers=%0d ratio=%0.3f",
+            dut.stat_cycles, dut.stat_bits, dut.stat_transfers,
+            dut.stat_cycles / (2.0 * dut.stat_bits));
         $finish;
     end
 endmodule
