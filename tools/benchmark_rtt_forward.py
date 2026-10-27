@@ -23,6 +23,7 @@ import usb.util
 from dap_pipeline_bench import open_dap, setup
 from probe_stream import Probe
 from test_probe_board import Memory, stop
+from probe_build_info import provenance
 
 DHCSR, DCRSR, DCRDR = 0xe000edf0, 0xe000edf4, 0xe000edf8
 
@@ -140,6 +141,8 @@ def main():
     ap.add_argument('--chunks', default='128,256,512,1024')
     ap.add_argument('--repeats', type=int, default=1)
     ap.add_argument('--output', type=Path, required=True)
+    ap.add_argument('--bit',type=Path)
+    ap.add_argument('--elf',type=Path)
     args = ap.parse_args()
     root = Path(__file__).resolve().parents[1]
     args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -158,7 +161,7 @@ def main():
     dev, out, inp = open_dap()
     mem = Memory(out, inp)
     backup, regs, initial = None, None, None
-    report = {'kind': 'continuous RAM producer RTT->CDC', 'rows': []}
+    report = {'artifacts':provenance(args.bit,args.elf),'kind': 'continuous RAM producer RTT->CDC', 'rows': []}
     try:
         stop(probe, dev)
         setup(out, inp, 50000)

@@ -12,6 +12,7 @@ module tb_probe_sample;
     probe_sample_engine #(.FIFO_SAMPLES(4),.TIMEOUT(64),.RETRIES(3)) dut(
         .clk(clk),.rst_n(rst_n),.wr(wr),.rd(rd),.waddr(waddr),.raddr(addr),.wdata(wdata),.rdata(rdata),
         .available(available),.active(active),.core_start(start),.core_req(req),.core_wdata(wd),
+        .stream_pop(1'b0),.core_next_ready(1'b0),
         .core_busy(busy),.core_result_valid(valid),.core_ack(ack),.core_parity_err(parity),.core_rdata(data));
     always @(posedge clk) begin
         valid<=0;
@@ -24,9 +25,9 @@ module tb_probe_sample;
                 else if(inject_wait) begin ack<=2;inject_wait<=0;waits<=waits+1;end
                 else case(req)
                 8'h08: if(wd!=0) $fatal(1,"SELECT not AP0 bank0");
-                8'h01: if(wd!=32'h23000002) $fatal(1,"CSW not word/no increment");
+                8'h01: if(wd!=32'h23000012) $fatal(1,"CSW not word/increment");
                 8'h05: tar<=wd;
-                8'h0f: begin data<=posted;posted<=tar^32'hcafe1234;end
+                8'h0f: begin data<=posted;posted<=tar^32'hcafe1234;tar<={tar[31:10],tar[9:0]+10'd4};end
                 8'h0e: data<=posted;
                 default: $fatal(1,"invalid request %x",req);
                 endcase

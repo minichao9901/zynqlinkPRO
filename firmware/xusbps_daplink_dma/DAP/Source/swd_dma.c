@@ -140,6 +140,18 @@ int swd_dma_download(uint32_t first, uint32_t words) {
     return swd_dma_download_to(first,words,swd_dma_rsp);
 }
 
+// Shared CDMA is serialized by the main loop: probe_before_dap() quiesces
+// stream SWD before CMSIS-DAP can use this controller. USB owns destination
+// slots until its completion callback, independently of PL bank ownership.
+int swd_dma_packet_to(uint32_t bank, uint32_t bytes, uint8_t *destination) {
+    uint32_t rounded=(bytes+31U)&~31U;
+    if(bank>=8 || bytes==0 || bytes>2048 || ((UINTPTR)destination&31U)) return -1;
+    Xil_DCacheFlushRange((UINTPTR)destination,rounded);
+    int rc=copy(0x42021000U+bank*2048U,(uint32_t)destination,(bytes+3U)&~3U);
+    Xil_DCacheInvalidateRange((UINTPTR)destination,rounded);
+    return rc;
+}
+
 int swd_dma_selftest(void) {
     uint32_t n;
     for (n=0; n<1024U; n++) swd_dma_cmd[n] = 0xCDA00000U ^ (n*0x10203U);

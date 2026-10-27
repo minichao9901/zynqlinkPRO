@@ -17,6 +17,12 @@ __attribute__((weak)) int probe_target_claimed(void) { return 0; }
 #define REG(n) (0x40010060U + 4U * (n))
 #define R(n) Xil_In32(REG(n))
 #define W(n, v) Xil_Out32(REG(n), (v))
+#define PK(n) (0x42020000U+4U*(n))
+#define PR(n) Xil_In32(PK(n))
+#define PW(n,v) Xil_Out32(PK(n),(v))
+extern int swd_dma_packet_to(uint32_t bank, uint32_t bytes, uint8_t *destination);
+static uint8_t pl_packets, rtt_pl_running, rtt_paused, dma_pending;
+static uint32_t dma_tail, dma_length;
 #define QSIZE 8U
 typedef struct {
 #ifdef __arm__
@@ -212,13 +218,45 @@ static uint8_t fill[512] __attribute__((aligned(32)));
 static int have_stamp;
 static uint32_t rtt_base = 0x20000000, rtt_size = 65536, scan, cb, up, drained, polls, drains,
                 write_errors;
-static uint32_t pending_rd, pending_len, chunk = 4096;
+static uint32_t pending_rd, pending_len, chunk = CDC_SLOT_SIZE;
 static uint8_t channel, discard;
 static uint32_t backoff;
+
+static void packet_config(uint32_t index,uint32_t value) { PW(6,index);PW(7,value); }
+static void packet_poll(void) {
+    tx_queue *q=mode==1 ? &cdc : &hss;
+    uint32_t d,tail;
+    if(dma_pending) {
+        // RTT ACK means DDR is durable. Publish to USB only after the target
+        // RdOff write and DP RDBUFF completion advance the PL consumer index.
+        tail=PR(3);
+        if(tail==dma_tail) {
+            if(PR(1)&0x80U) PW(3,1); // Retry the same idempotent RdOff write.
+            return;
+        }
+        if(!discard && publish(&cdc,dma_length)) return;
+        drained+=dma_length;drains++;dma_pending=0;
+    }
+    d=PR(2);
+    if(!(d&0xfffU) || !space(q)) return;
+    uint32_t bytes=d&0xfffU;
+    if(!((mode==1 && discard) || (mode==2 && (flags&2))) &&
+       swd_dma_packet_to((d>>16)&7U,bytes,slot(q))) {
+        result=-4;swd_errors++;return; // No ACK: immutable bank can be retried.
+    }
+    if(mode==1) {
+        dma_length=bytes;dma_tail=PR(3);dma_pending=1;PW(3,1);
+    } else {
+        PW(3,1);
+        if(!(flags&2)) publish(&hss,bytes);
+        formatted+=bytes;
+    }
+}
 
 static int sampler_stop(void) {
     uint32_t budget = 1000000;
     W(0, 0);
+    if(pl_packets) PW(0,0);
     while ((R(1) & 2) && --budget) {
     }
     if (!budget) {
@@ -306,11 +344,26 @@ static int sampler_arm(void) {
         W(2, i);
         W(3, addresses[i]);
     }
+    if(pl_packets) {
+        unsigned k=0,j;
+        packet_config(0,frame_size);packet_config(1,version);
+        packet_config(2,period);packet_config(5,nwords);
+        for(i=0;i<nvars;i++) for(j=0;j<vars[i].size;j++)
+            packet_config(16+k++,4*vars[i].word+vars[i].offset+j);
+        PW(0,1);
+    }
     W(7, now()); // Rebase after a DAP clock change while the sampler was paused.
     W(0, 1 | ((uint32_t)nwords << 8));
     return 0;
 }
 void probe_before_dap(void) {
+    if(pl_packets && mode==1 && rtt_pl_running) {
+        uint32_t budget=1000000;
+        PW(0,0);
+        rtt_paused=1;
+        while(((PR(1)&8U) || (Xil_In32(0x40010004)&1U)) && --budget) { }
+        if(!budget) { Xil_Out32(0x40010050,1);rtt_pl_running=0;dma_pending=0;mode=0;result=-4; }
+    }
     if (mode == 2) {
         if (sampler_stop()) {
             mode = 0;
@@ -322,6 +375,10 @@ void probe_before_dap(void) {
     probe_target_release();
 }
 void probe_after_dap(void) {
+    if(pl_packets && mode==1 && rtt_pl_running && !stopping && probe_session_live()) {
+        if(probe_target_claim(requested_hz)) { mode=0;result=-4; }
+        else if(discard || usbd_cdc_acm_get_dtr()) { PW(0,2);rtt_paused=0; }
+    }
     if (mode == 2 && !stopping && probe_session_live() && sampler_arm()) {
         mode = 0;
         result = -4;
@@ -329,6 +386,11 @@ void probe_after_dap(void) {
     }
 }
 static void hss_poll(void) {
+    if(pl_packets) {
+        packet_poll();produced=PR(4);seq=PR(5);
+        if(R(1)&16) { result=-4;swd_errors++;sampler_stop(); }
+        return;
+    }
     // The RTL fixed-address pipe can publish much faster than the old
     // timestamp+TAR path.  Drain a larger bounded batch per main-loop pass,
     // otherwise STOP spends many HID round trips emptying a full FIFO.
@@ -413,6 +475,18 @@ static int rtt_commit(void) {
 }
 static int stop(void) {
     int rc = 0;
+    if(pl_packets && mode) {
+        stopping=1;PW(0,0);
+        if(mode==2) { W(0,0);hss_poll(); }
+        else if(rtt_pl_running) packet_poll();
+        if((PR(1)&12U) || (PR(2)&0xfffU) || dma_pending ||
+           (mode==2 && (R(1)>>16))) return -7;
+        // A partial HSS packet is flushed autonomously after sampler stop.
+        // Give its state machine time to publish before releasing SWD.
+        if(mode==2) { uint32_t i;for(i=0;i<256;i++) (void)PR(1);packet_poll();if(PR(2)&0xfffU) return -7; }
+        if(mode==2) stat_packet();
+        probe_target_release();mode=0;stopping=0;rtt_pl_running=0;return 0;
+    }
     if (mode == 2) {
         stopping = 1;
         rc = sampler_stop();
@@ -439,6 +513,22 @@ static void rtt_poll(void) {
     uint8_t desc[24], search[256];
     uint32_t size, wr, rd, n, a, i;
     int rc = 0;
+    if(pl_packets && rtt_pl_running) {
+        if(!stopping && !discard && !usbd_cdc_acm_get_dtr()) {
+            if(!rtt_paused) { PW(0,0);rtt_paused=1; }
+            if(dma_pending) packet_poll();
+            return;
+        }
+        if(!stopping && rtt_paused) { PW(0,2);rtt_paused=0; }
+        packet_poll();polls=PR(13);
+        if((PR(1)&0x80U) && !dma_pending && !(PR(2)&0xfffU)) {
+            PW(0,0);result=-4;swd_errors++;rtt_pl_running=0;cb=up=0;
+            if(Xil_In32(0x40010004)&1U) { Xil_Out32(0x40010050,1);probe_target_forget(); }
+            else probe_target_release();
+            backoff=now()+240000;
+        }
+        return;
+    }
     if (backoff && (int32_t)(now() - backoff) < 0)
         return;
     if (!discard && (!usbd_cdc_acm_get_dtr() || !space(&cdc)))
@@ -507,6 +597,10 @@ static void rtt_poll(void) {
         n = chunk;
     if (!n)
         goto end;
+    if(pl_packets) {
+        PW(0,0x100);PW(8,up);PW(9,a);PW(10,size);PW(11,rd);PW(12,chunk);
+        PW(0,2);rtt_pl_running=1;rtt_paused=0;goto end;
+    }
     if (probe_target_read(a + rd, slot(&cdc), n)) {
         rc = -4;
         goto end;
@@ -598,10 +692,13 @@ static int configure_hss(const uint8_t *req) {
     for (i = 0; i < n; i++) {
         uint8_t raw[6];
         uint32_t a = plan[i].addr & ~3U;
-        plan[i].word = (uint8_t)w;
         plan[i].offset = (uint8_t)(plan[i].addr & 3);
-        for (j = 0; j < (unsigned)(plan[i].offset + plan[i].size + 3) / 4; j++)
-            addresses[w++] = a + 4 * j;
+        for (j = 0; j < (unsigned)(plan[i].offset + plan[i].size + 3) / 4; j++) {
+            unsigned k;
+            for(k=0;k<w && addresses[k]!=a+4*j;k++) { }
+            if(j==0) plan[i].word=(uint8_t)k;
+            if(k==w) addresses[w++]=a+4*j;
+        }
         bytes += plan[i].size;
         put32(raw, plan[i].addr);
         raw[4] = plan[i].size;
@@ -653,7 +750,7 @@ static void control(const uint8_t *req, uint8_t *res) {
         return;
     }
     if (cmd == 0x10 || cmd == 0x11 || cmd == 0x13) {
-        const char *s = cmd == 0x10 ? "ZynqLinkPro" : cmd == 0x11 ? "12345678" : "0.2";
+        const char *s = cmd == 0x10 ? "ZynqLinkPro" : cmd == 0x11 ? "12345678" : (pl_packets ? "0.3-dma" : "0.2");
         size_t n = strlen(s);
         memcpy(res + 3, s, n);
         res[1] = (uint8_t)(1 + n);
@@ -714,6 +811,7 @@ static void control(const uint8_t *req, uint8_t *res) {
             }
             cb = up = scan = drained = polls = drains = pending_len = write_errors = swd_errors =
                 backoff = 0;
+            rtt_pl_running=rtt_paused=dma_pending=0;
             mode = 1;
             actual_hz = requested_hz;
         } else {
@@ -726,6 +824,7 @@ static void control(const uint8_t *req, uint8_t *res) {
                 break;
             }
             W(0, 2);
+            if(pl_packets) PW(0,0x100);
             produced = seq = formatted = fill_count = skipped_base = yields = swd_errors = 0;
             tx_done_base = hss.completed;
             have_stamp = 0;
@@ -746,7 +845,7 @@ static void control(const uint8_t *req, uint8_t *res) {
                 nvars = nwords = frame_size = 0;
         } else if (act == 10)
             rc = req[1] >= 3 && req[4] == 0 ? 0 : -9;
-        else if (req[1] < 10 || mode == 2 || pending_len)
+        else if (req[1] < 10 || mode == 2 || pending_len || rtt_pl_running || dma_pending)
             rc = -7;
         else {
             uint32_t hz = get32(req + 4);
@@ -786,6 +885,9 @@ void probe_poll(XUsbPs *usb) {
         stopping = 0;
         W(0, 0);
         Xil_Out32(0x40010050, 1);
+        pl_packets=(Xil_In32(0x4001004c)&4U)!=0;
+        if(pl_packets && PR(0)!=0x53545232U) { pl_packets=0;result=-10; }
+        rtt_pl_running=rtt_paused=dma_pending=0;
         cdc.in = cdc.out = cdc.busy = 0;
         hss.in = hss.out = hss.busy = 0;
         hid.in = hid.out = hid.busy = 0;
@@ -821,6 +923,7 @@ void probe_poll(XUsbPs *usb) {
         if (stopping)
             stop();
     }
+    if(stopping && mode==1) stop();
     kick(usb, &hid);
     kick(usb, &hss);
     kick(usb, &cdc);

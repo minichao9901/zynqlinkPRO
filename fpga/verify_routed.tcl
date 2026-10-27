@@ -1,6 +1,9 @@
 set root [file normalize [file join [file dirname [info script]] ..]]
 set out [file join $root build fpga_dma_global]
 open_checkpoint [file join $out zynqlink_dma.runs impl_1 system_wrapper_routed.dcp]
+set packet_bram [get_cells -hier -filter {REF_NAME =~ RAMB* && NAME =~ *u_packet_bram*}]
+if {[llength $packet_bram] < 4} {error "PL packet banks did not implement in block RAM"}
+puts "PACKET_BRAM_VERIFIED count=[llength $packet_bram]"
 # Evaluate realizable PLL divisors on this routed netlist, without rebuilding
 # it for each frequency. Keep the highest rate that meets BOTH setup and hold.
 set verified_fclk 0

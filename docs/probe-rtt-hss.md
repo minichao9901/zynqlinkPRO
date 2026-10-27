@@ -1,5 +1,8 @@
 # Probe RTT→CDC 与 RTL HSS
 
+当前新增的 PL 拼包、RTT 自主读取和 CDMA→DDR 通路见 [PL→DDR 改造](probe-pl-ddr.md)。
+下文的数据路径、性能及预编译验收表记录早期版本，不代表新增 RTL 的性能。
+
 本功能在 `main`（`35f7cf6`）上创建的 `codex/probe-rtt-hss` 分支实现。
 参考 `E:/superlinkPRO/firmware/application_5301/src/{rtt,scope,usb,api}` 的协议。
 原 `prebuilt/zynqlink_packet.*` 保留原版本；本功能的已验收配对为

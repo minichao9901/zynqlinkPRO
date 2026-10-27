@@ -8,8 +8,16 @@ static unsigned samples,remaining;
 static int fail_send,fail_read,fail_write,host_dtr=1;
 static uintptr_t sent_buffer[8];
 static uint32_t sent_len[8];
+static uint32_t packet_regs[16],dma_calls,packet_acks;
+static int fail_dma;
+int swd_dma_packet_to(uint32_t bank,uint32_t bytes,uint8_t *destination) {
+    assert(bank<8 && bytes<=2048);dma_calls++;
+    if(fail_dma) return -1;
+    memset(destination,0xa5,bytes);return 0;
+}
 void XTime_GetTime(XTime *p) {*p=timer;}
 uint32_t Xil_In32(uintptr_t addr) {
+    if(addr>=0x42020000U && addr<0x42020040U) return packet_regs[(addr-0x42020000U)/4];
     unsigned n=(unsigned)((addr-0x40010060U)/4);
     if(n==0) return 0x48530000|regs[0];
     if(n==1) return (samples<<16)|(regs[0]&1);
@@ -21,6 +29,12 @@ uint32_t Xil_In32(uintptr_t addr) {
     return n<8 ? regs[n] : 3;
 }
 void Xil_Out32(uintptr_t addr,uint32_t value) {
+    if(addr>=0x42020000U && addr<0x42020040U) {
+        unsigned r=(unsigned)((addr-0x42020000U)/4);
+        if(r==3 && value==1) {packet_acks++;if(mode!=1) packet_regs[2]=0;}
+        else packet_regs[r]=value;
+        return;
+    }
     unsigned n=(unsigned)((addr-0x40010060U)/4);
     if(n<7) regs[n]=value;
     if(n==0 && (value&2)) {samples=sample_read=sample_write=0;}
@@ -101,6 +115,20 @@ int main(void) {
     probe_usb_reset();probe_poll(&usb);assert(mode==0 && cdc.in==cdc.out && hss.in==hss.out && pending_len==0);
     probe_usb_event(&usb,3,XUSBPS_EP_EVENT_DATA_TX,(void *)(sent_buffer[3]+512));assert(cdc.out==0);
     configured=1;current_epoch=epoch;status(0x32,out,1);assert(out[0]==0x31535348 && out[2]==24000000);
+    // Real DMA path: failed copies keep PL ownership. A successful RTT copy
+    // is held out of USB until RdOff completion changes the PL tail index.
+    pl_packets=1;mode=1;discard=0;cdc.in=cdc.out=0;
+    packet_regs[2]=0x01000000U|512;packet_regs[3]=10;fail_dma=1;
+    packet_poll();assert(dma_calls==1 && packet_acks==0 && !dma_pending && cdc.in==0);
+    fail_dma=0;packet_poll();assert(dma_pending && packet_acks==1 && cdc.in==0);
+    packet_poll();assert(dma_calls==2 && cdc.in==0); // No second DMA while committing.
+    packet_regs[3]++;packet_regs[2]=0;packet_poll();
+    assert(!dma_pending && cdc.in==1 && cdc.len[0]==512 && cdc.data[0][0]==0xa5);
+    // HSS hands the DMA destination directly to USB and never edits a slot
+    // still in the USB queue, even if a second PL packet is ready.
+    mode=2;flags=0;hss.in=hss.out=0;packet_regs[2]=(3U<<16)|512;
+    packet_poll();assert(hss.in==1 && hss.data[0][0]==0xa5 && packet_acks==2);
+    hss.in=hss.out+QSIZE;packet_regs[2]=512;before=dma_calls;packet_poll();assert(dma_calls==before && packet_acks==2);
     puts("PASS production probe C: HID, 8 variables, HSS DEF/DATA/gaps, backpressure, RTT wrap/RdOff retry, DAP handoff, ZLP, reset");
     return 0;
 }

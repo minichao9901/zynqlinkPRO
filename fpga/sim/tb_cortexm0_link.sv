@@ -37,6 +37,8 @@ module tb_cortexm0_link #(
     .cmd_bram_addr(cmd_addr),.cmd_bram_wrdata(cmd_data),
     .rsp_bram_clk(clk),.rsp_bram_rst(1'b0),.rsp_bram_en(rsp_en),.rsp_bram_we(4'd0),
     .rsp_bram_addr(rsp_addr),.rsp_bram_wrdata(32'd0),.rsp_bram_rddata(rsp_data),
+    .pkt_bram_clk(clk),.pkt_bram_rst(1'b0),.pkt_bram_en(1'b0),.pkt_bram_we(4'd0),
+    .pkt_bram_addr(32'd0),.pkt_bram_wrdata(32'd0),
     .swclk(swclk),.swdio(swdio));
 
   // Direction-aware return path prevents a delayed inout feedback loop.

@@ -63,6 +63,21 @@ module swd_controller #(
     (* X_INTERFACE_INFO = "xilinx.com:interface:bram:1.0 RSP_BRAM DOUT" *)
     output wire [31:0] rsp_bram_rddata,
 
+    (* X_INTERFACE_INFO = "xilinx.com:interface:bram:1.0 PKT_BRAM CLK" *)
+    input wire pkt_bram_clk,
+    (* X_INTERFACE_INFO = "xilinx.com:interface:bram:1.0 PKT_BRAM RST" *)
+    input wire pkt_bram_rst,
+    (* X_INTERFACE_INFO = "xilinx.com:interface:bram:1.0 PKT_BRAM EN" *)
+    input wire pkt_bram_en,
+    (* X_INTERFACE_INFO = "xilinx.com:interface:bram:1.0 PKT_BRAM WE" *)
+    input wire [3:0] pkt_bram_we,
+    (* X_INTERFACE_INFO = "xilinx.com:interface:bram:1.0 PKT_BRAM ADDR" *)
+    input wire [31:0] pkt_bram_addr,
+    (* X_INTERFACE_INFO = "xilinx.com:interface:bram:1.0 PKT_BRAM DIN" *)
+    input wire [31:0] pkt_bram_wrdata,
+    (* X_INTERFACE_INFO = "xilinx.com:interface:bram:1.0 PKT_BRAM DOUT" *)
+    output wire [31:0] pkt_bram_rddata,
+
     // SWD Physical Interface
     output wire                                    swclk,
     inout  wire                                    swdio
@@ -265,24 +280,52 @@ module swd_controller #(
     // Start Pulse Generation
     //=========================================================================
     reg start_pulse;
-    wire stream_active, stream_start;
+    wire stream_active, sampler_active, sampler_start;
+    wire [7:0] sampler_req;
+    wire [31:0] sampler_wdata;
+    wire sampler_next_valid;
+    wire [7:0] sampler_next_req;
+    wire rtt_active,rtt_start,rtt_next_valid;
+    wire [7:0] rtt_req,rtt_next_req;
+    wire [31:0] rtt_wdata;
+    wire sample_pop,sample_empty;
+    wire [31:0] sample_data,sample_tick;
+    wire stream_start = rtt_active ? rtt_start : sampler_start;
     wire [7:0] stream_req;
     wire [31:0] stream_wdata, stream_rdata;
     wire stream_next_valid;
     wire [7:0] stream_next_req;
     wire [31:0] stream_next_wdata;
+    assign stream_active = sampler_active || rtt_active;
+    assign stream_req = rtt_active ? rtt_req : sampler_req;
+    assign stream_wdata = rtt_active ? rtt_wdata : sampler_wdata;
+    assign stream_next_valid = rtt_active ? rtt_next_valid : sampler_next_valid;
+    assign stream_next_req = rtt_active ? rtt_next_req : sampler_next_req;
+    assign stream_next_wdata = 0;
     wire stream_wr = s_axi_wvalid && s_axi_wready && write_addr[6:5]==2'b11 && &s_axi_wstrb;
     wire stream_rd = s_axi_arvalid && s_axi_arready && s_axi_araddr[6:5]==2'b11;
     probe_sample_engine u_probe_sampler (
         .clk(clk), .rst_n(engine_rst_n), .wr(stream_wr), .rd(stream_rd),
         .waddr(write_addr[4:2]), .raddr(s_axi_araddr[4:2]),
         .wdata(s_axi_wdata), .rdata(stream_rdata),
-        .available(!core_busy && !batch_active && !packet_active && !start_pulse),
-        .active(stream_active), .core_start(stream_start), .core_req(stream_req),
-        .core_wdata(stream_wdata), .core_next_valid(stream_next_valid),
-        .core_next_req(stream_next_req), .core_next_wdata(stream_next_wdata), .core_busy(core_busy),
+        .available(!core_busy && !rtt_active && !batch_active && !packet_active && !start_pulse),
+        .stream_pop(sample_pop),.stream_empty(sample_empty),.stream_data(sample_data),.timer_tick(sample_tick),
+        .active(sampler_active), .core_start(sampler_start), .core_req(sampler_req),
+        .core_wdata(sampler_wdata), .core_next_valid(sampler_next_valid),
+        .core_next_req(sampler_next_req), .core_next_wdata(), .core_busy(core_busy),.core_next_ready(core_next_ready),
         .core_result_valid(core_result_valid), .core_ack(core_ack),
         .core_parity_err(core_parity_err), .core_rdata(core_rdata)
+    );
+    probe_stream_engine u_probe_stream (
+        .clk(clk),.rst_n(engine_rst_n),.host_en(pkt_bram_en),.host_we(pkt_bram_we),
+        .host_addr(pkt_bram_addr),.host_wdata(pkt_bram_wrdata),.host_rdata(pkt_bram_rddata),
+        .sample_empty(sample_empty),.sample_data(sample_data),.tick(sample_tick),
+        .sampler_active(sampler_active),.sample_pop(sample_pop),.rtt_active(rtt_active),
+        .core_start(rtt_start),.core_req(rtt_req),.core_wdata(rtt_wdata),
+        .core_next_valid(rtt_next_valid),.core_next_req(rtt_next_req),
+        .core_available(!sampler_active && !batch_active && !packet_active && !start_pulse),
+        .core_busy(core_busy),.core_result_valid(core_result_valid),.core_next_ready(core_next_ready),
+        .core_ack(core_ack),.core_parity_err(core_parity_err),.core_rdata(core_rdata)
     );
     wire        start_req;
     assign start_req = (s_axi_wvalid && s_axi_wready && 
@@ -415,7 +458,7 @@ module swd_controller #(
                     ADDR_CTRL: begin
                         rdata_reg <= {16'd0, xfer_request, 5'd0, ctrl_timestamp_en, ctrl_mode, core_busy};
                     end
-                    ADDR_FEATURES: rdata_reg <= 32'h4450_0003;
+                    ADDR_FEATURES: rdata_reg <= 32'h4450_0007;
                     ADDR_ENGINE_RESET: rdata_reg <= engine_reset_count;
                     ADDR_TRACE_CTRL: rdata_reg <= {trace_frozen,11'd0,trace_count,trace_head};
                     ADDR_TRACE_INDEX: rdata_reg <= {28'd0,trace_index};

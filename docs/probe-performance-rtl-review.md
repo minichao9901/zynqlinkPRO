@@ -1,5 +1,9 @@
 # Probe 性能差距与 RTL 化审查
 
+这是早期 `42edc7f` 的基线审查。当前改造见 [PL→DDR 通路](probe-pl-ddr.md)。
+此前只用 `--impl-only` 的实验未重新综合 sampler RTL，对应实测不能算作修改后 RTL 的成绩；
+新增构建流程使用源码 SHA256 拒绝这类过期 checkpoint。
+
 基线：已发布 `42edc7f`，F103CB HCLK96MHz，SWCLK50/60MHz。
 本次重新逐段核对 `E:/superlinkPRO/firmware/application_5301/src/` 的 RTT、scope、
 swd_host 和 USB 热路径。结论是：第一版主要完成协议和功能接通，没有充分保留参考工程
