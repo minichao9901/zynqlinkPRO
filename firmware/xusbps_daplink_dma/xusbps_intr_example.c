@@ -1,3 +1,4 @@
+#include "probe_stream.h"
 /******************************************************************************
 *
 * Copyright (C) 2010 - 2015 Xilinx, Inc.  All rights reserved.
@@ -186,7 +187,7 @@ static int UsbIntrExample(XScuGic *IntcInstancePtr, XUsbPs *UsbInstancePtr,
 	 *   Endpoint 4 (Bulk OUT for CDC)
 	 *   Endpoint 5 (Interrupt IN for CDC notifications)
 	 */
-	const u8 NumEndpoints = 6;
+	const u8 NumEndpoints = 8;
 
 	XUsbPs_Config		*UsbConfigPtr;
 	XUsbPs_DeviceConfig	DeviceConfig;
@@ -292,7 +293,17 @@ static int UsbIntrExample(XScuGic *IntcInstancePtr, XUsbPs *UsbInstancePtr,
 	DeviceConfig.EpCfg[5].In.NumBufs	= 2;
 	DeviceConfig.EpCfg[5].In.MaxPacketSize	= 64;
 
-	DeviceConfig.NumEndpoints = NumEndpoints;
+    DeviceConfig.EpCfg[6].In.Type=XUSBPS_EP_TYPE_INTERRUPT;
+    DeviceConfig.EpCfg[6].In.NumBufs=2;
+    DeviceConfig.EpCfg[6].In.MaxPacketSize=64;
+    DeviceConfig.EpCfg[6].Out.Type=XUSBPS_EP_TYPE_INTERRUPT;
+    DeviceConfig.EpCfg[6].Out.NumBufs=2;
+    DeviceConfig.EpCfg[6].Out.BufSize=64;
+    DeviceConfig.EpCfg[6].Out.MaxPacketSize=64;
+    DeviceConfig.EpCfg[7].In.Type=XUSBPS_EP_TYPE_BULK;
+    DeviceConfig.EpCfg[7].In.NumBufs=16;
+    DeviceConfig.EpCfg[7].In.MaxPacketSize=512;
+    DeviceConfig.NumEndpoints = NumEndpoints;
 
 	MemPtr = (u8 *)&Buffer[0];
 	memset(MemPtr,0,MEMORY_SIZE);
@@ -337,6 +348,10 @@ static int UsbIntrExample(XScuGic *IntcInstancePtr, XUsbPs *UsbInstancePtr,
 				XUSBPS_EP_DIRECTION_IN,
 				XUsbPs_EpCdcEventHandler, UsbInstancePtr);
 
+    if(XUsbPs_EpSetHandler(UsbInstancePtr,6,XUSBPS_EP_DIRECTION_IN,probe_usb_event,UsbInstancePtr)!=XST_SUCCESS ||
+       XUsbPs_EpSetHandler(UsbInstancePtr,6,XUSBPS_EP_DIRECTION_OUT,probe_usb_event,UsbInstancePtr)!=XST_SUCCESS ||
+       XUsbPs_EpSetHandler(UsbInstancePtr,7,XUSBPS_EP_DIRECTION_IN,probe_usb_event,UsbInstancePtr)!=XST_SUCCESS) goto out;
+
 	/* Enable the interrupts. */
 	XUsbPs_IntrEnable(UsbInstancePtr, XUSBPS_IXR_UR_MASK |
 					   XUSBPS_IXR_UI_MASK);
@@ -378,6 +393,7 @@ static int UsbIntrExample(XScuGic *IntcInstancePtr, XUsbPs *UsbInstancePtr,
 
 		extern void chry_dap_handle(void);
 		chry_dap_handle();
+        probe_poll(UsbInstancePtr);
 	}
 
 	ReturnStatus = XST_SUCCESS;
@@ -428,6 +444,7 @@ static void UsbIntrHandler(void *CallBackRef, u32 Mask)
     if(Mask & XUSBPS_IXR_UR_MASK){
         extern int chry_dap_usb_session_reset(void);
         chry_dap_usb_session_reset();
+        probe_usb_reset();
     }
 	NumIrqs++;
 	if (NumIrqs <= 8) {
@@ -593,7 +610,7 @@ static void XUsbPs_EpCdcEventHandler(void *CallBackRef, u8 EpNum,
 
 	case XUSBPS_EP_EVENT_DATA_TX:
 		/* CDC Bulk IN - EP 3 */
-		usbd_cdc_acm_bulk_in(InstancePtr, EpNum, 0);
+		probe_usb_event(InstancePtr,EpNum,EventType,Data);
 		break;
 
 	default:

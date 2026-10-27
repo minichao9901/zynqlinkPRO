@@ -62,6 +62,7 @@ foreach {b addr} {cmd 0x42000000 rsp 0x42010000} {
 }
 validate_bd_design
 save_bd_design
+source [file join $root fpga probe_stream_bd.tcl]
 source [file join $root fpga axi_pipeline.tcl]
 write_bd_tcl -force [file join $out system_dma.tcl]
 set_property synth_checkpoint_mode Hierarchical [get_files system.bd]

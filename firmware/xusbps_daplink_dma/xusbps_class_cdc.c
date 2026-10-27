@@ -30,6 +30,7 @@
  ******************************************************************************/
 
 #include <string.h>
+#include "probe_stream.h"
 
 #include "xparameters.h"
 #include "xusbps.h"
@@ -116,6 +117,18 @@ void XUsbPs_ClassReq(XUsbPs *InstancePtr, void *SetupDataPtr)
 	u8 Reply[CDC_LINE_CODING_SIZE];
 	int ReplyLen = 0;
 
+    if(SetupData->wIndex==PROBE_HID_INTERFACE) {
+        static u8 idle;
+        if(SetupData->bRequest==0x0a && SetupData->bmRequestType==0x21 && !SetupData->wLength) {
+            idle=(u8)(SetupData->wValue>>8); XUsbPs_EpBufferSend(InstancePtr,0,NULL,0);
+        } else if(SetupData->bRequest==2 && SetupData->bmRequestType==0xa1) {
+            XUsbPs_EpBufferSend(InstancePtr,0,&idle,SetupData->wLength ? 1 : 0);
+        } else XUsbPs_EpStall(InstancePtr,0,XUSBPS_EP_DIRECTION_IN|XUSBPS_EP_DIRECTION_OUT);
+        return;
+    }
+    if(SetupData->wIndex!=1) {
+        XUsbPs_EpStall(InstancePtr,0,XUSBPS_EP_DIRECTION_IN|XUSBPS_EP_DIRECTION_OUT); return;
+    }
 	switch (SetupData->bRequest) {
 	case CDC_SET_LINE_CODING:
 		line_coding.dwDTERate = 115200;

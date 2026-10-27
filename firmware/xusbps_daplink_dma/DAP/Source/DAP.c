@@ -850,6 +850,7 @@ static uint32_t DAP_HOT_CODE DAP_SWD_Transfer(const uint8_t *request, uint8_t *r
   transfer_write_header = -1;
   for (n = 0; n < count; n++) {
     req = *p++;
+    if ((req & 15U)==8U) goto legacy; /* Observe SELECT writes for probe ownership. */
     if (req & 0xF0U) goto legacy; /* Match/timestamp semantics retain CMSIS code. */
     if ((req & (DAP_TRANSFER_APnDP | DAP_TRANSFER_RnW)) ==
                (DAP_TRANSFER_APnDP | DAP_TRANSFER_RnW)) {

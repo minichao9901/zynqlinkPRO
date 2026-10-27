@@ -53,6 +53,8 @@ static void *active_buffer;static unsigned active_len;
 static int send_buf(XUsbPs *d,u8 ep,u8 *buf,unsigned len){(void)d;(void)ep;if(send_fail){send_fail=0;return 1;}submissions++;active_buffer=buf;active_len=len;return 0;}
 #define XUsbPs_EpBufferSend send_buf
 #define XUsbPs_EpBufferSendWithZLT send_buf
+void probe_before_dap(void){}
+void probe_after_dap(void){}
 void DAP_Setup(void){}
 uint32_t DAP_ExecuteCommand(const uint8_t *p,uint8_t *r);
 void XUsbPs_DapResumeRx(XUsbPs *i){(void)i;}

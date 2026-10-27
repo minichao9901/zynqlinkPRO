@@ -1,3 +1,4 @@
+#include "probe_stream.h"
 /******************************************************************************
 *
 * Copyright (C) 2010 - 2015 Xilinx, Inc.  All rights reserved.
@@ -311,7 +312,17 @@ static u8  	Reply[XUSBPS_REQ_REPLY_LEN];
 			}
 			break;
 
-		case XUSBPS_TYPE_CONFIG_DESC:
+        case 0x21:
+        case 0x22:
+            if(SetupData->wIndex!=PROBE_HID_INTERFACE) {
+                XUsbPs_EpStall(InstancePtr,0,XUSBPS_EP_DIRECTION_IN); break;
+            }
+            ReplyLen=probe_hid_descriptor(Reply,XUSBPS_REQ_REPLY_LEN,
+                         (SetupData->wValue>>8)==0x22);
+            if(ReplyLen>SetupData->wLength) ReplyLen=SetupData->wLength;
+            XUsbPs_EpBufferSend(InstancePtr,0,Reply,ReplyLen);
+            break;
+        case XUSBPS_TYPE_CONFIG_DESC:
 
 			/* Set up the reply buffer with the configuration
 			 * descriptor data.
@@ -428,7 +439,7 @@ static u8  	Reply[XUSBPS_REQ_REPLY_LEN];
 		 * Only allow configuration index 1 as this is the only one we
 		 * have.
 		 */
-		if ((SetupData->wValue & 0xff) != 1) {
+		if (SetupData->wValue > 1) {
 			Error = 1;
 			break;
 		}
@@ -448,14 +459,13 @@ static u8  	Reply[XUSBPS_REQ_REPLY_LEN];
 		XUsbPs_EpBufferSend(InstancePtr, 0, NULL, 0);
 
 
-		g_UsbConfigured = 1;
+		g_UsbConfigured = UsbLocalPtr->CurrentConfig != 0;
 		break;
 
 
 	case XUSBPS_REQ_GET_CONFIGURATION:
-		Response = (u8)InstancePtr->CurrentAltSetting;
-		XUsbPs_EpBufferSend(InstancePtr, 0,
-					&Response, 1);
+		Response = (u8)UsbLocalPtr->CurrentConfig;
+		XUsbPs_EpBufferSend(InstancePtr, 0, &Response, 1);
 		break;
 
 

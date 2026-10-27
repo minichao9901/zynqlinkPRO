@@ -10,6 +10,22 @@
 | `ps7_init.tcl` | PS 时钟/DDR 初始化（加载 ELF 前必须执行） |
 | `SHA256SUMS` | 校验值 |
 
+## Probe RTT/CDC + RTL HSS 配对（2026-10-27）
+
+新增可选 `zynqlink_probe.bit` + `zynqlink_probe.elf`，保持下方原 packet 配对。
+当前为 `0.3-dma`：HID 控制、RTT→CDC、PL HSS采样/拼包与独立Bulk IN，
+数据经专用 BRAM→CDMA→HP0→DDR→USB。SWCLK上限60 MHz，默认50 MHz。
+F103CB 实测 RTT 4.790 MB/s（10 s），HSS 单 u32 1 MHz、0%稳态跳点（变化源、10 s）；
+8×u32 为120 kHz、0%稳态跳点（3 s）。数据、DAP并发及 SRAM/寄存器/RCC恢复通过。
+Routed FCLK 120 MHz，setup +0.373 ns、hold +0.022 ns，bitgen/DRC通过。
+完整数据路径、速度/跳点和限制见[PL→DDR验收](../docs/probe-pl-ddr.md)，
+控制协议与端点见[Probe功能文档](../docs/probe-rtt-hss.md)，源文件与产物哈希见
+`probe_build_manifest.json`。
+
+```powershell
+python tools/run_xsct.py tools/download_dap_fpga.tcl prebuilt/zynqlink_probe.elf prebuilt/zynqlink_probe.bit
+```
+
 ## 当前配对（2026-10-27，codex/main-continuous-scheduler）
 
 包含连续完成握手、读收尾/ACK状态合并、混合Transfer写压缩，以及既有USB/执行引擎恢复。

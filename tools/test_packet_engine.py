@@ -19,7 +19,7 @@ def run(name, rtl, label, integration=False):
     exe = out/f'{label}_{name}.vvp'
     files = [rtl, src]
     if integration:
-        files += [root/'fpga/rtl'/f for f in ['swd_core.v', 'swd_controller.v', 'swd_batch_engine.v']]
+        files += [root/'fpga/rtl'/f for f in ['swd_core.v', 'swd_controller.v', 'swd_batch_engine.v', 'probe_sample_engine.v', 'probe_rtt_engine.v', 'probe_stream_engine.v']]
         files += [root/'fpga/sim/xpm_memory_tdpram.sv']
     subprocess.run(['iverilog', '-g2012', '-s', top, '-o', str(exe), *map(str, files)], check=True)
     r = subprocess.run(['vvp', str(exe)], capture_output=True, text=True, timeout=60)

@@ -22,6 +22,8 @@ module tb_packet_axi;
    .cmd_bram_addr(cmd_addr),.cmd_bram_wrdata(cmd_data),
    .rsp_bram_clk(clk),.rsp_bram_rst(1'b0),.rsp_bram_en(rsp_en),.rsp_bram_we(4'd0),
    .rsp_bram_addr(rsp_addr),.rsp_bram_wrdata(32'd0),.rsp_bram_rddata(rsp_data),
+   .pkt_bram_clk(clk),.pkt_bram_rst(1'b0),.pkt_bram_en(1'b0),.pkt_bram_we(4'd0),
+   .pkt_bram_addr(32'd0),.pkt_bram_wrdata(32'd0),
    .swclk(swclk),.swdio(swdio));
  reg mock_busy=0,stall=0,allow_batch=0;reg [31:0] mock_data=0;integer remaining=0,accepted=0;
  initial begin
@@ -78,7 +80,7 @@ module tb_packet_axi;
      $fatal(1,"status=%h core calls=%d",status,accepted);
    @(negedge clk);rsp_en=1;rsp_addr=0;@(negedge clk);
    if(rsp_data!==32'h00010003)$fatal(1,"response BRAM %h",rsp_data);
-   rd(7'h4c,status);if(status!==32'h44500001)$fatal(1,"reset feature %h",status);
+   rd(7'h4c,status);if(status!==32'h44500007)$fatal(1,"reset feature %h",status);
    stall=1;accepted=0;wr(7'h40,1);repeat(12)@(negedge clk);
    rd(7'h48,status);if(!status[0])$fatal(1,"packet did not stall");
    wr(7'h50,1);rd(7'h50,status);if(status!==1)$fatal(1,"packet reset counter %h",status);

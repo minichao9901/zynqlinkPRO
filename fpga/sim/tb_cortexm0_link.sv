@@ -37,6 +37,8 @@ module tb_cortexm0_link #(
     .cmd_bram_addr(cmd_addr),.cmd_bram_wrdata(cmd_data),
     .rsp_bram_clk(clk),.rsp_bram_rst(1'b0),.rsp_bram_en(rsp_en),.rsp_bram_we(4'd0),
     .rsp_bram_addr(rsp_addr),.rsp_bram_wrdata(32'd0),.rsp_bram_rddata(rsp_data),
+    .pkt_bram_clk(clk),.pkt_bram_rst(1'b0),.pkt_bram_en(1'b0),.pkt_bram_we(4'd0),
+    .pkt_bram_addr(32'd0),.pkt_bram_wrdata(32'd0),
     .swclk(swclk),.swdio(swdio));
 
   // Direction-aware return path prevents a delayed inout feedback loop.
@@ -179,6 +181,28 @@ module tb_cortexm0_link #(
     for(k=0;k<words;k=k+1)begin
       if(k==words-1)xfer(8'h0e,0,value);else xfer(8'h0f,0,value);
       if(value!==(32'h5a89cdef ^ (32'h9e3779b9*k)))$fatal(1,"SRAM index=%0d got=%h",k,value);
+    end
+    if($test$plusargs("sampler"))begin
+      wr(7'h60,2);wr(7'h78,$rtoi(500000000.0/half_ns));wr(7'h70,240);
+      wr(7'h68,0);wr(7'h6c,32'h20000000);
+      wr(7'h68,1);wr(7'h6c,32'h20000004);
+      wr(7'h60,32'h201);
+      // Competing packet/single launches must not disturb the sample owner.
+      wr(7'h40,1);wr(0,32'h0203);
+      repeat(25000)@(negedge clk);
+      wr(7'h60,0);repeat(4000)@(negedge clk);
+      rd(7'h64,value);
+      if(value[4] || value[31:16]!=16)$fatal(1,"sampler occupancy/fault %h",value);
+      for(k=0;k<16;k=k+1)begin
+        rd(7'h74,value); // 24 MHz timestamp
+        rd(7'h74,value);if(value!==32'h5a89cdef)$fatal(1,"sampler word0 %h",value);
+        rd(7'h74,value);if(value!==(32'h5a89cdef^32'h9e3779b9))$fatal(1,"sampler word1 %h",value);
+      end
+      rd(7'h64,value);if(value[31:16]!=0)$fatal(1,"sampler FIFO drain %h",value);
+      xfer(8'h08,0,value);xfer(8'h05,32'h20000000,value);
+      xfer(8'h0f,0,value);xfer(8'h0e,0,value);
+      if(value!==32'h5a89cdef)$fatal(1,"DAP after sampler %h",value);
+      $display("SAMPLER_PASS actual CortexM0 MEM-AP, FIFO, competing launches, DAP recovery");
     end
     if($test$plusargs("packets"))begin
       // The real M0 MEM-AP wraps TAR at 1 KiB. Use a modulo-256 pattern so

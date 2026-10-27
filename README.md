@@ -106,6 +106,8 @@ F103（HCLK=64 MHz）20 KiB SRAM 基准，三会话 ×100 轮，数据与 SRAM �
 
 ## 文档
 
+- [Probe RTT→CDC 与 RTL HSS](docs/probe-rtt-hss.md)（已提供 `prebuilt/zynqlink_probe.*`，F103CB 实板验收）
+
 - [RTL TransferBlock 修复与验收](docs/RTLTransferBlock修复与验收.md)
 - [RTL 批量与 DMA 优化](docs/RTL批量与DMA优化.md)
 - [SWD 采样相位与升频](docs/SWD采样相位与升频优化.md)

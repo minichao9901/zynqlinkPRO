@@ -63,6 +63,21 @@ module swd_controller #(
     (* X_INTERFACE_INFO = "xilinx.com:interface:bram:1.0 RSP_BRAM DOUT" *)
     output wire [31:0] rsp_bram_rddata,
 
+    (* X_INTERFACE_INFO = "xilinx.com:interface:bram:1.0 PKT_BRAM CLK" *)
+    input wire pkt_bram_clk,
+    (* X_INTERFACE_INFO = "xilinx.com:interface:bram:1.0 PKT_BRAM RST" *)
+    input wire pkt_bram_rst,
+    (* X_INTERFACE_INFO = "xilinx.com:interface:bram:1.0 PKT_BRAM EN" *)
+    input wire pkt_bram_en,
+    (* X_INTERFACE_INFO = "xilinx.com:interface:bram:1.0 PKT_BRAM WE" *)
+    input wire [3:0] pkt_bram_we,
+    (* X_INTERFACE_INFO = "xilinx.com:interface:bram:1.0 PKT_BRAM ADDR" *)
+    input wire [31:0] pkt_bram_addr,
+    (* X_INTERFACE_INFO = "xilinx.com:interface:bram:1.0 PKT_BRAM DIN" *)
+    input wire [31:0] pkt_bram_wrdata,
+    (* X_INTERFACE_INFO = "xilinx.com:interface:bram:1.0 PKT_BRAM DOUT" *)
+    output wire [31:0] pkt_bram_rddata,
+
     // SWD Physical Interface
     output wire                                    swclk,
     inout  wire                                    swdio
@@ -257,12 +272,62 @@ module swd_controller #(
     wire [7:0]  core_swj_count_sel;
     wire [7:0]  core_req_sel;
     wire [31:0] core_wdata_sel;
+    wire        core_next_valid_sel;
+    wire [7:0]  core_next_req_sel;
+    wire [31:0] core_next_wdata_sel;
 
     //=========================================================================
     // Start Pulse Generation
     //=========================================================================
+    reg start_pulse;
+    wire stream_active, sampler_active, sampler_start;
+    wire [7:0] sampler_req;
+    wire [31:0] sampler_wdata;
+    wire sampler_next_valid;
+    wire [7:0] sampler_next_req;
+    wire rtt_active,rtt_start,rtt_next_valid;
+    wire [7:0] rtt_req,rtt_next_req;
+    wire [31:0] rtt_wdata;
+    wire sample_pop,sample_empty;
+    wire [31:0] sample_data,sample_tick;
+    wire stream_start = rtt_active ? rtt_start : sampler_start;
+    wire [7:0] stream_req;
+    wire [31:0] stream_wdata, stream_rdata;
+    wire stream_next_valid;
+    wire [7:0] stream_next_req;
+    wire [31:0] stream_next_wdata;
+    assign stream_active = sampler_active || rtt_active;
+    assign stream_req = rtt_active ? rtt_req : sampler_req;
+    assign stream_wdata = rtt_active ? rtt_wdata : sampler_wdata;
+    assign stream_next_valid = rtt_active ? rtt_next_valid : sampler_next_valid;
+    assign stream_next_req = rtt_active ? rtt_next_req : sampler_next_req;
+    assign stream_next_wdata = 0;
+    wire stream_wr = s_axi_wvalid && s_axi_wready && write_addr[6:5]==2'b11 && &s_axi_wstrb;
+    wire stream_rd = s_axi_arvalid && s_axi_arready && s_axi_araddr[6:5]==2'b11;
+    probe_sample_engine u_probe_sampler (
+        .clk(clk), .rst_n(engine_rst_n), .wr(stream_wr), .rd(stream_rd),
+        .waddr(write_addr[4:2]), .raddr(s_axi_araddr[4:2]),
+        .wdata(s_axi_wdata), .rdata(stream_rdata),
+        .available(!core_busy && !rtt_active && !batch_active && !packet_active && !start_pulse),
+        .stream_pop(sample_pop),.stream_empty(sample_empty),.stream_data(sample_data),.timer_tick(sample_tick),
+        .active(sampler_active), .core_start(sampler_start), .core_req(sampler_req),
+        .core_wdata(sampler_wdata), .core_next_valid(sampler_next_valid),
+        .core_next_req(sampler_next_req), .core_next_wdata(), .core_busy(core_busy),.core_next_ready(core_next_ready),
+        .core_result_valid(core_result_valid), .core_ack(core_ack),
+        .core_parity_err(core_parity_err), .core_rdata(core_rdata)
+    );
+    probe_stream_engine u_probe_stream (
+        .clk(clk),.rst_n(engine_rst_n),.host_en(pkt_bram_en),.host_we(pkt_bram_we),
+        .host_addr(pkt_bram_addr),.host_wdata(pkt_bram_wrdata),.host_rdata(pkt_bram_rddata),
+        .sample_empty(sample_empty),.sample_data(sample_data),.tick(sample_tick),
+        .sampler_active(sampler_active),.sample_pop(sample_pop),.rtt_active(rtt_active),
+        .core_start(rtt_start),.core_req(rtt_req),.core_wdata(rtt_wdata),
+        .core_next_valid(rtt_next_valid),.core_next_req(rtt_next_req),
+        .core_available(!sampler_active && !batch_active && !packet_active && !start_pulse),
+        .core_busy(core_busy),.core_result_valid(core_result_valid),.core_next_ready(core_next_ready),
+        .core_ack(core_ack),.core_parity_err(core_parity_err),.core_rdata(core_rdata)
+    );
     wire        start_req;
-    reg         start_pulse;
     assign start_req = (s_axi_wvalid && s_axi_wready && 
                         ((aw_en && s_axi_awaddr == ADDR_CTRL[C_S_AXI_ADDR_WIDTH-1:0]) || 
                          (!aw_en && aw_addr == ADDR_CTRL[C_S_AXI_ADDR_WIDTH-1:0])) && 
@@ -273,7 +338,7 @@ module swd_controller #(
             start_pulse <= 1'b0;
         end
         else begin
-            start_pulse <= start_req;
+            start_pulse <= start_req && !stream_active;
         end
     end
 
@@ -330,7 +395,7 @@ module swd_controller #(
                         ctrl_timestamp_en <= s_axi_wdata[2];
                         xfer_request <= s_axi_wdata[15:8];  // move here
                     end
-                    ADDR_CFG: if (!core_busy && !batch_active && !packet_busy) begin
+                    ADDR_CFG: if (!core_busy && !batch_active && !packet_busy && !stream_active) begin
                         cfg_idle_cycles <= s_axi_wdata[7:4];
                         cfg_data_phase <= s_axi_wdata[8];
                         cfg_clock_delay <= s_axi_wdata[12:9];
@@ -357,7 +422,7 @@ module swd_controller #(
                     ADDR_SWJ_DATA7: swj_data[255:224] <= s_axi_wdata;
                     ADDR_SWJ_COUNT: swj_count <= s_axi_wdata[7:0];
                     ADDR_PACKET_LEN: packet_len_reg <= s_axi_wdata[15:0];
-                    ADDR_PACKET_CTRL: if (s_axi_wdata[0] && !packet_busy && !batch_active && !core_busy)
+                    ADDR_PACKET_CTRL: if (s_axi_wdata[0] && !packet_busy && !batch_active && !core_busy && !stream_active)
                         packet_start_pulse <= 1'b1;
                     ADDR_ENGINE_RESET: if (s_axi_wstrb[0] && s_axi_wdata[0]) begin
                         // Keep AXI, clocks, configuration and BRAM alive. Reset
@@ -393,7 +458,7 @@ module swd_controller #(
                     ADDR_CTRL: begin
                         rdata_reg <= {16'd0, xfer_request, 5'd0, ctrl_timestamp_en, ctrl_mode, core_busy};
                     end
-                    ADDR_FEATURES: rdata_reg <= 32'h4450_0001;
+                    ADDR_FEATURES: rdata_reg <= 32'h4450_0007;
                     ADDR_ENGINE_RESET: rdata_reg <= engine_reset_count;
                     ADDR_TRACE_CTRL: rdata_reg <= {trace_frozen,11'd0,trace_count,trace_head};
                     ADDR_TRACE_INDEX: rdata_reg <= {28'd0,trace_index};
@@ -442,7 +507,7 @@ module swd_controller #(
                     ADDR_PACKET_LEN: rdata_reg <= {16'd0,packet_len_reg};
                     ADDR_PACKET_STATUS: rdata_reg <= {packet_response_words,8'd0,packet_state,packet_error,packet_done,packet_busy};
                     default: begin
-                        rdata_reg <= 32'd0;
+                        rdata_reg <= s_axi_araddr[6:5]==2'b11 ? stream_rdata : 32'd0;
                     end
                 endcase
             end
@@ -465,7 +530,7 @@ module swd_controller #(
     assign s_axi_rresp = 2'b00;  // OKAY
     assign s_axi_rvalid = rvalid_reg;
 
-    assign batch_wr_en = s_axi_wvalid && s_axi_wready &&
+    assign batch_wr_en = !stream_active && s_axi_wvalid && s_axi_wready &&
                          ((write_addr == ADDR_BATCH_CTRL) ||
                           (write_addr == ADDR_BATCH_ADDR) ||
                           (write_addr == ADDR_BATCH_DATA));
@@ -540,12 +605,16 @@ module swd_controller #(
         .core_ack(core_ack), .core_parity_err(core_parity_err), .core_rdata(core_rdata)
     );
 
-    assign core_start_sel    = packet_active ? packet_core_start : (batch_active ? batch_core_start    : start_pulse);
-    assign core_mode_sel     = packet_active ? packet_core_mode  : (batch_active ? batch_core_mode     : ctrl_mode);
+    assign core_start_sel    = stream_active ? stream_start : packet_active ? packet_core_start : (batch_active ? batch_core_start    : start_pulse);
+    assign core_mode_sel     = stream_active ? 1'b1 : packet_active ? packet_core_mode  : (batch_active ? batch_core_mode     : ctrl_mode);
     assign core_swj_data_sel = batch_active ? batch_core_swj_data : swj_data;
     assign core_swj_count_sel= batch_active ? batch_core_swj_count: swj_count;
-    assign core_req_sel      = packet_active ? packet_core_req   : (batch_active ? batch_core_req      : xfer_request);
-    assign core_wdata_sel    = packet_active ? packet_core_wdata : (batch_active ? batch_core_wdata    : xfer_wdata);
+    assign core_req_sel      = stream_active ? stream_req : packet_active ? packet_core_req   : (batch_active ? batch_core_req      : xfer_request);
+    assign core_wdata_sel    = stream_active ? stream_wdata : packet_active ? packet_core_wdata : (batch_active ? batch_core_wdata    : xfer_wdata);
+    assign core_next_valid_sel = stream_active ? stream_next_valid :
+                                 packet_active ? packet_core_next_valid : 1'b0;
+    assign core_next_req_sel = stream_active ? stream_next_req : packet_core_next_request;
+    assign core_next_wdata_sel = stream_active ? stream_next_wdata : packet_core_next_wdata;
 
     //=========================================================================
     // SWD Core Instance
@@ -554,9 +623,9 @@ module swd_controller #(
         .clk           (clk),
         .rst_n         (engine_rst_n),
         .start         (core_start_sel),
-        .next_valid    (packet_active && packet_core_next_valid),
-        .next_request  (packet_core_next_request),
-        .next_wdata    (packet_core_next_wdata),
+        .next_valid    (core_next_valid_sel),
+        .next_request  (core_next_req_sel),
+        .next_wdata    (core_next_wdata_sel),
         .next_ready    (core_next_ready),
         .result_valid  (core_result_valid),
         .mode          (core_mode_sel),

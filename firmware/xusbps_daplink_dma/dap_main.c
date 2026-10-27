@@ -1,3 +1,4 @@
+#include "probe_stream.h"
 #include "stdint.h"
 #include "DAP.h"
 #include "dap_metrics.h"
@@ -228,7 +229,9 @@ void chry_dap_handle(void)
             ((execute_request[4]&2)?MET_EXEC06_READ:MET_EXEC06_WRITE):MET_EXEC05;
         dap_metric_end(MET_QUEUE_WAIT,request_time[req_slot],0);
         dap_trace_add(2U,execute_request[0]);
+        probe_before_dap();
         USB_RespSize[rsp_slot]=(uint16_t)DAP_ExecuteCommand(execute_request,USB_Response[rsp_slot]);
+        probe_after_dap();
         dap_metric_end(metric_id,t,USB_RespSize[rsp_slot]);
         dap_trace_bytes(32U,USB_Response[rsp_slot],USB_RespSize[rsp_slot]);
         dap_trace_add(3U,USB_RespSize[rsp_slot]);dap_dbg_exec_count++;
