@@ -30,6 +30,7 @@ if {!$impl_only} {
     add_files -norecurse [file join $root fpga rtl probe_rtt_engine.v]
     add_files -norecurse [file join $root fpga rtl probe_stream_engine.v]
     add_files -norecurse [file join $root fpga rtl jtag_shift.v]
+    add_files -norecurse [file join $root fpga rtl swj_clk_gen.v]
     add_files -norecurse [file join $root fpga rtl jtag_core.v]
     source [file join $root fpga axi_pipeline.tcl]
     if {$axi_pipeline_changed} {set fresh_impl 1}
