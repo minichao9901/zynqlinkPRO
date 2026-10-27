@@ -207,6 +207,20 @@ raw JTAG Sequence 不额外增加用户要求的 TCK 数。它使用较慢的扫
 
 HSS 在 30 MHz 下可用上限是 250 kHz，在 60 MHz 下是 500 kHz，塌陷点都落在约 40 kHz 那堵"每次提交 1 个样本、约 24.7 µs/次"的墙上，与之前定位一致。
 
+## 未完成：用帧尾空闲消掉 WAIT 重试
+
+思路：60 MHz 下一次 43 位扫描只要 717 ns，而目标 AP 周转约 830 ns，所以每字必然等一次 WAIT、多扫一遍。若在 Update-DR 之后插入若干 Run-Test/Idle 的 TCK（`idle_cycles`），让 AP 在同一个扫描间隔内做完，就可能把 2.04 次/字压回 1.04，吞吐上限从 2.3 MB/s 提到 4 MB/s 以上。
+
+**实验被寄存器通路卡住，尚未验证，也没有被证伪**：
+
+- 主机 `DAP_TransferConfigure`（`0x13, idle`，试过 0/7/15）之后读 `SWD_CFG` 始终是 `0x11`，即 `cfg_idle_cycles` 恒为 1；
+- 直接把 `PORT_JTAG_SETUP` 里的默认值改成 `15<<4` 并重新编译烧板，读回仍是 `0x11`；
+- 旁证：扫描统计里 `bits/scan` 一直是 43.4，正好等于 `7+35+1+1`，说明核心确实只用了 idle=1。
+
+也就是说 `ADDR_CFG`（0x08）的写入没有落地。`swd_controller.v` 里这个写被 `!core_busy && !batch_active && !packet_busy && !stream_active` 守着，最可能是守卫条件在 JTAG 使能状态下恒为假，或地址解码不符。
+
+下一步：仿照已有的 `half_q`（CSR `0xCC`），把 `idle_cycles` 也做成一个独立的 JTAG CSR（例如 `0xD0`），由固件直接写，绕开 `ADDR_CFG`。改完用 `tools/measure_jtag_scan.py` 看 `bits/scan` 是否从 43.4 升到 `43+idle`、`scans/word` 是否从 2.04 降到 1.04。注意 `idle_cycles` 字段只有 4 位（最大 15），60 MHz 下 15 拍约 250 ns，理论刚好够补上 830−717=113 ns 的缺口。
+
 ## 更正：HSS 真实可用频率
 
 上节把 39.5 kHz 当作 750 kHz 的塌陷点，但不能据此推断 HSS 上限。按 tick 周期逐档细扫后（60 MHz TCK，回复模式，2–3 秒）：
