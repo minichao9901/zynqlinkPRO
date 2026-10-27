@@ -20,12 +20,12 @@
     }
   },
   "candidate": {
-    "commit": "d773decb791f6d36854d613d0884224e9a6fd85c",
-    "bit": "build/fpga_dma_global/system_wrapper_unverified.bit",
+    "commit": "2d20baa-retimed",
+    "bit": "build/fpga_dma_global/system_wrapper_unverified_retimed.bit",
     "bit_bytes": 4045674,
     "resources": {
-      "slice_luts": 17882,
-      "slice_registers": 22468,
+      "slice_luts": 18050,
+      "slice_registers": 23388,
       "block_ram_tiles": 6,
       "dsps": 1,
       "carry4": 1086
@@ -33,14 +33,14 @@
     "timing": {
       "fclk_max_hz": null,
       "swclk_max_hz": null,
-      "setup_slack_ns_at_150mhz": -5.131,
-      "hold_slack_ns_at_150mhz": 0.034,
-      "setup_slack_ns_at_100mhz": -1.797,
-      "hold_slack_ns_at_100mhz": 0.034,
-      "worst_path_data_delay_ns": 11.466,
-      "worst_path_logic_levels": 22,
-      "worst_path_source": "system_i/swd_controller_0/inst/u_timing_regs/active_reg[5][30]/C",
-      "worst_path_destination": "system_i/swd_controller_0/inst/u_swd_core/FSM_sequential_state_reg[3]_rep/CE"
+      "setup_slack_ns_at_150mhz": -4.684,
+      "hold_slack_ns_at_150mhz": 0.023,
+      "setup_slack_ns_at_100mhz": -1.35,
+      "hold_slack_ns_at_100mhz": 0.023,
+      "worst_path_data_delay_ns": 10.969,
+      "worst_path_logic_levels": 21,
+      "worst_path_source": "system_i/swd_controller_0/inst/u_swd_core/FSM_sequential_state_reg[2]/C",
+      "worst_path_destination": "system_i/swd_controller_0/inst/u_swd_core/FSM_sequential_state_reg[4]/CE"
     }
   },
   "resource_delta": {
@@ -76,8 +76,8 @@
     }
   },
   "timing_delta_at_150mhz": {
-    "setup_slack_ns": -5.279,
-    "hold_slack_ns": 0.008
+    "setup_slack_ns": -4.832,
+    "hold_slack_ns": -0.003
   },
   "status": "candidate_bit_generated_but_timing_failed",
   "validation": {
@@ -92,7 +92,7 @@
     "Candidate routed DCP and unverified bitstream were generated from d773dec using the same part and XDC.",
     "Candidate timing fails before the main 150 MHz target; the bitstream is retained for diagnosis only and was not programmed.",
     "The worst path traverses the new Q16 timing-register carry chain into the SWD timing generator/state machine.",
-    "The available verified main bit predates the candidate packet-memory BD refresh; therefore the full-device resource delta includes packet-memory integration. The OOC SWD-module comparison isolates the RTL-side cost more directly."
+    "The final retimed candidate keeps configuration local to the SWD core during a transaction; it improves the candidate from -5.131 ns to -4.684 ns at 150 MHz, but still fails the main target."
   ],
   "ooc_swd_controller": {
     "main_verified_build": {
