@@ -29,6 +29,9 @@ module tb_swd_ack_delay #(
 
   swd_core core(
     .next_valid(1'b0),.next_request(8'd0),.next_wdata(32'd0),.next_ready(),.result_valid(),
+ .timing_ctrl(32'd0),.timing_half_q(32'd0),.timing_swj_q(32'd0),
+ .timing_ack_sample(32'd0),.timing_data_sample(32'd0),.timing_ack_q(32'd0),
+ .timing_turn_q(32'd0),.timing_inputs(2'd0),
     .clk(clk), .rst_n(rst_n), .start(start), .mode(1'b1),
     .timestamp_en(1'b0), .idle_cycles(4'd0), .data_phase(1'b0),
     .clock_delay(4'd0), .delay_fast(4'd0),

@@ -19,7 +19,9 @@ assign swdio=dio_t?1'bz:dio_o;
 wire core_next_valid,core_next_ready,core_result_valid;
 wire [7:0] core_next_request;wire [31:0] core_next_wdata;
 dap_transfer_block_engine #(.ENABLE_CHAIN(1)) dut(.*, .state_dbg());
-swd_core core(.next_valid(core_next_valid),.next_request(core_next_request),.next_wdata(core_next_wdata),
+swd_core core(.timing_ctrl(32'd0),.timing_half_q(32'd0),.timing_swj_q(32'd0),
+ .timing_ack_sample(32'd0),.timing_data_sample(32'd0),.timing_ack_q(32'd0),
+ .timing_turn_q(32'd0),.timing_inputs(2'd0),.next_valid(core_next_valid),.next_request(core_next_request),.next_wdata(core_next_wdata),
  .next_ready(core_next_ready),.result_valid(core_result_valid),.clk(clk),.rst_n(rst_n),.start(core_start),.mode(core_mode),
  .timestamp_en(1'b0),.idle_cycles(4'(IDLE_CYCLES)),.data_phase(1'b0),
  .clock_delay(4'd0),.delay_fast(4'd0),.turn_extra(2'd0),.ack_delay(3'd0),

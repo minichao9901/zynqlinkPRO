@@ -49,6 +49,9 @@ always @(posedge clk) begin
   if(fclk_cycle-last_rise_cycle<2)$fatal(1,"early sample consumed before two FCLK beats");
 end
 swd_core core(.next_valid(1'b0),.next_request(8'd0),.next_wdata(32'd0),.next_ready(),.result_valid(),
+ .timing_ctrl(32'd0),.timing_half_q(32'd0),.timing_swj_q(32'd0),
+ .timing_ack_sample(32'd0),.timing_data_sample(32'd0),.timing_ack_q(32'd0),
+ .timing_turn_q(32'd0),.timing_inputs(2'd0),
  .clk(clk),.rst_n(rst_n),.start(core_start),.mode(core_mode),
  .timestamp_en(1'b0),.idle_cycles(4'(IDLE_CYCLES)),.data_phase(1'b0),.clock_delay(4'd5),.delay_fast(4'd0),
  .turn_extra(2'(TURN_EXTRA)),.ack_delay(3'(ACK_DELAY)),

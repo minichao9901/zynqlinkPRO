@@ -17,6 +17,14 @@ ROOT = Path(__file__).resolve().parents[1]
 BASELINE = 'd42b60180e82fccb428c51613a0316776c2bc4fc'
 OUT = ROOT / 'build/swd_timing_sim'
 
+def baseline_ports(source):
+    # Add unused inputs to the frozen core's interface; its behavioral body
+    # remains unchanged. This lets current benches connect the extension bus.
+    return source.replace('    input  wire [2:0]  ack_delay,', '''    input  wire [2:0]  ack_delay,
+    input wire [31:0] timing_ctrl,timing_half_q,timing_swj_q,
+    input wire [31:0] timing_ack_sample,timing_data_sample,timing_ack_q,timing_turn_q,
+    input wire [1:0] timing_inputs,''')
+
 
 def instrument_core(out=OUT):
     out.mkdir(parents=True, exist_ok=True)
@@ -41,7 +49,10 @@ def instrument_core(out=OUT):
 reg [16:0] equivalence_states = 0;
 always @(posedge clk or negedge clk) begin
     #0.001;
-    if (rst_n && state < 17) begin
+    if (rst_n && state < 17 && (!timing_ctrl[0] ||
+        (timing_half_q==((delay_fast+1)*65536) &&
+         timing_swj_q==((clock_delay+1)*65536) && timing_ack_q==0 && timing_turn_q==0 &&
+         timing_ack_sample==65536 && timing_data_sample==65536))) begin
         equivalence_edges = equivalence_edges + 1;
         equivalence_states[state] = 1;
 '''
@@ -174,7 +185,7 @@ def main():
     rows = []
     sim = ROOT/'fpga/sim'
     rtl = ROOT/'fpga/rtl'
-    controller = [rtl/f for f in ['swd_controller.v','swd_batch_engine.v',
+    controller = [rtl/f for f in ['swd_timing_regs.v','swd_controller.v','swd_batch_engine.v',
         'dap_transfer_block_engine.v','probe_sample_engine.v','probe_rtt_engine.v',
         'probe_stream_engine.v']] + [sim/'sim_primitives.v',sim/'xpm_memory_tdpram.sv']
 
@@ -202,8 +213,8 @@ def main():
                 expect_pass=not(tco==40 and hold==0))
     if 'budget' in groups:
         baseline_core=OUT/'swd_core_baseline.v'
-        baseline_core.write_text(checked[1].read_text().replace(
-            'module swd_core_main (','module swd_core (',1))
+        baseline_core.write_text(baseline_ports(checked[1].read_text().replace(
+            'module swd_core_main (','module swd_core (',1)))
         for mhz,half_ns,idle in [(50,5.0,0),(50,5.0,1),(50,5.0,2),
                                 (60,4.166667,1),(60,4.166667,2)]:
             name=f'budget_{mhz}_idle{idle}'
@@ -256,8 +267,8 @@ def main():
     if 'baseline' in groups:
         from run_cortexm0_regress import DEFAULT_MODEL, MODEL
         baseline_core=OUT/'swd_core_baseline.v'
-        baseline_core.write_text(checked[1].read_text().replace(
-            'module swd_core_main (','module swd_core (',1))
+        baseline_core.write_text(baseline_ports(checked[1].read_text().replace(
+            'module swd_core_main (','module swd_core (',1)))
         work,env=compile_xsim([baseline_core]+controller+
             [DEFAULT_MODEL/f for f in MODEL]+[sim/'tb_cortexm0_link.sv'])
         for ns,ack in [(8,'4'),(30,'3'),(50,'7')]:

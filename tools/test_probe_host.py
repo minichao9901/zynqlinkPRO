@@ -24,6 +24,6 @@ descriptor_source=(root/'firmware/xusbps_daplink_dma/xusbps_ch9_storage.c').read
 for name in ['probe_host', 'probe_target', 'probe_descriptor']:
     exe=out/(name+'.exe')
     subprocess.run([*compiler, '-std=c11', '-O2', '-Wall', '-Wextra',
-                    '-I'+str(out), '-I'+str(root/'tools/tests'), '-I'+str(root/'firmware/xusbps_daplink_dma'),
+                    '-I'+str(out), '-I'+str(root/'tools/tests'), '-I'+str(root/'firmware/xusbps_daplink_dma'), '-I'+str(root/'firmware/xusbps_daplink_dma/DAP/Include'),
                     str(root/'tools/tests'/(name+'_test.c')), '-o', str(exe)], check=True)
     subprocess.run([str(exe)], check=True, timeout=30)

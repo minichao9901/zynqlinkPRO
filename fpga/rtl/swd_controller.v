@@ -7,7 +7,7 @@
 `timescale 1ns/1ps
 module swd_controller #(
     parameter C_S_AXI_DATA_WIDTH = 32,
-    parameter C_S_AXI_ADDR_WIDTH = 7,
+    parameter C_S_AXI_ADDR_WIDTH = 8,
     parameter integer SWDIO_IN_DELAY_NS = 0
 )(
     input  wire                                    clk,
@@ -169,6 +169,7 @@ module swd_controller #(
     localparam ADDR_TRACE_CTRL    = 7'h54;
     localparam ADDR_TRACE_INDEX   = 7'h58;
     localparam ADDR_TRACE_DATA    = 7'h5C;
+    wire [C_S_AXI_ADDR_WIDTH-1:0] write_addr;
     reg [31:0] transfer_trace [0:15];
     reg [3:0] trace_head,trace_index;
     reg [15:0] trace_count;
@@ -302,8 +303,8 @@ module swd_controller #(
     assign stream_next_valid = rtt_active ? rtt_next_valid : sampler_next_valid;
     assign stream_next_req = rtt_active ? rtt_next_req : sampler_next_req;
     assign stream_next_wdata = 0;
-    wire stream_wr = s_axi_wvalid && s_axi_wready && write_addr[6:5]==2'b11 && &s_axi_wstrb;
-    wire stream_rd = s_axi_arvalid && s_axi_arready && s_axi_araddr[6:5]==2'b11;
+    wire stream_wr = !write_addr[7] && s_axi_wvalid && s_axi_wready && write_addr[6:5]==2'b11 && &s_axi_wstrb;
+    wire stream_rd = !s_axi_araddr[7] && s_axi_arvalid && s_axi_arready && s_axi_araddr[6:5]==2'b11;
     probe_sample_engine u_probe_sampler (
         .clk(clk), .rst_n(engine_rst_n), .wr(stream_wr), .rd(stream_rd),
         .waddr(write_addr[4:2]), .raddr(s_axi_araddr[4:2]),
@@ -329,8 +330,8 @@ module swd_controller #(
     );
     wire        start_req;
     assign start_req = (s_axi_wvalid && s_axi_wready && 
-                        ((aw_en && s_axi_awaddr == ADDR_CTRL[C_S_AXI_ADDR_WIDTH-1:0]) || 
-                         (!aw_en && aw_addr == ADDR_CTRL[C_S_AXI_ADDR_WIDTH-1:0])) && 
+                        ((aw_en && s_axi_awaddr == ADDR_CTRL) ||
+                         (!aw_en && aw_addr == ADDR_CTRL)) &&
                         s_axi_wdata[0]);
 
     always @(posedge clk or negedge rst_n) begin
@@ -341,6 +342,21 @@ module swd_controller #(
             start_pulse <= start_req && !stream_active;
         end
     end
+
+    wire [31:0] timing_ctrl,timing_half_q,timing_swj_q,timing_ack_sample,
+        timing_data_sample,timing_ack_q,timing_turn_q,timing_rdata,timing_legacy;
+    wire timing_legacy_apply;
+    wire [31:0] current_cfg={4'd0,cfg_ack_delay,cfg_turn_extra,5'd0,
+        cfg_sample_rise,cfg_delay_fast,cfg_clock_delay,cfg_data_phase,cfg_idle_cycles,4'd1};
+    wire timing_idle=!(core_busy || batch_active || packet_busy || packet_active ||
+        stream_active || start_pulse || packet_start_pulse || start_req);
+    swd_timing_regs u_timing_regs(.clk(clk),.rst_n(rst_n),.quiescent(timing_idle),
+        .wr(s_axi_wvalid && s_axi_wready),.addr(write_addr),.raddr(s_axi_araddr),.wdata(s_axi_wdata),
+        .wstrb(s_axi_wstrb),.legacy_cfg(current_cfg),.rdata(timing_rdata),
+        .control(timing_ctrl),.xfer_half_q(timing_half_q),.swj_half_q(timing_swj_q),
+        .ack_sample(timing_ack_sample),.data_sample(timing_data_sample),
+        .ack_half_q(timing_ack_q),.turn_half_q(timing_turn_q),
+        .legacy_apply(timing_legacy_apply),.legacy_value(timing_legacy));
 
     //=========================================================================
     // AXI-Lite Write Logic
@@ -372,6 +388,12 @@ module swd_controller #(
         else begin
             packet_start_pulse <= 1'b0;
             engine_reset <= 1'b0;
+            if(timing_legacy_apply)begin
+                cfg_idle_cycles<=timing_legacy[7:4];cfg_data_phase<=timing_legacy[8];
+                cfg_clock_delay<=timing_legacy[12:9];cfg_delay_fast<=timing_legacy[16:13];
+                cfg_sample_rise<=timing_legacy[17];cfg_turn_extra<=timing_legacy[24:23];
+                cfg_ack_delay<=timing_legacy[27:25];
+            end
             // BRESP/BVALID handshake
             if (s_axi_bready && bvalid_reg) begin
                 bvalid_reg <= 1'b0;
@@ -438,7 +460,6 @@ module swd_controller #(
     end
 
     // Combinational address selection for write
-    wire [C_S_AXI_ADDR_WIDTH-1:0] write_addr;
     assign write_addr = (s_axi_awvalid && s_axi_awready) ? s_axi_awaddr : aw_addr;
 
     //=========================================================================
@@ -507,7 +528,8 @@ module swd_controller #(
                     ADDR_PACKET_LEN: rdata_reg <= {16'd0,packet_len_reg};
                     ADDR_PACKET_STATUS: rdata_reg <= {packet_response_words,8'd0,packet_state,packet_error,packet_done,packet_busy};
                     default: begin
-                        rdata_reg <= s_axi_araddr[6:5]==2'b11 ? stream_rdata : 32'd0;
+                        rdata_reg <= s_axi_araddr>=8'hd0 ? timing_rdata :
+                            !s_axi_araddr[7] && s_axi_araddr[6:5]==2'b11 ? stream_rdata : 32'd0;
                     end
                 endcase
             end
@@ -620,6 +642,10 @@ module swd_controller #(
     // SWD Core Instance
     //=========================================================================
     swd_core u_swd_core (
+        .timing_ctrl(timing_ctrl),.timing_half_q(timing_half_q),.timing_swj_q(timing_swj_q),
+        .timing_ack_sample(timing_ack_sample),.timing_data_sample(timing_data_sample),
+        .timing_ack_q(timing_ack_q),.timing_turn_q(timing_turn_q),
+        .timing_inputs({swdio_i_rise_raw,swdio_i_fall_raw}),
         .clk           (clk),
         .rst_n         (engine_rst_n),
         .start         (core_start_sel),

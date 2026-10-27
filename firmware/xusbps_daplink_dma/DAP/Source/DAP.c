@@ -445,6 +445,12 @@ static uint32_t DAP_SWJ_Clock(const uint8_t *request, uint8_t *response) {
     *response = DAP_ERROR;
     return ((4U << 16) | 1U);
   }
+  int timing_result=swd_timing_clock(clock);
+  if(timing_result!=0) {
+    *response=timing_result>0 ? DAP_OK : DAP_ERROR;
+    if(timing_result>0)Set_Clock_Delay(clock);
+    return ((4U<<16)|1U);
+  }
   ps_set_fclk0_hz(clock * 2U);
   /* FCLK runs at 2x SWCLK, so the transfer half-cycle must be one FCLK
    * cycle (delay_fast=0).  The RTL reset value is slow; program it here. */

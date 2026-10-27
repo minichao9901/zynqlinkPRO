@@ -14,6 +14,7 @@ add_files [glob [file join $root fpga rtl *.v]]
 add_files -fileset constrs_1 [file join $root fpga constraints dap_pins.xdc]
 set_property PROCESSING_ORDER LATE [get_files dap_pins.xdc]
 source [file join $root fpga bd legacy_system.tcl]
+set_property CONFIG.C_S_AXI_ADDR_WIDTH 8 [get_bd_cells swd_controller_0]
 set ps [get_bd_cells processing_system7_0]
 set_property -dict [list CONFIG.PCW_USE_S_AXI_HP0 {1} CONFIG.PCW_FPGA0_PERIPHERAL_FREQMHZ {100}] $ps
 set periph [get_bd_cells ps7_0_axi_periph]

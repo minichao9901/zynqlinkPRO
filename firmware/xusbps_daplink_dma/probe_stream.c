@@ -13,6 +13,7 @@
 // The standalone host state-machine harness supplies claim/release stubs but
 // does not link probe_target.c.  The ARM target provides the strong version.
 __attribute__((weak)) int probe_target_claimed(void) { return 0; }
+__attribute__((weak)) uint32_t probe_target_swclk(void) { return probe_target_fclk()/2U; }
 
 #define REG(n) (0x40010060U + 4U * (n))
 #define R(n) Xil_In32(REG(n))
@@ -361,7 +362,7 @@ static int sampler_arm(void) {
         probe_target_release();
         return -6;
     }
-    actual_hz = fclk / 2;
+    actual_hz = probe_target_swclk();
     W(6, fclk);
     W(4, period);
     for (i = 0; i < nwords; i++) {
@@ -380,6 +381,7 @@ static int sampler_arm(void) {
     W(0, 1 | ((uint32_t)nwords << 8));
     return 0;
 }
+int probe_timing_config_busy(void) {return mode!=0 || stopping || rtt_pl_running || dma_pending;}
 void probe_before_dap(void) {
     if(pl_packets && mode==1 && rtt_pl_running) {
         uint32_t budget=1000000;
@@ -576,7 +578,7 @@ static void rtt_poll(void) {
             return;
         }
     }
-    actual_hz = probe_target_fclk() / 2;
+    actual_hz = probe_target_swclk();
     if (pending_len) {
         rc = rtt_commit();
         goto end;

@@ -3,15 +3,23 @@
 #include "DAP_config.h"
 #include "probe_stream.h"
 #include <string.h>
+#include "swd_timing.h"
 static uint32_t select_shadow, saved_select, saved_csw, saved_tar;
 static int claimed, saved, link_ready;
 static uint32_t saved_clock, saved_cfg;
+#ifdef SWD_TIMING_EXTENSION
+static uint32_t saved_timing[SWD_TIMING_WORDS];
+static int saved_timing_valid;
+#endif
 static DAP_Data_t saved_dap;
 static void restore_clock(void) {
     Xil_Out32(XSLCR_UNLOCK_ADDR, XSLCR_UNLOCK_CODE);
     Xil_Out32(SLCR_FPGA0_CLK_CTRL, saved_clock);
     Xil_Out32(SLCR_LOCK_ADDR, 0x767b);
     swd_write32(SWD_CFG, saved_cfg);
+#ifdef SWD_TIMING_EXTENSION
+    if(saved_timing_valid)(void)swd_timing_apply(saved_timing,0);
+#endif
     DAP_Data = saved_dap;
 }
 void probe_target_forget(void) { claimed = saved = link_ready = 0; }
@@ -51,6 +59,16 @@ uint32_t probe_target_fclk(void) {
     uint32_t a = (c >> 8) & 63, b = (c >> 20) & 63;
     return a && b ? IO_PLL_HZ / a / b : 100000000;
 }
+uint32_t probe_target_swclk(void) {
+    uint32_t fclk=probe_target_fclk();
+#ifdef SWD_TIMING_EXTENSION
+    if(swd_timing_enabled()) {
+        uint32_t q=swd_read32(SWD_TIMING_BASE+4U);
+        return q ? (uint32_t)(((uint64_t)fclk<<16)/(2ULL*q)) : 0;
+    }
+#endif
+    return fclk/(2U*(((swd_read32(SWD_CFG)>>13)&15U)+1U));
+}
 int probe_target_claim(uint32_t hz) {
     uint32_t v = 0, i;
     if (!probe_session_live())
@@ -62,6 +80,9 @@ int probe_target_claim(uint32_t hz) {
     saved_dap = DAP_Data;
     saved_clock = Xil_In32(SLCR_FPGA0_CLK_CTRL);
     saved_cfg = swd_read32(SWD_CFG);
+#ifdef SWD_TIMING_EXTENSION
+    saved_timing_valid=swd_timing_snapshot(saved_timing);
+#endif
     if (!DAP_Data.debug_port && link_ready)
         DAP_Data.debug_port = DAP_PORT_SWD;
     if (DAP_Data.debug_port != DAP_PORT_SWD) {

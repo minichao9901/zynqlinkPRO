@@ -59,6 +59,9 @@ This information includes:
 
 /// Processor Clock of the Cortex-M MCU used in the Debug Unit.
 /// This value is used to calculate the SWD/JTAG clock speed.
+#define SWD_TIMING_EXTENSION 1
+#include "swd_timing.h"
+
 #define CPU_CLOCK               667000000U      ///< Specifies the CPU Clock in Hz.
 
 /// Number of processor cycles for I/O Port write operations.
@@ -457,6 +460,8 @@ __STATIC_INLINE void PORT_SWD_SETUP (void) {
   Xil_Out32(GPIO_DATA, 0x5U);
 
 
+
+  if(swd_timing_enabled())return; // Preserve an explicitly installed timing profile.
 
   // ADDR_CFG (0x08) bit definition (match current RTL):
   //   [3:0]   turnaround_fixed      SWD turnaround cycles (HW fixed readback=1)

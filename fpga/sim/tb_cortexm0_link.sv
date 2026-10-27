@@ -18,7 +18,7 @@ module tb_cortexm0_link #(
   end
   reg target_clk=0; always #5 target_clk=~target_clk;
   reg rst_n=1;
-  reg [6:0] awaddr=0,araddr=0;
+  reg [7:0] awaddr=0,araddr=0;
   reg awvalid=0,wvalid=0,arvalid=0;
   reg [31:0] wdata=0;
   wire awready,wready,bvalid,arready,rvalid;
@@ -67,7 +67,7 @@ module tb_cortexm0_link #(
        $time,swclk,target_pad,target.swdo,target.swdoen,dut.swdio_o,dut.swdio_t,
        dut.u_swd_core.state,dut.u_swd_core.lsm_cnt,dut.u_swd_core.req_hdr,dut.u_swd_core.ack_samples);
 
-  task wr(input [6:0] addr,input [31:0] data);
+  task wr(input [7:0] addr,input [31:0] data);
     begin
       @(negedge clk);awaddr=addr;wdata=data;awvalid=1;wvalid=1;
       @(posedge clk);if(!awready||!wready)$fatal(1,"AXI write stalled");
@@ -118,6 +118,13 @@ module tb_cortexm0_link #(
       wr(7'h78,$rtoi(500000000.0/half_ns));wr(7'h70,period_ticks);
       for(i=0;i<count;i=i+1)begin wr(7'h68,i);wr(7'h6c,32'h200003fc+i*4);end
       pw(0,1);wr(7'h60,(count<<8)|1);
+      if(ext_timing && $test$plusargs("timing_reject_busy"))begin
+        wr(8'hd4,65536);wr(8'hf0,1);rd(8'hf4,v);
+        if(v[15:8]!=1)$fatal(1,"live HSS timing commit was not rejected");
+        rd(8'hd4,v);if(v!==ext_halfq)$fatal(1,"busy HSS timing changed");
+        wr(8'hf0,2); // discard the staged write; active profile is unchanged
+        $display("TIMING_BUSY_REJECT_PASS real active HSS owner");
+      end
       capacity=496/(count*4);total=0;packets=0;n=0;
       // Startup deadlines and overload can produce a partial packet. Verify
       // its payload and acknowledge it; do not mistake a legal time gap for
@@ -191,7 +198,7 @@ module tb_cortexm0_link #(
       $display("SERVICES_RTT_PASS real MEM-AP unaligned 2048B/1KiB split, descriptor split, immutable bank, DMA-before-RdOff, ring tail/head");
     end
   endtask
-  task rd(input [6:0] addr,output [31:0] data);
+  task rd(input [7:0] addr,output [31:0] data);
     begin
       @(negedge clk);araddr=addr;arvalid=1;
       @(posedge clk);if(!arready)$fatal(1,"AXI read stalled");
@@ -265,6 +272,9 @@ module tb_cortexm0_link #(
       $display("PACKET_PASS count=%0d read=%0d",count,is_read);
     end
   endtask
+  integer ext_timing=0;
+  reg [31:0] ext_halfq=65536,ext_swjq=393216,ext_ackq=0,ext_turnq=0;
+  reg [31:0] ext_ack_sample=65536,ext_data_sample=65536;
   reg [31:0] value;
   reg [2:0] error_ack;
   integer saw_wait,saw_fault;
@@ -279,6 +289,22 @@ module tb_cortexm0_link #(
     if($test$plusargs("vcd"))begin $dumpfile("cortexm0_link.vcd");$dumpvars(0,dut,target.swdo,target.swdoen);end
     #1;rst_n=0;#100;rst_n=1;repeat(30)@(negedge clk);
     wr(8,1 | (idle<<4) | (5<<9) | (phase<<17) | (turn_extra<<23) | (ack_delay<<25));
+    if($value$plusargs("timing=%d",ext_timing))begin end
+    if($value$plusargs("halfq=%d",ext_halfq))begin end
+    if($value$plusargs("swjq=%d",ext_swjq))begin end
+    if($value$plusargs("ackq=%d",ext_ackq))begin end
+    if($value$plusargs("turnq=%d",ext_turnq))begin end
+    if($value$plusargs("ack_sample=%d",ext_ack_sample))begin end
+    if($value$plusargs("data_sample=%d",ext_data_sample))begin end
+    if(ext_timing)begin
+      wr(8'hd0,1);wr(8'hd4,ext_halfq);wr(8'hd8,ext_swjq);
+      wr(8'hdc,ext_ack_sample);wr(8'he0,ext_data_sample);
+      wr(8'he4,ext_ackq);wr(8'he8,ext_turnq);
+      wr(8'hec,1 | (idle<<4) | (5<<9) | (phase<<17) | (turn_extra<<23) | (ack_delay<<25));
+      wr(8'hf0,1);rd(8'hf4,value);
+      if(value[15:8]!=0 || value[31:16]!=1)$fatal(1,"timing commit %h",value);
+      $display("TIMING_CONFIG halfq=%0d swjq=%0d ackq=%0d turnq=%0d ack_sample=%0d data_sample=%0d",ext_halfq,ext_swjq,ext_ackq,ext_turnq,ext_ack_sample,ext_data_sample);
+    end
     swj(64,256'hffffffffffffffff);
     swj(16,256'he79e);
     swj(64,256'hffffffffffffffff);
@@ -355,7 +381,10 @@ module tb_cortexm0_link #(
       $display("RECOVERY_PASS active packet reset, SWJ reconnect and target SRAM");
     end
     if($test$plusargs("services"))begin
-      hss_service(1,24);hss_service(1,48);hss_service(2,240);rtt_service();
+      hss_service(1,24);
+      hss_service(1,ext_timing ? (48*((ext_halfq+65535)>>16)) : 48);
+      hss_service(2,ext_timing ? (240*((ext_halfq+65535)>>16)) : 240);
+      rtt_service();
       $display("SERVICES_PASS full physical SWD/HSS/RTT pipeline");
     end
     if($test$plusargs("errors"))begin

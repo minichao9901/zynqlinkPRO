@@ -30,6 +30,8 @@
 #include "swd_dma.h"
 #include "dap_metrics.h"
 #include "xtime_l.h"
+#include "swd_timing.h"
+#include "probe_stream.h"
 #include <string.h>
 
 //**************************************************************************************************
@@ -205,7 +207,26 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
     case ID_DAP_Vendor13: break;
     case ID_DAP_Vendor14: break;
     case ID_DAP_Vendor15: break;
-    case ID_DAP_Vendor16: break;
+    case ID_DAP_Vendor16:
+      { // 0x90: query=0, apply=1 + FCLK u32 + 8 words, disable=2.
+        uint8_t op=*request++;uint32_t c[SWD_TIMING_WORDS]={0},fclk=0,hw=0;
+        int rc=-1;
+        if(op==0)rc=swd_timing_snapshot(c) ? 0 : -1;
+        else if(op==1 && !probe_timing_config_busy()) {
+          memcpy(&fclk,request,4);request+=4;memcpy(c,request,sizeof c);
+          rc=swd_timing_apply(c,fclk);
+        } else if(op==2 && !probe_timing_config_busy())rc=swd_timing_disable();
+        int found=swd_timing_snapshot(c);
+        if(found)hw=swd_read32(SWD_TIMING_STATUS);
+        if(probe_timing_config_busy())hw|=1U;
+        fclk=swd_timing_fclk();
+        *response++=rc==0 ? DAP_OK : DAP_ERROR;
+        *response++=found ? 1 : 0;*response++=0;
+        memcpy(response,&fclk,4);response+=4;memcpy(response,&hw,4);response+=4;
+        memcpy(response,c,sizeof c);
+        num=((op==1 ? 38U : 2U)<<16)|44U;
+      }
+      break;
     case ID_DAP_Vendor17: break;
     case ID_DAP_Vendor18: break;
     case ID_DAP_Vendor19: break;

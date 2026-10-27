@@ -27,6 +27,7 @@ if {!$impl_only} {
     set packet_rtl [file join $root fpga rtl dap_transfer_block_engine.v]
     if {[file exists $packet_rtl]} {add_files -norecurse $packet_rtl}
     add_files -norecurse [file join $root fpga rtl swj_clk_gen.v]
+    add_files -norecurse [file join $root fpga rtl swd_timing_regs.v]
     add_files -norecurse [file join $root fpga rtl probe_sample_engine.v]
     add_files -norecurse [file join $root fpga rtl probe_rtt_engine.v]
     add_files -norecurse [file join $root fpga rtl probe_stream_engine.v]
@@ -38,8 +39,10 @@ if {!$impl_only} {
         # Internal-only edits need an OOC reset, not a BD topology upgrade.
         # The new BRAM pins are the sole interface change in this branch.
         if {![llength [get_bd_pins -quiet swd_controller_0/pkt_bram_en]] ||
-            ![llength [get_bd_cells -quiet pkt_mem]]} {
+            ![llength [get_bd_cells -quiet pkt_mem]] ||
+            [get_property CONFIG.C_S_AXI_ADDR_WIDTH [get_bd_cells swd_controller_0]] != 8} {
             update_module_reference [get_ips system_swd_controller_0_0]
+            set_property CONFIG.C_S_AXI_ADDR_WIDTH 8 [get_bd_cells swd_controller_0]
             source [file join $root fpga probe_stream_bd.tcl]
             save_bd_design
         }

@@ -13,6 +13,9 @@ module tb_swd_timing_equiv;
     reg swdio_i=0,swdio_i_fall=0;
     wire next_ready,result_valid,busy,parity_err,swclk,swdio_o,swdio_t;
     wire [31:0] xfer_rdata;wire [2:0] ack;wire [15:0] timestamp;
+    wire [31:0] timing_ctrl=0,timing_half_q=0,timing_swj_q=0,
+        timing_ack_sample=0,timing_data_sample=0,timing_ack_q=0,timing_turn_q=0;
+    wire [1:0] timing_inputs=0;
     swd_core dut(.*);
     reg [2:0] target_ack=1;
     reg [31:0] target_word=32'h96a53cc3,lfsr=32'h7b928e51;

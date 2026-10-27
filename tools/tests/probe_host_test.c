@@ -136,6 +136,10 @@ int main(void) {
     hss.in=hss.out+QSIZE;packet_regs[2]=512;before=dma_calls;packet_poll();assert(dma_calls==before && packet_acks==2);
     hss.in=hss.out=0;reset_in_dma=1;packet_poll();
     assert(reset_pending && hss.in==0 && packet_acks==2); // Reset during copy cannot ACK/consume.
+    assert(probe_timing_config_busy()); // mode2 is still logically live after preemption
+    mode=0;stopping=0;rtt_pl_running=0;dma_pending=0;
+    assert(!probe_timing_config_busy());mode=1;assert(probe_timing_config_busy());
+    mode=0;stopping=1;assert(probe_timing_config_busy());stopping=0;
     puts("PASS production probe C: HID, 8 variables, HSS DEF/DATA/gaps, backpressure, RTT wrap/RdOff retry, DAP handoff, ZLP, reset");
     return 0;
 }
