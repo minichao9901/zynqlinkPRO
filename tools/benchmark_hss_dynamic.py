@@ -26,12 +26,22 @@ class CounterReader(HssReader):
         self.changes=0
 
     def validate_values(self,data,n,seq,stamp):
-        values=np.frombuffer(data,dtype='<u4')
-        assert len(values)==n
+        assert len(data)==n*4
+        self.batch.append(data)
+
+    def consume(self,data):
+        # Validate all values, but batch NumPy work across the complete USB
+        # read instead of allocating several arrays for each 124-point frame.
+        self.batch=[]
+        super().consume(data)
+        if not self.batch:return
+        values=np.frombuffer(b''.join(self.batch),dtype='<u4')
         delta=np.diff(values)
-        assert np.all(delta<0x80000000),('backwards/stale counter',seq,stamp)
+        assert np.all(delta<0x80000000),'backwards/stale counter'
         if self.last_value is not None:
-            assert ((int(values[0])-self.last_value)&0xffffffff)<0x80000000,('packet counter order',seq)
+            step=(int(values[0])-self.last_value)&0xffffffff
+            assert step<0x80000000,'packet counter order'
+            self.changes+=int(step!=0)
         self.changes+=int(np.count_nonzero(delta))
         self.last_value=int(values[-1])
 
@@ -98,7 +108,8 @@ def main():
     code=(build/'producer.bin').read_bytes()
     p=Probe();dev,out,inp=open_dap();mem=Memory(out,inp)
     backup=regs=initial=None
-    report=dict(artifacts=provenance(a.bit,a.elf),kind='running F103CB counter HSS',rows=[])
+    report=dict(artifacts=provenance(a.bit,a.elf),kind='running F103CB counter HSS',
+                validation='all u32 values, NumPy batched per 32768-byte USB read',rows=[])
     try:
         stop(p,dev);setup(out,inp,50000)
         initial=mem.word(DHCSR);mem.write_word(DHCSR,0xa05f0003)
