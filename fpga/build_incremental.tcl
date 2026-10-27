@@ -6,6 +6,7 @@ open_project [file join $out zynqlink_dma.xpr]
 source [file join $root fpga configure_ip_cache.tcl]
 set_param general.maxThreads 8
 set impl_only [expr {[lsearch -exact $argv --impl-only] >= 0}]
+set no_physopt [expr {[lsearch -exact $argv --no-physopt] >= 0}]
 set rtl_stamp [exec python [file join $root tools fpga_rtl_stamp.py]]
 set stamp_file [file join $out swd_rtl_built.stamp]
 set old_stamp {}
@@ -68,6 +69,7 @@ if {!$impl_only} {
 }
 set ref [file join $root build checkpoints dma_routed_reference.dcp]
 source [file join $root fpga configure_runs.tcl]
+if {$no_physopt} {set_property STEPS.PHYS_OPT_DESIGN.IS_ENABLED false [get_runs impl_1]}
 set verified_bit [file join $out system_wrapper_verified.bit]
 set routed_dcp [file join $out zynqlink_dma.runs impl_1 system_wrapper_routed.dcp]
 if {!$fresh_impl && ![get_property NEEDS_REFRESH [get_runs impl_1]] &&

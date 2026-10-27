@@ -84,6 +84,12 @@ module swd_core (
     reg [7:0] active_request;
     reg  [4:0] state;
     reg  [8:0] lsm_cnt;
+    // Timing CSR values are committed only while idle.  Keep a transaction
+    // local copy so wide configuration buses do not fan directly into the
+    // half-cycle carry chain and protocol FSM on every FCLK edge.
+    reg        timing_ext_r;
+    reg [31:0] timing_half_r,timing_swj_r,timing_ack_sample_r,
+               timing_data_sample_r,timing_ack_q_r,timing_turn_q_r;
     reg         is_read_op;
     reg  [2:0]  ack_samples;
     reg  [2:0]  ack_hold;
@@ -102,7 +108,6 @@ module swd_core (
     wire        ila_sample_clk;
 
     wire [3:0]  active_delay;
-    wire        step_tick;
     wire        req_parity;
     wire [7:0]  req_hdr;
     wire        wr_parity;
@@ -122,10 +127,10 @@ module swd_core (
 
     assign result_valid = (state == ST_DONE) && mode;
     assign next_ready = result_valid && fast_timing && ack == 1 && !parity_err;
-    wire extended_timing=timing_ctrl[0];
+    wire extended_timing=timing_ext_r;
     wire fast_timing = extended_timing ?
-        (timing_half_q==65536 && (timing_ack_q==0 || timing_ack_q==65536) &&
-         (timing_turn_q==0 || timing_turn_q==65536)) : delay_fast==0;
+        (timing_half_r==65536 && (timing_ack_q_r==0 || timing_ack_q_r==65536) &&
+         (timing_turn_q_r==0 || timing_turn_q_r==65536)) : delay_fast==0;
     wire compact_ack = fast_timing && ack_delay == 0 && !data_phase;
     // The wrapper chooses early/late FCLK-domain input sampling.
     assign active_delay       = (state == ST_SWJ) ? clock_delay : delay_fast;
@@ -137,10 +142,10 @@ module swd_core (
     wire turn_slot = state==ST_TURN1 || state==ST_TURN_WR ||
         state==ST_TURN2 || state==ST_TURN_WFWR || state==ST_WTURN;
     wire [31:0] period_q = !extended_timing ? {11'd0,timing_cycles,16'd0} :
-        state==ST_SWJ ? timing_swj_q :
-        ack_slot && timing_ack_q!=0 ? timing_ack_q :
-        turn_slot && timing_turn_q!=0 ? timing_turn_q : timing_half_q;
-    wire [31:0] sample_cfg=ack_slot ? timing_ack_sample : timing_data_sample;
+        state==ST_SWJ ? timing_swj_r :
+        ack_slot && timing_ack_q_r!=0 ? timing_ack_q_r :
+        turn_slot && timing_turn_q_r!=0 ? timing_turn_q_r : timing_half_r;
+    wire [31:0] sample_cfg=ack_slot ? timing_ack_sample_r : timing_data_sample_r;
     wire sample_end=!extended_timing || sample_cfg[16];
     wire sample_tick;
     swj_clk_gen u_timing (.clk(clk),.rst_n(rst_n),.enable(timing_enable),
@@ -156,8 +161,8 @@ module swd_core (
             default:sample_input=legacy;
         endcase end
     endfunction
-    wire ack_input=extended_timing ? sample_input(timing_ack_sample[18:17],swdio_sample_fsm,timing_inputs[1],timing_inputs[0],swdio_i) : swdio_sample_fsm;
-    wire data_input=extended_timing ? sample_input(timing_data_sample[18:17],swdio_sample_fsm,timing_inputs[1],timing_inputs[0],swdio_i) : swdio_sample_fsm;
+    wire ack_input=extended_timing ? sample_input(timing_ack_sample_r[18:17],swdio_sample_fsm,timing_inputs[1],timing_inputs[0],swdio_i) : swdio_sample_fsm;
+    wire data_input=extended_timing ? sample_input(timing_data_sample_r[18:17],swdio_sample_fsm,timing_inputs[1],timing_inputs[0],swdio_i) : swdio_sample_fsm;
     // If capture occurs before the protocol edge, decode the held sample.
     wire ack_last=sample_tick ? ack_input : ack_samples[2];
     wire parity_last=sample_tick ? data_input : rd_samples[32];
@@ -247,6 +252,13 @@ module swd_core (
             active_request <= 0;
             state           <= ST_IDLE;
             lsm_cnt         <= 8'd0;
+            timing_ext_r    <= 1'b0;
+            timing_half_r   <= 32'd0;
+            timing_swj_r    <= 32'd0;
+            timing_ack_sample_r <= 32'd0;
+            timing_data_sample_r <= 32'd0;
+            timing_ack_q_r  <= 32'd0;
+            timing_turn_q_r <= 32'd0;
 
             is_read_op      <= 1'b0;
 
@@ -266,6 +278,17 @@ module swd_core (
             busy            <= 1'b0;
             timestamp       <= 16'd0;
         end else begin
+            // The register bank only accepts commits while the controller is
+            // idle, so sampling it here is atomic for the next transaction.
+            if (state == ST_IDLE) begin
+                timing_ext_r        <= timing_ctrl[0];
+                timing_half_r       <= timing_half_q;
+                timing_swj_r        <= timing_swj_q;
+                timing_ack_sample_r <= timing_ack_sample;
+                timing_data_sample_r <= timing_data_sample;
+                timing_ack_q_r      <= timing_ack_q;
+                timing_turn_q_r     <= timing_turn_q;
+            end
             case (state)
                 ST_IDLE: begin
                     swclk      <= 1'b1;
