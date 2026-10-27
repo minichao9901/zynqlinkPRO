@@ -30,7 +30,13 @@ module jtag_shift (
                              (mult == 2'd1) ? (half_q << 1) : (half_q << 2);
     wire tick;
 
-    swj_clk_gen u_clk_gen(.clk(clk),.rst_n(rst_n),.enable(busy),
+    // Start the generator on the same cycle the segment starts, not the cycle
+    // after: enable is registered inside the generator, and the consumer sees
+    // edge_tick one cycle later, so waiting for busy would add two cycles and
+    // compress the final half period of every segment.
+    wire gen_en = busy || (start && count != 0);
+
+    swj_clk_gen u_clk_gen(.clk(clk),.rst_n(rst_n),.enable(gen_en),
         .half_q(eff_half_q),.sample_off(16'd0),
         .clk_out(),.edge_tick(tick),.sample_tick());
 
