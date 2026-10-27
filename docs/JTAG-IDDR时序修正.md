@@ -103,6 +103,40 @@ raw JTAG Sequence 不额外增加用户要求的 TCK 数。它使用较慢的扫
 
 未完成：包聚合退化的触发条件（每次跳点是否会提前结束当前包，或提交阈值随 tick 周期缩放）尚未定位；PL 每样本访问预算（约 1.3 µs）也没有继续压缩。
 
+## JTAG 块访问的每字开销
+
+验收脚本给出的 1.2 MB/s 是测量方式造成的：它对每 1 KiB 先发一次 `address()`（SELECT+CSW+TAR），再发一次块读，全部串行等回应，属于 USB 往返限制。用自增 TAR、每 1 KiB 一次请求、depth=8 流水重测（`tools/jtag_block_bench.py`，同板同 harness）：
+
+| TCK | JTAG 读 | JTAG 写 | SWD 读 | SWD 写 |
+| ---: | ---: | ---: | ---: | ---: |
+| 30 MHz | 2.29 MB/s | 2.01 MB/s | 2.27 MB/s | 2.15 MB/s |
+| 60 MHz | 2.31 MB/s | 2.20 MB/s | 4.13 MB/s | 2.98 MB/s |
+
+换算成每字时间（4 字节/字）后能看出形状：
+
+| TCK | MB/s | µs/字 | 34 位扫描本身 |
+| ---: | ---: | ---: | ---: |
+| 1 MHz | 0.080 | 50.0 | 34 µs |
+| 10 MHz | 0.790 | 5.06 | 3.4 µs |
+| 30 MHz | 2.29 | 1.75 | 1.13 µs |
+| 60 MHz | 2.31 | 1.73 | 0.57 µs |
+
+低速端与扫描时间吻合（1 MHz 时 50 µs/字 ≈ 34 µs 扫描 + 开销），说明扫描链路本身正常；**到 30 MHz 以后撞上一个约 1.73 µs/字的硬地板**，TCK 再快也不涨——这就是 30 和 60 MHz 吞吐相同的原因。
+
+固件内置的 MET_PACKET_READ 计时把整笔开销拆开（64 包 × 65536 字节，60 MHz）：
+
+| 项 | JTAG | SWD |
+| --- | ---: | ---: |
+| PL packet engine | **26.44 ms**（1.61 µs/字） | **12.94 ms**（0.79 µs/字） |
+| DMA download | 0.45 ms | 0.46 ms |
+| USB submit | 0.18 ms | 0.18 ms |
+
+配对 `dbg_pkt_taken` / `dbg_pkt_fallback`（读法见 `tools/read_probe_counters.tcl`）为 5262 / 0：块传输确实走 PL packet engine，没有回落到 PS 逐字路径；`dap_transfer_block_engine` 也是 `ENABLE_CHAIN=1`，仿真里 16 字只用 18 次 DR 扫描，所以不是“每字多扫一遍”。
+
+已排除的因素：采样相位（强制 mode 0 与 mode 17 在 30 MHz 都是 2.27/2.29 MB/s）、DMA 与 USB 提交（合计 <3%）、PL 回落（fallback=0）。结论是 **JTAG 每字有约 1.0–1.2 µs 的固定开销，落在 PL packet engine 与 `jtag_core` 的握手/状态机里，与扫描时间无关**；SWD 同一路径几乎没有这项开销（0.79 µs/字 ≈ 46 个 SWCLK）。
+
+下一步应做逐周期分解：在 `fpga/sim/tb_jtag_pipeline.sv` 里对 `jtag_core` 每个状态计 FCLK 周期，直接指出这 ~1.1 µs 花在哪个状态；本轮的板上测量只能定位到“PL 引擎内部、与 TCK 无关”。
+
 ## 更正：HSS 真实可用频率
 
 上节把 39.5 kHz 当作 750 kHz 的塌陷点，但不能据此推断 HSS 上限。按 tick 周期逐档细扫后（60 MHz TCK，回复模式，2–3 秒）：

@@ -62,6 +62,8 @@ def main():
     ap.add_argument('--words', type=int, default=256, help='words per block')
     ap.add_argument('--loops', type=int, default=64)
     ap.add_argument('--depth', type=int, default=4)
+    ap.add_argument('--timing', type=int, default=None,
+                    help='pin the RTL TDO sampling mode instead of auto calibration')
     ap.add_argument('--output', type=Path)
     a = ap.parse_args()
 
@@ -69,6 +71,8 @@ def main():
     rows = []
     try:
         setup(out, inp, a.speed, a.transport)
+        if a.timing is not None:
+            xfer(out, inp, [0x89, a.timing])
         payload = bytes((i * 7 + 3) & 0xFF for i in range(a.words * 4))
         for name, fn in (('read_seq', lambda: bench_read_seq(out, inp, a.words, a.loops)),
                          ('read_pipe', lambda: bench_read_pipe(out, inp, a.words, a.loops, a.depth)),
