@@ -33,7 +33,14 @@ void DAP_JTAG_SetClock(uint32_t hz) {
      * then walks across the scan: measured on this board only half periods of
      * a whole or half FCLK cycle capture reliably, which is the same as TCK
      * dividing FCLK exactly. DAP_JTAG_FCLK_HZ is the cap. */
-    uint32_t target=hz*2U;
+    uint32_t target;
+    /* Data-verified ceiling for the current PHY: at 60 MHz TCK the capture is
+     * marginal in a way the chained probe cannot reliably detect, so a rate
+     * above this cap is served at the cap instead of being accepted sometimes
+     * and corrupting data other times. Raising it needs the sampling-margin
+     * work (IDELAY or sample_tick), not a bigger number here. */
+    if(hz>DAP_MAX_JTAG_TCK_HZ) hz=DAP_MAX_JTAG_TCK_HZ;
+    target=hz*2U;
     jtag_req_hz=hz ? hz : 1000000U;
     if(target>DAP_JTAG_FCLK_HZ) target=DAP_JTAG_FCLK_HZ;
     ps_set_fclk0_hz(target);

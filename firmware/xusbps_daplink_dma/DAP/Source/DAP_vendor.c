@@ -218,7 +218,18 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
         num = (2U << 16) | 15U;
       }
       break;
-    case ID_DAP_Vendor10: break;
+    case ID_DAP_Vendor10:
+      { // JTAG Run-Test/Idle TCK per DR frame (0..15); 255 = query.
+        uint8_t status = DAP_OK;
+        if (*request != 255U) {
+          if (swd_read32(SWD_BASE_ADDR + 4U) & 1U) status = DAP_ERROR;
+          else swd_write32(JTAG_IDLE, (uint32_t)(*request & 15U));
+        }
+        *response++ = status;
+        *response++ = (uint8_t)(swd_read32(JTAG_IDLE) & 15U);
+        num = (2U << 16) | 3U;
+      }
+      break;
     case ID_DAP_Vendor11: break;
     case ID_DAP_Vendor12: break;
     case ID_DAP_Vendor13: break;

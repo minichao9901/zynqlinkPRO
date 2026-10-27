@@ -4,6 +4,8 @@
 /* Fixed PL clock for the JTAG backend; the requested TCK is produced by the
  * half-period register instead of by changing this clock. */
 #define DAP_JTAG_FCLK_HZ 120000000U
+/* Highest TCK whose block data has been verified end to end. */
+#define DAP_MAX_JTAG_TCK_HZ 32000000U
 #define JTAG_ROUTE 0x40010080U
 #define JTAG_IR_CONFIG 0x40010084U
 #define JTAG_DR_CONFIG 0x40010088U
@@ -14,6 +16,7 @@
 #define JTAG_CACHED_IR 0x4001009cU
 #define JTAG_RX_DATA 0x400100a0U
 #define JTAG_HALF_Q 0x400100ccU
+#define JTAG_IDLE 0x400100d0U
 #define JTAG_STAT_CYCLES 0x400100c0U
 #define JTAG_STAT_BITS 0x400100c4U
 #define JTAG_STAT_TRANSFERS 0x400100c8U
