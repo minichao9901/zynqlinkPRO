@@ -218,3 +218,14 @@ uint8_t DAP_JTAG_MemTransfer(uint32_t request,uint32_t *data) {
     return SWD_Transfer(request,data);
 }
 #endif
+
+/* Bench hook: program FCLK = 2*TCK and the half period without the ceiling and
+ * without running calibration, so a rate the scheduler rejects can be measured
+ * on its own. Returns 0 if the request is out of range. */
+int DAP_JTAG_ForceClock(uint32_t hz) {
+    if(hz < 100000U || hz > 200000000U) return 0;
+    ps_set_fclk0_hz(hz * 2U);
+    jtag_req_hz = hz;
+    DAP_JTAG_ProgramHalfQ();
+    return 1;
+}

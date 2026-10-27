@@ -230,7 +230,20 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
         num = (2U << 16) | 3U;
       }
       break;
-    case ID_DAP_Vendor11: break;
+    case ID_DAP_Vendor11:
+      { // Raw JTAG clock override for bench work: request[0..3] = TCK Hz.
+        // Programs FCLK = 2*TCK without the cap and without calibration so a
+        // rate the scheduler would reject can still be measured directly.
+        uint32_t hz = (uint32_t)request[0] | ((uint32_t)request[1] << 8) |
+                      ((uint32_t)request[2] << 16) | ((uint32_t)request[3] << 24);
+        uint8_t status = DAP_OK;
+        extern int DAP_JTAG_ForceClock(uint32_t);
+        if (!DAP_JTAG_ForceClock(hz)) status = DAP_ERROR;
+        *response++ = status;
+        *response++ = (uint8_t)(swd_read32(0x40010080U));   /* route, sanity */
+        num = (2U << 16) | 5U;
+      }
+      break;
     case ID_DAP_Vendor12: break;
     case ID_DAP_Vendor13: break;
     case ID_DAP_Vendor14: break;
