@@ -161,11 +161,20 @@ module swd_core (
             default:sample_input=legacy;
         endcase end
     endfunction
-    wire ack_input=extended_timing ? sample_input(timing_ack_sample_r[18:17],swdio_sample_fsm,timing_inputs[1],timing_inputs[0],swdio_i) : swdio_sample_fsm;
-    wire data_input=extended_timing ? sample_input(timing_data_sample_r[18:17],swdio_sample_fsm,timing_inputs[1],timing_inputs[0],swdio_i) : swdio_sample_fsm;
+    // ACK, data and parity are one RX sample event class. Their protocol
+    // slots differ; the slot-specific configs remain for compatibility, but
+    // the physical input selection and event consumption share one path.
+    wire [31:0] rx_sample_cfg = ack_slot ? timing_ack_sample_r : timing_data_sample_r;
+    wire [1:0] rx_sample_source = rx_sample_cfg[18:17];
+    wire rx_sample_bit = extended_timing ?
+        sample_input(rx_sample_source,swdio_sample_fsm,timing_inputs[1],timing_inputs[0],swdio_i) :
+        swdio_sample_fsm;
+    wire rx_sample_event = sample_tick;
+    wire ack_input=rx_sample_bit;
+    wire data_input=rx_sample_bit;
     // If capture occurs before the protocol edge, decode the held sample.
-    wire ack_last=sample_tick ? ack_input : ack_samples[2];
-    wire parity_last=sample_tick ? data_input : rd_samples[32];
+    wire ack_last=rx_sample_event ? ack_input : ack_samples[2];
+    wire parity_last=rx_sample_event ? data_input : rd_samples[32];
 
     wire new_transfer = (state == ST_IDLE && start) ||
                         (state == ST_DONE && next_valid && next_ready);
@@ -178,7 +187,7 @@ module swd_core (
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) ack_samples <= 0;
         else if (clear_ack) ack_samples <= 0;
-        else if (sample_tick) begin
+        else if (rx_sample_event) begin
             if (state == ST_XFER_ACK) begin
                 case (lsm_cnt)
                     3: ack_samples[0] <= ack_input;
@@ -199,7 +208,7 @@ module swd_core (
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) rd_samples <= 0;
         else if (clear_read) rd_samples <= 0;
-        else if (sample_tick && state == ST_XFER_RD) begin
+        else if (rx_sample_event && state == ST_XFER_RD) begin
             if (lsm_cnt >= 3 && lsm_cnt < 66 && lsm_cnt[0])
                 rd_samples[31:0] <= {data_input,rd_samples[31:1]};
             else if (lsm_cnt == 67) rd_samples[32] <= data_input;
