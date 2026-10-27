@@ -1,7 +1,7 @@
 # Probe RTT→CDC 与 RTL HSS
 
-当前新增的 PL 拼包、RTT 自主读取和 CDMA→DDR 通路见 [PL→DDR 改造](probe-pl-ddr.md)。
-下文的数据路径、性能及预编译验收表记录早期版本，不代表新增 RTL 的性能。
+当前 PL 拼包、RTT 自主读取、CDMA→DDR 通路与最新速度/跳点率见 [PL→DDR 改造](probe-pl-ddr.md)。
+文末历史验收表保留作对照；当前预编译版本为 `0.3-dma`。
 
 本功能在 `main`（`35f7cf6`）上创建的 `codex/probe-rtt-hss` 分支实现。
 参考 `E:/superlinkPRO/firmware/application_5301/src/{rtt,scope,usb,api}` 的协议。
@@ -11,13 +11,13 @@
 
 ## 数据路径
 
-- RTT：PS 分段搜索 SEGGER RTT 控制块、读取选定的 up channel，使用现有 RTL
-  TransferBlock + CDMA 路径搬运目标数据，经 CDC 输出。支持环形回绕、未对齐字节、
+- RTT：PS 分段搜索 SEGGER RTT 控制块、配置选定的 up channel，PL 自主轮询描述符，
+  连续读取到专用包 BRAM，再经 CDMA→HP0→DDR→CDC。支持环形回绕、未对齐字节、
   1 KiB MEM-AP TAR 边界。CDC 队列满或 DTR 关闭时不继续消耗目标缓冲。
 - HSS：PL 自主执行 24 MHz 时间轴的定时调度、AP0 内存读计划、WAIT 重试与完整样本
-  FIFO。PS 只配置计划、提取变量字节并组装 HSS DEF/DATA/STAT USB 包。
+  FIFO、字节 gather 和 DATA 拼包。PS 配置计划、提交整包 CDMA/USB，构造 DEF/最终 STAT。
 - HSS 支持 1～8 个变量，宽度 1/2/4/8 字节、未对齐地址；按地址排序，最多展开成
-  24 个对齐字地址。当前每个字用 TAR → posted DRW → RDBUFF，未做单字跨样本流水优化。
+  24 个对齐字地址，重叠读地址去重。单字稳态每点一笔 DRW；连续 span 自动增址，页界/稀疏地址重新写 TAR。
 - RTT 和 HSS 互斥。实际 DAP 命令执行前，先等待当前采样完成并暂停采样；恢复主机的
   DP SELECT、AP0 CSW/TAR、FCLK、SWD CFG 和 DAP 软件状态，再执行 DAP。执行后恢复采样。
   批量 DAP_Transfer 中包含 SELECT 写入时走现有 scalar 路径，以跟踪主机的 SELECT。
@@ -62,13 +62,13 @@ n×{addr:u32,size:u8,type:u8}`，与参考工程相同。类型码 0～7 原样�
 配置中非法宽度/地址/变量数会整包拒绝，停止状态下清空计划，避免下次 START 使用旧计划。
 
 - v1：周期与 DATA 时间戳单位 µs；最小周期 2 µs，最大 1 s。
-- v2：周期与时间戳单位 24 MHz tick；最小 48 tick，最大 24000000 tick；u32 回绕。
+- v2：周期与时间戳单位 24 MHz tick；最小 24 tick（1 MHz），最大 24000000 tick；u32 回绕。
 - HSS 时间戳表示该样本的名义调度时刻，各变量依次读取。采样来不及时跳过 deadline，
   累加 skipped；不会把间断样本挤成连续时间轴。不同时间段拆成不同 DATA 包。
 - FIFO 满时跳过采样并计数；PS/USB 都不覆盖已发布的样本。FIFO 为单写口 LUT RAM，16 个样本，USB 每类
   队列 8 槽，HSS 包长 512 B。稀疏采样的部分 DATA 包约 10 ms flush 一次。
 - HSS CLOCK 允许 15～60 MHz，并受固件构建时的已验证时序上限约束；配置时需停止 HSS。
-  默认使用本板已验证的 50 MHz。RTT CONFIG 的时钟范围 1～60 MHz、块长上限 1024 B；
+  默认使用本板已验证的 50 MHz。RTT CONFIG 的时钟范围 1～60 MHz、块长上限 2048 B；
   有待回写 RdOff 时拒绝改配置。当前 F103CB 的 10/20 MHz 分频初始化路径存在既有失败，
   main 预编译版本同样如此；本分支的实板验收使用 50 MHz，不宣称全部频点均已验收。
 - HSS STOP 为排空当前采样/FIFO 的优雅停止。返回 `-7` 时仍需读取 `87`；主循环继续
@@ -78,14 +78,14 @@ n×{addr:u32,size:u8,type:u8}`，与参考工程相同。类型码 0～7 原样�
 - 不支持参考工程的 RISC-V/JTAG、触发、raw DAP、peek 和 benchmark 动作，明确返回错误。
   HSS DISCARD(bit1) 支持；其余已接受的 ARM 提示位不改变 RTL 的调度方式。
 
-STATUS 与 METRICS 保持参考工程的基本字段布局。METRICS word3 是已由 PS 取出并组包的
+STATUS 与 METRICS 保持参考工程的基本字段布局。METRICS word3 是已由 PL 组包的
 样本数，word4 是 RTL skipped；word5 为零（USB 背压统一体现在 RTL skipped 中），
 word7 是 DAP 让路次数。DAP 暂停造成的时间间隔不算 RTL skipped。
 word8 统计 USB DMA 完成，不能证明上位机实际保存了数据。
 
 ## RTL 寄存器
 
-SWD 控制器原地址不变，基址 `40010000`；FEATURES(`4C`) 为 `44500003`，bit1 表示采样器。
+SWD 控制器原地址不变，基址 `40010000`；FEATURES(`4C`) 为 `44500007`，bit1 表示采样器、bit2 表示包 DMA 通路。
 
 | 偏移 | 读 | 写（配置须停止且当前样本结束） |
 |---|---|---|
@@ -93,7 +93,7 @@ SWD 控制器原地址不变，基址 `40010000`；FEATURES(`4C`) 为 `44500003`
 | `64` | bit0 enabled；bit1 finishing；bit4 fault；高16位完整样本数 | — |
 | `68` | 计划索引 | 0～23 |
 | `6C` | 所选对齐字地址 | 对齐字地址 |
-| `70` | 周期（24 MHz tick） | 48～24000000 |
+| `70` | 周期（24 MHz tick） | 24～24000000 |
 | `74` | FIFO：timestamp、随后 count 个数据字；最后一字释放槽 | — |
 | `78` | 当前 24 MHz 时间戳 | 实际 FCLK Hz（至少24 MHz） |
 | `7C` | skipped 计数 | 设置时间戳；PS 在重新启用前与全局 timer 对时 |
@@ -111,8 +111,8 @@ python tools/run_xsct.py tools/download_dap_fpga.tcl prebuilt/zynqlink_probe.elf
 ```
 
 `prebuilt/probe_build_manifest.json` 记录 RTL/固件源文件和 bit/ELF 的 SHA256。
-固件限制 SWCLK≤60 MHz。最终 routed FCLK 上限 128571429 Hz，setup +0.227 ns、
-hold +0.040 ns；bitgen/DRC 通过。原 packet 配对未改动。
+固件限制 SWCLK≤60 MHz。当前 routed FCLK 上限 120 MHz，setup +0.373 ns、
+hold +0.022 ns；bitgen/DRC 通过。原 packet 配对未改动。
 
 源码构建沿用 README 的 BSP 和 Vivado 流程；增量构建也会添加新 RTL 源文件。
 
@@ -149,7 +149,8 @@ FAULT、parity、watchdog、时间戳回绕、停止和 FIFO 满。
 XSim 使用本机已有 ARM DesignStart Cortex-M0 模型，验证真实 MEM-AP 采样、16样本FIFO、
 竞争启动屏蔽与停采后的 DAP 读取。ARM 模型不复制进仓库。
 
-实板验收为 F103CB、HCLK 96 MHz、SWCLK 50 MHz。目标原本处于 halt，测试维持该状态，
+以下为初版历史功能验收；当前性能和变化源长测见 [PL→DDR 验收](probe-pl-ddr.md)。
+初版实板验收为 F103CB、HCLK 96 MHz、SWCLK 50 MHz。目标原本处于 halt，测试维持该状态，
 未复位、未改 RCC、未编程目标 Flash。
 
 | 项目 | 结果 |
