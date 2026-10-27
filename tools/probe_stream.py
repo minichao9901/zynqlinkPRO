@@ -63,6 +63,7 @@ def main():
     for name in ['rtt', 'hss']:
         p = sub.add_parser(name)
         p.add_argument('--clock', type=int, default=50_000_000)
+        p.add_argument('--transport', choices=['auto', 'swd', 'jtag'], default='auto')
         p.add_argument('--seconds', type=float, default=3)
         p.add_argument('--output', type=Path)
         if name == 'rtt':
@@ -94,6 +95,9 @@ def main():
         started = False
         resource = None
         try:
+            rc, _ = probe.action(command, 12, bytes([{'auto':0,'swd':1,'jtag':2}[args.transport]]))
+            if rc:
+                raise RuntimeError(f'Transport selection failed: {rc}')
             if args.command == 'rtt':
                 import serial
                 resource = serial.Serial(args.port, baudrate=115200, timeout=0.1)

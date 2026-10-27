@@ -21,9 +21,10 @@ if os.name=='nt' and shutil.which('clang') and shutil.which('gcc'):
               '-L'+str(mingw/'lib'),'-L'+str(libs[-1])]
 descriptor_source=(root/'firmware/xusbps_daplink_dma/xusbps_ch9_storage.c').read_text(encoding='utf-8')
 (out/'descriptor_under_test.c').write_text(descriptor_source.split('int XUsbPs_DapResetEndpoints(')[0],encoding='utf-8')
-for name in ['probe_host', 'probe_target', 'probe_descriptor']:
+for name in ['probe_host', 'probe_target', 'probe_descriptor', 'probe_jtag']:
     exe=out/(name+'.exe')
     subprocess.run([*compiler, '-std=c11', '-O2', '-Wall', '-Wextra',
                     '-I'+str(out), '-I'+str(root/'tools/tests'), '-I'+str(root/'firmware/xusbps_daplink_dma'),
+                    '-I'+str(root/'firmware/xusbps_daplink_dma/DAP/Include'),
                     str(root/'tools/tests'/(name+'_test.c')), '-o', str(exe)], check=True)
     subprocess.run([str(exe)], check=True, timeout=30)

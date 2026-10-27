@@ -140,6 +140,7 @@ def main():
     ap.add_argument('--speeds', default='50000000,60000000')
     ap.add_argument('--chunks', default='128,256,512,1024')
     ap.add_argument('--repeats', type=int, default=1)
+    ap.add_argument('--transport', choices=['swd', 'jtag'], default='swd')
     ap.add_argument('--output', type=Path, required=True)
     ap.add_argument('--bit',type=Path)
     ap.add_argument('--elf',type=Path)
@@ -161,10 +162,11 @@ def main():
     dev, out, inp = open_dap()
     mem = Memory(out, inp)
     backup, regs, initial = None, None, None
-    report = {'artifacts':provenance(args.bit,args.elf),'kind': 'continuous RAM producer RTT->CDC', 'rows': []}
+    report = {'artifacts':provenance(args.bit,args.elf),'kind': 'continuous RAM producer RTT->CDC', 'transport':args.transport, 'rows': []}
     try:
         stop(probe, dev)
-        setup(out, inp, 50000)
+        setup(out, inp, 10000, args.transport)
+        assert probe.action(0x31,12,bytes([2 if args.transport=='jtag' else 1]))[0]==0
         initial = mem.word(DHCSR)
         mem.write_word(DHCSR, 0xa05f0003)
         regs = {i: core_read(mem, i) for i in list(range(19))+[20]}
@@ -184,7 +186,7 @@ def main():
     finally:
         try:
             stop(probe, dev)
-            setup(out, inp, 50000)
+            setup(out, inp, 10000, args.transport)
             mem.write_word(DHCSR, 0xa05f0003)
             if backup is not None:
                 mem.write(0x20000000, backup)

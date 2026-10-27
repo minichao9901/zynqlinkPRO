@@ -1,0 +1,90 @@
+# JTAG IDDR 相位与采样窗口
+
+本轮将 JTAG TDO 输入固定接入 OPPOSITE_EDGE IDDR。默认 `JTAG_TIMING[0]=0` 使用 Q2；bit0=1 使用 Q1。bit4 独立选择前一 DR 位窗口，厂商命令 `0x89` 保留四种模式 0、1、16、17 的查询/手动设置。两条路径都经过输入寄存器，不再旁路到裸引脚。
+
+## 为什么仅切 Q2 不够
+
+以 FCLK 周期 P、稳态 TCK 周期 2P 为例，`jtag_shift` 在准备拉低 TCK 的 FCLK 上升沿收取 DR 数据。该时刻取得的 Q2 来自前半个 FCLK 的下降沿，Q1 则来自前一个 FCLK 上升沿。因此 Q2 和 Q1 都比裸引脚取值更早；对于迟到的 TDO，必须同时检查采样位窗口。
+
+| 模式 | 输入 | DR 窗口 | 理想返回延迟窗口，忽略建立/保持裕量 |
+| --- | --- | --- | --- |
+| 0 | IDDR Q2 | 当前位 | 0…1.5P |
+| 1 | IDDR Q1 | 当前位 | 0…P |
+| 16 | IDDR Q2 | 前一位 | 1.5P…3.5P |
+| 17 | IDDR Q1 | 前一位 | P…3P |
+
+这里的返回延迟包含 TCK 输出到目标、目标 TDO 更新、返回连线和输入路径。边界处仍需实际建立/保持裕量，不能仅凭 IDCODE 偶尔正确就选择该相位。
+
+DR 帧固定多移两位：在 TDI 请求前填充两个无关位，使 UPDATE 时目标移位寄存器中的请求值保持正确。第一个额外时钟可收齐延迟的最后一个有效输出位，第二个才退出 SHIFT_DR，避免 TDO 输出使能过早撤销。保护时钟不会创建第二次 AP 访问；稳态仍是每个 AP 字一次 DR 扫描。
+
+raw JTAG Sequence 不额外增加用户要求的 TCK 数。它使用较慢的扫描时钟，并在 TCK 上升前收取寄存后的 TDO，以保留 TMS=1、立即退出 SHIFT 时的末位。IR/TAP 导航同样使用较慢的时钟；缓存命中后的 DR 数据路径保持请求的高速时钟。
+
+## 校准与测试修正
+
+自动校准先在低速保存 AP CSW、TAR 和 DP SELECT 的软件影子，并读取只读 CPUID 作为基准。随后检查 IDCODE、CSW、TAR 多组图案读回及 CPUID，最后在低速恢复 CSW、TAR、SELECT。DPv0 的 SELECT 不依赖读回。校准不写目标内存，不执行 DRW 写；错误状态通过 JTAG CTRL/STAT 的 W1C 字段清除。四种模式均失败才允许按实际 FCLK 下降重试；已移除 43–52 MHz 请求的固定降频表。该校准目前仍可能漏过边缘相位，不能替代随机块读验收。
+
+此前临时校准注释称读写 CSW，实际请求 `0x0f/0x0d` 在 bank0 访问 DRW，可能触及目标内存，现已修正。此前 `tools/jtag_speed_matrix.py` 还给 CMSIS-DAP Transfer 头部多插入了一个字节，导致请求误解码，旧矩阵不能直接作为相位根因的证据。修正后重新验收，并记录实际 FCLK/TCK 与采样模式。
+
+## 仿真证据
+
+`tools/run_jtag_timing_sweep.py` 使用完整双 TAP 模型，并按 IDDR Q1/Q2 的真实时钟边沿注册输入，覆盖 IDCODE、posted AP 读、AP 写以及 DP/AP IR 切换。
+
+本轮 9 档 FCLK 周期 × 5 档 TDO 返回延迟 × 4 种模式，共 180 个组合。返回延迟为 12/16/20/24/28 ns，FCLK 周期为 8.333/9.091/9.615/10/11.111/11.628/12.5/14.925/16.667 ns。每个 FCLK×延迟组合至少有一个模式通过，详细结果为 `results/jtag/iddr_timing_sweep.json`。这表示可校准窗口覆盖，不表示每种固定模式都适用于全部延迟。
+
+`tools/test_jtag_rtl.py` 进一步覆盖 Q2、Q2 前一位、Q1 前一位的自主 HSS 与 RTT 完整路径、DDR 提交前不更新 RTT RdOff、错误检查失败不发布采样包，以及 raw 扫描最后一位的输出使能撤销场景。`tools/test_probe_host.py` 对生产校准 C 代码检查四相位选择、TAR 图案与 CPUID 验证、SELECT/CSW/TAR/时钟恢复，并禁止目标内存写入。
+
+旧 bit 加修正后的只读校准固件，其实板对照在 `results/jtag/before_iddr_checked.json`：请求 50 MHz 时实际 TCK 约 28.125 MHz，而请求 60 MHz 时实际约 60 MHz，说明验收必须核对实际频率。
+
+## RTT/HSS 的 RTL 数据路径
+
+两种传输共用 `probe_rtt_engine`、`probe_sample_engine`、`probe_stream_engine`，只在控制器内切换 SWD/JTAG 后端。JTAG 的 TAP、IR 缓存、DP/AP 访问、WAIT 重试、posted-read 结果回收和包边界错误检查由 `jtag_core` 实现。采样周期、跳点计数、RTT 环形缓冲读写位置、1 KiB 边界拆分和数据打包均由 RTL 实现；完整包经 AXI CDMA 搬入 DDR，再交 USB 控制器提交。PS 负责会话配置、启停、DMA 描述和 USB 队列，不逐字访问 AP，也不逐点组包。连接阶段的软件相位校准不属于采样热路径。
+
+## superlinkPRO 源码对照
+
+参考目录为 `E:/superlinkPRO/firmware/application_5301/src`。本轮逐段检查以下实际调用路径：
+
+- `dap/JTAG_DP/JTAG_DP.c` 的 `JTAG_Read/Write` 调用 `JTAG_Read/Write_Slow`；45 MHz 汇编用于 `JTAG_Sequence`。不能把汇编文件名称当作普通 JTAG 块读的实测频率。
+- `dap/JTAG_DP/JTAG_DP_GPIO_Slow.c` 的 ACK 在拉高 TCK 后采样，读数据在低电平等待后、拉高前采样。TDI 在拉低 TCK 前设置。非 OK ACK 提前退出 DR，正常请求使用 35 位加链上 bypass。
+- `dap/DAP.c` 的 TransferBlock 先 prime，连续 AP 读每次取回上一笔，最后切 DP RDBUFF 收尾；RDBUFF 不作为可反复读取的 AP 结果缓存。
+- `scope/scope_sampler.c` 的单字优化为固定地址 posted-read 流水，包尾用额外一次 pipe read 回填未决样本。其后端分派是 ARM SWD 与 RISC-V JTAG；这份代码不能作为 ARM JTAG HSS 已验证的依据。
+
+参考中的缓存和流水语义保留，但这里的稳态调度与处理实现在 RTL，不能移植 MCU 轮询热路径。JTAG RDBUFF 的读零语义已加入仿真模型：包边界 CTRL/STAT 检查消耗的未决 AP 结果必须由 RTL 缓存，下一次前端访问先归还该结果，否则会在 HSS 数据中插入零。完整路径三种相位的仿真已通过。
+
+## IDDR bit 实板验收
+
+新 bit（`system_wrapper_verified.bit` 15:44）加载后按 1 KiB 边界拆分做随机图案块写、块读回核对，每档 107940 字节：
+
+| 请求 TCK | 实际 FCLK | 实际 TCK | 采样模式 | 读+USB 命令透过率 |
+| --- | ---: | ---: | ---: | ---: |
+| 1 MHz | 2.0 MHz | 1.0 MHz | 0 | 0.072 MB/s |
+| 10 MHz | 20.0 MHz | 10.0 MHz | 0 | 0.584 MB/s |
+| 30 MHz | 60.0 MHz | 30.0 MHz | 0 | 1.203 MB/s |
+| 50 MHz | 66.7 MHz | 33.3 MHz | 17 | 1.285 MB/s |
+| 60 MHz | 120.0 MHz | 60.0 MHz | 17 | 1.230 MB/s |
+
+1/10/30/60 MHz 达到请求频率；请求 50 MHz 时 FCLK=100 MHz 四种相位都无法通过数据校验，闭环校准按实际可分频逐级下调，最终落在 33.3 MHz。这档不是软件回落问题：同一 TDO 往返延迟下，100 MHz 恰好落在相位窗口之外，而 66.7 与 120 MHz 落在窗口内。报告见 `results/jtag/iddr_acceptance_fine.json`。
+
+校准的下调步进从“乘以 3/4”改为“取下一个可实现的 FCLK”（调用 `ps_set_fclk0_hz(fclk-1)`），因此回落点尽量贴近请求值：同样请求 50 MHz，旧步进落到 28.1 MHz，新步进落在 33.3 MHz。
+
+## HSS 750 kHz 瓶颈定位
+
+为区分“USB/PS 提交”与“PL 每样本访问预算”，把 HSS 输出切到丢弃模式（仅保留 PL 采样与跳点计数，`probe_stream.c` 的 `discard` 会话位），同一条 bit/ELF、60 MHz TCK：
+
+| 周期 ticks | 请求速率 | 丢弃模式实际 | 丢弃跳点 | 回复模式实际 | 回复跳点 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 96 | 250 kHz | – | – | 250.0 kHz | 0.00% |
+| 48 | 500 kHz | – | – | 496.0 kHz | 0.79% |
+| 40 | 595 kHz | 595.2 kHz | 0.79% | – | – |
+| 36 | 667 kHz | 656.2 kHz | 1.57% | – | – |
+| 32 | 750 kHz | 375.0 kHz | 50.0% | 39.5 kHz | 94.74% |
+| 28 | 857 kHz | 428.6 kHz | 50.0% | – | – |
+| 24 | 1 MHz | 571.4 kHz | 42.9% | 39.4 kHz | 96.06% |
+
+结论：
+
+- **PL 侧**在 500–667 kHz 只丢 0.8–1.6%，到 750 kHz 才掉到 50%，即每样本扫描预算约等于 750 kHz 周期（60 MHz TCK 下约 1.3 µs）；这是采样 35 位 AP 访问加调度开销的真实成本。
+- **回复路径**在 750 kHz 从 375 kHz 进一步塌到 39.5 kHz，比 PL 上限低一个数量级，且 750 kHz/857 kHz/1 MHz 都收敛到同一个约 39.5 kHz。恒定值说明不是带宽不足，而是提交侧进入了“大部分时间停住、偶尔推进”的节流/停顿模式，与请求速率无关。
+- 因此 750 kHz 以上是**两个独立瓶颈**：PL 访问预算（~500–667 kHz 有效）与回复/提交路径（~39.5 kHz 塌陷）。500 kHz 时两者都不构成问题（0.79% 跳点），与 `hss_reply_long.json` 的 6 秒长测一致（496.0 kHz，跳点 0.79%，计数严格有序，错误 0）。
+
+未完成：回复路径塌陷的根因（怀疑 1 KiB 包边界与 USB 队列回压的交互）尚未定位；PL 访问预算也没有继续压缩。两条都在 RTL/PS 提交路径内，不影响 ≤500 kHz 的已验证行为。
+

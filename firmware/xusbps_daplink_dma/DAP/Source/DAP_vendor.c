@@ -198,7 +198,20 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
         num=(2U<<16)|70U;
       }
       break;
-    case ID_DAP_Vendor9:  break;
+    case ID_DAP_Vendor9:
+      { // JTAG IDDR phase bit0, previous-bit window bit4; 255=query.
+        uint8_t status = DAP_OK;
+        if (*request != 255U) {
+          if ((swd_read32(SWD_BASE_ADDR + 4U) & 1U) ||
+              (swd_read32(SWD_BASE_ADDR + 0x34U) & 1U) ||
+              (swd_read32(SWD_BASE_ADDR + 0x48U) & 1U)) status = DAP_ERROR;
+          else DAP_JTAG_SetTiming((uint32_t)*request & 0x11U);
+        }
+        *response++ = status;
+        *response++ = (uint8_t)(swd_read32(JTAG_TIMING) & 0x11U);
+        num = (2U << 16) | 3U;
+      }
+      break;
     case ID_DAP_Vendor10: break;
     case ID_DAP_Vendor11: break;
     case ID_DAP_Vendor12: break;

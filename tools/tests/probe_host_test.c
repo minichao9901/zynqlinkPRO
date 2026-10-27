@@ -48,6 +48,7 @@ int XUsbPs_EpBufferReceive(XUsbPs *u,u8 ep,u8 **p,u32 *n,u32 *h) {(void)u;(void)
 void XUsbPs_EpBufferRelease(u32 x) {(void)x;}
 u8 usbd_cdc_acm_get_dtr(void) {return (u8)host_dtr;}
 int probe_target_claim(uint32_t hz) {(void)hz;claim_calls++;return 0;}
+int probe_target_transport(uint32_t port) {return port<=2 ? 0 : -6;}
 void probe_target_release(void) {release_calls++;}
 void probe_target_forget(void) {release_calls++;}
 uint32_t probe_target_fclk(void) {return 100000000;}

@@ -17,6 +17,7 @@ module probe_sample_engine #(
     output wire stream_empty,
     output wire [31:0] stream_data,
     output wire [31:0] timer_tick,
+    output wire [31:0] validation_count,
     output wire active,
     output reg core_start,
     output reg [7:0] core_req,
@@ -65,6 +66,9 @@ module probe_sample_engine #(
     reg fixed_pipe;
     reg pending;
     reg [31:0] pending_time, launch_time;
+    // A JTAG CTRL/STAT fence also validates the outstanding single-word AP
+    // result. It may enter the FIFO after the fence, on the next DRW scan.
+    assign validation_count=head+((fixed_pipe && pending) ? 32'd1 : 32'd0);
     wire [31:0] used = head-tail;
     wire span_end = span_last[item];
     wire next_span_end = span_last[item+1];

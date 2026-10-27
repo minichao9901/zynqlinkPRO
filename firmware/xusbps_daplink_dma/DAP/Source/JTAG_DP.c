@@ -67,7 +67,7 @@
 #define PIN_DELAY() PIN_DELAY_SLOW(DAP_Data.clock_delay)
 
 
-#if (DAP_JTAG != 0)
+#if (DAP_JTAG != 0) && !DAP_JTAG_RTL
 
 
 // Generate JTAG Sequence

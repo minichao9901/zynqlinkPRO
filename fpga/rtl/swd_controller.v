@@ -7,7 +7,7 @@
 `timescale 1ns/1ps
 module swd_controller #(
     parameter C_S_AXI_DATA_WIDTH = 32,
-    parameter C_S_AXI_ADDR_WIDTH = 7,
+    parameter C_S_AXI_ADDR_WIDTH = 8,
     parameter integer SWDIO_IN_DELAY_NS = 0
 )(
     input  wire                                    clk,
@@ -80,8 +80,25 @@ module swd_controller #(
 
     // SWD Physical Interface
     output wire                                    swclk,
-    inout  wire                                    swdio
+    inout  wire                                    swdio,
+    // Existing B19/A20/E19/E18 connector, with JTAG TDI/TDO muxed onto 0/1.
+    inout wire [3:0] gpio_aux,
+    input wire [3:0] gpio_out,gpio_tri,
+    output wire [3:0] gpio_in
 );
+
+    // Declare pad control before the generate block. Vivado 2018.3 otherwise
+    // creates undriven generate-local implicit nets for forward references.
+    reg [31:0] jtag_config,jtag_ir_config,jtag_dr_config,manual_pins;
+    reg [2:0] jtag_operation;
+    reg jtag_seq_tms,jtag_sample_early;
+    reg jtag_return_late;
+    wire jtag_enabled=jtag_config[0] && jtag_config[1];
+    wire jtag_tck,jtag_tms,jtag_tdi,jtag_busy,jtag_result_valid,jtag_next_ready;
+    wire [2:0] core_ack;
+    wire core_parity_err,core_busy,core_result_valid,core_next_ready;
+    wire [15:0] core_timestamp;
+    wire [31:0] core_rdata;
 
     //=========================================================================
     // IOBUF for SWDIO (bidirectional)
@@ -101,9 +118,9 @@ module swd_controller #(
     wire swdio_i_raw;
     IOBUF u_swdio_iobuf (
         .IO(swdio),
-        .I (swdio_o),
+        .I (manual_pins[8] ? manual_pins[1] : jtag_enabled ? jtag_tms : swdio_o),
         .O (swdio_i_raw),
-        .T (swdio_t)
+        .T (!jtag_config[1] || (!manual_pins[8] && !jtag_enabled && swdio_t))
     );
     `ifndef SYNTHESIS
         assign #(SWDIO_IN_DELAY_NS) swdio_i = swdio_i_raw;
@@ -140,35 +157,40 @@ module swd_controller #(
     // Q1 samples on the next FCLK rising edge after a SWCLK launch; Q2 is the
     // earlier FCLK falling-edge sample. This gives one selectable phase step.
     assign swdio_i_fall = cfg_sample_rise ? swdio_i_rise_raw : swdio_i_fall_raw;
-    assign swclk = swclk_buf;
+    assign swclk = manual_pins[8] ? manual_pins[0] : jtag_enabled ? jtag_tck : swclk_buf;
+    for(genvar gi=0;gi<4;gi=gi+1) begin:g_aux
+        wire pin_o=gi==0 && jtag_enabled ? (manual_pins[8] ? manual_pins[2] : jtag_tdi) : gpio_out[gi];
+        wire pin_t=!jtag_config[1] || (gi==1 && jtag_enabled) || (!(gi==0 && jtag_enabled) && gpio_tri[gi]);
+        IOBUF u_pin(.IO(gpio_aux[gi]),.I(pin_o),.T(pin_t),.O(gpio_in[gi]));
+    end
 
     //=========================================================================
     // Address Map
     //=========================================================================
-    localparam ADDR_CTRL          = 7'h00;
-    localparam ADDR_STATUS        = 7'h04;
-    localparam ADDR_CFG           = 7'h08;
-    localparam ADDR_SWJ_COUNT     = 7'h0C;
-    localparam ADDR_SWJ_DATA0     = 7'h10;
-    localparam ADDR_SWJ_DATA1     = 7'h14;
-    localparam ADDR_SWJ_DATA2     = 7'h18;
-    localparam ADDR_SWJ_DATA3     = 7'h1C;
-    localparam ADDR_SWJ_DATA4     = 7'h20;
-    localparam ADDR_SWJ_DATA5     = 7'h24;
-    localparam ADDR_SWJ_DATA6     = 7'h28;
-    localparam ADDR_SWJ_DATA7     = 7'h2C;
-    localparam ADDR_BATCH_CTRL    = 7'h30;
-    localparam ADDR_BATCH_STATUS  = 7'h34;
-    localparam ADDR_BATCH_ADDR    = 7'h38;
-    localparam ADDR_BATCH_DATA    = 7'h3C;
-    localparam ADDR_PACKET_CTRL   = 7'h40;
-    localparam ADDR_PACKET_LEN    = 7'h44;
-    localparam ADDR_PACKET_STATUS = 7'h48;
-    localparam ADDR_FEATURES      = 7'h4C;
-    localparam ADDR_ENGINE_RESET  = 7'h50;
-    localparam ADDR_TRACE_CTRL    = 7'h54;
-    localparam ADDR_TRACE_INDEX   = 7'h58;
-    localparam ADDR_TRACE_DATA    = 7'h5C;
+    localparam [C_S_AXI_ADDR_WIDTH-1:0] ADDR_CTRL          = 7'h00;
+    localparam [C_S_AXI_ADDR_WIDTH-1:0] ADDR_STATUS        = 7'h04;
+    localparam [C_S_AXI_ADDR_WIDTH-1:0] ADDR_CFG           = 7'h08;
+    localparam [C_S_AXI_ADDR_WIDTH-1:0] ADDR_SWJ_COUNT     = 7'h0C;
+    localparam [C_S_AXI_ADDR_WIDTH-1:0] ADDR_SWJ_DATA0     = 7'h10;
+    localparam [C_S_AXI_ADDR_WIDTH-1:0] ADDR_SWJ_DATA1     = 7'h14;
+    localparam [C_S_AXI_ADDR_WIDTH-1:0] ADDR_SWJ_DATA2     = 7'h18;
+    localparam [C_S_AXI_ADDR_WIDTH-1:0] ADDR_SWJ_DATA3     = 7'h1C;
+    localparam [C_S_AXI_ADDR_WIDTH-1:0] ADDR_SWJ_DATA4     = 7'h20;
+    localparam [C_S_AXI_ADDR_WIDTH-1:0] ADDR_SWJ_DATA5     = 7'h24;
+    localparam [C_S_AXI_ADDR_WIDTH-1:0] ADDR_SWJ_DATA6     = 7'h28;
+    localparam [C_S_AXI_ADDR_WIDTH-1:0] ADDR_SWJ_DATA7     = 7'h2C;
+    localparam [C_S_AXI_ADDR_WIDTH-1:0] ADDR_BATCH_CTRL    = 7'h30;
+    localparam [C_S_AXI_ADDR_WIDTH-1:0] ADDR_BATCH_STATUS  = 7'h34;
+    localparam [C_S_AXI_ADDR_WIDTH-1:0] ADDR_BATCH_ADDR    = 7'h38;
+    localparam [C_S_AXI_ADDR_WIDTH-1:0] ADDR_BATCH_DATA    = 7'h3C;
+    localparam [C_S_AXI_ADDR_WIDTH-1:0] ADDR_PACKET_CTRL   = 7'h40;
+    localparam [C_S_AXI_ADDR_WIDTH-1:0] ADDR_PACKET_LEN    = 7'h44;
+    localparam [C_S_AXI_ADDR_WIDTH-1:0] ADDR_PACKET_STATUS = 7'h48;
+    localparam [C_S_AXI_ADDR_WIDTH-1:0] ADDR_FEATURES      = 7'h4C;
+    localparam [C_S_AXI_ADDR_WIDTH-1:0] ADDR_ENGINE_RESET  = 7'h50;
+    localparam [C_S_AXI_ADDR_WIDTH-1:0] ADDR_TRACE_CTRL    = 7'h54;
+    localparam [C_S_AXI_ADDR_WIDTH-1:0] ADDR_TRACE_INDEX   = 7'h58;
+    localparam [C_S_AXI_ADDR_WIDTH-1:0] ADDR_TRACE_DATA    = 7'h5C;
     reg [31:0] transfer_trace [0:15];
     reg [3:0] trace_head,trace_index;
     reg [15:0] trace_count;
@@ -192,6 +214,32 @@ module swd_controller #(
     reg engine_reset;
     reg [31:0] engine_reset_count;
     wire engine_rst_n = rst_n & ~engine_reset;
+    wire [2:0] jtag_ack;
+    wire [31:0] jtag_rdata,jtag_cached_ir;
+    wire jtag_cache_valid;
+    wire [255:0] jtag_sequence_data;
+    wire jtag_tdo_fall,jtag_tdo_rise;
+    wire jtag_fence_req,jtag_fence_done,jtag_fence_error;
+    wire swd_busy,swd_result_valid,swd_next_ready,swd_parity_err;
+    wire [2:0] swd_ack;
+    wire [31:0] swd_rdata;
+    wire [15:0] swd_timestamp;
+    reg [15:0] jtag_timestamp;
+    always @(posedge clk or negedge rst_n)
+        if(!rst_n) jtag_timestamp<=0;else jtag_timestamp<=jtag_timestamp+1'b1;
+    IDDR #(.DDR_CLK_EDGE("OPPOSITE_EDGE"),.INIT_Q1(0),.INIT_Q2(0),.SRTYPE("SYNC")) u_tdo_iddr(
+        .C(clk),.CE(1'b1),.D(gpio_in[1]),.Q1(jtag_tdo_rise),.Q2(jtag_tdo_fall),.R(1'b0),.S(1'b0));
+    wire jtag_invalidate=s_axi_wvalid && s_axi_wready &&
+        ((write_addr==8'h80 && s_axi_wdata!=jtag_config) ||
+         (write_addr==8'h84 && s_axi_wdata!=jtag_ir_config) ||
+         (write_addr==8'h88 && s_axi_wdata!=jtag_dr_config) || write_addr==8'h94);
+    assign core_busy=jtag_enabled ? jtag_busy : swd_busy;
+    assign core_ack=jtag_enabled ? jtag_ack : swd_ack;
+    assign core_parity_err=jtag_enabled ? 1'b0 : swd_parity_err;
+    assign core_rdata=jtag_enabled ? jtag_rdata : swd_rdata;
+    assign core_result_valid=jtag_enabled ? jtag_result_valid : swd_result_valid;
+    assign core_next_ready=jtag_enabled ? jtag_next_ready : swd_next_ready;
+    assign core_timestamp=jtag_enabled ? jtag_timestamp : swd_timestamp;
 
     // ADDR_CFG (0x08) bit definition:
     //   [3:0]   turnaround_fixed      SWD turnaround cycles (fixed to 1)
@@ -234,15 +282,9 @@ module swd_controller #(
     //=========================================================================
     // SWD Core Interface
     //=========================================================================
-    wire [2:0]  core_ack;
-    wire        core_parity_err;
-    wire        core_busy;
-    wire        core_result_valid, core_next_ready;
     wire        packet_core_next_valid;
     wire [7:0]  packet_core_next_request;
     wire [31:0] packet_core_next_wdata;
-    wire [15:0] core_timestamp;
-    wire [31:0] core_rdata;
     wire        batch_active;
     wire [31:0] batch_host_rdata;
     wire         packet_active, packet_busy, packet_done, packet_error;
@@ -290,6 +332,7 @@ module swd_controller #(
     wire [31:0] rtt_wdata;
     wire sample_pop,sample_empty;
     wire [31:0] sample_data,sample_tick;
+    wire [31:0] sample_validation_count;
     wire stream_start = rtt_active ? rtt_start : sampler_start;
     wire [7:0] stream_req;
     wire [31:0] stream_wdata, stream_rdata;
@@ -302,14 +345,15 @@ module swd_controller #(
     assign stream_next_valid = rtt_active ? rtt_next_valid : sampler_next_valid;
     assign stream_next_req = rtt_active ? rtt_next_req : sampler_next_req;
     assign stream_next_wdata = 0;
-    wire stream_wr = s_axi_wvalid && s_axi_wready && write_addr[6:5]==2'b11 && &s_axi_wstrb;
-    wire stream_rd = s_axi_arvalid && s_axi_arready && s_axi_araddr[6:5]==2'b11;
+    wire stream_wr = s_axi_wvalid && s_axi_wready && !write_addr[7] && write_addr[6:5]==2'b11 && &s_axi_wstrb;
+    wire stream_rd = s_axi_arvalid && s_axi_arready && !s_axi_araddr[7] && s_axi_araddr[6:5]==2'b11;
     probe_sample_engine u_probe_sampler (
         .clk(clk), .rst_n(engine_rst_n), .wr(stream_wr), .rd(stream_rd),
         .waddr(write_addr[4:2]), .raddr(s_axi_araddr[4:2]),
         .wdata(s_axi_wdata), .rdata(stream_rdata),
         .available(!core_busy && !rtt_active && !batch_active && !packet_active && !start_pulse),
         .stream_pop(sample_pop),.stream_empty(sample_empty),.stream_data(sample_data),.timer_tick(sample_tick),
+        .validation_count(sample_validation_count),
         .active(sampler_active), .core_start(sampler_start), .core_req(sampler_req),
         .core_wdata(sampler_wdata), .core_next_valid(sampler_next_valid),
         .core_next_req(sampler_next_req), .core_next_wdata(), .core_busy(core_busy),.core_next_ready(core_next_ready),
@@ -325,13 +369,23 @@ module swd_controller #(
         .core_next_valid(rtt_next_valid),.core_next_req(rtt_next_req),
         .core_available(!sampler_active && !batch_active && !packet_active && !start_pulse),
         .core_busy(core_busy),.core_result_valid(core_result_valid),.core_next_ready(core_next_ready),
-        .core_ack(core_ack),.core_parity_err(core_parity_err),.core_rdata(core_rdata)
+        .core_ack(core_ack),.core_parity_err(core_parity_err),.core_rdata(core_rdata),
+        .transport_jtag(jtag_enabled),.fence_req(jtag_fence_req),.fence_done(jtag_fence_done),.fence_error(jtag_fence_error),
+        .sample_validation_count(sample_validation_count)
     );
     wire        start_req;
     assign start_req = (s_axi_wvalid && s_axi_wready && 
                         ((aw_en && s_axi_awaddr == ADDR_CTRL[C_S_AXI_ADDR_WIDTH-1:0]) || 
                          (!aw_en && aw_addr == ADDR_CTRL[C_S_AXI_ADDR_WIDTH-1:0])) && 
                         s_axi_wdata[0]);
+    // Status must cover the accepted-command/start-pulse interval, before
+    // backend busy updates on the following edge. PS polling can reach that
+    // edge through AXI register slices and otherwise consume stale ACK/data.
+    wire scalar_status_busy=core_busy || start_pulse || (start_req && !stream_active);
+    wire packet_start_req=s_axi_wvalid && s_axi_wready && write_addr==ADDR_PACKET_CTRL &&
+                          s_axi_wdata[0] && !packet_busy && !batch_active && !core_busy && !stream_active;
+    wire packet_launch_pending=packet_start_req || packet_start_pulse;
+    wire packet_status_busy=packet_busy || packet_launch_pending;
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -364,6 +418,8 @@ module swd_controller #(
             engine_reset <= 1'b0;
             engine_reset_count <= 0;
             trace_index <= 0;
+            jtag_config<=2;jtag_ir_config<=4;jtag_dr_config<=0;jtag_operation<=0;
+            jtag_seq_tms<=0;jtag_sample_early<=0;jtag_return_late<=0;manual_pins<=0;
             swj_data <= 256'd0;
             swj_count <= 8'd0;
             xfer_request <= 8'd0;
@@ -372,6 +428,7 @@ module swd_controller #(
         else begin
             packet_start_pulse <= 1'b0;
             engine_reset <= 1'b0;
+            if(core_start_sel) manual_pins[8]<=0;
             // BRESP/BVALID handshake
             if (s_axi_bready && bvalid_reg) begin
                 bvalid_reg <= 1'b0;
@@ -431,6 +488,13 @@ module swd_controller #(
                         engine_reset_count <= engine_reset_count + 1'b1;
                     end
                     ADDR_TRACE_INDEX: trace_index<=s_axi_wdata[3:0];
+                    8'h80: if(!core_busy && !stream_active && !packet_active && !batch_active) jtag_config<=s_axi_wdata;
+                    8'h84: if(!core_busy && !stream_active && !packet_active && !batch_active) jtag_ir_config<=s_axi_wdata;
+                    8'h88: if(!core_busy && !stream_active && !packet_active && !batch_active) jtag_dr_config<=s_axi_wdata;
+                    8'h8c: if(!core_busy) jtag_operation<=s_axi_wdata[2:0];
+                    8'h90: if(!core_busy) jtag_seq_tms<=s_axi_wdata[0];
+                    8'h94: if(!core_busy) begin manual_pins<=s_axi_wdata;end
+                    8'h98: if(!core_busy) begin jtag_sample_early<=s_axi_wdata[0];jtag_return_late<=s_axi_wdata[4];end
                     default: ;
                 endcase
             end
@@ -456,9 +520,9 @@ module swd_controller #(
                 ar_addr <= s_axi_araddr;
                 case (s_axi_araddr)
                     ADDR_CTRL: begin
-                        rdata_reg <= {16'd0, xfer_request, 5'd0, ctrl_timestamp_en, ctrl_mode, core_busy};
+                        rdata_reg <= {16'd0, xfer_request, 5'd0, ctrl_timestamp_en, ctrl_mode, scalar_status_busy};
                     end
-                    ADDR_FEATURES: rdata_reg <= 32'h4450_0007;
+                    ADDR_FEATURES: rdata_reg <= 32'h4450_000f;
                     ADDR_ENGINE_RESET: rdata_reg <= engine_reset_count;
                     ADDR_TRACE_CTRL: rdata_reg <= {trace_frozen,11'd0,trace_count,trace_head};
                     ADDR_TRACE_INDEX: rdata_reg <= {28'd0,trace_index};
@@ -466,7 +530,7 @@ module swd_controller #(
                     ADDR_STATUS: begin
                         // 32-bit STATUS layout: [31:16] timestamp, [7] parity_err,
                         // [3:1] ack, [0] busy. Reserved bits read as 0.
-                        rdata_reg <= {core_timestamp, 8'd0, core_parity_err, 3'd0, core_ack, core_busy};
+                        rdata_reg <= {core_timestamp, 8'd0, core_parity_err, 3'd0, core_ack, scalar_status_busy};
                     end
                     ADDR_CFG: begin
                         rdata_reg <= {4'd0, cfg_ack_delay, cfg_turn_extra, 5'd0, cfg_sample_rise, cfg_delay_fast, cfg_clock_delay, cfg_data_phase, cfg_idle_cycles, 4'd1};
@@ -505,9 +569,26 @@ module swd_controller #(
                         rdata_reg <= batch_host_rdata;
                     end
                     ADDR_PACKET_LEN: rdata_reg <= {16'd0,packet_len_reg};
-                    ADDR_PACKET_STATUS: rdata_reg <= {packet_response_words,8'd0,packet_state,packet_error,packet_done,packet_busy};
+                    ADDR_PACKET_STATUS: rdata_reg <= {packet_response_words,8'd0,packet_state,packet_error,
+                                                    packet_done && !packet_launch_pending,packet_status_busy};
+                    8'h80:rdata_reg<=jtag_config;
+                    8'h84:rdata_reg<=jtag_ir_config;
+                    8'h88:rdata_reg<=jtag_dr_config;
+                    8'h8c:rdata_reg<={29'd0,jtag_operation};
+                    8'h90:rdata_reg<={31'd0,jtag_seq_tms};
+                    8'h94:rdata_reg<={23'd0,manual_pins[8],gpio_in[2],1'b0,gpio_in[3],1'b0,gpio_in[1],gpio_in[0],swdio_i_raw,swclk};
+                    8'h98:rdata_reg<={27'd0,jtag_return_late,jtag_fence_error,jtag_cache_valid,jtag_busy,jtag_sample_early};
+                    8'h9c:rdata_reg<=jtag_cached_ir;
+                    8'ha0:rdata_reg<=jtag_sequence_data[31:0];
+                    8'ha4:rdata_reg<=jtag_sequence_data[63:32];
+                    8'ha8:rdata_reg<=jtag_sequence_data[95:64];
+                    8'hac:rdata_reg<=jtag_sequence_data[127:96];
+                    8'hb0:rdata_reg<=jtag_sequence_data[159:128];
+                    8'hb4:rdata_reg<=jtag_sequence_data[191:160];
+                    8'hb8:rdata_reg<=jtag_sequence_data[223:192];
+                    8'hbc:rdata_reg<=jtag_sequence_data[255:224];
                     default: begin
-                        rdata_reg <= s_axi_araddr[6:5]==2'b11 ? stream_rdata : 32'd0;
+                        rdata_reg <= !s_axi_araddr[7] && s_axi_araddr[6:5]==2'b11 ? stream_rdata : 32'd0;
                     end
                 endcase
             end
@@ -622,12 +703,12 @@ module swd_controller #(
     swd_core u_swd_core (
         .clk           (clk),
         .rst_n         (engine_rst_n),
-        .start         (core_start_sel),
-        .next_valid    (core_next_valid_sel),
+        .start         (core_start_sel && !jtag_enabled),
+        .next_valid    (core_next_valid_sel && !jtag_enabled),
         .next_request  (core_next_req_sel),
         .next_wdata    (core_next_wdata_sel),
-        .next_ready    (core_next_ready),
-        .result_valid  (core_result_valid),
+        .next_ready    (swd_next_ready),
+        .result_valid  (swd_result_valid),
         .mode          (core_mode_sel),
         .timestamp_en  (ctrl_timestamp_en),
         .idle_cycles   (cfg_idle_cycles),
@@ -640,16 +721,35 @@ module swd_controller #(
         .swj_count     (core_swj_count_sel),
         .xfer_request  (core_req_sel),
         .xfer_wdata    (core_wdata_sel),
-        .xfer_rdata    (core_rdata),
-        .ack           (core_ack),
-        .parity_err    (core_parity_err),
-        .busy          (core_busy),
-        .timestamp     (core_timestamp),
+        .xfer_rdata    (swd_rdata),
+        .ack           (swd_ack),
+        .parity_err    (swd_parity_err),
+        .busy          (swd_busy),
+        .timestamp     (swd_timestamp),
         .swclk         (core_swclk),
         .swdio_o       (swdio_o),
         .swdio_i       (swdio_i),
         .swdio_i_fall  (swdio_i_fall),
         .swdio_t      (swdio_t)
+    );
+    jtag_core u_jtag_core (
+        .clk(clk),.rst_n(engine_rst_n),.start(core_start_sel && jtag_enabled),.invalidate(jtag_invalidate),
+        .operation(!core_mode_sel ? 3'd6 : stream_active || packet_active || batch_active ? 3'd0 : jtag_operation),
+        .request(core_req_sel),.wdata(core_wdata_sel),.seq_count(swj_count==0 ? 9'd256 : {1'b0,swj_count}),
+        .seq_data(swj_data),.seq_tms(jtag_seq_tms),.ir_length(jtag_ir_config[7:0]),
+        .ir_before(jtag_ir_config[18:8]),.ir_after(jtag_ir_config[29:19]),
+        .dr_before(jtag_dr_config[7:0]),.dr_after(jtag_dr_config[15:8]),
+        .half_delay(cfg_delay_fast),.idle_cycles(cfg_idle_cycles),
+        .late_return(jtag_return_late),
+        // Both phases use the IOB IDDR. Q1 is consumed one FCLK after its
+        // rising sample, Q2 half an FCLK after its falling sample. The DR
+        // window offset independently selects current/previous scan bit.
+        .tdo(jtag_sample_early ? jtag_tdo_rise : jtag_tdo_fall),
+        .next_valid(core_next_valid_sel && jtag_enabled),.next_request(core_next_req_sel),.next_wdata(core_next_wdata_sel),
+        .next_ready(jtag_next_ready),.result_valid(jtag_result_valid),.busy(jtag_busy),.ack(jtag_ack),.rdata(jtag_rdata),
+        .tck(jtag_tck),.tms(jtag_tms),.tdi(jtag_tdi),.cached_instruction(jtag_cached_ir),
+        .cache_valid(jtag_cache_valid),.sequence_result(jtag_sequence_data),
+        .fence_req(jtag_fence_req && jtag_enabled),.fence_done(jtag_fence_done),.fence_error(jtag_fence_error)
     );
 
 endmodule
