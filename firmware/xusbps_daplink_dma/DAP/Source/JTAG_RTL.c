@@ -28,8 +28,15 @@ void DAP_JTAG_ProgramHalfQ(void) {
     swd_write32(JTAG_HALF_Q,hq);
 }
 void DAP_JTAG_SetClock(uint32_t hz) {
+    /* Pick FCLK = 2*TCK so the half period is exactly one FCLK cycle. Any other
+     * ratio makes the half-period average non-integral, and the sampling phase
+     * then walks across the scan: measured on this board only half periods of
+     * a whole or half FCLK cycle capture reliably, which is the same as TCK
+     * dividing FCLK exactly. DAP_JTAG_FCLK_HZ is the cap. */
+    uint32_t target=hz*2U;
     jtag_req_hz=hz ? hz : 1000000U;
-    ps_set_fclk0_hz(DAP_JTAG_FCLK_HZ);
+    if(target>DAP_JTAG_FCLK_HZ) target=DAP_JTAG_FCLK_HZ;
+    ps_set_fclk0_hz(target);
     DAP_JTAG_ProgramHalfQ();
 }
 /* Exercise DP/AP IR transitions with saved/restored CSW and TAR patterns,
