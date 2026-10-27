@@ -329,7 +329,10 @@ void probe_after_dap(void) {
     }
 }
 static void hss_poll(void) {
-    unsigned budget = 16, i, k;
+    // The RTL fixed-address pipe can publish much faster than the old
+    // timestamp+TAR path.  Drain a larger bounded batch per main-loop pass,
+    // otherwise STOP spends many HID round trips emptying a full FIFO.
+    unsigned budget = 128, i, k;
     uint32_t sample[24], stamp, t;
     if (R(1) & 16) {
         result = -4;
@@ -343,6 +346,14 @@ static void hss_poll(void) {
         if (!space(&hss))
             break;
         stamp = R(5);
+        if (!have_stamp) {
+            have_stamp = 1;
+            last_stamp = stamp;
+            elapsed = 0;
+        } else {
+            elapsed += (uint32_t)(stamp - last_stamp);
+            last_stamp = stamp;
+        }
         if (!have_stamp) {
             have_stamp = 1;
             last_stamp = stamp;

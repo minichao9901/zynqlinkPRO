@@ -54,6 +54,10 @@ module probe_sample_engine #(
     reg [7:0] retries;
     reg [31:0] watchdog;
     reg setup_needed;
+    // Single aligned word: after the first prime, every later sample is one
+    // DRW read.  CSW keeps TAR fixed, so the posted result is returned by the
+    // next sample's DRW exactly like superlinkPRO's swd_read_word_pipe().
+    reg fixed_pipe;
     wire [31:0] used = head-tail;
     wire pop = rd && raddr==5 && used!=0 && read_word==count;
     wire ctrl = wr && waddr==0;
@@ -63,8 +67,9 @@ module probe_sample_engine #(
     // same ST_DONE edge of swd_core.  This removes the idle gap between DRW
     // transactions while retaining the old retry path for WAIT/FAULT.
     assign core_next_valid = (state==WAIT) && fast_span && core_result_valid &&
-                             core_ack==3'd1 && !core_parity_err && phase!=FAST_LAST;
-    assign core_next_req = (phase==3) ? ((count==1) ? 8'h0e : 8'h0f) :
+                             core_ack==3'd1 && !core_parity_err &&
+                             ((phase==3) || (phase==FAST_DRW && count>1));
+    assign core_next_req = (phase==3) ? 8'h0f :
                            (phase==FAST_DRW && (item+1==count-1) ? 8'h0e : 8'h0f);
     assign core_next_wdata = 0;
     always @* begin
@@ -89,7 +94,7 @@ module probe_sample_engine #(
             item<=0; head<=0; tail<=0; read_word<=0; tick<=0; deadline<=0;
             sample_time<=0; period<=2400; skipped<=0; errors<=0;
             clock_hz<=100000000; fraction<=0; phase<=0; retries<=0;
-            watchdog<=0; setup_needed<=1; core_start<=0; core_req<=0;
+            watchdog<=0; setup_needed<=1; fixed_pipe<=0; core_start<=0; core_req<=0;
             core_wdata<=0; fifo_wen<=0; fifo_waddr<=0; fifo_wdata<=0;
         end else begin
             core_start<=0; fifo_wen<=0;
@@ -117,7 +122,7 @@ module probe_sample_engine #(
                 end
                 if(!wdata[0]) enabled<=0;
                 else if(!active && wdata[12:8]!=0 && wdata[12:8]<=24 && available) begin
-                    enabled<=1; count<=wdata[12:8]; setup_needed<=1;
+                    enabled<=1; count<=wdata[12:8]; setup_needed<=1; fixed_pipe<=0;
                     fast_span<=1;
                     for (integer ci=1; ci<24; ci=ci+1)
                         if (ci < wdata[12:8] && plan[ci] != plan[0] + (ci*4))
@@ -131,7 +136,8 @@ module probe_sample_engine #(
                 deadline<=deadline+period;
                 if(state==IDLE && used<FIFO_SAMPLES && available) begin
                     sample_time<=deadline; item<=0;
-                    phase<=setup_needed ? 0 : 2;
+                    phase<=setup_needed ? 0 :
+                           ((fast_span && count==1 && fixed_pipe) ? FAST_DRW : 2);
                     retries<=RETRIES; state<=ISSUE;
                 end else skipped<=skipped+1'b1;
             end
@@ -162,15 +168,16 @@ module probe_sample_engine #(
                             fifo_wdata<=core_rdata;
                         end
                         if (fast_span && phase==3) begin
-                            if (count==1) phase<=FAST_LAST;
+                            if (count==1) phase<=FAST_DRW;
                             else begin item<=0; phase<=FAST_DRW; end
                             // core_next_valid keeps the SWD core busy with
                             // the next transfer; remain in WAIT for its result.
                             state<=WAIT;
                         end else if (fast_span && phase==FAST_DRW) begin
-                            if (item+1==count-1) phase<=FAST_LAST;
+                            if (count==1) state<=COMMIT;
+                            else if (item+1==count-1) phase<=FAST_LAST;
                             else item<=item+1'b1;
-                            state<=WAIT;
+                            if (count!=1) state<=WAIT;
                         end else if (fast_span && phase==FAST_LAST) begin
                             state<=COMMIT;
                         end else state<=ADVANCE;
@@ -193,7 +200,9 @@ module probe_sample_engine #(
             PUBLISH: begin
                 // The registered timestamp write lands on this edge. Publish
                 // afterwards so an immediate AXI FIFO read cannot see old RAM.
-                head<=head+1'b1; setup_needed<=0; state<=IDLE;
+                head<=head+1'b1; setup_needed<=0;
+                if (fast_span && count==1) fixed_pipe<=1;
+                state<=IDLE;
             end
             default: state<=IDLE;
             endcase
