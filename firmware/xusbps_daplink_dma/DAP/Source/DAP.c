@@ -445,11 +445,22 @@ static uint32_t DAP_SWJ_Clock(const uint8_t *request, uint8_t *response) {
     *response = DAP_ERROR;
     return ((4U << 16) | 1U);
   }
-  ps_set_fclk0_hz(clock * 2U);
+  int fclk_hz = ps_set_fclk0_hz(clock * 2U);
+  if (fclk_hz <= 0) {
+    *response = DAP_ERROR;
+    return ((4U << 16) | 1U);
+  }
+  uint32_t link_clock_hz = (uint32_t)fclk_hz / 2U;
   /* FCLK runs at 2x SWCLK, so the transfer half-cycle must be one FCLK
-   * cycle (delay_fast=0).  The RTL reset value is slow; program it here. */
-  swd_write32(SWD_CFG, (swd_read32(SWD_CFG) & ~((0xFU << 13) | (1U << 17))) |
-              ((clock <= 35000000U) ? (1U << 17) : 0U));
+   * cycle (delay_fast=0).  The RTL reset value is slow; program it here.
+   * Pick the capture phase from the realizable PLL rate, not the requested
+   * one: different requests can select the same divisor pair. The RX
+   * boundary (bit 18) stays at its legacy default here; the short boundary
+   * is a board profile that needs its own regression and is enabled only
+   * through the diagnostic vendor command. */
+  swd_write32(SWD_CFG, (swd_read32(SWD_CFG) &
+                        ~((0xFU << 13) | (1U << 17) | (1U << 18))) |
+              ((link_clock_hz <= 35000000U) ? (1U << 17) : 0U));
   Set_Clock_Delay(clock);
 
   *response = DAP_OK;
