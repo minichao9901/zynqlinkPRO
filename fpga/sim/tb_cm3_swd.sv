@@ -71,6 +71,10 @@ module tb_cm3_swd #(
        $time,swclk,target_pad,cm3_swdo,cm3_swdoen,dut.swdio_o,dut.swdio_t,
        dut.u_swd_core.state,dut.u_swd_core.lsm_cnt,dut.u_swd_core.req_hdr,dut.u_swd_core.ack_samples);
 
+  always @(posedge clk) if($test$plusargs("coretrace") && dut.core_result_valid)
+    $display("CORE t=%0t req=%h ack=%h wd=%h rd=%h committing=%b state=%0d",
+      $time,dut.core_req_sel,dut.core_ack,dut.core_wdata_sel,dut.core_rdata,dut.u_probe_stream.u_rtt.committing,dut.u_probe_stream.u_rtt.state);
+
   task wr(input [6:0] addr,input [31:0] data);
     begin
       @(negedge clk);awaddr=addr;wdata=data;awvalid=1;wvalid=1;
@@ -135,7 +139,7 @@ module tb_cm3_swd #(
     reg [31:0] status,response;
     integer n,timeout;
     begin
-      xfer(8'h05,32'h20000000,value);
+      xfer(8'h05,32'h60000000,value);
       put(0,((is_read?32'h0f:32'h0d)<<24)|(count<<8)|6);
       if(!is_read)for(n=0;n<count;n=n+1)put(n+1,32'h87654321^(32'h9e3779b9*(n%256)));
       wr(7'h44,is_read?4:(count+1)*4);wr(7'h40,1);
@@ -204,10 +208,12 @@ module tb_cm3_swd #(
     if((value & 32'ha0000000)!==32'ha0000000)$fatal(1,"power handshake %h",value);
     xfer(8'h08,0,value);
     xfer(8'h01,32'h23000052,value);
-    xfer(8'h05,32'h20000000,value);
-    for(k=0;k<words;k=k+1)xfer(8'h0d,32'h5a89cdef ^ (32'h9e3779b9*k),value);
+    xfer(8'h05,32'h60000000,value);
+    for(k=0;k<words;k=k+1)begin
+      xfer(8'h0d,32'h5a89cdef ^ (32'h9e3779b9*k),value);
+    end
     xfer(8'h0e,0,value);
-    xfer(8'h05,32'h20000000,value);
+    xfer(8'h05,32'h60000000,value);
     xfer(8'h0f,0,value); // posted read: discard previous result
     for(k=0;k<words;k=k+1)begin
       if(k==words-1)xfer(8'h0e,0,value);else xfer(8'h0f,0,value);
@@ -215,8 +221,8 @@ module tb_cm3_swd #(
     end
     if($test$plusargs("sampler"))begin
       wr(7'h60,2);wr(7'h78,$rtoi(500000000.0/half_ns));wr(7'h70,240);
-      wr(7'h68,0);wr(7'h6c,32'h20000000);
-      wr(7'h68,1);wr(7'h6c,32'h20000004);
+      wr(7'h68,0);wr(7'h6c,32'h60000000);
+      wr(7'h68,1);wr(7'h6c,32'h60000004);
       wr(7'h60,32'h201);
       // Competing packet/single launches must not disturb the sample owner.
       wr(7'h40,1);wr(0,32'h0203);
@@ -230,7 +236,7 @@ module tb_cm3_swd #(
         rd(7'h74,value);if(value!==(32'h5a89cdef^32'h9e3779b9))$fatal(1,"sampler word1 %h",value);
       end
       rd(7'h64,value);if(value[31:16]!=0)$fatal(1,"sampler FIFO drain %h",value);
-      xfer(8'h08,0,value);xfer(8'h05,32'h20000000,value);
+      xfer(8'h08,0,value);xfer(8'h05,32'h60000000,value);
       xfer(8'h0f,0,value);xfer(8'h0e,0,value);
       if(value!==32'h5a89cdef)$fatal(1,"DAP after sampler %h",value);
       $display("SAMPLER_PASS actual CortexM0 MEM-AP, FIFO, competing launches, DAP recovery");
@@ -241,7 +247,7 @@ module tb_cm3_swd #(
       stream_cfg(2,240);stream_cfg(5,1);
       for(k=0;k<4;k=k+1)stream_cfg(16+k,k);
       wr(7'h60,2);wr(7'h78,$rtoi(500000000.0/half_ns));wr(7'h70,240);
-      wr(7'h68,0);wr(7'h6c,32'h20000000);
+      wr(7'h68,0);wr(7'h6c,32'h60000000);
       stream_write(0,1);wr(7'h60,257);
       // Stop at a completed sample, then flush the posted read and packet.
       wait(dut.u_probe_stream.produced>=3);
@@ -259,12 +265,12 @@ module tb_cm3_swd #(
       $display("HSS_PASS real CortexM0 sampler, posted flush, packet BRAM payload");
       // Descriptor crosses a 1 KiB AP boundary; payload is unaligned.
       xfer(8'h01,32'h23000012,value);
-      memory_write(32'h200003fc,32'h20000501);
-      memory_write(32'h20000400,64);
-      memory_write(32'h20000404,13);
-      memory_write(32'h20000408,0);
-      for(k=0;k<4;k=k+1)memory_write(32'h20000500+4*k,32'h03020100+k*32'h04040404);
-      stream_write(32,32'h200003f8);stream_write(36,32'h20000501);
+      memory_write(32'h600003fc,32'h60000501);
+      memory_write(32'h60000400,64);
+      memory_write(32'h60000404,13);
+      memory_write(32'h60000408,0);
+      for(k=0;k<4;k=k+1)memory_write(32'h60000500+4*k,32'h03020100+k*32'h04040404);
+      stream_write(32,32'h600003f8);stream_write(36,32'h60000501);
       stream_write(40,64);stream_write(44,0);stream_write(48,13);
       stream_write(0,2);stream_wait(stream_status);
       if(stream_status[11:0]!=13)$fatal(1,"RTT length %h",stream_status);
@@ -286,8 +292,8 @@ module tb_cm3_swd #(
         @(negedge clk);stream_limit=stream_limit+1;
       end
       if(target.u_sys.mem['h408/4]!=13)begin
-        $display("DBG writes=%0d dout=%h mem408=%h tail=%b rtt_active=%b up_addr=%h",
-                 target.u_sys.dbg_writes,target.u_sys.dbg_dout,target.u_sys.mem['h408/4],
+        $display("DBG writes=%0d dout=%h mem408=%h code408=%h sys0=%h code0=%h tail=%b rtt_active=%b up_addr=%h",
+                 target.u_sys.dbg_writes,target.u_sys.dbg_dout,target.u_sys.mem['h408/4],target.u_code.mem['h408/4],target.u_sys.mem[0],target.u_code.mem[0],
                  dut.u_probe_stream.tail,dut.rtt_active,dut.u_probe_stream.up_addr);
         $fatal(1,"RTT RdOff commit %h",target.u_sys.mem['h408/4]);
       end

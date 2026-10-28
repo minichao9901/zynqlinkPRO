@@ -135,7 +135,7 @@ module cm3_target #(
         .dbg_dout(sys_dout), .dbg_writes(sys_writes)
     );
 
-    axi3_sram #(.WORDS(WORDS), .ADDR_BITS(ADDR_BITS)) u_code (
+    axi3_sram #(.WORDS(WORDS), .ADDR_BITS(ADDR_BITS), .NAME("CODE")) u_code (
         .clk(clk), .rst_n(rst_n),
         .awaddr(c_awaddr), .awlen(c_awlen), .awsize(c_awsize), .awburst(c_awburst),
         .awvalid(c_awvalid), .awready(c_awready),

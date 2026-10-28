@@ -4,7 +4,8 @@
 // asynchronous from the array so the core sees data in the same cycle.
 module axi3_sram #(
     parameter integer WORDS = 4096,
-    parameter integer ADDR_BITS = 12
+    parameter integer ADDR_BITS = 12,
+    parameter         NAME = "SYS"
 ) (
     input  wire        clk,
     input  wire        rst_n,
@@ -51,6 +52,7 @@ module axi3_sram #(
         dbg_writes = 16'd0;
     end
 
+    reg [31:0] aw_addr_r;
     reg [ADDR_BITS-1:0] wr_ptr;
     reg [ADDR_BITS-1:0] rd_ptr;
     reg [3:0]           rd_left;     // beats still to return after the current one
@@ -80,6 +82,7 @@ module axi3_sram #(
             if (awready && awvalid) begin
                 awready <= 1'b0;
                 wready  <= 1'b1;
+                aw_addr_r <= awaddr;
                 wr_ptr  <= aw_word;
                 wr_open <= 1'b1;
             end
@@ -88,7 +91,7 @@ module axi3_sram #(
                 if (wstrb[1]) mem[wr_ptr][15:8]  <= wdata[15:8];
                 if (wstrb[2]) mem[wr_ptr][23:16] <= wdata[23:16];
                 if (wstrb[3]) mem[wr_ptr][31:24] <= wdata[31:24];
-                if (dbg_trace) $display("AXIWR addr=%08h data=%08h strb=%b", {aw_word, 2'b00}, wdata, wstrb);
+                if (dbg_trace) $display("AXIWR %s addr=%08h idx=%0h data=%08h strb=%b", NAME, aw_addr_r, wr_ptr, wdata, wstrb);
                 dbg_writes <= dbg_writes + 16'd1;
                 wr_ptr     <= wr_ptr + 1'b1;
                 if (wlast) begin
@@ -109,6 +112,7 @@ module axi3_sram #(
                 rd_ptr  <= ar_word;
                 rd_left <= arlen;
                 rlast   <= (arlen == 4'd0);
+                if (dbg_trace) $display("AXIRD %s addr=%08h len=%0d idx=%0h", NAME, araddr, arlen, ar_word);
             end
             if (rvalid && rready) begin
                 if (rlast) begin
