@@ -258,3 +258,17 @@ python tools/run_xsct.py tools/download_dap_fpga.tcl <ZYNQ_ELF> <BITSTREAM>
 切换worktree不会切换板上固件。上一轮本聊天最后显式加载的是JTAG快照，但随后存在其他低频工作记录，**本文没有查询当前板状态，不能保证此刻板上仍是哪一版**。共享硬件测试前先确认占用，尤其不要在其他会话运行时重配FPGA。
 
 本轮仅整理文档和既有证据，不新增性能承诺；没有push、执行功能merge或恢复暂停任务。
+
+## 11. 追加：worktree 清理（2026-10-28 10:50 后）
+
+低频选择性合并进 main（`bf80287`、`cc58387`）之后，删除了以下 worktree，**分支一个都没删**：
+
+| 已删 worktree | 分支 | 说明 |
+| --- | --- | --- |
+| `C:/Users/Administrator/.codex/worktrees/main-lowfreq-sample/zynqlinkPRO` | `codex/main-lowfreq-sample` 9fdb1f5 | 已合入通用部分；未合的 xdc、trace_raw、30/45 分档、测量 JSON、checkpoint prebuilt 仍在分支上 |
+| `C:/Users/Administrator/.codex/worktrees/swd-timing-generator/zynqlinkPRO` | `codex/swd-timing-generator` 1b55cf8 | 同点有 tag `swd-timing-generator-rx-events-20261028` |
+| `E:/zynqlinkPRO_idelay` | `feature/swdio-idelay` 3013a5f | `origin` 有同名分支；删除前停掉了从该目录启动、已空转一天多的 `hw_server.exe`（PID 22792），需要时由 xsct/Vivado 重新拉起 |
+
+保留：`probe-rtt-hss/zynqlinkPRO`（`codex/probe-jtag`，下一步合并对象）、`probe-rtt-hss/zynqlink-baseline`（detached 902e228，仅一个未跟踪脚本待处理）、`E:/zynqlinkPRO_batch`（分支已进 main，7 个未提交改动待决断）、`E:/zynqlinkPRO_hflink`（未合且工作区脏）。
+
+lowfreq 的目录已清空（0 文件），但空目录被一个运行中的 Codex 进程占用，删不掉；Codex 退出或重开后即可移除，git 侧已无登记。
