@@ -207,6 +207,7 @@ module swd_controller #(
     reg [3:0] trace_head,trace_index;
     reg [15:0] trace_count;
     reg trace_frozen;
+    reg trace_raw_mode,trace_raw_armed,trace_raw_active,trace_previous_t;
     wire trace_clear = s_axi_wvalid && s_axi_wready &&
                        write_addr == ADDR_TRACE_CTRL && s_axi_wdata[0];
     // Out-of-band forensic history; freeze on an invalid ACK/parity failure.
@@ -214,8 +215,24 @@ module swd_controller #(
     always @(posedge clk or negedge rst_n) begin
         if(!rst_n) begin
             trace_head<=0;trace_count<=0;trace_frozen<=0;
+            trace_raw_mode<=0;trace_raw_armed<=0;trace_raw_active<=0;trace_previous_t<=0;
         end else begin
-            if(trace_clear) begin trace_head<=0;trace_count<=0;trace_frozen<=0;end
+            trace_previous_t<=swdio_t;
+            if(trace_clear) begin
+                trace_head<=0;trace_count<=0;trace_frozen<=0;
+                trace_raw_mode<=s_axi_wdata[1];trace_raw_armed<=s_axi_wdata[1];trace_raw_active<=0;
+            end else if(trace_raw_mode)begin
+                // Passive SWD receive history: first 16 FCLK samples from
+                // SWDIO release. Keep the existing JTAG history independent.
+                if(!jtag_enabled && ((trace_raw_armed && swdio_t && !trace_previous_t) || trace_raw_active))begin
+                    transfer_trace[trace_head]<={4'ha,trace_head,core_req_sel,3'd0,cfg_rx_boundary,cfg_sample_rise,
+                        core_result_valid,core_parity_err,core_ack,swdio_t,swdio_o,core_swclk,
+                        swdio_i_raw,swdio_i_rise_raw,swdio_i_fall_raw};
+                    trace_head<=trace_head+1'b1;trace_count<=trace_count+1'b1;
+                    trace_raw_armed<=0;trace_raw_active<=1;
+                    if(trace_head==15)begin trace_raw_active<=0;trace_frozen<=1;end
+                end
+            end
             else if(core_result_valid && !trace_frozen) begin
                 transfer_trace[trace_head]<={trace_count,core_req_sel,4'd0,core_parity_err,core_ack};
                 trace_head<=trace_head+1'b1;trace_count<=trace_count+1'b1;
@@ -568,7 +585,7 @@ module swd_controller #(
                     end
                     ADDR_FEATURES: rdata_reg <= 32'h4450_000f;
                     ADDR_ENGINE_RESET: rdata_reg <= engine_reset_count;
-                    ADDR_TRACE_CTRL: rdata_reg <= {trace_frozen,11'd0,trace_count,trace_head};
+                    ADDR_TRACE_CTRL: rdata_reg <= {trace_frozen,trace_raw_mode,trace_raw_active,trace_raw_armed,8'd0,trace_count,trace_head};
                     ADDR_TRACE_INDEX: rdata_reg <= {28'd0,trace_index};
                     ADDR_TRACE_DATA: rdata_reg <= transfer_trace[trace_index];
                     ADDR_STATUS: begin

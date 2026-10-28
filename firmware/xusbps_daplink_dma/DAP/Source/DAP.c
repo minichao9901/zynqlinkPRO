@@ -463,13 +463,18 @@ static uint32_t DAP_SWJ_Clock(const uint8_t *request, uint8_t *response) {
   /* FCLK runs at 2x SWCLK, so the transfer half-cycle must be one FCLK
    * cycle (delay_fast=0).  The RTL reset value is slow; program it here.
    * Pick the capture phase from the realizable PLL rate, not the requested
-   * one: different requests can select the same divisor pair. The RX
-   * boundary (bit 18) stays at its legacy default here; the short boundary
-   * is a board profile that needs its own regression and is enabled only
-   * through the diagnostic vendor command. */
+   * one: different requests can select the same divisor pair. At short
+   * return delays the legacy ACK/data pipeline is one SWCLK bit late.
+   * Select the validated F103 receive window using the actual PLL rate;
+   * JTAG has its own IDDR calibration and retains its existing setting. */
+  uint32_t receive_profile = (link_clock_hz <= 35000000U) ? (1U << 17) : 0U;
+  if (DAP_Data.debug_port == DAP_PORT_SWD) {
+    receive_profile = link_clock_hz <= 30000000U ? (1U << 18) :
+                      link_clock_hz <= 45000000U ? (1U << 17) : 0U;
+  }
   swd_write32(SWD_CFG, (swd_read32(SWD_CFG) &
                         ~((0xFU << 13) | (1U << 17) | (1U << 18))) |
-              ((link_clock_hz <= 35000000U) ? (1U << 17) : 0U));
+              receive_profile);
   Set_Clock_Delay(clock);
   if(DAP_Data.debug_port==DAP_PORT_JTAG) DAP_JTAG_ClockChanged();
 

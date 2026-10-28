@@ -200,7 +200,25 @@ module tb_cm3_swd #(
     swj(16,256'he79e);
     swj(64,256'hffffffffffffffff);
     swj(8,0);
-    xfer(8'h02,0,value);
+    if($test$plusargs("rx_trace"))begin
+      wr(7'h54,3);raw(8'h02,0,error_ack,value);
+      rd(7'h54,stream_status);
+      if(!stream_status[31] || !stream_status[30] || stream_status[19:4]!=16)
+        $fatal(1,"SWD raw trace did not capture 16 samples: %h",stream_status);
+      for(k=0;k<16;k=k+1)begin
+        wr(7'h58,k);rd(7'h5c,stream_header);
+        if(stream_header[31:28]!=4'ha || stream_header[27:24]!=k || stream_header[23:16]!=2)
+          $fatal(1,"SWD raw trace identity %h",stream_header);
+        $display("SWD_RX_TRACE index=%0d raw=%08h",k,stream_header);
+      end
+      if($test$plusargs("rx_trace_only"))begin
+        if($test$plusargs("expect_bad_ack") && error_ack==1)$fatal(1,"legacy ACK error not reproduced");
+        if(!$test$plusargs("expect_bad_ack") && (error_ack!=1 || value!==32'h2ba01477))
+          $fatal(1,"short-boundary DPIDR failed ACK=%h data=%h",error_ack,value);
+        $display("PASS SWD raw trace capture ACK=%h data=%h",error_ack,value);$finish;
+      end
+      if(error_ack!=1)$fatal(1,"DPIDR ACK=%h",error_ack);
+    end else xfer(8'h02,0,value);
     if(value!==32'h2ba01477)$fatal(1,"DPIDR %h",value);
     xfer(8'h00,32'h1e,value);
     xfer(8'h04,32'h50000000,value);

@@ -15,7 +15,10 @@ set_property -dict {PACKAGE_PIN E19 IOSTANDARD LVCMOS33} [get_ports {gpio_rtl_0_
 set_property -dict {PACKAGE_PIN E18 IOSTANDARD LVCMOS33} [get_ports {gpio_rtl_0_tri_io[3]}]
 
 # SWD interface
-set_property -dict {PACKAGE_PIN D20 IOSTANDARD LVCMOS33 SLEW FAST DRIVE 8} [get_ports swclk_0]
+# Short receive boundary fixes the digital bit alignment. Slow/4mA SWCLK
+# separately avoids the low-frequency failures observed with FAST/8mA on
+# this F103/Dupont link. TCK shares this output, so regress JTAG as well.
+set_property -dict {PACKAGE_PIN D20 IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 4} [get_ports swclk_0]
 set_property PACKAGE_PIN D19 [get_ports swdio_0]
 set_property IOSTANDARD LVCMOS33 [get_ports swdio_0]
 set_property PULLUP true [get_ports swdio_0]
