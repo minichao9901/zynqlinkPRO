@@ -1,0 +1,59 @@
+{
+  "kind": "diagnostic only; existing JTAG write corruption not fixed",
+  "source_commit": "6b14b58",
+  "build_options": {
+    "fpga": "python tools/run_vivado.py -mode batch -source fpga/build_dma.tcl",
+    "firmware": {
+      "opt": "3",
+      "project": "xusbps_daplink_dma",
+      "trace": false,
+      "usb_trace": false,
+      "experimental_zero_idle": false,
+      "max_swclk_hz": 60000000,
+      "bsp": null,
+      "gcc": "E:\\Xilinx\\SDK\\2018.3\\gnu\\aarch32\\nt\\gcc-arm-none-eabi\\bin\\arm-none-eabi-gcc.exe"
+    }
+  },
+  "source_rtl_sha256": {
+    "dap_transfer_block_engine.v": "85d03fa03966ecf2ae8599ba49ce21699060ab7bcdb27fc69f772bd492eed319",
+    "jtag_core.v": "71e16e14be4dd55aa220a6f31d34487dfa02546ad9152bc7c758f3f3d8b52403",
+    "jtag_shift.v": "5660cec2fd287cdaa9632fae53a915ab28179e6439f79b95367defb0d0970e9a",
+    "probe_rtt_engine.v": "10136ba15bbf387677053d95226703ac7563998843c0fc55d8082eee40f60bea",
+    "probe_sample_engine.v": "d4f152a6820b046911c78fc0ee6287665f761430413c990895b9a24611a5aa28",
+    "probe_stream_engine.v": "5cc6d298208a8fbda422d18b2b6ba7bf8df3419fc51a45dc0deec5b91a6b066a",
+    "swd_batch_engine.v": "2147786073a8ed8aa4a66c0c6c16a4e7ba34e222789af20cd84e24b74df70c41",
+    "swd_controller.v": "79019d56d0917c75fa7d95b9a7c72bc7aa19f23157dec8577d0c875510779f07",
+    "swd_core.v": "9e6fa90077a00ac3d6c4065d9be643038e67e65c1445f68d6a0bf3b04ee0c3ed"
+  },
+  "timing": {
+    "FCLK_max_Hz": 120000000,
+    "SWCLK_max_Hz": 60000000,
+    "setup_slack_ns": 0.145,
+    "hold_slack_ns": 0.044
+  },
+  "artifacts": {
+    "zynqlink_jtag_trace.bit": "a2ac59a0e5c7610397091bc0d8f10a6e4be027b3156273168201f69bc1157067",
+    "zynqlink_jtag_trace.elf": "432a66c9f962681d2f8cc84e5b8c38f10790d9169c4ab401b7fe352dd0d2d955"
+  },
+  "load_command": "python tools/run_xsct.py tools/download_dap_fpga.tcl prebuilt/20261028_jtag_internal_trace/zynqlink_jtag_trace.elf prebuilt/20261028_jtag_internal_trace/zynqlink_jtag_trace.bit",
+  "board": {
+    "trace_capture_verified": true,
+    "bug_fixed": false,
+    "actual_fclk_hz": 99999999,
+    "actual_tck_hz": 49999999,
+    "timing_mode": 17,
+    "4word_scans": 10,
+    "8word_scans": 18,
+    "tx_or_pad_mismatches": 0,
+    "write_corruption_reproduced": true,
+    "restore_match": true
+  },
+  "evidence_sha256": {
+    "board_50.json": "ba886ba76b2df3841edeb21beb3e2e39494ace4903e7b392af1b0e5fca1205d6",
+    "board_50_trace_4.json": "02868b124670a622b0bfafd57305e856f0194fba5d94de3e69caddf9d376d748",
+    "board_50_trace_4.txt": "ffec121158be7caf19c774966202ad99359ad15f96adca010bd91b93985b042e",
+    "board_50_trace_8.json": "48ab5831fb86d1f17ba381dd5f82d562d5fd9a91d931cdb88b2bae3842423ff5",
+    "board_50_trace_8.txt": "7cae585a6414d81b03a9c8952bf50532a6fa378db148d3a85b459378d43a2270",
+    "cm3_full_pipeline.log": "00778881876e99968b26bbc6c2ef061270d4a40f09e1f2facf9f0531148ec0cc"
+  }
+}

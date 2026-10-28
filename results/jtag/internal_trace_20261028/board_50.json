@@ -1,0 +1,93 @@
+{
+  "requested_khz": 50000,
+  "base": "0x20004000",
+  "pattern_seed": null,
+  "rows": [
+    {
+      "method": "scalar",
+      "count": 4,
+      "bad": []
+    },
+    {
+      "method": "block",
+      "count": 4,
+      "bad": [
+        {
+          "index": 1,
+          "got": "0x91150100",
+          "want": "0x91950101"
+        },
+        {
+          "index": 2,
+          "got": "0x91150202",
+          "want": "0x91950202"
+        },
+        {
+          "index": 3,
+          "got": "0x91150302",
+          "want": "0x91950303"
+        }
+      ],
+      "trace": "build\\jtag_internal_trace\\board_50_trace_4.json",
+      "trace_scans": 10,
+      "tx_mismatch_scans": [],
+      "pad_mismatch_scans": []
+    },
+    {
+      "method": "scalar",
+      "count": 8,
+      "bad": []
+    },
+    {
+      "method": "block",
+      "count": 8,
+      "bad": [
+        {
+          "index": 1,
+          "got": "0x91910101",
+          "want": "0x91990101"
+        },
+        {
+          "index": 2,
+          "got": "0x91910200",
+          "want": "0x91990202"
+        },
+        {
+          "index": 3,
+          "got": "0x91910101",
+          "want": "0x91990303"
+        },
+        {
+          "index": 4,
+          "got": "0x91910404",
+          "want": "0x91990404"
+        },
+        {
+          "index": 5,
+          "got": "0x91910505",
+          "want": "0x91990505"
+        },
+        {
+          "index": 6,
+          "got": "0x91910604",
+          "want": "0x91990606"
+        },
+        {
+          "index": 7,
+          "got": "0x91910505",
+          "want": "0x91990707"
+        }
+      ],
+      "trace": "build\\jtag_internal_trace\\board_50_trace_8.json",
+      "trace_scans": 18,
+      "tx_mismatch_scans": [],
+      "pad_mismatch_scans": []
+    }
+  ],
+  "backup_transport": "swd",
+  "fclk_hz": 99999999,
+  "tck_hz": 49999999,
+  "half_delay": 0,
+  "timing": "89 00 11 ca 32 00 00 ba 14 00 00 15 01 00 00",
+  "restore_match": true
+}
