@@ -15,10 +15,11 @@ set_property -dict {PACKAGE_PIN E19 IOSTANDARD LVCMOS33} [get_ports {gpio_rtl_0_
 set_property -dict {PACKAGE_PIN E18 IOSTANDARD LVCMOS33} [get_ports {gpio_rtl_0_tri_io[3]}]
 
 # SWD interface
-# Board profile under acceptance: same-route GPIO A/B changes only DRIVE.
-# SLOW/4mA reproduces ACK5/data FE3F019F; SLOW/16mA restores DPIDR/parity.
-# The shared TCK output requires a separate JTAG regression.
-set_property -dict {PACKAGE_PIN D20 IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 16} [get_ports swclk_0]
+# SLOW/4 retains high-speed SRAM acceptance with the clock-pad observer.
+# The independent GPIO fixture benefits from DRIVE16, but the main probe's
+# DRIVE16 variant failed a block read. Low-frequency SWD remains unfixed.
+# The shared TCK output still requires a separate JTAG regression.
+set_property -dict {PACKAGE_PIN D20 IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 4} [get_ports swclk_0]
 set_property PACKAGE_PIN D19 [get_ports swdio_0]
 set_property IOSTANDARD LVCMOS33 [get_ports swdio_0]
 set_property PULLUP true [get_ports swdio_0]

@@ -57,6 +57,9 @@ def main():
                 report['rows'].append(row);a.output.write_text(json.dumps(report,indent=2));print(json.dumps(row),flush=True)
         report['RCC_after']=[hex(mem.word(0x40021000)),hex(mem.word(0x40021004))]
         assert report['RCC_before']==report['RCC_after'],'Target RCC changed'
+    except Exception as exc:
+        report['fatal_error']=repr(exc)
+        raise
     finally:
         try:
             recover(dev,inp);setup(out,inp,50000)
