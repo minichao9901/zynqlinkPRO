@@ -272,3 +272,15 @@ python tools/run_xsct.py tools/download_dap_fpga.tcl <ZYNQ_ELF> <BITSTREAM>
 保留：`probe-rtt-hss/zynqlinkPRO`（`codex/probe-jtag`，下一步合并对象）、`probe-rtt-hss/zynqlink-baseline`（detached 902e228，仅一个未跟踪脚本待处理）、`E:/zynqlinkPRO_batch`（分支已进 main，7 个未提交改动待决断）、`E:/zynqlinkPRO_hflink`（未合且工作区脏）。
 
 lowfreq 的目录已清空（0 文件），但空目录被一个运行中的 Codex 进程占用，删不掉；Codex 退出或重开后即可移除，git 侧已无登记。
+
+## 12. 追加：JTAG base 合入 main（2026-10-28 11:00 后）
+
+`902e228`（tag `probe-jtag-baseline-20261027`）已作为合并提交进入 main，main 现在同时具备 SWD 与 JTAG 两套接口（`DAP_JTAG=1`、`FEATURES=0x4450_000F`）。细节见 [JTAG基础后端-合并-20261028.md](JTAG基础后端-合并-20261028.md)。
+
+要点：
+
+- 只合了 base 后端 + 整数分频 PHY + IDDR 相位闭环；Q16 发生器、链式校准、32 MHz 上限、粗采样 offset 仍在 `codex/probe-jtag`。
+- vendor `0x89` 冲突：0x89 归 JTAG 时序/scan 统计，SWD 接收边界命令移到 `0x8A`。
+- AXI 地址宽度 7→8 位，JTAG 寄存器在 `0x80..0xC8`。
+- 本文第 2 节表里 “main 未合 JTAG 后端” 一句自本条起作废；`codex/probe-jtag` 的 `main_only/branch_only` 也随之变化。
+- 仍未综合、未上板；`prebuilt/` 不含 JTAG 配对。

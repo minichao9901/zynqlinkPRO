@@ -1,9 +1,29 @@
 set root [file normalize [file join [file dirname [info script]] ..]]
 set out [file join $root build fpga_dma_global]
 open_checkpoint [file join $out zynqlink_dma.runs impl_1 system_wrapper_routed.dcp]
+# A forward reference inside a generate block can become an undriven local
+# net in Vivado 2018.3, silently tying every GPIO IOBUF's T pin high. Reject
+# that netlist even if internal STA passes; the two-wire loopback caught it.
+foreach pad [get_cells -hier -filter {REF_NAME == IOBUF && NAME =~ *g_aux*}] {
+    set tpin [get_pins -of_objects $pad -filter {REF_PIN_NAME == T}]
+    set tnet [get_nets -of_objects $tpin]
+    set driver [get_cells -of_objects [get_pins -of_objects $tnet -filter {DIRECTION == OUT}]]
+    if {[llength [filter $driver {REF_NAME == VCC || REF_NAME == GND}]]} {
+        error "GPIO pad output-enable is constant: $pad ($tnet)"
+    }
+}
 set packet_bram [get_cells -hier -filter {REF_NAME =~ RAMB* && NAME =~ *u_packet_bram*}]
 if {[llength $packet_bram] < 4} {error "PL packet banks did not implement in block RAM"}
 puts "PACKET_BRAM_VERIFIED count=[llength $packet_bram]"
+set tdo_ddr [get_cells -hier -filter {REF_NAME == IDDR && NAME =~ *u_tdo_iddr}]
+if {[llength $tdo_ddr] != 1} {error "JTAG TDO IDDR missing from implemented design"}
+foreach phase {Q1 Q2} {
+    set net [get_nets -of_objects [get_pins $tdo_ddr/$phase]]
+    if {![llength [get_pins -of_objects $net -filter {DIRECTION == IN}]]} {
+        error "JTAG TDO IDDR $phase was optimized out or bypassed"
+    }
+}
+puts "JTAG_TDO_IDDR_VERIFIED LOC=[get_property LOC $tdo_ddr] phases=Q1,Q2"
 # Evaluate realizable PLL divisors on this routed netlist, without rebuilding
 # it for each frequency. Keep the highest rate that meets BOTH setup and hold.
 set verified_fclk 0

@@ -65,20 +65,32 @@ def cmd(out, inp, payload):
     return r
 
 
-def setup(out, inp, speed_khz):
+def setup(out, inp, speed_khz, transport='swd', jtag_ir_lengths=(4, 5)):
     drain(inp)
-    cmd(out, inp, [0x02, 0x01])
+    port = 2 if transport == 'jtag' else 1
+    r = cmd(out, inp, [0x02, port])
+    if r[1] != port:
+        raise RuntimeError('Requested debug transport unavailable: '+r.hex(' '))
     cmd(out, inp, [0x11] + le(speed_khz * 1000))
     cmd(out, inp, [0x13, 0x00])
-    cmd(out, inp, [0x12, 152] + [0xFF] * 8 + [0x9E, 0xE7] + [0xFF] * 8 + [0x00])
+    if transport == 'jtag':
+        # ARM SWJ switch to JTAG, TAP reset, then Run-Test/Idle.
+        cmd(out, inp, [0x12, 88] + [0xFF]*8 + [0x3C, 0xE7, 0x1F])
+        # F103CB has an ARM DAP (IR4) plus its boundary TAP (IR5).
+        cmd(out, inp, [0x15, len(jtag_ir_lengths), *jtag_ir_lengths])
+    else:
+        cmd(out, inp, [0x12, 152] + [0xFF] * 8 + [0x9E, 0xE7] + [0xFF] * 8 + [0x00])
     cmd(out, inp, [0x04, 0x00, 0x40, 0x00, 0x00, 0x00])
-    r = cmd(out, inp, [0x05, 0x00, 0x01, 0x02])
-    if len(r) < 7 or r[2] != 0x01:
+    r = cmd(out, inp, [0x16, 0]) if transport == 'jtag' else cmd(out, inp, [0x05, 0x00, 0x01, 0x02])
+    if (len(r) < (6 if transport == 'jtag' else 7) or
+            r[1 if transport == 'jtag' else 2] != (0 if transport == 'jtag' else 1)):
         raise RuntimeError("IDCODE read failed: %s" % r.hex(" "))
+    if transport=='jtag' and int.from_bytes(r[2:6],'little')&0x0fff0fff!=0x0ba00477:
+        raise RuntimeError('Invalid ARM JTAG IDCODE: '+r.hex(' '))
     # A previous failed experiment can leave sticky MEM-AP errors. A line
     # reset restores framing but does not clear those flags.
     cmd(out, inp, [0x05, 0x00, 0x01, 0x00] + le(0x1E))
-    cmd(out, inp, [0x05, 0x00, 0x01, 0x04] + le(0x50000000))
+    cmd(out, inp, [0x05, 0x00, 0x01, 0x04] + le(0x50000032 if transport=='jtag' else 0x50000000))
     cmd(out, inp, [0x05, 0x00, 0x01, 0x08] + le(0x00000000))
     cmd(out, inp, [0x05, 0x00, 0x01, 0x01] + le(0x23000052))
     cmd(out, inp, [0x05, 0x00, 0x01, 0x05] + le(0x20000000))

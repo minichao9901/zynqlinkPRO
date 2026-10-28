@@ -60,6 +60,7 @@ static volatile uint32_t rx_in, rx_out, epoch;
 static volatile uint8_t configured, reset_pending;
 static uint32_t current_epoch;
 static uint8_t stopping;
+static uint8_t hss_fault_handled;
 static uint8_t mode; // 0 stopped, 1 RTT, 2 HSS
 static int8_t result;
 static uint32_t requested_hz = 50000000, actual_hz;
@@ -400,19 +401,22 @@ void probe_before_dap(void) {
 }
 void probe_after_dap(void) {
     if(pl_packets && mode==1 && rtt_pl_running && !stopping && probe_session_live()) {
-        if(probe_target_claim(requested_hz)) { mode=0;result=-4; }
-        else if(discard || usbd_cdc_acm_get_dtr()) { PW(0,2);rtt_paused=0; }
+        int rc=probe_target_claim(requested_hz);
+        if(rc && rc!=-7) { mode=0;result=-4; }
+        else if(!rc && (discard || usbd_cdc_acm_get_dtr())) { PW(0,2);rtt_paused=0; }
     }
-    if (mode == 2 && !stopping && probe_session_live() && sampler_arm()) {
-        mode = 0;
-        result = -4;
-        swd_errors++;
+    if (mode == 2 && !stopping && probe_session_live()) {
+        int rc=sampler_arm();
+        if(rc && rc!=-7) { mode=0;result=-4;swd_errors++; }
     }
 }
 static void hss_poll(void) {
     if(pl_packets) {
         packet_poll();produced=PR(4);seq=PR(5);
-        if(R(1)&16) { result=-4;swd_errors++;sampler_stop(); }
+        if(((R(1)&16) || (PR(1)&0x40U)) && !hss_fault_handled) {
+            hss_fault_handled=1;result=-4;swd_errors++;sampler_stop();
+            skipped_base+=R(7);W(0,2);stopping=1;
+        }
         return;
     }
     // The RTL fixed-address pipe can publish much faster than the old
@@ -550,7 +554,10 @@ static void rtt_poll(void) {
             if(dma_pending) packet_poll();
             return;
         }
-        if(!stopping && rtt_paused) { PW(0,2);rtt_paused=0; }
+        if(!stopping && rtt_paused) {
+            if(!probe_target_claimed() && probe_target_claim(requested_hz)) return;
+            PW(0,2);rtt_paused=0;
+        }
         packet_poll();polls=PR(13);
         if((PR(1)&0x80U) && !dma_pending && !(PR(2)&0xfffU)) {
             PW(0,0);result=-4;swd_errors++;rtt_pl_running=0;cb=up=0;
@@ -781,7 +788,8 @@ static void control(const uint8_t *req, uint8_t *res) {
         return;
     }
     if (cmd == 0x10 || cmd == 0x11 || cmd == 0x13) {
-        const char *s = cmd == 0x10 ? "ZynqLinkPro" : cmd == 0x11 ? "12345678" : (pl_packets ? "0.3-dma" : "0.2");
+        const char *s = cmd == 0x10 ? "ZynqLinkPro" : cmd == 0x11 ? "12345678" :
+            (Xil_In32(0x4001004c)&8U) ? "0.4-jtag" : (pl_packets ? "0.3-dma" : "0.2");
         size_t n = strlen(s);
         memcpy(res + 3, s, n);
         res[1] = (uint8_t)(1 + n);
@@ -859,6 +867,7 @@ static void control(const uint8_t *req, uint8_t *res) {
             produced = seq = formatted = fill_count = skipped_base = yields = swd_errors = 0;
             tx_done_base = hss.completed;
             have_stamp = 0;
+            hss_fault_handled=0;
             rc = sampler_arm();
             if (!rc) {
                 mode = 2;
@@ -891,6 +900,9 @@ static void control(const uint8_t *req, uint8_t *res) {
     case 11:
         if (cmd != 0x32)
             rc = -9;
+        break;
+    case 12:
+        rc=req[1]<3 ? -6 : mode ? -7 : probe_target_transport(req[4]);
         break;
     default:
         rc = -9;

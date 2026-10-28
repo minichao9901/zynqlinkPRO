@@ -75,7 +75,8 @@ This information includes:
 
 /// Indicate that JTAG communication mode is available at the Debug Port.
 /// This information is returned by the command \ref DAP_Info as part of <b>Capabilities</b>.
-#define DAP_JTAG                0               ///< JTAG Mode: 1 = available, 0 = not available.
+#define DAP_JTAG                1               ///< JTAG Mode: 1 = available, 0 = not available.
+#define DAP_JTAG_RTL            1
 
 /// Configure maximum number of JTAG devices on the scan chain connected to the Debug Access Port.
 /// This setting impacts the RAM requirements of the Debug Unit. Valid range is 1 .. 255.
@@ -442,9 +443,16 @@ P0: SWCLK/TCK  - Output, idle HIGH
 P1: SWDIO/TMS  - Bidirectional
 P2: nRESET     - Output, active LOW
 */
+#include "jtag_rtl.h"
 
 __STATIC_INLINE void PORT_JTAG_SETUP (void) {
-  ;
+  Xil_Out32(GPIO_DATA,0xcU);
+  Xil_Out32(GPIO_TRI,0xbU); // TDI/TDO belong to PL; nRESET released, nTRST high-Z.
+  swd_write32(JTAG_ROUTE,3);
+  swd_write32(JTAG_OPERATION,0);
+  swd_write32(JTAG_TIMING,0);DAP_JTAG_ClockChanged();
+  swd_write32(SWD_CFG,(1U<<0)|(1U<<4));
+  ps_set_fclk0_hz(100000000U);
 }
 
 /** Setup SWD I/O pins: SWCLK, SWDIO, and nRESET.
@@ -453,8 +461,9 @@ Configures the DAP Hardware I/O pins for Serial Wire Debug (SWD) mode:
  - TDI, nTRST to HighZ mode (pins are unused in SWD mode).
 */
 __STATIC_INLINE void PORT_SWD_SETUP (void) {
-  Xil_Out32(GPIO_TRI, 0x0U);
+  Xil_Out32(GPIO_TRI, 0xbU);
   Xil_Out32(GPIO_DATA, 0x5U);
+  swd_write32(JTAG_ROUTE,2);
 
 
 
@@ -491,7 +500,8 @@ Disables the DAP Hardware I/O pins which configures:
 */
 __STATIC_INLINE void PORT_OFF (void) {
   Xil_Out32(GPIO_DATA, 0x5U);
-  Xil_Out32(GPIO_TRI, 0x7U);
+  Xil_Out32(GPIO_TRI, 0xfU);
+  swd_write32(JTAG_ROUTE,0);
 }
 
 
@@ -501,21 +511,21 @@ __STATIC_INLINE void PORT_OFF (void) {
 \return Current status of the SWCLK/TCK DAP hardware I/O pin.
 */
 __STATIC_FORCEINLINE uint32_t PIN_SWCLK_TCK_IN  (void) {
-  return (Xil_In32(GPIO_DATA) & 0x1U);
+  return swd_read32(JTAG_PINS)&1U;
 }
 
 /** SWCLK/TCK I/O pin: Set Output to High.
 Set the SWCLK/TCK DAP hardware I/O pin to high level.
 */
 __STATIC_FORCEINLINE void     PIN_SWCLK_TCK_SET (void) {
-  Xil_Out32(GPIO_DATA, Xil_In32(GPIO_DATA) | 0x1U);
+  swd_write32(JTAG_PINS,swd_read32(JTAG_PINS)|0x101U);
 }
 
 /** SWCLK/TCK I/O pin: Set Output to Low.
 Set the SWCLK/TCK DAP hardware I/O pin to low level.
 */
 __STATIC_FORCEINLINE void     PIN_SWCLK_TCK_CLR (void) {
-  Xil_Out32(GPIO_DATA, Xil_In32(GPIO_DATA) & ~0x1U);
+  swd_write32(JTAG_PINS,(swd_read32(JTAG_PINS)&~1U)|0x100U);
 }
 
 
@@ -525,21 +535,21 @@ __STATIC_FORCEINLINE void     PIN_SWCLK_TCK_CLR (void) {
 \return Current status of the SWDIO/TMS DAP hardware I/O pin.
 */
 __STATIC_FORCEINLINE uint32_t PIN_SWDIO_TMS_IN  (void) {
-  return (Xil_In32(GPIO_DATA) & 0x2U) >> 1U;
+  return (swd_read32(JTAG_PINS)>>1)&1U;
 }
 
 /** SWDIO/TMS I/O pin: Set Output to High.
 Set the SWDIO/TMS DAP hardware I/O pin to high level.
 */
 __STATIC_FORCEINLINE void     PIN_SWDIO_TMS_SET (void) {
-  Xil_Out32(GPIO_DATA, Xil_In32(GPIO_DATA) | 0x2U);
+  swd_write32(JTAG_PINS,swd_read32(JTAG_PINS)|0x102U);
 }
 
 /** SWDIO/TMS I/O pin: Set Output to Low.
 Set the SWDIO/TMS DAP hardware I/O pin to low level.
 */
 __STATIC_FORCEINLINE void     PIN_SWDIO_TMS_CLR (void) {
-  Xil_Out32(GPIO_DATA, Xil_In32(GPIO_DATA) & ~0x2U);
+  swd_write32(JTAG_PINS,(swd_read32(JTAG_PINS)&~2U)|0x100U);
 }
 
 /** SWDIO I/O pin: Get Input (used in SWD mode only).
@@ -586,14 +596,15 @@ __STATIC_FORCEINLINE void     PIN_SWDIO_OUT_DISABLE (void) {
 \return Current status of the TDI DAP hardware I/O pin.
 */
 __STATIC_FORCEINLINE uint32_t PIN_TDI_IN  (void) {
-  return (0U);
+  return (swd_read32(JTAG_PINS)>>2)&1U;
 }
 
 /** TDI I/O pin: Set Output.
 \param bit Output value for the TDI DAP hardware I/O pin.
 */
 __STATIC_FORCEINLINE void     PIN_TDI_OUT (uint32_t bit) {
-  ;
+  uint32_t v=swd_read32(JTAG_PINS);
+  swd_write32(JTAG_PINS,(v&~4U)|((bit&1U)<<2)|0x100U);
 }
 
 
@@ -603,7 +614,7 @@ __STATIC_FORCEINLINE void     PIN_TDI_OUT (uint32_t bit) {
 \return Current status of the TDO DAP hardware I/O pin.
 */
 __STATIC_FORCEINLINE uint32_t PIN_TDO_IN  (void) {
-  return (0U);
+  return (swd_read32(JTAG_PINS)>>3)&1U;
 }
 
 
@@ -613,7 +624,7 @@ __STATIC_FORCEINLINE uint32_t PIN_TDO_IN  (void) {
 \return Current status of the nTRST DAP hardware I/O pin.
 */
 __STATIC_FORCEINLINE uint32_t PIN_nTRST_IN   (void) {
-  return (0U);
+  return (Xil_In32(GPIO_DATA)>>3)&1U;
 }
 
 /** nTRST I/O pin: Set Output.
@@ -622,7 +633,8 @@ __STATIC_FORCEINLINE uint32_t PIN_nTRST_IN   (void) {
            - 1: release JTAG TRST Test Reset.
 */
 __STATIC_FORCEINLINE void     PIN_nTRST_OUT  (uint32_t bit) {
-  ;
+  if(bit&1U) Xil_Out32(GPIO_TRI,Xil_In32(GPIO_TRI)|8U);
+  else {Xil_Out32(GPIO_DATA,Xil_In32(GPIO_DATA)&~8U);Xil_Out32(GPIO_TRI,Xil_In32(GPIO_TRI)&~8U);}
 }
 
 // nRESET Pin I/O------------------------------------------
