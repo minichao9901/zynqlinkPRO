@@ -1,0 +1,49 @@
+{
+  "purpose": "Diagnostic baseline only. DPIDR checks do not establish full memory-transfer acceptance.",
+  "source_commit": "81bdb267ba9b65a90416979ade8878f871d6ed0a",
+  "build": [
+    "python tools/build_minimal_swd.py",
+    "python tools/run_vivado.py -mode batch -notrace -nojournal -source fpga/diagnostics/minimal_swd/build.tcl",
+    "python tools/run_vivado.py -mode batch -notrace -nojournal -source fpga/make_swd_io_variant.tcl -tclargs build/minimal_swd/slow16.bit SLOW 16 build/minimal_swd/minimal_swd.runs/impl_1/minimal_swd_top_routed.dcp swclk"
+  ],
+  "pairs": {
+    "slow4": [
+      "slow4.bit",
+      "minimal_swd.elf"
+    ],
+    "slow16": [
+      "slow16.bit",
+      "minimal_swd.elf"
+    ]
+  },
+  "timing": {
+    "FCLK_Hz": 100000000,
+    "setup_slack_ns": 4.507,
+    "hold_slack_ns": 0.067
+  },
+  "artifacts": {
+    "minimal_swd.elf": "1d5acffbc6bbfed194c4a688b41c9f9207201cbd4f21f9f418a63cb6dae48e9e",
+    "slow16.bit": "11cd0e8f207ae07a155e11989e50118f081e7279edf1b37385aa63d7a99e4130",
+    "slow4.bit": "135bb24a1d4b7ac6b861a233075662082482df1d53b995fa0fac8dad8eb57823"
+  },
+  "evidence": {
+    "firmware.json": "5d79a8dcdda22538f58d6728efed8af0c368e9db1dee50c48b281c7ce08b6d27",
+    "pad_observer.json": "13da7def018755c9abcf79c1fbe4ea8e04348a949b98b849525c3def369aa511",
+    "slow16_repeat.json": "3235b130e1c37bed353d4c1fbd3e7e36997cba22757d3c35d0cb2599fcde2dab",
+    "slow16_test.json": "07fc7c01e97eab4c14fea8b3f3ad9ae0e2c8739df11c91b06fa3d66805ac6f18",
+    "slow4_back.json": "5c098766fcc257a1cbc4445a89350c49d4053c5572f2b181d6494d82e74ec6b8",
+    "timing.json": "b7d31f93364637ebef9a892bb2dc6250c585e6a07eb71d33a80dd89240130dce"
+  },
+  "observations": [
+    "Same routed design: SLOW/4 reproduces ACK5/data FE3F019F; SLOW/16 gives ACK1/DPIDR 1BA01477/correct parity at nominal 10kHz, 100kHz and 1MHz; switching back to SLOW/4 reproduces the error.",
+    "Pad-edge counter equals intended 200 rising edges in both passing and failing cases. No sticky unexpected edge was detected at the FPGA pad.",
+    "Production design with its output-only clock pad still fails low frequencies with SLOW/16. This is not a production fix."
+  ],
+  "limits": [
+    "FPGA-side digital counters cannot prove the analog waveform at the target MCU pin, and can miss sub-spec pulses.",
+    "Old ctrlstat_prediction.json and slow16_ctrlstat.json are excluded: they requested CTRL/STAT immediately after line reset without the mandatory successful DPIDR read. ACK7 from those tests is not valid fault evidence. The runner now permits DPIDR only.",
+    "Nominal GPIO rate excludes software/MMIO overhead. FCLK is fixed at 100MHz."
+  ],
+  "target_flash_written": false,
+  "probe_restored": true
+}
