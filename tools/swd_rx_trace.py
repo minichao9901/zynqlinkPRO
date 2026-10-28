@@ -20,10 +20,25 @@ def arm():
     work.mkdir(parents=True, exist_ok=True)
     script = work / 'arm.tcl'
     script.write_text('connect\ntargets -set -filter {name =~ "ARM Cortex-A9 MPCore #0*"}\n'
+                      'set c [mrd -force -value 0x400100f8]\n'
+                      'if {($c >> 16) == 0x5343} {mwr -force 0x400100f8 1;mwr -force 0x400100f8 0}\n'
                       'mwr -force 0x40010054 3\nset s [mrd -force -value 0x40010054]\n'
                       'if {!($s & 0x40000000)} {error "SWD raw trace not supported by loaded bit"}\n'
                       'disconnect\nexit\n')
     subprocess.run([sys.executable, str(ROOT / 'tools/run_xsct.py'), str(script)], check=True)
+
+
+def clock_observer():
+    from jtag_internal_trace import run
+    import re
+    text = run('puts [format "CLKOBS %08X %08X" [mrd -force -value 0x400100f8] [mrd -force -value 0x400100fc]]')
+    match = re.search(r'CLKOBS ([0-9A-Fa-f]{8}) ([0-9A-Fa-f]{8})', text)
+    assert match, text
+    counter, flags = [int(value, 16) for value in match.groups()]
+    if counter >> 16 != 0x5343:
+        return None
+    return dict(pad_rises=(counter >> 8) & 255, intended_rises=counter & 255,
+                rise_while_low=bool(flags & 8), fall_while_high=bool(flags & 4))
 
 
 def initialize(out, inp, khz, boundary=None, phase=None):
@@ -46,7 +61,7 @@ def decode(response):
     for i, (raw,) in enumerate(struct.iter_unpack('<I', response[6:])):
         assert raw >> 28 == 10 and ((raw >> 24) & 15) == i, hex(raw)
         rows.append(dict(index=i, raw=hex(raw), request=(raw >> 16) & 255,
-                         boundary=(raw >> 12) & 1, phase=(raw >> 11) & 1,
+                         clock_pad=(raw >> 13) & 1, boundary=(raw >> 12) & 1, phase=(raw >> 11) & 1,
                          result_valid=(raw >> 10) & 1, parity_error=(raw >> 9) & 1,
                          ack=(raw >> 6) & 7, released=(raw >> 5) & 1,
                          host_out=(raw >> 4) & 1, swclk=(raw >> 3) & 1,
@@ -84,7 +99,8 @@ def main():
             row = dict(requested_khz=khz, fclk_hz=hz, swclk_hz=hz / 2,
                        cfg=hex(cfg), boundary=(cfg >> 18) & 1, phase=(cfg >> 17) & 1,
                        reply=reply.hex(), passed=reply == bytes.fromhex('0501017714a01b'),
-                       trace_status=hex(status), ack_windows=windows, samples=samples)
+                       trace_status=hex(status), ack_windows=windows, samples=samples,
+                       clock_observer=clock_observer())
             report['rows'].append(row)
             print(json.dumps({k: v for k, v in row.items() if k != 'samples'}), flush=True)
     finally:

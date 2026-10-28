@@ -1,5 +1,6 @@
 # Preserve the connector pin names while moving GPIO IOBUFs into the protocol
 # mux: B19=TDI, A20=TDO, E19=nRESET, E18=optional nTRST.
+source [file join $root fpga clock_pad_bd.tcl]
 if {[llength [get_bd_intf_ports -quiet gpio_rtl_0]]} {
     set nets [get_bd_intf_nets -quiet -of_objects [get_bd_intf_ports gpio_rtl_0]]
     if {[llength $nets]} {delete_bd_objs $nets}

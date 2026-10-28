@@ -79,7 +79,7 @@ module swd_controller #(
     output wire [31:0] pkt_bram_rddata,
 
     // SWD Physical Interface
-    output wire                                    swclk,
+    inout  wire                                    swclk,
     inout  wire                                    swdio,
     // Existing B19/A20/E19/E18 connector, with JTAG TDI/TDO muxed onto 0/1.
     inout wire [3:0] gpio_aux,
@@ -122,6 +122,12 @@ module swd_controller #(
     wire        swdio_t;
     wire        core_swclk;
     wire        swclk_buf;
+    wire clock_drive;
+    (* CLOCK_BUFFER_TYPE="NONE" *) wire clock_feedback;
+    reg clock_observer_reset;
+    reg [7:0] clock_pad_rises=0,clock_intended_rises=0;
+    reg clock_previous_intent=0,clock_fall_while_high=0,clock_rise_while_low=0;
+    wire clock_observer_clear=!rst_n || clock_observer_reset;
     wire        swdio_i_fall_raw;
     wire        swdio_i_rise_raw; // unused Q1 retained for primitive clarity
     reg         cfg_sample_rise;
@@ -171,7 +177,25 @@ module swd_controller #(
     // Q1 samples on the next FCLK rising edge after a SWCLK launch; Q2 is the
     // earlier FCLK falling-edge sample. This gives one selectable phase step.
     assign swdio_i_fall = cfg_sample_rise ? swdio_i_rise_raw : swdio_i_fall_raw;
-    assign swclk = manual_pins[8] ? manual_pins[0] : jtag_enabled ? jtag_tck : swclk_buf;
+    assign clock_drive = manual_pins[8] ? manual_pins[0] : jtag_enabled ? jtag_tck : swclk_buf;
+    IOBUF u_clock_iobuf(.IO(swclk),.I(clock_drive),.T(1'b0),.O(clock_feedback));
+    // Read-only, asynchronous pad observer; software snapshots it after the
+    // transaction has stopped. It never controls a protocol clock or data.
+    always @(posedge clock_feedback or posedge clock_observer_clear)begin
+        if(clock_observer_clear)begin clock_pad_rises<=0;clock_rise_while_low<=0;end
+        else begin clock_pad_rises<=clock_pad_rises+1'b1;if(!clock_drive)clock_rise_while_low<=1;end
+    end
+    always @(negedge clock_feedback or posedge clock_observer_clear)begin
+        if(clock_observer_clear)clock_fall_while_high<=0;
+        else if(clock_drive)clock_fall_while_high<=1;
+    end
+    always @(posedge clk)begin
+        if(clock_observer_clear)begin clock_intended_rises<=0;clock_previous_intent<=clock_drive;end
+        else begin
+            clock_previous_intent<=clock_drive;
+            if(clock_drive && !clock_previous_intent)clock_intended_rises<=clock_intended_rises+1'b1;
+        end
+    end
     for(genvar gi=0;gi<4;gi=gi+1) begin:g_aux
         wire pin_o=gi==0 && jtag_enabled ? (manual_pins[8] ? manual_pins[2] : jtag_tdi) : gpio_out[gi];
         wire pin_t=!jtag_config[1] || (gi==1 && jtag_enabled) || (!(gi==0 && jtag_enabled) && gpio_tri[gi]);
@@ -227,7 +251,7 @@ module swd_controller #(
                 // Passive SWD receive history: first 16 FCLK samples from
                 // SWDIO release. Keep the existing JTAG history independent.
                 if(!jtag_enabled && ((trace_raw_armed && swdio_t && !trace_previous_t) || trace_raw_active))begin
-                    transfer_trace[trace_head]<={4'ha,trace_head,core_req_sel,3'd0,cfg_rx_boundary,cfg_sample_rise,
+                    transfer_trace[trace_head]<={4'ha,trace_head,core_req_sel,2'd0,clock_feedback,cfg_rx_boundary,cfg_sample_rise,
                         core_result_valid,core_parity_err,core_ack,swdio_t,swdio_o,core_swclk,
                         swdio_i_raw,swdio_i_rise_raw,swdio_i_fall_raw};
                     trace_head<=trace_head+1'b1;trace_count<=trace_count+1'b1;
@@ -476,6 +500,7 @@ module swd_controller #(
             packet_len_reg <= 16'd0;
             packet_start_pulse <= 1'b0;
             engine_reset <= 1'b0;
+            clock_observer_reset <= 0;
             engine_reset_count <= 0;
             trace_index <= 0;
             diag_index <= 0;
@@ -559,6 +584,7 @@ module swd_controller #(
                     8'h8c: if(!core_busy) jtag_operation<=s_axi_wdata[2:0];
                     8'h90: if(!core_busy) jtag_seq_tms<=s_axi_wdata[0];
                     8'h94: if(!core_busy) begin manual_pins<=s_axi_wdata;end
+                    8'hf8:clock_observer_reset<=s_axi_wdata[0];
                     8'h98: if(!core_busy) begin jtag_sample_early<=s_axi_wdata[0];jtag_return_late<=s_axi_wdata[4];end
                     default: ;
                 endcase
@@ -641,7 +667,7 @@ module swd_controller #(
                     8'h88:rdata_reg<=jtag_dr_config;
                     8'h8c:rdata_reg<={29'd0,jtag_operation};
                     8'h90:rdata_reg<={31'd0,jtag_seq_tms};
-                    8'h94:rdata_reg<={23'd0,manual_pins[8],gpio_in[2],1'b0,gpio_in[3],1'b0,gpio_in[1],gpio_in[0],swdio_i_raw,swclk};
+                    8'h94:rdata_reg<={23'd0,manual_pins[8],gpio_in[2],1'b0,gpio_in[3],1'b0,gpio_in[1],gpio_in[0],swdio_i_raw,clock_feedback};
                     8'h98:rdata_reg<={27'd0,jtag_return_late,jtag_fence_error,jtag_cache_valid,jtag_busy,jtag_sample_early};
                     8'h9c:rdata_reg<=jtag_cached_ir;
                     8'ha0:rdata_reg<=jtag_sequence_data[31:0];
@@ -666,6 +692,8 @@ module swd_controller #(
                     8'hec:rdata_reg<=diag_extra[diag_index];
                     8'hf0:rdata_reg<=diag_alternate[diag_index];
                     8'hf4:rdata_reg<=diag_samples[diag_index];
+                    8'hf8:rdata_reg<={16'h5343,clock_pad_rises,clock_intended_rises};
+                    8'hfc:rdata_reg<={28'd0,clock_rise_while_low,clock_fall_while_high,clock_feedback,clock_drive};
                     default: begin
                         rdata_reg <= !s_axi_araddr[7] && s_axi_araddr[6:5]==2'b11 ? stream_rdata : 32'd0;
                     end

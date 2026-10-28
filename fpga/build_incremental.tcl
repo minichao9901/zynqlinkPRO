@@ -37,10 +37,12 @@ if {!$impl_only} {
     # checkpoint when its external RTL changes. Refresh only that block.
     if {$rtl_stamp ne $old_stamp} {
         # Internal-only edits need an OOC reset, not a BD topology upgrade.
-        # The new BRAM pins are the sole interface change in this branch.
+        # Refresh external BRAM/GPIO pins and the bidirectional clock pad.
         if {![llength [get_bd_pins -quiet swd_controller_0/pkt_bram_en]] ||
             ![llength [get_bd_cells -quiet pkt_mem]] ||
-            ![llength [get_bd_pins -quiet swd_controller_0/gpio_aux]]} {
+            ![llength [get_bd_pins -quiet swd_controller_0/gpio_aux]] ||
+            [get_property DIR [get_bd_pins swd_controller_0/swclk]] ne "IO"} {
+            source [file join $root fpga clock_pad_bd.tcl]
             update_module_reference [get_ips system_swd_controller_0_0]
             set_property CONFIG.C_S_AXI_ADDR_WIDTH 8 [get_bd_cells swd_controller_0]
             source [file join $root fpga probe_stream_bd.tcl]
@@ -54,6 +56,13 @@ if {!$impl_only} {
         reset_run synth_1
     }
     generate_target all [get_files system.bd]
+    # Vivado 2018.3 can retain a stale OUT-net classification after the
+    # clock pad becomes bidirectional. Check emitted HDL before synthesis.
+    set generated_system [file join $out zynqlink_dma.srcs sources_1 bd system synth system.v]
+    set fd [open $generated_system r];set generated_hdl [read $fd];close $fd
+    if {![regexp {\.swclk\(swclk_0\)} $generated_hdl]} {
+        error "Generated SWCLK pad connection missing; recreate its BD net"
+    }
     update_compile_order -fileset sources_1
     source [file join $root fpga configure_runs.tcl]
     if {[get_property NEEDS_REFRESH [get_runs synth_1]] || [get_property PROGRESS [get_runs synth_1]] != "100%"} {
