@@ -90,6 +90,17 @@ module tb_cm3_jtag;
   if(!d[0])$fatal(1,"AXI launch race: STATUS reports idle before backend accepts start");
   @(negedge clk);wait(!dut.core_busy);repeat(3)@(negedge clk);
   transfer(0,'h1e);transfer(4,'h50000000);transfer(8,0);
+  // Multi-word AP write: the board corrupts every fourth word from the third on.
+  transfer(5,'h60004000);
+  for(i=0;i<8;i=i+1)transfer(8'h0d,32'h11110000+i);
+  transfer(5,'h60004000);
+  transfer(8'h0f,0);                 // posted read, discard the stale result
+  for(i=0;i<8;i=i+1)begin
+   if(i==7)transfer(8'h0e,0);else transfer(8'h0f,0);
+   read_reg(24,d);
+   if(d!==(32'h11110000+i))$display("JTAG_WR_BAD idx=%0d got=%08h want=%08h",i,d,32'h11110000+i);
+  end
+  $display("JTAG_WR_DONE");
   // No AXI operations per sample: configure once, then PL fills a bank.
   cfg(0,4);cfg(1,2);cfg(2,32);cfg(5,1);
   for(i=0;i<4;i=i+1)cfg(16+i,i);
