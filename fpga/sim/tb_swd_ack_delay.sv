@@ -7,6 +7,7 @@ module tb_swd_ack_delay #(
   parameter integer TARGET_TCO_NS = 1,
   parameter integer ACK_DELAY = 0,
   parameter integer TURN_EXTRA = 0,
+  parameter integer RX_BOUNDARY = 1,
   parameter integer EXPECT_ACK = 2
 );
   reg clk=0; always #(CLK_HALF_NS) clk=~clk;
@@ -27,7 +28,7 @@ module tb_swd_ack_delay #(
   reg sample_fall=0;
   always @(negedge clk) sample_fall <= swdio;
 
-  swd_core core(
+  swd_core core(.rx_boundary(1'(RX_BOUNDARY)),
     .next_valid(1'b0),.next_request(8'd0),.next_wdata(32'd0),.next_ready(),.result_valid(),
     .clk(clk), .rst_n(rst_n), .start(start), .mode(1'b1),
     .timestamp_en(1'b0), .idle_cycles(4'd0), .data_phase(1'b0),
@@ -44,13 +45,12 @@ module tb_swd_ack_delay #(
     @(negedge clk); start=1;
     @(negedge clk); start=0;
 
-    // Wait until the core has released SWDIO after the request, then mirror a
-    // target that launches each ACK bit on the next rising edge.
-    wait(core.state == 4'd4);
-    @(negedge swclk);
+    // Launch ACK0 on the request-turnaround rise, as the real ARM target
+    // does. Every following rise consumes the current bit and launches next.
+    wait(core.state == 4'd3);
+    @(posedge swclk);
     target_oe <= 1'b1;
     target_out <= EXPECT_ACK[0];
-    @(posedge swclk); // ACK[0] high phase
     @(posedge swclk); target_out <= EXPECT_ACK[1];
     @(posedge swclk); target_out <= EXPECT_ACK[2];
     @(posedge swclk); target_oe <= 1'b0;

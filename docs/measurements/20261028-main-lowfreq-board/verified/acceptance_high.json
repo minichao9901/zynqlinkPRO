@@ -1,0 +1,221 @@
+{
+  "label": "rx_verified",
+  "artifacts": {
+    "git_head": "d42b60180e82fccb428c51613a0316776c2bc4fc",
+    "git_dirty": true,
+    "bit": {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\artifacts\\rx_verified.bit",
+      "sha256": "ae59f5e92e445b9f38dbc879c164c7669366f70cc62323d961f46deef216279f"
+    },
+    "elf": {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\artifacts\\rx_verified.elf",
+      "sha256": "68bfb2ee0d6f3e726f8d99b3027d03706801953d40f04c19c6f976591db9ea04"
+    }
+  },
+  "runs": [
+    {
+      "name": "functional",
+      "command": [
+        "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\tools\\test_probe_board.py",
+        "--services",
+        "both",
+        "--seconds",
+        "0.5",
+        "--output",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\rx_verified\\functional.json"
+      ],
+      "returncode": 0,
+      "seconds": 3.69,
+      "required": true
+    },
+    {
+      "name": "sram_api_50000",
+      "command": [
+        "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\tools\\benchmark_cmsis_sram.py",
+        "--speed",
+        "50000",
+        "--sessions",
+        "3",
+        "--loops",
+        "100",
+        "--output",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\rx_verified\\sram_api_50000.json"
+      ],
+      "returncode": 0,
+      "seconds": 4.17,
+      "required": true
+    },
+    {
+      "name": "sram_openocd_50000",
+      "command": [
+        "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\tools\\benchmark_sram_optimized.py",
+        "--tag",
+        "rx_verified_50000",
+        "--output-dir",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\rx_verified\\openocd_50000",
+        "--sessions",
+        "3",
+        "--loops",
+        "100",
+        "--speed",
+        "50000",
+        "--no-reset",
+        "--clock-script",
+        "none",
+        "--openocd-exe",
+        "E:/zynqlinkPRO_batch/build/openocd_runtime/openocd.exe",
+        "--scripts",
+        "E:/zynqlinkPRO/build/openocd-src/tcl"
+      ],
+      "returncode": 0,
+      "seconds": 4.2,
+      "required": true
+    },
+    {
+      "name": "sram_api_60000",
+      "command": [
+        "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\tools\\benchmark_cmsis_sram.py",
+        "--speed",
+        "60000",
+        "--sessions",
+        "3",
+        "--loops",
+        "100",
+        "--output",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\rx_verified\\sram_api_60000.json"
+      ],
+      "returncode": 0,
+      "seconds": 3.52,
+      "required": true
+    },
+    {
+      "name": "sram_openocd_60000",
+      "command": [
+        "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\tools\\benchmark_sram_optimized.py",
+        "--tag",
+        "rx_verified_60000",
+        "--output-dir",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\rx_verified\\openocd_60000",
+        "--sessions",
+        "3",
+        "--loops",
+        "100",
+        "--speed",
+        "60000",
+        "--no-reset",
+        "--clock-script",
+        "none",
+        "--openocd-exe",
+        "E:/zynqlinkPRO_batch/build/openocd_runtime/openocd.exe",
+        "--scripts",
+        "E:/zynqlinkPRO/build/openocd-src/tcl"
+      ],
+      "returncode": 0,
+      "seconds": 3.65,
+      "required": true
+    },
+    {
+      "name": "hss_static1",
+      "command": [
+        "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\tools\\benchmark_probe_stream.py",
+        "--speeds",
+        "50000000,60000000",
+        "--variables",
+        "1",
+        "--periods",
+        "48,40,32,24",
+        "--seconds",
+        "3",
+        "--repeats",
+        "2",
+        "--output",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\rx_verified\\hss_static1.json",
+        "--bit",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\artifacts\\rx_verified.bit",
+        "--elf",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\artifacts\\rx_verified.elf"
+      ],
+      "returncode": 0,
+      "seconds": 57.29,
+      "required": true
+    },
+    {
+      "name": "hss_static8",
+      "command": [
+        "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\tools\\benchmark_probe_stream.py",
+        "--speeds",
+        "50000000,60000000",
+        "--variables",
+        "8",
+        "--periods",
+        "240,200,192",
+        "--seconds",
+        "3",
+        "--repeats",
+        "2",
+        "--output",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\rx_verified\\hss_static8.json",
+        "--bit",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\artifacts\\rx_verified.bit",
+        "--elf",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\artifacts\\rx_verified.elf"
+      ],
+      "returncode": 0,
+      "seconds": 43.11,
+      "required": true
+    },
+    {
+      "name": "hss_dynamic",
+      "command": [
+        "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\tools\\benchmark_hss_dynamic.py",
+        "--speed",
+        "60000000",
+        "--periods",
+        "48,40,32,24",
+        "--seconds",
+        "3",
+        "--output",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\rx_verified\\hss_dynamic.json",
+        "--bit",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\artifacts\\rx_verified.bit",
+        "--elf",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\artifacts\\rx_verified.elf"
+      ],
+      "returncode": 0,
+      "seconds": 15.23,
+      "required": true
+    },
+    {
+      "name": "rtt_high",
+      "command": [
+        "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\tools\\benchmark_rtt_forward.py",
+        "--speeds",
+        "50000000,60000000",
+        "--chunks",
+        "2048",
+        "--seconds",
+        "5",
+        "--repeats",
+        "2",
+        "--output",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\rx_verified\\rtt_high.json",
+        "--bit",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\artifacts\\rx_verified.bit",
+        "--elf",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\artifacts\\rx_verified.elf"
+      ],
+      "returncode": 0,
+      "seconds": 22.92,
+      "required": true
+    }
+  ]
+}

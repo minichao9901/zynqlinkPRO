@@ -445,11 +445,24 @@ static uint32_t DAP_SWJ_Clock(const uint8_t *request, uint8_t *response) {
     *response = DAP_ERROR;
     return ((4U << 16) | 1U);
   }
-  ps_set_fclk0_hz(clock * 2U);
+  int fclk_hz = ps_set_fclk0_hz(clock * 2U);
+  if (fclk_hz <= 0) {
+    *response = DAP_ERROR;
+    return ((4U << 16) | 1U);
+  }
+  uint32_t link_clock_hz = (uint32_t)fclk_hz / 2U;
   /* FCLK runs at 2x SWCLK, so the transfer half-cycle must be one FCLK
    * cycle (delay_fast=0).  The RTL reset value is slow; program it here. */
-  swd_write32(SWD_CFG, (swd_read32(SWD_CFG) & ~((0xFU << 13) | (1U << 17))) |
-              ((clock <= 35000000U) ? (1U << 17) : 0U));
+  /* Low rates use the standard ACK/data boundary, with Q2 capturing the
+   * current bit before the next SWCLK rise. Q1/Q2 alone cannot correct the
+   * legacy pipeline's one-bit offset. Keep the 50 MHz schedule unchanged.
+   * With SWCLK SLOW/4 mA, use the short boundary through 30 MHz;
+   * 30..45 MHz uses legacy Q1, faster rates legacy Q2. Use the realizable
+   * PLL rate: different requests can select the same pair of divisors. */
+  swd_write32(SWD_CFG,
+              (swd_read32(SWD_CFG) & ~((0xFU << 13) | (1U << 17) | (1U << 18))) |
+              ((link_clock_hz <= 30000000U) ? (1U << 18) :
+               ((link_clock_hz <= 45000000U) ? (1U << 17) : 0U)));
   Set_Clock_Delay(clock);
 
   *response = DAP_OK;

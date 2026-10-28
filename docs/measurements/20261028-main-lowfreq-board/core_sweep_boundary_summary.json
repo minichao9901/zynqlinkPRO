@@ -1,0 +1,190 @@
+[
+  {
+    "name": "firmware_35MHz",
+    "args": [
+      "half_ns=7.142857",
+      "rx_boundary=1",
+      "phase=0",
+      "return_ns=16",
+      "words=2",
+      "idle=1",
+      "packets",
+      "streams",
+      "errors",
+      "recovery"
+    ],
+    "passed": true,
+    "expected": true,
+    "matched": true,
+    "seconds": 196.01,
+    "equivalent_edges": [
+      "62"
+    ],
+    "cycles": [
+      [
+        "0",
+        "94"
+      ],
+      [
+        "1",
+        "26"
+      ],
+      [
+        "1",
+        "94"
+      ]
+    ],
+    "markers": [
+      "HSS_PASS real CortexM0 sampler, posted flush, packet BRAM payload",
+      "RTT_PASS real CortexM0 descriptor boundary, unaligned payload, DMA-before-RdOff, DAP recovery",
+      "PACKET_PASS count=1 read=0",
+      "PACKET_PASS count=1 read=1",
+      "PACKET_PASS count=2 read=0",
+      "PACKET_PASS count=2 read=1",
+      "PACKET_PASS count=127 read=0",
+      "PACKET_PASS count=127 read=1",
+      "PACKET_PASS count=256 read=0",
+      "PACKET_PASS count=256 read=1",
+      "PACKET_PASS count=770 read=0",
+      "PACKET_PASS count=770 read=1",
+      "PACKET_PASS count=1023 read=0",
+      "PACKET_PASS count=1023 read=1",
+      "PACKET_PASS count=2 read=0",
+      "PACKET_PASS count=2 read=1",
+      "RECOVERY_PASS active packet reset, SWJ reconnect and target SRAM",
+      "ERROR_PASS WAIT/release/recovery",
+      "FAULT_SKIP model did not report FAULT (ack=1 sticky=0)",
+      "ERROR_PASS WAIT/ABORT/recovery (FAULT not modelled)"
+    ]
+  },
+  {
+    "name": "rx_zero_idle",
+    "args": [
+      "half_ns=10",
+      "rx_boundary=1",
+      "phase=0",
+      "return_ns=16",
+      "words=2",
+      "idle=1",
+      "idle=0",
+      "packets",
+      "errors"
+    ],
+    "passed": true,
+    "expected": true,
+    "matched": true,
+    "seconds": 191.06,
+    "equivalent_edges": [
+      "62"
+    ],
+    "cycles": [
+      [
+        "0",
+        "94"
+      ],
+      [
+        "1",
+        "26"
+      ],
+      [
+        "1",
+        "94"
+      ]
+    ],
+    "markers": [
+      "PACKET_PASS count=1 read=0",
+      "PACKET_PASS count=1 read=1",
+      "PACKET_PASS count=2 read=0",
+      "PACKET_PASS count=2 read=1",
+      "PACKET_PASS count=127 read=0",
+      "PACKET_PASS count=127 read=1",
+      "PACKET_PASS count=256 read=0",
+      "PACKET_PASS count=256 read=1",
+      "PACKET_PASS count=770 read=0",
+      "PACKET_PASS count=770 read=1",
+      "PACKET_PASS count=1023 read=0",
+      "PACKET_PASS count=1023 read=1",
+      "ERROR_PASS WAIT/release/recovery",
+      "FAULT_SKIP model did not report FAULT (ack=1 sticky=0)",
+      "ERROR_PASS WAIT/ABORT/recovery (FAULT not modelled)"
+    ]
+  },
+  {
+    "name": "rx_delay1",
+    "args": [
+      "half_ns=5",
+      "rx_boundary=1",
+      "phase=0",
+      "return_ns=4",
+      "words=2",
+      "idle=1",
+      "transfer_delay=1",
+      "errors"
+    ],
+    "passed": true,
+    "expected": true,
+    "matched": true,
+    "seconds": 4.49,
+    "equivalent_edges": [
+      "62"
+    ],
+    "cycles": [
+      [
+        "0",
+        "191"
+      ],
+      [
+        "1",
+        "189"
+      ],
+      [
+        "1",
+        "53"
+      ]
+    ],
+    "markers": [
+      "ERROR_PASS WAIT/release/recovery",
+      "FAULT_SKIP model did not report FAULT (ack=1 sticky=0)",
+      "ERROR_PASS WAIT/ABORT/recovery (FAULT not modelled)"
+    ]
+  },
+  {
+    "name": "rx_delay3",
+    "args": [
+      "half_ns=5",
+      "rx_boundary=1",
+      "phase=0",
+      "return_ns=4",
+      "words=2",
+      "idle=1",
+      "transfer_delay=3",
+      "errors"
+    ],
+    "passed": true,
+    "expected": true,
+    "matched": true,
+    "seconds": 5.72,
+    "equivalent_edges": [
+      "62"
+    ],
+    "cycles": [
+      [
+        "0",
+        "381"
+      ],
+      [
+        "1",
+        "105"
+      ],
+      [
+        "1",
+        "377"
+      ]
+    ],
+    "markers": [
+      "ERROR_PASS WAIT/release/recovery",
+      "FAULT_SKIP model did not report FAULT (ack=1 sticky=0)",
+      "ERROR_PASS WAIT/ABORT/recovery (FAULT not modelled)"
+    ]
+  }
+]

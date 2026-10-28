@@ -1,6 +1,7 @@
 `timescale 1ns/1ps
 module tb_swd_stream #(
  parameter SAMPLE_RISE=1,
+ parameter RX_BOUNDARY=0,
  parameter TCO_NS=1,
  parameter CLK_HALF_NS=5.0,
  parameter IDLE_CYCLES=0,
@@ -48,7 +49,7 @@ always @(posedge clk) begin
      (core.state==6 && core.lsm_cnt>=3 && core.lsm_cnt<=67 && core.lsm_cnt[0])))
   if(fclk_cycle-last_rise_cycle<2)$fatal(1,"early sample consumed before two FCLK beats");
 end
-swd_core core(.next_valid(1'b0),.next_request(8'd0),.next_wdata(32'd0),.next_ready(),.result_valid(),
+swd_core core(.rx_boundary(1'(RX_BOUNDARY)),.next_valid(1'b0),.next_request(8'd0),.next_wdata(32'd0),.next_ready(),.result_valid(),
  .clk(clk),.rst_n(rst_n),.start(core_start),.mode(core_mode),
  .timestamp_en(1'b0),.idle_cycles(4'(IDLE_CYCLES)),.data_phase(1'b0),.clock_delay(4'd5),.delay_fast(4'd0),
  .turn_extra(2'(TURN_EXTRA)),.ack_delay(3'(ACK_DELAY)),

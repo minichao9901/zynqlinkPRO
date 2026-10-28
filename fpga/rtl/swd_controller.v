@@ -95,6 +95,7 @@ module swd_controller #(
     wire        swdio_i_fall_raw;
     wire        swdio_i_rise_raw; // unused Q1 retained for primitive clarity
     reg         cfg_sample_rise;
+    reg         cfg_rx_boundary;
     reg         swdio_early;
     wire        swdio_i_iddr;
     
@@ -173,6 +174,7 @@ module swd_controller #(
     reg [3:0] trace_head,trace_index;
     reg [15:0] trace_count;
     reg trace_frozen;
+    reg trace_raw_mode,trace_raw_armed,trace_raw_active,trace_previous_t;
     wire trace_clear = s_axi_wvalid && s_axi_wready &&
                        write_addr == ADDR_TRACE_CTRL && s_axi_wdata[0];
     // Out-of-band forensic history; freeze on an invalid ACK/parity failure.
@@ -180,8 +182,24 @@ module swd_controller #(
     always @(posedge clk or negedge rst_n) begin
         if(!rst_n) begin
             trace_head<=0;trace_count<=0;trace_frozen<=0;
+            trace_raw_mode<=0;trace_raw_armed<=0;trace_raw_active<=0;trace_previous_t<=0;
         end else begin
-            if(trace_clear) begin trace_head<=0;trace_count<=0;trace_frozen<=0;end
+            trace_previous_t<=swdio_t;
+            if(trace_clear) begin
+                trace_head<=0;trace_count<=0;trace_frozen<=0;
+                trace_raw_mode<=s_axi_wdata[1];trace_raw_armed<=s_axi_wdata[1];trace_raw_active<=0;
+            end
+            else if(trace_raw_mode) begin
+                // Diagnostic capture only: one record per FCLK, starting at
+                // the first observed SWDIO release. Reuse the forensic RAM.
+                if((trace_raw_armed && swdio_t && !trace_previous_t) || trace_raw_active) begin
+                    transfer_trace[trace_head]<={16'd0,trace_head,5'd0,swdio_t,swdio_o,core_swclk,
+                                                swdio_i_raw,swdio_i_rise_raw,swdio_i_fall_raw,1'b0};
+                    trace_head<=trace_head+1'b1;trace_count<=trace_count+1'b1;
+                    trace_raw_armed<=0;trace_raw_active<=1;
+                    if(trace_head==15) begin trace_raw_active<=0;trace_frozen<=1;end
+                end
+            end
             else if(core_result_valid && !trace_frozen) begin
                 transfer_trace[trace_head]<={trace_count,core_req_sel,4'd0,core_parity_err,core_ack};
                 trace_head<=trace_head+1'b1;trace_count<=trace_count+1'b1;
@@ -199,7 +217,8 @@ module swd_controller #(
     //   [8]     cfg_data_phase        Enable WAIT/FAULT data phase handling
     //   [12:9]  cfg_clock_delay       SWJ sequence half-cycle delay
     //   [16:13] cfg_delay_fast        Transfer half-cycle delay
-    //   [17]    cfg_sample_rise       1=held early sample, 0=late FCLK falling
+    //   [17]    cfg_sample_rise       1=FCLK Q1, 0=FCLK Q2
+    //   [18]    cfg_rx_boundary       1=short-return RX boundary, 0=legacy
     //   [24:23] cfg_turn_extra       Extra low half-cycle steps before ACK
     //   [27:25] cfg_ack_delay        0=legacy; 1..7=ACK hold/capture schedule
     //   [31:29] Reserved
@@ -359,6 +378,7 @@ module swd_controller #(
             cfg_turn_extra <= 2'd0;
             cfg_ack_delay <= 3'd0;
             cfg_sample_rise <= 1'b1;
+            cfg_rx_boundary <= 1'b0;
             packet_len_reg <= 16'd0;
             packet_start_pulse <= 1'b0;
             engine_reset <= 1'b0;
@@ -401,6 +421,7 @@ module swd_controller #(
                         cfg_clock_delay <= s_axi_wdata[12:9];
                         cfg_delay_fast <= s_axi_wdata[16:13];
                         cfg_sample_rise <= s_axi_wdata[17];
+                        cfg_rx_boundary <= s_axi_wdata[18];
                         cfg_turn_extra <= s_axi_wdata[24:23];
                         cfg_ack_delay <= s_axi_wdata[27:25];
                     end
@@ -469,7 +490,7 @@ module swd_controller #(
                         rdata_reg <= {core_timestamp, 8'd0, core_parity_err, 3'd0, core_ack, core_busy};
                     end
                     ADDR_CFG: begin
-                        rdata_reg <= {4'd0, cfg_ack_delay, cfg_turn_extra, 5'd0, cfg_sample_rise, cfg_delay_fast, cfg_clock_delay, cfg_data_phase, cfg_idle_cycles, 4'd1};
+                        rdata_reg <= {4'd0, cfg_ack_delay, cfg_turn_extra, 4'd0, cfg_rx_boundary, cfg_sample_rise, cfg_delay_fast, cfg_clock_delay, cfg_data_phase, cfg_idle_cycles, 4'd1};
                     end
                     ADDR_SWJ_DATA0: begin
                         rdata_reg <= (ctrl_mode) ? {32'd0} : swj_data[31:0];
@@ -636,6 +657,7 @@ module swd_controller #(
         .delay_fast    (cfg_delay_fast),
         .turn_extra   (cfg_turn_extra),
         .ack_delay     (cfg_ack_delay),
+        .rx_boundary   (cfg_rx_boundary),
         .swj_data      (core_swj_data_sel),
         .swj_count     (core_swj_count_sel),
         .xfer_request  (core_req_sel),

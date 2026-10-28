@@ -1,0 +1,649 @@
+{
+  "base_commit": "d42b60180e82fccb428c51613a0316776c2bc4fc",
+  "FCLK_target_Hz": 120000000,
+  "SRAM": [
+    {
+      "kind": "CMSIS_API_prefix2",
+      "SWCLK_kHz": 50000,
+      "main_read": 3.8431547496150666,
+      "new_read": 3.8344324042171882,
+      "read_delta_percent": -0.22695795423673948,
+      "main_write": 3.7916687829133764,
+      "new_write": 3.7907470602854065,
+      "write_delta_percent": -0.024309154642498942
+    },
+    {
+      "kind": "OpenOCD",
+      "SWCLK_kHz": 50000,
+      "main_read": 3.34640522875817,
+      "new_read": 3.4810198300283286,
+      "read_delta_percent": 4.0226628895184025,
+      "main_write": 3.5473441108545036,
+      "new_write": 3.5825072886297376,
+      "write_delta_percent": 0.9912536443148712
+    },
+    {
+      "kind": "CMSIS_API_prefix2",
+      "SWCLK_kHz": 60000,
+      "main_read": 4.551672146881255,
+      "new_read": 4.536398395039161,
+      "read_delta_percent": -0.33556353246047,
+      "main_write": 4.481146473336981,
+      "new_write": 4.471736138484555,
+      "write_delta_percent": -0.20999837671938915
+    },
+    {
+      "kind": "OpenOCD",
+      "SWCLK_kHz": 60000,
+      "main_read": 4.010443864229765,
+      "new_read": 4.058124174372523,
+      "read_delta_percent": 1.1889035667107084,
+      "main_write": 4.216884008236101,
+      "new_write": 4.231404958677685,
+      "write_delta_percent": 0.3443526170798794
+    }
+  ],
+  "RTT": [
+    {
+      "label": "main_exact",
+      "SWCLK_kHz": 50000,
+      "MB_s": 4.009113498971137
+    },
+    {
+      "label": "rx_verified",
+      "SWCLK_kHz": 50000,
+      "MB_s": 4.009077212097572
+    },
+    {
+      "label": "main_exact",
+      "SWCLK_kHz": 60000,
+      "MB_s": 4.795492805663338
+    },
+    {
+      "label": "rx_verified",
+      "SWCLK_kHz": 60000,
+      "MB_s": 4.79527127268052
+    }
+  ],
+  "HSS": [
+    {
+      "label": "main_exact",
+      "test": "hss_static1.json",
+      "speed_hz": 50000000,
+      "period": 48,
+      "variables": 1,
+      "effective_Hz": 500000.277618209,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "main_exact",
+      "test": "hss_static1.json",
+      "speed_hz": 50000000,
+      "period": 48,
+      "variables": 1,
+      "effective_Hz": 499999.9028335702,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "main_exact",
+      "test": "hss_static1.json",
+      "speed_hz": 50000000,
+      "period": 40,
+      "variables": 1,
+      "effective_Hz": 599999.9583572577,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "main_exact",
+      "test": "hss_static1.json",
+      "speed_hz": 50000000,
+      "period": 40,
+      "variables": 1,
+      "effective_Hz": 600000.0666283998,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "main_exact",
+      "test": "hss_static1.json",
+      "speed_hz": 50000000,
+      "period": 32,
+      "variables": 1,
+      "effective_Hz": 749999.9687679355,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "main_exact",
+      "test": "hss_static1.json",
+      "speed_hz": 50000000,
+      "period": 32,
+      "variables": 1,
+      "effective_Hz": 749999.2920732133,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "main_exact",
+      "test": "hss_static1.json",
+      "speed_hz": 50000000,
+      "period": 24,
+      "variables": 1,
+      "effective_Hz": 999999.958357238,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "main_exact",
+      "test": "hss_static1.json",
+      "speed_hz": 50000000,
+      "period": 24,
+      "variables": 1,
+      "effective_Hz": 1000000.9577828875,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "main_exact",
+      "test": "hss_static1.json",
+      "speed_hz": 60000000,
+      "period": 48,
+      "variables": 1,
+      "effective_Hz": 499999.99305953947,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "main_exact",
+      "test": "hss_static1.json",
+      "speed_hz": 60000000,
+      "period": 48,
+      "variables": 1,
+      "effective_Hz": 500000.02082138276,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "main_exact",
+      "test": "hss_static1.json",
+      "speed_hz": 60000000,
+      "period": 40,
+      "variables": 1,
+      "effective_Hz": 599999.5252725529,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "main_exact",
+      "test": "hss_static1.json",
+      "speed_hz": 60000000,
+      "period": 40,
+      "variables": 1,
+      "effective_Hz": 599999.516944008,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "main_exact",
+      "test": "hss_static1.json",
+      "speed_hz": 60000000,
+      "period": 32,
+      "variables": 1,
+      "effective_Hz": 750000.0936962093,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "main_exact",
+      "test": "hss_static1.json",
+      "speed_hz": 60000000,
+      "period": 32,
+      "variables": 1,
+      "effective_Hz": 750000.0312216659,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "main_exact",
+      "test": "hss_static1.json",
+      "speed_hz": 60000000,
+      "period": 24,
+      "variables": 1,
+      "effective_Hz": 999998.3204085534,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "main_exact",
+      "test": "hss_static1.json",
+      "speed_hz": 60000000,
+      "period": 24,
+      "variables": 1,
+      "effective_Hz": 999999.2504305652,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "main_exact",
+      "test": "hss_static8.json",
+      "speed_hz": 50000000,
+      "period": 240,
+      "variables": 8,
+      "effective_Hz": 100000.2234827358,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "main_exact",
+      "test": "hss_static8.json",
+      "speed_hz": 50000000,
+      "period": 240,
+      "variables": 8,
+      "effective_Hz": 100000.23042320943,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "main_exact",
+      "test": "hss_static8.json",
+      "speed_hz": 50000000,
+      "period": 200,
+      "variables": 8,
+      "effective_Hz": 40243.22757243588,
+      "skip_percent": 66.46391231684092
+    },
+    {
+      "label": "main_exact",
+      "test": "hss_static8.json",
+      "speed_hz": 50000000,
+      "period": 200,
+      "variables": 8,
+      "effective_Hz": 40262.2189052993,
+      "skip_percent": 66.4480880385113
+    },
+    {
+      "label": "main_exact",
+      "test": "hss_static8.json",
+      "speed_hz": 50000000,
+      "period": 192,
+      "variables": 8,
+      "effective_Hz": 40248.20794285572,
+      "skip_percent": 67.80147968103705
+    },
+    {
+      "label": "main_exact",
+      "test": "hss_static8.json",
+      "speed_hz": 50000000,
+      "period": 192,
+      "variables": 8,
+      "effective_Hz": 36902.15405955273,
+      "skip_percent": 70.47833781075434
+    },
+    {
+      "label": "main_exact",
+      "test": "hss_static8.json",
+      "speed_hz": 60000000,
+      "period": 240,
+      "variables": 8,
+      "effective_Hz": 99999.88478840969,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "main_exact",
+      "test": "hss_static8.json",
+      "speed_hz": 60000000,
+      "period": 240,
+      "variables": 8,
+      "effective_Hz": 99999.9083859427,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "main_exact",
+      "test": "hss_static8.json",
+      "speed_hz": 60000000,
+      "period": 200,
+      "variables": 8,
+      "effective_Hz": 120000.11493402308,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "main_exact",
+      "test": "hss_static8.json",
+      "speed_hz": 60000000,
+      "period": 200,
+      "variables": 8,
+      "effective_Hz": 120000.11659973519,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "main_exact",
+      "test": "hss_static8.json",
+      "speed_hz": 60000000,
+      "period": 192,
+      "variables": 8,
+      "effective_Hz": 40960.50175659644,
+      "skip_percent": 67.23158722332529
+    },
+    {
+      "label": "main_exact",
+      "test": "hss_static8.json",
+      "speed_hz": 60000000,
+      "period": 192,
+      "variables": 8,
+      "effective_Hz": 40663.98034828582,
+      "skip_percent": 67.46878456351692
+    },
+    {
+      "label": "main_exact",
+      "test": "hss_dynamic.json",
+      "speed_hz": 60000000,
+      "period": 48,
+      "variables": 1,
+      "effective_Hz": 499999.9305954035,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "main_exact",
+      "test": "hss_dynamic.json",
+      "speed_hz": 60000000,
+      "period": 40,
+      "variables": 1,
+      "effective_Hz": 599999.4419871133,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "main_exact",
+      "test": "hss_dynamic.json",
+      "speed_hz": 60000000,
+      "period": 32,
+      "variables": 1,
+      "effective_Hz": 750000.3331421837,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "main_exact",
+      "test": "hss_dynamic.json",
+      "speed_hz": 60000000,
+      "period": 24,
+      "variables": 1,
+      "effective_Hz": 999999.2365496603,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "rx_verified",
+      "test": "hss_static1.json",
+      "speed_hz": 50000000,
+      "period": 48,
+      "variables": 1,
+      "effective_Hz": 499999.75708383444,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "rx_verified",
+      "test": "hss_static1.json",
+      "speed_hz": 50000000,
+      "period": 48,
+      "variables": 1,
+      "effective_Hz": 499999.78484567,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "rx_verified",
+      "test": "hss_static1.json",
+      "speed_hz": 50000000,
+      "period": 40,
+      "variables": 1,
+      "effective_Hz": 599999.9000573726,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "rx_verified",
+      "test": "hss_static1.json",
+      "speed_hz": 50000000,
+      "period": 40,
+      "variables": 1,
+      "effective_Hz": 599999.8584145424,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "rx_verified",
+      "test": "hss_static1.json",
+      "speed_hz": 50000000,
+      "period": 32,
+      "variables": 1,
+      "effective_Hz": 749999.8750716464,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "rx_verified",
+      "test": "hss_static1.json",
+      "speed_hz": 50000000,
+      "period": 32,
+      "variables": 1,
+      "effective_Hz": 750000.8224445721,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "rx_verified",
+      "test": "hss_static1.json",
+      "speed_hz": 50000000,
+      "period": 24,
+      "variables": 1,
+      "effective_Hz": 1000000.1804520688,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "rx_verified",
+      "test": "hss_static1.json",
+      "speed_hz": 50000000,
+      "period": 24,
+      "variables": 1,
+      "effective_Hz": 1000000.1804520086,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "rx_verified",
+      "test": "hss_static1.json",
+      "speed_hz": 60000000,
+      "period": 48,
+      "variables": 1,
+      "effective_Hz": 499999.96529767616,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "rx_verified",
+      "test": "hss_static1.json",
+      "speed_hz": 60000000,
+      "period": 48,
+      "variables": 1,
+      "effective_Hz": 499999.687679051,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "rx_verified",
+      "test": "hss_static1.json",
+      "speed_hz": 60000000,
+      "period": 40,
+      "variables": 1,
+      "effective_Hz": 600000.3997706205,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "rx_verified",
+      "test": "hss_static1.json",
+      "speed_hz": 60000000,
+      "period": 40,
+      "variables": 1,
+      "effective_Hz": 600000.0333142165,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "rx_verified",
+      "test": "hss_static1.json",
+      "speed_hz": 60000000,
+      "period": 32,
+      "variables": 1,
+      "effective_Hz": 749999.9479465142,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "rx_verified",
+      "test": "hss_static1.json",
+      "speed_hz": 60000000,
+      "period": 32,
+      "variables": 1,
+      "effective_Hz": 749999.9687679077,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "rx_verified",
+      "test": "hss_static1.json",
+      "speed_hz": 60000000,
+      "period": 24,
+      "variables": 1,
+      "effective_Hz": 999999.8473098387,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "rx_verified",
+      "test": "hss_static1.json",
+      "speed_hz": 60000000,
+      "period": 24,
+      "variables": 1,
+      "effective_Hz": 999999.8750716829,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "rx_verified",
+      "test": "hss_static8.json",
+      "speed_hz": 50000000,
+      "period": 240,
+      "variables": 8,
+      "effective_Hz": 100000.30538038598,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "rx_verified",
+      "test": "hss_static8.json",
+      "speed_hz": 50000000,
+      "period": 240,
+      "variables": 8,
+      "effective_Hz": 99999.9791786086,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "rx_verified",
+      "test": "hss_static8.json",
+      "speed_hz": 50000000,
+      "period": 200,
+      "variables": 8,
+      "effective_Hz": 40460.785062614974,
+      "skip_percent": 66.28262716334542
+    },
+    {
+      "label": "rx_verified",
+      "test": "hss_static8.json",
+      "speed_hz": 50000000,
+      "period": 200,
+      "variables": 8,
+      "effective_Hz": 40246.93682824171,
+      "skip_percent": 66.46085850874222
+    },
+    {
+      "label": "rx_verified",
+      "test": "hss_static8.json",
+      "speed_hz": 50000000,
+      "period": 192,
+      "variables": 8,
+      "effective_Hz": 40830.582526738064,
+      "skip_percent": 67.335527630825
+    },
+    {
+      "label": "rx_verified",
+      "test": "hss_static8.json",
+      "speed_hz": 50000000,
+      "period": 192,
+      "variables": 8,
+      "effective_Hz": 40262.268645381286,
+      "skip_percent": 67.79020028516983
+    },
+    {
+      "label": "rx_verified",
+      "test": "hss_static8.json",
+      "speed_hz": 60000000,
+      "period": 240,
+      "variables": 8,
+      "effective_Hz": 99905.71933333612,
+      "skip_percent": 0.09427927987953573
+    },
+    {
+      "label": "rx_verified",
+      "test": "hss_static8.json",
+      "speed_hz": 60000000,
+      "period": 240,
+      "variables": 8,
+      "effective_Hz": 100000.31926135693,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "rx_verified",
+      "test": "hss_static8.json",
+      "speed_hz": 60000000,
+      "period": 200,
+      "variables": 8,
+      "effective_Hz": 119999.86174593809,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "rx_verified",
+      "test": "hss_static8.json",
+      "speed_hz": 60000000,
+      "period": 200,
+      "variables": 8,
+      "effective_Hz": 119999.86174593809,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "rx_verified",
+      "test": "hss_static8.json",
+      "speed_hz": 60000000,
+      "period": 192,
+      "variables": 8,
+      "effective_Hz": 40228.593333468074,
+      "skip_percent": 67.8171181855736
+    },
+    {
+      "label": "rx_verified",
+      "test": "hss_static8.json",
+      "speed_hz": 60000000,
+      "period": 192,
+      "variables": 8,
+      "effective_Hz": 40571.73718019431,
+      "skip_percent": 67.54260890422825
+    },
+    {
+      "label": "rx_verified",
+      "test": "hss_dynamic.json",
+      "speed_hz": 60000000,
+      "period": 48,
+      "variables": 1,
+      "effective_Hz": 500000.6524032802,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "rx_verified",
+      "test": "hss_dynamic.json",
+      "speed_hz": 60000000,
+      "period": 40,
+      "variables": 1,
+      "effective_Hz": 600000.3080540182,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "rx_verified",
+      "test": "hss_dynamic.json",
+      "speed_hz": 60000000,
+      "period": 32,
+      "variables": 1,
+      "effective_Hz": 749999.8021967927,
+      "skip_percent": 0.0
+    },
+    {
+      "label": "rx_verified",
+      "test": "hss_dynamic.json",
+      "speed_hz": 60000000,
+      "period": 24,
+      "variables": 1,
+      "effective_Hz": 999999.8750716412,
+      "skip_percent": 0.0
+    }
+  ],
+  "low_SRAM_points": 28,
+  "low_stress_points": 7,
+  "final_target_match": true
+}

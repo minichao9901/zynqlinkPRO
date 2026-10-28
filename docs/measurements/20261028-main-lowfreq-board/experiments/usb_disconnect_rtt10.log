@@ -1,0 +1,82 @@
+Traceback (most recent call last):
+  File "C:\Users\Administrator\.codex\worktrees\main-lowfreq-sample\zynqlinkPRO\tools\benchmark_rtt_forward.py", line 99, in point
+    rc, s1 = probe.action(0x31, 2)
+             ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Administrator\.codex\worktrees\main-lowfreq-sample\zynqlinkPRO\tools\probe_stream.py", line 43, in action
+    reply = self.request(command, bytes([action])+data)
+  File "C:\Users\Administrator\.codex\worktrees\main-lowfreq-sample\zynqlinkPRO\tools\probe_stream.py", line 37, in request
+    reply = bytes(self.device.read(64, 200))
+                  ~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "hid.pyx", line 235, in hid.device.read
+OSError: read error
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Administrator\.codex\worktrees\main-lowfreq-sample\zynqlinkPRO\tools\benchmark_rtt_forward.py", line 180, in main
+    row = point(probe, mem, port, code, speed, chunk, args.seconds, repeat)
+  File "C:\Users\Administrator\.codex\worktrees\main-lowfreq-sample\zynqlinkPRO\tools\benchmark_rtt_forward.py", line 131, in point
+    mem.write_word(DHCSR, 0xa05f0003)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\.codex\worktrees\main-lowfreq-sample\zynqlinkPRO\tools\test_probe_board.py", line 70, in write_word
+    self.write(addr, struct.pack('<I', value))
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\.codex\worktrees\main-lowfreq-sample\zynqlinkPRO\tools\test_probe_board.py", line 61, in write
+    self.address(at)
+    ~~~~~~~~~~~~^^^^
+  File "C:\Users\Administrator\.codex\worktrees\main-lowfreq-sample\zynqlinkPRO\tools\test_probe_board.py", line 33, in address
+    assert self.transfer(packet) == b'\x05\x03\x01'
+           ~~~~~~~~~~~~~^^^^^^^^
+  File "C:\Users\Administrator\.codex\worktrees\main-lowfreq-sample\zynqlinkPRO\tools\test_probe_board.py", line 29, in transfer
+    return xfer(self.out, self.inp, packet)
+  File "C:\Users\Administrator\.codex\worktrees\main-lowfreq-sample\zynqlinkPRO\tools\dap_pipeline_bench.py", line 57, in xfer
+    send(out, payload)
+    ~~~~^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\.codex\worktrees\main-lowfreq-sample\zynqlinkPRO\tools\dap_pipeline_bench.py", line 51, in send
+    out.write(b, timeout=3000)
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\site-packages\usb\core.py", line 416, in write
+    return self.device.write(self, data, timeout)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\site-packages\usb\core.py", line 1003, in write
+    return fn(
+            self._ctx.handle,
+    ...<3 lines>...
+            self.__get_timeout(timeout)
+        )
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\site-packages\usb\backend\libusb1.py", line 841, in bulk_write
+    return self.__write(self.lib.libusb_bulk_transfer,
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                        dev_handle,
+                        ^^^^^^^^^^^
+    ...<2 lines>...
+                        data,
+                        ^^^^^
+                        timeout)
+                        ^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\site-packages\usb\backend\libusb1.py", line 942, in __write
+    _check(retval)
+    ~~~~~~^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\site-packages\usb\backend\libusb1.py", line 604, in _check
+    raise USBError(_strerror(ret), ret, _libusb_errno[ret])
+usb.core.USBError: [Errno 5] Input/Output Error
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Administrator\.codex\worktrees\main-lowfreq-sample\zynqlinkPRO\tools\benchmark_rtt_forward.py", line 212, in <module>
+    main()
+    ~~~~^^
+  File "C:\Users\Administrator\.codex\worktrees\main-lowfreq-sample\zynqlinkPRO\tools\benchmark_rtt_forward.py", line 186, in main
+    stop(probe, dev)
+    ~~~~^^^^^^^^^^^^
+  File "C:\Users\Administrator\.codex\worktrees\main-lowfreq-sample\zynqlinkPRO\tools\test_probe_board.py", line 87, in stop
+    rc, _ = probe.action(0x32, 0)
+            ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Administrator\.codex\worktrees\main-lowfreq-sample\zynqlinkPRO\tools\probe_stream.py", line 43, in action
+    reply = self.request(command, bytes([action])+data)
+  File "C:\Users\Administrator\.codex\worktrees\main-lowfreq-sample\zynqlinkPRO\tools\probe_stream.py", line 37, in request
+    reply = bytes(self.device.read(64, 200))
+                  ~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "hid.pyx", line 235, in hid.device.read
+OSError: read error

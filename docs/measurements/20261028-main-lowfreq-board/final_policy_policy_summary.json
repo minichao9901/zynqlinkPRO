@@ -1,0 +1,125 @@
+[
+  {
+    "name": "policy30_ret20",
+    "args": [
+      "half_ns=8.333333",
+      "rx_boundary=1",
+      "phase=0",
+      "return_ns=20",
+      "words=2",
+      "idle=1",
+      "errors",
+      "streams"
+    ],
+    "passed": true,
+    "expected": true,
+    "matched": true,
+    "seconds": 6.17,
+    "equivalent_edges": [
+      "62"
+    ],
+    "cycles": [
+      [
+        "0",
+        "94"
+      ],
+      [
+        "1",
+        "26"
+      ],
+      [
+        "1",
+        "94"
+      ]
+    ],
+    "markers": [
+      "HSS_PASS real CortexM0 sampler, posted flush, packet BRAM payload",
+      "RTT_PASS real CortexM0 descriptor boundary, unaligned payload, DMA-before-RdOff, DAP recovery",
+      "ERROR_PASS WAIT/release/recovery",
+      "FAULT_SKIP model did not report FAULT (ack=1 sticky=0)",
+      "ERROR_PASS WAIT/ABORT/recovery (FAULT not modelled)"
+    ]
+  },
+  {
+    "name": "policy35_ret20",
+    "args": [
+      "half_ns=7.222222",
+      "rx_boundary=0",
+      "phase=1",
+      "return_ns=20",
+      "words=2",
+      "idle=1",
+      "errors",
+      "streams"
+    ],
+    "passed": true,
+    "expected": true,
+    "matched": true,
+    "seconds": 4.87,
+    "equivalent_edges": [
+      "25412"
+    ],
+    "cycles": [
+      [
+        "0",
+        "94"
+      ],
+      [
+        "1",
+        "27"
+      ],
+      [
+        "1",
+        "94"
+      ]
+    ],
+    "markers": [
+      "HSS_PASS real CortexM0 sampler, posted flush, packet BRAM payload",
+      "RTT_PASS real CortexM0 descriptor boundary, unaligned payload, DMA-before-RdOff, DAP recovery",
+      "ERROR_PASS WAIT/release/recovery",
+      "FAULT_SKIP model did not report FAULT (ack=1 sticky=0)",
+      "ERROR_PASS WAIT/ABORT/recovery (FAULT not modelled)"
+    ]
+  },
+  {
+    "name": "policy45_ret20",
+    "args": [
+      "half_ns=5.555556",
+      "rx_boundary=0",
+      "phase=1",
+      "return_ns=20",
+      "words=2",
+      "idle=1",
+      "errors",
+      "streams"
+    ],
+    "passed": true,
+    "expected": true,
+    "matched": true,
+    "seconds": 4.57,
+    "equivalent_edges": [
+      "26659"
+    ],
+    "cycles": [
+      [
+        "0",
+        "94"
+      ],
+      [
+        "1",
+        "27"
+      ],
+      [
+        "1",
+        "94"
+      ]
+    ],
+    "markers": [
+      "HSS_PASS real CortexM0 sampler, posted flush, packet BRAM payload",
+      "RTT_PASS real CortexM0 descriptor boundary, unaligned payload, DMA-before-RdOff, DAP recovery",
+      "ERROR_PASS WAIT/release/recovery",
+      "FAULT_SKIP model did not report FAULT (ack=1 sticky=0)",
+      "ERROR_PASS WAIT/ABORT/recovery (FAULT not modelled)"
+    ]
+  }
+]

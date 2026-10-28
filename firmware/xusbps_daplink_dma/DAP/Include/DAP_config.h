@@ -465,6 +465,7 @@ __STATIC_INLINE void PORT_SWD_SETUP (void) {
   //   [12:9]  cfg_clock_delay       SWJ sequence half-cycle delay
   //   [16:13] cfg_delay_fast        Transfer half-cycle delay
   //   [17]    cfg_sample_rise      Input capture phase (Q1/Q2)
+  //   [18]    cfg_rx_boundary      1=short-return ACK/data boundary, 0=legacy
   //   [24:23] cfg_turn_extra       Extra low half-cycle steps before ACK
   //   [27:25] cfg_ack_delay        0=legacy; 1..7=ACK hold/capture schedule
     //   [31:29] Reserved

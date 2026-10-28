@@ -187,7 +187,8 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
     case ID_DAP_Vendor8:
       {
         uint32_t state,i;
-        if(*request==1)swd_write32(SWD_BASE_ADDR+0x54U,1U);
+        if(*request==1 || *request==2)
+            swd_write32(SWD_BASE_ADDR+0x54U,*request==2 ? 3U : 1U);
         state=swd_read32(SWD_BASE_ADDR+0x54U);
         *response++=DAP_OK;memcpy(response,&state,4);response+=4;
         for(i=0;i<16;i++){
@@ -198,7 +199,21 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
         num=(2U<<16)|70U;
       }
       break;
-    case ID_DAP_Vendor9:  break;
+    case ID_DAP_Vendor9:
+      { // Receive-boundary diagnostic: 0/1=set, 255=query, preserve phase.
+        uint32_t cfg=swd_read32(SWD_CFG),i;
+        uint8_t status=DAP_OK;
+        if(*request<=1U) {
+          uint32_t wanted=(cfg & ~(1U<<18)) | ((uint32_t)*request<<18);
+          swd_write32(SWD_CFG,wanted);
+          cfg=swd_read32(SWD_CFG);
+          if(cfg!=wanted)status=DAP_ERROR;
+        } else if(*request!=255U)status=DAP_ERROR;
+        *response++=status;*response++=(cfg>>18)&1U;*response++=0;
+        for(i=0;i<4;i++)*response++=(uint8_t)(cfg>>(8*i));
+        num=(2U<<16)|8U;
+      }
+      break;
     case ID_DAP_Vendor10: break;
     case ID_DAP_Vendor11: break;
     case ID_DAP_Vendor12: break;

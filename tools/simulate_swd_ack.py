@@ -1,6 +1,6 @@
 """Verify configurable SWD ACK timing against a delayed target model.
 
-The target changes SWDIO on SWCLK falling edges and can delay its output
+The target changes SWDIO on SWCLK rising edges and can delay its output
 transitions.  ACK=WAIT (010) is used for the timing sweep because ACK=OK has a
 pull-up-compatible first bit and would hide a late target response.
 """
@@ -55,8 +55,8 @@ def main() -> None:
     build_dir.mkdir(parents=True, exist_ok=True)
 
     rows = []
-    # Baseline includes a complete DP read and checks data/parity. The sweep
-    # uses WAIT so a late ACK cannot be mistaken for the line pull-up.
+    # This bench checks ACK only. The wire-stream and Cortex-M0 regressions
+    # check read data/parity. WAIT avoids pull-up masking of a late response.
     rows.append(run_case(build_dir, tco=1, ack_delay=0, turn_extra=0,
                          expect_ack=1))
     for tco, ack_delay, turn_extra in (
@@ -69,7 +69,7 @@ def main() -> None:
 
     # In this model a 20 ns target response requires at least one extended
     # high phase; turnaround-only stretching does not fix the ACK bit that was
-    # already launched on the first falling edge.
+    # already launched on the request-turnaround rising edge.
     for row in rows:
         if row["expect_ack"] == 1:
             row["expected"] = True

@@ -15,7 +15,9 @@ set_property -dict {PACKAGE_PIN E19 IOSTANDARD LVCMOS33} [get_ports {gpio_rtl_0_
 set_property -dict {PACKAGE_PIN E18 IOSTANDARD LVCMOS33} [get_ports {gpio_rtl_0_tri_io[3]}]
 
 # SWD interface
-set_property -dict {PACKAGE_PIN D20 IOSTANDARD LVCMOS33 SLEW FAST DRIVE 8} [get_ports swclk_0]
+# Board A/B/A: SLOW/4 restores the low-rate ACK waveform on this link.
+# Keep SWDIO's existing settings; the receiver boundary is configured separately.
+set_property -dict {PACKAGE_PIN D20 IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 4} [get_ports swclk_0]
 set_property PACKAGE_PIN D19 [get_ports swdio_0]
 set_property IOSTANDARD LVCMOS33 [get_ports swdio_0]
 set_property PULLUP true [get_ports swdio_0]

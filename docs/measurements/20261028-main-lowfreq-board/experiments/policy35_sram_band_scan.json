@@ -1,0 +1,241 @@
+{
+  "artifacts": {
+    "git_head": "d42b60180e82fccb428c51613a0316776c2bc4fc",
+    "git_dirty": true,
+    "bit": {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\artifacts\\rx_final.bit",
+      "sha256": "ae59f5e92e445b9f38dbc879c164c7669366f70cc62323d961f46deef216279f"
+    },
+    "elf": {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\artifacts\\rx_final.elf",
+      "sha256": "c8e83190434fe74e58b7289618f15387037ea62d6f5c4fc4a43b1ae9cecc580b"
+    }
+  },
+  "address": "0x20004000",
+  "size": 1024,
+  "loops": 3,
+  "rows": [
+    {
+      "requested_kHz": 31000,
+      "passed": true,
+      "idcode_reply": "0501017714a01b",
+      "diagnostic": "80000100ff869303110a0200",
+      "FCLK_Hz": 59999999,
+      "SWCLK_Hz": 29999999.5,
+      "cfg": "0x20a11",
+      "phase": 1,
+      "rx_boundary": 0,
+      "bytes_each_direction": 3072,
+      "roundtrip_seconds": 0.004545699979644269,
+      "restore_match": true
+    },
+    {
+      "requested_kHz": 32000,
+      "passed": true,
+      "idcode_reply": "0501017714a01b",
+      "diagnostic": "80000100e418b303110a0200",
+      "FCLK_Hz": 62068964,
+      "SWCLK_Hz": 31034482.0,
+      "cfg": "0x20a11",
+      "phase": 1,
+      "rx_boundary": 0,
+      "bytes_each_direction": 3072,
+      "roundtrip_seconds": 0.004203899996355176,
+      "restore_match": true
+    },
+    {
+      "requested_kHz": 33000,
+      "passed": true,
+      "idcode_reply": "0501017714a01b",
+      "diagnostic": "8000010011ecd403110a0200",
+      "FCLK_Hz": 64285713,
+      "SWCLK_Hz": 32142856.5,
+      "cfg": "0x20a11",
+      "phase": 1,
+      "rx_boundary": 0,
+      "bytes_each_direction": 3072,
+      "roundtrip_seconds": 0.004316399979870766,
+      "restore_match": true
+    },
+    {
+      "requested_kHz": 34000,
+      "passed": true,
+      "idcode_reply": "0501017714a01b",
+      "diagnostic": "80000100aa40f903110a0200",
+      "FCLK_Hz": 66666666,
+      "SWCLK_Hz": 33333333.0,
+      "cfg": "0x20a11",
+      "phase": 1,
+      "rx_boundary": 0,
+      "bytes_each_direction": 3072,
+      "roundtrip_seconds": 0.00400179999996908,
+      "restore_match": true
+    },
+    {
+      "requested_kHz": 35000,
+      "passed": true,
+      "idcode_reply": "0501017714a01b",
+      "diagnostic": "80000100b0602004110a0200",
+      "FCLK_Hz": 69230768,
+      "SWCLK_Hz": 34615384.0,
+      "cfg": "0x20a11",
+      "phase": 1,
+      "rx_boundary": 0,
+      "bytes_each_direction": 3072,
+      "roundtrip_seconds": 0.004251400008797646,
+      "restore_match": true
+    },
+    {
+      "requested_kHz": 35500,
+      "passed": false,
+      "error": "RuntimeError('IDCODE read failed: 05 00 04')",
+      "engine_state": {
+        "features": 1146093575,
+        "reset_count": 16,
+        "core_status": 8,
+        "batch_status": 4096,
+        "packet_status": 16842754,
+        "recovery_errors": 0
+      },
+      "FCLK_Hz": 69230768,
+      "SWCLK_Hz": 34615384.0,
+      "cfg": "0xa11",
+      "phase": 0,
+      "rx_boundary": 0,
+      "restore_match": true
+    },
+    {
+      "requested_kHz": 36000,
+      "passed": false,
+      "error": "RuntimeError('IDCODE read failed: 05 00 08')",
+      "engine_state": {
+        "features": 1146093575,
+        "reset_count": 17,
+        "core_status": 130,
+        "batch_status": 4096,
+        "packet_status": 16842754,
+        "recovery_errors": 0
+      },
+      "FCLK_Hz": 71999999,
+      "SWCLK_Hz": 35999999.5,
+      "cfg": "0xa11",
+      "phase": 0,
+      "rx_boundary": 0,
+      "restore_match": true
+    },
+    {
+      "requested_kHz": 37000,
+      "passed": false,
+      "error": "RuntimeError('IDCODE read failed: 05 00 08')",
+      "engine_state": {
+        "features": 1146093575,
+        "reset_count": 18,
+        "core_status": 130,
+        "batch_status": 4096,
+        "packet_status": 16842754,
+        "recovery_errors": 0
+      },
+      "FCLK_Hz": 71999999,
+      "SWCLK_Hz": 35999999.5,
+      "cfg": "0xa11",
+      "phase": 0,
+      "rx_boundary": 0,
+      "restore_match": true
+    },
+    {
+      "requested_kHz": 38000,
+      "passed": true,
+      "idcode_reply": "0501017714a01b",
+      "diagnostic": "80000000bf687804110a0000",
+      "FCLK_Hz": 74999999,
+      "SWCLK_Hz": 37499999.5,
+      "cfg": "0xa11",
+      "phase": 0,
+      "rx_boundary": 0,
+      "bytes_each_direction": 3072,
+      "roundtrip_seconds": 0.0037936999869998544,
+      "restore_match": true
+    },
+    {
+      "requested_kHz": 39000,
+      "passed": true,
+      "idcode_reply": "0501017714a01b",
+      "diagnostic": "80000000bf687804110a0000",
+      "FCLK_Hz": 74999999,
+      "SWCLK_Hz": 37499999.5,
+      "cfg": "0xa11",
+      "phase": 0,
+      "rx_boundary": 0,
+      "bytes_each_direction": 3072,
+      "roundtrip_seconds": 0.004355299985036254,
+      "restore_match": true
+    },
+    {
+      "requested_kHz": 40000,
+      "passed": true,
+      "idcode_reply": "0501017714a01b",
+      "diagnostic": "80000000842aaa04110a0000",
+      "FCLK_Hz": 78260868,
+      "SWCLK_Hz": 39130434.0,
+      "cfg": "0xa11",
+      "phase": 0,
+      "rx_boundary": 0,
+      "bytes_each_direction": 3072,
+      "roundtrip_seconds": 0.0036441000120248646,
+      "restore_match": true
+    },
+    {
+      "requested_kHz": 41000,
+      "passed": true,
+      "idcode_reply": "0501017714a01b",
+      "diagnostic": "800000004572e004110a0000",
+      "FCLK_Hz": 81818181,
+      "SWCLK_Hz": 40909090.5,
+      "cfg": "0xa11",
+      "phase": 0,
+      "rx_boundary": 0,
+      "bytes_each_direction": 3072,
+      "roundtrip_seconds": 0.0036613999982364476,
+      "restore_match": true
+    },
+    {
+      "requested_kHz": 45000,
+      "passed": true,
+      "idcode_reply": "0501017714a01b",
+      "diagnostic": "800000007f4a5d05110a0000",
+      "FCLK_Hz": 89999999,
+      "SWCLK_Hz": 44999999.5,
+      "cfg": "0xa11",
+      "phase": 0,
+      "rx_boundary": 0,
+      "bytes_each_direction": 3072,
+      "roundtrip_seconds": 0.0036149999941699207,
+      "restore_match": true
+    },
+    {
+      "requested_kHz": 48000,
+      "passed": true,
+      "idcode_reply": "0501017714a01b",
+      "diagnostic": "80000000c991a505110a0000",
+      "FCLK_Hz": 94736841,
+      "SWCLK_Hz": 47368420.5,
+      "cfg": "0xa11",
+      "phase": 0,
+      "rx_boundary": 0,
+      "bytes_each_direction": 3072,
+      "roundtrip_seconds": 0.0034029999806080014,
+      "restore_match": true
+    }
+  ],
+  "CPUID": "0x411fc231",
+  "RCC_before": [
+    "0x3035983",
+    "0x29250a"
+  ],
+  "backup_sha256": "d55a61475e4ff5f4dff56b7d9bfdcbb210740790843aa729f6a11b84c49d6a14",
+  "RCC_after": [
+    "0x3035983",
+    "0x29250a"
+  ],
+  "restore_match": true
+}

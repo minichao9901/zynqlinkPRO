@@ -1,0 +1,447 @@
+[
+  {
+    "name": "legacy50_all",
+    "args": [
+      "half_ns=5",
+      "rx_boundary=0",
+      "phase=0",
+      "return_ns=16",
+      "words=2",
+      "idle=1",
+      "packets",
+      "errors",
+      "streams",
+      "recovery"
+    ],
+    "passed": true,
+    "expected": true,
+    "matched": true,
+    "seconds": 154.92,
+    "equivalent_edges": [
+      "882009"
+    ],
+    "cycles": [
+      [
+        "0",
+        "94"
+      ],
+      [
+        "1",
+        "27"
+      ],
+      [
+        "1",
+        "94"
+      ]
+    ],
+    "markers": [
+      "HSS_PASS real CortexM0 sampler, posted flush, packet BRAM payload",
+      "RTT_PASS real CortexM0 descriptor boundary, unaligned payload, DMA-before-RdOff, DAP recovery",
+      "PACKET_PASS count=1 read=0",
+      "PACKET_PASS count=1 read=1",
+      "PACKET_PASS count=2 read=0",
+      "PACKET_PASS count=2 read=1",
+      "PACKET_PASS count=127 read=0",
+      "PACKET_PASS count=127 read=1",
+      "PACKET_PASS count=256 read=0",
+      "PACKET_PASS count=256 read=1",
+      "PACKET_PASS count=770 read=0",
+      "PACKET_PASS count=770 read=1",
+      "PACKET_PASS count=1023 read=0",
+      "PACKET_PASS count=1023 read=1",
+      "PACKET_PASS count=2 read=0",
+      "PACKET_PASS count=2 read=1",
+      "RECOVERY_PASS active packet reset, SWJ reconnect and target SRAM",
+      "ERROR_PASS WAIT/release/recovery",
+      "FAULT_SKIP model did not report FAULT (ack=1 sticky=0)",
+      "ERROR_PASS WAIT/ABORT/recovery (FAULT not modelled)"
+    ]
+  },
+  {
+    "name": "rx25_all",
+    "args": [
+      "half_ns=10",
+      "rx_boundary=1",
+      "phase=1",
+      "return_ns=16",
+      "words=2",
+      "idle=1",
+      "packets",
+      "errors",
+      "streams",
+      "recovery"
+    ],
+    "passed": true,
+    "expected": true,
+    "matched": true,
+    "seconds": 237.99,
+    "equivalent_edges": [
+      "62"
+    ],
+    "cycles": [
+      [
+        "0",
+        "94"
+      ],
+      [
+        "1",
+        "26"
+      ],
+      [
+        "1",
+        "94"
+      ]
+    ],
+    "markers": [
+      "HSS_PASS real CortexM0 sampler, posted flush, packet BRAM payload",
+      "RTT_PASS real CortexM0 descriptor boundary, unaligned payload, DMA-before-RdOff, DAP recovery",
+      "PACKET_PASS count=1 read=0",
+      "PACKET_PASS count=1 read=1",
+      "PACKET_PASS count=2 read=0",
+      "PACKET_PASS count=2 read=1",
+      "PACKET_PASS count=127 read=0",
+      "PACKET_PASS count=127 read=1",
+      "PACKET_PASS count=256 read=0",
+      "PACKET_PASS count=256 read=1",
+      "PACKET_PASS count=770 read=0",
+      "PACKET_PASS count=770 read=1",
+      "PACKET_PASS count=1023 read=0",
+      "PACKET_PASS count=1023 read=1",
+      "PACKET_PASS count=2 read=0",
+      "PACKET_PASS count=2 read=1",
+      "RECOVERY_PASS active packet reset, SWJ reconnect and target SRAM",
+      "ERROR_PASS WAIT/release/recovery",
+      "FAULT_SKIP model did not report FAULT (ack=1 sticky=0)",
+      "ERROR_PASS WAIT/ABORT/recovery (FAULT not modelled)"
+    ]
+  },
+  {
+    "name": "rx10_all",
+    "args": [
+      "half_ns=25",
+      "rx_boundary=1",
+      "phase=1",
+      "return_ns=16",
+      "words=2",
+      "idle=1",
+      "packets",
+      "errors",
+      "streams",
+      "recovery"
+    ],
+    "passed": true,
+    "expected": true,
+    "matched": true,
+    "seconds": 439.47,
+    "equivalent_edges": [
+      "62"
+    ],
+    "cycles": [
+      [
+        "0",
+        "94"
+      ],
+      [
+        "1",
+        "26"
+      ],
+      [
+        "1",
+        "94"
+      ]
+    ],
+    "markers": [
+      "HSS_PASS real CortexM0 sampler, posted flush, packet BRAM payload",
+      "RTT_PASS real CortexM0 descriptor boundary, unaligned payload, DMA-before-RdOff, DAP recovery",
+      "PACKET_PASS count=1 read=0",
+      "PACKET_PASS count=1 read=1",
+      "PACKET_PASS count=2 read=0",
+      "PACKET_PASS count=2 read=1",
+      "PACKET_PASS count=127 read=0",
+      "PACKET_PASS count=127 read=1",
+      "PACKET_PASS count=256 read=0",
+      "PACKET_PASS count=256 read=1",
+      "PACKET_PASS count=770 read=0",
+      "PACKET_PASS count=770 read=1",
+      "PACKET_PASS count=1023 read=0",
+      "PACKET_PASS count=1023 read=1",
+      "PACKET_PASS count=2 read=0",
+      "PACKET_PASS count=2 read=1",
+      "RECOVERY_PASS active packet reset, SWJ reconnect and target SRAM",
+      "ERROR_PASS WAIT/release/recovery",
+      "FAULT_SKIP model did not report FAULT (ack=1 sticky=0)",
+      "ERROR_PASS WAIT/ABORT/recovery (FAULT not modelled)"
+    ]
+  },
+  {
+    "name": "legacy_sampler",
+    "args": [
+      "half_ns=5",
+      "rx_boundary=0",
+      "phase=0",
+      "return_ns=16",
+      "words=2",
+      "idle=1",
+      "sampler"
+    ],
+    "passed": true,
+    "expected": true,
+    "matched": true,
+    "seconds": 8.62,
+    "equivalent_edges": [
+      "67287"
+    ],
+    "cycles": [
+      [
+        "0",
+        "94"
+      ],
+      [
+        "1",
+        "94"
+      ]
+    ],
+    "markers": [
+      "SAMPLER_PASS actual CortexM0 MEM-AP, FIFO, competing launches, DAP recovery"
+    ]
+  },
+  {
+    "name": "rx_sampler",
+    "args": [
+      "half_ns=10",
+      "rx_boundary=1",
+      "phase=1",
+      "return_ns=16",
+      "words=2",
+      "idle=1",
+      "sampler"
+    ],
+    "passed": true,
+    "expected": true,
+    "matched": true,
+    "seconds": 13.54,
+    "equivalent_edges": [
+      "62"
+    ],
+    "cycles": [
+      [
+        "0",
+        "94"
+      ],
+      [
+        "1",
+        "94"
+      ]
+    ],
+    "markers": [
+      "SAMPLER_PASS actual CortexM0 MEM-AP, FIFO, competing launches, DAP recovery"
+    ]
+  },
+  {
+    "name": "legacy_ack1",
+    "args": [
+      "half_ns=5",
+      "rx_boundary=0",
+      "phase=0",
+      "return_ns=16",
+      "words=2",
+      "idle=1",
+      "ack_delay=1"
+    ],
+    "passed": true,
+    "expected": true,
+    "matched": true,
+    "seconds": 4.06,
+    "equivalent_edges": [
+      "8235"
+    ],
+    "cycles": [
+      [
+        "0",
+        "101"
+      ],
+      [
+        "1",
+        "101"
+      ]
+    ],
+    "markers": []
+  },
+  {
+    "name": "legacy_ack3",
+    "args": [
+      "half_ns=5",
+      "rx_boundary=0",
+      "phase=0",
+      "return_ns=16",
+      "words=2",
+      "idle=1",
+      "ack_delay=3"
+    ],
+    "passed": true,
+    "expected": true,
+    "matched": true,
+    "seconds": 3.94,
+    "equivalent_edges": [
+      "8451"
+    ],
+    "cycles": [
+      [
+        "0",
+        "107"
+      ],
+      [
+        "1",
+        "107"
+      ]
+    ],
+    "markers": []
+  },
+  {
+    "name": "legacy_ack7",
+    "args": [
+      "half_ns=5",
+      "rx_boundary=0",
+      "phase=0",
+      "return_ns=16",
+      "words=2",
+      "idle=1",
+      "ack_delay=7"
+    ],
+    "passed": true,
+    "expected": true,
+    "matched": true,
+    "seconds": 3.44,
+    "equivalent_edges": [
+      "8883"
+    ],
+    "cycles": [
+      [
+        "0",
+        "119"
+      ],
+      [
+        "1",
+        "119"
+      ]
+    ],
+    "markers": []
+  },
+  {
+    "name": "rx_turn1",
+    "args": [
+      "half_ns=10",
+      "rx_boundary=1",
+      "phase=1",
+      "return_ns=16",
+      "words=2",
+      "idle=1",
+      "turn_extra=1",
+      "errors"
+    ],
+    "passed": true,
+    "expected": true,
+    "matched": true,
+    "seconds": 4.57,
+    "equivalent_edges": [
+      "62"
+    ],
+    "cycles": [
+      [
+        "0",
+        "95"
+      ],
+      [
+        "1",
+        "27"
+      ],
+      [
+        "1",
+        "95"
+      ]
+    ],
+    "markers": [
+      "ERROR_PASS WAIT/release/recovery",
+      "FAULT_SKIP model did not report FAULT (ack=1 sticky=0)",
+      "ERROR_PASS WAIT/ABORT/recovery (FAULT not modelled)"
+    ]
+  },
+  {
+    "name": "rx_turn2",
+    "args": [
+      "half_ns=10",
+      "rx_boundary=1",
+      "phase=1",
+      "return_ns=16",
+      "words=2",
+      "idle=1",
+      "turn_extra=2",
+      "errors"
+    ],
+    "passed": true,
+    "expected": true,
+    "matched": true,
+    "seconds": 4.57,
+    "equivalent_edges": [
+      "62"
+    ],
+    "cycles": [
+      [
+        "0",
+        "96"
+      ],
+      [
+        "1",
+        "28"
+      ],
+      [
+        "1",
+        "96"
+      ]
+    ],
+    "markers": [
+      "ERROR_PASS WAIT/release/recovery",
+      "FAULT_SKIP model did not report FAULT (ack=1 sticky=0)",
+      "ERROR_PASS WAIT/ABORT/recovery (FAULT not modelled)"
+    ]
+  },
+  {
+    "name": "rx_turn3",
+    "args": [
+      "half_ns=10",
+      "rx_boundary=1",
+      "phase=1",
+      "return_ns=16",
+      "words=2",
+      "idle=1",
+      "turn_extra=3",
+      "errors"
+    ],
+    "passed": true,
+    "expected": true,
+    "matched": true,
+    "seconds": 4.55,
+    "equivalent_edges": [
+      "62"
+    ],
+    "cycles": [
+      [
+        "0",
+        "97"
+      ],
+      [
+        "1",
+        "29"
+      ],
+      [
+        "1",
+        "97"
+      ]
+    ],
+    "markers": [
+      "ERROR_PASS WAIT/release/recovery",
+      "FAULT_SKIP model did not report FAULT (ack=1 sticky=0)",
+      "ERROR_PASS WAIT/ABORT/recovery (FAULT not modelled)"
+    ]
+  }
+]

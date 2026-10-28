@@ -1,0 +1,57 @@
+{
+  "label": "rx_verified",
+  "artifacts": {
+    "git_head": "d42b60180e82fccb428c51613a0316776c2bc4fc",
+    "git_dirty": true,
+    "bit": {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\artifacts\\rx_verified.bit",
+      "sha256": "ae59f5e92e445b9f38dbc879c164c7669366f70cc62323d961f46deef216279f"
+    },
+    "elf": {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\artifacts\\rx_verified.elf",
+      "sha256": "68bfb2ee0d6f3e726f8d99b3027d03706801953d40f04c19c6f976591db9ea04"
+    }
+  },
+  "runs": [
+    {
+      "name": "sram_api_p2_50000",
+      "command": [
+        "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\tools\\benchmark_cmsis_sram.py",
+        "--speed",
+        "50000",
+        "--sessions",
+        "3",
+        "--loops",
+        "100",
+        "--prefix-words",
+        "2",
+        "--output",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\rx_verified\\sram_api_p2_50000.json"
+      ],
+      "returncode": 0,
+      "seconds": 4.02,
+      "required": true
+    },
+    {
+      "name": "sram_api_p2_60000",
+      "command": [
+        "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\tools\\benchmark_cmsis_sram.py",
+        "--speed",
+        "60000",
+        "--sessions",
+        "3",
+        "--loops",
+        "100",
+        "--prefix-words",
+        "2",
+        "--output",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\rx_verified\\sram_api_p2_60000.json"
+      ],
+      "returncode": 0,
+      "seconds": 3.51,
+      "required": true
+    }
+  ]
+}

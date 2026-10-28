@@ -126,3 +126,17 @@ openocd -s <openocd>/share/openocd/scripts `
   60/64/72 MHz 变体）；
 - 测速必须用 `--no-reset`：`reset halt` 会把目标停在复位向量，F103 还在
   HSI 8 MHz，吞吐只有约 1.5 MB/s。
+
+
+## 2026-10-28 低频实验暂停检查点
+
+本分支新增 `zynqlink_lowfreq_checkpoint.bit` + `.elf`，不覆盖原有配对。
+当前状态 **PAUSED、未合入 main、非正式发布**。FCLK 120 MHz，SWCLK 上限 60 MHz；SWCLK 为 SLOW/4 mA。
+源码/产物校验值见 `lowfreq_checkpoint_manifest.json` 与 `LOWFREQ_CHECKPOINT_SHA256SUMS`。
+板测结果、未归因的 USB/HSS 问题及适用范围见[状态日志](../docs/main-lowfreq-progress.md)。
+
+```powershell
+python tools/run_xsct.py tools/download_dap_fpga.tcl prebuilt/zynqlink_lowfreq_checkpoint.elf prebuilt/zynqlink_lowfreq_checkpoint.bit
+```
+
+此命令供以后明确恢复工作时使用；暂停整理期间未重新下载设备。

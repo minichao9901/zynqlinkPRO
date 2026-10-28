@@ -1,0 +1,68 @@
+{
+  "base": "d42b60180e82fccb428c51613a0316776c2bc4fc",
+  "files": {
+    "main_exact.bit": "c8ac6975287c62c0ac3bb576196440af4f562fe14ea27d16cec6865e7e00945c",
+    "main_exact.elf": "3e5e6311f55da72d1ce207491eb739e618d23e1e2c25b9cedac127dfa5a957cf"
+  },
+  "clock": {
+    "FCLK_max_Hz": 120000000,
+    "SWCLK_max_Hz": 60000000,
+    "setup_slack_ns": 0.443,
+    "hold_slack_ns": 0.013
+  },
+  "reference": "E:\\zynqlink_builds\\main_lowfreq_20261028\\main_reference\\reference_manifest.json",
+  "firmware": {
+    "options": {
+      "opt": "3",
+      "project": "xusbps_daplink_dma",
+      "trace": false,
+      "usb_trace": false,
+      "experimental_zero_idle": false,
+      "max_swclk_hz": 60000000,
+      "bsp": "E:/zynqlinkPRO/reference/legacy_zynq/ZYNQ_DAPLINK_RTL_100TO50MHz/ZYNQ_DAPLINK_RTL_100TO50MHz.sdk/usb_bsp/ps7_cortexa9_0",
+      "gcc": "E:\\Xilinx\\SDK\\2018.3\\gnu\\aarch32\\nt\\gcc-arm-none-eabi\\bin\\arm-none-eabi-gcc.exe"
+    },
+    "verified_fpga_clock": {
+      "FCLK_max_Hz": 120000000,
+      "SWCLK_max_Hz": 60000000,
+      "setup_slack_ns": 0.443,
+      "hold_slack_ns": 0.013
+    },
+    "source_sha256": {
+      "chry_ringbuffer.c": "2e0990400a94ea311255b83e1fb3cf21efd6453e468545440749b8a64f918fdc",
+      "chry_ringbuffer.h": "2839a07bdf9de6575086d25eb8a0e092a01eb376b003df21e89177a8ac081dc6",
+      "dap_main.c": "e6b69d38a5cee6cd059c88e8b2e986ca839a0505eeae287f8088f4165336404a",
+      "dap_main.h": "917c99ab647a6eca535957f9dcb107a4da9575c74d71abf3ed200d2e8276b845",
+      "lscript.ld": "c1bbc296540937ce9618a683e305e55c116678f6b42f1ce397b81492346e37c9",
+      "probe_stream.c": "b800e576df75bdf0bc4844ab3f647a8a8d06fec1ddbbe556cc1677fded6e82d7",
+      "probe_stream.h": "0af9e8397f6c81ce0e9b02cc22a2b92c31b20744072cfaca8b016f508c14366d",
+      "probe_target.c": "f162e7d479b9a32b968093cf3e3bbe96913054bb2bbd01c763a80d7c9911f372",
+      "README.txt": "265e6e74d7913c397b2e78997cb08682ffdae7c838f321a3f21f521f51e92dbc",
+      "Xilinx.spec": "d7f2fca3a9e48f9bb07059f5ecc8dd1468ee1ec1b82d361d0592ecdb24d15067",
+      "xusbps_bos_desc.c": "f298c9b7184a3e78ae5fe5cb1053e4bd1c364947e413fdc6469b592fb41d7f49",
+      "xusbps_bos_desc.h": "46695a1d22fa6ab3f5d534f0f232a9d4c02084f74e08f0ca63bf30251547fb42",
+      "xusbps_ch9.c": "1b57a29f74ebccd815f5f56e600dc50adbaf9d2b12f585ea24df71fe452a0702",
+      "xusbps_ch9.h": "d8c9dc12b1ed2dc7d259ae3ca418ba253c0663018ab9fea7e871babc08954163",
+      "xusbps_ch9_storage.c": "bd0067f9061bb70fe31b0a77e11e4a719f67ee1a04b8d43abf7393b5faa741af",
+      "xusbps_ch9_storage.h": "81df036fa976db4fa4f8b12b145204708fab74d5a4654e5572531c556ead20ec",
+      "xusbps_class_cdc.c": "9486a4eaca9c903d54fc7fb5c0a0c28a31eeb6b3e3afd1142a20e2f67fcea326",
+      "xusbps_class_cdc.h": "5bce7f89125bb1dcefef648005f94f43927a805a24a32cc9785e93e9c3c7c706",
+      "xusbps_intr.c": "c4784800d8db21dd4869c4200d84db4be6f1083ea374605c9af6599240fa14d8",
+      "xusbps_intr_example.c": "c41d4944eb88ca1d4fde171c15b65dc5ea0194d03d1423294986ae4254bb7921",
+      "DAP\\Include\\DAP.h": "0e2ef089e778308ef93a575e57a08d590b92ed54302fdb6c195a489f7e00915c",
+      "DAP\\Include\\DAP_config.h": "ab9eee73e8274cf4548afe03108e7cc3eec38b674c9f8623431f30b78c3216a1",
+      "DAP\\Include\\dap_metrics.h": "a4fd0d97c486ccb60061b540faffbfe7140d84f33aa0de2f00c4f7d6a749113e",
+      "DAP\\Include\\swd_dma.h": "a81f08e8320f83aa011bf32a619287b45b472d317b1344e6de22b641ff6521a7",
+      "DAP\\Source\\DAP.c": "61eb5ed70361b5e08d4ab88d1db8bc2953441a22af719ab0c39fc442cb2280c7",
+      "DAP\\Source\\dap_metrics.c": "1ddec04d35b84f9d28c282f370ae9954a90c4214c973252e33dd34ba8c64c54e",
+      "DAP\\Source\\DAP_vendor.c": "8ef7b3827c60219e4723b477c756ca00cd7f8171c955a933310048359f7af220",
+      "DAP\\Source\\JTAG_DP.c": "245efe319ea4acda024b14a386e7872746c2999c1f2d518364d4f7a5565669d1",
+      "DAP\\Source\\swd_dma.c": "057f76b99bb82f1c364766b69a0950f281be7a631cdee9ed0b9e3ac70271921d",
+      "DAP\\Source\\SWO.c": "39d996cc386fc7f232847cf65853efc7de32d1176b5f9ba880d42b2b9dd519ef",
+      "DAP\\Source\\SW_DP.c": "b4bd517f068687e36c148fb62a39ff4d46890c6aaf7b5d4764436c977c0bd638",
+      "DAP\\Source\\UART.c": "781e04bd830eda3a6c23ed9d0d0b08f53fbc7fa0d37d0ff7286500148ae3c72b"
+    },
+    "bsp_sha256": "b31bd5a75096dfdba14dca67c78629983985ba55a9984c0afa6062d1030859e5",
+    "elf_sha256": "3e5e6311f55da72d1ce207491eb739e618d23e1e2c25b9cedac127dfa5a957cf"
+  }
+}

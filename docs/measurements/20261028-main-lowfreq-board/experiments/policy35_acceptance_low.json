@@ -1,0 +1,233 @@
+{
+  "label": "rx_final",
+  "artifacts": {
+    "git_head": "d42b60180e82fccb428c51613a0316776c2bc4fc",
+    "git_dirty": true,
+    "bit": {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\artifacts\\rx_final.bit",
+      "sha256": "ae59f5e92e445b9f38dbc879c164c7669366f70cc62323d961f46deef216279f"
+    },
+    "elf": {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\artifacts\\rx_final.elf",
+      "sha256": "c8e83190434fe74e58b7289618f15387037ea62d6f5c4fc4a43b1ae9cecc580b"
+    }
+  },
+  "runs": [
+    {
+      "name": "sram_low",
+      "command": [
+        "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\tools\\test_swd_lowfreq_board.py",
+        "--output",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\rx_final\\sram_low.json",
+        "--bit",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\artifacts\\rx_final.bit",
+        "--elf",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\artifacts\\rx_final.elf"
+      ],
+      "returncode": 0,
+      "seconds": 4.58,
+      "required": false
+    },
+    {
+      "name": "rtt_low_1000000",
+      "command": [
+        "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\tools\\benchmark_rtt_forward.py",
+        "--speeds",
+        "1000000",
+        "--chunks",
+        "1024",
+        "--seconds",
+        "2",
+        "--repeats",
+        "1",
+        "--output",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\rx_final\\rtt_low_1000000.json",
+        "--bit",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\artifacts\\rx_final.bit",
+        "--elf",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\artifacts\\rx_final.elf"
+      ],
+      "returncode": 0,
+      "seconds": 3.86,
+      "required": false
+    },
+    {
+      "name": "rtt_low_10000000",
+      "command": [
+        "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\tools\\benchmark_rtt_forward.py",
+        "--speeds",
+        "10000000",
+        "--chunks",
+        "1024",
+        "--seconds",
+        "2",
+        "--repeats",
+        "1",
+        "--output",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\rx_final\\rtt_low_10000000.json",
+        "--bit",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\artifacts\\rx_final.bit",
+        "--elf",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\artifacts\\rx_final.elf"
+      ],
+      "returncode": 1,
+      "seconds": 3.53,
+      "required": false
+    },
+    {
+      "name": "rtt_low_25000000",
+      "command": [
+        "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\tools\\benchmark_rtt_forward.py",
+        "--speeds",
+        "25000000",
+        "--chunks",
+        "1024",
+        "--seconds",
+        "2",
+        "--repeats",
+        "1",
+        "--output",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\rx_final\\rtt_low_25000000.json",
+        "--bit",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\artifacts\\rx_final.bit",
+        "--elf",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\artifacts\\rx_final.elf"
+      ],
+      "returncode": 1,
+      "seconds": 1.52,
+      "required": false
+    },
+    {
+      "name": "rtt_low_35000000",
+      "command": [
+        "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\tools\\benchmark_rtt_forward.py",
+        "--speeds",
+        "35000000",
+        "--chunks",
+        "1024",
+        "--seconds",
+        "2",
+        "--repeats",
+        "1",
+        "--output",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\rx_final\\rtt_low_35000000.json",
+        "--bit",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\artifacts\\rx_final.bit",
+        "--elf",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\artifacts\\rx_final.elf"
+      ],
+      "returncode": 1,
+      "seconds": 1.01,
+      "required": false
+    },
+    {
+      "name": "hss_low_10000000",
+      "command": [
+        "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\tools\\benchmark_probe_stream.py",
+        "--speeds",
+        "10000000",
+        "--variables",
+        "1",
+        "--periods",
+        "2400",
+        "--seconds",
+        "1",
+        "--repeats",
+        "1",
+        "--output",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\rx_final\\hss_low_10000000.json",
+        "--bit",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\artifacts\\rx_final.bit",
+        "--elf",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\artifacts\\rx_final.elf"
+      ],
+      "returncode": 1,
+      "seconds": 0.33,
+      "required": false
+    },
+    {
+      "name": "hss_low_15000000",
+      "command": [
+        "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\tools\\benchmark_probe_stream.py",
+        "--speeds",
+        "15000000",
+        "--variables",
+        "1",
+        "--periods",
+        "2400",
+        "--seconds",
+        "1",
+        "--repeats",
+        "1",
+        "--output",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\rx_final\\hss_low_15000000.json",
+        "--bit",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\artifacts\\rx_final.bit",
+        "--elf",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\artifacts\\rx_final.elf"
+      ],
+      "returncode": 1,
+      "seconds": 0.5,
+      "required": false
+    },
+    {
+      "name": "hss_low_25000000",
+      "command": [
+        "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\tools\\benchmark_probe_stream.py",
+        "--speeds",
+        "25000000",
+        "--variables",
+        "1",
+        "--periods",
+        "2400",
+        "--seconds",
+        "1",
+        "--repeats",
+        "1",
+        "--output",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\rx_final\\hss_low_25000000.json",
+        "--bit",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\artifacts\\rx_final.bit",
+        "--elf",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\artifacts\\rx_final.elf"
+      ],
+      "returncode": 1,
+      "seconds": 0.51,
+      "required": false
+    },
+    {
+      "name": "hss_low_35000000",
+      "command": [
+        "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\tools\\benchmark_probe_stream.py",
+        "--speeds",
+        "35000000",
+        "--variables",
+        "1",
+        "--periods",
+        "2400",
+        "--seconds",
+        "1",
+        "--repeats",
+        "1",
+        "--output",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\rx_final\\hss_low_35000000.json",
+        "--bit",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\artifacts\\rx_final.bit",
+        "--elf",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO\\build\\board_comparison_20261028\\artifacts\\rx_final.elf"
+      ],
+      "returncode": 1,
+      "seconds": 0.33,
+      "required": false
+    }
+  ]
+}
