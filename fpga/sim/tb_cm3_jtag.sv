@@ -81,8 +81,8 @@ module tb_cm3_jtag;
   if(d==0)$fatal(1,"packet timeout core=%d sampler=%d packet=%d",dut.u_jtag_core.state,dut.u_probe_sampler.state,dut.u_probe_stream.state);
  endtask
  reg [31:0] d,head_before,expected,safe_at_fault;reg checking_fault=0;
- reg [31:0] dbg_meta,dbg_front,dbg_latched,dbg_tx,dbg_sense,dbg_extra;
- integer diag_n,k,aborted_scans;
+ reg [31:0] dbg_meta,dbg_front,dbg_latched,dbg_tx,dbg_sense;
+ integer diag_n,k;
  integer hss_t0,hss_t1,rtt_t0,rtt_t1,hss_total;
  integer i,j,bank_base,samples,packets;
  always @(posedge clk)if(checking_fault && dut.u_probe_stream.state==6 &&
@@ -102,7 +102,6 @@ module tb_cm3_jtag;
   write_reg('h80,3);write_reg('h84,4|(bypass_mode ? (5<<19) : 0));
   write_reg('h88,bypass_mode ? 'h100 : 0);
   write_reg('h08,1|((cfg_idle&15)<<4));write_reg('h8c,0);
-  write_reg('hf8,$test$plusargs("abort_wait") ? 1 : 0);
   write_reg('h98,(late_mode ? 16 : 0)|(q1_mode ? 1 : 0));
   // Earliest legal status poll: AR is accepted on the very edge where the
   // serial backend consumes the registered start pulse. Busy must include
@@ -158,20 +157,14 @@ module tb_cm3_jtag;
   $display("JTAG_PKT_DONE status=%h",d);
   write_reg('hcc,4);read_reg('hcc,d);diag_n=(d>>5)&63;
   if(d[31:16]!='h4a54 || diag_n<11)$fatal(1,"JTAG diagnostic history status=%h",d);
-  aborted_scans=0;
   for(k=0;k<diag_n;k=k+1)begin
    write_reg('hd0,k);read_reg('hd4,dbg_meta);read_reg('hd8,dbg_front);
    read_reg('hdc,dbg_latched);read_reg('he0,dbg_tx);read_reg('he4,dbg_sense);
-   read_reg('hec,dbg_extra);
-   if(dbg_extra[31])aborted_scans=aborted_scans+1;
-   if(dbg_extra[31] && (dbg_meta[2:0]!=2 || dbg_extra[30:24]>=40))
-    $fatal(1,"JTAG WAIT exit did not shorten a WAIT scan meta=%h extra=%h",dbg_meta,dbg_extra);
-   if(!dbg_extra[31] && dbg_meta[18:14]==0 && dbg_meta[13:6]==13 &&
+   if(dbg_meta[18:14]==0 && dbg_meta[13:6]==13 &&
       (dbg_front!==dbg_latched || dbg_latched!==dbg_tx || dbg_tx!==dbg_sense))
     $fatal(1,"JTAG diagnostic TX mismatch row=%0d front=%h latched=%h tx=%h pad=%h",k,dbg_front,dbg_latched,dbg_tx,dbg_sense);
   end
-  if($test$plusargs("abort_wait") && aborted_scans==0)$fatal(1,"WAIT exit was not exercised");
-  $display("JTAG_DIAG_DONE scans=%0d aborted=%0d",diag_n,aborted_scans);
+  $display("JTAG_DIAG_DONE scans=%0d",diag_n);
   if($test$plusargs("writes_only"))begin $display("PASS JTAG scalar, batch and packet writes");$finish;end
   // No AXI operations per sample: configure once, then PL fills a bank.
   cfg(0,4);cfg(1,2);cfg(2,32);cfg(5,1);

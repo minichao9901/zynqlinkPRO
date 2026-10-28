@@ -36,12 +36,13 @@ def set_wait_abort(enabled):
     result = run('set s [mrd -force -value 0x400100f8]\n'
                  'if {($s >> 16) != 0x5741} {error "WAIT exit control missing"}\n'
                  + f'mwr -force 0x400100f8 {int(enabled)}\n'
-                 + 'puts [mrd -force -value 0x400100f8]')
+                 + 'puts [format "%08X" [mrd -force -value 0x400100f8]]')
     assert f'5741000{int(enabled)}' in result.lower().replace('0x', ''), result
 
 
 def dump(path):
     text = run('mwr -force 0x400100cc 4\n'
+               'puts [format "CAPABILITY %08X" [mrd -force -value 0x400100f8]]\n'
                'set s [mrd -force -value 0x400100cc]\nputs [format "STATUS %08X" $s]\n'
                'set n [expr {($s >> 5) & 63}]\n'
                'if {$n > 32} {error "Invalid JTAG trace count"}\n'
@@ -51,6 +52,8 @@ def dump(path):
                '  append line [format " %08X" [mrd -force -value $a]]\n }\n puts $line\n}')
     status = re.search(r'STATUS ([0-9A-Fa-f]{8})', text)
     assert status, text
+    capability = re.search(r'CAPABILITY ([0-9A-Fa-f]{8})', text)
+    has_wait_exit = bool(capability and int(capability[1], 16) >> 16 == 0x5741)
     rows = []
     fields = ['meta', 'frontend', 'latched', 'tx', 'pad', 'rx', 'extra', 'alternate_rx', 'samples']
     for match in re.finditer(r'TRACE (\d+)((?: [0-9A-Fa-f]{8}){9})', text):
@@ -63,14 +66,14 @@ def dump(path):
                    tx_request=row['extra'] & 7, pad_request=(row['extra'] >> 3) & 7)
         row['tx_matches_latched'] = row['tx'] == row['latched']
         row['pad_matches_tx'] = row['pad'] == row['tx']
-        row['wait_aborted'] = bool(row['extra'] >> 31)
-        row['scan_bits'] = (row['extra'] >> 24) & 127
+        row['wait_aborted'] = bool(row['extra'] >> 31) if has_wait_exit else False
+        row['scan_bits'] = (row['extra'] >> 24) & 127 if has_wait_exit else None
         row['ack_windows'] = {str(offset): {
             'selected_raw': (row['samples'] >> offset) & 7,
             'alternate_raw': (row['samples'] >> (16 + offset)) & 7}
             for offset in range(2, 7)}
         rows.append(row)
-    report = {'status': int(status[1], 16), 'rows': rows}
+    report = {'status': int(status[1], 16), 'wait_exit_capability': has_wait_exit, 'rows': rows}
     assert report['status'] >> 16 == 0x4a54, text
     assert len(rows) == (report['status'] >> 5) & 63, text
     path = Path(path)

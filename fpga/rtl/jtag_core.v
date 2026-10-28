@@ -17,7 +17,6 @@ module jtag_core (
     input wire [3:0] half_delay,idle_cycles,
     input wire late_return,
     input wire tdo,tdo_alternate,tdi_sense,
-    input wire wait_abort,
     input wire next_valid,input wire [7:0] next_request,input wire [31:0] next_wdata,
     output wire next_ready,result_valid,busy,
     output reg [2:0] ack,output reg [31:0] rdata,
@@ -33,9 +32,7 @@ module jtag_core (
     output reg [31:0] stat_transfers,
     output wire debug_valid,
     output wire [31:0] debug_meta,debug_wdata,debug_tx,debug_sense,debug_rx,debug_alternate,debug_samples,
-    output wire [5:0] debug_tx_req,
-    output wire debug_wait_aborted,
-    output wire [6:0] debug_bits
+    output wire [5:0] debug_tx_req
 );
     localparam IDLE=0,ROUTE=1,RESET_TAP=2,IR_NAV=3,IR_PRE=4,IR_VALUE=5,IR_POST=6,IR_EXIT=7,
                DR_NAV=8,DR_PRE=9,DR_VALUE=10,DR_POST=11,DR_EXIT=12,EVALUATE=13,DONE=14,PHY_WAIT=15;
@@ -56,8 +53,6 @@ module jtag_core (
     wire phy_busy,phy_done;
     wire [255:0] phy_rx;
     wire [63:0] phy_tx_echo,phy_sense_echo,phy_rx_alternate;
-    wire phy_wait_aborted;
-    wire [11:0] phy_completed_bits;
     wire [63:0] debug_tx_frame=phy_tx_echo >> (5+dr_before);
     wire [63:0] debug_sense_frame=phy_sense_echo >> (5+dr_before);
     reg [34:0] scan_result;
@@ -86,8 +81,6 @@ module jtag_core (
     wire [63:0] debug_alt_frame=phy_rx_alternate >> capture_offset;
     assign debug_alternate=debug_alt_frame[34:3];
     assign debug_samples={phy_rx_alternate[15:0],phy_rx[15:0]};
-    assign debug_wait_aborted=phy_wait_aborted;
-    assign debug_bits=phy_completed_bits[6:0];
     assign cached_instruction=ir_cache;
     assign cache_valid=ir_valid;
     assign sequence_result=phy_rx;
@@ -96,11 +89,8 @@ module jtag_core (
         .exit_last(phy_exit),.capture(phy_capture),.tdi_mode(phy_tdi_mode),
         .capture_rise(phy_capture_rise),
         .tms_data(phy_tms_data),.tdi_data(phy_tdi_data),.tdo(tdo),.tdo_alternate(tdo_alternate),.tdi_sense(tdi_sense),
-        .abort_on_wait(wait_abort && state==PHY_WAIT && return_state==EVALUATE && (op==0 || op==1) && desired_ir!=8),
-        .ack_offset(capture_offset),.abort_idle_cycles(idle_cycles),
         .tck(tck),.tms(tms),.tdi(tdi),.busy(phy_busy),.done(phy_done),.rx_data(phy_rx),
-        .tx_echo(phy_tx_echo),.sense_echo(phy_sense_echo),.rx_alternate(phy_rx_alternate),
-        .wait_aborted(phy_wait_aborted),.completed_bits(phy_completed_bits));
+        .tx_echo(phy_tx_echo),.sense_echo(phy_sense_echo),.rx_alternate(phy_rx_alternate));
     task shift_segment;
         input [11:0] n;
         input variable_mode,tm,exit_bit,cap;
@@ -195,7 +185,7 @@ module jtag_core (
             PHY_WAIT: begin
                 stat_cycles<=stat_cycles+1'b1;
                 if(phy_done) begin
-                    stat_bits<=stat_bits+{20'd0,phy_completed_bits};
+                    stat_bits<=stat_bits+{20'd0,phy_count};
                     stat_transfers<=stat_transfers+1'b1;
                     if(return_state==EVALUATE) scan_result<=phy_rx >> capture_offset;
                     if(return_state==DONE && (op==5 || op==6)) rdata<=phy_rx[31:0];

@@ -1,6 +1,6 @@
 {
   "kind": "diagnostic only; existing JTAG write corruption not fixed",
-  "source_commit": "6b14b58",
+  "source_commit": "6b14b58e589725e1e5522d1158d5e26c8c73456d",
   "build_options": {
     "fpga": "python tools/run_vivado.py -mode batch -source fpga/build_dma.tcl",
     "firmware": {
@@ -54,6 +54,16 @@
     "board_50_trace_4.txt": "ffec121158be7caf19c774966202ad99359ad15f96adca010bd91b93985b042e",
     "board_50_trace_8.json": "48ab5831fb86d1f17ba381dd5f82d562d5fd9a91d931cdb88b2bae3842423ff5",
     "board_50_trace_8.txt": "7cae585a6414d81b03a9c8952bf50532a6fa378db148d3a85b459378d43a2270",
-    "cm3_full_pipeline.log": "00778881876e99968b26bbc6c2ef061270d4a40f09e1f2facf9f0531148ec0cc"
+    "cm3_full_pipeline.log": "00778881876e99968b26bbc6c2ef061270d4a40f09e1f2facf9f0531148ec0cc",
+    "final_passive_50.json": "9912cedce334b37c87af58e8c5383cab4cc0c07a3a58c0bf2f22a726043ececc",
+    "final_passive_50_trace_4.json": "c1d0917ced625a9fff8dafc5b78cf4a98db6455eaa3c9ae0e5b3b9cfd9f48d11",
+    "final_passive_50_trace_4.txt": "ca97d04c381590c46ec0335bded63932007b5c8027de0eaaf503032f5a69e11c",
+    "final_passive_50_trace_8.json": "721e37143879061987e22fe2ab3771471ec0cd2841b99fc989ec45a01aafc6a2",
+    "final_passive_50_trace_8.txt": "a239e7bb702f5121f2e1fbd65e68bc889ea94a4411f56412da96b676dc3693e7"
+  },
+  "final_reload_after_wait_experiment": {
+    "loaded_same_bit_and_elf": true,
+    "restore_match": true,
+    "board_has_passive_120MHz_design": true
   }
 }

@@ -1,0 +1,51 @@
+{
+  "kind": "rejected repair experiment; diagnostic A/B only",
+  "source_commit": "a40a50efc72054101841c0067d927a462051c0e3",
+  "build": {
+    "fpga": "python tools/run_vivado.py -mode batch -source fpga/build_dma.tcl",
+    "firmware": "python tools/build_xusbps_daplink.py --project xusbps_daplink_dma --opt 3 --max-swclk-hz 50000000"
+  },
+  "source_rtl_sha256": {
+    "dap_transfer_block_engine.v": "85d03fa03966ecf2ae8599ba49ce21699060ab7bcdb27fc69f772bd492eed319",
+    "jtag_core.v": "3286e1cd93268c2f5e750393b8bda792bdb2e00fba80b342c62ab42d77b42a16",
+    "jtag_shift.v": "04d210071aab6e12320d070370c94accf9d381c7d2197abbd6db89f6cf9a4865",
+    "probe_rtt_engine.v": "10136ba15bbf387677053d95226703ac7563998843c0fc55d8082eee40f60bea",
+    "probe_sample_engine.v": "d4f152a6820b046911c78fc0ee6287665f761430413c990895b9a24611a5aa28",
+    "probe_stream_engine.v": "5cc6d298208a8fbda422d18b2b6ba7bf8df3419fc51a45dc0deec5b91a6b066a",
+    "swd_batch_engine.v": "2147786073a8ed8aa4a66c0c6c16a4e7ba34e222789af20cd84e24b74df70c41",
+    "swd_controller.v": "3062183d3a902577cf7c4fd6b4cb372b8111fb9f3006377c8033dbcc2335822e",
+    "swd_core.v": "9e6fa90077a00ac3d6c4065d9be643038e67e65c1445f68d6a0bf3b04ee0c3ed"
+  },
+  "timing": {
+    "FCLK_max_Hz": 100000000,
+    "SWCLK_max_Hz": 50000000,
+    "setup_slack_ns": 0.564,
+    "hold_slack_ns": 0.044
+  },
+  "artifacts": {
+    "zynqlink_wait_exit.bit": "cedd18dc74c7badc25870698ae16cab0b1d66111bbd2d8281a256e09a3570680",
+    "zynqlink_wait_exit.elf": "da48f3b1673f7d201241f349db75809dbcf67258b1b942e664c3357ddb7c65b0"
+  },
+  "board": {
+    "actual_fclk_hz": 99999999,
+    "actual_tck_hz": 49999999,
+    "timing_mode": 17,
+    "wait_exit_off": "corrupt 4/8-word writes",
+    "wait_exit_on": "corrupt 4/8-word writes; 7 WAIT scans shortened 44 -> 11 TCK",
+    "restore_match": true,
+    "bug_fixed": false
+  },
+  "evidence_sha256": {
+    "off_50.json": "09f5700651cbd9ada6055e5de23e9f03fec401782c58c445b613fdff38bda9d8",
+    "off_50_trace_4.json": "4a3dede613b917bdc02503337b2a9ab89908a9de05037d42aa97c6f989c2fda2",
+    "off_50_trace_4.txt": "d31add3687d6366e68c0e53a4de36ab300dbf6e8b66e198c2728e252df703e57",
+    "off_50_trace_8.json": "d879efbd58823d1e3a669c9caf0e38daa5bdb8719b6faec760c009112751c3fc",
+    "off_50_trace_8.txt": "c317d3d17ea0ea7f41a6b6bb660ee79d4392a9ab066fc5037fbe6b72b449e525",
+    "on_50.json": "ff10414eda885c5a822000ff1ab4564c76761b001c187cf4f7eb41a10d309d01",
+    "on_50_trace_4.json": "b2ac06ccad3bf78fd1b28130f461994999e5cd1d79401d236f09d4acc6a801a3",
+    "on_50_trace_4.txt": "56258b41526a258b9c4ef2f8130328cecb41696ae7f5308b8ab283d0612c7edd",
+    "on_50_trace_8.json": "c4153bbf1289cc50554d8401214a255563d3a8f230eb367c5b433153742d1f1f",
+    "on_50_trace_8.txt": "526b32d40a6e15eb1e029d3c7e9a886354c6c8ff650748dea0514e6d2ace146f",
+    "rejected_exact_dr_swd_readback_50.json": "8b4c3d9341b353edba3b0caace747e86d51b0229d76c42b9c0d1a2dd69b8147b"
+  }
+}
