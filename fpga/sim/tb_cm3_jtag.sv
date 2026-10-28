@@ -33,6 +33,9 @@ module tb_cm3_jtag;
   .swclktck(tck),.swditms(tms),.tdi(pads[0]),
   .tdo(cm3_tdo),.ntdoen(cm3_ntdoen),.swdo(cm3_swdo),.swdoen(cm3_swdoen),.jtag_nsw(cm3_jtagnsw),
   .sys_dout(cm3_sysout),.sys_writes(cm3_writes));
+ always @(posedge clk) if($test$plusargs("coretrace") && dut.core_result_valid)
+   $display("CORE t=%0t req=%h ack=%h wd=%h rd=%h",$time,dut.core_req_sel,dut.core_ack,dut.core_wdata_sel,dut.core_rdata);
+
  task write_reg(input [7:0] a,input [31:0] d);
   @(negedge clk);aw=a;wd=d;av=1;wv=1;
   @(posedge clk);if(!awr || !wr)$fatal(1,"AXI write stalled");
@@ -91,6 +94,7 @@ module tb_cm3_jtag;
   @(negedge clk);wait(!dut.core_busy);repeat(3)@(negedge clk);
   transfer(0,'h1e);transfer(4,'h50000000);transfer(8,0);
   // Multi-word AP write: the board corrupts every fourth word from the third on.
+  transfer(1,'h50000032);          // AP CSW: 32-bit, single increment (4 is DP CTRL/STAT)
   transfer(5,'h60004000);
   for(i=0;i<8;i=i+1)transfer(8'h0d,32'h11110000+i);
   transfer(5,'h60004000);
