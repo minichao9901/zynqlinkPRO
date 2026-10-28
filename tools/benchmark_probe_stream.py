@@ -148,6 +148,7 @@ def main():
     ap.add_argument('--output', type=Path, required=True)
     ap.add_argument('--bit',type=Path)
     ap.add_argument('--elf',type=Path)
+    ap.add_argument('--transport', choices=['swd','jtag'], default='swd')
     args = ap.parse_args()
     args.output.parent.mkdir(parents=True, exist_ok=True)
     probe = Probe()
@@ -157,7 +158,11 @@ def main():
     report = {'artifacts':provenance(args.bit,args.elf), 'kind': 'HSS sustained end-to-end sweep', 'rows': []}
     try:
         stop(probe, dev)
-        setup(out, inp, 50000)
+        setup(out, inp, 50000, args.transport)
+        # The probe services keep their own transport flag; set it after the DAP setup.
+        rc_tr = probe.action(0x31, 12, bytes([2 if args.transport == 'jtag' else 1]))[0]
+        if rc_tr not in (0, -7):
+            print('transport flag ->', rc_tr)
         initial = mem.word(0xe000edf0)
         if not initial & (1 << 17):
             mem.write_word(0xe000edf0, 0xa05f0003)
@@ -176,7 +181,7 @@ def main():
         try:
             stop(probe, dev)
             if backup is not None:
-                setup(out, inp, 50000)
+                setup(out, inp, 50000, args.transport)
                 mem.write(0x20004000, backup)
                 restored = mem.read(0x20004000, 4096)
                 report['restore_match'] = restored == backup
