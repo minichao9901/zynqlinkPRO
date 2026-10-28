@@ -16,7 +16,7 @@ module jtag_core (
     input wire [7:0] dr_before,dr_after,
     input wire [3:0] half_delay,idle_cycles,
     input wire late_return,
-    input wire tdo,
+    input wire tdo,tdo_alternate,tdi_sense,
     input wire next_valid,input wire [7:0] next_request,input wire [31:0] next_wdata,
     output wire next_ready,result_valid,busy,
     output reg [2:0] ack,output reg [31:0] rdata,
@@ -29,7 +29,10 @@ module jtag_core (
     // bits scanned and the number of completed scans. cycles/(2*bits) yields
     // half_delay+1, so software can confirm the clock the PHY really used.
     output reg [31:0] stat_cycles,output reg [31:0] stat_bits,
-    output reg [31:0] stat_transfers
+    output reg [31:0] stat_transfers,
+    output wire debug_valid,
+    output wire [31:0] debug_meta,debug_wdata,debug_tx,debug_sense,debug_rx,debug_alternate,debug_samples,
+    output wire [5:0] debug_tx_req
 );
     localparam IDLE=0,ROUTE=1,RESET_TAP=2,IR_NAV=3,IR_PRE=4,IR_VALUE=5,IR_POST=6,IR_EXIT=7,
                DR_NAV=8,DR_PRE=9,DR_VALUE=10,DR_POST=11,DR_EXIT=12,EVALUATE=13,DONE=14,PHY_WAIT=15;
@@ -49,6 +52,9 @@ module jtag_core (
     reg [255:0] phy_tms_data,phy_tdi_data;
     wire phy_busy,phy_done;
     wire [255:0] phy_rx;
+    wire [63:0] phy_tx_echo,phy_sense_echo,phy_rx_alternate;
+    wire [63:0] debug_tx_frame=phy_tx_echo >> (5+dr_before);
+    wire [63:0] debug_sense_frame=phy_sense_echo >> (5+dr_before);
     reg [34:0] scan_result;
     reg [63:0] dr_tms_bits,dr_tdi_bits;
     reg [6:0] dr_count;
@@ -65,6 +71,16 @@ module jtag_core (
     assign busy=state!=IDLE || pending_fence;
     assign result_valid=state==DONE && !maintenance;
     assign next_ready=result_valid && op==0 && ack==1 && !pending_fence;
+    assign debug_valid=state==EVALUATE;
+    assign debug_meta={13'd0,op,phase,req,scan_result[2:0],scan_ack};
+    assign debug_wdata=phase==0 ? value : 32'd0;
+    assign debug_tx=debug_tx_frame[34:3];
+    assign debug_sense=debug_sense_frame[34:3];
+    assign debug_tx_req={debug_sense_frame[2:0],debug_tx_frame[2:0]};
+    assign debug_rx=scan_data;
+    wire [63:0] debug_alt_frame=phy_rx_alternate >> capture_offset;
+    assign debug_alternate=debug_alt_frame[34:3];
+    assign debug_samples={phy_rx_alternate[15:0],phy_rx[15:0]};
     assign cached_instruction=ir_cache;
     assign cache_valid=ir_valid;
     assign sequence_result=phy_rx;
@@ -72,8 +88,9 @@ module jtag_core (
         .half_delay(phy_delay),.variable_tms(phy_variable_tms),.tms_value(phy_tms),
         .exit_last(phy_exit),.capture(phy_capture),.tdi_mode(phy_tdi_mode),
         .capture_rise(phy_capture_rise),
-        .tms_data(phy_tms_data),.tdi_data(phy_tdi_data),.tdo(tdo),
-        .tck(tck),.tms(tms),.tdi(tdi),.busy(phy_busy),.done(phy_done),.rx_data(phy_rx));
+        .tms_data(phy_tms_data),.tdi_data(phy_tdi_data),.tdo(tdo),.tdo_alternate(tdo_alternate),.tdi_sense(tdi_sense),
+        .tck(tck),.tms(tms),.tdi(tdi),.busy(phy_busy),.done(phy_done),.rx_data(phy_rx),
+        .tx_echo(phy_tx_echo),.sense_echo(phy_sense_echo),.rx_alternate(phy_rx_alternate));
     task shift_segment;
         input [11:0] n;
         input variable_mode,tm,exit_bit,cap;

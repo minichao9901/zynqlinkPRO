@@ -99,6 +99,17 @@ module swd_controller #(
     wire core_parity_err,core_busy,core_result_valid,core_next_ready;
     wire [15:0] core_timestamp;
     wire [31:0] core_rdata;
+    // First 32 physical DR scans after an explicit arm, independent of the
+    // frontend result history. Capture both intended data and serial echoes.
+    wire jtag_debug_valid;
+    wire [31:0] jtag_debug_meta,jtag_debug_wdata,jtag_debug_tx,jtag_debug_sense,jtag_debug_rx;
+    wire [31:0] jtag_debug_alternate,jtag_debug_samples;
+    wire [5:0] jtag_debug_tx_req;
+    reg [31:0] diag_meta[0:31],diag_front[0:31],diag_latched[0:31],diag_tx[0:31],
+               diag_sense[0:31],diag_rx[0:31],diag_extra[0:31],diag_alternate[0:31],diag_samples[0:31];
+    reg [4:0] diag_head,diag_index;
+    reg [5:0] diag_count;
+    reg diag_armed,diag_frozen;
 
     //=========================================================================
     // IOBUF for SWDIO (bidirectional)
@@ -394,6 +405,29 @@ module swd_controller #(
     wire packet_status_busy=packet_busy || packet_launch_pending;
 
     always @(posedge clk or negedge rst_n) begin
+        if(!rst_n)begin diag_head<=0;diag_count<=0;diag_armed<=0;diag_frozen<=0;end
+        else if(s_axi_wvalid && s_axi_wready && write_addr==8'hcc)begin
+            if(s_axi_wdata[0])begin
+                diag_head<=0;diag_count<=0;diag_armed<=s_axi_wdata[1];diag_frozen<=0;
+            end else if(s_axi_wdata[2])begin diag_armed<=0;diag_frozen<=1;end
+        end else if(jtag_debug_valid && diag_armed)begin
+            diag_meta[diag_head]<={jtag_timestamp[12:0],jtag_debug_meta[18:0]};
+            diag_front[diag_head]<=core_wdata_sel;
+            diag_latched[diag_head]<=jtag_debug_wdata;
+            diag_tx[diag_head]<=jtag_debug_tx;
+            diag_sense[diag_head]<=jtag_debug_sense;
+            diag_rx[diag_head]<=jtag_debug_rx;
+            diag_alternate[diag_head]<=jtag_debug_alternate;
+            diag_samples[diag_head]<=jtag_debug_samples;
+            diag_extra[diag_head]<={8'd0,core_req_sel,packet_state,stream_active,packet_active,batch_active,
+                                   core_next_valid_sel,core_next_ready,jtag_debug_tx_req};
+            diag_count<=diag_count+1'b1;
+            if(diag_head==31)begin diag_armed<=0;diag_frozen<=1;end
+            else diag_head<=diag_head+1'b1;
+        end
+    end
+
+    always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             start_pulse <= 1'b0;
         end
@@ -425,6 +459,7 @@ module swd_controller #(
             engine_reset <= 1'b0;
             engine_reset_count <= 0;
             trace_index <= 0;
+            diag_index <= 0;
             jtag_config<=2;jtag_ir_config<=4;jtag_dr_config<=0;jtag_operation<=0;
             jtag_seq_tms<=0;jtag_sample_early<=0;jtag_return_late<=0;manual_pins<=0;
             swj_data <= 256'd0;
@@ -496,6 +531,7 @@ module swd_controller #(
                         engine_reset_count <= engine_reset_count + 1'b1;
                     end
                     ADDR_TRACE_INDEX: trace_index<=s_axi_wdata[3:0];
+                    8'hd0:diag_index<=s_axi_wdata[4:0];
                     8'h80: if(!core_busy && !stream_active && !packet_active && !batch_active) jtag_config<=s_axi_wdata;
                     8'h84: if(!core_busy && !stream_active && !packet_active && !batch_active) jtag_ir_config<=s_axi_wdata;
                     8'h88: if(!core_busy && !stream_active && !packet_active && !batch_active) jtag_dr_config<=s_axi_wdata;
@@ -598,6 +634,17 @@ module swd_controller #(
                     8'hc0:rdata_reg<=jtag_stat_cycles;
                     8'hc4:rdata_reg<=jtag_stat_bits;
                     8'hc8:rdata_reg<=jtag_stat_transfers;
+                    8'hcc:rdata_reg<={16'h4a54,3'd0,diag_frozen,diag_armed,diag_count,diag_head};
+                    8'hd0:rdata_reg<={27'd0,diag_index};
+                    8'hd4:rdata_reg<=diag_meta[diag_index];
+                    8'hd8:rdata_reg<=diag_front[diag_index];
+                    8'hdc:rdata_reg<=diag_latched[diag_index];
+                    8'he0:rdata_reg<=diag_tx[diag_index];
+                    8'he4:rdata_reg<=diag_sense[diag_index];
+                    8'he8:rdata_reg<=diag_rx[diag_index];
+                    8'hec:rdata_reg<=diag_extra[diag_index];
+                    8'hf0:rdata_reg<=diag_alternate[diag_index];
+                    8'hf4:rdata_reg<=diag_samples[diag_index];
                     default: begin
                         rdata_reg <= !s_axi_araddr[7] && s_axi_araddr[6:5]==2'b11 ? stream_rdata : 32'd0;
                     end
@@ -756,13 +803,17 @@ module swd_controller #(
         // Both phases use the IOB IDDR. Q1 is consumed one FCLK after its
         // rising sample, Q2 half an FCLK after its falling sample. The DR
         // window offset independently selects current/previous scan bit.
-        .tdo(jtag_sample_early ? jtag_tdo_rise : jtag_tdo_fall),
+        .tdo(jtag_sample_early ? jtag_tdo_rise : jtag_tdo_fall),.tdi_sense(gpio_in[0]),
+        .tdo_alternate(jtag_sample_early ? jtag_tdo_fall : jtag_tdo_rise),
         .next_valid(core_next_valid_sel && jtag_enabled),.next_request(core_next_req_sel),.next_wdata(core_next_wdata_sel),
         .next_ready(jtag_next_ready),.result_valid(jtag_result_valid),.busy(jtag_busy),.ack(jtag_ack),.rdata(jtag_rdata),
         .tck(jtag_tck),.tms(jtag_tms),.tdi(jtag_tdi),.cached_instruction(jtag_cached_ir),
         .cache_valid(jtag_cache_valid),.sequence_result(jtag_sequence_data),
         .fence_req(jtag_fence_req && jtag_enabled),.fence_done(jtag_fence_done),.fence_error(jtag_fence_error),
-        .stat_cycles(jtag_stat_cycles),.stat_bits(jtag_stat_bits),.stat_transfers(jtag_stat_transfers)
+        .stat_cycles(jtag_stat_cycles),.stat_bits(jtag_stat_bits),.stat_transfers(jtag_stat_transfers),
+        .debug_valid(jtag_debug_valid),.debug_meta(jtag_debug_meta),.debug_wdata(jtag_debug_wdata),
+        .debug_tx(jtag_debug_tx),.debug_sense(jtag_debug_sense),.debug_rx(jtag_debug_rx),.debug_tx_req(jtag_debug_tx_req),
+        .debug_alternate(jtag_debug_alternate),.debug_samples(jtag_debug_samples)
     );
 
 endmodule

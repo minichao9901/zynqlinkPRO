@@ -81,6 +81,8 @@ module tb_cm3_jtag;
   if(d==0)$fatal(1,"packet timeout core=%d sampler=%d packet=%d",dut.u_jtag_core.state,dut.u_probe_sampler.state,dut.u_probe_stream.state);
  endtask
  reg [31:0] d,head_before,expected,safe_at_fault;reg checking_fault=0;
+ reg [31:0] dbg_meta,dbg_front,dbg_latched,dbg_tx,dbg_sense;
+ integer diag_n,k;
  integer hss_t0,hss_t1,rtt_t0,rtt_t1,hss_total;
  integer i,j,bank_base,samples,packets;
  always @(posedge clk)if(checking_fault && dut.u_probe_stream.state==6 &&
@@ -143,6 +145,7 @@ module tb_cm3_jtag;
   transfer(5,'h60006000);
   write_reg('h38,0);write_reg('h3c,32'h0d000806);
   for(i=0;i<8;i=i+1)write_reg('h3c,32'h91990000+i*'h101);
+  write_reg('hcc,3); // arm physical scan history immediately before launch
   write_reg('h44,36);write_reg('h40,1);
   j=0;d=1;
   while(d[0] && j<20000)begin read_reg('h48,d);j=j+1;end
@@ -152,6 +155,16 @@ module tb_cm3_jtag;
      $fatal(1,"JTAG_PKT_BAD idx=%0d got=%08h want=%08h",i,target.u_sys.mem[('h6000+i*4)/4],32'h91990000+i*'h101);
   end
   $display("JTAG_PKT_DONE status=%h",d);
+  write_reg('hcc,4);read_reg('hcc,d);diag_n=(d>>5)&63;
+  if(d[31:16]!='h4a54 || diag_n<11)$fatal(1,"JTAG diagnostic history status=%h",d);
+  for(k=0;k<diag_n;k=k+1)begin
+   write_reg('hd0,k);read_reg('hd4,dbg_meta);read_reg('hd8,dbg_front);
+   read_reg('hdc,dbg_latched);read_reg('he0,dbg_tx);read_reg('he4,dbg_sense);
+   if(dbg_meta[18:14]==0 && dbg_meta[13:6]==13 &&
+      (dbg_front!==dbg_latched || dbg_latched!==dbg_tx || dbg_tx!==dbg_sense))
+    $fatal(1,"JTAG diagnostic TX mismatch row=%0d front=%h latched=%h tx=%h pad=%h",k,dbg_front,dbg_latched,dbg_tx,dbg_sense);
+  end
+  $display("JTAG_DIAG_DONE scans=%0d",diag_n);
   if($test$plusargs("writes_only"))begin $display("PASS JTAG scalar, batch and packet writes");$finish;end
   // No AXI operations per sample: configure once, then PL fills a bank.
   cfg(0,4);cfg(1,2);cfg(2,32);cfg(5,1);

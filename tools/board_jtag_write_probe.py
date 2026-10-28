@@ -41,8 +41,10 @@ def write_scalar(out, inp, addr, words):
         scalar(out, inp, 13, word)
 
 
-def write_words(out, inp, addr, words):
+def write_words(out, inp, addr, words, before_launch=None):
     address(out, inp, addr)
+    if before_launch:
+        before_launch()
     reply = xfer(out, inp, bytes([6, 0, len(words) & 255, len(words) >> 8, 13])
                  + b''.join(w.to_bytes(4, 'little') for w in words))
     assert reply == bytes([6, len(words) & 255, len(words) >> 8, 1]), reply.hex(' ')
@@ -59,6 +61,7 @@ def main():
     ap.add_argument('--half-delay', type=int, default=0, help='Override PHY half-cycle divider via XSCT')
     ap.add_argument('--batch', action='store_true', help='Also drive the legacy RTL batch engine via XSCT')
     ap.add_argument('--pattern-seed', type=int, default=None, help='Use reproducible random payloads')
+    ap.add_argument('--internal-trace', action='store_true', help='Arm/dump passive scan history in the diagnostic bitstream')
     ap.add_argument('--output', type=Path, default=Path('build/jtag_write_probe.json'))
     args = ap.parse_args()
     counts = [int(n) for n in args.counts.split(',')]
@@ -115,7 +118,14 @@ def main():
                     print(batch_dump, flush=True)
                     assert '0000440A' in batch_dump.upper(), batch_dump
                 else:
-                    (write_scalar if method == 'scalar' else write_words)(out, inp, args.base, pattern)
+                    if method == 'block' and args.internal_trace:
+                        from jtag_internal_trace import control, dump
+                        write_words(out, inp, args.base, pattern, before_launch=control)
+                        trace_path = args.output.with_name(args.output.stem + f'_trace_{n}.json')
+                        trace = dump(trace_path)
+                        print(f"internal trace {n} words: {len(trace['rows'])} scans -> {trace_path}", flush=True)
+                    else:
+                        (write_scalar if method == 'scalar' else write_words)(out, inp, args.base, pattern)
                 if method == 'block' and args.dump_command:
                     script = args.output.with_suffix('.tcl').resolve()
                     script.write_text('connect\ntargets -set -filter {name =~ "ARM Cortex-A9 MPCore #0*"}\n'
