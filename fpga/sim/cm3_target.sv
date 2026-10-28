@@ -24,6 +24,7 @@ module cm3_target #(
     output wire        ntdoen,
     output wire        swdo,
     output wire        swdoen,
+    output wire        jtag_nsw,
     output wire [31:0] sys_dout,
     output wire [15:0] sys_writes
 );
@@ -58,7 +59,7 @@ module cm3_target #(
     wire        c_rvalid;  wire       c_rready;
 
     wire sysresetreq, dbgrestarted, lockup, halted, wakeup, wicenack;
-    wire jtagnsw, jtagtop, trcena, traceclk, swv;
+    wire jtagtop, trcena, traceclk, swv;
     wire [3:0] tracedata;
 
     CortexM3DbgAXI u_cm3 (
@@ -68,7 +69,7 @@ module cm3_target #(
         .HALTED        (halted),
         .WAKEUP        (wakeup),
         .WICENACK      (wicenack),
-        .JTAGNSW       (jtagnsw),
+        .JTAGNSW       (jtag_nsw),
         .JTAGTOP       (jtagtop),
         .SWDO          (swdo),
         .SWDOEN        (swdoen),

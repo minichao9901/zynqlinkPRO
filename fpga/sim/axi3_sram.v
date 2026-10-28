@@ -42,6 +42,7 @@ module axi3_sram #(
     output reg  [31:0] dbg_dout,   // last write/read word, for testbenches
     output reg  [15:0] dbg_writes
 );
+    wire dbg_trace = ("axitrace");
     reg [31:0] mem [0:WORDS-1];
     integer i;
     initial begin
@@ -87,7 +88,7 @@ module axi3_sram #(
                 if (wstrb[1]) mem[wr_ptr][15:8]  <= wdata[15:8];
                 if (wstrb[2]) mem[wr_ptr][23:16] <= wdata[23:16];
                 if (wstrb[3]) mem[wr_ptr][31:24] <= wdata[31:24];
-                dbg_dout   <= wdata;
+                if (dbg_trace) $display("AXIWR addr=%08h data=%08h strb=%b", {aw_word, 2'b00}, wdata, wstrb);
                 dbg_writes <= dbg_writes + 16'd1;
                 wr_ptr     <= wr_ptr + 1'b1;
                 if (wlast) begin

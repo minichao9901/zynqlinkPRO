@@ -66,12 +66,21 @@ def main():
 
     if args.rebuild or not (work / 'xsim.dir').exists():
         rtl_files = sorted(str(p) for p in rtl.glob('*.v'))
-        sim_files = [str(ROOT / 'fpga/sim/axi3_sram.v'), str(ROOT / 'fpga/sim/cm3_target.sv'),
-                     str(ROOT / f'fpga/sim/{args.top}.sv')]
-        p, log = run([exe / 'xvlog.exe', '--relax', '-i', str(rtl), *rtl_files, *sim_files])
+        dut_files = sorted(str(p) for p in (ROOT / 'fpga/rtl').glob('*.v'))
+        sim_v = [str(ROOT / 'fpga/sim/axi3_sram.v'),
+                 str(ROOT / 'fpga/sim/sim_primitives.v')]
+        sim_sv = [str(ROOT / 'fpga/sim/xpm_memory_tdpram.sv'),
+                  str(ROOT / 'fpga/sim/cm3_target.sv'),
+                  str(ROOT / f'fpga/sim/{args.top}.sv')]
+        p, log = run([exe / 'xvlog.exe', '--relax', '-i', str(rtl),
+                      *rtl_files, *dut_files, *sim_v])
         if p.returncode:
             print(log[-4000:])
-            sys.exit('xvlog failed')
+            sys.exit('xvlog failed (verilog)')
+        p, log = run([exe / 'xvlog.exe', '--relax', '--sv', *sim_sv])
+        if p.returncode:
+            print(log[-4000:])
+            sys.exit('xvlog failed (systemverilog)')
         p, log = run([exe / 'xelab.exe', '--debug', 'typical', '-s', args.top + '_snap', args.top])
         if p.returncode:
             print(log[-4000:])
