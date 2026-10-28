@@ -199,7 +199,28 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
       }
       break;
     case ID_DAP_Vendor9:
-      { // Receive-boundary diagnostic: 0/1=set, 255=query, preserve phase.
+      { // JTAG IDDR phase bit0, previous-bit window bit4; 255=query.
+        uint8_t status = DAP_OK;
+        if (*request != 255U) {
+          if ((swd_read32(SWD_BASE_ADDR + 4U) & 1U) ||
+              (swd_read32(SWD_BASE_ADDR + 0x34U) & 1U) ||
+              (swd_read32(SWD_BASE_ADDR + 0x48U) & 1U)) status = DAP_ERROR;
+          else DAP_JTAG_SetTiming((uint32_t)*request & 0x11U);
+        }
+        uint32_t scan[3], i, j;
+        scan[0] = swd_read32(JTAG_STAT_CYCLES);
+        scan[1] = swd_read32(JTAG_STAT_BITS);
+        scan[2] = swd_read32(JTAG_STAT_TRANSFERS);
+        *response++ = status;
+        *response++ = (uint8_t)(swd_read32(JTAG_TIMING) & 0x11U);
+        for (i = 0; i < 3U; ++i)
+          for (j = 0; j < 4U; ++j) *response++ = (uint8_t)(scan[i] >> (8 * j));
+        num = (2U << 16) | 15U;
+      }
+      break;
+    case ID_DAP_Vendor10:
+      { // SWD receive boundary: 0/1=set, 255=query, preserve capture phase.
+        // 0x89 is the JTAG timing/scan command, so this moved to 0x8A.
         uint32_t cfg=swd_read32(SWD_CFG),i;
         uint8_t status=DAP_OK;
         if(*request<=1U) {
@@ -213,7 +234,6 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
         num=(2U<<16)|8U;
       }
       break;
-    case ID_DAP_Vendor10: break;
     case ID_DAP_Vendor11: break;
     case ID_DAP_Vendor12: break;
     case ID_DAP_Vendor13: break;

@@ -12,10 +12,14 @@ module probe_stream_engine (
     output wire [31:0] core_wdata,output wire core_next_valid,
     output wire [7:0] core_next_req,
     input wire core_available,core_busy,core_result_valid,core_next_ready,
-    input wire [2:0] core_ack,input wire core_parity_err,input wire [31:0] core_rdata
+    input wire [2:0] core_ack,input wire core_parity_err,input wire [31:0] core_rdata,
+    input wire transport_jtag,output wire fence_req,input wire fence_done,fence_error,
+    input wire [31:0] sample_validation_count
 );
     reg [1:0] mode;
     reg hss_session;
+    reg packet_validated,hss_transport_fault,watermark_safe;
+    reg [31:0] validated_count;
     reg [31:0] head,tail,packet_seq,produced;
     reg [11:0] lengths[0:7];
     reg [31:0] config_words[0:15];
@@ -78,7 +82,7 @@ module probe_stream_engine (
         if(host_en) memory_selected<=host_addr[14:12]!=0;
         if(host_en && host_addr[14:12]==0) case(host_addr[11:2])
         0: register_data<=32'h53545232;
-        1: register_data<={queued[15:0],8'd0,rtt_fault,3'd0,rtt_active,sampler_active,mode};
+        1: register_data<={queued[15:0],8'd0,rtt_fault,hss_transport_fault,2'd0,rtt_active,sampler_active,mode};
         2: register_data<= head!=tail ? {7'd0,rtt_announced,5'd0,oldest,4'd0,lengths[oldest]} : 0;
         3: register_data<=tail;
         4: register_data<=produced;
@@ -96,8 +100,8 @@ module probe_stream_engine (
         default: register_data<=0;
         endcase
     end
-    localparam EMPTY=0,CLEAR=1,STAMP=2,WORDS=3,GATHER=4,HEADER=5,PUBLISH=6,CHECK=7;
-    reg [2:0] state;
+    localparam EMPTY=0,CLEAR=1,STAMP=2,WORDS=3,GATHER=4,HEADER=5,PUBLISH=6,CHECK=7,VALIDATE=8;
+    reg [3:0] state;
     reg [6:0] cursor;
     reg [4:0] word_index;
     reg [31:0] values[0:23];
@@ -117,10 +121,13 @@ module probe_stream_engine (
     wire [4:0] word_count=config_words[5][4:0];
     wire [8:0] payload_bytes=samples*frame_size;
     wire gap=samples!=0 && stamp-last_stamp!=period;
+    wire packet_safe=packet_validated || watermark_safe;
+    assign fence_req=transport_jtag && state==HEADER && !packet_safe && !hss_transport_fault;
     assign sample_pop=(state==CHECK && !gap) || state==WORDS;
     always @(posedge clk or negedge rst_n) begin
         if(!rst_n) begin
             mode<=0;hss_session<=0;head<=0;tail<=0;packet_seq<=1;produced<=0;config_index<=0;
+            packet_validated<=0;hss_transport_fault<=0;validated_count<=0;watermark_safe<=0;
             up_addr<=0;ring_addr<=0;ring_size<=0;initial_rd<=0;chunk<=2048;
             rtt_announced<=0;rtt_commit<=0;state<=EMPTY;cursor<=0;word_index<=0;
             stamp<=0;first_stamp<=0;last_stamp<=0;have_origin<=0;packet_started<=0;
@@ -166,7 +173,7 @@ module probe_stream_engine (
             end
             if(rtt_announced && !rtt_ready) begin tail<=tail+1'b1;rtt_announced<=0;end
             case(state)
-            EMPTY: if(hss_session && !full && !sample_empty) begin cursor<=0;state<=CLEAR;end
+            EMPTY: if(hss_session && !full && !sample_empty) begin cursor<=0;state<=CLEAR;packet_validated<=0;watermark_safe<=0;end
             CLEAR: begin
                 mem_we<=1;mem_mask<=15;mem_addr<={bank,2'b00,cursor};mem_data<=0;
                 if(cursor==127) begin position<=16;samples<=0;state<=STAMP;packet_started<=tick;end
@@ -175,10 +182,10 @@ module probe_stream_engine (
             STAMP: if(!sample_empty) begin
                 stamp<=sample_data;state<=CHECK;
             end else if(samples!=0 && ((!sampler_active && mode==0) || tick-packet_started>=240000)) begin
-                header_index<=0;state<=HEADER;
+                header_index<=0;state<=VALIDATE;
             end else if(mode==0 && !sampler_active && samples==0) state<=EMPTY;
             CHECK: begin
-                if(gap) begin header_index<=0;state<=HEADER;end
+                if(gap) begin header_index<=0;state<=VALIDATE;end
                 else begin
                     if(samples==0 && v2) first_stamp<=stamp;
                     word_index<=0;state<=WORDS;
@@ -206,11 +213,14 @@ module probe_stream_engine (
                 position<=position+1'b1;
                 if(cursor+1==frame_size) begin
                     samples<=samples+1'b1;produced<=produced+1'b1;
-                    if(position+1+frame_size>512) begin header_index<=0;state<=HEADER;end
+                    if(position+1+frame_size>512) begin header_index<=0;state<=VALIDATE;end
                     else state<=STAMP;
                 end else cursor<=cursor+1'b1;
             end
-            HEADER: if(convert_bits==0) begin
+            // Register the 32-bit watermark comparison before it reaches the
+            // backend arbitration/clock-enable path. No per-sample overhead.
+            VALIDATE: begin watermark_safe<=$signed(validated_count-produced)>=0;state<=HEADER;end
+            HEADER: if(convert_bits==0 && (!transport_jtag || packet_safe)) begin
                 mem_we<=1;mem_mask<=15;mem_addr<={bank,7'd0,header_index};
                 case(header_index)
                 0: mem_data<={8'd2,config_words[1][7:0],16'h4a53};
@@ -225,10 +235,20 @@ module probe_stream_engine (
                 lengths[bank]<=512;head<=head+1'b1;packet_seq<=packet_seq+1'b1;state<=EMPTY;
             end
             endcase
+            // JTAG's ACK combines OK and FAULT. A packet is not published
+            // until a hardware CTRL/STAT fence verifies every AP read in it.
+            if(fence_done && state==HEADER && transport_jtag) begin
+                if(!fence_error) begin packet_validated<=1;validated_count<=sample_validation_count;end
+                else begin
+                    state<=EMPTY;hss_session<=0;mode<=0;hss_transport_fault<=1;
+                    produced<=produced-samples;samples<=0;mem_we<=0;convert_bits<=0;
+                end
+            end
             if(reset_packets) begin
                 mode<=0;head<=0;tail<=0;packet_seq<=1;produced<=0;
                 state<=EMPTY;have_origin<=0;rtt_announced<=0;samples<=0;hss_session<=0;
                 elapsed_ticks<=0;convert_bits<=0;
+                packet_validated<=0;hss_transport_fault<=0;validated_count<=0;watermark_safe<=0;
             end
         end
     end

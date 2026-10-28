@@ -11,7 +11,7 @@ module tb_probe_stream_dma;
         .sample_empty(fi==fo),.sample_data(fifo[fo]),.tick(tick),.sampler_active(sampling),.sample_pop(pop),
         .rtt_active(active),.core_start(start),.core_req(req),.core_wdata(cw),.core_next_valid(nvalid),.core_next_req(nreq),
         .core_available(1'b1),.core_busy(busy),.core_result_valid(valid),.core_next_ready(nready),
-        .core_ack(ack),.core_parity_err(parity),.core_rdata(cr));
+        .core_ack(ack),.core_parity_err(parity),.core_rdata(cr),.transport_jtag(1'b0),.fence_done(1'b0),.fence_error(1'b0));
     probe_ap_model ap(.clk(clk),.rst_n(rst_n),.start(start),.next_valid(nvalid),.chain_enable(chain),.req(req),.next_req(nreq),
         .wdata(cw),.busy(busy),.result_valid(valid),.next_ready(nready),.ack(ack),.parity(parity),.rdata(cr));
     always @(posedge clk) begin tick<=tick+1;if(pop) begin if(fi==fo) $fatal(1,"empty pop");fo<=fo+1;end end

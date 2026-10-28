@@ -30,6 +30,7 @@
 #include "DAP.h"
 #include "xil_printf.h"
 #include "swd_dma.h"
+#include "jtag_rtl.h"
 #include "dap_metrics.h"
 #include "xtime_l.h"
 
@@ -274,6 +275,7 @@ static uint32_t DAP_Connect(const uint8_t *request, uint8_t *response) {
 #endif
 #if (DAP_JTAG != 0)
     case DAP_PORT_JTAG:
+      if(!(swd_read32(SWD_FEATURES)&8U)) {port=DAP_PORT_DISABLED;break;}
       DAP_Data.debug_port = DAP_PORT_JTAG;
       PORT_JTAG_SETUP();
       break;
@@ -423,6 +425,13 @@ static uint32_t DAP_SWJ_Pins(const uint8_t *request, uint8_t *response) {
 #ifndef DAP_MAX_SWCLK_HZ
 #define DAP_MAX_SWCLK_HZ 60000000U
 #endif
+/* The target JTAG-DP needs about 0.83 us per AP access, so above roughly
+ * 50 MHz TCK the core answers WAIT and every word costs two DR scans: block
+ * reads peak at 45 MHz (2.53 MB/s) and fall to 2.30 MB/s at 60 MHz.
+ * Do not clamp the request here. Capping for that optimum moves FCLK onto a
+ * divider that fails capture validation, and the closed loop then steps down
+ * further (a 45 MHz cap was measured landing at 33 MHz), which is worse than
+ * honouring the request. Rate selection belongs to the host. */
 static uint32_t DAP_SWJ_Clock(const uint8_t *request, uint8_t *response) {
 #if ((DAP_SWD != 0) || (DAP_JTAG != 0))
   uint32_t clock;
@@ -462,6 +471,7 @@ static uint32_t DAP_SWJ_Clock(const uint8_t *request, uint8_t *response) {
                         ~((0xFU << 13) | (1U << 17) | (1U << 18))) |
               ((link_clock_hz <= 35000000U) ? (1U << 17) : 0U));
   Set_Clock_Delay(clock);
+  if(DAP_Data.debug_port==DAP_PORT_JTAG) DAP_JTAG_ClockChanged();
 
   *response = DAP_OK;
 #else
@@ -633,6 +643,10 @@ static uint32_t DAP_JTAG_Configure(const uint8_t *request, uint8_t *response) {
   uint32_t n;
 
   count = *request++;
+  if(count==0 || count>DAP_JTAG_DEV_CNT) { *response=DAP_ERROR;return (((count+1U)<<16)|1U); }
+  for(n=0;n<count;n++) if(request[n]==0 || request[n]>32) {
+    *response=DAP_ERROR;return (((count+1U)<<16)|1U);
+  }
   DAP_Data.jtag_dev.count = (uint8_t)count;
 
   bits = 0U;
@@ -1186,6 +1200,10 @@ end:
 //             number of bytes in request (upper 16 bits)
 #if (DAP_JTAG != 0)
 static uint32_t DAP_JTAG_Transfer(const uint8_t *request, uint8_t *response) {
+#if DAP_JTAG_RTL && DAP_SWD
+  if(DAP_JTAG_Select(request[0])) {response[0]=0;response[1]=DAP_TRANSFER_ERROR;return 2;}
+  return DAP_SWD_Transfer(request,response);
+#endif
   const
   uint8_t  *request_head;
   uint32_t  request_count;
@@ -1788,6 +1806,10 @@ end:
 //   return:   number of bytes in response
 #if (DAP_JTAG != 0)
 static uint32_t DAP_JTAG_TransferBlock(const uint8_t *request, uint8_t *response) {
+#if DAP_JTAG_RTL && DAP_SWD
+  if(DAP_JTAG_Select(request[0])) {response[0]=response[1]=0;response[2]=DAP_TRANSFER_ERROR;return 3;}
+  return DAP_SWD_TransferBlock(request,response);
+#endif
   uint32_t  request_count;
   uint32_t  request_value;
   uint32_t  response_count;

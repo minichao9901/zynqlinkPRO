@@ -29,6 +29,8 @@ if {!$impl_only} {
     add_files -norecurse [file join $root fpga rtl probe_sample_engine.v]
     add_files -norecurse [file join $root fpga rtl probe_rtt_engine.v]
     add_files -norecurse [file join $root fpga rtl probe_stream_engine.v]
+    add_files -norecurse [file join $root fpga rtl jtag_shift.v]
+    add_files -norecurse [file join $root fpga rtl jtag_core.v]
     source [file join $root fpga axi_pipeline.tcl]
     if {$axi_pipeline_changed} {set fresh_impl 1}
     # Vivado 2018.3 does not reliably invalidate an OOC module-reference
@@ -37,9 +39,12 @@ if {!$impl_only} {
         # Internal-only edits need an OOC reset, not a BD topology upgrade.
         # The new BRAM pins are the sole interface change in this branch.
         if {![llength [get_bd_pins -quiet swd_controller_0/pkt_bram_en]] ||
-            ![llength [get_bd_cells -quiet pkt_mem]]} {
+            ![llength [get_bd_cells -quiet pkt_mem]] ||
+            ![llength [get_bd_pins -quiet swd_controller_0/gpio_aux]]} {
             update_module_reference [get_ips system_swd_controller_0_0]
+            set_property CONFIG.C_S_AXI_ADDR_WIDTH 8 [get_bd_cells swd_controller_0]
             source [file join $root fpga probe_stream_bd.tcl]
+            source [file join $root fpga probe_jtag_bd.tcl]
             save_bd_design
         }
         # update_module_reference invalidates its nested products itself;

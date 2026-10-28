@@ -37,7 +37,12 @@ class CounterReader(HssReader):
         if not self.batch:return
         values=np.frombuffer(b''.join(self.batch),dtype='<u4')
         delta=np.diff(values)
-        assert np.all(delta<0x80000000),'backwards/stale counter'
+        bad=np.flatnonzero(delta>=0x80000000)
+        if bad.size:
+            at=int(bad[0])
+            raise AssertionError(('backwards/stale counter',int(values[at]),int(values[at+1]),
+                                  'batch index',at,'session samples',self.samples,
+                                  'nearby',values[max(0,at-2):at+4].tolist()))
         if self.last_value is not None:
             step=(int(values[0])-self.last_value)&0xffffffff
             assert step<0x80000000,'packet counter order'
@@ -95,6 +100,7 @@ def main():
     ap.add_argument('--speed',type=int,default=60000000)
     ap.add_argument('--periods',default='48,40,32,24')
     ap.add_argument('--seconds',type=float,default=2)
+    ap.add_argument('--transport',choices=['swd','jtag'],default='swd')
     ap.add_argument('--output',type=Path,required=True)
     ap.add_argument('--bit',type=Path);ap.add_argument('--elf',type=Path)
     a=ap.parse_args();root=Path(__file__).resolve().parents[1]
@@ -108,10 +114,11 @@ def main():
     code=(build/'producer.bin').read_bytes()
     p=Probe();dev,out,inp=open_dap();mem=Memory(out,inp)
     backup=regs=initial=None
-    report=dict(artifacts=provenance(a.bit,a.elf),kind='running F103CB counter HSS',
+    report=dict(artifacts=provenance(a.bit,a.elf),kind='running F103CB counter HSS',transport=a.transport,
                 validation='all u32 values, NumPy batched per 32768-byte USB read',rows=[])
     try:
-        stop(p,dev);setup(out,inp,50000)
+        stop(p,dev);setup(out,inp,10000,a.transport)
+        assert p.action(0x32,12,bytes([2 if a.transport=='jtag' else 1]))[0]==0
         initial=mem.word(DHCSR);mem.write_word(DHCSR,0xa05f0003)
         regs={i:core_read(mem,i) for i in list(range(19))+[20]}
         backup=mem.read(0x20000000,20480);a.output.with_suffix('.backup.bin').write_bytes(backup)
@@ -121,9 +128,12 @@ def main():
             row=point(p,mem,dev,code,a.speed,period,a.seconds);report['rows'].append(row)
             a.output.write_text(json.dumps(report,indent=2))
             print(json.dumps({k:v for k,v in row.items() if k not in ('m0','m1','final')}),flush=True)
+    except BaseException as exc:
+        report['failure']=repr(exc)
+        raise
     finally:
         try:
-            stop(p,dev);setup(out,inp,50000);mem.write_word(DHCSR,0xa05f0003)
+            stop(p,dev);setup(out,inp,10000,a.transport);mem.write_word(DHCSR,0xa05f0003)
             if backup is not None:
                 mem.write(0x20000000,backup);report['restore_match']=mem.read(0x20000000,20480)==backup
                 assert report['restore_match']

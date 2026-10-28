@@ -2,6 +2,7 @@
 import argparse
 import hashlib
 import json
+import re
 from pathlib import Path
 import subprocess
 
@@ -57,7 +58,7 @@ def main():
         p = subprocess.run([str(x) for x in cmd], capture_output=True, text=True, errors='replace')
         logs.append(subprocess.list2cmdline([str(x) for x in cmd]) + '\n' + p.stdout + p.stderr)
         (out / 'build.log').write_text('\n'.join(logs), encoding='utf-8')
-        if p.returncode:
+        if p.returncode or re.search(r'warning:.*redefined',p.stderr):
             raise RuntimeError(p.stdout + p.stderr)
 
     for p in cfiles:

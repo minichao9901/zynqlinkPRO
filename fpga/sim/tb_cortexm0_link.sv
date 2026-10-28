@@ -19,7 +19,7 @@ module tb_cortexm0_link #(
   end
   reg target_clk=0; always #5 target_clk=~target_clk;
   reg rst_n=1;
-  reg [6:0] awaddr=0,araddr=0;
+  reg [7:0] awaddr=0,araddr=0;
   reg awvalid=0,wvalid=0,arvalid=0;
   reg [31:0] wdata=0;
   wire awready,wready,bvalid,arready,rvalid;

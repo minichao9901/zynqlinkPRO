@@ -9,7 +9,7 @@
 #-----------------------------------------------------------------------------
 
 # GPIO
-set_property -dict {PACKAGE_PIN B19 IOSTANDARD LVCMOS33} [get_ports {gpio_rtl_0_tri_io[0]}]
+set_property -dict {PACKAGE_PIN B19 IOSTANDARD LVCMOS33 SLEW FAST DRIVE 8} [get_ports {gpio_rtl_0_tri_io[0]}]
 set_property -dict {PACKAGE_PIN A20 IOSTANDARD LVCMOS33} [get_ports {gpio_rtl_0_tri_io[1]}]
 set_property -dict {PACKAGE_PIN E19 IOSTANDARD LVCMOS33} [get_ports {gpio_rtl_0_tri_io[2]}]
 set_property -dict {PACKAGE_PIN E18 IOSTANDARD LVCMOS33} [get_ports {gpio_rtl_0_tri_io[3]}]
