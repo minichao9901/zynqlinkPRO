@@ -105,6 +105,18 @@ module tb_cm3_jtag;
    if(d!==(32'h11110000+i))$display("JTAG_WR_BAD idx=%0d got=%08h want=%08h",i,d,32'h11110000+i);
   end
   $display("JTAG_WR_DONE");
+  // Block engine write over JTAG: the board's Memory.write uses DAP_TransferBlock.
+  write_reg('h38,'h60005000);
+  for(i=0;i<8;i=i+1)write_reg('h3c,32'h22220000+i);
+  write_reg('h30,(8'h0d<<24)|(8<<8)|15);
+  j=0;d=0;
+  while(!d[1] && j<20000)begin read_reg('h34,d);j=j+1;end
+  if(!d[1])$display("JTAG_BLK timeout status=%h",d);
+  for(i=0;i<8;i=i+1)begin
+   if(target.u_sys.mem[('h5000+i*4)/4]!==(32'h22220000+i))
+     $display("JTAG_BLK_BAD idx=%0d got=%08h want=%08h",i,target.u_sys.mem[('h5000+i*4)/4],32'h22220000+i);
+  end
+  $display("JTAG_BLK_DONE status=%h",d);
   // No AXI operations per sample: configure once, then PL fills a bank.
   cfg(0,4);cfg(1,2);cfg(2,32);cfg(5,1);
   for(i=0;i<4;i=i+1)cfg(16+i,i);
