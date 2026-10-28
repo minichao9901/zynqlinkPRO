@@ -9,21 +9,36 @@ module minimal_swd_top(
  inout FIXED_IO_ddr_vrn,FIXED_IO_ddr_vrp,
  inout [53:0] FIXED_IO_mio,
  inout FIXED_IO_ps_clk,FIXED_IO_ps_porb,FIXED_IO_ps_srstb,
- output swclk,inout swdio,output nreset,ntrst
+ inout swclk,inout swdio,output nreset,ntrst
 );
- wire [3:0] control;
- wire [1:0] sense;
+ wire [4:0] control;
+ wire [11:0] sense;
  wire fabric_clk;
  reg previous_clock=0,short_clock=0;
  always @(posedge fabric_clk)begin
   previous_clock<=control[0];
   short_clock<=control[0] && !previous_clock;
  end
- assign swclk=control[3] ? short_clock : control[0];
- assign sense[0]=control[0]; // intended clock; not a pad edge counter
+ wire drive_clock=control[3] ? short_clock : control[0];
+ (* CLOCK_BUFFER_TYPE="NONE" *)wire clock_feedback;
+ wire dio_feedback;
+ reg [7:0] pad_rises=0;
+ reg fall_while_high=0,rise_while_low=0;
+ IOBUF clock_pin(.I(drive_clock),.T(1'b0),.O(clock_feedback),.IO(swclk));
+ // Diagnostic only. Snapshot the counter after clocks have stopped; narrow
+ // analog pulses below the input/FF specifications can still be missed.
+ always @(posedge clock_feedback or posedge control[4])begin
+  if(control[4])begin pad_rises<=0;rise_while_low<=0;end
+  else begin pad_rises<=pad_rises+1'b1;if(!drive_clock)rise_while_low<=1;end
+ end
+ always @(negedge clock_feedback or posedge control[4])begin
+  if(control[4])fall_while_high<=0;
+  else if(drive_clock)fall_while_high<=1;
+ end
+ assign sense={pad_rises,rise_while_low,fall_while_high,dio_feedback,clock_feedback};
  assign nreset=1'b1;
  assign ntrst=1'b1;
- IOBUF dio(.I(control[1]),.T(control[2]),.O(sense[1]),.IO(swdio));
+ IOBUF dio(.I(control[1]),.T(control[2]),.O(dio_feedback),.IO(swdio));
  minimal_swd_bd minimal_i(
  .DDR_addr(DDR_addr),.DDR_ba(DDR_ba),.DDR_cas_n(DDR_cas_n),
  .DDR_ck_n(DDR_ck_n),.DDR_ck_p(DDR_ck_p),.DDR_cke(DDR_cke),.DDR_cs_n(DDR_cs_n),

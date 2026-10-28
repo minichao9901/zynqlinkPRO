@@ -10,9 +10,10 @@
 volatile uint32_t swd_diag[96] __attribute__((section(".dap_debug"),aligned(32)));
 static uint32_t control_word=7;
 static unsigned pulse_mode=0;
+static unsigned observer_clear=0;
 static void pins(unsigned clock,unsigned data,unsigned release) {
  if(!(control_word&1U) && clock)swd_diag[7]++;
- control_word=(clock&1U)|((data&1U)<<1)|((release&1U)<<2)|(pulse_mode<<3);
+ control_word=(clock&1U)|((data&1U)<<1)|((release&1U)<<2)|(pulse_mode<<3)|(observer_clear<<4);
  Xil_Out32(CTRL,control_word);__asm__ volatile("dsb sy" ::: "memory");
 }
 static unsigned pad(void) {return (Xil_In32(SENSE)>>1)&1U;}
@@ -27,13 +28,21 @@ static void tick(unsigned data,unsigned release,unsigned ns) {
 static void transfer(unsigned ns,unsigned header,unsigned narrow) {
  swd_diag[6]=0;swd_diag[7]=0;
  XTime begin,end;XTime_GetTime(&begin);
- pins(0,1,1);pulse_mode=narrow;pins(0,1,1);pins(1,1,0);
+ pins(0,1,1);pulse_mode=narrow;pins(0,1,1);
+ pins(1,1,0);
+ for(unsigned i=0;i<64;i++)tick(1,0,ns); // settle target before observer self-test
+ pins(0,1,0);
+ observer_clear=1;pins(0,1,0);delay(100);
+ observer_clear=0;pins(0,1,0);delay(100);swd_diag[7]=0;
+ pins(1,1,0);
  for(unsigned i=0;i<64;i++)tick(1,0,ns);
+ swd_diag[83]=Xil_In32(SENSE);swd_diag[84]=swd_diag[7];
  for(unsigned i=0;i<16;i++)tick((0xe79eU>>i)&1U,0,ns);
  for(unsigned i=0;i<64;i++)tick(1,0,ns);
  for(unsigned i=0;i<8;i++)tick(0,0,ns);
  for(unsigned i=0;i<8;i++)tick((header>>i)&1U,0,ns);
  pins(1,1,1);tick(1,1,ns);
+ swd_diag[85]=Xil_In32(SENSE);swd_diag[86]=swd_diag[7];
  uint32_t ack=0,data=0,parity=0;
  for(unsigned i=0;i<36;i++) {
   pins(0,1,1);delay(ns);unsigned lo=pad();
@@ -43,8 +52,10 @@ static void transfer(unsigned ns,unsigned header,unsigned narrow) {
   else if(i<35)data|=lo<<(i-3);
   else parity=lo;
  }
+ swd_diag[87]=Xil_In32(SENSE);swd_diag[88]=swd_diag[7];
  tick(1,1,ns);pins(0,0,0);delay(ns);pins(1,0,0);delay(ns);
  pins(1,1,1);
+ swd_diag[89]=Xil_In32(SENSE);swd_diag[90]=swd_diag[7];
  XTime_GetTime(&end);uint64_t elapsed=end-begin;
  swd_diag[80]=(uint32_t)elapsed;swd_diag[81]=(uint32_t)(elapsed>>32);
  swd_diag[82]=COUNTS_PER_SECOND;

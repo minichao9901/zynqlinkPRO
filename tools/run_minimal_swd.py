@@ -7,13 +7,16 @@ ROOT=Path(__file__).resolve().parents[1]
 def main():
  p=argparse.ArgumentParser(description=__doc__)
  p.add_argument('--half-ns',default='500000,50000,5000,500')
- p.add_argument('--command',choices=['dpidr','ctrlstat'],default='dpidr')
+ # The fixture resets the SW-DP before every request. DPIDR must be the
+ # first successful read out of reset; a raw CTRL/STAT request is invalid.
+ p.add_argument('--command',choices=['dpidr'],default='dpidr')
  p.add_argument('--pulse-mode',choices=['direct','short','both'],default='direct')
+ p.add_argument('--bit',type=Path,help='Optional IO-only variant of the same minimal design')
  p.add_argument('--restore-bit',type=Path,required=True)
  p.add_argument('--restore-elf',type=Path,required=True)
  p.add_argument('--output',type=Path,required=True)
  a=p.parse_args();work=ROOT/'build/minimal_swd';info=json.loads((work/'firmware.json').read_text())
- bit=work/'minimal_swd.bit';elf=work/'minimal_swd.elf';mailbox=info['mailbox_address']
+ bit=a.bit.resolve() if a.bit else work/'minimal_swd.bit';elf=work/'minimal_swd.elf';mailbox=info['mailbox_address']
  for path in [bit,elf,a.restore_bit,a.restore_elf]:assert path.is_file(),path
  sha=lambda path:hashlib.sha256(path.read_bytes()).hexdigest()
  report={'kind':'standalone PS/AXI GPIO SWD fixture','artifacts':{str(v.resolve()):sha(v) for v in [bit,elf]},
@@ -67,7 +70,10 @@ puts "END_ROW"
             elapsed_ticks=words[80]+(words[81]<<32),timer_hz=words[82],
             bits=[{'index':i,'before_rise':words[8+2*i],'after_rise':words[9+2*i]} for i in range(36)])
    row['command']=a.command
-   row['passed']=row['ack']==1 and words[4]==(0x1ba01477 if a.command=='dpidr' else 0xf0000000) and row['parity_matches']
+   row['pad_observer']={label:dict(raw=hex(words[index]),pad_rises=(words[index]>>4)&255,
+       expected_rises=words[index+1],fall_while_high=bool(words[index]&4),rise_while_low=bool(words[index]&8))
+       for label,index in [('constant_high_preamble',83),('before_receive',85),('after_receive',87),('final',89)]}
+   row['passed']=row['ack']==1 and words[4]==0x1ba01477 and row['parity_matches']
    report['rows'].append(row)
    print(json.dumps({k:v for k,v in row.items() if k!='bits'}),flush=True)
  finally:
