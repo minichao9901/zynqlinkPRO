@@ -22,10 +22,18 @@ module minimal_swd_top(
  // exactly half a fabric cycle (5ns). Direct and short modes share this
  // same bitstream, pad, output primitive and source routing.
  wire drive_clock;
+ wire clock_d1=control[3] ? (control[0] && !previous_clock) : control[0];
+ wire clock_d2=control[3] ? 1'b0 : control[0];
+ reg intended_hi=0,intended_lo=0;
+ always @(posedge fabric_clk)begin
+  intended_hi<=clock_d1;intended_lo<=clock_d2;
+ end
+ // ODDR Q may only feed the pad. Compare feedback with a fabric copy of
+ // its requested levels, rather than adding illegal loads to the IOB Q.
+ wire intended_clock=fabric_clk ? intended_hi : intended_lo;
  ODDR #(.DDR_CLK_EDGE("SAME_EDGE"),.INIT(1'b0),.SRTYPE("SYNC")) clock_launch(
   .C(fabric_clk),.CE(1'b1),.R(1'b0),.S(1'b0),
-  .D1(control[3] ? (control[0] && !previous_clock) : control[0]),
-  .D2(control[3] ? 1'b0 : control[0]),.Q(drive_clock));
+  .D1(clock_d1),.D2(clock_d2),.Q(drive_clock));
  (* CLOCK_BUFFER_TYPE="NONE" *)wire clock_feedback;
  wire dio_feedback;
  reg [7:0] pad_rises=0;
@@ -35,11 +43,11 @@ module minimal_swd_top(
  // analog pulses below the input/FF specifications can still be missed.
  always @(posedge clock_feedback or posedge control[4])begin
   if(control[4])begin pad_rises<=0;rise_while_low<=0;end
-  else begin pad_rises<=pad_rises+1'b1;if(!drive_clock)rise_while_low<=1;end
+  else begin pad_rises<=pad_rises+1'b1;if(!intended_clock)rise_while_low<=1;end
  end
  always @(negedge clock_feedback or posedge control[4])begin
   if(control[4])fall_while_high<=0;
-  else if(drive_clock)fall_while_high<=1;
+  else if(intended_clock)fall_while_high<=1;
  end
  assign sense={pad_rises,rise_while_low,fall_while_high,dio_feedback,clock_feedback};
  assign nreset=1'b1;

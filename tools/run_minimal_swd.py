@@ -11,15 +11,23 @@ def main():
  # first successful read out of reset; a raw CTRL/STAT request is invalid.
  p.add_argument('--command',choices=['dpidr'],default='dpidr')
  p.add_argument('--pulse-mode',choices=['direct','short','both'],default='direct')
+ p.add_argument('--fixture',choices=['gpio','main'],default='gpio')
+ p.add_argument('--fclk-hz',type=int,choices=[50000000,100000000],default=100000000)
+ p.add_argument('--short-clock-cycles',type=float,choices=[0.5,1.0],default=0.5,
+                help='0.5 for the ODDR fixture; 1 for the archived single-FF short-pulse fixture')
  p.add_argument('--bit',type=Path,help='Optional IO-only variant of the same minimal design')
  p.add_argument('--restore-bit',type=Path,required=True)
  p.add_argument('--restore-elf',type=Path,required=True)
  p.add_argument('--output',type=Path,required=True)
- a=p.parse_args();work=ROOT/'build/minimal_swd';info=json.loads((work/'firmware.json').read_text())
+ a=p.parse_args()
+ if a.fixture=='main' and (not a.bit or a.pulse_mode!='direct'):
+  p.error('The main CSR fixture requires --bit and --pulse-mode direct')
+ work=ROOT/('build/minimal_swd_main' if a.fixture=='main' else 'build/minimal_swd')
+ info=json.loads((work/'firmware.json').read_text());assert info.get('fixture','gpio')==a.fixture
  bit=a.bit.resolve() if a.bit else work/'minimal_swd.bit';elf=work/'minimal_swd.elf';mailbox=info['mailbox_address']
  for path in [bit,elf,a.restore_bit,a.restore_elf]:assert path.is_file(),path
  sha=lambda path:hashlib.sha256(path.read_bytes()).hexdigest()
- report={'kind':'standalone PS/AXI GPIO SWD fixture','artifacts':{str(v.resolve()):sha(v) for v in [bit,elf]},
+ report={'kind':'minimal PS SWD driver','fixture':a.fixture,'requested_fclk_hz':a.fclk_hz,'artifacts':{str(v.resolve()):sha(v) for v in [bit,elf]},
          'restore_pair':{str(v.resolve()):sha(v) for v in [a.restore_bit,a.restore_elf]},'rows':[]}
  ns_values=[int(v) for v in a.half_ns.split(',')];assert min(ns_values)>=100
  script=work/'run.tcl'
@@ -30,6 +38,13 @@ after 1000
 source {INIT}
 ps7_init
 ps7_post_config
+# BD constraints do not program PS clock dividers. Set FCLK explicitly.
+set pll [mrd -force -value 0xf8000108]
+set divisor [expr {int(round(33333333.0*(($pll>>12)&127)/FCLK_REQUEST))}]
+if {$divisor<1 || $divisor>63} {error "Invalid fixture FCLK divisor"}
+mwr -force 0xf8000008 0xdf0d
+mwr -force 0xf8000170 [expr {1 | (1<<8) | ($divisor<<20)}]
+mwr -force 0xf8000004 0x767b
 targets -set -filter {name =~ "xc7z020"}
 fpga -f {BIT}
 targets -set -filter {name =~ "ARM*#0"}
@@ -40,7 +55,7 @@ con
 after 200
 targets -set -filter {name =~ "APU"}
 if {[mrd -force -value MAILBOX] != 0x53574431} {error "Minimal firmware not ready"}
-'''.replace('INIT',(ROOT/'prebuilt/ps7_init.tcl').as_posix()).replace('BIT',bit.as_posix()).replace('ELF',elf.as_posix()).replace('MAILBOX',hex(mailbox))
+'''.replace('INIT',(ROOT/'prebuilt/ps7_init.tcl').as_posix()).replace('BIT',bit.as_posix()).replace('ELF',elf.as_posix()).replace('MAILBOX',hex(mailbox)).replace('FCLK_REQUEST',str(a.fclk_hz))
  modes=['direct','short','direct'] if a.pulse_mode=='both' else [a.pulse_mode]
  for mode,ns in [(mode,ns) for mode in modes for ns in ns_values]:
   body+=f'''mwr -force {mailbox+8:#x} {ns}
@@ -70,9 +85,16 @@ puts "END_ROW"
             elapsed_ticks=words[80]+(words[81]<<32),timer_hz=words[82],
             bits=[{'index':i,'before_rise':words[8+2*i],'after_rise':words[9+2*i]} for i in range(36)])
    row['command']=a.command
+   row['PS_clock_registers']={name:hex(words[index]) for name,index in [('FCLK0_CTRL',92),('IO_PLL_CTRL',93),('ARM_PLL_CTRL',94)]}
+   ctrl=words[92];source=(ctrl>>4)&3
+   pll=words[93] if source in (0,1) else words[94] if source==2 else 0
+   assert pll and not pll&0x10,'Fixture PLL bypass/source unsupported'
+   row['actual_fclk_hz']=33333333*((pll>>12)&127)/(((ctrl>>8)&63)*((ctrl>>20)&63))
+   if mode=='short':row['intended_high_pulse_ns']=1e9*a.short_clock_cycles/row['actual_fclk_hz']
    row['pad_observer']={label:dict(raw=hex(words[index]),pad_rises=(words[index]>>4)&255,
        expected_rises=words[index+1],fall_while_high=bool(words[index]&4),rise_while_low=bool(words[index]&8))
        for label,index in [('constant_high_preamble',83),('before_receive',85),('after_receive',87),('final',89)]}
+   if a.fixture=='main' and words[91]>>16!=0x5343:row['pad_observer']=None
    row['passed']=row['ack']==1 and words[4]==0x1ba01477 and row['parity_matches']
    report['rows'].append(row)
    print(json.dumps({k:v for k,v in row.items() if k!='bits'}),flush=True)
