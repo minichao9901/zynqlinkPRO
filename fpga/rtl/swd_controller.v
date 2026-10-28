@@ -131,6 +131,8 @@ module swd_controller #(
     wire        swdio_i_fall_raw;
     wire        swdio_i_rise_raw; // unused Q1 retained for primitive clarity
     reg         cfg_sample_rise;
+    reg         cfg_short_clock;
+    reg         short_clock_previous,short_core_clock;
     reg         cfg_rx_boundary;
     reg         swdio_early;
     wire        swdio_i_iddr;
@@ -152,7 +154,7 @@ module swd_controller #(
 
     // Keep sampling in the FCLK domain. A second global clock tree on the
     // gated SWCLK adds skew to the input return path and limits high rates.
-    assign swclk_buf = core_swclk;
+    assign swclk_buf = cfg_short_clock ? short_core_clock : core_swclk;
     always @(posedge clk) begin
         // Phase 1 samples after the SWCLK rising launch; phase 0 uses IDDR
         // Q2 at the earlier FCLK falling point.
@@ -269,6 +271,17 @@ module swd_controller #(
     reg engine_reset;
     reg [31:0] engine_reset_count;
     wire engine_rst_n = rst_n & ~engine_reset;
+    // Optional SWD output profile: retain the core's slow bit period but
+    // emit one full-FCLK high pulse for each intended rising edge. The
+    // one-FCLK launch latency is covered by real-CM3 AP/block tests. It is
+    // selected only for a divided transfer clock (delay_fast != 0).
+    always @(posedge clk or negedge engine_rst_n)begin
+        if(!engine_rst_n)begin short_clock_previous<=1;short_core_clock<=0;end
+        else begin
+            short_clock_previous<=core_swclk;
+            short_core_clock<=core_swclk && !short_clock_previous;
+        end
+    end
     wire [2:0] jtag_ack;
     wire [31:0] jtag_rdata,jtag_cached_ir;
     wire jtag_cache_valid;
@@ -308,9 +321,10 @@ module swd_controller #(
     //   [16:13] cfg_delay_fast        Transfer half-cycle delay
     //   [17]    cfg_sample_rise       1=FCLK Q1, 0=FCLK Q2
     //   [18]    cfg_rx_boundary       1=short-return RX boundary, 0=legacy
+    //   [19]    cfg_short_clock       One-FCLK high pulse; SWJ uses transfer divisor
     //   [24:23] cfg_turn_extra       Extra low half-cycle steps before ACK
     //   [27:25] cfg_ack_delay        0=legacy; 1..7=ACK hold/capture schedule
-    //   [31:29] Reserved
+    //   [31:28] cfg_delay_fast[7:4]   Extended transfer half-cycle delay
 
     //=========================================================================
     // Registers
@@ -320,7 +334,7 @@ module swd_controller #(
     reg  [3:0]  cfg_idle_cycles;
     reg         cfg_data_phase;
     reg  [3:0]  cfg_clock_delay;
-    reg  [3:0]  cfg_delay_fast;
+    reg  [7:0]  cfg_delay_fast;
     reg  [1:0]  cfg_turn_extra;
     reg  [2:0]  cfg_ack_delay;
     reg  [255:0] swj_data;
@@ -492,7 +506,8 @@ module swd_controller #(
             cfg_idle_cycles <= 4'd0;
             cfg_data_phase <= 1'b0;
             cfg_clock_delay <= 4'd5;
-            cfg_delay_fast <= 4'd0;
+            cfg_delay_fast <= 8'd0;
+            cfg_short_clock <= 1'b0;
             cfg_turn_extra <= 2'd0;
             cfg_ack_delay <= 3'd0;
             cfg_sample_rise <= 1'b1;
@@ -542,7 +557,8 @@ module swd_controller #(
                         cfg_idle_cycles <= s_axi_wdata[7:4];
                         cfg_data_phase <= s_axi_wdata[8];
                         cfg_clock_delay <= s_axi_wdata[12:9];
-                        cfg_delay_fast <= s_axi_wdata[16:13];
+                        cfg_delay_fast <= {s_axi_wdata[31:28],s_axi_wdata[16:13]};
+                        cfg_short_clock <= s_axi_wdata[19] && (|{s_axi_wdata[31:28],s_axi_wdata[16:13]});
                         cfg_sample_rise <= s_axi_wdata[17];
                         cfg_rx_boundary <= s_axi_wdata[18];
                         cfg_turn_extra <= s_axi_wdata[24:23];
@@ -613,7 +629,7 @@ module swd_controller #(
                     ADDR_CTRL: begin
                         rdata_reg <= {16'd0, xfer_request, 5'd0, ctrl_timestamp_en, ctrl_mode, scalar_status_busy};
                     end
-                    ADDR_FEATURES: rdata_reg <= 32'h4450_000f;
+                    ADDR_FEATURES: rdata_reg <= 32'h4450_001f;
                     ADDR_ENGINE_RESET: rdata_reg <= engine_reset_count;
                     ADDR_TRACE_CTRL: rdata_reg <= {trace_frozen,trace_raw_mode,trace_raw_active,trace_raw_armed,8'd0,trace_count,trace_head};
                     ADDR_TRACE_INDEX: rdata_reg <= {28'd0,trace_index};
@@ -624,7 +640,7 @@ module swd_controller #(
                         rdata_reg <= {core_timestamp, 8'd0, core_parity_err, 3'd0, core_ack, scalar_status_busy};
                     end
                     ADDR_CFG: begin
-                        rdata_reg <= {4'd0, cfg_ack_delay, cfg_turn_extra, 4'd0, cfg_rx_boundary, cfg_sample_rise, cfg_delay_fast, cfg_clock_delay, cfg_data_phase, cfg_idle_cycles, 4'd1};
+                        rdata_reg <= {cfg_delay_fast[7:4], cfg_ack_delay, cfg_turn_extra, 3'd0, cfg_short_clock, cfg_rx_boundary, cfg_sample_rise, cfg_delay_fast[3:0], cfg_clock_delay, cfg_data_phase, cfg_idle_cycles, 4'd1};
                     end
                     ADDR_SWJ_DATA0: begin
                         rdata_reg <= (ctrl_mode) ? {32'd0} : swj_data[31:0];
@@ -820,7 +836,7 @@ module swd_controller #(
         .timestamp_en  (ctrl_timestamp_en),
         .idle_cycles   (cfg_idle_cycles),
         .data_phase    (cfg_data_phase),
-        .clock_delay   (cfg_clock_delay),
+        .clock_delay   (cfg_short_clock ? cfg_delay_fast : {4'd0,cfg_clock_delay}),
         .delay_fast    (cfg_delay_fast),
         .turn_extra   (cfg_turn_extra),
         .ack_delay     (cfg_ack_delay),
@@ -847,7 +863,7 @@ module swd_controller #(
         .seq_data(swj_data),.seq_tms(jtag_seq_tms),.ir_length(jtag_ir_config[7:0]),
         .ir_before(jtag_ir_config[18:8]),.ir_after(jtag_ir_config[29:19]),
         .dr_before(jtag_dr_config[7:0]),.dr_after(jtag_dr_config[15:8]),
-        .half_delay(cfg_delay_fast),.idle_cycles(cfg_idle_cycles),
+        .half_delay(cfg_delay_fast[3:0]),.idle_cycles(cfg_idle_cycles),
         .late_return(jtag_return_late),
         // Both phases use the IOB IDDR. Q1 is consumed one FCLK after its
         // rising sample, Q2 half an FCLK after its falling sample. The DR

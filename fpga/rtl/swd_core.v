@@ -25,8 +25,8 @@ module swd_core (
     // Configuration
     input  wire [3:0]  idle_cycles,
     input  wire        data_phase,
-    input  wire [3:0]  clock_delay,
-    input  wire [3:0]  delay_fast,
+    input  wire [7:0]  clock_delay,
+    input  wire [7:0]  delay_fast,
     // Extra transfer half-cycle steps held low before turnaround's rise.
     input  wire [1:0]  turn_extra,
     // 0=legacy pipeline; 1..7=non-overlapping ACK capture with configurable
@@ -98,7 +98,7 @@ module swd_core (
     wire        swdio_sample_fsm;
     wire        ila_sample_clk;
 
-    wire [3:0]  active_delay;
+    wire [7:0]  active_delay;
     wire        step_tick;
     wire        req_parity;
     wire [7:0]  req_hdr;
@@ -123,7 +123,7 @@ module swd_core (
     wire early_rx = rx_boundary && (ack_delay == 0);
     // The wrapper chooses early/late FCLK-domain input sampling.
     assign active_delay       = (state == ST_SWJ) ? clock_delay : delay_fast;
-    assign step_tick          = (delay_cnt == {12'd0, active_delay});
+    assign step_tick          = (delay_cnt == {8'd0, active_delay});
     assign req_parity         = active_request[0] ^ active_request[1] ^ active_request[2] ^ active_request[3];
     assign req_hdr            = {1'b1, 1'b0, req_parity, active_request[3], active_request[2], active_request[1], active_request[0], 1'b1};
     assign wr_parity          = ^xfer_wdata;

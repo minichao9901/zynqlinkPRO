@@ -3,6 +3,10 @@
 直接可用的 Zynq-7020 DAPLink 固件。**仅通过 JTAG 加载到 RAM，不写 Flash**：
 掉电或复位后需要重新加载。
 
+2026-10-29：当前 F103CB/接线的 SWD 低频修复验收配对为
+[`20261029_swd_short_high/probe.bit` + `probe.elf`](20261029_swd_short_high/README.md)。
+覆盖 250 kHz～60 MHz 请求、JTAG 与 RTT/HSS；源码、哈希、实际时钟和验收边界见该目录 manifest 与[验收记录](../docs/SWD窄脉宽修复验收-20261029.md)。下列旧配对保持原样。
+
 | 文件 | 说明 |
 |---|---|
 | `zynqlink_packet.bit` | PL 比特流（含 SWD 批量引擎、CDMA、命令/响应 BRAM） |

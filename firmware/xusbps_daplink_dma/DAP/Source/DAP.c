@@ -447,34 +447,46 @@ static uint32_t DAP_SWJ_Clock(const uint8_t *request, uint8_t *response) {
     return ((4U << 16) | 1U);
   }
 
-  /* Keep the core's two-beat waveform intact at all rates. Dividing FCLK
-   * avoids changing half-cycle step counts. Frequencies above 50 MHz are
-   * experimental until timing closure and board validation are complete. */
+  /* DAP_SWJ_Clock is a maximum rate. Low SWD rates use a faster FCLK and
+   * an extended half-period divider so the pad can emit a narrow high
+   * pulse while retaining the requested bit period. */
   if ((clock > DAP_MAX_SWCLK_HZ) || (clock < 250000U)) {
     *response = DAP_ERROR;
     return ((4U << 16) | 1U);
   }
-  int fclk_hz = ps_set_fclk0_hz(clock * 2U);
+  uint32_t divisor = 1U;
+  uint32_t narrow = DAP_Data.debug_port == DAP_PORT_SWD && clock < 35000000U &&
+                    (swd_read32(SWD_FEATURES) & SWD_FEATURE_SHORT_CLOCK);
+  uint32_t target_fclk = clock * 2U;
+  if (narrow) {
+    divisor = DAP_MAX_SWCLK_HZ / clock;
+    if (divisor < 2U) divisor = 2U;
+    if (divisor > 256U) divisor = 256U;
+    target_fclk = clock * 2U * divisor;
+    if (target_fclk > DAP_MAX_SWCLK_HZ * 2U) target_fclk = DAP_MAX_SWCLK_HZ * 2U;
+  }
+  int fclk_hz = ps_set_fclk0_hz(target_fclk);
   if (fclk_hz <= 0) {
     *response = DAP_ERROR;
     return ((4U << 16) | 1U);
   }
-  uint32_t link_clock_hz = (uint32_t)fclk_hz / 2U;
-  /* FCLK runs at 2x SWCLK, so the transfer half-cycle must be one FCLK
-   * cycle (delay_fast=0).  The RTL reset value is slow; program it here.
-   * Pick the capture phase from the realizable PLL rate, not the requested
-   * one: different requests can select the same divisor pair. At short
-   * return delays the legacy ACK/data pipeline is one SWCLK bit late.
-   * Select the validated F103 receive window using the actual PLL rate;
-   * JTAG has its own IDDR calibration and retains its existing setting. */
+  uint32_t link_clock_hz = (uint32_t)fclk_hz / (2U * divisor);
+  /* The narrow output launches one FCLK after the core. Above 25 MHz its
+   * two-cycle half-period needs the later receive boundary on this board.
+   * Undivided rates retain their receive profiles and JTAG calibration. */
   uint32_t receive_profile = (link_clock_hz <= 35000000U) ? (1U << 17) : 0U;
   if (DAP_Data.debug_port == DAP_PORT_SWD) {
-    receive_profile = link_clock_hz <= 30000000U ? (1U << 18) :
+    receive_profile = narrow ? (link_clock_hz <= 25000000U ? (1U << 18) : (1U << 17)) :
+                      link_clock_hz <= 30000000U ? (1U << 18) :
                       link_clock_hz <= 45000000U ? (1U << 17) : 0U;
   }
+  uint32_t half_delay = divisor - 1U;
+  uint32_t waveform = ((half_delay & 15U) << 13) | ((half_delay >> 4) << 28) |
+                      (narrow ? (1U << 19) : 0U);
   swd_write32(SWD_CFG, (swd_read32(SWD_CFG) &
-                        ~((0xFU << 13) | (1U << 17) | (1U << 18))) |
-              receive_profile);
+                        ~((0xFU << 13) | (1U << 17) | (1U << 18) |
+                          (1U << 19) | (0xFU << 28))) |
+              receive_profile | waveform);
   Set_Clock_Delay(clock);
   if(DAP_Data.debug_port==DAP_PORT_JTAG) DAP_JTAG_ClockChanged();
 

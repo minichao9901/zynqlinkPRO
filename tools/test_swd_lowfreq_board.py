@@ -5,7 +5,7 @@ import usb.util
 from dap_pipeline_bench import open_dap,setup,xfer
 from dap_transport_control import snapshot,engine_snapshot
 from test_probe_board import Memory
-from probe_build_info import provenance
+from probe_build_info import provenance,swd_clock_details
 
 def recover(dev,inp):
     assert bytes(dev.ctrl_transfer(0xc0,0x5a,0x4441,0x5052,4,timeout=3000))==b'DAP\0'
@@ -36,7 +36,7 @@ def main():
             try:
                 row['idcode_reply']=setup(out,inp,speed).hex()
                 diag=xfer(out,inp,[0x80,255]);row['diagnostic']=diag.hex()
-                hz,cfg=struct.unpack_from('<II',diag,4);row.update(FCLK_Hz=hz,SWCLK_Hz=hz/2,cfg=hex(cfg),phase=(cfg>>17)&1,rx_boundary=(cfg>>18)&1)
+                hz,cfg=struct.unpack_from('<II',diag,4);row.update(FCLK_Hz=hz,cfg=hex(cfg),phase=(cfg>>17)&1,rx_boundary=(cfg>>18)&1,**swd_clock_details(hz,cfg))
                 t=time.perf_counter()
                 for i in range(a.loops):
                     pattern=random.Random(0x20261028+speed*31+i).randbytes(a.size)
@@ -46,7 +46,7 @@ def main():
                 row['error']=repr(exc);row['engine_state']=engine_snapshot(dev)
                 try:
                     diag=xfer(out,inp,[0x80,255]);hz,cfg=struct.unpack_from('<II',diag,4)
-                    row.update(FCLK_Hz=hz,SWCLK_Hz=hz/2,cfg=hex(cfg),phase=(cfg>>17)&1,rx_boundary=(cfg>>18)&1)
+                    row.update(FCLK_Hz=hz,cfg=hex(cfg),phase=(cfg>>17)&1,rx_boundary=(cfg>>18)&1,**swd_clock_details(hz,cfg))
                 except Exception as diag_exc:row['diagnostic_error']=repr(diag_exc)
             finally:
                 # Always restore at the known high-speed baseline, even when a

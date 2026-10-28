@@ -20,6 +20,11 @@ __attribute__((weak)) int probe_target_claimed(void) { return 0; }
 #define PK(n) (0x42020000U+4U*(n))
 #define PR(n) Xil_In32(PK(n))
 #define PW(n,v) Xil_Out32(PK(n),(v))
+static uint32_t link_clock(uint32_t fclk) {
+    uint32_t cfg = Xil_In32(0x40010008U);
+    uint32_t half_cycles = 1U + ((cfg >> 13) & 15U) + (((cfg >> 28) & 15U) << 4);
+    return fclk / (2U * half_cycles);
+}
 extern int swd_dma_packet_to(uint32_t bank, uint32_t bytes, uint8_t *destination);
 static uint8_t pl_packets, rtt_pl_running, rtt_paused, dma_pending;
 static uint32_t dma_tail, dma_length;
@@ -362,7 +367,7 @@ static int sampler_arm(void) {
         probe_target_release();
         return -6;
     }
-    actual_hz = fclk / 2;
+    actual_hz = link_clock(fclk);
     W(6, fclk);
     W(4, period);
     for (i = 0; i < nwords; i++) {
@@ -583,7 +588,7 @@ static void rtt_poll(void) {
             return;
         }
     }
-    actual_hz = probe_target_fclk() / 2;
+    actual_hz = link_clock(probe_target_fclk());
     if (pending_len) {
         rc = rtt_commit();
         goto end;

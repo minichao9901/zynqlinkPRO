@@ -19,6 +19,7 @@ import usb.util
 
 from dap_pipeline_bench import open_dap, setup, xfer, le
 from probe_stream import Probe
+from probe_build_info import provenance, swd_clock_details
 
 
 class Memory:
@@ -94,17 +95,20 @@ def stop(probe, dev):
     assert probe.action(0x31, 0)[0] == 0
 
 
-def test_rtt(probe, mem, base, port):
+def test_rtt(probe, mem, base, port, speed_hz=50_000_000):
     ring = base+256
     control = struct.pack('<16sII6I', b'SEGGER RTT', 1, 0, 0, ring, 2048, 0, 0, 0)
     mem.write(base, control)
+    diag = mem.transfer([0x80, 255])
+    hz, cfg = struct.unpack_from('<II', diag, 4)
+    expected_hz = int(swd_clock_details(hz, cfg)['SWCLK_Hz'])
     assert mem.transfer([3]) == b'\x03\x00'  # Force the probe to initialize SWD itself.
     rng = random.Random(20261027)
     total, wr = 0, 0
     start = time.monotonic()
     with serial.Serial(port, 115200, timeout=0.1) as com:
         com.reset_input_buffer()
-        assert probe.action(0x31, 7, struct.pack('<IHBB', 50_000_000, 1024, 0, 1))[0] == 0
+        assert probe.action(0x31, 7, struct.pack('<IHBB', speed_hz, 1024, 0, 1))[0] == 0
         assert probe.action(0x31, 1, struct.pack('<IIB', base, 4096, 0))[0] == 0
         deadline=time.monotonic()+3
         while time.monotonic()<deadline:
@@ -115,7 +119,7 @@ def test_rtt(probe, mem, base, port):
         else:
             raise RuntimeError('Probe-side cold SWD initialization/search failed')
         assert mem.transfer([2,1])==b'\x02\x01'
-        assert mem.transfer([0x11]+le(50_000_000))==b'\x11\x00'
+        assert mem.transfer([0x11]+le(speed_hz))==b'\x11\x00'
         for _ in range(3):
             for n in [1, 511, 512, 1023, 1024, 1537, 2047]:
                 assert mem.word(base+40) == wr, 'Ring not drained before producer write'
@@ -135,12 +139,14 @@ def test_rtt(probe, mem, base, port):
                 total += n
         rc, words = probe.action(0x31, 2)
         assert rc == 0 and words[3] == total and words[5] == 0, (rc, words)
+        assert words[11] >> 24 == expected_hz // 1_000_000, words
         assert probe.action(0x31, 0)[0] == 0
     return {'bytes': total, 'rounds': 21, 'byte_exact': True, 'cold_probe_initialization': True, 'status': words,
+            'reported_SWCLK_MHz': words[11] >> 24,
             'elapsed_including_host_producer_s': time.monotonic()-start}
 
 
-def test_hss(probe, mem, dev, base, version, wide, seconds):
+def test_hss(probe, mem, dev, base, version, wide, seconds, speed_hz=50_000_000):
     fixture = random.Random(0x485353).randbytes(4096)
     mem.write(base, fixture)
     variables = [(base+0x100, 4, 4)]
@@ -150,7 +156,7 @@ def test_hss(probe, mem, dev, base, version, wide, seconds):
                      (base+0x7fd, 4, 5), (base+0x6ff, 2, 3)]
     expected = b''.join(fixture[a-base:a-base+n] for a, n, _ in sorted(variables))
     period = 2400 if version == 2 else 100
-    assert probe.action(0x32, 3, struct.pack('<I', 50_000_000))[0] == 0
+    assert probe.action(0x32, 3, struct.pack('<I', speed_hz))[0] == 0
     cfg = struct.pack('<IBB', period, 0, len(variables))
     cfg += b''.join(struct.pack('<IBB', *v) for v in variables)
     assert probe.action(0x32, 10 if version == 2 else 7, cfg)[0] == 0
@@ -158,7 +164,12 @@ def test_hss(probe, mem, dev, base, version, wide, seconds):
     # Cache a host TAR before starting the autonomous reader. The later raw
     # DRW reads deliberately do not rewrite TAR, testing real AP restoration.
     mem.address(base+0x900)
+    diag = mem.transfer([0x80, 255])
+    hz, cfg = struct.unpack_from('<II', diag, 4)
+    expected_hz = int(swd_clock_details(hz, cfg)['SWCLK_Hz'])
     assert probe.action(0x32, 1)[0] == 0
+    rc, active = probe.action(0x32, 2)
+    assert rc == 0 and active[1] == expected_hz, (expected_hz, active)
     count, packets, definitions, last_seq = 0, 0, 0, None
 
     def accept(packet):
@@ -204,6 +215,7 @@ def test_hss(probe, mem, dev, base, version, wide, seconds):
         assert rc == 0 and count == final[3], (count, final)
         assert definitions == 1 and count > 0
         return {'version': version, 'variables': len(variables), 'samples': count,
+                'actual_SWCLK_Hz': active[1],
                 'packets': packets, 'byte_exact': True, 'DAP_context_reads': 8,
                 'metrics': final, 'backpressure_skipped': final[4]}
     finally:
@@ -216,17 +228,24 @@ def main():
     ap.add_argument('--services', choices=['rtt', 'hss', 'both'], default='both')
     ap.add_argument('--port')
     ap.add_argument('--seconds', type=float, default=0.25)
+    ap.add_argument('--speed-hz', type=int, default=50_000_000)
+    ap.add_argument('--bit', type=Path)
+    ap.add_argument('--elf', type=Path)
     ap.add_argument('--output', type=Path, required=True)
     args = ap.parse_args()
     args.output.parent.mkdir(parents=True, exist_ok=True)
     probe = Probe()
     dev, out, inp = open_dap()
     mem = Memory(out, inp)
-    report = {'target': 'F103CB', 'speed_hz': 50_000_000, 'RAM_base': '0x20004000'}
+    report = {'target': 'F103CB', 'speed_hz': args.speed_hz, 'RAM_base': '0x20004000',
+              'artifacts': provenance(args.bit, args.elf)}
     backup, initial_dhcsr = None, None
     try:
         stop(probe, dev)
-        report['IDCODE'] = setup(out, inp, 50000).hex()
+        report['IDCODE'] = setup(out, inp, args.speed_hz//1000).hex()
+        diagnostic = xfer(out, inp, [0x80, 255])
+        hz, cfg = struct.unpack_from('<II', diagnostic, 4)
+        report['waveform'] = dict(FCLK_Hz=hz, cfg=hex(cfg), **swd_clock_details(hz, cfg))
         initial_dhcsr = mem.word(0xe000edf0)
         if not initial_dhcsr & (1 << 17):
             mem.write_word(0xe000edf0, 0xa05f0003)
@@ -240,9 +259,9 @@ def main():
             # Exercise SET_CONFIGURATION lifecycle and clear probe-side link cache.
             dev.ctrl_transfer(0,9,1,0,None,timeout=3000)
             time.sleep(0.02)
-            report['rtt'] = test_rtt(probe, mem, 0x20004000, port)
+            report['rtt'] = test_rtt(probe, mem, 0x20004000, port, args.speed_hz)
         if args.services in ('hss', 'both'):
-            report['hss'] = [test_hss(probe, mem, dev, 0x20004000, version, wide, args.seconds)
+            report['hss'] = [test_hss(probe, mem, dev, 0x20004000, version, wide, args.seconds, args.speed_hz)
                              for version, wide in [(1, False), (2, False), (2, True)]]
     finally:
         try:

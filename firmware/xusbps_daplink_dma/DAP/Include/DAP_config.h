@@ -343,6 +343,7 @@ Configures the DAP Hardware I/O pins for JTAG mode:
 #define SWD_PACKET_LEN      (SWD_BASE_ADDR + 0x44)
 #define SWD_PACKET_STATUS   (SWD_BASE_ADDR + 0x48)
 #define SWD_FEATURES        (SWD_BASE_ADDR + 0x4C)
+#define SWD_FEATURE_SHORT_CLOCK (1U << 4) /* CFG[19], extended transfer divider */
 #define SWD_ENGINE_RESET    (SWD_BASE_ADDR + 0x50)
 
 /* Low-rate bring-up counters.  Defined in dap_main.c and deliberately kept
@@ -479,9 +480,10 @@ __STATIC_INLINE void PORT_SWD_SETUP (void) {
   //   [16:13] cfg_delay_fast        Transfer half-cycle delay
   //   [17]    cfg_sample_rise      Input capture phase (Q1/Q2)
   //   [18]    cfg_rx_boundary      1=short-return ACK/data boundary, 0=legacy
+  //   [19]    cfg_short_clock      One-FCLK high pulse; SWJ uses transfer divisor
+  //   [31:28] cfg_delay_fast[7:4]   Extended transfer half-cycle delay
   //   [24:23] cfg_turn_extra       Extra low half-cycle steps before ACK
   //   [27:25] cfg_ack_delay        0=legacy; 1..7=ACK hold/capture schedule
-    //   [31:29] Reserved
   //
   // Current setup:
   // turnaround=1, idle=1, data_phase=0, clock_delay=5, delay_fast=0

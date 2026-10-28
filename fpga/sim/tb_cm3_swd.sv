@@ -11,7 +11,7 @@ module tb_cm3_swd #(
 );
   real half_ns=FCLK_HALF_NS, return_ns=RETURN_NS;
   integer phase=SAMPLE_RISE, ack_delay=ACK_DELAY, turn_extra=TURN_EXTRA, words=TEST_WORDS, idle=0;
-  integer rx_boundary=0, transfer_delay=0;
+  integer rx_boundary=0, transfer_delay=0,narrow_clock=0;
   reg clk=0;
   initial begin
     if($value$plusargs("half_ns=%f",half_ns))begin end
@@ -36,7 +36,34 @@ module tb_cm3_swd #(
   // after the clock has already fallen, in which case no extra edge occurs.
   reg coupled_clock_drop=0;
   integer coupled_events=0;
-  wire target_swclk=swclk && !coupled_clock_drop;
+  // Prototype a registered short-high output without changing the protocol
+  // core. Its rising edge is delayed by one FCLK and its high time is
+  // clock_high_cycles FCLK cycles. Exercise this latency against real CM3
+  // request/ACK/data behavior before implementing the production pad mux.
+  integer clock_high_cycles=0,clock_high_left=0;
+  reg previous_clock=1,short_clock=0;
+  always @(posedge clk)begin
+    if(!rst_n)begin previous_clock<=1;short_clock<=0;clock_high_left<=0;end
+    else begin
+      previous_clock<=swclk;
+      if(swclk && !previous_clock)begin short_clock<=1;clock_high_left<=clock_high_cycles-1;end
+      else if(clock_high_left>0)begin short_clock<=1;clock_high_left<=clock_high_left-1;end
+      else short_clock<=0;
+    end
+  end
+  wire physical_clock=clock_high_cycles>0 ? short_clock : swclk;
+  wire target_swclk=physical_clock && !coupled_clock_drop;
+  real pad_high_start=0;
+  reg narrow_at_rise=0;
+  integer narrow_pulses=0;
+  always @(posedge swclk)begin
+    pad_high_start=$realtime;narrow_at_rise=dut.cfg_short_clock;
+  end
+  always @(negedge swclk)if(narrow_at_rise && dut.cfg_short_clock && rst_n)begin
+    if($realtime-pad_high_start<2*half_ns-0.01 || $realtime-pad_high_start>2*half_ns+0.01)
+      $fatal(1,"narrow pad high width=%f expected=%f",$realtime-pad_high_start,2*half_ns);
+    narrow_pulses=narrow_pulses+1;
+  end
   swd_controller dut(.clk(clk),.rst_n(rst_n),
     .s_axi_awaddr(awaddr),.s_axi_awprot(3'd0),.s_axi_awvalid(awvalid),.s_axi_awready(awready),
     .s_axi_wdata(wdata),.s_axi_wstrb(4'hf),.s_axi_wvalid(wvalid),.s_axi_wready(wready),
@@ -73,7 +100,7 @@ module tb_cm3_swd #(
     return_data <= #(return_ns) cm3_swdo;
   end
   assign swdio = return_oe ? return_data : 1'bz;
-  always @(negedge return_data)if($test$plusargs("coupled_clock") && return_oe && swclk && !coupled_clock_drop)begin
+  always @(negedge return_data)if($test$plusargs("coupled_clock") && return_oe && physical_clock && !coupled_clock_drop)begin
     coupled_events=coupled_events+1;coupled_clock_drop<=1;#2;coupled_clock_drop<=0;
   end
   always @(posedge swclk or negedge swclk) if($test$plusargs("trace"))
@@ -102,11 +129,11 @@ module tb_cm3_swd #(
     end
   endtask
   task wait_idle;
-    reg [31:0] s; integer timeout;
+    reg [31:0] s; integer timeout,limit;
     begin
-      s=1;timeout=0;
-      while(s[0] && timeout<3000)begin rd(4,s);timeout=timeout+1;end
-      if(timeout==3000)$fatal(1,"core timeout");
+      s=1;timeout=0;limit=3000*(transfer_delay+1);
+      while(s[0] && timeout<limit)begin rd(4,s);timeout=timeout+1;end
+      if(timeout==limit)$fatal(1,"core timeout");
     end
   endtask
   task swj(input integer count,input [255:0] bits);
@@ -154,7 +181,7 @@ module tb_cm3_swd #(
       if(!is_read)for(n=0;n<count;n=n+1)put(n+1,32'h87654321^(32'h9e3779b9*(n%256)));
       wr(7'h44,is_read?4:(count+1)*4);wr(7'h40,1);
       status=0;timeout=0;
-      while(!status[1] && timeout<100000)begin rd(7'h48,status);timeout=timeout+1;end
+      while(!status[1] && timeout<100000*(transfer_delay+1))begin rd(7'h48,status);timeout=timeout+1;end
       if(!status[1] || status[2] || status[0])$fatal(1,"packet status %h",status);
       get_response(0,response);
       if(response!==((32'h1<<16)|count))$fatal(1,"packet header %h count=%0d",response,count);
@@ -203,10 +230,16 @@ module tb_cm3_swd #(
     if($value$plusargs("idle=%d",idle))begin end
     if($value$plusargs("rx_boundary=%d",rx_boundary))begin end
     if($value$plusargs("transfer_delay=%d",transfer_delay))begin end
+    if($value$plusargs("clock_high_cycles=%d",clock_high_cycles))begin end
+    if($value$plusargs("narrow_clock=%d",narrow_clock))begin end
     expected_ack=-1;if($value$plusargs("expected_ack=%d",expected_ack))begin end
     if($test$plusargs("vcd"))begin $dumpfile("cm3_swd.vcd");$dumpvars(0,dut,cm3_swdo,cm3_swdoen);end
     #1;rst_n=0;#100;rst_n=1;repeat(30)@(negedge clk);
-    wr(8,1 | (idle<<4) | (5<<9) | (transfer_delay<<13) | (phase<<17) | (rx_boundary<<18) | (turn_extra<<23) | (ack_delay<<25));
+    if(narrow_clock && clock_high_cycles>0)$fatal(1,"do not shape the clock twice");
+    wr(8,1 | (idle<<4) | (5<<9) | ((transfer_delay&15)<<13) | ((transfer_delay>>4)<<28) | (phase<<17) | (rx_boundary<<18) | (narrow_clock<<19) | (turn_extra<<23) | (ack_delay<<25));
+    rd(8,value);
+    if(value[31:28]!=(transfer_delay>>4) || value[16:13]!=(transfer_delay&15) || value[19]!=narrow_clock)
+      $fatal(1,"clock config readback %h delay=%0d narrow=%0d",value,transfer_delay,narrow_clock);
     swj(64,256'hffffffffffffffff);
     swj(16,256'he79e);
     swj(64,256'hffffffffffffffff);
@@ -331,15 +364,24 @@ module tb_cm3_swd #(
       xfer(8'h02,0,value);if(value!==32'h2ba01477)$fatal(1,"DPIDR after streams");
       $display("RTT_PASS real CortexM3 descriptor boundary, unaligned payload, DMA-before-RdOff, DAP recovery");
     end
-    if($test$plusargs("packets"))begin
+    if($test$plusargs("packets") || $test$plusargs("packet_small"))begin
       // The real M0 MEM-AP wraps TAR at 1 KiB. Use a modulo-256 pattern so
       // large raw TransferBlock counts verify the actual AP wrap semantics.
       packet(1,0);packet(1,1);
       packet(2,0);packet(2,1);
-      packet(127,0);packet(127,1);
-      packet(256,0);packet(256,1);
-      packet(770,0);packet(770,1);
-      packet(1023,0);packet(1023,1);
+      if($test$plusargs("packet_small"))begin packet(17,0);packet(17,1);end
+      else begin
+        packet(127,0);packet(127,1);
+        packet(256,0);packet(256,1);
+        packet(770,0);packet(770,1);
+        packet(1023,0);packet(1023,1);
+      end
+    end
+    if($test$plusargs("expect_no_coupling") && coupled_events!=0)
+      $fatal(1,"short high pulse still overlaps returned falling data: %0d events",coupled_events);
+    if(narrow_clock)begin
+      if(narrow_pulses==0)$fatal(1,"narrow pad emitted no pulses");
+      $display("NARROW_PAD_PASS pulses=%0d high_ns=%f delay=%0d",narrow_pulses,2*half_ns,transfer_delay);
     end
     $display("PASS CortexM3 DPIDR/power/AP posted SRAM %0d words",words);$finish;
   end

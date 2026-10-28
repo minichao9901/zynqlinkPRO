@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -95,7 +96,8 @@ def main():
     tail = [l for l in log.splitlines() if any(marker in l for marker in
             ('PASS', 'FAIL', 'Fatal', 'Error', 'IDCODE', 'JTAG_WR_', 'JTAG_BLK_', 'JTAG_PKT_'))]
     print('\n'.join(tail[-20:]) or log[-2000:])
-    return 0 if p.returncode == 0 and 'PASS' in log else 1
+    failed = re.search(r'\b(?:Fatal|Error|FAIL)\b', log, re.IGNORECASE)
+    return 0 if p.returncode == 0 and 'PASS' in log and not failed else 1
 
 
 if __name__ == '__main__':
