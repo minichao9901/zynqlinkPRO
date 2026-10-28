@@ -27,5 +27,13 @@
   "observed": "production engine, manual pin writes and independent AXI GPIO all reproduce ACK5/data FE3F019F; narrow-high pulses do not fix it; correct reply with first zero removed from each run matches observed 36 bits exactly",
   "interpretation": "data-correlated extra advancement is a working hypothesis; analog clock waveform not yet measured",
   "target_flash_written": false,
-  "probe_restored": true
+  "probe_restored": true,
+  "clock_correction_20261029": {
+    "previous_claim_FCLK_Hz": 100000000,
+    "reconstructed_loader_FCLK_Hz": 49999999.5,
+    "old_short_high_ns": 20.0000002,
+    "explanation": "The 100MHz value in timing is a timing constraint, not a clock measurement. The old runner sourced prebuilt/ps7_init.tcl, which programs divider 6*6 from the IO PLL (54*33,333,333Hz), and did not change it. The live minimal-driver register dump confirms 0x00600600. Old single-FCLK short pulses were about 20ns, not 10ns.",
+    "loader_sha256": "68e31ef14fff99b1c9385869ba5efc88b53d312cc47f0333bd7ff993e4cfa46f",
+    "new_evidence": "results/swd/pulse_width_20261029/main_no_usb_50.json"
+  }
 }

@@ -42,8 +42,16 @@
   "limits": [
     "FPGA-side digital counters cannot prove the analog waveform at the target MCU pin, and can miss sub-spec pulses.",
     "Old ctrlstat_prediction.json and slow16_ctrlstat.json are excluded: they requested CTRL/STAT immediately after line reset without the mandatory successful DPIDR read. ACK7 from those tests is not valid fault evidence. The runner now permits DPIDR only.",
-    "Nominal GPIO rate excludes software/MMIO overhead. FCLK is fixed at 100MHz."
+    "Nominal GPIO rate excludes software/MMIO overhead. The old loader ran FCLK at about 50MHz; 100MHz is the STA constraint (see clock_correction_20261029)."
   ],
   "target_flash_written": false,
-  "probe_restored": true
+  "probe_restored": true,
+  "clock_correction_20261029": {
+    "previous_claim_FCLK_Hz": 100000000,
+    "reconstructed_loader_FCLK_Hz": 49999999.5,
+    "old_short_high_ns": 20.0000002,
+    "explanation": "The 100MHz value in timing is a timing constraint, not a clock measurement. The old runner sourced prebuilt/ps7_init.tcl, which programs divider 6*6 from the IO PLL (54*33,333,333Hz), and did not change it. The live minimal-driver register dump confirms 0x00600600. Old single-FCLK short pulses were about 20ns, not 10ns.",
+    "loader_sha256": "68e31ef14fff99b1c9385869ba5efc88b53d312cc47f0333bd7ff993e4cfa46f",
+    "new_evidence": "results/swd/pulse_width_20261029/main_no_usb_50.json"
+  }
 }

@@ -1,0 +1,30 @@
+{
+  "mailbox_address": 1048576,
+  "fixture": "gpio",
+  "elf_sha256": "b115b0be24a85b94dfe7e5ac690489b07cb1df5b95bc514f48ddea1a97559e7b",
+  "source_sha256": "65bda9cd23a3324e0a5a7dd268bf4afcc4e74dfa2bc793e5d84422335d47ff47",
+  "command": [
+    "E:\\Xilinx\\SDK\\2018.3\\gnu\\aarch32\\nt\\gcc-arm-none-eabi\\bin\\arm-none-eabi-gcc.exe",
+    "-mcpu=cortex-a9",
+    "-mfpu=vfpv3",
+    "-mfloat-abi=hard",
+    "-O2",
+    "-g",
+    "-Wall",
+    "-Wextra",
+    "-I",
+    "E:\\zynqlinkPRO\\reference\\legacy_zynq\\ZYNQ_DAPLINK_RTL_100TO50MHz\\ZYNQ_DAPLINK_RTL_100TO50MHz.sdk\\usb_bsp\\ps7_cortexa9_0\\include",
+    "-specs=E:\\zynqlinkPRO\\firmware\\xusbps_daplink_dma\\Xilinx.spec",
+    "-Wl,-build-id=none",
+    "-Wl,-T,E:\\zynqlinkPRO\\firmware\\xusbps_daplink_dma\\lscript.ld",
+    "-LE:\\zynqlinkPRO\\reference\\legacy_zynq\\ZYNQ_DAPLINK_RTL_100TO50MHz\\ZYNQ_DAPLINK_RTL_100TO50MHz.sdk\\usb_bsp\\ps7_cortexa9_0\\lib",
+    "E:\\zynqlinkPRO\\firmware\\diagnostics\\minimal_swd_zynq.c",
+    "-o",
+    "E:\\zynqlinkPRO\\build\\minimal_swd\\minimal_swd.elf",
+    "-Wl,--start-group",
+    "-lxil",
+    "-lgcc",
+    "-lc",
+    "-Wl,--end-group"
+  ]
+}

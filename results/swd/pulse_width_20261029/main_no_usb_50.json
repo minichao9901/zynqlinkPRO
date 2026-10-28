@@ -1,0 +1,621 @@
+{
+  "kind": "minimal PS SWD driver",
+  "fixture": "main",
+  "artifacts": {
+    "E:\\zynqlinkPRO\\prebuilt\\20261029_swd_main_drive_ab\\slow16_120.bit": "0a4cdbf60fa7da63acb966ba618a44a11508433fdf00fc31a9f10bdbce73ae5f",
+    "E:\\zynqlinkPRO\\build\\minimal_swd_main\\minimal_swd.elf": "ea2d18c4ce44e1e5aa07a6808a74c1bc72d10c45986e52e8bbc7b113bc603ba3"
+  },
+  "restore_pair": {
+    "E:\\zynqlinkPRO\\prebuilt\\20261029_swd_main_drive_ab\\slow16_120.bit": "0a4cdbf60fa7da63acb966ba618a44a11508433fdf00fc31a9f10bdbce73ae5f",
+    "E:\\zynqlinkPRO\\prebuilt\\20261029_swd_main_drive_ab\\profile60.elf": "6c9fff000908a706dfebbd872403096cf0d602301003cf62be061b002b698b92"
+  },
+  "rows": [
+    {
+      "half_ns": 50000,
+      "pulse_mode": "direct",
+      "nominal_clock_hz": 10000.0,
+      "ack": 5,
+      "data": "0xfe3f019f",
+      "parity": 1,
+      "parity_matches": false,
+      "intended_rises": 200,
+      "elapsed_ticks": 9181417,
+      "timer_hz": 333333343,
+      "bits": [
+        {
+          "index": 0,
+          "before_rise": 1,
+          "after_rise": 0
+        },
+        {
+          "index": 1,
+          "before_rise": 0,
+          "after_rise": 1
+        },
+        {
+          "index": 2,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 3,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 4,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 5,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 6,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 7,
+          "before_rise": 1,
+          "after_rise": 0
+        },
+        {
+          "index": 8,
+          "before_rise": 0,
+          "after_rise": 0
+        },
+        {
+          "index": 9,
+          "before_rise": 0,
+          "after_rise": 1
+        },
+        {
+          "index": 10,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 11,
+          "before_rise": 1,
+          "after_rise": 0
+        },
+        {
+          "index": 12,
+          "before_rise": 0,
+          "after_rise": 0
+        },
+        {
+          "index": 13,
+          "before_rise": 0,
+          "after_rise": 0
+        },
+        {
+          "index": 14,
+          "before_rise": 0,
+          "after_rise": 0
+        },
+        {
+          "index": 15,
+          "before_rise": 0,
+          "after_rise": 0
+        },
+        {
+          "index": 16,
+          "before_rise": 0,
+          "after_rise": 0
+        },
+        {
+          "index": 17,
+          "before_rise": 0,
+          "after_rise": 0
+        },
+        {
+          "index": 18,
+          "before_rise": 0,
+          "after_rise": 1
+        },
+        {
+          "index": 19,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 20,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 21,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 22,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 23,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 24,
+          "before_rise": 1,
+          "after_rise": 0
+        },
+        {
+          "index": 25,
+          "before_rise": 0,
+          "after_rise": 0
+        },
+        {
+          "index": 26,
+          "before_rise": 0,
+          "after_rise": 0
+        },
+        {
+          "index": 27,
+          "before_rise": 0,
+          "after_rise": 1
+        },
+        {
+          "index": 28,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 29,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 30,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 31,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 32,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 33,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 34,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 35,
+          "before_rise": 1,
+          "after_rise": 1
+        }
+      ],
+      "command": "dpidr",
+      "PS_clock_registers": {
+        "FCLK0_CTRL": "0x600600",
+        "IO_PLL_CTRL": "0x36008",
+        "ARM_PLL_CTRL": "0x28008"
+      },
+      "pad_observer": null,
+      "passed": false
+    },
+    {
+      "half_ns": 5000,
+      "pulse_mode": "direct",
+      "nominal_clock_hz": 100000.0,
+      "ack": 5,
+      "data": "0xfe3f019f",
+      "parity": 1,
+      "parity_matches": false,
+      "intended_rises": 200,
+      "elapsed_ticks": 1282811,
+      "timer_hz": 333333343,
+      "bits": [
+        {
+          "index": 0,
+          "before_rise": 1,
+          "after_rise": 0
+        },
+        {
+          "index": 1,
+          "before_rise": 0,
+          "after_rise": 1
+        },
+        {
+          "index": 2,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 3,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 4,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 5,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 6,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 7,
+          "before_rise": 1,
+          "after_rise": 0
+        },
+        {
+          "index": 8,
+          "before_rise": 0,
+          "after_rise": 0
+        },
+        {
+          "index": 9,
+          "before_rise": 0,
+          "after_rise": 1
+        },
+        {
+          "index": 10,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 11,
+          "before_rise": 1,
+          "after_rise": 0
+        },
+        {
+          "index": 12,
+          "before_rise": 0,
+          "after_rise": 0
+        },
+        {
+          "index": 13,
+          "before_rise": 0,
+          "after_rise": 0
+        },
+        {
+          "index": 14,
+          "before_rise": 0,
+          "after_rise": 0
+        },
+        {
+          "index": 15,
+          "before_rise": 0,
+          "after_rise": 0
+        },
+        {
+          "index": 16,
+          "before_rise": 0,
+          "after_rise": 0
+        },
+        {
+          "index": 17,
+          "before_rise": 0,
+          "after_rise": 0
+        },
+        {
+          "index": 18,
+          "before_rise": 0,
+          "after_rise": 1
+        },
+        {
+          "index": 19,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 20,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 21,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 22,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 23,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 24,
+          "before_rise": 1,
+          "after_rise": 0
+        },
+        {
+          "index": 25,
+          "before_rise": 0,
+          "after_rise": 0
+        },
+        {
+          "index": 26,
+          "before_rise": 0,
+          "after_rise": 0
+        },
+        {
+          "index": 27,
+          "before_rise": 0,
+          "after_rise": 1
+        },
+        {
+          "index": 28,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 29,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 30,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 31,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 32,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 33,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 34,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 35,
+          "before_rise": 1,
+          "after_rise": 1
+        }
+      ],
+      "command": "dpidr",
+      "PS_clock_registers": {
+        "FCLK0_CTRL": "0x600600",
+        "IO_PLL_CTRL": "0x36008",
+        "ARM_PLL_CTRL": "0x28008"
+      },
+      "pad_observer": null,
+      "passed": false
+    },
+    {
+      "half_ns": 500,
+      "pulse_mode": "direct",
+      "nominal_clock_hz": 1000000.0,
+      "ack": 5,
+      "data": "0xfe3f019f",
+      "parity": 1,
+      "parity_matches": false,
+      "intended_rises": 200,
+      "elapsed_ticks": 492202,
+      "timer_hz": 333333343,
+      "bits": [
+        {
+          "index": 0,
+          "before_rise": 1,
+          "after_rise": 0
+        },
+        {
+          "index": 1,
+          "before_rise": 0,
+          "after_rise": 1
+        },
+        {
+          "index": 2,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 3,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 4,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 5,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 6,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 7,
+          "before_rise": 1,
+          "after_rise": 0
+        },
+        {
+          "index": 8,
+          "before_rise": 0,
+          "after_rise": 0
+        },
+        {
+          "index": 9,
+          "before_rise": 0,
+          "after_rise": 1
+        },
+        {
+          "index": 10,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 11,
+          "before_rise": 1,
+          "after_rise": 0
+        },
+        {
+          "index": 12,
+          "before_rise": 0,
+          "after_rise": 0
+        },
+        {
+          "index": 13,
+          "before_rise": 0,
+          "after_rise": 0
+        },
+        {
+          "index": 14,
+          "before_rise": 0,
+          "after_rise": 0
+        },
+        {
+          "index": 15,
+          "before_rise": 0,
+          "after_rise": 0
+        },
+        {
+          "index": 16,
+          "before_rise": 0,
+          "after_rise": 0
+        },
+        {
+          "index": 17,
+          "before_rise": 0,
+          "after_rise": 0
+        },
+        {
+          "index": 18,
+          "before_rise": 0,
+          "after_rise": 1
+        },
+        {
+          "index": 19,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 20,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 21,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 22,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 23,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 24,
+          "before_rise": 1,
+          "after_rise": 0
+        },
+        {
+          "index": 25,
+          "before_rise": 0,
+          "after_rise": 0
+        },
+        {
+          "index": 26,
+          "before_rise": 0,
+          "after_rise": 0
+        },
+        {
+          "index": 27,
+          "before_rise": 0,
+          "after_rise": 1
+        },
+        {
+          "index": 28,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 29,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 30,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 31,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 32,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 33,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 34,
+          "before_rise": 1,
+          "after_rise": 1
+        },
+        {
+          "index": 35,
+          "before_rise": 1,
+          "after_rise": 1
+        }
+      ],
+      "command": "dpidr",
+      "PS_clock_registers": {
+        "FCLK0_CTRL": "0x600600",
+        "IO_PLL_CTRL": "0x36008",
+        "ARM_PLL_CTRL": "0x28008"
+      },
+      "pad_observer": null,
+      "passed": false
+    }
+  ],
+  "probe_restored": true
+}

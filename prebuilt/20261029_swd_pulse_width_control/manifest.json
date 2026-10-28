@@ -1,0 +1,47 @@
+{
+  "purpose": "Controlled diagnostic; not production memory-transfer acceptance.",
+  "source_commit": "8c5d959d7cd159e597ab47b28e4f7005b0d4aaeb",
+  "production_bit_source": "fc5b8bb, with the same-route DRIVE16 override recorded in ../20261029_swd_main_drive_ab/manifest.json",
+  "artifacts": {
+    "gpio.elf": "b115b0be24a85b94dfe7e5ac690489b07cb1df5b95bc514f48ddea1a97559e7b",
+    "gpio_oddr.bit": "88993ae0b15aeb32455d57b5936ca8b60c10b25bba214c380bcd2308028aabd0",
+    "main_no_usb.elf": "ea2d18c4ce44e1e5aa07a6808a74c1bc72d10c45986e52e8bbc7b113bc603ba3",
+    "production_slow16.bit": "0a4cdbf60fa7da63acb966ba618a44a11508433fdf00fc31a9f10bdbce73ae5f"
+  },
+  "evidence": {
+    "gpio_firmware.json": "ba1269595130e35aca9e687a634f3b1ffc97f75f273eec94e6f0651a9af5a87f",
+    "gpio_timing.json": "8b64f5157050f3c3e40308d1b23fea60257552fd2135c3e7dcddf329fb30c515",
+    "main_firmware.json": "2bd88759f4db2b898aed2d7eca1d93b65c39a68d8f313e99dd36b0113dc4f202",
+    "main_no_usb_50.json": "17926a2e4a752122a2a98b7e7a13bb5f2f48f998165fffe9bb6becbdf7b41e09",
+    "pulse10_actual50.json": "75dfaff950f2b384073097ca8b36fbcd3c73c05312204da533030fbad6c43cda",
+    "pulse5_actual100.json": "bded0f28716e6eb2e007c8844be666c44281c2f475761f6f841813bfc29dbe54"
+  },
+  "pairs": {
+    "gpio": [
+      "gpio_oddr.bit",
+      "gpio.elf"
+    ],
+    "production_without_usb": [
+      "production_slow16.bit",
+      "main_no_usb.elf"
+    ]
+  },
+  "build": [
+    "python tools/build_minimal_swd.py --fixture gpio",
+    "python tools/build_minimal_swd.py --fixture main",
+    "python tools/run_vivado.py -mode batch -notrace -nojournal -source fpga/diagnostics/minimal_swd/build.tcl"
+  ],
+  "timing": {
+    "FCLK_Hz": 100000000,
+    "setup_slack_ns": 4.271,
+    "hold_slack_ns": 0.036
+  },
+  "observed": "On the SAME GPIO ODDR bit/ELF pair, direct -> short -> direct reproduces FAIL -> PASS -> FAIL at nominal 10k/100k/1MHz. Short passes at actual FCLK 99,999,999Hz (5ns requested high) and 49,999,999.5Hz (10ns requested high). ACK, DPIDR and parity all pass in every short case. Production PL with a minimal no-USB/no-DAP driver still fails at FCLK50MHz.",
+  "limits": [
+    "High pulse duration is the digital ODDR request, not an analog measurement at the MCU pin. Nominal GPIO bit rate excludes software/MMIO overhead.",
+    "Pad counter matches the 200 intended rising edges. The level-comparison sticky bits can fire in valid 5ns pulses because pad propagation outlasts the requested high; they do not by themselves prove an extra edge.",
+    "Only DPIDR is checked by the fixture. A production fix must still pass AP/block memory transfers at all required frequencies."
+  ],
+  "accepted_production_fix": false,
+  "target_flash_written": false
+}
