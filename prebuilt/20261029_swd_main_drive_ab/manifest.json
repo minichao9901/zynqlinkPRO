@@ -1,0 +1,42 @@
+{
+  "purpose": "Rejected production low-frequency repair; retained for exact reproduction.",
+  "source_commit": "fc5b8bbd6ff02863150cce516b6a5f93fd52395e",
+  "io_variant_tool_commit": "81bdb267ba9b65a90416979ade8878f871d6ed0a",
+  "pairs": {
+    "slow4": [
+      "slow4_120.bit",
+      "profile60.elf"
+    ],
+    "slow16": [
+      "slow16_120.bit",
+      "profile60.elf"
+    ]
+  },
+  "artifacts": {
+    "profile60.elf": "6c9fff000908a706dfebbd872403096cf0d602301003cf62be061b002b698b92",
+    "slow16_120.bit": "0a4cdbf60fa7da63acb966ba618a44a11508433fdf00fc31a9f10bdbce73ae5f",
+    "slow4_120.bit": "a97a906e4f5d7a4c63576b47f43897b82291bbf9a9871b7a45c3efadb22baf93"
+  },
+  "evidence": {
+    "firmware_manifest.json": "07300b1edc0baa1b4db1587d73a2e1c1c63329af612309cfa96a65e01338c2fb",
+    "main_drive_bitdiff.json": "69fdc9541ff2ec1d9aed305ba1697fe82c4afddac168ce0c59325085ddd2f8a7",
+    "minimal_drive_bitdiff.json": "0101e7095e64f6b2e31ed3d6256d66164a7b521f7df63cb266cbeed8f8d0946f",
+    "slow16_auto.json": "ffaf30c84a66d756d9179551fb694ca90972f6db268c236ac93dbbba94f0123b",
+    "slow4_auto.json": "437c258f234d8ecc4ee942ba7bfff0ac903af5add7a9bd597de6f6c457522011"
+  },
+  "build": [
+    "python tools/run_vivado.py -mode batch -notrace -nojournal -source fpga/build_dma.tcl",
+    "python tools/build_xusbps_daplink.py --project xusbps_daplink_dma --opt 3 --max-swclk-hz 60000000",
+    "python tools/run_vivado.py -mode batch -notrace -nojournal -source fpga/make_swd_io_variant.tcl -tclargs build/swd_lowfreq_final/slow16_120.bit SLOW 16 build/swd_lowfreq_final/route120.dcp swclk_0"
+  ],
+  "timing": {
+    "FCLK_max_Hz": 120000000,
+    "SWCLK_max_Hz": 60000000,
+    "setup_slack_ns": 0.162,
+    "hold_slack_ns": 0.015
+  },
+  "observations": "The SLOW/16 IO-only variant still returns ACK5 at requested 0.25, 1, 10 and 25MHz; DPIDR passes at requested 35, 50 and 60MHz. The exact pad configuration bits change in both the main and minimal designs, so this is not a stale DRIVE property.",
+  "accepted": false,
+  "target_flash_written": false,
+  "loading": "python tools/run_xsct.py tools/download_dap_fpga.tcl prebuilt/20261029_swd_main_drive_ab/profile60.elf prebuilt/20261029_swd_main_drive_ab/slow16_120.bit"
+}
