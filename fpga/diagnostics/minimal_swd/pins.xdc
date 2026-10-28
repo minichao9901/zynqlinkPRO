@@ -6,5 +6,5 @@ create_clock -name clk_fpga_0 -period 10.000 [get_pins {minimal_i/processing_sys
 # Passive pad-edge detector is intentionally asynchronous. The GPIO software
 # reads it with the clock stopped. These exceptions never apply to the SWD
 # driver or AXI logic; unexpected sub-spec pulses are diagnostic observations.
-create_clock -name pad_feedback -period 1000.000 -waveform {0 10} [get_ports swclk]
+create_clock -name pad_feedback -period 1000.000 -waveform {0 5} [get_ports swclk]
 set_clock_groups -asynchronous -group [get_clocks clk_fpga_0] -group [get_clocks pad_feedback]

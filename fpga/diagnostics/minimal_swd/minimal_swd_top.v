@@ -14,12 +14,18 @@ module minimal_swd_top(
  wire [4:0] control;
  wire [11:0] sense;
  wire fabric_clk;
- reg previous_clock=0,short_clock=0;
+ reg previous_clock=0;
  always @(posedge fabric_clk)begin
   previous_clock<=control[0];
-  short_clock<=control[0] && !previous_clock;
  end
- wire drive_clock=control[3] ? short_clock : control[0];
+ // At fixed 100MHz FCLK, the diagnostic short mode holds SWCLK high for
+ // exactly half a fabric cycle (5ns). Direct and short modes share this
+ // same bitstream, pad, output primitive and source routing.
+ wire drive_clock;
+ ODDR #(.DDR_CLK_EDGE("SAME_EDGE"),.INIT(1'b0),.SRTYPE("SYNC")) clock_launch(
+  .C(fabric_clk),.CE(1'b1),.R(1'b0),.S(1'b0),
+  .D1(control[3] ? (control[0] && !previous_clock) : control[0]),
+  .D2(control[3] ? 1'b0 : control[0]),.Q(drive_clock));
  (* CLOCK_BUFFER_TYPE="NONE" *)wire clock_feedback;
  wire dio_feedback;
  reg [7:0] pad_rises=0;
