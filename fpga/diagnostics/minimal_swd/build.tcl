@@ -46,7 +46,7 @@ foreach interface {DDR FIXED_IO} {
  connect_bd_intf_net [get_bd_intf_ports $interface] [get_bd_intf_pins processing_system7_0/$interface]
 }
 create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:2.0 gpio
-set_property -dict [list CONFIG.C_IS_DUAL 1 CONFIG.C_GPIO_WIDTH 3 CONFIG.C_ALL_OUTPUTS 1 \
+set_property -dict [list CONFIG.C_IS_DUAL 1 CONFIG.C_GPIO_WIDTH 4 CONFIG.C_ALL_OUTPUTS 1 \
  CONFIG.C_GPIO2_WIDTH 2 CONFIG.C_ALL_INPUTS_2 1] [get_bd_cells gpio]
 create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 axi_bus
 set_property -dict [list CONFIG.NUM_SI 1 CONFIG.NUM_MI 1] [get_bd_cells axi_bus]
@@ -70,8 +70,10 @@ foreach pin {axi_bus/ARESETN axi_bus/S00_ARESETN axi_bus/M00_ARESETN} {
  connect_bd_net [get_bd_pins reset/interconnect_aresetn] [get_bd_pins $pin]
 }
 connect_bd_net [get_bd_pins reset/peripheral_aresetn] [get_bd_pins gpio/s_axi_aresetn]
-create_bd_port -dir O -from 2 -to 0 control
+create_bd_port -dir O -from 3 -to 0 control
 create_bd_port -dir I -from 1 -to 0 sense
+create_bd_port -dir O -type clk fabric_clk
+connect_bd_net $clock [get_bd_ports fabric_clk]
 connect_bd_net [get_bd_ports control] [get_bd_pins gpio/gpio_io_o]
 connect_bd_net [get_bd_ports sense] [get_bd_pins gpio/gpio2_io_i]
 assign_bd_address

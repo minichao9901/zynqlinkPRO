@@ -11,9 +11,15 @@ module minimal_swd_top(
  inout FIXED_IO_ps_clk,FIXED_IO_ps_porb,FIXED_IO_ps_srstb,
  output swclk,inout swdio,output nreset,ntrst
 );
- wire [2:0] control;
+ wire [3:0] control;
  wire [1:0] sense;
- assign swclk=control[0];
+ wire fabric_clk;
+ reg previous_clock=0,short_clock=0;
+ always @(posedge fabric_clk)begin
+  previous_clock<=control[0];
+  short_clock<=control[0] && !previous_clock;
+ end
+ assign swclk=control[3] ? short_clock : control[0];
  assign sense[0]=control[0]; // intended clock; not a pad edge counter
  assign nreset=1'b1;
  assign ntrst=1'b1;
@@ -26,5 +32,5 @@ module minimal_swd_top(
  .FIXED_IO_ddr_vrn(FIXED_IO_ddr_vrn),.FIXED_IO_ddr_vrp(FIXED_IO_ddr_vrp),
  .FIXED_IO_mio(FIXED_IO_mio),.FIXED_IO_ps_clk(FIXED_IO_ps_clk),
  .FIXED_IO_ps_porb(FIXED_IO_ps_porb),.FIXED_IO_ps_srstb(FIXED_IO_ps_srstb),
- .control(control),.sense(sense));
+ .control(control),.sense(sense),.fabric_clk(fabric_clk));
 endmodule

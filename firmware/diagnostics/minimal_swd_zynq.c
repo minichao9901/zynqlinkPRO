@@ -9,9 +9,10 @@
  * followed by {before-rise pad, after-rise pad} for 36 received bits. */
 volatile uint32_t swd_diag[96] __attribute__((section(".dap_debug"),aligned(32)));
 static uint32_t control_word=7;
+static unsigned pulse_mode=0;
 static void pins(unsigned clock,unsigned data,unsigned release) {
  if(!(control_word&1U) && clock)swd_diag[7]++;
- control_word=(clock&1U)|((data&1U)<<1)|((release&1U)<<2);
+ control_word=(clock&1U)|((data&1U)<<1)|((release&1U)<<2)|(pulse_mode<<3);
  Xil_Out32(CTRL,control_word);__asm__ volatile("dsb sy" ::: "memory");
 }
 static unsigned pad(void) {return (Xil_In32(SENSE)>>1)&1U;}
@@ -23,10 +24,10 @@ static void delay(unsigned ns) {
 static void tick(unsigned data,unsigned release,unsigned ns) {
  pins(0,data,release);delay(ns);pins(1,data,release);delay(ns);
 }
-static void transfer(unsigned ns,unsigned header) {
+static void transfer(unsigned ns,unsigned header,unsigned narrow) {
  swd_diag[6]=0;swd_diag[7]=0;
  XTime begin,end;XTime_GetTime(&begin);
- pins(1,1,0);
+ pins(0,1,1);pulse_mode=narrow;pins(0,1,1);pins(1,1,0);
  for(unsigned i=0;i<64;i++)tick(1,0,ns);
  for(unsigned i=0;i<16;i++)tick((0xe79eU>>i)&1U,0,ns);
  for(unsigned i=0;i<64;i++)tick(1,0,ns);
@@ -58,6 +59,6 @@ int main(void) {
  for(;;)if(swd_diag[1]) {
   unsigned ns=swd_diag[2];if(ns<100U)ns=100U;
   unsigned command=swd_diag[1];
-  transfer(ns,command==2 ? 0x8dU : 0xa5U);swd_diag[1]=0;
+  transfer(ns,(command&3U)==2 ? 0x8dU : 0xa5U,(command>>2)&1U);swd_diag[1]=0;
  }
 }

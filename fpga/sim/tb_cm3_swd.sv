@@ -30,6 +30,13 @@ module tb_cm3_swd #(
   reg pkt_en=0; reg [3:0] pkt_we=0;
   reg [31:0] pkt_addr=0,pkt_wdata=0; wire [31:0] pkt_rdata;
   wire swclk; tri1 swdio;
+  // Diagnostic fault model: a returned SWDIO falling edge can pull an
+  // already-high clock briefly low. This is a hypothesis test, not a model
+  // of measured analog voltage. At high rates the returned edge can arrive
+  // after the clock has already fallen, in which case no extra edge occurs.
+  reg coupled_clock_drop=0;
+  integer coupled_events=0;
+  wire target_swclk=swclk && !coupled_clock_drop;
   swd_controller dut(.clk(clk),.rst_n(rst_n),
     .s_axi_awaddr(awaddr),.s_axi_awprot(3'd0),.s_axi_awvalid(awvalid),.s_axi_awready(awready),
     .s_axi_wdata(wdata),.s_axi_wstrb(4'hf),.s_axi_wvalid(wvalid),.s_axi_wready(wready),
@@ -56,7 +63,7 @@ module tb_cm3_swd #(
   assign cm3_pads[1] = cm3_ntdoen ? 1'bz : cm3_tdo;
   cm3_target target(
     .clk(core_clk),.rst_n(rst_n),.dbg_rst_n(rst_n),.trst_n(1'b1),
-    .swclktck(swclk),.swditms(target_pad),.tdi(cm3_pads[0]),
+    .swclktck(target_swclk),.swditms(target_pad),.tdi(cm3_pads[0]),
     .tdo(cm3_tdo),.ntdoen(cm3_ntdoen),
     .swdo(cm3_swdo),.swdoen(cm3_swdoen),.jtag_nsw(cm3_jtagnsw),
     .sys_dout(),.sys_writes());
@@ -66,6 +73,9 @@ module tb_cm3_swd #(
     return_data <= #(return_ns) cm3_swdo;
   end
   assign swdio = return_oe ? return_data : 1'bz;
+  always @(negedge return_data)if($test$plusargs("coupled_clock") && return_oe && swclk && !coupled_clock_drop)begin
+    coupled_events=coupled_events+1;coupled_clock_drop<=1;#2;coupled_clock_drop<=0;
+  end
   always @(posedge swclk or negedge swclk) if($test$plusargs("trace"))
     $display("WIRE t=%t clk=%b pad=%b target_o=%b target_oe=%b host_o=%b host_t=%b state=%0d lsm=%0d hdr=%h ack=%b",
        $time,swclk,target_pad,cm3_swdo,cm3_swdoen,dut.swdio_o,dut.swdio_t,
@@ -180,7 +190,7 @@ module tb_cm3_swd #(
     end
   endtask
   reg [31:0] value,stream_status,stream_header;
-  integer stream_count,stream_limit;
+  integer stream_count,stream_limit,expected_ack;
   reg [2:0] error_ack;
   integer saw_wait,saw_fault;
   integer k;
@@ -193,6 +203,7 @@ module tb_cm3_swd #(
     if($value$plusargs("idle=%d",idle))begin end
     if($value$plusargs("rx_boundary=%d",rx_boundary))begin end
     if($value$plusargs("transfer_delay=%d",transfer_delay))begin end
+    expected_ack=-1;if($value$plusargs("expected_ack=%d",expected_ack))begin end
     if($test$plusargs("vcd"))begin $dumpfile("cm3_swd.vcd");$dumpvars(0,dut,cm3_swdo,cm3_swdoen);end
     #1;rst_n=0;#100;rst_n=1;repeat(30)@(negedge clk);
     wr(8,1 | (idle<<4) | (5<<9) | (transfer_delay<<13) | (phase<<17) | (rx_boundary<<18) | (turn_extra<<23) | (ack_delay<<25));
@@ -212,10 +223,11 @@ module tb_cm3_swd #(
         $display("SWD_RX_TRACE index=%0d raw=%08h",k,stream_header);
       end
       if($test$plusargs("rx_trace_only"))begin
+        if(expected_ack>=0 && error_ack!=expected_ack)$fatal(1,"ACK=%h expected=%0d",error_ack,expected_ack);
         if($test$plusargs("expect_bad_ack") && error_ack==1)$fatal(1,"legacy ACK error not reproduced");
         if(!$test$plusargs("expect_bad_ack") && (error_ack!=1 || value!==32'h2ba01477))
           $fatal(1,"short-boundary DPIDR failed ACK=%h data=%h",error_ack,value);
-        $display("PASS SWD raw trace capture ACK=%h data=%h",error_ack,value);$finish;
+        $display("PASS SWD raw trace capture ACK=%h data=%h coupled_events=%0d",error_ack,value,coupled_events);$finish;
       end
       if(error_ack!=1)$fatal(1,"DPIDR ACK=%h",error_ack);
     end else xfer(8'h02,0,value);

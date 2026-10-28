@@ -8,6 +8,7 @@ def main():
  p=argparse.ArgumentParser(description=__doc__)
  p.add_argument('--half-ns',default='500000,50000,5000,500')
  p.add_argument('--command',choices=['dpidr','ctrlstat'],default='dpidr')
+ p.add_argument('--pulse-mode',choices=['direct','short','both'],default='direct')
  p.add_argument('--restore-bit',type=Path,required=True)
  p.add_argument('--restore-elf',type=Path,required=True)
  p.add_argument('--output',type=Path,required=True)
@@ -37,17 +38,18 @@ after 200
 targets -set -filter {name =~ "APU"}
 if {[mrd -force -value MAILBOX] != 0x53574431} {error "Minimal firmware not ready"}
 '''.replace('INIT',(ROOT/'prebuilt/ps7_init.tcl').as_posix()).replace('BIT',bit.as_posix()).replace('ELF',elf.as_posix()).replace('MAILBOX',hex(mailbox))
- for ns in ns_values:
+ modes=['direct','short','direct'] if a.pulse_mode=='both' else [a.pulse_mode]
+ for mode,ns in [(mode,ns) for mode in modes for ns in ns_values]:
   body+=f'''mwr -force {mailbox+8:#x} {ns}
 mwr -force {mailbox+24:#x} 0
-mwr -force {mailbox+4:#x} {1 if a.command=='dpidr' else 2}
+mwr -force {mailbox+4:#x} {(1 if a.command=='dpidr' else 2) | (4 if mode=='short' else 0)}
 set done 0
 for {{set i 0}} {{$i < 300}} {{incr i}} {{
  after 10
  if {{[mrd -force -value {mailbox+24:#x}] == 1 && [mrd -force -value {mailbox+4:#x}] == 0}} {{set done 1;break}}
 }}
 if {{!$done}} {{error "Minimal SWD transfer timeout"}}
-puts "BEGIN_ROW {ns}"
+puts "BEGIN_ROW {ns} {mode}"
 for {{set i 0}} {{$i < 96}} {{incr i}} {{puts [format "WORD %d %08X" $i [mrd -force -value [expr {{{mailbox} + 4*$i}}]]]}}
 puts "END_ROW"
 '''
@@ -56,11 +58,11 @@ puts "END_ROW"
   r=subprocess.run([sys.executable,str(ROOT/'tools/run_xsct.py'),str(script)],capture_output=True,text=True,errors='replace',timeout=120)
   (work/'run.log').write_text(r.stdout+r.stderr)
   assert r.returncode==0,r.stdout+r.stderr
-  for ns,block in re.findall(r'BEGIN_ROW (\d+)\s+(.*?)END_ROW',r.stdout,re.S):
+  for ns,mode,block in re.findall(r'BEGIN_ROW (\d+) (direct|short)\s+(.*?)END_ROW',r.stdout,re.S):
    words={int(i):int(v,16) for i,v in re.findall(r'WORD (\d+) ([0-9A-Fa-f]{8})',block)}
    assert len(words)==96 and words[0]==0x53574431 and words[6]==1,words
    parity=words[4].bit_count()&1
-   row=dict(half_ns=int(ns),nominal_clock_hz=1e9/(2*int(ns)),ack=words[3],data=hex(words[4]),
+   row=dict(half_ns=int(ns),pulse_mode=mode,nominal_clock_hz=1e9/(2*int(ns)),ack=words[3],data=hex(words[4]),
             parity=words[5],parity_matches=parity==words[5],intended_rises=words[7],
             elapsed_ticks=words[80]+(words[81]<<32),timer_hz=words[82],
             bits=[{'index':i,'before_rise':words[8+2*i],'after_rise':words[9+2*i]} for i in range(36)])
@@ -87,7 +89,7 @@ puts "END_ROW"
   report['probe_restored']=restore.returncode==0
   a.output.parent.mkdir(parents=True,exist_ok=True);a.output.write_text(json.dumps(report,indent=2)+'\n')
   assert restore.returncode==0,restore.stdout+restore.stderr
- assert len(report['rows'])==len(ns_values)
+ assert len(report['rows'])==len(ns_values)*len(modes)
  return int(any(not row['passed'] for row in report['rows']))
 
 
