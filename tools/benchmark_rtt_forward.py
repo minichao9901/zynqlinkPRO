@@ -165,7 +165,17 @@ def main():
     report = {'artifacts':provenance(args.bit,args.elf),'kind': 'continuous RAM producer RTT->CDC', 'transport':args.transport, 'rows': []}
     try:
         stop(probe, dev)
-        setup(out, inp, 10000, args.transport)
+        # A probe left in a stale HSS/route state can refuse the first SWJ/IDCODE
+        # exchange; retry the setup instead of failing the whole run.
+        for attempt in range(4):
+            try:
+                setup(out, inp, 50000, args.transport)
+                break
+            except RuntimeError as exc:
+                if attempt == 3:
+                    raise
+                print('setup retry %d: %s' % (attempt + 1, exc), flush=True)
+                time.sleep(0.5)
         assert probe.action(0x31,12,bytes([2 if args.transport=='jtag' else 1]))[0]==0
         initial = mem.word(DHCSR)
         mem.write_word(DHCSR, 0xa05f0003)
@@ -186,7 +196,7 @@ def main():
     finally:
         try:
             stop(probe, dev)
-            setup(out, inp, 10000, args.transport)
+            setup(out, inp, 50000, args.transport)
             mem.write_word(DHCSR, 0xa05f0003)
             if backup is not None:
                 mem.write(0x20000000, backup)
