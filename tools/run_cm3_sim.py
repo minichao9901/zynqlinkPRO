@@ -70,6 +70,7 @@ def main():
         sim_v = [str(ROOT / 'fpga/sim/axi3_sram.v'),
                  str(ROOT / 'fpga/sim/sim_primitives.v')]
         sim_sv = [str(ROOT / 'fpga/sim/xpm_memory_tdpram.sv'),
+                  str(ROOT / 'fpga/sim/jtag_dp_model.sv'),
                   str(ROOT / 'fpga/sim/cm3_target.sv'),
                   str(ROOT / f'fpga/sim/{args.top}.sv')]
         p, log = run([exe / 'xvlog.exe', '--relax', '-i', str(rtl),
@@ -91,7 +92,8 @@ def main():
     for a in args.plusargs:
         cmd += ['-testplusarg', a]
     p, log = run(cmd)
-    tail = [l for l in log.splitlines() if ('PASS' in l or 'FAIL' in l or 'Error' in l or 'IDCODE' in l)]
+    tail = [l for l in log.splitlines() if any(marker in l for marker in
+            ('PASS', 'FAIL', 'Fatal', 'Error', 'IDCODE', 'JTAG_WR_', 'JTAG_BLK_', 'JTAG_PKT_'))]
     print('\n'.join(tail[-20:]) or log[-2000:])
     return 0 if p.returncode == 0 and 'PASS' in log else 1
 

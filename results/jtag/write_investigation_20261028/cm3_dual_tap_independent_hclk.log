@@ -1,0 +1,19 @@
+
+****** xsim v2018.3 (64-bit)
+  **** SW Build 2405991 on Thu Dec  6 23:38:27 MST 2018
+  **** IP Build 2404404 on Fri Dec  7 01:43:56 MST 2018
+    ** Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+
+source xsim.dir/tb_cm3_jtag_snap/xsim_script.tcl
+# xsim {tb_cm3_jtag_snap} -testplusarg clk_ns=10 -testplusarg target_clk_ns=13.888889 -testplusarg bypass -testplusarg writes_only -autoloadwcfg -runall
+Vivado Simulator 2018.3
+Time resolution is 1 ps
+run -all
+WARNING: File  referenced on E:/zynqlinkPRO/fpga/rtl/dap_transfer_block_engine.v at line 79 cannot be opened for reading. Please ensure that this file is available in the current working directory.
+JTAG_WR_DONE
+JTAG_BLK_DONE status=0000440a
+JTAG_PKT_DONE status=00010002
+PASS JTAG scalar, batch and packet writes
+$finish called at time : 83310 ns : File "E:/zynqlinkPRO/fpga/sim/tb_cm3_jtag.sv" Line 155
+exit
+INFO: [Common 17-206] Exiting xsim at Wed Oct 28 19:46:56 2026...

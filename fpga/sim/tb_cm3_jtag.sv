@@ -1,10 +1,17 @@
 `timescale 1ns/1ps
 // Real AXI controller, physical pad mux, sampler, packet BRAM and RTT engine.
-// Only the external ARM debug port/memory is a protocol model.
+// The external debug port is the encrypted Cortex-M3 DesignStart RTL.
 module tb_cm3_jtag;
  real clk_ns=8.333333;
  integer cfg_idle=1;
  reg clk=0;
+ real target_clk_ns=8.333333;
+ reg target_clk=0;
+ initial begin
+  if($value$plusargs("clk_ns=%f",target_clk_ns))begin end
+  if($value$plusargs("target_clk_ns=%f",target_clk_ns))begin end
+  forever #(target_clk_ns/2.0) target_clk=~target_clk;
+ end
  initial begin if($value$plusargs("clk_ns=%f",clk_ns))begin end if($value$plusargs("idle=%d",cfg_idle))begin end forever #(clk_ns/2.0) clk=~clk; end
  reg rst_n=0;reg [7:0] aw=0,ar=0;reg av=0,wv=0,rv=0;
  reg [31:0] wd=0;wire awr,wr,bv,arr,rdv;wire [31:0] rd;
@@ -12,7 +19,9 @@ module tb_cm3_jtag;
  wire tck;tri tms;tri [3:0] pads;wire tdo,target_tdo;reg late_tdo=1;
  wire late_mode=$test$plusargs("late");
  wire q1_mode=$test$plusargs("q1");
- always @(target_tdo) late_tdo<=#(q1_mode ? 8 : 16) target_tdo;
+ real tdo_ns=16;
+ initial begin if($value$plusargs("tdo_ns=%f",tdo_ns))begin end end
+ always @(target_tdo) late_tdo<=#(tdo_ns) target_tdo;
  assign tdo=late_mode ? late_tdo : target_tdo;
  reg [3:0] aux_out=4'hc,aux_tri=4'hb;
  assign pads[1]=tdo;
@@ -26,11 +35,15 @@ module tb_cm3_jtag;
   .pkt_bram_clk(clk),.pkt_bram_rst(1'b0),.pkt_bram_en(pe),.pkt_bram_we(pw),.pkt_bram_addr(pa),.pkt_bram_wrdata(pd),.pkt_bram_rddata(pq),
   .swclk(tck),.swdio(tms),.gpio_aux(pads),.gpio_out(aux_out),.gpio_tri(aux_tri),.gpio_in());
  wire cm3_tdo,cm3_ntdoen,cm3_swdo,cm3_swdoen,cm3_jtagnsw;
+ wire bypass_tdo;
+ wire bypass_mode=$test$plusargs("bypass");
+ jtag_dp_model #(.IRLEN(5),.DUMMY(1)) boundary_tap(
+  .rst_n(rst_n),.tck(tck),.tms(tms),.tdi(pads[0]),.tdo(bypass_tdo));
  wire [31:0] cm3_sysout; wire [15:0] cm3_writes;
  assign target_tdo = cm3_ntdoen ? 1'bz : cm3_tdo;
  cm3_target #(.WORDS(8192),.ADDR_BITS(13)) target(
-  .clk(clk),.rst_n(rst_n),.dbg_rst_n(rst_n),.trst_n(rst_n),
-  .swclktck(tck),.swditms(tms),.tdi(pads[0]),
+  .clk(target_clk),.rst_n(rst_n),.dbg_rst_n(rst_n),.trst_n(rst_n),
+  .swclktck(tck),.swditms(tms),.tdi(bypass_mode ? bypass_tdo : pads[0]),
   .tdo(cm3_tdo),.ntdoen(cm3_ntdoen),.swdo(cm3_swdo),.swdoen(cm3_swdoen),.jtag_nsw(cm3_jtagnsw),
   .sys_dout(cm3_sysout),.sys_writes(cm3_writes));
  always @(posedge clk) if($test$plusargs("coretrace") && dut.core_result_valid)
@@ -53,9 +66,13 @@ module tb_cm3_jtag;
  endtask
  task cfg(input integer a,input [31:0] d);put(24,a);put(28,d);endtask
  task transfer(input [7:0] req,input [31:0] d);
-  reg [31:0] s;integer n;
-  write_reg('h14,d);write_reg(0,(req<<8)|3);n=0;s=1;
-  while(s[0] && n<2000)begin read_reg(4,s);n=n+1;end
+  reg [31:0] s;integer n,retries;
+  s=4;retries=0;
+  while(s[3:1]==2 && retries<64)begin
+   write_reg('h14,d);write_reg(0,(req<<8)|3);n=0;s=1;
+   while(s[0] && n<2000)begin read_reg(4,s);n=n+1;end
+   retries=retries+1;
+  end
   if(s[0] || s[3:1]!=1)$fatal(1,"scalar failed req=%h status=%h",req,s);
  endtask
  task wait_packet;
@@ -80,7 +97,9 @@ module tb_cm3_jtag;
   write_reg('h94,'h107);
   if(pads[0]!==1)$fatal(1,"JTAG manual TDI cannot drive high");
   write_reg('h94,0);
-  write_reg('h80,3);write_reg('h84,4);write_reg('h08,1|((cfg_idle&15)<<4));write_reg('h8c,0);
+  write_reg('h80,3);write_reg('h84,4|(bypass_mode ? (5<<19) : 0));
+  write_reg('h88,bypass_mode ? 'h100 : 0);
+  write_reg('h08,1|((cfg_idle&15)<<4));write_reg('h8c,0);
   write_reg('h98,(late_mode ? 16 : 0)|(q1_mode ? 1 : 0));
   // Earliest legal status poll: AR is accepted on the very edge where the
   // serial backend consumes the registered start pulse. Busy must include
@@ -102,21 +121,38 @@ module tb_cm3_jtag;
   for(i=0;i<8;i=i+1)begin
    if(i==7)transfer(8'h0e,0);else transfer(8'h0f,0);
    read_reg(24,d);
-   if(d!==(32'h11110000+i))$display("JTAG_WR_BAD idx=%0d got=%08h want=%08h",i,d,32'h11110000+i);
+   if(d!==(32'h11110000+i))$fatal(1,"JTAG_WR_BAD idx=%0d got=%08h want=%08h",i,d,32'h11110000+i);
   end
   $display("JTAG_WR_DONE");
   // Block engine write over JTAG: the board's Memory.write uses DAP_TransferBlock.
-  write_reg('h38,'h60005000);
+  transfer(5,'h60005000);
+  write_reg('h38,0);
+  write_reg('h3c,(5<<24)|(8<<8)|8'h0d);
   for(i=0;i<8;i=i+1)write_reg('h3c,32'h22220000+i);
-  write_reg('h30,(8'h0d<<24)|(8<<8)|15);
+  write_reg('h3c,32'h0300000e);write_reg('h3c,0);
+  write_reg('h30,'h1003);
   j=0;d=0;
   while(!d[1] && j<20000)begin read_reg('h34,d);j=j+1;end
-  if(!d[1])$display("JTAG_BLK timeout status=%h",d);
+  if(!d[1] || d[2] || d[5:3]!=1)$fatal(1,"JTAG_BLK failed status=%h",d);
   for(i=0;i<8;i=i+1)begin
    if(target.u_sys.mem[('h5000+i*4)/4]!==(32'h22220000+i))
-     $display("JTAG_BLK_BAD idx=%0d got=%08h want=%08h",i,target.u_sys.mem[('h5000+i*4)/4],32'h22220000+i);
+     $fatal(1,"JTAG_BLK_BAD idx=%0d got=%08h want=%08h",i,target.u_sys.mem[('h5000+i*4)/4],32'h22220000+i);
   end
   $display("JTAG_BLK_DONE status=%h",d);
+  // Firmware fast path: compact TransferBlock packet, shared command BRAM.
+  transfer(5,'h60006000);
+  write_reg('h38,0);write_reg('h3c,32'h0d000806);
+  for(i=0;i<8;i=i+1)write_reg('h3c,32'h91990000+i*'h101);
+  write_reg('h44,36);write_reg('h40,1);
+  j=0;d=1;
+  while(d[0] && j<20000)begin read_reg('h48,d);j=j+1;end
+  if(d[0] || !d[1] || d[2])$fatal(1,"JTAG_PKT failed status=%h",d);
+  for(i=0;i<8;i=i+1)begin
+   if(target.u_sys.mem[('h6000+i*4)/4]!==(32'h91990000+i*'h101))
+     $fatal(1,"JTAG_PKT_BAD idx=%0d got=%08h want=%08h",i,target.u_sys.mem[('h6000+i*4)/4],32'h91990000+i*'h101);
+  end
+  $display("JTAG_PKT_DONE status=%h",d);
+  if($test$plusargs("writes_only"))begin $display("PASS JTAG scalar, batch and packet writes");$finish;end
   // No AXI operations per sample: configure once, then PL fills a bank.
   cfg(0,4);cfg(1,2);cfg(2,32);cfg(5,1);
   for(i=0;i<4;i=i+1)cfg(16+i,i);

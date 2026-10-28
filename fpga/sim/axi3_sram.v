@@ -43,7 +43,7 @@ module axi3_sram #(
     output reg  [31:0] dbg_dout,   // last write/read word, for testbenches
     output reg  [15:0] dbg_writes
 );
-    wire dbg_trace = ("axitrace");
+    wire dbg_trace = $test$plusargs("axitrace");
     reg [31:0] mem [0:WORDS-1];
     integer i;
     initial begin
