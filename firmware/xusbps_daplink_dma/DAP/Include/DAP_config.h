@@ -451,7 +451,13 @@ __STATIC_INLINE void PORT_JTAG_SETUP (void) {
   swd_write32(JTAG_ROUTE,3);
   swd_write32(JTAG_OPERATION,0);
   swd_write32(JTAG_TIMING,0);DAP_JTAG_ClockChanged();
-  swd_write32(SWD_CFG,(1U<<0)|(1U<<4));
+  /* Three idle cycles after each scan. With one, the CM3 MEM-AP is not ready
+   * for the next DR scan and every AP read costs a WAIT scan: the simulated
+   * RTT path needs 97 TCK per word at 60 MHz instead of 52. PORT_SWD_SETUP
+   * puts the field back to one for SWD. Verified against the CM3 target at
+   * 25/35/50/60 MHz; the board still has to confirm the value, since the
+   * optimum follows the target HCLK to FCLK ratio. */
+  swd_write32(SWD_CFG,(1U<<0)|(3U<<4));
   ps_set_fclk0_hz(100000000U);
 }
 

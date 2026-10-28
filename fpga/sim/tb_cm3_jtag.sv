@@ -3,8 +3,9 @@
 // Only the external ARM debug port/memory is a protocol model.
 module tb_cm3_jtag;
  real clk_ns=8.333333;
+ integer cfg_idle=1;
  reg clk=0;
- initial begin if($value$plusargs("clk_ns=%f",clk_ns))begin end forever #(clk_ns/2.0) clk=~clk; end
+ initial begin if($value$plusargs("clk_ns=%f",clk_ns))begin end if($value$plusargs("idle=%d",cfg_idle))begin end forever #(clk_ns/2.0) clk=~clk; end
  reg rst_n=0;reg [7:0] aw=0,ar=0;reg av=0,wv=0,rv=0;
  reg [31:0] wd=0;wire awr,wr,bv,arr,rdv;wire [31:0] rd;
  reg pe=0;reg [3:0] pw=0;reg [31:0] pa=0,pd=0;wire [31:0] pq;
@@ -76,7 +77,7 @@ module tb_cm3_jtag;
   write_reg('h94,'h107);
   if(pads[0]!==1)$fatal(1,"JTAG manual TDI cannot drive high");
   write_reg('h94,0);
-  write_reg('h80,3);write_reg('h84,4);write_reg('h08,'h11);write_reg('h8c,0);
+  write_reg('h80,3);write_reg('h84,4);write_reg('h08,1|((cfg_idle&15)<<4));write_reg('h8c,0);
   write_reg('h98,(late_mode ? 16 : 0)|(q1_mode ? 1 : 0));
   // Earliest legal status poll: AR is accepted on the very edge where the
   // serial backend consumes the registered start pulse. Busy must include
