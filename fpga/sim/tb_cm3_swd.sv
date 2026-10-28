@@ -181,6 +181,7 @@ module tb_cm3_swd #(
   endtask
   reg [31:0] value,stream_status,stream_header;
   integer stream_count,stream_limit;
+  integer perf_h0,perf_h1,perf_r0,perf_r1;
   reg [2:0] error_ack;
   integer saw_wait,saw_fault;
   integer k;
@@ -311,7 +312,26 @@ module tb_cm3_swd #(
       packet(770,0);packet(770,1);
       packet(1023,0);packet(1023,1);
     end
-    $display("PASS CortexM3 DPIDR/power/AP posted SRAM %0d words",words);$finish;
+    if($test$plusargs("perf"))begin
+      // RTT first, from a clean engine, then a full 124-sample HSS bank.
+      xfer(8'h01,32'h23000012,value);
+      stream_write(32,'h600023f8);stream_write(36,'h600003f1);stream_write(40,4093);
+      stream_write(44,2);stream_write(48,2048);
+      memory_write('h600023fc,'h600003f1);memory_write('h60002400,4093);
+      memory_write('h60002404,2500);memory_write('h60002408,2);
+      perf_r0=$time;stream_write(0,2);stream_wait(stream_status);perf_r1=$time;
+      $display("SWD_RTT bytes=2048 ns=%0d status=%h",perf_r1-perf_r0,stream_status);
+      stream_write(12,1);stream_write(0,0);
+      stream_write(0,256);stream_cfg(0,4);stream_cfg(1,2);stream_cfg(2,240);stream_cfg(5,1);
+      for(k=0;k<4;k=k+1)stream_cfg(16+k,k);
+      wr(7'h60,2);wr(7'h78,$rtoi(500000000.0/half_ns));wr(7'h70,240);
+      wr(7'h68,0);wr(7'h6c,32'h60000000);
+      perf_h0=$time;stream_write(0,1);wr(7'h60,257);
+      wait(dut.u_probe_stream.produced>=124);
+      wr(7'h60,0);wait(!dut.sampler_active);stream_write(0,0);
+      stream_wait(stream_status);perf_h1=$time;
+      $display("SWD_PERF half_ns=%f rtt_ns=%0d hss_ns=%0d samples=124",half_ns,perf_r1-perf_r0,perf_h1-perf_h0);
+    end    $display("PASS CortexM3 DPIDR/power/AP posted SRAM %0d words",words);$finish;
   end
   initial begin #100000000;$fatal(1,"global timeout");end
 endmodule
