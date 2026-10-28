@@ -95,6 +95,7 @@ module swd_controller #(
     wire        swdio_i_fall_raw;
     wire        swdio_i_rise_raw; // unused Q1 retained for primitive clarity
     reg         cfg_sample_rise;
+    reg         cfg_rx_boundary;
     reg         swdio_early;
     wire        swdio_i_iddr;
     
@@ -199,7 +200,8 @@ module swd_controller #(
     //   [8]     cfg_data_phase        Enable WAIT/FAULT data phase handling
     //   [12:9]  cfg_clock_delay       SWJ sequence half-cycle delay
     //   [16:13] cfg_delay_fast        Transfer half-cycle delay
-    //   [17]    cfg_sample_rise       1=held early sample, 0=late FCLK falling
+    //   [17]    cfg_sample_rise       1=FCLK Q1, 0=FCLK Q2
+    //   [18]    cfg_rx_boundary       1=short-return RX boundary, 0=legacy
     //   [24:23] cfg_turn_extra       Extra low half-cycle steps before ACK
     //   [27:25] cfg_ack_delay        0=legacy; 1..7=ACK hold/capture schedule
     //   [31:29] Reserved
@@ -359,6 +361,7 @@ module swd_controller #(
             cfg_turn_extra <= 2'd0;
             cfg_ack_delay <= 3'd0;
             cfg_sample_rise <= 1'b1;
+            cfg_rx_boundary <= 1'b0;
             packet_len_reg <= 16'd0;
             packet_start_pulse <= 1'b0;
             engine_reset <= 1'b0;
@@ -401,6 +404,7 @@ module swd_controller #(
                         cfg_clock_delay <= s_axi_wdata[12:9];
                         cfg_delay_fast <= s_axi_wdata[16:13];
                         cfg_sample_rise <= s_axi_wdata[17];
+                        cfg_rx_boundary <= s_axi_wdata[18];
                         cfg_turn_extra <= s_axi_wdata[24:23];
                         cfg_ack_delay <= s_axi_wdata[27:25];
                     end
@@ -469,7 +473,7 @@ module swd_controller #(
                         rdata_reg <= {core_timestamp, 8'd0, core_parity_err, 3'd0, core_ack, core_busy};
                     end
                     ADDR_CFG: begin
-                        rdata_reg <= {4'd0, cfg_ack_delay, cfg_turn_extra, 5'd0, cfg_sample_rise, cfg_delay_fast, cfg_clock_delay, cfg_data_phase, cfg_idle_cycles, 4'd1};
+                        rdata_reg <= {4'd0, cfg_ack_delay, cfg_turn_extra, 4'd0, cfg_rx_boundary, cfg_sample_rise, cfg_delay_fast, cfg_clock_delay, cfg_data_phase, cfg_idle_cycles, 4'd1};
                     end
                     ADDR_SWJ_DATA0: begin
                         rdata_reg <= (ctrl_mode) ? {32'd0} : swj_data[31:0];
@@ -636,6 +640,7 @@ module swd_controller #(
         .delay_fast    (cfg_delay_fast),
         .turn_extra   (cfg_turn_extra),
         .ack_delay     (cfg_ack_delay),
+        .rx_boundary   (cfg_rx_boundary),
         .swj_data      (core_swj_data_sel),
         .swj_count     (core_swj_count_sel),
         .xfer_request  (core_req_sel),

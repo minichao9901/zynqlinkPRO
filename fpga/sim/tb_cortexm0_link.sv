@@ -11,6 +11,7 @@ module tb_cortexm0_link #(
 );
   real half_ns=FCLK_HALF_NS, return_ns=RETURN_NS;
   integer phase=SAMPLE_RISE, ack_delay=ACK_DELAY, turn_extra=TURN_EXTRA, words=TEST_WORDS, idle=0;
+  integer rx_boundary=0, transfer_delay=0;
   reg clk=0;
   initial begin
     if($value$plusargs("half_ns=%f",half_ns))begin end
@@ -26,6 +27,8 @@ module tb_cortexm0_link #(
   reg cmd_en=0; reg [3:0] cmd_we=0;
   reg [31:0] cmd_addr=0,cmd_data=0;
   reg rsp_en=0; reg [31:0] rsp_addr=0; wire [31:0] rsp_data;
+  reg pkt_en=0; reg [3:0] pkt_we=0;
+  reg [31:0] pkt_addr=0,pkt_wdata=0; wire [31:0] pkt_rdata;
   wire swclk; tri1 swdio;
   swd_controller dut(.clk(clk),.rst_n(rst_n),
     .s_axi_awaddr(awaddr),.s_axi_awprot(3'd0),.s_axi_awvalid(awvalid),.s_axi_awready(awready),
@@ -37,8 +40,8 @@ module tb_cortexm0_link #(
     .cmd_bram_addr(cmd_addr),.cmd_bram_wrdata(cmd_data),
     .rsp_bram_clk(clk),.rsp_bram_rst(1'b0),.rsp_bram_en(rsp_en),.rsp_bram_we(4'd0),
     .rsp_bram_addr(rsp_addr),.rsp_bram_wrdata(32'd0),.rsp_bram_rddata(rsp_data),
-    .pkt_bram_clk(clk),.pkt_bram_rst(1'b0),.pkt_bram_en(1'b0),.pkt_bram_we(4'd0),
-    .pkt_bram_addr(32'd0),.pkt_bram_wrdata(32'd0),
+    .pkt_bram_clk(clk),.pkt_bram_rst(1'b0),.pkt_bram_en(pkt_en),.pkt_bram_we(pkt_we),
+    .pkt_bram_addr(pkt_addr),.pkt_bram_wrdata(pkt_wdata),.pkt_bram_rddata(pkt_rdata),
     .swclk(swclk),.swdio(swdio));
 
   // Direction-aware return path prevents a delayed inout feedback loop.
@@ -147,7 +150,30 @@ module tb_cortexm0_link #(
       $display("PACKET_PASS count=%0d read=%0d",count,is_read);
     end
   endtask
-  reg [31:0] value;
+  task stream_write(input integer a,input [31:0] d);
+    @(negedge clk);pkt_addr=a;pkt_wdata=d;pkt_en=1;pkt_we=15;
+    @(negedge clk);pkt_en=0;pkt_we=0;
+  endtask
+  task stream_read(input integer a,output [31:0] d);
+    @(negedge clk);pkt_addr=a;pkt_en=1;pkt_we=0;
+    repeat(2)@(negedge clk);d=pkt_rdata;pkt_en=0;
+  endtask
+  task stream_cfg(input integer i,input [31:0] d);
+    stream_write(24,i);stream_write(28,d);
+  endtask
+  task memory_write(input [31:0] a,input [31:0] d);
+    reg [31:0] v;
+    xfer(8'h05,a,v);xfer(8'h0d,d,v);xfer(8'h0e,0,v);
+  endtask
+  task stream_wait(output [31:0] d);
+    integer timeout;
+    begin d=0;timeout=0;
+      while(d==0 && timeout<20000)begin stream_read(8,d);timeout=timeout+1;end
+      if(d==0)$fatal(1,"stream packet timeout");
+    end
+  endtask
+  reg [31:0] value,stream_status,stream_header;
+  integer stream_count,stream_limit;
   reg [2:0] error_ack;
   integer saw_wait,saw_fault;
   integer k;
@@ -158,9 +184,11 @@ module tb_cortexm0_link #(
     if($value$plusargs("turn_extra=%d",turn_extra))begin end
     if($value$plusargs("words=%d",words))begin end
     if($value$plusargs("idle=%d",idle))begin end
+    if($value$plusargs("rx_boundary=%d",rx_boundary))begin end
+    if($value$plusargs("transfer_delay=%d",transfer_delay))begin end
     if($test$plusargs("vcd"))begin $dumpfile("cortexm0_link.vcd");$dumpvars(0,dut,target.swdo,target.swdoen);end
     #1;rst_n=0;#100;rst_n=1;repeat(30)@(negedge clk);
-    wr(8,1 | (idle<<4) | (5<<9) | (phase<<17) | (turn_extra<<23) | (ack_delay<<25));
+    wr(8,1 | (idle<<4) | (5<<9) | (transfer_delay<<13) | (phase<<17) | (rx_boundary<<18) | (turn_extra<<23) | (ack_delay<<25));
     swj(64,256'hffffffffffffffff);
     swj(16,256'he79e);
     swj(64,256'hffffffffffffffff);
@@ -203,6 +231,55 @@ module tb_cortexm0_link #(
       xfer(8'h0f,0,value);xfer(8'h0e,0,value);
       if(value!==32'h5a89cdef)$fatal(1,"DAP after sampler %h",value);
       $display("SAMPLER_PASS actual CortexM0 MEM-AP, FIFO, competing launches, DAP recovery");
+    end
+    if($test$plusargs("streams"))begin
+      // Exercise the complete sampler -> SWD -> real MEM-AP -> packet BRAM.
+      stream_write(0,256);stream_cfg(0,4);stream_cfg(1,2);
+      stream_cfg(2,240);stream_cfg(5,1);
+      for(k=0;k<4;k=k+1)stream_cfg(16+k,k);
+      wr(7'h60,2);wr(7'h78,$rtoi(500000000.0/half_ns));wr(7'h70,240);
+      wr(7'h68,0);wr(7'h6c,32'h20000000);
+      stream_write(0,1);wr(7'h60,257);
+      // Stop at a completed sample, then flush the posted read and packet.
+      wait(dut.u_probe_stream.produced>=3);
+      wr(7'h60,0);wait(!dut.sampler_active);stream_write(0,0);
+      stream_wait(stream_status);
+      stream_read(4096,stream_header);
+      if(stream_header!==32'h02024a53)$fatal(1,"HSS header %h",stream_header);
+      stream_read(4108,stream_header);stream_count=stream_header[15:0];
+      if(stream_count==0)$fatal(1,"HSS empty packet");
+      for(k=0;k<stream_count;k=k+1)begin
+        stream_read(4112+4*k,value);
+        if(value!==32'h5a89cdef)$fatal(1,"HSS data %0d %h",k,value);
+      end
+      stream_write(12,1);stream_write(0,256);
+      $display("HSS_PASS real CortexM0 sampler, posted flush, packet BRAM payload");
+      // Descriptor crosses a 1 KiB AP boundary; payload is unaligned.
+      xfer(8'h01,32'h23000012,value);
+      memory_write(32'h200003fc,32'h20000501);
+      memory_write(32'h20000400,64);
+      memory_write(32'h20000404,13);
+      memory_write(32'h20000408,0);
+      for(k=0;k<4;k=k+1)memory_write(32'h20000500+4*k,32'h03020100+k*32'h04040404);
+      stream_write(32,32'h200003f8);stream_write(36,32'h20000501);
+      stream_write(40,64);stream_write(44,0);stream_write(48,13);
+      stream_write(0,2);stream_wait(stream_status);
+      if(stream_status[11:0]!=13)$fatal(1,"RTT length %h",stream_status);
+      for(k=0;k<3;k=k+1)begin
+        stream_read(4096+4*k,value);
+        if(value!==(32'h04030201+k*32'h04040404))$fatal(1,"RTT payload %d %h",k,value);
+      end
+      stream_read(4108,value);if(value[7:0]!=13)$fatal(1,"RTT tail byte %h",value);
+      if(target.sram['h408/4]!=0)$fatal(1,"RTT committed before DMA ACK");
+      stream_write(0,0);stream_write(12,1);
+      stream_limit=0;
+      while(dut.u_probe_stream.tail==0 && stream_limit<10000)begin
+        @(negedge clk);stream_limit=stream_limit+1;
+      end
+      if(target.sram['h408/4]!=13)$fatal(1,"RTT RdOff commit %h",target.sram['h408/4]);
+      wait(!dut.rtt_active);stream_write(0,256);
+      xfer(8'h02,0,value);if(value!==32'h0bb11477)$fatal(1,"DPIDR after streams");
+      $display("RTT_PASS real CortexM0 descriptor boundary, unaligned payload, DMA-before-RdOff, DAP recovery");
     end
     if($test$plusargs("packets"))begin
       // The real M0 MEM-AP wraps TAR at 1 KiB. Use a modulo-256 pattern so
