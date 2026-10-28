@@ -56,14 +56,18 @@ def main():
     ap.add_argument('--counts', default='1,2,3,4,6,7,8,16,32,64,256')
     ap.add_argument('--base', type=lambda x: int(x, 0), default=0x20004000)
     ap.add_argument('--mode', type=lambda x: int(x, 0), default=None)
+    ap.add_argument('--force-clock', action='store_true', help='Reapply requested clock after calibration; requires explicit --mode')
     ap.add_argument('--dump-command', action='store_true', help='Read command BRAM through XSCT after each block write')
     ap.add_argument('--idle', type=int, default=None, help='Override idle TCK cycles via XSCT')
     ap.add_argument('--half-delay', type=int, default=0, help='Override PHY half-cycle divider via XSCT')
     ap.add_argument('--batch', action='store_true', help='Also drive the legacy RTL batch engine via XSCT')
     ap.add_argument('--pattern-seed', type=int, default=None, help='Use reproducible random payloads')
     ap.add_argument('--internal-trace', action='store_true', help='Arm/dump passive scan history in the diagnostic bitstream')
+    ap.add_argument('--wait-abort', type=int, choices=[0, 1], default=None, help='Toggle experimental early WAIT exit via XSCT')
     ap.add_argument('--output', type=Path, default=Path('build/jtag_write_probe.json'))
     args = ap.parse_args()
+    if args.force_clock and args.mode is None:
+        ap.error('--force-clock requires --mode so a later access cannot recalibrate')
     counts = [int(n) for n in args.counts.split(',')]
     assert counts and min(counts) > 0 and max(counts) <= 256
     assert args.base % 1024 == 0
@@ -82,6 +86,9 @@ def main():
         args.output.with_suffix('.backup.bin').write_bytes(b''.join(w.to_bytes(4, 'little') for w in backup))
         report['backup_transport'] = 'swd'
         setup(out, inp, args.speed, 'jtag')
+        if args.force_clock:
+            xfer(out, inp, [0x11] + le(args.speed * 1000))
+            xfer(out, inp, [0x12, 63] + [0xff] * 8)
         if args.idle is not None or args.half_delay:
             assert args.idle is None or 0 <= args.idle <= 15
             assert 0 <= args.half_delay <= 15
@@ -93,6 +100,10 @@ def main():
             subprocess.run([sys.executable, str(Path(__file__).with_name('run_xsct.py')), str(script)], check=True)
         if args.mode is not None:
             xfer(out, inp, [0x89, args.mode])
+        if args.wait_abort is not None:
+            from jtag_internal_trace import set_wait_abort
+            set_wait_abort(args.wait_abort)
+            report['wait_abort'] = args.wait_abort
         clock = xfer(out, inp, [0x80, 255])
         report['fclk_hz'] = int.from_bytes(clock[4:8], 'little')
         report['tck_hz'] = report['fclk_hz'] // (2 * (args.half_delay + 1))
@@ -120,10 +131,12 @@ def main():
                 else:
                     if method == 'block' and args.internal_trace:
                         from jtag_internal_trace import control, dump
-                        write_words(out, inp, args.base, pattern, before_launch=control)
                         trace_path = args.output.with_name(args.output.stem + f'_trace_{n}.json')
-                        trace = dump(trace_path)
-                        print(f"internal trace {n} words: {len(trace['rows'])} scans -> {trace_path}", flush=True)
+                        try:
+                            write_words(out, inp, args.base, pattern, before_launch=control)
+                        finally:
+                            trace = dump(trace_path)
+                            print(f"internal trace {n} words: {len(trace['rows'])} scans -> {trace_path}", flush=True)
                     else:
                         (write_scalar if method == 'scalar' else write_words)(out, inp, args.base, pattern)
                 if method == 'block' and args.dump_command:
@@ -138,6 +151,11 @@ def main():
                 bad = [{'index': i, 'got': hex(back[i]), 'want': hex(pattern[i])}
                        for i in range(n) if back[i] != pattern[i]]
                 row = {'method': method, 'count': n, 'bad': bad}
+                if method == 'block' and args.internal_trace:
+                    row['trace'] = str(trace_path)
+                    row['trace_scans'] = len(trace['rows'])
+                    row['tx_mismatch_scans'] = [r['index'] for r in trace['rows'] if not r['wait_aborted'] and not r['tx_matches_latched']]
+                    row['pad_mismatch_scans'] = [r['index'] for r in trace['rows'] if not r['pad_matches_tx']]
                 report['rows'].append(row)
                 print(json.dumps(row), flush=True)
     finally:

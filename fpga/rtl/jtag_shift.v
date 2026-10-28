@@ -12,21 +12,28 @@ module jtag_shift (
     input wire [255:0] tms_data,tdi_data,
     input wire tdo,tdo_alternate,
     input wire tdi_sense,
+    input wire abort_on_wait,
+    input wire [3:0] ack_offset,abort_idle_cycles,
     output reg tck,tms,tdi,busy,done,
     output reg [255:0] rx_data,
-    output reg [63:0] tx_echo,sense_echo,rx_alternate
+    output reg [63:0] tx_echo,sense_echo,rx_alternate,
+    output reg wait_aborted,
+    output reg [11:0] completed_bits
 );
     reg [11:0] remaining;
     reg [7:0] bit_index;
     reg [3:0] divider;
     reg [255:0] ts,ds;
     reg vm,tv,el,cap,cap_rise;
+    reg abort_en;
+    reg [3:0] ack_at,abort_idle;
     reg [1:0] dm;
     always @(posedge clk or negedge rst_n) begin
         if(!rst_n) begin
             tck<=0;tms<=1;tdi<=1;busy<=0;done<=0;rx_data<=0;tx_echo<=0;sense_echo<=0;rx_alternate<=0;
             remaining<=0;bit_index<=0;divider<=0;ts<=0;ds<=0;
             vm<=0;tv<=0;el<=0;cap<=0;cap_rise<=0;dm<=0;
+            abort_en<=0;ack_at<=0;abort_idle<=0;wait_aborted<=0;completed_bits<=0;
         end else begin
             done<=0;
             if(!busy) begin
@@ -34,6 +41,8 @@ module jtag_shift (
                     remaining<=count;bit_index<=0;divider<=half_delay;
                     vm<=variable_tms;tv<=tms_value;el<=exit_last;cap<=capture;
                     cap_rise<=capture_rise;
+                    abort_en<=abort_on_wait;ack_at<=ack_offset;abort_idle<=abort_idle_cycles;
+                    wait_aborted<=0;completed_bits<=0;
                     dm<=tdi_mode;ts<=tms_data;ds<=tdi_data;rx_data<=0;tx_echo<=0;sense_echo<=0;rx_alternate<=0;
                     tms<=variable_tms ? tms_data[0] : tms_value || (exit_last && count==1);
                     tdi<=tdi_mode==2 ? tdi_data[0] : tdi_mode==1;
@@ -51,13 +60,21 @@ module jtag_shift (
                 end
                 else begin
                     tck<=0;
+                    completed_bits<=completed_bits+1'b1;
                     if(cap && !cap_rise && bit_index<64)rx_alternate[bit_index]<=tdo_alternate;
                     if(cap && !cap_rise) rx_data[bit_index]<=tdo;
                     if(remaining==1) begin busy<=0;done<=1;end
                     else begin
                         remaining<=remaining-1'b1;bit_index<=bit_index+1'b1;
                         ts<=ts>>1;ds<=ds>>1;
-                        tms<=vm ? ts[1] : tv || (el && remaining==2);
+                        // WAIT scans have no accepted update. Match the CMSIS
+                        // reference path: leave SHIFT_DR immediately after ACK
+                        // instead of clocking the pending write's data field.
+                        if(abort_en && cap && !cap_rise && bit_index==ack_at+2 &&
+                           {tdo,rx_data[ack_at+1],rx_data[ack_at]}==3'b001)begin
+                            remaining<=12'd3+abort_idle;
+                            vm<=1;ts<=256'd3;tms<=1;wait_aborted<=1;
+                        end else tms<=vm ? ts[1] : tv || (el && remaining==2);
                         tdi<=dm==2 ? ds[1] : dm==1;
                     end
                 end

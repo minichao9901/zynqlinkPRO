@@ -110,6 +110,9 @@ module swd_controller #(
     reg [4:0] diag_head,diag_index;
     reg [5:0] diag_count;
     reg diag_armed,diag_frozen;
+    reg jtag_wait_abort;
+    wire jtag_debug_wait_aborted;
+    wire [6:0] jtag_debug_bits;
 
     //=========================================================================
     // IOBUF for SWDIO (bidirectional)
@@ -419,7 +422,7 @@ module swd_controller #(
             diag_rx[diag_head]<=jtag_debug_rx;
             diag_alternate[diag_head]<=jtag_debug_alternate;
             diag_samples[diag_head]<=jtag_debug_samples;
-            diag_extra[diag_head]<={8'd0,core_req_sel,packet_state,stream_active,packet_active,batch_active,
+            diag_extra[diag_head]<={jtag_debug_wait_aborted,jtag_debug_bits,core_req_sel,packet_state,stream_active,packet_active,batch_active,
                                    core_next_valid_sel,core_next_ready,jtag_debug_tx_req};
             diag_count<=diag_count+1'b1;
             if(diag_head==31)begin diag_armed<=0;diag_frozen<=1;end
@@ -460,6 +463,7 @@ module swd_controller #(
             engine_reset_count <= 0;
             trace_index <= 0;
             diag_index <= 0;
+            jtag_wait_abort <= 0;
             jtag_config<=2;jtag_ir_config<=4;jtag_dr_config<=0;jtag_operation<=0;
             jtag_seq_tms<=0;jtag_sample_early<=0;jtag_return_late<=0;manual_pins<=0;
             swj_data <= 256'd0;
@@ -532,6 +536,7 @@ module swd_controller #(
                     end
                     ADDR_TRACE_INDEX: trace_index<=s_axi_wdata[3:0];
                     8'hd0:diag_index<=s_axi_wdata[4:0];
+                    8'hf8:if(!core_busy)jtag_wait_abort<=s_axi_wdata[0];
                     8'h80: if(!core_busy && !stream_active && !packet_active && !batch_active) jtag_config<=s_axi_wdata;
                     8'h84: if(!core_busy && !stream_active && !packet_active && !batch_active) jtag_ir_config<=s_axi_wdata;
                     8'h88: if(!core_busy && !stream_active && !packet_active && !batch_active) jtag_dr_config<=s_axi_wdata;
@@ -645,6 +650,7 @@ module swd_controller #(
                     8'hec:rdata_reg<=diag_extra[diag_index];
                     8'hf0:rdata_reg<=diag_alternate[diag_index];
                     8'hf4:rdata_reg<=diag_samples[diag_index];
+                    8'hf8:rdata_reg<={16'h5741,15'd0,jtag_wait_abort};
                     default: begin
                         rdata_reg <= !s_axi_araddr[7] && s_axi_araddr[6:5]==2'b11 ? stream_rdata : 32'd0;
                     end
@@ -805,6 +811,7 @@ module swd_controller #(
         // window offset independently selects current/previous scan bit.
         .tdo(jtag_sample_early ? jtag_tdo_rise : jtag_tdo_fall),.tdi_sense(gpio_in[0]),
         .tdo_alternate(jtag_sample_early ? jtag_tdo_fall : jtag_tdo_rise),
+        .wait_abort(jtag_wait_abort),
         .next_valid(core_next_valid_sel && jtag_enabled),.next_request(core_next_req_sel),.next_wdata(core_next_wdata_sel),
         .next_ready(jtag_next_ready),.result_valid(jtag_result_valid),.busy(jtag_busy),.ack(jtag_ack),.rdata(jtag_rdata),
         .tck(jtag_tck),.tms(jtag_tms),.tdi(jtag_tdi),.cached_instruction(jtag_cached_ir),
@@ -813,7 +820,8 @@ module swd_controller #(
         .stat_cycles(jtag_stat_cycles),.stat_bits(jtag_stat_bits),.stat_transfers(jtag_stat_transfers),
         .debug_valid(jtag_debug_valid),.debug_meta(jtag_debug_meta),.debug_wdata(jtag_debug_wdata),
         .debug_tx(jtag_debug_tx),.debug_sense(jtag_debug_sense),.debug_rx(jtag_debug_rx),.debug_tx_req(jtag_debug_tx_req),
-        .debug_alternate(jtag_debug_alternate),.debug_samples(jtag_debug_samples)
+        .debug_alternate(jtag_debug_alternate),.debug_samples(jtag_debug_samples),
+        .debug_wait_aborted(jtag_debug_wait_aborted),.debug_bits(jtag_debug_bits)
     );
 
 endmodule

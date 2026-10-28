@@ -32,6 +32,14 @@ def control():
     assert 'ARMED' in result, result
 
 
+def set_wait_abort(enabled):
+    result = run('set s [mrd -force -value 0x400100f8]\n'
+                 'if {($s >> 16) != 0x5741} {error "WAIT exit control missing"}\n'
+                 + f'mwr -force 0x400100f8 {int(enabled)}\n'
+                 + 'puts [mrd -force -value 0x400100f8]')
+    assert f'5741000{int(enabled)}' in result.lower().replace('0x', ''), result
+
+
 def dump(path):
     text = run('mwr -force 0x400100cc 4\n'
                'set s [mrd -force -value 0x400100cc]\nputs [format "STATUS %08X" $s]\n'
@@ -55,12 +63,15 @@ def dump(path):
                    tx_request=row['extra'] & 7, pad_request=(row['extra'] >> 3) & 7)
         row['tx_matches_latched'] = row['tx'] == row['latched']
         row['pad_matches_tx'] = row['pad'] == row['tx']
+        row['wait_aborted'] = bool(row['extra'] >> 31)
+        row['scan_bits'] = (row['extra'] >> 24) & 127
         row['ack_windows'] = {str(offset): {
             'selected_raw': (row['samples'] >> offset) & 7,
             'alternate_raw': (row['samples'] >> (16 + offset)) & 7}
             for offset in range(2, 7)}
         rows.append(row)
     report = {'status': int(status[1], 16), 'rows': rows}
+    assert report['status'] >> 16 == 0x4a54, text
     assert len(rows) == (report['status'] >> 5) & 63, text
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
