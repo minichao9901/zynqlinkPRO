@@ -68,6 +68,7 @@ def main():
             'pass': code == 0 and 'PASS JTAG full pipeline' in log,
             'hss': 'JTAG HSS' in log, 'rtt': 'RTT unaligned' in log,
             'fail': next((l.strip() for l in log.splitlines() if 'Fatal' in l), ''),
+            'perf': next((l.strip() for l in log.splitlines() if 'JTAG_PERF' in l), ''),
         })
         print(f"{name:22s} {'PASS' if rows[-1]['pass'] else 'FAIL'} {rows[-1]['fail'][:70]}", flush=True)
         args.out.write_text(json.dumps(rows, indent=2), encoding='utf-8')

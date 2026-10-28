@@ -60,6 +60,7 @@ module tb_cm3_jtag;
   if(d==0)$fatal(1,"packet timeout core=%d sampler=%d packet=%d",dut.u_jtag_core.state,dut.u_probe_sampler.state,dut.u_probe_stream.state);
  endtask
  reg [31:0] d,head_before,expected,safe_at_fault;reg checking_fault=0;
+ integer hss_t0,hss_t1,rtt_t0,rtt_t1,hss_total;
  integer i,j,bank_base,samples,packets;
  always @(posedge clk)if(checking_fault && dut.u_probe_stream.state==6 &&
     $signed(dut.u_probe_stream.produced-safe_at_fault)>0)$fatal(1,"unvalidated HSS bank published");
@@ -92,15 +93,17 @@ module tb_cm3_jtag;
   cfg(0,4);cfg(1,2);cfg(2,32);cfg(5,1);
   for(i=0;i<4;i=i+1)cfg(16+i,i);
   write_reg('h78,120000000);write_reg('h68,0);write_reg('h6c,'h60000000);write_reg('h70,32);
+  hss_t0=$time;hss_total=0;
   put(0,1);write_reg('h60,'h101);samples=0;packets=0;
   while(samples!=124 && packets<8)begin
    wait_packet();get(8,d);bank_base=4096+((d>>16)&7)*2048;
    get(bank_base,d);if(d!='h02024a53)$fatal(1,"JTAG HSS header %h",d);
-   get(bank_base+12,d);samples=d[15:0];if(samples<1 || samples>124)$fatal(1,"HSS count %h",d);
+   get(bank_base+12,d);samples=d[15:0];if(samples<1 || samples>124)$fatal(1,"HSS count %h",d);hss_total=hss_total+samples;
    for(i=0;i<samples;i=i+1)begin get(bank_base+16+4*i,d);if(d!='h12340000)$fatal(1,"HSS posted data %d %h",i,d);end
    $display("JTAG HSS bank=%d samples=%d skips=%d scans=%d tick=%d",bank_base,samples,dut.u_probe_sampler.skipped,0,dut.u_probe_sampler.tick);
    packets=packets+1;if(samples!=124)put(12,1);
   end
+  hss_t1=$time;
   if(samples!=124)$fatal(1,"JTAG cannot sustain requested HSS period");
   // No fault injection on the CM3 target: it has no hook to force an AP error.
   get(bank_base+16,d);if(d!='h12340000)$fatal(1,"validated bank changed");
@@ -110,13 +113,15 @@ module tb_cm3_jtag;
   put(32,'h600023f8);put(36,'h600003f1);put(40,4093);put(44,2);put(48,2048);
   target.u_sys.mem['h23fc/4]='h600003f1;target.u_sys.mem['h2400/4]=4093;
   target.u_sys.mem['h2404/4]=2500;target.u_sys.mem['h2408/4]=2;
-  put(0,2);wait_packet();get(8,d);if((d&4095)!=2048)$fatal(1,"RTT length %h",d);
+  rtt_t0=$time;
+  put(0,2);wait_packet();rtt_t1=$time;get(8,d);if((d&4095)!=2048)$fatal(1,"RTT length %h",d);
   if(target.u_sys.mem['h2408/4]!=2)$fatal(1,"RTT RdOff advanced before DMA");
   for(i=0;i<512;i=i+1)begin
    for(j=0;j<4;j=j+1)expected[j*8+:8]=target.u_sys.mem[('h3f3+i*4+j)/4][(('h3f3+i*4+j)%4)*8+:8];
    get(4096+4*i,d);if(d!=expected)$fatal(1,"RTT JTAG payload %d %h != %h",i,d,expected);
   end
   put(0,0);put(12,1);wait(target.u_sys.mem['h2408/4]==2050);wait(!dut.rtt_active);
+  $display("JTAG_PERF clk_ns=%f hss_samples=%0d hss_cycles=%0d rtt_bytes=%0d rtt_cycles=%0d",clk_ns,hss_total,(hss_t1-hss_t0)/clk_ns,2048,(rtt_t1-rtt_t0)/clk_ns);
   $display("PASS JTAG full pipeline: physical pad mux, AXI setup, autonomous HSS, posted timestamps/data, packet sticky-error fence/drop, immutable banks, RTT unaligned 1KiB split, DDR-before-RdOff");$finish;
  end
  initial begin #(clk_ns*4000000);$fatal(1,"JTAG pipeline watchdog");end
