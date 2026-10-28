@@ -1,0 +1,33 @@
+
+****** xsim v2018.3 (64-bit)
+  **** SW Build 2405991 on Thu Dec  6 23:38:27 MST 2018
+  **** IP Build 2404404 on Fri Dec  7 01:43:56 MST 2018
+    ** Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+
+source xsim.dir/tb_cm3_swd_snap/xsim_script.tcl
+# xsim {tb_cm3_swd_snap} -testplusarg half_ns=10 -testplusarg rx_boundary=1 -testplusarg phase=0 -testplusarg rx_trace -testplusarg rx_trace_only -testplusarg expect_bad_ack -testplusarg expected_ack=5 -testplusarg coupled_clock -autoloadwcfg -runall
+Vivado Simulator 2018.3
+Time resolution is 1 ps
+run -all
+WARNING: File  referenced on E:/zynqlinkPRO/fpga/rtl/dap_transfer_block_engine.v at line 79 cannot be opened for reading. Please ensure that this file is available in the current working directory.
+XFER req=02 ack=5 data=00000000
+SWD_RX_TRACE index=0 raw=a0021037
+SWD_RX_TRACE index=1 raw=a102103f
+SWD_RX_TRACE index=2 raw=a2021037
+SWD_RX_TRACE index=3 raw=a302103b
+SWD_RX_TRACE index=4 raw=a4021030
+SWD_RX_TRACE index=5 raw=a502103c
+SWD_RX_TRACE index=6 raw=a6021037
+SWD_RX_TRACE index=7 raw=a702103f
+SWD_RX_TRACE index=8 raw=a8021177
+SWD_RX_TRACE index=9 raw=a902157f
+SWD_RX_TRACE index=10 raw=aa02117f
+SWD_RX_TRACE index=11 raw=ab02117f
+SWD_RX_TRACE index=12 raw=ac02117f
+SWD_RX_TRACE index=13 raw=ad02117f
+SWD_RX_TRACE index=14 raw=ae02117f
+SWD_RX_TRACE index=15 raw=af02117f
+PASS SWD raw trace capture ACK=5 data=00000000 coupled_events=1
+$finish called at time : 43900 ns : File "E:/zynqlinkPRO/fpga/sim/tb_cm3_swd.sv" Line 230
+exit
+INFO: [Common 17-206] Exiting xsim at Thu Oct 29 01:37:49 2026...
