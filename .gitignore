@@ -1,7 +1,9 @@
-# Generated FPGA/SDK outputs and captures
-build/
+# Generated FPGA/SDK intermediates and captures (bitstreams / ELFs are versioned)
+build/**
+!build/**/
 results/
-releases/
+releases/**
+!releases/**/
 *.bit
 *.elf
 *.dcp
@@ -29,6 +31,14 @@ __pycache__/
 !prebuilt/
 !prebuilt/*.bit
 !prebuilt/*.elf
+
+# FPGA bitstreams and Zynq firmware ELFs must be eligible for Git tracking,
+# including artifacts kept under build/ and releases/. Keep intermediate
+# files ignored; select the validated artifact pair explicitly when committing.
+!build/**/*.bit
+!build/**/*.elf
+!releases/**/*.bit
+!releases/**/*.elf
 
 # Target firmware ELFs are shipped (avoid rebuilding)
 !firmware/target/stm32f103_scope/build-cb/fw.elf

@@ -1,0 +1,163 @@
+{
+  "snapshot_date": "2026-10-28",
+  "timezone": "Asia/Shanghai",
+  "scope": "Local references only; no fetch. Before committing this handoff. Status reflects concurrent worktrees at inspection time.",
+  "branches": [
+    {
+      "branch": "main",
+      "head": "d42b60180e82fccb428c51613a0316776c2bc4fc",
+      "main_only_branch_only": [
+        0,
+        0
+      ],
+      "merge_base_with_main": "d42b60180e82fccb428c51613a0316776c2bc4fc"
+    },
+    {
+      "branch": "codex/probe-rtt-hss",
+      "head": "c26936c83db1cbcf65f9f70984902d2566b67d93",
+      "main_only_branch_only": [
+        1,
+        0
+      ],
+      "merge_base_with_main": "c26936c83db1cbcf65f9f70984902d2566b67d93"
+    },
+    {
+      "branch": "codex/probe-jtag",
+      "head": "23db4a8bd1b8923c14f8093c4925654cc333242a",
+      "main_only_branch_only": [
+        0,
+        28
+      ],
+      "merge_base_with_main": "d42b60180e82fccb428c51613a0316776c2bc4fc"
+    },
+    {
+      "branch": "codex/swd-timing-generator",
+      "head": "1b55cf8cfb0f710e9aff9c8ced15864b48877eb9",
+      "main_only_branch_only": [
+        0,
+        7
+      ],
+      "merge_base_with_main": "d42b60180e82fccb428c51613a0316776c2bc4fc"
+    },
+    {
+      "branch": "codex/main-lowfreq-sample",
+      "head": "9fdb1f5e060d6fd01662703ebd982d2333fd4966",
+      "main_only_branch_only": [
+        0,
+        1
+      ],
+      "merge_base_with_main": "d42b60180e82fccb428c51613a0316776c2bc4fc"
+    },
+    {
+      "branch": "codex/banked-packet-pipeline",
+      "head": "35f7cf631d1510259bfd0da2f616dca28488e995",
+      "main_only_branch_only": [
+        11,
+        0
+      ],
+      "merge_base_with_main": "35f7cf631d1510259bfd0da2f616dca28488e995"
+    },
+    {
+      "branch": "codex/main-continuous-scheduler",
+      "head": "35f7cf631d1510259bfd0da2f616dca28488e995",
+      "main_only_branch_only": [
+        11,
+        0
+      ],
+      "merge_base_with_main": "35f7cf631d1510259bfd0da2f616dca28488e995"
+    },
+    {
+      "branch": "feature/swclk-sampling-delay",
+      "head": "9362797f5fe0fa129ec0ca72e32e246e957b5f52",
+      "main_only_branch_only": [
+        38,
+        0
+      ],
+      "merge_base_with_main": "9362797f5fe0fa129ec0ca72e32e246e957b5f52"
+    },
+    {
+      "branch": "feature/swdio-idelay",
+      "head": "3013a5f0baf4253988a089e341feebee39b5f5af",
+      "main_only_branch_only": [
+        47,
+        5
+      ],
+      "merge_base_with_main": "c895522d5a3e32d7d3b6b04a91332e5c2d833220"
+    },
+    {
+      "branch": "hflink-psusb",
+      "head": "324e4e1c787ba67c2831352b28f1e065a4f60442",
+      "main_only_branch_only": [
+        71,
+        7
+      ],
+      "merge_base_with_main": "5df30198c0bd13d96d9baddc3a7a3e51d75382fe"
+    }
+  ],
+  "detached_baseline": "902e22877276e0830c1f9cfda0a7ea6c75d41cfb",
+  "worktrees": [
+    {
+      "path": "E:\\zynqlinkPRO",
+      "head": "d42b60180e82fccb428c51613a0316776c2bc4fc",
+      "tracked_status": "M .gitignore"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\probe-rtt-hss\\zynqlinkPRO",
+      "head": "23db4a8bd1b8923c14f8093c4925654cc333242a",
+      "tracked_status": ""
+    },
+    {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\probe-rtt-hss\\zynqlink-baseline",
+      "head": "902e22877276e0830c1f9cfda0a7ea6c75d41cfb",
+      "tracked_status": ""
+    },
+    {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\swd-timing-generator\\zynqlinkPRO",
+      "head": "1b55cf8cfb0f710e9aff9c8ced15864b48877eb9",
+      "tracked_status": ""
+    },
+    {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\main-lowfreq-sample\\zynqlinkPRO",
+      "head": "9fdb1f5e060d6fd01662703ebd982d2333fd4966",
+      "tracked_status": ""
+    },
+    {
+      "path": "E:\\zynqlinkPRO_batch",
+      "head": "35f7cf631d1510259bfd0da2f616dca28488e995",
+      "tracked_status": "M fpga/build_dma.tcl\n M fpga/build_incremental.tcl\n M fpga/rtl/swd_batch_engine.v\n M fpga/rtl/swd_controller.v\n M fpga/sim/tb_batch_dma.sv\n M fpga/sim/tb_packet_axi.sv\n M fpga/sim/tb_swd_stream.sv"
+    },
+    {
+      "path": "E:\\zynqlinkPRO_hflink",
+      "head": "324e4e1c787ba67c2831352b28f1e065a4f60442",
+      "tracked_status": "M firmware/xusbps_daplink_hflink/hflink_app.c\n M fpga/hflink/DAP_Controller.v\n M fpga/hflink/cmd_worker/DAP_SWJ.v\n M fpga/hflink/interface/DAP_Seqence.v\n M fpga/rtl/hflink_dap_ps.v\n M fpga/sim/swd_f103_target.sv\n M fpga/sim/tb_hflink_swd_target.sv\n M fpga/sim/xpm_memory_tdpram.sv"
+    },
+    {
+      "path": "E:\\zynqlinkPRO_idelay",
+      "head": "3013a5f0baf4253988a089e341feebee39b5f5af",
+      "tracked_status": ""
+    }
+  ],
+  "worktree_porcelain": "worktree E:/zynqlinkPRO\nHEAD d42b60180e82fccb428c51613a0316776c2bc4fc\nbranch refs/heads/main\n\nworktree C:/Users/Administrator/.codex/worktrees/main-lowfreq-sample/zynqlinkPRO\nHEAD 9fdb1f5e060d6fd01662703ebd982d2333fd4966\nbranch refs/heads/codex/main-lowfreq-sample\n\nworktree C:/Users/Administrator/.codex/worktrees/probe-rtt-hss/zynqlink-baseline\nHEAD 902e22877276e0830c1f9cfda0a7ea6c75d41cfb\ndetached\n\nworktree C:/Users/Administrator/.codex/worktrees/probe-rtt-hss/zynqlinkPRO\nHEAD 23db4a8bd1b8923c14f8093c4925654cc333242a\nbranch refs/heads/codex/probe-jtag\n\nworktree C:/Users/Administrator/.codex/worktrees/swd-timing-generator/zynqlinkPRO\nHEAD 1b55cf8cfb0f710e9aff9c8ced15864b48877eb9\nbranch refs/heads/codex/swd-timing-generator\n\nworktree E:/zynqlinkPRO_batch\nHEAD 35f7cf631d1510259bfd0da2f616dca28488e995\nbranch refs/heads/codex/banked-packet-pipeline\n\nworktree E:/zynqlinkPRO_hflink\nHEAD 324e4e1c787ba67c2831352b28f1e065a4f60442\nbranch refs/heads/hflink-psusb\n\nworktree E:/zynqlinkPRO_idelay\nHEAD 3013a5f0baf4253988a089e341feebee39b5f5af\nbranch refs/heads/feature/swdio-idelay",
+  "jtag_swd_merge_base": "d42b60180e82fccb428c51613a0316776c2bc4fc",
+  "jtag_swd_shared_changed_files": [
+    "firmware/xusbps_daplink_dma/DAP/Include/DAP_config.h",
+    "firmware/xusbps_daplink_dma/DAP/Source/DAP.c",
+    "firmware/xusbps_daplink_dma/DAP/Source/DAP_vendor.c",
+    "firmware/xusbps_daplink_dma/probe_stream.c",
+    "firmware/xusbps_daplink_dma/probe_stream.h",
+    "firmware/xusbps_daplink_dma/probe_target.c",
+    "fpga/build_dma.tcl",
+    "fpga/build_incremental.tcl",
+    "fpga/rtl/swd_controller.v",
+    "fpga/rtl/swj_clk_gen.v",
+    "fpga/sim/run_cortexm0.tcl",
+    "fpga/sim/tb_cortexm0_link.sv",
+    "fpga/sim/tb_swj_clk_gen.sv",
+    "tools/run_cortexm0_regress.py",
+    "tools/test_packet_engine.py",
+    "tools/test_probe_host.py",
+    "tools/tests/probe_host_test.c",
+    "tools/tests/probe_target_test.c"
+  ],
+  "remote_state": "origin/HEAD                         -> origin/main\n  origin/feature/swclk-sampling-delay 9362797 f103: reproduce historical best with scope firmware at 96 MHz HCLK (3.8/4.0 MB/s)\n  origin/feature/swdio-idelay         3013a5f bench: fixed 152-bit SWJ sequence and accumulate split USB reads\n  origin/main                         d42b601 Merge validated RTT/HSS PL-to-DDR probe into main"
+}
