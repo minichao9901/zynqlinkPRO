@@ -62,7 +62,7 @@ module jtag_core (
     wire [255:0] phy_rx;
     wire [63:0] phy_tx_echo,phy_sense_echo,phy_rx_alternate;
     reg rv_active;
-    wire [63:0] debug_tx_frame=phy_tx_echo >> ((rv_active ? 3 : 5)+dr_before);
+    wire [63:0] debug_tx_frame=phy_tx_echo >> ((rv_active ? 5 : 5)+dr_before);
     wire [63:0] debug_sense_frame=phy_sense_echo >> ((rv_active ? 3 : 5)+dr_before);
     reg [40:0] scan_result;
     reg [63:0] dr_tms_bits,dr_tdi_bits;
@@ -259,10 +259,10 @@ module jtag_core (
                 // status/data bits arrive well before Exit1, even in the late
                 // capture window, so DMI needs exactly 41 shifts. ARM's final
                 // response bit is data and retains its two TDO guard clocks.
-                dr_tms_bits<=(64'd3 << ((rv_active ? 2 : 4)+dr_before+(rv_active ? 41 : op==3 ? 32 : 35)+dr_after)) | 1;
-                dr_tdi_bits<=(rv_active ? {23'd0,rv_frame} : op==3 ? 64'd0 : {29'd0,(phase==0 ? value : 32'd0),scan_req[3:1]}) << ((rv_active ? 3 : 5)+dr_before);
+                dr_tms_bits<=(64'd3 << ((rv_active ? 4 : 4)+dr_before+(rv_active ? 41 : op==3 ? 32 : 35)+dr_after)) | 1;
+                dr_tdi_bits<=(rv_active ? {23'd0,rv_frame} : op==3 ? 64'd0 : {29'd0,(phase==0 ? value : 32'd0),scan_req[3:1]}) << ((rv_active ? 5 : 5)+dr_before);
                 dr_count<=7+dr_before+(rv_active ? 41 : op==3 ? 32 : 35)+dr_after+
-                          (rv_active && idle_cycles<8 ? 4'd8 : idle_cycles)-(rv_active ? 2 : 0);
+                          (rv_active && idle_cycles<8 ? 4'd8 : idle_cycles);
                 capture_offset<=3+dr_before+(late_return ? 1 : 0);state<=DR_PRE;
             end
             DR_PRE: shift_segment({5'd0,dr_count},1,0,0,1,2,{192'd0,dr_tms_bits},{192'd0,dr_tdi_bits},EVALUATE);
