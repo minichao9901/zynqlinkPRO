@@ -87,14 +87,14 @@ module tb_riscv_pipeline;
   // performs this prime before returning IDCODE or completing calibration.
   write_reg('h94,0);write_reg('h8c,2);transfer(0,17);
   write_reg('h8c,0);
-  transfer(1,'h23000012);transfer(5,'h20006000);
+  transfer(1,'h23000012);transfer(5,'hf0406000);
   for(i=0;i<64;i=i+1)transfer(13,32'h89ab0000+i);
-  transfer(5,'h20006000);transfer(15,0);
+  transfer(5,'hf0406000);transfer(15,0);
   for(i=0;i<64;i=i+1)begin
    transfer(i==63 ? 14 : 15,0);read_reg('h18,d);
    if(d!=32'h89ab0000+i)$fatal(1,"RISC-V SRAM word %0d %h",i,d);
   end
-  transfer(1,'h23000002);transfer(5,'h20006020);transfer(15,0);
+  transfer(1,'h23000002);transfer(5,'hf0406020);transfer(15,0);
   repeat(4)begin transfer(15,0);read_reg('h18,d);
    if(d!=32'h89ab0008)$fatal(1,"RISC-V fixed-address read %h",d);end
   transfer(14,0);
@@ -102,7 +102,7 @@ module tb_riscv_pipeline;
   // No AXI operations per sample: configure once, then PL fills a bank.
   cfg(0,4);cfg(1,2);cfg(2,160);cfg(5,1);
   for(i=0;i<4;i=i+1)cfg(16+i,i);
-  write_reg('h78,120000000);write_reg('h68,0);write_reg('h6c,'h20000000);write_reg('h70,160);
+  write_reg('h78,120000000);write_reg('h68,0);write_reg('h6c,'hf0400000);write_reg('h70,160);
   put(0,1);write_reg('h60,'h101);samples=0;packets=0;
   while(samples!=124 && packets<8)begin
    wait_packet();get(8,d);bank_base=4096+((d>>16)&7)*2048;
@@ -124,8 +124,8 @@ module tb_riscv_pipeline;
   write_reg('h60,0);wait(!dut.sampler_active);write_reg('h60,2);
   put(0,0);put(0,256);transfer(0,'h1e);transfer(4,'h50000032);
   // RTT, with unaligned ring and descriptor crossing an AP 1KiB boundary.
-  put(32,'h200023f8);put(36,'h200003f1);put(40,4093);put(44,2);put(48,2048);
-  target.mem['h23fc/4]='h200003f1;target.mem['h2400/4]=4093;
+  put(32,'hf04023f8);put(36,'hf04003f1);put(40,4093);put(44,2);put(48,2048);
+  target.mem['h23fc/4]='hf04003f1;target.mem['h2400/4]=4093;
   target.mem['h2404/4]=2500;target.mem['h2408/4]=2;
   put(0,2);wait_packet();get(8,d);if((d&4095)!=2048)$fatal(1,"RTT length %h",d);
   if(target.mem['h2408/4]!=2)$fatal(1,"RTT RdOff advanced before DMA");

@@ -5,10 +5,12 @@ import subprocess
 root = Path(__file__).resolve().parents[1]
 out = root / 'build/riscv_sim'
 out.mkdir(parents=True, exist_ok=True)
-for top in ('tb_jtag_riscv', 'tb_riscv_pipeline'):
+for top in ('tb_jtag_riscv', 'tb_riscv_words', 'tb_riscv_pipeline'):
     sources = [root / 'fpga/rtl' / name for name in ('jtag_core.v', 'jtag_shift.v')]
     if top == 'tb_jtag_riscv':
         sources += [root / 'fpga/sim/jtag_dtm_model.sv']
+    elif top == 'tb_riscv_words':
+        sources += [root / 'fpga/sim/riscv_sba_model.sv']
     else:
         sources += [root / 'fpga/rtl' / name for name in (
             'swd_core.v', 'swd_controller.v', 'swd_batch_engine.v',
@@ -23,3 +25,9 @@ for top in ('tb_jtag_riscv', 'tb_riscv_pipeline'):
     (out / (top + '.log')).write_text(result.stdout + result.stderr, encoding='utf-8')
     print(result.stdout + result.stderr, end='', flush=True)
     assert result.returncode == 0, top
+    if top == 'tb_riscv_pipeline':
+        for args, suffix in [(['+late'], '_late'), (['+late', '+q1'], '_q1_late')]:
+            result = subprocess.run(['vvp', str(exe), *args], capture_output=True, text=True, timeout=180)
+            (out / (top + suffix + '.log')).write_text(result.stdout + result.stderr, encoding='utf-8')
+            print(result.stdout + result.stderr, end='', flush=True)
+            assert result.returncode == 0, top + suffix

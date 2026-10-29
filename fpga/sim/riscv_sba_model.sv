@@ -17,8 +17,19 @@ module riscv_sba_model #(parameter real RETURN_NS=12)(
     reg dmi_poisoned=0;
     wire [31:0] ctrlstat=sbcs[14:12]!=0 ? 32'ha2 : 0;
     integer scans=0,ir_writes=0,idles=0,dmi_scans=0;
+    integer bus_reads=0,bus_writes=0,out_of_range_reads=0,mmio_reads=0,counter_reads=0;
     wire [6:0] address=dr[40:34];
     wire [31:0] data=dr[33:2];
+    task bus_read(input [31:0] at);
+        begin
+            bus_reads<=bus_reads+1;
+            if(at==32'hf0407000)begin counter_reads<=counter_reads+1;sbdata<=counter_reads+1;end
+            else if(at[31:18]==14'h0041 || at[31:15]==17'h1e080)sbdata<=mem[at[14:2]];
+            else if(at==32'h40010000)begin
+                mmio_reads<=mmio_reads+1;sbdata<=mmio_reads+1;
+            end else begin out_of_range_reads<=out_of_range_reads+1;sbdata<=0;end
+        end
+    endtask
     function [3:0] next_state(input [3:0] s,input b);
         case(s)
         RESET:next_state=b?RESET:IDLE;IDLE:next_state=b?SEL_DR:IDLE;
@@ -71,7 +82,7 @@ module riscv_sba_model #(parameter real RETURN_NS=12)(
                     'h3c:begin
                         response<={address,sbdata,2'b00};
                         if(sbcs[15])begin
-                            sbdata<=mem[sbaddr[14:2]];
+                            bus_read(sbaddr);
                             if(sbcs[16])sbaddr<=sbaddr+4;
                         end
                     end
@@ -84,11 +95,12 @@ module riscv_sba_model #(parameter real RETURN_NS=12)(
                     'h39:begin
                         sbaddr<=data;
                         if(sbcs[20])begin
-                            sbdata<=mem[data[14:2]];
+                            bus_read(data);
                             if(sbcs[16])sbaddr<=data+4;
                         end
                     end
                     'h3c:begin
+                        bus_writes<=bus_writes+1;
                         mem[sbaddr[14:2]]<=data;
                         if(sbcs[16])sbaddr<=sbaddr+4;
                     end
