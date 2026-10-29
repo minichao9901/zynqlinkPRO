@@ -79,6 +79,10 @@ module jtag_core (
     // The DTM answers one transaction deep and has no valid response until
     // one completes, so a single NOP scan is flushed at session start.
     reg rv_synced,rv_discard;
+    // A failed SBA access sets sticky SBCS errors (write-one-to-clear).
+    // Clear them and resync the DMI response before the next request,
+    // otherwise one fault wedges every later access.
+    reg rv_error_clear;
     reg [1:0] rv_pending_kind; // 0 none, 1 posted SBDATA read, 2 posted write.
     reg [4:0] rv_return;
     reg [40:0] rv_frame;
@@ -190,7 +194,7 @@ module jtag_core (
             rv_return<=0;rv_frame<=0;rv_csw<=32'h23000052;rv_tar<=0;rv_posted<=0;
             rv_cfg<=0;rv_dmi_data<=0;rv_poll<=0;
             rv_words<=0;
-            rv_single<=0;rv_fast_write<=0;rv_pending_kind<=0;rv_synced<=0;rv_discard<=0;
+            rv_single<=0;rv_fast_write<=0;rv_pending_kind<=0;rv_synced<=0;rv_discard<=0;rv_error_clear<=0;
         end else begin
             phy_start<=0;fence_done<=0;
             if(!fence_req) fence_consumed<=0;
@@ -289,6 +293,7 @@ module jtag_core (
                         state<=RV_BUSYWAIT;
                     end else if(scan_result[1:0]!=0)begin
                         ack<=4;rv_cfg_valid<=0;rv_addr_dirty<=1;rv_pending_kind<=0;
+                        rv_error_clear<=1;
                         fence_error<=maintenance;state<=DONE;
                     end else if(!rv_collect)begin
                         if(rv_pending_kind==1)rv_posted<=scan_result[33:2];
@@ -350,10 +355,15 @@ module jtag_core (
                 if(!rv_synced)begin
                     rv_synced<=1;rv_discard<=1;
                     rv_dmi(7'h00,0,0,RV_SYNCED);
+                end else if(rv_error_clear)begin
+                    // Clear the sticky error bits; this scan also resyncs the
+                    // one-deep DMI response, then the request is retried.
+                    rv_error_clear<=0;rv_cfg_valid<=1;
+                    rv_dmi(7'h38,2,rv_wanted_cfg | 32'h00407000,RV_DISPATCH);
                 end else
                 case(req[3:0])
                 0:begin // ABORT: clear sticky SBA errors; preserve access mode.
-                    rv_cfg_valid<=0;rv_addr_dirty<=1;
+                    rv_cfg_valid<=0;rv_addr_dirty<=1;rv_error_clear<=0;
                     rv_dmi(7'h38,2,rv_cfg | 32'h00407000,RV_READY);
                 end
                 2,6:begin rdata<=32'ha0000000;state<=DONE;end
