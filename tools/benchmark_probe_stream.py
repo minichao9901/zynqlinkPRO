@@ -20,11 +20,11 @@ import usb.util
 from dap_pipeline_bench import open_dap, setup
 from probe_stream import Probe
 from test_probe_board import Memory, drain_hss, stop
-from probe_build_info import provenance
+from probe_build_info import provenance,live_clock_snapshot
 
 
 class HssReader(threading.Thread):
-    def __init__(self, dev, expected, period):
+    def __init__(self, dev, expected, period, allow_duplicate_stat=False):
         super().__init__(daemon=True)
         self.dev, self.expected = dev, expected
         self.quit = threading.Event()
@@ -34,6 +34,8 @@ class HssReader(threading.Thread):
         self.error = None
         self.period=period
         self.timeline_skips=0
+        self.allow_duplicate_stat=allow_duplicate_stat
+        self.control_sequence_errors=[]
 
     def consume(self, data):
         assert len(data) % 512 == 0, len(data)
@@ -41,8 +43,11 @@ class HssReader(threading.Thread):
             magic, ver, kind, seq, stamp, n, aux = struct.unpack_from('<HBBIIHH', data, off)
             assert magic == 0x4a53 and ver == 2
             if self.previous_seq is not None:
-                assert seq == ((self.previous_seq+1) & 0xffffffff), (self.previous_seq, seq)
-            self.previous_seq = seq
+                if seq!=((self.previous_seq+1)&0xffffffff):
+                    if self.allow_duplicate_stat and kind==3 and seq==self.previous_seq:
+                        self.control_sequence_errors.append(dict(kind=kind,previous_seq=self.previous_seq,seq=seq,timestamp=stamp))
+                    else:raise AssertionError(('frame sequence',self.previous_seq,seq,'kind',kind,'timestamp',stamp,'samples',n))
+            self.previous_seq=seq
             if kind == 2:
                 assert aux == n*len(self.expected) and n > 0
                 self.validate_values(data[off+16:off+16+aux],n,seq,stamp)
@@ -73,22 +78,34 @@ class HssReader(threading.Thread):
             self.error = repr(exc)
 
 
-def hss_point(probe, mem, dev, speed, period, nvars, seconds, repeat):
+def hss_point(probe, mem, dev, speed, period, nvars, seconds, repeat, allow_low_clock=False, activate_transport=None, allow_duplicate_stat=False):
     base = 0x20004000
     fixture = random.Random(0x485353).randbytes(4096)
     mem.write(base, fixture)
+    assert mem.read(base,4096)==fixture,'HSS fixture did not verify'
+    if activate_transport:activate_transport()
     variables = [(base+256+4*i, 4, 4) for i in range(nvars)]
     expected = fixture[256:256+4*nvars]
-    assert probe.action(0x32, 3, struct.pack('<I', speed))[0] == 0
+    clock_rc=probe.action(0x32,3,struct.pack('<I',speed))[0]
+    clock_method='HSS public clock setter'
+    if clock_rc==-6 and allow_low_clock and 1000000<=speed<15000000:
+        # Services share requested_hz. Exercise the existing low-rate path
+        # without changing the accepted firmware or lying about its API.
+        assert probe.action(0x31,7,struct.pack('<IHBB',speed,1024,0,1))[0]==0
+        clock_method='shared RTT clock setter (HSS public setter rejected low rate)'
+    else:assert clock_rc==0,('HSS clock rejected',clock_rc,speed)
     cfg = struct.pack('<IBB', period, 0, nvars)+b''.join(struct.pack('<IBB', *v) for v in variables)
     assert probe.action(0x32, 10, cfg)[0] == 0
     drain_hss(dev)
-    reader = HssReader(dev, expected, period)
+    reader = HssReader(dev, expected, period,allow_duplicate_stat)
     reader.start()
     final = None
+    partial=None
     try:
-        assert probe.action(0x32, 1)[0] == 0
+        start_rc=probe.action(0x32,1)[0]
+        assert start_rc==0,('HSS start rejected',start_rc,'requested clock',speed)
         time.sleep(0.25)
+        clock=live_clock_snapshot()
         t0 = time.perf_counter()
         rc, m0 = probe.action(0x32, 11)
         t0 = (t0+time.perf_counter())/2
@@ -100,6 +117,12 @@ def hss_point(probe, mem, dev, speed, period, nvars, seconds, repeat):
         t1 = (t1+time.perf_counter())/2
         assert rc == 0, (rc, m1)
         host1 = reader.samples
+        delta=[(b-a)&0xffffffff for a,b in zip(m0,m1)]
+        tick_hz=min(24000000,clock['FCLK_Hz']);dt=delta[1]/tick_hz
+        partial=dict(service='hss',speed_hz=speed,period_ticks=period,requested_Hz=tick_hz/period,
+                     effective_Hz=delta[3]/dt,skip_percent=100*delta[4]/(delta[3]+delta[4]),
+                     produced=delta[3],skipped=delta[4],counter_window_s=dt,period_clock_Hz=tick_hz,
+                     m0=m0,m1=m1,**clock)
         for _ in range(100):
             rc, _ = probe.action(0x32, 0)
             if rc == 0:
@@ -116,21 +139,36 @@ def hss_point(probe, mem, dev, speed, period, nvars, seconds, repeat):
         rc, final = probe.action(0x32, 11)
         assert rc == 0 and reader.samples == final[3], (reader.samples, final)
         delta = [(b-a) & 0xffffffff for a, b in zip(m0, m1)]
-        dt = delta[1]/24_000_000
+        # The sampler advances at most one timer tick per FCLK. Below
+        # 24MHz (experimental low-rate JTAG), the timer cannot run at 24MHz.
+        tick_hz=min(24_000_000,clock['FCLK_Hz'])
+        dt = delta[1]/tick_hz
         produced, skipped = delta[3], delta[4]
         row = {'service': 'hss', 'speed_hz': speed, 'period_ticks': period,
-               'requested_Hz': 24_000_000/period, 'variables': nvars, 'repeat': repeat,
+               **clock,
+               'clock_setter_rc':clock_rc,'clock_method':clock_method,
+               'requested_Hz': tick_hz/period,'nominal_24MHz_requested_Hz':24_000_000/period,
+               'period_clock_Hz':tick_hz,'variables': nvars, 'repeat': repeat,
                'counter_window_s': dt, 'host_window_s': t1-t0,
                'produced': produced, 'skipped': skipped,
                'effective_Hz': produced/dt, 'skip_percent': 100*skipped/(produced+skipped),
                'host_received_Hz': (host1-host0)/(t1-t0),
                'swd_errors': delta[6], 'DAP_yields': delta[7],
                'session_received_samples': reader.samples, 'session_packets': reader.packets,
-               'all_frames_byte_exact': True, 'sample_count_match': True,
+               'all_frames_byte_exact': not reader.control_sequence_errors, 'sample_count_match': True,
+               'all_data_frames_verified':True,'control_sequence_errors':reader.control_sequence_errors,
+               'all_frame_sequences_valid':not reader.control_sequence_errors,
                'timeline_gaps_preserved':True,'session_timeline_skipped':reader.timeline_skips,
                'm0': m0, 'm1': m1, 'final': final}
         assert delta[6] == 0 and delta[7] == 0, row
         return row
+    except Exception as exc:
+        if partial is not None:
+            partial.update(validation_error=repr(exc),sample_count_match=False,
+                           session_received_samples=reader.samples,control_sequence_errors=reader.control_sequence_errors)
+            if final is not None:partial['final']=final
+            exc.measurement=partial
+        raise
     finally:
         probe.action(0x32, 0)
         reader.quit.set()

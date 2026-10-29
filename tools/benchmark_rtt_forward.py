@@ -23,7 +23,8 @@ import usb.util
 from dap_pipeline_bench import open_dap, setup
 from probe_stream import Probe
 from test_probe_board import Memory, stop
-from probe_build_info import provenance
+from probe_build_info import provenance,live_clock_snapshot
+from test_swd_lowfreq_board import recover
 
 DHCSR, DCRSR, DCRDR = 0xe000edf0, 0xe000edf4, 0xe000edf8
 
@@ -72,13 +73,15 @@ class Reader(threading.Thread):
             self.error = repr(exc)
 
 
-def point(probe, mem, port, code, speed, chunk, seconds, repeat):
+def point(probe, mem, port, code, speed, chunk, seconds, repeat, activate_transport=None):
     mem.write_word(DHCSR, 0xa05f0003)
     mem.write(0x20000000, code)
     mem.write(0x20000200, struct.pack('<16sII6II', b'SEGGER RTT', 1, 0, 0, 0x20001000, 8192, 0, 0, 0, 0))
+    assert mem.read(0x20000000,len(code))==code,'producer code did not verify'
     core_write(mem, 16, 0x01000000)  # Clear inherited IT/condition state for the RAM entry.
     core_write(mem, 20, 1)  # privileged, interrupts masked, no fixture stack use
     core_write(mem, 15, 0x20000001)
+    if activate_transport:activate_transport()
     reader = None
     with serial.Serial(port, 115200, timeout=0.025) as com:
         com.reset_input_buffer()
@@ -89,6 +92,7 @@ def point(probe, mem, port, code, speed, chunk, seconds, repeat):
         try:
             mem.write_word(DHCSR, 0xa05f0001)
             time.sleep(0.3)
+            clock=live_clock_snapshot()
             t0 = time.perf_counter()
             rc, s0 = probe.action(0x31, 2)
             t0 = (t0+time.perf_counter())/2
@@ -121,6 +125,7 @@ def point(probe, mem, port, code, speed, chunk, seconds, repeat):
             assert reader.error is None, reader.error
             assert reader.count == published and not reader.pending, (reader.count, published)
             return {'speed_hz': speed, 'chunk': chunk, 'repeat': repeat,
+                    **clock,
                     'window_s': t1-t0, 'host_bytes': count1-count0,
                     'host_MB_s': (count1-count0)/(t1-t0)/1e6,
                     'probe_bytes': (s1[3]-s0[3]) & 0xffffffff,
@@ -169,7 +174,7 @@ def main():
         # exchange; retry the setup instead of failing the whole run.
         for attempt in range(4):
             try:
-                setup(out, inp, 50000, args.transport)
+                setup(out, inp, 50000, 'swd')
                 break
             except RuntimeError as exc:
                 if attempt == 3:
@@ -189,14 +194,20 @@ def main():
         for speed in map(int, args.speeds.split(',')):
             for chunk in map(int, args.chunks.split(',')):
                 for repeat in range(args.repeats):
-                    row = point(probe, mem, port, code, speed, chunk, args.seconds, repeat)
+                    setup(out,inp,50000,'swd')
+                    row = point(probe, mem, port, code, speed, chunk, args.seconds, repeat,
+                                lambda:setup(out,inp,speed//1000,args.transport))
                     report['rows'].append(row)
                     args.output.write_text(json.dumps(report, indent=2))
                     print(json.dumps({k:v for k,v in row.items() if k not in ('s0','s1')}), flush=True)
+    except BaseException as exc:
+        report['failure']=repr(exc)
+        raise
     finally:
         try:
-            stop(probe, dev)
-            setup(out, inp, 50000, args.transport)
+            try:stop(probe,dev)
+            except RuntimeError:recover(dev,inp);stop(probe,dev)
+            setup(out, inp, 50000, 'swd')
             mem.write_word(DHCSR, 0xa05f0003)
             if backup is not None:
                 mem.write(0x20000000, backup)

@@ -22,7 +22,7 @@ module tb_cm3_jtag;
  real tdo_ns=16;
  initial begin if($value$plusargs("tdo_ns=%f",tdo_ns))begin end end
  always @(target_tdo) late_tdo<=#(tdo_ns) target_tdo;
- assign tdo=late_mode ? late_tdo : target_tdo;
+ assign tdo=(late_mode || $test$plusargs("delay_tdo")) ? late_tdo : target_tdo;
  reg [3:0] aux_out=4'hc,aux_tri=4'hb;
  assign pads[1]=tdo;
  swd_controller dut(.clk(clk),.rst_n(rst_n),
@@ -85,6 +85,12 @@ module tb_cm3_jtag;
  integer diag_n,k;
  integer hss_t0,hss_t1,rtt_t0,rtt_t1,hss_total;
  integer i,j,bank_base,samples,packets;
+ task perf_write(input [7:0] a,input [31:0] v);write_reg(a,v);endtask
+ task perf_read(input [7:0] a,output [31:0] v);read_reg(a,v);endtask
+ task perf_put(input integer a,input [31:0] v);put(a,v);endtask
+ task perf_get(input integer a,output [31:0] v);get(a,v);endtask
+ task perf_scalar(input [7:0] req,input [31:0] v,output [31:0] q);transfer(req,v);read_reg(24,q);endtask
+ `include "cm3_perf_tasks.svh"
  always @(posedge clk)if(checking_fault && dut.u_probe_stream.state==6 &&
     $signed(dut.u_probe_stream.produced-safe_at_fault)>0)$fatal(1,"unvalidated HSS bank published");
  initial begin
@@ -117,6 +123,7 @@ module tb_cm3_jtag;
   // Multi-word AP write: the board corrupts every fourth word from the third on.
   transfer(1,'h50000032);          // AP CSW: 32-bit, single increment (4 is DP CTRL/STAT)
   transfer(5,'h60004000);
+  if($test$plusargs("benchmark"))begin run_transport_benchmark(clk_ns);$finish;end
   for(i=0;i<8;i=i+1)transfer(8'h0d,32'h11110000+i);
   transfer(5,'h60004000);
   transfer(8'h0f,0);                 // posted read, discard the stale result

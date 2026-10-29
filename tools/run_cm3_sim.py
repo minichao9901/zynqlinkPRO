@@ -46,6 +46,7 @@ def main():
     ap.add_argument('--top', required=True)
     ap.add_argument('--rtl', type=Path, default=Path(os.environ.get('CM3_RTL', DEFAULT_RTL)))
     ap.add_argument('--rebuild', action='store_true')
+    ap.add_argument('--work-dir',type=Path,help='Isolated simulator output/library directory')
     ap.add_argument('plusargs', nargs='*')
     args = ap.parse_args()
 
@@ -53,7 +54,7 @@ def main():
     if not (rtl / 'cortexm3_integration.v').is_file():
         sys.exit(f'CM3 RTL not found: {rtl}\nset CM3_RTL or pass --rtl')
 
-    work = ROOT / 'build/cm3_sim' / args.top
+    work = args.work_dir.resolve() if args.work_dir else ROOT / 'build/cm3_sim' / args.top
     work.mkdir(parents=True, exist_ok=True)
     env = environment()
     exe = VIVADO / 'bin/unwrapped/win64.o'
@@ -79,7 +80,7 @@ def main():
         if p.returncode:
             print(log[-4000:])
             sys.exit('xvlog failed (verilog)')
-        p, log = run([exe / 'xvlog.exe', '--relax', '--sv', *sim_sv])
+        p, log = run([exe / 'xvlog.exe', '--relax', '--sv', '-i',str(ROOT/'fpga/sim'), *sim_sv])
         if p.returncode:
             print(log[-4000:])
             sys.exit('xvlog failed (systemverilog)')

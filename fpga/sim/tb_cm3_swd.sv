@@ -82,7 +82,12 @@ module tb_cm3_swd #(
   // Delay NBAs are transport delays: short bits are not filtered out.
   // The CM3 core runs on its own 100 MHz HCLK; only the debug port follows
   // the DUT's SWCLK.
-  reg core_clk=0; always #5 core_clk=~core_clk;
+  real core_period_ns=10;
+  reg core_clk=0;
+  initial begin
+    if($value$plusargs("target_clk_ns=%f",core_period_ns))begin end
+    forever #(core_period_ns/2.0)core_clk=~core_clk;
+  end
   tri1 target_pad;
   assign target_pad = dut.swdio_t ? 1'bz : dut.swdio_o;
   wire cm3_swdo, cm3_swdoen, cm3_tdo, cm3_ntdoen, cm3_jtagnsw;
@@ -205,6 +210,12 @@ module tb_cm3_swd #(
   task stream_cfg(input integer i,input [31:0] d);
     stream_write(24,i);stream_write(28,d);
   endtask
+  task perf_write(input [7:0] a,input [31:0] d);wr(a[6:0],d);endtask
+  task perf_read(input [7:0] a,output [31:0] d);rd(a[6:0],d);endtask
+  task perf_put(input integer a,input [31:0] d);stream_write(a,d);endtask
+  task perf_get(input integer a,output [31:0] d);stream_read(a,d);endtask
+  task perf_scalar(input [7:0] req,input [31:0] d,output [31:0] v);xfer(req,d,v);endtask
+  `include "cm3_perf_tasks.svh"
   task memory_write(input [31:0] a,input [31:0] d);
     reg [31:0] v;
     xfer(8'h05,a,v);xfer(8'h0d,d,v);xfer(8'h0e,0,v);
@@ -272,6 +283,7 @@ module tb_cm3_swd #(
     xfer(8'h08,0,value);
     xfer(8'h01,32'h23000052,value);
     xfer(8'h05,32'h60000000,value);
+    if($test$plusargs("benchmark"))begin run_transport_benchmark(2*half_ns);$finish;end
     for(k=0;k<words;k=k+1)begin
       xfer(8'h0d,32'h5a89cdef ^ (32'h9e3779b9*k),value);
     end
