@@ -863,6 +863,11 @@ module swd_controller #(
         .seq_data(swj_data),.seq_tms(jtag_seq_tms),.ir_length(jtag_ir_config[7:0]),
         .ir_before(jtag_ir_config[18:8]),.ir_after(jtag_ir_config[29:19]),
         .dr_before(jtag_dr_config[7:0]),.dr_after(jtag_dr_config[15:8]),
+        // [31:24] of the IR config carries the IDCODE instruction (0x0E ARM, 0x01 RISC-V).
+        // Route bits [15:8] are independent of all IR chain-length fields.
+        // A zero encoding keeps the legacy ARM default for older firmware.
+        .idcode_ir(jtag_config[15:8]==0 ? 8'h0e : jtag_config[15:8]),
+        .riscv_mode(jtag_config[2]),
         .half_delay(cfg_delay_fast[3:0]),.idle_cycles(cfg_idle_cycles),
         .late_return(jtag_return_late),
         // Both phases use the IOB IDDR. Q1 is consumed one FCLK after its

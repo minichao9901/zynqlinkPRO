@@ -234,7 +234,14 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
         num=(2U<<16)|8U;
       }
       break;
-    case ID_DAP_Vendor11: break;
+    case ID_DAP_Vendor11:
+      { // Set the IDCODE instruction used by DAP_JTAG_IDCode (0x0E ARM, 0x01 RISC-V).
+        JTAG_SetIDCodeIR(*request);
+        *response++ = DAP_OK;
+        *response++ = (uint8_t)JTAG_IDCodeIR();
+        num = (2U << 16) | 3U;
+      }
+      break;
     case ID_DAP_Vendor12: break;
     case ID_DAP_Vendor13: break;
     case ID_DAP_Vendor14: break;

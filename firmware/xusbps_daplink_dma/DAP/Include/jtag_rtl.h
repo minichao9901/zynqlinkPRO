@@ -18,4 +18,5 @@ int DAP_JTAG_AutoConfigure(void);
 void DAP_JTAG_ClockChanged(void);
 void DAP_JTAG_SetTiming(uint32_t value);
 uint8_t DAP_JTAG_MemTransfer(uint32_t request,uint32_t *data);
+uint32_t DAP_JTAG_RouteWord(void);
 #endif

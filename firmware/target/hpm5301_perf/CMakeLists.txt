@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.13)
+find_package(hpm-sdk REQUIRED HINTS $ENV{HPM_SDK_BASE})
+project(hpm5301_perf)
+sdk_compile_definitions(CONFIG_NDEBUG_CONSOLE=1 NO_BOARD_TIMER_SUPPORT=1)
+sdk_app_src(main.c)

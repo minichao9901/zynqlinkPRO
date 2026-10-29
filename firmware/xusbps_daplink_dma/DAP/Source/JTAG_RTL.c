@@ -69,35 +69,82 @@ static int dp_roundtrip_ok(const timing_context *c) {
  * lower achievable FCLK until one does. Clocks are a maximum, so a lower
  * validated rate is acceptable; stepping one divider at a time keeps the
  * fallback as close to the request as the hardware allows. */
+/* IDCODE instruction loaded by operation 3. 0x0E is ARM ADIv5; a RISC-V DTM
+ * uses 0x01. Route[15:8] is independent of IR chain lengths. Route bit2
+ * selects the PL RISC-V SBA memory frontend for the packet/RTT/HSS engines. */
+static uint32_t idcode_ir = JTAG_IDCODE;
+void JTAG_SetIDCodeIR(uint32_t value) { idcode_ir = value & 0xFFU; }
+uint32_t JTAG_IDCodeIR(void) { return idcode_ir; }
+uint32_t DAP_JTAG_RouteWord(void) {
+    return 3U | (idcode_ir<<8) | (idcode_ir==1U ? 4U : 0U);
+}
+/* HPM's DTM needs a TAP reset between IDCODE/DTMCS and DMI. Merely
+ * replacing IR leaves DMI unresponsive, even though the IR cache says 0x11.
+ * Reset through the PL and select DMI before handing it to memory/streams. */
+static int prime_riscv(void) {
+    if(idcode_ir!=1U) return 1;
+    uint32_t ir=17U;
+    swd_write32(JTAG_PINS,swd_read32(JTAG_PINS));
+    int ok=run(2,0,&ir)==1;
+    /* A new stream claim may calibrate after the host activated the DM.
+     * Re-establish dmactive after TLR, before autonomous SBA starts. */
+    uint32_t active=1U;
+    if(ok) ok=run(0,4,&active)==1;
+    swd_write32(JTAG_OPERATION,0);
+    return ok;
+}
 #define JTAG_VALIDATE_ATTEMPTS 16U
 #define JTAG_VALIDATE_FLOOR_HZ 500000U
 static int calibrate(void) {
     timing_context context;
-    if(!context_capture(&context)) {swd_write32(JTAG_OPERATION,0);return -1;}
+    uint32_t expect_ir=idcode_ir;
+    int generic = expect_ir!=(uint32_t)JTAG_IDCODE;   /* RISC-V DTM, not ADIv5 */
+    if(!generic) {
+        if(!context_capture(&context)) {swd_write32(JTAG_OPERATION,0);return -1;}
+    } else {
+        memset(&context,0,sizeof context);
+    }
     const uint32_t modes[4]={0U,1U,17U,16U};
+    uint32_t preferred=generic ? (swd_read32(JTAG_TIMING)&17U) : 0U;
     for(unsigned attempt=0;attempt<JTAG_VALIDATE_ATTEMPTS;attempt++) {
         for(unsigned mode=0;mode<4;mode++) {
-            uint32_t value=0U;
-            swd_write32(JTAG_TIMING,modes[mode]);
-            if((swd_read32(JTAG_TIMING)&17U)!=modes[mode]) continue;
+            uint32_t chosen=modes[mode]^preferred;
+            uint32_t value=0U,again=0U;
+            swd_write32(JTAG_TIMING,chosen);
+            if((swd_read32(JTAG_TIMING)&17U)!=chosen) continue;
             /* A pins write invalidates the IR cache, forcing a TAP reset
              * before the scan: clock changes can leave the TAP mid-scan. */
             swd_write32(JTAG_PINS,swd_read32(JTAG_PINS));
-            if(run(3,2,&value)!=1 || (value&0x0fff0fffU)!=0x0ba00477U) continue;
-            if(dp_roundtrip_ok(&context)) {
-                uint32_t clock=Xil_In32(SLCR_FPGA0_CLK_CTRL);
-                int restored=context_restore(&context);
-                clock_restore(clock);swd_write32(JTAG_TIMING,modes[mode]);
-                timing_dirty=!restored;swd_write32(JTAG_OPERATION,0);return restored ? 0 : -1;
+            if(run(3,2,&value)!=1) continue;
+            if(!generic) {
+                if((value&0x0fff0fffU)!=0x0ba00477U) continue;
+                if(dp_roundtrip_ok(&context)) {
+                    uint32_t clock=Xil_In32(SLCR_FPGA0_CLK_CTRL);
+                    int restored=context_restore(&context);
+                    clock_restore(clock);swd_write32(JTAG_TIMING,chosen);
+                    timing_dirty=!restored;swd_write32(JTAG_OPERATION,0);return restored ? 0 : -1;
+                }
+                continue;
             }
+            /* No ADIv5 DP/AP on this target: accept a stable, non-degenerate
+             * IDCODE instead of the ARM one and skip the DP/AP round trip. */
+            if(value==0U || value==0xffffffffU) continue;
+            if(run(3,2,&again)!=1 || again!=value) continue;
+            swd_write32(JTAG_TIMING,chosen);
+            if(!prime_riscv()) continue;
+            timing_dirty=0;swd_write32(JTAG_OPERATION,0);return 0;
         }
+        /* A non-ADIv5 target has no DP/AP round trip to gain from a slower
+         * clock, and walking the divider down would leave the link slow for
+         * every later scan: stop after the four sampling modes. */
+        if(generic) break;
         uint32_t fclk=fclk_now();
         if(!fclk || fclk<=JTAG_VALIDATE_FLOOR_HZ) break;
         /* Ask for anything below the current rate: ps_set_fclk0_hz returns the
          * highest achievable value not above the target, i.e. one divider step. */
         ps_set_fclk0_hz(fclk-1U);
     }
-    (void)context_restore(&context);clock_restore(context.clock);
+    if(!generic) {(void)context_restore(&context);clock_restore(context.clock);}
     swd_write32(JTAG_TIMING,0);swd_write32(JTAG_OPERATION,0);return -1;
 }
 
@@ -109,6 +156,8 @@ int DAP_JTAG_Select(uint32_t index) {
     uint32_t ir=len|((uint32_t)DAP_Data.jtag_dev.ir_before[index]<<8)|
                 ((uint32_t)DAP_Data.jtag_dev.ir_after[index]<<19);
     uint32_t dr=index|((uint32_t)(DAP_Data.jtag_dev.count-index-1U)<<8);
+    uint32_t route=DAP_JTAG_RouteWord();
+    if(swd_read32(JTAG_ROUTE)!=route) {swd_write32(JTAG_ROUTE,route);timing_dirty=1;}
     if(swd_read32(JTAG_IR_CONFIG)!=ir) {swd_write32(JTAG_IR_CONFIG,ir);timing_dirty=1;}
     if(swd_read32(JTAG_DR_CONFIG)!=dr) {swd_write32(JTAG_DR_CONFIG,dr);timing_dirty=1;}
     DAP_Data.jtag_dev.index=(uint8_t)index;
@@ -159,7 +208,11 @@ void JTAG_IR(uint32_t ir) {
 uint32_t JTAG_ReadIDCode(void) {
     uint32_t value=0;
     if(DAP_JTAG_Select(DAP_Data.jtag_dev.index)) return 0;
+    /* IDCODE queries switch away from an already active HPM DMI. Start the
+     * observation from TLR too, then prime DMI again for the next transfer. */
+    if(idcode_ir==1U) swd_write32(JTAG_PINS,swd_read32(JTAG_PINS));
     if(run(3,2,&value)!=1) value=0;
+    if(!prime_riscv()) value=0;
     swd_write32(JTAG_OPERATION,0);
     return value;
 }

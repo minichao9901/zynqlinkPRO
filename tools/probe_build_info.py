@@ -8,13 +8,14 @@ def live_clock_snapshot():
     """Observe PS/PL clock registers without suspending the DAP target owner."""
     import re
     from jtag_internal_trace import run
-    output=run('puts [format "LIVECLK %08X %08X %08X" [mrd -force -value 0xf8000170] [mrd -force -value 0xf8000108] [mrd -force -value 0x40010008]]')
-    match=re.search(r'LIVECLK ([0-9A-Fa-f]{8}) ([0-9A-Fa-f]{8}) ([0-9A-Fa-f]{8})',output)
+    output=run('puts [format "LIVECLK %08X %08X %08X %08X %08X" [mrd -force -value 0xf8000170] [mrd -force -value 0xf8000108] [mrd -force -value 0x40010008] [mrd -force -value 0x40010098] [mrd -force -value 0x40010080]]')
+    match=re.search(r'LIVECLK '+r'([0-9A-Fa-f]{8}) '*4+r'([0-9A-Fa-f]{8})',output)
     assert match,output
-    control,pll,cfg=[int(v,16) for v in match.groups()]
+    control,pll,cfg,timing,route=[int(v,16) for v in match.groups()]
     assert ((control>>4)&3) in (0,1) and not pll&16,'Unexpected PLL source/bypass'
     fclk=33333333*((pll>>12)&127)//((control>>8)&63)//((control>>20)&63)
     return dict(FCLK_Hz=fclk,cfg=hex(cfg),waveform=swd_clock_details(fclk,cfg),
+                JTAG_sampling_mode=timing&17,RISC_V_SBA_enabled=bool(route&4),
                 actual_link_Hz=swd_clock_details(fclk,cfg)['SWCLK_Hz'],
                 clock_observation='PS JTAG register read; no DAP command during stream')
 

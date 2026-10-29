@@ -92,7 +92,7 @@ int probe_target_claim(uint32_t hz) {
         DAP_Data.debug_port = (uint8_t)port;
         if(port==2) memcpy(&DAP_Data.jtag_dev,&cached_jtag.jtag_dev,sizeof(DAP_Data.jtag_dev));
     }
-    if(has_jtag) swd_write32(JTAG_ROUTE,port==2 ? 3 : 2);
+    if(has_jtag) swd_write32(JTAG_ROUTE,port==2 ? DAP_JTAG_RouteWord() : 2);
     if (DAP_Data.debug_port != port) {
         command[0] = 2;
         command[1] = (uint8_t)port;

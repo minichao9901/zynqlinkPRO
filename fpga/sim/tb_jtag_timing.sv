@@ -53,7 +53,7 @@ module tb_jtag_timing;
     always @(posedge clk) tdo_rise<=tdo;
     always @(negedge clk) tdo_fall<=tdo;
 
-    jtag_core dut(.clk(clk),.rst_n(rst_n),.start(start),.invalidate(invalidate),
+    jtag_core dut(.idcode_ir(8'h0e),.riscv_mode(1'b0),.clk(clk),.rst_n(rst_n),.start(start),.invalidate(invalidate),
         .operation(op),.request(req),.wdata(wd),.seq_count(9'd0),.seq_data(256'd0),
         .seq_tms(1'b0),.ir_length(8'd4),.ir_before(11'd0),.ir_after(11'd5),
         .dr_before(8'd0),.dr_after(8'd1),.half_delay(4'd0),.idle_cycles(4'd1),

@@ -8,6 +8,7 @@ static int inject_wait,inject_fault;
 static int jtag_present,jtag_calls,idcode_reads;
 static uint32_t jtag_regs[8]={3,4,0,0,0,0,4,10};
 void DAP_JTAG_ClockChanged(void) {}
+uint32_t DAP_JTAG_RouteWord(void) {return 3U;}
 int DAP_JTAG_AutoConfigure(void) {
     DAP_Data.jtag_dev.count=2;DAP_Data.jtag_dev.ir_length[0]=4;
     DAP_Data.jtag_dev.ir_length[1]=5;DAP_Data.jtag_dev.ir_after[0]=5;

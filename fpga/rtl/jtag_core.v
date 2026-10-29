@@ -14,6 +14,10 @@ module jtag_core (
     input wire [7:0] ir_length,
     input wire [10:0] ir_before,ir_after,
     input wire [7:0] dr_before,dr_after,
+    // IR value loaded for operation 3 (IDCODE). Default 0x0E is the ARM ADIv5
+    // IDCODE instruction; a RISC-V DTM needs 0x01 instead.
+    input wire [7:0] idcode_ir,
+    input wire riscv_mode,
     input wire [3:0] half_delay,idle_cycles,
     input wire late_return,
     input wire tdo,tdo_alternate,tdi_sense,
@@ -36,7 +40,9 @@ module jtag_core (
 );
     localparam IDLE=0,ROUTE=1,RESET_TAP=2,IR_NAV=3,IR_PRE=4,IR_VALUE=5,IR_POST=6,IR_EXIT=7,
                DR_NAV=8,DR_PRE=9,DR_VALUE=10,DR_POST=11,DR_EXIT=12,EVALUATE=13,DONE=14,PHY_WAIT=15;
-    reg [3:0] state,return_state;
+    localparam RV_DISPATCH=16,RV_CONFIGURED=17,RV_ADDRESSED=18,RV_DATA=19,
+               RV_CHECK=20,RV_CHECKED=21,RV_READY=22,RV_PREPARE=23;
+    reg [4:0] state,return_state;
     reg [2:0] op;
     reg [7:0] req;
     reg [31:0] value,desired_ir,ir_cache,saved_result;
@@ -55,12 +61,24 @@ module jtag_core (
     wire [63:0] phy_tx_echo,phy_sense_echo,phy_rx_alternate;
     wire [63:0] debug_tx_frame=phy_tx_echo >> (5+dr_before);
     wire [63:0] debug_sense_frame=phy_sense_echo >> (5+dr_before);
-    reg [34:0] scan_result;
+    reg [40:0] scan_result;
     reg [63:0] dr_tms_bits,dr_tdi_bits;
     reg [6:0] dr_count;
     reg [3:0] capture_offset;
     reg phy_slow;
     reg phy_capture_rise;
+    // Virtual memory-AP frontend for the existing packet/RTT/HSS engines.
+    // Wire transactions are standard 41-bit RISC-V DMI/SBA, executed in PL.
+    // AP reads retain the frontend's posted-read contract; no ARM instruction
+    // or fabricated CPUID is sent to the RISC-V target.
+    reg rv_active,rv_collect,rv_cfg_valid,rv_addr_dirty,rv_read;
+    reg [4:0] rv_return;
+    reg [40:0] rv_frame;
+    reg [31:0] rv_csw,rv_tar,rv_posted,rv_cfg,rv_dmi_data;
+    reg [6:0] rv_poll;
+    reg [4:0] rv_words;
+    wire [31:0] rv_wanted_cfg=32'h00040000 |
+        (rv_csw[4] ? 32'h00010000 : 0) | (rv_read ? 32'h00108000 : 0);
     wire [3:0] phy_min_delay=phy_capture_rise ? 4'd3 : phy_slow ? 4'd1 : 4'd0;
     wire [3:0] phy_delay=half_delay<phy_min_delay ? phy_min_delay : half_delay;
     wire [2:0] scan_ack={scan_result[2],scan_result[0],scan_result[1]};
@@ -96,7 +114,7 @@ module jtag_core (
         input variable_mode,tm,exit_bit,cap;
         input [1:0] data_mode;
         input [255:0] tms_bits,data_bits;
-        input [3:0] following;
+        input [4:0] following;
         begin
             phy_count<=n;phy_variable_tms<=variable_mode;phy_tms<=tm;phy_exit<=exit_bit;
             phy_capture<=cap;phy_tdi_mode<=data_mode;phy_tms_data<=tms_bits;
@@ -107,12 +125,23 @@ module jtag_core (
             phy_capture_rise<=following==DONE && (operation==5 || operation==6);
         end
     endtask
+    task rv_dmi;
+        input [6:0] address;
+        input [1:0] command;
+        input [31:0] data;
+        input [4:0] following;
+        begin
+            rv_frame<={address,data,command};rv_collect<=0;rv_return<=following;
+            desired_ir<=17;state<=ROUTE;
+        end
+    endtask
     task memory_request;
         input [7:0] nr;input [31:0] nv;
         begin
             op<=0;req<=nr;value<=nv;phase<=0;maintenance<=0;retries<=64;
             desired_ir<=!nr[0] && !nr[1] && nr[3:2]==0 ? 8 : nr[0] ? 11 : 10;
-            state<=ROUTE;
+            if(riscv_mode)begin rv_active<=1;state<=RV_DISPATCH;end
+            else state<=ROUTE;
         end
     endtask
     always @(posedge clk or negedge rst_n) begin
@@ -126,26 +155,37 @@ module jtag_core (
             stat_cycles<=0;stat_bits<=0;stat_transfers<=0;
             dr_tms_bits<=0;dr_tdi_bits<=0;dr_count<=0;capture_offset<=0;
             phy_slow<=0;phy_capture_rise<=0;
+            rv_active<=0;rv_collect<=0;rv_cfg_valid<=0;rv_addr_dirty<=1;rv_read<=0;
+            rv_return<=0;rv_frame<=0;rv_csw<=32'h23000052;rv_tar<=0;rv_posted<=0;
+            rv_cfg<=0;rv_dmi_data<=0;rv_poll<=0;
+            rv_words<=0;
         end else begin
             phy_start<=0;fence_done<=0;
             if(!fence_req) fence_consumed<=0;
-            if(invalidate) begin ir_valid<=0;unknown_tap<=1;fenced_result_valid<=0;end
+            if(invalidate) begin
+                ir_valid<=0;unknown_tap<=1;fenced_result_valid<=0;
+                rv_cfg_valid<=0;rv_addr_dirty<=1;
+            end
             case(state)
             IDLE: begin
                 if(start) begin
                     if(operation!=0 || (!request[0] && !request[1] && request[3:2]==0)) fenced_result_valid<=0;
                     op<=operation;req<=request;value<=wdata;phase<=0;retries<=64;maintenance<=0;
-                    desired_ir<=operation==2 ? wdata : operation==3 ? 14 :
+                    rv_active<=riscv_mode && operation<=1;
+                    desired_ir<=operation==2 ? wdata : operation==3 ? {24'd0,idcode_ir} :
                                 operation==4 || (operation==0 && !request[0] && !request[1] && request[3:2]==0) ? 8 :
                                 request[0] ? 11 : 10;
                     if(operation==5 || operation==6) begin
+                        rv_cfg_valid<=0;rv_addr_dirty<=1;
                         ir_valid<=0;unknown_tap<=1;ack<=1;
                         shift_segment({3'd0,seq_count},operation==6,seq_tms,0,1,operation==6 ? 1 : 2,
                                       seq_data,seq_data,DONE);
-                    end else state<=ROUTE;
+                    end else if(riscv_mode && operation<=1)state<=RV_DISPATCH;
+                    else state<=ROUTE;
                 end else if(pending_fence) begin
                     maintenance<=1;op<=0;phase<=2;desired_ir<=10;retries<=64;state<=ROUTE;
                     fence_consumed<=1;fence_error<=0;
+                    if(riscv_mode)begin rv_active<=1;rv_poll<=64;state<=RV_CHECK;end
                 end
             end
             ROUTE: if(ir_length==0 || ir_length>32 || dr_before+dr_after>7) begin ack<=7;state<=DONE;end
@@ -176,9 +216,10 @@ module jtag_core (
                 // the same register value. The first extra output bit captures
                 // the last response bit while TDO remains in SHIFT_DR; the
                 // second exits SHIFT, avoiding a fast TDO output-disable race.
-                dr_tms_bits<=(64'd3 << (4+dr_before+(op==3 ? 32 : 35)+dr_after)) | 1;
-                dr_tdi_bits<=(op==3 ? 64'd0 : {29'd0,(phase==0 ? value : 32'd0),scan_req[3:1]}) << (5+dr_before);
-                dr_count<=7+dr_before+(op==3 ? 32 : 35)+dr_after+idle_cycles;
+                dr_tms_bits<=(64'd3 << (4+dr_before+(rv_active ? 41 : op==3 ? 32 : 35)+dr_after)) | 1;
+                dr_tdi_bits<=(rv_active ? {23'd0,rv_frame} : op==3 ? 64'd0 : {29'd0,(phase==0 ? value : 32'd0),scan_req[3:1]}) << (5+dr_before);
+                dr_count<=7+dr_before+(rv_active ? 41 : op==3 ? 32 : 35)+dr_after+
+                          (rv_active && idle_cycles<8 ? 4'd8 : idle_cycles);
                 capture_offset<=3+dr_before+(late_return ? 1 : 0);state<=DR_PRE;
             end
             DR_PRE: shift_segment({5'd0,dr_count},1,0,0,1,2,{192'd0,dr_tms_bits},{192'd0,dr_tdi_bits},EVALUATE);
@@ -193,7 +234,16 @@ module jtag_core (
                 end
             end
             EVALUATE: begin
-                if(op==3) begin ack<=1;rdata<=scan_result[31:0];state<=DONE;end
+                if(rv_active)begin
+                    // A request and a NOP collect scan form one checked DMI
+                    // transaction. Sticky BUSY/FAILED are surfaced as errors,
+                    // never retried as a possibly duplicated SBA write.
+                    if(scan_result[1:0]!=0)begin
+                        ack<=4;rv_cfg_valid<=0;rv_addr_dirty<=1;fence_error<=maintenance;state<=DONE;
+                    end else if(!rv_collect)begin rv_collect<=1;rv_frame<=0;state<=DR_NAV;end
+                    else begin rv_dmi_data<=scan_result[33:2];state<=rv_return;end
+                end
+                else if(op==3) begin ack<=1;rdata<=scan_result[31:0];state<=DONE;end
                 else if(op==4 || (op==0 && phase==0 && desired_ir==8)) begin ack<=1;state<=DONE;end
                 else if(scan_ack==2 && phase!=0 && retries!=0) begin
                     retries<=retries-1'b1;state<=DR_NAV;
@@ -221,6 +271,67 @@ module jtag_core (
                     state<=DONE;
                 end
             end
+            RV_DISPATCH:begin
+                rv_poll<=64;ack<=1;rdata<=0;
+                case(req[3:0])
+                0:begin // ABORT: clear sticky SBA errors; preserve access mode.
+                    rv_cfg_valid<=0;rv_addr_dirty<=1;
+                    rv_dmi(7'h38,2,rv_cfg | 32'h00407000,RV_READY);
+                end
+                2,6:begin rdata<=32'ha0000000;state<=DONE;end
+                4:rv_dmi(7'h10,2,32'd1,RV_READY); // DM active; no reset/halt/resume.
+                8:begin
+                    if(value!=0)ack<=4; // This memory frontend only exposes bank0/AP0.
+                    state<=DONE;
+                end
+                1:begin
+                    if(value[2:0]!=2)ack<=4; // 32-bit SBA only.
+                    rv_csw<=value;rv_addr_dirty<=1;state<=DONE;
+                end
+                3:begin rdata<=rv_posted;rv_posted<=rv_csw;state<=DONE;end
+                5:begin rv_tar<=value;rv_addr_dirty<=1;state<=DONE;end
+                7:begin rdata<=rv_posted;rv_posted<=rv_tar;state<=DONE;end
+                13,15:begin
+                    rv_read<=req[1];state<=RV_PREPARE;
+                end
+                14:begin rdata<=rv_posted;state<=RV_CHECK;end
+                default:begin ack<=4;state<=DONE;end
+                endcase
+            end
+            RV_PREPARE:begin
+                if(!rv_cfg_valid || rv_cfg!=rv_wanted_cfg || rv_addr_dirty || rv_words==31)
+                    begin rv_words<=0;state<=RV_CHECK;end
+                else state<=RV_CONFIGURED;
+            end
+            RV_CHECK:rv_dmi(7'h38,1,0,RV_CHECKED);
+            RV_CHECKED:begin
+                if((rv_dmi_data & 32'h00407000)!=0)begin
+                    ack<=4;rv_cfg_valid<=0;rv_addr_dirty<=1;fence_error<=maintenance;state<=DONE;
+                end else if(rv_dmi_data[21])begin
+                    if(rv_poll==0)begin ack<=4;fence_error<=maintenance;state<=DONE;end
+                    else begin rv_poll<=rv_poll-1'b1;state<=RV_CHECK;end
+                end else if(maintenance || req[3:0]==14)begin
+                    ack<=1;fence_error<=0;state<=DONE;
+                end else if(!rv_cfg_valid || rv_cfg!=rv_wanted_cfg)begin
+                    rv_cfg<=rv_wanted_cfg;rv_cfg_valid<=1;
+                    rv_dmi(7'h38,2,rv_wanted_cfg,RV_CONFIGURED);
+                end else state<=RV_CONFIGURED;
+            end
+            RV_CONFIGURED:begin
+                if(rv_addr_dirty)rv_dmi(7'h39,2,rv_tar,RV_ADDRESSED);
+                else state<=RV_ADDRESSED;
+            end
+            RV_ADDRESSED:begin
+                rv_addr_dirty<=0;
+                rv_dmi(7'h3c,rv_read ? 2'd1 : 2'd2,value,RV_DATA);
+            end
+            RV_DATA:begin
+                rv_words<=rv_words+1'b1;
+                if(rv_read)begin rdata<=rv_posted;rv_posted<=rv_dmi_data;end
+                if(rv_csw[4])rv_tar<=rv_tar+4;
+                ack<=1;state<=DONE;
+            end
+            RV_READY:begin ack<=1;state<=DONE;end
             DONE: begin
                 if(maintenance) begin fence_done<=1;fence_error<=ack!=1;state<=IDLE;end
                 else if(next_valid && next_ready) memory_request(next_request,next_wdata);
