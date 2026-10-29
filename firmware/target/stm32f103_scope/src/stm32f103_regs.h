@@ -18,6 +18,9 @@
 #define RCC_APB2ENR_USART1EN  (1u << 14)
 
 /* ---- GPIOA / GPIOC ---- */
+#define AFIO_MAPR     REG32(0x40010004)
+#define AFIO_MAPR_SWJ_CFG_MASK   (7u << 24)
+#define AFIO_MAPR_SWJ_CFG_FULL   (0u << 24)   /* JTAG-DP + SW-DP both enabled */
 #define GPIOA_CRL     REG32(0x40010800)
 #define GPIOA_CRH     REG32(0x40010804)
 #define GPIOA_IDR     REG32(0x40010808)

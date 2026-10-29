@@ -210,6 +210,13 @@ int main(void){
   /* 只开时钟，不碰任何外设（和兄弟例程一样，越小越干净） */
   RCC_APB2ENR |= RCC_APB2ENR_AFIOEN | RCC_APB2ENR_IOPAEN | RCC_APB2ENR_IOPCEN;
 
+  /* 明确保持 JTAG-DP + SW-DP 同时使能（SWJ_CFG=000）。
+   * 背景：这块 F103ZE 之前 JTAG 一直扫不到，最后定位到运行中的固件把
+   * AFIO_MAPR.SWJ_CFG 写成了 100（JTAG/SWD 都关），TAP 直接消失；用 SWD 写回
+   * 000 后 IDCODE 立刻恢复（0x3BA00477）。本固件不把 PA15/PB3/PB4 当 GPIO 用，
+   * 所以这里显式写一次，避免被前面跑过的程序/引导程序留在关闭状态。 */
+  AFIO_MAPR = (AFIO_MAPR & ~AFIO_MAPR_SWJ_CFG_MASK) | AFIO_MAPR_SWJ_CFG_FULL;
+
   SYST_RVR = SYST_RELOAD;
   SYST_CVR = 0;
   SYST_CSR = 7;                            /* 内核时钟 + 中断使能 + 计数使能 */

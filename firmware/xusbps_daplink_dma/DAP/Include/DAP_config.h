@@ -442,13 +442,19 @@ found:
 /*
 P0: SWCLK/TCK  - Output, idle HIGH
 P1: SWDIO/TMS  - Bidirectional
-P2: nRESET     - Output, active LOW
+P2: nRESET     - Output, active LOW (E19 is wired to the target nTRST on this fixture)
 */
 #include "jtag_rtl.h"
 
 __STATIC_INLINE void PORT_JTAG_SETUP (void) {
-  Xil_Out32(GPIO_DATA,0xcU);
-  Xil_Out32(GPIO_TRI,0xbU); // TDI/TDO belong to PL; nRESET released, nTRST high-Z.
+  /* E19 (AXI GPIO bit2) is wired to the target nTRST on this fixture. The PL
+   * keeps that pin a plain GPIO in JTAG mode too, so a TRST pulse needs no
+   * bitstream change: assert low, hold ~1 ms, release before any TCK runs. */
+  Xil_Out32(GPIO_TRI,0xbU);   /* bit2 output, bits 0/1/3 input */
+  Xil_Out32(GPIO_DATA,0x0U);  /* nTRST asserted */
+  for (volatile uint32_t i=0;i<200000U;i++) { }
+  Xil_Out32(GPIO_DATA,0xcU);  /* nTRST released (E19/E18 high) */
+  for (volatile uint32_t i=0;i<2000U;i++) { }
   swd_write32(JTAG_ROUTE,3);
   swd_write32(JTAG_OPERATION,0);
   swd_write32(JTAG_TIMING,0);DAP_JTAG_ClockChanged();

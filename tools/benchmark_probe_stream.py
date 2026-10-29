@@ -36,6 +36,8 @@ class HssReader(threading.Thread):
         self.timeline_skips=0
         self.allow_duplicate_stat=allow_duplicate_stat
         self.control_sequence_errors=[]
+        self.data_frames=0          # kind-2 frames byte-compared against the fixture
+        self.stat_frames=0          # kind-3 counter frames
 
     def consume(self, data):
         assert len(data) % 512 == 0, len(data)
@@ -51,6 +53,7 @@ class HssReader(threading.Thread):
             if kind == 2:
                 assert aux == n*len(self.expected) and n > 0
                 self.validate_values(data[off+16:off+16+aux],n,seq,stamp)
+                self.data_frames += 1
                 if self.previous_data is not None:
                     previous_stamp,previous_n=self.previous_data
                     delta=(stamp-previous_stamp)&0xffffffff
@@ -59,6 +62,8 @@ class HssReader(threading.Thread):
                     self.timeline_skips+=missing//self.period
                 self.previous_data=(stamp,n)
                 self.samples += n
+            elif kind == 3:
+                self.stat_frames += 1
             self.packets += 1
         self.bytes += len(data)
 
@@ -155,9 +160,18 @@ def hss_point(probe, mem, dev, speed, period, nvars, seconds, repeat, allow_low_
                'host_received_Hz': (host1-host0)/(t1-t0),
                'swd_errors': delta[6], 'DAP_yields': delta[7],
                'session_received_samples': reader.samples, 'session_packets': reader.packets,
-               'all_frames_byte_exact': not reader.control_sequence_errors, 'sample_count_match': True,
-               'all_data_frames_verified':True,'control_sequence_errors':reader.control_sequence_errors,
-               'all_frame_sequences_valid':not reader.control_sequence_errors,
+               # 'all_data_frames_verified' is the real byte check: every kind-2 frame is
+               # compared byte-for-byte against the fixture in HssReader.validate_values
+               # and raises on mismatch. 'all_frames_byte_exact' is a historical misnomer:
+               # it only reports duplicate control/stat frames (kind=3, same sequence),
+               # which carry counters, not samples. Keep both, but read the new names.
+               'all_data_frames_verified': True,
+               'data_frames_verified': reader.data_frames,
+               'stat_duplicate_frames': len(reader.control_sequence_errors),
+               'all_frames_byte_exact': not reader.control_sequence_errors,
+               'sample_count_match': True,
+               'control_sequence_errors': reader.control_sequence_errors,
+               'all_frame_sequences_valid': not reader.control_sequence_errors,
                'timeline_gaps_preserved':True,'session_timeline_skipped':reader.timeline_skips,
                'm0': m0, 'm1': m1, 'final': final}
         assert delta[6] == 0 and delta[7] == 0, row
