@@ -19,6 +19,7 @@ def main():
     parser.add_argument('--bit', type=Path, required=True)
     parser.add_argument('--elf', type=Path, required=True)
     parser.add_argument('--speed', type=int, default=24500000)
+    parser.add_argument('--mode', type=int, default=0)
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
     args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -29,7 +30,7 @@ def main():
     def stats():
         return struct.unpack_from('<3I', xfer(out, inp, [0x89, 255]), 3)
     try:
-        setup(out, inp, args.speed, connect=True)
+        setup(out, inp, args.speed, args.mode, connect=True)
         report.update(clock(out, inp))
         saved = mem.read(BASE, SIZE)
         data = random.Random(0x5301).randbytes(SIZE)

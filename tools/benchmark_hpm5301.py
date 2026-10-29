@@ -37,7 +37,8 @@ def setup(out, inp, speed, mode=0, connect=False):
         assert xfer(out, inp, [2, 2]) == b'\x02\x02'
     assert xfer(out, inp, [0x8B, 1]) == b'\x8b\x00\x01'
     assert xfer(out, inp, [0x15, 1, 5]) == b'\x15\x00'
-    assert xfer(out, inp, [0x11] + le(speed)) == b'\x11\x00'
+    clock_reply = xfer(out, inp, [0x11] + le(speed))
+    assert clock_reply == b'\x11\x00', ('Clock request rejected', speed, clock_reply.hex())
     assert xfer(out, inp, [0x89, mode])[:3] == bytes([0x89, 0, mode])
     reply = xfer(out, inp, [0x16, 0])
     assert reply == bytes.fromhex('16003d560010'), ('IDCODE', reply.hex())

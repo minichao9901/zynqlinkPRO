@@ -15,6 +15,9 @@ module riscv_sba_model #(parameter real RETURN_NS=12)(
     reg [31:0] mem[0:8191];
     reg fault_next=0;
     reg dmi_poisoned=0;
+    // A real DTM is one response deep: until an operation completes there is
+    // no valid response, and the first scan returns a stale/undefined word.
+    reg response_valid=0;
     wire [31:0] ctrlstat=sbcs[14:12]!=0 ? 32'ha2 : 0;
     integer scans=0,ir_writes=0,idles=0,dmi_scans=0;
     integer bus_reads=0,bus_writes=0,out_of_range_reads=0,mmio_reads=0,counter_reads=0;
@@ -46,12 +49,12 @@ module riscv_sba_model #(parameter real RETURN_NS=12)(
     always @(posedge tck or negedge rst_n)begin
         if(!rst_n)begin
             state<=RESET;ir<=1;ir_shift<=1;dr<=0;response<=0;sbcs<=0;
-            sbaddr<=0;sbdata<=0;dmcontrol<=0;idles<=0;dmi_poisoned<=0;
+            sbaddr<=0;sbdata<=0;dmcontrol<=0;idles<=0;dmi_poisoned<=0;response_valid<=0;
         end else begin
             state<=next_state(state,tms);
             if(state==IDLE)idles<=idles+1;
             case(state)
-            RESET:begin ir<=1;ir_shift<=1;dmi_poisoned<=0;end
+            RESET:begin ir<=1;ir_shift<=1;dmi_poisoned<=0;response_valid<=0;end
             CAP_IR:ir_shift<=1;
             SHIFT_IR:ir_shift<={tdi,ir_shift[4:1]};
             UPDATE_IR:begin ir<=ir_shift;ir_writes<=ir_writes+1;end
@@ -60,7 +63,7 @@ module riscv_sba_model #(parameter real RETURN_NS=12)(
                 case(ir)
                 1:begin dr<={9'd0,32'h1000563d};dmi_poisoned<=1;end
                 16:begin dr<={9'd0,32'h7071};dmi_poisoned<=1;end
-                17:dr<=dmi_poisoned ? 41'd1 : response;
+                17:dr<=(dmi_poisoned || !response_valid) ? 41'd1 : response;
                 default:dr<=0;
                 endcase
             end
@@ -71,7 +74,7 @@ module riscv_sba_model #(parameter real RETURN_NS=12)(
             end
             UPDATE_DR:if(ir==17 && !dmi_poisoned)begin
                 if(dmi_scans!=0 && idles<7)$fatal(1,"RISC-V DMI idle violation: %0d",idles);
-                idles<=0;dmi_scans<=dmi_scans+1;
+                idles<=0;dmi_scans<=dmi_scans+1;response_valid<=1;
                 response<=0;
                 if(dr[1:0]==1)begin
                     case(address)

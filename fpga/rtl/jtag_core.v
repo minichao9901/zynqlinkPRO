@@ -42,7 +42,8 @@ module jtag_core (
                DR_NAV=8,DR_PRE=9,DR_VALUE=10,DR_POST=11,DR_EXIT=12,EVALUATE=13,DONE=14,PHY_WAIT=15;
     localparam RV_DISPATCH=16,RV_CONFIGURED=17,RV_ADDRESSED=18,RV_DATA=19,
                RV_CHECK=20,RV_CHECKED=21,RV_READY=22,RV_PREPARE=23,
-               RV_SHADOW=24,RV_WRITE_STATUS=25,RV_WRITE_CHECKED=26,RV_FINISH=27,RV_POLL_READ=28;
+               RV_SHADOW=24,RV_WRITE_STATUS=25,RV_WRITE_CHECKED=26,RV_FINISH=27,RV_POLL_READ=28,
+               RV_SYNCED=29,RV_BUSYWAIT=30;
     reg [4:0] state,return_state;
     reg [2:0] op;
     reg [7:0] req;
@@ -75,6 +76,9 @@ module jtag_core (
     // or fabricated CPUID is sent to the RISC-V target.
     reg rv_collect,rv_cfg_valid,rv_addr_dirty,rv_read;
     reg rv_single,rv_fast_write;
+    // The DTM answers one transaction deep and has no valid response until
+    // one completes, so a single NOP scan is flushed at session start.
+    reg rv_synced,rv_discard;
     reg [1:0] rv_pending_kind; // 0 none, 1 posted SBDATA read, 2 posted write.
     reg [4:0] rv_return;
     reg [40:0] rv_frame;
@@ -186,14 +190,14 @@ module jtag_core (
             rv_return<=0;rv_frame<=0;rv_csw<=32'h23000052;rv_tar<=0;rv_posted<=0;
             rv_cfg<=0;rv_dmi_data<=0;rv_poll<=0;
             rv_words<=0;
-            rv_single<=0;rv_fast_write<=0;rv_pending_kind<=0;
+            rv_single<=0;rv_fast_write<=0;rv_pending_kind<=0;rv_synced<=0;rv_discard<=0;
         end else begin
             phy_start<=0;fence_done<=0;
             if(!fence_req) fence_consumed<=0;
             if(invalidate) begin
                 ir_valid<=0;unknown_tap<=1;fenced_result_valid<=0;
                 rv_cfg_valid<=0;rv_addr_dirty<=1;
-                rv_pending_kind<=0;
+                rv_pending_kind<=0;rv_synced<=0;rv_discard<=0;
             end
             case(state)
             IDLE: begin
@@ -269,12 +273,21 @@ module jtag_core (
                 end
             end
             EVALUATE: begin
-                if(rv_active)begin
+                if(rv_active && rv_discard)begin
+                    rv_discard<=0;state<=rv_return;
+                end
+                else if(rv_active)begin
                     // DMI is one response deep, just like the memory frontend's
                     // posted AP read. A streaming word therefore needs only
                     // one scan. A poll/fence must save the response it consumes.
                     // Never replay a possibly completed write on BUSY/FAILED.
-                    if(scan_result[1:0]!=0)begin
+                    if(scan_result[1:0]==1 && rv_poll!=0)begin
+                        // DTM still busy: collect one more scan. The frame mux
+                        // lives in its own state so this compare does not feed
+                        // the 41-bit rv_frame enable directly (timing).
+                        rv_poll<=rv_poll-1'b1;
+                        state<=RV_BUSYWAIT;
+                    end else if(scan_result[1:0]!=0)begin
                         ack<=4;rv_cfg_valid<=0;rv_addr_dirty<=1;rv_pending_kind<=0;
                         fence_error<=maintenance;state<=DONE;
                     end else if(!rv_collect)begin
@@ -334,6 +347,10 @@ module jtag_core (
             end
             RV_DISPATCH:begin
                 rv_poll<=64;ack<=1;rdata<=0;
+                if(!rv_synced)begin
+                    rv_synced<=1;rv_discard<=1;
+                    rv_dmi(7'h00,0,0,RV_SYNCED);
+                end else
                 case(req[3:0])
                 0:begin // ABORT: clear sticky SBA errors; preserve access mode.
                     rv_cfg_valid<=0;rv_addr_dirty<=1;
@@ -362,6 +379,13 @@ module jtag_core (
                 14:begin rdata<=rv_posted;state<=RV_CHECK;end
                 default:begin ack<=4;state<=DONE;end
                 endcase
+            end
+            RV_SYNCED:state<=RV_DISPATCH;
+            RV_BUSYWAIT:begin
+                // A busy response means the request shifted out in that scan was
+                // dropped while the DTM finished the previous access, so shift
+                // the same frame again instead of a NOP.
+                state<=DR_NAV;
             end
             RV_PREPARE:begin
                 // Auto-increment spans are checked by their mandatory final
