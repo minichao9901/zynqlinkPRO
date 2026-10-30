@@ -311,6 +311,50 @@ export class EtmView{
    * 收不到 ETM 数据时先看这里——「0 字节但传输记录很多」说明流是通的，只是 ID 对不上。
    */
   /**
+   * 读目标固件的诊断结构 `g_trace`（固定放在 0x2000C000，见 firmware 的 trace_hooks.h）。
+   * 判断目标到底在不在跑、SYSCLK 是不是以为的那个值：sysclk_hz 不对，TRACECLK 也就不对。
+   */
+  async readDiag(){
+    if(!this.probe)throw Error('没有连接探针');
+    const base=0x2000c000;
+    const word=async offset=>{
+      const bytes=await this.probe.readMemDiagnostic(base+offset*4,4);
+      return new DataView(bytes.buffer,bytes.byteOffset,4).getUint32(0,true);
+    };
+    const first=await word(0);
+    if(first!==0x31435254&&first!==0x31524354){   // 'TRC1' / 'TR1C' 都放行，先看原始值
+      this.log('g_trace magic=0x'+first.toString(16));
+    }
+    const values=[];for(let i=0;i<13;i++)values.push(await word(i));
+    return {magic:'0x'+values[0].toString(16),sysclk_hz:values[1],ready:values[2],loops:values[3],
+      marks:values[4],cyc_last:values[5],cyc_delta:values[6],usb_rx:values[7],usb_tx:values[8],
+      usb_hp_irq:values[9],usb_ctr:values[10],etm_status:values[11],
+      etm_bits:'0x'+values[12].toString(16).padStart(3,'0')};
+  }
+  /**
+   * 只做自动配置（按目标实际寄存器写 ETM/TPIU），不启动采集。
+   * 用来把「配置错」和「线没接/FPGA 收错」分开——采集会把探针搞挂，配置不会。
+   */
+  async configureOnly({enable=false}={}){
+    if(!this.probe)throw Error('没有连接探针');
+    if(!this.images.length)throw Error('先载入匹配的 ELF');
+    this.busy=true;this.buttons();
+    try{
+      this.config=await this.target.prepare({divider:Number(this.$('div').value)});
+      this.$('config').value=JSON.stringify(this.config,null,2);
+      const registers=await this.traceRegisters();
+      this.log('已按目标实际寄存器配置 ETM（未采集）');
+      return {config:this.config,registers};
+    }finally{this.busy=false;this.buttons();}
+  }
+  /** 把 configureOnly 改过的 ETM/TPIU/DBGMCU 寄存器还原。 */
+  async restoreTarget(){
+    if(!this.target?.saved)return {restored:false};
+    await this.target.restore();
+    this.log('已恢复目标 ETM/TPIU 寄存器');
+    return {restored:true};
+  }
+  /**
    * 排查用：把和并行 trace 直接相关的寄存器读回来。
    * DBGMCU_CR 的 bit5=TRACE_IOEN、bit6-7=TRACE_MODE（11=4 位同步）；GPIOE_CRL 里 PE2~PE7
    * 应该是 0x4 开头的 AF 推挽。任何一项不对，四根数据线就不会被驱动，FPGA 只能采到空闲电平。

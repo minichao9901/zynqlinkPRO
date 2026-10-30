@@ -21,17 +21,25 @@ export class EtmTarget{
       const saved={demcr};for(const [name,addr]of Object.entries(REG))if(name!=='demcr')saved[name]=await this.read(addr);
       if(!((await this.read(0xe0040000))&8))throw Error('TPIU 不支持四位 DDR');
       this.saved=saved;await this.unlock(0xe0041000);await this.unlock(0xe0040000);
-      this.control=(this.saved.etmcr|0xc00)&~0x301;
-      await this.write(REG.etmcr,this.control);await this.waitProgram(true);
-      for(const [name,value]of Object.entries({etmtrigger:0,etmteevr:0x6f,etmtecr1:0,etmfflr:0,etmtraceidr:2,cspsr:8,sppr:0,ffcr:this.saved.ffcr|2,dbg_cr:(this.saved.dbg_cr&~0xe0)|0xe0}))await this.write(REG[name],value);
+      // ETMv3 要求：先停 tracing（清 ETM_EN/bit11）再进编程模式（PROG/bit10），否则写进去的
+      // 过滤配置不生效。位定义见本仓库 firmware 的 trace_hooks.c：PWD_DWN=b0、ETM_PRG=b10、
+      // ETM_EN=b11、端口宽度=b4..b6（010=4 位并行口）。
+      this.armed=((this.saved.etmcr&~0x301)|0x20)&~0x800;
+      await this.write(REG.etmcr,this.armed);
+      await this.write(REG.etmcr,this.armed|0x400);
+      await this.waitProgram(true);
+      for(const [name,value]of Object.entries({etmtrigger:0,etmteevr:0x6f,etmtecr1:1<<24,etmfflr:0,etmtraceidr:2,cspsr:8,sppr:0,ffcr:this.saved.ffcr|2,dbg_cr:(this.saved.dbg_cr&~0xe0)|0xe0}))await this.write(REG[name],value);
       this.divider=Math.min(4,Math.max(1,Math.round(Number(divider)||3)));
       await this.write(REG.acpr,this.divider-1);   // ACPR：TRACECLK = HCLK / divider
-      this.config={protocol:'ETMv3',idr:await this.read(0xe00411e4),ctrl:(await this.read(REG.etmcr))&~0x400,ccer:await this.read(0xe00411e8),traceid:await this.read(REG.etmtraceidr),divider:this.divider};
+      this.control=(await this.read(REG.etmcr))&~0x400;   // armed：PROG 已清、ETM_EN 仍为 0
+      this.config={protocol:'ETMv3',idr:await this.read(0xe00411e4),ctrl:this.control|0x800,ccer:await this.read(0xe00411e8),traceid:await this.read(REG.etmtraceidr),divider:this.divider};
       return this.config;
     }catch(e){try{if(this.saved)await this.restore();else await this.write(REG.demcr,demcr);}catch(cleanup){e.message+='；恢复失败：'+cleanup.message;}throw e;}
   }
-  async start(){await this.write(REG.etmcr,this.control&~0x400);await this.waitProgram(false);}
-  async stop(){if(this.saved){await this.write(REG.etmcr,this.control);await this.waitProgram(true);}}
+  // 退出编程态并打开 TRACEOUT：必须读-改-写当前寄存器（写法对齐 firmware 的 trace_hooks.c 第 7 步），
+  // 自己拼一个值写回去实测会被 ETM 忽略，PROG 位卡住不动。
+  async start(){await this.write(REG.etmcr,((await this.read(REG.etmcr))&~0x400)|0x800);await this.waitProgram(false);}
+  async stop(){if(this.saved)await this.write(REG.etmcr,this.control);}   // 只清 ETM_EN，退回 armed 态
   async restore(){
     if(!this.saved)return;
     await this.unlock(0xe0041000);await this.unlock(0xe0040000);
