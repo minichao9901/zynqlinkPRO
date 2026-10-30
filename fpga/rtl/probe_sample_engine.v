@@ -42,7 +42,7 @@ module probe_sample_engine #(
     reg [31:0] plan[0:23];
     // Slot stride is 32 words: timestamp followed by up to 24 data words.
     localparam FIFO_ADDR_W=$clog2(FIFO_SAMPLES)+5;
-    (* ram_style="distributed" *) reg [31:0] fifo[0:FIFO_SAMPLES*32-1];
+    (* ram_style="block" *) reg [31:0] fifo[0:FIFO_SAMPLES*32-1];
     reg fifo_wen;
     reg [FIFO_ADDR_W-1:0] fifo_waddr;
     reg [31:0] fifo_wdata;
@@ -75,7 +75,24 @@ module probe_sample_engine #(
     wire take_word = (rd && raddr==5) || stream_pop;
     wire pop = take_word && used!=0 && read_word==count;
     assign stream_empty = used==0;
-    assign stream_data = used!=0 ? fifo[(tail%FIFO_SAMPLES)*32+read_word] : 0;
+    // Read the cursor that will be visible AFTER this edge. This sustains
+    // one word/clock for both AXI and the PL packetizer with synchronous RAM.
+    // A timestamp is written on PUBLISH's edge; forward that collision so
+    // the newly published sample never exposes the old slot's timestamp.
+    wire clear_fifo = wr && waddr==0 && wdata[1] && !active;
+    wire [FIFO_ADDR_W-1:0] fifo_raddr = clear_fifo ? 0 :
+        (take_word && used!=0) ? (pop ? ((tail+1)%FIFO_SAMPLES)*32 :
+                                     (tail%FIFO_SAMPLES)*32+read_word+1) :
+                                (tail%FIFO_SAMPLES)*32+read_word;
+    reg [31:0] fifo_rdata, fifo_forward_data;
+    reg fifo_forward;
+    always @(posedge clk) begin
+        fifo_rdata <= fifo[fifo_raddr];
+        fifo_forward <= fifo_wen && fifo_waddr==fifo_raddr;
+        fifo_forward_data <= fifo_wdata;
+    end
+    wire [31:0] fifo_current = fifo_forward ? fifo_forward_data : fifo_rdata;
+    assign stream_data = used!=0 ? fifo_current : 0;
     assign timer_tick = tick;
     wire ctrl = wr && waddr==0;
     wire finishing = state!=IDLE || (!enabled && pending) || (fault && core_busy);
@@ -95,7 +112,7 @@ module probe_sample_engine #(
         2: rdata={27'd0,plan_index};
         3: rdata=plan[plan_index<24 ? plan_index : 0];
         4: rdata=period;
-        5: rdata=used!=0 ? fifo[(tail%FIFO_SAMPLES)*32+read_word] : 0;
+        5: rdata=used!=0 ? fifo_current : 0;
         // Data-only window: skip the timestamp word and advance the same
         // FIFO cursor.  Version-2 HSS uses nominal period timestamps, so a
         // sample needs one AXI read per value instead of timestamp+value.

@@ -9,7 +9,7 @@ set target_part xc7z020clg400-2
 if {[info exists ::env(ZYNQLINK_PART)]} {set target_part $::env(ZYNQLINK_PART)}
 create_project -force zynqlink_dma $out -part $target_part
 source [file join $root fpga configure_ip_cache.tcl]
-set_param general.maxThreads 8
+source [file join $root fpga run_threads.tcl]
 set_property target_language Verilog [current_project]
 set_property XPM_LIBRARIES {XPM_MEMORY} [current_project]
 add_files [glob [file join $root fpga rtl *.v]]
@@ -77,10 +77,10 @@ make_wrapper -files [get_files system.bd] -top
 add_files [file join $out zynqlink_dma.srcs sources_1 bd system hdl system_wrapper.v]
 set_property top system_wrapper [current_fileset]
 source [file join $root fpga configure_runs.tcl]
-launch_runs synth_1 -jobs 4
+launch_runs synth_1 -jobs $::zynqlink_jobs
 wait_on_run synth_1
 if {[get_property PROGRESS [get_runs synth_1]] != "100%"} {error "Synthesis failed"}
-launch_runs impl_1 -to_step route_design -jobs 4
+launch_runs impl_1 -to_step route_design -jobs $::zynqlink_jobs
 wait_on_run impl_1
 if {[get_property PROGRESS [get_runs impl_1]] != "100%"} {error "Implementation failed"}
 source [file join $root fpga verify_routed.tcl]

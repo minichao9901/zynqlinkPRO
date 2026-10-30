@@ -4,7 +4,7 @@ set ::zynqlink_no_pipeline [expr {[lsearch -exact $argv --no-pipeline] >= 0}]
 set out [file join $root build fpga_dma_global]
 open_project [file join $out zynqlink_dma.xpr]
 source [file join $root fpga configure_ip_cache.tcl]
-set_param general.maxThreads 8
+source [file join $root fpga run_threads.tcl]
 set impl_only [expr {[lsearch -exact $argv --impl-only] >= 0}]
 set rtl_stamp [exec python [file join $root tools fpga_rtl_stamp.py]]
 set stamp_file [file join $out swd_rtl_built.stamp]
@@ -90,7 +90,7 @@ if {!$impl_only} {
     source [file join $root fpga configure_runs.tcl]
     if {[get_property NEEDS_REFRESH [get_runs synth_1]] || [get_property PROGRESS [get_runs synth_1]] != "100%"} {
         reset_run synth_1
-        launch_runs synth_1 -jobs 4
+        launch_runs synth_1 -jobs $::zynqlink_jobs
         wait_on_run synth_1
     }
     if {[get_property PROGRESS [get_runs synth_1]] != "100%"} {error "Synthesis failed"}
@@ -118,7 +118,7 @@ if {!$fresh_impl && [file exists $ref]} {
     set_property INCREMENTAL_CHECKPOINT {} [get_runs impl_1]
     set_property strategy Performance_Explore [get_runs impl_1]
 }
-launch_runs impl_1 -to_step route_design -jobs 4
+launch_runs impl_1 -to_step route_design -jobs $::zynqlink_jobs
 wait_on_run impl_1
 if {[get_property PROGRESS [get_runs impl_1]] != "100%"} {error "Implementation failed"}
 if {[catch {source [file join $root fpga verify_routed.tcl]} timing_error]} {
@@ -133,7 +133,7 @@ if {[catch {source [file join $root fpga verify_routed.tcl]} timing_error]} {
     reset_run impl_1
     set_property INCREMENTAL_CHECKPOINT {} [get_runs impl_1]
     set_property strategy Performance_Explore [get_runs impl_1]
-    launch_runs impl_1 -to_step route_design -jobs 4
+    launch_runs impl_1 -to_step route_design -jobs $::zynqlink_jobs
     wait_on_run impl_1
     if {[get_property PROGRESS [get_runs impl_1]] != "100%"} {error "Implementation failed"}
     source [file join $root fpga verify_routed.tcl]

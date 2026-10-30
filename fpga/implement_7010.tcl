@@ -3,17 +3,19 @@
 set root [file normalize [file join [file dirname [info script]] ..]]
 set out [file join $root build fpga_7010]
 file mkdir $out
-set_param general.maxThreads 8
+source [file join $root fpga run_threads.tcl]
+if {[lsearch -exact $argv --reuse-netlist] < 0} {
 open_project [file join $root build fpga_dma_global zynqlink_dma.xpr]
 open_run synth_1
 if {[llength [get_cells -hier -filter {IS_BLACKBOX == 1 && REF_NAME != PS7}]]} {
     error "Synthesis design contains unresolved black boxes"
 }
-write_edif -force [file join $out system.edf]
+write_edif -force [file join $out system_wrapper.edf]
 write_xdc -force [file join $out system.xdc]
 close_project
+}
 create_project -in_memory -part xc7z010clg400-2
-read_edif [file join $out system.edf]
+read_edif [file join $out system_wrapper.edf]
 link_design -top system_wrapper -part xc7z010clg400-2
 read_xdc [file join $out system.xdc]
 create_clock -name clk_fpga_0 -period 8.333 [get_pins {system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]}]
