@@ -68,15 +68,7 @@
 #include "sleep.h"
 
 /************************** Constant Definitions *****************************/
-#ifdef ZYNQLINK_OCM
-#define MEMORY_SIZE (40 * 1024)
-#define DAP_RX_DESCRIPTORS 4
-#define CDC_RX_DESCRIPTORS 2
-#else
 #define MEMORY_SIZE (512 * 1024)
-#define DAP_RX_DESCRIPTORS 16
-#define CDC_RX_DESCRIPTORS 16
-#endif
 
 // #define CDC_IN_EP   0x82
 // #define CDC_OUT_EP  0x02
@@ -87,11 +79,7 @@
 u8 Buffer[MEMORY_SIZE];
 #pragma data_alignment = 4
 #else
-#ifdef ZYNQLINK_OCM
-u8 Buffer[MEMORY_SIZE] __attribute__((section(".usb_dma"), aligned(2048)));
-#else
 u8 Buffer[MEMORY_SIZE] ALIGNMENT_CACHELINE;
-#endif
 #endif
 
 /**************************** Type Definitions *******************************/
@@ -283,7 +271,7 @@ static int UsbIntrExample(XScuGic *IntcInstancePtr, XUsbPs *UsbInstancePtr,
 
 	/* Endpoint 2: DAP Bulk OUT (0x02) */
 	DeviceConfig.EpCfg[2].Out.Type		= XUSBPS_EP_TYPE_BULK;
-	DeviceConfig.EpCfg[2].Out.NumBufs	= DAP_RX_DESCRIPTORS;
+	DeviceConfig.EpCfg[2].Out.NumBufs	= 16;
 	DeviceConfig.EpCfg[2].Out.BufSize	= 4096;
 	DeviceConfig.EpCfg[2].Out.MaxPacketSize	= 512;
     DeviceConfig.EpCfg[2].In.Type=XUSBPS_EP_TYPE_BULK;
@@ -297,7 +285,7 @@ static int UsbIntrExample(XScuGic *IntcInstancePtr, XUsbPs *UsbInstancePtr,
 
 	/* Endpoint 4: CDC Bulk OUT (0x04) */
 	DeviceConfig.EpCfg[4].Out.Type		= XUSBPS_EP_TYPE_BULK;
-	DeviceConfig.EpCfg[4].Out.NumBufs	= CDC_RX_DESCRIPTORS;
+	DeviceConfig.EpCfg[4].Out.NumBufs	= 16;
 	DeviceConfig.EpCfg[4].Out.BufSize	= 4096;
 	DeviceConfig.EpCfg[4].Out.MaxPacketSize	= 512;
 

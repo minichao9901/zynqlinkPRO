@@ -22,9 +22,7 @@ shim=r'''
 typedef uint8_t u8;typedef uint32_t u32;typedef uintptr_t UINTPTR;typedef uint64_t XTime;
 typedef struct {int unused;} XUsbPs;
 #define DAP_PACKET_SIZE 4096
-#ifndef DAP_PACKET_COUNT
 #define DAP_PACKET_COUNT 16
-#endif
 #define NORM_NONCACHE 0
 #define DAP_ENABLE_TRACE 0
 #define XST_SUCCESS 0
@@ -83,14 +81,14 @@ static void finish(void){void *p=active_buffer;unsigned len=active_len;
 }
 int main(void){
  chry_dap_state_init();
- for(unsigned i=0;i<DAP_PACKET_COUNT;i++)put(i, i==0?512:7);
- chry_dap_handle();assert(response_in-response_out==DAP_PACKET_COUNT);assert(tx_active);
+ for(unsigned i=0;i<16;i++)put(i, i==0?512:7);
+ chry_dap_handle();assert(response_in-response_out==16);assert(tx_active);
  uint8_t first[512];memcpy(first,active_buffer,512);
- for(unsigned i=DAP_PACKET_COUNT;i<2*DAP_PACKET_COUNT;i++)put(i,7);
+ for(unsigned i=16;i<32;i++)put(i,7);
  assert(!chry_dap_rx_ready());chry_dap_handle();
- assert(response_in-response_out==DAP_PACKET_COUNT);assert(request_in-request_out==DAP_PACKET_COUNT);
+ assert(response_in-response_out==16);assert(request_in-request_out==16);
  assert(!memcmp(first,active_buffer,512));
- for(unsigned i=0;i<2*DAP_PACKET_COUNT;i++){assert(((uint8_t *)active_buffer)[1]==i);finish();chry_dap_handle();}
+ for(unsigned i=0;i<32;i++){assert(((uint8_t *)active_buffer)[1]==i);finish();chry_dap_handle();}
  assert(response_in==response_out);assert(!tx_active);assert(request_in==request_out);
  puts("PASS full queues preserve in-flight data and ZLP ownership");
  send_fail=1;put(55,7);chry_dap_handle();assert(!tx_active);assert(response_in-response_out==1);
@@ -117,8 +115,5 @@ if Path(args.cc).stem.lower()=='clang':
     gcc_lib=max(versions,key=lambda p:tuple(int(n) for n in p.name.split('.')))
     extra=['--target=x86_64-w64-windows-gnu','--sysroot='+str(args.mingw_root),
            '-B',str(args.mingw_root/'bin'),'-L',str(gcc_lib)]
-for count in (16,4):
-    exe=out/f'test_{count}.exe'
-    subprocess.run([args.cc,*extra,'-std=gnu11','-Wall','-Wextra','-Werror',f'-DDAP_PACKET_COUNT={count}', '-I',str(out),str(out/'test.c'),'-o',str(exe)],check=True)
-    print(f'DAP queue slots: {count}', flush=True)
-    subprocess.run([str(exe)],check=True)
+subprocess.run([args.cc,*extra,'-std=gnu11','-Wall','-Wextra','-Werror','-I',str(out),str(out/'test.c'),'-o',str(out/'test.exe')],check=True)
+subprocess.run([str(out/'test.exe')],check=True)
