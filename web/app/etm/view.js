@@ -24,10 +24,10 @@ export class EtmView{
   init(){
     const panel=document.getElementById('tab-etm');
     panel.innerHTML=`<div class="z-page"><div class="z-heading"><div><h1>ETM 执行轨迹</h1><p>FPGA 并行接收 · PS USB bulk-in · OpenCSD 浏览器解码 · 前端调用树分析</p></div><div class="z-actions"><span class="z-badge">四位 DDR / source ID 2</span></div></div>
-    <div class="z-columns"><aside class="z-card"><h2>采集</h2><div class="z-actions"><button id="ze-connect">连接 ZynqDAP</button><button id="ze-disconnect">断开</button></div><p id="ze-device" class="muted">USB 未连接</p>
+    <div class="z-columns"><aside class="z-card"><h2>采集</h2><div class="z-actions"><button id="ze-connect">连接 ZynqDAP</button><button id="ze-pick">换设备…</button><button id="ze-disconnect">断开</button></div><p id="ze-device" class="muted">USB 未连接</p>
     <p class="z-pinout">J7.16 TRACECLK<br>J7.15 / 17 / 18 / 19 → D0 / D1 / D2 / D3<br>J7.14 GND · 3.3 V · TRACECLK ≤ 50 MHz</p>
     <label class="btn">载入匹配的 ELF<input id="ze-elf" type="file" accept=".elf,.axf,.out" hidden></label><p id="ze-image" class="muted">尚未载入镜像</p>
-    <label><input id="ze-auto" type="checkbox" checked>自动配置并恢复 F103ZE ETM</label><label>采集时长 (ms，0 为手动)<input id="ze-ms" type="number" min="0" max="60000" value="10"></label>
+    <label><input id="ze-auto" type="checkbox" checked>自动配置并恢复 F103ZE ETM</label><label>TRACECLK 分频 (HCLK / N)<select id="ze-div"><option>1</option><option>2</option><option selected>3</option><option>4</option></select></label><label>采集时长 (ms，0 为手动)<input id="ze-ms" type="number" min="0" max="60000" value="10"></label>
     <label>内存上限 (MiB)<input id="ze-limit" type="number" min="1" max="256" value="16"></label>
     <div class="z-actions"><button id="ze-start">开始采集</button><button id="ze-stop">停止</button></div>
     <details><summary>ETMv3 解码寄存器</summary><textarea id="ze-config" rows="6">{"protocol":"ETMv3","idr":1091891777,"ctrl":2320,"ccer":100352,"traceid":2}</textarea><p>自动配置会替换为目标实际读回值；手工配置时由目标工程启用 ETM。</p></details>
@@ -51,7 +51,7 @@ export class EtmView{
     <div class="z-trace-columns"><div><h2>历史调用栈</h2><ol id="ze-stack" class="z-stack"></ol></div><div><h2>源码 / 指令字节</h2><pre id="ze-code" class="z-code">载入记录后解码；可另选源码进行逐范围回放。</pre></div></div></div></div></div>`;
     this.$=id=>document.getElementById('ze-'+id);
     const action=fn=>async()=>{try{await fn();}catch(e){this.log(e.message);toast(e.message,'err');}finally{this.buttons();}};
-    this.$('connect').onclick=action(()=>this.connect());this.$('disconnect').onclick=action(()=>this.releaseProbe());
+    this.$('connect').onclick=action(()=>this.connect());this.$('pick').onclick=action(()=>this.connectNew());this.$('disconnect').onclick=action(()=>this.releaseProbe());
     this.$('start').onclick=action(()=>this.start());this.$('stop').onclick=action(()=>this.stop());
     this.$('elf').onchange=action(async()=>{const f=this.$('elf').files[0];if(f)await this.loadElf(new Uint8Array(await f.arrayBuffer()),f.name);});
     this.$('open').onclick=()=>this.$('record').click();this.$('record').onchange=action(async()=>{const f=this.$('record').files[0];if(f)await this.loadRecord(JSON.parse(await f.text()));});
@@ -71,17 +71,58 @@ export class EtmView{
   }
   buttons(){if(!this.$)return;this.$('start').disabled=!this.probe||this.busy||!this.images.length||(this.$('auto').checked&&!this.elfBytes);this.$('stop').disabled=!this.transport?.running&&!this.worker;this.$('disconnect').disabled=!this.probe||this.busy&&!this.transport?.running;this.$('connect').disabled=!!this.probe||this.busy;this.$('decode').disabled=!this.etm?.length||this.busy;this.$('save').disabled=!this.etm?.length||this.busy;this.$('sample').disabled=this.busy;this.$('sample-f103').disabled=this.busy;this.$('open').disabled=this.busy;this.$('elf').disabled=this.busy;this.$('csv').disabled=!this.model;this.$('svg').disabled=!this.model;this.$('json').disabled=!this.model;this.$('srcflow').disabled=!this.model||!this.lines;}
   log(text){this.$('log').textContent+=(new Date().toLocaleTimeString())+' '+text+'\n';this.$('log').scrollTop=this.$('log').scrollHeight;}
+  /**
+   * 连接：优先复用浏览器已经授权过的 ZynqDAP（`getDevices()` 不需要用户手势），
+   * 没有授权过才弹设备选择框。板子重新烧录/断电后 USB 会重新枚举，旧句柄失效但授权还在，
+   * 这条路径就是为那种场景准备的——CLI 因此可以在不弹框的情况下自己恢复连接。
+   */
   async connect(){return runProbeOperation(this,'etm',async()=>{
-    const device=await navigator.usb.requestDevice({filters:[{vendorId:0x0d28,productId:0x0204}]});
+    await this.openDevice(await this.pickDevice(false));
+  });}
+  /** 强制弹设备选择框（换设备、或授权过别的板子时用）。 */
+  async connectNew(){return runProbeOperation(this,'etm',async()=>{
+    await this.openDevice(await this.pickDevice(true));
+  });}
+  /**
+   * 只走已授权设备的重连：CLI 造不出 `requestDevice` 需要的用户手势，所以这条不给弹框退路。
+   * 第一次仍然要人点一次「连接 ZynqDAP」，之后 `page etm invoke reconnect` 就能自己恢复。
+   */
+  async reconnect(){return runProbeOperation(this,'etm',async()=>{
+    const devices=(await WebUsbDapProbe.authorized().catch(()=>[]))
+      .filter(device=>device.vendorId===0x0d28&&device.productId===0x0204);
+    if(!devices.length)throw Error('没有已授权的 ZynqDAP：先在页面上点一次「连接 ZynqDAP」完成授权');
+    await this.openDevice(devices[0]);
+  });}
+  async pickDevice(forcePick){
+    if(!forcePick){
+      const authorised=await WebUsbDapProbe.authorized().catch(()=>[]);
+      const hit=authorised.find(device=>device.vendorId===0x0d28&&device.productId===0x0204);
+      if(hit)return hit;
+    }
+    return navigator.usb.requestDevice({filters:[{vendorId:0x0d28,productId:0x0204}]});
+  }
+  async openDevice(device){
+    // 同一个设备已经连着就不用重开：WebUSB 关闭后立刻重开会读到超时（端点还没复位）。
+    if(this.probe&&this.probe.device===device)return;
+    if(this.probe){
+      try{await this.releaseProbe();}catch(e){this.log('旧连接收尾失败：'+e.message);}
+      await new Promise(resolve=>setTimeout(resolve,300));   // 给设备一点时间复位端点
+    }
     try{this.probe=await WebUsbDapProbe.open(device,{clockKhz:50000});this.target=new EtmTarget(this.probe);this.transport=new EtmTransport(this.probe.device,(p,e)=>{
       this.quality={...p.quality(),refClockHz:this.transport?.refClockHz};this.status();if(e)this.log(e.message);
       const limit=Number(this.$('limit').value)*1024*1024;if(p.records*2>=limit&&!this.stopping)this.stop().catch(e=>this.log(e.message));
     });await this.transport.open();this.$('device').textContent=this.probe.name;this.log('已连接，端点 0x82');}
-    catch(e){if(this.transport)try{await this.transport.close();}catch{}if(this.probe)await this.probe.close();this.transport=null;this.probe=null;throw e;}
-  });}
+    catch(e){
+      // 收尾失败不能顶掉原始错误，否则只剩一句 "xxx is not a function"。
+      try{if(this.transport)await this.transport.close();}catch(cleanup){e.message+='；USB 端点收尾失败：'+cleanup.message;}
+      try{if(this.probe)await this.probe.disconnect();}catch(cleanup){e.message+='；探针收尾失败：'+cleanup.message;}
+      this.transport=null;this.probe=null;throw e;
+    }
+  }
   async releaseProbe(){
     if(this.transport?.running)await this.stop();if(this.target?.saved)await this.target.restore();
-    if(this.transport)await this.transport.close();if(this.probe)await this.probe.close();
+    if(this.transport)await this.transport.close();
+    if(this.probe)await this.probe.disconnect();   // WebUsbDapProbe 的方法是 disconnect()，没有 close()
     this.transport=null;this.probe=null;this.probeManager?.forget('etm');this.$('device').textContent='USB 未连接';this.buttons();
   }
   async loadElf(bytes,name){
@@ -104,7 +145,7 @@ export class EtmView{
   async start(){
     if(!this.probe||!this.images.length)throw Error('请连接并载入匹配 ELF');this.busy=true;this.buttons();
     try{
-      if(this.$('auto').checked){await this.verifyFlash();this.config=await this.target.prepare();this.$('config').value=JSON.stringify(this.config,null,2);}
+      if(this.$('auto').checked){await this.verifyFlash();this.config=await this.target.prepare({divider:Number(this.$('div').value)});this.$('config').value=JSON.stringify(this.config,null,2);}
       else this.config=JSON.parse(this.$('config').value);
       this.etm=null;this.ranges=[];this.decoded=null;this.recordKind='hardware';this.stopping=null;this.transport.byteLimit=Number(this.$('limit').value)*1024*1024;await this.transport.start();
       if(this.$('auto').checked)await this.target.start();
@@ -257,6 +298,25 @@ export class EtmView{
     if(!this.model)throw Error('先解码再导出');const rows=sourceFlow(this.model,this.lines);
     if(!rows.length)throw Error('ELF 里没有可用的源码行信息');
     save('file,line,halfwords,ranges\n'+rows.map(r=>`"${r.file.replaceAll('"','""')}",${r.line},${r.weight},${r.ranges}`).join('\n'),'zynqdap-etm-source-flow.csv','text/csv');
+  }
+  /**
+   * 排查用：这次捕获里各 source ID 各有多少字节。
+   * 收不到 ETM 数据时先看这里——「0 字节但传输记录很多」说明流是通的，只是 ID 对不上。
+   */
+  streamIds(){
+    const counts=new Map();
+    for(const chunk of this.transport?.parser?.chunks||[]){
+      for(let i=0;i+1<chunk.length;i+=2)counts.set(chunk[i+1],(counts.get(chunk[i+1])||0)+1);
+    }
+    const total=[...counts.values()].reduce((sum,n)=>sum+n,0);
+    const sample=[];
+    for(const chunk of this.transport?.parser?.chunks||[]){
+      for(let i=0;i+1<chunk.length&&sample.length<24;i+=2)
+        sample.push(chunk[i].toString(16).padStart(2,'0')+'/'+chunk[i+1].toString(16).padStart(2,'0'));
+      if(sample.length>=24)break;
+    }
+    return {total,expecting:this.config?.traceid??null,sample,
+      ids:[...counts].sort((a,b)=>b[1]-a[1]).slice(0,8).map(([sourceId,bytes])=>({sourceId,bytes}))};
   }
   onShow(){if(this.ranges.length)this.timeline();if(this.view==='flame')this.renderFlame();}
   summary(){return {connected:!!this.probe,running:!!this.transport?.running,busy:this.busy,bytes:this.etm?.length||0,ranges:this.ranges.length,

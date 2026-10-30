@@ -35,7 +35,7 @@ const CATALOG=[
   {page:'dbg',title:'调试器',range:'ARM/RISC-V、断点、暂停/继续/单步、寄存器/内存、调用栈、异常诊断、命令行',
     methods:['connect','disconnect','exec','reset','halt','resume']},
   {page:'etm',title:'ETM 执行轨迹',range:'目标 ELF 与 ETM 配置、FPGA 并行采集、OpenCSD 解码、执行流/调用统计/火焰图/热点/包/可信区段、四类导出',
-    methods:['decode','loadRecord','saveRecord','exportCsv','exportSvg','exportJson','exportSourceFlow','connect','start','stop']},
+    methods:['decode','loadRecord','saveRecord','exportCsv','exportSvg','exportJson','exportSourceFlow','connect','connectNew','reconnect','start','stop']},
   {page:'gen',title:'工程生成',range:'解析 Keil .uvprojx、参数、生成 Makefile/脚本、预览、单文件/ZIP',
     methods:['loadUvprojx','build','save']},
 ];
@@ -141,14 +141,23 @@ function findBrowser(){
 async function commandServe(flags){
   if(!flags.runtime)fail('serve 需要 --runtime <目录>',2);
   const runtime=path.resolve(String(flags.runtime));
-  if(fs.existsSync(runtime)&&fs.readdirSync(runtime).length)fail('运行时目录必须不存在或为空：'+runtime,2);
-  fs.mkdirSync(runtime,{recursive:true});
-  const token=crypto.randomBytes(32).toString('hex');
-  fs.writeFileSync(path.join(runtime,'cli-token'),token,{encoding:'utf8',mode:0o600});
+  // 目录里已经有 cli-token 时复用（服务崩溃/机器重启后，仍然开着的页面不必重新授权就能接回来）。
+  const tokenFile=path.join(runtime,'cli-token');
+  let token=null,reused=false;
+  if(fs.existsSync(runtime)&&fs.readdirSync(runtime).length){
+    if(!fs.existsSync(tokenFile))fail('运行时目录不是空的，也没有 cli-token：'+runtime,2);
+    token=fs.readFileSync(tokenFile,'utf8').trim();
+    if(!/^[0-9a-f]{64}$/.test(token))fail('cli-token 内容无效：'+tokenFile,2);
+    reused=true;
+  }else{
+    fs.mkdirSync(runtime,{recursive:true});
+    token=crypto.randomBytes(32).toString('hex');
+    fs.writeFileSync(tokenFile,token,{encoding:'utf8',mode:0o600});
+  }
   const service=await startService({port:Number(flags.port||8896),token});
   fs.writeFileSync(path.join(runtime,'port'),String(service.port),'utf8');
   const browserUrl=service.url;
-  const payload={ok:true,browserUrl,port:service.port,runtime};
+  const payload={ok:true,browserUrl,port:service.port,runtime,reusedToken:reused};
   console.log(JSON.stringify(payload,null,2));
   if(flags.open){
     const browser=findBrowser();

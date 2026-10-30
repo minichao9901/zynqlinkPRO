@@ -96,7 +96,9 @@ node web/tools/toolbox.mjs --runtime R page serial describe     # 查控件
 node web/tools/toolbox.mjs --runtime R page serial invoke sendText --args '["hello\r\n"]'
 
 # ETM：连 ZynqDAP → 载入 ELF → 采集 → 解码 → 读结果
-node web/tools/toolbox.mjs --runtime R page etm click '#ze-connect'
+# 已经授权过的话，`invoke reconnect` 不需要弹框、也不需要用户手势；
+# 板子重新烧录/断电后 USB 会重新枚举，用它能自己把连接恢复回来。
+node web/tools/toolbox.mjs --runtime R page etm invoke reconnect
 node web/tools/toolbox.mjs --runtime R page etm upload '#ze-elf' E:/fw/fw-ze.elf
 node web/tools/toolbox.mjs --runtime R page etm click '#ze-start'
 node web/tools/toolbox.mjs --runtime R page etm wait '#ze-status' --contains 'ETM 字节'
