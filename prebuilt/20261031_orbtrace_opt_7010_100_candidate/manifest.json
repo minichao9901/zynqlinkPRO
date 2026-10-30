@@ -1,5 +1,5 @@
 {
-  "status": "EXPERIMENTAL: routed STA, bitgen and matched-profile real-CM3 comparisons pass; hardware/PS/USB acceptance pending",
+  "status": "EXPERIMENTAL: 7010/100MHz routed STA and RTL simulation pass; physical board acceptance pending",
   "source_commit": "bc9ced6",
   "implementation_script_commit": "bc9ced6",
   "device": "xc7z010clg400-2",
@@ -50,10 +50,10 @@
   },
   "sha256": {
     "zynqlink_probe.bit": "7592559507a7139f62774fce1b28427c5c70bc9cb441a42958b40189b9d18fd6",
-    "zynqlink_probe.elf": "f762d2222ed47eb94ce046f6dd4c7696cc395467f0e0ec548282ff1986d6a49a",
+    "zynqlink_probe.elf": "ba87ff9028c4132f605ff12666ad04bff08be34f2db3877b11fd9e7d2b7bd0a3",
     "ps7_init.tcl": "aa9747c31f705be7c28af1c6b1cdeaf282f0dcdb01faecee2a9f72e4d3489132",
-    "firmware-build.json": "21bc5a43af1e63d9d5ede3402350f137b9977487c5aaafb174ac194934f5bd2b",
-    "ocm_layout.json": "71fae818da45409dbcb01cfc52f0c8a71b0efb5a0fc97c924e5b0610d291b5da",
+    "firmware-build.json": "25ff016b28c463b32ae2e1252e884f6265ca3c2b1423f075ff5c683c169219a8",
+    "ocm_layout.json": "4a2a412a90670d86a9b1699cdbd098fd4fcd9927a669738084fd21fd66cfac8e",
     "timing_100mhz.rpt": "9258cef4c62c957e28e1447558e39428f6103b15939f0d108768a6b128ceb6a1",
     "utilization.rpt": "f2f252f5efffd6593c4fb72e14e9a2bda0c21059796edb119b2ee70ae9530136",
     "simulation_comparison.json": "97f197d4d02953a2cc0ee45b973e5628133b732dab7e42942e441f0fb105b0be"
@@ -66,5 +66,15 @@
     "metrics_identical_to_parent": true,
     "USB_or_PS_instruction_timing_modeled": false,
     "raw_model_compatibility_failures": "7 matrix points match parent; raw SWD30 board sampling also fails both fixed-delay models, calibrated boundary1 passes both"
-  }
+  },
+  "rejected_previous_firmware": {
+    "source_revision": "bc9ced6",
+    "elf_sha256": "f762d2222ed47eb94ce046f6dd4c7696cc395467f0e0ec548282ff1986d6a49a",
+    "failure": "Original common compact ELF triggered unaligned SWJ LDRD Data Abort on 7020; never accepted on 7010",
+    "evidence": "../../docs/validation/orbtrace-hardware-20261031/optimized_50_rejected_unaligned/"
+  },
+  "firmware_source_revision": "f5c938e71e0127ba573f0dcc425f62d924492965",
+  "firmware_executable_bytes": 71252,
+  "OCM_span_bytes": 120976,
+  "hardware_acceptance": "Physical 7010 remains untested; corrected shared 50MHz firmware rebuilt"
 }

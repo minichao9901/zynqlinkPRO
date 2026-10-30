@@ -14,3 +14,5 @@ PS 初始化/BSP 沿用当前探针平台，实际 7010 板的 PS/DDR 配置仍�
 ELF 上限为 SWCLK/TCK 50MHz、FCLK 100MHz，代码和必要数据/栈位于 OCM，
 USB/DAP 运行缓冲保持 DDR 和原队列配置。
 文件 SHA-256、源码指纹、构建选项及未验收状态见 `manifest.json`。
+
+Common compact firmware corrected for unaligned SWJ payloads; firmware source f5c938e71e0127ba573f0dcc425f62d924492965. Physical 7010 board acceptance remains pending. See manifest for rejected previous ELF and new file hashes.
