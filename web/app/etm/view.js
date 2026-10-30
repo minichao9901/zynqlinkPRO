@@ -10,7 +10,8 @@ import {store} from '../core/store.js';
 export const DEFAULT_ETM_ORIGIN = 'http://127.0.0.1:8766';
 
 export function etmOrigin(){
-  const saved = String(store.get('etm.service', '') || '').trim();
+  let saved = String(store.get('etm.service', '') || '').trim();
+  if (saved && !/^https?:\/\//i.test(saved)) saved = 'http://' + saved;
   return (saved || DEFAULT_ETM_ORIGIN).replace(/\/+$/, '');
 }
 
