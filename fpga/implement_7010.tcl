@@ -28,11 +28,13 @@ if {![llength $rx_regs]} {error "JTAG RX registers missing before control-set op
 set_property CONTROL_SET_REMAP ENABLE $rx_regs
 puts "JTAG_RX_ENABLE_REMAP=[llength $rx_regs]"
 opt_design
-opt_design -control_set_opt
 report_utilization -file [file join $out utilization_optimized.rpt]
 report_control_sets -file [file join $out control_sets_optimized.rpt]
+write_checkpoint -force [file join $out system_optimized.dcp]
 place_design -directive Explore
+write_checkpoint -force [file join $out system_placed.dcp]
 phys_opt_design -directive AggressiveExplore
+write_checkpoint -force [file join $out system_physopt.dcp]
 route_design -directive Explore
 report_utilization -file [file join $out utilization.rpt]
 report_utilization -hierarchical -file [file join $out utilization_hier.rpt]
