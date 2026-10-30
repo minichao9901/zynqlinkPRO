@@ -1,0 +1,18 @@
+
+****** xsim v2018.3 (64-bit)
+  **** SW Build 2405991 on Thu Dec  6 23:38:27 MST 2018
+  **** IP Build 2404404 on Fri Dec  7 01:43:56 MST 2018
+    ** Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+
+source xsim.dir/tb_cm3_swd_snap/xsim_script.tcl
+# xsim {tb_cm3_swd_snap} -testplusarg half_ns=10.0 -testplusarg rx_boundary=0 -testplusarg streams -autoloadwcfg -runall
+Vivado Simulator 2018.3
+Time resolution is 1 ps
+run -all
+WARNING: File  referenced on E:/zynqlinkPRO_orbtrace_opt/build/transport_baseline_00b9f2f/fpga/rtl/dap_transfer_block_engine.v at line 79 cannot be opened for reading. Please ensure that this file is available in the current working directory.
+XFER req=02 ack=4 data=00000000
+Fatal: transfer req=02 ACK=4
+Time: 41640 ns  Iteration: 0  Process: /tb_cm3_swd/xfer  File: E:/zynqlinkPRO_orbtrace_opt/build/transport_baseline_00b9f2f/fpga/sim/tb_cm3_swd.sv
+$finish called at time : 41640 ns : File "E:/zynqlinkPRO_orbtrace_opt/build/transport_baseline_00b9f2f/fpga/sim/tb_cm3_swd.sv" Line 175
+exit
+INFO: [Common 17-206] Exiting xsim at Sat Oct 31 01:09:22 2026...
