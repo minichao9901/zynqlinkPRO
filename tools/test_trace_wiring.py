@@ -64,24 +64,28 @@ def main():
     was_halted = False
     try:
         setup(out, inp, args.speed_khz)
-        for address in (DHCSR, DBGMCU_CR, GPIOE_CRL, GPIOE_ODR, RCC_APB2ENR):
+        for address in (DHCSR, DBGMCU_CR, RCC_APB2ENR):
             saved[address] = mem.word(address)
         was_halted = bool(saved[DHCSR] & (1 << 17))
         mem.write_word(DHCSR, 0xA05F0003)
         mem.write_word(RCC_APB2ENR, saved[RCC_APB2ENR] | (1 << 6))
+        saved[GPIOE_CRL] = mem.word(GPIOE_CRL)
+        saved[GPIOE_ODR] = mem.word(GPIOE_ODR)
         mem.write_word(DBGMCU_CR, saved[DBGMCU_CR] & ~0xE0)
         crl = saved[GPIOE_CRL]
         for pin in range(2, 8):
             crl = (crl & ~(0xF << (pin * 4))) | (0x2 << (pin * 4))
         mem.write_word(GPIOE_CRL, crl)
         for name, bit in TARGET_BITS.items():
-            mem.write_word(GPIOE_ODR, bit)
+            # Leave unrelated PE0/PE1/PE8..PE15 outputs unchanged.
+            mem.write_word(GPIOE_ODR, (saved[GPIOE_ODR] & ~0xFC) | bit)
             observed = boundary_sample()
             expected = {n: int(n == name) for n in FPGA_PINS}
+            target_idr = mem.word(GPIOE_IDR) & 0xFC
             rows.append({'target_pin': name, 'odr': hex(bit),
-                         'target_idr_bit': bool(mem.word(GPIOE_IDR) & bit),
+                         'target_idr': hex(target_idr),
                          'observed_fpga': observed, 'expected_fpga': expected,
-                         'pass': observed == expected})
+                         'pass': observed == expected and target_idr == bit})
             print(rows[-1], flush=True)
         report = {'target': 'STM32F103ZE', 'speed_khz': args.speed_khz,
                   'mapping': {k: v[0] for k, v in FPGA_PINS.items()},
@@ -90,11 +94,17 @@ def main():
                   'pe7_isolated': rows[5]['observed_fpga'] == {n: 0 for n in FPGA_PINS}}
     finally:
         try:
-            if saved:
+            if GPIOE_ODR in saved and GPIOE_CRL in saved:
                 mem.write_word(GPIOE_ODR, saved[GPIOE_ODR])
                 mem.write_word(GPIOE_CRL, saved[GPIOE_CRL])
+                if 'report' in locals():
+                    report['gpio_restored'] = (mem.word(GPIOE_ODR) == saved[GPIOE_ODR]
+                                               and mem.word(GPIOE_CRL) == saved[GPIOE_CRL])
+            if DBGMCU_CR in saved:
                 mem.write_word(DBGMCU_CR, saved[DBGMCU_CR])
+            if RCC_APB2ENR in saved:
                 mem.write_word(RCC_APB2ENR, saved[RCC_APB2ENR])
+            if DHCSR in saved:
                 mem.write_word(DHCSR, 0xA05F0003 if was_halted else 0xA05F0001)
         finally:
             args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -102,7 +112,7 @@ def main():
                 args.output.write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
             usb.util.release_interface(dev, 0)
             usb.util.dispose_resources(dev)
-    if not report['all_connected_pins_pass'] or not report['pe7_isolated']:
+    if not report['all_connected_pins_pass'] or not report['pe7_isolated'] or not report.get('gpio_restored'):
         raise SystemExit(1)
 
 
