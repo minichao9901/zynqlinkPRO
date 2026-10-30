@@ -165,14 +165,14 @@ export class EtmView{
     for(const name of ['flow','stats','flame','hot','packet','section'])this.$('view-'+name).hidden=name!==view;
     if(view==='flame')this.renderFlame();
   }
-  renderAll(){this.renderFlow();this.renderStats();this.renderFlame();this.renderHot();this.renderPackets();this.renderSections();this.renderStack();}
+  renderAll(){this.renderFlow();this.renderStats();this.renderFlame();this.renderHot();this.renderPackets();this.renderSections();this.renderStack();this.timeline();}
   renderFlow(){
     if(!this.model){this.$('rows').replaceChildren();return;}
     const filter=this.$('filter').value.toLowerCase(),start=Math.max(0,Number(this.$('cursor').value)-50),total=this.model.ranges.length;
     const cell=[];for(let i=filter?0:start;i<total&&cell.length<250;i++){
       const r=this.model.ranges[i],name=this.func(r.start),branch=BRANCH_LABEL[r.kind]||r.kind;
       if(filter&&!name.toLowerCase().includes(filter)&&!hex(r.start).includes(filter)&&!branch.includes(filter))continue;
-      cell.push(`<tr data-index="${i}"${i===Number(this.$('cursor').value)?' class="z-row-current"':''}><td>${i}</td><td>${hex(r.start)}</td><td>${hex(r.end)}</td><td>${branch}${r.conditional?'?':''}</td><td>${r.depth}</td><td>${esc(name)}</td></tr>`);
+      cell.push(`<tr data-index="${i}"${i===Number(this.$('cursor').value)?' class="z-row-current"':''}><td>${i}</td><td>${hex(r.start)}</td><td>${hex(r.end)}</td><td>${branch}${r.executed?'':'（未执行）'}</td><td>${r.depth}</td><td>${esc(name)}</td></tr>`);
     }
     this.$('rows').innerHTML=cell.join('');
     for(const row of this.$('rows').children)row.onclick=()=>this.select(Number(row.dataset.index));
@@ -230,7 +230,21 @@ export class EtmView{
     }
     toast('这个方向上没有更多「'+this.$('nav').selectedOptions[0].textContent+'」范围','warn');
   }
-  timeline(){const c=this.$('timeline'),ctx=c.getContext('2d');c.width=Math.max(400,c.clientWidth*devicePixelRatio);c.height=110*devicePixelRatio;const min=Math.min(...this.ranges.slice(0,100000).map(r=>r.start)),max=Math.max(...this.ranges.slice(0,100000).map(r=>r.start));ctx.fillStyle='#0d1420';ctx.fillRect(0,0,c.width,c.height);ctx.strokeStyle='#5ca8ff';ctx.beginPath();for(let x=0;x<c.width;x++){const r=this.ranges[Math.min(this.ranges.length-1,Math.floor(x/c.width*this.ranges.length))],y=10+(max-r.start)/(max-min||1)*(c.height-20);if(!x)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.stroke();}
+  // 执行地址时间轴。用循环取极值：几十万范围展开成 Math.min(...array) 会直接爆栈。
+  timeline(){
+    const canvas=this.$('timeline');if(!canvas||!this.ranges.length)return;
+    const ctx=canvas.getContext('2d');canvas.width=Math.max(400,canvas.clientWidth*devicePixelRatio);canvas.height=110*devicePixelRatio;
+    const limit=Math.min(this.ranges.length,200000);let low=Infinity,high=-Infinity;
+    for(let i=0;i<limit;i++){const start=this.ranges[i].start;if(start<low)low=start;if(start>high)high=start;}
+    ctx.fillStyle='#0d1420';ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.strokeStyle='#5ca8ff';ctx.lineWidth=devicePixelRatio;ctx.beginPath();
+    for(let x=0;x<canvas.width;x++){
+      const range=this.ranges[Math.min(this.ranges.length-1,Math.floor(x/canvas.width*this.ranges.length))];
+      const y=10+(high-range.start)/((high-low)||1)*(canvas.height-20);
+      if(!x)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+  }
   exportCsv(){if(!this.model)throw Error('先解码再导出');save(executionCsv(this.model),'zynqdap-etm-flow.csv','text/csv');}
   exportSvg(){if(!this.model)throw Error('先解码再导出');save(flameSvg(this.model,{width:1600}),'zynqdap-etm-flame.svg','image/svg+xml');}
   async exportJson(){

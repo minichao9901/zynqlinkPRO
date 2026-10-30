@@ -244,6 +244,7 @@ export function analyze({records=[], symbols=[], nameOf, resolve, maxIssues=MAX_
       nonExecuted:stats.nonExecuted,gaps:stats.gaps,exceptions:stats.exceptions,
       calls:stats.calls,returns:stats.returns,issues:issues.length,issuesTruncated:truncated},
     stackAt(index){return stackFrames(this,index);}};
+  model.tree=foldTree(model);      // 火焰图用的合并调用树，布局和导出共用同一棵
   return model;
 }
 
@@ -256,32 +257,65 @@ export function stackFrames(model,index){
   return chain.reverse();
 }
 
-/** 火焰图布局：先序遍历调用树，按 self+子节点 的宽度铺开。 */
+/**
+ * 把调用树按「同名兄弟合并」压成火焰图用的树。
+ *
+ * 一段 trace 里同一个函数会被调用几百次，逐个实例画出来只会得到几百个一像素的条。
+ * 火焰图的标准做法是按调用路径聚合：每个节点代表一条「函数路径」，同名路径的 self 相加、
+ * 子孙继续合并。这样宽度才等于这条路径实际执行的量。
+ */
+export function foldTree(model){
+  const frames=model?.frames||[];
+  if(!frames.length)return {name:'全部',kind:'root',self:0,total:0,children:[],instances:0};
+  const root={name:'全部',kind:'root',self:frames[0].self,children:new Map(),instances:1};
+  for(const frame of frames){
+    if(frame.parent<0)continue;
+    const parts=[];                       // 自底向上收集路径，再反过来
+    for(let current=frame;current&&current.parent>=0;current=frames[current.parent])parts.push(current.name);
+    parts.reverse();
+    let node=root;
+    for(const part of parts){
+      let child=node.children.get(part);
+      if(!child){child={name:part,kind:frame.kind,self:0,total:0,children:new Map(),instances:0};node.children.set(part,child);}
+      node=child;
+    }
+    node.self+=frame.self;node.instances++;
+  }
+  // 自底向上定 total，并把子节点按权重降序排好（宽条在左）。
+  const finish=node=>{
+    const list=[];
+    for(const child of node.children.values()){finish(child);list.push(child);}
+    list.sort((a,b)=>(b.self+b.total)-(a.self+a.total)||a.name.localeCompare(b.name));
+    node.children=list;
+    node.total=list.reduce((sum,child)=>sum+child.self+child.total,0);
+    return node.total;
+  };
+  finish(root);
+  return root;
+}
+
+const foldedWeight=node=>node.self+node.total;
+
+/** 火焰图布局：先序遍历合并后的调用树，按 self+子树 的宽度铺开。 */
 export function flameLayout(model,{maxDepth=96,maxNodes=20000,minWidth=0}={}){
   const rows=[];
-  if(!model?.frames?.length)return {rows,total:0,omitted:0};
-  const total=(model.frames[0].self+model.frames[0].total)||0;
-  const children=new Map();
-  for(const frame of model.frames){
-    if(frame.parent<0)continue;
-    if(!children.has(frame.parent))children.set(frame.parent,[]);
-    children.get(frame.parent).push(frame.id);
-  }
-  const widthOf=id=>{const frame=model.frames[id];return (frame.self+frame.total)||0;};
+  const tree=model?.tree||foldTree(model);
+  const total=tree?foldedWeight(tree):0;
+  if(!tree||!total)return {rows,total:0,omitted:0,tree};
   let omitted=0;
-  const walk=(id,depth,x)=>{
+  const walk=(node,depth,x)=>{
     if(depth>maxDepth||rows.length>=maxNodes){omitted++;return;}
-    const width=widthOf(id)||1;
+    const width=foldedWeight(node)||1;
     if(minWidth&&width<minWidth&&depth>0){omitted++;return;}
-    rows.push({id,depth,x,width,name:model.frames[id].name,kind:model.frames[id].kind,self:model.frames[id].self});
+    rows.push({depth,x,width,name:node.name,kind:node.kind,self:node.self,instances:node.instances});
     let cursor=x;
-    for(const child of children.get(id)||[]){
+    for(const child of node.children){
       walk(child,depth+1,cursor);
-      cursor+=widthOf(child);
+      cursor+=foldedWeight(child);
     }
   };
-  walk(0,0,0);
-  return {rows,total,omitted};
+  walk(tree,0,0);
+  return {rows,total,omitted,tree};
 }
 
 const hue=name=>{let h=0;for(let i=0;i<name.length;i++)h=(h*33+name.charCodeAt(i))>>>0;return h%360;};

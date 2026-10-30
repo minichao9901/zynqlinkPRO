@@ -93,6 +93,31 @@ test('unbalanced returns and resync boundaries become reported issues',()=>{
   assert.equal(model.ranges[1].executed,false);
 });
 
+test('repeated calls fold into one flame-graph node per call path',()=>{
+  const records=[element(ELEM.TRACE_ON,{offset:0})];
+  for(let i=0;i<3;i++){
+    records.push(range(0x1000,{offset:2+i*3,lastType:INSTR.BR,lastSubtype:SUB.BR_LINK}));
+    records.push(range(0x2000,{offset:3+i*3}));
+    records.push(range(0x2002,{offset:4+i*3,lastType:INSTR.BR_INDIRECT,lastSubtype:SUB.V7_IMPLIED_RET}));
+  }
+  const model=analyze({records,symbols:SYMBOLS});
+  assert.equal(model.totals.calls,3);
+  const tree=model.tree;
+  assert.equal(tree.children.length,1);                 // 只有 main 一个入口
+  assert.equal(tree.children[0].name,'main');
+  assert.equal(tree.children[0].self,3);
+  assert.equal(tree.children[0].children.length,1);     // 三次 helper 合成一个节点
+  const helper=tree.children[0].children[0];
+  assert.equal(helper.name,'helper');
+  assert.equal(helper.instances,3);
+  assert.equal(helper.self,6);
+  assert.equal(helper.total,0);
+  assert.equal(tree.total,tree.self+9);                 // 3 次 bl + 3×2 条 helper
+  const {rows,total}=flameLayout(model);
+  assert.equal(total,9);
+  assert.equal(rows.length,3);                          // 全部 / main / helper
+});
+
 test('flame layout covers the whole tree and the SVG escapes source text',()=>{
   const model=analyze({records:[
     element(ELEM.TRACE_ON,{offset:0}),
