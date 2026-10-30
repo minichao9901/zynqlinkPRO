@@ -3,7 +3,7 @@
 // 1 = one pin, 2 = two pins, 3 = four pins. Hold it stable until next reset.
 // The consumer receives unformatted bytes tagged with CoreSight source ID.
 // No USB/ORBFlow framing is added here.
-module orbtrace_parallel #(parameter USE_IO_CLOCK=0,USE_INPUT_DELAY=0) (
+module orbtrace_parallel #(parameter USE_IO_CLOCK=0,USE_INPUT_DELAY=0,INPUT_DELAY_VALUE=16) (
     input wire trace_clk,input wire [3:0] trace_data,input wire [1:0] width,
     input wire trace_io_clk,
     input wire clk,input wire rst,
@@ -22,7 +22,7 @@ module orbtrace_parallel #(parameter USE_IO_CLOCK=0,USE_INPUT_DELAY=0) (
       wire sampled_data;
       if(USE_INPUT_DELAY)begin: delay_input
         (* IODELAY_GROUP="ORBTRACE_INPUTS" *)
-        IDELAYE2 #(.DELAY_SRC("IDATAIN"),.IDELAY_TYPE("FIXED"),.IDELAY_VALUE(28),
+        IDELAYE2 #(.DELAY_SRC("IDATAIN"),.IDELAY_TYPE("FIXED"),.IDELAY_VALUE(INPUT_DELAY_VALUE),
           .REFCLK_FREQUENCY(200.0),.HIGH_PERFORMANCE_MODE("TRUE"),.SIGNAL_PATTERN("DATA")) input_delay(
           .IDATAIN(trace_data[i]),.DATAIN(1'b0),.DATAOUT(sampled_data),.C(1'b0),.CE(1'b0),
           .INC(1'b0),.LD(1'b0),.LDPIPEEN(1'b0),.REGRST(1'b0),.CINVCTRL(1'b0),
