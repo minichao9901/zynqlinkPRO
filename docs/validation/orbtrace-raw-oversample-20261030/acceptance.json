@@ -1,0 +1,107 @@
+{
+  "artifacts": {
+    "git_head": "c1a0f9932c8ac6827ac2e0eead9eea26d38d21b4",
+    "git_dirty": true,
+    "bit": {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\orbtrace-cm3\\zynqlinkPRO\\build\\orbtrace_board_20261030\\oversample-raw.bit",
+      "sha256": "f250ca591706fd2708754a285e0915d6660e3be6e6038e09163839389c0dc365"
+    },
+    "elf": {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\orbtrace-cm3\\zynqlinkPRO\\prebuilt\\20261030_orbtrace_usbfix_20261030\\zynqdap_orbtrace.elf",
+      "sha256": "6419c8b00a71b70a1572a55f84c3478f32b67aae8eda95a3821684dc7b3f1a30"
+    },
+    "source_commit_for_bit": "cca0acfbec4dc1b8204e79e63b7189e74179ebda",
+    "source_tree_was_dirty_when_capture_started": true,
+    "source_commit_note": "The diagnostic source was committed immediately after the bit/board capture; file contents are identical to the recorded source commit."
+  },
+  "target_elf": "E:\\superlinkPRO\\etm\\firmware\\stm32f103_cdc_trace\\fw-ze.elf",
+  "target_elf_sha256": "63881ed9f6c1187d56924795ccad3f151a677aea0dfa201823fe44e0cb857522",
+  "milliseconds": 0.1,
+  "periodic_sync": false,
+  "hclk_div": 4,
+  "raw_diagnostic": true,
+  "IDCODE": "0501017714a01b",
+  "cpuid": "0x411fc231",
+  "flash": [
+    {
+      "address": 134217728,
+      "bytes": 20040,
+      "sha256": "d02f765f73d708299161b6ca5e2849956cc42fc03d1dc3145533b6a96dbf3c87"
+    },
+    {
+      "address": 134237768,
+      "bytes": 128,
+      "sha256": "496d8b1d85d4a90921e45cc77629b2c80dcaae957a6ed79710200efa1d4cf341"
+    }
+  ],
+  "reference": [
+    199999998,
+    9437440,
+    221192,
+    1
+  ],
+  "rcc_before": [
+    50548355,
+    5309450
+  ],
+  "rcc_capture": [
+    50548355,
+    5308570
+  ],
+  "gpio_before": [
+    16461,
+    1270594372
+  ],
+  "gpio_capture": 1091637572,
+  "tpiu_supported": 11,
+  "config": {
+    "protocol": "ETMv3",
+    "idr": 1091891777,
+    "ctrl": 2064,
+    "ccer": 100352,
+    "traceid": 2
+  },
+  "start_status": [
+    1163152689,
+    65470483,
+    641,
+    1648,
+    4,
+    1,
+    99999999,
+    0
+  ],
+  "stop_status": [
+    1163152689,
+    65470482,
+    0,
+    9040,
+    38,
+    1,
+    99999999,
+    0
+  ],
+  "quality": {
+    "records": 9040,
+    "loss": false,
+    "synced": true,
+    "ended": true,
+    "trailingBytes": 0,
+    "fclk": 99999999,
+    "tckKhz": 999,
+    "refClockHz": 199999998
+  },
+  "packets": 38,
+  "sequence_ok": true,
+  "capture_id_ok": true,
+  "raw_bytes": 9040,
+  "raw_sha256": "cbb466a356724a8ee104fb02e4b011faf55df697f6649000bdbc73f355812111",
+  "raw_note": "sampled DDR bytes before TPIU parsing; source tag 2 is a transport placeholder",
+  "capture_passed": true,
+  "restored": true,
+  "rcc_after": [
+    50548355,
+    5309450
+  ],
+  "usb_reader_errors": []
+}

@@ -1,0 +1,61 @@
+{
+  "name": "orbtrace raw oversampling diagnostic",
+  "status": "experimental diagnostic; not the default production ETM path",
+  "source_commit": "cca0acfbec4dc1b8204e79e63b7189e74179ebda",
+  "build_options": {
+    "ZYNQLINK_RAW_TRACE": "2",
+    "ZYNQLINK_RUN_THREADS": "1",
+    "part": "xc7z020clg400-2",
+    "fclk_hz": 100000000,
+    "trace_reference_clock_hz": 200000000,
+    "raw_fifo_addr_bits": 14
+  },
+  "bitstream": {
+    "file": "orbtrace_raw_oversample.bit",
+    "sha256": "f250ca591706fd2708754a285e0915d6660e3be6e6038e09163839389c0dc365",
+    "bytes": 4045674
+  },
+  "zynq_elf": {
+    "file": "zynqdap_orbtrace.elf",
+    "sha256": "6419c8b00a71b70a1572a55f84c3478f32b67aae8eda95a3821684dc7b3f1a30",
+    "bytes": 825584
+  },
+  "timing": {
+    "verified_fclk_hz": 100000000,
+    "setup_slack_ns": 0.413,
+    "hold_slack_ns": 0.034,
+    "post_route_wns_at_120mhz_ns": -0.136,
+    "post_route_whs_ns": 0.034
+  },
+  "utilization": {
+    "slice_lut": 19244,
+    "slice_register": 28030,
+    "bram_tile": 12,
+    "dsp": 1
+  },
+  "board_acceptance": {
+    "target": "STM32F103ZE",
+    "target_elf_sha256": "63881ed9f6c1187d56924795ccad3f151a677aea0dfa201823fe44e0cb857522",
+    "hclk_hz": 48000000,
+    "traceclk_hz": 24000000,
+    "hclk_div": 4,
+    "gpio_speed": 1,
+    "swd_khz": 999,
+    "raw_bytes": 9040,
+    "raw_sha256": "cbb466a356724a8ee104fb02e4b011faf55df697f6649000bdbc73f355812111",
+    "tpiu_phase": 1,
+    "tpiu_strict_pass": true,
+    "tpiu_frames": 410,
+    "etm_bytes": 1660,
+    "opencsd_decoder_exit": 0,
+    "instruction_ranges": 1578,
+    "first_frame_matching_prefix_bytes": 16,
+    "first_frame_bit_differences": 0,
+    "fifo_loss": false
+  },
+  "evidence": {
+    "reference_la_capture": "E:/superlinkPRO/etm/records/capture-2d6da5829a8c4811b7c5ed2ca9e08cc3",
+    "raw_analysis": "docs/validation/orbtrace-raw-oversample-20261030/raw-analysis.json",
+    "acceptance": "docs/validation/orbtrace-raw-oversample-20261030/acceptance.json"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "method": "200 MHz two-stage synchronized edge-qualified oversampling",
+  "reference_la_capture": "E:/superlinkPRO/etm/records/capture-2d6da5829a8c4811b7c5ed2ca9e08cc3",
+  "normal_ddr_result": "phase-1 framing error / reserved source 0x7f at 27-44 bytes across repeated runs, extra ground did not remove it",
+  "oversample_result": {
+    "raw_bytes": 9040,
+    "phase": 1,
+    "tpiu_strict_pass": true,
+    "frames": 410,
+    "etm_bytes": 1660,
+    "opencsd_exit": 0,
+    "instruction_ranges": 1578,
+    "first_frame": "05f801c800000588010f000000000012",
+    "reference_first_frame": "05f801c800000588010f000000000012",
+    "bit_differences": 0
+  },
+  "interpretation": "Target firmware, PE2-PE6 wiring and common ground are proven. The failure is in the original synchronous IDDR sampling window; oversampling recovers the known-good TPIU stream. This diagnostic path still needs a production integration design before replacing the normal decoder."
+}
