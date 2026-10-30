@@ -1,0 +1,25 @@
+{
+  "source_commit": "668a91d7f8378e5f24e87fd61fd1c637bb09a49f",
+  "status": "DIAGNOSTIC ONLY: raw sampled DDR mode, not ETM data; 100MHz STA passes; real trace capture reports overflow and TPIU framing error; not accepted",
+  "build_options": {
+    "ZYNQLINK_RAW_TRACE": "1",
+    "ZYNQLINK_RUN_THREADS": "1",
+    "IDELAY_VALUE": 16,
+    "Vivado": "2018.3",
+    "bit_source": "raw16 diagnostic build",
+    "elf_source": "USB toggle fix"
+  },
+  "sha256": {
+    "zynqdap_orbtrace.bit": "304d7a5adb9b6fa03a90354c2360ec3a61a2da6eda8de53de08a6be5c20e4e1e",
+    "zynqdap_orbtrace.elf": "6419c8b00a71b70a1572a55f84c3478f32b67aae8eda95a3821684dc7b3f1a30",
+    "ps7_init.tcl": "68e31ef14fff99b1c9385869ba5efc88b53d312cc47f0333bd7ff993e4cfa46f"
+  },
+  "timing": {
+    "FCLK_max_Hz": 100000000,
+    "SWCLK_max_Hz": 50000000,
+    "setup_slack_ns": 0.291,
+    "hold_slack_ns": 0.018
+  },
+  "board": "F103ZE, raw16-f103-a and raw16-f103-c under docs/validation/orbtrace-raw-20261030",
+  "notes": "Trace data source tag 2 carries raw DDR sampled bytes, not ETM payload. Restore regular bit before normal use."
+}
