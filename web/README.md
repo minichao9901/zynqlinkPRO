@@ -89,7 +89,9 @@ python tools/build_etm_wasm.py --emsdk build/emsdk
 
 `etm-analysis.test.mjs` 用合成的 OpenCSD 元素流覆盖调用/返回、尾调用、未同步、可信区段、
 火焰图布局和导出，并跑一遍 60 万范围的性能下限。`page-smoke.mjs` 用 CDP 驱动无头 Edge
-逐个点开九个页面，并在 ETM 页里载入 `samples/cm3-orbtrace.zetm` 走完解码→调用树→火焰图。
+逐个点开九个页面，并在 ETM 页里载入 `samples/cm3-orbtrace.zetm` 走完解码→调用树→火焰图，
+另外把三个内置模拟目标（调试器 Cortex-M7 模型、J-Scope 假探针、RTT `?backend=mock`）也
+真连一遍。接线相关的串口、烧录和实板 ETM 仍需人工上板。
 
 WASM 重建需激活 Emscripten 4.0.10、CMake 和 Ninja。源码位于 `web/etm-native/` 与
 `third_party/OpenCSD-1.8.3/`；运行时只需已纳入本项目的 `opencsd.mjs` 和 `opencsd.wasm`。

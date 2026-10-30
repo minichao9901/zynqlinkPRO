@@ -153,6 +153,43 @@ try{
   console.log('  ETM 视图：执行流 '+etm.rows+' 行 · 调用统计 '+etm.stats+' 行 · 区段 '+etm.sections+
     ' · 包类型 '+etm.packets+' · 栈深 '+etm.stack+' · 火焰节点 '+etm.flameNodes);
 
+  // 调试器模拟目标：内置 Cortex-M7 模型，走「选后端 → 连接 → 读 IDCODE/断点能力」这条真路径。
+  await evaluate('document.querySelector(\'[data-tab="dbg"]\').click()');
+  await sleep(150);
+  await evaluate('(()=>{const s=document.getElementById("d-backend");s.value="mock";s.dispatchEvent(new Event("change"));})()');
+  await sleep(200);
+  await evaluate('document.getElementById("d-connect").click()');
+  let dbgOut='';
+  for(let attempt=0;attempt<40;attempt++){
+    await sleep(250);
+    dbgOut=await evaluate('document.getElementById("d-out").innerText');
+    if(/已连接：模拟目标|故障|失败/.test(dbgOut))break;
+  }
+  if(/已连接：模拟目标/.test(dbgOut)){
+    const idcode=(dbgOut.match(/IDCODE=0x[0-9A-F]+/i)||[''])[0];
+    const fpb=(dbgOut.match(/硬件断点：\d+ 个比较器/)||[''])[0];
+    console.log('  调试器模拟目标：已连接 · '+[idcode,fpb].filter(Boolean).join(' · '));
+  }else fail('调试器','模拟目标没有连上：'+dbgOut.slice(-200).replace(/\s+/g,' '));
+
+  // J-Scope 模拟探针：页面自己生成波形，走完「开假探针 → 采样 → 累计样本」。
+  await evaluate('document.querySelector(\'[data-tab="scope"]\').click()');
+  await sleep(250);
+  const mockOn=await evaluate('(()=>{const c=document.getElementById("sc-mock");if(!c.checked)c.click();return c.checked;})()');
+  if(!mockOn)fail('J-Scope','模拟探针开关没有打开');
+  await evaluate('document.getElementById("sc-start").click()');
+  let scope=null;
+  for(let attempt=0;attempt<40;attempt++){
+    await sleep(250);
+    scope=await evaluate('({state:document.getElementById("sc-state").innerText,'+
+      'samples:Number(document.getElementById("sc-samples").innerText.replace(/[^0-9]/g,""))||0,'+
+      'rate:document.getElementById("sc-rate").innerText,err:document.getElementById("sc-err").innerText})');
+    if(scope.samples>0||/失败|错误/.test(scope.err))break;
+  }
+  try{await evaluate('document.getElementById("sc-stop").click()');}catch{}
+  if(scope&&scope.samples>0&&!scope.err){
+    console.log('  J-Scope 模拟探针：'+scope.samples+' 样本 · '+scope.rate);
+  }else fail('J-Scope','模拟采样没有产出样本：'+JSON.stringify(scope));
+
   // RTT Viewer 的模拟目标端到端：页面用 ?backend=mock&auto=1 自动连上内置模拟探针，
   // 走完「连接 → 扫描控制块 → 上行缓冲」这条真实路径，不需要接板子。
   const mockUrl=BASE+(BASE.includes('?')?'&':'?')+'backend=mock&auto=1';
@@ -185,4 +222,4 @@ if(failures.length){
   for(const failure of failures)console.error('  - '+failure);
   process.exit(1);
 }
-console.log('\nPASS 九个页面渲染正常，ETM 样例解码与分析视图可用');
+console.log('\nPASS 九个页面渲染正常；ETM 样例端到端，调试器 / J-Scope / RTT 的模拟目标均跑通');
