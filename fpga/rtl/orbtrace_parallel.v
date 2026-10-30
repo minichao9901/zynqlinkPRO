@@ -34,7 +34,7 @@ module orbtrace_parallel #(parameter USE_IO_CLOCK=0,USE_INPUT_DELAY=0,INPUT_DELA
         .C(USE_IO_CLOCK ? trace_io_clk : trace_clk),.CE(1'b1),.D(sampled_data),.R(trace_reset[1]),.S(1'b0),.Q1(rise[i]),.Q2(fall[i]));
     end endgenerate
     wire [127:0] frame,decoded_frame;
-    wire toggle,decoded_toggle,trace_synced,oversample_synced;
+    wire toggle,decoded_toggle,trace_synced,oversample_synced,parser_malformed;
     wire capture_clk,capture_reset;
     reg previous_toggle;
     always @(posedge capture_clk or posedge rst)
@@ -85,7 +85,7 @@ module orbtrace_parallel #(parameter USE_IO_CLOCK=0,USE_INPUT_DELAY=0,INPUT_DELA
         end
       orbtrace_tpiu_stream parser(.clk(sample_clk),.rst(sample_reset[1]),
         .byte_in(sampled_byte),.byte_toggle(byte_toggle),
-        .frame(parsed_frame),.frame_toggle(parsed_toggle),.synced(parsed_synced));
+        .frame(parsed_frame),.frame_toggle(parsed_toggle),.synced(parsed_synced),.malformed(parser_malformed));
       assign frame=parsed_frame;
       assign toggle=parsed_toggle;
       assign capture_clk=sample_clk;
@@ -109,12 +109,14 @@ module orbtrace_parallel #(parameter USE_IO_CLOCK=0,USE_INPUT_DELAY=0,INPUT_DELA
       assign capture_clk=trace_clk;
       assign capture_reset=trace_reset[1];
       assign oversample_synced=1'b0;
+      assign parser_malformed=1'b0;
     end else begin: formatted_capture
       assign frame=decoded_frame;
       assign toggle=decoded_toggle;
       assign capture_clk=trace_clk;
       assign capture_reset=trace_reset[1];
       assign oversample_synced=1'b0;
+      assign parser_malformed=1'b0;
     end endgenerate
     wire [127:0] fifo_data;
     wire fifo_valid,fifo_ready,trace_overflow;
@@ -126,7 +128,7 @@ module orbtrace_parallel #(parameter USE_IO_CLOCK=0,USE_INPUT_DELAY=0,INPUT_DELA
       if(rst)begin sync_status<=0;oversample_sync_status<=0;overflow_status<=0;end
       else begin sync_status<={sync_status[0],trace_synced};
         oversample_sync_status<={oversample_sync_status[0],oversample_synced};
-        overflow_status<={overflow_status[0],trace_overflow};end
+        overflow_status<={overflow_status[0],trace_overflow | parser_malformed};end
     assign synced=sync_status[1] | oversample_sync_status[1];assign overflow=overflow_status[1];
     generate if(RAW_DIAGNOSTIC==1)begin: raw_output
       reg [127:0] raw_frame;
