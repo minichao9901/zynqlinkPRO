@@ -56,7 +56,8 @@ static inline void XUsbPs_WritedQH(XUsbPs_dQH *p,unsigned n,u32 v) {(void)p;(voi
 static inline int XUsbPs_EpFlush(XUsbPs *p,unsigned e,unsigned d) {(void)p;(void)e;(void)d;return 0;}
 static inline int XUsbPs_ReconfigureEp(XUsbPs *p,void *cfg,unsigned e,unsigned d,unsigned z) {(void)p;(void)cfg;(void)e;(void)d;(void)z;return 0;}
 static inline void XUsbPs_EpEnable(XUsbPs *p,unsigned e,unsigned d) {(void)p;(void)e;(void)d;}
-static inline void XUsbPs_SetBits(XUsbPs *p,unsigned r,unsigned v) {(void)p;(void)r;(void)v;}
+static unsigned host_last_setbits;
+static inline void XUsbPs_SetBits(XUsbPs *p,unsigned r,unsigned v) {(void)p;(void)r;host_last_setbits=v;}
 static inline void XUsbPs_WriteReg(uintptr_t p,unsigned r,unsigned v) {(void)p;(void)r;(void)v;}
 static inline u32 XUsbPs_ReadReg(uintptr_t p,unsigned r) {(void)p;(void)r;return 0;}
 static inline int XUsbPs_EpPrime(XUsbPs *p,unsigned e,unsigned d) {(void)p;(void)e;(void)d;return 0;}

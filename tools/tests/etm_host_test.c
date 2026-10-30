@@ -43,8 +43,10 @@ int main(void){
   XUsbPs usb={0};uint32_t reply[8],before;
   assert(etm_reference_init()==199999998U);etm_reference_snapshot(reply);assert(reply[0]==199999998U && reply[1]==reference_config);
   pll_status=0;before=reference_config;assert(!etm_reference_init() && reference_config==before);pll_status=4;assert(etm_reference_init()==199999998U);
-  etm_usb_configured(&usb);etm_control(0x301,reply);assert(reply[0]==0x45544d31 && reply[7]==0x301);
+  etm_usb_configured(&usb);assert(host_last_setbits&XUSBPS_EPCR_TXR_MASK);
+  etm_control(0x301,reply);assert(reply[0]==0x45544d31 && reply[7]==0x301);
   etm_poll(&usb);assert(running && !pending && capture_id==1 && !(head-tail));
+  assert(!(host_last_setbits&XUSBPS_EPCR_TXR_MASK));
   append(300);etm_poll(&usb);assert(word(0)==0x3154455a && word(1)==0 && word(3)==240 && sent_length==512 && sent[33]==2 && (word(2)&16));
   before=tail;etm_usb_event(&usb,7,XUSBPS_EP_EVENT_DATA_TX,(void*)sent_pointer);assert(tail==before);
   etm_usb_event(&usb,2,XUSBPS_EP_EVENT_DATA_TX,(void*)(sent_pointer+32));assert(tail==before);

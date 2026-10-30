@@ -12,16 +12,20 @@ export class EtmTarget{
     if(this.saved)throw Error('上一次目标 trace 配置尚未恢复');
     const cpuid=await this.read(0xe000ed00),device=(await this.read(0xe0042000))&0xfff;
     if(((cpuid>>>4)&0xfff)!==0xc23||device!==0x414)throw Error('当前自动配置仅支持 STM32F103ZE / Cortex-M3');
-    if(!((await this.read(0xe0040000))&8))throw Error('TPIU 不支持四位 DDR');
-    this.saved={};for(const [name,addr]of Object.entries(REG))this.saved[name]=await this.read(addr);
+    // F103ZE can return zero from gated TPIU registers until TRCENA is set.
+    // Preserve DEMCR before enabling access, then snapshot the real registers.
+    const demcr=await this.read(REG.demcr);
     try{
-      await this.write(REG.demcr,this.saved.demcr|0x01000000);await this.unlock(0xe0041000);await this.unlock(0xe0040000);
+      await this.write(REG.demcr,demcr|0x01000000);
+      const saved={demcr};for(const [name,addr]of Object.entries(REG))if(name!=='demcr')saved[name]=await this.read(addr);
+      if(!((await this.read(0xe0040000))&8))throw Error('TPIU 不支持四位 DDR');
+      this.saved=saved;await this.unlock(0xe0041000);await this.unlock(0xe0040000);
       this.control=(this.saved.etmcr|0xc00)&~0x301;
       await this.write(REG.etmcr,this.control);await this.waitProgram(true);
       for(const [name,value]of Object.entries({etmtrigger:0,etmteevr:0x6f,etmtecr1:0,etmfflr:0,etmtraceidr:2,cspsr:8,sppr:0,ffcr:this.saved.ffcr|2,dbg_cr:(this.saved.dbg_cr&~0xe0)|0xe0}))await this.write(REG[name],value);
       this.config={protocol:'ETMv3',idr:await this.read(0xe00411e4),ctrl:(await this.read(REG.etmcr))&~0x400,ccer:await this.read(0xe00411e8),traceid:await this.read(REG.etmtraceidr)};
       return this.config;
-    }catch(e){try{await this.restore();}catch(cleanup){e.message+='；恢复失败：'+cleanup.message;}throw e;}
+    }catch(e){try{if(this.saved)await this.restore();else await this.write(REG.demcr,demcr);}catch(cleanup){e.message+='；恢复失败：'+cleanup.message;}throw e;}
   }
   async start(){await this.write(REG.etmcr,this.control&~0x400);await this.waitProgram(false);}
   async stop(){if(this.saved){await this.write(REG.etmcr,this.control);await this.waitProgram(true);}}

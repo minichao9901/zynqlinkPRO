@@ -55,7 +55,7 @@ static uint32_t trace_status(void){
 static void put32(uint8_t *p,uint32_t v){p[0]=v;p[1]=v>>8;p[2]=v>>16;p[3]=v>>24;}
 static uint32_t irq_save(void){uint32_t f=mfcpsr();mtcpsr(f|0x80U);return f;}
 static void irq_restore(uint32_t f){mtcpsr(f);}
-static void reset_endpoint(XUsbPs *usb){
+static void reset_endpoint(XUsbPs *usb,unsigned reset_toggle){
   unsigned i;
   XUsbPs_EpFlush(usb,ETM_BULKIN_EP,XUSBPS_EP_DIRECTION_IN);
   XUsbPs_WriteReg(usb->Config.BaseAddress,XUSBPS_EPCOMPL_OFFSET,1U<<(16+ETM_BULKIN_EP));
@@ -69,11 +69,15 @@ static void reset_endpoint(XUsbPs *usb){
   XUsbPs_WritedQH(usb->DeviceConfig.Ep[ETM_BULKIN_EP].In.dQH,XUSBPS_dQHdTDNLP,1);
   XUsbPs_dQHFlushCache(usb->DeviceConfig.Ep[ETM_BULKIN_EP].In.dQH);
   XUsbPs_EpEnable(usb,ETM_BULKIN_EP,XUSBPS_EP_DIRECTION_IN);
-  XUsbPs_SetBits(usb,XUSBPS_EPCRn_OFFSET(ETM_BULKIN_EP),XUSBPS_EPCR_TXT_BULK_MASK|XUSBPS_EPCR_TXR_MASK);
+  // A vendor capture restart does not reset the host's USB DATA0/DATA1 state.
+  // Resetting only the device toggle silently discards the first packet when
+  // the host expects DATA1. Reset it only for the configuration lifecycle.
+  XUsbPs_SetBits(usb,XUSBPS_EPCRn_OFFSET(ETM_BULKIN_EP),XUSBPS_EPCR_TXT_BULK_MASK|
+                (reset_toggle ? XUSBPS_EPCR_TXR_MASK : 0U));
   head=tail=busy=busy_zlp=flush_remaining=fill_count=0;
 }
 void etm_usb_reset(void){configured=0;epoch++;pending=0;running=ending=0;fill_count=flush_remaining=0;EW(1,12);}
-void etm_usb_configured(XUsbPs *usb){etm_usb_reset();reset_endpoint(usb);configured=1;}
+void etm_usb_configured(XUsbPs *usb){etm_usb_reset();reset_endpoint(usb,1);configured=1;}
 void etm_usb_event(void *ref,u8 ep,u8 event,void *data){
   (void)ref;
   if(ep==ETM_BULKIN_EP && event==XUSBPS_EP_EVENT_DATA_TX && configured && busy && (uintptr_t)data==active_buffer){
@@ -113,7 +117,7 @@ void etm_poll(XUsbPs *usb){
   if(command){
     unsigned op=command&255U;
     if(op==1 || op==3){
-      f=irq_save();reset_endpoint(usb);sequence=0;capture_id++;ending=0;
+      f=irq_save();reset_endpoint(usb,0);sequence=0;capture_id++;ending=0;
       running=op==1;
       EW(1,((op==1 ? command>>8 : 3U)<<2)|2U|running);
       irq_restore(f);

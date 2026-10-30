@@ -1,6 +1,6 @@
-"""F103CB RAM-only acceptance for RTT/CDC and RTL HSS.
+"""F103 RAM-only acceptance for RTT/CDC and RTL HSS.
 
-Halts the target if needed, backs up the last 4KiB of its 20KiB SRAM, installs
+Halts the target if needed, backs up a 4KiB SRAM window, installs
 temporary fixtures, verifies bytes/frames, and restores the complete SRAM window
 and original run/halt state. Never resets the target or programs its flash.
 """
@@ -242,6 +242,8 @@ def main():
     ap.add_argument('--port')
     ap.add_argument('--seconds', type=float, default=0.25)
     ap.add_argument('--speed-hz', type=int, default=50_000_000)
+    ap.add_argument('--ram-base', type=lambda s: int(s, 0),
+                    help='4KiB fixture window; defaults to end of F103CB/xE SRAM')
     ap.add_argument('--bit', type=Path)
     ap.add_argument('--elf', type=Path)
     ap.add_argument('--output', type=Path, required=True)
@@ -250,12 +252,17 @@ def main():
     probe = Probe()
     dev, out, inp = open_dap()
     mem = Memory(out, inp)
-    report = {'target': 'F103CB', 'speed_hz': args.speed_hz, 'RAM_base': '0x20004000',
+    report = {'speed_hz': args.speed_hz,
               'artifacts': provenance(args.bit, args.elf)}
     backup, initial_dhcsr = None, None
     try:
         stop(probe, dev)
         report['IDCODE'] = setup(out, inp, args.speed_hz//1000).hex()
+        device = mem.word(0xe0042000) & 0xfff
+        report['target'] = 'STM32F103xE' if device == 0x414 else 'STM32F103CB-compatible'
+        report['device_id'] = hex(device)
+        base = args.ram_base if args.ram_base is not None else (0x2000f000 if device == 0x414 else 0x20004000)
+        report['RAM_base'] = hex(base)
         diagnostic = xfer(out, inp, [0x80, 255])
         hz, cfg = struct.unpack_from('<II', diagnostic, 4)
         report['waveform'] = dict(FCLK_Hz=hz, cfg=hex(cfg), **swd_clock_details(hz, cfg))
@@ -263,7 +270,7 @@ def main():
         if not initial_dhcsr & (1 << 17):
             mem.write_word(0xe000edf0, 0xa05f0003)
         assert mem.word(0xe000edf0) & (1 << 17)
-        backup = mem.read(0x20004000, 4096)
+        backup = mem.read(base, 4096)
         args.output.with_suffix('.backup.bin').write_bytes(backup)
         report['backup_sha256'] = hashlib.sha256(backup).hexdigest()
         if args.services in ('rtt', 'both'):
@@ -272,17 +279,17 @@ def main():
             # Exercise SET_CONFIGURATION lifecycle and clear probe-side link cache.
             dev.ctrl_transfer(0,9,1,0,None,timeout=3000)
             time.sleep(0.02)
-            report['rtt'] = test_rtt(probe, mem, 0x20004000, port, args.speed_hz)
+            report['rtt'] = test_rtt(probe, mem, base, port, args.speed_hz)
         if args.services in ('hss', 'both'):
-            report['hss'] = [test_hss(probe, mem, dev, 0x20004000, version, wide, args.seconds, args.speed_hz)
+            report['hss'] = [test_hss(probe, mem, dev, base, version, wide, args.seconds, args.speed_hz)
                              for version, wide in [(1, False), (2, False), (2, True)]]
     finally:
         try:
             stop(probe, dev)
             if backup is not None:
                 setup(out, inp, 50000)
-                mem.write(0x20004000, backup)
-                restored = mem.read(0x20004000, 4096)
+                mem.write(base, backup)
+                restored = mem.read(base, 4096)
                 report['restore_sha256'] = hashlib.sha256(restored).hexdigest()
                 report['restore_match'] = restored == backup
                 assert report['restore_match'], 'Original target SRAM was not restored'

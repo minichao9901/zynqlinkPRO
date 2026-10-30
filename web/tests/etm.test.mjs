@@ -52,8 +52,9 @@ test('F103ZE CoreSight program and restore preserves registers and locks',async(
   registers.set(0xe000ed00,0x412fc231);registers.set(0xe0042000,0x414);registers.set(0xe0040000,8);
   registers.set(0xe00411e4,record.config.idr);registers.set(0xe00411e8,record.config.ccer);
   registers.set(0xe0041fb4,3);registers.set(0xe0040fb4,3);
+  registers.set(REG.demcr,0); // Real F103ZE TPIU reads are gated by TRCENA.
   const original=new Map(registers);
-  const probe={async flushWrites(){},async readMemDiagnostic(a){const b=new Uint8Array(4);new DataView(b.buffer).setUint32(0,registers.get(a)||0,true);return b;},async writeMemDiagnostic(a,b){const n=new DataView(b.buffer,b.byteOffset).getUint32(0,true);registers.set(a,n);if(a===REG.etmcr)registers.set(0xe0041010,n&0x400?2:0);if(a===0xe0041fb0||a===0xe0040fb0)registers.set(a+4,n===0xc5acce55?1:3);}};
+  const probe={async flushWrites(){},async readMemDiagnostic(a){const b=new Uint8Array(4);const gated=a>=0xe0040000&&a<0xe0041000&&!(registers.get(REG.demcr)&0x01000000);new DataView(b.buffer).setUint32(0,gated?0:registers.get(a)||0,true);return b;},async writeMemDiagnostic(a,b){const n=new DataView(b.buffer,b.byteOffset).getUint32(0,true);registers.set(a,n);if(a===REG.etmcr)registers.set(0xe0041010,n&0x400?2:0);if(a===0xe0041fb0||a===0xe0040fb0)registers.set(a+4,n===0xc5acce55?1:3);}};
   const t=new EtmTarget(probe);const config=await t.prepare();assert.equal(config.traceid,2);assert.equal(registers.get(REG.cspsr),8);await t.start();assert.equal(registers.get(REG.etmcr)&0x400,0);await t.stop();await t.restore();
   for(const address of Object.values(REG))assert.equal(registers.get(address),original.get(address));
   assert.equal(registers.get(0xe0041fb4),3);assert.equal(registers.get(0xe0040fb4),3);assert.equal(t.saved,null);
