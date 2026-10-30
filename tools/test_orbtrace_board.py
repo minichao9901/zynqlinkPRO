@@ -3,7 +3,8 @@
 Requires the explicitly supplied probe pair to have been loaded already.
 Verifies the target Flash against its ELF, saves/restores CoreSight registers
 and run state, and records raw USB plus a Web-importable .zetm capture.
-Does not program Flash or change target clocks.
+Does not program Flash. An optional diagnostic divider temporarily changes
+the target clock and is restored before returning.
 """
 import argparse
 import base64

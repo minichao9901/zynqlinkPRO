@@ -63,6 +63,14 @@ if {!$impl_only} {
         if {[llength $trace_run] && [lsearch -exact $changed_groups trace]>=0} {reset_run $trace_run}
         reset_run synth_1
     }
+    # Switching the diagnostic parameter must invalidate the module's OOC
+    # checkpoint even when no RTL file changed.
+    if {$raw_trace_changed && $rtl_stamp eq $old_stamp} {
+        set trace_run [get_runs -quiet system_orbtrace_0_0_synth_1]
+        if {[llength $trace_run]} {reset_run $trace_run}
+        reset_run synth_1
+        set fresh_impl 1
+    }
     generate_target all [get_files system.bd]
     make_wrapper -files [get_files system.bd] -top
     # Vivado 2018.3 can retain a stale OUT-net classification after the

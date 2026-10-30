@@ -1,8 +1,9 @@
 `timescale 1ns/1ps
 // Replay real captured physical TPIU bytes into the existing DDR frontend.
 // Input files and results are supplied externally; no target RTL is bundled.
-module tb_orbtrace_replay #(parameter BOARD=0);
+module tb_orbtrace_replay #(parameter BOARD=0,MODE=0);
   reg clk=0;always #5 clk=~clk;
+  reg sample_clk=0;always #2.5 sample_clk=~sample_clk;
   reg tclk=0,rst=1;
   reg [3:0] pins=0;
   wire fabric_clk;
@@ -10,14 +11,19 @@ module tb_orbtrace_replay #(parameter BOARD=0);
     BUFR #(.BUFR_DIVIDE("BYPASS"),.SIM_DEVICE("7SERIES")) b(.I(tclk),.CE(1'b1),.CLR(1'b0),.O(fabric_clk));
   end else assign fabric_clk=tclk;endgenerate
   wire [7:0] data;wire [6:0] channel;wire valid,synced,overflow;
-  orbtrace_parallel #(.USE_IO_CLOCK(BOARD),.USE_INPUT_DELAY(BOARD)) dut(
-    .trace_clk(fabric_clk),.trace_io_clk(tclk),.trace_data(pins),.width(2'd3),
+  orbtrace_parallel #(.USE_IO_CLOCK(BOARD),.USE_INPUT_DELAY(BOARD),.RAW_DIAGNOSTIC(MODE)) dut(
+    .trace_clk(fabric_clk),.trace_io_clk(tclk),.trace_pad_clk(tclk),.sample_clk(sample_clk),.trace_data(pins),.width(2'd3),
     .clk(clk),.rst(rst),.data(data),.channel(channel),.valid(valid),.ready(1'b1),.synced(synced),.overflow(overflow));
   reg [2047:0] source_name,sink_name;
   integer source,sink,c,bytes=0,records=0;
   always @(posedge clk)if(valid)begin $fwrite(sink,"%02x %02x\n",channel,data);records=records+1;end
   task sendbyte(input [7:0] v);
-    begin pins=v[3:0];#90;tclk=1;#110;pins=v[7:4];#90;tclk=0;#110;end
+    begin
+      if(MODE==2)begin
+        #17;tclk=1;#2;tclk=0;#63;tclk=1;
+        #2;pins=v[3:0];#81;tclk=0;#2;pins=v[7:4];#81;
+      end else begin pins=v[3:0];#90;tclk=1;#110;pins=v[7:4];#90;tclk=0;#110;end
+    end
   endtask
   initial begin
     if(!$value$plusargs("source=%s",source_name) || !$value$plusargs("sink=%s",sink_name))$fatal(1,"missing file paths");

@@ -39,6 +39,14 @@ if {[llength [get_cells -hier -filter {REF_NAME == IDELAYE2 && NAME =~ *orbtrace
     error "Parallel TRACE input delay/calibration primitives missing"
 }
 puts "ORBTRACE_DELAY_VERIFIED IDELAYE2=4 IDELAYCTRL=1 REFCLK=200MHz"
+if {[info exists ::env(ZYNQLINK_RAW_TRACE)] && $::env(ZYNQLINK_RAW_TRACE) eq "2"} {
+    set os_meta [get_cells -quiet -hier -filter {NAME =~ *raw_oversample*pad_meta_reg*}]
+    set os_sync [get_cells -quiet -hier -filter {NAME =~ *raw_oversample*pad_sync_reg*}]
+    if {[llength $os_meta] != 5 || [llength $os_sync] != 5} {
+        error "Raw oversampling synchronizers missing: meta=[llength $os_meta] sync=[llength $os_sync]"
+    }
+    puts "ORBTRACE_OVERSAMPLE_VERIFIED META=[llength $os_meta] SYNC=[llength $os_sync]"
+}
 # Evaluate realizable PLL divisors on this routed netlist, without rebuilding
 # it for each frequency. Keep the highest rate that meets BOTH setup and hold.
 set verified_fclk 0
