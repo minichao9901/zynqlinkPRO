@@ -59,6 +59,13 @@ test('F103ZE CoreSight program and restore preserves registers and locks',async(
   for(const address of Object.values(REG))assert.equal(registers.get(address),original.get(address));
   assert.equal(registers.get(0xe0041fb4),3);assert.equal(registers.get(0xe0040fb4),3);assert.equal(t.saved,null);
 });
+test('ETM capture breakpoints use the same FPB encoding as the debugger',async()=>{
+  const registers=new Map([[0xe0002000,0x00000880]]); // rev1, eight code comparators
+  const probe={async flushWrites(){},async readMemDiagnostic(a){const b=new Uint8Array(4);new DataView(b.buffer).setUint32(0,registers.get(a)||0,true);return b;},async writeMemDiagnostic(a,b){registers.set(a,new DataView(b.buffer,b.byteOffset).getUint32(0,true));}};
+  const t=new EtmTarget(probe);const caps=await t.bpInit();assert.equal(caps.numCode,8);assert.equal(caps.rev,1);
+  await t.bpAdd(0x08000101);assert.deepEqual(t.breakpoints,[0x08000100]);assert.equal(registers.get(0xe0002008)&1,1);
+  await t.bpClear();assert.equal(registers.get(0xe0002008),0);
+});
 test('project generator and J-Scope use this project CMSIS-DAP/HSS path',()=>{
   const config=parseUvprojx('<Device>STM32F103ZE</Device><TargetName>demo</TargetName>');assert.equal(config.device,'STM32F103ZE');
   const files=buildOutputs({projectName:'demo',checks:{pyocd:true,openocd:true,testBin:true}});

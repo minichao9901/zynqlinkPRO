@@ -1,11 +1,46 @@
 // STM32F103ZE ETMv3.5 recipe, ported from superlinkPRO's verified f103ze_etm.py.
+import {FPB,FP_CTRL_KEY,canBreak,compAddr,decodeFpCtrl,encodeComparator} from '../dbg/bp.js';
+const hex=value=>'0x'+(value>>>0).toString(16).padStart(8,'0');
 export const REG={demcr:0xe000edfc,dbg_cr:0xe0042004,etmcr:0xe0041000,etmtrigger:0xe0041008,
   etmteevr:0xe0041020,etmtecr1:0xe0041024,etmfflr:0xe004102c,etmtraceidr:0xe0041200,
   cspsr:0xe0040004,sppr:0xe00400f0,ffcr:0xe0040304,acpr:0xe0040010};
 export class EtmTarget{
-  constructor(probe){this.probe=probe;this.saved=null;this.locks=new Map();}
+  constructor(probe){this.probe=probe;this.saved=null;this.locks=new Map();this.breakpoints=[];this.bpCaps={numCode:0,rev:1};}
   async read(addr){const b=await this.probe.readMemDiagnostic(addr,4);return new DataView(b.buffer,b.byteOffset,4).getUint32(0,true);}
   async write(addr,value){const b=new Uint8Array(4);new DataView(b.buffer).setUint32(0,value>>>0,true);await this.probe.writeMemDiagnostic(addr,b);await this.probe.flushWrites();}
+  async bpInit(){
+    const raw=await this.read(FPB.CTRL);this.bpCaps=decodeFpCtrl(raw);this.savedBpCtrl=raw;this.savedBpRegs=[];
+    if(this.bpCaps.numCode>16)this.bpCaps.numCode=16;
+    this.breakpoints=[];
+    for(let i=0;i<this.bpCaps.numCode;i++){this.savedBpRegs.push(await this.read(compAddr(i)));await this.write(compAddr(i),0);}
+    await this.write(FPB.CTRL,FP_CTRL_KEY|(this.bpCaps.numCode?1:0));
+    return this.bpCaps;
+  }
+  async bpRestore(){
+    if(!this.savedBpRegs)return;
+    for(let i=0;i<this.savedBpRegs.length;i++)await this.write(compAddr(i),this.savedBpRegs[i]);
+    await this.write(FPB.CTRL,this.savedBpCtrl>>>0);this.savedBpRegs=null;
+  }
+  async bpProgram(){
+    if(this.breakpoints.length>this.bpCaps.numCode)throw Error(`硬件断点已用完（上限 ${this.bpCaps.numCode} 个）`);
+    for(let i=0;i<this.bpCaps.numCode;i++)await this.write(compAddr(i),i<this.breakpoints.length?encodeComparator(this.breakpoints[i],this.bpCaps.rev):0);
+    await this.write(FPB.CTRL,FP_CTRL_KEY|(this.breakpoints.length?1:0));
+  }
+  async bpAdd(addr){
+    addr=((addr>>>1)<<1)>>>0;if(!canBreak(addr,this.bpCaps.rev))throw Error(`FPB rev${this.bpCaps.rev} 不支持地址 ${hex(addr)}`);
+    if(this.breakpoints.includes(addr))return addr;
+    this.breakpoints.push(addr);await this.bpProgram();return addr;
+  }
+  async bpDelete(addr){addr=((addr>>>1)<<1)>>>0;this.breakpoints=this.breakpoints.filter(v=>v!==addr);await this.bpProgram();}
+  async bpClear(){this.breakpoints=[];await this.bpProgram();}
+  async isHalted(){return !!((await this.read(0xe000edf0))&(1<<17));}
+  async pc(){if(!this.probe.regRead)return 0;return (await this.probe.regRead(15))>>>0;}
+  async reset(){await this.write(0xe000ed0c,0x05fa0004);await new Promise(r=>setTimeout(r,20));}
+  async runTo(addr,{timeoutMs=8000}={}){
+    const old=this.breakpoints.slice();await this.bpClear();await this.bpAdd(addr);await this.run();
+    const deadline=Date.now()+timeoutMs;while(Date.now()<deadline){if(await this.isHalted())break;await new Promise(r=>setTimeout(r,10));}
+    await this.halt();await this.bpClear();for(const item of old)await this.bpAdd(item);if(!(await this.isHalted()))throw Error('等待断点超时');
+  }
   async waitProgram(value){for(let i=0;i<100;i++)if(((await this.read(0xe0041010))&2)===(value?2:0))return;throw Error('ETM 编程态握手超时');}
   async unlock(base){const lock=await this.read(base+0xfb4);if(!this.locks.has(base))this.locks.set(base,!!(lock&2));if((lock&3)===3)await this.write(base+0xfb0,0xc5acce55);if((await this.read(base+0xfb4))&2)throw Error('CoreSight 解锁失败');}
   /** @param {{divider?:number}} options TRACECLK 分频（1～4，TPIU ACPR）；实板语法见 README。 */

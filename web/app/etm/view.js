@@ -20,25 +20,23 @@ const NAV_KINDS={all:()=>true,call:r=>r.kind==='call',return:r=>r.kind==='return
   nonexec:r=>!r.executed,indirect:r=>r.kind==='indirect'||r.kind==='unknown'};
 
 export class EtmView{
-  constructor(){this.probe=null;this.busy=false;this.ranges=[];this.sources=new Map();this.symbols=[];this.images=[];this.model=null;this.view='flow';}
+  constructor(){this.probe=null;this.busy=false;this.ranges=[];this.sources=new Map();this.symbols=[];this.images=[];this.model=null;this.view='flow';this.bpItems=[];this.bpCaps=null;this.step='target';}
   init(){
     const panel=document.getElementById('tab-etm');
     panel.innerHTML=`<div class="z-page etm-full-layout"><div class="z-heading"><div><h1>ETM 执行轨迹</h1><p>指令历史 · 源码 · 调用路径</p></div><div class="z-actions"><span class="etm-service-state">Zynq ETM trace</span><span class="z-badge">四位 DDR / source ID 2</span></div></div>
     <div class="etm-layout-meta"><strong>目标与录制</strong><span>ELF → 配置 → 采集</span><nav class="etm-step-tabs" id="ze-steps" aria-label="采集步骤"><button class="active" data-step="target">1 调试</button><button data-step="clock">2 时钟</button><button data-step="capture">3 采集</button><button data-step="files">4 文件</button></nav></div>
-    <div class="z-columns"><aside class="z-card"><h2 id="ze-step-target">① 载入目标 ELF</h2><div class="z-actions"><label class="btn etm-primary-btn">浏览载入 ELF…<input id="ze-elf" type="file" accept=".elf,.axf,.out" hidden></label></div><p id="ze-image" class="muted">尚未载入 ELF</p>
+    <div class="z-columns"><aside class="z-card etm-sidebar">
+    <div class="etm-step-panel" data-step-panel="target"><h2 id="ze-step-target">① 载入目标 ELF</h2><div class="z-actions"><label class="btn etm-primary-btn">浏览载入 ELF…<input id="ze-elf" type="file" accept=".elf,.axf,.out" hidden></label></div><p id="ze-image" class="muted">尚未载入 ELF</p>
     <details><summary>配套源码（可选）</summary><label class="btn">选择源码文件<input id="ze-source" type="file" multiple hidden></label></details>
-    <h2>② 连接与识别目标</h2><div class="z-actions"><button id="ze-connect" class="etm-primary-btn">连接 ZynqDAP</button><button id="ze-pick">换设备…</button><button id="ze-disconnect">断开</button></div><p id="ze-device" class="muted">USB 未连接</p>
-    <p class="etm-capability-note">F103ZE / Zynq ETM 已验收；并行 TRACECLK 由 FPGA 接收。</p>
-    <h2 id="ze-step-clock">③ ETM / TPIU 配置</h2>
-    <p class="z-pinout">J7.16 TRACECLK<br>J7.15 / 17 / 18 / 19 → D0 / D1 / D2 / D3<br>J7.14 GND · 3.3 V · TRACECLK ≤ 50 MHz</p>
-    <label><input id="ze-auto" type="checkbox" checked>自动配置并恢复 F103ZE ETM</label><label>TRACECLK 分频 (HCLK / N)<select id="ze-div"><option>1</option><option>2</option><option selected>3</option><option>4</option></select></label><label>采集时长 (ms，0 为手动)<input id="ze-ms" type="number" min="0" max="60000" value="10"></label>
-    <div class="z-actions"><button id="ze-read-registers">读取 Trace 寄存器</button></div><pre id="ze-registers" class="z-log">连接后可回读 DEMCR / DBGMCU / ETM / TPIU / GPIOE。</pre>
-    <label>内存上限 (MiB)<input id="ze-limit" type="number" min="1" max="256" value="16"></label>
-    <h2 id="ze-step-capture">④ 开始采集</h2><div class="z-actions"><button id="ze-start" class="etm-primary-btn">开始采集</button><button id="ze-stop">停止</button></div>
-    <details><summary>ETMv3 解码寄存器</summary><textarea id="ze-config" rows="6">{"protocol":"ETMv3","idr":1091891777,"ctrl":2320,"ccer":100352,"traceid":2}</textarea><p>自动配置会替换为目标实际读回值；手工配置时由目标工程启用 ETM。</p></details>
-    <h2 id="ze-step-files">⑤ 文件与样例</h2><input id="ze-record" type="file" accept=".zetm,.json" hidden>
-    <button id="ze-sample">载入真实 CM3 仿真样例</button><button id="ze-sample-f103">载入 F103ZE 实板样例</button><button id="ze-decode">解码 / 重新解码</button>
-    <pre id="ze-log" class="z-log" aria-live="polite"></pre></aside>
+    <h2>② 连接与识别目标</h2><div class="z-actions"><button id="ze-connect" class="etm-primary-btn">连接 ZynqDAP</button><button id="ze-pick">换设备…</button><button id="ze-disconnect">断开</button></div><p id="ze-device" class="muted">USB 未连接</p><p class="etm-capability-note">F103ZE / Zynq ETM 已验收；并行 TRACECLK 由 FPGA 接收。</p>
+    <h2>③ 添加断点</h2><input id="ze-bp-search" class="etm-wide" placeholder="搜索 ELF 函数…"><div id="ze-bp-list" class="etm-bp-list"></div><p id="ze-bp-info" class="muted">载入 ELF 后可从函数列表添加硬件断点。</p><div class="z-actions"><input id="ze-bp-command" placeholder="b main 或 0x08000101"><button id="ze-bp-add">添加</button></div>
+    <h2>④ 断点与采集起点</h2><div id="ze-bp-state" class="muted">未添加断点。</div><div class="z-actions"><button id="ze-bp-run">运行至起点</button><button id="ze-bp-clear">清空断点</button></div><div class="z-actions"><button id="ze-bp-reset">复位并暂停</button><button id="ze-bp-halt">暂停</button><button id="ze-bp-continue">继续</button></div><p id="ze-bp-live" class="muted">当前 PC：未连接</p></div>
+    <div class="etm-step-panel" data-step-panel="clock" hidden><h2 id="ze-step-clock">① 板级时钟与 ETM / TPIU 配置</h2><p class="z-pinout">J7.16 TRACECLK<br>J7.15 / 17 / 18 / 19 → D0 / D1 / D2 / D3<br>J7.14 GND · 3.3 V · TRACECLK ≤ 50 MHz</p>
+    <label><input id="ze-auto" type="checkbox" checked>自动配置并恢复 F103ZE ETM</label><label>TRACECLK 分频 (HCLK / N)<select id="ze-div"><option>1</option><option>2</option><option selected>3</option><option>4</option></select></label><label>采集时长 (ms，0 为手动)<input id="ze-ms" type="number" min="0" max="60000" value="10"></label><div class="z-actions"><button id="ze-read-registers">读取 Trace 寄存器</button><button id="ze-read-diag">读取固件诊断</button></div><pre id="ze-registers" class="z-log">连接后可回读 DEMCR / DBGMCU / ETM / TPIU / GPIOE。</pre><label>内存上限 (MiB)<input id="ze-limit" type="number" min="1" max="256" value="16"></label>
+    <div class="z-actions"><button id="ze-configure">只配置不采集</button><button id="ze-restore">恢复原 trace 设置</button></div><details><summary>ETMv3 解码寄存器</summary><textarea id="ze-config" rows="6">{"protocol":"ETMv3","idr":1091891777,"ctrl":2320,"ccer":100352,"traceid":2}</textarea><p>自动配置会替换为目标实际读回值；手工配置时由目标工程启用 ETM。</p></details></div>
+    <div class="etm-step-panel" data-step-panel="capture" hidden><h2 id="ze-step-capture">① 开始采集</h2><div class="z-actions"><button id="ze-start" class="etm-primary-btn">开始采集</button><button id="ze-stop">停止</button></div><p class="etm-capability-note">采集后由 Zynq FPGA 直接接收 ETM 并行流，浏览器 Worker 使用 OpenCSD 解码。</p><pre id="ze-log" class="z-log" aria-live="polite"></pre></div>
+    <div class="etm-step-panel" data-step-panel="files" hidden><h2 id="ze-step-files">① 文件与样例</h2><input id="ze-record" type="file" accept=".zetm,.json" hidden><button id="ze-open-file">导入记录…</button><button id="ze-sample">载入真实 CM3 仿真样例</button><button id="ze-sample-f103">载入 F103ZE 实板样例</button><button id="ze-decode">解码 / 重新解码</button><p class="muted">记录包包含 ETM 字节、传输质量、协议配置和匹配 ELF，可离线重解码。</p></div>
+    </aside>
     <div class="z-card z-trace"><div class="etm-record-bar"><strong id="ze-record-title">历史执行流与当前目标状态分别显示</strong><span id="ze-status" class="z-stats">尚无捕获</span><button id="ze-open">导入记录</button><button id="ze-save">保存</button></div><nav class="z-etm-tabs" id="ze-tabs" aria-label="分析视图"><button data-view="flow" class="active">执行流</button><button data-view="stats">调用统计</button><button data-view="flame">火焰图</button><button data-view="hot">热点</button><button data-view="packet">ETM 包</button><button data-view="section">可信区段</button></nav><canvas id="ze-timeline" height="110" aria-label="执行地址时间轴"></canvas>
     <div class="z-actions"><label>搜索函数 / 地址<input id="ze-filter" placeholder="函数名或 0x0800…"></label>
       <label>历史导航<select id="ze-nav"><option value="all">指令</option><option value="call">调用</option><option value="return">返回</option><option value="cond">条件跳转</option><option value="indirect">间接跳转 / 未知</option><option value="exception">异常</option><option value="nonexec">未执行</option></select></label>
@@ -55,16 +53,14 @@ export class EtmView{
     this.$=id=>document.getElementById('ze-'+id);
     const action=fn=>async()=>{try{await fn();}catch(e){this.log(e.message);toast(e.message,'err');}finally{this.buttons();}};
     const steps={target:'step-target',clock:'step-clock',capture:'step-capture',files:'step-files'};
-    for(const button of this.$('steps').querySelectorAll('button'))button.onclick=()=>{
-      const target=document.getElementById('ze-'+steps[button.dataset.step]);
-      target?.scrollIntoView({behavior:'smooth',block:'start'});
-      for(const item of this.$('steps').querySelectorAll('button'))item.classList.toggle('active',item===button);
-    };
+    for(const button of this.$('steps').querySelectorAll('button'))button.onclick=()=>this.showStep(button.dataset.step);
     this.$('connect').onclick=action(()=>this.connect());this.$('pick').onclick=action(()=>this.connectNew());this.$('disconnect').onclick=action(()=>this.releaseProbe());
     this.$('read-registers').onclick=action(async()=>{this.$('registers').textContent=JSON.stringify(await this.traceRegisters(),null,2);});
+    this.$('read-diag').onclick=action(async()=>{this.$('registers').textContent=JSON.stringify(await this.readDiag(),null,2);});
+    this.$('configure').onclick=action(()=>this.configureOnly());this.$('restore').onclick=action(()=>this.restoreTarget());
     this.$('start').onclick=action(()=>this.start());this.$('stop').onclick=action(()=>this.stop());
     this.$('elf').onchange=action(async()=>{const f=this.$('elf').files[0];if(f)await this.loadElf(new Uint8Array(await f.arrayBuffer()),f.name);});
-    this.$('open').onclick=()=>this.$('record').click();this.$('record').onchange=action(async()=>{const f=this.$('record').files[0];if(f)await this.loadRecord(JSON.parse(await f.text()));});
+    this.$('open').onclick=()=>this.$('record').click();this.$('open-file').onclick=()=>this.$('record').click();this.$('record').onchange=action(async()=>{const f=this.$('record').files[0];if(f)await this.loadRecord(JSON.parse(await f.text()));});
     this.$('save').onclick=action(()=>this.saveRecord());this.$('sample').onclick=action(async()=>this.loadRecord(await(await fetch('samples/cm3-orbtrace.zetm')).json()));
     this.$('sample-f103').onclick=action(async()=>this.loadRecord(await(await fetch('samples/f103ze-oversample.zetm')).json()));
     this.$('decode').onclick=action(()=>this.decode());
@@ -79,12 +75,43 @@ export class EtmView{
     // 板子重新上电/烧录会让 USB 重新枚举：旧句柄失效，界面必须跟着说实话。
     navigator.usb?.addEventListener?.('disconnect',event=>{
       if(!this.probe||event.device!==this.probe.device)return;
-      this.probe=null;this.transport=null;this.$('device').textContent='USB 已断开（重新上电/烧录后点「连接」）';
+      this.target?.bpRestore?.().catch(()=>{});this.probe=null;this.transport=null;this.$('device').textContent='USB 已断开（重新上电/烧录后点「连接」）';
       this.log('探针已断开');this.buttons();
     });
     this.$('filter').oninput=()=>this.renderFlow();this.$('timeline').onclick=e=>{if(this.ranges.length)this.select(Math.floor((e.offsetX/this.$('timeline').clientWidth)*this.ranges.length));};
+    this.$('bp-search').oninput=()=>this.renderBreakpoints();this.$('bp-add').onclick=action(()=>this.addBreakpoint(this.$('bp-command').value));
+    this.$('bp-clear').onclick=action(()=>this.clearBreakpoints());this.$('bp-run').onclick=action(()=>this.runToBreakpoint());
+    this.$('bp-reset').onclick=action(()=>this.resetToBreakpoint());this.$('bp-halt').onclick=action(()=>this.target?.halt());this.$('bp-continue').onclick=action(()=>this.target?.run());
+    this.$('bp-list').onclick=e=>{const button=e.target.closest('button[data-bp]');if(button)this.selectBreakpoint(Number(button.dataset.bp));};
     this.buttons();
   }
+  showStep(step){
+    this.step=step;
+    for(const button of this.$('steps').querySelectorAll('button'))button.classList.toggle('active',button.dataset.step===step);
+    for(const panel of this.$('steps').closest('.etm-full-layout').querySelectorAll('[data-step-panel]'))panel.hidden=panel.dataset.stepPanel!==step;
+    this.$('steps').closest('.etm-full-layout').querySelector('.etm-sidebar')?.scrollTo({top:0,behavior:'smooth'});
+  }
+  renderBreakpoints(){
+    const box=this.$('bp-list');if(!box)return;
+    const query=(this.$('bp-search').value||'').trim().toLowerCase();
+    const rows=(this.symbols||[]).filter(s=>!query||s.name.toLowerCase().includes(query)||hex(s.addr).includes(query)).slice(0,120);
+    box.innerHTML=rows.map(s=>`<div class="etm-bp-row"><button data-bp="${s.addr>>>0}" title="添加 ${esc(s.name)}">＋</button><span>${esc(s.name)}</span><small>${hex(s.addr)}</small></div>`).join('')||'<span class="muted">没有匹配函数；先载入 ELF。</span>';
+    const active=this.target?.breakpoints||this.bpItems||[];
+    this.$('bp-state').textContent=active.length?`已添加 ${active.length} 个断点${this.bpCaps?` · FPB ${this.bpCaps.numCode} 个比较器`:''}`:'未添加断点。';
+  }
+  async addBreakpoint(value){
+    let addr=String(value||'').trim();if(/^b\s+/i.test(addr))addr=addr.slice(2).trim();
+    if(!addr)throw Error('请输入函数名或 0x 地址');
+    const symbol=(this.symbols||[]).find(s=>s.name===addr||s.name.includes(addr));
+    if(symbol)addr=symbol.addr;else if(/^0x/i.test(addr))addr=Number.parseInt(addr,16);else if(/^\d+$/.test(addr))addr=Number(addr);else throw Error('没有找到函数：'+addr);
+    if(this.target){if(!this.bpCaps)this.bpCaps=await this.target.bpInit();await this.target.bpAdd(addr);this.bpItems=this.target.breakpoints.slice();}
+    else if(!this.bpItems.includes(addr))this.bpItems.push(addr);
+    this.bpEntry=addr;this.$('bp-command').value='';this.renderBreakpoints();this.log(`已添加断点 ${hex(addr)}${this.target?'（已下发）':'（连接后下发）'}，作为采集起点`);
+  }
+  async selectBreakpoint(addr){if(!this.target)return;if(!this.bpCaps)this.bpCaps=await this.target.bpInit();if(!this.target.breakpoints.includes(addr))await this.target.bpAdd(addr);this.bpItems=this.target.breakpoints.slice();this.bpEntry=addr;this.renderBreakpoints();}
+  async clearBreakpoints(){if(!this.target)throw Error('请先连接 ZynqDAP');if(!this.bpCaps)this.bpCaps=await this.target.bpInit();await this.target.bpClear();this.bpItems=[];this.bpEntry=null;this.renderBreakpoints();}
+  async runToBreakpoint(){if(!this.bpEntry)throw Error('请先从函数列表添加采集起点');await this.target.runTo(this.bpEntry);this.$('bp-live').textContent='当前 PC：'+hex(await this.target.pc());this.log('已运行至采集起点并暂停');}
+  async resetToBreakpoint(){if(!this.bpEntry)throw Error('请先从函数列表添加采集起点');await this.target.halt();await this.target.reset();await this.target.runTo(this.bpEntry);this.$('bp-live').textContent='当前 PC：'+hex(await this.target.pc());this.log('已复位/运行至采集起点（当前目标保持暂停）');}
   buttons(){if(!this.$)return;this.$('start').disabled=!this.probe||this.busy||!this.images.length||(this.$('auto').checked&&!this.elfBytes);this.$('stop').disabled=!this.transport?.running&&!this.worker;this.$('disconnect').disabled=!this.probe||this.busy&&!this.transport?.running;this.$('connect').disabled=!!this.probe||this.busy;this.$('decode').disabled=!this.etm?.length||this.busy;this.$('save').disabled=!this.etm?.length||this.busy;this.$('sample').disabled=this.busy;this.$('sample-f103').disabled=this.busy;this.$('open').disabled=this.busy;this.$('elf').disabled=this.busy;this.$('csv').disabled=!this.model;this.$('svg').disabled=!this.model;this.$('json').disabled=!this.model;this.$('srcflow').disabled=!this.model||!this.lines;}
   log(text){this.$('log').textContent+=(new Date().toLocaleTimeString())+' '+text+'\n';this.$('log').scrollTop=this.$('log').scrollHeight;}
   /**
@@ -125,7 +152,7 @@ export class EtmView{
       try{await this.releaseProbe();}catch(e){this.log('旧连接收尾失败：'+e.message);}
       await new Promise(resolve=>setTimeout(resolve,300));   // 给设备一点时间复位端点
     }
-    try{this.probe=await WebUsbDapProbe.open(device,{clockKhz:50000});this.target=new EtmTarget(this.probe);this.transport=new EtmTransport(this.probe.device,(p,e)=>{
+    try{this.probe=await WebUsbDapProbe.open(device,{clockKhz:50000});this.target=new EtmTarget(this.probe);this.bpCaps=await this.target.bpInit();for(const addr of this.bpItems)await this.target.bpAdd(addr);this.renderBreakpoints();this.transport=new EtmTransport(this.probe.device,(p,e)=>{
       this.quality={...p.quality(),refClockHz:this.transport?.refClockHz};this.status();if(e)this.log(e.message);
       const limit=Number(this.$('limit').value)*1024*1024;if(p.records*2>=limit&&!this.stopping)this.stop().catch(e=>this.log(e.message));
     });await this.transport.open();this.$('device').textContent=this.probe.name;this.log('已连接，端点 0x82');}
@@ -137,7 +164,7 @@ export class EtmView{
     }
   }
   async releaseProbe(){
-    if(this.transport?.running)await this.stop();if(this.target?.saved)await this.target.restore();
+    if(this.transport?.running)await this.stop();if(this.target?.saved)await this.target.restore();if(this.target?.savedBpRegs)await this.target.bpRestore();
     if(this.transport)await this.transport.close();
     if(this.probe)await this.probe.disconnect();   // WebUsbDapProbe 的方法是 disconnect()，没有 close()
     this.transport=null;this.probe=null;this.probeManager?.forget('etm');this.$('device').textContent='USB 未连接';this.buttons();
@@ -146,7 +173,7 @@ export class EtmView{
     this.images=elfImages(bytes);this.flashImages=elfImages(bytes,{physical:true});this.elfBytes=bytes;this.elfName=name;this.elfSha=await sha256(bytes);
     const elf=new Elf(bytes);this.symbols=elf.symbols().filter(s=>s.isFunc&&s.size).sort((a,b)=>a.addr-b.addr);
     try{this.lines=LineTable.fromElf(elf);}catch{this.lines=null;}
-    this.$('image').textContent=`${name} · SHA-256 ${this.elfSha.slice(0,16)}…`;this.log('镜像已载入');this.buttons();
+    this.$('image').textContent=`${name} · SHA-256 ${this.elfSha.slice(0,16)}…`;this.log('镜像已载入');this.renderBreakpoints();this.buttons();
   }
   async verifyFlash(){
     let verified=0;
@@ -175,12 +202,14 @@ export class EtmView{
        * 否则 FPGA 的 ID 解复用一直锁不上，只能给 0x7F。
        */
       if(auto)await this.target.halt();
+      this.captureBreakpoints=this.target?.breakpoints?.slice()||[];
+      if(this.captureBreakpoints.length)await this.target.bpClear();
       if(auto)await this.target.start();
       await this.transport.start();
       if(auto)await this.target.run();
       this.log('开始采集');this.buttons();const ms=Number(this.$('ms').value);
       if(ms>0)this.timer=setTimeout(()=>this.stop().catch(e=>{this.log(e.message);toast(e.message,'err');}),ms);
-    }catch(e){try{await this.transport?.stop();if(this.target?.saved)await this.target.restore();}catch(cleanup){e.message+='；收尾失败：'+cleanup.message;}this.busy=false;throw e;}
+    }catch(e){try{await this.transport?.stop();if(this.target?.saved)await this.target.restore();if(this.captureBreakpoints?.length&&this.target){for(const addr of this.captureBreakpoints)await this.target.bpAdd(addr);}}catch(cleanup){e.message+='；收尾失败：'+cleanup.message;}this.busy=false;throw e;}
   }
   async stop(){
     if(this.worker){this.worker.terminate();this.cancelDecode?.(Error('已取消解码'));return;}
@@ -188,9 +217,13 @@ export class EtmView{
     this.stopping=(async()=>{
       clearTimeout(this.timer);
       try{
-        if(this.target?.saved){await this.target.stop();await sleep(5);}await this.transport.stop();
+        // 同时发停止：ETM 编程态握手有时会占用一秒，若等它完成再通知 FPGA，
+        // 高速目标会在这段时间继续灌满 FIFO，页面看到的就是 overflow 而不是目标 trace。
+        await Promise.all([this.transport.stop(),(async()=>{if(this.target?.saved){await this.target.stop();await sleep(5);}})()]);
         this.etm=this.transport.parser.stream(this.config.traceid);this.quality={...this.transport.parser.quality(),refClockHz:this.transport.refClockHz};
-        if(this.target?.saved)await this.target.restore();this.log(`停止：${this.etm.length} ETM 字节`);
+        if(this.target?.saved)await this.target.restore();
+        if(this.captureBreakpoints?.length&&this.target){for(const addr of this.captureBreakpoints)await this.target.bpAdd(addr);this.bpItems=this.target.breakpoints.slice();this.renderBreakpoints();}
+        this.log(`停止：${this.etm.length} ETM 字节`);
         if(this.quality.loss)this.log('检测到 trace 丢失，捕获质量不通过');this.status();
       }finally{this.busy=false;this.buttons();}
     })();return this.stopping;
@@ -289,7 +322,7 @@ export class EtmView{
     const source=line?this.sources.get(line.file.replace(/\\/g,'/').split('/').pop()):null;
     if(source)this.$('code').textContent=source.split(/\r?\n/).slice(Math.max(0,line.line-10),line.line+10).map((s,i)=>`${Math.max(1,line.line-9)+i===line.line?'▶':' '} ${Math.max(1,line.line-9)+i} ${s}`).join('\n');
     else{const image=this.images.find(i=>i.addr<=r.start&&r.start<i.addr+i.data.length),data=image?.data.subarray(r.start-image.addr,Math.min(r.end-image.addr,r.start-image.addr+64));this.$('code').textContent=`${hex(r.start)}  ${data?[...data].map(x=>x.toString(16).padStart(2,'0')).join(' '):'镜像无可用指令字节'}\n${line?'源码：'+line.file+':'+line.line+'，请载入该文件。':'镜像没有可用的源码行信息。'}`;}
-    this.renderStack();this.renderFlow();
+    this.renderStack();this.renderFlow();this.timeline();
   }
   jump(direction){
     if(!this.model?.ranges.length)return;
@@ -303,17 +336,22 @@ export class EtmView{
   // 执行地址时间轴。用循环取极值：几十万范围展开成 Math.min(...array) 会直接爆栈。
   timeline(){
     const canvas=this.$('timeline');if(!canvas||!this.ranges.length)return;
-    const ctx=canvas.getContext('2d');canvas.width=Math.max(400,canvas.clientWidth*devicePixelRatio);canvas.height=110*devicePixelRatio;
-    const limit=Math.min(this.ranges.length,200000);let low=Infinity,high=-Infinity;
+    const dpr=devicePixelRatio||1,ctx=canvas.getContext('2d');canvas.width=Math.max(400,canvas.clientWidth*dpr);canvas.height=150*dpr;
+    const width=canvas.width,height=canvas.height,limit=Math.min(this.ranges.length,200000);let low=Infinity,high=-Infinity;
     for(let i=0;i<limit;i++){const start=this.ranges[i].start;if(start<low)low=start;if(start>high)high=start;}
-    ctx.fillStyle='#0d1420';ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.strokeStyle='#5ca8ff';ctx.lineWidth=devicePixelRatio;ctx.beginPath();
-    for(let x=0;x<canvas.width;x++){
-      const range=this.ranges[Math.min(this.ranges.length-1,Math.floor(x/canvas.width*this.ranges.length))];
-      const y=10+(high-range.start)/((high-low)||1)*(canvas.height-20);
+    ctx.fillStyle='#0d1420';ctx.fillRect(0,0,width,height);
+    const lanes=[];if(this.model){for(const frame of this.model.frames||[]){if(frame.kind==='root')continue;if(!lanes.includes(frame.name))lanes.push(frame.name);if(lanes.length>=8)break;}}
+    const laneH=Math.max(10,Math.floor((height-20)/Math.max(1,lanes.length||1)));
+    for(let i=0;i<lanes.length;i++){ctx.fillStyle=i%2?'#121c28':'#101822';ctx.fillRect(0,i*laneH,width,laneH);ctx.fillStyle='#7890aa';ctx.font=`${10*dpr}px ui-monospace`;ctx.fillText(lanes[i].slice(0,22),4*dpr,(i+1)*laneH-2*dpr);}
+    ctx.strokeStyle='#5ca8ff';ctx.lineWidth=dpr;ctx.beginPath();
+    for(let x=0;x<width;x++){
+      const index=Math.min(this.ranges.length-1,Math.floor(x/width*this.ranges.length)),range=this.ranges[index];
+      const y=lanes.length?(lanes.indexOf(this.model?.frames?.[this.model.order[index]]?.name)*laneH+laneH/2):(10+(high-range.start)/((high-low)||1)*(height-20));
       if(!x)ctx.moveTo(x,y);else ctx.lineTo(x,y);
     }
     ctx.stroke();
+    const selected=Number(this.$('cursor').value)||0,marker=Math.min(width-1,Math.floor(selected/Math.max(1,this.ranges.length-1)*width));
+    ctx.strokeStyle='#f2cc60';ctx.beginPath();ctx.moveTo(marker,0);ctx.lineTo(marker,height);ctx.stroke();
   }
   exportCsv(){if(!this.model)throw Error('先解码再导出');save(executionCsv(this.model),'zynqdap-etm-flow.csv','text/csv');}
   exportSvg(){if(!this.model)throw Error('先解码再导出');save(flameSvg(this.model,{width:1600}),'zynqdap-etm-flame.svg','image/svg+xml');}
