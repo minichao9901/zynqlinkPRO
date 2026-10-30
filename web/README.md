@@ -85,12 +85,29 @@ FCLK 与 SWD/JTAG TCK（kHz 精度）。仓库里有两份样例，都能一键�
 只带 ELF 的加载段和 221 个函数符号（不含 DWARF），ELF 与 ETM 的 SHA-256 都按验收 JSON
 核对过，来源见记录里的 `provenance` 字段。
 
+## AI / 脚本驱动（toolbox CLI）
+
+除了人点页面，工作台还能被 CLI 驱动——给 AI 用，也给自动化验收用：
+
+```powershell
+node web/tools/toolbox.mjs --runtime build/toolbox-001 serve --port 8896 --open
+node web/tools/toolbox.mjs --runtime build/toolbox-001 page etm describe
+node web/tools/toolbox.mjs --runtime build/toolbox-001 page etm click '#ze-sample-f103'
+node web/tools/toolbox.mjs --runtime build/toolbox-001 page etm wait '#ze-log' --contains '调用树'
+```
+
+`serve` 托管的页面会注入 `app/toolbox-bridge.js`，它长轮询本机队列，把请求变成页面上的
+真实操作（控件或视图公开方法）。设备授权、WebUSB/串口句柄、会话和资源互斥仍留在那个
+浏览器页面里，CLI 只是借用——所以真人授权一次之后，AI 就能全程驱动采集、烧录、调试。
+完整命令、页面清单和已知边界见 [docs/toolbox-cli-ai.md](../docs/toolbox-cli-ai.md)。
+
 ## 检查和重建
 
 ```powershell
 node web/tools/check.mjs
 node --test web/tests/etm.test.mjs web/tests/etm-analysis.test.mjs
 node web/tools/page-smoke.mjs      # 需要先跑 node web/tools/serve.mjs，用本机 Edge 无头验收九页
+node web/tools/toolbox-selftest.mjs  # 真起服务 + 无头浏览器 + 真跑 CLI 子进程
 python tools/test_probe_host.py
 python tools/build_etm_wasm.py --emsdk build/emsdk
 ```

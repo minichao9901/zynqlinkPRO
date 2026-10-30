@@ -70,6 +70,8 @@ initDockNavigation();
 installAcquisitionDiagnostics(tools);
 
 const pages = { serial:assistant, terminal, rtt, rttcdc:stream, scope, flash, dbg, etm, gen };
+// toolbox CLI 通过这张表按页面取视图对象（见 app/toolbox-bridge.js）。
+tools.pages = pages;
 initTabs(name => {
   workspace.sync();
   requestAnimationFrame(() => {
