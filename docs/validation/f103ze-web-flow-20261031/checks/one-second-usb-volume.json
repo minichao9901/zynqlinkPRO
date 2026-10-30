@@ -1,0 +1,35 @@
+{
+  "basis": "ZET1 payload: 16-bit source/data records +32-byte header per packet; excludes USB bus protocol overhead and EP0 control traffic",
+  "rows": [
+    {
+      "traceclk": "6MHz",
+      "etmBytes": 1363722,
+      "records": 1363722,
+      "packets": 5685,
+      "usbApplicationBytes": 2909364,
+      "activeHostSeconds": 1.0023944999993546,
+      "loss": false,
+      "evidence": "docs\\validation\\f103ze-web-flow-20261031\\capacity-packed\\window-1000ms\\acceptance.json"
+    },
+    {
+      "traceclk": "12MHz",
+      "etmBytes": 2121671,
+      "records": 2121671,
+      "packets": 8843,
+      "usbApplicationBytes": 4526318,
+      "activeHostSeconds": 1.0026993999999831,
+      "loss": false,
+      "evidence": "docs\\validation\\f103ze-web-flow-20261031\\frequency\\12mhz-1s\\cpu48-div2-gpio1-r1\\acceptance.json"
+    },
+    {
+      "traceclk": "18MHz",
+      "etmBytes": 2926065,
+      "records": 2926065,
+      "packets": 12193,
+      "usbApplicationBytes": 6242306,
+      "activeHostSeconds": 1.0022763999950257,
+      "loss": false,
+      "evidence": "docs\\validation\\f103ze-web-flow-20261031\\frequency\\filtered-18-1s\\cpu72-div2-gpio1-r1\\acceptance.json"
+    }
+  ]
+}
