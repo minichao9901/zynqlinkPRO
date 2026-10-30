@@ -48,6 +48,7 @@ def main():
     ap.add_argument('--rtl', type=Path, default=Path(os.environ.get('CM3_RTL', DEFAULT_RTL)))
     ap.add_argument('--rebuild', action='store_true')
     ap.add_argument('--work-dir',type=Path,help='Isolated simulator output/library directory')
+    ap.add_argument('--debug', choices=['off','typical','all'], default='off', help='Enable waveform/debug instrumentation only when needed')
     ap.add_argument('plusargs', nargs='*')
     args = ap.parse_args()
 
@@ -74,7 +75,7 @@ def main():
                      *(ROOT / 'fpga/sim').glob('*.sv'),
                      *(ROOT / 'fpga/sim').glob('*.svh'),
                      *rtl.glob('*.v'), *rtl.glob('*.vp')])
-    digest = hashlib.sha256((args.top + str(VIVADO)).encode())
+    digest = hashlib.sha256((args.top + str(VIVADO) + args.debug).encode())
     for source in inputs:
         digest.update(str(source).encode())
         digest.update(source.read_bytes())
@@ -101,7 +102,8 @@ def main():
         if p.returncode:
             print(log[-4000:])
             sys.exit('xvlog failed (systemverilog)')
-        p, log = run([exe / 'xelab.exe', '--mt', '2', '--debug', 'typical', '-s', args.top + '_snap', args.top])
+        debug_args = [] if args.debug=='off' else ['--debug', args.debug]
+        p, log = run([exe / 'xelab.exe', '--mt', '2', *debug_args, '-s', args.top + '_snap', args.top])
         if p.returncode:
             print(log[-4000:])
             sys.exit('xelab failed')
