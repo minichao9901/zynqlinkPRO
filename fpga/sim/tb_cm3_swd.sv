@@ -7,7 +7,9 @@ module tb_cm3_swd #(
   parameter integer SAMPLE_RISE = 0,
   parameter integer ACK_DELAY = 0,
   parameter integer TURN_EXTRA = 0,
-  parameter integer TEST_WORDS = 16
+  parameter integer TEST_WORDS = 16,
+  parameter integer CM3_TRACE_LEVEL = 0,
+  parameter integer ETM_TEST = 0
 );
   real half_ns=FCLK_HALF_NS, return_ns=RETURN_NS;
   integer phase=SAMPLE_RISE, ack_delay=ACK_DELAY, turn_extra=TURN_EXTRA, words=TEST_WORDS, idle=0;
@@ -91,12 +93,15 @@ module tb_cm3_swd #(
   tri1 target_pad;
   assign target_pad = dut.swdio_t ? 1'bz : dut.swdio_o;
   wire cm3_swdo, cm3_swdoen, cm3_tdo, cm3_ntdoen, cm3_jtagnsw;
+  wire cm3_traceclk,cm3_trcena;
+  wire [3:0] cm3_tracedata;
   wire [3:0] cm3_pads;
   assign cm3_pads[1] = cm3_ntdoen ? 1'bz : cm3_tdo;
-  cm3_target target(
+  cm3_target #(.TRACE_LEVEL(CM3_TRACE_LEVEL)) target(
     .clk(core_clk),.rst_n(rst_n),.dbg_rst_n(rst_n),.trst_n(1'b1),
     .swclktck(target_swclk),.swditms(target_pad),.tdi(cm3_pads[0]),
     .tdo(cm3_tdo),.ntdoen(cm3_ntdoen),
+    .trace_clk(cm3_traceclk),.trace_data(cm3_tracedata),.trace_enable(cm3_trcena),
     .swdo(cm3_swdo),.swdoen(cm3_swdoen),.jtag_nsw(cm3_jtagnsw),
     .sys_dout(),.sys_writes());
   reg return_oe=0,return_data=1;
@@ -232,6 +237,7 @@ module tb_cm3_swd #(
   reg [2:0] error_ack;
   integer saw_wait,saw_fault;
   integer k;
+  `include "cm3_etm_tasks.svh"
   initial begin
     if($value$plusargs("return_ns=%f",return_ns))begin end
     if($value$plusargs("phase=%d",phase))begin end
@@ -245,7 +251,16 @@ module tb_cm3_swd #(
     if($value$plusargs("narrow_clock=%d",narrow_clock))begin end
     expected_ack=-1;if($value$plusargs("expected_ack=%d",expected_ack))begin end
     if($test$plusargs("vcd"))begin $dumpfile("cm3_swd.vcd");$dumpvars(0,dut,cm3_swdo,cm3_swdoen);end
-    #1;rst_n=0;#100;rst_n=1;repeat(30)@(negedge clk);
+    #1;rst_n=0;
+    if(ETM_TEST)begin
+      // Real Thumb instructions, fetched by the encrypted core over CODE AXI.
+      for(k=0;k<64;k=k+1)target.u_code.mem[k]=32'h00000101;
+      target.u_code.mem[0]=32'h20003ff0;
+      target.u_code.mem['h100/4]=32'h30012000;
+      target.u_code.mem['h104/4]=32'hd1fc2807;
+      target.u_code.mem['h108/4]=32'hbf00e7fa;
+    end
+    #100;rst_n=1;repeat(30)@(negedge clk);
     if(narrow_clock && clock_high_cycles>0)$fatal(1,"do not shape the clock twice");
     wr(8,1 | (idle<<4) | (5<<9) | ((transfer_delay&15)<<13) | ((transfer_delay>>4)<<28) | (phase<<17) | (rx_boundary<<18) | (narrow_clock<<19) | (turn_extra<<23) | (ack_delay<<25));
     rd(8,value);
@@ -282,6 +297,7 @@ module tb_cm3_swd #(
     if((value & 32'ha0000000)!==32'ha0000000)$fatal(1,"power handshake %h",value);
     xfer(8'h08,0,value);
     xfer(8'h01,32'h23000052,value);
+    if(ETM_TEST)begin run_etm_trace; $finish; end
     xfer(8'h05,32'h60000000,value);
     if($test$plusargs("benchmark"))begin run_transport_benchmark(2*half_ns);$finish;end
     for(k=0;k<words;k=k+1)begin

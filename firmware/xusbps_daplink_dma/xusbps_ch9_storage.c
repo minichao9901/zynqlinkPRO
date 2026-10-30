@@ -38,6 +38,7 @@
 
 #include <string.h>
 #include "probe_stream.h"
+#include "etm_stream.h"
 
 #include "xparameters.h"	/* XPAR parameters */
 #include "xusbps_endpoint.h"
@@ -367,7 +368,7 @@ u32 XUsbPs_Ch9SetupCfgDescReply(u8 *BufPtr, u32 BufLen)
 	configDesc[offset++] = USB_INTERFACE_CFG_DESC;	/* bDescriptorType */
 	configDesc[offset++] = 0x00;		/* bInterfaceNumber: 0 */
 	configDesc[offset++] = 0x00;		/* bAlternateSetting */
-	configDesc[offset++] = 0x03;		/* DAP IN/OUT + HSS IN */
+	configDesc[offset++] = 0x04;		/* DAP IN/OUT + HSS IN + ETM IN */
 	configDesc[offset++] = USB_CLASS_VENDOR;	/* bInterfaceClass: Vendor Specific */
 	configDesc[offset++] = 0x00;		/* bInterfaceSubClass */
 	configDesc[offset++] = 0x00;		/* bInterfaceProtocol */
@@ -393,6 +394,8 @@ u32 XUsbPs_Ch9SetupCfgDescReply(u8 *BufPtr, u32 BufLen)
 
     { const u8 hss[] = {7,5,0x87,2,0,2,0};
       memcpy(configDesc+offset,hss,sizeof(hss)); offset+=sizeof(hss); }
+    { const u8 etm[] = {7,5,0x82,2,0,2,0};
+      memcpy(configDesc+offset,etm,sizeof(etm));offset+=sizeof(etm); }
 
 	/* ==================== CDC ACM Interface (Interfaces 1 & 2) ==================== */
 	/* IAD (Interface Association Descriptor) for CDC */
@@ -649,6 +652,7 @@ void XUsbPs_SetConfiguration(XUsbPs *InstancePtr, int ConfigIdx)
 	if (0 == ConfigIdx) {
         unsigned ep;
         probe_usb_reset();
+        etm_usb_reset();
         for(ep=1;ep<8;ep++) {
             XUsbPs_EpDisable(InstancePtr,ep,XUSBPS_EP_DIRECTION_IN|XUSBPS_EP_DIRECTION_OUT);
             XUsbPs_EpFlush(InstancePtr,ep,XUSBPS_EP_DIRECTION_IN|XUSBPS_EP_DIRECTION_OUT);
@@ -661,6 +665,7 @@ void XUsbPs_SetConfiguration(XUsbPs *InstancePtr, int ConfigIdx)
 	xil_printf("[DAP] SET_CONFIGURATION 1\r\n");
 
 	probe_usb_configured(InstancePtr);
+    etm_usb_configured(InstancePtr);
 	/* Enable DAP Endpoints */
 	XUsbPs_EpEnable(InstancePtr, DAP_BULKOUT_EP, XUSBPS_EP_DIRECTION_OUT);
 	XUsbPs_EpEnable(InstancePtr, DAP_BULKIN_EP, XUSBPS_EP_DIRECTION_IN);

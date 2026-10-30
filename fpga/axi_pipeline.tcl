@@ -2,8 +2,14 @@
 # Register both outer boundaries to break READY chains between interconnects.
 set axi_pipeline_changed 0
 set no_pipeline [expr {[info exists ::zynqlink_no_pipeline] && $::zynqlink_no_pipeline}]
-foreach name {ps7_0_axi_periph dma_bus cmd_bus rsp_bus} {
+foreach name {ps7_0_axi_periph dma_bus cmd_bus rsp_bus pkt_bus} {
     set cell [get_bd_cells $name]
+    # Vivado 2018.3 ignores XBAR_DATA_WIDTH unless advanced options are on.
+    # Checking only the parent property can falsely report a native-32 design.
+    if {![get_property CONFIG.ENABLE_ADVANCED_OPTIONS $cell]} {
+        set_property CONFIG.ENABLE_ADVANCED_OPTIONS 1 $cell
+        set axi_pipeline_changed 1
+    }
     if {[get_property CONFIG.XBAR_DATA_WIDTH $cell] != 32 ||
         [get_property CONFIG.XBAR_DATA_WIDTH.VALUE_SRC $cell] ne "USER"} {
         set_property CONFIG.XBAR_DATA_WIDTH 32 $cell
@@ -28,11 +34,16 @@ if {$axi_pipeline_changed} {
     save_bd_design
     puts "AXI_NATIVE32_OUTER_PIPELINES_ENABLED"
 }
-foreach name {ps7_0_axi_periph dma_bus cmd_bus rsp_bus} {
+foreach name {ps7_0_axi_periph dma_bus cmd_bus rsp_bus pkt_bus} {
     set cell [get_bd_cells $name]
     puts "AXI_XBAR_WIDTH $name=[get_property CONFIG.XBAR_DATA_WIDTH $cell] SOURCE=[get_property CONFIG.XBAR_DATA_WIDTH.VALUE_SRC $cell] PIPE=$no_pipeline"
     if {[get_property CONFIG.XBAR_DATA_WIDTH $cell] != 32 ||
         [get_property CONFIG.XBAR_DATA_WIDTH.VALUE_SRC $cell] ne "USER"} {
         error "Native AXI width was overridden for $name"
+    }
+    set xbar [get_bd_cells $name/xbar]
+    puts "AXI_IMPLEMENTED_XBAR_WIDTH $name=[get_property CONFIG.DATA_WIDTH $xbar]"
+    if {[get_property CONFIG.DATA_WIDTH $xbar] != 32} {
+        error "Internal AXI crossbar is still wide for $name"
     }
 }

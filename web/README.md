@@ -1,0 +1,71 @@
+# ZynqDAP Web 工作台
+
+本项目自己的静态 Web 上位机，参考 superlinkPRO/Web 的 Apache-2.0 代码移植。
+保留串口助手、xterm 终端、RTT 转发、J-Scope、烧录器、调试器、ETM 执行轨迹、工程生成，
+另保留通用 RTT Viewer。页面可部署到 HTTPS 静态站点；本地使用 Chrome / Edge：
+
+```powershell
+node web/tools/serve.mjs
+# 打开 http://127.0.0.1:8898
+```
+
+该服务只提供静态文件，没有调试桥或解码后端。Web Serial / WebHID / WebUSB 直接连接
+浏览器授权的设备；ETM 在 Worker 内运行 OpenCSD WASM。没有沿用参考项目的 Kingst 采集桥。
+
+## 设备通路
+
+| 功能 | 本项目通路 |
+|---|---|
+| 串口助手 / 终端 | 标准 Web Serial，共用一个所选 COM 口 |
+| RTT Viewer / 烧录器 / 调试器 | CMSIS-DAP，接口 0 的 EP1 IN / EP2 OUT |
+| RTT 转发 | HID 控制接口 3，CDC EP3 IN 接收 |
+| J-Scope | HID 控制；独立 HSS bulk-in `0x87` |
+| ETM | 独立 bulk-in `0x82`，EP0 vendor `0x60` 控制 |
+| ETM 解码 / 回放 | 本仓库 ORBTrace 接收数据 + OpenCSD 1.8.3 WASM，匹配 ELF / DWARF |
+| 工程生成 | 浏览器解析 Keil `.uvprojx`，预览 / ZIP / 所选目录写入 |
+
+HID RTT 转发与 J-Scope 目前支持 ARM 目标；RISC-V 可使用独立调试器和 RTT Viewer。
+J-Scope 触发由浏览器执行，计划标定测量 PS MEM-AP 读回耗时，供保守起始周期参考；它不是
+PL 连续采样吞吐或 USB 极限。计数和实际采集质量仍须观察丢样、USB 缺口和读错误。
+
+ETM 自动配置仅支持 STM32F103ZE / Cortex-M3。开始前逐字节核对 ELF 的目标 Flash，
+读取实际 ETM 配置，采集后恢复 CoreSight 寄存器与锁。手工模式可输入准确的 ETMv3 配置。
+默认采集 10 ms；解码可用“停止”取消。较大记录需考虑浏览器内存和解码时间。
+
+## ETM 接线
+
+ZYNQ Micro-SYS 的 J7 连续 15–19 脚，电平 3.3 V，另接地：
+
+| J7 | Zynq 球位 | 目标信号 |
+|---|---|---|
+| 15 | H15 | TRACEDATA[0] |
+| 16 | H16（MRCC） | TRACECLK |
+| 17 | G15 | TRACEDATA[1] |
+| 18 | H17 | TRACEDATA[2] |
+| 19 | N15 | TRACEDATA[3] |
+| 14 | GND | 目标 GND |
+
+当前约束目标 TRACECLK ≤ 50 MHz、四位 DDR。构建/仿真通过不能替代实际接线后的时序裕量验收。
+
+## 本地记录和质量
+
+`.zetm` 保存 ETM 字节、SHA-256、解码配置、匹配 ELF 或指令镜像、源 ID 和捕获质量。
+检测到包序号缺口、PL 溢出、结束包缺失时，不应视作完整捕获。设备包同时携带 PS 实际
+FCLK 与 SWD/JTAG TCK（kHz 精度）。示例 `samples/cm3-orbtrace.zetm` 来自真实 DesignStart
+CM3 仿真，明确标为仿真记录，不是实板结果；可一键导入并在浏览器验证 22,036 个指令范围。
+
+## 检查和重建
+
+```powershell
+node web/tools/check.mjs
+node --test web/tests/etm.test.mjs
+python tools/test_probe_host.py
+python tools/build_etm_wasm.py --emsdk build/emsdk
+```
+
+WASM 重建需激活 Emscripten 4.0.10、CMake 和 Ninja。源码位于 `web/etm-native/` 与
+`third_party/OpenCSD-1.8.3/`；运行时只需已纳入本项目的 `opencsd.mjs` 和 `opencsd.wasm`。
+构建指纹记录于 `app/etm/build-manifest.json`。参考代码来源、许可证见 `LICENSE`、
+`etm-native/LICENSE`、`etm-native/EMSCRIPTEN-LICENSE` 与第三方目录。
+
+物理 ETM 线尚未接好，完整实板 trace 验收待完成；具体构建和板级状态以项目验收记录为准。

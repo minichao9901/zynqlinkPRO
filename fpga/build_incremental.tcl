@@ -9,6 +9,7 @@ set impl_only [expr {[lsearch -exact $argv --impl-only] >= 0}]
 set rtl_stamp [exec python [file join $root tools fpga_rtl_stamp.py]]
 set stamp_file [file join $out swd_rtl_built.stamp]
 set old_stamp {}
+set changed_groups [exec python [file join $root tools fpga_rtl_stamp.py] --changed-groups $stamp_file]
 if {[file exists $stamp_file]} {
     set fd [open $stamp_file r]; set old_stamp [read $fd]; close $fd
 }
@@ -31,6 +32,11 @@ if {!$impl_only} {
     add_files -norecurse [file join $root fpga rtl probe_stream_engine.v]
     add_files -norecurse [file join $root fpga rtl jtag_shift.v]
     add_files -norecurse [file join $root fpga rtl jtag_core.v]
+    add_files -norecurse [glob [file join $root fpga rtl orbtrace_*.v]]
+    if {![llength [get_files -quiet orbtrace_pins.xdc]]} {
+        add_files -fileset constrs_1 [file join $root fpga constraints orbtrace_pins.xdc]
+    }
+    source [file join $root fpga orbtrace_bd.tcl]
     source [file join $root fpga axi_pipeline.tcl]
     if {$axi_pipeline_changed} {set fresh_impl 1}
     # Vivado 2018.3 does not reliably invalidate an OOC module-reference
@@ -52,10 +58,13 @@ if {!$impl_only} {
         # update_module_reference invalidates its nested products itself;
         # reset_target on the nested XCI is forbidden in Vivado 2018.3.
         set swd_run [get_runs -quiet system_swd_controller_0_0_synth_1]
-        if {[llength $swd_run]} {reset_run $swd_run}
+        if {[llength $swd_run] && [lsearch -exact $changed_groups swd]>=0} {reset_run $swd_run}
+        set trace_run [get_runs -quiet system_orbtrace_0_0_synth_1]
+        if {[llength $trace_run] && [lsearch -exact $changed_groups trace]>=0} {reset_run $trace_run}
         reset_run synth_1
     }
     generate_target all [get_files system.bd]
+    make_wrapper -files [get_files system.bd] -top
     # Vivado 2018.3 can retain a stale OUT-net classification after the
     # clock pad becomes bidirectional. Check emitted HDL before synthesis.
     set generated_system [file join $out zynqlink_dma.srcs sources_1 bd system synth system.v]

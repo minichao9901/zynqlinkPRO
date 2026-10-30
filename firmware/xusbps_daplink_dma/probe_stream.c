@@ -236,6 +236,9 @@ typedef struct {
 } variable;
 static variable vars[8];
 static uint32_t addresses[24], period = 2400, step = 100, plan_hash;
+static uint32_t bench_requested,bench_count,bench_ticks;
+static int32_t bench_error;
+static uint8_t bench_active;
 static uint8_t nvars, nwords, frame_size, version = 1, flags, direct_layout;
 static uint32_t produced, seq, formatted, fill_count, fill_time, last_stamp;
 static uint32_t skipped_base, tx_done_base, fill_started;
@@ -387,6 +390,7 @@ static int sampler_arm(void) {
     return 0;
 }
 void probe_before_dap(void) {
+    if(bench_active){bench_active=0;bench_error=-7;}
     if(pl_packets && mode==1 && rtt_pl_running) {
         uint32_t budget=1000000;
         PW(0,0);
@@ -507,6 +511,7 @@ static int rtt_commit(void) {
     return 0;
 }
 static int stop(void) {
+    if(bench_active){bench_active=0;bench_error=-7;}
     int rc = 0;
     if(pl_packets && mode) {
         stopping=1;PW(0,0);
@@ -710,7 +715,7 @@ static int configure_hss(const uint8_t *req) {
     uint32_t p = get32(req + 4), hash = 0x811c9dc5;
     unsigned i, j, w = 0, bytes = 0;
     uint8_t n = req[9], f = req[8];
-    if (mode == 2)
+    if (mode == 2 || bench_active)
         return -7;
     if (!n || n > 8 || req[1] < 8 + 6 * n || (f & 0x44))
         return -6; // No RISC-V/trigger backend.
@@ -793,8 +798,7 @@ static void control(const uint8_t *req, uint8_t *res) {
         return;
     }
     if (cmd == 0x10 || cmd == 0x11 || cmd == 0x13) {
-        const char *s = cmd == 0x10 ? "ZynqLinkPro" : cmd == 0x11 ? "12345678" :
-            (Xil_In32(0x4001004c)&8U) ? "0.4-jtag" : (pl_packets ? "0.3-dma" : "0.2");
+        const char *s = cmd == 0x10 ? "ZynqLinkPro" : cmd == 0x11 ? "12345678" : "0.5-orbtrace";
         size_t n = strlen(s);
         memcpy(res + 3, s, n);
         res[1] = (uint8_t)(1 + n);
@@ -811,7 +815,7 @@ static void control(const uint8_t *req, uint8_t *res) {
     case 1:
     case 3:
         if (cmd == 0x32 && act == 3) {
-            if (req[1] < 6 || mode) {
+            if (req[1] < 6 || mode || bench_active) {
                 rc = -7;
                 break;
             }
@@ -882,6 +886,15 @@ static void control(const uint8_t *req, uint8_t *res) {
         break;
     case 2:
         break;
+    case 8:
+        if(cmd!=0x32 || req[1]<6 || !nwords || mode || bench_active){rc=-7;break;}
+        bench_requested=get32(req+4);
+        if(!bench_requested || bench_requested>10000){rc=-6;break;}
+        bench_count=bench_ticks=0;bench_error=-1;bench_active=1;
+        break;
+    case 9:
+        if(cmd!=0x32)rc=-9;
+        break;
     case 7:
     case 10:
         if (cmd == 0x32) {
@@ -907,7 +920,7 @@ static void control(const uint8_t *req, uint8_t *res) {
             rc = -9;
         break;
     case 12:
-        rc=req[1]<3 ? -6 : mode ? -7 : probe_target_transport(req[4]);
+        rc=req[1]<3 ? -6 : (mode || bench_active) ? -7 : probe_target_transport(req[4]);
         break;
     default:
         rc = -9;
@@ -917,9 +930,13 @@ static void control(const uint8_t *req, uint8_t *res) {
         requested_hz = 50000000;
         rc = -6;
     }
-    if (act != 2 && act != 11)
+    if (act != 2 && act != 9 && act != 11)
         result = (int8_t)rc;
     status(cmd, words, cmd == 0x32 && act == 11);
+    if(cmd==0x32 && act==9){
+        words[0]=bench_ticks;words[1]=bench_count;words[2]=(uint32_t)bench_error;
+        words[3]=0x5a594e51U;words[4]=0; // Zynq PS MEM-AP plan benchmark.
+    }
     res[1] = 50;
     res[3] = (uint8_t)result;
     for (i = 0; i < 12; i++)
@@ -930,6 +947,7 @@ void probe_poll(XUsbPs *usb) {
         uint32_t f = irq_save();
         // RESET already flushed USB DMA. No old slot may survive reconfiguration.
         mode = 0;
+        bench_active=0;bench_error=-7;
         stopping = 0;
         W(0, 0);
         Xil_Out32(0x40010050, 1);
@@ -950,6 +968,22 @@ void probe_poll(XUsbPs *usb) {
     }
     if (!probe_session_live())
         return;
+    if(bench_active){
+        unsigned sample,word;uint8_t scratch[4];int rc=probe_target_claim(requested_hz);
+        if(rc && rc!=-7){bench_error=rc;bench_active=0;}
+        if(!rc){
+            actual_hz=link_clock(probe_target_fclk());
+            for(sample=0;sample<8 && bench_count<bench_requested;sample++){
+                uint32_t begin=now();
+                for(word=0;word<nwords;word++)if((rc=probe_target_read(addresses[word],scratch,4)))break;
+                bench_ticks+=now()-begin;
+                if(rc){bench_error=rc;bench_active=0;break;}
+                bench_count++;
+            }
+            if(bench_count==bench_requested){bench_error=0;bench_active=0;}
+            if(!bench_active)probe_target_release();
+        }
+    }
     kick(usb, &hid);
     kick(usb, &hss);
     kick(usb, &cdc);

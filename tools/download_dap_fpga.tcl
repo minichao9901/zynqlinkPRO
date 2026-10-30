@@ -1,4 +1,4 @@
-if {[llength $argv] != 2} {error "Expected ELF and BIT paths"}
+if {[llength $argv] < 2 || [llength $argv] > 3} {error "Expected ELF and BIT paths, optionally PS init Tcl"}
 set elf [file normalize [lindex $argv 0]]
 set bit [file normalize [lindex $argv 1]]
 if {![file exists $elf]} {error "ELF does not exist: $elf"}
@@ -14,7 +14,12 @@ rst -system
 after 1000
 
 set root [file normalize [file join [file dirname [info script]] ..]]
-set init [file join $root prebuilt ps7_init.tcl]
+set init [file join [file dirname $elf] ps7_init.tcl]
+if {[llength $argv] == 3} {
+    set init [file normalize [lindex $argv 2]]
+    if {![file exists $init]} {error "Explicit PS init does not exist: $init"}
+}
+if {![file exists $init]} {set init [file join $root prebuilt ps7_init.tcl]}
 if {![file exists $init]} {
     # Fallback for the original development workspace layout.
     set init [file join $root reference legacy_zynq PS_CherryUSB_Minichao \

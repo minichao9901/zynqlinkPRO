@@ -24,6 +24,21 @@ foreach phase {Q1 Q2} {
     }
 }
 puts "JTAG_TDO_IDDR_VERIFIED LOC=[get_property LOC $tdo_ddr] phases=Q1,Q2"
+set trace_ddr [get_cells -hier -filter {REF_NAME == IDDR && NAME =~ *orbtrace_0*}]
+if {[llength $trace_ddr] != 4} {error "Parallel TRACE must retain four input IDDRs"}
+if {[llength [get_cells -hier -filter {REF_NAME == BUFIO && NAME =~ *orbtrace_0*}]] != 1 ||
+    [llength [get_cells -hier -filter {REF_NAME == BUFR && NAME =~ *orbtrace_0*}]] != 1} {
+    error "Parallel TRACE dedicated I/O/fabric clock buffers missing"
+}
+if {[llength [get_cells -hier -filter {NAME =~ *orbtrace_0* && (REF_NAME == LDCE || REF_NAME == LDPE || REF_NAME == LDCPE)}]]} {
+    error "Parallel TRACE contains unintended latches"
+}
+puts "ORBTRACE_IO_VERIFIED IDDR=4 BUFIO=1 BUFR=1 latches=0"
+if {[llength [get_cells -hier -filter {REF_NAME == IDELAYE2 && NAME =~ *orbtrace_0*}]] != 4 ||
+    [llength [get_cells -hier -filter {REF_NAME == IDELAYCTRL && NAME =~ *orbtrace_0*}]] != 1} {
+    error "Parallel TRACE input delay/calibration primitives missing"
+}
+puts "ORBTRACE_DELAY_VERIFIED IDELAYE2=4 IDELAYCTRL=1 REFCLK=200MHz"
 # Evaluate realizable PLL divisors on this routed netlist, without rebuilding
 # it for each frequency. Keep the highest rate that meets BOTH setup and hold.
 set verified_fclk 0
@@ -38,9 +53,15 @@ foreach rate {180000000 163636364 150000000 138461539 128571429 120000000 100000
     if {$setup >= 0 && $h >= 0} {set verified_fclk $rate; break}
 }
 close $fd
-if {!$verified_fclk} {error "Routed timing failed at every tested frequency"}
+if {!$verified_fclk} {
+    report_clocks -file [file join $out clocks_failed.rpt]
+    report_utilization -file [file join $out utilization_failed.rpt]
+    report_timing_summary -report_unconstrained -file [file join $out timing_failed.rpt]
+    error "Routed timing failed at every tested frequency"
+}
 report_clocks -file [file join $out clocks_verified.rpt]
 report_utilization -file [file join $out utilization.rpt]
+report_utilization -hierarchical -file [file join $out utilization_hier.rpt]
 report_timing_summary -report_unconstrained -file [file join $out timing_verified.rpt]
 set worst [get_property SLACK [get_timing_paths -max_paths 1 -delay_type max]]
 set hold [get_property SLACK [get_timing_paths -max_paths 1 -delay_type min]]

@@ -1,0 +1,20 @@
+{
+  "compiler": "emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 4.0.10 (b7dc6e5747465580df5984e723b9d1f10d8e804b)",
+  "opencsd": "1.8.3",
+  "source_sha256": "77a7ef386358c20ec26bc30d9013eb415770a3c9961ff1b4941a7cc33c22b0a6",
+  "artifacts": {
+    "opencsd.mjs": "2feb19e2f86598ce506e4bab52ffad297930b2d0b506502871ba799f50ee1571",
+    "opencsd.wasm": "bcde967fd026ee2496cdf91de27ed261988bd7cda159f6bf7fc97fbb2a15162c"
+  },
+  "options": [
+    "Release",
+    "-O3",
+    "-fexceptions",
+    "MODULARIZE",
+    "EXPORT_ES6",
+    "ALLOW_MEMORY_GROWTH",
+    "MEMFS",
+    "FS",
+    "callMain"
+  ]
+}

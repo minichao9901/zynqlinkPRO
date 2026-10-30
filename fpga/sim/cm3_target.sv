@@ -11,7 +11,8 @@
 // holds cortexm3_integration.v, dapswjdp.v, ... (see the README next to it).
 module cm3_target #(
     parameter integer WORDS      = 4096,
-    parameter integer ADDR_BITS  = 12
+    parameter integer ADDR_BITS  = 12,
+    parameter integer TRACE_LEVEL = 0
 ) (
     input  wire        clk,        // HCLK
     input  wire        rst_n,      // SYSRESETn
@@ -26,7 +27,10 @@ module cm3_target #(
     output wire        swdoen,
     output wire        jtag_nsw,
     output wire [31:0] sys_dout,
-    output wire [15:0] sys_writes
+    output wire [15:0] sys_writes,
+    output wire        trace_clk,
+    output wire [3:0]  trace_data,
+    output wire        trace_enable
 );
     wire [31:0] s_awaddr;  wire [3:0] s_awlen;  wire [2:0] s_awsize;
     wire [1:0]  s_awburst; wire [1:0] s_awlock; wire [3:0] s_awcache;
@@ -61,8 +65,11 @@ module cm3_target #(
     wire sysresetreq, dbgrestarted, lockup, halted, wakeup, wicenack;
     wire jtagtop, trcena, traceclk, swv;
     wire [3:0] tracedata;
+    assign trace_clk = traceclk;
+    assign trace_data = tracedata;
+    assign trace_enable = trcena;
 
-    CortexM3DbgAXI u_cm3 (
+    CortexM3DbgAXI #(.TRACE_LVL(TRACE_LEVEL)) u_cm3 (
         .SYSRESETREQ   (sysresetreq),
         .DBGRESTARTED  (dbgrestarted),
         .LOCKUP        (lockup),

@@ -1,4 +1,5 @@
 #include "probe_stream.h"
+#include "etm_stream.h"
 /******************************************************************************
 *
 * Copyright (C) 2010 - 2015 Xilinx, Inc.  All rights reserved.
@@ -136,6 +137,7 @@ int main(void)
 {
 	int Status;
 	printf("hello cdc acm test!\n");
+    xil_printf("[ETM] independent FCLK1 reference=%u Hz\r\n",etm_reference_init());
 	extern int swd_dma_selftest(void);
 	Status = swd_dma_selftest();
 	xil_printf("[DMA] BRAM/CDMA/CACHE selftest=%d\r\n", Status);
@@ -272,6 +274,9 @@ static int UsbIntrExample(XScuGic *IntcInstancePtr, XUsbPs *UsbInstancePtr,
 	DeviceConfig.EpCfg[2].Out.NumBufs	= 16;
 	DeviceConfig.EpCfg[2].Out.BufSize	= 4096;
 	DeviceConfig.EpCfg[2].Out.MaxPacketSize	= 512;
+    DeviceConfig.EpCfg[2].In.Type=XUSBPS_EP_TYPE_BULK;
+    DeviceConfig.EpCfg[2].In.NumBufs=16;
+    DeviceConfig.EpCfg[2].In.MaxPacketSize=512;
 
 	/* Endpoint 3: CDC Bulk IN (0x83) */
 	DeviceConfig.EpCfg[3].In.Type		= XUSBPS_EP_TYPE_BULK;
@@ -351,6 +356,7 @@ static int UsbIntrExample(XScuGic *IntcInstancePtr, XUsbPs *UsbInstancePtr,
     if(XUsbPs_EpSetHandler(UsbInstancePtr,6,XUSBPS_EP_DIRECTION_IN,probe_usb_event,UsbInstancePtr)!=XST_SUCCESS ||
        XUsbPs_EpSetHandler(UsbInstancePtr,6,XUSBPS_EP_DIRECTION_OUT,probe_usb_event,UsbInstancePtr)!=XST_SUCCESS ||
        XUsbPs_EpSetHandler(UsbInstancePtr,7,XUSBPS_EP_DIRECTION_IN,probe_usb_event,UsbInstancePtr)!=XST_SUCCESS) goto out;
+    if(XUsbPs_EpSetHandler(UsbInstancePtr,ETM_BULKIN_EP,XUSBPS_EP_DIRECTION_IN,etm_usb_event,UsbInstancePtr)!=XST_SUCCESS)goto out;
 
 	/* Enable the interrupts. */
 	XUsbPs_IntrEnable(UsbInstancePtr, XUSBPS_IXR_UR_MASK |
@@ -394,6 +400,7 @@ static int UsbIntrExample(XScuGic *IntcInstancePtr, XUsbPs *UsbInstancePtr,
 		extern void chry_dap_handle(void);
 		chry_dap_handle();
         probe_poll(UsbInstancePtr);
+        etm_poll(UsbInstancePtr);
 	}
 
 	ReturnStatus = XST_SUCCESS;
@@ -445,6 +452,7 @@ static void UsbIntrHandler(void *CallBackRef, u32 Mask)
         extern int chry_dap_usb_session_reset(void);
         chry_dap_usb_session_reset();
         probe_usb_reset();
+        etm_usb_reset();
     }
 	NumIrqs++;
 	if (NumIrqs <= 8) {

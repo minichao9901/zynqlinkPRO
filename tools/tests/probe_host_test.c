@@ -137,6 +137,13 @@ int main(void) {
     hss.in=hss.out+QSIZE;packet_regs[2]=512;before=dma_calls;packet_poll();assert(dma_calls==before && packet_acks==2);
     hss.in=hss.out=0;reset_in_dma=1;packet_poll();
     assert(reset_pending && hss.in==0 && packet_acks==2); // Reset during copy cannot ACK/consume.
-    puts("PASS production probe C: HID, 8 variables, HSS DEF/DATA/gaps, backpressure, RTT wrap/RdOff retry, DAP handoff, ZLP, reset");
+    configured=1;reset_pending=0;current_epoch=epoch;mode=0;pl_packets=0;nwords=1;addresses[0]=0x20000000;
+    command_req(req,0x32,8,6);put32(req+4,12);control(req,res);assert(bench_active && bench_error==-1);
+    before=read_calls;probe_poll(&usb);assert(bench_count==8 && bench_active && read_calls==before+8);
+    probe_poll(&usb);assert(bench_count==12 && !bench_active && bench_error==0);
+    command_req(req,0x32,9,2);control(req,res);assert(get32(res+8)==12 && get32(res+12)==0 && get32(res+16)==0x5a594e51);
+    command_req(req,0x32,8,6);put32(req+4,12);control(req,res);fail_read=1;probe_poll(&usb);assert(!bench_active && bench_error==-4);fail_read=0;
+    command_req(req,0x32,8,6);put32(req+4,12);control(req,res);probe_before_dap();assert(!bench_active && bench_error==-7);
+    puts("PASS production probe C: HID, 8 variables, HSS DEF/DATA/gaps, backpressure, RTT wrap/RdOff retry, DAP handoff, ZLP, reset, plan benchmark");
     return 0;
 }

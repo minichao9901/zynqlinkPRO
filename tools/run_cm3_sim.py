@@ -14,6 +14,7 @@ Usage::
 from __future__ import annotations
 
 import argparse
+import hashlib
 import os
 import re
 import subprocess
@@ -66,7 +67,21 @@ def main():
         (work / (Path(str(cmd[0])).stem + '.log')).write_text(log, encoding='utf-8', errors='replace')
         return p, log
 
-    if args.rebuild or not (work / 'xsim.dir').exists():
+    # A worktree has its own sources, and a prior failed compile may leave an
+    # xsim.dir behind. Reuse only a successful snapshot of these exact inputs.
+    inputs = sorted([*(ROOT / 'fpga/rtl').glob('*.v'),
+                     *(ROOT / 'fpga/sim').glob('*.v'),
+                     *(ROOT / 'fpga/sim').glob('*.sv'),
+                     *(ROOT / 'fpga/sim').glob('*.svh'),
+                     *rtl.glob('*.v'), *rtl.glob('*.vp')])
+    digest = hashlib.sha256((args.top + str(VIVADO)).encode())
+    for source in inputs:
+        digest.update(str(source).encode())
+        digest.update(source.read_bytes())
+    fingerprint = digest.hexdigest()
+    stamp = work / 'snapshot.sha256'
+    if args.rebuild or not stamp.exists() or stamp.read_text().strip() != fingerprint:
+        stamp.unlink(missing_ok=True)
         rtl_files = sorted(str(p) for p in rtl.glob('*.v'))
         dut_files = sorted(str(p) for p in (ROOT / 'fpga/rtl').glob('*.v'))
         sim_v = [str(ROOT / 'fpga/sim/axi3_sram.v'),
@@ -75,6 +90,8 @@ def main():
                   str(ROOT / 'fpga/sim/jtag_dp_model.sv'),
                   str(ROOT / 'fpga/sim/cm3_target.sv'),
                   str(ROOT / f'fpga/sim/{args.top}.sv')]
+        if args.top == 'tb_cm3_etm':
+            sim_sv.insert(-1, str(ROOT / 'fpga/sim/tb_cm3_swd.sv'))
         p, log = run([exe / 'xvlog.exe', '--relax', '-i', str(rtl),
                       *rtl_files, *dut_files, *sim_v])
         if p.returncode:
@@ -88,6 +105,7 @@ def main():
         if p.returncode:
             print(log[-4000:])
             sys.exit('xelab failed')
+        stamp.write_text(fingerprint + '\n')
         print('built', args.top)
 
     cmd = [exe / 'xsim.exe', args.top + '_snap', '-runall', '-log', 'xsim.log']

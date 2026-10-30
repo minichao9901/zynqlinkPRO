@@ -27,6 +27,7 @@ typedef struct {u8 bmRequestType,bRequest;u16 wValue,wIndex,wLength;} XUsbPs_Set
 #define XUSBPS_EPCR_RXR_MASK 0x40
 #define XUSBPS_EPFLUSH_OFFSET 0x1b4
 #define XUSBPS_EPSTAT_OFFSET 0x1b8
+#define XUSBPS_EPCOMPL_OFFSET 0x1bc
 #define XUSBPS_EPRDY_OFFSET 0x1bc
 #define XUSBPS_PORTSCR1_OFFSET 0x184
 #define Xil_AssertVoid(x) assert(x)

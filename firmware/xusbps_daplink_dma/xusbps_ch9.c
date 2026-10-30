@@ -613,6 +613,7 @@ static int XUsbPs_HandleVendorReq(XUsbPs *InstancePtr,
 	u32     BufferLen;
 	u32     Handle;
 	u32	Reg;
+
 	u8	EpNum = 0;
 	int 	Status;
 	int 	Direction;
@@ -627,6 +628,21 @@ static u8	Reply[XUSBPS_REQ_REPLY_LEN];
 	static u8	Reply[XUSBPS_REQ_REPLY_LEN] ALIGNMENT_CACHELINE;
 #endif
 
+    /* ETM status/start/stop/reset. Control stays on EP0, data on EP2 IN. */
+    if(SetupData->bmRequestType==0xc0 && SetupData->bRequest==0x61 &&
+       SetupData->wIndex==0x4554 && SetupData->wLength==16){
+        uint32_t snapshot[4];
+        extern void etm_reference_snapshot(uint32_t reply[4]);
+        etm_reference_snapshot(snapshot);memcpy(Reply,snapshot,sizeof(snapshot));
+        return XUsbPs_EpBufferSend(InstancePtr,0,Reply,sizeof(snapshot));
+    }
+    if(SetupData->bmRequestType==0xc0 && SetupData->bRequest==0x60 &&
+       SetupData->wIndex==0x4554 && SetupData->wLength==32){
+        uint32_t snapshot[8];
+        extern void etm_control(uint16_t action,uint32_t reply[8]);
+        etm_control(SetupData->wValue,snapshot);memcpy(Reply,snapshot,sizeof(snapshot));
+        return XUsbPs_EpBufferSend(InstancePtr,0,Reply,sizeof(snapshot));
+    }
 	/* Check the direction, USB 2.0 section 9.3 */
 	Direction = SetupData->bmRequestType & (1 << 7);
     /* Explicit bulk-session recovery via EP0, which remains usable even
