@@ -1,0 +1,22 @@
+
+****** xsim v2018.3 (64-bit)
+  **** SW Build 2405991 on Thu Dec  6 23:38:27 MST 2018
+  **** IP Build 2404404 on Fri Dec  7 01:43:56 MST 2018
+    ** Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+
+source xsim.dir/tb_cm3_jtag_snap/xsim_script.tcl
+# xsim {tb_cm3_jtag_snap} -testplusarg benchmark -testplusarg target_clk_ns=10.416667 -testplusarg clk_ns=10.000000100 -testplusarg delay_tdo -testplusarg tdo_ns=16 -testplusarg bypass -testplusarg late -testplusarg q1 -autoloadwcfg -runall
+Vivado Simulator 2018.3
+Time resolution is 1 ps
+run -all
+WARNING: File  referenced on E:/zynqlinkPRO_orbtrace_opt/build/transport_baseline_00b9f2f/fpga/sim/cm3_target.sv at line 98 cannot be opened for reading. Please ensure that this file is available in the current working directory.
+SIM_SRAM read=0 bytes=1024 elapsed_ns=494260.000000 MBps=2.071784 waits=255
+SIM_SRAM read=1 bytes=1024 elapsed_ns=494230.000000 MBps=2.071910 waits=255
+SIM_RTT bytes=1024 elapsed_ns=514200.000000 MBps=1.991443 waits=257
+SIM_HSS period=24 produced=64 skipped=64 elapsed_ns=128000.000000 Hz=500000.000000 skip_percent=50.000000
+SIM_HSS period=53 produced=125 skipped=1 elapsed_ns=278240.000000 Hz=449252.443933 skip_percent=0.793651
+PASS SIM_TRANSPORT_BENCH payloads and counters verified
+$finish called at time : 2298740 ns : File "E:/zynqlinkPRO_orbtrace_opt/build/transport_baseline_00b9f2f/fpga/sim/tb_cm3_jtag.sv" Line 126
+run: Time (s): cpu = 00:00:00 ; elapsed = 00:00:46 . Memory (MB): peak = 219.559 ; gain = 0.000
+exit
+INFO: [Common 17-206] Exiting xsim at Sat Oct 31 02:54:28 2026...

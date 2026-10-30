@@ -1,5 +1,5 @@
 {
-  "status": "EXPERIMENTAL: routed STA and bitgen pass; hardware and full-CM3 comparison pending",
+  "status": "EXPERIMENTAL: routed STA, bitgen and matched-profile real-CM3 comparisons pass; hardware/PS/USB acceptance pending",
   "source_commit": "bc9ced69f1f8f81647b8d62eaf74100d53fd883f",
   "base_commit": "00b9f2f",
   "device": "xc7z020clg400-2",
@@ -64,7 +64,8 @@
     "utilization.rpt": "5ed241656b938e2c8d1dafe4a85fb3d53c628a13f581c447b5d7cc9bd559d4f9",
     "zynqlink_probe_60.elf": "b455d6d77be1d04fbbce3d4c7cd290b1f17ff9abebb9e6e7e29abee26d405b1c",
     "firmware-build_60.json": "29fdf45a849f2f8100c9cb35afa210882394956af0f8fbdc02cd6450a57c2e01",
-    "ocm_layout_60.json": "880e94abcdf9802feee83e8acae50bc583680515dd5da0287c214df5f0714558"
+    "ocm_layout_60.json": "880e94abcdf9802feee83e8acae50bc583680515dd5da0287c214df5f0714558",
+    "simulation_comparison.json": "97f197d4d02953a2cc0ee45b973e5628133b732dab7e42942e441f0fb105b0be"
   },
   "routed_checkpoint_sha256": "4c4daacf6788958f8534c4f4daa75ca3faa626686addbfb22cf481576c5ed9e7",
   "firmware_profiles": {
@@ -77,5 +78,12 @@
       "max_link_Hz": 60000000,
       "hardware_acceptance": "pending"
     }
+  },
+  "simulation_acceptance": {
+    "status": "matched-profile real-CM3 payload/counter/throughput comparison passed",
+    "operating_points": 9,
+    "metrics_identical_to_parent": true,
+    "USB_or_PS_instruction_timing_modeled": false,
+    "raw_model_compatibility_failures": "7 matrix points match parent; raw SWD30 board sampling also fails both fixed-delay models, calibrated boundary1 passes both"
   }
 }

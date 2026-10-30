@@ -1,0 +1,37 @@
+
+****** xsim v2018.3 (64-bit)
+  **** SW Build 2405991 on Thu Dec  6 23:38:27 MST 2018
+  **** IP Build 2404404 on Fri Dec  7 01:43:56 MST 2018
+    ** Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+
+source xsim.dir/tb_cm3_swd_snap/xsim_script.tcl
+# xsim {tb_cm3_swd_snap} -testplusarg half_ns=4.166666736 -testplusarg transfer_delay=1 -testplusarg narrow_clock=1 -testplusarg phase=1 -testplusarg rx_boundary=1 -testplusarg return_ns=16 -testplusarg target_clk_ns=10.416667 -testplusarg words=2 -autoloadwcfg -runall
+Vivado Simulator 2018.3
+Time resolution is 1 ps
+run -all
+WARNING: File  referenced on E:/zynqlinkPRO_orbtrace_opt/build/transport_baseline_00b9f2f/fpga/rtl/orbtrace_tpiu_demux.v at line 22 cannot be opened for reading. Please ensure that this file is available in the current working directory.
+XFER req=02 ack=1 data=2ba01477
+XFER req=00 ack=1 data=2ba01477
+XFER req=04 ack=1 data=2ba01477
+XFER req=06 ack=1 data=f0000000
+XFER req=06 ack=1 data=f0000000
+XFER req=06 ack=1 data=f0000000
+XFER req=06 ack=1 data=f0000000
+XFER req=06 ack=1 data=f0000000
+XFER req=08 ack=1 data=f0000000
+XFER req=01 ack=1 data=f0000000
+XFER req=05 ack=1 data=f0000000
+XFER req=0d ack=1 data=f0000000
+XFER req=0d ack=1 data=f0000000
+XFER req=0e ack=2 data=f0000000
+XFER req=0e ack=1 data=00000000
+XFER req=05 ack=1 data=00000000
+XFER req=0f ack=2 data=00000000
+XFER req=0f ack=1 data=00000000
+XFER req=0f ack=1 data=5a89cdef
+XFER req=0e ack=1 data=c4beb456
+NARROW_PAD_PASS pulses=1006 high_ns=8.333333 delay=1
+PASS CortexM3 DPIDR/power/AP posted SRAM 2 words
+$finish called at time : 38228058 ps : File "E:/zynqlinkPRO_orbtrace_opt/build/transport_baseline_00b9f2f/fpga/sim/tb_cm3_swd.sv" Line 419
+exit
+INFO: [Common 17-206] Exiting xsim at Sat Oct 31 03:16:08 2026...

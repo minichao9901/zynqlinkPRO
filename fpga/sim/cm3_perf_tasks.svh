@@ -1,14 +1,22 @@
 // Shared performance workload. All payloads are checked; no USB is modeled.
 integer perf_waits=0;
+real perf_fclk_ns=10.0;
 always @(posedge clk)if(dut.core_result_valid && dut.core_ack==2)perf_waits=perf_waits+1;
 
 task perf_cfg(input integer a,input [31:0] v);
   perf_put(24,a);perf_put(28,v);
 endtask
 task perf_wait_bank(output [31:0] v);
-  integer n;begin
-    v=0;n=0;
-    while(v==0 && n<2000000)begin perf_get(8,v);n=n+1;end
+  integer n;real started,limit_ns;begin
+    v=0;n=0;started=$realtime;
+    limit_ns=40000.0*2.0*(dut.cfg_delay_fast+1)*perf_fclk_ns;
+    while(v==0 && n<2000000)begin
+      perf_get(8,v);n=n+1;
+      if(dut.u_probe_stream.hss_transport_fault || dut.u_probe_sampler.fault || dut.u_probe_stream.rtt_fault)
+        $fatal(1,"benchmark stream fault hss=%0d sampler=%0d rtt=%0d fence=%0d",dut.u_probe_stream.hss_transport_fault,dut.u_probe_sampler.fault,dut.u_probe_stream.rtt_fault,dut.jtag_fence_error);
+      if($realtime-started>limit_ns)
+        $fatal(1,"benchmark bank timeout stream=%0d sampler=%0d active=%0d pending=%0d jtag=%0d busy=%0d fence_req=%0d done=%0d consumed=%0d validated=%0d produced=%0d samples=%0d fifo_head=%0d fifo_tail=%0d",dut.u_probe_stream.state,dut.u_probe_sampler.state,dut.sampler_active,dut.u_probe_sampler.pending,dut.u_jtag_core.state,dut.core_busy,dut.jtag_fence_req,dut.jtag_fence_done,dut.u_jtag_core.fence_consumed,dut.u_probe_stream.validated_count,dut.u_probe_stream.produced,dut.u_probe_stream.samples,dut.u_probe_sampler.head,dut.u_probe_sampler.tail);
+    end
     if(v==0)$fatal(1,"benchmark stream bank timeout");
   end
 endtask
@@ -61,7 +69,11 @@ task perf_hss(input integer period_ticks,input real fclk_ns,output real measured
     for(j=0;j<4;j=j+1)perf_cfg(16+j,j);
     perf_write('h78,$rtoi(1e9/fclk_ns));perf_write('h68,0);perf_write('h6c,32'h60000000);perf_write('h70,period_ticks);
     expected=target.u_sys.mem[0];total=0;started=0;loops=0;
+    // A stopped JTAG sampler can leave a partial-bank CTRL/STAT fence in
+    // flight. Start is accepted only when the shared backend is available.
+    wait(!dut.core_busy);
     perf_put(0,1);perf_write('h60,257);
+    if(!dut.u_probe_sampler.enabled)$fatal(1,"benchmark HSS start was not accepted");
     while(!started || dut.u_probe_sampler.head-h0<64)begin
       perf_wait_bank(s);base=4096+((s>>16)&7)*2048;
       perf_get(base,v);if(v!==32'h02024a53)$fatal(1,"benchmark HSS header %h",v);
@@ -83,6 +95,7 @@ endtask
 task run_transport_benchmark(input real fclk_ns);
   integer n,period;real peak,zero,clock_rate;
   begin
+    perf_fclk_ns=fclk_ns;
     for(n=0;n<4096;n=n+1)target.u_sys.mem[n]=32'h12340000+n;
     if(!$test$plusargs("skip_sram"))begin perf_sram(0);perf_sram(1);end
     perf_rtt;

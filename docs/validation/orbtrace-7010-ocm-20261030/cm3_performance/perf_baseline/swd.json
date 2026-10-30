@@ -1,0 +1,301 @@
+{
+  "source_sha256": {
+    "fpga\\rtl\\dap_transfer_block_engine.v": "85d03fa03966ecf2ae8599ba49ce21699060ab7bcdb27fc69f772bd492eed319",
+    "fpga\\rtl\\jtag_core.v": "f81361743a29584b78a1179264d1fa41c4e6fa0456ea486a437cd65e0ff6ed7b",
+    "fpga\\rtl\\jtag_shift.v": "5660cec2fd287cdaa9632fae53a915ab28179e6439f79b95367defb0d0970e9a",
+    "fpga\\rtl\\orbtrace_controller.v": "16114542ff14dda19fa7d36c5b5286e348d8ebfa5ef010bdaa1198d3ac656600",
+    "fpga\\rtl\\orbtrace_frame_fifo.v": "132b79c3621479c0acfeb95a17416fd9a5f52645a22016509538c12e485e27dc",
+    "fpga\\rtl\\orbtrace_parallel.v": "ee2df3b300ce66cb684a2e6d32946dfda28cf245f8fd0b451de29901c11b432f",
+    "fpga\\rtl\\orbtrace_tpiu_demux.v": "8ee22425aceca214bb30b067704f26816dc322b9db60244fc451476caf2cb768",
+    "fpga\\rtl\\orbtrace_tpiu_stream.v": "803b6003de1e30f22c6aad50ea333320e564fcf57bb8fe184ff703e0bcbbf86d",
+    "fpga\\rtl\\orbtrace_traceif.v": "e4c9adda46c34b8888c7084a6f01bb134836118263a73a64a857f8f4dc04fef1",
+    "fpga\\rtl\\probe_rtt_engine.v": "10136ba15bbf387677053d95226703ac7563998843c0fc55d8082eee40f60bea",
+    "fpga\\rtl\\probe_sample_engine.v": "d4f152a6820b046911c78fc0ee6287665f761430413c990895b9a24611a5aa28",
+    "fpga\\rtl\\probe_stream_engine.v": "5cc6d298208a8fbda422d18b2b6ba7bf8df3419fc51a45dc0deec5b91a6b066a",
+    "fpga\\rtl\\swd_batch_engine.v": "2147786073a8ed8aa4a66c0c6c16a4e7ba34e222789af20cd84e24b74df70c41",
+    "fpga\\rtl\\swd_controller.v": "c846b1e21a91374d32488b375099f4f63ba93b59f0e5d63f5de870fc06207ea9",
+    "fpga\\rtl\\swd_core.v": "dfa1163be05d278580bb1225e7b30848cb770175e185e440a24d0b5a82679ce8",
+    "fpga\\sim\\tb_cm3_swd.sv": "02ee5887dec7b8175c0d7eab575dce68c22a3566270d7e83afa63aa00dabacb7",
+    "fpga\\sim\\cm3_perf_tasks.svh": "c6608d9a949a0d8057254d5441fdab5d420c28e709bc56a664330a9a5d9513d7",
+    "fpga\\sim\\cm3_target.sv": "0494031922b009ef481d94f4fec0e5af3168ab59966fa75a962ea6fc268ba012"
+  },
+  "rows": [
+    {
+      "transport": "swd",
+      "requested_Hz": 1000000,
+      "FCLK_Hz": 119999998,
+      "actual_link_Hz": 999999.9833333333,
+      "target_HCLK_Hz": 96000000,
+      "return_delay_ns": 16,
+      "USB_modeled": false,
+      "args": [
+        "benchmark",
+        "target_clk_ns=10.416667",
+        "half_ns=4.166666736",
+        "transfer_delay=59",
+        "narrow_clock=1",
+        "rx_boundary=1",
+        "phase=0",
+        "return_ns=16"
+      ],
+      "returncode": 0,
+      "passed": true,
+      "SRAM": [
+        {
+          "read": 0,
+          "bytes": 1024,
+          "elapsed_ns": 11970515.898,
+          "MB_s": 0.085544,
+          "WAITs": 1
+        },
+        {
+          "read": 1,
+          "bytes": 1024,
+          "elapsed_ns": 11840355.486,
+          "MB_s": 0.086484,
+          "WAITs": 1
+        }
+      ],
+      "RTT": [
+        {
+          "bytes": 1024,
+          "elapsed_ns": 12377456.784,
+          "MB_s": 0.082731,
+          "WAITs": 4
+        }
+      ],
+      "HSS": [
+        {
+          "period_ticks": 24,
+          "produced": 64,
+          "skipped": 2944,
+          "elapsed_ns": 3008232.306,
+          "effective_Hz": 21274.952693,
+          "skip_percent": 97.87234
+        },
+        {
+          "period_ticks": 1241,
+          "produced": 124,
+          "skipped": 0,
+          "elapsed_ns": 6412354.614,
+          "effective_Hz": 19337.670398,
+          "skip_percent": 0.0
+        }
+      ]
+    },
+    {
+      "transport": "swd",
+      "requested_Hz": 10000000,
+      "FCLK_Hz": 119999998,
+      "actual_link_Hz": 9999999.833333334,
+      "target_HCLK_Hz": 96000000,
+      "return_delay_ns": 16,
+      "USB_modeled": false,
+      "args": [
+        "benchmark",
+        "target_clk_ns=10.416667",
+        "half_ns=4.166666736",
+        "transfer_delay=5",
+        "narrow_clock=1",
+        "rx_boundary=1",
+        "phase=0",
+        "return_ns=16"
+      ],
+      "returncode": 0,
+      "passed": true,
+      "SRAM": [
+        {
+          "read": 0,
+          "bytes": 1024,
+          "elapsed_ns": 1202954.562,
+          "MB_s": 0.851237,
+          "WAITs": 1
+        },
+        {
+          "read": 1,
+          "bytes": 1024,
+          "elapsed_ns": 1188003.366,
+          "MB_s": 0.86195,
+          "WAITs": 1
+        }
+      ],
+      "RTT": [
+        {
+          "bytes": 1024,
+          "elapsed_ns": 1244016.18,
+          "MB_s": 0.82314,
+          "WAITs": 4
+        }
+      ],
+      "HSS": [
+        {
+          "period_ticks": 24,
+          "produced": 64,
+          "skipped": 256,
+          "elapsed_ns": 320017.266,
+          "effective_Hz": 199989.209332,
+          "skip_percent": 80.0
+        },
+        {
+          "period_ticks": 133,
+          "produced": 124,
+          "skipped": 0,
+          "elapsed_ns": 687221.64,
+          "effective_Hz": 180436.692884,
+          "skip_percent": 0.0
+        }
+      ]
+    },
+    {
+      "transport": "swd",
+      "requested_Hz": 30000000,
+      "FCLK_Hz": 119999998,
+      "actual_link_Hz": 29999999.5,
+      "target_HCLK_Hz": 96000000,
+      "return_delay_ns": 16,
+      "USB_modeled": false,
+      "args": [
+        "benchmark",
+        "target_clk_ns=10.416667",
+        "half_ns=4.166666736",
+        "transfer_delay=1",
+        "narrow_clock=1",
+        "rx_boundary=0",
+        "phase=1",
+        "return_ns=16"
+      ],
+      "returncode": 1,
+      "passed": false,
+      "SRAM": [],
+      "RTT": [],
+      "HSS": [],
+      "failure": "Fatal: transfer req=02 ACK=4"
+    },
+    {
+      "transport": "swd",
+      "requested_Hz": 50000000,
+      "FCLK_Hz": 99999999,
+      "actual_link_Hz": 49999999.5,
+      "target_HCLK_Hz": 96000000,
+      "return_delay_ns": 16,
+      "USB_modeled": false,
+      "args": [
+        "benchmark",
+        "target_clk_ns=10.416667",
+        "half_ns=5.000000050",
+        "transfer_delay=0",
+        "narrow_clock=0",
+        "rx_boundary=0",
+        "phase=0",
+        "return_ns=16"
+      ],
+      "returncode": 0,
+      "passed": true,
+      "SRAM": [
+        {
+          "read": 0,
+          "bytes": 1024,
+          "elapsed_ns": 236890.0,
+          "MB_s": 4.322681,
+          "WAITs": 1
+        },
+        {
+          "read": 1,
+          "bytes": 1024,
+          "elapsed_ns": 236860.0,
+          "MB_s": 4.323229,
+          "WAITs": 1
+        }
+      ],
+      "RTT": [
+        {
+          "bytes": 1024,
+          "elapsed_ns": 247760.0,
+          "MB_s": 4.133032,
+          "WAITs": 4
+        }
+      ],
+      "HSS": [
+        {
+          "period_ticks": 24,
+          "produced": 124,
+          "skipped": 0,
+          "elapsed_ns": 123980.0,
+          "effective_Hz": 1000161.316341,
+          "skip_percent": 0.0
+        },
+        {
+          "period_ticks": 27,
+          "produced": 124,
+          "skipped": 0,
+          "elapsed_ns": 139490.0,
+          "effective_Hz": 888952.613091,
+          "skip_percent": 0.0
+        }
+      ]
+    },
+    {
+      "transport": "swd",
+      "requested_Hz": 60000000,
+      "FCLK_Hz": 119999998,
+      "actual_link_Hz": 59999999.0,
+      "target_HCLK_Hz": 96000000,
+      "return_delay_ns": 16,
+      "USB_modeled": false,
+      "args": [
+        "benchmark",
+        "target_clk_ns=10.416667",
+        "half_ns=4.166666736",
+        "transfer_delay=0",
+        "narrow_clock=0",
+        "rx_boundary=0",
+        "phase=0",
+        "return_ns=16"
+      ],
+      "returncode": 0,
+      "passed": true,
+      "SRAM": [
+        {
+          "read": 0,
+          "bytes": 1024,
+          "elapsed_ns": 197424.126,
+          "MB_s": 5.186803,
+          "WAITs": 1
+        },
+        {
+          "read": 1,
+          "bytes": 1024,
+          "elapsed_ns": 197399.124,
+          "MB_s": 5.18746,
+          "WAITs": 1
+        }
+      ],
+      "RTT": [
+        {
+          "bytes": 1024,
+          "elapsed_ns": 206483.184,
+          "MB_s": 4.959242,
+          "WAITs": 4
+        }
+      ],
+      "HSS": [
+        {
+          "period_ticks": 24,
+          "produced": 124,
+          "skipped": 0,
+          "elapsed_ns": 124001.586,
+          "effective_Hz": 999987.209841,
+          "skip_percent": 0.0
+        },
+        {
+          "period_ticks": 27,
+          "produced": 124,
+          "skipped": 0,
+          "elapsed_ns": 139502.826,
+          "effective_Hz": 888870.882085,
+          "skip_percent": 0.0
+        }
+      ]
+    }
+  ]
+}
