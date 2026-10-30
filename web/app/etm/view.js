@@ -10,6 +10,8 @@ import {store} from '../core/store.js';
 export const DEFAULT_ETM_ORIGIN = 'http://127.0.0.1:8766';
 
 export function etmOrigin(){
+  // toolbox.py hosts the workbench, ETM and authenticated queue on one origin.
+  if (globalThis.location && new URLSearchParams(location.search).has('trace-cli')) return location.origin + '/etm';
   let saved = String(store.get('etm.service', '') || '').trim();
   if (saved && !/^https?:\/\//i.test(saved)) saved = 'http://' + saved;
   return (saved || DEFAULT_ETM_ORIGIN).replace(/\/+$/, '');
@@ -34,7 +36,8 @@ export class EtmView {
     this.info = null;
     this.origin = etmOrigin();
   }
-  get busy(){ return false; }
+  get probe(){ return this.bridge?.probe() || null; }
+  get busy(){ return !!this.bridge?.busy(); }
   init(){
     this.frame = document.getElementById('etm-frame');
     this.notice = document.getElementById('etm-notice');
@@ -47,10 +50,10 @@ export class EtmView {
       input.onchange = () => {
         const value = String(input.value || '').trim();
         store.set('etm.service', value);
-        this.load(true);
+        this.retryLoad();
       };
     }
-    if (this.retry) this.retry.onclick = () => this.load(true);
+    if (this.retry) this.retry.onclick = () => this.retryLoad();
     this.load(false);
   }
   async onShow(){
@@ -66,7 +69,8 @@ export class EtmView {
       if (this.notice) this.notice.hidden = true;
       if (this.frame){
         this.frame.hidden = false;
-        const target = `${this.origin}/`;
+        const sameOrigin = new URL(this.origin).origin === location.origin;
+        const target = `${this.origin}/${sameOrigin ? '?embedded=1' : ''}`;
         if (force || this.frame.src !== target) this.frame.src = target;
       }
       if (this.open) this.open.href = this.origin + '/';
@@ -82,7 +86,34 @@ export class EtmView {
       return false;
     }
   }
-  releaseProbe(){}
-  summary(){ return {ready: this.ready, origin: this.origin, health: this.info}; }
+  async retryLoad(){
+    try {
+      if (this.bridge) {
+        if (this.busy) await this.bridge.requestStop();
+        await this.run(() => this.releaseProbe());
+        this.bridge = null;
+      }
+      return await this.load(true);
+    } catch(error) { this.status.textContent = error.message; return false; }
+  }
+  attach(bridge, child){
+    if (this.bridge && this.bridge !== bridge) throw Error('请先释放原 ETM 连接再刷新');
+    this.bridge = bridge;
+    child.addEventListener('pagehide', () => {
+      if (this.bridge !== bridge) return;
+      this.ready = false;
+      this.status.textContent = 'ETM 子页面已卸载，请重新检测并释放旧连接';
+    }, {once:true});
+    return this;
+  }
+  run(fn){ return this.probeManager ? this.probeManager.run('etm', fn, {reason:'ETM 执行轨迹使用探针'}) : fn(); }
+  async releaseProbe(){
+    if (this.busy) throw Error('ETM 正在操作目标或采集，请先停止');
+    if (this.bridge) await this.bridge.release();
+    if (this.probe) throw Error('ETM 探针尚未断开');
+    this.probeManager?.forget('etm');
+  }
+  summary(){ return {ready: this.ready, origin: this.origin, health: this.info, connected:!!this.probe,
+    busy:this.busy, ...this.bridge?.summary()}; }
 }
 

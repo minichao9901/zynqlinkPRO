@@ -16,6 +16,9 @@ ETM 执行轨迹页直接 iframe superlinkPRO 原始 ETM 工作台，由 [`etm-s
 ETM 命令行：[`trace.cmd`](trace.cmd) / [`etm-service/trace.py`](etm-service/trace.py)，用法与限制见
 [`Trace CLI 使用说明`](docs/Trace-CLI使用说明.md)。
 
+全部 Web 功能的统一 CLI：`python -X utf8 toolbox.py --help`；启动、命令表及
+串口/调试/RTT/J-Scope/烧录/ETM流程见 [Web CLI 使用说明](docs/toolbox-cli-ai.md)。
+
 ORBTrace/并行 ETM 背景：[`并行 ETM 与 PS USB`](docs/orbtrace-usb.md)、[`LUT 资源分析`](docs/orbtrace-area-native32.md)。
 后续优化见 [`资源与性能合并方案`](docs/探针资源与性能优化方案-20261030.md)。
 本次实验配对在 [`prebuilt/20261030_orbtrace_native32/`](prebuilt/20261030_orbtrace_native32/)，

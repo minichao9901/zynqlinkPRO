@@ -1,10 +1,9 @@
 /** Local, opt-in CLI projection of the actual workbench. No eval or protocol copy. */
 export const PAGES = {
   serial:['串口助手','assistant'], terminal:['终端','terminal'], rtt:['RTT Viewer','rtt'],
-  rttcdc:['RTT 转发','stream'], spicdc:['SPI 转发','spiCdc'], scope:['J-Scope 波形','scope'],
-  flash:['烧录器','flash'], dbg:['调试器','dbg'], swo:['SWO PC 采样','swo'],
-  etm:['ETM 执行轨迹','etm'], spi:['USB SPI/QSPI','spi'], panel:['SPI/QSPI 屏','panel'],
-  i2c:['USB I2C','i2c'], analog:['ADC / DAC','analog'], gen:['工程生成','gen'],
+  rttcdc:['RTT 转发','stream'], scope:['J-Scope 波形','scope'],
+  flash:['烧录器','flash'], dbg:['调试器','dbg'],
+  etm:['ETM 执行轨迹','etm'], gen:['工程生成','gen'],
 };
 export const INTERRUPTS={
   rttcdc:['#h-stop'],spicdc:['#si-stop'],scope:['#sc-stop'],dbg:['#d-rtt-stop'],
@@ -72,8 +71,13 @@ export function createWorkbenchAutomation(tools,win=globalThis.window){
     const [,key]=page(name);
     if(name==='etm'){
       await tools.etm.onShow();
-      const child=tools.etm.frame?.contentWindow;
-      if(!child?.__etm)throw Error('ETM 子页面尚未就绪，请稍后重试；离线大文件推荐 trace 命令');
+      let child;
+      for(let i=0;i<100;i++){
+        try{child=tools.etm.frame?.contentWindow;if(child?.__etm)break;}
+        catch{throw Error('ETM CLI 需要同源页面；请使用 toolbox.py serve 的工作台地址');}
+        await new Promise(resolve=>setTimeout(resolve,50));
+      }
+      if(!child?.__etm)throw Error('ETM 子页面尚未就绪，请检查本地 ETM 服务');
       return {root:child.document.getElementById('etm-app'),view:child.__etm,win:child};
     }
     const root=doc.getElementById('tab-'+name);
@@ -127,7 +131,7 @@ export function createWorkbenchAutomation(tools,win=globalThis.window){
       ...(['spi','panel'].includes(m.page)?{session:tools.spiSession}:{}),
       ...(m.page==='spicdc'?{stream:view.stream,serial:tools.session}:{}),
       ...(m.page==='swo'?{capture:view.capture,sources:view.sources}:{}),
-      ...(m.page==='etm'?{target:view.target}:{}),
+      ...(m.page==='etm'?{target:view.target,history:view.history}:{}),
       ...(view.store?{store:view.store}:{}),
     };
     const targetName=m.target||'view';
