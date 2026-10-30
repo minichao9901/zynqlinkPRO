@@ -16,3 +16,5 @@ USB/DAP 运行缓冲保持 DDR 和原队列配置。
 文件 SHA-256、源码指纹、构建选项及未验收状态见 `manifest.json`。
 
 Common compact firmware corrected for unaligned SWJ payloads; firmware source f5c938e71e0127ba573f0dcc425f62d924492965. Physical 7010 board acceptance remains pending. See manifest for rejected previous ELF and new file hashes.
+
+Final firmware source cbedca23cae57402cb1b5e3fb0000544d5b706b8 additionally refreshes HSS counters after the last partial packet drains; no queue sizes or sampling path changed. Strict hardware retest pending.
