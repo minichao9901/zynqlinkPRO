@@ -3,6 +3,12 @@
 set root [file normalize [file join [file dirname [info script]] ..]]
 set out [file join $root build fpga_7010]
 file mkdir $out
+set fclk_mhz 100
+set rate_arg [lsearch -exact $argv --fclk-mhz]
+if {$rate_arg >= 0} {
+    set fclk_mhz [lindex $argv [expr {$rate_arg+1}]]
+    if {$fclk_mhz ni {100 120}} {error "--fclk-mhz must be 100 or 120"}
+}
 source [file join $root fpga run_threads.tcl]
 if {[lsearch -exact $argv --reuse-netlist] < 0} {
 open_project [file join $root build fpga_dma_global zynqlink_dma.xpr]
@@ -18,7 +24,7 @@ create_project -in_memory -part xc7z010clg400-2
 read_edif [file join $out system_wrapper.edf]
 link_design -top system_wrapper -part xc7z010clg400-2
 read_xdc [file join $out system.xdc]
-create_clock -name clk_fpga_0 -period 8.333 [get_pins {system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]}]
+create_clock -name clk_fpga_0 -period [expr {1000.0/$fclk_mhz}] [get_pins {system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]}]
 report_utilization -file [file join $out utilization_linked.rpt]
 # A per-bit indexed receive write creates up to 256 unrelated clock enables.
 # Keep the identical FF behavior but express those enables in the D inputs so
@@ -39,13 +45,13 @@ route_design -directive Explore
 report_utilization -file [file join $out utilization.rpt]
 report_utilization -hierarchical -file [file join $out utilization_hier.rpt]
 report_control_sets -file [file join $out control_sets.rpt]
-report_timing_summary -report_unconstrained -file [file join $out timing_120mhz.rpt]
+report_timing_summary -report_unconstrained -file [file join $out timing_${fclk_mhz}mhz.rpt]
 report_timing -delay_type max -max_paths 20 -file [file join $out setup_paths.rpt]
 report_timing -delay_type min -max_paths 20 -file [file join $out hold_paths.rpt]
 write_checkpoint -force [file join $out system_routed.dcp]
 set setup [get_property SLACK [get_timing_paths -delay_type max -max_paths 1]]
 set hold [get_property SLACK [get_timing_paths -delay_type min -max_paths 1]]
-puts "ZYNQ7010_120MHZ SETUP=$setup HOLD=$hold"
-if {$setup < 0 || $hold < 0} {error "7010 timing does not meet 120 MHz"}
+puts "ZYNQ7010_${fclk_mhz}MHZ SETUP=$setup HOLD=$hold"
+if {$setup < 0 || $hold < 0} {error "7010 timing does not meet $fclk_mhz MHz"}
 write_bitstream -force [file join $out system_wrapper.bit]
 puts "ZYNQ7010_BIT_READY $out/system_wrapper.bit (NOT BOARD VALIDATED)"
