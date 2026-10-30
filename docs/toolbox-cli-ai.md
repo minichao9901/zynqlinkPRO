@@ -159,15 +159,29 @@ python toolbox.py fixtures rtt --out prebuilt/NEW_RTT_DIR
 python toolbox.py fixtures scope --out prebuilt/NEW_SCOPE_DIR
 python toolbox.py --runtime R validate rttcdc --elf prebuilt/NEW_RTT_DIR/fw.elf --stream-seconds .5 --artifacts build/rtt-web-001
 python toolbox.py --runtime R validate scope --elf prebuilt/NEW_SCOPE_DIR/fw.elf --periods 100,20,10,5,2 --stream-seconds 1 --artifacts build/scope-web-001
+python toolbox.py --runtime R validate scope --elf prebuilt/NEW_SCOPE_DIR/fw.elf --scope-channels 8 --periods 100,50,25 --observe-clock --artifacts build/scope-eight-001
 ```
 
 fixtures固定构建F103ZE额定72MHz，保存源码与ELF哈希。stream验收会通过Web桥实际烧录所给
 ELF；结束后需用Web烧回业务固件。RTT逐条检查序号、回退和字节对账，J-Scope导出真实CSV并
 检查计数值及流质量。包含失败的矩阵不会标为通过；实测结果以统一验收文档为准。
 
+`rttcdc`使用公开的`captureWindow({seconds,maxMiB})`记录有限原始窗口，默认32MiB上限，
+返回实际时长、字节数、是否完整和是否超限，并生成可download的二进制Blob。
+它独立于2MiB显示历史，可验证3秒的高速序号流。RTT Viewer的`saveRaw()`导出有界原始历史；
+`save()`按当前显示模式输出可读内容，终端模式保留终端滚动历史语义。
+`--observe-clock`在流仍活动时经PS JTAG读回FCLK与SWD divider，不暂停F103目标。
+
+打开ETM历史应使用`page etm invoke openRecord --args '["capture-..."]'`，它同步记录选择框和分析器。
+`history.load`是低层阅读器方法。`history.zoomRange(true/false)`、`backRange()`、`setRange({start,end})`
+和`exportFlame({mode:"aggregate",weight:"records",rootPath:""})`可直接通过`--target history`调用。
+切换火焰图后源码跟随会按可见几何位置定位选中行。
+
 serve使用Waitress的HTTP/1.1连接复用，避免高频本机RPC耗尽Windows动态端口。
 本地传输相同请求ID只执行一次；结果缓存过期拒绝重放。100000请求达到会话上限后，
 需先停止硬件任务再重新启动服务。普通WebUSB不经过此服务。
+页面刷新保留本会话身份；重新打开时换用自己的新OS句柄并返回generation，旧请求不能关闭新句柄。
+FPGA重载后重新连接即可，不需要拔插数据线或强杀其它应用。
 
 ### WebUSB采集（首次需要浏览器授权）
 

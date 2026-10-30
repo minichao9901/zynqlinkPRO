@@ -779,10 +779,24 @@ export class ScopeView {
 
   async _stopData(){
     let failure;
+    const drainBeforeQuiesce=this.transport?.epAddr===0x87;
     if (this._stopUnconfirmed && !this.hid) failure = new Error('探针未连接，不能确认 STOP');
-    try { await this.transport?.quiesce?.(); } catch (e) { failure = e; }
-    try { if (this.hid) await this.hidXfer(P.HID_CMD, P.flagsData(P.ACT.STOP)); }
+    // Zynq STOP can report busy until its final PL/USB packets are drained.
+    // Keep the consumer alive during that handshake, then retire native reads.
+    try { if(!drainBeforeQuiesce)await this.transport?.quiesce?.(); } catch (e) { failure = e; }
+    try { if (this.hid){
+      const deadline=performance.now()+2000;
+      for(;;){
+        const reply=await this.hidXfer(P.HID_CMD,P.flagsData(P.ACT.STOP));
+        if(!reply||reply.length<3)throw Error('STOP回包不完整');
+        const rc=this.signed(reply[2]);
+        if(rc===0)break;
+        if(rc!==-7||!drainBeforeQuiesce||performance.now()>=deadline)throw Error(P.scopeRcText(rc,this.targetRiscv));
+        await sleep(10);
+      }
+    }}
     catch (e) { failure = e; }
+    try { if(drainBeforeQuiesce)await this.transport?.quiesce?.(); } catch (e) { failure ||= e; }
     try { await this.transport?.stop(); } catch (e) { failure ||= e; }
     if (failure){
       this._stopUnconfirmed = true;

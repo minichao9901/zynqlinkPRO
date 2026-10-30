@@ -247,6 +247,30 @@ export class RttCdcStreamView {
   }
 
   // ---------------- 保存 / 记录 ----------------
+  /** Finite CLI recording independent of the 2 MiB display history. */
+  async captureWindow({seconds=1,maxMiB=32}={}){
+    if(!this.s.isOpen)throw Error('先连接接收串口');
+    if(this._windowRecording)throw Error('已有窗口记录正在进行');
+    if(!Number.isFinite(seconds)||seconds<.1||seconds>30||!Number.isInteger(maxMiB)||maxMiB<1||maxMiB>64)
+      throw Error('记录窗口须为0.1..30秒，缓存须为1..64MiB');
+    this._windowRecording=true;
+    const chunks=[],limit=maxMiB*1024*1024,started=performance.now();
+    let bytes=0,observedBytes=0,closed=false,error=null;
+    const offData=this.s.on('data',b=>{
+      observedBytes+=b.length;
+      const take=Math.min(b.length,limit-bytes);
+      if(take>0){chunks.push(b.slice(0,take));bytes+=take;}
+    });
+    const offClose=this.s.on('close',()=>{closed=true;});
+    const offError=this.s.on('error',e=>{error=e?.message||String(e);});
+    try{await new Promise(resolve=>setTimeout(resolve,seconds*1000));}
+    finally{offData();offClose();offError();this._windowRecording=false;}
+    const elapsed=(performance.now()-started)/1000,name=`${this.owner}-raw-${fileStamp()}.bin`;
+    download(name,new Blob(chunks,{type:'application/octet-stream'}));
+    return {name,bytes,observedBytes,seconds:elapsed,complete:bytes>0&&observedBytes===bytes&&!closed&&!error,
+      limitExceeded:observedBytes>bytes,portClosed:closed,error,bytesPerSecond:bytes/elapsed};
+  }
+
   save(){
     if (this.rx.empty){ toast('接收区没有数据', 'warn'); return; }
     const name = `${this.owner}-${fileStamp()}.txt`;

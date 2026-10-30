@@ -7,7 +7,10 @@ import subprocess
 def live_clock_snapshot():
     """Observe PS/PL clock registers without suspending the DAP target owner."""
     import re
-    from jtag_internal_trace import run
+    try:
+        from .jtag_internal_trace import run
+    except ImportError:
+        from jtag_internal_trace import run
     output=run('puts [format "LIVECLK %08X %08X %08X %08X %08X" [mrd -force -value 0xf8000170] [mrd -force -value 0xf8000108] [mrd -force -value 0x40010008] [mrd -force -value 0x40010098] [mrd -force -value 0x40010080]]')
     match=re.search(r'LIVECLK '+r'([0-9A-Fa-f]{8}) '*4+r'([0-9A-Fa-f]{8})',output)
     assert match,output

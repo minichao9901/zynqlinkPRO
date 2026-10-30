@@ -478,7 +478,11 @@ async function captureNative(options={}){
     });
   }catch(e){error(e);throw e;}finally{state.operation=false;state.hardwareOperation=false;controls();}
 }
-window.__etm={target,state,history,api,captureNative};
+window.__etm={target,state,history,api,captureNative,openRecord:async id=>{
+  if(state.operation||state.job)throw Error('请等待当前操作完成，再打开历史记录');
+  state.operation=true;controls();
+  try{return await loadRecord(id);}finally{state.operation=false;controls();}
+}};
 if(attached)init();
 
 // 与操作互斥的轻量状态回读，实际命中后刷新 PC 和断点标记。

@@ -298,7 +298,10 @@ export class AkaLinkHid {
     if (this.device && this.device !== device) await this.close();
     const channel = channelFor(device);
     await onChannel(channel, async () => {
-      if (!device.opened) await device.open();
+      if (!device.opened){
+        await device.open();
+        if(device.nativeService)channel.fault=null; // host reopened/drained its own HID handle
+      }
       this.device = device;
       this._disconnectedDevice = null;
       channel.clients.add(this);

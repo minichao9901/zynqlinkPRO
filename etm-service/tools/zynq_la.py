@@ -90,11 +90,51 @@ class Session:
             raise CaptureError("ETM 参考时钟请求返回 %d 字节" % len(reply))
         return struct.unpack("<I", reply[:4])[0]
 
-    def _dap_write32(self, addr, value):
+    def _set_tar(self, addr):
         xfer(self.out, self.inp, [5, 0, 3, 8] + le(0) + [1] + le(0x23000052) + [5] + le(addr))
+
+    def _dap_write32(self, addr, value):
+        self._set_tar(addr)
         reply = xfer(self.out, self.inp, [6, 0, 1, 0, 0x0D] + le(value))
-        if len(reply) < 3 or reply[1] != 1 or (reply[2] & 7) != 1:
+        # DAP_TransferBlock reply: [cmd, count_lo, count_hi, ack]; ack is byte 3.
+        if len(reply) < 4 or reply[1] != 1 or (reply[3] & 7) != 1:
             raise CaptureError("DAP 写 %#x 失败：%s" % (addr, reply[:8].hex()))
+
+    def _dap_read32(self, addr):
+        self._set_tar(addr)
+        reply = xfer(self.out, self.inp, [6, 0, 1, 0, 0x0F])
+        if len(reply) < 8 or reply[1] != 1 or (reply[3] & 7) != 1:
+            raise CaptureError("DAP 读 %#x 失败：%s" % (addr, reply[:8].hex()))
+        return struct.unpack_from("<I", reply, 4)[0]
+
+    def _restart_trace(self):
+        """Force a fresh TPIU sync inside the FPGA capture window.
+
+        The page enables ETM while the CPU is still halted, then hands USB to
+        this service. Arming after that can start mid-frame; writing PROG and
+        re-enabling ETM emits a new sync sequence before the CPU resumes.
+        """
+        if str(self.config.get("protocol", "")).lower() != "etmv3":
+            return
+        ctrl = int(self.config.get("ctrl", 0))
+        try:
+            self._dap_write32(0xE0041FB0, 0xC5ACCE55)      # ETM LAR; TPIU LAR is 0xE0040FB0
+            self._dap_write32(0xE0041000, (ctrl | 0x400) & 0xFFFFFFFF)
+            for _ in range(100):
+                if self._dap_read32(0xE0041010) & 2:
+                    break
+                time.sleep(0.002)
+            else:
+                raise CaptureError('ETM没有进入编程模式，拒绝继续采集')
+            self._dap_write32(0xE0041000, ctrl & ~0x400)
+            for _ in range(100):
+                if not (self._dap_read32(0xE0041010) & 2):
+                    break
+                time.sleep(0.002)
+            else:
+                raise CaptureError('ETM没有退出编程模式，拒绝继续采集')
+        except CaptureError:
+            raise
 
     # ---------------- capture ----------------
     def configure(self, config, traceid, seconds):
@@ -122,8 +162,9 @@ class Session:
             time.sleep(0.005)
         else:
             raise CaptureError("ETM 采样延时校准未就绪，请核对 bit/ELF 与 PS 初始化")
-        # The browser released the probe at halt; the service now resumes the
-        # target so TPIU emits its synchronization sequence inside the window.
+        # The browser released the probe at halt; re-enable ETM after arming so
+        # the TPIU sync sequence lands inside this capture, then resume the CPU.
+        self._restart_trace()
         self._dap_write32(0xE000EDF0, 0xA05F0001)
         self.started = time.time()
         self.running = True

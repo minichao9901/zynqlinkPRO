@@ -1,0 +1,368 @@
+{
+  "ok": true,
+  "suite": "scope",
+  "flash": "✅ stm32f103 · 3.3 KB · 0.5s · 已校验 · 已复位运行",
+  "declaredProbePair": {
+    "bit": "E:\\zynqlinkPRO\\prebuilt\\20261031_filtered_tpiu\\zynqdap_filtered.bit",
+    "bitSha256": "306fa26134e63509ec64a2982dfb22ab8b7164d15c1fbb617df30fbdb5f29619",
+    "elf": "E:\\zynqlinkPRO\\prebuilt\\20261031_filtered_tpiu\\zynqdap_filtered.elf",
+    "elfSha256": "a67ed2d1d61b99ac1e9c4d08b2f68a6308dffaca7ddb09213053896e538b855e",
+    "note": "声明采集配对；服务不会加载板卡，请先通过JTAG加载相同文件"
+  },
+  "rows": [
+    {
+      "requestedPeriodUs": 60.0,
+      "valid": true,
+      "samplesChecked": 9900,
+      "bad": 0,
+      "channels": 8,
+      "waveformBad": 0,
+      "liveClocks": {
+        "FCLK_Hz": 99999999,
+        "cfg": "0xa11",
+        "waveform": {
+          "SWCLK_Hz": 49999999.5,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 10.000000100000001
+        },
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 49999999.5,
+        "clock_observation": "PS JTAG register read; no DAP command during stream"
+      },
+      "counterBackwards": 0,
+      "live": {
+        "benchUs": 37.862125,
+        "blob": {
+          "delay": 0,
+          "name": "0x5a594e51",
+          "offset": 1515802193
+        },
+        "capacity": 183398,
+        "connectErr": null,
+        "dapYields": 0,
+        "elf": {
+          "name": "fw.elf",
+          "note": "",
+          "source": "dwarf",
+          "stats": {
+            "cu": 2,
+            "dies": 127,
+            "vars": 30
+          },
+          "versions": [
+            4
+          ]
+        },
+        "lod": false,
+        "lost": 0,
+        "lostGap": 0,
+        "lostProbe": 0,
+        "lostUsb": 0,
+        "metricsError": null,
+        "mockVars": [
+          "mock0.f32",
+          "mock1.f32",
+          "mock2.i32",
+          "mock3.u16",
+          "mock4.i16",
+          "mock5.u8",
+          "mock6.i8",
+          "mock7.f64"
+        ],
+        "mode": "real",
+        "packets": 0,
+        "plan": {
+          "estHz": 89842,
+          "estUs": 11.13,
+          "frameBytes": 22,
+          "spans": 1
+        },
+        "rateHz": 0,
+        "raw": 0,
+        "readErrors": 0,
+        "resyncs": 0,
+        "running": true,
+        "samples": 0,
+        "state": "采样中：8 通道 × 16.67 kHz，缓冲 183398 样本　预计 DATA 流量 0.37 MB/s（另有状态包）；稳定上限以实采跳拍/USB 计数为准",
+        "trigger": {
+          "hit": -1,
+          "hits": 0,
+          "marker": false,
+          "mode": 0
+        },
+        "varCount": 8,
+        "vars": [
+          "g_pack.f_sin:f32@0x20001014",
+          "g_pack.f_tri:f32@0x20001018",
+          "g_pack.i_tick:i32@0x2000101c",
+          "g_pack.u_ramp:u16@0x20001020",
+          "g_pack.i_sq1k:i16@0x20001022",
+          "g_pack.u_cnt:u8@0x20001024",
+          "g_pack.i_saw:i8@0x20001025",
+          "g_pack.u_hi:u32@0x20001028"
+        ],
+        "view": {
+          "end": 1,
+          "start": 0
+        }
+      },
+      "summary": {
+        "benchUs": 37.862125,
+        "blob": {
+          "delay": 0,
+          "name": "0x5a594e51",
+          "offset": 1515802193
+        },
+        "capacity": 183398,
+        "connectErr": null,
+        "dapYields": 0,
+        "elf": {
+          "name": "fw.elf",
+          "note": "",
+          "source": "dwarf",
+          "stats": {
+            "cu": 2,
+            "dies": 127,
+            "vars": 30
+          },
+          "versions": [
+            4
+          ]
+        },
+        "lod": true,
+        "lost": 0,
+        "lostGap": 0,
+        "lostProbe": 0,
+        "lostUsb": 0,
+        "metricsError": null,
+        "mockVars": [
+          "mock0.f32",
+          "mock1.f32",
+          "mock2.i32",
+          "mock3.u16",
+          "mock4.i16",
+          "mock5.u8",
+          "mock6.i8",
+          "mock7.f64"
+        ],
+        "mode": "real",
+        "packets": 450,
+        "plan": {
+          "estHz": 89842,
+          "estUs": 11.13,
+          "frameBytes": 22,
+          "spans": 1
+        },
+        "rateHz": 16667,
+        "raw": 0,
+        "readErrors": 0,
+        "resyncs": 0,
+        "running": false,
+        "samples": 9900,
+        "state": "已停止（CLI finite acceptance window）：9900 个样本 / 593.94 ms，跳拍 0 / USB 丢样本 0 / 读错 0 / 包缺口 0",
+        "trigger": {
+          "hit": -1,
+          "hits": 0,
+          "marker": false,
+          "mode": 0
+        },
+        "varCount": 8,
+        "vars": [
+          "g_pack.f_sin:f32@0x20001014",
+          "g_pack.f_tri:f32@0x20001018",
+          "g_pack.i_tick:i32@0x2000101c",
+          "g_pack.u_ramp:u16@0x20001020",
+          "g_pack.i_sq1k:i16@0x20001022",
+          "g_pack.u_cnt:u8@0x20001024",
+          "g_pack.i_saw:i8@0x20001025",
+          "g_pack.u_hi:u32@0x20001028"
+        ],
+        "view": {
+          "end": 9900,
+          "start": 0
+        }
+      },
+      "measuredRateHz": 16667,
+      "meetsRequestedRate": true
+    },
+    {
+      "requestedPeriodUs": 50.0,
+      "valid": true,
+      "samplesChecked": 36652,
+      "bad": 0,
+      "channels": 8,
+      "waveformBad": 0,
+      "liveClocks": {
+        "FCLK_Hz": 99999999,
+        "cfg": "0xa11",
+        "waveform": {
+          "SWCLK_Hz": 49999999.5,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 10.000000100000001
+        },
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 49999999.5,
+        "clock_observation": "PS JTAG register read; no DAP command during stream"
+      },
+      "counterBackwards": 0,
+      "live": {
+        "benchUs": 37.862125,
+        "blob": {
+          "delay": 0,
+          "name": "0x5a594e51",
+          "offset": 1515802193
+        },
+        "capacity": 220065,
+        "connectErr": null,
+        "dapYields": 0,
+        "elf": {
+          "name": "fw.elf",
+          "note": "",
+          "source": "dwarf",
+          "stats": {
+            "cu": 2,
+            "dies": 127,
+            "vars": 30
+          },
+          "versions": [
+            4
+          ]
+        },
+        "lod": true,
+        "lost": 0,
+        "lostGap": 0,
+        "lostProbe": 0,
+        "lostUsb": 0,
+        "metricsError": null,
+        "mockVars": [
+          "mock0.f32",
+          "mock1.f32",
+          "mock2.i32",
+          "mock3.u16",
+          "mock4.i16",
+          "mock5.u8",
+          "mock6.i8",
+          "mock7.f64"
+        ],
+        "mode": "real",
+        "packets": 1113,
+        "plan": {
+          "estHz": 89842,
+          "estUs": 11.13,
+          "frameBytes": 22,
+          "spans": 1
+        },
+        "rateHz": 20000,
+        "raw": 0,
+        "readErrors": 0,
+        "resyncs": 0,
+        "running": true,
+        "samples": 24464,
+        "state": "采样中 1.175 s / 10.000 s（23496 样本 · 实得 20.0 kHz · 缓冲 11%）",
+        "trigger": {
+          "hit": -1,
+          "hits": 0,
+          "marker": false,
+          "mode": 0
+        },
+        "varCount": 8,
+        "vars": [
+          "g_pack.f_sin:f32@0x20001014",
+          "g_pack.f_tri:f32@0x20001018",
+          "g_pack.i_tick:i32@0x2000101c",
+          "g_pack.u_ramp:u16@0x20001020",
+          "g_pack.i_sq1k:i16@0x20001022",
+          "g_pack.u_cnt:u8@0x20001024",
+          "g_pack.i_saw:i8@0x20001025",
+          "g_pack.u_hi:u32@0x20001028"
+        ],
+        "view": {
+          "end": 24464,
+          "start": 0
+        }
+      },
+      "summary": {
+        "benchUs": 37.862125,
+        "blob": {
+          "delay": 0,
+          "name": "0x5a594e51",
+          "offset": 1515802193
+        },
+        "capacity": 220065,
+        "connectErr": null,
+        "dapYields": 0,
+        "elf": {
+          "name": "fw.elf",
+          "note": "",
+          "source": "dwarf",
+          "stats": {
+            "cu": 2,
+            "dies": 127,
+            "vars": 30
+          },
+          "versions": [
+            4
+          ]
+        },
+        "lod": true,
+        "lost": 0,
+        "lostGap": 0,
+        "lostProbe": 0,
+        "lostUsb": 0,
+        "metricsError": null,
+        "mockVars": [
+          "mock0.f32",
+          "mock1.f32",
+          "mock2.i32",
+          "mock3.u16",
+          "mock4.i16",
+          "mock5.u8",
+          "mock6.i8",
+          "mock7.f64"
+        ],
+        "mode": "real",
+        "packets": 1667,
+        "plan": {
+          "estHz": 89842,
+          "estUs": 11.13,
+          "frameBytes": 22,
+          "spans": 1
+        },
+        "rateHz": 20000,
+        "raw": 0,
+        "readErrors": 0,
+        "resyncs": 0,
+        "running": false,
+        "samples": 36652,
+        "state": "已停止（CLI finite acceptance window）：36652 个样本 / 1.833 s，跳拍 0 / USB 丢样本 0 / 读错 0 / 包缺口 0",
+        "trigger": {
+          "hit": -1,
+          "hits": 0,
+          "marker": false,
+          "mode": 0
+        },
+        "varCount": 8,
+        "vars": [
+          "g_pack.f_sin:f32@0x20001014",
+          "g_pack.f_tri:f32@0x20001018",
+          "g_pack.i_tick:i32@0x2000101c",
+          "g_pack.u_ramp:u16@0x20001020",
+          "g_pack.i_sq1k:i16@0x20001022",
+          "g_pack.u_cnt:u8@0x20001024",
+          "g_pack.i_saw:i8@0x20001025",
+          "g_pack.u_hi:u32@0x20001028"
+        ],
+        "view": {
+          "end": 36652,
+          "start": 0
+        }
+      },
+      "measuredRateHz": 20000,
+      "meetsRequestedRate": true
+    }
+  ]
+}

@@ -1,0 +1,816 @@
+[
+  {
+    "request": {
+      "action": "workbench",
+      "page": "flash",
+      "op": "set",
+      "selector": "#f-backend",
+      "value": "openocd"
+    },
+    "seconds": 0.25994160000118427,
+    "result": {
+      "job": "c21325b7b7375d71cd8f318daa17656d",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "control": {
+          "disabled": false,
+          "hidden": false,
+          "label": "后端\n          \n            WebUSB · 零安装（默认）\n            本地桥 · OpenOCD\n            本地桥 · J-Link",
+          "options": [
+            {
+              "disabled": false,
+              "label": "WebUSB · 零安装（默认）",
+              "value": "webusb"
+            },
+            {
+              "disabled": false,
+              "label": "本地桥 · OpenOCD",
+              "value": "openocd"
+            },
+            {
+              "disabled": false,
+              "label": "本地桥 · J-Link",
+              "value": "jlink"
+            }
+          ],
+          "selector": "#f-backend",
+          "tag": "select",
+          "type": "select-one",
+          "value": "openocd"
+        },
+        "dispatched": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "flash",
+      "op": "set",
+      "selector": "#f-chip",
+      "value": "stm32f103"
+    },
+    "seconds": 0.12449490000290098,
+    "result": {
+      "job": "3f7f1b9b6fd3c08b65fd4a99acc0b825",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "control": {
+          "disabled": false,
+          "hidden": false,
+          "label": "芯片\n          STM32F1（F103 等）STM32F0STM32F2STM32F3STM32F4STM32F7STM32G0STM32G4STM32H7STM32H7B0/H7A3/H7B3STM32H5STM32L0STM32L1STM32L4 / L4+STM32L5STM32U5STM32C0STM32WBSTM32WLESP32-S31（板载 USB-JTAG）ESP32（Wrover Kit）HPM5300EVK（HPM5361）（RISC-V，零安",
+          "options": [
+            {
+              "disabled": false,
+              "label": "STM32F1（F103 等）",
+              "value": "stm32f103"
+            },
+            {
+              "disabled": false,
+              "label": "STM32F0",
+              "value": "stm32f0"
+            },
+            {
+              "disabled": false,
+              "label": "STM32F2",
+              "value": "stm32f2"
+            },
+            {
+              "disabled": false,
+              "label": "STM32F3",
+              "value": "stm32f3"
+            },
+            {
+              "disabled": false,
+              "label": "STM32F4",
+              "value": "stm32f4"
+            },
+            {
+              "disabled": false,
+              "label": "STM32F7",
+              "value": "stm32f7"
+            },
+            {
+              "disabled": false,
+              "label": "STM32G0",
+              "value": "stm32g0"
+            },
+            {
+              "disabled": false,
+              "label": "STM32G4",
+              "value": "stm32g4"
+            },
+            {
+              "disabled": false,
+              "label": "STM32H7",
+              "value": "stm32h7"
+            },
+            {
+              "disabled": false,
+              "label": "STM32H7B0/H7A3/H7B3",
+              "value": "stm32h7b0"
+            },
+            {
+              "disabled": false,
+              "label": "STM32H5",
+              "value": "stm32h5"
+            },
+            {
+              "disabled": false,
+              "label": "STM32L0",
+              "value": "stm32l0"
+            },
+            {
+              "disabled": false,
+              "label": "STM32L1",
+              "value": "stm32l1"
+            },
+            {
+              "disabled": false,
+              "label": "STM32L4 / L4+",
+              "value": "stm32l4"
+            },
+            {
+              "disabled": false,
+              "label": "STM32L5",
+              "value": "stm32l5"
+            },
+            {
+              "disabled": false,
+              "label": "STM32U5",
+              "value": "stm32u5"
+            },
+            {
+              "disabled": false,
+              "label": "STM32C0",
+              "value": "stm32c0"
+            },
+            {
+              "disabled": false,
+              "label": "STM32WB",
+              "value": "stm32wb"
+            },
+            {
+              "disabled": false,
+              "label": "STM32WL",
+              "value": "stm32wl"
+            },
+            {
+              "disabled": false,
+              "label": "ESP32-S31（板载 USB-JTAG）",
+              "value": "esp32s31"
+            },
+            {
+              "disabled": false,
+              "label": "ESP32（Wrover Kit）",
+              "value": "esp32"
+            },
+            {
+              "disabled": false,
+              "label": "HPM5300EVK（HPM5361）（RISC-V，零安装）",
+              "value": "hpm5300evk"
+            },
+            {
+              "disabled": false,
+              "label": "HPM5301EVKLite（RISC-V，零安装）",
+              "value": "hpm5301evklite"
+            },
+            {
+              "disabled": false,
+              "label": "HPM5E00EVK（RISC-V，零安装）",
+              "value": "hpm5e00evk"
+            },
+            {
+              "disabled": false,
+              "label": "HPM6200EVK（HPM6280）（RISC-V，零安装）",
+              "value": "hpm6200evk"
+            },
+            {
+              "disabled": false,
+              "label": "HPM6300EVK（HPM6360）（RISC-V，零安装）",
+              "value": "hpm6300evk"
+            },
+            {
+              "disabled": false,
+              "label": "HPM6750EVK2（RISC-V，零安装）",
+              "value": "hpm6750evk2"
+            },
+            {
+              "disabled": false,
+              "label": "HPM6750EVKMINI（RISC-V，零安装）",
+              "value": "hpm6750evkmini"
+            },
+            {
+              "disabled": false,
+              "label": "HPM6800EVK（HPM6880）（RISC-V，零安装）",
+              "value": "hpm6800evk"
+            },
+            {
+              "disabled": false,
+              "label": "HPM6E00EVK（HPM6E80）（RISC-V，零安装）",
+              "value": "hpm6e00evk"
+            },
+            {
+              "disabled": false,
+              "label": "HPM6P00EVK（HPM6P81）（RISC-V，零安装）",
+              "value": "hpm6p00evk"
+            },
+            {
+              "disabled": false,
+              "label": "自定义 cfg…",
+              "value": "custom"
+            }
+          ],
+          "selector": "#f-chip",
+          "tag": "select",
+          "type": "select-one",
+          "value": "stm32f103"
+        },
+        "dispatched": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "flash",
+      "op": "upload",
+      "selector": "@file:view._fileInput"
+    },
+    "seconds": 0.25627970000641653,
+    "result": {
+      "job": "f4d25d7a3513de96816d0668dcae1ad6",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "control": {
+          "disabled": false,
+          "hidden": false,
+          "label": "",
+          "selector": "@file:view._fileInput",
+          "tag": "input",
+          "type": "file",
+          "value": ""
+        },
+        "dispatched": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "flash",
+      "op": "read",
+      "selector": "#f-file-info"
+    },
+    "seconds": 0.10459049999917625,
+    "result": {
+      "job": "f7cff52641792495046dd0fecbd60c17",
+      "ok": true,
+      "value": {
+        "disabled": false,
+        "hidden": false,
+        "label": "已选择：20261031_f103ze_cdc_trace-fw-48-echo.elf（1.16 MB）",
+        "selector": "#f-file-info",
+        "tag": "p",
+        "text": "已选择：20261031_f103ze_cdc_trace-fw-48-echo.elf（1.16 MB）",
+        "type": null,
+        "value": null
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "flash",
+      "op": "invoke",
+      "method": "flash",
+      "args": [],
+      "target": "view"
+    },
+    "seconds": 1.9682691999987583,
+    "result": {
+      "job": "7b2f684f9a9fcd696a9f15bbcfc9181c",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "flash",
+      "op": "read",
+      "selector": "#f-result"
+    },
+    "seconds": 0.14137480000499636,
+    "result": {
+      "job": "5d63dc1d624f0a50388947f6b16bc822",
+      "ok": true,
+      "value": {
+        "disabled": false,
+        "hidden": false,
+        "label": "✅ stm32f103 · 19.7 KB · 1.5s · 已校验 · 已复位运行",
+        "selector": "#f-result",
+        "tag": "span",
+        "text": "✅ stm32f103 · 19.7 KB · 1.5s · 已校验 · 已复位运行",
+        "type": null,
+        "value": null
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "etm",
+      "op": "upload",
+      "selector": "#elf-file"
+    },
+    "seconds": 0.3471633000008296,
+    "result": {
+      "job": "7f0bf09929afe11aa2c92cf87f6e6513",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "control": {
+          "disabled": false,
+          "hidden": true,
+          "label": "",
+          "selector": "#elf-file",
+          "tag": "input",
+          "type": "file",
+          "value": "C:\\fakepath\\fw-48-echo.elf"
+        },
+        "dispatched": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "etm",
+      "op": "read",
+      "selector": "#hse"
+    },
+    "seconds": 0.0294720999954734,
+    "result": {
+      "job": "952aadeec29908a0715e3a674e436367",
+      "ok": true,
+      "value": {
+        "disabled": false,
+        "hidden": false,
+        "label": "HSE（MHz）",
+        "selector": "#hse",
+        "tag": "input",
+        "text": "",
+        "type": "number",
+        "value": "25"
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "etm",
+      "op": "upload",
+      "selector": "#sources-files"
+    },
+    "seconds": 0.1594355000052019,
+    "result": {
+      "job": "5991c42edefebdc8707bbaa716ca2ab8",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "control": {
+          "disabled": false,
+          "hidden": true,
+          "label": "",
+          "selector": "#sources-files",
+          "tag": "input",
+          "type": "file",
+          "value": "C:\\fakepath\\usbd_cdc_acm.c"
+        },
+        "dispatched": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "etm",
+      "op": "read",
+      "selector": "#hse"
+    },
+    "seconds": 0.10417859999870416,
+    "result": {
+      "job": "b02e7325c1eac3dae935397034e40059",
+      "ok": true,
+      "value": {
+        "disabled": true,
+        "hidden": false,
+        "label": "HSE（MHz）",
+        "selector": "#hse",
+        "tag": "input",
+        "text": "",
+        "type": "number",
+        "value": "25"
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "etm",
+      "op": "read",
+      "selector": "#hse"
+    },
+    "seconds": 0.03863709999859566,
+    "result": {
+      "job": "0b4bf971e37f75afa0b8269023c27a7d",
+      "ok": true,
+      "value": {
+        "disabled": false,
+        "hidden": false,
+        "label": "HSE（MHz）",
+        "selector": "#hse",
+        "tag": "input",
+        "text": "",
+        "type": "number",
+        "value": "25"
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "etm",
+      "op": "read",
+      "selector": "#sources-label"
+    },
+    "seconds": 0.10395720000087749,
+    "result": {
+      "job": "a559ca0a9338ccf36b5997c33d1a078f",
+      "ok": true,
+      "value": {
+        "disabled": false,
+        "hidden": false,
+        "label": "匹配 22 / 22 个文件 · 0.65 MiB · 已保存本地快照",
+        "selector": "#sources-label",
+        "tag": "p",
+        "text": "匹配 22 / 22 个文件 · 0.65 MiB · 已保存本地快照",
+        "type": null,
+        "value": null
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "etm",
+      "op": "set",
+      "selector": "#hse",
+      "value": "8"
+    },
+    "seconds": 0.1044696999961161,
+    "result": {
+      "job": "1aad7e4766bb6644ae49fdb9e2ddd4cc",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "control": {
+          "disabled": false,
+          "hidden": false,
+          "label": "HSE（MHz）",
+          "selector": "#hse",
+          "tag": "input",
+          "type": "number",
+          "value": "8"
+        },
+        "dispatched": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "etm",
+      "op": "set",
+      "selector": "#reset-before",
+      "value": true
+    },
+    "seconds": 0.12425589999475051,
+    "result": {
+      "job": "5d0c88f60e930c4b36f53bc7b3d871dc",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "control": {
+          "disabled": false,
+          "hidden": false,
+          "label": "先复位，再运行至起点",
+          "selector": "#reset-before",
+          "tag": "input",
+          "type": "checkbox",
+          "value": true
+        },
+        "dispatched": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "etm",
+      "op": "set",
+      "selector": "#break-command",
+      "value": "b cdc_acm_init"
+    },
+    "seconds": 0.013303700005053543,
+    "result": {
+      "job": "0a1ff99280f66472cd1c3a69e1abaabf",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "control": {
+          "disabled": false,
+          "hidden": false,
+          "label": "断点命令",
+          "selector": "#break-command",
+          "tag": "input",
+          "type": "text",
+          "value": "b cdc_acm_init"
+        },
+        "dispatched": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "etm",
+      "op": "click",
+      "selector": "#add-break"
+    },
+    "seconds": 0.12207260000286624,
+    "result": {
+      "job": "50b21765556b0eb4da19de567d2418b7",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "control": {
+          "disabled": true,
+          "hidden": false,
+          "label": "添加",
+          "selector": "#add-break",
+          "tag": "button",
+          "type": "submit",
+          "value": ""
+        },
+        "dispatched": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "etm",
+      "op": "read",
+      "selector": "#breakpoint-list"
+    },
+    "seconds": 0.12013669999578269,
+    "result": {
+      "job": "ed6db1c054c0110da934a817b4292ac3",
+      "ok": true,
+      "value": {
+        "disabled": false,
+        "hidden": false,
+        "label": "cdc_acm_init0x080004d0 · 待下发 · 采集起点×",
+        "selector": "#breakpoint-list",
+        "tag": "div",
+        "text": "cdc_acm_init0x080004d0 · 待下发 · 采集起点×",
+        "type": null,
+        "value": null
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "etm",
+      "op": "invoke",
+      "method": "captureNative",
+      "args": [
+        {
+          "seconds": 0.1,
+          "usbReconnect": true,
+          "hclkDiv": 4,
+          "gpioSpeed": 1,
+          "swdKhz": 1000,
+          "decode": true
+        }
+      ],
+      "target": "view"
+    },
+    "seconds": 19.270253700000467,
+    "result": {
+      "job": "6330ad535c9360e1f2d6db8593ae5828",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": {
+          "captureProof": {
+            "artifacts": {
+              "bit": {
+                "path": "E:\\zynqlinkPRO\\prebuilt\\20261031_filtered_tpiu\\zynqdap_filtered.bit",
+                "sha256": "306fa26134e63509ec64a2982dfb22ab8b7164d15c1fbb617df30fbdb5f29619"
+              },
+              "elf": {
+                "path": "E:\\zynqlinkPRO\\prebuilt\\20261031_filtered_tpiu\\zynqdap_filtered.elf",
+                "sha256": "a67ed2d1d61b99ac1e9c4d08b2f68a6308dffaca7ddb09213053896e538b855e"
+              },
+              "git_dirty": true,
+              "git_head": "b5df86da79864b33ea7a437ce374a76e03d320b2"
+            },
+            "entry": {
+              "address": 134218960,
+              "matched": true,
+              "pc": 134218960,
+              "resetToEntry": true,
+              "savedFpb": {
+                "comparators": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "control": 609
+              }
+            },
+            "fpbRestored": true,
+            "quality": {
+              "ended": true,
+              "fclk": 99999999,
+              "loss": false,
+              "records": 111019,
+              "refClockHz": 199999998,
+              "synced": true,
+              "tckKhz": 999,
+              "trailingBytes": 0
+            },
+            "rccCapture": [
+              50548355,
+              5308570
+            ],
+            "restored": true
+          },
+          "record": "capture-a63604803b8947d1a26d0ed1c3766132",
+          "serialStimulus": null,
+          "targetRestored": true,
+          "transport": "native-service"
+        },
+        "verificationRequired": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "etm",
+      "op": "invoke",
+      "method": "captureNative",
+      "args": [
+        {
+          "seconds": 0.2,
+          "entry": "cdc_poll",
+          "resetToEntry": false,
+          "usbReconnect": false,
+          "hclkDiv": 4,
+          "gpioSpeed": 1,
+          "swdKhz": 1000,
+          "decode": true,
+          "serialStimulus": {
+            "port": "COM34",
+            "text": "ETM_CDC_ECHO_0123456789abcdef\r\n",
+            "rounds": 4,
+            "intervalMs": 10
+          }
+        }
+      ],
+      "target": "view"
+    },
+    "seconds": 38.750845800001116,
+    "result": {
+      "job": "99880728692cbb422fc8ee1e336ba982",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": {
+          "captureProof": {
+            "artifacts": {
+              "bit": {
+                "path": "E:\\zynqlinkPRO\\prebuilt\\20261031_filtered_tpiu\\zynqdap_filtered.bit",
+                "sha256": "306fa26134e63509ec64a2982dfb22ab8b7164d15c1fbb617df30fbdb5f29619"
+              },
+              "elf": {
+                "path": "E:\\zynqlinkPRO\\prebuilt\\20261031_filtered_tpiu\\zynqdap_filtered.elf",
+                "sha256": "a67ed2d1d61b99ac1e9c4d08b2f68a6308dffaca7ddb09213053896e538b855e"
+              },
+              "git_dirty": true,
+              "git_head": "b5df86da79864b33ea7a437ce374a76e03d320b2"
+            },
+            "entry": {
+              "address": 134219152,
+              "matched": true,
+              "pc": 134219152,
+              "resetToEntry": false,
+              "savedFpb": {
+                "comparators": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "control": 609
+              }
+            },
+            "fpbRestored": true,
+            "quality": {
+              "ended": true,
+              "fclk": 99999999,
+              "loss": false,
+              "records": 344651,
+              "refClockHz": 199999998,
+              "synced": true,
+              "tckKhz": 999,
+              "trailingBytes": 0
+            },
+            "rccCapture": [
+              50548355,
+              5308570
+            ],
+            "restored": true
+          },
+          "record": "capture-5a32966b3a6e4d70848bb4b35073ff5c",
+          "serialStimulus": {
+            "armed": true,
+            "captureSeconds": 0.2,
+            "ok": true,
+            "payloadBytes": 31,
+            "payloadSha256": "236d76d377b26594f2b2133331052cde77c1db7f08f395c77a86bdcaa54e4259",
+            "port": "COM34",
+            "requestedRounds": 4,
+            "rounds": [
+              {
+                "byteExact": true,
+                "index": 0,
+                "receivedBytes": 31,
+                "receivedSha256": "236d76d377b26594f2b2133331052cde77c1db7f08f395c77a86bdcaa54e4259",
+                "sendOffsetSeconds": 0.022847899999760557,
+                "sentBytes": 31
+              },
+              {
+                "byteExact": true,
+                "index": 1,
+                "receivedBytes": 31,
+                "receivedSha256": "236d76d377b26594f2b2133331052cde77c1db7f08f395c77a86bdcaa54e4259",
+                "sendOffsetSeconds": 0.0418227999980445,
+                "sentBytes": 31
+              },
+              {
+                "byteExact": true,
+                "index": 2,
+                "receivedBytes": 31,
+                "receivedSha256": "236d76d377b26594f2b2133331052cde77c1db7f08f395c77a86bdcaa54e4259",
+                "sendOffsetSeconds": 0.057879799998772796,
+                "sentBytes": 31
+              },
+              {
+                "byteExact": true,
+                "index": 3,
+                "receivedBytes": 31,
+                "receivedSha256": "236d76d377b26594f2b2133331052cde77c1db7f08f395c77a86bdcaa54e4259",
+                "sendOffsetSeconds": 0.07344220000231871,
+                "sentBytes": 31
+              }
+            ]
+          },
+          "targetRestored": true,
+          "transport": "native-service"
+        },
+        "verificationRequired": true
+      }
+    }
+  }
+]

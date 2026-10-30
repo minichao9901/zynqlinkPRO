@@ -1,0 +1,72 @@
+{
+  "suite": "rttcdc",
+  "rows": [
+    {
+      "requestedClockHz": 20000000,
+      "valid": true,
+      "bytes": 4689920,
+      "recordsChecked": 360762,
+      "sequenceGaps": 0,
+      "unparsedPrefix": 10,
+      "unparsedTail": 4,
+      "webBytesPerSecond": 1562369.2451211459,
+      "window": {
+        "bytes": 4689920,
+        "bytesPerSecond": 1562369.2451211459,
+        "complete": true,
+        "error": null,
+        "limitExceeded": false,
+        "name": "rtt-raw-20261031-043932.bin",
+        "observedBytes": 4689920,
+        "portClosed": false,
+        "seconds": 3.00179999999702
+      },
+      "liveClocks": {
+        "FCLK_Hz": 78260868,
+        "cfg": "0xc2a11",
+        "waveform": {
+          "SWCLK_Hz": 19565217.0,
+          "half_period_fclk": 2,
+          "short_high": true,
+          "intended_high_ns": 12.77777803333334
+        },
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 19565217.0,
+        "clock_observation": "PS JTAG register read; no DAP command during stream"
+      },
+      "hostWindowSeconds": 3.00179999999702,
+      "totalCaseSeconds": 5.915989000000991,
+      "engine": {
+        "cbAddr": "0x2000000c",
+        "connected": true,
+        "dapYield": 0,
+        "info": "已连接：ZynqLink probe control · 12345678 · FW 0.5-orbtrace · SN 12345678",
+        "label": "ZynqLink probe control · 12345678",
+        "mock": false,
+        "moved": 6189056,
+        "rdErr": 0,
+        "rescans": 0,
+        "running": false,
+        "stall": 0,
+        "startRc": 0,
+        "state": "未运行（点「启动转发」或「自动搜控制块」）",
+        "supported": true,
+        "swdMhz": 19
+      },
+      "summary": {
+        "buffered": 2093568,
+        "bytes": 6187520,
+        "frames": 1166,
+        "mode": "ascii",
+        "open": true,
+        "paused": false,
+        "rate": 878592,
+        "recordBytes": 0,
+        "recording": false,
+        "shown": 0,
+        "suppressed": true
+      }
+    }
+  ]
+}

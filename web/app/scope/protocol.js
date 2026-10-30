@@ -559,6 +559,7 @@ export function scopeRcText(rc, riscv = false){
      * ——周期非法是在 CONFIG 阶段被拒（-6）。这里以前写反了（2026-10 代码审查）。 */
     case -5: return '探针没有空闲的包缓冲（主机没把 0x83 的数据读走）—— 标定/采集卡住时先确认读循环在跑';
     case -6: return '配置被拒：变量宽度非法（只支持 1/2/4 字节，一条 CONFIG 最多 8 个变量）。**被拒后固件会清空变量表**，紧接着的 START 会回 -3';
+    case -7: return '探针采样、标定或收尾仍忙；请保持数据端点连接并等待停止确认';
     default: return `未知返回码 ${rc}`;
   }
 }

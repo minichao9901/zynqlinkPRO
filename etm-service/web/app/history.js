@@ -108,7 +108,7 @@ export class HistoryView{
         {window:this.window,onExportOptions:options=>{this.flameExportOptions=options;},onExport:options=>this.exportFlame(options),mode:this.flameMode,cursorSeq:this.selected,cursorFunction:this.selectedFunction,zoomBusy:this.scopeBusy,sourceCollapsed:this.flameSourceCollapsed,canBack:!!this.rangeHistory.length,onError:this.onError,onZoom:zoomIn=>this.zoomRange(zoomIn),
          onMode:mode=>{if(this.flameMode!==mode){this.flameMode=mode;if(!this.range)this.window=null;}return this.render();},onToggleSource:()=>{this.flameSourceCollapsed=!this.flameSourceCollapsed;return this.render();},onRange:r=>this.setRange(r),onBack:()=>this.backRange(),onReset:()=>this.setRange(null,true,this.selected),onSelect:seq=>this.select(seq,false)});
       this.flameZoomControls=flame.zoomControls;$('table-container').replaceChildren(flame);
-      this.pagination(0,0);return;
+      this.pagination(0,0);this.scrollSource();return;
     }
     let data,headers;
     const analysis=this.range?this.window?.analysis:this.result.analysis;
@@ -243,7 +243,13 @@ export class HistoryView{
     if(this.sourceDomFile!==e.file||this.sourceDomText!==source){
       const fragment=document.createDocumentFragment();source.split(/\r?\n/).forEach((text,i)=>{const line=make('div',null,'source-line');line.append(make('span',i+1,'line-number'),make('span',text||' ','line-text'));fragment.append(line);});box.replaceChildren(fragment);this.sourceDomFile=e.file;this.sourceDomText=source;
     }
-    box.querySelector('.highlight')?.classList.remove('highlight');const active=box.children[e.line-1];if(active){active.classList.add('highlight');box.scrollTop=active.offsetTop-box.offsetTop-100;}if(this.view==='flame')await this.render();
+    box.querySelector('.highlight')?.classList.remove('highlight');const active=box.children[e.line-1];if(active){active.classList.add('highlight');this.scrollSource();}if(this.view==='flame')await this.render();
+  }
+  scrollSource(){
+    const box=$('source-code'),active=box.querySelector('.highlight');
+    if(!active||!box.clientHeight)return;
+    const line=active.getBoundingClientRect(),bounds=box.getBoundingClientRect();
+    box.scrollTop+=line.top-bounds.top-Math.max(0,(box.clientHeight-line.height)/2);
   }
   async navigate(direction,mode=$('nav-mode').value){if(!this.result)return;const generation=this.recordRevision;const q=new URLSearchParams({seq:this.selected??0,direction,mode});this.scopeParams(q);const found=await this.api(this.path('navigate?'+q));if(generation!==this.recordRevision)return;if(found.seq===null){$('cursor-state').textContent='该方向已无符合条件的历史位置';return;}await this.select(found.seq,true);}
   async refreshSources(){this.sources.clear();this.sourceDomFile=null;if(this.selected!==null)await this.select(this.selected);}

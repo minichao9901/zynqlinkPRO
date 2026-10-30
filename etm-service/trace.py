@@ -26,9 +26,9 @@ REPO = SERVICE.parent
 TOOLS = SERVICE / 'tools'
 CLI = TOOLS / 'trace_cli.py'
 BOARD = REPO / 'tools' / 'test_orbtrace_board.py'
-DEFAULT_TARGET_ELF = SERVICE / 'firmware' / 'stm32f103_cdc_trace' / 'fw-ze.elf'
-DEFAULT_BIT = REPO / 'prebuilt' / '20261030_orbtrace_oversample_parser' / 'orbtrace_oversample_parser.bit'
-DEFAULT_ZYNQ_ELF = REPO / 'prebuilt' / '20261030_orbtrace_oversample_parser' / 'zynqdap_orbtrace.elf'
+DEFAULT_TARGET_ELF = REPO / 'prebuilt/20261031_f103ze_cdc_trace/fw-48-echo.elf'
+DEFAULT_BIT = REPO / 'prebuilt/20261031_filtered_tpiu/zynqdap_filtered.bit'
+DEFAULT_ZYNQ_ELF = REPO / 'prebuilt/20261031_filtered_tpiu/zynqdap_filtered.elf'
 PROTOCOL = 'trace-cli/1'
 
 
@@ -128,8 +128,8 @@ def capture(argv):
     parser.add_argument('--usb-reconnect', action='store_true')
     parser.add_argument('--ready-file')
     parser.add_argument('--gpio-speed', type=int, choices=(1, 2, 3), default=1)
-    parser.add_argument('--bit', default=str(DEFAULT_BIT))
-    parser.add_argument('--zynq-elf', default=str(DEFAULT_ZYNQ_ELF))
+    parser.add_argument('--bit', required=True, help='实际已通过JTAG加载的bit；不会自动加载')
+    parser.add_argument('--zynq-elf', required=True, help='与bit实际配套加载的Zynq ELF')
     parser.add_argument('--no-decode', action='store_true')
     parser.add_argument('--json-out')
     args = parser.parse_args(argv)

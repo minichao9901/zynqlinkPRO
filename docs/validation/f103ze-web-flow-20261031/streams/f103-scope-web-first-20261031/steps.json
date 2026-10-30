@@ -1,0 +1,917 @@
+[
+  {
+    "request": {
+      "action": "disconnect"
+    },
+    "seconds": 0.27361490000475897,
+    "result": {
+      "job": "efaa9cd1baeaba70158b9b655e60b212",
+      "ok": true,
+      "value": {
+        "disconnected": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "flash",
+      "op": "set",
+      "selector": "#f-backend",
+      "value": "openocd"
+    },
+    "seconds": 0.11869039999874076,
+    "result": {
+      "job": "fa8239fe6ec5f3198b1bfdb2db2ceabc",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "control": {
+          "disabled": false,
+          "hidden": false,
+          "label": "后端\n          \n            WebUSB · 零安装（默认）\n            本地桥 · OpenOCD\n            本地桥 · J-Link",
+          "options": [
+            {
+              "disabled": false,
+              "label": "WebUSB · 零安装（默认）",
+              "value": "webusb"
+            },
+            {
+              "disabled": false,
+              "label": "本地桥 · OpenOCD",
+              "value": "openocd"
+            },
+            {
+              "disabled": false,
+              "label": "本地桥 · J-Link",
+              "value": "jlink"
+            }
+          ],
+          "selector": "#f-backend",
+          "tag": "select",
+          "type": "select-one",
+          "value": "openocd"
+        },
+        "dispatched": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "flash",
+      "op": "set",
+      "selector": "#f-chip",
+      "value": "stm32f103"
+    },
+    "seconds": 0.031289800004742574,
+    "result": {
+      "job": "8c96f5bf7efbc49c2bf0dae54e3b3615",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "control": {
+          "disabled": false,
+          "hidden": false,
+          "label": "芯片\n          STM32F1（F103 等）STM32F0STM32F2STM32F3STM32F4STM32F7STM32G0STM32G4STM32H7STM32H7B0/H7A3/H7B3STM32H5STM32L0STM32L1STM32L4 / L4+STM32L5STM32U5STM32C0STM32WBSTM32WLESP32-S31（板载 USB-JTAG）ESP32（Wrover Kit）HPM5300EVK（HPM5361）（RISC-V，零安",
+          "options": [
+            {
+              "disabled": false,
+              "label": "STM32F1（F103 等）",
+              "value": "stm32f103"
+            },
+            {
+              "disabled": false,
+              "label": "STM32F0",
+              "value": "stm32f0"
+            },
+            {
+              "disabled": false,
+              "label": "STM32F2",
+              "value": "stm32f2"
+            },
+            {
+              "disabled": false,
+              "label": "STM32F3",
+              "value": "stm32f3"
+            },
+            {
+              "disabled": false,
+              "label": "STM32F4",
+              "value": "stm32f4"
+            },
+            {
+              "disabled": false,
+              "label": "STM32F7",
+              "value": "stm32f7"
+            },
+            {
+              "disabled": false,
+              "label": "STM32G0",
+              "value": "stm32g0"
+            },
+            {
+              "disabled": false,
+              "label": "STM32G4",
+              "value": "stm32g4"
+            },
+            {
+              "disabled": false,
+              "label": "STM32H7",
+              "value": "stm32h7"
+            },
+            {
+              "disabled": false,
+              "label": "STM32H7B0/H7A3/H7B3",
+              "value": "stm32h7b0"
+            },
+            {
+              "disabled": false,
+              "label": "STM32H5",
+              "value": "stm32h5"
+            },
+            {
+              "disabled": false,
+              "label": "STM32L0",
+              "value": "stm32l0"
+            },
+            {
+              "disabled": false,
+              "label": "STM32L1",
+              "value": "stm32l1"
+            },
+            {
+              "disabled": false,
+              "label": "STM32L4 / L4+",
+              "value": "stm32l4"
+            },
+            {
+              "disabled": false,
+              "label": "STM32L5",
+              "value": "stm32l5"
+            },
+            {
+              "disabled": false,
+              "label": "STM32U5",
+              "value": "stm32u5"
+            },
+            {
+              "disabled": false,
+              "label": "STM32C0",
+              "value": "stm32c0"
+            },
+            {
+              "disabled": false,
+              "label": "STM32WB",
+              "value": "stm32wb"
+            },
+            {
+              "disabled": false,
+              "label": "STM32WL",
+              "value": "stm32wl"
+            },
+            {
+              "disabled": false,
+              "label": "ESP32-S31（板载 USB-JTAG）",
+              "value": "esp32s31"
+            },
+            {
+              "disabled": false,
+              "label": "ESP32（Wrover Kit）",
+              "value": "esp32"
+            },
+            {
+              "disabled": false,
+              "label": "HPM5300EVK（HPM5361）（RISC-V，零安装）",
+              "value": "hpm5300evk"
+            },
+            {
+              "disabled": false,
+              "label": "HPM5301EVKLite（RISC-V，零安装）",
+              "value": "hpm5301evklite"
+            },
+            {
+              "disabled": false,
+              "label": "HPM5E00EVK（RISC-V，零安装）",
+              "value": "hpm5e00evk"
+            },
+            {
+              "disabled": false,
+              "label": "HPM6200EVK（HPM6280）（RISC-V，零安装）",
+              "value": "hpm6200evk"
+            },
+            {
+              "disabled": false,
+              "label": "HPM6300EVK（HPM6360）（RISC-V，零安装）",
+              "value": "hpm6300evk"
+            },
+            {
+              "disabled": false,
+              "label": "HPM6750EVK2（RISC-V，零安装）",
+              "value": "hpm6750evk2"
+            },
+            {
+              "disabled": false,
+              "label": "HPM6750EVKMINI（RISC-V，零安装）",
+              "value": "hpm6750evkmini"
+            },
+            {
+              "disabled": false,
+              "label": "HPM6800EVK（HPM6880）（RISC-V，零安装）",
+              "value": "hpm6800evk"
+            },
+            {
+              "disabled": false,
+              "label": "HPM6E00EVK（HPM6E80）（RISC-V，零安装）",
+              "value": "hpm6e00evk"
+            },
+            {
+              "disabled": false,
+              "label": "HPM6P00EVK（HPM6P81）（RISC-V，零安装）",
+              "value": "hpm6p00evk"
+            },
+            {
+              "disabled": false,
+              "label": "自定义 cfg…",
+              "value": "custom"
+            }
+          ],
+          "selector": "#f-chip",
+          "tag": "select",
+          "type": "select-one",
+          "value": "stm32f103"
+        },
+        "dispatched": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "flash",
+      "op": "upload",
+      "selector": "@file:view._fileInput"
+    },
+    "seconds": 0.14664630000334,
+    "result": {
+      "job": "61d7e4b2d2a521b484a5e00e46e06fd5",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "control": {
+          "disabled": false,
+          "hidden": false,
+          "label": "",
+          "selector": "@file:view._fileInput",
+          "tag": "input",
+          "type": "file",
+          "value": ""
+        },
+        "dispatched": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "flash",
+      "op": "read",
+      "selector": "#f-file-info"
+    },
+    "seconds": 0.03720899999461835,
+    "result": {
+      "job": "034d8738845ddc47d82904f5e9278e9f",
+      "ok": true,
+      "value": {
+        "disabled": false,
+        "hidden": false,
+        "label": "已选择：20261031_f103ze_scope72.elf（157.2 KB）",
+        "selector": "#f-file-info",
+        "tag": "p",
+        "text": "已选择：20261031_f103ze_scope72.elf（157.2 KB）",
+        "type": null,
+        "value": null
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "flash",
+      "op": "invoke",
+      "method": "flash",
+      "args": [],
+      "target": "view"
+    },
+    "seconds": 0.9406397999991896,
+    "result": {
+      "job": "c6361ceb84a5da6dfa5164d49ba5652d",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "flash",
+      "op": "read",
+      "selector": "#f-result"
+    },
+    "seconds": 0.041495199999189936,
+    "result": {
+      "job": "05e0a178af6f32f942c0eba430647318",
+      "ok": true,
+      "value": {
+        "disabled": false,
+        "hidden": false,
+        "label": "✅ stm32f103 · 3.3 KB · 0.5s · 已校验 · 已复位运行",
+        "selector": "#f-result",
+        "tag": "span",
+        "text": "✅ stm32f103 · 3.3 KB · 0.5s · 已校验 · 已复位运行",
+        "type": null,
+        "value": null
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "invoke",
+      "method": "setMock",
+      "args": [
+        false
+      ],
+      "target": "view"
+    },
+    "seconds": 0.10470560000248952,
+    "result": {
+      "job": "c16af5d456cc223d084a9636fe87e001",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "invoke",
+      "method": "connectHid",
+      "args": [
+        false
+      ],
+      "target": "view"
+    },
+    "seconds": 0.23907199999666773,
+    "result": {
+      "job": "6ac073915715f5fdc9b4ec3891f7946d",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "invoke",
+      "method": "connectUsb",
+      "args": [
+        false
+      ],
+      "target": "view"
+    },
+    "seconds": 0.3587900999991689,
+    "result": {
+      "job": "8eaf9b88b8a8b34193f422ecae2b4225",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "set",
+      "selector": "#sc-target",
+      "value": "swd"
+    },
+    "seconds": 0.1041620000032708,
+    "result": {
+      "job": "2f4ff1a0c88f9c8aeeb570969d91565b",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "control": {
+          "disabled": false,
+          "hidden": false,
+          "label": "目标类型\n          \n            SWD / ARM\n            RISC-V / JTAG",
+          "options": [
+            {
+              "disabled": false,
+              "label": "SWD / ARM",
+              "value": "swd"
+            },
+            {
+              "disabled": false,
+              "label": "RISC-V / JTAG",
+              "value": "riscv"
+            }
+          ],
+          "selector": "#sc-target",
+          "tag": "select",
+          "type": "select-one",
+          "value": "swd"
+        },
+        "dispatched": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "upload",
+      "selector": "@file:view.elfInput"
+    },
+    "seconds": 0.10680380000121659,
+    "result": {
+      "job": "6daff3930e1279be3beddf1282e0da21",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "control": {
+          "disabled": false,
+          "hidden": true,
+          "label": "",
+          "selector": "@file:view.elfInput",
+          "tag": "input",
+          "type": "file",
+          "value": ""
+        },
+        "dispatched": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "read",
+      "selector": "#sc-elfinfo"
+    },
+    "seconds": 0.030787399999098852,
+    "result": {
+      "job": "3d11183f5738fad4de15229ef1ab45a5",
+      "ok": true,
+      "value": {
+        "disabled": false,
+        "hidden": false,
+        "label": "fw.elf · DWARF 4 · 直接列出 19 项 · 数组 1 组 · 未直接列出 13 项",
+        "selector": "#sc-elfinfo",
+        "tag": "p",
+        "text": "fw.elf · DWARF 4 · 直接列出 19 项 · 数组 1 组 · 未直接列出 13 项",
+        "type": null,
+        "value": null
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "set",
+      "selector": "#sc-clock",
+      "value": "50000"
+    },
+    "seconds": 0.12325140000029933,
+    "result": {
+      "job": "5d8985626299862b871dde555b955541",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "control": {
+          "disabled": false,
+          "hidden": false,
+          "label": "SWD 时钟自动1 MHz5 MHz10 MHz20 MHz30 MHz40 MHz45 MHz50 MHz60 MHz",
+          "options": [
+            {
+              "disabled": false,
+              "label": "自动",
+              "value": "0"
+            },
+            {
+              "disabled": false,
+              "label": "1 MHz",
+              "value": "1000"
+            },
+            {
+              "disabled": false,
+              "label": "5 MHz",
+              "value": "5000"
+            },
+            {
+              "disabled": false,
+              "label": "10 MHz",
+              "value": "10000"
+            },
+            {
+              "disabled": false,
+              "label": "20 MHz",
+              "value": "20000"
+            },
+            {
+              "disabled": false,
+              "label": "30 MHz",
+              "value": "30000"
+            },
+            {
+              "disabled": false,
+              "label": "40 MHz",
+              "value": "40000"
+            },
+            {
+              "disabled": false,
+              "label": "45 MHz",
+              "value": "45000"
+            },
+            {
+              "disabled": false,
+              "label": "50 MHz",
+              "value": "50000"
+            },
+            {
+              "disabled": false,
+              "label": "60 MHz",
+              "value": "60000"
+            }
+          ],
+          "selector": "#sc-clock",
+          "tag": "select",
+          "type": "select-one",
+          "value": "50000"
+        },
+        "dispatched": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "set",
+      "selector": "#sc-cdcoff",
+      "value": true
+    },
+    "seconds": 0.10528200000408106,
+    "result": {
+      "job": "a0f031bd7739dbee3a53de1ed6768eda",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "control": {
+          "disabled": false,
+          "hidden": false,
+          "label": "采样时暂停串口桥",
+          "selector": "#sc-cdcoff",
+          "tag": "input",
+          "type": "checkbox",
+          "value": true
+        },
+        "dispatched": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "set",
+      "selector": "#sc-batch",
+      "value": true
+    },
+    "seconds": 0.10456189999968046,
+    "result": {
+      "job": "e3205501740bf7ffd8a8806433a6b6c9",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "control": {
+          "disabled": false,
+          "hidden": false,
+          "label": "单字短批次",
+          "selector": "#sc-batch",
+          "tag": "input",
+          "type": "checkbox",
+          "value": true
+        },
+        "dispatched": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "set",
+      "selector": "#sc-seconds",
+      "value": "5"
+    },
+    "seconds": 0.12397770000097807,
+    "result": {
+      "job": "8d086f060ae6d0efba70412b1feabb86",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "control": {
+          "disabled": false,
+          "hidden": false,
+          "label": "时长s",
+          "selector": "#sc-seconds",
+          "tag": "input",
+          "type": "text",
+          "value": "5"
+        },
+        "dispatched": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "click",
+      "selector": "#sc-varclear"
+    },
+    "seconds": 0.10420729999896139,
+    "result": {
+      "job": "7fd5729f095e93c51821482518d06e63",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "control": {
+          "disabled": false,
+          "hidden": false,
+          "label": "清空勾选",
+          "selector": "#sc-varclear",
+          "tag": "button",
+          "type": "submit",
+          "value": ""
+        },
+        "dispatched": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "invoke",
+      "method": "toggleVar",
+      "args": [
+        {
+          "name": "g_pack.u_hi",
+          "addr": 536875048,
+          "scalar": "u32",
+          "size": 4,
+          "scale": 1,
+          "offset": 0
+        },
+        true
+      ],
+      "target": "view"
+    },
+    "seconds": 0.11837789999844972,
+    "result": {
+      "job": "548c10bd1c14750c05543848326e3ca6",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "invoke",
+      "method": "bench",
+      "args": [],
+      "target": "view"
+    },
+    "seconds": 0.2176342000020668,
+    "result": {
+      "job": "0bad5d0c2b7520e7f785fd5d7241fb30",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": true,
+        "verificationRequired": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "set",
+      "selector": "#sc-period",
+      "value": "100.0"
+    },
+    "seconds": 0.11960420000104932,
+    "result": {
+      "job": "c66321231fcd7fe2d725c76da99b1f03",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "control": {
+          "disabled": false,
+          "hidden": false,
+          "label": "周期µs",
+          "selector": "#sc-period",
+          "tag": "input",
+          "type": "text",
+          "value": "100.0"
+        },
+        "dispatched": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "invoke",
+      "method": "start",
+      "args": [],
+      "target": "view"
+    },
+    "seconds": 0.43871799999760697,
+    "result": {
+      "job": "06a1c7195d09a6dd1c2f41885b59a7a3",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "invoke",
+      "method": "summary",
+      "args": [],
+      "target": "view"
+    },
+    "seconds": 0.12422810000134632,
+    "result": {
+      "job": "96e5fe313f199f4972a09da7db7e9086",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": {
+          "benchUs": 7.0795,
+          "blob": {
+            "delay": 0,
+            "name": "0x5a594e51",
+            "offset": 1515802193
+          },
+          "capacity": 0,
+          "connectErr": null,
+          "dapYields": 0,
+          "elf": {
+            "name": "fw.elf",
+            "note": "",
+            "source": "dwarf",
+            "stats": {
+              "cu": 2,
+              "dies": 127,
+              "vars": 30
+            },
+            "versions": [
+              4
+            ]
+          },
+          "lod": false,
+          "lost": 0,
+          "lostGap": 0,
+          "lostProbe": 0,
+          "lostUsb": 0,
+          "metricsError": null,
+          "mockVars": [
+            "mock0.f32",
+            "mock1.f32",
+            "mock2.i32",
+            "mock3.u16",
+            "mock4.i16",
+            "mock5.u8",
+            "mock6.i8",
+            "mock7.f64"
+          ],
+          "mode": "real",
+          "packets": 0,
+          "plan": {
+            "estHz": 205233,
+            "estUs": 4.87,
+            "frameBytes": 4,
+            "spans": 1
+          },
+          "rateHz": 0,
+          "raw": 0,
+          "readErrors": 0,
+          "resyncs": 0,
+          "running": false,
+          "samples": 0,
+          "state": "数据端点没连上：点「连接数据端点…」授权一次（采样数据走 EP 0x83，必须有它）",
+          "trigger": {
+            "hit": -1,
+            "hits": 0,
+            "marker": false,
+            "mode": 0
+          },
+          "varCount": 1,
+          "vars": [
+            "g_pack.u_hi:u32@0x20001028"
+          ],
+          "view": {
+            "end": 1,
+            "start": 0
+          }
+        },
+        "verificationRequired": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "invoke",
+      "method": "stop",
+      "args": [
+        "CLI cleanup"
+      ],
+      "target": "view"
+    },
+    "seconds": 0.1441835000005085,
+    "result": {
+      "job": "e8a26a2b973762810c0f66192caeb976",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "invoke",
+      "method": "disconnect",
+      "args": [],
+      "target": "view"
+    },
+    "seconds": 0.027778700001363177,
+    "result": {
+      "job": "ce80994a352ef7cc40ed892b0ed11296",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": true,
+        "verificationRequired": true
+      }
+    }
+  }
+]

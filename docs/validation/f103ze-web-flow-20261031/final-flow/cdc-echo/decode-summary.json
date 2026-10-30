@@ -1,0 +1,72 @@
+{
+  "summary": {
+    "packets": 279573,
+    "ranges": 1139372,
+    "instructions": 1139372,
+    "executed": 984735,
+    "sourceMapped": 1139088,
+    "exceptions": 58,
+    "gaps": 2,
+    "packetIssues": 0,
+    "unknownExecution": 30759,
+    "functions": {
+      "cdc_poll": 297454,
+      "cdc_tx_poll": 266419,
+      "cdc_console_peek": 246705,
+      "main": 92252,
+      "usb_device_is_configured": 71757,
+      "cdc_console_feed": 3760,
+      "cdc_console_write": 3100,
+      "USBD_IRQHandler": 624,
+      "fsdev_write_pma": 548,
+      "fsdev_read_pma": 524,
+      "HAL_IncTick": 350,
+      "handle_line": 208,
+      "strcmp": 160,
+      "usbd_ep_start_write": 184,
+      "SysTick_Handler": 150,
+      "usbd_ep_start_read": 108,
+      "usbd_cdc_acm_bulk_in": 76,
+      "strncmp": 68,
+      "usbd_cdc_acm_bulk_out": 72,
+      "cdc_console_consume": 52,
+      "usbd_event_ep_out_complete_handler": 44,
+      "usbd_event_ep_in_complete_handler": 44,
+      "usbd_get_ep_mps": 44,
+      "USB_LP_CAN1_RX0_IRQHandler": 32
+    }
+  },
+  "quality": {
+    "inputBytes": 344651,
+    "unprocessedBytes": 0,
+    "processedBytes": 344651,
+    "accountedBytes": 344651,
+    "overlapBytes": 0,
+    "unaccountedBytes": 0,
+    "unsynchronizedBytes": 0,
+    "unsynchronizedRecords": 0,
+    "validPackets": 279573,
+    "packetIssues": 0,
+    "overflowPackets": 0,
+    "decoderLastError": 0,
+    "unknownExecution": 30759,
+    "initialPhysicalBytes": null,
+    "unknownSourceBytes": null,
+    "trailingFrameBytes": null,
+    "trailingSyncBytes": 0,
+    "firstPathOffset": 12,
+    "boundaryPresent": false,
+    "timing": {
+      "cycleElements": 0,
+      "timeFlameAvailable": false
+    },
+    "basis": "字节核算不等于采集无损证明；源码映射率不等于程序覆盖率"
+  },
+  "status": {
+    "kind": "status",
+    "processed": 344651,
+    "library": "1.8.3",
+    "lastErrorCode": 0,
+    "lastError": ""
+  }
+}

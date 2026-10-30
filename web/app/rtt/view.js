@@ -22,7 +22,7 @@ import { parseRanges } from '../core/bin.js';
 import { parseHex, textToBytes } from '../core/hex.js';
 import { pickCfgs } from '../ui/cfgpicker.js';
 import { closeProbeUsbDevices } from '../core/probe-bus.js';
-import { sleep } from '../core/pace.js';
+import { sleep,waitMs,yieldTask } from '../core/pace.js';
 import { rate as fRate, bytes as fBytes, fileStamp, download, stamp as stampOf } from '../core/format.js';
 
 const EOL = { cr: '\r', crlf: '\r\n', lf: '\n', none: '' };
@@ -537,6 +537,10 @@ export class RttView {
   async _disconnectNow(){
     this.running = false;
     clearTimeout(this.timer);
+    // A readUp transaction can still be reading/writing RdOff. Let it retire
+    // before DAP_Disconnect and native USB close consume the same reply queue.
+    if(this._pollTask)await this._pollTask.catch(()=>{});
+    this._pollTask=null;
     if (this.rec.active || this.rec.needsClose || this.rec.starting || this.rec.draining){
       const info = await this.rec.stop();
       this._recordBtn();
@@ -660,6 +664,7 @@ export class RttView {
      */
     if (this.probe && typeof this.probe.fast === 'boolean') this.probe.fast = true;
     this.stats.polls = 0; this.stats.bytes = 0; this.stats.lost = 0;
+    this.stats.lastBytes=0;this.stats.lastPolls=0;this._lastStatsAt=performance.now();
     this.fullPolls = 0; this.highPolls = 0; this.peak = 0; this._faults = 0;
     this._pollT0 = Date.now(); this._zeroHinted = false; this._zeroHintSet = false;   // 见 _stats 里的"零速率"诊断
     /**
@@ -739,7 +744,9 @@ export class RttView {
       if (!active()) return;
       this.stats.polls++;
       const cost = performance.now() - t0;
-      this.timer = setTimeout(() => { if (active()) this._pollTask = loop(); }, Math.max(minGap, this.interval - cost, 0));
+      const gap=Math.max(minGap,this.interval-cost,0);
+      await (gap>0?waitMs(gap):yieldTask());
+      if(active())this._pollTask=loop();
     };
     this._pollTask = loop();
   }
@@ -760,14 +767,6 @@ export class RttView {
     if (!bytes?.length) return;
     this.stats.bytes += bytes.length;
     this.rec.push(bytes, t);            // 落文件在"显示之前"：暂停/丢历史都不影响它
-    if (this.suppressed){
-      if (this.records.length === 0 && this.mode === 'term'){
-        const hint = $('r-empty');
-        if (hint) hint.hidden = true;
-      }
-      this.suppBytes += bytes.length;
-      return;
-    }
     this.records.push({ t, b: bytes });
     if (this.records.length === 1) this._updateEmptyHint();
     this.recBytes += bytes.length;
@@ -775,6 +774,7 @@ export class RttView {
       this.recBytes -= this.records.shift().b.length;
       this.truncated = true;
     }
+    if(this.suppressed){this.suppBytes+=bytes.length;return;}
     if (this.paused) return;
     if (this.mode === 'term') this._termWrite(bytes, t);
     else this.tx.push(bytes, t);
@@ -973,10 +973,17 @@ export class RttView {
   }
 
   // ================= 统计 / 保存 =================
+  summary(){
+    return {connected:!!this.probe,running:this.running,backend:$('r-backend').value,
+      stats:{...this.stats},controlBlock:this.rtt?.addr??null,
+      bufferedBytes:this.recBytes,displaySuppressed:this.suppressed,error:$('r-err').textContent};
+  }
   _stats(){
     const s = this.stats;
-    s.rate = Math.max(0, s.bytes - s.lastBytes) * 2;
-    s.hz = Math.max(0, s.polls - s.lastPolls) * 2;
+    const now=performance.now(),elapsed=Math.max(.001,(now-(this._lastStatsAt??(now-500)))/1000);
+    this._lastStatsAt=now;
+    s.rate = Math.max(0, s.bytes - s.lastBytes) / elapsed;
+    s.hz = Math.max(0, s.polls - s.lastPolls) / elapsed;
     s.lastBytes = s.bytes; s.lastPolls = s.polls;
     $('r-rate').textContent = fRate(s.rate);
     $('r-hz').textContent = Math.round(s.hz);
@@ -1102,6 +1109,13 @@ export class RttView {
     b.textContent = s.text;
     b.title = s.title.replace('收到的字节', '读到的 RTT 上行字节');
     b.classList.toggle('primary', s.primary);
+  }
+
+  saveRaw(){
+    if(!this.records.length)throw Error('还没有原始数据');
+    const name=`rtt-raw-${fileStamp()}.bin`;
+    download(name,new Blob(this.records.map(r=>r.b),{type:'application/octet-stream'}));
+    return {name,bytes:this.recBytes,truncated:!!this.truncated};
   }
 
   save(){

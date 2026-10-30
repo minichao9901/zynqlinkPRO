@@ -50,7 +50,8 @@ def catalog():
                       for key, value in PAGES.items()],
             'trace': 'toolbox.py trace <existing trace CLI arguments>',
             'bridge': 'toolbox.py bridge <OpenOCD/J-Link bridge arguments>',
-            'browserRequired': True, 'hardwareValidatedThisChange': False,
+            'fixtures': 'toolbox.py fixtures rtt|scope --out NEW_DIR',
+            'browserRequired': True, 'hardwareValidationReport': 'docs/F103ZE-Web-CLI-ETM统一验收-20261031.md',
             'completion': '事件投递不代表业务完成；读取状态/质量/日志验证。invoke等待原方法返回，原方法可能自行捕获错误。'}
 
 
@@ -164,7 +165,8 @@ def serve(args):
                                   'note': '声明采集配对；服务不会加载板卡，请先通过JTAG加载相同文件'}
     emit(state, folder / 'toolbox-runtime.json')
     emit({**state, 'browserUrl': state['url'] + '/?trace-cli=' + token + '#flash',
-          'note': '在Chrome/Edge打开browserUrl，保持页面打开；首次硬件授权需在网页完成。Ctrl+C退出服务。'})
+          'note': ('已启用本地探针通路；在浏览器打开browserUrl并保持页面打开。Ctrl+C退出服务。'
+                   if args.native_probe else '在Chrome/Edge打开browserUrl，保持页面打开；首次硬件授权需在网页完成。Ctrl+C退出服务。')})
     try:
         server.run()
     except KeyboardInterrupt:
@@ -235,6 +237,7 @@ def parser():
     c.add_argument('--args-file')
     sub.add_parser('trace', help='原样转交全部现有ETM Trace CLI参数（trace之后的--help）')
     sub.add_parser('bridge', help='启动可选OpenOCD/J-Link桥（bridge --help查看桥选项）')
+    sub.add_parser('fixtures', help='构建F103ZE额定72MHz测试目标（fixtures --help查看参数）')
     v = sub.add_parser('validate', help='通过真实Web页面运行F103ZE回归，保存逐步证据')
     v.add_argument('suite', choices=['capacity', 'debug', 'scope', 'rttcdc'])
     v.add_argument('--artifacts', required=True, help='新的证据目录，拒绝覆盖')
@@ -246,6 +249,8 @@ def parser():
     v.add_argument('--clocks',default='20000000,30000000,36000000,45000000,60000000')
     v.add_argument('--periods',default='100,20,10,5,2')
     v.add_argument('--stream-seconds',type=float,default=.5)
+    v.add_argument('--scope-channels',type=int,choices=[1,8],default=1)
+    v.add_argument('--observe-clock',action='store_true',help='通过PS JTAG无暂停读取实际FCLK/SWD divider')
     return p
 
 

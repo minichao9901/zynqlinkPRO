@@ -1,0 +1,204 @@
+{
+  "usbInitialization": {
+    "record": "capture-a63604803b8947d1a26d0ed1c3766132",
+    "range": {
+      "start": 0,
+      "end": 6934
+    },
+    "counts": {
+      "cdc_acm_init": 29,
+      "usbd_initialize": 25,
+      "usb_dc_init": 18,
+      "usb_dc_low_level_init": 8
+    },
+    "sourceExample": {
+      "seq": 2,
+      "function": "cdc_acm_init",
+      "file": "E:/zynqlinkPRO/build/f103-target-source-zip/firmware/stm32f103_cdc_trace/src/main.c",
+      "line": 234,
+      "pc": 134218960
+    },
+    "quality": {
+      "inputBytes": 111019,
+      "unprocessedBytes": 0,
+      "processedBytes": 111019,
+      "accountedBytes": 111019,
+      "overlapBytes": 0,
+      "unaccountedBytes": 0,
+      "unsynchronizedBytes": 0,
+      "unsynchronizedRecords": 0,
+      "validPackets": 109656,
+      "packetIssues": 0,
+      "overflowPackets": 0,
+      "decoderLastError": 0,
+      "unknownExecution": 32,
+      "initialPhysicalBytes": null,
+      "unknownSourceBytes": null,
+      "trailingFrameBytes": null,
+      "trailingSyncBytes": 0,
+      "firstPathOffset": 12,
+      "boundaryPresent": false,
+      "timing": {
+        "cycleElements": 0,
+        "timeFlameAvailable": false
+      },
+      "basis": "字节核算不等于采集无损证明；源码映射率不等于程序覆盖率"
+    },
+    "summary": {
+      "packets": 109656,
+      "ranges": 550167,
+      "instructions": 550167,
+      "executed": 495782,
+      "sourceMapped": 542979,
+      "exceptions": 29,
+      "gaps": 2,
+      "packetIssues": 0,
+      "unknownExecution": 32,
+      "functions": {
+        "cdc_poll": 243631,
+        "main": 243632,
+        "memset": 5688,
+        "_svfprintf_r": 361,
+        "USBD_IRQHandler": 322,
+        "memmove": 253,
+        "memcpy": 218,
+        "usbd_ep_open": 196,
+        "HAL_IncTick": 175,
+        "memchr": 138,
+        "_printf_i": 128,
+        "__ssputs_r": 110,
+        "usbd_class_event_notify_handler": 94,
+        "SysTick_Handler": 75,
+        "_vsnprintf_r": 56,
+        "_printf_common": 47,
+        "SEGGER_RTT_WriteNoLock": 48,
+        "trace_log_printf": 46,
+        "usbd_event_reset_handler": 43,
+        "usbd_add_endpoint": 40,
+        "cdc_session_reset": 40,
+        "cdc_console_reset": 34,
+        "NVIC_EncodePriority": 30,
+        "usbd_add_interface": 30,
+        "_WriteNoCheck": 28,
+        "cdc_acm_init": 29,
+        "HAL_PCD_MspInit": 28,
+        "SEGGER_RTT_Write": 26,
+        "usbd_initialize": 25,
+        "HAL_NVIC_SetPriority": 24,
+        "usbd_desc_register": 20,
+        "vsnprintf": 20,
+        "usb_dc_init": 18,
+        "__NVIC_EnableIRQ": 16,
+        "_GetAvailWriteSpace": 16,
+        "usbd_cdc_acm_init_intf": 16,
+        "__NVIC_SetPriority": 14,
+        "USB_LP_CAN1_RX0_IRQHandler": 16,
+        "usbd_event_handler": 13,
+        "usbd_set_address": 9,
+        "usb_dc_low_level_init": 8,
+        "__NVIC_GetPriorityGrouping": 8,
+        "trace_hook_ready": 7,
+        "HAL_NVIC_EnableIRQ": 6
+      }
+    },
+    "performance": {
+      "jobSeconds": 17.20920350000233,
+      "jobPhasesSeconds": {
+        "metadataPreparation": 0.02166890000080457,
+        "decode": 13.004712900001323,
+        "captureStartAndMetadata": 0.014336600004753564,
+        "browsePreparation": 4.16848769999342
+      }
+    }
+  },
+  "cdcEcho": {
+    "record": "capture-5a32966b3a6e4d70848bb4b35073ff5c",
+    "range": {
+      "start": 123005,
+      "end": 414358
+    },
+    "counts": {
+      "usbd_cdc_acm_bulk_out": 72,
+      "usbd_cdc_acm_bulk_in": 92
+    },
+    "sourceExample": {
+      "seq": 123025,
+      "function": "usbd_cdc_acm_bulk_out",
+      "file": "E:/zynqlinkPRO/build/f103-target-source-zip/firmware/stm32f103_cdc_trace/src/main.c",
+      "line": 182,
+      "pc": 134218432
+    },
+    "quality": {
+      "inputBytes": 344651,
+      "unprocessedBytes": 0,
+      "processedBytes": 344651,
+      "accountedBytes": 344651,
+      "overlapBytes": 0,
+      "unaccountedBytes": 0,
+      "unsynchronizedBytes": 0,
+      "unsynchronizedRecords": 0,
+      "validPackets": 279573,
+      "packetIssues": 0,
+      "overflowPackets": 0,
+      "decoderLastError": 0,
+      "unknownExecution": 30759,
+      "initialPhysicalBytes": null,
+      "unknownSourceBytes": null,
+      "trailingFrameBytes": null,
+      "trailingSyncBytes": 0,
+      "firstPathOffset": 12,
+      "boundaryPresent": false,
+      "timing": {
+        "cycleElements": 0,
+        "timeFlameAvailable": false
+      },
+      "basis": "字节核算不等于采集无损证明；源码映射率不等于程序覆盖率"
+    },
+    "summary": {
+      "packets": 279573,
+      "ranges": 1139372,
+      "instructions": 1139372,
+      "executed": 984735,
+      "sourceMapped": 1139088,
+      "exceptions": 58,
+      "gaps": 2,
+      "packetIssues": 0,
+      "unknownExecution": 30759,
+      "functions": {
+        "cdc_poll": 297454,
+        "cdc_tx_poll": 266419,
+        "cdc_console_peek": 246705,
+        "main": 92252,
+        "usb_device_is_configured": 71757,
+        "cdc_console_feed": 3760,
+        "cdc_console_write": 3100,
+        "USBD_IRQHandler": 624,
+        "fsdev_write_pma": 548,
+        "fsdev_read_pma": 524,
+        "HAL_IncTick": 350,
+        "handle_line": 208,
+        "strcmp": 160,
+        "usbd_ep_start_write": 184,
+        "SysTick_Handler": 150,
+        "usbd_ep_start_read": 108,
+        "usbd_cdc_acm_bulk_in": 76,
+        "strncmp": 68,
+        "usbd_cdc_acm_bulk_out": 72,
+        "cdc_console_consume": 52,
+        "usbd_event_ep_out_complete_handler": 44,
+        "usbd_event_ep_in_complete_handler": 44,
+        "usbd_get_ep_mps": 44,
+        "USB_LP_CAN1_RX0_IRQHandler": 32
+      }
+    },
+    "performance": {
+      "jobSeconds": 36.54208199999994,
+      "jobPhasesSeconds": {
+        "metadataPreparation": 0.024151600002369378,
+        "decode": 26.86678920000122,
+        "captureStartAndMetadata": 0.013973499997518957,
+        "browsePreparation": 9.637168699999165
+      }
+    }
+  }
+}

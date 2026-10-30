@@ -8,6 +8,7 @@ import hashlib
 import hmac
 import json
 import re
+import secrets
 import threading
 import time
 from pathlib import Path
@@ -20,10 +21,13 @@ class NativeProbe:
         self.token = Path(token_file).read_text(encoding='ascii').strip()
         self.usb = None
         self.usb_owner = None
+        self.usb_epoch = None
         self.claimed = set()
         self.hid = None
         self.hid_owner = None
+        self.hid_epoch = None
         self.ports = {}
+        self.port_epochs = {}
         self.usb_lock = threading.RLock()
         self.hid_lock = threading.RLock()
         self.port_lock = threading.RLock()
@@ -139,15 +143,27 @@ class NativeProbe:
                     raise ValueError('ETM采集或清理尚未结束')
                 if self.usb is not None and owner != self.usb_owner:
                     raise ValueError('另一Web会话仍持有本地USB通路')
+                if self.usb is not None:
+                    # A page reload/reprogram can retain this owner's logical
+                    # identity while invalidating its old native OS handle.
+                    for interface in list(self.claimed):
+                        try: usb.util.release_interface(self.usb, interface)
+                        except usb.core.USBError: pass
+                    usb.util.dispose_resources(self.usb)
+                    self.usb=None;self.claimed.clear()
                 if self.usb is None:
                     self.usb = self.find_usb()
                     self.usb_owner = owner
-                return self.descriptor(self.usb)
+                self.usb_epoch=secrets.token_hex(16)
+                return {**self.descriptor(self.usb),'resourceEpoch':self.usb_epoch}
             if self.usb is None or owner != self.usb_owner:
                 if action == 'close':
                     return {'closed': True}
                 raise ValueError('USB会话已关闭或已更换')
             device = self.usb
+            if value.get('resourceEpoch') is not None and value['resourceEpoch'] != self.usb_epoch:
+                if action == 'close':return {'closed':True,'superseded':True}
+                raise ValueError('USB通路已重新打开；拒绝旧会话操作')
             if action == 'close':
                 for interface in list(self.claimed):
                     usb.util.release_interface(device, interface)
@@ -249,6 +265,8 @@ class NativeProbe:
             if action == 'open':
                 if self.hid is not None and owner != self.hid_owner:
                     raise ValueError('另一Web会话仍持有HID')
+                if self.hid is not None:
+                    self.hid.close();self.hid=None
                 if self.hid is None:
                     matches = [d for d in hid.enumerate(0x0D28, 0x0204) if d['usage_page'] == 0xFF00]
                     if len(matches) != 1:
@@ -256,11 +274,17 @@ class NativeProbe:
                     self.hid = hid.device()
                     self.hid.open_path(matches[0]['path'])
                     self.hid_owner = owner
-                return {'opened': True}
+                    for _ in range(32):
+                        if not self.hid.read(64,1):break
+                self.hid_epoch=secrets.token_hex(16)
+                return {'opened': True,'resourceEpoch':self.hid_epoch}
             if self.hid is None or owner != self.hid_owner:
                 if action == 'close':
                     return {'closed': True}
                 raise ValueError('HID会话已关闭')
+            if value.get('resourceEpoch') is not None and value['resourceEpoch'] != self.hid_epoch:
+                if action == 'close':return {'closed':True,'superseded':True}
+                raise ValueError('HID通路已重新打开；拒绝旧会话操作')
             if action == 'close':
                 self.hid.close()
                 self.hid = self.hid_owner = None
@@ -292,22 +316,36 @@ class NativeProbe:
         if action == 'open':
             with self.port_lock:
                 if key in self.ports:
-                    return {'opened': True}
+                    self.ports.pop(key).close()
                 if path not in {p.device for p in serial.tools.list_ports.comports()}:
                     raise ValueError('串口不存在')
                 if any(p == path for _, p in self.ports):
                     raise ValueError('串口已被另一Web会话使用')
                 o = value.get('options') or {}
-                self.ports[key] = serial.Serial(path, baudrate=int(o.get('baudRate', 115200)),
+                size = int(o.get('bufferSize', 4096))
+                if not 1024 <= size <= 1048576:
+                    raise ValueError('串口bufferSize须为1024..1048576')
+                port = serial.Serial(path, baudrate=int(o.get('baudRate', 115200)),
                     bytesize=int(o.get('dataBits', 8)), stopbits=int(o.get('stopBits', 1)),
                     parity={'none': 'N', 'even': 'E', 'odd': 'O'}[o.get('parity', 'none')],
                     rtscts=o.get('flowControl') == 'hardware', timeout=.015, write_timeout=2)
-                return {'opened': True}
+                try:
+                    if hasattr(port, 'set_buffer_size'):
+                        port.set_buffer_size(rx_size=size, tx_size=size)
+                except Exception:
+                    port.close()
+                    raise
+                self.ports[key] = port
+                self.port_epochs[key]=secrets.token_hex(16)
+                return {'opened': True,'resourceEpoch':self.port_epochs[key]}
         port = self.ports.get(key)
         if port is None:
             if action == 'close':
                 return {'closed': True}
             raise ValueError('串口未打开')
+        if value.get('resourceEpoch') is not None and value['resourceEpoch'] != self.port_epochs.get(key):
+            if action == 'close':return {'closed':True,'superseded':True}
+            raise ValueError('串口已重新打开；拒绝旧会话操作')
         if action == 'read':
             data = port.read(1)
             if data:
@@ -331,6 +369,7 @@ class NativeProbe:
             port.close()
             with self.port_lock:
                 self.ports.pop(key, None)
+                self.port_epochs.pop(key,None)
             return {'closed': True}
         raise ValueError('未知串口动作')
 

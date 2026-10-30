@@ -1,0 +1,600 @@
+[
+  {
+    "request": {
+      "action": "workbench",
+      "page": "flash",
+      "op": "set",
+      "selector": "#f-backend",
+      "value": "openocd"
+    },
+    "seconds": 0.18060690000129398,
+    "result": {
+      "job": "c286ff1c2f7c4057d341140a1ff8a9f5",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "control": {
+          "disabled": false,
+          "hidden": false,
+          "label": "后端\n          \n            WebUSB · 零安装（默认）\n            本地桥 · OpenOCD\n            本地桥 · J-Link",
+          "options": [
+            {
+              "disabled": false,
+              "label": "WebUSB · 零安装（默认）",
+              "value": "webusb"
+            },
+            {
+              "disabled": false,
+              "label": "本地桥 · OpenOCD",
+              "value": "openocd"
+            },
+            {
+              "disabled": false,
+              "label": "本地桥 · J-Link",
+              "value": "jlink"
+            }
+          ],
+          "selector": "#f-backend",
+          "tag": "select",
+          "type": "select-one",
+          "value": "openocd"
+        },
+        "dispatched": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "flash",
+      "op": "set",
+      "selector": "#f-chip",
+      "value": "stm32f103"
+    },
+    "seconds": 0.12203360000421526,
+    "result": {
+      "job": "47ecfeb5177f2c84a1ece16cb367884f",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "control": {
+          "disabled": false,
+          "hidden": false,
+          "label": "芯片\n          STM32F1（F103 等）STM32F0STM32F2STM32F3STM32F4STM32F7STM32G0STM32G4STM32H7STM32H7B0/H7A3/H7B3STM32H5STM32L0STM32L1STM32L4 / L4+STM32L5STM32U5STM32C0STM32WBSTM32WLESP32-S31（板载 USB-JTAG）ESP32（Wrover Kit）HPM5300EVK（HPM5361）（RISC-V，零安",
+          "options": [
+            {
+              "disabled": false,
+              "label": "STM32F1（F103 等）",
+              "value": "stm32f103"
+            },
+            {
+              "disabled": false,
+              "label": "STM32F0",
+              "value": "stm32f0"
+            },
+            {
+              "disabled": false,
+              "label": "STM32F2",
+              "value": "stm32f2"
+            },
+            {
+              "disabled": false,
+              "label": "STM32F3",
+              "value": "stm32f3"
+            },
+            {
+              "disabled": false,
+              "label": "STM32F4",
+              "value": "stm32f4"
+            },
+            {
+              "disabled": false,
+              "label": "STM32F7",
+              "value": "stm32f7"
+            },
+            {
+              "disabled": false,
+              "label": "STM32G0",
+              "value": "stm32g0"
+            },
+            {
+              "disabled": false,
+              "label": "STM32G4",
+              "value": "stm32g4"
+            },
+            {
+              "disabled": false,
+              "label": "STM32H7",
+              "value": "stm32h7"
+            },
+            {
+              "disabled": false,
+              "label": "STM32H7B0/H7A3/H7B3",
+              "value": "stm32h7b0"
+            },
+            {
+              "disabled": false,
+              "label": "STM32H5",
+              "value": "stm32h5"
+            },
+            {
+              "disabled": false,
+              "label": "STM32L0",
+              "value": "stm32l0"
+            },
+            {
+              "disabled": false,
+              "label": "STM32L1",
+              "value": "stm32l1"
+            },
+            {
+              "disabled": false,
+              "label": "STM32L4 / L4+",
+              "value": "stm32l4"
+            },
+            {
+              "disabled": false,
+              "label": "STM32L5",
+              "value": "stm32l5"
+            },
+            {
+              "disabled": false,
+              "label": "STM32U5",
+              "value": "stm32u5"
+            },
+            {
+              "disabled": false,
+              "label": "STM32C0",
+              "value": "stm32c0"
+            },
+            {
+              "disabled": false,
+              "label": "STM32WB",
+              "value": "stm32wb"
+            },
+            {
+              "disabled": false,
+              "label": "STM32WL",
+              "value": "stm32wl"
+            },
+            {
+              "disabled": false,
+              "label": "ESP32-S31（板载 USB-JTAG）",
+              "value": "esp32s31"
+            },
+            {
+              "disabled": false,
+              "label": "ESP32（Wrover Kit）",
+              "value": "esp32"
+            },
+            {
+              "disabled": false,
+              "label": "HPM5300EVK（HPM5361）（RISC-V，零安装）",
+              "value": "hpm5300evk"
+            },
+            {
+              "disabled": false,
+              "label": "HPM5301EVKLite（RISC-V，零安装）",
+              "value": "hpm5301evklite"
+            },
+            {
+              "disabled": false,
+              "label": "HPM5E00EVK（RISC-V，零安装）",
+              "value": "hpm5e00evk"
+            },
+            {
+              "disabled": false,
+              "label": "HPM6200EVK（HPM6280）（RISC-V，零安装）",
+              "value": "hpm6200evk"
+            },
+            {
+              "disabled": false,
+              "label": "HPM6300EVK（HPM6360）（RISC-V，零安装）",
+              "value": "hpm6300evk"
+            },
+            {
+              "disabled": false,
+              "label": "HPM6750EVK2（RISC-V，零安装）",
+              "value": "hpm6750evk2"
+            },
+            {
+              "disabled": false,
+              "label": "HPM6750EVKMINI（RISC-V，零安装）",
+              "value": "hpm6750evkmini"
+            },
+            {
+              "disabled": false,
+              "label": "HPM6800EVK（HPM6880）（RISC-V，零安装）",
+              "value": "hpm6800evk"
+            },
+            {
+              "disabled": false,
+              "label": "HPM6E00EVK（HPM6E80）（RISC-V，零安装）",
+              "value": "hpm6e00evk"
+            },
+            {
+              "disabled": false,
+              "label": "HPM6P00EVK（HPM6P81）（RISC-V，零安装）",
+              "value": "hpm6p00evk"
+            },
+            {
+              "disabled": false,
+              "label": "自定义 cfg…",
+              "value": "custom"
+            }
+          ],
+          "selector": "#f-chip",
+          "tag": "select",
+          "type": "select-one",
+          "value": "stm32f103"
+        },
+        "dispatched": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "flash",
+      "op": "upload",
+      "selector": "@file:view._fileInput"
+    },
+    "seconds": 0.12514269999519456,
+    "result": {
+      "job": "fc95f5f13f15fef378113d7c11ee3fdf",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "control": {
+          "disabled": false,
+          "hidden": false,
+          "label": "",
+          "selector": "@file:view._fileInput",
+          "tag": "input",
+          "type": "file",
+          "value": ""
+        },
+        "dispatched": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "flash",
+      "op": "read",
+      "selector": "#f-file-info"
+    },
+    "seconds": 0.12411050000082469,
+    "result": {
+      "job": "12699eea47eac91cd492e562ed75c25e",
+      "ok": true,
+      "value": {
+        "disabled": false,
+        "hidden": false,
+        "label": "已选择：20261031_f103ze_rtt_seq72.elf（136.2 KB）",
+        "selector": "#f-file-info",
+        "tag": "p",
+        "text": "已选择：20261031_f103ze_rtt_seq72.elf（136.2 KB）",
+        "type": null,
+        "value": null
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "flash",
+      "op": "invoke",
+      "method": "flash",
+      "args": [],
+      "target": "view"
+    },
+    "seconds": 0.7777454000024591,
+    "result": {
+      "job": "2a6692fe84170da121fa51eb47f68301",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "flash",
+      "op": "read",
+      "selector": "#f-result"
+    },
+    "seconds": 0.10403229999792529,
+    "result": {
+      "job": "f4278d1714cd49290e99783805ddf974",
+      "ok": true,
+      "value": {
+        "disabled": false,
+        "hidden": false,
+        "label": "✅ stm32f103 · 1.1 KB · 0.3s · 已校验 · 已复位运行",
+        "selector": "#f-result",
+        "tag": "span",
+        "text": "✅ stm32f103 · 1.1 KB · 0.3s · 已校验 · 已复位运行",
+        "type": null,
+        "value": null
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rtt",
+      "op": "set",
+      "selector": "#r-usb-clock",
+      "value": "50000"
+    },
+    "seconds": 0.03148009999858914,
+    "result": {
+      "job": "96cfee9c6be22d0f17ad5001be36fb80",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "control": {
+          "disabled": false,
+          "hidden": false,
+          "label": "SWD 时钟\n            \n              自动\n              1 MHz\n              5 MHz\n              10 MHz\n              20 MHz\n              30 MHz\n              40 MHz\n              45 MHz\n              50 MHz\n              60 MHz",
+          "options": [
+            {
+              "disabled": false,
+              "label": "自动",
+              "value": "0"
+            },
+            {
+              "disabled": false,
+              "label": "1 MHz",
+              "value": "1000"
+            },
+            {
+              "disabled": false,
+              "label": "5 MHz",
+              "value": "5000"
+            },
+            {
+              "disabled": false,
+              "label": "10 MHz",
+              "value": "10000"
+            },
+            {
+              "disabled": false,
+              "label": "20 MHz",
+              "value": "20000"
+            },
+            {
+              "disabled": false,
+              "label": "30 MHz",
+              "value": "30000"
+            },
+            {
+              "disabled": false,
+              "label": "40 MHz",
+              "value": "40000"
+            },
+            {
+              "disabled": false,
+              "label": "45 MHz",
+              "value": "45000"
+            },
+            {
+              "disabled": false,
+              "label": "50 MHz",
+              "value": "50000"
+            },
+            {
+              "disabled": false,
+              "label": "60 MHz",
+              "value": "60000"
+            }
+          ],
+          "selector": "#r-usb-clock",
+          "tag": "select",
+          "type": "select-one",
+          "value": "50000"
+        },
+        "dispatched": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rtt",
+      "op": "set",
+      "selector": "#r-addr",
+      "value": "0x2000000c"
+    },
+    "seconds": 0.1037341999981436,
+    "result": {
+      "job": "381481d6cbe113398a4104b1daab73ee",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "control": {
+          "disabled": false,
+          "hidden": false,
+          "label": "地址",
+          "selector": "#r-addr",
+          "tag": "input",
+          "type": "text",
+          "value": "0x2000000c"
+        },
+        "dispatched": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rtt",
+      "op": "invoke",
+      "method": "connectProbe",
+      "args": [],
+      "target": "view"
+    },
+    "seconds": 0.6327546999964397,
+    "result": {
+      "job": "96666a4664fce3ed6beaaba5fcef36e8",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rtt",
+      "op": "invoke",
+      "method": "summary",
+      "args": [],
+      "target": "view"
+    },
+    "seconds": 0.11658860000170534,
+    "result": {
+      "job": "6701faf8f3251055ff7975aa0d4e6984",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": {
+          "backend": "webusb",
+          "bufferedBytes": 98301,
+          "connected": true,
+          "controlBlock": 536870924,
+          "displaySuppressed": false,
+          "error": "控制块 0x2000000c，上行缓冲 32768 B（固件声明 2 个上行通道，本页读 ch0）",
+          "running": true,
+          "stats": {
+            "bytes": 98301,
+            "corrupt": 0,
+            "hz": 1.9996000800078355,
+            "lastBytes": 98301,
+            "lastPolls": 3,
+            "lost": 0,
+            "polls": 3,
+            "rate": 65520.895821616745
+          }
+        },
+        "verificationRequired": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rtt",
+      "op": "invoke",
+      "method": "saveRaw",
+      "args": [],
+      "target": "view"
+    },
+    "seconds": 0.02422830000432441,
+    "result": {
+      "job": "dfff351f51b1b7b641d2af91c36c74f7",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": {
+          "bytes": 98301,
+          "name": "rtt-raw-20261031-042839.bin",
+          "truncated": false
+        },
+        "verificationRequired": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rtt",
+      "op": "downloads"
+    },
+    "seconds": 0.10495690000243485,
+    "result": {
+      "job": "ea097a971c408b43a686a25a1b4d4eca",
+      "ok": true,
+      "value": [
+        {
+          "bytes": 98301,
+          "id": "1",
+          "name": "rtt-raw-20261031-042839.bin",
+          "type": "application/octet-stream"
+        }
+      ]
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rtt",
+      "op": "download",
+      "id": "1",
+      "offset": 0,
+      "length": 98301
+    },
+    "seconds": 0.12122570000065025,
+    "result": {
+      "job": "a656b6b6b87a35780edf696fe4522c01",
+      "ok": true,
+      "value": {
+        "name": "rtt-raw-20261031-042839.bin",
+        "offset": 0,
+        "total": 98301,
+        "downloadEvidence": {
+          "bytes": 98301,
+          "sha256": "f5acb46aeb6e64842f97b439d98ac165627e1c71662328a6f52763516e3c3540"
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rtt",
+      "op": "discard",
+      "id": "1"
+    },
+    "seconds": 0.10557280000648461,
+    "result": {
+      "job": "9cf2de506ed5e9752e5bf8b8f6aff311",
+      "ok": true,
+      "value": {
+        "discarded": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rtt",
+      "op": "invoke",
+      "method": "disconnect",
+      "args": [],
+      "target": "view"
+    },
+    "seconds": 0.3094494000033592,
+    "result": {
+      "job": "eca5e589758365a21580dc540f9a9958",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    }
+  }
+]

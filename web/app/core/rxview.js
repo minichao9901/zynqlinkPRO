@@ -80,8 +80,8 @@ export class RxBuffer {
   /** @param {Uint8Array} bytes */
   push(bytes, t = new Date(), prefix = ''){
     if (!bytes || !bytes.length) return;
-    if (this.displayOff){ this.suppressedBytes += bytes.length; return; }
     this._store(bytes, t);
+    if (this.displayOff){ this.suppressedBytes += bytes.length; return; }
     if (this.paused || !this.isVisible()){ this._dirty = true; return; }
     this._pend.push({ b: bytes, t, prefix });
     this._pendBytes += bytes.length;

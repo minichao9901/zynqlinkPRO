@@ -56,6 +56,42 @@ module orbtrace_parallel #(parameter USE_IO_CLOCK=0,USE_INPUT_DELAY=0,INPUT_DELA
       assign capture_clk=sample_clk;
       assign capture_reset=sample_reset[1];
       assign parser_malformed=1'b0;
+    end else if(RAW_DIAGNOSTIC==4)begin: raw_oversample_filtered
+      // Same causal per-line stable-two filter as the accepted physical
+      // sample experiment. Detect and sample the *same filtered time slice*;
+      // delaying only TRACECLK samples data too late at 24 MHz.
+      (* ASYNC_REG="TRUE" *) reg [1:0] sample_reset;
+      (* ASYNC_REG="TRUE" *) reg [4:0] pad_meta,pad_sync;
+      reg [4:0] previous,filtered;
+      reg stable_clock,half;
+      reg [3:0] low_nibble;
+      reg [7:0] sampled_byte;
+      reg byte_toggle;
+      wire [127:0] parsed_frame;
+      wire parsed_toggle,parsed_synced;
+      always @(posedge sample_clk or posedge rst)
+        if(rst)sample_reset<=3;else sample_reset<={sample_reset[0],1'b0};
+      always @(posedge sample_clk or posedge sample_reset[1])
+        if(sample_reset[1])begin
+          pad_meta<=0;pad_sync<=0;previous<=0;filtered<=0;
+          stable_clock<=0;half<=0;low_nibble<=0;sampled_byte<=0;byte_toggle<=0;
+        end else begin
+          pad_meta<={trace_pad_clk,trace_data};pad_sync<=pad_meta;
+          previous<=pad_sync;
+          filtered<=(pad_sync & previous) | ((pad_sync | previous) & filtered);
+          stable_clock<=filtered[4];
+          if(filtered[4]!=stable_clock)begin
+            half<=!half;
+            if(!half)low_nibble<=filtered[3:0];
+            else begin sampled_byte<={filtered[3:0],low_nibble};byte_toggle<=!byte_toggle;end
+          end
+        end
+      orbtrace_tpiu_stream parser(.clk(sample_clk),.rst(sample_reset[1]),
+        .byte_in(sampled_byte),.byte_toggle(byte_toggle),
+        .frame(parsed_frame),.frame_toggle(parsed_toggle),.synced(parsed_synced),.malformed(parser_malformed));
+      assign frame=parsed_frame;assign toggle=parsed_toggle;
+      assign capture_clk=sample_clk;assign capture_reset=sample_reset[1];
+      assign oversample_synced=parsed_synced;
     end else if(RAW_DIAGNOSTIC==2)begin: raw_oversample
       // Diagnostic, low-frequency mode only: synchronize the five physical
       // pins to the independent 200 MHz reference and require two consecutive

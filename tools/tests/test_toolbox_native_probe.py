@@ -12,6 +12,30 @@ from native_probe import NativeProbe, install
 
 
 class NativeProbeTests(unittest.TestCase):
+    def test_late_close_cannot_close_a_reopened_usb_or_hid_handle(self):
+        backend=SimpleNamespace(lock=threading.RLock(),jobs={},ACTIVE=('queued',))
+        with tempfile.TemporaryDirectory() as folder:
+            token=Path(folder)/'token';token.write_text('c'*64)
+            proxy=NativeProbe(backend,token);device=object()
+            proxy.usb=proxy.hid=device;proxy.usb_owner=proxy.hid_owner='a'*32
+            proxy.usb_epoch=proxy.hid_epoch='new'
+            old={'owner':'a'*32,'resourceEpoch':'old'}
+            self.assertTrue(proxy.usb_call('close',old)['superseded'])
+            self.assertTrue(proxy.hid_call('close',old)['superseded'])
+            self.assertIs(proxy.usb,device);self.assertIs(proxy.hid,device)
+
+    def test_native_serial_honors_the_web_requested_receive_buffer(self):
+        class Port:
+            def set_buffer_size(self,**kwargs):self.sizes=kwargs
+            def close(self):pass
+        with tempfile.TemporaryDirectory() as folder:
+            token=Path(folder)/'token';token.write_text('c'*64)
+            proxy=NativeProbe(SimpleNamespace(),token);port=Port()
+            with patch('serial.tools.list_ports.comports',return_value=[SimpleNamespace(device='COM33')]),patch('serial.Serial',return_value=port):
+                proxy.serial_call('open',{'owner':'a'*32,'path':'COM33','options':{'bufferSize':65536}})
+                self.assertEqual(port.sizes,{'rx_size':65536,'tx_size':65536})
+                self.assertIs(proxy.ports[('a'*32,'COM33')],port)
+
     def test_http_redelivery_returns_the_original_result_without_hardware_reexecution(self):
         with tempfile.TemporaryDirectory() as folder:
             token=Path(folder)/'token';token.write_text('c'*64)

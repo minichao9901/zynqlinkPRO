@@ -25,7 +25,8 @@ const CLOCK_OPTIONS = [
   { v: '30000000', label: '30 MHz' },
   { v: '36000000', label: '36 MHz' },
   { v: '45000000', label: '45 MHz（出厂默认）' },
-  { v: '60000000', label: '60 MHz（更快，偶发抖动）' },
+  { v: '50000000', label: '50 MHz' },
+  { v: '60000000', label: '60 MHz（需探针固件支持）' },
 ];
 
 const hex = n => '0x' + (n >>> 0).toString(16);

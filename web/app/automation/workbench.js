@@ -133,6 +133,7 @@ export function createWorkbenchAutomation(tools,win=globalThis.window){
     const c=await context(m.page),{root,view}=c;
     const targets={view,session:view.session||view.s,
       ...(m.page==='rttcdc'?{hid:tools.hid}:{}),
+      ...(m.page==='rtt'?{probe:view.probe,rtt:view.rtt}:{}),
       ...(['spi','panel'].includes(m.page)?{session:tools.spiSession}:{}),
       ...(m.page==='spicdc'?{stream:view.stream,serial:tools.session}:{}),
       ...(m.page==='swo'?{capture:view.capture,sources:view.sources}:{}),

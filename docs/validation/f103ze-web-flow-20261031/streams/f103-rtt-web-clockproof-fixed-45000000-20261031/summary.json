@@ -1,0 +1,81 @@
+{
+  "ok": true,
+  "suite": "rttcdc",
+  "flash": "✅ stm32f103 · 1.1 KB · 0.3s · 已校验 · 已复位运行",
+  "declaredProbePair": {
+    "bit": "E:\\zynqlinkPRO\\prebuilt\\20261031_filtered_tpiu\\zynqdap_filtered.bit",
+    "bitSha256": "306fa26134e63509ec64a2982dfb22ab8b7164d15c1fbb617df30fbdb5f29619",
+    "elf": "E:\\zynqlinkPRO\\prebuilt\\20261031_filtered_tpiu\\zynqdap_filtered.elf",
+    "elfSha256": "a67ed2d1d61b99ac1e9c4d08b2f68a6308dffaca7ddb09213053896e538b855e",
+    "note": "声明采集配对；服务不会加载板卡，请先通过JTAG加载相同文件"
+  },
+  "rows": [
+    {
+      "requestedClockHz": 45000000,
+      "valid": true,
+      "bytes": 7140263,
+      "recordsChecked": 549251,
+      "sequenceGaps": 0,
+      "unparsedPrefix": 0,
+      "unparsedTail": 0,
+      "webBytesPerSecond": 2379294.5684771743,
+      "window": {
+        "bytes": 7140263,
+        "bytesPerSecond": 2379294.5684771743,
+        "complete": true,
+        "error": null,
+        "limitExceeded": false,
+        "name": "rtt-raw-20261031-044002.bin",
+        "observedBytes": 7140263,
+        "portClosed": false,
+        "seconds": 3.001
+      },
+      "liveClocks": {
+        "FCLK_Hz": 89999999,
+        "cfg": "0x20a11",
+        "waveform": {
+          "SWCLK_Hz": 44999999.5,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 11.111111234567902
+        },
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 44999999.5,
+        "clock_observation": "PS JTAG register read; no DAP command during stream"
+      },
+      "hostWindowSeconds": 3.001,
+      "totalCaseSeconds": 6.192897599998105,
+      "engine": {
+        "cbAddr": "0x2000000c",
+        "connected": true,
+        "dapYield": 0,
+        "info": "已连接：ZynqLink probe control · 12345678 · FW 0.5-orbtrace · SN 12345678",
+        "label": "ZynqLink probe control · 12345678",
+        "mock": false,
+        "moved": 9034507,
+        "rdErr": 0,
+        "rescans": 0,
+        "running": false,
+        "stall": 0,
+        "startRc": 0,
+        "state": "未运行（点「启动转发」或「自动搜控制块」）",
+        "supported": true,
+        "swdMhz": 44
+      },
+      "summary": {
+        "buffered": 2096120,
+        "bytes": 9034507,
+        "frames": 819,
+        "mode": "ascii",
+        "open": true,
+        "paused": false,
+        "rate": 1486706,
+        "recordBytes": 0,
+        "recording": false,
+        "shown": 0,
+        "suppressed": true
+      }
+    }
+  ]
+}

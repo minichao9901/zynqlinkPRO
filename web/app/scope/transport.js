@@ -22,6 +22,7 @@ export function findScopeEndpoint(configuration){
   // akaLinkPro publishes HSS on IN3; ZynqDAP reserves IN2 for ETM and uses IN7.
   for(const number of [3,7])for(const iface of configuration.interfaces){
     for(const alt of iface.alternates){
+      if(alt.interfaceClass!==0xff)continue; // IN3 may instead be a CDC data endpoint.
       const ep=(alt.endpoints||[]).find(e=>e.endpointNumber===number&&e.type==='bulk'&&e.direction==='in');
       if(ep)return {iface,ep};
     }

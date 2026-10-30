@@ -1,5 +1,10 @@
 # zynqlinkPRO
 
+本轮 ZynqDAP + F103ZE 的 Web/CLI、TRACECLK、软件滤波、RTT/J-Scope 与压力验收，统一见
+[F103ZE Web CLI ETM验收记录](docs/F103ZE-Web-CLI-ETM统一验收-20261031.md)。
+当前ETM加载配对见[`prebuilt/20261031_filtered_tpiu/`](prebuilt/20261031_filtered_tpiu/)，
+统一命令入口为[`toolbox.py`](toolbox.py)，用法见[CLI手册](docs/toolbox-cli-ai.md)。
+
 Zynq-7020（xc7z020）上的高性能 **CMSIS-DAP v2 / DAPLink** 固件：
 PS 跑 XUsbPs USB + CMSIS-DAP 协议，PL 里做 SWD 批量引擎和 CDMA 数据搬运，
 支持50/60MHz SWCLK；F103@96MHz的20KiB OpenOCD读/写实测为

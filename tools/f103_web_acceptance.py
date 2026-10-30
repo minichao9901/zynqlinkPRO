@@ -1,5 +1,6 @@
 """Repeatable real-Web acceptance through toolbox's authenticated page queue."""
 import base64
+import copy
 import hashlib
 import json
 from pathlib import Path
@@ -25,8 +26,13 @@ class Acceptance:
     def call(self, payload):
         started = time.perf_counter()
         result = self.client.request(payload)
+        recorded=copy.deepcopy(result)
+        if payload.get('op')=='download' and isinstance(recorded.get('value'),dict) and 'base64' in recorded['value']:
+            encoded=recorded['value'].pop('base64')
+            raw=base64.b64decode(encoded)
+            recorded['value']['downloadEvidence']={'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest()}
         self.steps.append({'request': payload if payload.get('action') != 'elf' else {'action': 'elf', 'name': payload['name']},
-                           'seconds': time.perf_counter() - started, 'result': result})
+                           'seconds': time.perf_counter() - started, 'result': recorded})
         # Do not duplicate uploaded firmware/source contents in the step log.
         if payload.get('op') == 'upload':
             self.steps[-1]['request'] = {k: v for k, v in payload.items() if k != 'files'}

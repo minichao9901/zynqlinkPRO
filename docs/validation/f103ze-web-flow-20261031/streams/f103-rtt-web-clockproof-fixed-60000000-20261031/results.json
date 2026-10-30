@@ -1,0 +1,72 @@
+{
+  "suite": "rttcdc",
+  "rows": [
+    {
+      "requestedClockHz": 60000000,
+      "valid": false,
+      "bytes": 0,
+      "recordsChecked": 0,
+      "sequenceGaps": 0,
+      "unparsedPrefix": 0,
+      "unparsedTail": 0,
+      "webBytesPerSecond": 0,
+      "window": {
+        "bytes": 0,
+        "bytesPerSecond": 0,
+        "complete": false,
+        "error": null,
+        "limitExceeded": false,
+        "name": "rtt-raw-20261031-044012.bin",
+        "observedBytes": 0,
+        "portClosed": false,
+        "seconds": 3.0007000000029804
+      },
+      "liveClocks": {
+        "FCLK_Hz": 99999999,
+        "cfg": "0x300c2a11",
+        "waveform": {
+          "SWCLK_Hz": 999999.99,
+          "half_period_fclk": 50,
+          "short_high": true,
+          "intended_high_ns": 10.000000100000001
+        },
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 999999.99,
+        "clock_observation": "PS JTAG register read; no DAP command during stream"
+      },
+      "hostWindowSeconds": 3.0007000000029804,
+      "totalCaseSeconds": 4.719812700001057,
+      "engine": {
+        "cbAddr": "0x0",
+        "connected": true,
+        "dapYield": 0,
+        "info": "已连接：ZynqLink probe control · 12345678 · FW 0.5-orbtrace · SN 12345678",
+        "label": "ZynqLink probe control · 12345678",
+        "mock": false,
+        "moved": 0,
+        "rdErr": 379,
+        "rescans": 0,
+        "running": false,
+        "stall": 0,
+        "startRc": 0,
+        "state": "未运行（点「启动转发」或「自动搜控制块」）",
+        "supported": true,
+        "swdMhz": 60
+      },
+      "summary": {
+        "buffered": 0,
+        "bytes": 0,
+        "frames": 0,
+        "mode": "ascii",
+        "open": true,
+        "paused": false,
+        "rate": 0,
+        "recordBytes": 0,
+        "recording": false,
+        "shown": 0,
+        "suppressed": false
+      }
+    }
+  ]
+}
