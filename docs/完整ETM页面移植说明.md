@@ -80,7 +80,7 @@ node web/tools/page-smoke.mjs
 | 样例 | 结果 |
 |---|---|
 | `samples/cm3-orbtrace.zetm`（CM3 仿真） | 1948 字节 → 22,036 范围、1 函数、1 区段、3 类包 |
-| `samples/f103ze-oversample.zetm`（F103ZE 实板，24 MHz TRACECLK） | 1309 字节 → 6,368 范围、8 函数、253 调用、深度 3、火焰图 261 个节点 |
+| `samples/f103ze-oversample.zetm`（F103ZE 实板，24 MHz TRACECLK） | 1309 字节 → 6,368 范围、8 函数、253 调用、深度 3、火焰图 10 个节点 |
 
 实板样例的 `main → cdc_poll` 调用（252 次）来自真实 ETM 数据，不是合成流。
 
