@@ -20,7 +20,17 @@ link_design -top system_wrapper -part xc7z010clg400-2
 read_xdc [file join $out system.xdc]
 create_clock -name clk_fpga_0 -period 8.333 [get_pins {system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]}]
 report_utilization -file [file join $out utilization_linked.rpt]
+# A per-bit indexed receive write creates up to 256 unrelated clock enables.
+# Keep the identical FF behavior but express those enables in the D inputs so
+# the placer can pack the receive bank with the shared reset/clock control set.
+set rx_regs [get_cells -hier -filter {REF_NAME =~ FD* && NAME =~ *u_shift/rx_data_reg*}]
+if {![llength $rx_regs]} {error "JTAG RX registers missing before control-set optimization"}
+set_property CONTROL_SET_REMAP ENABLE $rx_regs
+puts "JTAG_RX_ENABLE_REMAP=[llength $rx_regs]"
 opt_design
+opt_design -control_set_opt
+report_utilization -file [file join $out utilization_optimized.rpt]
+report_control_sets -file [file join $out control_sets_optimized.rpt]
 place_design -directive Explore
 phys_opt_design -directive AggressiveExplore
 route_design -directive Explore
