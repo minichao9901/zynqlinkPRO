@@ -28,7 +28,7 @@ import { sleep, waitMs } from './pace.js';
 
 export const PROBE_BUS_CHANNEL = 'web-serial-rtt-tools/probe-bus';
 
-/** 探针的 VID（ZynqDAP / DAPLink 都是 0x0d28） */
+/** 探针的 VID（akaLinkPro / DAPLink 都是 0x0d28） */
 export const PROBE_VID = 0x0d28;
 
 /**

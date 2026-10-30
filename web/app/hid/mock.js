@@ -13,7 +13,7 @@ const DEFAULT_CB = 0x20000000;
 
 export class MockAkaLinkHid {
   constructor(){
-    this.device = { productName: 'ZynqDAP (mock)', serialNumber: 'MOCK-0001', opened: true };
+    this.device = { productName: 'akaLinkPro (mock)', serialNumber: 'MOCK-0001', opened: true };
     this.running = false;
     this.riscv = false;              // 全局目标类型（HID 0x31 action 10，粘性）
     this.cbAddr = 0;
@@ -36,7 +36,7 @@ export class MockAkaLinkHid {
 
   static supported(){ return true; }
   get connected(){ return true; }
-  get label(){ return 'ZynqDAP (mock) · MOCK-0001'; }
+  get label(){ return 'akaLinkPro (mock) · MOCK-0001'; }
 
   async request(){ this.calls.push('request'); return this.device; }
   async reconnect(){ this.calls.push('reconnect'); return this.device; }

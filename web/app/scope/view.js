@@ -4,7 +4,7 @@
  * 页面骨架沿用仓库既有约定：左侧栏放"设置"，工具栏/右下统计条放"操作与指标"。
  *
  * 数据通路（两条，页面里只差一个对象）：
- *   真机：HID 0x32 配置/启停（AkaLinkHid） + WebUSB 0x87 收流（VendorEpTransport）
+ *   真机：HID 0x32 配置/启停（AkaLinkHid） + WebUSB 0x83 收流（VendorEpTransport）
  *   假机：同一个 MockScopeProbe 既当 HID 又当数据源（MockTransport 注入它）
  *   → 所以"假探针能跑通"就等于整条链路（配置 → 组包 → 收流 → 解码 → 缓冲 → 画图）跑通，
  *     这也是本页能在没有硬件时自测的原因。
@@ -361,24 +361,24 @@ export class ScopeView {
       if (!connected){
         this.hid = null;
         this.setStatusText('连接探针失败：' + (lastErr || '浏览器里没有已授权的探针') +
-          ' —— 点「连接探针」在弹出的列表里选 ZynqDAP（授权过一次以后就直连，不再弹框）', 'err');
+          ' —— 点「连接探针」在弹出的列表里选 akaLinkPro（授权过一次以后就直连，不再弹框）', 'err');
         return;
       }
       this.hid = hid;
       let info = '';
-      try { const i = await hid.info(); this._probeInfo=i; info = `${i.model || 'ZynqDAP'}${i.fw ? ' · FW ' + i.fw : ''}`; }
+      try { const i = await hid.info(); this._probeInfo=i; info = `${i.model || 'akaLinkPro'}${i.fw ? ' · FW ' + i.fw : ''}`; }
       catch {
         // 连上了但问不出型号 —— 十有八九选错了设备（触摸板/键盘也有 0xFF00 的 collection）
         info = hid.label || '未知 HID 设备';
         $('sc-info').textContent = info + '（HID 已连接，但问不出型号）';
         this.setStatusText(`连到的 HID 设备是「${info}」，但它不响应探针协议 —— ` +
-          '选错设备了？请点「连接探针」并在弹框里选 ZynqDAP', 'err');
+          '选错设备了？请点「连接探针」并在弹框里选 akaLinkPro', 'err');
         return;
       }
       $('sc-info').textContent = info + '（HID 已连接）';
       this.setStatusText(`探针已连接：${info}`, hid.isProbe ? 'ok' : 'warn');
       if (!hid.isProbe){
-        $('sc-info').textContent = info + '（HID 已连接 · ⚠ 不是 ZynqDAP 的 VID/PID）';
+        $('sc-info').textContent = info + '（HID 已连接 · ⚠ 不是 akaLinkPro 的 VID/PID）';
         this.setStatusText(`⚠ 连到的是「${info}」（VID/PID 不是 0d28:0204）—— 可能选错设备了`, 'warn');
       }
     } catch (e){
@@ -1362,7 +1362,7 @@ export class ScopeView {
       this._benchKey = this.benchKeyOf();          // 记住测的是哪套变量 + 哪个时钟（选择一变就失效）
       const actualRiscv = this._benchKey.backend === P.BACKEND.RISCV;
       this.recPeriodUs = this.recPeriodUsFor(usPerSample);
-      const blobName = { 0x5a594e51: 'Zynq PS MEM-AP 计划读回', 0x53c: '60M(6 指令/bit)', 0x60c: '45M(8)', 0x6e0: '36M(10)', 0x7c4: '30M(12)',
+      const blobName = { 0x53c: '60M(6 指令/bit)', 0x60c: '45M(8)', 0x6e0: '36M(10)', 0x7c4: '30M(12)',
                          0xa54: '20M(18)', 0x620: 'SLOW', 0xffffffff: '还没装载' }[blob] || `0x${blob.toString(16)}`;
       this.blob = { offset: blob, name: blobName, delay };
       // 计划行里那个"保守模型"和实测差多少，当场说清楚（单字 span 实测 1.53 µs，模型算 6.74）。
@@ -1639,7 +1639,10 @@ export class ScopeView {
       this.renderer.setTrigger(null);
       $('sc-trig-state').textContent = '未命中';
     }
-    // Triggers are evaluated on the browser sample stream in this port.
+    if (!silent && this.isReal() && this.hid){
+      // 探针侧触发是 v2（主机侧已经够用），这里只把配置发过去，失败不影响
+      this.hidXfer(P.HID_CMD, P.triggerData(c)).catch(() => {});
+    }
     this._needDraw = true;
   }
 

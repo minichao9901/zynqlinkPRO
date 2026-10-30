@@ -1,1 +1,14 @@
-{"name":"zynqdap-web","private":true,"type":"module","scripts":{"serve":"node tools/serve.mjs","check":"node tools/check.mjs","test":"node --test tests/*.test.mjs","smoke":"node tools/page-smoke.mjs","toolbox":"node tools/toolbox.mjs","toolbox:selftest":"node tools/toolbox-selftest.mjs"},"devDependencies":{}}
+{
+  "name": "web-serial-rtt-tools",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:web": "node tools/dev/build-svd.mjs && node tools/dev/build-web.mjs",
+    "check:web": "node tools/dev/build-web.mjs --check",
+    "test:etm": "python tools/dev/test-etm.py"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.12",
+    "linkedom": "0.18.12"
+  }
+}

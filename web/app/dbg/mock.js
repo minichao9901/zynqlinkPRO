@@ -63,7 +63,7 @@ export class MockTarget {
     this._dhcsrPhase = 0; this._dhcsrVal = 0;  // 一次字读的 4 个字节要返回同一个值（见 _dhcsrWord）
     this._stepPending = false; this._stepRunning = false;
     /**
-     * 模拟"这颗探针/内核不执行 C_STEP"（2026-10-02 真机 ZynqDAP + STM32F103ZE 实测）：
+     * 模拟"这颗探针/内核不执行 C_STEP"（2026-10-02 真机 akaLinkPro + STM32F103ZE 实测）：
      * 写完 C_STEP 后 DHCSR 恒定回 0x30007（C_STEP 位一直在、S_HALT 从不掉），PC 一动不动。
      * 上层 `step()` 的兜底（改用断点单步）就靠这个开关做离线回归。
      */

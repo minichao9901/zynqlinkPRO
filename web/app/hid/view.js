@@ -1,7 +1,7 @@
 /**
  * RTT → CDC 转发页的探针控制面；接收视图共用串口会话。
  *
- * 干什么：ZynqDAP 探针自己就能轮询目标的 RTT 控制块、把数据塞进它的 CDC 虚拟串口，
+ * 干什么：akaLinkPro 探针自己就能轮询目标的 RTT 控制块、把数据塞进它的 CDC 虚拟串口，
  * 于是主机只要读一个 COM 口就能拿到 RTT —— 不用每轮三次 USB 往返（实测 2.5~3 MB/s）。
  * 开启/停止/地址这些参数走探针的**自定义 HID**（0x31 命令），协议在 app/hid/probe.js。
  *
@@ -145,7 +145,7 @@ export class RttCdcView {
       this.render();
       if (!silent) toast(`已重连：${this.dev.label}`, 'ok');
       /**
-       * 🚨 顺手把**探针侧状态**也查一次（2026-10 用户现场：一打开页面就看到"已连接：ZynqDAP…"，
+       * 🚨 顺手把**探针侧状态**也查一次（2026-10 用户现场：一打开页面就看到"已连接：akaLinkPro…"，
        *    于是搞不清转发到底在不在跑、会不会影响 RTT Viewer）。
        *    桥是**探针侧**的状态 —— 上次没停的话，重新打开页面它照样在跑，而只查型号（info）是看不出来的：
        *    面板上会显示"已连接"却不说在不在搬数据。这里查一次 status，面板那行才说实话。
@@ -228,7 +228,7 @@ export class RttCdcView {
     if (label){
       label.title = this._resetIoSupported
         ? `J3[23]/PA27 NRST：${state.openDrain ? '开漏' : '推挽'}；J5[3]/PA08 固定开漏（只由 CMSIS-DAP nTRST 驱动，两路互不联动）。`
-        : '未知：连接支持 PA27 NRST 电气模式切换的新版 ZynqDAP 固件后才能读取/修改（固件默认推挽）。';
+        : '未知：连接支持 PA27 NRST 电气模式切换的新版 akaLinkPro 固件后才能读取/修改（固件默认推挽）。';
     }
   }
 
@@ -458,7 +458,7 @@ export class RttCdcView {
        *
        * 目标类型是探针侧的**粘性**状态，但烧录/复位、J-Scope 页、参考脚本都会把它打回 SWD；
        * 而本页按用户的意图显示 RISC-V —— 于是桥按 SWD 去握手，回 **-2「SWD 初始化失败」**，
-       * 看着像接线/供电坏了。实测（HPM6800EVK + ZynqDAP，同一块板同一支探针）：
+       * 看着像接线/供电坏了。实测（HPM6800EVK + akaLinkPro，同一块板同一支探针）：
        *   · 目标类型=SWD → startRc=-2、控制块找不到、moved=0
        *   · 补发成 RISC-V 后再启动 → startRc=0、控制块 0x4C0003C0、moved=32768、读错 0
        * 固件在引擎运行时会拒绝切换（rc=-7）—— 那不算错，状态本来就该是它，所以这里不抛。
@@ -675,7 +675,7 @@ export class RttCdcView {
     const resetMode = $('global-nrst-open-drain'); if (resetMode) resetMode.disabled = !this._resetIoSupported || this._disconnecting;
     // 第一行：设备信息
     if (error && !dev.connected) setStatus($('h-info'), error, 'err');
-    else if (!dev.connected) setStatus($('h-info'), '未连接（点「连接探针」；首次使用或有多个设备时选择 ZynqDAP）', '');
+    else if (!dev.connected) setStatus($('h-info'), '未连接（点「连接探针」；首次使用或有多个设备时选择 akaLinkPro）', '');
     else{
       const i = this.info || {};
       setStatus($('h-info'), `已连接：${dev.label}${i.fw ? ' · FW ' + i.fw : ''}${i.sn ? ' · SN ' + i.sn : ''}`, 'ok');

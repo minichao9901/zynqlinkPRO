@@ -1,7 +1,7 @@
 import { waitMs } from '../core/pace.js';
 /**
  * 数据面传输：把"512 B 包流"从探针搬到页面。两种实现**同形**，页面不用管用的是哪个：
- *   · `VendorEpTransport` —— 真家伙：WebUSB 认领 interface 0，走**空闲的 bulk IN 端点 0x87**
+ *   · `VendorEpTransport` —— 真家伙：WebUSB 认领 interface 0，走**空闲的 bulk IN 端点 0x83**
  *     （SWO 端点，固件里从没写过；见 docs/scope-page.md §4）。
  *   · `MockTransport`      —— 假探针：不需要硬件，波形确定性生成（自测/演示用）。
  *
@@ -16,7 +16,7 @@ import { MockScopeProbe } from './mock.js';
 import { UsbLease, isUsbResourceConflict } from '../core/usb-device.js';
 
 /** 探针上那个空闲的 bulk IN 端点（SWO 端点，SWO_STREAM=0 所以没人用）*/
-export const EP_SCOPE = 0x87;
+export const EP_SCOPE = 0x83;
 const VID = 0x0d28;
 const dirtyDevices = new WeakSet();
 const pendingByDevice = new WeakMap();
@@ -79,10 +79,10 @@ export class VendorEpTransport {
   get label(){
     const d = this.device;
     const addr = (this.epAddr || (this.ep | 0x80)).toString(16);
-    return `${d?.productName || 'ZynqDAP'} · EP 0x${addr} · ${this.chunkBytes} B/读 × ${this.inFlight}`;
+    return `${d?.productName || 'akaLinkPro'} · EP 0x${addr} · ${this.chunkBytes} B/读 × ${this.inFlight}`;
   }
 
-  /** 打开设备、找到带 0x87 的那个接口并认领 */
+  /** 打开设备、找到带 0x83 的那个接口并认领 */
   async open(){
     try { return await this._open(); }
     catch (e){
@@ -99,9 +99,9 @@ export class VendorEpTransport {
       for (const alt of iface.alternates){
         /**
          * 🚨 Chrome 的 WebUSB 报的 `endpointNumber` **不含方向位**：
-         *    描述符里的 `0x87`（IN EP3）这里读出来是 `3`、`0x02`（OUT EP2）是 `2`、
-         *    `0x81`（IN EP1）是 `1`。第一版按 `=== 0x87` 找，真机上永远找不到
-         *    （"这个设备没有 bulk IN 端点 0x87"）—— 只有上真机才会暴露，假探针测不出来。
+         *    描述符里的 `0x83`（IN EP3）这里读出来是 `3`、`0x02`（OUT EP2）是 `2`、
+         *    `0x81`（IN EP1）是 `1`。第一版按 `=== 0x83` 找，真机上永远找不到
+         *    （"这个设备没有 bulk IN 端点 0x83"）—— 只有上真机才会暴露，假探针测不出来。
          *    而 `transferIn(ep)` / `clearHalt('in', ep)` 收的也是**这个不带方向位的编号**
          *    （既有的 CMSIS-DAP 通路就是这么用的，所以它一直好使）。
          */
@@ -114,11 +114,11 @@ export class VendorEpTransport {
     if (!found){
       const seen = d.configuration.interfaces.flatMap(i => i.alternates.flatMap(a =>
         (a.endpoints || []).map(e => `0x${(e.endpointNumber | (e.direction === 'in' ? 0x80 : 0)).toString(16)}/${e.type}`)));
-      throw new Error('没找到 bulk IN 端点 0x87（SWO 端点）—— 旧固件？选错设备了？' +
+      throw new Error('没找到 bulk IN 端点 0x83（SWO 端点）—— 旧固件？选错设备了？' +
         `这个设备暴露的端点：${seen.join(' ') || '(无)'}`);
     }
     this.iface = found.iface.interfaceNumber;
-    this.ep = found.ep.endpointNumber;         // 注意：不带方向位的编号（0x87 → 3）
+    this.ep = found.ep.endpointNumber;         // 注意：不带方向位的编号（0x83 → 3）
     this.epAddr = this.ep | 0x80;              // 描述符里的地址，只用于显示/排障
     this.claimed = false;
     try { await this._usb.claim(this.iface, [this.epAddr]); this.claimed = true; }
@@ -170,7 +170,7 @@ export class VendorEpTransport {
     try { await this._usb.reset(); }
     catch (resetError){
       /**
-       * Windows sometimes rejects USBDevice.reset() after a timed-out EP 0x87
+       * Windows sometimes rejects USBDevice.reset() after a timed-out EP 0x83
        * read, even though this transport is the only active owner. A reset is
        * still the preferred way to retire the native request; if the browser
        * refuses it, close the released interface/device and reopen it instead.

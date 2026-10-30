@@ -33,7 +33,7 @@ export { SCALARS };                    // 页面算帧长/画图都要用，从�
 /**
  * 采样计划 / 速率模型。
  *
- * **SWD 侧按 ZynqDAP 最新拟合重算**（2026-09-30；那边 README §scope 与 `Custom HID Protocol.md` §16）：
+ * **SWD 侧按 akaLinkPro 最新拟合重算**（2026-09-30；那边 README §scope 与 `Custom HID Protocol.md` §16）：
  *   每次 SWD 传输的实测成本 = `36.2 × 指令/bit + 184 周期`，60 MHz 档 = **401 周期 = 1.115 µs**；
  *   当前 swd_read_block 的稳态是 N+2 次传输（TAR、prime、N-1 次 DRW、RDBUFF）。
  *   60 MHz 的经验拟合为每块固定 3.35 µs + 每字节 0.279 µs；固定项含软件开销，
@@ -137,7 +137,7 @@ export function planReads(vars, opts = {}){
    * 固件有条**单字流水读**快路径（`s_pipe_ok`）：只有一个 span、4 字节对齐、整段正好 4 字节、
    * 且变量在内存与帧里都连续时，每拍**只发一次 DRW 读**、拿回来的值是上一拍的结果（AHB-AP 读是 posted 的）。
    * 判据与固件 `scope_span_is_direct()` + `s_nspans == 1 && len == 4` 一一对应，改一边别忘了另一边。
-   * 实测（2026-09/10，F103 + ZynqDAP @60 MHz，两轮都在 1.548~1.588 µs）：单字 f32 = **1.55 µs/样本**
+   * 实测（2026-09/10，F103 + akaLinkPro @60 MHz，两轮都在 1.548~1.588 µs）：单字 f32 = **1.55 µs/样本**
    * ⇒ 629~646 kHz；而模型那条路（3 次传输 + 1 次 DRW ≈ 4.47 µs）是给"没有快路径"的配置用的 ——
    * 拿模型当"能不能跑某个周期"的依据会把人吓退：用户就被"建议周期 ≥ 11 µs"挡住过，而他实测 3 µs 零丢。
    */
@@ -408,7 +408,7 @@ export const BACKEND = { SWD: 'swd', RISCV: 'riscv' };
 export const backendName = b => (b === BACKEND.RISCV ? 'RISC-V/JTAG' : b === BACKEND.SWD ? 'SWD/ARM' : '未知');
 
 /**
- * 每样本耗时的**实测**基线（µs）——历史锚点来自 ZynqDAP 的真机记录
+ * 每样本耗时的**实测**基线（µs）——历史锚点来自 akaLinkPro 的真机记录
  * （`README.md` §scope / §RISC-V、`docs/代码审查报告.md` 第二轮回归表，2026-09-30）：
  *   · SWD @60 MHz：单字 1.548~1.588（取 1.55）、pack 8 通道 32 B 11.193~11.234（取 11.19）；
  *   · RISC-V/JTAG：单字 2.97、8 通道 32 B 31.08（2026-10-07 读取标定）。

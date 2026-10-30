@@ -16,11 +16,8 @@ export function probeStatus(tools){
 
 export function initProbeStatus(tools){
   const summaryViews = [
-    ['spi', () => `控制${tools.spiSession.connected?'已连接':'未连接'} · 数据${tools.spiSession.dataReady?'已连接':'未连接'}`],
-    ['panel', () => `共享 SPI：控制${tools.spiSession.connected?'已连接':'未连接'} · 数据${tools.spiSession.dataReady?'已连接':'未连接'}`],
     ['scope', () => `探针${tools.scope.hid?.connected||tools.scope.usingMock?'已连接':'未连接'} · 数据${tools.scope.transport||tools.scope.usingMock?'已连接':'未连接'}`],
     ['rttcdc', () => `转发${tools.hid.last?.running?'运行中':tools.probeManager?.failures.has('hid')?'状态未确认':'未启动'} · 接收口${tools.session.isOpen?'已打开':'未打开'}`],
-    ['spicdc', () => `转发${tools.spiCdc.session.running?'运行中':'未启动'} · 接收口${tools.session.isOpen?'已打开':'未打开'}`],
   ].map(([name, read]) => {
     const side=document.querySelector(`#tab-${name} .side`);
     if(!side)return null;

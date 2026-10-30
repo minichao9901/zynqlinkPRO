@@ -3,13 +3,23 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ZynqDAP 工作台 · 串口、调试与 ETM</title>
-<meta name="description" content="Zynq-7020 CMSIS-DAP：串口、RTT、J-Scope、烧录、调试、ETM 执行轨迹与工程生成。纯浏览器直连。">
+<title>ZynqDAP 工作台 —— 串口 · RTT · 调试 · ETM 执行轨迹</title>
+<meta name="description" content="零安装的网页工具：Web Serial 串口助手（SSCOM 风格）、ANSI 终端（Xshell 风格）、以及走 WebUSB/CMSIS-DAP 的 SEGGER RTT Viewer。">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230d1117'/%3E%3Ctext x='16' y='22' font-size='16' text-anchor='middle' fill='%2358a6ff'%3E%3E_%3C/text%3E%3C/svg%3E">
 <link rel="stylesheet" href="app/vendor/xterm/xterm.css">
 <link rel="stylesheet" href="app/app.css">
-<script>window.__useWebBundle=false;</script>
-<link rel="stylesheet" href="app/zynqdap.css">
+<script>
+(function(){
+  // 本仓库只维护源码模块，不使用 superlinkPRO 的合并包 app/site/main.js。
+  window.__useWebBundle = false;
+  window.__webBundleUrl = '';
+  var preload = document.createElement('link');
+  preload.rel = 'modulepreload';
+  preload.href = 'app/main.js';
+  document.head.appendChild(preload);
+})();
+</script>
+<link rel="stylesheet" href="app/etm/style.css">
 </head>
 <body>
 
@@ -35,25 +45,32 @@
       <button class="tab active" data-tab="flash">烧录器</button>
       <button class="tab" data-tab="dbg">调试器</button>
       <button class="tab" data-tab="etm">ETM 执行轨迹</button>
-      <button class="tab" data-tab="gen">工程生成</button>
     </div>
+    <details class="tool-switch" id="tool-switch">
+      <summary>更多功能 <span aria-hidden="true">▾</span></summary>
+      <div class="tool-menu" aria-label="更多功能">
+        <button class="tab" data-tab="gen">工程生成</button>
+      </div>
+    </details>
   </nav>
   <div class="topright">
     <span id="conn-flag" class="flag flag-off">串口：未连接</span>
-    
+    <label class="chk" id="global-nrst-control" title="未连接探针：这一格是未知（2026-10-18 起固件默认推挽）。连接 akaLinkPro 后显示 PA27/J3[23] 的真实模式；J5[3]/PA08 是独立的 TRST 输出。">
+      <input type="checkbox" id="global-nrst-open-drain" disabled> NRST 开漏
+    </label>
     <script>
       /* 未连接探针时这一格是"未知"，画成横杠而不是假装"开漏"。
          连接后 app/hid/view.js 的 _setResetIoUi() 会按 HID 0x3A 的真实状态清掉 indeterminate。 */
       (function(){ var c = document.getElementById('global-nrst-open-drain'); if (c) c.indeterminate = true; })();
     </script>
-    <button id="btn-global-reset" class="mini" type="button" title="目标 nRESET 为 E19；E18 为可选 nTRST。复位会改变目标运行状态。">全局复位</button>
+    <button id="btn-global-reset" class="mini" type="button" title="向目标 NRST 发送硬复位脉冲；EVKLite 使用 PA27/J3[23]，PA08 接 TRST 时仅复位 JTAG">全局复位</button>
     <button id="btn-fullscreen" class="mini" type="button" aria-pressed="false" title="全屏显示工作台">全屏</button>
     <span id="probe-flag" class="flag flag-off" role="status">探针：未使用</span>
     <details class="app-more" id="app-more">
       <summary>帮助</summary>
       <div class="more-menu">
         <button class="ghost" id="btn-help">帮助与快捷键</button>
-        <a class="ghost" id="lnk-github" href="https://github.com/minichao9901/web-serial-rtt-tools" target="_blank" rel="noopener">参考项目</a>
+        <a class="ghost" id="lnk-github" href="https://github.com/minichao9901/web-serial-rtt-tools" target="_blank" rel="noopener">GitHub</a>
       </div>
     </details>
   </div>
@@ -62,7 +79,23 @@
 <main>
 
 <!-- ============================ ETM 执行轨迹 ============================ -->
-<section class="panel" id="tab-etm"></section>
+<section class="panel" id="tab-etm">
+  <div id="etm-notice">
+    <h2>ETM 执行轨迹</h2>
+    <p id="etm-status">正在检测本地 Zynq ETM 服务…</p>
+    <p>ETM 页由 superlinkPRO 原始工作台托管，采集与解码由本地服务完成。</p>
+    <label class="row"><span>服务地址</span>
+      <input id="etm-service" type="text" inputmode="url" autocomplete="off" spellcheck="false"
+             placeholder="127.0.0.1:8766"
+             title="本地 Zynq ETM 服务：host:port（默认 127.0.0.1:8766）">
+    </label>
+    <div class="etm-actions">
+      <button id="etm-retry">重新检测服务</button>
+      <a id="etm-open" href="http://127.0.0.1:8766/" target="_blank" rel="noopener">打开独立 ETM 工作台</a>
+    </div>
+  </div>
+  <iframe id="etm-frame" title="ETM 执行轨迹" allow="usb" hidden></iframe>
+</section>
 <section class="panel" id="tab-serial">
   <div class="ws">
     <aside class="side">
@@ -211,7 +244,7 @@
           <button id="t-save">保存输出</button>
         </div>
         <p class="hint">选中即复制（Ctrl+Shift+C）；Ctrl+Shift+V 粘贴；Ctrl+Shift+L 清屏。</p>
-        <p class="hint">RTT→CDC 转发（ZynqDAP）在「<b>RTT 转发</b>」那一页。</p>
+        <p class="hint">RTT→CDC 转发（akaLinkPro）在「<b>RTT 转发</b>」那一页。</p>
       </fieldset>
     </aside>
     <section class="main">
@@ -230,8 +263,8 @@
         <label class="row"><span>类型</span>
           <select id="r-backend">
             <option value="webusb">WebUSB · CMSIS-DAP（零安装）</option>
-            
-            
+            <option value="bridge-openocd">本地桥 · OpenOCD</option>
+            <option value="bridge-jlink">本地桥 · J-Link（ch0）</option>
             <option value="mock">内置模拟目标（演示/自测）</option>
           </select>
         </label>
@@ -417,7 +450,7 @@
   </div>
 </section>
 
-<!-- ================== RTT 转发（ZynqDAP 探针侧 RTT→CDC，纯输出） ================== -->
+<!-- ================== RTT 转发（akaLinkPro 探针侧 RTT→CDC，纯输出） ================== -->
 <section class="panel" id="tab-rttcdc">
   <div class="ws">
     <aside class="side">
@@ -441,9 +474,9 @@
           <input id="h-chan" class="num" value="0" title="RTT 上行通道号，0 = channel 0">
         </label>
         <label class="row"><span>目标类型</span>
-          <select id="h-target" title="本版探针 RTT 转发 / J-Scope 支持 ARM 目标；RISC-V 可使用独立调试器或 RTT Viewer。">
+          <select id="h-target" title="探针的全局目标类型（HID 0x31 action 10）。SWD/ARM 走 DAPLink 的 swd_host；RISC-V/JTAG 走探针里的 DMI+SBA 引擎（TAP 复位 + IR=0x11 + 唤醒 DM）。粘性：设一次就一直有效，采样器那个后端也跟着它走">
             <option value="swd">SWD / ARM</option>
-            <option value="riscv">RISC-V / JTAG（本固件尚未支持）</option>
+            <option value="riscv">RISC-V / JTAG</option>
           </select>
         </label>
         <label class="row"><span>SWD 时钟</span>
@@ -541,9 +574,9 @@
         <label class="row"><span>周期</span><input id="sc-period" class="num" value="100" inputmode="decimal" title="µs，可填 2.25 / 2.5 / 2.75；小数周期需新版探针固件，按 24 MHz tick 量化"><em class="unit">µs</em></label>
         <label class="row"><span>时长</span><input id="sc-seconds" class="num" value="20" inputmode="numeric" title="缓冲容量 = 实测速率 × 时长（页面会显示占多少内存）"><em class="unit">s</em></label>
         <label class="row" id="sc-target-row"><span>目标类型</span>
-          <select id="sc-target" title="本版探针 RTT 转发 / J-Scope 支持 ARM 目标；RISC-V 可使用独立调试器或 RTT Viewer。">
+          <select id="sc-target" title="探针的全局目标类型（HID 0x31 action 10，与 RTT-over-JTAG 共用同一个开关）。粘性：设一次就一直有效。切到 RISC-V/JTAG 后本页后端也跟着换（探针侧采样器的传输后端 = 全局目标类型）">
             <option value="swd">SWD / ARM</option>
-            <option value="riscv">RISC-V / JTAG（本固件尚未支持）</option>
+            <option value="riscv">RISC-V / JTAG</option>
           </select></label>
         <p class="hint" id="sc-backend">生效后端：未开始（采样后由探针回报）</p>
         <label class="row" id="sc-clock-row"><span>SWD 时钟</span><select id="sc-clock" title="与 RTT Viewer 同款档位；固件自带失败自动降档"></select></label>
@@ -651,8 +684,8 @@
         <label class="row"><span>后端</span>
           <select id="f-backend" title="零安装（默认）：与 RTT 共用探针，直接在浏览器里烧，覆盖 STM32 F0/F1/F4/F7/H7/L0/L4 与 HPM 全系 RISC-V。个别探针固件在 PPB 访问上有兼容问题、或你只想给磁盘路径（不给文件）时，换「本地桥」即可。">
             <option value="webusb">WebUSB · 零安装（默认）</option>
-            
-            
+            <option value="openocd">本地桥 · OpenOCD</option>
+            <option value="jlink">本地桥 · J-Link</option>
           </select>
         </label>
         <label class="row"><span>芯片</span>
@@ -848,7 +881,7 @@
           <fieldset class="dbgbox dbgsrc" id="d-box-src">
             <legend>源码
               <button id="d-src-pick" class="foldbtn" title="用浏览器的目录选择器授权一次工程目录（Chromium；只需选一次，之后按需读文件）">选择源码目录…</button>
-              <input type="file" id="d-src-dir" webkitdirectory="" directory="" multiple hidden>
+              <input type="file" id="d-src-dir" webkitdirectory directory multiple hidden>
               <span class="hint mono" id="d-src-file">—</span>
             </legend>
             <div id="d-src" class="srclist mono"><div class="hint">（停下来时这里显示 PC 所在的源码行；点行号下/删硬件断点，双击正文 = 运行到这一行）</div></div>
@@ -973,18 +1006,232 @@
 </section>
 
 <!-- ============================ 工程生成 ============================ -->
-<section class="panel" id="tab-gen"></section>
+<section class="panel" id="tab-gen">
+  <div class="ws">
+    <aside class="side">
+      <!-- 左栏卡片按右列的 tab 分组：`data-dock` 决定它属于哪个 tab，切 tab 时只显示当组的卡片
+           （用户 2026-10：左栏太长 → 跟右列联动，"分类简洁"）。见 app/gen/view.js 的 _dockSelect()。 -->
+      <fieldset data-dock="files">
+        <legend>工程</legend>
+        <div class="row btnrow">
+          <button id="g-uvpick" class="primary" title="读取 .uvprojx 里的器件/Flash 信息，自动填下面的参数（也可以直接把文件拖到右边）">选择 .uvprojx…</button>
+        </div>
+        <input type="file" id="g-uvfile" accept=".uvprojx,.xml" hidden>
+        <label class="row"><span>项目名</span><input id="g-project" value="project" title="写进 Makefile 的工程名 / build 目录里的文件名；Python 工具取的是 .uvprojx 所在目录名"></label>
+        <label class="row"><span>器件</span><input id="g-device" list="g-device-list" value="STM32F103RB" title="J-Link 的 -Device 名字；表外的型号直接手输"></label>
+        <datalist id="g-device-list"></datalist>
+        <label class="row"><span>Flash 起址</span><input id="g-flash-start" value="0x08000000"></label>
+        <p class="hint" id="g-detect">把 .uvprojx 拖进来（或点上面的按钮）：项目名、器件、Flash 起址会自动填好，其余都能手改。</p>
+      </fieldset>
 
+      <fieldset data-dock="files">
+        <legend>生成哪些</legend>
+        <label class="chk"><input type="checkbox" id="g-c-jlink" checked> Makefile.jlink（J-Link 烧录/调试）</label>
+        <label class="chk"><input type="checkbox" id="g-c-gdb" checked> jlink_gdb.script（GDB 脚本）</label>
+        <label class="chk"><input type="checkbox" id="g-c-pyocd" checked> Makefile.pyocd（PyOCD）</label>
+        <label class="chk"><input type="checkbox" id="g-c-openocd" checked> Makefile.openocd（附带 rtt_logger.py）</label>
+        <label class="chk"><input type="checkbox" id="g-c-testbin" checked> test_sram.bin（SRAM 测试图案）</label>
+        <label class="row"><span>bin 大小</span><input id="g-testbin-size" class="num" value="20480" inputmode="numeric"></label>
+      </fieldset>
 
+      <fieldset data-dock="params">
+        <legend>参数</legend>
+        <label class="row"><span>接口</span>
+          <select id="g-if"><option>SWD</option><option>JTAG</option></select>
+        </label>
+        <label class="row"><span>时钟 kHz</span><input id="g-speed" class="num" value="25000" inputmode="numeric" title="J-Link 的 -Speed。J-Link PRO 上 50000 也能稳跑"></label>
+        <label class="row"><span>RTT 地址</span><input id="g-rtt-addr" value="0x20002000" title="_SEGGER_RTT 控制块地址，要与链接脚本里钉的位置一致"></label>
+        <label class="row"><span>RTT 范围</span><input id="g-rtt-size" value="0x2000" title="-RTTSearchRanges 的搜索长度。Python 模板原值是 0x5000，在 20KB RAM 的 F103 上会越过 RAM 顶，所以这里默认按修正后的 0x2000"></label>
+        <label class="row"><span>GDB 端口</span><input id="g-gdb-port" class="num" value="3333" inputmode="numeric"></label>
+        <label class="row"><span>build 目录</span><input id="g-build-dir" value="build"></label>
+        <label class="row"><span>CMake 生成器</span>
+          <select id="g-generator"><option>Ninja</option><option>Unix Makefiles</option><option>MinGW Makefiles</option></select>
+        </label>
+        <label class="row"><span>构建类型</span>
+          <select id="g-build-type"><option>Debug</option><option>Release</option><option>RelWithDebInfo</option><option>MinSizeRel</option></select>
+        </label>
+        <label class="row"><span>PyOCD 目标</span><input id="g-pyocd-target" value="stm32f103rb" title="pyocd -t 的 target 名（pyocd pack 里能查到）"></label>
+        <label class="row"><span>PyOCD Hz</span><input id="g-pyocd-freq" class="num" value="10000000" inputmode="numeric"></label>
+        <!-- 路径类输入框用 `row wide`：控件独占一行、撑满侧栏宽度（原来 179px 的框里塞 605px 的路径，
+             看到的永远是开头那截）。浏览器出于安全拿不到真实目录名（showDirectoryPicker 只给文件夹名），
+             所以这里没有"选择…"可挂；完整值看 title。 -->
+        <label class="row wide"><span>OpenOCD 根</span><input id="g-openocd-root" value="E:/MounRiver/MounRiver_Studio2/resources/app/resources/win32/components/WCH/OpenOCD/OpenOCD" title="OpenOCD 安装/解压目录（里面要有 bin 和 scripts）。留空 = 产物里也留空"></label>
+        <label class="row"><span>OpenOCD 接口</span><select id="g-openocd-if"></select></label>
+        <label class="row"><span>OpenOCD 目标</span><input id="g-openocd-target" list="g-openocd-targets" value="target/stm32f1x.cfg"></label>
+        <datalist id="g-openocd-targets"></datalist>
+        <label class="row"><span>OpenOCD kHz</span><input id="g-openocd-freq" class="num" value="10000" inputmode="numeric"></label>
+        <label class="row"><span>RTT 端口</span><input id="g-rtt-port" class="num" value="9090" inputmode="numeric" title="openocd-rtt 目标里 rtt server start 的端口"></label>
+      </fieldset>
 
+      <fieldset data-dock="files">
+        <legend>落地方式</legend>
+        <label class="row"><span>换行符</span>
+          <select id="g-newline" title="CRLF = 与 uvprojx2cmake.py 的产物逐字节一致；LF 更贴近 git 习惯">
+            <option value="crlf">CRLF（和 Python 工具一致）</option>
+            <option value="lf">LF</option>
+          </select>
+        </label>
+        <label class="chk"><input type="checkbox" id="g-force"> 已存在就直接覆盖（不再问）</label>
+        <div class="row btnrow">
+          <button id="g-save" class="primary" title="Edge/Chrome：选一个文件夹，多个文件直接写进去，不用解压">写入文件夹…</button>
+        </div>
+        <div class="row btnrow">
+          <button id="g-zip" title="不支持选文件夹的浏览器走这里：打包成一个 zip 落「下载」">打包 ZIP</button>
+        </div>
+        <p class="hint">网页不能自动写你的项目目录：得你亲手选一次文件夹（浏览器安全模型）。Edge/Chrome 支持直写，其它浏览器自动走 ZIP。</p>
+      </fieldset>
 
+      <!-- 本地桥：跟"工程配套文件"是两回事（那是本机跑的程序包）—— 单独一个 tab（用户 2026-10 要求） -->
+      <fieldset id="g-bridge-card" data-dock="bridge">
+        <legend>本地桥（J-Link / OpenOCD）</legend>
+        <label class="chk"><input type="checkbox" id="g-bk-on" checked title="J-Link / OpenOCD 都是本机程序，浏览器无权启动它们 —— 要用这两条后端就得有个本机桥。零安装的 WebUSB 通路不需要它">生成「本地桥」安装包（双击即用）</label>
+        <label class="row"><span>端口</span><input id="g-bk-port" class="num" value="17321" inputmode="numeric" title="桥监听的本地端口；页面与桥都走它"></label>
+        <label class="row"><span>目标</span>
+          <select id="g-bk-target">
+            <option value="stm32f103">STM32F103（cmsis-dap + stm32f1x）</option>
+            <option value="stm32h7b0">STM32H7B0（cmsis-dap + stm32h7x）</option>
+            <option value="custom">自定义 cfg…</option>
+          </select></label>
+        <label class="row wide"><span>自定义 cfg</span><input id="g-bk-cfgs" value="interface/cmsis-dap.cfg, target/stm32f1x.cfg" title="逗号分隔；相对 OpenOCD 的 scripts 目录（也可写绝对路径）。只有「目标 = 自定义」时才用"></label>
+        <label class="row"><span>OpenOCD kHz</span><input id="g-bk-speed" class="num" value="4000" inputmode="numeric"></label>
+        <label class="row wide"><span>openocd.exe</span><input id="g-bk-openocd" placeholder="留空 = 自动探测" title="找不到 OpenOCD 时填绝对路径（例：C:/Users/你/.espressif/tools/openocd-esp32/vX/openocd-esp32/bin/openocd.exe）"></label>
+        <label class="row"><span>scripts 目录</span><input id="g-bk-scripts" placeholder="留空 = 跟着 openocd.exe 推断"></label>
+        <label class="row"><span>J-Link 器件</span><input id="g-bk-jdev" value="STM32F103C8" title="给 J-Link 的 -Device（留空用默认 STM32F103C8）"></label>
+        <label class="row"><span>J-Link kHz</span><input id="g-bk-jspeed" class="num" value="50000" inputmode="numeric" title="本机 J-Link PRO + F103 实测 50 MHz 可用"></label>
+        <label class="row"><span>便携 Node</span><input id="g-bk-nodever" class="num" value="22.14.0" title="本机没装 Node 时自动下这个版本（绿色包，放到包里的 node/ 目录，不动系统）"></label>
+        <label class="row"><span>下载源</span>
+          <select id="g-bk-mirror">
+            <option value="1">国内镜像优先（npmmirror）</option>
+            <option value="0">官方优先（nodejs.org）</option>
+          </select></label>
+        <label class="chk"><input type="checkbox" id="g-bk-autonode" checked title="关掉 = 没 Node 时只提示、不下载（企业内网/杀软敏感时用）">没 Node 时自动下便携版</label>
+        <p class="hint">包里：启动器（bat/sh）+ 桥本体 + 配置 + 预检脚本 + 便携 Node 下载器 + 说明。
+          <b>路径留空 = 桥自己探测</b>（ESP-IDF 的 openocd-esp32 → Program Files → PATH；J-Link 找 SEGGER 目录里版本号最大的）；
+          起桥前会先跑一次环境预检，把"该改哪一行"打出来。退出用 <b>Ctrl+C</b>（会把 OpenOCD / J-Link 子进程一起收掉）。
+          <b>每个文件的预览与「下载桥包（ZIP）」在右边「本地桥」tab</b>。</p>
+      </fieldset>
+    </aside>
+
+    <section class="main">
+      <!-- 右列 = 一个带 tab 的面板（照 #spi / #i2c 的 `.seg.docktabs` + `.dockpage` 那套）。
+           为什么 tab 化：13 个产物原来挤在一条文件栏里（桥包那 7 个还另占一行），而
+           「工程配套文件」与「本地桥安装包」本来就是两件事；顺带让左栏能按 tab 分组（用户 2026-10 要求）。 -->
+      <fieldset class="gendock" id="g-box-dock">
+        <div class="dockhead">
+          <span class="seg docktabs" id="g-dock-tabs">
+            <button data-dock="files" class="on">工程文件</button>
+            <button data-dock="params">调试参数</button>
+            <button data-dock="bridge">本地桥</button>
+          </span>
+          <span class="hint dockrun" id="g-dock-pill" title="当前 tab 的一句话状态">待生成</span>
+          <span class="spacer"></span>
+        </div>
+
+        <div class="dockpage on" data-dock="files" id="g-files-card">
+          <div class="toolbar">
+            <span class="flush hint">产物</span>
+            <div class="seg" id="g-files"></div>
+            <span class="spacer"></span>
+            <button id="g-copy" class="mini">复制当前文件</button>
+            <button id="g-dl" class="mini">下载当前文件</button>
+          </div>
+          <pre class="rx fill" id="g-preview" tabindex="0"></pre>
+          <p class="flush hint">这几件是 <code>uvprojx2cmake.py</code> 的模板产物（默认套 4 项修正）——
+            落地用左栏「落地方式」里的「写入文件夹…」/「打包 ZIP」。</p>
+        </div>
+
+        <div class="dockpage" data-dock="params" id="g-params-card">
+          <div class="toolbar">
+            <span class="flush hint">左栏填的值在这里逐项列全（长路径不再被侧栏宽度截断；<b>点值即复制</b>）</span>
+            <span class="spacer"></span>
+            <button id="g-params-copy" class="mini">复制全部（键=值）</button>
+          </div>
+          <div class="scroll fill" id="g-params-wrap">
+            <table class="sp gparamtab"><tbody id="g-params-body"></tbody></table>
+          </div>
+        </div>
+
+        <div class="dockpage" data-dock="bridge" id="g-kit-card">
+          <div class="toolbar">
+            <span class="flush hint">安装包里的文件</span>
+            <div class="seg" id="g-kit-files"></div>
+            <span class="spacer"></span>
+            <button id="g-kit-copy" class="mini">复制当前文件</button>
+            <button id="g-zip-bridge" class="primary mini" title="只打包桥的文件（zip 里是 rtt-bridge-kit/…）：解压后双击 start-bridge.bat 就能起桥">下载桥包（ZIP）</button>
+          </div>
+          <pre class="rx fill" id="g-kit-preview" tabindex="0"></pre>
+          <p class="flush hint">7 个文件：启动器（bat / sh）+ 桥本体 + 配置 + 预检脚本 + 便携 Node 下载器 + 说明 ——
+            参数在左栏「本地桥」那张卡里改，改完这里立刻跟着变。</p>
+        </div>
+      </fieldset>
+      <div class="stats">
+        <span id="g-status">待生成</span>
+        <span class="spacer"></span>
+        <span class="hint">模板逐字节移植自 <code>uvprojx2cmake.py</code>，默认再套 4 项修正（<code>make test-gen</code> 负责对账）</span>
+      </div>
+    </section>
+  </div>
+</section>
 
 
 </main>
 
 <div class="toasts" id="toasts"></div>
 
-<dialog id="help"><h2>ZynqDAP 工作台</h2><h3>浏览器直连</h3><p>使用桌面版 Chrome / Edge，在 HTTPS 或 localhost 下打开。串口助手与终端共用所选 COM 口；调试、RTT 和烧录通过 CMSIS-DAP。RTT 转发与 J-Scope 使用本项目的 HID 控制。</p><h3>ETM 执行轨迹</h3><p>顶部直接进入“ETM 执行轨迹”。J7.16 接 TRACECLK，J7.15/17/18/19 接 D0/D1/D2/D3，J7.14 接地。载入与目标 Flash 匹配的 ELF 后采集；解码在浏览器 Worker 中运行 OpenCSD WASM。CM3 样例明确标记为仿真记录。</p><h3>连接与质量</h3><p>同一 COM 口不能同时被其它串口工具占用。烧录或调试会协调释放冲突的探针会话。捕获需检查同步、溢出、包序号和结束状态；页面支持的目标仍需要实板验收。</p><h3>工程生成</h3><p>载入 Keil .uvprojx 或手填项目参数，可预览并下载 CMSIS-DAP / pyOCD / OpenOCD 文件，或写入自行选择的目录。</p><form method="dialog"><button>关闭</button></form></dialog>
+
+
+
+<dialog id="help">
+  <h2>帮助 / 已知限制</h2>
+  <h3>浏览器要求</h3>
+  <ul>
+    <li>需要 <b>Chrome / Edge 89+</b>（桌面版）。Firefox / Safari 不支持 Web Serial。</li>
+    <li>页面必须是 <b>HTTPS</b> 或 <b>http://127.0.0.1</b>（安全上下文），GitHub Pages 满足。</li>
+  </ul>
+  <h3>第一次用串口</h3>
+  <ol>
+    <li>点「选择…」→ 在弹出的浏览器授权框里选你的 COM 口（<b>必须手动选一次</b>，网页不允许自动开串口）。</li>
+    <li>选好后端口会记在浏览器里，下次「刷新」就能直接看到并连接。</li>
+    <li>⚠️ <b>独占</b>：SSCOM / 串口监视器 / idf.py monitor 开着同一个口时，这里打不开。</li>
+  </ol>
+  <h3>ETM 执行轨迹</h3>
+  <p>「ETM 执行轨迹」直接用 Zynq FPGA 接收目标的四位并行 ETM，不经过逻辑分析仪。先载入与目标 Flash 匹配的 ELF，连接 ZynqDAP，选择起点断点，再在「2 时钟 / 3 采集」里配置并采集。停止后由浏览器内的 OpenCSD 解码，右侧可看执行流、调用统计、火焰图、热点、ETM 包和可信区段；没有硬件时可载入内置 F103ZE 实板样例体验完整流程。</p>
+  <h3>RTT 为什么分三种后端</h3>
+  <ul>
+    <li><b>WebUSB · CMSIS-DAP</b>：零安装，页面上直接读目标 RAM 拿 RTT。只认 CMSIS-DAP 类探针（DAPLink、cherrydap…），<b>不认 J-Link</b>。</li>
+    <li><b>本地桥 · OpenOCD / J-Link</b>：J-Link 与 OpenOCD 都是本机程序，网页无权启动它们，需要一个本机小程序当桥（仓库 <code>bridge/</code>，双击启动，零 npm 依赖）。</li>
+    <li><b>内置模拟目标</b>：无硬件也能看效果。</li>
+  </ul>
+  <h3>RTT 使用要点</h3>
+  <ul>
+    <li>固件里必须编进了 SEGGER RTT（<code>SEGGER_RTT_Init()</code> 会被自动调用）。</li>
+    <li>控制块地址优先用 <b>ELF 符号</b>（载入 .elf 最稳），否则用「扫描控制块」在 RAM 里找 <code>"SEGGER RTT"</code>。</li>
+    <li>同一个探针不能被两个程序同时占用：OpenOCD / pyOCD / J-Link 开着时，先关掉它们。</li>
+    <li><b>RTT 不重传</b>：目标写太快会覆盖/丢弃还没读走的数据。<b>「缓冲高位」的次数和峰值水位</b>是最实用的
+      过载信号（≥75% 就算高位）；「溢出丢弃」只在主机侧读指针落后时才算得出来 —— 两个数字都当下限看。
+      主机读速受调试器限制（OpenOCD RPC 实测 ~17 KB/s），大流量场景优先用 WebUSB 探针。</li>
+  </ul>
+  <h3>工程生成（最后一个标签）</h3>
+  <ul>
+    <li>把 Keil <code>.uvprojx</code> 拖进页面：器件、Flash 起址、PyOCD / OpenOCD 目标会自动填好，其余参数都能手改。</li>
+    <li>勾选要哪些文件，右侧是<b>实时预览</b>；「写入文件夹…」选一次目录就能把多个文件直接写进去（Edge / Chrome），
+        其它浏览器自动改走「打包 ZIP」。</li>
+    <li>生成时在 <code>uvprojx2cmake.py</code> 的模板上<b>固定套 4 项修正</b>（RTT 范围收进 RAM、clean 不再删
+        <code>*.log</code>、OpenOCD 的 <code>-c</code> 改双引号、去掉 SWO 目标）；对账测试验证的是"不带修正时逐字节相同"。</li>
+    <li>网页不能静默写你的项目目录 —— 必须你亲手选一次文件夹；<code>test_sram.bin</code> 是 RAM 测试图案，不是固件。</li>
+  </ul>
+  <h3>RTT → CDC 转发（「RTT 转发」那一页，akaLinkPro 探针）</h3>
+  <ul>
+    <li>让<b>探针自己</b>通过 SWD 轮询目标的 RTT 控制块、把数据塞进它的 CDC 串口 —— 主机只要读一个 COM 口，
+        比主机侧轮询快得多（本机实测 <b>2.4 MB/s</b>）。</li>
+    <li>这一页是<b>纯输出</b>：只有接收（ASCII / ANSI / HEX、时间戳、暂停、保存数据、记录到文件），<b>没有发送</b>。</li>
+    <li>「连接探针」走探针的自定义 HID（usage page 0xFF00）；授权一次后页面会自动重连。</li>
+    <li>RTT 地址可以手填，也可以「载入 ELF…」从 <code>_SEGGER_RTT</code> 符号自动解析（和 RTT Viewer 一样）。</li>
+    <li>启动转发后，在<b>同一页</b>「选择…」授权探针的 CDC 口并「连接」，数据就出来了；「停止」把该口交回 UART。</li>
+    <li>⚠️ Cortex-M7（H743 / H7B3…）要给 AXI SRAM 地址（如 <code>0x24000000</code>）：DTCM 探针读不到。</li>
+  </ul>
+  <form method="dialog"><button class="primary">知道了</button></form>
+</dialog>
 
 <script src="app/vendor/xterm/xterm.js"></script>
 <script src="app/vendor/xterm/addon-fit.js"></script>
@@ -1039,5 +1286,6 @@ import(window.__useWebBundle ? './' + window.__webBundleUrl : './app/main.js').c
 </script>
 </body>
 </html>
+
 
 

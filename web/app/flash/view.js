@@ -272,7 +272,7 @@ export class FlashView {
        * 失败也要复位目标（ARM 路径的老经验：flashloader 可能已写进目标 RAM，踩掉 RTT 控制块等数据）。
        *
        * 🚨 **但 HPM / RISC-V 路径绝不能拉 nRESET**（2026-10 定因，也是"越失败越不对劲"的真凶）：
-       *    ZynqDAP 的板级配置写着 `reset_config none`，注释原文：
+       *    akaLinkPro 的板级配置写着 `reset_config none`，注释原文：
        *    「Do NOT use the SRST pin: 20 针排线的第 15 脚是**探针自己的 RESET_N**，
        *      拉 nSRST 会把探针一起复位（observed as OpenOCD hanging and the probe dropping off USB）」
        *    我们原来不分路径都拉一次 `probe.reset()` → 烧录一失败就把探针打掉线，

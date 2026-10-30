@@ -1,9 +1,9 @@
 /**
- * ZynqDAP 自定义 HID 配置通道（WebHID）—— 纯协议，不碰 DOM。
+ * akaLinkPro 自定义 HID 配置通道（WebHID）—— 纯协议，不碰 DOM。
  *
  * 协议出处（探针固件仓库，以源码为准）：
- *   E:\Share\github\ZynqDAP\firmware\application_5301\Custom HID Protocol.md
- *   E:\Share\github\ZynqDAP\firmware\application_5301\src\api\api_param.c
+ *   E:\Share\github\akaLinkPro\firmware\application_5301\Custom HID Protocol.md
+ *   E:\Share\github\akaLinkPro\firmware\application_5301\src\api\api_param.c
  *
  * 报文固定 64 字节，byte[0] = Report ID（1 = 主机→设备，2 = 设备→主机）。
  * WebHID 把 Report ID 单独传（sendReport(id, payload) / inputreport 事件），所以这里操作的是
@@ -15,7 +15,7 @@
  */
 
 export const USAGE_PAGE = 0xFF00;   // 厂商自定义页
-export const VID = 0x0d28;          // ZynqDAP：CMSIS-DAP + CDC + HID + WebUSB + DFU 复合设备
+export const VID = 0x0d28;          // akaLinkPro：CMSIS-DAP + CDC + HID + WebUSB + DFU 复合设备
 export const PID = 0x0204;
 export const PAYLOAD = 63;          // 64 - 1（Report ID）
 
@@ -96,7 +96,7 @@ const s8 = v => (v & 0xff) > 127 ? (v & 0xff) - 256 : (v & 0xff);
 /** Parse the 0x3A response payload: cmd, rc, mode, capability bits. */
 export function parseResetIoResponse(res){
   if (!res || res[1] !== CMD.RESET_IO){
-    if (res?.[1] === 0) throw new Error('探针固件不支持复位输出设置（请升级 ZynqDAP 固件）');
+    if (res?.[1] === 0) throw new Error('探针固件不支持复位输出设置（请升级 akaLinkPro 固件）');
     throw new Error('复位输出设置响应格式错误');
   }
   if (res.length < 5 || res[0] !== 4 || res[3] > 1) throw new Error('复位输出设置响应不完整或格式错误');
@@ -224,7 +224,7 @@ export class AkaLinkHid {
   get label(){
     const d = this.device;
     if (!d) return '';
-    return [d.productName || 'ZynqDAP', d.serialNumber ? '· ' + d.serialNumber : ''].join(' ').trim();
+    return [d.productName || 'akaLinkPro', d.serialNumber ? '· ' + d.serialNumber : ''].join(' ').trim();
   }
 
   /** 这个句柄是不是探针（按 VID/PID 判；厂商改名字也不影响）*/

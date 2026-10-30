@@ -3,8 +3,7 @@ import { CdcMode, isProbeCdcPort } from './cdc-mode.js';
 import { setUsbResetGuard, usbResourceConflict } from './usb-device.js';
 
 // One declaration owns resource policy, teardown, injection and USB reset identity.
-// EVKLite: SPI2 PB10..15 and debug PA04..08 are independent. SPI auxiliary
-// pads may use I2C PA28/29, so keep SPI/I2C pin exclusion until configuration-aware leases exist.
+// This workbench keeps serial/RTT/debug/flash/J-Scope and the Zynq ETM trace path only.
 export const PROBE_FEATURES = Object.freeze([
   {
     id: 'flash', label: '烧录器', client: t => t.flash, usbKind: 'dap',
@@ -18,7 +17,6 @@ export const PROBE_FEATURES = Object.freeze([
     active: t => !!t.dbg?.session?.connected && t.dbg?.session?.backendName !== '模拟目标',
     release: t => t.dbg.disconnect(),
   },
-
   {
     id: 'rtt', label: 'RTT Viewer', client: t => t.rtt, usbKind: 'dap',
     resources: ['target-engine', 'debug-pins', 'rtt-ring', 'dap-bulk'],
@@ -47,10 +45,6 @@ export const PROBE_FEATURES = Object.freeze([
     active: t => !t.hid?.mock && !!(t.hid?.last?.running || t.hid?._bridgeRequested),
     release: async t => { await t.hid.stop({ fromManager: true }); await t.hid.dev?.close?.(); },
   },
-
-
-
-
   {
     id: 'serial', label: 'CDC 串口', client: t => t.session,
     resources: ['cdc-port'],

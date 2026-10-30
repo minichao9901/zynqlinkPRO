@@ -52,3 +52,8 @@ firmware/target/hpm5301_perf/build/
 # STM32F103ZE scope firmware (96 MHz, JTAG kept enabled) is shipped
 !firmware/target/stm32f103_scope/build/fw.elf
 !firmware/target/stm32f103_scope/build/fw.hex
+
+# ETM service runtime records and the target acceptance firmware
+etm-service/records/
+!etm-service/firmware/**/*.elf
+

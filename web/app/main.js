@@ -52,6 +52,9 @@ const probeManager = installProbeManager(tools, { bus: probeBus });
 initProbeStatus(tools);
 initEventLogs();
 window.__tools = tools;
+if(new URLSearchParams(location.search).has('trace-cli')){
+  import('./automation/trace.js').then(m=>m.startWorker()).catch(e=>console.error('CLI工作台：',e));
+}
 const workspace = initWorkspaces();
 initSidebarTabs();
 initFullscreen();
@@ -70,8 +73,6 @@ initDockNavigation();
 installAcquisitionDiagnostics(tools);
 
 const pages = { serial:assistant, terminal, rtt, rttcdc:stream, scope, flash, dbg, etm, gen };
-// toolbox CLI 通过这张表按页面取视图对象（见 app/toolbox-bridge.js）。
-tools.pages = pages;
 initTabs(name => {
   workspace.sync();
   requestAnimationFrame(() => {
@@ -115,7 +116,7 @@ function summary(){
     etm: etm.summary(),
     dbg: dbg?.summary?.() || null,
     probeResources: probeManager.summary(),
-    vendor: 'zynqdap',
+    vendor: 'serial-rtt-tools',
   };
 }
 const box = document.createElement('div');
@@ -162,7 +163,7 @@ document.body.appendChild(box);
         stamp.style.color = '#c60';
         stamp.title = '线上有更新的版本（HTTP 缓存最多 10 分钟）；按 Ctrl+Shift+R 强制刷新即可';
         const menu = document.querySelector('#app-more>summary');
-        if (menu){ menu.textContent = '帮助 · 有更新'; menu.style.color = 'var(--warn)'; }
+        if (menu){ menu.textContent = '更多 · 有更新'; menu.style.color = 'var(--warn)'; }
         console.warn('[build] 页面模块是旧版（HTTP 缓存）：线上已有更新，Ctrl+Shift+R 刷新');
         errors.push?.('页面是旧版（HTTP 缓存），建议 Ctrl+Shift+R');
       }
@@ -170,4 +171,19 @@ document.body.appendChild(box);
   })();
 }
 
-setTimeout(() => { box.textContent = JSON.stringify(summary()); }, 500);
+// ---------- 浏览器端端到端自检：?demo=serial&selftest=1 ----------
+const q = new URLSearchParams(location.search);
+if (q.get('selftest') === '1'){
+  box.textContent = 'selftest: running';
+  (async () => {
+    try {
+      const { runUiSelfTest } = await import('../tools/selftest/ui.selftest.mjs');
+      const res = await runUiSelfTest(window.__tools);
+      box.textContent = JSON.stringify({ ...summary(), selftest: res });
+    } catch (e){
+      box.textContent = JSON.stringify({ ...summary(), selftestError: String(e?.message || e) });
+    }
+  })();
+} else {
+  setTimeout(() => { box.textContent = JSON.stringify(summary()); }, 500);
+}

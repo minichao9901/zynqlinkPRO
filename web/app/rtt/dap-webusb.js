@@ -67,7 +67,7 @@ const dirty = new WeakSet();
 /**
  * 探针认哪种 bulk 封包写法（`short` = 规范的长度精确包；`pad` = 补齐到整包）。
  * 记在设备对象上：同一台探针第二次 open 就不用再探测了。
- * 依据（2026-10 真机实测，HPM6800EVK + ZynqDAP 探针）：
+ * 依据（2026-10 真机实测，HPM6800EVK + akaLinkPro 探针）：
  *   · 短包：`DAP_Info(0)`→`00 00`、`DAP_Connect(2)`→`02 00`、`SWJ_Clock`→`11 00`，全都有应答；
  *   · 补齐 512 B：**一条都不回应**（"探针没响应"超时），且会把端点搞脏（之后短包也不应，需端口复位）。
  */
@@ -246,7 +246,7 @@ export class WebUsbDapProbe {
     try {
       const ps = await this.info(0xff);
       /**
-       * ⚠️ 探针上报的是 `DAP_XFER_SIZE`（ZynqDAP 固件 = **1024**，`DAP_config.h`；
+       * ⚠️ 探针上报的是 `DAP_XFER_SIZE`（akaLinkPro 固件 = **1024**，`DAP_config.h`；
        *    `DAP.c:180` 注释明说"不能报端点 mps，否则主机每次只能带 ~508 B 数据"）——
        *    但**实测 >512 B 的命令不可靠**（2026-10 逐档扫描：请求 577 B 正常、
        *    721 B 起响应恒少 222 B、973 B 更乱；固件侧 `DAP_JTAG_Sequence` 与 OUT 回调都
@@ -551,7 +551,7 @@ export class WebUsbDapProbe {
   /**
    * 上一次访问撞上**总线 FAULT**（读了未映射地址/外设时钟没开…）之后的自愈。
    *
-   * 🚨 2026-10 真机定标（H743 + ZynqDAP）：**一次 FAULT 会把整条 SWD 链路打死** ——
+   * 🚨 2026-10 真机定标（H743 + akaLinkPro）：**一次 FAULT 会把整条 SWD 链路打死** ——
    *    之后连"读寄存器""读 flash"都一路 FAULT，`abort()`（清 sticky）和写 DP CTRL/STAT
    *    **都救不回来**，只有重新走一遍 `_targetInit()` 才恢复。
    *    而 FAULT 太容易撞上了：hexdump 里手输一个不存在的地址、内存跟随 PC 走到未映射区……
@@ -1218,7 +1218,7 @@ export class WebUsbDapProbe {
    *
    * 🚨 ADIv5 的 TAR 自增是**有界**的，而且这个"界"比很多人以为的小得多。2026-09 用
    *    "自描述字"（每个字写成 `0xAD000000 | 它本应去的地址`，读回来就知道跑到哪了）在这块
-   *    H7B0 + ZynqDAP 上实测，一次 DAP_TransferBlock 内：
+   *    H7B0 + akaLinkPro 上实测，一次 DAP_TransferBlock 内：
    *      · 起点 0x20000200 走 64 字（不跨界）→ **逐字正确**；
    *      · 起点 0x200003F0 走 8 字（跨 0x400）→ 前 4 字对，**后 4 字跑到 0x20000000**（块首！）；
    *      · 起点 0x20000FF0 走 8 字（跨 0x1000）→ 前 4 字对，**后 4 字跑到 0x20000C00**（块首！）。

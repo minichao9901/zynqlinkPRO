@@ -17,7 +17,7 @@
 import { DAP, DAP_PORT, tapReset, tapLoadIR } from './jtag.js';
 import { IR_DMI } from './riscv-dm.js';
 
-/** 探针 output_mode 设置（来自 ZynqDAP 的 `script_test/hpm6800_probe.py set_mode()`，照抄）*/
+/** 探针 output_mode 设置（来自 akaLinkPro 的 `script_test/hpm6800_probe.py set_mode()`，照抄）*/
 export const PROBE_OUTPUT_MODE = { SWD_VCOM: 0, SWD_JTAG: 1 };
 export const setOutputModeData = mode => Uint8Array.of(mode & 0xff, 1, 0, 1, 0, 0xc4, 0x0c);
 
@@ -94,7 +94,7 @@ export class DapJtagTransport {
   /** 读 TAP IDCODE（探活用；失败说明 JTAG 链路/接线/上电有问题）。
    *  🚨 **必须带一个字节的 TAP 序号**：固件 `DAP_JTAG_IdCode` 把 `*request` 当 device index，
    *    不带的话它读到的是缓冲区里的垃圾 → `index >= count` → 直接回 `DAP_ERROR(0xFF)`
-   *    （2026-10 真机实测就是 0xff，卡了好一会儿）。ZynqDAP 的示例脚本也没带这个字节。*/
+   *    （2026-10 真机实测就是 0xff，卡了好一会儿）。akaLinkPro 的示例脚本也没带这个字节。*/
   async idcode(index = 0){
     const r = await this.probe._ctrl(DAP.JTAG_IDCODE, Uint8Array.of(index & 0xff));
     if (r[0] !== 0x00) throw new Error(`DAP_JTAG_IdCode 失败（状态 0x${r[0].toString(16)}）——` +

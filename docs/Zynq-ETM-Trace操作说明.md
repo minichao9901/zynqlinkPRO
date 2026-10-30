@@ -1,30 +1,26 @@
-# Zynq ETM Trace 操作说明
+# Zynq ETM Trace 操作说明（superlinkPRO 页面 + 本地服务）
 
-本文说明本仓库的 Zynq FPGA 并行 ETM 接收链路如何从上板、采集到 OpenCSD 解码和火焰图分析。当前验收对象是 **STM32F103ZE / Cortex-M3 ETMv3**；目标板只需要 SWD 和 ETM，不需要连接目标 JTAG。
+本文说明本仓库的 ETM 执行轨迹流程：**页面是 superlinkPRO 原始工作台**，采集后端从 Kingst 逻辑分析仪换成 **Zynq FPGA 并行 ETM**，解码仍由 OpenCSD。
 
-## 1. 使用的文件配对
+## 1. 组成
 
-先确认加载的是同一目录下的 bitstream 和 Zynq 固件，不要把其他构建目录里的旧文件混用。
+| 部分 | 位置 | 说明 |
+|---|---|---|
+| 工具箱页面 | `web/` | 从 `E:\superlinkPRO\web` 拷贝后删掉六个功能页；ETM tab 是 iframe |
+| ETM 页面 | `etm-service/web/` | superlinkPRO 原始 ETM 四步页面；“② 逻辑分析仪”已换成“② Zynq ETM 接收” |
+| 本地服务 | `etm-service/server.py` | 提供页面/API、Zynq 采集、OpenCSD 解码、记录浏览 |
+| 采集适配 | `etm-service/tools/zynq_la.py` | 保持 server 的 job/记录接口，把 LA 的 `Vis` 换成 Zynq EP2 |
+| 解码器 | `etm-service/build-native/etm_decode.exe` | OpenCSD 原生解码，随仓库提供 |
+
+## 2. 文件配对
 
 | 文件 | 路径 | SHA-256 |
 |---|---|---|
 | FPGA bitstream | `prebuilt/20261030_orbtrace_oversample_parser/orbtrace_oversample_parser.bit` | `230531cef335e6a0b81586be16025fa06bfef28a8106553d6fb8f9296ab09c68` |
 | Zynq 固件 | `prebuilt/20261030_orbtrace_oversample_parser/zynqdap_orbtrace.elf` | `6419c8b00a71b70a1572a55f84c3478f32b67aae8eda95a3821684dc7b3f1a30` |
-| F103ZE 目标 ELF | `E:\superlinkPRO\etm\firmware\stm32f103_cdc_trace\fw-ze.elf` | `63881ed9f6c1187d56924795ccad3f151a677aea0dfa201823fe44e0cb857522` |
+| F103ZE 目标固件 | `etm-service/firmware/stm32f103_cdc_trace/fw-ze.elf` | `63881ed9f6c1187d56924795ccad3f151a677aea0dfa201823fe44e0cb857522` |
 
-在 PowerShell 中可以这样核对：
-
-```powershell
-Get-FileHash prebuilt/20261030_orbtrace_oversample_parser/orbtrace_oversample_parser.bit -Algorithm SHA256
-Get-FileHash prebuilt/20261030_orbtrace_oversample_parser/zynqdap_orbtrace.elf -Algorithm SHA256
-Get-FileHash E:\superlinkPRO\etm\firmware\stm32f103_cdc_trace\fw-ze.elf -Algorithm SHA256
-```
-
-## 2. 上板和接线
-
-### 2.1 加载 Zynq bit/ELF
-
-下面的命令通过 **Zynq JTAG** 给 Zynq 芯片加载 bitstream 和 Zynq 固件。这里的 JTAG 是加载 Zynq 本身，不是目标 F103ZE 的 JTAG。
+加载 Zynq bit/ELF（通过 Zynq 自己的 JTAG，不是目标 JTAG）：
 
 ```powershell
 python tools/run_xsct.py tools/download_dap_fpga.tcl `
@@ -32,181 +28,94 @@ python tools/run_xsct.py tools/download_dap_fpga.tcl `
   prebuilt/20261030_orbtrace_oversample_parser/orbtrace_oversample_parser.bit
 ```
 
-脚本需要 Xilinx SDK 2018.3 的 XSCT/hw_server 环境，并会使用 `prebuilt/ps7_init.tcl`。加载完成后，ZynqDAP 的 USB 设备应重新枚举；网页中的 ZynqDAP 连接需要重新授权一次。
+目标 Flash 必须是 `fw-ze.elf` 的那个构建；页面采集前会逐字节核对，不匹配会拒绝。
 
-### 2.2 F103ZE ETM 线
-
-目标板的 ETM 信号连接到 Zynq J7：
+## 3. 接线
 
 | F103ZE | 目标球位 | Zynq J7 | Zynq 球位 | 信号 |
 |---|---|---|---|---|
 | PE2 | H16 | J7.16 | H16 | TRACECLK |
-| PE3 | H15 | J7.15 | H15 | D0 / TRACEDATA[0] |
-| PE4 | G15 | J7.17 | G15 | D1 / TRACEDATA[1] |
-| PE5 | H17 | J7.18 | H17 | D2 / TRACEDATA[2] |
-| PE6 | N15 | J7.19 | N15 | D3 / TRACEDATA[3] |
-| GND | — | J7.14 | — | 信号地 |
+| PE3 | H15 | J7.15 | H15 | D0 |
+| PE4 | G15 | J7.17 | G15 | D1 |
+| PE5 | H17 | J7.18 | H17 | D2 |
+| PE6 | N15 | J7.19 | N15 | D3 |
+| GND | — | J7.14 | — | 地 |
 
-要求：
+SWDIO / SWCLK / GND 仍接 ZynqDAP；目标 JTAG 可以不接。至少两根地线。
 
-- 目标和 Zynq 必须共地；高速 trace 建议至少使用两根地线。
-- ETM 为 3.3 V 电平，TRACECLK 当前约束不超过 50 MHz。
-- 先确认 PE2～PE6 没有被目标业务代码重新配置成普通 GPIO。
-- SWDIO、SWCLK、GND 仍连接到 ZynqDAP；目标 JTAG 线可以不接。
-
-## 3. 网页采集流程
-
-启动静态网页服务：
+## 4. 启动
 
 ```powershell
-node web/tools/serve.mjs
+# 窗口 1：ETM 本地服务（页面 + 采集 + 解码）
+cd etm-service
+python server.py --port 8766
+
+# 窗口 2：工具箱静态站
+node web/tools/serve.mjs      # http://127.0.0.1:8898
 ```
 
-打开 `http://127.0.0.1:8898/`，进入“ETM 执行轨迹”。页面的四步与参考工程一致，但“逻辑分析仪”已经替换为 Zynq FPGA ETM trace。
+打开 `http://127.0.0.1:8898/` →「ETM 执行轨迹」。也可以直接打开 `http://127.0.0.1:8766/`。
 
-### 第一步：调试
+服务状态：`GET http://127.0.0.1:8766/api/status`。只有带 **bulk-in 0x82** 的 ZynqDAP 才显示 `zynq.ready=true`；akaLinkPro 虽然 VID/PID 相同，但没有 0x82，会明确提示。
 
-1. 点击“浏览载入 ELF”，选择与目标 Flash 完全匹配的 `fw-ze.elf`。
-2. 点击“连接 ZynqDAP”。首次使用时浏览器会弹出 USB 授权框；之后可直接重连。
-3. 如果需要从固定业务函数开始采集，在函数搜索框中添加硬件断点，再选择该函数作为采集起点。断点使用 Cortex-M FPB，不会修改 Flash。
-4. 可以使用“运行至起点”“复位并暂停”“暂停”“继续”检查目标状态。
+## 5. 四步流程
 
-网页开始采集前会逐字节核对目标 Flash 与 ELF 的加载段。ELF 不匹配时会拒绝采集，避免把错误的指令镜像交给 OpenCSD。
+### 5.1 调试
 
-### 第二步：时钟
+1. 载入与目标 Flash 匹配的 `fw-ze.elf`。
+2. 连接探针（WebUSB 授权一次）。
+3. 添加硬件断点并选采集起点；建议 `trace_workload_round` 这类业务函数。
+4. 「复位并停在起点」或「运行至起点」；采集前目标保持暂停。
 
-1. 保持“自动配置并恢复 F103ZE ETM”勾选。
-2. 先使用默认 TRACECLK 分频；出现信号完整性问题时，优先选择更低的目标 Trace 工作点并重新验证。
-3. “读取 Trace 寄存器”用于确认 DEMCR、DBGMCU、ETM、TPIU 和 GPIOE 配置。
-4. “读取固件诊断”用于确认目标固件的时钟、运行状态和 ETM 状态。
-5. “只配置不采集”只写入 ETM/TPIU 配置，不启动 FPGA 接收；“恢复原 trace 设置”用于撤销这一步的修改。
+### 5.2 时钟
 
-网页不会替目标修改 PLL/HCLK。需要降低目标 CPU/Trace 频率时，应使用目标固件的低频配置，或使用 CLI 的临时诊断分频；网页中的 Trace 分频只影响 ETM/TPIU 输出配置。
+1. 填 HSE（F103 板常见 8 MHz），核对实际 CPU/TRACECLK。
+2. 「配置并暂停」写 Trace GPIO / ETM / TPIU；ETM 处于已使能、CPU 暂停的状态，TPIU 同步序列会落在采集窗口里。
 
-### 第三步：采集
+### 5.3 采集
 
-点击“开始采集”。自动流程为：
+1. 时长默认 10 ms，上限 1000 ms；「服务端联动」保持勾选。
+2. 点「联动采集」：
+   - 页面释放 WebUSB 句柄；
+   - 服务独占 USB：校验 ETM 签名/参考时钟 → arm FPGA → 写 DHCSR 恢复 CPU；
+   - 读 EP2，按 source ID 2 解复用，写 `etm-service/records/<sid>/capture.bin`；
+   - 到时或「停止采集」时发 vendor control 2，收结束包，释放 USB；
+   - 页面重新认领探针、恢复 ETM/断点。
+3. 状态至少满足：ETM 字节 > 0、同步/完整结束、无丢失、source ID 2、FCLK 约 100 MHz。
 
-1. 核对目标 Flash 与 ELF。
-2. 暂停目标 CPU。
-3. 保存并配置 ETM、TPIU、DBGMCU 和 GPIOE。
-4. 让 FPGA ETM 接收端进入采集状态。
-5. 启用 ETM 并恢复目标运行。
-6. 按设定时长停止，等待 FPGA 的结束包，再恢复目标寄存器和原有断点。
+### 5.4 文件与分析
 
-默认采集时长为 10 ms。需要手动结束时把时长设为 0，然后点击“停止”。建议第一次先用 5～10 ms，确认无丢失后再增加窗口。
+- 采集成功会自动解码；也可「单独解码」。
+- 右侧页签：执行流、调用统计、火焰图、热点、ETM 包、可信区段。
+- 导出：执行流 CSV、火焰图 SVG、分析 JSON、源码执行流。
+- 没有硬件时可用历史记录或导入已解复用的 ETM BIN + ELF + session.json。
 
-采集结束后，状态栏至少应满足：
+## 6. 验收基线
 
-- `ETM 字节` 大于 0；
-- `同步 / 完整结束`；
-- 没有 `有丢失`、overflow 或包序号缺口；
-- source ID 为 2；
-- FCLK 通常显示约 100 MHz（取决于实际加载的 Zynq 固件配对）。
+离线（当前仓库内可复现）：
 
-### 第四步：文件与分析
+| 项目 | 结果 |
+|---|---|
+| 输入 | F103ZE 样例 1309 ETM 字节 |
+| 解码 | 6,368 个执行路径、1,287 个包、1 个中断 |
+| 页面 | 执行流/调用统计/火焰图/热点均能打开，无控制台错误 |
 
-页面支持三种入口：
+实板：F103ZE @ 48 MHz HCLK / 24 MHz TRACECLK，Zynq FCLK 100 MHz，10 ms 窗口。**当前总线上只有 akaLinkPro（没有 0x82），ZynqDAP 需重新接入后复核这一项**；在接回并加载上述 bit/ELF 前，不要把它当成已完成。
 
-- “载入真实 CM3 仿真样例”：验证网页解码和分析，不需要接板。
-- “载入 F103ZE 实板样例”：验证真实 ETM 字节、调用树和火焰图。
-- “导入记录”：打开网页保存的 `.zetm` 记录，离线重新解码。
+## 7. 排障
 
-采集或导入后点击“解码 / 重新解码”。解码在浏览器 Worker 中运行 OpenCSD WASM，不依赖 Python 或 Kingst 服务。
-
-## 4. 查看火焰图
-
-解码完成后，右侧分析页签可查看：
-
-- **执行流**：每段指令的 PC 起止、分支类型、调用深度和所属函数。
-- **调用统计**：函数调用次数、自身执行量、包含子树执行量和占比。
-- **火焰图**：按调用路径折叠，横向宽度表示执行半字数量；重复调用会聚合。
-- **热点**：按包含子树执行量排序的热点函数。
-- **ETM 包**：包类型、字节数和最近原始包。
-- **可信区段**：显示 TRACE_ON、失同步、地址问题和区段可信性。
-
-点击执行流中的一条记录可以查看历史调用栈。载入配套源码后，源码窗格会显示对应文件和行附近内容；没有 DWARF 行表时仍可查看机器码字节和地址。
-
-“导出火焰图 SVG”生成可在浏览器或矢量编辑器中打开的 SVG；“导出分析 JSON”保存区段、问题、函数统计和包样本；“导出执行流 CSV”保存每段执行范围。
-
-## 5. 已验收基线
-
-使用上述 bit/ELF 配对和 F103ZE 接线，已验收工作点为：
-
-- HCLK：48 MHz；
-- 目标物理 TRACECLK：24 MHz；
-- Zynq FCLK：100 MHz；
-- source ID：2；
-- ETM 字节：1309；
-- 传输记录：1309；
-- FIFO 丢失：0；
-- OpenCSD 错误码：0；
-- 指令范围：6368；
-- 函数：8；
-- 调用次数：253；
-- 最大调用深度：3。
-
-网页样例文件为 `web/samples/f103ze-oversample.zetm`。它可以在没有硬件的情况下复现解码、调用统计和火焰图流程。
-
-## 6. EMI、降频和原始码流排查
-
-### 6.1 先看状态和寄存器
-
-- `0 ETM 字节 · 很多传输记录`：先核对 source ID、ETM Trace ID、目标是否真的运行，以及 PE2～PE6 是否被配置为复用输出。
-- 有记录但 `未同步`：优先检查 TRACECLK、地线、J7 针脚和 bit/ELF 配对。
-- `有丢失` 或 overflow：说明接收窗口、FIFO 或 USB 排空速度已经超过当前工作点。
-
-### 6.2 降低工作点
-
-怀疑 EMI 或边沿质量时按以下顺序处理：
-
-1. 缩短采集时长，先确认 5～10 ms 无丢失。
-2. 降低目标固件的 HCLK/TRACECLK 工作频率；网页不会自动改目标 PLL。
-3. 降低 F103 PE2～PE6 的 GPIO 输出速度，重新采集并比较同步、丢失和解码错误。
-4. 加强目标与 Zynq 的地线，缩短并行线，避免线缆贴近高速 USB/电源开关节点。
-5. 重新读取 Trace 寄存器，确保降频后目标仍输出四位并行 trace。
-
-CLI 可用于一次性的低频/原始码流对照。它不会烧写目标 Flash，会在结束时恢复目标 CoreSight 和时钟寄存器：
-
-```powershell
-python tools/test_orbtrace_board.py `
-  --target-elf E:\superlinkPRO\etm\firmware\stm32f103_cdc_trace\fw-ze.elf `
-  --bit prebuilt/20261030_orbtrace_oversample_parser/orbtrace_oversample_parser.bit `
-  --elf prebuilt/20261030_orbtrace_oversample_parser/zynqdap_orbtrace.elf `
-  --output build/etm-f103-check `
-  --milliseconds 10 `
-  --hclk-div 2 `
-  --gpio-speed 1
-```
-
-其中 `--hclk-div 2/4` 是目标 AHB 的临时诊断分频，`--gpio-speed 1` 是较慢的 PE2～PE6 输出模式；它们不是网页 Trace 分频的同一含义。要抓 FPGA 看到的原始 DDR 字节，可额外加 `--raw`：
-
-```powershell
-python tools/test_orbtrace_board.py `
-  --target-elf E:\superlinkPRO\etm\firmware\stm32f103_cdc_trace\fw-ze.elf `
-  --bit prebuilt/20261030_orbtrace_oversample_parser/orbtrace_oversample_parser.bit `
-  --elf prebuilt/20261030_orbtrace_oversample_parser/zynqdap_orbtrace.elf `
-  --output build/etm-f103-raw `
-  --milliseconds 10 --raw
-```
-
-`--raw` 输出的是接收端采样的 DDR 原始字节，不是可以直接交给 OpenCSD 的 ETM 流；正常网页采集则保存解复用后的 source ID 2 ETM 字节。
-
-## 7. 结束和恢复
-
-停止采集后应看到目标 CoreSight 配置恢复，页面断开前再点击“断开”。如果浏览器或 USB 在采集中断开：
-
-1. 先停止网页采集并重新连接 ZynqDAP；
-2. 确认目标仍有 SWD 响应；
-3. 必要时重新加载 Zynq bit/ELF 配对；
-4. 再做一次“读取 Trace 寄存器”确认 DEMCR、ETM 和 TPIU 已恢复；
-5. 不要把一次有 overflow 或未同步的记录当成有效火焰图。
+| 现象 | 处理 |
+|---|---|
+| `zynq.ready=false`，提示“没有 ETM bulk-in 0x82” | 接的是 akaLinkPro；换 ZynqDAP 并加载配套 bit/ELF |
+| `ETM PL 签名不匹配` | bit/ELF 不是同一配对 |
+| `参考时钟未初始化到 200 MHz` | PS 初始化未完成或 ELF 不配套 |
+| `ETM 采样延时校准未就绪` | 重新加载 bit/ELF；确认 PL 时钟 |
+| 采集后页面重连失败 | 服务是否已释放 USB；关掉其它占用探针的页签/工具 |
+| 有记录但未同步/有丢失 | 降 TRACECLK、缩短窗口、检查地线和 J7 针脚 |
 
 ## 8. 相关文件
 
-- [ETM 页面移植说明](完整ETM页面移植说明.md)
-- [F103ZE ETM 过采样端到端验收](ETM过采样端到端验收-20261030.md)
+- [ETM 本地服务说明](../etm-service/README.md)
 - [Web 工作台说明](../web/README.md)
-- [FPGA/Zynq 产物清单](../prebuilt/20261030_orbtrace_oversample_parser/manifest.json)
-- [ETM 接收协议](../web/app/etm/protocol.js)
-- [ETM 分析与火焰图](../web/app/etm/analysis.js)
+- [采集适配 `zynq_la.py`](../etm-service/tools/zynq_la.py)
+- [服务端 `server.py`](../etm-service/server.py)

@@ -48,7 +48,7 @@ function busFaultText(verb, addr, len){
 /* Thumb 的指令长度/调用解码在 app/dbg/thumb.js（那边能单独自测），这里直接用。 */
 
 /** 调试页默认 SWD 时钟（kHz）。
- *  🚨 2026-10-02 由用户拍板改成 **10 MHz**（原来是 1 MHz）：真机实测（ZynqDAP + STM32F103ZE）
+ *  🚨 2026-10-02 由用户拍板改成 **10 MHz**（原来是 1 MHz）：真机实测（akaLinkPro + STM32F103ZE）
  *  10/20/30 MHz 下 DHCSR/FPB/寄存器/RAM 全都正确，内存读 32 KB 从 1 MHz 的 ~100 KB/s 提到 **375 KB/s**
  *  （20 MHz 最高 488 KB/s）。历史"时钟偏高 DHCSR 读回 0"的坑由 `verifyClock()` 兜底：
  *  连上之后先验一次 PPB，读回不可信就**自动退回 1 MHz** 并写日志。 */
@@ -80,7 +80,7 @@ export class DebugSession {
     this.arch = ARM_ARCH;
     /**
      * C_STEP（DHCSR 单步）到底能不能用：null=还没试过，true/false=试过的结论。
-     * 这颗探针/内核（ZynqDAP + F103ZE/H743）实测**不执行 C_STEP**，一次试探要 ~400 ms，
+     * 这颗探针/内核（akaLinkPro + F103ZE/H743）实测**不执行 C_STEP**，一次试探要 ~400 ms，
      * 所以失败一次就记住，后面全走断点单步（见 `step()`）。
      */
     this._cStepWorks = null;
@@ -214,7 +214,7 @@ export class DebugSession {
    *
    * 历史坑（docs/dbg-page.md §3.1）：DHCSR/DCRSR/FPB/AIRCR 都在 PPB（0xE0000000 那一片），
    * 这颗探针固件在时钟偏高时**读回 0** → 寄存器表全是 0、断点静默失效，看着像"页面坏了"。
-   * 2026-10 真机实测（ZynqDAP + STM32F103ZE）：10/20/30 MHz 的 DHCSR/FPB/RAM 全都正常，
+   * 2026-10 真机实测（akaLinkPro + STM32F103ZE）：10/20/30 MHz 的 DHCSR/FPB/RAM 全都正常，
    * 但换一块探针固件未必 —— 所以这里**主动验一次**，不合格就自动退回 1 MHz，
    * 并把证据写进日志（不许静默降级，用户得知道为什么寄存器不灵了）。
    */
@@ -400,7 +400,7 @@ export class DebugSession {
    *    只等"=1"会立刻返回（等于没等）。C_MASKINTS 让这一步不响应中断（gdb 的 stepi 语义）。
    *
    * 兜底（2026-10-02 真机实测加）：**有的探针/内核组合根本不执行 C_STEP**。
-   *    本机 ZynqDAP(CMSIS-DAP v2) + STM32F103ZE 实测：写完 C_STEP 后 DHCSR 回读**恒定**
+   *    本机 akaLinkPro(CMSIS-DAP v2) + STM32F103ZE 实测：写完 C_STEP 后 DHCSR 回读**恒定**
    *    `0x30007`（C_STEP 位一直在、S_HALT 从不掉），PC 一动不动 —— 换个姿势（带/不带 C_MASKINTS）、
    *    换干净状态（AIRCR 复位后线程模式、CFSR/HFSR 全 0）都一样；而**同一个地址上
    *    "放 FPB 比较器 + 运行"能精确停在下一条指令**（实测 pc → pc+2 命中）。
@@ -478,7 +478,7 @@ export class DebugSession {
        *   · 更糟的是 `_cStepWorks` 是粘性记忆（只试一次 C_STEP）：**一次粘上，整个会话都坏**
        *     （实测就是这么连坏 6 轮压测的）。
        *
-       * 实测（2026-10-03，F103ZE + ZynqDAP）：坏状态 `DHCSR=0x1010009`（MASKINTS=1 / C_HALT=0）
+       * 实测（2026-10-03，F103ZE + akaLinkPro）：坏状态 `DHCSR=0x1010009`（MASKINTS=1 / C_HALT=0）
        * → 写一次 `0xA05F0003` 回到 `0x30003` → 恢复运行 Δticks 立即恢复、ISR 断点 406 ms 命中。
        */
       await this._clearStepResidue();
@@ -872,7 +872,7 @@ export class DebugSession {
    *    而 AIRCR 走内核寄存器，一定到。
    *
    * 🚨🚨 **"复位并停"要在复位向量上停住**（2026-10 压测抓到的体验问题）：
-   *    只写 `C_HALT` 再 SYSRESETREQ 是不够的 —— 实测（H743 + ZynqDAP）复位后内核照样跑，
+   *    只写 `C_HALT` 再 SYSRESETREQ 是不够的 —— 实测（H743 + akaLinkPro）复位后内核照样跑，
    *    等我们去"停"它的时候已经跑到 `main+0x6c` 了：用户点了「复位并停」，PC 却不在复位向量上；
    *    更糟的是如果此刻挂着断点，内核会**一路跑到断点**（"复位重跑"于是变成"复位后直接停在某个断点"）。
    *    正解是 **DEMCR.VC_CORERESET（内核复位向量捕获）**：置上它，内核一退出复位就立刻停下、

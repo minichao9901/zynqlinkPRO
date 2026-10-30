@@ -51,7 +51,7 @@ code{font-family:var(--mono);background:var(--bg3);padding:0 4px;border-radius:v
   background:var(--bg2);border-bottom:1px solid var(--line);flex:none;
 }
 .brand{font-weight:600;letter-spacing:.2px}
-/* 所有工具入口按顺序平铺，窄窗口可横向滚动。 */
+/* 常用入口可滚动，其余工具由“更多功能”展开。 */
 .tabs{display:flex;gap:2px;min-width:0;padding-bottom:0}
 .tabs .tab{flex:none}
 .tab{background:transparent;border:1px solid transparent;color:var(--fg2);padding:3px 10px;border-radius:var(--radius-control)}
@@ -1234,6 +1234,15 @@ body.workspace-focused>.topbar{display:none}
 .topbar>#tabs{grid-column:2;grid-row:1;display:flex;align-items:center;gap:6px;overflow:visible;scrollbar-width:none;padding:0}
 .primary-tabs{display:flex;align-items:center;gap:1px;flex:1 1 auto;overflow-x:auto;scrollbar-width:none;min-width:0}
 .primary-tabs>.tab{padding:4px 7px}
+.tool-switch{position:relative;flex:none;min-width:0;font-size:var(--text-xs)}
+.tool-switch>summary{display:block;list-style:none;cursor:pointer;padding:4px 7px;border:1px solid transparent;border-radius:var(--radius-control);color:var(--fg2);white-space:nowrap}
+.tool-switch>summary::-webkit-details-marker{display:none}
+.tool-switch>summary:hover,.tool-switch[open]>summary{color:var(--fg);background:var(--bg3)}
+.tool-switch.has-current>summary{color:var(--acc)}
+.tool-menu{position:absolute;top:calc(100% + 5px);right:0;z-index:60;width:220px;max-width:calc(100vw - 24px);max-height:calc(100vh - 55px);overflow:auto;display:flex;flex-direction:column;gap:1px;padding:5px;background:var(--bg2);border:1px solid var(--line);border-radius:4px;box-shadow:0 8px 24px #0008}
+.tool-switch:not([open])>.tool-menu{display:none}
+.tool-menu>.tab{text-align:left;padding:4px 9px;border-radius:3px;font-weight:400}
+.tool-menu>.tab.active{background:var(--bg3);border-color:transparent;color:var(--acc);font-weight:600}
 .side>fieldset{border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;padding:4px 2px 8px}
 .side>fieldset:last-child{border-bottom:0}
 .side>fieldset>legend{padding:0;font-weight:600;color:var(--fg)}
@@ -1251,7 +1260,7 @@ body.workspace-focused>.topbar{display:none}
 #tab-dbg .docktabs>button{padding:2px 7px;border-bottom:2px solid transparent}
 #tab-dbg .docktabs>button.on{background:transparent;color:var(--acc);border-bottom-color:var(--acc)}
 #sc-canvas{border-radius:0}
-@media(max-width:640px){.topbar{gap:5px;padding:4px 6px}.primary-tabs>.tab{padding:4px 5px}.topbar>.topright{gap:3px}}
+@media(max-width:640px){.topbar{gap:5px;padding:4px 6px}.primary-tabs>.tab{padding:4px 5px}.tool-switch>summary{padding:4px 5px}.topbar>.topright{gap:3px}}
 @media(max-width:540px){.topbar{grid-template-columns:auto minmax(0,1fr)}.topbar>.brand{grid-column:1;grid-row:1}.topbar>#tabs{grid-column:2;grid-row:1}.topbar>.topright{grid-column:1/-1;grid-row:2;justify-self:stretch;justify-content:flex-start;flex-wrap:wrap;max-width:100%}}
 
 #g-files,#g-kit-files,#g-etm-files{display:flex;flex:1 1 0;min-width:0;max-width:100%;overflow-x:auto;scrollbar-width:thin}
@@ -1311,6 +1320,7 @@ body.workspace-focused>.topbar{display:none}
 .topbar{border-bottom-color:#222a33}
 .app-more>summary{color:var(--fg2)}
 .app-more[open]>.more-menu{border-color:#303a46;box-shadow:0 8px 22px #0006}
+.tool-menu{border-color:#303a46;box-shadow:0 8px 22px #0006;border-radius:6px}
 fieldset,.toolbar,.sendbar,.stats,.an-measurements,.an-plot,
 #tab-spi .scroll,#tab-panel .scroll,#tab-i2c .scroll,#tab-gen .dockpage>.scroll,
 #tab-dbg .symlist,#tab-dbg .watchlist{border-color:var(--line)}

@@ -4,7 +4,7 @@
  *       store.bind(el, 'serial.ts', 'checked')   // 复选框
  *       store.get('serial.baud', '115200')
  */
-const KEY = 'zynqdap-workbench:v1';
+const KEY = 'serial-rtt-tools:v1';
 
 class Store {
   constructor(){

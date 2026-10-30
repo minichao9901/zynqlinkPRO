@@ -14,7 +14,7 @@
  * 架构相关的"指令解码/落点/返回地址校验"在 `app/dbg/rv.js` 里，通过
  * `DebugSession` 的 `this.arch`（`RV_ARCH`）接进去。
  *
- * 🚨 四条真机踩出来的硬约束（改这块前必读，都是 2026-10 在 HPM6800EVK + ZynqDAP 上定的）：
+ * 🚨 四条真机踩出来的硬约束（改这块前必读，都是 2026-10 在 HPM6800EVK + akaLinkPro 上定的）：
  *   ① **`dmcontrol` 是老排法**：`haltreq = bit31`、`resumereq = bit30`、`hartsel = [25:16]`
  *      （不是规范 0.13 的 16/17）。按规范写 `1<<17` 会落进 hartsel → DM 认为"选了个不存在的
  *      hart"，`dmstatus` 立刻变 `allnonexistent`（0x40c0a2），之后**所有抽象命令 cmderr=4**。
@@ -125,7 +125,7 @@ export class RiscvDebugSession extends DebugSession {
     try { auth = await withTimeout(WebUsbDapProbe.authorized(), 5000, '枚举已授权探针'); } catch {}
     const openOpts = { skipTargetInit: true };
     /**
-     * 🚨 **开探针要重试**（2026-10 真机统计）：这颗 ZynqDAP 在被上一个会话中途放开之后，
+     * 🚨 **开探针要重试**（2026-10 真机统计）：这颗 akaLinkPro 在被上一个会话中途放开之后，
      *    IN 端点里躺着**陈旧响应**，封包探测第一次会以
      *    `响应回显 0x3 ≠ 命令 0x0` 失败（页面刷新后大约 3 次里 1 次）。
      *    `dap-webusb` 内部已经清过一次队列，但偶尔还是会连吃两次陈旧包 ——
