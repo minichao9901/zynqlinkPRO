@@ -23,24 +23,26 @@ export class EtmView{
   constructor(){this.probe=null;this.busy=false;this.ranges=[];this.sources=new Map();this.symbols=[];this.images=[];this.model=null;this.view='flow';}
   init(){
     const panel=document.getElementById('tab-etm');
-    panel.innerHTML=`<div class="z-page"><div class="z-heading"><div><h1>ETM 执行轨迹</h1><p>FPGA 并行接收 · PS USB bulk-in · OpenCSD 浏览器解码 · 前端调用树分析</p></div><div class="z-actions"><span class="z-badge">四位 DDR / source ID 2</span></div></div>
-    <div class="z-columns"><aside class="z-card"><h2>采集</h2><div class="z-actions"><button id="ze-connect">连接 ZynqDAP</button><button id="ze-pick">换设备…</button><button id="ze-disconnect">断开</button></div><p id="ze-device" class="muted">USB 未连接</p>
+    panel.innerHTML=`<div class="z-page etm-full-layout"><div class="z-heading"><div><h1>ETM 执行轨迹</h1><p>指令历史 · 源码 · 调用路径</p></div><div class="z-actions"><span class="etm-service-state">Zynq ETM trace</span><span class="z-badge">四位 DDR / source ID 2</span></div></div>
+    <div class="etm-layout-meta"><strong>目标与录制</strong><span>ELF → 配置 → 采集</span><nav class="etm-step-tabs" aria-label="采集步骤"><button class="active">1 调试</button><button>2 时钟</button><button>3 采集</button><button>4 文件</button></nav></div>
+    <div class="z-columns"><aside class="z-card"><h2>① 载入目标 ELF</h2><div class="z-actions"><label class="btn etm-primary-btn">浏览载入 ELF…<input id="ze-elf" type="file" accept=".elf,.axf,.out" hidden></label></div><p id="ze-image" class="muted">尚未载入 ELF</p>
+    <details><summary>配套源码（可选）</summary><label class="btn">选择源码文件<input id="ze-source" type="file" multiple hidden></label></details>
+    <h2>② 连接与识别目标</h2><div class="z-actions"><button id="ze-connect" class="etm-primary-btn">连接 ZynqDAP</button><button id="ze-pick">换设备…</button><button id="ze-disconnect">断开</button></div><p id="ze-device" class="muted">USB 未连接</p>
+    <p class="etm-capability-note">F103ZE / Zynq ETM 已验收；并行 TRACECLK 由 FPGA 接收。</p>
+    <h2>③ ETM / TPIU 配置</h2>
     <p class="z-pinout">J7.16 TRACECLK<br>J7.15 / 17 / 18 / 19 → D0 / D1 / D2 / D3<br>J7.14 GND · 3.3 V · TRACECLK ≤ 50 MHz</p>
-    <label class="btn">载入匹配的 ELF<input id="ze-elf" type="file" accept=".elf,.axf,.out" hidden></label><p id="ze-image" class="muted">尚未载入镜像</p>
     <label><input id="ze-auto" type="checkbox" checked>自动配置并恢复 F103ZE ETM</label><label>TRACECLK 分频 (HCLK / N)<select id="ze-div"><option>1</option><option>2</option><option selected>3</option><option>4</option></select></label><label>采集时长 (ms，0 为手动)<input id="ze-ms" type="number" min="0" max="60000" value="10"></label>
     <label>内存上限 (MiB)<input id="ze-limit" type="number" min="1" max="256" value="16"></label>
-    <div class="z-actions"><button id="ze-start">开始采集</button><button id="ze-stop">停止</button></div>
+    <h2>④ 开始采集</h2><div class="z-actions"><button id="ze-start" class="etm-primary-btn">开始采集</button><button id="ze-stop">停止</button></div>
     <details><summary>ETMv3 解码寄存器</summary><textarea id="ze-config" rows="6">{"protocol":"ETMv3","idr":1091891777,"ctrl":2320,"ccer":100352,"traceid":2}</textarea><p>自动配置会替换为目标实际读回值；手工配置时由目标工程启用 ETM。</p></details>
-    <h2>本地记录</h2><div class="z-actions"><button id="ze-open">导入记录</button><button id="ze-save">保存记录</button></div><input id="ze-record" type="file" accept=".zetm,.json" hidden>
+    <h2>④ 文件与样例</h2><input id="ze-record" type="file" accept=".zetm,.json" hidden>
     <button id="ze-sample">载入真实 CM3 仿真样例</button><button id="ze-sample-f103">载入 F103ZE 实板样例</button><button id="ze-decode">解码 / 重新解码</button>
-    <label class="btn">载入源码文件<input id="ze-source" type="file" multiple hidden></label>
     <pre id="ze-log" class="z-log" aria-live="polite"></pre></aside>
-    <div class="z-card z-trace"><div id="ze-status" class="z-stats">尚无捕获</div><canvas id="ze-timeline" height="110" aria-label="执行地址时间轴"></canvas>
+    <div class="z-card z-trace"><div class="etm-record-bar"><strong id="ze-record-title">历史执行流与当前目标状态分别显示</strong><span id="ze-status" class="z-stats">尚无捕获</span><button id="ze-open">导入记录</button><button id="ze-save">保存</button></div><nav class="z-etm-tabs" id="ze-tabs" aria-label="分析视图"><button data-view="flow" class="active">执行流</button><button data-view="stats">调用统计</button><button data-view="flame">火焰图</button><button data-view="hot">热点</button><button data-view="packet">ETM 包</button><button data-view="section">可信区段</button></nav><canvas id="ze-timeline" height="110" aria-label="执行地址时间轴"></canvas>
     <div class="z-actions"><label>搜索函数 / 地址<input id="ze-filter" placeholder="函数名或 0x0800…"></label>
       <label>历史导航<select id="ze-nav"><option value="all">指令</option><option value="call">调用</option><option value="return">返回</option><option value="cond">条件跳转</option><option value="indirect">间接跳转 / 未知</option><option value="exception">异常</option><option value="nonexec">未执行</option></select></label>
       <button id="ze-prev">上一个</button><button id="ze-next">下一个</button></div>
     <input id="ze-cursor" type="range" min="0" max="0" value="0" aria-label="执行范围回放"><p id="ze-location"></p>
-    <nav class="z-etm-tabs" id="ze-tabs" aria-label="分析视图"><button data-view="flow" class="active">执行流</button><button data-view="stats">调用统计</button><button data-view="flame">火焰图</button><button data-view="hot">热点</button><button data-view="packet">ETM 包</button><button data-view="section">可信区段</button></nav>
     <div id="ze-view-flow" class="z-etm-view"><div class="z-table-scroll"><table><thead><tr><th>#</th><th>PC</th><th>结束</th><th>分支</th><th>深度</th><th>函数</th></tr></thead><tbody id="ze-rows"></tbody></table></div></div>
     <div id="ze-view-stats" class="z-etm-view" hidden><div class="z-table-scroll"><table><thead><tr><th>函数</th><th>调用</th><th>自身半字</th><th>含子树</th><th>占比</th><th>深度</th></tr></thead><tbody id="ze-statrows"></tbody></table></div></div>
     <div id="ze-view-flame" class="z-etm-view" hidden><div class="z-actions"><span class="z-legend">列宽按执行半字数；颜色按函数名散列。</span></div><div id="ze-flame" class="z-flame"></div></div>
