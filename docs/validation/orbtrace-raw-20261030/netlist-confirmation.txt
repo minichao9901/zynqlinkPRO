@@ -1,0 +1,83 @@
+#-----------------------------------------------------------
+# Vivado v2018.3 (64-bit)
+# SW Build 2405991 on Thu Dec  6 23:38:27 MST 2018
+# IP Build 2404404 on Fri Dec  7 01:43:56 MST 2018
+# Start of session at: Fri Oct 30 11:49:46 2026
+# Process ID: 39200
+# Current directory: C:/Users/Administrator/.codex/worktrees/orbtrace-cm3/zynqlinkPRO
+# Command line: vivado.exe -mode batch -nojournal -log build/query_raw16.log -source build/query_raw16.tcl
+# Log file: C:/Users/Administrator/.codex/worktrees/orbtrace-cm3/zynqlinkPRO/build/query_raw16.log
+# Journal file: 
+#-----------------------------------------------------------
+source build/query_raw16.tcl
+# set root [file normalize [pwd]]
+# open_checkpoint [file join $root build fpga_dma_global system_wrapper_verified.dcp]
+Command: open_checkpoint C:/Users/Administrator/.codex/worktrees/orbtrace-cm3/zynqlinkPRO/build/fpga_dma_global/system_wrapper_verified.dcp
+
+Starting open_checkpoint Task
+
+Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.036 . Memory (MB): peak = 254.242 ; gain = 0.000
+INFO: [Netlist 29-17] Analyzing 3274 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 0 CPU seconds
+INFO: [Project 1-479] Netlist was created with Vivado 2018.3
+INFO: [Device 21-403] Loading part xc7z020clg400-2
+INFO: [Project 1-570] Preparing netlist for logic optimization
+WARNING: [Constraints 18-550] Could not create 'DRIVE' constraint because net 'system_i/swd_controller_0/gpio_in[0]' is not directly connected to top level port. Synthesis is ignored for DRIVE but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'IBUF_LOW_PWR' constraint because net 'system_i/swd_controller_0/gpio_in[0]' is not directly connected to top level port. Synthesis is ignored for IBUF_LOW_PWR but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'SLEW' constraint because net 'system_i/swd_controller_0/gpio_in[0]' is not directly connected to top level port. Synthesis is ignored for SLEW but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'DRIVE' constraint because net 'system_i/swd_controller_0/gpio_in[1]' is not directly connected to top level port. Synthesis is ignored for DRIVE but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'IBUF_LOW_PWR' constraint because net 'system_i/swd_controller_0/gpio_in[1]' is not directly connected to top level port. Synthesis is ignored for IBUF_LOW_PWR but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'SLEW' constraint because net 'system_i/swd_controller_0/gpio_in[1]' is not directly connected to top level port. Synthesis is ignored for SLEW but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'DRIVE' constraint because net 'system_i/swd_controller_0/gpio_in[2]' is not directly connected to top level port. Synthesis is ignored for DRIVE but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'IBUF_LOW_PWR' constraint because net 'system_i/swd_controller_0/gpio_in[2]' is not directly connected to top level port. Synthesis is ignored for IBUF_LOW_PWR but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'SLEW' constraint because net 'system_i/swd_controller_0/gpio_in[2]' is not directly connected to top level port. Synthesis is ignored for SLEW but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'DRIVE' constraint because net 'system_i/swd_controller_0/gpio_in[3]' is not directly connected to top level port. Synthesis is ignored for DRIVE but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'IBUF_LOW_PWR' constraint because net 'system_i/swd_controller_0/gpio_in[3]' is not directly connected to top level port. Synthesis is ignored for IBUF_LOW_PWR but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'SLEW' constraint because net 'system_i/swd_controller_0/gpio_in[3]' is not directly connected to top level port. Synthesis is ignored for SLEW but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'DRIVE' constraint because net 'system_i/swd_controller_0/gpio_out[1]' is not directly connected to top level port. Synthesis is ignored for DRIVE but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'IBUF_LOW_PWR' constraint because net 'system_i/swd_controller_0/gpio_out[1]' is not directly connected to top level port. Synthesis is ignored for IBUF_LOW_PWR but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'SLEW' constraint because net 'system_i/swd_controller_0/gpio_out[1]' is not directly connected to top level port. Synthesis is ignored for SLEW but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'DRIVE' constraint because net 'system_i/swd_controller_0/gpio_out[2]' is not directly connected to top level port. Synthesis is ignored for DRIVE but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'IBUF_LOW_PWR' constraint because net 'system_i/swd_controller_0/gpio_out[2]' is not directly connected to top level port. Synthesis is ignored for IBUF_LOW_PWR but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'SLEW' constraint because net 'system_i/swd_controller_0/gpio_out[2]' is not directly connected to top level port. Synthesis is ignored for SLEW but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'DRIVE' constraint because net 'system_i/swd_controller_0/gpio_out[3]' is not directly connected to top level port. Synthesis is ignored for DRIVE but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'IBUF_LOW_PWR' constraint because net 'system_i/swd_controller_0/gpio_out[3]' is not directly connected to top level port. Synthesis is ignored for IBUF_LOW_PWR but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'SLEW' constraint because net 'system_i/swd_controller_0/gpio_out[3]' is not directly connected to top level port. Synthesis is ignored for SLEW but preserved for implementation.
+INFO: [Timing 38-478] Restoring timing data from binary archive.
+INFO: [Timing 38-479] Binary timing data restore complete.
+INFO: [Project 1-856] Restoring constraints from binary archive.
+INFO: [Constraints 18-5170] The checkpoint was created with non-default parameter values which do not match the current Vivado settings.  Mismatching parameters are:
+  general.maxThreads
+INFO: [Project 1-853] Binary constraint restore complete.
+Reading XDEF placement.
+Reading placer database...
+Reading XDEF routing.
+Read XDEF File: Time (s): cpu = 00:00:04 ; elapsed = 00:00:05 . Memory (MB): peak = 1283.535 ; gain = 43.449
+Restored from archive | CPU: 4.000000 secs | Memory: 0.000000 MB |
+Finished XDEF File Restore: Time (s): cpu = 00:00:04 ; elapsed = 00:00:05 . Memory (MB): peak = 1283.535 ; gain = 43.449
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.020 . Memory (MB): peak = 1283.535 ; gain = 0.000
+INFO: [Project 1-111] Unisim Transformation Summary:
+  A total of 127 instances were transformed.
+  IOBUF => IOBUF (IBUF, OBUFT): 6 instances
+  RAM32M => RAM32M (RAMD32, RAMD32, RAMD32, RAMD32, RAMD32, RAMD32, RAMS32, RAMS32): 24 instances
+  RAM32X1D => RAM32X1D (RAMD32, RAMD32): 1 instances
+  RAM64M => RAM64M (RAMD64E, RAMD64E, RAMD64E, RAMD64E): 80 instances
+  RAM64X1D => RAM64X1D (RAMD64E, RAMD64E): 16 instances
+
+INFO: [Project 1-604] Checkpoint was created with Vivado v2018.3 (64-bit) build 2405991
+open_checkpoint: Time (s): cpu = 00:00:25 ; elapsed = 00:00:28 . Memory (MB): peak = 1283.535 ; gain = 1029.293
+# set raw [get_cells -hier -filter {NAME =~ *orbtrace_0*raw_capture*}]
+# if {![llength $raw]} {error "raw capture logic is absent"}
+# puts "RAW_CAPTURE_CELLS=[llength $raw]"
+RAW_CAPTURE_CELLS=259
+# set ids [get_cells -hier -filter {REF_NAME==IDELAYE2 && NAME=~*orbtrace*}]
+# if {[llength $ids] != 4} {error "wrong IDELAY count"}
+# foreach c $ids {set v [get_property IDELAY_VALUE $c];puts "IDELAY [get_property NAME $c] $v";if {$v!=16} {error "wrong IDELAY value"}}
+IDELAY system_i/orbtrace_0/inst/receiver/capture[0].delay_input.input_delay 16
+IDELAY system_i/orbtrace_0/inst/receiver/capture[1].delay_input.input_delay 16
+IDELAY system_i/orbtrace_0/inst/receiver/capture[2].delay_input.input_delay 16
+IDELAY system_i/orbtrace_0/inst/receiver/capture[3].delay_input.input_delay 16
+# puts "RAW_NETLIST_CONFIRMED"
+RAW_NETLIST_CONFIRMED
+# exit
+INFO: [Common 17-206] Exiting Vivado at Fri Oct 30 11:50:17 2026...

@@ -19,6 +19,18 @@ if {![llength [get_bd_cells -quiet orbtrace_0]]} {
 # A stopped target TRACECLK cannot serve IDELAYCTRL calibration. Keep a fixed,
 # independent 200 MHz PS reference, unaffected by DAP's FCLK0 rate changes.
 set_property -dict [list CONFIG.PCW_EN_CLK1_PORT 1 CONFIG.PCW_FPGA1_PERIPHERAL_FREQMHZ 200] [get_bd_cells processing_system7_0]
+set raw_diag [expr {[info exists ::env(ZYNQLINK_RAW_TRACE)] && $::env(ZYNQLINK_RAW_TRACE) eq "1"}]
+if {[lsearch -exact [list_property [get_bd_cells orbtrace_0]] CONFIG.RAW_DIAGNOSTIC] < 0} {
+  update_module_reference [get_ips system_orbtrace_0_0]
+}
+if {[lsearch -exact [list_property [get_bd_cells orbtrace_0]] CONFIG.RAW_DIAGNOSTIC] < 0} {
+  error "ORBTrace module reference did not refresh RAW_DIAGNOSTIC parameter"
+}
+set_property CONFIG.RAW_DIAGNOSTIC $raw_diag [get_bd_cells orbtrace_0]
+if {[get_property CONFIG.RAW_DIAGNOSTIC [get_bd_cells orbtrace_0]] != $raw_diag} {
+  error "ORBTrace RAW_DIAGNOSTIC configuration did not propagate"
+}
+puts "ORBTRACE_RAW_DIAGNOSTIC=$raw_diag"
 if {![llength [get_bd_pins -quiet orbtrace_0/ref_clk]]} {
   update_module_reference [get_ips system_orbtrace_0_0]
 }

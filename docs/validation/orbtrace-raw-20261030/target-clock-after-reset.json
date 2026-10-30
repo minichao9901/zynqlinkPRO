@@ -1,0 +1,50 @@
+{
+  "method": "DWT cycle counter against host perf_counter; two SWD reads timestamped at transfer midpoint",
+  "crystal_hz_assumed": null,
+  "before_reset": {
+    "0xe000ed00": "0x411fc231",
+    "0xe000edf0": "0x1010001",
+    "0x40021000": "0x3034e83",
+    "0x40021004": "0x51040a"
+  },
+  "reset_request": "SYSRESETREQ acknowledged",
+  "after_reset": {
+    "0xe000ed00": "0x411fc231",
+    "0xe0042000": "0x10036414",
+    "0xe000edf0": "0x3010001",
+    "0x40021000": "0x3034e83",
+    "0x40021004": "0x51040a"
+  },
+  "dwt": [
+    {
+      "cycles": 24057579,
+      "elapsed_s": 0.501044950040523,
+      "hz": 48014811.84084242,
+      "read_width_s": [
+        0.00036830001045018435,
+        0.000830999983008951
+      ]
+    },
+    {
+      "cycles": 24054851,
+      "elapsed_s": 0.5011574499658309,
+      "hz": 47998590.06713373,
+      "read_width_s": [
+        0.000830999983008951,
+        0.0006560999900102615
+      ]
+    },
+    {
+      "cycles": 48112430,
+      "elapsed_s": 1.0022024000063539,
+      "hz": 48006700.043519124,
+      "read_width_s": [
+        0.00036830001045018435,
+        0.0006560999900102615
+      ]
+    }
+  ],
+  "median_hz": 48006700.043519124,
+  "dhcsr_during": "0x1010001",
+  "dwt_ctrl_before": "0x40000001"
+}

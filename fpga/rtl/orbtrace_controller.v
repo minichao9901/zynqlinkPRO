@@ -4,7 +4,8 @@
 module orbtrace_controller #(
   parameter C_S_AXI_DATA_WIDTH=32,
   parameter C_S_AXI_ADDR_WIDTH=6,
-  parameter FIFO_ADDR_BITS=12
+  parameter FIFO_ADDR_BITS=12,
+  parameter RAW_DIAGNOSTIC=0
 )(
   (* X_INTERFACE_PARAMETER="ASSOCIATED_BUSIF s_axi, ASSOCIATED_RESET rst_n" *)
   input wire clk,input wire rst_n,
@@ -44,7 +45,7 @@ module orbtrace_controller #(
   wire [FIFO_ADDR_BITS:0] level;
   wire fifo_full=level==(1<<FIFO_ADDR_BITS);
   wire receiver_reset=!rst_n || !enable || clear_count!=0 || !delay_ready;
-  orbtrace_parallel #(.USE_IO_CLOCK(1),.USE_INPUT_DELAY(1)) receiver(.trace_clk(trace_clock),.trace_io_clk(trace_io_clock),.trace_data(trace_data),.width(width),
+  orbtrace_parallel #(.USE_IO_CLOCK(1),.USE_INPUT_DELAY(1),.RAW_DIAGNOSTIC(RAW_DIAGNOSTIC)) receiver(.trace_clk(trace_clock),.trace_io_clk(trace_io_clock),.trace_data(trace_data),.width(width),
     .clk(clk),.rst(receiver_reset),.data(byte_data),.channel(source_id),
     .valid(byte_valid),.ready(!fifo_full && !receiver_reset),
     .synced(receiver_synced),.overflow(receiver_overflow));

@@ -45,6 +45,7 @@ def main():
     ap.add_argument('--gpio-speed', type=int, choices=(1, 2, 3),
                     help='Temporary PE2..PE6 output mode (1=10,2=2,3=50MHz); restored')
     ap.add_argument('--sync', action='store_true', help='Enable ITM/DWT periodic synchronization')
+    ap.add_argument('--raw', action='store_true', help='Capture diagnostic sampled DDR bytes, not decoded ETM')
     args = ap.parse_args()
     if not 0 < args.milliseconds <= 1000:
         ap.error('capture must be 0..1000 ms')
@@ -53,7 +54,8 @@ def main():
     report = dict(artifacts=provenance(args.bit, args.elf),
                   target_elf=str(args.target_elf.resolve()),
                   target_elf_sha256=sha(args.target_elf.read_bytes()),
-                  milliseconds=args.milliseconds, periodic_sync=args.sync, hclk_div=args.hclk_div)
+                  milliseconds=args.milliseconds, periodic_sync=args.sync, hclk_div=args.hclk_div,
+                  raw_diagnostic=args.raw)
     dev, out, inp = open_dap()
     mem = Memory(out, inp)
     before, locks, reader = {}, {}, None
@@ -168,6 +170,13 @@ def main():
                       ctrl=mem.word(REG['etmcr']) & ~0x400,
                       ccer=mem.word(0xe00411e8), traceid=mem.word(REG['etmtraceidr']))
         report['config'] = config
+        if args.raw:
+            # Prepare ETM while the CPU is halted, before arming the raw
+            # receiver: the port otherwise floods it with idle bytes while
+            # the host configures CoreSight over SWD.
+            mem.write_word(REG['etmcr'], cr & ~0x400)
+            wait_program(0)
+            mem.write_word(0xe000edf0, 0xa05f0001)
         control(0x301)
         armed = True
         for _ in range(100):
@@ -180,13 +189,18 @@ def main():
         report['start_status'] = s
         reader = threading.Thread(target=receive, daemon=True)
         reader.start()
-        mem.write_word(REG['etmcr'], cr & ~0x400)
-        wait_program(0)
-        mem.write_word(0xe000edf0, 0xa05f0001)
+        if not args.raw:
+            mem.write_word(REG['etmcr'], cr & ~0x400)
+            wait_program(0)
+            mem.write_word(0xe000edf0, 0xa05f0001)
         time.sleep(args.milliseconds/1000)
-        mem.write_word(REG['etmcr'], cr)
-        wait_program(2)
-        time.sleep(.005)
+        if not args.raw:
+            mem.write_word(REG['etmcr'], cr)
+            wait_program(2)
+        # Raw mode also streams idle/synchronization bytes at line rate;
+        # stop promptly to avoid overflowing while no ETM payload is produced.
+        if not args.raw:
+            time.sleep(.005)
         control(2)
         reader.join(5)
         assert not reader.is_alive(), 'USB reader did not retire'
@@ -206,10 +220,18 @@ def main():
                       etm=base64.b64encode(etm).decode(), etmSha=sha(etm),
                       elf=base64.b64encode(args.target_elf.read_bytes()).decode(),
                       elfName=args.target_elf.name, elfSha=report['target_elf_sha256'])
-        (work/'capture.zetm').write_text(json.dumps(record, indent=2)+'\n')
-        (work/'etm.bin').write_bytes(etm)
-        report.update(quality=quality, packets=len(packets), etm_bytes=len(etm),
-                      sequence_ok=sequence_ok, capture_id_ok=capture_ok, etm_sha256=sha(etm))
+        if args.raw:
+            (work/'raw-ddr.bin').write_bytes(etm)
+        else:
+            (work/'capture.zetm').write_text(json.dumps(record, indent=2)+'\n')
+            (work/'etm.bin').write_bytes(etm)
+        report.update(quality=quality, packets=len(packets),
+                      sequence_ok=sequence_ok, capture_id_ok=capture_ok)
+        if args.raw:
+            report.update(raw_bytes=len(etm), raw_sha256=sha(etm),
+                          raw_note='sampled DDR bytes before TPIU parsing; source tag 2 is a transport placeholder')
+        else:
+            report.update(etm_bytes=len(etm), etm_sha256=sha(etm))
         assert sequence_ok and capture_ok and synced and not loss and quality['ended'] and etm
         report['capture_passed'] = True
     except BaseException as exc:
@@ -229,7 +251,7 @@ def main():
             except BaseException as exc:
                 report['usb_cleanup_error'] = repr(exc)
         try:
-            if before:
+            if was_halted is not None:
                 mem.write_word(0xe000edf0, 0xa05f0003)
                 if 'etmcr' in before:
                     mem.write_word(REG['etmcr'], (mem.word(REG['etmcr']) | 0x400) & ~1)
@@ -246,7 +268,8 @@ def main():
                 for base, status in locks.items():
                     if status & 2:
                         mem.write_word(base + 0xfb0, 0)
-                mem.write_word(REG['demcr'], before['demcr'])
+                if 'demcr' in before:
+                    mem.write_word(REG['demcr'], before['demcr'])
                 if gpio_before is not None:
                     mem.write_word(0x40011800,gpio_before[1])
                     mem.write_word(0x40021018,gpio_before[0])
@@ -256,10 +279,17 @@ def main():
                 assert report['rcc_before'] == report['rcc_after'], 'target clock changed'
                 if not was_halted:
                     mem.write_word(0xe000edf0, 0xa05f0001)
+                if report.get('restored') is False:
+                    raise RuntimeError('CoreSight register restoration did not match snapshot')
         except BaseException as exc:
             report['target_cleanup_error'] = repr(exc)
             raise
         finally:
+            if args.raw and records and not (work/'raw-ddr.bin').exists():
+                partial = bytes(v[0] & 255 for v in records if v[0] >> 8 == 2)
+                (work/'raw-ddr.bin').write_bytes(partial)
+                report['partial_raw_bytes'] = len(partial)
+                report['partial_raw_sha256'] = sha(partial)
             (work/'usb-wire.bin').write_bytes(wire)
             report['usb_reader_errors'] = errors
             (work/'acceptance.json').write_text(json.dumps(report, indent=2)+'\n')
