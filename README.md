@@ -13,6 +13,9 @@ PS 跑 XUsbPs USB + CMSIS-DAP 协议，PL 里做 SWD 批量引擎和 CDMA 数据
 ETM 执行轨迹页直接 iframe superlinkPRO 原始 ETM 工作台，由 [`etm-service`](etm-service/README.md) 提供 Zynq 采集和 OpenCSD 解码，
 操作见 [`Zynq-ETM-Trace 操作说明`](docs/Zynq-ETM-Trace操作说明.md)。
 
+ETM 命令行：[`trace.cmd`](trace.cmd) / [`etm-service/trace.py`](etm-service/trace.py)，用法与限制见
+[`Trace CLI 使用说明`](docs/Trace-CLI使用说明.md)。
+
 ORBTrace/并行 ETM 背景：[`并行 ETM 与 PS USB`](docs/orbtrace-usb.md)、[`LUT 资源分析`](docs/orbtrace-area-native32.md)。
 后续优化见 [`资源与性能合并方案`](docs/探针资源与性能优化方案-20261030.md)。
 本次实验配对在 [`prebuilt/20261030_orbtrace_native32/`](prebuilt/20261030_orbtrace_native32/)，
