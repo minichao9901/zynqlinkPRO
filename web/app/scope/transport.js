@@ -18,6 +18,16 @@ import {nativeProbeEnabled,nativeUsbDevices} from '../core/native-probe.js';
 
 /** 探针上那个空闲的 bulk IN 端点（SWO 端点，SWO_STREAM=0 所以没人用）*/
 export const EP_SCOPE = 0x83;
+export function findScopeEndpoint(configuration){
+  // akaLinkPro publishes HSS on IN3; ZynqDAP reserves IN2 for ETM and uses IN7.
+  for(const number of [3,7])for(const iface of configuration.interfaces){
+    for(const alt of iface.alternates){
+      const ep=(alt.endpoints||[]).find(e=>e.endpointNumber===number&&e.type==='bulk'&&e.direction==='in');
+      if(ep)return {iface,ep};
+    }
+  }
+  return null;
+}
 const VID = 0x0d28;
 const dirtyDevices = new WeakSet();
 const pendingByDevice = new WeakMap();
@@ -101,27 +111,11 @@ export class VendorEpTransport {
   async _open(){
     const d = this.device;
     await this._usb.open();
-    let found = null;
-    for (const iface of d.configuration.interfaces){
-      for (const alt of iface.alternates){
-        /**
-         * 🚨 Chrome 的 WebUSB 报的 `endpointNumber` **不含方向位**：
-         *    描述符里的 `0x83`（IN EP3）这里读出来是 `3`、`0x02`（OUT EP2）是 `2`、
-         *    `0x81`（IN EP1）是 `1`。第一版按 `=== 0x83` 找，真机上永远找不到
-         *    （"这个设备没有 bulk IN 端点 0x83"）—— 只有上真机才会暴露，假探针测不出来。
-         *    而 `transferIn(ep)` / `clearHalt('in', ep)` 收的也是**这个不带方向位的编号**
-         *    （既有的 CMSIS-DAP 通路就是这么用的，所以它一直好使）。
-         */
-        const ep = (alt.endpoints || []).find(e =>
-          e.endpointNumber === (EP_SCOPE & 0x7f) && e.type === 'bulk' && e.direction === 'in');
-        if (ep){ found = { iface, ep }; break; }
-      }
-      if (found) break;
-    }
+    const found = findScopeEndpoint(d.configuration);
     if (!found){
       const seen = d.configuration.interfaces.flatMap(i => i.alternates.flatMap(a =>
         (a.endpoints || []).map(e => `0x${(e.endpointNumber | (e.direction === 'in' ? 0x80 : 0)).toString(16)}/${e.type}`)));
-      throw new Error('没找到 bulk IN 端点 0x83（SWO 端点）—— 旧固件？选错设备了？' +
+      throw new Error('没找到 HSS bulk IN 端点0x83或0x87，请核对探针固件。' +
         `这个设备暴露的端点：${seen.join(' ') || '(无)'}`);
     }
     this.iface = found.iface.interfaceNumber;

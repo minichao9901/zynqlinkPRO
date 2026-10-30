@@ -4,7 +4,9 @@ No target protocol is emulated here: bytes go to the connected ZynqDAP/COM
 devices. Browser-side DAP, RTT and scope parsers remain the source of behavior.
 """
 import base64
+import hashlib
 import hmac
+import json
 import re
 import threading
 import time
@@ -26,6 +28,47 @@ class NativeProbe:
         self.hid_lock = threading.RLock()
         self.port_lock = threading.RLock()
         self.hss_stopping = True
+        self.delivery_lock = threading.Condition()
+        self.delivery_seen = set()
+        self.delivery_cache = {}
+        self.delivery_replays = 0
+
+    def deliver(self, delivery, body, execute):
+        """An HTTP redelivery must never repeat a USB write/read/serial action."""
+        if not re.fullmatch(r'[0-9a-f]{32}', delivery or ''):
+            raise ValueError('无效传输请求ID')
+        signature = hashlib.sha256(json.dumps(body, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
+        with self.delivery_lock:
+            if delivery in self.delivery_seen:
+                entry = self.delivery_cache.get(delivery)
+                if entry is None:
+                    raise ValueError('传输结果已回收；拒绝重放硬件动作')
+                if entry['signature'] != signature:
+                    raise ValueError('同一传输ID的内容不一致')
+                while not entry['done']:
+                    self.delivery_lock.wait(timeout=1)
+                self.delivery_replays += 1
+                return entry['result']
+            if len(self.delivery_seen) >= 100000:
+                raise ValueError('本地传输会话已达100000请求；请停止硬件任务后重新启动服务')
+            self.delivery_seen.add(delivery)
+            entry = dict(signature=signature, done=False, result=None)
+            self.delivery_cache[delivery] = entry
+        try:
+            result = execute()
+        except Exception as error:
+            result = ({'ok': False, 'error': str(error), 'type': type(error).__name__}, 400)
+        with self.delivery_lock:
+            entry.update(done=True, result=result)
+            # Keep lightweight tombstones for every ID for this service's
+            # lifetime. Evicted results fail closed instead of being replayed.
+            for key in list(self.delivery_cache):
+                if len(self.delivery_cache) <= 256:
+                    break
+                if key != delivery and self.delivery_cache[key]['done']:
+                    del self.delivery_cache[key]
+            self.delivery_lock.notify_all()
+        return result
 
     def busy(self):
         b = self.backend
@@ -307,11 +350,22 @@ def install(app, backend, token_file):
         value = request.get_json()
         if not isinstance(value, dict) or (request.content_length or 0) > 400000:
             abort(400)
-        try:
+        def execute():
             handlers = {'usb': proxy.usb_call, 'hid': proxy.hid_call, 'serial': proxy.serial_call}
             if kind not in handlers:
                 raise ValueError('未知本地探针通路')
-            return jsonify(ok=True, value=handlers[kind](action, value))
+            return ({'ok': True, 'value': handlers[kind](action, value)}, 200)
+        try:
+            if kind == 'meta' and action == 'status':
+                with proxy.delivery_lock:
+                    return jsonify(ok=True, value={'requests': len(proxy.delivery_seen),
+                        'redeliveries': proxy.delivery_replays, 'cached': len(proxy.delivery_cache)})
+            delivery = request.headers.get('X-Trace-Delivery')
+            if delivery:
+                result, status = proxy.deliver(delivery, {'kind': kind, 'action': action, 'value': value}, execute)
+                return jsonify(result), status
+            result, status = execute()
+            return jsonify(result), status
         except Exception as error:
             return jsonify(ok=False, error=str(error), type=type(error).__name__), 400
 

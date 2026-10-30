@@ -1267,6 +1267,13 @@ export class WebUsbDapProbe {
     const data = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
     if (!data.length) return;
     await this._writeMemOnce(addr, data, apIndex);
+    // MMIO includes write-only, write-one-to-clear and command registers.
+    // Comparing their read value with the write can repeat reset/step/clear
+    // side effects. Drain the posted AP write without reading the peripheral.
+    if ((addr >= 0x40000000 && addr < 0x60000000) || addr >= 0xe0000000){
+      await this._flushPosted();
+      return;
+    }
     if (this.verifyWrites === false) return;      // 排障开关（默认开）
     /**
      * 回读确认：**严格档每次都做；快速档只对"换了地址的写"做**。

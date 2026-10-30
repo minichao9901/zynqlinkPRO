@@ -140,9 +140,7 @@ def serve(args):
     spec = importlib.util.spec_from_file_location('toolbox_service', ROOT / 'web/tools/dev/serve-etm.py')
     service = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(service)
-    from werkzeug.serving import make_server
-    import logging
-    logging.getLogger('werkzeug').setLevel(logging.WARNING)
+    from waitress.server import create_server
     folder = Path(args.runtime).resolve()
     folder.mkdir(parents=True, exist_ok=False)
     token = secrets.token_hex(32)
@@ -152,7 +150,10 @@ def serve(args):
     os.environ['TEMP'] = os.environ['TMP'] = str(temporary)
     pair = (args.bit, args.zynq_elf) if args.bit else None
     app = service.create_application(ROOT / 'etm-service', ROOT / 'web', folder / 'cli-token', pair, args.native_probe)
-    server = make_server('127.0.0.1', args.port, app, threaded=True)
+    # Keep HTTP/1.1 connections alive. Closing every byte-level USB RPC can
+    # exhaust Windows' 16384 ephemeral TCP ports during debug pressure tests.
+    server = create_server(app, host='127.0.0.1', port=args.port, threads=16,
+                           connection_limit=64, max_request_body_size=48 << 20)
     state = {'protocol': 'workbench/1', 'url': 'http://127.0.0.1:' + str(args.port), 'pid': os.getpid(), 'status': 'serving'}
     state['nativeProbe']=bool(args.native_probe)
     if pair:
@@ -165,11 +166,12 @@ def serve(args):
     emit({**state, 'browserUrl': state['url'] + '/?trace-cli=' + token + '#flash',
           'note': '在Chrome/Edge打开browserUrl，保持页面打开；首次硬件授权需在网页完成。Ctrl+C退出服务。'})
     try:
-        server.serve_forever()
+        server.run()
     except KeyboardInterrupt:
         pass
     finally:
-        server.server_close()
+        server.close()
+        server.task_dispatcher.shutdown()
         state['status'] = 'stopped'
         (folder / 'toolbox-runtime.json').write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding='utf-8')
 
@@ -234,13 +236,16 @@ def parser():
     sub.add_parser('trace', help='原样转交全部现有ETM Trace CLI参数（trace之后的--help）')
     sub.add_parser('bridge', help='启动可选OpenOCD/J-Link桥（bridge --help查看桥选项）')
     v = sub.add_parser('validate', help='通过真实Web页面运行F103ZE回归，保存逐步证据')
-    v.add_argument('suite', choices=['capacity', 'debug'])
+    v.add_argument('suite', choices=['capacity', 'debug', 'scope', 'rttcdc'])
     v.add_argument('--artifacts', required=True, help='新的证据目录，拒绝覆盖')
     v.add_argument('--elf', default=str(ROOT / 'prebuilt/20261031_f103ze_cdc_trace/fw-48-echo.elf'))
     v.add_argument('--sources', default=str(ROOT / 'docs/validation/f103ze-web-flow-20261031/source-snapshot'))
     v.add_argument('--lengths', default='0.01,0.1,0.2,1')
     v.add_argument('--rounds', type=int, default=20)
     v.add_argument('--case-timeout', type=float, default=600)
+    v.add_argument('--clocks',default='20000000,30000000,36000000,45000000,60000000')
+    v.add_argument('--periods',default='100,20,10,5,2')
+    v.add_argument('--stream-seconds',type=float,default=.5)
     return p
 
 
@@ -248,6 +253,8 @@ def main(argv=None):
     argv = list(sys.argv[1:] if argv is None else argv)
     if argv and argv[0] == 'trace':
         return subprocess.call([sys.executable, '-X', 'utf8', str(ROOT / 'etm-service/trace.py'), *argv[1:]])
+    if argv and argv[0] == 'fixtures':
+        return subprocess.call([sys.executable, '-X', 'utf8', str(ROOT / 'tools/build_f103_fixtures.py'), *argv[1:]])
     if argv and argv[0] == 'bridge':
         node = shutil.which('node')
         if not node:
@@ -275,7 +282,10 @@ def main(argv=None):
             serve(args)
             return 0
         if args.command == 'validate':
-            from tools.f103_web_acceptance import run
+            if args.suite in ('scope','rttcdc'):
+                from tools.f103_stream_acceptance import run
+            else:
+                from tools.f103_web_acceptance import run
             emit(run(args), args.out)
             return 0
         client = Client(args.runtime, args.timeout)

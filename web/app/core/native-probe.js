@@ -19,9 +19,20 @@ async function call(kind,action,value={}){
   const w=host();if(!w)throw Error('本地探针服务未启用');
   const token=new URLSearchParams(w.location.search).get('trace-cli');
   if(!/^[0-9a-f]{64}$/.test(token||''))throw Error('本地探针服务需要CLI运行时地址');
-  const response=await fetch(w.location.origin+'/native-probe/'+kind+'/'+action,{method:'POST',
-    headers:{'Content-Type':'application/json','X-Trace-CLI':token},body:JSON.stringify(value)});
-  const result=await response.json();
+  const delivery=identity();
+  let response,result;
+  const attempts=w.document.body.dataset.nativeDelivery==='1'?3:1;
+  for(let attempt=0;attempt<attempts;attempt++){
+    try{
+      response=await fetch(w.location.origin+'/native-probe/'+kind+'/'+action,{method:'POST',
+        headers:{'Content-Type':'application/json','X-Trace-CLI':token,'X-Trace-Delivery':delivery},body:JSON.stringify(value)});
+      result=await response.json();
+      break;
+    }catch(error){
+      if(attempt===attempts-1)throw Error(`本地${kind}/${action}传输失败；硬件动作未重放：${error.message}`);
+      await new Promise(r=>setTimeout(r,100));
+    }
+  }
   if(!response.ok||!result.ok)throw Error(result.error||'本地探针服务HTTP '+response.status);
   return result.value;
 }

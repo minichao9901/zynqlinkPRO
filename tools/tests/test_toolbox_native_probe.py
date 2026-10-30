@@ -12,6 +12,25 @@ from native_probe import NativeProbe, install
 
 
 class NativeProbeTests(unittest.TestCase):
+    def test_http_redelivery_returns_the_original_result_without_hardware_reexecution(self):
+        with tempfile.TemporaryDirectory() as folder:
+            token=Path(folder)/'token';token.write_text('c'*64)
+            proxy=NativeProbe(SimpleNamespace(),token)
+            calls=[]
+            def operation():
+                calls.append('USB write/read')
+                return ({'ok':True,'value':{'data':'real USB reply'}},200)
+            identity='a'*32;body={'action':'write','data':'abc'}
+            first=proxy.deliver(identity,body,operation)
+            self.assertEqual(proxy.deliver(identity,body,operation),first)
+            self.assertEqual(len(calls),1)
+            with self.assertRaisesRegex(ValueError,'内容不一致'):
+                proxy.deliver(identity,{'action':'reset'},operation)
+            del proxy.delivery_cache[identity]
+            with self.assertRaisesRegex(ValueError,'拒绝重放'):
+                proxy.deliver(identity,body,operation)
+            self.assertEqual(len(calls),1)
+
     def test_loopback_token_and_origin_are_required_before_hardware_dispatch(self):
         from flask import Flask
         app = Flask('native_probe_test')

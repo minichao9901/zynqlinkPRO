@@ -151,6 +151,24 @@ samples对同一份五线样本分别运行不滤波、因果三点多数和逐�
 字节、边界和字节SHA，不修补ETM字节。依赖numpy/pyelftools与仓库原生解码器。该短窗实验
 不能直接证明连续采集可靠性；样本只持续约0.975ms，可能缺少I-SYNC而解不出执行路径。
 
+### 本地服务依赖与压力入口
+
+```powershell
+python -m pip install -r etm-service/requirements.txt
+python toolbox.py fixtures rtt --out prebuilt/NEW_RTT_DIR
+python toolbox.py fixtures scope --out prebuilt/NEW_SCOPE_DIR
+python toolbox.py --runtime R validate rttcdc --elf prebuilt/NEW_RTT_DIR/fw.elf --stream-seconds .5 --artifacts build/rtt-web-001
+python toolbox.py --runtime R validate scope --elf prebuilt/NEW_SCOPE_DIR/fw.elf --periods 100,20,10,5,2 --stream-seconds 1 --artifacts build/scope-web-001
+```
+
+fixtures固定构建F103ZE额定72MHz，保存源码与ELF哈希。stream验收会通过Web桥实际烧录所给
+ELF；结束后需用Web烧回业务固件。RTT逐条检查序号、回退和字节对账，J-Scope导出真实CSV并
+检查计数值及流质量。包含失败的矩阵不会标为通过；实测结果以统一验收文档为准。
+
+serve使用Waitress的HTTP/1.1连接复用，避免高频本机RPC耗尽Windows动态端口。
+本地传输相同请求ID只执行一次；结果缓存过期拒绝重放。100000请求达到会话上限后，
+需先停止硬件任务再重新启动服务。普通WebUSB不经过此服务。
+
 ### WebUSB采集（首次需要浏览器授权）
 
 1. `page etm describe`，向返回的ELF控件 upload 目标ELF，等待标签更新。
