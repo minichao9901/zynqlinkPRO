@@ -24,18 +24,19 @@ export class EtmView{
   init(){
     const panel=document.getElementById('tab-etm');
     panel.innerHTML=`<div class="z-page etm-full-layout"><div class="z-heading"><div><h1>ETM 执行轨迹</h1><p>指令历史 · 源码 · 调用路径</p></div><div class="z-actions"><span class="etm-service-state">Zynq ETM trace</span><span class="z-badge">四位 DDR / source ID 2</span></div></div>
-    <div class="etm-layout-meta"><strong>目标与录制</strong><span>ELF → 配置 → 采集</span><nav class="etm-step-tabs" aria-label="采集步骤"><button class="active">1 调试</button><button>2 时钟</button><button>3 采集</button><button>4 文件</button></nav></div>
-    <div class="z-columns"><aside class="z-card"><h2>① 载入目标 ELF</h2><div class="z-actions"><label class="btn etm-primary-btn">浏览载入 ELF…<input id="ze-elf" type="file" accept=".elf,.axf,.out" hidden></label></div><p id="ze-image" class="muted">尚未载入 ELF</p>
+    <div class="etm-layout-meta"><strong>目标与录制</strong><span>ELF → 配置 → 采集</span><nav class="etm-step-tabs" id="ze-steps" aria-label="采集步骤"><button class="active" data-step="target">1 调试</button><button data-step="clock">2 时钟</button><button data-step="capture">3 采集</button><button data-step="files">4 文件</button></nav></div>
+    <div class="z-columns"><aside class="z-card"><h2 id="ze-step-target">① 载入目标 ELF</h2><div class="z-actions"><label class="btn etm-primary-btn">浏览载入 ELF…<input id="ze-elf" type="file" accept=".elf,.axf,.out" hidden></label></div><p id="ze-image" class="muted">尚未载入 ELF</p>
     <details><summary>配套源码（可选）</summary><label class="btn">选择源码文件<input id="ze-source" type="file" multiple hidden></label></details>
     <h2>② 连接与识别目标</h2><div class="z-actions"><button id="ze-connect" class="etm-primary-btn">连接 ZynqDAP</button><button id="ze-pick">换设备…</button><button id="ze-disconnect">断开</button></div><p id="ze-device" class="muted">USB 未连接</p>
     <p class="etm-capability-note">F103ZE / Zynq ETM 已验收；并行 TRACECLK 由 FPGA 接收。</p>
-    <h2>③ ETM / TPIU 配置</h2>
+    <h2 id="ze-step-clock">③ ETM / TPIU 配置</h2>
     <p class="z-pinout">J7.16 TRACECLK<br>J7.15 / 17 / 18 / 19 → D0 / D1 / D2 / D3<br>J7.14 GND · 3.3 V · TRACECLK ≤ 50 MHz</p>
     <label><input id="ze-auto" type="checkbox" checked>自动配置并恢复 F103ZE ETM</label><label>TRACECLK 分频 (HCLK / N)<select id="ze-div"><option>1</option><option>2</option><option selected>3</option><option>4</option></select></label><label>采集时长 (ms，0 为手动)<input id="ze-ms" type="number" min="0" max="60000" value="10"></label>
+    <div class="z-actions"><button id="ze-read-registers">读取 Trace 寄存器</button></div><pre id="ze-registers" class="z-log">连接后可回读 DEMCR / DBGMCU / ETM / TPIU / GPIOE。</pre>
     <label>内存上限 (MiB)<input id="ze-limit" type="number" min="1" max="256" value="16"></label>
-    <h2>④ 开始采集</h2><div class="z-actions"><button id="ze-start" class="etm-primary-btn">开始采集</button><button id="ze-stop">停止</button></div>
+    <h2 id="ze-step-capture">④ 开始采集</h2><div class="z-actions"><button id="ze-start" class="etm-primary-btn">开始采集</button><button id="ze-stop">停止</button></div>
     <details><summary>ETMv3 解码寄存器</summary><textarea id="ze-config" rows="6">{"protocol":"ETMv3","idr":1091891777,"ctrl":2320,"ccer":100352,"traceid":2}</textarea><p>自动配置会替换为目标实际读回值；手工配置时由目标工程启用 ETM。</p></details>
-    <h2>④ 文件与样例</h2><input id="ze-record" type="file" accept=".zetm,.json" hidden>
+    <h2 id="ze-step-files">⑤ 文件与样例</h2><input id="ze-record" type="file" accept=".zetm,.json" hidden>
     <button id="ze-sample">载入真实 CM3 仿真样例</button><button id="ze-sample-f103">载入 F103ZE 实板样例</button><button id="ze-decode">解码 / 重新解码</button>
     <pre id="ze-log" class="z-log" aria-live="polite"></pre></aside>
     <div class="z-card z-trace"><div class="etm-record-bar"><strong id="ze-record-title">历史执行流与当前目标状态分别显示</strong><span id="ze-status" class="z-stats">尚无捕获</span><button id="ze-open">导入记录</button><button id="ze-save">保存</button></div><nav class="z-etm-tabs" id="ze-tabs" aria-label="分析视图"><button data-view="flow" class="active">执行流</button><button data-view="stats">调用统计</button><button data-view="flame">火焰图</button><button data-view="hot">热点</button><button data-view="packet">ETM 包</button><button data-view="section">可信区段</button></nav><canvas id="ze-timeline" height="110" aria-label="执行地址时间轴"></canvas>
@@ -53,7 +54,14 @@ export class EtmView{
     <div class="z-trace-columns"><div><h2>历史调用栈</h2><ol id="ze-stack" class="z-stack"></ol></div><div><h2>源码 / 指令字节</h2><pre id="ze-code" class="z-code">载入记录后解码；可另选源码进行逐范围回放。</pre></div></div></div></div></div>`;
     this.$=id=>document.getElementById('ze-'+id);
     const action=fn=>async()=>{try{await fn();}catch(e){this.log(e.message);toast(e.message,'err');}finally{this.buttons();}};
+    const steps={target:'step-target',clock:'step-clock',capture:'step-capture',files:'step-files'};
+    for(const button of this.$('steps').querySelectorAll('button'))button.onclick=()=>{
+      const target=document.getElementById('ze-'+steps[button.dataset.step]);
+      target?.scrollIntoView({behavior:'smooth',block:'start'});
+      for(const item of this.$('steps').querySelectorAll('button'))item.classList.toggle('active',item===button);
+    };
     this.$('connect').onclick=action(()=>this.connect());this.$('pick').onclick=action(()=>this.connectNew());this.$('disconnect').onclick=action(()=>this.releaseProbe());
+    this.$('read-registers').onclick=action(async()=>{this.$('registers').textContent=JSON.stringify(await this.traceRegisters(),null,2);});
     this.$('start').onclick=action(()=>this.start());this.$('stop').onclick=action(()=>this.stop());
     this.$('elf').onchange=action(async()=>{const f=this.$('elf').files[0];if(f)await this.loadElf(new Uint8Array(await f.arrayBuffer()),f.name);});
     this.$('open').onclick=()=>this.$('record').click();this.$('record').onchange=action(async()=>{const f=this.$('record').files[0];if(f)await this.loadRecord(JSON.parse(await f.text()));});
