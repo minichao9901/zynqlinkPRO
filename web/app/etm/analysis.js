@@ -138,7 +138,8 @@ export function analyze({records=[], symbols=[], nameOf, resolve, maxIssues=MAX_
     if(e.type===ELEM.EXCEPTION_RET){if(stack.length>1)stack.pop();pendingCall=-1;continue;}
     if(e.type===ELEM.EXCEPTION){
       touch(e);stats.exceptions++;
-      if(section){section.exception++;section.ranges++;section.halfwords+=weightOf(e);}
+      // 异常入口不占指令范围数，单独记在区段的 exception 上，免得和 ranges 口径对不上。
+      if(section)section.exception++;
       // 异常目标本身就是被调用帧的入口：上一条 BL_LINK 帧在这里落地。
       if(pendingCall>=0){
         const pending=frames[pendingCall];
@@ -203,8 +204,9 @@ export function analyze({records=[], symbols=[], nameOf, resolve, maxIssues=MAX_
     }
   }
   if(!sections.length)openSection('empty');
-  // 可信区段：没有数据缺口、没有地址问题、并且真的解出了执行数据。
-  for(const part of sections)part.trusted=!part.gap&&part.issues===0&&part.ranges+part.exception>0;
+  // 可信区段：没有数据缺口、并且真的解出了执行数据。地址类问题按条数暴露在 issues 里，
+  // 不直接否定整个区段——实板上 ADDR_UNKNOWN 在 trace 起点之后出现是常见现象。
+  for(const part of sections)part.trusted=!part.gap&&part.ranges+part.exception>0;
   // 收尾：从后往前把「self + 子树 total」加到父节点，得到每帧的 total。
   for(let i=frames.length-1;i>0;i--){
     const frame=frames[i];

@@ -74,8 +74,16 @@ ZYNQ Micro-SYS 的 J7 连续 15–19 脚，电平 3.3 V，另接地：
 
 `.zetm` 保存 ETM 字节、SHA-256、解码配置、匹配 ELF 或指令镜像、源 ID 和捕获质量。
 检测到包序号缺口、PL 溢出、结束包缺失时，不应视作完整捕获。设备包同时携带 PS 实际
-FCLK 与 SWD/JTAG TCK（kHz 精度）。示例 `samples/cm3-orbtrace.zetm` 来自真实 DesignStart
-CM3 仿真，明确标为仿真记录，不是实板结果；可一键导入并在浏览器验证 22,036 个指令范围。
+FCLK 与 SWD/JTAG TCK（kHz 精度）。仓库里有两份样例，都能一键导入并在浏览器里解码：
+
+| 样例 | 来源 | 解码结果 |
+|---|---|---|
+| `samples/cm3-orbtrace.zetm` | DesignStart CM3 实际仿真 | 1948 字节、22,036 个指令范围、1 个函数 |
+| `samples/f103ze-oversample.zetm` | F103ZE 实板，24 MHz TRACECLK 过采样 parser 路径 | 1309 字节、6368 个指令范围、8 个函数、253 次调用、深度 3 |
+
+实板样例由 `web/tools/make-etm-sample.mjs` 从验收目录的 `etm.bin` + 目标 ELF 生成，
+只带 ELF 的加载段和 221 个函数符号（不含 DWARF），ELF 与 ETM 的 SHA-256 都按验收 JSON
+核对过，来源见记录里的 `provenance` 字段。
 
 ## 检查和重建
 

@@ -45,8 +45,10 @@ OpenCSD 对每段指令范围给出 `last_i_type`（`ocsd_instr_type`）和 `las
 - 区段按 `TRACE_ON` 与 `NO_SYNC` 切分。`NO_SYNC` 的 `payload` 是 `unsync_info_t`：
   0 UNKNOWN / 1 INIT_DECODER / 2 RESET / 3 OVERFLOW / 4 DISCARD / 5 BAD_PACKET /
   6 BAD_IMAGE / 7 EOT，只有 3～6 计为真实数据缺口。
-- 只有「无缺口、无地址问题、且真的解出了执行数据」的区段标为可信。
-- 地址不可访问 / 地址未知 / 孤立返回都进问题列表（上限 500 条，超出时在 JSON 里标明已截断）。
+- 「可信」= 该区段没有数据缺口、并且真的解出了执行数据。地址不可访问 / 地址未知 / 孤立
+  返回都进问题列表单独计数（上限 500 条，超出时在 JSON 里标明已截断），但不直接否定整个
+  区段——实板上 trace 起点之后出现 `ADDR_UNKNOWN` 是常见现象。
+- 异常入口单独记 `exception`，不混进指令范围数，保证各区段 `ranges` 之和等于总范围数。
 
 ## 验证
 
@@ -59,11 +61,20 @@ node web/tools/page-smoke.mjs
 
 `etm-analysis.test.mjs` 覆盖调用/返回、尾调用、未同步缺口、可信区段、火焰图布局、CSV/JSON
 导出和 60 万范围的性能下限；`page-smoke.mjs` 用 CDP 驱动无头 Edge 点开九个页面，并在 ETM
-页载入 `samples/cm3-orbtrace.zetm`，跑完「WASM 解码 → 调用树 → 六个视图」。
-当前实测：22,036 个指令范围、1 个函数、1 个可信区段、3 类包、控制台无错误。
+页依次载入两份样例，跑完「WASM 解码 → 调用树 → 六个视图」。
+
+当前实测：
+
+| 样例 | 结果 |
+|---|---|
+| `samples/cm3-orbtrace.zetm`（CM3 仿真） | 1948 字节 → 22,036 范围、1 函数、1 区段、3 类包 |
+| `samples/f103ze-oversample.zetm`（F103ZE 实板，24 MHz TRACECLK） | 1309 字节 → 6,368 范围、8 函数、253 调用、深度 3、火焰图 261 个节点 |
+
+实板样例的 `main → cdc_poll` 调用（252 次）来自真实 ETM 数据，不是合成流。
 
 ## 未完成
 
 - 火焰图目前不做点击缩放/合并同类帧，只做整树静态 SVG。
-- 源码执行流需要 ELF 带 DWARF 行表；只载入指令镜像的记录导不出这一项。
-- 实板 ETM 接线后的完整验收仍未完成，分析层只用仿真样例和记录验证过。
+- 源码执行流需要 ELF 带 DWARF 行表；只带加载段和符号的样例导不出这一项，要另载 ELF。
+- 实板 ETM 采集链路本身已在 24 MHz TRACECLK 工作点端到端验收过（见
+  `ETM过采样端到端验收-20261030.md`），但那仍是实验模式；默认生产 IDDR 配对没有切换。

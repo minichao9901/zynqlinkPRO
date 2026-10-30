@@ -32,7 +32,7 @@ export class EtmView{
     <div class="z-actions"><button id="ze-start">开始采集</button><button id="ze-stop">停止</button></div>
     <details><summary>ETMv3 解码寄存器</summary><textarea id="ze-config" rows="6">{"protocol":"ETMv3","idr":1091891777,"ctrl":2320,"ccer":100352,"traceid":2}</textarea><p>自动配置会替换为目标实际读回值；手工配置时由目标工程启用 ETM。</p></details>
     <h2>本地记录</h2><div class="z-actions"><button id="ze-open">导入记录</button><button id="ze-save">保存记录</button></div><input id="ze-record" type="file" accept=".zetm,.json" hidden>
-    <button id="ze-sample">载入真实 CM3 仿真样例</button><button id="ze-decode">解码 / 重新解码</button>
+    <button id="ze-sample">载入真实 CM3 仿真样例</button><button id="ze-sample-f103">载入 F103ZE 实板样例</button><button id="ze-decode">解码 / 重新解码</button>
     <label class="btn">载入源码文件<input id="ze-source" type="file" multiple hidden></label>
     <pre id="ze-log" class="z-log" aria-live="polite"></pre></aside>
     <div class="z-card z-trace"><div id="ze-status" class="z-stats">尚无捕获</div><canvas id="ze-timeline" height="110" aria-label="执行地址时间轴"></canvas>
@@ -56,6 +56,7 @@ export class EtmView{
     this.$('elf').onchange=action(async()=>{const f=this.$('elf').files[0];if(f)await this.loadElf(new Uint8Array(await f.arrayBuffer()),f.name);});
     this.$('open').onclick=()=>this.$('record').click();this.$('record').onchange=action(async()=>{const f=this.$('record').files[0];if(f)await this.loadRecord(JSON.parse(await f.text()));});
     this.$('save').onclick=action(()=>this.saveRecord());this.$('sample').onclick=action(async()=>this.loadRecord(await(await fetch('samples/cm3-orbtrace.zetm')).json()));
+    this.$('sample-f103').onclick=action(async()=>this.loadRecord(await(await fetch('samples/f103ze-oversample.zetm')).json()));
     this.$('decode').onclick=action(()=>this.decode());
     this.$('csv').onclick=action(()=>this.exportCsv());this.$('svg').onclick=action(()=>this.exportSvg());
     this.$('json').onclick=action(()=>this.exportJson());this.$('srcflow').onclick=action(()=>this.exportSourceFlow());
@@ -68,7 +69,7 @@ export class EtmView{
     this.$('filter').oninput=()=>this.renderFlow();this.$('timeline').onclick=e=>{if(this.ranges.length)this.select(Math.floor((e.offsetX/this.$('timeline').clientWidth)*this.ranges.length));};
     this.buttons();
   }
-  buttons(){if(!this.$)return;this.$('start').disabled=!this.probe||this.busy||!this.images.length||(this.$('auto').checked&&!this.elfBytes);this.$('stop').disabled=!this.transport?.running&&!this.worker;this.$('disconnect').disabled=!this.probe||this.busy&&!this.transport?.running;this.$('connect').disabled=!!this.probe||this.busy;this.$('decode').disabled=!this.etm?.length||this.busy;this.$('save').disabled=!this.etm?.length||this.busy;this.$('sample').disabled=this.busy;this.$('open').disabled=this.busy;this.$('elf').disabled=this.busy;this.$('csv').disabled=!this.model;this.$('svg').disabled=!this.model;this.$('json').disabled=!this.model;this.$('srcflow').disabled=!this.model||!this.lines;}
+  buttons(){if(!this.$)return;this.$('start').disabled=!this.probe||this.busy||!this.images.length||(this.$('auto').checked&&!this.elfBytes);this.$('stop').disabled=!this.transport?.running&&!this.worker;this.$('disconnect').disabled=!this.probe||this.busy&&!this.transport?.running;this.$('connect').disabled=!!this.probe||this.busy;this.$('decode').disabled=!this.etm?.length||this.busy;this.$('save').disabled=!this.etm?.length||this.busy;this.$('sample').disabled=this.busy;this.$('sample-f103').disabled=this.busy;this.$('open').disabled=this.busy;this.$('elf').disabled=this.busy;this.$('csv').disabled=!this.model;this.$('svg').disabled=!this.model;this.$('json').disabled=!this.model;this.$('srcflow').disabled=!this.model||!this.lines;}
   log(text){this.$('log').textContent+=(new Date().toLocaleTimeString())+' '+text+'\n';this.$('log').scrollTop=this.$('log').scrollHeight;}
   async connect(){return runProbeOperation(this,'etm',async()=>{
     const device=await navigator.usb.requestDevice({filters:[{vendorId:0x0d28,productId:0x0204}]});

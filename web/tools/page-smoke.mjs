@@ -153,6 +153,37 @@ try{
   console.log('  ETM 视图：执行流 '+etm.rows+' 行 · 调用统计 '+etm.stats+' 行 · 区段 '+etm.sections+
     ' · 包类型 '+etm.packets+' · 栈深 '+etm.stack+' · 火焰节点 '+etm.flameNodes);
 
+  // 第二份样例是 F103ZE 实板过采样采集（24 MHz TRACECLK，1309 字节），带真实函数符号，
+  // 用来验证调用/返回还原在真实 trace 上成立，而不只是合成循环。
+  await evaluate('document.getElementById("ze-sample-f103").click()');
+  let f103=null;
+  for(let attempt=0;attempt<160;attempt++){
+    await sleep(250);
+    try{
+      f103=await evaluate(`(()=>{
+        const max=Number(document.getElementById('ze-cursor').max);
+        if(max!==6367)return {ready:false,max};
+        const stats=[...document.querySelectorAll('#ze-statrows tr')].map(r=>r.cells[0].textContent);
+        document.querySelector('[data-view="flame"]').click();
+        const svg=document.querySelector('#ze-flame svg');
+        return {ready:true,max,stats,
+          flameNodes:svg?svg.querySelectorAll('rect').length:0,
+          samples:document.getElementById('ze-samples')?.textContent||'',
+          status:document.getElementById('ze-status').innerText};
+      })()`);
+    }catch{}
+    if(f103?.ready)break;
+  }
+  if(!f103?.ready){
+    fail('ETM 实板样例','没有解出 6368 个指令范围（当前滑杆上限 '+(f103?.max??'?')+'）');
+  }else{
+    const named=['main','cdc_poll'].filter(name=>f103.stats.includes(name));
+    if(named.length<2)fail('ETM 实板样例','函数符号没有解析出来：'+f103.stats.slice(0,6).join(','));
+    if(f103.flameNodes<5)fail('ETM 实板样例','火焰图节点过少：'+f103.flameNodes);
+    console.log('  ETM 实板样例：'+f103.status.replace(/\s+/g,' ')+' · 函数 '+f103.stats.length+
+      ' · 火焰节点 '+f103.flameNodes);
+  }
+
   // 调试器模拟目标：内置 Cortex-M7 模型，走「选后端 → 连接 → 读 IDCODE/断点能力」这条真路径。
   await evaluate('document.querySelector(\'[data-tab="dbg"]\').click()');
   await sleep(150);
