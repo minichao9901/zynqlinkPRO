@@ -12,7 +12,7 @@ module tb_packet_axi;
  reg [31:0] cmd_addr=0,cmd_data=0;
  reg rsp_en=0;reg [31:0] rsp_addr=0;wire [31:0] rsp_data;
  wire swclk;tri swdio;
- swd_controller dut(.clk(clk),.rst_n(rst_n),
+ swd_controller #(.ENABLE_DIAGNOSTICS(0)) dut(.clk(clk),.rst_n(rst_n),
    .s_axi_awaddr(awaddr),.s_axi_awprot(3'd0),.s_axi_awvalid(awvalid),.s_axi_awready(awready),
    .s_axi_wdata(wdata),.s_axi_wstrb(4'hf),.s_axi_wvalid(wvalid),.s_axi_wready(wready),
    .s_axi_bvalid(bvalid),.s_axi_bready(1'b1),
@@ -86,7 +86,7 @@ module tb_packet_axi;
      $fatal(1,"status=%h core calls=%d",status,accepted);
    @(negedge clk);rsp_en=1;rsp_addr=0;@(negedge clk);
    if(rsp_data!==32'h00010003)$fatal(1,"response BRAM %h",rsp_data);
-   rd(7'h4c,status);if(status!==32'h4450000f)$fatal(1,"reset feature %h",status);
+   rd(7'h4c,status);if(status!==32'h4450001f)$fatal(1,"reset feature %h",status);
    stall=1;accepted=0;wr(7'h40,1);repeat(12)@(negedge clk);
    rd(7'h48,status);if(!status[0])$fatal(1,"packet did not stall");
    wr(7'h50,1);rd(7'h50,status);if(status!==1)$fatal(1,"packet reset counter %h",status);

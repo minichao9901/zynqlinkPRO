@@ -18,7 +18,9 @@
 typedef struct {
   uint32_t lo, hi, ev, arg;
 } dap_trace_ent_t;
+#if DAP_ENABLE_TRACE
 __attribute__((section(".dap_trace"), aligned(64))) volatile dap_trace_ent_t dap_trace_buf[DAP_TRACE_MAX];
+#endif
 __attribute__((section(".dap_trace"))) volatile uint32_t dap_trace_count;
 __attribute__((section(".dap_trace"))) volatile uint32_t dap_trace_hz;
 
@@ -175,6 +177,7 @@ int chry_dap_usb_session_reset(void)
 
 void chry_dap_init(void)
 {
+#if DAP_ENABLE_TRACE
   XTime t0, t1;
 
   /* The trace buffer sits at 0x3F000000 in DDR; keep it non-cacheable so
@@ -185,6 +188,7 @@ void chry_dap_init(void)
   sleep(1);
   XTime_GetTime(&t1);
   dap_trace_hz = (uint32_t)(t1 - t0);
+#endif
   dap_trace_count = 0U;
 
   // chry_ringbuffer_init(&g_uartrx, uartrx_ringbuffer, (8 * 1024));

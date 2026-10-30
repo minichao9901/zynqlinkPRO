@@ -103,7 +103,11 @@ This information includes:
 /// This configuration settings is used to optimize the communication performance with the
 /// debugger and depends on the USB peripheral. For devices with limited RAM or USB buffer the
 /// setting can be reduced (valid range is 1 .. 255).
+#ifdef ZYNQLINK_OCM
+#define DAP_PACKET_COUNT        4U
+#else
 #define DAP_PACKET_COUNT        16U              ///< Specifies number of packets buffered.
+#endif
 
 /// Indicate that UART Serial Wire Output (SWO) trace is available.
 /// This information is returned by the command \ref DAP_Info as part of <b>Capabilities</b>.

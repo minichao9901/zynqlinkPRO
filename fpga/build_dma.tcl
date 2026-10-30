@@ -5,7 +5,9 @@ if {[file exists [file join $out zynqlink_dma.xpr]] && [lsearch -exact $argv --r
     source [file join $root fpga build_incremental.tcl]
     exit
 }
-create_project -force zynqlink_dma $out -part xc7z020clg400-2
+set target_part xc7z020clg400-2
+if {[info exists ::env(ZYNQLINK_PART)]} {set target_part $::env(ZYNQLINK_PART)}
+create_project -force zynqlink_dma $out -part $target_part
 source [file join $root fpga configure_ip_cache.tcl]
 set_param general.maxThreads 8
 set_property target_language Verilog [current_project]
@@ -66,6 +68,7 @@ save_bd_design
 source [file join $root fpga probe_stream_bd.tcl]
 source [file join $root fpga probe_jtag_bd.tcl]
 source [file join $root fpga orbtrace_bd.tcl]
+source [file join $root fpga compact_config.tcl]
 source [file join $root fpga axi_pipeline.tcl]
 write_bd_tcl -force [file join $out system_dma.tcl]
 set_property synth_checkpoint_mode Hierarchical [get_files system.bd]

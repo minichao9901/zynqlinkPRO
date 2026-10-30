@@ -68,7 +68,15 @@
 #include "sleep.h"
 
 /************************** Constant Definitions *****************************/
+#ifdef ZYNQLINK_OCM
+#define MEMORY_SIZE (40 * 1024)
+#define DAP_RX_DESCRIPTORS 4
+#define CDC_RX_DESCRIPTORS 2
+#else
 #define MEMORY_SIZE (512 * 1024)
+#define DAP_RX_DESCRIPTORS 16
+#define CDC_RX_DESCRIPTORS 16
+#endif
 
 // #define CDC_IN_EP   0x82
 // #define CDC_OUT_EP  0x02
@@ -79,7 +87,11 @@
 u8 Buffer[MEMORY_SIZE];
 #pragma data_alignment = 4
 #else
+#ifdef ZYNQLINK_OCM
+u8 Buffer[MEMORY_SIZE] __attribute__((section(".usb_dma"), aligned(2048)));
+#else
 u8 Buffer[MEMORY_SIZE] ALIGNMENT_CACHELINE;
+#endif
 #endif
 
 /**************************** Type Definitions *******************************/
@@ -192,7 +204,7 @@ static int UsbIntrExample(XScuGic *IntcInstancePtr, XUsbPs *UsbInstancePtr,
 	const u8 NumEndpoints = 8;
 
 	XUsbPs_Config		*UsbConfigPtr;
-	XUsbPs_DeviceConfig	DeviceConfig;
+	XUsbPs_DeviceConfig	DeviceConfig = {0};
 
 	/* Initialize the USB driver so that it's ready to use,
 	 * specify the controller ID that is generated in xparameters.h
@@ -271,7 +283,7 @@ static int UsbIntrExample(XScuGic *IntcInstancePtr, XUsbPs *UsbInstancePtr,
 
 	/* Endpoint 2: DAP Bulk OUT (0x02) */
 	DeviceConfig.EpCfg[2].Out.Type		= XUSBPS_EP_TYPE_BULK;
-	DeviceConfig.EpCfg[2].Out.NumBufs	= 16;
+	DeviceConfig.EpCfg[2].Out.NumBufs	= DAP_RX_DESCRIPTORS;
 	DeviceConfig.EpCfg[2].Out.BufSize	= 4096;
 	DeviceConfig.EpCfg[2].Out.MaxPacketSize	= 512;
     DeviceConfig.EpCfg[2].In.Type=XUSBPS_EP_TYPE_BULK;
@@ -285,7 +297,7 @@ static int UsbIntrExample(XScuGic *IntcInstancePtr, XUsbPs *UsbInstancePtr,
 
 	/* Endpoint 4: CDC Bulk OUT (0x04) */
 	DeviceConfig.EpCfg[4].Out.Type		= XUSBPS_EP_TYPE_BULK;
-	DeviceConfig.EpCfg[4].Out.NumBufs	= 16;
+	DeviceConfig.EpCfg[4].Out.NumBufs	= CDC_RX_DESCRIPTORS;
 	DeviceConfig.EpCfg[4].Out.BufSize	= 4096;
 	DeviceConfig.EpCfg[4].Out.MaxPacketSize	= 512;
 
@@ -309,6 +321,24 @@ static int UsbIntrExample(XScuGic *IntcInstancePtr, XUsbPs *UsbInstancePtr,
     DeviceConfig.EpCfg[7].In.NumBufs=16;
     DeviceConfig.EpCfg[7].In.MaxPacketSize=512;
     DeviceConfig.NumEndpoints = NumEndpoints;
+
+    /* SDK 2018.3 XUsbPs_ConfigureDevice reserves one alignment quantum,
+     * 2 queue heads per endpoint, all dTDs, then OUT payload buffers.
+     * Check the complete allocation before the driver writes any memory. */
+    {
+        u32 needed = 2048U + 2U * NumEndpoints * 64U;
+        unsigned ep;
+        for (ep = 0; ep < NumEndpoints; ++ep) {
+            needed += 64U * (DeviceConfig.EpCfg[ep].Out.NumBufs +
+                             DeviceConfig.EpCfg[ep].In.NumBufs);
+            needed += DeviceConfig.EpCfg[ep].Out.NumBufs *
+                      DeviceConfig.EpCfg[ep].Out.BufSize;
+        }
+        if (needed > sizeof Buffer) {
+            xil_printf("USB DMA arena too small: %u > %u\r\n", needed, sizeof Buffer);
+            goto out;
+        }
+    }
 
 	MemPtr = (u8 *)&Buffer[0];
 	memset(MemPtr,0,MEMORY_SIZE);

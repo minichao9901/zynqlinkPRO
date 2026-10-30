@@ -37,6 +37,7 @@ if {!$impl_only} {
         add_files -fileset constrs_1 [file join $root fpga constraints orbtrace_pins.xdc]
     }
     source [file join $root fpga orbtrace_bd.tcl]
+    source [file join $root fpga compact_config.tcl]
     source [file join $root fpga axi_pipeline.tcl]
     if {$axi_pipeline_changed} {set fresh_impl 1}
     # Vivado 2018.3 does not reliably invalidate an OOC module-reference
@@ -65,6 +66,11 @@ if {!$impl_only} {
     }
     # Switching the diagnostic parameter must invalidate the module's OOC
     # checkpoint even when no RTL file changed.
+    if {$diagnostic_config_changed} {
+        reset_run [get_runs system_swd_controller_0_0_synth_1]
+        reset_run synth_1
+        set fresh_impl 1
+    }
     if {$raw_trace_changed && $rtl_stamp eq $old_stamp} {
         set trace_run [get_runs -quiet system_orbtrace_0_0_synth_1]
         if {[llength $trace_run]} {reset_run $trace_run}
