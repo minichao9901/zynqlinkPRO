@@ -142,8 +142,9 @@ export class EtmView{
     let verified=0;
     for(const image of this.flashImages||[]){
       if(image.addr<0x08000000||image.addr>=0x08080000)continue;
-      for(let off=0;off<image.data.length;off+=512){
-        const expected=image.data.subarray(off,off+512),actual=await this.probe.readMem(image.addr+off,expected.length);
+      // 块传输（TransferBlock）在多次采集后会 NO ACK，改走逐字诊断读：牺牲速度换稳定。
+      for(let off=0;off<image.data.length;off+=128){
+        const expected=image.data.subarray(off,off+128),actual=await this.probe.readMemDiagnostic(image.addr+off,expected.length);
         if(actual.length!==expected.length||expected.some((v,i)=>v!==actual[i]))throw Error(`目标 Flash 与 ELF 不符：${hex(image.addr+off)}`);verified+=expected.length;
       }
     }
@@ -152,10 +153,21 @@ export class EtmView{
   async start(){
     if(!this.probe||!this.images.length)throw Error('请连接并载入匹配 ELF');this.busy=true;this.buttons();
     try{
-      if(this.$('auto').checked){await this.verifyFlash();this.config=await this.target.prepare({divider:Number(this.$('div').value)});this.$('config').value=JSON.stringify(this.config,null,2);}
+      const auto=this.$('auto').checked;
+      if(auto){await this.verifyFlash();this.config=await this.target.prepare({divider:Number(this.$('div').value)});this.$('config').value=JSON.stringify(this.config,null,2);}
       else this.config=JSON.parse(this.$('config').value);
-      this.etm=null;this.ranges=[];this.decoded=null;this.recordKind='hardware';this.stopping=null;this.transport.byteLimit=Number(this.$('limit').value)*1024*1024;await this.transport.start();
-      if(this.$('auto').checked)await this.target.start();
+      this.etm=null;this.ranges=[];this.decoded=null;this.recordKind='hardware';this.stopping=null;
+      this.transport.byteLimit=Number(this.$('limit').value)*1024*1024;
+      /**
+       * 顺序照 tools/test_orbtrace_board.py（实板验收过的那套）：
+       *   停 CPU → 开 ETM（CPU 停着，暂时没有输出）→ 让 FPGA 就绪并开始读 → 放 CPU 跑
+       * TPIU 的同步序列只在自己开始输出的那一刻出现一次，必须让它落在采集窗口里，
+       * 否则 FPGA 的 ID 解复用一直锁不上，只能给 0x7F。
+       */
+      if(auto)await this.target.halt();
+      if(auto)await this.target.start();
+      await this.transport.start();
+      if(auto)await this.target.run();
       this.log('开始采集');this.buttons();const ms=Number(this.$('ms').value);
       if(ms>0)this.timer=setTimeout(()=>this.stop().catch(e=>{this.log(e.message);toast(e.message,'err');}),ms);
     }catch(e){try{await this.transport?.stop();if(this.target?.saved)await this.target.restore();}catch(cleanup){e.message+='；收尾失败：'+cleanup.message;}this.busy=false;throw e;}
