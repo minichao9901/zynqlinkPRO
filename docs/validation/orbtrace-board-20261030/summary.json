@@ -22,5 +22,17 @@
     "ETM USB DATA toggle restart fix is source-only in this report and uses new ELF; bit remains unchanged.",
     "Target TPIU reads require DEMCR.TRCENA before probing gated registers.",
     "Physical ETM wires verified by user."
-  ]
+  ],
+  "wiring_test": {
+    "tool": "tools/test_trace_wiring.py",
+    "target": "STM32F103ZE",
+    "result": "PASS",
+    "PE2_to_H16": "PASS",
+    "PE3_to_H15": "PASS",
+    "PE4_to_G15": "PASS",
+    "PE5_to_H17": "PASS",
+    "PE6_to_N15": "PASS",
+    "PE7": "isolated as expected; no current FPGA mapping",
+    "restored_target_state": true
+  }
 }
