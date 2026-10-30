@@ -59,6 +59,12 @@ if {[info exists ::env(ZYNQLINK_RAW_TRACE)] && $::env(ZYNQLINK_RAW_TRACE) eq "2"
 }
 # Evaluate realizable PLL divisors on this routed netlist, without rebuilding
 # it for each frequency. Keep the highest rate that meets BOTH setup and hold.
+# Preserve a direct report at the requested work point, even if a higher
+# exploratory frequency passes first or the script later falls back to 100MHz.
+create_clock -name clk_fpga_0 -period 8.333 [get_pins {system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]}]
+report_timing_summary -report_unconstrained -file [file join $out timing_120mhz.rpt]
+report_timing -delay_type max -max_paths 20 -file [file join $out setup_120mhz.rpt]
+report_timing -delay_type min -max_paths 20 -file [file join $out hold_120mhz.rpt]
 set verified_fclk 0
 set fd [open [file join $out frequency_timing.csv] w]
 puts $fd "FCLK_Hz,setup_slack_ns,hold_slack_ns"
