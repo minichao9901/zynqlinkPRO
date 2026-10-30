@@ -32,6 +32,29 @@ ETM 自动配置仅支持 STM32F103ZE / Cortex-M3。开始前逐字节核对 ELF
 读取实际 ETM 配置，采集后恢复 CoreSight 寄存器与锁。手工模式可输入准确的 ETMv3 配置。
 默认采集 10 ms；解码可用“停止”取消。较大记录需考虑浏览器内存和解码时间。
 
+## ETM 分析视图
+
+`ETM 执行轨迹` 页在解码后由 `app/etm/analysis.js` 在浏览器里还原调用树，不依赖任何本地
+服务、Python 桥或逻辑分析仪。数据只来自本机的 FPGA 并行 trace（PS bulk-in `0x82`）或
+`.zetm` 记录。六个页签和导出都基于同一份 `analyze()` 结果：
+
+| 视图 | 内容 |
+|---|---|
+| 执行流 | 每段指令的起止、分支性质（调用/返回/条件/间接/屏障）、调用深度、所属函数 |
+| 调用统计 | 每个函数的调用次数、自身与包含子树半字数、占比、最大深度 |
+| 火焰图 | 按 `BL`/`BX LR` 还原的调用树，列宽为执行半字数；可导出 SVG |
+| 热点 | 按包含子树权重排序的前 12 个函数 |
+| ETM 包 | 包类型统计与最近 400 条原始包 |
+| 可信区段 | 按 `TRACE_ON` / 未同步事件切分的区段，标出缺口、地址问题和可信性 |
+
+历史导航（指令 / 调用 / 返回 / 条件跳转 / 间接跳转 / 异常 / 未执行）用来在长记录里跳到
+下一个关心的位置；`历史调用栈` 显示当前范围所处的完整调用链。导出支持执行流 CSV、
+火焰图 SVG、分析 JSON（含区段、问题、函数统计和包样本）和源码执行流 CSV。
+
+调用/返回的判定只用 OpenCSD 给出的 `last_i_type` / `last_i_subtype`：只有 `BR_LINK` 算
+调用，只有间接分支上的 RET 子类型算返回，尾调用不会被误判成返回。trace 起点的入口函数
+没有调用者，会作为顶层帧出现，它的最终返回属于正常收尾，不计为异常。
+
 ## ETM 接线
 
 ZYNQ Micro-SYS 的 J7 连续 15–19 脚，电平 3.3 V，另接地：
@@ -58,10 +81,15 @@ CM3 仿真，明确标为仿真记录，不是实板结果；可一键导入并�
 
 ```powershell
 node web/tools/check.mjs
-node --test web/tests/etm.test.mjs
+node --test web/tests/etm.test.mjs web/tests/etm-analysis.test.mjs
+node web/tools/page-smoke.mjs      # 需要先跑 node web/tools/serve.mjs，用本机 Edge 无头验收九页
 python tools/test_probe_host.py
 python tools/build_etm_wasm.py --emsdk build/emsdk
 ```
+
+`etm-analysis.test.mjs` 用合成的 OpenCSD 元素流覆盖调用/返回、尾调用、未同步、可信区段、
+火焰图布局和导出，并跑一遍 60 万范围的性能下限。`page-smoke.mjs` 用 CDP 驱动无头 Edge
+逐个点开九个页面，并在 ETM 页里载入 `samples/cm3-orbtrace.zetm` 走完解码→调用树→火焰图。
 
 WASM 重建需激活 Emscripten 4.0.10、CMake 和 Ninja。源码位于 `web/etm-native/` 与
 `third_party/OpenCSD-1.8.3/`；运行时只需已纳入本项目的 `opencsd.mjs` 和 `opencsd.wasm`。

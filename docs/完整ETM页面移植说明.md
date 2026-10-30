@@ -1,20 +1,69 @@
-# 完整 ETM 页面移植说明
+# 完整 ETM 页面：从「照搬」改为本项目原生实现
 
-当前工作台的轻量 `ETM 执行轨迹` 面板继续保留 ZynqDAP 直连和 `.zetm` 本地记录解码。`E:\superlinkPRO\web\etm` 的完整页面已经原样移植到当前仓库的 [web/etm](../web/etm/) 路径，主页面 ETM 面板提供“打开完整 ETM 工作台”入口。
+## 结论
 
-完整页面包含：
+`E:\superlinkPRO\web\etm` 的完整工作台依赖它自己的 Python 桥（默认 `127.0.0.1:8899`）：
+页面里 `apiBase` 在非 github.io 站点上取 `/api/`，只有由桥自己托管的页面才连得上；
+桥的采集侧是 Kingst LA，解码侧是 `build-native/etm_decode.exe`（OpenCSD C++）。
+本项目的 ETM 是 FPGA 并行接收（PS bulk-in `0x82`，ZET1 包），既不接 LA，也不该为一个
+分析页面引入 Python 运行时，因此**没有把静态副本留在仓库里**（`web/etm/` 已删除）。
 
-- ELF / 源码载入、目标识别、F103ZE / H7 时钟规划与 ETM/TPIU 配置
-- 硬件断点起点、复位/运行至起点、采集设置与 Kingst 联动
-- 历史记录、可信区段、包问题、源码快照和调用栈
-- 执行时间线、函数统计、热点、按调用权重/执行顺序的火焰图
-- 当前区间火焰图 SVG、CSV、JSON、源码执行流等导出
+改为把这些功能在本项目 Web 里用纯前端实现，数据只来自本仓库的采集或 `.zetm` 记录：
 
-完整页使用 superlinkPRO 的本地 ETM bridge API（默认 `127.0.0.1:8899`）。没有启动 bridge 时仍可打开页面和查看界面，但采集、历史分析和导出服务会显示离线提示。当前仓库的 ZynqDAP 直连链路不依赖 bridge，继续由轻量面板提供。
+| superlink 能力 | 本项目落点 |
+|---|---|
+| 执行流 / 历史导航 | `app/etm/view.js` 执行流页签 + 历史导航下拉 |
+| 调用统计 | `analysis.js` `callStats()` |
+| 火焰图（含 SVG 导出） | `analysis.js` `flameLayout()` / `flameSvg()` |
+| 热点 | `callStats()` 前 12 |
+| ETM 包视图 | `analysis.js` `packetSummary()` + 原始包表 |
+| 可信区段 / 包问题 | `analysis.js` 区段切分与 `issues` |
+| 历史调用栈 | `analysis.js` `stackFrames()` |
+| 导出 CSV / JSON / 源码执行流 | `executionCsv()`、`summaryJson()`、`sourceFlow()` |
+| ELF / 源码载入、目标识别、ETM 配置与恢复 | 沿用原有 ZynqDAP 直连面板，未改 |
 
-本轮验证：
+## 调用树怎么来的
 
-- 完整页面静态加载、分析视图和火焰图入口可见。
-- 启动 `E:\superlinkPRO\web\bridge\etm\backend\server.py --port 8899` 后，完整页面报告本地服务在线。
-- 当前仓库 Web ETM 记录已通过 OpenCSD WASM 解码：1309 ETM 字节、6368 指令范围、`lastErrorCode=0`。
-- 当前工作台九个页面均完成模块语法/本地依赖检查；页面切换回归见 `node web/tools/check.mjs` 和 `node --test web/tests/*.test.mjs`。
+OpenCSD 对每段指令范围给出 `last_i_type`（`ocsd_instr_type`）和 `last_i_subtype`
+（`ocsd_instr_subtype`）。判定规则只用这两个字段，枚举值取自本仓库
+`third_party/OpenCSD-1.8.3/decoder/include/opencsd/ocsd_if_types.h`：
+
+- 调用：`lastSubtype == BR_LINK`（Cortex-M3 的 `BL`/`BLX`）。
+- 返回：`lastSubtype` 为 `V8_RET` / `V8_ERET` / `V7_IMPLIED_RET`（`BX LR`、`POP {..., PC}`）。
+- 其它 `BR` 按 `lastConditional` 分成条件跳转和直接跳转；`BR_INDIRECT` 且无 RET 子类型是
+  间接跳转（尾调用就在这里，不能算返回）。
+
+调用目标取「下一条执行范围的起始地址」——ETM 的范围只是起点加长度，目标地址要等下一段
+范围才出现。trace 起点的入口函数没有调用者，作为顶层帧挂在根下面；它的最终返回是正常
+收尾，计入 `entryReturns`，不报问题。
+
+权重用半字数（`(end-start)/2`），不是指令条数：解码层不逐条拆指令，半字数与执行量单调
+相关，够做火焰图的相对宽度。这一点在 UI 和导出里都写明。
+
+## 区段与质量
+
+- 区段按 `TRACE_ON` 与 `NO_SYNC` 切分。`NO_SYNC` 的 `payload` 是 `unsync_info_t`：
+  0 UNKNOWN / 1 INIT_DECODER / 2 RESET / 3 OVERFLOW / 4 DISCARD / 5 BAD_PACKET /
+  6 BAD_IMAGE / 7 EOT，只有 3～6 计为真实数据缺口。
+- 只有「无缺口、无地址问题、且真的解出了执行数据」的区段标为可信。
+- 地址不可访问 / 地址未知 / 孤立返回都进问题列表（上限 500 条，超出时在 JSON 里标明已截断）。
+
+## 验证
+
+```powershell
+node web/tools/check.mjs
+node --test web/tests/etm.test.mjs web/tests/etm-analysis.test.mjs
+node web/tools/serve.mjs            # 另一个窗口
+node web/tools/page-smoke.mjs
+```
+
+`etm-analysis.test.mjs` 覆盖调用/返回、尾调用、未同步缺口、可信区段、火焰图布局、CSV/JSON
+导出和 60 万范围的性能下限；`page-smoke.mjs` 用 CDP 驱动无头 Edge 点开九个页面，并在 ETM
+页载入 `samples/cm3-orbtrace.zetm`，跑完「WASM 解码 → 调用树 → 六个视图」。
+当前实测：22,036 个指令范围、1 个函数、1 个可信区段、3 类包、控制台无错误。
+
+## 未完成
+
+- 火焰图目前不做点击缩放/合并同类帧，只做整树静态 SVG。
+- 源码执行流需要 ELF 带 DWARF 行表；只载入指令镜像的记录导不出这一项。
+- 实板 ETM 接线后的完整验收仍未完成，分析层只用仿真样例和记录验证过。

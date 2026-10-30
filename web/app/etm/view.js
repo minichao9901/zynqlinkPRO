@@ -8,15 +8,22 @@ import {EtmTransport} from './transport.js';
 import {base64,sha256} from './protocol.js';
 import {toast} from '../ui/toast.js';
 import {readRecord} from './record.js';
-const hex=v=>'0x'+v.toString(16).padStart(8,'0');
+import {analyze,callStats,executionCsv,flameSvg,packetSummary,sourceFlow,
+  summaryJson,BRANCH_LABEL} from './analysis.js';const hex=v=>'0x'+(v>>>0).toString(16).padStart(8,'0');
 const save=(bytes,name,type)=>{const url=URL.createObjectURL(new Blob([bytes],{type})),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pct=v=>(v*100).toFixed(1)+'%';
+// 历史导航的过滤条件；和 superlink 的「指令 / 调用 / 返回 / 异常 / 未知」一一对应。
+const NAV_KINDS={all:()=>true,call:r=>r.kind==='call',return:r=>r.kind==='return',cond:r=>r.kind==='cond',
+  exception:(r,model)=>model.frames[model.order[r.index]]?.kind==='exception',
+  nonexec:r=>!r.executed,indirect:r=>r.kind==='indirect'||r.kind==='unknown'};
+
 export class EtmView{
-  constructor(){this.probe=null;this.busy=false;this.ranges=[];this.sources=new Map();this.symbols=[];this.images=[];}
+  constructor(){this.probe=null;this.busy=false;this.ranges=[];this.sources=new Map();this.symbols=[];this.images=[];this.model=null;this.view='flow';}
   init(){
     const panel=document.getElementById('tab-etm');
-    panel.innerHTML=`<div class="z-page"><div class="z-heading"><div><h1>ETM 执行轨迹</h1><p>ORBTrace 并行接收 · PS USB bulk-in · OpenCSD 浏览器解码</p></div><div class="z-actions"><button id="ze-full">打开完整 ETM 工作台</button><span class="z-badge">四位 DDR / source ID 2</span></div></div>
+    panel.innerHTML=`<div class="z-page"><div class="z-heading"><div><h1>ETM 执行轨迹</h1><p>FPGA 并行接收 · PS USB bulk-in · OpenCSD 浏览器解码 · 前端调用树分析</p></div><div class="z-actions"><span class="z-badge">四位 DDR / source ID 2</span></div></div>
     <div class="z-columns"><aside class="z-card"><h2>采集</h2><div class="z-actions"><button id="ze-connect">连接 ZynqDAP</button><button id="ze-disconnect">断开</button></div><p id="ze-device" class="muted">USB 未连接</p>
     <p class="z-pinout">J7.16 TRACECLK<br>J7.15 / 17 / 18 / 19 → D0 / D1 / D2 / D3<br>J7.14 GND · 3.3 V · TRACECLK ≤ 50 MHz</p>
     <label class="btn">载入匹配的 ELF<input id="ze-elf" type="file" accept=".elf,.axf,.out" hidden></label><p id="ze-image" class="muted">尚未载入镜像</p>
@@ -25,30 +32,43 @@ export class EtmView{
     <div class="z-actions"><button id="ze-start">开始采集</button><button id="ze-stop">停止</button></div>
     <details><summary>ETMv3 解码寄存器</summary><textarea id="ze-config" rows="6">{"protocol":"ETMv3","idr":1091891777,"ctrl":2320,"ccer":100352,"traceid":2}</textarea><p>自动配置会替换为目标实际读回值；手工配置时由目标工程启用 ETM。</p></details>
     <h2>本地记录</h2><div class="z-actions"><button id="ze-open">导入记录</button><button id="ze-save">保存记录</button></div><input id="ze-record" type="file" accept=".zetm,.json" hidden>
-    <button id="ze-sample">载入真实 CM3 仿真样例</button><button id="ze-decode">解码 / 重新解码</button><button id="ze-export">导出指令范围 CSV</button>
+    <button id="ze-sample">载入真实 CM3 仿真样例</button><button id="ze-decode">解码 / 重新解码</button>
     <label class="btn">载入源码文件<input id="ze-source" type="file" multiple hidden></label>
     <pre id="ze-log" class="z-log" aria-live="polite"></pre></aside>
     <div class="z-card z-trace"><div id="ze-status" class="z-stats">尚无捕获</div><canvas id="ze-timeline" height="110" aria-label="执行地址时间轴"></canvas>
-    <div class="z-actions"><label>搜索函数 / 地址<input id="ze-filter" placeholder="函数名或 0x0800…"></label><button id="ze-prev">上一范围</button><button id="ze-next">下一范围</button></div>
+    <div class="z-actions"><label>搜索函数 / 地址<input id="ze-filter" placeholder="函数名或 0x0800…"></label>
+      <label>历史导航<select id="ze-nav"><option value="all">指令</option><option value="call">调用</option><option value="return">返回</option><option value="cond">条件跳转</option><option value="indirect">间接跳转 / 未知</option><option value="exception">异常</option><option value="nonexec">未执行</option></select></label>
+      <button id="ze-prev">上一个</button><button id="ze-next">下一个</button></div>
     <input id="ze-cursor" type="range" min="0" max="0" value="0" aria-label="执行范围回放"><p id="ze-location"></p>
-    <div class="z-trace-columns"><div><h2>函数热点</h2><div id="ze-hotspots"></div><h2>顺序执行范围</h2><div class="z-table-scroll"><table><thead><tr><th>#</th><th>PC</th><th>结束</th><th>执行</th><th>函数</th></tr></thead><tbody id="ze-rows"></tbody></table></div></div>
-    <div><h2>源码 / 指令字节</h2><pre id="ze-code" class="z-code">载入记录后解码；可另选源码进行逐范围回放。</pre></div></div></div></div></div>`;
+    <nav class="z-etm-tabs" id="ze-tabs" aria-label="分析视图"><button data-view="flow" class="active">执行流</button><button data-view="stats">调用统计</button><button data-view="flame">火焰图</button><button data-view="hot">热点</button><button data-view="packet">ETM 包</button><button data-view="section">可信区段</button></nav>
+    <div id="ze-view-flow" class="z-etm-view"><div class="z-table-scroll"><table><thead><tr><th>#</th><th>PC</th><th>结束</th><th>分支</th><th>深度</th><th>函数</th></tr></thead><tbody id="ze-rows"></tbody></table></div></div>
+    <div id="ze-view-stats" class="z-etm-view" hidden><div class="z-table-scroll"><table><thead><tr><th>函数</th><th>调用</th><th>自身半字</th><th>含子树</th><th>占比</th><th>深度</th></tr></thead><tbody id="ze-statrows"></tbody></table></div></div>
+    <div id="ze-view-flame" class="z-etm-view" hidden><div class="z-actions"><span class="z-legend">列宽按执行半字数；颜色按函数名散列。</span></div><div id="ze-flame" class="z-flame"></div></div>
+    <div id="ze-view-hot" class="z-etm-view" hidden><div id="ze-hotspots"></div></div>
+    <div id="ze-view-packet" class="z-etm-view" hidden><h2>包类型统计</h2><div class="z-table-scroll"><table><thead><tr><th>包</th><th>条数</th><th>字节</th></tr></thead><tbody id="ze-packetgroups"></tbody></table></div><h2>最近的包</h2><div class="z-table-scroll"><table><thead><tr><th>偏移</th><th>长度</th><th>原始字节</th><th>说明</th></tr></thead><tbody id="ze-packets"></tbody></table></div></div>
+    <div id="ze-view-section" class="z-etm-view" hidden><div class="z-actions"><span class="z-legend">区段按 TRACE_ON / 未同步事件切分；缺口或地址问题会让区段不可信。</span></div><div class="z-table-scroll"><table><thead><tr><th>#</th><th>起点</th><th>终点</th><th>来源</th><th>范围</th><th>半字</th><th>异常</th><th>问题</th><th>可信</th></tr></thead><tbody id="ze-sections"></tbody></table></div><h2>包问题</h2><div class="z-table-scroll"><table><thead><tr><th>类型</th><th>偏移</th><th>说明</th></tr></thead><tbody id="ze-issues"></tbody></table></div></div>
+    <div class="z-actions z-exports"><button id="ze-csv">导出执行流 CSV</button><button id="ze-svg">导出火焰图 SVG</button><button id="ze-json">导出分析 JSON</button><button id="ze-srcflow">导出源码执行流</button></div>
+    <div class="z-trace-columns"><div><h2>历史调用栈</h2><ol id="ze-stack" class="z-stack"></ol></div><div><h2>源码 / 指令字节</h2><pre id="ze-code" class="z-code">载入记录后解码；可另选源码进行逐范围回放。</pre></div></div></div></div></div>`;
     this.$=id=>document.getElementById('ze-'+id);
     const action=fn=>async()=>{try{await fn();}catch(e){this.log(e.message);toast(e.message,'err');}finally{this.buttons();}};
-    this.$('full').onclick=()=>window.open('/etm/index.html','_blank','noopener');
     this.$('connect').onclick=action(()=>this.connect());this.$('disconnect').onclick=action(()=>this.releaseProbe());
     this.$('start').onclick=action(()=>this.start());this.$('stop').onclick=action(()=>this.stop());
     this.$('elf').onchange=action(async()=>{const f=this.$('elf').files[0];if(f)await this.loadElf(new Uint8Array(await f.arrayBuffer()),f.name);});
     this.$('open').onclick=()=>this.$('record').click();this.$('record').onchange=action(async()=>{const f=this.$('record').files[0];if(f)await this.loadRecord(JSON.parse(await f.text()));});
     this.$('save').onclick=action(()=>this.saveRecord());this.$('sample').onclick=action(async()=>this.loadRecord(await(await fetch('samples/cm3-orbtrace.zetm')).json()));
-    this.$('decode').onclick=action(()=>this.decode());this.$('export').onclick=()=>this.exportCsv();
+    this.$('decode').onclick=action(()=>this.decode());
+    this.$('csv').onclick=action(()=>this.exportCsv());this.$('svg').onclick=action(()=>this.exportSvg());
+    this.$('json').onclick=action(()=>this.exportJson());this.$('srcflow').onclick=action(()=>this.exportSourceFlow());
     this.$('source').onchange=action(async()=>{for(const f of this.$('source').files)this.sources.set(f.name,await f.text());this.select(Number(this.$('cursor').value));});
     this.$('auto').onchange=()=>this.buttons();
-    this.$('cursor').oninput=()=>this.select(Number(this.$('cursor').value));this.$('prev').onclick=()=>this.select(Number(this.$('cursor').value)-1);this.$('next').onclick=()=>this.select(Number(this.$('cursor').value)+1);
-    this.$('filter').oninput=()=>this.renderRows();this.$('timeline').onclick=e=>{if(this.ranges.length)this.select(Math.floor((e.offsetX/this.$('timeline').clientWidth)*this.ranges.length));};
+    this.$('cursor').oninput=()=>this.select(Number(this.$('cursor').value));
+    this.$('prev').onclick=()=>this.jump(-1);this.$('next').onclick=()=>this.jump(1);
+    this.$('nav').onchange=()=>this.jump(1);
+    for(const button of this.$('tabs').querySelectorAll('button'))button.onclick=()=>this.showView(button.dataset.view);
+    this.$('filter').oninput=()=>this.renderFlow();this.$('timeline').onclick=e=>{if(this.ranges.length)this.select(Math.floor((e.offsetX/this.$('timeline').clientWidth)*this.ranges.length));};
     this.buttons();
   }
-  buttons(){if(!this.$)return;this.$('start').disabled=!this.probe||this.busy||!this.images.length||(this.$('auto').checked&&!this.elfBytes);this.$('stop').disabled=!this.transport?.running&&!this.worker;this.$('disconnect').disabled=!this.probe||this.busy&&!this.transport?.running;this.$('connect').disabled=!!this.probe||this.busy;this.$('decode').disabled=!this.etm?.length||this.busy;this.$('save').disabled=!this.etm?.length||this.busy;this.$('sample').disabled=this.busy;this.$('open').disabled=this.busy;this.$('elf').disabled=this.busy;}
+  buttons(){if(!this.$)return;this.$('start').disabled=!this.probe||this.busy||!this.images.length||(this.$('auto').checked&&!this.elfBytes);this.$('stop').disabled=!this.transport?.running&&!this.worker;this.$('disconnect').disabled=!this.probe||this.busy&&!this.transport?.running;this.$('connect').disabled=!!this.probe||this.busy;this.$('decode').disabled=!this.etm?.length||this.busy;this.$('save').disabled=!this.etm?.length||this.busy;this.$('sample').disabled=this.busy;this.$('open').disabled=this.busy;this.$('elf').disabled=this.busy;this.$('csv').disabled=!this.model;this.$('svg').disabled=!this.model;this.$('json').disabled=!this.model;this.$('srcflow').disabled=!this.model||!this.lines;}
   log(text){this.$('log').textContent+=(new Date().toLocaleTimeString())+' '+text+'\n';this.$('log').scrollTop=this.$('log').scrollHeight;}
   async connect(){return runProbeOperation(this,'etm',async()=>{
     const device=await navigator.usb.requestDevice({filters:[{vendorId:0x0d28,productId:0x0204}]});
@@ -108,7 +128,7 @@ export class EtmView{
     if(this.busy)throw Error('请先停止采集');const parsed=await readRecord(record);
     if(parsed.elf)await this.loadElf(parsed.elf,parsed.elfName);
     else{this.elfBytes=null;this.elfName=null;this.elfSha=null;this.flashImages=[];this.symbols=parsed.symbols;this.lines=null;this.images=parsed.images;this.$('image').textContent=parsed.kind==='simulation'?'CM3 实际仿真指令镜像':'记录中的指令镜像';}
-    this.etm=parsed.etm;this.config=parsed.config;this.quality=parsed.quality;this.recordKind=parsed.kind;this.ranges=[];this.decoded=null;
+    this.etm=parsed.etm;this.config=parsed.config;this.quality=parsed.quality;this.recordKind=parsed.kind;this.ranges=[];this.decoded=null;this.model=null;
     this.$('config').value=JSON.stringify(this.config,null,2);this.status();this.log('已导入 '+(record.kind==='simulation'?'CM3 仿真':'设备')+'记录');await this.decode();
   }
   async saveRecord(){
@@ -120,36 +140,111 @@ export class EtmView{
   }
   async decode(){
     if(!this.etm?.length||!this.images.length)throw Error('需要捕获数据与匹配镜像');this.config=JSON.parse(this.$('config').value);
-    this.busy=true;this.ranges=[];this.decoded=null;this.$('rows').replaceChildren();this.$('hotspots').replaceChildren();this.buttons();this.status();this.log('OpenCSD WASM 解码中…');
+    this.busy=true;this.ranges=[];this.decoded=null;this.model=null;this.$('rows').replaceChildren();this.$('hotspots').replaceChildren();this.buttons();this.status();this.log('OpenCSD WASM 解码中…');
     const worker=new Worker(new URL('./worker.js',import.meta.url),{type:'module'});this.worker=worker;this.buttons();
     try{
       const result=await new Promise((resolve,reject)=>{this.cancelDecode=reject;worker.onmessage=e=>e.data.ok?resolve(e.data.value):reject(Error(e.data.error));worker.onerror=e=>reject(Error(e.message));worker.postMessage({etm:this.etm,config:this.config,images:this.images});});
-      this.decoded=result;this.ranges=result.ranges;this.$('cursor').max=this.ranges.length-1;
-      this.log(`恢复 ${this.ranges.length.toLocaleString()} 个指令范围 · OpenCSD ${result.status.library}`);this.renderRows();this.hotspots();this.timeline();this.select(0);this.status();
+      this.decoded=result;this.ranges=result.ranges;this.$('cursor').max=Math.max(0,this.ranges.length-1);
+      this.log(`恢复 ${this.ranges.length.toLocaleString()} 个指令范围 · OpenCSD ${result.status.library}`);
+      const analysisStarted=performance.now();
+      this.model=analyze({records:result.records,symbols:this.symbols});
+      this.log(`调用树：${this.model.totals.functions} 个函数 · 深度 ${this.model.totals.maxDepth} · ${this.model.totals.calls} 次调用 · ${Math.round(performance.now()-analysisStarted)} ms`);
+      this.renderAll();this.select(0);this.status();
     }finally{worker.terminate();this.worker=null;this.cancelDecode=null;this.busy=false;this.buttons();}
   }
   func(addr){let lo=0,hi=this.symbols.length;while(lo<hi){const mid=(lo+hi)>>>1;if((this.symbols[mid].addr>>>1)*2<=addr)lo=mid+1;else hi=mid;}const s=this.symbols[lo-1];return s&&addr<(s.addr>>>1)*2+s.size?s.name:hex(addr);}
   status(){
-    const q=this.quality||{};this.$('status').textContent=`${this.recordKind==='simulation'?'CM3 仿真 · ':''}${this.etm?.length||0} ETM 字节 · ${q.records||0} 传输记录 · ${this.ranges.length.toLocaleString()} 指令范围 · ${q.loss?'有丢失':q.ended&&q.synced?'同步 / 完整结束':'采集中或未验收'} · FCLK ${q.fclk?Math.round(q.fclk/1000000)+' MHz':'未知'}`;
+    const q=this.quality||{},t=this.model?.totals;
+    this.$('status').textContent=`${this.recordKind==='simulation'?'CM3 仿真 · ':''}${this.etm?.length||0} ETM 字节 · ${q.records||0} 传输记录 · ${this.ranges.length.toLocaleString()} 指令范围 · ${q.loss?'有丢失':q.ended&&q.synced?'同步 / 完整结束':'采集中或未验收'} · FCLK ${q.fclk?Math.round(q.fclk/1000000)+' MHz':'未知'}${t?' · '+t.functions+' 函数 / 深度 '+t.maxDepth+' / '+t.calls+' 调用':''}`;
     this.$('status').classList.toggle('z-loss',!!q.loss);
   }
-  renderRows(){
-    const filter=this.$('filter').value.toLowerCase(),start=Math.max(0,Number(this.$('cursor').value)-50);
-    const rows=[];for(let i=filter?0:start;i<this.ranges.length&&rows.length<250;i++){const r=this.ranges[i],name=this.func(r.start);if(filter&&!name.toLowerCase().includes(filter)&&!hex(r.start).includes(filter))continue;
-      rows.push(`<tr data-index="${i}"><td>${i}</td><td>${hex(r.start)}</td><td>${hex(r.end)}</td><td>${r.lastExecuted?'E':'N'}</td><td>${esc(name)}</td></tr>`);}
-    this.$('rows').innerHTML=rows.join('');for(const row of this.$('rows').children)row.onclick=()=>this.select(Number(row.dataset.index));
+  showView(view){
+    this.view=view;
+    for(const button of this.$('tabs').querySelectorAll('button'))button.classList.toggle('active',button.dataset.view===view);
+    for(const name of ['flow','stats','flame','hot','packet','section'])this.$('view-'+name).hidden=name!==view;
+    if(view==='flame')this.renderFlame();
+  }
+  renderAll(){this.renderFlow();this.renderStats();this.renderFlame();this.renderHot();this.renderPackets();this.renderSections();this.renderStack();}
+  renderFlow(){
+    if(!this.model){this.$('rows').replaceChildren();return;}
+    const filter=this.$('filter').value.toLowerCase(),start=Math.max(0,Number(this.$('cursor').value)-50),total=this.model.ranges.length;
+    const cell=[];for(let i=filter?0:start;i<total&&cell.length<250;i++){
+      const r=this.model.ranges[i],name=this.func(r.start),branch=BRANCH_LABEL[r.kind]||r.kind;
+      if(filter&&!name.toLowerCase().includes(filter)&&!hex(r.start).includes(filter)&&!branch.includes(filter))continue;
+      cell.push(`<tr data-index="${i}"${i===Number(this.$('cursor').value)?' class="z-row-current"':''}><td>${i}</td><td>${hex(r.start)}</td><td>${hex(r.end)}</td><td>${branch}${r.conditional?'?':''}</td><td>${r.depth}</td><td>${esc(name)}</td></tr>`);
+    }
+    this.$('rows').innerHTML=cell.join('');
+    for(const row of this.$('rows').children)row.onclick=()=>this.select(Number(row.dataset.index));
+  }
+  renderStats(){
+    if(!this.model){this.$('statrows').replaceChildren();return;}
+    const rows=callStats(this.model,{limit:400}).map(row=>`<tr><td>${esc(row.name)}</td><td>${row.calls}</td><td>${row.self.toLocaleString()}</td><td>${row.total.toLocaleString()}</td><td>${pct(row.share)}</td><td>${row.maxDepth}</td></tr>`);
+    this.$('statrows').innerHTML=rows.join('');
+  }
+  renderFlame(){
+    if(!this.model||this.view!=='flame')return;
+    const width=Math.max(480,this.$('flame').clientWidth||960);
+    this.$('flame').innerHTML=flameSvg(this.model,{width:Math.round(width)});
+  }
+  renderHot(){
+    if(!this.model){this.$('hotspots').replaceChildren();return;}
+    const top=callStats(this.model,{limit:12});
+    const max=top.length?top[0].total:1;
+    this.$('hotspots').innerHTML=top.map(row=>`<div class="z-hot"><span>${esc(row.name)}</span><meter min="0" max="${max}" value="${row.total}"></meter><b>${row.total.toLocaleString()}</b></div>`).join('');
+  }
+  renderPackets(){
+    if(!this.model){this.$('packetgroups').replaceChildren();this.$('packets').replaceChildren();return;}
+    this.$('packetgroups').innerHTML=packetSummary(this.model).map(row=>`<tr><td>${esc(row.label)}</td><td>${row.count.toLocaleString()}</td><td>${row.bytes.toLocaleString()}</td></tr>`).join('');
+    const recent=this.model.packets.slice(-400);
+    this.$('packets').innerHTML=recent.map(packet=>`<tr><td>${packet.offset}</td><td>${packet.size}</td><td>${esc(packet.hex||'')}</td><td>${esc(packet.text||'')}</td></tr>`).join('');
+  }
+  renderSections(){
+    if(!this.model){this.$('sections').replaceChildren();this.$('issues').replaceChildren();return;}
+    this.$('sections').innerHTML=this.model.sections.map(part=>`<tr><td>${part.index}</td><td>${part.startOffset??'—'}</td><td>${part.endOffset??'—'}</td><td>${esc(part.reason)}</td><td>${part.ranges.toLocaleString()}</td><td>${part.halfwords.toLocaleString()}</td><td>${part.exception}</td><td>${part.issues}</td><td>${part.trusted?'可信':'不可信'}</td></tr>`).join('');
+    const issues=this.model.issues.slice(0,300).map(issue=>`<tr><td>${esc(issue.kind)}</td><td>${issue.offset}</td><td>${esc(issue.detail||'')}</td></tr>`);
+    if(this.model.totals.issuesTruncated)issues.push('<tr><td colspan="3">问题超出显示上限，完整的 500 条已记录在分析 JSON 中</td></tr>');
+    this.$('issues').innerHTML=issues.join('');
+  }
+  renderStack(){
+    if(!this.model){this.$('stack').replaceChildren();return;}
+    const frames=this.model.stackAt(Number(this.$('cursor').value));
+    this.$('stack').innerHTML=frames.map((frame,depth)=>`<li><b>${esc(frame.name)}</b> <span>深度 ${depth} · ${hex(frame.addr)}</span></li>`).join('')||'<li><span>调用栈为空（trace 起点之前没有可恢复的调用者）</span></li>';
   }
   select(index){
     if(!this.ranges.length)return;index=Math.max(0,Math.min(this.ranges.length-1,index));this.$('cursor').value=index;
-    const r=this.ranges[index],line=this.lines?.at(r.start);this.$('location').textContent=`#${index} ${hex(r.start)} → ${hex(r.end)} · ${this.func(r.start)}${line?' · '+line.file+':'+line.line:''}`;
+    const r=this.ranges[index],line=this.lines?.at(r.start);
+    const branch=BRANCH_LABEL[this.model?.ranges?.[index]?.kind]||'';
+    this.$('location').textContent=`#${index} ${hex(r.start)} → ${hex(r.end)} · ${this.func(r.start)}${branch?' · '+branch:''}${line?' · '+line.file+':'+line.line:''}`;
     const source=line?this.sources.get(line.file.replace(/\\/g,'/').split('/').pop()):null;
     if(source)this.$('code').textContent=source.split(/\r?\n/).slice(Math.max(0,line.line-10),line.line+10).map((s,i)=>`${Math.max(1,line.line-9)+i===line.line?'▶':' '} ${Math.max(1,line.line-9)+i} ${s}`).join('\n');
     else{const image=this.images.find(i=>i.addr<=r.start&&r.start<i.addr+i.data.length),data=image?.data.subarray(r.start-image.addr,Math.min(r.end-image.addr,r.start-image.addr+64));this.$('code').textContent=`${hex(r.start)}  ${data?[...data].map(x=>x.toString(16).padStart(2,'0')).join(' '):'镜像无可用指令字节'}\n${line?'源码：'+line.file+':'+line.line+'，请载入该文件。':'镜像没有可用的源码行信息。'}`;}
-    this.renderRows();
+    this.renderStack();this.renderFlow();
   }
-  hotspots(){const counts=new Map();for(const r of this.ranges){const n=this.func(r.start);counts.set(n,(counts.get(n)||0)+1);}const top=[...counts].sort((a,b)=>b[1]-a[1]).slice(0,12);this.$('hotspots').innerHTML=top.map(([name,n])=>`<div class="z-hot"><span>${esc(name)}</span><meter min="0" max="${this.ranges.length}" value="${n}"></meter><b>${n.toLocaleString()}</b></div>`).join('');}
+  jump(direction){
+    if(!this.model?.ranges.length)return;
+    const kind=this.$('nav').value,predicate=NAV_KINDS[kind]||NAV_KINDS.all;
+    const current=Number(this.$('cursor').value);
+    for(let i=current+direction;i>=0&&i<this.model.ranges.length;i+=direction){
+      if(predicate(this.model.ranges[i],this.model)){this.select(i);return;}
+    }
+    toast('这个方向上没有更多「'+this.$('nav').selectedOptions[0].textContent+'」范围','warn');
+  }
   timeline(){const c=this.$('timeline'),ctx=c.getContext('2d');c.width=Math.max(400,c.clientWidth*devicePixelRatio);c.height=110*devicePixelRatio;const min=Math.min(...this.ranges.slice(0,100000).map(r=>r.start)),max=Math.max(...this.ranges.slice(0,100000).map(r=>r.start));ctx.fillStyle='#0d1420';ctx.fillRect(0,0,c.width,c.height);ctx.strokeStyle='#5ca8ff';ctx.beginPath();for(let x=0;x<c.width;x++){const r=this.ranges[Math.min(this.ranges.length-1,Math.floor(x/c.width*this.ranges.length))],y=10+(max-r.start)/(max-min||1)*(c.height-20);if(!x)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.stroke();}
-  exportCsv(){if(!this.ranges.length)return;save('index,start,end,executed,function\n'+this.ranges.map((r,i)=>`${i},${hex(r.start)},${hex(r.end)},${r.lastExecuted},"${this.func(r.start).replaceAll('"','""')}"`).join('\n'),'zynqdap-etm.csv','text/csv');}
-  onShow(){if(this.ranges.length)this.timeline();}
-  summary(){return {connected:!!this.probe,running:!!this.transport?.running,busy:this.busy,bytes:this.etm?.length||0,ranges:this.ranges.length,quality:this.quality||null,fullEtmPath:'/etm/'};}
+  exportCsv(){if(!this.model)throw Error('先解码再导出');save(executionCsv(this.model),'zynqdap-etm-flow.csv','text/csv');}
+  exportSvg(){if(!this.model)throw Error('先解码再导出');save(flameSvg(this.model,{width:1600}),'zynqdap-etm-flame.svg','image/svg+xml');}
+  async exportJson(){
+    if(!this.model)throw Error('先解码再导出');
+    const etmSha=this.etm?.length?await sha256(this.etm):null;
+    save(JSON.stringify(summaryJson(this.model,{elf:this.elfName,elfSha:this.elfSha,etmSha,
+      config:this.config,quality:this.quality}),null,2),'zynqdap-etm-analysis.json','application/json');
+  }
+  exportSourceFlow(){
+    if(!this.model)throw Error('先解码再导出');const rows=sourceFlow(this.model,this.lines);
+    if(!rows.length)throw Error('ELF 里没有可用的源码行信息');
+    save('file,line,halfwords,ranges\n'+rows.map(r=>`"${r.file.replaceAll('"','""')}",${r.line},${r.weight},${r.ranges}`).join('\n'),'zynqdap-etm-source-flow.csv','text/csv');
+  }
+  onShow(){if(this.ranges.length)this.timeline();if(this.view==='flame')this.renderFlame();}
+  summary(){return {connected:!!this.probe,running:!!this.transport?.running,busy:this.busy,bytes:this.etm?.length||0,ranges:this.ranges.length,
+    quality:this.quality||null,functions:this.model?.totals.functions||0,calls:this.model?.totals.calls||0,
+    sections:this.model?.sections.length||0,view:this.view};}
 }
