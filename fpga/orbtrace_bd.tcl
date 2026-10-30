@@ -21,7 +21,7 @@ if {![llength [get_bd_cells -quiet orbtrace_0]]} {
 set_property -dict [list CONFIG.PCW_EN_CLK1_PORT 1 CONFIG.PCW_FPGA1_PERIPHERAL_FREQMHZ 200] [get_bd_cells processing_system7_0]
 set raw_diag 0
 if {[info exists ::env(ZYNQLINK_RAW_TRACE)]} {
-  if {$::env(ZYNQLINK_RAW_TRACE) ni {0 1 2}} {error "ZYNQLINK_RAW_TRACE must be 0, 1 or 2"}
+  if {$::env(ZYNQLINK_RAW_TRACE) ni {0 1 2 3}} {error "ZYNQLINK_RAW_TRACE must be 0, 1, 2 or 3"}
   set raw_diag $::env(ZYNQLINK_RAW_TRACE)
 }
 if {[lsearch -exact [list_property [get_bd_cells orbtrace_0]] CONFIG.RAW_DIAGNOSTIC] < 0} {
@@ -32,7 +32,7 @@ if {[lsearch -exact [list_property [get_bd_cells orbtrace_0]] CONFIG.RAW_DIAGNOS
 }
 set raw_trace_changed [expr {[get_property CONFIG.RAW_DIAGNOSTIC [get_bd_cells orbtrace_0]] != $raw_diag}]
 if {$raw_trace_changed} {set_property CONFIG.RAW_DIAGNOSTIC $raw_diag [get_bd_cells orbtrace_0]}
-set raw_fifo_bits [expr {$raw_diag == 2 ? 14 : 12}]
+set raw_fifo_bits [expr {$raw_diag == 3 ? 16 : ($raw_diag == 2 ? 14 : 12)}]
 if {[get_property CONFIG.FIFO_ADDR_BITS [get_bd_cells orbtrace_0]] != $raw_fifo_bits} {
   set_property CONFIG.FIFO_ADDR_BITS $raw_fifo_bits [get_bd_cells orbtrace_0]
   set raw_trace_changed 1
@@ -48,7 +48,7 @@ puts "ORBTRACE_RAW_DIAGNOSTIC=$raw_diag FIFO_ADDR_BITS=$raw_fifo_bits"
 # diagnostic-only exception at the project level and never apply it to IDDR.
 set os_xdc [file join [file dirname [info script]] constraints orbtrace_raw_oversample.xdc]
 set os_xdc_existing [get_files -quiet $os_xdc]
-if {$raw_diag == 2} {
+if {$raw_diag >= 2} {
   if {![llength $os_xdc_existing]} {add_files -fileset constrs_1 $os_xdc}
   set_property USED_IN_SYNTHESIS false [get_files $os_xdc]
   set_property PROCESSING_ORDER LATE [get_files $os_xdc]

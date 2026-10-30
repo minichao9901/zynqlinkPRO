@@ -33,5 +33,14 @@
     "change": "arm CDC OUT at 64-byte MPS instead of waiting for 512 bytes or a short packet",
     "status": "Web Flash verified; native echo 31/64/65/128/512/1024 exact; Web serial 64 exact; Web ETM initialization and synchronized CDC echo accepted"
   },
-  "acceptance": "../../docs/F103ZE-Web-CLI-ETM统一验收-20261031.md"
+  "acceptance": "../../docs/F103ZE-Web-CLI-ETM统一验收-20261031.md",
+  "echo72": {
+    "elf": "fw-72-echo.elf",
+    "sha256": "2a14f845d729f8ca42a1fa49adc1e22c3424a547013c1825b4e0f9b04cf30847",
+    "bytes": 1216624,
+    "build": "same source and cdc-packet-boundary.patch; build.ps1 -Chip ze -CpuMHz 72",
+    "systemHz": 72000000,
+    "usbHz": 48000000,
+    "status": "Web flashed/verified/reset; TRACECLK9/18 short and100ms tests passed; 18MHz1s 2/3, 36MHz loss; all failures retained"
+  }
 }

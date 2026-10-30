@@ -16,7 +16,7 @@ from elftools.elf.elffile import ELFFile
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'etm-service/tools'))
 from tpiu_demux import demux
-from native_binary import classify_packet_text, PACKET_INVALID, PACKET_UNSYNC
+from native_binary import NativeFile, classify_packet_text, packet_name, PACKET_INVALID, PACKET_UNSYNC
 
 
 def save(path, value):
@@ -37,31 +37,31 @@ def native_summary(data, elf, config, output):
                 manifest += f"{hex(segment['p_vaddr'])} {target.resolve()}\n"
     cfg = output / 'native-config.txt'
     cfg.write_text(manifest, encoding='utf-8')
-    with (output / 'native.jsonl').open('wb') as dest:
-        run = subprocess.run([str(ROOT / 'etm-service/build-native/etm_decode.exe'),
-                              str(output / 'etm.bin'), str(cfg)], stdout=dest,
-                             stderr=subprocess.PIPE, timeout=60)
+    native = output / 'native.bin'
+    run = subprocess.run([str(ROOT / 'etm-service/build-native/etm_decode.exe'),
+                          '--binary', str(native), str(output / 'etm.bin'), str(cfg)],
+                         stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, timeout=120)
     (output / 'native.log').write_bytes(run.stderr)
     result = dict(returnCode=run.returncode, packets=0, packetIssues=0, boundaryIncomplete=0,
                   unsyncBytes=0, ranges=0, addressInaccessible=0, status=None)
-    for line in (output / 'native.jsonl').read_text(encoding='utf-8').splitlines():
-        row = json.loads(line)
-        if row['kind'] == 'packet':
+    for row in NativeFile(native).records():
+        if row[0] == 2:
             result['packets'] += 1
-            flags = classify_packet_text(row['text'])
+            text = packet_name(row[3], 'ETMv3')
+            flags = classify_packet_text(text)
             if flags & PACKET_INVALID:
                 result['packetIssues'] += 1
-                if 'INCOMPLETE_EOT' in row['text']:
+                if 'INCOMPLETE_EOT' in text:
                     result['boundaryIncomplete'] += 1
             if flags & PACKET_UNSYNC:
-                result['unsyncBytes'] += row['size']
-        elif row['kind'] == 'element':
-            if row['type'] == 5:
+                result['unsyncBytes'] += row[2]
+        elif row[0] == 1:
+            if row[1] == 5:
                 result['ranges'] += 1
-            elif row['type'] == 7:
+            elif row[1] == 7:
                 result['addressInaccessible'] += 1
-        elif row['kind'] == 'status':
-            result['status'] = row
+        elif row[0] == 3:
+            result['status'] = row[1]
     status = result['status'] or {}
     result['interiorPass'] = bool(not run.returncode and status.get('processed') == len(data)
                                   and not status.get('lastErrorCode', 1)
@@ -150,6 +150,7 @@ def analyze(args):
                         raise ValueError('missing ETM stream or unexpected source ID')
                     row['decoder'] = native_summary(stream, args.elf, acceptance['config'], output / name)
                     row['etmBytes'] = len(stream)
+                    row['etmSha256'] = hashlib.sha256(stream).hexdigest()
                     row['interiorPass'] = row['decoder']['interiorPass']
                 except (ValueError, OSError, subprocess.TimeoutExpired) as error:
                     row.update(error=str(error), interiorPass=False)

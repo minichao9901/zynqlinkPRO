@@ -39,7 +39,7 @@ module orbtrace_parallel #(parameter USE_IO_CLOCK=0,USE_INPUT_DELAY=0,INPUT_DELA
     reg previous_toggle;
     always @(posedge capture_clk or posedge rst)
       if(rst)previous_toggle<=0;else previous_toggle<=toggle;
-    generate if(RAW_DIAGNOSTIC!=2)begin: formatted_receiver
+    generate if(RAW_DIAGNOSTIC<2)begin: formatted_receiver
       orbtrace_traceif receiver(.rst(trace_reset[1]),.traceDina(rise),.traceDinb(fall),
         .traceClkin(trace_clk),.width(width),.edgeOutput(),.FrAvail(decoded_toggle),.Frame(decoded_frame),.synced(trace_synced));
     end else begin: oversample_receiver_bypass
@@ -47,7 +47,16 @@ module orbtrace_parallel #(parameter USE_IO_CLOCK=0,USE_INPUT_DELAY=0,INPUT_DELA
       assign decoded_frame=128'd0;
       assign trace_synced=1'b0;
     end endgenerate
-    generate if(RAW_DIAGNOSTIC==2)begin: raw_oversample
+    generate if(RAW_DIAGNOSTIC==3)begin: raw_oversample_samples
+      (* ASYNC_REG="TRUE" *) reg [1:0] sample_reset;
+      always @(posedge sample_clk or posedge rst)
+        if(rst)sample_reset<=3;else sample_reset<={sample_reset[0],1'b0};
+      orbtrace_sample_capture sampler(.clk(sample_clk),.rst(sample_reset[1]),
+        .pads({trace_pad_clk,trace_data}),.frame(frame),.frame_toggle(toggle),.started(oversample_synced));
+      assign capture_clk=sample_clk;
+      assign capture_reset=sample_reset[1];
+      assign parser_malformed=1'b0;
+    end else if(RAW_DIAGNOSTIC==2)begin: raw_oversample
       // Diagnostic, low-frequency mode only: synchronize the five physical
       // pins to the independent 200 MHz reference and require two consecutive
       // clock samples before accepting an edge. Each accepted edge samples
@@ -130,7 +139,22 @@ module orbtrace_parallel #(parameter USE_IO_CLOCK=0,USE_INPUT_DELAY=0,INPUT_DELA
         oversample_sync_status<={oversample_sync_status[0],oversample_synced};
         overflow_status<={overflow_status[0],trace_overflow | parser_malformed};end
     assign synced=sync_status[1] | oversample_sync_status[1];assign overflow=overflow_status[1];
-    generate if(RAW_DIAGNOSTIC==1)begin: raw_output
+    generate if(RAW_DIAGNOSTIC==3)begin: sample_output
+      reg [119:0] samples;
+      reg [2:0] index;
+      reg active;
+      assign data=samples[112:105];
+      assign channel=samples[119:113];
+      assign valid=active;
+      assign fifo_ready=!active || (index==7 && ready);
+      always @(posedge clk or posedge sys_reset[1])
+        if(sys_reset[1])begin samples<=0;index<=0;active<=0;end
+        else if(fifo_ready && fifo_valid)begin samples<=fifo_data[119:0];index<=0;active<=1;end
+        else if(active && ready)begin
+          if(index==7)active<=0;
+          else begin samples<={samples[104:0],15'd0};index<=index+1'b1;end
+        end
+    end else if(RAW_DIAGNOSTIC==1)begin: raw_output
       reg [127:0] raw_frame;
       reg [3:0] index;
       reg active;

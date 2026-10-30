@@ -132,6 +132,25 @@ validate保留逐步CLI结果和每窗原始ETM、质量、恢复与解码统计
 不自动重放硬件操作。`--case-timeout`默认600秒。`bridge`提供可选OpenOCD本机后端，
 烧录完成等待自己启动的后端退出；ELF编程量按可加载Flash段计算。
 
+### TRACECLK与软件滤波实验
+
+```powershell
+python toolbox.py trace sweep --target-elf TARGET.elf --bit PROBE.bit --zynq-elf PROBE.elf --cpu-mhz 48 --out build/frequency-001
+python toolbox.py trace sweep --target-elf TARGET.elf --bit SAMPLE.bit --zynq-elf SAMPLE.elf --cpu-mhz 48 --raw-samples --out build/raw-001
+python toolbox.py trace samples --capture build/raw-001/cpu48-div1-gpio1-r1 --elf TARGET.elf --out build/filter-001
+```
+
+sweep不会加载bit/ELF，运行前须明确JTAG加载；每次核对目标Flash与ELF，并从RCC读取实际
+SYSCLK/AHB分频，板级HSE默认8MHz。默认3轮、两种GPIO驱动档、AHB /4 /2 /1、10ms窗口。
+可用`--divs`、`--gpio`、`--rounds`、`--milliseconds`指定有限实验。失败样本保留，只有恢复
+通过才继续下一项；`sweep.json`逐项accepted才表示那一项通过，程序退出0只表示矩阵执行完。
+实时字节采集使用正式执行流配对；`--raw-samples`必须加载RAW_DIAGNOSTIC=3专用配对。
+
+samples对同一份五线样本分别运行不滤波、因果三点多数和逐线两点稳定滤波，各扫四个取样
+相位和两种半字节相位，严格TPIU解复用后用OpenCSD解码。输出包含所有失败、初始未同步
+字节、边界和字节SHA，不修补ETM字节。依赖numpy/pyelftools与仓库原生解码器。该短窗实验
+不能直接证明连续采集可靠性；样本只持续约0.975ms，可能缺少I-SYNC而解不出执行路径。
+
 ### WebUSB采集（首次需要浏览器授权）
 
 1. `page etm describe`，向返回的ELF控件 upload 目标ELF，等待标签更新。

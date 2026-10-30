@@ -77,6 +77,16 @@ class ToolboxTests(unittest.TestCase):
             headers = {'X-Trace-CLI': 'a' * 64}
             self.assertEqual(client.post('/trace-cli/request', headers=headers, json={'action': 'ping'}).status_code, 409)
             self.assertEqual(client.post('/trace-cli/request', headers={**headers, 'Origin': 'https://example.com'}, json={'action': 'ping'}).status_code, 403)
+            wid='b'*32
+            client.post('/trace-cli/poll',headers=headers,json={'worker':wid})
+            jid=client.post('/trace-cli/request',headers=headers,json={'action':'ping'}).json['id']
+            claimed=client.post('/trace-cli/poll',headers=headers,json={'worker':wid}).json
+            self.assertEqual(claimed['job']['id'],jid)
+            done={'worker':wid,'result':{'ok':True,'value':{'once':1}}}
+            self.assertEqual(client.post('/trace-cli/complete/'+jid,headers=headers,json=done).status_code,200)
+            self.assertEqual(client.post('/trace-cli/complete/'+jid,headers=headers,json=done).status_code,200)
+            done['result']['value']['once']=2
+            self.assertEqual(client.post('/trace-cli/complete/'+jid,headers=headers,json=done).status_code,409)
 
 
 if __name__ == '__main__':
