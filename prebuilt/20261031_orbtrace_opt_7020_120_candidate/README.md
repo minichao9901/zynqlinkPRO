@@ -9,7 +9,7 @@
 
 - `zynqlink_probe.bit` + `zynqlink_probe.elf`：50MHz 链路上限，运行 FCLK 不超过 100MHz，用于同频对照。
 - 同一 bit + `zynqlink_probe_60.elf`：60MHz 链路上限的实验固件，允许 FCLK 达 120MHz，上板回归待做。
-- 两个 ELF 均为 `-O3` + Thumb + unused-section GC，代码 71,236 字节，OCM 静态占用 120,976 字节。
+- 两个 ELF 均为 `-O3` + Thumb + unused-section GC，代码 71,252 字节，OCM 静态占用 120,976 字节。
 - DAP 保持 16×4096 字节；USB 队列和 512KiB DMA arena 保持基线，运行缓冲位于 DDR。
 - SWD/JTAG 诊断快照/历史/引脚观察器关闭；普通状态与性能计数保留。
 
@@ -24,3 +24,6 @@ E:/Xilinx/SDK/2018.3/bin/xsct.bat tools/download_dap_fpga.tcl `
 
 实际加载的 SHA-256、FCLK/TCK、目标状态和测速结果必须随验收记录。
 完整优化及仿真记录见 `docs/orbtrace-7010-120MHz-OCM优化记录-20261030.md`。
+
+
+2026-10-31 board correction: the original compact ELF triggered Data Abort on unaligned SWJ bytes. It has been replaced by a fresh firmware build from f5c938e71e0127ba573f0dcc425f62d924492965 using an aligned, bounded sequence copy. RTL/bit identity is unchanged; full hardware retest is pending. Original failed ELF hashes and logs are retained in the manifest/validation history.

@@ -1,5 +1,5 @@
 {
-  "status": "EXPERIMENTAL: routed STA, bitgen and matched-profile real-CM3 comparisons pass; hardware/PS/USB acceptance pending",
+  "status": "EXPERIMENTAL: routed STA and RTL simulation pass; corrected unaligned SWJ firmware awaiting board acceptance",
   "source_commit": "bc9ced69f1f8f81647b8d62eaf74100d53fd883f",
   "base_commit": "00b9f2f",
   "device": "xc7z020clg400-2",
@@ -10,7 +10,7 @@
   "firmware_max_link_Hz": 50000000,
   "actual_loaded_FCLK_Hz": null,
   "actual_loaded_TCK_Hz": null,
-  "hardware_acceptance": "not performed; probe reserved for the other AI until the delayed availability check",
+  "hardware_acceptance": "Corrected Thumb firmware rebuilt; hardware retest pending",
   "timing": {
     "WNS_ns": 0.499,
     "TNS_ns": 0.0,
@@ -52,19 +52,19 @@
     "swd_controller.v": "d00966dde8db8b71ce594e9c85ed8a86b89aca5a41291bba213f55dadeac5cf4",
     "swd_core.v": "dfa1163be05d278580bb1225e7b30848cb770175e185e440a24d0b5a82679ce8"
   },
-  "firmware_source_revision": "bc9ced69f1f8f81647b8d62eaf74100d53fd883f",
+  "firmware_source_revision": "f5c938e71e0127ba573f0dcc425f62d924492965",
   "bsp_sha256": "b31bd5a75096dfdba14dca67c78629983985ba55a9984c0afa6062d1030859e5",
   "sha256": {
     "zynqlink_probe.bit": "f02a15db0b576f631c08448b19ea3844d1b45ef00ee6801d243caee398960230",
-    "zynqlink_probe.elf": "f762d2222ed47eb94ce046f6dd4c7696cc395467f0e0ec548282ff1986d6a49a",
+    "zynqlink_probe.elf": "ba87ff9028c4132f605ff12666ad04bff08be34f2db3877b11fd9e7d2b7bd0a3",
     "ps7_init.tcl": "aa9747c31f705be7c28af1c6b1cdeaf282f0dcdb01faecee2a9f72e4d3489132",
-    "firmware-build.json": "21bc5a43af1e63d9d5ede3402350f137b9977487c5aaafb174ac194934f5bd2b",
-    "ocm_layout.json": "71fae818da45409dbcb01cfc52f0c8a71b0efb5a0fc97c924e5b0610d291b5da",
+    "firmware-build.json": "25ff016b28c463b32ae2e1252e884f6265ca3c2b1423f075ff5c683c169219a8",
+    "ocm_layout.json": "4a2a412a90670d86a9b1699cdbd098fd4fcd9927a669738084fd21fd66cfac8e",
     "timing_120mhz.rpt": "26f94748faecb84ff1eda51f89a26a62b7e3c20d2ee95e3ea829eb7e8e564c61",
     "utilization.rpt": "5ed241656b938e2c8d1dafe4a85fb3d53c628a13f581c447b5d7cc9bd559d4f9",
-    "zynqlink_probe_60.elf": "b455d6d77be1d04fbbce3d4c7cd290b1f17ff9abebb9e6e7e29abee26d405b1c",
-    "firmware-build_60.json": "29fdf45a849f2f8100c9cb35afa210882394956af0f8fbdc02cd6450a57c2e01",
-    "ocm_layout_60.json": "880e94abcdf9802feee83e8acae50bc583680515dd5da0287c214df5f0714558",
+    "zynqlink_probe_60.elf": "443f4dace9f109da43309f769b148ddb8eb87adc62a956d5a687fc4db33ae2c4",
+    "firmware-build_60.json": "7fd199938f23f887d6e163e89b88d29ca59fdca60208f306c2ec36182a6cbd02",
+    "ocm_layout_60.json": "807b0d355f9425d243b0dffd1bb2222153ede8aca31c2f8110470ba79ff558c1",
     "simulation_comparison.json": "97f197d4d02953a2cc0ee45b973e5628133b732dab7e42942e441f0fb105b0be"
   },
   "routed_checkpoint_sha256": "4c4daacf6788958f8534c4f4daa75ca3faa626686addbfb22cf481576c5ed9e7",
@@ -85,5 +85,13 @@
     "metrics_identical_to_parent": true,
     "USB_or_PS_instruction_timing_modeled": false,
     "raw_model_compatibility_failures": "7 matrix points match parent; raw SWD30 board sampling also fails both fixed-delay models, calibrated boundary1 passes both"
-  }
+  },
+  "rejected_previous_firmware": {
+    "source_revision": "bc9ced69f1f8f81647b8d62eaf74100d53fd883f",
+    "elf_sha256": "f762d2222ed47eb94ce046f6dd4c7696cc395467f0e0ec548282ff1986d6a49a",
+    "failure": "SWJ packet+2 uint32_t cast generated unaligned Thumb LDRD; Data Abort at 0x8d98 with data 0x001203a2; no target SRAM writes",
+    "evidence": "../../docs/validation/orbtrace-hardware-20261031/optimized_50_rejected_unaligned/"
+  },
+  "firmware_executable_bytes": 71252,
+  "OCM_span_bytes": 120976
 }
