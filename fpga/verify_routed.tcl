@@ -25,20 +25,30 @@ foreach phase {Q1 Q2} {
 }
 puts "JTAG_TDO_IDDR_VERIFIED LOC=[get_property LOC $tdo_ddr] phases=Q1,Q2"
 set trace_ddr [get_cells -hier -filter {REF_NAME == IDDR && NAME =~ *orbtrace_0*}]
-if {[llength $trace_ddr] != 4} {error "Parallel TRACE must retain four input IDDRs"}
-if {[llength [get_cells -hier -filter {REF_NAME == BUFIO && NAME =~ *orbtrace_0*}]] != 1 ||
-    [llength [get_cells -hier -filter {REF_NAME == BUFR && NAME =~ *orbtrace_0*}]] != 1} {
+if {[info exists ::env(ZYNQLINK_RAW_TRACE)] && $::env(ZYNQLINK_RAW_TRACE) eq "2"} {
+    if {[llength $trace_ddr] != 0} {error "Oversample mode must bypass normal TRACE IDDRs"}
+    puts "ORBTRACE_IDDR_BYPASS_VERIFIED mode=2"
+} elseif {[llength $trace_ddr] != 4} {error "Parallel TRACE must retain four input IDDRs"}
+set trace_bufio [get_cells -hier -filter {REF_NAME == BUFIO && NAME =~ *orbtrace_0*}]
+set trace_bufr [get_cells -hier -filter {REF_NAME == BUFR && NAME =~ *orbtrace_0*}]
+if {[info exists ::env(ZYNQLINK_RAW_TRACE)] && $::env(ZYNQLINK_RAW_TRACE) eq "2"} {
+    puts "ORBTRACE_CLOCK_BYPASS_VERIFIED mode=2 BUFIO=[llength $trace_bufio] BUFR=[llength $trace_bufr]"
+} elseif {[llength $trace_bufio] != 1 || [llength $trace_bufr] != 1} {
     error "Parallel TRACE dedicated I/O/fabric clock buffers missing"
 }
 if {[llength [get_cells -hier -filter {NAME =~ *orbtrace_0* && (REF_NAME == LDCE || REF_NAME == LDPE || REF_NAME == LDCPE)}]]} {
     error "Parallel TRACE contains unintended latches"
 }
 puts "ORBTRACE_IO_VERIFIED IDDR=4 BUFIO=1 BUFR=1 latches=0"
-if {[llength [get_cells -hier -filter {REF_NAME == IDELAYE2 && NAME =~ *orbtrace_0*}]] != 4 ||
-    [llength [get_cells -hier -filter {REF_NAME == IDELAYCTRL && NAME =~ *orbtrace_0*}]] != 1} {
+set trace_idelay [get_cells -hier -filter {REF_NAME == IDELAYE2 && NAME =~ *orbtrace_0*}]
+set trace_idelayctrl [get_cells -hier -filter {REF_NAME == IDELAYCTRL && NAME =~ *orbtrace_0*}]
+if {[info exists ::env(ZYNQLINK_RAW_TRACE)] && $::env(ZYNQLINK_RAW_TRACE) eq "2"} {
+    puts "ORBTRACE_DELAY_BYPASS_VERIFIED mode=2 IDELAYE2=[llength $trace_idelay] IDELAYCTRL=[llength $trace_idelayctrl]"
+} elseif {[llength $trace_idelay] != 4 || [llength $trace_idelayctrl] != 1} {
     error "Parallel TRACE input delay/calibration primitives missing"
+} else {
+    puts "ORBTRACE_DELAY_VERIFIED IDELAYE2=4 IDELAYCTRL=1 REFCLK=200MHz"
 }
-puts "ORBTRACE_DELAY_VERIFIED IDELAYE2=4 IDELAYCTRL=1 REFCLK=200MHz"
 if {[info exists ::env(ZYNQLINK_RAW_TRACE)] && $::env(ZYNQLINK_RAW_TRACE) eq "2"} {
     set os_meta [get_cells -quiet -hier -filter {NAME =~ *raw_oversample*pad_meta_reg*}]
     set os_sync [get_cells -quiet -hier -filter {NAME =~ *raw_oversample*pad_sync_reg*}]

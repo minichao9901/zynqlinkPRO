@@ -39,8 +39,14 @@ module orbtrace_parallel #(parameter USE_IO_CLOCK=0,USE_INPUT_DELAY=0,INPUT_DELA
     reg previous_toggle;
     always @(posedge capture_clk or posedge rst)
       if(rst)previous_toggle<=0;else previous_toggle<=toggle;
-    orbtrace_traceif receiver(.rst(trace_reset[1]),.traceDina(rise),.traceDinb(fall),
-      .traceClkin(trace_clk),.width(width),.edgeOutput(),.FrAvail(decoded_toggle),.Frame(decoded_frame),.synced(trace_synced));
+    generate if(RAW_DIAGNOSTIC!=2)begin: formatted_receiver
+      orbtrace_traceif receiver(.rst(trace_reset[1]),.traceDina(rise),.traceDinb(fall),
+        .traceClkin(trace_clk),.width(width),.edgeOutput(),.FrAvail(decoded_toggle),.Frame(decoded_frame),.synced(trace_synced));
+    end else begin: oversample_receiver_bypass
+      assign decoded_toggle=1'b0;
+      assign decoded_frame=128'd0;
+      assign trace_synced=1'b0;
+    end endgenerate
     generate if(RAW_DIAGNOSTIC==2)begin: raw_oversample
       // Diagnostic, low-frequency mode only: synchronize the five physical
       // pins to the independent 200 MHz reference and require two consecutive
@@ -51,10 +57,10 @@ module orbtrace_parallel #(parameter USE_IO_CLOCK=0,USE_INPUT_DELAY=0,INPUT_DELA
       reg [1:0] clock_history;
       reg stable_clock,half;
       reg [3:0] low_nibble,count;
-      reg [31:0] sync_nibbles;
-      reg acquired;
-      reg [127:0] build_frame,completed_frame;
-      reg frame_toggle;
+      reg [7:0] sampled_byte;
+      reg byte_toggle;
+      wire [127:0] parsed_frame;
+      wire parsed_toggle,parsed_synced;
       wire edge_rise=(clock_history==2'b11 && !stable_clock);
       wire edge_fall=(clock_history==2'b00 && stable_clock);
       always @(posedge sample_clk or posedge rst)
@@ -62,33 +68,29 @@ module orbtrace_parallel #(parameter USE_IO_CLOCK=0,USE_INPUT_DELAY=0,INPUT_DELA
       always @(posedge sample_clk or posedge sample_reset[1])
         if(sample_reset[1])begin
           pad_meta<=0;pad_sync<=0;clock_history<=0;stable_clock<=0;half<=0;
-          low_nibble<=0;count<=0;sync_nibbles<=0;acquired<=0;
-          build_frame<=0;completed_frame<=0;frame_toggle<=0;
+          low_nibble<=0;sampled_byte<=0;byte_toggle<=0;
         end else begin
           pad_meta<={trace_pad_clk,trace_data};
           pad_sync<=pad_meta;
           clock_history<={clock_history[0],pad_sync[4]};
           if(edge_rise || edge_fall)begin
             stable_clock<=edge_rise;
-            sync_nibbles<={pad_sync[3:0],sync_nibbles[31:4]};
-            if({pad_sync[3:0],sync_nibbles[31:4]}==32'h7fffffff)acquired<=1;
             half<=!half;
             if(!half)low_nibble<=pad_sync[3:0];
             else begin
-              build_frame<={build_frame[119:0],pad_sync[3:0],low_nibble};
-              count<=count+1'b1;
-              if(count==15)begin
-                completed_frame<={build_frame[119:0],pad_sync[3:0],low_nibble};
-                frame_toggle<=!frame_toggle;
-              end
+              sampled_byte<={pad_sync[3:0],low_nibble};
+              byte_toggle<=!byte_toggle;
             end
           end
         end
-      assign frame=completed_frame;
-      assign toggle=frame_toggle;
+      orbtrace_tpiu_stream parser(.clk(sample_clk),.rst(sample_reset[1]),
+        .byte_in(sampled_byte),.byte_toggle(byte_toggle),
+        .frame(parsed_frame),.frame_toggle(parsed_toggle),.synced(parsed_synced));
+      assign frame=parsed_frame;
+      assign toggle=parsed_toggle;
       assign capture_clk=sample_clk;
       assign capture_reset=sample_reset[1];
-      assign oversample_synced=acquired;
+      assign oversample_synced=parsed_synced;
     end else if(RAW_DIAGNOSTIC==1)begin: raw_capture
       // Preserve every sampled DDR byte, including full/half sync. Frame
       // boundaries here are transport blocks, not TPIU formatter boundaries.
@@ -126,7 +128,7 @@ module orbtrace_parallel #(parameter USE_IO_CLOCK=0,USE_INPUT_DELAY=0,INPUT_DELA
         oversample_sync_status<={oversample_sync_status[0],oversample_synced};
         overflow_status<={overflow_status[0],trace_overflow};end
     assign synced=sync_status[1] | oversample_sync_status[1];assign overflow=overflow_status[1];
-    generate if(RAW_DIAGNOSTIC)begin: raw_output
+    generate if(RAW_DIAGNOSTIC==1)begin: raw_output
       reg [127:0] raw_frame;
       reg [3:0] index;
       reg active;
