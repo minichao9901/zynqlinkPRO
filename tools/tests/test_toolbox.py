@@ -60,14 +60,16 @@ class ToolboxTests(unittest.TestCase):
             token = Path(directory) / 'token'
             token.write_text('a' * 64)
             client = Client(service.create_application(ROOT / 'etm-service', ROOT / 'web', token), Response)
-            self.assertEqual(client.get('/').status_code, 200)
+            with client.get('/') as response:
+                self.assertEqual(response.status_code, 200)
             embedded = client.get('/etm/?embedded=1')
             self.assertEqual(embedded.status_code, 200)
             self.assertIn(b'data-api-base="/etm/api/"', embedded.data)
             self.assertIn(b'data-embedded="1"', embedded.data)
             self.assertEqual(client.get('/etm/integration.json').json['backend'], 'zynq')
             self.assertEqual(client.get('/etm/api/health').status_code, 200)
-            self.assertEqual(client.get('/etm/app/view.js').status_code, 200)
+            with client.get('/etm/app/view.js') as response:
+                self.assertEqual(response.status_code, 200)
             self.assertEqual(client.get('/.git/config').status_code, 404)
             self.assertEqual(client.post('/trace-cli/request', json={'action': 'ping'}).status_code, 403)
             headers = {'X-Trace-CLI': 'a' * 64}

@@ -1,5 +1,9 @@
 # Zynq ETM CLI 使用说明
 
+> 2026-10-30复测：旧parser配对在50 ms窗口也会出现OpenCSD BAD_SEQUENCE；下文历史成功
+> 记录不代表稳定验收。已定位并正在构建TPIU连续帧/HSYNC修复，当前进展见
+> [本轮记录](validation/web-cli-f103ze-20261030/README.md)。Web统一入口为根目录toolbox.py。
+
 本仓库的 ETM CLI 参考 superlinkPRO 的 `etm/trace.py`（原说明：`E:\superlinkPRO\docs\trace-cli-ai.md`），但采集端换成了 **Zynq FPGA 并行 ETM**。入口：
 
 ```powershell
@@ -56,8 +60,9 @@ python -X utf8 etm-service/trace.py capture `
 
 | 参数 | 说明 |
 |---|---|
-| `--seconds` | 0.01–1 s，默认 0.01；实板建议 **0.05**，10 ms 窗口可能解不出（见限制） |
+| `--seconds` | 0..1 s，必须大于0，默认 **0.05**；短窗不能掩盖解码错误 |
 | `--trace-id` | 默认 2 |
+| `--swd-khz` | 目标控制SWD时钟，默认1000 kHz，与TRACECLK独立 |
 | `--hclk-div` | 默认 **4**；当前 parser bit 在 48 MHz HCLK / 24 MHz TRACECLK 下收不到 source 2，`/4` 是已验证工作点 |
 | `--gpio-speed` | 默认 1（10 MHz）；与 `/4` 配套 |
 | `--no-decode` | 只采集，不跑解码 |

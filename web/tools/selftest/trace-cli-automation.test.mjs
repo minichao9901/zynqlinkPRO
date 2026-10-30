@@ -41,8 +41,16 @@ test('probe mismatch and multiple authorized probes fail before command executio
   await assert.rejects(r.a.dispatch({action:'connect',probe:'a'}),/多个/);
 });
 test('flash delegates to the Web flasher with verification and reset enabled',async()=>{
-  const r=rig();await r.a.dispatch({action:'flash',probe:'probe',name:'test.bin',data:'AA==',chip:'stm32h7',base:0x08000000});
+  const r=rig();r.tools.flash.flash=async()=>{r.calls.push('flash');r.elements.get('f-result').className='ok';};
+  await r.a.dispatch({action:'flash',probe:'probe',name:'test.bin',data:'AA==',chip:'stm32h7',base:0x08000000});
   assert.deepEqual(r.calls,['flash']);assert.equal(r.tools.flash.file.dataB64,'AA==');assert.equal(r.elements.get('f-verify').checked,true);
+});
+
+test('flash errors caught by the page must not become programmed:true',async()=>{
+  const r=rig();r.tools.flash.flash=async()=>{
+    const status=r.elements.get('f-result');status.className='err';status.textContent='verify mismatch';
+  };
+  await assert.rejects(r.a.dispatch({action:'flash',probe:'probe',name:'bad.bin',data:'AA==',chip:'stm32f1'}),/verify mismatch/);
 });
 test('target operations reuse the page object and release its busy guard',async()=>{
   const r=rig();r.e.target.saved.clear();await r.a.dispatch({action:'target',op:'init',profile:'stm32h743',probe:'probe'});

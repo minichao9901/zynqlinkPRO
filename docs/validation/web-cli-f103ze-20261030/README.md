@@ -49,3 +49,37 @@
 - 原始波形、导出、质量统计和实际FCLK/TCK需要本轮实测证据，不以旧样例代替。
 
 本文件是阶段工作记录；未完成项没有标记为通过。
+
+## 第二阶段：复现与结果语义修复
+
+- 实际浏览器CLI冒烟56条通过（`browser-smoke/results.json`），覆盖九页describe/state/show/read，
+  ETM ELF上传、history/target方法发现、set/event、真实Blob导出与分块下载、request/batch/job/ack，
+  以及私有方法/非唯一选择器/非法停止按钮拒绝。
+- `browser-inventory.json` 保存九页运行时控件和方法；这些动态结果比静态catalog更完整。
+- Python回归8项、Node回归14项通过。烧录页面内部捕获错误时，旧高层flash动作仍返回
+  programmed:true；现要求本次页面明确显示ok才确认烧录。普通invoke仍需读取业务结果。
+- ETM接收端检测从判断zynq对象存在改为检查zynq.ready===true，避免未接入时显示在线。
+- 修正原生capture：Trace ID传入目标而非只修改解码元数据；开放SWD控制时钟；保留
+  target-before.json原始寄存器快照；解码失败也返回record/quality；拒绝覆盖json-out。
+
+### 真实硬件复测（独立原生工具，不冒充Web硬件通过）
+
+- 旧oversample_parser配对：50ms，23,393 ETM字节；FCLK=99,999,999Hz，TCK=9,999kHz；
+  synced/ended=true，loss=false，恢复成功。OpenCSD offset1427遇到BAD_SEQUENCE，退出5。
+  因此历史“50ms建议窗口”不能作为稳定解码保证。
+- usbfix配对重新加载：bit SHA `15a0ec16c0c62a12c70eb1fb2914e126c13fb4edeafe9048e3cbae47f0ed4193`，
+  ELF SHA `6419c8b00a71b70a1572a55f84c3478f32b67aae8eda95a3821684dc7b3f1a30`。
+  `native-probe-usbfix-20mhz.json` 和 `native-probe-usbfix-100fclk.json` 均通过RTT/HSS。
+  后者名称包含100fclk但**实测仍为78,260,868Hz**，不能按文件名当作100MHz测试；
+  实际SWCLK=19,565,217Hz。第二次加载显式指定了prebuilt/ps7_init.tcl。
+- RTT21轮/19,965字节逐字节一致；HSS v1/v2单变量和v2八变量逐字节一致、背压计数有效、
+  24次DAP上下文检查通过，4KiB SRAM备份/恢复SHA一致。
+- 最初在1MHz跑HSS失败，源码HSS配置只接受15..60MHz；RTT本身通过。保留native-probe.json
+  作为该未完成HSS运行的证据，不把它整体标为通过。
+
+### 正在构建的RTL修复
+
+旧 `orbtrace_tpiu_stream` 把帧内HSYNC当载荷，并在每帧后只等待FSYNC而丢弃连续帧。
+新回归明确使旧实现失败（首帧混入ff7f），修复后连续帧、重复FSYNC、帧内HSYNC、
+半字节相位、非法帧内FSYNC恢复/丢失标志通过。异常结构会传播为transport loss。
+Vivado构建日志为build/web_cli_tpiu_fix_build.log；本段尚不代表新产物上板验收。

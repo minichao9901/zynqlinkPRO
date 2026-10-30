@@ -45,6 +45,7 @@ def main():
                     help='Temporary AHB divider for signal-integrity diagnosis; restored on exit')
     ap.add_argument('--gpio-speed', type=int, choices=(1, 2, 3),
                     help='Temporary PE2..PE6 output mode (1=10,2=2,3=50MHz); restored')
+    ap.add_argument('--trace-id', type=int, choices=range(1, 112), default=2, metavar='1..111')
     ap.add_argument('--sync', action='store_true', help='Enable ITM/DWT periodic synchronization')
     ap.add_argument('--raw', action='store_true', help='Capture diagnostic sampled DDR bytes, not decoded ETM')
     args = ap.parse_args()
@@ -160,7 +161,7 @@ def main():
         mem.write_word(REG['etmcr'], cr)
         wait_program(2)
         for name, value in dict(etmtrigger=0, etmteevr=0x6f, etmtecr1=0, etmfflr=0,
-                                etmtraceidr=2, cspsr=8, sppr=0, ffcr=before['ffcr'] | 2,
+                                etmtraceidr=args.trace_id, cspsr=8, sppr=0, ffcr=before['ffcr'] | 2,
                                 dbg_cr=(before['dbg_cr'] & ~0xe0) | 0xe0).items():
             mem.write_word(REG[name], value)
         if args.sync:

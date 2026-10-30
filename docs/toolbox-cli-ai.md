@@ -118,6 +118,7 @@ RTT/J-Scope 需要目标固件提供控制块/变量，ETM样例固件不等于R
 ```powershell
 python -m unittest discover -s tools/tests -p 'test_toolbox*.py'
 node --test web/tools/selftest/trace-cli-automation.test.mjs
+python -X utf8 tools/accept_web_cli.py --runtime R --out build/cli-smoke-001
 python -X utf8 toolbox.py trace doctor
 ```
 

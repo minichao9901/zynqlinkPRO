@@ -36,9 +36,9 @@ def envelope(command, ok, result=None, error=None, code=0, started=None):
     value = {'protocol': PROTOCOL, 'runId': time.strftime('%Y%m%d-%H%M%S-') + uuid.uuid4().hex[:8],
              'command': command, 'ok': ok, 'exitCode': code,
              'elapsedSeconds': round(time.perf_counter() - started, 3) if started else 0}
-    if ok:
+    if result is not None:
         value['result'] = result
-    else:
+    if not ok:
         value['error'] = error or {'type': 'CliError', 'message': 'unknown error'}
     return value
 
@@ -117,10 +117,11 @@ def capture(argv):
     parser = argparse.ArgumentParser(prog='trace.py capture', description='Zynq FPGA ETM capture + native decode')
     parser.add_argument('--elf', required=True, help='目标 ELF（必须与 Flash 匹配）')
     parser.add_argument('--out', required=True, help='新记录目录（必须不存在）')
-    parser.add_argument('--seconds', type=float, default=0.01, help='采集时长 0..1 s')
+    parser.add_argument('--seconds', type=float, default=0.05, help='采集时长 0..1 s，默认50 ms')
     parser.add_argument('--trace-id', type=int, default=2)
     parser.add_argument('--hclk-div', type=int, choices=(1, 2, 4), default=4,
-                        help='临时 AHB 分频；默认 4（24 MHz TRACECLK 的诊断工作点）')
+                        help='临时 AHB 分频；默认4，实际TRACECLK取决于目标原始RCC配置')
+    parser.add_argument('--swd-khz', type=int, default=1000, help='目标控制SWD时钟，默认1000 kHz')
     parser.add_argument('--gpio-speed', type=int, choices=(1, 2, 3), default=1)
     parser.add_argument('--bit', default=str(DEFAULT_BIT))
     parser.add_argument('--zynq-elf', default=str(DEFAULT_ZYNQ_ELF))
@@ -130,11 +131,18 @@ def capture(argv):
 
     if not 0 < args.seconds <= 1:
         return fail('capture', '采集时长必须为 0..1 s', 2, started)
+    if not 1 <= args.trace_id <= 111:
+        return fail('capture', 'Trace ID必须为1..111', 2, started)
+    if not 1 <= args.swd_khz <= 50000:
+        return fail('capture', 'SWD时钟必须为1..50000 kHz', 2, started)
+    if args.json_out and Path(args.json_out).exists():
+        return fail('capture', 'JSON输出已存在，拒绝覆盖：' + args.json_out, 2, started)
     out = Path(args.out).resolve()
     if out.exists():
         return fail('capture', '输出目录已存在，拒绝覆盖：%s' % out, 2, started)
-    if not Path(args.elf).is_file():
-        return fail('capture', 'ELF 不存在：%s' % args.elf, 2, started)
+    for name, path in [('目标ELF', args.elf), ('探针bit', args.bit), ('探针ELF', args.zynq_elf)]:
+        if not Path(path).is_file():
+            return fail('capture', '%s不存在：%s' % (name, path), 2, started)
     status = zynq_status()
     if not status['ready']:
         return fail('capture', 'Zynq ETM 接收端未就绪：' + status['message'], 4, started, status)
@@ -145,6 +153,8 @@ def capture(argv):
                '--elf', str(Path(args.zynq_elf).resolve()),
                '--output', str(out),
                '--milliseconds', str(args.seconds * 1000),
+               '--trace-id', str(args.trace_id),
+               '--speed-khz', str(args.swd_khz),
                '--hclk-div', str(args.hclk_div),
                '--gpio-speed', str(args.gpio_speed)]
     completed = subprocess.run(command, cwd=str(REPO), text=True, capture_output=True)
@@ -172,8 +182,7 @@ def capture(argv):
         'etmBytes': len(etm), 'etmSha256': acceptance.get('etm_sha256'),
     }
     (out / 'session.json').write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-    (out / 'target-before.json').write_text(json.dumps(acceptance, ensure_ascii=False, indent=2) + '\n',
-                                            encoding='utf-8')
+    # Keep the board runner's actual target-before.json register snapshot intact.
     summary = None
     decode_error = None
     if not args.no_decode:
@@ -199,7 +208,8 @@ def capture(argv):
     text = json.dumps(payload, ensure_ascii=False)
     print(text)
     if args.json_out:
-        Path(args.json_out).write_text(text + '\n', encoding='utf-8')
+        with Path(args.json_out).open('x', encoding='utf-8') as stream:
+            stream.write(text + '\n')
     return 0 if not decode_error else 5
 
 

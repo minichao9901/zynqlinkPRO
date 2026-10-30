@@ -108,8 +108,12 @@ export function createTraceAutomation(tools, win=globalThis.window){
       set('f-verify',true);set('f-reset',true);
       if(tools.flash.busy)throw Error('网页烧录器正在运行，请等待完成');
       tools.flash.file={name:m.name,dataB64:m.data};element('f-path').value='';
+      // FlashView catches device/programming errors to render them in its UI.
+      // Require this invocation's success marker before claiming programming.
+      const status=element('f-result');status.textContent='';status.className='';
       await tools.flash.flash();
-      return {programmed:true,name:m.name,chip:m.chip,result:element('f-result').textContent};
+      if(status.className!=='ok')throw Error(status.textContent||'网页未确认烧录与校验成功，请检查烧录日志');
+      return {programmed:true,name:m.name,chip:m.chip,result:status.textContent};
     }
     if(m.action==='help')return runCmd('help',tools.dbg.session);
     throw Error('未知Web CLI动作：'+m.action);
