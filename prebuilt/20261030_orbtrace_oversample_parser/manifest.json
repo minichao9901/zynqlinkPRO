@@ -1,0 +1,59 @@
+{
+  "name": "orbtrace oversampled ETM formatter parser",
+  "status": "experimental diagnostic; board-validated at 24 MHz TRACECLK, not default production mode",
+  "source_commit": "43f5524f15431aa288e8b2cfa650b3ebbbbc9c3b",
+  "build_options": {
+    "ZYNQLINK_RAW_TRACE": "2",
+    "ZYNQLINK_RUN_THREADS": "1",
+    "part": "xc7z020clg400-2",
+    "fclk_hz": 100000000,
+    "trace_reference_clock_hz": 200000000,
+    "raw_fifo_addr_bits": 14
+  },
+  "bitstream": {
+    "file": "orbtrace_oversample_parser.bit",
+    "sha256": "230531cef335e6a0b81586be16025fa06bfef28a8106553d6fb8f9296ab09c68",
+    "bytes": 4045674
+  },
+  "zynq_elf": {
+    "file": "zynqdap_orbtrace.elf",
+    "sha256": "6419c8b00a71b70a1572a55f84c3478f32b67aae8eda95a3821684dc7b3f1a30",
+    "bytes": 825584
+  },
+  "timing": {
+    "verified_fclk_hz": 100000000,
+    "setup_slack_ns": 0.476,
+    "hold_slack_ns": 0.05
+  },
+  "utilization": {
+    "slice_lut": 19293,
+    "slice_register": 27918,
+    "bram_tile": 15.5,
+    "dsp": 1
+  },
+  "board_acceptance": {
+    "target": "STM32F103ZE",
+    "target_elf_sha256": "63881ed9f6c1187d56924795ccad3f151a677aea0dfa201823fe44e0cb857522",
+    "hclk_hz": 48000000,
+    "traceclk_hz": 24000000,
+    "hclk_div": 4,
+    "gpio_speed": 1,
+    "swd_khz": 999,
+    "records": 1309,
+    "fifo_loss": false,
+    "synced": true,
+    "ended": true,
+    "source_id": 2,
+    "etm_bytes": 1309,
+    "etm_sha256": "b794a377e5b9cfdb6c4bc5c6075579f2728cb10de002e8b3736e41745ea2a355",
+    "opencsd_exit": 0,
+    "opencsd_last_error_code": 0,
+    "instruction_ranges": 6368
+  },
+  "evidence": {
+    "reference_la_capture": "E:/superlinkPRO/etm/records/capture-2d6da5829a8c4811b7c5ed2ca9e08cc3",
+    "acceptance": "docs/validation/orbtrace-oversample-parser-20261030/acceptance.json",
+    "decode": "docs/validation/orbtrace-oversample-parser-20261030/decode.jsonl",
+    "summary": "docs/validation/orbtrace-oversample-parser-20261030/summary.json"
+  }
+}
