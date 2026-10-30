@@ -53,5 +53,10 @@
     "reference_Hz": 199999998,
     "SWCLK_Hz": 999999.99
   },
-  "acceptance": "../../docs/F103ZE-Web-CLI-ETM\u7edf\u4e00\u9a8c\u6536-20261031.md"
+  "acceptance": "../../docs/F103ZE-Web-CLI-ETM统一验收-20261031.md",
+  "source_commit": "13c7b524aa1f88acdf9073efb278af6434e48820",
+  "build_commands": [
+    "ZYNQLINK_RAW_TRACE=4 ZYNQLINK_RUN_THREADS=1 python tools/run_vivado.py -mode batch -nojournal -log build/filtered_frontend_20261031_build.log -source fpga/build_dma.tcl -tclargs --fresh",
+    "python tools/build_xusbps_daplink.py --project xusbps_daplink_dma --max-swclk-hz 50000000"
+  ]
 }
