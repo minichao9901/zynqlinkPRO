@@ -16,7 +16,7 @@ export class EtmView{
   constructor(){this.probe=null;this.busy=false;this.ranges=[];this.sources=new Map();this.symbols=[];this.images=[];}
   init(){
     const panel=document.getElementById('tab-etm');
-    panel.innerHTML=`<div class="z-page"><div class="z-heading"><div><h1>ETM 执行轨迹</h1><p>ORBTrace 并行接收 · PS USB bulk-in · OpenCSD 浏览器解码</p></div><span class="z-badge">四位 DDR / source ID 2</span></div>
+    panel.innerHTML=`<div class="z-page"><div class="z-heading"><div><h1>ETM 执行轨迹</h1><p>ORBTrace 并行接收 · PS USB bulk-in · OpenCSD 浏览器解码</p></div><div class="z-actions"><button id="ze-full">打开完整 ETM 工作台</button><span class="z-badge">四位 DDR / source ID 2</span></div></div>
     <div class="z-columns"><aside class="z-card"><h2>采集</h2><div class="z-actions"><button id="ze-connect">连接 ZynqDAP</button><button id="ze-disconnect">断开</button></div><p id="ze-device" class="muted">USB 未连接</p>
     <p class="z-pinout">J7.16 TRACECLK<br>J7.15 / 17 / 18 / 19 → D0 / D1 / D2 / D3<br>J7.14 GND · 3.3 V · TRACECLK ≤ 50 MHz</p>
     <label class="btn">载入匹配的 ELF<input id="ze-elf" type="file" accept=".elf,.axf,.out" hidden></label><p id="ze-image" class="muted">尚未载入镜像</p>
@@ -35,6 +35,7 @@ export class EtmView{
     <div><h2>源码 / 指令字节</h2><pre id="ze-code" class="z-code">载入记录后解码；可另选源码进行逐范围回放。</pre></div></div></div></div></div>`;
     this.$=id=>document.getElementById('ze-'+id);
     const action=fn=>async()=>{try{await fn();}catch(e){this.log(e.message);toast(e.message,'err');}finally{this.buttons();}};
+    this.$('full').onclick=()=>window.open('/etm/index.html','_blank','noopener');
     this.$('connect').onclick=action(()=>this.connect());this.$('disconnect').onclick=action(()=>this.releaseProbe());
     this.$('start').onclick=action(()=>this.start());this.$('stop').onclick=action(()=>this.stop());
     this.$('elf').onchange=action(async()=>{const f=this.$('elf').files[0];if(f)await this.loadElf(new Uint8Array(await f.arrayBuffer()),f.name);});
@@ -150,5 +151,5 @@ export class EtmView{
   timeline(){const c=this.$('timeline'),ctx=c.getContext('2d');c.width=Math.max(400,c.clientWidth*devicePixelRatio);c.height=110*devicePixelRatio;const min=Math.min(...this.ranges.slice(0,100000).map(r=>r.start)),max=Math.max(...this.ranges.slice(0,100000).map(r=>r.start));ctx.fillStyle='#0d1420';ctx.fillRect(0,0,c.width,c.height);ctx.strokeStyle='#5ca8ff';ctx.beginPath();for(let x=0;x<c.width;x++){const r=this.ranges[Math.min(this.ranges.length-1,Math.floor(x/c.width*this.ranges.length))],y=10+(max-r.start)/(max-min||1)*(c.height-20);if(!x)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.stroke();}
   exportCsv(){if(!this.ranges.length)return;save('index,start,end,executed,function\n'+this.ranges.map((r,i)=>`${i},${hex(r.start)},${hex(r.end)},${r.lastExecuted},"${this.func(r.start).replaceAll('"','""')}"`).join('\n'),'zynqdap-etm.csv','text/csv');}
   onShow(){if(this.ranges.length)this.timeline();}
-  summary(){return {connected:!!this.probe,running:!!this.transport?.running,busy:this.busy,bytes:this.etm?.length||0,ranges:this.ranges.length,quality:this.quality||null};}
+  summary(){return {connected:!!this.probe,running:!!this.transport?.running,busy:this.busy,bytes:this.etm?.length||0,ranges:this.ranges.length,quality:this.quality||null,fullEtmPath:'/etm/'};}
 }
