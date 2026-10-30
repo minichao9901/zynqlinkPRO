@@ -115,7 +115,9 @@ def main():
     tail = [l for l in log.splitlines() if any(marker in l for marker in
             ('PASS', 'FAIL', 'Fatal', 'Error', 'IDCODE', 'JTAG_WR_', 'JTAG_BLK_', 'JTAG_PKT_'))]
     print('\n'.join(tail[-20:]) or log[-2000:])
-    failed = re.search(r'\b(?:Fatal|Error|FAIL)\b', log, re.IGNORECASE)
+    # Successful coverage messages include "sticky-error fence/drop". Only
+    # diagnostic lines starting with a failure marker denote simulation errors.
+    failed = re.search(r'^\s*(?:Fatal|Error|FAIL)\b', log, re.IGNORECASE | re.MULTILINE)
     return 0 if p.returncode == 0 and 'PASS' in log and not failed else 1
 
 

@@ -20,7 +20,12 @@ module tb_cm3_swd #(
     if($value$plusargs("half_ns=%f",half_ns))begin end
     forever #(half_ns) clk=~clk;
   end
-  reg target_clk=0; always #5 target_clk=~target_clk;
+  reg target_clk=0;
+  real target_clk_ns=10.0;
+  initial begin
+    if($value$plusargs("target_clk_ns=%f",target_clk_ns))begin end
+    forever #(target_clk_ns/2.0) target_clk=~target_clk;
+  end
   reg rst_n=1;
   reg [7:0] awaddr=0,araddr=0;
   reg awvalid=0,wvalid=0,arvalid=0;

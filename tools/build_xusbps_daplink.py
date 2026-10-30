@@ -13,6 +13,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--opt', choices=['0', '3', 's'], default='3')
     ap.add_argument('--compact-code', action='store_true', help='Thumb code and unused section removal; preserve production queues and DDR buffers')
+    ap.add_argument('--out', help='Separate output directory for clock/optimization profiles (default: build/<project>/<optimization>)')
     ap.add_argument('--project', choices=['xusbps_daplink', 'xusbps_daplink_dma'], default='xusbps_daplink')
     ap.add_argument('--trace', action='store_true', help='Enable DMA firmware timing trace and MMIO diagnostics')
     ap.add_argument('--usb-trace', action='store_true', help='Trace USB events without per-MMIO diagnostics')
@@ -35,6 +36,8 @@ def main():
     else:
         bsp = ROOT / 'reference/legacy_zynq/ZYNQ_DAPLINK_RTL_100TO50MHz/ZYNQ_DAPLINK_RTL_100TO50MHz.sdk/usb_bsp/ps7_cortexa9_0'
     out = ROOT / 'build' / args.project / (f'O{args.opt}' + ('_compact' if args.compact_code else ''))
+    if args.out:
+        out = (ROOT / args.out).resolve()
     out.mkdir(parents=True, exist_ok=True)
     gcc = Path(args.gcc)
     flags = ['-mcpu=cortex-a9', '-mfpu=vfpv3', '-mfloat-abi=hard']
