@@ -101,7 +101,7 @@ def main():
         if p.returncode:
             print(log[-4000:])
             sys.exit('xvlog failed (systemverilog)')
-        p, log = run([exe / 'xelab.exe', '--debug', 'typical', '-s', args.top + '_snap', args.top])
+        p, log = run([exe / 'xelab.exe', '--mt', '2', '--debug', 'typical', '-s', args.top + '_snap', args.top])
         if p.returncode:
             print(log[-4000:])
             sys.exit('xelab failed')

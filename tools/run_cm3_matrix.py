@@ -37,7 +37,13 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--out', type=Path, required=True)
     ap.add_argument('--only', default='', help='substring filter on the case name')
+    ap.add_argument('--source-root', type=Path, help='Isolated source export to compare against the working tree')
+    ap.add_argument('--case-logs', action='store_true', help='Keep the complete XSim log for every matrix point')
     args = ap.parse_args()
+    global ROOT, RUNNER
+    if args.source_root:
+        ROOT=args.source_root.resolve()
+        RUNNER=ROOT/'tools/run_cm3_sim.py'
 
     rows = []
     for f in SPEEDS:
@@ -47,6 +53,9 @@ def main():
                 continue
             half = 250.0 / f
             code, log = run('tb_cm3_swd', [f'half_ns={half}', f'rx_boundary={rx}', 'streams'])
+            if args.case_logs:
+                args.out.parent.mkdir(parents=True, exist_ok=True)
+                (args.out.parent/(name+'.txt')).write_text(log, encoding='utf-8')
             rows.append({
                 'case': name, 'protocol': 'SWD', 'speed_MHz': f, 'rx_boundary': rx,
                 'pass': code == 0 and 'PASS CortexM3' in log and 'RTT_PASS' in log,
@@ -63,6 +72,9 @@ def main():
             continue
         clk = 500.0 / f
         code, log = run('tb_cm3_jtag', [f'clk_ns={clk}'])
+        if args.case_logs:
+            args.out.parent.mkdir(parents=True, exist_ok=True)
+            (args.out.parent/(name+'.txt')).write_text(log, encoding='utf-8')
         rows.append({
             'case': name, 'protocol': 'JTAG', 'speed_MHz': f,
             'pass': code == 0 and 'PASS JTAG full pipeline' in log,
