@@ -22,7 +22,7 @@ create_clock -name clk_fpga_0 -period 8.333 [get_pins {system_i/processing_syste
 report_utilization -file [file join $out utilization_linked.rpt]
 opt_design
 place_design -directive Explore
-phys_opt_design -directive Explore
+phys_opt_design -directive AggressiveExplore
 route_design -directive Explore
 report_utilization -file [file join $out utilization.rpt]
 report_utilization -hierarchical -file [file join $out utilization_hier.rpt]
