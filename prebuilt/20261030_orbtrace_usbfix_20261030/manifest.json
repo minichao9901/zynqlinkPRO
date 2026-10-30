@@ -1,0 +1,26 @@
+{
+  "source_commit": "448a0a6914dbb93f7fdde40a6c943491d638e1d4",
+  "status": "EXPERIMENTAL partial hardware acceptance: SWD/DAP/RTT/HSS passed; low-speed ETM capture synchronized/loss-free but OpenCSD decode failed; not full ETM acceptance",
+  "changes": [
+    "preserve USB DATA toggle across capture restart",
+    "read DEMCR/TRCENA before gated CoreSight/TPIU discovery"
+  ],
+  "bit_sha256": "15a0ec16c0c62a12c70eb1fb2914e126c13fb4edeafe9048e3cbae47f0ed4193",
+  "elf_sha256": "6419c8b00a71b70a1572a55f84c3478f32b67aae8eda95a3821684dc7b3f1a30",
+  "ps7_init_sha256": "68e31ef14fff99b1c9385869ba5efc88b53d312cc47f0333bd7ff993e4cfa46f",
+  "timing": {
+    "FCLK_max_Hz": 100000000,
+    "SWCLK_max_Hz": 50000000,
+    "setup_slack_ns": 0.568,
+    "hold_slack_ns": 0.024
+  },
+  "hardware": {
+    "target": "STM32F103ZE",
+    "wiring": "PE2/H16 TRACECLK, PE3/H15 D0, PE4/G15 D1, PE5/H17 D2, PE6/N15 D3, GND",
+    "swd_50mhz_read_MB_s": 3.7986289733234453,
+    "swd_50mhz_write_MB_s": 3.7411061956645364,
+    "rtt_hss_restore": true,
+    "etm_full_decode": false,
+    "etm_failure": "OpenCSD response 9 after low-speed loss-free capture"
+  }
+}
