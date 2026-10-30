@@ -99,6 +99,10 @@ if {!$impl_only} {
     }
     set fd [open $stamp_file w]; puts -nonewline $fd $rtl_stamp; close $fd
 }
+if {[lsearch -exact $argv --synth-only] >= 0} {
+    puts "SYNTHESIS_ONLY_READY $out"
+    return
+}
 set ref [file join $root build checkpoints dma_routed_reference.dcp]
 source [file join $root fpga configure_runs.tcl]
 set verified_bit [file join $out system_wrapper_verified.bit]

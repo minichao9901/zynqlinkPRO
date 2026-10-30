@@ -80,6 +80,10 @@ source [file join $root fpga configure_runs.tcl]
 launch_runs synth_1 -jobs $::zynqlink_jobs
 wait_on_run synth_1
 if {[get_property PROGRESS [get_runs synth_1]] != "100%"} {error "Synthesis failed"}
+if {[lsearch -exact $argv --synth-only] >= 0} {
+    puts "SYNTHESIS_ONLY_READY $out"
+    exit
+}
 launch_runs impl_1 -to_step route_design -jobs $::zynqlink_jobs
 wait_on_run impl_1
 if {[get_property PROGRESS [get_runs impl_1]] != "100%"} {error "Implementation failed"}
