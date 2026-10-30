@@ -66,6 +66,12 @@ export class EtmView{
     this.$('prev').onclick=()=>this.jump(-1);this.$('next').onclick=()=>this.jump(1);
     this.$('nav').onchange=()=>this.jump(1);
     for(const button of this.$('tabs').querySelectorAll('button'))button.onclick=()=>this.showView(button.dataset.view);
+    // 板子重新上电/烧录会让 USB 重新枚举：旧句柄失效，界面必须跟着说实话。
+    navigator.usb?.addEventListener?.('disconnect',event=>{
+      if(!this.probe||event.device!==this.probe.device)return;
+      this.probe=null;this.transport=null;this.$('device').textContent='USB 已断开（重新上电/烧录后点「连接」）';
+      this.log('探针已断开');this.buttons();
+    });
     this.$('filter').oninput=()=>this.renderFlow();this.$('timeline').onclick=e=>{if(this.ranges.length)this.select(Math.floor((e.offsetX/this.$('timeline').clientWidth)*this.ranges.length));};
     this.buttons();
   }
@@ -103,7 +109,8 @@ export class EtmView{
   }
   async openDevice(device){
     // 同一个设备已经连着就不用重开：WebUSB 关闭后立刻重开会读到超时（端点还没复位）。
-    if(this.probe&&this.probe.device===device)return;
+    // 同一个设备且句柄还开着才复用；USB 重新枚举后 device.opened 会变 false，必须重开。
+    if(this.probe&&this.probe.device===device&&device.opened)return;
     if(this.probe){
       try{await this.releaseProbe();}catch(e){this.log('旧连接收尾失败：'+e.message);}
       await new Promise(resolve=>setTimeout(resolve,300));   // 给设备一点时间复位端点
@@ -303,6 +310,23 @@ export class EtmView{
    * 排查用：这次捕获里各 source ID 各有多少字节。
    * 收不到 ETM 数据时先看这里——「0 字节但传输记录很多」说明流是通的，只是 ID 对不上。
    */
+  /**
+   * 排查用：把和并行 trace 直接相关的寄存器读回来。
+   * DBGMCU_CR 的 bit5=TRACE_IOEN、bit6-7=TRACE_MODE（11=4 位同步）；GPIOE_CRL 里 PE2~PE7
+   * 应该是 0x4 开头的 AF 推挽。任何一项不对，四根数据线就不会被驱动，FPGA 只能采到空闲电平。
+   */
+  async traceRegisters(){
+    if(!this.probe)throw Error('没有连接探针');
+    const read=async address=>{
+      const bytes=await this.probe.readMemDiagnostic(address,4);
+      return '0x'+(new DataView(bytes.buffer,bytes.byteOffset,4).getUint32(0,true)>>>0).toString(16).padStart(8,'0');
+    };
+    const map={demcr:0xe000edfc,dbg_cr:0xe0042004,etmcr:0xe0041000,etmtraceidr:0xe0041200,
+      tpiu_cspsr:0xe0040004,tpiu_acpr:0xe0040010,tpiu_ffcr:0xe0040304,gpioe_crl:0x40011800};
+    const out={};
+    for(const [name,address] of Object.entries(map))out[name]=await read(address);
+    return out;
+  }
   streamIds(){
     const counts=new Map();
     for(const chunk of this.transport?.parser?.chunks||[]){

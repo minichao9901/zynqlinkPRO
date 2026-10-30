@@ -114,6 +114,15 @@
       controls.push(control);
     }
     const view = viewFor(page);
+    // 页面外挂的 file input 也要能被 describe 找到，否则 CLI 只能靠猜。
+    if (view) {
+      for (const [name, value] of Object.entries(view)) {
+        if (!name.startsWith('_')) continue;
+        if (value instanceof HTMLInputElement && value.type === 'file')
+          controls.push({selector: `@file:${page}.${name}`, tag: 'input', type: 'file',
+            disabled: !!value.disabled, label: '页面外的文件入口'});
+      }
+    }
     const methods = new Set();
     if (view) {
       for (let object = view; object && object !== Object.prototype; object = Object.getPrototypeOf(object)) {
@@ -195,8 +204,22 @@
     return {dispatched: true};
   }
 
-  function attachFiles(selector, files) {
-    const element = resolve(selector);
+  // 有些页面把 file input 建在 body 上（比如烧录器的 _fileInput），它不在页面容器里，
+  // 普通选择器找不到。用 `@file:<页面>.<属性>` 指过去，属性必须是页面对象上真实存在的
+  // file input，不接受任意对象路径。
+  function resolveFileInput(selector, page) {
+    const match = /^@file:([a-z]+)\.(_[A-Za-z0-9_]+)$/.exec(selector);
+    if (!match) throw new Error('虚拟文件选择器格式应为 @file:<页面>._属性：' + selector);
+    const view = viewFor(match[1]);
+    const element = view?.[match[2]];
+    if (!(element instanceof HTMLInputElement) || element.type !== 'file')
+      throw new Error('不是文件输入控件：' + selector);
+    void page;
+    return element;
+  }
+
+  function attachFiles(selector, files, page) {
+    const element = selector.startsWith('@file:') ? resolveFileInput(selector, page) : resolve(selector);
     if (element.type !== 'file') throw new Error('不是文件控件：' + selector);
     const transfer = new DataTransfer();
     for (const file of files) {
@@ -282,7 +305,7 @@
     if (op === 'set') return setControl(args.selector, args.value);
     if (op === 'click') return clickControl(args.selector);
     if (op === 'event') return dispatchEvent(args.selector, args.type, args.data || {});
-    if (op === 'upload') return attachFiles(args.selector, args.files || []);
+    if (op === 'upload') return attachFiles(args.selector, args.files || [], page);
     if (op === 'invoke') return invoke(page, args.method, args.args || []);
     if (op === 'wait') return waitFor(args.selector, args.contains, args.timeoutMs);
     if (op === 'summary') return jsonSafe(window.__tools?.summary?.() || null);
