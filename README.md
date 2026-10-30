@@ -11,6 +11,7 @@ PS 跑 XUsbPs USB + CMSIS-DAP 协议，PL 里做 SWD 批量引擎和 CDMA 数据
 
 ORBTrace/纯 Web 开发分支：[`web/README.md`](web/README.md)、
 [`并行 ETM 与 PS USB`](docs/orbtrace-usb.md)、[`LUT 资源分析`](docs/orbtrace-area-native32.md)。
+后续优化见 [`资源与性能合并方案`](docs/探针资源与性能优化方案-20261030.md)。
 本次实验配对在 [`prebuilt/20261030_orbtrace_native32/`](prebuilt/20261030_orbtrace_native32/)，
 FCLK 100 MHz / 调试时钟上限 50 MHz，19,228 LUT；已生成并通过现有约束 STA，尚待实板验收。
 
