@@ -13,7 +13,7 @@ def asset_root():
 
 
 def backend_root():
-    return Path(sys._MEIPASS) / 'backend' if frozen() else asset_root() / 'etm'
+    return Path(sys._MEIPASS) / 'backend' if frozen() else Path(__file__).resolve().parents[1]
 
 
 def node_executable():
