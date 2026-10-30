@@ -163,7 +163,7 @@ export function createWorkbenchAutomation(tools,win=globalThis.window){
       methods:Array.from(methods(target),([name,fn])=>({name,signature:fn.toString().split('{')[0].trim().slice(0,400),
         note:'原网页方法；参数含 DOM/回调的接口应改用控件接口'}))};
     if(m.op==='state')return {page:m.page,summary:typeof view.summary==='function'?jsonValue(await view.summary()):null,
-      errors:tools.errors?.slice(-20)||[],text:root.textContent.slice(0,100000)};
+      errors:[...(tools.errors?.slice(-20)||[]),...(c.win.__etmPageErrors?.slice(-20)||[])],text:root.textContent.slice(0,100000)};
     if(m.op==='show'){
       win.location.hash=m.page;
       return {page:m.page,dispatched:true,completed:false};

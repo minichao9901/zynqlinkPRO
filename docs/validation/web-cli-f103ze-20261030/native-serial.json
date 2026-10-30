@@ -1,0 +1,44 @@
+{
+  "transport": "native pyserial; not Web Serial acceptance",
+  "targetPort": "COM34",
+  "baud": 115200,
+  "checks": [
+    {
+      "bytes": 1,
+      "receivedBytes": 1,
+      "byteExact": true,
+      "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    {
+      "bytes": 31,
+      "receivedBytes": 31,
+      "byteExact": true,
+      "sha256": "8cdbdad56e5d28b5873a3a47ba7c3df53fa97c9bf24bded872425f7f7bc2a0f3"
+    },
+    {
+      "bytes": 64,
+      "receivedBytes": 0,
+      "byteExact": false,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 255,
+      "receivedBytes": 255,
+      "byteExact": true,
+      "sha256": "dc74b99ae353675b816717c5bc8f25f36fa1375c84842a150155f1efe93568e8"
+    },
+    {
+      "bytes": 512,
+      "receivedBytes": 512,
+      "byteExact": true,
+      "sha256": "7611305393e02768716f294de975e1b904a23daae1eca1e4feaa0e6267a2feb2"
+    },
+    {
+      "bytes": 1024,
+      "receivedBytes": 1024,
+      "byteExact": true,
+      "sha256": "4613a38a7f79ada3fc343ea4de1488f8828f0fe602d8cb7bdce958040b204b8b"
+    }
+  ],
+  "ok": false
+}

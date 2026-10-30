@@ -66,16 +66,20 @@ class EmbeddedDocument(HTMLParser):
         return ''.join(output)
 
 EMBEDDED_STYLE='<style>body#etm-app[data-embedded]{min-height:0}body#etm-app[data-embedded]>header{display:none}body#etm-app[data-embedded]>.workspace{height:100vh}body#etm-app .embedded-actions{display:flex;gap:4px}</style>'
-EMBEDDED_DIAGNOSTICS="""<script>function etmPageError(message){var el=document.getElementById('job-state');if(el){el.textContent='页面发生错误：'+message;el.classList.add('bad');}}window.addEventListener('error',function(e){etmPageError(e.message);});window.addEventListener('unhandledrejection',function(e){etmPageError(e.reason&&e.reason.message||e.reason);});</script>"""
+EMBEDDED_DIAGNOSTICS="""<script>window.__etmPageErrors=[];function etmPageError(message){window.__etmPageErrors.push(String(message));var el=document.getElementById('job-state');if(el){el.textContent='页面发生错误：'+message;el.classList.add('bad');}}window.addEventListener('error',function(e){etmPageError(e.message);});window.addEventListener('unhandledrejection',function(e){etmPageError(e.reason&&e.reason.message||e.reason);});</script>"""
 
 
-def create_application(etm_root,serial_root=ROOT,cli_token_file=None):
+def create_application(etm_root,serial_root=ROOT,cli_token_file=None,native_pair=None):
     etm_root=Path(etm_root).resolve();serial_root=Path(serial_root).resolve()
     source=etm_root/'server.py'
     if not source.is_file():raise ValueError('找不到 ETM 工程，请用 --etm-root 指定其目录')
     spec=importlib.util.spec_from_file_location('etm_toolbox_backend',source)
     backend=importlib.util.module_from_spec(spec);sys.modules[spec.name]=backend;spec.loader.exec_module(backend)
     backend.app.static_folder=str(etm_root/'web')
+    if native_pair:
+        if not cli_token_file:raise ValueError('本地服务采集必须启用CLI鉴权')
+        from native_web_capture import install
+        install(backend,cli_token_file,*native_pair)
     if not (etm_root/'web/app/embedding.js').is_file():
         raise ValueError('ETM工程版本过旧，请同时更新两个仓库后再启动')
     # A separate backend namespace preserves standalone ETM /api and records.
@@ -101,6 +105,10 @@ def create_application(etm_root,serial_root=ROOT,cli_token_file=None):
         # Only public files. Never expose Git metadata, backend records or temp files.
         if any(part.startswith('.') for part in Path(path).parts) or Path(path).parts[0] in ('tmp','node_modules','captures','records'):
             abort(404)
+        if path == 'index.html':
+            text=(serial_root/path).read_text(encoding='utf-8')
+            marker=' data-native-capture="1"' if native_pair else ''
+            return text.replace('<body', '<body data-etm-base="/etm"'+marker, 1)
         return send_from_directory(serial_root,path)
     @app.after_request
     def fresh_main(response):

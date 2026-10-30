@@ -87,6 +87,33 @@ RTT/J-Scope 需要目标固件提供控制块/变量，ETM样例固件不等于R
 
 加载配对与限制见 [ETM操作说明](Zynq-ETM-Trace操作说明.md) 和 [Trace CLI](Trace-CLI使用说明.md)。
 
+### 本地服务采集（无需浏览器设备授权）
+
+适用于CLI驱动当前已连接F103ZE。先通过JTAG加载实际bit/ELF配对，再在serve声明相同文件：
+
+```powershell
+python -X utf8 toolbox.py --runtime build/native-web-001 serve --port 8878 --bit B.bit --zynq-elf P.elf
+python -X utf8 toolbox.py --runtime build/native-web-001 page etm upload '#elf-file' TARGET.elf
+python -X utf8 toolbox.py --runtime build/native-web-001 page etm wait '#elf-label' --contains TARGET.elf
+python -X utf8 toolbox.py --runtime build/native-web-001 --timeout 180 page etm invoke captureNative --args-file capture-args.json
+```
+
+capture-args.json为位置参数数组：
+
+```json
+[{"seconds":0.01,"hclkDiv":4,"gpioSpeed":1,"traceId":2,"swdKhz":1000,"decode":true}]
+```
+
+真实Web页面负责发起任务、显示进度、载入记录和分析；本地服务复用原生板卡事务工具，
+逐字节核对目标Flash、保存配置/运行状态、配置ETM/TPIU、采集和恢复。服务记录输入配对
+的SHA-256，但**声明路径不会自动切换板上固件**。仅支持F103ZE当前连续窗口，暂不支持
+通过这个入口选择断点起点；需要断点/启动入口时使用下方WebUSB流程。
+本地采集复用同一探针租约，与WebUSB采集互斥；鉴权只接受当前CLI令牌。停止请求等待
+当前短窗与现场恢复完成，不强杀硬件事务、不自动重试。恢复未通过时阻止后续采集。
+原始数据及acceptance.json在记录的raw/下保留，即使解码失败也不丢证据。
+
+### WebUSB采集（首次需要浏览器授权）
+
 1. `page etm describe`，向返回的ELF控件 upload 目标ELF，等待标签更新。
 2. 首次在页面连接探针授权，后续复用授权连接；填板级 HSE=8 MHz。
 3. 读取时钟，选择业务断点和采集起点，核对实际 HCLK/TRACECLK。

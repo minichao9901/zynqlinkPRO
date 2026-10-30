@@ -1,0 +1,103 @@
+{
+  "artifacts": {
+    "git_head": "ba4fa6ec8b88a7ed302baea35452dae42b3f31f7",
+    "git_dirty": true,
+    "bit": {
+      "path": "E:\\zynqlinkPRO\\prebuilt\\20261030_orbtrace_usbfix_20261030\\zynqdap_orbtrace.bit",
+      "sha256": "15a0ec16c0c62a12c70eb1fb2914e126c13fb4edeafe9048e3cbae47f0ed4193"
+    },
+    "elf": {
+      "path": "E:\\zynqlinkPRO\\prebuilt\\20261030_orbtrace_usbfix_20261030\\zynqdap_orbtrace.elf",
+      "sha256": "6419c8b00a71b70a1572a55f84c3478f32b67aae8eda95a3821684dc7b3f1a30"
+    }
+  },
+  "target_elf": "E:\\zynqlinkPRO\\etm-service\\records\\capture-a31aade4fafb43a897d032c331d72060\\firmware.elf",
+  "target_elf_sha256": "63881ed9f6c1187d56924795ccad3f151a677aea0dfa201823fe44e0cb857522",
+  "milliseconds": 10.0,
+  "periodic_sync": false,
+  "hclk_div": 4,
+  "raw_diagnostic": false,
+  "IDCODE": "0501017714a01b",
+  "cpuid": "0x411fc231",
+  "flash": [
+    {
+      "address": 134217728,
+      "bytes": 20040,
+      "sha256": "d02f765f73d708299161b6ca5e2849956cc42fc03d1dc3145533b6a96dbf3c87"
+    },
+    {
+      "address": 134237768,
+      "bytes": 128,
+      "sha256": "496d8b1d85d4a90921e45cc77629b2c80dcaae957a6ed79710200efa1d4cf341"
+    }
+  ],
+  "reference": [
+    199999998,
+    9437440,
+    221192,
+    1
+  ],
+  "rcc_before": [
+    50548355,
+    5309450
+  ],
+  "rcc_capture": [
+    50548355,
+    5308570
+  ],
+  "gpio_before": [
+    16461,
+    1270594372
+  ],
+  "gpio_capture": 1091637572,
+  "tpiu_supported": 11,
+  "config": {
+    "protocol": "ETMv3",
+    "idr": 1091891777,
+    "ctrl": 2064,
+    "ccer": 100352,
+    "traceid": 2
+  },
+  "start_status": [
+    1163152689,
+    65470483,
+    0,
+    0,
+    0,
+    1,
+    99999999,
+    0
+  ],
+  "stop_status": [
+    1163152689,
+    65470482,
+    0,
+    23473,
+    99,
+    1,
+    99999999,
+    0
+  ],
+  "quality": {
+    "records": 23473,
+    "loss": false,
+    "synced": true,
+    "ended": true,
+    "trailingBytes": 0,
+    "fclk": 99999999,
+    "tckKhz": 999,
+    "refClockHz": 199999998
+  },
+  "packets": 99,
+  "sequence_ok": true,
+  "capture_id_ok": true,
+  "etm_bytes": 15877,
+  "etm_sha256": "05ccdf81114757661bfb46986d43ec15f925888a7a989a96cbbd566a4231da51",
+  "capture_passed": true,
+  "restored": true,
+  "rcc_after": [
+    50548355,
+    5309450
+  ],
+  "usb_reader_errors": []
+}

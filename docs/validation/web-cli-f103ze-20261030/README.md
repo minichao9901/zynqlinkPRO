@@ -83,3 +83,23 @@
 新回归明确使旧实现失败（首帧混入ff7f），修复后连续帧、重复FSYNC、帧内HSYNC、
 半字节相位、非法帧内FSYNC恢复/丢失标志通过。异常结构会传播为transport loss。
 Vivado构建日志为build/web_cli_tpiu_fix_build.log；本段尚不代表新产物上板验收。
+
+## 第三阶段：本地服务采集入口与真实失败闭环
+
+- 新增 `page etm invoke captureNative`。真实页面通过鉴权API发起板卡事务，不依赖WebUSB
+  设备选择器；同一页面继续处理任务进度、记录、解码与分析。serve必须显式声明已加载bit/ELF。
+- 后端复用原生板卡事务，验证目标Flash后配置和采集；始终等待现场恢复，不终止/重试子进程。
+  采集与原WebUSB流程共享租约；恢复失败阻止新任务。停止请求等当前短窗/恢复结束。
+- 新接口Python集成验证通过：鉴权、参数、并发租约、恢复确认、停止与恢复失败隔离。
+  当前Python共9项、Node14项通过。
+- 旧usbfix配对的**真实CLI→Web→本地服务→实板**复测：10ms，15,877字节，FCLK99,999,999Hz，
+  TCK999kHz，源ID2；synced/ended=true、loss=false、restored=true。
+  随后Web解码在offset35/15877返回response9，CLI返回ok=false；记录与原始数据保留。
+  证据：native-web-baseline-result.json、native-web-baseline-acceptance.json、native-web-baseline.etm。
+  这是旧配对的失败复现，不是新parser验收。
+- COM34原生串口实测：63/65等非整包可回显，64/128整包等待；追加一个短字节后返回
+  完整待收数据。已在native-serial*.json复现，疑似目标CDC短包/ZLP问题。目标ELF编译时
+  源目录E:/web-etm-trace-worktrees/codex-f103-target当前不存在，未修改或伪造目标固件。
+- parser进一步支持FSYNC自动选择字节/半字节相位；两种相位回归及真实引脚回放通过。
+  固定fixture：8180原始字节、413帧，参考解复用874字节与RTL输出逐字节一致。
+  上一次综合因期间parser变化被保护逻辑拒绝实施；最终构建日志改为web_cli_tpiu_final_build.log。

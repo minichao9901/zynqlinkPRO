@@ -10,6 +10,8 @@ import {store} from '../core/store.js';
 export const DEFAULT_ETM_ORIGIN = 'http://127.0.0.1:8766';
 
 export function etmOrigin(){
+  const mounted = globalThis.document?.body?.dataset?.etmBase;
+  if (mounted === '/etm') return location.origin + mounted;
   // toolbox.py hosts the workbench, ETM and authenticated queue on one origin.
   if (globalThis.location && new URLSearchParams(location.search).has('trace-cli')) return location.origin + '/etm';
   let saved = String(store.get('etm.service', '') || '').trim();
@@ -46,7 +48,9 @@ export class EtmView {
     this.open = document.getElementById('etm-open');
     const input = document.getElementById('etm-service');
     if (input){
-      input.value = store.get('etm.service', '') || '';
+      const mounted = !!document.body.dataset.etmBase;
+      input.value = mounted ? this.origin : store.get('etm.service', '') || '';
+      input.disabled = mounted;
       input.onchange = () => {
         const value = String(input.value || '').trim();
         store.set('etm.service', value);

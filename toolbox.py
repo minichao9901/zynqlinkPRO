@@ -131,6 +131,8 @@ def expand_arguments(value):
 def serve(args):
     if not 1024 <= args.port <= 65535:
         raise ValueError('端口须为1024～65535')
+    if bool(args.bit) != bool(args.zynq_elf):
+        raise ValueError('--bit与--zynq-elf必须同时指定')
     # Reuse the existing full application, ETM API and authenticated loopback queue.
     sys.path.insert(0, str(ROOT / 'etm-service/tools'))
     spec = importlib.util.spec_from_file_location('toolbox_service', ROOT / 'web/tools/dev/serve-etm.py')
@@ -141,9 +143,19 @@ def serve(args):
     folder.mkdir(parents=True, exist_ok=False)
     token = secrets.token_hex(32)
     (folder / 'cli-token').write_text(token, encoding='ascii')
-    app = service.create_application(ROOT / 'etm-service', ROOT / 'web', folder / 'cli-token')
+    temporary = folder / 'tmp'
+    temporary.mkdir()
+    os.environ['TEMP'] = os.environ['TMP'] = str(temporary)
+    pair = (args.bit, args.zynq_elf) if args.bit else None
+    app = service.create_application(ROOT / 'etm-service', ROOT / 'web', folder / 'cli-token', pair)
     server = make_server('127.0.0.1', args.port, app, threaded=True)
     state = {'protocol': 'workbench/1', 'url': 'http://127.0.0.1:' + str(args.port), 'pid': os.getpid(), 'status': 'serving'}
+    if pair:
+        state['nativeCapture'] = {'bit': str(Path(args.bit).resolve()),
+                                  'bitSha256': hashlib.sha256(Path(args.bit).read_bytes()).hexdigest(),
+                                  'elf': str(Path(args.zynq_elf).resolve()),
+                                  'elfSha256': hashlib.sha256(Path(args.zynq_elf).read_bytes()).hexdigest(),
+                                  'note': '声明采集配对；服务不会加载板卡，请先通过JTAG加载相同文件'}
     emit(state, folder / 'toolbox-runtime.json')
     emit({**state, 'browserUrl': state['url'] + '/?trace-cli=' + token + '#flash',
           'note': '在Chrome/Edge打开browserUrl，保持页面打开；首次硬件授权需在网页完成。Ctrl+C退出服务。'})
@@ -167,6 +179,8 @@ def parser():
     c.add_argument('--full', action='store_true', help='输出总清单，包括静态控件、选项和方法源码位置')
     s = sub.add_parser('serve', help='启动本机工作台和CLI队列，前台运行')
     s.add_argument('--port', type=int, default=8878)
+    s.add_argument('--bit', help='显式启用本地服务ETM采集：已加载的探针bit路径')
+    s.add_argument('--zynq-elf', help='已加载的配套探针ELF；与--bit一起指定')
     sub.add_parser('ping', help='检查浏览器worker就绪，不访问设备')
     sub.add_parser('status', help='工作台摘要')
     s = sub.add_parser('job', help='查询超时/历史操作结果，不重试')

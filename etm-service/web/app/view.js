@@ -62,7 +62,15 @@ function apiUrl(value){
  * 默认轨迹图也走这里的 45 s，但 `history.js` 已把它与 overview/首页行解耦：
  * 图表超时只会把轨迹图自身标为失败，不影响已经渲染的首批执行流行与页面其它部分。
  */
-async function api(path,body){return requestJson(apiBase+path,body===undefined?{}:{method:'POST',...(body instanceof FormData?{body}:{headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})},{timeout:path.endsWith('/overview')?300000:(path.includes('/window')?180000:45000)});}
+async function api(path,body){
+  const headers={};
+  // The opt-in CLI service grants its local native capture API with the same
+  // ephemeral token as the queue. Never send it to a cross-origin bridge.
+  try{if(new URL(apiBase,location.href).origin===location.origin){const token=new URLSearchParams(parent.location.search).get('trace-cli');if(/^[0-9a-f]{64}$/.test(token||''))headers['X-Trace-CLI']=token;}}catch{}
+  const init={headers};
+  if(body!==undefined){init.method='POST';if(body instanceof FormData)init.body=body;else{headers['Content-Type']='application/json';init.body=JSON.stringify(body);}}
+  return requestJson(apiBase+path,init,{timeout:path.endsWith('/overview')?300000:(path.includes('/window')?180000:45000)});
+}
 function log(message){$('log').textContent=new Date().toLocaleTimeString('zh-CN')+' '+message+'\n'+$('log').textContent;controls();}
 function error(e){log(e.message);$('job-state').textContent=e.message;$('job-state').classList.add('bad');}
 const history=new HistoryView(api,error);
@@ -445,9 +453,31 @@ target.canRelease=()=>!embeddedBridge.busy()&&!target.transportFault;
 let attached=true;
 try{if(host)host.attach(embeddedBridge,window);}catch(e){attached=false;state.operation=true;error(e);controls();}
 // Developer diagnostics also used by the integrated page acceptance tests.
-window.__etm={target,state,history,api};
+async function captureNative(options={}){
+  if(!host)throw Error('本地服务采集需要从统一CLI工作台打开ETM页面');
+  if(!parent.document.body.dataset.nativeCapture)throw Error('服务未启用本地采集；请用toolbox.py serve同时指定已加载的--bit和--zynq-elf');
+  if(!options||typeof options!=='object'||Array.isArray(options))throw Error('采集参数必须为JSON对象');
+  if(state.operation||state.job||state.waiting)throw Error('已有ETM操作或任务，请先等待完成');
+  if(!state.elfId||!state.elfInfo)throw Error('请先载入与F103ZE匹配的ELF');
+  if(target.transportFault)throw Error('旧调试口仍故障，请先恢复或断开');
+  state.operation=true;state.hardwareOperation=true;controls();
+  try{
+    return await runEmbedded(host,async()=>{
+      if(target.probe)await disconnectTarget();
+      log('本地服务联动采集：逐字节校验Flash、配置ETM、采集并恢复目标现场');
+      const created=await api('native-capture',{...options,elfId:state.elfId,sourceSnapshot:state.sourceSnapshot});
+      await watchJob(created.job,{resume:false,kind:'capture'});
+      log('本地服务采集与现场恢复通过，记录已交给Web分析');
+      return {record:created.record,transport:'native-service',targetRestored:true};
+    });
+  }catch(e){error(e);throw e;}finally{state.operation=false;state.hardwareOperation=false;controls();}
+}
+window.__etm={target,state,history,api,captureNative};
 if(attached)init();
 
 // 与操作互斥的轻量状态回读，实际命中后刷新 PC 和断点标记。
 setInterval(async()=>{if(!target.probe||state.operation||state.job||!target.breakpoints.items.some(b=>b.lease)||target.info?.halted||target.transportFault)return;
   state.operation=true;state.hardwareOperation=true;try{await runEmbedded(host,async()=>{if(await target.isHalted())await showTarget(await target.inspect());});}catch(e){error(e);}finally{state.operation=false;state.hardwareOperation=false;controls();}},800);
+
+// 页面打开时先探测一次 Zynq 接收端，避免采集页一直显示未检查。
+setTimeout(()=>{try{document.getElementById('check-la')?.click();}catch{}},800);
