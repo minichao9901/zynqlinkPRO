@@ -1,7 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createTraceAutomation} from '../../app/automation/trace.js';
+import {createTraceAutomation,queueDelivery} from '../../app/automation/trace.js';
 import {runCmd} from '../../app/dbg/cmd.js';
+
+test('CLI completion transport can recover without replaying a hardware command',async()=>{
+  let sends=0,hardware=0;
+  const result={ok:true,value:++hardware};
+  const received=await queueDelivery(async()=>{if(++sends===1)throw new TypeError('Failed to fetch');return result;},{pause:async()=>{}});
+  assert.equal(received,result);assert.equal(sends,2);assert.equal(hardware,1);
+  await assert.rejects(queueDelivery(async()=>{throw Object.assign(Error('conflicting worker'),{permanent:true});},{pause:async()=>{throw Error('must not retry');}}),/conflicting worker/);
+});
 
 function rig(){
   const device={productName:'akaLinkPro CMSIS-DAP',serialNumber:'probe'},calls=[],elements=new Map();

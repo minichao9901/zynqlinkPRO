@@ -14,6 +14,8 @@
  * 0x31（探针侧 RTT 桥）响应：payload[2] = 返回码，payload[3..] = 12 个 32 位小端状态字。
  */
 
+import {nativeProbeEnabled,nativeHidDevices} from '../core/native-probe.js';
+
 export const USAGE_PAGE = 0xFF00;   // 厂商自定义页
 export const VID = 0x0d28;          // akaLinkPro：CMSIS-DAP + CDC + HID + WebUSB + DFU 复合设备
 export const PID = 0x0204;
@@ -219,7 +221,7 @@ export class AkaLinkHid {
     this._onDisc = this._handleDisconnect.bind(this);
   }
 
-  static supported(){ return typeof navigator !== 'undefined' && !!navigator.hid; }
+  static supported(){ return nativeProbeEnabled() || typeof navigator !== 'undefined' && !!navigator.hid; }
   get connected(){ return !!(this.device && this.device.opened); }
   get label(){
     const d = this.device;
@@ -254,6 +256,9 @@ export class AkaLinkHid {
 
   /** 弹设备选择框。过滤条件带上 VID/PID —— 否则选择框里会混进触摸板这类同样有 0xFF00 的设备 */
   async request(){
+    if(nativeProbeEnabled()){
+      const devices=await nativeHidDevices();const device=AkaLinkHid.pick(devices);if(!device)throw Error('本地服务未发现ZynqDAP HID');await this.open(device);return device;
+    }
     if (!AkaLinkHid.supported()) throw new Error('这个浏览器没有 WebHID（Chrome / Edge 桌面版才有）');
     const devs = await navigator.hid.requestDevice({
       filters: [{ vendorId: VID, productId: PID, usagePage: USAGE_PAGE }],
@@ -268,7 +273,7 @@ export class AkaLinkHid {
     if (interactive === true) return await this.request();
     if (interactive === false) return await this.reconnect();
     if (!AkaLinkHid.supported()) throw new Error('这个浏览器没有 WebHID（Chrome / Edge 桌面版才有）');
-    const devices = (await navigator.hid.getDevices()).filter(d =>
+    const devices = (await (nativeProbeEnabled()?nativeHidDevices():navigator.hid.getDevices())).filter(d =>
       d.vendorId === VID && d.productId === PID && d.collections?.some(c => c.usagePage === USAGE_PAGE));
     if (devices.length !== 1) return await this.request();
     await this.open(devices[0]);
@@ -278,7 +283,7 @@ export class AkaLinkHid {
   /** 用之前授权过的探针直接连（浏览器记住过就不用再点弹框） */
   async reconnect(){
     if (!AkaLinkHid.supported()) throw new Error('这个浏览器没有 WebHID（Chrome / Edge 桌面版才有）');
-    const devs = await navigator.hid.getDevices();
+    const devs = await (nativeProbeEnabled()?nativeHidDevices():navigator.hid.getDevices());
     const d = AkaLinkHid.pick(devs);
     if (!d){
       const names = devs.map(x => x.productName || '(无名)').join('、');
@@ -298,7 +303,7 @@ export class AkaLinkHid {
       this._disconnectedDevice = null;
       channel.clients.add(this);
       device.addEventListener('inputreport', channel.input);
-      navigator.hid.addEventListener('disconnect', this._onDisc);
+      navigator.hid?.addEventListener('disconnect', this._onDisc);
     });
   }
 
@@ -328,7 +333,7 @@ export class AkaLinkHid {
       catch (e){ if (this._disconnectedDevice !== d) throw e; }
       channel.clients.delete(this);
       if (!channel.clients.size){ try { d.removeEventListener('inputreport', channel.input); } catch {} }
-      try { navigator.hid.removeEventListener('disconnect', this._onDisc); } catch {}
+      try { navigator.hid?.removeEventListener('disconnect', this._onDisc); } catch {}
       this.device = null;
     });
   }

@@ -1,0 +1,11 @@
+--- a/firmware/stm32f103_cdc_trace/src/main.c
++++ b/firmware/stm32f103_cdc_trace/src/main.c
+@@ -289,7 +289,7 @@
+             }
+         }
+         if (!rx_pending && !rx_armed) {
+-            if (usbd_ep_start_read(0, CDC_OUT_EP, read_buffer, sizeof(read_buffer)) == 0) {
++            if (usbd_ep_start_read(0, CDC_OUT_EP, read_buffer, CDC_MAX_MPS) == 0) {
+                 rx_armed = 1;
+             }
+         }

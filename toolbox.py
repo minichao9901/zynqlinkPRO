@@ -9,6 +9,7 @@ from pathlib import Path
 import secrets
 import hashlib
 import subprocess
+import shutil
 import sys
 import time
 from urllib.error import HTTPError
@@ -48,6 +49,7 @@ def catalog():
                        'features': value[2], 'commands': ['describe', 'state', 'show', 'read', 'set', 'click', 'interrupt', 'upload', 'invoke', 'wait', 'event', 'downloads', 'download', 'discard']}
                       for key, value in PAGES.items()],
             'trace': 'toolbox.py trace <existing trace CLI arguments>',
+            'bridge': 'toolbox.py bridge <OpenOCD/J-Link bridge arguments>',
             'browserRequired': True, 'hardwareValidatedThisChange': False,
             'completion': '事件投递不代表业务完成；读取状态/质量/日志验证。invoke等待原方法返回，原方法可能自行捕获错误。'}
 
@@ -139,6 +141,8 @@ def serve(args):
     service = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(service)
     from werkzeug.serving import make_server
+    import logging
+    logging.getLogger('werkzeug').setLevel(logging.WARNING)
     folder = Path(args.runtime).resolve()
     folder.mkdir(parents=True, exist_ok=False)
     token = secrets.token_hex(32)
@@ -147,9 +151,10 @@ def serve(args):
     temporary.mkdir()
     os.environ['TEMP'] = os.environ['TMP'] = str(temporary)
     pair = (args.bit, args.zynq_elf) if args.bit else None
-    app = service.create_application(ROOT / 'etm-service', ROOT / 'web', folder / 'cli-token', pair)
+    app = service.create_application(ROOT / 'etm-service', ROOT / 'web', folder / 'cli-token', pair, args.native_probe)
     server = make_server('127.0.0.1', args.port, app, threaded=True)
     state = {'protocol': 'workbench/1', 'url': 'http://127.0.0.1:' + str(args.port), 'pid': os.getpid(), 'status': 'serving'}
+    state['nativeProbe']=bool(args.native_probe)
     if pair:
         state['nativeCapture'] = {'bit': str(Path(args.bit).resolve()),
                                   'bitSha256': hashlib.sha256(Path(args.bit).read_bytes()).hexdigest(),
@@ -181,6 +186,7 @@ def parser():
     s.add_argument('--port', type=int, default=8878)
     s.add_argument('--bit', help='显式启用本地服务ETM采集：已加载的探针bit路径')
     s.add_argument('--zynq-elf', help='已加载的配套探针ELF；与--bit一起指定')
+    s.add_argument('--native-probe', action='store_true', help='通过鉴权本机服务使用实际USB/HID/COM，复用网页协议与界面')
     sub.add_parser('ping', help='检查浏览器worker就绪，不访问设备')
     sub.add_parser('status', help='工作台摘要')
     s = sub.add_parser('job', help='查询超时/历史操作结果，不重试')
@@ -217,13 +223,24 @@ def parser():
             c.add_argument('files', nargs='+')
             c.add_argument('--directory', action='store_true', help='上传一个源码目录，保留相对路径')
         elif name == 'wait':
-            c.add_argument('--contains', required=True, help='等待控件文本包含内容；仍需检查业务质量')
+            condition = c.add_mutually_exclusive_group(required=True)
+            condition.add_argument('--contains', help='等待控件文本包含内容；仍需检查业务质量')
+            condition.add_argument('--enabled', action='store_true', help='等待控件恢复可用；用于同名文件再次上传后的异步完成检查')
     c = commands.add_parser('invoke', help='调用describe公开的原方法，等待其Promise返回')
     c.add_argument('method')
     c.add_argument('--target', default='view', help='以describe返回的targets为准')
     c.add_argument('--args', default='[]', help='JSON位置参数数组；大参数可用--args-file')
     c.add_argument('--args-file')
     sub.add_parser('trace', help='原样转交全部现有ETM Trace CLI参数（trace之后的--help）')
+    sub.add_parser('bridge', help='启动可选OpenOCD/J-Link桥（bridge --help查看桥选项）')
+    v = sub.add_parser('validate', help='通过真实Web页面运行F103ZE回归，保存逐步证据')
+    v.add_argument('suite', choices=['capacity', 'debug'])
+    v.add_argument('--artifacts', required=True, help='新的证据目录，拒绝覆盖')
+    v.add_argument('--elf', default=str(ROOT / 'prebuilt/20261031_f103ze_cdc_trace/fw-48-echo.elf'))
+    v.add_argument('--sources', default=str(ROOT / 'docs/validation/f103ze-web-flow-20261031/source-snapshot'))
+    v.add_argument('--lengths', default='0.01,0.1,0.2,1')
+    v.add_argument('--rounds', type=int, default=20)
+    v.add_argument('--case-timeout', type=float, default=600)
     return p
 
 
@@ -231,6 +248,12 @@ def main(argv=None):
     argv = list(sys.argv[1:] if argv is None else argv)
     if argv and argv[0] == 'trace':
         return subprocess.call([sys.executable, '-X', 'utf8', str(ROOT / 'etm-service/trace.py'), *argv[1:]])
+    if argv and argv[0] == 'bridge':
+        node = shutil.which('node')
+        if not node:
+            emit({'ok': False, 'error': '本地桥需要Node.js 18+'})
+            return 1
+        return subprocess.call([node, str(ROOT / 'web/bridge/rtt-bridge.mjs'), *argv[1:]])
     p = parser()
     args = p.parse_args(argv)
     try:
@@ -250,6 +273,10 @@ def main(argv=None):
             p.error('此命令需要 --runtime 目录')
         if args.command == 'serve':
             serve(args)
+            return 0
+        if args.command == 'validate':
+            from tools.f103_web_acceptance import run
+            emit(run(args), args.out)
             return 0
         client = Client(args.runtime, args.timeout)
         if args.command == 'job':
@@ -343,7 +370,7 @@ def main(argv=None):
                     deadline = time.monotonic() + args.timeout
                     while True:
                         result = client.request(payload)
-                        if not result.get('ok') or args.contains in result.get('value', {}).get('text', ''):
+                        if not result.get('ok') or (args.enabled and result.get('value', {}).get('disabled') is False) or (not args.enabled and args.contains in result.get('value', {}).get('text', '')):
                             break
                         client.http('ack/' + result['job'], {})
                         if time.monotonic() >= deadline:

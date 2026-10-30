@@ -1,5 +1,5 @@
 {
-  "status": "candidate: built and STA passed; board acceptance pending",
+  "status": "partial board acceptance: Web ETM 6MHz 10ms..1s and USB initialization/CDC echo; frequency/stress campaign ongoing",
   "source_base_commit": "75e4850acdabb1d7490434391a7fb20291fe0b86",
   "build": {
     "command": "ZYNQLINK_RAW_TRACE=2 ZYNQLINK_RUN_THREADS=1 python tools/run_vivado.py -mode batch -nojournal -log build/web_cli_tpiu_final_build.log -source fpga/build_dma.tcl -tclargs --fresh",
@@ -45,5 +45,7 @@
       "bytes": 4187,
       "sha256": "90bb44a9edf33fa9ddc3fab088e2eaea22bc671ebfdfba99be065a5b5f2dc302"
     }
-  }
+  },
+  "source_commit": "4a828b2d33dbc7f54f0af55e1632f66961ad24d4",
+  "acceptance": "../../docs/F103ZE-Web-CLI-ETM统一验收-20261031.md"
 }

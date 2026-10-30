@@ -1,0 +1,143 @@
+{
+  "suite": "capacity",
+  "rows": [
+    {
+      "requestedSeconds": 0.01,
+      "wallSecondsIncludingWeb": 8.456055200003902,
+      "record": "capture-0d0f6f8218c6462dbc085d114cb0f9e5",
+      "ok": true,
+      "etmBytes": 24953,
+      "captureQuality": {
+        "records": 24953,
+        "loss": false,
+        "synced": true,
+        "ended": true,
+        "trailingBytes": 0,
+        "fclk": 99999999,
+        "tckKhz": 999,
+        "refClockHz": 199999998
+      },
+      "decodedQuality": {
+        "inputBytes": 24953,
+        "unprocessedBytes": 0,
+        "processedBytes": 24953,
+        "accountedBytes": 24953,
+        "overlapBytes": 0,
+        "unaccountedBytes": 0,
+        "unsynchronizedBytes": 0,
+        "unsynchronizedRecords": 0,
+        "validPackets": 21410,
+        "packetIssues": 0,
+        "overflowPackets": 0,
+        "decoderLastError": 0,
+        "unknownExecution": 1639,
+        "initialPhysicalBytes": null,
+        "unknownSourceBytes": null,
+        "trailingFrameBytes": null,
+        "trailingSyncBytes": 0,
+        "firstPathOffset": 12,
+        "boundaryPresent": false,
+        "timing": {
+          "cycleElements": 0,
+          "timeFlameAvailable": false
+        },
+        "basis": "字节核算不等于采集无损证明；源码映射率不等于程序覆盖率"
+      },
+      "summary": {
+        "packets": 21410,
+        "ranges": 100016,
+        "instructions": 100016,
+        "executed": 91821,
+        "sourceMapped": 100016,
+        "exceptions": 4,
+        "gaps": 2,
+        "packetIssues": 0,
+        "unknownExecution": 1639,
+        "functions": {
+          "cdc_poll": 45895,
+          "cdc_tx_poll": 19668,
+          "main": 14745,
+          "usb_device_is_configured": 11473,
+          "HAL_IncTick": 28,
+          "SysTick_Handler": 12
+        }
+      },
+      "captureExtent": {
+        "requestedSeconds": 0.01,
+        "actualSeconds": 0.02056599999923492,
+        "complete": true,
+        "known": true,
+        "basis": "host monotonic ETM active window; not cycle-accurate timing"
+      }
+    },
+    {
+      "requestedSeconds": 0.1,
+      "wallSecondsIncludingWeb": 28.5627039999963,
+      "record": "capture-d09245aee0f64eb186dc9e2ec6a9919e",
+      "ok": true,
+      "etmBytes": 137783,
+      "captureQuality": {
+        "records": 137783,
+        "loss": false,
+        "synced": true,
+        "ended": true,
+        "trailingBytes": 0,
+        "fclk": 99999999,
+        "tckKhz": 999,
+        "refClockHz": 199999998
+      },
+      "decodedQuality": {
+        "inputBytes": 137783,
+        "unprocessedBytes": 0,
+        "processedBytes": 137783,
+        "accountedBytes": 137783,
+        "overlapBytes": 0,
+        "unaccountedBytes": 0,
+        "unsynchronizedBytes": 0,
+        "unsynchronizedRecords": 0,
+        "validPackets": 118241,
+        "packetIssues": 0,
+        "overflowPackets": 0,
+        "decoderLastError": 0,
+        "unknownExecution": 9051,
+        "initialPhysicalBytes": null,
+        "unknownSourceBytes": null,
+        "trailingFrameBytes": null,
+        "trailingSyncBytes": 0,
+        "firstPathOffset": 12,
+        "boundaryPresent": false,
+        "timing": {
+          "cycleElements": 0,
+          "timeFlameAvailable": false
+        },
+        "basis": "字节核算不等于采集无损证明；源码映射率不等于程序覆盖率"
+      },
+      "summary": {
+        "packets": 118241,
+        "ranges": 552374,
+        "instructions": 552374,
+        "executed": 507119,
+        "sourceMapped": 552374,
+        "exceptions": 25,
+        "gaps": 2,
+        "packetIssues": 0,
+        "unknownExecution": 9051,
+        "functions": {
+          "cdc_poll": 253447,
+          "cdc_tx_poll": 108612,
+          "main": 81453,
+          "usb_device_is_configured": 63357,
+          "HAL_IncTick": 175,
+          "SysTick_Handler": 75
+        }
+      },
+      "captureExtent": {
+        "requestedSeconds": 0.1,
+        "actualSeconds": 0.10239659999933792,
+        "complete": true,
+        "known": true,
+        "basis": "host monotonic ETM active window; not cycle-accurate timing"
+      }
+    }
+  ]
+}

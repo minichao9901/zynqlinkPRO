@@ -1,0 +1,40 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import vm from 'node:vm';
+import {nativeUsbDevices,nativeHidDevices,nativeSerialPorts} from '../../app/core/native-probe.js';
+
+test('native transport preserves real wire bytes, report IDs and serial reads after idle polls',async t=>{
+  const originalWindow=globalThis.window,originalFetch=globalThis.fetch;
+  t.after(()=>{globalThis.window=originalWindow;globalThis.fetch=originalFetch;});
+  globalThis.window={document:{body:{dataset:{nativeProbe:'1'}}},location:{origin:'http://127.0.0.1:8882',search:'?trace-cli='+'a'.repeat(64)}};
+  const requests=[];let empty=2;
+  const encode=bytes=>Buffer.from(bytes).toString('base64');
+  const descriptor={vendorId:0x0d28,productId:0x0204,serialNumber:'test-probe',productName:'wire device',configuration:{interfaces:[]}};
+  globalThis.fetch=async(url,options)=>{
+    assert.equal(options.headers['X-Trace-CLI'],'a'.repeat(64));
+    const route=new URL(url).pathname,value=JSON.parse(options.body);requests.push({route,value});
+    let reply={};
+    if(route==='/native-probe/usb/list')reply=[descriptor];
+    if(route==='/native-probe/usb/open')reply=descriptor;
+    if(route==='/native-probe/usb/write')reply={bytesWritten:Buffer.from(value.data,'base64').length};
+    if(route==='/native-probe/usb/read')reply={data:encode([0,128,255])};
+    if(route==='/native-probe/hid/list')reply=[{...descriptor,collections:[{usagePage:0xff00}]}];
+    if(route==='/native-probe/hid/report')reply={reportId:2,data:encode([1,0x31,0])};
+    if(route==='/native-probe/serial/list')reply=[{path:'COM-test',usbVendorId:0x0d28,usbProductId:0x0204}];
+    if(route==='/native-probe/serial/read')reply={data:empty-->0?'':encode([65,66])};
+    return {ok:true,json:async()=>({ok:true,value:reply})};
+  };
+  const [usb]=await nativeUsbDevices();await usb.open();
+  const buffer=vm.runInNewContext('new Uint8Array([0,128,255]).buffer');
+  assert.equal((await usb.transferOut(2,buffer)).bytesWritten,3);
+  assert.deepEqual([...new Uint8Array((await usb.transferIn(1,64)).data.buffer)],[0,128,255]);
+  await usb.close();
+  const [hid]=await nativeHidDevices();await hid.open();let report;
+  hid.addEventListener('inputreport',event=>{report=event;});
+  await hid.sendReport(1,new Uint8Array(63));assert.equal(report.reportId,2);
+  assert.deepEqual([...new Uint8Array(report.data.buffer)],[1,0x31,0]);await hid.close();
+  const [port]=await nativeSerialPorts();await port.open({baudRate:115200});
+  const reader=port.readable.getReader();assert.deepEqual([...(await reader.read()).value],[65,66]);
+  await reader.cancel();reader.releaseLock();await port.close();
+  assert.equal(requests.filter(r=>r.route==='/native-probe/serial/read').length,3);
+});

@@ -1,6 +1,7 @@
 # TPIU 连续帧/同步与CLI配对
 
-状态：本次新构建，STA通过，待上板验收。保留其它已知配对，不替换根目录默认固件。
+状态：本次新构建，STA通过；TRACECLK6MHz的Web初始化/CDC echo与10ms～1s采集已实板通过，
+更高频率及长期压力仍在进行。保留其它已知配对，不替换根目录默认固件。
 源码修改：连续16字节帧、帧内HSYNC移除、FSYNC自动选择字节相位，非法结构传播为loss。
 详细源码哈希、构建命令、bit/ELF及PS初始化SHA-256见manifest.json。
 
@@ -13,6 +14,6 @@ python -X utf8 toolbox.py --runtime build/native-web-final serve --port 8882 --b
 ```
 
 打开serve输出的browserUrl，CLI上传目标ELF后调用page etm invoke captureNative。
-完整命令见docs/toolbox-cli-ai.md；本轮记录见docs/validation/web-cli-f103ze-20261030/README.md。
-当前目标ELF为etm-service/firmware/stm32f103_cdc_trace/fw-ze.elf，SHA-256：
-63881ed9f6c1187d56924795ccad3f151a677aea0dfa201823fe44e0cb857522。
+完整命令见docs/toolbox-cli-ai.md；全部结论见docs/F103ZE-Web-CLI-ETM统一验收-20261031.md。
+当前目标ELF为prebuilt/20261031_f103ze_cdc_trace/fw-48-echo.elf，SHA-256：
+e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f。

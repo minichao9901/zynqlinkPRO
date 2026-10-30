@@ -1,0 +1,37 @@
+{
+  "status": "48 MHz target rebuilt, Web flashed/verified, matching source imported and ETM accepted at TRACECLK 6MHz",
+  "source_repo": "https://github.com/minichao9901/web-etm-trace",
+  "source_commit": "12746fc035833e90f695d45e15a1f7ffa1e132ad",
+  "source_archive_sha256": "f36427af597aaaf837ecfbc44655ac301aa0bebd1cbf2af9a7a312d5b616637e",
+  "source_project": "firmware/stm32f103_cdc_trace",
+  "build_command": "pwsh -NoProfile -File build/f103-target-source-zip/firmware/stm32f103_cdc_trace/build.ps1 -Chip ze -Gcc E:/Share/env-windows/tools/gnu_gcc/arm_gcc/mingw/bin/arm-none-eabi-gcc.exe",
+  "chip": "STM32F103xE",
+  "cpu_hz": 48000000,
+  "traceclk_hz": 24000000,
+  "usb_hz": 48000000,
+  "elf_sha256": "a10133ec3e12e337d316a395e03287f32e1851e4160964bc936959407e3342e7",
+  "segments": [
+    {
+      "address": 134217728,
+      "bytes": 20040,
+      "sha256": "ed4b92dc1736a0afb6a41cb43729640f74a3a1d362bb052b70093a82ed55e1cd"
+    },
+    {
+      "address": 134237768,
+      "bytes": 128,
+      "sha256": "496d8b1d85d4a90921e45cc77629b2c80dcaae957a6ed79710200efa1d4cf341"
+    }
+  ],
+  "elf_file_bytes": 1216624,
+  "flash_load_bytes": 20168,
+  "compiler": "arm-none-eabi-gcc.exe (GNU Arm Embedded Toolchain 10.3-2021.10) 10.3.1 20210824 (release)",
+  "echoFix": {
+    "elf": "fw-48-echo.elf",
+    "elfSha256": "e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f",
+    "patch": "cdc-packet-boundary.patch",
+    "patchSha256": "33e1e29660827460a34a3f1dff08e73b835e440a1dd195b8c50872131fd02585",
+    "change": "arm CDC OUT at 64-byte MPS instead of waiting for 512 bytes or a short packet",
+    "status": "Web Flash verified; native echo 31/64/65/128/512/1024 exact; Web serial 64 exact; Web ETM initialization and synchronized CDC echo accepted"
+  },
+  "acceptance": "../../docs/F103ZE-Web-CLI-ETM统一验收-20261031.md"
+}

@@ -1,0 +1,13 @@
+{
+  "openocd": "",
+  "scripts": "",
+  "jlink": {"exe": "", "gdbserver": "", "device": "STM32F103ZE", "speed": 1000, "rttPort": 19021},
+  "targets": {
+    "stm32f103": {
+      "cfgs": ["interface/cmsis-dap.cfg", "target/stm32f1x.cfg"],
+      "pre": ["cmsis-dap backend usb_bulk"],
+      "speed": 1000,
+      "jlinkDevice": "STM32F103ZE"
+    }
+  }
+}

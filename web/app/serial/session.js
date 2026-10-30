@@ -8,6 +8,7 @@ import { Bus } from '../core/bus.js';
 import { waitMs, yieldTask } from '../core/pace.js';
 import { isProbeCdcPort } from '../core/cdc-mode.js';
 import { ProbeCancelled } from '../core/probe-manager.js';
+import {nativeProbeEnabled,nativeSerialPorts} from '../core/native-probe.js';
 
 export class SerialSession extends Bus {
   constructor(){
@@ -23,19 +24,24 @@ export class SerialSession extends Bus {
     this._epoch = 0;
   }
 
-  static supported(){ return typeof navigator !== 'undefined' && 'serial' in navigator; }
+  static supported(){ return nativeProbeEnabled() || typeof navigator !== 'undefined' && 'serial' in navigator; }
 
   static async listPorts(){
+    if(nativeProbeEnabled())return nativeSerialPorts();
     if (!SerialSession.supported()) return [];
     try { return await navigator.serial.getPorts(); } catch { return []; }
   }
 
   static async requestPort(){
+    if(nativeProbeEnabled()){
+      const ports=await nativeSerialPorts();if(ports.length!==1)throw Error('请在端口列表中选择要打开的本机COM口');return ports[0];
+    }
     if (!SerialSession.supported()) throw new Error('这个浏览器不支持 Web Serial（请用桌面版 Chrome / Edge）');
     return await navigator.serial.requestPort();
   }
 
   static describe(port){
+    if(port.nativeService)return `${port.path} · ${port.productName||'本地串口'}`;
     let i = {};
     try { i = port.getInfo ? port.getInfo() : {}; } catch {}
     const vid = i.usbVendorId != null ? i.usbVendorId.toString(16).toUpperCase().padStart(4, '0') : null;

@@ -965,33 +965,39 @@ export class FlashView {
     this._status(useJlink ? '桥烧录中…（J-Link Commander 完成后一次性返回结果）'
                           : '桥烧录中…（OpenOCD 完成后一次性返回结果）');
     this.bc = new BridgeClient($('f-bridge-url').value);
-    await this.bc.connect({ version: 1 });
-    const cfg = {
-      target: $('f-chip').value,
-      verify: $('f-verify').checked,
-      reset: $('f-reset').checked,
-      /**
-       * J-Link 这条路由桥自己起 JLink.exe 烧（见 bridge/rtt-bridge.mjs 的 jlinkFlash）：
-       * 桥会**先停掉 RTT 会话**再烧 —— J-Link 同一时刻只允许一个持有者，两个进程一起抢
-       * 会直接连不上探针（跟 WebUSB 那边"谁占着调试器"是同一类问题）。
-       */
-      ...(useJlink ? { backend: 'jlink' } : {}),
-      speed: Number($('f-speed').value) || 0,
-    };
-    if (cfg.target === 'custom'){
-      cfg.cfgs = String($('f-cfgs').value || '').split(/[,\s;]+/).map(s => s.trim()).filter(Boolean);
-      if (!cfg.cfgs.length) throw new Error('自定义目标要填 cfg 文件（逗号分隔）');
-    }
-    if (/\.bin$/i.test(name)) cfg.base = Number($('f-base').value) || 0;
-    if (this.file){ cfg.name = this.file.name; cfg.dataB64 = this.file.dataB64; cfg.size = this.file.size; }
-    else cfg.path = pathText;
+    const bridge=this.bc;
+    try {
+      await this.bc.connect({ version: 1 });
+      const cfg = {
+        target: $('f-chip').value,
+        verify: $('f-verify').checked,
+        reset: $('f-reset').checked,
+        /**
+         * J-Link 这条路由桥自己起 JLink.exe 烧（见 bridge/rtt-bridge.mjs 的 jlinkFlash）：
+         * 桥会**先停掉 RTT 会话**再烧 —— J-Link 同一时刻只允许一个持有者，两个进程一起抢
+         * 会直接连不上探针（跟 WebUSB 那边"谁占着调试器"是同一类问题）。
+         */
+        ...(useJlink ? { backend: 'jlink' } : {}),
+        speed: Number($('f-speed').value) || 0,
+      };
+      if (cfg.target === 'custom'){
+        cfg.cfgs = String($('f-cfgs').value || '').split(/[,\s;]+/).map(s => s.trim()).filter(Boolean);
+        if (!cfg.cfgs.length) throw new Error('自定义目标要填 cfg 文件（逗号分隔）');
+      }
+      if (/\.bin$/i.test(name)) cfg.base = Number($('f-base').value) || 0;
+      if (this.file){ cfg.name = this.file.name; cfg.dataB64 = this.file.dataB64; cfg.size = this.file.size; }
+      else cfg.path = pathText;
 
-    const r = await this.bc.flash(cfg);
-    this._bar(100);
-    this._log(`── 桥烧录完成（${r.seconds.toFixed(1)}s）──\n${r.output || ''}`);
-    setStatus($('f-result'),
-      `✅ ${r.target} · ${fBytes(r.bytes)} · ${r.seconds.toFixed(1)}s${r.verify ? ' · 已校验' : ''}${r.reset ? ' · 已复位运行' : ''}`, 'ok');
-    toast('烧录成功', 'ok', 5000);
+      const r = await this.bc.flash(cfg);
+      this._bar(100);
+      this._log(`── 桥烧录完成（${r.seconds.toFixed(1)}s）──\n${r.output || ''}`);
+      setStatus($('f-result'),
+        `✅ ${r.target} · ${fBytes(r.bytes)} · ${r.seconds.toFixed(1)}s${r.verify ? ' · 已校验' : ''}${r.reset ? ' · 已复位运行' : ''}`, 'ok');
+      toast('烧录成功', 'ok', 5000);
+    } finally {
+      await bridge.release();
+      if(this.bc===bridge)this.bc=null;
+    }
   }
 
   // ================= 界面小工具 =================

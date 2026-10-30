@@ -1,0 +1,72 @@
+{
+  "summary": {
+    "packets": 279775,
+    "ranges": 1140170,
+    "instructions": 1140170,
+    "executed": 985423,
+    "sourceMapped": 1139886,
+    "exceptions": 58,
+    "gaps": 2,
+    "packetIssues": 0,
+    "unknownExecution": 30781,
+    "functions": {
+      "cdc_poll": 297669,
+      "cdc_tx_poll": 266603,
+      "cdc_console_peek": 246884,
+      "main": 92313,
+      "usb_device_is_configured": 71806,
+      "cdc_console_feed": 3760,
+      "cdc_console_write": 3100,
+      "USBD_IRQHandler": 624,
+      "fsdev_write_pma": 548,
+      "fsdev_read_pma": 524,
+      "HAL_IncTick": 350,
+      "handle_line": 208,
+      "strcmp": 160,
+      "usbd_ep_start_write": 184,
+      "SysTick_Handler": 150,
+      "usbd_ep_start_read": 108,
+      "usbd_cdc_acm_bulk_in": 76,
+      "strncmp": 68,
+      "usbd_cdc_acm_bulk_out": 72,
+      "cdc_console_consume": 52,
+      "usbd_event_ep_out_complete_handler": 44,
+      "usbd_event_ep_in_complete_handler": 44,
+      "usbd_get_ep_mps": 44,
+      "USB_LP_CAN1_RX0_IRQHandler": 32
+    }
+  },
+  "quality": {
+    "inputBytes": 344913,
+    "unprocessedBytes": 0,
+    "processedBytes": 344913,
+    "accountedBytes": 344913,
+    "overlapBytes": 0,
+    "unaccountedBytes": 0,
+    "unsynchronizedBytes": 0,
+    "unsynchronizedRecords": 0,
+    "validPackets": 279775,
+    "packetIssues": 0,
+    "overflowPackets": 0,
+    "decoderLastError": 0,
+    "unknownExecution": 30781,
+    "initialPhysicalBytes": null,
+    "unknownSourceBytes": null,
+    "trailingFrameBytes": null,
+    "trailingSyncBytes": 0,
+    "firstPathOffset": 18,
+    "boundaryPresent": false,
+    "timing": {
+      "cycleElements": 0,
+      "timeFlameAvailable": false
+    },
+    "basis": "\u5b57\u8282\u6838\u7b97\u4e0d\u7b49\u4e8e\u91c7\u96c6\u65e0\u635f\u8bc1\u660e\uff1b\u6e90\u7801\u6620\u5c04\u7387\u4e0d\u7b49\u4e8e\u7a0b\u5e8f\u8986\u76d6\u7387"
+  },
+  "status": {
+    "kind": "status",
+    "processed": 344913,
+    "library": "1.8.3",
+    "lastErrorCode": 0,
+    "lastError": ""
+  }
+}

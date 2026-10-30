@@ -1,0 +1,11 @@
+*.bit binary
+*.elf binary
+*.etm binary
+*.tpiu binary
+# Preserve byte identity for loaded initialization files and hashed build inputs.
+prebuilt/**/ps7_init.tcl -text
+prebuilt/**/firmware-build.json -text
+prebuilt/**/cdc-packet-boundary.patch -text
+# These are exact source/export evidence snapshots, not editable repo sources.
+docs/validation/f103ze-web-flow-20261031/source-snapshot/** -text
+docs/validation/f103ze-web-flow-20261031/*.svg -text

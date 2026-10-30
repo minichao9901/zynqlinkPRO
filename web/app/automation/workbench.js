@@ -16,6 +16,9 @@ const GLOBAL_CONTROLS=['btn-global-reset','global-nrst-open-drain','btn-fullscre
 function methods(object){
   const result=new Map();
   for(let p=object;p&&p!==Object.prototype;p=Object.getPrototypeOf(p)){
+    // An iframe has a distinct Object.prototype. Do not advertise its built-in
+    // prototype methods as application commands; null-prototype views are OK.
+    if(p!==object&&Object.getPrototypeOf(p)===null)break;
     for(const [name,d] of Object.entries(Object.getOwnPropertyDescriptors(p))){
       if(name==='constructor'||name.startsWith('_')||['init','subscribe','onSession'].includes(name))continue;
       if(typeof d.value==='function'&&!result.has(name))result.set(name,d.value);
@@ -24,24 +27,26 @@ function methods(object){
   return result;
 }
 
-function jsonValue(value,seen=new WeakSet(),depth=0){
+function jsonValue(value,seen=new WeakSet(),depth=0,realm=globalThis){
   if(value===undefined)return null;
   if(typeof value==='bigint')return String(value);
   if(value===null||typeof value!=='object')return typeof value==='function'?undefined:value;
   if(depth>12)throw Error('结果嵌套过深，请读取页面状态或缩小查询');
-  if(value instanceof ArrayBuffer)return {$bytes:Array.from(new Uint8Array(value))};
+  const branded=name=>value instanceof globalThis[name] || typeof realm?.[name]==='function' && value instanceof realm[name];
+  if(branded('ArrayBuffer'))return {$bytes:Array.from(new Uint8Array(value))};
   if(ArrayBuffer.isView(value))return {$bytes:Array.from(new Uint8Array(value.buffer,value.byteOffset,value.byteLength))};
   if(seen.has(value))return '[circular]';
   seen.add(value);
   let out;
-  if(value instanceof Map)out=Array.from(value,([k,v])=>[jsonValue(k,seen,depth+1),jsonValue(v,seen,depth+1)]);
-  else if(value instanceof Set)out=Array.from(value,v=>jsonValue(v,seen,depth+1));
-  else if(Array.isArray(value))out=value.map(v=>jsonValue(v,seen,depth+1));
+  if(branded('Map'))out=Array.from(value,([k,v])=>[jsonValue(k,seen,depth+1,realm),jsonValue(v,seen,depth+1,realm)]);
+  else if(branded('Set'))out=Array.from(value,v=>jsonValue(v,seen,depth+1,realm));
+  else if(Array.isArray(value))out=Array.from(value,v=>jsonValue(v,seen,depth+1,realm));
   else {
     out={};
     // Do not traverse getters, DOM nodes, devices, or class internals.
-    if(Object.getPrototypeOf(value)!==Object.prototype&&Object.getPrototypeOf(value)!==null){seen.delete(value);return {type:value.constructor?.name||'object'};}
-    for(const [k,d]of Object.entries(Object.getOwnPropertyDescriptors(value)))if('value'in d)out[k]=jsonValue(d.value,seen,depth+1);
+    const prototype=Object.getPrototypeOf(value);
+    if(prototype!==Object.prototype&&prototype!==realm?.Object?.prototype&&prototype!==null){seen.delete(value);return {type:value.constructor?.name||'object'};}
+    for(const [k,d]of Object.entries(Object.getOwnPropertyDescriptors(value)))if('value'in d)out[k]=jsonValue(d.value,seen,depth+1,realm);
   }
   seen.delete(value);return out;
 }
@@ -162,7 +167,7 @@ export function createWorkbenchAutomation(tools,win=globalThis.window){
         ...Array.from(fileControls,([key,e])=>({...control(e,e.ownerDocument.body,key),detachedFromPage:true}))],
       methods:Array.from(methods(target),([name,fn])=>({name,signature:fn.toString().split('{')[0].trim().slice(0,400),
         note:'原网页方法；参数含 DOM/回调的接口应改用控件接口'}))};
-    if(m.op==='state')return {page:m.page,summary:typeof view.summary==='function'?jsonValue(await view.summary()):null,
+    if(m.op==='state')return {page:m.page,summary:typeof view.summary==='function'?jsonValue(await view.summary(),new WeakSet(),0,c.win):null,
       errors:[...(tools.errors?.slice(-20)||[]),...(c.win.__etmPageErrors?.slice(-20)||[])],text:root.textContent.slice(0,100000)};
     if(m.op==='show'){
       win.location.hash=m.page;
@@ -174,7 +179,7 @@ export function createWorkbenchAutomation(tools,win=globalThis.window){
       const start=tools.errors?.length||0;
       const value=await fn.apply(target,(m.args||[]).map(v=>argument(v,c)));
       const errors=tools.errors?.slice(start)||[];
-      return {returned:true,value:jsonValue(value),errors,verificationRequired:true};
+      return {returned:true,value:jsonValue(value,new WeakSet(),0,c.win),errors,verificationRequired:true};
     }
     const e=locate(root,m.selector,fileControls);
     if(m.op==='read')return {...control(e,root,m.selector),text:e.textContent.slice(0,100000)};

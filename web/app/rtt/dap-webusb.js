@@ -17,6 +17,7 @@
 import { u32le, u32leBytes } from '../core/bin.js';
 import { UsbLease } from '../core/usb-device.js';
 import { OperationBudget } from '../core/operation-budget.js';
+import {nativeProbeEnabled,nativeUsbDevices} from '../core/native-probe.js';
 /**
  * 等待原语（见 core/pace.js 的整段说明）：
  * 🚨 轮询间隔**不能用 setTimeout** —— 页面不可见时浏览器把短延时钳到 ≥1 s，
@@ -175,15 +176,21 @@ export class WebUsbDapProbe {
    */
   static CLOCK_CANDIDATES = [8000, 12000, 4000, 2000, 1000, 500, 200];
 
-  static supported(){ return typeof navigator !== 'undefined' && 'usb' in navigator; }
+  static supported(){ return nativeProbeEnabled() || typeof navigator !== 'undefined' && 'usb' in navigator; }
 
   static async authorized(){
+    if(nativeProbeEnabled())return nativeUsbDevices();
     if (!WebUsbDapProbe.supported()) return [];
     try { return await navigator.usb.getDevices(); } catch { return []; }
   }
 
   /** 弹浏览器设备选择框；all=true 时列出所有 USB 设备（非 DAPLink 也能试） */
   static async request(all = false, opts = {}){
+    if(nativeProbeEnabled()){
+      const devices=await nativeUsbDevices();
+      if(devices.length!==1)throw Error('本地服务需要唯一ZynqDAP');
+      return WebUsbDapProbe.open(devices[0],opts);
+    }
     if (!WebUsbDapProbe.supported()) throw new Error('这个浏览器没有 WebUSB（请用桌面版 Chrome / Edge）');
     const device = await navigator.usb.requestDevice({ filters: all ? [] : [{ vendorId: 0x0d28 }] });
     return await WebUsbDapProbe.open(device, opts);
@@ -223,7 +230,7 @@ export class WebUsbDapProbe {
     this.skipTargetInit = skipTargetInit;
     this.skipClearHalt = skipClearHalt;
     await this._claim();
-    const prod = this.device.productName || 'CMSIS-DAP';
+    const prod = (this.device.nativeService?'本地服务 · ':'')+(this.device.productName || 'CMSIS-DAP');
 
     /**
      * 🚨 **先定封包写法再发任何命令**（见 `_ctrl` 的注释）：当前固件只认**短包**，

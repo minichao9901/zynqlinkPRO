@@ -843,13 +843,12 @@ def _decode_job(jid, sid):
             return r['summary']
         browse_started=time.perf_counter()
         if streamed:browse_store(sid).ensure()
-        if r.get('performance'):
-            performance=dict(r['performance'])
-            performance.update(jobSeconds=time.perf_counter()-started,
-                jobPhasesSeconds=dict(metadataPreparation=prepared-started,
-                    decode=decoded_at-prepared,captureStartAndMetadata=browse_started-decoded_at,
-                    browsePreparation=time.perf_counter()-browse_started))
-            save_json(folder/'decode-performance.json',performance)
+        performance=dict(r.get('performance') or {})
+        performance.update(jobSeconds=time.perf_counter()-started,
+            jobPhasesSeconds=dict(metadataPreparation=prepared-started,
+                decode=decoded_at-prepared,captureStartAndMetadata=browse_started-decoded_at,
+                browsePreparation=time.perf_counter()-browse_started))
+        save_json(folder/'decode-performance.json',performance)
         return r['summary']
     except (Exception,SystemExit) as error:
         record_failure(sid,error,'decode')

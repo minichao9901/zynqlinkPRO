@@ -1,6 +1,7 @@
 /** CLI adapter. Hardware algorithms remain in the existing Web views/commands. */
 import {runCmd} from '../dbg/cmd.js';
 import {createWorkbenchAutomation} from './workbench.js';
+import {nativeProbeEnabled,nativeUsbDevices} from '../core/native-probe.js';
 
 export function createTraceAutomation(tools, win=globalThis.window){
   let transaction=null, busy=false,lastDevices=[];
@@ -19,7 +20,7 @@ export function createTraceAutomation(tools, win=globalThis.window){
     throw Error('ETM 子页面未就绪；请先启动本地工作台服务');
   }
   function authorized(probe){
-    return win.navigator.usb.getDevices().then(devices=>{
+    return (nativeProbeEnabled()?nativeUsbDevices():win.navigator.usb.getDevices()).then(devices=>{
       lastDevices=devices;
       const matches=devices.filter(d=>(!probe||d.serialNumber===probe)&&/akaLink|CMSIS|DAP/i.test(d.productName||''));
       if(matches.length!==1)throw Error('须授权并唯一选择探针；已匹配 '+matches.map(d=>d.serialNumber).join(','));
@@ -61,7 +62,7 @@ export function createTraceAutomation(tools, win=globalThis.window){
     if(m.action==='ping')return {protocol:'web-trace/1',ready:true,hardwareAccessed:false};
     if(m.action==='status')return {protocol:'web-trace/1',connected:!!tools.dbg.session?.connected,
       debug:tools.dbg.session?.statusInfo(),etm:tools.etm.summary(),flashBusy:!!tools.flash.busy,
-      cached:busy,devices:(busy?lastDevices:(lastDevices=await win.navigator.usb.getDevices())).map(d=>({serialNumber:d.serialNumber,productName:d.productName,vendorId:d.vendorId,productId:d.productId}))};
+      cached:busy,devices:(busy?lastDevices:(lastDevices=await (nativeProbeEnabled()?nativeUsbDevices():win.navigator.usb.getDevices()))).map(d=>({serialNumber:d.serialNumber,productName:d.productName,vendorId:d.vendorId,productId:d.productId}))};
     if(m.action==='cancel'){
       tools.dbg.cancelFlag=true;
       if(transaction){transaction.t.cancelEntry=true;}
@@ -102,7 +103,7 @@ export function createTraceAutomation(tools, win=globalThis.window){
       await authorized(m.probe);
       // FlashView selects the first authorized device. Refuse ambiguity rather
       // than pretending its selector honors a serial argument.
-      const ds=await win.navigator.usb.getDevices();
+      const ds=await (nativeProbeEnabled()?nativeUsbDevices():win.navigator.usb.getDevices());
       if(ds.filter(d=>/akaLink|CMSIS|DAP/i.test(d.productName||'')).length!==1)throw Error('烧录需要网页只授权一个调试探针');
       set('f-backend','webusb');set('f-chip',m.chip);set('f-base',m.base||0);
       set('f-verify',true);set('f-reset',true);
@@ -223,6 +224,17 @@ export function browserWorkerId(token,env=globalThis){
   return id;
 }
 
+// Retry transport delivery only. Hardware dispatch is never replayed.
+export async function queueDelivery(send,{pause=ms=>new Promise(r=>setTimeout(r,ms))}={}){
+  for(;;){
+    try{return await send();}
+    catch(error){
+      if(error.permanent)throw error;
+      await pause(500);
+    }
+  }
+}
+
 /** Opt-in browser worker; one authorized page, explicit commands, no eval. */
 export async function startWorker(){
   const token=new URLSearchParams(location.search).get('trace-cli');
@@ -231,18 +243,18 @@ export async function startWorker(){
   const worker=browserWorkerId(token);
   const call=async(path,value)=>{
     const response=await fetch('/trace-cli/'+path,{method:'POST',headers:{'Content-Type':'application/json','X-Trace-CLI':token},body:JSON.stringify(value)});
-    if(!response.ok)throw Error('CLI队列HTTP '+response.status);
+    if(!response.ok){const error=Error('CLI队列HTTP '+response.status);error.permanent=response.status>=400&&response.status<500;throw error;}
     return response.json();
   };
   // Polling continues while a command runs so cancellation can reach that command.
   for(;;){
-    const {job}=await call('poll',{worker});
+    const {job}=await queueDelivery(()=>call('poll',{worker}));
     if(!job)continue;
     (async()=>{
       let result;
       try{result={ok:true,value:await automation.dispatch(job.request)};}
       catch(e){result={ok:false,error:e.message,results:e.results};}
-      await call('complete/'+job.id,{worker,result});
+      await queueDelivery(()=>call('complete/'+job.id,{worker,result}));
     })().catch(e=>console.error('CLI结果回传失败；请检查目标状态',e));
   }
 }

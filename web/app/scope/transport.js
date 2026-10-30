@@ -14,6 +14,7 @@ import { waitMs } from '../core/pace.js';
 import { withTimeout } from '../rtt/dap-webusb.js';
 import { MockScopeProbe } from './mock.js';
 import { UsbLease, isUsbResourceConflict } from '../core/usb-device.js';
+import {nativeProbeEnabled,nativeUsbDevices} from '../core/native-probe.js';
 
 /** 探针上那个空闲的 bulk IN 端点（SWO 端点，SWO_STREAM=0 所以没人用）*/
 export const EP_SCOPE = 0x83;
@@ -32,6 +33,7 @@ export class VendorEpTransport {
     this.chunkBytes = opts.chunkBytes ?? 4096;   // 一次 transferIn 想收多少（会被短包提前结束）
     this.inFlight = opts.inFlight ?? 3;          // 同时在飞的读
     this._adaptiveReadAhead = opts.inFlight == null && opts.chunkBytes == null;
+    if(device.nativeService){this.chunkBytes=65536;this.inFlight=1;this._adaptiveReadAhead=false;}
     this.running = false;
     this.workers = [];
     this._pendingWorkers = pendingByDevice.get(device) || new Set();
@@ -43,7 +45,7 @@ export class VendorEpTransport {
     this.chunks = 0; this.bytes = 0; this.errors = 0; this.lastError = null;
   }
 
-  static supported(){ return typeof navigator !== 'undefined' && !!navigator.usb; }
+  static supported(){ return nativeProbeEnabled() || typeof navigator !== 'undefined' && !!navigator.usb; }
 
   configureReadAhead(wireBps){
     if (this.running) throw new Error('先停止采样再改变预读窗口');
@@ -63,12 +65,17 @@ export class VendorEpTransport {
 
   /** 已授权过的探针（浏览器记得就不用再弹框）*/
   static async authorized(){
+    if(nativeProbeEnabled())return nativeUsbDevices();
     if (!VendorEpTransport.supported()) return [];
     try { return (await navigator.usb.getDevices()).filter(d => d.vendorId === VID); } catch { return []; }
   }
 
   /** 弹设备框 → 打开 → 认领接口（注意：必须给浏览器一个可见窗口，否则 requestDevice 直接回空数组）*/
   static async request(opts = {}){
+    if(nativeProbeEnabled()){
+      const devices=await nativeUsbDevices();if(devices.length!==1)throw Error('本地服务需要唯一ZynqDAP');
+      const transport=new VendorEpTransport(devices[0],opts);await transport.open();return transport;
+    }
     if (!VendorEpTransport.supported()) throw new Error('这个浏览器没有 WebUSB（桌面版 Chrome / Edge 才有）');
     const d = await navigator.usb.requestDevice({ filters: [{ vendorId: VID }] });
     const t = new VendorEpTransport(d, opts);
@@ -79,7 +86,7 @@ export class VendorEpTransport {
   get label(){
     const d = this.device;
     const addr = (this.epAddr || (this.ep | 0x80)).toString(16);
-    return `${d?.productName || 'akaLinkPro'} · EP 0x${addr} · ${this.chunkBytes} B/读 × ${this.inFlight}`;
+    return `${d?.nativeService?'本地服务 · ':''}${d?.productName || 'akaLinkPro'} · EP 0x${addr} · ${this.chunkBytes} B/读 × ${this.inFlight}`;
   }
 
   /** 打开设备、找到带 0x83 的那个接口并认领 */

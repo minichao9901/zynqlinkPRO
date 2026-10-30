@@ -272,8 +272,9 @@ async function loadRecord(id){if(!id)throw Error('请选择记录');history.rang
 }
 async function watchJob(id,{resume=false,kind='decode'}={}){
   state.job=id;state.jobKind=kind;state.jobPhase='queued';state.captureCancelled=false;controls();
+  $('job-state').classList.remove('bad');
   try{await pollJob(id,{read:id=>api('jobs/'+id),shouldResume:()=>!state.captureCancelled,
-    onState:job=>{state.jobPhase=job.state;$('job-state').textContent={queued:'准备参数',starting:'LA 正在启动',armed:'LA 等待触发',saving:'保存原始数据',decoding:'解码与源码映射',done:'记录已保存',cancelled:'采集已取消',error:'操作失败'}[job.state];controls();},
+    onState:job=>{state.jobPhase=job.state;$('job-state').classList.toggle('bad',job.state==='error');$('job-state').textContent={queued:'准备参数',starting:'正在启动采集',armed:'采集已就绪',saving:'保存原始数据',decoding:'解码与源码映射',done:'记录已保存',cancelled:'采集已取消',error:'操作失败'}[job.state];controls();},
     onResume:resume?async()=>{log('Zynq ETM 已就绪，CPU 由本地服务恢复');}:null,
     onDone:async job=>{await refreshRecords();await loadRecord(job.record);}
   });}catch(e){
@@ -465,10 +466,15 @@ async function captureNative(options={}){
     return await runEmbedded(host,async()=>{
       if(target.probe)await disconnectTarget();
       log('本地服务联动采集：逐字节校验Flash、配置ETM、采集并恢复目标现场');
-      const created=await api('native-capture',{...options,elfId:state.elfId,sourceSnapshot:state.sourceSnapshot});
+      const selected=Object.hasOwn(options,'entry')?options.entry:$('entry-before').checked?state.entryAddress:null;
+      const resetToEntry=options.resetToEntry??(selected!==null&&selected!==undefined&&$('reset-before').checked);
+      const created=await api('native-capture',{...options,entry:selected,resetToEntry,elfId:state.elfId,sourceSnapshot:state.sourceSnapshot});
       await watchJob(created.job,{resume:false,kind:'capture'});
+      const finished=await api('jobs/'+created.job),proof=finished.captureProof;
+      if(proof?.entry?.matched)$('break-state').textContent='本地服务已命中 '+hex(proof.entry.pc)+'；原FPB断点恢复'+(proof.fpbRestored?'通过':'未确认');
       log('本地服务采集与现场恢复通过，记录已交给Web分析');
-      return {record:created.record,transport:'native-service',targetRestored:true};
+      if(finished.serialStimulus&&!finished.serialStimulus.ok)throw Error('采集与解码记录已保留，但串口刺激/echo校验未通过');
+      return {record:created.record,transport:'native-service',targetRestored:true,captureProof:proof,serialStimulus:finished.serialStimulus};
     });
   }catch(e){error(e);throw e;}finally{state.operation=false;state.hardwareOperation=false;controls();}
 }

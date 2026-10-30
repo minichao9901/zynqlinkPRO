@@ -16,6 +16,10 @@ import time
 import uuid
 from flask import abort, jsonify, request
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'tools'))
+from f103_capture_entry import resolve_entry
+from native_stimulus import SerialStimulus, settings as stimulus_settings
+
 
 class NativeCapture:
     def __init__(self, backend, token_file, bit, elf):
@@ -60,7 +64,24 @@ class NativeCapture:
             if isinstance(value, bool) or not isinstance(value, int) or value not in allowed:
                 raise ValueError('无效参数：' + name)
             options[name] = value
+        entry = o.get('entry')
+        options['entry'] = resolve_entry(target, entry)
+        options['resetToEntry'] = o.get('resetToEntry', False)
+        if not isinstance(options['resetToEntry'], bool) or options['resetToEntry'] and entry is None:
+            raise ValueError('resetToEntry需要明确的断点起点')
+        options['usbReconnect'] = o.get('usbReconnect', options['resetToEntry'])
+        if not isinstance(options['usbReconnect'], bool) or options['usbReconnect'] and not options['resetToEntry']:
+            raise ValueError('usbReconnect只适用于复位至USB初始化起点')
+        options['entryTimeout'] = o.get('entryTimeout', 5)
+        if isinstance(options['entryTimeout'], bool) or not isinstance(options['entryTimeout'], (int, float)) or not 0 < options['entryTimeout'] <= 30:
+            raise ValueError('entryTimeout必须大于0且不超过30秒')
+        options['serialStimulus'] = stimulus_settings(o.get('serialStimulus'))
+        if options['serialStimulus'] and options['resetToEntry']:
+            raise ValueError('echo刺激请在已枚举的CDC目标上运行至起点，不要同时复位USB')
         with b.lock:
+            proxy=b.app.extensions.get('native_probe')
+            if proxy and proxy.usb is not None:
+                raise ValueError('本地USB仍由另一Web功能使用，请先断开')
             if any(j.get('kind', 'capture') == 'capture' and
                    (j['state'] in b.ACTIVE or j.get('_laLease') or j.get('cleanupPending')) for j in b.jobs.values()):
                 raise ValueError('已有采集或清理任务，请等待完成')
@@ -91,6 +112,7 @@ class NativeCapture:
     def run(self, jid, sid, options):
         b = self.backend
         folder = b.directory(sid)
+        stimulus = None
         try:
             with b.lock:
                 if b.jobs[jid].get('_stopped'):
@@ -103,10 +125,26 @@ class NativeCapture:
                        '--seconds', str(options['seconds']), '--trace-id', str(options['traceId']),
                        '--hclk-div', str(options['hclkDiv']), '--gpio-speed', str(options['gpioSpeed']),
                        '--swd-khz', str(options['swdKhz'])]
+            if options.get('entry') is not None:
+                command += ['--entry', hex(options['entry']), '--entry-timeout', str(options['entryTimeout'])]
+                if options['resetToEntry']:
+                    command.append('--reset-to-entry')
+                if options['usbReconnect']:
+                    command.append('--usb-reconnect')
+            if options.get('serialStimulus'):
+                ready_file = folder / 'raw/capture-ready.json'
+                command += ['--ready-file', str(ready_file)]
+                stimulus = SerialStimulus(options['serialStimulus'], ready_file, options['seconds'])
+                stimulus.prepare()
             b.save_json(folder / 'native-command.json', command)
             # Killing the subprocess would bypass its target-restoration finally.
             # The runner bounds its capture and USB I/O; cancellation waits for it.
             process = subprocess.run(command, cwd=b.ROOT.parent, capture_output=True, text=True, encoding='utf-8')
+            stimulus_report = stimulus.close() if stimulus else None
+            stimulus = None
+            if stimulus_report:
+                b.save_json(folder / 'serial-stimulus.json', stimulus_report)
+                b.change(jid, serialStimulus=stimulus_report)
             (folder / 'native-cli.txt').write_text(process.stdout + '\n' + process.stderr, encoding='utf-8')
             result = json.loads(process.stdout)
             if process.returncode or not result.get('ok'):
@@ -126,7 +164,12 @@ class NativeCapture:
             for name in ('capture.bin', 'target-before.json', 'acceptance.json'):
                 shutil.copy2(raw / name, folder / name)
             metadata.update(captured)
-            metadata.update(captureStatus='saved', captureScope='cli-web-service-continuous-window',
+            if stimulus_report:
+                metadata['serialStimulus'] = stimulus_report
+            b.change(jid, captureProof={'entry': acceptance.get('entry'), 'quality': acceptance.get('quality'),
+                                       'restored': acceptance.get('restored'), 'fpbRestored': acceptance.get('fpb_restored'),
+                                       'artifacts': acceptance.get('artifacts'), 'rccCapture': acceptance.get('rcc_capture')})
+            metadata.update(captureStatus='saved', captureScope='cli-web-service-entry-window' if options.get('entry') else 'cli-web-service-continuous-window',
                             configBasis='native SWD readback and ELF/Flash verification',
                             nativeAcceptance=acceptance, targetVerified=True)
             b.save(sid, metadata)
@@ -142,6 +185,8 @@ class NativeCapture:
             b.record_failure(sid, error, 'native capture')
             b.change(jid, state='error', error=str(error))
         finally:
+            if stimulus:
+                b.save_json(folder / 'serial-stimulus.json', stimulus.close())
             with b.lock:
                 b.jobs[jid].pop('_laLease', None)
 

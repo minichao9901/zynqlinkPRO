@@ -198,6 +198,7 @@ export class DebugSession {
       this.probe.onLog = s => this._log('   [usb] ' + s, 'dim');
       this.probe.fast = false;             // 严格档：调试动作全都要回读确认
       this.name = this.probe.name || 'CMSIS-DAP';
+      if(this.probe.device?.nativeService)this.backendName='本地探针服务';
       this.idcode = this.probe.idcode >>> 0;
       this.clockHz = this.probe.clockHz || clockKhz * 1000;
     }

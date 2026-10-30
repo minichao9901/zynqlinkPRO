@@ -94,23 +94,43 @@ RTT/J-Scope 需要目标固件提供控制块/变量，ETM样例固件不等于R
 ```powershell
 python -X utf8 toolbox.py --runtime build/native-web-001 serve --port 8878 --bit B.bit --zynq-elf P.elf
 python -X utf8 toolbox.py --runtime build/native-web-001 page etm upload '#elf-file' TARGET.elf
-python -X utf8 toolbox.py --runtime build/native-web-001 page etm wait '#elf-label' --contains TARGET.elf
+python -X utf8 toolbox.py --runtime build/native-web-001 page etm wait '#hse' --enabled
 python -X utf8 toolbox.py --runtime build/native-web-001 --timeout 180 page etm invoke captureNative --args-file capture-args.json
 ```
 
 capture-args.json为位置参数数组：
 
 ```json
-[{"seconds":0.01,"hclkDiv":4,"gpioSpeed":1,"traceId":2,"swdKhz":1000,"decode":true}]
+[{"seconds":0.1,"entry":"cdc_acm_init","resetToEntry":true,"usbReconnect":true,"hclkDiv":4,"gpioSpeed":1,"traceId":2,"swdKhz":1000,"decode":true}]
 ```
 
 真实Web页面负责发起任务、显示进度、载入记录和分析；本地服务复用原生板卡事务工具，
 逐字节核对目标Flash、保存配置/运行状态、配置ETM/TPIU、采集和恢复。服务记录输入配对
-的SHA-256，但**声明路径不会自动切换板上固件**。仅支持F103ZE当前连续窗口，暂不支持
-通过这个入口选择断点起点；需要断点/启动入口时使用下方WebUSB流程。
+的SHA-256，但**声明路径不会自动切换板上固件**。支持F103ZE连续窗口或FPB硬件断点起点；
+不传entry/resetToEntry时读取Web当前选中的断点与复位选项。确认PC精确命中后才启用采集，
+退出核对FPB、CoreSight和时钟恢复。复位采USB初始化时可选usbReconnect短暂拉低PA12，
+避免Windows沿用复位前的USB地址。它只恢复自己触及的GPIO位，不覆盖ETM的GPIOE配置。
 本地采集复用同一探针租约，与WebUSB采集互斥；鉴权只接受当前CLI令牌。停止请求等待
 当前短窗与现场恢复完成，不强杀硬件事务、不自动重试。恢复未通过时阻止后续采集。
 原始数据及acceptance.json在记录的raw/下保留，即使解码失败也不丢证据。
+
+CDC同步激励可加入`serialStimulus`对象：`{"port":"COM34","text":"hello","rounds":4,"intervalMs":10}`。
+它先打开真实串口，等待采集就绪标记才发送，记录发送相对时间、回显和SHA-256；失败不重试。
+Web串口使用相同接口时须先关闭。精确二进制回显需DTR=true、行尾none。
+
+`serve --native-probe`显式启用真实USB/HID/COM转发；Web的DAP/RTT/HSS解析仍照常执行。
+转发只接受本机、同源和当前CLI令牌，不替换navigator，不模拟探针成功。
+首次连接清理旧DAP回包；ETM采集与各页共享真实探针所有权。
+
+```powershell
+python toolbox.py --runtime R validate capacity --elf TARGET.elf --sources SOURCE_DIR --lengths 0.01,0.1,0.2,1 --artifacts build/capacity-001
+python toolbox.py --runtime R validate debug --elf TARGET.elf --rounds 20 --artifacts build/debug-001
+python toolbox.py bridge --help
+```
+
+validate保留逐步CLI结果和每窗原始ETM、质量、恢复与解码统计。目录必须全新；失败停止，
+不自动重放硬件操作。`--case-timeout`默认600秒。`bridge`提供可选OpenOCD本机后端，
+烧录完成等待自己启动的后端退出；ELF编程量按可加载Flash段计算。
 
 ### WebUSB采集（首次需要浏览器授权）
 
@@ -150,4 +170,4 @@ python -X utf8 toolbox.py trace doctor
 ```
 
 模拟/离线与实板分开记录；进展和未完成项见
-[2026-10-30验收记录](validation/web-cli-f103ze-20261030/README.md)。
+[统一实板验收记录](F103ZE-Web-CLI-ETM统一验收-20261031.md)。

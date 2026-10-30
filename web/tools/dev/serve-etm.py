@@ -69,7 +69,7 @@ EMBEDDED_STYLE='<style>body#etm-app[data-embedded]{min-height:0}body#etm-app[dat
 EMBEDDED_DIAGNOSTICS="""<script>window.__etmPageErrors=[];function etmPageError(message){window.__etmPageErrors.push(String(message));var el=document.getElementById('job-state');if(el){el.textContent='页面发生错误：'+message;el.classList.add('bad');}}window.addEventListener('error',function(e){etmPageError(e.message);});window.addEventListener('unhandledrejection',function(e){etmPageError(e.reason&&e.reason.message||e.reason);});</script>"""
 
 
-def create_application(etm_root,serial_root=ROOT,cli_token_file=None,native_pair=None):
+def create_application(etm_root,serial_root=ROOT,cli_token_file=None,native_pair=None,native_probe=False):
     etm_root=Path(etm_root).resolve();serial_root=Path(serial_root).resolve()
     source=etm_root/'server.py'
     if not source.is_file():raise ValueError('找不到 ETM 工程，请用 --etm-root 指定其目录')
@@ -92,6 +92,10 @@ def create_application(etm_root,serial_root=ROOT,cli_token_file=None,native_pair
     def fresh_backend(response):
         response.headers['Cache-Control']='no-store';return response
     app=Flask('serial_etm_workbench',static_folder=None)
+    if native_probe:
+        if not cli_token_file:raise ValueError('本地探针通路需要CLI鉴权')
+        from native_probe import install
+        install(app,backend,cli_token_file)
     @app.before_request
     def local_only():
         if request.remote_addr not in ('127.0.0.1','::1'):abort(403)
@@ -107,7 +111,7 @@ def create_application(etm_root,serial_root=ROOT,cli_token_file=None,native_pair
             abort(404)
         if path == 'index.html':
             text=(serial_root/path).read_text(encoding='utf-8')
-            marker=' data-native-capture="1"' if native_pair else ''
+            marker=(' data-native-capture="1"' if native_pair else '')+(' data-native-probe="1"' if native_probe else '')
             return text.replace('<body', '<body data-etm-base="/etm"'+marker, 1)
         return send_from_directory(serial_root,path)
     @app.after_request

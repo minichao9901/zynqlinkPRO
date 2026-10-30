@@ -122,6 +122,11 @@ def capture(argv):
     parser.add_argument('--hclk-div', type=int, choices=(1, 2, 4), default=4,
                         help='临时 AHB 分频；默认4，实际TRACECLK取决于目标原始RCC配置')
     parser.add_argument('--swd-khz', type=int, default=1000, help='目标控制SWD时钟，默认1000 kHz')
+    parser.add_argument('--entry', help='采集起点函数名或0x地址')
+    parser.add_argument('--reset-to-entry', action='store_true')
+    parser.add_argument('--entry-timeout', type=float, default=5)
+    parser.add_argument('--usb-reconnect', action='store_true')
+    parser.add_argument('--ready-file')
     parser.add_argument('--gpio-speed', type=int, choices=(1, 2, 3), default=1)
     parser.add_argument('--bit', default=str(DEFAULT_BIT))
     parser.add_argument('--zynq-elf', default=str(DEFAULT_ZYNQ_ELF))
@@ -143,6 +148,19 @@ def capture(argv):
     for name, path in [('目标ELF', args.elf), ('探针bit', args.bit), ('探针ELF', args.zynq_elf)]:
         if not Path(path).is_file():
             return fail('capture', '%s不存在：%s' % (name, path), 2, started)
+    if not 0 < args.entry_timeout <= 30 or args.reset_to_entry and args.entry is None:
+        return fail('capture', '起点等待必须为0..30秒；reset-to-entry必须指定entry', 2, started)
+    if args.usb_reconnect and not args.reset_to_entry:
+        return fail('capture', 'usb-reconnect需要reset-to-entry', 2, started)
+    if args.ready_file and Path(args.ready_file).exists():
+        return fail('capture', 'ready-file已存在', 2, started)
+    if args.entry is not None:
+        sys.path.insert(0, str(REPO / 'tools'))
+        from f103_capture_entry import resolve_entry
+        try:
+            resolve_entry(args.elf, args.entry)
+        except (ValueError, OSError) as error:
+            return fail('capture', str(error), 2, started)
     status = zynq_status()
     if not status['ready']:
         return fail('capture', 'Zynq ETM 接收端未就绪：' + status['message'], 4, started, status)
@@ -157,6 +175,14 @@ def capture(argv):
                '--speed-khz', str(args.swd_khz),
                '--hclk-div', str(args.hclk_div),
                '--gpio-speed', str(args.gpio_speed)]
+    if args.entry is not None:
+        command += ['--entry', args.entry, '--entry-timeout', str(args.entry_timeout)]
+        if args.reset_to_entry:
+            command.append('--reset-to-entry')
+        if args.usb_reconnect:
+            command.append('--usb-reconnect')
+    if args.ready_file:
+        command += ['--ready-file', args.ready_file]
     completed = subprocess.run(command, cwd=str(REPO), text=True, capture_output=True)
     if completed.returncode:
         detail = (completed.stderr or completed.stdout or '').strip()[-1200:]
@@ -174,9 +200,11 @@ def capture(argv):
         'name': '%s · CLI %s' % (config.get('protocol', 'ETM'), time.strftime('%Y-%m-%d %H:%M:%S')),
         'created': time.time(), 'input': 'capture.bin', 'seconds': args.seconds,
         'config': config, 'quality': acceptance.get('quality'), 'rawFormat': 'bin',
-        'targetVerified': True, 'captureScope': 'cli-continuous-window',
-        'captureExtent': {'requestedSeconds': args.seconds, 'actualSeconds': args.seconds,
-                          'complete': True, 'known': True},
+        'targetVerified': True, 'captureScope': 'cli-entry-window' if args.entry else 'cli-continuous-window',
+        'captureEntry': (acceptance.get('entry') or {}).get('address'),
+        'captureExtent': {'requestedSeconds': args.seconds, 'actualSeconds': acceptance.get('capture_host_seconds'),
+                          'complete': True, 'known': 'capture_host_seconds' in acceptance,
+                          'basis': 'host monotonic ETM active window; not cycle-accurate timing'},
         'targetSnapshot': {'name': 'STM32F103ZE', 'hclkDiv': args.hclk_div,
                            'gpioSpeed': args.gpio_speed},
         'etmBytes': len(etm), 'etmSha256': acceptance.get('etm_sha256'),
@@ -215,20 +243,23 @@ def capture(argv):
 
 def delegate(argv):
     long_temp()
-    os.execv(sys.executable, [sys.executable, '-X', 'utf8', str(TOOLS / 'cli_entry.py'), *argv])
+    return subprocess.call([sys.executable, '-X', 'utf8', str(TOOLS / 'cli_entry.py'), *argv])
 
 
 def main(argv=None):
     argv = list(sys.argv[1:] if argv is None else argv)
     if not argv or argv[0] in ('-h', '--help'):
         print(__doc__)
-        print('命令：doctor | capture | decode | query | verify | export | record | elf | import-record')
+        print('命令：doctor | capture | sweep | samples | decode | query | verify | export | record | elf | import-record')
         return 0
     command = argv[0]
     if command == 'doctor':
         return doctor()
     if command == 'capture':
         return capture(argv[1:])
+    if command in ('samples', 'sweep'):
+        script = REPO / 'tools' / ('trace_signal_analysis.py' if command == 'samples' else 'f103_trace_sweep.py')
+        return subprocess.call([sys.executable, '-X', 'utf8', str(script), *argv[1:]])
     # Everything offline keeps the superlinkPRO CLI contract.
     return delegate(argv)
 

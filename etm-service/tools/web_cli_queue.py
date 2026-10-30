@@ -96,7 +96,11 @@ def install_web_cli(app, token_file):
         if not isinstance(data,dict) or 'result' not in data:abort(400)
         with condition:
             value=jobs.get(jid)
-            if not value or value['state']!='running' or data.get('worker')!=value.get('worker'):abort(409)
+            if not value or data.get('worker')!=value.get('worker'):abort(409)
+            if value['state']=='done':
+                if value.get('result') != data['result']:abort(409)
+                return jsonify(saved=True)
+            if value['state']!='running':abort(409)
             value.update(state='done',result=data['result'])
             condition.notify_all()
             return jsonify(saved=True)

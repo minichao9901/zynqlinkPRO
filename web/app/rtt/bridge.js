@@ -136,6 +136,11 @@ export class BridgeClient {
   // ---------------- stream 能力（J-Link ch0） ----------------
   async streamWrite(bytes){ await this._call({ t: 'stream.write', data: toB64(bytes) }, 10000); }
 
+  async release(){
+    try { if(this.connected)await this._call({t:'session.close'},10000); }
+    finally { this.close(); }
+  }
+
   close(){
     this._closedByUs = true;
     try { this.ws?.close(); } catch {}
