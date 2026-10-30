@@ -47,8 +47,12 @@ def main():
             if 'testplusarg skip_sram' in log:args+=['skip_sram']
         else:
             cmd=[sys.executable,'tools/run_cm3_sim.py','--top',top]+(['--rebuild'] if idx==0 and a.rebuild else [])+args
+            log_path=work/'xsim.log'
+            previous_log_stamp=log_path.stat().st_mtime_ns if log_path.exists() else None
             done=subprocess.run(cmd,cwd=r,capture_output=True,text=True,errors='replace',timeout=3600)
-            log=(work/'xsim.log').read_text(errors='replace');rc=done.returncode
+            fresh_log=log_path.exists() and log_path.stat().st_mtime_ns!=previous_log_stamp
+            log=log_path.read_text(errors='replace') if fresh_log else done.stdout+done.stderr
+            rc=done.returncode
         dest=out/f'{a.transport}_{mhz}.log';dest.write_text(log)
         item=dict(transport=a.transport,requested_Hz=row['requested_Hz'],FCLK_Hz=fclk,actual_link_Hz=row['actual_link_Hz'],
                   target_HCLK_Hz=96000000,return_delay_ns=16,USB_modeled=False,args=args,returncode=rc,**decode(log))

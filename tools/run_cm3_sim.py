@@ -49,6 +49,7 @@ def main():
     ap.add_argument('--rebuild', action='store_true')
     ap.add_argument('--work-dir',type=Path,help='Isolated simulator output/library directory')
     ap.add_argument('--debug', choices=['off','typical','all'], default='off', help='Enable waveform/debug instrumentation only when needed')
+    ap.add_argument('--compile-jobs', type=int, choices=range(1,9), default=int(os.environ.get('ZYNQLINK_SIM_JOBS','2')))
     ap.add_argument('plusargs', nargs='*')
     args = ap.parse_args()
 
@@ -103,7 +104,8 @@ def main():
             print(log[-4000:])
             sys.exit('xvlog failed (systemverilog)')
         debug_args = [] if args.debug=='off' else ['--debug', args.debug]
-        p, log = run([exe / 'xelab.exe', '--mt', '2', *debug_args, '-s', args.top + '_snap', args.top])
+        compile_jobs = 'off' if args.compile_jobs==1 else str(args.compile_jobs)
+        p, log = run([exe / 'xelab.exe', '--mt', compile_jobs, *debug_args, '-s', args.top + '_snap', args.top])
         if p.returncode:
             print(log[-4000:])
             sys.exit('xelab failed')
