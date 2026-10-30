@@ -1,0 +1,65 @@
+{
+  "source": "tools/test_orbtrace_gpio.py --raw",
+  "expected_design": "raw16 diagnostic, programmed using deployment-extra-ground.txt",
+  "bit_sha256": "304d7a5adb9b6fa03a90354c2360ec3a61a2da6eda8de53de08a6be5c20e4e1e",
+  "elf_sha256": "6419c8b00a71b70a1572a55f84c3478f32b67aae8eda95a3821684dc7b3f1a30",
+  "target_clock": "software-driven GPIO, not representative of 6MHz ETM",
+  "rows": [
+    {
+      "gpio_mode": 3,
+      "swd_khz": 1000,
+      "raw": true,
+      "records": 80,
+      "phase_matches": [
+        0
+      ],
+      "status": "0000000B",
+      "match": true
+    },
+    {
+      "gpio_mode": 2,
+      "swd_khz": 10000,
+      "raw": true,
+      "records": 80,
+      "phase_matches": [
+        0
+      ],
+      "status": "0000000B",
+      "match": true
+    },
+    {
+      "gpio_mode": 2,
+      "swd_khz": 1000,
+      "raw": true,
+      "records": 80,
+      "phase_matches": [
+        0
+      ],
+      "status": "0000000B",
+      "match": true
+    },
+    {
+      "gpio_mode": 3,
+      "swd_khz": 10000,
+      "raw": true,
+      "records": 80,
+      "phase_matches": [
+        0
+      ],
+      "status": "0000000B",
+      "match": true
+    },
+    {
+      "gpio_mode": 1,
+      "swd_khz": 1000,
+      "raw": true,
+      "records": 80,
+      "phase_matches": [
+        0
+      ],
+      "status": "0000000B",
+      "match": true
+    }
+  ],
+  "all_pass": true
+}
