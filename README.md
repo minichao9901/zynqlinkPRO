@@ -13,6 +13,7 @@ Zynq-7020 CMSIS-DAP：PL SWD/JTAG/RTT/HSS 与并行 ETM，PS USB/OCM 固件，�
 # 明确需要上板时，以下命令只下载到RAM
 python tools/run_xsct.py tools/download_dap_fpga.tcl prebuilt/golden/application.elf prebuilt/golden/probe.bit prebuilt/golden/ps7_init.tcl
 # 严格离线：不枚举USB、不访问运行服务
+python tools/verify_dependencies.py
 python toolbox.py trace doctor --offline
 python toolbox.py project list
 python toolbox.py project run etm.records-check
@@ -20,6 +21,8 @@ python toolbox.py project run sim.cm3 --dry-run -- --top tb_cm3_jtag
 ```
 
 业务记录只保留F103ZE CDC-ETM最新有效1s和100ms，见[记录清单](docs/retained-records.json)。记录包含原始输入、目标ELF、源码和trace-store；可重建的native.bin已省略。自动测试另保留最小固定哈希夹具。
+
+正式PS构建所需BSP、真实CM3模型和main的VexRiscv仿真模型均随Git提供，来源及哈希见[必需依赖清单](docs/required-dependencies.json)。换机需安装对应工具链，详见依赖与构建说明。
 
 - [统一CLI](docs/toolbox-cli-ai.md)、[Trace CLI](docs/Trace-CLI使用说明.md)
 - [ETM接线/使用](docs/Zynq-ETM-Trace操作说明.md)

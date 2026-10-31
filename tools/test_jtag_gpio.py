@@ -20,7 +20,7 @@ from probe_stream import Probe
 from benchmark_rtt_forward import core_read,core_write,DHCSR
 
 ROOT=Path(__file__).resolve().parents[1]
-BSP=Path('E:/zynqlinkPRO/reference/legacy_zynq/ZYNQ_DAPLINK_RTL_100TO50MHz/'
+BSP=ROOT/Path('reference/legacy_zynq/ZYNQ_DAPLINK_RTL_100TO50MHz/'
          'ZYNQ_DAPLINK_RTL_100TO50MHz.sdk/usb_bsp/ps7_cortexa9_0')
 PS_GCC=Path('E:/Xilinx/SDK/2018.3/gnu/aarch32/nt/gcc-arm-none-eabi/bin/arm-none-eabi-gcc.exe')
 

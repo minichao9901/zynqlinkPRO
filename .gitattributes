@@ -4,6 +4,9 @@
 *.tpiu binary
 *.samples16 binary
 *.rttdata binary
+*.a binary
+# Vendored model/BSP snapshots retain upstream byte identity on all checkouts.
+reference/** -text -whitespace
 firmware/target/stm32f103_rtt_seq72/** -text
 firmware/target/stm32f103_scope_rated/** -text
 # Preserve byte identity for loaded initialization files and hashed build inputs.

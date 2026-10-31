@@ -1,9 +1,8 @@
 """Run XSim against the Cortex-M3 DesignStart RTL.
 
 The CM3 RTL is IEEE-1735 encrypted for Xilinx tools, so it only simulates
-inside Vivado/XSim. It is not part of this repository; point ``CM3_RTL`` (or
-``--rtl``) at the directory holding cortexm3_integration.v and friends, for
-example::
+inside Vivado/XSim. The required model is vendored at the default path below.
+Use ``CM3_RTL`` (or ``--rtl``) to select another model installation::
 
     reference/cortex_m3_on_xc7a100t/cm3_core/Arm_ipi_repository/CM3DbgAXI/rtl
 
@@ -22,7 +21,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-VIVADO = Path(r'E:/Xilinx/Vivado/2018.3')
+VIVADO = Path(os.environ.get('XILINX_VIVADO', r'E:/Xilinx/Vivado/2018.3'))
 DEFAULT_RTL = ROOT / 'reference/cortex_m3_on_xc7a100t/cm3_core/Arm_ipi_repository/CM3DbgAXI/rtl'
 
 

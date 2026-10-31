@@ -11,7 +11,7 @@ import shutil
 import pefile
 import json
 
-v = Path(r'E:\Xilinx\Vivado\2018.3')
+v = Path(os.environ.get('XILINX_VIVADO', r'E:\Xilinx\Vivado\2018.3'))
 env = os.environ.copy()
 paths = [v/'bin/unwrapped/win64.o', v/'lib/win64.o', v/'tps/win64',
          v/'bin/unwrapped/win64.o/Microsoft.VC140.CRT', v/'tps/win64/jre9.0.4/bin/server', v/'tps/win64/jre9.0.4/bin']

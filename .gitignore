@@ -17,7 +17,32 @@ releases/**
 
 # Local experiments and third-party reference trees
 NA/
-reference/
+reference/*
+# Required build/simulation inputs are vendored explicitly. Research stays local.
+!reference/cortex_m3_on_xc7a100t/
+reference/cortex_m3_on_xc7a100t/*
+!reference/cortex_m3_on_xc7a100t/LICENSE
+!reference/cortex_m3_on_xc7a100t/README.md
+!reference/cortex_m3_on_xc7a100t/cm3_core/
+reference/cortex_m3_on_xc7a100t/cm3_core/*
+!reference/cortex_m3_on_xc7a100t/cm3_core/Arm_ipi_repository/
+reference/cortex_m3_on_xc7a100t/cm3_core/Arm_ipi_repository/*
+!reference/cortex_m3_on_xc7a100t/cm3_core/Arm_ipi_repository/CM3DbgAXI/
+reference/cortex_m3_on_xc7a100t/cm3_core/Arm_ipi_repository/CM3DbgAXI/*
+!reference/cortex_m3_on_xc7a100t/cm3_core/Arm_ipi_repository/CM3DbgAXI/rtl/
+!reference/legacy_zynq/
+reference/legacy_zynq/*
+!reference/legacy_zynq/ZYNQ_DAPLINK_RTL_100TO50MHz/
+reference/legacy_zynq/ZYNQ_DAPLINK_RTL_100TO50MHz/*
+!reference/legacy_zynq/ZYNQ_DAPLINK_RTL_100TO50MHz/ZYNQ_DAPLINK_RTL_100TO50MHz.sdk/
+reference/legacy_zynq/ZYNQ_DAPLINK_RTL_100TO50MHz/ZYNQ_DAPLINK_RTL_100TO50MHz.sdk/*
+!reference/legacy_zynq/ZYNQ_DAPLINK_RTL_100TO50MHz/ZYNQ_DAPLINK_RTL_100TO50MHz.sdk/usb_bsp/
+reference/legacy_zynq/**/usb_bsp/.*
+reference/legacy_zynq/**/*.o
+!reference/vexriscv/
+reference/vexriscv/*
+!reference/vexriscv/vexriscv.v
+!reference/vexriscv/LICENSE
 firmware/cdc_bench/
 firmware/xusbps_cdc/
 firmware/xusbps_composite_bench/

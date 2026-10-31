@@ -10,6 +10,10 @@ B. 本轮维护临时目录，非工具拒绝；推送成功后可整体删除�
 E:\zynqlinkPRO-maintenance\20261031-slim
 这里只剩维护副本/日志/临时验证数据；原始Flash备份已升至 E:\zynqlinkPRO-private\flash-backups。
 
-C. 未纳入主Git但必须保留：
-reference/ 下的CM3模型、BSP、真实VexRiscv及研究依赖。完整本机文件列表：E:/zynqlinkPRO/docs/not-in-git-files.txt
-另外，项目外私有Flash备份、已安装Vivado/SDK/Python依赖不属于主仓库。
+另外，本次依赖补全临时目录在推送成功后也可删除：
+E:\zynqlinkPRO-maintenance\20261031-dependencies
+
+C. 当前Git与本机研究文件：
+真实CM3 RTL、匹配BSP、main的VexRiscv模型已纳入Git，普通clone可取到；它们不是待删缓存。
+未纳入主Git的仅本机研究/旧工程/上游额外材料，详见docs/not-in-git-files.txt；按用户要求继续保留本地。
+项目外私有Flash备份、已安装Vivado/SDK/Python依赖不属于主仓库。

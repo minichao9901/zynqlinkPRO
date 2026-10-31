@@ -3,8 +3,8 @@
 // VexRiscv's JtagBridge has a 4-bit IR (IDCODE=0001) and a 32-bit IDCODE of
 // 0x10001FFF, i.e. exactly the "bare 32-bit DR, no ADIv5 padding" case.
 //
-// Dependency: the generated core is NOT in this repository (reference/ is
-// git-ignored). Drop VexRiscvAxi4 into reference/vexriscv/vexriscv.v first.
+// Dependency: the generated core is vendored in reference/vexriscv/vexriscv.v.
+// Source identity and upstream license are recorded in docs/required-dependencies.json.
 // Run from any scratch directory:
 //   xvlog -sv fpga/rtl/jtag_core.v fpga/rtl/jtag_shift.v \
 //          reference/vexriscv/vexriscv.v fpga/sim/tb_jtag_vexriscv.sv
