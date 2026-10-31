@@ -36,7 +36,10 @@ def main(argv=None):
     args=parser.parse_args(argv)
     if os.name!='nt' or sys.maxsize<=2**32:raise ValueError('请使用Windows x64 Python构建')
     out=args.out.resolve()
-    if out.exists() or out.with_suffix('.zip').exists():raise ValueError('输出已存在，请选择新目录：'+str(out))
+    archive=Path(str(out)+'.zip')
+    if out.exists() or archive.exists():raise ValueError('输出已存在，请选择新目录：'+str(out))
+    source_dirty=bool(subprocess.check_output(['git','status','--porcelain','--untracked-files=all','--','.',
+        ':(exclude)build/**',':(exclude)dist/**',':(exclude)releases/**'],cwd=ROOT))
     dependencies={name:importlib.metadata.version(name) for name in DEPENDENCIES}
     from PyInstaller.utils.hooks import collect_submodules
     workbase=ROOT/'build/bridge-package'
@@ -114,12 +117,11 @@ def main(argv=None):
         revision=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
         files=[dict(path=p.relative_to(package).as_posix(),bytes=p.stat().st_size,sha256=sha(p)) for p in sorted(package.rglob('*')) if p.is_file()]
         manifest=dict(schema=1,platform='windows-x64',sourceRevision=revision,
-            sourceDirty=bool(subprocess.check_output(['git','status','--porcelain'],cwd=ROOT)),dependencies=dependencies,
+            sourceDirty=source_dirty,dependencies=dependencies,
             capturePath='Web button -> Zynq LA -> OpenCSD binary -> C++ TraceStore',
             clockPolicy='target-firmware-owned',requiresSystemPython=False,requiresNode=False,files=files)
         (package/'package-manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n',encoding='utf8')
         out.parent.mkdir(parents=True,exist_ok=True);shutil.copytree(package,out)
-    archive=out.with_suffix('.zip')
     with zipfile.ZipFile(archive,'w',zipfile.ZIP_DEFLATED,compresslevel=6) as target:
         for path in sorted(out.rglob('*')):
             if path.is_file():target.write(path,'zynq-etm-bridge/'+path.relative_to(out).as_posix())
