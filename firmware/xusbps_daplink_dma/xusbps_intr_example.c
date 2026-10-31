@@ -439,11 +439,8 @@ out:
 
 	UsbDisableIntrSystem(IntcInstancePtr, UsbIntrId);
 
-	/* Free allocated memory.
-	 */
-	if (NULL != UsbInstancePtr->UserDataPtr) {
-		free(UsbInstancePtr->UserDataPtr);
-	}
+	/* The Chapter 9 context is static; never pass it to free(). */
+	UsbInstancePtr->UserDataPtr = NULL;
 	return ReturnStatus;
 }
 
