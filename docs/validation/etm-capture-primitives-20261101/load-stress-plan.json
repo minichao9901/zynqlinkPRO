@@ -1,0 +1,27 @@
+{
+  "ok": true,
+  "value": {
+    "id": "tools/stress_etm_ddr_loads.py",
+    "requestedName": "etm.ddr-load-stress",
+    "steps": [
+      {
+        "runtime": "python",
+        "executable": "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "arguments": [
+          "-X",
+          "utf8",
+          "E:\\zynqlinkPRO_etm_calibration\\tools\\stress_etm_ddr_loads.py",
+          "--pair",
+          "prebuilt/etm-ddr-pilot-raw4-20261101",
+          "--out",
+          "build/NEW_LOAD_TEST"
+        ],
+        "cwd": "E:\\zynqlinkPRO_etm_calibration"
+      }
+    ],
+    "environment": {},
+    "effects": "same as the underlying registered tool; no tool runs during planning",
+    "output": "underlying stdout/stderr and exit code are preserved",
+    "dependencyValidation": "interpreter discovery only; SDK/vendor/hardware requirements remain tool-specific"
+  }
+}

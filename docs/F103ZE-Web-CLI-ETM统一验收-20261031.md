@@ -262,6 +262,24 @@ FCLK119,999,998Hz、配置SWCLK999,999.98Hz。PL已知模式写满0x10000000～0
 尚未接ETM源、硬件录制窗口、采后USB下载或逐线校准，候选整体仍不作为Golden。
 [完整保留区结果](validation/etm-ddr-full512-20261101/summary.json)。
 
+### 同一配对重复加载10次与窗口/帧桥接仿真
+
+继续按原JTAG加载器，逐轮重新明确加载同一bit/ELF及PS init、物理OCM身份核查、
+等待USB枚举、正常DAP设置、不同seed的1MiB模式写入和AP0完整读回。10/10均通过，
+每轮FCLK119,999,998Hz、配置SWCLK999,999.98Hz，首个失败才停止且不补过。
+最初那次启动退出在本次10轮未复现；这不等于证明全部复位/上电状态都可靠，也没有建立其根因。
+本阶段没有为消除不可复现现象修改加载顺序或绕过启动自检。
+[10轮加载与物理数据核查](validation/etm-ddr-load-stress-20261101/summary.json)。
+
+有限采集的下一步模块已独立仿真：参考时钟域窗口锁定N周期、拒绝忙时重开、停止保留实际周期与原因；
+134bit帧+长度/EOF桥接使用同步BRAM读取、寄存输出和Gray跨域指针，背压不改数据，停钟不制造帧。
+8项FIFO核对1,028帧，512项FIFO核对2,597帧，均覆盖多次指针回绕、停读/停写时钟及新捕获复位；
+每个变体12项参考窗口用例通过。仿真使用缩小计数宽度检查边界，不声称已经跑过或上板完成200MHz下1～2秒窗口。
+这些文件位于`fpga/experiments/etm_ddr/`，**尚未进入生产BD或当前bit**。
+还需配置CDC、源端停止确认、部分帧/EOF入队及DDR全部写响应完成后的发布握手，再做真实ETM采集验证。
+统一AI入口`etm.capture-sim`、`etm.ddr-load-stress`已生成执行计划。
+[窗口/帧桥接仿真](validation/etm-capture-primitives-20261101/result.json)。
+
 DDR前端已有隔离的实验RTL：`fpga/experiments/etm_ddr/etm_ddr_packetizer.v`，尚未加入生产BD或本轮ETD1构建输入。
 它把带有效长度/EOF的128bit帧转为64bit AXIS，保留最后一拍直到后续数据或EOF确定，正确产生TKEEP/TLAST；
 不发送零字节DMA包，不越过锁定的byte_limit，背压期间数据稳定，源暂停不会伪造结束，busy时拒绝重启。

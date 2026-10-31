@@ -1,0 +1,23 @@
+{
+  "passed": true,
+  "hardwareAccess": false,
+  "productionIntegration": false,
+  "variants": [
+    {
+      "depth": 8,
+      "windowCases": 12,
+      "acceptedFrameChecks": 1028
+    },
+    {
+      "depth": 512,
+      "windowCases": 12,
+      "acceptedFrameChecks": 2597
+    }
+  ],
+  "note": "Reference-domain command primitive only; owner CDC handshake, source stop acknowledgement, partial frame flush and AXI completion integration remain required.",
+  "sources": {
+    "fpga/experiments/etm_ddr/etm_ref_window.v": "8a5f21d46382c79f84a77a2291cddf31e66b37a967f21d74917d8014d6c32744",
+    "fpga/experiments/etm_ddr/etm_frame_async_fifo.v": "a43568d62dc3f76fb96e849fdff04c101e89082d22cfacbb1750100ee3222c01",
+    "fpga/experiments/etm_ddr/tb_etm_capture_primitives.sv": "e766ef03d15eb40ddde70f3bb764f48525b23ac9fec9c4494c501325a7ecc37f"
+  }
+}
