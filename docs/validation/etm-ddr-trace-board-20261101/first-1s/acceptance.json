@@ -1,0 +1,185 @@
+{
+  "artifacts": {
+    "git_head": "e6c40a1e2262098d326a8adc49fe0d9ea5b61d26",
+    "git_dirty": true,
+    "bit": {
+      "path": "E:\\zynqlinkPRO_etm_calibration\\prebuilt\\etm-ddr-trace-raw4-20261101\\probe.bit",
+      "sha256": "56a70e493ee0f276e02bb6b8f7f358ee3e7fb9cdfeeaec1613ee02f065687581"
+    },
+    "elf": {
+      "path": "E:\\zynqlinkPRO_etm_calibration\\prebuilt\\etm-ddr-trace-raw4-20261101\\application.elf",
+      "sha256": "ab7c097764bea91272783ec59a51d200bf154ba5d4f9adbf1e7350466c17947f"
+    }
+  },
+  "target_elf": "E:\\zynqlinkPRO_etm_calibration\\prebuilt\\golden\\f103ze-cdc48.elf",
+  "target_elf_sha256": "e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f",
+  "milliseconds": 1000.0,
+  "periodic_sync": false,
+  "hclk_div": 1,
+  "raw_diagnostic": false,
+  "IDCODE": "0501017714a01b",
+  "control_clock": {
+    "fclk_hz": 119999998,
+    "cfg": "0x300d6a11",
+    "SWCLK_Hz": 999999.9833333333,
+    "half_period_fclk": 60,
+    "short_high": true,
+    "intended_high_ns": 8.333333472222225
+  },
+  "cpuid": "0x411fc231",
+  "flash": [
+    {
+      "address": 134217728,
+      "bytes": 20040,
+      "sha256": "b5b09d9a0446795acc1981aff62ed55f36f10fa71a47544b77c3d0fe1a0610d1"
+    },
+    {
+      "address": 134237768,
+      "bytes": 128,
+      "sha256": "496d8b1d85d4a90921e45cc77629b2c80dcaae957a6ed79710200efa1d4cf341"
+    }
+  ],
+  "reference": [
+    199999998,
+    9437440,
+    221192,
+    257
+  ],
+  "entry": {
+    "address": 134219152,
+    "pc": 134219152,
+    "resetToEntry": false,
+    "matched": true,
+    "savedFpb": {
+      "control": 608,
+      "comparators": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "rcc_before": [
+    50548355,
+    5309450
+  ],
+  "rcc_capture": [
+    50548355,
+    5309450
+  ],
+  "tpiu_supported": 11,
+  "config": {
+    "protocol": "ETMv3",
+    "idr": 1091891777,
+    "ctrl": 2064,
+    "ccer": 100352,
+    "traceid": 2
+  },
+  "ddr": {
+    "hardwareAccess": true,
+    "transport": "physical MEM-AP0 after capture; not USB download",
+    "bytesLimit": 67108864,
+    "requestedTicks": 199999998,
+    "referenceHz": 199999998,
+    "expectedCaptureId": 3,
+    "nonce": 4772469584159886662,
+    "actualClocks": {
+      "FCLK_Hz": 119999998,
+      "cfg": "0x300d6a11",
+      "waveform": {
+        "SWCLK_Hz": 999999.9833333333,
+        "half_period_fclk": 60,
+        "short_high": true,
+        "intended_high_ns": 8.333333472222225
+      },
+      "JTAG_sampling_mode": 0,
+      "RISC_V_SBA_enabled": false,
+      "actual_link_Hz": 999999.9833333333,
+      "clock_observation": "PS JTAG register read; no DAP command during stream"
+    },
+    "passed": true,
+    "hostResumeMonotonic": 138929.3162692,
+    "registers": [
+      1162104113,
+      0,
+      2,
+      268435456,
+      67108864,
+      2987598544,
+      19277266,
+      19277266,
+      120000087,
+      0,
+      3,
+      7,
+      268435456,
+      805306368,
+      128,
+      2,
+      199999998,
+      199999998,
+      0,
+      0,
+      0,
+      1204829,
+      2,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1179798833,
+      1,
+      0,
+      422890822,
+      1111177165,
+      2
+    ],
+    "actualWindowSeconds": 1.0,
+    "bytes": 19277266,
+    "qualityFlags": 0,
+    "droppedFrames": 0,
+    "parserErrors": 0,
+    "tailBytes": 2,
+    "stopReason": 0,
+    "syncs": 1,
+    "fifoHighwater": 1,
+    "readyLosses": 0,
+    "capacityReached": false,
+    "tailAmbiguous": true,
+    "demux": {
+      "protocol": "etm-framed-native/1",
+      "format": "FRM1",
+      "inputBytes": 19277266,
+      "frames": 1204829,
+      "trailingFrameBytes": 2,
+      "unknownBytes": 0,
+      "paddingBytes": 8661088,
+      "idChanges": 4584404,
+      "streams": {
+        "2": 4567468
+      },
+      "seconds": 0.0530078,
+      "inputSha256": "b316eaa5b162ad53a0fa7868c1f88aa6cfec2f9520953273f52485e5314be55b",
+      "binarySha256": "2d9a2e45b180c621bee207fd3ff740dd238dcf612227bdf4676cd23933981e3e",
+      "traceId": 2,
+      "selectedStream": "E:\\zynqlinkPRO_etm_calibration\\build\\etm-ddr-trace-first-1s-20261101\\ddr\\demux\\id2.bin",
+      "streamSha256": {
+        "2": "3479401dbaac279d4aba9560d3b5de0ec8e4d1f95ae8b3125b4ff5b46bb33166"
+      }
+    }
+  },
+  "etm_bytes": 4567468,
+  "etm_sha256": "3479401dbaac279d4aba9560d3b5de0ec8e4d1f95ae8b3125b4ff5b46bb33166",
+  "capture_passed": true,
+  "restored": true,
+  "rcc_after": [
+    50548355,
+    5309450
+  ],
+  "fpb_restored": true,
+  "usb_reader_errors": []
+}

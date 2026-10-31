@@ -1,0 +1,249 @@
+{
+  "hardware": true,
+  "traceCapture": false,
+  "flashWrites": false,
+  "source": "address-dependent PL pattern",
+  "pair": "E:\\zynqlinkPRO_etm_calibration\\prebuilt\\etm-ddr-trace-raw4-20261101",
+  "pairFiles": {
+    "probe.bit": {
+      "bytes": 4045674,
+      "sha256": "56a70e493ee0f276e02bb6b8f7f358ee3e7fb9cdfeeaec1613ee02f065687581"
+    },
+    "application.elf": {
+      "bytes": 792100,
+      "sha256": "ab7c097764bea91272783ec59a51d200bf154ba5d4f9adbf1e7350466c17947f"
+    },
+    "ps7_init.tcl": {
+      "bytes": 35186,
+      "sha256": "aa9747c31f705be7c28af1c6b1cdeaf282f0dcdb01faecee2a9f72e4d3489132"
+    },
+    "verified_clock.json": {
+      "bytes": 96,
+      "sha256": "099b0ca1921fe4fa1e8ae1ed650a3e99158bbccd6afda5e8c2f3d498d4f84ff9"
+    },
+    "ps-build.json": {
+      "bytes": 4942,
+      "sha256": "3aa2a09ae204fae2f3e498a1f097f44b82e7281cfeae66b557dca48c00dc854b"
+    },
+    "rtl-stamp.json": {
+      "bytes": 2078,
+      "sha256": "f9b21089c37045c0f7cfcf8a6fa705bb92d41166e5b828befa1d5975240bbd92"
+    }
+  },
+  "base": 268435456,
+  "bytesPerRound": 1048576,
+  "seed": 333162775,
+  "requestedRounds": 2,
+  "reloadBetweenRounds": false,
+  "retryFailedRounds": false,
+  "clockMode": "dap",
+  "loader": "E:\\zynqlinkPRO_etm_calibration\\tools\\download_dap_fpga.tcl",
+  "loaderSha256": "78ed003b599778e0f07d88323f13861e4013b1af52150859060d5e2ce4d91b73",
+  "runnerSha256": "bd10a402fd689dbd898ce2ed72971b32a6e49042160e754e2117e6a0684fb67d",
+  "readbackPath": "physical MEM-AP0; no Cortex-A9 memory/cache context",
+  "cases": [
+    {
+      "bytes": 1048576,
+      "seed": 333162775,
+      "actualClocks": {
+        "FCLK_Hz": 119999998,
+        "cfg": "0x300d6a11",
+        "waveform": {
+          "SWCLK_Hz": 999999.9833333333,
+          "half_period_fclk": 60,
+          "short_high": true,
+          "intended_high_ns": 8.333333472222225
+        },
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 999999.9833333333,
+        "clock_observation": "PS JTAG register read; no DAP command during stream"
+      },
+      "passed": true,
+      "stage": "done",
+      "expectedCaptureId": 1,
+      "guardBefore": {
+        "head": [
+          4294967295,
+          4294967295,
+          4294967295,
+          4294967295
+        ],
+        "tail": [
+          3463817495,
+          3463817494,
+          3463817493,
+          3463817492
+        ]
+      },
+      "hardwareRegisters": [
+        1162104113,
+        0,
+        2,
+        268435456,
+        1048576,
+        333162775,
+        1048576,
+        1048576,
+        335890,
+        0,
+        1,
+        7,
+        268435456,
+        805306368,
+        128,
+        1
+      ],
+      "writerSeconds": 0.002799083379984723,
+      "responseRateMBps": 374.61406383889965,
+      "timingBasis": "FCLK cycles through final OKAY B; counter rate is not verified payload throughput",
+      "guardAfter": {
+        "head": [
+          4294967295,
+          4294967295,
+          4294967295,
+          4294967295
+        ],
+        "tail": [
+          3463817495,
+          3463817494,
+          3463817493,
+          3463817492
+        ]
+      },
+      "adjacentGuardsUnchanged": true,
+      "readbackChunks": [
+        {
+          "offset": 0,
+          "bytes": 1048576,
+          "storedBytes": 1048576,
+          "sha256": "f9a86f476aabe331ec30f74e2a5c73c324e0433ebc1d955314f37d15d1f985df"
+        }
+      ],
+      "readbackProgressBytes": 1048576,
+      "readbackBytesVerified": 1048576,
+      "readbackSha256": "f9a86f476aabe331ec30f74e2a5c73c324e0433ebc1d955314f37d15d1f985df",
+      "expectedSha256": "f9a86f476aabe331ec30f74e2a5c73c324e0433ebc1d955314f37d15d1f985df",
+      "firstMismatches": [],
+      "clocksAfter": {
+        "FCLK_Hz": 119999998,
+        "cfg": "0x300d6a11",
+        "waveform": {
+          "SWCLK_Hz": 999999.9833333333,
+          "half_period_fclk": 60,
+          "short_high": true,
+          "intended_high_ns": 8.333333472222225
+        },
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 999999.9833333333,
+        "clock_observation": "PS JTAG register read; no DAP command during stream"
+      },
+      "clockStable": true,
+      "verifiedPatternMBps": 374.61406383889965
+    },
+    {
+      "bytes": 1048576,
+      "seed": 2987598544,
+      "actualClocks": {
+        "FCLK_Hz": 119999998,
+        "cfg": "0x300d6a11",
+        "waveform": {
+          "SWCLK_Hz": 999999.9833333333,
+          "half_period_fclk": 60,
+          "short_high": true,
+          "intended_high_ns": 8.333333472222225
+        },
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 999999.9833333333,
+        "clock_observation": "PS JTAG register read; no DAP command during stream"
+      },
+      "passed": true,
+      "stage": "done",
+      "expectedCaptureId": 2,
+      "guardBefore": {
+        "head": [
+          4294967295,
+          4294967295,
+          4294967295,
+          4294967295
+        ],
+        "tail": [
+          3463817495,
+          3463817494,
+          3463817493,
+          3463817492
+        ]
+      },
+      "hardwareRegisters": [
+        1162104113,
+        0,
+        2,
+        268435456,
+        1048576,
+        2987598544,
+        1048576,
+        1048576,
+        335890,
+        0,
+        2,
+        7,
+        268435456,
+        805306368,
+        128,
+        1
+      ],
+      "writerSeconds": 0.002799083379984723,
+      "responseRateMBps": 374.61406383889965,
+      "timingBasis": "FCLK cycles through final OKAY B; counter rate is not verified payload throughput",
+      "guardAfter": {
+        "head": [
+          4294967295,
+          4294967295,
+          4294967295,
+          4294967295
+        ],
+        "tail": [
+          3463817495,
+          3463817494,
+          3463817493,
+          3463817492
+        ]
+      },
+      "adjacentGuardsUnchanged": true,
+      "readbackChunks": [
+        {
+          "offset": 0,
+          "bytes": 1048576,
+          "storedBytes": 1048576,
+          "sha256": "b0468ef0aacc5e3516e8a47d6f2d27ee31ad339b87a27ea6c36f1dcc688ced4c"
+        }
+      ],
+      "readbackProgressBytes": 1048576,
+      "readbackBytesVerified": 1048576,
+      "readbackSha256": "b0468ef0aacc5e3516e8a47d6f2d27ee31ad339b87a27ea6c36f1dcc688ced4c",
+      "expectedSha256": "b0468ef0aacc5e3516e8a47d6f2d27ee31ad339b87a27ea6c36f1dcc688ced4c",
+      "firstMismatches": [],
+      "clocksAfter": {
+        "FCLK_Hz": 119999998,
+        "cfg": "0x300d6a11",
+        "waveform": {
+          "SWCLK_Hz": 999999.9833333333,
+          "half_period_fclk": 60,
+          "short_high": true,
+          "intended_high_ns": 8.333333472222225
+        },
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 999999.9833333333,
+        "clock_observation": "PS JTAG register read; no DAP command during stream"
+      },
+      "clockStable": true,
+      "verifiedPatternMBps": 374.61406383889965
+    }
+  ],
+  "passed": true,
+  "stage": "done",
+  "usbEnumeratedBeforePattern": true
+}

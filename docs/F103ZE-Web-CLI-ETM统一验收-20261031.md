@@ -1061,3 +1061,15 @@ DDR格式FRM1为去掉TPIU同步的连续16字节formatter帧，末尾不足16�
 FRM1后续主机检查：新增超大尾部参数拒绝用例，共49项通过；修正后的F103原生段6.72ms，时间口径同上。[最终EXE哈希及源码哈希](validation/etm-framed-native-20261101/v2/build.json)。桥启动预检可运行全部6个原生工具，现有3项Web完整测试再次通过（含真实F103/H743 C++解码及损坏采集不能冒充通过）；5项传输生命周期检查通过。EXE打包脚本仅复制6个明确运行工具，不把本地CMake缓存/对象/静态库打包。此处尚未重新交付桥ZIP。
 
 新增AI真机验收选项`tools/test_orbtrace_board.py --ddr-physical`，沿用原F103 ELF/Flash只读核对、断点/CoreSight恢复；拒绝搭配目标分频或GPIO诊断改写。硬件窗口完成后通过物理AP0分块读DDR，再由C++解复用。nonce/captureId不符即拒绝读取负载，2项主机安全边界测试通过。该入口是DDR源首次上板的JTAG验收工具，不是用户Web操作入口，也不等于PS USB下载接口已实现。新RTL120MHz时序通过，setup +0.060ns、hold +0.003ns、SWCLK clock-to-pad 6.389ns/7ns；新bit/ELF及实际加载结果在完成后单独登记。
+
+### 2026-11-01：首轮真实ETM→DDR 1秒采集与原生解码通过（仍非Golden）
+
+新配对目录`prebuilt/etm-ddr-trace-raw4-20261101/`。bit SHA-256 `56a70e493ee0f276e02bb6b8f7f358ee3e7fb9cdfeeaec1613ee02f065687581`；本次实际重新构建的ELF SHA-256 `ab7c097764bea91272783ec59a51d200bf154ba5d4f9adbf1e7350466c17947f`（PS源码未变，因此与前pilot ELF相同；构建日志/时间及输入时序另记，不冒充新PS代码）。RTL提交`d212517`、PS构建提交`e6c40a1`；init及完整哈希/选项在配对manifest。通过JTAG加载新bit及PS RAM，物理OCM执行段核对，随后同次运行2轮不同seed的1MiB模式数据，全部读回通过，未复位重试。
+
+首轮F103 `cdc_poll`、固件HCLK48MHz/TRACECLK24MHz：参考时钟199,999,998Hz，窗口199,999,998ticks，精确1秒；实际FCLK119,999,998Hz、SWCLK999,999.98Hz。FRM1实际写入19,277,266字节（含2字节残帧，另有未成字节的边界歧义，未伪造末尾数据），帧丢失/解析错误/ready丢失均0，frame FIFO高水位1。C++解复用53.0ms，输出4,567,468字节ETM，剔除零源padding 8,661,088字节。物理AP0采后读回，采集中没有下载trace负载。
+
+OpenCSD实际处理全部4,567,468字节，packetIssues=0、unsyncBytes=0、addressInaccessible=0、lastErrorCode=0；3,919,374个packet、18,306,718个指令范围元素。范围数不是指令数；本次没有以Python展开逐指令JSONL。验证统计工具扫描原生二进制的时间也不是生产C++解码耗时。Flash与ELF逐段只读匹配，目标CoreSight、FPB与RCC均恢复，没有改目标时钟、目标Flash或QSPI。
+
+[加载/模式数据与首轮完整证据](validation/etm-ddr-trace-board-20261101/first-1s/acceptance.json)、[原生解码结果](validation/etm-ddr-trace-board-20261101/first-1s/decode/summary.json)、[真实FRM1压缩原始数据](validation/etm-ddr-trace-board-20261101/first-1s/capture.frm1.gz)、[可回放记录](validation/etm-ddr-trace-board-20261101/first-1s/capture.etmrecord)。原始压缩前SHA与native工具版本在ddr/result.json，可以离线复现解复用。
+
+结论限于首轮1秒24MHz实际链路；这是解决下游排空瓶颈后的新证据，不证明更高频、零BER、实时显示或完整Web验收。此版本没有PS USB DDR下载接口，也没有逐线IDELAY校准。保留原Golden；F103 1/2秒更换函数+CDC压力、H743 Zynq实机、USB采后传输和逐线校准继续推进。

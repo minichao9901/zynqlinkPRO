@@ -52,6 +52,7 @@ physwr -force {CSR+16:#x} {64<<20}
 physwr -force {CSR+64:#x} {ticks}
 physwr -force {CSR+124:#x} {nonce&0xffffffff}
 physwr -force {CSR+128:#x} {nonce>>32}
+set arm_before_ms [clock milliseconds]
 physwr -force {CSR+4:#x} 1
 set terminal 0
 set marked 0
@@ -59,7 +60,9 @@ for {{set n 0}} {{$n<10000}} {{incr n}} {{
   set status [physrd -force -value {CSR+8:#x}]
   set id [physrd -force -value {CSR+40:#x}]
   if {{!$marked && ($status&32) && $id=={expected_id}}} {{
-    set f [open {{{marker.as_posix()}}} w];puts $f {{"armed"}};close $f;set marked 1
+    set f [open {{{marker.as_posix()}.tmp}} w]
+    puts $f [format {{{{"armBeforeMs":%s,"activeObservedMs":%s}}}} $arm_before_ms [clock milliseconds]]
+    close $f;file rename {{{marker.as_posix()}.tmp}} {{{marker.as_posix()}}};set marked 1
   }}
   if {{[file exists {{{cancelled.as_posix()}}}] && ($status&1)}} {{catch {{physwr -force {CSR+4:#x} 2}}}}
   if {{$id=={expected_id} && !($status&1) && ($status&2)}} {{set terminal 1;break}}
@@ -78,7 +81,10 @@ if {{!$terminal}} {{catch {{physwr -force {CSR+4:#x} 2}};error "capture timed ou
             if not worker.is_alive(): raise RuntimeError('DDR source ended before arm acknowledgement')
             if time.monotonic()>deadline: raise TimeoutError('waiting for DDR source arm')
             time.sleep(.002)
-        report['hostResumeMonotonic'] = time.monotonic(); save()
+        arm = json.loads(marker.read_text())
+        report.update(hostResumeMonotonic=time.monotonic(), hostResumeUnix=time.time(),
+            hardwareStartBracketUnix=[arm['armBeforeMs']/1000,arm['activeObservedMs']/1000])
+        save()
         resume()
         worker.join(30)
         if worker.is_alive(): raise TimeoutError('DDR worker remains active')

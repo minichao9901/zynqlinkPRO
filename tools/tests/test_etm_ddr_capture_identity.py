@@ -24,7 +24,8 @@ class CaptureIdentity(unittest.TestCase):
             def run(self,body):
                 self.calls.append(body)
                 marker=re.search(r'set f \[open \{([^}]+)\}',body)[1]
-                Path(marker).write_text('armed')
+                Path(marker).write_text(json.dumps(dict(armBeforeMs=1000,activeObservedMs=1001)))
+                Path(marker).rename(Path(marker).with_suffix(''))
                 words=[0]*34
                 words[2]=2;words[10]=1;words[31]=10;words[33]=2
                 return 'TRACE_DDR_REGS '+' '.join(map(str,words))
