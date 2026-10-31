@@ -53,7 +53,7 @@ SRAM、CPU 寄存器、RCC、运行/暂停状态均按脚本校验恢复。
 本阶段结束时曾重新加载另一工作线原有的 `20261031_filtered_tpiu` 配对，供原 ETM/Web 工作流继续使用。
 [最终状态](restored_baseline/final_state.json) 确认目标仍运行，RCC 与最初相同。
 这是该阶段的恢复快照。后续用户授权完成 SOTA 复测与 QSPI 固化，当前交付状态见
-[QSPI 记录](../orbtrace-qspi-20261031/README.md)：板上已固化优化 bit + 60MHz 配置 ELF。
+[最终 USB 修复与 QSPI 记录](../orbtrace-usb-context-20261031/README.md)：板上已固化优化 bit + 修复版60MHz配置ELF `6684400f…`。
 今后复测仍必须核对实际加载身份，不能用本阶段的恢复快照推断板上版本。
 
 ## 对照方法与主要吞吐

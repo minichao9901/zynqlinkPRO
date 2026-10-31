@@ -1,0 +1,22 @@
+{
+  "user_cold_power_cycle_boot_success": true,
+  "original_ELF_sha256": "4fbf5f7816644ea946a684e1ff3f30425e57eea6e5b64cd0d0d6839f284e6bdb",
+  "idle_FCLK_Hz": 99999999,
+  "requested60_FCLK_Hz": 119999998,
+  "initial_audit_expectation_error": "Idle boot does not force120MHz; PS init defaults100MHz, DAP60 requests120MHz. No clock bug.",
+  "code_diff": {
+    "address": 0,
+    "ELF_word": "ea000049",
+    "live_word": "ea000001",
+    "hardware_watchpoint_PC": "0000f88a",
+    "instruction": "strb r1,[r6]",
+    "r1": 1,
+    "r6": 0,
+    "source": "xusbps_ch9.c XUsbPs_StdDevReq SET_CONFIGURATION; UsbLocalPtr=(XUsbPs_Local*)InstancePtr->UserDataPtr is NULL",
+    "fix_source": [
+      "24d6665",
+      "0ec2e63"
+    ],
+    "not_claimed_cause_of_all_USB_disconnects": true
+  }
+}

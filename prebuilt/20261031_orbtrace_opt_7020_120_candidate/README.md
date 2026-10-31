@@ -1,3 +1,5 @@
+> 本目录旧固件已被USB Chapter9修复版替代；旧源码存在空上下文写OCM0的问题。当前交付见 `../20261031_orbtrace_opt_qspi_usbfix_7020_120/`（7020）或 `../20261031_orbtrace_usbfix_7010_100/`（7010静态配对）。原始时序和历史测速身份继续保留。
+
 # 7020 / 120MHz 优化配对
 
 ARM SWD/JTAG 的 SRAM、RTT、HSS、USB 背压/重配置与 OpenOCD 回归已在 ZynqDAP +

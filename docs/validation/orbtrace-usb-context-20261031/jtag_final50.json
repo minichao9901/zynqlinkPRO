@@ -1,0 +1,34 @@
+{
+  "command": [
+    "python",
+    "tools/run_sota_regression.py",
+    "--bit",
+    "prebuilt/20261031_orbtrace_opt_qspi_usbfix_7020_120/probe.bit",
+    "--elf",
+    "prebuilt/20261031_orbtrace_opt_qspi_usbfix_7020_120/application_50.elf",
+    "--output-dir",
+    "docs/validation/orbtrace-usb-context-20261031/sota_final50",
+    "--phase",
+    "peak_rtt",
+    "--speeds",
+    "50000"
+  ],
+  "restore_swj_from_target_source": 2,
+  "initial_DHCSR": "0x30003",
+  "APB2ENR": "0x404d",
+  "MAPR_readable_bits": "0x0",
+  "target_id": "0x10036414",
+  "RCC_before": [
+    50548355,
+    6931466
+  ],
+  "JTAG_IDCODE": "0x3ba00477",
+  "returncode": 0,
+  "MAPR_readable_restore_match": true,
+  "APB2ENR_restore_match": true,
+  "RCC_after": [
+    50548355,
+    6931466
+  ],
+  "run_halt_restore_match": true
+}

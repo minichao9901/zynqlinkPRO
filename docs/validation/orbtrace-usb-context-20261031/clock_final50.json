@@ -1,0 +1,54 @@
+{
+  "command": [
+    "python",
+    "tools/run_f103_jtag_fixture.py",
+    "--restore-swj",
+    "2",
+    "--output",
+    "docs/validation/orbtrace-usb-context-20261031/jtag_final50.json",
+    "--",
+    "python",
+    "tools/run_sota_regression.py",
+    "--bit",
+    "prebuilt/20261031_orbtrace_opt_qspi_usbfix_7020_120/probe.bit",
+    "--elf",
+    "prebuilt/20261031_orbtrace_opt_qspi_usbfix_7020_120/application_50.elf",
+    "--output-dir",
+    "docs/validation/orbtrace-usb-context-20261031/sota_final50",
+    "--phase",
+    "peak_rtt",
+    "--speeds",
+    "50000"
+  ],
+  "target_Flash_programmed": false,
+  "requested_HCLK_Hz": 96000000,
+  "initial_DHCSR": "0x1010001",
+  "clock_before": {
+    "CR": 50548355,
+    "CFGR": 5309450,
+    "APB1ENR": 276824064,
+    "FLASH_ACR": 49
+  },
+  "clock_active": {
+    "CR": 50548355,
+    "CFGR": 6931466
+  },
+  "DWT_verification": {
+    "scratch_backup_sha256": "f4b3349a387fbe0d27afa5ab0ab0151487b420565bbdf9aa62ab2c47717e3f8c",
+    "elapsed_s": 0.3512118000071496,
+    "cycles": 33739594,
+    "measured_Hz": 96066231.25792803,
+    "method": "DWT CYCCNT in SRAM-only loop; host midpoint-bracketed SWD reads",
+    "scratch_restored": true,
+    "core_registers_restored": true
+  },
+  "returncode": 0,
+  "clock_after": {
+    "CR": 50548355,
+    "CFGR": 5309450,
+    "APB1ENR": 276824064,
+    "FLASH_ACR": 49
+  },
+  "clock_restore_match": true,
+  "run_halt_restore_match": true
+}

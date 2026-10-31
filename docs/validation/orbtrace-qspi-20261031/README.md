@@ -1,3 +1,5 @@
+> 历史镜像验收。随后冷启动代码审计定位并修复了USB空指针；最终新配对见 `../orbtrace-usb-context-20261031/`，不使用本目录旧ELF作为当前默认。
+
 # QSPI 固化验收（2026-10-31）
 
 本轮按用户授权固化本次 7020/120MHz 优化配对，后续 ETM 滤波改动未合入。启动拨码由用户切到 QSPI 并重新上电，软件读回 BOOT_MODE=1。
@@ -15,11 +17,11 @@
 | 整片新回读SHA-256 | `2500c2b2a9444c6b98b24d2d236e22644c83242984bff762f4abdd459542fe2f` |
 | 无暂停软件系统复位 | PASS，不执行fpga/dow/con，由QSPI自主引导 |
 | 引导交接 | trace=`53544730,20261031,10008,1,2,600,0,1`，QSPI→DDR加载器→OCM入口0 |
-| USB / 时钟 | USB 0D28:0204重新枚举；FCLK读回119999998Hz |
+| USB / 时钟 | USB 0D28:0204重新枚举；空闲FCLK99999999Hz，请求60MHz后119999998Hz |
 | 固化后SWD60短测 | 2KiB、depth32、64块、2轮：读4.83914 / 写4.74603MB/s，数据/SRAM/RCC恢复PASS |
 | CLI实际回读及复位流程 | `toolbox.py probe-flash --verify-only` PASS，见cli_verify_pass |
 | 损坏镜像拒绝 | dry-run在访问硬件前拒绝BOOT.bin SHA不符，见negative_manifest_test.json |
-| 实体按键/断电重启 | 等待用户完成烧写后的操作；此前用户重上电发生在此次烧写前，不计为此项通过 |
+| 实体按键/断电重启 | 用户已断电重上，旧镜像自主启动/USB/SWD/JTAG通过，但代码审计发现USB空指针；已由新修复包替代 |
 | JTAG线缆硬件SRST | 发出脉冲后启动标记未改变，未观察到板复位；不能代替用户按键/断电检查 |
 
 原Flash备份和完整回读保留在本机 `E:/zynqlinkPRO_orbtrace_opt/build/qspi_boot/backup/original_flash_32MiB.bin` 及 `post_program/programmed_flash_32MiB.bin`，不提交公开Git；本目录保留哈希、范围和校验结果。

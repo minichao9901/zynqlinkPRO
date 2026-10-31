@@ -21,5 +21,8 @@
   "app_profile": "60MHz-capable, previously SOTA-validated",
   "boot_validation": "SDK erase/program/verify + full 32MiB independent readback + outside erase range unchanged + no-halt QSPI software reset + SWD60 passed; physical button/POR pending user",
   "ETM_filter_changes": "not merged",
-  "source_revision": "74c480236cdb84dc2864f4ac5be58f0daee4ddc7"
+  "source_revision": "74c480236cdb84dc2864f4ac5be58f0daee4ddc7",
+  "status": "SUPERSEDED: original ELF writes OCM0 through NULL Chapter9 UserDataPtr",
+  "superseded_by": "20261031_orbtrace_opt_qspi_usbfix_7020_120",
+  "known_issue": "SET_CONFIGURATION overwrites reset-vector byte; historical performance/boot evidence retained, do not use as current default"
 }

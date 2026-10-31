@@ -1,3 +1,5 @@
+> 已被 `../20261031_orbtrace_opt_qspi_usbfix_7020_120/` 替代。旧ELF存在USB Chapter9空指针写OCM0的问题；本目录仅保留历史，不是当前默认。
+
 # 7020 / 120MHz 优化版 QSPI 启动包
 
 配对为本次优化 RTL + 60MHz-capable 固件，应用继续执行于 OCM，缓冲使用 DDR。后续 ETM 滤波改动未合入。bit/ELF 与已完成 50/60MHz SOTA 复测的文件相同。
@@ -10,7 +12,7 @@
 
 BOOT.bin 长度4,264,656字节，实际擦写范围 `[0, 0x412000)`。SDK 编程校验通过；独立整片32MiB回读中，镜像逐字节相等，擦写范围以外数据与原备份相等。原备份 SHA-256 `eba1c30c082caf617f92177e67030ad5c7a0fd567762957f149f19e913413e19`，本机 `E:/zynqlinkPRO_orbtrace_opt/build/qspi_boot/backup/original_flash_32MiB.bin`。
 
-无暂停软件系统复位已经通过：BOOT_MODE=1，stage0/stage2 从 QSPI 加载后记录应用入口0、PS分区存在，USB重新枚举，FCLK读回119,999,998Hz。复位后 SWD60 2KiB/depth32 短测读4.839、写4.746MB/s，数据和SRAM恢复正确。实体按键/断电验证以最终验收记录为准。
+无暂停软件系统复位已经通过：BOOT_MODE=1，stage0/stage2 从 QSPI 加载后记录应用入口0、PS分区存在，USB重新枚举，启动空闲FCLK99,999,999Hz，请求60MHz后119,999,998Hz。复位后 SWD60 2KiB/depth32 短测读4.839、写4.746MB/s，数据和SRAM恢复正确。实体按键/断电验证以最终验收记录为准。
 
 PL STA：xc7z020clg400-2，120MHz，WNS +0.499ns / WHS +0.020ns / TNS与THS零。完整资源、时序和OCM布局报告保留在本目录。应用代码71300字节、OCM占用120976字节；没有缩小 USB/DAP 队列。
 
