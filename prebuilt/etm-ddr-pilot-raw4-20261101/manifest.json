@@ -1,5 +1,5 @@
 {
-  "status": "physical-memory-path-verified-overall-not-accepted-not-golden",
+  "status": "memory-gates-passed-etm-integration-pending-not-golden",
   "device": "xc7z020clg400-2",
   "rtlSourceRevision": "348d73a08948f4f35f2bffe223067e261b8f9511",
   "psSourceRevision": "f364085f680686e21185f3dba94853fa982baa5e",
@@ -32,11 +32,12 @@
     "method": "XSCT JTAG + PS RAM, no Flash",
     "bitSha256": "6690d8dd214be1986b7f89f64f93096b99aa7a5b30fb93b65e7f51919577c720",
     "elfSha256": "ab7c097764bea91272783ec59a51d200bf154ba5d4f9adbf1e7350466c17947f",
-    "initialFclkHz": 99999999,
-    "postDapFclkHz": 119999998,
-    "postDapSwclkHz": 999999.9833333333,
     "executableBytesVerified": 71620,
-    "identityEvidence": "docs/validation/etm-ddr-pilot-board-20261101/initial-ocm-identity.json"
+    "identityEvidence": "docs/validation/etm-ddr-load-stress-20261101/load-010/physical-ocm-identity.json",
+    "FCLK_Hz": 119999998,
+    "SWCLK_Hz": 999999.9833333333,
+    "lastCampaign": "docs/validation/etm-ddr-load-stress-20261101/summary.json",
+    "noActiveWriter": true
   },
   "files": {
     "probe.bit": {
@@ -66,21 +67,43 @@
   },
   "boardResult": {
     "accepted": false,
-    "evidence": "docs/validation/etm-ddr-pilot-board-20261101/result.json",
-    "onePatternPassDoesNotEstablishStability": true,
-    "cpuContextReadbackDeprecated": true,
-    "physicalPattern40Passed": true,
-    "cacheCorrectionEvidence": "docs/validation/etm-ddr-physical-readback-20261101/result.json",
-    "startupAndFullBufferValidationPending": true,
-    "full512PhysicalReadbackPassed": true,
-    "full512Evidence": "docs/validation/etm-ddr-full512-20261101/summary.json",
-    "startupAndEtmIntegrationPending": true
+    "memoryPath": {
+      "passed": true,
+      "bytesFullyVerified": 536870912,
+      "evidence": "docs/validation/etm-ddr-full512-20261101/summary.json"
+    },
+    "explicitLoadCampaign": {
+      "passed": true,
+      "rounds": 10,
+      "evidence": "docs/validation/etm-ddr-load-stress-20261101/summary.json"
+    },
+    "earlierCpuContextReadback": {
+      "invalidForPhysicalDdrIntegrity": true,
+      "correctionEvidence": "docs/validation/etm-ddr-physical-readback-20261101/cache-comparison.json"
+    },
+    "historicalBootExit": {
+      "observed": true,
+      "resolved": false,
+      "reproducedInLatest10": false
+    },
+    "traceCaptureAccepted": false,
+    "goldenPromoted": false
   },
   "sourceReceiptNote": "RTL receipt preserves the build-time snapshot, including then-current PS files for context. The later ps-build.json is authoritative for the paired PS source and ABSOLUTE linker fix.",
   "limitations": [
-    "No stable capture frequency claim",
-    "No 1-2s ETM DDR capture or USB download implementation",
-    "B-response byte count and clean counters did not prove payload integrity",
-    "Reset/reload/clock-change relation requires isolated experiments"
-  ]
+    "Pattern memory path only; ETM frames, hardware window and USB download are not integrated",
+    "No ETM input frequency or complete-system stability claim",
+    "CPU/USB cache coherence remains required independently of physical AP0 validation",
+    "One historical boot exit was not reproduced in the later 10 explicit loads; cause not established"
+  ],
+  "initialObservedLoad": {
+    "method": "XSCT JTAG + PS RAM, no Flash",
+    "bitSha256": "6690d8dd214be1986b7f89f64f93096b99aa7a5b30fb93b65e7f51919577c720",
+    "elfSha256": "ab7c097764bea91272783ec59a51d200bf154ba5d4f9adbf1e7350466c17947f",
+    "initialFclkHz": 99999999,
+    "postDapFclkHz": 119999998,
+    "postDapSwclkHz": 999999.9833333333,
+    "executableBytesVerified": 71620,
+    "identityEvidence": "docs/validation/etm-ddr-pilot-board-20261101/initial-ocm-identity.json"
+  }
 }
