@@ -260,3 +260,49 @@ python toolbox.py --runtime R validate no-flash --rounds 2 --skip-scope --artifa
 `--skip-scope`只显式跳过已登记的J-Scope连续切换问题，报告保留DEFERRED，不等于全套通过。
 原有`validate scope`和`validate rttcdc`会先烧录各自测试target，禁止编程Flash的会话不要运行这两项。
 已知问题及验收结论统一见[F103ZE统一文档](F103ZE-Web-CLI-ETM统一验收-20261031.md)。
+
+## 全项目入口：Web与非Web
+
+`page`控制实际Web页面；`trace`直接调用原生ETM产品链路；`project`不需要工作台或浏览器，
+负责发现并转交仓库内的构建、仿真、固件、JTAG/RAM下载、QSPI、benchmark、target及开发工具。
+独立工具的依赖、硬件副作用和验收状态以原工具及统一文档为准。
+
+```powershell
+python toolbox.py catalog --full
+python toolbox.py project list --all --out build/project-inventory.json
+python toolbox.py project describe probe.load
+python toolbox.py project run fpga.build --dry-run --env-json '{"ZYNQ_PART":"xc7z020clg400-1"}'
+python toolbox.py project run etm.cli -- --help
+python toolbox.py project run firmware.ocm -- --help
+python toolbox.py project run test.cli
+python toolbox.py project run test.web
+python toolbox.py project run web.check
+```
+
+`project run NAME -- 原参数`保留原stdout/stderr和退出码；原工具参数全部放在`--`后。
+`--dry-run`只生成计划，不执行SDK或硬件命令；`--env-json`传递构建环境变量。
+FPGA、PS、启动包、采集、测速和target均有别名，也可直接用清单中的相对脚本ID。
+例如`fpga.build`、`firmware.build`、`boot.build`、`probe.load`、`probe.flash`、`probe.ocm-verify`、
+`bench.sram/rtt/hss/sota`、`sim.cm3/matrix`、`target.fixtures/cdc-build/cdc-tests`、
+`etm.fixture/bench/web-bench/equivalence`。支持库和Vivado上下文片段可describe，但不能独立run。
+
+清单的`reference-entry`/`legacy-entry`保留低层及历史用途，不能替代产品默认的`toolbox trace`
+原生配置，也不表示对应硬件已验收。`requiresBrowser`标出脚本自身的浏览器依赖。
+`web.check`只做全部142个Web模块语法检查。当前Web直接加载源码，旧package.json中的
+`build:web/check:web/test:etm`引用了未迁入脚本，不能当作本仓库可用命令；此缺口已登记。
+
+### 火焰图文件导出
+
+手动点击“导出当前火焰图 SVG”会请求浏览器自动下载，页面显示文件名、大小及“再次下载 SVG”。
+嵌入ETM页面通过同源外层工作台下载，避免内置浏览器不支持iframe Blob的问题。
+CLI明确传第二个参数`{"captureOnly":true}`，仅捕获文件到CLI缓存，再downloads/download保存：
+
+```powershell
+python toolbox.py --runtime R page etm invoke exportFlame --target history --args '[{"mode":"timeline","weight":"records","rootPath":""},{"captureOnly":true}]'
+python toolbox.py --runtime R page etm downloads
+python toolbox.py --runtime R page etm download FILE_ID build/flame.svg
+python toolbox.py --runtime R --timeout 180 validate flame-export --record capture-RECORD_ID --artifacts build/flame-exports
+```
+
+验收脚本不操作硬件，检查当前记录的区间、缩放、全记录汇总SVG及完整时序的明确上限；会切换阅读区间，
+请先保存当前查看位置。全时序超过200,000调用段会拒绝导出，不会静默截断。

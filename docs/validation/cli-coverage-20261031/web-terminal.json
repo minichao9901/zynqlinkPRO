@@ -1,0 +1,239 @@
+{
+  "job": "4b8ec1eb1bfb0b1220ab8470a138894c",
+  "ok": true,
+  "value": {
+    "controls": [
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "回显\n          \n            设备回显（默认）\n            本地回显\n            双向",
+        "options": [
+          {
+            "disabled": false,
+            "label": "设备回显（默认）",
+            "value": "off"
+          },
+          {
+            "disabled": false,
+            "label": "本地回显",
+            "value": "on"
+          },
+          {
+            "disabled": false,
+            "label": "双向",
+            "value": "both"
+          }
+        ],
+        "selector": "#t-echo",
+        "tag": "select",
+        "text": "设备回显（默认）\n            本地回显\n            双向",
+        "title": null,
+        "type": "select-one",
+        "value": "off"
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "回车发送\n          \n            \\r (0x0D)\n            \\r\\n\n            \\n (0x0A)",
+        "options": [
+          {
+            "disabled": false,
+            "label": "\\r (0x0D)",
+            "value": "cr"
+          },
+          {
+            "disabled": false,
+            "label": "\\r\\n",
+            "value": "crlf"
+          },
+          {
+            "disabled": false,
+            "label": "\\n (0x0A)",
+            "value": "lf"
+          }
+        ],
+        "selector": "#t-enter",
+        "tag": "select",
+        "text": "\\r (0x0D)\n            \\r\\n\n            \\n (0x0A)",
+        "title": null,
+        "type": "select-one",
+        "value": "cr"
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "退格发送\n          \n            0x7F (DEL)\n            0x08 (BS)",
+        "options": [
+          {
+            "disabled": false,
+            "label": "0x7F (DEL)",
+            "value": "del"
+          },
+          {
+            "disabled": false,
+            "label": "0x08 (BS)",
+            "value": "bs"
+          }
+        ],
+        "selector": "#t-bs",
+        "tag": "select",
+        "text": "0x7F (DEL)\n            0x08 (BS)",
+        "title": null,
+        "type": "select-one",
+        "value": "del"
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "换行\n          \n            自动补回车（\\n → \\r\\n）\n            原样（\\n 只换行）",
+        "options": [
+          {
+            "disabled": false,
+            "label": "自动补回车（\\n → \\r\\n）",
+            "value": "auto"
+          },
+          {
+            "disabled": false,
+            "label": "原样（\\n 只换行）",
+            "value": "raw"
+          }
+        ],
+        "selector": "#t-nl",
+        "tag": "select",
+        "text": "自动补回车（\\n → \\r\\n）\n            原样（\\n 只换行）",
+        "title": null,
+        "type": "select-one",
+        "value": "auto"
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "字号\n           px",
+        "selector": "#t-font",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "text",
+        "value": "14"
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "从剪贴板粘贴并发送（终端里 Ctrl+V 是发给设备的 0x16）",
+        "selector": "#t-paste",
+        "tag": "button",
+        "text": "粘贴并发送",
+        "title": "从剪贴板粘贴并发送（终端里 Ctrl+V 是发给设备的 0x16）",
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "清屏",
+        "selector": "#t-clear",
+        "tag": "button",
+        "text": "清屏",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "保存输出",
+        "selector": "#t-save",
+        "tag": "button",
+        "text": "保存输出",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "Terminal input",
+        "selector": ":scope > div:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > textarea:nth-of-type(1)",
+        "tag": "textarea",
+        "text": "",
+        "title": null,
+        "type": "textarea",
+        "value": ""
+      }
+    ],
+    "globalControls": [
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "向目标 NRST 发送硬复位脉冲；EVKLite 使用 PA27/J3[23]，PA08 接 TRST 时仅复位 JTAG",
+        "selector": "#btn-global-reset",
+        "tag": "button",
+        "text": "全局复位",
+        "title": "向目标 NRST 发送硬复位脉冲；EVKLite 使用 PA27/J3[23]，PA08 接 TRST 时仅复位 JTAG",
+        "type": "button",
+        "value": ""
+      },
+      {
+        "disabled": true,
+        "hidden": false,
+        "label": "NRST 开漏",
+        "selector": "#global-nrst-open-drain",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "checkbox",
+        "value": false
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "全屏显示工作台",
+        "selector": "#btn-fullscreen",
+        "tag": "button",
+        "text": "全屏",
+        "title": "全屏显示工作台",
+        "type": "button",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "帮助与快捷键",
+        "selector": "#btn-help",
+        "tag": "button",
+        "text": "帮助与快捷键",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      }
+    ],
+    "interrupts": [],
+    "methods": [
+      {
+        "name": "onShow",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "onShow()"
+      },
+      {
+        "name": "writeText",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "writeText(s)"
+      },
+      {
+        "name": "pasteSend",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "async pasteSend()"
+      },
+      {
+        "name": "save",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "save()"
+      }
+    ],
+    "page": "terminal",
+    "targets": [
+      "view",
+      "session"
+    ]
+  }
+}

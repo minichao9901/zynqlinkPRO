@@ -1,0 +1,1279 @@
+{
+  "job": "8a9bf66e599f79b5459f214d69d02fae",
+  "ok": true,
+  "value": {
+    "controls": [
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "会话",
+        "selector": "#d-side-session-tab",
+        "tag": "button",
+        "text": "会话",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "断点 0",
+        "selector": "#d-side-breaks-tab",
+        "tag": "button",
+        "text": "断点 0",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "栈帧",
+        "selector": "#d-side-frames-tab",
+        "tag": "button",
+        "text": "栈帧",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "后端\n          \n            SWD / ARM\n            JTAG / RISC-V\n            模拟目标",
+        "options": [
+          {
+            "disabled": false,
+            "label": "SWD / ARM",
+            "value": "webusb"
+          },
+          {
+            "disabled": false,
+            "label": "JTAG / RISC-V",
+            "value": "riscv"
+          },
+          {
+            "disabled": false,
+            "label": "模拟目标",
+            "value": "mock"
+          }
+        ],
+        "selector": "#d-backend",
+        "tag": "select",
+        "text": "SWD / ARM\n            JTAG / RISC-V\n            模拟目标",
+        "title": "调试连接方式",
+        "type": "select-one",
+        "value": "webusb"
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "目标板卡\n          HPM5300EVK（HPM5361）HPM5301EVKLiteHPM5E00EVKHPM6200EVK（HPM6280）HPM6300EVK（HPM6360）HPM6750EVK2HPM6750EVKMINIHPM6800EVK（HPM6880）HPM6E00EVK（HPM6E80）HPM6P00EVK（HPM6P81）其它 RISC-V",
+        "options": [
+          {
+            "disabled": false,
+            "label": "HPM5300EVK（HPM5361）",
+            "value": "hpm5300evk"
+          },
+          {
+            "disabled": false,
+            "label": "HPM5301EVKLite",
+            "value": "hpm5301evklite"
+          },
+          {
+            "disabled": false,
+            "label": "HPM5E00EVK",
+            "value": "hpm5e00evk"
+          },
+          {
+            "disabled": false,
+            "label": "HPM6200EVK（HPM6280）",
+            "value": "hpm6200evk"
+          },
+          {
+            "disabled": false,
+            "label": "HPM6300EVK（HPM6360）",
+            "value": "hpm6300evk"
+          },
+          {
+            "disabled": false,
+            "label": "HPM6750EVK2",
+            "value": "hpm6750evk2"
+          },
+          {
+            "disabled": false,
+            "label": "HPM6750EVKMINI",
+            "value": "hpm6750evkmini"
+          },
+          {
+            "disabled": false,
+            "label": "HPM6800EVK（HPM6880）",
+            "value": "hpm6800evk"
+          },
+          {
+            "disabled": false,
+            "label": "HPM6E00EVK（HPM6E80）",
+            "value": "hpm6e00evk"
+          },
+          {
+            "disabled": false,
+            "label": "HPM6P00EVK（HPM6P81）",
+            "value": "hpm6p00evk"
+          },
+          {
+            "disabled": false,
+            "label": "其它 RISC-V",
+            "value": "riscv-other"
+          }
+        ],
+        "selector": "#d-hpm-target",
+        "tag": "select",
+        "text": "HPM5300EVK（HPM5361）HPM5301EVKLiteHPM5E00EVKHPM6200EVK（HPM6280）HPM6300EVK（HPM6360）HPM6750EVK2HPM6750EVKMINIHPM6800EVK（HPM6880）HPM6E00EVK（HPM6E80）HPM6P00EVK（HPM6P81）其它 RISC-V",
+        "title": "选择板卡以使用对应的内存与复位配置",
+        "type": "select-one",
+        "value": "hpm6800evk"
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "SWD 时钟\n          \n            10 MHz（默认）\n            20 MHz\n            5 MHz\n            2 MHz\n            1 MHz\n            500 kHz\n            200 kHz",
+        "options": [
+          {
+            "disabled": false,
+            "label": "10 MHz（默认）",
+            "value": "10000"
+          },
+          {
+            "disabled": false,
+            "label": "20 MHz",
+            "value": "20000"
+          },
+          {
+            "disabled": false,
+            "label": "5 MHz",
+            "value": "5000"
+          },
+          {
+            "disabled": false,
+            "label": "2 MHz",
+            "value": "2000"
+          },
+          {
+            "disabled": false,
+            "label": "1 MHz",
+            "value": "1000"
+          },
+          {
+            "disabled": false,
+            "label": "500 kHz",
+            "value": "500"
+          },
+          {
+            "disabled": false,
+            "label": "200 kHz",
+            "value": "200"
+          }
+        ],
+        "selector": "#d-clock",
+        "tag": "select",
+        "text": "10 MHz（默认）\n            20 MHz\n            5 MHz\n            2 MHz\n            1 MHz\n            500 kHz\n            200 kHz",
+        "title": "连接后校验通信，必要时降频",
+        "type": "select-one",
+        "value": "10000"
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "连接",
+        "selector": "#d-connect",
+        "tag": "button",
+        "text": "连接",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": true,
+        "hidden": false,
+        "label": "断开",
+        "selector": "#d-disconnect",
+        "tag": "button",
+        "text": "断开",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "载入 ELF…",
+        "selector": "#d-elf-pick",
+        "tag": "button",
+        "text": "载入 ELF…",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": true,
+        "label": "",
+        "selector": "#d-elf-file",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "file",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "授权 load_image 和 dump_image 读写此目录下的镜像文件",
+        "selector": "#d-image-pick",
+        "tag": "button",
+        "text": "选择镜像目录…",
+        "title": "授权 load_image 和 dump_image 读写此目录下的镜像文件",
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": true,
+        "hidden": false,
+        "label": "复位并停",
+        "selector": "#d-reset-halt",
+        "tag": "button",
+        "text": "复位并停",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": true,
+        "hidden": false,
+        "label": "复位并跑",
+        "selector": "#d-reset-run",
+        "tag": "button",
+        "text": "复位并跑",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "清空断点",
+        "selector": "#d-bp-clear",
+        "tag": "button",
+        "text": "清空断点",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "观察地址或变量",
+        "selector": "#d-wp-addr",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "text",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "观察访问类型",
+        "options": [
+          {
+            "disabled": false,
+            "label": "写入",
+            "value": "w"
+          },
+          {
+            "disabled": false,
+            "label": "读取",
+            "value": "r"
+          },
+          {
+            "disabled": false,
+            "label": "读写",
+            "value": "rw"
+          }
+        ],
+        "selector": "#d-wp-mode",
+        "tag": "select",
+        "text": "写入读取读写",
+        "title": null,
+        "type": "select-one",
+        "value": "w"
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "观察字节范围",
+        "options": [
+          {
+            "disabled": false,
+            "label": "1",
+            "value": "1"
+          },
+          {
+            "disabled": false,
+            "label": "2",
+            "value": "2"
+          },
+          {
+            "disabled": false,
+            "label": "4",
+            "value": "4"
+          },
+          {
+            "disabled": false,
+            "label": "8",
+            "value": "8"
+          },
+          {
+            "disabled": false,
+            "label": "16",
+            "value": "16"
+          },
+          {
+            "disabled": false,
+            "label": "32",
+            "value": "32"
+          },
+          {
+            "disabled": false,
+            "label": "64",
+            "value": "64"
+          }
+        ],
+        "selector": "#d-wp-size",
+        "tag": "select",
+        "text": "1248163264",
+        "title": "字节范围；地址需按范围对齐",
+        "type": "select-one",
+        "value": "4"
+      },
+      {
+        "disabled": true,
+        "hidden": false,
+        "label": "添加",
+        "selector": "#d-wp-add",
+        "tag": "button",
+        "text": "添加",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": true,
+        "hidden": false,
+        "label": "清空",
+        "selector": "#d-wp-clear",
+        "tag": "button",
+        "text": "清空",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": true,
+        "hidden": false,
+        "label": "栈回溯",
+        "selector": "#d-bt",
+        "tag": "button",
+        "text": "栈回溯",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": true,
+        "hidden": false,
+        "label": "扫描候选地址",
+        "selector": "#d-bt-scan",
+        "tag": "button",
+        "text": "扫描候选地址",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "显示或收起设置侧栏；记住本页选择",
+        "selector": "#d-layout-sidebar",
+        "tag": "button",
+        "text": "收起设置",
+        "title": "显示或收起设置侧栏；记住本页选择",
+        "type": "button",
+        "value": ""
+      },
+      {
+        "disabled": true,
+        "hidden": false,
+        "label": "暂停目标（Halt）",
+        "selector": "#d-halt",
+        "tag": "button",
+        "text": "暂停",
+        "title": "暂停目标（Halt）",
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": true,
+        "hidden": false,
+        "label": "继续运行（F5）—— PC 停在断点上时会先跨过它",
+        "selector": "#d-cont",
+        "tag": "button",
+        "text": "继续",
+        "title": "继续运行（F5）—— PC 停在断点上时会先跨过它",
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": true,
+        "hidden": false,
+        "label": "单步一条指令（指令级；探针不执行 C_STEP 时自动改用断点单步）",
+        "selector": "#d-step",
+        "tag": "button",
+        "text": "单步",
+        "title": "单步一条指令（指令级；探针不执行 C_STEP 时自动改用断点单步）",
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": true,
+        "hidden": false,
+        "label": "单步跳过这一行（源码级，F10）—— 函数调用整行跳过",
+        "selector": "#d-step-over",
+        "tag": "button",
+        "text": "跳过",
+        "title": "单步跳过这一行（源码级，F10）—— 函数调用整行跳过",
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": true,
+        "hidden": false,
+        "label": "单步进入（源码级，F11）—— 当前是调用就进被调函数的第一条语句",
+        "selector": "#d-step-into",
+        "tag": "button",
+        "text": "进入",
+        "title": "单步进入（源码级，F11）—— 当前是调用就进被调函数的第一条语句",
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": true,
+        "hidden": false,
+        "label": "单步跳出（源码级，Shift+F11 / Ctrl+F11）—— 跑到调用点的下一条指令",
+        "selector": "#d-step-out",
+        "tag": "button",
+        "text": "跳出",
+        "title": "单步跳出（源码级，Shift+F11 / Ctrl+F11）—— 跑到调用点的下一条指令",
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "内存跟随 PC",
+        "selector": "#d-follow-pc",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "checkbox",
+        "value": true
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "最大化调试工作区",
+        "selector": "#d-layout-focus",
+        "tag": "button",
+        "text": "专注调试",
+        "title": "放大当前工作区；点击还原，或在非输入区域按 Esc 还原",
+        "type": "button",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "用浏览器的目录选择器授权一次工程目录（Chromium；只需选一次，之后按需读文件）",
+        "selector": "#d-src-pick",
+        "tag": "button",
+        "text": "选择源码目录…",
+        "title": "用浏览器的目录选择器授权一次工程目录（Chromium；只需选一次，之后按需读文件）",
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": true,
+        "label": "",
+        "selector": "#d-src-dir",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "file",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "最大化源码",
+        "selector": "#d-max-src",
+        "tag": "button",
+        "text": "最大化",
+        "title": "放大当前工作区；点击还原，或在非输入区域按 Esc 还原",
+        "type": "button",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "最大化命令行",
+        "selector": "#d-max-term",
+        "tag": "button",
+        "text": "最大化",
+        "title": "放大当前工作区；点击还原，或在非输入区域按 Esc 还原",
+        "type": "button",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "h / r / md 0x20000000 / b main.c:192 / p g_pack / w g_var / n / si / fin / c",
+        "selector": "#d-cmd",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "text",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "执行",
+        "selector": "#d-run",
+        "tag": "button",
+        "text": "执行",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "寄存器",
+        "selector": "#d-dock-tabs-tab-regs",
+        "tag": "button",
+        "text": "寄存器",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "内存",
+        "selector": "#d-dock-tabs-tab-mem",
+        "tag": "button",
+        "text": "内存",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "变量",
+        "selector": "#d-dock-tabs-tab-var",
+        "tag": "button",
+        "text": "变量",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "SVD",
+        "selector": "#d-dock-tabs-tab-svd",
+        "tag": "button",
+        "text": "SVD",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "RTT",
+        "selector": "#d-dock-tabs-tab-rtt",
+        "tag": "button",
+        "text": "RTT",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "异常",
+        "selector": "#d-dock-tabs-tab-fault",
+        "tag": "button",
+        "text": "异常",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "最大化检查面板",
+        "selector": "#d-max-dock",
+        "tag": "button",
+        "text": "最大化",
+        "title": "放大当前工作区；点击还原，或在非输入区域按 Esc 还原",
+        "type": "button",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "刷新",
+        "selector": "#d-reg-refresh",
+        "tag": "button",
+        "text": "刷新",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": true,
+        "hidden": false,
+        "label": "读取现场",
+        "selector": "#d-fault-read",
+        "tag": "button",
+        "text": "读取现场",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": true,
+        "hidden": false,
+        "label": "JSON",
+        "selector": "#d-fault-json",
+        "tag": "button",
+        "text": "JSON",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": true,
+        "hidden": false,
+        "label": "报告",
+        "selector": "#d-fault-md",
+        "tag": "button",
+        "text": "报告",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": true,
+        "hidden": false,
+        "label": "捕获 HardFault",
+        "selector": "#d-fault-catch",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "checkbox",
+        "value": false
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "",
+        "selector": "#d-mem-addr",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "text",
+        "value": "0x08000590"
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "",
+        "selector": "#d-mem-len",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "text",
+        "value": "128"
+      },
+      {
+        "disabled": true,
+        "hidden": false,
+        "label": "读",
+        "selector": "#d-mem-read",
+        "tag": "button",
+        "text": "读",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "可写",
+        "selector": "#d-mem-write-on",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "checkbox",
+        "value": false
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "地址",
+        "selector": "#d-mem-ea",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "text",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "字节（如 01 或 0x01）",
+        "selector": "#d-mem-ev",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "text",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "写入",
+        "selector": "#d-mem-write",
+        "tag": "button",
+        "text": "写入",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "搜符号（变量优先，留空看全部）",
+        "selector": "#d-sym-q",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "text",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "监视：变量名 / main+4 / 0x20000000",
+        "selector": "#d-watch-in",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "text",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "加",
+        "selector": "#d-watch-add",
+        "tag": "button",
+        "text": "加",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "刷新值",
+        "selector": "#d-watch-refresh",
+        "tag": "button",
+        "text": "刷新值",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "清空",
+        "selector": "#d-watch-clear",
+        "tag": "button",
+        "text": "清空",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "运行中也刷新",
+        "selector": "#d-watch-live",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "checkbox",
+        "value": false
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "内置 SVD 型号",
+        "options": [
+          {
+            "disabled": false,
+            "label": "STM32F103",
+            "value": "STM32F103xx"
+          },
+          {
+            "disabled": false,
+            "label": "STM32H743",
+            "value": "STM32H743"
+          },
+          {
+            "disabled": false,
+            "label": "STM32H750",
+            "value": "STM32H750"
+          }
+        ],
+        "selector": "#d-svd-bundled",
+        "tag": "select",
+        "text": "STM32F103STM32H743STM32H750",
+        "title": null,
+        "type": "select-one",
+        "value": "STM32F103xx"
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "载入内置",
+        "selector": "#d-svd-default",
+        "tag": "button",
+        "text": "载入内置",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "选择 .svd…",
+        "selector": "#d-svd-pick",
+        "tag": "button",
+        "text": "选择 .svd…",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": true,
+        "label": "",
+        "selector": "#d-svd-file",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "file",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "—",
+        "options": [
+          {
+            "disabled": false,
+            "label": "—",
+            "value": ""
+          }
+        ],
+        "selector": "#d-svd-periph",
+        "tag": "select",
+        "text": "—",
+        "title": null,
+        "type": "select-one",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "—",
+        "options": [
+          {
+            "disabled": false,
+            "label": "—",
+            "value": ""
+          }
+        ],
+        "selector": "#d-svd-reg",
+        "tag": "select",
+        "text": "—",
+        "title": null,
+        "type": "select-one",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "读取",
+        "selector": "#d-svd-read",
+        "tag": "button",
+        "text": "读取",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "运行中也刷新",
+        "selector": "#d-svd-live",
+        "tag": "input",
+        "text": "",
+        "title": "仅刷新当前 SVD 寄存器，约每 500 ms；变化约 2 秒后恢复颜色",
+        "type": "checkbox",
+        "value": false
+      },
+      {
+        "disabled": true,
+        "hidden": false,
+        "label": "定位并开始",
+        "selector": "#d-rtt-locate",
+        "tag": "button",
+        "text": "定位并开始",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "停止",
+        "selector": "#d-rtt-stop",
+        "tag": "button",
+        "text": "停止",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "清屏",
+        "selector": "#d-rtt-clear",
+        "tag": "button",
+        "text": "清屏",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "连接后自动开始",
+        "selector": "#d-rtt-on",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "checkbox",
+        "value": false
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "留空 = 用 _SEGGER_RTT 符号",
+        "selector": "#d-rtt-addr",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "text",
+        "value": ""
+      }
+    ],
+    "globalControls": [
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "向目标 NRST 发送硬复位脉冲；EVKLite 使用 PA27/J3[23]，PA08 接 TRST 时仅复位 JTAG",
+        "selector": "#btn-global-reset",
+        "tag": "button",
+        "text": "全局复位",
+        "title": "向目标 NRST 发送硬复位脉冲；EVKLite 使用 PA27/J3[23]，PA08 接 TRST 时仅复位 JTAG",
+        "type": "button",
+        "value": ""
+      },
+      {
+        "disabled": true,
+        "hidden": false,
+        "label": "NRST 开漏",
+        "selector": "#global-nrst-open-drain",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "checkbox",
+        "value": false
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "全屏显示工作台",
+        "selector": "#btn-fullscreen",
+        "tag": "button",
+        "text": "全屏",
+        "title": "全屏显示工作台",
+        "type": "button",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "帮助与快捷键",
+        "selector": "#btn-help",
+        "tag": "button",
+        "text": "帮助与快捷键",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      }
+    ],
+    "interrupts": [
+      "#d-rtt-stop"
+    ],
+    "methods": [
+      {
+        "name": "initSidebar",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "initSidebar()"
+      },
+      {
+        "name": "selectSidebar",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "selectSidebar(name)"
+      },
+      {
+        "name": "renderElfInfo",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "renderElfInfo()"
+      },
+      {
+        "name": "onShow",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "onShow()"
+      },
+      {
+        "name": "connect",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "async connect()"
+      },
+      {
+        "name": "disconnect",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "async disconnect("
+      },
+      {
+        "name": "refreshAll",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "async refreshAll()"
+      },
+      {
+        "name": "afterStop",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "async afterStop()"
+      },
+      {
+        "name": "renderRegs",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "renderRegs()"
+      },
+      {
+        "name": "presentBacktrace",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "presentBacktrace(result)"
+      },
+      {
+        "name": "presentSelectedFrame",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "async presentSelectedFrame(index,frame)"
+      },
+      {
+        "name": "presentLocals",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "presentLocals(result,index=0)"
+      },
+      {
+        "name": "renderDwt",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "renderDwt()"
+      },
+      {
+        "name": "renderBps",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "renderBps()"
+      },
+      {
+        "name": "readMem",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "async readMem(opts ="
+      },
+      {
+        "name": "renderMem",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "renderMem(errText)"
+      },
+      {
+        "name": "writeMemEdit",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "async writeMemEdit()"
+      },
+      {
+        "name": "pickImageDirectory",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "async pickImageDirectory()"
+      },
+      {
+        "name": "runLine",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "async runLine(text)"
+      },
+      {
+        "name": "loadElfBuffer",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "loadElfBuffer(buf, name = '')"
+      },
+      {
+        "name": "loadBundledSvd",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "async loadBundledSvd(id=$('d-svd-bundled')?.value || 'STM32F103xx')"
+      },
+      {
+        "name": "loadSvdText",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "loadSvdText(text, name = 'SVD')"
+      },
+      {
+        "name": "renderSyms",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "renderSyms()"
+      },
+      {
+        "name": "addWatch",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "addWatch(expr)"
+      },
+      {
+        "name": "delWatch",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "delWatch(what)"
+      },
+      {
+        "name": "watchItems",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "watchItems()"
+      },
+      {
+        "name": "clearWatch",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "clearWatch()"
+      },
+      {
+        "name": "refreshWatch",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "async refreshWatch(opts ="
+      },
+      {
+        "name": "renderWatch",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "renderWatch()"
+      },
+      {
+        "name": "pickSourceDir",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "async pickSourceDir()"
+      },
+      {
+        "name": "renderSource",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "async renderSource()"
+      },
+      {
+        "name": "toggleSourceBp",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "async toggleSourceBp(line)"
+      },
+      {
+        "name": "runToLine",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "async runToLine(line)"
+      },
+      {
+        "name": "stepOver",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "async stepOver()"
+      },
+      {
+        "name": "stepInto",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "async stepInto()"
+      },
+      {
+        "name": "stepOut",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "async stepOut()"
+      },
+      {
+        "name": "showSource",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "async showSource(file, line = 1)"
+      },
+      {
+        "name": "rttStart",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "async rttStart()"
+      },
+      {
+        "name": "rttStop",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "rttStop()"
+      },
+      {
+        "name": "rttClear",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "rttClear()"
+      },
+      {
+        "name": "summary",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "summary()"
+      }
+    ],
+    "page": "dbg",
+    "targets": [
+      "view",
+      "session"
+    ]
+  }
+}

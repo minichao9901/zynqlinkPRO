@@ -1,0 +1,118 @@
+{
+  "hardwareOperations": false,
+  "indexed": 371,
+  "runnable": 252,
+  "support": 119,
+  "roles": {
+    "entry": 205,
+    "support-library": 119,
+    "reference-entry": 27,
+    "legacy-entry": 17,
+    "workflow": 3
+  },
+  "categories": {
+    "etm": 122,
+    "boot": 5,
+    "target": 9,
+    "fpga": 27,
+    "validation": 36,
+    "benchmark": 25,
+    "diagnostic": 134,
+    "build": 8,
+    "web-build": 5
+  },
+  "allPlansConstructed": true,
+  "allToolsExecuted": false,
+  "webPages": [
+    {
+      "id": "serial",
+      "controls": 49,
+      "methods": 8,
+      "targets": [
+        "view",
+        "session"
+      ]
+    },
+    {
+      "id": "terminal",
+      "controls": 9,
+      "methods": 4,
+      "targets": [
+        "view",
+        "session"
+      ]
+    },
+    {
+      "id": "rtt",
+      "controls": 41,
+      "methods": 7,
+      "targets": [
+        "view"
+      ]
+    },
+    {
+      "id": "rttcdc",
+      "controls": 33,
+      "methods": 9,
+      "targets": [
+        "view",
+        "session",
+        "hid"
+      ]
+    },
+    {
+      "id": "scope",
+      "controls": 49,
+      "methods": 51,
+      "targets": [
+        "view"
+      ]
+    },
+    {
+      "id": "dbg",
+      "controls": 74,
+      "methods": 41,
+      "targets": [
+        "view",
+        "session"
+      ]
+    },
+    {
+      "id": "flash",
+      "controls": 15,
+      "methods": 4,
+      "targets": [
+        "view"
+      ]
+    },
+    {
+      "id": "etm",
+      "controls": 368,
+      "methods": 4,
+      "targets": [
+        "view",
+        "target",
+        "history"
+      ]
+    },
+    {
+      "id": "gen",
+      "controls": 63,
+      "methods": 18,
+      "targets": [
+        "view"
+      ]
+    }
+  ],
+  "hostPythonTests": 43,
+  "webTests": 39,
+  "webSyntaxModules": 142,
+  "aliases": 32,
+  "knownGaps": [
+    "Deferred J-Scope missing DEF during handoff",
+    "Full execution-order SVG capped at 200000 frames; Python reconstruction remains costly",
+    "Full aggregate SVG geometry can be impractically wide",
+    "Legacy web/package.json build:web/check:web/test:etm reference missing scripts",
+    "Entry plans do not validate every target, SDK, browser or hardware parameter combination"
+  ]
+}

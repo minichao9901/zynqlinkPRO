@@ -1,0 +1,540 @@
+{
+  "job": "b813c9f7fe576dcf7062b6608143d2b9",
+  "ok": true,
+  "value": {
+    "controls": [
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "连接已授权探针；首次使用或有多个探针时弹出设备选择框",
+        "selector": "#h-connect",
+        "tag": "button",
+        "text": "连接探针",
+        "title": "连接已授权探针；首次使用或有多个探针时弹出设备选择框",
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": true,
+        "hidden": false,
+        "label": "先停止探针侧 RTT 转发，再关闭 HID 连接；CDC 串口由串口页单独管理",
+        "selector": "#h-disconnect",
+        "tag": "button",
+        "text": "关闭探针",
+        "title": "先停止探针侧 RTT 转发，再关闭 HID 连接；CDC 串口由串口页单独管理",
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "RTT 地址",
+        "selector": "#h-addr",
+        "tag": "input",
+        "text": "",
+        "title": "控制块搜索起点。Cortex-M7（H743 / H7B3 等）的 DTCM 探针读不到，要给 AXI SRAM（如 0x24000000）",
+        "type": "text",
+        "value": "0x2000b000"
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "从 ELF 里读 _SEGGER_RTT 符号，顺手把搜索长度收成 0x1000",
+        "selector": "#h-elf",
+        "tag": "button",
+        "text": "载入 ELF…",
+        "title": "从 ELF 里读 _SEGGER_RTT 符号，顺手把搜索长度收成 0x1000",
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "搜索长度",
+        "selector": "#h-size",
+        "tag": "input",
+        "text": "",
+        "title": "0 = 探针默认 64 KB（从上面的地址起搜）",
+        "type": "text",
+        "value": "256"
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "通道",
+        "selector": "#h-chan",
+        "tag": "input",
+        "text": "",
+        "title": "RTT 上行通道号，0 = channel 0",
+        "type": "text",
+        "value": "0"
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "目标类型\n          \n            SWD / ARM\n            RISC-V / JTAG",
+        "options": [
+          {
+            "disabled": false,
+            "label": "SWD / ARM",
+            "value": "swd"
+          },
+          {
+            "disabled": false,
+            "label": "RISC-V / JTAG",
+            "value": "riscv"
+          }
+        ],
+        "selector": "#h-target",
+        "tag": "select",
+        "text": "SWD / ARM\n            RISC-V / JTAG",
+        "title": "探针的全局目标类型（HID 0x31 action 10）。SWD/ARM 走 DAPLink 的 swd_host；RISC-V/JTAG 走探针里的 DMI+SBA 引擎（TAP 复位 + IR=0x11 + 唤醒 DM）。粘性：设一次就一直有效，采样器那个后端也跟着它走",
+        "type": "select-one",
+        "value": "swd"
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "SWD 时钟\n          不改（用探针当前档位）20 MHz30 MHz36 MHz45 MHz（出厂默认）50 MHz60 MHz（需探针固件支持）",
+        "options": [
+          {
+            "disabled": false,
+            "label": "不改（用探针当前档位）",
+            "value": ""
+          },
+          {
+            "disabled": false,
+            "label": "20 MHz",
+            "value": "20000000"
+          },
+          {
+            "disabled": false,
+            "label": "30 MHz",
+            "value": "30000000"
+          },
+          {
+            "disabled": false,
+            "label": "36 MHz",
+            "value": "36000000"
+          },
+          {
+            "disabled": false,
+            "label": "45 MHz（出厂默认）",
+            "value": "45000000"
+          },
+          {
+            "disabled": false,
+            "label": "50 MHz",
+            "value": "50000000"
+          },
+          {
+            "disabled": false,
+            "label": "60 MHz（需探针固件支持）",
+            "value": "60000000"
+          }
+        ],
+        "selector": "#h-clock",
+        "tag": "select",
+        "text": "不改（用探针当前档位）20 MHz30 MHz36 MHz45 MHz（出厂默认）50 MHz60 MHz（需探针固件支持）",
+        "title": "运行时调参（HID 0x31 action 7），改完立刻生效",
+        "type": "select-one",
+        "value": "20000000"
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "启动转发",
+        "selector": "#h-start",
+        "tag": "button",
+        "text": "启动转发",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "停止",
+        "selector": "#h-stop",
+        "tag": "button",
+        "text": "停止",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "让探针自己从 0x20000000 起扫 64 KB 找 \"SEGGER RTT\" 签名",
+        "selector": "#h-auto",
+        "tag": "button",
+        "text": "自动搜控制块",
+        "title": "让探针自己从 0x20000000 起扫 64 KB 找 \"SEGGER RTT\" 签名",
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "刷新状态",
+        "selector": "#h-refresh",
+        "tag": "button",
+        "text": "刷新状态",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "端口\n          串口 1 · COM33 · USB 串行设备 (COM33)串口 2 · COM34 · USB 串行设备 (COM34)串口 3 · COM52 · USB-SERIAL CH340 (COM52)",
+        "options": [
+          {
+            "disabled": false,
+            "label": "串口 1 · COM33 · USB 串行设备 (COM33)",
+            "value": "0"
+          },
+          {
+            "disabled": false,
+            "label": "串口 2 · COM34 · USB 串行设备 (COM34)",
+            "value": "1"
+          },
+          {
+            "disabled": false,
+            "label": "串口 3 · COM52 · USB-SERIAL CH340 (COM52)",
+            "value": "2"
+          }
+        ],
+        "selector": "#c-port",
+        "tag": "select",
+        "text": "串口 1 · COM33 · USB 串行设备 (COM33)串口 2 · COM34 · USB 串行设备 (COM34)串口 3 · COM52 · USB-SERIAL CH340 (COM52)",
+        "title": null,
+        "type": "select-one",
+        "value": "0"
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "选择串口（浏览器会弹授权框，第一次必须手动选一次）",
+        "selector": "#c-pick",
+        "tag": "button",
+        "text": "选择…",
+        "title": "选择串口（浏览器会弹授权框，第一次必须手动选一次）",
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "刷新已授权端口列表",
+        "selector": "#c-scan",
+        "tag": "button",
+        "text": "刷新",
+        "title": "刷新已授权端口列表",
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "波特率",
+        "selector": "#c-baud",
+        "tag": "input",
+        "text": "",
+        "title": "CDC 虚拟串口不按波特率跑，填什么都行",
+        "type": "text",
+        "value": "115200"
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "连接",
+        "selector": "#c-open",
+        "tag": "button",
+        "text": "连接",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": true,
+        "hidden": false,
+        "label": "断开",
+        "selector": "#c-close",
+        "tag": "button",
+        "text": "断开",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "ASCII",
+        "selector": ":scope > div:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(1)",
+        "tag": "button",
+        "text": "ASCII",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "按 ANSI 转义码彩色渲染（像 MobaXterm）",
+        "selector": ":scope > div:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(2)",
+        "tag": "button",
+        "text": "ANSI",
+        "title": "按 ANSI 转义码彩色渲染（像 MobaXterm）",
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "HEX",
+        "selector": ":scope > div:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(3)",
+        "tag": "button",
+        "text": "HEX",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "时间戳",
+        "selector": "#c-ts",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "checkbox",
+        "value": false
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "绝对时间",
+        "selector": "#c-tsabs",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "checkbox",
+        "value": false
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "自动滚动",
+        "selector": "#c-autoscroll",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "checkbox",
+        "value": true
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "把接收区里的数据存成 txt（按当前 ASCII/HEX 与时间戳设置）",
+        "selector": "#c-save",
+        "tag": "button",
+        "text": "保存数据",
+        "title": "把接收区里的数据存成 txt（按当前 ASCII/HEX 与时间戳设置）",
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "暂停",
+        "selector": "#c-pause",
+        "tag": "button",
+        "text": "暂停",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "清空",
+        "selector": "#c-clear",
+        "tag": "button",
+        "text": "清空",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "把收到的字节直接写进本地文件（不走接收区 2MB 上限），高速采集用",
+        "selector": "#c-record",
+        "tag": "button",
+        "text": "● 记录到文件",
+        "title": "把收到的字节直接写进本地文件（不走接收区 2MB 上限），高速采集用",
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "记录带时间戳",
+        "selector": "#c-record-ts",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "checkbox",
+        "value": true
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "连接自动记录",
+        "selector": "#c-record-auto",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "checkbox",
+        "value": false
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "计数清零",
+        "selector": "#c-statclear",
+        "tag": "button",
+        "text": "计数清零",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "质量",
+        "selector": "#c-quality",
+        "tag": "button",
+        "text": "质量",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "detachedFromPage": true,
+        "disabled": false,
+        "hidden": true,
+        "label": "",
+        "selector": "@file:hid._elfInput",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "file",
+        "value": ""
+      }
+    ],
+    "globalControls": [
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "向目标 NRST 发送硬复位脉冲；EVKLite 使用 PA27/J3[23]，PA08 接 TRST 时仅复位 JTAG",
+        "selector": "#btn-global-reset",
+        "tag": "button",
+        "text": "全局复位",
+        "title": "向目标 NRST 发送硬复位脉冲；EVKLite 使用 PA27/J3[23]，PA08 接 TRST 时仅复位 JTAG",
+        "type": "button",
+        "value": ""
+      },
+      {
+        "disabled": true,
+        "hidden": false,
+        "label": "NRST 开漏",
+        "selector": "#global-nrst-open-drain",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "checkbox",
+        "value": false
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "全屏显示工作台",
+        "selector": "#btn-fullscreen",
+        "tag": "button",
+        "text": "全屏",
+        "title": "全屏显示工作台",
+        "type": "button",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "帮助与快捷键",
+        "selector": "#btn-help",
+        "tag": "button",
+        "text": "帮助与快捷键",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      }
+    ],
+    "interrupts": [
+      "#h-stop"
+    ],
+    "methods": [
+      {
+        "name": "$",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "id => $(id === \"tab-rttcdc\" ? \"tab-\"+tab : id.replace(/^c-/, prefix+\"-\"))"
+      },
+      {
+        "name": "key",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "key => namespace+\".\"+key"
+      },
+      {
+        "name": "onShow",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "onShow()"
+      },
+      {
+        "name": "refreshPorts",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "async refreshPorts()"
+      },
+      {
+        "name": "pickPort",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "async pickPort()"
+      },
+      {
+        "name": "connect",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "async connect()"
+      },
+      {
+        "name": "captureWindow",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "async captureWindow("
+      },
+      {
+        "name": "save",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "save()"
+      },
+      {
+        "name": "summary",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "summary()"
+      }
+    ],
+    "page": "rttcdc",
+    "targets": [
+      "view",
+      "session",
+      "hid"
+    ]
+  }
+}

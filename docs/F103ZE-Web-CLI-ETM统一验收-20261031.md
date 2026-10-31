@@ -605,3 +605,48 @@ CLI缓存最多32文件/128MiB，缓存满时不会阻止手动下载。
 [下载落盘及哈希证据](validation/flame-download-20261031/result.json)、
 [当前区间SVG](validation/flame-download-20261031/flame-913-977.svg)、
 [页面状态截图](validation/flame-download-20261031/web-download.jpg)。
+
+### CLI覆盖审计与SVG能力边界
+
+统一入口补入`toolbox.py project list|describe|run`，支持32个常用别名，按实际Git跟踪源码动态生成清单。
+本次索引371项：252个可运行入口及119个支持库/上下文片段。252个入口均成功构造执行计划；
+**没有实际执行所有252个工具，更不等于所有功能已真机通过**。旧/参考入口单独标注，产品ETM仍默认原生链路。
+9个现有Web页面全部通过真实CLI读取describe，共701个控件、146个顶层公开方法；嵌套session/target/history按需describe。
+list/describe/dry-run不需要浏览器；具体工具如自身需要SDK、USB或浏览器，依赖仍须满足。
+
+| 范围 | 当前覆盖和验收结论 |
+|---|---|
+| Web串口、终端、RTT、RTT转发、J-Scope、调试、烧录、ETM、工程生成 | 9页面均有统一CLI；此前串口、RTT、IDCODE、ETM及精确单步有真机证据，不能把界面入口存在当作每个参数组合已通过 |
+| 非Web PL/PS/boot构建、JTAG/RAM加载、QSPI、仿真、测速、target | project按原工具参数转交，全部入口已生成计划；本轮没有额外执行Flash或SDK构建 |
+| 主机验证 | 43项Python测试、39项Web测试通过；全部142个Web模块语法通过 |
+| Web开发构建 | 当前直接加载源码；旧package.json的build:web/check:web/test:etm引用缺失脚本，登记待迁移，未虚构可运行别名 |
+| 连续切换J-Scope首DEF | 按用户指示暂停，DEFERRED；没有继续实验或宣称恢复 |
+| 火焰图手动下载 | 原区间913～977的自动下载及再次下载均实际落盘，2,531字节、XML及SHA核对通过 |
+
+`web.check`恢复自superlinkPRO提交`be75311236da2665a2edc54b9b4d4561f0219456`的check-syntax.mjs，
+使用当前目录自动遍历，不需Node依赖包。CLI清单、9页describe和测试日志见
+[覆盖证据](validation/cli-coverage-20261031/summary.json)。用法统一收在[CLI手册](toolbox-cli-ai.md)。
+
+对同一6MHz、1s已解码记录（5,467,630个事件）重新通过**显式CLI捕获**导出：
+
+| SVG | 大小 | 调用段 | 包含CLI保存耗时 |
+|---|---:|---:|---:|
+| 顺序区间2～2000 | 44,968 B | 134 | 0.337 s |
+| 缩放后0～999 | 22,905 B | 68 | 0.504 s |
+| 汇总区间0～999 | 2,894 B | 9 | 0.656 s |
+| 汇总全记录 | 4,402 B | 14 | 0.613 s |
+
+全部XML、区间和函数名核对通过，四个SVG与完整命令/返回值归档在
+[导出证据](validation/flame-svg-20261031/summary.json)。本次打开130.5ms/缩放51.9ms为已有缓存上的检查，
+不替换前文完整处理、首屏和首次大区间缩放基准。
+
+仍有明确限制：全记录顺序导出扫描31.263秒后触及200,000调用段上限并明确拒绝；
+全记录汇总SVG虽生成成功，为完整文字比例扩成207,750,782px宽，实际查看不方便。
+精确SVG生成仍有Python按事件重建调用段的开销；这与已默认C++的解码/TraceStore处理链不同，
+没有生成生产events.jsonl，但不能声称所有导出耗时都已C++化。后续需改善几何尺寸及大记录SVG重建性能。
+
+同一交付配对已完成直接Zynq原生CLI的12MHz TRACECLK、1s采集：2,592,006字节，
+10,391,585条指令记录，loss=false、synced/ended=true、packetIssues=0，整体14.842秒。
+实际FCLK119,999,998Hz、ref199,999,998Hz；运行后恢复RCC/FPB，未写Flash。
+这不是更高频极限或实时显示证明；与6MHz的离线1s基准输入不同，不用于直接性能比较。
+[直接CLI原始返回](validation/cli-coverage-20261031/direct-cli-12mhz.json)。

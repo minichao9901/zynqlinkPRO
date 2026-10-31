@@ -1,0 +1,12 @@
+Zynq ETM CLI for this repository.
+
+`capture` and `doctor` are Zynq-native. Offline commands (`decode`, `query`,
+`verify`, `export`, `record`, `elf`) delegate to the retained superlinkPRO
+trace CLI in `tools/trace_cli.py`, so their JSON schema and rules stay the same.
+
+Usage:
+  python -X utf8 etm-service/trace.py doctor
+  python -X utf8 etm-service/trace.py capture --elf ... --out ... --seconds 0.01
+  python -X utf8 etm-service/trace.py query --record ... --view summary
+
+命令：doctor | capture | sweep | samples | decode | query | verify | export | record | elf | import-record

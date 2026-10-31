@@ -1,0 +1,743 @@
+{
+  "job": "f5ce6afa8b7ffc42a7fcf139cec7b950",
+  "ok": true,
+  "value": {
+    "controls": [
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "端口\n          串口 1 · COM33 · USB 串行设备 (COM33)串口 2 · COM34 · USB 串行设备 (COM34) ★串口 3 · COM52 · USB-SERIAL CH340 (COM52)",
+        "options": [
+          {
+            "disabled": false,
+            "label": "串口 1 · COM33 · USB 串行设备 (COM33)",
+            "value": "0"
+          },
+          {
+            "disabled": false,
+            "label": "串口 2 · COM34 · USB 串行设备 (COM34) ★",
+            "value": "1"
+          },
+          {
+            "disabled": false,
+            "label": "串口 3 · COM52 · USB-SERIAL CH340 (COM52)",
+            "value": "2"
+          }
+        ],
+        "selector": "#s-port",
+        "tag": "select",
+        "text": "串口 1 · COM33 · USB 串行设备 (COM33)串口 2 · COM34 · USB 串行设备 (COM34) ★串口 3 · COM52 · USB-SERIAL CH340 (COM52)",
+        "title": null,
+        "type": "select-one",
+        "value": "0"
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "选择串口（浏览器会弹授权框，第一次必须手动选一次）",
+        "selector": "#s-pick",
+        "tag": "button",
+        "text": "选择…",
+        "title": "选择串口（浏览器会弹授权框，第一次必须手动选一次）",
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "刷新已授权端口列表",
+        "selector": "#s-scan",
+        "tag": "button",
+        "text": "刷新",
+        "title": "刷新已授权端口列表",
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "波特率\n          \n          \n            9600192003840057600\n            115200230400460800921600\n            100000015000002000000\n            4000000800000010000000200000002500000030000000",
+        "selector": "#s-baud",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "text",
+        "value": "115200"
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "数据位\n          8765",
+        "options": [
+          {
+            "disabled": false,
+            "label": "8",
+            "value": "8"
+          },
+          {
+            "disabled": false,
+            "label": "7",
+            "value": "7"
+          },
+          {
+            "disabled": false,
+            "label": "6",
+            "value": "6"
+          },
+          {
+            "disabled": false,
+            "label": "5",
+            "value": "5"
+          }
+        ],
+        "selector": "#s-databits",
+        "tag": "select",
+        "text": "8765",
+        "title": null,
+        "type": "select-one",
+        "value": "8"
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "停止位\n          12",
+        "options": [
+          {
+            "disabled": false,
+            "label": "1",
+            "value": "1"
+          },
+          {
+            "disabled": false,
+            "label": "2",
+            "value": "2"
+          }
+        ],
+        "selector": "#s-stopbits",
+        "tag": "select",
+        "text": "12",
+        "title": null,
+        "type": "select-one",
+        "value": "1"
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "校验\n          \n            无偶奇",
+        "options": [
+          {
+            "disabled": false,
+            "label": "无",
+            "value": "none"
+          },
+          {
+            "disabled": false,
+            "label": "偶",
+            "value": "even"
+          },
+          {
+            "disabled": false,
+            "label": "奇",
+            "value": "odd"
+          }
+        ],
+        "selector": "#s-parity",
+        "tag": "select",
+        "text": "无偶奇",
+        "title": null,
+        "type": "select-one",
+        "value": "none"
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "流控\n          \n            无硬件 RTS/CTS",
+        "options": [
+          {
+            "disabled": false,
+            "label": "无",
+            "value": "none"
+          },
+          {
+            "disabled": false,
+            "label": "硬件 RTS/CTS",
+            "value": "hardware"
+          }
+        ],
+        "selector": "#s-flow",
+        "tag": "select",
+        "text": "无硬件 RTS/CTS",
+        "title": null,
+        "type": "select-one",
+        "value": "none"
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "DTR",
+        "selector": "#s-dtr",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "checkbox",
+        "value": true
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "RTS",
+        "selector": "#s-rts",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "checkbox",
+        "value": false
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "连接",
+        "selector": "#s-open",
+        "tag": "button",
+        "text": "连接",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": true,
+        "hidden": false,
+        "label": "断开",
+        "selector": "#s-close",
+        "tag": "button",
+        "text": "断开",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "名称",
+        "selector": ":scope > div:nth-of-type(1) > aside:nth-of-type(1) > fieldset:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > input:nth-of-type(1)",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "text",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "内容",
+        "selector": ":scope > div:nth-of-type(1) > aside:nth-of-type(1) > fieldset:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > input:nth-of-type(2)",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "text",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "发送（Alt+1）",
+        "selector": ":scope > div:nth-of-type(1) > aside:nth-of-type(1) > fieldset:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(1)",
+        "tag": "button",
+        "text": "发",
+        "title": "发送（Alt+1）",
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "名称",
+        "selector": ":scope > div:nth-of-type(1) > aside:nth-of-type(1) > fieldset:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > input:nth-of-type(1)",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "text",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "内容",
+        "selector": ":scope > div:nth-of-type(1) > aside:nth-of-type(1) > fieldset:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > input:nth-of-type(2)",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "text",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "发送（Alt+2）",
+        "selector": ":scope > div:nth-of-type(1) > aside:nth-of-type(1) > fieldset:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > button:nth-of-type(1)",
+        "tag": "button",
+        "text": "发",
+        "title": "发送（Alt+2）",
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "名称",
+        "selector": ":scope > div:nth-of-type(1) > aside:nth-of-type(1) > fieldset:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(3) > input:nth-of-type(1)",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "text",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "内容",
+        "selector": ":scope > div:nth-of-type(1) > aside:nth-of-type(1) > fieldset:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(3) > input:nth-of-type(2)",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "text",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "发送（Alt+3）",
+        "selector": ":scope > div:nth-of-type(1) > aside:nth-of-type(1) > fieldset:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(3) > button:nth-of-type(1)",
+        "tag": "button",
+        "text": "发",
+        "title": "发送（Alt+3）",
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "名称",
+        "selector": ":scope > div:nth-of-type(1) > aside:nth-of-type(1) > fieldset:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(4) > input:nth-of-type(1)",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "text",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "内容",
+        "selector": ":scope > div:nth-of-type(1) > aside:nth-of-type(1) > fieldset:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(4) > input:nth-of-type(2)",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "text",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "发送（Alt+4）",
+        "selector": ":scope > div:nth-of-type(1) > aside:nth-of-type(1) > fieldset:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(4) > button:nth-of-type(1)",
+        "tag": "button",
+        "text": "发",
+        "title": "发送（Alt+4）",
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "名称",
+        "selector": ":scope > div:nth-of-type(1) > aside:nth-of-type(1) > fieldset:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(5) > input:nth-of-type(1)",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "text",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "内容",
+        "selector": ":scope > div:nth-of-type(1) > aside:nth-of-type(1) > fieldset:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(5) > input:nth-of-type(2)",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "text",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "发送（Alt+5）",
+        "selector": ":scope > div:nth-of-type(1) > aside:nth-of-type(1) > fieldset:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(5) > button:nth-of-type(1)",
+        "tag": "button",
+        "text": "发",
+        "title": "发送（Alt+5）",
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "＋ 添加快捷发送",
+        "selector": "#s-quick-add",
+        "tag": "button",
+        "text": "＋ 添加快捷发送",
+        "title": null,
+        "type": "button",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "ASCII",
+        "selector": ":scope > div:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(1)",
+        "tag": "button",
+        "text": "ASCII",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "按 ANSI 转义码彩色渲染（像 MobaXterm）：设备发的颜色/光标控制都生效",
+        "selector": ":scope > div:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(2)",
+        "tag": "button",
+        "text": "ANSI",
+        "title": "按 ANSI 转义码彩色渲染（像 MobaXterm）：设备发的颜色/光标控制都生效",
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "HEX",
+        "selector": ":scope > div:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(3)",
+        "tag": "button",
+        "text": "HEX",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "时间戳",
+        "selector": "#s-ts",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "checkbox",
+        "value": false
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "绝对时间",
+        "selector": "#s-tsabs",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "checkbox",
+        "value": false
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "自动滚动",
+        "selector": "#s-autoscroll",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "checkbox",
+        "value": true
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "显示发送",
+        "selector": "#s-echo",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "checkbox",
+        "value": false
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "暂停",
+        "selector": "#s-pause",
+        "tag": "button",
+        "text": "暂停",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "清空",
+        "selector": "#s-clear",
+        "tag": "button",
+        "text": "清空",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "保存数据",
+        "selector": "#s-save",
+        "tag": "button",
+        "text": "保存数据",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "把收到的字节直接写进本地文件（不走接收区 2MB 上限），高速采集用　界面卡就先「暂停」——只停显示，不停记录。",
+        "selector": "#s-record",
+        "tag": "button",
+        "text": "● 记录到文件",
+        "title": "把收到的字节直接写进本地文件（不走接收区 2MB 上限），高速采集用　界面卡就先「暂停」——只停显示，不停记录。",
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "记录带时间戳",
+        "selector": "#s-record-ts",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "checkbox",
+        "value": true
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "连接自动记录",
+        "selector": "#s-record-auto",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "checkbox",
+        "value": false
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "计数清零",
+        "selector": "#s-statclear",
+        "tag": "button",
+        "text": "计数清零",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "ASCII",
+        "selector": ":scope > div:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(4) > div:nth-of-type(1) > button:nth-of-type(1)",
+        "tag": "button",
+        "text": "ASCII",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "HEX",
+        "selector": ":scope > div:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(4) > div:nth-of-type(1) > button:nth-of-type(2)",
+        "tag": "button",
+        "text": "HEX",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "行尾\n          \n            无\n            \\r\\n\n            \\r\n            \\n",
+        "options": [
+          {
+            "disabled": false,
+            "label": "无",
+            "value": "none"
+          },
+          {
+            "disabled": false,
+            "label": "\\r\\n",
+            "value": "crlf"
+          },
+          {
+            "disabled": false,
+            "label": "\\r",
+            "value": "cr"
+          },
+          {
+            "disabled": false,
+            "label": "\\n",
+            "value": "lf"
+          }
+        ],
+        "selector": "#s-eol",
+        "tag": "select",
+        "text": "无\n            \\r\\n\n            \\r\n            \\n",
+        "title": null,
+        "type": "select-one",
+        "value": "none"
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "定时",
+        "selector": "#s-timer",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "checkbox",
+        "value": false
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "周期，毫秒",
+        "selector": "#s-timer-ms",
+        "tag": "input",
+        "text": "",
+        "title": "周期，毫秒",
+        "type": "text",
+        "value": "1000"
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "Ctrl+Enter",
+        "selector": "#s-send",
+        "tag": "button",
+        "text": "发送",
+        "title": "Ctrl+Enter",
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "在这里输入要发送的内容（Ctrl+Enter 发送；HEX 模式如：01 03 00 00 00 0A C5 CD）",
+        "selector": "#s-tx",
+        "tag": "textarea",
+        "text": "",
+        "title": null,
+        "type": "textarea",
+        "value": ""
+      }
+    ],
+    "globalControls": [
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "向目标 NRST 发送硬复位脉冲；EVKLite 使用 PA27/J3[23]，PA08 接 TRST 时仅复位 JTAG",
+        "selector": "#btn-global-reset",
+        "tag": "button",
+        "text": "全局复位",
+        "title": "向目标 NRST 发送硬复位脉冲；EVKLite 使用 PA27/J3[23]，PA08 接 TRST 时仅复位 JTAG",
+        "type": "button",
+        "value": ""
+      },
+      {
+        "disabled": true,
+        "hidden": false,
+        "label": "NRST 开漏",
+        "selector": "#global-nrst-open-drain",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "checkbox",
+        "value": false
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "全屏显示工作台",
+        "selector": "#btn-fullscreen",
+        "tag": "button",
+        "text": "全屏",
+        "title": "全屏显示工作台",
+        "type": "button",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "帮助与快捷键",
+        "selector": "#btn-help",
+        "tag": "button",
+        "text": "帮助与快捷键",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      }
+    ],
+    "interrupts": [],
+    "methods": [
+      {
+        "name": "refreshPorts",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "async refreshPorts()"
+      },
+      {
+        "name": "pickPort",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "async pickPort()"
+      },
+      {
+        "name": "renamePort",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "renamePort()"
+      },
+      {
+        "name": "connect",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "async connect()"
+      },
+      {
+        "name": "send",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "async send(rawText, opts ="
+      },
+      {
+        "name": "sendText",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "sendText(t, opts ="
+      },
+      {
+        "name": "onShow",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "onShow()"
+      },
+      {
+        "name": "save",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "save()"
+      }
+    ],
+    "page": "serial",
+    "targets": [
+      "view",
+      "session"
+    ]
+  }
+}

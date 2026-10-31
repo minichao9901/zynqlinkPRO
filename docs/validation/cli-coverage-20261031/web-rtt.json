@@ -1,0 +1,932 @@
+{
+  "job": "b20bd5c267b348e4e5e594f07b436afa",
+  "ok": true,
+  "value": {
+    "controls": [
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "类型\n          \n            WebUSB · CMSIS-DAP（零安装）\n            本地桥 · OpenOCD\n            本地桥 · J-Link（ch0）\n            内置模拟目标（演示/自测）",
+        "options": [
+          {
+            "disabled": false,
+            "label": "WebUSB · CMSIS-DAP（零安装）",
+            "value": "webusb"
+          },
+          {
+            "disabled": false,
+            "label": "本地桥 · OpenOCD",
+            "value": "bridge-openocd"
+          },
+          {
+            "disabled": false,
+            "label": "本地桥 · J-Link（ch0）",
+            "value": "bridge-jlink"
+          },
+          {
+            "disabled": false,
+            "label": "内置模拟目标（演示/自测）",
+            "value": "mock"
+          }
+        ],
+        "selector": "#r-backend",
+        "tag": "select",
+        "text": "WebUSB · CMSIS-DAP（零安装）\n            本地桥 · OpenOCD\n            本地桥 · J-Link（ch0）\n            内置模拟目标（演示/自测）",
+        "title": null,
+        "type": "select-one",
+        "value": "webusb"
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "连接探针",
+        "selector": "#r-usb-connect",
+        "tag": "button",
+        "text": "连接探针",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "换一个探针（会弹浏览器设备选择框）",
+        "selector": "#r-usb-pick",
+        "tag": "button",
+        "text": "换设备…",
+        "title": "换一个探针（会弹浏览器设备选择框）",
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": true,
+        "hidden": false,
+        "label": "断开",
+        "selector": "#r-usb-disconnect",
+        "tag": "button",
+        "text": "断开",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "目标类型\n            \n              SWD / ARM（Cortex-M，默认）\n              RISC-V / JTAG（HPM、CH32V…）",
+        "options": [
+          {
+            "disabled": false,
+            "label": "SWD / ARM（Cortex-M，默认）",
+            "value": "swd"
+          },
+          {
+            "disabled": false,
+            "label": "RISC-V / JTAG（HPM、CH32V…）",
+            "value": "riscv"
+          }
+        ],
+        "selector": "#r-target",
+        "tag": "select",
+        "text": "SWD / ARM（Cortex-M，默认）\n              RISC-V / JTAG（HPM、CH32V…）",
+        "title": "零安装通路的两种目标：ARM/Cortex-M 走 SWD + AHB-AP（浏览器里做 ADIv5）；RISC-V（HPM 等）走 JTAG + DMI + SBA 系统总线读。两者都只用 WebUSB，不需要装驱动",
+        "type": "select-one",
+        "value": "swd"
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "SWD 时钟\n            \n              自动\n              1 MHz\n              5 MHz\n              10 MHz\n              20 MHz\n              30 MHz\n              40 MHz\n              45 MHz\n              50 MHz\n              60 MHz",
+        "options": [
+          {
+            "disabled": false,
+            "label": "自动",
+            "value": "0"
+          },
+          {
+            "disabled": false,
+            "label": "1 MHz",
+            "value": "1000"
+          },
+          {
+            "disabled": false,
+            "label": "5 MHz",
+            "value": "5000"
+          },
+          {
+            "disabled": false,
+            "label": "10 MHz",
+            "value": "10000"
+          },
+          {
+            "disabled": false,
+            "label": "20 MHz",
+            "value": "20000"
+          },
+          {
+            "disabled": false,
+            "label": "30 MHz",
+            "value": "30000"
+          },
+          {
+            "disabled": false,
+            "label": "40 MHz",
+            "value": "40000"
+          },
+          {
+            "disabled": false,
+            "label": "45 MHz",
+            "value": "45000"
+          },
+          {
+            "disabled": false,
+            "label": "50 MHz",
+            "value": "50000"
+          },
+          {
+            "disabled": false,
+            "label": "60 MHz",
+            "value": "60000"
+          }
+        ],
+        "selector": "#r-usb-clock",
+        "tag": "select",
+        "text": "自动\n              1 MHz\n              5 MHz\n              10 MHz\n              20 MHz\n              30 MHz\n              40 MHz\n              45 MHz\n              50 MHz\n              60 MHz",
+        "title": "SWD 时钟：自动 = 从高到低试到通为止",
+        "type": "select-one",
+        "value": "1000"
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "显示所有 USB 设备（非 DAPLink）",
+        "selector": "#r-usb-all",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "checkbox",
+        "value": false
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "桥地址",
+        "selector": "#r-bridge-url",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "text",
+        "value": "ws://127.0.0.1:17321"
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "器件",
+        "selector": "#r-jlink-device",
+        "tag": "input",
+        "text": "",
+        "title": "给 J-Link 的器件名（如 STM32F103C8 / STM32F103RB / STM32H7B0VB）",
+        "type": "text",
+        "value": "STM32F103C8"
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "SWD kHz\n              \n                1 MHz\n                5 MHz\n                10 MHz\n                20 MHz\n                30 MHz\n                40 MHz\n                45 MHz\n                50 MHz\n                60 MHz",
+        "options": [
+          {
+            "disabled": false,
+            "label": "1 MHz",
+            "value": "1000"
+          },
+          {
+            "disabled": false,
+            "label": "5 MHz",
+            "value": "5000"
+          },
+          {
+            "disabled": false,
+            "label": "10 MHz",
+            "value": "10000"
+          },
+          {
+            "disabled": false,
+            "label": "20 MHz",
+            "value": "20000"
+          },
+          {
+            "disabled": false,
+            "label": "30 MHz",
+            "value": "30000"
+          },
+          {
+            "disabled": false,
+            "label": "40 MHz",
+            "value": "40000"
+          },
+          {
+            "disabled": false,
+            "label": "45 MHz",
+            "value": "45000"
+          },
+          {
+            "disabled": false,
+            "label": "50 MHz",
+            "value": "50000"
+          },
+          {
+            "disabled": false,
+            "label": "60 MHz",
+            "value": "60000"
+          }
+        ],
+        "selector": "#r-jlink-speed",
+        "tag": "select",
+        "text": "1 MHz\n                5 MHz\n                10 MHz\n                20 MHz\n                30 MHz\n                40 MHz\n                45 MHz\n                50 MHz\n                60 MHz",
+        "title": "SWD 时钟（J-Link）：50000 = 50MHz（J-Link PRO + STM32F103RB 实测可用）",
+        "type": "select-one",
+        "value": "50000"
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "高速只读（JLinkRTTLogger）",
+        "selector": "#r-jlink-fast",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "checkbox",
+        "value": false
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "逗号/空格分隔，按顺序加载。相对 OpenOCD scripts 目录或绝对路径。第一个 cfg 是 cmsis-dap 时会自动加 backend usb_bulk",
+        "selector": "#r-ocd-cfgs",
+        "tag": "input",
+        "text": "",
+        "title": "逗号/空格分隔，按顺序加载。相对 OpenOCD scripts 目录或绝对路径。第一个 cfg 是 cmsis-dap 时会自动加 backend usb_bulk",
+        "type": "text",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "列出桥所在机器的 OpenOCD cfg 让你挑（浏览器拿不到本地文件路径，所以列表由桥提供）",
+        "selector": "#r-ocd-cfgs-pick",
+        "tag": "button",
+        "text": "选择…",
+        "title": "列出桥所在机器的 OpenOCD cfg 让你挑（浏览器拿不到本地文件路径，所以列表由桥提供）",
+        "type": "button",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "SWD kHz\n            \n              不设（默认）\n              1 MHz\n              5 MHz\n              10 MHz\n              20 MHz\n              30 MHz\n              40 MHz\n              45 MHz\n              50 MHz\n              60 MHz",
+        "options": [
+          {
+            "disabled": false,
+            "label": "不设（默认）",
+            "value": ""
+          },
+          {
+            "disabled": false,
+            "label": "1 MHz",
+            "value": "1000"
+          },
+          {
+            "disabled": false,
+            "label": "5 MHz",
+            "value": "5000"
+          },
+          {
+            "disabled": false,
+            "label": "10 MHz",
+            "value": "10000"
+          },
+          {
+            "disabled": false,
+            "label": "20 MHz",
+            "value": "20000"
+          },
+          {
+            "disabled": false,
+            "label": "30 MHz",
+            "value": "30000"
+          },
+          {
+            "disabled": false,
+            "label": "40 MHz",
+            "value": "40000"
+          },
+          {
+            "disabled": false,
+            "label": "45 MHz",
+            "value": "45000"
+          },
+          {
+            "disabled": false,
+            "label": "50 MHz",
+            "value": "50000"
+          },
+          {
+            "disabled": false,
+            "label": "60 MHz",
+            "value": "60000"
+          }
+        ],
+        "selector": "#r-ocd-speed",
+        "tag": "select",
+        "text": "不设（默认）\n              1 MHz\n              5 MHz\n              10 MHz\n              20 MHz\n              30 MHz\n              40 MHz\n              45 MHz\n              50 MHz\n              60 MHz",
+        "title": null,
+        "type": "select-one",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "连接桥",
+        "selector": "#r-bridge-connect",
+        "tag": "button",
+        "text": "连接桥",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": true,
+        "hidden": false,
+        "label": "断开",
+        "selector": "#r-bridge-disconnect",
+        "tag": "button",
+        "text": "断开",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "芯片\n          \n            \n              STM32F1（F103 等）\n              STM32F0\n              STM32F2\n              STM32F3\n              STM32F4\n              STM32F7\n              STM32G0\n              STM32G4\n              STM32H7（H743 等）",
+        "options": [
+          {
+            "disabled": false,
+            "label": "STM32F1（F103 等）",
+            "value": "stm32f103"
+          },
+          {
+            "disabled": false,
+            "label": "STM32F0",
+            "value": "stm32f0"
+          },
+          {
+            "disabled": false,
+            "label": "STM32F2",
+            "value": "stm32f2"
+          },
+          {
+            "disabled": false,
+            "label": "STM32F3",
+            "value": "stm32f3"
+          },
+          {
+            "disabled": false,
+            "label": "STM32F4",
+            "value": "stm32f4"
+          },
+          {
+            "disabled": false,
+            "label": "STM32F7",
+            "value": "stm32f7"
+          },
+          {
+            "disabled": false,
+            "label": "STM32G0",
+            "value": "stm32g0"
+          },
+          {
+            "disabled": false,
+            "label": "STM32G4",
+            "value": "stm32g4"
+          },
+          {
+            "disabled": false,
+            "label": "STM32H7（H743 等）",
+            "value": "stm32h7"
+          },
+          {
+            "disabled": false,
+            "label": "STM32H7B0 / H7A3 / H7B3（H7B0VBT6 KIT）",
+            "value": "stm32h7b0"
+          },
+          {
+            "disabled": false,
+            "label": "STM32H7A3",
+            "value": "stm32h7a3"
+          },
+          {
+            "disabled": false,
+            "label": "STM32H7B3",
+            "value": "stm32h7b3"
+          },
+          {
+            "disabled": false,
+            "label": "STM32H5",
+            "value": "stm32h5"
+          },
+          {
+            "disabled": false,
+            "label": "STM32L0",
+            "value": "stm32l0"
+          },
+          {
+            "disabled": false,
+            "label": "STM32L1",
+            "value": "stm32l1"
+          },
+          {
+            "disabled": false,
+            "label": "STM32L4 / L4+",
+            "value": "stm32l4"
+          },
+          {
+            "disabled": false,
+            "label": "STM32L5",
+            "value": "stm32l5"
+          },
+          {
+            "disabled": false,
+            "label": "STM32U5",
+            "value": "stm32u5"
+          },
+          {
+            "disabled": false,
+            "label": "STM32C0",
+            "value": "stm32c0"
+          },
+          {
+            "disabled": false,
+            "label": "STM32WB",
+            "value": "stm32wb"
+          },
+          {
+            "disabled": false,
+            "label": "STM32WL",
+            "value": "stm32wl"
+          },
+          {
+            "disabled": false,
+            "label": "ESP32-S31（板载 USB-JTAG）",
+            "value": "esp32s31"
+          },
+          {
+            "disabled": false,
+            "label": "ESP32（Wrover Kit）",
+            "value": "esp32"
+          },
+          {
+            "disabled": false,
+            "label": "自定义 cfg…",
+            "value": "custom"
+          },
+          {
+            "disabled": false,
+            "label": "HPM5300EVK（HPM5361）",
+            "value": "hpm5300evk"
+          },
+          {
+            "disabled": false,
+            "label": "HPM5301EVKLite",
+            "value": "hpm5301evklite"
+          },
+          {
+            "disabled": false,
+            "label": "HPM5E00EVK",
+            "value": "hpm5e00evk"
+          },
+          {
+            "disabled": false,
+            "label": "HPM6200EVK（HPM6280）",
+            "value": "hpm6200evk"
+          },
+          {
+            "disabled": false,
+            "label": "HPM6300EVK（HPM6360）",
+            "value": "hpm6300evk"
+          },
+          {
+            "disabled": false,
+            "label": "HPM6750EVK2",
+            "value": "hpm6750evk2"
+          },
+          {
+            "disabled": false,
+            "label": "HPM6750EVKMINI",
+            "value": "hpm6750evkmini"
+          },
+          {
+            "disabled": false,
+            "label": "HPM6800EVK（HPM6880）",
+            "value": "hpm6800evk"
+          },
+          {
+            "disabled": false,
+            "label": "HPM6E00EVK（HPM6E80）",
+            "value": "hpm6e00evk"
+          },
+          {
+            "disabled": false,
+            "label": "HPM6P00EVK（HPM6P81）",
+            "value": "hpm6p00evk"
+          },
+          {
+            "disabled": false,
+            "label": "其它 RISC-V（自己填 RAM 范围）",
+            "value": "riscv-other"
+          }
+        ],
+        "selector": "#r-chip",
+        "tag": "select",
+        "text": "STM32F1（F103 等）\n              STM32F0\n              STM32F2\n              STM32F3\n              STM32F4\n              STM32F7\n              STM32G0\n              STM32G4\n              STM32H7（H743 等）\n              STM32H7B0 / H7A3 / H7B3（H7B0VBT6 KIT）\n              STM32H7A3\n              STM32H7B3\n              STM32H5\n              STM32L0\n              STM32L1\n              STM32L4 / L4+\n              STM32L5\n              STM32U5\n              STM32C0\n              STM32WB\n              STM3",
+        "title": "ARM：WebUSB 走 SWD，桥侧走 SWD 还是 JTAG 由你的 OpenOCD cfg 决定；RISC-V：只能 JTAG。换芯片在这里选，RAM 扫描范围自动带出（可手改）。走「本地桥 · OpenOCD」时 ARM 组的名字同时是 OpenOCD 的目标 cfg；零安装 WebUSB 模式只用到 RAM 范围。列表外的芯片选 ARM 组的「自定义 cfg…」",
+        "type": "select-one",
+        "value": "stm32f103"
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "RAM 范围",
+        "selector": "#r-range",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "text",
+        "value": "0x20000000-0x20005000"
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "地址",
+        "selector": "#r-addr",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "text",
+        "value": "0x2000b000"
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "载入 ELF…",
+        "selector": "#r-elf",
+        "tag": "button",
+        "text": "载入 ELF…",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "扫描控制块",
+        "selector": "#r-find",
+        "tag": "button",
+        "text": "扫描控制块",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "轮询 ms",
+        "selector": "#r-poll",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "text",
+        "value": "5"
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "复位目标（AIRCR.SYSRESETREQ；探针没接 NRST 时靠软复位）",
+        "selector": "#r-reset",
+        "tag": "button",
+        "text": "复位目标",
+        "title": "复位目标（AIRCR.SYSRESETREQ；探针没接 NRST 时靠软复位）",
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "重连 RTT",
+        "selector": "#r-restart",
+        "tag": "button",
+        "text": "重连 RTT",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "终端(ANSI)",
+        "selector": ":scope > div:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(1)",
+        "tag": "button",
+        "text": "终端(ANSI)",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "文本",
+        "selector": ":scope > div:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(2)",
+        "tag": "button",
+        "text": "文本",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "HEX",
+        "selector": ":scope > div:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(3)",
+        "tag": "button",
+        "text": "HEX",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "时间戳",
+        "selector": "#r-ts",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "checkbox",
+        "value": false
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "自动滚动",
+        "selector": "#r-autoscroll",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "checkbox",
+        "value": true
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "暂停",
+        "selector": "#r-pause",
+        "tag": "button",
+        "text": "暂停",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "清空",
+        "selector": "#r-clear",
+        "tag": "button",
+        "text": "清空",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "保存数据",
+        "selector": "#r-save",
+        "tag": "button",
+        "text": "保存数据",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "Terminal input",
+        "selector": ":scope > div:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > textarea:nth-of-type(1)",
+        "tag": "textarea",
+        "text": "",
+        "title": null,
+        "type": "textarea",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "把读到的 RTT 上行字节直接写进本地文件（不走接收区 2MB 上限），高速采集用",
+        "selector": "#r-record",
+        "tag": "button",
+        "text": "● 记录到文件",
+        "title": "把读到的 RTT 上行字节直接写进本地文件（不走接收区 2MB 上限），高速采集用",
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "记录带时间戳",
+        "selector": "#r-record-ts",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "checkbox",
+        "value": true
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "连接自动记录",
+        "selector": "#r-record-auto",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "checkbox",
+        "value": false
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "行尾\n          \n            \\r\\r\\n\n            \\n无",
+        "options": [
+          {
+            "disabled": false,
+            "label": "\\r",
+            "value": "cr"
+          },
+          {
+            "disabled": false,
+            "label": "\\r\\n",
+            "value": "crlf"
+          },
+          {
+            "disabled": false,
+            "label": "\\n",
+            "value": "lf"
+          },
+          {
+            "disabled": false,
+            "label": "无",
+            "value": "none"
+          }
+        ],
+        "selector": "#r-eol",
+        "tag": "select",
+        "text": "\\r\\r\\n\n            \\n无",
+        "title": null,
+        "type": "select-one",
+        "value": "cr"
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "HEX",
+        "selector": "#r-hexsend",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "checkbox",
+        "value": false
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "给固件发送输入（↑/↓ 翻历史；Enter 发送）",
+        "selector": "#r-tx",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "text",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "发送",
+        "selector": "#r-send",
+        "tag": "button",
+        "text": "发送",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      },
+      {
+        "detachedFromPage": true,
+        "disabled": false,
+        "hidden": false,
+        "label": "",
+        "selector": "@file:view._elfInput",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "file",
+        "value": ""
+      }
+    ],
+    "globalControls": [
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "向目标 NRST 发送硬复位脉冲；EVKLite 使用 PA27/J3[23]，PA08 接 TRST 时仅复位 JTAG",
+        "selector": "#btn-global-reset",
+        "tag": "button",
+        "text": "全局复位",
+        "title": "向目标 NRST 发送硬复位脉冲；EVKLite 使用 PA27/J3[23]，PA08 接 TRST 时仅复位 JTAG",
+        "type": "button",
+        "value": ""
+      },
+      {
+        "disabled": true,
+        "hidden": false,
+        "label": "NRST 开漏",
+        "selector": "#global-nrst-open-drain",
+        "tag": "input",
+        "text": "",
+        "title": null,
+        "type": "checkbox",
+        "value": false
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "全屏显示工作台",
+        "selector": "#btn-fullscreen",
+        "tag": "button",
+        "text": "全屏",
+        "title": "全屏显示工作台",
+        "type": "button",
+        "value": ""
+      },
+      {
+        "disabled": false,
+        "hidden": false,
+        "label": "帮助与快捷键",
+        "selector": "#btn-help",
+        "tag": "button",
+        "text": "帮助与快捷键",
+        "title": null,
+        "type": "submit",
+        "value": ""
+      }
+    ],
+    "interrupts": [],
+    "methods": [
+      {
+        "name": "connectProbe",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "async connectProbe()"
+      },
+      {
+        "name": "disconnect",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "async disconnect()"
+      },
+      {
+        "name": "onShow",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "onShow()"
+      },
+      {
+        "name": "resetTarget",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "async resetTarget()"
+      },
+      {
+        "name": "summary",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "summary()"
+      },
+      {
+        "name": "saveRaw",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "saveRaw()"
+      },
+      {
+        "name": "save",
+        "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+        "signature": "save()"
+      }
+    ],
+    "page": "rtt",
+    "targets": [
+      "view"
+    ]
+  }
+}

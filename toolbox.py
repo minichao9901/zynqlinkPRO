@@ -49,10 +49,12 @@ def catalog():
                        'features': value[2], 'commands': ['describe', 'state', 'show', 'read', 'set', 'click', 'interrupt', 'upload', 'invoke', 'wait', 'event', 'downloads', 'download', 'discard']}
                       for key, value in PAGES.items()],
             'trace': 'toolbox.py trace <existing trace CLI arguments>',
+            'project': {'entry':'toolbox.py project list|describe|run','browserRequired':False,'validation':'入口覆盖不等于全部功能实测'},
             'bridge': 'toolbox.py bridge <OpenOCD/J-Link bridge arguments>',
             'fixtures': 'toolbox.py fixtures rtt|scope --out NEW_DIR',
             'probe-flash': 'toolbox.py probe-flash [--image-dir BOOT_PACKAGE] [--dry-run|--verify-only|--backup-only] (direct JTAG, no browser/runtime)',
-            'browserRequired': True, 'hardwareValidationReport': 'docs/F103ZE-Web-CLI-ETM统一验收-20261031.md',
+            'browserRequired': False, 'browserRequiredForPages': True,
+            'hardwareValidationReport': 'docs/F103ZE-Web-CLI-ETM统一验收-20261031.md',
             'completion': '事件投递不代表业务完成；读取状态/质量/日志验证。invoke等待原方法返回，原方法可能自行捕获错误。'}
 
 
@@ -238,12 +240,14 @@ def parser():
     c.add_argument('--target', default='view', help='以describe返回的targets为准')
     c.add_argument('--args', default='[]', help='JSON位置参数数组；大参数可用--args-file')
     c.add_argument('--args-file')
+    sub.add_parser('project',help='全项目非Web工具的清单/描述/执行；project --help')
     sub.add_parser('trace', help='原样转交全部现有ETM Trace CLI参数（trace之后的--help）')
     sub.add_parser('bridge', help='启动可选OpenOCD/J-Link桥（bridge --help查看桥选项）')
     sub.add_parser('fixtures', help='构建F103ZE额定72MHz测试目标（fixtures --help查看参数）')
     sub.add_parser('probe-flash', help='备份并固化Zynq探针到QSPI（probe-flash --help查看参数）')
     v = sub.add_parser('validate', help='真实Web验收；scope/rttcdc会烧录目标，禁止Flash时用no-flash')
-    v.add_argument('suite', choices=['capacity', 'debug', 'scope', 'rttcdc', 'no-flash'])
+    v.add_argument('suite', choices=['capacity', 'debug', 'scope', 'rttcdc', 'no-flash', 'flame-export'])
+    v.add_argument('--record',help='flame-export验收的已解码记录ID；不操作硬件')
     v.add_argument('--artifacts', required=True, help='新的证据目录，拒绝覆盖')
     v.add_argument('--elf', default=str(ROOT / 'prebuilt/20261031_f103ze_cdc_trace/fw-48-echo.elf'))
     v.add_argument('--sources', default=str(ROOT / 'docs/validation/f103ze-web-flow-20261031/source-snapshot'))
@@ -261,6 +265,8 @@ def parser():
 
 def main(argv=None):
     argv = list(sys.argv[1:] if argv is None else argv)
+    if argv and argv[0] == 'project':
+        return subprocess.call([sys.executable,'-X','utf8',str(ROOT/'tools/project_cli.py'),*argv[1:]])
     if argv and argv[0] == 'probe-flash':
         return subprocess.call([sys.executable, '-X', 'utf8', str(ROOT / 'tools/probe_flash.py'), *argv[1:]])
     if argv and argv[0] == 'trace':
@@ -294,7 +300,9 @@ def main(argv=None):
             serve(args)
             return 0
         if args.command == 'validate':
-            if args.suite=='no-flash':
+            if args.suite=='flame-export':
+                from tools.etm_flame_export_acceptance import run
+            elif args.suite=='no-flash':
                 from tools.f103_no_flash_web_acceptance import run
             elif args.suite in ('scope','rttcdc'):
                 from tools.f103_stream_acceptance import run
