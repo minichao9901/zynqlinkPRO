@@ -11,7 +11,7 @@ QSPI MIO1..6、单片 x4、反馈时钟关闭（MIO8 供现有 USB PHY 复位）
 构建（Windows SDK 2018.3；所有输出放独立 worktree）：
 
 ```powershell
-E:/Xilinx/SDK/2018.3/bin/hsi.bat firmware/boot/hardware/generate_bsp.tcl build/qspi_boot/bsp
+E:/Xilinx/SDK/2018.3/bin/hsi.bat -source firmware/boot/hardware/generate_bsp.tcl -tclargs build/qspi_boot/bsp
 # 将 SDK GCC 与 gnuwin/bin 加入 PATH，RDI_PLATFORM=win64；BSP 必须串行构建：
 make -C build/qspi_boot/bsp -j1
 python tools/build_probe_boot.py --bsp build/qspi_boot/bsp `
