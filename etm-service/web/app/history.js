@@ -251,6 +251,23 @@ export class HistoryView{
     const line=active.getBoundingClientRect(),bounds=box.getBoundingClientRect();
     box.scrollTop+=line.top-bounds.top-Math.max(0,(box.clientHeight-line.height)/2);
   }
+  async waitForDisplay(){
+    const recordRevision=this.recordRevision,revision=this.revision,started=performance.now();
+    if(this.timelineTask)await this.timelineTask;
+    if(recordRevision!==this.recordRevision||revision!==this.revision)throw Error('计时期间记录或视图发生变化');
+    if(this.view==='instructions'&&!this.timelineData)throw Error('默认时间线尚未就绪，不能作为完整首屏');
+    if(this.view==='flame'&&!this.window)throw Error('火焰图区间尚未就绪');
+    const timelineReady=performance.now();
+    if(document.visibilityState!=='visible')return {timelineReadyMs:timelineReady-started,painted:false,visibility:document.visibilityState};
+    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+    return {timelineReadyMs:timelineReady-started,paintMs:performance.now()-timelineReady,painted:true,visibility:document.visibilityState};
+  }
+  async measureZoom(zoomIn=true){
+    const started=performance.now();await this.zoomRange(zoomIn);const readerReady=performance.now();
+    const display=await this.waitForDisplay();
+    return {record:this.sid,view:this.view,zoomIn,range:this.range?{...this.range}:null,
+      readerReadyMs:readerReady-started,...display,totalMs:performance.now()-started};
+  }
   async navigate(direction,mode=$('nav-mode').value){if(!this.result)return;const generation=this.recordRevision;const q=new URLSearchParams({seq:this.selected??0,direction,mode});this.scopeParams(q);const found=await this.api(this.path('navigate?'+q));if(generation!==this.recordRevision)return;if(found.seq===null){$('cursor-state').textContent='该方向已无符合条件的历史位置';return;}await this.select(found.seq,true);}
   async refreshSources(){this.sources.clear();this.sourceDomFile=null;if(this.selected!==null)await this.select(this.selected);}
   async locatePC(pc){const generation=this.recordRevision;const q=new URLSearchParams({seq:this.selected??-1,pc:'0x'+pc.toString(16)});this.scopeParams(q);const found=await this.api(this.path('navigate?'+q));if(generation!==this.recordRevision)return;if(found.seq===null)throw Error('记录中未找到该 PC');await this.select(found.seq,true);if(found.wrapped)$('cursor-state').textContent+=' · 已回到首个匹配';}

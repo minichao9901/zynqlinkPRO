@@ -158,6 +158,8 @@ def serve(args):
                            connection_limit=64, max_request_body_size=48 << 20)
     state = {'protocol': 'workbench/1', 'url': 'http://127.0.0.1:' + str(args.port), 'pid': os.getpid(), 'status': 'serving'}
     state['nativeProbe']=bool(args.native_probe)
+    from engine_profile import current_profile
+    state['decodeEngineProfile']=current_profile()
     if pair:
         state['nativeCapture'] = {'bit': str(Path(args.bit).resolve()),
                                   'bitSha256': hashlib.sha256(Path(args.bit).read_bytes()).hexdigest(),

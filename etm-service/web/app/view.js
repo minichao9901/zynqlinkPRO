@@ -478,10 +478,15 @@ async function captureNative(options={}){
     });
   }catch(e){error(e);throw e;}finally{state.operation=false;state.hardwareOperation=false;controls();}
 }
-window.__etm={target,state,history,api,captureNative,openRecord:async id=>{
+async function openRecordForCli(id){
   if(state.operation||state.job)throw Error('请等待当前操作完成，再打开历史记录');
   state.operation=true;controls();
   try{return await loadRecord(id);}finally{state.operation=false;controls();}
+}
+window.__etm={target,state,history,api,captureNative,openRecord:openRecordForCli,measureOpenRecord:async id=>{
+  const started=performance.now();await openRecordForCli(id);const readerReady=performance.now();
+  const display=await history.waitForDisplay();
+  return {record:id,readerReadyMs:readerReady-started,...display,totalMs:performance.now()-started};
 }};
 if(attached)init();
 
