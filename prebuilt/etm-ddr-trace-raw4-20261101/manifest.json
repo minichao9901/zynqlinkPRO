@@ -1,5 +1,5 @@
 {
-  "status": "memory-and-first-1s-framed-trace-passed-usb-and-stress-pending-not-golden",
+  "status": "memory-and-1s-2s-framed-trace-passed-usb-and-calibration-pending-not-golden",
   "accepted": false,
   "rtlSourceRevision": "d2125173133fb6a20abc63463c62faec7f35115c",
   "psSourceRevision": "e6c40a1e2262098d326a8adc49fe0d9ea5b61d26",
@@ -58,7 +58,7 @@
     }
   },
   "boardValidation": {
-    "status": "first-1s-framed-trace-passed-full-product-acceptance-pending",
+    "status": "physical-DDR-trace-1s-and-2s-passed-full-product-acceptance-pending",
     "flashWrites": false,
     "actualLoad": "docs/validation/etm-ddr-trace-board-20261101/memory/load.txt",
     "bitSha256": "56a70e493ee0f276e02bb6b8f7f358ee3e7fb9cdfeeaec1613ee02f065687581",
@@ -95,6 +95,70 @@
     "memoryPatternRounds": 2,
     "evidence": "docs/validation/etm-ddr-trace-board-20261101",
     "usbDdrDownload": "not implemented",
-    "perLaneCalibration": "not implemented"
+    "perLaneCalibration": "not implemented",
+    "traceStressEvidence": "docs/validation/etm-ddr-trace-board-20261101/stress/result.json",
+    "traceStressRounds": 2,
+    "traceStressReloadBetweenRounds": false,
+    "actualLoadStillSame": true,
+    "traceStressCases": [
+      {
+        "entry": "cdc_poll",
+        "hardwareWindowSeconds": 1.0,
+        "formatterBytes": 19695384,
+        "etmBytes": 5839932,
+        "frameDrops": 0,
+        "parserErrors": 0,
+        "readyLosses": 0,
+        "fifoHighwater": 1,
+        "cdcEchoInsideHardwareWindow": 62,
+        "decode": {
+          "returnCode": 0,
+          "packets": 4741975,
+          "packetIssues": 0,
+          "boundaryIncomplete": 0,
+          "unsyncBytes": 0,
+          "ranges": 19400053,
+          "addressInaccessible": 0,
+          "status": {
+            "kind": "status",
+            "processed": 5839932,
+            "library": "1.8.3",
+            "lastErrorCode": 0,
+            "lastError": ""
+          },
+          "interiorPass": true,
+          "completePacketPass": true
+        }
+      },
+      {
+        "entry": "cdc_tx_poll",
+        "hardwareWindowSeconds": 2.0,
+        "formatterBytes": 39579025,
+        "etmBytes": 11735757,
+        "frameDrops": 0,
+        "parserErrors": 0,
+        "readyLosses": 0,
+        "fifoHighwater": 1,
+        "cdcEchoInsideHardwareWindow": 126,
+        "decode": {
+          "returnCode": 0,
+          "packets": 9529145,
+          "packetIssues": 0,
+          "boundaryIncomplete": 0,
+          "unsyncBytes": 0,
+          "ranges": 38980772,
+          "addressInaccessible": 0,
+          "status": {
+            "kind": "status",
+            "processed": 11735757,
+            "library": "1.8.3",
+            "lastErrorCode": 0,
+            "lastError": ""
+          },
+          "interiorPass": true,
+          "completePacketPass": true
+        }
+      }
+    ]
   }
 }

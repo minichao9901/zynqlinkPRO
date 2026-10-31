@@ -1,0 +1,264 @@
+E:\Xilinx\SDK\2018.3\gnu\aarch32\nt\gcc-arm-none-eabi\bin\arm-none-eabi-gcc.exe -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -mthumb -ffunction-sections -fdata-sections -DDAP_ALLOW_ZERO_IDLE=0 -DDAP_ENABLE_TRACE=0 -DDAP_MMIO_DIAGNOSTICS=0 -DDAP_MAX_SWCLK_HZ=60000000 -O3 -g3 -Wall -Wextra -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source -I E:\zynqlinkPRO_etm_calibration\reference\legacy_zynq\ZYNQ_DAPLINK_RTL_100TO50MHz\ZYNQ_DAPLINK_RTL_100TO50MHz.sdk\usb_bsp\ps7_cortexa9_0\include -c E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\chry_ringbuffer.c -o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\chry_ringbuffer.o
+
+E:\Xilinx\SDK\2018.3\gnu\aarch32\nt\gcc-arm-none-eabi\bin\arm-none-eabi-gcc.exe -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -mthumb -ffunction-sections -fdata-sections -DDAP_ALLOW_ZERO_IDLE=0 -DDAP_ENABLE_TRACE=0 -DDAP_MMIO_DIAGNOSTICS=0 -DDAP_MAX_SWCLK_HZ=60000000 -O3 -g3 -Wall -Wextra -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source -I E:\zynqlinkPRO_etm_calibration\reference\legacy_zynq\ZYNQ_DAPLINK_RTL_100TO50MHz\ZYNQ_DAPLINK_RTL_100TO50MHz.sdk\usb_bsp\ps7_cortexa9_0\include -c E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source\DAP.c -o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\DAP\Source\DAP.o
+In file included from E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source\DAP.c:29:0:
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h: In function 'LED_CONNECTED_OUT':
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h:700:50: warning: unused parameter 'bit' [-Wunused-parameter]
+ __STATIC_INLINE void LED_CONNECTED_OUT (uint32_t bit) {}
+                                                  ^~~
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h: In function 'LED_RUNNING_OUT':
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h:707:48: warning: unused parameter 'bit' [-Wunused-parameter]
+ __STATIC_INLINE void LED_RUNNING_OUT (uint32_t bit) {}
+                                                ^~~
+In file included from E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/dap_metrics.h:4:0,
+                 from E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source\DAP.c:34:
+E:\zynqlinkPRO_etm_calibration\reference\legacy_zynq\ZYNQ_DAPLINK_RTL_100TO50MHz\ZYNQ_DAPLINK_RTL_100TO50MHz.sdk\usb_bsp\ps7_cortexa9_0\include/xtime_l.h: At top level:
+E:\zynqlinkPRO_etm_calibration\reference\legacy_zynq\ZYNQ_DAPLINK_RTL_100TO50MHz\ZYNQ_DAPLINK_RTL_100TO50MHz.sdk\usb_bsp\ps7_cortexa9_0\include/xtime_l.h:87:9: note: #pragma message: For the sleep routines, Global timer is being used
+ #pragma message ("For the sleep routines, Global timer is being used")
+         ^~~~~~~
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source\DAP.c: In function 'DAP_SWJ_Clock':
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source\DAP.c:438:12: warning: unused variable 'delay' [-Wunused-variable]
+   uint32_t delay;
+            ^~~~~
+
+E:\Xilinx\SDK\2018.3\gnu\aarch32\nt\gcc-arm-none-eabi\bin\arm-none-eabi-gcc.exe -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -mthumb -ffunction-sections -fdata-sections -DDAP_ALLOW_ZERO_IDLE=0 -DDAP_ENABLE_TRACE=0 -DDAP_MMIO_DIAGNOSTICS=0 -DDAP_MAX_SWCLK_HZ=60000000 -O3 -g3 -Wall -Wextra -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source -I E:\zynqlinkPRO_etm_calibration\reference\legacy_zynq\ZYNQ_DAPLINK_RTL_100TO50MHz\ZYNQ_DAPLINK_RTL_100TO50MHz.sdk\usb_bsp\ps7_cortexa9_0\include -c E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source\dap_metrics.c -o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\DAP\Source\dap_metrics.o
+In file included from E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/dap_metrics.h:4:0,
+                 from E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source\dap_metrics.c:1:
+E:\zynqlinkPRO_etm_calibration\reference\legacy_zynq\ZYNQ_DAPLINK_RTL_100TO50MHz\ZYNQ_DAPLINK_RTL_100TO50MHz.sdk\usb_bsp\ps7_cortexa9_0\include/xtime_l.h:87:9: note: #pragma message: For the sleep routines, Global timer is being used
+ #pragma message ("For the sleep routines, Global timer is being used")
+         ^~~~~~~
+
+E:\Xilinx\SDK\2018.3\gnu\aarch32\nt\gcc-arm-none-eabi\bin\arm-none-eabi-gcc.exe -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -mthumb -ffunction-sections -fdata-sections -DDAP_ALLOW_ZERO_IDLE=0 -DDAP_ENABLE_TRACE=0 -DDAP_MMIO_DIAGNOSTICS=0 -DDAP_MAX_SWCLK_HZ=60000000 -O3 -g3 -Wall -Wextra -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source -I E:\zynqlinkPRO_etm_calibration\reference\legacy_zynq\ZYNQ_DAPLINK_RTL_100TO50MHz\ZYNQ_DAPLINK_RTL_100TO50MHz.sdk\usb_bsp\ps7_cortexa9_0\include -c E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source\DAP_vendor.c -o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\DAP\Source\DAP_vendor.o
+In file included from E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source\DAP_vendor.c:28:0:
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h: In function 'LED_CONNECTED_OUT':
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h:700:50: warning: unused parameter 'bit' [-Wunused-parameter]
+ __STATIC_INLINE void LED_CONNECTED_OUT (uint32_t bit) {}
+                                                  ^~~
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h: In function 'LED_RUNNING_OUT':
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h:707:48: warning: unused parameter 'bit' [-Wunused-parameter]
+ __STATIC_INLINE void LED_RUNNING_OUT (uint32_t bit) {}
+                                                ^~~
+In file included from E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/dap_metrics.h:4:0,
+                 from E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source\DAP_vendor.c:31:
+E:\zynqlinkPRO_etm_calibration\reference\legacy_zynq\ZYNQ_DAPLINK_RTL_100TO50MHz\ZYNQ_DAPLINK_RTL_100TO50MHz.sdk\usb_bsp\ps7_cortexa9_0\include/xtime_l.h: At top level:
+E:\zynqlinkPRO_etm_calibration\reference\legacy_zynq\ZYNQ_DAPLINK_RTL_100TO50MHz\ZYNQ_DAPLINK_RTL_100TO50MHz.sdk\usb_bsp\ps7_cortexa9_0\include/xtime_l.h:87:9: note: #pragma message: For the sleep routines, Global timer is being used
+ #pragma message ("For the sleep routines, Global timer is being used")
+         ^~~~~~~
+
+E:\Xilinx\SDK\2018.3\gnu\aarch32\nt\gcc-arm-none-eabi\bin\arm-none-eabi-gcc.exe -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -mthumb -ffunction-sections -fdata-sections -DDAP_ALLOW_ZERO_IDLE=0 -DDAP_ENABLE_TRACE=0 -DDAP_MMIO_DIAGNOSTICS=0 -DDAP_MAX_SWCLK_HZ=60000000 -O3 -g3 -Wall -Wextra -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source -I E:\zynqlinkPRO_etm_calibration\reference\legacy_zynq\ZYNQ_DAPLINK_RTL_100TO50MHz\ZYNQ_DAPLINK_RTL_100TO50MHz.sdk\usb_bsp\ps7_cortexa9_0\include -c E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source\JTAG_DP.c -o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\DAP\Source\JTAG_DP.o
+In file included from E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source\JTAG_DP.c:28:0:
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h: In function 'LED_CONNECTED_OUT':
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h:700:50: warning: unused parameter 'bit' [-Wunused-parameter]
+ __STATIC_INLINE void LED_CONNECTED_OUT (uint32_t bit) {}
+                                                  ^~~
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h: In function 'LED_RUNNING_OUT':
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h:707:48: warning: unused parameter 'bit' [-Wunused-parameter]
+ __STATIC_INLINE void LED_RUNNING_OUT (uint32_t bit) {}
+                                                ^~~
+
+E:\Xilinx\SDK\2018.3\gnu\aarch32\nt\gcc-arm-none-eabi\bin\arm-none-eabi-gcc.exe -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -mthumb -ffunction-sections -fdata-sections -DDAP_ALLOW_ZERO_IDLE=0 -DDAP_ENABLE_TRACE=0 -DDAP_MMIO_DIAGNOSTICS=0 -DDAP_MAX_SWCLK_HZ=60000000 -O3 -g3 -Wall -Wextra -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source -I E:\zynqlinkPRO_etm_calibration\reference\legacy_zynq\ZYNQ_DAPLINK_RTL_100TO50MHz\ZYNQ_DAPLINK_RTL_100TO50MHz.sdk\usb_bsp\ps7_cortexa9_0\include -c E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source\JTAG_RTL.c -o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\DAP\Source\JTAG_RTL.o
+In file included from E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source\JTAG_RTL.c:2:0:
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h: In function 'LED_CONNECTED_OUT':
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h:700:50: warning: unused parameter 'bit' [-Wunused-parameter]
+ __STATIC_INLINE void LED_CONNECTED_OUT (uint32_t bit) {}
+                                                  ^~~
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h: In function 'LED_RUNNING_OUT':
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h:707:48: warning: unused parameter 'bit' [-Wunused-parameter]
+ __STATIC_INLINE void LED_RUNNING_OUT (uint32_t bit) {}
+                                                ^~~
+
+E:\Xilinx\SDK\2018.3\gnu\aarch32\nt\gcc-arm-none-eabi\bin\arm-none-eabi-gcc.exe -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -mthumb -ffunction-sections -fdata-sections -DDAP_ALLOW_ZERO_IDLE=0 -DDAP_ENABLE_TRACE=0 -DDAP_MMIO_DIAGNOSTICS=0 -DDAP_MAX_SWCLK_HZ=60000000 -O3 -g3 -Wall -Wextra -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source -I E:\zynqlinkPRO_etm_calibration\reference\legacy_zynq\ZYNQ_DAPLINK_RTL_100TO50MHz\ZYNQ_DAPLINK_RTL_100TO50MHz.sdk\usb_bsp\ps7_cortexa9_0\include -c E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source\SW_DP.c -o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\DAP\Source\SW_DP.o
+In file included from E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source\SW_DP.c:28:0:
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h: In function 'LED_CONNECTED_OUT':
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h:700:50: warning: unused parameter 'bit' [-Wunused-parameter]
+ __STATIC_INLINE void LED_CONNECTED_OUT (uint32_t bit) {}
+                                                  ^~~
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h: In function 'LED_RUNNING_OUT':
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h:707:48: warning: unused parameter 'bit' [-Wunused-parameter]
+ __STATIC_INLINE void LED_RUNNING_OUT (uint32_t bit) {}
+                                                ^~~
+At top level:
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source\SW_DP.c:177:16: warning: 'SWD_TransferSlow' defined but not used [-Wunused-function]
+ static uint8_t SWD_Transfer##speed (uint32_t request, uint32_t *data) {         \
+                ^
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source\SW_DP.c:310:1: note: in expansion of macro 'SWD_TransferFunction'
+ SWD_TransferFunction(Slow)
+ ^~~~~~~~~~~~~~~~~~~~
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source\SW_DP.c:177:16: warning: 'SWD_TransferFast' defined but not used [-Wunused-function]
+ static uint8_t SWD_Transfer##speed (uint32_t request, uint32_t *data) {         \
+                ^
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source\SW_DP.c:306:1: note: in expansion of macro 'SWD_TransferFunction'
+ SWD_TransferFunction(Fast)
+ ^~~~~~~~~~~~~~~~~~~~
+
+E:\Xilinx\SDK\2018.3\gnu\aarch32\nt\gcc-arm-none-eabi\bin\arm-none-eabi-gcc.exe -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -mthumb -ffunction-sections -fdata-sections -DDAP_ALLOW_ZERO_IDLE=0 -DDAP_ENABLE_TRACE=0 -DDAP_MMIO_DIAGNOSTICS=0 -DDAP_MAX_SWCLK_HZ=60000000 -O3 -g3 -Wall -Wextra -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source -I E:\zynqlinkPRO_etm_calibration\reference\legacy_zynq\ZYNQ_DAPLINK_RTL_100TO50MHz\ZYNQ_DAPLINK_RTL_100TO50MHz.sdk\usb_bsp\ps7_cortexa9_0\include -c E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source\swd_dma.c -o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\DAP\Source\swd_dma.o
+In file included from E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP.h:231:0,
+                 from E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source\swd_dma.c:2:
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h: In function 'LED_CONNECTED_OUT':
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h:700:50: warning: unused parameter 'bit' [-Wunused-parameter]
+ __STATIC_INLINE void LED_CONNECTED_OUT (uint32_t bit) {}
+                                                  ^~~
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h: In function 'LED_RUNNING_OUT':
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h:707:48: warning: unused parameter 'bit' [-Wunused-parameter]
+ __STATIC_INLINE void LED_RUNNING_OUT (uint32_t bit) {}
+                                                ^~~
+In file included from E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/dap_metrics.h:4:0,
+                 from E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source\swd_dma.c:3:
+E:\zynqlinkPRO_etm_calibration\reference\legacy_zynq\ZYNQ_DAPLINK_RTL_100TO50MHz\ZYNQ_DAPLINK_RTL_100TO50MHz.sdk\usb_bsp\ps7_cortexa9_0\include/xtime_l.h: At top level:
+E:\zynqlinkPRO_etm_calibration\reference\legacy_zynq\ZYNQ_DAPLINK_RTL_100TO50MHz\ZYNQ_DAPLINK_RTL_100TO50MHz.sdk\usb_bsp\ps7_cortexa9_0\include/xtime_l.h:87:9: note: #pragma message: For the sleep routines, Global timer is being used
+ #pragma message ("For the sleep routines, Global timer is being used")
+         ^~~~~~~
+
+E:\Xilinx\SDK\2018.3\gnu\aarch32\nt\gcc-arm-none-eabi\bin\arm-none-eabi-gcc.exe -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -mthumb -ffunction-sections -fdata-sections -DDAP_ALLOW_ZERO_IDLE=0 -DDAP_ENABLE_TRACE=0 -DDAP_MMIO_DIAGNOSTICS=0 -DDAP_MAX_SWCLK_HZ=60000000 -O3 -g3 -Wall -Wextra -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source -I E:\zynqlinkPRO_etm_calibration\reference\legacy_zynq\ZYNQ_DAPLINK_RTL_100TO50MHz\ZYNQ_DAPLINK_RTL_100TO50MHz.sdk\usb_bsp\ps7_cortexa9_0\include -c E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source\SWO.c -o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\DAP\Source\SWO.o
+In file included from E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source\SWO.c:28:0:
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h: In function 'LED_CONNECTED_OUT':
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h:700:50: warning: unused parameter 'bit' [-Wunused-parameter]
+ __STATIC_INLINE void LED_CONNECTED_OUT (uint32_t bit) {}
+                                                  ^~~
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h: In function 'LED_RUNNING_OUT':
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h:707:48: warning: unused parameter 'bit' [-Wunused-parameter]
+ __STATIC_INLINE void LED_RUNNING_OUT (uint32_t bit) {}
+                                                ^~~
+
+E:\Xilinx\SDK\2018.3\gnu\aarch32\nt\gcc-arm-none-eabi\bin\arm-none-eabi-gcc.exe -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -mthumb -ffunction-sections -fdata-sections -DDAP_ALLOW_ZERO_IDLE=0 -DDAP_ENABLE_TRACE=0 -DDAP_MMIO_DIAGNOSTICS=0 -DDAP_MAX_SWCLK_HZ=60000000 -O3 -g3 -Wall -Wextra -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source -I E:\zynqlinkPRO_etm_calibration\reference\legacy_zynq\ZYNQ_DAPLINK_RTL_100TO50MHz\ZYNQ_DAPLINK_RTL_100TO50MHz.sdk\usb_bsp\ps7_cortexa9_0\include -c E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source\UART.c -o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\DAP\Source\UART.o
+In file included from E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source\UART.c:28:0:
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h: In function 'LED_CONNECTED_OUT':
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h:700:50: warning: unused parameter 'bit' [-Wunused-parameter]
+ __STATIC_INLINE void LED_CONNECTED_OUT (uint32_t bit) {}
+                                                  ^~~
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h: In function 'LED_RUNNING_OUT':
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h:707:48: warning: unused parameter 'bit' [-Wunused-parameter]
+ __STATIC_INLINE void LED_RUNNING_OUT (uint32_t bit) {}
+                                                ^~~
+
+E:\Xilinx\SDK\2018.3\gnu\aarch32\nt\gcc-arm-none-eabi\bin\arm-none-eabi-gcc.exe -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -mthumb -ffunction-sections -fdata-sections -DDAP_ALLOW_ZERO_IDLE=0 -DDAP_ENABLE_TRACE=0 -DDAP_MMIO_DIAGNOSTICS=0 -DDAP_MAX_SWCLK_HZ=60000000 -O3 -g3 -Wall -Wextra -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source -I E:\zynqlinkPRO_etm_calibration\reference\legacy_zynq\ZYNQ_DAPLINK_RTL_100TO50MHz\ZYNQ_DAPLINK_RTL_100TO50MHz.sdk\usb_bsp\ps7_cortexa9_0\include -c E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\dap_main.c -o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\dap_main.o
+In file included from E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP.h:231:0,
+                 from E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\dap_main.c:3:
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h: In function 'LED_CONNECTED_OUT':
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h:700:50: warning: unused parameter 'bit' [-Wunused-parameter]
+ __STATIC_INLINE void LED_CONNECTED_OUT (uint32_t bit) {}
+                                                  ^~~
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h: In function 'LED_RUNNING_OUT':
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h:707:48: warning: unused parameter 'bit' [-Wunused-parameter]
+ __STATIC_INLINE void LED_RUNNING_OUT (uint32_t bit) {}
+                                                ^~~
+In file included from E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/dap_metrics.h:4:0,
+                 from E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\dap_main.c:4:
+E:\zynqlinkPRO_etm_calibration\reference\legacy_zynq\ZYNQ_DAPLINK_RTL_100TO50MHz\ZYNQ_DAPLINK_RTL_100TO50MHz.sdk\usb_bsp\ps7_cortexa9_0\include/xtime_l.h: At top level:
+E:\zynqlinkPRO_etm_calibration\reference\legacy_zynq\ZYNQ_DAPLINK_RTL_100TO50MHz\ZYNQ_DAPLINK_RTL_100TO50MHz.sdk\usb_bsp\ps7_cortexa9_0\include/xtime_l.h:87:9: note: #pragma message: For the sleep routines, Global timer is being used
+ #pragma message ("For the sleep routines, Global timer is being used")
+         ^~~~~~~
+
+E:\Xilinx\SDK\2018.3\gnu\aarch32\nt\gcc-arm-none-eabi\bin\arm-none-eabi-gcc.exe -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -mthumb -ffunction-sections -fdata-sections -DDAP_ALLOW_ZERO_IDLE=0 -DDAP_ENABLE_TRACE=0 -DDAP_MMIO_DIAGNOSTICS=0 -DDAP_MAX_SWCLK_HZ=60000000 -O3 -g3 -Wall -Wextra -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source -I E:\zynqlinkPRO_etm_calibration\reference\legacy_zynq\ZYNQ_DAPLINK_RTL_100TO50MHz\ZYNQ_DAPLINK_RTL_100TO50MHz.sdk\usb_bsp\ps7_cortexa9_0\include -c E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\etm_stream.c -o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\etm_stream.o
+In file included from E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\etm_stream.c:8:0:
+E:\zynqlinkPRO_etm_calibration\reference\legacy_zynq\ZYNQ_DAPLINK_RTL_100TO50MHz\ZYNQ_DAPLINK_RTL_100TO50MHz.sdk\usb_bsp\ps7_cortexa9_0\include/xtime_l.h:87:9: note: #pragma message: For the sleep routines, Global timer is being used
+ #pragma message ("For the sleep routines, Global timer is being used")
+         ^~~~~~~
+
+E:\Xilinx\SDK\2018.3\gnu\aarch32\nt\gcc-arm-none-eabi\bin\arm-none-eabi-gcc.exe -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -mthumb -ffunction-sections -fdata-sections -DDAP_ALLOW_ZERO_IDLE=0 -DDAP_ENABLE_TRACE=0 -DDAP_MMIO_DIAGNOSTICS=0 -DDAP_MAX_SWCLK_HZ=60000000 -O3 -g3 -Wall -Wextra -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source -I E:\zynqlinkPRO_etm_calibration\reference\legacy_zynq\ZYNQ_DAPLINK_RTL_100TO50MHz\ZYNQ_DAPLINK_RTL_100TO50MHz.sdk\usb_bsp\ps7_cortexa9_0\include -c E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\probe_stream.c -o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\probe_stream.o
+In file included from E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\probe_stream.c:7:0:
+E:\zynqlinkPRO_etm_calibration\reference\legacy_zynq\ZYNQ_DAPLINK_RTL_100TO50MHz\ZYNQ_DAPLINK_RTL_100TO50MHz.sdk\usb_bsp\ps7_cortexa9_0\include/xtime_l.h:87:9: note: #pragma message: For the sleep routines, Global timer is being used
+ #pragma message ("For the sleep routines, Global timer is being used")
+         ^~~~~~~
+
+E:\Xilinx\SDK\2018.3\gnu\aarch32\nt\gcc-arm-none-eabi\bin\arm-none-eabi-gcc.exe -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -mthumb -ffunction-sections -fdata-sections -DDAP_ALLOW_ZERO_IDLE=0 -DDAP_ENABLE_TRACE=0 -DDAP_MMIO_DIAGNOSTICS=0 -DDAP_MAX_SWCLK_HZ=60000000 -O3 -g3 -Wall -Wextra -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source -I E:\zynqlinkPRO_etm_calibration\reference\legacy_zynq\ZYNQ_DAPLINK_RTL_100TO50MHz\ZYNQ_DAPLINK_RTL_100TO50MHz.sdk\usb_bsp\ps7_cortexa9_0\include -c E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\probe_target.c -o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\probe_target.o
+In file included from E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP.h:231:0,
+                 from E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\probe_target.c:2:
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h: In function 'LED_CONNECTED_OUT':
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h:700:50: warning: unused parameter 'bit' [-Wunused-parameter]
+ __STATIC_INLINE void LED_CONNECTED_OUT (uint32_t bit) {}
+                                                  ^~~
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h: In function 'LED_RUNNING_OUT':
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include/DAP_config.h:707:48: warning: unused parameter 'bit' [-Wunused-parameter]
+ __STATIC_INLINE void LED_RUNNING_OUT (uint32_t bit) {}
+                                                ^~~
+
+E:\Xilinx\SDK\2018.3\gnu\aarch32\nt\gcc-arm-none-eabi\bin\arm-none-eabi-gcc.exe -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -mthumb -ffunction-sections -fdata-sections -DDAP_ALLOW_ZERO_IDLE=0 -DDAP_ENABLE_TRACE=0 -DDAP_MMIO_DIAGNOSTICS=0 -DDAP_MAX_SWCLK_HZ=60000000 -O3 -g3 -Wall -Wextra -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source -I E:\zynqlinkPRO_etm_calibration\reference\legacy_zynq\ZYNQ_DAPLINK_RTL_100TO50MHz\ZYNQ_DAPLINK_RTL_100TO50MHz.sdk\usb_bsp\ps7_cortexa9_0\include -c E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\xusbps_bos_desc.c -o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\xusbps_bos_desc.o
+
+E:\Xilinx\SDK\2018.3\gnu\aarch32\nt\gcc-arm-none-eabi\bin\arm-none-eabi-gcc.exe -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -mthumb -ffunction-sections -fdata-sections -DDAP_ALLOW_ZERO_IDLE=0 -DDAP_ENABLE_TRACE=0 -DDAP_MMIO_DIAGNOSTICS=0 -DDAP_MAX_SWCLK_HZ=60000000 -O3 -g3 -Wall -Wextra -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source -I E:\zynqlinkPRO_etm_calibration\reference\legacy_zynq\ZYNQ_DAPLINK_RTL_100TO50MHz\ZYNQ_DAPLINK_RTL_100TO50MHz.sdk\usb_bsp\ps7_cortexa9_0\include -c E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\xusbps_ch9.c -o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\xusbps_ch9.o
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\xusbps_ch9.c: In function 'XUsbPs_StdDevReq':
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\xusbps_ch9.c:521:7: warning: this statement may fall through [-Wimplicit-fallthrough=]
+    if (SetupData->wValue == XUSBPS_TEST_MODE) {
+       ^
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\xusbps_ch9.c:546:3: note: here
+   default:
+   ^~~~~~~
+
+E:\Xilinx\SDK\2018.3\gnu\aarch32\nt\gcc-arm-none-eabi\bin\arm-none-eabi-gcc.exe -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -mthumb -ffunction-sections -fdata-sections -DDAP_ALLOW_ZERO_IDLE=0 -DDAP_ENABLE_TRACE=0 -DDAP_MMIO_DIAGNOSTICS=0 -DDAP_MAX_SWCLK_HZ=60000000 -O3 -g3 -Wall -Wextra -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source -I E:\zynqlinkPRO_etm_calibration\reference\legacy_zynq\ZYNQ_DAPLINK_RTL_100TO50MHz\ZYNQ_DAPLINK_RTL_100TO50MHz.sdk\usb_bsp\ps7_cortexa9_0\include -c E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\xusbps_ch9_storage.c -o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\xusbps_ch9_storage.o
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\xusbps_ch9_storage.c: In function 'XUsbPs_Ch9SetupStrDescReply':
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\xusbps_ch9_storage.c:574:17: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+   for (i = 0; i < StringLen; i++) {
+                 ^
+
+E:\Xilinx\SDK\2018.3\gnu\aarch32\nt\gcc-arm-none-eabi\bin\arm-none-eabi-gcc.exe -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -mthumb -ffunction-sections -fdata-sections -DDAP_ALLOW_ZERO_IDLE=0 -DDAP_ENABLE_TRACE=0 -DDAP_MMIO_DIAGNOSTICS=0 -DDAP_MAX_SWCLK_HZ=60000000 -O3 -g3 -Wall -Wextra -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source -I E:\zynqlinkPRO_etm_calibration\reference\legacy_zynq\ZYNQ_DAPLINK_RTL_100TO50MHz\ZYNQ_DAPLINK_RTL_100TO50MHz.sdk\usb_bsp\ps7_cortexa9_0\include -c E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\xusbps_class_cdc.c -o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\xusbps_class_cdc.o
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\xusbps_class_cdc.c: In function 'usbd_dap_bulk_out':
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\xusbps_class_cdc.c:197:70: warning: unused parameter 'EpNum' [-Wunused-parameter]
+ __attribute__((weak)) void usbd_dap_bulk_out(XUsbPs *InstancePtr, u8 EpNum, u32 nbytes, u8 *Buffer)
+                                                                      ^~~~~
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\xusbps_class_cdc.c:197:81: warning: unused parameter 'nbytes' [-Wunused-parameter]
+ __attribute__((weak)) void usbd_dap_bulk_out(XUsbPs *InstancePtr, u8 EpNum, u32 nbytes, u8 *Buffer)
+                                                                                 ^~~~~~
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\xusbps_class_cdc.c:197:93: warning: unused parameter 'Buffer' [-Wunused-parameter]
+ __attribute__((weak)) void usbd_dap_bulk_out(XUsbPs *InstancePtr, u8 EpNum, u32 nbytes, u8 *Buffer)
+                                                                                             ^~~~~~
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\xusbps_class_cdc.c: In function 'usbd_dap_bulk_in':
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\xusbps_class_cdc.c:234:53: warning: unused parameter 'InstancePtr' [-Wunused-parameter]
+ __attribute__((weak)) void usbd_dap_bulk_in(XUsbPs *InstancePtr, u8 EpNum, void *buffer)
+                                                     ^~~~~~~~~~~
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\xusbps_class_cdc.c:234:69: warning: unused parameter 'EpNum' [-Wunused-parameter]
+ __attribute__((weak)) void usbd_dap_bulk_in(XUsbPs *InstancePtr, u8 EpNum, void *buffer)
+                                                                     ^~~~~
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\xusbps_class_cdc.c:234:82: warning: unused parameter 'buffer' [-Wunused-parameter]
+ __attribute__((weak)) void usbd_dap_bulk_in(XUsbPs *InstancePtr, u8 EpNum, void *buffer)
+                                                                                  ^~~~~~
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\xusbps_class_cdc.c: In function 'usbd_cdc_acm_bulk_out':
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\xusbps_class_cdc.c:275:74: warning: unused parameter 'EpNum' [-Wunused-parameter]
+ __attribute__((weak)) void usbd_cdc_acm_bulk_out(XUsbPs *InstancePtr, u8 EpNum, u32 nbytes, u8 *Buffer)
+                                                                          ^~~~~
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\xusbps_class_cdc.c:275:85: warning: unused parameter 'nbytes' [-Wunused-parameter]
+ __attribute__((weak)) void usbd_cdc_acm_bulk_out(XUsbPs *InstancePtr, u8 EpNum, u32 nbytes, u8 *Buffer)
+                                                                                     ^~~~~~
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\xusbps_class_cdc.c:275:97: warning: unused parameter 'Buffer' [-Wunused-parameter]
+ __attribute__((weak)) void usbd_cdc_acm_bulk_out(XUsbPs *InstancePtr, u8 EpNum, u32 nbytes, u8 *Buffer)
+                                                                                                 ^~~~~~
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\xusbps_class_cdc.c: In function 'usbd_cdc_acm_bulk_in':
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\xusbps_class_cdc.c:297:57: warning: unused parameter 'InstancePtr' [-Wunused-parameter]
+ __attribute__((weak)) void usbd_cdc_acm_bulk_in(XUsbPs *InstancePtr, u8 EpNum, u32 nbytes)
+                                                         ^~~~~~~~~~~
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\xusbps_class_cdc.c:297:73: warning: unused parameter 'EpNum' [-Wunused-parameter]
+ __attribute__((weak)) void usbd_cdc_acm_bulk_in(XUsbPs *InstancePtr, u8 EpNum, u32 nbytes)
+                                                                         ^~~~~
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\xusbps_class_cdc.c:297:84: warning: unused parameter 'nbytes' [-Wunused-parameter]
+ __attribute__((weak)) void usbd_cdc_acm_bulk_in(XUsbPs *InstancePtr, u8 EpNum, u32 nbytes)
+                                                                                    ^~~~~~
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\xusbps_class_cdc.c: In function 'usbd_cdc_acm_set_dtr':
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\xusbps_class_cdc.c:311:35: warning: unused parameter 'InstancePtr' [-Wunused-parameter]
+ void usbd_cdc_acm_set_dtr(XUsbPs *InstancePtr, u8 intf, u8 dtr)
+                                   ^~~~~~~~~~~
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\xusbps_class_cdc.c:311:51: warning: unused parameter 'intf' [-Wunused-parameter]
+ void usbd_cdc_acm_set_dtr(XUsbPs *InstancePtr, u8 intf, u8 dtr)
+                                                   ^~~~
+At top level:
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\xusbps_class_cdc.c:187:11: warning: 'cdc_tx_pending_buffer' defined but not used [-Wunused-variable]
+ static u8 cdc_tx_pending_buffer[4096];
+           ^~~~~~~~~~~~~~~~~~~~~
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\xusbps_class_cdc.c:184:16: warning: 'dap_instance_ptr' defined but not used [-Wunused-variable]
+ static XUsbPs *dap_instance_ptr = NULL;
+                ^~~~~~~~~~~~~~~~
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\xusbps_class_cdc.c:179:11: warning: 'dap_tx_pending_buffer' defined but not used [-Wunused-variable]
+ static u8 dap_tx_pending_buffer[DAP_AGGREGATE_SIZE];
+           ^~~~~~~~~~~~~~~~~~~~~
+
+E:\Xilinx\SDK\2018.3\gnu\aarch32\nt\gcc-arm-none-eabi\bin\arm-none-eabi-gcc.exe -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -mthumb -ffunction-sections -fdata-sections -DDAP_ALLOW_ZERO_IDLE=0 -DDAP_ENABLE_TRACE=0 -DDAP_MMIO_DIAGNOSTICS=0 -DDAP_MAX_SWCLK_HZ=60000000 -O3 -g3 -Wall -Wextra -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source -I E:\zynqlinkPRO_etm_calibration\reference\legacy_zynq\ZYNQ_DAPLINK_RTL_100TO50MHz\ZYNQ_DAPLINK_RTL_100TO50MHz.sdk\usb_bsp\ps7_cortexa9_0\include -c E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\xusbps_intr.c -o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\xusbps_intr.o
+
+E:\Xilinx\SDK\2018.3\gnu\aarch32\nt\gcc-arm-none-eabi\bin\arm-none-eabi-gcc.exe -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -mthumb -ffunction-sections -fdata-sections -DDAP_ALLOW_ZERO_IDLE=0 -DDAP_ENABLE_TRACE=0 -DDAP_MMIO_DIAGNOSTICS=0 -DDAP_MAX_SWCLK_HZ=60000000 -O3 -g3 -Wall -Wextra -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Include -I E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\DAP\Source -I E:\zynqlinkPRO_etm_calibration\reference\legacy_zynq\ZYNQ_DAPLINK_RTL_100TO50MHz\ZYNQ_DAPLINK_RTL_100TO50MHz.sdk\usb_bsp\ps7_cortexa9_0\include -c E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\xusbps_intr_example.c -o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\xusbps_intr_example.o
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\xusbps_intr_example.c: In function 'UsbIntrHandler':
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\xusbps_intr_example.c:469:34: warning: unused parameter 'CallBackRef' [-Wunused-parameter]
+ static void UsbIntrHandler(void *CallBackRef, u32 Mask)
+                                  ^~~~~~~~~~~
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\xusbps_intr_example.c: In function 'XUsbPs_Ep0EventHandler':
+E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\xusbps_intr_example.c:502:26: warning: unused parameter 'Data' [-Wunused-parameter]
+      u8 EventType, void *Data)
+                          ^~~~
+
+E:\Xilinx\SDK\2018.3\gnu\aarch32\nt\gcc-arm-none-eabi\bin\arm-none-eabi-gcc.exe -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -mthumb -ffunction-sections -fdata-sections -DDAP_ALLOW_ZERO_IDLE=0 -DDAP_ENABLE_TRACE=0 -DDAP_MMIO_DIAGNOSTICS=0 -DDAP_MAX_SWCLK_HZ=60000000 -specs=E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\Xilinx.spec -Wl,-build-id=none -Wl,--gc-sections -Wl,-T,E:\zynqlinkPRO_etm_calibration\firmware\xusbps_daplink_dma\lscript.ld -Wl,-Map,E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\xusbps_daplink.map -LE:\zynqlinkPRO_etm_calibration\reference\legacy_zynq\ZYNQ_DAPLINK_RTL_100TO50MHz\ZYNQ_DAPLINK_RTL_100TO50MHz.sdk\usb_bsp\ps7_cortexa9_0\lib -o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\xusbps_daplink_dma.elf E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\chry_ringbuffer.o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\DAP\Source\DAP.o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\DAP\Source\dap_metrics.o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\DAP\Source\DAP_vendor.o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\DAP\Source\JTAG_DP.o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\DAP\Source\JTAG_RTL.o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\DAP\Source\SW_DP.o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\DAP\Source\swd_dma.o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\DAP\Source\SWO.o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\DAP\Source\UART.o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\dap_main.o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\etm_stream.o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\probe_stream.o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\probe_target.o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\xusbps_bos_desc.o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\xusbps_ch9.o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\xusbps_ch9_storage.o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\xusbps_class_cdc.o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\xusbps_intr.o E:\zynqlinkPRO_etm_calibration\build\etm-ddr-trace-ps-20261101\xusbps_intr_example.o -Wl,--start-group -lxil -lgcc -lc -Wl,--end-group

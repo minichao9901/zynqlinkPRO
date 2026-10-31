@@ -1073,3 +1073,20 @@ OpenCSD实际处理全部4,567,468字节，packetIssues=0、unsyncBytes=0、addr
 [加载/模式数据与首轮完整证据](validation/etm-ddr-trace-board-20261101/first-1s/acceptance.json)、[原生解码结果](validation/etm-ddr-trace-board-20261101/first-1s/decode/summary.json)、[真实FRM1压缩原始数据](validation/etm-ddr-trace-board-20261101/first-1s/capture.frm1.gz)、[可回放记录](validation/etm-ddr-trace-board-20261101/first-1s/capture.etmrecord)。原始压缩前SHA与native工具版本在ddr/result.json，可以离线复现解复用。
 
 结论限于首轮1秒24MHz实际链路；这是解决下游排空瓶颈后的新证据，不证明更高频、零BER、实时显示或完整Web验收。此版本没有PS USB DDR下载接口，也没有逐线IDELAY校准。保留原Golden；F103 1/2秒更换函数+CDC压力、H743 Zynq实机、USB采后传输和逐线校准继续推进。
+
+### 2026-11-01：同配对1/2秒更换函数、CDC及原生解码阶段通过
+
+保持板上同一个新bit/ELF配对，不重载、不重试失败轮次；`cdc_poll`采集1秒→完整OpenCSD解码→`cdc_tx_poll`采集2秒→完整OpenCSD解码，两轮通过。窗口内CDC判定进一步收紧：XSCT在START前记录时间、首次观察到硬件active后记录时间，Python仅计数整个发送/接收事务都落在所有可能硬件窗口交集内、且两端额外留20ms余量的字节精确回显。不是把整个主机下载/处理阶段当采集时间。
+
+| entry / 硬件窗口 | FRM1实际写入 | C++解复用后的ETM | 原生解复用段 | 窗口内完整CDC回显 | 丢帧/解析错误/ready丢失 | packetIssues |
+|---|---:|---:|---:|---:|---|---:|
+| cdc_poll / 1秒 | 19,695,384 B | 5,839,932 B | 55.3ms | 62 | 0 / 0 / 0 | 0 |
+| cdc_tx_poll / 2秒 | 39,579,025 B | 11,735,757 B | 109.8ms | 126 | 0 / 0 / 0 | 0 |
+
+两轮FIFO高水位均1，精确参考ticks分别199,999,998及399,999,996，未触及64MiB本轮容量上限；最后残帧8/1字节保留长度而不解码。两轮OpenCSD处理全部ETM输入，均unsyncBytes=0、addressInaccessible=0、lastErrorCode=0、无末包INCOMPLETE，目标CoreSight/FPB/RCC恢复均核对。2秒数据未假称为1秒性能对照。
+
+在这个实际负载下，每秒约19.7MB formatter、5.8MB ETM；这给采后USB下载设计提供大小依据，但本轮仍走JTAG物理AP0读回，**没有测得新DDR路径的USB吞吐、Web首屏或实时显示性能**。当前证据说明消除USB边采边排空后，24MHz TRACECLK可完成1/2秒有限采集；2轮不是长时间稳定性上限，也不替代更高频及逐线校准实验。
+
+[两轮完整结果、CDC逐事务与解码统计](validation/etm-ddr-trace-board-20261101/stress/result.json)。每轮实际FRM1压缩原始数据、可导入的etmrecord、目标状态及XSCT脚本一起归档，worktree删除后仍能复现。CLI `etm.ddr-trace-stress`保留该F103专用验收入口；H743不借用F103寄存器流程，沿用独立ETMv4入口，待换板后实测。
+
+补充交付身份核对：新增目录沿用`-text`保留加载文件字节，已重新登记JSON文件的原始换行；Git对象及工作区都必须逐项与manifest SHA一致。原始Vivado/PS构建日志和频率扫描CSV也显式纳入Git，不能因全局忽略规则而漏掉证据。此版本仍accepted=false、非Golden，待PS USB/Web/校准完整验收后再决定合并与晋级。

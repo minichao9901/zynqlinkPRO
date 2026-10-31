@@ -38,3 +38,17 @@ Trace原始CLI见Trace-CLI使用说明.md。页内控制、串口/调试/RTT/J-S
 需要启动工作台时用serve子命令，运行目录可用项目内小型.runtime目录。硬件模式必须显式指定Golden的bit/ELF；本轮精简与离线验证没有启用它。旧8882运行目录已清理，后续启动须生成新runtime，不能复用已删除的鉴权/URL文件。
 
 RTT桥若需此前OpenOCD部署，路径为prebuilt/golden/host/openocd/openocd.exe，scripts为同目录scripts。没有服务在本轮结束时自动重启。
+
+## DDR研究路径（仅供AI阶段验收）
+
+主流程仍为双击bridge EXE后使用Web。下列命令用于研发验收，不要求用户输入CLI。
+先按配对manifest加载并验证指定bit/ELF，再运行；不会自动切换板上固件。
+
+```powershell
+python toolbox.py project run etm.ddr-trace-stress -- --pair prebuilt/etm-ddr-trace-raw4-20261101 --out build/ddr-trace-check-new --rounds 2 --seconds 1,2 --cdc-port COM34 --decode
+python toolbox.py project run etm.framed -- captured.frm1 --out build/framed-check-new --tail-bytes 1 --trace-id 2
+```
+
+DDR阶段验收仅针对F103，1/2秒窗口、函数交替、CDC及采后物理AP0读回；不写Flash或改目标分频。
+H743已有独立ETMv4 Web/Kingst入口与target.h743-build源码构建命令，不能用F103专用验收替代。
+FRM1原生工具已加入桥包运行文件，但PS USB DDR下载和Web默认DDR路径仍待实现。
