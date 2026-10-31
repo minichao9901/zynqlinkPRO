@@ -1,0 +1,56 @@
+{
+  "command": [
+    "python",
+    "-X",
+    "utf8",
+    "tools/run_f103_jtag_fixture.py",
+    "--restore-swj",
+    "2",
+    "--output",
+    "docs/validation/orbtrace-sota-20261031/historical/jtag_peak_rtt_fixture.json",
+    "--",
+    "python",
+    "-X",
+    "utf8",
+    "build/run_sota_profile.py",
+    "--label",
+    "historical",
+    "--bit",
+    "prebuilt/20261029_swd_short_high/probe.bit",
+    "--elf",
+    "prebuilt/20261029_swd_short_high/probe.elf",
+    "--phase",
+    "peak_rtt"
+  ],
+  "target_Flash_programmed": false,
+  "requested_HCLK_Hz": 96000000,
+  "initial_DHCSR": "0x1010001",
+  "clock_before": {
+    "CR": 50548355,
+    "CFGR": 5309450,
+    "APB1ENR": 276824064,
+    "FLASH_ACR": 49
+  },
+  "clock_active": {
+    "CR": 50548355,
+    "CFGR": 6931466
+  },
+  "DWT_verification": {
+    "scratch_backup_sha256": "9ddb8506aa35d3ba8f0648246ba768b380bc31eaa5597019cfcb88850654628d",
+    "elapsed_s": 0.35085370000160765,
+    "cycles": 33694508,
+    "measured_Hz": 96035777.8750676,
+    "method": "DWT CYCCNT in SRAM-only loop; host midpoint-bracketed SWD reads",
+    "scratch_restored": true,
+    "core_registers_restored": true
+  },
+  "returncode": 0,
+  "clock_after": {
+    "CR": 50548355,
+    "CFGR": 5309450,
+    "APB1ENR": 276824064,
+    "FLASH_ACR": 49
+  },
+  "clock_restore_match": true,
+  "run_halt_restore_match": true
+}

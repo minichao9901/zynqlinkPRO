@@ -30,6 +30,7 @@ stdout 为 JSON；退出码0=请求成功、1=执行失败、2=参数错误；tr
 | 命令 | 作用 |
 |---|---|
 | `catalog [--full]` | 离线九页功能/命令/静态控件清单 |
+| `probe-flash [--image-dir DIR]` | 直接经Zynq JTAG备份整片QSPI、固化BOOT.bin、回读校验并验证复位启动；不需要浏览器/runtime |
 | `serve --port 8878` | 启动统一 Web、ETM 后端与本机队列 |
 | `ping` / `status` | 执行器就绪 / USB授权和调试、ETM状态 |
 | `page P describe [--target T]` | 当前控件、选项、公开方法、targets、停止白名单 |
@@ -222,3 +223,22 @@ python -X utf8 toolbox.py trace doctor
 
 模拟/离线与实板分开记录；进展和未完成项见
 [统一实板验收记录](F103ZE-Web-CLI-ETM统一验收-20261031.md)。
+
+## Zynq 探针 QSPI 固化
+
+```powershell
+python -X utf8 toolbox.py probe-flash --dry-run
+python -X utf8 toolbox.py probe-flash
+# 已固化镜像只回读及复位检查，不擦写：
+python -X utf8 toolbox.py probe-flash --verify-only
+```
+
+默认使用 `prebuilt/20261031_orbtrace_opt_qspi_7020_120`：本次优化7020/120MHz、50/60MHz SOTA复测通过的bit/OCM固件配对，后续ETM滤波改动未合入。可用 `--image-dir` 指定另一完整启动包；包内BOOT.bin、加载器、bit/ELF和初始化文件由SHA-256清单绑定。变更bit/ELF后需重新生成启动包。
+
+此命令直接使用Windows Xilinx SDK 2018.3（默认 `E:/Xilinx/SDK/2018.3`，可用 `--sdk` 覆盖）、Python及pefile、Zynq FTDI/JTAG，不依赖浏览器或CLI服务。拨码切到QSPI后重新上电；与其他硬件任务错开执行。当前Flash几何只验收了EF4019单片32MiB，命令会拒绝其他型号。
+
+默认先备份整片到新的 `build/probe-flash-时间/`，保存原备份SHA-256后才擦写，随后由SDK校验并独立整片回读，检查镜像及擦写范围外数据，再验证无暂停系统复位后的OCM入口交接。`--out NEW_DIR` 指定新的输出目录，`--backup-only` 只备份。原Flash备份及含备份的build目录保留在本机，不提交公开Git；失败时查看目录内result.json和日志。固化后保留QSPI拨码，按板上复位键即可启动，无需每次JTAG下载。
+
+此配对的PL时序WNS +0.499ns / WHS +0.020ns；OCM占用120976字节，USB/DAP队列未缩小。启动包中包含构建来源与哈希，验收依据见 `docs/validation/orbtrace-qspi-20261031/`。
+
+备份辅助程序会暂时接管探针；`--backup-only`结束时CPU暂停，恢复使用需复位到已有有效镜像或重新加载配对。

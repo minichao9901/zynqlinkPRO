@@ -51,6 +51,7 @@ def catalog():
             'trace': 'toolbox.py trace <existing trace CLI arguments>',
             'bridge': 'toolbox.py bridge <OpenOCD/J-Link bridge arguments>',
             'fixtures': 'toolbox.py fixtures rtt|scope --out NEW_DIR',
+            'probe-flash': 'toolbox.py probe-flash [--image-dir BOOT_PACKAGE] [--dry-run|--verify-only|--backup-only] (direct JTAG, no browser/runtime)',
             'browserRequired': True, 'hardwareValidationReport': 'docs/F103ZE-Web-CLI-ETM统一验收-20261031.md',
             'completion': '事件投递不代表业务完成；读取状态/质量/日志验证。invoke等待原方法返回，原方法可能自行捕获错误。'}
 
@@ -238,6 +239,7 @@ def parser():
     sub.add_parser('trace', help='原样转交全部现有ETM Trace CLI参数（trace之后的--help）')
     sub.add_parser('bridge', help='启动可选OpenOCD/J-Link桥（bridge --help查看桥选项）')
     sub.add_parser('fixtures', help='构建F103ZE额定72MHz测试目标（fixtures --help查看参数）')
+    sub.add_parser('probe-flash', help='备份并固化Zynq探针到QSPI（probe-flash --help查看参数）')
     v = sub.add_parser('validate', help='通过真实Web页面运行F103ZE回归，保存逐步证据')
     v.add_argument('suite', choices=['capacity', 'debug', 'scope', 'rttcdc'])
     v.add_argument('--artifacts', required=True, help='新的证据目录，拒绝覆盖')
@@ -256,6 +258,8 @@ def parser():
 
 def main(argv=None):
     argv = list(sys.argv[1:] if argv is None else argv)
+    if argv and argv[0] == 'probe-flash':
+        return subprocess.call([sys.executable, '-X', 'utf8', str(ROOT / 'tools/probe_flash.py'), *argv[1:]])
     if argv and argv[0] == 'trace':
         return subprocess.call([sys.executable, '-X', 'utf8', str(ROOT / 'etm-service/trace.py'), *argv[1:]])
     if argv and argv[0] == 'fixtures':
