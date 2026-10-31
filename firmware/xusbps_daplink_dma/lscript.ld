@@ -23,7 +23,10 @@ _UNDEF_STACK_SIZE = DEFINED(_UNDEF_STACK_SIZE) ? _UNDEF_STACK_SIZE : 1024;
 
 MEMORY
 {
-   ps7_ddr_0 : ORIGIN = 0x100000, LENGTH = 0x3FF00000
+   /* Keep normal PS allocations below the PL capture reservation. No huge
+      NOLOAD section: startup/download must not clear 512MiB implicitly. */
+   ps7_ddr_0 : ORIGIN = 0x100000, LENGTH = 0x0FF00000
+   etm_capture_mem : ORIGIN = 0x10000000, LENGTH = 0x20000000
    dap_trace_mem : ORIGIN = 0x3F000000, LENGTH = 0x100000
    ps7_ram_0 : ORIGIN = 0x0, LENGTH = 0x30000
    ps7_ram_1 : ORIGIN = 0xFFFF0000, LENGTH = 0xFE00
@@ -37,6 +40,10 @@ ENTRY(_vector_table)
 
 SECTIONS
 {
+__etm_ddr_base = ORIGIN(etm_capture_mem);
+__etm_ddr_end = ORIGIN(etm_capture_mem) + LENGTH(etm_capture_mem);
+ASSERT(ORIGIN(ps7_ddr_0) + LENGTH(ps7_ddr_0) <= __etm_ddr_base, "PS DDR overlaps ETM reservation")
+ASSERT(__etm_ddr_end <= ORIGIN(dap_trace_mem), "ETM reservation overlaps diagnostic trace memory")
 .text : {
    KEEP (*(.vectors))
    *(.boot)

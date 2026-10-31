@@ -37,6 +37,8 @@ if {!$impl_only} {
         add_files -fileset constrs_1 [file join $root fpga constraints orbtrace_pins.xdc]
     }
     source [file join $root fpga orbtrace_bd.tcl]
+    source [file join $root fpga orbtrace_ddr_bd.tcl]
+    if {$etm_ddr_changed} {set fresh_impl 1}
     source [file join $root fpga compact_config.tcl]
     source [file join $root fpga axi_pipeline.tcl]
     if {$axi_pipeline_changed} {set fresh_impl 1}
@@ -62,6 +64,8 @@ if {!$impl_only} {
         if {[llength $swd_run] && [lsearch -exact $changed_groups swd]>=0} {reset_run $swd_run}
         set trace_run [get_runs -quiet system_orbtrace_0_0_synth_1]
         if {[llength $trace_run] && [lsearch -exact $changed_groups trace]>=0} {reset_run $trace_run}
+        set ddr_run [get_runs -quiet system_etm_ddr_0_0_synth_1]
+        if {[llength $ddr_run] && [lsearch -exact $changed_groups trace]>=0} {reset_run $ddr_run}
         reset_run synth_1
     }
     # Switching the diagnostic parameter must invalidate the module's OOC

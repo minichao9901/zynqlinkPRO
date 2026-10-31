@@ -135,6 +135,24 @@ DDR接入前已做有限地址别名实验：实际运行的PS ELF执行段再�
 检查采样地址不与分配段重叠，再作带恢复的少量写入；必须在采集/DMA客户均空闲时运行。
 [地址样点结果](validation/etm-ddr-geometry-20261101/result.json)。
 
+随后实现可选HP1 DDR内存路径试验模块（`ZYNQLINK_ETM_DDR=1`，默认关闭）：
+独立CSR 0x40040000、AXIS64写入器、两组16拍缓冲、单个在途写事务、128字节对齐基址、
+每次最多16拍且不跨4KiB、硬件地址范围0x10000000～0x30000000。
+`response_bytes`仅在OKAY的B响应握手后增加；输入接收数与响应数分别记录。
+中止会完成已发出的AW/W/B，不撤回被背压的VALID、不把未回应事务标为完成，也不自动重试错误写入。
+这遵循[ARM AXI写响应依赖](https://developer.arm.com/-/media/Arm%20Developer%20Community/PDF/IHI0022H_amba_axi_protocol_spec.pdf)，
+HP接口选择参考[AMD UG585 PL DMA](https://docs.amd.com/r/en-US/ug585-zynq-7000-SoC-TRM/PL-DMA-via-AXI-High-Performance-HP-Interface)。
+
+内存路径pilot仅生成带地址索引的已知模式，不宣称已接入ETM源；能力寄存器不置Trace采集位。
+先测同一写入器的真实DDR写入、结束与读回，再接接收帧、硬件窗口和采后USB下载，避免把仿真当成整条链路已完成。
+PS链接器已将普通DDR分配区限制在0x10000000以下，并以独立MEMORY区保留512MiB；
+只导出ABS边界符号，不生成或在启动/下载时隐式清零512MiB的巨大NOLOAD段。
+试编译O3/Thumb ELF通过，OCM跨度仍为120,976B；这份试编译尚未与新bit配对加载。
+
+28项写入器仿真及控制器寄存器/模式读回用例通过，覆盖分离AW/W、背压稳定、B延后、
+首尾1～7字节、4KiB边界、越界拒绝、忙时修改/重启拒绝、中止排空、错误B和合法重启清除旧错误。
+原11项Trace RTL回归及生产主机C回归通过。新DDR网表构建和板上读回尚待进行；旧诊断配对仍在板上，Golden不变。
+
 DDR前端已有隔离的实验RTL：`fpga/experiments/etm_ddr/etm_ddr_packetizer.v`，尚未加入生产BD或本轮ETD1构建输入。
 它把带有效长度/EOF的128bit帧转为64bit AXIS，保留最后一拍直到后续数据或EOF确定，正确产生TKEEP/TLAST；
 不发送零字节DMA包，不越过锁定的byte_limit，背压期间数据稳定，源暂停不会伪造结束，busy时拒绝重启。

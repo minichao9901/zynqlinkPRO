@@ -68,6 +68,7 @@ save_bd_design
 source [file join $root fpga probe_stream_bd.tcl]
 source [file join $root fpga probe_jtag_bd.tcl]
 source [file join $root fpga orbtrace_bd.tcl]
+source [file join $root fpga orbtrace_ddr_bd.tcl]
 source [file join $root fpga compact_config.tcl]
 source [file join $root fpga axi_pipeline.tcl]
 write_bd_tcl -force [file join $out system_dma.tcl]
