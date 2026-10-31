@@ -242,8 +242,8 @@ def parser():
     sub.add_parser('bridge', help='启动可选OpenOCD/J-Link桥（bridge --help查看桥选项）')
     sub.add_parser('fixtures', help='构建F103ZE额定72MHz测试目标（fixtures --help查看参数）')
     sub.add_parser('probe-flash', help='备份并固化Zynq探针到QSPI（probe-flash --help查看参数）')
-    v = sub.add_parser('validate', help='通过真实Web页面运行F103ZE回归，保存逐步证据')
-    v.add_argument('suite', choices=['capacity', 'debug', 'scope', 'rttcdc'])
+    v = sub.add_parser('validate', help='真实Web验收；scope/rttcdc会烧录目标，禁止Flash时用no-flash')
+    v.add_argument('suite', choices=['capacity', 'debug', 'scope', 'rttcdc', 'no-flash'])
     v.add_argument('--artifacts', required=True, help='新的证据目录，拒绝覆盖')
     v.add_argument('--elf', default=str(ROOT / 'prebuilt/20261031_f103ze_cdc_trace/fw-48-echo.elf'))
     v.add_argument('--sources', default=str(ROOT / 'docs/validation/f103ze-web-flow-20261031/source-snapshot'))
@@ -254,6 +254,7 @@ def parser():
     v.add_argument('--periods',default='100,20,10,5,2')
     v.add_argument('--stream-seconds',type=float,default=.5)
     v.add_argument('--scope-channels',type=int,choices=[1,8],default=1)
+    v.add_argument('--skip-scope',action='store_true',help='no-flash套件显式跳过已登记的J-Scope连续切换问题；报告保留DEFERRED')
     v.add_argument('--observe-clock',action='store_true',help='通过PS JTAG无暂停读取实际FCLK/SWD divider')
     return p
 
@@ -293,7 +294,9 @@ def main(argv=None):
             serve(args)
             return 0
         if args.command == 'validate':
-            if args.suite in ('scope','rttcdc'):
+            if args.suite=='no-flash':
+                from tools.f103_no_flash_web_acceptance import run
+            elif args.suite in ('scope','rttcdc'):
                 from tools.f103_stream_acceptance import run
             else:
                 from tools.f103_web_acceptance import run

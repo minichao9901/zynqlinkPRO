@@ -573,3 +573,18 @@ cmake --build build/etm-native-rebuild --parallel 2
 同一配对上Web CLI采集10/100/1000ms、串口PING/INFO/64字节回显、USB初始化和4轮窗口内CDC回显、
 应用RTT启动日志、8变量J-Scope均已初步通过；完整最终矩阵、直接Zynq CLI、交互/导出和现场恢复仍在继续，
 本阶段不提前标记整个新配对ETM/Web验收完成。
+
+### 按用户要求暂停：跨功能切换时J-Scope缺首DEF
+
+用户已明确要求先记下、不继续分析。状态为**DEFERRED，未验收通过**。在RTT/ETM/J-Scope连续切换时，
+8×u32、1kHz采样偶发缺少DEF seq0：失败原始81,408字节中159包全部是DATA seq1～159；
+对照61,440字节是DEF seq0加DATA1～119。页面在解析前保存raw，因此不是单纯界面未画出来。
+只等1.5秒后按本地变量表解码不能算恢复成功。
+
+特别纠正计数边界：此Zynq固件的HSS metrics word5和STAT usbErr字段未实现，回0不能排除USB侧丢弃。
+已提出旧异步读消费首包、发送退役/publish边界等假设，尚未定根因。不把这些猜测写成结论。
+未验收的readEpoch实验已从运行源码撤出，补丁和测试原样归档，后续可继续研究；未修改PL/PS或Flash。
+[完整复现、对照与实验归档](validation/combined-etm-web-20261031/deferred-hss/issue.json)。
+
+`validate no-flash --skip-scope`可显式跳过这一项，报告仍标DEFERRED；不能因此宣称全套通过。
+接下来工作转为火焰图Web导出和全项目Web/非Web CLI覆盖审计。

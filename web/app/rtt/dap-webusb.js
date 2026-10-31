@@ -444,7 +444,7 @@ export class WebUsbDapProbe {
     return f;
   }
 
-  /** 一条命令的"写 + 读"，不做陈旧包重试（只给封包探测用）*/
+  /** 封包探测只写一次；读取时跳过前一会话的异命令回包，不重放命令。 */
   async _ctrlRaw(cmd, payload, timeout = 1500){
     timeout = Math.min(timeout, this._operationBudget?.check('探测 USB 封包') ?? timeout);
     const n = 1 + (payload ? payload.length : 0);
@@ -452,11 +452,16 @@ export class WebUsbDapProbe {
     req[0] = cmd;
     if (payload) req.set(payload, 1);
     await withTimeout(this.device.transferOut(this.epOut, req), timeout, 'USB 写');
-    const r = await withTimeout(this.device.transferIn(this.epIn, this.pkt), timeout, 'USB 读');
-    if (!r.data || !r.data.byteLength) throw new Error('收到空包');
-    const res = new Uint8Array(r.data.buffer, r.data.byteOffset, r.data.byteLength);
-    if (res[0] !== cmd) throw new Error(`响应回显 0x${res[0].toString(16)} ≠ 命令 0x${cmd.toString(16)}`);
-    return res.subarray(1);
+    const deadline=performance.now()+timeout;
+    for(let i=0;i<32;i++){
+      const left=deadline-performance.now();if(left<=0)break;
+      const r=await withTimeout(this.device.transferIn(this.epIn,this.pkt),left,'USB 读');
+      if(!r.data?.byteLength)continue;
+      const res=new Uint8Array(r.data.buffer,r.data.byteOffset,r.data.byteLength);
+      if(res[0]!==cmd){this.stale=(this.stale||0)+1;continue;}
+      return res.subarray(1);
+    }
+    throw new Error(`封包探测未收到命令 0x${cmd.toString(16)} 的匹配响应；已跳过陈旧回包，未重放命令`);
   }
 
   async _ctrl(cmd, payload, { deadline = Infinity } = {}){

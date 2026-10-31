@@ -1,0 +1,111 @@
+{
+  "status": {
+    "awaitingDefinition": false,
+    "benchUs": 85.6873125,
+    "blob": {
+      "delay": 0,
+      "name": "0x5a594e51",
+      "offset": 1515802193
+    },
+    "capacity": 5564,
+    "captureFlags": 160,
+    "connectErr": null,
+    "dapYields": 0,
+    "definitionReceived": true,
+    "elf": null,
+    "lod": false,
+    "lost": 0,
+    "lostGap": 0,
+    "lostProbe": 0,
+    "lostUsb": 0,
+    "metricsError": null,
+    "mockVars": [
+      "mock0.f32",
+      "mock1.f32",
+      "mock2.i32",
+      "mock3.u16",
+      "mock4.i16",
+      "mock5.u8",
+      "mock6.i8",
+      "mock7.f64"
+    ],
+    "mode": "real",
+    "packets": 120,
+    "plan": {
+      "estHz": 39507,
+      "estUs": 25.31,
+      "frameBytes": 32,
+      "spans": 1
+    },
+    "probeMetrics": {
+      "bytes": 62976,
+      "errors": 0,
+      "flags": 32,
+      "hz": 24000000,
+      "periodTicks": 24000,
+      "produced": 1327,
+      "skipped": 0,
+      "tick": 3369759838,
+      "tx": 123,
+      "usb": 0,
+      "yields": 0
+    },
+    "rateHz": 1000,
+    "raw": 24,
+    "readErrors": 0,
+    "resyncs": 0,
+    "running": false,
+    "samples": 1309,
+    "stalePackets": 0,
+    "state": "已停止（finite no-flash acceptance）：1309 个样本 / 1.308 s，跳拍 0 / USB 丢样本 0 / 读错 0 / 包缺口 0",
+    "supportsMetrics": true,
+    "transport": {
+      "bytes": 61440,
+      "chunks": 24,
+      "errors": 0,
+      "lastError": null,
+      "running": false
+    },
+    "trigger": {
+      "hit": -1,
+      "hits": 0,
+      "marker": false,
+      "mode": 0
+    },
+    "varCount": 8,
+    "vars": [
+      "g_trace.magic:u32@0x2000c000",
+      "g_trace.sysclk_hz:u32@0x2000c004",
+      "g_trace.ready:u32@0x2000c008",
+      "g_trace.loops:u32@0x2000c00c",
+      "g_trace.marks:u32@0x2000c010",
+      "g_trace.cyc_last:u32@0x2000c014",
+      "g_trace.cyc_delta:u32@0x2000c018",
+      "g_trace.usb_rx:u32@0x2000c01c"
+    ],
+    "view": {
+      "end": 1309,
+      "start": 0
+    }
+  },
+  "endpoint": "本地服务 · CMSIS-DAP · EP 0x87 · 65536 B/读 × 1",
+  "liveClocks": {
+    "FCLK_Hz": 119999998,
+    "cfg": "0x300d6a11",
+    "waveform": {
+      "SWCLK_Hz": 999999.9833333333,
+      "half_period_fclk": 60,
+      "short_high": true,
+      "intended_high_ns": 8.333333472222225
+    },
+    "JTAG_sampling_mode": 0,
+    "RISC_V_SBA_enabled": false,
+    "actual_link_Hz": 999999.9833333333,
+    "clock_observation": "PS JTAG register read; no DAP command during stream"
+  },
+  "rows": 1309,
+  "fieldCount": 8,
+  "startupSeconds": 1.7999991541728377e-06,
+  "constantsAndMonotonicLoopVerified": true,
+  "sha256": "24fa61b0d21279899fe6c3aaec5d1408026a70fca50eaa1eccd22f9404f0338c"
+}

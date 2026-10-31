@@ -1,0 +1,87 @@
+import base64
+import json
+from pathlib import Path
+import struct
+import sys
+import tempfile
+import threading
+import unittest
+from unittest.mock import patch
+import usb.core
+sys.path.insert(0,str(Path(__file__).resolve().parents[2]/'etm-service/tools'))
+from native_probe import NativeProbe
+
+
+def packet(kind,seq):
+    data=bytearray(512);struct.pack_into('<HBBI',data,0,0x4a53,1,kind,seq);return bytes(data)
+
+class Device:
+    def __init__(self):self.queue=[];self.calls=0
+    def read(self,*args,**kwargs):
+        self.calls+=1
+        if self.queue:return self.queue.pop(0)
+        raise usb.core.USBTimeoutError('quiet')
+
+class HssEpochTests(unittest.TestCase):
+    def setUp(self):
+        self.folder=tempfile.TemporaryDirectory();self.addCleanup(self.folder.cleanup)
+        token=Path(self.folder.name)/'token';token.write_text('c'*64)
+        self.proxy=NativeProbe(type('Backend',(),{'jobs':{},'ACTIVE':(), 'lock':threading.RLock()})(),token)
+        self.device=Device();self.proxy.usb=self.device;self.proxy.usb_owner='a'*32;self.proxy.usb_epoch='usb-epoch'
+        self.proxy.claimed={0};self.proxy.hss_stopping=True
+
+    def call(self,action,**extra):
+        return self.proxy.usb_call(action,{'owner':'a'*32,'resourceEpoch':'usb-epoch','endpoint':0x87,**extra})
+
+    def test_stopped_previous_definition_is_drained_before_new_token(self):
+        self.device.queue=[packet(1,0),packet(2,1)]
+        session=self.call('begin-read')
+        self.assertEqual(session['discardedPackets'],2)
+        self.assertEqual(session['discardedFirst'],[[1,0]])
+        self.device.queue=[packet(1,0)]
+        reply=self.call('read',readEpoch=session['readEpoch'],length=512)
+        self.assertEqual(base64.b64decode(reply['data']),packet(1,0))
+        self.assertEqual(reply['readEpoch'],session['readEpoch'])
+
+    def test_late_old_read_and_end_do_not_consume_or_cancel_new_session(self):
+        old=self.call('begin-read',cleanup=True)['readEpoch'];new=self.call('begin-read')['readEpoch']
+        self.device.queue=[packet(1,0)];before=self.device.calls
+        with self.assertRaisesRegex(ValueError,'未读取硬件'):self.call('read',readEpoch=old,length=512)
+        self.assertEqual(self.device.calls,before)
+        self.assertTrue(self.call('end-read',readEpoch=old)['superseded'])
+        self.assertEqual(self.proxy.read_epochs[0x87],new)
+        self.assertEqual(base64.b64decode(self.call('read',readEpoch=new,length=512)['data']),packet(1,0))
+
+    def test_normal_begin_requires_confirmed_stop_but_cleanup_can_drain(self):
+        self.proxy.hss_stopping=False
+        with self.assertRaisesRegex(ValueError,'STOP尚未确认'):self.call('begin-read')
+        self.assertEqual(self.device.calls,0)
+        self.assertTrue(self.call('begin-read',cleanup=True)['cleanup'])
+
+    def test_begin_waits_for_old_hardware_read_to_leave_the_usb_lock(self):
+        old=self.call('begin-read',cleanup=True)['readEpoch']
+        entered=threading.Event();release=threading.Event();begun=threading.Event();results={}
+        original=self.device.read
+        def blocked(*args,**kwargs):
+            if not entered.is_set():entered.set();release.wait(2);return packet(2,99)
+            return original(*args,**kwargs)
+        self.device.read=blocked
+        reader=threading.Thread(target=lambda:results.update(old=self.call('read',readEpoch=old,length=512)))
+        starter=threading.Thread(target=lambda:(results.update(new=self.call('begin-read')),begun.set()))
+        try:
+            reader.start();self.assertTrue(entered.wait(1));starter.start()
+            self.assertFalse(begun.wait(.05))
+        finally:
+            release.set();reader.join(2);starter.join(2)
+        self.assertTrue(begun.is_set())
+        self.assertEqual(results['old']['readEpoch'],old)
+        self.assertNotEqual(results['new']['readEpoch'],old)
+
+    def test_old_usb_resource_epoch_cannot_read_after_reopen(self):
+        old=self.call('begin-read',cleanup=True)['readEpoch']
+        self.proxy.usb_epoch='new-usb';self.proxy.read_epochs={}
+        before=self.device.calls
+        with self.assertRaisesRegex(ValueError,'旧会话'):self.call('read',readEpoch=old,length=512)
+        self.assertEqual(before,self.device.calls)
+
+if __name__=='__main__':unittest.main()

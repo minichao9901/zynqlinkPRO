@@ -1,0 +1,398 @@
+--- a/etm-service/tools/native_probe.py
++++ b/etm-service/tools/native_probe.py
+@@ -7,16 +7,21 @@
+ import hashlib
+ import hmac
+ import json
++import os
+ import re
+ import secrets
+ import threading
+ import time
+ from pathlib import Path
+-from flask import abort, jsonify, request
++from flask import abort, jsonify, request, has_request_context
+ 
+ 
+ def drain_dap_replies(device,quiet_ms=80,limit=32):
+-    """Require a bounded quiet interval before a different DAP client starts."""
++    """Require a bounded quiet interval before a different DAP client starts.
++
++    A previous full DAP request can still be processing after its handle closes;
++    a single 10ms empty read did not prove that its reply had finished.
++    """
+     import usb.core
+     stale=0
+     for _ in range(limit):
+@@ -42,11 +47,22 @@
+         self.usb_lock = threading.RLock()
+         self.hid_lock = threading.RLock()
+         self.port_lock = threading.RLock()
+-        self.hss_stopping = True
++        self.hss_stopping = None
++        self.read_epochs={}
++        self.audit_path=Path(os.environ['ZYNQ_NATIVE_IO_AUDIT']) if os.environ.get('ZYNQ_NATIVE_IO_AUDIT') else None
++        self.audit_lock=threading.Lock()
++        if self.audit_path:self.audit_path.parent.mkdir(parents=True,exist_ok=True)
+         self.delivery_lock = threading.Condition()
+         self.delivery_seen = set()
+         self.delivery_cache = {}
+         self.delivery_replays = 0
++
++    def audit(self,event,**value):
++        if not self.audit_path:return
++        row={'event':event,'time':time.perf_counter(),'wall':time.time(),
++             'delivery':request.headers.get('X-Trace-Delivery') if has_request_context() else None,**value}
++        with self.audit_lock:
++            with self.audit_path.open('a',encoding='utf8') as output:output.write(json.dumps(row,separators=(',',':'))+'\n')
+ 
+     def deliver(self, delivery, body, execute):
+         """An HTTP redelivery must never repeat a USB write/read/serial action."""
+@@ -120,7 +136,7 @@
+                 row['alternate'] = alternate
+         return {'vendorId': device.idVendor, 'productId': device.idProduct,
+                 'productName': device.product, 'serialNumber': device.serial_number,
+-                'configuration': {'configurationValue': config.bConfigurationValue, 'interfaces': list(interfaces.values())}}
++                'configuration': {'configurationValue': config.bConfigurationValue, 'interfaces': list(interfaces.values())},'auditEnabled':bool(self.audit_path)}
+ 
+     @staticmethod
+     def find_usb():
+@@ -165,22 +181,22 @@
+                 if self.usb is None:
+                     self.usb = self.find_usb()
+                     self.usb_owner = owner
+-                self.usb_epoch=secrets.token_hex(16)
++                self.usb_epoch=secrets.token_hex(16);self.read_epochs={}
+                 return {**self.descriptor(self.usb),'resourceEpoch':self.usb_epoch}
+             if self.usb is None or owner != self.usb_owner:
+-                if action == 'close':
++                if action in ('close','end-read'):
+                     return {'closed': True}
+                 raise ValueError('USB会话已关闭或已更换')
+             device = self.usb
+             if value.get('resourceEpoch') is not None and value['resourceEpoch'] != self.usb_epoch:
+-                if action == 'close':return {'closed':True,'superseded':True}
++                if action in ('close','end-read'):return {'closed':True,'superseded':True}
+                 raise ValueError('USB通路已重新打开；拒绝旧会话操作')
+             if action == 'close':
+                 for interface in list(self.claimed):
+                     usb.util.release_interface(device, interface)
+                     self.claimed.remove(interface)
+                 usb.util.dispose_resources(device)
+-                self.usb = self.usb_owner = None
++                self.usb = self.usb_owner = None;self.read_epochs={}
+                 return {'closed': True}
+             if self.busy():
+                 raise ValueError('ETM采集期间禁止竞争USB通路')
+@@ -212,6 +228,7 @@
+                 return {'ok': True}
+             if action == 'reset':
+                 device.reset()
++                self.read_epochs={ep:secrets.token_hex(16) for ep in self.read_epochs}
+                 return {'ok': True}
+             ep = value.get('endpoint')
+             if action == 'clear':
+@@ -221,6 +238,30 @@
+                 return {'ok': True}
+             if 0 not in self.claimed:
+                 raise ValueError('请先认领USB接口0')
++            if action in ('begin-read','end-read'):
++                if ep!=0x87:raise ValueError('只支持HSS数据面读分代')
++                if action=='begin-read':
++                    with self.hid_lock:
++                        cleanup=value.get('cleanup') is True
++                        if not cleanup and self.hss_stopping is not True:raise ValueError('HSS STOP尚未确认，不创建新采样读会话')
++                        token=secrets.token_hex(16);self.read_epochs[ep]=token
++                        discarded=[]
++                        if not cleanup:
++                            deadline=time.monotonic()+1
++                            for _ in range(2048):
++                                if time.monotonic()>=deadline:raise ValueError('旧HSS数据未静默；拒绝开始新轮')
++                                try:chunk=bytes(device.read(ep,512,timeout=20))
++                                except usb.core.USBTimeoutError:break
++                                if len(chunk)>=8 and chunk[:2]==b'\x53\x4a':discarded.append([chunk[3],int.from_bytes(chunk[4:8],'little')])
++                            else:raise ValueError('旧HSS队列超过排空上限')
++                        self.audit('read-session-begin',owner=owner,epoch=self.usb_epoch,readEpoch=token,cleanup=cleanup,discarded=discarded)
++                        return {'readEpoch':token,'cleanup':cleanup,'discardedPackets':len(discarded),
++                                'discardedFirst':discarded[:1],'discardedLast':discarded[-1:]}
++                token=value.get('readEpoch')
++                if token!=self.read_epochs.get(ep):return {'superseded':True}
++                self.read_epochs[ep]=secrets.token_hex(16)
++                self.audit('read-session-end',owner=owner,epoch=self.usb_epoch,readEpoch=token)
++                return {'ended':True}
+             if action == 'write':
+                 if ep != 2:
+                     raise ValueError('仅允许DAP OUT端点2')
+@@ -232,6 +273,11 @@
+                 length = value.get('length', 4096)
+                 if not isinstance(length, int) or not 1 <= length <= 65536:
+                     raise ValueError('无效读取长度')
++                read_epoch=value.get('readEpoch')
++                if ep==0x87 and self.read_epochs.get(ep) is not None and read_epoch!=self.read_epochs[ep]:
++                    self.audit('read-rejected',owner=owner,epoch=self.usb_epoch,readEpoch=read_epoch,context=value.get('context'))
++                    raise ValueError('旧HSS读会话已失效；未读取硬件')
++                self.audit('read-enter',owner=owner,epoch=self.usb_epoch,readEpoch=read_epoch,endpoint=ep,context=value.get('context'))
+                 data = bytearray()
+                 timeout = 2000 if value.get('commandPending') else 25
+                 if ep == 0x81:
+@@ -251,7 +297,14 @@
+                         data.extend(chunk)
+                         if len(chunk) < 512:
+                             break
+-                return {'data': self.encode(data), 'timedOut': not data}
++                headers=[]
++                if self.audit_path and ep==0x87:
++                    for offset in range(0,len(data)-15,512):
++                        if data[offset:offset+2]==b'\x53\x4a':headers.append([data[offset+3],int.from_bytes(data[offset+4:offset+8],'little')])
++                self.audit('read-return',owner=owner,epoch=self.usb_epoch,readEpoch=read_epoch,endpoint=ep,length=len(data),headers=headers,context=value.get('context'))
++                result={'data':self.encode(data),'timedOut':not data,**({'readEpoch':read_epoch} if ep==0x87 else {})}
++                if self.audit_path:result['audit']={'delivery':request.headers.get('X-Trace-Delivery') if has_request_context() else None,'headers':headers}
++                return result
+             raise ValueError('未知USB动作')
+ 
+     def hid_call(self, action, value):
+@@ -298,11 +351,15 @@
+                 data = self.blob(value.get('data', ''), 63)
+                 if value.get('reportId') != 1 or len(data) != 63:
+                     raise ValueError('HID要求report 1 + 63-byte payload')
++                if data[1:3]==b'\x32\x01':self.hss_stopping=False
++                self.audit('hid-send',owner=owner,epoch=self.hid_epoch,command=data[1],action=data[2],prefix=data[:24].hex())
+                 self.hid.write(bytes([1]) + data)
+                 deadline = time.monotonic() + 2
+                 while time.monotonic() < deadline:
+                     reply = bytes(self.hid.read(64, 100))
+                     if len(reply) == 64 and reply[0] == 2 and reply[2] == data[1]:
++                        if data[1:3]==b'\x32\x00' and reply[3]==0:self.hss_stopping=True
++                        self.audit('hid-reply',owner=owner,epoch=self.hid_epoch,command=data[1],action=data[2],prefix=reply[:24].hex())
+                         return {'reportId': 2, 'data': self.encode(reply[1:])}
+                 raise TimeoutError('本地HID响应超时；未重放命令')
+             raise ValueError('未知HID动作')
+@@ -394,6 +451,7 @@
+         value = request.get_json()
+         if not isinstance(value, dict) or (request.content_length or 0) > 400000:
+             abort(400)
++        proxy.audit('request',kind=kind,action=action,owner=value.get('owner'),epoch=value.get('resourceEpoch'),endpoint=value.get('endpoint'),readEpoch=value.get('readEpoch'),context=value.get('context'))
+         def execute():
+             handlers = {'usb': proxy.usb_call, 'hid': proxy.hid_call, 'serial': proxy.serial_call}
+             if kind not in handlers:
+--- a/web/app/core/native-probe.js
++++ b/web/app/core/native-probe.js
+@@ -73,7 +73,14 @@
+     if(data.byteLength)this.commandPending++;
+     return {status:'ok',bytesWritten:result.bytesWritten};
+   }
+-  transferIn(endpoint,length){
++  async beginReadSession(endpoint,{cleanup=false}={}){
++    const result=await this.rpc('begin-read',{endpoint:endpoint|128,cleanup});
++    if(!/^[0-9a-f]{32}$/.test(result.readEpoch||''))throw Error('HSS读会话未确认');
++    this.lastReadSession=result;return result.readEpoch;
++  }
++  async endReadSession(endpoint,readEpoch){return this.rpc('end-read',{endpoint:endpoint|128,readEpoch});}
++  transferIn(endpoint,length,context={}){
++    context={...context};
+     // Keep packet order across HTTP response scheduling. Native HSS uses one
+     // batched reader instead of concurrent browser USB URBs.
+     const previous=this.reads.get(endpoint)||Promise.resolve();
+@@ -81,11 +88,13 @@
+     const next=previous.catch(()=>{}).then(async()=>{
+       if(epoch!==this.resourceEpoch)throw Error('USB会话已重新打开；旧读请求已取消');
+       const pending=endpoint===1&&this.commandPending>0;
+-      const result=await this.rpc('read',{endpoint:endpoint|128,length,commandPending:pending});
++      const result=await this.rpc('read',{endpoint:endpoint|128,length,commandPending:pending,readEpoch:context.readEpoch,context});
++      if(this.auditEnabled)console.info('[native-read]',JSON.stringify({time:Date.now(),context,createdEpoch:epoch,currentEpoch:this.resourceEpoch,audit:result.audit,length:decoded(result.data).length}));
+       if(epoch!==this.resourceEpoch)throw Error('USB会话已重新打开；旧读回包已丢弃');
++      if(context.readEpoch&&result.readEpoch!==context.readEpoch)throw Error('HSS读回包会话不匹配');
+       if(pending)this.commandPending--;
+       if(pending&&result.timedOut)throw Error('本地DAP响应超时；未重放命令');
+-      const bytes=decoded(result.data);return {status:'ok',data:new DataView(bytes.buffer)};
++      const bytes=decoded(result.data);return {status:'ok',data:new DataView(bytes.buffer),...(result.audit?{audit:result.audit}:{} )};
+     });
+     this.reads.set(endpoint,next);return next;
+   }
+--- a/web/app/scope/transport.js
++++ b/web/app/scope/transport.js
+@@ -45,6 +45,7 @@
+     this.inFlight = opts.inFlight ?? 3;          // 同时在飞的读
+     this._adaptiveReadAhead = opts.inFlight == null && opts.chunkBytes == null;
+     if(device.nativeService){this.chunkBytes=65536;this.inFlight=1;this._adaptiveReadAhead=false;}
++    this._auditId='scope-'+Math.random().toString(16).slice(2);this._readSerial=0;this._readEpoch=null;
+     this.running = false;
+     this.workers = [];
+     this._pendingWorkers = pendingByDevice.get(device) || new Set();
+@@ -212,18 +213,21 @@
+     return true;
+   }
+ 
+-  async start(onChunk, onError){
++  async start(onChunk, onError,options={}){
+     if (this.running) return;
+     if (this._startPromise) return await this._startPromise;
+-    this._startPromise = this._start(onChunk, onError);
++    this._startPromise = this._start(onChunk, onError,options);
+     try { return await this._startPromise; }
+     finally { this._startPromise = null; }
+   }
+ 
+-  async _start(onChunk, onError){
++  async _start(onChunk, onError,options={}){
+     const generation = ++this.gen;
+     await this.prepare();
+     if (generation !== this.gen) return;
++    const readEpoch=await this.device.beginReadSession?.(this.ep,options);
++    if(generation!==this.gen){if(readEpoch)await this.device.endReadSession?.(this.ep,readEpoch);return;}
++    this._readEpoch=readEpoch;this.readSessionInfo=this.device.lastReadSession?{...this.device.lastReadSession}:null;
+     this.running = true;
+     this._fatal = null;
+     this.onError = typeof onError === 'function' ? onError : null;
+@@ -235,7 +239,7 @@
+     // completion order is not necessarily stream order on Windows under load.
+     this._nativeInFlight = 0;
+     this.workers = Array.from({ length: 1 }, () => {
+-      const worker = this._worker(onChunk, g);
++      const worker = this._worker(onChunk, g,readEpoch);
+       this._pendingWorkers.add(worker);
+       worker.then(() => this._pendingWorkers.delete(worker), () => this._pendingWorkers.delete(worker));
+       return worker;
+@@ -251,13 +255,13 @@
+     try { this.onError?.(new Error(why)); } catch { /* 页面自己出错不该拖垮这里 */ }
+   }
+ 
+-  async _worker(onChunk, g){
++  async _worker(onChunk, g,readEpoch){
+     let stalls = 0;
+     // Attach rejection handling immediately: a rearmed read can reject while decoding.
+     const issue = () => {
+       this._nativeInFlight++;
+       try {
+-        return Promise.resolve(this.device.transferIn(this.ep, this.chunkBytes))
++        return Promise.resolve(this.device.transferIn(this.ep,this.chunkBytes,{consumer:this._auditId,generation:g,read:++this._readSerial,readEpoch}))
+           .then(result => { this._nativeInFlight--; return { result }; },
+             error => { this._nativeInFlight--; return { error }; });
+       } catch (error){ this._nativeInFlight--; return Promise.resolve({ error }); }
+@@ -284,6 +288,7 @@
+         }
+         break;
+       }
++      if(this.device.auditEnabled)console.info('[scope-read]',JSON.stringify({time:Date.now(),consumer:this._auditId,createdGeneration:g,currentGeneration:this.gen,running:this.running,audit:r.audit,length:r.data?.byteLength}));
+       if (!this.running || g !== this.gen) break;     // 收尾 / 换轮：这一条读到了也不再用
+       if (r.status === 'ok' && r.data?.byteLength){
+         stalls = 0;
+@@ -338,8 +343,9 @@
+   /** 停止收流：等在飞的读全部回来（最多 800 ms），**不要**让它们挂在那儿 */
+   async stop(){
+     this.gen++;                    // 代号一变，超时残留在飞的那条读回来后就自行作废
+-    if (!this.workers.length){ this.stalledInFlight = 0; return; }
+-    this.running = false;
++    const retiringReadEpoch=this._readEpoch;this._readEpoch=null;
++    this.running = false;
++    if (!this.workers.length){this.stalledInFlight=0;if(retiringReadEpoch)await this.device.endReadSession?.(this.ep,retiringReadEpoch);return;}
+     let settled = 0;
+     const all = this.workers.map(p => p.then(() => { settled++; }, () => { settled++; }));
+     await Promise.race([Promise.allSettled(all), sleep(800)]);
+@@ -347,6 +353,7 @@
+     /** 800 ms 还没回来的在飞读有几笔（WebUSB 取消不掉，只能如实记账；页面可据此提示）*/
+     this.stalledInFlight = settled === all.length ? 0 : Math.max(1, this._nativeInFlight || 0);
+     if (this.stalledInFlight) dirtyDevices.add(this.device);
++    if(retiringReadEpoch)await this.device.endReadSession?.(this.ep,retiringReadEpoch);
+   }
+ 
+   async close(){
+--- a/web/app/scope/view.js
++++ b/web/app/scope/view.js
+@@ -929,6 +929,13 @@
+       this.transport.configureReadAhead?.(wireBps);
+       await this.transport.prepare?.();
+       if (!this._captureAlive(g)) return;
++      if(this.transport.device?.nativeService){
++        // Retire an unknown/previous producer before the new CONFIG/START. The
++        // temporary consumer drains STOP backpressure; it never enters raw/data.
++        await this.transport.start(()=>{},e=>{throw e;},{cleanup:true});
++        await this._stopData();
++        if(!this._captureAlive(g))return;
++      }
+       const clockKhz = Number($('sc-clock').value) || 0;
+       /**
+        * flags：bit0 允许 60 MHz；bit4 SWD 空闲拍压 0；bit5 采样时暂停 CDC/串口桥；
+@@ -968,7 +975,7 @@
+        *    早就被丢掉**，于是"等 DEF 当起跑线"的守卫永远等不到、新采集一个样本都没有。
+        *    现在先 start() 读起来（顺便把上一轮的残留吃掉），再发 START。
+        */
+-      await this.transport.start(chunk => { if (this._captureAlive(g)) this.onChunk(chunk); }, e => { if (this._captureAlive(g)) this._onDataPlaneDead(e); });
++      await this.transport.start(chunk => {if(this.transport.device?.auditEnabled)console.info('[scope-chunk]',JSON.stringify({time:Date.now(),captureGeneration:g,currentGeneration:this._captureGen,alive:this._captureAlive(g),length:chunk.length,kind:chunk[3],seq:chunk.length>=8?new DataView(chunk.buffer,chunk.byteOffset,chunk.byteLength).getUint32(4,true):null}));if (this._captureAlive(g)) this.onChunk(chunk); }, e => { if (this._captureAlive(g)) this._onDataPlaneDead(e); });
+       if (!this._captureAlive(g)) return;
+       if (!this.transport.running) throw new Error('数据端点未能启动');
+       this._startWatchdog();          // 采集中途断流的兜底（见 _onDataPlaneDead 的说明）
+@@ -1059,7 +1066,7 @@
+     if (!this._capturing && !this.running) return;
+     const msg = e?.message || String(e);
+     void this.stop('数据流中断：' + msg).then(() => {
+-      this.setStatusText(`采样中断：${msg} —— 探针掉线了？拔插一次，或改用假探针`, 'err');
++      this.setStatusText(`采样中断：${msg}`, 'err');
+     }).catch(error => this.setStatusText(`采样中断：${msg}；${error.message}`, 'err'));
+   }
+ 
+@@ -1100,7 +1107,7 @@
+     this.state = why ? `已停止（${why}）` : '已停止';
+     this.setStatusText(`已停止${why ? `（${why}）` : ''}：${st?.count || 0} 个样本` +
+       (spanUs ? ` / ${fmtTime(spanUs)}` : '') +
+-      `，跳拍 ${this.probeDropped || 0} / USB 丢样本 ${this.usbDrop || 0} / 读错 ${this.readErrors || 0} / 包缺口 ${this.lost}`,
++      `，跳拍 ${this.probeDropped || 0} / USB 丢样本 ${this.transport?.epAddr===0x87?'未提供':this.usbDrop||0} / 读错 ${this.readErrors || 0} / 包缺口 ${this.lost}`,
+       why === '缓冲已满' || this.lost || this.probeDropped || this.usbDrop || this.readErrors ? 'warn' : 'ok');
+     this.syncButtons();
+     this._needDraw = true;
+@@ -1446,6 +1453,7 @@
+       const res = await this.hidXfer(P.HID_CMD, Uint8Array.of(P.ACT.METRICS));
+       if (generation !== this._captureGen) return;
+       const m = P.parseScopeMetrics(res.subarray(3));
++      m.usbCounterAvailable=this.transport?.epAddr!==0x87;if(!m.usbCounterAvailable)m.usb=null;
+       this.probeMetrics = m; this.probeDropped = m.skipped; this.usbDrop = m.usb;
+       this._metricsAt = Date.now();
+       this.probeYield = m.yields; this.readErrors = m.errors;
+@@ -1479,6 +1487,7 @@
+           // 兜底：1.5 s 还没等到 DEF 就别死等（万一固件版本不发 DEF），
+           // 退化成"按本地变量表解码"，并在状态栏说清楚 —— 而不是一个样本都没有还不解释
+           if (this._awaitDefSince && performance.now() - this._awaitDefSince > 1500){
++            if(this.transport?.epAddr===0x87){this._onDataPlaneDead(new Error('未收到本轮DEF定义，拒绝按本地变量表解码'));return;}
+             this._awaitDef = false;
+             this.setStatusText(`没等到探针的 DEF 包（已丢 ${this.stalePackets} 个残留包），` +
+               '按本地变量表解码 —— 波形若有错位请检查固件版本', 'warn');
+@@ -1520,8 +1529,10 @@
+            *    宁可报错停在这儿 —— 数据错了比没数据更坏。
+            */
+           const want = this.store?.vars.length || 0;
+-          if (want && d.vars.length !== want){
+-            this.defMismatch = `探针回报 ${d.vars.length} 个变量，本地缓冲是 ${want} 个 —— 解码已暂停（配置没生效？）`;
++          const requested=this.store?.vars||[];
++          const sameDefinition=d.vars.length===want&&d.vars.every((v,i)=>v.addr===requested[i].addr&&v.size===requested[i].size&&v.scalar===requested[i].scalar);
++          if (want && !sameDefinition){
++            this.defMismatch = `探针DEF与本轮变量地址、类型或宽度不符（${d.vars.length}/${want}）—— 解码已暂停`;
+             this.setStatusText('⚠ ' + this.defMismatch, 'err');
+           } else {
+             this.defMismatch = null;
+@@ -1789,7 +1800,7 @@
+     const lostProbe = this.probeDropped || 0;
+     const lostUsb = this.usbDrop || 0;
+     $('sc-lost').textContent = String(lostProbe);
+-    $('sc-lostusb').textContent = String(lostUsb);
++    $('sc-lostusb').textContent = this.transport?.epAddr===0x87?'未提供':String(lostUsb);
+     if ($('sc-readerr')) $('sc-readerr').textContent = String(this.readErrors || 0);
+     if ($('sc-yields')) $('sc-yields').textContent = String(this.probeYield || 0);
+     $('sc-gap').textContent = String(this.lost);
+@@ -1868,7 +1879,8 @@
+       packets: this.packets,
+       lost: this.lost + (this.probeDropped || 0) + (this.usbDrop || 0) + (st?.overrun || 0),
+       lostProbe: this.probeDropped || 0,          // 探针跳拍（探针 CPU 的账）
+-      lostUsb: this.usbDrop || 0,                 // 无缓冲丢样本（主机排空的账）
++      lostUsb: this.transport?.epAddr===0x87?null:this.usbDrop||0,
++      usbCounterAvailable: this.transport?.epAddr!==0x87,                 // 无缓冲丢样本（主机排空的账）
+       readErrors: this.readErrors || 0,
+       dapYields: this.probeYield || 0,
+       metricsError: this.metricsError || null,
+@@ -1883,6 +1895,7 @@
+       lod: !!this.usedLod,
+       resyncs: this.stream.resyncs,
+       definitionReceived: Array.isArray(this.defVars),
++      definitionMatches: Array.isArray(this.defVars)&&!this.defMismatch,
+       awaitingDefinition: !!this._awaitDef,
+       stalePackets: this.stalePackets || 0,
+       captureFlags: this._captureFlags || 0,

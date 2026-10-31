@@ -244,3 +244,19 @@ python -X utf8 toolbox.py probe-flash --verify-only
 备份辅助程序会暂时接管探针；`--backup-only`结束时CPU暂停，恢复使用需复位到已有有效镜像或重新加载配对。
 
 最终修复版已通过用户断电重上、自主QSPI启动、USB和完整OCM代码比对，以及SWD/JTAG60 SRAM读写；以后保持QSPI启动档，按复位键即可运行。
+
+
+## 不编程Flash的验收与工作台doctor
+
+```powershell
+python toolbox.py trace doctor --runtime R
+python toolbox.py --runtime R validate no-flash --rounds 2 --skip-scope --artifacts build/no-flash-001
+```
+
+`doctor --runtime`使用该工作台的真实URL与配对声明，核对本地bit/ELF哈希和原生配置；它不证明板上版本，
+仍需明确JTAG加载和OCM/时钟核对。省略runtime时保持独立ETM服务8766的检查方式。
+
+`no-flash`针对现有F103 CDC/ETM应用，按VID/PID寻找目标CDC与探针CDC，不运行QSPI或目标烧录。
+`--skip-scope`只显式跳过已登记的J-Scope连续切换问题，报告保留DEFERRED，不等于全套通过。
+原有`validate scope`和`validate rttcdc`会先烧录各自测试target，禁止编程Flash的会话不要运行这两项。
+已知问题及验收结论统一见[F103ZE统一文档](F103ZE-Web-CLI-ETM统一验收-20261031.md)。

@@ -15,6 +15,17 @@ from pathlib import Path
 from flask import abort, jsonify, request
 
 
+def drain_dap_replies(device,quiet_ms=80,limit=32):
+    """Require a bounded quiet interval before a different DAP client starts."""
+    import usb.core
+    stale=0
+    for _ in range(limit):
+        try:device.read(0x81,4096,timeout=quiet_ms)
+        except usb.core.USBTimeoutError:return stale
+        stale+=1
+    raise ValueError('DAP队列未静默，拒绝把旧响应交给新会话')
+
+
 class NativeProbe:
     def __init__(self, backend, token_file):
         self.backend = backend
@@ -185,18 +196,12 @@ class NativeProbe:
                 if action == 'claim' and 0 not in self.claimed:
                     usb.util.claim_interface(device, 0)
                     self.claimed.add(0)
-                    # Unlike browser USB, libusb provides a cancellable timeout.
-                    # Drain the preceding owner's replies before Web resync sends
-                    # its fixed eight Disconnects, otherwise a ninth old reply can
-                    # masquerade as the next DAP_Info response.
-                    stale = 0
-                    for _ in range(32):
-                        try:
-                            device.read(0x81, 4096, timeout=10)
-                            stale += 1
-                        except usb.core.USBTimeoutError:
-                            break
-                    return {'ok': True, 'staleDapReplies': stale}
+                    try:
+                        stale=drain_dap_replies(device)
+                    except BaseException:
+                        usb.util.release_interface(device,0);self.claimed.remove(0)
+                        raise
+                    return {'ok':True,'staleDapReplies':stale,'drainQuietMs':80}
                 elif action == 'release' and 0 in self.claimed:
                     usb.util.release_interface(device, 0)
                     self.claimed.remove(0)

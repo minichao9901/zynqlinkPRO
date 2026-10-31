@@ -1,0 +1,36 @@
+{
+  "status": "DEFERRED_BY_USER",
+  "doNotTreatAsPass": true,
+  "pair": {
+    "bitSha256": "1da17cb60175bbc2b7abd647770c7053bd7b7097e0d38aa819fb89678d564473",
+    "zynqElfSha256": "e977914c2924ab4cac13f4075de0a5108d1e2e8cf48966fb8fbdea3a358e0b2c"
+  },
+  "conditions": {
+    "FCLK_Hz": 119999998,
+    "sampleReference_Hz": 199999998,
+    "targetSysclk_Hz": 48000000,
+    "SWCLK_Hz": 999999.9833,
+    "requestedSampleHz": 1000,
+    "variables": 8,
+    "endpoint": "0x87"
+  },
+  "facts": [
+    "Failure raw:159 packets, DATA seq1..159, no DEF seq0",
+    "Control raw:DEF seq0 then DATA1..119",
+    "The page saves raw bytes before decoding, so the absent DEF is not a display-only error",
+    "PS metrics word5 and STAT usbErr field are unimplemented zeros; they do not prove absence of USB loss",
+    "A 1.5-second local-definition fallback must not be used as evidence that the new capture is valid"
+  ],
+  "unprovenHypotheses": [
+    "an older/cleanup USB read consumed the new DEF",
+    "PS TX completion/retirement or publish behavior"
+  ],
+  "experiment": {
+    "activeInRuntimeCode": false,
+    "patch": "unvalidated-read-epoch.patch",
+    "tests": "read-epoch-tests.py.txt",
+    "baseline": "host DAP drain retained; HSS protocol remains at known committed behavior plus read-only diagnostics"
+  },
+  "FlashProgrammed": false,
+  "sourceHead": "a6227d181ed4f0c51fa84c4bd0f414295bcd9b47"
+}

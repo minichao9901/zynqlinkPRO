@@ -25,3 +25,7 @@ etm-service/native/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
 etm-service/vendor/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
 etm-service/CMakeLists.txt -text whitespace=cr-at-eol
 etm-service/build-decoder.ps1 -text whitespace=cr-at-eol
+
+# J-Scope raw wire evidence and deferred patch snapshots are exact artifacts.
+docs/validation/combined-etm-web-20261031/deferred-hss/**/*.jsp binary
+docs/validation/combined-etm-web-20261031/deferred-hss/*.patch -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol

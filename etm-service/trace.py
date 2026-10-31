@@ -80,9 +80,24 @@ def zynq_status():
         return {'ready': False, 'message': str(error)}
 
 
-def doctor():
-    started = time.perf_counter()
-    checks = {}
+def doctor(argv=None):
+    import argparse
+    import hashlib
+    parser=argparse.ArgumentParser(prog="trace.py doctor")
+    parser.add_argument("--runtime",type=Path,help="toolbox工作台运行时目录；读取真实URL与配对声明")
+    parser.add_argument("--service-url",help="显式服务根URL，如http://127.0.0.1:8882/etm")
+    args=parser.parse_args(argv)
+    started=time.perf_counter()
+    try:
+        runtime=json.loads((args.runtime/"toolbox-runtime.json").read_text(encoding="utf8")) if args.runtime else None
+        if runtime is not None and (not isinstance(runtime,dict) or not isinstance(runtime.get('url'),str)):
+            raise ValueError('runtime requires a workbench URL')
+        service_url=args.service_url or (runtime["url"].rstrip("/")+"/etm" if runtime else "http://127.0.0.1:8766")
+    except (OSError,ValueError,TypeError) as error:
+        return fail('doctor','工作台runtime不可用：'+str(error),2,started)
+    checks={}
+    if runtime:checks['runtime']={'ok':runtime.get('protocol')=='workbench/1' and runtime.get('status')=='serving',
+                                  'protocol':runtime.get('protocol'),'status':runtime.get('status')}
     try:
         import usb.core  # noqa: F401
         import elftools  # noqa: F401
@@ -96,13 +111,25 @@ def doctor():
     checks['zynq'] = zynq_status()
     try:
         import urllib.request
-        with urllib.request.urlopen('http://127.0.0.1:8766/api/health', timeout=2) as response:
-            checks['service'] = {'ok': response.status == 200,
+        with urllib.request.urlopen(service_url.rstrip('/')+'/api/health', timeout=2) as response:
+            checks['service'] = {'ok': response.status == 200, 'url':service_url,
                                  'health': json.loads(response.read().decode('utf-8'))}
     except Exception as error:
-        checks['service'] = {'ok': False, 'error': str(error)}
+        checks['service'] = {'ok': False, 'url':service_url,'error': str(error)}
     checks['target_elf'] = {'ok': DEFAULT_TARGET_ELF.is_file(), 'path': str(DEFAULT_TARGET_ELF)}
-    checks['bit'] = {'ok': DEFAULT_BIT.is_file(), 'path': str(DEFAULT_BIT)}
+    if runtime:
+        pair=runtime.get('nativeCapture') or {};files={}
+        for kind in ['bit','elf']:
+            path=Path(pair[kind]) if pair.get(kind) else None
+            actual=hashlib.sha256(path.read_bytes()).hexdigest() if path and path.is_file() else None
+            expected=pair.get(kind+'Sha256')
+            files[kind]={'path':str(path) if path else None,'sha256':actual,'expectedSha256':expected,'ok':bool(actual and actual==expected)}
+        checks['pair']={'ok':all(f['ok'] for f in files.values()),'files':files,
+                        'identityScope':'runtime declaration and local file hashes; does not attest the loaded FPGA'}
+        profile=checks['service'].get('health',{}).get('decodeEngineProfile',{})
+        checks['nativeProfile']={'ok':profile.get('name')=='native' and profile.get('perInstructionJsonl') is False,'profile':profile}
+    else:
+        checks['bit'] = {'ok': DEFAULT_BIT.is_file(), 'path': str(DEFAULT_BIT)}
     ok = all(item.get('ok') for item in checks.values())
     payload = envelope('doctor', ok, {'checks': checks}, code=0 if ok else 3, started=started)
     if not ok:
@@ -258,7 +285,7 @@ def main(argv=None):
         return 0
     command = argv[0]
     if command == 'doctor':
-        return doctor()
+        return doctor(argv[1:])
     if command == 'capture':
         return capture(argv[1:])
     if command in ('samples', 'sweep'):
