@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "E:\zynqlinkPRO_orbtrace_opt\tools\test_probe_board.py", line 307, in <module>
+    main()
+    ~~~~^^
+  File "E:\zynqlinkPRO_orbtrace_opt\tools\test_probe_board.py", line 282, in main
+    report['rtt'] = test_rtt(probe, mem, base, port, args.speed_hz)
+                    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\zynqlinkPRO_orbtrace_opt\tools\test_probe_board.py", line 129, in test_rtt
+    assert rc in (0,-3), (rc,found)
+           ^^^^^^^^^^^^
+AssertionError: (-2, (65537, 0, 0, 0, 0, 1, 0, 0, 0, 0, 4294967294, 838861824))

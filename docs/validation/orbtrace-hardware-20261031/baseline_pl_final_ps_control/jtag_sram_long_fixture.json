@@ -1,0 +1,40 @@
+{
+  "command": [
+    "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "-X",
+    "utf8",
+    "tools/benchmark_sram_matrix.py",
+    "--transport",
+    "jtag",
+    "--speeds",
+    "50000000",
+    "--seconds",
+    "2",
+    "--repeats",
+    "5",
+    "--bit",
+    "E:\\zynqlinkPRO_orbtrace_opt\\prebuilt\\20261031_baseline_pl_compact_ps_control\\probe.bit",
+    "--elf",
+    "E:\\zynqlinkPRO_orbtrace_opt\\prebuilt\\20261031_baseline_pl_compact_ps_control\\probe.elf",
+    "--output",
+    "E:\\zynqlinkPRO_orbtrace_opt\\docs\\validation\\orbtrace-hardware-20261031\\baseline_pl_final_ps_control\\jtag_sram_long.json"
+  ],
+  "restore_swj_from_target_source": 2,
+  "initial_DHCSR": "0x1010001",
+  "APB2ENR": "0x404d",
+  "MAPR_readable_bits": "0x0",
+  "target_id": "0x10036414",
+  "RCC_before": [
+    50548355,
+    5309450
+  ],
+  "JTAG_IDCODE": "0x3ba00477",
+  "returncode": 0,
+  "MAPR_readable_restore_match": true,
+  "APB2ENR_restore_match": true,
+  "RCC_after": [
+    50548355,
+    5309450
+  ],
+  "run_halt_restore_match": true
+}

@@ -1,0 +1,65 @@
+Traceback (most recent call last):
+  File "E:\zynqlinkPRO_orbtrace_opt\tools\benchmark_sram_matrix.py", line 43, in main
+    stop(p,d);setup(o,i,50000);initial=m.word(0xe000edf0)
+              ~~~~~^^^^^^^^^^^
+  File "E:\zynqlinkPRO_orbtrace_opt\tools\dap_pipeline_bench.py", line 82, in setup
+    cmd(out, inp, [0x12, 152] + [0xFF] * 8 + [0x9E, 0xE7] + [0xFF] * 8 + [0x00])
+    ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\zynqlinkPRO_orbtrace_opt\tools\dap_pipeline_bench.py", line 62, in cmd
+    r = xfer(out, inp, payload)
+  File "E:\zynqlinkPRO_orbtrace_opt\tools\dap_pipeline_bench.py", line 58, in xfer
+    return bytes(inp.read(PKT, timeout=5000))
+                 ~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\site-packages\usb\core.py", line 431, in read
+    return self.device.read(self, size_or_buffer, timeout)
+           ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\site-packages\usb\core.py", line 1043, in read
+    ret = fn(
+            self._ctx.handle,
+    ...<2 lines>...
+            buff,
+            self.__get_timeout(timeout))
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\site-packages\usb\backend\libusb1.py", line 850, in bulk_read
+    return self.__read(self.lib.libusb_bulk_transfer,
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                       dev_handle,
+                       ^^^^^^^^^^^
+    ...<2 lines>...
+                       buff,
+                       ^^^^^
+                       timeout)
+                       ^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\site-packages\usb\backend\libusb1.py", line 958, in __read
+    _check(retval)
+    ~~~~~~^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\site-packages\usb\backend\libusb1.py", line 602, in _check
+    raise USBTimeoutError(_strerror(ret), ret, _libusb_errno[ret])
+usb.core.USBTimeoutError: [Errno 10060] Operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "E:\zynqlinkPRO_orbtrace_opt\tools\benchmark_sram_matrix.py", line 104, in <module>
+    if __name__=='__main__':main()
+                            ~~~~^^
+  File "E:\zynqlinkPRO_orbtrace_opt\tools\benchmark_sram_matrix.py", line 94, in main
+    recover(d,i);setup(o,i,50000)
+    ~~~~~~~^^^^^
+  File "E:\zynqlinkPRO_orbtrace_opt\tools\test_swd_lowfreq_board.py", line 11, in recover
+    assert bytes(dev.ctrl_transfer(0xc0,0x5a,0x4441,0x5052,4,timeout=3000))==b'DAP\0'
+                 ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\site-packages\usb\core.py", line 1093, in ctrl_transfer
+    ret = self._ctx.backend.ctrl_transfer(
+                                self._ctx.handle,
+    ...<4 lines>...
+                                buff,
+                                self.__get_timeout(timeout))
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\site-packages\usb\backend\libusb1.py", line 897, in ctrl_transfer
+    ret = _check(self.lib.libusb_control_transfer(
+                                    dev_handle.handle,
+    ...<5 lines>...
+                                    length,
+                                    timeout))
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\site-packages\usb\backend\libusb1.py", line 602, in _check
+    raise USBTimeoutError(_strerror(ret), ret, _libusb_errno[ret])
+usb.core.USBTimeoutError: [Errno 10060] Operation timed out

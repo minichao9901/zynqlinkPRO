@@ -1,0 +1,10 @@
+PASS production probe C: HID, 8 variables, HSS DEF/DATA/gaps, backpressure, RTT wrap/RdOff retry, DAP handoff, ZLP, reset, plan benchmark
+PASS production target C: WAIT, unaligned 1KiB split, overflow, SELECT/CSW/TAR/clock restore, independent initialization
+In file included from E:\zynqlinkPRO_orbtrace_opt\tools\tests\probe_descriptor_test.c:2:
+E:\zynqlinkPRO_orbtrace_opt\build\probe_host\descriptor_under_test.c:574:17: warning: comparison of integers of different signs: 'int' and 'u32' (aka 'unsigned int') [-Wsign-compare]
+                for (i = 0; i < StringLen; i++) {
+                            ~ ^ ~~~~~~~~~
+1 warning generated.
+PASS production USB descriptors: total length, interface/endpoint counts, unique addresses, CDC IAD/union, HID report length
+PASS production JTAG calibration: all IDDR phases, TAR pattern/CPUID validation, SELECT/CSW/TAR/clock restore, no target memory writes
+PASS production ETM USB: EP2 IN isolation, ZET1 framing, empty/end/loss, retry, queue ownership, reset epoch

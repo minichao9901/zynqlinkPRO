@@ -1,0 +1,76 @@
+[
+  {
+    "stage": "sram",
+    "returncode": 0,
+    "command": [
+      "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "-X",
+      "utf8",
+      "tools/benchmark_sram_matrix.py",
+      "--bit",
+      "E:\\zynqlinkPRO_orbtrace_opt\\prebuilt\\20261031_orbtrace_opt_7020_120_candidate\\zynqlink_probe.bit",
+      "--elf",
+      "E:\\zynqlinkPRO_orbtrace_opt\\prebuilt\\20261031_orbtrace_opt_7020_120_candidate\\zynqlink_probe.elf",
+      "--speeds",
+      "1000000,10000000,25000000,30000000,35000000,50000000",
+      "--transport",
+      "swd",
+      "--seconds",
+      "0.6",
+      "--repeats",
+      "5",
+      "--output",
+      "E:\\zynqlinkPRO_orbtrace_opt\\docs\\validation\\orbtrace-hardware-20261031\\optimized_50\\sram.json"
+    ]
+  },
+  {
+    "stage": "rtt",
+    "returncode": 0,
+    "command": [
+      "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "-X",
+      "utf8",
+      "E:\\zynqlinkPRO_orbtrace_opt\\build\\run_candidate_rtt.py"
+    ]
+  },
+  {
+    "stage": "hss",
+    "returncode": 0,
+    "command": [
+      "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "-X",
+      "utf8",
+      "E:\\zynqlinkPRO_orbtrace_opt\\build\\run_candidate_hss.py"
+    ]
+  },
+  {
+    "stage": "jtag",
+    "returncode": 0,
+    "command": [
+      "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "-X",
+      "utf8",
+      "E:\\zynqlinkPRO_orbtrace_opt\\build\\run_candidate_jtag.py"
+    ]
+  },
+  {
+    "stage": "extras",
+    "returncode": 0,
+    "command": [
+      "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "-X",
+      "utf8",
+      "E:\\zynqlinkPRO_orbtrace_opt\\build\\run_candidate_extras.py"
+    ]
+  },
+  {
+    "stage": "diagnostics",
+    "returncode": 0,
+    "command": [
+      "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "-X",
+      "utf8",
+      "E:\\zynqlinkPRO_orbtrace_opt\\build\\run_candidate_diagnostics.py"
+    ]
+  }
+]

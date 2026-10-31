@@ -1,20 +1,15 @@
-# ORBTrace 7010 / 100MHz 优化候选
+# 7010 / 100MHz 静态实现配对
 
-`xc7z010clg400-2`，Vivado 2018.3，RTL 源码 `bc9ced6`。
-14,618 LUT、16,990 FF、4,398/4,400 Slice、10.5/60 BRAM36 等价、1 DSP。
-100MHz routed STA：WNS +0.258ns、WHS +0.012ns、TNS/THS 0；bitgen 成功。
+器件 `xc7z010clg400-2`，已完成实际目标器件布局布线、STA与bitgen：
+LUT14,618、FF16,990、Slice4,398/4,400、BRAM36等效10.5；
+WNS +0.258ns、WHS +0.012ns。仅剩2个Slice，按用户指示不再追求7010/120MHz。
 
-**实验配对：未进行物理 7010 板卡验收。** Slice 仅剩 2 个，布局余量很小。
-按用户调整后的目标，7010 采用 100MHz。
+配对为本目录 `zynqlink_probe.bit`、`zynqlink_probe.elf`、`ps7_init.tcl`。
+RTL/实现源码 `bc9ced6`；最终通用固件源码 `cbedca2`，上限50MHz，包含SWJ与HSS STOP修复。
+PS代码71,300B，OCM跨度120,976B，原USB/DAP队列和DDR缓冲保留。
 
-加载文件为本目录 `zynqlink_probe.bit`、`zynqlink_probe.elf`、`ps7_init.tcl`。
-此 bit 适用于 7010；现有 7020 probe 回归使用独立的 7020 配对目录。
-PS 初始化/BSP 沿用当前探针平台，实际 7010 板的 PS/DDR 配置仍需匹配验收。
+**没有物理7010板验收。** 同一个ELF在7020上的通过不代表7010平台/DDR/USB已验证。
+不得向当前7020板加载此7010 bit。PS初始化/BSP沿用现有平台，7010实板仍须核对板级配置。
 
-ELF 上限为 SWCLK/TCK 50MHz、FCLK 100MHz，代码和必要数据/栈位于 OCM，
-USB/DAP 运行缓冲保持 DDR 和原队列配置。
-文件 SHA-256、源码指纹、构建选项及未验收状态见 `manifest.json`。
-
-Common compact firmware corrected for unaligned SWJ payloads; firmware source f5c938e71e0127ba573f0dcc425f62d924492965. Physical 7010 board acceptance remains pending. See manifest for rejected previous ELF and new file hashes.
-
-Final firmware source cbedca23cae57402cb1b5e3fb0000544d5b706b8 additionally refreshes HSS counters after the last partial packet drains; no queue sizes or sampling path changed. Strict hardware retest pending.
+[完整记录](../../docs/validation/orbtrace-hardware-20261031/README.md)；精确SHA、选项与来源见
+`manifest.json` / `SHA256SUMS`。另一worktree后续ETM改动未合入，合并后须重新检查资源与时序。

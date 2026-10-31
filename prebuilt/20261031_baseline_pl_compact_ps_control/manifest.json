@@ -1,5 +1,5 @@
 {
-  "status": "DIAGNOSTIC CONTROL: board comparison pending",
+  "status": "DIAGNOSTIC CONTROL: HSS overload and JTAG read checks passed; old PL RTT25/30 failures retained; not the optimized deliverable",
   "device": "xc7z020clg400-2",
   "rtl_source_commit": "13c7b524aa1f88acdf9073efb278af6434e48820",
   "firmware_source_revision": "cbedca23cae57402cb1b5e3fb0000544d5b706b8",
@@ -16,6 +16,45 @@
     "probe.bit": "306fa26134e63509ec64a2982dfb22ab8b7164d15c1fbb617df30fbdb5f29619",
     "probe.elf": "de61421deea6f7bf81810cc9cd1e5fc1024df21ccaf3805bb10f21dd7d2d9957",
     "ps7_init.tcl": "aa9747c31f705be7c28af1c6b1cdeaf282f0dcdb01faecee2a9f72e4d3489132",
-    "README.md": "2608bbef6b8d0ef31d1a2d35239505589903711c05f1083111c32dc13629cbdc"
-  }
+    "README.md": "104c69ed55a7ff58943f2027e019b51fc1e62ff8c62d6439ab45847d1de1b82b"
+  },
+  "acceptance_record": "../../docs/validation/orbtrace-hardware-20261031/README.md",
+  "hardware_control_results": [
+    {
+      "period_ticks": 240,
+      "nominal_requested_Hz": 100000.0,
+      "baseline_pl_Hz": 100000.20127322667,
+      "optimized_pl_Hz": 99999.9916714424,
+      "baseline_skip_percent": 0.0,
+      "optimized_skip_percent": 0.0,
+      "delta_percent": -0.00020960136239978056,
+      "same_elf_sha256": "de61421deea6f7bf81810cc9cd1e5fc1024df21ccaf3805bb10f21dd7d2d9957",
+      "baseline_packets_per_sample": 0.06668248238030652,
+      "optimized_packets_per_sample": 0.06668223332434856
+    },
+    {
+      "period_ticks": 200,
+      "nominal_requested_Hz": 120000.0,
+      "baseline_pl_Hz": 40523.7050607117,
+      "optimized_pl_Hz": 40716.30455591925,
+      "baseline_skip_percent": 66.23025093904339,
+      "optimized_skip_percent": 66.06969345319068,
+      "delta_percent": 0.47527612521856,
+      "same_elf_sha256": "de61421deea6f7bf81810cc9cd1e5fc1024df21ccaf3805bb10f21dd7d2d9957",
+      "baseline_packets_per_sample": 1.0,
+      "optimized_packets_per_sample": 1.0
+    },
+    {
+      "period_ticks": 192,
+      "nominal_requested_Hz": 125000.0,
+      "baseline_pl_Hz": 40474.766359810405,
+      "optimized_pl_Hz": 40570.365753269034,
+      "baseline_skip_percent": 67.6202507355763,
+      "optimized_skip_percent": 67.54376146006567,
+      "delta_percent": 0.23619504707890204,
+      "same_elf_sha256": "de61421deea6f7bf81810cc9cd1e5fc1024df21ccaf3805bb10f21dd7d2d9957",
+      "baseline_packets_per_sample": 1.0,
+      "optimized_packets_per_sample": 1.0
+    }
+  ]
 }

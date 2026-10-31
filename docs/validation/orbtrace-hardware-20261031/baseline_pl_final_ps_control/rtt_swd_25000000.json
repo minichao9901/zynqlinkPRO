@@ -1,0 +1,87 @@
+{
+  "artifacts": {
+    "git_head": "728f2b77a44e82399166d3637ed1af34360a74c5",
+    "git_dirty": true,
+    "bit": {
+      "path": "E:\\zynqlinkPRO_orbtrace_opt\\prebuilt\\20261031_baseline_pl_compact_ps_control\\probe.bit",
+      "sha256": "306fa26134e63509ec64a2982dfb22ab8b7164d15c1fbb617df30fbdb5f29619"
+    },
+    "elf": {
+      "path": "E:\\zynqlinkPRO_orbtrace_opt\\prebuilt\\20261031_baseline_pl_compact_ps_control\\probe.elf",
+      "sha256": "de61421deea6f7bf81810cc9cd1e5fc1024df21ccaf3805bb10f21dd7d2d9957"
+    }
+  },
+  "kind": "continuous RAM producer RTT->CDC",
+  "transport": "swd",
+  "rows": [],
+  "backup_sha256": "56a3f0e9abf98e84f078085a3c1c821d686d63347101b5698173e0d576ec7c37",
+  "registers_before": {
+    "0": 1,
+    "1": 131072,
+    "2": 0,
+    "3": 536871744,
+    "4": 0,
+    "5": 8,
+    "6": 79764919,
+    "7": 7,
+    "8": 6,
+    "9": 536936406,
+    "10": 536875076,
+    "11": 2328958680,
+    "12": 536878076,
+    "13": 536936424,
+    "14": 134219259,
+    "15": 134219062,
+    "16": 553648128,
+    "17": 536936424,
+    "18": 37205868,
+    "20": 1
+  },
+  "RCC_before": [
+    50548355,
+    5309450
+  ],
+  "failure": "AssertionError()",
+  "failure_clock": {
+    "FCLK_Hz": 99999999,
+    "cfg": "0xc2a11",
+    "waveform": {
+      "SWCLK_Hz": 24999999.75,
+      "half_period_fclk": 2,
+      "short_high": true,
+      "intended_high_ns": 10.000000100000001
+    },
+    "JTAG_sampling_mode": 0,
+    "RISC_V_SBA_enabled": false,
+    "actual_link_Hz": 24999999.75,
+    "clock_observation": "PS JTAG register read; no DAP command during stream"
+  },
+  "restore_match": true,
+  "registers_after": {
+    "0": 1,
+    "1": 131072,
+    "2": 0,
+    "3": 536871744,
+    "4": 0,
+    "5": 8,
+    "6": 79764919,
+    "7": 7,
+    "8": 6,
+    "9": 536936406,
+    "10": 536875076,
+    "11": 2328958680,
+    "12": 536878076,
+    "13": 536936424,
+    "14": 134219259,
+    "15": 134219062,
+    "16": 553648128,
+    "17": 536936424,
+    "18": 37205868,
+    "20": 1
+  },
+  "registers_match": true,
+  "RCC_after": [
+    50548355,
+    5309450
+  ]
+}

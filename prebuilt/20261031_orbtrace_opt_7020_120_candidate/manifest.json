@@ -1,5 +1,5 @@
 {
-  "status": "EXPERIMENTAL: routed STA and RTL simulation pass; corrected unaligned SWJ firmware awaiting board acceptance",
+  "status": "PASS: routed 120MHz STA/bitgen and bounded F103ZE ARM SWD/JTAG hardware regression; ETM board acceptance not performed",
   "source_commit": "bc9ced69f1f8f81647b8d62eaf74100d53fd883f",
   "base_commit": "00b9f2f",
   "device": "xc7z020clg400-2",
@@ -8,9 +8,9 @@
   "traceclk_constraint_Hz": 50000000,
   "idelay_ref_Hz": 200000000,
   "firmware_max_link_Hz": 50000000,
-  "actual_loaded_FCLK_Hz": null,
-  "actual_loaded_TCK_Hz": null,
-  "hardware_acceptance": "Rebuilt final SWJ + HSS STOP correction; strict hardware retest pending",
+  "actual_loaded_FCLK_Hz": 99999999,
+  "actual_loaded_TCK_Hz": 49999999.5,
+  "hardware_acceptance": "Final 50/60MHz profiles physically tested on xc7z020 + F103ZE/HCLK48MHz; original filtered pair restored afterward",
   "timing": {
     "WNS_ns": 0.499,
     "TNS_ns": 0.0,
@@ -59,24 +59,25 @@
     "zynqlink_probe.elf": "de61421deea6f7bf81810cc9cd1e5fc1024df21ccaf3805bb10f21dd7d2d9957",
     "ps7_init.tcl": "aa9747c31f705be7c28af1c6b1cdeaf282f0dcdb01faecee2a9f72e4d3489132",
     "firmware-build.json": "dde459773f01d3e17c5ce81226d3046d23a6554f87f92ec692c9493fe0232b09",
-    "ocm_layout.json": "811907f2864249bfb94152617f950853fa187f36a5cf707f7ce2e0e617a7c43e",
+    "ocm_layout.json": "aa2347bfb37f4bf29e15dd1979b1be0d3c8d2e937186041fbd5e811ab7eab104",
     "timing_120mhz.rpt": "26f94748faecb84ff1eda51f89a26a62b7e3c20d2ee95e3ea829eb7e8e564c61",
     "utilization.rpt": "5ed241656b938e2c8d1dafe4a85fb3d53c628a13f581c447b5d7cc9bd559d4f9",
     "zynqlink_probe_60.elf": "4fbf5f7816644ea946a684e1ff3f30425e57eea6e5b64cd0d0d6839f284e6bdb",
     "firmware-build_60.json": "335097dd32afc5dd639bdffd7d9a9a4f9e7b02ecb58f6a15436bd3d0aa28bb51",
-    "ocm_layout_60.json": "2c280568df939728a26736339fd300a756e3e16fd43b1dd5e452ca39e46f04df",
+    "ocm_layout_60.json": "d99239f216e17277ca6e40bdaf407ea0bbb038a486f9192f102a6bd1d1e50c3d",
     "simulation_comparison.json": "97f197d4d02953a2cc0ee45b973e5628133b732dab7e42942e441f0fb105b0be"
   },
   "routed_checkpoint_sha256": "4c4daacf6788958f8534c4f4daa75ca3faa626686addbfb22cf481576c5ed9e7",
   "firmware_profiles": {
     "50MHz": {
       "elf": "zynqlink_probe.elf",
-      "max_link_Hz": 50000000
+      "max_link_Hz": 50000000,
+      "hardware_acceptance": "PASS on current F103ZE fixture; raw clocks/conditions in acceptance record"
     },
     "60MHz_experimental": {
       "elf": "zynqlink_probe_60.elf",
       "max_link_Hz": 60000000,
-      "hardware_acceptance": "pending"
+      "hardware_acceptance": "PASS on current F103ZE fixture; raw clocks/conditions in acceptance record"
     }
   },
   "simulation_acceptance": {
@@ -99,5 +100,34 @@
     "elf_sha256": "ba87ff9028c4132f605ff12666ad04bff08be34f2db3877b11fd9e7d2b7bd0a3",
     "reason": "Throughput/functional matrix passed, but strict HSS STOP replay exposed the baseline-shared stale final STAT sequence/sample snapshot",
     "evidence": "../../docs/validation/orbtrace-hardware-20261031/optimized_50/"
+  },
+  "acceptance_record": "../../docs/validation/orbtrace-hardware-20261031/README.md",
+  "actual_loaded_clock_note": "50MHz profile peak test values; per-rate clocks are in raw records. Board was subsequently restored to the original filtered baseline.",
+  "hardware_validation": {
+    "target": "xc7z020 + STM32F103ZE, target HCLK48MHz",
+    "profiles": {
+      "50MHz": {
+        "elf": "zynqlink_probe.elf",
+        "FCLK_Hz": 99999999,
+        "link_Hz": 49999999.5,
+        "HSS_strict_rows": 106
+      },
+      "60MHz": {
+        "elf": "zynqlink_probe_60.elf",
+        "FCLK_Hz": 119999998,
+        "link_Hz": 59999999,
+        "HSS_strict_rows": 72,
+        "completed_driver_jobs": 25,
+        "nonzero_jobs": 0
+      }
+    },
+    "sample_count_mismatches": 0,
+    "control_sequence_errors": 0,
+    "USB_DAP_queues": "unchanged",
+    "common_metric_max_absolute_delta_percent": 0.680718878056219,
+    "all_target_SRAM_register_RCC_runstate_restoration_verified": true,
+    "target_flash_programmed": false,
+    "real_ETM_capture_tested": false,
+    "final_board_pair": "original 20261031_filtered_tpiu; see restored_baseline/final_state.json"
   }
 }

@@ -1,0 +1,40 @@
+{"transport": "swd", "speed_hz": 50000000, "period_ticks": 246, "effective_Hz": 97560.62737752896, "skip_percent": 0.0, "stage": "coarse", "actual_link_Hz": 49999999.5}
+{"transport": "swd", "speed_hz": 50000000, "period_ticks": 123, "effective_Hz": 195120.84982490388, "skip_percent": 0.0, "stage": "coarse", "actual_link_Hz": 49999999.5}
+no targets found with "name =~ "ARM Cortex-A9 MPCore #0*"". available targets: none
+    while executing
+"error "no targets found with \"$params(filter)\". available targets:$target_list""
+    (procedure "targets" line 177)
+    invoked from within
+"targets -set -filter {name =~ "ARM Cortex-A9 MPCore #0*"}"
+    (file "E:\zynqlinkPRO_orbtrace_opt\build\jtag_internal_trace\read_trace.tcl" line 2)
+    invoked from within
+"source $script"
+    (file "E:\zynqlinkPRO_orbtrace_opt\build\xilinx_runtime\bootstrap.tcl" line 5)
+Traceback (most recent call last):
+  File "E:\zynqlinkPRO_orbtrace_opt\tools\benchmark_hss_matrix.py", line 85, in <module>
+    if __name__=='__main__':main()
+                            ~~~~^^
+  File "E:\zynqlinkPRO_orbtrace_opt\tools\benchmark_hss_matrix.py", line 43, in main
+    for period in periods:point(period,'coarse')
+                          ~~~~~^^^^^^^^^^^^^^^^^
+  File "E:\zynqlinkPRO_orbtrace_opt\tools\benchmark_hss_matrix.py", line 36, in point
+    row=hss_point(probe,mem,d,speed,period,1,seconds or a.seconds,len(current),True,
+                  lambda:setup(o,i,50000,transport),True)
+  File "E:\zynqlinkPRO_orbtrace_opt\tools\benchmark_probe_stream.py", line 113, in hss_point
+    clock=live_clock_snapshot()
+  File "E:\zynqlinkPRO_orbtrace_opt\tools\probe_build_info.py", line 11, in live_clock_snapshot
+    output=run('puts [format "LIVECLK %08X %08X %08X %08X %08X" [mrd -force -value 0xf8000170] [mrd -force -value 0xf8000108] [mrd -force -value 0x40010008] [mrd -force -value 0x40010098] [mrd -force -value 0x40010080]]')
+  File "E:\zynqlinkPRO_orbtrace_opt\tools\jtag_internal_trace.py", line 24, in run
+    return subprocess.check_output([sys.executable, str(ROOT / 'tools/run_xsct.py'), str(script)],
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                   text=True, encoding='utf-8', errors='replace')
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\subprocess.py", line 472, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+               **kwargs).stdout
+               ^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\subprocess.py", line 577, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe', 'E:\\zynqlinkPRO_orbtrace_opt\\tools\\run_xsct.py', 'E:\\zynqlinkPRO_orbtrace_opt\\build\\jtag_internal_trace\\read_trace.tcl']' returned non-zero exit status 1.

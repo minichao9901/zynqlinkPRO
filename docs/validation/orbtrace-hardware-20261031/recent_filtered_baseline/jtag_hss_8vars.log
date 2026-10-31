@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "E:\zynqlinkPRO_orbtrace_opt\tools\benchmark_probe_stream.py", line 251, in <module>
+    main()
+    ~~~~^^
+  File "E:\zynqlinkPRO_orbtrace_opt\tools\benchmark_probe_stream.py", line 228, in main
+    row = hss_point(probe, mem, dev, speed, period, nv, args.seconds, repeat)
+  File "E:\zynqlinkPRO_orbtrace_opt\tools\benchmark_probe_stream.py", line 142, in hss_point
+    assert not reader.is_alive() and reader.error is None, reader.error
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: AssertionError(('frame sequence', 2406, 2406, 'kind', 3, 'timestamp', 0, 'samples', 0))

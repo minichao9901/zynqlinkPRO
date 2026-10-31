@@ -1,0 +1,42 @@
+{
+  "command": [
+    "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "-X",
+    "utf8",
+    "tools/benchmark_rtt_forward.py",
+    "--transport",
+    "swd",
+    "--speeds",
+    "30000000",
+    "--chunks",
+    "1024",
+    "--seconds",
+    "2",
+    "--repeats",
+    "1",
+    "--bit",
+    "E:\\zynqlinkPRO\\prebuilt\\20261031_filtered_tpiu\\zynqdap_filtered.bit",
+    "--elf",
+    "E:\\zynqlinkPRO\\prebuilt\\20261031_filtered_tpiu\\zynqdap_filtered.elf",
+    "--output",
+    "E:\\zynqlinkPRO_orbtrace_opt\\docs\\validation\\orbtrace-hardware-20261031\\recent_filtered_baseline\\swd_rtt_clock_diagnostic_30000000.json"
+  ],
+  "restore_swj_from_target_source": 2,
+  "initial_DHCSR": "0x1010001",
+  "APB2ENR": "0x404d",
+  "MAPR_readable_bits": "0x0",
+  "target_id": "0x10036414",
+  "RCC_before": [
+    50548355,
+    5309450
+  ],
+  "JTAG_IDCODE": "0x3ba00477",
+  "returncode": 1,
+  "MAPR_readable_restore_match": true,
+  "APB2ENR_restore_match": true,
+  "RCC_after": [
+    50548355,
+    5309450
+  ],
+  "run_halt_restore_match": true
+}
