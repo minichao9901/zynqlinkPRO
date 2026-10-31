@@ -55,8 +55,8 @@ class NativeCapture:
         b.elf_info(target)
         sources_snapshot = b.read_source_snapshot(elf_id, o['sourceSnapshot']) if o.get('sourceSnapshot') else None
         seconds = o.get('seconds', .01)
-        if isinstance(seconds, bool) or not isinstance(seconds, (int, float)) or not math.isfinite(seconds) or not 0 < seconds <= 1:
-            raise ValueError('采集时长必须大于0且不超过1秒')
+        if isinstance(seconds, bool) or not isinstance(seconds, (int, float)) or not math.isfinite(seconds) or not 0 < seconds <= 2:
+            raise ValueError('采集时长必须大于0且不超过2秒（需DDR固件）')
         options = {'seconds': seconds, 'decode': o.get('decode', True)}
         if not isinstance(options['decode'], bool):
             raise ValueError('decode必须为boolean')
@@ -165,6 +165,8 @@ class NativeCapture:
             captured = b.load_json(raw / 'session.json')
             for name in ('capture.bin', 'target-before.json', 'acceptance.json'):
                 shutil.copy2(raw / name, folder / name)
+            for name in ('capture.frm1','ddr-capture.json','ddr-demux.json'):
+                if (raw/name).is_file():shutil.copy2(raw/name,folder/name)
             metadata.update(captured)
             if stimulus_report:
                 metadata['serialStimulus'] = stimulus_report

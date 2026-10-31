@@ -10,6 +10,12 @@ ROOT = Path(__file__).resolve().parents[1]
 PROTOCOL = 'etm-framed-native/1'
 
 
+def binary_path():
+    # The bridge binds decode_trace.ROOT to its bundled backend assets.
+    import decode_trace
+    return decode_trace.ROOT/'build-native'/('etm_framed.exe' if os.name=='nt' else 'etm_framed')
+
+
 def digest(path):
     with Path(path).open('rb') as stream:
         return hashlib.file_digest(stream, 'sha256').hexdigest()
@@ -17,15 +23,16 @@ def digest(path):
 
 def run(source, out, *, tail_bytes, trace_id=2, binary=None):
     source, out = Path(source).resolve(), Path(out).resolve()
-    exe = Path(binary or ROOT/'build-native'/('etm_framed.exe' if os.name == 'nt' else 'etm_framed'))
+    exe = Path(binary or binary_path())
     if not 0 <= tail_bytes <= 15 or not 1 <= trace_id <= 126:
         raise ValueError('invalid FRM1 tail length or trace ID')
-    version = subprocess.run([str(exe), '--version'], check=True, capture_output=True, text=True, timeout=10)
+    flags={'creationflags':subprocess.CREATE_NO_WINDOW} if os.name=='nt' else {}
+    version = subprocess.run([str(exe), '--version'], check=True, capture_output=True, text=True, timeout=10,**flags)
     if json.loads(version.stdout).get('protocol') != PROTOCOL:
         raise ValueError('FRM1 native protocol mismatch')
     before = digest(source)
     subprocess.run([str(exe), str(source), str(out), '--tail-bytes', str(tail_bytes)],
-                   check=True, capture_output=True, timeout=120)
+                   check=True, capture_output=True, timeout=120,**flags)
     report = json.loads((out/'result.json').read_text())
     if report.get('protocol') != PROTOCOL or report.get('inputBytes') != source.stat().st_size:
         raise ValueError('FRM1 native result mismatch')

@@ -1100,3 +1100,13 @@ OpenCSD实际处理全部4,567,468字节，packetIssues=0、unsyncBytes=0、addr
 下载先发512字节ZDD1身份头，再从非缓存DDR直接按最大16KiB USB描述符发送原始FRM1，不产生每字节或每指令JSON。固件验证done、写入/响应字节数、记录格式、ID/nonce及范围后才占有EP2；最后描述符TX完成前不推进已完成字节计数。新START不能覆盖正在下载的记录，USB旧发送回调通过指针/epoch识别。DDR源与USB传输阶段分开，Web无需改目标PLL/AHB/APB。
 
 主机C验证覆盖旧bit能力保护、512个1MiB非缓存映射、采集中下载拒绝、身份/范围/加法溢出保护、完整头与尾部3字节、descriptor持有、失败提交不推进计数、USB复位保留源和记录；旧ETM/探针服务5组检查通过。RTL 9项集成及旧11项回归通过，包括新增的CSR存在声明核对。[源码冻结主机证据](validation/etm-ddr-usb-host-20261101/production-c-tests.txt)。此阶段不声称USB吞吐、Web默认DDR或新PS已上板完成。
+
+### 2026-11-01：Web/CLI默认DDR能力分支与原始记录保存（主机验证通过）
+
+Web Zynq Session和直接CLI均按PS 0x61 bit9选择默认传输；广告位存在即走有界硬件窗口→采后USB二进制下载→原生C++ FRM1解复用→原ETMv3/ETMv4 C++解码。旧固件明确保留1秒旧传输入口，新DDR最大2秒；不回退成逐指令JSONL，不更改目标PLL/AHB/APB。H743仍保留独立ETMv4配置及Kingst接入，不向H743写F103 ETMv3寄存器。
+
+USB下载核对176字节状态协议与完整512字节ZDD1头的captureId/nonce/transferId/范围/格式；允许USB拆包但禁止先于最后设备TX退役进入下一次覆盖。下载到文件并计算SHA，C++处理大数据；错误原始数据保存在所属记录目录，而非只留内存。导出etmrecord和再导入保留capture.frm1、ddr-capture.json和ddr-demux.json，可离线追查全部源ID及末尾边界。
+
+Web窗口元数据在DDR模式以硬件ticks/ref计算实际时长，主机下载/解复用时间另存；formatter帧不是物理采样点，actualSamples仍未知。非法计数/时长不一致直接拒绝。CLI也去掉旧路径把host时间当完整硬件窗口的推断。页面开放2000ms，旧固件超过1000ms明确提示。
+
+4项Python传输测试核对二进制拆包、尾描述符完成、错误头不落盘/不读负载、采集中下载拒绝及默认DDR分支；4项Web/桥检查包含真实F103/H743原生回放、错误采集保留、硬件时长与原始FRM1记录包导出/导入；1项本地CLI/Web API检查和144模块语法检查通过。桥包原生工具路径按运行时backend解析，避免冻结EXE误找开发源码目录。这些仍是主机验证，未替代即将进行的新bit/ELF实测。

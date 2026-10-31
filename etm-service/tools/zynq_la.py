@@ -9,6 +9,11 @@ demultiplexed source-ID-2 bytes to `capture.bin`; `decode_stream()` then feeds
 those bytes to OpenCSD exactly like an imported ETM BIN record.
 """
 import struct
+import json
+import os
+from pathlib import Path
+import shutil
+import tempfile
 import threading
 import time
 
@@ -56,6 +61,10 @@ class Session:
         self._reader = None
         self._timer = None
         self.diagnostics_supported = False
+        self.ddr_supported = False
+        self.ddr = None
+        self.capture_directory = None
+        self.stream_file = None
 
     # ---------------- USB ----------------
     def open(self):
@@ -71,6 +80,10 @@ class Session:
                 return
         if self.dev is None:
             return
+        cleanup_error=None
+        if self.ddr is not None:
+            try:self.ddr.release()
+            except Exception as exc:cleanup_error=exc
         try:
             usb.util.release_interface(self.dev, 0)
         except Exception:
@@ -80,6 +93,8 @@ class Session:
         except Exception:
             pass
         self.dev = self.out = self.inp = None
+        self.ddr = None
+        if cleanup_error:raise CaptureError('DDR USB释放失败：'+str(cleanup_error))
 
     def _control(self, action=0):
         reply = self.dev.ctrl_transfer(0xC0, CTRL_REQUEST, action, CTRL_INDEX, 32, timeout=2000)
@@ -93,6 +108,7 @@ class Session:
             raise CaptureError("ETM 参考时钟请求返回 %d 字节" % len(reply))
         words=struct.unpack('<4I',reply)
         self.diagnostics_supported=bool(words[3]&0x100)
+        self.ddr_supported=bool(words[3]&0x200)
         return words[0]
 
     def diagnostics(self):
@@ -173,6 +189,10 @@ class Session:
         ref = self._reference_clock()
         if not 190_000_000 <= ref <= 210_000_000:
             raise CaptureError("独立采样参考时钟未初始化到 200 MHz 范围")
+        if self.ddr_supported:
+            return self._start_ddr(ref,state)
+        if self.seconds>1:
+            raise CaptureError('当前探针固件不支持DDR采后下载；旧流式链路单次上限1秒')
         self._control(0x301)
         for _ in range(100):
             state = self._control()
@@ -196,6 +216,54 @@ class Session:
             self._timer.daemon = True
             self._timer.start()
         return self
+
+    def _start_ddr(self,ref,state):
+        from zynq_ddr import Transport
+        base=Path(self.capture_directory) if self.capture_directory is not None else Path(os.environ.get('WEB_ETM_RECORDS',Path(__file__).resolve().parents[1]/'records'))
+        base.mkdir(parents=True,exist_ok=True)
+        self.ddr_directory=Path(tempfile.mkdtemp(prefix='ddr-',dir=base))
+        self.stream_file=None
+        self.ddr=Transport(self.dev,self.out,self.inp)
+        try:
+            self.ddr.arm(self.seconds,ref)
+            self.ddr.wait_source()
+            self._restart_trace()
+            self._dap_write32(0xE000EDF0,0xA05F0001)
+        except Exception:
+            try:
+                self.ddr.stop();self.ddr.wait();self.ddr.release()
+            except Exception:pass
+            raise
+        self.started=time.time();self.started_monotonic=time.perf_counter()
+        self.quality.update(transport='ddr-usb/1',fclk=state[6],tckKhz=state[1]>>16 or None,hostStartedUnix=self.started)
+        self.running=True
+        self._reader=threading.Thread(target=self._ddr_loop,daemon=True);self._reader.start()
+        return self
+
+    def _ddr_loop(self):
+        from zynq_ddr import quality
+        from native_framed import run as deformat
+        try:
+            self.ddr.wait(max(5,self.seconds+3))
+            status=self.ddr.download(self.ddr_directory/'capture.frm1')
+            self.quality.update(quality(status))
+            # Save a failing raw record before the Web quality gate rejects it.
+            try:
+                report=deformat(self.ddr_directory/'capture.frm1',self.ddr_directory/'demux',
+                    tail_bytes=status['tailBytes'],trace_id=self.traceid)
+                self.stream_file=Path(report['selectedStream'])
+                self.quality.update(nativeDemuxSeconds=report['seconds'],etmBytes=self.stream_file.stat().st_size)
+            except Exception as exc:
+                self.quality.update(loss=True,nativeDemuxError=str(exc))
+        except Exception as exc:
+            self.error=str(exc)
+        finally:
+            self.running=False
+            self.quality.update(hostSeconds=time.perf_counter()-self.started_monotonic,hostEndedUnix=time.time(),
+                hostSecondsBasis='resume through hardware completion, USB download and native deformat; not capture coverage')
+            try:(self.ddr_directory/'quality.json').write_text(json.dumps(self.quality,indent=2)+'\n',encoding='utf8')
+            except Exception as exc:self.error=self.error or str(exc)
+            finally:self.done.set()
 
     def _read_loop(self):
         seq = None
@@ -248,6 +316,11 @@ class Session:
     def stop(self):
         if not self.running and self.done.is_set():
             return
+        if self.ddr is not None:
+            try:self.ddr.stop()
+            except Exception as exc:self.error=self.error or str(exc)
+            if self._reader:self._reader.join(timeout=30)
+            return
         try:
             self._control(2)
         except Exception as exc:
@@ -298,6 +371,7 @@ class _Sock:
             raise CaptureError("unsupported LA start command")
         s = session()
         s.configure(self.vis.config, self.vis.traceid, self.vis.seconds)
+        s.capture_directory=getattr(self.vis,'capture_directory',None)
         s.start()
         # Like a socket sendall, start returns after arm/resume. recv owns the
         # completion wait, so the server can publish armed while capture runs.
@@ -374,15 +448,24 @@ def do_export(vis, path, channels):
     s.wait(5)
     if s.error:
         raise CaptureError(s.error)
-    with open(path, "wb") as f:
-        f.write(bytes(s.bytes))
+    if getattr(s,'stream_file',None) is not None:
+        shutil.copyfile(s.stream_file,path)
+    else:
+        with open(path, "wb") as f:
+            f.write(bytes(s.bytes))
+    if getattr(s,'ddr',None) is not None:
+        dest=Path(path).parent
+        shutil.copyfile(s.ddr_directory/'capture.frm1',dest/'capture.frm1')
+        shutil.copyfile(s.ddr_directory/'capture.usb.json',dest/'ddr-capture.json')
+        demux=s.ddr_directory/'demux/result.json'
+        if demux.is_file():shutil.copyfile(demux,dest/'ddr-demux.json')
     # The file is durable even if the subsequent diagnostic request fails.
-    s.quality['diagnostics'] = s.diagnostics()
+    if getattr(s,'ddr',None) is None:s.quality['diagnostics'] = s.diagnostics()
     # capture_job creates a fresh Vis for export. Carry the completed session's
     # duration and transport proof before release() retires it; defaults would
     # otherwise relabel every window as 10 ms and discard the loss/end flags.
     vis.seconds = s.seconds
-    vis.actual_seconds = s.quality.get('hostSeconds', s.seconds)
+    vis.actual_seconds = s.quality.get('hardwareSeconds',s.quality.get('hostSeconds', s.seconds))
     vis.capture_quality = dict(s.quality)
     # The browser is waiting to reconnect; release the interface before the
     # (potentially slow) native decode starts.

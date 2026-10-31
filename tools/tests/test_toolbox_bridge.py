@@ -141,5 +141,34 @@ class BridgeTests(unittest.TestCase):
             self.assertEqual(float(vis.cmd('get-actual-sample-time')),1.003)
             release.assert_called_once()
 
+    def test_ddr_hardware_extent_and_raw_record_roundtrip(self):
+        from werkzeug.wrappers import Response
+        with tempfile.TemporaryDirectory(dir=self.scratch) as folder,patch.dict(os.environ),patch('usb.core.find',side_effect=AssertionError('USB forbidden')):
+            app=self.app(Path(folder),offline=True);client=LocalClient(app,Response);backend=sys.modules['etm_toolbox_backend']
+            transport=dict(transport='ddr-usb/1',hardwareTicks=400000000,requestedTicks=400000000,
+                refClockHz=200000000,hardwareSeconds=2,hostSeconds=3.5,stopReason=0,loss=False)
+            extent=backend.capture_extent(None,500000000,2,transport)
+            self.assertEqual(extent['actualSeconds'],2);self.assertTrue(extent['complete'])
+            self.assertIsNone(extent['actualSamples']);self.assertFalse(extent['sampleCountMeasured'])
+            broken={**transport,'hardwareSeconds':3.5}
+            with self.assertRaises(ValueError):backend.capture_extent(None,500000000,2,broken)
+            sid='capture-'+'d'*32;record=backend.directory(sid);record.mkdir()
+            record.joinpath('firmware.elf').write_bytes((ROOT/'prebuilt/golden/f103ze-cdc48.elf').read_bytes())
+            record.joinpath('capture.bin').write_bytes(b'ETM')
+            record.joinpath('capture.frm1').write_bytes(bytes(range(16)))
+            record.joinpath('ddr-capture.json').write_text(json.dumps(transport))
+            backend.save(sid,dict(input='capture.bin',config=json.loads((ROOT/'tools/tests/fixtures/etm-offline/session.json').read_text())['config']))
+            with client.get('/etm/api/download/'+sid+'/record') as response:
+                self.assertEqual(response.status_code,200,response.data)
+                package=response.data
+            with zipfile.ZipFile(io.BytesIO(package)) as archive:
+                self.assertEqual(archive.read('capture.frm1'),bytes(range(16)))
+                self.assertEqual(json.loads(archive.read('ddr-capture.json')),transport)
+            with client.post('/etm/api/import',data={'capture':(io.BytesIO(package),'ddr.etmrecord')}) as response:
+                self.assertEqual(response.status_code,200,response.data)
+                imported=backend.directory(response.json['record'])
+            self.assertEqual((imported/'capture.frm1').read_bytes(),bytes(range(16)))
+            self.assertEqual(json.loads((imported/'ddr-capture.json').read_text()),transport)
+
 
 if __name__=='__main__':unittest.main()

@@ -44,7 +44,7 @@ class NativeWebCaptureTests(unittest.TestCase):
             options = {'elfId': elf_id, 'seconds': .01, 'decode': False}
             self.assertEqual(client.post('/etm/api/native-capture', json=options).status_code, 403)
             self.assertEqual(client.post('/etm/api/native-capture', headers=headers,
-                json={**options, 'seconds': 2}).status_code, 400)
+                json={**options, 'seconds': 3}).status_code, 400)
             for divider in (1, 2, 4):
                 rejected=client.post('/etm/api/native-capture',headers=headers,json={**options,'hclkDiv':divider})
                 self.assertEqual(rejected.status_code,400)

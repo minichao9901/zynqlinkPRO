@@ -106,7 +106,7 @@ def doctor(argv=None):
         checks['python'] = {'ok': True, 'version': sys.version.split()[0]}
     except Exception as error:
         checks['python'] = {'ok': False, 'error': str(error)}
-    exes = ['etm_decode.exe', 'etm_export.exe', 'etm_frontend.exe', 'etm_index.exe', 'etm_storebuild.exe']
+    exes = ['etm_decode.exe', 'etm_export.exe', 'etm_frontend.exe', 'etm_index.exe', 'etm_storebuild.exe','etm_framed.exe']
     checks['native'] = {'ok': all((SERVICE / 'build-native' / n).is_file() for n in exes),
                         'files': {n: (SERVICE / 'build-native' / n).is_file() for n in exes}}
     checks['zynq'] = ({'ok':True,'ready':False,'skipped':True,'message':'offline: hardware not inspected'}
@@ -151,7 +151,8 @@ def capture(argv):
     parser = argparse.ArgumentParser(prog='trace.py capture', description='Zynq FPGA ETM capture + native decode')
     parser.add_argument('--elf', required=True, help='目标 ELF（必须与 Flash 匹配）')
     parser.add_argument('--out', required=True, help='新记录目录（必须不存在）')
-    parser.add_argument('--seconds', type=float, default=0.05, help='采集时长 0..1 s，默认50 ms')
+    parser.add_argument('--seconds', type=float, default=0.05, help='采集时长0..2 s；DDR固件默认采后下载，旧固件最多1秒')
+    parser.add_argument('--transport',choices=('auto','ddr','legacy'),default='auto')
     parser.add_argument('--trace-id', type=int, default=2)
     parser.add_argument('--swd-khz', type=int, default=1000, help='目标控制SWD时钟，默认1000 kHz')
     parser.add_argument('--entry', help='采集起点函数名或0x地址')
@@ -166,8 +167,8 @@ def capture(argv):
     parser.add_argument('--json-out')
     args = parser.parse_args(argv)
 
-    if not 0 < args.seconds <= 1:
-        return fail('capture', '采集时长必须为 0..1 s', 2, started)
+    if not 0 < args.seconds <= 2:
+        return fail('capture', '采集时长必须为 0..2 s', 2, started)
     if not 1 <= args.trace_id <= 111:
         return fail('capture', 'Trace ID必须为1..111', 2, started)
     if not 1 <= args.swd_khz <= 50000:
@@ -209,7 +210,7 @@ def capture(argv):
                '--milliseconds', str(args.seconds * 1000),
                '--trace-id', str(args.trace_id),
                '--speed-khz', str(args.swd_khz),
-               '--gpio-speed', str(args.gpio_speed)]
+               '--gpio-speed', str(args.gpio_speed),'--transport',args.transport]
     if args.entry is not None:
         command += ['--entry', args.entry, '--entry-timeout', str(args.entry_timeout)]
         if args.reset_to_entry:
@@ -237,13 +238,23 @@ def capture(argv):
         'config': config, 'quality': acceptance.get('quality'), 'rawFormat': 'bin',
         'targetVerified': True, 'captureScope': 'cli-entry-window' if args.entry else 'cli-continuous-window',
         'captureEntry': (acceptance.get('entry') or {}).get('address'),
-        'captureExtent': {'requestedSeconds': args.seconds, 'actualSeconds': acceptance.get('capture_host_seconds'),
-                          'complete': True, 'known': 'capture_host_seconds' in acceptance,
-                          'basis': 'host monotonic ETM active window; not cycle-accurate timing'},
+        'captureExtent': {'requestedSeconds': args.seconds, 'actualSeconds': None,
+                          'complete': None, 'known': False,
+                          'hostReceiveSeconds':acceptance.get('capture_host_seconds'),
+                          'basis': 'legacy transport does not measure the hardware window'},
         'targetSnapshot': {'name': 'STM32F103ZE', 'clockPolicy': 'target-firmware-owned',
                            'gpioSpeed': args.gpio_speed},
         'etmBytes': len(etm), 'etmSha256': acceptance.get('etm_sha256'),
     }
+    if acceptance.get('transport')=='ddr-usb':
+        ddr=acceptance['ddr'];q=ddr['quality']
+        metadata.update(captureQuality=q,captureExtent=dict(requestedSeconds=args.seconds,
+            actualSeconds=ddr['actualWindowSeconds'],actualSamples=None,sampleCountMeasured=False,
+            complete=ddr['ticks']==ddr['requestedTicks'] and not q['loss'] and ddr['stopReason']==0,
+            known=True,hardwareTicks=ddr['ticks'],referenceClockHz=ddr['referenceHz'],
+            basis='bounded hardware reference ticks, not host download time'))
+        for source,name in [('capture.frm1','capture.frm1'),('capture.usb.json','ddr-capture.json')]:
+            shutil.copy2(out/'ddr'/source,out/name)
     (out / 'session.json').write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     # Keep the board runner's actual target-before.json register snapshot intact.
     summary = None

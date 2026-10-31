@@ -55,10 +55,12 @@ def main():
     ap.add_argument('--ready-file', type=Path, help='Internal stimulus synchronization marker; new file only')
     ap.add_argument('--sync', action='store_true', help='Enable ITM/DWT periodic synchronization')
     ap.add_argument('--ddr-physical', action='store_true', help='AI acceptance only: bounded PL DDR capture and JTAG AP0 download')
+    ap.add_argument('--transport',choices=('auto','ddr','legacy'),default='auto',help='Auto selects advertised post-capture DDR USB; legacy is explicit diagnostic only')
+    ap.add_argument('--verify-ddr-physical',action='store_true',help='AI acceptance: compare the same USB capture against physical MEM-AP0')
     ap.add_argument('--raw', action='store_true', help='Capture diagnostic sampled DDR bytes, not decoded ETM')
     ap.add_argument('--raw-samples', action='store_true', help='RAW_DIAGNOSTIC=3: preserve packed 200MHz five-line samples')
     args = ap.parse_args()
-    if not 0 < args.milliseconds <= (2000 if args.ddr_physical else 1000):
+    if not 0 < args.milliseconds <= 2000:
         ap.error('capture outside supported window')
     if args.ddr_physical and (args.raw or args.raw_samples or args.hclk_div != 1 or args.gpio_speed is not None):
         ap.error('DDR acceptance preserves target clock and requires framed RAW4 mode')
@@ -159,6 +161,11 @@ def main():
         assert report['flash'], 'no Flash image verified'
         report['reference'] = struct.unpack('<4I', dev.ctrl_transfer(0xc0, 0x61, 0, 0x4554, 16))
         assert 190_000_000 <= report['reference'][0] <= 210_000_000 and report['reference'][3] & 1
+        ddr_usb=not args.ddr_physical and not args.raw and args.transport!='legacy' and bool(report['reference'][3]&0x200)
+        if args.transport=='ddr' and not ddr_usb:raise RuntimeError('Probe does not advertise DDR USB capture')
+        if args.verify_ddr_physical and not ddr_usb:raise RuntimeError('Physical comparison requires DDR USB capture')
+        if not ddr_usb and not args.ddr_physical and args.milliseconds>1000:raise RuntimeError('Legacy capture is limited to 1 second')
+        report['transport']='ddr-usb' if ddr_usb else ('ddr-physical' if args.ddr_physical else 'legacy')
         was_halted = bool(mem.word(0xe000edf0) & (1 << 17))
         mem.write_word(0xe000edf0, 0xa05f0003)
         assert mem.word(0xe000edf0) & (1 << 17)
@@ -209,15 +216,22 @@ def main():
                       ctrl=mem.word(REG['etmcr']) & ~0x400,
                       ccer=mem.word(0xe00411e8), traceid=mem.word(REG['etmtraceidr']))
         report['config'] = config
-        if args.ddr_physical:
-            from etm_ddr_physical_capture import capture as capture_ddr
+        if args.ddr_physical or ddr_usb:
             def resume_ddr_target():
                 mem.write_word(REG['etmcr'], cr & ~0x400)
                 wait_program(0)
                 usb_reconnect.restore()
+                if args.ready_file:args.ready_file.write_text(json.dumps(dict(armed=True,monotonic=time.monotonic(),unix=time.time())))
                 mem.write_word(0xe000edf0, 0xa05f0001)
-            etm, ddr = capture_ddr(work, args.elf, args.milliseconds/1000,
-                                   report['reference'][0], resume_ddr_target, config['traceid'])
+            if ddr_usb:
+                from etm_ddr_usb_capture import capture as capture_ddr
+                etm,ddr=capture_ddr(work,args.elf,dev,out,inp,args.milliseconds/1000,
+                    report['reference'][0],resume_ddr_target,config['traceid'],args.verify_ddr_physical)
+                report['quality']=ddr['quality']
+            else:
+                from etm_ddr_physical_capture import capture as capture_ddr
+                etm,ddr=capture_ddr(work,args.elf,args.milliseconds/1000,
+                    report['reference'][0],resume_ddr_target,config['traceid'])
             report.update(ddr=ddr, etm_bytes=len(etm), etm_sha256=sha(etm))
             (work/'etm.bin').write_bytes(etm)
             shutil.copy2(args.target_elf, work/'firmware.elf')

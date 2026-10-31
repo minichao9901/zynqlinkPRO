@@ -670,12 +670,23 @@ def capture_start_info(events,metadata):
 DEFAULT_SLICE_SECONDS = 0.2  # 历史长窗单片时长；仅旧的 export_slices()/离线重建工具仍用
 # 2026-10-23 用户决定开放实验长窗；一次采集、一次完整解码，不自动分片。
 # 请求1 s不等于实际录满1 s：保存后回读深度，明确提示压缩存储提前结束。
-CAPTURE_MAX_SECONDS = 1.0
-CAPTURE_MAX_SAMPLES = 500_000_000
+CAPTURE_MAX_SECONDS = 2.0
+CAPTURE_MAX_SAMPLES = 1_000_000_000
 
 
 def capture_extent(depth, rate, seconds, transport=None):
     if transport is not None:
+        if transport.get('transport')=='ddr-usb/1':
+            ticks=transport.get('hardwareTicks');reference=transport.get('refClockHz')
+            requested=transport.get('requestedTicks');actual=transport.get('hardwareSeconds')
+            if not isinstance(ticks,int) or not isinstance(reference,int) or reference<=0 or not isinstance(requested,int):
+                raise ValueError('DDR硬件窗口元数据缺失')
+            if not isinstance(actual,(int,float)) or not math.isfinite(actual) or abs(actual-ticks/reference)>1e-9:
+                raise ValueError('DDR硬件窗口计数与时长不一致')
+            return dict(known=True,requestedSeconds=seconds,requestedSamples=None,actualSeconds=actual,
+                actualSamples=None,complete=ticks==requested and transport.get('stopReason')==0 and not transport.get('loss'),
+                hardwareTicks=ticks,referenceClockHz=reference,sampleCountMeasured=False,
+                hostReceiveSeconds=transport.get('hostSeconds'),basis='bounded hardware reference ticks; formatter bytes are not physical sample counts')
         # ZET1 has no physical sample count or hardware start/stop timestamp.
         # Host receive/drain time cannot prove the requested target window.
         return dict(known=False,requestedSeconds=seconds,requestedSamples=None,
@@ -922,7 +933,7 @@ def import_record():
                     if name.startswith('store/'):
                         raise ValueError('记录包里的 trace-store 不完整（缺少 store/manifest.json），拒绝导入。')
             names = list(dict.fromkeys(('session.json', m['input'], 'firmware.elf', 'sources.json',
-                                        'capture.kvdat')
+                                        'capture.kvdat','capture.frm1','ddr-capture.json','ddr-demux.json')
                                        + (('decoded.json',) if store_members else ())
                                        + tuple(store_members)))
             total = 0
@@ -983,6 +994,7 @@ def capture_job(jid, sid, options):
         with lock:
             if jobs[jid].get('_stopped'):return
         v = Vis()
+        v.capture_directory=directory(sid)
         v.config = options['config']
         v.traceid = int(options['config'].get('traceid', 2))
         v.seconds = options['seconds']
@@ -1147,7 +1159,7 @@ def start_capture():
              targetVerified=bool(o.get('targetVerified')), fraction=.25, glitchNs=0,
              targetSnapshot=o.get('targetSnapshot'),captureScope=o.get('captureScope','unfiltered-window'),captureEntry=o.get('captureEntry'),
              rawFormat='bin')
-    # 默认开放1 s实验长窗；500 MSa/s最多5亿样本，仍保留资源边界。
+# DDR固件支持最多2s硬件窗口；旧固件由传输层限制为1s。
     if not (0 < o['seconds'] <= CAPTURE_MAX_SECONDS and 0 < o['rate'] <= 500000000
             and o['seconds']*o['rate'] <= CAPTURE_MAX_SAMPLES):
         raise ValueError(f'单次采集上限 {CAPTURE_MAX_SECONDS*1000:g} ms（最多 {CAPTURE_MAX_SAMPLES:,} 样本）；更长的覆盖请分多次采集。')
@@ -1312,7 +1324,7 @@ def download(sid, kind):
         if not (folder/m['input']).is_file() or not (folder/'firmware.elf').is_file():
             raise ValueError('本记录尚无本次原始波形或配套 ELF，不能导出为完整记录包。')
         names = list(dict.fromkeys(('session.json', m['input'], 'firmware.elf', 'sources.json',
-                                    'capture.kvdat')))
+                                    'capture.kvdat','capture.frm1','ddr-capture.json','ddr-demux.json')))
         manifest_file = folder / 'store' / STORE_MANIFEST_NAME
         if manifest_file.is_file():
             # 新格式记录：把 trace-store 与小型 decoded.json 一起打包，导入后无需重新解码。
