@@ -1,0 +1,181 @@
+{
+  "artifacts": {
+    "git_head": "742eecaed752b1715b66a5624042aab505ae08d5",
+    "git_dirty": true,
+    "bit": {
+      "path": "E:\\zynqlinkPRO_orbtrace_opt\\prebuilt\\20261029_swd_short_high\\probe.bit",
+      "sha256": "62ce682ef3302941d109b0af7479010ac88e8856f32764f60cdeb5d869259ce3"
+    },
+    "elf": {
+      "path": "E:\\zynqlinkPRO_orbtrace_opt\\prebuilt\\20261029_swd_short_high\\probe.elf",
+      "sha256": "5893bdd4248dfd3c9f26c729f36159ad4bc3feadf2b38f6ebb9cb9fc12c4a842"
+    }
+  },
+  "kind": "continuous RAM producer RTT->CDC",
+  "transport": "swd",
+  "rows": [
+    {
+      "speed_hz": 60000000,
+      "chunk": 2048,
+      "repeat": 0,
+      "FCLK_Hz": 119999998,
+      "cfg": "0xa11",
+      "waveform": {
+        "SWCLK_Hz": 59999999.0,
+        "half_period_fclk": 1,
+        "short_high": false,
+        "intended_high_ns": 8.333333472222225
+      },
+      "JTAG_sampling_mode": 16,
+      "RISC_V_SBA_enabled": false,
+      "actual_link_Hz": 59999999.0,
+      "clock_observation": "PS JTAG register read; no DAP command during stream",
+      "window_s": 3.0020743000059156,
+      "host_bytes": 14352384,
+      "host_MB_s": 4.780822380036271,
+      "probe_bytes": 14399488,
+      "probe_MB_s": 4.796512864445635,
+      "session_bytes": 18739196,
+      "sequence_exact": true,
+      "all_published_received": true,
+      "errors": 0,
+      "s0": [
+        65537,
+        536871424,
+        536871448,
+        4323328,
+        138348608,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        989857792
+      ],
+      "s1": [
+        65537,
+        536871424,
+        536871448,
+        18722816,
+        599139255,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        989857792
+      ]
+    },
+    {
+      "speed_hz": 60000000,
+      "chunk": 2048,
+      "repeat": 1,
+      "FCLK_Hz": 119999998,
+      "cfg": "0xa11",
+      "waveform": {
+        "SWCLK_Hz": 59999999.0,
+        "half_period_fclk": 1,
+        "short_high": false,
+        "intended_high_ns": 8.333333472222225
+      },
+      "JTAG_sampling_mode": 16,
+      "RISC_V_SBA_enabled": false,
+      "actual_link_Hz": 59999999.0,
+      "clock_observation": "PS JTAG register read; no DAP command during stream",
+      "window_s": 3.0021946499982732,
+      "host_bytes": 14352384,
+      "host_MB_s": 4.780630729592518,
+      "probe_bytes": 14405632,
+      "probe_MB_s": 4.798367087892947,
+      "session_bytes": 18681852,
+      "sequence_exact": true,
+      "all_published_received": true,
+      "errors": 0,
+      "s0": [
+        65537,
+        536871424,
+        536871448,
+        4261888,
+        136382498,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        989857792
+      ],
+      "s1": [
+        65537,
+        536871424,
+        536871448,
+        18667520,
+        597369756,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        989857792
+      ]
+    }
+  ],
+  "backup_sha256": "e053ddfa6d1218f841cd069a385d86c52b637ef9e3acb1a646782a03c4b7113a",
+  "registers_before": {
+    "0": 1,
+    "1": 131072,
+    "2": 0,
+    "3": 536871744,
+    "4": 0,
+    "5": 8,
+    "6": 79764919,
+    "7": 7,
+    "8": 6,
+    "9": 536936406,
+    "10": 536875076,
+    "11": 2328958680,
+    "12": 536878076,
+    "13": 536936424,
+    "14": 134219791,
+    "15": 134219162,
+    "16": 2164260864,
+    "17": 536936424,
+    "18": 37205868,
+    "20": 1
+  },
+  "RCC_before": [
+    50548355,
+    6931466
+  ],
+  "restore_match": true,
+  "registers_after": {
+    "0": 1,
+    "1": 131072,
+    "2": 0,
+    "3": 536871744,
+    "4": 0,
+    "5": 8,
+    "6": 79764919,
+    "7": 7,
+    "8": 6,
+    "9": 536936406,
+    "10": 536875076,
+    "11": 2328958680,
+    "12": 536878076,
+    "13": 536936424,
+    "14": 134219791,
+    "15": 134219162,
+    "16": 2164260864,
+    "17": 536936424,
+    "18": 37205868,
+    "20": 1
+  },
+  "registers_match": true,
+  "RCC_after": [
+    50548355,
+    6931466
+  ]
+}

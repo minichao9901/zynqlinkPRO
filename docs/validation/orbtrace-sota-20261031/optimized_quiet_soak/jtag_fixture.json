@@ -1,0 +1,50 @@
+{
+  "command": [
+    "python",
+    "-X",
+    "utf8",
+    "tools/h743_peak.py",
+    "--transport",
+    "swd",
+    "--speed",
+    "60000",
+    "--jtag-ir",
+    "4,5",
+    "--address",
+    "0x20008000",
+    "--words",
+    "512",
+    "--depth",
+    "32",
+    "--loops",
+    "256",
+    "--repeats",
+    "3",
+    "--soak-seconds",
+    "30",
+    "--bit",
+    "prebuilt/20261031_orbtrace_opt_7020_120_candidate/zynqlink_probe.bit",
+    "--elf",
+    "prebuilt/20261031_orbtrace_opt_7020_120_candidate/zynqlink_probe_60.elf",
+    "--output",
+    "docs/validation/orbtrace-sota-20261031/optimized_quiet_soak/peak.json"
+  ],
+  "restore_swj_from_target_source": 2,
+  "initial_DHCSR": "0x30003",
+  "APB2ENR": "0x404d",
+  "MAPR_readable_bits": "0x0",
+  "target_id": "0x10036414",
+  "RCC_before": [
+    50548355,
+    6931466
+  ],
+  "JTAG_IDCODE": "0x3ba00477",
+  "returncode": 0,
+  "MAPR_readable_restore_match": true,
+  "APB2ENR_restore_match": true,
+  "RCC_after": [
+    50548355,
+    6931466
+  ],
+  "run_halt_restore_match": true
+}

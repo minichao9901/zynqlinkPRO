@@ -1,0 +1,29 @@
+{
+  "image_dir": "E:\\zynqlinkPRO_qspi_cli\\prebuilt\\20261031_orbtrace_opt_qspi_7020_120",
+  "out": "E:\\zynqlinkPRO_qspi_cli\\build\\qspi_cli_verify",
+  "boot_sha256": "389c0d2cd52f6087aae038dc6bf35acfff0f0d65b74b98949fbdb5deab9525eb",
+  "operation": "verify existing image -> system reset",
+  "status": "failed",
+  "source": {
+    "files": {
+      "application.elf": "4fbf5f7816644ea946a684e1ff3f30425e57eea6e5b64cd0d0d6839f284e6bdb",
+      "BOOT.bif": "0cdcf2b024578146cf4524bd41d5668baaafa3e216c15317664313bff88191eb",
+      "BOOT.bin": "389c0d2cd52f6087aae038dc6bf35acfff0f0d65b74b98949fbdb5deab9525eb",
+      "build_manifest.json": "b1fb64a0826265ae592a40b9eafa7eb57fe2e7b14eb62bff1ecb22f4c3a55223",
+      "fsbl_programmer.elf": "08fe7d7b2df859cd0205e0fc288ceb2aa98bc6444cd41ebdf30cb01252bbedf9",
+      "fsbl_stage0.elf": "0acc74c53ad67b7ffa5a7476311b88ee0d516a8529060c03c629e10d345c8799",
+      "fsbl_stage2.bin": "f18bd49242ad78e3a28d99f7f486377bbe056f904dc6766119a788b3e561ecf8",
+      "fsbl_stage2.elf": "f2cfb301c89808bc9d8eb6b4d9ef7fcf9d17070d415f1e602f49b4a0f3157184",
+      "probe.bit": "f02a15db0b576f631c08448b19ea3844d1b45ef00ee6801d243caee398960230",
+      "ps7_init.tcl": "d3eeab6707765ab59acb924e39ff5c77c013da8cbf598b181e9eb43578f29ece",
+      "qspi_read.elf": "15edc399d513ea30df3ee8f945a3252d58fcff5a96b31452bab30b5f52db3f37"
+    },
+    "device": "xc7z020clg400-2",
+    "FCLK_Hz": 120000000,
+    "app_profile": "60MHz-capable, previously SOTA-validated",
+    "boot_validation": "pending readback and reset",
+    "ETM_filter_changes": "not merged",
+    "source_revision": "742eecaed752b1715b66a5624042aab505ae08d5 + firmware/boot sources; build_manifest contains source SHA-256"
+  },
+  "error": "QSPI helper did not become ready"
+}
