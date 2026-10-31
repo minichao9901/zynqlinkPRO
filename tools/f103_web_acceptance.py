@@ -96,7 +96,7 @@ class Acceptance:
             started = time.perf_counter()
             captured = self.page('etm', 'invoke', method='captureNative', args=[{
                 'seconds': seconds, 'entry': 'cdc_poll', 'resetToEntry': False,
-                'hclkDiv': 4, 'gpioSpeed': 1, 'traceId': 2, 'swdKhz': 1000, 'decode': True}])
+                'gpioSpeed': 1, 'traceId': 2, 'swdKhz': 1000, 'decode': True}])
             wall = time.perf_counter() - started
             sid = captured['record']
             folder = ROOT / 'etm-service/records' / sid

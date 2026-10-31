@@ -51,6 +51,7 @@ def catalog():
             'trace': 'toolbox.py trace <existing trace CLI arguments>',
             'project': {'entry':'toolbox.py project list|describe|run','browserRequired':False,'validation':'入口覆盖不等于全部功能实测'},
             'bridge': 'toolbox.py bridge <OpenOCD/J-Link bridge arguments>',
+            'bridge-build': 'toolbox.py bridge-build --out NEW_DIR (Windows portable EXE + ZIP, AI build entry)',
             'fixtures': 'toolbox.py fixtures rtt|scope --out NEW_DIR',
             'probe-flash': 'toolbox.py probe-flash [--image-dir BOOT_PACKAGE] [--dry-run|--verify-only|--backup-only] (direct JTAG, no browser/runtime)',
             'browserRequired': False, 'browserRequiredForPages': True,
@@ -241,6 +242,7 @@ def parser():
     c.add_argument('--args', default='[]', help='JSON位置参数数组；大参数可用--args-file')
     c.add_argument('--args-file')
     sub.add_parser('project',help='全项目非Web工具的清单/描述/执行；project --help')
+    sub.add_parser('bridge-build',help='AI：构建便携Windows工作台EXE；bridge-build --help')
     sub.add_parser('trace', help='原样转交全部现有ETM Trace CLI参数（trace之后的--help）')
     sub.add_parser('bridge', help='启动可选OpenOCD/J-Link桥（bridge --help查看桥选项）')
     sub.add_parser('fixtures', help='构建F103ZE额定72MHz测试目标（fixtures --help查看参数）')
@@ -265,6 +267,9 @@ def parser():
 
 def main(argv=None):
     argv = list(sys.argv[1:] if argv is None else argv)
+    if argv and argv[0] == 'bridge-build':
+        from tools.build_bridge import main as build_bridge
+        return build_bridge(argv[1:])
     if argv and argv[0] == 'project':
         return subprocess.call([sys.executable,'-X','utf8',str(ROOT/'tools/project_cli.py'),*argv[1:]])
     if argv and argv[0] == 'probe-flash':

@@ -21,6 +21,8 @@ ROOTS=('tools/','fpga/','firmware/target/','firmware/boot/','etm-service/','web/
 EXCLUDED={'vendor','sdk','reference','records','build-native','node_modules','tests','selftest','as_run_helpers'}
 EXTENSIONS={'.py','.tcl','.ps1','.mjs'}
 ALIASES={
+ 'bridge.build':'tools/build_bridge.py',
+ 'bridge.verify':'tools/verify_bridge_package.py',
  'fpga.build':'fpga/build_dma.tcl','fpga.incremental':'fpga/build_incremental.tcl',
  'fpga.verify':'fpga/verify_routed.tcl','fpga.7010':'fpga/implement_7010.tcl',
  'fpga.repair-io':'fpga/repair_probe_io.tcl','sim.cm3':'tools/run_cm3_sim.py','sim.matrix':'tools/run_cm3_matrix.py',

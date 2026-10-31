@@ -45,6 +45,10 @@ class NativeWebCaptureTests(unittest.TestCase):
             self.assertEqual(client.post('/etm/api/native-capture', json=options).status_code, 403)
             self.assertEqual(client.post('/etm/api/native-capture', headers=headers,
                 json={**options, 'seconds': 2}).status_code, 400)
+            for divider in (1, 2, 4):
+                rejected=client.post('/etm/api/native-capture',headers=headers,json={**options,'hclkDiv':divider})
+                self.assertEqual(rejected.status_code,400)
+                self.assertIn('target',rejected.json['error'])
             with patch.object(native_web_capture.threading, 'Thread'):
                 response = client.post('/etm/api/native-capture', headers=headers, json=options)
                 self.assertEqual(response.status_code, 200, response.data)
@@ -53,6 +57,7 @@ class NativeWebCaptureTests(unittest.TestCase):
 
             restored = True
             def transaction(command, **kwargs):
+                self.assertNotIn('--hclk-div',command,'Web must preserve the target firmware clock')
                 self.assertNotIn('timeout', kwargs, 'must not kill before target restoration')
                 raw = Path(command[command.index('--out') + 1])
                 raw.mkdir()
@@ -63,7 +68,7 @@ class NativeWebCaptureTests(unittest.TestCase):
                                                              'quality': {'loss': False}}))
                 return SimpleNamespace(returncode=0, stdout='{"ok":true}', stderr='')
 
-            prepared = {'seconds': .01, 'decode': False, 'traceId': 2, 'hclkDiv': 4, 'gpioSpeed': 1, 'swdKhz': 1000}
+            prepared = {'seconds': .01, 'decode': False, 'traceId': 2, 'gpioSpeed': 1, 'swdKhz': 1000}
             with patch.object(native_web_capture.subprocess, 'run', side_effect=transaction) as run:
                 capture.run(job['job'], job['record'], prepared)
                 self.assertEqual(run.call_count, 1)

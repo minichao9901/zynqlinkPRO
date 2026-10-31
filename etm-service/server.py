@@ -50,8 +50,8 @@ MAX_UPLOAD_BYTES = 1024 * 1024 * 1024           # 1 GiB：.etmrecord 或裸 CSV 
 MAX_RECORD_MEMBER_BYTES = 1024 * 1024 * 1024    # 1 GiB：单个解压成员
 MAX_RECORD_TOTAL_BYTES = 2 * 1024 * 1024 * 1024  # 2 GiB：整包解压总量
 app.config['MAX_CONTENT_LENGTH'] = MAX_UPLOAD_BYTES
-RECORDS = ROOT / 'records'
-RECORDS.mkdir(exist_ok=True)
+RECORDS = Path(os.environ.get('WEB_ETM_RECORDS', ROOT / 'records')).resolve()
+RECORDS.mkdir(parents=True, exist_ok=True)
 jobs = {}
 CAPTURE_PROTOCOL=2
 lock = threading.RLock()
@@ -257,6 +257,7 @@ def result(sid):
                             unaccountedBytes=max(0,size-r['quality'].get('accountedBytes',0)))
     r.setdefault('targetSnapshot',metadata.get('targetSnapshot'))
     r.setdefault('captureScope',metadata.get('captureScope','unfiltered-window'))
+    r['captureQuality']=metadata.get('captureQuality')
     if 'captureStart' not in r:
         r['captureStart']=(capture_start_from_store(folder / 'store',metadata)
                            if r.get('traceStore') else capture_start_info(r.get('events',[]),metadata))
@@ -316,6 +317,7 @@ def browse_overview(sid):
     r.update(name=m.get('name',sid),laFilter=m.get('laFilter'),targetSnapshot=m.get('targetSnapshot'),
              targetVerified=bool(m.get('targetVerified')),captureScope=m.get('captureScope'),captureEntry=m.get('captureEntry'),recordError=m.get('error') or m.get('captureWarning'))
     if m.get('captureExtent'):r['captureExtent']=m['captureExtent']
+    if m.get('captureQuality'):r['captureQuality']=m['captureQuality']
     return jsonify(r)
 
 @app.get('/api/browse/<sid>/page')
@@ -1043,6 +1045,15 @@ def capture_job(jid, sid, options):
         m = meta(sid)
         extent=capture_extent(depth,options['rate'],options['seconds'])
         m.update(actualDepth=depth, actualTime=span, stopped=stopped,captureStatus='saved',captureExtent=extent)
+        transport=getattr(v,'capture_quality',None)
+        if transport is not None:
+            m['captureQuality']=transport
+            extent.update(basis='host monotonic receive window; not target cycle timing',sampleCountMeasured=False)
+            save(sid,m)
+            change(jid,captureQuality=transport)
+            if transport.get('loss') or not transport.get('synced') or not transport.get('ended'):
+                raise ValueError('Zynq接收未完整通过：loss=%s / synced=%s / ended=%s；原始数据已保留，请检查接线或由target固件调整TRACECLK' %
+                    (transport.get('loss'),transport.get('synced'),transport.get('ended')))
         if not extent['complete']:
             m['captureWarning']=(f"请求 {options['seconds']*1000:g} ms，实际仅采集 "
                 f"{extent['actualSeconds']*1000:.3f} ms；可能达到 Zynq FIFO/接收窗口容量。"
@@ -1094,6 +1105,8 @@ def capture_job(jid, sid, options):
 @app.post('/api/capture')
 def start_capture():
     o = request.get_json()
+    if isinstance(o,dict) and 'hclkDiv' in o:
+        raise ValueError('AHB分频由target固件负责；Web采集不接受hclkDiv')
     elf_id=o.get('elfId') if isinstance(o,dict) else None
     if not isinstance(elf_id,str) or not re.fullmatch(r'elf-[0-9a-f]{32}',elf_id):
         raise ValueError('联动采集必须先载入明确的 ELF；不会自动绑定示例固件。')

@@ -2,6 +2,13 @@
 
 # F103ZE / ZynqDAP：Web CLI、ETM与压力测试统一记录
 
+> 最新操作边界：用户双击bridge EXE并通过Web完成采集；CLI用于AI自动化与打包。
+> PLL、AHB/APB分频由target固件负责，生产Web和Trace CLI不再设置AHB分频。
+> 本文之前6/12MHz中通过上位机临时分频得到的结果属于历史实验，不能套用为当前Web默认频率。
+> F103ZE 48MHz Golden目标默认物理TRACECLK24MHz；如需更低频率由target固件提供，并载入匹配ELF。
+> H743保留superlinkPRO的ETMv4能力；新增Kingst真实记录作离线回归，不冒充Zynq上板验收。
+> 用户操作见[Web操作说明](Zynq-ETM-Trace操作说明.md)。
+
 本文件集中记录本轮结论。**2026-10-31追加离线原生链路复测：同一份1s数据完整处理中位7.208s，
 解码后完整首屏中位221.5ms；首次半段缩放1.12～1.39s。此前268s与GB级JSONL来自入口漏配，
 不能代表superlinkPRO C++引擎性能。**新入口默认二进制/C++存储，不再生成逐事件JSONL；详细口径见末节。

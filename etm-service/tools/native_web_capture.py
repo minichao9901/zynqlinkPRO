@@ -44,6 +44,8 @@ class NativeCapture:
         o = request.get_json()
         if not isinstance(o, dict):
             raise ValueError('采集参数必须为对象')
+        if 'hclkDiv' in o:
+            raise ValueError('AHB分频由target固件负责；Web采集不接受hclkDiv，请使用目标固件的实际时钟')
         elf_id = o.get('elfId')
         if not isinstance(elf_id, str) or not re.fullmatch(r'elf-[0-9a-f]{32}', elf_id):
             raise ValueError('请先在当前Web页面载入目标ELF')
@@ -58,7 +60,7 @@ class NativeCapture:
         options = {'seconds': seconds, 'decode': o.get('decode', True)}
         if not isinstance(options['decode'], bool):
             raise ValueError('decode必须为boolean')
-        for name, default, allowed in [('hclkDiv', 4, (1, 2, 4)), ('gpioSpeed', 1, (1, 2, 3)),
+        for name, default, allowed in [('gpioSpeed', 1, (1, 2, 3)),
                                        ('traceId', 2, range(1, 112)), ('swdKhz', 1000, range(1, 50001))]:
             value = o.get(name, default)
             if isinstance(value, bool) or not isinstance(value, int) or value not in allowed:
@@ -123,7 +125,7 @@ class NativeCapture:
                        '--elf', str(folder / 'firmware.elf'), '--out', str(folder / 'raw'),
                        '--bit', str(self.bit), '--zynq-elf', str(self.elf), '--no-decode',
                        '--seconds', str(options['seconds']), '--trace-id', str(options['traceId']),
-                       '--hclk-div', str(options['hclkDiv']), '--gpio-speed', str(options['gpioSpeed']),
+                       '--gpio-speed', str(options['gpioSpeed']),
                        '--swd-khz', str(options['swdKhz'])]
             if options.get('entry') is not None:
                 command += ['--entry', hex(options['entry']), '--entry-timeout', str(options['entryTimeout'])]

@@ -51,6 +51,7 @@ class Session:
         self.running = False
         self.done = threading.Event()
         self.started = 0.0
+        self.started_monotonic = None
         self._reader = None
         self._timer = None
 
@@ -167,6 +168,7 @@ class Session:
         self._restart_trace()
         self._dap_write32(0xE000EDF0, 0xA05F0001)
         self.started = time.time()
+        self.started_monotonic = time.perf_counter()
         self.running = True
         self._reader = threading.Thread(target=self._read_loop, daemon=True)
         self._reader.start()
@@ -219,6 +221,8 @@ class Session:
             self.error = str(exc)
             self.running = False
         finally:
+            if self.started_monotonic is not None:
+                self.quality['hostSeconds'] = time.perf_counter() - self.started_monotonic
             self.done.set()
 
     def stop(self):
@@ -331,9 +335,9 @@ class Vis:
             session().stop()
             return "ACK"
         if head == "get-actual-sample-depth":
-            return str(int(self.seconds * self.rate))
+            return str(int(getattr(self, 'actual_seconds', self.seconds) * self.rate))
         if head == "get-actual-sample-time":
-            return str(self.seconds)
+            return str(getattr(self, 'actual_seconds', self.seconds))
         return "OK"
 
     def close(self):
@@ -351,6 +355,12 @@ def do_export(vis, path, channels):
         raise CaptureError(s.error)
     with open(path, "wb") as f:
         f.write(bytes(s.bytes))
+    # capture_job creates a fresh Vis for export. Carry the completed session's
+    # duration and transport proof before release() retires it; defaults would
+    # otherwise relabel every window as 10 ms and discard the loss/end flags.
+    vis.seconds = s.seconds
+    vis.actual_seconds = s.quality.get('hostSeconds', s.seconds)
+    vis.capture_quality = dict(s.quality)
     # The browser is waiting to reconnect; release the interface before the
     # (potentially slow) native decode starts.
     release()

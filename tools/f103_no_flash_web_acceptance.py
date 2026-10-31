@@ -196,7 +196,7 @@ class NoFlash(Streams):
     def rttcdc(self):
         # Refill the real application's finite boot log after RTT Viewer drained it.
         capture=self.capture('usb-init-for-rttcdc',{'seconds':.1,'entry':'cdc_acm_init','resetToEntry':True,
-            'usbReconnect':True,'hclkDiv':4,'gpioSpeed':1,'swdKhz':1000,'traceId':2,'decode':True})
+            'usbReconnect':True,'gpioSpeed':1,'swdKhz':1000,'traceId':2,'decode':True})
         self.page('rttcdc','show');self.invoke('rttcdc','connect',target='hid')
         try:
             self.set('rttcdc','#h-target','swd');self.set('rttcdc','#h-addr',hex(symbol(self.args.elf,'_SEGGER_RTT')))
@@ -227,11 +227,11 @@ class NoFlash(Streams):
         self.page('etm','show');self.load_etm()
         report['usbInitialization']=self.capture('usb-initialization',{
             'seconds':.1,'entry':'cdc_acm_init','resetToEntry':True,'usbReconnect':True,
-            'hclkDiv':4,'gpioSpeed':1,'swdKhz':1000,'traceId':2,'decode':True},
+            'gpioSpeed':1,'swdKhz':1000,'traceId':2,'decode':True},
             ('cdc_acm_init','usbd_initialize','usb_dc_init'))
         report['serialAfterReset']=self.serial('after-reset');self.save(self.out/'results.json',report)
         report['cdcEcho']=self.capture('cdc-echo',{
-            'seconds':.2,'entry':'cdc_poll','resetToEntry':False,'hclkDiv':4,'gpioSpeed':1,'swdKhz':1000,
+            'seconds':.2,'entry':'cdc_poll','resetToEntry':False,'gpioSpeed':1,'swdKhz':1000,
             'traceId':2,'decode':True,'serialStimulus':{'port':self.target_port,'payload':'ETM_CDC_ECHO_0123456789abcdef\r\n',
             'rounds':4,'intervalSeconds':.02}},('usbd_cdc_acm_bulk_out','usbd_cdc_acm_bulk_in'))
         self.save(self.out/'results.json',report)

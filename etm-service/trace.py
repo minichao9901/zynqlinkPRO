@@ -153,8 +153,6 @@ def capture(argv):
     parser.add_argument('--out', required=True, help='新记录目录（必须不存在）')
     parser.add_argument('--seconds', type=float, default=0.05, help='采集时长 0..1 s，默认50 ms')
     parser.add_argument('--trace-id', type=int, default=2)
-    parser.add_argument('--hclk-div', type=int, choices=(1, 2, 4), default=4,
-                        help='临时 AHB 分频；默认4，实际TRACECLK取决于目标原始RCC配置')
     parser.add_argument('--swd-khz', type=int, default=1000, help='目标控制SWD时钟，默认1000 kHz')
     parser.add_argument('--entry', help='采集起点函数名或0x地址')
     parser.add_argument('--reset-to-entry', action='store_true')
@@ -211,7 +209,6 @@ def capture(argv):
                '--milliseconds', str(args.seconds * 1000),
                '--trace-id', str(args.trace_id),
                '--speed-khz', str(args.swd_khz),
-               '--hclk-div', str(args.hclk_div),
                '--gpio-speed', str(args.gpio_speed)]
     if args.entry is not None:
         command += ['--entry', args.entry, '--entry-timeout', str(args.entry_timeout)]
@@ -243,7 +240,7 @@ def capture(argv):
         'captureExtent': {'requestedSeconds': args.seconds, 'actualSeconds': acceptance.get('capture_host_seconds'),
                           'complete': True, 'known': 'capture_host_seconds' in acceptance,
                           'basis': 'host monotonic ETM active window; not cycle-accurate timing'},
-        'targetSnapshot': {'name': 'STM32F103ZE', 'hclkDiv': args.hclk_div,
+        'targetSnapshot': {'name': 'STM32F103ZE', 'clockPolicy': 'target-firmware-owned',
                            'gpioSpeed': args.gpio_speed},
         'etmBytes': len(etm), 'etmSha256': acceptance.get('etm_sha256'),
     }
@@ -263,7 +260,7 @@ def capture(argv):
     result = {'record': str(out), 'etmBytes': len(etm), 'etmSha256': metadata['etmSha256'],
               'quality': acceptance.get('quality'), 'summary': summary,
               'config': config, 'captureSeconds': args.seconds,
-              'hclkDiv': args.hclk_div, 'gpioSpeed': args.gpio_speed}
+              'clockPolicy': 'target-firmware-owned', 'gpioSpeed': args.gpio_speed}
     if decode_error:
         result['decodeError'] = decode_error
         payload = envelope('capture', False, result, started=started, code=5,

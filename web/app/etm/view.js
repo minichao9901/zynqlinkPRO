@@ -85,7 +85,7 @@ export class EtmView {
       if (this.notice) this.notice.hidden = false;
       if (this.status){
         this.status.textContent = `没有找到本地 ETM 服务（${this.origin}）：${error.message}。` +
-          '请先运行 etm-service/start-etm.bat，或在下面填入服务地址。';
+          '请先双击 zynq-etm-bridge.exe 打开本地工作台，或在下面填入服务地址。';
       }
       return false;
     }

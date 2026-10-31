@@ -1,19 +1,74 @@
-# Zynq ETM
+# Zynq ETM Web 操作说明
 
-Zynq使用prebuilt/golden的bit/ELF/ps7_init；目标匹配f103ze-cdc48.elf（48MHz CDC应用）。恢复包属于旧已验收版本，不能混称当前Golden。
+用户双击Windows bridge EXE并操作Web；CLI用于AI自动化、打包和验收。
+主流程沿用superlinkPRO，LA接收后端替换成Zynq ETM-LA，保留原生C++解码与TraceStore。
 
-| F103ZE | Zynq J7 | 信号 |
-|---|---|---|
-| PE2 | 16 | TRACECLK |
-| PE3 | 15 | D0 |
-| PE4 | 17 | D1 |
-| PE5 | 18 | D2 |
-| PE6 | 19 | D3 |
-| GND | 14 | 地 |
+## 启动与停止
 
-统一入口为toolbox.py。离线浏览保存记录不需要连接探针。启用native probe、下载、采集或Flash均为独立硬件操作，本轮精简没有执行。
+完整解压桥包，双击`zynq-etm-bridge.exe`，浏览器自动打开ETM工作台。保留`_internal/`目录。
+无需安装Python或Node，不需手输启动命令。数据默认保存在EXE旁的`data/records/`。
+关闭桥控制台停止服务；重复双击同版本/同数据目录会重新打开已有工作台。
+桥不会给Zynq下载bit/ELF，也不会烧录目标。上板前使用已经加载对应配对的ZynqDAP。
 
-只保留最新有效1s（12MHz TRACECLK）和100ms业务记录，见retained-records.json。记录含gaps/unknownExecution，不把成功解码等同于全部执行已知，也不外推更高TRACECLK均通过。
+## 1 调试：ELF、源码与函数
 
-原始输入、目标ELF、配置和源码必须配套。离线查看/导出：
-`python toolbox.py trace --help`、`python toolbox.py project list`。
+点击“采集设置”→“1 调试”，载入与目标Flash完全匹配的ELF。
+F103ZE现有Golden目标为`prebuilt/golden/f103ze-cdc48.elf`；H743使用自己的匹配ELF。
+展开“配套源码”，选择对应源码目录。ELF导入只供符号、镜像校验和解码，不烧录。
+点击“连接探针”，核对芯片识别；首次进入保留原硬件状态，不自动重置目标时钟。
+搜索函数并点“＋”，或输入`b cdc_poll`；选断点列表中的圆点作为采集起点。
+起点表示从该处开始录制后续窗口，包含被调函数和中断，不是只采该函数。
+循环业务函数可取消“先复位，再运行至起点”；只执行一次的初始化函数可勾选复位。
+H743可选superlinkPRO例程的`trace_hook_entry`或自己的循环业务入口。
+
+## 2 时钟：只读核对
+
+PLL、AHB/APB分频、CPU和Trace时钟由target固件负责。Web只读取RCC，用户填写板上真实HSE。
+“预期频率”只做核对，填写更低数字不会修改实际频率。生产Web/API不接受`hclkDiv`。
+F103ZE样例HSE为8MHz，48MHz固件默认HCLK48MHz、物理TRACECLK24MHz。
+H743阿波罗例程HSE为25MHz；superlinkPRO参考记录为CPU60MHz、TRACECLK30MHz。
+H743 Trace时钟和CPU可独立，必须以实际RCC及板级HSE计算，不能套用F103的CPU/2。
+如果需要降低TRACECLK，应由target固件构建档位完成，并重新载入新固件的匹配ELF。
+这些基线不是H743接Zynq后的验收结论。
+
+## 3 采集：全程点击Web
+
+Trace ID先用2。分支广播默认关闭；F103不支持返回栈压缩与周期准确模式，页面会禁用。
+H743保留ETMv4分支广播、返回栈和周期计数能力检测、Funnel/ETF/TPIU路由。
+点击“配置并暂停”可先检查配置，也可由“联动采集”自动配置。
+点击“检查接收端”，确认Zynq ETM接收端在线。
+第一次时长选10ms，保留“服务端联动”和“保存后自动解码”，点击“联动采集”。
+网页依次校验ELF、命中起点、核对时钟、配置ETM/TPIU、释放USB；本地服务arm FPGA后恢复CPU，
+接收结束后交回网页，恢复Trace配置和本页断点。无需用户输入CLI。
+
+Zynq接收必须有数据、已同步、完整结束且无丢失；失败保留原始数据和原因，不算成功。
+窗口由主机计时，不是逐指令周期时间；Web显示实际接收质量，不能把源码映射率当作无损证明。
+先10ms再100ms；长窗失败时缩短窗口、检查接线，必要时由target固件降低Trace频率。
+
+## 接线
+
+Zynq J7.16←TRACECLK；J7.15/17/18/19←D0/D1/D2/D3；J7.14←GND。
+F103ZE的Trace脚为PE2～PE6；H743须按自己的板级引出核对这五根信号。
+目标SWDIO/SWCLK/GND仍接ZynqDAP，Trace接收为4位并行DDR。
+
+## 4 分析与导出
+
+新记录自动解码，右侧查看执行流、调用统计、火焰图、热点、ETM包和可信区段。
+点击火焰图定位历史源码；不是在线单步，也不提供历史变量值。
+“导出当前火焰图SVG”自动下载并显示状态和再次下载链接。
+“4 文件”可导出记录包、CSV、源码执行流，或导入`.etmrecord`离线重解码。
+桥包examples内有H743真实历史参考记录，来自superlinkPRO的Kingst LA，仅用于离线回归。
+
+## AI打包命令
+
+```powershell
+python -X utf8 toolbox.py bridge-build --out dist/zynq-etm-bridge-win64
+# 同一入口也可使用项目工具别名：
+python toolbox.py project run bridge.build -- --out dist/another-bridge
+```
+
+构建机安装`requirements-bridge-build.txt`；输出为EXE+运行目录及完整ZIP，拒绝覆盖已有输出。
+包内manifest记录源码提交、依赖版本、文件SHA-256。Golden bit/PS ELF不因打包改变，不包含SDK或Node。
+AI离线预检：`zynq-etm-bridge.exe --check --data-dir CHECK_DIR`，不连接目标。
+AI界面验收：加`--offline --no-browser`，硬件API明确拒绝，只允许导入、解码和浏览。
+实际构建与离线验收结论统一见[F103ZE记录](F103ZE-Web-CLI-ETM统一验收-20261031.md)。

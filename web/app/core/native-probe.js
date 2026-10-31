@@ -28,7 +28,7 @@ const decoded=text=>Uint8Array.from(atob(text||''),c=>c.charCodeAt(0));
 async function call(kind,action,value={}){
   const w=host();if(!w)throw Error('本地探针服务未启用');
   const token=new URLSearchParams(w.location.search).get('trace-cli');
-  if(!/^[0-9a-f]{64}$/.test(token||''))throw Error('本地探针服务需要CLI运行时地址');
+  if(!/^[0-9a-f]{64}$/.test(token||''))throw Error('请从bridge EXE自动打开的地址进入工作台');
   const delivery=identity();
   let response,result;
   const attempts=w.document.body.dataset.nativeDelivery==='1'?3:1;
