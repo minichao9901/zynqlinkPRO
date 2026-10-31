@@ -42,6 +42,7 @@ ALIASES={
  'etm.diag-sim':'tools/test_orbtrace_diagnostics.py',
  'etm.ddr-sim':'tools/test_etm_ddr_packetizer.py',
  'etm.ddr-writer-sim':'tools/test_etm_ddr_writer.py',
+ 'etm.ddr-memory-test':'tools/test_etm_ddr_memory.py',
  'deps.check':'tools/verify_dependencies.py',
  'target.fixtures':'tools/build_f103_fixtures.py','target.cdc-build':'firmware/target/stm32f103_cdc_trace/build.ps1',
  'target.cdc-tests':'firmware/target/stm32f103_cdc_trace/tests/run_tests.ps1',
