@@ -1,0 +1,56 @@
+{
+  "schema": "etm-ddr-capacity-study/1",
+  "hardwareAccess": false,
+  "frequencyIsCapabilityClaim": false,
+  "input": {
+    "pins": 4,
+    "doubleDataRate": true,
+    "traceClockHz": 200000000,
+    "seconds": 2,
+    "format": "raw8"
+  },
+  "payloadBytes": 400000000,
+  "metadataBudgetBytes": 65536,
+  "requiredBytesAligned": 400068608,
+  "candidateBase": 268435456,
+  "candidateCapacityBytes": 536870912,
+  "configuredDdrStart": 1048576,
+  "configuredDdrEndExclusive": 1073741824,
+  "knownOccupiedRegions": [
+    {
+      "name": "linker dap_trace_mem reservation",
+      "start": 1056964608,
+      "end": 1058013184
+    },
+    {
+      "name": ".dap_debug",
+      "start": 1048576,
+      "end": 1048804
+    },
+    {
+      "name": ".dap_trace",
+      "start": 1056964608,
+      "end": 1056964616
+    },
+    {
+      "name": ".bss",
+      "start": 1048832,
+      "end": 1760116
+    }
+  ],
+  "staticOverlaps": [],
+  "fitsCapacity": true,
+  "safeForDeployment": false,
+  "validationPending": [
+    "physical DDR size/address alias test",
+    "dynamic DMA/USB/heap region audit",
+    "linker reservation and build assertions",
+    "DMA cache coherence and fences",
+    "PL-to-DDR throughput/backpressure/stop/readback test"
+  ],
+  "baselineFiles": {
+    "prebuilt\\golden\\probe.bit": "1da17cb60175bbc2b7abd647770c7053bd7b7097e0d38aa819fb89678d564473",
+    "prebuilt\\golden\\application.elf": "e977914c2924ab4cac13f4075de0a5108d1e2e8cf48966fb8fbdea3a358e0b2c",
+    "reference\\legacy_zynq\\ZYNQ_DAPLINK_RTL_100TO50MHz\\ZYNQ_DAPLINK_RTL_100TO50MHz.sdk\\usb_bsp\\ps7_cortexa9_0\\include\\xparameters.h": "306b265ca58efaeb40ba0c4d0b27b57a229560a4650c64c353a6241116f9ef12"
+  }
+}

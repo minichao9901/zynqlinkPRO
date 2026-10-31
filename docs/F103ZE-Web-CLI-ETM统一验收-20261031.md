@@ -11,6 +11,59 @@
 
 ## 2026-11-01：Windows bridge EXE与纯Web操作
 
+## 2026-11-01：独立worktree的校准与有限DDR采集研究（进行中）
+
+研究分支`codex/etm-lane-calibration`，目录`E:/zynqlinkPRO_etm_calibration`，从main `bc0d3ad`建立。
+目标为反复连接/关闭、采集/解码/更换断点及CDC echo压力测试，并研究可靠采满1～2秒到DDR、采后下载。
+本阶段仅检查源码/官方资料和离线容量，未改生产RTL/PS，未综合、未上板；Golden仍为原1da17c/e977配对。
+
+官方核实：SEGGER明确提供每条data线独立的采样时序调整，默认偏移+2ns。
+2026-11-01直接打开的当前产品页规格写200MHz TRACECLK；搜索缓存中出现过不同旧值，因此本记录以当前原文为准。
+没有官方证据确认其内部芯片是Zynq，也没有足够证据把逐线可调解释为已公开的全自动眼图训练。
+[SEGGER时序说明](https://kb.segger.com/Adjusting_trace_timings_and_general_troubleshooting)、
+[当前J-Trace PRO规格](https://www.segger.com/products/debug-probes/j-trace/models/j-trace-pro/)。
+7-series的IDELAYE2支持按输入引脚延迟，IDELAYCTRL提供参考校准；RDY不等于信号眼图已测好。
+[AMD UG471](https://docs.amd.com/api/khub/documents/IbGcnPFe6eF19RHma_Y~IA/content)。
+
+本地确认：Golden的RAW_DIAGNOSTIC=4，真正路径是200MHz异步同步/两点稳定滤波/检测滤后时钟边沿，
+未使用源同步IDDR路径的IDELAY输出。已有源同步路径四条data共用FIXED tap=16，无运行时逐线装载/读回。
+所以只把现有FIXED常量改成寄存器不会改善正在用的RAW4；需要接入真实源同步采样路径并重新约束和验证。
+RAW4在200MHz下每点5ns，无法观察200MHz TRACECLK的每个2.5ns半周期；这不是Zynq I/O极限结论。
+当前overflow还合并了frame FIFO与parser malformed，必须先补独立计数，不能把所有lost直接归因于杜邦线。
+
+DDR方向拟为“源同步接收/逐线校准→紧凑打包→CDC弹性FIFO→AXI突发写DDR→到时/到界停止→USB下载”。
+这可以解除采集期间USB连续吞吐要求，但不能纠正输入误采；当前PS逐条MMIO读记录不能冒充高吞吐PL→DDR路径。
+4线DDR按两nibble合一字节，最坏每个TRACECLK周期1字节，不假定空闲过滤降低容量：
+
+| 目标TRACECLK，仅作容量算例 | 1秒原始payload | 2秒原始payload |
+|---|---:|---:|
+| 24MHz | 24MB | 48MB |
+| 36MHz | 36MB | 72MB |
+| 100MHz | 100MB | 200MB |
+| 150MHz | 150MB | 300MB |
+| 200MHz | 200MB | 400MB |
+
+MB为十进制。这不是支持相应频率的承诺；若每字节带16bit记录tag，200MHz/2s仅payload就达800MB。
+当前BSP/链接文件配置DDR上界0x3fffffff；这只是配置，不是本轮测得的物理容量。
+Golden ELF的静态DDR段在低地址约1～1.76MB及0x3f000000，链接器另保留0x3f000000起1MiB。
+暂以0x10000000起512MiB作**未保留的候选范围**；实际还需核查动态DMA/USB/heap、地址别名、缓存属性及屏障。
+不可仅凭静态段不重叠就写入，必须在链接器明确保留并验证PL写入/停止边界/采后读回身份。
+
+新增纯离线AI入口：`python toolbox.py project run etm.ddr-plan`，保存baseline文件SHA和静态重叠检查。
+默认200MHz/2s容量计算raw8为400,000,000B，能装入候选512MiB；record16为800,000,000B，不能装入。
+输出始终`safeForDeployment=false`，四项容量/重叠/边界测试通过，尚未生成任何新bit/ELF。
+[容量计划](validation/etm-calibration-study-20261101/capacity-raw8-200mhz-2s.json)、
+[16bit格式对照](validation/etm-calibration-study-20261101/capacity-record16-200mhz-2s.json)。
+
+下一阶段依次验证：独立错误计数；可装载/读回的逐线tap及配置握手；两沿眼区/固定偏斜/毛刺/停钟仿真；
+已知模式下的真实比对；有界DDR写入及cache一致性；最后新配对STA、明确加载、分级频率和USB停用时的1～2s板测。
+无已知模式时，TPIU结构/合法source/能解码只能用于选窗评估，不能证明零误码；恒定线或翻转不足必须报未测得窗口。
+校准先在采前完成并锁定，不能有效采集中静默改tap。杜邦线造成的伪时钟边沿或闭合眼图仍需改善电气。
+压力测试将记录每轮探针开关、实际FCLK/TCK/RCC、入口PC、原始数据与echo SHA、解码质量和恢复状态；
+不通过重试隐藏首次失败，不更改target分频，也不继续已暂停的HSS缺首DEF修复。
+
+## Windows bridge离线交付记录
+
 交付`dist/zynq-etm-bridge/zynq-etm-bridge.exe`及完整`dist/zynq-etm-bridge.zip`，ZIP为51,653,326字节，
 SHA-256 `0f9a7542c9d8ad3592cd08d50e9f9790abfb223b442a60271956ed266c3b7926`。
 源码版本`dc81148`，构建时源码无未提交修改。生成目录不进Git；可用已提交的一条AI命令
