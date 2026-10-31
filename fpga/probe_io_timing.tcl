@@ -7,3 +7,14 @@ if {[llength $swclk_launch] != 1} {error "Short SWCLK launch register missing/am
 set swclk_pad [get_ports swclk_0]
 set_max_delay 7.000 -datapath_only -from $swclk_launch -to $swclk_pad
 puts "SWCLK_LAUNCH_BUDGET=7.000ns SOURCE=$swclk_launch"
+# Optional internal work point for placement/route, not the target TRACECLK.
+# The PS boots at the BD clock and firmware may select 120MHz at run time;
+# optimizing only for 100MHz can leave that required work point unclosed.
+if {[info exists ::env(ZYNQLINK_IMPLEMENT_FCLK_HZ)]} {
+    set implementation_hz $::env(ZYNQLINK_IMPLEMENT_FCLK_HZ)
+    if {![string is integer -strict $implementation_hz] || $implementation_hz < 10000000 || $implementation_hz > 180000000} {
+        error "ZYNQLINK_IMPLEMENT_FCLK_HZ must be 10000000..180000000"
+    }
+    create_clock -name clk_fpga_0 -period [expr {1e9/$implementation_hz}] [get_pins {system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]}]
+    puts "IMPLEMENTATION_FCLK_HZ=$implementation_hz"
+}

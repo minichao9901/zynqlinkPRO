@@ -56,6 +56,15 @@ PS通过0x61回复的能力位声明0x62/64字节只读诊断，主机在文件�
 新RTL/PS正在准备首次完整构建，**未生成或加载实验bit/ELF，未标为已验收**；旧Golden保持原文件。
 [RTL证据](validation/etm-diagnostics-rtl-20261101/result.json)。
 
+首次完整构建随后已结束：100MHz STA通过，但120MHz setup为-0.176ns，最差路径为帧BRAM输出经demux有效信号、
+lookahead水位加法/比较到新增高水位寄存器CE。SWCLK 7ns独立预算余量+0.291ns，hold+0.011ns。
+这版只验证到FCLK100/SWCLK50，**没有加载，也没有与SWCLK60固件标为已验收配对**。
+不以降低既有120/60工作点作为完成；已把高水位改成观察寄存指针的一周期延后水位（仍能精确保留峰值），
+去掉BRAM到统计加法的长组合路径，RTL原有/新诊断用例通过。
+另增加显式`ZYNQLINK_IMPLEMENT_FCLK_HZ=120000000`的实现约束选项，保留SWCLK7ns预算，准备重实现。
+PS已按Golden相同O3/Thumb/MAX_SWCLK60重建，SHA b07980ab…，OCM跨度120,976B；尚待120MHz新bit及上板验证。
+[失败时序与定位](validation/etm-diag-timing-attempt1-20261101/result.json)。
+
 ### 最初的只读研究与容量计划
 
 DDR前端已有隔离的实验RTL：`fpga/experiments/etm_ddr/etm_ddr_packetizer.v`，尚未加入生产BD或本轮ETD1构建输入。

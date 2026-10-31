@@ -1,0 +1,1611 @@
+Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+-----------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2018.3 (win64) Build 2405991 Thu Dec  6 23:38:27 MST 2018
+| Date         : Sun Nov  1 02:21:42 2026
+| Host         : DESKTOP-0UKCPD3 running 64-bit major release  (build 9200)
+| Command      : report_timing -delay_type max -max_paths 20 -file E:/zynqlinkPRO_etm_calibration/build/fpga_dma_global/setup_120mhz.rpt
+| Design       : system_wrapper
+| Device       : 7z020-clg400
+| Speed File   : -2  PRODUCTION 1.11 2014-09-11
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+Timing Report
+
+Slack (VIOLATED) :        -0.176ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/CLKARDCLK
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/orbtrace_0/inst/record_highwater_reg[12]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        8.028ns  (logic 4.765ns (59.358%)  route 3.263ns (40.642%))
+  Logic Levels:           11  (CARRY4=5 LUT2=1 LUT4=2 LUT5=2 MUXF7=1)
+  Clock Path Skew:        -0.160ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.277ns = ( 10.610 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.630ns
+    Clock Pessimism Removal (CPR):    0.193ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.551     2.630    system_i/orbtrace_0/inst/receiver/fifo/clk
+    RAMB36_X4Y3          RAMB36E1                                     r  system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/CLKARDCLK
+  -------------------------------------------------------------------    -------------------
+    RAMB36_X4Y3          RAMB36E1 (Prop_ramb36e1_CLKARDCLK_DOADO[8])
+                                                      2.125     4.755 f  system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/DOADO[8]
+                         net (fo=1, routed)           0.844     5.599    system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_n_27
+    SLICE_X88Y18         LUT4 (Prop_lut4_I0_O)        0.105     5.704 f  system_i/orbtrace_0/inst/receiver/fifo/current_channel[6]_i_9/O
+                         net (fo=2, routed)           0.000     5.704    system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_1
+    SLICE_X88Y18         MUXF7 (Prop_muxf7_I1_O)      0.182     5.886 f  system_i/orbtrace_0/inst/receiver/fifo/index_reg[3]_i_15/O
+                         net (fo=2, routed)           0.534     6.420    system_i/orbtrace_0/inst/receiver/decoded_output.demux/index_reg[0]_1
+    SLICE_X84Y18         LUT5 (Prop_lut5_I0_O)        0.252     6.672 r  system_i/orbtrace_0/inst/receiver/decoded_output.demux/index[3]_i_6/O
+                         net (fo=45, routed)          0.558     7.230    system_i/orbtrace_0/inst/receiver/decoded_output.demux/index[3]_i_6_n_0
+    SLICE_X79Y19         LUT5 (Prop_lut5_I1_O)        0.105     7.335 r  system_i/orbtrace_0/inst/receiver/decoded_output.demux/next_level__0_carry_i_3/O
+                         net (fo=1, routed)           0.267     7.601    system_i/orbtrace_0/inst/receiver_n_22
+    SLICE_X75Y19         CARRY4 (Prop_carry4_DI[1]_CO[3])
+                                                      0.418     8.019 r  system_i/orbtrace_0/inst/next_level__0_carry/CO[3]
+                         net (fo=1, routed)           0.000     8.019    system_i/orbtrace_0/inst/next_level__0_carry_n_0
+    SLICE_X75Y20         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     8.117 r  system_i/orbtrace_0/inst/next_level__0_carry__0/CO[3]
+                         net (fo=1, routed)           0.000     8.117    system_i/orbtrace_0/inst/next_level__0_carry__0_n_0
+    SLICE_X75Y21         CARRY4 (Prop_carry4_CI_O[1])
+                                                      0.265     8.382 r  system_i/orbtrace_0/inst/next_level__0_carry__1/O[1]
+                         net (fo=3, routed)           0.533     8.915    system_i/orbtrace_0/inst/next_level[9]
+    SLICE_X73Y21         LUT4 (Prop_lut4_I1_O)        0.250     9.165 r  system_i/orbtrace_0/inst/record_highwater0_carry__0_i_8/O
+                         net (fo=1, routed)           0.000     9.165    system_i/orbtrace_0/inst/record_highwater0_carry__0_i_8_n_0
+    SLICE_X73Y21         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.440     9.605 r  system_i/orbtrace_0/inst/record_highwater0_carry__0/CO[3]
+                         net (fo=1, routed)           0.000     9.605    system_i/orbtrace_0/inst/record_highwater0_carry__0_n_0
+    SLICE_X73Y22         CARRY4 (Prop_carry4_CI_CO[0])
+                                                      0.216     9.821 r  system_i/orbtrace_0/inst/record_highwater0_carry__1/CO[0]
+                         net (fo=1, routed)           0.245    10.066    system_i/orbtrace_0/inst/record_highwater0_carry__1_n_3
+    SLICE_X74Y23         LUT2 (Prop_lut2_I0_O)        0.309    10.375 r  system_i/orbtrace_0/inst/record_highwater[16]_i_1/O
+                         net (fo=17, routed)          0.282    10.657    system_i/orbtrace_0/inst/record_highwater[16]_i_1_n_0
+    SLICE_X72Y23         FDCE                                         r  system_i/orbtrace_0/inst/record_highwater_reg[12]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     9.239    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.316 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.295    10.610    system_i/orbtrace_0/inst/clk
+    SLICE_X72Y23         FDCE                                         r  system_i/orbtrace_0/inst/record_highwater_reg[12]/C
+                         clock pessimism              0.193    10.803    
+                         clock uncertainty           -0.154    10.649    
+    SLICE_X72Y23         FDCE (Setup_fdce_C_CE)      -0.168    10.481    system_i/orbtrace_0/inst/record_highwater_reg[12]
+  -------------------------------------------------------------------
+                         required time                         10.481    
+                         arrival time                         -10.657    
+  -------------------------------------------------------------------
+                         slack                                 -0.176    
+
+Slack (VIOLATED) :        -0.176ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/CLKARDCLK
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/orbtrace_0/inst/record_highwater_reg[13]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        8.028ns  (logic 4.765ns (59.358%)  route 3.263ns (40.642%))
+  Logic Levels:           11  (CARRY4=5 LUT2=1 LUT4=2 LUT5=2 MUXF7=1)
+  Clock Path Skew:        -0.160ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.277ns = ( 10.610 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.630ns
+    Clock Pessimism Removal (CPR):    0.193ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.551     2.630    system_i/orbtrace_0/inst/receiver/fifo/clk
+    RAMB36_X4Y3          RAMB36E1                                     r  system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/CLKARDCLK
+  -------------------------------------------------------------------    -------------------
+    RAMB36_X4Y3          RAMB36E1 (Prop_ramb36e1_CLKARDCLK_DOADO[8])
+                                                      2.125     4.755 f  system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/DOADO[8]
+                         net (fo=1, routed)           0.844     5.599    system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_n_27
+    SLICE_X88Y18         LUT4 (Prop_lut4_I0_O)        0.105     5.704 f  system_i/orbtrace_0/inst/receiver/fifo/current_channel[6]_i_9/O
+                         net (fo=2, routed)           0.000     5.704    system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_1
+    SLICE_X88Y18         MUXF7 (Prop_muxf7_I1_O)      0.182     5.886 f  system_i/orbtrace_0/inst/receiver/fifo/index_reg[3]_i_15/O
+                         net (fo=2, routed)           0.534     6.420    system_i/orbtrace_0/inst/receiver/decoded_output.demux/index_reg[0]_1
+    SLICE_X84Y18         LUT5 (Prop_lut5_I0_O)        0.252     6.672 r  system_i/orbtrace_0/inst/receiver/decoded_output.demux/index[3]_i_6/O
+                         net (fo=45, routed)          0.558     7.230    system_i/orbtrace_0/inst/receiver/decoded_output.demux/index[3]_i_6_n_0
+    SLICE_X79Y19         LUT5 (Prop_lut5_I1_O)        0.105     7.335 r  system_i/orbtrace_0/inst/receiver/decoded_output.demux/next_level__0_carry_i_3/O
+                         net (fo=1, routed)           0.267     7.601    system_i/orbtrace_0/inst/receiver_n_22
+    SLICE_X75Y19         CARRY4 (Prop_carry4_DI[1]_CO[3])
+                                                      0.418     8.019 r  system_i/orbtrace_0/inst/next_level__0_carry/CO[3]
+                         net (fo=1, routed)           0.000     8.019    system_i/orbtrace_0/inst/next_level__0_carry_n_0
+    SLICE_X75Y20         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     8.117 r  system_i/orbtrace_0/inst/next_level__0_carry__0/CO[3]
+                         net (fo=1, routed)           0.000     8.117    system_i/orbtrace_0/inst/next_level__0_carry__0_n_0
+    SLICE_X75Y21         CARRY4 (Prop_carry4_CI_O[1])
+                                                      0.265     8.382 r  system_i/orbtrace_0/inst/next_level__0_carry__1/O[1]
+                         net (fo=3, routed)           0.533     8.915    system_i/orbtrace_0/inst/next_level[9]
+    SLICE_X73Y21         LUT4 (Prop_lut4_I1_O)        0.250     9.165 r  system_i/orbtrace_0/inst/record_highwater0_carry__0_i_8/O
+                         net (fo=1, routed)           0.000     9.165    system_i/orbtrace_0/inst/record_highwater0_carry__0_i_8_n_0
+    SLICE_X73Y21         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.440     9.605 r  system_i/orbtrace_0/inst/record_highwater0_carry__0/CO[3]
+                         net (fo=1, routed)           0.000     9.605    system_i/orbtrace_0/inst/record_highwater0_carry__0_n_0
+    SLICE_X73Y22         CARRY4 (Prop_carry4_CI_CO[0])
+                                                      0.216     9.821 r  system_i/orbtrace_0/inst/record_highwater0_carry__1/CO[0]
+                         net (fo=1, routed)           0.245    10.066    system_i/orbtrace_0/inst/record_highwater0_carry__1_n_3
+    SLICE_X74Y23         LUT2 (Prop_lut2_I0_O)        0.309    10.375 r  system_i/orbtrace_0/inst/record_highwater[16]_i_1/O
+                         net (fo=17, routed)          0.282    10.657    system_i/orbtrace_0/inst/record_highwater[16]_i_1_n_0
+    SLICE_X73Y23         FDCE                                         r  system_i/orbtrace_0/inst/record_highwater_reg[13]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     9.239    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.316 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.295    10.610    system_i/orbtrace_0/inst/clk
+    SLICE_X73Y23         FDCE                                         r  system_i/orbtrace_0/inst/record_highwater_reg[13]/C
+                         clock pessimism              0.193    10.803    
+                         clock uncertainty           -0.154    10.649    
+    SLICE_X73Y23         FDCE (Setup_fdce_C_CE)      -0.168    10.481    system_i/orbtrace_0/inst/record_highwater_reg[13]
+  -------------------------------------------------------------------
+                         required time                         10.481    
+                         arrival time                         -10.657    
+  -------------------------------------------------------------------
+                         slack                                 -0.176    
+
+Slack (VIOLATED) :        -0.176ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/CLKARDCLK
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/orbtrace_0/inst/record_highwater_reg[15]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        8.028ns  (logic 4.765ns (59.358%)  route 3.263ns (40.642%))
+  Logic Levels:           11  (CARRY4=5 LUT2=1 LUT4=2 LUT5=2 MUXF7=1)
+  Clock Path Skew:        -0.160ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.277ns = ( 10.610 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.630ns
+    Clock Pessimism Removal (CPR):    0.193ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.551     2.630    system_i/orbtrace_0/inst/receiver/fifo/clk
+    RAMB36_X4Y3          RAMB36E1                                     r  system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/CLKARDCLK
+  -------------------------------------------------------------------    -------------------
+    RAMB36_X4Y3          RAMB36E1 (Prop_ramb36e1_CLKARDCLK_DOADO[8])
+                                                      2.125     4.755 f  system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/DOADO[8]
+                         net (fo=1, routed)           0.844     5.599    system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_n_27
+    SLICE_X88Y18         LUT4 (Prop_lut4_I0_O)        0.105     5.704 f  system_i/orbtrace_0/inst/receiver/fifo/current_channel[6]_i_9/O
+                         net (fo=2, routed)           0.000     5.704    system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_1
+    SLICE_X88Y18         MUXF7 (Prop_muxf7_I1_O)      0.182     5.886 f  system_i/orbtrace_0/inst/receiver/fifo/index_reg[3]_i_15/O
+                         net (fo=2, routed)           0.534     6.420    system_i/orbtrace_0/inst/receiver/decoded_output.demux/index_reg[0]_1
+    SLICE_X84Y18         LUT5 (Prop_lut5_I0_O)        0.252     6.672 r  system_i/orbtrace_0/inst/receiver/decoded_output.demux/index[3]_i_6/O
+                         net (fo=45, routed)          0.558     7.230    system_i/orbtrace_0/inst/receiver/decoded_output.demux/index[3]_i_6_n_0
+    SLICE_X79Y19         LUT5 (Prop_lut5_I1_O)        0.105     7.335 r  system_i/orbtrace_0/inst/receiver/decoded_output.demux/next_level__0_carry_i_3/O
+                         net (fo=1, routed)           0.267     7.601    system_i/orbtrace_0/inst/receiver_n_22
+    SLICE_X75Y19         CARRY4 (Prop_carry4_DI[1]_CO[3])
+                                                      0.418     8.019 r  system_i/orbtrace_0/inst/next_level__0_carry/CO[3]
+                         net (fo=1, routed)           0.000     8.019    system_i/orbtrace_0/inst/next_level__0_carry_n_0
+    SLICE_X75Y20         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     8.117 r  system_i/orbtrace_0/inst/next_level__0_carry__0/CO[3]
+                         net (fo=1, routed)           0.000     8.117    system_i/orbtrace_0/inst/next_level__0_carry__0_n_0
+    SLICE_X75Y21         CARRY4 (Prop_carry4_CI_O[1])
+                                                      0.265     8.382 r  system_i/orbtrace_0/inst/next_level__0_carry__1/O[1]
+                         net (fo=3, routed)           0.533     8.915    system_i/orbtrace_0/inst/next_level[9]
+    SLICE_X73Y21         LUT4 (Prop_lut4_I1_O)        0.250     9.165 r  system_i/orbtrace_0/inst/record_highwater0_carry__0_i_8/O
+                         net (fo=1, routed)           0.000     9.165    system_i/orbtrace_0/inst/record_highwater0_carry__0_i_8_n_0
+    SLICE_X73Y21         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.440     9.605 r  system_i/orbtrace_0/inst/record_highwater0_carry__0/CO[3]
+                         net (fo=1, routed)           0.000     9.605    system_i/orbtrace_0/inst/record_highwater0_carry__0_n_0
+    SLICE_X73Y22         CARRY4 (Prop_carry4_CI_CO[0])
+                                                      0.216     9.821 r  system_i/orbtrace_0/inst/record_highwater0_carry__1/CO[0]
+                         net (fo=1, routed)           0.245    10.066    system_i/orbtrace_0/inst/record_highwater0_carry__1_n_3
+    SLICE_X74Y23         LUT2 (Prop_lut2_I0_O)        0.309    10.375 r  system_i/orbtrace_0/inst/record_highwater[16]_i_1/O
+                         net (fo=17, routed)          0.282    10.657    system_i/orbtrace_0/inst/record_highwater[16]_i_1_n_0
+    SLICE_X73Y23         FDCE                                         r  system_i/orbtrace_0/inst/record_highwater_reg[15]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     9.239    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.316 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.295    10.610    system_i/orbtrace_0/inst/clk
+    SLICE_X73Y23         FDCE                                         r  system_i/orbtrace_0/inst/record_highwater_reg[15]/C
+                         clock pessimism              0.193    10.803    
+                         clock uncertainty           -0.154    10.649    
+    SLICE_X73Y23         FDCE (Setup_fdce_C_CE)      -0.168    10.481    system_i/orbtrace_0/inst/record_highwater_reg[15]
+  -------------------------------------------------------------------
+                         required time                         10.481    
+                         arrival time                         -10.657    
+  -------------------------------------------------------------------
+                         slack                                 -0.176    
+
+Slack (VIOLATED) :        -0.176ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/CLKARDCLK
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/orbtrace_0/inst/record_highwater_reg[16]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        8.028ns  (logic 4.765ns (59.358%)  route 3.263ns (40.642%))
+  Logic Levels:           11  (CARRY4=5 LUT2=1 LUT4=2 LUT5=2 MUXF7=1)
+  Clock Path Skew:        -0.160ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.277ns = ( 10.610 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.630ns
+    Clock Pessimism Removal (CPR):    0.193ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.551     2.630    system_i/orbtrace_0/inst/receiver/fifo/clk
+    RAMB36_X4Y3          RAMB36E1                                     r  system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/CLKARDCLK
+  -------------------------------------------------------------------    -------------------
+    RAMB36_X4Y3          RAMB36E1 (Prop_ramb36e1_CLKARDCLK_DOADO[8])
+                                                      2.125     4.755 f  system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/DOADO[8]
+                         net (fo=1, routed)           0.844     5.599    system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_n_27
+    SLICE_X88Y18         LUT4 (Prop_lut4_I0_O)        0.105     5.704 f  system_i/orbtrace_0/inst/receiver/fifo/current_channel[6]_i_9/O
+                         net (fo=2, routed)           0.000     5.704    system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_1
+    SLICE_X88Y18         MUXF7 (Prop_muxf7_I1_O)      0.182     5.886 f  system_i/orbtrace_0/inst/receiver/fifo/index_reg[3]_i_15/O
+                         net (fo=2, routed)           0.534     6.420    system_i/orbtrace_0/inst/receiver/decoded_output.demux/index_reg[0]_1
+    SLICE_X84Y18         LUT5 (Prop_lut5_I0_O)        0.252     6.672 r  system_i/orbtrace_0/inst/receiver/decoded_output.demux/index[3]_i_6/O
+                         net (fo=45, routed)          0.558     7.230    system_i/orbtrace_0/inst/receiver/decoded_output.demux/index[3]_i_6_n_0
+    SLICE_X79Y19         LUT5 (Prop_lut5_I1_O)        0.105     7.335 r  system_i/orbtrace_0/inst/receiver/decoded_output.demux/next_level__0_carry_i_3/O
+                         net (fo=1, routed)           0.267     7.601    system_i/orbtrace_0/inst/receiver_n_22
+    SLICE_X75Y19         CARRY4 (Prop_carry4_DI[1]_CO[3])
+                                                      0.418     8.019 r  system_i/orbtrace_0/inst/next_level__0_carry/CO[3]
+                         net (fo=1, routed)           0.000     8.019    system_i/orbtrace_0/inst/next_level__0_carry_n_0
+    SLICE_X75Y20         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     8.117 r  system_i/orbtrace_0/inst/next_level__0_carry__0/CO[3]
+                         net (fo=1, routed)           0.000     8.117    system_i/orbtrace_0/inst/next_level__0_carry__0_n_0
+    SLICE_X75Y21         CARRY4 (Prop_carry4_CI_O[1])
+                                                      0.265     8.382 r  system_i/orbtrace_0/inst/next_level__0_carry__1/O[1]
+                         net (fo=3, routed)           0.533     8.915    system_i/orbtrace_0/inst/next_level[9]
+    SLICE_X73Y21         LUT4 (Prop_lut4_I1_O)        0.250     9.165 r  system_i/orbtrace_0/inst/record_highwater0_carry__0_i_8/O
+                         net (fo=1, routed)           0.000     9.165    system_i/orbtrace_0/inst/record_highwater0_carry__0_i_8_n_0
+    SLICE_X73Y21         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.440     9.605 r  system_i/orbtrace_0/inst/record_highwater0_carry__0/CO[3]
+                         net (fo=1, routed)           0.000     9.605    system_i/orbtrace_0/inst/record_highwater0_carry__0_n_0
+    SLICE_X73Y22         CARRY4 (Prop_carry4_CI_CO[0])
+                                                      0.216     9.821 r  system_i/orbtrace_0/inst/record_highwater0_carry__1/CO[0]
+                         net (fo=1, routed)           0.245    10.066    system_i/orbtrace_0/inst/record_highwater0_carry__1_n_3
+    SLICE_X74Y23         LUT2 (Prop_lut2_I0_O)        0.309    10.375 r  system_i/orbtrace_0/inst/record_highwater[16]_i_1/O
+                         net (fo=17, routed)          0.282    10.657    system_i/orbtrace_0/inst/record_highwater[16]_i_1_n_0
+    SLICE_X72Y23         FDCE                                         r  system_i/orbtrace_0/inst/record_highwater_reg[16]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     9.239    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.316 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.295    10.610    system_i/orbtrace_0/inst/clk
+    SLICE_X72Y23         FDCE                                         r  system_i/orbtrace_0/inst/record_highwater_reg[16]/C
+                         clock pessimism              0.193    10.803    
+                         clock uncertainty           -0.154    10.649    
+    SLICE_X72Y23         FDCE (Setup_fdce_C_CE)      -0.168    10.481    system_i/orbtrace_0/inst/record_highwater_reg[16]
+  -------------------------------------------------------------------
+                         required time                         10.481    
+                         arrival time                         -10.657    
+  -------------------------------------------------------------------
+                         slack                                 -0.176    
+
+Slack (VIOLATED) :        -0.166ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/CLKARDCLK
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/orbtrace_0/inst/record_highwater_reg[11]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        8.019ns  (logic 4.765ns (59.423%)  route 3.254ns (40.577%))
+  Logic Levels:           11  (CARRY4=5 LUT2=1 LUT4=2 LUT5=2 MUXF7=1)
+  Clock Path Skew:        -0.158ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.279ns = ( 10.612 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.630ns
+    Clock Pessimism Removal (CPR):    0.193ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.551     2.630    system_i/orbtrace_0/inst/receiver/fifo/clk
+    RAMB36_X4Y3          RAMB36E1                                     r  system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/CLKARDCLK
+  -------------------------------------------------------------------    -------------------
+    RAMB36_X4Y3          RAMB36E1 (Prop_ramb36e1_CLKARDCLK_DOADO[8])
+                                                      2.125     4.755 f  system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/DOADO[8]
+                         net (fo=1, routed)           0.844     5.599    system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_n_27
+    SLICE_X88Y18         LUT4 (Prop_lut4_I0_O)        0.105     5.704 f  system_i/orbtrace_0/inst/receiver/fifo/current_channel[6]_i_9/O
+                         net (fo=2, routed)           0.000     5.704    system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_1
+    SLICE_X88Y18         MUXF7 (Prop_muxf7_I1_O)      0.182     5.886 f  system_i/orbtrace_0/inst/receiver/fifo/index_reg[3]_i_15/O
+                         net (fo=2, routed)           0.534     6.420    system_i/orbtrace_0/inst/receiver/decoded_output.demux/index_reg[0]_1
+    SLICE_X84Y18         LUT5 (Prop_lut5_I0_O)        0.252     6.672 r  system_i/orbtrace_0/inst/receiver/decoded_output.demux/index[3]_i_6/O
+                         net (fo=45, routed)          0.558     7.230    system_i/orbtrace_0/inst/receiver/decoded_output.demux/index[3]_i_6_n_0
+    SLICE_X79Y19         LUT5 (Prop_lut5_I1_O)        0.105     7.335 r  system_i/orbtrace_0/inst/receiver/decoded_output.demux/next_level__0_carry_i_3/O
+                         net (fo=1, routed)           0.267     7.601    system_i/orbtrace_0/inst/receiver_n_22
+    SLICE_X75Y19         CARRY4 (Prop_carry4_DI[1]_CO[3])
+                                                      0.418     8.019 r  system_i/orbtrace_0/inst/next_level__0_carry/CO[3]
+                         net (fo=1, routed)           0.000     8.019    system_i/orbtrace_0/inst/next_level__0_carry_n_0
+    SLICE_X75Y20         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     8.117 r  system_i/orbtrace_0/inst/next_level__0_carry__0/CO[3]
+                         net (fo=1, routed)           0.000     8.117    system_i/orbtrace_0/inst/next_level__0_carry__0_n_0
+    SLICE_X75Y21         CARRY4 (Prop_carry4_CI_O[1])
+                                                      0.265     8.382 r  system_i/orbtrace_0/inst/next_level__0_carry__1/O[1]
+                         net (fo=3, routed)           0.533     8.915    system_i/orbtrace_0/inst/next_level[9]
+    SLICE_X73Y21         LUT4 (Prop_lut4_I1_O)        0.250     9.165 r  system_i/orbtrace_0/inst/record_highwater0_carry__0_i_8/O
+                         net (fo=1, routed)           0.000     9.165    system_i/orbtrace_0/inst/record_highwater0_carry__0_i_8_n_0
+    SLICE_X73Y21         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.440     9.605 r  system_i/orbtrace_0/inst/record_highwater0_carry__0/CO[3]
+                         net (fo=1, routed)           0.000     9.605    system_i/orbtrace_0/inst/record_highwater0_carry__0_n_0
+    SLICE_X73Y22         CARRY4 (Prop_carry4_CI_CO[0])
+                                                      0.216     9.821 r  system_i/orbtrace_0/inst/record_highwater0_carry__1/CO[0]
+                         net (fo=1, routed)           0.245    10.066    system_i/orbtrace_0/inst/record_highwater0_carry__1_n_3
+    SLICE_X74Y23         LUT2 (Prop_lut2_I0_O)        0.309    10.375 r  system_i/orbtrace_0/inst/record_highwater[16]_i_1/O
+                         net (fo=17, routed)          0.273    10.648    system_i/orbtrace_0/inst/record_highwater[16]_i_1_n_0
+    SLICE_X74Y22         FDCE                                         r  system_i/orbtrace_0/inst/record_highwater_reg[11]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     9.239    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.316 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.297    10.612    system_i/orbtrace_0/inst/clk
+    SLICE_X74Y22         FDCE                                         r  system_i/orbtrace_0/inst/record_highwater_reg[11]/C
+                         clock pessimism              0.193    10.805    
+                         clock uncertainty           -0.154    10.651    
+    SLICE_X74Y22         FDCE (Setup_fdce_C_CE)      -0.168    10.483    system_i/orbtrace_0/inst/record_highwater_reg[11]
+  -------------------------------------------------------------------
+                         required time                         10.483    
+                         arrival time                         -10.648    
+  -------------------------------------------------------------------
+                         slack                                 -0.166    
+
+Slack (VIOLATED) :        -0.166ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/CLKARDCLK
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/orbtrace_0/inst/record_highwater_reg[14]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        8.019ns  (logic 4.765ns (59.423%)  route 3.254ns (40.577%))
+  Logic Levels:           11  (CARRY4=5 LUT2=1 LUT4=2 LUT5=2 MUXF7=1)
+  Clock Path Skew:        -0.158ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.279ns = ( 10.612 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.630ns
+    Clock Pessimism Removal (CPR):    0.193ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.551     2.630    system_i/orbtrace_0/inst/receiver/fifo/clk
+    RAMB36_X4Y3          RAMB36E1                                     r  system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/CLKARDCLK
+  -------------------------------------------------------------------    -------------------
+    RAMB36_X4Y3          RAMB36E1 (Prop_ramb36e1_CLKARDCLK_DOADO[8])
+                                                      2.125     4.755 f  system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/DOADO[8]
+                         net (fo=1, routed)           0.844     5.599    system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_n_27
+    SLICE_X88Y18         LUT4 (Prop_lut4_I0_O)        0.105     5.704 f  system_i/orbtrace_0/inst/receiver/fifo/current_channel[6]_i_9/O
+                         net (fo=2, routed)           0.000     5.704    system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_1
+    SLICE_X88Y18         MUXF7 (Prop_muxf7_I1_O)      0.182     5.886 f  system_i/orbtrace_0/inst/receiver/fifo/index_reg[3]_i_15/O
+                         net (fo=2, routed)           0.534     6.420    system_i/orbtrace_0/inst/receiver/decoded_output.demux/index_reg[0]_1
+    SLICE_X84Y18         LUT5 (Prop_lut5_I0_O)        0.252     6.672 r  system_i/orbtrace_0/inst/receiver/decoded_output.demux/index[3]_i_6/O
+                         net (fo=45, routed)          0.558     7.230    system_i/orbtrace_0/inst/receiver/decoded_output.demux/index[3]_i_6_n_0
+    SLICE_X79Y19         LUT5 (Prop_lut5_I1_O)        0.105     7.335 r  system_i/orbtrace_0/inst/receiver/decoded_output.demux/next_level__0_carry_i_3/O
+                         net (fo=1, routed)           0.267     7.601    system_i/orbtrace_0/inst/receiver_n_22
+    SLICE_X75Y19         CARRY4 (Prop_carry4_DI[1]_CO[3])
+                                                      0.418     8.019 r  system_i/orbtrace_0/inst/next_level__0_carry/CO[3]
+                         net (fo=1, routed)           0.000     8.019    system_i/orbtrace_0/inst/next_level__0_carry_n_0
+    SLICE_X75Y20         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     8.117 r  system_i/orbtrace_0/inst/next_level__0_carry__0/CO[3]
+                         net (fo=1, routed)           0.000     8.117    system_i/orbtrace_0/inst/next_level__0_carry__0_n_0
+    SLICE_X75Y21         CARRY4 (Prop_carry4_CI_O[1])
+                                                      0.265     8.382 r  system_i/orbtrace_0/inst/next_level__0_carry__1/O[1]
+                         net (fo=3, routed)           0.533     8.915    system_i/orbtrace_0/inst/next_level[9]
+    SLICE_X73Y21         LUT4 (Prop_lut4_I1_O)        0.250     9.165 r  system_i/orbtrace_0/inst/record_highwater0_carry__0_i_8/O
+                         net (fo=1, routed)           0.000     9.165    system_i/orbtrace_0/inst/record_highwater0_carry__0_i_8_n_0
+    SLICE_X73Y21         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.440     9.605 r  system_i/orbtrace_0/inst/record_highwater0_carry__0/CO[3]
+                         net (fo=1, routed)           0.000     9.605    system_i/orbtrace_0/inst/record_highwater0_carry__0_n_0
+    SLICE_X73Y22         CARRY4 (Prop_carry4_CI_CO[0])
+                                                      0.216     9.821 r  system_i/orbtrace_0/inst/record_highwater0_carry__1/CO[0]
+                         net (fo=1, routed)           0.245    10.066    system_i/orbtrace_0/inst/record_highwater0_carry__1_n_3
+    SLICE_X74Y23         LUT2 (Prop_lut2_I0_O)        0.309    10.375 r  system_i/orbtrace_0/inst/record_highwater[16]_i_1/O
+                         net (fo=17, routed)          0.273    10.648    system_i/orbtrace_0/inst/record_highwater[16]_i_1_n_0
+    SLICE_X74Y22         FDCE                                         r  system_i/orbtrace_0/inst/record_highwater_reg[14]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     9.239    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.316 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.297    10.612    system_i/orbtrace_0/inst/clk
+    SLICE_X74Y22         FDCE                                         r  system_i/orbtrace_0/inst/record_highwater_reg[14]/C
+                         clock pessimism              0.193    10.805    
+                         clock uncertainty           -0.154    10.651    
+    SLICE_X74Y22         FDCE (Setup_fdce_C_CE)      -0.168    10.483    system_i/orbtrace_0/inst/record_highwater_reg[14]
+  -------------------------------------------------------------------
+                         required time                         10.483    
+                         arrival time                         -10.648    
+  -------------------------------------------------------------------
+                         slack                                 -0.166    
+
+Slack (VIOLATED) :        -0.166ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/CLKARDCLK
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/orbtrace_0/inst/record_highwater_reg[1]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        8.019ns  (logic 4.765ns (59.423%)  route 3.254ns (40.577%))
+  Logic Levels:           11  (CARRY4=5 LUT2=1 LUT4=2 LUT5=2 MUXF7=1)
+  Clock Path Skew:        -0.158ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.279ns = ( 10.612 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.630ns
+    Clock Pessimism Removal (CPR):    0.193ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.551     2.630    system_i/orbtrace_0/inst/receiver/fifo/clk
+    RAMB36_X4Y3          RAMB36E1                                     r  system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/CLKARDCLK
+  -------------------------------------------------------------------    -------------------
+    RAMB36_X4Y3          RAMB36E1 (Prop_ramb36e1_CLKARDCLK_DOADO[8])
+                                                      2.125     4.755 f  system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/DOADO[8]
+                         net (fo=1, routed)           0.844     5.599    system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_n_27
+    SLICE_X88Y18         LUT4 (Prop_lut4_I0_O)        0.105     5.704 f  system_i/orbtrace_0/inst/receiver/fifo/current_channel[6]_i_9/O
+                         net (fo=2, routed)           0.000     5.704    system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_1
+    SLICE_X88Y18         MUXF7 (Prop_muxf7_I1_O)      0.182     5.886 f  system_i/orbtrace_0/inst/receiver/fifo/index_reg[3]_i_15/O
+                         net (fo=2, routed)           0.534     6.420    system_i/orbtrace_0/inst/receiver/decoded_output.demux/index_reg[0]_1
+    SLICE_X84Y18         LUT5 (Prop_lut5_I0_O)        0.252     6.672 r  system_i/orbtrace_0/inst/receiver/decoded_output.demux/index[3]_i_6/O
+                         net (fo=45, routed)          0.558     7.230    system_i/orbtrace_0/inst/receiver/decoded_output.demux/index[3]_i_6_n_0
+    SLICE_X79Y19         LUT5 (Prop_lut5_I1_O)        0.105     7.335 r  system_i/orbtrace_0/inst/receiver/decoded_output.demux/next_level__0_carry_i_3/O
+                         net (fo=1, routed)           0.267     7.601    system_i/orbtrace_0/inst/receiver_n_22
+    SLICE_X75Y19         CARRY4 (Prop_carry4_DI[1]_CO[3])
+                                                      0.418     8.019 r  system_i/orbtrace_0/inst/next_level__0_carry/CO[3]
+                         net (fo=1, routed)           0.000     8.019    system_i/orbtrace_0/inst/next_level__0_carry_n_0
+    SLICE_X75Y20         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     8.117 r  system_i/orbtrace_0/inst/next_level__0_carry__0/CO[3]
+                         net (fo=1, routed)           0.000     8.117    system_i/orbtrace_0/inst/next_level__0_carry__0_n_0
+    SLICE_X75Y21         CARRY4 (Prop_carry4_CI_O[1])
+                                                      0.265     8.382 r  system_i/orbtrace_0/inst/next_level__0_carry__1/O[1]
+                         net (fo=3, routed)           0.533     8.915    system_i/orbtrace_0/inst/next_level[9]
+    SLICE_X73Y21         LUT4 (Prop_lut4_I1_O)        0.250     9.165 r  system_i/orbtrace_0/inst/record_highwater0_carry__0_i_8/O
+                         net (fo=1, routed)           0.000     9.165    system_i/orbtrace_0/inst/record_highwater0_carry__0_i_8_n_0
+    SLICE_X73Y21         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.440     9.605 r  system_i/orbtrace_0/inst/record_highwater0_carry__0/CO[3]
+                         net (fo=1, routed)           0.000     9.605    system_i/orbtrace_0/inst/record_highwater0_carry__0_n_0
+    SLICE_X73Y22         CARRY4 (Prop_carry4_CI_CO[0])
+                                                      0.216     9.821 r  system_i/orbtrace_0/inst/record_highwater0_carry__1/CO[0]
+                         net (fo=1, routed)           0.245    10.066    system_i/orbtrace_0/inst/record_highwater0_carry__1_n_3
+    SLICE_X74Y23         LUT2 (Prop_lut2_I0_O)        0.309    10.375 r  system_i/orbtrace_0/inst/record_highwater[16]_i_1/O
+                         net (fo=17, routed)          0.273    10.648    system_i/orbtrace_0/inst/record_highwater[16]_i_1_n_0
+    SLICE_X74Y22         FDCE                                         r  system_i/orbtrace_0/inst/record_highwater_reg[1]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     9.239    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.316 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.297    10.612    system_i/orbtrace_0/inst/clk
+    SLICE_X74Y22         FDCE                                         r  system_i/orbtrace_0/inst/record_highwater_reg[1]/C
+                         clock pessimism              0.193    10.805    
+                         clock uncertainty           -0.154    10.651    
+    SLICE_X74Y22         FDCE (Setup_fdce_C_CE)      -0.168    10.483    system_i/orbtrace_0/inst/record_highwater_reg[1]
+  -------------------------------------------------------------------
+                         required time                         10.483    
+                         arrival time                         -10.648    
+  -------------------------------------------------------------------
+                         slack                                 -0.166    
+
+Slack (VIOLATED) :        -0.166ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/CLKARDCLK
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/orbtrace_0/inst/record_highwater_reg[3]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        8.019ns  (logic 4.765ns (59.423%)  route 3.254ns (40.577%))
+  Logic Levels:           11  (CARRY4=5 LUT2=1 LUT4=2 LUT5=2 MUXF7=1)
+  Clock Path Skew:        -0.158ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.279ns = ( 10.612 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.630ns
+    Clock Pessimism Removal (CPR):    0.193ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.551     2.630    system_i/orbtrace_0/inst/receiver/fifo/clk
+    RAMB36_X4Y3          RAMB36E1                                     r  system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/CLKARDCLK
+  -------------------------------------------------------------------    -------------------
+    RAMB36_X4Y3          RAMB36E1 (Prop_ramb36e1_CLKARDCLK_DOADO[8])
+                                                      2.125     4.755 f  system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/DOADO[8]
+                         net (fo=1, routed)           0.844     5.599    system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_n_27
+    SLICE_X88Y18         LUT4 (Prop_lut4_I0_O)        0.105     5.704 f  system_i/orbtrace_0/inst/receiver/fifo/current_channel[6]_i_9/O
+                         net (fo=2, routed)           0.000     5.704    system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_1
+    SLICE_X88Y18         MUXF7 (Prop_muxf7_I1_O)      0.182     5.886 f  system_i/orbtrace_0/inst/receiver/fifo/index_reg[3]_i_15/O
+                         net (fo=2, routed)           0.534     6.420    system_i/orbtrace_0/inst/receiver/decoded_output.demux/index_reg[0]_1
+    SLICE_X84Y18         LUT5 (Prop_lut5_I0_O)        0.252     6.672 r  system_i/orbtrace_0/inst/receiver/decoded_output.demux/index[3]_i_6/O
+                         net (fo=45, routed)          0.558     7.230    system_i/orbtrace_0/inst/receiver/decoded_output.demux/index[3]_i_6_n_0
+    SLICE_X79Y19         LUT5 (Prop_lut5_I1_O)        0.105     7.335 r  system_i/orbtrace_0/inst/receiver/decoded_output.demux/next_level__0_carry_i_3/O
+                         net (fo=1, routed)           0.267     7.601    system_i/orbtrace_0/inst/receiver_n_22
+    SLICE_X75Y19         CARRY4 (Prop_carry4_DI[1]_CO[3])
+                                                      0.418     8.019 r  system_i/orbtrace_0/inst/next_level__0_carry/CO[3]
+                         net (fo=1, routed)           0.000     8.019    system_i/orbtrace_0/inst/next_level__0_carry_n_0
+    SLICE_X75Y20         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     8.117 r  system_i/orbtrace_0/inst/next_level__0_carry__0/CO[3]
+                         net (fo=1, routed)           0.000     8.117    system_i/orbtrace_0/inst/next_level__0_carry__0_n_0
+    SLICE_X75Y21         CARRY4 (Prop_carry4_CI_O[1])
+                                                      0.265     8.382 r  system_i/orbtrace_0/inst/next_level__0_carry__1/O[1]
+                         net (fo=3, routed)           0.533     8.915    system_i/orbtrace_0/inst/next_level[9]
+    SLICE_X73Y21         LUT4 (Prop_lut4_I1_O)        0.250     9.165 r  system_i/orbtrace_0/inst/record_highwater0_carry__0_i_8/O
+                         net (fo=1, routed)           0.000     9.165    system_i/orbtrace_0/inst/record_highwater0_carry__0_i_8_n_0
+    SLICE_X73Y21         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.440     9.605 r  system_i/orbtrace_0/inst/record_highwater0_carry__0/CO[3]
+                         net (fo=1, routed)           0.000     9.605    system_i/orbtrace_0/inst/record_highwater0_carry__0_n_0
+    SLICE_X73Y22         CARRY4 (Prop_carry4_CI_CO[0])
+                                                      0.216     9.821 r  system_i/orbtrace_0/inst/record_highwater0_carry__1/CO[0]
+                         net (fo=1, routed)           0.245    10.066    system_i/orbtrace_0/inst/record_highwater0_carry__1_n_3
+    SLICE_X74Y23         LUT2 (Prop_lut2_I0_O)        0.309    10.375 r  system_i/orbtrace_0/inst/record_highwater[16]_i_1/O
+                         net (fo=17, routed)          0.273    10.648    system_i/orbtrace_0/inst/record_highwater[16]_i_1_n_0
+    SLICE_X74Y22         FDCE                                         r  system_i/orbtrace_0/inst/record_highwater_reg[3]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     9.239    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.316 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.297    10.612    system_i/orbtrace_0/inst/clk
+    SLICE_X74Y22         FDCE                                         r  system_i/orbtrace_0/inst/record_highwater_reg[3]/C
+                         clock pessimism              0.193    10.805    
+                         clock uncertainty           -0.154    10.651    
+    SLICE_X74Y22         FDCE (Setup_fdce_C_CE)      -0.168    10.483    system_i/orbtrace_0/inst/record_highwater_reg[3]
+  -------------------------------------------------------------------
+                         required time                         10.483    
+                         arrival time                         -10.648    
+  -------------------------------------------------------------------
+                         slack                                 -0.166    
+
+Slack (VIOLATED) :        -0.166ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/CLKARDCLK
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/orbtrace_0/inst/record_highwater_reg[5]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        8.019ns  (logic 4.765ns (59.423%)  route 3.254ns (40.577%))
+  Logic Levels:           11  (CARRY4=5 LUT2=1 LUT4=2 LUT5=2 MUXF7=1)
+  Clock Path Skew:        -0.158ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.279ns = ( 10.612 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.630ns
+    Clock Pessimism Removal (CPR):    0.193ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.551     2.630    system_i/orbtrace_0/inst/receiver/fifo/clk
+    RAMB36_X4Y3          RAMB36E1                                     r  system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/CLKARDCLK
+  -------------------------------------------------------------------    -------------------
+    RAMB36_X4Y3          RAMB36E1 (Prop_ramb36e1_CLKARDCLK_DOADO[8])
+                                                      2.125     4.755 f  system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/DOADO[8]
+                         net (fo=1, routed)           0.844     5.599    system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_n_27
+    SLICE_X88Y18         LUT4 (Prop_lut4_I0_O)        0.105     5.704 f  system_i/orbtrace_0/inst/receiver/fifo/current_channel[6]_i_9/O
+                         net (fo=2, routed)           0.000     5.704    system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_1
+    SLICE_X88Y18         MUXF7 (Prop_muxf7_I1_O)      0.182     5.886 f  system_i/orbtrace_0/inst/receiver/fifo/index_reg[3]_i_15/O
+                         net (fo=2, routed)           0.534     6.420    system_i/orbtrace_0/inst/receiver/decoded_output.demux/index_reg[0]_1
+    SLICE_X84Y18         LUT5 (Prop_lut5_I0_O)        0.252     6.672 r  system_i/orbtrace_0/inst/receiver/decoded_output.demux/index[3]_i_6/O
+                         net (fo=45, routed)          0.558     7.230    system_i/orbtrace_0/inst/receiver/decoded_output.demux/index[3]_i_6_n_0
+    SLICE_X79Y19         LUT5 (Prop_lut5_I1_O)        0.105     7.335 r  system_i/orbtrace_0/inst/receiver/decoded_output.demux/next_level__0_carry_i_3/O
+                         net (fo=1, routed)           0.267     7.601    system_i/orbtrace_0/inst/receiver_n_22
+    SLICE_X75Y19         CARRY4 (Prop_carry4_DI[1]_CO[3])
+                                                      0.418     8.019 r  system_i/orbtrace_0/inst/next_level__0_carry/CO[3]
+                         net (fo=1, routed)           0.000     8.019    system_i/orbtrace_0/inst/next_level__0_carry_n_0
+    SLICE_X75Y20         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     8.117 r  system_i/orbtrace_0/inst/next_level__0_carry__0/CO[3]
+                         net (fo=1, routed)           0.000     8.117    system_i/orbtrace_0/inst/next_level__0_carry__0_n_0
+    SLICE_X75Y21         CARRY4 (Prop_carry4_CI_O[1])
+                                                      0.265     8.382 r  system_i/orbtrace_0/inst/next_level__0_carry__1/O[1]
+                         net (fo=3, routed)           0.533     8.915    system_i/orbtrace_0/inst/next_level[9]
+    SLICE_X73Y21         LUT4 (Prop_lut4_I1_O)        0.250     9.165 r  system_i/orbtrace_0/inst/record_highwater0_carry__0_i_8/O
+                         net (fo=1, routed)           0.000     9.165    system_i/orbtrace_0/inst/record_highwater0_carry__0_i_8_n_0
+    SLICE_X73Y21         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.440     9.605 r  system_i/orbtrace_0/inst/record_highwater0_carry__0/CO[3]
+                         net (fo=1, routed)           0.000     9.605    system_i/orbtrace_0/inst/record_highwater0_carry__0_n_0
+    SLICE_X73Y22         CARRY4 (Prop_carry4_CI_CO[0])
+                                                      0.216     9.821 r  system_i/orbtrace_0/inst/record_highwater0_carry__1/CO[0]
+                         net (fo=1, routed)           0.245    10.066    system_i/orbtrace_0/inst/record_highwater0_carry__1_n_3
+    SLICE_X74Y23         LUT2 (Prop_lut2_I0_O)        0.309    10.375 r  system_i/orbtrace_0/inst/record_highwater[16]_i_1/O
+                         net (fo=17, routed)          0.273    10.648    system_i/orbtrace_0/inst/record_highwater[16]_i_1_n_0
+    SLICE_X74Y22         FDCE                                         r  system_i/orbtrace_0/inst/record_highwater_reg[5]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     9.239    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.316 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.297    10.612    system_i/orbtrace_0/inst/clk
+    SLICE_X74Y22         FDCE                                         r  system_i/orbtrace_0/inst/record_highwater_reg[5]/C
+                         clock pessimism              0.193    10.805    
+                         clock uncertainty           -0.154    10.651    
+    SLICE_X74Y22         FDCE (Setup_fdce_C_CE)      -0.168    10.483    system_i/orbtrace_0/inst/record_highwater_reg[5]
+  -------------------------------------------------------------------
+                         required time                         10.483    
+                         arrival time                         -10.648    
+  -------------------------------------------------------------------
+                         slack                                 -0.166    
+
+Slack (VIOLATED) :        -0.166ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/CLKARDCLK
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/orbtrace_0/inst/record_highwater_reg[7]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        8.019ns  (logic 4.765ns (59.423%)  route 3.254ns (40.577%))
+  Logic Levels:           11  (CARRY4=5 LUT2=1 LUT4=2 LUT5=2 MUXF7=1)
+  Clock Path Skew:        -0.158ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.279ns = ( 10.612 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.630ns
+    Clock Pessimism Removal (CPR):    0.193ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.551     2.630    system_i/orbtrace_0/inst/receiver/fifo/clk
+    RAMB36_X4Y3          RAMB36E1                                     r  system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/CLKARDCLK
+  -------------------------------------------------------------------    -------------------
+    RAMB36_X4Y3          RAMB36E1 (Prop_ramb36e1_CLKARDCLK_DOADO[8])
+                                                      2.125     4.755 f  system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/DOADO[8]
+                         net (fo=1, routed)           0.844     5.599    system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_n_27
+    SLICE_X88Y18         LUT4 (Prop_lut4_I0_O)        0.105     5.704 f  system_i/orbtrace_0/inst/receiver/fifo/current_channel[6]_i_9/O
+                         net (fo=2, routed)           0.000     5.704    system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_1
+    SLICE_X88Y18         MUXF7 (Prop_muxf7_I1_O)      0.182     5.886 f  system_i/orbtrace_0/inst/receiver/fifo/index_reg[3]_i_15/O
+                         net (fo=2, routed)           0.534     6.420    system_i/orbtrace_0/inst/receiver/decoded_output.demux/index_reg[0]_1
+    SLICE_X84Y18         LUT5 (Prop_lut5_I0_O)        0.252     6.672 r  system_i/orbtrace_0/inst/receiver/decoded_output.demux/index[3]_i_6/O
+                         net (fo=45, routed)          0.558     7.230    system_i/orbtrace_0/inst/receiver/decoded_output.demux/index[3]_i_6_n_0
+    SLICE_X79Y19         LUT5 (Prop_lut5_I1_O)        0.105     7.335 r  system_i/orbtrace_0/inst/receiver/decoded_output.demux/next_level__0_carry_i_3/O
+                         net (fo=1, routed)           0.267     7.601    system_i/orbtrace_0/inst/receiver_n_22
+    SLICE_X75Y19         CARRY4 (Prop_carry4_DI[1]_CO[3])
+                                                      0.418     8.019 r  system_i/orbtrace_0/inst/next_level__0_carry/CO[3]
+                         net (fo=1, routed)           0.000     8.019    system_i/orbtrace_0/inst/next_level__0_carry_n_0
+    SLICE_X75Y20         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     8.117 r  system_i/orbtrace_0/inst/next_level__0_carry__0/CO[3]
+                         net (fo=1, routed)           0.000     8.117    system_i/orbtrace_0/inst/next_level__0_carry__0_n_0
+    SLICE_X75Y21         CARRY4 (Prop_carry4_CI_O[1])
+                                                      0.265     8.382 r  system_i/orbtrace_0/inst/next_level__0_carry__1/O[1]
+                         net (fo=3, routed)           0.533     8.915    system_i/orbtrace_0/inst/next_level[9]
+    SLICE_X73Y21         LUT4 (Prop_lut4_I1_O)        0.250     9.165 r  system_i/orbtrace_0/inst/record_highwater0_carry__0_i_8/O
+                         net (fo=1, routed)           0.000     9.165    system_i/orbtrace_0/inst/record_highwater0_carry__0_i_8_n_0
+    SLICE_X73Y21         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.440     9.605 r  system_i/orbtrace_0/inst/record_highwater0_carry__0/CO[3]
+                         net (fo=1, routed)           0.000     9.605    system_i/orbtrace_0/inst/record_highwater0_carry__0_n_0
+    SLICE_X73Y22         CARRY4 (Prop_carry4_CI_CO[0])
+                                                      0.216     9.821 r  system_i/orbtrace_0/inst/record_highwater0_carry__1/CO[0]
+                         net (fo=1, routed)           0.245    10.066    system_i/orbtrace_0/inst/record_highwater0_carry__1_n_3
+    SLICE_X74Y23         LUT2 (Prop_lut2_I0_O)        0.309    10.375 r  system_i/orbtrace_0/inst/record_highwater[16]_i_1/O
+                         net (fo=17, routed)          0.273    10.648    system_i/orbtrace_0/inst/record_highwater[16]_i_1_n_0
+    SLICE_X74Y22         FDCE                                         r  system_i/orbtrace_0/inst/record_highwater_reg[7]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     9.239    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.316 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.297    10.612    system_i/orbtrace_0/inst/clk
+    SLICE_X74Y22         FDCE                                         r  system_i/orbtrace_0/inst/record_highwater_reg[7]/C
+                         clock pessimism              0.193    10.805    
+                         clock uncertainty           -0.154    10.651    
+    SLICE_X74Y22         FDCE (Setup_fdce_C_CE)      -0.168    10.483    system_i/orbtrace_0/inst/record_highwater_reg[7]
+  -------------------------------------------------------------------
+                         required time                         10.483    
+                         arrival time                         -10.648    
+  -------------------------------------------------------------------
+                         slack                                 -0.166    
+
+Slack (VIOLATED) :        -0.166ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/CLKARDCLK
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/orbtrace_0/inst/record_highwater_reg[9]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        8.019ns  (logic 4.765ns (59.423%)  route 3.254ns (40.577%))
+  Logic Levels:           11  (CARRY4=5 LUT2=1 LUT4=2 LUT5=2 MUXF7=1)
+  Clock Path Skew:        -0.158ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.279ns = ( 10.612 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.630ns
+    Clock Pessimism Removal (CPR):    0.193ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.551     2.630    system_i/orbtrace_0/inst/receiver/fifo/clk
+    RAMB36_X4Y3          RAMB36E1                                     r  system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/CLKARDCLK
+  -------------------------------------------------------------------    -------------------
+    RAMB36_X4Y3          RAMB36E1 (Prop_ramb36e1_CLKARDCLK_DOADO[8])
+                                                      2.125     4.755 f  system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/DOADO[8]
+                         net (fo=1, routed)           0.844     5.599    system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_n_27
+    SLICE_X88Y18         LUT4 (Prop_lut4_I0_O)        0.105     5.704 f  system_i/orbtrace_0/inst/receiver/fifo/current_channel[6]_i_9/O
+                         net (fo=2, routed)           0.000     5.704    system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_1
+    SLICE_X88Y18         MUXF7 (Prop_muxf7_I1_O)      0.182     5.886 f  system_i/orbtrace_0/inst/receiver/fifo/index_reg[3]_i_15/O
+                         net (fo=2, routed)           0.534     6.420    system_i/orbtrace_0/inst/receiver/decoded_output.demux/index_reg[0]_1
+    SLICE_X84Y18         LUT5 (Prop_lut5_I0_O)        0.252     6.672 r  system_i/orbtrace_0/inst/receiver/decoded_output.demux/index[3]_i_6/O
+                         net (fo=45, routed)          0.558     7.230    system_i/orbtrace_0/inst/receiver/decoded_output.demux/index[3]_i_6_n_0
+    SLICE_X79Y19         LUT5 (Prop_lut5_I1_O)        0.105     7.335 r  system_i/orbtrace_0/inst/receiver/decoded_output.demux/next_level__0_carry_i_3/O
+                         net (fo=1, routed)           0.267     7.601    system_i/orbtrace_0/inst/receiver_n_22
+    SLICE_X75Y19         CARRY4 (Prop_carry4_DI[1]_CO[3])
+                                                      0.418     8.019 r  system_i/orbtrace_0/inst/next_level__0_carry/CO[3]
+                         net (fo=1, routed)           0.000     8.019    system_i/orbtrace_0/inst/next_level__0_carry_n_0
+    SLICE_X75Y20         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     8.117 r  system_i/orbtrace_0/inst/next_level__0_carry__0/CO[3]
+                         net (fo=1, routed)           0.000     8.117    system_i/orbtrace_0/inst/next_level__0_carry__0_n_0
+    SLICE_X75Y21         CARRY4 (Prop_carry4_CI_O[1])
+                                                      0.265     8.382 r  system_i/orbtrace_0/inst/next_level__0_carry__1/O[1]
+                         net (fo=3, routed)           0.533     8.915    system_i/orbtrace_0/inst/next_level[9]
+    SLICE_X73Y21         LUT4 (Prop_lut4_I1_O)        0.250     9.165 r  system_i/orbtrace_0/inst/record_highwater0_carry__0_i_8/O
+                         net (fo=1, routed)           0.000     9.165    system_i/orbtrace_0/inst/record_highwater0_carry__0_i_8_n_0
+    SLICE_X73Y21         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.440     9.605 r  system_i/orbtrace_0/inst/record_highwater0_carry__0/CO[3]
+                         net (fo=1, routed)           0.000     9.605    system_i/orbtrace_0/inst/record_highwater0_carry__0_n_0
+    SLICE_X73Y22         CARRY4 (Prop_carry4_CI_CO[0])
+                                                      0.216     9.821 r  system_i/orbtrace_0/inst/record_highwater0_carry__1/CO[0]
+                         net (fo=1, routed)           0.245    10.066    system_i/orbtrace_0/inst/record_highwater0_carry__1_n_3
+    SLICE_X74Y23         LUT2 (Prop_lut2_I0_O)        0.309    10.375 r  system_i/orbtrace_0/inst/record_highwater[16]_i_1/O
+                         net (fo=17, routed)          0.273    10.648    system_i/orbtrace_0/inst/record_highwater[16]_i_1_n_0
+    SLICE_X74Y22         FDCE                                         r  system_i/orbtrace_0/inst/record_highwater_reg[9]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     9.239    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.316 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.297    10.612    system_i/orbtrace_0/inst/clk
+    SLICE_X74Y22         FDCE                                         r  system_i/orbtrace_0/inst/record_highwater_reg[9]/C
+                         clock pessimism              0.193    10.805    
+                         clock uncertainty           -0.154    10.651    
+    SLICE_X74Y22         FDCE (Setup_fdce_C_CE)      -0.168    10.483    system_i/orbtrace_0/inst/record_highwater_reg[9]
+  -------------------------------------------------------------------
+                         required time                         10.483    
+                         arrival time                         -10.648    
+  -------------------------------------------------------------------
+                         slack                                 -0.166    
+
+Slack (VIOLATED) :        -0.060ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/CLKARDCLK
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/orbtrace_0/inst/record_highwater_reg[0]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        7.911ns  (logic 4.765ns (60.234%)  route 3.146ns (39.766%))
+  Logic Levels:           11  (CARRY4=5 LUT2=1 LUT4=2 LUT5=2 MUXF7=1)
+  Clock Path Skew:        -0.160ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.277ns = ( 10.610 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.630ns
+    Clock Pessimism Removal (CPR):    0.193ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.551     2.630    system_i/orbtrace_0/inst/receiver/fifo/clk
+    RAMB36_X4Y3          RAMB36E1                                     r  system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/CLKARDCLK
+  -------------------------------------------------------------------    -------------------
+    RAMB36_X4Y3          RAMB36E1 (Prop_ramb36e1_CLKARDCLK_DOADO[8])
+                                                      2.125     4.755 f  system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/DOADO[8]
+                         net (fo=1, routed)           0.844     5.599    system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_n_27
+    SLICE_X88Y18         LUT4 (Prop_lut4_I0_O)        0.105     5.704 f  system_i/orbtrace_0/inst/receiver/fifo/current_channel[6]_i_9/O
+                         net (fo=2, routed)           0.000     5.704    system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_1
+    SLICE_X88Y18         MUXF7 (Prop_muxf7_I1_O)      0.182     5.886 f  system_i/orbtrace_0/inst/receiver/fifo/index_reg[3]_i_15/O
+                         net (fo=2, routed)           0.534     6.420    system_i/orbtrace_0/inst/receiver/decoded_output.demux/index_reg[0]_1
+    SLICE_X84Y18         LUT5 (Prop_lut5_I0_O)        0.252     6.672 r  system_i/orbtrace_0/inst/receiver/decoded_output.demux/index[3]_i_6/O
+                         net (fo=45, routed)          0.558     7.230    system_i/orbtrace_0/inst/receiver/decoded_output.demux/index[3]_i_6_n_0
+    SLICE_X79Y19         LUT5 (Prop_lut5_I1_O)        0.105     7.335 r  system_i/orbtrace_0/inst/receiver/decoded_output.demux/next_level__0_carry_i_3/O
+                         net (fo=1, routed)           0.267     7.601    system_i/orbtrace_0/inst/receiver_n_22
+    SLICE_X75Y19         CARRY4 (Prop_carry4_DI[1]_CO[3])
+                                                      0.418     8.019 r  system_i/orbtrace_0/inst/next_level__0_carry/CO[3]
+                         net (fo=1, routed)           0.000     8.019    system_i/orbtrace_0/inst/next_level__0_carry_n_0
+    SLICE_X75Y20         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     8.117 r  system_i/orbtrace_0/inst/next_level__0_carry__0/CO[3]
+                         net (fo=1, routed)           0.000     8.117    system_i/orbtrace_0/inst/next_level__0_carry__0_n_0
+    SLICE_X75Y21         CARRY4 (Prop_carry4_CI_O[1])
+                                                      0.265     8.382 r  system_i/orbtrace_0/inst/next_level__0_carry__1/O[1]
+                         net (fo=3, routed)           0.533     8.915    system_i/orbtrace_0/inst/next_level[9]
+    SLICE_X73Y21         LUT4 (Prop_lut4_I1_O)        0.250     9.165 r  system_i/orbtrace_0/inst/record_highwater0_carry__0_i_8/O
+                         net (fo=1, routed)           0.000     9.165    system_i/orbtrace_0/inst/record_highwater0_carry__0_i_8_n_0
+    SLICE_X73Y21         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.440     9.605 r  system_i/orbtrace_0/inst/record_highwater0_carry__0/CO[3]
+                         net (fo=1, routed)           0.000     9.605    system_i/orbtrace_0/inst/record_highwater0_carry__0_n_0
+    SLICE_X73Y22         CARRY4 (Prop_carry4_CI_CO[0])
+                                                      0.216     9.821 r  system_i/orbtrace_0/inst/record_highwater0_carry__1/CO[0]
+                         net (fo=1, routed)           0.245    10.066    system_i/orbtrace_0/inst/record_highwater0_carry__1_n_3
+    SLICE_X74Y23         LUT2 (Prop_lut2_I0_O)        0.309    10.375 r  system_i/orbtrace_0/inst/record_highwater[16]_i_1/O
+                         net (fo=17, routed)          0.165    10.541    system_i/orbtrace_0/inst/record_highwater[16]_i_1_n_0
+    SLICE_X74Y23         FDCE                                         r  system_i/orbtrace_0/inst/record_highwater_reg[0]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     9.239    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.316 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.295    10.610    system_i/orbtrace_0/inst/clk
+    SLICE_X74Y23         FDCE                                         r  system_i/orbtrace_0/inst/record_highwater_reg[0]/C
+                         clock pessimism              0.193    10.803    
+                         clock uncertainty           -0.154    10.649    
+    SLICE_X74Y23         FDCE (Setup_fdce_C_CE)      -0.168    10.481    system_i/orbtrace_0/inst/record_highwater_reg[0]
+  -------------------------------------------------------------------
+                         required time                         10.481    
+                         arrival time                         -10.541    
+  -------------------------------------------------------------------
+                         slack                                 -0.060    
+
+Slack (VIOLATED) :        -0.060ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/CLKARDCLK
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/orbtrace_0/inst/record_highwater_reg[10]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        7.911ns  (logic 4.765ns (60.234%)  route 3.146ns (39.766%))
+  Logic Levels:           11  (CARRY4=5 LUT2=1 LUT4=2 LUT5=2 MUXF7=1)
+  Clock Path Skew:        -0.160ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.277ns = ( 10.610 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.630ns
+    Clock Pessimism Removal (CPR):    0.193ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.551     2.630    system_i/orbtrace_0/inst/receiver/fifo/clk
+    RAMB36_X4Y3          RAMB36E1                                     r  system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/CLKARDCLK
+  -------------------------------------------------------------------    -------------------
+    RAMB36_X4Y3          RAMB36E1 (Prop_ramb36e1_CLKARDCLK_DOADO[8])
+                                                      2.125     4.755 f  system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/DOADO[8]
+                         net (fo=1, routed)           0.844     5.599    system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_n_27
+    SLICE_X88Y18         LUT4 (Prop_lut4_I0_O)        0.105     5.704 f  system_i/orbtrace_0/inst/receiver/fifo/current_channel[6]_i_9/O
+                         net (fo=2, routed)           0.000     5.704    system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_1
+    SLICE_X88Y18         MUXF7 (Prop_muxf7_I1_O)      0.182     5.886 f  system_i/orbtrace_0/inst/receiver/fifo/index_reg[3]_i_15/O
+                         net (fo=2, routed)           0.534     6.420    system_i/orbtrace_0/inst/receiver/decoded_output.demux/index_reg[0]_1
+    SLICE_X84Y18         LUT5 (Prop_lut5_I0_O)        0.252     6.672 r  system_i/orbtrace_0/inst/receiver/decoded_output.demux/index[3]_i_6/O
+                         net (fo=45, routed)          0.558     7.230    system_i/orbtrace_0/inst/receiver/decoded_output.demux/index[3]_i_6_n_0
+    SLICE_X79Y19         LUT5 (Prop_lut5_I1_O)        0.105     7.335 r  system_i/orbtrace_0/inst/receiver/decoded_output.demux/next_level__0_carry_i_3/O
+                         net (fo=1, routed)           0.267     7.601    system_i/orbtrace_0/inst/receiver_n_22
+    SLICE_X75Y19         CARRY4 (Prop_carry4_DI[1]_CO[3])
+                                                      0.418     8.019 r  system_i/orbtrace_0/inst/next_level__0_carry/CO[3]
+                         net (fo=1, routed)           0.000     8.019    system_i/orbtrace_0/inst/next_level__0_carry_n_0
+    SLICE_X75Y20         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     8.117 r  system_i/orbtrace_0/inst/next_level__0_carry__0/CO[3]
+                         net (fo=1, routed)           0.000     8.117    system_i/orbtrace_0/inst/next_level__0_carry__0_n_0
+    SLICE_X75Y21         CARRY4 (Prop_carry4_CI_O[1])
+                                                      0.265     8.382 r  system_i/orbtrace_0/inst/next_level__0_carry__1/O[1]
+                         net (fo=3, routed)           0.533     8.915    system_i/orbtrace_0/inst/next_level[9]
+    SLICE_X73Y21         LUT4 (Prop_lut4_I1_O)        0.250     9.165 r  system_i/orbtrace_0/inst/record_highwater0_carry__0_i_8/O
+                         net (fo=1, routed)           0.000     9.165    system_i/orbtrace_0/inst/record_highwater0_carry__0_i_8_n_0
+    SLICE_X73Y21         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.440     9.605 r  system_i/orbtrace_0/inst/record_highwater0_carry__0/CO[3]
+                         net (fo=1, routed)           0.000     9.605    system_i/orbtrace_0/inst/record_highwater0_carry__0_n_0
+    SLICE_X73Y22         CARRY4 (Prop_carry4_CI_CO[0])
+                                                      0.216     9.821 r  system_i/orbtrace_0/inst/record_highwater0_carry__1/CO[0]
+                         net (fo=1, routed)           0.245    10.066    system_i/orbtrace_0/inst/record_highwater0_carry__1_n_3
+    SLICE_X74Y23         LUT2 (Prop_lut2_I0_O)        0.309    10.375 r  system_i/orbtrace_0/inst/record_highwater[16]_i_1/O
+                         net (fo=17, routed)          0.165    10.541    system_i/orbtrace_0/inst/record_highwater[16]_i_1_n_0
+    SLICE_X74Y23         FDCE                                         r  system_i/orbtrace_0/inst/record_highwater_reg[10]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     9.239    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.316 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.295    10.610    system_i/orbtrace_0/inst/clk
+    SLICE_X74Y23         FDCE                                         r  system_i/orbtrace_0/inst/record_highwater_reg[10]/C
+                         clock pessimism              0.193    10.803    
+                         clock uncertainty           -0.154    10.649    
+    SLICE_X74Y23         FDCE (Setup_fdce_C_CE)      -0.168    10.481    system_i/orbtrace_0/inst/record_highwater_reg[10]
+  -------------------------------------------------------------------
+                         required time                         10.481    
+                         arrival time                         -10.541    
+  -------------------------------------------------------------------
+                         slack                                 -0.060    
+
+Slack (VIOLATED) :        -0.060ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/CLKARDCLK
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/orbtrace_0/inst/record_highwater_reg[2]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        7.911ns  (logic 4.765ns (60.234%)  route 3.146ns (39.766%))
+  Logic Levels:           11  (CARRY4=5 LUT2=1 LUT4=2 LUT5=2 MUXF7=1)
+  Clock Path Skew:        -0.160ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.277ns = ( 10.610 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.630ns
+    Clock Pessimism Removal (CPR):    0.193ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.551     2.630    system_i/orbtrace_0/inst/receiver/fifo/clk
+    RAMB36_X4Y3          RAMB36E1                                     r  system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/CLKARDCLK
+  -------------------------------------------------------------------    -------------------
+    RAMB36_X4Y3          RAMB36E1 (Prop_ramb36e1_CLKARDCLK_DOADO[8])
+                                                      2.125     4.755 f  system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/DOADO[8]
+                         net (fo=1, routed)           0.844     5.599    system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_n_27
+    SLICE_X88Y18         LUT4 (Prop_lut4_I0_O)        0.105     5.704 f  system_i/orbtrace_0/inst/receiver/fifo/current_channel[6]_i_9/O
+                         net (fo=2, routed)           0.000     5.704    system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_1
+    SLICE_X88Y18         MUXF7 (Prop_muxf7_I1_O)      0.182     5.886 f  system_i/orbtrace_0/inst/receiver/fifo/index_reg[3]_i_15/O
+                         net (fo=2, routed)           0.534     6.420    system_i/orbtrace_0/inst/receiver/decoded_output.demux/index_reg[0]_1
+    SLICE_X84Y18         LUT5 (Prop_lut5_I0_O)        0.252     6.672 r  system_i/orbtrace_0/inst/receiver/decoded_output.demux/index[3]_i_6/O
+                         net (fo=45, routed)          0.558     7.230    system_i/orbtrace_0/inst/receiver/decoded_output.demux/index[3]_i_6_n_0
+    SLICE_X79Y19         LUT5 (Prop_lut5_I1_O)        0.105     7.335 r  system_i/orbtrace_0/inst/receiver/decoded_output.demux/next_level__0_carry_i_3/O
+                         net (fo=1, routed)           0.267     7.601    system_i/orbtrace_0/inst/receiver_n_22
+    SLICE_X75Y19         CARRY4 (Prop_carry4_DI[1]_CO[3])
+                                                      0.418     8.019 r  system_i/orbtrace_0/inst/next_level__0_carry/CO[3]
+                         net (fo=1, routed)           0.000     8.019    system_i/orbtrace_0/inst/next_level__0_carry_n_0
+    SLICE_X75Y20         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     8.117 r  system_i/orbtrace_0/inst/next_level__0_carry__0/CO[3]
+                         net (fo=1, routed)           0.000     8.117    system_i/orbtrace_0/inst/next_level__0_carry__0_n_0
+    SLICE_X75Y21         CARRY4 (Prop_carry4_CI_O[1])
+                                                      0.265     8.382 r  system_i/orbtrace_0/inst/next_level__0_carry__1/O[1]
+                         net (fo=3, routed)           0.533     8.915    system_i/orbtrace_0/inst/next_level[9]
+    SLICE_X73Y21         LUT4 (Prop_lut4_I1_O)        0.250     9.165 r  system_i/orbtrace_0/inst/record_highwater0_carry__0_i_8/O
+                         net (fo=1, routed)           0.000     9.165    system_i/orbtrace_0/inst/record_highwater0_carry__0_i_8_n_0
+    SLICE_X73Y21         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.440     9.605 r  system_i/orbtrace_0/inst/record_highwater0_carry__0/CO[3]
+                         net (fo=1, routed)           0.000     9.605    system_i/orbtrace_0/inst/record_highwater0_carry__0_n_0
+    SLICE_X73Y22         CARRY4 (Prop_carry4_CI_CO[0])
+                                                      0.216     9.821 r  system_i/orbtrace_0/inst/record_highwater0_carry__1/CO[0]
+                         net (fo=1, routed)           0.245    10.066    system_i/orbtrace_0/inst/record_highwater0_carry__1_n_3
+    SLICE_X74Y23         LUT2 (Prop_lut2_I0_O)        0.309    10.375 r  system_i/orbtrace_0/inst/record_highwater[16]_i_1/O
+                         net (fo=17, routed)          0.165    10.541    system_i/orbtrace_0/inst/record_highwater[16]_i_1_n_0
+    SLICE_X74Y23         FDCE                                         r  system_i/orbtrace_0/inst/record_highwater_reg[2]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     9.239    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.316 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.295    10.610    system_i/orbtrace_0/inst/clk
+    SLICE_X74Y23         FDCE                                         r  system_i/orbtrace_0/inst/record_highwater_reg[2]/C
+                         clock pessimism              0.193    10.803    
+                         clock uncertainty           -0.154    10.649    
+    SLICE_X74Y23         FDCE (Setup_fdce_C_CE)      -0.168    10.481    system_i/orbtrace_0/inst/record_highwater_reg[2]
+  -------------------------------------------------------------------
+                         required time                         10.481    
+                         arrival time                         -10.541    
+  -------------------------------------------------------------------
+                         slack                                 -0.060    
+
+Slack (VIOLATED) :        -0.060ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/CLKARDCLK
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/orbtrace_0/inst/record_highwater_reg[4]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        7.911ns  (logic 4.765ns (60.234%)  route 3.146ns (39.766%))
+  Logic Levels:           11  (CARRY4=5 LUT2=1 LUT4=2 LUT5=2 MUXF7=1)
+  Clock Path Skew:        -0.160ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.277ns = ( 10.610 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.630ns
+    Clock Pessimism Removal (CPR):    0.193ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.551     2.630    system_i/orbtrace_0/inst/receiver/fifo/clk
+    RAMB36_X4Y3          RAMB36E1                                     r  system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/CLKARDCLK
+  -------------------------------------------------------------------    -------------------
+    RAMB36_X4Y3          RAMB36E1 (Prop_ramb36e1_CLKARDCLK_DOADO[8])
+                                                      2.125     4.755 f  system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/DOADO[8]
+                         net (fo=1, routed)           0.844     5.599    system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_n_27
+    SLICE_X88Y18         LUT4 (Prop_lut4_I0_O)        0.105     5.704 f  system_i/orbtrace_0/inst/receiver/fifo/current_channel[6]_i_9/O
+                         net (fo=2, routed)           0.000     5.704    system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_1
+    SLICE_X88Y18         MUXF7 (Prop_muxf7_I1_O)      0.182     5.886 f  system_i/orbtrace_0/inst/receiver/fifo/index_reg[3]_i_15/O
+                         net (fo=2, routed)           0.534     6.420    system_i/orbtrace_0/inst/receiver/decoded_output.demux/index_reg[0]_1
+    SLICE_X84Y18         LUT5 (Prop_lut5_I0_O)        0.252     6.672 r  system_i/orbtrace_0/inst/receiver/decoded_output.demux/index[3]_i_6/O
+                         net (fo=45, routed)          0.558     7.230    system_i/orbtrace_0/inst/receiver/decoded_output.demux/index[3]_i_6_n_0
+    SLICE_X79Y19         LUT5 (Prop_lut5_I1_O)        0.105     7.335 r  system_i/orbtrace_0/inst/receiver/decoded_output.demux/next_level__0_carry_i_3/O
+                         net (fo=1, routed)           0.267     7.601    system_i/orbtrace_0/inst/receiver_n_22
+    SLICE_X75Y19         CARRY4 (Prop_carry4_DI[1]_CO[3])
+                                                      0.418     8.019 r  system_i/orbtrace_0/inst/next_level__0_carry/CO[3]
+                         net (fo=1, routed)           0.000     8.019    system_i/orbtrace_0/inst/next_level__0_carry_n_0
+    SLICE_X75Y20         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     8.117 r  system_i/orbtrace_0/inst/next_level__0_carry__0/CO[3]
+                         net (fo=1, routed)           0.000     8.117    system_i/orbtrace_0/inst/next_level__0_carry__0_n_0
+    SLICE_X75Y21         CARRY4 (Prop_carry4_CI_O[1])
+                                                      0.265     8.382 r  system_i/orbtrace_0/inst/next_level__0_carry__1/O[1]
+                         net (fo=3, routed)           0.533     8.915    system_i/orbtrace_0/inst/next_level[9]
+    SLICE_X73Y21         LUT4 (Prop_lut4_I1_O)        0.250     9.165 r  system_i/orbtrace_0/inst/record_highwater0_carry__0_i_8/O
+                         net (fo=1, routed)           0.000     9.165    system_i/orbtrace_0/inst/record_highwater0_carry__0_i_8_n_0
+    SLICE_X73Y21         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.440     9.605 r  system_i/orbtrace_0/inst/record_highwater0_carry__0/CO[3]
+                         net (fo=1, routed)           0.000     9.605    system_i/orbtrace_0/inst/record_highwater0_carry__0_n_0
+    SLICE_X73Y22         CARRY4 (Prop_carry4_CI_CO[0])
+                                                      0.216     9.821 r  system_i/orbtrace_0/inst/record_highwater0_carry__1/CO[0]
+                         net (fo=1, routed)           0.245    10.066    system_i/orbtrace_0/inst/record_highwater0_carry__1_n_3
+    SLICE_X74Y23         LUT2 (Prop_lut2_I0_O)        0.309    10.375 r  system_i/orbtrace_0/inst/record_highwater[16]_i_1/O
+                         net (fo=17, routed)          0.165    10.541    system_i/orbtrace_0/inst/record_highwater[16]_i_1_n_0
+    SLICE_X74Y23         FDCE                                         r  system_i/orbtrace_0/inst/record_highwater_reg[4]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     9.239    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.316 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.295    10.610    system_i/orbtrace_0/inst/clk
+    SLICE_X74Y23         FDCE                                         r  system_i/orbtrace_0/inst/record_highwater_reg[4]/C
+                         clock pessimism              0.193    10.803    
+                         clock uncertainty           -0.154    10.649    
+    SLICE_X74Y23         FDCE (Setup_fdce_C_CE)      -0.168    10.481    system_i/orbtrace_0/inst/record_highwater_reg[4]
+  -------------------------------------------------------------------
+                         required time                         10.481    
+                         arrival time                         -10.541    
+  -------------------------------------------------------------------
+                         slack                                 -0.060    
+
+Slack (VIOLATED) :        -0.060ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/CLKARDCLK
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/orbtrace_0/inst/record_highwater_reg[6]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        7.911ns  (logic 4.765ns (60.234%)  route 3.146ns (39.766%))
+  Logic Levels:           11  (CARRY4=5 LUT2=1 LUT4=2 LUT5=2 MUXF7=1)
+  Clock Path Skew:        -0.160ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.277ns = ( 10.610 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.630ns
+    Clock Pessimism Removal (CPR):    0.193ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.551     2.630    system_i/orbtrace_0/inst/receiver/fifo/clk
+    RAMB36_X4Y3          RAMB36E1                                     r  system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/CLKARDCLK
+  -------------------------------------------------------------------    -------------------
+    RAMB36_X4Y3          RAMB36E1 (Prop_ramb36e1_CLKARDCLK_DOADO[8])
+                                                      2.125     4.755 f  system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/DOADO[8]
+                         net (fo=1, routed)           0.844     5.599    system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_n_27
+    SLICE_X88Y18         LUT4 (Prop_lut4_I0_O)        0.105     5.704 f  system_i/orbtrace_0/inst/receiver/fifo/current_channel[6]_i_9/O
+                         net (fo=2, routed)           0.000     5.704    system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_1
+    SLICE_X88Y18         MUXF7 (Prop_muxf7_I1_O)      0.182     5.886 f  system_i/orbtrace_0/inst/receiver/fifo/index_reg[3]_i_15/O
+                         net (fo=2, routed)           0.534     6.420    system_i/orbtrace_0/inst/receiver/decoded_output.demux/index_reg[0]_1
+    SLICE_X84Y18         LUT5 (Prop_lut5_I0_O)        0.252     6.672 r  system_i/orbtrace_0/inst/receiver/decoded_output.demux/index[3]_i_6/O
+                         net (fo=45, routed)          0.558     7.230    system_i/orbtrace_0/inst/receiver/decoded_output.demux/index[3]_i_6_n_0
+    SLICE_X79Y19         LUT5 (Prop_lut5_I1_O)        0.105     7.335 r  system_i/orbtrace_0/inst/receiver/decoded_output.demux/next_level__0_carry_i_3/O
+                         net (fo=1, routed)           0.267     7.601    system_i/orbtrace_0/inst/receiver_n_22
+    SLICE_X75Y19         CARRY4 (Prop_carry4_DI[1]_CO[3])
+                                                      0.418     8.019 r  system_i/orbtrace_0/inst/next_level__0_carry/CO[3]
+                         net (fo=1, routed)           0.000     8.019    system_i/orbtrace_0/inst/next_level__0_carry_n_0
+    SLICE_X75Y20         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     8.117 r  system_i/orbtrace_0/inst/next_level__0_carry__0/CO[3]
+                         net (fo=1, routed)           0.000     8.117    system_i/orbtrace_0/inst/next_level__0_carry__0_n_0
+    SLICE_X75Y21         CARRY4 (Prop_carry4_CI_O[1])
+                                                      0.265     8.382 r  system_i/orbtrace_0/inst/next_level__0_carry__1/O[1]
+                         net (fo=3, routed)           0.533     8.915    system_i/orbtrace_0/inst/next_level[9]
+    SLICE_X73Y21         LUT4 (Prop_lut4_I1_O)        0.250     9.165 r  system_i/orbtrace_0/inst/record_highwater0_carry__0_i_8/O
+                         net (fo=1, routed)           0.000     9.165    system_i/orbtrace_0/inst/record_highwater0_carry__0_i_8_n_0
+    SLICE_X73Y21         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.440     9.605 r  system_i/orbtrace_0/inst/record_highwater0_carry__0/CO[3]
+                         net (fo=1, routed)           0.000     9.605    system_i/orbtrace_0/inst/record_highwater0_carry__0_n_0
+    SLICE_X73Y22         CARRY4 (Prop_carry4_CI_CO[0])
+                                                      0.216     9.821 r  system_i/orbtrace_0/inst/record_highwater0_carry__1/CO[0]
+                         net (fo=1, routed)           0.245    10.066    system_i/orbtrace_0/inst/record_highwater0_carry__1_n_3
+    SLICE_X74Y23         LUT2 (Prop_lut2_I0_O)        0.309    10.375 r  system_i/orbtrace_0/inst/record_highwater[16]_i_1/O
+                         net (fo=17, routed)          0.165    10.541    system_i/orbtrace_0/inst/record_highwater[16]_i_1_n_0
+    SLICE_X74Y23         FDCE                                         r  system_i/orbtrace_0/inst/record_highwater_reg[6]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     9.239    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.316 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.295    10.610    system_i/orbtrace_0/inst/clk
+    SLICE_X74Y23         FDCE                                         r  system_i/orbtrace_0/inst/record_highwater_reg[6]/C
+                         clock pessimism              0.193    10.803    
+                         clock uncertainty           -0.154    10.649    
+    SLICE_X74Y23         FDCE (Setup_fdce_C_CE)      -0.168    10.481    system_i/orbtrace_0/inst/record_highwater_reg[6]
+  -------------------------------------------------------------------
+                         required time                         10.481    
+                         arrival time                         -10.541    
+  -------------------------------------------------------------------
+                         slack                                 -0.060    
+
+Slack (VIOLATED) :        -0.060ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/CLKARDCLK
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/orbtrace_0/inst/record_highwater_reg[8]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        7.911ns  (logic 4.765ns (60.234%)  route 3.146ns (39.766%))
+  Logic Levels:           11  (CARRY4=5 LUT2=1 LUT4=2 LUT5=2 MUXF7=1)
+  Clock Path Skew:        -0.160ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.277ns = ( 10.610 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.630ns
+    Clock Pessimism Removal (CPR):    0.193ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.551     2.630    system_i/orbtrace_0/inst/receiver/fifo/clk
+    RAMB36_X4Y3          RAMB36E1                                     r  system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/CLKARDCLK
+  -------------------------------------------------------------------    -------------------
+    RAMB36_X4Y3          RAMB36E1 (Prop_ramb36e1_CLKARDCLK_DOADO[8])
+                                                      2.125     4.755 f  system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0/DOADO[8]
+                         net (fo=1, routed)           0.844     5.599    system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_n_27
+    SLICE_X88Y18         LUT4 (Prop_lut4_I0_O)        0.105     5.704 f  system_i/orbtrace_0/inst/receiver/fifo/current_channel[6]_i_9/O
+                         net (fo=2, routed)           0.000     5.704    system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_1
+    SLICE_X88Y18         MUXF7 (Prop_muxf7_I1_O)      0.182     5.886 f  system_i/orbtrace_0/inst/receiver/fifo/index_reg[3]_i_15/O
+                         net (fo=2, routed)           0.534     6.420    system_i/orbtrace_0/inst/receiver/decoded_output.demux/index_reg[0]_1
+    SLICE_X84Y18         LUT5 (Prop_lut5_I0_O)        0.252     6.672 r  system_i/orbtrace_0/inst/receiver/decoded_output.demux/index[3]_i_6/O
+                         net (fo=45, routed)          0.558     7.230    system_i/orbtrace_0/inst/receiver/decoded_output.demux/index[3]_i_6_n_0
+    SLICE_X79Y19         LUT5 (Prop_lut5_I1_O)        0.105     7.335 r  system_i/orbtrace_0/inst/receiver/decoded_output.demux/next_level__0_carry_i_3/O
+                         net (fo=1, routed)           0.267     7.601    system_i/orbtrace_0/inst/receiver_n_22
+    SLICE_X75Y19         CARRY4 (Prop_carry4_DI[1]_CO[3])
+                                                      0.418     8.019 r  system_i/orbtrace_0/inst/next_level__0_carry/CO[3]
+                         net (fo=1, routed)           0.000     8.019    system_i/orbtrace_0/inst/next_level__0_carry_n_0
+    SLICE_X75Y20         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     8.117 r  system_i/orbtrace_0/inst/next_level__0_carry__0/CO[3]
+                         net (fo=1, routed)           0.000     8.117    system_i/orbtrace_0/inst/next_level__0_carry__0_n_0
+    SLICE_X75Y21         CARRY4 (Prop_carry4_CI_O[1])
+                                                      0.265     8.382 r  system_i/orbtrace_0/inst/next_level__0_carry__1/O[1]
+                         net (fo=3, routed)           0.533     8.915    system_i/orbtrace_0/inst/next_level[9]
+    SLICE_X73Y21         LUT4 (Prop_lut4_I1_O)        0.250     9.165 r  system_i/orbtrace_0/inst/record_highwater0_carry__0_i_8/O
+                         net (fo=1, routed)           0.000     9.165    system_i/orbtrace_0/inst/record_highwater0_carry__0_i_8_n_0
+    SLICE_X73Y21         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.440     9.605 r  system_i/orbtrace_0/inst/record_highwater0_carry__0/CO[3]
+                         net (fo=1, routed)           0.000     9.605    system_i/orbtrace_0/inst/record_highwater0_carry__0_n_0
+    SLICE_X73Y22         CARRY4 (Prop_carry4_CI_CO[0])
+                                                      0.216     9.821 r  system_i/orbtrace_0/inst/record_highwater0_carry__1/CO[0]
+                         net (fo=1, routed)           0.245    10.066    system_i/orbtrace_0/inst/record_highwater0_carry__1_n_3
+    SLICE_X74Y23         LUT2 (Prop_lut2_I0_O)        0.309    10.375 r  system_i/orbtrace_0/inst/record_highwater[16]_i_1/O
+                         net (fo=17, routed)          0.165    10.541    system_i/orbtrace_0/inst/record_highwater[16]_i_1_n_0
+    SLICE_X74Y23         FDCE                                         r  system_i/orbtrace_0/inst/record_highwater_reg[8]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     9.239    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.316 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.295    10.610    system_i/orbtrace_0/inst/clk
+    SLICE_X74Y23         FDCE                                         r  system_i/orbtrace_0/inst/record_highwater_reg[8]/C
+                         clock pessimism              0.193    10.803    
+                         clock uncertainty           -0.154    10.649    
+    SLICE_X74Y23         FDCE (Setup_fdce_C_CE)      -0.168    10.481    system_i/orbtrace_0/inst/record_highwater_reg[8]
+  -------------------------------------------------------------------
+                         required time                         10.481    
+                         arrival time                         -10.541    
+  -------------------------------------------------------------------
+                         slack                                 -0.060    
+
+Slack (MET) :             0.207ns  (required time - arrival time)
+  Source:                 system_i/swd_controller_0/inst/u_dap_packet_engine/index_reg[2]/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/swd_controller_0/inst/u_jtag_core/state_reg[0]/D
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        7.959ns  (logic 3.093ns (38.860%)  route 4.866ns (61.140%))
+  Logic Levels:           14  (CARRY4=5 LUT2=2 LUT5=1 LUT6=6)
+  Clock Path Skew:        0.002ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.535ns = ( 10.868 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.741ns
+    Clock Pessimism Removal (CPR):    0.208ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.662     2.741    system_i/swd_controller_0/inst/u_dap_packet_engine/clk
+    SLICE_X93Y120        FDCE                                         r  system_i/swd_controller_0/inst/u_dap_packet_engine/index_reg[2]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X93Y120        FDCE (Prop_fdce_C_Q)         0.348     3.089 r  system_i/swd_controller_0/inst/u_dap_packet_engine/index_reg[2]/Q
+                         net (fo=17, routed)          0.423     3.512    system_i/swd_controller_0/inst/u_dap_packet_engine/index_reg_n_0_[2]
+    SLICE_X92Y120        CARRY4 (Prop_carry4_S[1]_CO[3])
+                                                      0.686     4.198 r  system_i/swd_controller_0/inst/u_dap_packet_engine/index_reg[4]_i_2/CO[3]
+                         net (fo=1, routed)           0.000     4.198    system_i/swd_controller_0/inst/u_dap_packet_engine/index_reg[4]_i_2_n_0
+    SLICE_X92Y121        CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     4.298 r  system_i/swd_controller_0/inst/u_dap_packet_engine/index_reg[8]_i_2/CO[3]
+                         net (fo=1, routed)           0.000     4.298    system_i/swd_controller_0/inst/u_dap_packet_engine/index_reg[8]_i_2_n_0
+    SLICE_X92Y122        CARRY4 (Prop_carry4_CI_O[1])
+                                                      0.257     4.555 r  system_i/swd_controller_0/inst/u_dap_packet_engine/index_reg[12]_i_2/O[1]
+                         net (fo=4, routed)           0.657     5.212    system_i/swd_controller_0/inst/u_dap_packet_engine/in48[10]
+    SLICE_X94Y121        LUT6 (Prop_lut6_I2_O)        0.245     5.457 r  system_i/swd_controller_0/inst/u_dap_packet_engine/core_req[3]_i_7/O
+                         net (fo=1, routed)           0.000     5.457    system_i/swd_controller_0/inst/u_dap_packet_engine/core_req[3]_i_7_n_0
+    SLICE_X94Y121        CARRY4 (Prop_carry4_S[3]_CO[3])
+                                                      0.314     5.771 r  system_i/swd_controller_0/inst/u_dap_packet_engine/core_req_reg[3]_i_4/CO[3]
+                         net (fo=1, routed)           0.000     5.771    system_i/swd_controller_0/inst/u_dap_packet_engine/core_req_reg[3]_i_4_n_0
+    SLICE_X94Y122        CARRY4 (Prop_carry4_CI_CO[1])
+                                                      0.131     5.902 r  system_i/swd_controller_0/inst/u_dap_packet_engine/core_req_reg[3]_i_3/CO[1]
+                         net (fo=17, routed)          0.286     6.188    system_i/swd_controller_0/inst/u_dap_packet_engine/CO[0]
+    SLICE_X96Y122        LUT6 (Prop_lut6_I4_O)        0.277     6.465 r  system_i/swd_controller_0/inst/u_dap_packet_engine/FSM_sequential_state[1]_i_17/O
+                         net (fo=1, routed)           0.637     7.102    system_i/swd_controller_0/inst/u_dap_packet_engine/packet_core_next_valid
+    SLICE_X98Y123        LUT6 (Prop_lut6_I0_O)        0.105     7.207 r  system_i/swd_controller_0/inst/u_dap_packet_engine/FSM_sequential_state[1]_i_9/O
+                         net (fo=2, routed)           0.327     7.533    system_i/swd_controller_0/inst/u_dap_packet_engine/core_next_valid_sel
+    SLICE_X100Y123       LUT2 (Prop_lut2_I1_O)        0.105     7.638 r  system_i/swd_controller_0/inst/u_dap_packet_engine/req[3]_i_7/O
+                         net (fo=2, routed)           0.456     8.095    system_i/swd_controller_0/inst/u_dap_packet_engine/next_valid0
+    SLICE_X100Y124       LUT6 (Prop_lut6_I3_O)        0.105     8.200 r  system_i/swd_controller_0/inst/u_dap_packet_engine/rv_collect_i_5/O
+                         net (fo=1, routed)           0.383     8.583    system_i/swd_controller_0/inst/u_jtag_core/rv_frame_reg[38]_0
+    SLICE_X101Y125       LUT2 (Prop_lut2_I1_O)        0.105     8.688 f  system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4/O
+                         net (fo=5, routed)           0.313     9.001    system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4_n_0
+    SLICE_X101Y124       LUT5 (Prop_lut5_I3_O)        0.105     9.106 r  system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0/O
+                         net (fo=4, routed)           0.410     9.516    system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0_n_0
+    SLICE_X103Y125       LUT6 (Prop_lut6_I1_O)        0.105     9.621 f  system_i/swd_controller_0/inst/u_jtag_core/state[0]_i_2__0/O
+                         net (fo=1, routed)           0.562    10.183    system_i/swd_controller_0/inst/u_jtag_core/state[0]_i_2__0_n_0
+    SLICE_X106Y125       LUT6 (Prop_lut6_I0_O)        0.105    10.288 r  system_i/swd_controller_0/inst/u_jtag_core/state[0]_i_1__0/O
+                         net (fo=1, routed)           0.412    10.700    system_i/swd_controller_0/inst/u_jtag_core/state[0]_i_1__0_n_0
+    SLICE_X108Y124       FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/state_reg[0]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     9.239    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.316 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.553    10.868    system_i/swd_controller_0/inst/u_jtag_core/clk
+    SLICE_X108Y124       FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/state_reg[0]/C
+                         clock pessimism              0.208    11.076    
+                         clock uncertainty           -0.154    10.922    
+    SLICE_X108Y124       FDCE (Setup_fdce_C_D)       -0.015    10.907    system_i/swd_controller_0/inst/u_jtag_core/state_reg[0]
+  -------------------------------------------------------------------
+                         required time                         10.907    
+                         arrival time                         -10.700    
+  -------------------------------------------------------------------
+                         slack                                  0.207    
+
+Slack (MET) :             0.271ns  (required time - arrival time)
+  Source:                 system_i/swd_controller_0/inst/u_dap_packet_engine/index_reg[2]/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[1]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        7.677ns  (logic 3.093ns (40.287%)  route 4.584ns (59.713%))
+  Logic Levels:           14  (CARRY4=5 LUT2=2 LUT5=2 LUT6=5)
+  Clock Path Skew:        -0.062ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.471ns = ( 10.804 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.741ns
+    Clock Pessimism Removal (CPR):    0.208ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.662     2.741    system_i/swd_controller_0/inst/u_dap_packet_engine/clk
+    SLICE_X93Y120        FDCE                                         r  system_i/swd_controller_0/inst/u_dap_packet_engine/index_reg[2]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X93Y120        FDCE (Prop_fdce_C_Q)         0.348     3.089 r  system_i/swd_controller_0/inst/u_dap_packet_engine/index_reg[2]/Q
+                         net (fo=17, routed)          0.423     3.512    system_i/swd_controller_0/inst/u_dap_packet_engine/index_reg_n_0_[2]
+    SLICE_X92Y120        CARRY4 (Prop_carry4_S[1]_CO[3])
+                                                      0.686     4.198 r  system_i/swd_controller_0/inst/u_dap_packet_engine/index_reg[4]_i_2/CO[3]
+                         net (fo=1, routed)           0.000     4.198    system_i/swd_controller_0/inst/u_dap_packet_engine/index_reg[4]_i_2_n_0
+    SLICE_X92Y121        CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     4.298 r  system_i/swd_controller_0/inst/u_dap_packet_engine/index_reg[8]_i_2/CO[3]
+                         net (fo=1, routed)           0.000     4.298    system_i/swd_controller_0/inst/u_dap_packet_engine/index_reg[8]_i_2_n_0
+    SLICE_X92Y122        CARRY4 (Prop_carry4_CI_O[1])
+                                                      0.257     4.555 r  system_i/swd_controller_0/inst/u_dap_packet_engine/index_reg[12]_i_2/O[1]
+                         net (fo=4, routed)           0.657     5.212    system_i/swd_controller_0/inst/u_dap_packet_engine/in48[10]
+    SLICE_X94Y121        LUT6 (Prop_lut6_I2_O)        0.245     5.457 r  system_i/swd_controller_0/inst/u_dap_packet_engine/core_req[3]_i_7/O
+                         net (fo=1, routed)           0.000     5.457    system_i/swd_controller_0/inst/u_dap_packet_engine/core_req[3]_i_7_n_0
+    SLICE_X94Y121        CARRY4 (Prop_carry4_S[3]_CO[3])
+                                                      0.314     5.771 r  system_i/swd_controller_0/inst/u_dap_packet_engine/core_req_reg[3]_i_4/CO[3]
+                         net (fo=1, routed)           0.000     5.771    system_i/swd_controller_0/inst/u_dap_packet_engine/core_req_reg[3]_i_4_n_0
+    SLICE_X94Y122        CARRY4 (Prop_carry4_CI_CO[1])
+                                                      0.131     5.902 r  system_i/swd_controller_0/inst/u_dap_packet_engine/core_req_reg[3]_i_3/CO[1]
+                         net (fo=17, routed)          0.286     6.188    system_i/swd_controller_0/inst/u_dap_packet_engine/CO[0]
+    SLICE_X96Y122        LUT6 (Prop_lut6_I4_O)        0.277     6.465 r  system_i/swd_controller_0/inst/u_dap_packet_engine/FSM_sequential_state[1]_i_17/O
+                         net (fo=1, routed)           0.637     7.102    system_i/swd_controller_0/inst/u_dap_packet_engine/packet_core_next_valid
+    SLICE_X98Y123        LUT6 (Prop_lut6_I0_O)        0.105     7.207 r  system_i/swd_controller_0/inst/u_dap_packet_engine/FSM_sequential_state[1]_i_9/O
+                         net (fo=2, routed)           0.327     7.533    system_i/swd_controller_0/inst/u_dap_packet_engine/core_next_valid_sel
+    SLICE_X100Y123       LUT2 (Prop_lut2_I1_O)        0.105     7.638 r  system_i/swd_controller_0/inst/u_dap_packet_engine/req[3]_i_7/O
+                         net (fo=2, routed)           0.456     8.095    system_i/swd_controller_0/inst/u_dap_packet_engine/next_valid0
+    SLICE_X100Y124       LUT6 (Prop_lut6_I3_O)        0.105     8.200 r  system_i/swd_controller_0/inst/u_dap_packet_engine/rv_collect_i_5/O
+                         net (fo=1, routed)           0.383     8.583    system_i/swd_controller_0/inst/u_jtag_core/rv_frame_reg[38]_0
+    SLICE_X101Y125       LUT2 (Prop_lut2_I1_O)        0.105     8.688 f  system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4/O
+                         net (fo=5, routed)           0.313     9.001    system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4_n_0
+    SLICE_X101Y124       LUT5 (Prop_lut5_I3_O)        0.105     9.106 r  system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0/O
+                         net (fo=4, routed)           0.276     9.382    system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0_n_0
+    SLICE_X102Y124       LUT6 (Prop_lut6_I4_O)        0.105     9.487 f  system_i/swd_controller_0/inst/u_jtag_core/rdata[31]_i_5/O
+                         net (fo=1, routed)           0.377     9.864    system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata_reg[0]_1
+    SLICE_X105Y125       LUT5 (Prop_lut5_I2_O)        0.105     9.969 r  system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata[31]_i_1/O
+                         net (fo=32, routed)          0.450    10.418    system_i/swd_controller_0/inst/u_jtag_core/u_shift_n_48
+    SLICE_X105Y124       FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[1]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     9.239    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.316 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.489    10.804    system_i/swd_controller_0/inst/u_jtag_core/clk
+    SLICE_X105Y124       FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[1]/C
+                         clock pessimism              0.208    11.012    
+                         clock uncertainty           -0.154    10.858    
+    SLICE_X105Y124       FDCE (Setup_fdce_C_CE)      -0.168    10.690    system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[1]
+  -------------------------------------------------------------------
+                         required time                         10.690    
+                         arrival time                         -10.418    
+  -------------------------------------------------------------------
+                         slack                                  0.271    
+
+Slack (MET) :             0.271ns  (required time - arrival time)
+  Source:                 system_i/swd_controller_0/inst/u_dap_packet_engine/index_reg[2]/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[20]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        7.677ns  (logic 3.093ns (40.287%)  route 4.584ns (59.713%))
+  Logic Levels:           14  (CARRY4=5 LUT2=2 LUT5=2 LUT6=5)
+  Clock Path Skew:        -0.062ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.471ns = ( 10.804 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.741ns
+    Clock Pessimism Removal (CPR):    0.208ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.662     2.741    system_i/swd_controller_0/inst/u_dap_packet_engine/clk
+    SLICE_X93Y120        FDCE                                         r  system_i/swd_controller_0/inst/u_dap_packet_engine/index_reg[2]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X93Y120        FDCE (Prop_fdce_C_Q)         0.348     3.089 r  system_i/swd_controller_0/inst/u_dap_packet_engine/index_reg[2]/Q
+                         net (fo=17, routed)          0.423     3.512    system_i/swd_controller_0/inst/u_dap_packet_engine/index_reg_n_0_[2]
+    SLICE_X92Y120        CARRY4 (Prop_carry4_S[1]_CO[3])
+                                                      0.686     4.198 r  system_i/swd_controller_0/inst/u_dap_packet_engine/index_reg[4]_i_2/CO[3]
+                         net (fo=1, routed)           0.000     4.198    system_i/swd_controller_0/inst/u_dap_packet_engine/index_reg[4]_i_2_n_0
+    SLICE_X92Y121        CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     4.298 r  system_i/swd_controller_0/inst/u_dap_packet_engine/index_reg[8]_i_2/CO[3]
+                         net (fo=1, routed)           0.000     4.298    system_i/swd_controller_0/inst/u_dap_packet_engine/index_reg[8]_i_2_n_0
+    SLICE_X92Y122        CARRY4 (Prop_carry4_CI_O[1])
+                                                      0.257     4.555 r  system_i/swd_controller_0/inst/u_dap_packet_engine/index_reg[12]_i_2/O[1]
+                         net (fo=4, routed)           0.657     5.212    system_i/swd_controller_0/inst/u_dap_packet_engine/in48[10]
+    SLICE_X94Y121        LUT6 (Prop_lut6_I2_O)        0.245     5.457 r  system_i/swd_controller_0/inst/u_dap_packet_engine/core_req[3]_i_7/O
+                         net (fo=1, routed)           0.000     5.457    system_i/swd_controller_0/inst/u_dap_packet_engine/core_req[3]_i_7_n_0
+    SLICE_X94Y121        CARRY4 (Prop_carry4_S[3]_CO[3])
+                                                      0.314     5.771 r  system_i/swd_controller_0/inst/u_dap_packet_engine/core_req_reg[3]_i_4/CO[3]
+                         net (fo=1, routed)           0.000     5.771    system_i/swd_controller_0/inst/u_dap_packet_engine/core_req_reg[3]_i_4_n_0
+    SLICE_X94Y122        CARRY4 (Prop_carry4_CI_CO[1])
+                                                      0.131     5.902 r  system_i/swd_controller_0/inst/u_dap_packet_engine/core_req_reg[3]_i_3/CO[1]
+                         net (fo=17, routed)          0.286     6.188    system_i/swd_controller_0/inst/u_dap_packet_engine/CO[0]
+    SLICE_X96Y122        LUT6 (Prop_lut6_I4_O)        0.277     6.465 r  system_i/swd_controller_0/inst/u_dap_packet_engine/FSM_sequential_state[1]_i_17/O
+                         net (fo=1, routed)           0.637     7.102    system_i/swd_controller_0/inst/u_dap_packet_engine/packet_core_next_valid
+    SLICE_X98Y123        LUT6 (Prop_lut6_I0_O)        0.105     7.207 r  system_i/swd_controller_0/inst/u_dap_packet_engine/FSM_sequential_state[1]_i_9/O
+                         net (fo=2, routed)           0.327     7.533    system_i/swd_controller_0/inst/u_dap_packet_engine/core_next_valid_sel
+    SLICE_X100Y123       LUT2 (Prop_lut2_I1_O)        0.105     7.638 r  system_i/swd_controller_0/inst/u_dap_packet_engine/req[3]_i_7/O
+                         net (fo=2, routed)           0.456     8.095    system_i/swd_controller_0/inst/u_dap_packet_engine/next_valid0
+    SLICE_X100Y124       LUT6 (Prop_lut6_I3_O)        0.105     8.200 r  system_i/swd_controller_0/inst/u_dap_packet_engine/rv_collect_i_5/O
+                         net (fo=1, routed)           0.383     8.583    system_i/swd_controller_0/inst/u_jtag_core/rv_frame_reg[38]_0
+    SLICE_X101Y125       LUT2 (Prop_lut2_I1_O)        0.105     8.688 f  system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4/O
+                         net (fo=5, routed)           0.313     9.001    system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4_n_0
+    SLICE_X101Y124       LUT5 (Prop_lut5_I3_O)        0.105     9.106 r  system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0/O
+                         net (fo=4, routed)           0.276     9.382    system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0_n_0
+    SLICE_X102Y124       LUT6 (Prop_lut6_I4_O)        0.105     9.487 f  system_i/swd_controller_0/inst/u_jtag_core/rdata[31]_i_5/O
+                         net (fo=1, routed)           0.377     9.864    system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata_reg[0]_1
+    SLICE_X105Y125       LUT5 (Prop_lut5_I2_O)        0.105     9.969 r  system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata[31]_i_1/O
+                         net (fo=32, routed)          0.450    10.418    system_i/swd_controller_0/inst/u_jtag_core/u_shift_n_48
+    SLICE_X105Y124       FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[20]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     9.239    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.316 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.489    10.804    system_i/swd_controller_0/inst/u_jtag_core/clk
+    SLICE_X105Y124       FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[20]/C
+                         clock pessimism              0.208    11.012    
+                         clock uncertainty           -0.154    10.858    
+    SLICE_X105Y124       FDCE (Setup_fdce_C_CE)      -0.168    10.690    system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[20]
+  -------------------------------------------------------------------
+                         required time                         10.690    
+                         arrival time                         -10.418    
+  -------------------------------------------------------------------
+                         slack                                  0.271    
+
+
+
+

@@ -76,7 +76,6 @@ module orbtrace_controller #(
   wire read_accept=s_axi_arvalid && s_axi_arready;
   wire pop=read_accept && s_axi_araddr[C_S_AXI_ADDR_WIDTH-1:2]==4 && level!=0 && clear_count==0 && !clear;
   wire push=byte_valid && !fifo_full && !receiver_reset;
-  wire [FIFO_ADDR_BITS:0] next_level=level+push-pop;
   // Memory has a synchronous read port so Vivado infers block RAM.
   reg [15:0] read_record;
   reg read_fifo;
@@ -114,7 +113,10 @@ module orbtrace_controller #(
         if(pop)read_ptr<=read_ptr+1'b1;
         if(receiver_overflow || (seen_sync && enable && !delay_ready))lost<=1;
         if(receiver_synced)seen_sync<=1;
-        if(next_level>record_highwater)record_highwater<=next_level;
+        // Observe registered pointers one cycle later: the peak remains
+        // visible before the next pop updates them. Do not put BRAM->demux
+        // validity through an occupancy adder/comparator onto this CE path.
+        if(level>record_highwater)record_highwater<=level;
         if(byte_valid && fifo_full && !receiver_reset)record_stall_cycles<=record_stall_cycles+1'b1;
         if(previous_delay_ready && !delay_ready && enable)delay_loss_count<=delay_loss_count+1'b1;
       end
