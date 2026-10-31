@@ -70,7 +70,10 @@ def main():
                 report['summary'].append(summary);persist();print('SUMMARY '+json.dumps(summary),flush=True)
         report['RCC_after']=[mem.word(0x40021000),mem.word(0x40021004)]
         assert report['RCC_before']==report['RCC_after']
-    except BaseException as exc:report['failure']=repr(exc);raise
+    except BaseException as exc:
+        report['failure']=repr(exc)
+        if hasattr(exc,'measurement'):report['failed_measurement']=exc.measurement
+        raise
     finally:
         try:
             try:stop(probe,d)

@@ -1,0 +1,8 @@
+from pathlib import Path
+import struct,collections,subprocess,json
+p=Path('prebuilt/20261031_orbtrace_opt_qspi_7020_120/application.elf').read_bytes();h=struct.unpack_from('<16sHHIIIIIHHHHHH',p);ss=[struct.unpack_from('<10I',p,h[6]+i*h[11]) for i in range(h[12])];string=ss[h[13]];names=p[string[4]:string[4]+string[5]];a=Path('build/qspi_boot/cold_OCM_code.bin').read_bytes();r=[]
+for sh in ss:
+ if sh[1]==1 and sh[2]&6==6 and sh[5]:
+  expected=p[sh[4]:sh[4]+sh[5]];actual=a[sh[3]:sh[3]+sh[5]];idx=[i for i,(x,y) in enumerate(zip(expected,actual)) if x!=y];print(names[sh[0]:].split(b'\0')[0],len(idx));print([(hex(i+sh[3]),expected[max(0,i-4):i+8].hex(),actual[max(0,i-4):i+8].hex()) for i in idx[:20]]);r.extend([i+sh[3] for i in idx])
+print('range',hex(min(r)) if r else None,hex(max(r)) if r else None)
+Path('build/qspi_boot/cold_code_diff.json').write_text(json.dumps({'mismatch_addresses':r},indent=2))

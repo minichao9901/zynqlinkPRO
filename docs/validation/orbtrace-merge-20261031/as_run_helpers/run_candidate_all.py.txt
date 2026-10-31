@@ -1,0 +1,11 @@
+import subprocess,sys,json,os
+from pathlib import Path
+root=Path.cwd();dest=root/'docs/validation/orbtrace-hardware-20261031/optimized_50';dest.mkdir(parents=True,exist_ok=True);os.environ['TEMP']=os.environ['TMP']=str(root/'build/probe_tmp');runs=[]
+art=['--bit',str(root/'prebuilt/20261031_orbtrace_opt_7020_120_candidate/zynqlink_probe.bit'),'--elf',str(root/'prebuilt/20261031_orbtrace_opt_7020_120_candidate/zynqlink_probe.elf')]
+cmd=[sys.executable,'-X','utf8','tools/benchmark_sram_matrix.py',*art,'--speeds','1000000,10000000,25000000,30000000,35000000,50000000','--transport','swd','--seconds','0.6','--repeats','5','--output',str(dest/'sram.json')]
+with (dest/'sram.log').open('w') as log:r=subprocess.run(cmd,stdout=log,stderr=subprocess.STDOUT)
+v=json.loads((dest/'sram.json').read_text());assert v.get('restore_match'),'SRAM restoration not verified';runs.append(dict(stage='sram',returncode=r.returncode,command=cmd));(dest/'stages.json').write_text(json.dumps(runs,indent=2)+'\n');print('SRAM completed returncode='+str(r.returncode),flush=True)
+for kind in ['rtt','hss','jtag','extras','diagnostics']:
+ cmd=[sys.executable,'-X','utf8',str(root/f'build/run_candidate_{kind}.py')]
+ r=subprocess.run(cmd);runs.append(dict(stage=kind,returncode=r.returncode,command=cmd));(dest/'stages.json').write_text(json.dumps(runs,indent=2)+'\n')
+ if r.returncode:raise RuntimeError(kind+' driver aborted; inspect restoration before proceeding')

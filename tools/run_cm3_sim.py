@@ -48,6 +48,8 @@ def main():
     ap.add_argument('--rtl', type=Path, default=Path(os.environ.get('CM3_RTL', DEFAULT_RTL)))
     ap.add_argument('--rebuild', action='store_true')
     ap.add_argument('--work-dir',type=Path,help='Isolated simulator output/library directory')
+    ap.add_argument('--debug', choices=['off','typical','all'], default='off', help='Enable waveform/debug instrumentation only when needed')
+    ap.add_argument('--compile-jobs', type=int, choices=range(1,9), default=int(os.environ.get('ZYNQLINK_SIM_JOBS','2')))
     ap.add_argument('plusargs', nargs='*')
     args = ap.parse_args()
 
@@ -74,7 +76,7 @@ def main():
                      *(ROOT / 'fpga/sim').glob('*.sv'),
                      *(ROOT / 'fpga/sim').glob('*.svh'),
                      *rtl.glob('*.v'), *rtl.glob('*.vp')])
-    digest = hashlib.sha256((args.top + str(VIVADO)).encode())
+    digest = hashlib.sha256((args.top + str(VIVADO) + args.debug).encode())
     for source in inputs:
         digest.update(str(source).encode())
         digest.update(source.read_bytes())
@@ -101,7 +103,9 @@ def main():
         if p.returncode:
             print(log[-4000:])
             sys.exit('xvlog failed (systemverilog)')
-        p, log = run([exe / 'xelab.exe', '--debug', 'typical', '-s', args.top + '_snap', args.top])
+        debug_args = [] if args.debug=='off' else ['--debug', args.debug]
+        compile_jobs = 'off' if args.compile_jobs==1 else str(args.compile_jobs)
+        p, log = run([exe / 'xelab.exe', '--mt', compile_jobs, *debug_args, '-s', args.top + '_snap', args.top])
         if p.returncode:
             print(log[-4000:])
             sys.exit('xelab failed')
@@ -115,7 +119,9 @@ def main():
     tail = [l for l in log.splitlines() if any(marker in l for marker in
             ('PASS', 'FAIL', 'Fatal', 'Error', 'IDCODE', 'JTAG_WR_', 'JTAG_BLK_', 'JTAG_PKT_'))]
     print('\n'.join(tail[-20:]) or log[-2000:])
-    failed = re.search(r'\b(?:Fatal|Error|FAIL)\b', log, re.IGNORECASE)
+    # Successful coverage messages include "sticky-error fence/drop". Only
+    # diagnostic lines starting with a failure marker denote simulation errors.
+    failed = re.search(r'^\s*(?:Fatal|Error|FAIL)\b', log, re.IGNORECASE | re.MULTILINE)
     return 0 if p.returncode == 0 and 'PASS' in log and not failed else 1
 
 

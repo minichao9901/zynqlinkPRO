@@ -528,7 +528,17 @@ static int stop(void) {
            (mode==2 && (R(1)>>16))) return -7;
         // A partial HSS packet is flushed autonomously after sampler stop.
         // Give its state machine time to publish before releasing SWD.
-        if(mode==2) { uint32_t i;for(i=0;i<256;i++) (void)PR(1);packet_poll();if(PR(2)&0xfffU) return -7; }
+        if(mode==2) {
+            uint32_t i;
+            for(i=0;i<256;i++) (void)PR(1);
+            packet_poll();
+            if(PR(2)&0xfffU) return -7;
+            // hss_poll() observed these before the final partial packet was
+            // published. Refresh after draining it so STAT cannot reuse its
+            // sequence number or under-report its last sample.
+            produced=PR(4);
+            seq=PR(5);
+        }
         if(mode==2) stat_packet();
         probe_target_release();mode=0;stopping=0;rtt_pl_running=0;return 0;
     }

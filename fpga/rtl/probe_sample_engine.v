@@ -33,7 +33,7 @@ module probe_sample_engine #(
     localparam IDLE=0, ISSUE=1, WAIT=2, ADVANCE=3, COMMIT=4, PUBLISH=5;
     localparam FAST_DRW=5, FAST_LAST=6;
     reg [2:0] state;
-    reg enabled, fault;
+    reg enabled, fault, fault_drain;
     reg [4:0] count, plan_index, item;
     // Contiguous plans use the SWD posted-read pipeline. Sparse plans keep
     // the TAR-per-word path because their addresses cannot be auto-incremented.
@@ -42,7 +42,7 @@ module probe_sample_engine #(
     reg [31:0] plan[0:23];
     // Slot stride is 32 words: timestamp followed by up to 24 data words.
     localparam FIFO_ADDR_W=$clog2(FIFO_SAMPLES)+5;
-    (* ram_style="distributed" *) reg [31:0] fifo[0:FIFO_SAMPLES*32-1];
+    (* ram_style="block" *) reg [31:0] fifo[0:FIFO_SAMPLES*32-1];
     reg fifo_wen;
     reg [FIFO_ADDR_W-1:0] fifo_waddr;
     reg [31:0] fifo_wdata;
@@ -75,10 +75,32 @@ module probe_sample_engine #(
     wire take_word = (rd && raddr==5) || stream_pop;
     wire pop = take_word && used!=0 && read_word==count;
     assign stream_empty = used==0;
-    assign stream_data = used!=0 ? fifo[(tail%FIFO_SAMPLES)*32+read_word] : 0;
+    // Read the cursor that will be visible AFTER this edge. This sustains
+    // one word/clock for both AXI and the PL packetizer with synchronous RAM.
+    // A timestamp is written on PUBLISH's edge; forward that collision so
+    // the newly published sample never exposes the old slot's timestamp.
+    wire clear_fifo = wr && waddr==0 && wdata[1] && !active;
+    wire [FIFO_ADDR_W-1:0] fifo_raddr = clear_fifo ? 0 :
+        (take_word && used!=0) ? (pop ? ((tail+1)%FIFO_SAMPLES)*32 :
+                                     (tail%FIFO_SAMPLES)*32+read_word+1) :
+                                (tail%FIFO_SAMPLES)*32+read_word;
+    reg [31:0] fifo_rdata, fifo_forward_data;
+    reg fifo_forward;
+    always @(posedge clk) begin
+        fifo_rdata <= fifo[fifo_raddr];
+        fifo_forward <= fifo_wen && fifo_waddr==fifo_raddr;
+        fifo_forward_data <= fifo_wdata;
+    end
+    wire [31:0] fifo_current = fifo_forward ? fifo_forward_data : fifo_rdata;
+    assign stream_data = used!=0 ? fifo_current : 0;
     assign timer_tick = tick;
     wire ctrl = wr && waddr==0;
-    wire finishing = state!=IDLE || (!enabled && pending) || (fault && core_busy);
+    // Retain ownership after a fault until a clock edge observes the backend
+    // idle. A combinational fault && core_busy here feeds busy back through
+    // sampler/RTT arbitration into the JTAG result enables (16 LUT levels).
+    // Normal traffic keeps exactly the existing cycle schedule; a fault's
+    // release is deliberately delayed until the registered drain completes.
+    wire finishing = state!=IDLE || (!enabled && pending) || fault_drain;
     assign active = enabled || finishing;
     // Consume the current result and launch the next posted transfer on the
     // same ST_DONE edge of swd_core.  This removes the idle gap between DRW
@@ -95,7 +117,7 @@ module probe_sample_engine #(
         2: rdata={27'd0,plan_index};
         3: rdata=plan[plan_index<24 ? plan_index : 0];
         4: rdata=period;
-        5: rdata=used!=0 ? fifo[(tail%FIFO_SAMPLES)*32+read_word] : 0;
+        5: rdata=used!=0 ? fifo_current : 0;
         // Data-only window: skip the timestamp word and advance the same
         // FIFO cursor.  Version-2 HSS uses nominal period timestamps, so a
         // sample needs one AXI read per value instead of timestamp+value.
@@ -106,7 +128,7 @@ module probe_sample_engine #(
     end
     always @(posedge clk or negedge rst_n) begin
         if(!rst_n) begin
-            state<=IDLE; enabled<=0; fault<=0; count<=0; plan_index<=0; fast_span<=0;span_last<=24'hffffff;
+            state<=IDLE; enabled<=0; fault<=0; fault_drain<=0; count<=0; plan_index<=0; fast_span<=0;span_last<=24'hffffff;
             item<=0; head<=0; tail<=0; read_word<=0; tick<=0; deadline<=0;
             sample_time<=0; period<=2400; skipped<=0; errors<=0;
             clock_hz<=100000000; fraction<=0; phase<=0; retries<=0;
@@ -115,6 +137,7 @@ module probe_sample_engine #(
             core_wdata<=0; fifo_wen<=0; fifo_waddr<=0; fifo_wdata<=0;
         end else begin
             core_start<=0; fifo_wen<=0;
+            if(!core_busy) fault_drain<=0;
             if(tick_en) begin tick<=tick+1'b1; fraction<=phase_sum-clock_hz; end
             else fraction<=phase_sum[31:0];
             if(take_word && used!=0) begin
@@ -135,7 +158,7 @@ module probe_sample_engine #(
             if(ctrl) begin
                 // bit1 clears FIFO/counters only after a graceful stop.
                 if(wdata[1] && !active) begin
-                    head<=0; tail<=0; read_word<=0; skipped<=0; errors<=0; fault<=0;
+                    head<=0; tail<=0; read_word<=0; skipped<=0; errors<=0; fault<=0; fault_drain<=0;
                 end
                 if(!wdata[0]) enabled<=0;
                 else if(!active && wdata[12:8]!=0 && wdata[12:8]<=24 && available) begin
@@ -188,7 +211,7 @@ module probe_sample_engine #(
                     if(core_ack==2 && !core_parity_err && retries!=0) begin
                         retries<=retries-1'b1; state<=ISSUE;
                     end else if(core_ack!=1 || core_parity_err) begin
-                        errors<=errors+1'b1; fault<=1; enabled<=0; pending<=0; state<=IDLE;
+                        errors<=errors+1'b1; fault<=1; fault_drain<=1; enabled<=0; pending<=0; state<=IDLE;
                     end else begin
                         if(phase==4 || phase==FAST_DRW || phase==FAST_LAST) begin
                             fifo_wen<=1; fifo_waddr<=(head%FIFO_SAMPLES)*32+item+1;
@@ -217,7 +240,7 @@ module probe_sample_engine #(
                         watchdog<=TIMEOUT; retries<=RETRIES;
                     end
                 end else if(watchdog==0) begin
-                    errors<=errors+1'b1; fault<=1; enabled<=0; pending<=0; state<=IDLE;
+                    errors<=errors+1'b1; fault<=1; fault_drain<=1; enabled<=0; pending<=0; state<=IDLE;
                 end else watchdog<=watchdog-1'b1;
             end
             ADVANCE: if(!core_busy) begin

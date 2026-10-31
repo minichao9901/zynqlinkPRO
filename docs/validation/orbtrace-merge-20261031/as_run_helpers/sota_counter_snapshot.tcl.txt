@@ -1,0 +1,14 @@
+connect -url tcp:127.0.0.1:3121
+after 200
+targets -set -filter {name =~ "ARM*#0"}
+stop
+puts [rrd pc]
+puts [format "dbg_pkt_taken %08X" [mrd -value 0x12ba14]]
+puts [format "dbg_pkt_fallback %08X" [mrd -value 0x12ba08]]
+puts [format "swd_dma_errors %08X" [mrd -value 0x12cb30]]
+puts [format "swd_dma_last_status %08X" [mrd -value 0x12cb34]]
+puts [format "dap_tx_submit_errors %08X" [mrd -value 0x12db44]]
+puts [format "dap_queue_backpressure %08X" [mrd -value 0x12db48]]
+con
+disconnect
+exit

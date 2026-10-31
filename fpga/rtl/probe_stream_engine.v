@@ -23,7 +23,7 @@ module probe_stream_engine (
     reg [31:0] head,tail,packet_seq,produced;
     reg [11:0] lengths[0:7];
     reg [31:0] config_words[0:15];
-    reg [6:0] byte_map[0:63];
+    (* ram_style="distributed" *) reg [6:0] byte_map[0:63];
     reg [6:0] config_index;
     reg [31:0] up_addr,ring_addr,ring_size,initial_rd;
     reg [11:0] chunk;
@@ -104,7 +104,7 @@ module probe_stream_engine (
     reg [3:0] state;
     reg [6:0] cursor;
     reg [4:0] word_index;
-    reg [31:0] values[0:23];
+    (* ram_style="distributed" *) reg [31:0] values[0:23];
     reg [31:0] stamp,first_stamp,last_stamp,packet_started,sample_delta;
     reg [63:0] elapsed_ticks,convert_input;
     reg [31:0] convert_quotient;
@@ -124,6 +124,16 @@ module probe_stream_engine (
     wire packet_safe=packet_validated || watermark_safe;
     assign fence_req=transport_jtag && state==HEADER && !packet_safe && !hss_transport_fault;
     assign sample_pop=(state==CHECK && !gap) || state==WORDS;
+    // Separate storage writes from asynchronous control reset. Every value
+    // is replaced before GATHER, and the map is host-configured before use;
+    // neither array needs a reset. Keep the original asynchronous read ports.
+    always @(posedge clk) begin
+        if(rst_n && state==WORDS)
+            values[word_index]<=sample_data;
+        if(rst_n && host_en && &host_we && host_addr[14:12]==0 &&
+           host_addr[11:2]==7 && mode==0 && config_index>=16 && config_index<80)
+            byte_map[config_index-16]<=host_wdata[6:0];
+    end
     always @(posedge clk or negedge rst_n) begin
         if(!rst_n) begin
             mode<=0;hss_session<=0;head<=0;tail<=0;packet_seq<=1;produced<=0;config_index<=0;
@@ -151,7 +161,6 @@ module probe_stream_engine (
             6: config_index<=host_wdata[6:0];
             7: if(mode==0) begin
                 if(config_index<16) config_words[config_index]<=host_wdata;
-                else if(config_index<80) byte_map[config_index-16]<=host_wdata[6:0];
                 if(config_index==3) packet_seq<=host_wdata;
             end
             8: if(mode==0) up_addr<=host_wdata;
@@ -192,7 +201,6 @@ module probe_stream_engine (
                 end
             end
             WORDS: begin
-                values[word_index]<=sample_data;
                 if(word_index==0) begin
                     sample_delta<=have_origin ? stamp-last_stamp : 0;
                     last_stamp<=stamp;have_origin<=1;

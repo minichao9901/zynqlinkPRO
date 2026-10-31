@@ -1,0 +1,24 @@
+
+****** xsim v2018.3 (64-bit)
+  **** SW Build 2405991 on Thu Dec  6 23:38:27 MST 2018
+  **** IP Build 2404404 on Fri Dec  7 01:43:56 MST 2018
+    ** Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+
+source xsim.dir/tb_cm3_jtag_snap/xsim_script.tcl
+# xsim {tb_cm3_jtag_snap} -testplusarg clk_ns=50.0 -autoloadwcfg -runall
+Vivado Simulator 2018.3
+Time resolution is 1 ps
+run -all
+WARNING: File  referenced on E:/zynqlinkPRO_orbtrace_opt/fpga/rtl/dap_transfer_block_engine.v at line 79 cannot be opened for reading. Please ensure that this file is available in the current working directory.
+JTAG_WR_DONE
+JTAG_BLK_DONE status=0000440a
+JTAG_PKT_DONE status=00010002
+JTAG HSS bank=       4096 samples=          1 skips=         4 scans=          0 tick=      1754
+JTAG HSS bank=       6144 samples=          2 skips=         4 scans=          0 tick=      1835
+JTAG HSS bank=       8192 samples=        124 skips=         6 scans=          0 tick=      5868
+JTAG_PERF clk_ns=50.000000 hss_samples=127 hss_cycles=21564 rtt_bytes=2048 rtt_cycles=99314
+PASS JTAG full pipeline: physical pad mux, AXI setup, autonomous HSS, posted timestamps/data, packet sticky-error fence/drop, immutable banks, RTT unaligned 1KiB split, DDR-before-RdOff
+$finish called at time : 6492275 ns : File "E:/zynqlinkPRO_orbtrace_opt/fpga/sim/tb_cm3_jtag.sv" Line 211
+run: Time (s): cpu = 00:00:00 ; elapsed = 00:00:27 . Memory (MB): peak = 218.641 ; gain = 0.000
+exit
+INFO: [Common 17-206] Exiting xsim at Sat Oct 31 01:02:28 2026...

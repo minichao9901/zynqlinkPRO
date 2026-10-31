@@ -1,0 +1,38 @@
+[
+  {
+    "name": "jtag_sram_long",
+    "command": [
+      "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "-X",
+      "utf8",
+      "tools/run_f103_jtag_fixture.py",
+      "--restore-swj",
+      "2",
+      "--output",
+      "E:\\zynqlinkPRO_orbtrace_opt\\docs\\validation\\orbtrace-hardware-20261031\\optimized_50_final\\jtag_sram_long_fixture.json",
+      "--",
+      "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "-X",
+      "utf8",
+      "tools/benchmark_sram_matrix.py",
+      "--transport",
+      "jtag",
+      "--speeds",
+      "50000000",
+      "--seconds",
+      "2",
+      "--repeats",
+      "5",
+      "--bit",
+      "E:\\zynqlinkPRO_orbtrace_opt\\prebuilt\\20261031_orbtrace_opt_7020_120_candidate\\zynqlink_probe.bit",
+      "--elf",
+      "E:\\zynqlinkPRO_orbtrace_opt\\prebuilt\\20261031_orbtrace_opt_7020_120_candidate\\zynqlink_probe.elf",
+      "--output",
+      "E:\\zynqlinkPRO_orbtrace_opt\\docs\\validation\\orbtrace-hardware-20261031\\optimized_50_final\\jtag_sram_long.json"
+    ],
+    "returncode": 0,
+    "restore_match": true,
+    "failure_clock": null,
+    "failure": null
+  }
+]

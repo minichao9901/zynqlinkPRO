@@ -1,0 +1,87 @@
+{
+  "status": "PASS: 7010/100MHz routed STA and bitgen; EXPERIMENTAL until physical 7010 validation",
+  "source_commit": "bc9ced6",
+  "implementation_script_commit": "bc9ced6",
+  "device": "xc7z010clg400-2",
+  "vivado": "2018.3",
+  "FCLK_constraint_Hz": 100000000,
+  "firmware_max_link_Hz": 50000000,
+  "actual_loaded_FCLK_Hz": null,
+  "actual_loaded_TCK_Hz": null,
+  "timing": {
+    "WNS_ns": 0.258,
+    "TNS_ns": 0.0,
+    "WHS_ns": 0.012,
+    "THS_ns": 0.0,
+    "WPWS_ns": 0.264
+  },
+  "resources": {
+    "Slice LUTs": 14618.0,
+    "Slice Registers": 16990.0,
+    "Slice": 4398.0,
+    "Block RAM Tile": 10.5,
+    "Unique Control Sets": 757.0,
+    "DSPs": 1.0
+  },
+  "options": {
+    "diagnostics": 0,
+    "raw_trace": 0,
+    "RX_control_set_remap": "ENABLE",
+    "jobs": 1,
+    "threads": 2,
+    "queues": "unchanged: DAP 16 x 4096, USB arena 512KiB"
+  },
+  "rtl_source_sha256": {
+    "dap_transfer_block_engine.v": "85d03fa03966ecf2ae8599ba49ce21699060ab7bcdb27fc69f772bd492eed319",
+    "jtag_core.v": "f81361743a29584b78a1179264d1fa41c4e6fa0456ea486a437cd65e0ff6ed7b",
+    "jtag_shift.v": "5660cec2fd287cdaa9632fae53a915ab28179e6439f79b95367defb0d0970e9a",
+    "orbtrace_controller.v": "16114542ff14dda19fa7d36c5b5286e348d8ebfa5ef010bdaa1198d3ac656600",
+    "orbtrace_frame_fifo.v": "132b79c3621479c0acfeb95a17416fd9a5f52645a22016509538c12e485e27dc",
+    "orbtrace_parallel.v": "ee2df3b300ce66cb684a2e6d32946dfda28cf245f8fd0b451de29901c11b432f",
+    "orbtrace_tpiu_demux.v": "8ee22425aceca214bb30b067704f26816dc322b9db60244fc451476caf2cb768",
+    "orbtrace_tpiu_stream.v": "803b6003de1e30f22c6aad50ea333320e564fcf57bb8fe184ff703e0bcbbf86d",
+    "orbtrace_traceif.v": "e4c9adda46c34b8888c7084a6f01bb134836118263a73a64a857f8f4dc04fef1",
+    "probe_rtt_engine.v": "10136ba15bbf387677053d95226703ac7563998843c0fc55d8082eee40f60bea",
+    "probe_sample_engine.v": "7056bc68ca349e3e8d49f1a79a6f111b996e3569f8cbf8caac5c159743f6bfa0",
+    "probe_stream_engine.v": "2161753d551ced29a45646ea8872af38313704d02b15f939e0c4d6218b2e80e6",
+    "swd_batch_engine.v": "2147786073a8ed8aa4a66c0c6c16a4e7ba34e222789af20cd84e24b74df70c41",
+    "swd_controller.v": "d00966dde8db8b71ce594e9c85ed8a86b89aca5a41291bba213f55dadeac5cf4",
+    "swd_core.v": "dfa1163be05d278580bb1225e7b30848cb770175e185e440a24d0b5a82679ce8"
+  },
+  "sha256": {
+    "zynqlink_probe.bit": "7592559507a7139f62774fce1b28427c5c70bc9cb441a42958b40189b9d18fd6",
+    "zynqlink_probe.elf": "de61421deea6f7bf81810cc9cd1e5fc1024df21ccaf3805bb10f21dd7d2d9957",
+    "ps7_init.tcl": "aa9747c31f705be7c28af1c6b1cdeaf282f0dcdb01faecee2a9f72e4d3489132",
+    "firmware-build.json": "dde459773f01d3e17c5ce81226d3046d23a6554f87f92ec692c9493fe0232b09",
+    "ocm_layout.json": "5145dc69d4aa8d6b031b0280644ff950029430714778a33842ab442cd0ab0c48",
+    "timing_100mhz.rpt": "9258cef4c62c957e28e1447558e39428f6103b15939f0d108768a6b128ceb6a1",
+    "utilization.rpt": "f2f252f5efffd6593c4fb72e14e9a2bda0c21059796edb119b2ee70ae9530136",
+    "simulation_comparison.json": "97f197d4d02953a2cc0ee45b973e5628133b732dab7e42942e441f0fb105b0be"
+  },
+  "routed_checkpoint_sha256": "9cb310e058e621795b7ab5bc4cc2ea52cdb6057664367666c78166c66befcad6",
+  "platform_note": "PS initialization and BSP match the existing probe platform. 7010 delivery is a static implementation result; physical 7010 PS/DDR acceptance is pending.",
+  "simulation_acceptance": {
+    "status": "matched-profile real-CM3 payload/counter/throughput comparison passed",
+    "operating_points": 9,
+    "metrics_identical_to_parent": true,
+    "USB_or_PS_instruction_timing_modeled": false,
+    "raw_model_compatibility_failures": "7 matrix points match parent; raw SWD30 board sampling also fails both fixed-delay models, calibrated boundary1 passes both"
+  },
+  "rejected_previous_firmware": {
+    "source_revision": "bc9ced6",
+    "elf_sha256": "f762d2222ed47eb94ce046f6dd4c7696cc395467f0e0ec548282ff1986d6a49a",
+    "failure": "Original common compact ELF triggered unaligned SWJ LDRD Data Abort on 7020; never accepted on 7010",
+    "evidence": "../../docs/validation/orbtrace-hardware-20261031/optimized_50_rejected_unaligned/"
+  },
+  "firmware_source_revision": "cbedca23cae57402cb1b5e3fb0000544d5b706b8",
+  "firmware_executable_bytes": 71300,
+  "OCM_span_bytes": 120976,
+  "hardware_acceptance": "No physical 7010 test. The identical common 50MHz ELF passed the xc7z020 regression; this does not validate a 7010 platform.",
+  "superseded_previous_firmware": {
+    "source_revision": "f5c938e71e0127ba573f0dcc425f62d924492965",
+    "elf_sha256": "ba87ff9028c4132f605ff12666ad04bff08be34f2db3877b11fd9e7d2b7bd0a3",
+    "reason": "Throughput/functional matrix passed, but strict HSS STOP replay exposed the baseline-shared stale final STAT sequence/sample snapshot",
+    "evidence": "../../docs/validation/orbtrace-hardware-20261031/optimized_50/"
+  },
+  "acceptance_record": "../../docs/validation/orbtrace-hardware-20261031/README.md"
+}

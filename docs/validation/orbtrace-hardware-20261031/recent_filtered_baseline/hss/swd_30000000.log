@@ -1,0 +1,26 @@
+{"transport": "swd", "speed_hz": 30000000, "period_ticks": 410, "effective_Hz": 58535.26856016212, "skip_percent": 0.0, "stage": "coarse", "actual_link_Hz": 24999999.75}
+{"transport": "swd", "speed_hz": 30000000, "period_ticks": 205, "effective_Hz": 118961.3778119789, "skip_percent": 0.0016774301769688837, "stage": "coarse", "actual_link_Hz": 24999999.75}
+{"transport": "swd", "speed_hz": 30000000, "period_ticks": 154, "effective_Hz": 155845.0225871555, "skip_percent": 0.0, "stage": "coarse", "actual_link_Hz": 24999999.75}
+{"transport": "swd", "speed_hz": 30000000, "period_ticks": 128, "effective_Hz": 189499.43299885985, "skip_percent": 0.0021044435325189136, "stage": "coarse", "actual_link_Hz": 24999999.75}
+{"transport": "swd", "speed_hz": 30000000, "period_ticks": 103, "effective_Hz": 233009.92149910488, "skip_percent": 0.0, "stage": "coarse", "actual_link_Hz": 24999999.75}
+{"transport": "swd", "speed_hz": 30000000, "period_ticks": 77, "effective_Hz": 311688.95851332496, "skip_percent": 0.0, "stage": "coarse", "actual_link_Hz": 24999999.75}
+{"transport": "swd", "speed_hz": 30000000, "period_ticks": 64, "effective_Hz": 376857.0119218475, "skip_percent": 0.0015887053639988774, "stage": "coarse", "actual_link_Hz": 24999999.75}
+{"transport": "swd", "speed_hz": 30000000, "period_ticks": 52, "effective_Hz": 461535.8946380611, "skip_percent": 0.0, "stage": "coarse", "actual_link_Hz": 24999999.75}
+{"transport": "swd", "speed_hz": 30000000, "period_ticks": 39, "effective_Hz": 41121.294554108, "skip_percent": 93.31777243973661, "stage": "coarse", "actual_link_Hz": 24999999.75}
+{"transport": "swd", "speed_hz": 30000000, "period_ticks": 26, "effective_Hz": 41057.608452579996, "skip_percent": 95.5520879870333, "stage": "coarse", "actual_link_Hz": 24999999.75}
+{"transport": "swd", "speed_hz": 30000000, "period_ticks": 24, "effective_Hz": 41262.97467989295, "skip_percent": 95.87370081940269, "stage": "coarse", "actual_link_Hz": 24999999.75}
+{"transport": "swd", "speed_hz": 30000000, "period_ticks": 45, "effective_Hz": 41001.78211955267, "skip_percent": 92.31217478680209, "stage": "refine", "actual_link_Hz": 24999999.75}
+Traceback (most recent call last):
+  File "E:\zynqlinkPRO_orbtrace_opt\tools\benchmark_hss_matrix.py", line 85, in <module>
+    if __name__=='__main__':main()
+                            ~~~~^^
+  File "E:\zynqlinkPRO_orbtrace_opt\tools\benchmark_hss_matrix.py", line 50, in main
+    mid=(good+bad)//2;v=point(mid,'refine')
+                        ~~~~~^^^^^^^^^^^^^^
+  File "E:\zynqlinkPRO_orbtrace_opt\tools\benchmark_hss_matrix.py", line 36, in point
+    row=hss_point(probe,mem,d,speed,period,1,seconds or a.seconds,len(current),True,
+                  lambda:setup(o,i,50000,transport),True)
+  File "E:\zynqlinkPRO_orbtrace_opt\tools\benchmark_probe_stream.py", line 117, in hss_point
+    assert rc == 0, (rc, m0)
+           ^^^^^^^
+AssertionError: (-4, (827544392, 2352902506, 24000000, 0, 0, 0, 1, 0, 2, 1024, 48, 0))

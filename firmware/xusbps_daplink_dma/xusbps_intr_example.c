@@ -195,7 +195,7 @@ static int UsbIntrExample(XScuGic *IntcInstancePtr, XUsbPs *UsbInstancePtr,
 	const u8 NumEndpoints = 8;
 
 	XUsbPs_Config		*UsbConfigPtr;
-	XUsbPs_DeviceConfig	DeviceConfig;
+	XUsbPs_DeviceConfig	DeviceConfig = {0};
 
 	/* Initialize the USB driver so that it's ready to use,
 	 * specify the controller ID that is generated in xparameters.h
@@ -312,6 +312,24 @@ static int UsbIntrExample(XScuGic *IntcInstancePtr, XUsbPs *UsbInstancePtr,
     DeviceConfig.EpCfg[7].In.NumBufs=16;
     DeviceConfig.EpCfg[7].In.MaxPacketSize=512;
     DeviceConfig.NumEndpoints = NumEndpoints;
+
+    /* SDK 2018.3 XUsbPs_ConfigureDevice reserves one alignment quantum,
+     * 2 queue heads per endpoint, all dTDs, then OUT payload buffers.
+     * Check the complete allocation before the driver writes any memory. */
+    {
+        u32 needed = 2048U + 2U * NumEndpoints * 64U;
+        unsigned ep;
+        for (ep = 0; ep < NumEndpoints; ++ep) {
+            needed += 64U * (DeviceConfig.EpCfg[ep].Out.NumBufs +
+                             DeviceConfig.EpCfg[ep].In.NumBufs);
+            needed += DeviceConfig.EpCfg[ep].Out.NumBufs *
+                      DeviceConfig.EpCfg[ep].Out.BufSize;
+        }
+        if (needed > sizeof Buffer) {
+            xil_printf("USB DMA arena too small: %u > %u\r\n", needed, sizeof Buffer);
+            goto out;
+        }
+    }
 
 	MemPtr = (u8 *)&Buffer[0];
 	memset(MemPtr,0,MEMORY_SIZE);

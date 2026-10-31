@@ -13,7 +13,7 @@ module tb_riscv_pipeline;
  assign tdo=late_mode ? late_tdo : target_tdo;
  reg [3:0] aux_out=4'hc,aux_tri=4'hb;
  assign pads[1]=tdo;
- swd_controller dut(.clk(clk),.rst_n(rst_n),
+ swd_controller #(.ENABLE_DIAGNOSTICS(0)) dut(.clk(clk),.rst_n(rst_n),
   .s_axi_awaddr(aw),.s_axi_awprot(3'd0),.s_axi_awvalid(av),.s_axi_awready(awr),
   .s_axi_wdata(wd),.s_axi_wstrb(4'hf),.s_axi_wvalid(wv),.s_axi_wready(wr),.s_axi_bvalid(bv),.s_axi_bready(1'b1),
   .s_axi_araddr(ar),.s_axi_arprot(3'd0),.s_axi_arvalid(rv),.s_axi_arready(arr),

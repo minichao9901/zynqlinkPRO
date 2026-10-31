@@ -23,6 +23,7 @@ def main():
     p.add_argument('--output-dir',type=Path,required=True)
     p.add_argument('--use-current-first-log',action='store_true',help='Import the already completed first-rate benchmark from this top')
     p.add_argument('--rebuild',action='store_true')
+    p.add_argument('--return-delay-ns',type=float,default=16.0,help='Explicit model-only pad/return latency; does not change recorded board settings')
     p.add_argument('--first-sram-log',type=Path,help='Import separately validated first-rate SRAM stages; subsequent RTT/HSS rerun must complete')
     a=p.parse_args();out=a.output_dir.resolve();out.mkdir(parents=True,exist_ok=True)
     top='tb_cm3_'+a.transport;work=r/'build/cm3_sim'/top
@@ -34,10 +35,10 @@ def main():
         fclk=row['FCLK_Hz'];cfg=int(row['cfg'],16);mhz=row['requested_Hz']//1000000
         args=['benchmark','target_clk_ns=10.416667']
         if a.transport=='swd':
-            args += [f'half_ns={5e8/fclk:.9f}',f'transfer_delay={((cfg>>13)&15)+(((cfg>>28)&15)<<4)}',f'narrow_clock={(cfg>>19)&1}',f'rx_boundary={(cfg>>18)&1}',f'phase={(cfg>>17)&1}','return_ns=16']
+            args += [f'half_ns={5e8/fclk:.9f}',f'transfer_delay={((cfg>>13)&15)+(((cfg>>28)&15)<<4)}',f'narrow_clock={(cfg>>19)&1}',f'rx_boundary={(cfg>>18)&1}',f'phase={(cfg>>17)&1}',f'return_ns={a.return_delay_ns:g}']
         else:
             mode=row['JTAG_sampling_mode']
-            args += [f'clk_ns={1e9/fclk:.9f}','delay_tdo','tdo_ns=16','bypass']
+            args += [f'clk_ns={1e9/fclk:.9f}','delay_tdo',f'tdo_ns={a.return_delay_ns:g}','bypass']
             if mode&16:args+=['late']
             if mode&1:args+=['q1']
         if idx==0 and a.use_current_first_log:
@@ -47,11 +48,15 @@ def main():
             if 'testplusarg skip_sram' in log:args+=['skip_sram']
         else:
             cmd=[sys.executable,'tools/run_cm3_sim.py','--top',top]+(['--rebuild'] if idx==0 and a.rebuild else [])+args
+            log_path=work/'xsim.log'
+            previous_log_stamp=log_path.stat().st_mtime_ns if log_path.exists() else None
             done=subprocess.run(cmd,cwd=r,capture_output=True,text=True,errors='replace',timeout=3600)
-            log=(work/'xsim.log').read_text(errors='replace');rc=done.returncode
+            fresh_log=log_path.exists() and log_path.stat().st_mtime_ns!=previous_log_stamp
+            log=log_path.read_text(errors='replace') if fresh_log else done.stdout+done.stderr
+            rc=done.returncode
         dest=out/f'{a.transport}_{mhz}.log';dest.write_text(log)
         item=dict(transport=a.transport,requested_Hz=row['requested_Hz'],FCLK_Hz=fclk,actual_link_Hz=row['actual_link_Hz'],
-                  target_HCLK_Hz=96000000,return_delay_ns=16,USB_modeled=False,args=args,returncode=rc,**decode(log))
+                  target_HCLK_Hz=96000000,return_delay_ns=a.return_delay_ns,USB_modeled=False,args=args,returncode=rc,**decode(log))
         if idx==0 and a.first_sram_log:
             earlier=a.first_sram_log.read_text(errors='replace');sram=decode(earlier)['SRAM']
             assert len(sram)==2 and {v['read'] for v in sram}=={0,1} and all(v['bytes']==1024 for v in sram)

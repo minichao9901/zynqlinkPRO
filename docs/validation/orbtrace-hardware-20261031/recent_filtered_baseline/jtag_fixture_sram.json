@@ -1,0 +1,30 @@
+{
+  "command": [
+    "python",
+    "-X",
+    "utf8",
+    "tools/benchmark_sram_matrix.py",
+    "--bit",
+    "E:/zynqlinkPRO/prebuilt/20261031_filtered_tpiu/zynqdap_filtered.bit",
+    "--elf",
+    "E:/zynqlinkPRO/prebuilt/20261031_filtered_tpiu/zynqdap_filtered.elf",
+    "--speeds",
+    "1000000,10000000,25000000,30000000,35000000,50000000",
+    "--transport",
+    "jtag",
+    "--seconds",
+    "0.6",
+    "--repeats",
+    "5",
+    "--output",
+    "docs/validation/orbtrace-hardware-20261031/recent_filtered_baseline/sram_jtag_enabled.json"
+  ],
+  "restore_swj_from_target_source": 2,
+  "initial_DHCSR": "0x1010001",
+  "APB2ENR": "0x404d",
+  "MAPR_readable_bits": "0x0",
+  "target_id": "0x10036414",
+  "MAPR_readable_restore_match": true,
+  "APB2ENR_restore_match": true,
+  "run_halt_restore_match": true
+}

@@ -105,28 +105,16 @@
 //   return: none
 #if ((DAP_SWD != 0) || (DAP_JTAG != 0))
 static void SWJ_SequenceChunk (uint32_t count, const uint8_t *data) {
-  uint32_t w0, w1, w2, w3, w4, w5, w6, w7;
-
-  w0 = ((const uint32_t *)data)[0];
-  w1 = ((const uint32_t *)data)[1];
-  w2 = ((const uint32_t *)data)[2];
-  w3 = ((const uint32_t *)data)[3];
-  w4 = ((const uint32_t *)data)[4];
-  w5 = ((const uint32_t *)data)[5];
-  w6 = ((const uint32_t *)data)[6];
-  w7 = ((const uint32_t *)data)[7];
-
-  // xil_printf("%d, %08x, %08x, %08x, %08x, %08x, %08x, %08x, %08x\n",
-            //  count, w0, w1, w2, w3, w4, w5, w6, w7);
-
-  swd_write32(SWD_SWJ_DATA0, w0);
-  swd_write32(SWD_SWJ_DATA1, w1);
-  swd_write32(SWD_SWJ_DATA2, w2);
-  swd_write32(SWD_SWJ_DATA3, w3);
-  swd_write32(SWD_SWJ_DATA4, w4);
-  swd_write32(SWD_SWJ_DATA5, w5);
-  swd_write32(SWD_SWJ_DATA6, w6);
-  swd_write32(SWD_SWJ_DATA7, w7);
+  uint32_t words[8] = {0};
+  uint32_t bytes = (count + 7U) / 8U;
+  unsigned i;
+  /* DAP sequence bytes start at an arbitrary packet offset. A uint32_t cast
+   * lets Thumb emit LDRD, which faults on the usual packet+2 address. Copy
+   * exactly the supplied bytes into aligned storage, padding the unused tail. */
+  if (bytes > sizeof(words)) bytes = sizeof(words);
+  memcpy(words, data, bytes);
+  for (i = 0; i < 8; ++i)
+    swd_write32(SWD_SWJ_DATA0 + 4U * i, words[i]);
   swd_write32(SWD_SWJ_COUNT, count);
   swd_write32(SWD_CTRL, 0x01);
   swd_wait_idle();

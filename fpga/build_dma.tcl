@@ -5,9 +5,11 @@ if {[file exists [file join $out zynqlink_dma.xpr]] && [lsearch -exact $argv --r
     source [file join $root fpga build_incremental.tcl]
     exit
 }
-create_project -force zynqlink_dma $out -part xc7z020clg400-2
+set target_part xc7z020clg400-2
+if {[info exists ::env(ZYNQLINK_PART)]} {set target_part $::env(ZYNQLINK_PART)}
+create_project -force zynqlink_dma $out -part $target_part
 source [file join $root fpga configure_ip_cache.tcl]
-set_param general.maxThreads 8
+source [file join $root fpga run_threads.tcl]
 set_property target_language Verilog [current_project]
 set_property XPM_LIBRARIES {XPM_MEMORY} [current_project]
 add_files [glob [file join $root fpga rtl *.v]]
@@ -66,6 +68,7 @@ save_bd_design
 source [file join $root fpga probe_stream_bd.tcl]
 source [file join $root fpga probe_jtag_bd.tcl]
 source [file join $root fpga orbtrace_bd.tcl]
+source [file join $root fpga compact_config.tcl]
 source [file join $root fpga axi_pipeline.tcl]
 write_bd_tcl -force [file join $out system_dma.tcl]
 set_property synth_checkpoint_mode Hierarchical [get_files system.bd]
@@ -74,10 +77,14 @@ make_wrapper -files [get_files system.bd] -top
 add_files [file join $out zynqlink_dma.srcs sources_1 bd system hdl system_wrapper.v]
 set_property top system_wrapper [current_fileset]
 source [file join $root fpga configure_runs.tcl]
-launch_runs synth_1 -jobs 4
+launch_runs synth_1 -jobs $::zynqlink_jobs
 wait_on_run synth_1
 if {[get_property PROGRESS [get_runs synth_1]] != "100%"} {error "Synthesis failed"}
-launch_runs impl_1 -to_step route_design -jobs 4
+if {[lsearch -exact $argv --synth-only] >= 0} {
+    puts "SYNTHESIS_ONLY_READY $out"
+    exit
+}
+launch_runs impl_1 -to_step route_design -jobs $::zynqlink_jobs
 wait_on_run impl_1
 if {[get_property PROGRESS [get_runs impl_1]] != "100%"} {error "Implementation failed"}
 source [file join $root fpga verify_routed.tcl]

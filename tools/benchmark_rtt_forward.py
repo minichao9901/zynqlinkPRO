@@ -202,6 +202,10 @@ def main():
                     print(json.dumps({k:v for k,v in row.items() if k not in ('s0','s1')}), flush=True)
     except BaseException as exc:
         report['failure']=repr(exc)
+        try:
+            report['failure_clock'] = live_clock_snapshot()
+        except Exception as clock_error:
+            report['failure_clock_error'] = repr(clock_error)
         raise
     finally:
         try:

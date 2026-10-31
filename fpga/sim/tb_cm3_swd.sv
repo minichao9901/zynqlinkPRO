@@ -2,6 +2,7 @@
 // SWD link against the real Cortex-M3 DesignStart core (XSim only).
 // The CM3 RTL is IEEE-1735 encrypted and lives outside this repository.
 module tb_cm3_swd #(
+  parameter integer ENABLE_DIAGNOSTICS = 0,
   parameter real FCLK_HALF_NS = 4.166667,
   parameter real RETURN_NS = 16.0,
   parameter integer SAMPLE_RISE = 0,
@@ -19,7 +20,12 @@ module tb_cm3_swd #(
     if($value$plusargs("half_ns=%f",half_ns))begin end
     forever #(half_ns) clk=~clk;
   end
-  reg target_clk=0; always #5 target_clk=~target_clk;
+  reg target_clk=0;
+  real target_clk_ns=10.0;
+  initial begin
+    if($value$plusargs("target_clk_ns=%f",target_clk_ns))begin end
+    forever #(target_clk_ns/2.0) target_clk=~target_clk;
+  end
   reg rst_n=1;
   reg [7:0] awaddr=0,araddr=0;
   reg awvalid=0,wvalid=0,arvalid=0;
@@ -66,7 +72,7 @@ module tb_cm3_swd #(
       $fatal(1,"narrow pad high width=%f expected=%f",$realtime-pad_high_start,2*half_ns);
     narrow_pulses=narrow_pulses+1;
   end
-  swd_controller dut(.clk(clk),.rst_n(rst_n),
+  swd_controller #(.ENABLE_DIAGNOSTICS(ENABLE_DIAGNOSTICS)) dut(.clk(clk),.rst_n(rst_n),
     .s_axi_awaddr(awaddr),.s_axi_awprot(3'd0),.s_axi_awvalid(awvalid),.s_axi_awready(awready),
     .s_axi_wdata(wdata),.s_axi_wstrb(4'hf),.s_axi_wvalid(wvalid),.s_axi_wready(wready),
     .s_axi_bvalid(bvalid),.s_axi_bready(1'b1),

@@ -11,6 +11,7 @@ from pathlib import Path
 import re
 import subprocess
 import sys
+import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -18,11 +19,23 @@ ROOT = Path(__file__).resolve().parents[1]
 def run(body):
     work = ROOT / 'build/jtag_internal_trace'
     work.mkdir(parents=True, exist_ok=True)
-    script = work / 'read_trace.tcl'
-    script.write_text('connect\ntargets -set -filter {name =~ "ARM Cortex-A9 MPCore #0*"}\n'
-                      + body + '\ndisconnect\nexit\n', encoding='ascii')
-    return subprocess.check_output([sys.executable, str(ROOT / 'tools/run_xsct.py'), str(script)],
-                                   text=True, encoding='utf-8', errors='replace')
+    # The server can acknowledge connect before its target inventory arrives.
+    # Retry only selection, before any supplied command has executed.
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.tcl', dir=work,
+                                     encoding='ascii', delete=False) as stream:
+        script = Path(stream.name)
+        stream.write('connect -url tcp:127.0.0.1:3121\n'
+                     'set selected 0\n'
+                     'for {set n 0} {$n < 30} {incr n} {\n'
+                     ' if {![catch {targets -set -filter {name =~ "ARM Cortex-A9 MPCore #0*"}} why]} {set selected 1;break}\n'
+                     ' after 100\n}\n'
+                     'if {!$selected} {error $why}\n'
+                     + body + '\ndisconnect\nexit\n')
+    try:
+        return subprocess.check_output([sys.executable, str(ROOT / 'tools/run_xsct.py'), str(script)],
+                                       text=True, encoding='utf-8', errors='replace')
+    finally:
+        script.unlink(missing_ok=True)
 
 
 def control():

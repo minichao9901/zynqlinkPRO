@@ -1,0 +1,6 @@
+connect -url tcp:127.0.0.1:3121
+after 200
+targets -set -filter {name =~ "ARM*#0"}
+foreach a {0xf800025c 0xf8000530 0xf800702c 0xf8007080} {puts [format "BOOTREG %08X %08X" $a [mrd -force -value $a]]}
+disconnect
+exit

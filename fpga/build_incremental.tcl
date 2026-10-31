@@ -4,7 +4,7 @@ set ::zynqlink_no_pipeline [expr {[lsearch -exact $argv --no-pipeline] >= 0}]
 set out [file join $root build fpga_dma_global]
 open_project [file join $out zynqlink_dma.xpr]
 source [file join $root fpga configure_ip_cache.tcl]
-set_param general.maxThreads 8
+source [file join $root fpga run_threads.tcl]
 set impl_only [expr {[lsearch -exact $argv --impl-only] >= 0}]
 set rtl_stamp [exec python [file join $root tools fpga_rtl_stamp.py]]
 set stamp_file [file join $out swd_rtl_built.stamp]
@@ -37,6 +37,7 @@ if {!$impl_only} {
         add_files -fileset constrs_1 [file join $root fpga constraints orbtrace_pins.xdc]
     }
     source [file join $root fpga orbtrace_bd.tcl]
+    source [file join $root fpga compact_config.tcl]
     source [file join $root fpga axi_pipeline.tcl]
     if {$axi_pipeline_changed} {set fresh_impl 1}
     # Vivado 2018.3 does not reliably invalidate an OOC module-reference
@@ -65,6 +66,11 @@ if {!$impl_only} {
     }
     # Switching the diagnostic parameter must invalidate the module's OOC
     # checkpoint even when no RTL file changed.
+    if {$diagnostic_config_changed} {
+        reset_run [get_runs system_swd_controller_0_0_synth_1]
+        reset_run synth_1
+        set fresh_impl 1
+    }
     if {$raw_trace_changed && $rtl_stamp eq $old_stamp} {
         set trace_run [get_runs -quiet system_orbtrace_0_0_synth_1]
         if {[llength $trace_run]} {reset_run $trace_run}
@@ -84,7 +90,7 @@ if {!$impl_only} {
     source [file join $root fpga configure_runs.tcl]
     if {[get_property NEEDS_REFRESH [get_runs synth_1]] || [get_property PROGRESS [get_runs synth_1]] != "100%"} {
         reset_run synth_1
-        launch_runs synth_1 -jobs 4
+        launch_runs synth_1 -jobs $::zynqlink_jobs
         wait_on_run synth_1
     }
     if {[get_property PROGRESS [get_runs synth_1]] != "100%"} {error "Synthesis failed"}
@@ -92,6 +98,10 @@ if {!$impl_only} {
         error "RTL changed during synthesis; rebuild before implementation"
     }
     set fd [open $stamp_file w]; puts -nonewline $fd $rtl_stamp; close $fd
+}
+if {[lsearch -exact $argv --synth-only] >= 0} {
+    puts "SYNTHESIS_ONLY_READY $out"
+    return
 }
 set ref [file join $root build checkpoints dma_routed_reference.dcp]
 source [file join $root fpga configure_runs.tcl]
@@ -112,7 +122,7 @@ if {!$fresh_impl && [file exists $ref]} {
     set_property INCREMENTAL_CHECKPOINT {} [get_runs impl_1]
     set_property strategy Performance_Explore [get_runs impl_1]
 }
-launch_runs impl_1 -to_step route_design -jobs 4
+launch_runs impl_1 -to_step route_design -jobs $::zynqlink_jobs
 wait_on_run impl_1
 if {[get_property PROGRESS [get_runs impl_1]] != "100%"} {error "Implementation failed"}
 if {[catch {source [file join $root fpga verify_routed.tcl]} timing_error]} {
@@ -127,7 +137,7 @@ if {[catch {source [file join $root fpga verify_routed.tcl]} timing_error]} {
     reset_run impl_1
     set_property INCREMENTAL_CHECKPOINT {} [get_runs impl_1]
     set_property strategy Performance_Explore [get_runs impl_1]
-    launch_runs impl_1 -to_step route_design -jobs 4
+    launch_runs impl_1 -to_step route_design -jobs $::zynqlink_jobs
     wait_on_run impl_1
     if {[get_property PROGRESS [get_runs impl_1]] != "100%"} {error "Implementation failed"}
     source [file join $root fpga verify_routed.tcl]

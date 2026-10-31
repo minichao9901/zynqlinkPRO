@@ -201,13 +201,16 @@ def main():
     ap.add_argument('--bit',type=Path)
     ap.add_argument('--elf',type=Path)
     ap.add_argument('--transport', choices=['swd','jtag'], default='swd')
+    ap.add_argument('--allow-duplicate-stat', action='store_true',
+                    help='Diagnostic only: record repeated kind-3 status sequences; data/count checks remain strict')
     args = ap.parse_args()
     args.output.parent.mkdir(parents=True, exist_ok=True)
     probe = Probe()
     dev, out, inp = open_dap()
     mem = Memory(out, inp)
     backup = initial = None
-    report = {'artifacts':provenance(args.bit,args.elf), 'kind': 'HSS sustained end-to-end sweep', 'rows': []}
+    report = {'artifacts':provenance(args.bit,args.elf), 'kind': 'HSS sustained end-to-end sweep',
+              'allow_duplicate_stat_diagnostic': args.allow_duplicate_stat, 'rows': []}
     try:
         stop(probe, dev)
         setup(out, inp, 50000, args.transport)
@@ -225,7 +228,8 @@ def main():
             for nv in map(int, args.variables.split(',')):
                 for period in map(int, args.periods.split(',')):
                     for repeat in range(args.repeats):
-                        row = hss_point(probe, mem, dev, speed, period, nv, args.seconds, repeat)
+                        row = hss_point(probe, mem, dev, speed, period, nv, args.seconds, repeat,
+                                        allow_duplicate_stat=args.allow_duplicate_stat)
                         report['rows'].append(row)
                         args.output.write_text(json.dumps(report, indent=2))
                         print(json.dumps({k: v for k, v in row.items() if k not in ('m0','m1','final')}), flush=True)

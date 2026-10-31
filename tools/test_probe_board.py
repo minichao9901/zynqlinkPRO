@@ -258,6 +258,11 @@ def main():
     try:
         stop(probe, dev)
         report['IDCODE'] = setup(out, inp, args.speed_hz//1000).hex()
+        # DAP transport selection and the autonomous service preference are
+        # separate. A preceding JTAG client may have left the latter at JTAG;
+        # this test deliberately disconnects DAP to exercise cold SWD startup.
+        assert probe.action(0x31, 12, bytes([1]))[0] == 0
+        report['service_transport'] = 'swd'
         device = mem.word(0xe0042000) & 0xfff
         report['target'] = 'STM32F103xE' if device == 0x414 else 'STM32F103CB-compatible'
         report['device_id'] = hex(device)

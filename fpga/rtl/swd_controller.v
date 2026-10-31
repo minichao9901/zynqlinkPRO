@@ -8,6 +8,9 @@
 module swd_controller #(
     parameter C_S_AXI_DATA_WIDTH = 32,
     parameter C_S_AXI_ADDR_WIDTH = 8,
+    // Set to zero in the compact production BD; retain the diagnostic build
+    // for protocol investigations and the real-CM3 diagnostic testbench.
+    parameter integer ENABLE_DIAGNOSTICS = 1,
     parameter integer SWDIO_IN_DELAY_NS = 0
 )(
     input  wire                                    clk,
@@ -183,6 +186,7 @@ module swd_controller #(
     IOBUF u_clock_iobuf(.IO(swclk),.I(clock_drive),.T(1'b0),.O(clock_feedback));
     // Read-only, asynchronous pad observer; software snapshots it after the
     // transaction has stopped. It never controls a protocol clock or data.
+    generate if (ENABLE_DIAGNOSTICS) begin:g_clock_diagnostics
     always @(posedge clock_feedback or posedge clock_observer_clear)begin
         if(clock_observer_clear)begin clock_pad_rises<=0;clock_rise_while_low<=0;end
         else begin clock_pad_rises<=clock_pad_rises+1'b1;if(!clock_drive)clock_rise_while_low<=1;end
@@ -198,6 +202,12 @@ module swd_controller #(
             if(clock_drive && !clock_previous_intent)clock_intended_rises<=clock_intended_rises+1'b1;
         end
     end
+    end else begin:g_no_clock_diagnostics
+        always @(posedge clk) begin
+            clock_pad_rises<=0; clock_intended_rises<=0;
+            clock_previous_intent<=0; clock_fall_while_high<=0; clock_rise_while_low<=0;
+        end
+    end endgenerate
     for(genvar gi=0;gi<4;gi=gi+1) begin:g_aux
         wire pin_o=gi==0 && jtag_enabled ? (manual_pins[8] ? manual_pins[2] : jtag_tdi) : gpio_out[gi];
         wire pin_t=!jtag_config[1] || (gi==1 && jtag_enabled) || (!(gi==0 && jtag_enabled) && gpio_tri[gi]);
@@ -246,7 +256,7 @@ module swd_controller #(
             trace_raw_mode<=0;trace_raw_armed<=0;trace_raw_active<=0;trace_previous_t<=0;
         end else begin
             trace_previous_t<=swdio_t;
-            if(trace_clear) begin
+            if(ENABLE_DIAGNOSTICS && trace_clear) begin
                 trace_head<=0;trace_count<=0;trace_frozen<=0;
                 trace_raw_mode<=s_axi_wdata[1];trace_raw_armed<=s_axi_wdata[1];trace_raw_active<=0;
             end else if(trace_raw_mode)begin
@@ -261,7 +271,7 @@ module swd_controller #(
                     if(trace_head==15)begin trace_raw_active<=0;trace_frozen<=1;end
                 end
             end
-            else if(core_result_valid && !trace_frozen) begin
+            else if(ENABLE_DIAGNOSTICS && core_result_valid && !trace_frozen) begin
                 transfer_trace[trace_head]<={trace_count,core_req_sel,4'd0,core_parity_err,core_ack};
                 trace_head<=trace_head+1'b1;trace_count<=trace_count+1'b1;
                 if(core_parity_err || (core_ack!=1 && core_ack!=2 && core_ack!=4))trace_frozen<=1;
@@ -464,10 +474,10 @@ module swd_controller #(
     always @(posedge clk or negedge rst_n) begin
         if(!rst_n)begin diag_head<=0;diag_count<=0;diag_armed<=0;diag_frozen<=0;end
         else if(s_axi_wvalid && s_axi_wready && write_addr==8'hcc)begin
-            if(s_axi_wdata[0])begin
+            if(ENABLE_DIAGNOSTICS && s_axi_wdata[0])begin
                 diag_head<=0;diag_count<=0;diag_armed<=s_axi_wdata[1];diag_frozen<=0;
-            end else if(s_axi_wdata[2])begin diag_armed<=0;diag_frozen<=1;end
-        end else if(jtag_debug_valid && diag_armed)begin
+            end else if(ENABLE_DIAGNOSTICS && s_axi_wdata[2])begin diag_armed<=0;diag_frozen<=1;end
+        end else if(ENABLE_DIAGNOSTICS && jtag_debug_valid && diag_armed)begin
             diag_meta[diag_head]<={jtag_timestamp[12:0],jtag_debug_meta[18:0]};
             diag_front[diag_head]<=core_wdata_sel;
             diag_latched[diag_head]<=jtag_debug_wdata;
@@ -590,8 +600,8 @@ module swd_controller #(
                         engine_reset <= 1'b1;
                         engine_reset_count <= engine_reset_count + 1'b1;
                     end
-                    ADDR_TRACE_INDEX: trace_index<=s_axi_wdata[3:0];
-                    8'hd0:diag_index<=s_axi_wdata[4:0];
+                    ADDR_TRACE_INDEX: if(ENABLE_DIAGNOSTICS) trace_index<=s_axi_wdata[3:0];
+                    8'hd0:if(ENABLE_DIAGNOSTICS)diag_index<=s_axi_wdata[4:0];
                     8'h80: if(!core_busy && !stream_active && !packet_active && !batch_active)begin
                         jtag_config<=s_axi_wdata;jtag_enabled<=s_axi_wdata[0] && s_axi_wdata[1];
                     end
@@ -600,7 +610,7 @@ module swd_controller #(
                     8'h8c: if(!core_busy) jtag_operation<=s_axi_wdata[2:0];
                     8'h90: if(!core_busy) jtag_seq_tms<=s_axi_wdata[0];
                     8'h94: if(!core_busy) begin manual_pins<=s_axi_wdata;end
-                    8'hf8:clock_observer_reset<=s_axi_wdata[0];
+                    8'hf8:if(ENABLE_DIAGNOSTICS)clock_observer_reset<=s_axi_wdata[0];
                     8'h98: if(!core_busy) begin jtag_sample_early<=s_axi_wdata[0];jtag_return_late<=s_axi_wdata[4];end
                     default: ;
                 endcase
@@ -633,7 +643,7 @@ module swd_controller #(
                     ADDR_ENGINE_RESET: rdata_reg <= engine_reset_count;
                     ADDR_TRACE_CTRL: rdata_reg <= {trace_frozen,trace_raw_mode,trace_raw_active,trace_raw_armed,8'd0,trace_count,trace_head};
                     ADDR_TRACE_INDEX: rdata_reg <= {28'd0,trace_index};
-                    ADDR_TRACE_DATA: rdata_reg <= transfer_trace[trace_index];
+                    ADDR_TRACE_DATA: rdata_reg <= ENABLE_DIAGNOSTICS ? transfer_trace[trace_index] : 0;
                     ADDR_STATUS: begin
                         // 32-bit STATUS layout: [31:16] timestamp, [7] parity_err,
                         // [3:1] ack, [0] busy. Reserved bits read as 0.
@@ -697,18 +707,18 @@ module swd_controller #(
                     8'hc0:rdata_reg<=jtag_stat_cycles;
                     8'hc4:rdata_reg<=jtag_stat_bits;
                     8'hc8:rdata_reg<=jtag_stat_transfers;
-                    8'hcc:rdata_reg<={16'h4a54,3'd0,diag_frozen,diag_armed,diag_count,diag_head};
+                    8'hcc:rdata_reg<=ENABLE_DIAGNOSTICS ? {16'h4a54,3'd0,diag_frozen,diag_armed,diag_count,diag_head} : 0;
                     8'hd0:rdata_reg<={27'd0,diag_index};
-                    8'hd4:rdata_reg<=diag_meta[diag_index];
-                    8'hd8:rdata_reg<=diag_front[diag_index];
-                    8'hdc:rdata_reg<=diag_latched[diag_index];
-                    8'he0:rdata_reg<=diag_tx[diag_index];
-                    8'he4:rdata_reg<=diag_sense[diag_index];
-                    8'he8:rdata_reg<=diag_rx[diag_index];
-                    8'hec:rdata_reg<=diag_extra[diag_index];
-                    8'hf0:rdata_reg<=diag_alternate[diag_index];
-                    8'hf4:rdata_reg<=diag_samples[diag_index];
-                    8'hf8:rdata_reg<={16'h5343,clock_pad_rises,clock_intended_rises};
+                    8'hd4:rdata_reg<=ENABLE_DIAGNOSTICS ? diag_meta[diag_index] : 0;
+                    8'hd8:rdata_reg<=ENABLE_DIAGNOSTICS ? diag_front[diag_index] : 0;
+                    8'hdc:rdata_reg<=ENABLE_DIAGNOSTICS ? diag_latched[diag_index] : 0;
+                    8'he0:rdata_reg<=ENABLE_DIAGNOSTICS ? diag_tx[diag_index] : 0;
+                    8'he4:rdata_reg<=ENABLE_DIAGNOSTICS ? diag_sense[diag_index] : 0;
+                    8'he8:rdata_reg<=ENABLE_DIAGNOSTICS ? diag_rx[diag_index] : 0;
+                    8'hec:rdata_reg<=ENABLE_DIAGNOSTICS ? diag_extra[diag_index] : 0;
+                    8'hf0:rdata_reg<=ENABLE_DIAGNOSTICS ? diag_alternate[diag_index] : 0;
+                    8'hf4:rdata_reg<=ENABLE_DIAGNOSTICS ? diag_samples[diag_index] : 0;
+                    8'hf8:rdata_reg<=ENABLE_DIAGNOSTICS ? {16'h5343,clock_pad_rises,clock_intended_rises} : 0;
                     8'hfc:rdata_reg<={28'd0,clock_rise_while_low,clock_fall_while_high,clock_feedback,clock_drive};
                     default: begin
                         rdata_reg <= !s_axi_araddr[7] && s_axi_araddr[6:5]==2'b11 ? stream_rdata : 32'd0;

@@ -1,0 +1,10 @@
+connect -url tcp:127.0.0.1:3121
+after 200
+targets -set -filter {name =~ "ARM*#0"}
+stop
+puts [rrd cp15]
+puts [rrd abt]
+mrd -force 0x1d078 16
+con
+disconnect
+exit

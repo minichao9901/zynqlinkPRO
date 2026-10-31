@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 // Real AXI controller, physical pad mux, sampler, packet BRAM and RTT engine.
 // The external debug port is the encrypted Cortex-M3 DesignStart RTL.
-module tb_cm3_jtag;
+module tb_cm3_jtag #(parameter integer ENABLE_DIAGNOSTICS=0);
  real clk_ns=8.333333;
  integer cfg_idle=1;
  reg clk=0;
@@ -25,7 +25,7 @@ module tb_cm3_jtag;
  assign tdo=(late_mode || $test$plusargs("delay_tdo")) ? late_tdo : target_tdo;
  reg [3:0] aux_out=4'hc,aux_tri=4'hb;
  assign pads[1]=tdo;
- swd_controller dut(.clk(clk),.rst_n(rst_n),
+ swd_controller #(.ENABLE_DIAGNOSTICS(ENABLE_DIAGNOSTICS)) dut(.clk(clk),.rst_n(rst_n),
   .s_axi_awaddr(aw),.s_axi_awprot(3'd0),.s_axi_awvalid(av),.s_axi_awready(awr),
   .s_axi_wdata(wd),.s_axi_wstrb(4'hf),.s_axi_wvalid(wv),.s_axi_wready(wr),.s_axi_bvalid(bv),.s_axi_bready(1'b1),
   .s_axi_araddr(ar),.s_axi_arprot(3'd0),.s_axi_arvalid(rv),.s_axi_arready(arr),
@@ -163,6 +163,7 @@ module tb_cm3_jtag;
   end
   $display("JTAG_PKT_DONE status=%h",d);
   write_reg('hcc,4);read_reg('hcc,d);diag_n=(d>>5)&63;
+  if(ENABLE_DIAGNOSTICS)begin
   if(d[31:16]!='h4a54 || diag_n<11)$fatal(1,"JTAG diagnostic history status=%h",d);
   for(k=0;k<diag_n;k=k+1)begin
    write_reg('hd0,k);read_reg('hd4,dbg_meta);read_reg('hd8,dbg_front);
@@ -172,6 +173,7 @@ module tb_cm3_jtag;
     $fatal(1,"JTAG diagnostic TX mismatch row=%0d front=%h latched=%h tx=%h pad=%h",k,dbg_front,dbg_latched,dbg_tx,dbg_sense);
   end
   $display("JTAG_DIAG_DONE scans=%0d",diag_n);
+  end else if(d!==0)$fatal(1,"compact build exposed diagnostic history %h",d);
   if($test$plusargs("writes_only"))begin $display("PASS JTAG scalar, batch and packet writes");$finish;end
   // No AXI operations per sample: configure once, then PL fills a bank.
   cfg(0,4);cfg(1,2);cfg(2,32);cfg(5,1);

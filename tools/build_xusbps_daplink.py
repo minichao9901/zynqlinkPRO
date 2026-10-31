@@ -11,7 +11,9 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument('--opt', choices=['0', '3'], default='3')
+    ap.add_argument('--opt', choices=['0', '3', 's'], default='3')
+    ap.add_argument('--compact-code', action='store_true', help='Thumb code and unused section removal; preserve production queues and DDR buffers')
+    ap.add_argument('--out', help='Separate output directory for clock/optimization profiles (default: build/<project>/<optimization>)')
     ap.add_argument('--project', choices=['xusbps_daplink', 'xusbps_daplink_dma'], default='xusbps_daplink')
     ap.add_argument('--trace', action='store_true', help='Enable DMA firmware timing trace and MMIO diagnostics')
     ap.add_argument('--usb-trace', action='store_true', help='Trace USB events without per-MMIO diagnostics')
@@ -24,6 +26,8 @@ def main():
                          'a BSP root containing ps7_cortexa9_0 is also accepted')
     ap.add_argument('--gcc', default=r'E:\Xilinx\SDK\2018.3\gnu\aarch32\nt\gcc-arm-none-eabi\bin\arm-none-eabi-gcc.exe')
     args = ap.parse_args()
+    if args.compact_code and args.project != 'xusbps_daplink_dma':
+        ap.error('--compact-code requires the DMA project')
     src = ROOT / 'firmware' / args.project
     if args.bsp:
         bsp = Path(args.bsp)
@@ -31,10 +35,14 @@ def main():
             bsp = bsp / 'ps7_cortexa9_0'
     else:
         bsp = ROOT / 'reference/legacy_zynq/ZYNQ_DAPLINK_RTL_100TO50MHz/ZYNQ_DAPLINK_RTL_100TO50MHz.sdk/usb_bsp/ps7_cortexa9_0'
-    out = ROOT / 'build' / args.project / f'O{args.opt}'
+    out = ROOT / 'build' / args.project / (f'O{args.opt}' + ('_compact' if args.compact_code else ''))
+    if args.out:
+        out = (ROOT / args.out).resolve()
     out.mkdir(parents=True, exist_ok=True)
     gcc = Path(args.gcc)
     flags = ['-mcpu=cortex-a9', '-mfpu=vfpv3', '-mfloat-abi=hard']
+    if args.compact_code:
+        flags += ['-mthumb', '-ffunction-sections', '-fdata-sections']
     verified_clock = None
     if args.project == 'xusbps_daplink_dma':
         flags += ['-DDAP_ALLOW_ZERO_IDLE='+str(int(args.experimental_zero_idle))]
@@ -68,15 +76,25 @@ def main():
         objects.append(obj)
 
     elf = out / (args.project + '.elf')
-    run([gcc, *flags, '-specs=' + str(src / 'Xilinx.spec'), '-Wl,-build-id=none', '-Wl,-T,' + str(src / 'lscript.ld'), '-Wl,-Map,' + str(out / 'xusbps_daplink.map'), '-L' + str(bsp / 'lib'), '-o', elf, *objects, '-Wl,--start-group', '-lxil', '-lgcc', '-lc', '-Wl,--end-group'])
+    linker = src / 'lscript.ld'
+    run([gcc, *flags, '-specs=' + str(src / 'Xilinx.spec'), '-Wl,-build-id=none', *(['-Wl,--gc-sections'] if args.compact_code else []), '-Wl,-T,' + str(linker), '-Wl,-Map,' + str(out / 'xusbps_daplink.map'), '-L' + str(bsp / 'lib'), '-o', elf, *objects, '-Wl,--start-group', '-lxil', '-lgcc', '-lc', '-Wl,--end-group'])
     manifest = {
         'options': vars(args),
+        'source_revision': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
+        'compiler_flags': flags + ['-O' + args.opt],
+        'linker_script': str(linker.relative_to(ROOT)),
+        'linker_sha256': hashlib.sha256(linker.read_bytes()).hexdigest(),
         'verified_fpga_clock': verified_clock,
         'source_sha256': {str(p.relative_to(src)): hashlib.sha256(p.read_bytes()).hexdigest() for p in src.rglob('*') if p.is_file()},
         'bsp_sha256': hashlib.sha256((bsp / 'lib/libxil.a').read_bytes()).hexdigest(),
         'elf_sha256': hashlib.sha256(elf.read_bytes()).hexdigest(),
     }
     (out / 'manifest.json').write_text(json.dumps(manifest, indent=2), encoding='utf-8')
+    if args.compact_code:
+        from report_ocm_elf import inspect
+        report = inspect(elf)
+        (out / 'ocm_layout.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
+        print('OCM span:', report['span_bytes'], 'free:', report['free_bytes'], 'reserved:', report['reserved_bytes'])
     print(elf)
 
 

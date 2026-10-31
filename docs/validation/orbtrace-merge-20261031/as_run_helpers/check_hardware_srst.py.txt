@@ -1,0 +1,24 @@
+from pathlib import Path
+import sys,json,time
+sys.path.insert(0,'tools')
+from probe_flash import Session
+p=Path('docs/validation/orbtrace-qspi-20261031/hardware_srst_check');p.mkdir(exist_ok=False)
+s=Session(p,Path('E:/Xilinx/SDK/2018.3'),'tcp:127.0.0.1:3121')
+r={'purpose':'Verify electrical SRST reset actually reaches board without downloading or continuing CPU','downloads':False}
+try:
+ r['initial_trace']=s.read_words(0x03ff0000,8)
+ assert r['initial_trace'][0]==0x53544730 and r['initial_trace'][5]==0x600
+ s.run('mwr -force 0x03ff0014 0x53525354\nputs MARKED')
+ try:
+  r['srst_output']=s.run('rst -srst\nputs SRST_PULSED')
+ except Exception as e:r['srst_error']=str(e)
+ time.sleep(3)
+ r['final_trace']=s.read_words(0x03ff0000,8)
+ r['hardware_reset_observed']=r['final_trace'][5]==0x600
+ if not r['hardware_reset_observed']:
+  assert r['final_trace'][5]==0x53525354
+  s.run('mwr -force 0x03ff0014 0x600\nputs ORIGINAL_TRACE_RESTORED')
+  r['diagnostic_marker_restored']=True
+finally:
+ (p/'result.json').write_text(json.dumps(r,indent=2)+'\n')
+print(json.dumps(r,indent=2))

@@ -1,0 +1,17 @@
+import subprocess,sys,json,os
+from pathlib import Path
+root=Path.cwd();dest=root/'docs/validation/orbtrace-hardware-20261031/optimized_50';bit=Path('E:/zynqlinkPRO_orbtrace_opt/prebuilt/20261031_orbtrace_opt_7020_120_candidate/zynqlink_probe.bit');elf=bit.with_name('zynqlink_probe.elf');os.environ['TEMP']=os.environ['TMP']=str(root/'build/probe_tmp');rows=[]
+art=['--bit',str(bit),'--elf',str(elf)]
+jobs=[('swd_sram_rewired',['tools/benchmark_sram_matrix.py','--transport','swd','--speeds','25000000,30000000,50000000','--seconds','0.6','--repeats','5',*art]),('swd_cmsis_depth16',['tools/benchmark_cmsis_sram.py','--speed','50000','--sessions','3','--loops','100','--depth','16']),('swd_functional',['tools/test_probe_board.py','--services','both','--seconds','0.5','--speed-hz','50000000',*art]),('jtag_unaligned',['tools/test_jtag_board.py','--speeds','1000000,10000000,30000000,50000000'])]
+for tr in ['swd','jtag']:
+ jobs.append((tr+'_hss_dynamic',['tools/benchmark_hss_dynamic.py','--transport',tr,'--speed','50000000','--periods','120,48,40,32,24','--seconds','2',*art]))
+ jobs.append((tr+'_hss_8vars',['tools/benchmark_probe_stream.py','--transport',tr,'--speeds','50000000','--variables','8','--periods','1200,480,240,200,192','--seconds','1','--repeats','3',*art]))
+jobs.append(('swd_openocd',['tools/benchmark_sram_optimized.py','--tag','optimized_50','--output-dir',str(dest/'openocd'),'--sessions','3','--loops','30','--speed','50000','--no-reset','--clock-script','none']))
+for speed in [25000000,30000000]:jobs.append((f'swd_rtt_rewired_{speed}',['tools/benchmark_rtt_forward.py','--transport','swd','--speeds',str(speed),'--chunks','1024','--seconds','2','--repeats','3',*art]))
+for name,extra in jobs:
+ out=dest/(name+'.json');fixture=dest/(name+'_fixture.json');child=[sys.executable,'-X','utf8',*extra]+([] if name=='swd_openocd' else ['--output',str(out)]);cmd=[sys.executable,'-X','utf8','tools/run_f103_jtag_fixture.py','--restore-swj','2','--output',str(fixture),'--',*child]
+ with out.with_suffix('.log').open('w') as log:r=subprocess.run(cmd,stdout=log,stderr=subprocess.STDOUT)
+ v=json.loads(out.read_text()) if out.exists() else {};f=json.loads(fixture.read_text()) if fixture.exists() else {};row=dict(name=name,command=cmd,returncode=r.returncode,restore_match=v.get('restore_match'),fixture_restore=f.get('run_halt_restore_match'),failure=v.get('failure',v.get('error')));rows.append(row);(dest/'extra_runs.json').write_text(json.dumps(rows,indent=2)+'\n');print(json.dumps(row),flush=True)
+ if v.get('backup_sha256') and not v.get('restore_match'):raise RuntimeError('RAM restoration not verified')
+ if v.get('sessions') and any(not x.get('restore_match') for x in v['sessions']):raise RuntimeError('session restoration not verified')
+ if not f.get('run_halt_restore_match'):raise RuntimeError('pin/core fixture restoration not verified')

@@ -16,7 +16,11 @@ def main():
     a.add_argument('--bit',type=Path,required=True);a.add_argument('--elf',type=Path,required=True)
     a.add_argument('--seconds',type=float,default=.4);a.add_argument('--repeats',type=int,default=3)
     a.add_argument('--transport',choices=['both','swd','jtag'],default='both')
+    a.add_argument('--speeds',default='1000000,10000000,25000000,35000000,50000000,60000000',
+                   help='Comma-separated requested link rates in Hz')
     args=a.parse_args();args.output.parent.mkdir(parents=True,exist_ok=True)
+    speeds=[int(v) for v in args.speeds.split(',')]
+    if not speeds or any(v<=0 or v%1000 for v in speeds):a.error('--speeds must contain positive whole-kHz rates in Hz')
     d,o,i=open_dap();p=Probe();m=Memory(o,i);saved=initial=None;base=0x20004000
     report=dict(artifacts=provenance(args.bit,args.elf),block_bytes=1024,pipeline_depth=4,rows=[])
     pattern=random.Random(0x20261029).randbytes(1024)
@@ -44,7 +48,8 @@ def main():
         report['backup_sha256']=hashlib.sha256(saved).hexdigest()
         transports=['swd','jtag'] if args.transport=='both' else [args.transport]
         for transport in transports:
-            for khz in [1000,10000,25000,35000,50000,60000]:
+            for speed in speeds:
+                khz=speed//1000
                 row=dict(transport=transport,requested_Hz=khz*1000,passed=False)
                 try:
                     setup(o,i,khz,transport)
@@ -93,7 +98,7 @@ def main():
         finally:
             args.output.write_text(json.dumps(report,indent=2)+'\n');p.close()
             usb.util.release_interface(d,0);usb.util.dispose_resources(d)
-    assert len(report['rows'])==6*len(transports) and all(v['passed'] for v in report['rows'])
+    assert len(report['rows'])==len(speeds)*len(transports) and all(v['passed'] for v in report['rows'])
 
 
 if __name__=='__main__':main()

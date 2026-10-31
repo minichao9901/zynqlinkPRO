@@ -1,0 +1,11 @@
+open_project {E:/zynqlinkPRO_orbtrace_opt/build/fpga_dma_global/zynqlink_dma.xpr}
+open_bd_design [get_files system.bd]
+set ps [get_bd_cells processing_system7_0]
+set_property -dict [list CONFIG.PCW_QSPI_PERIPHERAL_ENABLE {1} CONFIG.PCW_QSPI_QSPI_IO {MIO 1 .. 6} CONFIG.PCW_QSPI_GRP_SINGLE_SS_ENABLE {1} CONFIG.PCW_QSPI_GRP_FBCLK_ENABLE {0} CONFIG.PCW_QSPI_PERIPHERAL_FREQMHZ {200}] $ps
+validate_bd_design
+generate_target all [get_files system.bd]
+file mkdir {E:/zynqlinkPRO_orbtrace_opt/build/qspi_boot/hw}
+write_hwdef -force -file {E:/zynqlinkPRO_orbtrace_opt/build/qspi_boot/hw/system.hdf}
+foreach n {CONFIG.PCW_QSPI_PERIPHERAL_ENABLE CONFIG.PCW_QSPI_QSPI_IO CONFIG.PCW_ACT_QSPI_PERIPHERAL_FREQMHZ CONFIG.PCW_QSPI_GRP_FBCLK_ENABLE} {puts "QSPIFINAL $n [get_property $n $ps]"}
+exit
+

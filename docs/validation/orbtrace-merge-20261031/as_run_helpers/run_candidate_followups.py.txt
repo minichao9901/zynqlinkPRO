@@ -1,0 +1,10 @@
+import subprocess,sys,json,os
+from pathlib import Path
+root=Path.cwd();dest=root/'docs/validation/orbtrace-hardware-20261031/optimized_50';bit=Path('E:/zynqlinkPRO_orbtrace_opt/prebuilt/20261031_orbtrace_opt_7020_120_candidate/zynqlink_probe.bit');elf=bit.with_name('zynqlink_probe.elf');os.environ['TEMP']=os.environ['TMP']=str(root/'build/probe_tmp');rows=[]
+jobs=[('swd_25_fixed_frontier',['tools/benchmark_hss_confirm.py','--transport','swd','--speed','25000000','--periods','47,48,49']),('swd_35_50_long_rtt',['tools/benchmark_rtt_forward.py','--transport','swd','--speeds','35000000,50000000','--chunks','1024','--seconds','8','--repeats','3'])]
+for name,extra in jobs:
+ out=dest/(name+'.json');fixture=dest/(name+'_fixture.json');cmd=[sys.executable,'-X','utf8','tools/run_f103_jtag_fixture.py','--restore-swj','2','--output',str(fixture),'--',sys.executable,'-X','utf8',*extra,'--bit',str(bit),'--elf',str(elf),'--output',str(out)]
+ with out.with_suffix('.log').open('w') as log:r=subprocess.run(cmd,stdout=log,stderr=subprocess.STDOUT)
+ v=json.loads(out.read_text()) if out.exists() else {};f=json.loads(fixture.read_text());row=dict(name=name,command=cmd,returncode=r.returncode,restore_match=v.get('restore_match'),failure_clock=v.get('failure_clock'),failure=v.get('failure'));rows.append(row);(dest/'followup_runs.json').write_text(json.dumps(rows,indent=2)+'\n');print(json.dumps(row),flush=True)
+ assert f.get('run_halt_restore_match')
+ if v.get('backup_sha256'):assert v.get('restore_match')

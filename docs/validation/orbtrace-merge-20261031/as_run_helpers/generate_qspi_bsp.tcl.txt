@@ -1,0 +1,5 @@
+open_hw_design {E:/zynqlinkPRO_orbtrace_opt/build/qspi_boot/hw/system.hdf}
+puts "PROCESSORS [get_cells -filter {IP_TYPE==PROCESSOR}]"
+create_sw_design qspi_boot_bsp -proc ps7_cortexa9_0 -os standalone
+generate_bsp -dir {E:/zynqlinkPRO_orbtrace_opt/build/qspi_boot/bsp}
+exit

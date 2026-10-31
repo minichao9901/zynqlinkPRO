@@ -1,0 +1,101 @@
+
+****** xsim v2018.3 (64-bit)
+  **** SW Build 2405991 on Thu Dec  6 23:38:27 MST 2018
+  **** IP Build 2404404 on Fri Dec  7 01:43:56 MST 2018
+    ** Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+
+source xsim.dir/tb_cm3_swd_snap/xsim_script.tcl
+# xsim {tb_cm3_swd_snap} -testplusarg half_ns=50.0 -testplusarg rx_boundary=1 -testplusarg streams -autoloadwcfg -runall
+Vivado Simulator 2018.3
+Time resolution is 1 ps
+run -all
+WARNING: File  referenced on E:/zynqlinkPRO_orbtrace_opt/fpga/rtl/dap_transfer_block_engine.v at line 79 cannot be opened for reading. Please ensure that this file is available in the current working directory.
+XFER req=02 ack=1 data=2ba01477
+XFER req=00 ack=1 data=2ba01477
+XFER req=04 ack=1 data=2ba01477
+XFER req=06 ack=1 data=f0000000
+XFER req=06 ack=1 data=f0000000
+XFER req=06 ack=1 data=f0000000
+XFER req=06 ack=1 data=f0000000
+XFER req=06 ack=1 data=f0000000
+XFER req=08 ack=1 data=f0000000
+XFER req=01 ack=1 data=f0000000
+XFER req=05 ack=1 data=f0000000
+XFER req=0d ack=1 data=f0000000
+XFER req=0d ack=1 data=f0000000
+XFER req=0d ack=1 data=f0000000
+XFER req=0d ack=1 data=f0000000
+XFER req=0d ack=1 data=f0000000
+XFER req=0d ack=1 data=f0000000
+XFER req=0d ack=1 data=f0000000
+XFER req=0d ack=1 data=f0000000
+XFER req=0d ack=1 data=f0000000
+XFER req=0d ack=1 data=f0000000
+XFER req=0d ack=1 data=f0000000
+XFER req=0d ack=1 data=f0000000
+XFER req=0d ack=1 data=f0000000
+XFER req=0d ack=1 data=f0000000
+XFER req=0d ack=1 data=f0000000
+XFER req=0d ack=1 data=f0000000
+XFER req=0e ack=2 data=f0000000
+XFER req=0e ack=1 data=00000000
+XFER req=05 ack=1 data=00000000
+XFER req=0f ack=2 data=00000000
+XFER req=0f ack=1 data=00000000
+XFER req=0f ack=1 data=5a89cdef
+XFER req=0f ack=1 data=c4beb456
+XFER req=0f ack=1 data=66e73e9d
+XFER req=0f ack=1 data=802fa0c4
+XFER req=0f ack=1 data=22542b0b
+XFER req=0f ack=1 data=4d9cad72
+XFER req=0f ack=1 data=efc517b9
+XFER req=0f ack=1 data=090d99e0
+XFER req=0f ack=1 data=ab320027
+XFER req=0f ack=1 data=d57a8a6e
+XFER req=0f ack=1 data=74a30cd5
+XFER req=0f ack=1 data=96ebf71c
+XFER req=0f ack=1 data=30107943
+XFER req=0f ack=1 data=5258e38a
+XFER req=0f ack=1 data=fd8165f1
+XFER req=0e ack=1 data=1fc9ec38
+HSS_PASS real CortexM0 sampler, posted flush, packet BRAM payload
+XFER req=01 ack=1 data=5a89cdef
+XFER req=05 ack=1 data=5a89cdef
+XFER req=0d ack=1 data=5a89cdef
+XFER req=0e ack=2 data=5a89cdef
+XFER req=0e ack=1 data=5a89cdef
+XFER req=05 ack=1 data=5a89cdef
+XFER req=0d ack=1 data=5a89cdef
+XFER req=0e ack=2 data=5a89cdef
+XFER req=0e ack=1 data=5a89cdef
+XFER req=05 ack=1 data=5a89cdef
+XFER req=0d ack=1 data=5a89cdef
+XFER req=0e ack=2 data=5a89cdef
+XFER req=0e ack=1 data=5a89cdef
+XFER req=05 ack=1 data=5a89cdef
+XFER req=0d ack=1 data=5a89cdef
+XFER req=0e ack=2 data=5a89cdef
+XFER req=0e ack=1 data=5a89cdef
+XFER req=05 ack=1 data=5a89cdef
+XFER req=0d ack=1 data=5a89cdef
+XFER req=0e ack=2 data=5a89cdef
+XFER req=0e ack=1 data=5a89cdef
+XFER req=05 ack=1 data=5a89cdef
+XFER req=0d ack=1 data=5a89cdef
+XFER req=0e ack=2 data=5a89cdef
+XFER req=0e ack=1 data=5a89cdef
+XFER req=05 ack=1 data=5a89cdef
+XFER req=0d ack=1 data=5a89cdef
+XFER req=0e ack=2 data=5a89cdef
+XFER req=0e ack=1 data=5a89cdef
+XFER req=05 ack=1 data=5a89cdef
+XFER req=0d ack=1 data=5a89cdef
+XFER req=0e ack=2 data=5a89cdef
+XFER req=0e ack=1 data=5a89cdef
+XFER req=02 ack=1 data=2ba01477
+RTT_PASS real CortexM3 descriptor boundary, unaligned payload, DMA-before-RdOff, DAP recovery
+PASS CortexM3 DPIDR/power/AP posted SRAM 16 words
+$finish called at time : 1349800 ns : File "E:/zynqlinkPRO_orbtrace_opt/fpga/sim/tb_cm3_swd.sv" Line 415
+run: Time (s): cpu = 00:00:00 ; elapsed = 00:00:20 . Memory (MB): peak = 218.063 ; gain = 0.000
+exit
+INFO: [Common 17-206] Exiting xsim at Sat Oct 31 00:59:22 2026...
