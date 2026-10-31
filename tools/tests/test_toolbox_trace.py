@@ -2,6 +2,7 @@ import contextlib
 import importlib.util
 import io
 import json
+import os
 from pathlib import Path
 import tempfile
 from types import SimpleNamespace
@@ -15,6 +16,19 @@ spec.loader.exec_module(trace)
 
 
 class TraceCaptureTests(unittest.TestCase):
+    def test_zynq_cli_selects_native_profile_before_capture_and_decode(self):
+        original_board=self.board
+        def board(*args,**kwargs):
+            self.assertEqual(os.environ['ETM_STORE_ENGINE'],'native')
+            return original_board(*args,**kwargs)
+        def decode(*args,**kwargs):
+            self.assertEqual(os.environ['ETM_NATIVE_FORMAT'],'binary')
+            self.assertEqual(os.environ['ETM_STORE_ENGINE_FALLBACK'],'0')
+            return {'summary':{'instructions':1}}
+        with patch.dict(os.environ,{'ETM_STORE_WRITE':'0','ETM_NATIVE_FORMAT':'text'}),patch.object(self,'board',side_effect=board),patch.dict('sys.modules',{'decode_stream':SimpleNamespace(decode_stream=decode)}):
+            code,result=self.call(self.args[:-1])
+        self.assertEqual(code,0);self.assertTrue(result['ok'])
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
