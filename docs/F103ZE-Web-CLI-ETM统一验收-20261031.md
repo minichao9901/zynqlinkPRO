@@ -1049,3 +1049,11 @@ DDR格式FRM1为去掉TPIU同步的连续16字节formatter帧，末尾不足16�
 离线验证：9项真实RAW4引脚→解析→异步FIFO→AXI DDR集成场景、92项DDR writer场景及原接收器11项回归通过。覆盖完整帧+5字节尾部、精确窗口、32字节容量停止、目标时钟停止后的手动结束、无信号空记录、最终B响应延迟、512帧FIFO溢出、B错误、准备超时与取消。结果及源码SHA见[本轮仿真归档](validation/etm-ddr-trace-rtl-20261101/integration/result.json)。所有测试hardwareAccess=false，未将仿真结论扩大为板上频率结论。
 
 当前DDR引脚入口限制为RAW4，传输格式与F103 ETMv3/H743 ETMv4无关；H743原有Kingst接入、目标识别、独立时钟读取、ETMv4配置与原生解码保留。此阶段没有修改任何目标PLL/AHB/APB寄存器，没有写目标Flash/QSPI。后续需完成新bit时序、配套ELF、真实DDR采集和USB采后下载，才可将此路径接为Web默认。每条lane校准及高频上板仍未完成。
+
+### 2026-11-01：FRM1原生C++解复用与H743兼容性回归
+
+新增独立`etm_framed.exe`，按仓内OpenCSD 1.8.3 `TraceFmtDcdImpl::unpackFrame()`语义恢复formatter的LSB、源ID及“跟随字节属于旧ID”标志，按源输出BIN。保留superlinkPRO原生前端/解码器/TraceStore二进制与源码；新增CMake目标，不替换原始Kingst路径。`native/source-provenance.json`仍描述导入时快照，当前CMake的本地扩展及新EXE哈希另见[本地构建记录](validation/etm-framed-native-20261101/build.json)。
+
+每个源有64KiB输出缓存，输入64KiB分块，内存不随采集总量增长。要求显式给出末尾长度并与文件大小核对；缺失flags的残帧只计数、不生成虚构ETM字节；保留源ID 127或输入变更均拒绝发布。Python仅作版本/身份/大小检查及SHA，不逐字节解复用，不产生逐指令JSONL。AI入口为`toolbox.py project run etm.framed -- INPUT --out NEW_DIR --tail-bytes N --trace-id 2`，构建仍用`native.build`。
+
+48项离线检查全部通过：28种尾部有效载荷长度、多源切换、15种残帧长度、非法ID和长度拒绝，以及两份真实ETM字节流重封装的一致性。F103原1s数据1,363,722字节经1,558,544字节FRM1恢复后逐字节一致，原生解复用段7.17ms；H743 ETMv4 15,306字节恢复后逐字节一致，原生段0.325ms。这些时间只涵盖解复用，不包含SHA、进程启动或完整指令解码；测试FRM1由已保存ETM流重封装，不是真实DDR采集。结论是新增阶段保持两种协议的输入字节，H743 Zynq实机和完整性能仍待验收。[48项结果](validation/etm-framed-native-20261101/result.json)。

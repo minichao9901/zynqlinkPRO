@@ -60,6 +60,13 @@ if(NOT ETM_STOREBUILD_SHA)
 endif()
 target_compile_definitions(etm_storebuild PRIVATE ETM_STOREBUILD_SHA="${ETM_STOREBUILD_SHA}")
 
+# Local extension: synchronized formatter frames from the Zynq DDR capture.
+add_executable(etm_framed native/framed.cpp)
+set_property(TARGET etm_framed PROPERTY CXX_STANDARD 17)
+if(MINGW)
+  target_link_options(etm_framed PRIVATE -municode -static -static-libgcc -static-libstdc++)
+endif()
+
 # Direct execution-store exports; no per-instruction Python projection.
 add_executable(etm_export native/export.cpp)
 set_property(TARGET etm_export PROPERTY CXX_STANDARD 17)
