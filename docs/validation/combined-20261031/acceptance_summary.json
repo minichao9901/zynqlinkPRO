@@ -1,0 +1,307 @@
+{
+  "timestamp_UTC": "2026-10-31T07:57:08.737590+00:00",
+  "root_probe_transport_validation": "PASS",
+  "ETM_Web_validation": "PENDING other thread; not included in root acceptance",
+  "QSPI_programmed": false,
+  "target_Flash_programmed": false,
+  "download_mode": "Zynq JTAG PL configuration + ELF RAM download",
+  "source_integration_revision": "6c3818378cce94bee498e996a8af11c4f7ce8ba9",
+  "RTL_application_build_revision": "954de8fd09f4a97aafb7dc42fa5e4a9a019c3f19",
+  "IO_constraints_revision": "9bfd403",
+  "full_routed_verifier_revision": "dcd4f3e",
+  "IO_constraint_sha256": "aa3f8b7c23f34e69ca5055dcead3d0faf861928a5a00e6e97822cb2eb258384c",
+  "full_suite_jobs": 25,
+  "SRAM_points": 14,
+  "RTT_frequency_points": 14,
+  "normal_fixture_HCLK_Hz": 48000000,
+  "SOTA_fixture_HCLK_Hz": 96000000,
+  "OCM_code_bytes": 71268,
+  "OCM_span_bytes": 120976,
+  "OCM_free_bytes": 140656,
+  "DDR_section_bytes": 711520,
+  "USB_DAP_queues": "unchanged:16x4096 and512KiB",
+  "peak": [
+    {
+      "transport": "jtag",
+      "requested_kHz": 50000,
+      "FCLK_Hz": 99999999,
+      "actual_link_Hz": 49999999.5,
+      "read_MB_s": 2.0227027832086106,
+      "write_MB_s": 2.0046318264374245
+    },
+    {
+      "transport": "jtag",
+      "requested_kHz": 60000,
+      "FCLK_Hz": 119999998,
+      "actual_link_Hz": 59999999.0,
+      "read_MB_s": 2.4195536529764654,
+      "write_MB_s": 2.395808723946055
+    },
+    {
+      "transport": "swd",
+      "requested_kHz": 50000,
+      "FCLK_Hz": 99999999,
+      "actual_link_Hz": 49999999.5,
+      "read_MB_s": 4.046724802816657,
+      "write_MB_s": 3.983261258479484
+    },
+    {
+      "transport": "swd",
+      "requested_kHz": 60000,
+      "FCLK_Hz": 119999998,
+      "actual_link_Hz": 59999999.0,
+      "read_MB_s": 4.836261630961513,
+      "write_MB_s": 4.754873107766406
+    }
+  ],
+  "RTT": [
+    {
+      "transport": "jtag",
+      "requested_Hz": 50000000,
+      "host_median_MB_s": 1.9988991410719068,
+      "repeats": 2
+    },
+    {
+      "transport": "jtag",
+      "requested_Hz": 60000000,
+      "host_median_MB_s": 2.3934987524943576,
+      "repeats": 2
+    },
+    {
+      "transport": "swd",
+      "requested_Hz": 50000000,
+      "host_median_MB_s": 3.9948204955197757,
+      "repeats": 2
+    },
+    {
+      "transport": "swd",
+      "requested_Hz": 60000000,
+      "host_median_MB_s": 4.802753287412369,
+      "repeats": 2
+    }
+  ],
+  "HSS": [
+    {
+      "transport": "jtag",
+      "speed_Hz": 50000000,
+      "variables": 1,
+      "period": 60,
+      "effective_median_Hz": 396825.26533100975,
+      "skip_percent": [
+        0.7936557494770364,
+        0.7936557494770364,
+        0.7936547583068365
+      ],
+      "repeats": 3,
+      "data_frames_verified": 54506
+    },
+    {
+      "transport": "jtag",
+      "speed_Hz": 50000000,
+      "variables": 1,
+      "period": 89,
+      "effective_median_Hz": 269662.76418757706,
+      "skip_percent": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "repeats": 3,
+      "data_frames_verified": 18548
+    },
+    {
+      "transport": "jtag",
+      "speed_Hz": 50000000,
+      "variables": 8,
+      "period": 527,
+      "effective_median_Hz": 42694.256740934965,
+      "skip_percent": [
+        6.250274231056118,
+        6.250274231056118,
+        6.250205671036033
+      ],
+      "repeats": 3,
+      "data_frames_verified": 24299
+    },
+    {
+      "transport": "jtag",
+      "speed_Hz": 50000000,
+      "variables": 8,
+      "period": 529,
+      "effective_median_Hz": 45368.41323076789,
+      "skip_percent": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "repeats": 3,
+      "data_frames_verified": 25998
+    },
+    {
+      "transport": "jtag",
+      "speed_Hz": 60000000,
+      "variables": 1,
+      "period": 40,
+      "effective_median_Hz": 595238.0238743222,
+      "skip_percent": [
+        0.7936131294183861,
+        0.7936957263818698,
+        0.7936131294183861
+      ],
+      "repeats": 3,
+      "data_frames_verified": 82604
+    },
+    {
+      "transport": "jtag",
+      "speed_Hz": 60000000,
+      "variables": 1,
+      "period": 74,
+      "effective_median_Hz": 324324.4525862168,
+      "skip_percent": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "repeats": 3,
+      "data_frames_verified": 22488
+    },
+    {
+      "transport": "jtag",
+      "speed_Hz": 60000000,
+      "variables": 8,
+      "period": 411,
+      "effective_median_Hz": 54744.797426519784,
+      "skip_percent": [
+        6.250053466786432,
+        6.250106934487656,
+        6.250053466786432
+      ],
+      "repeats": 3,
+      "data_frames_verified": 31727
+    },
+    {
+      "transport": "jtag",
+      "speed_Hz": 60000000,
+      "variables": 8,
+      "period": 441,
+      "effective_median_Hz": 54422.016781241655,
+      "skip_percent": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "repeats": 3,
+      "data_frames_verified": 30863
+    },
+    {
+      "transport": "jtag",
+      "speed_Hz": 60000000,
+      "variables": 8,
+      "period": 442,
+      "effective_median_Hz": 54298.74990261438,
+      "skip_percent": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "repeats": 3,
+      "data_frames_verified": 30838
+    },
+    {
+      "transport": "swd",
+      "speed_Hz": 50000000,
+      "variables": 1,
+      "period": 24,
+      "effective_median_Hz": 1000000.3122164488,
+      "skip_percent": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "repeats": 3,
+      "data_frames_verified": 69423
+    },
+    {
+      "transport": "swd",
+      "speed_Hz": 50000000,
+      "variables": 8,
+      "period": 236,
+      "effective_median_Hz": 101695.11845947278,
+      "skip_percent": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "repeats": 3,
+      "data_frames_verified": 58792
+    },
+    {
+      "transport": "swd",
+      "speed_Hz": 60000000,
+      "variables": 1,
+      "period": 24,
+      "effective_median_Hz": 1000000.2081442776,
+      "skip_percent": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "repeats": 3,
+      "data_frames_verified": 68946
+    },
+    {
+      "transport": "swd",
+      "speed_Hz": 60000000,
+      "variables": 8,
+      "period": 195,
+      "effective_median_Hz": 40846.91355542377,
+      "skip_percent": [
+        66.88489591155019,
+        66.81183714388925,
+        66.80737244142108
+      ],
+      "repeats": 3,
+      "data_frames_verified": 349942
+    },
+    {
+      "transport": "swd",
+      "speed_Hz": 60000000,
+      "variables": 8,
+      "period": 197,
+      "effective_median_Hz": 121827.38580982575,
+      "skip_percent": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "repeats": 3,
+      "data_frames_verified": 69592
+    }
+  ],
+  "SWD60_soak": {
+    "seconds": 30.05915799998911,
+    "errors": 0
+  },
+  "profile50": {
+    "SRAM_points": 12,
+    "RTT_points": 4,
+    "RTT_repeats_per_point": 2,
+    "request60_rejected": true,
+    "physical_board": "7020 only; not a7010 hardware test"
+  },
+  "final_board_clocks": {
+    "FPGA0_CLK_CTRL": "0x300600",
+    "FPGA1_CLK_CTRL": "0x900100",
+    "IO_PLL_CTRL": "0x36008",
+    "FCLK0_Hz": 99999999,
+    "FCLK1_Hz": 199999998,
+    "mode": "JTAG RAM tuple; BOOT_MODE physical switch remains QSPI; no flash writes this run"
+  },
+  "target_CDC_response": "PING\r\nPONG\r\nINFO\r\nchip=STM32F103 sysclk=48000000Hz clk_err=0 loops=3628503101 marks=3460 rx=12 tx=116 usbhp=0 ctr=0\r\n",
+  "limitations": [
+    "No physical7010board acceptance;4399/4400slices",
+    "Old failed candidate76a8 retained with failure evidence; do not promote",
+    "NewBOOT persistence not tested or programmed; accepted oldQSPI retained",
+    "ETM/Web acceptance must use final1da17c/e977 pair after explicit handoff"
+  ]
+}

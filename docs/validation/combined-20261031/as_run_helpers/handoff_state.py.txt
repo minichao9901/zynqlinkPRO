@@ -1,0 +1,18 @@
+import sys,json,time
+from pathlib import Path
+import serial,serial.tools.list_ports
+r=Path.cwd();d=r/'docs/validation/combined-20261031/handoff_state';d.mkdir(exist_ok=False)
+ports=[dict(port=p.device,VID=p.vid,PID=p.pid,description=p.description) for p in serial.tools.list_ports.comports()]
+target=next(p['port'] for p in ports if p['VID']==0xf055 and p['PID']==0x1031)
+data=b''
+with serial.Serial(target,115200,timeout=.2) as s:
+    s.reset_input_buffer();s.write(b'PING\r\nINFO\r\n');s.flush();end=time.monotonic()+2
+    while time.monotonic()<end:data+=s.read(4096)
+report=dict(ports=ports,target_port=target,command='PING\r\nINFO\r\n',response=data.decode('utf8',errors='replace'),response_hex=data.hex(),target_Flash_programmed=False,target_reset=False)
+(d/'target_cdc.json').write_text(json.dumps(report,indent=2)+'\n');print(report['response'],flush=True);assert b'PONG' in data
+sys.path.insert(0,str(r/'tools'))
+from probe_flash import Session
+sdk=Path('E:/Xilinx/SDK/2018.3');session=Session(d,sdk,'tcp:127.0.0.1:3121')
+values=session.read_words(0xf8000170,5);pll=session.read_words(0xf8000108)[0]
+def hz(ctrl):return 33333333*((pll>>12)&127)//((ctrl>>8)&63)//((ctrl>>20)&63)
+(d/'zynq_clocks.json').write_text(json.dumps(dict(FPGA0_CLK_CTRL=hex(values[0]),FPGA1_CLK_CTRL=hex(values[4]),IO_PLL_CTRL=hex(pll),FCLK0_Hz=hz(values[0]),FCLK1_Hz=hz(values[4]),mode='JTAG RAM tuple; BOOT_MODE physical switch remains QSPI; no flash writes this run'),indent=2)+'\n')

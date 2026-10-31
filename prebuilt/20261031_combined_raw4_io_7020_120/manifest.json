@@ -1,0 +1,52 @@
+{
+  "source_revision": "9bfd4031f9d115585e2be307d7653f5849c522cc",
+  "RTL_source_revision": "954de8fd09f4a97aafb7dc42fa5e4a9a019c3f19",
+  "application_source_revision": "954de8fd09f4a97aafb7dc42fa5e4a9a019c3f19",
+  "device": "xc7z020clg400-2",
+  "RAW_DIAGNOSTIC": 4,
+  "FIFO_ADDR_BITS": 16,
+  "FCLK_max_Hz": 120000000,
+  "SWCLK_max_Hz": 60000000,
+  "build_method": "Fresh merged-source synthesis/place/route, then phys_opt/route under added <=7ns SWCLK launch constraint; no RTL/PS change",
+  "input_routed_DCP_sha256": "d49d7c0c1d5b81c723aaedb72c0162ea1e25bfb422b8e33022ccde00b4ee229e",
+  "output_routed_DCP_sha256": "72395d51bcea46143bcc4189a9a91e1fe986d15d6b4b96ea1e5b77d6871bde17",
+  "timing": {
+    "WNS_ns": 0.167,
+    "WHS_ns": 0.024,
+    "TNS_ns": 0,
+    "THS_ns": 0,
+    "FCLK_setup_slack_ns": 0.259,
+    "SWCLK_launch_ns": 6.833,
+    "SWCLK_launch_budget_ns": 7.0
+  },
+  "resources": {
+    "LUT": 14779,
+    "FF": 17051,
+    "BRAM36_equivalent": 38.5,
+    "Slice": 6367
+  },
+  "code_bytes": 71268,
+  "OCM_span_bytes": 120976,
+  "OCM_free_bytes": 140656,
+  "DDR_section_bytes": 711520,
+  "USB_DAP_queues": "unchanged:16x4096 and512KiB",
+  "board_validation": "PASS root transport/PS/SOTA; ETM/Web pending peer",
+  "QSPI_programmed": false,
+  "files": {
+    ".gitattributes": "e97602ab9cac70102245345c5ab0fc9830df8b17f1072b188265a662a3a547ae",
+    "application.elf": "e977914c2924ab4cac13f4075de0a5108d1e2e8cf48966fb8fbdea3a358e0b2c",
+    "application_50.elf": "99f7f4eb9e05f4f3b3c2b90278049ecdcab806eccc4d2f9032e6cd02c8868b42",
+    "firmware_build_50.json": "b8c43072876998e49ea622c5bca7b892600f2a1b894fec911f9beb1fdee4375e",
+    "firmware_build_60.json": "9f6e572574c0df55aff8ccdb13ae7441eb8139f4d5e15b003bbd7aae716bfc37",
+    "ocm_layout_50.json": "ed08a588f5e09e333ab30ce0e8793014e77aee40cd39fdd554ff21d2131339f5",
+    "ocm_layout_60.json": "06335aaad5016cbbad84aa40df15a12d3992d2b4e75477d15fefd729367323fc",
+    "probe.bit": "1da17cb60175bbc2b7abd647770c7053bd7b7097e0d38aa819fb89678d564473",
+    "ps7_init.tcl": "d3eeab6707765ab59acb924e39ff5c77c013da8cbf598b181e9eb43578f29ece",
+    "swclk_launch.rpt": "f92d5aaf1edf9da47e402be78d206d63c45909a259d6d26c64f753c63281f028",
+    "timing.rpt": "c76797805e157fa2897fef7437680d9f1d74a292572e21df7b0fc662c3df5d11",
+    "utilization.rpt": "7760bd533ebb5b9fa366cde2addf2add552d811540a98b737af778fbf33f5197"
+  },
+  "acceptance_evidence": "docs/validation/combined-20261031/acceptance_summary.json",
+  "verification_source_revision": "dcd4f3e",
+  "source_integration_revision": "6c3818378cce94bee498e996a8af11c4f7ce8ba9"
+}

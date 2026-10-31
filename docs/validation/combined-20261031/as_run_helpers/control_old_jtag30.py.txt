@@ -1,0 +1,16 @@
+import json, subprocess, sys
+from pathlib import Path
+r=Path.cwd(); dest=r/'docs/validation/combined-20261031/old_pl_jtag30_control'; dest.mkdir(exist_ok=False)
+old=r/'prebuilt/20261031_orbtrace_opt_qspi_usbfix_7020_120/probe.bit'
+new=r/'prebuilt/20261031_combined_raw4_7020_120'
+assert old.is_file()
+load=[sys.executable,'tools/run_xsct.py','tools/download_dap_fpga.tcl',str(new/'application.elf'),str(old),str(new/'ps7_init.tcl')]
+with (dest/'load.log').open('w') as f: subprocess.run(load,stdout=f,stderr=subprocess.STDOUT,check=True)
+rows=[]
+for n in range(3):
+    out=dest/f'case_{n}.json'
+    cmd=[sys.executable,'tools/run_f103_jtag_fixture.py','--restore-swj','2','--output',str(dest/f'fixture_{n}.json'),'--',sys.executable,'tools/benchmark_sram_matrix.py','--transport','jtag','--speeds','30000000','--seconds','1','--repeats','5','--bit',str(old),'--elf',str(new/'application.elf'),'--output',str(out)]
+    with out.with_suffix('.log').open('w') as f: result=subprocess.run(cmd,stdout=f,stderr=subprocess.STDOUT)
+    data=json.loads(out.read_text()); rows.append({'returncode':result.returncode,'command':cmd,'rows':data.get('rows'),'restore_match':data.get('restore_match')})
+    (dest/'results.json').write_text(json.dumps(rows,indent=2)+'\n'); print(n,result.returncode,data.get('passed'),data.get('restore_match'),flush=True)
+    assert data.get('restore_match') is True

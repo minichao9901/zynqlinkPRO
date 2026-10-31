@@ -1,0 +1,52 @@
+{
+  "command": [
+    "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "tools/run_f103_jtag_fixture.py",
+    "--restore-swj",
+    "2",
+    "--output",
+    "E:\\zynqlinkPRO_combined_verify\\docs\\validation\\combined-20261031\\sota_peak_rtt_jtag.json",
+    "--",
+    "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "tools/run_sota_regression.py",
+    "--bit",
+    "E:\\zynqlinkPRO_combined_verify\\prebuilt\\20261031_combined_raw4_io_7020_120\\probe.bit",
+    "--elf",
+    "E:\\zynqlinkPRO_combined_verify\\prebuilt\\20261031_combined_raw4_io_7020_120\\application.elf",
+    "--output-dir",
+    "E:\\zynqlinkPRO_combined_verify\\docs\\validation\\combined-20261031\\sota_peak_rtt",
+    "--phase",
+    "peak_rtt"
+  ],
+  "target_Flash_programmed": false,
+  "requested_HCLK_Hz": 96000000,
+  "initial_DHCSR": "0x1010001",
+  "clock_before": {
+    "CR": 50548355,
+    "CFGR": 5309450,
+    "APB1ENR": 276824064,
+    "FLASH_ACR": 49
+  },
+  "clock_active": {
+    "CR": 50548355,
+    "CFGR": 6931466
+  },
+  "DWT_verification": {
+    "scratch_backup_sha256": "7be9c5ce699fe70a73fa5aaffd2b4f85f214e4bdd7af9a32b8425c650a7eb9c3",
+    "elapsed_s": 0.35109055001521483,
+    "cycles": 33718025,
+    "measured_Hz": 96037973.67527778,
+    "method": "DWT CYCCNT in SRAM-only loop; host midpoint-bracketed SWD reads",
+    "scratch_restored": true,
+    "core_registers_restored": true
+  },
+  "returncode": 0,
+  "clock_after": {
+    "CR": 50548355,
+    "CFGR": 5309450,
+    "APB1ENR": 276824064,
+    "FLASH_ACR": 49
+  },
+  "clock_restore_match": true,
+  "run_halt_restore_match": true
+}

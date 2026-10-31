@@ -1,0 +1,6 @@
+import hashlib,json,shutil
+from pathlib import Path
+r=Path.cwd();dest=Path('E:/zynqlinkPRO/build/preserved_combined_20261031/checkpoints');dest.mkdir(exist_ok=True);rows=[]
+for src,name in [('build/fpga_dma_global/system_wrapper_verified.dcp','initial_7020_120.dcp'),('build/fpga_7010/system_routed.dcp','initial_7010_100.dcp'),('build/fpga_dma_io_eco/system_wrapper_routed.dcp','bounded_io_7020_120.dcp'),('build/fpga_7010_io_eco/system_wrapper_routed.dcp','bounded_io_7010_100.dcp')]:
+    p=r/src;out=dest/name;shutil.copyfile(p,out);a=hashlib.sha256(p.read_bytes()).hexdigest();assert hashlib.sha256(out.read_bytes()).hexdigest()==a;rows.append(dict(source=src,retained=str(out),sha256=a,bytes=p.stat().st_size))
+d=r/'docs/validation/combined-20261031';(d/'checkpoint_migration.json').write_text(json.dumps(rows,indent=2)+'\n');shutil.copyfile(Path(__file__),d/'as_run_helpers/preserve_checkpoints.py.txt');print('Preserved four input/output DCPs outside disposable worktree')

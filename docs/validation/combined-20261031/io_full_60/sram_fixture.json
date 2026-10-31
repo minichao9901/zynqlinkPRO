@@ -1,0 +1,40 @@
+{
+  "command": [
+    "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "-X",
+    "utf8",
+    "E:\\zynqlinkPRO_combined_verify\\tools\\benchmark_sram_matrix.py",
+    "--transport",
+    "both",
+    "--speeds",
+    "1000000,10000000,25000000,30000000,35000000,50000000,60000000",
+    "--seconds",
+    "0.6",
+    "--repeats",
+    "5",
+    "--bit",
+    "E:\\zynqlinkPRO_combined_verify\\prebuilt\\20261031_combined_raw4_io_7020_120\\probe.bit",
+    "--elf",
+    "E:\\zynqlinkPRO_combined_verify\\prebuilt\\20261031_combined_raw4_io_7020_120\\application.elf",
+    "--output",
+    "E:\\zynqlinkPRO_combined_verify\\docs\\validation\\combined-20261031\\io_full_60\\sram.json"
+  ],
+  "restore_swj_from_target_source": 2,
+  "initial_DHCSR": "0x1010001",
+  "APB2ENR": "0x404d",
+  "MAPR_readable_bits": "0x0",
+  "target_id": "0x10036414",
+  "RCC_before": [
+    50548355,
+    5309450
+  ],
+  "JTAG_IDCODE": "0x3ba00477",
+  "returncode": 0,
+  "MAPR_readable_restore_match": true,
+  "APB2ENR_restore_match": true,
+  "RCC_after": [
+    50548355,
+    5309450
+  ],
+  "run_halt_restore_match": true
+}

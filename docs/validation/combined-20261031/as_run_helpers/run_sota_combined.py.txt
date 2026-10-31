@@ -1,0 +1,7 @@
+import subprocess,sys
+from pathlib import Path
+r=Path.cwd();dest=r/'docs/validation/combined-20261031';p=r/'prebuilt/20261031_combined_raw4_io_7020_120'
+phase=sys.argv[1] if len(sys.argv)>1 else 'peak_rtt'
+cmd=[sys.executable,'tools/run_f103_clock_fixture.py','--output',str(dest/f'sota_{phase}_clock.json'),'--',sys.executable,'tools/run_f103_jtag_fixture.py','--restore-swj','2','--output',str(dest/f'sota_{phase}_jtag.json'),'--',sys.executable,'tools/run_sota_regression.py','--bit',str(p/'probe.bit'),'--elf',str(p/'application.elf'),'--output-dir',str(dest/f'sota_{phase}'),'--phase',phase]
+with (dest/f'sota_{phase}_console.log').open('w') as log:rc=subprocess.run(cmd,stdout=log,stderr=subprocess.STDOUT).returncode
+print(phase,rc,flush=True);sys.exit(rc)

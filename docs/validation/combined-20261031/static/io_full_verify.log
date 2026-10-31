@@ -1,0 +1,329 @@
+
+****** Vivado v2018.3 (64-bit)
+  **** SW Build 2405991 on Thu Dec  6 23:38:27 MST 2018
+  **** IP Build 2404404 on Fri Dec  7 01:43:56 MST 2018
+    ** Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+
+source build/combined_validation/verify_io_eco.tcl
+# set ::env(ZYNQLINK_RAW_TRACE) 4
+# set ::zynqlink_verify_out E:/zynqlinkPRO_combined_verify/build/fpga_dma_io_eco
+# set ::zynqlink_verify_checkpoint $::zynqlink_verify_out/system_wrapper_routed.dcp
+# set ::zynqlink_verify_bit $::zynqlink_verify_out/system_wrapper.bit
+# source E:/zynqlinkPRO_combined_verify/fpga/verify_routed.tcl
+## set root [file normalize [file join [file dirname [info script]] ..]]
+## set out [file join $root build fpga_dma_global]
+## if {[info exists ::zynqlink_verify_out]} {set out [file normalize $::zynqlink_verify_out]}
+## set routed_checkpoint [file join $out zynqlink_dma.runs impl_1 system_wrapper_routed.dcp]
+## if {[info exists ::zynqlink_verify_checkpoint]} {set routed_checkpoint [file normalize $::zynqlink_verify_checkpoint]}
+## open_checkpoint $routed_checkpoint
+Command: open_checkpoint E:/zynqlinkPRO_combined_verify/build/fpga_dma_io_eco/system_wrapper_routed.dcp
+
+Starting open_checkpoint Task
+
+Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.028 . Memory (MB): peak = 273.660 ; gain = 0.000
+INFO: [Netlist 29-17] Analyzing 1556 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 0 CPU seconds
+INFO: [Project 1-479] Netlist was created with Vivado 2018.3
+INFO: [Device 21-403] Loading part xc7z020clg400-2
+INFO: [Project 1-570] Preparing netlist for logic optimization
+WARNING: [Constraints 18-550] Could not create 'DRIVE' constraint because net 'system_i/swd_controller_0/gpio_in[0]' is not directly connected to top level port. Synthesis is ignored for DRIVE but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'IBUF_LOW_PWR' constraint because net 'system_i/swd_controller_0/gpio_in[0]' is not directly connected to top level port. Synthesis is ignored for IBUF_LOW_PWR but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'SLEW' constraint because net 'system_i/swd_controller_0/gpio_in[0]' is not directly connected to top level port. Synthesis is ignored for SLEW but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'DRIVE' constraint because net 'system_i/swd_controller_0/gpio_in[1]' is not directly connected to top level port. Synthesis is ignored for DRIVE but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'IBUF_LOW_PWR' constraint because net 'system_i/swd_controller_0/gpio_in[1]' is not directly connected to top level port. Synthesis is ignored for IBUF_LOW_PWR but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'SLEW' constraint because net 'system_i/swd_controller_0/gpio_in[1]' is not directly connected to top level port. Synthesis is ignored for SLEW but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'DRIVE' constraint because net 'system_i/swd_controller_0/gpio_in[2]' is not directly connected to top level port. Synthesis is ignored for DRIVE but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'IBUF_LOW_PWR' constraint because net 'system_i/swd_controller_0/gpio_in[2]' is not directly connected to top level port. Synthesis is ignored for IBUF_LOW_PWR but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'SLEW' constraint because net 'system_i/swd_controller_0/gpio_in[2]' is not directly connected to top level port. Synthesis is ignored for SLEW but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'DRIVE' constraint because net 'system_i/swd_controller_0/gpio_in[3]' is not directly connected to top level port. Synthesis is ignored for DRIVE but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'IBUF_LOW_PWR' constraint because net 'system_i/swd_controller_0/gpio_in[3]' is not directly connected to top level port. Synthesis is ignored for IBUF_LOW_PWR but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'SLEW' constraint because net 'system_i/swd_controller_0/gpio_in[3]' is not directly connected to top level port. Synthesis is ignored for SLEW but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'DRIVE' constraint because net 'system_i/swd_controller_0/gpio_out[1]' is not directly connected to top level port. Synthesis is ignored for DRIVE but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'IBUF_LOW_PWR' constraint because net 'system_i/swd_controller_0/gpio_out[1]' is not directly connected to top level port. Synthesis is ignored for IBUF_LOW_PWR but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'SLEW' constraint because net 'system_i/swd_controller_0/gpio_out[1]' is not directly connected to top level port. Synthesis is ignored for SLEW but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'DRIVE' constraint because net 'system_i/swd_controller_0/gpio_out[2]' is not directly connected to top level port. Synthesis is ignored for DRIVE but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'IBUF_LOW_PWR' constraint because net 'system_i/swd_controller_0/gpio_out[2]' is not directly connected to top level port. Synthesis is ignored for IBUF_LOW_PWR but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'SLEW' constraint because net 'system_i/swd_controller_0/gpio_out[2]' is not directly connected to top level port. Synthesis is ignored for SLEW but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'DRIVE' constraint because net 'system_i/swd_controller_0/gpio_out[3]' is not directly connected to top level port. Synthesis is ignored for DRIVE but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'IBUF_LOW_PWR' constraint because net 'system_i/swd_controller_0/gpio_out[3]' is not directly connected to top level port. Synthesis is ignored for IBUF_LOW_PWR but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'SLEW' constraint because net 'system_i/swd_controller_0/gpio_out[3]' is not directly connected to top level port. Synthesis is ignored for SLEW but preserved for implementation.
+INFO: [Timing 38-478] Restoring timing data from binary archive.
+INFO: [Timing 38-479] Binary timing data restore complete.
+INFO: [Project 1-856] Restoring constraints from binary archive.
+INFO: [Project 1-853] Binary constraint restore complete.
+Reading XDEF placement.
+Reading placer database...
+Reading XDEF routing.
+Read XDEF File: Time (s): cpu = 00:00:03 ; elapsed = 00:00:03 . Memory (MB): peak = 1358.004 ; gain = 21.266
+Restored from archive | CPU: 3.000000 secs | Memory: 0.000000 MB |
+Finished XDEF File Restore: Time (s): cpu = 00:00:03 ; elapsed = 00:00:03 . Memory (MB): peak = 1358.004 ; gain = 21.266
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.012 . Memory (MB): peak = 1358.004 ; gain = 0.000
+INFO: [Project 1-111] Unisim Transformation Summary:
+  A total of 22 instances were transformed.
+  IOBUF => IOBUF (IBUF, OBUFT): 6 instances
+  RAM32M => RAM32M (RAMD32, RAMD32, RAMD32, RAMD32, RAMD32, RAMD32, RAMS32, RAMS32): 8 instances
+  RAM32X1D => RAM32X1D (RAMD32, RAMD32): 1 instances
+  RAM64X1D => RAM64X1D (RAMD64E, RAMD64E): 7 instances
+
+INFO: [Project 1-604] Checkpoint was created with Vivado v2018.3 (64-bit) build 2405991
+open_checkpoint: Time (s): cpu = 00:00:21 ; elapsed = 00:00:23 . Memory (MB): peak = 1358.004 ; gain = 1084.344
+## set swclk_launch [get_cells -quiet -hier -filter {NAME =~ *short_core_clock_reg}]
+## if {[llength $swclk_launch] != 1} {error "SWCLK launch register missing"}
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+INFO: [Common 17-14] Message 'Designutils 20-3303' appears 100 times and further instances of the messages will be disabled. Use the Tcl command set_msg_config to change the current settings.
+## set swclk_path [get_timing_paths -from $swclk_launch -to [get_ports swclk_0] -max_paths 1]
+## if {![llength $swclk_path] || [get_property REQUIREMENT $swclk_path] > 7.001 || [get_property SLACK $swclk_path] < 0} {
+##     error "Short SWCLK clock-to-pad path is missing its passing <=7ns budget"
+## }
+## report_timing -from $swclk_launch -to [get_ports swclk_0] -max_paths 2 -file [file join $out swclk_launch.rpt]
+INFO: [Timing 38-78] ReportTimingParams: -from_pins  -to_pins  -max_paths 2 -nworst 1 -delay_type max -sort_by slack.
+## puts "SWCLK_LAUNCH_VERIFIED slack=[get_property SLACK $swclk_path]"
+SWCLK_LAUNCH_VERIFIED slack=0.167
+## foreach pad [get_cells -hier -filter {REF_NAME == IOBUF && NAME =~ *g_aux*}] {
+##     set tpin [get_pins -of_objects $pad -filter {REF_PIN_NAME == T}]
+##     set tnet [get_nets -of_objects $tpin]
+##     set driver [get_cells -of_objects [get_pins -of_objects $tnet -filter {DIRECTION == OUT}]]
+##     if {[llength [filter $driver {REF_NAME == VCC || REF_NAME == GND}]]} {
+##         error "GPIO pad output-enable is constant: $pad ($tnet)"
+##     }
+## }
+## set packet_bram [get_cells -hier -filter {REF_NAME =~ RAMB* && NAME =~ *u_packet_bram*}]
+## if {[llength $packet_bram] < 4} {error "PL packet banks did not implement in block RAM"}
+## puts "PACKET_BRAM_VERIFIED count=[llength $packet_bram]"
+PACKET_BRAM_VERIFIED count=4
+## set tdo_ddr [get_cells -hier -filter {REF_NAME == IDDR && NAME =~ *u_tdo_iddr}]
+## if {[llength $tdo_ddr] != 1} {error "JTAG TDO IDDR missing from implemented design"}
+## foreach phase {Q1 Q2} {
+##     set net [get_nets -of_objects [get_pins $tdo_ddr/$phase]]
+##     if {![llength [get_pins -of_objects $net -filter {DIRECTION == IN}]]} {
+##         error "JTAG TDO IDDR $phase was optimized out or bypassed"
+##     }
+## }
+## puts "JTAG_TDO_IDDR_VERIFIED LOC=[get_property LOC $tdo_ddr] phases=Q1,Q2"
+JTAG_TDO_IDDR_VERIFIED LOC=ILOGIC_X1Y145 phases=Q1,Q2
+WARNING: [Vivado 12-180] No cells matched 'get_cells -hier -filter {REF_NAME == IDDR && NAME =~ *orbtrace_0*}'.
+## set trace_ddr [get_cells -hier -filter {REF_NAME == IDDR && NAME =~ *orbtrace_0*}]
+## if {[info exists ::env(ZYNQLINK_RAW_TRACE)] && $::env(ZYNQLINK_RAW_TRACE) in {2 3 4}} {
+##     if {[llength $trace_ddr] != 0} {error "Oversample mode must bypass normal TRACE IDDRs"}
+##     puts "ORBTRACE_IDDR_BYPASS_VERIFIED mode=$::env(ZYNQLINK_RAW_TRACE)"
+## } elseif {[llength $trace_ddr] != 4} {error "Parallel TRACE must retain four input IDDRs"}
+ORBTRACE_IDDR_BYPASS_VERIFIED mode=4
+WARNING: [Vivado 12-180] No cells matched 'get_cells -hier -filter {REF_NAME == BUFIO && NAME =~ *orbtrace_0*}'.
+## set trace_bufio [get_cells -hier -filter {REF_NAME == BUFIO && NAME =~ *orbtrace_0*}]
+WARNING: [Vivado 12-180] No cells matched 'get_cells -hier -filter {REF_NAME == BUFR && NAME =~ *orbtrace_0*}'.
+## set trace_bufr [get_cells -hier -filter {REF_NAME == BUFR && NAME =~ *orbtrace_0*}]
+## if {[info exists ::env(ZYNQLINK_RAW_TRACE)] && $::env(ZYNQLINK_RAW_TRACE) in {2 3 4}} {
+##     puts "ORBTRACE_CLOCK_BYPASS_VERIFIED mode=$::env(ZYNQLINK_RAW_TRACE) BUFIO=[llength $trace_bufio] BUFR=[llength $trace_bufr]"
+## } elseif {[llength $trace_bufio] != 1 || [llength $trace_bufr] != 1} {
+##     error "Parallel TRACE dedicated I/O/fabric clock buffers missing"
+## }
+ORBTRACE_CLOCK_BYPASS_VERIFIED mode=4 BUFIO=0 BUFR=0
+## if {[llength [get_cells -hier -filter {NAME =~ *orbtrace_0* && (REF_NAME == LDCE || REF_NAME == LDPE || REF_NAME == LDCPE)}]]} {
+##     error "Parallel TRACE contains unintended latches"
+## }
+WARNING: [Vivado 12-180] No cells matched 'get_cells -hier -filter {NAME =~ *orbtrace_0* && (REF_NAME == LDCE || REF_NAME == LDPE || REF_NAME == LDCPE)}'.
+## puts "ORBTRACE_IO_VERIFIED IDDR=[llength $trace_ddr] BUFIO=[llength $trace_bufio] BUFR=[llength $trace_bufr] latches=0"
+ORBTRACE_IO_VERIFIED IDDR=0 BUFIO=0 BUFR=0 latches=0
+WARNING: [Vivado 12-180] No cells matched 'get_cells -hier -filter {REF_NAME == IDELAYE2 && NAME =~ *orbtrace_0*}'.
+## set trace_idelay [get_cells -hier -filter {REF_NAME == IDELAYE2 && NAME =~ *orbtrace_0*}]
+WARNING: [Vivado 12-180] No cells matched 'get_cells -hier -filter {REF_NAME == IDELAYCTRL && NAME =~ *orbtrace_0*}'.
+## set trace_idelayctrl [get_cells -hier -filter {REF_NAME == IDELAYCTRL && NAME =~ *orbtrace_0*}]
+## if {[info exists ::env(ZYNQLINK_RAW_TRACE)] && $::env(ZYNQLINK_RAW_TRACE) in {2 3 4}} {
+##     puts "ORBTRACE_DELAY_BYPASS_VERIFIED mode=$::env(ZYNQLINK_RAW_TRACE) IDELAYE2=[llength $trace_idelay] IDELAYCTRL=[llength $trace_idelayctrl]"
+## } elseif {[llength $trace_idelay] != 4 || [llength $trace_idelayctrl] != 1} {
+##     error "Parallel TRACE input delay/calibration primitives missing"
+## } else {
+##     puts "ORBTRACE_DELAY_VERIFIED IDELAYE2=4 IDELAYCTRL=1 REFCLK=200MHz"
+## }
+ORBTRACE_DELAY_BYPASS_VERIFIED mode=4 IDELAYE2=0 IDELAYCTRL=0
+## if {[info exists ::env(ZYNQLINK_RAW_TRACE)] && $::env(ZYNQLINK_RAW_TRACE) in {2 3 4}} {
+##     set os_meta [get_cells -quiet -hier -filter {NAME =~ *raw_oversample*pad_meta_reg*}]
+##     set os_sync [get_cells -quiet -hier -filter {NAME =~ *raw_oversample*pad_sync_reg*}]
+##     if {[llength $os_meta] != 5 || [llength $os_sync] != 5} {
+##         error "Raw oversampling synchronizers missing: meta=[llength $os_meta] sync=[llength $os_sync]"
+##     }
+##     puts "ORBTRACE_OVERSAMPLE_VERIFIED META=[llength $os_meta] SYNC=[llength $os_sync]"
+## }
+ORBTRACE_OVERSAMPLE_VERIFIED META=5 SYNC=5
+## create_clock -name clk_fpga_0 -period 8.333 [get_pins {system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]}]
+WARNING: [Constraints 18-619] A clock with name 'clk_fpga_0' already exists, overwriting the previous clock with the same name.
+## report_timing_summary -report_unconstrained -file [file join $out timing_120mhz.rpt]
+report_timing_summary: Time (s): cpu = 00:00:12 ; elapsed = 00:00:07 . Memory (MB): peak = 1434.438 ; gain = 36.090
+## report_timing -delay_type max -max_paths 20 -file [file join $out setup_120mhz.rpt]
+INFO: [Timing 38-78] ReportTimingParams: -max_paths 20 -nworst 1 -delay_type max -sort_by slack.
+## report_timing -delay_type min -max_paths 20 -file [file join $out hold_120mhz.rpt]
+INFO: [Timing 38-78] ReportTimingParams: -max_paths 20 -nworst 1 -delay_type min -sort_by slack.
+## set verified_fclk 0
+## set fd [open [file join $out frequency_timing.csv] w]
+## puts $fd "FCLK_Hz,setup_slack_ns,hold_slack_ns"
+## foreach rate {180000000 163636364 150000000 138461539 128571429 120000000 100000000} {
+##     create_clock -name clk_fpga_0 -period [expr {floor(1e12/$rate)/1000.0}] [get_pins {system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]}]
+##     set setup [get_property SLACK [get_timing_paths -max_paths 1 -delay_type max]]
+##     set h [get_property SLACK [get_timing_paths -max_paths 1 -delay_type min]]
+##     puts $fd "$rate,$setup,$h"
+##     puts "FREQUENCY_CHECK FCLK=$rate SETUP=$setup HOLD=$h"
+##     if {$setup >= 0 && $h >= 0} {set verified_fclk $rate; break}
+## }
+WARNING: [Constraints 18-619] A clock with name 'clk_fpga_0' already exists, overwriting the previous clock with the same name.
+get_timing_paths: Time (s): cpu = 00:00:12 ; elapsed = 00:00:07 . Memory (MB): peak = 1437.094 ; gain = 2.656
+FREQUENCY_CHECK FCLK=180000000 SETUP=-2.519 HOLD=0.024
+WARNING: [Constraints 18-619] A clock with name 'clk_fpga_0' already exists, overwriting the previous clock with the same name.
+get_timing_paths: Time (s): cpu = 00:00:11 ; elapsed = 00:00:06 . Memory (MB): peak = 1437.141 ; gain = 0.047
+FREQUENCY_CHECK FCLK=163636364 SETUP=-1.963 HOLD=0.024
+WARNING: [Constraints 18-619] A clock with name 'clk_fpga_0' already exists, overwriting the previous clock with the same name.
+get_timing_paths: Time (s): cpu = 00:00:12 ; elapsed = 00:00:07 . Memory (MB): peak = 1437.141 ; gain = 0.000
+FREQUENCY_CHECK FCLK=150000000 SETUP=-1.408 HOLD=0.024
+WARNING: [Constraints 18-619] A clock with name 'clk_fpga_0' already exists, overwriting the previous clock with the same name.
+get_timing_paths: Time (s): cpu = 00:00:10 ; elapsed = 00:00:05 . Memory (MB): peak = 1437.141 ; gain = 0.000
+FREQUENCY_CHECK FCLK=138461539 SETUP=-0.852 HOLD=0.024
+WARNING: [Constraints 18-619] A clock with name 'clk_fpga_0' already exists, overwriting the previous clock with the same name.
+FREQUENCY_CHECK FCLK=128571429 SETUP=-0.297 HOLD=0.024
+WARNING: [Constraints 18-619] A clock with name 'clk_fpga_0' already exists, overwriting the previous clock with the same name.
+get_timing_paths: Time (s): cpu = 00:00:10 ; elapsed = 00:00:05 . Memory (MB): peak = 1437.141 ; gain = 0.000
+FREQUENCY_CHECK FCLK=120000000 SETUP=0.167 HOLD=0.024
+## close $fd
+## if {!$verified_fclk} {
+##     report_clocks -file [file join $out clocks_failed.rpt]
+##     report_utilization -file [file join $out utilization_failed.rpt]
+##     report_timing_summary -report_unconstrained -file [file join $out timing_failed.rpt]
+##     error "Routed timing failed at every tested frequency"
+## }
+## report_clocks -file [file join $out clocks_verified.rpt]
+## report_utilization -file [file join $out utilization.rpt]
+## report_utilization -hierarchical -file [file join $out utilization_hier.rpt]
+## report_timing_summary -report_unconstrained -file [file join $out timing_verified.rpt]
+## set worst [get_property SLACK [get_timing_paths -max_paths 1 -delay_type max]]
+## set hold [get_property SLACK [get_timing_paths -max_paths 1 -delay_type min]]
+## puts "VERIFIED_SETUP_SLACK=$worst VERIFIED_HOLD_SLACK=$hold"
+VERIFIED_SETUP_SLACK=0.167 VERIFIED_HOLD_SLACK=0.024
+## if {$worst < 0 || $hold < 0} {error "Routed timing failed with all FCLK input sampling paths constrained"}
+## write_checkpoint -force [file join $out system_wrapper_verified.dcp]
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.011 . Memory (MB): peak = 1468.836 ; gain = 0.000
+INFO: [Timing 38-480] Writing timing data to binary archive.
+Writing placer database...
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.014 . Memory (MB): peak = 1478.660 ; gain = 0.000
+Writing XDEF routing.
+Writing XDEF routing logical nets.
+Writing XDEF routing special nets.
+Write XDEF Complete: Time (s): cpu = 00:00:07 ; elapsed = 00:00:03 . Memory (MB): peak = 1482.727 ; gain = 13.730
+INFO: [Common 17-1381] The checkpoint 'E:/zynqlinkPRO_combined_verify/build/fpga_dma_io_eco/system_wrapper_verified.dcp' has been generated.
+write_checkpoint: Time (s): cpu = 00:00:11 ; elapsed = 00:00:07 . Memory (MB): peak = 1482.727 ; gain = 13.891
+## set run_bit [file join $out zynqlink_dma.runs impl_1 system_wrapper.bit]
+## if {[info exists ::zynqlink_verify_bit]} {set run_bit [file normalize $::zynqlink_verify_bit]}
+## set run_dcp $routed_checkpoint
+## if {[file exists $run_bit] && [file mtime $run_bit] >= [file mtime $run_dcp]} {
+##     # STA does not change configuration bits. Avoid a duplicate bitgen when
+##     # an existing project run already generated this routed design's bit.
+##     file copy -force $run_bit [file join $out system_wrapper_verified.bit]
+## } else {
+##     write_bitstream -force [file join $out system_wrapper_verified.bit]
+## }
+## file copy -force [file join $out system_wrapper_verified.bit] [file join $out system_wrapper.bit]
+## set fd [open [file join $out verified_clock.json] w]
+## puts $fd "{\"FCLK_max_Hz\":$verified_fclk,\"SWCLK_max_Hz\":[expr {$verified_fclk/2}],\"setup_slack_ns\":$worst,\"hold_slack_ns\":$hold}"
+## close $fd
+## file mkdir [file join $root build checkpoints]
+## file copy -force [file join $out system_wrapper_verified.dcp] [file join $root build checkpoints dma_routed_reference.dcp]
+## puts "VERIFIED_BITSTREAM_READY"
+VERIFIED_BITSTREAM_READY
+INFO: [Common 17-206] Exiting Vivado at Sat Oct 31 15:33:30 2026...
+Vivado exit: 0

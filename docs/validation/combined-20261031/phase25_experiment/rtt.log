@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "E:\zynqlinkPRO_combined_verify\tools\benchmark_rtt_forward.py", line 239, in <module>
+    main()
+    ~~~~^^
+  File "E:\zynqlinkPRO_combined_verify\tools\benchmark_rtt_forward.py", line 198, in main
+    row = point(probe, mem, port, code, speed, chunk, args.seconds, repeat,
+                lambda:setup(out,inp,speed//1000,args.transport))
+  File "E:\zynqlinkPRO_combined_verify\tools\benchmark_rtt_forward.py", line 84, in point
+    if activate_transport:activate_transport()
+                          ~~~~~~~~~~~~~~~~~~^^
+  File "E:\zynqlinkPRO_combined_verify\tools\benchmark_rtt_forward.py", line 199, in <lambda>
+    lambda:setup(out,inp,speed//1000,args.transport))
+           ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\zynqlinkPRO_combined_verify\tools\dap_pipeline_bench.py", line 87, in setup
+    raise RuntimeError("IDCODE read failed: %s" % r.hex(" "))
+RuntimeError: IDCODE read failed: 05 00 03

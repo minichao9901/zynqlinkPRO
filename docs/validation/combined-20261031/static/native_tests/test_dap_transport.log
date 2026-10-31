@@ -1,0 +1,6 @@
+PASS full queues preserve in-flight data and ZLP ownership
+PASS failed submission retries without losing response
+PASS 70,000 completions and 32-bit sequence wrap
+PASS reset epoch discards old execution; OUT ZLP creates no command
+PASS reset before consumer lock cannot create phantom commands
+ALL TRANSPORT TESTS PASSED

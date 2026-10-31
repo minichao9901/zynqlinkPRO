@@ -1,0 +1,5 @@
+set ::env(ZYNQLINK_RAW_TRACE) 4
+set ::zynqlink_verify_out E:/zynqlinkPRO_combined_verify/build/fpga_dma_io_eco
+set ::zynqlink_verify_checkpoint $::zynqlink_verify_out/system_wrapper_routed.dcp
+set ::zynqlink_verify_bit $::zynqlink_verify_out/system_wrapper.bit
+source E:/zynqlinkPRO_combined_verify/fpga/verify_routed.tcl

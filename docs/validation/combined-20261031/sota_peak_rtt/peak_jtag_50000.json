@@ -1,0 +1,78 @@
+{
+  "transport": "jtag",
+  "requested_kHz": 50000,
+  "words": 512,
+  "depth": 32,
+  "loops": 256,
+  "artifacts": {
+    "git_head": "6c3818378cce94bee498e996a8af11c4f7ce8ba9",
+    "git_dirty": true,
+    "bit": {
+      "path": "E:\\zynqlinkPRO_combined_verify\\prebuilt\\20261031_combined_raw4_io_7020_120\\probe.bit",
+      "sha256": "1da17cb60175bbc2b7abd647770c7053bd7b7097e0d38aa819fb89678d564473"
+    },
+    "elf": {
+      "path": "E:\\zynqlinkPRO_combined_verify\\prebuilt\\20261031_combined_raw4_io_7020_120\\application.elf",
+      "sha256": "e977914c2924ab4cac13f4075de0a5108d1e2e8cf48966fb8fbdea3a358e0b2c"
+    }
+  },
+  "RCC_before": [
+    50548355,
+    6931466
+  ],
+  "target_halted": true,
+  "backup_sha256": "4acbfd09f4566e2786e48faa8890067cf888ca2a43ba272dc8ac60545c5792d1",
+  "FCLK_Hz": 99999999,
+  "cfg": "0x11",
+  "SWCLK_Hz": 49999999.5,
+  "half_period_fclk": 1,
+  "short_high": false,
+  "intended_high_ns": 10.000000100000001,
+  "JTAG_sampling_mode": 17,
+  "restore_ok": true,
+  "read": {
+    "MB_s": 2.0227027832086106,
+    "samples": [
+      {
+        "MB_s": 2.0220186401975235,
+        "seconds": 0.2592893999972148
+      },
+      {
+        "MB_s": 2.0227027832086106,
+        "seconds": 0.2592016999988118
+      },
+      {
+        "MB_s": 2.023150808269542,
+        "seconds": 0.25914429999829736
+      }
+    ],
+    "blocks": 256,
+    "bytes": 524288
+  },
+  "write": {
+    "MB_s": 2.0046318264374245,
+    "samples": [
+      {
+        "MB_s": 2.003027341563698,
+        "seconds": 0.2617478000029223
+      },
+      {
+        "MB_s": 2.00569089079055,
+        "seconds": 0.261400200004573
+      },
+      {
+        "MB_s": 2.0046318264374245,
+        "seconds": 0.2615382999938447
+      }
+    ],
+    "blocks": 256,
+    "bytes": 524288
+  },
+  "passed": true,
+  "restore_match": true,
+  "restore_sha256": "4acbfd09f4566e2786e48faa8890067cf888ca2a43ba272dc8ac60545c5792d1",
+  "RCC_after": [
+    50548355,
+    6931466
+  ]
+}

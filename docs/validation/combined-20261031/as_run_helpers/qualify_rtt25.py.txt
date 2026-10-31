@@ -1,0 +1,14 @@
+import json,subprocess,sys
+from pathlib import Path
+r=Path.cwd();dest=r/'docs/validation/combined-20261031/rtt25_qualification';dest.mkdir(exist_ok=False)
+new=r/'prebuilt/20261031_combined_raw4_7020_120';old=r/'prebuilt/20261031_orbtrace_opt_qspi_usbfix_7020_120'
+rows=[]
+for label,bit in [('new',new/'probe.bit'),('old_control',old/'probe.bit')]:
+    if label=='old_control':
+        with (dest/'old_control_load.log').open('w') as f:subprocess.run([sys.executable,'tools/run_xsct.py','tools/download_dap_fpga.tcl',str(new/'application.elf'),str(bit),str(new/'ps7_init.tcl')],stdout=f,stderr=subprocess.STDOUT,check=True)
+    for n in range(3):
+        p=dest/f'{label}_{n}.json';fx=dest/f'{label}_{n}_fixture.json'
+        cmd=[sys.executable,'tools/run_f103_jtag_fixture.py','--restore-swj','2','--output',str(fx),'--',sys.executable,'tools/benchmark_rtt_forward.py','--transport','swd','--speeds','25000000','--chunks','1024','--seconds','3','--repeats','3','--bit',str(bit),'--elf',str(new/'application.elf'),'--output',str(p)]
+        with p.with_suffix('.log').open('w') as f:rc=subprocess.run(cmd,stdout=f,stderr=subprocess.STDOUT).returncode
+        d=json.loads(p.read_text()) if p.exists() else {};fd=json.loads(fx.read_text());rows.append(dict(label=label,returncode=rc,command=cmd,rows=len(d.get('rows',[])),failure=d.get('failure'),restore_match=d.get('restore_match'),fixture=fd));(dest/'results.json').write_text(json.dumps(rows,indent=2)+'\n');print(label,n,rc,len(d.get('rows',[])),d.get('failure'),flush=True)
+        assert d.get('restore_match') and fd.get('run_halt_restore_match')

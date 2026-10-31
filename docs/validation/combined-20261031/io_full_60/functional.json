@@ -1,0 +1,127 @@
+{
+  "speed_hz": 60000000,
+  "artifacts": {
+    "git_head": "6c3818378cce94bee498e996a8af11c4f7ce8ba9",
+    "git_dirty": true,
+    "bit": {
+      "path": "E:\\zynqlinkPRO_combined_verify\\prebuilt\\20261031_combined_raw4_io_7020_120\\probe.bit",
+      "sha256": "1da17cb60175bbc2b7abd647770c7053bd7b7097e0d38aa819fb89678d564473"
+    },
+    "elf": {
+      "path": "E:\\zynqlinkPRO_combined_verify\\prebuilt\\20261031_combined_raw4_io_7020_120\\application.elf",
+      "sha256": "e977914c2924ab4cac13f4075de0a5108d1e2e8cf48966fb8fbdea3a358e0b2c"
+    }
+  },
+  "IDCODE": "0501017714a01b",
+  "service_transport": "swd",
+  "target": "STM32F103xE",
+  "device_id": "0x414",
+  "RAM_base": "0x2000f000",
+  "waveform": {
+    "FCLK_Hz": 119999998,
+    "cfg": "0xa11",
+    "SWCLK_Hz": 59999999.0,
+    "half_period_fclk": 1,
+    "short_high": false,
+    "intended_high_ns": 8.333333472222225
+  },
+  "backup_sha256": "658551be48ab2371661ba775dd871005f77f012ffa78c0671549e78631d71043",
+  "rtt": {
+    "bytes": 19965,
+    "rounds": 21,
+    "byte_exact": true,
+    "cold_probe_initialization": true,
+    "status": [
+      65537,
+      536932352,
+      536932376,
+      19965,
+      2301018,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      989856768
+    ],
+    "reported_SWCLK_MHz": 59,
+    "elapsed_including_host_producer_s": 0.22349980000581127
+  },
+  "hss": [
+    {
+      "version": 1,
+      "variables": 1,
+      "samples": 5844,
+      "actual_SWCLK_Hz": 59999999,
+      "packets": 69,
+      "byte_exact": true,
+      "DAP_context_reads": 8,
+      "metrics": [
+        827544392,
+        527325371,
+        24000000,
+        5844,
+        2282,
+        0,
+        0,
+        8,
+        69,
+        35328,
+        2400,
+        0
+      ],
+      "backpressure_skipped": 2282
+    },
+    {
+      "version": 2,
+      "variables": 1,
+      "samples": 5843,
+      "actual_SWCLK_Hz": 59999999,
+      "packets": 69,
+      "byte_exact": true,
+      "DAP_context_reads": 8,
+      "metrics": [
+        827544392,
+        550027270,
+        24000000,
+        5843,
+        2284,
+        0,
+        0,
+        8,
+        69,
+        35328,
+        2400,
+        0
+      ],
+      "backpressure_skipped": 2284
+    },
+    {
+      "version": 2,
+      "variables": 8,
+      "samples": 5193,
+      "actual_SWCLK_Hz": 59999999,
+      "packets": 333,
+      "byte_exact": true,
+      "DAP_context_reads": 8,
+      "metrics": [
+        827544392,
+        571937242,
+        24000000,
+        5193,
+        2892,
+        0,
+        0,
+        8,
+        333,
+        170496,
+        2400,
+        0
+      ],
+      "backpressure_skipped": 2892
+    }
+  ],
+  "restore_sha256": "658551be48ab2371661ba775dd871005f77f012ffa78c0671549e78631d71043",
+  "restore_match": true
+}

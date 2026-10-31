@@ -1,0 +1,142 @@
+{
+  "transport_RTL": [
+    {
+      "path": "fpga/rtl/swd_controller.v",
+      "Git_blob": "5dc4191077af0822d1e6c25212c47953067589d5",
+      "unchanged": true
+    },
+    {
+      "path": "fpga/rtl/swd_core.v",
+      "Git_blob": "ad594d87cd5636391f1a689e29b8d8a5c73c2145",
+      "unchanged": true
+    },
+    {
+      "path": "fpga/rtl/swd_batch_engine.v",
+      "Git_blob": "ba413c488a477557955f8f90ffd914276250bd00",
+      "unchanged": true
+    },
+    {
+      "path": "fpga/rtl/dap_transfer_block_engine.v",
+      "Git_blob": "f90b913d54b120a00cf532b4f93e2aedb45bcdde",
+      "unchanged": true
+    },
+    {
+      "path": "fpga/rtl/jtag_core.v",
+      "Git_blob": "1098646c8f1dd93218e80291b5bc0b665b29302c",
+      "unchanged": true
+    },
+    {
+      "path": "fpga/rtl/jtag_shift.v",
+      "Git_blob": "2c5956d1ef017fd4ade6d297c888cc9adfc4d3ce",
+      "unchanged": true
+    },
+    {
+      "path": "fpga/rtl/probe_sample_engine.v",
+      "Git_blob": "8197623161c7dbb42d8dbedf4d4589e43802bcab",
+      "unchanged": true
+    },
+    {
+      "path": "fpga/rtl/probe_stream_engine.v",
+      "Git_blob": "df75abd2229978c38ec4a138cbd54ba077be1001",
+      "unchanged": true
+    },
+    {
+      "path": "fpga/rtl/probe_rtt_engine.v",
+      "Git_blob": "a9929a160b1ad0f625f5816baace4c6e1b75854a",
+      "unchanged": true
+    }
+  ],
+  "PS_tree_unchanged_from_USB_context_fixed_source": true,
+  "old_PS_tree": "ca6f2358cf109924dc19842dde636b1b74bb1b41",
+  "new_PS_tree": "ca6f2358cf109924dc19842dde636b1b74bb1b41",
+  "native_tests": [
+    {
+      "name": "test_probe_rtl",
+      "command": [
+        "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "tools/test_probe_rtl.py"
+      ],
+      "returncode": 0,
+      "seconds": 2.6113624999998137
+    },
+    {
+      "name": "test_jtag_rtl",
+      "command": [
+        "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "tools/test_jtag_rtl.py"
+      ],
+      "returncode": 0,
+      "seconds": 12.217987399999402
+    },
+    {
+      "name": "test_riscv_rtl",
+      "command": [
+        "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "tools/test_riscv_rtl.py"
+      ],
+      "returncode": 0,
+      "seconds": 169.9695275999984
+    },
+    {
+      "name": "test_packet_engine",
+      "command": [
+        "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "tools/test_packet_engine.py"
+      ],
+      "returncode": 0,
+      "seconds": 2.759843899999396
+    },
+    {
+      "name": "test_probe_host",
+      "command": [
+        "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "tools/test_probe_host.py"
+      ],
+      "returncode": 0,
+      "seconds": 3.418281999998726
+    },
+    {
+      "name": "test_dap_transport",
+      "command": [
+        "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "tools/test_dap_transport.py",
+        "--cc",
+        "clang"
+      ],
+      "returncode": 0,
+      "seconds": 1.1330503999924986
+    },
+    {
+      "name": "test_swj_sequence",
+      "command": [
+        "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "tools/test_swj_sequence.py"
+      ],
+      "returncode": 0,
+      "seconds": 3.2082121999992523
+    },
+    {
+      "name": "test_orbtrace_tpiu",
+      "command": [
+        "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "tools/test_orbtrace_tpiu.py"
+      ],
+      "returncode": 0,
+      "seconds": 2.967145899994648
+    },
+    {
+      "name": "test_trace_signal_replay",
+      "command": [
+        "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "tools/test_trace_signal_replay.py"
+      ],
+      "returncode": 0,
+      "seconds": 29.933161099994322
+    }
+  ],
+  "new_ETM_RTL_tests_rerun": [
+    "test_orbtrace_tpiu",
+    "test_trace_signal_replay"
+  ],
+  "prior_real_CM3_scope": "unchanged transport modules; prior 21-point compatibility and9 matched profiles retained as component evidence; not falsely described as a new USB simulation"
+}

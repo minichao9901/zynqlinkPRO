@@ -1,0 +1,104 @@
+{
+  "artifacts": {
+    "git_head": "95610823d3adfc382c18c8f564edf3c7fa67c2c2",
+    "git_dirty": true,
+    "bit": {
+      "path": "E:\\zynqlinkPRO_combined_verify\\prebuilt\\20261031_combined_raw4_7020_120\\probe.bit",
+      "sha256": "76a8deefb1b879c7ac253a205cabd6fde53674f6454c1c2c5a88fd4f54e65f1f"
+    },
+    "elf": {
+      "path": "E:\\zynqlinkPRO_combined_verify\\prebuilt\\20261031_combined_raw4_7020_120\\application.elf",
+      "sha256": "e977914c2924ab4cac13f4075de0a5108d1e2e8cf48966fb8fbdea3a358e0b2c"
+    }
+  },
+  "block_bytes": 1024,
+  "pipeline_depth": 4,
+  "rows": [
+    {
+      "transport": "jtag",
+      "requested_Hz": 30000000,
+      "passed": true,
+      "forced_JTAG_sampling_mode": 17,
+      "FCLK_Hz": 59999999,
+      "cfg": "0x20011",
+      "waveform": {
+        "SWCLK_Hz": 29999999.5,
+        "half_period_fclk": 1,
+        "short_high": false,
+        "intended_high_ns": 16.66666694444445
+      },
+      "actual_link_Hz": 29999999.5,
+      "JTAG_sampling_mode": 17,
+      "TAR_after_1KiB": "0x20004400",
+      "TAR_after_4KiB": "0x20004000",
+      "read_seq": {
+        "MB_s": 1.0341075742444603,
+        "repeats_MB_s": [
+          1.0347107043779953,
+          1.0412529364070873,
+          1.0341075742444603,
+          1.0305076558378006,
+          1.033494298724923
+        ],
+        "loops": 1000,
+        "bytes_per_repeat": 1024000,
+        "seconds": [
+          0.9896486000070581,
+          0.9834305999975186,
+          0.9902258000074653,
+          0.9936850000085542,
+          0.9908133999997517
+        ]
+      },
+      "read_pipe": {
+        "MB_s": 1.1579372853395251,
+        "repeats_MB_s": [
+          1.1600925999080898,
+          1.156586856070532,
+          1.1562492540397777,
+          1.1580443438795986,
+          1.1579372853395251
+        ],
+        "loops": 1140,
+        "bytes_per_repeat": 1167360,
+        "seconds": [
+          1.0062644999998156,
+          1.0093145999999251,
+          1.0096093000029214,
+          1.0080443000042578,
+          1.0081375000008848
+        ]
+      },
+      "write_pipe": {
+        "MB_s": 1.1503219934639974,
+        "repeats_MB_s": [
+          1.15201302444151,
+          1.1513316237264937,
+          1.1486738840076867,
+          1.1503219934639974,
+          1.1469319560293556
+        ],
+        "loops": 1120,
+        "bytes_per_repeat": 1146880,
+        "seconds": [
+          0.9955442999926163,
+          0.9961334999970859,
+          0.9984382999973604,
+          0.9970078000042122,
+          0.9999546999897575
+        ]
+      },
+      "restore_match": true
+    }
+  ],
+  "RCC_before": [
+    50548355,
+    5309450
+  ],
+  "backup_sha256": "57c43ac45e4bd7d9c2fcaf02e3f4b42e585c0483909b0ce49560ed3c509d6bb9",
+  "RCC_after": [
+    50548355,
+    5309450
+  ],
+  "restore_match": true
+}

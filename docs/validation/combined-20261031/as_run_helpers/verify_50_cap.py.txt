@@ -1,0 +1,17 @@
+import subprocess,sys,json
+from pathlib import Path
+r=Path.cwd();d=r/'docs/validation/combined-20261031/profile50';d.mkdir(exist_ok=False);p=r/'prebuilt/20261031_combined_raw4_io_7020_120';elf=p/'application_50.elf';rows=[]
+with (d/'load.log').open('w') as f:subprocess.run([sys.executable,'tools/run_xsct.py','tools/download_dap_fpga.tcl',str(elf),str(p/'probe.bit'),str(p/'ps7_init.tcl')],stdout=f,stderr=subprocess.STDOUT,check=True)
+jobs=[('sram',['benchmark_sram_matrix.py','--transport','both','--speeds','1000000,10000000,25000000,30000000,35000000,50000000','--seconds','0.15','--repeats','1'])]+[(f'rtt_{tr}',['benchmark_rtt_forward.py','--transport',tr,'--speeds','25000000,50000000','--chunks','1024','--seconds','1','--repeats','2']) for tr in ['swd','jtag']]
+for name,opts in jobs:
+    out=d/(name+'.json');fx=d/(name+'_fixture.json');cmd=[sys.executable,'tools/run_f103_jtag_fixture.py','--restore-swj','2','--output',str(fx),'--',sys.executable,'tools/'+opts[0],*opts[1:],'--bit',str(p/'probe.bit'),'--elf',str(elf),'--output',str(out)]
+    with out.with_suffix('.log').open('w') as f:rc=subprocess.run(cmd,stdout=f,stderr=subprocess.STDOUT).returncode
+    v=json.loads(out.read_text());fixture=json.loads(fx.read_text());passed=rc==0 and v.get('restore_match') and not v.get('failure') and fixture.get('run_halt_restore_match');rows.append(dict(name=name,command=cmd,passed=bool(passed),returncode=rc));(d/'runs.json').write_text(json.dumps(rows,indent=2)+'\n');print(name,passed,flush=True);assert passed
+sys.path.insert(0,str(r/'tools'))
+from dap_pipeline_bench import open_dap,xfer
+import struct,usb.util
+dev,o,i=open_dap()
+try:
+    reply=xfer(o,i,b'\x11'+struct.pack('<I',60000000));assert reply[:2]==b'\x11\xff',reply.hex()
+    (d/'cap_rejection.json').write_text(json.dumps(dict(requested_Hz=60000000,reply=reply.hex(),passed=True))+'\n')
+finally:usb.util.dispose_resources(dev)

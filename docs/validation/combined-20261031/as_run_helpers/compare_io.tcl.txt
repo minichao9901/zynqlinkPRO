@@ -1,0 +1,14 @@
+set out [file normalize build/combined_validation/io_compare]
+file mkdir $out
+foreach {label checkpoint} {old E:/zynqlinkPRO_orbtrace_opt/build/fpga_dma_global/system_wrapper_verified.dcp new E:/zynqlinkPRO_combined_verify/build/fpga_dma_global/system_wrapper_verified.dcp} {
+    open_checkpoint $checkpoint
+    set_output_delay -clock clk_fpga_0 0 [get_ports swclk_0]
+    set source [get_cells -hier -filter {NAME =~ *short_core_clock_reg}]
+    set_max_delay 100 -datapath_only -from $source -to [get_ports swclk_0]
+    report_timing -from $source -to [get_ports swclk_0] -max_paths 2 -path_type full_clock_expanded -file $out/${label}_clock_output.rpt
+    set input [get_cells -hier -filter {REF_NAME == IDDR && NAME =~ *u_swdio_iddr}]
+    report_property $input -file $out/${label}_iddr.txt
+    set_input_delay -clock clk_fpga_0 0 [get_ports swdio_0]
+    report_timing -from [get_ports swdio_0] -max_paths 4 -path_type full_clock_expanded -file $out/${label}_input.rpt
+    close_design
+}
