@@ -20,6 +20,7 @@
 | CLI实际回读及复位流程 | `toolbox.py probe-flash --verify-only` PASS，见cli_verify_pass |
 | 损坏镜像拒绝 | dry-run在访问硬件前拒绝BOOT.bin SHA不符，见negative_manifest_test.json |
 | 实体按键/断电重启 | 等待用户完成烧写后的操作；此前用户重上电发生在此次烧写前，不计为此项通过 |
+| JTAG线缆硬件SRST | 发出脉冲后启动标记未改变，未观察到板复位；不能代替用户按键/断电检查 |
 
 原Flash备份和完整回读保留在本机 `E:/zynqlinkPRO_orbtrace_opt/build/qspi_boot/backup/original_flash_32MiB.bin` 及 `post_program/programmed_flash_32MiB.bin`，不提交公开Git；本目录保留哈希、范围和校验结果。
 

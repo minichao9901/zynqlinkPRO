@@ -2,7 +2,7 @@
 
 本轮在独立 worktree `E:\zynqlinkPRO_orbtrace_opt`、分支
 `codex/orbtrace-7010-120mhz-ocm` 完成。基点为 ORBTrace 工作线 `00b9f2f`。
-源码、构建、IP/cache、临时文件与另一聊天分开；没有向另一 worktree 写入源码或构建产物。
+优化、构建与首轮回归阶段的源码、IP/cache、临时文件与另一聊天分开，没有向另一 worktree 写入源码或构建产物。
 Git 对象库和只读 SDK/BSP 的共享不是构建输出共享。
 
 ## 结果与交付配对
@@ -50,9 +50,11 @@ CDC/HSS/HID 队列保留。`xusbps_ch9_storage` 是沿用的文件名；512KiB `
 验证使用 SRAM 临时生产者及完整备份恢复，没有写目标 Flash，没有使用目标复位命令。
 SRAM、CPU 寄存器、RCC、运行/暂停状态均按脚本校验恢复。
 
-最后已重新加载另一工作线原有的 `20261031_filtered_tpiu` 配对，供原 ETM/Web 工作流继续使用。
+本阶段结束时曾重新加载另一工作线原有的 `20261031_filtered_tpiu` 配对，供原 ETM/Web 工作流继续使用。
 [最终状态](restored_baseline/final_state.json) 确认目标仍运行，RCC 与最初相同。
-**当前板上不是本轮优化配对**，以后复测必须显式加载所选版本。
+这是该阶段的恢复快照。后续用户授权完成 SOTA 复测与 QSPI 固化，当前交付状态见
+[QSPI 记录](../orbtrace-qspi-20261031/README.md)：板上已固化优化 bit + 60MHz 配置 ELF。
+今后复测仍必须核对实际加载身份，不能用本阶段的恢复快照推断板上版本。
 
 ## 对照方法与主要吞吐
 
