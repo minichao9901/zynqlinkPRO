@@ -23,6 +23,6 @@ PL继续显式复用未变RTL的 `f02a15db0b576f631c08448b19ea3844d1b45ef00ee680
 
 `qspi_cli/` 记录总CLI实际执行的完整固化流程：先备份整片32MiB（SHA-256 `2500c2b2a9444c6b98b24d2d236e22644c83242984bff762f4abdd459542fe2f`，即之前旧镜像的整片回读），再SDK编程/verify、独立整片回读和擦写范围外对比，最后无暂停QSPI软件复位。新BOOT.bin及回读SHA-256均为 `ee7116bc71b0c7f0fdbebed75c5c85137e80ec7ef7c1b8cc3db50cebb39f1185`。`post_QSPI_software/` 再次证明四轮USB配置后完整代码与最终ELF相等。原始全片备份/回读留本机 `build/qspi_usb_context_flash/`，不提交公开Git。
 
-最终修复版的实体断电重启当前等待用户操作；软件复位通过不冒充这一项已测。早先用户已断电验证的是原ELF，正是在那次额外代码审计中发现了本缺陷。
+最终修复版已由用户再次断电重上，并在2026-10-31 13:03（北京时间）完成验收，见`cold_final/`。没有JTAG下载、复位或继续CPU：QSPI BOOT_MODE=1、引导交接记录完整、USB枚举正常，全部71268字节可执行代码与最终6684400f ELF逐字节一致，复位向量保持EA000049。随后60MHz短测SWD读/写4.83372/4.75272MB/s，JTAG2.42086/2.39953MB/s，数据及SRAM/RCC/引脚/运行状态恢复均通过。空闲启动FCLK99999999Hz，请求60MHz时119999998Hz。这一结果属于最终修复版，不借用原4fb ELF的旧冷启动记录。
 
 `firmware_source_audit.json` 核对最终ELF的36个构建源文件与完整提交指纹，明确区分Git原始字节和CRLF检出。固件修复也以独立提交加入 `codex/qspi-cli-integration`；主目录只安装总CLI、启动包及其记录，未覆盖另一AI的固件源码。7010/100MHz仍沿用原PL静态实现，另配同一修复的50MHz ELF于 `prebuilt/20261031_orbtrace_usbfix_7010_100/`，没有物理7010板测。

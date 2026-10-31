@@ -13,6 +13,8 @@ PL显式复用未改变RTL的bc9ced6配对，未声称重新综合。7020/120MHz
 
 新60MHz ELF已重新上板完成50/60MHz峰值、RTT、30秒soak和42行严格HSS；50MHz ELF另行加载完成50MHz峰值/RTT。四轮USB配置请求后全部可执行字节与最终ELF一致，复位向量保持EA000049。原始记录及相同参数对照在`docs/validation/orbtrace-usb-context-20261031/`。QSPI最终验收状态以flash_manifest.json及该目录最终记录为准。
 
+用户再次断电重上后的最终冷启动已通过：未JTAG下载，QSPI交接/USB/完整代码比对正确，SWD60读/写4.834/4.753MB/s、JTAG60为2.421/2.400MB/s，数据与目标状态恢复通过。完整验收见acceptance.json。
+
 主应用代码继续在OCM执行。空闲启动FCLK100MHz，请求SWCLK/TCK60MHz时切换FCLK120MHz。FSBL、BIF、构建来源/选项/哈希、实际bit/ELF均在本目录；只读Flash辅助程序用于整片备份与独立回读。
 
 统一CLI默认使用本包：
