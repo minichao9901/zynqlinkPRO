@@ -9,8 +9,6 @@
 > H743保留superlinkPRO的ETMv4能力；新增Kingst真实记录作离线回归，不冒充Zynq上板验收。
 > 用户操作见[Web操作说明](Zynq-ETM-Trace操作说明.md)。
 
-## 2026-11-01：Windows bridge EXE与纯Web操作
-
 ## 2026-11-01：独立worktree的校准与有限DDR采集研究（进行中）
 
 研究分支`codex/etm-lane-calibration`，目录`E:/zynqlinkPRO_etm_calibration`，从main `bc0d3ad`建立。
@@ -62,7 +60,7 @@ Golden ELF的静态DDR段在低地址约1～1.76MB及0x3f000000，链接器另�
 压力测试将记录每轮探针开关、实际FCLK/TCK/RCC、入口PC、原始数据与echo SHA、解码质量和恢复状态；
 不通过重试隐藏首次失败，不更改target分频，也不继续已暂停的HSS缺首DEF修复。
 
-## Windows bridge离线交付记录
+## 2026-11-01：Windows bridge EXE与纯Web操作
 
 交付`dist/zynq-etm-bridge/zynq-etm-bridge.exe`及完整`dist/zynq-etm-bridge.zip`，ZIP为51,653,326字节，
 SHA-256 `0f9a7542c9d8ad3592cd08d50e9f9790abfb223b442a60271956ed266c3b7926`。
