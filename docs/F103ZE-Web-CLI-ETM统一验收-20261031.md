@@ -153,6 +153,14 @@ PS链接器已将普通DDR分配区限制在0x10000000以下，并以独立MEMOR
 首尾1～7字节、4KiB边界、越界拒绝、忙时修改/重启拒绝、中止排空、错误B和合法重启清除旧错误。
 原11项Trace RTL回归及生产主机C回归通过。新DDR网表构建和板上读回尚待进行；旧诊断配对仍在板上，Golden不变。
 
+首轮DDR pilot实现进行到布局/phys_opt后，placed DCP最差setup -1.902ns：
+accepted_bytes经32bit剩余量减法、动态TKEEP与预算判断到缓冲存储控制，21级逻辑、12级CARRY4。
+缓冲被综合为2,000余个FF，叠加大扇出控制使物理优化估算仍约-1.8ns。
+已停止这一轮实现并保留placed DCP身份和报告；它没有生成、加载或验收新的bit，不能拿旧bit配新时序声明。
+修正为寄存remaining_bytes、用“高位是否非零+低4bit比较”检查最多8字节的拍预算，
+并把无复位的payload RAM写入移出异步状态复位过程，保留原边界/中止语义。
+原28项及控制器用例、预算守恒检查通过，准备重综合以核实RAM推断和120MHz时序；尚未声称已收敛。
+
 DDR前端已有隔离的实验RTL：`fpga/experiments/etm_ddr/etm_ddr_packetizer.v`，尚未加入生产BD或本轮ETD1构建输入。
 它把带有效长度/EOF的128bit帧转为64bit AXIS，保留最后一拍直到后续数据或EOF确定，正确产生TKEEP/TLAST；
 不发送零字节DMA包，不越过锁定的byte_limit，背压期间数据稳定，源暂停不会伪造结束，busy时拒绝重启。

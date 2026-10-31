@@ -63,6 +63,7 @@ module tb_orbtrace_ddr_writer;
       else if(bdelay>0)bdelay=bdelay-1;
       old_response=response_bytes;
       #1;
+      if(busy && accepted_bytes+dut.remaining_bytes!=dut.limit)$fatal(1,"budget conservation");
       if(response_bytes!=old_response && !acknowledged)$fatal(1,"response count advanced before OKAY B");
       if(done && outstanding)$fatal(1,"completion with outstanding AXI write");
     end

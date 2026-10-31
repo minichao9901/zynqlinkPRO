@@ -12,7 +12,7 @@ module orbtrace_ddr_writer #(
   input wire [31:0] base_address,input wire [31:0] byte_limit,
   output reg busy,output reg done,output reg error,
   output reg [3:0] error_code,output reg command_rejected,
-  output reg [31:0] accepted_bytes,response_bytes,
+  output reg [31:0] accepted_bytes,response_bytes,remaining_bytes,
   input wire [63:0] s_axis_tdata,input wire [7:0] s_axis_tkeep,
   input wire s_axis_tlast,input wire s_axis_tvalid,output wire s_axis_tready,
   output reg [31:0] m_axi_awaddr,output wire [7:0] m_axi_awlen,
@@ -41,7 +41,13 @@ module orbtrace_ddr_writer #(
   wire [3:0] incoming_bytes=byte_count(s_axis_tkeep);
   wire legal_keep=s_axis_tkeep!=0 && (s_axis_tkeep & (s_axis_tkeep+8'd1))==0 &&
                   (s_axis_tlast || s_axis_tkeep==8'hff);
-  wire [32:0] incoming_total={1'b0,accepted_bytes}+incoming_bytes;
+  // Registered remaining budget avoids a 32-bit add then 33-bit compare on
+  // every RAM write-enable. Each beat is <=8B, so the guard needs only the
+  // low nibble unless any higher bit is set.
+  wire has_room=(|remaining_bytes[31:4]) || remaining_bytes[3:0]>=incoming_bytes;
+  wire at_limit=remaining_bytes==incoming_bytes;
+  wire input_fire=s_axis_tvalid && s_axis_tready;
+  wire valid_beat=legal_keep && has_room && (!at_limit || s_axis_tlast);
   wire [32:0] end_address={1'b0,base_address}+{1'b0,byte_limit};
   wire legal_config=base_address[6:0]==0 && base_address>=REGION_BASE && byte_limit!=0 &&
                     end_address<={1'b0,REGION_END};
@@ -54,10 +60,17 @@ module orbtrace_ddr_writer #(
   assign m_axi_wlast={1'b0,send_index}+5'd1==burst_beats;
   assign m_axi_wvalid=state==DATA;
   assign m_axi_bready=state==RESPONSE;
+  // Keep payload storage outside the asynchronous state-reset process so
+  // Vivado can infer simple dual-port distributed RAM instead of reset FFs.
+  always @(posedge clk)
+    if(rst_n && input_fire && valid_beat)begin
+      data_bank[{producer_bank,fill_index}]<=s_axis_tdata;
+      keep_bank[{producer_bank,fill_index}]<=s_axis_tkeep;
+    end
   always @(posedge clk or negedge rst_n)
     if(!rst_n)begin
       busy<=0;done<=0;error<=0;error_code<=0;command_rejected<=0;
-      accepted_bytes<=0;response_bytes<=0;state<=IDLE;bank_ready<=0;bank_last<=0;
+      accepted_bytes<=0;response_bytes<=0;remaining_bytes<=0;state<=IDLE;bank_ready<=0;bank_last<=0;
       bank_count[0]<=0;bank_count[1]<=0;bank_bytes[0]<=0;bank_bytes[1]<=0;
       producer_bank<=0;reader_bank<=0;input_closed<=0;aborting<=0;
       fill_index<=0;send_index<=0;fill_bytes<=0;burst_bytes<=0;burst_beats<=0;burst_last<=0;
@@ -67,23 +80,22 @@ module orbtrace_ddr_writer #(
       if(start)begin
         if(busy || state!=IDLE)command_rejected<=1;
         else if(!legal_config)begin
-          command_rejected<=1;error<=1;error_code<=1;done<=1;accepted_bytes<=0;response_bytes<=0;
+          command_rejected<=1;error<=1;error_code<=1;done<=1;accepted_bytes<=0;response_bytes<=0;remaining_bytes<=0;
         end
         else begin
           busy<=1;error<=0;error_code<=0;command_rejected<=0;aborting<=0;
-          limit<=byte_limit;next_address<=base_address;
+          limit<=byte_limit;remaining_bytes<=byte_limit;next_address<=base_address;
           accepted_bytes<=0;response_bytes<=0;bank_ready<=0;bank_last<=0;
           producer_bank<=0;reader_bank<=0;input_closed<=0;fill_index<=0;fill_bytes<=0;
         end
       end
       if(abort && busy)begin aborting<=1;error<=1;if(!error)error_code<=5;end
-      if(s_axis_tvalid && s_axis_tready)begin
-        if(!legal_keep || incoming_total>{1'b0,limit} || (incoming_total=={1'b0,limit} && !s_axis_tlast))begin
+      if(input_fire)begin
+        if(!valid_beat)begin
           aborting<=1;error<=1;error_code<=!legal_keep ? 2 : 3;
         end else begin
-          data_bank[{producer_bank,fill_index}]<=s_axis_tdata;
-          keep_bank[{producer_bank,fill_index}]<=s_axis_tkeep;
-          accepted_bytes<=incoming_total[31:0];
+          accepted_bytes<=accepted_bytes+incoming_bytes;
+          remaining_bytes<=remaining_bytes-incoming_bytes;
           if(fill_index==15 || s_axis_tlast)begin
             bank_count[producer_bank]<={1'b0,fill_index}+5'd1;
             bank_bytes[producer_bank]<=fill_bytes+incoming_bytes;

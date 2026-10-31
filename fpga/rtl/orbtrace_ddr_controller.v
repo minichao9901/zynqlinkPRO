@@ -31,16 +31,16 @@ module orbtrace_ddr_controller(
   reg writer_start,writer_abort;
   wire writer_busy,writer_done,writer_error,writer_rejected;
   wire [3:0] writer_error_code;wire [31:0] accepted_bytes,response_bytes;
-  wire stream_ready;wire [31:0] remaining=byte_limit-accepted_bytes;
+  wire stream_ready;wire [31:0] remaining;
   wire [31:0] word_index=accepted_bytes>>2;
   wire [63:0] stream_data={32'hddaa0000 ^ seed ^ (word_index+32'd1),32'hddaa0000 ^ seed ^ word_index};
   wire [7:0] stream_keep=remaining>=8 ? 8'hff : (9'd1<<remaining[3:0])-1'b1;
   wire stream_last=remaining<=8;
-  wire stream_valid=active && writer_busy && accepted_bytes<byte_limit;
+  wire stream_valid=active && writer_busy && remaining!=0;
   assign m_axi_awcache=4'b0011;assign m_axi_awprot=0;assign m_axi_awlock=0;assign m_axi_awqos=0;
   orbtrace_ddr_writer writer(.clk(clk),.rst_n(rst_n),.start(writer_start),.abort(writer_abort),.finish_empty(1'b0),
     .base_address(base_address),.byte_limit(byte_limit),.busy(writer_busy),.done(writer_done),.error(writer_error),
-    .error_code(writer_error_code),.command_rejected(writer_rejected),.accepted_bytes(accepted_bytes),.response_bytes(response_bytes),
+    .error_code(writer_error_code),.command_rejected(writer_rejected),.accepted_bytes(accepted_bytes),.response_bytes(response_bytes),.remaining_bytes(remaining),
     .s_axis_tdata(stream_data),.s_axis_tkeep(stream_keep),.s_axis_tlast(stream_last),.s_axis_tvalid(stream_valid),.s_axis_tready(stream_ready),
     .m_axi_awaddr(m_axi_awaddr),.m_axi_awlen(m_axi_awlen),.m_axi_awsize(m_axi_awsize),.m_axi_awburst(m_axi_awburst),
     .m_axi_awvalid(m_axi_awvalid),.m_axi_awready(m_axi_awready),.m_axi_wdata(m_axi_wdata),.m_axi_wstrb(m_axi_wstrb),

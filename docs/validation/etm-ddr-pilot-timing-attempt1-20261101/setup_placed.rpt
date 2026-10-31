@@ -1,0 +1,1066 @@
+Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2018.3 (win64) Build 2405991 Thu Dec  6 23:38:27 MST 2018
+| Date         : Sun Nov  1 03:52:30 2026
+| Host         : DESKTOP-0UKCPD3 running 64-bit major release  (build 9200)
+| Command      : report_timing -delay_type max -max_paths 10 -file build/etm-ddr-pilot-build1-20261101/setup_placed.rpt
+| Design       : system_wrapper
+| Device       : 7z020-clg400
+| Speed File   : -2  PRODUCTION 1.11 2014-09-11
+------------------------------------------------------------------------------------------------------------------------
+
+Timing Report
+
+Slack (VIOLATED) :        -1.902ns  (required time - arrival time)
+  Source:                 system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[1]/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/etm_ddr_0/inst/writer/keep_bank_reg[2][0]/S
+                            (rising edge-triggered cell FDSE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        9.621ns  (logic 4.409ns (45.827%)  route 5.212ns (54.173%))
+  Logic Levels:           21  (CARRY4=12 LUT2=2 LUT3=1 LUT4=3 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.037ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.262ns = ( 10.595 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.485ns
+    Clock Pessimism Removal (CPR):    0.186ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, estimated)        0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=21300, estimated)    1.406     2.485    system_i/etm_ddr_0/inst/writer/clk
+    SLICE_X34Y10         FDCE                                         r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X34Y10         FDCE (Prop_fdce_C_Q)         0.398     2.883 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[1]/Q
+                         net (fo=6, estimated)        0.365     3.248    system_i/etm_ddr_0/inst/writer/accepted_bytes[1]
+    SLICE_X34Y11         LUT2 (Prop_lut2_I1_O)        0.234     3.482 r  system_i/etm_ddr_0/inst/writer/remaining_carry_i_3/O
+                         net (fo=1, routed)           0.000     3.482    system_i/etm_ddr_0/inst/writer_n_8
+    SLICE_X34Y11         CARRY4 (Prop_carry4_S[1]_CO[3])
+                                                      0.444     3.926 r  system_i/etm_ddr_0/inst/remaining_carry/CO[3]
+                         net (fo=1, estimated)        0.000     3.926    system_i/etm_ddr_0/inst/remaining_carry_n_0
+    SLICE_X34Y12         CARRY4 (Prop_carry4_CI_O[0])
+                                                      0.178     4.104 r  system_i/etm_ddr_0/inst/remaining_carry__0/O[0]
+                         net (fo=2, estimated)        0.696     4.800    system_i/etm_ddr_0/inst/writer/remaining[4]
+    SLICE_X32Y12         LUT4 (Prop_lut4_I0_O)        0.238     5.038 r  system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_8/O
+                         net (fo=1, estimated)        0.524     5.562    system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_8_n_0
+    SLICE_X35Y12         LUT6 (Prop_lut6_I0_O)        0.105     5.667 r  system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_5/O
+                         net (fo=1, estimated)        0.588     6.255    system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_5_n_0
+    SLICE_X37Y13         LUT5 (Prop_lut5_I3_O)        0.105     6.360 r  system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_3/O
+                         net (fo=41, estimated)       0.509     6.869    system_i/etm_ddr_0/inst/writer/stream_keep1
+    SLICE_X36Y11         LUT4 (Prop_lut4_I3_O)        0.105     6.974 r  system_i/etm_ddr_0/inst/writer/accepted_bytes[3]_i_6/O
+                         net (fo=1, routed)           0.000     6.974    system_i/etm_ddr_0/inst/writer/accepted_bytes[3]_i_6_n_0
+    SLICE_X36Y11         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.423     7.397 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[3]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.397    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[3]_i_2_n_0
+    SLICE_X36Y12         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.497 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[7]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.497    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[7]_i_2_n_0
+    SLICE_X36Y13         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.597 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[11]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.597    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[11]_i_2_n_0
+    SLICE_X36Y14         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.697 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[15]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.697    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[15]_i_2_n_0
+    SLICE_X36Y15         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.797 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[19]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.797    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[19]_i_2_n_0
+    SLICE_X36Y16         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.897 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[23]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.897    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[23]_i_2_n_0
+    SLICE_X36Y17         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.997 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[27]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.997    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[27]_i_2_n_0
+    SLICE_X36Y18         CARRY4 (Prop_carry4_CI_O[3])
+                                                      0.262     8.259 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[31]_i_3/O[3]
+                         net (fo=4, estimated)        0.831     9.090    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[31]_i_3_n_4
+    SLICE_X33Y15         LUT4 (Prop_lut4_I1_O)        0.250     9.340 r  system_i/etm_ddr_0/inst/writer/fill_index[3]_i_26/O
+                         net (fo=1, routed)           0.000     9.340    system_i/etm_ddr_0/inst/writer/fill_index[3]_i_26_n_0
+    SLICE_X33Y15         CARRY4 (Prop_carry4_S[3]_CO[3])
+                                                      0.332     9.672 r  system_i/etm_ddr_0/inst/writer/fill_index_reg[3]_i_9/CO[3]
+                         net (fo=1, estimated)        0.000     9.672    system_i/etm_ddr_0/inst/writer/fill_index_reg[3]_i_9_n_0
+    SLICE_X33Y16         CARRY4 (Prop_carry4_CI_CO[0])
+                                                      0.216     9.888 f  system_i/etm_ddr_0/inst/writer/fill_index_reg[3]_i_5/CO[0]
+                         net (fo=4, estimated)        0.480    10.368    system_i/etm_ddr_0/inst/writer/error3
+    SLICE_X33Y17         LUT3 (Prop_lut3_I0_O)        0.309    10.677 f  system_i/etm_ddr_0/inst/writer/bank_bytes[1][7]_i_3/O
+                         net (fo=8, estimated)        0.392    11.069    system_i/etm_ddr_0/inst/writer/bank_bytes[1][7]_i_3_n_0
+    SLICE_X32Y20         LUT6 (Prop_lut6_I3_O)        0.105    11.174 r  system_i/etm_ddr_0/inst/writer/data_bank[2][63]_i_1/O
+                         net (fo=72, estimated)       0.528    11.702    system_i/etm_ddr_0/inst/writer/data_bank[2][63]_i_1_n_0
+    SLICE_X35Y20         LUT2 (Prop_lut2_I1_O)        0.105    11.807 r  system_i/etm_ddr_0/inst/writer/keep_bank[2][7]_i_1/O
+                         net (fo=8, estimated)        0.299    12.106    system_i/etm_ddr_0/inst/writer/keep_bank[2][7]_i_1_n_0
+    SLICE_X34Y21         FDSE                                         r  system_i/etm_ddr_0/inst/writer/keep_bank_reg[2][0]/S
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, estimated)        0.944     9.277    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.354 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=21300, estimated)    1.241    10.595    system_i/etm_ddr_0/inst/writer/clk
+    SLICE_X34Y21         FDSE                                         r  system_i/etm_ddr_0/inst/writer/keep_bank_reg[2][0]/C
+                         clock pessimism              0.186    10.781    
+                         clock uncertainty           -0.154    10.627    
+    SLICE_X34Y21         FDSE (Setup_fdse_C_S)       -0.423    10.204    system_i/etm_ddr_0/inst/writer/keep_bank_reg[2][0]
+  -------------------------------------------------------------------
+                         required time                         10.204    
+                         arrival time                         -12.106    
+  -------------------------------------------------------------------
+                         slack                                 -1.902    
+
+Slack (VIOLATED) :        -1.902ns  (required time - arrival time)
+  Source:                 system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[1]/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/etm_ddr_0/inst/writer/keep_bank_reg[2][1]/S
+                            (rising edge-triggered cell FDSE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        9.621ns  (logic 4.409ns (45.827%)  route 5.212ns (54.173%))
+  Logic Levels:           21  (CARRY4=12 LUT2=2 LUT3=1 LUT4=3 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.037ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.262ns = ( 10.595 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.485ns
+    Clock Pessimism Removal (CPR):    0.186ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, estimated)        0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=21300, estimated)    1.406     2.485    system_i/etm_ddr_0/inst/writer/clk
+    SLICE_X34Y10         FDCE                                         r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X34Y10         FDCE (Prop_fdce_C_Q)         0.398     2.883 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[1]/Q
+                         net (fo=6, estimated)        0.365     3.248    system_i/etm_ddr_0/inst/writer/accepted_bytes[1]
+    SLICE_X34Y11         LUT2 (Prop_lut2_I1_O)        0.234     3.482 r  system_i/etm_ddr_0/inst/writer/remaining_carry_i_3/O
+                         net (fo=1, routed)           0.000     3.482    system_i/etm_ddr_0/inst/writer_n_8
+    SLICE_X34Y11         CARRY4 (Prop_carry4_S[1]_CO[3])
+                                                      0.444     3.926 r  system_i/etm_ddr_0/inst/remaining_carry/CO[3]
+                         net (fo=1, estimated)        0.000     3.926    system_i/etm_ddr_0/inst/remaining_carry_n_0
+    SLICE_X34Y12         CARRY4 (Prop_carry4_CI_O[0])
+                                                      0.178     4.104 r  system_i/etm_ddr_0/inst/remaining_carry__0/O[0]
+                         net (fo=2, estimated)        0.696     4.800    system_i/etm_ddr_0/inst/writer/remaining[4]
+    SLICE_X32Y12         LUT4 (Prop_lut4_I0_O)        0.238     5.038 r  system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_8/O
+                         net (fo=1, estimated)        0.524     5.562    system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_8_n_0
+    SLICE_X35Y12         LUT6 (Prop_lut6_I0_O)        0.105     5.667 r  system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_5/O
+                         net (fo=1, estimated)        0.588     6.255    system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_5_n_0
+    SLICE_X37Y13         LUT5 (Prop_lut5_I3_O)        0.105     6.360 r  system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_3/O
+                         net (fo=41, estimated)       0.509     6.869    system_i/etm_ddr_0/inst/writer/stream_keep1
+    SLICE_X36Y11         LUT4 (Prop_lut4_I3_O)        0.105     6.974 r  system_i/etm_ddr_0/inst/writer/accepted_bytes[3]_i_6/O
+                         net (fo=1, routed)           0.000     6.974    system_i/etm_ddr_0/inst/writer/accepted_bytes[3]_i_6_n_0
+    SLICE_X36Y11         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.423     7.397 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[3]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.397    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[3]_i_2_n_0
+    SLICE_X36Y12         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.497 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[7]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.497    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[7]_i_2_n_0
+    SLICE_X36Y13         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.597 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[11]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.597    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[11]_i_2_n_0
+    SLICE_X36Y14         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.697 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[15]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.697    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[15]_i_2_n_0
+    SLICE_X36Y15         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.797 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[19]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.797    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[19]_i_2_n_0
+    SLICE_X36Y16         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.897 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[23]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.897    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[23]_i_2_n_0
+    SLICE_X36Y17         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.997 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[27]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.997    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[27]_i_2_n_0
+    SLICE_X36Y18         CARRY4 (Prop_carry4_CI_O[3])
+                                                      0.262     8.259 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[31]_i_3/O[3]
+                         net (fo=4, estimated)        0.831     9.090    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[31]_i_3_n_4
+    SLICE_X33Y15         LUT4 (Prop_lut4_I1_O)        0.250     9.340 r  system_i/etm_ddr_0/inst/writer/fill_index[3]_i_26/O
+                         net (fo=1, routed)           0.000     9.340    system_i/etm_ddr_0/inst/writer/fill_index[3]_i_26_n_0
+    SLICE_X33Y15         CARRY4 (Prop_carry4_S[3]_CO[3])
+                                                      0.332     9.672 r  system_i/etm_ddr_0/inst/writer/fill_index_reg[3]_i_9/CO[3]
+                         net (fo=1, estimated)        0.000     9.672    system_i/etm_ddr_0/inst/writer/fill_index_reg[3]_i_9_n_0
+    SLICE_X33Y16         CARRY4 (Prop_carry4_CI_CO[0])
+                                                      0.216     9.888 f  system_i/etm_ddr_0/inst/writer/fill_index_reg[3]_i_5/CO[0]
+                         net (fo=4, estimated)        0.480    10.368    system_i/etm_ddr_0/inst/writer/error3
+    SLICE_X33Y17         LUT3 (Prop_lut3_I0_O)        0.309    10.677 f  system_i/etm_ddr_0/inst/writer/bank_bytes[1][7]_i_3/O
+                         net (fo=8, estimated)        0.392    11.069    system_i/etm_ddr_0/inst/writer/bank_bytes[1][7]_i_3_n_0
+    SLICE_X32Y20         LUT6 (Prop_lut6_I3_O)        0.105    11.174 r  system_i/etm_ddr_0/inst/writer/data_bank[2][63]_i_1/O
+                         net (fo=72, estimated)       0.528    11.702    system_i/etm_ddr_0/inst/writer/data_bank[2][63]_i_1_n_0
+    SLICE_X35Y20         LUT2 (Prop_lut2_I1_O)        0.105    11.807 r  system_i/etm_ddr_0/inst/writer/keep_bank[2][7]_i_1/O
+                         net (fo=8, estimated)        0.299    12.106    system_i/etm_ddr_0/inst/writer/keep_bank[2][7]_i_1_n_0
+    SLICE_X34Y21         FDSE                                         r  system_i/etm_ddr_0/inst/writer/keep_bank_reg[2][1]/S
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, estimated)        0.944     9.277    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.354 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=21300, estimated)    1.241    10.595    system_i/etm_ddr_0/inst/writer/clk
+    SLICE_X34Y21         FDSE                                         r  system_i/etm_ddr_0/inst/writer/keep_bank_reg[2][1]/C
+                         clock pessimism              0.186    10.781    
+                         clock uncertainty           -0.154    10.627    
+    SLICE_X34Y21         FDSE (Setup_fdse_C_S)       -0.423    10.204    system_i/etm_ddr_0/inst/writer/keep_bank_reg[2][1]
+  -------------------------------------------------------------------
+                         required time                         10.204    
+                         arrival time                         -12.106    
+  -------------------------------------------------------------------
+                         slack                                 -1.902    
+
+Slack (VIOLATED) :        -1.902ns  (required time - arrival time)
+  Source:                 system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[1]/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/etm_ddr_0/inst/writer/keep_bank_reg[2][2]/S
+                            (rising edge-triggered cell FDSE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        9.621ns  (logic 4.409ns (45.827%)  route 5.212ns (54.173%))
+  Logic Levels:           21  (CARRY4=12 LUT2=2 LUT3=1 LUT4=3 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.037ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.262ns = ( 10.595 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.485ns
+    Clock Pessimism Removal (CPR):    0.186ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, estimated)        0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=21300, estimated)    1.406     2.485    system_i/etm_ddr_0/inst/writer/clk
+    SLICE_X34Y10         FDCE                                         r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X34Y10         FDCE (Prop_fdce_C_Q)         0.398     2.883 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[1]/Q
+                         net (fo=6, estimated)        0.365     3.248    system_i/etm_ddr_0/inst/writer/accepted_bytes[1]
+    SLICE_X34Y11         LUT2 (Prop_lut2_I1_O)        0.234     3.482 r  system_i/etm_ddr_0/inst/writer/remaining_carry_i_3/O
+                         net (fo=1, routed)           0.000     3.482    system_i/etm_ddr_0/inst/writer_n_8
+    SLICE_X34Y11         CARRY4 (Prop_carry4_S[1]_CO[3])
+                                                      0.444     3.926 r  system_i/etm_ddr_0/inst/remaining_carry/CO[3]
+                         net (fo=1, estimated)        0.000     3.926    system_i/etm_ddr_0/inst/remaining_carry_n_0
+    SLICE_X34Y12         CARRY4 (Prop_carry4_CI_O[0])
+                                                      0.178     4.104 r  system_i/etm_ddr_0/inst/remaining_carry__0/O[0]
+                         net (fo=2, estimated)        0.696     4.800    system_i/etm_ddr_0/inst/writer/remaining[4]
+    SLICE_X32Y12         LUT4 (Prop_lut4_I0_O)        0.238     5.038 r  system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_8/O
+                         net (fo=1, estimated)        0.524     5.562    system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_8_n_0
+    SLICE_X35Y12         LUT6 (Prop_lut6_I0_O)        0.105     5.667 r  system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_5/O
+                         net (fo=1, estimated)        0.588     6.255    system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_5_n_0
+    SLICE_X37Y13         LUT5 (Prop_lut5_I3_O)        0.105     6.360 r  system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_3/O
+                         net (fo=41, estimated)       0.509     6.869    system_i/etm_ddr_0/inst/writer/stream_keep1
+    SLICE_X36Y11         LUT4 (Prop_lut4_I3_O)        0.105     6.974 r  system_i/etm_ddr_0/inst/writer/accepted_bytes[3]_i_6/O
+                         net (fo=1, routed)           0.000     6.974    system_i/etm_ddr_0/inst/writer/accepted_bytes[3]_i_6_n_0
+    SLICE_X36Y11         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.423     7.397 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[3]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.397    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[3]_i_2_n_0
+    SLICE_X36Y12         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.497 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[7]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.497    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[7]_i_2_n_0
+    SLICE_X36Y13         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.597 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[11]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.597    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[11]_i_2_n_0
+    SLICE_X36Y14         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.697 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[15]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.697    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[15]_i_2_n_0
+    SLICE_X36Y15         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.797 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[19]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.797    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[19]_i_2_n_0
+    SLICE_X36Y16         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.897 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[23]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.897    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[23]_i_2_n_0
+    SLICE_X36Y17         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.997 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[27]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.997    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[27]_i_2_n_0
+    SLICE_X36Y18         CARRY4 (Prop_carry4_CI_O[3])
+                                                      0.262     8.259 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[31]_i_3/O[3]
+                         net (fo=4, estimated)        0.831     9.090    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[31]_i_3_n_4
+    SLICE_X33Y15         LUT4 (Prop_lut4_I1_O)        0.250     9.340 r  system_i/etm_ddr_0/inst/writer/fill_index[3]_i_26/O
+                         net (fo=1, routed)           0.000     9.340    system_i/etm_ddr_0/inst/writer/fill_index[3]_i_26_n_0
+    SLICE_X33Y15         CARRY4 (Prop_carry4_S[3]_CO[3])
+                                                      0.332     9.672 r  system_i/etm_ddr_0/inst/writer/fill_index_reg[3]_i_9/CO[3]
+                         net (fo=1, estimated)        0.000     9.672    system_i/etm_ddr_0/inst/writer/fill_index_reg[3]_i_9_n_0
+    SLICE_X33Y16         CARRY4 (Prop_carry4_CI_CO[0])
+                                                      0.216     9.888 f  system_i/etm_ddr_0/inst/writer/fill_index_reg[3]_i_5/CO[0]
+                         net (fo=4, estimated)        0.480    10.368    system_i/etm_ddr_0/inst/writer/error3
+    SLICE_X33Y17         LUT3 (Prop_lut3_I0_O)        0.309    10.677 f  system_i/etm_ddr_0/inst/writer/bank_bytes[1][7]_i_3/O
+                         net (fo=8, estimated)        0.392    11.069    system_i/etm_ddr_0/inst/writer/bank_bytes[1][7]_i_3_n_0
+    SLICE_X32Y20         LUT6 (Prop_lut6_I3_O)        0.105    11.174 r  system_i/etm_ddr_0/inst/writer/data_bank[2][63]_i_1/O
+                         net (fo=72, estimated)       0.528    11.702    system_i/etm_ddr_0/inst/writer/data_bank[2][63]_i_1_n_0
+    SLICE_X35Y20         LUT2 (Prop_lut2_I1_O)        0.105    11.807 r  system_i/etm_ddr_0/inst/writer/keep_bank[2][7]_i_1/O
+                         net (fo=8, estimated)        0.299    12.106    system_i/etm_ddr_0/inst/writer/keep_bank[2][7]_i_1_n_0
+    SLICE_X34Y21         FDSE                                         r  system_i/etm_ddr_0/inst/writer/keep_bank_reg[2][2]/S
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, estimated)        0.944     9.277    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.354 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=21300, estimated)    1.241    10.595    system_i/etm_ddr_0/inst/writer/clk
+    SLICE_X34Y21         FDSE                                         r  system_i/etm_ddr_0/inst/writer/keep_bank_reg[2][2]/C
+                         clock pessimism              0.186    10.781    
+                         clock uncertainty           -0.154    10.627    
+    SLICE_X34Y21         FDSE (Setup_fdse_C_S)       -0.423    10.204    system_i/etm_ddr_0/inst/writer/keep_bank_reg[2][2]
+  -------------------------------------------------------------------
+                         required time                         10.204    
+                         arrival time                         -12.106    
+  -------------------------------------------------------------------
+                         slack                                 -1.902    
+
+Slack (VIOLATED) :        -1.902ns  (required time - arrival time)
+  Source:                 system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[1]/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/etm_ddr_0/inst/writer/keep_bank_reg[2][3]/S
+                            (rising edge-triggered cell FDSE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        9.621ns  (logic 4.409ns (45.827%)  route 5.212ns (54.173%))
+  Logic Levels:           21  (CARRY4=12 LUT2=2 LUT3=1 LUT4=3 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.037ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.262ns = ( 10.595 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.485ns
+    Clock Pessimism Removal (CPR):    0.186ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, estimated)        0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=21300, estimated)    1.406     2.485    system_i/etm_ddr_0/inst/writer/clk
+    SLICE_X34Y10         FDCE                                         r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X34Y10         FDCE (Prop_fdce_C_Q)         0.398     2.883 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[1]/Q
+                         net (fo=6, estimated)        0.365     3.248    system_i/etm_ddr_0/inst/writer/accepted_bytes[1]
+    SLICE_X34Y11         LUT2 (Prop_lut2_I1_O)        0.234     3.482 r  system_i/etm_ddr_0/inst/writer/remaining_carry_i_3/O
+                         net (fo=1, routed)           0.000     3.482    system_i/etm_ddr_0/inst/writer_n_8
+    SLICE_X34Y11         CARRY4 (Prop_carry4_S[1]_CO[3])
+                                                      0.444     3.926 r  system_i/etm_ddr_0/inst/remaining_carry/CO[3]
+                         net (fo=1, estimated)        0.000     3.926    system_i/etm_ddr_0/inst/remaining_carry_n_0
+    SLICE_X34Y12         CARRY4 (Prop_carry4_CI_O[0])
+                                                      0.178     4.104 r  system_i/etm_ddr_0/inst/remaining_carry__0/O[0]
+                         net (fo=2, estimated)        0.696     4.800    system_i/etm_ddr_0/inst/writer/remaining[4]
+    SLICE_X32Y12         LUT4 (Prop_lut4_I0_O)        0.238     5.038 r  system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_8/O
+                         net (fo=1, estimated)        0.524     5.562    system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_8_n_0
+    SLICE_X35Y12         LUT6 (Prop_lut6_I0_O)        0.105     5.667 r  system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_5/O
+                         net (fo=1, estimated)        0.588     6.255    system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_5_n_0
+    SLICE_X37Y13         LUT5 (Prop_lut5_I3_O)        0.105     6.360 r  system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_3/O
+                         net (fo=41, estimated)       0.509     6.869    system_i/etm_ddr_0/inst/writer/stream_keep1
+    SLICE_X36Y11         LUT4 (Prop_lut4_I3_O)        0.105     6.974 r  system_i/etm_ddr_0/inst/writer/accepted_bytes[3]_i_6/O
+                         net (fo=1, routed)           0.000     6.974    system_i/etm_ddr_0/inst/writer/accepted_bytes[3]_i_6_n_0
+    SLICE_X36Y11         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.423     7.397 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[3]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.397    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[3]_i_2_n_0
+    SLICE_X36Y12         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.497 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[7]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.497    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[7]_i_2_n_0
+    SLICE_X36Y13         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.597 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[11]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.597    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[11]_i_2_n_0
+    SLICE_X36Y14         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.697 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[15]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.697    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[15]_i_2_n_0
+    SLICE_X36Y15         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.797 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[19]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.797    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[19]_i_2_n_0
+    SLICE_X36Y16         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.897 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[23]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.897    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[23]_i_2_n_0
+    SLICE_X36Y17         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.997 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[27]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.997    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[27]_i_2_n_0
+    SLICE_X36Y18         CARRY4 (Prop_carry4_CI_O[3])
+                                                      0.262     8.259 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[31]_i_3/O[3]
+                         net (fo=4, estimated)        0.831     9.090    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[31]_i_3_n_4
+    SLICE_X33Y15         LUT4 (Prop_lut4_I1_O)        0.250     9.340 r  system_i/etm_ddr_0/inst/writer/fill_index[3]_i_26/O
+                         net (fo=1, routed)           0.000     9.340    system_i/etm_ddr_0/inst/writer/fill_index[3]_i_26_n_0
+    SLICE_X33Y15         CARRY4 (Prop_carry4_S[3]_CO[3])
+                                                      0.332     9.672 r  system_i/etm_ddr_0/inst/writer/fill_index_reg[3]_i_9/CO[3]
+                         net (fo=1, estimated)        0.000     9.672    system_i/etm_ddr_0/inst/writer/fill_index_reg[3]_i_9_n_0
+    SLICE_X33Y16         CARRY4 (Prop_carry4_CI_CO[0])
+                                                      0.216     9.888 f  system_i/etm_ddr_0/inst/writer/fill_index_reg[3]_i_5/CO[0]
+                         net (fo=4, estimated)        0.480    10.368    system_i/etm_ddr_0/inst/writer/error3
+    SLICE_X33Y17         LUT3 (Prop_lut3_I0_O)        0.309    10.677 f  system_i/etm_ddr_0/inst/writer/bank_bytes[1][7]_i_3/O
+                         net (fo=8, estimated)        0.392    11.069    system_i/etm_ddr_0/inst/writer/bank_bytes[1][7]_i_3_n_0
+    SLICE_X32Y20         LUT6 (Prop_lut6_I3_O)        0.105    11.174 r  system_i/etm_ddr_0/inst/writer/data_bank[2][63]_i_1/O
+                         net (fo=72, estimated)       0.528    11.702    system_i/etm_ddr_0/inst/writer/data_bank[2][63]_i_1_n_0
+    SLICE_X35Y20         LUT2 (Prop_lut2_I1_O)        0.105    11.807 r  system_i/etm_ddr_0/inst/writer/keep_bank[2][7]_i_1/O
+                         net (fo=8, estimated)        0.299    12.106    system_i/etm_ddr_0/inst/writer/keep_bank[2][7]_i_1_n_0
+    SLICE_X34Y21         FDSE                                         r  system_i/etm_ddr_0/inst/writer/keep_bank_reg[2][3]/S
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, estimated)        0.944     9.277    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.354 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=21300, estimated)    1.241    10.595    system_i/etm_ddr_0/inst/writer/clk
+    SLICE_X34Y21         FDSE                                         r  system_i/etm_ddr_0/inst/writer/keep_bank_reg[2][3]/C
+                         clock pessimism              0.186    10.781    
+                         clock uncertainty           -0.154    10.627    
+    SLICE_X34Y21         FDSE (Setup_fdse_C_S)       -0.423    10.204    system_i/etm_ddr_0/inst/writer/keep_bank_reg[2][3]
+  -------------------------------------------------------------------
+                         required time                         10.204    
+                         arrival time                         -12.106    
+  -------------------------------------------------------------------
+                         slack                                 -1.902    
+
+Slack (VIOLATED) :        -1.902ns  (required time - arrival time)
+  Source:                 system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[1]/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/etm_ddr_0/inst/writer/keep_bank_reg[2][4]/S
+                            (rising edge-triggered cell FDSE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        9.621ns  (logic 4.409ns (45.827%)  route 5.212ns (54.173%))
+  Logic Levels:           21  (CARRY4=12 LUT2=2 LUT3=1 LUT4=3 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.037ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.262ns = ( 10.595 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.485ns
+    Clock Pessimism Removal (CPR):    0.186ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, estimated)        0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=21300, estimated)    1.406     2.485    system_i/etm_ddr_0/inst/writer/clk
+    SLICE_X34Y10         FDCE                                         r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X34Y10         FDCE (Prop_fdce_C_Q)         0.398     2.883 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[1]/Q
+                         net (fo=6, estimated)        0.365     3.248    system_i/etm_ddr_0/inst/writer/accepted_bytes[1]
+    SLICE_X34Y11         LUT2 (Prop_lut2_I1_O)        0.234     3.482 r  system_i/etm_ddr_0/inst/writer/remaining_carry_i_3/O
+                         net (fo=1, routed)           0.000     3.482    system_i/etm_ddr_0/inst/writer_n_8
+    SLICE_X34Y11         CARRY4 (Prop_carry4_S[1]_CO[3])
+                                                      0.444     3.926 r  system_i/etm_ddr_0/inst/remaining_carry/CO[3]
+                         net (fo=1, estimated)        0.000     3.926    system_i/etm_ddr_0/inst/remaining_carry_n_0
+    SLICE_X34Y12         CARRY4 (Prop_carry4_CI_O[0])
+                                                      0.178     4.104 r  system_i/etm_ddr_0/inst/remaining_carry__0/O[0]
+                         net (fo=2, estimated)        0.696     4.800    system_i/etm_ddr_0/inst/writer/remaining[4]
+    SLICE_X32Y12         LUT4 (Prop_lut4_I0_O)        0.238     5.038 r  system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_8/O
+                         net (fo=1, estimated)        0.524     5.562    system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_8_n_0
+    SLICE_X35Y12         LUT6 (Prop_lut6_I0_O)        0.105     5.667 r  system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_5/O
+                         net (fo=1, estimated)        0.588     6.255    system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_5_n_0
+    SLICE_X37Y13         LUT5 (Prop_lut5_I3_O)        0.105     6.360 r  system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_3/O
+                         net (fo=41, estimated)       0.509     6.869    system_i/etm_ddr_0/inst/writer/stream_keep1
+    SLICE_X36Y11         LUT4 (Prop_lut4_I3_O)        0.105     6.974 r  system_i/etm_ddr_0/inst/writer/accepted_bytes[3]_i_6/O
+                         net (fo=1, routed)           0.000     6.974    system_i/etm_ddr_0/inst/writer/accepted_bytes[3]_i_6_n_0
+    SLICE_X36Y11         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.423     7.397 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[3]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.397    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[3]_i_2_n_0
+    SLICE_X36Y12         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.497 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[7]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.497    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[7]_i_2_n_0
+    SLICE_X36Y13         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.597 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[11]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.597    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[11]_i_2_n_0
+    SLICE_X36Y14         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.697 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[15]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.697    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[15]_i_2_n_0
+    SLICE_X36Y15         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.797 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[19]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.797    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[19]_i_2_n_0
+    SLICE_X36Y16         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.897 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[23]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.897    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[23]_i_2_n_0
+    SLICE_X36Y17         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.997 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[27]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.997    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[27]_i_2_n_0
+    SLICE_X36Y18         CARRY4 (Prop_carry4_CI_O[3])
+                                                      0.262     8.259 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[31]_i_3/O[3]
+                         net (fo=4, estimated)        0.831     9.090    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[31]_i_3_n_4
+    SLICE_X33Y15         LUT4 (Prop_lut4_I1_O)        0.250     9.340 r  system_i/etm_ddr_0/inst/writer/fill_index[3]_i_26/O
+                         net (fo=1, routed)           0.000     9.340    system_i/etm_ddr_0/inst/writer/fill_index[3]_i_26_n_0
+    SLICE_X33Y15         CARRY4 (Prop_carry4_S[3]_CO[3])
+                                                      0.332     9.672 r  system_i/etm_ddr_0/inst/writer/fill_index_reg[3]_i_9/CO[3]
+                         net (fo=1, estimated)        0.000     9.672    system_i/etm_ddr_0/inst/writer/fill_index_reg[3]_i_9_n_0
+    SLICE_X33Y16         CARRY4 (Prop_carry4_CI_CO[0])
+                                                      0.216     9.888 f  system_i/etm_ddr_0/inst/writer/fill_index_reg[3]_i_5/CO[0]
+                         net (fo=4, estimated)        0.480    10.368    system_i/etm_ddr_0/inst/writer/error3
+    SLICE_X33Y17         LUT3 (Prop_lut3_I0_O)        0.309    10.677 f  system_i/etm_ddr_0/inst/writer/bank_bytes[1][7]_i_3/O
+                         net (fo=8, estimated)        0.392    11.069    system_i/etm_ddr_0/inst/writer/bank_bytes[1][7]_i_3_n_0
+    SLICE_X32Y20         LUT6 (Prop_lut6_I3_O)        0.105    11.174 r  system_i/etm_ddr_0/inst/writer/data_bank[2][63]_i_1/O
+                         net (fo=72, estimated)       0.528    11.702    system_i/etm_ddr_0/inst/writer/data_bank[2][63]_i_1_n_0
+    SLICE_X35Y20         LUT2 (Prop_lut2_I1_O)        0.105    11.807 r  system_i/etm_ddr_0/inst/writer/keep_bank[2][7]_i_1/O
+                         net (fo=8, estimated)        0.299    12.106    system_i/etm_ddr_0/inst/writer/keep_bank[2][7]_i_1_n_0
+    SLICE_X34Y21         FDSE                                         r  system_i/etm_ddr_0/inst/writer/keep_bank_reg[2][4]/S
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, estimated)        0.944     9.277    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.354 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=21300, estimated)    1.241    10.595    system_i/etm_ddr_0/inst/writer/clk
+    SLICE_X34Y21         FDSE                                         r  system_i/etm_ddr_0/inst/writer/keep_bank_reg[2][4]/C
+                         clock pessimism              0.186    10.781    
+                         clock uncertainty           -0.154    10.627    
+    SLICE_X34Y21         FDSE (Setup_fdse_C_S)       -0.423    10.204    system_i/etm_ddr_0/inst/writer/keep_bank_reg[2][4]
+  -------------------------------------------------------------------
+                         required time                         10.204    
+                         arrival time                         -12.106    
+  -------------------------------------------------------------------
+                         slack                                 -1.902    
+
+Slack (VIOLATED) :        -1.902ns  (required time - arrival time)
+  Source:                 system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[1]/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/etm_ddr_0/inst/writer/keep_bank_reg[2][5]/S
+                            (rising edge-triggered cell FDSE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        9.621ns  (logic 4.409ns (45.827%)  route 5.212ns (54.173%))
+  Logic Levels:           21  (CARRY4=12 LUT2=2 LUT3=1 LUT4=3 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.037ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.262ns = ( 10.595 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.485ns
+    Clock Pessimism Removal (CPR):    0.186ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, estimated)        0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=21300, estimated)    1.406     2.485    system_i/etm_ddr_0/inst/writer/clk
+    SLICE_X34Y10         FDCE                                         r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X34Y10         FDCE (Prop_fdce_C_Q)         0.398     2.883 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[1]/Q
+                         net (fo=6, estimated)        0.365     3.248    system_i/etm_ddr_0/inst/writer/accepted_bytes[1]
+    SLICE_X34Y11         LUT2 (Prop_lut2_I1_O)        0.234     3.482 r  system_i/etm_ddr_0/inst/writer/remaining_carry_i_3/O
+                         net (fo=1, routed)           0.000     3.482    system_i/etm_ddr_0/inst/writer_n_8
+    SLICE_X34Y11         CARRY4 (Prop_carry4_S[1]_CO[3])
+                                                      0.444     3.926 r  system_i/etm_ddr_0/inst/remaining_carry/CO[3]
+                         net (fo=1, estimated)        0.000     3.926    system_i/etm_ddr_0/inst/remaining_carry_n_0
+    SLICE_X34Y12         CARRY4 (Prop_carry4_CI_O[0])
+                                                      0.178     4.104 r  system_i/etm_ddr_0/inst/remaining_carry__0/O[0]
+                         net (fo=2, estimated)        0.696     4.800    system_i/etm_ddr_0/inst/writer/remaining[4]
+    SLICE_X32Y12         LUT4 (Prop_lut4_I0_O)        0.238     5.038 r  system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_8/O
+                         net (fo=1, estimated)        0.524     5.562    system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_8_n_0
+    SLICE_X35Y12         LUT6 (Prop_lut6_I0_O)        0.105     5.667 r  system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_5/O
+                         net (fo=1, estimated)        0.588     6.255    system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_5_n_0
+    SLICE_X37Y13         LUT5 (Prop_lut5_I3_O)        0.105     6.360 r  system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_3/O
+                         net (fo=41, estimated)       0.509     6.869    system_i/etm_ddr_0/inst/writer/stream_keep1
+    SLICE_X36Y11         LUT4 (Prop_lut4_I3_O)        0.105     6.974 r  system_i/etm_ddr_0/inst/writer/accepted_bytes[3]_i_6/O
+                         net (fo=1, routed)           0.000     6.974    system_i/etm_ddr_0/inst/writer/accepted_bytes[3]_i_6_n_0
+    SLICE_X36Y11         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.423     7.397 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[3]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.397    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[3]_i_2_n_0
+    SLICE_X36Y12         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.497 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[7]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.497    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[7]_i_2_n_0
+    SLICE_X36Y13         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.597 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[11]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.597    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[11]_i_2_n_0
+    SLICE_X36Y14         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.697 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[15]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.697    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[15]_i_2_n_0
+    SLICE_X36Y15         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.797 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[19]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.797    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[19]_i_2_n_0
+    SLICE_X36Y16         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.897 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[23]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.897    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[23]_i_2_n_0
+    SLICE_X36Y17         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.997 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[27]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.997    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[27]_i_2_n_0
+    SLICE_X36Y18         CARRY4 (Prop_carry4_CI_O[3])
+                                                      0.262     8.259 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[31]_i_3/O[3]
+                         net (fo=4, estimated)        0.831     9.090    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[31]_i_3_n_4
+    SLICE_X33Y15         LUT4 (Prop_lut4_I1_O)        0.250     9.340 r  system_i/etm_ddr_0/inst/writer/fill_index[3]_i_26/O
+                         net (fo=1, routed)           0.000     9.340    system_i/etm_ddr_0/inst/writer/fill_index[3]_i_26_n_0
+    SLICE_X33Y15         CARRY4 (Prop_carry4_S[3]_CO[3])
+                                                      0.332     9.672 r  system_i/etm_ddr_0/inst/writer/fill_index_reg[3]_i_9/CO[3]
+                         net (fo=1, estimated)        0.000     9.672    system_i/etm_ddr_0/inst/writer/fill_index_reg[3]_i_9_n_0
+    SLICE_X33Y16         CARRY4 (Prop_carry4_CI_CO[0])
+                                                      0.216     9.888 f  system_i/etm_ddr_0/inst/writer/fill_index_reg[3]_i_5/CO[0]
+                         net (fo=4, estimated)        0.480    10.368    system_i/etm_ddr_0/inst/writer/error3
+    SLICE_X33Y17         LUT3 (Prop_lut3_I0_O)        0.309    10.677 f  system_i/etm_ddr_0/inst/writer/bank_bytes[1][7]_i_3/O
+                         net (fo=8, estimated)        0.392    11.069    system_i/etm_ddr_0/inst/writer/bank_bytes[1][7]_i_3_n_0
+    SLICE_X32Y20         LUT6 (Prop_lut6_I3_O)        0.105    11.174 r  system_i/etm_ddr_0/inst/writer/data_bank[2][63]_i_1/O
+                         net (fo=72, estimated)       0.528    11.702    system_i/etm_ddr_0/inst/writer/data_bank[2][63]_i_1_n_0
+    SLICE_X35Y20         LUT2 (Prop_lut2_I1_O)        0.105    11.807 r  system_i/etm_ddr_0/inst/writer/keep_bank[2][7]_i_1/O
+                         net (fo=8, estimated)        0.299    12.106    system_i/etm_ddr_0/inst/writer/keep_bank[2][7]_i_1_n_0
+    SLICE_X34Y21         FDSE                                         r  system_i/etm_ddr_0/inst/writer/keep_bank_reg[2][5]/S
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, estimated)        0.944     9.277    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.354 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=21300, estimated)    1.241    10.595    system_i/etm_ddr_0/inst/writer/clk
+    SLICE_X34Y21         FDSE                                         r  system_i/etm_ddr_0/inst/writer/keep_bank_reg[2][5]/C
+                         clock pessimism              0.186    10.781    
+                         clock uncertainty           -0.154    10.627    
+    SLICE_X34Y21         FDSE (Setup_fdse_C_S)       -0.423    10.204    system_i/etm_ddr_0/inst/writer/keep_bank_reg[2][5]
+  -------------------------------------------------------------------
+                         required time                         10.204    
+                         arrival time                         -12.106    
+  -------------------------------------------------------------------
+                         slack                                 -1.902    
+
+Slack (VIOLATED) :        -1.902ns  (required time - arrival time)
+  Source:                 system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[1]/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/etm_ddr_0/inst/writer/keep_bank_reg[2][6]/S
+                            (rising edge-triggered cell FDSE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        9.621ns  (logic 4.409ns (45.827%)  route 5.212ns (54.173%))
+  Logic Levels:           21  (CARRY4=12 LUT2=2 LUT3=1 LUT4=3 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.037ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.262ns = ( 10.595 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.485ns
+    Clock Pessimism Removal (CPR):    0.186ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, estimated)        0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=21300, estimated)    1.406     2.485    system_i/etm_ddr_0/inst/writer/clk
+    SLICE_X34Y10         FDCE                                         r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X34Y10         FDCE (Prop_fdce_C_Q)         0.398     2.883 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[1]/Q
+                         net (fo=6, estimated)        0.365     3.248    system_i/etm_ddr_0/inst/writer/accepted_bytes[1]
+    SLICE_X34Y11         LUT2 (Prop_lut2_I1_O)        0.234     3.482 r  system_i/etm_ddr_0/inst/writer/remaining_carry_i_3/O
+                         net (fo=1, routed)           0.000     3.482    system_i/etm_ddr_0/inst/writer_n_8
+    SLICE_X34Y11         CARRY4 (Prop_carry4_S[1]_CO[3])
+                                                      0.444     3.926 r  system_i/etm_ddr_0/inst/remaining_carry/CO[3]
+                         net (fo=1, estimated)        0.000     3.926    system_i/etm_ddr_0/inst/remaining_carry_n_0
+    SLICE_X34Y12         CARRY4 (Prop_carry4_CI_O[0])
+                                                      0.178     4.104 r  system_i/etm_ddr_0/inst/remaining_carry__0/O[0]
+                         net (fo=2, estimated)        0.696     4.800    system_i/etm_ddr_0/inst/writer/remaining[4]
+    SLICE_X32Y12         LUT4 (Prop_lut4_I0_O)        0.238     5.038 r  system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_8/O
+                         net (fo=1, estimated)        0.524     5.562    system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_8_n_0
+    SLICE_X35Y12         LUT6 (Prop_lut6_I0_O)        0.105     5.667 r  system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_5/O
+                         net (fo=1, estimated)        0.588     6.255    system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_5_n_0
+    SLICE_X37Y13         LUT5 (Prop_lut5_I3_O)        0.105     6.360 r  system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_3/O
+                         net (fo=41, estimated)       0.509     6.869    system_i/etm_ddr_0/inst/writer/stream_keep1
+    SLICE_X36Y11         LUT4 (Prop_lut4_I3_O)        0.105     6.974 r  system_i/etm_ddr_0/inst/writer/accepted_bytes[3]_i_6/O
+                         net (fo=1, routed)           0.000     6.974    system_i/etm_ddr_0/inst/writer/accepted_bytes[3]_i_6_n_0
+    SLICE_X36Y11         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.423     7.397 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[3]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.397    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[3]_i_2_n_0
+    SLICE_X36Y12         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.497 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[7]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.497    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[7]_i_2_n_0
+    SLICE_X36Y13         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.597 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[11]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.597    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[11]_i_2_n_0
+    SLICE_X36Y14         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.697 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[15]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.697    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[15]_i_2_n_0
+    SLICE_X36Y15         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.797 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[19]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.797    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[19]_i_2_n_0
+    SLICE_X36Y16         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.897 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[23]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.897    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[23]_i_2_n_0
+    SLICE_X36Y17         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.997 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[27]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.997    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[27]_i_2_n_0
+    SLICE_X36Y18         CARRY4 (Prop_carry4_CI_O[3])
+                                                      0.262     8.259 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[31]_i_3/O[3]
+                         net (fo=4, estimated)        0.831     9.090    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[31]_i_3_n_4
+    SLICE_X33Y15         LUT4 (Prop_lut4_I1_O)        0.250     9.340 r  system_i/etm_ddr_0/inst/writer/fill_index[3]_i_26/O
+                         net (fo=1, routed)           0.000     9.340    system_i/etm_ddr_0/inst/writer/fill_index[3]_i_26_n_0
+    SLICE_X33Y15         CARRY4 (Prop_carry4_S[3]_CO[3])
+                                                      0.332     9.672 r  system_i/etm_ddr_0/inst/writer/fill_index_reg[3]_i_9/CO[3]
+                         net (fo=1, estimated)        0.000     9.672    system_i/etm_ddr_0/inst/writer/fill_index_reg[3]_i_9_n_0
+    SLICE_X33Y16         CARRY4 (Prop_carry4_CI_CO[0])
+                                                      0.216     9.888 f  system_i/etm_ddr_0/inst/writer/fill_index_reg[3]_i_5/CO[0]
+                         net (fo=4, estimated)        0.480    10.368    system_i/etm_ddr_0/inst/writer/error3
+    SLICE_X33Y17         LUT3 (Prop_lut3_I0_O)        0.309    10.677 f  system_i/etm_ddr_0/inst/writer/bank_bytes[1][7]_i_3/O
+                         net (fo=8, estimated)        0.392    11.069    system_i/etm_ddr_0/inst/writer/bank_bytes[1][7]_i_3_n_0
+    SLICE_X32Y20         LUT6 (Prop_lut6_I3_O)        0.105    11.174 r  system_i/etm_ddr_0/inst/writer/data_bank[2][63]_i_1/O
+                         net (fo=72, estimated)       0.528    11.702    system_i/etm_ddr_0/inst/writer/data_bank[2][63]_i_1_n_0
+    SLICE_X35Y20         LUT2 (Prop_lut2_I1_O)        0.105    11.807 r  system_i/etm_ddr_0/inst/writer/keep_bank[2][7]_i_1/O
+                         net (fo=8, estimated)        0.299    12.106    system_i/etm_ddr_0/inst/writer/keep_bank[2][7]_i_1_n_0
+    SLICE_X34Y21         FDSE                                         r  system_i/etm_ddr_0/inst/writer/keep_bank_reg[2][6]/S
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, estimated)        0.944     9.277    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.354 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=21300, estimated)    1.241    10.595    system_i/etm_ddr_0/inst/writer/clk
+    SLICE_X34Y21         FDSE                                         r  system_i/etm_ddr_0/inst/writer/keep_bank_reg[2][6]/C
+                         clock pessimism              0.186    10.781    
+                         clock uncertainty           -0.154    10.627    
+    SLICE_X34Y21         FDSE (Setup_fdse_C_S)       -0.423    10.204    system_i/etm_ddr_0/inst/writer/keep_bank_reg[2][6]
+  -------------------------------------------------------------------
+                         required time                         10.204    
+                         arrival time                         -12.106    
+  -------------------------------------------------------------------
+                         slack                                 -1.902    
+
+Slack (VIOLATED) :        -1.902ns  (required time - arrival time)
+  Source:                 system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[1]/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/etm_ddr_0/inst/writer/keep_bank_reg[2][7]/S
+                            (rising edge-triggered cell FDSE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        9.621ns  (logic 4.409ns (45.827%)  route 5.212ns (54.173%))
+  Logic Levels:           21  (CARRY4=12 LUT2=2 LUT3=1 LUT4=3 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.037ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.262ns = ( 10.595 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.485ns
+    Clock Pessimism Removal (CPR):    0.186ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, estimated)        0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=21300, estimated)    1.406     2.485    system_i/etm_ddr_0/inst/writer/clk
+    SLICE_X34Y10         FDCE                                         r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X34Y10         FDCE (Prop_fdce_C_Q)         0.398     2.883 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[1]/Q
+                         net (fo=6, estimated)        0.365     3.248    system_i/etm_ddr_0/inst/writer/accepted_bytes[1]
+    SLICE_X34Y11         LUT2 (Prop_lut2_I1_O)        0.234     3.482 r  system_i/etm_ddr_0/inst/writer/remaining_carry_i_3/O
+                         net (fo=1, routed)           0.000     3.482    system_i/etm_ddr_0/inst/writer_n_8
+    SLICE_X34Y11         CARRY4 (Prop_carry4_S[1]_CO[3])
+                                                      0.444     3.926 r  system_i/etm_ddr_0/inst/remaining_carry/CO[3]
+                         net (fo=1, estimated)        0.000     3.926    system_i/etm_ddr_0/inst/remaining_carry_n_0
+    SLICE_X34Y12         CARRY4 (Prop_carry4_CI_O[0])
+                                                      0.178     4.104 r  system_i/etm_ddr_0/inst/remaining_carry__0/O[0]
+                         net (fo=2, estimated)        0.696     4.800    system_i/etm_ddr_0/inst/writer/remaining[4]
+    SLICE_X32Y12         LUT4 (Prop_lut4_I0_O)        0.238     5.038 r  system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_8/O
+                         net (fo=1, estimated)        0.524     5.562    system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_8_n_0
+    SLICE_X35Y12         LUT6 (Prop_lut6_I0_O)        0.105     5.667 r  system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_5/O
+                         net (fo=1, estimated)        0.588     6.255    system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_5_n_0
+    SLICE_X37Y13         LUT5 (Prop_lut5_I3_O)        0.105     6.360 r  system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_3/O
+                         net (fo=41, estimated)       0.509     6.869    system_i/etm_ddr_0/inst/writer/stream_keep1
+    SLICE_X36Y11         LUT4 (Prop_lut4_I3_O)        0.105     6.974 r  system_i/etm_ddr_0/inst/writer/accepted_bytes[3]_i_6/O
+                         net (fo=1, routed)           0.000     6.974    system_i/etm_ddr_0/inst/writer/accepted_bytes[3]_i_6_n_0
+    SLICE_X36Y11         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.423     7.397 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[3]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.397    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[3]_i_2_n_0
+    SLICE_X36Y12         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.497 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[7]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.497    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[7]_i_2_n_0
+    SLICE_X36Y13         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.597 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[11]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.597    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[11]_i_2_n_0
+    SLICE_X36Y14         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.697 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[15]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.697    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[15]_i_2_n_0
+    SLICE_X36Y15         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.797 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[19]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.797    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[19]_i_2_n_0
+    SLICE_X36Y16         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.897 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[23]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.897    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[23]_i_2_n_0
+    SLICE_X36Y17         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.997 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[27]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.997    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[27]_i_2_n_0
+    SLICE_X36Y18         CARRY4 (Prop_carry4_CI_O[3])
+                                                      0.262     8.259 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[31]_i_3/O[3]
+                         net (fo=4, estimated)        0.831     9.090    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[31]_i_3_n_4
+    SLICE_X33Y15         LUT4 (Prop_lut4_I1_O)        0.250     9.340 r  system_i/etm_ddr_0/inst/writer/fill_index[3]_i_26/O
+                         net (fo=1, routed)           0.000     9.340    system_i/etm_ddr_0/inst/writer/fill_index[3]_i_26_n_0
+    SLICE_X33Y15         CARRY4 (Prop_carry4_S[3]_CO[3])
+                                                      0.332     9.672 r  system_i/etm_ddr_0/inst/writer/fill_index_reg[3]_i_9/CO[3]
+                         net (fo=1, estimated)        0.000     9.672    system_i/etm_ddr_0/inst/writer/fill_index_reg[3]_i_9_n_0
+    SLICE_X33Y16         CARRY4 (Prop_carry4_CI_CO[0])
+                                                      0.216     9.888 f  system_i/etm_ddr_0/inst/writer/fill_index_reg[3]_i_5/CO[0]
+                         net (fo=4, estimated)        0.480    10.368    system_i/etm_ddr_0/inst/writer/error3
+    SLICE_X33Y17         LUT3 (Prop_lut3_I0_O)        0.309    10.677 f  system_i/etm_ddr_0/inst/writer/bank_bytes[1][7]_i_3/O
+                         net (fo=8, estimated)        0.392    11.069    system_i/etm_ddr_0/inst/writer/bank_bytes[1][7]_i_3_n_0
+    SLICE_X32Y20         LUT6 (Prop_lut6_I3_O)        0.105    11.174 r  system_i/etm_ddr_0/inst/writer/data_bank[2][63]_i_1/O
+                         net (fo=72, estimated)       0.528    11.702    system_i/etm_ddr_0/inst/writer/data_bank[2][63]_i_1_n_0
+    SLICE_X35Y20         LUT2 (Prop_lut2_I1_O)        0.105    11.807 r  system_i/etm_ddr_0/inst/writer/keep_bank[2][7]_i_1/O
+                         net (fo=8, estimated)        0.299    12.106    system_i/etm_ddr_0/inst/writer/keep_bank[2][7]_i_1_n_0
+    SLICE_X34Y21         FDSE                                         r  system_i/etm_ddr_0/inst/writer/keep_bank_reg[2][7]/S
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, estimated)        0.944     9.277    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.354 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=21300, estimated)    1.241    10.595    system_i/etm_ddr_0/inst/writer/clk
+    SLICE_X34Y21         FDSE                                         r  system_i/etm_ddr_0/inst/writer/keep_bank_reg[2][7]/C
+                         clock pessimism              0.186    10.781    
+                         clock uncertainty           -0.154    10.627    
+    SLICE_X34Y21         FDSE (Setup_fdse_C_S)       -0.423    10.204    system_i/etm_ddr_0/inst/writer/keep_bank_reg[2][7]
+  -------------------------------------------------------------------
+                         required time                         10.204    
+                         arrival time                         -12.106    
+  -------------------------------------------------------------------
+                         slack                                 -1.902    
+
+Slack (VIOLATED) :        -1.823ns  (required time - arrival time)
+  Source:                 system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[1]/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/etm_ddr_0/inst/writer/keep_bank_reg[26][0]/S
+                            (rising edge-triggered cell FDSE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        9.579ns  (logic 4.409ns (46.028%)  route 5.170ns (53.972%))
+  Logic Levels:           21  (CARRY4=12 LUT2=2 LUT3=1 LUT4=3 LUT5=1 LUT6=2)
+  Clock Path Skew:        0.000ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.330ns = ( 10.663 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.485ns
+    Clock Pessimism Removal (CPR):    0.155ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, estimated)        0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=21300, estimated)    1.406     2.485    system_i/etm_ddr_0/inst/writer/clk
+    SLICE_X34Y10         FDCE                                         r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X34Y10         FDCE (Prop_fdce_C_Q)         0.398     2.883 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[1]/Q
+                         net (fo=6, estimated)        0.365     3.248    system_i/etm_ddr_0/inst/writer/accepted_bytes[1]
+    SLICE_X34Y11         LUT2 (Prop_lut2_I1_O)        0.234     3.482 r  system_i/etm_ddr_0/inst/writer/remaining_carry_i_3/O
+                         net (fo=1, routed)           0.000     3.482    system_i/etm_ddr_0/inst/writer_n_8
+    SLICE_X34Y11         CARRY4 (Prop_carry4_S[1]_CO[3])
+                                                      0.444     3.926 r  system_i/etm_ddr_0/inst/remaining_carry/CO[3]
+                         net (fo=1, estimated)        0.000     3.926    system_i/etm_ddr_0/inst/remaining_carry_n_0
+    SLICE_X34Y12         CARRY4 (Prop_carry4_CI_O[0])
+                                                      0.178     4.104 r  system_i/etm_ddr_0/inst/remaining_carry__0/O[0]
+                         net (fo=2, estimated)        0.696     4.800    system_i/etm_ddr_0/inst/writer/remaining[4]
+    SLICE_X32Y12         LUT4 (Prop_lut4_I0_O)        0.238     5.038 r  system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_8/O
+                         net (fo=1, estimated)        0.524     5.562    system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_8_n_0
+    SLICE_X35Y12         LUT6 (Prop_lut6_I0_O)        0.105     5.667 r  system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_5/O
+                         net (fo=1, estimated)        0.588     6.255    system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_5_n_0
+    SLICE_X37Y13         LUT5 (Prop_lut5_I3_O)        0.105     6.360 r  system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_3/O
+                         net (fo=41, estimated)       0.509     6.869    system_i/etm_ddr_0/inst/writer/stream_keep1
+    SLICE_X36Y11         LUT4 (Prop_lut4_I3_O)        0.105     6.974 r  system_i/etm_ddr_0/inst/writer/accepted_bytes[3]_i_6/O
+                         net (fo=1, routed)           0.000     6.974    system_i/etm_ddr_0/inst/writer/accepted_bytes[3]_i_6_n_0
+    SLICE_X36Y11         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.423     7.397 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[3]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.397    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[3]_i_2_n_0
+    SLICE_X36Y12         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.497 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[7]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.497    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[7]_i_2_n_0
+    SLICE_X36Y13         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.597 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[11]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.597    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[11]_i_2_n_0
+    SLICE_X36Y14         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.697 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[15]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.697    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[15]_i_2_n_0
+    SLICE_X36Y15         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.797 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[19]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.797    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[19]_i_2_n_0
+    SLICE_X36Y16         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.897 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[23]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.897    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[23]_i_2_n_0
+    SLICE_X36Y17         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.997 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[27]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.997    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[27]_i_2_n_0
+    SLICE_X36Y18         CARRY4 (Prop_carry4_CI_O[3])
+                                                      0.262     8.259 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[31]_i_3/O[3]
+                         net (fo=4, estimated)        0.831     9.090    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[31]_i_3_n_4
+    SLICE_X33Y15         LUT4 (Prop_lut4_I1_O)        0.250     9.340 r  system_i/etm_ddr_0/inst/writer/fill_index[3]_i_26/O
+                         net (fo=1, routed)           0.000     9.340    system_i/etm_ddr_0/inst/writer/fill_index[3]_i_26_n_0
+    SLICE_X33Y15         CARRY4 (Prop_carry4_S[3]_CO[3])
+                                                      0.332     9.672 r  system_i/etm_ddr_0/inst/writer/fill_index_reg[3]_i_9/CO[3]
+                         net (fo=1, estimated)        0.000     9.672    system_i/etm_ddr_0/inst/writer/fill_index_reg[3]_i_9_n_0
+    SLICE_X33Y16         CARRY4 (Prop_carry4_CI_CO[0])
+                                                      0.216     9.888 f  system_i/etm_ddr_0/inst/writer/fill_index_reg[3]_i_5/CO[0]
+                         net (fo=4, estimated)        0.480    10.368    system_i/etm_ddr_0/inst/writer/error3
+    SLICE_X33Y17         LUT3 (Prop_lut3_I0_O)        0.309    10.677 f  system_i/etm_ddr_0/inst/writer/bank_bytes[1][7]_i_3/O
+                         net (fo=8, estimated)        0.262    10.939    system_i/etm_ddr_0/inst/writer/bank_bytes[1][7]_i_3_n_0
+    SLICE_X33Y18         LUT6 (Prop_lut6_I5_O)        0.105    11.044 r  system_i/etm_ddr_0/inst/writer/data_bank[26][63]_i_1/O
+                         net (fo=72, estimated)       0.611    11.655    system_i/etm_ddr_0/inst/writer/data_bank[26][63]_i_1_n_0
+    SLICE_X31Y19         LUT2 (Prop_lut2_I1_O)        0.105    11.760 r  system_i/etm_ddr_0/inst/writer/keep_bank[26][7]_i_1/O
+                         net (fo=8, estimated)        0.304    12.064    system_i/etm_ddr_0/inst/writer/keep_bank[26][7]_i_1_n_0
+    SLICE_X30Y18         FDSE                                         r  system_i/etm_ddr_0/inst/writer/keep_bank_reg[26][0]/S
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, estimated)        0.944     9.277    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.354 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=21300, estimated)    1.309    10.663    system_i/etm_ddr_0/inst/writer/clk
+    SLICE_X30Y18         FDSE                                         r  system_i/etm_ddr_0/inst/writer/keep_bank_reg[26][0]/C
+                         clock pessimism              0.155    10.818    
+                         clock uncertainty           -0.154    10.664    
+    SLICE_X30Y18         FDSE (Setup_fdse_C_S)       -0.423    10.241    system_i/etm_ddr_0/inst/writer/keep_bank_reg[26][0]
+  -------------------------------------------------------------------
+                         required time                         10.241    
+                         arrival time                         -12.064    
+  -------------------------------------------------------------------
+                         slack                                 -1.823    
+
+Slack (VIOLATED) :        -1.823ns  (required time - arrival time)
+  Source:                 system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[1]/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/etm_ddr_0/inst/writer/keep_bank_reg[26][1]/S
+                            (rising edge-triggered cell FDSE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        9.579ns  (logic 4.409ns (46.028%)  route 5.170ns (53.972%))
+  Logic Levels:           21  (CARRY4=12 LUT2=2 LUT3=1 LUT4=3 LUT5=1 LUT6=2)
+  Clock Path Skew:        0.000ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.330ns = ( 10.663 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.485ns
+    Clock Pessimism Removal (CPR):    0.155ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, estimated)        0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=21300, estimated)    1.406     2.485    system_i/etm_ddr_0/inst/writer/clk
+    SLICE_X34Y10         FDCE                                         r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X34Y10         FDCE (Prop_fdce_C_Q)         0.398     2.883 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[1]/Q
+                         net (fo=6, estimated)        0.365     3.248    system_i/etm_ddr_0/inst/writer/accepted_bytes[1]
+    SLICE_X34Y11         LUT2 (Prop_lut2_I1_O)        0.234     3.482 r  system_i/etm_ddr_0/inst/writer/remaining_carry_i_3/O
+                         net (fo=1, routed)           0.000     3.482    system_i/etm_ddr_0/inst/writer_n_8
+    SLICE_X34Y11         CARRY4 (Prop_carry4_S[1]_CO[3])
+                                                      0.444     3.926 r  system_i/etm_ddr_0/inst/remaining_carry/CO[3]
+                         net (fo=1, estimated)        0.000     3.926    system_i/etm_ddr_0/inst/remaining_carry_n_0
+    SLICE_X34Y12         CARRY4 (Prop_carry4_CI_O[0])
+                                                      0.178     4.104 r  system_i/etm_ddr_0/inst/remaining_carry__0/O[0]
+                         net (fo=2, estimated)        0.696     4.800    system_i/etm_ddr_0/inst/writer/remaining[4]
+    SLICE_X32Y12         LUT4 (Prop_lut4_I0_O)        0.238     5.038 r  system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_8/O
+                         net (fo=1, estimated)        0.524     5.562    system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_8_n_0
+    SLICE_X35Y12         LUT6 (Prop_lut6_I0_O)        0.105     5.667 r  system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_5/O
+                         net (fo=1, estimated)        0.588     6.255    system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_5_n_0
+    SLICE_X37Y13         LUT5 (Prop_lut5_I3_O)        0.105     6.360 r  system_i/etm_ddr_0/inst/writer/keep_bank[31][7]_i_3/O
+                         net (fo=41, estimated)       0.509     6.869    system_i/etm_ddr_0/inst/writer/stream_keep1
+    SLICE_X36Y11         LUT4 (Prop_lut4_I3_O)        0.105     6.974 r  system_i/etm_ddr_0/inst/writer/accepted_bytes[3]_i_6/O
+                         net (fo=1, routed)           0.000     6.974    system_i/etm_ddr_0/inst/writer/accepted_bytes[3]_i_6_n_0
+    SLICE_X36Y11         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.423     7.397 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[3]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.397    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[3]_i_2_n_0
+    SLICE_X36Y12         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.497 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[7]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.497    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[7]_i_2_n_0
+    SLICE_X36Y13         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.597 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[11]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.597    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[11]_i_2_n_0
+    SLICE_X36Y14         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.697 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[15]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.697    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[15]_i_2_n_0
+    SLICE_X36Y15         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.797 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[19]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.797    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[19]_i_2_n_0
+    SLICE_X36Y16         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.897 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[23]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.897    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[23]_i_2_n_0
+    SLICE_X36Y17         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     7.997 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[27]_i_2/CO[3]
+                         net (fo=1, estimated)        0.000     7.997    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[27]_i_2_n_0
+    SLICE_X36Y18         CARRY4 (Prop_carry4_CI_O[3])
+                                                      0.262     8.259 r  system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[31]_i_3/O[3]
+                         net (fo=4, estimated)        0.831     9.090    system_i/etm_ddr_0/inst/writer/accepted_bytes_reg[31]_i_3_n_4
+    SLICE_X33Y15         LUT4 (Prop_lut4_I1_O)        0.250     9.340 r  system_i/etm_ddr_0/inst/writer/fill_index[3]_i_26/O
+                         net (fo=1, routed)           0.000     9.340    system_i/etm_ddr_0/inst/writer/fill_index[3]_i_26_n_0
+    SLICE_X33Y15         CARRY4 (Prop_carry4_S[3]_CO[3])
+                                                      0.332     9.672 r  system_i/etm_ddr_0/inst/writer/fill_index_reg[3]_i_9/CO[3]
+                         net (fo=1, estimated)        0.000     9.672    system_i/etm_ddr_0/inst/writer/fill_index_reg[3]_i_9_n_0
+    SLICE_X33Y16         CARRY4 (Prop_carry4_CI_CO[0])
+                                                      0.216     9.888 f  system_i/etm_ddr_0/inst/writer/fill_index_reg[3]_i_5/CO[0]
+                         net (fo=4, estimated)        0.480    10.368    system_i/etm_ddr_0/inst/writer/error3
+    SLICE_X33Y17         LUT3 (Prop_lut3_I0_O)        0.309    10.677 f  system_i/etm_ddr_0/inst/writer/bank_bytes[1][7]_i_3/O
+                         net (fo=8, estimated)        0.262    10.939    system_i/etm_ddr_0/inst/writer/bank_bytes[1][7]_i_3_n_0
+    SLICE_X33Y18         LUT6 (Prop_lut6_I5_O)        0.105    11.044 r  system_i/etm_ddr_0/inst/writer/data_bank[26][63]_i_1/O
+                         net (fo=72, estimated)       0.611    11.655    system_i/etm_ddr_0/inst/writer/data_bank[26][63]_i_1_n_0
+    SLICE_X31Y19         LUT2 (Prop_lut2_I1_O)        0.105    11.760 r  system_i/etm_ddr_0/inst/writer/keep_bank[26][7]_i_1/O
+                         net (fo=8, estimated)        0.304    12.064    system_i/etm_ddr_0/inst/writer/keep_bank[26][7]_i_1_n_0
+    SLICE_X30Y18         FDSE                                         r  system_i/etm_ddr_0/inst/writer/keep_bank_reg[26][1]/S
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, estimated)        0.944     9.277    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.354 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=21300, estimated)    1.309    10.663    system_i/etm_ddr_0/inst/writer/clk
+    SLICE_X30Y18         FDSE                                         r  system_i/etm_ddr_0/inst/writer/keep_bank_reg[26][1]/C
+                         clock pessimism              0.155    10.818    
+                         clock uncertainty           -0.154    10.664    
+    SLICE_X30Y18         FDSE (Setup_fdse_C_S)       -0.423    10.241    system_i/etm_ddr_0/inst/writer/keep_bank_reg[26][1]
+  -------------------------------------------------------------------
+                         required time                         10.241    
+                         arrival time                         -12.064    
+  -------------------------------------------------------------------
+                         slack                                 -1.823    
+
+
+
+
