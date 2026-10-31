@@ -161,6 +161,10 @@ def capture(argv):
             resolve_entry(args.elf, args.entry)
         except (ValueError, OSError) as error:
             return fail('capture', str(error), 2, started)
+    if not args.no_decode:
+        sys.path.insert(0, str(TOOLS))
+        from engine_profile import activate_native_profile
+        activate_native_profile()
     status = zynq_status()
     if not status['ready']:
         return fail('capture', 'Zynq ETM 接收端未就绪：' + status['message'], 4, started, status)

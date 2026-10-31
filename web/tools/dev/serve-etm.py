@@ -102,7 +102,8 @@ def create_application(etm_root,serial_root=ROOT,cli_token_file=None,native_pair
         if urlsplit('//'+request.host).hostname not in ('127.0.0.1','localhost','::1'):abort(403)
     @app.route('/etm-launcher.json')
     def launcher_info():
-        return jsonify(protocol=1,serialRoot=str(serial_root),etmRoot=str(etm_root))
+        return jsonify(protocol=1,serialRoot=str(serial_root),etmRoot=str(etm_root),
+                       decodeEngineProfile=backend.current_profile())
     @app.route('/',defaults={'path':'index.html'})
     @app.route('/<path:path>')
     def static_file(path):

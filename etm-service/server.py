@@ -23,6 +23,8 @@ from flask import Flask, jsonify, request, send_file, send_from_directory, abort
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT / 'tools'))
 sys.path.insert(0, str(ROOT / 'tools/la'))
+from engine_profile import activate_native_profile, current_profile
+ENGINE_PROFILE = activate_native_profile()
 from decode_trace import DEFAULT_CONFIG, Image, decode_capture, decoder_config
 from flow_analysis import enrich
 import zynq_la
@@ -387,6 +389,7 @@ def health():
     """
     from native_index import executable
     return jsonify(ok=True, captureProtocol=CAPTURE_PROTOCOL,
+                   decodeEngineProfile=current_profile(),
                    decoder=(ROOT / 'build-native/etm_decode.exe').exists(),
                    nativeIndexer=bool(executable()),captureFormats=['bin'],
                    frontend=frontend_accel())

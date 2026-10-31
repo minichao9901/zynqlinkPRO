@@ -70,6 +70,8 @@ class ToolboxTests(unittest.TestCase):
             self.assertIn(b'__etmPageErrors', embedded.data)
             self.assertEqual(client.get('/etm/integration.json').json['backend'], 'zynq')
             self.assertEqual(client.get('/etm/api/health').status_code, 200)
+            self.assertEqual(client.get('/etm/api/health').json['decodeEngineProfile']['name'],'native')
+            self.assertEqual(client.get('/etm-launcher.json').json['decodeEngineProfile']['settings']['ETM_NATIVE_FORMAT'],'binary')
             with client.get('/etm/app/view.js') as response:
                 self.assertEqual(response.status_code, 200)
             self.assertEqual(client.get('/.git/config').status_code, 404)
