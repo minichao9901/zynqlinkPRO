@@ -174,6 +174,9 @@ accepted_bytes经32bit剩余量减法、动态TKEEP与预算判断到缓冲存�
 
 ### DDR HP1候选已上板，但数据完整性与启动稳定性未通过
 
+> 后续更正：本段的DDR“读回不匹配”采用了CPU上下文，混入旧缓存线，不能作为物理DDR写坏或FCLK上限的证据。
+> 原始数据保留用于审计，当前物理内存结论见后面的“物理AP0对照更正”。启动时USB缺失仍单独待验。
+
 本轮实际配对保留在`prebuilt/etm-ddr-pilot-raw4-20261101/`：bit SHA
 `6690d8dd214be1986b7f89f64f93096b99aa7a5b30fb93b65e7f51919577c720`，
 PS ELF SHA `ab7c097764bea91272783ec59a51d200bf154ba5d4f9adbf1e7350466c17947f`。
@@ -208,6 +211,39 @@ PS执行段71,620B匹配，候选全部已分配PROGBITS及地址也与前诊断
 板上已经恢复上一诊断配对086333/b07980，USB重新枚举、执行段读回通过，当前初始FCLK99,999,999Hz。
 Golden/recovery保持原文件；无Flash写入/target RCC改动。1～2秒ETM DDR采集、逐线校准及最终Web压力验收仍未完成。
 [完整结果、压缩输入与实际加载记录](validation/etm-ddr-pilot-board-20261101/result.json)。
+
+### 物理AP0对照更正：40轮DDR模式数据通过
+
+先增加不重载、不换频的连续模式测试，计划20轮。CPU上下文读回第1轮正确，第2轮报告102,504个u32错误；
+前后FCLK均实读99,999,999Hz、采集ID正确、硬件已完成。
+进一步比较发现这些坏值全部是同地址的上一轮内容，并完整落在32字节缓存线：12813条整线旧值，没有半条旧线或其它错位数据。
+不重录、不改内存、不切时钟，只把同一已完成采集改用APU的MEM-AP0物理读取，1MiB全部匹配原期望SHA。
+因此这次失败来自CPU上下文读回路径的缓存影响，不能归因PL写入或时钟切换。
+尚未定位CPU与调试器具体哪一缓存层提供了旧线，不把这一点写成已定根因。
+
+SDK 2018.3本机xsdb.tcl与[AMD mrd说明](https://docs.amd.com/r/2020.2-English/ug1400-vitis-embedded/mrd)
+确认`-address-space AP0`选择MEM-AP；`-force`只覆盖地址访问保护，并不是绕过CPU缓存。
+新增`tools/zynq_memory.py`，DDR模式读回、保护字、OCM身份核查和地址别名实验改用显式物理AP0路径；
+MMIO写使用cache-sync bypass，避免通过CPU上下文同步旧缓存线覆盖新的DMA数据。
+验收脚本现在核对本轮新采集ID、每轮前后实测FCLK、完整数据SHA和相邻保护字，保存失败阶段并在首个失败停止，不自动补过。
+
+修正后的两组测试均使用同一6690d8/ab7c09配对，分别加载一次、轮间不重载/不复位并改变seed：
+
+| 内部PL FCLK实读 | 连续轮数/数据 | 完整数据、SHA、保护字 | 硬件计时的已校验模式数据速率中位 |
+|---|---|---|---:|
+| 99,999,999Hz，不调用DAP换频 | 20 × 1MiB | 全通过 | 328.187 MB/s |
+| 119,999,998Hz，正常DAP设置后 | 20 × 1MiB | 全通过 | 374.614 MB/s |
+
+速率只表示已知模式在PL→DDR通路中从开始到最后OKAY B的硬件周期，数据另外通过物理读回全量核对。
+它不是USB速度、ETM TRACECLK或已完成的1～2秒采集能力，也不证明512MiB全容量或CPU/USB缓存一致性。
+此前按CPU上下文读取的四个地址样点也已物理AP0重测：四组不同模式独立读回、原16B逐点恢复验证通过；
+71,620B OCM执行段同样物理读取后与配套ELF匹配。
+
+原DDR读回“错位”和换频的关联需要撤回，不能据旧缓存数据要求降低既有120MHz工作点；未修改RTL/FCLK实现来迎合错误判据。
+最初那次USB缺失/PS进入_exit的启动现象仍然保留，不能由缓存对照直接销案。
+候选暂不晋升Golden；接下来验证完整保留区和重复加载，再接ETM帧/硬件窗口/采后USB下载。
+[缓存对照与40轮结果](validation/etm-ddr-physical-readback-20261101/result.json)、
+[同一采集的两种读取路径](validation/etm-ddr-physical-readback-20261101/cache-comparison.json)。
 
 DDR前端已有隔离的实验RTL：`fpga/experiments/etm_ddr/etm_ddr_packetizer.v`，尚未加入生产BD或本轮ETD1构建输入。
 它把带有效长度/EOF的128bit帧转为64bit AXIS，保留最后一拍直到后续数据或EOF确定，正确产生TKEEP/TLAST；

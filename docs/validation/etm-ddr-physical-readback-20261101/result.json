@@ -1,0 +1,29 @@
+{
+  "hardware": true,
+  "traceCapture": false,
+  "flashWrites": false,
+  "physicalReadback": true,
+  "campaigns": [
+    {
+      "mode": "current",
+      "rounds": 20,
+      "bytesPerRound": 1048576,
+      "fclkHz": [
+        99999999
+      ],
+      "verifiedPatternMBpsMedian": 328.1866348407354
+    },
+    {
+      "mode": "dap",
+      "rounds": 20,
+      "bytesPerRound": 1048576,
+      "fclkHz": [
+        119999998
+      ],
+      "verifiedPatternMBpsMedian": 374.61406383889965
+    }
+  ],
+  "scope": "Two one-load/no-reset campaigns, 40 total 1MiB address-dependent pattern writes at measured clocks with physical AP0 data/guard verification. Not full-capacity, USB throughput, CPU cache-coherence or ETM capture acceptance.",
+  "pairBitSha256": "6690d8dd214be1986b7f89f64f93096b99aa7a5b30fb93b65e7f51919577c720",
+  "pairElfSha256": "ab7c097764bea91272783ec59a51d200bf154ba5d4f9adbf1e7350466c17947f"
+}

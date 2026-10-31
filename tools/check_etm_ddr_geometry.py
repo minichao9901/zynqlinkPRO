@@ -26,12 +26,12 @@ def script_for(elf):
             if address<hi and lo<address+16:raise ValueError('Test address overlaps allocated ELF section '+name)
     addresses=' '.join(hex(a) for a in ADDRESSES)
     return '''connect -url tcp:127.0.0.1:3121
-targets -set -filter {name =~ "ARM Cortex-A9 MPCore #0*"}
+targets -set -filter {name =~ "APU"}
 set addresses {'''+addresses+'''}
 set backup [dict create]
 # Gather all backups before the first write. No CPU reset, stop or continue.
 foreach a $addresses {
-  set words [mrd -force -value $a 4]
+  set words [mrd -address-space AP0 -force -value $a 4]
   if {[llength $words]!=4} {error "Incomplete backup"}
   dict set backup $a $words
   puts "DDR_BACKUP $a $words"
@@ -41,11 +41,11 @@ set rc [catch {
   set i 0
   foreach a $addresses {
     for {set j 0} {$j<4} {incr j} {
-      mwr -force [expr {$a+4*$j}] [expr {0xa5190000 | ($i<<8) | $j}]
+      mwr -address-space AP0 -bypass-cache-sync -force [expr {$a+4*$j}] [expr {0xa5190000 | ($i<<8) | $j}]
     }
     incr i
   }
-  foreach a $addresses {puts "DDR_PATTERN $a [mrd -force -value $a 4]"}
+  foreach a $addresses {puts "DDR_PATTERN $a [mrd -address-space AP0 -force -value $a 4]"}
 } why]
 # Every sampled location is restored even when a write/read raised an error.
 # Aliased backups are equal because they were all collected before mutation.
@@ -53,12 +53,12 @@ set restore_errors {}
 foreach a [lreverse $addresses] {
   set j 0
   foreach word [dict get $backup $a] {
-    if {[catch {mwr -force [expr {$a+4*$j}] $word} msg]} {lappend restore_errors $msg}
+    if {[catch {mwr -address-space AP0 -bypass-cache-sync -force [expr {$a+4*$j}] $word} msg]} {lappend restore_errors $msg}
     incr j
   }
 }
 foreach a $addresses {
-  set restored [mrd -force -value $a 4]
+  set restored [mrd -address-space AP0 -force -value $a 4]
   puts "DDR_RESTORED $a $restored"
   if {$restored ne [dict get $backup $a]} {lappend restore_errors "Restore mismatch at $a"}
 }
@@ -85,7 +85,7 @@ def main(argv=None):
     report=dict(elfSha256=hashlib.sha256(a.elf.read_bytes()).hexdigest(),hardware=True,flashWrites=False,
                 cpuResetOrStop=False,addresses=[hex(x) for x in ADDRESSES],bytesPerAddress=16,
                 restored='DDR_RESTORE_VERIFIED' in log,exitCode=run.returncode,
-                writesAttempted='DDR_WRITE_BEGIN' in log,
+                writesAttempted='DDR_WRITE_BEGIN' in log,memoryAccess='physical MEM-AP0, cache-sync bypass on writes',
                 limitation='Four small samples only; not a full capacity, cache coherence or sustained DDR acceptance test')
     patterns={}
     for address,words in re.findall(r'DDR_PATTERN (0x[0-9a-fA-F]+) ([^\r\n]+)',log):

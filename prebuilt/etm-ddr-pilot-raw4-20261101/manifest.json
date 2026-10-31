@@ -1,5 +1,5 @@
 {
-  "status": "board-rejected-data-integrity-and-boot-stability-not-golden",
+  "status": "physical-memory-revalidation-in-progress-not-golden",
   "device": "xc7z020clg400-2",
   "rtlSourceRevision": "348d73a08948f4f35f2bffe223067e261b8f9511",
   "psSourceRevision": "f364085f680686e21185f3dba94853fa982baa5e",
@@ -67,7 +67,11 @@
   "boardResult": {
     "accepted": false,
     "evidence": "docs/validation/etm-ddr-pilot-board-20261101/result.json",
-    "onePatternPassDoesNotEstablishStability": true
+    "onePatternPassDoesNotEstablishStability": true,
+    "cpuContextReadbackDeprecated": true,
+    "physicalPattern40Passed": true,
+    "cacheCorrectionEvidence": "docs/validation/etm-ddr-physical-readback-20261101/result.json",
+    "startupAndFullBufferValidationPending": true
   },
   "sourceReceiptNote": "RTL receipt preserves the build-time snapshot, including then-current PS files for context. The later ps-build.json is authoritative for the paired PS source and ABSOLUTE linker fix.",
   "limitations": [

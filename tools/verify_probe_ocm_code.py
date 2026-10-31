@@ -7,6 +7,7 @@ from pathlib import Path
 import struct
 
 from probe_flash import Session
+from zynq_memory import PhysicalMemory
 
 
 def main():
@@ -26,10 +27,11 @@ def main():
     if not sections or any(s[3]+s[5]>0x30000 for s in sections):p.error('Executable sections must be in low OCM')
     end=max(s[3]+s[5] for s in sections)
     dest=a.out_dir.resolve();dest.mkdir(parents=True,exist_ok=False)
-    session=Session(dest,a.sdk,'tcp:127.0.0.1:3121')
+    session=PhysicalMemory(Session(dest,a.sdk,'tcp:127.0.0.1:3121'))
     report=dict(time_UTC=datetime.datetime.now(datetime.timezone.utc).isoformat(),elf=str(a.elf.resolve()),
                 elf_sha256=hashlib.sha256(blob).hexdigest(),downloads=False,probe_reset_or_continue=False,
-                expected_executable_bytes=sum(s[5] for s in sections),cycles=[],passed=False)
+                expected_executable_bytes=sum(s[5] for s in sections),cycles=[],passed=False,
+                memoryAccess='physical MEM-AP0; independent of CPU memory/cache context')
     output=dest/'result.json'
     try:
         report['boot_mode']=session.read_words(0xf800025c)[0]&15
@@ -53,7 +55,7 @@ def main():
                     assert row['GET_CONFIGURATION_before']==row['GET_CONFIGURATION_after']==[1]
                 finally:usb.util.dispose_resources(dev)
             image=dest/f'live_code_{cycle}.bin'
-            session.run('mrd -force -bin -file {'+image.as_posix()+f'}} 0 {(end+3)//4}\nputs CODE_READ')
+            session.run('physrd -force -bin -file {'+image.as_posix()+f'}} 0 {(end+3)//4}\nputs CODE_READ')
             live=image.read_bytes();diff=[];checked=[]
             for s in sections:
                 name=names[s[0]:].split(b'\0',1)[0].decode()
