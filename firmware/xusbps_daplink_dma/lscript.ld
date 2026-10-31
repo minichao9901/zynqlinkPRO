@@ -40,8 +40,8 @@ ENTRY(_vector_table)
 
 SECTIONS
 {
-__etm_ddr_base = ORIGIN(etm_capture_mem);
-__etm_ddr_end = ORIGIN(etm_capture_mem) + LENGTH(etm_capture_mem);
+__etm_ddr_base = ABSOLUTE(ORIGIN(etm_capture_mem));
+__etm_ddr_end = ABSOLUTE(ORIGIN(etm_capture_mem) + LENGTH(etm_capture_mem));
 ASSERT(ORIGIN(ps7_ddr_0) + LENGTH(ps7_ddr_0) <= __etm_ddr_base, "PS DDR overlaps ETM reservation")
 ASSERT(__etm_ddr_end <= ORIGIN(dap_trace_mem), "ETM reservation overlaps diagnostic trace memory")
 .text : {

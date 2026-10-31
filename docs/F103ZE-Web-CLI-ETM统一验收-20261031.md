@@ -168,6 +168,9 @@ accepted_bytes经32bit剩余量减法、动态TKEEP与预算判断到缓冲存�
 再启用已知模式，检查最终B响应计数、逐字节完整读回及SHA、相邻保护字，记录实际FCLK。
 普通Golden ELF缺少保留区符号时在任何硬件写入前拒绝；3项规划/保护测试和46项CLI回归通过。
 该脚本尚待通过新配对上板执行；JTAG读回速度不是USB吞吐，也不证明CPU缓存/USB下载已验收。
+第二轮bit已生成并通过120MHz STA（setup +0.284ns / hold +0.066ns，SWCLK launch 6.575ns）。
+首次配套ELF的边界值正确，但SECTIONS内普通赋值被链接器标为.text相对符号，
+硬件验收脚本的ABS检查在加载/写入前拒绝；已改用ABSOLUTE并重新构建PS ELF，不能绕过该检查。
 
 DDR前端已有隔离的实验RTL：`fpga/experiments/etm_ddr/etm_ddr_packetizer.v`，尚未加入生产BD或本轮ETD1构建输入。
 它把带有效长度/EOF的128bit帧转为64bit AXIS，保留最后一拍直到后续数据或EOF确定，正确产生TKEEP/TLAST；
