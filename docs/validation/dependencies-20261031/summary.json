@@ -1,0 +1,31 @@
+{
+  "scope": "Vendored dependencies + host path portability; offline clean clone validation only",
+  "tested_commit": "a9c61ddb4fc77ef06cfc5ab2d59d3137db20dcb5",
+  "dependency_files": 298,
+  "dependency_bytes": 7564424,
+  "components": [
+    "cm3-designstart-model",
+    "zynq-ps-bsp",
+    "vexriscv-jtag-model"
+  ],
+  "clean_clone": "git clone --depth1 --single-branch --branch main file:///E:/zynqlinkPRO into new independent directory",
+  "clone_reference_directories": [
+    "cortex_m3_on_xc7a100t",
+    "legacy_zynq",
+    "vexriscv"
+  ],
+  "git_blob_and_clone_SHA256": "PASS all298 inputs; matches docs/required-dependencies.json",
+  "accepted_BSP": "libxil.a SHA256 b31bd5a75096dfdba14dca67c78629983985ba55a9984c0afa6062d1030859e5, identical to Golden and recovery build manifests",
+  "production_PS_C_units_syntax_check": 20,
+  "BSP_archive_members": 102,
+  "Python_tests": 45,
+  "real_CM3_JTAG": "PASS rebuilt XSim snapshot using cloned34-file encrypted model",
+  "real_VexRiscv_TAP": "PASS IDCODE + repeated scan using cloned generated model",
+  "PL_synthesis_performed": false,
+  "PS_ELF_built": false,
+  "hardware_access": false,
+  "Golden_and_recovery_changed": false,
+  "remaining_local_research": "286 reference files; docs/not-in-git-files.txt",
+  "external_dependencies": "Vivado/XSim2018.3, SDK ARM compiler and documented host packages must be installed separately",
+  "Web_tests": 39
+}

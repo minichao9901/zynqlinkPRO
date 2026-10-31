@@ -1,17 +1,13 @@
-本机手动清理清单（只在本次commit/push成功后执行）
-不要删除 E:\zynqlinkPRO-private\flash-backups。它不在Git，存放原始Flash私有备份。
-不要误删 main/reference 下正在使用的真实CM3模型/BSP。
+本机手动清理清单（仅在commit/push成功后执行）
+不要删除 E:\zynqlinkPRO-private\flash-backups。原始Flash私有备份不在Git。
 
-A. 此前被工具策略拒绝永久递归删除，现已移出主目录：
+A. 此前被工具策略拒绝递归删除，已移出主目录的旧worktree残留：
 C:\Users\Administrator\zynqlinkPRO-retired\orbtrace-cm3-20261031
-Retired worktree residue; refs/history/needed files preserved; old locking services stopped
 
-B. 本轮维护临时目录，非工具拒绝；推送成功后可整体删除：
+B. 推送成功后可选删除的维护副本、临时克隆、缓存和日志：
 E:\zynqlinkPRO-maintenance\20261031-slim
-这里只剩维护副本/日志/临时验证数据；原始Flash备份已升至 E:\zynqlinkPRO-private\flash-backups。
-
-另外，本次依赖补全临时目录在推送成功后也可删除：
 E:\zynqlinkPRO-maintenance\20261031-dependencies
+重要交付、记录、来源及验证摘要已入main/Git；私有Flash备份已移至上述独立目录。
 
 C. 当前Git与本机研究文件：
 真实CM3 RTL、匹配BSP、main的VexRiscv模型已纳入Git，普通clone可取到；它们不是待删缓存。
