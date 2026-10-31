@@ -82,7 +82,7 @@ class Session:
 
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--image-dir', type=Path, default=ROOT/'prebuilt/20261031_orbtrace_opt_qspi_7020_120')
+    p.add_argument('--image-dir', type=Path, default=ROOT/'prebuilt/20261031_orbtrace_opt_qspi_usbfix_7020_120')
     p.add_argument('--sdk', type=Path, default=Path('E:/Xilinx/SDK/2018.3'))
     p.add_argument('--url', default='tcp:127.0.0.1:3121')
     p.add_argument('--out', type=Path)
