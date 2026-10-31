@@ -4,7 +4,7 @@
 - CM3默认目录reference/cortex_m3_on_xc7a100t下的34个RTL/include文件、上游许可证和README已纳入Git；文件身份见cm3-model.json。
 - PS默认BSP的include/lib/libsrc、Makefile与system.mss已纳入Git。libxil.a是必要的固定构建输入，其SHA-256与Golden及recovery的原构建清单一致；不提交可再生.o或SDK工作区元数据。
 - reference/vexriscv/vexriscv.v和上游许可证已纳入Git，供main已有的真实RISC-V TAP仿真使用。
-- reference/HFLink、hpm6800evk_rtt_kingst、xilinx_msc以及旧示例工程仍仅保留本地，正式构建/CM3仿真不依赖这些目录。
+- hpm6800evk_rtt_kingst、xilinx_msc以及旧示例工程仍仅保留本地，正式构建/CM3仿真不依赖这些目录。HFLink worktree和分支已按用户要求退役，reference/HFLink仅为待手动清理的旧参考副本，不再要求保留。
 - docs/required-dependencies.json列出全部298个必需依赖文件及SHA-256；普通git clone即可取得，无需子模块或Git LFS。运行python tools/verify_dependencies.py可严格离线检查完整性。
 - etm-service/native、vendor/OpenCSD-1.8.3、CMakeLists.txt及source-provenance保留原生重建源码。
 - etm-service/build-native仅部署5个当前EXE，不是CMake缓存。它们的PE直接依赖仅Windows KERNEL32/msvcrt。

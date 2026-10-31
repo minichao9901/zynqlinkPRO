@@ -35,29 +35,24 @@
   },
   "manual_delete_after_successful_push": [
     {
-      "path": "C:/Users/Administrator/zynqlinkPRO-retired/orbtrace-cm3-20261031",
-      "reason": "Retired worktree residue; refs/history/needed files preserved; old locking services stopped",
+      "path": "E:/zynqlinkPRO/reference/HFLink",
+      "reason": "Unused reference clone after user-authorized HFLink retirement; recursive-delete combination rejected by automatic policy review (blocked by policy, no detailed reason)",
       "tool_recursive_delete_rejected": true
-    },
-    {
-      "path": "E:\\zynqlinkPRO-maintenance\\20261031-slim",
-      "reason": "Completed maintenance staging, validation caches and detailed local logs; selected records/artifacts/evidence are in main/Git; private Flash backup moved out",
-      "tool_recursive_delete_rejected": false
-    },
-    {
-      "path": "E:/zynqlinkPRO-maintenance/20261031-dependencies",
-      "reason": "Dependency import/clone verification logs and temporary clone; optional cleanup after successful push",
-      "tool_recursive_delete_rejected": false
     }
   ],
   "do_not_delete": [
-    "E:/zynqlinkPRO-private/flash-backups",
     "E:/zynqlinkPRO/reference/cortex_m3_on_xc7a100t/cm3_core",
     "E:/zynqlinkPRO/prebuilt/golden",
     "E:/zynqlinkPRO/prebuilt/recovery",
     "E:/zynqlinkPRO/etm-service/records"
   ],
-  "other_worktree": "HFLink worktree still has its previously preserved uncommitted edits; outside this cleanup/push scope",
+  "other_worktree": null,
+  "retirement_20261031": {
+    "HFLink_worktree_and_branch": "User authorized deletion including uncommitted experiments; E:/zynqlinkPRO_hflink and local hflink-psusb removed; no remote branch existed",
+    "private_flash_backups": "User deleted E:/zynqlinkPRO-private and explicitly discarded original Flash backups; absence confirmed",
+    "required_dependencies": "All298 required inputs verified after retirement; Golden/recovery unchanged",
+    "remaining_HFLink_reference": "E:/zynqlinkPRO/reference/HFLink remains local; optional manual cleanup"
+  },
   "push_scope": "main plus this cleanup snapshot and Golden tag; research branches/archive tags not automatically pushed",
   "required_dependencies_in_git": "docs/required-dependencies.json (298 inputs, SHA-256; no submodule or LFS)"
 }

@@ -1,15 +1,10 @@
-本机手动清理清单（仅在commit/push成功后执行）
-不要删除 E:\zynqlinkPRO-private\flash-backups。原始Flash私有备份不在Git。
+本机手动清理清单（2026-10-31更新）
 
-A. 此前被工具策略拒绝递归删除，已移出主目录的旧worktree残留：
-C:\Users\Administrator\zynqlinkPRO-retired\orbtrace-cm3-20261031
+已处理：用户自行删除zynqlinkPRO-private并明确弃用原Flash备份；HFLink worktree及hflink-psusb分支已按用户要求删除，未提交实验改动不再保留。原维护目录和旧worktree残留也已不存在。
 
-B. 推送成功后可选删除的维护副本、临时克隆、缓存和日志：
-E:\zynqlinkPRO-maintenance\20261031-slim
-E:\zynqlinkPRO-maintenance\20261031-dependencies
-重要交付、记录、来源及验证摘要已入main/Git；私有Flash备份已移至上述独立目录。
+尚可手动删除的非必需旧参考副本：
+E:\zynqlinkPRO\reference\HFLink
+它已不被任何worktree共享，不属于298个必需依赖。包含递归删除的组合命令被自动审批拒绝，仅返回blocked by policy，未提供具体原因，因此该参考副本仍在本地。
 
-C. 当前Git与本机研究文件：
-真实CM3 RTL、匹配BSP、main的VexRiscv模型已纳入Git，普通clone可取到；它们不是待删缓存。
-未纳入主Git的仅本机研究/旧工程/上游额外材料，详见docs/not-in-git-files.txt；按用户要求继续保留本地。
-项目外私有Flash备份、已安装Vivado/SDK/Python依赖不属于主仓库。
+仅删除上面HFLink子目录，保留同级真实CM3模型及匹配BSP。当前Golden、正式recovery恢复包和精选记录继续保留；弃用原始Flash备份不影响正式恢复包。
+其他本机研究/旧工程文件详见docs/not-in-git-files.txt，未在本轮删除。真实CM3 RTL、匹配BSP和VexRiscv仿真模型均已纳入Git。
