@@ -21,8 +21,27 @@ export async function fetchExecutionExport(url,{fetchImpl=globalThis.fetch,timeo
   return {blob:await response.blob(),filename};
 }
 
-export function saveExportFile({blob,filename}){
-  const url=URL.createObjectURL(blob),a=document.createElement('a');
-  a.href=url;a.download=filename;document.body.append(a);
-  try{a.click();}finally{a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);}
+export function saveExportFile({blob,filename},{retainUrl=false,captureOnly=false,windowImpl=globalThis}={}){
+  // Embedded browsers may not support downloads initiated inside an iframe.
+  // Use the same-origin workbench document for human downloads; the explicit
+  // CLI path stays in the frame where its capture hook is installed.
+  let owner=windowImpl;
+  if(!captureOnly)try{if(windowImpl.parent?.document)owner=windowImpl.parent;}catch{}
+  const a=owner.document.createElement('a');
+  if(captureOnly&&!a.click._traceCliDownloadCapture)throw Error('CLI下载捕获未启用，请从统一工作台调用');
+  const url=owner.URL.createObjectURL(blob);
+  const activate=link=>{
+    link.href=url;link.download=filename;
+    if(captureOnly)link.dataset.cliDownloadOnly='1';
+    owner.document.body.append(link);
+    try{link.click();}finally{link.remove();}
+  };
+  let requested=false;
+  try{
+    activate(a);requested=true;
+    return {downloadUrl:url,filename,bytes:blob.size,cliCaptured:a.dataset.cliCaptured==='1',browserDownloadRequested:!captureOnly,
+      retryDownload:captureOnly?undefined:()=>activate(owner.document.createElement('a'))};
+  }finally{
+    if(!retainUrl||!requested)setTimeout(()=>owner.URL.revokeObjectURL(url),30000);
+  }
 }

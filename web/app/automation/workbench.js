@@ -61,14 +61,22 @@ export function createWorkbenchAutomation(tools,win=globalThis.window){
     w.URL.createObjectURL=blob=>{const url=create(blob);blobs.set(url,blob);return url;};
     w.URL.revokeObjectURL=url=>{blobs.delete(url);return revoke(url);};
     const click=w.HTMLAnchorElement.prototype.click;
-    w.HTMLAnchorElement.prototype.click=function(){
-      const blob=blobs.get(this.href);
+    const capturedClick=function(){
+      const blob=blobs.get(this.href),captureOnly=this.dataset?.cliDownloadOnly==='1';
       if(this.download&&blob){
-        if(files.size>=32)throw Error('CLI下载暂存已满；请 download 保存或 discard 释放');
-        files.set(String(++next),{name:this.download,blob});return;
+        const limit=128*1024*1024;
+        if(blob.size<=limit){
+          const used=()=>Array.from(files.values()).reduce((n,f)=>n+f.blob.size,0);
+          while(files.size&&(files.size>=32||used()+blob.size>limit))files.delete(files.keys().next().value);
+          files.set(String(++next),{name:this.download,blob,captureOnly});
+        }else if(captureOnly)throw Error('文件超过CLI缓存上限，请使用浏览器下载或Trace直接导出到磁盘');
+        if(captureOnly){this.dataset.cliCaptured='1';return;}
       }
+      // Capturing CLI evidence must never suppress a person's browser download.
       return click.call(this);
     };
+    capturedClick._traceCliDownloadCapture=true;
+    w.HTMLAnchorElement.prototype.click=capturedClick;
     captures.set(w,files);return files;
   }
   function page(name){if(!Object.hasOwn(PAGES,name))throw Error('未知页面：'+name);return PAGES[name];}
@@ -101,6 +109,7 @@ export function createWorkbenchAutomation(tools,win=globalThis.window){
   function control(e,root,query){
     return {selector:query??selector(e,root),tag:e.tagName.toLowerCase(),type:e.type||null,
       label:(e.labels?.[0]?.textContent||e.getAttribute('aria-label')||e.title||e.textContent||e.placeholder||'').trim().slice(0,240),
+      text:(e.textContent||'').trim().slice(0,500),title:e.title||null,
       value:e.type==='checkbox'||e.type==='radio'?!!e.checked:e.value??null,
       disabled:!!e.disabled,hidden:!!e.hidden,
       options:e.tagName==='SELECT'?Array.from(e.options,o=>({value:o.value,label:o.textContent,disabled:o.disabled})):undefined};
@@ -152,7 +161,7 @@ export function createWorkbenchAutomation(tools,win=globalThis.window){
       }
     }
     const downloads=captureDownloads(c.win);
-    if(m.op==='downloads')return Array.from(downloads,([id,f])=>({id,name:f.name,bytes:f.blob.size,type:f.blob.type}));
+    if(m.op==='downloads')return Array.from(downloads,([id,f])=>({id,name:f.name,bytes:f.blob.size,type:f.blob.type,browserDownloadRequested:!f.captureOnly}));
     if(m.op==='download'||m.op==='discard'){
       const f=downloads.get(String(m.id));if(!f)throw Error('下载ID不存在');
       if(m.op==='discard'){downloads.delete(String(m.id));return {discarded:true};}

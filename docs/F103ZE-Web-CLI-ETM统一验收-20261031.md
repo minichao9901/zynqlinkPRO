@@ -588,3 +588,20 @@ cmake --build build/etm-native-rebuild --parallel 2
 
 `validate no-flash --skip-scope`可显式跳过这一项，报告仍标DEFERRED；不能因此宣称全套通过。
 接下来工作转为火焰图Web导出和全项目Web/非Web CLI覆盖审计。
+
+### 火焰图按钮没有下载文件：已修复并验证实际落盘
+
+用户在区间 #913～#977 点击“导出当前火焰图 SVG”，服务已生成2,531字节SVG，但界面无提示、下载目录无文件。
+确认存在两个交付问题：工作台CLI全局下载钩子无条件吞掉手动Blob下载；内置浏览器不支持嵌入ETM页面发起Blob下载。
+修复后手动下载经同源外层工作台发起，CLI显式指定`captureOnly:true`才抑制浏览器保存。
+CLI缓存最多32文件/128MiB，缓存满时不会阻止手动下载。
+
+按钮现在显示生成进度、文件名与大小、下载请求状态及“再次下载 SVG”；失败原因直接保留在页面，按钮可重试。
+页面只声称已请求下载，不伪称已知用户最终保存路径。实际验收另外监听浏览器下载完成并检查磁盘文件。
+保持用户原记录、区间及光标，真实点击按钮和重试链接均保存到Windows下载目录，两个文件均为有效SVG且SHA-256一致。
+覆盖原问题的自动化测试包括手动/CLI分流、缓存满、外层文档下载与重试、进度和失败反馈；全部39项Web测试通过。
+本轮无硬件操作，没有修改PL、PS或目标Flash。
+
+[下载落盘及哈希证据](validation/flame-download-20261031/result.json)、
+[当前区间SVG](validation/flame-download-20261031/flame-913-977.svg)、
+[页面状态截图](validation/flame-download-20261031/web-download.jpg)。

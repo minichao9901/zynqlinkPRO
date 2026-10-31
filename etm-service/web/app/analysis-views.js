@@ -1,3 +1,4 @@
+import {wireFlameExport} from './flame-export-ui.js';
 import {rangeFromPixels,wheelRange} from './execution-window.js';
 import {createZoomControls} from './zoom-controls.js';
 import {traceSettingsText} from './trace-options.js';
@@ -61,11 +62,8 @@ function aggregateFlameView(result,onFunction,selectedFunction='',o={}){
     for(let i=0;i<node.children.length;i++){const found=nodePath(target,node.children[i],path.concat(i));if(found)return found;}
     return null;
   }
-  async function exportCurrentSvg(){
-    exportSvg.disabled=true;
-    try{await o.onExport?.({mode:'aggregate',weight:weightMode,rootPath:(nodePath(selected)||[]).join('.')});}
-    catch(error){o.onError?.(error);}finally{exportSvg.disabled=false;}
-  }
+  const exportFeedback=wireFlameExport(exportSvg,()=>o.onExport?.({mode:'aggregate',weight:weightMode,rootPath:(nodePath(selected)||[]).join('.')}),o.onError);
+  tools.after(exportFeedback);
   function repaint(root){selected=root;o.onExportOptions?.({mode:'aggregate',weight:weightMode,rootPath:(nodePath(root)||[]).join('.')});label.textContent=root.name+' · '+(weightMode==='cycles'?n(root.valueCycles||0)+' 周期':n(root.value)+' 条');open.disabled=root===original||/未知|中断/.test(root.name);const svg=document.createElementNS(namespace,'svg'),height=levels(root)*29+12;svg.setAttribute('viewBox',`0 0 1000 ${height}`);svg.setAttribute('role','img');svg.setAttribute('aria-label',`按${weightMode==='cycles'?'周期数':'路径指令记录数量'}加权的调用火焰图`);svg.style.width='100%';
     function draw(node,x,depth,width,path){const group=document.createElementNS(namespace,'g'),rect=document.createElementNS(namespace,'rect'),text=document.createElementNS(namespace,'text'),title=document.createElementNS(namespace,'title'),y=depth*29+2;   // 向下生长：根在顶部，子调用逐层向下
       rect.setAttribute('x',x);rect.setAttribute('y',y);rect.setAttribute('width',Math.max(.2,width-1));rect.setAttribute('height',26);let hash=0;for(const c of node.name)hash=(hash*31+c.charCodeAt(0))|0;rect.setAttribute('fill',node.name.includes('未知')?'#c4ccd8':`hsl(${25+Math.abs(hash)%40} 78% ${58+depth%3*5}%)`);rect.setAttribute('rx',2);if(selectedFunction&&node.name===selectedFunction){rect.setAttribute('stroke','#58a6ff');rect.setAttribute('stroke-width','2');}
@@ -78,7 +76,7 @@ function aggregateFlameView(result,onFunction,selectedFunction='',o={}){
     if(weightOf(root))draw(root,0,0,1000,[]);else canvas.replaceChildren(make('p','当前权重下没有可绘制区间。','hint'));canvas.replaceChildren(svg);
   }
   weightBtn.onclick=()=>{weightMode=weightMode==='cycles'?'records':'cycles';weightBtn.textContent=weightMode==='cycles'?'切换到记录数':'切换到周期';repaint(original);};
-  reset.onclick=()=>repaint(original);open.onclick=()=>onFunction(selected.name);exportSvg.onclick=exportCurrentSvg;repaint(original);return box;
+  reset.onclick=()=>repaint(original);open.onclick=()=>onFunction(selected.name);repaint(original);return box;
 }
 
 export function flameView(result,onFunction,o={}){
@@ -107,12 +105,10 @@ export function flameView(result,onFunction,o={}){
     return box;
   }
   o.onExportOptions?.({mode:'timeline',weight:'records',rootPath:''});
-  const exportSvg=button('导出当前火焰图 SVG',async()=>{
-    exportSvg.disabled=true;
-    try{await o.onExport?.({mode:'timeline',weight:'records',rootPath:''});}finally{exportSvg.disabled=false;}
-  });
+  const exportSvg=make('button','导出当前火焰图 SVG');
+  const exportFeedback=wireFlameExport(exportSvg,()=>o.onExport?.({mode:'timeline',weight:'records',rootPath:''}),o.onError);
   exportSvg.title='读取当前区间的原始调用栈，完整深度、完整函数名；图宽按最小所需比例扩展';
-  modes.append(exportSvg);
+  modes.append(exportSvg);box.append(exportFeedback);
   const ns='http://www.w3.org/2000/svg',svg=document.createElementNS(ns,'svg');
   const maxDepth=Math.max(1,...data.timeline.map(b=>b.path.length)),height=maxDepth*26+38;
   const unit=1000;svg.setAttribute('viewBox',`0 0 ${unit} ${height}`);svg.setAttribute('role','img');svg.setAttribute('aria-label','按执行先后排列的调用区间图，拖选缩放');svg.classList.add('execution-timeline');svg.style.touchAction='none';
