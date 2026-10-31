@@ -1,0 +1,38 @@
+✔ flash accounting uses ELF load bytes instead of debug-bearing file size (6.99ms)
+✔ release waits for the owned backend child to exit before confirming USB availability (29.3865ms)
+✔ display timing refuses an incomplete default timeline (4.7511ms)
+✔ display timing rejects a stale record or render generation (0.7525ms)
+✔ a hidden document cannot be reported as a painted first screen (0.5392ms)
+✔ source following uses viewport geometry across flame/source layout changes (1.5764ms)
+✔ MMIO writes flush once without re-reading or replaying command/W1C registers (3.4994ms)
+✔ ordinary SRAM writes retain exact readback verification (1.984ms)
+✔ native transport preserves real wire bytes, report IDs and serial reads after idle polls (32.3644ms)
+✔ RTT Viewer keeps raw history while high-speed rendering is suppressed (2.5536ms)
+✔ automatic display suppression preserves bounded raw data for save/byte accounting (3.4433ms)
+✔ HSS finds legacy IN3 and Zynq IN7 while excluding the ETM IN2 endpoint (1.2231ms)
+✔ Zynq STOP keeps the reader alive while busy and confirms before retiring reads (42.398ms)
+✔ a negative STOP reply cannot claim a successful hardware release (0.8575ms)
+✔ CLI completion transport can recover without replaying a hardware command (1.6689ms)
+✔ commands are forwarded verbatim to the existing Web command runner (1.6522ms)
+✔ runtime software readiness never enumerates or opens a USB device (0.2664ms)
+✔ a command error stops the batch and preserves prior results (0.3938ms)
+✔ red error result lines cannot be reported as a successful memory write (0.2375ms)
+✔ probe mismatch and multiple authorized probes fail before command execution (0.5824ms)
+✔ flash delegates to the Web flasher with verification and reset enabled (0.4119ms)
+✔ flash errors caught by the page must not become programmed:true (0.4024ms)
+✔ target operations reuse the page object and release its busy guard (1.4587ms)
+✔ stale target state is rejected before changing saved register ownership (0.5004ms)
+✔ cancellation is delivered even while an existing command is waiting (6.9415ms)
+✔ the same adapter exposes all Web debugger help, including image and watchpoint commands (3.372ms)
+✔ raw addresses work without ELF and info reports Hz in MHz correctly (1.2289ms)
+✔ capture suspends/restores only its original active Web breakpoints (0.6422ms)
+✔ validation errors cannot restore a pending configuration from another CLI transaction (0.3877ms)
+✔ ETM iframe results retain record IDs, nested quality, maps and binary data (5.5585ms)
+ℹ tests 30
+ℹ suites 0
+ℹ pass 30
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 323.3448
