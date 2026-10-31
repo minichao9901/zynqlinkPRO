@@ -35,6 +35,7 @@ module swd_batch_engine #(
     input  wire                   core_parity_err,
     input  wire [31:0]            core_rdata,
     input  wire                   packet_active,
+    input  wire                   packet_bank,
     input  wire                   packet_cmd_en,
     input  wire [BRAM_ADDR_W-1:0] packet_cmd_addr,
     output wire [31:0]            packet_cmd_data,
@@ -131,11 +132,11 @@ module swd_batch_engine #(
     assign active     = (state != ST_IDLE);
 
     xpm_memory_tdpram #(
-        .ADDR_WIDTH_A(BRAM_ADDR_W), .ADDR_WIDTH_B(BRAM_ADDR_W),
+        .ADDR_WIDTH_A(BRAM_ADDR_W+1), .ADDR_WIDTH_B(BRAM_ADDR_W+1),
         .AUTO_SLEEP_TIME(0), .BYTE_WRITE_WIDTH_A(8), .BYTE_WRITE_WIDTH_B(8),
         .CLOCKING_MODE("common_clock"), .MEMORY_INIT_FILE("none"),
         .MEMORY_INIT_PARAM("0"), .MEMORY_OPTIMIZATION("true"),
-        .MEMORY_PRIMITIVE("block"), .MEMORY_SIZE((1 << BRAM_ADDR_W) * 32),
+        .MEMORY_PRIMITIVE("block"), .MEMORY_SIZE((2 << BRAM_ADDR_W) * 32),
         .MESSAGE_CONTROL(0), .READ_DATA_WIDTH_A(32), .READ_DATA_WIDTH_B(32),
         .READ_LATENCY_A(1), .READ_LATENCY_B(1), .READ_RESET_VALUE_A("0"),
         .READ_RESET_VALUE_B("0"), .RST_MODE_A("SYNC"), .RST_MODE_B("SYNC"),
@@ -143,19 +144,19 @@ module swd_batch_engine #(
         .WRITE_DATA_WIDTH_A(32), .WRITE_DATA_WIDTH_B(32),
         .WRITE_MODE_A("read_first"), .WRITE_MODE_B("read_first")
     ) u_cmd_bram (
-        .clka(clk), .ena(1'b1), .wea(cmd_wea), .addra(cmd_bram_en ? cmd_bram_addr[BRAM_ADDR_W+1:2] : bram_addr_reg), .dina(cmd_bram_en ? cmd_bram_wrdata : host_wdata), .douta(cmd_douta),
+        .clka(clk), .ena(1'b1), .wea(cmd_wea), .addra(cmd_bram_en ? cmd_bram_addr[BRAM_ADDR_W+2:2] : {1'b0,bram_addr_reg}), .dina(cmd_bram_en ? cmd_bram_wrdata : host_wdata), .douta(cmd_douta),
         .rsta(1'b0), .regcea(1'b1),
         .clkb(clk), .enb(packet_active ? packet_cmd_en : cmd_en_b), .web(4'b0000),
-        .addrb(packet_active ? packet_cmd_addr : cmd_addr_b), .dinb(32'd0), .doutb(cmd_doutb),
+        .addrb(packet_active ? {packet_bank,packet_cmd_addr} : {1'b0,cmd_addr_b}), .dinb(32'd0), .doutb(cmd_doutb),
         .rstb(1'b0), .regceb(1'b1)
     );
 
     xpm_memory_tdpram #(
-        .ADDR_WIDTH_A(BRAM_ADDR_W), .ADDR_WIDTH_B(BRAM_ADDR_W),
+        .ADDR_WIDTH_A(BRAM_ADDR_W+1), .ADDR_WIDTH_B(BRAM_ADDR_W+1),
         .AUTO_SLEEP_TIME(0), .BYTE_WRITE_WIDTH_A(8), .BYTE_WRITE_WIDTH_B(8),
         .CLOCKING_MODE("common_clock"), .MEMORY_INIT_FILE("none"),
         .MEMORY_INIT_PARAM("0"), .MEMORY_OPTIMIZATION("true"),
-        .MEMORY_PRIMITIVE("block"), .MEMORY_SIZE((1 << BRAM_ADDR_W) * 32),
+        .MEMORY_PRIMITIVE("block"), .MEMORY_SIZE((2 << BRAM_ADDR_W) * 32),
         .MESSAGE_CONTROL(0), .READ_DATA_WIDTH_A(32), .READ_DATA_WIDTH_B(32),
         .READ_LATENCY_A(1), .READ_LATENCY_B(1), .READ_RESET_VALUE_A("0"),
         .READ_RESET_VALUE_B("0"), .RST_MODE_A("SYNC"), .RST_MODE_B("SYNC"),
@@ -163,11 +164,11 @@ module swd_batch_engine #(
         .WRITE_DATA_WIDTH_A(32), .WRITE_DATA_WIDTH_B(32),
         .WRITE_MODE_A("read_first"), .WRITE_MODE_B("read_first")
     ) u_rsp_bram (
-        .clka(clk), .ena(1'b1), .wea(rsp_wea), .addra(rsp_bram_en ? rsp_bram_addr[BRAM_ADDR_W+1:2] : bram_addr_reg), .dina(rsp_bram_en ? rsp_bram_wrdata : host_wdata), .douta(rsp_douta),
+        .clka(clk), .ena(1'b1), .wea(rsp_wea), .addra(rsp_bram_en ? rsp_bram_addr[BRAM_ADDR_W+2:2] : {1'b0,bram_addr_reg}), .dina(rsp_bram_en ? rsp_bram_wrdata : host_wdata), .douta(rsp_douta),
         .rsta(1'b0), .regcea(1'b1),
         .clkb(clk), .enb(packet_active ? packet_rsp_en : rsp_en_b),
         .web(packet_active ? packet_rsp_we : rsp_web_b),
-        .addrb(packet_active ? packet_rsp_addr : rsp_addr_b),
+        .addrb(packet_active ? {packet_bank,packet_rsp_addr} : {1'b0,rsp_addr_b}),
         .dinb(packet_active ? packet_rsp_data : rsp_din_b), .doutb(rsp_doutb),
         .rstb(1'b0), .regceb(1'b1)
     );

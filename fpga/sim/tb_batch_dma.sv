@@ -18,7 +18,7 @@ reg core_parity_err=0;
 integer busy_left=0, ok_count=0, attempts=0, reads=0, writes=0;
 reg inject_wait=0, inject_fault=0;
 reg [31:0] write_sum=0;
-swd_batch_engine dut(.*, .host_wstrb(4'hf), .rsp_bram_we(4'd0), .rsp_bram_wrdata(32'd0));
+swd_batch_engine dut(.*, .packet_bank(1'b0), .host_wstrb(4'hf), .rsp_bram_we(4'd0), .rsp_bram_wrdata(32'd0));
 always @(posedge clk) begin
  if (core_start && !core_busy) begin
    attempts <= attempts+1; core_busy<=1;busy_left<=3;

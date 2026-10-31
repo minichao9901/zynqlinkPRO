@@ -13,6 +13,18 @@ if {!$impl_only} {
     # subsequent builds retain unchanged IPs, including CDMA and interconnects.
     set_property synth_checkpoint_mode Hierarchical [get_files system.bd]
     open_bd_design [get_files system.bd]
+    # Packet command/response RAM each contain two independent 4 KiB banks.
+    # The legacy register window remains bank zero. Refresh only affected IPs.
+    foreach b {cmd rsp} {
+        foreach space {processing_system7_0/Data cdma/Data} {
+            set seg [get_bd_addr_segs -quiet ${space}/SEG_${b}_mem_Mem0]
+            if {[llength $seg] && [get_property RANGE $seg] != 8192} {
+                set_property range 8K $seg
+                set fresh_impl 1
+            }
+        }
+    }
+    save_bd_design
     # New helper RTL files must be added to the module-reference source set
     # explicitly; Vivado 2018.3 does not discover them from the old XCI.
     set packet_rtl [file join $root fpga rtl dap_transfer_block_engine.v]

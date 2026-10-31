@@ -30,7 +30,7 @@ reg [31:0] packet_rsp_data=0;
 integer busy_left=0, ok_count=0, attempts=0, reads=0, writes=0;
 reg inject_wait=0, inject_fault=0;
 reg [31:0] write_sum=0;
-swd_batch_engine dut(.*, .host_wstrb(4'hf), .rsp_bram_we(4'd0), .rsp_bram_wrdata(32'd0));
+swd_batch_engine dut(.*, .packet_bank(1'b0), .host_wstrb(4'hf), .rsp_bram_we(4'd0), .rsp_bram_wrdata(32'd0));
 wire swclk, dio_o, dio_t;
 tri1 swdio;
 reg sample_fall=0;

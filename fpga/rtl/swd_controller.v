@@ -154,6 +154,8 @@ module swd_controller #(
     localparam ADDR_TRACE_CTRL    = 7'h54;
     localparam ADDR_TRACE_INDEX   = 7'h58;
     localparam ADDR_TRACE_DATA    = 7'h5C;
+    localparam ADDR_PACKET_BANK   = 7'h60;
+    reg packet_bank_reg,packet_bank_active;
     reg [31:0] transfer_trace [0:15];
     reg [3:0] trace_head,trace_index;
     reg [15:0] trace_count;
@@ -296,6 +298,8 @@ module swd_controller #(
             cfg_sample_rise <= 1'b1;
             packet_len_reg <= 16'd0;
             packet_start_pulse <= 1'b0;
+            packet_bank_reg <= 1'b0;
+            packet_bank_active <= 1'b0;
             engine_reset <= 1'b0;
             engine_reset_count <= 0;
             trace_index <= 0;
@@ -357,8 +361,11 @@ module swd_controller #(
                     ADDR_SWJ_DATA7: swj_data[255:224] <= s_axi_wdata;
                     ADDR_SWJ_COUNT: swj_count <= s_axi_wdata[7:0];
                     ADDR_PACKET_LEN: packet_len_reg <= s_axi_wdata[15:0];
-                    ADDR_PACKET_CTRL: if (s_axi_wdata[0] && !packet_busy && !batch_active && !core_busy)
+                    ADDR_PACKET_CTRL: if (s_axi_wdata[0] && !packet_busy && !batch_active && !core_busy) begin
                         packet_start_pulse <= 1'b1;
+                        packet_bank_active <= packet_bank_reg;
+                    end
+                    ADDR_PACKET_BANK: if(s_axi_wstrb[0]) packet_bank_reg<=s_axi_wdata[0];
                     ADDR_ENGINE_RESET: if (s_axi_wstrb[0] && s_axi_wdata[0]) begin
                         // Keep AXI, clocks, configuration and BRAM alive. Reset
                         // only the execution state machines, even while busy.
@@ -393,7 +400,8 @@ module swd_controller #(
                     ADDR_CTRL: begin
                         rdata_reg <= {16'd0, xfer_request, 5'd0, ctrl_timestamp_en, ctrl_mode, core_busy};
                     end
-                    ADDR_FEATURES: rdata_reg <= 32'h4450_0001;
+                    ADDR_FEATURES: rdata_reg <= 32'h4450_0003;
+                    ADDR_PACKET_BANK: rdata_reg <= {30'd0,packet_bank_active,packet_bank_reg};
                     ADDR_ENGINE_RESET: rdata_reg <= engine_reset_count;
                     ADDR_TRACE_CTRL: rdata_reg <= {trace_frozen,11'd0,trace_count,trace_head};
                     ADDR_TRACE_INDEX: rdata_reg <= {28'd0,trace_index};
@@ -515,6 +523,7 @@ module swd_controller #(
         .core_parity_err(core_parity_err),
         .core_rdata   (core_rdata),
         .packet_active(packet_active),
+        .packet_bank(packet_bank_active),
         .packet_cmd_en(packet_cmd_en),
         .packet_cmd_addr(packet_cmd_addr),
         .packet_cmd_data(packet_cmd_data),

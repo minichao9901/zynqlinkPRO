@@ -57,7 +57,7 @@ set_property offset 0x40020000 [get_bd_addr_segs processing_system7_0/Data/SEG_c
 foreach {b addr} {cmd 0x42000000 rsp 0x42010000} {
     foreach space {processing_system7_0/Data cdma/Data} {
         set seg [get_bd_addr_segs -quiet ${space}/SEG_${b}_mem_Mem0]
-        if {[llength $seg]} {set_property range 4K $seg; set_property offset $addr $seg}
+        if {[llength $seg]} {set_property range 8K $seg; set_property offset $addr $seg}
     }
 }
 validate_bd_design
