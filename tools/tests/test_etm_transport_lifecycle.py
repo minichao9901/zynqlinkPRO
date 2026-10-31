@@ -10,6 +10,15 @@ import zynq_la
 
 
 class StartLifecycleTests(unittest.TestCase):
+    def test_h743_handoff_keeps_etmv4_and_never_writes_etmv3_control(self):
+        session=zynq_la.Session()
+        session.configure({'protocol':'ETMv4','traceid':2,'configr':0x1019},2,.01)
+        session._dap_write32=Mock();session._dap_read32=Mock()
+        session._restart_trace()
+        session._dap_write32.assert_not_called();session._dap_read32.assert_not_called()
+        self.assertEqual(session.config['configr'],0x1019)
+        self.assertEqual(session.config['protocol'],'ETMv4')
+
     def test_send_publishes_arm_before_recv_waits_for_end(self):
         session=SimpleNamespace(configure=Mock(),start=Mock(),wait=Mock(return_value=True),error=None)
         socket=zynq_la._Sock(SimpleNamespace(config={'traceid':2},traceid=2,seconds=.1))

@@ -59,6 +59,26 @@ F103ZE的Trace脚为PE2～PE6；H743须按自己的板级引出核对这五根�
 “4 文件”可导出记录包、CSV、源码执行流，或导入`.etmrecord`离线重解码。
 桥包examples内有H743真实历史参考记录，来自superlinkPRO的Kingst LA，仅用于离线回归。
 
+## H743换板验收约定
+
+H743继续使用superlinkPRO迁入的目标识别、ETMv4配置、Funnel/ETF/TPIU路由、
+C++解码、TraceStore和Web分析/导出；接收设备使用Zynq ETM-LA。
+F103专用的ETMv3编程模式重启不用于H743。诊断CSR和后续DDR后端不应按F103协议硬编码。
+旧Kingst参考只证明离线回归；尚未把H743接Zynq上板采集标记为已验收。
+
+换板后先核对接线、电平、板上HSE和实际固件，载入其匹配ELF/源码，
+选自己的循环入口；初始化入口`trace_hook_entry`需要复位后命中。
+首次以target固件提供的低频档、10ms窗口验证，检查实际CPU/TRACECLK、
+同步/结束/丢失、ETMv4包错误及采集入口，再逐档增加Trace频率和窗口。
+每档记录Zynq bit/ELF与target ELF的SHA、接线、诊断计数和原始记录，
+完成反复开关探针、换函数采集、解码、缩放和SVG自动下载后再判定通过。
+本文的60/30MHz是superlinkPRO历史参考，不是Zynq当前承诺的H743上限。
+
+AI压力工具`toolbox.py project run etm.stress`现支持`--profile stm32h743`，
+必须显式提供`--elf`和`--functions`，可设`--sources`、实际`--hse-mhz`及`--reset-before`。
+使用`--echo`还必须指定目标`--cdc-port`，避免误用F103端口；
+用户仍全程操作Web，不需要执行这些参数。
+
 ## AI打包命令
 
 ```powershell

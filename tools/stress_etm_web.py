@@ -1,7 +1,8 @@
 """AI drives real Web buttons: probe lifecycle, changed entries, capture and CDC.
 
 No Flash programming, PLL/AHB changes or automatic retry of failed rounds.
-Run against a loaded, identity-verified probe and the matching F103 target ELF.
+Run against a loaded, identity-verified probe and the matching target ELF.
+H743 requires explicit ELF and recurring entry functions; it never borrows F103 firmware.
 """
 import argparse
 import hashlib
@@ -71,8 +72,8 @@ class Stress(Streams):
         self.page('etm','show')
         self.page('etm','upload',selector='#elf-file',files=[pack_file(self.args.elf)])
         self.wait('etm','#elf-label',Path(self.args.elf).name);self.ready('#choose-elf')
-        self.set('etm','#hse','8');self.set('etm','#target-profile','stm32f103ze')
-        self.set('etm','#reset-before',False);self.set('etm','#entry-before',True)
+        self.set('etm','#hse',str(self.args.hse_mhz));self.set('etm','#target-profile',self.args.profile)
+        self.set('etm','#reset-before',self.args.reset_before);self.set('etm','#entry-before',True)
         self.set('etm','#duration',str(self.args.milliseconds));self.set('etm','#auto-decode',True)
         if self.args.sources:
             root=Path(self.args.sources)
@@ -83,7 +84,7 @@ class Stress(Streams):
     def connect(self):
         start=time.perf_counter();self.page('etm','click',selector='#connect');self.ready('#disconnect')
         info=self.invoke('etm','inspect',target='target')
-        if info['profile']!='stm32f103ze' or info.get('clockError'):raise RuntimeError('Unexpected target: '+str(info))
+        if info['profile']!=self.args.profile or info.get('clockError'):raise RuntimeError('Unexpected target: '+str(info))
         return info,time.perf_counter()-start
 
     def disconnect(self):
@@ -101,8 +102,12 @@ class Stress(Streams):
 
     def captures(self):
         from serial.tools.list_ports import comports
-        ports=[p.device for p in comports() if p.vid==0xf055 and p.pid==0x1031]
-        if len(ports)!=1:raise ValueError('Expected one F103 CDC target, got '+str(ports))
+        port=self.args.cdc_port
+        if self.args.echo and not port:
+            ports=[p.device for p in comports() if p.vid==0xf055 and p.pid==0x1031]
+            if self.args.profile!='stm32f103ze' or len(ports)!=1:
+                raise ValueError('Select the target CDC port explicitly with --cdc-port; found '+str(ports))
+            port=ports[0]
         rows=[];functions=self.args.functions.split(',')
         for n in range(self.args.capture_rounds):
             info,opened=self.connect();function=functions[n%len(functions)];echo=None
@@ -110,7 +115,7 @@ class Stress(Streams):
             try:
                 if self.args.echo:
                     self.page('etm','click',selector='#run');self.ready('#disconnect')
-                    echo=Echo(ports[0]);echo.start()
+                    echo=Echo(port);echo.start()
                 self.set('etm','#break-command','b '+function)
                 self.page('etm','click',selector='#add-break');self.ready('#start')
                 previous=self.page('etm','read',selector='#records')['value'];started=time.perf_counter()
@@ -186,17 +191,37 @@ class Stress(Streams):
         return rows
 
 
-def main(argv=None):
+def arguments(argv=None):
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--runtime',required=True);p.add_argument('--artifacts',required=True)
     p.add_argument('--rounds',type=int,default=30);p.add_argument('--capture-rounds',type=int,default=10)
     p.add_argument('--milliseconds',type=int,default=10);p.add_argument('--case-timeout',type=float,default=120)
-    p.add_argument('--elf',default=str(ROOT/'prebuilt/golden/f103ze-cdc48.elf'))
-    p.add_argument('--sources',default=str(ROOT/'prebuilt/golden/source-snapshot'))
-    p.add_argument('--functions',default='cdc_poll,cdc_tx_poll');p.add_argument('--echo',action='store_true')
+    p.add_argument('--profile',choices=['stm32f103ze','stm32h743'],default='stm32f103ze')
+    p.add_argument('--elf');p.add_argument('--sources');p.add_argument('--hse-mhz',type=float)
+    p.add_argument('--functions');p.add_argument('--echo',action='store_true');p.add_argument('--cdc-port')
+    p.add_argument('--reset-before',action='store_true',help='Reset and run to entry; does not program Flash')
     a=p.parse_args(argv)
     if not 1<=a.rounds<=1000 or not 0<=a.capture_rounds<=1000 or not 1<=a.milliseconds<=1000:raise ValueError('Invalid finite campaign bounds')
-    campaign=Stress(a);report={'hardware':True,'noFlash':True,'clockPolicy':'target-firmware-owned','retryFailedRounds':False}
+    if a.profile=='stm32h743':
+        if not a.elf or not a.functions:p.error('H743 requires --elf and --functions for the firmware actually on the board')
+        if a.echo and not a.cdc_port:p.error('H743 echo requires its explicit --cdc-port')
+    else:
+        a.elf=a.elf or str(ROOT/'prebuilt/golden/f103ze-cdc48.elf')
+        a.sources=a.sources or str(ROOT/'prebuilt/golden/source-snapshot')
+        a.functions=a.functions or 'cdc_poll,cdc_tx_poll'
+    a.hse_mhz=a.hse_mhz if a.hse_mhz is not None else (25 if a.profile=='stm32h743' else 8)
+    if not 0<a.hse_mhz<=100: p.error('--hse-mhz must be the actual board oscillator, in (0,100] MHz')
+    if not Path(a.elf).is_file():p.error('Target ELF does not exist: '+a.elf)
+    if any(not f.strip() for f in a.functions.split(',')):p.error('--functions contains an empty entry')
+    a.functions=','.join(f.strip() for f in a.functions.split(','))
+    return a
+
+
+def main(argv=None):
+    a=arguments(argv)
+    campaign=Stress(a);report={'hardware':True,'noFlash':True,'clockPolicy':'target-firmware-owned','retryFailedRounds':False,
+        'profile':a.profile,'targetElf':str(Path(a.elf).resolve()),'targetElfSha256':hashlib.sha256(Path(a.elf).read_bytes()).hexdigest(),
+        'hseMHz':a.hse_mhz,'functions':a.functions,'resetBefore':a.reset_before}
     try:
         campaign.initialize();report['lifecycle']=campaign.lifecycle()
         if a.capture_rounds:report['captures']=campaign.captures()
