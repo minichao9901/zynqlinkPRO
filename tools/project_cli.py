@@ -37,6 +37,7 @@ ALIASES={
  'etm.fixture':'tools/prepare_etm_offline_fixture.py','etm.equivalence':'tools/verify_etm_native_equivalence.py',
  'etm.records-check':'tools/verify_retained_records.py',
  'etm.ddr-plan':'tools/plan_etm_ddr.py',
+ 'etm.stress':'tools/stress_etm_web.py',
  'deps.check':'tools/verify_dependencies.py',
  'target.fixtures':'tools/build_f103_fixtures.py','target.cdc-build':'firmware/target/stm32f103_cdc_trace/build.ps1',
  'target.cdc-tests':'firmware/target/stm32f103_cdc_trace/tests/run_tests.ps1',

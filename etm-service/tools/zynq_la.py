@@ -168,6 +168,7 @@ class Session:
         self._restart_trace()
         self._dap_write32(0xE000EDF0, 0xA05F0001)
         self.started = time.time()
+        self.quality['hostStartedUnix'] = self.started
         self.started_monotonic = time.perf_counter()
         self.running = True
         self._reader = threading.Thread(target=self._read_loop, daemon=True)
@@ -223,6 +224,7 @@ class Session:
         finally:
             if self.started_monotonic is not None:
                 self.quality['hostSeconds'] = time.perf_counter() - self.started_monotonic
+                self.quality['hostEndedUnix'] = time.time()
             self.done.set()
 
     def stop(self):
@@ -279,7 +281,8 @@ class _Sock:
         s = session()
         s.configure(self.vis.config, self.vis.traceid, self.vis.seconds)
         s.start()
-        s.wait(5)
+        # Like a socket sendall, start returns after arm/resume. recv owns the
+        # completion wait, so the server can publish armed while capture runs.
 
     def recv(self, n):
         s = session()
