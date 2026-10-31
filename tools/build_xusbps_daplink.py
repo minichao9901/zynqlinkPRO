@@ -21,6 +21,8 @@ def main():
                     help='DMA firmware only: allow unproven zero-idle timing; default clamps to one')
     ap.add_argument('--max-swclk-hz', type=int,
                     help='Conservative firmware limit; cannot exceed the verified timing limit')
+    ap.add_argument('--timing', type=Path,
+                    help='Verified clock JSON for the actual paired bitstream; explicit path must exist')
     ap.add_argument('--bsp', default=None,
                     help='BSP directory (default: reference/legacy_zynq/.../usb_bsp/ps7_cortexa9_0); '
                          'a BSP root containing ps7_cortexa9_0 is also accepted')
@@ -47,7 +49,9 @@ def main():
     if args.project == 'xusbps_daplink_dma':
         flags += ['-DDAP_ALLOW_ZERO_IDLE='+str(int(args.experimental_zero_idle))]
         flags += ['-DDAP_ENABLE_TRACE=' + str(int(args.trace or args.usb_trace)), '-DDAP_MMIO_DIAGNOSTICS=' + str(int(args.trace))]
-        timing_path = ROOT / 'build/fpga_dma_global/verified_clock.json'
+        timing_path = args.timing.resolve() if args.timing else ROOT / 'build/fpga_dma_global/verified_clock.json'
+        if args.timing and not timing_path.is_file():
+            ap.error('Explicit --timing does not exist: '+str(timing_path))
         max_swclk = 60000000
         if timing_path.exists():
             verified_clock = json.loads(timing_path.read_text())
@@ -79,12 +83,14 @@ def main():
     linker = src / 'lscript.ld'
     run([gcc, *flags, '-specs=' + str(src / 'Xilinx.spec'), '-Wl,-build-id=none', *(['-Wl,--gc-sections'] if args.compact_code else []), '-Wl,-T,' + str(linker), '-Wl,-Map,' + str(out / 'xusbps_daplink.map'), '-L' + str(bsp / 'lib'), '-o', elf, *objects, '-Wl,--start-group', '-lxil', '-lgcc', '-lc', '-Wl,--end-group'])
     manifest = {
-        'options': vars(args),
+        'options': {k:str(v) if isinstance(v,Path) else v for k,v in vars(args).items()},
         'source_revision': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
         'compiler_flags': flags + ['-O' + args.opt],
         'linker_script': str(linker.relative_to(ROOT)),
         'linker_sha256': hashlib.sha256(linker.read_bytes()).hexdigest(),
         'verified_fpga_clock': verified_clock,
+        'verified_fpga_clock_path': str(timing_path) if verified_clock is not None else None,
+        'verified_fpga_clock_sha256': hashlib.sha256(timing_path.read_bytes()).hexdigest() if verified_clock is not None else None,
         'source_sha256': {str(p.relative_to(src)): hashlib.sha256(p.read_bytes()).hexdigest() for p in src.rglob('*') if p.is_file()},
         'bsp_sha256': hashlib.sha256((bsp / 'lib/libxil.a').read_bytes()).hexdigest(),
         'elf_sha256': hashlib.sha256(elf.read_bytes()).hexdigest(),
