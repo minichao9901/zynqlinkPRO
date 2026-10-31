@@ -1,0 +1,78 @@
+{
+  "transport": "jtag",
+  "requested_kHz": 50000,
+  "words": 512,
+  "depth": 32,
+  "loops": 256,
+  "artifacts": {
+    "git_head": "0ec2e63c779e4208044825adce05cb325db897c0",
+    "git_dirty": true,
+    "bit": {
+      "path": "E:\\zynqlinkPRO_orbtrace_opt\\prebuilt\\20261031_orbtrace_opt_qspi_usbfix_7020_120\\probe.bit",
+      "sha256": "f02a15db0b576f631c08448b19ea3844d1b45ef00ee6801d243caee398960230"
+    },
+    "elf": {
+      "path": "E:\\zynqlinkPRO_orbtrace_opt\\prebuilt\\20261031_orbtrace_opt_qspi_usbfix_7020_120\\application.elf",
+      "sha256": "6684400fd217fdd10f4a6375be48eff1e55560d861eca097470a2b88f0a6ddb7"
+    }
+  },
+  "RCC_before": [
+    50548355,
+    6931466
+  ],
+  "target_halted": true,
+  "backup_sha256": "4acbfd09f4566e2786e48faa8890067cf888ca2a43ba272dc8ac60545c5792d1",
+  "FCLK_Hz": 99999999,
+  "cfg": "0x11",
+  "SWCLK_Hz": 49999999.5,
+  "half_period_fclk": 1,
+  "short_high": false,
+  "intended_high_ns": 10.000000100000001,
+  "JTAG_sampling_mode": 17,
+  "restore_ok": true,
+  "read": {
+    "MB_s": 2.0216428315798387,
+    "samples": [
+      {
+        "MB_s": 2.0218244809668033,
+        "seconds": 0.2593142999976408
+      },
+      {
+        "MB_s": 2.0191179376261843,
+        "seconds": 0.2596618999959901
+      },
+      {
+        "MB_s": 2.0216428315798387,
+        "seconds": 0.2593376000004355
+      }
+    ],
+    "blocks": 256,
+    "bytes": 524288
+  },
+  "write": {
+    "MB_s": 2.0041260790663027,
+    "samples": [
+      {
+        "MB_s": 2.0041260790663027,
+        "seconds": 0.26160429998708423
+      },
+      {
+        "MB_s": 2.0034460213597334,
+        "seconds": 0.26169309999386314
+      },
+      {
+        "MB_s": 2.0053295635532193,
+        "seconds": 0.26144729999941774
+      }
+    ],
+    "blocks": 256,
+    "bytes": 524288
+  },
+  "passed": true,
+  "restore_match": true,
+  "restore_sha256": "4acbfd09f4566e2786e48faa8890067cf888ca2a43ba272dc8ac60545c5792d1",
+  "RCC_after": [
+    50548355,
+    6931466
+  ]
+}

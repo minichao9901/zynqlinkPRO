@@ -233,12 +233,12 @@ python -X utf8 toolbox.py probe-flash
 python -X utf8 toolbox.py probe-flash --verify-only
 ```
 
-默认使用 `prebuilt/20261031_orbtrace_opt_qspi_7020_120`：本次优化7020/120MHz、50/60MHz SOTA复测通过的bit/OCM固件配对，后续ETM滤波改动未合入。可用 `--image-dir` 指定另一完整启动包；包内BOOT.bin、加载器、bit/ELF和初始化文件由SHA-256清单绑定。变更bit/ELF后需重新生成启动包。
+默认使用 `prebuilt/20261031_orbtrace_opt_qspi_usbfix_7020_120`：本次优化7020/120MHz、50/60MHz SOTA复测通过的bit/OCM固件配对，后续ETM滤波改动未合入。可用 `--image-dir` 指定另一完整启动包；包内BOOT.bin、加载器、bit/ELF和初始化文件由SHA-256清单绑定。变更bit/ELF后需重新生成启动包。
 
 此命令直接使用Windows Xilinx SDK 2018.3（默认 `E:/Xilinx/SDK/2018.3`，可用 `--sdk` 覆盖）、Python及pefile、Zynq FTDI/JTAG，不依赖浏览器或CLI服务。拨码切到QSPI后重新上电；与其他硬件任务错开执行。当前Flash几何只验收了EF4019单片32MiB，命令会拒绝其他型号。
 
 默认先备份整片到新的 `build/probe-flash-时间/`，保存原备份SHA-256后才擦写，随后由SDK校验并独立整片回读，检查镜像及擦写范围外数据，再验证无暂停系统复位后的OCM入口交接。`--out NEW_DIR` 指定新的输出目录，`--backup-only` 只备份。原Flash备份及含备份的build目录保留在本机，不提交公开Git；失败时查看目录内result.json和日志。固化后保留QSPI拨码，按板上复位键即可启动，无需每次JTAG下载。
 
-此配对的PL时序WNS +0.499ns / WHS +0.020ns；OCM占用120976字节，USB/DAP队列未缩小。启动包中包含构建来源与哈希，验收依据见 `docs/validation/orbtrace-qspi-20261031/`。
+此配对的PL时序WNS +0.499ns / WHS +0.020ns；OCM占用120976字节、代码71268字节，USB/DAP队列未缩小；USB Chapter9空指针已修复。启动包中包含构建来源与哈希，验收依据见 `docs/validation/orbtrace-usb-context-20261031/`。
 
 备份辅助程序会暂时接管探针；`--backup-only`结束时CPU暂停，恢复使用需复位到已有有效镜像或重新加载配对。
