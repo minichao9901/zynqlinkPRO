@@ -18,7 +18,7 @@
     "qspi_read.elf": "45c6b19977d479edb70b528c98d44a2d375d71e1cf8dd110b553d003f3f13e8c",
     "timing_120mhz.rpt": "26f94748faecb84ff1eda51f89a26a62b7e3c20d2ee95e3ea829eb7e8e564c61",
     "utilization.rpt": "5ed241656b938e2c8d1dafe4a85fb3d53c628a13f581c447b5d7cc9bd559d4f9",
-    "acceptance.json": "697a7c17dfe05232e2cd063d06c1bb203b99c879c9df21bf2a2d0bffffce1f4c"
+    "acceptance.json": "79ffc12a8c772c980e8ed8241eb34177a29f4b100adfb7cae198dc004c1c953a"
   },
   "device": "xc7z020clg400-2",
   "PL_source_revision": "bc9ced6",
@@ -32,5 +32,5 @@
   "OCM_span_bytes": 120976,
   "USB_DAP_queues": "unchanged: 16x4096 and 512KiB arena",
   "firmware_validation": "USB config x4 / exact live executable bytes / SOTA50+60 peak/RTT/soak / HSS42 passed for final60; separate default50 peak/RTT passed",
-  "boot_validation": "PASS full CLI backup/program/verify/full readback/no-halt QSPI reset and full code comparison; final physical reset pending user"
+  "boot_validation": "PASS complete CLI backup/program/verify/full readback/no-halt software reset AND user physical power-cycle; exact live code, USB and SWD/JTAG60 accepted"
 }

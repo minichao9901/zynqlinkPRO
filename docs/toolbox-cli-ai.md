@@ -242,3 +242,5 @@ python -X utf8 toolbox.py probe-flash --verify-only
 此配对的PL时序WNS +0.499ns / WHS +0.020ns；OCM占用120976字节、代码71268字节，USB/DAP队列未缩小；USB Chapter9空指针已修复。启动包中包含构建来源与哈希，验收依据见 `docs/validation/orbtrace-usb-context-20261031/`。
 
 备份辅助程序会暂时接管探针；`--backup-only`结束时CPU暂停，恢复使用需复位到已有有效镜像或重新加载配对。
+
+最终修复版已通过用户断电重上、自主QSPI启动、USB和完整OCM代码比对，以及SWD/JTAG60 SRAM读写；以后保持QSPI启动档，按复位键即可运行。

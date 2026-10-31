@@ -1,0 +1,64 @@
+{
+  "time_UTC": "2026-10-31T05:03:23.017136+00:00",
+  "elf": "E:\\zynqlinkPRO_orbtrace_opt\\prebuilt\\20261031_orbtrace_opt_qspi_usbfix_7020_120\\application.elf",
+  "elf_sha256": "6684400fd217fdd10f4a6375be48eff1e55560d861eca097470a2b88f0a6ddb7",
+  "downloads": false,
+  "probe_reset_or_continue": false,
+  "expected_executable_bytes": 71268,
+  "cycles": [
+    {
+      "cycle": 0,
+      "sections": [
+        {
+          "name": ".text",
+          "bytes": 68704,
+          "address": 0,
+          "equal": true,
+          "expected_sha256": "5dafcbe34f355396ee75bc1e0c3540ed719022f3387a938af08007a331dd0755",
+          "live_sha256": "5dafcbe34f355396ee75bc1e0c3540ed719022f3387a938af08007a331dd0755"
+        },
+        {
+          "name": ".ocm_text",
+          "bytes": 2540,
+          "address": 68704,
+          "equal": true,
+          "expected_sha256": "98bfcf2954cfd8f308cc21383248413462b82c864fdacd68a6acd14046376219",
+          "live_sha256": "98bfcf2954cfd8f308cc21383248413462b82c864fdacd68a6acd14046376219"
+        },
+        {
+          "name": ".init",
+          "bytes": 12,
+          "address": 71244,
+          "equal": true,
+          "expected_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6",
+          "live_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6"
+        },
+        {
+          "name": ".fini",
+          "bytes": 12,
+          "address": 71256,
+          "equal": true,
+          "expected_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6",
+          "live_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6"
+        }
+      ],
+      "differing_addresses": [],
+      "vector_word": "ea000049"
+    }
+  ],
+  "passed": true,
+  "boot_mode": 1,
+  "boot_trace": [
+    1398032176,
+    539365425,
+    65544,
+    1,
+    2,
+    1536,
+    0,
+    1
+  ],
+  "FCLK_CTRL": 3147264,
+  "IO_PLL_CTRL": 221192,
+  "initial_FCLK_Hz": 99999999
+}
