@@ -1,5 +1,5 @@
 {
-  "status": "physical-usb-1s-2s-trace-passed-web-session-fix-under-validation-not-golden",
+  "status": "USB-and-Web-stage-passed-high-frequency-calibration-pending-not-golden",
   "accepted": false,
   "rtlSourceRevision": "21bb509f7190c23c8b357dc273b552dc3f4ad26e",
   "psSourceRevision": "91728bfde2c3c4600556d0e836bd1dff64d2f6b8",
@@ -58,7 +58,7 @@
     }
   },
   "boardValidation": {
-    "status": "USB/physical trace gates passed; Web stability pending",
+    "status": "physical USB trace and Web lifecycle/capture stage passed; not complete product acceptance",
     "flashWrites": false,
     "loadEvidence": "docs/validation/etm-ddr-usb-board-20261101/memory/load.txt",
     "codeIdentity": "docs/validation/etm-ddr-usb-board-20261101/memory/identity/result.json",
@@ -100,7 +100,13 @@
       }
     ],
     "evidence": "docs/validation/etm-ddr-usb-board-20261101",
-    "web": "first 30 lifecycle plus capture succeeded; fresh-open failures retained, epoch fix pending",
+    "web": {
+      "passed": true,
+      "lifecycleRounds": 30,
+      "captureRounds": 10,
+      "evidence": "docs/validation/etm-ddr-usb-board-20261101/web-final/verification.json",
+      "firstFailuresPreserved": true
+    },
     "perLaneCalibration": "not implemented"
   }
 }

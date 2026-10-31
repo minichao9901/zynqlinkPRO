@@ -85,3 +85,7 @@ firmware/target/hpm5301_perf/build/
 etm-service/records/
 !etm-service/firmware/**/*.elf
 
+# Native CMake cache/objects are local; ship only the explicitly retained tools.
+/etm-service/build-native/*
+!/etm-service/build-native/etm_*.exe
+

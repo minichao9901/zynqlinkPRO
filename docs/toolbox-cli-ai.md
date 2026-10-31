@@ -45,10 +45,11 @@ RTT桥若需此前OpenOCD部署，路径为prebuilt/golden/host/openocd/openocd.
 先按配对manifest加载并验证指定bit/ELF，再运行；不会自动切换板上固件。
 
 ```powershell
-python toolbox.py project run etm.ddr-trace-stress -- --pair prebuilt/etm-ddr-trace-raw4-20261101 --out build/ddr-trace-check-new --rounds 2 --seconds 1,2 --cdc-port COM34 --decode
+python toolbox.py project run etm.ddr-trace-stress -- --pair prebuilt/etm-ddr-usb-raw4-20261101 --out build/ddr-trace-check-new --rounds 2 --seconds 1,2 --cdc-port COM34 --decode --verify-ddr-physical
 python toolbox.py project run etm.framed -- captured.frm1 --out build/framed-check-new --tail-bytes 1 --trace-id 2
 ```
 
-DDR阶段验收仅针对F103，1/2秒窗口、函数交替、CDC及采后物理AP0读回；不写Flash或改目标分频。
+DDR阶段验收仅针对F103，默认USB采后下载，1/2秒窗口、函数交替、CDC；可用物理AP0核对同一缓冲。不会写Flash或改目标分频。
 H743已有独立ETMv4 Web/Kingst入口与target.h743-build源码构建命令，不能用F103专用验收替代。
-FRM1原生工具已加入桥包运行文件，但PS USB DDR下载和Web默认DDR路径仍待实现。
+FRM1原生工具、PS USB采后下载、Web/CLI默认DDR能力分支已完成本阶段真机验证；更高频和逐线校准继续研究。
+`web.shared-sync --check`核对9份ETM共享驱动；`--write`从主工作台同步。web.check与bridge.build都会阻止驱动副本不一致。

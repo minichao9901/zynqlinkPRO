@@ -9,6 +9,14 @@
 > H743保留superlinkPRO的ETMv4能力；新增Kingst真实记录作离线回归，不冒充Zynq上板验收。
 > 用户操作见[Web操作说明](Zynq-ETM-Trace操作说明.md)。
 
+## 2026-11-01最新阶段结论
+
+- 研究配对：`prebuilt/etm-ddr-usb-raw4-20261101/`，Web/CLI默认硬件DDR窗口→USB采后下载→C++，原Golden未替换。F103固件HCLK48MHz/物理TRACECLK24MHz不变。
+- 1/2秒实际采集约19.87/39.78MB FRM1，USB实测35.94/38.01MB/s，与同一缓冲区物理AP0全部读回SHA一致；帧丢失、解析错误、ready丢失、packetIssues均0。
+- 最新Web验收：30次开关、10轮100ms交替cdc_poll/cdc_tx_poll全部通过；每轮5～6份完整CDC回显严格位于硬件窗口内。此前首次连接失败记录与修复依据全部保留。
+- 火焰图0～2000区间SVG实际落盘15,166B，XML/SHA核对。直接CLI默认DDR+C++也通过。H743 ETMv4/Kingst记录、源码与构建入口保留，未冒充H743 Zynq真机验收。
+- 100ms完整Web流程12.5～14.9秒，原生解码约2秒量级，仍非实时显示。更高TRACECLK、逐线IDELAY校准、最新桥包交付和最终合并尚在继续；此配对仍非Golden。
+
 ## 2026-11-01：独立worktree的校准与有限DDR采集研究（进行中）
 
 ### Golden真实压力基线与ETD1诊断阶段
@@ -1130,3 +1138,14 @@ Web窗口元数据在DDR模式以硬件ticks/ref计算实际时长，主机下�
 进一步检查发现浏览器同步600ms预算短于本地OS读取2秒，通用批量Disconnect/封包探测不适合再叠在本地服务的同步上。改为利用固件已存在的EP0 0x5a，建立**DAP专用epoch边界**，同步重建EP1 IN/EP2 OUT队列、对齐主机端点并回读epoch改变且req/rsp/tx_active均0；不做整机USB复位、不重放目标命令、不动ETM DDR缓冲。手动对照后5次Info精确返回，8项本地服务测试、主/ETM两份驱动的4项封包检查通过。新版本已完成另一轮30次开关，10轮Web采集正在验收，尚不提前标记完整通过。
 
 新增`web.shared-sync --check|--write`并加入web.check及桥包构建保护；共享驱动必须字节一致，防止只修主页面却漏ETM。修正硬件窗口已知时仍显示旧ZET1“未知窗口”的提示；运行时记录真实recordsDirectory，验收工具不再猜路径。Web的CDC判定也使用硬件起点区间的保守交集，而非整个主机下载跨度。47项Web主机检查通过。本配对仍非Golden；H743实机、更高TRACECLK和逐线校准未完成。
+
+
+### 2026-11-01：最终Web 30+10、默认CLI及SVG下载验证通过
+
+确认DAP专用epoch的当前主机代码下，真实Web重新执行30次连接/关闭，连接中位1.558s、最短1.380s、最长1.768s；随后10轮100ms交替入口采集→原生解码→更换函数，全部通过。captureId连续7～16；每轮RCC不变、入口PC恢复、无传输丢失和packetIssues；硬件窗口内完整CDC事务分别5/5/6/5/6/5/5/5/6/6。不是重复使用一条历史记录。之前失败版本不计入通过轮数。
+
+10轮各自有store/manifest.json，源为native.bin，无events.jsonl/native.jsonl；原始FRM1、ETM、匹配ELF/源码、会话、解码小型摘要和每轮性能一起保留，可从etmrecord重解码。完整Web流程12.537～14.923秒包含目标配置、USB交接、采后下载、C++解码/TraceStore与恢复，并非纯解码计时；最后一轮原生解码/索引段2.181秒。不能把本阶段稳定性通过解释成实时显示通过。
+
+直接trace.py capture不指定transport，自动选到ddr-usb/1；100ms采集输出450,529字节ETM、1,805,794条指令、packetIssues=0、loss=false，完整CLI+解码4.543秒，硬件窗口0.100000001秒。目标RCC/FPB/CoreSight恢复通过；未写Flash。
+
+实际打开最后一条Web记录的火焰图，选0～2000区间，点击「导出当前火焰图SVG」，浏览器确认保存到Windows下载目录etm-flame-timeline (6).svg，15,166字节，XML解析成功；SHA、截图与SVG原文件见[最终Web证据](validation/etm-ddr-usb-board-20261101/web-final/verification.json)。页面显示生成大小、下载请求与重试链接。完整实测截图为[SVG下载画面](validation/etm-ddr-usb-board-20261101/web-final/svg-download.png)。
