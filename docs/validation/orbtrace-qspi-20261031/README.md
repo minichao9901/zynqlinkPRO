@@ -2,7 +2,7 @@
 
 本轮按用户授权固化本次 7020/120MHz 优化配对，后续 ETM 滤波改动未合入。启动拨码由用户切到 QSPI 并重新上电，软件读回 BOOT_MODE=1。
 
-实际烧写包在 [prebuilt/20261031_orbtrace_opt_qspi_7020_120](../../../prebuilt/20261031_orbtrace_opt_qspi_7020_120/README.md)。PL源 `bc9ced69f1f8f81647b8d62eaf74100d53fd883f`，固件配对已在 `742eeca` 验收；加载器与CLI后端源提交 `13caecfcf4b83c92608e6a6d4e994e2a237a2eda`。再次构建的BOOT.bin与实际已烧写文件SHA-256完全一致。构建源文件哈希、选项、BSP、三分区MD5校验和ELF布局在包内build_manifest.json；bit/ELF/BOOT身份由flash_manifest.json绑定。
+实际烧写包在 [prebuilt/20261031_orbtrace_opt_qspi_7020_120](../../../prebuilt/20261031_orbtrace_opt_qspi_7020_120/README.md)。PL源 `bc9ced69f1f8f81647b8d62eaf74100d53fd883f`，固件配对已在 `742eeca` 验收；加载器与CLI后端源提交 `74c480236cdb84dc2864f4ac5be58f0daee4ddc7`。再次构建的BOOT.bin与实际已烧写文件SHA-256完全一致。构建源文件哈希、选项、BSP、三分区MD5校验和ELF布局在包内build_manifest.json；bit/ELF/BOOT身份由flash_manifest.json绑定。
 
 | 检查 | 结果 |
 | --- | --- |
