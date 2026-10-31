@@ -65,6 +65,8 @@ H743继续使用superlinkPRO迁入的目标识别、ETMv4配置、Funnel/ETF/TPI
 C++解码、TraceStore和Web分析/导出；接收设备使用Zynq ETM-LA。
 F103专用的ETMv3编程模式重启不用于H743。诊断CSR和后续DDR后端不应按F103协议硬编码。
 旧Kingst参考只证明离线回归；尚未把H743接Zynq上板采集标记为已验收。
+可迁移target用例已保存到`etm-service/firmware/stm32h743_cdc_trace/`，
+含源文件、链接脚本、CherryUSB许可证和构建脚本；外部H743 SDK仍须提供，目标编译/上板待验。
 
 换板后先核对接线、电平、板上HSE和实际固件，载入其匹配ELF/源码，
 选自己的循环入口；初始化入口`trace_hook_entry`需要复位后命中。

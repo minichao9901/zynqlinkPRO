@@ -43,6 +43,7 @@ ALIASES={
  'deps.check':'tools/verify_dependencies.py',
  'target.fixtures':'tools/build_f103_fixtures.py','target.cdc-build':'firmware/target/stm32f103_cdc_trace/build.ps1',
  'target.cdc-tests':'firmware/target/stm32f103_cdc_trace/tests/run_tests.ps1',
+ 'target.h743-build':'etm-service/firmware/stm32h743_cdc_trace/build.ps1',
  'target.scope-build':'firmware/target/stm32f103_scope/build.ps1','target.hpm-build':'firmware/target/hpm5301_perf/build.ps1',
  'native.build':'etm-service/build-decoder.ps1',
 }

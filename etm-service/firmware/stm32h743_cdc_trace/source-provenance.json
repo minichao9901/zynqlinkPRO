@@ -1,0 +1,240 @@
+{
+  "sourceRepository": "superlinkPRO",
+  "sourceRevision": "be75311236da2665a2edc54b9b4d4561f0219456",
+  "method": "git show fixed commit; source, linker, CherryUSB license and build helper only",
+  "notMigrated": [
+    "historical fw.* and frequency variant binaries; fixture already binds its original ELF",
+    "external STM32H743 SDK"
+  ],
+  "files": [
+    {
+      "sourcePath": "etm/firmware/stm32h743_cdc_trace/README.md",
+      "path": "etm-service/firmware/stm32h743_cdc_trace/README.upstream.md",
+      "bytes": 5636,
+      "sha256": "02ed8dea8db1553e68e89ac1264a628874480f97b919e852a793396c1a0736c1"
+    },
+    {
+      "sourcePath": "etm/firmware/stm32h743_cdc_trace/VARIANTS.md",
+      "path": "etm-service/firmware/stm32h743_cdc_trace/VARIANTS.upstream.md",
+      "bytes": 8032,
+      "sha256": "565b566ee43f6014e8aa6dc163cddb581b58cf0d35ff567b61ee98210d3c22f9"
+    },
+    {
+      "sourcePath": "etm/firmware/stm32h743_cdc_trace/build.ps1",
+      "path": "etm-service/firmware/stm32h743_cdc_trace/build.ps1",
+      "bytes": 9286,
+      "sha256": "0f5df1f92299a4e74fe87deaf00f0ccb3f66c09502e6c32bf966ba02ab7de14a"
+    },
+    {
+      "sourcePath": "etm/firmware/stm32h743_cdc_trace/cherryusb/LICENSE",
+      "path": "etm-service/firmware/stm32h743_cdc_trace/cherryusb/LICENSE",
+      "bytes": 11357,
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+      "sourcePath": "etm/firmware/stm32h743_cdc_trace/cherryusb/VERSION",
+      "path": "etm-service/firmware/stm32h743_cdc_trace/cherryusb/VERSION",
+      "bytes": 86,
+      "sha256": "5e628b42e5f7eeb10ead759669541a73c6c1d7e29217a79eb67a96c6fb9191aa"
+    },
+    {
+      "sourcePath": "etm/firmware/stm32h743_cdc_trace/cherryusb/class/cdc/usb_cdc.h",
+      "path": "etm-service/firmware/stm32h743_cdc_trace/cherryusb/class/cdc/usb_cdc.h",
+      "bytes": 46886,
+      "sha256": "a8d25b954d5dbfd0d03659651c79af342abe8e5b993fefa278cd8246fa64e476"
+    },
+    {
+      "sourcePath": "etm/firmware/stm32h743_cdc_trace/cherryusb/class/cdc/usbd_cdc.h",
+      "path": "etm-service/firmware/stm32h743_cdc_trace/cherryusb/class/cdc/usbd_cdc.h",
+      "bytes": 180,
+      "sha256": "556229fcbdc505d927d3d82f5423463b78a182b948b4c9e8a59b294eaebcb06b"
+    },
+    {
+      "sourcePath": "etm/firmware/stm32h743_cdc_trace/cherryusb/class/cdc/usbd_cdc_acm.c",
+      "path": "etm-service/firmware/stm32h743_cdc_trace/cherryusb/class/cdc/usbd_cdc_acm.c",
+      "bytes": 4952,
+      "sha256": "cf483b1962b7c8d4c1047935d40c6ef14ed3d6e78dd72d6b22879ff682972879"
+    },
+    {
+      "sourcePath": "etm/firmware/stm32h743_cdc_trace/cherryusb/class/cdc/usbd_cdc_acm.h",
+      "path": "etm-service/firmware/stm32h743_cdc_trace/cherryusb/class/cdc/usbd_cdc_acm.h",
+      "bytes": 810,
+      "sha256": "bfcc0101c13f537658ab09f480f22e65003385d25fad7fb4d57da33f7908e8da"
+    },
+    {
+      "sourcePath": "etm/firmware/stm32h743_cdc_trace/cherryusb/common/usb_dc.h",
+      "path": "etm-service/firmware/stm32h743_cdc_trace/cherryusb/common/usb_dc.h",
+      "bytes": 5571,
+      "sha256": "b086beabb5da7871e1311d2d48fc1eb910902352b6c647d98c87991dd8156932"
+    },
+    {
+      "sourcePath": "etm/firmware/stm32h743_cdc_trace/cherryusb/common/usb_dcache.h",
+      "path": "etm-service/firmware/stm32h743_cdc_trace/cherryusb/common/usb_dcache.h",
+      "bytes": 565,
+      "sha256": "69325427ad4c3a3a426793190be6b7da775fdfb044c73b409ef273d3746aaf70"
+    },
+    {
+      "sourcePath": "etm/firmware/stm32h743_cdc_trace/cherryusb/common/usb_def.h",
+      "path": "etm-service/firmware/stm32h743_cdc_trace/cherryusb/common/usb_def.h",
+      "bytes": 42303,
+      "sha256": "dbfbeac7e6541dcb486a4c521bceb3d69ec8a1edd4b3796aa24bad230194e15a"
+    },
+    {
+      "sourcePath": "etm/firmware/stm32h743_cdc_trace/cherryusb/common/usb_errno.h",
+      "path": "etm-service/firmware/stm32h743_cdc_trace/cherryusb/common/usb_errno.h",
+      "bytes": 567,
+      "sha256": "58cfb7de877feaa747feceeddc26c11e4c93485c8e9456058fa4adb6cf7a9631"
+    },
+    {
+      "sourcePath": "etm/firmware/stm32h743_cdc_trace/cherryusb/common/usb_hc.h",
+      "path": "etm-service/firmware/stm32h743_cdc_trace/cherryusb/common/usb_hc.h",
+      "bytes": 2729,
+      "sha256": "359b3ea61fabfe683cc10e284aa45ac95a8c61898d83846002c93c99a1e63cc5"
+    },
+    {
+      "sourcePath": "etm/firmware/stm32h743_cdc_trace/cherryusb/common/usb_list.h",
+      "path": "etm-service/firmware/stm32h743_cdc_trace/cherryusb/common/usb_list.h",
+      "bytes": 12521,
+      "sha256": "2ba9f6b76d7785b8d700bc46fa57d63902664ccf0608a0ab3cab9a74e8a2c61d"
+    },
+    {
+      "sourcePath": "etm/firmware/stm32h743_cdc_trace/cherryusb/common/usb_log.h",
+      "path": "etm-service/firmware/stm32h743_cdc_trace/cherryusb/common/usb_log.h",
+      "bytes": 4151,
+      "sha256": "f2ebbff64ee9346e8c3fedb01c75b826cab0b347f61979b4853aa53d24da236d"
+    },
+    {
+      "sourcePath": "etm/firmware/stm32h743_cdc_trace/cherryusb/common/usb_memcpy.h",
+      "path": "etm-service/firmware/stm32h743_cdc_trace/cherryusb/common/usb_memcpy.h",
+      "bytes": 2091,
+      "sha256": "660ca7ab49f88be0354113eb86b3df71617a797313e83497513252ecaf5901c5"
+    },
+    {
+      "sourcePath": "etm/firmware/stm32h743_cdc_trace/cherryusb/common/usb_mempool.h",
+      "path": "etm-service/firmware/stm32h743_cdc_trace/cherryusb/common/usb_mempool.h",
+      "bytes": 3648,
+      "sha256": "4dc698c07e23fe2c42594ab03f1ab679d42bdedc6513f0480123b42efb394afb"
+    },
+    {
+      "sourcePath": "etm/firmware/stm32h743_cdc_trace/cherryusb/common/usb_osal.h",
+      "path": "etm-service/firmware/stm32h743_cdc_trace/cherryusb/common/usb_osal.h",
+      "bytes": 2674,
+      "sha256": "fdc134bfb481de6706b2b99d65ebaccc98f580e7e3437a2e9af8910b0a776dbc"
+    },
+    {
+      "sourcePath": "etm/firmware/stm32h743_cdc_trace/cherryusb/common/usb_otg.h",
+      "path": "etm-service/firmware/stm32h743_cdc_trace/cherryusb/common/usb_otg.h",
+      "bytes": 728,
+      "sha256": "ae2c0f768468d12ca125e8d4de305fd32f5dc2589fb700e82982e529e6c49b62"
+    },
+    {
+      "sourcePath": "etm/firmware/stm32h743_cdc_trace/cherryusb/common/usb_ringbuffer.h",
+      "path": "etm-service/firmware/stm32h743_cdc_trace/cherryusb/common/usb_ringbuffer.h",
+      "bytes": 15076,
+      "sha256": "992e142365fc6c1662adce2bca1bd43049d30d36b34f50242d88cf88ab665798"
+    },
+    {
+      "sourcePath": "etm/firmware/stm32h743_cdc_trace/cherryusb/common/usb_util.h",
+      "path": "etm-service/firmware/stm32h743_cdc_trace/cherryusb/common/usb_util.h",
+      "bytes": 6560,
+      "sha256": "c62fc34ce1abf2d81219dbf4bfc77eacdd837da60e737d6511a5261854cb0465"
+    },
+    {
+      "sourcePath": "etm/firmware/stm32h743_cdc_trace/cherryusb/common/usb_version.h",
+      "path": "etm-service/firmware/stm32h743_cdc_trace/cherryusb/common/usb_version.h",
+      "bytes": 470,
+      "sha256": "90aac36e7fed7687a25cbab32129c8df6c2b64591d7f1cb3fb6d2dbd1073d5f5"
+    },
+    {
+      "sourcePath": "etm/firmware/stm32h743_cdc_trace/cherryusb/config/usb_config.h",
+      "path": "etm-service/firmware/stm32h743_cdc_trace/cherryusb/config/usb_config.h",
+      "bytes": 1891,
+      "sha256": "53ef8455ac88c3444875b0104a5a6a6068a2e7d79da754ce8439b3022a551ec0"
+    },
+    {
+      "sourcePath": "etm/firmware/stm32h743_cdc_trace/cherryusb/core/usbd_core.c",
+      "path": "etm-service/firmware/stm32h743_cdc_trace/cherryusb/core/usbd_core.c",
+      "bytes": 48285,
+      "sha256": "409b74d21a58335d67c19e01cab99447c05443d408b94aad72d3627e34793f56"
+    },
+    {
+      "sourcePath": "etm/firmware/stm32h743_cdc_trace/cherryusb/core/usbd_core.h",
+      "path": "etm-service/firmware/stm32h743_cdc_trace/cherryusb/core/usbd_core.h",
+      "bytes": 3928,
+      "sha256": "7f2d455e2d32e9e0f66f8c88718c1e64afd0b2f5f58e97bc6b513d0afc5176e1"
+    },
+    {
+      "sourcePath": "etm/firmware/stm32h743_cdc_trace/cherryusb/port/dwc2/usb_dc_dwc2.c",
+      "path": "etm-service/firmware/stm32h743_cdc_trace/cherryusb/port/dwc2/usb_dc_dwc2.c",
+      "bytes": 48044,
+      "sha256": "bd7ab81cfe4849ad9f9b16b5c74cb9f2537334d20442536eacdc3d96d15d3afa"
+    },
+    {
+      "sourcePath": "etm/firmware/stm32h743_cdc_trace/cherryusb/port/dwc2/usb_dwc2_param.h",
+      "path": "etm-service/firmware/stm32h743_cdc_trace/cherryusb/port/dwc2/usb_dwc2_param.h",
+      "bytes": 16223,
+      "sha256": "893902a4ed7ad4a963005037e66a3d20e694eebb388429f8480bf44ec17f1a75"
+    },
+    {
+      "sourcePath": "etm/firmware/stm32h743_cdc_trace/cherryusb/port/dwc2/usb_dwc2_reg.h",
+      "path": "etm-service/firmware/stm32h743_cdc_trace/cherryusb/port/dwc2/usb_dwc2_reg.h",
+      "bytes": 140764,
+      "sha256": "02dc261ad23f64ecb27df358928474091dbf8be6d997adeafed631179d22bd6e"
+    },
+    {
+      "sourcePath": "etm/firmware/stm32h743_cdc_trace/cherryusb/port/dwc2/usb_glue_st_h7b0.c",
+      "path": "etm-service/firmware/stm32h743_cdc_trace/cherryusb/port/dwc2/usb_glue_st_h7b0.c",
+      "bytes": 5084,
+      "sha256": "b3bd87dca15864938f8d9232a10128173e917ec477334d1583b9b19afac0b057"
+    },
+    {
+      "sourcePath": "etm/firmware/stm32h743_cdc_trace/ld/stm32h743.ld",
+      "path": "etm-service/firmware/stm32h743_cdc_trace/ld/stm32h743.ld",
+      "bytes": 3168,
+      "sha256": "9cd34a35152f487f58d4eede02f7540d7839af386a3a5e89c22ba3c62057409e"
+    },
+    {
+      "sourcePath": "etm/firmware/stm32h743_cdc_trace/src/boot_probe.c",
+      "path": "etm-service/firmware/stm32h743_cdc_trace/src/boot_probe.c",
+      "bytes": 2710,
+      "sha256": "bd6af261399a103035b44b3afdd4fd52b338adf0f69ff6a45e62b87ae260fa7d"
+    },
+    {
+      "sourcePath": "etm/firmware/stm32h743_cdc_trace/src/main.c",
+      "path": "etm-service/firmware/stm32h743_cdc_trace/src/main.c",
+      "bytes": 17048,
+      "sha256": "7811d2135878fbf11c0feeb546766a92aa00473c8620b1e2cb94d9e1c99e1b0b"
+    },
+    {
+      "sourcePath": "etm/firmware/stm32h743_cdc_trace/src/runtime.c",
+      "path": "etm-service/firmware/stm32h743_cdc_trace/src/runtime.c",
+      "bytes": 801,
+      "sha256": "70665bddd0e5946ad9ec038a3584f089ec2d74cc2124c6205e388a23997dcef1"
+    },
+    {
+      "sourcePath": "etm/firmware/stm32h743_cdc_trace/src/trace_hooks.c",
+      "path": "etm-service/firmware/stm32h743_cdc_trace/src/trace_hooks.c",
+      "bytes": 3913,
+      "sha256": "20a80dfd8d931bd04e8fc22eb039b91166f9c1d1cb93a715328d9fa534d63065"
+    },
+    {
+      "sourcePath": "etm/firmware/stm32h743_cdc_trace/src/trace_hooks.h",
+      "path": "etm-service/firmware/stm32h743_cdc_trace/src/trace_hooks.h",
+      "bytes": 2636,
+      "sha256": "178465769786349777d467778bca81fdcfc8513df3923aa038526b62d91d3b92"
+    },
+    {
+      "sourcePath": "etm/firmware/stm32h743_cdc_trace/src/usb_dc_low_level.c",
+      "path": "etm-service/firmware/stm32h743_cdc_trace/src/usb_dc_low_level.c",
+      "bytes": 4395,
+      "sha256": "6bb4218a0f4759acc94861ff7f488bbd3428e6bf99b2c035442ccc0e337ced7a"
+    },
+    {
+      "sourcePath": "etm/firmware/tools/BuildTools.psm1",
+      "path": "etm-service/firmware/tools/BuildTools.psm1",
+      "bytes": 1941,
+      "sha256": "a8cc9370a81948d4f7f69f037e985c159070815b14990e871c66db921a9e7f8f"
+    }
+  ],
+  "hardwareAccepted": false
+}

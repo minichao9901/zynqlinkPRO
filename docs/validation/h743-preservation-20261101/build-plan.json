@@ -1,0 +1,32 @@
+{
+  "ok": true,
+  "value": {
+    "id": "etm-service/firmware/stm32h743_cdc_trace/build.ps1",
+    "requestedName": "target.h743-build",
+    "steps": [
+      {
+        "runtime": "powershell",
+        "executable": "C:\\Program Files\\WindowsApps\\OpenAI.CodexPrimaryRuntime.v26-1029-1117-0_26.1029.1117.0_x64__3k8sg7r9htsxt\\dependencies\\native\\powershell\\pwsh.EXE",
+        "arguments": [
+          "-NoProfile",
+          "-File",
+          "E:\\zynqlinkPRO_etm_calibration\\etm-service\\firmware\\stm32h743_cdc_trace\\build.ps1",
+          "-CoreMHz",
+          "60",
+          "-TraceR",
+          "12",
+          "-SdkRoot",
+          "H743_SDK_DIR",
+          "-OutputDir",
+          "NEW_OUTPUT_DIR",
+          "-NoPublish"
+        ],
+        "cwd": "E:\\zynqlinkPRO_etm_calibration"
+      }
+    ],
+    "environment": {},
+    "effects": "same as the underlying registered tool; no tool runs during planning",
+    "output": "underlying stdout/stderr and exit code are preserved",
+    "dependencyValidation": "interpreter discovery only; SDK/vendor/hardware requirements remain tool-specific"
+  }
+}
