@@ -37,6 +37,7 @@ ALIASES={
  'etm.fixture':'tools/prepare_etm_offline_fixture.py','etm.equivalence':'tools/verify_etm_native_equivalence.py',
  'etm.records-check':'tools/verify_retained_records.py',
  'etm.ddr-plan':'tools/plan_etm_ddr.py',
+ 'etm.ddr-geometry':'tools/check_etm_ddr_geometry.py',
  'etm.stress':'tools/stress_etm_web.py',
  'etm.diag-sim':'tools/test_orbtrace_diagnostics.py',
  'etm.ddr-sim':'tools/test_etm_ddr_packetizer.py',
