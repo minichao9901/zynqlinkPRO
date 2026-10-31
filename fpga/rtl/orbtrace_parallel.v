@@ -3,7 +3,7 @@
 // 1 = one pin, 2 = two pins, 3 = four pins. Hold it stable until next reset.
 // The consumer receives unformatted bytes tagged with CoreSight source ID.
 // No USB/ORBFlow framing is added here.
-module orbtrace_parallel #(parameter USE_IO_CLOCK=0,USE_INPUT_DELAY=0,INPUT_DELAY_VALUE=16,RAW_DIAGNOSTIC=0,SEPARATE_DIAGNOSTIC_RESET=0) (
+module orbtrace_parallel #(parameter USE_IO_CLOCK=0,USE_INPUT_DELAY=0,INPUT_DELAY_VALUE=16,RAW_DIAGNOSTIC=0,SEPARATE_DIAGNOSTIC_RESET=0,ENABLE_DDR_TAP=0) (
     input wire trace_clk,input wire [3:0] trace_data,input wire [1:0] width,
     input wire trace_io_clk,input wire trace_pad_clk,input wire sample_clk,
     input wire clk,input wire rst,
@@ -12,8 +12,16 @@ module orbtrace_parallel #(parameter USE_IO_CLOCK=0,USE_INPUT_DELAY=0,INPUT_DELA
     output wire synced,output wire overflow,
     input wire diagnostic_reset,
     output wire [1:0] diagnostic_flags,
-    output wire [31:0] dropped_frames,parser_errors,sync_acquisitions,frame_highwater
+    output wire [31:0] dropped_frames,parser_errors,sync_acquisitions,frame_highwater,
+    input wire ddr_hold,input wire ddr_sampler_gate,input wire ddr_parser_enable,input wire ddr_parser_clear,
+    output wire [127:0] ddr_frame,ddr_tail,
+    output wire ddr_frame_event,ddr_parser_error,ddr_sync_event,ddr_tail_ambiguous,
+    output wire [4:0] ddr_tail_bytes
 );
+    wire ddr_mode=ENABLE_DDR_TAP ? ddr_hold : 1'b0;
+    (* ASYNC_REG="TRUE" *) reg [1:0] ddr_mode_ref;
+    always @(posedge sample_clk or posedge rst)
+      if(rst)ddr_mode_ref<=0;else ddr_mode_ref<={ddr_mode_ref[0],ddr_mode};
     (* ASYNC_REG="TRUE" *) reg [1:0] trace_reset,sys_reset;
     always @(posedge trace_clk or posedge rst)
       if(rst)trace_reset<=3;else trace_reset<={trace_reset[0],1'b0};
@@ -74,6 +82,7 @@ module orbtrace_parallel #(parameter USE_IO_CLOCK=0,USE_INPUT_DELAY=0,INPUT_DELA
       reg byte_toggle;
       wire [127:0] parsed_frame;
       wire parsed_toggle,parsed_synced;
+      wire parsed_tail_ambiguous;
       always @(posedge sample_clk or posedge rst)
         if(rst)sample_reset<=3;else sample_reset<={sample_reset[0],1'b0};
       always @(posedge sample_clk or posedge sample_reset[1])
@@ -85,16 +94,21 @@ module orbtrace_parallel #(parameter USE_IO_CLOCK=0,USE_INPUT_DELAY=0,INPUT_DELA
           previous<=pad_sync;
           filtered<=(pad_sync & previous) | ((pad_sync | previous) & filtered);
           stable_clock<=filtered[4];
-          if(filtered[4]!=stable_clock)begin
+          if(ENABLE_DDR_TAP && ddr_mode_ref[1] && ddr_parser_clear)begin
+            half<=0;low_nibble<=0;sampled_byte<=0;byte_toggle<=0;
+          end else if((!ddr_mode_ref[1] || ddr_sampler_gate) && filtered[4]!=stable_clock)begin
             half<=!half;
             if(!half)low_nibble<=filtered[3:0];
             else begin sampled_byte<={filtered[3:0],low_nibble};byte_toggle<=!byte_toggle;end
           end
         end
-      orbtrace_tpiu_stream parser(.clk(sample_clk),.rst(sample_reset[1]),
+      orbtrace_tpiu_stream #(.GATED(ENABLE_DDR_TAP)) parser(.clk(sample_clk),.rst(sample_reset[1]),
         .byte_in(sampled_byte),.byte_toggle(byte_toggle),
         .frame(parsed_frame),.frame_toggle(parsed_toggle),.synced(parsed_synced),.malformed(parser_malformed),
-        .malformed_event(malformed_event),.sync_event(sync_event));
+        .malformed_event(malformed_event),.sync_event(sync_event),
+        .capture_enable(!ddr_mode_ref[1] || ddr_parser_enable),.capture_clear(ddr_mode_ref[1] && ddr_parser_clear),
+        .tail_data(ddr_tail),.tail_bytes(ddr_tail_bytes),.tail_ambiguous(parsed_tail_ambiguous));
+      assign ddr_tail_ambiguous=parsed_tail_ambiguous || half;
       assign frame=parsed_frame;assign toggle=parsed_toggle;
       assign capture_clk=sample_clk;assign capture_reset=sample_reset[1];
       assign oversample_synced=parsed_synced;
@@ -172,15 +186,21 @@ module orbtrace_parallel #(parameter USE_IO_CLOCK=0,USE_INPUT_DELAY=0,INPUT_DELA
       assign parser_malformed=1'b0;
       assign malformed_event=1'b0;assign sync_event=1'b0;
     end endgenerate
+    generate if(RAW_DIAGNOSTIC!=4)begin: no_ddr_tail
+      assign ddr_tail=0;assign ddr_tail_bytes=0;assign ddr_tail_ambiguous=0;
+    end endgenerate
+    assign ddr_frame=frame;
+    assign ddr_frame_event=toggle!=previous_toggle;
+    assign ddr_parser_error=malformed_event;assign ddr_sync_event=sync_event;
     wire [127:0] fifo_data;
     wire fifo_valid,fifo_ready,trace_overflow;
     wire [3:0] frame_level;
     wire frame_drop;
-    orbtrace_frame_fifo fifo(.wr_clk(capture_clk),.wr_rst(capture_reset),
-      .wr_data(frame),.wr_valid(toggle!=previous_toggle),.overflow(trace_overflow),
-      .rd_clk(clk),.rd_rst(sys_reset[1]),.rd_data(fifo_data),.rd_valid(fifo_valid),.rd_ready(fifo_ready),
+    orbtrace_frame_fifo fifo(.wr_clk(capture_clk),.wr_rst(capture_reset || ddr_mode_ref[1]),
+      .wr_data(frame),.wr_valid(toggle!=previous_toggle && !ddr_mode_ref[1]),.overflow(trace_overflow),
+      .rd_clk(clk),.rd_rst(sys_reset[1] || ddr_mode),.rd_data(fifo_data),.rd_valid(fifo_valid),.rd_ready(fifo_ready),
       .wr_level(frame_level),.drop_event(frame_drop));
-    wire [3:0] level_after_push=frame_level+((toggle!=previous_toggle && !capture_reset && !frame_drop)?1'b1:1'b0);
+    wire [3:0] level_after_push=frame_level+((toggle!=previous_toggle && !capture_reset && !frame_drop && !ddr_mode_ref[1])?1'b1:1'b0);
     orbtrace_rx_diagnostics diagnostics(.source_clk(capture_clk),.capture_reset(capture_reset),
       .diagnostic_reset(SEPARATE_DIAGNOSTIC_RESET ? diagnostic_reset : rst),
       .frame_drop(frame_drop),.parser_error(malformed_event),.sync_acquire(sync_event),.frame_level(level_after_push),

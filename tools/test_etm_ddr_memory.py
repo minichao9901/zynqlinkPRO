@@ -45,8 +45,11 @@ def pattern_case(session,out,base,end,length,seed,clock,save):
     report=dict(bytes=length,seed=seed,actualClocks=clock,passed=False,stage='preflight')
     save(report)
     before=session.read_words(CSR,16)
-    if before[0]!=0x45444d31 or before[11]!=3 or before[12:14]!=[base,end]:raise ValueError('DDR pilot signature/capabilities/range mismatch')
+    if before[0]!=0x45444d31 or before[11]&3!=3 or before[12:14]!=[base,end]:raise ValueError('DDR signature/capabilities/range mismatch')
     if before[2]&1:raise ValueError('Previous hardware operation is still active; no start issued')
+    if before[15]!=1:
+        if not before[11]&4:raise ValueError('Unknown source mode without framed capture capability')
+        session.run(f'physwr -force {CSR+60:#x} 1\nputs PATTERN_MODE_SELECTED')
     expected_id=(before[10]+1)&0xffffffff
     report['expectedCaptureId']=expected_id
     tail_address=base+(length//4)*4;tail_words=min(4,(end-tail_address)//4)

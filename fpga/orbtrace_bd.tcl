@@ -50,6 +50,15 @@ if {[get_property CONFIG.FIFO_ADDR_BITS [get_bd_cells orbtrace_0]] != $raw_fifo_
   error "ORBTrace diagnostic FIFO depth did not propagate"
 }
 puts "ORBTRACE_RAW_DIAGNOSTIC=$raw_diag FIFO_ADDR_BITS=$raw_fifo_bits"
+set want_ddr_tap [expr {[info exists ::env(ZYNQLINK_ETM_DDR)] && $::env(ZYNQLINK_ETM_DDR)==1 && $raw_diag==4}]
+if {[lsearch -exact [list_property [get_bd_cells orbtrace_0]] CONFIG.ENABLE_DDR] < 0 ||
+    ![llength [get_bd_pins -quiet orbtrace_0/ddr_frame]]} {
+  update_module_reference [get_ips system_orbtrace_0_0]
+}
+if {[get_property CONFIG.ENABLE_DDR [get_bd_cells orbtrace_0]] != $want_ddr_tap} {
+  set_property CONFIG.ENABLE_DDR $want_ddr_tap [get_bd_cells orbtrace_0]
+  set raw_trace_changed 1
+}
 # Vivado 2018.3 XDC files cannot contain Tcl conditionals; select this
 # diagnostic-only exception at the project level and never apply it to IDDR.
 set os_xdc [file join [file dirname [info script]] constraints orbtrace_raw_oversample.xdc]

@@ -43,6 +43,7 @@ ALIASES={
  'etm.ddr-sim':'tools/test_etm_ddr_packetizer.py',
  'etm.ddr-writer-sim':'tools/test_etm_ddr_writer.py',
  'etm.capture-sim':'tools/test_etm_capture_primitives.py',
+ 'etm.ddr-trace-sim':'tools/test_orbtrace_ddr_trace.py',
  'etm.ddr-memory-test':'tools/test_etm_ddr_memory.py',
  'etm.ddr-load-stress':'tools/stress_etm_ddr_loads.py',
  'deps.check':'tools/verify_dependencies.py',

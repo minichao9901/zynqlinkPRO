@@ -5,13 +5,21 @@ module orbtrace_controller #(
   parameter C_S_AXI_DATA_WIDTH=32,
   parameter C_S_AXI_ADDR_WIDTH=8,
   parameter FIFO_ADDR_BITS=12,
-  parameter RAW_DIAGNOSTIC=0
+  parameter RAW_DIAGNOSTIC=0,
+  parameter ENABLE_DDR=0
 )(
   (* X_INTERFACE_PARAMETER="ASSOCIATED_BUSIF s_axi, ASSOCIATED_RESET rst_n" *)
   input wire clk,input wire rst_n,
   (* X_INTERFACE_PARAMETER="FREQ_HZ 200000000" *)
   input wire ref_clk,
   input wire trace_clk,input wire [3:0] trace_data,
+  input wire ddr_hold,input wire ddr_prepare,
+  input wire ddr_sampler_gate,input wire ddr_parser_enable,input wire ddr_parser_clear,
+  output wire ddr_ready,output wire ddr_idle,output wire ddr_receiver_ready_ref,
+  (* X_INTERFACE_PARAMETER="FREQ_HZ 200000000" *) output wire ddr_ref_clk,
+  output wire [127:0] ddr_frame,ddr_tail,
+  output wire ddr_frame_event,ddr_parser_error,ddr_sync_event,ddr_tail_ambiguous,
+  output wire [4:0] ddr_tail_bytes,
   input wire [C_S_AXI_ADDR_WIDTH-1:0] s_axi_awaddr,input wire [2:0] s_axi_awprot,
   input wire s_axi_awvalid,output wire s_axi_awready,
   input wire [31:0] s_axi_wdata,input wire [3:0] s_axi_wstrb,
@@ -23,6 +31,8 @@ module orbtrace_controller #(
   output reg s_axi_rvalid,input wire s_axi_rready
 );
   reg enable;
+  wire ddr_owned=ENABLE_DDR ? ddr_hold : 1'b0;
+  wire ddr_clear=ENABLE_DDR ? ddr_prepare : 1'b0;
   wire clear;
   reg [1:0] width;
   reg [5:0] clear_count;
@@ -40,6 +50,10 @@ module orbtrace_controller #(
   always @(posedge clk or negedge rst_n)
     if(!rst_n)delay_ready_sync<=0;else delay_ready_sync<={delay_ready_sync[0],delay_calibrated};
   assign delay_ready=delay_ready_sync[1];
+  assign ddr_ref_clk=delay_ref_clock;
+  assign ddr_idle=!enable;
+  assign ddr_ready=!enable && level==0 && clear_count==0 && delay_ready;
+  assign ddr_receiver_ready_ref=delay_calibrated;
   wire [7:0] byte_data;
   wire [6:0] source_id;
   wire byte_valid,receiver_synced,receiver_overflow;
@@ -47,13 +61,16 @@ module orbtrace_controller #(
   wire [31:0] dropped_frames,parser_errors,sync_acquisitions,frame_highwater;
   wire [FIFO_ADDR_BITS:0] level;
   wire fifo_full=level==(1<<FIFO_ADDR_BITS);
-  wire receiver_reset=!rst_n || !enable || clear_count!=0 || !delay_ready;
-  orbtrace_parallel #(.USE_IO_CLOCK(1),.USE_INPUT_DELAY(1),.RAW_DIAGNOSTIC(RAW_DIAGNOSTIC),.SEPARATE_DIAGNOSTIC_RESET(1)) receiver(.trace_clk(trace_clock),.trace_io_clk(trace_io_clock),.trace_pad_clk(trace_clk),.sample_clk(delay_ref_clock),.trace_data(trace_data),.width(width),
+  wire receiver_reset=!rst_n || !(enable || ddr_owned) || clear_count!=0 || !delay_ready;
+  orbtrace_parallel #(.USE_IO_CLOCK(1),.USE_INPUT_DELAY(1),.RAW_DIAGNOSTIC(RAW_DIAGNOSTIC),.SEPARATE_DIAGNOSTIC_RESET(1),.ENABLE_DDR_TAP(ENABLE_DDR)) receiver(.trace_clk(trace_clock),.trace_io_clk(trace_io_clock),.trace_pad_clk(trace_clk),.sample_clk(delay_ref_clock),.trace_data(trace_data),.width(width),
     .clk(clk),.rst(receiver_reset),.data(byte_data),.channel(source_id),
     .valid(byte_valid),.ready(!fifo_full && !receiver_reset),
     .synced(receiver_synced),.overflow(receiver_overflow),.diagnostic_reset(!rst_n || clear_count!=0 || clear),
     .diagnostic_flags(receiver_faults),.dropped_frames(dropped_frames),.parser_errors(parser_errors),
-    .sync_acquisitions(sync_acquisitions),.frame_highwater(frame_highwater));
+    .sync_acquisitions(sync_acquisitions),.frame_highwater(frame_highwater),
+    .ddr_hold(ddr_owned),.ddr_sampler_gate(ddr_sampler_gate),.ddr_parser_enable(ddr_parser_enable),.ddr_parser_clear(ddr_parser_clear),
+    .ddr_frame(ddr_frame),.ddr_tail(ddr_tail),.ddr_tail_bytes(ddr_tail_bytes),.ddr_frame_event(ddr_frame_event),
+    .ddr_parser_error(ddr_parser_error),.ddr_sync_event(ddr_sync_event),.ddr_tail_ambiguous(ddr_tail_ambiguous));
   (* ram_style="block" *) reg [15:0] records[0:(1<<FIFO_ADDR_BITS)-1];
   reg [FIFO_ADDR_BITS:0] write_ptr,read_ptr;
   reg [31:0] total;
@@ -72,7 +89,7 @@ module orbtrace_controller #(
   assign s_axi_bresp=0;
   assign s_axi_rresp=0;
   wire write_commit=aw_pending && w_pending && !s_axi_bvalid;
-  assign clear=write_commit && write_address[C_S_AXI_ADDR_WIDTH-1:2]==1 && write_strobe[0] && write_data[1];
+  assign clear=(write_commit && !ddr_owned && write_address[C_S_AXI_ADDR_WIDTH-1:2]==1 && write_strobe[0] && write_data[1]) || ddr_clear;
   wire read_accept=s_axi_arvalid && s_axi_arready;
   wire pop=read_accept && s_axi_araddr[C_S_AXI_ADDR_WIDTH-1:2]==4 && level!=0 && clear_count==0 && !clear;
   wire push=byte_valid && !fifo_full && !receiver_reset;
@@ -98,13 +115,14 @@ module orbtrace_controller #(
       if(s_axi_bvalid && s_axi_bready)s_axi_bvalid<=0;
       if(write_commit)begin
         aw_pending<=0;w_pending<=0;s_axi_bvalid<=1;
-        if(write_address[C_S_AXI_ADDR_WIDTH-1:2]==1 && write_strobe[0])begin
+        if(write_address[C_S_AXI_ADDR_WIDTH-1:2]==1 && write_strobe[0] && !ddr_owned)begin
           enable<=write_data[0];
           // Width changes are accepted only with an explicit fresh capture.
           if(write_data[1] || !enable)width<=write_data[3:2];
         end
       end
       if(clear || clear_count!=0)begin
+        if(ddr_clear)begin enable<=0;width<=3;end
         if(clear)clear_count<=32;
         write_ptr<=0;read_ptr<=0;total<=0;lost<=0;seen_sync<=0;
         record_highwater<=0;record_stall_cycles<=0;delay_loss_count<=0;

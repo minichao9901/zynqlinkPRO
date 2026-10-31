@@ -3,12 +3,15 @@
 // FF 7F may interrupt a frame; FF FF FF 7F is only legal between frames.
 // Acquire either byte phase from FSYNC; the clock/data relationship may put
 // the oversampler on a byte boundary or half a nibble ahead.
-module orbtrace_tpiu_stream (
+module orbtrace_tpiu_stream #(parameter GATED=0)(
     input wire clk,input wire rst,
     input wire [7:0] byte_in,input wire byte_toggle,
     output reg [127:0] frame,output reg frame_toggle,
     output reg synced,output reg malformed,
-    output wire malformed_event,output wire sync_event
+    output wire malformed_event,output wire sync_event,
+    input wire capture_enable,input wire capture_clear,
+    output wire [127:0] tail_data,output wire [4:0] tail_bytes,
+    output wire tail_ambiguous
 );
     reg seen_toggle,have_previous;
     reg [7:0] previous_byte,first_byte;
@@ -22,18 +25,23 @@ module orbtrace_tpiu_stream (
     wire [31:0] next_sync = {sync_shift[23:0],shifted_byte};
     wire [31:0] next_direct = {direct_shift[23:0],byte_in};
     wire [15:0] pair = {first_byte,stream_byte};
-    assign sync_event=!rst && byte_event && have_previous && !synced &&
+    wire parser_run=!GATED || capture_enable;
+    wire parser_clear=GATED && capture_clear;
+    assign tail_bytes=synced && !full_sync_tail ? {1'b0,pair_count,1'b0}+have_first : 0;
+    assign tail_data=have_first ? {frame_build[119:0],first_byte} : frame_build;
+    assign tail_ambiguous=full_sync_tail || (have_first && first_byte==8'hff);
+    assign sync_event=!rst && !parser_clear && parser_run && byte_event && have_previous && !synced &&
       (next_sync==32'hffff_ff7f || next_direct==32'hffff_ff7f);
-    assign malformed_event=!rst && byte_event && have_previous && synced && have_first &&
+    assign malformed_event=!rst && !parser_clear && parser_run && byte_event && have_previous && synced && have_first &&
       ((full_sync_tail && pair!=16'hff7f) || (!full_sync_tail && pair==16'hffff && pair_count!=0));
 
     always @(posedge clk or posedge rst)
-      if(rst)begin
+      if(rst || parser_clear)begin
         seen_toggle<=0;have_previous<=0;previous_byte<=0;first_byte<=0;
         sync_shift<=0;direct_shift<=0;shifted_phase<=0;
         frame_build<=0;pair_count<=0;have_first<=0;full_sync_tail<=0;
         frame<=0;frame_toggle<=0;synced<=0;malformed<=0;
-      end else if(byte_event)begin
+      end else if(parser_run && byte_event)begin
         seen_toggle<=byte_toggle;
         previous_byte<=byte_in;
         if(!have_previous)have_previous<=1;

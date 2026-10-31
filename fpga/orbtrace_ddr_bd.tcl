@@ -24,6 +24,7 @@ if {$want_etm_ddr && ![llength [get_bd_cells -quiet etm_ddr_0]]} {
   set ddr_rst [get_bd_pins rst_ps7_0_50M/peripheral_aresetn]
   foreach cell {etm_ddr_0 etm_ddr_bus ps7_0_axi_periph} {
     foreach p [get_bd_pins -of_objects [get_bd_cells $cell] -filter {TYPE == clk && DIR == I}] {
+      if {[get_property NAME $p] eq "etm_ddr_0/ref_clk"} {continue}
       if {![llength [get_bd_nets -quiet -of_objects $p]]} {connect_bd_net $ddr_clk $p}
     }
     foreach p [get_bd_pins -of_objects [get_bd_cells $cell] -filter {TYPE == rst && DIR == I}] {
@@ -36,6 +37,41 @@ if {$want_etm_ddr && ![llength [get_bd_cells -quiet etm_ddr_0]]} {
   set_property range 64K $ddr_seg
   set_property offset 0x40040000 $ddr_seg
   set etm_ddr_changed 1
+}
+if {$want_etm_ddr} {
+  if {![llength [get_bd_pins -quiet etm_ddr_0/ref_clk]] ||
+      [lsearch -exact [list_property [get_bd_cells etm_ddr_0]] CONFIG.ENABLE_TRACE_SOURCE]<0} {
+    update_module_reference [get_ips system_etm_ddr_0_0]
+  }
+  set trace_source_supported [expr {$raw_diag==4}]
+  if {[get_property CONFIG.ENABLE_TRACE_SOURCE [get_bd_cells etm_ddr_0]] != $trace_source_supported} {
+    set_property CONFIG.ENABLE_TRACE_SOURCE $trace_source_supported [get_bd_cells etm_ddr_0]
+    set etm_ddr_changed 1
+  }
+  foreach {from to} {
+    orbtrace_0/ddr_ref_clk etm_ddr_0/ref_clk
+    orbtrace_0/ddr_ready etm_ddr_0/trace_ready
+    orbtrace_0/ddr_idle etm_ddr_0/trace_idle
+    orbtrace_0/ddr_receiver_ready_ref etm_ddr_0/trace_receiver_ready_ref
+    orbtrace_0/ddr_frame etm_ddr_0/trace_frame
+    orbtrace_0/ddr_tail etm_ddr_0/trace_tail
+    orbtrace_0/ddr_tail_bytes etm_ddr_0/trace_tail_bytes
+    orbtrace_0/ddr_frame_event etm_ddr_0/trace_frame_event
+    orbtrace_0/ddr_parser_error etm_ddr_0/trace_parser_error
+    orbtrace_0/ddr_sync_event etm_ddr_0/trace_sync_event
+    orbtrace_0/ddr_tail_ambiguous etm_ddr_0/trace_tail_ambiguous
+    etm_ddr_0/trace_hold orbtrace_0/ddr_hold
+    etm_ddr_0/trace_prepare orbtrace_0/ddr_prepare
+    etm_ddr_0/trace_sampler_gate orbtrace_0/ddr_sampler_gate
+    etm_ddr_0/trace_parser_enable orbtrace_0/ddr_parser_enable
+    etm_ddr_0/trace_parser_clear orbtrace_0/ddr_parser_clear
+  } {
+    set src [get_bd_pins $from];set dst [get_bd_pins $to]
+    if {![llength [get_bd_nets -quiet -of_objects $dst]]} {
+      connect_bd_net $src $dst
+      set etm_ddr_changed 1
+    }
+  }
 }
 puts "ETM_DDR_MEMORY_PILOT=$want_etm_ddr"
 validate_bd_design
