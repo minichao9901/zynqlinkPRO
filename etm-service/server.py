@@ -674,7 +674,14 @@ CAPTURE_MAX_SECONDS = 1.0
 CAPTURE_MAX_SAMPLES = 500_000_000
 
 
-def capture_extent(depth, rate, seconds):
+def capture_extent(depth, rate, seconds, transport=None):
+    if transport is not None:
+        # ZET1 has no physical sample count or hardware start/stop timestamp.
+        # Host receive/drain time cannot prove the requested target window.
+        return dict(known=False,requestedSeconds=seconds,requestedSamples=None,
+                    actualSeconds=None,actualSamples=None,complete=None,
+                    hostReceiveSeconds=transport.get('hostSeconds'),sampleCountMeasured=False,
+                    basis='ZET1 has no measured hardware window; host receive/drain time is separate')
     actual = int(depth)
     if actual <= 0 or rate <= 0 or not math.isfinite(seconds) or seconds <= 0:
         raise ValueError('采集实际深度或采样率无效，不能确认本次窗口')
@@ -1048,15 +1055,14 @@ def capture_job(jid, sid, options):
         # 单窗采集 + 单次解码，不自动分窗。
         # 旧的 export_slices() 保留，仅用于读取/离线重建历史长窗记录（streamed.schema=3）。
         do_export(v, str((folder / ('capture.' + options.get('rawFormat','csv'))).resolve()), [options['clock']] + options['data'])
-        depth = v.cmd('get-actual-sample-depth')
-        span = v.cmd('get-actual-sample-time')
-        m = meta(sid)
-        extent=capture_extent(depth,options['rate'],options['seconds'])
-        m.update(actualDepth=depth, actualTime=span, stopped=stopped,captureStatus='saved',captureExtent=extent)
         transport=getattr(v,'capture_quality',None)
+        depth = v.cmd('get-actual-sample-depth') if transport is None else None
+        span = v.cmd('get-actual-sample-time') if transport is None else None
+        m = meta(sid)
+        extent=capture_extent(depth,options['rate'],options['seconds'],transport)
+        m.update(actualDepth=depth, actualTime=span, stopped=stopped,captureStatus='saved',captureExtent=extent)
         if transport is not None:
             m['captureQuality']=transport
-            extent.update(basis='host monotonic receive window; not target cycle timing',sampleCountMeasured=False)
             save(sid,m)
             change(jid,captureQuality=transport)
             if transport.get('loss') or not transport.get('synced') or not transport.get('ended'):
@@ -1069,10 +1075,13 @@ def capture_job(jid, sid, options):
                 diagnosis='；'+' / '.join(facts) if facts else '；探针未提供细分诊断，尚不能区分采样和后级堵塞'
                 raise ValueError(('Zynq接收未完整通过：loss=%s / synced=%s / ended=%s；原始数据已保留' %
                     (transport.get('loss'),transport.get('synced'),transport.get('ended')))+diagnosis)
-        if not extent['complete']:
+        if extent['complete'] is False:
             m['captureWarning']=(f"请求 {options['seconds']*1000:g} ms，实际仅采集 "
                 f"{extent['actualSeconds']*1000:.3f} ms；可能达到 Zynq FIFO/接收窗口容量。"
                 '原始波形保留，以下解码仅覆盖实际窗口。')
+            change(jid,captureWarning=m['captureWarning'])
+        elif transport is not None:
+            m['captureWarning']='接收已结束；ZET1未测量硬件录制时长或采样数，不能据主机接收/排空时间确认录满请求窗口。'
             change(jid,captureWarning=m['captureWarning'])
         try:
             m['laFilter']=read_glitch_settings(folder/'capture.kvdat',options['rate'])

@@ -94,6 +94,13 @@ class BridgeTests(unittest.TestCase):
                     while (backend.jobs[job['job']]['state'] not in ('done','error') or backend.jobs[job['job']].get('_laLease')) and time.monotonic()<deadline:time.sleep(.05)
                     self.assertEqual(backend.jobs[job['job']]['state'],'done' if instructions else 'error',backend.jobs[job['job']])
                 self.assertEqual(calls,[b'start'])
+                record=Path(folder)/'records'/job['record']
+                metadata=json.loads((record/'session.json').read_text(encoding='utf8'))
+                self.assertIsNone(metadata['actualDepth']);self.assertIsNone(metadata['actualTime'])
+                self.assertIsNone(metadata['captureExtent']['actualSamples'])
+                self.assertIsNone(metadata['captureExtent']['actualSeconds'])
+                self.assertIsNone(metadata['captureExtent']['complete'])
+                self.assertFalse(metadata['captureExtent']['sampleCountMeasured'])
                 if instructions is None:
                     record=Path(folder)/'records'/job['record']
                     self.assertEqual((record/'capture.bin').read_bytes(),raw)
