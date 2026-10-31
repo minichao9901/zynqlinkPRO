@@ -83,6 +83,9 @@ u8 Buffer[MEMORY_SIZE] ALIGNMENT_CACHELINE;
 #endif
 
 /**************************** Type Definitions *******************************/
+/* Chapter 9 reads/writes CurrentConfig through UserDataPtr. A NULL context
+ * writes SET_CONFIGURATION's byte to OCM address zero (the reset vector). */
+static XUsbPs_Local UsbLocal;
 
 /***************** Macros (Inline Functions) Definitions *********************/
 
@@ -323,6 +326,8 @@ static int UsbIntrExample(XScuGic *IntcInstancePtr, XUsbPs *UsbInstancePtr,
 	if (XST_SUCCESS != Status) {
 		goto out;
 	}
+	UsbLocal.CurrentConfig = 0;
+	UsbInstancePtr->UserDataPtr = &UsbLocal;
 
 	/* Set the handler for receiving frames. */
 	Status = XUsbPs_IntrSetHandler(UsbInstancePtr, UsbIntrHandler, NULL,
@@ -449,6 +454,7 @@ out:
 static void UsbIntrHandler(void *CallBackRef, u32 Mask)
 {
     if(Mask & XUSBPS_IXR_UR_MASK){
+        UsbLocal.CurrentConfig = 0;
         extern int chry_dap_usb_session_reset(void);
         chry_dap_usb_session_reset();
         probe_usb_reset();
