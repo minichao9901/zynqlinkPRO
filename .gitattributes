@@ -29,6 +29,12 @@ etm-service/vendor/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
 etm-service/CMakeLists.txt -text whitespace=cr-at-eol
 etm-service/build-decoder.ps1 -text whitespace=cr-at-eol
 
+# Fixed H743 source export and the identity-bound diagnostic delivery pair.
+etm-service/firmware/stm32h743_cdc_trace/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+etm-service/firmware/tools/BuildTools.psm1 -text whitespace=cr-at-eol
+prebuilt/etm-diag-raw4-20261101/** -text whitespace=cr-at-eol
+docs/validation/etm-diag-board-20261101/** -text -whitespace
+
 # J-Scope raw wire evidence and deferred patch snapshots are exact artifacts.
 docs/validation/combined-etm-web-20261031/deferred-hss/**/*.jsp binary
 docs/validation/combined-etm-web-20261031/deferred-hss/*.patch -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol

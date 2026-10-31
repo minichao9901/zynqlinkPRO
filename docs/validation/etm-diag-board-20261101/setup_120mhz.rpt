@@ -1,0 +1,1587 @@
+Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2018.3 (win64) Build 2405991 Thu Dec  6 23:38:27 MST 2018
+| Date         : Sun Nov  1 03:11:04 2026
+| Host         : DESKTOP-0UKCPD3 running 64-bit major release  (build 9200)
+| Command      : report_timing -delay_type max -max_paths 20 -file E:/zynqlinkPRO_etm_calibration/build/etm-diag-io-repair-20261101/setup_120mhz.rpt
+| Design       : system_wrapper
+| Device       : 7z020-clg400
+| Speed File   : -2  PRODUCTION 1.11 2014-09-11
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+Timing Report
+
+Slack (MET) :             0.181ns  (required time - arrival time)
+  Source:                 system_i/swd_controller_0/inst/short_core_clock_reg/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            swclk_0
+  Path Group:             **default**
+  Path Type:              Max at Slow Process Corner
+  Requirement:            7.000ns  (MaxDelay Path 7.000ns)
+  Data Path Delay:        6.819ns  (logic 4.467ns (65.511%)  route 2.352ns (34.489%))
+  Logic Levels:           2  (LUT6=1 OBUFT=1)
+  Output Delay:           0.000ns
+  Timing Exception:       MaxDelay Path 7.000ns -datapath_only
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+    SLICE_X105Y132                                    0.000     0.000 r  system_i/swd_controller_0/inst/short_core_clock_reg/C
+    SLICE_X105Y132       FDCE (Prop_fdce_C_Q)         0.379     0.379 r  system_i/swd_controller_0/inst/short_core_clock_reg/Q
+                         net (fo=1, routed)           0.390     0.769    system_i/swd_controller_0/inst/u_jtag_core/u_shift/short_core_clock
+    SLICE_X102Y129       LUT6 (Prop_lut6_I5_O)        0.105     0.874 r  system_i/swd_controller_0/inst/u_jtag_core/u_shift/u_clock_iobuf_i_1_comp/O
+                         net (fo=2, routed)           1.962     2.836    system_i/swd_controller_0/inst/u_clock_iobuf/I
+    D20                  OBUFT (Prop_obuft_I_O)       3.983     6.819 r  system_i/swd_controller_0/inst/u_clock_iobuf/OBUFT/O
+                         net (fo=1, unset)            0.000     6.819    swclk_0
+    D20                                                               r  swclk_0 (INOUT)
+  -------------------------------------------------------------------    -------------------
+
+                         max delay                    7.000     7.000    
+                         output delay                -0.000     7.000    
+  -------------------------------------------------------------------
+                         required time                          7.000    
+                         arrival time                          -6.819    
+  -------------------------------------------------------------------
+                         slack                                  0.181    
+
+Slack (MET) :             0.224ns  (required time - arrival time)
+  Source:                 system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/swd_controller_0/inst/u_jtag_core/state_reg[0]/D
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        7.878ns  (logic 1.954ns (24.803%)  route 5.924ns (75.197%))
+  Logic Levels:           15  (LUT2=2 LUT3=1 LUT4=1 LUT5=2 LUT6=9)
+  Clock Path Skew:        -0.062ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.475ns = ( 10.808 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.745ns
+    Clock Pessimism Removal (CPR):    0.208ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.666     2.745    system_i/swd_controller_0/inst/u_probe_sampler/clk
+    SLICE_X95Y117        FDCE                                         r  system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X95Y117        FDCE (Prop_fdce_C_Q)         0.379     3.124 r  system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/Q
+                         net (fo=5, routed)           0.698     3.822    system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg_n_0
+    SLICE_X94Y118        LUT6 (Prop_lut6_I0_O)        0.105     3.927 r  system_i/swd_controller_0/inst/u_probe_sampler/fifo_reg_i_10/O
+                         net (fo=15, routed)          0.541     4.468    system_i/swd_controller_0/inst/u_probe_stream/u_rtt/sampler_active
+    SLICE_X96Y118        LUT6 (Prop_lut6_I0_O)        0.105     4.573 r  system_i/swd_controller_0/inst/u_probe_stream/u_rtt/wr_shift[31]_i_3/O
+                         net (fo=120, routed)         0.423     4.996    system_i/swd_controller_0/inst/u_swd_batch_engine/stream_active
+    SLICE_X97Y119        LUT6 (Prop_lut6_I5_O)        0.105     5.101 r  system_i/swd_controller_0/inst/u_swd_batch_engine/FSM_sequential_state[4]_i_24/O
+                         net (fo=7, routed)           0.139     5.240    system_i/swd_controller_0/inst/u_swd_core/core_mode_sel
+    SLICE_X97Y119        LUT6 (Prop_lut6_I5_O)        0.105     5.345 r  system_i/swd_controller_0/inst/u_swd_core/core_wait_cnt[23]_i_10/O
+                         net (fo=6, routed)           0.440     5.785    system_i/swd_controller_0/inst/u_jtag_core/swd_result_valid
+    SLICE_X96Y117        LUT3 (Prop_lut3_I2_O)        0.105     5.890 r  system_i/swd_controller_0/inst/u_jtag_core/core_wait_cnt[23]_i_7/O
+                         net (fo=42, routed)          0.379     6.269    system_i/swd_controller_0/inst/u_jtag_core/core_result_valid
+    SLICE_X97Y117        LUT5 (Prop_lut5_I4_O)        0.105     6.374 f  system_i/swd_controller_0/inst/u_jtag_core/fifo_waddr[8]_i_4/O
+                         net (fo=16, routed)          0.237     6.611    system_i/swd_controller_0/inst/u_probe_sampler/pending_time_reg[0]_0
+    SLICE_X97Y117        LUT4 (Prop_lut4_I0_O)        0.105     6.716 r  system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_4__0/O
+                         net (fo=2, routed)           0.260     6.976    system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_4__0_n_0
+    SLICE_X99Y118        LUT6 (Prop_lut6_I0_O)        0.105     7.081 r  system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_18/O
+                         net (fo=1, routed)           0.249     7.330    system_i/swd_controller_0/inst/u_dap_packet_engine/sampler_next_valid
+    SLICE_X96Y118        LUT6 (Prop_lut6_I2_O)        0.105     7.435 r  system_i/swd_controller_0/inst/u_dap_packet_engine/FSM_sequential_state[1]_i_9/O
+                         net (fo=2, routed)           0.268     7.703    system_i/swd_controller_0/inst/u_dap_packet_engine/core_next_valid_sel
+    SLICE_X97Y118        LUT2 (Prop_lut2_I1_O)        0.105     7.808 r  system_i/swd_controller_0/inst/u_dap_packet_engine/req[3]_i_7/O
+                         net (fo=2, routed)           0.371     8.179    system_i/swd_controller_0/inst/u_dap_packet_engine/next_valid0
+    SLICE_X98Y118        LUT6 (Prop_lut6_I3_O)        0.105     8.284 r  system_i/swd_controller_0/inst/u_dap_packet_engine/rv_collect_i_5/O
+                         net (fo=1, routed)           0.430     8.714    system_i/swd_controller_0/inst/u_jtag_core/rv_frame_reg[38]_0
+    SLICE_X99Y121        LUT2 (Prop_lut2_I1_O)        0.105     8.819 f  system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4/O
+                         net (fo=5, routed)           0.376     9.195    system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4_n_0
+    SLICE_X98Y122        LUT5 (Prop_lut5_I3_O)        0.105     9.300 r  system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0/O
+                         net (fo=4, routed)           0.382     9.682    system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0_n_0
+    SLICE_X100Y123       LUT6 (Prop_lut6_I1_O)        0.105     9.787 f  system_i/swd_controller_0/inst/u_jtag_core/state[0]_i_2__0/O
+                         net (fo=1, routed)           0.445    10.232    system_i/swd_controller_0/inst/u_jtag_core/state[0]_i_2__0_n_0
+    SLICE_X99Y120        LUT6 (Prop_lut6_I0_O)        0.105    10.337 r  system_i/swd_controller_0/inst/u_jtag_core/state[0]_i_1__0/O
+                         net (fo=1, routed)           0.286    10.623    system_i/swd_controller_0/inst/u_jtag_core/state[0]_i_1__0_n_0
+    SLICE_X98Y120        FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/state_reg[0]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     9.239    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.316 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.493    10.808    system_i/swd_controller_0/inst/u_jtag_core/clk
+    SLICE_X98Y120        FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/state_reg[0]/C
+                         clock pessimism              0.208    11.016    
+                         clock uncertainty           -0.154    10.862    
+    SLICE_X98Y120        FDCE (Setup_fdce_C_D)       -0.015    10.847    system_i/swd_controller_0/inst/u_jtag_core/state_reg[0]
+  -------------------------------------------------------------------
+                         required time                         10.847    
+                         arrival time                         -10.623    
+  -------------------------------------------------------------------
+                         slack                                  0.224    
+
+Slack (MET) :             0.238ns  (required time - arrival time)
+  Source:                 system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[11]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        7.741ns  (logic 1.954ns (25.244%)  route 5.787ns (74.756%))
+  Logic Levels:           15  (LUT2=2 LUT3=1 LUT4=1 LUT5=3 LUT6=8)
+  Clock Path Skew:        -0.064ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.473ns = ( 10.806 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.745ns
+    Clock Pessimism Removal (CPR):    0.208ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.666     2.745    system_i/swd_controller_0/inst/u_probe_sampler/clk
+    SLICE_X95Y117        FDCE                                         r  system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X95Y117        FDCE (Prop_fdce_C_Q)         0.379     3.124 r  system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/Q
+                         net (fo=5, routed)           0.698     3.822    system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg_n_0
+    SLICE_X94Y118        LUT6 (Prop_lut6_I0_O)        0.105     3.927 r  system_i/swd_controller_0/inst/u_probe_sampler/fifo_reg_i_10/O
+                         net (fo=15, routed)          0.541     4.468    system_i/swd_controller_0/inst/u_probe_stream/u_rtt/sampler_active
+    SLICE_X96Y118        LUT6 (Prop_lut6_I0_O)        0.105     4.573 r  system_i/swd_controller_0/inst/u_probe_stream/u_rtt/wr_shift[31]_i_3/O
+                         net (fo=120, routed)         0.423     4.996    system_i/swd_controller_0/inst/u_swd_batch_engine/stream_active
+    SLICE_X97Y119        LUT6 (Prop_lut6_I5_O)        0.105     5.101 r  system_i/swd_controller_0/inst/u_swd_batch_engine/FSM_sequential_state[4]_i_24/O
+                         net (fo=7, routed)           0.139     5.240    system_i/swd_controller_0/inst/u_swd_core/core_mode_sel
+    SLICE_X97Y119        LUT6 (Prop_lut6_I5_O)        0.105     5.345 r  system_i/swd_controller_0/inst/u_swd_core/core_wait_cnt[23]_i_10/O
+                         net (fo=6, routed)           0.440     5.785    system_i/swd_controller_0/inst/u_jtag_core/swd_result_valid
+    SLICE_X96Y117        LUT3 (Prop_lut3_I2_O)        0.105     5.890 r  system_i/swd_controller_0/inst/u_jtag_core/core_wait_cnt[23]_i_7/O
+                         net (fo=42, routed)          0.379     6.269    system_i/swd_controller_0/inst/u_jtag_core/core_result_valid
+    SLICE_X97Y117        LUT5 (Prop_lut5_I4_O)        0.105     6.374 f  system_i/swd_controller_0/inst/u_jtag_core/fifo_waddr[8]_i_4/O
+                         net (fo=16, routed)          0.237     6.611    system_i/swd_controller_0/inst/u_probe_sampler/pending_time_reg[0]_0
+    SLICE_X97Y117        LUT4 (Prop_lut4_I0_O)        0.105     6.716 r  system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_4__0/O
+                         net (fo=2, routed)           0.260     6.976    system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_4__0_n_0
+    SLICE_X99Y118        LUT6 (Prop_lut6_I0_O)        0.105     7.081 r  system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_18/O
+                         net (fo=1, routed)           0.249     7.330    system_i/swd_controller_0/inst/u_dap_packet_engine/sampler_next_valid
+    SLICE_X96Y118        LUT6 (Prop_lut6_I2_O)        0.105     7.435 r  system_i/swd_controller_0/inst/u_dap_packet_engine/FSM_sequential_state[1]_i_9/O
+                         net (fo=2, routed)           0.268     7.703    system_i/swd_controller_0/inst/u_dap_packet_engine/core_next_valid_sel
+    SLICE_X97Y118        LUT2 (Prop_lut2_I1_O)        0.105     7.808 r  system_i/swd_controller_0/inst/u_dap_packet_engine/req[3]_i_7/O
+                         net (fo=2, routed)           0.371     8.179    system_i/swd_controller_0/inst/u_dap_packet_engine/next_valid0
+    SLICE_X98Y118        LUT6 (Prop_lut6_I3_O)        0.105     8.284 r  system_i/swd_controller_0/inst/u_dap_packet_engine/rv_collect_i_5/O
+                         net (fo=1, routed)           0.430     8.714    system_i/swd_controller_0/inst/u_jtag_core/rv_frame_reg[38]_0
+    SLICE_X99Y121        LUT2 (Prop_lut2_I1_O)        0.105     8.819 f  system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4/O
+                         net (fo=5, routed)           0.376     9.195    system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4_n_0
+    SLICE_X98Y122        LUT5 (Prop_lut5_I3_O)        0.105     9.300 r  system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0/O
+                         net (fo=4, routed)           0.251     9.551    system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0_n_0
+    SLICE_X98Y122        LUT6 (Prop_lut6_I4_O)        0.105     9.656 f  system_i/swd_controller_0/inst/u_jtag_core/rdata[31]_i_5/O
+                         net (fo=1, routed)           0.243     9.899    system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata_reg[0]_1
+    SLICE_X100Y121       LUT5 (Prop_lut5_I2_O)        0.105    10.004 r  system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata[31]_i_1/O
+                         net (fo=32, routed)          0.482    10.486    system_i/swd_controller_0/inst/u_jtag_core/u_shift_n_48
+    SLICE_X100Y121       FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[11]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     9.239    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.316 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.491    10.806    system_i/swd_controller_0/inst/u_jtag_core/clk
+    SLICE_X100Y121       FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[11]/C
+                         clock pessimism              0.208    11.014    
+                         clock uncertainty           -0.154    10.860    
+    SLICE_X100Y121       FDCE (Setup_fdce_C_CE)      -0.136    10.724    system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[11]
+  -------------------------------------------------------------------
+                         required time                         10.724    
+                         arrival time                         -10.486    
+  -------------------------------------------------------------------
+                         slack                                  0.238    
+
+Slack (MET) :             0.238ns  (required time - arrival time)
+  Source:                 system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[23]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        7.741ns  (logic 1.954ns (25.244%)  route 5.787ns (74.756%))
+  Logic Levels:           15  (LUT2=2 LUT3=1 LUT4=1 LUT5=3 LUT6=8)
+  Clock Path Skew:        -0.064ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.473ns = ( 10.806 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.745ns
+    Clock Pessimism Removal (CPR):    0.208ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.666     2.745    system_i/swd_controller_0/inst/u_probe_sampler/clk
+    SLICE_X95Y117        FDCE                                         r  system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X95Y117        FDCE (Prop_fdce_C_Q)         0.379     3.124 r  system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/Q
+                         net (fo=5, routed)           0.698     3.822    system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg_n_0
+    SLICE_X94Y118        LUT6 (Prop_lut6_I0_O)        0.105     3.927 r  system_i/swd_controller_0/inst/u_probe_sampler/fifo_reg_i_10/O
+                         net (fo=15, routed)          0.541     4.468    system_i/swd_controller_0/inst/u_probe_stream/u_rtt/sampler_active
+    SLICE_X96Y118        LUT6 (Prop_lut6_I0_O)        0.105     4.573 r  system_i/swd_controller_0/inst/u_probe_stream/u_rtt/wr_shift[31]_i_3/O
+                         net (fo=120, routed)         0.423     4.996    system_i/swd_controller_0/inst/u_swd_batch_engine/stream_active
+    SLICE_X97Y119        LUT6 (Prop_lut6_I5_O)        0.105     5.101 r  system_i/swd_controller_0/inst/u_swd_batch_engine/FSM_sequential_state[4]_i_24/O
+                         net (fo=7, routed)           0.139     5.240    system_i/swd_controller_0/inst/u_swd_core/core_mode_sel
+    SLICE_X97Y119        LUT6 (Prop_lut6_I5_O)        0.105     5.345 r  system_i/swd_controller_0/inst/u_swd_core/core_wait_cnt[23]_i_10/O
+                         net (fo=6, routed)           0.440     5.785    system_i/swd_controller_0/inst/u_jtag_core/swd_result_valid
+    SLICE_X96Y117        LUT3 (Prop_lut3_I2_O)        0.105     5.890 r  system_i/swd_controller_0/inst/u_jtag_core/core_wait_cnt[23]_i_7/O
+                         net (fo=42, routed)          0.379     6.269    system_i/swd_controller_0/inst/u_jtag_core/core_result_valid
+    SLICE_X97Y117        LUT5 (Prop_lut5_I4_O)        0.105     6.374 f  system_i/swd_controller_0/inst/u_jtag_core/fifo_waddr[8]_i_4/O
+                         net (fo=16, routed)          0.237     6.611    system_i/swd_controller_0/inst/u_probe_sampler/pending_time_reg[0]_0
+    SLICE_X97Y117        LUT4 (Prop_lut4_I0_O)        0.105     6.716 r  system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_4__0/O
+                         net (fo=2, routed)           0.260     6.976    system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_4__0_n_0
+    SLICE_X99Y118        LUT6 (Prop_lut6_I0_O)        0.105     7.081 r  system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_18/O
+                         net (fo=1, routed)           0.249     7.330    system_i/swd_controller_0/inst/u_dap_packet_engine/sampler_next_valid
+    SLICE_X96Y118        LUT6 (Prop_lut6_I2_O)        0.105     7.435 r  system_i/swd_controller_0/inst/u_dap_packet_engine/FSM_sequential_state[1]_i_9/O
+                         net (fo=2, routed)           0.268     7.703    system_i/swd_controller_0/inst/u_dap_packet_engine/core_next_valid_sel
+    SLICE_X97Y118        LUT2 (Prop_lut2_I1_O)        0.105     7.808 r  system_i/swd_controller_0/inst/u_dap_packet_engine/req[3]_i_7/O
+                         net (fo=2, routed)           0.371     8.179    system_i/swd_controller_0/inst/u_dap_packet_engine/next_valid0
+    SLICE_X98Y118        LUT6 (Prop_lut6_I3_O)        0.105     8.284 r  system_i/swd_controller_0/inst/u_dap_packet_engine/rv_collect_i_5/O
+                         net (fo=1, routed)           0.430     8.714    system_i/swd_controller_0/inst/u_jtag_core/rv_frame_reg[38]_0
+    SLICE_X99Y121        LUT2 (Prop_lut2_I1_O)        0.105     8.819 f  system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4/O
+                         net (fo=5, routed)           0.376     9.195    system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4_n_0
+    SLICE_X98Y122        LUT5 (Prop_lut5_I3_O)        0.105     9.300 r  system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0/O
+                         net (fo=4, routed)           0.251     9.551    system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0_n_0
+    SLICE_X98Y122        LUT6 (Prop_lut6_I4_O)        0.105     9.656 f  system_i/swd_controller_0/inst/u_jtag_core/rdata[31]_i_5/O
+                         net (fo=1, routed)           0.243     9.899    system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata_reg[0]_1
+    SLICE_X100Y121       LUT5 (Prop_lut5_I2_O)        0.105    10.004 r  system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata[31]_i_1/O
+                         net (fo=32, routed)          0.482    10.486    system_i/swd_controller_0/inst/u_jtag_core/u_shift_n_48
+    SLICE_X100Y121       FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[23]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     9.239    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.316 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.491    10.806    system_i/swd_controller_0/inst/u_jtag_core/clk
+    SLICE_X100Y121       FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[23]/C
+                         clock pessimism              0.208    11.014    
+                         clock uncertainty           -0.154    10.860    
+    SLICE_X100Y121       FDCE (Setup_fdce_C_CE)      -0.136    10.724    system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[23]
+  -------------------------------------------------------------------
+                         required time                         10.724    
+                         arrival time                         -10.486    
+  -------------------------------------------------------------------
+                         slack                                  0.238    
+
+Slack (MET) :             0.238ns  (required time - arrival time)
+  Source:                 system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[27]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        7.741ns  (logic 1.954ns (25.244%)  route 5.787ns (74.756%))
+  Logic Levels:           15  (LUT2=2 LUT3=1 LUT4=1 LUT5=3 LUT6=8)
+  Clock Path Skew:        -0.064ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.473ns = ( 10.806 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.745ns
+    Clock Pessimism Removal (CPR):    0.208ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.666     2.745    system_i/swd_controller_0/inst/u_probe_sampler/clk
+    SLICE_X95Y117        FDCE                                         r  system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X95Y117        FDCE (Prop_fdce_C_Q)         0.379     3.124 r  system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/Q
+                         net (fo=5, routed)           0.698     3.822    system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg_n_0
+    SLICE_X94Y118        LUT6 (Prop_lut6_I0_O)        0.105     3.927 r  system_i/swd_controller_0/inst/u_probe_sampler/fifo_reg_i_10/O
+                         net (fo=15, routed)          0.541     4.468    system_i/swd_controller_0/inst/u_probe_stream/u_rtt/sampler_active
+    SLICE_X96Y118        LUT6 (Prop_lut6_I0_O)        0.105     4.573 r  system_i/swd_controller_0/inst/u_probe_stream/u_rtt/wr_shift[31]_i_3/O
+                         net (fo=120, routed)         0.423     4.996    system_i/swd_controller_0/inst/u_swd_batch_engine/stream_active
+    SLICE_X97Y119        LUT6 (Prop_lut6_I5_O)        0.105     5.101 r  system_i/swd_controller_0/inst/u_swd_batch_engine/FSM_sequential_state[4]_i_24/O
+                         net (fo=7, routed)           0.139     5.240    system_i/swd_controller_0/inst/u_swd_core/core_mode_sel
+    SLICE_X97Y119        LUT6 (Prop_lut6_I5_O)        0.105     5.345 r  system_i/swd_controller_0/inst/u_swd_core/core_wait_cnt[23]_i_10/O
+                         net (fo=6, routed)           0.440     5.785    system_i/swd_controller_0/inst/u_jtag_core/swd_result_valid
+    SLICE_X96Y117        LUT3 (Prop_lut3_I2_O)        0.105     5.890 r  system_i/swd_controller_0/inst/u_jtag_core/core_wait_cnt[23]_i_7/O
+                         net (fo=42, routed)          0.379     6.269    system_i/swd_controller_0/inst/u_jtag_core/core_result_valid
+    SLICE_X97Y117        LUT5 (Prop_lut5_I4_O)        0.105     6.374 f  system_i/swd_controller_0/inst/u_jtag_core/fifo_waddr[8]_i_4/O
+                         net (fo=16, routed)          0.237     6.611    system_i/swd_controller_0/inst/u_probe_sampler/pending_time_reg[0]_0
+    SLICE_X97Y117        LUT4 (Prop_lut4_I0_O)        0.105     6.716 r  system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_4__0/O
+                         net (fo=2, routed)           0.260     6.976    system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_4__0_n_0
+    SLICE_X99Y118        LUT6 (Prop_lut6_I0_O)        0.105     7.081 r  system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_18/O
+                         net (fo=1, routed)           0.249     7.330    system_i/swd_controller_0/inst/u_dap_packet_engine/sampler_next_valid
+    SLICE_X96Y118        LUT6 (Prop_lut6_I2_O)        0.105     7.435 r  system_i/swd_controller_0/inst/u_dap_packet_engine/FSM_sequential_state[1]_i_9/O
+                         net (fo=2, routed)           0.268     7.703    system_i/swd_controller_0/inst/u_dap_packet_engine/core_next_valid_sel
+    SLICE_X97Y118        LUT2 (Prop_lut2_I1_O)        0.105     7.808 r  system_i/swd_controller_0/inst/u_dap_packet_engine/req[3]_i_7/O
+                         net (fo=2, routed)           0.371     8.179    system_i/swd_controller_0/inst/u_dap_packet_engine/next_valid0
+    SLICE_X98Y118        LUT6 (Prop_lut6_I3_O)        0.105     8.284 r  system_i/swd_controller_0/inst/u_dap_packet_engine/rv_collect_i_5/O
+                         net (fo=1, routed)           0.430     8.714    system_i/swd_controller_0/inst/u_jtag_core/rv_frame_reg[38]_0
+    SLICE_X99Y121        LUT2 (Prop_lut2_I1_O)        0.105     8.819 f  system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4/O
+                         net (fo=5, routed)           0.376     9.195    system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4_n_0
+    SLICE_X98Y122        LUT5 (Prop_lut5_I3_O)        0.105     9.300 r  system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0/O
+                         net (fo=4, routed)           0.251     9.551    system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0_n_0
+    SLICE_X98Y122        LUT6 (Prop_lut6_I4_O)        0.105     9.656 f  system_i/swd_controller_0/inst/u_jtag_core/rdata[31]_i_5/O
+                         net (fo=1, routed)           0.243     9.899    system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata_reg[0]_1
+    SLICE_X100Y121       LUT5 (Prop_lut5_I2_O)        0.105    10.004 r  system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata[31]_i_1/O
+                         net (fo=32, routed)          0.482    10.486    system_i/swd_controller_0/inst/u_jtag_core/u_shift_n_48
+    SLICE_X100Y121       FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[27]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     9.239    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.316 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.491    10.806    system_i/swd_controller_0/inst/u_jtag_core/clk
+    SLICE_X100Y121       FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[27]/C
+                         clock pessimism              0.208    11.014    
+                         clock uncertainty           -0.154    10.860    
+    SLICE_X100Y121       FDCE (Setup_fdce_C_CE)      -0.136    10.724    system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[27]
+  -------------------------------------------------------------------
+                         required time                         10.724    
+                         arrival time                         -10.486    
+  -------------------------------------------------------------------
+                         slack                                  0.238    
+
+Slack (MET) :             0.260ns  (required time - arrival time)
+  Source:                 system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[4]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        7.717ns  (logic 1.954ns (25.321%)  route 5.763ns (74.679%))
+  Logic Levels:           15  (LUT2=2 LUT3=1 LUT4=1 LUT5=3 LUT6=8)
+  Clock Path Skew:        -0.066ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.471ns = ( 10.804 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.745ns
+    Clock Pessimism Removal (CPR):    0.208ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.666     2.745    system_i/swd_controller_0/inst/u_probe_sampler/clk
+    SLICE_X95Y117        FDCE                                         r  system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X95Y117        FDCE (Prop_fdce_C_Q)         0.379     3.124 r  system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/Q
+                         net (fo=5, routed)           0.698     3.822    system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg_n_0
+    SLICE_X94Y118        LUT6 (Prop_lut6_I0_O)        0.105     3.927 r  system_i/swd_controller_0/inst/u_probe_sampler/fifo_reg_i_10/O
+                         net (fo=15, routed)          0.541     4.468    system_i/swd_controller_0/inst/u_probe_stream/u_rtt/sampler_active
+    SLICE_X96Y118        LUT6 (Prop_lut6_I0_O)        0.105     4.573 r  system_i/swd_controller_0/inst/u_probe_stream/u_rtt/wr_shift[31]_i_3/O
+                         net (fo=120, routed)         0.423     4.996    system_i/swd_controller_0/inst/u_swd_batch_engine/stream_active
+    SLICE_X97Y119        LUT6 (Prop_lut6_I5_O)        0.105     5.101 r  system_i/swd_controller_0/inst/u_swd_batch_engine/FSM_sequential_state[4]_i_24/O
+                         net (fo=7, routed)           0.139     5.240    system_i/swd_controller_0/inst/u_swd_core/core_mode_sel
+    SLICE_X97Y119        LUT6 (Prop_lut6_I5_O)        0.105     5.345 r  system_i/swd_controller_0/inst/u_swd_core/core_wait_cnt[23]_i_10/O
+                         net (fo=6, routed)           0.440     5.785    system_i/swd_controller_0/inst/u_jtag_core/swd_result_valid
+    SLICE_X96Y117        LUT3 (Prop_lut3_I2_O)        0.105     5.890 r  system_i/swd_controller_0/inst/u_jtag_core/core_wait_cnt[23]_i_7/O
+                         net (fo=42, routed)          0.379     6.269    system_i/swd_controller_0/inst/u_jtag_core/core_result_valid
+    SLICE_X97Y117        LUT5 (Prop_lut5_I4_O)        0.105     6.374 f  system_i/swd_controller_0/inst/u_jtag_core/fifo_waddr[8]_i_4/O
+                         net (fo=16, routed)          0.237     6.611    system_i/swd_controller_0/inst/u_probe_sampler/pending_time_reg[0]_0
+    SLICE_X97Y117        LUT4 (Prop_lut4_I0_O)        0.105     6.716 r  system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_4__0/O
+                         net (fo=2, routed)           0.260     6.976    system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_4__0_n_0
+    SLICE_X99Y118        LUT6 (Prop_lut6_I0_O)        0.105     7.081 r  system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_18/O
+                         net (fo=1, routed)           0.249     7.330    system_i/swd_controller_0/inst/u_dap_packet_engine/sampler_next_valid
+    SLICE_X96Y118        LUT6 (Prop_lut6_I2_O)        0.105     7.435 r  system_i/swd_controller_0/inst/u_dap_packet_engine/FSM_sequential_state[1]_i_9/O
+                         net (fo=2, routed)           0.268     7.703    system_i/swd_controller_0/inst/u_dap_packet_engine/core_next_valid_sel
+    SLICE_X97Y118        LUT2 (Prop_lut2_I1_O)        0.105     7.808 r  system_i/swd_controller_0/inst/u_dap_packet_engine/req[3]_i_7/O
+                         net (fo=2, routed)           0.371     8.179    system_i/swd_controller_0/inst/u_dap_packet_engine/next_valid0
+    SLICE_X98Y118        LUT6 (Prop_lut6_I3_O)        0.105     8.284 r  system_i/swd_controller_0/inst/u_dap_packet_engine/rv_collect_i_5/O
+                         net (fo=1, routed)           0.430     8.714    system_i/swd_controller_0/inst/u_jtag_core/rv_frame_reg[38]_0
+    SLICE_X99Y121        LUT2 (Prop_lut2_I1_O)        0.105     8.819 f  system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4/O
+                         net (fo=5, routed)           0.376     9.195    system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4_n_0
+    SLICE_X98Y122        LUT5 (Prop_lut5_I3_O)        0.105     9.300 r  system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0/O
+                         net (fo=4, routed)           0.251     9.551    system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0_n_0
+    SLICE_X98Y122        LUT6 (Prop_lut6_I4_O)        0.105     9.656 f  system_i/swd_controller_0/inst/u_jtag_core/rdata[31]_i_5/O
+                         net (fo=1, routed)           0.243     9.899    system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata_reg[0]_1
+    SLICE_X100Y121       LUT5 (Prop_lut5_I2_O)        0.105    10.004 r  system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata[31]_i_1/O
+                         net (fo=32, routed)          0.458    10.462    system_i/swd_controller_0/inst/u_jtag_core/u_shift_n_48
+    SLICE_X100Y123       FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[4]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     9.239    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.316 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.489    10.804    system_i/swd_controller_0/inst/u_jtag_core/clk
+    SLICE_X100Y123       FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[4]/C
+                         clock pessimism              0.208    11.012    
+                         clock uncertainty           -0.154    10.858    
+    SLICE_X100Y123       FDCE (Setup_fdce_C_CE)      -0.136    10.722    system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[4]
+  -------------------------------------------------------------------
+                         required time                         10.722    
+                         arrival time                         -10.462    
+  -------------------------------------------------------------------
+                         slack                                  0.260    
+
+Slack (MET) :             0.267ns  (required time - arrival time)
+  Source:                 system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[0]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        7.714ns  (logic 1.954ns (25.332%)  route 5.760ns (74.668%))
+  Logic Levels:           15  (LUT2=2 LUT3=1 LUT4=1 LUT5=3 LUT6=8)
+  Clock Path Skew:        -0.062ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.475ns = ( 10.808 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.745ns
+    Clock Pessimism Removal (CPR):    0.208ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.666     2.745    system_i/swd_controller_0/inst/u_probe_sampler/clk
+    SLICE_X95Y117        FDCE                                         r  system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X95Y117        FDCE (Prop_fdce_C_Q)         0.379     3.124 r  system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/Q
+                         net (fo=5, routed)           0.698     3.822    system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg_n_0
+    SLICE_X94Y118        LUT6 (Prop_lut6_I0_O)        0.105     3.927 r  system_i/swd_controller_0/inst/u_probe_sampler/fifo_reg_i_10/O
+                         net (fo=15, routed)          0.541     4.468    system_i/swd_controller_0/inst/u_probe_stream/u_rtt/sampler_active
+    SLICE_X96Y118        LUT6 (Prop_lut6_I0_O)        0.105     4.573 r  system_i/swd_controller_0/inst/u_probe_stream/u_rtt/wr_shift[31]_i_3/O
+                         net (fo=120, routed)         0.423     4.996    system_i/swd_controller_0/inst/u_swd_batch_engine/stream_active
+    SLICE_X97Y119        LUT6 (Prop_lut6_I5_O)        0.105     5.101 r  system_i/swd_controller_0/inst/u_swd_batch_engine/FSM_sequential_state[4]_i_24/O
+                         net (fo=7, routed)           0.139     5.240    system_i/swd_controller_0/inst/u_swd_core/core_mode_sel
+    SLICE_X97Y119        LUT6 (Prop_lut6_I5_O)        0.105     5.345 r  system_i/swd_controller_0/inst/u_swd_core/core_wait_cnt[23]_i_10/O
+                         net (fo=6, routed)           0.440     5.785    system_i/swd_controller_0/inst/u_jtag_core/swd_result_valid
+    SLICE_X96Y117        LUT3 (Prop_lut3_I2_O)        0.105     5.890 r  system_i/swd_controller_0/inst/u_jtag_core/core_wait_cnt[23]_i_7/O
+                         net (fo=42, routed)          0.379     6.269    system_i/swd_controller_0/inst/u_jtag_core/core_result_valid
+    SLICE_X97Y117        LUT5 (Prop_lut5_I4_O)        0.105     6.374 f  system_i/swd_controller_0/inst/u_jtag_core/fifo_waddr[8]_i_4/O
+                         net (fo=16, routed)          0.237     6.611    system_i/swd_controller_0/inst/u_probe_sampler/pending_time_reg[0]_0
+    SLICE_X97Y117        LUT4 (Prop_lut4_I0_O)        0.105     6.716 r  system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_4__0/O
+                         net (fo=2, routed)           0.260     6.976    system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_4__0_n_0
+    SLICE_X99Y118        LUT6 (Prop_lut6_I0_O)        0.105     7.081 r  system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_18/O
+                         net (fo=1, routed)           0.249     7.330    system_i/swd_controller_0/inst/u_dap_packet_engine/sampler_next_valid
+    SLICE_X96Y118        LUT6 (Prop_lut6_I2_O)        0.105     7.435 r  system_i/swd_controller_0/inst/u_dap_packet_engine/FSM_sequential_state[1]_i_9/O
+                         net (fo=2, routed)           0.268     7.703    system_i/swd_controller_0/inst/u_dap_packet_engine/core_next_valid_sel
+    SLICE_X97Y118        LUT2 (Prop_lut2_I1_O)        0.105     7.808 r  system_i/swd_controller_0/inst/u_dap_packet_engine/req[3]_i_7/O
+                         net (fo=2, routed)           0.371     8.179    system_i/swd_controller_0/inst/u_dap_packet_engine/next_valid0
+    SLICE_X98Y118        LUT6 (Prop_lut6_I3_O)        0.105     8.284 r  system_i/swd_controller_0/inst/u_dap_packet_engine/rv_collect_i_5/O
+                         net (fo=1, routed)           0.430     8.714    system_i/swd_controller_0/inst/u_jtag_core/rv_frame_reg[38]_0
+    SLICE_X99Y121        LUT2 (Prop_lut2_I1_O)        0.105     8.819 f  system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4/O
+                         net (fo=5, routed)           0.376     9.195    system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4_n_0
+    SLICE_X98Y122        LUT5 (Prop_lut5_I3_O)        0.105     9.300 r  system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0/O
+                         net (fo=4, routed)           0.251     9.551    system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0_n_0
+    SLICE_X98Y122        LUT6 (Prop_lut6_I4_O)        0.105     9.656 f  system_i/swd_controller_0/inst/u_jtag_core/rdata[31]_i_5/O
+                         net (fo=1, routed)           0.243     9.899    system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata_reg[0]_1
+    SLICE_X100Y121       LUT5 (Prop_lut5_I2_O)        0.105    10.004 r  system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata[31]_i_1/O
+                         net (fo=32, routed)          0.455    10.459    system_i/swd_controller_0/inst/u_jtag_core/u_shift_n_48
+    SLICE_X100Y120       FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[0]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     9.239    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.316 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.493    10.808    system_i/swd_controller_0/inst/u_jtag_core/clk
+    SLICE_X100Y120       FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[0]/C
+                         clock pessimism              0.208    11.016    
+                         clock uncertainty           -0.154    10.862    
+    SLICE_X100Y120       FDCE (Setup_fdce_C_CE)      -0.136    10.726    system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[0]
+  -------------------------------------------------------------------
+                         required time                         10.726    
+                         arrival time                         -10.459    
+  -------------------------------------------------------------------
+                         slack                                  0.267    
+
+Slack (MET) :             0.267ns  (required time - arrival time)
+  Source:                 system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[10]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        7.714ns  (logic 1.954ns (25.332%)  route 5.760ns (74.668%))
+  Logic Levels:           15  (LUT2=2 LUT3=1 LUT4=1 LUT5=3 LUT6=8)
+  Clock Path Skew:        -0.062ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.475ns = ( 10.808 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.745ns
+    Clock Pessimism Removal (CPR):    0.208ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.666     2.745    system_i/swd_controller_0/inst/u_probe_sampler/clk
+    SLICE_X95Y117        FDCE                                         r  system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X95Y117        FDCE (Prop_fdce_C_Q)         0.379     3.124 r  system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/Q
+                         net (fo=5, routed)           0.698     3.822    system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg_n_0
+    SLICE_X94Y118        LUT6 (Prop_lut6_I0_O)        0.105     3.927 r  system_i/swd_controller_0/inst/u_probe_sampler/fifo_reg_i_10/O
+                         net (fo=15, routed)          0.541     4.468    system_i/swd_controller_0/inst/u_probe_stream/u_rtt/sampler_active
+    SLICE_X96Y118        LUT6 (Prop_lut6_I0_O)        0.105     4.573 r  system_i/swd_controller_0/inst/u_probe_stream/u_rtt/wr_shift[31]_i_3/O
+                         net (fo=120, routed)         0.423     4.996    system_i/swd_controller_0/inst/u_swd_batch_engine/stream_active
+    SLICE_X97Y119        LUT6 (Prop_lut6_I5_O)        0.105     5.101 r  system_i/swd_controller_0/inst/u_swd_batch_engine/FSM_sequential_state[4]_i_24/O
+                         net (fo=7, routed)           0.139     5.240    system_i/swd_controller_0/inst/u_swd_core/core_mode_sel
+    SLICE_X97Y119        LUT6 (Prop_lut6_I5_O)        0.105     5.345 r  system_i/swd_controller_0/inst/u_swd_core/core_wait_cnt[23]_i_10/O
+                         net (fo=6, routed)           0.440     5.785    system_i/swd_controller_0/inst/u_jtag_core/swd_result_valid
+    SLICE_X96Y117        LUT3 (Prop_lut3_I2_O)        0.105     5.890 r  system_i/swd_controller_0/inst/u_jtag_core/core_wait_cnt[23]_i_7/O
+                         net (fo=42, routed)          0.379     6.269    system_i/swd_controller_0/inst/u_jtag_core/core_result_valid
+    SLICE_X97Y117        LUT5 (Prop_lut5_I4_O)        0.105     6.374 f  system_i/swd_controller_0/inst/u_jtag_core/fifo_waddr[8]_i_4/O
+                         net (fo=16, routed)          0.237     6.611    system_i/swd_controller_0/inst/u_probe_sampler/pending_time_reg[0]_0
+    SLICE_X97Y117        LUT4 (Prop_lut4_I0_O)        0.105     6.716 r  system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_4__0/O
+                         net (fo=2, routed)           0.260     6.976    system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_4__0_n_0
+    SLICE_X99Y118        LUT6 (Prop_lut6_I0_O)        0.105     7.081 r  system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_18/O
+                         net (fo=1, routed)           0.249     7.330    system_i/swd_controller_0/inst/u_dap_packet_engine/sampler_next_valid
+    SLICE_X96Y118        LUT6 (Prop_lut6_I2_O)        0.105     7.435 r  system_i/swd_controller_0/inst/u_dap_packet_engine/FSM_sequential_state[1]_i_9/O
+                         net (fo=2, routed)           0.268     7.703    system_i/swd_controller_0/inst/u_dap_packet_engine/core_next_valid_sel
+    SLICE_X97Y118        LUT2 (Prop_lut2_I1_O)        0.105     7.808 r  system_i/swd_controller_0/inst/u_dap_packet_engine/req[3]_i_7/O
+                         net (fo=2, routed)           0.371     8.179    system_i/swd_controller_0/inst/u_dap_packet_engine/next_valid0
+    SLICE_X98Y118        LUT6 (Prop_lut6_I3_O)        0.105     8.284 r  system_i/swd_controller_0/inst/u_dap_packet_engine/rv_collect_i_5/O
+                         net (fo=1, routed)           0.430     8.714    system_i/swd_controller_0/inst/u_jtag_core/rv_frame_reg[38]_0
+    SLICE_X99Y121        LUT2 (Prop_lut2_I1_O)        0.105     8.819 f  system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4/O
+                         net (fo=5, routed)           0.376     9.195    system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4_n_0
+    SLICE_X98Y122        LUT5 (Prop_lut5_I3_O)        0.105     9.300 r  system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0/O
+                         net (fo=4, routed)           0.251     9.551    system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0_n_0
+    SLICE_X98Y122        LUT6 (Prop_lut6_I4_O)        0.105     9.656 f  system_i/swd_controller_0/inst/u_jtag_core/rdata[31]_i_5/O
+                         net (fo=1, routed)           0.243     9.899    system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata_reg[0]_1
+    SLICE_X100Y121       LUT5 (Prop_lut5_I2_O)        0.105    10.004 r  system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata[31]_i_1/O
+                         net (fo=32, routed)          0.455    10.459    system_i/swd_controller_0/inst/u_jtag_core/u_shift_n_48
+    SLICE_X100Y120       FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[10]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     9.239    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.316 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.493    10.808    system_i/swd_controller_0/inst/u_jtag_core/clk
+    SLICE_X100Y120       FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[10]/C
+                         clock pessimism              0.208    11.016    
+                         clock uncertainty           -0.154    10.862    
+    SLICE_X100Y120       FDCE (Setup_fdce_C_CE)      -0.136    10.726    system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[10]
+  -------------------------------------------------------------------
+                         required time                         10.726    
+                         arrival time                         -10.459    
+  -------------------------------------------------------------------
+                         slack                                  0.267    
+
+Slack (MET) :             0.267ns  (required time - arrival time)
+  Source:                 system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[25]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        7.714ns  (logic 1.954ns (25.332%)  route 5.760ns (74.668%))
+  Logic Levels:           15  (LUT2=2 LUT3=1 LUT4=1 LUT5=3 LUT6=8)
+  Clock Path Skew:        -0.062ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.475ns = ( 10.808 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.745ns
+    Clock Pessimism Removal (CPR):    0.208ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.666     2.745    system_i/swd_controller_0/inst/u_probe_sampler/clk
+    SLICE_X95Y117        FDCE                                         r  system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X95Y117        FDCE (Prop_fdce_C_Q)         0.379     3.124 r  system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/Q
+                         net (fo=5, routed)           0.698     3.822    system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg_n_0
+    SLICE_X94Y118        LUT6 (Prop_lut6_I0_O)        0.105     3.927 r  system_i/swd_controller_0/inst/u_probe_sampler/fifo_reg_i_10/O
+                         net (fo=15, routed)          0.541     4.468    system_i/swd_controller_0/inst/u_probe_stream/u_rtt/sampler_active
+    SLICE_X96Y118        LUT6 (Prop_lut6_I0_O)        0.105     4.573 r  system_i/swd_controller_0/inst/u_probe_stream/u_rtt/wr_shift[31]_i_3/O
+                         net (fo=120, routed)         0.423     4.996    system_i/swd_controller_0/inst/u_swd_batch_engine/stream_active
+    SLICE_X97Y119        LUT6 (Prop_lut6_I5_O)        0.105     5.101 r  system_i/swd_controller_0/inst/u_swd_batch_engine/FSM_sequential_state[4]_i_24/O
+                         net (fo=7, routed)           0.139     5.240    system_i/swd_controller_0/inst/u_swd_core/core_mode_sel
+    SLICE_X97Y119        LUT6 (Prop_lut6_I5_O)        0.105     5.345 r  system_i/swd_controller_0/inst/u_swd_core/core_wait_cnt[23]_i_10/O
+                         net (fo=6, routed)           0.440     5.785    system_i/swd_controller_0/inst/u_jtag_core/swd_result_valid
+    SLICE_X96Y117        LUT3 (Prop_lut3_I2_O)        0.105     5.890 r  system_i/swd_controller_0/inst/u_jtag_core/core_wait_cnt[23]_i_7/O
+                         net (fo=42, routed)          0.379     6.269    system_i/swd_controller_0/inst/u_jtag_core/core_result_valid
+    SLICE_X97Y117        LUT5 (Prop_lut5_I4_O)        0.105     6.374 f  system_i/swd_controller_0/inst/u_jtag_core/fifo_waddr[8]_i_4/O
+                         net (fo=16, routed)          0.237     6.611    system_i/swd_controller_0/inst/u_probe_sampler/pending_time_reg[0]_0
+    SLICE_X97Y117        LUT4 (Prop_lut4_I0_O)        0.105     6.716 r  system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_4__0/O
+                         net (fo=2, routed)           0.260     6.976    system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_4__0_n_0
+    SLICE_X99Y118        LUT6 (Prop_lut6_I0_O)        0.105     7.081 r  system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_18/O
+                         net (fo=1, routed)           0.249     7.330    system_i/swd_controller_0/inst/u_dap_packet_engine/sampler_next_valid
+    SLICE_X96Y118        LUT6 (Prop_lut6_I2_O)        0.105     7.435 r  system_i/swd_controller_0/inst/u_dap_packet_engine/FSM_sequential_state[1]_i_9/O
+                         net (fo=2, routed)           0.268     7.703    system_i/swd_controller_0/inst/u_dap_packet_engine/core_next_valid_sel
+    SLICE_X97Y118        LUT2 (Prop_lut2_I1_O)        0.105     7.808 r  system_i/swd_controller_0/inst/u_dap_packet_engine/req[3]_i_7/O
+                         net (fo=2, routed)           0.371     8.179    system_i/swd_controller_0/inst/u_dap_packet_engine/next_valid0
+    SLICE_X98Y118        LUT6 (Prop_lut6_I3_O)        0.105     8.284 r  system_i/swd_controller_0/inst/u_dap_packet_engine/rv_collect_i_5/O
+                         net (fo=1, routed)           0.430     8.714    system_i/swd_controller_0/inst/u_jtag_core/rv_frame_reg[38]_0
+    SLICE_X99Y121        LUT2 (Prop_lut2_I1_O)        0.105     8.819 f  system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4/O
+                         net (fo=5, routed)           0.376     9.195    system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4_n_0
+    SLICE_X98Y122        LUT5 (Prop_lut5_I3_O)        0.105     9.300 r  system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0/O
+                         net (fo=4, routed)           0.251     9.551    system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0_n_0
+    SLICE_X98Y122        LUT6 (Prop_lut6_I4_O)        0.105     9.656 f  system_i/swd_controller_0/inst/u_jtag_core/rdata[31]_i_5/O
+                         net (fo=1, routed)           0.243     9.899    system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata_reg[0]_1
+    SLICE_X100Y121       LUT5 (Prop_lut5_I2_O)        0.105    10.004 r  system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata[31]_i_1/O
+                         net (fo=32, routed)          0.455    10.459    system_i/swd_controller_0/inst/u_jtag_core/u_shift_n_48
+    SLICE_X100Y120       FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[25]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     9.239    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.316 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.493    10.808    system_i/swd_controller_0/inst/u_jtag_core/clk
+    SLICE_X100Y120       FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[25]/C
+                         clock pessimism              0.208    11.016    
+                         clock uncertainty           -0.154    10.862    
+    SLICE_X100Y120       FDCE (Setup_fdce_C_CE)      -0.136    10.726    system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[25]
+  -------------------------------------------------------------------
+                         required time                         10.726    
+                         arrival time                         -10.459    
+  -------------------------------------------------------------------
+                         slack                                  0.267    
+
+Slack (MET) :             0.267ns  (required time - arrival time)
+  Source:                 system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[26]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        7.714ns  (logic 1.954ns (25.332%)  route 5.760ns (74.668%))
+  Logic Levels:           15  (LUT2=2 LUT3=1 LUT4=1 LUT5=3 LUT6=8)
+  Clock Path Skew:        -0.062ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.475ns = ( 10.808 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.745ns
+    Clock Pessimism Removal (CPR):    0.208ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.666     2.745    system_i/swd_controller_0/inst/u_probe_sampler/clk
+    SLICE_X95Y117        FDCE                                         r  system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X95Y117        FDCE (Prop_fdce_C_Q)         0.379     3.124 r  system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/Q
+                         net (fo=5, routed)           0.698     3.822    system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg_n_0
+    SLICE_X94Y118        LUT6 (Prop_lut6_I0_O)        0.105     3.927 r  system_i/swd_controller_0/inst/u_probe_sampler/fifo_reg_i_10/O
+                         net (fo=15, routed)          0.541     4.468    system_i/swd_controller_0/inst/u_probe_stream/u_rtt/sampler_active
+    SLICE_X96Y118        LUT6 (Prop_lut6_I0_O)        0.105     4.573 r  system_i/swd_controller_0/inst/u_probe_stream/u_rtt/wr_shift[31]_i_3/O
+                         net (fo=120, routed)         0.423     4.996    system_i/swd_controller_0/inst/u_swd_batch_engine/stream_active
+    SLICE_X97Y119        LUT6 (Prop_lut6_I5_O)        0.105     5.101 r  system_i/swd_controller_0/inst/u_swd_batch_engine/FSM_sequential_state[4]_i_24/O
+                         net (fo=7, routed)           0.139     5.240    system_i/swd_controller_0/inst/u_swd_core/core_mode_sel
+    SLICE_X97Y119        LUT6 (Prop_lut6_I5_O)        0.105     5.345 r  system_i/swd_controller_0/inst/u_swd_core/core_wait_cnt[23]_i_10/O
+                         net (fo=6, routed)           0.440     5.785    system_i/swd_controller_0/inst/u_jtag_core/swd_result_valid
+    SLICE_X96Y117        LUT3 (Prop_lut3_I2_O)        0.105     5.890 r  system_i/swd_controller_0/inst/u_jtag_core/core_wait_cnt[23]_i_7/O
+                         net (fo=42, routed)          0.379     6.269    system_i/swd_controller_0/inst/u_jtag_core/core_result_valid
+    SLICE_X97Y117        LUT5 (Prop_lut5_I4_O)        0.105     6.374 f  system_i/swd_controller_0/inst/u_jtag_core/fifo_waddr[8]_i_4/O
+                         net (fo=16, routed)          0.237     6.611    system_i/swd_controller_0/inst/u_probe_sampler/pending_time_reg[0]_0
+    SLICE_X97Y117        LUT4 (Prop_lut4_I0_O)        0.105     6.716 r  system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_4__0/O
+                         net (fo=2, routed)           0.260     6.976    system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_4__0_n_0
+    SLICE_X99Y118        LUT6 (Prop_lut6_I0_O)        0.105     7.081 r  system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_18/O
+                         net (fo=1, routed)           0.249     7.330    system_i/swd_controller_0/inst/u_dap_packet_engine/sampler_next_valid
+    SLICE_X96Y118        LUT6 (Prop_lut6_I2_O)        0.105     7.435 r  system_i/swd_controller_0/inst/u_dap_packet_engine/FSM_sequential_state[1]_i_9/O
+                         net (fo=2, routed)           0.268     7.703    system_i/swd_controller_0/inst/u_dap_packet_engine/core_next_valid_sel
+    SLICE_X97Y118        LUT2 (Prop_lut2_I1_O)        0.105     7.808 r  system_i/swd_controller_0/inst/u_dap_packet_engine/req[3]_i_7/O
+                         net (fo=2, routed)           0.371     8.179    system_i/swd_controller_0/inst/u_dap_packet_engine/next_valid0
+    SLICE_X98Y118        LUT6 (Prop_lut6_I3_O)        0.105     8.284 r  system_i/swd_controller_0/inst/u_dap_packet_engine/rv_collect_i_5/O
+                         net (fo=1, routed)           0.430     8.714    system_i/swd_controller_0/inst/u_jtag_core/rv_frame_reg[38]_0
+    SLICE_X99Y121        LUT2 (Prop_lut2_I1_O)        0.105     8.819 f  system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4/O
+                         net (fo=5, routed)           0.376     9.195    system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4_n_0
+    SLICE_X98Y122        LUT5 (Prop_lut5_I3_O)        0.105     9.300 r  system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0/O
+                         net (fo=4, routed)           0.251     9.551    system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0_n_0
+    SLICE_X98Y122        LUT6 (Prop_lut6_I4_O)        0.105     9.656 f  system_i/swd_controller_0/inst/u_jtag_core/rdata[31]_i_5/O
+                         net (fo=1, routed)           0.243     9.899    system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata_reg[0]_1
+    SLICE_X100Y121       LUT5 (Prop_lut5_I2_O)        0.105    10.004 r  system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata[31]_i_1/O
+                         net (fo=32, routed)          0.455    10.459    system_i/swd_controller_0/inst/u_jtag_core/u_shift_n_48
+    SLICE_X100Y120       FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[26]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     9.239    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.316 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.493    10.808    system_i/swd_controller_0/inst/u_jtag_core/clk
+    SLICE_X100Y120       FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[26]/C
+                         clock pessimism              0.208    11.016    
+                         clock uncertainty           -0.154    10.862    
+    SLICE_X100Y120       FDCE (Setup_fdce_C_CE)      -0.136    10.726    system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[26]
+  -------------------------------------------------------------------
+                         required time                         10.726    
+                         arrival time                         -10.459    
+  -------------------------------------------------------------------
+                         slack                                  0.267    
+
+Slack (MET) :             0.271ns  (required time - arrival time)
+  Source:                 system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[13]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        7.713ns  (logic 1.954ns (25.335%)  route 5.759ns (74.665%))
+  Logic Levels:           15  (LUT2=2 LUT3=1 LUT4=1 LUT5=3 LUT6=8)
+  Clock Path Skew:        -0.059ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.478ns = ( 10.811 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.745ns
+    Clock Pessimism Removal (CPR):    0.208ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.666     2.745    system_i/swd_controller_0/inst/u_probe_sampler/clk
+    SLICE_X95Y117        FDCE                                         r  system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X95Y117        FDCE (Prop_fdce_C_Q)         0.379     3.124 r  system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/Q
+                         net (fo=5, routed)           0.698     3.822    system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg_n_0
+    SLICE_X94Y118        LUT6 (Prop_lut6_I0_O)        0.105     3.927 r  system_i/swd_controller_0/inst/u_probe_sampler/fifo_reg_i_10/O
+                         net (fo=15, routed)          0.541     4.468    system_i/swd_controller_0/inst/u_probe_stream/u_rtt/sampler_active
+    SLICE_X96Y118        LUT6 (Prop_lut6_I0_O)        0.105     4.573 r  system_i/swd_controller_0/inst/u_probe_stream/u_rtt/wr_shift[31]_i_3/O
+                         net (fo=120, routed)         0.423     4.996    system_i/swd_controller_0/inst/u_swd_batch_engine/stream_active
+    SLICE_X97Y119        LUT6 (Prop_lut6_I5_O)        0.105     5.101 r  system_i/swd_controller_0/inst/u_swd_batch_engine/FSM_sequential_state[4]_i_24/O
+                         net (fo=7, routed)           0.139     5.240    system_i/swd_controller_0/inst/u_swd_core/core_mode_sel
+    SLICE_X97Y119        LUT6 (Prop_lut6_I5_O)        0.105     5.345 r  system_i/swd_controller_0/inst/u_swd_core/core_wait_cnt[23]_i_10/O
+                         net (fo=6, routed)           0.440     5.785    system_i/swd_controller_0/inst/u_jtag_core/swd_result_valid
+    SLICE_X96Y117        LUT3 (Prop_lut3_I2_O)        0.105     5.890 r  system_i/swd_controller_0/inst/u_jtag_core/core_wait_cnt[23]_i_7/O
+                         net (fo=42, routed)          0.379     6.269    system_i/swd_controller_0/inst/u_jtag_core/core_result_valid
+    SLICE_X97Y117        LUT5 (Prop_lut5_I4_O)        0.105     6.374 f  system_i/swd_controller_0/inst/u_jtag_core/fifo_waddr[8]_i_4/O
+                         net (fo=16, routed)          0.237     6.611    system_i/swd_controller_0/inst/u_probe_sampler/pending_time_reg[0]_0
+    SLICE_X97Y117        LUT4 (Prop_lut4_I0_O)        0.105     6.716 r  system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_4__0/O
+                         net (fo=2, routed)           0.260     6.976    system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_4__0_n_0
+    SLICE_X99Y118        LUT6 (Prop_lut6_I0_O)        0.105     7.081 r  system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_18/O
+                         net (fo=1, routed)           0.249     7.330    system_i/swd_controller_0/inst/u_dap_packet_engine/sampler_next_valid
+    SLICE_X96Y118        LUT6 (Prop_lut6_I2_O)        0.105     7.435 r  system_i/swd_controller_0/inst/u_dap_packet_engine/FSM_sequential_state[1]_i_9/O
+                         net (fo=2, routed)           0.268     7.703    system_i/swd_controller_0/inst/u_dap_packet_engine/core_next_valid_sel
+    SLICE_X97Y118        LUT2 (Prop_lut2_I1_O)        0.105     7.808 r  system_i/swd_controller_0/inst/u_dap_packet_engine/req[3]_i_7/O
+                         net (fo=2, routed)           0.371     8.179    system_i/swd_controller_0/inst/u_dap_packet_engine/next_valid0
+    SLICE_X98Y118        LUT6 (Prop_lut6_I3_O)        0.105     8.284 r  system_i/swd_controller_0/inst/u_dap_packet_engine/rv_collect_i_5/O
+                         net (fo=1, routed)           0.430     8.714    system_i/swd_controller_0/inst/u_jtag_core/rv_frame_reg[38]_0
+    SLICE_X99Y121        LUT2 (Prop_lut2_I1_O)        0.105     8.819 f  system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4/O
+                         net (fo=5, routed)           0.376     9.195    system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4_n_0
+    SLICE_X98Y122        LUT5 (Prop_lut5_I3_O)        0.105     9.300 r  system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0/O
+                         net (fo=4, routed)           0.251     9.551    system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0_n_0
+    SLICE_X98Y122        LUT6 (Prop_lut6_I4_O)        0.105     9.656 f  system_i/swd_controller_0/inst/u_jtag_core/rdata[31]_i_5/O
+                         net (fo=1, routed)           0.243     9.899    system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata_reg[0]_1
+    SLICE_X100Y121       LUT5 (Prop_lut5_I2_O)        0.105    10.004 r  system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata[31]_i_1/O
+                         net (fo=32, routed)          0.454    10.458    system_i/swd_controller_0/inst/u_jtag_core/u_shift_n_48
+    SLICE_X100Y117       FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[13]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     9.239    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.316 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.496    10.811    system_i/swd_controller_0/inst/u_jtag_core/clk
+    SLICE_X100Y117       FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[13]/C
+                         clock pessimism              0.208    11.019    
+                         clock uncertainty           -0.154    10.865    
+    SLICE_X100Y117       FDCE (Setup_fdce_C_CE)      -0.136    10.729    system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[13]
+  -------------------------------------------------------------------
+                         required time                         10.729    
+                         arrival time                         -10.458    
+  -------------------------------------------------------------------
+                         slack                                  0.271    
+
+Slack (MET) :             0.271ns  (required time - arrival time)
+  Source:                 system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[14]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        7.713ns  (logic 1.954ns (25.335%)  route 5.759ns (74.665%))
+  Logic Levels:           15  (LUT2=2 LUT3=1 LUT4=1 LUT5=3 LUT6=8)
+  Clock Path Skew:        -0.059ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.478ns = ( 10.811 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.745ns
+    Clock Pessimism Removal (CPR):    0.208ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.666     2.745    system_i/swd_controller_0/inst/u_probe_sampler/clk
+    SLICE_X95Y117        FDCE                                         r  system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X95Y117        FDCE (Prop_fdce_C_Q)         0.379     3.124 r  system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/Q
+                         net (fo=5, routed)           0.698     3.822    system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg_n_0
+    SLICE_X94Y118        LUT6 (Prop_lut6_I0_O)        0.105     3.927 r  system_i/swd_controller_0/inst/u_probe_sampler/fifo_reg_i_10/O
+                         net (fo=15, routed)          0.541     4.468    system_i/swd_controller_0/inst/u_probe_stream/u_rtt/sampler_active
+    SLICE_X96Y118        LUT6 (Prop_lut6_I0_O)        0.105     4.573 r  system_i/swd_controller_0/inst/u_probe_stream/u_rtt/wr_shift[31]_i_3/O
+                         net (fo=120, routed)         0.423     4.996    system_i/swd_controller_0/inst/u_swd_batch_engine/stream_active
+    SLICE_X97Y119        LUT6 (Prop_lut6_I5_O)        0.105     5.101 r  system_i/swd_controller_0/inst/u_swd_batch_engine/FSM_sequential_state[4]_i_24/O
+                         net (fo=7, routed)           0.139     5.240    system_i/swd_controller_0/inst/u_swd_core/core_mode_sel
+    SLICE_X97Y119        LUT6 (Prop_lut6_I5_O)        0.105     5.345 r  system_i/swd_controller_0/inst/u_swd_core/core_wait_cnt[23]_i_10/O
+                         net (fo=6, routed)           0.440     5.785    system_i/swd_controller_0/inst/u_jtag_core/swd_result_valid
+    SLICE_X96Y117        LUT3 (Prop_lut3_I2_O)        0.105     5.890 r  system_i/swd_controller_0/inst/u_jtag_core/core_wait_cnt[23]_i_7/O
+                         net (fo=42, routed)          0.379     6.269    system_i/swd_controller_0/inst/u_jtag_core/core_result_valid
+    SLICE_X97Y117        LUT5 (Prop_lut5_I4_O)        0.105     6.374 f  system_i/swd_controller_0/inst/u_jtag_core/fifo_waddr[8]_i_4/O
+                         net (fo=16, routed)          0.237     6.611    system_i/swd_controller_0/inst/u_probe_sampler/pending_time_reg[0]_0
+    SLICE_X97Y117        LUT4 (Prop_lut4_I0_O)        0.105     6.716 r  system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_4__0/O
+                         net (fo=2, routed)           0.260     6.976    system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_4__0_n_0
+    SLICE_X99Y118        LUT6 (Prop_lut6_I0_O)        0.105     7.081 r  system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_18/O
+                         net (fo=1, routed)           0.249     7.330    system_i/swd_controller_0/inst/u_dap_packet_engine/sampler_next_valid
+    SLICE_X96Y118        LUT6 (Prop_lut6_I2_O)        0.105     7.435 r  system_i/swd_controller_0/inst/u_dap_packet_engine/FSM_sequential_state[1]_i_9/O
+                         net (fo=2, routed)           0.268     7.703    system_i/swd_controller_0/inst/u_dap_packet_engine/core_next_valid_sel
+    SLICE_X97Y118        LUT2 (Prop_lut2_I1_O)        0.105     7.808 r  system_i/swd_controller_0/inst/u_dap_packet_engine/req[3]_i_7/O
+                         net (fo=2, routed)           0.371     8.179    system_i/swd_controller_0/inst/u_dap_packet_engine/next_valid0
+    SLICE_X98Y118        LUT6 (Prop_lut6_I3_O)        0.105     8.284 r  system_i/swd_controller_0/inst/u_dap_packet_engine/rv_collect_i_5/O
+                         net (fo=1, routed)           0.430     8.714    system_i/swd_controller_0/inst/u_jtag_core/rv_frame_reg[38]_0
+    SLICE_X99Y121        LUT2 (Prop_lut2_I1_O)        0.105     8.819 f  system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4/O
+                         net (fo=5, routed)           0.376     9.195    system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4_n_0
+    SLICE_X98Y122        LUT5 (Prop_lut5_I3_O)        0.105     9.300 r  system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0/O
+                         net (fo=4, routed)           0.251     9.551    system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0_n_0
+    SLICE_X98Y122        LUT6 (Prop_lut6_I4_O)        0.105     9.656 f  system_i/swd_controller_0/inst/u_jtag_core/rdata[31]_i_5/O
+                         net (fo=1, routed)           0.243     9.899    system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata_reg[0]_1
+    SLICE_X100Y121       LUT5 (Prop_lut5_I2_O)        0.105    10.004 r  system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata[31]_i_1/O
+                         net (fo=32, routed)          0.454    10.458    system_i/swd_controller_0/inst/u_jtag_core/u_shift_n_48
+    SLICE_X100Y117       FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[14]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     9.239    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.316 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.496    10.811    system_i/swd_controller_0/inst/u_jtag_core/clk
+    SLICE_X100Y117       FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[14]/C
+                         clock pessimism              0.208    11.019    
+                         clock uncertainty           -0.154    10.865    
+    SLICE_X100Y117       FDCE (Setup_fdce_C_CE)      -0.136    10.729    system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[14]
+  -------------------------------------------------------------------
+                         required time                         10.729    
+                         arrival time                         -10.458    
+  -------------------------------------------------------------------
+                         slack                                  0.271    
+
+Slack (MET) :             0.271ns  (required time - arrival time)
+  Source:                 system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[15]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        7.713ns  (logic 1.954ns (25.335%)  route 5.759ns (74.665%))
+  Logic Levels:           15  (LUT2=2 LUT3=1 LUT4=1 LUT5=3 LUT6=8)
+  Clock Path Skew:        -0.059ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.478ns = ( 10.811 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.745ns
+    Clock Pessimism Removal (CPR):    0.208ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.666     2.745    system_i/swd_controller_0/inst/u_probe_sampler/clk
+    SLICE_X95Y117        FDCE                                         r  system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X95Y117        FDCE (Prop_fdce_C_Q)         0.379     3.124 r  system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/Q
+                         net (fo=5, routed)           0.698     3.822    system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg_n_0
+    SLICE_X94Y118        LUT6 (Prop_lut6_I0_O)        0.105     3.927 r  system_i/swd_controller_0/inst/u_probe_sampler/fifo_reg_i_10/O
+                         net (fo=15, routed)          0.541     4.468    system_i/swd_controller_0/inst/u_probe_stream/u_rtt/sampler_active
+    SLICE_X96Y118        LUT6 (Prop_lut6_I0_O)        0.105     4.573 r  system_i/swd_controller_0/inst/u_probe_stream/u_rtt/wr_shift[31]_i_3/O
+                         net (fo=120, routed)         0.423     4.996    system_i/swd_controller_0/inst/u_swd_batch_engine/stream_active
+    SLICE_X97Y119        LUT6 (Prop_lut6_I5_O)        0.105     5.101 r  system_i/swd_controller_0/inst/u_swd_batch_engine/FSM_sequential_state[4]_i_24/O
+                         net (fo=7, routed)           0.139     5.240    system_i/swd_controller_0/inst/u_swd_core/core_mode_sel
+    SLICE_X97Y119        LUT6 (Prop_lut6_I5_O)        0.105     5.345 r  system_i/swd_controller_0/inst/u_swd_core/core_wait_cnt[23]_i_10/O
+                         net (fo=6, routed)           0.440     5.785    system_i/swd_controller_0/inst/u_jtag_core/swd_result_valid
+    SLICE_X96Y117        LUT3 (Prop_lut3_I2_O)        0.105     5.890 r  system_i/swd_controller_0/inst/u_jtag_core/core_wait_cnt[23]_i_7/O
+                         net (fo=42, routed)          0.379     6.269    system_i/swd_controller_0/inst/u_jtag_core/core_result_valid
+    SLICE_X97Y117        LUT5 (Prop_lut5_I4_O)        0.105     6.374 f  system_i/swd_controller_0/inst/u_jtag_core/fifo_waddr[8]_i_4/O
+                         net (fo=16, routed)          0.237     6.611    system_i/swd_controller_0/inst/u_probe_sampler/pending_time_reg[0]_0
+    SLICE_X97Y117        LUT4 (Prop_lut4_I0_O)        0.105     6.716 r  system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_4__0/O
+                         net (fo=2, routed)           0.260     6.976    system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_4__0_n_0
+    SLICE_X99Y118        LUT6 (Prop_lut6_I0_O)        0.105     7.081 r  system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_18/O
+                         net (fo=1, routed)           0.249     7.330    system_i/swd_controller_0/inst/u_dap_packet_engine/sampler_next_valid
+    SLICE_X96Y118        LUT6 (Prop_lut6_I2_O)        0.105     7.435 r  system_i/swd_controller_0/inst/u_dap_packet_engine/FSM_sequential_state[1]_i_9/O
+                         net (fo=2, routed)           0.268     7.703    system_i/swd_controller_0/inst/u_dap_packet_engine/core_next_valid_sel
+    SLICE_X97Y118        LUT2 (Prop_lut2_I1_O)        0.105     7.808 r  system_i/swd_controller_0/inst/u_dap_packet_engine/req[3]_i_7/O
+                         net (fo=2, routed)           0.371     8.179    system_i/swd_controller_0/inst/u_dap_packet_engine/next_valid0
+    SLICE_X98Y118        LUT6 (Prop_lut6_I3_O)        0.105     8.284 r  system_i/swd_controller_0/inst/u_dap_packet_engine/rv_collect_i_5/O
+                         net (fo=1, routed)           0.430     8.714    system_i/swd_controller_0/inst/u_jtag_core/rv_frame_reg[38]_0
+    SLICE_X99Y121        LUT2 (Prop_lut2_I1_O)        0.105     8.819 f  system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4/O
+                         net (fo=5, routed)           0.376     9.195    system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4_n_0
+    SLICE_X98Y122        LUT5 (Prop_lut5_I3_O)        0.105     9.300 r  system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0/O
+                         net (fo=4, routed)           0.251     9.551    system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0_n_0
+    SLICE_X98Y122        LUT6 (Prop_lut6_I4_O)        0.105     9.656 f  system_i/swd_controller_0/inst/u_jtag_core/rdata[31]_i_5/O
+                         net (fo=1, routed)           0.243     9.899    system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata_reg[0]_1
+    SLICE_X100Y121       LUT5 (Prop_lut5_I2_O)        0.105    10.004 r  system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata[31]_i_1/O
+                         net (fo=32, routed)          0.454    10.458    system_i/swd_controller_0/inst/u_jtag_core/u_shift_n_48
+    SLICE_X100Y117       FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[15]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     9.239    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.316 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.496    10.811    system_i/swd_controller_0/inst/u_jtag_core/clk
+    SLICE_X100Y117       FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[15]/C
+                         clock pessimism              0.208    11.019    
+                         clock uncertainty           -0.154    10.865    
+    SLICE_X100Y117       FDCE (Setup_fdce_C_CE)      -0.136    10.729    system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[15]
+  -------------------------------------------------------------------
+                         required time                         10.729    
+                         arrival time                         -10.458    
+  -------------------------------------------------------------------
+                         slack                                  0.271    
+
+Slack (MET) :             0.271ns  (required time - arrival time)
+  Source:                 system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[16]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        7.713ns  (logic 1.954ns (25.335%)  route 5.759ns (74.665%))
+  Logic Levels:           15  (LUT2=2 LUT3=1 LUT4=1 LUT5=3 LUT6=8)
+  Clock Path Skew:        -0.059ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.478ns = ( 10.811 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.745ns
+    Clock Pessimism Removal (CPR):    0.208ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.666     2.745    system_i/swd_controller_0/inst/u_probe_sampler/clk
+    SLICE_X95Y117        FDCE                                         r  system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X95Y117        FDCE (Prop_fdce_C_Q)         0.379     3.124 r  system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/Q
+                         net (fo=5, routed)           0.698     3.822    system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg_n_0
+    SLICE_X94Y118        LUT6 (Prop_lut6_I0_O)        0.105     3.927 r  system_i/swd_controller_0/inst/u_probe_sampler/fifo_reg_i_10/O
+                         net (fo=15, routed)          0.541     4.468    system_i/swd_controller_0/inst/u_probe_stream/u_rtt/sampler_active
+    SLICE_X96Y118        LUT6 (Prop_lut6_I0_O)        0.105     4.573 r  system_i/swd_controller_0/inst/u_probe_stream/u_rtt/wr_shift[31]_i_3/O
+                         net (fo=120, routed)         0.423     4.996    system_i/swd_controller_0/inst/u_swd_batch_engine/stream_active
+    SLICE_X97Y119        LUT6 (Prop_lut6_I5_O)        0.105     5.101 r  system_i/swd_controller_0/inst/u_swd_batch_engine/FSM_sequential_state[4]_i_24/O
+                         net (fo=7, routed)           0.139     5.240    system_i/swd_controller_0/inst/u_swd_core/core_mode_sel
+    SLICE_X97Y119        LUT6 (Prop_lut6_I5_O)        0.105     5.345 r  system_i/swd_controller_0/inst/u_swd_core/core_wait_cnt[23]_i_10/O
+                         net (fo=6, routed)           0.440     5.785    system_i/swd_controller_0/inst/u_jtag_core/swd_result_valid
+    SLICE_X96Y117        LUT3 (Prop_lut3_I2_O)        0.105     5.890 r  system_i/swd_controller_0/inst/u_jtag_core/core_wait_cnt[23]_i_7/O
+                         net (fo=42, routed)          0.379     6.269    system_i/swd_controller_0/inst/u_jtag_core/core_result_valid
+    SLICE_X97Y117        LUT5 (Prop_lut5_I4_O)        0.105     6.374 f  system_i/swd_controller_0/inst/u_jtag_core/fifo_waddr[8]_i_4/O
+                         net (fo=16, routed)          0.237     6.611    system_i/swd_controller_0/inst/u_probe_sampler/pending_time_reg[0]_0
+    SLICE_X97Y117        LUT4 (Prop_lut4_I0_O)        0.105     6.716 r  system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_4__0/O
+                         net (fo=2, routed)           0.260     6.976    system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_4__0_n_0
+    SLICE_X99Y118        LUT6 (Prop_lut6_I0_O)        0.105     7.081 r  system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_18/O
+                         net (fo=1, routed)           0.249     7.330    system_i/swd_controller_0/inst/u_dap_packet_engine/sampler_next_valid
+    SLICE_X96Y118        LUT6 (Prop_lut6_I2_O)        0.105     7.435 r  system_i/swd_controller_0/inst/u_dap_packet_engine/FSM_sequential_state[1]_i_9/O
+                         net (fo=2, routed)           0.268     7.703    system_i/swd_controller_0/inst/u_dap_packet_engine/core_next_valid_sel
+    SLICE_X97Y118        LUT2 (Prop_lut2_I1_O)        0.105     7.808 r  system_i/swd_controller_0/inst/u_dap_packet_engine/req[3]_i_7/O
+                         net (fo=2, routed)           0.371     8.179    system_i/swd_controller_0/inst/u_dap_packet_engine/next_valid0
+    SLICE_X98Y118        LUT6 (Prop_lut6_I3_O)        0.105     8.284 r  system_i/swd_controller_0/inst/u_dap_packet_engine/rv_collect_i_5/O
+                         net (fo=1, routed)           0.430     8.714    system_i/swd_controller_0/inst/u_jtag_core/rv_frame_reg[38]_0
+    SLICE_X99Y121        LUT2 (Prop_lut2_I1_O)        0.105     8.819 f  system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4/O
+                         net (fo=5, routed)           0.376     9.195    system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4_n_0
+    SLICE_X98Y122        LUT5 (Prop_lut5_I3_O)        0.105     9.300 r  system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0/O
+                         net (fo=4, routed)           0.251     9.551    system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0_n_0
+    SLICE_X98Y122        LUT6 (Prop_lut6_I4_O)        0.105     9.656 f  system_i/swd_controller_0/inst/u_jtag_core/rdata[31]_i_5/O
+                         net (fo=1, routed)           0.243     9.899    system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata_reg[0]_1
+    SLICE_X100Y121       LUT5 (Prop_lut5_I2_O)        0.105    10.004 r  system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata[31]_i_1/O
+                         net (fo=32, routed)          0.454    10.458    system_i/swd_controller_0/inst/u_jtag_core/u_shift_n_48
+    SLICE_X100Y117       FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[16]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     9.239    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.316 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.496    10.811    system_i/swd_controller_0/inst/u_jtag_core/clk
+    SLICE_X100Y117       FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[16]/C
+                         clock pessimism              0.208    11.019    
+                         clock uncertainty           -0.154    10.865    
+    SLICE_X100Y117       FDCE (Setup_fdce_C_CE)      -0.136    10.729    system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[16]
+  -------------------------------------------------------------------
+                         required time                         10.729    
+                         arrival time                         -10.458    
+  -------------------------------------------------------------------
+                         slack                                  0.271    
+
+Slack (MET) :             0.273ns  (required time - arrival time)
+  Source:                 system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[12]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        7.674ns  (logic 1.954ns (25.463%)  route 5.720ns (74.537%))
+  Logic Levels:           15  (LUT2=2 LUT3=1 LUT4=1 LUT5=3 LUT6=8)
+  Clock Path Skew:        -0.064ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.473ns = ( 10.806 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.745ns
+    Clock Pessimism Removal (CPR):    0.208ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.666     2.745    system_i/swd_controller_0/inst/u_probe_sampler/clk
+    SLICE_X95Y117        FDCE                                         r  system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X95Y117        FDCE (Prop_fdce_C_Q)         0.379     3.124 r  system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/Q
+                         net (fo=5, routed)           0.698     3.822    system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg_n_0
+    SLICE_X94Y118        LUT6 (Prop_lut6_I0_O)        0.105     3.927 r  system_i/swd_controller_0/inst/u_probe_sampler/fifo_reg_i_10/O
+                         net (fo=15, routed)          0.541     4.468    system_i/swd_controller_0/inst/u_probe_stream/u_rtt/sampler_active
+    SLICE_X96Y118        LUT6 (Prop_lut6_I0_O)        0.105     4.573 r  system_i/swd_controller_0/inst/u_probe_stream/u_rtt/wr_shift[31]_i_3/O
+                         net (fo=120, routed)         0.423     4.996    system_i/swd_controller_0/inst/u_swd_batch_engine/stream_active
+    SLICE_X97Y119        LUT6 (Prop_lut6_I5_O)        0.105     5.101 r  system_i/swd_controller_0/inst/u_swd_batch_engine/FSM_sequential_state[4]_i_24/O
+                         net (fo=7, routed)           0.139     5.240    system_i/swd_controller_0/inst/u_swd_core/core_mode_sel
+    SLICE_X97Y119        LUT6 (Prop_lut6_I5_O)        0.105     5.345 r  system_i/swd_controller_0/inst/u_swd_core/core_wait_cnt[23]_i_10/O
+                         net (fo=6, routed)           0.440     5.785    system_i/swd_controller_0/inst/u_jtag_core/swd_result_valid
+    SLICE_X96Y117        LUT3 (Prop_lut3_I2_O)        0.105     5.890 r  system_i/swd_controller_0/inst/u_jtag_core/core_wait_cnt[23]_i_7/O
+                         net (fo=42, routed)          0.379     6.269    system_i/swd_controller_0/inst/u_jtag_core/core_result_valid
+    SLICE_X97Y117        LUT5 (Prop_lut5_I4_O)        0.105     6.374 f  system_i/swd_controller_0/inst/u_jtag_core/fifo_waddr[8]_i_4/O
+                         net (fo=16, routed)          0.237     6.611    system_i/swd_controller_0/inst/u_probe_sampler/pending_time_reg[0]_0
+    SLICE_X97Y117        LUT4 (Prop_lut4_I0_O)        0.105     6.716 r  system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_4__0/O
+                         net (fo=2, routed)           0.260     6.976    system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_4__0_n_0
+    SLICE_X99Y118        LUT6 (Prop_lut6_I0_O)        0.105     7.081 r  system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_18/O
+                         net (fo=1, routed)           0.249     7.330    system_i/swd_controller_0/inst/u_dap_packet_engine/sampler_next_valid
+    SLICE_X96Y118        LUT6 (Prop_lut6_I2_O)        0.105     7.435 r  system_i/swd_controller_0/inst/u_dap_packet_engine/FSM_sequential_state[1]_i_9/O
+                         net (fo=2, routed)           0.268     7.703    system_i/swd_controller_0/inst/u_dap_packet_engine/core_next_valid_sel
+    SLICE_X97Y118        LUT2 (Prop_lut2_I1_O)        0.105     7.808 r  system_i/swd_controller_0/inst/u_dap_packet_engine/req[3]_i_7/O
+                         net (fo=2, routed)           0.371     8.179    system_i/swd_controller_0/inst/u_dap_packet_engine/next_valid0
+    SLICE_X98Y118        LUT6 (Prop_lut6_I3_O)        0.105     8.284 r  system_i/swd_controller_0/inst/u_dap_packet_engine/rv_collect_i_5/O
+                         net (fo=1, routed)           0.430     8.714    system_i/swd_controller_0/inst/u_jtag_core/rv_frame_reg[38]_0
+    SLICE_X99Y121        LUT2 (Prop_lut2_I1_O)        0.105     8.819 f  system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4/O
+                         net (fo=5, routed)           0.376     9.195    system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4_n_0
+    SLICE_X98Y122        LUT5 (Prop_lut5_I3_O)        0.105     9.300 r  system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0/O
+                         net (fo=4, routed)           0.251     9.551    system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0_n_0
+    SLICE_X98Y122        LUT6 (Prop_lut6_I4_O)        0.105     9.656 f  system_i/swd_controller_0/inst/u_jtag_core/rdata[31]_i_5/O
+                         net (fo=1, routed)           0.243     9.899    system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata_reg[0]_1
+    SLICE_X100Y121       LUT5 (Prop_lut5_I2_O)        0.105    10.004 r  system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata[31]_i_1/O
+                         net (fo=32, routed)          0.415    10.419    system_i/swd_controller_0/inst/u_jtag_core/u_shift_n_48
+    SLICE_X99Y122        FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[12]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     9.239    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.316 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.491    10.806    system_i/swd_controller_0/inst/u_jtag_core/clk
+    SLICE_X99Y122        FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[12]/C
+                         clock pessimism              0.208    11.014    
+                         clock uncertainty           -0.154    10.860    
+    SLICE_X99Y122        FDCE (Setup_fdce_C_CE)      -0.168    10.692    system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[12]
+  -------------------------------------------------------------------
+                         required time                         10.692    
+                         arrival time                         -10.419    
+  -------------------------------------------------------------------
+                         slack                                  0.273    
+
+Slack (MET) :             0.273ns  (required time - arrival time)
+  Source:                 system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[17]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        7.674ns  (logic 1.954ns (25.463%)  route 5.720ns (74.537%))
+  Logic Levels:           15  (LUT2=2 LUT3=1 LUT4=1 LUT5=3 LUT6=8)
+  Clock Path Skew:        -0.064ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.473ns = ( 10.806 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.745ns
+    Clock Pessimism Removal (CPR):    0.208ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.666     2.745    system_i/swd_controller_0/inst/u_probe_sampler/clk
+    SLICE_X95Y117        FDCE                                         r  system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X95Y117        FDCE (Prop_fdce_C_Q)         0.379     3.124 r  system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/Q
+                         net (fo=5, routed)           0.698     3.822    system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg_n_0
+    SLICE_X94Y118        LUT6 (Prop_lut6_I0_O)        0.105     3.927 r  system_i/swd_controller_0/inst/u_probe_sampler/fifo_reg_i_10/O
+                         net (fo=15, routed)          0.541     4.468    system_i/swd_controller_0/inst/u_probe_stream/u_rtt/sampler_active
+    SLICE_X96Y118        LUT6 (Prop_lut6_I0_O)        0.105     4.573 r  system_i/swd_controller_0/inst/u_probe_stream/u_rtt/wr_shift[31]_i_3/O
+                         net (fo=120, routed)         0.423     4.996    system_i/swd_controller_0/inst/u_swd_batch_engine/stream_active
+    SLICE_X97Y119        LUT6 (Prop_lut6_I5_O)        0.105     5.101 r  system_i/swd_controller_0/inst/u_swd_batch_engine/FSM_sequential_state[4]_i_24/O
+                         net (fo=7, routed)           0.139     5.240    system_i/swd_controller_0/inst/u_swd_core/core_mode_sel
+    SLICE_X97Y119        LUT6 (Prop_lut6_I5_O)        0.105     5.345 r  system_i/swd_controller_0/inst/u_swd_core/core_wait_cnt[23]_i_10/O
+                         net (fo=6, routed)           0.440     5.785    system_i/swd_controller_0/inst/u_jtag_core/swd_result_valid
+    SLICE_X96Y117        LUT3 (Prop_lut3_I2_O)        0.105     5.890 r  system_i/swd_controller_0/inst/u_jtag_core/core_wait_cnt[23]_i_7/O
+                         net (fo=42, routed)          0.379     6.269    system_i/swd_controller_0/inst/u_jtag_core/core_result_valid
+    SLICE_X97Y117        LUT5 (Prop_lut5_I4_O)        0.105     6.374 f  system_i/swd_controller_0/inst/u_jtag_core/fifo_waddr[8]_i_4/O
+                         net (fo=16, routed)          0.237     6.611    system_i/swd_controller_0/inst/u_probe_sampler/pending_time_reg[0]_0
+    SLICE_X97Y117        LUT4 (Prop_lut4_I0_O)        0.105     6.716 r  system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_4__0/O
+                         net (fo=2, routed)           0.260     6.976    system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_4__0_n_0
+    SLICE_X99Y118        LUT6 (Prop_lut6_I0_O)        0.105     7.081 r  system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_18/O
+                         net (fo=1, routed)           0.249     7.330    system_i/swd_controller_0/inst/u_dap_packet_engine/sampler_next_valid
+    SLICE_X96Y118        LUT6 (Prop_lut6_I2_O)        0.105     7.435 r  system_i/swd_controller_0/inst/u_dap_packet_engine/FSM_sequential_state[1]_i_9/O
+                         net (fo=2, routed)           0.268     7.703    system_i/swd_controller_0/inst/u_dap_packet_engine/core_next_valid_sel
+    SLICE_X97Y118        LUT2 (Prop_lut2_I1_O)        0.105     7.808 r  system_i/swd_controller_0/inst/u_dap_packet_engine/req[3]_i_7/O
+                         net (fo=2, routed)           0.371     8.179    system_i/swd_controller_0/inst/u_dap_packet_engine/next_valid0
+    SLICE_X98Y118        LUT6 (Prop_lut6_I3_O)        0.105     8.284 r  system_i/swd_controller_0/inst/u_dap_packet_engine/rv_collect_i_5/O
+                         net (fo=1, routed)           0.430     8.714    system_i/swd_controller_0/inst/u_jtag_core/rv_frame_reg[38]_0
+    SLICE_X99Y121        LUT2 (Prop_lut2_I1_O)        0.105     8.819 f  system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4/O
+                         net (fo=5, routed)           0.376     9.195    system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4_n_0
+    SLICE_X98Y122        LUT5 (Prop_lut5_I3_O)        0.105     9.300 r  system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0/O
+                         net (fo=4, routed)           0.251     9.551    system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0_n_0
+    SLICE_X98Y122        LUT6 (Prop_lut6_I4_O)        0.105     9.656 f  system_i/swd_controller_0/inst/u_jtag_core/rdata[31]_i_5/O
+                         net (fo=1, routed)           0.243     9.899    system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata_reg[0]_1
+    SLICE_X100Y121       LUT5 (Prop_lut5_I2_O)        0.105    10.004 r  system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata[31]_i_1/O
+                         net (fo=32, routed)          0.415    10.419    system_i/swd_controller_0/inst/u_jtag_core/u_shift_n_48
+    SLICE_X99Y122        FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[17]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     9.239    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.316 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.491    10.806    system_i/swd_controller_0/inst/u_jtag_core/clk
+    SLICE_X99Y122        FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[17]/C
+                         clock pessimism              0.208    11.014    
+                         clock uncertainty           -0.154    10.860    
+    SLICE_X99Y122        FDCE (Setup_fdce_C_CE)      -0.168    10.692    system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[17]
+  -------------------------------------------------------------------
+                         required time                         10.692    
+                         arrival time                         -10.419    
+  -------------------------------------------------------------------
+                         slack                                  0.273    
+
+Slack (MET) :             0.273ns  (required time - arrival time)
+  Source:                 system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[6]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        7.674ns  (logic 1.954ns (25.463%)  route 5.720ns (74.537%))
+  Logic Levels:           15  (LUT2=2 LUT3=1 LUT4=1 LUT5=3 LUT6=8)
+  Clock Path Skew:        -0.064ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.473ns = ( 10.806 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.745ns
+    Clock Pessimism Removal (CPR):    0.208ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.666     2.745    system_i/swd_controller_0/inst/u_probe_sampler/clk
+    SLICE_X95Y117        FDCE                                         r  system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X95Y117        FDCE (Prop_fdce_C_Q)         0.379     3.124 r  system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/Q
+                         net (fo=5, routed)           0.698     3.822    system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg_n_0
+    SLICE_X94Y118        LUT6 (Prop_lut6_I0_O)        0.105     3.927 r  system_i/swd_controller_0/inst/u_probe_sampler/fifo_reg_i_10/O
+                         net (fo=15, routed)          0.541     4.468    system_i/swd_controller_0/inst/u_probe_stream/u_rtt/sampler_active
+    SLICE_X96Y118        LUT6 (Prop_lut6_I0_O)        0.105     4.573 r  system_i/swd_controller_0/inst/u_probe_stream/u_rtt/wr_shift[31]_i_3/O
+                         net (fo=120, routed)         0.423     4.996    system_i/swd_controller_0/inst/u_swd_batch_engine/stream_active
+    SLICE_X97Y119        LUT6 (Prop_lut6_I5_O)        0.105     5.101 r  system_i/swd_controller_0/inst/u_swd_batch_engine/FSM_sequential_state[4]_i_24/O
+                         net (fo=7, routed)           0.139     5.240    system_i/swd_controller_0/inst/u_swd_core/core_mode_sel
+    SLICE_X97Y119        LUT6 (Prop_lut6_I5_O)        0.105     5.345 r  system_i/swd_controller_0/inst/u_swd_core/core_wait_cnt[23]_i_10/O
+                         net (fo=6, routed)           0.440     5.785    system_i/swd_controller_0/inst/u_jtag_core/swd_result_valid
+    SLICE_X96Y117        LUT3 (Prop_lut3_I2_O)        0.105     5.890 r  system_i/swd_controller_0/inst/u_jtag_core/core_wait_cnt[23]_i_7/O
+                         net (fo=42, routed)          0.379     6.269    system_i/swd_controller_0/inst/u_jtag_core/core_result_valid
+    SLICE_X97Y117        LUT5 (Prop_lut5_I4_O)        0.105     6.374 f  system_i/swd_controller_0/inst/u_jtag_core/fifo_waddr[8]_i_4/O
+                         net (fo=16, routed)          0.237     6.611    system_i/swd_controller_0/inst/u_probe_sampler/pending_time_reg[0]_0
+    SLICE_X97Y117        LUT4 (Prop_lut4_I0_O)        0.105     6.716 r  system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_4__0/O
+                         net (fo=2, routed)           0.260     6.976    system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_4__0_n_0
+    SLICE_X99Y118        LUT6 (Prop_lut6_I0_O)        0.105     7.081 r  system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_18/O
+                         net (fo=1, routed)           0.249     7.330    system_i/swd_controller_0/inst/u_dap_packet_engine/sampler_next_valid
+    SLICE_X96Y118        LUT6 (Prop_lut6_I2_O)        0.105     7.435 r  system_i/swd_controller_0/inst/u_dap_packet_engine/FSM_sequential_state[1]_i_9/O
+                         net (fo=2, routed)           0.268     7.703    system_i/swd_controller_0/inst/u_dap_packet_engine/core_next_valid_sel
+    SLICE_X97Y118        LUT2 (Prop_lut2_I1_O)        0.105     7.808 r  system_i/swd_controller_0/inst/u_dap_packet_engine/req[3]_i_7/O
+                         net (fo=2, routed)           0.371     8.179    system_i/swd_controller_0/inst/u_dap_packet_engine/next_valid0
+    SLICE_X98Y118        LUT6 (Prop_lut6_I3_O)        0.105     8.284 r  system_i/swd_controller_0/inst/u_dap_packet_engine/rv_collect_i_5/O
+                         net (fo=1, routed)           0.430     8.714    system_i/swd_controller_0/inst/u_jtag_core/rv_frame_reg[38]_0
+    SLICE_X99Y121        LUT2 (Prop_lut2_I1_O)        0.105     8.819 f  system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4/O
+                         net (fo=5, routed)           0.376     9.195    system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4_n_0
+    SLICE_X98Y122        LUT5 (Prop_lut5_I3_O)        0.105     9.300 r  system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0/O
+                         net (fo=4, routed)           0.251     9.551    system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0_n_0
+    SLICE_X98Y122        LUT6 (Prop_lut6_I4_O)        0.105     9.656 f  system_i/swd_controller_0/inst/u_jtag_core/rdata[31]_i_5/O
+                         net (fo=1, routed)           0.243     9.899    system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata_reg[0]_1
+    SLICE_X100Y121       LUT5 (Prop_lut5_I2_O)        0.105    10.004 r  system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata[31]_i_1/O
+                         net (fo=32, routed)          0.415    10.419    system_i/swd_controller_0/inst/u_jtag_core/u_shift_n_48
+    SLICE_X99Y122        FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[6]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     9.239    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.316 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.491    10.806    system_i/swd_controller_0/inst/u_jtag_core/clk
+    SLICE_X99Y122        FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[6]/C
+                         clock pessimism              0.208    11.014    
+                         clock uncertainty           -0.154    10.860    
+    SLICE_X99Y122        FDCE (Setup_fdce_C_CE)      -0.168    10.692    system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[6]
+  -------------------------------------------------------------------
+                         required time                         10.692    
+                         arrival time                         -10.419    
+  -------------------------------------------------------------------
+                         slack                                  0.273    
+
+Slack (MET) :             0.273ns  (required time - arrival time)
+  Source:                 system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[8]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        7.674ns  (logic 1.954ns (25.463%)  route 5.720ns (74.537%))
+  Logic Levels:           15  (LUT2=2 LUT3=1 LUT4=1 LUT5=3 LUT6=8)
+  Clock Path Skew:        -0.064ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.473ns = ( 10.806 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.745ns
+    Clock Pessimism Removal (CPR):    0.208ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.666     2.745    system_i/swd_controller_0/inst/u_probe_sampler/clk
+    SLICE_X95Y117        FDCE                                         r  system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X95Y117        FDCE (Prop_fdce_C_Q)         0.379     3.124 r  system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/Q
+                         net (fo=5, routed)           0.698     3.822    system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg_n_0
+    SLICE_X94Y118        LUT6 (Prop_lut6_I0_O)        0.105     3.927 r  system_i/swd_controller_0/inst/u_probe_sampler/fifo_reg_i_10/O
+                         net (fo=15, routed)          0.541     4.468    system_i/swd_controller_0/inst/u_probe_stream/u_rtt/sampler_active
+    SLICE_X96Y118        LUT6 (Prop_lut6_I0_O)        0.105     4.573 r  system_i/swd_controller_0/inst/u_probe_stream/u_rtt/wr_shift[31]_i_3/O
+                         net (fo=120, routed)         0.423     4.996    system_i/swd_controller_0/inst/u_swd_batch_engine/stream_active
+    SLICE_X97Y119        LUT6 (Prop_lut6_I5_O)        0.105     5.101 r  system_i/swd_controller_0/inst/u_swd_batch_engine/FSM_sequential_state[4]_i_24/O
+                         net (fo=7, routed)           0.139     5.240    system_i/swd_controller_0/inst/u_swd_core/core_mode_sel
+    SLICE_X97Y119        LUT6 (Prop_lut6_I5_O)        0.105     5.345 r  system_i/swd_controller_0/inst/u_swd_core/core_wait_cnt[23]_i_10/O
+                         net (fo=6, routed)           0.440     5.785    system_i/swd_controller_0/inst/u_jtag_core/swd_result_valid
+    SLICE_X96Y117        LUT3 (Prop_lut3_I2_O)        0.105     5.890 r  system_i/swd_controller_0/inst/u_jtag_core/core_wait_cnt[23]_i_7/O
+                         net (fo=42, routed)          0.379     6.269    system_i/swd_controller_0/inst/u_jtag_core/core_result_valid
+    SLICE_X97Y117        LUT5 (Prop_lut5_I4_O)        0.105     6.374 f  system_i/swd_controller_0/inst/u_jtag_core/fifo_waddr[8]_i_4/O
+                         net (fo=16, routed)          0.237     6.611    system_i/swd_controller_0/inst/u_probe_sampler/pending_time_reg[0]_0
+    SLICE_X97Y117        LUT4 (Prop_lut4_I0_O)        0.105     6.716 r  system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_4__0/O
+                         net (fo=2, routed)           0.260     6.976    system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_4__0_n_0
+    SLICE_X99Y118        LUT6 (Prop_lut6_I0_O)        0.105     7.081 r  system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_18/O
+                         net (fo=1, routed)           0.249     7.330    system_i/swd_controller_0/inst/u_dap_packet_engine/sampler_next_valid
+    SLICE_X96Y118        LUT6 (Prop_lut6_I2_O)        0.105     7.435 r  system_i/swd_controller_0/inst/u_dap_packet_engine/FSM_sequential_state[1]_i_9/O
+                         net (fo=2, routed)           0.268     7.703    system_i/swd_controller_0/inst/u_dap_packet_engine/core_next_valid_sel
+    SLICE_X97Y118        LUT2 (Prop_lut2_I1_O)        0.105     7.808 r  system_i/swd_controller_0/inst/u_dap_packet_engine/req[3]_i_7/O
+                         net (fo=2, routed)           0.371     8.179    system_i/swd_controller_0/inst/u_dap_packet_engine/next_valid0
+    SLICE_X98Y118        LUT6 (Prop_lut6_I3_O)        0.105     8.284 r  system_i/swd_controller_0/inst/u_dap_packet_engine/rv_collect_i_5/O
+                         net (fo=1, routed)           0.430     8.714    system_i/swd_controller_0/inst/u_jtag_core/rv_frame_reg[38]_0
+    SLICE_X99Y121        LUT2 (Prop_lut2_I1_O)        0.105     8.819 f  system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4/O
+                         net (fo=5, routed)           0.376     9.195    system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4_n_0
+    SLICE_X98Y122        LUT5 (Prop_lut5_I3_O)        0.105     9.300 r  system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0/O
+                         net (fo=4, routed)           0.251     9.551    system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0_n_0
+    SLICE_X98Y122        LUT6 (Prop_lut6_I4_O)        0.105     9.656 f  system_i/swd_controller_0/inst/u_jtag_core/rdata[31]_i_5/O
+                         net (fo=1, routed)           0.243     9.899    system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata_reg[0]_1
+    SLICE_X100Y121       LUT5 (Prop_lut5_I2_O)        0.105    10.004 r  system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata[31]_i_1/O
+                         net (fo=32, routed)          0.415    10.419    system_i/swd_controller_0/inst/u_jtag_core/u_shift_n_48
+    SLICE_X99Y122        FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[8]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     9.239    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.316 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.491    10.806    system_i/swd_controller_0/inst/u_jtag_core/clk
+    SLICE_X99Y122        FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[8]/C
+                         clock pessimism              0.208    11.014    
+                         clock uncertainty           -0.154    10.860    
+    SLICE_X99Y122        FDCE (Setup_fdce_C_CE)      -0.168    10.692    system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[8]
+  -------------------------------------------------------------------
+                         required time                         10.692    
+                         arrival time                         -10.419    
+  -------------------------------------------------------------------
+                         slack                                  0.273    
+
+Slack (MET) :             0.357ns  (required time - arrival time)
+  Source:                 system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[19]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        7.593ns  (logic 1.954ns (25.736%)  route 5.639ns (74.264%))
+  Logic Levels:           15  (LUT2=2 LUT3=1 LUT4=1 LUT5=3 LUT6=8)
+  Clock Path Skew:        -0.061ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.476ns = ( 10.809 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.745ns
+    Clock Pessimism Removal (CPR):    0.208ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.666     2.745    system_i/swd_controller_0/inst/u_probe_sampler/clk
+    SLICE_X95Y117        FDCE                                         r  system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X95Y117        FDCE (Prop_fdce_C_Q)         0.379     3.124 r  system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/Q
+                         net (fo=5, routed)           0.698     3.822    system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg_n_0
+    SLICE_X94Y118        LUT6 (Prop_lut6_I0_O)        0.105     3.927 r  system_i/swd_controller_0/inst/u_probe_sampler/fifo_reg_i_10/O
+                         net (fo=15, routed)          0.541     4.468    system_i/swd_controller_0/inst/u_probe_stream/u_rtt/sampler_active
+    SLICE_X96Y118        LUT6 (Prop_lut6_I0_O)        0.105     4.573 r  system_i/swd_controller_0/inst/u_probe_stream/u_rtt/wr_shift[31]_i_3/O
+                         net (fo=120, routed)         0.423     4.996    system_i/swd_controller_0/inst/u_swd_batch_engine/stream_active
+    SLICE_X97Y119        LUT6 (Prop_lut6_I5_O)        0.105     5.101 r  system_i/swd_controller_0/inst/u_swd_batch_engine/FSM_sequential_state[4]_i_24/O
+                         net (fo=7, routed)           0.139     5.240    system_i/swd_controller_0/inst/u_swd_core/core_mode_sel
+    SLICE_X97Y119        LUT6 (Prop_lut6_I5_O)        0.105     5.345 r  system_i/swd_controller_0/inst/u_swd_core/core_wait_cnt[23]_i_10/O
+                         net (fo=6, routed)           0.440     5.785    system_i/swd_controller_0/inst/u_jtag_core/swd_result_valid
+    SLICE_X96Y117        LUT3 (Prop_lut3_I2_O)        0.105     5.890 r  system_i/swd_controller_0/inst/u_jtag_core/core_wait_cnt[23]_i_7/O
+                         net (fo=42, routed)          0.379     6.269    system_i/swd_controller_0/inst/u_jtag_core/core_result_valid
+    SLICE_X97Y117        LUT5 (Prop_lut5_I4_O)        0.105     6.374 f  system_i/swd_controller_0/inst/u_jtag_core/fifo_waddr[8]_i_4/O
+                         net (fo=16, routed)          0.237     6.611    system_i/swd_controller_0/inst/u_probe_sampler/pending_time_reg[0]_0
+    SLICE_X97Y117        LUT4 (Prop_lut4_I0_O)        0.105     6.716 r  system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_4__0/O
+                         net (fo=2, routed)           0.260     6.976    system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_4__0_n_0
+    SLICE_X99Y118        LUT6 (Prop_lut6_I0_O)        0.105     7.081 r  system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_18/O
+                         net (fo=1, routed)           0.249     7.330    system_i/swd_controller_0/inst/u_dap_packet_engine/sampler_next_valid
+    SLICE_X96Y118        LUT6 (Prop_lut6_I2_O)        0.105     7.435 r  system_i/swd_controller_0/inst/u_dap_packet_engine/FSM_sequential_state[1]_i_9/O
+                         net (fo=2, routed)           0.268     7.703    system_i/swd_controller_0/inst/u_dap_packet_engine/core_next_valid_sel
+    SLICE_X97Y118        LUT2 (Prop_lut2_I1_O)        0.105     7.808 r  system_i/swd_controller_0/inst/u_dap_packet_engine/req[3]_i_7/O
+                         net (fo=2, routed)           0.371     8.179    system_i/swd_controller_0/inst/u_dap_packet_engine/next_valid0
+    SLICE_X98Y118        LUT6 (Prop_lut6_I3_O)        0.105     8.284 r  system_i/swd_controller_0/inst/u_dap_packet_engine/rv_collect_i_5/O
+                         net (fo=1, routed)           0.430     8.714    system_i/swd_controller_0/inst/u_jtag_core/rv_frame_reg[38]_0
+    SLICE_X99Y121        LUT2 (Prop_lut2_I1_O)        0.105     8.819 f  system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4/O
+                         net (fo=5, routed)           0.376     9.195    system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4_n_0
+    SLICE_X98Y122        LUT5 (Prop_lut5_I3_O)        0.105     9.300 r  system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0/O
+                         net (fo=4, routed)           0.251     9.551    system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0_n_0
+    SLICE_X98Y122        LUT6 (Prop_lut6_I4_O)        0.105     9.656 f  system_i/swd_controller_0/inst/u_jtag_core/rdata[31]_i_5/O
+                         net (fo=1, routed)           0.243     9.899    system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata_reg[0]_1
+    SLICE_X100Y121       LUT5 (Prop_lut5_I2_O)        0.105    10.004 r  system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata[31]_i_1/O
+                         net (fo=32, routed)          0.334    10.338    system_i/swd_controller_0/inst/u_jtag_core/u_shift_n_48
+    SLICE_X101Y119       FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[19]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     9.239    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.316 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.494    10.809    system_i/swd_controller_0/inst/u_jtag_core/clk
+    SLICE_X101Y119       FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[19]/C
+                         clock pessimism              0.208    11.017    
+                         clock uncertainty           -0.154    10.863    
+    SLICE_X101Y119       FDCE (Setup_fdce_C_CE)      -0.168    10.695    system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[19]
+  -------------------------------------------------------------------
+                         required time                         10.695    
+                         arrival time                         -10.338    
+  -------------------------------------------------------------------
+                         slack                                  0.357    
+
+Slack (MET) :             0.357ns  (required time - arrival time)
+  Source:                 system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Destination:            system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[1]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@4.167ns period=8.333ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            8.333ns  (clk_fpga_0 rise@8.333ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        7.593ns  (logic 1.954ns (25.736%)  route 5.639ns (74.264%))
+  Logic Levels:           15  (LUT2=2 LUT3=1 LUT4=1 LUT5=3 LUT6=8)
+  Clock Path Skew:        -0.061ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.476ns = ( 10.809 - 8.333 ) 
+    Source Clock Delay      (SCD):    2.745ns
+    Clock Pessimism Removal (CPR):    0.208ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.666     2.745    system_i/swd_controller_0/inst/u_probe_sampler/clk
+    SLICE_X95Y117        FDCE                                         r  system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X95Y117        FDCE (Prop_fdce_C_Q)         0.379     3.124 r  system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg/Q
+                         net (fo=5, routed)           0.698     3.822    system_i/swd_controller_0/inst/u_probe_sampler/fault_drain_reg_n_0
+    SLICE_X94Y118        LUT6 (Prop_lut6_I0_O)        0.105     3.927 r  system_i/swd_controller_0/inst/u_probe_sampler/fifo_reg_i_10/O
+                         net (fo=15, routed)          0.541     4.468    system_i/swd_controller_0/inst/u_probe_stream/u_rtt/sampler_active
+    SLICE_X96Y118        LUT6 (Prop_lut6_I0_O)        0.105     4.573 r  system_i/swd_controller_0/inst/u_probe_stream/u_rtt/wr_shift[31]_i_3/O
+                         net (fo=120, routed)         0.423     4.996    system_i/swd_controller_0/inst/u_swd_batch_engine/stream_active
+    SLICE_X97Y119        LUT6 (Prop_lut6_I5_O)        0.105     5.101 r  system_i/swd_controller_0/inst/u_swd_batch_engine/FSM_sequential_state[4]_i_24/O
+                         net (fo=7, routed)           0.139     5.240    system_i/swd_controller_0/inst/u_swd_core/core_mode_sel
+    SLICE_X97Y119        LUT6 (Prop_lut6_I5_O)        0.105     5.345 r  system_i/swd_controller_0/inst/u_swd_core/core_wait_cnt[23]_i_10/O
+                         net (fo=6, routed)           0.440     5.785    system_i/swd_controller_0/inst/u_jtag_core/swd_result_valid
+    SLICE_X96Y117        LUT3 (Prop_lut3_I2_O)        0.105     5.890 r  system_i/swd_controller_0/inst/u_jtag_core/core_wait_cnt[23]_i_7/O
+                         net (fo=42, routed)          0.379     6.269    system_i/swd_controller_0/inst/u_jtag_core/core_result_valid
+    SLICE_X97Y117        LUT5 (Prop_lut5_I4_O)        0.105     6.374 f  system_i/swd_controller_0/inst/u_jtag_core/fifo_waddr[8]_i_4/O
+                         net (fo=16, routed)          0.237     6.611    system_i/swd_controller_0/inst/u_probe_sampler/pending_time_reg[0]_0
+    SLICE_X97Y117        LUT4 (Prop_lut4_I0_O)        0.105     6.716 r  system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_4__0/O
+                         net (fo=2, routed)           0.260     6.976    system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_4__0_n_0
+    SLICE_X99Y118        LUT6 (Prop_lut6_I0_O)        0.105     7.081 r  system_i/swd_controller_0/inst/u_probe_sampler/FSM_sequential_state[1]_i_18/O
+                         net (fo=1, routed)           0.249     7.330    system_i/swd_controller_0/inst/u_dap_packet_engine/sampler_next_valid
+    SLICE_X96Y118        LUT6 (Prop_lut6_I2_O)        0.105     7.435 r  system_i/swd_controller_0/inst/u_dap_packet_engine/FSM_sequential_state[1]_i_9/O
+                         net (fo=2, routed)           0.268     7.703    system_i/swd_controller_0/inst/u_dap_packet_engine/core_next_valid_sel
+    SLICE_X97Y118        LUT2 (Prop_lut2_I1_O)        0.105     7.808 r  system_i/swd_controller_0/inst/u_dap_packet_engine/req[3]_i_7/O
+                         net (fo=2, routed)           0.371     8.179    system_i/swd_controller_0/inst/u_dap_packet_engine/next_valid0
+    SLICE_X98Y118        LUT6 (Prop_lut6_I3_O)        0.105     8.284 r  system_i/swd_controller_0/inst/u_dap_packet_engine/rv_collect_i_5/O
+                         net (fo=1, routed)           0.430     8.714    system_i/swd_controller_0/inst/u_jtag_core/rv_frame_reg[38]_0
+    SLICE_X99Y121        LUT2 (Prop_lut2_I1_O)        0.105     8.819 f  system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4/O
+                         net (fo=5, routed)           0.376     9.195    system_i/swd_controller_0/inst/u_jtag_core/rv_collect_i_4_n_0
+    SLICE_X98Y122        LUT5 (Prop_lut5_I3_O)        0.105     9.300 r  system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0/O
+                         net (fo=4, routed)           0.251     9.551    system_i/swd_controller_0/inst/u_jtag_core/state[4]_i_9__0_n_0
+    SLICE_X98Y122        LUT6 (Prop_lut6_I4_O)        0.105     9.656 f  system_i/swd_controller_0/inst/u_jtag_core/rdata[31]_i_5/O
+                         net (fo=1, routed)           0.243     9.899    system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata_reg[0]_1
+    SLICE_X100Y121       LUT5 (Prop_lut5_I2_O)        0.105    10.004 r  system_i/swd_controller_0/inst/u_jtag_core/u_shift/rdata[31]_i_1/O
+                         net (fo=32, routed)          0.334    10.338    system_i/swd_controller_0/inst/u_jtag_core/u_shift_n_48
+    SLICE_X101Y119       FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[1]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      8.333     8.333 r  
+    PS7_X0Y0             PS7                          0.000     8.333 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     9.239    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     9.316 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=17657, routed)       1.494    10.809    system_i/swd_controller_0/inst/u_jtag_core/clk
+    SLICE_X101Y119       FDCE                                         r  system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[1]/C
+                         clock pessimism              0.208    11.017    
+                         clock uncertainty           -0.154    10.863    
+    SLICE_X101Y119       FDCE (Setup_fdce_C_CE)      -0.168    10.695    system_i/swd_controller_0/inst/u_jtag_core/rdata_reg[1]
+  -------------------------------------------------------------------
+                         required time                         10.695    
+                         arrival time                         -10.338    
+  -------------------------------------------------------------------
+                         slack                                  0.357    
+
+
+
+

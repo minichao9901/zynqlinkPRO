@@ -53,7 +53,7 @@ PS通过0x61回复的能力位声明0x62/64字节只读诊断，主机在文件�
 
 11项RTL用例通过，包括数据路径旧回归、单独解析异常、单独FIFO压力、RDY失锁、停止保留、clear时CDC旧标志不能重新锁存。
 46项CLI主机回归、8项研究测试及生产USB/ETM/JTAG host测试通过。
-诊断RTL/PS的构建与时序结果见下段；**实验配对尚未上板验收**，旧Golden保持原文件。
+诊断RTL/PS的构建与时序及随后上板结果见下段，旧Golden保持原文件。
 [RTL证据](validation/etm-diagnostics-rtl-20261101/result.json)。
 
 首次完整构建随后已结束：100MHz STA通过，但120MHz setup为-0.176ns，最差路径为帧BRAM输出经demux有效信号、
@@ -65,12 +65,62 @@ lookahead水位加法/比较到新增高水位寄存器CE。SWCLK 7ns独立预�
 PS已按Golden相同O3/Thumb/MAX_SWCLK60重建，SHA b07980ab…，OCM跨度120,976B；尚待120MHz新bit及上板验证。
 [失败时序与定位](validation/etm-diag-timing-attempt1-20261101/result.json)。
 
+### ETD1新配对上板：确认这次24MHz失败存在后级背压
+
+第二轮使用修正后的统计路径、120MHz实现约束。初始route未满足SWCLK7ns预算，随后在同一新网表DCP上
+phys_opt/route修复；最终FCLK120MHz setup +0.181ns、hold +0.042ns，SWCLK clock-to-pad 6.819ns，
+bitgen DRC为0错误（仍有异步BRAM控制等46项警告，未宣称无警告）。128.57MHz档setup -0.332ns，不作交付频率。
+RTL输入提交`3d7663b`，O3/Thumb/compact的PS从`75fba4a`重新构建，明确绑定该bit的verified_clock。
+源码输入SHA、完整频率表和时序报告已归档。
+
+新配对保存到`prebuilt/etm-diag-raw4-20261101/`，实际JTAG/RAM加载：
+
+| 文件 | SHA-256 |
+|---|---|
+| probe.bit | 0863332c4381d3bcc210eb75d150e9acdb6171ccd2d6c95e82ccc0749c32c8d0 |
+| application.elf | b07980abf5d1d107c1356dab8022533d3d9863d9b2e107b97241536378121cf0 |
+| ps7_init.tcl，来自本次BD生成 | aa9747c31f705be7c28af1c6b1cdeaf282f0dcdb01faecee2a9f72e4d3489132 |
+
+71,620字节PS执行段逐字节读回匹配。0x61参考199,999,998Hz并声明ETD1；0x62签名/能力/模式正确，
+刚启动的错误计数为0。实际Web测试FCLK119,999,998Hz、SWCLK999,999.98Hz，目标仍为e379固件的CPU48/TRACECLK24MHz，
+没有编程QSPI、目标Flash或更改target时钟。
+
+30次真实Web连接/关闭全部成功：打开中位1.771s，范围1.616～3.763s；关闭中位0.402s。
+随后第一轮cdc_poll请求10ms就出现loss，保留125,531B并停止，未重试补过。原始输入SHA为
+`0d3d86be2726a648f73c7505250af482febc8c94a9e81e6edab4afb4f3a2a112`。
+诊断为记录FIFO峰值65,536/容量65,536、记录背压349,223个FCLK周期、帧FIFO峰值8、丢帧2,166，
+parserErrors=0、syncAcquisitions=1、IDELAY RDY下降=0。主机接收跨度内4份64字节echo逐字节正确，清理无错误。
+这直接证明**本次失败包含后级排空不足→记录FIFO满→帧丢失**；不能凭parser为0证明模拟链路零误码，
+也不能外推更高频均由同一原因造成。应优先做PL→DDR有限采集与采后下载，再研究接收时序极限。
+
+本配对的诊断功能已上板验证，但**采集压力验收失败，非Golden，不声称频率提升、H743已验收或DDR已实现**。
+manifest记录加载身份和限制；原Golden/recovery未覆盖。
+[板测、时序及原始压缩数据](validation/etm-diag-board-20261101/result.json)。
+
+此次还发现captureExtent虽标sampleCountMeasured=false，却把主机46ms接收/排空跨度乘500MSa/s当成实际采样数，
+继而标complete=true。这些原始失败元数据不追改，已明确标出口径问题。
+新保存路径不再生成这类伪采样数：ZET1的actualDepth/actualTime、actualSamples/actualSeconds/complete均为null，
+主机跨度单独保留为hostReceiveSeconds；收到结束包不能证明硬件录满请求窗口。3项后端用例覆盖F103/H743真实C++回放及失败记录，均通过。
+
 压力测试同时暴露并修复失败历史展示：失败捕获未刷新进state.records时，openRecord误入decoded.json路径；
 现在失败后刷新并显示原始记录，列表/正文明确标“采集失败/采集未通过”，不再继续展示上一条成功结果。
 另修复成功重解码清掉采集失败的语义问题：captureError和captureStatus=failed独立保留；OpenCSD成功不等于接收无损。
 缺失或数字占位的质量标志显示“未知”，不能显示“无丢失”。真实失败记录已在Web打开并保存截图；
 后端回放明确注入loss后再成功C++重解码，确认采集错误仍保留。3项后端、44项Web回归通过。
 [展示与保留验证](validation/etm-failure-visibility-20261101/result.json)。
+
+### H743接入保留与换板准备
+
+保留superlinkPRO的H743识别、独立CPU/Trace时钟计算、ETMv4选项及Funnel/ETF/TPIU路由，
+原生Zynq接收交接不会向H743写F103的ETMv3控制寄存器。7项主机/3项Web检查通过。
+当前代码重新处理原始Kingst H743参考：210,497条指令、182,006条执行、packetIssues=0，
+native完整处理0.628s，TraceStore存在且无逐指令JSONL。该单次离线结果不证明H743 Zynq上板或实时吞吐。
+
+迁入`etm-service/firmware/stm32h743_cdc_trace/`及构建helper，固定superlinkPRO提交`be75311236da2665a2edc54b9b4d4561f0219456`，
+共38份原始源码/构建文件，包含CherryUSB许可证，逐文件Git内容SHA见source-provenance。
+统一AI入口`target.h743-build`已生成执行计划、PowerShell语法通过；完整H743 SDK仍是外部依赖，未完成目标编译或烧录。
+压力入口支持显式profile/ELF/HSE/函数/CDC端口，不会默用F103目标文件。换板后按Web说明低频短窗开始验收。
+[保留验证](validation/h743-preservation-20261101/replay.json)。
 
 ### 最初的只读研究与容量计划
 

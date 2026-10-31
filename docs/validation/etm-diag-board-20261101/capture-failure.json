@@ -1,0 +1,96 @@
+{
+  "round": 1,
+  "function": "cdc_poll",
+  "before": {
+    "clockError": null,
+    "clocks": {
+      "busDivider": 1,
+      "coreDivider": 1,
+      "coreHz": 48000000,
+      "external": true,
+      "hclkHz": 48000000,
+      "knownHz": 48000000,
+      "knownTraceHz": 48000000,
+      "path": "HSE 8 MHz ÷1 ×6 → AHB ÷1",
+      "physicalTraceHz": 24000000,
+      "source": "HSE → PLL",
+      "traceHz": 48000000,
+      "tracePath": "HCLK → TRACEPORTCK（与 CPU 相同）",
+      "traceReady": true,
+      "traceRelation": "Trace 输入 = HCLK；4 位 DDR 的 TRACECLK = HCLK / 2"
+    },
+    "config": {
+      "ccer": 100352,
+      "ctrl": 1041,
+      "idr": 1091891777,
+      "protocol": "ETMv3",
+      "traceid": 0
+    },
+    "core": "Cortex-M3",
+    "cpuid": 1092600369,
+    "device": 268657684,
+    "etmVersion": "ETMv3.4",
+    "flashLimit": 134742016,
+    "halted": false,
+    "hseHz": 8000000,
+    "name": "STM32F103ZE / 高容量 F103（PE2～PE6）",
+    "profile": "stm32f103ze",
+    "rcc": {
+      "cfgr": 5309450,
+      "cr": 50548355
+    },
+    "traceOptions": {
+      "branchBroadcast": true,
+      "cycleCount": false,
+      "returnStack": false
+    },
+    "traceStatus": "F103ZE 48/24 MHz Kingst 联动与 ETMv3 解码已验收；封装须有 PE2～PE6",
+    "traceSupported": true,
+    "width": 1
+  },
+  "openSeconds": 1.8777207999955863,
+  "captureAttemptUnix": 1793474101.4166634,
+  "error": "操作失败",
+  "record": "capture-88f0afa2b0fd4a55af5efac596941d0c",
+  "transport": {
+    "records": 125531,
+    "loss": true,
+    "synced": true,
+    "ended": true,
+    "fclk": 119999998,
+    "tckKhz": 999,
+    "captureId": 1,
+    "hostStartedUnix": 1793474108.3491163,
+    "hostSeconds": 0.04638729999714997,
+    "hostEndedUnix": 1793474108.3955069,
+    "diagnostics": {
+      "implemented": true,
+      "capabilities": 15,
+      "flags": 1,
+      "rawMode": 4,
+      "frameHighwater": 8,
+      "recordHighwater": 65536,
+      "frameDrops": 2166,
+      "parserErrors": 0,
+      "idelayReadyLosses": 0,
+      "recordStallCycles": 349223,
+      "syncAcquisitions": 1,
+      "recordLevel": 0,
+      "recordsAccepted": 125531,
+      "receiverEnabled": false,
+      "fclkHz": 119999998,
+      "recordCapacity": 65536
+    }
+  },
+  "captureExtent": {
+    "requestedSeconds": 0.01,
+    "actualSeconds": 0.046387298,
+    "requestedSamples": 5000000,
+    "actualSamples": 23193649,
+    "complete": true,
+    "basis": "host monotonic receive window; not target cycle timing",
+    "sampleCountMeasured": false
+  },
+  "rawBytes": 125531,
+  "rawSha256": "0d3d86be2726a648f73c7505250af482febc8c94a9e81e6edab4afb4f3a2a112"
+}

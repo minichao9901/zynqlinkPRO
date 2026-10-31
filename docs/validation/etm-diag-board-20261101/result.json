@@ -1,0 +1,72 @@
+{
+  "hardware": true,
+  "captureStressPassed": false,
+  "firstFailurePreserved": true,
+  "lifecyclePassed": 30,
+  "lifecycleRequested": 30,
+  "openSeconds": {
+    "median": 1.771181849995628,
+    "min": 1.6161960000026738,
+    "max": 3.763439799993648
+  },
+  "closeMedianSeconds": 0.40168205000372836,
+  "captureRoundsAttempted": 1,
+  "captureRoundsRequested": 10,
+  "failedRecord": "capture-88f0afa2b0fd4a55af5efac596941d0c",
+  "rawBytes": 125531,
+  "rawSha256": "0d3d86be2726a648f73c7505250af482febc8c94a9e81e6edab4afb4f3a2a112",
+  "transport": {
+    "records": 125531,
+    "loss": true,
+    "synced": true,
+    "ended": true,
+    "fclk": 119999998,
+    "tckKhz": 999,
+    "captureId": 1,
+    "hostStartedUnix": 1793474108.3491163,
+    "hostSeconds": 0.04638729999714997,
+    "hostEndedUnix": 1793474108.3955069,
+    "diagnostics": {
+      "implemented": true,
+      "capabilities": 15,
+      "flags": 1,
+      "rawMode": 4,
+      "frameHighwater": 8,
+      "recordHighwater": 65536,
+      "frameDrops": 2166,
+      "parserErrors": 0,
+      "idelayReadyLosses": 0,
+      "recordStallCycles": 349223,
+      "syncAcquisitions": 1,
+      "recordLevel": 0,
+      "recordsAccepted": 125531,
+      "receiverEnabled": false,
+      "fclkHz": 119999998,
+      "recordCapacity": 65536
+    }
+  },
+  "echoInsideHostWindow": 4,
+  "echoError": null,
+  "cleanupError": null,
+  "actualClocks": {
+    "FCLK_Hz": 119999998,
+    "cfg": "0x300d6a11",
+    "waveform": {
+      "SWCLK_Hz": 999999.9833333333,
+      "half_period_fclk": 60,
+      "short_high": true,
+      "intended_high_ns": 8.333333472222225
+    },
+    "JTAG_sampling_mode": 0,
+    "RISC_V_SBA_enabled": false,
+    "actual_link_Hz": 999999.9833333333,
+    "clock_observation": "PS JTAG register read; no DAP command during stream"
+  },
+  "targetCPUHz": 48000000,
+  "targetPhysicalTraceHz": 24000000,
+  "noFlash": true,
+  "targetClockRegistersChanged": false,
+  "conclusion": "This capture has record FIFO full, backpressure and frame FIFO drops, with zero parser malformed events. Direct evidence of downstream drain bottleneck; not a signal BER limit or all future loss causes.",
+  "hardwareWindowMeasured": false,
+  "captureExtentNote": "Original metadata derived sample count from host span. Subsequent host fix leaves actualSamples,actualSeconds,complete null until hardware measurement exists."
+}
