@@ -1,6 +1,9 @@
 set root [file normalize [file join [file dirname [info script]] ..]]
 set out [file join $root build fpga_dma_global]
-open_checkpoint [file join $out zynqlink_dma.runs impl_1 system_wrapper_routed.dcp]
+if {[info exists ::zynqlink_verify_out]} {set out [file normalize $::zynqlink_verify_out]}
+set routed_checkpoint [file join $out zynqlink_dma.runs impl_1 system_wrapper_routed.dcp]
+if {[info exists ::zynqlink_verify_checkpoint]} {set routed_checkpoint [file normalize $::zynqlink_verify_checkpoint]}
+open_checkpoint $routed_checkpoint
 set swclk_launch [get_cells -quiet -hier -filter {NAME =~ *short_core_clock_reg}]
 if {[llength $swclk_launch] != 1} {error "SWCLK launch register missing"}
 set swclk_path [get_timing_paths -from $swclk_launch -to [get_ports swclk_0] -max_paths 1]
@@ -101,7 +104,8 @@ puts "VERIFIED_SETUP_SLACK=$worst VERIFIED_HOLD_SLACK=$hold"
 if {$worst < 0 || $hold < 0} {error "Routed timing failed with all FCLK input sampling paths constrained"}
 write_checkpoint -force [file join $out system_wrapper_verified.dcp]
 set run_bit [file join $out zynqlink_dma.runs impl_1 system_wrapper.bit]
-set run_dcp [file join $out zynqlink_dma.runs impl_1 system_wrapper_routed.dcp]
+if {[info exists ::zynqlink_verify_bit]} {set run_bit [file normalize $::zynqlink_verify_bit]}
+set run_dcp $routed_checkpoint
 if {[file exists $run_bit] && [file mtime $run_bit] >= [file mtime $run_dcp]} {
     # STA does not change configuration bits. Avoid a duplicate bitgen when
     # an existing project run already generated this routed design's bit.

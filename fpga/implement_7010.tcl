@@ -52,7 +52,9 @@ report_timing -delay_type min -max_paths 20 -file [file join $out hold_paths.rpt
 write_checkpoint -force [file join $out system_routed.dcp]
 set setup [get_property SLACK [get_timing_paths -delay_type max -max_paths 1]]
 set hold [get_property SLACK [get_timing_paths -delay_type min -max_paths 1]]
+set launch [get_property SLACK [get_timing_paths -from $swclk_launch -to $swclk_pad -max_paths 1]]
+report_timing -from $swclk_launch -to $swclk_pad -max_paths 2 -file [file join $out swclk_launch.rpt]
 puts "ZYNQ7010_${fclk_mhz}MHZ SETUP=$setup HOLD=$hold"
-if {$setup < 0 || $hold < 0} {error "7010 timing does not meet $fclk_mhz MHz"}
+if {$setup < 0 || $hold < 0 || $launch < 0} {error "7010 timing does not meet $fclk_mhz MHz / SWCLK launch budget"}
 write_bitstream -force [file join $out system_wrapper.bit]
 puts "ZYNQ7010_BIT_READY $out/system_wrapper.bit (NOT BOARD VALIDATED)"
