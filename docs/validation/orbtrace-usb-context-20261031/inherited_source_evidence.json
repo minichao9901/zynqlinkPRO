@@ -1,0 +1,15 @@
+{
+  "baseline_sources": {
+    "00b9f2f": [
+      "00b9f2f:firmware/xusbps_daplink_dma/xusbps_ch9.c:187:\tUsbLocalPtr = (XUsbPs_Local *) InstancePtr->UserDataPtr;",
+      "00b9f2f:firmware/xusbps_daplink_dma/xusbps_intr_example.c:421:\tif (NULL != UsbInstancePtr->UserDataPtr) {",
+      "00b9f2f:firmware/xusbps_daplink_dma/xusbps_intr_example.c:422:\t\tfree(UsbInstancePtr->UserDataPtr);"
+    ],
+    "13c7b52": [
+      "13c7b52:firmware/xusbps_daplink_dma/xusbps_ch9.c:187:\tUsbLocalPtr = (XUsbPs_Local *) InstancePtr->UserDataPtr;",
+      "13c7b52:firmware/xusbps_daplink_dma/xusbps_intr_example.c:421:\tif (NULL != UsbInstancePtr->UserDataPtr) {",
+      "13c7b52:firmware/xusbps_daplink_dma/xusbps_intr_example.c:422:\t\tfree(UsbInstancePtr->UserDataPtr);"
+    ]
+  },
+  "scope": "Baseline sources contain the Chapter9 dereference and free-only cleanup, without initializing UserDataPtr. Actual OCM0 write was observed for original optimized4fb ELF; no claim that all historical binaries were independently watched."
+}
