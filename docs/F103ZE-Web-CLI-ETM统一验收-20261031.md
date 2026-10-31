@@ -482,7 +482,7 @@ python tools/verify_etm_native_equivalence.py --legacy etm-service/records/captu
 
 本轮已与“优化PL资源时序与PS代码体积”聊天核对：对方源码合并窗口已经结束，PL/PS优化、QSPI CLI和ETM改动
 共同位于主工作分支`feature/superlink-zynq-web`。对方正从`954de8f`的隔离快照统一构建和先行板测；
-本轮后补仅涉及target归档和离线材料，未改变该快照的FPGA/PS输入。本地`main`原无独占提交，待归档核验后
+本轮后补仅涉及target归档和离线材料，未改变该快照的FPGA/PS输入。本地`main`原无独占提交；本次在归档核验后
 安全快进到同一合入头；不切换当前工作区，不重置、不推远端，也不删除worktree。
 
 复查对方的PL诊断裁剪/FIFO资源优化、PS紧凑构建/SWJ/USB上下文修复和QSPI工具时，确认不能拿旧优化线
@@ -491,6 +491,7 @@ bit/ELF替代ETM合并头。新配对、SHA、实际FCLK/TCK与板测仍由统�
 | 必须保留的内容 | 仓库内入口 |
 |---|---|
 | 统一CLI、Web和原生配置 | `toolbox.py`、`web/`、`etm-service/` |
+| C++原生源码、OpenCSD与构建入口 | `etm-service/native/`、`vendor/OpenCSD-1.8.3/`、`CMakeLists.txt`、`build-decoder.ps1` |
 | ETM完整流程/断点/容量、RTT和J-Scope验收 | `tools/f103_web_acceptance.py`、`f103_stream_acceptance.py`、`f103_capture_entry.py`、`f103_trace_sweep.py` |
 | 实板采集及物理边沿分析 | `tools/test_orbtrace_board.py`、`trace_signal_analysis.py`及原始回放证据 |
 | 离线完整处理、首屏/缩放、语义比较 | `tools/bench_etm_native_offline.py`、`bench_etm_native_browser.py`、`verify_etm_native_equivalence.py` |
@@ -522,3 +523,27 @@ python tools/verify_etm_native_equivalence.py --oracle docs/validation/native-en
 
 未入库的主目录build/releases/HPM历史文件没有混入本轮提交，也没有删除；另一AI的私有Flash备份保留约定仍有效。
 worktree删除必须等对应真机验收通过并核对新产物身份后再做，本轮不删除。
+
+归档补齐提交`cff18fa`已用`git archive`导出到仓库外全新目录验证：没有.git、没有原records和build，
+只用Git跟踪文件恢复输入。原生1s解码、全部summary/共有quality及1,759事件oracle通过；CDC 48MHz
+USB向量自检、8项host场景、RTT 72MHz和J-Scope 72MHz target均构建成功。此轮与其他编译并行，
+额外单次耗时只作为可运行性检查，不替换前文三次性能基准。
+
+另补齐此前只交付EXE的原生工具源码：从superlinkPRO固定提交`2ca380ab6cf96e5742cae61a01e8871d2df6de28`
+导出C++、CMake/build脚本、OpenCSD 1.8.3及许可证，共204份原始文件，逐文件SHA见
+`etm-service/native/source-provenance.json`。选择该提交的依据是已迁入storebuild EXE报告的源码版本；
+其余旧EXE没有报告完整源码版本，不能反推它们全部来自同一提交。
+
+全部五个工具已在私有build目录重新编译，重建工具再处理同一1s输入并对照全部summary/共有quality和1,759条
+完整事件字典均通过。已跟踪的运行EXE保持原SHA，本轮不替换。原生重建仍需已安装的MinGW C/C++、CMake、
+Ninja及zlib/OpenSSL/SQLite开发库；这些为外部工具链，源码和上游许可证均在仓库内。
+针对私有输出目录的复核命令（不覆盖运行EXE、不连接硬件）：
+
+```powershell
+cmake -S etm-service -B build/etm-native-rebuild -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=C:/msys64/mingw64/bin/gcc.exe -DCMAKE_CXX_COMPILER=C:/msys64/mingw64/bin/g++.exe
+cmake --build build/etm-native-rebuild --parallel 2
+```
+
+原始导出及原生重建的完整处理/事件比较结果、target编译清单与日志见
+[最终归档核查](validation/etm-merge-20261031/handoff.json)。原有source-provenance.json中main.c仍记着CDC补丁前哈希，
+本次已改为与已保存的补丁后source-snapshot相符，并保留被纠正的旧值；没有修改该target源码或旧已验收ELF。

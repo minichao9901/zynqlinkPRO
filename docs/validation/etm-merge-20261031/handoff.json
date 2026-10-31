@@ -91,6 +91,33 @@
     "expectedEvents": 1759,
     "expectedBoundaryEvents": 503
   },
-  "freshExportAudit": "pending",
-  "hardwareValidation": "Peer is building/validating first. ETM/Web board acceptance awaits explicit device release; no worktree deletion performed."
+  "freshExportAudit": {
+    "passed": true,
+    "sourceCommit": "cff18fafd0a0312ea991a40584d063db9221a208",
+    "archiveBytes": 11611958,
+    "exportDirectory": "E:\\zynqlinkPRO_etm_export_audit_20261031",
+    "gitDirectoryPresent": false,
+    "originalRecordsPresent": false,
+    "originalBuildOrExternalSourceUsed": false,
+    "restoredInputHashesMatched": true,
+    "nativeDecodePassed": true,
+    "summaryAndSharedQualityMatched": true,
+    "sampledEventDictionariesMatched": 1759,
+    "cdcHostScenariosPassed": 8,
+    "cdc48UsbVectorBuildPassed": true,
+    "rtt72BuildPassed": true,
+    "scope72BuildPassed": true,
+    "timingNote": "Functional portability checks run concurrently with other compilation; these single runs do not replace the earlier three-trial performance baseline."
+  },
+  "hardwareValidation": "Peer is building/validating first. ETM/Web board acceptance awaits explicit device release; no worktree deletion performed.",
+  "nativeSourceArchive": {
+    "repository": "https://github.com/minichao9901/superlinkPRO",
+    "revision": "2ca380ab6cf96e5742cae61a01e8871d2df6de28",
+    "build": "all five CMake executables rebuilt successfully in private build output; tracked runtime executables unchanged",
+    "reconstructedPipelinePassed": true,
+    "summaryAndSharedQualityMatched": true,
+    "sampledEventDictionariesMatched": 1759,
+    "sourceSnapshotProvenance": "../../../etm-service/native/source-provenance.json",
+    "buildSnapshotNote": "Source files were imported during this audit, before their archive commit; exact imported source hashes are recorded independently of the working HEAD."
+  }
 }

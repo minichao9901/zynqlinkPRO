@@ -1,3 +1,7 @@
+> 当前统一入口为根目录`toolbox.py`，服务默认选择binary/C++ storebuild/数值索引；最新频率、质量及性能结论以
+> [统一验收文档](../docs/F103ZE-Web-CLI-ETM统一验收-20261031.md)为准。下文历史启动/配对说明不代表合并头已验收。
+> 原生C++/OpenCSD源码及构建入口已归档至本目录`native/`、`vendor/`和`CMakeLists.txt`；固定来源与逐文件SHA见`native/source-provenance.json`。
+
 # ETM 本地服务（superlinkPRO 页面 + Zynq 采集）
 
 这是 **superlinkPRO 原始 ETM 工作台**（`web/`，四步页面、执行流/调用统计/火焰图/热点/ETM 包/可信区段）在本仓库的本地服务。页面本身不再重写；只把原来的 **Kingst 逻辑分析仪** 采集后端换成 **Zynq FPGA 并行 ETM**，解码仍由原来的 OpenCSD 原生解码器完成。
