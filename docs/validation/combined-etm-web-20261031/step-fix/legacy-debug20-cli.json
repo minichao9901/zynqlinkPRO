@@ -1,0 +1,3628 @@
+[
+  {
+    "request": {
+      "action": "disconnect"
+    },
+    "seconds": 0.2826213999942411,
+    "result": {
+      "job": "4f8725eb695bddcb5af1809cbdbe4f07",
+      "ok": true,
+      "value": {
+        "disconnected": true
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "connect",
+      "swdHz": 1000000
+    },
+    "seconds": 0.7491787000035401,
+    "result": {
+      "job": "fdf4bcc0003d4a834356aff72f6fba9b",
+      "ok": true,
+      "value": {
+        "connected": true,
+        "halted": false,
+        "linked": true,
+        "pc": 0
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "elf",
+      "name": "fw-48-echo.elf"
+    },
+    "seconds": 0.27525880000030156,
+    "result": {
+      "job": "1fe2c2ecb32ed12e3c59404c3b9b0659",
+      "ok": true,
+      "value": {
+        "loaded": true,
+        "name": "fw-48-echo.elf",
+        "symbols": 733
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "halt",
+        "bd all",
+        "b cdc_poll",
+        "c"
+      ]
+    },
+    "seconds": 2.749801199999638,
+    "result": {
+      "job": "ce4ce41e4197a40f2b1c44f9fe4c1c22",
+      "ok": true,
+      "value": {
+        "breakpoints": [
+          {
+            "addr": 134219152,
+            "loc": "main.c:266",
+            "note": "cdc_poll",
+            "slot": 0,
+            "sym": "cdc_poll"
+          }
+        ],
+        "results": [
+          {
+            "command": "halt",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已暂停　状态：已停止（halted）　PC=0x0800053e cdc_tx_poll+0xa"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 0 个断点"
+              }
+            ]
+          },
+          {
+            "command": "b cdc_poll",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "断点 #1 @ 0x08000590  cdc_poll  main.c:266"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x0800053e cdc_tx_poll+0xa"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134219070
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "wait-halt",
+      "timeoutMs": 3000
+    },
+    "seconds": 0.12424660001124721,
+    "result": {
+      "job": "0e5760ed5be987f2f99fa5844eeb20e6",
+      "ok": true,
+      "value": {
+        "connected": true,
+        "halted": true,
+        "linked": true,
+        "pc": 134219152
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "r r0",
+        "si",
+        "si",
+        "bd all",
+        "c"
+      ]
+    },
+    "seconds": 7.712157900008606,
+    "result": {
+      "job": "e369f56f4999108c9460169838954197",
+      "ok": true,
+      "value": {
+        "breakpoints": [],
+        "results": [
+          {
+            "command": "r r0",
+            "lines": [
+              {
+                "t": "R0         0x00000001"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ cmsis_gcc.h:386"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000592  →  cdc_poll+0x2"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ main.c:266"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000590  →  cdc_poll+0x0"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 1 个断点"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x08000590 cdc_poll+0x0"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134219152
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "halt",
+        "bd all",
+        "b cdc_poll",
+        "c"
+      ]
+    },
+    "seconds": 2.321706600007019,
+    "result": {
+      "job": "1c2a8303341b34ba50d29fe9165278a8",
+      "ok": true,
+      "value": {
+        "breakpoints": [
+          {
+            "addr": 134219152,
+            "loc": "main.c:266",
+            "note": "cdc_poll",
+            "slot": 0,
+            "sym": "cdc_poll"
+          }
+        ],
+        "results": [
+          {
+            "command": "halt",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已暂停　状态：已停止（halted）　PC=0x080005aa cdc_poll+0x1a"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 0 个断点"
+              }
+            ]
+          },
+          {
+            "command": "b cdc_poll",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "断点 #1 @ 0x08000590  cdc_poll  main.c:266"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x080005aa cdc_poll+0x1a"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134219178
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "wait-halt",
+      "timeoutMs": 3000
+    },
+    "seconds": 0.10442669999611098,
+    "result": {
+      "job": "00d56720a84268a448b36cd32946a11f",
+      "ok": true,
+      "value": {
+        "connected": true,
+        "halted": true,
+        "linked": true,
+        "pc": 134219152
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "r r0",
+        "si",
+        "si",
+        "bd all",
+        "c"
+      ]
+    },
+    "seconds": 5.9973933000001125,
+    "result": {
+      "job": "fe3e57a7c28c595ead5943092a3a5891",
+      "ok": true,
+      "value": {
+        "breakpoints": [],
+        "results": [
+          {
+            "command": "r r0",
+            "lines": [
+              {
+                "t": "R0         0x00000001"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ cmsis_gcc.h:386"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000592  →  cdc_poll+0x2"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ main.c:266"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000590  →  cdc_poll+0x0"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 1 个断点"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x08000590 cdc_poll+0x0"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134219152
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "halt",
+        "bd all",
+        "b cdc_poll",
+        "c"
+      ]
+    },
+    "seconds": 2.1890806000010343,
+    "result": {
+      "job": "c2e8626eda2fd0b8f9cd004c9ecbae55",
+      "ok": true,
+      "value": {
+        "breakpoints": [
+          {
+            "addr": 134219152,
+            "loc": "main.c:266",
+            "note": "cdc_poll",
+            "slot": 0,
+            "sym": "cdc_poll"
+          }
+        ],
+        "results": [
+          {
+            "command": "halt",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已暂停　状态：已停止（halted）　PC=0x080005ea cdc_poll+0x5a"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 0 个断点"
+              }
+            ]
+          },
+          {
+            "command": "b cdc_poll",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "断点 #1 @ 0x08000590  cdc_poll  main.c:266"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x080005ea cdc_poll+0x5a"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134219242
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "wait-halt",
+      "timeoutMs": 3000
+    },
+    "seconds": 0.1043368999962695,
+    "result": {
+      "job": "864b60a47991c7797481d4a9d63d10ef",
+      "ok": true,
+      "value": {
+        "connected": true,
+        "halted": true,
+        "linked": true,
+        "pc": 134219152
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "r r0",
+        "si",
+        "si",
+        "bd all",
+        "c"
+      ]
+    },
+    "seconds": 5.581566599998041,
+    "result": {
+      "job": "3b98078c59d993f8acb2e36db6fed0fb",
+      "ok": true,
+      "value": {
+        "breakpoints": [],
+        "results": [
+          {
+            "command": "r r0",
+            "lines": [
+              {
+                "t": "R0         0x00000001"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ cmsis_gcc.h:386"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000592  →  cdc_poll+0x2"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ main.c:266"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000590  →  cdc_poll+0x0"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 1 个断点"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x08000590 cdc_poll+0x0"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134219152
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "halt",
+        "bd all",
+        "b cdc_poll",
+        "c"
+      ]
+    },
+    "seconds": 2.334968100010883,
+    "result": {
+      "job": "7ef87cb85279840be97ffad8ddb160ec",
+      "ok": true,
+      "value": {
+        "breakpoints": [
+          {
+            "addr": 134219152,
+            "loc": "main.c:266",
+            "note": "cdc_poll",
+            "slot": 0,
+            "sym": "cdc_poll"
+          }
+        ],
+        "results": [
+          {
+            "command": "halt",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已暂停　状态：已停止（halted）　PC=0x080005c0 cdc_poll+0x30"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 0 个断点"
+              }
+            ]
+          },
+          {
+            "command": "b cdc_poll",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "断点 #1 @ 0x08000590  cdc_poll  main.c:266"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x080005c0 cdc_poll+0x30"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134219200
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "wait-halt",
+      "timeoutMs": 3000
+    },
+    "seconds": 0.1326042000000598,
+    "result": {
+      "job": "f990e224c87775df8b70866024bc6d30",
+      "ok": true,
+      "value": {
+        "connected": true,
+        "halted": true,
+        "linked": true,
+        "pc": 134219152
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "r r0",
+        "si",
+        "si",
+        "bd all",
+        "c"
+      ]
+    },
+    "seconds": 5.639456999997492,
+    "result": {
+      "job": "b9aa29bbbefba141ee725de82a43c2ca",
+      "ok": true,
+      "value": {
+        "breakpoints": [],
+        "results": [
+          {
+            "command": "r r0",
+            "lines": [
+              {
+                "t": "R0         0x00000001"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ cmsis_gcc.h:386"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000592  →  cdc_poll+0x2"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ main.c:266"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000590  →  cdc_poll+0x0"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 1 个断点"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x08000590 cdc_poll+0x0"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134219152
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "halt",
+        "bd all",
+        "b cdc_poll",
+        "c"
+      ]
+    },
+    "seconds": 2.2769745999976294,
+    "result": {
+      "job": "feabef51a22a0f461e34f6ceb22768e8",
+      "ok": true,
+      "value": {
+        "breakpoints": [
+          {
+            "addr": 134219152,
+            "loc": "main.c:266",
+            "note": "cdc_poll",
+            "slot": 0,
+            "sym": "cdc_poll"
+          }
+        ],
+        "results": [
+          {
+            "command": "halt",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已暂停　状态：已停止（halted）　PC=0x08000536 cdc_tx_poll+0x2"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 0 个断点"
+              }
+            ]
+          },
+          {
+            "command": "b cdc_poll",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "断点 #1 @ 0x08000590  cdc_poll  main.c:266"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x08000536 cdc_tx_poll+0x2"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134219062
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "wait-halt",
+      "timeoutMs": 3000
+    },
+    "seconds": 0.10461310000391677,
+    "result": {
+      "job": "a32887ca8491fb545d08620db6c011d1",
+      "ok": true,
+      "value": {
+        "connected": true,
+        "halted": true,
+        "linked": true,
+        "pc": 134219152
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "r r0",
+        "si",
+        "si",
+        "bd all",
+        "c"
+      ]
+    },
+    "seconds": 6.012679199993727,
+    "result": {
+      "job": "35a2b1040ab26904976eee563ee5b222",
+      "ok": true,
+      "value": {
+        "breakpoints": [],
+        "results": [
+          {
+            "command": "r r0",
+            "lines": [
+              {
+                "t": "R0         0x00000001"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ cmsis_gcc.h:386"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000592  →  cdc_poll+0x2"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ main.c:266"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000590  →  cdc_poll+0x0"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 1 个断点"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x08000590 cdc_poll+0x0"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134219152
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "halt",
+        "bd all",
+        "b cdc_poll",
+        "c"
+      ]
+    },
+    "seconds": 2.185670200007735,
+    "result": {
+      "job": "b9a4f1e786b507f95ba1e766c89bca7d",
+      "ok": true,
+      "value": {
+        "breakpoints": [
+          {
+            "addr": 134219152,
+            "loc": "main.c:266",
+            "note": "cdc_poll",
+            "slot": 0,
+            "sym": "cdc_poll"
+          }
+        ],
+        "results": [
+          {
+            "command": "halt",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已暂停　状态：已停止（halted）　PC=0x08000534 cdc_tx_poll+0x0"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 0 个断点"
+              }
+            ]
+          },
+          {
+            "command": "b cdc_poll",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "断点 #1 @ 0x08000590  cdc_poll  main.c:266"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x08000534 cdc_tx_poll+0x0"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134219060
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "wait-halt",
+      "timeoutMs": 3000
+    },
+    "seconds": 0.12764040000911336,
+    "result": {
+      "job": "d3fa07bfad7fab5b4ceb31b997c9cb77",
+      "ok": true,
+      "value": {
+        "connected": true,
+        "halted": true,
+        "linked": true,
+        "pc": 134219152
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "r r0",
+        "si",
+        "si",
+        "bd all",
+        "c"
+      ]
+    },
+    "seconds": 5.655959600000642,
+    "result": {
+      "job": "f307d9b73304f2e0228b159b2437b7f2",
+      "ok": true,
+      "value": {
+        "breakpoints": [],
+        "results": [
+          {
+            "command": "r r0",
+            "lines": [
+              {
+                "t": "R0         0x00000001"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ cmsis_gcc.h:386"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000592  →  cdc_poll+0x2"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ main.c:266"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000590  →  cdc_poll+0x0"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 1 个断点"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x08000590 cdc_poll+0x0"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134219152
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "halt",
+        "bd all",
+        "b cdc_poll",
+        "c"
+      ]
+    },
+    "seconds": 2.235548299999209,
+    "result": {
+      "job": "9a0e5736ea0712e1b808776e59be8366",
+      "ok": true,
+      "value": {
+        "breakpoints": [
+          {
+            "addr": 134219152,
+            "loc": "main.c:266",
+            "note": "cdc_poll",
+            "slot": 0,
+            "sym": "cdc_poll"
+          }
+        ],
+        "results": [
+          {
+            "command": "halt",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已暂停　状态：已停止（halted）　PC=0x080005a0 cdc_poll+0x10"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 0 个断点"
+              }
+            ]
+          },
+          {
+            "command": "b cdc_poll",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "断点 #1 @ 0x08000590  cdc_poll  main.c:266"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x080005a0 cdc_poll+0x10"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134219168
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "wait-halt",
+      "timeoutMs": 3000
+    },
+    "seconds": 0.10385040000255685,
+    "result": {
+      "job": "b948872b2429aa1c4fcbec7e15846777",
+      "ok": true,
+      "value": {
+        "connected": true,
+        "halted": true,
+        "linked": true,
+        "pc": 134219152
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "r r0",
+        "si",
+        "si",
+        "bd all",
+        "c"
+      ]
+    },
+    "seconds": 5.819117999999435,
+    "result": {
+      "job": "33a6d00be8b6f1d2b7efac0564710756",
+      "ok": true,
+      "value": {
+        "breakpoints": [],
+        "results": [
+          {
+            "command": "r r0",
+            "lines": [
+              {
+                "t": "R0         0x00000001"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ cmsis_gcc.h:386"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000592  →  cdc_poll+0x2"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ main.c:266"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000590  →  cdc_poll+0x0"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 1 个断点"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x08000590 cdc_poll+0x0"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134219152
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "halt",
+        "bd all",
+        "b cdc_poll",
+        "c"
+      ]
+    },
+    "seconds": 2.281854699991527,
+    "result": {
+      "job": "f6469caf7e69861df8950a1a6b812fb9",
+      "ok": true,
+      "value": {
+        "breakpoints": [
+          {
+            "addr": 134219152,
+            "loc": "main.c:266",
+            "note": "cdc_poll",
+            "slot": 0,
+            "sym": "cdc_poll"
+          }
+        ],
+        "results": [
+          {
+            "command": "halt",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已暂停　状态：已停止（halted）　PC=0x080005cc cdc_poll+0x3c"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 0 个断点"
+              }
+            ]
+          },
+          {
+            "command": "b cdc_poll",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "断点 #1 @ 0x08000590  cdc_poll  main.c:266"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x080005cc cdc_poll+0x3c"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134219212
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "wait-halt",
+      "timeoutMs": 3000
+    },
+    "seconds": 0.10450600000331178,
+    "result": {
+      "job": "4bda66209d9a37321e626942d2e63219",
+      "ok": true,
+      "value": {
+        "connected": true,
+        "halted": true,
+        "linked": true,
+        "pc": 134219152
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "r r0",
+        "si",
+        "si",
+        "bd all",
+        "c"
+      ]
+    },
+    "seconds": 5.8975018999917665,
+    "result": {
+      "job": "a3479adad07b8828b6da862f77a2eed4",
+      "ok": true,
+      "value": {
+        "breakpoints": [],
+        "results": [
+          {
+            "command": "r r0",
+            "lines": [
+              {
+                "t": "R0         0x00000001"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ cmsis_gcc.h:386"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000592  →  cdc_poll+0x2"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ main.c:266"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000590  →  cdc_poll+0x0"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 1 个断点"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x08000590 cdc_poll+0x0"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134219152
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "halt",
+        "bd all",
+        "b cdc_poll",
+        "c"
+      ]
+    },
+    "seconds": 2.379073599993717,
+    "result": {
+      "job": "736164ffa9684ea68280b0d3979e2968",
+      "ok": true,
+      "value": {
+        "breakpoints": [
+          {
+            "addr": 134219152,
+            "loc": "main.c:266",
+            "note": "cdc_poll",
+            "slot": 0,
+            "sym": "cdc_poll"
+          }
+        ],
+        "results": [
+          {
+            "command": "halt",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已暂停　状态：已停止（halted）　PC=0x08002270 usb_device_is_configured+0x14"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 0 个断点"
+              }
+            ]
+          },
+          {
+            "command": "b cdc_poll",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "断点 #1 @ 0x08000590  cdc_poll  main.c:266"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x08002270 usb_device_is_configured+0x14"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134226544
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "wait-halt",
+      "timeoutMs": 3000
+    },
+    "seconds": 0.12305799999739975,
+    "result": {
+      "job": "49bc2324adcb717216d0407148a9976f",
+      "ok": true,
+      "value": {
+        "connected": true,
+        "halted": true,
+        "linked": true,
+        "pc": 134219152
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "r r0",
+        "si",
+        "si",
+        "bd all",
+        "c"
+      ]
+    },
+    "seconds": 6.262364499998512,
+    "result": {
+      "job": "032a2b503251622c74af6a7226e0a6e0",
+      "ok": true,
+      "value": {
+        "breakpoints": [],
+        "results": [
+          {
+            "command": "r r0",
+            "lines": [
+              {
+                "t": "R0         0x00000001"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ cmsis_gcc.h:386"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000592  →  cdc_poll+0x2"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ main.c:266"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000590  →  cdc_poll+0x0"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 1 个断点"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x08000590 cdc_poll+0x0"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134219152
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "halt",
+        "bd all",
+        "b cdc_poll",
+        "c"
+      ]
+    },
+    "seconds": 2.121091399996658,
+    "result": {
+      "job": "17579f608b5d9723780bb2217584f9f4",
+      "ok": true,
+      "value": {
+        "breakpoints": [
+          {
+            "addr": 134219152,
+            "loc": "main.c:266",
+            "note": "cdc_poll",
+            "slot": 0,
+            "sym": "cdc_poll"
+          }
+        ],
+        "results": [
+          {
+            "command": "halt",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已暂停　状态：已停止（halted）　PC=0x08000546 cdc_tx_poll+0x12"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 0 个断点"
+              }
+            ]
+          },
+          {
+            "command": "b cdc_poll",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "断点 #1 @ 0x08000590  cdc_poll  main.c:266"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x08000546 cdc_tx_poll+0x12"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134219078
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "wait-halt",
+      "timeoutMs": 3000
+    },
+    "seconds": 0.10377580000204034,
+    "result": {
+      "job": "deabc263099a154883389bc21cd6624b",
+      "ok": true,
+      "value": {
+        "connected": true,
+        "halted": true,
+        "linked": true,
+        "pc": 134219152
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "r r0",
+        "si",
+        "si",
+        "bd all",
+        "c"
+      ]
+    },
+    "seconds": 5.562665799996466,
+    "result": {
+      "job": "5c6bd81f85f2c3cdc530cd008ab270b3",
+      "ok": true,
+      "value": {
+        "breakpoints": [],
+        "results": [
+          {
+            "command": "r r0",
+            "lines": [
+              {
+                "t": "R0         0x00000001"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ cmsis_gcc.h:386"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000592  →  cdc_poll+0x2"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ main.c:266"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000590  →  cdc_poll+0x0"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 1 个断点"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x08000590 cdc_poll+0x0"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134219152
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "halt",
+        "bd all",
+        "b cdc_poll",
+        "c"
+      ]
+    },
+    "seconds": 2.2339869999996154,
+    "result": {
+      "job": "f8af0441e61a8b5e83c0d463264ac982",
+      "ok": true,
+      "value": {
+        "breakpoints": [
+          {
+            "addr": 134219152,
+            "loc": "main.c:266",
+            "note": "cdc_poll",
+            "slot": 0,
+            "sym": "cdc_poll"
+          }
+        ],
+        "results": [
+          {
+            "command": "halt",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已暂停　状态：已停止（halted）　PC=0x0800059c cdc_poll+0xc"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 0 个断点"
+              }
+            ]
+          },
+          {
+            "command": "b cdc_poll",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "断点 #1 @ 0x08000590  cdc_poll  main.c:266"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x0800059c cdc_poll+0xc"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134219164
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "wait-halt",
+      "timeoutMs": 3000
+    },
+    "seconds": 0.12957750000350643,
+    "result": {
+      "job": "d7eba6c97a533ae385d1a00e4f94e3a3",
+      "ok": true,
+      "value": {
+        "connected": true,
+        "halted": true,
+        "linked": true,
+        "pc": 134219152
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "r r0",
+        "si",
+        "si",
+        "bd all",
+        "c"
+      ]
+    },
+    "seconds": 5.787341700008255,
+    "result": {
+      "job": "87c16b61397bd5160252a412e6bee64a",
+      "ok": true,
+      "value": {
+        "breakpoints": [],
+        "results": [
+          {
+            "command": "r r0",
+            "lines": [
+              {
+                "t": "R0         0x00000001"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ cmsis_gcc.h:386"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000592  →  cdc_poll+0x2"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ main.c:266"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000590  →  cdc_poll+0x0"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 1 个断点"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x08000590 cdc_poll+0x0"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134219152
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "halt",
+        "bd all",
+        "b cdc_poll",
+        "c"
+      ]
+    },
+    "seconds": 2.3132749000069452,
+    "result": {
+      "job": "a540ff79412739a6182d7345472e86eb",
+      "ok": true,
+      "value": {
+        "breakpoints": [
+          {
+            "addr": 134219152,
+            "loc": "main.c:266",
+            "note": "cdc_poll",
+            "slot": 0,
+            "sym": "cdc_poll"
+          }
+        ],
+        "results": [
+          {
+            "command": "halt",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已暂停　状态：已停止（halted）　PC=0x0800080e main+0x62"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 0 个断点"
+              }
+            ]
+          },
+          {
+            "command": "b cdc_poll",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "断点 #1 @ 0x08000590  cdc_poll  main.c:266"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x0800080e main+0x62"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134219790
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "wait-halt",
+      "timeoutMs": 3000
+    },
+    "seconds": 0.11811079998733476,
+    "result": {
+      "job": "7387c30d67c54a634af6346a04dccaab",
+      "ok": true,
+      "value": {
+        "connected": true,
+        "halted": true,
+        "linked": true,
+        "pc": 134219152
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "r r0",
+        "si",
+        "si",
+        "bd all",
+        "c"
+      ]
+    },
+    "seconds": 6.006656800003839,
+    "result": {
+      "job": "99145702b97fa08c5c8630409e060cf1",
+      "ok": true,
+      "value": {
+        "breakpoints": [],
+        "results": [
+          {
+            "command": "r r0",
+            "lines": [
+              {
+                "t": "R0         0x00000001"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ cmsis_gcc.h:386"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000592  →  cdc_poll+0x2"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ main.c:266"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000590  →  cdc_poll+0x0"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 1 个断点"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x08000590 cdc_poll+0x0"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134219152
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "halt",
+        "bd all",
+        "b cdc_poll",
+        "c"
+      ]
+    },
+    "seconds": 2.256617000006372,
+    "result": {
+      "job": "1c9d70493e1752eed5ddaf58bd2bdfc6",
+      "ok": true,
+      "value": {
+        "breakpoints": [
+          {
+            "addr": 134219152,
+            "loc": "main.c:266",
+            "note": "cdc_poll",
+            "slot": 0,
+            "sym": "cdc_poll"
+          }
+        ],
+        "results": [
+          {
+            "command": "halt",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已暂停　状态：已停止（halted）　PC=0x08002266 usb_device_is_configured+0xa"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 0 个断点"
+              }
+            ]
+          },
+          {
+            "command": "b cdc_poll",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "断点 #1 @ 0x08000590  cdc_poll  main.c:266"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x08002266 usb_device_is_configured+0xa"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134226534
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "wait-halt",
+      "timeoutMs": 3000
+    },
+    "seconds": 0.10480220000317786,
+    "result": {
+      "job": "1d3675e25fa61bc6733c02b70a0baefd",
+      "ok": true,
+      "value": {
+        "connected": true,
+        "halted": true,
+        "linked": true,
+        "pc": 134219152
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "r r0",
+        "si",
+        "si",
+        "bd all",
+        "c"
+      ]
+    },
+    "seconds": 5.6746331000031205,
+    "result": {
+      "job": "78f96a1b0bc594bfc062325d826443b8",
+      "ok": true,
+      "value": {
+        "breakpoints": [],
+        "results": [
+          {
+            "command": "r r0",
+            "lines": [
+              {
+                "t": "R0         0x00000001"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ cmsis_gcc.h:386"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000592  →  cdc_poll+0x2"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ main.c:266"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000590  →  cdc_poll+0x0"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 1 个断点"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x08000590 cdc_poll+0x0"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134219152
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "halt",
+        "bd all",
+        "b cdc_poll",
+        "c"
+      ]
+    },
+    "seconds": 2.239382400002796,
+    "result": {
+      "job": "db2777107e0d8650ff167c1988e9d820",
+      "ok": true,
+      "value": {
+        "breakpoints": [
+          {
+            "addr": 134219152,
+            "loc": "main.c:266",
+            "note": "cdc_poll",
+            "slot": 0,
+            "sym": "cdc_poll"
+          }
+        ],
+        "results": [
+          {
+            "command": "halt",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已暂停　状态：已停止（halted）　PC=0x08000810 main+0x64"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 0 个断点"
+              }
+            ]
+          },
+          {
+            "command": "b cdc_poll",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "断点 #1 @ 0x08000590  cdc_poll  main.c:266"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x08000810 main+0x64"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134219792
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "wait-halt",
+      "timeoutMs": 3000
+    },
+    "seconds": 0.11893839998811018,
+    "result": {
+      "job": "66d74237af9cdd8c86e739d618425f6b",
+      "ok": true,
+      "value": {
+        "connected": true,
+        "halted": true,
+        "linked": true,
+        "pc": 134219152
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "r r0",
+        "si",
+        "si",
+        "bd all",
+        "c"
+      ]
+    },
+    "seconds": 5.918937399997958,
+    "result": {
+      "job": "eca7f5bee0126f81ff8907893c353d4b",
+      "ok": true,
+      "value": {
+        "breakpoints": [],
+        "results": [
+          {
+            "command": "r r0",
+            "lines": [
+              {
+                "t": "R0         0x00000001"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ cmsis_gcc.h:386"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000592  →  cdc_poll+0x2"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ main.c:266"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000590  →  cdc_poll+0x0"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 1 个断点"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x08000590 cdc_poll+0x0"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134219152
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "halt",
+        "bd all",
+        "b cdc_poll",
+        "c"
+      ]
+    },
+    "seconds": 2.4460887999885017,
+    "result": {
+      "job": "a3afc94bec0300e9cec2f91afb6741a1",
+      "ok": true,
+      "value": {
+        "breakpoints": [
+          {
+            "addr": 134219152,
+            "loc": "main.c:266",
+            "note": "cdc_poll",
+            "slot": 0,
+            "sym": "cdc_poll"
+          }
+        ],
+        "results": [
+          {
+            "command": "halt",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已暂停　状态：已停止（halted）　PC=0x0800080e main+0x62"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 0 个断点"
+              }
+            ]
+          },
+          {
+            "command": "b cdc_poll",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "断点 #1 @ 0x08000590  cdc_poll  main.c:266"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x0800080e main+0x62"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134219790
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "wait-halt",
+      "timeoutMs": 3000
+    },
+    "seconds": 0.10530260000086855,
+    "result": {
+      "job": "aa54f25a67c8df0c2adb4983af7f0c50",
+      "ok": true,
+      "value": {
+        "connected": true,
+        "halted": true,
+        "linked": true,
+        "pc": 134219152
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "r r0",
+        "si",
+        "si",
+        "bd all",
+        "c"
+      ]
+    },
+    "seconds": 5.888529899995774,
+    "result": {
+      "job": "c5c0b834aa32753d54af437e385a72a1",
+      "ok": true,
+      "value": {
+        "breakpoints": [],
+        "results": [
+          {
+            "command": "r r0",
+            "lines": [
+              {
+                "t": "R0         0x00000001"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ cmsis_gcc.h:386"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000592  →  cdc_poll+0x2"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ main.c:266"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000590  →  cdc_poll+0x0"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 1 个断点"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x08000590 cdc_poll+0x0"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134219152
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "halt",
+        "bd all",
+        "b cdc_poll",
+        "c"
+      ]
+    },
+    "seconds": 5.693424099998083,
+    "result": {
+      "job": "fb1515c2fc8eb63c901345f0a1564f36",
+      "ok": true,
+      "value": {
+        "breakpoints": [
+          {
+            "addr": 134219152,
+            "loc": "main.c:266",
+            "note": "cdc_poll",
+            "slot": 0,
+            "sym": "cdc_poll"
+          }
+        ],
+        "results": [
+          {
+            "command": "halt",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已暂停　状态：已停止（halted）　PC=0x08000590 cdc_poll+0x0"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 0 个断点"
+              }
+            ]
+          },
+          {
+            "command": "b cdc_poll",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "断点 #1 @ 0x08000590  cdc_poll  main.c:266"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x08000592 cdc_poll+0x2"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134219154
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "wait-halt",
+      "timeoutMs": 3000
+    },
+    "seconds": 0.2070235999999568,
+    "result": {
+      "job": "5a533008356805dfe94e36d7bbcde1cd",
+      "ok": true,
+      "value": {
+        "connected": true,
+        "halted": true,
+        "linked": true,
+        "pc": 134219152
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "r r0",
+        "si",
+        "si",
+        "bd all",
+        "c"
+      ]
+    },
+    "seconds": 6.534124199999496,
+    "result": {
+      "job": "32afd3206f922a8803eb4e9eff13c44d",
+      "ok": true,
+      "value": {
+        "breakpoints": [],
+        "results": [
+          {
+            "command": "r r0",
+            "lines": [
+              {
+                "t": "R0         0x00000001"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ cmsis_gcc.h:386"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000592  →  cdc_poll+0x2"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ main.c:266"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000590  →  cdc_poll+0x0"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 1 个断点"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x08000590 cdc_poll+0x0"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134219152
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "halt",
+        "bd all",
+        "b cdc_poll",
+        "c"
+      ]
+    },
+    "seconds": 2.425796600000467,
+    "result": {
+      "job": "9eaf010ae4c9e418f80ec3e1e1cc8b6f",
+      "ok": true,
+      "value": {
+        "breakpoints": [
+          {
+            "addr": 134219152,
+            "loc": "main.c:266",
+            "note": "cdc_poll",
+            "slot": 0,
+            "sym": "cdc_poll"
+          }
+        ],
+        "results": [
+          {
+            "command": "halt",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已暂停　状态：已停止（halted）　PC=0x0800226e usb_device_is_configured+0x12"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 0 个断点"
+              }
+            ]
+          },
+          {
+            "command": "b cdc_poll",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "断点 #1 @ 0x08000590  cdc_poll  main.c:266"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x0800226e usb_device_is_configured+0x12"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134226542
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "wait-halt",
+      "timeoutMs": 3000
+    },
+    "seconds": 0.10462889999325853,
+    "result": {
+      "job": "d27b9a2d1caa59a60b230349a10b48ae",
+      "ok": true,
+      "value": {
+        "connected": true,
+        "halted": true,
+        "linked": true,
+        "pc": 134219152
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "r r0",
+        "si",
+        "si",
+        "bd all",
+        "c"
+      ]
+    },
+    "seconds": 6.877783300005831,
+    "result": {
+      "job": "8881d32ae20283719c45d5e35793dcb8",
+      "ok": true,
+      "value": {
+        "breakpoints": [],
+        "results": [
+          {
+            "command": "r r0",
+            "lines": [
+              {
+                "t": "R0         0x00000001"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ cmsis_gcc.h:386"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000592  →  cdc_poll+0x2"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ main.c:266"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000590  →  cdc_poll+0x0"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 1 个断点"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x08000590 cdc_poll+0x0"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134219152
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "halt",
+        "bd all",
+        "b cdc_poll",
+        "c"
+      ]
+    },
+    "seconds": 2.270315399990068,
+    "result": {
+      "job": "948c85d6b28e3dd28012b41af7b60250",
+      "ok": true,
+      "value": {
+        "breakpoints": [
+          {
+            "addr": 134219152,
+            "loc": "main.c:266",
+            "note": "cdc_poll",
+            "slot": 0,
+            "sym": "cdc_poll"
+          }
+        ],
+        "results": [
+          {
+            "command": "halt",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已暂停　状态：已停止（halted）　PC=0x0800053c cdc_tx_poll+0x8"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 0 个断点"
+              }
+            ]
+          },
+          {
+            "command": "b cdc_poll",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "断点 #1 @ 0x08000590  cdc_poll  main.c:266"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x0800053c cdc_tx_poll+0x8"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134219068
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "wait-halt",
+      "timeoutMs": 3000
+    },
+    "seconds": 0.11717650000355206,
+    "result": {
+      "job": "025a9502fd3a63d59c2abdeef42d26a0",
+      "ok": true,
+      "value": {
+        "connected": true,
+        "halted": true,
+        "linked": true,
+        "pc": 134219152
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "r r0",
+        "si",
+        "si",
+        "bd all",
+        "c"
+      ]
+    },
+    "seconds": 5.9414598000003025,
+    "result": {
+      "job": "b2bfd19c71a2c00c804e6f952bfaedbe",
+      "ok": true,
+      "value": {
+        "breakpoints": [],
+        "results": [
+          {
+            "command": "r r0",
+            "lines": [
+              {
+                "t": "R0         0x00000001"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ cmsis_gcc.h:386"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000592  →  cdc_poll+0x2"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ main.c:266"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000590  →  cdc_poll+0x0"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 1 个断点"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x08000590 cdc_poll+0x0"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134219152
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "halt",
+        "bd all",
+        "b cdc_poll",
+        "c"
+      ]
+    },
+    "seconds": 4.918915599992033,
+    "result": {
+      "job": "b15797f2e5a07aad290f70513b7fc82a",
+      "ok": true,
+      "value": {
+        "breakpoints": [
+          {
+            "addr": 134219152,
+            "loc": "main.c:266",
+            "note": "cdc_poll",
+            "slot": 0,
+            "sym": "cdc_poll"
+          }
+        ],
+        "results": [
+          {
+            "command": "halt",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已暂停　状态：已停止（halted）　PC=0x08000590 cdc_poll+0x0"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 0 个断点"
+              }
+            ]
+          },
+          {
+            "command": "b cdc_poll",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "断点 #1 @ 0x08000590  cdc_poll  main.c:266"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x08000592 cdc_poll+0x2"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134219154
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "wait-halt",
+      "timeoutMs": 3000
+    },
+    "seconds": 0.12289689999306574,
+    "result": {
+      "job": "18aaf9da28362b1687f8891c4f180cc0",
+      "ok": true,
+      "value": {
+        "connected": true,
+        "halted": true,
+        "linked": true,
+        "pc": 134219152
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "r r0",
+        "si",
+        "si",
+        "bd all",
+        "c"
+      ]
+    },
+    "seconds": 5.6713958000036655,
+    "result": {
+      "job": "9bcd9282d7ae1458300d12a6ebd8c23d",
+      "ok": true,
+      "value": {
+        "breakpoints": [],
+        "results": [
+          {
+            "command": "r r0",
+            "lines": [
+              {
+                "t": "R0         0x00000001"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ cmsis_gcc.h:386"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000592  →  cdc_poll+0x2"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ main.c:266"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000590  →  cdc_poll+0x0"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 1 个断点"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x08000590 cdc_poll+0x0"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134219152
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "halt",
+        "bd all",
+        "b cdc_poll",
+        "c"
+      ]
+    },
+    "seconds": 2.1908269000123255,
+    "result": {
+      "job": "da26b3e7d9578da91cfd6c7a86c1ef1b",
+      "ok": true,
+      "value": {
+        "breakpoints": [
+          {
+            "addr": 134219152,
+            "loc": "main.c:266",
+            "note": "cdc_poll",
+            "slot": 0,
+            "sym": "cdc_poll"
+          }
+        ],
+        "results": [
+          {
+            "command": "halt",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已暂停　状态：已停止（halted）　PC=0x08000536 cdc_tx_poll+0x2"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 0 个断点"
+              }
+            ]
+          },
+          {
+            "command": "b cdc_poll",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "断点 #1 @ 0x08000590  cdc_poll  main.c:266"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x08000536 cdc_tx_poll+0x2"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134219062
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "wait-halt",
+      "timeoutMs": 3000
+    },
+    "seconds": 0.10509489999094512,
+    "result": {
+      "job": "96589d3ba2ca42a16a81b817ffbb5cde",
+      "ok": true,
+      "value": {
+        "connected": true,
+        "halted": true,
+        "linked": true,
+        "pc": 134219152
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "r r0",
+        "si",
+        "si",
+        "bd all",
+        "c"
+      ]
+    },
+    "seconds": 5.879803000003449,
+    "result": {
+      "job": "852750fa064a06334bdfb47c5f963596",
+      "ok": true,
+      "value": {
+        "breakpoints": [],
+        "results": [
+          {
+            "command": "r r0",
+            "lines": [
+              {
+                "t": "R0         0x00000001"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ cmsis_gcc.h:386"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000592  →  cdc_poll+0x2"
+              }
+            ]
+          },
+          {
+            "command": "si",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "单步进入（指令级）→ main.c:266"
+              },
+              {
+                "c": "dim",
+                "t": "PC         0x08000590  →  cdc_poll+0x0"
+              }
+            ]
+          },
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 1 个断点"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x08000590 cdc_poll+0x0"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134219152
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "command",
+      "commands": [
+        "bd all",
+        "c"
+      ]
+    },
+    "seconds": 0.3663639000005787,
+    "result": {
+      "job": "f95a7bbfe18df3014b0928d8dd346d46",
+      "ok": true,
+      "value": {
+        "breakpoints": [],
+        "results": [
+          {
+            "command": "bd all",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "已清掉 0 个断点"
+              }
+            ]
+          },
+          {
+            "command": "c",
+            "lines": [
+              {
+                "c": "ok",
+                "t": "继续运行（遇到断点或暂停为止）"
+              },
+              {
+                "c": "dim",
+                "t": "状态：运行中　PC=0x08000590 cdc_poll+0x0"
+              }
+            ]
+          }
+        ],
+        "status": {
+          "connected": true,
+          "halted": false,
+          "linked": true,
+          "pc": 134219152
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "action": "disconnect"
+    },
+    "seconds": 0.1049749000085285,
+    "result": {
+      "job": "4b041049786a4bedf8419b1e58311838",
+      "ok": true,
+      "value": {
+        "disconnected": true
+      }
+    }
+  }
+]

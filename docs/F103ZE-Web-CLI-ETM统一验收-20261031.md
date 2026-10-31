@@ -3,7 +3,8 @@
 本文件集中记录本轮结论。**2026-10-31追加离线原生链路复测：同一份1s数据完整处理中位7.208s，
 解码后完整首屏中位221.5ms；首次半段缩放1.12～1.39s。此前268s与GB级JSONL来自入口漏配，
 不能代表superlinkPRO C++引擎性能。**新入口默认二进制/C++存储，不再生成逐事件JSONL；详细口径见末节。
-本次不连接板卡、不重新综合；以下实板频率与配对结论均为此前验收基线，不确认当前板上身份。
+前一阶段为离线验收。随后另一AI已交付合并配对，本轮接续JTAG/RAM真机验收，进展见末节；
+此前频率基线与新配对结果分别记录，不把旧结果替代新验收。
 
 已验收滤波执行流配对的TRACECLK 18MHz、1s、两种GPIO驱动档各3次均通过；
 24MHz可做10ms短窗，但长窗仍丢失，36MHz未通过。RTT完整序号流约2.34～2.38MB/s。
@@ -547,3 +548,28 @@ cmake --build build/etm-native-rebuild --parallel 2
 原始导出及原生重建的完整处理/事件比较结果、target编译清单与日志见
 [最终归档核查](validation/etm-merge-20261031/handoff.json)。原有source-provenance.json中main.c仍记着CDC补丁前哈希，
 本次已改为与已保存的补丁后source-snapshot相符，并保留被纠正的旧值；没有修改该target源码或旧已验收ELF。
+
+## 合并版JTAG/RAM真机验收：单步握手修复
+
+另一AI已明确释放设备，主分支基于`311fc3b`接续验收。实际重新JTAG加载
+`prebuilt/20261031_combined_raw4_io_7020_120/probe.bit`（SHA-256
+`1da17cb60175bbc2b7abd647770c7053bd7b7097e0d38aa819fb89678d564473`）及同目录`application.elf`
+（`e977914c2924ab4cac13f4075de0a5108d1e2e8cf48966fb8fbdea3a358e0b2c`），匹配PS init。
+加载前读回71,268字节OCM执行段与ELF逐字节一致；本轮全程不编程QSPI或F103 Flash。
+
+此前粗粒度Web调试20轮虽均返回成功，逐指令核对却发现第二步可以回到函数入口。
+根因之一是Web `_stepByDhcsr()`只写`C_HALT|C_STEP|C_MASKINTS`，没有随后清`C_HALT`触发执行，
+却把没有前进解释成“探针/内核不支持C_STEP”，长期改走断点兜底。已按本机pyOCD CortexM.step的
+握手顺序修正：暂停时设置中断掩码，再用`C_STEP|C_MASKINTS`释放暂停；清除旧retire状态，
+确认新指令执行/PC变化，结束或失败均清理单步残留。自跳转PC不变时允许以新的S_RETIRE_ST确认执行。
+正确握手真正失败时仍保留断点兜底；Web摘要额外暴露`lastStepOk`。
+
+修复后真实Web CLI连续5组×5步，均使用`dhcsr`模式：`cdc_poll`入口`0x08000590`后依次停在
+`0x08000592 / 0x08000596 / 0x08000598 / 0x0800059a / 0x0800059c`，25个PC和成功标志全部核对通过。
+覆盖16/32位指令及CPSID。旧20轮的原始命令/返回值和修复后结果一起保留，不能用“调用返回成功”代替正确PC。
+新增握手、自跳转、失败清理三项测试，Web测试共33项通过。
+[实际配对、下载和单步证据](validation/combined-etm-web-20261031/step-fix/)。
+
+同一配对上Web CLI采集10/100/1000ms、串口PING/INFO/64字节回显、USB初始化和4轮窗口内CDC回显、
+应用RTT启动日志、8变量J-Scope均已初步通过；完整最终矩阵、直接Zynq CLI、交互/导出和现场恢复仍在继续，
+本阶段不提前标记整个新配对ETM/Web验收完成。

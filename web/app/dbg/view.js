@@ -2100,7 +2100,8 @@ export class DbgView {
       clockKhz: (s.clockHz / 1000) | 0,
       regs: s.regList().length,
       bps: s.bps.map(a => hex32(a)),
-      lastStepMode: s.lastStepMode || null,     // 'dhcsr' | 'breakpoint'（后者 = C_STEP 不生效，走了兜底）
+      lastStepMode: s.lastStepMode || null,     // 原生握手 / 断点兜底 / 源码步进
+      lastStepOk: s.lastStepOk ?? null,
       bpCap: s.bpCapacity,
       elf: this.sym ? { name: this.elfName, symbols: this.sym.size, vars: this.sym.varCount, source: this.sym.source,
         lines: this.sym.lines ? this.sym.lines.size : 0, files: this.sym.lines ? this.sym.lines.fileCount : 0,
