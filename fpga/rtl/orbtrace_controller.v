@@ -3,7 +3,7 @@
 // Separate AW/W capture supports independent AXI-Lite channel arrival.
 module orbtrace_controller #(
   parameter C_S_AXI_DATA_WIDTH=32,
-  parameter C_S_AXI_ADDR_WIDTH=6,
+  parameter C_S_AXI_ADDR_WIDTH=8,
   parameter FIFO_ADDR_BITS=12,
   parameter RAW_DIAGNOSTIC=0
 )(
@@ -23,6 +23,7 @@ module orbtrace_controller #(
   output reg s_axi_rvalid,input wire s_axi_rready
 );
   reg enable;
+  wire clear;
   reg [1:0] width;
   reg [5:0] clear_count;
   wire trace_clock,trace_io_clock;
@@ -42,17 +43,24 @@ module orbtrace_controller #(
   wire [7:0] byte_data;
   wire [6:0] source_id;
   wire byte_valid,receiver_synced,receiver_overflow;
+  wire [1:0] receiver_faults;
+  wire [31:0] dropped_frames,parser_errors,sync_acquisitions,frame_highwater;
   wire [FIFO_ADDR_BITS:0] level;
   wire fifo_full=level==(1<<FIFO_ADDR_BITS);
   wire receiver_reset=!rst_n || !enable || clear_count!=0 || !delay_ready;
-  orbtrace_parallel #(.USE_IO_CLOCK(1),.USE_INPUT_DELAY(1),.RAW_DIAGNOSTIC(RAW_DIAGNOSTIC)) receiver(.trace_clk(trace_clock),.trace_io_clk(trace_io_clock),.trace_pad_clk(trace_clk),.sample_clk(delay_ref_clock),.trace_data(trace_data),.width(width),
+  orbtrace_parallel #(.USE_IO_CLOCK(1),.USE_INPUT_DELAY(1),.RAW_DIAGNOSTIC(RAW_DIAGNOSTIC),.SEPARATE_DIAGNOSTIC_RESET(1)) receiver(.trace_clk(trace_clock),.trace_io_clk(trace_io_clock),.trace_pad_clk(trace_clk),.sample_clk(delay_ref_clock),.trace_data(trace_data),.width(width),
     .clk(clk),.rst(receiver_reset),.data(byte_data),.channel(source_id),
     .valid(byte_valid),.ready(!fifo_full && !receiver_reset),
-    .synced(receiver_synced),.overflow(receiver_overflow));
+    .synced(receiver_synced),.overflow(receiver_overflow),.diagnostic_reset(!rst_n || clear_count!=0 || clear),
+    .diagnostic_flags(receiver_faults),.dropped_frames(dropped_frames),.parser_errors(parser_errors),
+    .sync_acquisitions(sync_acquisitions),.frame_highwater(frame_highwater));
   (* ram_style="block" *) reg [15:0] records[0:(1<<FIFO_ADDR_BITS)-1];
   reg [FIFO_ADDR_BITS:0] write_ptr,read_ptr;
   reg [31:0] total;
   reg lost,seen_sync;
+  reg [FIFO_ADDR_BITS:0] record_highwater;
+  reg [31:0] record_stall_cycles,delay_loss_count;
+  reg previous_delay_ready;
   assign level=write_ptr-read_ptr;
   reg aw_pending,w_pending;
   reg [C_S_AXI_ADDR_WIDTH-1:0] write_address;
@@ -64,10 +72,11 @@ module orbtrace_controller #(
   assign s_axi_bresp=0;
   assign s_axi_rresp=0;
   wire write_commit=aw_pending && w_pending && !s_axi_bvalid;
-  wire clear=write_commit && write_address[5:2]==1 && write_strobe[0] && write_data[1];
+  assign clear=write_commit && write_address[C_S_AXI_ADDR_WIDTH-1:2]==1 && write_strobe[0] && write_data[1];
   wire read_accept=s_axi_arvalid && s_axi_arready;
-  wire pop=read_accept && s_axi_araddr[5:2]==4 && level!=0 && clear_count==0 && !clear;
+  wire pop=read_accept && s_axi_araddr[C_S_AXI_ADDR_WIDTH-1:2]==4 && level!=0 && clear_count==0 && !clear;
   wire push=byte_valid && !fifo_full && !receiver_reset;
+  wire [FIFO_ADDR_BITS:0] next_level=level+push-pop;
   // Memory has a synchronous read port so Vivado infers block RAM.
   reg [15:0] read_record;
   reg read_fifo;
@@ -79,35 +88,42 @@ module orbtrace_controller #(
     if(!rst_n)begin
       enable<=0;width<=3;clear_count<=32;write_ptr<=0;read_ptr<=0;
       total<=0;lost<=0;seen_sync<=0;aw_pending<=0;w_pending<=0;
+      record_highwater<=0;record_stall_cycles<=0;delay_loss_count<=0;previous_delay_ready<=0;
       write_address<=0;write_data<=0;write_strobe<=0;
       s_axi_bvalid<=0;s_axi_rvalid<=0;s_axi_rdata<=0;read_fifo<=0;
     end else begin
       if(clear_count!=0)clear_count<=clear_count-1'b1;
+      previous_delay_ready<=delay_ready;
       if(s_axi_awvalid && s_axi_awready)begin aw_pending<=1;write_address<=s_axi_awaddr;end
       if(s_axi_wvalid && s_axi_wready)begin w_pending<=1;write_data<=s_axi_wdata;write_strobe<=s_axi_wstrb;end
       if(s_axi_bvalid && s_axi_bready)s_axi_bvalid<=0;
       if(write_commit)begin
         aw_pending<=0;w_pending<=0;s_axi_bvalid<=1;
-        if(write_address[5:2]==1 && write_strobe[0])begin
+        if(write_address[C_S_AXI_ADDR_WIDTH-1:2]==1 && write_strobe[0])begin
           enable<=write_data[0];
           // Width changes are accepted only with an explicit fresh capture.
           if(write_data[1] || !enable)width<=write_data[3:2];
         end
       end
-      if(clear)begin
-        clear_count<=32;write_ptr<=0;read_ptr<=0;total<=0;lost<=0;seen_sync<=0;
+      if(clear || clear_count!=0)begin
+        if(clear)clear_count<=32;
+        write_ptr<=0;read_ptr<=0;total<=0;lost<=0;seen_sync<=0;
+        record_highwater<=0;record_stall_cycles<=0;delay_loss_count<=0;
       end else begin
         if(push)begin write_ptr<=write_ptr+1'b1;total<=total+1'b1;end
         if(pop)read_ptr<=read_ptr+1'b1;
         if(receiver_overflow || (seen_sync && enable && !delay_ready))lost<=1;
         if(receiver_synced)seen_sync<=1;
+        if(next_level>record_highwater)record_highwater<=next_level;
+        if(byte_valid && fifo_full && !receiver_reset)record_stall_cycles<=record_stall_cycles+1'b1;
+        if(previous_delay_ready && !delay_ready && enable)delay_loss_count<=delay_loss_count+1'b1;
       end
       if(s_axi_rvalid && s_axi_rready)s_axi_rvalid<=0;
       // A FIFO data read needs one extra cycle for the BRAM output.
       if(read_fifo)begin s_axi_rdata<={16'd0,read_record};s_axi_rvalid<=1;read_fifo<=0;end
       if(read_accept && !read_fifo)begin
         s_axi_rvalid<=1;
-        case(s_axi_araddr[5:2])
+        case(s_axi_araddr[C_S_AXI_ADDR_WIDTH-1:2])
           0:s_axi_rdata<=32'h45544d31;
           1:s_axi_rdata<={28'd0,width,1'b0,enable};
           2:s_axi_rdata<={28'd0,delay_ready,lost,seen_sync,enable};
@@ -119,6 +135,17 @@ module orbtrace_controller #(
           5:s_axi_rdata<=total;
           6:s_axi_rdata<=120000000;
           7:s_axi_rdata<=(1<<FIFO_ADDR_BITS);
+          8:s_axi_rdata<=32'h45544431; // ETD1: implemented diagnostics, not old zero placeholders.
+          9:s_axi_rdata<={29'd0,(delay_loss_count!=0),receiver_faults};
+          10:s_axi_rdata<=frame_highwater;
+          11:s_axi_rdata<=record_highwater;
+          12:s_axi_rdata<=dropped_frames;
+          13:s_axi_rdata<=parser_errors;
+          14:s_axi_rdata<=delay_loss_count;
+          15:s_axi_rdata<=record_stall_cycles;
+          16:s_axi_rdata<=sync_acquisitions;
+          17:s_axi_rdata<=RAW_DIAGNOSTIC;
+          18:s_axi_rdata<=32'hb | ((RAW_DIAGNOSTIC==2 || RAW_DIAGNOSTIC==4) ? 32'h4 : 0);
           default:s_axi_rdata<=0;
         endcase
       end

@@ -7,7 +7,8 @@ module orbtrace_tpiu_stream (
     input wire clk,input wire rst,
     input wire [7:0] byte_in,input wire byte_toggle,
     output reg [127:0] frame,output reg frame_toggle,
-    output reg synced,output reg malformed
+    output reg synced,output reg malformed,
+    output wire malformed_event,output wire sync_event
 );
     reg seen_toggle,have_previous;
     reg [7:0] previous_byte,first_byte;
@@ -21,6 +22,10 @@ module orbtrace_tpiu_stream (
     wire [31:0] next_sync = {sync_shift[23:0],shifted_byte};
     wire [31:0] next_direct = {direct_shift[23:0],byte_in};
     wire [15:0] pair = {first_byte,stream_byte};
+    assign sync_event=!rst && byte_event && have_previous && !synced &&
+      (next_sync==32'hffff_ff7f || next_direct==32'hffff_ff7f);
+    assign malformed_event=!rst && byte_event && have_previous && synced && have_first &&
+      ((full_sync_tail && pair!=16'hff7f) || (!full_sync_tail && pair==16'hffff && pair_count!=0));
 
     always @(posedge clk or posedge rst)
       if(rst)begin

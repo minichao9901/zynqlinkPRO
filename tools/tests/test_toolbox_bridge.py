@@ -114,7 +114,7 @@ class BridgeTests(unittest.TestCase):
     def test_zynq_export_keeps_duration_and_transport_proof_before_usb_release(self):
         import zynq_la
         session=SimpleNamespace(wait=lambda timeout:True,error=None,bytes=b'trace',seconds=1,
-            quality={'hostSeconds':1.003,'loss':False,'synced':True,'ended':True})
+            quality={'hostSeconds':1.003,'loss':False,'synced':True,'ended':True},diagnostics=lambda:{'implemented':False})
         with tempfile.TemporaryDirectory() as folder,patch.object(zynq_la,'session',return_value=session),patch.object(zynq_la,'release') as release:
             vis=zynq_la.Vis();zynq_la.do_export(vis,Path(folder)/'capture.bin',[])
             self.assertEqual(vis.seconds,1);self.assertEqual(vis.capture_quality,session.quality)

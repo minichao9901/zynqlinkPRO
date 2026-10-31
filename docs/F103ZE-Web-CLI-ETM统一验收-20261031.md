@@ -11,6 +11,53 @@
 
 ## 2026-11-01：独立worktree的校准与有限DDR采集研究（进行中）
 
+### Golden真实压力基线与ETD1诊断阶段
+
+已重新通过JTAG/RAM加载Golden 1da17c/e977，71,268字节执行段读回匹配。
+目标F103ZE仍为e379的48MHz CDC固件，未编程QSPI/目标Flash，也没有更改target分频。
+真实Web按钮30次连接/关闭全部成功：连接中位1.737s，最短1.416s、最长3.637s；关闭中位0.435s。
+每轮RCC推算CPU48MHz/物理TRACECLK24MHz。采后PS寄存器读回FCLK119,999,998Hz、SWCLK999,999.98Hz；
+vendor参考查询为199,999,998Hz，旧Golden未提供细分接收诊断。
+
+随后按计划交替cdc_poll/cdc_tx_poll并连续收发64字节CDC echo。第一轮cdc_poll采集120,291字节，
+packetIssues=0，loss=false/synced/ended=true，401,617条指令，接收窗口内有4份逐字节正确echo。
+第二轮切换cdc_tx_poll时，129,136字节原始数据出现loss=true、synced/ended=true，脚本立即停止，未重试掩盖失败。
+因此不能宣称采集压力验收通过。30次探针开关只证明这一轮基线，不能外推所有上电/故障状态。
+
+请求窗口为10ms，主机接收/排空跨度约44/47ms；这不等于目标实际录制了44/47ms。
+它也说明不能用软件线程停止与USB排空时间冒充精确硬件窗口，DDR有限采集需要硬件停止边界和有效长度。
+当前65536个16bit记录槽只容纳至多65536字节有效Trace（另带source tag），不能按128KiB估算有效Trace缓冲。
+旧lost合并解析错误和帧FIFO溢出，暂不能认定物理误采或后级背压中的哪一个占主导。
+[完整基线](validation/etm-baseline-stress-20261101/baseline-summary.json)、
+[两份原始输入身份](validation/etm-baseline-stress-20261101/raw-inputs.json)。
+
+压力脚本`tools/stress_etm_web.py`通过Web公开CLI驱动真实按钮，保存每轮RCC、PC/配置、质量、原始SHA和echo时序，
+不使用captureNative绕开普通Web采集。另修复Zynq LA适配器sendall等待到采集结束的问题：现在启动后即可发布armed，完成等待属于recv。
+浏览器日志另有运行至断点阶段的C_HALT警告，尚不能当作探针连接失败；原文保留在基线目录。
+
+新的实验RTL增加ETD1寄存器，诊断独立于receiver stop reset，下一次显式clear才清除。
+分别记录帧FIFO丢帧、parser malformed、同步获取、帧/记录FIFO高水位、记录FIFO背压周期、IDELAYCTRL RDY下降沿；
+后者不是完整的参考时钟或眼图监测器。扩展AXI-Lite地址为8bit，避免高寄存器别名到控制/FIFO。
+Source Gray计数跨域，停止后等待同步再读；已实现能力用bitmap声明，未实现字段在主机中为null而不是0错误。
+PS通过0x61回复的能力位声明0x62/64字节只读诊断，主机在文件落盘、USB释放前读回，旧Golden不会被发送不支持的0x62请求。
+接收失败仍保留原始输入；细分原因可随captureQuality进入Web报告和AI记录。
+
+| FPGA字索引 | ETD1字段 |
+|---|---|
+| 8 | 签名0x45544431 |
+| 9 | 帧FIFO丢失/parser异常/IDELAY RDY丢失粘滞位 |
+| 10/11 | 帧FIFO/记录FIFO高水位 |
+| 12/13 | 丢帧次数/parser异常次数 |
+| 14/15 | RDY下降次数/记录FIFO背压周期 |
+| 16/17/18 | 同步获取次数/RAW模式/实现能力bitmap |
+
+11项RTL用例通过，包括数据路径旧回归、单独解析异常、单独FIFO压力、RDY失锁、停止保留、clear时CDC旧标志不能重新锁存。
+46项CLI主机回归、8项研究测试及生产USB/ETM/JTAG host测试通过。
+新RTL/PS正在准备首次完整构建，**未生成或加载实验bit/ELF，未标为已验收**；旧Golden保持原文件。
+[RTL证据](validation/etm-diagnostics-rtl-20261101/result.json)。
+
+### 最初的只读研究与容量计划
+
 研究分支`codex/etm-lane-calibration`，目录`E:/zynqlinkPRO_etm_calibration`，从main `bc0d3ad`建立。
 目标为反复连接/关闭、采集/解码/更换断点及CDC echo压力测试，并研究可靠采满1～2秒到DDR、采后下载。
 本阶段仅检查源码/官方资料和离线容量，未改生产RTL/PS，未综合、未上板；Golden仍为原1da17c/e977配对。

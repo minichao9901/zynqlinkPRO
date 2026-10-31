@@ -8,12 +8,20 @@ module orbtrace_frame_fifo #(parameter ADDR_BITS=3) (
     output reg overflow,
     input wire rd_clk, input wire rd_rst,
     output wire [127:0] rd_data, output wire rd_valid,
-    input wire rd_ready
+    input wire rd_ready,
+    output wire [ADDR_BITS:0] wr_level,
+    output wire drop_event
 );
     reg [127:0] mem [0:(1<<ADDR_BITS)-1];
     reg [ADDR_BITS:0] wp, wg, rp, rg;
     (* ASYNC_REG="TRUE" *) reg [ADDR_BITS:0] rg1,rg2,wg1,wg2;
     wire full = wg == {~rg2[ADDR_BITS:ADDR_BITS-1],rg2[ADDR_BITS-2:0]};
+    function [ADDR_BITS:0] gray_binary(input [ADDR_BITS:0] gray);
+      integer i;begin gray_binary[ADDR_BITS]=gray[ADDR_BITS];
+        for(i=ADDR_BITS-1;i>=0;i=i-1)gray_binary[i]=gray_binary[i+1]^gray[i];end
+    endfunction
+    assign wr_level=wp-gray_binary(rg2);
+    assign drop_event=wr_valid && full && !wr_rst;
     wire push = wr_valid && !full;
     wire [ADDR_BITS:0] wn = wp + push;
     wire [ADDR_BITS:0] rn = rp + (rd_valid && rd_ready);

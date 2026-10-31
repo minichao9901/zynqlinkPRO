@@ -1052,8 +1052,15 @@ def capture_job(jid, sid, options):
             save(sid,m)
             change(jid,captureQuality=transport)
             if transport.get('loss') or not transport.get('synced') or not transport.get('ended'):
-                raise ValueError('Zynq接收未完整通过：loss=%s / synced=%s / ended=%s；原始数据已保留，请检查接线或由target固件调整TRACECLK' %
-                    (transport.get('loss'),transport.get('synced'),transport.get('ended')))
+                detail=transport.get('diagnostics') or {}
+                facts=[]
+                if detail.get('implemented'):
+                    for label,key in [('TPIU结构异常','parserErrors'),('帧FIFO丢帧','frameDrops'),('记录FIFO峰值','recordHighwater')]:
+                        value=detail.get(key)
+                        facts.append(label+'='+('未提供' if value is None else str(value)))
+                diagnosis='；'+' / '.join(facts) if facts else '；探针未提供细分诊断，尚不能区分采样和后级堵塞'
+                raise ValueError(('Zynq接收未完整通过：loss=%s / synced=%s / ended=%s；原始数据已保留' %
+                    (transport.get('loss'),transport.get('synced'),transport.get('ended')))+diagnosis)
         if not extent['complete']:
             m['captureWarning']=(f"请求 {options['seconds']*1000:g} ms，实际仅采集 "
                 f"{extent['actualSeconds']*1000:.3f} ms；可能达到 Zynq FIFO/接收窗口容量。"

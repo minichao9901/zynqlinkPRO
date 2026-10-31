@@ -3,13 +3,16 @@
 // 1 = one pin, 2 = two pins, 3 = four pins. Hold it stable until next reset.
 // The consumer receives unformatted bytes tagged with CoreSight source ID.
 // No USB/ORBFlow framing is added here.
-module orbtrace_parallel #(parameter USE_IO_CLOCK=0,USE_INPUT_DELAY=0,INPUT_DELAY_VALUE=16,RAW_DIAGNOSTIC=0) (
+module orbtrace_parallel #(parameter USE_IO_CLOCK=0,USE_INPUT_DELAY=0,INPUT_DELAY_VALUE=16,RAW_DIAGNOSTIC=0,SEPARATE_DIAGNOSTIC_RESET=0) (
     input wire trace_clk,input wire [3:0] trace_data,input wire [1:0] width,
     input wire trace_io_clk,input wire trace_pad_clk,input wire sample_clk,
     input wire clk,input wire rst,
     output wire [7:0] data,output wire [6:0] channel,
     output wire valid,input wire ready,
-    output wire synced,output wire overflow
+    output wire synced,output wire overflow,
+    input wire diagnostic_reset,
+    output wire [1:0] diagnostic_flags,
+    output wire [31:0] dropped_frames,parser_errors,sync_acquisitions,frame_highwater
 );
     (* ASYNC_REG="TRUE" *) reg [1:0] trace_reset,sys_reset;
     always @(posedge trace_clk or posedge rst)
@@ -35,6 +38,7 @@ module orbtrace_parallel #(parameter USE_IO_CLOCK=0,USE_INPUT_DELAY=0,INPUT_DELA
     end endgenerate
     wire [127:0] frame,decoded_frame;
     wire toggle,decoded_toggle,trace_synced,oversample_synced,parser_malformed;
+    wire malformed_event,sync_event;
     wire capture_clk,capture_reset;
     reg previous_toggle;
     always @(posedge capture_clk or posedge rst)
@@ -56,6 +60,7 @@ module orbtrace_parallel #(parameter USE_IO_CLOCK=0,USE_INPUT_DELAY=0,INPUT_DELA
       assign capture_clk=sample_clk;
       assign capture_reset=sample_reset[1];
       assign parser_malformed=1'b0;
+      assign malformed_event=1'b0;assign sync_event=1'b0;
     end else if(RAW_DIAGNOSTIC==4)begin: raw_oversample_filtered
       // Same causal per-line stable-two filter as the accepted physical
       // sample experiment. Detect and sample the *same filtered time slice*;
@@ -88,7 +93,8 @@ module orbtrace_parallel #(parameter USE_IO_CLOCK=0,USE_INPUT_DELAY=0,INPUT_DELA
         end
       orbtrace_tpiu_stream parser(.clk(sample_clk),.rst(sample_reset[1]),
         .byte_in(sampled_byte),.byte_toggle(byte_toggle),
-        .frame(parsed_frame),.frame_toggle(parsed_toggle),.synced(parsed_synced),.malformed(parser_malformed));
+        .frame(parsed_frame),.frame_toggle(parsed_toggle),.synced(parsed_synced),.malformed(parser_malformed),
+        .malformed_event(malformed_event),.sync_event(sync_event));
       assign frame=parsed_frame;assign toggle=parsed_toggle;
       assign capture_clk=sample_clk;assign capture_reset=sample_reset[1];
       assign oversample_synced=parsed_synced;
@@ -130,7 +136,8 @@ module orbtrace_parallel #(parameter USE_IO_CLOCK=0,USE_INPUT_DELAY=0,INPUT_DELA
         end
       orbtrace_tpiu_stream parser(.clk(sample_clk),.rst(sample_reset[1]),
         .byte_in(sampled_byte),.byte_toggle(byte_toggle),
-        .frame(parsed_frame),.frame_toggle(parsed_toggle),.synced(parsed_synced),.malformed(parser_malformed));
+        .frame(parsed_frame),.frame_toggle(parsed_toggle),.synced(parsed_synced),.malformed(parser_malformed),
+        .malformed_event(malformed_event),.sync_event(sync_event));
       assign frame=parsed_frame;
       assign toggle=parsed_toggle;
       assign capture_clk=sample_clk;
@@ -155,6 +162,7 @@ module orbtrace_parallel #(parameter USE_IO_CLOCK=0,USE_INPUT_DELAY=0,INPUT_DELA
       assign capture_reset=trace_reset[1];
       assign oversample_synced=1'b0;
       assign parser_malformed=1'b0;
+      assign malformed_event=1'b0;assign sync_event=1'b0;
     end else begin: formatted_capture
       assign frame=decoded_frame;
       assign toggle=decoded_toggle;
@@ -162,19 +170,29 @@ module orbtrace_parallel #(parameter USE_IO_CLOCK=0,USE_INPUT_DELAY=0,INPUT_DELA
       assign capture_reset=trace_reset[1];
       assign oversample_synced=1'b0;
       assign parser_malformed=1'b0;
+      assign malformed_event=1'b0;assign sync_event=1'b0;
     end endgenerate
     wire [127:0] fifo_data;
     wire fifo_valid,fifo_ready,trace_overflow;
+    wire [3:0] frame_level;
+    wire frame_drop;
     orbtrace_frame_fifo fifo(.wr_clk(capture_clk),.wr_rst(capture_reset),
       .wr_data(frame),.wr_valid(toggle!=previous_toggle),.overflow(trace_overflow),
-      .rd_clk(clk),.rd_rst(sys_reset[1]),.rd_data(fifo_data),.rd_valid(fifo_valid),.rd_ready(fifo_ready));
+      .rd_clk(clk),.rd_rst(sys_reset[1]),.rd_data(fifo_data),.rd_valid(fifo_valid),.rd_ready(fifo_ready),
+      .wr_level(frame_level),.drop_event(frame_drop));
+    wire [3:0] level_after_push=frame_level+((toggle!=previous_toggle && !capture_reset && !frame_drop)?1'b1:1'b0);
+    orbtrace_rx_diagnostics diagnostics(.source_clk(capture_clk),.capture_reset(capture_reset),
+      .diagnostic_reset(SEPARATE_DIAGNOSTIC_RESET ? diagnostic_reset : rst),
+      .frame_drop(frame_drop),.parser_error(malformed_event),.sync_acquire(sync_event),.frame_level(level_after_push),
+      .clk(clk),.rst(SEPARATE_DIAGNOSTIC_RESET ? diagnostic_reset : rst),.flags(diagnostic_flags),.dropped_frames(dropped_frames),.parser_errors(parser_errors),
+      .sync_acquisitions(sync_acquisitions),.frame_highwater(frame_highwater));
     (* ASYNC_REG="TRUE" *) reg [1:0] sync_status,oversample_sync_status,overflow_status;
     always @(posedge clk or posedge rst)
       if(rst)begin sync_status<=0;oversample_sync_status<=0;overflow_status<=0;end
       else begin sync_status<={sync_status[0],trace_synced};
         oversample_sync_status<={oversample_sync_status[0],oversample_synced};
         overflow_status<={overflow_status[0],trace_overflow | parser_malformed};end
-    assign synced=sync_status[1] | oversample_sync_status[1];assign overflow=overflow_status[1];
+    assign synced=sync_status[1] | oversample_sync_status[1];assign overflow=overflow_status[1] | (|diagnostic_flags);
     generate if(RAW_DIAGNOSTIC==3)begin: sample_output
       reg [119:0] samples;
       reg [2:0] index;

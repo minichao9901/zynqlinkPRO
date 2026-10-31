@@ -114,6 +114,7 @@ class Stress(Streams):
                 self.set('etm','#break-command','b '+function)
                 self.page('etm','click',selector='#add-break');self.ready('#start')
                 previous=self.page('etm','read',selector='#records')['value'];started=time.perf_counter()
+                row['captureAttemptUnix']=time.time()
                 self.page('etm','click',selector='#start')
                 until=time.monotonic()+self.args.case_timeout
                 while time.monotonic()<until:
@@ -139,7 +140,19 @@ class Stress(Streams):
                     captureStart=decoded.get('captureStart'),rccAfter=self.invoke('etm','inspect',target='target')['rcc'])
                 if row['rccAfter']!=info['rcc']:raise RuntimeError('Firmware clock registers changed')
             except Exception as error:
-                row['error']=str(error);self.save(self.out/'capture-failure.json',row)
+                row['error']=str(error)
+                # Failed captures need not become the selected decoded record.
+                # Locate only this round's new evidence; never retry the action.
+                if row.get('captureAttemptUnix'):
+                    candidates=[]
+                    for session_path in (ROOT/'etm-service/records').glob('capture-*/session.json'):
+                        metadata=json.loads(session_path.read_text(encoding='utf8'))
+                        if metadata.get('created',0)>=row['captureAttemptUnix']:candidates.append((session_path,metadata))
+                    if len(candidates)==1:
+                        path,metadata=candidates[0];raw=path.parent/'capture.bin'
+                        row.update(record=path.parent.name,transport=metadata.get('captureQuality'),captureExtent=metadata.get('captureExtent'))
+                        if raw.is_file():row.update(rawBytes=raw.stat().st_size,rawSha256=hashlib.sha256(raw.read_bytes()).hexdigest())
+                self.save(self.out/'capture-failure.json',row)
                 self.save(self.out/'web-log.json',{'log':self.page('etm','read',selector='#log')['text']})
                 raise
             finally:

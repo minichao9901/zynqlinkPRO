@@ -43,7 +43,18 @@ uint32_t etm_reference_init(void){
 }
 void etm_reference_snapshot(uint32_t reply[4]){
   reply[0]=reference_hz;reply[1]=Xil_In32(0xf8000180U);
-  reply[2]=Xil_In32(0xf8000108U);reply[3]=(ER(2)>>3)&1U;
+  reply[2]=Xil_In32(0xf8000108U);reply[3]=((ER(2)>>3)&1U)|(ER(8)==0x45544431U ? 0x100U : 0U);
+}
+void etm_diagnostics_snapshot(uint32_t reply[16]){
+  unsigned i;
+  for(i=0;i<16;i++)reply[i]=0;
+  reply[0]=ER(8);
+  if(reply[0]!=0x45544431U)return;
+  reply[1]=ER(18);reply[2]=ER(9);reply[3]=ER(17);
+  reply[4]=ER(10);reply[5]=ER(11);reply[6]=ER(12);reply[7]=ER(13);
+  reply[8]=ER(14);reply[9]=ER(15);reply[10]=ER(16);
+  reply[11]=ER(3);reply[12]=ER(5);reply[13]=ER(1);
+  reply[14]=probe_target_fclk();reply[15]=ER(7);
 }
 static uint32_t trace_status(void){
   uint32_t cfg=Xil_In32(0x40010008U);

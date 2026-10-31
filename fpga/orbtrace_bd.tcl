@@ -32,6 +32,12 @@ if {[lsearch -exact [list_property [get_bd_cells orbtrace_0]] CONFIG.RAW_DIAGNOS
 }
 set raw_trace_changed [expr {[get_property CONFIG.RAW_DIAGNOSTIC [get_bd_cells orbtrace_0]] != $raw_diag}]
 if {$raw_trace_changed} {set_property CONFIG.RAW_DIAGNOSTIC $raw_diag [get_bd_cells orbtrace_0]}
+# ETD1 uses registers above the legacy 64-byte window. Do not retain an old
+# module-reference parameter that would alias these reads onto control/FIFO.
+if {[get_property CONFIG.C_S_AXI_ADDR_WIDTH [get_bd_cells orbtrace_0]] != 8} {
+  set_property CONFIG.C_S_AXI_ADDR_WIDTH 8 [get_bd_cells orbtrace_0]
+  set raw_trace_changed 1
+}
 set raw_fifo_bits [expr {$raw_diag in {3 4} ? 16 : ($raw_diag == 2 ? 14 : 12)}]
 if {[get_property CONFIG.FIFO_ADDR_BITS [get_bd_cells orbtrace_0]] != $raw_fifo_bits} {
   set_property CONFIG.FIFO_ADDR_BITS $raw_fifo_bits [get_bd_cells orbtrace_0]

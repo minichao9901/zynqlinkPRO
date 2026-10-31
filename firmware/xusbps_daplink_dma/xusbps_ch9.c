@@ -629,6 +629,13 @@ static u8	Reply[XUSBPS_REQ_REPLY_LEN];
 #endif
 
     /* ETM status/start/stop/reset. Control stays on EP0, data on EP2 IN. */
+    if(SetupData->bmRequestType==0xc0 && SetupData->bRequest==0x62 &&
+       SetupData->wValue==0 && SetupData->wIndex==0x4554 && SetupData->wLength==64){
+        uint32_t snapshot[16];
+        extern void etm_diagnostics_snapshot(uint32_t reply[16]);
+        etm_diagnostics_snapshot(snapshot);memcpy(Reply,snapshot,sizeof(snapshot));
+        return XUsbPs_EpBufferSend(InstancePtr,0,Reply,sizeof(snapshot));
+    }
     if(SetupData->bmRequestType==0xc0 && SetupData->bRequest==0x61 &&
        SetupData->wIndex==0x4554 && SetupData->wLength==16){
         uint32_t snapshot[4];

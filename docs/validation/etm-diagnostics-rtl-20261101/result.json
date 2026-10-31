@@ -1,0 +1,88 @@
+{
+  "hardwareAccess": false,
+  "tests": [
+    {
+      "top": "tb_orbtrace_diagnostics",
+      "arguments": [],
+      "passed": true
+    },
+    {
+      "top": "tb_orbtrace_controller",
+      "arguments": [],
+      "passed": true
+    },
+    {
+      "top": "tb_orbtrace_tpiu_stream",
+      "arguments": [],
+      "passed": true
+    },
+    {
+      "top": "tb_orbtrace_parallel",
+      "arguments": [
+        "+pins=1",
+        "+phase=0"
+      ],
+      "passed": true
+    },
+    {
+      "top": "tb_orbtrace_parallel",
+      "arguments": [
+        "+pins=1",
+        "+phase=1"
+      ],
+      "passed": true
+    },
+    {
+      "top": "tb_orbtrace_parallel",
+      "arguments": [
+        "+pins=2",
+        "+phase=0"
+      ],
+      "passed": true
+    },
+    {
+      "top": "tb_orbtrace_parallel",
+      "arguments": [
+        "+pins=2",
+        "+phase=1"
+      ],
+      "passed": true
+    },
+    {
+      "top": "tb_orbtrace_parallel",
+      "arguments": [
+        "+pins=4",
+        "+phase=0"
+      ],
+      "passed": true
+    },
+    {
+      "top": "tb_orbtrace_parallel",
+      "arguments": [
+        "+pins=4",
+        "+phase=1"
+      ],
+      "passed": true
+    },
+    {
+      "top": "tb_orbtrace_raw",
+      "arguments": [],
+      "passed": true
+    },
+    {
+      "top": "tb_orbtrace_samples",
+      "arguments": [],
+      "passed": true
+    }
+  ],
+  "rtlSha256": {
+    "fpga/rtl/orbtrace_controller.v": "3e13c993c5d36e4fcd82d690cfcbf5419b71dbfd6b5895665ba68b9016198cba",
+    "fpga/rtl/orbtrace_frame_fifo.v": "e4d256a9406985e2f7016d2f53cc3f9589ef1292c02588551bf532f642ddb801",
+    "fpga/rtl/orbtrace_parallel.v": "d680cd979aad19f241eb78cc8d260886514f218e321f19d548873839fd8e844f",
+    "fpga/rtl/orbtrace_rx_diagnostics.v": "c8c62c7a0c044652becd81c4f3163ae5932327d0d7e420eb5b708b21c8eb4562",
+    "fpga/rtl/orbtrace_sample_capture.v": "9179431fb3b7594bf022a0abf4fc1859c5faf7011983aedc5be1410b909dbb79",
+    "fpga/rtl/orbtrace_tpiu_demux.v": "8ee22425aceca214bb30b067704f26816dc322b9db60244fc451476caf2cb768",
+    "fpga/rtl/orbtrace_tpiu_stream.v": "1245e8d75c8b54f12c8140f91f6d10ed337feedcd62b012dcb923692a56eea8c",
+    "fpga/rtl/orbtrace_traceif.v": "e4c9adda46c34b8888c7084a6f01bb134836118263a73a64a857f8f4dc04fef1"
+  }
+}

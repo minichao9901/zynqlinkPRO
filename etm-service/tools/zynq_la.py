@@ -20,6 +20,7 @@ from dap_pipeline_bench import open_dap, setup, xfer, le
 TRACE_EP = 0x82
 CTRL_REQUEST = 0x60
 CTRL_REFERENCE = 0x61
+CTRL_DIAGNOSTICS = 0x62
 CTRL_INDEX = 0x4554
 ZET1_MAGIC = 0x3154455A
 ETM_SIGNATURE = 0x45544D31
@@ -54,6 +55,7 @@ class Session:
         self.started_monotonic = None
         self._reader = None
         self._timer = None
+        self.diagnostics_supported = False
 
     # ---------------- USB ----------------
     def open(self):
@@ -89,7 +91,23 @@ class Session:
         reply = bytes(self.dev.ctrl_transfer(0xC0, CTRL_REFERENCE, 0, CTRL_INDEX, 16, timeout=2000))
         if len(reply) != 16:
             raise CaptureError("ETM 参考时钟请求返回 %d 字节" % len(reply))
-        return struct.unpack("<I", reply[:4])[0]
+        words=struct.unpack('<4I',reply)
+        self.diagnostics_supported=bool(words[3]&0x100)
+        return words[0]
+
+    def diagnostics(self):
+        if not self.diagnostics_supported:
+            return {'implemented':False,'reason':'probe did not advertise ETD1 diagnostics'}
+        reply=bytes(self.dev.ctrl_transfer(0xC0,CTRL_DIAGNOSTICS,0,CTRL_INDEX,64,timeout=2000))
+        if len(reply)!=64:raise CaptureError('ETM诊断长度不匹配')
+        w=struct.unpack('<16I',reply)
+        if w[0]!=0x45544431:raise CaptureError('ETM诊断版本不匹配')
+        return dict(implemented=True,capabilities=w[1],flags=w[2],rawMode=w[3],
+            frameHighwater=w[4] if w[1]&1 else None,recordHighwater=w[5] if w[1]&2 else None,
+            frameDrops=w[6] if w[1]&1 else None,parserErrors=w[7] if w[1]&4 else None,
+            idelayReadyLosses=w[8] if w[1]&8 else None,recordStallCycles=w[9] if w[1]&2 else None,
+            syncAcquisitions=w[10] if w[1]&4 else None,recordLevel=w[11],recordsAccepted=w[12],
+            receiverEnabled=bool(w[13]&1),fclkHz=w[14],recordCapacity=w[15])
 
     def _set_tar(self, addr):
         xfer(self.out, self.inp, [5, 0, 3, 8] + le(0) + [1] + le(0x23000052) + [5] + le(addr))
@@ -358,6 +376,8 @@ def do_export(vis, path, channels):
         raise CaptureError(s.error)
     with open(path, "wb") as f:
         f.write(bytes(s.bytes))
+    # The file is durable even if the subsequent diagnostic request fails.
+    s.quality['diagnostics'] = s.diagnostics()
     # capture_job creates a fresh Vis for export. Carry the completed session's
     # duration and transport proof before release() retires it; defaults would
     # otherwise relabel every window as 10 ms and discard the loss/end flags.
