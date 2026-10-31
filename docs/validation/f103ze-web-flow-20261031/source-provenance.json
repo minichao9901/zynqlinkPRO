@@ -85,8 +85,8 @@
     },
     "E:/web-etm-trace-worktrees/codex-f103-target/firmware/stm32f103_cdc_trace/src/main.c": {
       "relative": "src/main.c",
-      "sha256": "ddbd6e8a9f1f85b8c0015c4459583b839a0f525f6d4fd3e90e531b36f849628d",
-      "bytes": 16647
+      "sha256": "8f87d2dfc3d5af056947240ba546a9aaacbe1a88900fc8aaf2c82b3384cb7bb6",
+      "bytes": 17107
     },
     "E:/web-etm-trace-worktrees/codex-f103-target/firmware/stm32f103_cdc_trace/src/stm32f1xx_hal_msp.c": {
       "relative": "src/stm32f1xx_hal_msp.c",
@@ -141,5 +141,13 @@
     "cherryusb/port/fsdev/usb_dc_fsdev.c": "ee84b4fda2b510776ac70b776a5dc583796ecd5ecafe7f56857540a64b7d6193",
     "cherryusb/port/fsdev/usb_glue_st.c": "8022e3244ed5f5772efd4994f0b28faaa5f28060fa0443a42027c3a9f2b5867b",
     "cherryusb/class/cdc/usbd_cdc_acm.c": "cf483b1962b7c8d4c1047935d40c6ef14ed3d6e78dd72d6b22879ff682972879"
-  }
+  },
+  "mergeAuditCorrections20261031": [
+    {
+      "relative": "src/main.c",
+      "previousSha256": "ddbd6e8a9f1f85b8c0015c4459583b839a0f525f6d4fd3e90e531b36f849628d",
+      "sha256": "8f87d2dfc3d5af056947240ba546a9aaacbe1a88900fc8aaf2c82b3384cb7bb6",
+      "reason": "The retained source-snapshot already contains the accepted CDC MPS fix; its main.c provenance hash still described the pre-patch source."
+    }
+  ]
 }

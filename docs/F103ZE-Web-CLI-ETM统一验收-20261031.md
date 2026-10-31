@@ -477,3 +477,48 @@ python tools/verify_etm_native_equivalence.py --legacy etm-service/records/captu
 浏览器测量会使查询缓存变暖；需要重新测首次行为时必须重建新记录。本次先顺序测三份首屏，后独立执行
 `--skip-open`缩放批次，原始日志分别保留。私有CLI令牌不入Git；原始capture/ELF/源码保留在本地记录目录，
 原生360MB中间件和测试结果副本留在build，不作为新FPGA/Zynq交付产物。
+
+## 主分支合并与删除worktree前的材料保留
+
+本轮已与“优化PL资源时序与PS代码体积”聊天核对：对方源码合并窗口已经结束，PL/PS优化、QSPI CLI和ETM改动
+共同位于主工作分支`feature/superlink-zynq-web`。对方正从`954de8f`的隔离快照统一构建和先行板测；
+本轮后补仅涉及target归档和离线材料，未改变该快照的FPGA/PS输入。本地`main`原无独占提交，待归档核验后
+安全快进到同一合入头；不切换当前工作区，不重置、不推远端，也不删除worktree。
+
+复查对方的PL诊断裁剪/FIFO资源优化、PS紧凑构建/SWJ/USB上下文修复和QSPI工具时，确认不能拿旧优化线
+bit/ELF替代ETM合并头。新配对、SHA、实际FCLK/TCK与板测仍由统一构建验收记录确认；双方探针独占顺序不变。
+
+| 必须保留的内容 | 仓库内入口 |
+|---|---|
+| 统一CLI、Web和原生配置 | `toolbox.py`、`web/`、`etm-service/` |
+| ETM完整流程/断点/容量、RTT和J-Scope验收 | `tools/f103_web_acceptance.py`、`f103_stream_acceptance.py`、`f103_capture_entry.py`、`f103_trace_sweep.py` |
+| 实板采集及物理边沿分析 | `tools/test_orbtrace_board.py`、`trace_signal_analysis.py`及原始回放证据 |
+| 离线完整处理、首屏/缩放、语义比较 | `tools/bench_etm_native_offline.py`、`bench_etm_native_browser.py`、`verify_etm_native_equivalence.py` |
+| 可恢复1s原始输入和小型事件基线 | `tools/prepare_etm_offline_fixture.py`及`validation/native-engine-offline-20261031/fixture/manifest.json` |
+| CDC/ETM target的完整编译依赖与host用例 | `firmware/target/stm32f103_cdc_trace/`（含CB/ZE必需CMSIS/HAL和许可证、CherryUSB、RTT、链接/构建脚本） |
+| RTT序号与J-Scope波形target | `firmware/target/stm32f103_rtt_seq72/`、`stm32f103_scope_rated/`；重建入口`tools/build_f103_fixtures.py` |
+| 已验收target ELF及身份 | `prebuilt/20261031_f103ze_cdc_trace/`、`20261031_f103ze_rtt_seq72/`、`20261031_f103ze_scope72/` |
+| 统一结论及原始验收记录 | 本文、`docs/validation/f103ze-web-flow-20261031/`、`native-engine-offline-20261031/` |
+
+新增CDC target包含全部22份已验收DWARF源码，其SHA与原快照一致；另补齐头文件、启动/链接、构建工具和host用例。
+迁移后48/72MHz均成功编译并通过USB HP/LP向量自检，8项CDC host场景通过。路径变短改变了USB驱动`__FILE__`
+字符串及装载段内容，因此新ELF只计离线构建通过，**不冒充旧版已上板固件**；已验收prebuilt文件及哈希保持原样。
+[归档核查](validation/etm-merge-20261031/handoff.json)分别记录新旧ELF及装载段哈希。
+
+1s夹具复用已入库的`capacity-packed/window-1000ms/capture.etm`和48MHz echo ELF，不重复提交raw文件。
+补入原样sources映射与summary/quality参考、25KB压缩事件oracle。它保留1,759份完整事件字典及全部503边界，
+可在没有旧2.81GB events.jsonl、SQLite、原records目录和外部源码worktree的情况下做同一抽样比较。
+这些小型测试oracle不进入生产解码路径。
+
+从新的checkout复测示例（服务端口需空闲，所有输出目录必须尚不存在）：
+
+```powershell
+python tools/prepare_etm_offline_fixture.py --out build/etm-1s-fixture
+python tools/bench_etm_native_offline.py --record build/etm-1s-fixture --out build/etm-portable-bench --port 8884 --repeat 3
+# 打开脚本输出的URL，等待ready后执行：
+python tools/bench_etm_native_browser.py --campaign build/etm-portable-bench --out build/etm-portable-bench/browser
+python tools/verify_etm_native_equivalence.py --oracle docs/validation/native-engine-offline-20261031/fixture/events-oracle.json.gz --native <该轮新记录目录> --out build/etm-portable-bench/equivalence.json
+```
+
+未入库的主目录build/releases/HPM历史文件没有混入本轮提交，也没有删除；另一AI的私有Flash备份保留约定仍有效。
+worktree删除必须等对应真机验收通过并核对新产物身份后再做，本轮不删除。
