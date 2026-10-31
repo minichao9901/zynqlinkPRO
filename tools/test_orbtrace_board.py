@@ -10,6 +10,7 @@ import argparse
 import base64
 import hashlib
 import json
+import shutil
 from pathlib import Path
 import struct
 import threading
@@ -53,11 +54,14 @@ def main():
     ap.add_argument('--usb-reconnect', action='store_true', help='Hold PA12 low during reset/entry preparation')
     ap.add_argument('--ready-file', type=Path, help='Internal stimulus synchronization marker; new file only')
     ap.add_argument('--sync', action='store_true', help='Enable ITM/DWT periodic synchronization')
+    ap.add_argument('--ddr-physical', action='store_true', help='AI acceptance only: bounded PL DDR capture and JTAG AP0 download')
     ap.add_argument('--raw', action='store_true', help='Capture diagnostic sampled DDR bytes, not decoded ETM')
     ap.add_argument('--raw-samples', action='store_true', help='RAW_DIAGNOSTIC=3: preserve packed 200MHz five-line samples')
     args = ap.parse_args()
-    if not 0 < args.milliseconds <= 1000:
-        ap.error('capture must be 0..1000 ms')
+    if not 0 < args.milliseconds <= (2000 if args.ddr_physical else 1000):
+        ap.error('capture outside supported window')
+    if args.ddr_physical and (args.raw or args.raw_samples or args.hclk_div != 1 or args.gpio_speed is not None):
+        ap.error('DDR acceptance preserves target clock and requires framed RAW4 mode')
     entry_address = resolve_entry(args.target_elf, args.entry)
     if args.reset_to_entry and entry_address is None:
         ap.error('--reset-to-entry requires --entry')
@@ -154,7 +158,7 @@ def main():
                     report['flash'].append(dict(address=address, bytes=len(expected), sha256=sha(actual)))
         assert report['flash'], 'no Flash image verified'
         report['reference'] = struct.unpack('<4I', dev.ctrl_transfer(0xc0, 0x61, 0, 0x4554, 16))
-        assert 190_000_000 <= report['reference'][0] <= 210_000_000 and report['reference'][3] == 1
+        assert 190_000_000 <= report['reference'][0] <= 210_000_000 and report['reference'][3] & 1
         was_halted = bool(mem.word(0xe000edf0) & (1 << 17))
         mem.write_word(0xe000edf0, 0xa05f0003)
         assert mem.word(0xe000edf0) & (1 << 17)
@@ -205,81 +209,98 @@ def main():
                       ctrl=mem.word(REG['etmcr']) & ~0x400,
                       ccer=mem.word(0xe00411e8), traceid=mem.word(REG['etmtraceidr']))
         report['config'] = config
-        if args.raw:
-            # Prepare ETM while the CPU is halted, before arming the raw
-            # receiver: the port otherwise floods it with idle bytes while
-            # the host configures CoreSight over SWD.
-            mem.write_word(REG['etmcr'], cr & ~0x400)
-            wait_program(0)
-            mem.write_word(0xe000edf0, 0xa05f0001)
-        control(0x301)
-        armed = True
-        for _ in range(100):
-            s = control()
-            if not s[7] and s[1] & 17 == 17:
-                break
-            time.sleep(.005)
-        else:
-            raise RuntimeError(f'PL not armed/calibrated: {s}')
-        report['start_status'] = s
-        reader = threading.Thread(target=receive, daemon=True)
-        reader.start()
-        if not args.raw:
-            mem.write_word(REG['etmcr'], cr & ~0x400)
-            wait_program(0)
-            usb_reconnect.restore()
-            if args.ready_file:
-                args.ready_file.write_text(json.dumps({'armed': True, 'monotonic': time.monotonic()}))
-            capture_started = time.monotonic()
-            mem.write_word(0xe000edf0, 0xa05f0001)
-        time.sleep(args.milliseconds/1000)
-        if not args.raw:
-            mem.write_word(REG['etmcr'], cr)
-            wait_program(2)
-            report['capture_host_seconds'] = time.monotonic() - capture_started
-        # Raw mode also streams idle/synchronization bytes at line rate;
-        # stop promptly to avoid overflowing while no ETM payload is produced.
-        if not args.raw:
-            time.sleep(.005)
-        control(2)
-        reader.join(5)
-        assert not reader.is_alive(), 'USB reader did not retire'
-        assert not errors, errors
-        report['stop_status'] = control()
-        sequence_ok = all(p[1] == i for i, p in enumerate(packets))
-        capture_ok = len({p[6] for p in packets}) == 1
-        loss = any(p[2] & 4 for p in packets)
-        synced = any(p[2] & 2 for p in packets)
-        etm = (bytes(records) if args.raw_samples else
-               bytes(records[i] for i in range(0, len(records), 2) if records[i+1] == config['traceid']))
-        quality = dict(records=len(records)//2, loss=loss, synced=synced,
-                       ended=bool(packets and packets[-1][2] & 8), trailingBytes=0,
-                       fclk=packets[-1][5] if packets else None,
-                       tckKhz=packets[-1][2] >> 16 if packets else None,
-                       refClockHz=report['reference'][0])
-        record = dict(format='zynqdap-etm-1', kind='hardware', config=config, quality=quality,
-                      etm=base64.b64encode(etm).decode(), etmSha=sha(etm),
-                      elf=base64.b64encode(args.target_elf.read_bytes()).decode(),
-                      elfName=args.target_elf.name, elfSha=report['target_elf_sha256'])
-        if args.raw_samples:
-            (work/'raw-samples16.bin').write_bytes(etm)
-            report.update(sample_count=len(records)//2*3, sample_rate_hz=report['reference'][0],
-                          sample_packing='three 5-bit {TRACECLK,D3,D2,D1,D0} samples in bits 14:10,9:5,4:0; bit15=0',
-                          sample_duration_seconds=len(records)//2*3/report['reference'][0])
-        elif args.raw:
-            (work/'raw-ddr.bin').write_bytes(etm)
-        else:
-            (work/'capture.zetm').write_text(json.dumps(record, indent=2)+'\n')
+        if args.ddr_physical:
+            from etm_ddr_physical_capture import capture as capture_ddr
+            def resume_ddr_target():
+                mem.write_word(REG['etmcr'], cr & ~0x400)
+                wait_program(0)
+                usb_reconnect.restore()
+                mem.write_word(0xe000edf0, 0xa05f0001)
+            etm, ddr = capture_ddr(work, args.elf, args.milliseconds/1000,
+                                   report['reference'][0], resume_ddr_target, config['traceid'])
+            report.update(ddr=ddr, etm_bytes=len(etm), etm_sha256=sha(etm))
             (work/'etm.bin').write_bytes(etm)
-        report.update(quality=quality, packets=len(packets),
-                      sequence_ok=sequence_ok, capture_id_ok=capture_ok)
-        if args.raw:
-            report.update(raw_bytes=len(etm), raw_sha256=sha(etm),
-                          raw_note=('packed five-line samples; synced means sampler started, not TPIU synchronization' if args.raw_samples else
-                                    'sampled DDR bytes before TPIU parsing; source tag 2 is a transport placeholder'))
+            shutil.copy2(args.target_elf, work/'firmware.elf')
+            (work/'session.json').write_text(json.dumps(dict(config=config,
+                quality=dict(loss=False, synced=True, ended=True, source='hardware DDR window',
+                             actualTimeMs=ddr['actualWindowSeconds']*1000),
+                input='etm.bin', inputKind='BIN', elf='firmware.elf'),indent=2)+'\n')
         else:
-            report.update(etm_bytes=len(etm), etm_sha256=sha(etm))
-        assert sequence_ok and capture_ok and synced and not loss and quality['ended'] and etm
+            if args.raw:
+                # Prepare ETM while the CPU is halted, before arming the raw
+                # receiver: the port otherwise floods it with idle bytes while
+                # the host configures CoreSight over SWD.
+                mem.write_word(REG['etmcr'], cr & ~0x400)
+                wait_program(0)
+                mem.write_word(0xe000edf0, 0xa05f0001)
+            control(0x301)
+            armed = True
+            for _ in range(100):
+                s = control()
+                if not s[7] and s[1] & 17 == 17:
+                    break
+                time.sleep(.005)
+            else:
+                raise RuntimeError(f'PL not armed/calibrated: {s}')
+            report['start_status'] = s
+            reader = threading.Thread(target=receive, daemon=True)
+            reader.start()
+            if not args.raw:
+                mem.write_word(REG['etmcr'], cr & ~0x400)
+                wait_program(0)
+                usb_reconnect.restore()
+                if args.ready_file:
+                    args.ready_file.write_text(json.dumps({'armed': True, 'monotonic': time.monotonic()}))
+                capture_started = time.monotonic()
+                mem.write_word(0xe000edf0, 0xa05f0001)
+            time.sleep(args.milliseconds/1000)
+            if not args.raw:
+                mem.write_word(REG['etmcr'], cr)
+                wait_program(2)
+                report['capture_host_seconds'] = time.monotonic() - capture_started
+            # Raw mode also streams idle/synchronization bytes at line rate;
+            # stop promptly to avoid overflowing while no ETM payload is produced.
+            if not args.raw:
+                time.sleep(.005)
+            control(2)
+            reader.join(5)
+            assert not reader.is_alive(), 'USB reader did not retire'
+            assert not errors, errors
+            report['stop_status'] = control()
+            sequence_ok = all(p[1] == i for i, p in enumerate(packets))
+            capture_ok = len({p[6] for p in packets}) == 1
+            loss = any(p[2] & 4 for p in packets)
+            synced = any(p[2] & 2 for p in packets)
+            etm = (bytes(records) if args.raw_samples else
+                   bytes(records[i] for i in range(0, len(records), 2) if records[i+1] == config['traceid']))
+            quality = dict(records=len(records)//2, loss=loss, synced=synced,
+                           ended=bool(packets and packets[-1][2] & 8), trailingBytes=0,
+                           fclk=packets[-1][5] if packets else None,
+                           tckKhz=packets[-1][2] >> 16 if packets else None,
+                           refClockHz=report['reference'][0])
+            record = dict(format='zynqdap-etm-1', kind='hardware', config=config, quality=quality,
+                          etm=base64.b64encode(etm).decode(), etmSha=sha(etm),
+                          elf=base64.b64encode(args.target_elf.read_bytes()).decode(),
+                          elfName=args.target_elf.name, elfSha=report['target_elf_sha256'])
+            if args.raw_samples:
+                (work/'raw-samples16.bin').write_bytes(etm)
+                report.update(sample_count=len(records)//2*3, sample_rate_hz=report['reference'][0],
+                              sample_packing='three 5-bit {TRACECLK,D3,D2,D1,D0} samples in bits 14:10,9:5,4:0; bit15=0',
+                              sample_duration_seconds=len(records)//2*3/report['reference'][0])
+            elif args.raw:
+                (work/'raw-ddr.bin').write_bytes(etm)
+            else:
+                (work/'capture.zetm').write_text(json.dumps(record, indent=2)+'\n')
+                (work/'etm.bin').write_bytes(etm)
+            report.update(quality=quality, packets=len(packets),
+                          sequence_ok=sequence_ok, capture_id_ok=capture_ok)
+            if args.raw:
+                report.update(raw_bytes=len(etm), raw_sha256=sha(etm),
+                              raw_note=('packed five-line samples; synced means sampler started, not TPIU synchronization' if args.raw_samples else
+                                        'sampled DDR bytes before TPIU parsing; source tag 2 is a transport placeholder'))
+            else:
+                report.update(etm_bytes=len(etm), etm_sha256=sha(etm))
+            assert sequence_ok and capture_ok and synced and not loss and quality['ended'] and etm
         report['capture_passed'] = True
     except BaseException as exc:
         report['error'] = repr(exc)

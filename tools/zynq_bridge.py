@@ -75,7 +75,7 @@ def preflight(backend, web, service_path):
         if not path.is_file():
             raise ValueError('桥包不完整，请完整解压ZIP：' + str(path))
     versions={}
-    for name in ('etm_decode', 'etm_frontend', 'etm_storebuild', 'etm_index', 'etm_export'):
+    for name in ('etm_decode', 'etm_frontend', 'etm_storebuild', 'etm_index', 'etm_export', 'etm_framed'):
         executable=backend / 'build-native' / (name + '.exe')
         usage_only=name in ('etm_decode','etm_index')
         result=subprocess.run([str(executable)] + ([] if usage_only else ['--version']), capture_output=True, timeout=20)

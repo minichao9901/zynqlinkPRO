@@ -1057,3 +1057,7 @@ DDR格式FRM1为去掉TPIU同步的连续16字节formatter帧，末尾不足16�
 每个源有64KiB输出缓存，输入64KiB分块，内存不随采集总量增长。要求显式给出末尾长度并与文件大小核对；缺失flags的残帧只计数、不生成虚构ETM字节；保留源ID 127或输入变更均拒绝发布。Python仅作版本/身份/大小检查及SHA，不逐字节解复用，不产生逐指令JSONL。AI入口为`toolbox.py project run etm.framed -- INPUT --out NEW_DIR --tail-bytes N --trace-id 2`，构建仍用`native.build`。
 
 48项离线检查全部通过：28种尾部有效载荷长度、多源切换、15种残帧长度、非法ID和长度拒绝，以及两份真实ETM字节流重封装的一致性。F103原1s数据1,363,722字节经1,558,544字节FRM1恢复后逐字节一致，原生解复用段7.17ms；H743 ETMv4 15,306字节恢复后逐字节一致，原生段0.325ms。这些时间只涵盖解复用，不包含SHA、进程启动或完整指令解码；测试FRM1由已保存ETM流重封装，不是真实DDR采集。结论是新增阶段保持两种协议的输入字节，H743 Zynq实机和完整性能仍待验收。[48项结果](validation/etm-framed-native-20261101/result.json)。
+
+FRM1后续主机检查：新增超大尾部参数拒绝用例，共49项通过；修正后的F103原生段6.72ms，时间口径同上。[最终EXE哈希及源码哈希](validation/etm-framed-native-20261101/v2/build.json)。桥启动预检可运行全部6个原生工具，现有3项Web完整测试再次通过（含真实F103/H743 C++解码及损坏采集不能冒充通过）；5项传输生命周期检查通过。EXE打包脚本仅复制6个明确运行工具，不把本地CMake缓存/对象/静态库打包。此处尚未重新交付桥ZIP。
+
+新增AI真机验收选项`tools/test_orbtrace_board.py --ddr-physical`，沿用原F103 ELF/Flash只读核对、断点/CoreSight恢复；拒绝搭配目标分频或GPIO诊断改写。硬件窗口完成后通过物理AP0分块读DDR，再由C++解复用。nonce/captureId不符即拒绝读取负载，2项主机安全边界测试通过。该入口是DDR源首次上板的JTAG验收工具，不是用户Web操作入口，也不等于PS USB下载接口已实现。新RTL120MHz时序通过，setup +0.060ns、hold +0.003ns、SWCLK clock-to-pad 6.389ns/7ns；新bit/ELF及实际加载结果在完成后单独登记。

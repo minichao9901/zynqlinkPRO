@@ -93,8 +93,10 @@ def main():
         raise AssertionError('reserved source ID accepted')
     bad = subprocess.run([str(exe),str(invalid),str(out/'bad-tail'),'--tail-bytes','1'],capture_output=True)
     if bad.returncode == 0: raise AssertionError('mismatched tail accepted')
+    bad = subprocess.run([str(exe),str(invalid),str(out/'overflow-tail'),'--tail-bytes','4294967296'],capture_output=True)
+    if bad.returncode == 0: raise AssertionError('overflow tail accepted')
     report = dict(hardwareAccess=False, passed=True, source='repacked real ETM streams and generated formatter frames',
-                  cases=len(rows)+2, rows=rows, binarySha256=hashlib.sha256(exe.read_bytes()).hexdigest())
+                  cases=len(rows)+3, rows=rows, binarySha256=hashlib.sha256(exe.read_bytes()).hexdigest())
     (out/'result.json').write_text(json.dumps(report,indent=2)+'\n')
     print(json.dumps(dict(passed=True,cases=report['cases'],realFixtures=rows[-2:]),indent=2))
 

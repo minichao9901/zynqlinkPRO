@@ -28,8 +28,9 @@ static int run(const std::vector<fs::path>& args) {
         throw std::runtime_error("usage: etm_framed INPUT NEW_OUTPUT_DIR --tail-bytes N (0..15)");
     const std::string tail_arg = args[4].string();
     size_t used = 0;
-    const unsigned tail = std::stoul(tail_arg, &used);
-    if (used != tail_arg.size() || tail > 15) throw std::runtime_error("invalid tail length");
+    const auto parsed_tail = std::stoull(tail_arg, &used);
+    if (used != tail_arg.size() || parsed_tail > 15) throw std::runtime_error("invalid tail length");
+    const unsigned tail = static_cast<unsigned>(parsed_tail);
     const uint64_t size = fs::file_size(args[1]);
     if (size % 16 != tail) throw std::runtime_error("FRM1 size disagrees with capture tail length");
     std::ifstream input(args[1], std::ios::binary);

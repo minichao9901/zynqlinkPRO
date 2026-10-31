@@ -60,7 +60,11 @@ def main(argv=None):
                 destination=payload/Path(name).relative_to('etm-service')
             else:continue
             destination.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/name,destination)
-        shutil.copytree(ROOT/'etm-service/build-native',payload/'build-native')
+        # An in-tree CMake build also contains caches, objects and vendor
+        # archives. Only these statically linked runtime tools ship to users.
+        native=payload/'build-native';native.mkdir()
+        for name in ('etm_decode','etm_frontend','etm_storebuild','etm_index','etm_export','etm_framed'):
+            shutil.copyfile(ROOT/'etm-service/build-native'/(name+'.exe'),native/(name+'.exe'))
         helpers=work/'hosttools';helpers.mkdir()
         shutil.copyfile(ROOT/'tools/dap_pipeline_bench.py',helpers/'dap_pipeline_bench.py')
         golden=work/'prebuilt/golden';golden.mkdir(parents=True)
