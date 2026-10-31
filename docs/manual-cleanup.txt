@@ -8,3 +8,9 @@ E:\zynqlinkPRO\reference\HFLink
 
 仅删除上面HFLink子目录，保留同级真实CM3模型及匹配BSP。当前Golden、正式recovery恢复包和精选记录继续保留；弃用原始Flash备份不影响正式恢复包。
 其他本机研究/旧工程文件详见docs/not-in-git-files.txt，未在本轮删除。真实CM3 RTL、匹配BSP和VexRiscv仿真模型均已纳入Git。
+
+2026-11-01 bridge构建派生副本（不是正式交付；自动审批拒绝批量删除，保留供手动选择）：
+保留正式：E:/zynqlinkPRO/dist/zynq-etm-bridge/ 与 E:/zynqlinkPRO/dist/zynq-etm-bridge.zip
+可选旧试包：E:/zynqlinkPRO/dist/zynq-etm-bridge-win64/、zynq-etm-bridge-win64-v2/、zynq-etm-bridge-1.0.0/及对应旧ZIP。
+可选离线回放副本：E:/zynqlinkPRO/build/bridge-validation/ 内 tmp*、verify-v2/data、final/data；两个测试服务均已关闭，必要结果已入docs/validation/bridge-exe-20261101/。
+原有etm-service/records两条业务记录与tools/tests/fixtures不可按此清单删除。

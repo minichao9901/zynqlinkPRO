@@ -9,6 +9,56 @@
 > H743保留superlinkPRO的ETMv4能力；新增Kingst真实记录作离线回归，不冒充Zynq上板验收。
 > 用户操作见[Web操作说明](Zynq-ETM-Trace操作说明.md)。
 
+## 2026-11-01：Windows bridge EXE与纯Web操作
+
+交付`dist/zynq-etm-bridge/zynq-etm-bridge.exe`及完整`dist/zynq-etm-bridge.zip`，ZIP为51,653,326字节，
+SHA-256 `0f9a7542c9d8ad3592cd08d50e9f9790abfb223b442a60271956ed266c3b7926`。
+源码版本`dc81148`，构建时源码无未提交修改。生成目录不进Git；可用已提交的一条AI命令
+`python toolbox.py bridge-build --out NEW_DIR`重建，自动检查冻结EXE后才发布目录和ZIP。
+用户完整解压后双击EXE，浏览器自动打开；不安装Python/Node，不手输CLI。
+
+产品流程沿用superlinkPRO：载入匹配ELF/源码、连接探针、选择函数起点、只读核对时钟、配置ETM/TPIU、
+点击“联动采集”、自动解码与浏览。主要替换LA接收后端，同时保留本仓库USB互斥、镜像核对、实际质量检测、
+C++/TraceStore、分页浏览、火焰图源码跟随及真实下载反馈。
+此前建议用户用CLI临时设置AHB/4的操作不再适用。Web主采集与原生辅助API拒绝hclkDiv；生产Trace capture也移除该参数。
+低层频率实验工具仍显式保留在研究入口，不能当作产品默认流程。
+
+本轮发现并修复普通Web采集路径的两处遗漏：导出阶段新建Vis导致丢失实际窗口（误用10ms默认值）和Zynq接收质量。
+现在退出接收会话前保存主机单调时钟窗口、FCLK/TCK、loss/synced/ended；loss、未同步或未结束均保留原始输入并明确失败。
+主机窗口不是目标周期计时，导出深度换算不是物理采样点实测，metadata明确标注。
+
+离线验收结果：46项Python、42项Web测试通过，143个Web模块语法、298个已入Git必要依赖校验通过。
+两种协议的Web capture任务接口替换**外部LA/USB输入**后执行真实上传、任务、C++解码、TraceStore与浏览；
+另检查loss/未同步/未结束不能误报通过，F103/H743 Trace配置不会写PLL/AHB/APB分频寄存器。
+这些结果不冒充硬件采集或真实探针反复开关的压力验收。
+
+最终冻结EXE在PATH只保留Windows System32、去掉系统Python/Node的环境中，五个原生工具、libusb/HID/串口运行库均可加载。
+真实EXE HTTP服务导入、解码、首段浏览、区间查询、SVG导出及重复双击复用均通过；无生产events.jsonl/native.jsonl。
+浏览器实际用文件选择器导入ELF、选cdc_poll，再导入H743记录、自动解码、点火焰图、设913～977区间并下载2,187字节SVG，
+磁盘文件与API产物逐字节一致。
+
+| 冻结EXE的单次离线检查 | 完整处理 | 完整首屏 | 半段缩放 |
+|---|---:|---:|---:|
+| 同一F103ZE 1s夹具，SHA 2cb583… | 6.882 s | 204.8 ms | 176.4 ms |
+| H743原始10ms参考，210,497条指令 | 0.889 s | 119.8 ms | 178.4 ms |
+
+首屏/缩放来自真实可见Web的公开测量方法，缩放视图为instructions；已有解码索引/缓存，单次检查不替换前文三次基准。
+1s数据处理仍明显超过1s，不能宣称实时采集显示达标。
+
+H743保留自动识别、独立CPU/Trace时钟计算、ETMv4选项及Funnel/ETF/TPIU路由。
+新增可迁移回归夹具`tools/tests/fixtures/h743-etmv4/`，包含原始ETM、匹配ELF、配置与来源哈希；源记录来自superlinkPRO的Kingst LA，
+CPU60MHz/TRACECLK30MHz、210,497条指令、packetIssues=0。H743接Zynq的真机验收仍待换板进行。
+
+本机系统TEMP和C盘用户目录出现原生工具写入拒绝，原因未定；桥将TEMP/TMP显式放自己的data/runtime内，
+本轮EXE与数据在E盘验证通过，没有修改系统权限；C盘解压运行不计已验证。
+全时序SVG的200,000段限制、超宽聚合图、Python精确SVG重建及已暂停的HSS缺首DEF仍未消除。
+Golden/recovery及生产PL/PS均未改变，本轮未综合、未连接板卡或写Flash。
+
+[完整发行身份与范围](validation/bridge-exe-20261101/release.json)、
+[冻结EXE回归](validation/bridge-exe-20261101/frozen-api.json)、
+[浏览器测量](validation/bridge-exe-20261101/browser-timing.json)、
+[H743页面证据](validation/bridge-exe-20261101/web-h743.jpg)。
+
 本文件集中记录本轮结论。**2026-10-31追加离线原生链路复测：同一份1s数据完整处理中位7.208s，
 解码后完整首屏中位221.5ms；首次半段缩放1.12～1.39s。此前268s与GB级JSONL来自入口漏配，
 不能代表superlinkPRO C++引擎性能。**新入口默认二进制/C++存储，不再生成逐事件JSONL；详细口径见末节。

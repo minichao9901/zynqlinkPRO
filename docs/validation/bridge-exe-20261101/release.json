@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "version": "1.0.0",
+  "sourceRevision": "dc811482c9eca79de4b8078e29bd7180a5c30dc3",
+  "sourceDirty": false,
+  "exe": "E:\\zynqlinkPRO\\dist\\zynq-etm-bridge\\zynq-etm-bridge.exe",
+  "exeSha256": "fcea0f277bc422e184e2a1b4e646582bf96f6b6b145c4aba8b5cdbcd866c7a67",
+  "archive": "E:\\zynqlinkPRO\\dist\\zynq-etm-bridge.zip",
+  "archiveBytes": 51653326,
+  "archiveSha256": "0f9a7542c9d8ad3592cd08d50e9f9790abfb223b442a60271956ed266c3b7926",
+  "packageManifestSha256": "5d900935869ebb56968380c8e29c26c34d23444e926c55c87d059732680acfb8",
+  "pythonTests": 46,
+  "webTests": 42,
+  "webSyntaxModules": 143,
+  "vendoredDependenciesChecked": 298,
+  "hardwareAccess": false,
+  "clockPolicy": "target-firmware-owned",
+  "userRequiresCLI": false,
+  "h743ZynqBoardAccepted": false,
+  "gui": {
+    "fileChooserELF": true,
+    "functionSelection": "cdc_poll 0x08000590 (offline, not installed on hardware)",
+    "fileChooserH743Record": true,
+    "automaticDecode": true,
+    "flameRange": {
+      "start": 913,
+      "end": 977
+    },
+    "nativeBrowserDownload": true,
+    "svgBytes": 2187,
+    "svgSha256": "58f539043aa46c9586db2b47bd86831f1939bf8a92215020d8b01b8fba99271a",
+    "downloadPath": "C:\\Users\\Administrator\\Downloads\\etm-flame-timeline (5).svg"
+  },
+  "limitations": [
+    "Hardware capture path exercised with external LA/USB replaced in tests; no real board actions this round",
+    "H743 fixture is original Kingst LA data from superlinkPRO, not Zynq validation",
+    "Native writes into C profile directories failed in this environment; tested package/data location is E drive. No system security settings changed.",
+    "Full execution-order SVG still capped at 200000 frames; HSS missing DEF remains deferred"
+  ],
+  "offlineServersStopped": true,
+  "cleanup": "Automatic approval rejected batched deletion of superseded packages and offline fixture copies (blocked by policy); files retained, no deletion retried."
+}
