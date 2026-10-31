@@ -1,0 +1,160 @@
+{
+  "audited_at_UTC": "2026-10-31T02:31:33.259968+00:00",
+  "authoritative_worktree": "E:\\zynqlinkPRO_orbtrace_opt",
+  "source_commit": "75e6491d89c963c09d315178123128a5f483b7f9",
+  "original_delayed_regression_objective_verified": true,
+  "all_session_requests_complete": false,
+  "requirements": [
+    {
+      "requirement": "20261031_orbtrace_opt_7020_120_candidate",
+      "status": "verified",
+      "evidence": "prebuilt\\20261031_orbtrace_opt_7020_120_candidate\\manifest.json",
+      "detail": {
+        "timing": {
+          "WNS_ns": 0.499,
+          "TNS_ns": 0.0,
+          "WHS_ns": 0.02,
+          "THS_ns": 0.0,
+          "WPWS_ns": 0.264,
+          "TPWS_ns": 0.0
+        },
+        "resources": {
+          "Slice LUTs": 14767.0,
+          "Slice Registers": 16990.0,
+          "Slice": 6304.0,
+          "Block RAM Tile": 10.5,
+          "Unique Control Sets": 757.0,
+          "DSPs": 1.0
+        },
+        "scope": "7020 physical SWD/JTAG acceptance; 7010 static implementation only"
+      }
+    },
+    {
+      "requirement": "20261031_orbtrace_opt_7010_100_candidate",
+      "status": "verified",
+      "evidence": "prebuilt\\20261031_orbtrace_opt_7010_100_candidate\\manifest.json",
+      "detail": {
+        "timing": {
+          "WNS_ns": 0.258,
+          "TNS_ns": 0.0,
+          "WHS_ns": 0.012,
+          "THS_ns": 0.0,
+          "WPWS_ns": 0.264
+        },
+        "resources": {
+          "Slice LUTs": 14618.0,
+          "Slice Registers": 16990.0,
+          "Slice": 4398.0,
+          "Block RAM Tile": 10.5,
+          "Unique Control Sets": 757.0,
+          "DSPs": 1.0
+        },
+        "scope": "7020 physical SWD/JTAG acceptance; 7010 static implementation only"
+      }
+    },
+    {
+      "requirement": "OCM capacity and unchanged USB/DAP queues",
+      "status": "verified",
+      "evidence": "prebuilt/20261031_orbtrace_opt_7020_120_candidate/ocm_layout_60.json",
+      "detail": {
+        "OCM_span": 120976,
+        "code": 71300,
+        "DAP": "16x4096",
+        "USB_arena": 524288
+      }
+    },
+    {
+      "requirement": "SWD/JTAG SRAM, RTT, HSS simulation",
+      "status": "verified",
+      "evidence": "docs\\validation\\orbtrace-7010-ocm-20261030\\simulation_results.json",
+      "detail": {
+        "native_commands": [
+          "python tools/test_probe_rtl.py",
+          "python tools/test_jtag_rtl.py",
+          "python tools/test_riscv_rtl.py",
+          "python tools/test_packet_engine.py",
+          "python tools/test_probe_host.py",
+          "python tools/test_dap_transport.py --cc clang"
+        ],
+        "CM3_matrix": {
+          "baseline": "00b9f2f",
+          "candidate_rtl": "bc9ced6",
+          "cases_each": 21,
+          "payload_validated_cases_each": 14,
+          "incompatible_sampling_points_each": 7,
+          "new_failures": [],
+          "compatibility_changes": [],
+          "baseline_harness_adaptations": [
+            "XSim compilation limited to 2 jobs",
+            "Failure detection anchors Fatal/Error/FAIL to diagnostic line starts",
+            "Optional target_clk_ns support; default remains 100MHz for the SWD matrix"
+          ]
+        },
+        "matched_performance_profiles": 9,
+        "USB_modeled": false
+      }
+    },
+    {
+      "requirement": "Three-hour gate and other AI idle before probe use",
+      "status": "verified",
+      "evidence": "docs\\validation\\orbtrace-hardware-20261031\\availability.json",
+      "detail": {
+        "time": "2026-10-30T22:22:52.304826+00:00",
+        "other_ai_thread": "01a18d3e-aacf-7cd3-bd66-fe132794462c",
+        "thread_status": "idle/completed",
+        "native_server_delivery_requests_two_checks": [
+          54,
+          54
+        ],
+        "probe_commands_before_gate": false,
+        "jtag_wiring": "Initially missing TDI/TDO; user confirmed reconnection during baseline SWD HSS sweep.",
+        "second_ownership_check": {
+          "other_thread_status": "idle/interrupted",
+          "intervening_work": "Offline ETM decode/index optimization; inspected recent commands, no probe operations",
+          "native_delivery_requests": 54,
+          "no_new_openocd_or_capture_process": true
+        }
+      }
+    },
+    {
+      "requirement": "Physical probe regression, recent-baseline comparison, degradation analysis",
+      "status": "verified",
+      "evidence": "docs\\validation\\orbtrace-hardware-20261031\\comparison.json",
+      "detail": {
+        "driver_jobs": 25,
+        "matched_metrics": 11,
+        "max_absolute_delta_percent": 0.680718878056219,
+        "analysis": "README: same-ELF old/new PL controls, USB packetization/backpressure, retained failures and fixed SWJ/STOP defects"
+      }
+    },
+    {
+      "requirement": "Reproduce original 50/60MHz SOTA",
+      "status": "verified",
+      "evidence": "docs/validation/orbtrace-sota-20261031/comparison.json",
+      "detail": {
+        "metrics": 12,
+        "strict_hss_rows": 42,
+        "scope": "96MHz RAM fixtures; historical pair rerun for throughput/RTT; instantaneous soak minima differ as documented"
+      }
+    },
+    {
+      "requirement": "QSPI persistence, backup, readback, OCM handoff and unified CLI",
+      "status": "verified",
+      "evidence": "prebuilt\\20261031_orbtrace_opt_qspi_7020_120\\flash_manifest.json",
+      "detail": {
+        "boot_sha256": "389c0d2cd52f6087aae038dc6bf35acfff0f0d65b74b98949fbdb5deab9525eb",
+        "software_no_halt_reset": true,
+        "CLI_commit": "d564dec",
+        "physical_SWD60": "post_boot_swd.json: payload/RCC/SRAM restored",
+        "main_entry": "E:/zynqlinkPRO/toolbox.py probe-flash",
+        "source": "74c4802"
+      }
+    },
+    {
+      "requirement": "Physical button/power-cycle after programming",
+      "status": "pending_user",
+      "evidence": "hardware_srst_check/result.json",
+      "detail": "Cable SRST did not trigger reset; user action after programming not yet confirmed. No further download/programming needed."
+    }
+  ]
+}
