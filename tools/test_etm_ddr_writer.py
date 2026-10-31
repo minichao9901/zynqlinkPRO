@@ -17,7 +17,7 @@ def main():
     if c.returncode:raise RuntimeError(c.stderr)
     r=subprocess.run(['vvp',str(exe)],capture_output=True,text=True,timeout=60)
     (out/'simulation.txt').write_text(r.stdout+r.stderr,encoding='utf8')
-    if r.returncode or 'PASS ALL DDR writer cases=28' not in r.stdout:raise RuntimeError(r.stdout+r.stderr)
+    if r.returncode or 'PASS ALL DDR writer cases=92' not in r.stdout:raise RuntimeError(r.stdout+r.stderr)
     controller=ROOT/'fpga/rtl/orbtrace_ddr_controller.v';bench=ROOT/'fpga/sim/tb_orbtrace_ddr_controller.sv'
     controller_exe=out/'controller.vvp';files.extend([controller,bench])
     c=subprocess.run(['iverilog','-g2012','-s','tb_orbtrace_ddr_controller','-o',str(controller_exe),*[str(f) for f in files if f.suffix=='.v' or f==bench]],capture_output=True,text=True)
@@ -26,7 +26,7 @@ def main():
     check=subprocess.run(['vvp',str(controller_exe)],capture_output=True,text=True,timeout=60)
     (out/'controller-simulation.txt').write_text(check.stdout+check.stderr,encoding='utf8')
     if check.returncode or 'PASS DDR controller' not in check.stdout:raise RuntimeError(check.stdout+check.stderr)
-    report=dict(passed=True,hardwareAccess=False,actualDdrReadback=False,cases=28,
+    report=dict(passed=True,hardwareAccess=False,actualDdrReadback=False,cases=92,repeatedCapturesWithoutReset=64,
         scope='AXI channel stability, B-response completion, byte limits, 4KiB boundaries, partial WSTRB, ping-pong stalls, errors, empty input and draining abort',
         sources={f.relative_to(ROOT).as_posix():hashlib.sha256(f.read_bytes()).hexdigest() for f in files})
     report['controllerRegressionPassed']=True

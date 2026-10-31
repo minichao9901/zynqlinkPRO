@@ -18,13 +18,14 @@ module tb_orbtrace_ddr_writer;
     .m_axi_bresp(bresp),.m_axi_bvalid(bvalid),.m_axi_bready(bready));
   reg [7:0] memory[0:8191];
   integer cycle=0,aw_count=0,beats=0,expected_beats=0,bdelay=-1,written=0;
-  integer tests=0,i,j,offset;
+  integer tests=0,i,j,offset,pattern_bias=0,previous_written;
+  reg [7:0] following_guard;
   reg outstanding=0,force_awstall=0,force_wstall=0,force_bhold=0;
   reg [31:0] transaction_address;
   reg aw_blocked=0,w_blocked=0;
   reg [39:0] held_aw;reg [72:0] held_w;
   reg [31:0] old_response;
-  reg acknowledged;
+  reg acknowledged,new_capture;
   always @(negedge clk)begin
     awready=rst_n && !force_awstall && !outstanding && (cycle%5!=1);
     wready=rst_n && !force_wstall && outstanding && (cycle%3!=1);
@@ -58,13 +59,15 @@ module tb_orbtrace_ddr_writer;
         if(wlast)bdelay=19;
       end
       acknowledged=bvalid&&bready&&bresp==0;
+      new_capture=start && !busy;
       if(bvalid&&bready)begin bvalid<=0;outstanding=0;end
       else if(bdelay==0 && !force_bhold)begin bvalid<=1;bresp<=response_code;bdelay=-1;end
       else if(bdelay>0)bdelay=bdelay-1;
       old_response=response_bytes;
       #1;
       if(busy && accepted_bytes+dut.remaining_bytes!=dut.limit)$fatal(1,"budget conservation");
-      if(response_bytes!=old_response && !acknowledged)$fatal(1,"response count advanced before OKAY B");
+      if(response_bytes>old_response && !acknowledged)$fatal(1,"response count advanced before OKAY B");
+      if(response_bytes<old_response && !new_capture)$fatal(1,"response count reset without a new capture");
       if(done && outstanding)$fatal(1,"completion with outstanding AXI write");
     end
   end
@@ -83,7 +86,7 @@ module tb_orbtrace_ddr_writer;
   task send_beat(input integer position,input integer n,input reg last);
     integer k;begin
       @(negedge clk);
-      for(k=0;k<8;k=k+1)tdata[k*8+:8]=((position+k)*13+7)&255;
+      for(k=0;k<8;k=k+1)tdata[k*8+:8]=((position+k)*13+7+pattern_bias)&255;
       tkeep=(9'b1<<n)-1;tlast=last;tvalid=1;
       @(posedge clk);while(!tready)@(posedge clk);
       @(negedge clk);tvalid=0;
@@ -98,7 +101,7 @@ module tb_orbtrace_ddr_writer;
   endtask
   task verify_bytes(input integer count);
     integer k;begin
-      for(k=0;k<count;k=k+1)if(memory[k]!==((k*13+7)&255))$fatal(1,"memory mismatch at %0d",k);
+      for(k=0;k<count;k=k+1)if(memory[k]!==((k*13+7+pattern_bias)&255))$fatal(1,"memory mismatch at %0d",k);
       if(count<8192 && memory[count]!==8'hcc)$fatal(1,"overwrote byte after payload");
     end
   endtask
@@ -151,6 +154,19 @@ module tb_orbtrace_ddr_writer;
     for(integer p=0;p<128;p=p+8)send_beat(p,8,p==120);
     wait(awvalid);launch();if(!command_rejected)$fatal(1,"busy restart accepted");
     force_awstall=0;await_terminal();verify_bytes(128);if(error || response_bytes!=128)$fatal(1,"restart corrupted capture");tests=tests+1;
+    // Reuse the complete writer/RAM repeatedly without reset, with changed
+    // byte counts and contents. Stale bank flags/counts/data must not survive.
+    for(integer round=0;round<64;round=round+1)begin
+      byte_limit=(round*37)%1024+1;pattern_bias=round+1;
+      following_guard=memory[byte_limit];previous_written=written;
+      launch();
+      for(integer p=0;p<byte_limit;p=p+8)send_beat(p,(byte_limit-p<8)?byte_limit-p:8,p+8>=byte_limit);
+      await_terminal();
+      if(error || command_rejected || accepted_bytes!=byte_limit || response_bytes!=byte_limit || written-previous_written!=byte_limit)$fatal(1,"repeat capture counts/flags");
+      for(integer k=0;k<byte_limit;k=k+1)if(memory[k]!==((k*13+7+pattern_bias)&255))$fatal(1,"stale capture data round=%0d byte=%0d",round,k);
+      if(memory[byte_limit]!==following_guard)$fatal(1,"repeated capture overwrote tail");
+      tests=tests+1;
+    end
     $display("PASS ALL DDR writer cases=%0d",tests);$finish;
   end
 endmodule
