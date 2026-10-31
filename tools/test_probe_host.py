@@ -8,7 +8,7 @@ root = Path(__file__).resolve().parents[1]
 out = root/'build/probe_host'
 out.mkdir(parents=True, exist_ok=True)
 for name in ['xusbps', 'xusbps_hw', 'xusbps_endpoint', 'xil_types', 'xstatus',
-             'xparameters', 'xil_cache', 'xil_exception', 'xil_io', 'xtime_l']:
+             'xparameters', 'xil_cache', 'xil_exception', 'xil_io', 'xtime_l', 'xil_mmu']:
     (out/f'{name}.h').write_text('#include "probe_host_platform.h"\n')
 for name in ['DAP','DAP_config']:
     (out/f'{name}.h').write_text('#include "probe_target_platform.h"\n')
@@ -21,7 +21,7 @@ if os.name=='nt' and shutil.which('clang') and shutil.which('gcc'):
               '-L'+str(mingw/'lib'),'-L'+str(libs[-1])]
 descriptor_source=(root/'firmware/xusbps_daplink_dma/xusbps_ch9_storage.c').read_text(encoding='utf-8')
 (out/'descriptor_under_test.c').write_text(descriptor_source.split('int XUsbPs_DapResetEndpoints(')[0],encoding='utf-8')
-for name in ['probe_host', 'probe_target', 'probe_descriptor', 'probe_jtag', 'etm_host']:
+for name in ['probe_host', 'probe_target', 'probe_descriptor', 'probe_jtag', 'etm_host', 'etm_ddr_usb_host']:
     exe=out/(name+'.exe')
     subprocess.run([*compiler, '-std=c11', '-O2', '-Wall', '-Wextra',
                     '-I'+str(out), '-I'+str(root/'tools/tests'), '-I'+str(root/'firmware/xusbps_daplink_dma'),

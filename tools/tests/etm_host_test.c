@@ -1,6 +1,13 @@
 // Production PS stream code with deterministic USB and trace FIFO mocks.
 #include "probe_host_platform.h"
 #include "../../firmware/xusbps_daplink_dma/etm_stream.c"
+// Optional DDR service has no mapped slave in these legacy transport cases.
+unsigned etm_ddr_available(void){return 0;}
+unsigned etm_ddr_owned(void){return 0;}
+void etm_ddr_usb_reset(void){}
+void etm_ddr_usb_configured(XUsbPs *usb){(void)usb;}
+unsigned etm_ddr_usb_event(u8 ep,u8 event,void *data){(void)ep;(void)event;(void)data;return 0;}
+unsigned etm_ddr_poll(XUsbPs *usb){(void)usb;return 0;}
 static uint16_t fifo[8192];
 static uint32_t wr,rd,control_reg,status_reg,total_records;
 static uint8_t sent[512];

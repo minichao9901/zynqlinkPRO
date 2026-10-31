@@ -628,6 +628,14 @@ static u8	Reply[XUSBPS_REQ_REPLY_LEN];
 	static u8	Reply[XUSBPS_REQ_REPLY_LEN] ALIGNMENT_CACHELINE;
 #endif
 
+    /* Read-only DDR status; changes go through DAP main, never this IRQ. */
+    if(SetupData->bmRequestType==0xc0 && SetupData->bRequest==0x63 &&
+       SetupData->wValue==0 && SetupData->wIndex==0x4554 && SetupData->wLength==176){
+        uint32_t snapshot[44];
+        extern void etm_ddr_snapshot(uint32_t reply[44]);
+        etm_ddr_snapshot(snapshot);memcpy(Reply,snapshot,sizeof(snapshot));
+        return XUsbPs_EpBufferSend(InstancePtr,0,Reply,sizeof(snapshot));
+    }
     /* ETM status/start/stop/reset. Control stays on EP0, data on EP2 IN. */
     if(SetupData->bmRequestType==0xc0 && SetupData->bRequest==0x62 &&
        SetupData->wValue==0 && SetupData->wIndex==0x4554 && SetupData->wLength==64){

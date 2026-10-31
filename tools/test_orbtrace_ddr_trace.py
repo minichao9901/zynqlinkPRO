@@ -20,7 +20,7 @@ def main():
     (out/'simulation.txt').write_text(run.stdout+run.stderr,encoding='utf8')
     if run.returncode or 'PASS DDR trace integration cases=9' not in run.stdout:raise RuntimeError(run.stdout+run.stderr)
     report=dict(passed=True,hardwareAccess=False,integratedCases=9,
-        checks=['RAW4 physical pin model and normalized formatter bytes','exact reference tick window','full frames plus partial tail',
+        checks=['DDR CSR presence advertised before PS access','RAW4 physical pin model and normalized formatter bytes','exact reference tick window','full frames plus partial tail',
                 'capture nonce frozen independently of next configuration','legacy reset cannot clear DDR source',
                 'capacity stop and FIFO EOF drain','manual stop with target clock stopped','empty source cannot reuse data',
                 'no completion before final DDR B response','FIFO overflow is counted and failed','failed B is not committed bytes',

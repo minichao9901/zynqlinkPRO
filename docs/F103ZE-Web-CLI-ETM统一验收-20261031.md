@@ -1090,3 +1090,13 @@ OpenCSD实际处理全部4,567,468字节，packetIssues=0、unsyncBytes=0、addr
 [两轮完整结果、CDC逐事务与解码统计](validation/etm-ddr-trace-board-20261101/stress/result.json)。每轮实际FRM1压缩原始数据、可导入的etmrecord、目标状态及XSCT脚本一起归档，worktree删除后仍能复现。CLI `etm.ddr-trace-stress`保留该F103专用验收入口；H743不借用F103寄存器流程，沿用独立ETMv4入口，待换板后实测。
 
 补充交付身份核对：新增目录沿用`-text`保留加载文件字节，已重新登记JSON文件的原始换行；Git对象及工作区都必须逐项与manifest SHA一致。原始Vivado/PS构建日志和频率扫描CSV也显式纳入Git，不能因全局忽略规则而漏掉证据。此版本仍accepted=false、非Golden，待PS USB/Web/校准完整验收后再决定合并与晋级。
+
+### 2026-11-01：PS采后USB下载协议源码冻结（待新配对上板）
+
+新增PS `etm_ddr_usb`服务：只有RTL ETD1 capabilities bit8明确声明DDR CSR已存在时才访问0x40040000，避免老bit未映射地址访问；启动时将明确保留的0x10000000～0x30000000设置为CPU非缓存区，再允许PL DMA。USB配置/重连仅取消下载状态，不停止自治采集、不擦除DDR记录身份。此为代码设计与主机测试结论，物理AP0与USB逐字节一致性仍须新ELF实测。
+
+控制通过主循环CMSIS-DAP vendor0x8c：固定28字节（command/op/u16 magic0x4445/6个u32），op0状态、op1窗口/容量/nonce启动、op2按ID+nonce停止、op3按ID+nonce下载指定范围、op4采集结束后释放/取消下载。独立EP0 IN 0x63、index0x4554可只读176字节状态。完整支持后在0x61 reference flags bit9发布USB DDR能力；旧bit/ELF仍走原入口，不靠试读超时猜支持。
+
+下载先发512字节ZDD1身份头，再从非缓存DDR直接按最大16KiB USB描述符发送原始FRM1，不产生每字节或每指令JSON。固件验证done、写入/响应字节数、记录格式、ID/nonce及范围后才占有EP2；最后描述符TX完成前不推进已完成字节计数。新START不能覆盖正在下载的记录，USB旧发送回调通过指针/epoch识别。DDR源与USB传输阶段分开，Web无需改目标PLL/AHB/APB。
+
+主机C验证覆盖旧bit能力保护、512个1MiB非缓存映射、采集中下载拒绝、身份/范围/加法溢出保护、完整头与尾部3字节、descriptor持有、失败提交不推进计数、USB复位保留源和记录；旧ETM/探针服务5组检查通过。RTL 9项集成及旧11项回归通过，包括新增的CSR存在声明核对。[源码冻结主机证据](validation/etm-ddr-usb-host-20261101/production-c-tests.txt)。此阶段不声称USB吞吐、Web默认DDR或新PS已上板完成。

@@ -165,7 +165,8 @@ module orbtrace_controller #(
           15:s_axi_rdata<=record_stall_cycles;
           16:s_axi_rdata<=sync_acquisitions;
           17:s_axi_rdata<=RAW_DIAGNOSTIC;
-          18:s_axi_rdata<=32'hb | ((RAW_DIAGNOSTIC==2 || RAW_DIAGNOSTIC==4) ? 32'h4 : 0);
+          // Bit8 proves the optional DDR CSR slave is present before PS probes it.
+          18:s_axi_rdata<=32'hb | ((RAW_DIAGNOSTIC==2 || RAW_DIAGNOSTIC==4) ? 32'h4 : 0) | (ENABLE_DDR ? 32'h100 : 0);
           default:s_axi_rdata<=0;
         endcase
       end

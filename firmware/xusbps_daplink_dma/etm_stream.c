@@ -1,6 +1,7 @@
 // The only trace data endpoint is EP2 IN. EP2 OUT remains CMSIS-DAP.
 // EP0 requests only enqueue state changes; MMIO draining runs in main.
 #include "etm_stream.h"
+#include "etm_ddr_usb.h"
 #include "probe_stream.h"
 #include "xil_io.h"
 #include "xil_exception.h"
@@ -43,7 +44,7 @@ uint32_t etm_reference_init(void){
 }
 void etm_reference_snapshot(uint32_t reply[4]){
   reply[0]=reference_hz;reply[1]=Xil_In32(0xf8000180U);
-  reply[2]=Xil_In32(0xf8000108U);reply[3]=((ER(2)>>3)&1U)|(ER(8)==0x45544431U ? 0x100U : 0U);
+  reply[2]=Xil_In32(0xf8000108U);reply[3]=((ER(2)>>3)&1U)|(ER(8)==0x45544431U ? 0x100U : 0U)|(etm_ddr_available() ? 0x200U : 0U);
 }
 void etm_diagnostics_snapshot(uint32_t reply[16]){
   unsigned i;
@@ -87,10 +88,16 @@ static void reset_endpoint(XUsbPs *usb,unsigned reset_toggle){
                 (reset_toggle ? XUSBPS_EPCR_TXR_MASK : 0U));
   head=tail=busy=busy_zlp=flush_remaining=fill_count=0;
 }
-void etm_usb_reset(void){configured=0;epoch++;pending=0;running=ending=0;fill_count=flush_remaining=0;EW(1,12);}
-void etm_usb_configured(XUsbPs *usb){etm_usb_reset();reset_endpoint(usb,1);configured=1;}
+unsigned etm_stream_claim_ddr(XUsbPs *usb){
+  uint32_t f=irq_save();
+  if(!configured || running || ending){irq_restore(f);return 0;}
+  pending=0;reset_endpoint(usb,0);EW(1,12);irq_restore(f);return 1;
+}
+void etm_usb_reset(void){configured=0;epoch++;pending=0;running=ending=0;fill_count=flush_remaining=0;etm_ddr_usb_reset();EW(1,12);}
+void etm_usb_configured(XUsbPs *usb){etm_usb_reset();reset_endpoint(usb,1);configured=1;etm_ddr_usb_configured(usb);}
 void etm_usb_event(void *ref,u8 ep,u8 event,void *data){
   (void)ref;
+  if(etm_ddr_usb_event(ep,event,data))return;
   if(ep==ETM_BULKIN_EP && event==XUSBPS_EP_EVENT_DATA_TX && configured && busy && (uintptr_t)data==active_buffer){
     if(busy_zlp){if(flush_remaining)flush_remaining--;busy_zlp=0;}
     else tail++;
@@ -99,8 +106,10 @@ void etm_usb_event(void *ref,u8 ep,u8 event,void *data){
 }
 void etm_control(uint16_t action,uint32_t reply[8]){
   uint16_t op=action&255U,width=action>>8;
-  if(op==1 && width>=1 && width<=3)pending=action;
-  else if(op==2 || op==3)pending=action;
+  if(!etm_ddr_owned()){
+    if(op==1 && width>=1 && width<=3)pending=action;
+    else if(op==2 || op==3)pending=action;
+  }
   reply[0]=ER(0);reply[1]=trace_status();reply[2]=ER(3);reply[3]=ER(5);
   reply[4]=sequence;reply[5]=capture_id;reply[6]=probe_target_fclk();
   reply[7]=pending;
@@ -124,6 +133,7 @@ void etm_poll(XUsbPs *usb){
   uint16_t command;
   uint8_t *p;
   if(!configured)return;
+  if(etm_ddr_poll(usb))return;
   f=irq_save();command=pending;pending=0;irq_restore(f);
   if(command){
     unsigned op=command&255U;

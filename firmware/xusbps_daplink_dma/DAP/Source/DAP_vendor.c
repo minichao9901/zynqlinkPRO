@@ -29,6 +29,7 @@
 #include "DAP.h"
 #include "swd_dma.h"
 #include "dap_metrics.h"
+#include "etm_ddr_usb.h"
 #include "xtime_l.h"
 #include <string.h>
 
@@ -242,7 +243,19 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
         num = (2U << 16) | 3U;
       }
       break;
-    case ID_DAP_Vendor12: break;
+    case ID_DAP_Vendor12:
+      { // Fixed 28-byte request: command, op, magic 0x4445, six LE u32 args.
+        uint32_t args[6],reply[ETM_DDR_REPLY_WORDS];
+        unsigned failed;
+        if(request[1]!=0x45 || request[2]!=0x44){
+          *response++=DAP_ERROR;num=(4U<<16)|2U;break;
+        }
+        memcpy(args,request+3,sizeof args);
+        failed=etm_ddr_command(request[0],args,reply);
+        *response++=failed ? DAP_ERROR : DAP_OK;
+        memcpy(response,reply,sizeof reply);num=(28U<<16)|(2U+sizeof reply);
+      }
+      break;
     case ID_DAP_Vendor13: break;
     case ID_DAP_Vendor14: break;
     case ID_DAP_Vendor15: break;

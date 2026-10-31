@@ -17,6 +17,7 @@ module tb_orbtrace_ddr_trace;
   wire source_frame_event,source_error,source_sync,source_ambiguous;
   reg [7:0] l_awaddr=0;reg [31:0] l_wdata=0;reg l_awvalid=0,l_wvalid=0,l_bready=1;
   wire l_awready,l_wready,l_bvalid;wire [1:0] l_bresp;
+  reg l_arvalid=0;wire l_arready,l_rvalid;wire [31:0] l_rdata;
   orbtrace_controller #(.RAW_DIAGNOSTIC(4),.ENABLE_DDR(1)) receiver(
     .clk(clk),.rst_n(rst_n),.ref_clk(ref_input),.trace_clk(trace_clk),.trace_data(trace_data),
     .ddr_hold(trace_hold),.ddr_prepare(trace_prepare),.ddr_sampler_gate(sampler_gate),.ddr_parser_enable(parser_enable),.ddr_parser_clear(parser_clear),
@@ -26,7 +27,8 @@ module tb_orbtrace_ddr_trace;
     .s_axi_awaddr(l_awaddr),.s_axi_awprot(3'd0),.s_axi_awvalid(l_awvalid),.s_axi_awready(l_awready),
     .s_axi_wdata(l_wdata),.s_axi_wstrb(4'hf),.s_axi_wvalid(l_wvalid),.s_axi_wready(l_wready),
     .s_axi_bresp(l_bresp),.s_axi_bvalid(l_bvalid),.s_axi_bready(l_bready),
-    .s_axi_araddr(8'd0),.s_axi_arprot(3'd0),.s_axi_arvalid(1'b0),.s_axi_rready(1'b1));
+    .s_axi_araddr(8'd72),.s_axi_arprot(3'd0),.s_axi_arvalid(l_arvalid),.s_axi_arready(l_arready),
+    .s_axi_rdata(l_rdata),.s_axi_rvalid(l_rvalid),.s_axi_rready(1'b1));
   orbtrace_ddr_controller #(.ENABLE_TRACE_SOURCE(1),.PREPARE_TIMEOUT(1000)) dut(.clk(clk),.rst_n(rst_n),
     .ref_clk(ref_clock),.trace_ready(trace_ready && allow_ready),.trace_idle(trace_idle),.trace_receiver_ready_ref(receiver_ready),
     .trace_frame(source_frame),.trace_tail(source_tail),.trace_tail_bytes(source_tail_bytes),.trace_frame_event(source_frame_event),
@@ -115,6 +117,10 @@ module tb_orbtrace_ddr_trace;
   endtask
   initial begin
     repeat(4)@(negedge clk);rst_n=1;
+    @(negedge clk);l_arvalid=1;
+    do @(posedge clk);while(!l_arready);
+    @(negedge clk);l_arvalid=0;wait(l_rvalid);
+    if(l_rdata!==32'h10f)$fatal(1,"DDR CSR presence was not advertised safely: %h",l_rdata);
     read_reg(44,value);if(value!=7)$fatal(1,"trace capability");
     write_reg(12,32'h10000000,0,0);write_reg(16,4096,1,0);write_reg(60,2,0,0);write_reg(64,8000,1,0);
     write_reg(124,32'habcd1234,0,0);write_reg(128,32'hdead5678,1,0);

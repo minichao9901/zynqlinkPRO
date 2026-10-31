@@ -200,7 +200,7 @@ void chry_dap_init(void)
 
 void chry_dap_handle(void)
 {
-    uint32_t req_slot,rsp_slot,epoch,flags,metric_id;
+    uint32_t req_slot,rsp_slot,epoch,flags,metric_id,request_length;
     XTime t;
     dap_service_tx();
     if(dap_rx_deferred && chry_dap_rx_ready()){
@@ -224,7 +224,8 @@ void chry_dap_handle(void)
             while(q!=request_in && USB_Request[q%DAP_PACKET_COUNT][0]==0x7eU)q++;
             if(q==request_in){irq_restore(flags);break;}
         }
-        memcpy(execute_request,USB_Request[req_slot],request_size[req_slot]);
+        request_length=request_size[req_slot];
+        memcpy(execute_request,USB_Request[req_slot],request_length);
         if(execute_request[0]==0x7eU)execute_request[0]=0x7fU;
         rsp_slot=response_in%DAP_PACKET_COUNT;
         irq_restore(flags);
@@ -234,7 +235,9 @@ void chry_dap_handle(void)
         dap_metric_end(MET_QUEUE_WAIT,request_time[req_slot],0);
         dap_trace_add(2U,execute_request[0]);
         probe_before_dap();
-        USB_RespSize[rsp_slot]=(uint16_t)DAP_ExecuteCommand(execute_request,USB_Response[rsp_slot]);
+        if(execute_request[0]==0x8cU && request_length!=28U){
+            USB_Response[rsp_slot][0]=0x8cU;USB_Response[rsp_slot][1]=0xffU;USB_RespSize[rsp_slot]=2;
+        }else USB_RespSize[rsp_slot]=(uint16_t)DAP_ExecuteCommand(execute_request,USB_Response[rsp_slot]);
         probe_after_dap();
         dap_metric_end(metric_id,t,USB_RespSize[rsp_slot]);
         dap_trace_bytes(32U,USB_Response[rsp_slot],USB_RespSize[rsp_slot]);

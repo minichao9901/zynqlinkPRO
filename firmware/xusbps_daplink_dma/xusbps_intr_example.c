@@ -141,6 +141,8 @@ int main(void)
 	int Status;
 	printf("hello cdc acm test!\n");
     xil_printf("[ETM] independent FCLK1 reference=%u Hz\r\n",etm_reference_init());
+    extern uint32_t etm_ddr_init(void);
+    xil_printf("[ETM] bounded DDR USB=%u\r\n",etm_ddr_init());
 	extern int swd_dma_selftest(void);
 	Status = swd_dma_selftest();
 	xil_printf("[DMA] BRAM/CDMA/CACHE selftest=%d\r\n", Status);
