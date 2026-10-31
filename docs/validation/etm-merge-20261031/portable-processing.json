@@ -1,0 +1,187 @@
+{
+  "offline": true,
+  "sourceRecord": "E:\\zynqlinkPRO_etm_export_audit_20261031\\build\\fixture",
+  "inputSha256": {
+    "capture.bin": "2cb5838887188cbdebf554967281ad44f03eca9aab2867cde82e548ca9873199",
+    "firmware.elf": "e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f",
+    "sources.json": "6533c1d4df3832ae8b9ad1013e6bb3c2fc5c8660e26531e2068d8891328bec44"
+  },
+  "engineProfile": {
+    "name": "native",
+    "settings": {
+      "ETM_STORE_WRITE": "1",
+      "ETM_STORE_ENGINE": "native",
+      "ETM_DECODE_ENGINE": "fast",
+      "ETM_NATIVE_FORMAT": "binary",
+      "ETM_STORE_ENGINE_FALLBACK": "0",
+      "ETM_EXPORT_ENGINE": "native",
+      "ETM_QUERY_ENGINE": "native",
+      "ETM_PREPARE_CACHE": "1"
+    },
+    "pipeline": "OpenCSD binary -> C++ storebuild -> numeric query index",
+    "perInstructionJsonl": false
+  },
+  "rows": [
+    {
+      "trial": 1,
+      "record": "record-native-1s-r1-01fcfe2c",
+      "completeProcessingWallSeconds": 8.878284699996584,
+      "state": "done",
+      "summaryMatchesLegacy": true,
+      "sharedQualityMatchesLegacy": true,
+      "summary": {
+        "packets": 1170388,
+        "ranges": 5467740,
+        "instructions": 5467740,
+        "executed": 5019787,
+        "sourceMapped": 5467740,
+        "exceptions": 250,
+        "gaps": 2,
+        "packetIssues": 0,
+        "unknownExecution": 89591,
+        "functions": {
+          "cdc_poll": 2508740,
+          "cdc_tx_poll": 1075086,
+          "main": 806324,
+          "usb_device_is_configured": 627137,
+          "HAL_IncTick": 1750,
+          "SysTick_Handler": 750
+        }
+      },
+      "quality": {
+        "inputBytes": 1363722,
+        "unprocessedBytes": 0,
+        "processedBytes": 1363722,
+        "accountedBytes": 1363722,
+        "overlapBytes": 0,
+        "unaccountedBytes": 0,
+        "unsynchronizedBytes": 0,
+        "unsynchronizedRecords": 0,
+        "validPackets": 1170388,
+        "packetIssues": 0,
+        "overflowPackets": 0,
+        "decoderLastError": 0,
+        "unknownExecution": 89591,
+        "initialPhysicalBytes": null,
+        "unknownSourceBytes": null,
+        "trailingFrameBytes": null,
+        "trailingSyncBytes": 0,
+        "firstPathOffset": 12,
+        "boundaryPresent": false,
+        "timing": {
+          "cycleElements": 0,
+          "timeFlameAvailable": false
+        },
+        "basis": "字节核算不等于采集无损证明；源码映射率不等于程序覆盖率"
+      },
+      "performance": {
+        "storePhasesSeconds": {
+          "decodeAndInputs": 0.770564,
+          "prescanAndStatic": 0.428311,
+          "nativeBuild": 1.930337,
+          "queryIndex": 1.723716,
+          "assemble": 0.687298,
+          "inputBindings": 0.440671,
+          "publish": 0.018908,
+          "cleanup": 0.062837
+        },
+        "storeDetails": {
+          "phases": {
+            "decodeAndInputs": 0.770564,
+            "prescanAndStatic": 0.428311,
+            "nativeBuild": 1.930337,
+            "queryIndex": 1.723716,
+            "assemble": 0.687298,
+            "inputBindings": 0.440671,
+            "publish": 0.018908,
+            "cleanup": 0.062837
+          },
+          "index": {
+            "staticMaps": 0.0003,
+            "counts": 0.0004,
+            "cycles": 0.0,
+            "firstSeq": 0.0004,
+            "hotspotFinalize": 0.0,
+            "v2Tables": 0.0791,
+            "remainingSeconds": 0.1555,
+            "tablesSeconds": 0.2904,
+            "defaultViewsSeconds": 1.0561,
+            "encodeSeconds": 0.3139,
+            "totalSeconds": 1.6606
+          },
+          "static": {
+            "uniquePCs": 64,
+            "predicateFallback": 0,
+            "sourceMapped": 64,
+            "functions": 221,
+            "functionBytes": 18472,
+            "predicateCount": 73,
+            "knownCount": 7061,
+            "timings": {
+              "loadImageSeconds": 0.0,
+              "addressPreparationCacheHit": false,
+              "addressCacheSeconds": 0.11055329999362584,
+              "predicateAddressesSeconds": 0.07681729999603704,
+              "knownAddressesSeconds": 0.03272519999882206,
+              "instructionTableSeconds": 0.0005,
+              "disasmUniqueRangesSeconds": 0.0028,
+              "staticInfoSeconds": 0.0088
+            },
+            "buildSeconds": 0.123
+          },
+          "image": {
+            "cacheHit": false,
+            "sha256": "e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f",
+            "readAndHashSeconds": 0.015816900006029755,
+            "parseSeconds": 0.19792019999295007,
+            "waitSeconds": 5.89998671784997e-06,
+            "totalSeconds": 0.2151025000057416
+          }
+        },
+        "version": 1,
+        "generation": "g-20261031T134840-22f73381",
+        "scope": "offline-decode; excludes acquisition, upload and browser rendering",
+        "decodeSeconds": 7.856180299990228,
+        "decodePhasesSeconds": {
+          "imagePreparation": 0.2151123999938136,
+          "nativeInputPreparation": 0.003445599999395199,
+          "openCsd": 1.0238438999949722,
+          "storeBuildAndIndex": 6.61278830000083
+        },
+        "image": {
+          "cacheHit": false,
+          "sha256": "e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f",
+          "readAndHashSeconds": 0.015816900006029755,
+          "parseSeconds": 0.19792019999295007,
+          "waitSeconds": 5.89998671784997e-06,
+          "totalSeconds": 0.2151025000057416
+        },
+        "jobSeconds": 8.664328099999693,
+        "jobPhasesSeconds": {
+          "metadataPreparation": 0.0161894999910146,
+          "decode": 7.869693200002075,
+          "captureStartAndMetadata": 0.28130240000609774,
+          "browsePreparation": 0.4971435999905225
+        }
+      },
+      "files": {
+        "capture.bin": 1363722,
+        "decode-performance.json": 2308,
+        "decoded.json": 13280,
+        "etm.bin": 1363722,
+        "firmware.elf": 1216624,
+        "image-0.bin": 20040,
+        "image-1.bin": 128,
+        "native-config.txt": 287,
+        "native.bin": 360776440,
+        "native.log": 0,
+        "session.json": 3444,
+        "sources.json": 167754,
+        "store\\manifest.json": 6072,
+        "store\\generations\\g-20261031T134840-22f73381\\store.bin": 20351858
+      },
+      "largeJsonIntermediates": []
+    }
+  ],
+  "inputUnchanged": true
+}

@@ -15,3 +15,13 @@ docs/validation/f103ze-web-flow-20261031/source-snapshot/** -text
 docs/validation/f103ze-web-flow-20261031/*.svg -text
 docs/validation/f103ze-web-flow-20261031/final-flow/*.svg -text
 docs/validation/f103ze-web-flow-20261031/streams/**/*.csv -text
+
+# Keep imported target and hashed offline fixture bytes portable across checkouts.
+firmware/target/stm32f103_cdc_trace/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+docs/validation/native-engine-offline-20261031/fixture/** -text whitespace=cr-at-eol
+
+# Exact native-engine source snapshot and OpenCSD upstream bytes.
+etm-service/native/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+etm-service/vendor/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+etm-service/CMakeLists.txt -text whitespace=cr-at-eol
+etm-service/build-decoder.ps1 -text whitespace=cr-at-eol

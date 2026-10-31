@@ -1,0 +1,219 @@
+[1/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/ocsd_code_follower.cpp.obj
+[2/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/cs_frame_mux_data.cpp.obj
+[3/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/ocsd_error.cpp.obj
+[4/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/ocsd_error_logger.cpp.obj
+[5/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/ocsd_dcd_tree.cpp.obj
+[6/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/ocsd_gen_elem_list.cpp.obj
+[7/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/ocsd_gen_elem_stack.cpp.obj
+[8/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/ocsd_msg_logger.cpp.obj
+[9/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/ocsd_version.cpp.obj
+[10/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/trc_component.cpp.obj
+[11/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/trc_core_arch_map.cpp.obj
+[12/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/ocsd_lib_dcd_register.cpp.obj
+[13/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/trc_gen_elem.cpp.obj
+[14/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/trc_frame_deformatter.cpp.obj
+[15/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/trc_printable_elem.cpp.obj
+[16/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/trc_ret_stack.cpp.obj
+[17/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/ete/trc_cmp_cfg_ete.cpp.obj
+[18/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/etmv3/trc_cmp_cfg_etmv3.cpp.obj
+[19/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/etmv3/trc_pkt_decode_etmv3.cpp.obj
+[20/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/etmv3/trc_pkt_elem_etmv3.cpp.obj
+[21/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/etmv3/trc_pkt_proc_etmv3.cpp.obj
+[22/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/etmv4/trc_cmp_cfg_etmv4.cpp.obj
+[23/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/etmv3/trc_pkt_proc_etmv3_impl.cpp.obj
+[24/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/etmv4/trc_etmv4_stack_elem.cpp.obj
+[25/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/etmv4/trc_pkt_elem_etmv4i.cpp.obj
+[26/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/etmv4/trc_pkt_decode_etmv4i.cpp.obj
+[27/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/i_dec/trc_i_decode.cpp.obj
+[28/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/i_dec/trc_idec_arminst.cpp.obj
+[29/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/etmv4/trc_pkt_proc_etmv4i.cpp.obj
+In file included from E:/zynqlinkPRO/etm-service/vendor/OpenCSD-1.8.3/decoder/include/opencsd/etmv4/trc_pkt_proc_etmv4i.h:41,
+                 from E:/zynqlinkPRO/etm-service/vendor/OpenCSD-1.8.3/decoder/include/opencsd/etmv4/trc_pkt_proc_etmv4.h:42,
+                 from E:/zynqlinkPRO/etm-service/vendor/OpenCSD-1.8.3/decoder/source/etmv4/trc_pkt_proc_etmv4i.cpp:35:
+In member function 'void EtmV4ITrcPacket::setCondRF1(const uint32_t*, const uint8_t*, const uint8_t*, bool)',
+    inlined from 'void TrcPktProcEtmV4I::iPktCondResult(uint8_t)' at E:/zynqlinkPRO/etm-service/vendor/OpenCSD-1.8.3/decoder/source/etmv4/trc_pkt_proc_etmv4i.cpp:846:37:
+E:/zynqlinkPRO/etm-service/vendor/OpenCSD-1.8.3/decoder/include/opencsd/etmv4/trc_pkt_elem_etmv4i.h:390:23: warning: 'result[0]' may be used uninitialized [-Wmaybe-uninitialized]
+  390 |     cond_result.res_0 = res[0];
+      |     ~~~~~~~~~~~~~~~~~~^~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/OpenCSD-1.8.3/decoder/source/etmv4/trc_pkt_proc_etmv4i.cpp: In member function 'void TrcPktProcEtmV4I::iPktCondResult(uint8_t)':
+E:/zynqlinkPRO/etm-service/vendor/OpenCSD-1.8.3/decoder/source/etmv4/trc_pkt_proc_etmv4i.cpp:836:21: note: 'result[0]' was declared here
+  836 |             uint8_t result[2];
+      |                     ^~~~~~
+At global scope:
+cc1plus.exe: note: unrecognized command-line option '-Wno-invalid-token-paste' may have been intended to silence earlier diagnostics
+[30/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/itm/trc_pkt_decode_itm.cpp.obj
+[31/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/itm/trc_pkt_elem_itm.cpp.obj
+[32/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/mem_acc/trc_mem_acc_base.cpp.obj
+[33/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/itm/trc_pkt_proc_itm.cpp.obj
+[34/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/mem_acc/trc_mem_acc_bufptr.cpp.obj
+[35/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/mem_acc/trc_mem_acc_cache.cpp.obj
+[36/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/mem_acc/trc_mem_acc_cb.cpp.obj
+[37/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/mem_acc/trc_mem_acc_mapper.cpp.obj
+[38/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/mem_acc/trc_mem_acc_file.cpp.obj
+[39/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/pkt_printers/gen_elem_printer.cpp.obj
+[40/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/pkt_printers/raw_frame_printer.cpp.obj
+[41/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/ptm/trc_cmp_cfg_ptm.cpp.obj
+[42/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/ptm/trc_pkt_decode_ptm.cpp.obj
+[43/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/pkt_printers/trc_print_fact.cpp.obj
+[44/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/ptm/trc_pkt_elem_ptm.cpp.obj
+[45/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/ptm/trc_pkt_proc_ptm.cpp.obj
+[46/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/stm/trc_pkt_decode_stm.cpp.obj
+[47/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/stm/trc_pkt_elem_stm.cpp.obj
+[48/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd_c_api.dir/decoder/source/c_api/ocsd_c_api.cpp.obj
+[49/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/stm/trc_pkt_proc_stm.cpp.obj
+[50/62] Linking CXX static library vendor\OpenCSD-1.8.3\libopencsd.a
+[51/62] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd_c_api.dir/decoder/source/c_api/ocsd_c_api_custom_obj.cpp.obj
+[52/62] Building CXX object CMakeFiles/etm_decode.dir/native/decoder.cpp.obj
+[53/62] Building CXX object CMakeFiles/etm_index.dir/native/indexer.cpp.obj
+[54/62] Building CXX object CMakeFiles/etm_frontend.dir/native/frontend.cpp.obj
+E:/zynqlinkPRO/etm-service/native/frontend.cpp: In constructor 'Sha256::Sha256()':
+E:/zynqlinkPRO/etm-service/native/frontend.cpp:154:27: warning: 'int SHA256_Init(SHA256_CTX*)' is deprecated: Since OpenSSL 3.0 [-Wdeprecated-declarations]
+  154 |     Sha256() { SHA256_Init(&context_); }
+      |                ~~~~~~~~~~~^~~~~~~~~~~
+In file included from E:/zynqlinkPRO/etm-service/native/frontend.cpp:28:
+C:/msys64/mingw64/include/openssl/sha.h:73:27: note: declared here
+   73 | OSSL_DEPRECATEDIN_3_0 int SHA256_Init(SHA256_CTX *c);
+      |                           ^~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/native/frontend.cpp: In member function 'void Sha256::update(const unsigned char*, size_t)':
+E:/zynqlinkPRO/etm-service/native/frontend.cpp:155:72: warning: 'int SHA256_Update(SHA256_CTX*, const void*, size_t)' is deprecated: Since OpenSSL 3.0 [-Wdeprecated-declarations]
+  155 |     void update(const unsigned char* data, size_t size) { SHA256_Update(&context_, data, size); }
+      |                                                           ~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~
+C:/msys64/mingw64/include/openssl/sha.h:74:27: note: declared here
+   74 | OSSL_DEPRECATEDIN_3_0 int SHA256_Update(SHA256_CTX *c,
+      |                           ^~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/native/frontend.cpp: In member function 'std::string Sha256::hexDigest() const':
+E:/zynqlinkPRO/etm-service/native/frontend.cpp:159:21: warning: 'int SHA256_Final(unsigned char*, SHA256_CTX*)' is deprecated: Since OpenSSL 3.0 [-Wdeprecated-declarations]
+  159 |         SHA256_Final(digest, &copy);
+      |         ~~~~~~~~~~~~^~~~~~~~~~~~~~~
+C:/msys64/mingw64/include/openssl/sha.h:76:27: note: declared here
+   76 | OSSL_DEPRECATEDIN_3_0 int SHA256_Final(unsigned char *md, SHA256_CTX *c);
+      |                           ^~~~~~~~~~~~
+[55/62] Building CXX object CMakeFiles/etm_export.dir/native/export.cpp.obj
+E:/zynqlinkPRO/etm-service/native/export.cpp: In function 'std::string hashFile(const std::filesystem::__cxx11::path&)':
+E:/zynqlinkPRO/etm-service/native/export.cpp:54:16: warning: 'int SHA256_Init(SHA256_CTX*)' is deprecated: Since OpenSSL 3.0 [-Wdeprecated-declarations]
+   54 |     SHA256_Init(&hash);
+      |     ~~~~~~~~~~~^~~~~~~
+In file included from E:/zynqlinkPRO/etm-service/native/export.cpp:13:
+C:/msys64/mingw64/include/openssl/sha.h:73:27: note: declared here
+   73 | OSSL_DEPRECATEDIN_3_0 int SHA256_Init(SHA256_CTX *c);
+      |                           ^~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/native/export.cpp:58:26: warning: 'int SHA256_Update(SHA256_CTX*, const void*, size_t)' is deprecated: Since OpenSSL 3.0 [-Wdeprecated-declarations]
+   58 |             SHA256_Update(&hash, buffer.data(), size_t(in.gcount()));
+      |             ~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:/msys64/mingw64/include/openssl/sha.h:74:27: note: declared here
+   74 | OSSL_DEPRECATEDIN_3_0 int SHA256_Update(SHA256_CTX *c,
+      |                           ^~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/native/export.cpp:62:17: warning: 'int SHA256_Final(unsigned char*, SHA256_CTX*)' is deprecated: Since OpenSSL 3.0 [-Wdeprecated-declarations]
+   62 |     SHA256_Final(result, &hash);
+      |     ~~~~~~~~~~~~^~~~~~~~~~~~~~~
+C:/msys64/mingw64/include/openssl/sha.h:76:27: note: declared here
+   76 | OSSL_DEPRECATEDIN_3_0 int SHA256_Final(unsigned char *md, SHA256_CTX *c);
+      |                           ^~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/native/export.cpp: In constructor 'Plan::Plan(const std::filesystem::__cxx11::path&)':
+E:/zynqlinkPRO/etm-service/native/export.cpp:137:20: warning: 'int SHA256_Init(SHA256_CTX*)' is deprecated: Since OpenSSL 3.0 [-Wdeprecated-declarations]
+  137 |         SHA256_Init(&hash);
+      |         ~~~~~~~~~~~^~~~~~~
+C:/msys64/mingw64/include/openssl/sha.h:73:27: note: declared here
+   73 | OSSL_DEPRECATEDIN_3_0 int SHA256_Init(SHA256_CTX *c);
+      |                           ^~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/native/export.cpp:138:22: warning: 'int SHA256_Update(SHA256_CTX*, const void*, size_t)' is deprecated: Since OpenSSL 3.0 [-Wdeprecated-declarations]
+  138 |         SHA256_Update(&hash, bytes.data(), bytes.size() - 32);
+      |         ~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:/msys64/mingw64/include/openssl/sha.h:74:27: note: declared here
+   74 | OSSL_DEPRECATEDIN_3_0 int SHA256_Update(SHA256_CTX *c,
+      |                           ^~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/native/export.cpp:139:21: warning: 'int SHA256_Final(unsigned char*, SHA256_CTX*)' is deprecated: Since OpenSSL 3.0 [-Wdeprecated-declarations]
+  139 |         SHA256_Final(digest, &hash);
+      |         ~~~~~~~~~~~~^~~~~~~~~~~~~~~
+C:/msys64/mingw64/include/openssl/sha.h:76:27: note: declared here
+   76 | OSSL_DEPRECATEDIN_3_0 int SHA256_Final(unsigned char *md, SHA256_CTX *c);
+      |                           ^~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/native/export.cpp: In constructor 'Output::Output(const std::filesystem::__cxx11::path&)':
+E:/zynqlinkPRO/etm-service/native/export.cpp:207:20: warning: 'int SHA256_Init(SHA256_CTX*)' is deprecated: Since OpenSSL 3.0 [-Wdeprecated-declarations]
+  207 |         SHA256_Init(&hash);
+      |         ~~~~~~~~~~~^~~~~~~
+C:/msys64/mingw64/include/openssl/sha.h:73:27: note: declared here
+   73 | OSSL_DEPRECATEDIN_3_0 int SHA256_Init(SHA256_CTX *c);
+      |                           ^~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/native/export.cpp: In member function 'void Output::flush()':
+E:/zynqlinkPRO/etm-service/native/export.cpp:214:22: warning: 'int SHA256_Update(SHA256_CTX*, const void*, size_t)' is deprecated: Since OpenSSL 3.0 [-Wdeprecated-declarations]
+  214 |         SHA256_Update(&hash, buffer.data(), buffer.size());
+      |         ~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:/msys64/mingw64/include/openssl/sha.h:74:27: note: declared here
+   74 | OSSL_DEPRECATEDIN_3_0 int SHA256_Update(SHA256_CTX *c,
+      |                           ^~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/native/export.cpp: In member function 'std::string Output::finish()':
+E:/zynqlinkPRO/etm-service/native/export.cpp:233:21: warning: 'int SHA256_Final(unsigned char*, SHA256_CTX*)' is deprecated: Since OpenSSL 3.0 [-Wdeprecated-declarations]
+  233 |         SHA256_Final(digest, &hash);
+      |         ~~~~~~~~~~~~^~~~~~~~~~~~~~~
+C:/msys64/mingw64/include/openssl/sha.h:76:27: note: declared here
+   76 | OSSL_DEPRECATEDIN_3_0 int SHA256_Final(unsigned char *md, SHA256_CTX *c);
+      |                           ^~~~~~~~~~~~
+In file included from E:/zynqlinkPRO/etm-service/native/export.cpp:512:
+E:/zynqlinkPRO/etm-service/native/reading_projection.hpp: In constructor 'ReadingPlan::ReadingPlan(const std::filesystem::__cxx11::path&)':
+E:/zynqlinkPRO/etm-service/native/reading_projection.hpp:12:61: warning: 'int SHA256_Init(SHA256_CTX*)' is deprecated: Since OpenSSL 3.0 [-Wdeprecated-declarations]
+   12 |         unsigned char digest[32];SHA256_CTX hash;SHA256_Init(&hash);SHA256_Update(&hash,data.data(),data.size()-32);SHA256_Final(digest,&hash);
+      |                                                  ~~~~~~~~~~~^~~~~~~
+C:/msys64/mingw64/include/openssl/sha.h:73:27: note: declared here
+   73 | OSSL_DEPRECATEDIN_3_0 int SHA256_Init(SHA256_CTX *c);
+      |                           ^~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/native/reading_projection.hpp:12:82: warning: 'int SHA256_Update(SHA256_CTX*, const void*, size_t)' is deprecated: Since OpenSSL 3.0 [-Wdeprecated-declarations]
+   12 |         unsigned char digest[32];SHA256_CTX hash;SHA256_Init(&hash);SHA256_Update(&hash,data.data(),data.size()-32);SHA256_Final(digest,&hash);
+      |                                                                     ~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:/msys64/mingw64/include/openssl/sha.h:74:27: note: declared here
+   74 | OSSL_DEPRECATEDIN_3_0 int SHA256_Update(SHA256_CTX *c,
+      |                           ^~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/native/reading_projection.hpp:12:129: warning: 'int SHA256_Final(unsigned char*, SHA256_CTX*)' is deprecated: Since OpenSSL 3.0 [-Wdeprecated-declarations]
+   12 |         unsigned char digest[32];SHA256_CTX hash;SHA256_Init(&hash);SHA256_Update(&hash,data.data(),data.size()-32);SHA256_Final(digest,&hash);
+      |                                                                                                                     ~~~~~~~~~~~~^~~~~~~~~~~~~~
+C:/msys64/mingw64/include/openssl/sha.h:76:27: note: declared here
+   76 | OSSL_DEPRECATEDIN_3_0 int SHA256_Final(unsigned char *md, SHA256_CTX *c);
+      |                           ^~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/native/export.cpp: In constructor 'SelectionPlan::SelectionPlan(const std::filesystem::__cxx11::path&)':
+E:/zynqlinkPRO/etm-service/native/export.cpp:533:20: warning: 'int SHA256_Init(SHA256_CTX*)' is deprecated: Since OpenSSL 3.0 [-Wdeprecated-declarations]
+  533 |         SHA256_Init(&hash);
+      |         ~~~~~~~~~~~^~~~~~~
+C:/msys64/mingw64/include/openssl/sha.h:73:27: note: declared here
+   73 | OSSL_DEPRECATEDIN_3_0 int SHA256_Init(SHA256_CTX *c);
+      |                           ^~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/native/export.cpp:534:22: warning: 'int SHA256_Update(SHA256_CTX*, const void*, size_t)' is deprecated: Since OpenSSL 3.0 [-Wdeprecated-declarations]
+  534 |         SHA256_Update(&hash, bytes.data(), bytes.size() - 32);
+      |         ~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:/msys64/mingw64/include/openssl/sha.h:74:27: note: declared here
+   74 | OSSL_DEPRECATEDIN_3_0 int SHA256_Update(SHA256_CTX *c,
+      |                           ^~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/native/export.cpp:535:21: warning: 'int SHA256_Final(unsigned char*, SHA256_CTX*)' is deprecated: Since OpenSSL 3.0 [-Wdeprecated-declarations]
+  535 |         SHA256_Final(digest, &hash);
+      |         ~~~~~~~~~~~~^~~~~~~~~~~~~~~
+C:/msys64/mingw64/include/openssl/sha.h:76:27: note: declared here
+   76 | OSSL_DEPRECATEDIN_3_0 int SHA256_Final(unsigned char *md, SHA256_CTX *c);
+      |                           ^~~~~~~~~~~~
+[56/62] Linking CXX static library vendor\OpenCSD-1.8.3\libopencsd_c_api.a
+[57/62] Linking CXX executable etm_decode.exe
+[58/62] Linking CXX executable etm_frontend.exe
+[59/62] Linking CXX executable etm_index.exe
+[60/62] Linking CXX executable etm_export.exe
+[61/62] Building CXX object CMakeFiles/etm_storebuild.dir/native/storebuild.cpp.obj
+E:/zynqlinkPRO/etm-service/native/storebuild.cpp: In constructor '{anonymous}::FastSha256::FastSha256()':
+E:/zynqlinkPRO/etm-service/native/storebuild.cpp:142:31: warning: 'int SHA256_Init(SHA256_CTX*)' is deprecated: Since OpenSSL 3.0 [-Wdeprecated-declarations]
+  142 |     FastSha256() { SHA256_Init(&context_); }
+      |                    ~~~~~~~~~~~^~~~~~~~~~~
+In file included from E:/zynqlinkPRO/etm-service/native/storebuild.cpp:27:
+C:/msys64/mingw64/include/openssl/sha.h:73:27: note: declared here
+   73 | OSSL_DEPRECATEDIN_3_0 int SHA256_Init(SHA256_CTX *c);
+      |                           ^~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/native/storebuild.cpp: In member function 'void {anonymous}::FastSha256::update(const void*, size_t)':
+E:/zynqlinkPRO/etm-service/native/storebuild.cpp:144:22: warning: 'int SHA256_Update(SHA256_CTX*, const void*, size_t)' is deprecated: Since OpenSSL 3.0 [-Wdeprecated-declarations]
+  144 |         SHA256_Update(&context_, data, size);
+      |         ~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~
+C:/msys64/mingw64/include/openssl/sha.h:74:27: note: declared here
+   74 | OSSL_DEPRECATEDIN_3_0 int SHA256_Update(SHA256_CTX *c,
+      |                           ^~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/native/storebuild.cpp: In member function 'std::string {anonymous}::FastSha256::hex_digest()':
+E:/zynqlinkPRO/etm-service/native/storebuild.cpp:148:21: warning: 'int SHA256_Final(unsigned char*, SHA256_CTX*)' is deprecated: Since OpenSSL 3.0 [-Wdeprecated-declarations]
+  148 |         SHA256_Final(digest, &context_);
+      |         ~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~
+C:/msys64/mingw64/include/openssl/sha.h:76:27: note: declared here
+   76 | OSSL_DEPRECATEDIN_3_0 int SHA256_Final(unsigned char *md, SHA256_CTX *c);
+      |                           ^~~~~~~~~~~~
+[62/62] Linking CXX executable etm_storebuild.exe
