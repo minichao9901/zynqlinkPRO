@@ -1,0 +1,64 @@
+{
+  "time_UTC": "2026-10-31T20:32:23.275302+00:00",
+  "elf": "E:\\zynqlinkPRO_etm_calibration\\prebuilt\\etm-diag-raw4-20261101\\application.elf",
+  "elf_sha256": "b07980abf5d1d107c1356dab8022533d3d9863d9b2e107b97241536378121cf0",
+  "downloads": false,
+  "probe_reset_or_continue": false,
+  "expected_executable_bytes": 71620,
+  "cycles": [
+    {
+      "cycle": 0,
+      "sections": [
+        {
+          "name": ".text",
+          "bytes": 69056,
+          "address": 0,
+          "equal": true,
+          "expected_sha256": "156660d326723a6348de1a1dbf5ae95c3282412cee1db078499e6046a90474f3",
+          "live_sha256": "156660d326723a6348de1a1dbf5ae95c3282412cee1db078499e6046a90474f3"
+        },
+        {
+          "name": ".ocm_text",
+          "bytes": 2540,
+          "address": 69056,
+          "equal": true,
+          "expected_sha256": "76c6d5bc95df51f81d5c8154fe5945b01b318e8bd37ed4dcddfb4db97d7c84a9",
+          "live_sha256": "76c6d5bc95df51f81d5c8154fe5945b01b318e8bd37ed4dcddfb4db97d7c84a9"
+        },
+        {
+          "name": ".init",
+          "bytes": 12,
+          "address": 71596,
+          "equal": true,
+          "expected_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6",
+          "live_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6"
+        },
+        {
+          "name": ".fini",
+          "bytes": 12,
+          "address": 71608,
+          "equal": true,
+          "expected_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6",
+          "live_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6"
+        }
+      ],
+      "differing_addresses": [],
+      "vector_word": "ea000049"
+    }
+  ],
+  "passed": true,
+  "boot_mode": 1,
+  "boot_trace": [
+    1398032176,
+    539365425,
+    65544,
+    1,
+    2,
+    1536,
+    0,
+    1
+  ],
+  "FCLK_CTRL": 3147264,
+  "IO_PLL_CTRL": 221192,
+  "initial_FCLK_Hz": 99999999
+}

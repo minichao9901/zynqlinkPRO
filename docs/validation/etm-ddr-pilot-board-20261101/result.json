@@ -1,0 +1,142 @@
+{
+  "status": "REJECTED_NOT_GOLDEN",
+  "hardware": true,
+  "flashWrites": false,
+  "targetRccChanged": false,
+  "patternOnly": true,
+  "traceSourceImplemented": false,
+  "patternCases": [
+    {
+      "input": "pilot-1m-readback.bin.gz",
+      "bytes": 1048576,
+      "seed": 333162775,
+      "fclkHz": 99999999,
+      "clockBasis": "initial OCM identity SLCR observation; no subsequent clock command before this write",
+      "dataPassed": false,
+      "badWords": 262144,
+      "firstBadWords": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "sha256": "9d842c0bbaf2db4601cf3ec039725274d3497717293043aefaa4cc4b049ff893",
+      "expectedSha256": "f9a86f476aabe331ec30f74e2a5c73c324e0433ebc1d955314f37d15d1f985df"
+    },
+    {
+      "input": "second-pilot-100m-readback.bin.gz",
+      "bytes": 1048576,
+      "seed": 333162775,
+      "fclkHz": null,
+      "clockBasis": "after controlled reload; nominal PS init work point, not independently sampled immediately before this one",
+      "dataPassed": true,
+      "badWords": 0,
+      "firstBadWords": [],
+      "sha256": "f9a86f476aabe331ec30f74e2a5c73c324e0433ebc1d955314f37d15d1f985df",
+      "expectedSha256": "f9a86f476aabe331ec30f74e2a5c73c324e0433ebc1d955314f37d15d1f985df"
+    },
+    {
+      "input": "second-pilot-120m-readback.bin.gz",
+      "bytes": 1048576,
+      "seed": 665570799,
+      "fclkHz": 119999998,
+      "clockBasis": "live_clock_snapshot observation after normal DAP setup, transcribed from tool output",
+      "dataPassed": false,
+      "badWords": 78992,
+      "firstBadWords": [
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31
+      ],
+      "sha256": "1fdced2c1e8a22c713bec695669422342b5b95e6f4e7b52ecb94b9ebf0be98c1",
+      "expectedSha256": "c38b9a1e90f7ddb2fa246c89ce3300980730b19c2f38b2e30d05a300d4230b07"
+    },
+    {
+      "input": "third-pilot-measured100-readback.bin.gz",
+      "bytes": 1048576,
+      "seed": 1132003626,
+      "fclkHz": 99999999,
+      "clockBasis": "explicit SLCR change and live_clock_snapshot, see measured100-result.json",
+      "dataPassed": false,
+      "badWords": 90600,
+      "firstBadWords": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "sha256": "e36cdf01e1857e8dbcfd2a3ff8b93aacedc404841c960f285908437cbcf77e33",
+      "expectedSha256": "e079703c695b0609d66fd956ac1ee4d6a7310df4ea105329a481e97d18b13778"
+    }
+  ],
+  "bootFirstAttemptPassed": false,
+  "bootAfterControlledReloadPassed": true,
+  "bootIssue": "Initial PS stopped in _exit after CDMA startup selftest; CMD BRAM contents correct while response destination differed. Another explicit reload booted normally. Do not infer a deterministic RTL-only failure or stability from the later pass.",
+  "initialPatternStatus": {
+    "signature": 1162104113,
+    "acceptedBytes": 1048576,
+    "responseBytes": 1048576,
+    "elapsedCycles": 319506,
+    "errorCode": 0
+  },
+  "postDapPatternStatus": {
+    "acceptedBytes": 1048576,
+    "responseBytes": 1048576,
+    "elapsedCycles": 335890,
+    "errorCode": 0
+  },
+  "measured100PatternStatus": {
+    "acceptedBytes": 1048576,
+    "responseBytes": 1048576,
+    "elapsedCycles": 319506,
+    "errorCode": 0
+  },
+  "throughputAccepted": false,
+  "causeEstablished": false,
+  "limitations": [
+    "No stable capture frequency claim",
+    "No 1-2s ETM DDR capture or USB download implementation",
+    "B-response byte count and clean counters did not prove payload integrity",
+    "Reset/reload/clock-change relation requires isolated experiments"
+  ],
+  "boardRestoredTo": "prebuilt/etm-diag-raw4-20261101",
+  "restoredUsbEnumerated": true,
+  "restoredOcmIdentityPassed": true
+}

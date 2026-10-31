@@ -1,0 +1,40 @@
+{
+  "actualClocks": {
+    "FCLK_Hz": 99999999,
+    "cfg": "0x300d6a11",
+    "waveform": {
+      "SWCLK_Hz": 833333.325,
+      "half_period_fclk": 60,
+      "short_high": true,
+      "intended_high_ns": 10.000000100000001
+    },
+    "JTAG_sampling_mode": 0,
+    "RISC_V_SBA_enabled": false,
+    "actual_link_Hz": 833333.325,
+    "clock_observation": "PS JTAG register read; no DAP command during stream"
+  },
+  "bytes": 1048576,
+  "dataPassed": false,
+  "badWords": 90600,
+  "firstBadWords": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "sha256": "e36cdf01e1857e8dbcfd2a3ff8b93aacedc404841c960f285908437cbcf77e33",
+  "expectedSha256": "e079703c695b0609d66fd956ac1ee4d6a7310df4ea105329a481e97d18b13778",
+  "note": "Controlled decrease of internal probe FCLK after preserving prior failure; not target RCC. Single pattern test, not ETM or stable system acceptance."
+}

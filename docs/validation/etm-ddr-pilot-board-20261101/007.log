@@ -1,0 +1,16 @@
+SECOND_PILOT_DMA 0 4098 0 0 0 0 1107361792 0 1227520 0 4096 0
+Memory read error at 0xF8008028. AHB AP transaction error, DAP status f0000021
+    invoked from within
+"::tcf::eval -progress {apply {{msg} {puts $msg}}} {tcf_send_command tcfchan#0 Memory get siiii {Bea{o{msg o{} A}}} {JTAG-jsn-JTAG-HS3-210299008529-4ba00477-0.0 4160782336 4 48 7}}"
+    (procedure "::tcf::send_command" line 4)
+    invoked from within
+"::tcf::send_command $chan Memory get "siiii" "Bea{o{msg o{} A}}" [list $ctx $start_addr $size $nbytes $mode]"
+    (procedure "mrd" line 87)
+    invoked from within
+"mrd -force -value 0xf8008000 12"
+    invoked from within
+"puts "HP0 [mrd -force -value 0xf8008000 12]""
+    (file "E:\zynqlinkPRO_etm_calibration\build\etm-ddr-boot-failure-20261101\007.tcl" line 9)
+    invoked from within
+"source $script"
+    (file "E:\zynqlinkPRO-work\runtime\xilinx\bootstrap.tcl" line 5)

@@ -1,0 +1,79 @@
+{
+  "status": "board-rejected-data-integrity-and-boot-stability-not-golden",
+  "device": "xc7z020clg400-2",
+  "rtlSourceRevision": "348d73a08948f4f35f2bffe223067e261b8f9511",
+  "psSourceRevision": "f364085f680686e21185f3dba94853fa982baa5e",
+  "rawMode": 4,
+  "fifoAddrBits": 16,
+  "ddrPilot": true,
+  "traceSourceImplemented": false,
+  "etmDdrReservation": {
+    "base": 268435456,
+    "endExclusive": 805306368,
+    "bytes": 536870912
+  },
+  "buildOptions": {
+    "implementFclkHz": 120000000,
+    "optimization": "O3 Thumb compact",
+    "maxSwclkHz": 60000000
+  },
+  "timing": {
+    "FCLK_max_Hz": 120000000,
+    "SWCLK_max_Hz": 60000000,
+    "setup_slack_ns": 0.284,
+    "hold_slack_ns": 0.066
+  },
+  "swclkLaunch": {
+    "delayNs": 6.575,
+    "budgetNs": 7.0
+  },
+  "routedDcpSha256": "81ff1f9853d7397c68fc674e2c9e81a041e984de35ea798a66ab51073b11f041",
+  "actualLoad": {
+    "method": "XSCT JTAG + PS RAM, no Flash",
+    "bitSha256": "6690d8dd214be1986b7f89f64f93096b99aa7a5b30fb93b65e7f51919577c720",
+    "elfSha256": "ab7c097764bea91272783ec59a51d200bf154ba5d4f9adbf1e7350466c17947f",
+    "initialFclkHz": 99999999,
+    "postDapFclkHz": 119999998,
+    "postDapSwclkHz": 999999.9833333333,
+    "executableBytesVerified": 71620,
+    "identityEvidence": "docs/validation/etm-ddr-pilot-board-20261101/initial-ocm-identity.json"
+  },
+  "files": {
+    "probe.bit": {
+      "bytes": 4045674,
+      "sha256": "6690d8dd214be1986b7f89f64f93096b99aa7a5b30fb93b65e7f51919577c720"
+    },
+    "application.elf": {
+      "bytes": 792100,
+      "sha256": "ab7c097764bea91272783ec59a51d200bf154ba5d4f9adbf1e7350466c17947f"
+    },
+    "ps7_init.tcl": {
+      "bytes": 35186,
+      "sha256": "aa9747c31f705be7c28af1c6b1cdeaf282f0dcdb01faecee2a9f72e4d3489132"
+    },
+    "verified_clock.json": {
+      "bytes": 96,
+      "sha256": "686a99d7b16f975e3e3f6217960423e652e7827bd4ebc2125cababf836090d4e"
+    },
+    "ps-build.json": {
+      "bytes": 4952,
+      "sha256": "0ba27dbe8e2c79154582f273539e127daa0a8fefce332532879233e2bf1eb2fa"
+    },
+    "rtl-build-inputs.json": {
+      "bytes": 9803,
+      "sha256": "6e988bf8e6f836c6a66368e8ffd576fe4d77d4ce37282771c2f094ce75103d2f"
+    }
+  },
+  "boardResult": {
+    "accepted": false,
+    "evidence": "docs/validation/etm-ddr-pilot-board-20261101/result.json",
+    "onePatternPassDoesNotEstablishStability": true
+  },
+  "sourceReceiptNote": "RTL receipt preserves the build-time snapshot, including then-current PS files for context. The later ps-build.json is authoritative for the paired PS source and ABSOLUTE linker fix.",
+  "limitations": [
+    "No stable capture frequency claim",
+    "No 1-2s ETM DDR capture or USB download implementation",
+    "B-response byte count and clean counters did not prove payload integrity",
+    "Reset/reload/clock-change relation requires isolated experiments"
+  ]
+}

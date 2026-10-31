@@ -172,6 +172,43 @@ accepted_bytes经32bit剩余量减法、动态TKEEP与预算判断到缓冲存�
 首次配套ELF的边界值正确，但SECTIONS内普通赋值被链接器标为.text相对符号，
 硬件验收脚本的ABS检查在加载/写入前拒绝；已改用ABSOLUTE并重新构建PS ELF，不能绕过该检查。
 
+### DDR HP1候选已上板，但数据完整性与启动稳定性未通过
+
+本轮实际配对保留在`prebuilt/etm-ddr-pilot-raw4-20261101/`：bit SHA
+`6690d8dd214be1986b7f89f64f93096b99aa7a5b30fb93b65e7f51919577c720`，
+PS ELF SHA `ab7c097764bea91272783ec59a51d200bf154ba5d4f9adbf1e7350466c17947f`。
+RTL来自348d73a，配套PS来自f364085；PS init来自该BD实际输出，SHA与前诊断版相同，不虚构不同哈希。
+PS执行段71,620B匹配，候选全部已分配PROGBITS及地址也与前诊断版一致，仅链接元数据/保留区声明变化。
+
+初次加载PS在CDMA启动自检后停入_exit、USB未枚举；CDMA没有硬件错误位，但CMD BRAM内容与
+响应DDR数据不一致，4KiB响应开头两word为旧值，后续错位。不得跳过自检把USB打开当修复。
+随后用JTAG单独启动HP1模式源（不是ETM），一次受控重载、FCLK切换和逐字节读回得到：
+
+| 顺序 | 1MiB模式读回 | 时钟与边界 |
+|---|---|---|
+| 首次失败启动状态 | 262,144个u32均不匹配 | 初始JTAG实读FCLK99,999,999Hz，未经过DAP换频 |
+| 对照重载后 | 全部匹配，SHA f9a86f476aabe331ec30f74e2a5c73c324e0433ebc1d955314f37d15d1f985df | 名义启动档；该次没有在写入前单独记录实际时钟，不作为带宽测量 |
+| 正常DAP设置后 | 78,992个u32不匹配 | 实读FCLK119,999,998Hz、SWCLK999,999.98Hz |
+| 显式改回100MHz后 | 90,600个u32不匹配 | 实读FCLK99,999,999Hz、配置SWCLK833,333.325Hz |
+
+后三次都收到最终OKAY B并报告输入/响应各1,048,576B、错误码0，但两次内容仍错。
+因此不接受响应计数作为DDR完整性证据，不公布这些失败数据的有效吞吐，也不能据此认定100MHz稳定或120MHz硬件上限。
+一次成功与后续失败同时保留，尚未确定是初始化、换频、接口/复位或其它状态问题；没有通过重试覆盖第一次失败。
+新旧网表中所查CMD RAMB的DOA_REG/DOB_REG均为0、读取宽度36，未发现该处读延迟参数发生变化；
+这只是缩小检查范围，不证明整个旧CDMA路径完全等价。
+
+待继续隔离：现有JTAG工具在fpga配置前调用ps7_post_config，
+而[AMD启动顺序](https://docs.amd.com/r/en-US/ug585-zynq-7000-SoC-TRM/PS-Bring-up-with-PL-Configuration-Example)
+在PL配置完成后再使能level shifter；
+[电平转换隔离说明](https://docs.amd.com/r/en-US/ug585-zynq-7000-SoC-TRM/PS-PL-Voltage-Level-Shifter-Enables)
+要求避免PS输入上的额外跳变。这是需实测的加载顺序线索，不是已确认根因；还需独立检查FCLK切换/AXI静默及HP FIFO状态。
+本轮尚未修改加载器、绕过启动自检或把工作点降为100MHz交付。
+
+候选状态明确为**REJECTED_NOT_GOLDEN**，其实际bit/ELF与失败证据一起纳入Git供复现。
+板上已经恢复上一诊断配对086333/b07980，USB重新枚举、执行段读回通过，当前初始FCLK99,999,999Hz。
+Golden/recovery保持原文件；无Flash写入/target RCC改动。1～2秒ETM DDR采集、逐线校准及最终Web压力验收仍未完成。
+[完整结果、压缩输入与实际加载记录](validation/etm-ddr-pilot-board-20261101/result.json)。
+
 DDR前端已有隔离的实验RTL：`fpga/experiments/etm_ddr/etm_ddr_packetizer.v`，尚未加入生产BD或本轮ETD1构建输入。
 它把带有效长度/EOF的128bit帧转为64bit AXIS，保留最后一拍直到后续数据或EOF确定，正确产生TKEEP/TLAST；
 不发送零字节DMA包，不越过锁定的byte_limit，背压期间数据稳定，源暂停不会伪造结束，busy时拒绝重启。
