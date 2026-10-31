@@ -14,7 +14,7 @@ def main():
     ap.add_argument('--opt', choices=['0', '3', 's'], default='3')
     ap.add_argument('--compact-code', action='store_true', help='Thumb code and unused section removal; preserve production queues and DDR buffers')
     ap.add_argument('--out', help='Separate output directory for clock/optimization profiles (default: build/<project>/<optimization>)')
-    ap.add_argument('--project', choices=['xusbps_daplink', 'xusbps_daplink_dma'], default='xusbps_daplink')
+    ap.add_argument('--project', choices=['xusbps_daplink_dma'], default='xusbps_daplink_dma')
     ap.add_argument('--trace', action='store_true', help='Enable DMA firmware timing trace and MMIO diagnostics')
     ap.add_argument('--usb-trace', action='store_true', help='Trace USB events without per-MMIO diagnostics')
     ap.add_argument('--experimental-zero-idle',action='store_true',

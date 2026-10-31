@@ -1,0 +1,58 @@
+{
+  "time_UTC": "2026-10-31T14:12:26.762661+00:00",
+  "scope": "Main checkout excluding primary .git and installed toolchains; nested dependency Git metadata counted",
+  "working_tree_bytes": 231398532,
+  "files": 3128,
+  "top_level_bytes": {
+    ".gitattributes": 1596,
+    ".gitignore": 1560,
+    "AGENTS.md": 1315,
+    "README.md": 1942,
+    "toolbox.py": 24940,
+    "trace.cmd": 86,
+    "docs": 658204,
+    "etm-service": 88032356,
+    "firmware": 9136564,
+    "fpga": 584873,
+    "prebuilt": 39046452,
+    "reference": 70338836,
+    "third_party": 1453699,
+    "tools": 8867760,
+    "web": 13248349
+  },
+  "not_in_main_git": {
+    "file_count": 583,
+    "directory_summary": [
+      "reference"
+    ],
+    "full_local_list": "E:/zynqlinkPRO/docs/not-in-git-files.txt",
+    "essential_local_dependencies": [
+      "reference/cortex_m3_on_xc7a100t/cm3_core (licensed real CM3 RTL)",
+      "reference/legacy_zynq (matching BSP include/lib/libsrc)",
+      "reference/vexriscv (real RISC-V model)",
+      "reference/HFLink (research shared source dependency)",
+      "reference/hpm6800evk_rtt_kingst (legacy research capture; not active ETM business record)"
+    ]
+  },
+  "manual_delete_after_successful_push": [
+    {
+      "path": "C:/Users/Administrator/zynqlinkPRO-retired/orbtrace-cm3-20261031",
+      "reason": "Retired worktree residue; refs/history/needed files preserved; old locking services stopped",
+      "tool_recursive_delete_rejected": true
+    },
+    {
+      "path": "E:\\zynqlinkPRO-maintenance\\20261031-slim",
+      "reason": "Completed maintenance staging, validation caches and detailed local logs; selected records/artifacts/evidence are in main/Git; private Flash backup moved out",
+      "tool_recursive_delete_rejected": false
+    }
+  ],
+  "do_not_delete": [
+    "E:/zynqlinkPRO-private/flash-backups",
+    "E:/zynqlinkPRO/reference/cortex_m3_on_xc7a100t/cm3_core",
+    "E:/zynqlinkPRO/prebuilt/golden",
+    "E:/zynqlinkPRO/prebuilt/recovery",
+    "E:/zynqlinkPRO/etm-service/records"
+  ],
+  "other_worktree": "HFLink worktree still has its previously preserved uncommitted edits; outside this cleanup/push scope",
+  "push_scope": "main plus this cleanup snapshot and Golden tag; research branches/archive tags not automatically pushed"
+}

@@ -1,3 +1,5 @@
+> 本文件保留原验收/测量结论。已退出主目录的逐轮细节可由Git tag `archive/main-before-slim-20261031`追溯；当前使用入口见根README和prebuilt/golden。
+
 # F103ZE / ZynqDAP：Web CLI、ETM与压力测试统一记录
 
 本文件集中记录本轮结论。**2026-10-31追加离线原生链路复测：同一份1s数据完整处理中位7.208s，
@@ -113,10 +115,10 @@ usbd_ep_start_write及bulk_in。路径1,140,170条，packetIssues=0；保留2个
 已从初始化区间#2～#3953导出SVG并校验XML：58个rect、16,089字节；这是旧ELF基线，
 旧图仅作基线保留。此前C4基线匹配修补版源码的两张图已通过Web实际导出；当前滤波配对的最终图见文末：
 
-- [USB初始化](validation/f103ze-web-flow-20261031/usb-initialization-matched.svg)：记录
+- USB初始化（归档路径：`validation/f103ze-web-flow-20261031/usb-initialization-matched.svg`）：记录
   capture-3f283d20471c432f8a82c3a5225983ff，区间#2～#8210，18,000字节，
   SHA-256 `fd487378d413932bd77d2296e0f044ca01e37d3cec5417e3f6211951ba021529`。
-- [CDC echo](validation/f103ze-web-flow-20261031/cdc-echo.svg)：记录
+- CDC echo（归档路径：`validation/f103ze-web-flow-20261031/cdc-echo.svg`）：记录
   capture-8befceae549f4369bd5f6acb3e8a81aa，区间#189～#243868，11,873字节，
   SHA-256 `51678822b84fef6ee71e646fadb26d882b9886c6d7d940b0d6c23cf40afb1e42`。
 
@@ -297,9 +299,9 @@ STOP必须检查返回码；Zynq返回忙时保持读流排空，确认停止后
 
 最终SVG均由Web在实际记录区间导出，XML已检查，权重为路径记录数：
 
-- [USB初始化SVG](validation/f103ze-web-flow-20261031/final-flow/usb-initialization-filtered.svg)：
+- USB初始化SVG（归档路径：`validation/f103ze-web-flow-20261031/final-flow/usb-initialization-filtered.svg`）：
   capture-a63604803b8947d1a26d0ed1c3766132，#0～#6934，48个rect、13,449字节。
-- [CDC echo SVG](validation/f103ze-web-flow-20261031/final-flow/cdc-echo-filtered.svg)：
+- CDC echo SVG（归档路径：`validation/f103ze-web-flow-20261031/final-flow/cdc-echo-filtered.svg`）：
   capture-5a32966b3a6e4d70848bb4b35073ff5c，#123005～#414358，29个rect、8,231字节。
 
 各图SHA-256与CLI步骤在final-flow/exports-cli/summary.json。
@@ -334,7 +336,7 @@ Waitress 3.0.2后，5,000次请求只使用1个客户端端口，耗时2.38秒�
 既有九页Web CLI冒烟56条通过。所有仿真与实板结果在各自JSON中标明，不混为硬件验收。
 bit/ELF、PS初始化、构建元数据及测试靶源文件的SHA-256已对照Git暂存字节再次核对。
 当前保留已知配对和失败样本；工作台最终截图为
-[ETM界面](validation/f103ze-web-flow-20261031/etm-final.jpg)。
+ETM界面（归档路径：`validation/f103ze-web-flow-20261031/etm-final.jpg`）。
 
 
 ## 1秒数据量、USB HS承载与实时显示
@@ -392,7 +394,7 @@ Web `/etm/api/health`、`/etm-launcher.json`及CLI运行信息会报告`decodeEn
 - ELF：SHA-256 `e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f`。
 - 源码快照：SHA-256 `6533c1d4df3832ae8b9ad1013e6bb3c2fc5c8660e26531e2068d8891328bec44`。
 - 主机：Ryzen 7 PRO 5850U、8核16线程、Python 3.13.5；实际版本及五个原生EXE的哈希及支持`--version`工具的协议握手见
-  [environment.json](validation/native-engine-offline-20261031/environment.json)。
+  environment.json（归档路径：`validation/native-engine-offline-20261031/environment.json`）。
 - Web：IAB视口694×668，ETM iframe 694×632，页面可见。使用真实工作台CLI队列调用，未用模拟DOM替代浏览器测量。
 
 “完整处理”从提交正常Web解码请求计到任务完成：包含解码、源码解析/存储、数值索引、元数据和browse准备；
@@ -425,7 +427,7 @@ packets.jsonl / browse-columns.tsv / browse-v3.sqlite`。每份`native.bin`为36
 ### 首次缩放与缓存差异
 
 各记录均从全段连续放大三次，再连续缩小三次；序号区间和逐次结果保存在
-[zoom.json](validation/native-engine-offline-20261031/zoom.json)。缩小时所选中心会改变边界，不能笼统视作每档全命中缓存。
+zoom.json（归档路径：`validation/native-engine-offline-20261031/zoom.json`）。缩小时所选中心会改变边界，不能笼统视作每档全命中缓存。
 
 | 显示操作 | 次数 | 完整显示耗时ms | 口径 |
 |---|---:|---:|---|
@@ -445,13 +447,13 @@ packets.jsonl / browse-columns.tsv / browse-v3.sqlite`。每份`native.bin`为36
 另从保留SQLite/JSONL只读取样，与原生存储重建的完整事件字典比较1,759条：包含全部503个边界/中断事件及
 相邻指令、全段均匀样本、未知及未成立条件；PC、机器码、源码行、调用栈、执行状态及边界payload全部一致。
 这是抽样语义验证，不能写成对546万事件逐条全量比较。
-[比较证据](validation/native-engine-offline-20261031/equivalence.json)记录了具体序号。
+比较证据（归档路径：`validation/native-engine-offline-20261031/equivalence.json`）记录了具体序号。
 
 默认配置Python回归28项、Web自测30项通过。包括旧环境强制修正、Zynq解码前启用原生配置、
 隐藏文档/不完整时间线拒绝伪造绘制完成，以及实际Web首屏/24次缩放无CLI错误。
-新脚本和计时接口提交`7b7ea55`；[默认时间线截图](validation/native-engine-offline-20261031/native-first-screen.jpg)保留了实际分析页面；
+新脚本和计时接口提交`7b7ea55`；默认时间线截图（归档路径：`validation/native-engine-offline-20261031/native-first-screen.jpg`）保留了实际分析页面；
 原始处理、首屏、缩放和命令证据统一在
-[离线验收目录](validation/native-engine-offline-20261031/)。
+离线验收目录（归档路径：`validation/native-engine-offline-20261031/`）。
 本次未接板，不改变既有18MHz实板结论，也不声称合并后的PL/PS产物已经通过ETM真机验收。
 
 以本负载计，当前完整处理7.208秒才能消费1秒记录，约为实时所需吞吐的13.9%，
@@ -505,7 +507,7 @@ bit/ELF替代ETM合并头。新配对、SHA、实际FCLK/TCK与板测仍由统�
 新增CDC target包含全部22份已验收DWARF源码，其SHA与原快照一致；另补齐头文件、启动/链接、构建工具和host用例。
 迁移后48/72MHz均成功编译并通过USB HP/LP向量自检，8项CDC host场景通过。路径变短改变了USB驱动`__FILE__`
 字符串及装载段内容，因此新ELF只计离线构建通过，**不冒充旧版已上板固件**；已验收prebuilt文件及哈希保持原样。
-[归档核查](validation/etm-merge-20261031/handoff.json)分别记录新旧ELF及装载段哈希。
+归档核查（归档路径：`validation/etm-merge-20261031/handoff.json`）分别记录新旧ELF及装载段哈希。
 
 1s夹具复用已入库的`capacity-packed/window-1000ms/capture.etm`和48MHz echo ELF，不重复提交raw文件。
 补入原样sources映射与summary/quality参考、25KB压缩事件oracle。它保留1,759份完整事件字典及全部503边界，
@@ -546,7 +548,7 @@ cmake --build build/etm-native-rebuild --parallel 2
 ```
 
 原始导出及原生重建的完整处理/事件比较结果、target编译清单与日志见
-[最终归档核查](validation/etm-merge-20261031/handoff.json)。原有source-provenance.json中main.c仍记着CDC补丁前哈希，
+最终归档核查（归档路径：`validation/etm-merge-20261031/handoff.json`）。原有source-provenance.json中main.c仍记着CDC补丁前哈希，
 本次已改为与已保存的补丁后source-snapshot相符，并保留被纠正的旧值；没有修改该target源码或旧已验收ELF。
 
 ## 合并版JTAG/RAM真机验收：单步握手修复
@@ -568,7 +570,7 @@ cmake --build build/etm-native-rebuild --parallel 2
 `0x08000592 / 0x08000596 / 0x08000598 / 0x0800059a / 0x0800059c`，25个PC和成功标志全部核对通过。
 覆盖16/32位指令及CPSID。旧20轮的原始命令/返回值和修复后结果一起保留，不能用“调用返回成功”代替正确PC。
 新增握手、自跳转、失败清理三项测试，Web测试共33项通过。
-[实际配对、下载和单步证据](validation/combined-etm-web-20261031/step-fix/)。
+实际配对、下载和单步证据（归档路径：`validation/combined-etm-web-20261031/step-fix/`）。
 
 同一配对上Web CLI采集10/100/1000ms、串口PING/INFO/64字节回显、USB初始化和4轮窗口内CDC回显、
 应用RTT启动日志、8变量J-Scope均已初步通过；完整最终矩阵、直接Zynq CLI、交互/导出和现场恢复仍在继续，
@@ -602,9 +604,9 @@ CLI缓存最多32文件/128MiB，缓存满时不会阻止手动下载。
 覆盖原问题的自动化测试包括手动/CLI分流、缓存满、外层文档下载与重试、进度和失败反馈；全部39项Web测试通过。
 本轮无硬件操作，没有修改PL、PS或目标Flash。
 
-[下载落盘及哈希证据](validation/flame-download-20261031/result.json)、
-[当前区间SVG](validation/flame-download-20261031/flame-913-977.svg)、
-[页面状态截图](validation/flame-download-20261031/web-download.jpg)。
+下载落盘及哈希证据（归档路径：`validation/flame-download-20261031/result.json`）、
+当前区间SVG（归档路径：`validation/flame-download-20261031/flame-913-977.svg`）、
+页面状态截图（归档路径：`validation/flame-download-20261031/web-download.jpg`）。
 
 ### CLI覆盖审计与SVG能力边界
 

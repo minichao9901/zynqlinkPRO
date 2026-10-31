@@ -122,8 +122,16 @@ def _run_json_command(args, json_path, timeout, binary=None):
     probe(binary)                               # 每次调用都握手：拒绝旧残留
     temporary = None
     if json_path is None:
+        # Keep native output beside the writable record/work inputs. The Windows
+        # system TEMP may use a short/redirected path the bundled CRT cannot open.
+        # Explicit json_path continues to take precedence.
+        directory = None
+        for flag in ('--native', '--static', '--plan'):
+            if flag in args and args.index(flag) + 1 < len(args):
+                directory = Path(args[args.index(flag) + 1]).resolve().parent
+                break
         handle = tempfile.NamedTemporaryFile('w', suffix='.json', delete=False,
-                                             encoding='utf-8')
+                                             encoding='utf-8', dir=directory)
         handle.close()
         temporary = Path(handle.name)
         json_path = temporary

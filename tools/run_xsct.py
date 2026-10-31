@@ -20,7 +20,8 @@ def main():
     ap.add_argument('--sdk', type=Path, default=Path(r'E:\Xilinx\SDK\2018.3'))
     args = ap.parse_args()
     root = Path(__file__).resolve().parents[1]
-    out = root / 'build/xilinx_runtime'
+    work_root = Path(os.environ.get('ZYNQLINK_WORK_DIR', str(root.parent/'zynqlinkPRO-work')))
+    out = work_root / 'runtime/xilinx'
     out.mkdir(parents=True, exist_ok=True)
     sdk = args.sdk
     search = [sdk / p for p in ['lib/win64.o', 'bin/unwrapped/win64.o', 'tps/win64']]

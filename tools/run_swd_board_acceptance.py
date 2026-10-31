@@ -29,7 +29,7 @@ def main():
         run('functional','test_probe_board.py',['--services','both','--seconds',.5,'--output',out/'functional.json'])
         for speed in [50000,60000]:
             run(f'sram_api_{speed}','benchmark_cmsis_sram.py',['--speed',speed,'--sessions',3,'--loops',a.loops,'--output',out/f'sram_api_{speed}.json'])
-            run(f'sram_openocd_{speed}','benchmark_sram_optimized.py',['--tag',a.label+'_'+str(speed),'--output-dir',out/f'openocd_{speed}','--sessions',3,'--loops',a.loops,'--speed',speed,'--no-reset','--clock-script','none','--openocd-exe',r'E:/zynqlinkPRO_batch/build/openocd_runtime/openocd.exe','--scripts',r'E:/zynqlinkPRO/build/openocd-src/tcl'])
+            run(f'sram_openocd_{speed}','benchmark_sram_optimized.py',['--tag',a.label+'_'+str(speed),'--output-dir',out/f'openocd_{speed}','--sessions',3,'--loops',a.loops,'--speed',speed,'--no-reset','--clock-script','none','--openocd-exe',r'E:/zynqlinkPRO/prebuilt/golden/host/openocd/openocd.exe','--scripts',r'E:/zynqlinkPRO/prebuilt/golden/host/openocd/scripts'])
         run('hss_static1','benchmark_probe_stream.py',['--speeds','50000000,60000000','--variables','1','--periods','48,40,32,24','--seconds',3,'--repeats',2,'--output',out/'hss_static1.json',*art],timeout=180)
         run('hss_static8','benchmark_probe_stream.py',['--speeds','50000000,60000000','--variables','8','--periods','240,200,192','--seconds',3,'--repeats',2,'--output',out/'hss_static8.json',*art],timeout=160)
         run('hss_dynamic','benchmark_hss_dynamic.py',['--speed',60000000,'--periods','48,40,32,24','--seconds',3,'--output',out/'hss_dynamic.json',*art],timeout=90)

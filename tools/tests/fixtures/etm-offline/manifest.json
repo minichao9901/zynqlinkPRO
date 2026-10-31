@@ -1,0 +1,41 @@
+{
+  "schema": "etm-offline-fixture/1",
+  "name": "F103ZE 48MHz / TRACECLK6MHz / 1s saved real capture",
+  "hardwareAccess": false,
+  "files": {
+    "capture.bin": {
+      "repoPath": "tools/tests/fixtures/etm-offline/capture.bin",
+      "sha256": "2cb5838887188cbdebf554967281ad44f03eca9aab2867cde82e548ca9873199",
+      "bytes": 1363722
+    },
+    "session.json": {
+      "repoPath": "tools/tests/fixtures/etm-offline/session.json",
+      "sha256": "05a65ca58e11d34f4d60570b018c8a119ce23a34f380bbee43ffcfe186b1b7ff",
+      "bytes": 3446
+    },
+    "firmware.elf": {
+      "repoPath": "prebuilt/golden/f103ze-cdc48.elf",
+      "sha256": "e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f",
+      "bytes": 1216624
+    },
+    "sources.json": {
+      "repoPath": "tools/tests/fixtures/etm-offline/sources.json",
+      "sha256": "6533c1d4df3832ae8b9ad1013e6bb3c2fc5c8660e26531e2068d8891328bec44",
+      "bytes": 167754
+    },
+    "decoded.json": {
+      "repoPath": "tools/tests/fixtures/etm-offline/legacy-decoded.json",
+      "sha256": "5531c0bf6dafd2112e7891c97e4a3a648c8970f74546492ba0a338c43b608f21",
+      "bytes": 10921
+    }
+  },
+  "sourceIdentity": "Source-map keys retain the accepted ELF DWARF build paths; embedded source text makes them independent of those directories.",
+  "qualityNote": "Original 2 gap boundaries and 89591 unknown executions are retained, not normalized away.",
+  "eventOracle": {
+    "repoPath": "tools/tests/fixtures/etm-offline/events-oracle.json.gz",
+    "bytes": 25293,
+    "sha256": "ef0e2606c028d797da5137a4b5f3c242bc7229b4a24d9783c3624e0b854bee0a",
+    "sampleCount": 1759,
+    "allBoundaryEvents": 503
+  }
+}

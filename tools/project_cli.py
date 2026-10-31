@@ -33,6 +33,7 @@ ALIASES={
  'etm.sweep':'tools/f103_trace_sweep.py','etm.samples':'tools/trace_signal_analysis.py',
  'etm.bench':'tools/bench_etm_native_offline.py','etm.web-bench':'tools/bench_etm_native_browser.py',
  'etm.fixture':'tools/prepare_etm_offline_fixture.py','etm.equivalence':'tools/verify_etm_native_equivalence.py',
+ 'etm.records-check':'tools/verify_retained_records.py',
  'target.fixtures':'tools/build_f103_fixtures.py','target.cdc-build':'firmware/target/stm32f103_cdc_trace/build.ps1',
  'target.cdc-tests':'firmware/target/stm32f103_cdc_trace/tests/run_tests.ps1',
  'target.scope-build':'firmware/target/stm32f103_scope/build.ps1','target.hpm-build':'firmware/target/hpm5301_perf/build.ps1',

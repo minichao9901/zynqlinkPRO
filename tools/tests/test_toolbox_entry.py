@@ -24,7 +24,7 @@ class Memory:
 
 class EntryTests(unittest.TestCase):
     def test_resolves_actual_elf_function_and_rejects_non_code_addresses(self):
-        elf = ROOT / 'etm-service/firmware/stm32f103_cdc_trace/fw-ze.elf'
+        elf = ROOT / 'prebuilt/golden/f103ze-cdc48.elf'
         self.assertEqual(resolve_entry(elf, 'usbd_initialize'), 0x08002278)
         self.assertEqual(resolve_entry(elf, '0x08002279'), 0x08002278)
         for entry in ('missing_function', 0x20000000, True):

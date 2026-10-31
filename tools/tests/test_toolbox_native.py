@@ -24,13 +24,13 @@ class NativeWebCaptureTests(unittest.TestCase):
         spec = importlib.util.spec_from_file_location('native_web_test_service', ROOT / 'web/tools/dev/serve-etm.py')
         service = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(service)
-        pair = ROOT / 'prebuilt/20261030_orbtrace_oversample_parser'
+        pair = ROOT / 'prebuilt/golden'
         with tempfile.TemporaryDirectory() as directory:
             folder = Path(directory)
             token = folder / 'token'
             token.write_text('b' * 64)
             application = service.create_application(ROOT / 'etm-service', ROOT / 'web', token,
-                (pair / 'orbtrace_oversample_parser.bit', pair / 'zynqdap_orbtrace.elf'))
+                (pair / 'probe.bit', pair / 'application.elf'))
             capture = application.mounts['/etm'].extensions['native_capture']
             backend = capture.backend
             backend.RECORDS = folder / 'records'
@@ -38,7 +38,7 @@ class NativeWebCaptureTests(unittest.TestCase):
             elf_id = 'elf-' + 'c' * 32
             target = backend.directory(elf_id)
             target.mkdir()
-            shutil.copy2(ROOT / 'etm-service/firmware/stm32f103_cdc_trace/fw-ze.elf', target / 'firmware.elf')
+            shutil.copy2(ROOT / 'prebuilt/golden/f103ze-cdc48.elf', target / 'firmware.elf')
             client = Client(application, Response)
             headers = {'X-Trace-CLI': 'b' * 64}
             options = {'elfId': elf_id, 'seconds': .01, 'decode': False}

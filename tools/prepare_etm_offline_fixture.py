@@ -6,7 +6,7 @@ from pathlib import Path
 import shutil
 
 ROOT=Path(__file__).resolve().parents[1]
-DEFAULT=ROOT/'docs/validation/native-engine-offline-20261031/fixture/manifest.json'
+DEFAULT=ROOT/'tools/tests/fixtures/etm-offline/manifest.json'
 
 
 def prepare(output,fixture=DEFAULT):

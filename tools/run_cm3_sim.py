@@ -57,7 +57,8 @@ def main():
     if not (rtl / 'cortexm3_integration.v').is_file():
         sys.exit(f'CM3 RTL not found: {rtl}\nset CM3_RTL or pass --rtl')
 
-    work = args.work_dir.resolve() if args.work_dir else ROOT / 'build/cm3_sim' / args.top
+    work_root = Path(os.environ.get('ZYNQLINK_WORK_DIR', str(ROOT.parent / 'zynqlinkPRO-work')))
+    work = args.work_dir.resolve() if args.work_dir else work_root / 'cm3_sim' / args.top
     work.mkdir(parents=True, exist_ok=True)
     env = environment()
     exe = VIVADO / 'bin/unwrapped/win64.o'

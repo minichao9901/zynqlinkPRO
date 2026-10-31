@@ -1,3 +1,5 @@
+> 本文件保留原验收/测量结论。已退出主目录的逐轮细节可由Git tag `archive/main-before-slim-20261031`追溯；当前使用入口见根README和prebuilt/golden。
+
 # OpenOCD 块读流水线补丁
 
 2026-10-25。目标：让 OpenOCD 的内存块读真正流水线化，吃到 raw 客户端实测的

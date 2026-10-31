@@ -19,13 +19,13 @@ if {[llength $argv] == 3} {
     set init [file normalize [lindex $argv 2]]
     if {![file exists $init]} {error "Explicit PS init does not exist: $init"}
 }
-if {![file exists $init]} {set init [file join $root prebuilt ps7_init.tcl]}
+if {![file exists $init]} {set init [file join $root prebuilt golden ps7_init.tcl]}
 if {![file exists $init]} {
     # Fallback for the original development workspace layout.
     set init [file join $root reference legacy_zynq PS_CherryUSB_Minichao \
         PS_CherryUSB_Minichao.sdk system_wrapper_hw_platform_0 ps7_init.tcl]
 }
-if {![file exists $init]} {error "ps7_init.tcl not found (expected prebuilt/ps7_init.tcl)"}
+if {![file exists $init]} {error "ps7_init.tcl not found (expected prebuilt/golden/ps7_init.tcl)"}
 source $init
 ps7_init
 ps7_post_config

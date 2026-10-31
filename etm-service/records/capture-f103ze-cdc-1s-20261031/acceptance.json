@@ -1,0 +1,130 @@
+{
+  "artifacts": {
+    "git_head": "a6227d181ed4f0c51fa84c4bd0f414295bcd9b47",
+    "git_dirty": true,
+    "bit": {
+      "path": "E:\\zynqlinkPRO\\prebuilt\\20261031_combined_raw4_io_7020_120\\probe.bit",
+      "sha256": "1da17cb60175bbc2b7abd647770c7053bd7b7097e0d38aa819fb89678d564473"
+    },
+    "elf": {
+      "path": "E:\\zynqlinkPRO\\prebuilt\\20261031_combined_raw4_io_7020_120\\application.elf",
+      "sha256": "e977914c2924ab4cac13f4075de0a5108d1e2e8cf48966fb8fbdea3a358e0b2c"
+    }
+  },
+  "target_elf": "E:\\zynqlinkPRO\\prebuilt\\20261031_f103ze_cdc_trace\\fw-48-echo.elf",
+  "target_elf_sha256": "e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f",
+  "milliseconds": 1000.0,
+  "periodic_sync": false,
+  "hclk_div": 2,
+  "raw_diagnostic": false,
+  "IDCODE": "0501017714a01b",
+  "control_clock": {
+    "fclk_hz": 119999998,
+    "cfg": "0x300d6a11",
+    "SWCLK_Hz": 999999.9833333333,
+    "half_period_fclk": 60,
+    "short_high": true,
+    "intended_high_ns": 8.333333472222225
+  },
+  "cpuid": "0x411fc231",
+  "flash": [
+    {
+      "address": 134217728,
+      "bytes": 20040,
+      "sha256": "b5b09d9a0446795acc1981aff62ed55f36f10fa71a47544b77c3d0fe1a0610d1"
+    },
+    {
+      "address": 134237768,
+      "bytes": 128,
+      "sha256": "496d8b1d85d4a90921e45cc77629b2c80dcaae957a6ed79710200efa1d4cf341"
+    }
+  ],
+  "reference": [
+    199999998,
+    9437440,
+    221192,
+    1
+  ],
+  "entry": {
+    "address": 134219152,
+    "pc": 134219152,
+    "resetToEntry": false,
+    "matched": true,
+    "savedFpb": {
+      "control": 608,
+      "comparators": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "rcc_before": [
+    50548355,
+    5309450
+  ],
+  "rcc_capture": [
+    50548355,
+    5309578
+  ],
+  "gpio_before": [
+    16461,
+    1270594372
+  ],
+  "gpio_capture": 1091637572,
+  "tpiu_supported": 11,
+  "config": {
+    "protocol": "ETMv3",
+    "idr": 1091891777,
+    "ctrl": 2064,
+    "ccer": 100352,
+    "traceid": 2
+  },
+  "start_status": [
+    1163152689,
+    65470483,
+    0,
+    0,
+    0,
+    18,
+    119999998,
+    0
+  ],
+  "capture_host_seconds": 1.0024045999889495,
+  "stop_status": [
+    1163152689,
+    65470482,
+    0,
+    2592006,
+    10802,
+    18,
+    119999998,
+    0
+  ],
+  "quality": {
+    "records": 2592006,
+    "loss": false,
+    "synced": true,
+    "ended": true,
+    "trailingBytes": 0,
+    "fclk": 119999998,
+    "tckKhz": 999,
+    "refClockHz": 199999998
+  },
+  "packets": 10802,
+  "sequence_ok": true,
+  "capture_id_ok": true,
+  "etm_bytes": 2592006,
+  "etm_sha256": "9c82dc7560095edf9a346aa19018a7dc71c5e7819017f4abe4793298381a8043",
+  "capture_passed": true,
+  "restored": true,
+  "rcc_after": [
+    50548355,
+    5309450
+  ],
+  "fpb_restored": true,
+  "usb_reader_errors": []
+}

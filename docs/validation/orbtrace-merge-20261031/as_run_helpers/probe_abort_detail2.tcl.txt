@@ -1,9 +1,0 @@
-connect -url tcp:127.0.0.1:3121
-after 200
-targets -set -filter {name =~ "ARM*#0"}
-stop
-foreach reg {cp15.c5 cp15.c6} {if {[catch {rrd $reg} v]} {puts "REGISTER_ERROR $v"} else {puts $v}}
-puts [mrd -force 0x1d078 16]
-con
-disconnect
-exit

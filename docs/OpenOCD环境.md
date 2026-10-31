@@ -1,3 +1,5 @@
+> 本文件保留原验收/测量结论。已退出主目录的逐轮细节可由Git tag `archive/main-before-slim-20261031`追溯；当前使用入口见根README和prebuilt/golden。
+
 # OpenOCD 环境
 
 2026-10-25 升级到带异步 CMSIS-DAP 后端的 nightly。

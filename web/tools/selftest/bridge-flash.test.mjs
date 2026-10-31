@@ -5,7 +5,7 @@ import {spawn} from 'node:child_process';
 import {firmwareLoadBytes,releaseBackend} from '../../bridge/rtt-bridge.mjs';
 
 test('flash accounting uses ELF load bytes instead of debug-bearing file size',()=>{
-  const bytes=fs.readFileSync(new URL('../../../etm-service/firmware/stm32f103_cdc_trace/fw-ze.elf',import.meta.url));
+  const bytes=fs.readFileSync(new URL('../../../prebuilt/golden/f103ze-cdc48.elf',import.meta.url));
   assert.equal(firmwareLoadBytes('fw.elf',bytes),20168);
   assert(bytes.length>1000000);
 });

@@ -18,7 +18,7 @@ def main():
                         *map(str,rtl),str(ROOT/'fpga/sim/sim_primitives.v'),
                         str(ROOT/'fpga/sim/tb_orbtrace_signal_replay.sv')],check=True)
     rows=[]
-    source=ROOT/'docs/validation/f103ze-web-flow-20261031/frequency/samples/48mhz'
+    source=ROOT/'tools/tests/fixtures/trace-pads-48mhz'
     for capture in sorted(source.glob('cpu48-div1*')):
         samples=unpack((capture/'raw.samples16').read_bytes())
         filtered=filter_samples(samples,'stable2');_,edges=physical(filtered,200_000_000)

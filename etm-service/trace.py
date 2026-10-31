@@ -26,9 +26,9 @@ REPO = SERVICE.parent
 TOOLS = SERVICE / 'tools'
 CLI = TOOLS / 'trace_cli.py'
 BOARD = REPO / 'tools' / 'test_orbtrace_board.py'
-DEFAULT_TARGET_ELF = REPO / 'prebuilt/20261031_f103ze_cdc_trace/fw-48-echo.elf'
-DEFAULT_BIT = REPO / 'prebuilt/20261031_filtered_tpiu/zynqdap_filtered.bit'
-DEFAULT_ZYNQ_ELF = REPO / 'prebuilt/20261031_filtered_tpiu/zynqdap_filtered.elf'
+DEFAULT_TARGET_ELF = REPO / 'prebuilt/golden/f103ze-cdc48.elf'
+DEFAULT_BIT = REPO / 'prebuilt/golden/probe.bit'
+DEFAULT_ZYNQ_ELF = REPO / 'prebuilt/golden/application.elf'
 PROTOCOL = 'trace-cli/1'
 
 
@@ -86,6 +86,7 @@ def doctor(argv=None):
     parser=argparse.ArgumentParser(prog="trace.py doctor")
     parser.add_argument("--runtime",type=Path,help="toolbox工作台运行时目录；读取真实URL与配对声明")
     parser.add_argument("--service-url",help="显式服务根URL，如http://127.0.0.1:8882/etm")
+    parser.add_argument("--offline",action='store_true',help='仅检查本地文件/依赖，不枚举USB、不访问运行服务')
     args=parser.parse_args(argv)
     started=time.perf_counter()
     try:
@@ -108,12 +109,16 @@ def doctor(argv=None):
     exes = ['etm_decode.exe', 'etm_export.exe', 'etm_frontend.exe', 'etm_index.exe', 'etm_storebuild.exe']
     checks['native'] = {'ok': all((SERVICE / 'build-native' / n).is_file() for n in exes),
                         'files': {n: (SERVICE / 'build-native' / n).is_file() for n in exes}}
-    checks['zynq'] = zynq_status()
+    checks['zynq'] = ({'ok':True,'ready':False,'skipped':True,'message':'offline: hardware not inspected'}
+                      if args.offline else zynq_status())
     try:
         import urllib.request
-        with urllib.request.urlopen(service_url.rstrip('/')+'/api/health', timeout=2) as response:
-            checks['service'] = {'ok': response.status == 200, 'url':service_url,
-                                 'health': json.loads(response.read().decode('utf-8'))}
+        if args.offline:
+            checks['service'] = {'ok':True,'skipped':True,'message':'offline: service not contacted'}
+        else:
+            with urllib.request.urlopen(service_url.rstrip('/')+'/api/health', timeout=2) as response:
+                checks['service'] = {'ok': response.status == 200, 'url':service_url,
+                                     'health': json.loads(response.read().decode('utf-8'))}
     except Exception as error:
         checks['service'] = {'ok': False, 'url':service_url,'error': str(error)}
     checks['target_elf'] = {'ok': DEFAULT_TARGET_ELF.is_file(), 'path': str(DEFAULT_TARGET_ELF)}
@@ -127,11 +132,13 @@ def doctor(argv=None):
         checks['pair']={'ok':all(f['ok'] for f in files.values()),'files':files,
                         'identityScope':'runtime declaration and local file hashes; does not attest the loaded FPGA'}
         profile=checks['service'].get('health',{}).get('decodeEngineProfile',{})
-        checks['nativeProfile']={'ok':profile.get('name')=='native' and profile.get('perInstructionJsonl') is False,'profile':profile}
+        checks['nativeProfile']=({'ok':True,'skipped':True} if args.offline else
+                                 {'ok':profile.get('name')=='native' and profile.get('perInstructionJsonl') is False,'profile':profile})
     else:
         checks['bit'] = {'ok': DEFAULT_BIT.is_file(), 'path': str(DEFAULT_BIT)}
+        checks['zynq_elf'] = {'ok': DEFAULT_ZYNQ_ELF.is_file(), 'path': str(DEFAULT_ZYNQ_ELF)}
     ok = all(item.get('ok') for item in checks.values())
-    payload = envelope('doctor', ok, {'checks': checks}, code=0 if ok else 3, started=started)
+    payload = envelope('doctor', ok, {'checks': checks,'offline':args.offline}, code=0 if ok else 3, started=started)
     if not ok:
         payload['error'] = {'type': 'CliError', 'message': '依赖/服务未就绪', 'details': checks}
     print(json.dumps(payload, ensure_ascii=False))

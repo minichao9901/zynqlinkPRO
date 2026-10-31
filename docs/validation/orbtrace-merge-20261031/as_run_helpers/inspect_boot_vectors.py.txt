@@ -1,5 +1,0 @@
-from pathlib import Path
-import struct
-p=Path('prebuilt/20261031_orbtrace_opt_qspi_7020_120/BOOT.bin').read_bytes();o=struct.unpack_from('<I',p,0x9c)[0]
-for i in range(3):
- a=struct.unpack_from('<16I',p,o+i*64);print(i,hex(a[3]),hex(a[4]),hex(a[5]*4),p[a[5]*4:a[5]*4+32].hex())

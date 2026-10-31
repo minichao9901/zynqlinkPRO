@@ -1,9 +1,0 @@
-from pathlib import Path
-import subprocess,sys,json
-root=Path('E:/zynqlinkPRO_orbtrace_opt/build/transport_baseline_00b9f2f');out=Path('E:/zynqlinkPRO_orbtrace_opt/build/cm3_validation/phase_sweep_baseline');out.mkdir(exist_ok=True)
-rows=[]
-for phase in [0,1]:
- for boundary in [0,1]:
-  cmd=[sys.executable,str(root/'tools/run_cm3_sim.py'),'--top','tb_cm3_swd','half_ns=4.166666736','transfer_delay=1','narrow_clock=1',f'phase={phase}',f'rx_boundary={boundary}','return_ns=16','target_clk_ns=10.416667','words=2']
-  p=subprocess.run(cmd,cwd=root,capture_output=True,text=True,errors='replace',timeout=600)
-  text=(root/'build/cm3_sim/tb_cm3_swd/xsim.log').read_text(errors='replace');(out/f'phase{phase}_rx{boundary}.txt').write_text(text,encoding='utf-8');rows.append({'phase':phase,'rx_boundary':boundary,'returncode':p.returncode,'passed':p.returncode==0,'tail':p.stdout[-700:]});(out/'summary.json').write_text(json.dumps(rows,indent=2),encoding='utf-8');print(phase,boundary,p.returncode,flush=True)

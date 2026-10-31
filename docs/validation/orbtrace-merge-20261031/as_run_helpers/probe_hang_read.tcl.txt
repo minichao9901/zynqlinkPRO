@@ -1,7 +1,0 @@
-connect -url tcp:127.0.0.1:3121
-after 200
-targets -set -filter {name =~ "ARM*#0"}
-puts [rrd pc]
-foreach a {0xf8000170 0xf8000108 0x40010000 0x40010004 0x40010008 0x40010010 0x4001004c 0x40010080 0x40010094 0x42020000} {puts [format "CSR %08X %08X" $a [mrd -force -value $a]]}
-disconnect
-exit

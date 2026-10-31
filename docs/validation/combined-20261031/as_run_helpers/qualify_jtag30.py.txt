@@ -1,9 +1,0 @@
-import subprocess,sys,json
-from pathlib import Path
-r=Path.cwd();out=r/'docs/validation/combined-20261031/jtag30_qualification';out.mkdir(exist_ok=False);results=[]
-for mode in ['auto','auto','auto','17','17','17']:
- n=len(results);dest=out/f'case_{n}_{mode}.json';cmd=[sys.executable,'tools/run_f103_jtag_fixture.py','--restore-swj','2','--output',str(dest.with_name(dest.stem+'_fixture.json')),'--',sys.executable,'tools/benchmark_sram_matrix.py','--transport','jtag','--speeds','30000000','--seconds','1','--repeats','5','--bit',str(r/'prebuilt/20261031_combined_raw4_7020_120/probe.bit'),'--elf',str(r/'prebuilt/20261031_combined_raw4_7020_120/application.elf'),'--output',str(dest)]
- if mode!='auto':cmd+=['--jtag-timing',mode]
- with dest.with_suffix('.log').open('w') as log:p=subprocess.run(cmd,cwd=r,stdout=log,stderr=subprocess.STDOUT)
- d=json.loads(dest.read_text()) if dest.exists() else {};results.append({'mode':mode,'returncode':p.returncode,'rows':d.get('rows'),'restore_match':d.get('restore_match'),'command':cmd});(out/'results.json').write_text(json.dumps(results,indent=2)+'\n');print(n,mode,p.returncode,[(x.get('JTAG_sampling_mode'),x.get('passed'),x.get('error')) for x in d.get('rows',[])],flush=True)
- assert d.get('restore_match') is True,'restore not verified; stop'

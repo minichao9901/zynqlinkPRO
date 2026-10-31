@@ -13,6 +13,7 @@ Usage::
 from __future__ import annotations
 
 import argparse
+import os
 import json
 import re
 import subprocess
@@ -28,7 +29,8 @@ def run(top, plusargs, timeout=3600):
     cmd = [sys.executable, str(RUNNER), '--top', top, *plusargs]
     p = subprocess.run(cmd, cwd=str(ROOT), capture_output=True, text=True,
                        errors='replace', timeout=timeout)
-    log = ROOT / f'build/cm3_sim/{top}/xsim.log'
+    work_root = Path(os.environ.get('ZYNQLINK_WORK_DIR', str(ROOT.parent / 'zynqlinkPRO-work')))
+    log = work_root / 'cm3_sim' / top / 'xsim.log'
     text = log.read_text(encoding='utf-8', errors='replace') if log.exists() else p.stdout
     return p.returncode, text
 

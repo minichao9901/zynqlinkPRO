@@ -1,0 +1,36 @@
+{
+  "scope": "Offline source/data curation; no synthesis, no PL/PS build or board/Flash operations",
+  "parent": "6df629884f8111e155b5f3ab5e52328dd1029a1c",
+  "before_working_tree_GiB": 43.757,
+  "python_tests": 45,
+  "web_tests": 39,
+  "module_syntax_checks": 142,
+  "protocol_groups": 9,
+  "real_CM3_JTAG": "PASS rebuilt XSim snapshot with retained encrypted model",
+  "fixture_equivalence": "PASS1759 events including503 boundaries;5468243 reconstructed records",
+  "curated_business_records": 2,
+  "formal_Zynq_packages": [
+    "prebuilt/golden",
+    "prebuilt/recovery"
+  ],
+  "artifact_identity": {
+    "prebuilt/golden/probe.bit": "1da17cb60175bbc2b7abd647770c7053bd7b7097e0d38aa819fb89678d564473",
+    "prebuilt/golden/application.elf": "e977914c2924ab4cac13f4075de0a5108d1e2e8cf48966fb8fbdea3a358e0b2c",
+    "prebuilt/recovery/BOOT.bin": "ee7116bc71b0c7f0fdbebed75c5c85137e80ec7ef7c1b8cc3db50cebb39f1185"
+  },
+  "CLI": {
+    "indexed": 189,
+    "runnable_plans": 120,
+    "hardware_validation_claimed": false
+  },
+  "known_limitations": [
+    "Cross-session HSS missingDEF remains deferred",
+    "ETM gaps/unknownExecution remain unchanged",
+    "Native decode output at arbitrary external maintenance paths was not accepted; final decode used project temporary workdir",
+    "System TEMP native JSON issue fixed by using input work directory"
+  ],
+  "private_flash_backups": "E:/zynqlinkPRO-private/flash-backups",
+  "after_working_tree_bytes": 231398532,
+  "after_files": 3128,
+  "full_local_untracked_list": "E:/zynqlinkPRO/docs/not-in-git-files.txt"
+}

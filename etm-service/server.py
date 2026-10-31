@@ -436,15 +436,7 @@ def firmware():
 
 
 PROFILES = {
-    'h743-cdc-60': ('H743 CDC · CPU 60 / TRACECLK 30 MHz · 实验档', 'stm32h743_cdc_trace/fw.elf'),
-    'spi-70': ('SPI · 70 MHz CPU / 35 MHz trace · 稳定基准 v1', 'stm32h7b0_spi_trace/stable-70-35-v1/fw.elf'),
-    'spi-140-r8': ('SPI · 140 MHz CPU / 35 MHz trace · 对照档', 'stm32h7b0_spi_trace/fw-140-r8.elf'),
-    'spi-140': ('SPI · 140 MHz CPU / 70 MHz trace · DDR/滤波验证档', 'stm32h7b0_spi_trace/fw-140.elf'),
-    'fixture': ('8 MHz CPU / 4 MHz trace · 原示例', 'stm32h7b0_etm_board_v1/fw.elf'),
-    'spi-280': ('SPI · 280 MHz CPU / 70 MHz trace · 验证档', 'stm32h7b0_spi_trace/fw-280.elf'),
-    'spi-280-r5': ('SPI · 280 MHz CPU / 56 MHz trace', 'stm32h7b0_spi_trace/fw-280-r5.elf'),
-    'spi-280-r6': ('SPI · 280 MHz CPU / 46.667 MHz trace', 'stm32h7b0_spi_trace/fw-280-r6.elf'),
-    'spi-280-r8': ('SPI · 280 MHz CPU / 35 MHz trace · 历史验收档', 'stm32h7b0_spi_trace/fw-280-r8.elf'),
+    'fixture': ('F103ZE CDC-ETM · 48MHz · Golden', ROOT.parent/'prebuilt/golden/f103ze-cdc48.elf'),
 }
 
 def firmware_path(key):
@@ -1367,7 +1359,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--port', type=int, default=8766)
     args = parser.parse_args()
-    samples()
+    # Business records are retained explicitly; do not recreate historical demos.
     app.run(host='127.0.0.1', port=args.port, threaded=True, debug=False)
 
 

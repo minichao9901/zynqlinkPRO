@@ -1,5 +1,5 @@
 """Real-CM3 SRAM/RTT/HSS RTL throughput at the board's realized link settings."""
-import argparse,hashlib,json,re,subprocess,sys
+import argparse,hashlib,json,os,re,subprocess,sys
 from pathlib import Path
 r=Path(__file__).resolve().parents[1]
 
@@ -26,7 +26,7 @@ def main():
     p.add_argument('--return-delay-ns',type=float,default=16.0,help='Explicit model-only pad/return latency; does not change recorded board settings')
     p.add_argument('--first-sram-log',type=Path,help='Import separately validated first-rate SRAM stages; subsequent RTT/HSS rerun must complete')
     a=p.parse_args();out=a.output_dir.resolve();out.mkdir(parents=True,exist_ok=True)
-    top='tb_cm3_'+a.transport;work=r/'build/cm3_sim'/top
+    top='tb_cm3_'+a.transport;work=Path(os.environ.get('ZYNQLINK_WORK_DIR',str(r.parent/'zynqlinkPRO-work')))/'cm3_sim'/top
     source_files=list((r/'fpga/rtl').glob('*.v'))+[r/'fpga/sim'/f'{top}.sv',r/'fpga/sim/cm3_perf_tasks.svh',r/'fpga/sim/cm3_target.sv']
     sources={str(v.relative_to(r)):hashlib.sha256(v.read_bytes()).hexdigest() for v in source_files}
     settings=[v for v in json.loads(a.board_settings.read_text())['rows'] if v['transport']==a.transport]

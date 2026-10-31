@@ -1,3 +1,5 @@
+> 本轮精简没有生成或烧写新BOOT。当前recovery包是旧已验收恢复版本，构建新Golden BOOT后必须另行验收。
+
 # Zynq-7020 QSPI 启动，应用保留在 OCM
 
 本目录构建 2018.3 SDK 的 FSBL 和只读 Flash 备份辅助程序，主应用 bit/ELF 没有为固化重新链接到 DDR。USB/DAP 缓冲区仍在 DDR，队列未修改。
@@ -15,8 +17,8 @@ E:/Xilinx/SDK/2018.3/bin/hsi.bat -source firmware/boot/hardware/generate_bsp.tcl
 # 将 SDK GCC 与 gnuwin/bin 加入 PATH，RDI_PLATFORM=win64；BSP 必须串行构建：
 make -C build/qspi_boot/bsp -j1
 python tools/build_probe_boot.py --bsp build/qspi_boot/bsp `
-  --bit prebuilt/20261031_orbtrace_opt_7020_120_candidate/zynqlink_probe.bit `
-  --elf prebuilt/20261031_orbtrace_opt_7020_120_candidate/zynqlink_probe_60.elf
+  --bit prebuilt/golden/probe.bit `
+  --elf prebuilt/golden/application.elf
 ```
 
 编译使用 `-Os`、函数/数据分节、GC，固定 FSBL 构建时间字符串。输出 stage0/stage2/programmer ELF、只读 `qspi_read.elf`、Bootgen BIF/BOOT.bin、分区/MD5 检查、来源哈希和链接 map。`fsbl_programmer.elf` 强制加载器采用 JTAG 分支，供真实启动拨码已经是 QSPI 的板子使用 `program_flash`。

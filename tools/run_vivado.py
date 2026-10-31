@@ -16,9 +16,10 @@ env = os.environ.copy()
 paths = [v/'bin/unwrapped/win64.o', v/'lib/win64.o', v/'tps/win64',
          v/'bin/unwrapped/win64.o/Microsoft.VC140.CRT', v/'tps/win64/jre9.0.4/bin/server', v/'tps/win64/jre9.0.4/bin']
 env['PATH'] = os.pathsep.join(str(p) for p in paths) + os.pathsep + env['PATH']
-runtime = Path(__file__).resolve().parents[1]/'build/vivado_runtime'
+work_root = Path(os.environ.get('ZYNQLINK_WORK_DIR', str(Path(__file__).resolve().parents[2]/'zynqlinkPRO-work')))
+runtime = work_root/'runtime/vivado'
 runtime.mkdir(parents=True, exist_ok=True)
-tmp = runtime.parent/'vivado_tmp'
+tmp = work_root/'tmp/vivado'
 tmp.mkdir(exist_ok=True)
 env['TEMP'] = env['TMP'] = str(tmp)
 seen = set()
