@@ -16,6 +16,7 @@ def main():
     a.add_argument('--bit',type=Path,required=True);a.add_argument('--elf',type=Path,required=True)
     a.add_argument('--seconds',type=float,default=.4);a.add_argument('--repeats',type=int,default=3)
     a.add_argument('--transport',choices=['both','swd','jtag'],default='both')
+    a.add_argument('--jtag-timing',type=int,choices=[0,1,16,17],help='Diagnostic: force sampling after normal setup; default remains automatic')
     a.add_argument('--speeds',default='1000000,10000000,25000000,35000000,50000000,60000000',
                    help='Comma-separated requested link rates in Hz')
     args=a.parse_args();args.output.parent.mkdir(parents=True,exist_ok=True)
@@ -53,6 +54,10 @@ def main():
                 row=dict(transport=transport,requested_Hz=khz*1000,passed=False)
                 try:
                     setup(o,i,khz,transport)
+                    if transport=='jtag' and args.jtag_timing is not None:
+                        timing=xfer(o,i,[0x89,args.jtag_timing])
+                        assert timing[1]==0 and timing[2]==args.jtag_timing,timing.hex()
+                        row['forced_JTAG_sampling_mode']=args.jtag_timing
                     diag=xfer(o,i,[0x80,255]);hz,cfg=struct.unpack_from('<II',diag,4)
                     row.update(FCLK_Hz=hz,cfg=hex(cfg),waveform=swd_clock_details(hz,cfg))
                     row['actual_link_Hz']=row['waveform']['SWCLK_Hz']

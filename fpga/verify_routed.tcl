@@ -1,6 +1,14 @@
 set root [file normalize [file join [file dirname [info script]] ..]]
 set out [file join $root build fpga_dma_global]
 open_checkpoint [file join $out zynqlink_dma.runs impl_1 system_wrapper_routed.dcp]
+set swclk_launch [get_cells -quiet -hier -filter {NAME =~ *short_core_clock_reg}]
+if {[llength $swclk_launch] != 1} {error "SWCLK launch register missing"}
+set swclk_path [get_timing_paths -from $swclk_launch -to [get_ports swclk_0] -max_paths 1]
+if {![llength $swclk_path] || [get_property REQUIREMENT $swclk_path] > 7.001 || [get_property SLACK $swclk_path] < 0} {
+    error "Short SWCLK clock-to-pad path is missing its passing <=7ns budget"
+}
+report_timing -from $swclk_launch -to [get_ports swclk_0] -max_paths 2 -file [file join $out swclk_launch.rpt]
+puts "SWCLK_LAUNCH_VERIFIED slack=[get_property SLACK $swclk_path]"
 # A forward reference inside a generate block can become an undriven local
 # net in Vivado 2018.3, silently tying every GPIO IOBUF's T pin high. Reject
 # that netlist even if internal STA passes; the two-wire loopback caught it.

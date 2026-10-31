@@ -11,4 +11,5 @@ foreach run [get_runs -filter {IS_SYNTHESIS}] {
 }
 foreach run [get_runs -filter {IS_IMPLEMENTATION}] {
     set_property STEPS.INIT_DESIGN.TCL.PRE $hook $run
+    set_property STEPS.OPT_DESIGN.TCL.PRE [file join [file dirname [info script]] probe_io_timing.tcl] $run
 }

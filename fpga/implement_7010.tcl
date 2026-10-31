@@ -24,6 +24,7 @@ create_project -in_memory -part xc7z010clg400-2
 read_edif [file join $out system_wrapper.edf]
 link_design -top system_wrapper -part xc7z010clg400-2
 read_xdc [file join $out system.xdc]
+source [file join $root fpga probe_io_timing.tcl]
 create_clock -name clk_fpga_0 -period [expr {1000.0/$fclk_mhz}] [get_pins {system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]}]
 report_utilization -file [file join $out utilization_linked.rpt]
 # A per-bit indexed receive write creates up to 256 unrelated clock enables.
