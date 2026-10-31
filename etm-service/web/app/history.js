@@ -1,4 +1,5 @@
 import {fetchExecutionExport,saveExportFile} from './export.js';
+import {captureTransportFailed,captureTransportText} from './capture-quality.js';
 import {integrityView,flameView} from './analysis-views.js';
 import {bindFunctionTimeline} from './function-timeline.js';
 import {createZoomControls} from './zoom-controls.js';
@@ -62,7 +63,8 @@ export class HistoryView{
     $('metrics').textContent=n(r.summary.instructions)+' 路径 · '+n(r.quality.validPackets)+' 包 · '+r.summary.exceptions+' 中断'+cycleMetricsText(r);
     $('quality').textContent=`${r.targetVerified?'采集时镜像已核对':'未记录采集时镜像核对'} · 未知条件 ${r.quality.unknownExecution} 条 · 包问题 ${r.quality.packetIssues} · overflow ${r.quality.overflowPackets}`+(r.status.lastErrorCode?' · 解码器错误 '+r.status.lastErrorCode:'')+(r.quality.unprocessedBytes?' · 未处理 '+r.quality.unprocessedBytes+' 字节':'')+' · 捕获边界保留';
     if(r.recordError)$('quality').textContent+=' · 最近操作失败：'+r.recordError;
-    if(r.captureQuality)$('quality').textContent+=' · Zynq：'+(r.captureQuality.loss?'有丢失':'无丢失')+' / '+(r.captureQuality.synced?'已同步':'未同步')+' / '+(r.captureQuality.ended?'完整结束':'未完整结束');
+    if(r.captureQuality)$('quality').textContent+=' · Zynq：'+captureTransportText(r.captureQuality);
+    $('quality').classList.toggle('bad',captureTransportFailed(r.captureQuality));
     if(r.quality.unaccountedBytes)$('quality').textContent+=' · 字节覆盖缺口 '+r.quality.unaccountedBytes;
     if(r.quality.overlapBytes)$('quality').textContent+=' · 字节覆盖重叠 '+r.quality.overlapBytes;
     if(r.quality.unsynchronizedBytes)$('quality').textContent+=' · 未同步 '+r.quality.unsynchronizedBytes+' 字节';

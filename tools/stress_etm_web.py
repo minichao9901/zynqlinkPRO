@@ -13,7 +13,7 @@ import sys
 
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
-from tools.f103_stream_acceptance import Streams
+from tools.f103_stream_acceptance import Streams,symbol
 from toolbox import pack_file
 
 
@@ -124,7 +124,11 @@ class Stress(Streams):
                     if not controls['disabled']:
                         if '失败' in status or 'loss=' in status or '超时' in status or '错误' in status:
                             raise RuntimeError(status)
-                        if sid and sid!=previous:break
+                        if sid and sid!=previous:
+                            folder=ROOT/'etm-service/records'/sid
+                            metadata=json.loads((folder/'session.json').read_text(encoding='utf8'))
+                            if metadata.get('errorStage')=='capture':raise RuntimeError(metadata.get('error') or 'Capture failed')
+                            if (folder/'decoded.json').is_file():break
                     time.sleep(.05)
                 else:raise TimeoutError('Capture did not finish: '+status)
                 self.invoke('etm','waitForDisplay',target='history')
@@ -135,6 +139,10 @@ class Stress(Streams):
                 if quality.get('loss') or not quality.get('synced') or not quality.get('ended'):
                     raise RuntimeError('Transport quality did not pass: '+str(quality))
                 if decoded['summary']['packetIssues']:raise RuntimeError('Decoder packet errors')
+                entry=decoded.get('captureStart') or {}
+                if entry.get('selectedPC')!=(symbol(self.args.elf,function)&~1) or not entry.get('entryRecovered'):
+                    raise RuntimeError('Selected function entry was not recovered: '+str(entry))
+                if not decoded['summary'].get('functions',{}).get(function):raise RuntimeError('Trace did not execute the requested function')
                 row.update(record=sid,seconds=time.perf_counter()-started,transport=quality,summary=decoded['summary'],
                     rawBytes=(record/'capture.bin').stat().st_size,rawSha256=hashlib.sha256((record/'capture.bin').read_bytes()).hexdigest(),
                     captureStart=decoded.get('captureStart'),rccAfter=self.invoke('etm','inspect',target='target')['rcc'])

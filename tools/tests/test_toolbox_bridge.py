@@ -99,6 +99,19 @@ class BridgeTests(unittest.TestCase):
                     self.assertEqual((record/'capture.bin').read_bytes(),raw)
                     self.assertFalse((record/'decoded.json').exists())
                     self.assertIn('loss=',backend.jobs[job['job']]['error'])
+                    if label=='loss':
+                        with client.post('/etm/api/decode/'+job['record'],json={}) as response:
+                            redecoded=response.json['job']
+                        deadline=time.monotonic()+60
+                        while backend.jobs[redecoded]['state'] not in ('done','error') and time.monotonic()<deadline:time.sleep(.05)
+                        self.assertEqual(backend.jobs[redecoded]['state'],'done',backend.jobs[redecoded])
+                        saved=json.loads((record/'session.json').read_text(encoding='utf8'))
+                        self.assertEqual(saved['errorStage'],'capture')
+                        self.assertEqual(saved['captureStatus'],'failed')
+                        with client.get('/etm/api/browse/'+job['record']+'/overview') as response:
+                            self.assertTrue(response.json['captureQuality']['loss'])
+                            self.assertTrue(response.json['recordError'])
+                        backend.browse_store(job['record']).close()
                     continue
                 with client.get('/etm/api/browse/'+job['record']+'/overview') as response:
                     self.assertEqual(response.status_code,200,response.data)

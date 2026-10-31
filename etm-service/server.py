@@ -645,8 +645,17 @@ def change(jid, **fields):
 
 def record_failure(sid,error,stage):
     try:
-        m=meta(sid);m.update(error=str(error),errorStage=stage);save(sid,m)
+        m=meta(sid);m.update(error=str(error),errorStage=stage)
+        if stage=='capture':m.update(captureError=str(error),captureStatus='failed')
+        save(sid,m)
     except Exception:pass
+
+
+def clear_decode_failure(metadata):
+    if metadata.get('captureError'):
+        metadata.update(error=metadata['captureError'],errorStage='capture')
+    elif metadata.get('errorStage')!='capture':
+        metadata.pop('error',None);metadata.pop('errorStage',None)
 
 
 def capture_start_info(events,metadata):
@@ -761,8 +770,7 @@ def finalize_slices(sid, folder, m, slices, step, seconds, seq_off, parts):
     m = {**m, 'slices': slices, 'sliceSeconds': step, 'longWindow': True,
          'decodeStatus': 'building-index', 'summary': base['summary'],
          'captureScope': 'sliced-window', 'eventCount': seq_off}
-    m.pop('error', None)
-    m.pop('errorStage', None)
+    clear_decode_failure(m)
     save(sid, m)
     browse_store(sid).ensure()
     save(sid, {**m, 'decodeStatus': 'done'})
@@ -828,7 +836,7 @@ def _decode_job(jid, sid):
 
         if 'sources' in r:save_json(folder/'sources.json',r['sources'])
         m['summary'] = r['summary']
-        m.pop('error',None);m.pop('errorStage',None);m['decodeStatus']='done'
+        clear_decode_failure(m);m['decodeStatus']='done'
         save(sid, m)
         with lock:
             stop_requested=jobs[jid].get('_stopped',False)

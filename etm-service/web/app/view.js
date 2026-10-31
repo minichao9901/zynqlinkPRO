@@ -11,6 +11,7 @@ import {COMMON_TARGETS,completeClocks,targetPort} from './clock.js';
 import {offlineSettings} from './offline-config.js';
 import {bindFilePicker} from './file-picker.js';
 import {fetchExecutionExport,saveExportFile} from './export.js';
+import {captureTransportFailed,captureTransportText} from './capture-quality.js';
 const $=id=>document.getElementById(id),hex=n=>'0x'+(n>>>0).toString(16).padStart(8,'0'),sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const state={records:[],current:null,job:null,operation:false,elfInfo:null,elfId:null,elfFile:null,sourceFiles:{},sourceSnapshot:null,sourceCompat:false,sources:new SourceStore(),entryAddress:null,hseValues:{stm32h7b0:25,stm32h743:25,stm32f103ze:8},hseOverride:null,lastProfile:null,symbolAddress:null,pendingBreakpointRestore:[],lastTraceConfig:null,waiting:false,traceConfigDirty:false,sliceModel:null,sliceEventCount:null,capabilities:null,captureMaxSeconds:0.2,captureMaxSamples:1e8};
 const host=embeddedHost(),target=new EtmTarget(log,{host});
@@ -238,7 +239,7 @@ function renderRecordOptions(){
   for(const [kind,label]of [['demo','Demo'],['user','我的记录'],['experiment',all?'实验历史':'当前打开的历史']]){
     const items=visible.filter(r=>r.recordKind===kind);if(!items.length)continue;
     const group=document.createElement('optgroup');group.label=label;
-    for(const r of items){const option=new Option((kind==='demo'?'Demo · 70/35 MHz · 1 ms':r.name)+(r.decoded?'':' · 未解码'),r.id);option.title=r.name;group.append(option);}groups.push(group);
+    for(const r of items){const failed=r.captureError||r.errorStage==='capture'||captureTransportFailed(r.captureQuality);const option=new Option((failed?'采集失败 · ':'')+(kind==='demo'?'Demo · 70/35 MHz · 1 ms':r.name)+(r.decoded?'':' · 未解码'),r.id);option.title=r.name;group.append(option);}groups.push(group);
   }
   $('records').replaceChildren(new Option('选择记录…',''),...groups);if(current)$('records').value=current;
 }
@@ -267,7 +268,17 @@ async function selectSlice(index){
 $('show-experiments').onchange=renderRecordOptions;
 async function loadRecord(id){if(!id)throw Error('请选择记录');history.range=null;history.rangeHistory=[];history.window=null;$('scope-state').hidden=$('clear-scope').hidden=true;state.current=id;renderRecordOptions();$('records').value=id;const m=state.records.find(r=>r.id===id);
   state.sliceEventCount=Number(m?.eventCount)||null;state.sliceModel=m&&!m.decoded?null:normalizeSliceRecord(m);syncSliceTimeline();
-  if(m&&!m.decoded){history.unload(id);history.setLoading(false);$('record-description').textContent=m.name;$('metrics').textContent='原始记录';$('quality').textContent=m.error?'失败原因：'+m.error:'已保存波形，尚未解码';$('table-container').textContent='在文件页点击“单独解码”；失败记录保留原始证据';$('source-code').textContent='尚未解码，没有可信源码定位';$('source-location').textContent='';$('selected-instruction').textContent='';$('call-stack').textContent='尚未解码';return;}
+  if(m&&!m.decoded){
+    history.unload(id);history.setLoading(false);$('record-description').textContent=m.name;
+    const failed=m.captureError||m.errorStage==='capture'||captureTransportFailed(m.captureQuality);
+    $('metrics').textContent=(failed?'采集未通过 · ':'')+'原始记录';
+    $('quality').textContent=m.error?'失败原因：'+m.error:failed?'接收质量未通过：'+captureTransportText(m.captureQuality):'已保存波形，尚未解码';
+    $('quality').classList.toggle('bad',!!failed||!!m.error);$('quality').classList.remove('warn');
+    const notice=document.createElement('p');notice.className=failed?'bad':'hint';
+    notice.textContent=failed?'本次采集未通过，记录和失败原因已保留；重新解码不会修复接收丢失。':'在文件页点击“单独解码”；失败记录保留原始证据';
+    $('table-container').replaceChildren(notice);$('source-code').textContent='尚未解码，没有可信源码定位';
+    $('source-location').textContent='';$('selected-instruction').textContent='';$('call-stack').textContent='尚未解码';return;
+  }
   await history.load(id,m?.name);log('已按需载入记录 '+id);controls();syncSliceTimeline();
 }
 async function watchJob(id,{resume=false,kind='decode'}={}){
@@ -282,6 +293,11 @@ async function watchJob(id,{resume=false,kind='decode'}={}){
       state.failedCaptureJob=id;
       try{await api('stop/'+id,{});state.failedCaptureJob=null;}
       catch(cleanup){log('采集停止未确认：'+cleanup.message+'；请点击“停止采集”重试，确认前不能新建采集');}
+      try{
+        await refreshRecords();
+        const failed=await api('jobs/'+id),record=state.records.find(r=>r.id===failed.record);
+        if(record&&!record.decoded)await loadRecord(record.id);
+      }catch(refreshError){log('失败记录列表更新失败（保留首次错误）：'+refreshError.message);}
     }
     throw e;
   }finally{state.job=null;state.jobKind=null;state.jobPhase=null;controls();}
@@ -481,7 +497,7 @@ async function captureNative(options={}){
 async function openRecordForCli(id){
   if(state.operation||state.job)throw Error('请等待当前操作完成，再打开历史记录');
   state.operation=true;controls();
-  try{return await loadRecord(id);}finally{state.operation=false;controls();}
+  try{if(!state.records.some(r=>r.id===id))await refreshRecords();return await loadRecord(id);}finally{state.operation=false;controls();}
 }
 window.__etm={target,state,history,api,captureNative,openRecord:openRecordForCli,measureOpenRecord:async id=>{
   const started=performance.now();await openRecordForCli(id);const readerReady=performance.now();

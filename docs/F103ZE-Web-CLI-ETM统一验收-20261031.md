@@ -53,7 +53,7 @@ PS通过0x61回复的能力位声明0x62/64字节只读诊断，主机在文件�
 
 11项RTL用例通过，包括数据路径旧回归、单独解析异常、单独FIFO压力、RDY失锁、停止保留、clear时CDC旧标志不能重新锁存。
 46项CLI主机回归、8项研究测试及生产USB/ETM/JTAG host测试通过。
-新RTL/PS正在准备首次完整构建，**未生成或加载实验bit/ELF，未标为已验收**；旧Golden保持原文件。
+诊断RTL/PS的构建与时序结果见下段；**实验配对尚未上板验收**，旧Golden保持原文件。
 [RTL证据](validation/etm-diagnostics-rtl-20261101/result.json)。
 
 首次完整构建随后已结束：100MHz STA通过，但120MHz setup为-0.176ns，最差路径为帧BRAM输出经demux有效信号、
@@ -64,6 +64,13 @@ lookahead水位加法/比较到新增高水位寄存器CE。SWCLK 7ns独立预�
 另增加显式`ZYNQLINK_IMPLEMENT_FCLK_HZ=120000000`的实现约束选项，保留SWCLK7ns预算，准备重实现。
 PS已按Golden相同O3/Thumb/MAX_SWCLK60重建，SHA b07980ab…，OCM跨度120,976B；尚待120MHz新bit及上板验证。
 [失败时序与定位](validation/etm-diag-timing-attempt1-20261101/result.json)。
+
+压力测试同时暴露并修复失败历史展示：失败捕获未刷新进state.records时，openRecord误入decoded.json路径；
+现在失败后刷新并显示原始记录，列表/正文明确标“采集失败/采集未通过”，不再继续展示上一条成功结果。
+另修复成功重解码清掉采集失败的语义问题：captureError和captureStatus=failed独立保留；OpenCSD成功不等于接收无损。
+缺失或数字占位的质量标志显示“未知”，不能显示“无丢失”。真实失败记录已在Web打开并保存截图；
+后端回放明确注入loss后再成功C++重解码，确认采集错误仍保留。3项后端、44项Web回归通过。
+[展示与保留验证](validation/etm-failure-visibility-20261101/result.json)。
 
 ### 最初的只读研究与容量计划
 
