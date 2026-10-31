@@ -351,7 +351,10 @@ export class WebUsbDapProbe {
     //    **不要**用「一串短超时 transferIn 去排空」：WebUSB 没有取消接口，超时的那次
     //    传输会一直挂着，把后续响应偷走 —— 实测会把「响应回显不匹配」变成「USB 读 超时」。
     //    （这一条是 ETM 页侧真机踩到后写下的，合并时保留 —— 见 docs/driver-unification.md）
-    await this.resync();
+    // The native Zynq service has acknowledged a DAP-only queue epoch reset.
+    // Its OS reads can take 2s; issuing browser-style 600ms resync
+    // reads here can abandon HTTP replies and poison the following client.
+    if(!(d.nativeService && d.dapSynchronized))await this.resync();
     this._watchUsb();
     this._ready = true;
     this.maxWords = Math.max(1, Math.min(120, Math.floor((this.pkt - 8) / 4)));
@@ -411,6 +414,12 @@ export class WebUsbDapProbe {
    *   （本机真机踩到：页面刷新后 3 次里 1 次打不开）。现在先清队列、按短包重试一次。
    */
   async _detectFraming(){
+    // The native service is explicitly paired with this project's short-packet
+    // Zynq firmware. Do not run timeout-driven generic framing detection after
+    // its acknowledged queue synchronization.
+    if(this.device.nativeService && this.device.dapSynchronized){
+      FRAMING.set(this.device,'short');return 'short';
+    }
     const tryOne = async (framing, timeout) => {
       this._framing = framing;
       await this._ctrlRaw(CMD.Info, Uint8Array.of(0), timeout);

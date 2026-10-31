@@ -351,7 +351,10 @@ export class WebUsbDapProbe {
     //    **不要**用「一串短超时 transferIn 去排空」：WebUSB 没有取消接口，超时的那次
     //    传输会一直挂着，把后续响应偷走 —— 实测会把「响应回显不匹配」变成「USB 读 超时」。
     //    （这一条是 ETM 页侧真机踩到后写下的，合并时保留 —— 见 docs/driver-unification.md）
-    await this.resync();
+    // The native Zynq service has acknowledged a DAP-only queue epoch reset.
+    // Its OS reads can take 2s; issuing browser-style 600ms resync
+    // reads here can abandon HTTP replies and poison the following client.
+    if(!(d.nativeService && d.dapSynchronized))await this.resync();
     this._watchUsb();
     this._ready = true;
     this.maxWords = Math.max(1, Math.min(120, Math.floor((this.pkt - 8) / 4)));
@@ -411,6 +414,12 @@ export class WebUsbDapProbe {
    *   （本机真机踩到：页面刷新后 3 次里 1 次打不开）。现在先清队列、按短包重试一次。
    */
   async _detectFraming(){
+    // The native service is explicitly paired with this project's short-packet
+    // Zynq firmware. Do not run timeout-driven generic framing detection after
+    // its acknowledged queue synchronization.
+    if(this.device.nativeService && this.device.dapSynchronized){
+      FRAMING.set(this.device,'short');return 'short';
+    }
     const tryOne = async (framing, timeout) => {
       this._framing = framing;
       await this._ctrlRaw(CMD.Info, Uint8Array.of(0), timeout);
@@ -444,7 +453,7 @@ export class WebUsbDapProbe {
     return f;
   }
 
-  /** 一条命令的"写 + 读"，不做陈旧包重试（只给封包探测用）*/
+  /** 封包探测只写一次；读取时跳过前一会话的异命令回包，不重放命令。 */
   async _ctrlRaw(cmd, payload, timeout = 1500){
     timeout = Math.min(timeout, this._operationBudget?.check('探测 USB 封包') ?? timeout);
     const n = 1 + (payload ? payload.length : 0);
@@ -452,11 +461,16 @@ export class WebUsbDapProbe {
     req[0] = cmd;
     if (payload) req.set(payload, 1);
     await withTimeout(this.device.transferOut(this.epOut, req), timeout, 'USB 写');
-    const r = await withTimeout(this.device.transferIn(this.epIn, this.pkt), timeout, 'USB 读');
-    if (!r.data || !r.data.byteLength) throw new Error('收到空包');
-    const res = new Uint8Array(r.data.buffer, r.data.byteOffset, r.data.byteLength);
-    if (res[0] !== cmd) throw new Error(`响应回显 0x${res[0].toString(16)} ≠ 命令 0x${cmd.toString(16)}`);
-    return res.subarray(1);
+    const deadline=performance.now()+timeout;
+    for(let i=0;i<32;i++){
+      const left=deadline-performance.now();if(left<=0)break;
+      const r=await withTimeout(this.device.transferIn(this.epIn,this.pkt),left,'USB 读');
+      if(!r.data?.byteLength)continue;
+      const res=new Uint8Array(r.data.buffer,r.data.byteOffset,r.data.byteLength);
+      if(res[0]!==cmd){this.stale=(this.stale||0)+1;continue;}
+      return res.subarray(1);
+    }
+    throw new Error(`封包探测未收到命令 0x${cmd.toString(16)} 的匹配响应；已跳过陈旧回包，未重放命令`);
   }
 
   async _ctrl(cmd, payload, { deadline = Infinity } = {}){

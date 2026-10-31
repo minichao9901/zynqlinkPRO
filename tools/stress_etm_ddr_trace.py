@@ -1,7 +1,7 @@
 """AI F103-only DDR acceptance: changed entry, hardware window, CDC, native decode.
 
 Load and identity-verify the supplied probe pair before running. No Flash or
-target clock writes; no automatic retries. This is not Web/USB-DDR acceptance.
+target clock writes; no automatic retries. Web acceptance is a separate test.
 H743 remains on its existing ETMv4 Web/Kingst path pending separate board tests.
 """
 import argparse
@@ -28,6 +28,8 @@ def main():
     p.add_argument('--functions',default='cdc_poll,cdc_tx_poll')
     p.add_argument('--cdc-port',default='COM34')
     p.add_argument('--decode',action='store_true',help='Full native packet/range verification, may expand to large native.bin')
+    p.add_argument('--download',choices=('usb','physical'),default='usb')
+    p.add_argument('--verify-ddr-physical',action='store_true',help='Compare USB bytes with the same physical AP0 DDR buffer')
     a=p.parse_args()
     seconds=[float(x) for x in a.seconds.split(',')]
     functions=a.functions.split(',')
@@ -40,7 +42,7 @@ def main():
         if isinstance(expected,dict):expected=expected['sha256']
         if hashlib.sha256((pair/name).read_bytes()).hexdigest()!=expected:raise ValueError('pair hash mismatch')
     out.mkdir(parents=True,exist_ok=False)
-    report=dict(hardwareAccess=True,webAcceptance=False,usbDdrDownload=False,flashWrites=False,
+    report=dict(hardwareAccess=True,webAcceptance=False,usbDdrDownload=a.download=='usb',flashWrites=False,
         pair=str(pair),files=manifest['files'],reloadBetweenRounds=False,retryFailedRounds=False,
         runnerSha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),rows=[],passed=False)
     def save():(out/'result.json').write_text(json.dumps(report,indent=2)+'\n')
@@ -55,7 +57,9 @@ def main():
             echo.start()
             command=[sys.executable,str(ROOT/'tools/test_orbtrace_board.py'),'--target-elf',str(a.target_elf.resolve()),
                 '--bit',str(pair/'probe.bit'),'--elf',str(pair/'application.elf'),'--output',str(work),
-                '--milliseconds',str(duration*1000),'--speed-khz','1000','--entry',function,'--ddr-physical']
+                '--milliseconds',str(duration*1000),'--speed-khz','1000','--entry',function]
+            command+=['--ddr-physical'] if a.download=='physical' else ['--transport','ddr']
+            if a.verify_ddr_physical:command+=['--verify-ddr-physical']
             started=time.time()
             # Wait for the target-restoration finally block; do not kill a capture subprocess.
             run=subprocess.run(command,capture_output=True)

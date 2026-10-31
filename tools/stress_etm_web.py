@@ -57,6 +57,10 @@ class Echo:
 
 
 class Stress(Streams):
+    def __init__(self,args):
+        super().__init__(args)
+        runtime=json.loads((Path(args.runtime)/'toolbox-runtime.json').read_text(encoding='utf8'))
+        self.records=Path(args.records_root or runtime.get('recordsDirectory') or ROOT/'etm-service/records')
     def ready(self,selector,timeout=30):
         until=time.monotonic()+timeout
         while time.monotonic()<until:
@@ -130,17 +134,20 @@ class Stress(Streams):
                         if '失败' in status or 'loss=' in status or '超时' in status or '错误' in status:
                             raise RuntimeError(status)
                         if sid and sid!=previous:
-                            folder=ROOT/'etm-service/records'/sid
+                            folder=self.records/sid
                             metadata=json.loads((folder/'session.json').read_text(encoding='utf8'))
                             if metadata.get('errorStage')=='capture':raise RuntimeError(metadata.get('error') or 'Capture failed')
                             if (folder/'decoded.json').is_file():break
                     time.sleep(.05)
                 else:raise TimeoutError('Capture did not finish: '+status)
                 self.invoke('etm','waitForDisplay',target='history')
-                record=ROOT/'etm-service/records'/sid
+                record=self.records/sid
                 meta=json.loads((record/'session.json').read_text(encoding='utf8'))
                 decoded=json.loads((record/'decoded.json').read_text(encoding='utf8'))
                 quality=meta.get('captureQuality') or {}
+                if quality.get('transport')=='ddr-usb/1':
+                    if not meta.get('captureExtent',{}).get('complete') or meta.get('captureWarning'):
+                        raise RuntimeError('Measured DDR window metadata is inconsistent: '+str(meta.get('captureWarning')))
                 if quality.get('loss') or not quality.get('synced') or not quality.get('ended'):
                     raise RuntimeError('Transport quality did not pass: '+str(quality))
                 if decoded['summary']['packetIssues']:raise RuntimeError('Decoder packet errors')
@@ -158,7 +165,7 @@ class Stress(Streams):
                 # Locate only this round's new evidence; never retry the action.
                 if row.get('captureAttemptUnix'):
                     candidates=[]
-                    for session_path in (ROOT/'etm-service/records').glob('capture-*/session.json'):
+                    for session_path in self.records.glob('capture-*/session.json'):
                         metadata=json.loads(session_path.read_text(encoding='utf8'))
                         if metadata.get('created',0)>=row['captureAttemptUnix']:candidates.append((session_path,metadata))
                     if len(candidates)==1:
@@ -179,6 +186,11 @@ class Stress(Streams):
                     row['echo']=echo.close();self.save(self.out/f'echo-{n+1:03}.json',row['echo'])
                     window=row.get('transport',{})
                     row['echoInsideWindow']=sum(r['exact'] and window.get('hostStartedUnix',float('inf'))<=r['receivedUnix']<=window.get('hostEndedUnix',0) for r in row['echo']['rows'])
+                    if window.get('transport')=='ddr-usb/1':
+                        earliest,latest=window['hardwareStartBracketUnix'];duration=window['hardwareSeconds']
+                        margin=min(.020,duration*.1);lower,upper=latest+margin,earliest+duration-margin
+                        row['guaranteedHardwareWindowUnix']=[lower,upper]
+                        row['echoInsideHardwareWindow']=sum(r['exact'] and lower<=r['sentUnix'] and r['receivedUnix']<=upper for r in row['echo']['rows'])
                 try:row['closeSeconds']=self.disconnect()
                 except Exception as cleanup:
                     row['cleanupError']=str(cleanup)
@@ -187,6 +199,8 @@ class Stress(Streams):
                 rows.append(row);self.save(self.out/'captures.json',rows)
             if row.get('cleanupError') or row.get('echo',{}).get('error'):raise RuntimeError('Capture cleanup/echo failed: '+str(row))
             if self.args.echo and not row['echoInsideWindow']:raise RuntimeError('No verified echo observed inside host capture window')
+            if self.args.echo and row.get('transport',{}).get('transport')=='ddr-usb/1' and not row['echoInsideHardwareWindow']:
+                raise RuntimeError('No complete exact CDC transaction proven inside hardware window')
             print('capture',n+1,function,row['rawBytes'],'bytes',round(row['seconds'],3),'seconds',flush=True)
         return rows
 
@@ -194,6 +208,7 @@ class Stress(Streams):
 def arguments(argv=None):
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--runtime',required=True);p.add_argument('--artifacts',required=True)
+    p.add_argument('--records-root',help='Explicit server record directory; default from runtime metadata')
     p.add_argument('--rounds',type=int,default=30);p.add_argument('--capture-rounds',type=int,default=10)
     p.add_argument('--milliseconds',type=int,default=10);p.add_argument('--case-timeout',type=float,default=120)
     p.add_argument('--profile',choices=['stm32f103ze','stm32h743'],default='stm32f103ze')

@@ -1110,3 +1110,23 @@ USB下载核对176字节状态协议与完整512字节ZDD1头的captureId/nonce/
 Web窗口元数据在DDR模式以硬件ticks/ref计算实际时长，主机下载/解复用时间另存；formatter帧不是物理采样点，actualSamples仍未知。非法计数/时长不一致直接拒绝。CLI也去掉旧路径把host时间当完整硬件窗口的推断。页面开放2000ms，旧固件超过1000ms明确提示。
 
 4项Python传输测试核对二进制拆包、尾描述符完成、错误头不落盘/不读负载、采集中下载拒绝及默认DDR分支；4项Web/桥检查包含真实F103/H743原生回放、错误采集保留、硬件时长与原始FRM1记录包导出/导入；1项本地CLI/Web API检查和144模块语法检查通过。桥包原生工具路径按运行时backend解析，避免冻结EXE误找开发源码目录。这些仍是主机验证，未替代即将进行的新bit/ELF实测。
+
+### 2026-11-01：采后USB真机、物理一致性与连接边界修复阶段
+
+新配对`prebuilt/etm-ddr-usb-raw4-20261101/`：bit SHA `82863bb7c06b27b32f5fd518e7b08d70ce1b855ca3c6f0525b8961d6967cd8ea`，PS ELF SHA `1d55b321f95e15d43afb719380c7cefb4f05955c89f018e49c38bb3fb38ef559`；RTL提交21bb509、PS构建提交91728bf。新bit 120MHz setup +0.189ns、hold +0.041ns；实际加载后物理OCM执行段74,976字节匹配，实际FCLK119,999,998Hz / SWCLK999,999.98Hz。先做2轮1MiB模式数据通过，再测真实F103ZE24MHz TRACECLK；没有改目标PLL/AHB/APB、没有写Flash/QSPI。
+
+| 实际硬件窗口 | FRM1字节 | ETM字节 | USB采后下载 | 实测USB负载吞吐 | C++解复用段 | 严格窗口内完整CDC回显 |
+|---|---:|---:|---:|---:|---:|---:|
+| 100ms | 1,898,616 | 449,816 | 50.9ms | 37.28MB/s | 7.10ms | 本轮未注入 |
+| 1秒 | 19,872,752 | 5,893,471 | 552.9ms | 35.94MB/s | 56.9ms | 62 |
+| 2秒 | 39,783,860 | 11,796,910 | 1046.5ms | 38.01MB/s | 145.4ms | 127 |
+
+三轮USB下载数据与**同一缓冲区采后物理MEM-AP0全部读回**SHA一致，验证了非缓存区/USB DMA交接；不是跨两次采集比较。三轮帧丢失、parserErrors、readyLosses及USB submitErrors均0，OpenCSD处理全部ETM输入、packetIssues=0、无INCOMPLETE、无地址不可访问。1/2秒未重载或重试，改变cdc_poll/cdc_tx_poll入口，目标CoreSight/FPB/RCC均恢复。
+
+本负载约19.9MB/s formatter、5.9MB/s ETM；USB负载吞吐约36～38MB/s，说明采后下载具有足够带宽余量。它不证明旧PS逐条MMIO排空能跑同样速率，不把下载+解码时间等同实时显示：本路径仍先采集后下载。完整处理/首屏/缩放须在同一新记录上另测。[完整USB/物理对照及可回放记录](validation/etm-ddr-usb-board-20261101/stress/result.json)。
+
+真实Web验收保留了多个失败阶段：首次连接0x03/0x00错位；ETM共享驱动漏掉主驱动的旧回包修复（9份镜像中仅DAP文件有差异）；同步后一次30次开关和10ms采集通过，但脚本硬编码旧records目录而中断；新服务首次连接仍能出现同步失败，不能把一次30次通过当作全部稳定。原生队列审计首个Info(0xff)读到旧Info(0)响应，证明同命令回显也不足以辨别记录身份。所有失败结果保留在web-history目录，没有抹掉或当作重试通过。
+
+进一步检查发现浏览器同步600ms预算短于本地OS读取2秒，通用批量Disconnect/封包探测不适合再叠在本地服务的同步上。改为利用固件已存在的EP0 0x5a，建立**DAP专用epoch边界**，同步重建EP1 IN/EP2 OUT队列、对齐主机端点并回读epoch改变且req/rsp/tx_active均0；不做整机USB复位、不重放目标命令、不动ETM DDR缓冲。手动对照后5次Info精确返回，8项本地服务测试、主/ETM两份驱动的4项封包检查通过。新版本已完成另一轮30次开关，10轮Web采集正在验收，尚不提前标记完整通过。
+
+新增`web.shared-sync --check|--write`并加入web.check及桥包构建保护；共享驱动必须字节一致，防止只修主页面却漏ETM。修正硬件窗口已知时仍显示旧ZET1“未知窗口”的提示；运行时记录真实recordsDirectory，验收工具不再猜路径。Web的CDC判定也使用硬件起点区间的保守交集，而非整个主机下载跨度。47项Web主机检查通过。本配对仍非Golden；H743实机、更高TRACECLK和逐线校准未完成。

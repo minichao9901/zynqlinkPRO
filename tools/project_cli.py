@@ -55,9 +55,10 @@ ALIASES={
  'target.h743-build':'etm-service/firmware/stm32h743_cdc_trace/build.ps1',
  'target.scope-build':'firmware/target/stm32f103_scope/build.ps1','target.hpm-build':'firmware/target/hpm5301_perf/build.ps1',
  'native.build':'etm-service/build-decoder.ps1',
+ 'web.shared-sync':'tools/sync_etm_shared.py',
 }
 WORKFLOWS={
- 'web.check':('Web全部模块语法检查（源码入口无需bundle构建）',[('node',['web/tools/dev/check-syntax.mjs'])]),
+ 'web.check':('共享驱动一致性与Web模块语法检查',[('python',['tools/sync_etm_shared.py','--check']),('node',['web/tools/dev/check-syntax.mjs'])]),
  'test.web':('Web主机自测',[('node',['--test','web/tools/selftest/*.test.mjs'])]),
  'test.cli':('统一CLI主机自测',[('python',['-m','unittest','discover','-s','tools/tests','-p','test_toolbox*.py'])]),
 }

@@ -146,7 +146,8 @@ def main(argv=None):
         raise ValueError(f'端口{args.port}已被占用；请关闭原桥或选择其他端口，不会停止其它服务') from error
     browser_url=url+'/?trace-cli='+token+'#etm'
     state={'protocol':'workbench/1','url':url,'browserUrl':browser_url,'pid':os.getpid(),
-        'status':'serving','bootId':boot,'nativeProbe':True,'offline':args.offline,'runtime':str(folder)}
+        'status':'serving','bootId':boot,'nativeProbe':True,'offline':args.offline,'runtime':str(folder),
+        'recordsDirectory':str(data/'records')}
     for path in (folder / 'toolbox-runtime.json', state_path):
         path.write_text(json.dumps(state, ensure_ascii=False, indent=2)+'\n', encoding='utf8')
     print('Zynq ETM 工作台 '+VERSION+'；时钟由target固件负责', flush=True)

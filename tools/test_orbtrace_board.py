@@ -164,6 +164,7 @@ def main():
         ddr_usb=not args.ddr_physical and not args.raw and args.transport!='legacy' and bool(report['reference'][3]&0x200)
         if args.transport=='ddr' and not ddr_usb:raise RuntimeError('Probe does not advertise DDR USB capture')
         if args.verify_ddr_physical and not ddr_usb:raise RuntimeError('Physical comparison requires DDR USB capture')
+        if ddr_usb and args.hclk_div!=1:raise RuntimeError('DDR capture preserves target firmware clocks; no AHB override')
         if not ddr_usb and not args.ddr_physical and args.milliseconds>1000:raise RuntimeError('Legacy capture is limited to 1 second')
         report['transport']='ddr-usb' if ddr_usb else ('ddr-physical' if args.ddr_physical else 'legacy')
         was_halted = bool(mem.word(0xe000edf0) & (1 << 17))
@@ -228,6 +229,7 @@ def main():
                 etm,ddr=capture_ddr(work,args.elf,dev,out,inp,args.milliseconds/1000,
                     report['reference'][0],resume_ddr_target,config['traceid'],args.verify_ddr_physical)
                 report['quality']=ddr['quality']
+                report['quality'].update(fclk=live_fclk,tckKhz=report['control_clock']['SWCLK_Hz']/1000)
             else:
                 from etm_ddr_physical_capture import capture as capture_ddr
                 etm,ddr=capture_ddr(work,args.elf,args.milliseconds/1000,

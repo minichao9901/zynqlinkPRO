@@ -153,6 +153,7 @@ def quality(status):
         ended=status['done'] and not status['active'],records=r[21],
         hardwareTicks=status['ticks'],requestedTicks=status['requestedTicks'],
         refClockHz=status['referenceHz'],hardwareSeconds=status['actualWindowSeconds'],
+        hardwareStartBracketUnix=status['hardwareStartBracketUnix'],
         stopReason=status['stopReason'],formatterBytes=status['bytes'],tailBytes=status['tailBytes'],
         tailAmbiguous=status['tailAmbiguous'],usbSeconds=status['usbSeconds'],usbPayloadMBps=status['usbPayloadMBps'],
         diagnostics=dict(implemented=True,frameDrops=r[19],parserErrors=r[20],idelayReadyLosses=r[26],

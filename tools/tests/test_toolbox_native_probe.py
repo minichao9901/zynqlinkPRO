@@ -5,13 +5,28 @@ import tempfile
 import threading
 from types import SimpleNamespace
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch,Mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'etm-service/tools'))
-from native_probe import NativeProbe, install
+from native_probe import NativeProbe, install,reset_dap_session
 
 
 class NativeProbeTests(unittest.TestCase):
+    def test_dap_epoch_reset_uses_no_speculative_bulk_reads_or_whole_usb_reset(self):
+        import struct
+        device=Mock()
+        device.ctrl_transfer.side_effect=[struct.pack('<8I',0,2,1,7,0,0,0,0),b'DAP\0',struct.pack('<8I',0,0,0,8,0,0,0,0)]
+        result=reset_dap_session(device)
+        self.assertEqual(result,dict(syncProtocol='zynq-dap-epoch/1',queueEpoch=8,queueState=[0,0,0]))
+        self.assertEqual([c.args[1] for c in device.ctrl_transfer.call_args_list],[0x5b,0x5a,0x5b])
+        self.assertEqual([c.args for c in device.clear_halt.call_args_list],[(0x81,),(2,)])
+        device.read.assert_not_called();device.write.assert_not_called();device.reset.assert_not_called()
+
+    def test_dap_epoch_reset_requires_idle_queues_and_a_new_epoch(self):
+        import struct
+        for tail in [(0,0,0,7,0,0,0,0),(0,1,1,8,0,0,0,0)]:
+            device=Mock();device.ctrl_transfer.side_effect=[struct.pack('<8I',0,0,0,7,0,0,0,0),b'DAP\0',struct.pack('<8I',*tail)]
+            with self.assertRaisesRegex(ValueError,'epoch'):reset_dap_session(device)
     def test_late_close_cannot_close_a_reopened_usb_or_hid_handle(self):
         backend=SimpleNamespace(lock=threading.RLock(),jobs={},ACTIVE=('queued',))
         with tempfile.TemporaryDirectory() as folder:

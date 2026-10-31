@@ -1092,9 +1092,10 @@ def capture_job(jid, sid, options):
                 f"{extent['actualSeconds']*1000:.3f} ms；可能达到 Zynq FIFO/接收窗口容量。"
                 '原始波形保留，以下解码仅覆盖实际窗口。')
             change(jid,captureWarning=m['captureWarning'])
-        elif transport is not None:
+        elif transport is not None and not extent.get('known'):
             m['captureWarning']='接收已结束；ZET1未测量硬件录制时长或采样数，不能据主机接收/排空时间确认录满请求窗口。'
             change(jid,captureWarning=m['captureWarning'])
+        else:m.pop('captureWarning',None)
         try:
             m['laFilter']=read_glitch_settings(folder/'capture.kvdat',options['rate'])
         except Exception as error:

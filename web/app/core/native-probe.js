@@ -56,12 +56,12 @@ export async function nativeUsbDevices(){
   });
 }
 class NativeUsbDevice extends EventTarget{
-  constructor(info){super();Object.assign(this,info);this.nativeService=true;this.opened=false;this.owner=sessionOwner('usb',info.serialNumber);this.reads=new Map();this.commandPending=0;}
+  constructor(info){super();Object.assign(this,info);this.nativeService=true;this.dapSynchronized=false;this.opened=false;this.owner=sessionOwner('usb',info.serialNumber);this.reads=new Map();this.commandPending=0;}
   rpc(action,value={}){return call('usb',action,{owner:this.owner,resourceEpoch:this.resourceEpoch,...value});}
-  async open(){Object.assign(this,await this.rpc('open'));this.opened=true;this.reads=new Map();this.commandPending=0;}
+  async open(){Object.assign(this,await this.rpc('open'));this.opened=true;this.dapSynchronized=false;this.reads=new Map();this.commandPending=0;}
   async close(){const epoch=this.resourceEpoch;await this.rpc('close');if(epoch===this.resourceEpoch){this.opened=false;this.commandPending=0;}}
   async selectConfiguration(number){Object.assign(this,await this.rpc('configuration',{number}));}
-  async claimInterface(number){await this.rpc('claim',{number});const i=this.configuration.interfaces.find(i=>i.interfaceNumber===number);if(i)i.claimed=true;}
+  async claimInterface(number){const r=await this.rpc('claim',{number});this.dapSynchronized=number===0&&r.syncProtocol==='zynq-dap-epoch/1'&&Number.isInteger(r.queueEpoch)&&r.queueState?.length===3&&r.queueState.every(v=>v===0);if(!this.dapSynchronized)throw Error('本地桥未确认DAP会话边界，请更新完整桥包');const i=this.configuration.interfaces.find(i=>i.interfaceNumber===number);if(i)i.claimed=true;}
   async releaseInterface(number){await this.rpc('release',{number});const i=this.configuration.interfaces.find(i=>i.interfaceNumber===number);if(i)i.claimed=false;}
   async selectAlternateInterface(number,alternate){await this.rpc('alternate',{number,alternate});const i=this.configuration.interfaces.find(i=>i.interfaceNumber===number);if(i)i.alternate=i.alternates.find(a=>a.alternateSetting===alternate);}
   async clearHalt(direction,endpoint){await this.rpc('clear',{endpoint:endpoint|(direction==='in'?128:0)});}

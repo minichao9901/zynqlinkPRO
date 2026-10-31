@@ -1,0 +1,826 @@
+{
+  "hardware": true,
+  "noFlash": true,
+  "clockPolicy": "target-firmware-owned",
+  "retryFailedRounds": false,
+  "profile": "stm32f103ze",
+  "targetElf": "E:\\zynqlinkPRO_etm_calibration\\prebuilt\\golden\\f103ze-cdc48.elf",
+  "targetElfSha256": "e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f",
+  "hseMHz": 8,
+  "functions": "cdc_poll,cdc_tx_poll",
+  "resetBefore": false,
+  "lifecycle": [
+    {
+      "round": 1,
+      "openSeconds": 1.4301633999857586,
+      "closeSeconds": 0.4973355000256561,
+      "profile": "stm32f103ze",
+      "clocks": {
+        "busDivider": 1,
+        "coreDivider": 1,
+        "coreHz": 48000000,
+        "external": true,
+        "hclkHz": 48000000,
+        "knownHz": 48000000,
+        "knownTraceHz": 48000000,
+        "path": "HSE 8 MHz ÷1 ×6 → AHB ÷1",
+        "physicalTraceHz": 24000000,
+        "source": "HSE → PLL",
+        "traceHz": 48000000,
+        "tracePath": "HCLK → TRACEPORTCK（与 CPU 相同）",
+        "traceReady": true,
+        "traceRelation": "Trace 输入 = HCLK；4 位 DDR 的 TRACECLK = HCLK / 2"
+      },
+      "rcc": {
+        "cfgr": 5309450,
+        "cr": 50548355
+      },
+      "halted": false
+    },
+    {
+      "round": 2,
+      "openSeconds": 3.6904597000102513,
+      "closeSeconds": 0.6207768000022043,
+      "profile": "stm32f103ze",
+      "clocks": {
+        "busDivider": 1,
+        "coreDivider": 1,
+        "coreHz": 48000000,
+        "external": true,
+        "hclkHz": 48000000,
+        "knownHz": 48000000,
+        "knownTraceHz": 48000000,
+        "path": "HSE 8 MHz ÷1 ×6 → AHB ÷1",
+        "physicalTraceHz": 24000000,
+        "source": "HSE → PLL",
+        "traceHz": 48000000,
+        "tracePath": "HCLK → TRACEPORTCK（与 CPU 相同）",
+        "traceReady": true,
+        "traceRelation": "Trace 输入 = HCLK；4 位 DDR 的 TRACECLK = HCLK / 2"
+      },
+      "rcc": {
+        "cfgr": 5309450,
+        "cr": 50548355
+      },
+      "halted": false
+    },
+    {
+      "round": 3,
+      "openSeconds": 1.9189367000071798,
+      "closeSeconds": 0.5839379999961238,
+      "profile": "stm32f103ze",
+      "clocks": {
+        "busDivider": 1,
+        "coreDivider": 1,
+        "coreHz": 48000000,
+        "external": true,
+        "hclkHz": 48000000,
+        "knownHz": 48000000,
+        "knownTraceHz": 48000000,
+        "path": "HSE 8 MHz ÷1 ×6 → AHB ÷1",
+        "physicalTraceHz": 24000000,
+        "source": "HSE → PLL",
+        "traceHz": 48000000,
+        "tracePath": "HCLK → TRACEPORTCK（与 CPU 相同）",
+        "traceReady": true,
+        "traceRelation": "Trace 输入 = HCLK；4 位 DDR 的 TRACECLK = HCLK / 2"
+      },
+      "rcc": {
+        "cfgr": 5309450,
+        "cr": 50548355
+      },
+      "halted": false
+    },
+    {
+      "round": 4,
+      "openSeconds": 1.7650055999984033,
+      "closeSeconds": 0.5057623999891803,
+      "profile": "stm32f103ze",
+      "clocks": {
+        "busDivider": 1,
+        "coreDivider": 1,
+        "coreHz": 48000000,
+        "external": true,
+        "hclkHz": 48000000,
+        "knownHz": 48000000,
+        "knownTraceHz": 48000000,
+        "path": "HSE 8 MHz ÷1 ×6 → AHB ÷1",
+        "physicalTraceHz": 24000000,
+        "source": "HSE → PLL",
+        "traceHz": 48000000,
+        "tracePath": "HCLK → TRACEPORTCK（与 CPU 相同）",
+        "traceReady": true,
+        "traceRelation": "Trace 输入 = HCLK；4 位 DDR 的 TRACECLK = HCLK / 2"
+      },
+      "rcc": {
+        "cfgr": 5309450,
+        "cr": 50548355
+      },
+      "halted": false
+    },
+    {
+      "round": 5,
+      "openSeconds": 1.8507689000107348,
+      "closeSeconds": 0.48266559999319725,
+      "profile": "stm32f103ze",
+      "clocks": {
+        "busDivider": 1,
+        "coreDivider": 1,
+        "coreHz": 48000000,
+        "external": true,
+        "hclkHz": 48000000,
+        "knownHz": 48000000,
+        "knownTraceHz": 48000000,
+        "path": "HSE 8 MHz ÷1 ×6 → AHB ÷1",
+        "physicalTraceHz": 24000000,
+        "source": "HSE → PLL",
+        "traceHz": 48000000,
+        "tracePath": "HCLK → TRACEPORTCK（与 CPU 相同）",
+        "traceReady": true,
+        "traceRelation": "Trace 输入 = HCLK；4 位 DDR 的 TRACECLK = HCLK / 2"
+      },
+      "rcc": {
+        "cfgr": 5309450,
+        "cr": 50548355
+      },
+      "halted": false
+    },
+    {
+      "round": 6,
+      "openSeconds": 1.8511869999929331,
+      "closeSeconds": 0.5958411000028718,
+      "profile": "stm32f103ze",
+      "clocks": {
+        "busDivider": 1,
+        "coreDivider": 1,
+        "coreHz": 48000000,
+        "external": true,
+        "hclkHz": 48000000,
+        "knownHz": 48000000,
+        "knownTraceHz": 48000000,
+        "path": "HSE 8 MHz ÷1 ×6 → AHB ÷1",
+        "physicalTraceHz": 24000000,
+        "source": "HSE → PLL",
+        "traceHz": 48000000,
+        "tracePath": "HCLK → TRACEPORTCK（与 CPU 相同）",
+        "traceReady": true,
+        "traceRelation": "Trace 输入 = HCLK；4 位 DDR 的 TRACECLK = HCLK / 2"
+      },
+      "rcc": {
+        "cfgr": 5309450,
+        "cr": 50548355
+      },
+      "halted": false
+    },
+    {
+      "round": 7,
+      "openSeconds": 2.320142599986866,
+      "closeSeconds": 0.6971610999898985,
+      "profile": "stm32f103ze",
+      "clocks": {
+        "busDivider": 1,
+        "coreDivider": 1,
+        "coreHz": 48000000,
+        "external": true,
+        "hclkHz": 48000000,
+        "knownHz": 48000000,
+        "knownTraceHz": 48000000,
+        "path": "HSE 8 MHz ÷1 ×6 → AHB ÷1",
+        "physicalTraceHz": 24000000,
+        "source": "HSE → PLL",
+        "traceHz": 48000000,
+        "tracePath": "HCLK → TRACEPORTCK（与 CPU 相同）",
+        "traceReady": true,
+        "traceRelation": "Trace 输入 = HCLK；4 位 DDR 的 TRACECLK = HCLK / 2"
+      },
+      "rcc": {
+        "cfgr": 5309450,
+        "cr": 50548355
+      },
+      "halted": false
+    },
+    {
+      "round": 8,
+      "openSeconds": 1.5001275000104215,
+      "closeSeconds": 0.4176353999937419,
+      "profile": "stm32f103ze",
+      "clocks": {
+        "busDivider": 1,
+        "coreDivider": 1,
+        "coreHz": 48000000,
+        "external": true,
+        "hclkHz": 48000000,
+        "knownHz": 48000000,
+        "knownTraceHz": 48000000,
+        "path": "HSE 8 MHz ÷1 ×6 → AHB ÷1",
+        "physicalTraceHz": 24000000,
+        "source": "HSE → PLL",
+        "traceHz": 48000000,
+        "tracePath": "HCLK → TRACEPORTCK（与 CPU 相同）",
+        "traceReady": true,
+        "traceRelation": "Trace 输入 = HCLK；4 位 DDR 的 TRACECLK = HCLK / 2"
+      },
+      "rcc": {
+        "cfgr": 5309450,
+        "cr": 50548355
+      },
+      "halted": false
+    },
+    {
+      "round": 9,
+      "openSeconds": 1.6023578000022098,
+      "closeSeconds": 0.32944830000633374,
+      "profile": "stm32f103ze",
+      "clocks": {
+        "busDivider": 1,
+        "coreDivider": 1,
+        "coreHz": 48000000,
+        "external": true,
+        "hclkHz": 48000000,
+        "knownHz": 48000000,
+        "knownTraceHz": 48000000,
+        "path": "HSE 8 MHz ÷1 ×6 → AHB ÷1",
+        "physicalTraceHz": 24000000,
+        "source": "HSE → PLL",
+        "traceHz": 48000000,
+        "tracePath": "HCLK → TRACEPORTCK（与 CPU 相同）",
+        "traceReady": true,
+        "traceRelation": "Trace 输入 = HCLK；4 位 DDR 的 TRACECLK = HCLK / 2"
+      },
+      "rcc": {
+        "cfgr": 5309450,
+        "cr": 50548355
+      },
+      "halted": false
+    },
+    {
+      "round": 10,
+      "openSeconds": 1.5557569999946281,
+      "closeSeconds": 0.45161399999051355,
+      "profile": "stm32f103ze",
+      "clocks": {
+        "busDivider": 1,
+        "coreDivider": 1,
+        "coreHz": 48000000,
+        "external": true,
+        "hclkHz": 48000000,
+        "knownHz": 48000000,
+        "knownTraceHz": 48000000,
+        "path": "HSE 8 MHz ÷1 ×6 → AHB ÷1",
+        "physicalTraceHz": 24000000,
+        "source": "HSE → PLL",
+        "traceHz": 48000000,
+        "tracePath": "HCLK → TRACEPORTCK（与 CPU 相同）",
+        "traceReady": true,
+        "traceRelation": "Trace 输入 = HCLK；4 位 DDR 的 TRACECLK = HCLK / 2"
+      },
+      "rcc": {
+        "cfgr": 5309450,
+        "cr": 50548355
+      },
+      "halted": false
+    },
+    {
+      "round": 11,
+      "openSeconds": 1.8229577000020072,
+      "closeSeconds": 0.5305167000042275,
+      "profile": "stm32f103ze",
+      "clocks": {
+        "busDivider": 1,
+        "coreDivider": 1,
+        "coreHz": 48000000,
+        "external": true,
+        "hclkHz": 48000000,
+        "knownHz": 48000000,
+        "knownTraceHz": 48000000,
+        "path": "HSE 8 MHz ÷1 ×6 → AHB ÷1",
+        "physicalTraceHz": 24000000,
+        "source": "HSE → PLL",
+        "traceHz": 48000000,
+        "tracePath": "HCLK → TRACEPORTCK（与 CPU 相同）",
+        "traceReady": true,
+        "traceRelation": "Trace 输入 = HCLK；4 位 DDR 的 TRACECLK = HCLK / 2"
+      },
+      "rcc": {
+        "cfgr": 5309450,
+        "cr": 50548355
+      },
+      "halted": false
+    },
+    {
+      "round": 12,
+      "openSeconds": 1.71173860001727,
+      "closeSeconds": 0.5568232000223361,
+      "profile": "stm32f103ze",
+      "clocks": {
+        "busDivider": 1,
+        "coreDivider": 1,
+        "coreHz": 48000000,
+        "external": true,
+        "hclkHz": 48000000,
+        "knownHz": 48000000,
+        "knownTraceHz": 48000000,
+        "path": "HSE 8 MHz ÷1 ×6 → AHB ÷1",
+        "physicalTraceHz": 24000000,
+        "source": "HSE → PLL",
+        "traceHz": 48000000,
+        "tracePath": "HCLK → TRACEPORTCK（与 CPU 相同）",
+        "traceReady": true,
+        "traceRelation": "Trace 输入 = HCLK；4 位 DDR 的 TRACECLK = HCLK / 2"
+      },
+      "rcc": {
+        "cfgr": 5309450,
+        "cr": 50548355
+      },
+      "halted": false
+    },
+    {
+      "round": 13,
+      "openSeconds": 1.496584000007715,
+      "closeSeconds": 0.5433081000228412,
+      "profile": "stm32f103ze",
+      "clocks": {
+        "busDivider": 1,
+        "coreDivider": 1,
+        "coreHz": 48000000,
+        "external": true,
+        "hclkHz": 48000000,
+        "knownHz": 48000000,
+        "knownTraceHz": 48000000,
+        "path": "HSE 8 MHz ÷1 ×6 → AHB ÷1",
+        "physicalTraceHz": 24000000,
+        "source": "HSE → PLL",
+        "traceHz": 48000000,
+        "tracePath": "HCLK → TRACEPORTCK（与 CPU 相同）",
+        "traceReady": true,
+        "traceRelation": "Trace 输入 = HCLK；4 位 DDR 的 TRACECLK = HCLK / 2"
+      },
+      "rcc": {
+        "cfgr": 5309450,
+        "cr": 50548355
+      },
+      "halted": false
+    },
+    {
+      "round": 14,
+      "openSeconds": 1.589874500001315,
+      "closeSeconds": 0.42374120000749826,
+      "profile": "stm32f103ze",
+      "clocks": {
+        "busDivider": 1,
+        "coreDivider": 1,
+        "coreHz": 48000000,
+        "external": true,
+        "hclkHz": 48000000,
+        "knownHz": 48000000,
+        "knownTraceHz": 48000000,
+        "path": "HSE 8 MHz ÷1 ×6 → AHB ÷1",
+        "physicalTraceHz": 24000000,
+        "source": "HSE → PLL",
+        "traceHz": 48000000,
+        "tracePath": "HCLK → TRACEPORTCK（与 CPU 相同）",
+        "traceReady": true,
+        "traceRelation": "Trace 输入 = HCLK；4 位 DDR 的 TRACECLK = HCLK / 2"
+      },
+      "rcc": {
+        "cfgr": 5309450,
+        "cr": 50548355
+      },
+      "halted": false
+    },
+    {
+      "round": 15,
+      "openSeconds": 1.6252236999862362,
+      "closeSeconds": 0.4370614000072237,
+      "profile": "stm32f103ze",
+      "clocks": {
+        "busDivider": 1,
+        "coreDivider": 1,
+        "coreHz": 48000000,
+        "external": true,
+        "hclkHz": 48000000,
+        "knownHz": 48000000,
+        "knownTraceHz": 48000000,
+        "path": "HSE 8 MHz ÷1 ×6 → AHB ÷1",
+        "physicalTraceHz": 24000000,
+        "source": "HSE → PLL",
+        "traceHz": 48000000,
+        "tracePath": "HCLK → TRACEPORTCK（与 CPU 相同）",
+        "traceReady": true,
+        "traceRelation": "Trace 输入 = HCLK；4 位 DDR 的 TRACECLK = HCLK / 2"
+      },
+      "rcc": {
+        "cfgr": 5309450,
+        "cr": 50548355
+      },
+      "halted": false
+    },
+    {
+      "round": 16,
+      "openSeconds": 1.7035010000108741,
+      "closeSeconds": 0.5444734000193421,
+      "profile": "stm32f103ze",
+      "clocks": {
+        "busDivider": 1,
+        "coreDivider": 1,
+        "coreHz": 48000000,
+        "external": true,
+        "hclkHz": 48000000,
+        "knownHz": 48000000,
+        "knownTraceHz": 48000000,
+        "path": "HSE 8 MHz ÷1 ×6 → AHB ÷1",
+        "physicalTraceHz": 24000000,
+        "source": "HSE → PLL",
+        "traceHz": 48000000,
+        "tracePath": "HCLK → TRACEPORTCK（与 CPU 相同）",
+        "traceReady": true,
+        "traceRelation": "Trace 输入 = HCLK；4 位 DDR 的 TRACECLK = HCLK / 2"
+      },
+      "rcc": {
+        "cfgr": 5309450,
+        "cr": 50548355
+      },
+      "halted": false
+    },
+    {
+      "round": 17,
+      "openSeconds": 1.6530632999783847,
+      "closeSeconds": 0.5172954000008758,
+      "profile": "stm32f103ze",
+      "clocks": {
+        "busDivider": 1,
+        "coreDivider": 1,
+        "coreHz": 48000000,
+        "external": true,
+        "hclkHz": 48000000,
+        "knownHz": 48000000,
+        "knownTraceHz": 48000000,
+        "path": "HSE 8 MHz ÷1 ×6 → AHB ÷1",
+        "physicalTraceHz": 24000000,
+        "source": "HSE → PLL",
+        "traceHz": 48000000,
+        "tracePath": "HCLK → TRACEPORTCK（与 CPU 相同）",
+        "traceReady": true,
+        "traceRelation": "Trace 输入 = HCLK；4 位 DDR 的 TRACECLK = HCLK / 2"
+      },
+      "rcc": {
+        "cfgr": 5309450,
+        "cr": 50548355
+      },
+      "halted": false
+    },
+    {
+      "round": 18,
+      "openSeconds": 1.8513660999888089,
+      "closeSeconds": 0.45292420001351275,
+      "profile": "stm32f103ze",
+      "clocks": {
+        "busDivider": 1,
+        "coreDivider": 1,
+        "coreHz": 48000000,
+        "external": true,
+        "hclkHz": 48000000,
+        "knownHz": 48000000,
+        "knownTraceHz": 48000000,
+        "path": "HSE 8 MHz ÷1 ×6 → AHB ÷1",
+        "physicalTraceHz": 24000000,
+        "source": "HSE → PLL",
+        "traceHz": 48000000,
+        "tracePath": "HCLK → TRACEPORTCK（与 CPU 相同）",
+        "traceReady": true,
+        "traceRelation": "Trace 输入 = HCLK；4 位 DDR 的 TRACECLK = HCLK / 2"
+      },
+      "rcc": {
+        "cfgr": 5309450,
+        "cr": 50548355
+      },
+      "halted": false
+    },
+    {
+      "round": 19,
+      "openSeconds": 1.615412799990736,
+      "closeSeconds": 0.44390529999509454,
+      "profile": "stm32f103ze",
+      "clocks": {
+        "busDivider": 1,
+        "coreDivider": 1,
+        "coreHz": 48000000,
+        "external": true,
+        "hclkHz": 48000000,
+        "knownHz": 48000000,
+        "knownTraceHz": 48000000,
+        "path": "HSE 8 MHz ÷1 ×6 → AHB ÷1",
+        "physicalTraceHz": 24000000,
+        "source": "HSE → PLL",
+        "traceHz": 48000000,
+        "tracePath": "HCLK → TRACEPORTCK（与 CPU 相同）",
+        "traceReady": true,
+        "traceRelation": "Trace 输入 = HCLK；4 位 DDR 的 TRACECLK = HCLK / 2"
+      },
+      "rcc": {
+        "cfgr": 5309450,
+        "cr": 50548355
+      },
+      "halted": false
+    },
+    {
+      "round": 20,
+      "openSeconds": 1.7950434999947902,
+      "closeSeconds": 0.35550199999124743,
+      "profile": "stm32f103ze",
+      "clocks": {
+        "busDivider": 1,
+        "coreDivider": 1,
+        "coreHz": 48000000,
+        "external": true,
+        "hclkHz": 48000000,
+        "knownHz": 48000000,
+        "knownTraceHz": 48000000,
+        "path": "HSE 8 MHz ÷1 ×6 → AHB ÷1",
+        "physicalTraceHz": 24000000,
+        "source": "HSE → PLL",
+        "traceHz": 48000000,
+        "tracePath": "HCLK → TRACEPORTCK（与 CPU 相同）",
+        "traceReady": true,
+        "traceRelation": "Trace 输入 = HCLK；4 位 DDR 的 TRACECLK = HCLK / 2"
+      },
+      "rcc": {
+        "cfgr": 5309450,
+        "cr": 50548355
+      },
+      "halted": false
+    },
+    {
+      "round": 21,
+      "openSeconds": 1.7992200000153389,
+      "closeSeconds": 0.34298840002156794,
+      "profile": "stm32f103ze",
+      "clocks": {
+        "busDivider": 1,
+        "coreDivider": 1,
+        "coreHz": 48000000,
+        "external": true,
+        "hclkHz": 48000000,
+        "knownHz": 48000000,
+        "knownTraceHz": 48000000,
+        "path": "HSE 8 MHz ÷1 ×6 → AHB ÷1",
+        "physicalTraceHz": 24000000,
+        "source": "HSE → PLL",
+        "traceHz": 48000000,
+        "tracePath": "HCLK → TRACEPORTCK（与 CPU 相同）",
+        "traceReady": true,
+        "traceRelation": "Trace 输入 = HCLK；4 位 DDR 的 TRACECLK = HCLK / 2"
+      },
+      "rcc": {
+        "cfgr": 5309450,
+        "cr": 50548355
+      },
+      "halted": false
+    },
+    {
+      "round": 22,
+      "openSeconds": 1.6364627000002656,
+      "closeSeconds": 0.3228334999876097,
+      "profile": "stm32f103ze",
+      "clocks": {
+        "busDivider": 1,
+        "coreDivider": 1,
+        "coreHz": 48000000,
+        "external": true,
+        "hclkHz": 48000000,
+        "knownHz": 48000000,
+        "knownTraceHz": 48000000,
+        "path": "HSE 8 MHz ÷1 ×6 → AHB ÷1",
+        "physicalTraceHz": 24000000,
+        "source": "HSE → PLL",
+        "traceHz": 48000000,
+        "tracePath": "HCLK → TRACEPORTCK（与 CPU 相同）",
+        "traceReady": true,
+        "traceRelation": "Trace 输入 = HCLK；4 位 DDR 的 TRACECLK = HCLK / 2"
+      },
+      "rcc": {
+        "cfgr": 5309450,
+        "cr": 50548355
+      },
+      "halted": false
+    },
+    {
+      "round": 23,
+      "openSeconds": 1.5051800000073854,
+      "closeSeconds": 0.5446455999917816,
+      "profile": "stm32f103ze",
+      "clocks": {
+        "busDivider": 1,
+        "coreDivider": 1,
+        "coreHz": 48000000,
+        "external": true,
+        "hclkHz": 48000000,
+        "knownHz": 48000000,
+        "knownTraceHz": 48000000,
+        "path": "HSE 8 MHz ÷1 ×6 → AHB ÷1",
+        "physicalTraceHz": 24000000,
+        "source": "HSE → PLL",
+        "traceHz": 48000000,
+        "tracePath": "HCLK → TRACEPORTCK（与 CPU 相同）",
+        "traceReady": true,
+        "traceRelation": "Trace 输入 = HCLK；4 位 DDR 的 TRACECLK = HCLK / 2"
+      },
+      "rcc": {
+        "cfgr": 5309450,
+        "cr": 50548355
+      },
+      "halted": false
+    },
+    {
+      "round": 24,
+      "openSeconds": 1.4632924000034109,
+      "closeSeconds": 0.43554480001330376,
+      "profile": "stm32f103ze",
+      "clocks": {
+        "busDivider": 1,
+        "coreDivider": 1,
+        "coreHz": 48000000,
+        "external": true,
+        "hclkHz": 48000000,
+        "knownHz": 48000000,
+        "knownTraceHz": 48000000,
+        "path": "HSE 8 MHz ÷1 ×6 → AHB ÷1",
+        "physicalTraceHz": 24000000,
+        "source": "HSE → PLL",
+        "traceHz": 48000000,
+        "tracePath": "HCLK → TRACEPORTCK（与 CPU 相同）",
+        "traceReady": true,
+        "traceRelation": "Trace 输入 = HCLK；4 位 DDR 的 TRACECLK = HCLK / 2"
+      },
+      "rcc": {
+        "cfgr": 5309450,
+        "cr": 50548355
+      },
+      "halted": false
+    },
+    {
+      "round": 25,
+      "openSeconds": 1.6325011999870185,
+      "closeSeconds": 0.4354915999865625,
+      "profile": "stm32f103ze",
+      "clocks": {
+        "busDivider": 1,
+        "coreDivider": 1,
+        "coreHz": 48000000,
+        "external": true,
+        "hclkHz": 48000000,
+        "knownHz": 48000000,
+        "knownTraceHz": 48000000,
+        "path": "HSE 8 MHz ÷1 ×6 → AHB ÷1",
+        "physicalTraceHz": 24000000,
+        "source": "HSE → PLL",
+        "traceHz": 48000000,
+        "tracePath": "HCLK → TRACEPORTCK（与 CPU 相同）",
+        "traceReady": true,
+        "traceRelation": "Trace 输入 = HCLK；4 位 DDR 的 TRACECLK = HCLK / 2"
+      },
+      "rcc": {
+        "cfgr": 5309450,
+        "cr": 50548355
+      },
+      "halted": false
+    },
+    {
+      "round": 26,
+      "openSeconds": 1.9316440999973565,
+      "closeSeconds": 0.5819005999946967,
+      "profile": "stm32f103ze",
+      "clocks": {
+        "busDivider": 1,
+        "coreDivider": 1,
+        "coreHz": 48000000,
+        "external": true,
+        "hclkHz": 48000000,
+        "knownHz": 48000000,
+        "knownTraceHz": 48000000,
+        "path": "HSE 8 MHz ÷1 ×6 → AHB ÷1",
+        "physicalTraceHz": 24000000,
+        "source": "HSE → PLL",
+        "traceHz": 48000000,
+        "tracePath": "HCLK → TRACEPORTCK（与 CPU 相同）",
+        "traceReady": true,
+        "traceRelation": "Trace 输入 = HCLK；4 位 DDR 的 TRACECLK = HCLK / 2"
+      },
+      "rcc": {
+        "cfgr": 5309450,
+        "cr": 50548355
+      },
+      "halted": false
+    },
+    {
+      "round": 27,
+      "openSeconds": 1.529385799978627,
+      "closeSeconds": 0.43089779998990707,
+      "profile": "stm32f103ze",
+      "clocks": {
+        "busDivider": 1,
+        "coreDivider": 1,
+        "coreHz": 48000000,
+        "external": true,
+        "hclkHz": 48000000,
+        "knownHz": 48000000,
+        "knownTraceHz": 48000000,
+        "path": "HSE 8 MHz ÷1 ×6 → AHB ÷1",
+        "physicalTraceHz": 24000000,
+        "source": "HSE → PLL",
+        "traceHz": 48000000,
+        "tracePath": "HCLK → TRACEPORTCK（与 CPU 相同）",
+        "traceReady": true,
+        "traceRelation": "Trace 输入 = HCLK；4 位 DDR 的 TRACECLK = HCLK / 2"
+      },
+      "rcc": {
+        "cfgr": 5309450,
+        "cr": 50548355
+      },
+      "halted": false
+    },
+    {
+      "round": 28,
+      "openSeconds": 1.695366500003729,
+      "closeSeconds": 0.3572965000057593,
+      "profile": "stm32f103ze",
+      "clocks": {
+        "busDivider": 1,
+        "coreDivider": 1,
+        "coreHz": 48000000,
+        "external": true,
+        "hclkHz": 48000000,
+        "knownHz": 48000000,
+        "knownTraceHz": 48000000,
+        "path": "HSE 8 MHz ÷1 ×6 → AHB ÷1",
+        "physicalTraceHz": 24000000,
+        "source": "HSE → PLL",
+        "traceHz": 48000000,
+        "tracePath": "HCLK → TRACEPORTCK（与 CPU 相同）",
+        "traceReady": true,
+        "traceRelation": "Trace 输入 = HCLK；4 位 DDR 的 TRACECLK = HCLK / 2"
+      },
+      "rcc": {
+        "cfgr": 5309450,
+        "cr": 50548355
+      },
+      "halted": false
+    },
+    {
+      "round": 29,
+      "openSeconds": 1.6703720999939833,
+      "closeSeconds": 0.4574803000141401,
+      "profile": "stm32f103ze",
+      "clocks": {
+        "busDivider": 1,
+        "coreDivider": 1,
+        "coreHz": 48000000,
+        "external": true,
+        "hclkHz": 48000000,
+        "knownHz": 48000000,
+        "knownTraceHz": 48000000,
+        "path": "HSE 8 MHz ÷1 ×6 → AHB ÷1",
+        "physicalTraceHz": 24000000,
+        "source": "HSE → PLL",
+        "traceHz": 48000000,
+        "tracePath": "HCLK → TRACEPORTCK（与 CPU 相同）",
+        "traceReady": true,
+        "traceRelation": "Trace 输入 = HCLK；4 位 DDR 的 TRACECLK = HCLK / 2"
+      },
+      "rcc": {
+        "cfgr": 5309450,
+        "cr": 50548355
+      },
+      "halted": false
+    },
+    {
+      "round": 30,
+      "openSeconds": 1.4913649000227451,
+      "closeSeconds": 0.34119820001069456,
+      "profile": "stm32f103ze",
+      "clocks": {
+        "busDivider": 1,
+        "coreDivider": 1,
+        "coreHz": 48000000,
+        "external": true,
+        "hclkHz": 48000000,
+        "knownHz": 48000000,
+        "knownTraceHz": 48000000,
+        "path": "HSE 8 MHz ÷1 ×6 → AHB ÷1",
+        "physicalTraceHz": 24000000,
+        "source": "HSE → PLL",
+        "traceHz": 48000000,
+        "tracePath": "HCLK → TRACEPORTCK（与 CPU 相同）",
+        "traceReady": true,
+        "traceRelation": "Trace 输入 = HCLK；4 位 DDR 的 TRACECLK = HCLK / 2"
+      },
+      "rcc": {
+        "cfgr": 5309450,
+        "cr": 50548355
+      },
+      "halted": false
+    }
+  ],
+  "ok": false,
+  "error": "[Errno 2] No such file or directory: 'E:\\\\zynqlinkPRO_etm_calibration\\\\etm-service\\\\records\\\\capture-e85b049fab1e4cc1b8d4f520d17f4cb6\\\\session.json'"
+}

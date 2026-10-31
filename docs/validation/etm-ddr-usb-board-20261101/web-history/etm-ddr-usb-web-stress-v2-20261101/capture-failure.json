@@ -1,0 +1,54 @@
+{
+  "round": 1,
+  "function": "cdc_poll",
+  "before": {
+    "clockError": null,
+    "clocks": {
+      "busDivider": 1,
+      "coreDivider": 1,
+      "coreHz": 48000000,
+      "external": true,
+      "hclkHz": 48000000,
+      "knownHz": 48000000,
+      "knownTraceHz": 48000000,
+      "path": "HSE 8 MHz ÷1 ×6 → AHB ÷1",
+      "physicalTraceHz": 24000000,
+      "source": "HSE → PLL",
+      "traceHz": 48000000,
+      "tracePath": "HCLK → TRACEPORTCK（与 CPU 相同）",
+      "traceReady": true,
+      "traceRelation": "Trace 输入 = HCLK；4 位 DDR 的 TRACECLK = HCLK / 2"
+    },
+    "config": {
+      "ccer": 100352,
+      "ctrl": 1041,
+      "idr": 1091891777,
+      "protocol": "ETMv3",
+      "traceid": 0
+    },
+    "core": "Cortex-M3",
+    "cpuid": 1092600369,
+    "device": 268657684,
+    "etmVersion": "ETMv3.4",
+    "flashLimit": 134742016,
+    "halted": false,
+    "hseHz": 8000000,
+    "name": "STM32F103ZE / 高容量 F103（PE2～PE6）",
+    "profile": "stm32f103ze",
+    "rcc": {
+      "cfgr": 5309450,
+      "cr": 50548355
+    },
+    "traceOptions": {
+      "branchBroadcast": true,
+      "cycleCount": false,
+      "returnStack": false
+    },
+    "traceStatus": "F103ZE 48/24 MHz Kingst 联动与 ETMv3 解码已验收；封装须有 PE2～PE6",
+    "traceSupported": true,
+    "width": 1
+  },
+  "openSeconds": 1.5919690000009723,
+  "captureAttemptUnix": 1793488710.3971868,
+  "error": "[Errno 2] No such file or directory: 'E:\\\\zynqlinkPRO_etm_calibration\\\\etm-service\\\\records\\\\capture-e85b049fab1e4cc1b8d4f520d17f4cb6\\\\session.json'"
+}

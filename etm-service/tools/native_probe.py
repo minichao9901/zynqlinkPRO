@@ -9,6 +9,7 @@ import hmac
 import json
 import re
 import secrets
+import struct
 import threading
 import time
 from pathlib import Path
@@ -24,6 +25,27 @@ def drain_dap_replies(device,quiet_ms=80,limit=32):
         except usb.core.USBTimeoutError:return stale
         stale+=1
     raise ValueError('DAP队列未静默，拒绝把旧响应交给新会话')
+
+
+def reset_dap_session(device):
+    """One acknowledged DAP-only epoch boundary, without resetting USB/target.
+
+    Native ownership is exclusive before this call. A quiet host read alone
+    cannot prove the device TX descriptor and software queues have retired.
+    Existing firmware EP0 0x5a rebuilds only EP1 IN / EP2 OUT and aborts DAP
+    engines; it does not touch target Flash/RCC or the DDR trace endpoint.
+    """
+    def snapshot():
+        data=bytes(device.ctrl_transfer(0xc0,0x5b,0x4441,0x5052,32,timeout=2000))
+        if len(data)!=32:raise ValueError('DAP队列状态长度无效')
+        return struct.unpack('<8I',data)
+    before=snapshot()
+    result=bytes(device.ctrl_transfer(0xc0,0x5a,0x4441,0x5052,4,timeout=2000))
+    if result!=b'DAP\0':raise ValueError('DAP专用会话复位未确认；没有重放命令')
+    device.clear_halt(0x81);device.clear_halt(2)
+    after=snapshot()
+    if after[3]==before[3] or any(after[:3]):raise ValueError('DAP会话epoch或空闲队列未确认')
+    return dict(syncProtocol='zynq-dap-epoch/1',queueEpoch=after[3],queueState=list(after[:3]))
 
 
 class NativeProbe:
@@ -197,11 +219,11 @@ class NativeProbe:
                     usb.util.claim_interface(device, 0)
                     self.claimed.add(0)
                     try:
-                        stale=drain_dap_replies(device)
+                        synchronized=reset_dap_session(device)
                     except BaseException:
                         usb.util.release_interface(device,0);self.claimed.remove(0)
                         raise
-                    return {'ok':True,'staleDapReplies':stale,'drainQuietMs':80}
+                    return {'ok':True,**synchronized}
                 elif action == 'release' and 0 in self.claimed:
                     usb.util.release_interface(device, 0)
                     self.claimed.remove(0)

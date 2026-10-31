@@ -35,6 +35,8 @@ def main(argv=None):
     parser.add_argument('--out',type=Path,default=ROOT/'dist/zynq-etm-bridge-win64',help='新输出目录；拒绝覆盖')
     args=parser.parse_args(argv)
     if os.name!='nt' or sys.maxsize<=2**32:raise ValueError('请使用Windows x64 Python构建')
+    shared=subprocess.run([sys.executable,str(ROOT/'tools/sync_etm_shared.py'),'--check'],capture_output=True,text=True)
+    if shared.returncode:raise ValueError('ETM共享驱动不是当前主驱动，请先运行web.shared-sync --write：'+shared.stdout+shared.stderr)
     out=args.out.resolve()
     archive=Path(str(out)+'.zip')
     if out.exists() or archive.exists():raise ValueError('输出已存在，请选择新目录：'+str(out))
