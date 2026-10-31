@@ -58,6 +58,14 @@ PS通过0x61回复的能力位声明0x62/64字节只读诊断，主机在文件�
 
 ### 最初的只读研究与容量计划
 
+DDR前端已有隔离的实验RTL：`fpga/experiments/etm_ddr/etm_ddr_packetizer.v`，尚未加入生产BD或本轮ETD1构建输入。
+它把带有效长度/EOF的128bit帧转为64bit AXIS，保留最后一拍直到后续数据或EOF确定，正确产生TKEEP/TLAST；
+不发送零字节DMA包，不越过锁定的byte_limit，背压期间数据稳定，源暂停不会伪造结束，busy时拒绝重启。
+39个正常长度/边界/停顿用例及非法帧检查通过；输出stream_bytes只表示AXIS握手字节，不等于DDR已提交字节。
+仍需接入源时钟跨域打包、独立硬件停止、AXI HP/DMA、显式DDR保留与cache一致性，并完成真实内存读回。
+因此本阶段不能宣称已实现或验收1～2秒DDR采集。
+[实验前端仿真](validation/etm-ddr-packetizer-20261101/result.json)。
+
 研究分支`codex/etm-lane-calibration`，目录`E:/zynqlinkPRO_etm_calibration`，从main `bc0d3ad`建立。
 目标为反复连接/关闭、采集/解码/更换断点及CDC echo压力测试，并研究可靠采满1～2秒到DDR、采后下载。
 本阶段仅检查源码/官方资料和离线容量，未改生产RTL/PS，未综合、未上板；Golden仍为原1da17c/e977配对。
