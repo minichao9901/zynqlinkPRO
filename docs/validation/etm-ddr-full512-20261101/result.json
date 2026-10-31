@@ -1,0 +1,325 @@
+{
+  "hardware": true,
+  "traceCapture": false,
+  "flashWrites": false,
+  "source": "address-dependent PL pattern",
+  "pair": "E:\\zynqlinkPRO_etm_calibration\\prebuilt\\etm-ddr-pilot-raw4-20261101",
+  "pairFiles": {
+    "probe.bit": {
+      "bytes": 4045674,
+      "sha256": "6690d8dd214be1986b7f89f64f93096b99aa7a5b30fb93b65e7f51919577c720"
+    },
+    "application.elf": {
+      "bytes": 792100,
+      "sha256": "ab7c097764bea91272783ec59a51d200bf154ba5d4f9adbf1e7350466c17947f"
+    },
+    "ps7_init.tcl": {
+      "bytes": 35186,
+      "sha256": "aa9747c31f705be7c28af1c6b1cdeaf282f0dcdb01faecee2a9f72e4d3489132"
+    },
+    "verified_clock.json": {
+      "bytes": 96,
+      "sha256": "686a99d7b16f975e3e3f6217960423e652e7827bd4ebc2125cababf836090d4e"
+    },
+    "ps-build.json": {
+      "bytes": 4952,
+      "sha256": "0ba27dbe8e2c79154582f273539e127daa0a8fefce332532879233e2bf1eb2fa"
+    },
+    "rtl-build-inputs.json": {
+      "bytes": 9803,
+      "sha256": "6e988bf8e6f836c6a66368e8ffd576fe4d77d4ce37282771c2f094ce75103d2f"
+    }
+  },
+  "base": 268435456,
+  "bytesPerRound": 536870912,
+  "seed": 333162775,
+  "requestedRounds": 1,
+  "reloadBetweenRounds": false,
+  "retryFailedRounds": false,
+  "clockMode": "dap",
+  "loader": "E:\\zynqlinkPRO_etm_calibration\\tools\\download_dap_fpga.tcl",
+  "loaderSha256": "78ed003b599778e0f07d88323f13861e4013b1af52150859060d5e2ce4d91b73",
+  "runnerSha256": "4639b3f3468e504f9e1ed52b1532807630e055b7c55b99c28289a6605188ffa8",
+  "readbackPath": "physical MEM-AP0; no Cortex-A9 memory/cache context",
+  "cases": [
+    {
+      "bytes": 536870912,
+      "seed": 333162775,
+      "actualClocks": {
+        "FCLK_Hz": 119999998,
+        "cfg": "0x300d6a11",
+        "waveform": {
+          "SWCLK_Hz": 999999.9833333333,
+          "half_period_fclk": 60,
+          "short_high": true,
+          "intended_high_ns": 8.333333472222225
+        },
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 999999.9833333333,
+        "clock_observation": "PS JTAG register read; no DAP command during stream"
+      },
+      "passed": true,
+      "stage": "done",
+      "expectedCaptureId": 1,
+      "guardBefore": {
+        "head": [
+          4294967295,
+          4294967295,
+          4294967295,
+          4294967295
+        ],
+        "tail": []
+      },
+      "hardwareRegisters": [
+        1162104113,
+        0,
+        2,
+        268435456,
+        536870912,
+        333162775,
+        536870912,
+        536870912,
+        171966482,
+        0,
+        1,
+        3,
+        268435456,
+        805306368,
+        128,
+        1
+      ],
+      "writerSeconds": 1.4330540405509007,
+      "responseRateMBps": 374.634100884021,
+      "timingBasis": "FCLK cycles through final OKAY B; counter rate is not verified payload throughput",
+      "guardAfter": {
+        "head": [
+          4294967295,
+          4294967295,
+          4294967295,
+          4294967295
+        ],
+        "tail": []
+      },
+      "adjacentGuardsUnchanged": true,
+      "readbackChunks": [
+        {
+          "offset": 0,
+          "bytes": 16777216,
+          "storedBytes": 16777216,
+          "sha256": "88beb320d922ceb373c5ab220def4563b93b53305c5bf682b783df29e226873d"
+        },
+        {
+          "offset": 16777216,
+          "bytes": 16777216,
+          "storedBytes": 16777216,
+          "sha256": "9e7dc3425ed3c5811e25f48c00ab55b54b8240bcaa8c8facfb10cdd8cf2d4bda"
+        },
+        {
+          "offset": 33554432,
+          "bytes": 16777216,
+          "storedBytes": 16777216,
+          "sha256": "c8abab24a306dbceec243b8d9ebc2c25d134649869f95c83eb45a38f4294d677"
+        },
+        {
+          "offset": 50331648,
+          "bytes": 16777216,
+          "storedBytes": 16777216,
+          "sha256": "16f2453b74fed779ec15b9b23b12558ab42b06749c416595d0cc63f99e8d5b75"
+        },
+        {
+          "offset": 67108864,
+          "bytes": 16777216,
+          "storedBytes": 16777216,
+          "sha256": "9f4cb4deeec1bc06090bf999fc9f6db13fe4d297581f7416b75af0bb5a866338"
+        },
+        {
+          "offset": 83886080,
+          "bytes": 16777216,
+          "storedBytes": 16777216,
+          "sha256": "3dd8da076e843c4e2a59f1d1a78e192d4d05bc79b39471eea2c6c532eda1cc60"
+        },
+        {
+          "offset": 100663296,
+          "bytes": 16777216,
+          "storedBytes": 16777216,
+          "sha256": "0c0c30df6516ca95179c5fd6da5ea36aa2e1a250c7394873d9d9b0955bdcc1af"
+        },
+        {
+          "offset": 117440512,
+          "bytes": 16777216,
+          "storedBytes": 16777216,
+          "sha256": "3d22fab42f8abb93fd2e12450404956f604a8cfcb88156f2b6843c1c06e1d6c1"
+        },
+        {
+          "offset": 134217728,
+          "bytes": 16777216,
+          "storedBytes": 16777216,
+          "sha256": "bf73805c8b3c28555d38abd0587463ce75ae1f7dc2c11e16774c344ea05e8d68"
+        },
+        {
+          "offset": 150994944,
+          "bytes": 16777216,
+          "storedBytes": 16777216,
+          "sha256": "fa128f74c3c6eba4a3d8a8326bb41eca4bed86378d33831169c9270eeca5e4d4"
+        },
+        {
+          "offset": 167772160,
+          "bytes": 16777216,
+          "storedBytes": 16777216,
+          "sha256": "5b14b5b42a747a17ba3b5c1c68f0f9c81873af746032173aa39592264593f0e4"
+        },
+        {
+          "offset": 184549376,
+          "bytes": 16777216,
+          "storedBytes": 16777216,
+          "sha256": "59e64039b8d63edd437646c5cf983d6d63ccca4db5bde87a3b5472a5924e4998"
+        },
+        {
+          "offset": 201326592,
+          "bytes": 16777216,
+          "storedBytes": 16777216,
+          "sha256": "d5355bcb305ba63764d64cbcbe8ca7c9802582f29594ebd40a8d1f6d540b29d8"
+        },
+        {
+          "offset": 218103808,
+          "bytes": 16777216,
+          "storedBytes": 16777216,
+          "sha256": "94d1dcc9df6483e3feb156d095802a8ec366625be142c4ec34b45c503a36c29b"
+        },
+        {
+          "offset": 234881024,
+          "bytes": 16777216,
+          "storedBytes": 16777216,
+          "sha256": "c92830b9c9f46a429e000168d8de8712e948583ed51b0411a0db13235fe7d890"
+        },
+        {
+          "offset": 251658240,
+          "bytes": 16777216,
+          "storedBytes": 16777216,
+          "sha256": "e9cc5a3e1f612a176104bbd059a14cb948760f351cc5936f27ba3e6403bd2edc"
+        },
+        {
+          "offset": 268435456,
+          "bytes": 16777216,
+          "storedBytes": 16777216,
+          "sha256": "7fb4b92f0a4c39b95fade949f83072f17314da31cd584014aa0f2ab24ffe57ca"
+        },
+        {
+          "offset": 285212672,
+          "bytes": 16777216,
+          "storedBytes": 16777216,
+          "sha256": "1a6a08ca53c3fb8377558694faf359e1b63b4d321f02a409ab5299df32bda305"
+        },
+        {
+          "offset": 301989888,
+          "bytes": 16777216,
+          "storedBytes": 16777216,
+          "sha256": "de0affef3a4ae0d023d6ef04de770662bb19a00ca7df7007d137999f3d736009"
+        },
+        {
+          "offset": 318767104,
+          "bytes": 16777216,
+          "storedBytes": 16777216,
+          "sha256": "fca88d690c99781b509031dc12dab4ba65cf71ed859bf5e93faeb42c13dbb632"
+        },
+        {
+          "offset": 335544320,
+          "bytes": 16777216,
+          "storedBytes": 16777216,
+          "sha256": "f7684b47bb4525c0d4ab4a724d771418747c9dc1b31a704b2d3f0cb414f71225"
+        },
+        {
+          "offset": 352321536,
+          "bytes": 16777216,
+          "storedBytes": 16777216,
+          "sha256": "22e37cc792b2d69dd86dc502a19b92c63905929da70ff07ff44d5fffb80da5da"
+        },
+        {
+          "offset": 369098752,
+          "bytes": 16777216,
+          "storedBytes": 16777216,
+          "sha256": "e329d9ed8f65bad464d18139359135cfafc9f2ec7d553d810add84aa1e235986"
+        },
+        {
+          "offset": 385875968,
+          "bytes": 16777216,
+          "storedBytes": 16777216,
+          "sha256": "90bf369a8276257584ea7e566aa829f76f785580487cd36761e6834c8b23cbbf"
+        },
+        {
+          "offset": 402653184,
+          "bytes": 16777216,
+          "storedBytes": 16777216,
+          "sha256": "66b3c623153559a62bcbce0352f424864d1a68ed3457c19f21878d566576eb05"
+        },
+        {
+          "offset": 419430400,
+          "bytes": 16777216,
+          "storedBytes": 16777216,
+          "sha256": "b27a0564b186e9b8c73a57dc12361e9448c27209d12653c20679d5a6a546fda1"
+        },
+        {
+          "offset": 436207616,
+          "bytes": 16777216,
+          "storedBytes": 16777216,
+          "sha256": "ad722b5c32fac259b4faec52048a55abc715ab0cf4b390e58c3cc2a7b1c6498e"
+        },
+        {
+          "offset": 452984832,
+          "bytes": 16777216,
+          "storedBytes": 16777216,
+          "sha256": "ba457e9760f19d70f166dccb4ba2f37559f474925414b1642c4a05f4a61296c9"
+        },
+        {
+          "offset": 469762048,
+          "bytes": 16777216,
+          "storedBytes": 16777216,
+          "sha256": "0e24f572f779b800f57f3dc44c70a45f72219f42d9582d53d5f65f71ccd44e83"
+        },
+        {
+          "offset": 486539264,
+          "bytes": 16777216,
+          "storedBytes": 16777216,
+          "sha256": "9ac3c51ecd5d6a0869077d9350f1471c28076730fad9421c19123a76e410778e"
+        },
+        {
+          "offset": 503316480,
+          "bytes": 16777216,
+          "storedBytes": 16777216,
+          "sha256": "76b97ea07fc64c195a53e54b52a10bf1072829f3d255d4dd374347b6fcaab1eb"
+        },
+        {
+          "offset": 520093696,
+          "bytes": 16777216,
+          "storedBytes": 16777216,
+          "sha256": "0956d3bd1fd5e2c59f5e40309eaddbe0d2b319aac2abfe9d1f491f25d9484ae9"
+        }
+      ],
+      "readbackProgressBytes": 536870912,
+      "readbackBytesVerified": 536870912,
+      "readbackSha256": "10a9421967397c392be07f9fc08f7f0a48dfe420c1fc7200123dbaee05f68b8e",
+      "expectedSha256": "10a9421967397c392be07f9fc08f7f0a48dfe420c1fc7200123dbaee05f68b8e",
+      "firstMismatches": [],
+      "clocksAfter": {
+        "FCLK_Hz": 119999998,
+        "cfg": "0x300d6a11",
+        "waveform": {
+          "SWCLK_Hz": 999999.9833333333,
+          "half_period_fclk": 60,
+          "short_high": true,
+          "intended_high_ns": 8.333333472222225
+        },
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 999999.9833333333,
+        "clock_observation": "PS JTAG register read; no DAP command during stream"
+      },
+      "clockStable": true,
+      "verifiedPatternMBps": 374.634100884021
+    }
+  ],
+  "passed": true,
+  "stage": "done",
+  "usbEnumeratedBeforePattern": true
+}

@@ -83,7 +83,22 @@ if {{!$terminal}} {{
     guard_ok=guards_before['head']==guards_after['head'] and tail_before[length%4:]==tail_after[length%4:]
     report.update(guardAfter=guards_after,adjacentGuardsUnchanged=guard_ok,stage='full-readback');save(report)
     image=out/'ddr-readback.bin'
-    session.run('physrd -force -bin -file {'+image.as_posix()+f'}} {base:#x} {(length+3)//4}\nputs FULL_READBACK')
+    # Bound each TCF binary response instead of constructing a 512MiB Tcl
+    # string, and expose progress while the independently running PL is idle.
+    report['readbackChunks']=[]
+    with image.open('xb') as combined:
+        for part_index,offset in enumerate(range(0,length,16<<20)):
+            size=min(16<<20,length-offset);part=out/f'ddr-part-{part_index:03}.bin'
+            session.run('physrd -force -bin -file {'+part.as_posix()+f'}} {base+offset:#x} {(size+3)//4}\nputs PHYSICAL_CHUNK_READ')
+            expected_size=(size+3)//4*4
+            if part.stat().st_size!=expected_size:raise RuntimeError('Incomplete physical readback chunk')
+            digest=hashlib.sha256()
+            with part.open('rb') as stream:
+                while data:=stream.read(1<<20):combined.write(data);digest.update(data)
+            combined.flush()
+            report['readbackChunks'].append(dict(offset=offset,bytes=size,storedBytes=expected_size,sha256=digest.hexdigest()))
+            report['readbackProgressBytes']=offset+size;save(report)
+            if length>16<<20:print('physical readback',offset+size,'/',length,'bytes',flush=True)
     if image.stat().st_size!=(length+3)//4*4:raise RuntimeError('Incomplete JTAG readback')
     actual_sha=hashlib.sha256();expected_sha=hashlib.sha256();offset=0;mismatches=[]
     with image.open('rb') as f:

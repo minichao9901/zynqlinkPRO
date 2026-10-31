@@ -1,0 +1,50 @@
+{
+  "passed": true,
+  "traceCapture": false,
+  "hardware": true,
+  "bytesVerified": 536870912,
+  "readbackSha256": "10a9421967397c392be07f9fc08f7f0a48dfe420c1fc7200123dbaee05f68b8e",
+  "expectedSha256": "10a9421967397c392be07f9fc08f7f0a48dfe420c1fc7200123dbaee05f68b8e",
+  "actualClocks": {
+    "FCLK_Hz": 119999998,
+    "cfg": "0x300d6a11",
+    "waveform": {
+      "SWCLK_Hz": 999999.9833333333,
+      "half_period_fclk": 60,
+      "short_high": true,
+      "intended_high_ns": 8.333333472222225
+    },
+    "JTAG_sampling_mode": 0,
+    "RISC_V_SBA_enabled": false,
+    "actual_link_Hz": 999999.9833333333,
+    "clock_observation": "PS JTAG register read; no DAP command during stream"
+  },
+  "clocksAfter": {
+    "FCLK_Hz": 119999998,
+    "cfg": "0x300d6a11",
+    "waveform": {
+      "SWCLK_Hz": 999999.9833333333,
+      "half_period_fclk": 60,
+      "short_high": true,
+      "intended_high_ns": 8.333333472222225
+    },
+    "JTAG_sampling_mode": 0,
+    "RISC_V_SBA_enabled": false,
+    "actual_link_Hz": 999999.9833333333,
+    "clock_observation": "PS JTAG register read; no DAP command during stream"
+  },
+  "writerSeconds": 1.4330540405509007,
+  "verifiedPatternMBps": 374.634100884021,
+  "source": "address-dependent PL pattern",
+  "pairBitSha256": "6690d8dd214be1986b7f89f64f93096b99aa7a5b30fb93b65e7f51919577c720",
+  "pairElfSha256": "ab7c097764bea91272783ec59a51d200bf154ba5d4f9adbf1e7350466c17947f",
+  "leadingGuardsUnchanged": true,
+  "trailingGuardScope": "Payload ends exactly at the reservation boundary; no guard was written outside the reservation",
+  "readbackMethod": "physical MEM-AP0; no Cortex-A9 memory/cache context",
+  "hostReadbackChunkBytes": 16777216,
+  "limitations": [
+    "not ETM source/1-2s hardware window acceptance",
+    "not USB download speed or CPU cache coherence",
+    "startup stability checked separately"
+  ]
+}

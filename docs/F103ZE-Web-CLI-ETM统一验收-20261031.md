@@ -245,6 +245,23 @@ MMIO写使用cache-sync bypass，避免通过CPU上下文同步旧缓存线覆�
 [缓存对照与40轮结果](validation/etm-ddr-physical-readback-20261101/result.json)、
 [同一采集的两种读取路径](validation/etm-ddr-physical-readback-20261101/cache-comparison.json)。
 
+### 完整512MiB保留区：物理全量数据通过
+
+同一6690d8/ab7c09配对重新明确加载，OCM执行段通过物理AP0核查，正常DAP设置后
+FCLK119,999,998Hz、配置SWCLK999,999.98Hz。PL已知模式写满0x10000000～0x30000000，
+536,870,912B的接收/OKAY B响应计数一致，硬件计时1.433054s。
+随后不经CPU缓存上下文，通过AP0按16MiB分块独立读回全部32块，逐字节模式检查及整体SHA完全一致：
+`10a9421967397c392be07f9fc08f7f0a48dfe420c1fc7200123dbaee05f68b8e`。
+已核对内容的模式写入速率374.634MB/s；时钟前后未变化，起点前保护字未变。
+末端严格等于保留区边界，没有在区外写保护字；不要将空的末端保护列表解读为测过任意区外地址。
+
+调试器分块读取耗时不属于录制时间，也不是Zynq USB速度。脚本限制每次TCF响应16MiB并保存进度/块SHA，
+避免一次创建512MiB Tcl二进制字符串；原始512MiB和分块文件留在私有build目录，Git保存完整结果、命令、
+匹配SHA及首尾实际4KiB样本。46项CLI回归通过。
+这证明本次实际板卡上的保留区与模式PL→DDR写入通路可用；未证明CPU/USB缓存一致性，
+尚未接ETM源、硬件录制窗口、采后USB下载或逐线校准，候选整体仍不作为Golden。
+[完整保留区结果](validation/etm-ddr-full512-20261101/summary.json)。
+
 DDR前端已有隔离的实验RTL：`fpga/experiments/etm_ddr/etm_ddr_packetizer.v`，尚未加入生产BD或本轮ETD1构建输入。
 它把带有效长度/EOF的128bit帧转为64bit AXIS，保留最后一拍直到后续数据或EOF确定，正确产生TKEEP/TLAST；
 不发送零字节DMA包，不越过锁定的byte_limit，背压期间数据稳定，源暂停不会伪造结束，busy时拒绝重启。
