@@ -57,7 +57,9 @@ export async function nativeUsbDevices(){
 }
 class NativeUsbDevice extends EventTarget{
   constructor(info){super();Object.assign(this,info);this.nativeService=true;this.dapSynchronized=false;this.opened=false;this.owner=sessionOwner('usb',info.serialNumber);this.reads=new Map();this.commandPending=0;}
-  rpc(action,value={}){return call('usb',action,{owner:this.owner,resourceEpoch:this.resourceEpoch,...value});}
+  async rpc(action,value={}){const started=performance.now();try{return await call('usb',action,{owner:this.owner,resourceEpoch:this.resourceEpoch,...value});}finally{this.rpcStats??={};const r=this.rpcStats[action]??={calls:0,milliseconds:0};r.calls++;r.milliseconds+=performance.now()-started;}}
+  resetTransportStats(){this.rpcStats={};}
+  transportStats(){return {atomicDapEnabled:this.atomicDapEnabled!==false,actions:structuredClone(this.rpcStats||{})};}
   async open(){Object.assign(this,await this.rpc('open'));this.opened=true;this.dapSynchronized=false;this.reads=new Map();this.commandPending=0;}
   async close(){const epoch=this.resourceEpoch;await this.rpc('close');if(epoch===this.resourceEpoch){this.opened=false;this.commandPending=0;}}
   async selectConfiguration(number){Object.assign(this,await this.rpc('configuration',{number}));}
@@ -67,13 +69,26 @@ class NativeUsbDevice extends EventTarget{
   async clearHalt(direction,endpoint){await this.rpc('clear',{endpoint:endpoint|(direction==='in'?128:0)});}
   async reset(){await this.rpc('reset');this.commandPending=0;}
   async transferOut(endpoint,data){
+    if(this.atomicDap)throw Error('DAP交换进行中，拒绝并发写入');
     const epoch=this.resourceEpoch;
     const result=await this.rpc('write',{endpoint,data:encoded(data)});
     if(epoch!==this.resourceEpoch)throw Error('USB会话已重新打开；旧写回包已丢弃');
     if(data.byteLength)this.commandPending++;
     return {status:'ok',bytesWritten:result.bytesWritten};
   }
+  async exchangeDap(data,length,timeoutMs=2000){
+    if(this.atomicDap||this.commandPending)throw Error('DAP仍有未完成命令，拒绝交错交换');
+    const epoch=this.resourceEpoch;this.atomicDap=true;
+    try{
+      const result=await this.rpc('exchange',{data:encoded(data),length,timeoutMs});
+      if(epoch!==this.resourceEpoch)throw Error('USB会话已重新打开；旧交换结果已丢弃');
+      if(result.bytesWritten!==data.byteLength)throw Error('本地DAP请求短写；未重放命令');
+      if(result.timedOut)throw Error('本地DAP交换超时；未重放命令');
+      const bytes=decoded(result.data);return {status:'ok',data:new DataView(bytes.buffer)};
+    }finally{this.atomicDap=false;}
+  }
   transferIn(endpoint,length){
+    if(endpoint===1&&this.atomicDap)return Promise.reject(Error('DAP交换进行中，拒绝并发读入'));
     // Keep packet order across HTTP response scheduling. Native HSS uses one
     // batched reader instead of concurrent browser USB URBs.
     const previous=this.reads.get(endpoint)||Promise.resolve();

@@ -499,8 +499,12 @@ export class WebUsbDapProbe {
       return Math.min(3000, left);
     };
     const writeTimeout = remaining();
+    let exchanged=null;
     try {
-      await withTimeout(this.device.transferOut(this.epOut, req), writeTimeout, 'USB 写');
+      if(this.device.nativeService && this.device.atomicDapEnabled!==false && typeof this.device.exchangeDap==='function'){
+        const budget=Math.max(1,Math.floor(Math.min(2000,writeTimeout-100)));
+        exchanged=await withTimeout(this.device.exchangeDap(req,this.pkt,budget),writeTimeout,'DAP 交换');
+      }else await withTimeout(this.device.transferOut(this.epOut, req), writeTimeout, 'USB 写');
     } catch (e){
       await this._onXferTimeout('USB 写');    // 写超时：底层传输可能还挂着 → 标脏 + 立刻复位救回来
       throw e;
@@ -509,7 +513,7 @@ export class WebUsbDapProbe {
       let r;
       const readTimeout = remaining();
       try {
-        r = await withTimeout(this.device.transferIn(this.epIn, this.pkt), readTimeout, 'USB 读');
+        r = attempt===0 && exchanged ? exchanged : await withTimeout(this.device.transferIn(this.epIn, this.pkt), readTimeout, 'USB 读');
       } catch (e){
         await this._onXferTimeout('USB 读');
         throw e;

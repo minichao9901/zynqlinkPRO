@@ -12,6 +12,27 @@ from native_probe import NativeProbe, install,reset_dap_session
 
 
 class NativeProbeTests(unittest.TestCase):
+    def test_atomic_dap_exchange_sends_once_then_reads_the_same_epoch(self):
+        import base64
+        backend=SimpleNamespace(lock=threading.RLock(),jobs={},ACTIVE=('queued',))
+        with tempfile.TemporaryDirectory() as folder:
+            token=Path(folder)/'token';token.write_text('c'*64);proxy=NativeProbe(backend,token)
+            device=Mock();device.write.return_value=2;device.read.return_value=b'\x00\x00'
+            proxy.usb=device;proxy.usb_owner='a'*32;proxy.usb_epoch='epoch';proxy.claimed={0}
+            result=proxy.usb_call('exchange',dict(owner='a'*32,resourceEpoch='epoch',data=base64.b64encode(b'\0\xff').decode(),length=512,timeoutMs=1000))
+            self.assertEqual(base64.b64decode(result['data']),b'\0\0');self.assertFalse(result['timedOut'])
+            device.write.assert_called_once();device.read.assert_called_once()
+            self.assertLessEqual(device.read.call_args.kwargs['timeout'],1000)
+
+    def test_atomic_dap_exchange_rejects_short_write_without_read_or_replay(self):
+        backend=SimpleNamespace(lock=threading.RLock(),jobs={},ACTIVE=('queued',))
+        with tempfile.TemporaryDirectory() as folder:
+            token=Path(folder)/'token';token.write_text('c'*64);proxy=NativeProbe(backend,token)
+            device=Mock();device.write.return_value=1
+            proxy.usb=device;proxy.usb_owner='a'*32;proxy.usb_epoch='epoch';proxy.claimed={0}
+            with self.assertRaisesRegex(ValueError,'短写'):
+                proxy.usb_call('exchange',dict(owner='a'*32,resourceEpoch='epoch',data='AP8=',length=512,timeoutMs=1000))
+            device.write.assert_called_once();device.read.assert_not_called()
     def test_dap_epoch_reset_uses_no_speculative_bulk_reads_or_whole_usb_reset(self):
         import struct
         device=Mock()

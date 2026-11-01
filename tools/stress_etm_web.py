@@ -122,6 +122,10 @@ class Stress(Streams):
                     echo=Echo(port);echo.start()
                 self.set('etm','#break-command','b '+function)
                 self.page('etm','click',selector='#add-break');self.ready('#start')
+                if self.args.native_exchange!='auto':
+                    enabled=self.args.native_exchange=='on' or self.args.native_exchange=='alternate' and n%2==1
+                    self.invoke('etm','setNativeExchange',enabled,target='target');row['nativeExchange']=enabled
+                if self.args.profile_control:self.invoke('etm','resetTransportStats',target='target')
                 previous=self.page('etm','read',selector='#records')['value'];started=time.perf_counter()
                 row['captureAttemptUnix']=time.time()
                 self.page('etm','click',selector='#start')
@@ -144,6 +148,7 @@ class Stress(Streams):
                 record=self.records/sid
                 meta=json.loads((record/'session.json').read_text(encoding='utf8'))
                 decoded=json.loads((record/'decoded.json').read_text(encoding='utf8'))
+                if self.args.profile_control:row['controlTransport']=self.invoke('etm','transportStats',target='target')
                 quality=meta.get('captureQuality') or {}
                 if quality.get('transport')=='ddr-usb/1':
                     if not meta.get('captureExtent',{}).get('complete') or meta.get('captureWarning'):
@@ -209,6 +214,8 @@ def arguments(argv=None):
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--runtime',required=True);p.add_argument('--artifacts',required=True)
     p.add_argument('--records-root',help='Explicit server record directory; default from runtime metadata')
+    p.add_argument('--profile-control',action='store_true',help='Record per-action native USB HTTP round-trip counters')
+    p.add_argument('--native-exchange',choices=('auto','on','off','alternate'),default='auto',help='AI controlled A/B only; normal product default is on')
     p.add_argument('--rounds',type=int,default=30);p.add_argument('--capture-rounds',type=int,default=10)
     p.add_argument('--milliseconds',type=int,default=10);p.add_argument('--case-timeout',type=float,default=120)
     p.add_argument('--profile',choices=['stm32f103ze','stm32h743'],default='stm32f103ze')

@@ -4,6 +4,20 @@ import {WebUsbDapProbe} from '../../../web/app/rtt/dap-webusb.js';
 import {WebUsbDapProbe as EtmDapProbe} from '../../../etm-service/web/app/shared/rtt/dap-webusb.js';
 
 for(const [name,Probe] of [['workbench',WebUsbDapProbe],['ETM standalone',EtmDapProbe]]){
+test(name+' native control exchanges once and keeps response validation',async()=>{
+  const probe=Object.create(Probe.prototype);let exchanges=0;
+  Object.assign(probe,{_ready:true,pkt:512,epOut:2,epIn:1,device:{nativeService:true,
+    exchangeDap:async req=>{exchanges++;assert.deepEqual([...req],[17,1]);const b=Uint8Array.of(17,0);return {data:new DataView(b.buffer)};},
+    transferOut:async()=>{throw Error('duplicate write');},transferIn:async()=>{throw Error('duplicate read');}}});
+  assert.deepEqual([...await probe._ctrl(17,Uint8Array.of(1))],[0]);assert.equal(exchanges,1);
+});
+test(name+' native stale response never replays the control write',async()=>{
+  const probe=Object.create(Probe.prototype);let exchanges=0,reads=0;
+  Object.assign(probe,{_ready:true,pkt:512,epOut:2,epIn:1,device:{nativeService:true,
+    exchangeDap:async()=>{exchanges++;const b=Uint8Array.of(3,0);return {data:new DataView(b.buffer)};},
+    transferOut:async()=>{throw Error('duplicate write');},transferIn:async()=>{reads++;const b=Uint8Array.of(17,0);return {data:new DataView(b.buffer)};}}});
+  assert.deepEqual([...await probe._ctrl(17,Uint8Array.of(1))],[0]);assert.equal(exchanges,1);assert.equal(reads,1);
+});
 test(name+' trusts acknowledged native queue synchronization without speculative reads',async()=>{
   const probe=Object.create(Probe.prototype);
   probe.device={nativeService:true,dapSynchronized:true,

@@ -243,6 +243,23 @@ class NativeProbe:
                 return {'ok': True}
             if 0 not in self.claimed:
                 raise ValueError('请先认领USB接口0')
+            if action == 'exchange':
+                # One HTTP round trip for a serialized DAP write+read. A
+                # duplicate delivery ID is handled outside this lock and must
+                # never execute the write a second time.
+                data=self.blob(value.get('data',''),4096)
+                length=value.get('length',512);budget=value.get('timeoutMs',2000)
+                if not data or not isinstance(length,int) or not 1<=length<=4096 or not isinstance(budget,int) or not 1<=budget<=2000:
+                    raise ValueError('无效DAP交换参数')
+                until=time.monotonic()+budget/1000
+                written=device.write(2,data,timeout=budget)
+                if written!=len(data):raise ValueError('DAP请求短写；未重放命令')
+                def remaining():
+                    return max(1,int((until-time.monotonic())*1000))
+                if len(data)%512==0:device.write(2,b'',timeout=remaining())
+                try:reply=bytes(device.read(0x81,length,timeout=remaining()))
+                except usb.core.USBTimeoutError:return {'data':'','timedOut':True,'bytesWritten':written}
+                return {'data':self.encode(reply),'timedOut':False,'bytesWritten':written}
             if action == 'write':
                 if ep != 2:
                     raise ValueError('仅允许DAP OUT端点2')
