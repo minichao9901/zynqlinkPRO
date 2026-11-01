@@ -1,0 +1,18 @@
+F103ZE 24MHz ETM: verified DDR/USB/Web baseline
+
+Commit: 3bdda8929c79c28094fc5cbb3482c50921c62f57
+Probe pair: prebuilt/etm-ddr-usb-raw4-20261101/
+BIT SHA-256: 82863bb7c06b27b32f5fd518e7b08d70ce1b855ca3c6f0525b8961d6967cd8ea
+Zynq ELF SHA-256: 1d55b321f95e15d43afb719380c7cefb4f05955c89f018e49c38bb3fb38ef559
+PS init SHA-256: aa9747c31f705be7c28af1c6b1cdeaf282f0dcdb01faecee2a9f72e4d3489132
+Target: prebuilt/golden/f103ze-cdc48.elf
+Target SHA-256: e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f
+
+Scope: target HCLK48MHz / TRACECLK24MHz, FCLK about 120MHz, SWCLK about 1MHz.
+Passed: 1s/2s finite PL-to-DDR capture; post-capture USB vs physical AP0 identity;
+30 Web probe cycles; 20 changed-entry capture/native-decode rounds with exact CDC echo.
+See pair manifest and docs/validation/etm-web-soak-after-ram-20261101/.
+
+This is a measured F103ZE baseline, not whole-product Golden promotion.
+Later ELD1/36MHz experiments and their cleanup failure are excluded.
+H743 ETMv4 support is retained; H743 Zynq board acceptance remains pending.

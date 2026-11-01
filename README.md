@@ -7,6 +7,8 @@ PLL和AHB/APB分频由target固件负责。CLI用于AI；一条命令打包：
 `python toolbox.py bridge-build --out dist/zynq-etm-bridge-win64`。
 保留F103ZE ETMv3和H743 ETMv4能力，H743接Zynq的真机验收待换板后进行。
 
+2026-11-01：ETM研究成果已合并主线；最佳已验证基线tag为`etm-best-24mhz-ddr-usb-20261101`（F103ZE TRACECLK24MHz、1/2秒DDR＋USB采集及Web压力通过），配对在`prebuilt/etm-ddr-usb-raw4-20261101/`。ELD1/36MHz研究仍未通过高频验收；详见[主线合并与最佳基线](docs/ETM主线合并与最佳基线-20261101.md)。
+
 | 正式版本 | 目录 | 身份 |
 |---|---|---|
 | Golden，7020/120MHz，JTAG/RAM | [prebuilt/golden](prebuilt/golden/README.md) | bit `1da17c…` / ELF `e97791…` |

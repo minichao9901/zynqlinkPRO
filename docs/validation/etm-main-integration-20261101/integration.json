@@ -1,0 +1,182 @@
+{
+  "mainBefore": "bc0d3ad67aeb3a82ea4863a3536ceb591364e430",
+  "mergedResearch": "0da5ea6",
+  "bestVerifiedCommit": "3bdda8929c79c28094fc5cbb3482c50921c62f57",
+  "tag": "etm-best-24mhz-ddr-usb-20261101",
+  "mergeMode": "fast-forward, all 48 stage commits retained",
+  "checks": {
+    "webTests": 77,
+    "pythonTests": 85,
+    "syntaxModules": 148,
+    "sharedDriverCopies": 10,
+    "hardwareAccess": false
+  },
+  "pairArtifactAudit": [
+    {
+      "directory": "prebuilt/etm-ddr-pilot-raw4-20261101",
+      "status": "memory-gates-passed-etm-integration-pending-not-golden",
+      "files": [
+        {
+          "name": "probe.bit",
+          "sha256": "6690d8dd214be1986b7f89f64f93096b99aa7a5b30fb93b65e7f51919577c720"
+        },
+        {
+          "name": "application.elf",
+          "sha256": "ab7c097764bea91272783ec59a51d200bf154ba5d4f9adbf1e7350466c17947f"
+        },
+        {
+          "name": "ps7_init.tcl",
+          "sha256": "aa9747c31f705be7c28af1c6b1cdeaf282f0dcdb01faecee2a9f72e4d3489132"
+        },
+        {
+          "name": "verified_clock.json",
+          "sha256": "686a99d7b16f975e3e3f6217960423e652e7827bd4ebc2125cababf836090d4e"
+        },
+        {
+          "name": "ps-build.json",
+          "sha256": "0ba27dbe8e2c79154582f273539e127daa0a8fefce332532879233e2bf1eb2fa"
+        },
+        {
+          "name": "rtl-build-inputs.json",
+          "sha256": "6e988bf8e6f836c6a66368e8ffd576fe4d77d4ce37282771c2f094ce75103d2f"
+        }
+      ]
+    },
+    {
+      "directory": "prebuilt/etm-ddr-trace-raw4-20261101",
+      "status": "memory-and-1s-2s-framed-trace-passed-usb-and-calibration-pending-not-golden",
+      "files": [
+        {
+          "name": "probe.bit",
+          "sha256": "56a70e493ee0f276e02bb6b8f7f358ee3e7fb9cdfeeaec1613ee02f065687581"
+        },
+        {
+          "name": "application.elf",
+          "sha256": "ab7c097764bea91272783ec59a51d200bf154ba5d4f9adbf1e7350466c17947f"
+        },
+        {
+          "name": "ps7_init.tcl",
+          "sha256": "aa9747c31f705be7c28af1c6b1cdeaf282f0dcdb01faecee2a9f72e4d3489132"
+        },
+        {
+          "name": "verified_clock.json",
+          "sha256": "099b0ca1921fe4fa1e8ae1ed650a3e99158bbccd6afda5e8c2f3d498d4f84ff9"
+        },
+        {
+          "name": "ps-build.json",
+          "sha256": "3aa2a09ae204fae2f3e498a1f097f44b82e7281cfeae66b557dca48c00dc854b"
+        },
+        {
+          "name": "rtl-stamp.json",
+          "sha256": "f9b21089c37045c0f7cfcf8a6fa705bb92d41166e5b828befa1d5975240bbd92"
+        }
+      ]
+    },
+    {
+      "directory": "prebuilt/etm-ddr-usb-raw4-20261101",
+      "status": "USB-and-Web-stage-passed-high-frequency-calibration-pending-not-golden",
+      "files": [
+        {
+          "name": "probe.bit",
+          "sha256": "82863bb7c06b27b32f5fd518e7b08d70ce1b855ca3c6f0525b8961d6967cd8ea"
+        },
+        {
+          "name": "application.elf",
+          "sha256": "1d55b321f95e15d43afb719380c7cefb4f05955c89f018e49c38bb3fb38ef559"
+        },
+        {
+          "name": "ps7_init.tcl",
+          "sha256": "aa9747c31f705be7c28af1c6b1cdeaf282f0dcdb01faecee2a9f72e4d3489132"
+        },
+        {
+          "name": "verified_clock.json",
+          "sha256": "988dfd622d3c0085cd35192390c21ae7bcb3cea99516b2cd3666a3fb39022b5d"
+        },
+        {
+          "name": "ps-build.json",
+          "sha256": "3e2e49316f8a7ab00a2056fba9ac6f253fb8cef0403d5ac73561f09948f6af17"
+        },
+        {
+          "name": "rtl-stamp.json",
+          "sha256": "da637e7185954629227c522bc0a266394ddbebf1c7c927e3fbcf261f845a46fb"
+        }
+      ]
+    },
+    {
+      "directory": "prebuilt/etm-diag-raw4-20261101",
+      "status": "diagnostics-board-validated-capture-stress-failed-not-golden",
+      "files": [
+        {
+          "name": "probe.bit",
+          "sha256": "0863332c4381d3bcc210eb75d150e9acdb6171ccd2d6c95e82ccc0749c32c8d0"
+        },
+        {
+          "name": "application.elf",
+          "sha256": "b07980abf5d1d107c1356dab8022533d3d9863d9b2e107b97241536378121cf0"
+        },
+        {
+          "name": "ps7_init.tcl",
+          "sha256": "aa9747c31f705be7c28af1c6b1cdeaf282f0dcdb01faecee2a9f72e4d3489132"
+        },
+        {
+          "name": "verified_clock.json",
+          "sha256": "a3b8b3a71a4282be6abf4c10514692d00869154c281030cc15fdf02a615b4677"
+        },
+        {
+          "name": "ps-build.json",
+          "sha256": "bc2c52481dbca084e5a4e955b590108de07b4e864afff9c35c10d6ca3ab13dfd"
+        }
+      ]
+    },
+    {
+      "directory": "prebuilt/etm-lane-delay-raw4-20261101",
+      "status": "ELD1 physical controls and 24MHz zero-tap capture passed; 36MHz scan found no passing point and stopped on DAP cleanup failure; not Golden",
+      "files": [
+        {
+          "name": "probe.bit",
+          "sha256": "eac5a263c4966e664370a78f299600c47d034b905b897a083cdf154ee01264ae"
+        },
+        {
+          "name": "application.elf",
+          "sha256": "1d55b321f95e15d43afb719380c7cefb4f05955c89f018e49c38bb3fb38ef559"
+        },
+        {
+          "name": "ps7_init.tcl",
+          "sha256": "aa9747c31f705be7c28af1c6b1cdeaf282f0dcdb01faecee2a9f72e4d3489132"
+        },
+        {
+          "name": "firmware-build.json",
+          "sha256": "a53965d308248f58e925b17ffaa255d599c44becc3d20dd2dae39322e4f8a874"
+        },
+        {
+          "name": "verified_clock.json",
+          "sha256": "7180421c7e05b65380a29001f55cc81795d172a816f0cf5f6e8262eaf43f3c3b"
+        }
+      ]
+    },
+    {
+      "directory": "prebuilt/f103ze-cdc-ram-clock-20261101",
+      "status": null,
+      "files": [
+        {
+          "name": "cpu48.elf",
+          "sha256": "3fb3af5f21e024c48b7b0dae6b5c369111c5a5e2f5584e1fa604c8baaa2d2ae4"
+        },
+        {
+          "name": "cpu48.bin",
+          "sha256": "b0d0ee4f171167df1b69f07f4079dfee4941c6bdfcd8f9843a67c5d3cabf7983"
+        },
+        {
+          "name": "cpu72.elf",
+          "sha256": "1c1605d993df533c91629dde52333c85a6ab681b34e86301266c169172fee334"
+        },
+        {
+          "name": "cpu72.bin",
+          "sha256": "25e0321fa0cccc338136b90a43b26c75ffcbbde498b074f5c6397e22561d7e1b"
+        }
+      ]
+    }
+  ],
+  "researchPaused": true,
+  "newHardwareOrFpgaBuilds": false
+}

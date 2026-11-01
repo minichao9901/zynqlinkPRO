@@ -1,6 +1,8 @@
-> 本文件保留原验收/测量结论。已退出主目录的逐轮细节可由Git tag `archive/main-before-slim-20261031`追溯；当前使用入口见根README和prebuilt/golden。
+> 本文件保留原验收/测量结论。已退出主目录的逐轮细节可由Git tag `archive/main-before-slim-20261031`追溯；全项目Golden仍见prebuilt/golden，本轮ETM已验证配对与tag见下方。
 
 # F103ZE / ZynqDAP：Web CLI、ETM与压力测试统一记录
+
+> 2026-11-01主线归档：研究分支48个阶段提交已合并。最佳可复测tag为`etm-best-24mhz-ddr-usb-20261101`（3bdda89），配对为`prebuilt/etm-ddr-usb-raw4-20261101/`，支持范围限于已验证的F103ZE TRACECLK24MHz。后续ELD1/36MHz实验及失败现场保留在main，不作为最佳基线。研究保持暂停；见[主线合并与最佳基线说明](ETM主线合并与最佳基线-20261101.md)。
 
 > 最新操作边界：用户双击bridge EXE并通过Web完成采集；CLI用于AI自动化与打包。
 > PLL、AHB/APB分频由target固件负责，生产Web和Trace CLI不再设置AHB分频。
