@@ -12,6 +12,9 @@ import subprocess
 import sys
 
 ROOT=Path(__file__).resolve().parents[1]
+# Both benches use 1ns/1ps precision. A requested 4.166667ns half period
+# becomes 4.167ns in XSim; cycle counts must use that actual quantized clock.
+SIM_PERIOD_NS=8.334
 
 
 def main():
@@ -32,6 +35,7 @@ def main():
         dut=golden if a.phase=='golden' else ROOT/'fpga/rtl'
         report={'golden_revision':revision,'hardware_access':False,'FCLK_Hz':120000000,
                 'external_debug_Hz':60000000,'target_HCLK_Hz':100000000,'phase':a.phase,
+                'simulated_FCLK_Hz':1e9/SIM_PERIOD_NS,'simulated_external_debug_Hz':5e8/SIM_PERIOD_NS,
                 'hss_minimum_period_ticks':24,'hss_maximum_requested_Hz':1000000,
                 'model_manifest_sha256':hashlib.sha256((ROOT/'docs/cm3-model.json').read_bytes()).hexdigest(),
                 'sources':{f.name:hashlib.sha256(f.read_bytes()).hexdigest() for f in sorted(dut.glob('*.v'))},
@@ -50,7 +54,7 @@ def main():
                 if line.startswith(('SIM_SRAM ','SIM_RTT ','SIM_HSS ')):
                     row={'kind':line.split()[0]}
                     row.update({k:float(v) for k,v in re.findall(r'(\w+)=([\d.eE+-]+)',line)})
-                    if 'elapsed_ns' in row:row['fclk_cycles']=round(row['elapsed_ns']/(1e9/120000000))
+                    if 'elapsed_ns' in row:row['fclk_cycles']=round(row['elapsed_ns']/SIM_PERIOD_NS)
                     metrics.append(row);print(top,line,flush=True)
             passed=r.returncode==0 and 'PASS SIM_TRANSPORT_BENCH' in log and len(metrics)==5
             if any(hashlib.sha256(f.read_bytes()).hexdigest()!=report['sources'][f.name] for f in dut.glob('*.v')):
@@ -63,6 +67,14 @@ def main():
             if not passed:print((r.stdout+r.stderr)[-3000:]);return 1
         return 0
     base=json.loads((out/'golden.json').read_text());current=json.loads((out/'candidate.json').read_text())
+    for report in [base,current]:
+        report['simulated_FCLK_Hz']=1e9/SIM_PERIOD_NS
+        report['simulated_external_debug_Hz']=5e8/SIM_PERIOD_NS
+        report['cycle_count_method']='elapsed_ns / 8.334ns (1ps time precision)'
+        for case in report['cases']:
+            for row in case['metrics']:
+                row['fclk_cycles']=round(row['elapsed_ns']/SIM_PERIOD_NS)
+        (out/(report['phase']+'.json')).write_text(json.dumps(report,indent=2)+'\n',encoding='utf8')
     expected_tops=['tb_cm3_swd','tb_cm3_jtag']
     if [c['top'] for c in base['cases']]!=expected_tops or [c['top'] for c in current['cases']]!=expected_tops:
         raise RuntimeError('Incomplete SWD/JTAG matrix; synthesis gate remains closed')
