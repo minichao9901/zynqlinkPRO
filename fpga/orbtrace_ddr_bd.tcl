@@ -24,7 +24,9 @@ if {$want_etm_ddr && ![llength [get_bd_cells -quiet etm_ddr_0]]} {
   set ddr_rst [get_bd_pins rst_ps7_0_50M/peripheral_aresetn]
   foreach cell {etm_ddr_0 etm_ddr_bus ps7_0_axi_periph} {
     foreach p [get_bd_pins -of_objects [get_bd_cells $cell] -filter {TYPE == clk && DIR == I}] {
-      if {[get_property NAME $p] eq "etm_ddr_0/ref_clk"} {continue}
+      # Vivado 2018.3 can return the local name "ref_clk" here. Do not
+      # attach the independent 200MHz input to the FCLK0 system bus clock.
+      if {$cell eq "etm_ddr_0" && [regexp {(^|/)ref_clk$} [get_property NAME $p]]} {continue}
       if {![llength [get_bd_nets -quiet -of_objects $p]]} {connect_bd_net $ddr_clk $p}
     }
     foreach p [get_bd_pins -of_objects [get_bd_cells $cell] -filter {TYPE == rst && DIR == I}] {
@@ -32,6 +34,8 @@ if {$want_etm_ddr && ![llength [get_bd_cells -quiet etm_ddr_0]]} {
     }
   }
   connect_bd_net $ddr_clk [get_bd_pins processing_system7_0/S_AXI_HP1_ACLK]
+  # Connect before the first validation (the shared wiring pass is below).
+  connect_bd_net [get_bd_pins orbtrace_0/ddr_ref_clk] [get_bd_pins etm_ddr_0/ref_clk]
   assign_bd_address
   set ddr_seg [get_bd_addr_segs processing_system7_0/Data/SEG_etm_ddr_0_reg0]
   set_property range 64K $ddr_seg
