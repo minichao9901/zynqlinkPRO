@@ -1,0 +1,1734 @@
+{
+  "projection": "All mutations and state-changing observations; identical read polling omitted",
+  "originalSteps": 299,
+  "selectedSteps": [
+    {
+      "originalIndex": 0,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "show"
+      },
+      "seconds": 0.2834685000125319,
+      "result": {
+        "job": "bc09701dc9b27bbb2bee5e5641b768e6",
+        "ok": true,
+        "value": {
+          "completed": false,
+          "dispatched": true,
+          "page": "etm"
+        }
+      }
+    },
+    {
+      "originalIndex": 1,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "upload",
+        "selector": "#elf-file"
+      },
+      "seconds": 0.1814236000063829,
+      "result": {
+        "job": "f24a0bf86e9ef4ad0d6c9b26d04acb3e",
+        "ok": true,
+        "value": {
+          "completed": false,
+          "control": {
+            "disabled": false,
+            "hidden": true,
+            "label": "",
+            "selector": "#elf-file",
+            "tag": "input",
+            "text": "",
+            "title": null,
+            "type": "file",
+            "value": "C:\\fakepath\\f103ze-cdc48.elf"
+          },
+          "dispatched": true
+        }
+      }
+    },
+    {
+      "originalIndex": 2,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "read",
+        "selector": "#elf-label"
+      },
+      "seconds": 0.18210700000054203,
+      "result": {
+        "job": "1ddbee1d9264c12cf1f099e40ab7939c",
+        "ok": true,
+        "value": {
+          "disabled": false,
+          "hidden": false,
+          "label": "尚未载入 ELF",
+          "selector": "#elf-label",
+          "tag": "p",
+          "text": "尚未载入 ELF",
+          "title": null,
+          "type": null,
+          "value": null
+        }
+      }
+    },
+    {
+      "originalIndex": 3,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "read",
+        "selector": "#elf-label"
+      },
+      "seconds": 0.12656370000331663,
+      "result": {
+        "job": "e76dd09fb8440ecc52ac3c355405f87a",
+        "ok": true,
+        "value": {
+          "disabled": false,
+          "hidden": false,
+          "label": "f103ze-cdc48.elf · e379b4680925",
+          "selector": "#elf-label",
+          "tag": "p",
+          "text": "f103ze-cdc48.elf · e379b4680925",
+          "title": null,
+          "type": null,
+          "value": null
+        }
+      }
+    },
+    {
+      "originalIndex": 4,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "read",
+        "selector": "#choose-elf"
+      },
+      "seconds": 0.11790849998942576,
+      "result": {
+        "job": "0511dc3fba43c6f4b86c6a36598ea2f3",
+        "ok": true,
+        "value": {
+          "disabled": false,
+          "hidden": false,
+          "label": "浏览载入 ELF…",
+          "selector": "#choose-elf",
+          "tag": "button",
+          "text": "浏览载入 ELF…",
+          "title": null,
+          "type": "submit",
+          "value": ""
+        }
+      }
+    },
+    {
+      "originalIndex": 5,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "set",
+        "selector": "#hse",
+        "value": "8"
+      },
+      "seconds": 0.14221320001524873,
+      "result": {
+        "job": "e5aa8fdcd54d1d5b0a0087360bbabb0c",
+        "ok": true,
+        "value": {
+          "completed": false,
+          "control": {
+            "disabled": false,
+            "hidden": false,
+            "label": "HSE（MHz）",
+            "selector": "#hse",
+            "tag": "input",
+            "text": "",
+            "title": null,
+            "type": "number",
+            "value": "8"
+          },
+          "dispatched": true
+        }
+      }
+    },
+    {
+      "originalIndex": 6,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "set",
+        "selector": "#target-profile",
+        "value": "stm32f103ze"
+      },
+      "seconds": 0.11989690002519637,
+      "result": {
+        "job": "d6c732d989a185f80e1ec61606e47cb8",
+        "ok": true,
+        "value": {
+          "completed": false,
+          "control": {
+            "disabled": false,
+            "hidden": false,
+            "label": "芯片预置自动识别STM32F103ZE / 高容量 F103（PE2～PE6）STM32F103（标准/超大容量，Trace 待验收）STM32F407 / F405STM32H743 / H742 / H750 / H753STM32H7B0 / H7A3 / H7B3",
+            "options": [
+              {
+                "disabled": false,
+                "label": "自动识别",
+                "value": "auto"
+              },
+              {
+                "disabled": false,
+                "label": "STM32F103ZE / 高容量 F103（PE2～PE6）",
+                "value": "stm32f103ze"
+              },
+              {
+                "disabled": false,
+                "label": "STM32F103（标准/超大容量，Trace 待验收）",
+                "value": "stm32f1"
+              },
+              {
+                "disabled": false,
+                "label": "STM32F407 / F405",
+                "value": "stm32f4"
+              },
+              {
+                "disabled": false,
+                "label": "STM32H743 / H742 / H750 / H753",
+                "value": "stm32h743"
+              },
+              {
+                "disabled": false,
+                "label": "STM32H7B0 / H7A3 / H7B3",
+                "value": "stm32h7b0"
+              }
+            ],
+            "selector": "#target-profile",
+            "tag": "select",
+            "text": "自动识别STM32F103ZE / 高容量 F103（PE2～PE6）STM32F103（标准/超大容量，Trace 待验收）STM32F407 / F405STM32H743 / H742 / H750 / H753STM32H7B0 / H7A3 / H7B3",
+            "title": null,
+            "type": "select-one",
+            "value": "stm32f103ze"
+          },
+          "dispatched": true
+        }
+      }
+    },
+    {
+      "originalIndex": 7,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "set",
+        "selector": "#reset-before",
+        "value": false
+      },
+      "seconds": 0.13903049999498762,
+      "result": {
+        "job": "c9609bc3698e114cc8d58e92b7858026",
+        "ok": true,
+        "value": {
+          "completed": false,
+          "control": {
+            "disabled": false,
+            "hidden": false,
+            "label": "先复位，再运行至起点",
+            "selector": "#reset-before",
+            "tag": "input",
+            "text": "",
+            "title": null,
+            "type": "checkbox",
+            "value": false
+          },
+          "dispatched": true
+        }
+      }
+    },
+    {
+      "originalIndex": 8,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "set",
+        "selector": "#entry-before",
+        "value": true
+      },
+      "seconds": 0.10462060000281781,
+      "result": {
+        "job": "2aac8b30fe333c42ef6adefb49cf5fec",
+        "ok": true,
+        "value": {
+          "completed": false,
+          "control": {
+            "disabled": false,
+            "hidden": false,
+            "label": "联动采集前停在所选断点",
+            "selector": "#entry-before",
+            "tag": "input",
+            "text": "",
+            "title": null,
+            "type": "checkbox",
+            "value": true
+          },
+          "dispatched": true
+        }
+      }
+    },
+    {
+      "originalIndex": 9,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "set",
+        "selector": "#duration",
+        "value": "1000"
+      },
+      "seconds": 0.015631599992047995,
+      "result": {
+        "job": "22e0401574873f7ee42ffb4940f36b1d",
+        "ok": true,
+        "value": {
+          "completed": false,
+          "control": {
+            "disabled": false,
+            "hidden": false,
+            "label": "采集时长（ms）",
+            "selector": "#duration",
+            "tag": "input",
+            "text": "",
+            "title": "单次采集上限 2000 ms：一次采集 + 一次解码；长窗可能需十几秒，请核对实际采集时长",
+            "type": "number",
+            "value": "1000"
+          },
+          "dispatched": true
+        }
+      }
+    },
+    {
+      "originalIndex": 10,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "set",
+        "selector": "#auto-decode",
+        "value": true
+      },
+      "seconds": 0.10433469997951761,
+      "result": {
+        "job": "420f9e18162f2d4e82a79f91eb351c35",
+        "ok": true,
+        "value": {
+          "completed": false,
+          "control": {
+            "disabled": false,
+            "hidden": false,
+            "label": "保存后自动解码",
+            "selector": "#auto-decode",
+            "tag": "input",
+            "text": "",
+            "title": null,
+            "type": "checkbox",
+            "value": true
+          },
+          "dispatched": true
+        }
+      }
+    },
+    {
+      "originalIndex": 11,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "upload",
+        "selector": "#sources-files"
+      },
+      "seconds": 0.1467926999903284,
+      "result": {
+        "job": "3590a9cde393c55b6849848e6a394971",
+        "ok": true,
+        "value": {
+          "completed": false,
+          "control": {
+            "disabled": false,
+            "hidden": true,
+            "label": "",
+            "selector": "#sources-files",
+            "tag": "input",
+            "text": "",
+            "title": null,
+            "type": "file",
+            "value": "C:\\fakepath\\usbd_cdc_acm.c"
+          },
+          "dispatched": true
+        }
+      }
+    },
+    {
+      "originalIndex": 12,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "read",
+        "selector": "#sources-label"
+      },
+      "seconds": 0.02081359998555854,
+      "result": {
+        "job": "567a1e5b5e72b455598cc5e72091dc44",
+        "ok": true,
+        "value": {
+          "disabled": false,
+          "hidden": false,
+          "label": "保存配套源码 1 / 1 批…",
+          "selector": "#sources-label",
+          "tag": "p",
+          "text": "保存配套源码 1 / 1 批…",
+          "title": null,
+          "type": null,
+          "value": null
+        }
+      }
+    },
+    {
+      "originalIndex": 13,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "read",
+        "selector": "#sources-label"
+      },
+      "seconds": 0.021818399982294068,
+      "result": {
+        "job": "3bda12bdd42b50f76d250186855057ab",
+        "ok": true,
+        "value": {
+          "disabled": false,
+          "hidden": false,
+          "label": "匹配 22 / 22 个文件 · 0.65 MiB · 已保存本地快照",
+          "selector": "#sources-label",
+          "tag": "p",
+          "text": "匹配 22 / 22 个文件 · 0.65 MiB · 已保存本地快照",
+          "title": null,
+          "type": null,
+          "value": null
+        }
+      }
+    },
+    {
+      "originalIndex": 15,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "click",
+        "selector": "#connect"
+      },
+      "seconds": 0.10404740000376478,
+      "result": {
+        "job": "3bfda7966eeeb3872dbab95066836ce4",
+        "ok": true,
+        "value": {
+          "completed": false,
+          "control": {
+            "disabled": true,
+            "hidden": false,
+            "label": "连接探针",
+            "selector": "#connect",
+            "tag": "button",
+            "text": "连接探针",
+            "title": null,
+            "type": "submit",
+            "value": ""
+          },
+          "dispatched": true
+        }
+      }
+    },
+    {
+      "originalIndex": 16,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "read",
+        "selector": "#disconnect"
+      },
+      "seconds": 0.1048579000052996,
+      "result": {
+        "job": "9448d597bf821a44adf497e3b789b985",
+        "ok": true,
+        "value": {
+          "disabled": true,
+          "hidden": false,
+          "label": "断开",
+          "selector": "#disconnect",
+          "tag": "button",
+          "text": "断开",
+          "title": null,
+          "type": "submit",
+          "value": ""
+        }
+      }
+    },
+    {
+      "originalIndex": 18,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "read",
+        "selector": "#disconnect"
+      },
+      "seconds": 0.11820359999546781,
+      "result": {
+        "job": "763fd773c319c083ab961d1c4f5f3751",
+        "ok": true,
+        "value": {
+          "disabled": false,
+          "hidden": false,
+          "label": "断开",
+          "selector": "#disconnect",
+          "tag": "button",
+          "text": "断开",
+          "title": null,
+          "type": "submit",
+          "value": ""
+        }
+      }
+    },
+    {
+      "originalIndex": 19,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "invoke",
+        "method": "inspect",
+        "args": [],
+        "target": "target"
+      },
+      "seconds": 0.10588879999704659,
+      "result": {
+        "job": "27987c99a5594ded74ca97b8a74ab951",
+        "ok": true,
+        "value": {
+          "errors": [],
+          "returned": true,
+          "value": {
+            "clockError": null,
+            "clocks": {
+              "busDivider": 1,
+              "coreDivider": 1,
+              "coreHz": 48000000,
+              "external": true,
+              "hclkHz": 48000000,
+              "knownHz": 48000000,
+              "knownTraceHz": 48000000,
+              "path": "HSE 8 MHz ÷1 ×6 → AHB ÷1",
+              "physicalTraceHz": 24000000,
+              "source": "HSE → PLL",
+              "traceHz": 48000000,
+              "tracePath": "HCLK → TRACEPORTCK（与 CPU 相同）",
+              "traceReady": true,
+              "traceRelation": "Trace 输入 = HCLK；4 位 DDR 的 TRACECLK = HCLK / 2"
+            },
+            "config": {
+              "ccer": 100352,
+              "ctrl": 1041,
+              "idr": 1091891777,
+              "protocol": "ETMv3",
+              "traceid": 0
+            },
+            "core": "Cortex-M3",
+            "cpuid": 1092600369,
+            "device": 268657684,
+            "etmVersion": "ETMv3.4",
+            "flashLimit": 134742016,
+            "halted": false,
+            "hseHz": 8000000,
+            "name": "STM32F103ZE / 高容量 F103（PE2～PE6）",
+            "profile": "stm32f103ze",
+            "rcc": {
+              "cfgr": 5309450,
+              "cr": 50548355
+            },
+            "traceOptions": {
+              "branchBroadcast": true,
+              "cycleCount": false,
+              "returnStack": false
+            },
+            "traceStatus": "F103ZE 48/24 MHz Kingst 联动与 ETMv3 解码已验收；封装须有 PE2～PE6",
+            "traceSupported": true,
+            "width": 1
+          },
+          "verificationRequired": true
+        }
+      }
+    },
+    {
+      "originalIndex": 20,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "click",
+        "selector": "#disconnect"
+      },
+      "seconds": 0.12445300002582371,
+      "result": {
+        "job": "8f2919dcabcdcbd164a58b7c57314492",
+        "ok": true,
+        "value": {
+          "completed": false,
+          "control": {
+            "disabled": true,
+            "hidden": false,
+            "label": "断开",
+            "selector": "#disconnect",
+            "tag": "button",
+            "text": "断开",
+            "title": null,
+            "type": "submit",
+            "value": ""
+          },
+          "dispatched": true
+        }
+      }
+    },
+    {
+      "originalIndex": 21,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "read",
+        "selector": "#connect"
+      },
+      "seconds": 0.027662700013024732,
+      "result": {
+        "job": "fb00ec52a228d2fc6cfbef82026f1fed",
+        "ok": true,
+        "value": {
+          "disabled": true,
+          "hidden": false,
+          "label": "连接探针",
+          "selector": "#connect",
+          "tag": "button",
+          "text": "连接探针",
+          "title": null,
+          "type": "submit",
+          "value": ""
+        }
+      }
+    },
+    {
+      "originalIndex": 22,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "read",
+        "selector": "#connect"
+      },
+      "seconds": 0.10531970000010915,
+      "result": {
+        "job": "5fd42497b8cd5e4331980025187fcd80",
+        "ok": true,
+        "value": {
+          "disabled": false,
+          "hidden": false,
+          "label": "连接探针",
+          "selector": "#connect",
+          "tag": "button",
+          "text": "连接探针",
+          "title": null,
+          "type": "submit",
+          "value": ""
+        }
+      }
+    },
+    {
+      "originalIndex": 23,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "click",
+        "selector": "#connect"
+      },
+      "seconds": 0.03869359998498112,
+      "result": {
+        "job": "c16ea6847541741856558d9fa8b6e79c",
+        "ok": true,
+        "value": {
+          "completed": false,
+          "control": {
+            "disabled": true,
+            "hidden": false,
+            "label": "连接探针",
+            "selector": "#connect",
+            "tag": "button",
+            "text": "连接探针",
+            "title": null,
+            "type": "submit",
+            "value": ""
+          },
+          "dispatched": true
+        }
+      }
+    },
+    {
+      "originalIndex": 24,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "read",
+        "selector": "#disconnect"
+      },
+      "seconds": 0.10497549999854527,
+      "result": {
+        "job": "c526467513f4b7d338d7b14a8c2c826c",
+        "ok": true,
+        "value": {
+          "disabled": true,
+          "hidden": false,
+          "label": "断开",
+          "selector": "#disconnect",
+          "tag": "button",
+          "text": "断开",
+          "title": null,
+          "type": "submit",
+          "value": ""
+        }
+      }
+    },
+    {
+      "originalIndex": 26,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "read",
+        "selector": "#disconnect"
+      },
+      "seconds": 0.10688010000740178,
+      "result": {
+        "job": "62dc463a075f722789f3580fae9b6118",
+        "ok": true,
+        "value": {
+          "disabled": false,
+          "hidden": false,
+          "label": "断开",
+          "selector": "#disconnect",
+          "tag": "button",
+          "text": "断开",
+          "title": null,
+          "type": "submit",
+          "value": ""
+        }
+      }
+    },
+    {
+      "originalIndex": 27,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "invoke",
+        "method": "inspect",
+        "args": [],
+        "target": "target"
+      },
+      "seconds": 0.10479500002111308,
+      "result": {
+        "job": "c9e1a862d94dd331e7e7dbc195751e2a",
+        "ok": true,
+        "value": {
+          "errors": [],
+          "returned": true,
+          "value": {
+            "clockError": null,
+            "clocks": {
+              "busDivider": 1,
+              "coreDivider": 1,
+              "coreHz": 48000000,
+              "external": true,
+              "hclkHz": 48000000,
+              "knownHz": 48000000,
+              "knownTraceHz": 48000000,
+              "path": "HSE 8 MHz ÷1 ×6 → AHB ÷1",
+              "physicalTraceHz": 24000000,
+              "source": "HSE → PLL",
+              "traceHz": 48000000,
+              "tracePath": "HCLK → TRACEPORTCK（与 CPU 相同）",
+              "traceReady": true,
+              "traceRelation": "Trace 输入 = HCLK；4 位 DDR 的 TRACECLK = HCLK / 2"
+            },
+            "config": {
+              "ccer": 100352,
+              "ctrl": 1041,
+              "idr": 1091891777,
+              "protocol": "ETMv3",
+              "traceid": 0
+            },
+            "core": "Cortex-M3",
+            "cpuid": 1092600369,
+            "device": 268657684,
+            "etmVersion": "ETMv3.4",
+            "flashLimit": 134742016,
+            "halted": false,
+            "hseHz": 8000000,
+            "name": "STM32F103ZE / 高容量 F103（PE2～PE6）",
+            "profile": "stm32f103ze",
+            "rcc": {
+              "cfgr": 5309450,
+              "cr": 50548355
+            },
+            "traceOptions": {
+              "branchBroadcast": true,
+              "cycleCount": false,
+              "returnStack": false
+            },
+            "traceStatus": "F103ZE 48/24 MHz Kingst 联动与 ETMv3 解码已验收；封装须有 PE2～PE6",
+            "traceSupported": true,
+            "width": 1
+          },
+          "verificationRequired": true
+        }
+      }
+    },
+    {
+      "originalIndex": 28,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "click",
+        "selector": "#run"
+      },
+      "seconds": 0.105521299992688,
+      "result": {
+        "job": "b432a7667907c4fa74af8c705196ac97",
+        "ok": true,
+        "value": {
+          "completed": false,
+          "control": {
+            "disabled": true,
+            "hidden": false,
+            "label": "继续",
+            "selector": "#run",
+            "tag": "button",
+            "text": "继续",
+            "title": null,
+            "type": "submit",
+            "value": ""
+          },
+          "dispatched": true
+        }
+      }
+    },
+    {
+      "originalIndex": 30,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "set",
+        "selector": "#break-command",
+        "value": "b cdc_poll"
+      },
+      "seconds": 0.02994489998673089,
+      "result": {
+        "job": "f75404cf85cacc5f40486753cd1f9866",
+        "ok": true,
+        "value": {
+          "completed": false,
+          "control": {
+            "disabled": false,
+            "hidden": false,
+            "label": "断点命令",
+            "selector": "#break-command",
+            "tag": "input",
+            "text": "",
+            "title": null,
+            "type": "text",
+            "value": "b cdc_poll"
+          },
+          "dispatched": true
+        }
+      }
+    },
+    {
+      "originalIndex": 31,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "click",
+        "selector": "#add-break"
+      },
+      "seconds": 0.11765759999980219,
+      "result": {
+        "job": "1a8593f5c158ff736bc74178c7ab9652",
+        "ok": true,
+        "value": {
+          "completed": false,
+          "control": {
+            "disabled": true,
+            "hidden": false,
+            "label": "添加",
+            "selector": "#add-break",
+            "tag": "button",
+            "text": "添加",
+            "title": null,
+            "type": "submit",
+            "value": ""
+          },
+          "dispatched": true
+        }
+      }
+    },
+    {
+      "originalIndex": 32,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "read",
+        "selector": "#start"
+      },
+      "seconds": 0.10463859999435954,
+      "result": {
+        "job": "c8884d62368daed0d11f316f8e0fd79d",
+        "ok": true,
+        "value": {
+          "disabled": true,
+          "hidden": false,
+          "label": "联动采集",
+          "selector": "#start",
+          "tag": "button",
+          "text": "联动采集",
+          "title": null,
+          "type": "submit",
+          "value": ""
+        }
+      }
+    },
+    {
+      "originalIndex": 37,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "read",
+        "selector": "#start"
+      },
+      "seconds": 0.12943869997980073,
+      "result": {
+        "job": "2465c92cae442b6435e2733f108c7d22",
+        "ok": true,
+        "value": {
+          "disabled": false,
+          "hidden": false,
+          "label": "联动采集",
+          "selector": "#start",
+          "tag": "button",
+          "text": "联动采集",
+          "title": null,
+          "type": "submit",
+          "value": ""
+        }
+      }
+    },
+    {
+      "originalIndex": 38,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "invoke",
+        "method": "resetTransportStats",
+        "args": [],
+        "target": "target"
+      },
+      "seconds": 0.1044405999709852,
+      "result": {
+        "job": "d6a31ac1c7b857c171ecf539e0a4ec76",
+        "ok": true,
+        "value": {
+          "errors": [],
+          "returned": true,
+          "value": null,
+          "verificationRequired": true
+        }
+      }
+    },
+    {
+      "originalIndex": 39,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "read",
+        "selector": "#records"
+      },
+      "seconds": 0.11961799999698997,
+      "result": {
+        "job": "0d57c5f488e8ab2f85ca041d7c7896f7",
+        "ok": true,
+        "value": {
+          "disabled": false,
+          "hidden": false,
+          "label": "已保存记录",
+          "options": [
+            {
+              "disabled": false,
+              "label": "选择记录…",
+              "value": ""
+            }
+          ],
+          "selector": "#records",
+          "tag": "select",
+          "text": "选择记录…",
+          "title": null,
+          "type": "select-one",
+          "value": ""
+        }
+      }
+    },
+    {
+      "originalIndex": 40,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "click",
+        "selector": "#start"
+      },
+      "seconds": 0.032315799995558336,
+      "result": {
+        "job": "2153b8bcc7e0499253084e003d3baac6",
+        "ok": true,
+        "value": {
+          "completed": false,
+          "control": {
+            "disabled": true,
+            "hidden": false,
+            "label": "联动采集",
+            "selector": "#start",
+            "tag": "button",
+            "text": "联动采集",
+            "title": null,
+            "type": "submit",
+            "value": ""
+          },
+          "dispatched": true
+        }
+      }
+    },
+    {
+      "originalIndex": 41,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "read",
+        "selector": "#job-state"
+      },
+      "seconds": 0.13942789999418892,
+      "result": {
+        "job": "e1a5909c992e78674d72ba2975b63a7d",
+        "ok": true,
+        "value": {
+          "disabled": false,
+          "hidden": false,
+          "label": "已添加 cdc_poll · 硬件断点已生效",
+          "selector": "#job-state",
+          "tag": "p",
+          "text": "已添加 cdc_poll · 硬件断点已生效",
+          "title": null,
+          "type": null,
+          "value": null
+        }
+      }
+    },
+    {
+      "originalIndex": 42,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "read",
+        "selector": "#disconnect"
+      },
+      "seconds": 0.10444869997445494,
+      "result": {
+        "job": "435f5c2016f07a6aac305c95e33a423e",
+        "ok": true,
+        "value": {
+          "disabled": true,
+          "hidden": false,
+          "label": "断开",
+          "selector": "#disconnect",
+          "tag": "button",
+          "text": "断开",
+          "title": null,
+          "type": "submit",
+          "value": ""
+        }
+      }
+    },
+    {
+      "originalIndex": 56,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "read",
+        "selector": "#job-state"
+      },
+      "seconds": 0.11712989999796264,
+      "result": {
+        "job": "f881f34c79e2722430d70cee092e7274",
+        "ok": true,
+        "value": {
+          "disabled": false,
+          "hidden": false,
+          "label": "采集已就绪",
+          "selector": "#job-state",
+          "tag": "p",
+          "text": "采集已就绪",
+          "title": null,
+          "type": null,
+          "value": null
+        }
+      }
+    },
+    {
+      "originalIndex": 71,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "read",
+        "selector": "#job-state"
+      },
+      "seconds": 0.01834650000091642,
+      "result": {
+        "job": "dc80ab76f61d79789547915cfc6438ed",
+        "ok": true,
+        "value": {
+          "disabled": false,
+          "hidden": false,
+          "label": "解码与源码映射",
+          "selector": "#job-state",
+          "tag": "p",
+          "text": "解码与源码映射",
+          "title": null,
+          "type": null,
+          "value": null
+        }
+      }
+    },
+    {
+      "originalIndex": 274,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "read",
+        "selector": "#records"
+      },
+      "seconds": 0.12389560000156052,
+      "result": {
+        "job": "8f0723748a0f2e69c0e857891fa12a88",
+        "ok": true,
+        "value": {
+          "disabled": false,
+          "hidden": false,
+          "label": "已保存记录",
+          "options": [
+            {
+              "disabled": false,
+              "label": "选择记录…",
+              "value": ""
+            },
+            {
+              "disabled": false,
+              "label": "STM32F103ZE / 高容量 F103（PE2～PE6） · 2026-11-01 20:10:04",
+              "value": "capture-4d7316597c914dfa8ec46ddb36a4a8db"
+            }
+          ],
+          "selector": "#records",
+          "tag": "select",
+          "text": "选择记录…STM32F103ZE / 高容量 F103（PE2～PE6） · 2026-11-01 20:10:04",
+          "title": "STM32F103ZE / 高容量 F103（PE2～PE6） · 2026-11-01 20:10:04 · ELF e379b4680925",
+          "type": "select-one",
+          "value": "capture-4d7316597c914dfa8ec46ddb36a4a8db"
+        }
+      }
+    },
+    {
+      "originalIndex": 275,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "read",
+        "selector": "#job-state"
+      },
+      "seconds": 0.10616049999953248,
+      "result": {
+        "job": "135963fbbcb0d4334651adc45207897a",
+        "ok": true,
+        "value": {
+          "disabled": false,
+          "hidden": false,
+          "label": "记录已保存",
+          "selector": "#job-state",
+          "tag": "p",
+          "text": "记录已保存",
+          "title": null,
+          "type": null,
+          "value": null
+        }
+      }
+    },
+    {
+      "originalIndex": 285,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "read",
+        "selector": "#disconnect"
+      },
+      "seconds": 0.10540880000917241,
+      "result": {
+        "job": "6d4122af4d89773c3cdd6a6b225b5dfe",
+        "ok": true,
+        "value": {
+          "disabled": false,
+          "hidden": false,
+          "label": "断开",
+          "selector": "#disconnect",
+          "tag": "button",
+          "text": "断开",
+          "title": null,
+          "type": "submit",
+          "value": ""
+        }
+      }
+    },
+    {
+      "originalIndex": 287,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "invoke",
+        "method": "waitForDisplay",
+        "args": [],
+        "target": "history"
+      },
+      "seconds": 0.028857600002083927,
+      "result": {
+        "job": "1cfc2e858142d823abbb145075f32579",
+        "ok": true,
+        "value": {
+          "errors": [],
+          "returned": true,
+          "value": {
+            "paintMs": 9.100000023841858,
+            "painted": true,
+            "timelineReadyMs": 0,
+            "visibility": "visible"
+          },
+          "verificationRequired": true
+        }
+      }
+    },
+    {
+      "originalIndex": 288,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "invoke",
+        "method": "transportStats",
+        "args": [],
+        "target": "target"
+      },
+      "seconds": 0.12835429998813197,
+      "result": {
+        "job": "8c32ecf03007bc236d926beb7cb1006d",
+        "ok": true,
+        "value": {
+          "errors": [],
+          "returned": true,
+          "value": {
+            "actions": {
+              "claim": {
+                "calls": 1,
+                "milliseconds": 5
+              },
+              "clear": {
+                "calls": 2,
+                "milliseconds": 6.299999982118607
+              },
+              "close": {
+                "calls": 1,
+                "milliseconds": 2.300000011920929
+              },
+              "exchange": {
+                "calls": 634,
+                "milliseconds": 2013.8999997973442
+              },
+              "open": {
+                "calls": 1,
+                "milliseconds": 32.29999998211861
+              },
+              "release": {
+                "calls": 1,
+                "milliseconds": 2.199999988079071
+              }
+            },
+            "atomicDapEnabled": true,
+            "dap": {
+              "basis": "completed DAP requests and AP word accesses; SWD retry cycles are not counted",
+              "commands": {
+                "0x00": 2,
+                "0x02": 1,
+                "0x03": 1,
+                "0x04": 1,
+                "0x05": 478,
+                "0x06": 148,
+                "0x11": 1,
+                "0x12": 1,
+                "0x13": 1
+              },
+              "regions": {
+                "core-debug": {
+                  "reads": 504,
+                  "writes": 82
+                },
+                "flash": {
+                  "reads": 5042,
+                  "writes": 0
+                },
+                "peripheral": {
+                  "reads": 74,
+                  "writes": 4
+                }
+              },
+              "registers": {
+                "0x40011800": {
+                  "reads": 10,
+                  "writes": 2
+                },
+                "0x40021000": {
+                  "reads": 28,
+                  "writes": 0
+                },
+                "0x40021004": {
+                  "reads": 28,
+                  "writes": 0
+                },
+                "0x40021018": {
+                  "reads": 8,
+                  "writes": 2
+                },
+                "0xe0000e80": {
+                  "reads": 8,
+                  "writes": 2
+                },
+                "0xe0000fb0": {
+                  "reads": 0,
+                  "writes": 3
+                },
+                "0xe0000fb4": {
+                  "reads": 6,
+                  "writes": 0
+                },
+                "0xe0001000": {
+                  "reads": 8,
+                  "writes": 2
+                },
+                "0xe0002000": {
+                  "reads": 22,
+                  "writes": 4
+                },
+                "0xe0002008": {
+                  "reads": 20,
+                  "writes": 4
+                },
+                "0xe000200c": {
+                  "reads": 8,
+                  "writes": 0
+                },
+                "0xe0002010": {
+                  "reads": 8,
+                  "writes": 0
+                },
+                "0xe0002014": {
+                  "reads": 8,
+                  "writes": 0
+                },
+                "0xe0002018": {
+                  "reads": 8,
+                  "writes": 0
+                },
+                "0xe000201c": {
+                  "reads": 8,
+                  "writes": 0
+                },
+                "0xe000ed00": {
+                  "reads": 16,
+                  "writes": 0
+                },
+                "0xe000ed30": {
+                  "reads": 18,
+                  "writes": 0
+                },
+                "0xe000edf0": {
+                  "reads": 94,
+                  "writes": 13
+                },
+                "0xe000edf4": {
+                  "reads": 0,
+                  "writes": 10
+                },
+                "0xe000edf8": {
+                  "reads": 20,
+                  "writes": 0
+                },
+                "0xe000edfc": {
+                  "reads": 36,
+                  "writes": 9
+                },
+                "0xe0040000": {
+                  "reads": 2,
+                  "writes": 0
+                },
+                "0xe0040004": {
+                  "reads": 22,
+                  "writes": 2
+                },
+                "0xe00400f0": {
+                  "reads": 2,
+                  "writes": 1
+                },
+                "0xe0040304": {
+                  "reads": 8,
+                  "writes": 2
+                },
+                "0xe0040fb0": {
+                  "reads": 0,
+                  "writes": 1
+                },
+                "0xe0040fb4": {
+                  "reads": 4,
+                  "writes": 0
+                },
+                "0xe0041000": {
+                  "reads": 50,
+                  "writes": 11
+                },
+                "0xe0041008": {
+                  "reads": 8,
+                  "writes": 2
+                },
+                "0xe0041010": {
+                  "reads": 8,
+                  "writes": 0
+                },
+                "0xe0041020": {
+                  "reads": 8,
+                  "writes": 2
+                },
+                "0xe0041024": {
+                  "reads": 8,
+                  "writes": 2
+                },
+                "0xe004102c": {
+                  "reads": 8,
+                  "writes": 2
+                },
+                "0xe00411e4": {
+                  "reads": 14,
+                  "writes": 0
+                },
+                "0xe00411e8": {
+                  "reads": 14,
+                  "writes": 0
+                },
+                "0xe0041200": {
+                  "reads": 22,
+                  "writes": 2
+                },
+                "0xe0041fb0": {
+                  "reads": 0,
+                  "writes": 4
+                },
+                "0xe0041fb4": {
+                  "reads": 8,
+                  "writes": 0
+                },
+                "0xe0042000": {
+                  "reads": 14,
+                  "writes": 0
+                },
+                "0xe0042004": {
+                  "reads": 16,
+                  "writes": 4
+                }
+              },
+              "stages": {
+                "交接/采集/下载/解码/首屏": {
+                  "commands": 1,
+                  "wallMs": 26198.5
+                },
+                "恢复配置/断点/刷新状态": {
+                  "commands": 161,
+                  "wallMs": 702.1999999880791
+                },
+                "暂停本页断点": {
+                  "commands": 12,
+                  "wallMs": 35.400000005960464
+                },
+                "校验 ELF": {
+                  "commands": 168,
+                  "wallMs": 518.3000000119209
+                },
+                "核对实际时钟": {
+                  "commands": 12,
+                  "wallMs": 34.400000005960464
+                },
+                "运行至业务起点": {
+                  "commands": 151,
+                  "wallMs": 464.19999998807907
+                },
+                "配置 ETM / TPIU": {
+                  "commands": 108,
+                  "wallMs": 300.90000000596046
+                },
+                "重新连接 USB": {
+                  "commands": 21,
+                  "wallMs": 194.09999999403954
+                }
+              },
+              "unknownWords": 0
+            },
+            "packedMemoryEnabled": true,
+            "registerBatchEnabled": true
+          },
+          "verificationRequired": true
+        }
+      }
+    },
+    {
+      "originalIndex": 289,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "invoke",
+        "method": "inspect",
+        "args": [],
+        "target": "target"
+      },
+      "seconds": 0.12957079999614507,
+      "result": {
+        "job": "3e5a3aafdab962390a9cf231d41005e8",
+        "ok": true,
+        "value": {
+          "errors": [],
+          "returned": true,
+          "value": {
+            "clockError": null,
+            "clocks": {
+              "busDivider": 1,
+              "coreDivider": 1,
+              "coreHz": 48000000,
+              "external": true,
+              "hclkHz": 48000000,
+              "knownHz": 48000000,
+              "knownTraceHz": 48000000,
+              "path": "HSE 8 MHz ÷1 ×6 → AHB ÷1",
+              "physicalTraceHz": 24000000,
+              "source": "HSE → PLL",
+              "traceHz": 48000000,
+              "tracePath": "HCLK → TRACEPORTCK（与 CPU 相同）",
+              "traceReady": true,
+              "traceRelation": "Trace 输入 = HCLK；4 位 DDR 的 TRACECLK = HCLK / 2"
+            },
+            "config": {
+              "ccer": 100352,
+              "ctrl": 1041,
+              "idr": 1091891777,
+              "protocol": "ETMv3",
+              "traceid": 0
+            },
+            "core": "Cortex-M3",
+            "cpuid": 1092600369,
+            "device": 268657684,
+            "etmVersion": "ETMv3.4",
+            "flashLimit": 134742016,
+            "halted": true,
+            "hseHz": 8000000,
+            "name": "STM32F103ZE / 高容量 F103（PE2～PE6）",
+            "profile": "stm32f103ze",
+            "rcc": {
+              "cfgr": 5309450,
+              "cr": 50548355
+            },
+            "traceOptions": {
+              "branchBroadcast": true,
+              "cycleCount": false,
+              "returnStack": false
+            },
+            "traceStatus": "F103ZE 48/24 MHz Kingst 联动与 ETMv3 解码已验收；封装须有 PE2～PE6",
+            "traceSupported": true,
+            "width": 1
+          },
+          "verificationRequired": true
+        }
+      }
+    },
+    {
+      "originalIndex": 290,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "read",
+        "selector": "#remove-break"
+      },
+      "seconds": 0.02986340000643395,
+      "result": {
+        "job": "202f20e23d21c9ce5e1d72d8bb31e4c6",
+        "ok": true,
+        "value": {
+          "disabled": false,
+          "hidden": false,
+          "label": "清空断点",
+          "selector": "#remove-break",
+          "tag": "button",
+          "text": "清空断点",
+          "title": null,
+          "type": "submit",
+          "value": ""
+        }
+      }
+    },
+    {
+      "originalIndex": 291,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "click",
+        "selector": "#remove-break"
+      },
+      "seconds": 0.015562099986709654,
+      "result": {
+        "job": "e076ad5862477df1b1d076924a32d834",
+        "ok": true,
+        "value": {
+          "completed": false,
+          "control": {
+            "disabled": true,
+            "hidden": false,
+            "label": "清空断点",
+            "selector": "#remove-break",
+            "tag": "button",
+            "text": "清空断点",
+            "title": null,
+            "type": "submit",
+            "value": ""
+          },
+          "dispatched": true
+        }
+      }
+    },
+    {
+      "originalIndex": 292,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "read",
+        "selector": "#run"
+      },
+      "seconds": 0.02442409997456707,
+      "result": {
+        "job": "96b5dcb5e42a86c022b53391dc7b0ae7",
+        "ok": true,
+        "value": {
+          "disabled": true,
+          "hidden": false,
+          "label": "继续",
+          "selector": "#run",
+          "tag": "button",
+          "text": "继续",
+          "title": null,
+          "type": "submit",
+          "value": ""
+        }
+      }
+    },
+    {
+      "originalIndex": 294,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "read",
+        "selector": "#run"
+      },
+      "seconds": 0.015280699997674674,
+      "result": {
+        "job": "3ef61f35b36164e4764ea631d20b0902",
+        "ok": true,
+        "value": {
+          "disabled": false,
+          "hidden": false,
+          "label": "继续",
+          "selector": "#run",
+          "tag": "button",
+          "text": "继续",
+          "title": null,
+          "type": "submit",
+          "value": ""
+        }
+      }
+    },
+    {
+      "originalIndex": 295,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "click",
+        "selector": "#run"
+      },
+      "seconds": 0.12148940001497976,
+      "result": {
+        "job": "1a8bbf3da18df3240604eba6445bec9e",
+        "ok": true,
+        "value": {
+          "completed": false,
+          "control": {
+            "disabled": true,
+            "hidden": false,
+            "label": "继续",
+            "selector": "#run",
+            "tag": "button",
+            "text": "继续",
+            "title": null,
+            "type": "submit",
+            "value": ""
+          },
+          "dispatched": true
+        }
+      }
+    },
+    {
+      "originalIndex": 297,
+      "request": {
+        "action": "workbench",
+        "page": "etm",
+        "op": "click",
+        "selector": "#disconnect"
+      },
+      "seconds": 0.1175539999967441,
+      "result": {
+        "job": "be6a5072f3510645a564a2d298bd529c",
+        "ok": true,
+        "value": {
+          "completed": false,
+          "control": {
+            "disabled": true,
+            "hidden": false,
+            "label": "断开",
+            "selector": "#disconnect",
+            "tag": "button",
+            "text": "断开",
+            "title": null,
+            "type": "submit",
+            "value": ""
+          },
+          "dispatched": true
+        }
+      }
+    }
+  ]
+}

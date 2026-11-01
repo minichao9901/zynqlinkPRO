@@ -1,0 +1,955 @@
+{
+  "scope": "Start-capture button to first display, target restore and ready; excludes initial connection and initial breakpoint creation",
+  "windowSeconds": 1,
+  "firmwareHCLKHz": 48000000,
+  "TRACECLKHz": 24000000,
+  "rows": [
+    {
+      "series": "ab-measured",
+      "round": 1,
+      "clockKhz": 1000,
+      "actualControlClock": {
+        "FCLK_Hz": 119999998,
+        "cfg": "0x300d6a11",
+        "waveform": {
+          "SWCLK_Hz": 999999.9833333333,
+          "half_period_fclk": 60,
+          "short_high": true,
+          "intended_high_ns": 8.333333472222225
+        },
+        "clockSource": 0,
+        "clockControl": 15728896,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 999999.9833333333,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+      },
+      "reportedCaptureTckKhz": 999,
+      "e2eSeconds": 51.521499799971934,
+      "controlExchangeSeconds": 5.117499999850988,
+      "exchangeCalls": 634,
+      "decodeSeconds": 38.41124280000804,
+      "openSeconds": 0.8626178000122309,
+      "closeSeconds": 0.44289870001375675,
+      "ETMBytes": 5885024,
+      "sha256": "c08aec42aff3cda8c4dedbd04d95e89fc273233964b86b816784eaa08b76d6d2",
+      "record": "capture-fc21189f7e5442ca914bb5eb4a22b305",
+      "nativePhases": {
+        "imagePreparation": 0.02751329998136498,
+        "nativeInputPreparation": 0.007275900017702952,
+        "openCsd": 4.001299299998209,
+        "storeBuildAndIndex": 34.373500199988484
+      },
+      "storePhases": {
+        "decodeAndInputs": 4.606401,
+        "prescanAndStatic": 2.276367,
+        "nativeBuild": 13.485545,
+        "queryIndex": 7.715879,
+        "assemble": 4.217475,
+        "inputBindings": 1.652958,
+        "publish": 0.020543,
+        "cleanup": 0.164322
+      },
+      "hardwareSeconds": 1.0,
+      "packetIssues": 0,
+      "loss": false,
+      "CDCInsideWindow": 62,
+      "RCCRestored": true,
+      "cleanupError": null
+    },
+    {
+      "series": "ab-measured",
+      "round": 2,
+      "clockKhz": 10000,
+      "actualControlClock": {
+        "FCLK_Hz": 119999998,
+        "cfg": "0xcaa11",
+        "waveform": {
+          "SWCLK_Hz": 9999999.833333334,
+          "half_period_fclk": 6,
+          "short_high": true,
+          "intended_high_ns": 8.333333472222225
+        },
+        "clockSource": 0,
+        "clockControl": 15728896,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 9999999.833333334,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+      },
+      "reportedCaptureTckKhz": 9999,
+      "e2eSeconds": 53.21894170000451,
+      "controlExchangeSeconds": 3.6991999995410443,
+      "exchangeCalls": 634,
+      "decodeSeconds": 42.04828080002335,
+      "openSeconds": 1.1855436000041664,
+      "closeSeconds": 0.4904847999860067,
+      "ETMBytes": 5888671,
+      "sha256": "fb3d6c1047f69becce3f87c90c6a25b02983c80aceb99fcef19aea59eac3c251",
+      "record": "capture-117e77ef3db24f29a36c055aaa6f65d4",
+      "nativePhases": {
+        "imagePreparation": 0.026678800000809133,
+        "nativeInputPreparation": 0.010016400017775595,
+        "openCsd": 4.485765799996443,
+        "storeBuildAndIndex": 37.52410370000871
+      },
+      "storePhases": {
+        "decodeAndInputs": 3.420345,
+        "prescanAndStatic": 1.753539,
+        "nativeBuild": 16.970024,
+        "queryIndex": 10.146061,
+        "assemble": 3.220636,
+        "inputBindings": 1.658011,
+        "publish": 0.031009,
+        "cleanup": 0.181151
+      },
+      "hardwareSeconds": 1.0,
+      "packetIssues": 0,
+      "loss": false,
+      "CDCInsideWindow": 62,
+      "RCCRestored": true,
+      "cleanupError": null
+    },
+    {
+      "series": "ab-measured",
+      "round": 3,
+      "clockKhz": 1000,
+      "actualControlClock": {
+        "FCLK_Hz": 119999998,
+        "cfg": "0x300d6a11",
+        "waveform": {
+          "SWCLK_Hz": 999999.9833333333,
+          "half_period_fclk": 60,
+          "short_high": true,
+          "intended_high_ns": 8.333333472222225
+        },
+        "clockSource": 0,
+        "clockControl": 15728896,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 999999.9833333333,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+      },
+      "reportedCaptureTckKhz": 999,
+      "e2eSeconds": 49.9683098999958,
+      "controlExchangeSeconds": 6.179100000053644,
+      "exchangeCalls": 634,
+      "decodeSeconds": 36.11429570001201,
+      "openSeconds": 0.9146705000021029,
+      "closeSeconds": 0.42777499998919666,
+      "ETMBytes": 5883413,
+      "sha256": "fd2415f5a8e1357c11c480177dd11e474e725526d2e6a56409beab4ea093ab9c",
+      "record": "capture-aba3c22f8dc146249f2f8cff3f3adc9b",
+      "nativePhases": {
+        "imagePreparation": 0.03303880000021309,
+        "nativeInputPreparation": 0.010567599994828925,
+        "openCsd": 4.261205399991013,
+        "storeBuildAndIndex": 31.807181400014088
+      },
+      "storePhases": {
+        "decodeAndInputs": 4.56003,
+        "prescanAndStatic": 1.342043,
+        "nativeBuild": 13.4858,
+        "queryIndex": 7.388223,
+        "assemble": 3.010269,
+        "inputBindings": 1.680616,
+        "publish": 0.023361,
+        "cleanup": 0.173112
+      },
+      "hardwareSeconds": 1.0,
+      "packetIssues": 0,
+      "loss": false,
+      "CDCInsideWindow": 61,
+      "RCCRestored": true,
+      "cleanupError": null
+    },
+    {
+      "series": "ab-measured",
+      "round": 4,
+      "clockKhz": 10000,
+      "actualControlClock": {
+        "FCLK_Hz": 119999998,
+        "cfg": "0xcaa11",
+        "waveform": {
+          "SWCLK_Hz": 9999999.833333334,
+          "half_period_fclk": 6,
+          "short_high": true,
+          "intended_high_ns": 8.333333472222225
+        },
+        "clockSource": 0,
+        "clockControl": 15728896,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 9999999.833333334,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+      },
+      "reportedCaptureTckKhz": 9999,
+      "e2eSeconds": 44.084371199976886,
+      "controlExchangeSeconds": 3.1793000001609326,
+      "exchangeCalls": 634,
+      "decodeSeconds": 33.5902043999813,
+      "openSeconds": 1.2714685999962967,
+      "closeSeconds": 0.4478625000047032,
+      "ETMBytes": 5892171,
+      "sha256": "a89614e7b655f348c5aea45ba6d8232fe783843e57c5fa51d5ae59ed1f4aef18",
+      "record": "capture-1a86196e6ac648fb823efa7c9cc3036a",
+      "nativePhases": {
+        "imagePreparation": 0.034856800019042566,
+        "nativeInputPreparation": 0.013652499997988343,
+        "openCsd": 4.487172799999826,
+        "storeBuildAndIndex": 29.05253939999966
+      },
+      "storePhases": {
+        "decodeAndInputs": 4.413853,
+        "prescanAndStatic": 1.362389,
+        "nativeBuild": 10.773325,
+        "queryIndex": 7.126377,
+        "assemble": 3.575236,
+        "inputBindings": 1.488127,
+        "publish": 0.020274,
+        "cleanup": 0.160931
+      },
+      "hardwareSeconds": 1.0,
+      "packetIssues": 0,
+      "loss": false,
+      "CDCInsideWindow": 62,
+      "RCCRestored": true,
+      "cleanupError": null
+    },
+    {
+      "series": "ab-measured",
+      "round": 5,
+      "clockKhz": 1000,
+      "actualControlClock": {
+        "FCLK_Hz": 119999998,
+        "cfg": "0x300d6a11",
+        "waveform": {
+          "SWCLK_Hz": 999999.9833333333,
+          "half_period_fclk": 60,
+          "short_high": true,
+          "intended_high_ns": 8.333333472222225
+        },
+        "clockSource": 0,
+        "clockControl": 15728896,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 999999.9833333333,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+      },
+      "reportedCaptureTckKhz": 999,
+      "e2eSeconds": 33.9814161999966,
+      "controlExchangeSeconds": 2.5261999996304514,
+      "exchangeCalls": 634,
+      "decodeSeconds": 25.755243699997663,
+      "openSeconds": 0.7248906999884639,
+      "closeSeconds": 0.3334698000107892,
+      "ETMBytes": 5888376,
+      "sha256": "b91c64250e76d5049f0da62646606d41996c657b06f23a3d08355fbb1186875a",
+      "record": "capture-87bc3feb0cb1406daa9b32a574460336",
+      "nativePhases": {
+        "imagePreparation": 0.024221999978180975,
+        "nativeInputPreparation": 0.00723019998986274,
+        "openCsd": 3.5966423000209033,
+        "storeBuildAndIndex": 22.12607709999429
+      },
+      "storePhases": {
+        "decodeAndInputs": 4.289302,
+        "prescanAndStatic": 1.11424,
+        "nativeBuild": 8.048303,
+        "queryIndex": 4.868257,
+        "assemble": 2.226147,
+        "inputBindings": 1.284945,
+        "publish": 0.030438,
+        "cleanup": 0.15326
+      },
+      "hardwareSeconds": 1.0,
+      "packetIssues": 0,
+      "loss": false,
+      "CDCInsideWindow": 59,
+      "RCCRestored": true,
+      "cleanupError": null
+    },
+    {
+      "series": "ab-measured",
+      "round": 6,
+      "clockKhz": 10000,
+      "actualControlClock": {
+        "FCLK_Hz": 119999998,
+        "cfg": "0xcaa11",
+        "waveform": {
+          "SWCLK_Hz": 9999999.833333334,
+          "half_period_fclk": 6,
+          "short_high": true,
+          "intended_high_ns": 8.333333472222225
+        },
+        "clockSource": 0,
+        "clockControl": 15728896,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 9999999.833333334,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+      },
+      "reportedCaptureTckKhz": 9999,
+      "e2eSeconds": 31.79838490000111,
+      "controlExchangeSeconds": 2.1152999998927116,
+      "exchangeCalls": 634,
+      "decodeSeconds": 23.402955700003076,
+      "openSeconds": 0.8277391000010539,
+      "closeSeconds": 0.2916259000194259,
+      "ETMBytes": 5888945,
+      "sha256": "470c35b395e3fdbc35626134a851b3655259659092b18f7dc0c512749360049c",
+      "record": "capture-6b6a0b66bf2647e583782fef14abfcd7",
+      "nativePhases": {
+        "imagePreparation": 0.013036999996984378,
+        "nativeInputPreparation": 0.0062612000037916005,
+        "openCsd": 2.3604472000151873,
+        "storeBuildAndIndex": 21.02235639997525
+      },
+      "storePhases": {
+        "decodeAndInputs": 2.307254,
+        "prescanAndStatic": 1.439445,
+        "nativeBuild": 7.698049,
+        "queryIndex": 4.976143,
+        "assemble": 2.987366,
+        "inputBindings": 1.327432,
+        "publish": 0.020069,
+        "cleanup": 0.159614
+      },
+      "hardwareSeconds": 1.0,
+      "packetIssues": 0,
+      "loss": false,
+      "CDCInsideWindow": 62,
+      "RCCRestored": true,
+      "cleanupError": null
+    },
+    {
+      "series": "ab-repeat",
+      "round": 1,
+      "clockKhz": 1000,
+      "actualControlClock": {
+        "FCLK_Hz": 119999998,
+        "cfg": "0x300d6a11",
+        "waveform": {
+          "SWCLK_Hz": 999999.9833333333,
+          "half_period_fclk": 60,
+          "short_high": true,
+          "intended_high_ns": 8.333333472222225
+        },
+        "clockSource": 0,
+        "clockControl": 15728896,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 999999.9833333333,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+      },
+      "reportedCaptureTckKhz": 999,
+      "e2eSeconds": 30.324406400002772,
+      "controlExchangeSeconds": 2.9905999994874,
+      "exchangeCalls": 634,
+      "decodeSeconds": 21.850105099991197,
+      "openSeconds": 0.6399078000104055,
+      "closeSeconds": 0.24368039998807944,
+      "ETMBytes": 5883802,
+      "sha256": "eff1d828c462485e91a0a41083118a37f74a45d111a77e1384da0b2828de33d9",
+      "record": "capture-466c13feb5d74f4a9df5c7e7f116e16d",
+      "nativePhases": {
+        "imagePreparation": 0.01420259999576956,
+        "nativeInputPreparation": 0.004540800000540912,
+        "openCsd": 1.9745843000127934,
+        "storeBuildAndIndex": 19.855793700000504
+      },
+      "storePhases": {
+        "decodeAndInputs": 2.640065,
+        "prescanAndStatic": 0.85274,
+        "nativeBuild": 6.947954,
+        "queryIndex": 4.915917,
+        "assemble": 2.88909,
+        "inputBindings": 1.290062,
+        "publish": 0.041186,
+        "cleanup": 0.166319
+      },
+      "hardwareSeconds": 1.0,
+      "packetIssues": 0,
+      "loss": false,
+      "CDCInsideWindow": 62,
+      "RCCRestored": true,
+      "cleanupError": null
+    },
+    {
+      "series": "ab-repeat",
+      "round": 2,
+      "clockKhz": 10000,
+      "actualControlClock": {
+        "FCLK_Hz": 119999998,
+        "cfg": "0xcaa11",
+        "waveform": {
+          "SWCLK_Hz": 9999999.833333334,
+          "half_period_fclk": 6,
+          "short_high": true,
+          "intended_high_ns": 8.333333472222225
+        },
+        "clockSource": 0,
+        "clockControl": 15728896,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 9999999.833333334,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+      },
+      "reportedCaptureTckKhz": 9999,
+      "e2eSeconds": 32.9948083999916,
+      "controlExchangeSeconds": 2.316600000143051,
+      "exchangeCalls": 638,
+      "decodeSeconds": 24.813606999989133,
+      "openSeconds": 0.7698948000033852,
+      "closeSeconds": 0.20525280002038926,
+      "ETMBytes": 5890304,
+      "sha256": "84efbbee8ea6647009c1794578f6de89042a3c94749cdcee2f3c895977f06798",
+      "record": "capture-6a0cbd289e8943f799603a374d476e1b",
+      "nativePhases": {
+        "imagePreparation": 0.01291059999493882,
+        "nativeInputPreparation": 0.004585999995470047,
+        "openCsd": 2.0328889999946114,
+        "storeBuildAndIndex": 22.762511300010374
+      },
+      "storePhases": {
+        "decodeAndInputs": 2.408821,
+        "prescanAndStatic": 0.846911,
+        "nativeBuild": 7.45558,
+        "queryIndex": 6.335856,
+        "assemble": 4.116578,
+        "inputBindings": 1.308839,
+        "publish": 0.016546,
+        "cleanup": 0.161437
+      },
+      "hardwareSeconds": 1.0,
+      "packetIssues": 0,
+      "loss": false,
+      "CDCInsideWindow": 62,
+      "RCCRestored": true,
+      "cleanupError": null
+    },
+    {
+      "series": "ab-repeat",
+      "round": 3,
+      "clockKhz": 1000,
+      "actualControlClock": {
+        "FCLK_Hz": 119999998,
+        "cfg": "0x300d6a11",
+        "waveform": {
+          "SWCLK_Hz": 999999.9833333333,
+          "half_period_fclk": 60,
+          "short_high": true,
+          "intended_high_ns": 8.333333472222225
+        },
+        "clockSource": 0,
+        "clockControl": 15728896,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 999999.9833333333,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+      },
+      "reportedCaptureTckKhz": 999,
+      "e2eSeconds": 31.173611100006383,
+      "controlExchangeSeconds": 2.471900000423193,
+      "exchangeCalls": 634,
+      "decodeSeconds": 23.030952900007833,
+      "openSeconds": 0.662301500007743,
+      "closeSeconds": 0.4789552000002004,
+      "ETMBytes": 5885409,
+      "sha256": "45f539e51b99a2e3de345aeff702e5dc05a30e09026c886e563b23c0f5b3cde6",
+      "record": "capture-b8092a475b4b45efabc9449afaa57ef5",
+      "nativePhases": {
+        "imagePreparation": 0.014463600004091859,
+        "nativeInputPreparation": 0.005708800017600879,
+        "openCsd": 2.540990299981786,
+        "storeBuildAndIndex": 20.46849719999591
+      },
+      "storePhases": {
+        "decodeAndInputs": 2.973809,
+        "prescanAndStatic": 0.9627,
+        "nativeBuild": 7.403105,
+        "queryIndex": 4.906549,
+        "assemble": 2.638943,
+        "inputBindings": 1.278308,
+        "publish": 0.018172,
+        "cleanup": 0.173265
+      },
+      "hardwareSeconds": 1.0,
+      "packetIssues": 0,
+      "loss": false,
+      "CDCInsideWindow": 62,
+      "RCCRestored": true,
+      "cleanupError": null
+    },
+    {
+      "series": "ab-repeat",
+      "round": 4,
+      "clockKhz": 10000,
+      "actualControlClock": {
+        "FCLK_Hz": 119999998,
+        "cfg": "0xcaa11",
+        "waveform": {
+          "SWCLK_Hz": 9999999.833333334,
+          "half_period_fclk": 6,
+          "short_high": true,
+          "intended_high_ns": 8.333333472222225
+        },
+        "clockSource": 0,
+        "clockControl": 15728896,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 9999999.833333334,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+      },
+      "reportedCaptureTckKhz": 9999,
+      "e2eSeconds": 32.4729393000016,
+      "controlExchangeSeconds": 2.1538999999165536,
+      "exchangeCalls": 634,
+      "decodeSeconds": 24.509173399972497,
+      "openSeconds": 0.677177900011884,
+      "closeSeconds": 0.2829809999966528,
+      "ETMBytes": 5891232,
+      "sha256": "3e151af0751da4ddf77fd5bc256f0fc04349a3b7311317795291c779d80516fa",
+      "record": "capture-d175fd1731a64107af12125d06a76172",
+      "nativePhases": {
+        "imagePreparation": 0.012077300023520365,
+        "nativeInputPreparation": 0.00406560002011247,
+        "openCsd": 2.2686811999883503,
+        "storeBuildAndIndex": 22.22359020001022
+      },
+      "storePhases": {
+        "decodeAndInputs": 2.633767,
+        "prescanAndStatic": 1.535335,
+        "nativeBuild": 8.597101,
+        "queryIndex": 4.950745,
+        "assemble": 2.871721,
+        "inputBindings": 1.321158,
+        "publish": 0.026307,
+        "cleanup": 0.171637
+      },
+      "hardwareSeconds": 1.0,
+      "packetIssues": 0,
+      "loss": false,
+      "CDCInsideWindow": 62,
+      "RCCRestored": true,
+      "cleanupError": null
+    },
+    {
+      "series": "ab-repeat",
+      "round": 5,
+      "clockKhz": 1000,
+      "actualControlClock": {
+        "FCLK_Hz": 119999998,
+        "cfg": "0x300d6a11",
+        "waveform": {
+          "SWCLK_Hz": 999999.9833333333,
+          "half_period_fclk": 60,
+          "short_high": true,
+          "intended_high_ns": 8.333333472222225
+        },
+        "clockSource": 0,
+        "clockControl": 15728896,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 999999.9833333333,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+      },
+      "reportedCaptureTckKhz": 999,
+      "e2eSeconds": 30.759061999997357,
+      "controlExchangeSeconds": 2.445600000053644,
+      "exchangeCalls": 634,
+      "decodeSeconds": 22.708685999998124,
+      "openSeconds": 0.7056099000037648,
+      "closeSeconds": 0.6307061000261456,
+      "ETMBytes": 5886213,
+      "sha256": "3094e54aded8d1eeb95e73ab4f501bf820db5f4efb300fe4d70806e04fc389c9",
+      "record": "capture-173cd51646524bfa83a3c95cf7f071ca",
+      "nativePhases": {
+        "imagePreparation": 0.012191800022264943,
+        "nativeInputPreparation": 0.004667200002586469,
+        "openCsd": 2.1437531000119634,
+        "storeBuildAndIndex": 20.547204400005285
+      },
+      "storePhases": {
+        "decodeAndInputs": 3.008616,
+        "prescanAndStatic": 1.000031,
+        "nativeBuild": 7.108111,
+        "queryIndex": 4.979053,
+        "assemble": 2.841827,
+        "inputBindings": 1.310715,
+        "publish": 0.019635,
+        "cleanup": 0.163635
+      },
+      "hardwareSeconds": 1.0,
+      "packetIssues": 0,
+      "loss": false,
+      "CDCInsideWindow": 60,
+      "RCCRestored": true,
+      "cleanupError": null
+    },
+    {
+      "series": "ab-repeat",
+      "round": 6,
+      "clockKhz": 10000,
+      "actualControlClock": {
+        "FCLK_Hz": 119999998,
+        "cfg": "0xcaa11",
+        "waveform": {
+          "SWCLK_Hz": 9999999.833333334,
+          "half_period_fclk": 6,
+          "short_high": true,
+          "intended_high_ns": 8.333333472222225
+        },
+        "clockSource": 0,
+        "clockControl": 15728896,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 9999999.833333334,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+      },
+      "reportedCaptureTckKhz": 9999,
+      "e2eSeconds": 31.67689580001752,
+      "controlExchangeSeconds": 2.231299999982119,
+      "exchangeCalls": 634,
+      "decodeSeconds": 23.794649499992374,
+      "openSeconds": 0.6536588000017218,
+      "closeSeconds": 0.3018752000061795,
+      "ETMBytes": 5892279,
+      "sha256": "3b54995365d440cb154c8249b2fc2a0319d9ccb42c2460b3ca861550c421ea78",
+      "record": "capture-e61a64f34d0047e4a9c1c617b87099e1",
+      "nativePhases": {
+        "imagePreparation": 0.014089399977819994,
+        "nativeInputPreparation": 0.004533600003924221,
+        "openCsd": 2.28050669998629,
+        "storeBuildAndIndex": 21.494377499999246
+      },
+      "storePhases": {
+        "decodeAndInputs": 2.773163,
+        "prescanAndStatic": 1.221736,
+        "nativeBuild": 7.678194,
+        "queryIndex": 5.203787,
+        "assemble": 2.973954,
+        "inputBindings": 1.326572,
+        "publish": 0.018241,
+        "cleanup": 0.177562
+      },
+      "hardwareSeconds": 1.0,
+      "packetIssues": 0,
+      "loss": false,
+      "CDCInsideWindow": 60,
+      "RCCRestored": true,
+      "cleanupError": null
+    }
+  ],
+  "summary": {
+    "ab-measured": {
+      "1000": {
+        "e2eSeconds": {
+          "n": 3,
+          "values": [
+            51.521499799971934,
+            49.9683098999958,
+            33.9814161999966
+          ],
+          "median": 49.9683098999958,
+          "range": [
+            33.9814161999966,
+            51.521499799971934
+          ]
+        },
+        "controlExchangeSeconds": {
+          "n": 3,
+          "values": [
+            5.117499999850988,
+            6.179100000053644,
+            2.5261999996304514
+          ],
+          "median": 5.117499999850988,
+          "range": [
+            2.5261999996304514,
+            6.179100000053644
+          ]
+        },
+        "decodeSeconds": {
+          "n": 3,
+          "values": [
+            38.41124280000804,
+            36.11429570001201,
+            25.755243699997663
+          ],
+          "median": 36.11429570001201,
+          "range": [
+            25.755243699997663,
+            38.41124280000804
+          ]
+        }
+      },
+      "10000": {
+        "e2eSeconds": {
+          "n": 3,
+          "values": [
+            53.21894170000451,
+            44.084371199976886,
+            31.79838490000111
+          ],
+          "median": 44.084371199976886,
+          "range": [
+            31.79838490000111,
+            53.21894170000451
+          ]
+        },
+        "controlExchangeSeconds": {
+          "n": 3,
+          "values": [
+            3.6991999995410443,
+            3.1793000001609326,
+            2.1152999998927116
+          ],
+          "median": 3.1793000001609326,
+          "range": [
+            2.1152999998927116,
+            3.6991999995410443
+          ]
+        },
+        "decodeSeconds": {
+          "n": 3,
+          "values": [
+            42.04828080002335,
+            33.5902043999813,
+            23.402955700003076
+          ],
+          "median": 33.5902043999813,
+          "range": [
+            23.402955700003076,
+            42.04828080002335
+          ]
+        }
+      },
+      "observedE2ESecondsSaved": 5.883938700018916,
+      "observedE2EReductionPercent": 11.775340634483639,
+      "controlSecondsSaved": 1.9381999996900556,
+      "controlReductionPercent": 37.873961890503026
+    },
+    "ab-repeat": {
+      "1000": {
+        "e2eSeconds": {
+          "n": 3,
+          "values": [
+            30.324406400002772,
+            31.173611100006383,
+            30.759061999997357
+          ],
+          "median": 30.759061999997357,
+          "range": [
+            30.324406400002772,
+            31.173611100006383
+          ]
+        },
+        "controlExchangeSeconds": {
+          "n": 3,
+          "values": [
+            2.9905999994874,
+            2.471900000423193,
+            2.445600000053644
+          ],
+          "median": 2.471900000423193,
+          "range": [
+            2.445600000053644,
+            2.9905999994874
+          ]
+        },
+        "decodeSeconds": {
+          "n": 3,
+          "values": [
+            21.850105099991197,
+            23.030952900007833,
+            22.708685999998124
+          ],
+          "median": 22.708685999998124,
+          "range": [
+            21.850105099991197,
+            23.030952900007833
+          ]
+        }
+      },
+      "10000": {
+        "e2eSeconds": {
+          "n": 3,
+          "values": [
+            32.9948083999916,
+            32.4729393000016,
+            31.67689580001752
+          ],
+          "median": 32.4729393000016,
+          "range": [
+            31.67689580001752,
+            32.9948083999916
+          ]
+        },
+        "controlExchangeSeconds": {
+          "n": 3,
+          "values": [
+            2.316600000143051,
+            2.1538999999165536,
+            2.231299999982119
+          ],
+          "median": 2.231299999982119,
+          "range": [
+            2.1538999999165536,
+            2.316600000143051
+          ]
+        },
+        "decodeSeconds": {
+          "n": 3,
+          "values": [
+            24.813606999989133,
+            24.509173399972497,
+            23.794649499992374
+          ],
+          "median": 24.509173399972497,
+          "range": [
+            23.794649499992374,
+            24.813606999989133
+          ]
+        }
+      },
+      "observedE2ESecondsSaved": -1.713877300004242,
+      "observedE2EReductionPercent": -5.57194266848706,
+      "controlSecondsSaved": 0.240600000441074,
+      "controlReductionPercent": 9.733403471009463
+    },
+    "all": {
+      "1000": {
+        "e2eSeconds": {
+          "n": 6,
+          "values": [
+            51.521499799971934,
+            49.9683098999958,
+            33.9814161999966,
+            30.324406400002772,
+            31.173611100006383,
+            30.759061999997357
+          ],
+          "median": 32.57751365000149,
+          "range": [
+            30.324406400002772,
+            51.521499799971934
+          ]
+        },
+        "controlExchangeSeconds": {
+          "n": 6,
+          "values": [
+            5.117499999850988,
+            6.179100000053644,
+            2.5261999996304514,
+            2.9905999994874,
+            2.471900000423193,
+            2.445600000053644
+          ],
+          "median": 2.7583999995589257,
+          "range": [
+            2.445600000053644,
+            6.179100000053644
+          ]
+        },
+        "decodeSeconds": {
+          "n": 6,
+          "values": [
+            38.41124280000804,
+            36.11429570001201,
+            25.755243699997663,
+            21.850105099991197,
+            23.030952900007833,
+            22.708685999998124
+          ],
+          "median": 24.393098300002748,
+          "range": [
+            21.850105099991197,
+            38.41124280000804
+          ]
+        }
+      },
+      "10000": {
+        "e2eSeconds": {
+          "n": 6,
+          "values": [
+            53.21894170000451,
+            44.084371199976886,
+            31.79838490000111,
+            32.9948083999916,
+            32.4729393000016,
+            31.67689580001752
+          ],
+          "median": 32.7338738499966,
+          "range": [
+            31.67689580001752,
+            53.21894170000451
+          ]
+        },
+        "controlExchangeSeconds": {
+          "n": 6,
+          "values": [
+            3.6991999995410443,
+            3.1793000001609326,
+            2.1152999998927116,
+            2.316600000143051,
+            2.1538999999165536,
+            2.231299999982119
+          ],
+          "median": 2.2739500000625847,
+          "range": [
+            2.1152999998927116,
+            3.6991999995410443
+          ]
+        },
+        "decodeSeconds": {
+          "n": 6,
+          "values": [
+            42.04828080002335,
+            33.5902043999813,
+            23.402955700003076,
+            24.813606999989133,
+            24.509173399972497,
+            23.794649499992374
+          ],
+          "median": 24.661390199980815,
+          "range": [
+            23.402955700003076,
+            42.04828080002335
+          ]
+        }
+      },
+      "observedE2ESecondsSaved": -0.1563601999951061,
+      "observedE2EReductionPercent": -0.4799635775614169,
+      "controlSecondsSaved": 0.48444999949634093,
+      "controlReductionPercent": 17.56271750195061
+    }
+  },
+  "interpretation": "E2E includes CPU/disk-heavy native decode/index; overlap and drift prevent attributing all observed difference to SWD. No outlier removed.",
+  "exploratoryMixedHandoffSeries": "ab/ configured UI at 1/10MHz but capture service reset both to 1MHz; excluded from formal comparison",
+  "softwareFailure": "ab-full-clock/ failed before acquisition because bundled setup lacked speed_hz; preserved and fixed before both formal series"
+}

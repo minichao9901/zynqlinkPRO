@@ -18,6 +18,8 @@ PLL和AHB/APB分频由target固件负责。CLI用于AI；一条命令打包：
 
 133.333 MHz实验与普通DAP 50/60 MHz的最新板测见[极限性能与Golden对照](docs/validation/performance-limits-20261101/README.md)；固定133实验仍不是Golden替代品，ETM并发RTT限制单独保留。
 
+ETM配置默认SWD已改为10MHz，USB交接/恢复保持所选档位，本地程序已重建；[1秒ETM端到端1/10MHz对照](docs/validation/etm-e2e-clock-20261101/README.md)显示控制段更快，但完整E2E未测出稳定缩短。
+
 ```powershell
 # 明确需要上板时，以下命令只下载到RAM
 python tools/run_xsct.py tools/download_dap_fpga.tcl prebuilt/golden/application.elf prebuilt/golden/probe.bit prebuilt/golden/ps7_init.tcl

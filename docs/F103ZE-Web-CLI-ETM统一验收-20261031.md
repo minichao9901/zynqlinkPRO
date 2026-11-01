@@ -1252,3 +1252,9 @@ SRAM target CPU72MHz/TRACECLK36MHz首次扫描已完成110点，**没有无错�
 真实冻结EXE以System32-only PATH离线验收：F103ZE 5,467,740条、H743 210,497条指令，packetIssues均0，C++ TraceStore且没有逐指令JSONL；SVG分别2,531/2,187字节且XML有效；重复启动复用通过，验收进程已关闭。发布后1794个程序文件SHA与包manifest匹配。EXE SHA `b655096d3ddae1abf1140408f238066cf7f2f600c1cdfdace91954a704429193`。89项Python回归通过。本次只更新本机程序，没有进行板卡采集或改动板上固件。[交付记录](validation/bridge-local-20261101/delivery.json)。
 
 AI默认更新命令现在为`python toolbox.py bridge-build`；只有需分发时才加`--zip`，分发包不带用户data、记录或令牌。候选冻结程序先完成离线验收再替换当前目录，旧程序保留于build归档，失败自动恢复。首轮发布曾因Windows子进程中文编码不一致而中断，旧程序未替换；已统一UTF-8后重建、验收并发布成功。
+
+### 2026-11-01：ETM默认SWD改10MHz，1秒E2E同条件复测
+
+同一release133配对、F103ZE HCLK48MHz/TRACECLK24MHz、cdc_poll入口、1秒DDR/USB窗口与CDC刺激，1/10MHz交错各6次，12轮无loss、packetIssues或恢复错误。E2E合并中位32.578/32.734秒（连接/初次断点准备不在该计时内），没有稳定减少；控制交换累计中位2.758/2.274秒，少0.484秒/17.6%。第一批曾表现省5.884秒，追加对照未复现，保留全部数据，不用旧268.11秒JSON全流程或7.208秒离线数字作提频基线。
+
+网页、CLI、USB接管服务及恢复连接默认/选定时钟已贯通，不再在采集中暗退1MHz。本地EXE已重建，无参数默认10MHz再做1秒采集/解码通过，单次29.173秒仅作功能验收。目标PLL/AHB/APB/Flash/QSPI不变；81项Web及10项相关Python检查通过。详见[完整时间、分项、实际时钟、包身份和失败现场](validation/etm-e2e-clock-20261101/README.md)。
