@@ -1,0 +1,166 @@
+{
+  "artifacts": {
+    "git_head": "c8d88d023ed9af9f676b5de2b6754ce1faae7e58",
+    "git_dirty": true,
+    "bit": {
+      "path": "E:\\zynqlinkPRO\\prebuilt\\golden\\probe.bit",
+      "sha256": "1da17cb60175bbc2b7abd647770c7053bd7b7097e0d38aa819fb89678d564473"
+    },
+    "elf": {
+      "path": "E:\\zynqlinkPRO\\prebuilt\\golden\\application.elf",
+      "sha256": "e977914c2924ab4cac13f4075de0a5108d1e2e8cf48966fb8fbdea3a358e0b2c"
+    }
+  },
+  "block_bytes": 1024,
+  "pipeline_depth": 4,
+  "rows": [
+    {
+      "transport": "swd",
+      "requested_Hz": 25000000,
+      "passed": true,
+      "FCLK_Hz": 99999999,
+      "cfg": "0xc2a11",
+      "waveform": {
+        "SWCLK_Hz": 24999999.75,
+        "half_period_fclk": 2,
+        "short_high": true,
+        "intended_high_ns": 10.000000100000001
+      },
+      "actual_link_Hz": 24999999.75,
+      "TAR_after_1KiB": "0x20004400",
+      "TAR_after_4KiB": "0x20004000",
+      "read_seq": {
+        "MB_s": 1.5474982922545806,
+        "repeats_MB_s": [
+          1.5499210937478305,
+          1.5474982922545806,
+          1.5120010335897356
+        ],
+        "loops": 448,
+        "bytes_per_repeat": 458752,
+        "seconds": [
+          0.29598409999744035,
+          0.2964475000044331,
+          0.30340720000094734
+        ]
+      },
+      "read_pipe": {
+        "MB_s": 1.866062948853188,
+        "repeats_MB_s": [
+          1.8096592861017802,
+          1.8747147763588246,
+          1.866062948853188
+        ],
+        "loops": 548,
+        "bytes_per_repeat": 561152,
+        "seconds": [
+          0.31008709999150597,
+          0.2993266000121366,
+          0.30071439998573624
+        ]
+      },
+      "write_pipe": {
+        "MB_s": 1.8225962347630726,
+        "repeats_MB_s": [
+          1.8225962347630726,
+          1.8246168264974285,
+          1.8129901317516985
+        ],
+        "loops": 532,
+        "bytes_per_repeat": 544768,
+        "seconds": [
+          0.29889669999829493,
+          0.29856569998082705,
+          0.3004804000083823
+        ]
+      },
+      "restore_match": true
+    },
+    {
+      "transport": "swd",
+      "requested_Hz": 60000000,
+      "passed": true,
+      "FCLK_Hz": 119999998,
+      "cfg": "0xa11",
+      "waveform": {
+        "SWCLK_Hz": 59999999.0,
+        "half_period_fclk": 1,
+        "short_high": false,
+        "intended_high_ns": 8.333333472222225
+      },
+      "actual_link_Hz": 59999999.0,
+      "TAR_after_1KiB": "0x20004400",
+      "TAR_after_4KiB": "0x20004000",
+      "read_seq": {
+        "MB_s": 2.730290197401426,
+        "repeats_MB_s": [
+          2.704948107825235,
+          2.730290197401426,
+          2.760501629821791
+        ],
+        "loops": 820,
+        "bytes_per_repeat": 839680,
+        "seconds": [
+          0.3104237000225112,
+          0.30754239999805577,
+          0.3041765999805648
+        ]
+      },
+      "read_pipe": {
+        "MB_s": 3.9732286992746815,
+        "repeats_MB_s": [
+          3.8827985411414367,
+          3.9732286992746815,
+          3.997512214698456
+        ],
+        "loops": 1084,
+        "bytes_per_repeat": 1110016,
+        "seconds": [
+          0.2858803999843076,
+          0.2793738000036683,
+          0.2776767000032123
+        ]
+      },
+      "write_pipe": {
+        "MB_s": 3.842343484128707,
+        "repeats_MB_s": [
+          3.7373524004760057,
+          3.942113133714648,
+          3.842343484128707
+        ],
+        "loops": 1168,
+        "bytes_per_repeat": 1196032,
+        "seconds": [
+          0.3200211999937892,
+          0.3033986999944318,
+          0.311276699998416
+        ]
+      },
+      "restore_match": true
+    },
+    {
+      "transport": "jtag",
+      "requested_Hz": 25000000,
+      "passed": false,
+      "error": "RuntimeError('Invalid ARM JTAG IDCODE: 16 00 00 00 00 00')",
+      "restore_match": true
+    },
+    {
+      "transport": "jtag",
+      "requested_Hz": 60000000,
+      "passed": false,
+      "error": "RuntimeError('Invalid ARM JTAG IDCODE: 16 00 00 00 00 00')",
+      "restore_match": true
+    }
+  ],
+  "RCC_before": [
+    50548355,
+    5309450
+  ],
+  "backup_sha256": "971c05e0f69fef0968c513851d28791c1740b58512d3e4b3121b6a3f84d7d9e7",
+  "RCC_after": [
+    50548355,
+    5309450
+  ],
+  "restore_match": true
+}

@@ -1,0 +1,39 @@
+{
+  "pair": "prebuilt/golden",
+  "actualFclkHz": 119999998,
+  "actualSwclkHz": 59999999.0,
+  "sramPeakReadMBps": 4.830682678202024,
+  "sramPeakWriteMBps": 4.745757187697079,
+  "sramSoakReadMBps": 4.82977931559171,
+  "sramSoakWriteMBps": 4.746130949543898,
+  "rttHostMedianMBps": 4.648627136743164,
+  "rttNoErrors": true,
+  "hssSummary": [
+    {
+      "transport": "swd",
+      "requested_Hz": 60000000,
+      "actual_link_Hz": 59999999.0,
+      "max_effective_Hz": 1000000.6244334048,
+      "peak_requested_sample_Hz": 1000000.0,
+      "peak_period_ticks": 24,
+      "peak_skip_percent": 0.0,
+      "highest_verified_zero_skip_Hz": 1000000.0,
+      "zero_period_ticks": 24,
+      "zero_verification_runs": 3,
+      "all_data_frames_verified": true,
+      "all_sample_counts_match": true,
+      "control_sequence_errors": 0
+    }
+  ],
+  "hssNonzeroSkipRuns": [
+    {
+      "stage": "verify_peak",
+      "periodTicks": 24,
+      "skipPercent": 0.10595379395508878,
+      "skipped": 2121
+    }
+  ],
+  "jtagCurrentHardwareBaselinePassed": false,
+  "jtagFailure": "IDCODE all zero at both requested 25MHz and 60MHz; no retry, wiring confirmation pending",
+  "newCandidateLoaded": false
+}
