@@ -48,6 +48,8 @@ ZL-075：额外PLL快照读取0xf40c00c4后SBA长时间忙，发生在SRAM改写
 
 验证：完整RISC-V IDCODE/word/full-pipeline及late/Q1三种返回模式，生产探针8组C主机测试；真实DAP_SWJ_Clock C函数的RISC-V分频、ARM/SWD策略、非法频率检查；验收工具非法窗口/零重复参数提前拒绝测试。raw报告driver_sha256和drivers快照标识实测版本，delivered为最后增加非法参数拒绝后的工具，正常参数路径未改。未覆盖GUI、QSPI启动、多板温压、无限时长；没有重启暂停的ETM/跨功能缺DEF研究。
 
+源码与已验收bit/ELF提交：`2bd88adf5fd748678e025e4af7cb1670696f7d87`；manifest固定该提交及逐文件SHA，构建时基提交另行保留。统一CLI 53项自测通过。
+
 最后板上快照 **2026-11-02 01:19:49 +08:00**：新HPM配对，FCLK49.999999MHz、DR TCK24.9999995MHz、mode0，目标运行；RTT/HSS、capture/packet空闲，SRAM/核心/cache及SYSCTL恢复通过。时钟为PS PLL/分频与PL寄存器计算值，非外部频率计；TAP/IR控制序列可更慢。无本任务后台采集/串口进程，共享hw_server保留；随后OCM再次复核通过。
 
 复测先加载/核对同一配对（out须新目录，--elf为探针PS ELF）：

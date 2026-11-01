@@ -3,7 +3,7 @@
   "accepted": true,
   "scope": "HPM6800EVK RISC-V JTAG/RAM only; not an ARM/ETM/QSPI release",
   "source_base_revision": "e0b8a513abe7cac4b167a28f2c7bed36120d2476",
-  "source_revision": null,
+  "source_revision": "2bd88adf5fd748678e025e4af7cb1670696f7d87",
   "rtl_source_sha256": {
     "dap_transfer_block_engine.v": "e249a3d7153c0584e896fa99637e97673156d36ab4e1faba27778b480c551afb",
     "jtag_core.v": "4460c67f63c057db5e23c8f980763a9c4216d3e47718e6ce2bd571ec764f24c6",
@@ -153,5 +153,6 @@
   "target_flash_writes": false,
   "qspi_writes": false,
   "final_state": "running target; idle services; FCLK49.999999MHz, TCK24.9999995MHz; mode0",
-  "measurement_summary": "../../docs/validation/hpm6800-acceptance-20261102/summary.json"
+  "measurement_summary": "../../docs/validation/hpm6800-acceptance-20261102/summary.json",
+  "source_revision_note": "Post-build commit containing exact hashed RTL/PS inputs and accepted bit/ELF; source_base_revision is the base observed by the build."
 }
