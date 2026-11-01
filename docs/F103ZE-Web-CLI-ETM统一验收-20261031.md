@@ -1212,3 +1212,5 @@ Web窗口元数据在DDR模式以硬件ticks/ref计算实际时长，主机下�
 使用相同已加载RAW4 DDR配对，SRAM CPU48MHz/TRACECLK24MHz的100ms、1s两轮通过；1s完整原生解析4,986,432包、20,392,676个执行范围，packetIssues=0、addressInaccessible=0，硬件窗口内62次完整精确CDC echo。SRAM CPU72MHz/TRACECLK36MHz首轮100ms即失败，保留原始FRM1 2,647,833字节：parserErrors=23,741、syncAcquisitions=23,742，但frameDrops=0、IDELAY ready loss=0、FIFO highwater=1、writerError=0、stopReason=0。采集中没有USB trace负载，采后下载约36.44MB/s。它把问题进一步定位到输入采样/成帧侧，不能归因为USB带宽；也不能仅凭parser错误断定是杜邦线电气问题，RAW4滤波与采样相位仍需对照。
 
 这次36MHz失败后没有补跑下一轮。清理及原Flash固件重启成功，RCC回到CPU48MHz基线，随后额外10次精确CDC echo通过。此阶段仍无运行时逐线IDELAY校准，36MHz不能标成支持；接下来需在真实接收路径加入可装载/读回的独立tap，完成偏斜/毛刺/停钟仿真和新bit/ELF时序、上板对照。SRAM试验不替代Flash FPB起点或H743验收。
+
+源码冻结b72ec89后重新构建两份SRAM ELF，SHA与实际加载验收文件一致，交付到[SRAM时钟对照产物及manifest](../prebuilt/f103ze-cdc-ram-clock-20261101/manifest.json)；[24MHz通过与36MHz首错的原始FRM1、可导入记录、CDC及恢复证据](validation/etm-ram-clock-board-20261101/README.md)已入库，3项SRAM安全边界检查和8项项目CLI检查通过。另记录一项元数据问题待修：capture.usb.json的rangeBytes/sentBytes/downloadState保留的是下载前快照，可能显示前一次传输状态；本次ZDD1 header身份/范围及最后TX退休条件在代码中已严格核对。这三个快照字段不用于本次输入质量结论，后续应修正输出为明确的传输后状态。

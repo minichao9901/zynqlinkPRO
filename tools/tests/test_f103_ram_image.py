@@ -29,8 +29,7 @@ class RamImageTests(unittest.TestCase):
             plan(ROOT/'prebuilt/golden/f103ze-cdc48.elf')
 
     def test_out_of_range_ram_segment_and_vector_entry_are_rejected(self):
-        source=ROOT/'firmware/target/stm32f103_cdc_trace/build/ze-72-ram/fw.elf'
-        if not source.exists():self.skipTest('Build the RAM firmware to exercise its ELF')
+        source=ROOT/'prebuilt/f103ze-cdc-ram-clock-20261101/cpu72.elf'
         raw=source.read_bytes();valid=plan(source)
         self.assertEqual(valid['stack'],0x20010000)
         self.assertEqual(valid['payloads'][0][0],0x20000000)

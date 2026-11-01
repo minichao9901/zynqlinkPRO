@@ -1,0 +1,834 @@
+{
+  "hardwareAccess": true,
+  "webAcceptance": false,
+  "usbDdrDownload": true,
+  "flashWrites": false,
+  "pair": "E:\\zynqlinkPRO_etm_calibration\\prebuilt\\etm-ddr-usb-raw4-20261101",
+  "files": {
+    "probe.bit": {
+      "bytes": 4045674,
+      "sha256": "82863bb7c06b27b32f5fd518e7b08d70ce1b855ca3c6f0525b8961d6967cd8ea"
+    },
+    "application.elf": {
+      "bytes": 812200,
+      "sha256": "1d55b321f95e15d43afb719380c7cefb4f05955c89f018e49c38bb3fb38ef559"
+    },
+    "ps7_init.tcl": {
+      "bytes": 35186,
+      "sha256": "aa9747c31f705be7c28af1c6b1cdeaf282f0dcdb01faecee2a9f72e4d3489132"
+    },
+    "verified_clock.json": {
+      "bytes": 96,
+      "sha256": "988dfd622d3c0085cd35192390c21ae7bcb3cea99516b2cd3666a3fb39022b5d"
+    },
+    "ps-build.json": {
+      "bytes": 5121,
+      "sha256": "3e2e49316f8a7ab00a2056fba9ac6f253fb8cef0403d5ac73561f09948f6af17"
+    },
+    "rtl-stamp.json": {
+      "bytes": 2078,
+      "sha256": "da637e7185954629227c522bc0a266394ddbebf1c7c927e3fbcf261f845a46fb"
+    }
+  },
+  "reloadBetweenRounds": false,
+  "retryFailedRounds": false,
+  "runnerSha256": "192e5d9ab5f170288badf0bd574c28660d7e5a80c364cecfecd52580f5818096",
+  "ramImage": true,
+  "entryMode": "free-running SRAM",
+  "rows": [
+    {
+      "round": 1,
+      "seconds": 0.1,
+      "function": "RAM-running",
+      "passed": false,
+      "returnCode": 1,
+      "hostStartedUnix": 1793495125.6991134,
+      "hostEndedUnix": 1793495127.1149943,
+      "echo": {
+        "rows": [
+          {
+            "number": 0,
+            "sentUnix": 1793495125.6984444,
+            "receivedUnix": 1793495125.6989512,
+            "bytes": 64,
+            "sha256": "1c807b18b4604a9f370951e249689b4010a769bc464c36376b40fa9fd06a29ee",
+            "exact": true
+          },
+          {
+            "number": 1,
+            "sentUnix": 1793495125.7119145,
+            "receivedUnix": 1793495125.7124836,
+            "bytes": 64,
+            "sha256": "7a424334d992706e1e8502d1e7380aed9a78630e92ddfe2a6750b26c35f00924",
+            "exact": true
+          },
+          {
+            "number": 2,
+            "sentUnix": 1793495125.7280188,
+            "receivedUnix": 1793495125.728523,
+            "bytes": 64,
+            "sha256": "bb21780a7296ebb5ea17846d16e195cbbf5bf1cc60b24b108c05af974f9fa87b",
+            "exact": true
+          },
+          {
+            "number": 3,
+            "sentUnix": 1793495125.7436833,
+            "receivedUnix": 1793495125.7443395,
+            "bytes": 64,
+            "sha256": "8ba1eb1ab082c0a57983893ae3fe39b0243ac3e19ed548f5d8c5c799df8e42ff",
+            "exact": true
+          },
+          {
+            "number": 4,
+            "sentUnix": 1793495125.7588398,
+            "receivedUnix": 1793495125.7594051,
+            "bytes": 64,
+            "sha256": "ff0bbbfdc2c61dbb17b475f1025d76b839e8629d89da6e8f26310d4e2f81a27f",
+            "exact": true
+          },
+          {
+            "number": 5,
+            "sentUnix": 1793495125.7740467,
+            "receivedUnix": 1793495125.774505,
+            "bytes": 64,
+            "sha256": "3facef36e3e0622e8885c19feab361392a9e031d5f15963b49dadcab51367563",
+            "exact": true
+          },
+          {
+            "number": 6,
+            "sentUnix": 1793495125.78929,
+            "receivedUnix": 1793495125.7898126,
+            "bytes": 64,
+            "sha256": "02d5e5912b35bfbd6353bf166e12b09307c20581d23db3959632838835b23122",
+            "exact": true
+          },
+          {
+            "number": 7,
+            "sentUnix": 1793495125.804874,
+            "receivedUnix": 1793495125.8054626,
+            "bytes": 64,
+            "sha256": "ea3e109c3d6676ee87be5926a42e4bb9520402f453ab2e7c7b8cd612fe7e0536",
+            "exact": true
+          },
+          {
+            "number": 8,
+            "sentUnix": 1793495125.8199048,
+            "receivedUnix": 1793495125.820554,
+            "bytes": 64,
+            "sha256": "e2b34696679bf7d973884b480f5df6b9fdb3c4215ba1bd17a853fc47ba2d4980",
+            "exact": true
+          },
+          {
+            "number": 9,
+            "sentUnix": 1793495125.8353853,
+            "receivedUnix": 1793495125.8358474,
+            "bytes": 64,
+            "sha256": "4ad943135648986c2c65ce04989a1fe675e895f402117d7759e1fd63eb39c55f",
+            "exact": true
+          },
+          {
+            "number": 10,
+            "sentUnix": 1793495125.850734,
+            "receivedUnix": 1793495125.851255,
+            "bytes": 64,
+            "sha256": "e996101d3290301112175c3fb0d9e6d27930ed7342be6c6bea1a3b70a7ff923a",
+            "exact": true
+          },
+          {
+            "number": 11,
+            "sentUnix": 1793495125.8659897,
+            "receivedUnix": 1793495125.8665876,
+            "bytes": 64,
+            "sha256": "2697bc48cbef02cae0cf97516b8917be71e340aab2f87b16870f21122737ed1f",
+            "exact": true
+          },
+          {
+            "number": 12,
+            "sentUnix": 1793495125.881133,
+            "receivedUnix": 1793495125.881573,
+            "bytes": 64,
+            "sha256": "86be83454d381675db179d52b658b02400fc95fbe63f46888cd8cf8f0cae40b3",
+            "exact": true
+          },
+          {
+            "number": 13,
+            "sentUnix": 1793495125.8965428,
+            "receivedUnix": 1793495125.897044,
+            "bytes": 64,
+            "sha256": "47fc3b4fee640fb7cf9987dce4f7dd11adc73297b9e7d4f5abf81aaf9d8054c9",
+            "exact": true
+          },
+          {
+            "number": 14,
+            "sentUnix": 1793495125.9134834,
+            "receivedUnix": 1793495125.9139545,
+            "bytes": 64,
+            "sha256": "886f0c7e165ed28a24f6f117765ad7a0ccd66db980abafeefdd6649cf8596f1c",
+            "exact": true
+          },
+          {
+            "number": 15,
+            "sentUnix": 1793495125.9292386,
+            "receivedUnix": 1793495125.9296672,
+            "bytes": 64,
+            "sha256": "5f31e05ae3eba00727510cac4da078be1a9d0870f8cf0abee6b6de620e6f5e94",
+            "exact": true
+          },
+          {
+            "number": 16,
+            "sentUnix": 1793495125.944117,
+            "receivedUnix": 1793495125.944555,
+            "bytes": 64,
+            "sha256": "6aa48b043a1887b9da7d3d16c94d428262bd8732679302de232df0744decbe26",
+            "exact": true
+          },
+          {
+            "number": 17,
+            "sentUnix": 1793495125.9603863,
+            "receivedUnix": 1793495125.9608881,
+            "bytes": 64,
+            "sha256": "7c29834736498242f914c094709b09a5215ffcf144f47d7bba95d4157c54e6c3",
+            "exact": true
+          },
+          {
+            "number": 18,
+            "sentUnix": 1793495125.9756746,
+            "receivedUnix": 1793495125.976194,
+            "bytes": 64,
+            "sha256": "8fb7361876b7115b4fba54664ba138cd66125ddbe9f9dfc6c60a6916c8e212fc",
+            "exact": true
+          },
+          {
+            "number": 19,
+            "sentUnix": 1793495125.9915361,
+            "receivedUnix": 1793495125.9920337,
+            "bytes": 64,
+            "sha256": "2f4dcfb990fae28f8c30588fc79a7ff213978bff7453cd7e4eb738e34e2fb1ae",
+            "exact": true
+          },
+          {
+            "number": 20,
+            "sentUnix": 1793495126.0071583,
+            "receivedUnix": 1793495126.007615,
+            "bytes": 64,
+            "sha256": "e7cb9bcc1dfb099b9c14749828df5229faba440c562224b589d5df255a1cdd8a",
+            "exact": true
+          },
+          {
+            "number": 21,
+            "sentUnix": 1793495126.0224445,
+            "receivedUnix": 1793495126.0229747,
+            "bytes": 64,
+            "sha256": "b9515ccac862535e164b450d56f3d770ba00ea8b83cdc37a558528edc4c592cf",
+            "exact": true
+          },
+          {
+            "number": 22,
+            "sentUnix": 1793495126.0384011,
+            "receivedUnix": 1793495126.0388167,
+            "bytes": 64,
+            "sha256": "b622ba4405a20e2a91ec840e2a627a5217d0d5698a0ffe8fdc6954d482db18bf",
+            "exact": true
+          },
+          {
+            "number": 23,
+            "sentUnix": 1793495126.0536153,
+            "receivedUnix": 1793495126.0540493,
+            "bytes": 64,
+            "sha256": "2eb5059d3a2dd442eda710c57097c6adef28e3638b086b549afa0a245d7ff11a",
+            "exact": true
+          },
+          {
+            "number": 24,
+            "sentUnix": 1793495126.0690427,
+            "receivedUnix": 1793495126.0694928,
+            "bytes": 64,
+            "sha256": "17e0f596c0128200bb18a4b9a275f135c28bc162ae2e0ca34168da9c0c9c5c50",
+            "exact": true
+          },
+          {
+            "number": 25,
+            "sentUnix": 1793495126.0849652,
+            "receivedUnix": 1793495126.0854578,
+            "bytes": 64,
+            "sha256": "91ac1c830ebf0c962d98dca7e80ab1b6ace0e0d6c4d4a7b671b763fd1f16a88d",
+            "exact": true
+          },
+          {
+            "number": 26,
+            "sentUnix": 1793495126.100288,
+            "receivedUnix": 1793495126.1007452,
+            "bytes": 64,
+            "sha256": "f323d64dea5984e109039a6b5b53f23f0f8c191636914bf65c1e86248bfb995b",
+            "exact": true
+          },
+          {
+            "number": 27,
+            "sentUnix": 1793495126.1162434,
+            "receivedUnix": 1793495126.116679,
+            "bytes": 64,
+            "sha256": "bebb4ec343f4c5d00e65e7424220238325e2d148eaf575903908535c6e20dd85",
+            "exact": true
+          },
+          {
+            "number": 28,
+            "sentUnix": 1793495126.1318457,
+            "receivedUnix": 1793495126.132281,
+            "bytes": 64,
+            "sha256": "c4e9a666ccaceb73e788e66c59318effdca35ffb071e2adf1d093d630306a6d1",
+            "exact": true
+          },
+          {
+            "number": 29,
+            "sentUnix": 1793495126.148025,
+            "receivedUnix": 1793495126.1484752,
+            "bytes": 64,
+            "sha256": "941bbe7ca57eca63261472c47b2897ed7558261e7bd864883d8d1dac56b55250",
+            "exact": true
+          },
+          {
+            "number": 30,
+            "sentUnix": 1793495126.1635299,
+            "receivedUnix": 1793495126.164027,
+            "bytes": 64,
+            "sha256": "d63f650d704ea962c67848af2f8e52b82aa18c48ef832a5f241ec90609693699",
+            "exact": true
+          },
+          {
+            "number": 31,
+            "sentUnix": 1793495126.1786966,
+            "receivedUnix": 1793495126.1791384,
+            "bytes": 64,
+            "sha256": "e5f577f08534a42123264a0c2427f7523fb683ba740407e91b92b8b74e45d6f8",
+            "exact": true
+          },
+          {
+            "number": 32,
+            "sentUnix": 1793495126.1942825,
+            "receivedUnix": 1793495126.194782,
+            "bytes": 64,
+            "sha256": "bcf0460d0e8fbf018c82640402598eae5683d71c9cf5cb0d0072b3f3008286d8",
+            "exact": true
+          },
+          {
+            "number": 33,
+            "sentUnix": 1793495126.2091248,
+            "receivedUnix": 1793495126.2096303,
+            "bytes": 64,
+            "sha256": "72d0fe04c95fe040d61e007d946c4797e8b30b01d15f075121d34fddf74b1a0b",
+            "exact": true
+          },
+          {
+            "number": 34,
+            "sentUnix": 1793495126.2244906,
+            "receivedUnix": 1793495126.2249937,
+            "bytes": 64,
+            "sha256": "9c5d87e7dbea2b41aa434c513ac3ddc9bdb9637b718d17be6848dd3da7348b4f",
+            "exact": true
+          },
+          {
+            "number": 35,
+            "sentUnix": 1793495126.2407894,
+            "receivedUnix": 1793495126.2412786,
+            "bytes": 64,
+            "sha256": "c3d1a5e710375f5e8a55312ed65c0e9a1ab9d8ef88ca2ed42597c01834d9a985",
+            "exact": true
+          },
+          {
+            "number": 36,
+            "sentUnix": 1793495126.2562828,
+            "receivedUnix": 1793495126.256702,
+            "bytes": 64,
+            "sha256": "8f7770b19ca40444b0500f862ed1bb527771ec435190f1932ca57373a291e6d7",
+            "exact": true
+          },
+          {
+            "number": 37,
+            "sentUnix": 1793495126.2715938,
+            "receivedUnix": 1793495126.2721152,
+            "bytes": 64,
+            "sha256": "49c317fea3cab9e17212694646156b0e921f53b3f4887843e74354df11c8b477",
+            "exact": true
+          },
+          {
+            "number": 38,
+            "sentUnix": 1793495126.2874534,
+            "receivedUnix": 1793495126.2879717,
+            "bytes": 64,
+            "sha256": "9eb2d26f07422eb814c4a35885befda7baa109642bb69c717614256acf1f00e8",
+            "exact": true
+          },
+          {
+            "number": 39,
+            "sentUnix": 1793495126.3027036,
+            "receivedUnix": 1793495126.3031662,
+            "bytes": 64,
+            "sha256": "8ed132ccb3168ef8b788c699e67827020c4272280f62a240f3dbb7b2ace72f2a",
+            "exact": true
+          },
+          {
+            "number": 40,
+            "sentUnix": 1793495126.3188722,
+            "receivedUnix": 1793495126.319305,
+            "bytes": 64,
+            "sha256": "93af64f2f99c46edccc97ac9bd8e68f164b1f8b0da9110a23a66602f9b5230db",
+            "exact": true
+          },
+          {
+            "number": 41,
+            "sentUnix": 1793495126.334058,
+            "receivedUnix": 1793495126.33451,
+            "bytes": 64,
+            "sha256": "b388e6cb000084eba4ff72468e4838e297dcef3ad97ec2ed114bc84f9653eb94",
+            "exact": true
+          },
+          {
+            "number": 42,
+            "sentUnix": 1793495126.3495128,
+            "receivedUnix": 1793495126.350017,
+            "bytes": 64,
+            "sha256": "f3cef1283b64f3d33cfc83f3611f1c724fbb34349a063c7e278c63e55c8ef11c",
+            "exact": true
+          },
+          {
+            "number": 43,
+            "sentUnix": 1793495126.364633,
+            "receivedUnix": 1793495126.3650672,
+            "bytes": 64,
+            "sha256": "3a2a087b65c6fdc3af3466d14b4e239cf9558dc7271c7edf4d6526d1b0636d76",
+            "exact": true
+          },
+          {
+            "number": 44,
+            "sentUnix": 1793495126.3805463,
+            "receivedUnix": 1793495126.3809628,
+            "bytes": 64,
+            "sha256": "29d280218c8890bdf6eb91489536efc5b0fae0a1edd8ad6c87338709d9a93ed5",
+            "exact": true
+          },
+          {
+            "number": 45,
+            "sentUnix": 1793495126.3967338,
+            "receivedUnix": 1793495126.3972414,
+            "bytes": 64,
+            "sha256": "e59a1abab2b033322deb808ae504ade4caa1c4a5b8cc6bd43c5b26051ad2da71",
+            "exact": true
+          },
+          {
+            "number": 46,
+            "sentUnix": 1793495126.4115212,
+            "receivedUnix": 1793495126.411982,
+            "bytes": 64,
+            "sha256": "451daed72362a75b894644065aface96fad9a5f824b5114063db21ab62aa231d",
+            "exact": true
+          },
+          {
+            "number": 47,
+            "sentUnix": 1793495126.4274,
+            "receivedUnix": 1793495126.4278965,
+            "bytes": 64,
+            "sha256": "a6d84282a6c47f2d1e9d3167ba8543349ee4f1e2e5e0c6b35d52bed6130fa85d",
+            "exact": true
+          },
+          {
+            "number": 48,
+            "sentUnix": 1793495126.4423788,
+            "receivedUnix": 1793495126.4428623,
+            "bytes": 64,
+            "sha256": "7902b96d54cd8011ad87351241cf87ed503b5fc0cd6a49f303f62e5d69b48a65",
+            "exact": true
+          },
+          {
+            "number": 49,
+            "sentUnix": 1793495126.4580567,
+            "receivedUnix": 1793495126.4584885,
+            "bytes": 64,
+            "sha256": "f821beb8851a68fa8affaeaa40c69ddf8cc2de9340570ccd6d2e12fa82ea1165",
+            "exact": true
+          },
+          {
+            "number": 50,
+            "sentUnix": 1793495126.4737954,
+            "receivedUnix": 1793495126.47424,
+            "bytes": 64,
+            "sha256": "54a70b128b4f78d112a6cb641465a2c6c09f1368d0ce087eb2016f8964c16ba7",
+            "exact": true
+          },
+          {
+            "number": 51,
+            "sentUnix": 1793495126.489003,
+            "receivedUnix": 1793495126.4894702,
+            "bytes": 64,
+            "sha256": "a39c17304292901b25c6fdc6cc9a3eb373ff2b73558f2d5f7b7b5168022929b3",
+            "exact": true
+          },
+          {
+            "number": 52,
+            "sentUnix": 1793495126.5050383,
+            "receivedUnix": 1793495126.5054922,
+            "bytes": 64,
+            "sha256": "8ee058a0da94e2c0cba5f71becfaef8c8bf60aefbd5bef224c22724519968b80",
+            "exact": true
+          },
+          {
+            "number": 53,
+            "sentUnix": 1793495126.521867,
+            "receivedUnix": 1793495126.523183,
+            "bytes": 64,
+            "sha256": "cd635b854cbeb112bb8dacd15ddb5e23bc1b6aef028712c6c4791329667f404c",
+            "exact": true
+          },
+          {
+            "number": 54,
+            "sentUnix": 1793495126.5375724,
+            "receivedUnix": 1793495126.5379817,
+            "bytes": 64,
+            "sha256": "ab04ae519487a43545553fc19a3b4414baac69583b2e6b6e9f0828f3d2998721",
+            "exact": true
+          },
+          {
+            "number": 55,
+            "sentUnix": 1793495126.5535395,
+            "receivedUnix": 1793495126.554038,
+            "bytes": 64,
+            "sha256": "a857ebf343fc457bb0416000b1732f404ed59e8721c1c46ac5b3f7351e30283e",
+            "exact": true
+          },
+          {
+            "number": 56,
+            "sentUnix": 1793495126.5701807,
+            "receivedUnix": 1793495126.5706797,
+            "bytes": 64,
+            "sha256": "51a05cb51b5637996c5bfbc767b3d372727efd470e43ccf18272f5762d96b822",
+            "exact": true
+          },
+          {
+            "number": 57,
+            "sentUnix": 1793495126.5859966,
+            "receivedUnix": 1793495126.5865772,
+            "bytes": 64,
+            "sha256": "add796b4bea260137f3a05b56d5e900533c09b3e5b38ebcc8fc206e3f6a29432",
+            "exact": true
+          },
+          {
+            "number": 58,
+            "sentUnix": 1793495126.601226,
+            "receivedUnix": 1793495126.6017838,
+            "bytes": 64,
+            "sha256": "b874465e6308d430353a14e9e7fb8fb288346b3b794b4f4749cbf06cf8d8b5a4",
+            "exact": true
+          },
+          {
+            "number": 59,
+            "sentUnix": 1793495126.6172001,
+            "receivedUnix": 1793495126.6176832,
+            "bytes": 64,
+            "sha256": "de12b6184d3934a7ce9e6d1d1789285cf99c009899ecfb1dbf868942b1e79cff",
+            "exact": true
+          },
+          {
+            "number": 60,
+            "sentUnix": 1793495126.6326046,
+            "receivedUnix": 1793495126.633085,
+            "bytes": 64,
+            "sha256": "3bd100a9041bc704f1e16311f372ee3b1eda846e58e0b67c6abca9a9d27c6757",
+            "exact": true
+          },
+          {
+            "number": 61,
+            "sentUnix": 1793495126.6478453,
+            "receivedUnix": 1793495126.6483302,
+            "bytes": 64,
+            "sha256": "41287d98ad13819757dd3347ecdff8946b83dd2e7ef8097704824284fe19a8e6",
+            "exact": true
+          },
+          {
+            "number": 62,
+            "sentUnix": 1793495126.6628902,
+            "receivedUnix": 1793495126.663337,
+            "bytes": 64,
+            "sha256": "e0b39abb274b3916fdef8b882038d6993cc788de87a2df5bfbd5ed5ec695b263",
+            "exact": true
+          },
+          {
+            "number": 63,
+            "sentUnix": 1793495126.6783311,
+            "receivedUnix": 1793495126.679031,
+            "bytes": 64,
+            "sha256": "105d25b7baf5338048c4ced99fe4a4c444636526af8fde2405f7708118313e5b",
+            "exact": true
+          },
+          {
+            "number": 64,
+            "sentUnix": 1793495126.693648,
+            "receivedUnix": 1793495126.6941507,
+            "bytes": 64,
+            "sha256": "23db0d436e43027e91c23c1c7723d7f1ea07c4a3e6c850d777d7c0b51d8c897c",
+            "exact": true
+          },
+          {
+            "number": 65,
+            "sentUnix": 1793495126.7091544,
+            "receivedUnix": 1793495126.7096388,
+            "bytes": 64,
+            "sha256": "3fcefc64cb3db506d00f5359ea312ebe4f04a6440209f6f3234bdfa736f23143",
+            "exact": true
+          },
+          {
+            "number": 66,
+            "sentUnix": 1793495126.7247777,
+            "receivedUnix": 1793495126.798655,
+            "bytes": 64,
+            "sha256": "dee5954ff71282f16c9927b2ad561eff06d140a97cecb51821ad7382c3b40032",
+            "exact": true
+          },
+          {
+            "number": 67,
+            "sentUnix": 1793495126.8021832,
+            "receivedUnix": 1793495126.8025925,
+            "bytes": 64,
+            "sha256": "0461cb9473174bb339eb01e9124b5fd56c634be10023350d6403c12131388221",
+            "exact": true
+          },
+          {
+            "number": 68,
+            "sentUnix": 1793495126.8170772,
+            "receivedUnix": 1793495126.8174758,
+            "bytes": 64,
+            "sha256": "103db79a0a318b6b2e223a56f2442b4bc9a4b8476d2b7b18faeeb5ebca24a29f",
+            "exact": true
+          },
+          {
+            "number": 69,
+            "sentUnix": 1793495126.8324819,
+            "receivedUnix": 1793495126.8329906,
+            "bytes": 64,
+            "sha256": "392168d407aeca41f6a6419ccd4db2aba86cc424e4f973d5b861d304bb656eb2",
+            "exact": true
+          },
+          {
+            "number": 70,
+            "sentUnix": 1793495126.8478432,
+            "receivedUnix": 1793495126.8482487,
+            "bytes": 64,
+            "sha256": "5170095510fef0b9e36a0b1c44e81ff1c3c83d85e4a5e20db2f5328a891522f8",
+            "exact": true
+          },
+          {
+            "number": 71,
+            "sentUnix": 1793495126.8632047,
+            "receivedUnix": 1793495126.8637538,
+            "bytes": 64,
+            "sha256": "d0c9d29de2599719f7a35a719d2db9feabb37479ca23181190dd36cec449b39d",
+            "exact": true
+          },
+          {
+            "number": 72,
+            "sentUnix": 1793495126.8786104,
+            "receivedUnix": 1793495126.879065,
+            "bytes": 64,
+            "sha256": "f5c6070b6333e5d43a6d53869a6733a33c98ccabd46345503e2f9684a8f386e5",
+            "exact": true
+          },
+          {
+            "number": 73,
+            "sentUnix": 1793495126.8945956,
+            "receivedUnix": 1793495126.895045,
+            "bytes": 64,
+            "sha256": "6b8e5cecda14ffd8989dd2fc7934a9e4a9bb1657686fff645cf7cd98326fa5b4",
+            "exact": true
+          },
+          {
+            "number": 74,
+            "sentUnix": 1793495126.9102697,
+            "receivedUnix": 1793495126.9108489,
+            "bytes": 64,
+            "sha256": "7976ce5e72cb613320d0d34fe05449fdcb1dd8a10dd9f6ba9e754fa4860e71bb",
+            "exact": true
+          },
+          {
+            "number": 75,
+            "sentUnix": 1793495126.9253485,
+            "receivedUnix": 1793495126.9262304,
+            "bytes": 64,
+            "sha256": "676ae4b2eb0729c83e392118c23200b0697700fba6e28337c1e8f7f8e5ffa118",
+            "exact": true
+          },
+          {
+            "number": 76,
+            "sentUnix": 1793495126.9404774,
+            "receivedUnix": 1793495126.9409819,
+            "bytes": 64,
+            "sha256": "698f6e1432668d7572018e3ac767359db414db3fad5f320e314956d86c5670af",
+            "exact": true
+          },
+          {
+            "number": 77,
+            "sentUnix": 1793495126.956714,
+            "receivedUnix": 1793495126.957241,
+            "bytes": 64,
+            "sha256": "a9a4274dc2dafb73004e8b9a60e84801cb42b2f2a1a280e7393370c541661492",
+            "exact": true
+          },
+          {
+            "number": 78,
+            "sentUnix": 1793495126.9724746,
+            "receivedUnix": 1793495126.9734821,
+            "bytes": 64,
+            "sha256": "5f7802591bf6e6f1026dcd790c364eb2984a670cc3d7a37cab31ff83cad70f4a",
+            "exact": true
+          },
+          {
+            "number": 79,
+            "sentUnix": 1793495126.9877467,
+            "receivedUnix": 1793495126.9882631,
+            "bytes": 64,
+            "sha256": "4251995c468da2a3a5ec671b9a51189a3aea882b7b035910ec92a7e9f8557125",
+            "exact": true
+          },
+          {
+            "number": 80,
+            "sentUnix": 1793495127.0029752,
+            "receivedUnix": 1793495127.0034204,
+            "bytes": 64,
+            "sha256": "c6a1f1e0cb8b27e3178956b09ed35a0abda9391d3cddb1f28eebd10478bedbea",
+            "exact": true
+          },
+          {
+            "number": 81,
+            "sentUnix": 1793495127.0184448,
+            "receivedUnix": 1793495127.018892,
+            "bytes": 64,
+            "sha256": "72146d03a6ccba8ab70b6f232dea8e46ae6935795d36c00a4e8cd93ac2a2bb67",
+            "exact": true
+          },
+          {
+            "number": 82,
+            "sentUnix": 1793495127.0335429,
+            "receivedUnix": 1793495127.0340462,
+            "bytes": 64,
+            "sha256": "e10eea01a43bc47631395e79e97db92f7390afbfd80faf3ef0ac1755d26db205",
+            "exact": true
+          },
+          {
+            "number": 83,
+            "sentUnix": 1793495127.0490696,
+            "receivedUnix": 1793495127.049618,
+            "bytes": 64,
+            "sha256": "1a46779d0641309dbb5c3f791745d8cdc8b953205f38f0b5686d6e562be5f794",
+            "exact": true
+          },
+          {
+            "number": 84,
+            "sentUnix": 1793495127.0637887,
+            "receivedUnix": 1793495127.0642326,
+            "bytes": 64,
+            "sha256": "24ef011a6dc06afa0c8703e518c4db8c8d53144ae7ac5ce978dca2ebfc528bff",
+            "exact": true
+          },
+          {
+            "number": 85,
+            "sentUnix": 1793495127.0793293,
+            "receivedUnix": 1793495127.0864894,
+            "bytes": 64,
+            "sha256": "946f228d596d9ea4ec16ccfc1f9055506ebf94fd5814fd68272546865d680fc7",
+            "exact": true
+          },
+          {
+            "number": 86,
+            "sentUnix": 1793495127.095477,
+            "receivedUnix": 1793495127.0960188,
+            "bytes": 64,
+            "sha256": "1fb8f510f4ca6e19eb75053dd73416a482977d507411908d9db01b58edc7955a",
+            "exact": true
+          },
+          {
+            "number": 87,
+            "sentUnix": 1793495127.110593,
+            "receivedUnix": 1793495127.1110842,
+            "bytes": 64,
+            "sha256": "ea71c7cf0fc992503957e1ccddab67782c6f18863df180e3d365f1ab22d33f2e",
+            "exact": true
+          }
+        ],
+        "error": null,
+        "threadStopped": true
+      },
+      "capture": {
+        "artifacts": {
+          "git_head": "9dc6e0b24e60e52fd9bcfd59602aca666f29b3d1",
+          "git_dirty": true,
+          "bit": {
+            "path": "E:\\zynqlinkPRO_etm_calibration\\prebuilt\\etm-ddr-usb-raw4-20261101\\probe.bit",
+            "sha256": "82863bb7c06b27b32f5fd518e7b08d70ce1b855ca3c6f0525b8961d6967cd8ea"
+          },
+          "elf": {
+            "path": "E:\\zynqlinkPRO_etm_calibration\\prebuilt\\etm-ddr-usb-raw4-20261101\\application.elf",
+            "sha256": "1d55b321f95e15d43afb719380c7cefb4f05955c89f018e49c38bb3fb38ef559"
+          }
+        },
+        "target_elf": "E:\\zynqlinkPRO_etm_calibration\\firmware\\target\\stm32f103_cdc_trace\\build\\ze-72-ram\\fw.elf",
+        "target_elf_sha256": "1c1605d993df533c91629dde52333c85a6ab681b34e86301266c169172fee334",
+        "milliseconds": 100.0,
+        "periodic_sync": false,
+        "hclk_div": 1,
+        "raw_diagnostic": false,
+        "IDCODE": "0501017714a01b",
+        "control_clock": {
+          "fclk_hz": 119999998,
+          "cfg": "0x300d6a11",
+          "SWCLK_Hz": 999999.9833333333,
+          "half_period_fclk": 60,
+          "short_high": true,
+          "intended_high_ns": 8.333333472222225
+        },
+        "cpuid": "0x411fc231",
+        "flash": [],
+        "ram_image": [
+          {
+            "address": 536870912,
+            "bytes": 20040,
+            "sha256": "19bcb6e4dc1d5d09240702338ccefdb0c587b0099c06fe1c823e0bf40169cbcd"
+          },
+          {
+            "address": 536890952,
+            "bytes": 128,
+            "sha256": "da1a2d73228ae40c7509f27f24b582aeb419e58c04b7eb73b1f055b5b01ee412"
+          }
+        ],
+        "reference": [
+          199999998,
+          9437440,
+          221192,
+          769
+        ],
+        "transport": "ddr-usb",
+        "rcc_before": [
+          50548355,
+          1901578
+        ],
+        "rcc_capture": [
+          50548355,
+          1901578
+        ],
+        "tpiu_supported": 11,
+        "config": {
+          "protocol": "ETMv3",
+          "idr": 1091891777,
+          "ctrl": 2064,
+          "ccer": 100352,
+          "traceid": 2
+        },
+        "error": "RuntimeError('DDR hardware quality/window failed; raw data retained')",
+        "restored": true,
+        "rcc_after": [
+          50548355,
+          1901578
+        ],
+        "fpb_restored": true,
+        "usb_reader_errors": []
+      }
+    }
+  ],
+  "passed": false
+}
