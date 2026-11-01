@@ -53,6 +53,7 @@ export class EtmTarget {
   resetTransportStats(){this.probe?.device?.resetTransportStats?.();}
   transportStats(){return this.probe?.device?.transportStats?.()||null;}
   setNativeExchange(enabled){if(typeof enabled!=='boolean')throw Error('交换模式须为boolean');if(!this.probe?.device?.nativeService)throw Error('仅本地桥提供HTTP交换测量');this.probe.device.atomicDapEnabled=enabled;}
+  setPackedMemory(enabled){if(typeof enabled!=='boolean')throw Error('批量模式须为boolean');if(!this.probe?.device?.nativeService)throw Error('仅本地桥提供批量控制测量');this.probe.device.packedMemoryEnabled=enabled;}
   assertTransport(){if(this.transportFault)throw Error('SWD 已故障，已保留现场；请点击“恢复调试口”后重试');}
   accessError(e,operation,address){if(e.ack===4||this.probe?._faulted)this.debugFault=true;const wrapped=new Error(`${operation} ${hex(address)}：${e.message}`,{cause:e});wrapped.ack=e.ack;return wrapped;}
   async read(addr){if(!this.probe)throw Error('请先连接探针');this.assertTransport();try{const bytes=await this.probe.readMemDiagnostic(addr>>>0,4);return new DataView(bytes.buffer,bytes.byteOffset,4).getUint32(0,true);}catch(e){throw this.accessError(e,'读寄存器',addr);}}

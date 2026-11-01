@@ -728,14 +728,17 @@ export class WebUsbDapProbe {
    */
   async _transfer(ops, apIndex = 0){
     const count = ops.length;
-    const payload = new Uint8Array(2 + count * 5);
+    if(count<1 || count>255)throw new Error('DAP_Transfer条数须为1～255；命令未发送');
+    // CMSIS-DAP reads occupy one request byte; only writes carry a u32.
+    // Padding every read by four bytes corrupts mixed/batched transactions.
+    const payload = new Uint8Array(2 + ops.reduce((n,op)=>n+(op.rnw?1:5),0));
     payload[0] = apIndex;                            // DAP 索引 = APSEL（0=AHB-AP，1=APB-AP 调试口）
     payload[1] = count;                              // 传输条数
     let o = 2;
     for (const op of ops){
       payload[o] = reqByte(op.ap, op.rnw, op.addr);
       if (!op.rnw) payload.set(u32leBytes(op.data >>> 0), o + 1);
-      o += 5;
+      o += op.rnw ? 1 : 5;
     }
     if (1 + payload.length > this.pkt) throw new Error(`DAP_Transfer 超过一个包（${1 + payload.length} > ${this.pkt}）`);
     const res = await this._ctrl(CMD.Transfer, payload);
@@ -743,7 +746,8 @@ export class WebUsbDapProbe {
     const rv = res[1];
     const ack = rv & 0x07;
     const vals = [];
-    for (let i = 0; i < n && 2 + i * 4 + 4 <= res.length; i++) vals.push(u32le(res, 2 + i * 4));
+    const reads=ops.filter(op=>op.rnw).length;
+    for (let i = 0; i < reads && 2 + i * 4 + 4 <= res.length; i++) vals.push(u32le(res, 2 + i * 4));
     if (ack !== 1){
       // 出过错之后 TAR 已自增到不可知的位置、posted 写也不可信 → 标记作废（下次访问会重写 TAR）
       this._posted = false;
@@ -751,6 +755,10 @@ export class WebUsbDapProbe {
       const err = new Error(`SWD ${ACK[ack] || ('ACK=' + ack)}（传输 ${n}/${count} 条，地址 0x${(ops[0]?.addr || 0).toString(16)}）`);
       err.ack = ack;
       throw err;
+    }
+    if(n!==count || vals.length!==reads){
+      this._posted=false;
+      throw new Error(`SWD响应不完整：完成${n}/${count}条、读取${vals.length}/${reads}字；未重放命令`);
     }
     return vals;
   }
@@ -1101,8 +1109,17 @@ export class WebUsbDapProbe {
   /** Fault diagnostics must preserve the scene: never initialize/heal the target transport. */
   async readMemDiagnostic(addr, len){
     if (this._faulted || this._recovering) throw new Error('调试口已有 FAULT／正在恢复；诊断未重新初始化目标');
-    return this._withLock(() => {
+    return this._withLock(async () => {
       if (this._faulted || this._recovering) throw new Error('调试口已有 FAULT／正在恢复；诊断未重新初始化目标');
+      if(this.device?.nativeService && this.device.atomicDapEnabled!==false && this.device.packedMemoryEnabled!==false && len===4 && (addr&3)===0){
+        addr=addr>>>0;await this._flushPosted();
+        const twice=addr>=0xe0000000 || !this.fast;
+        const sample=[{ap:true,rnw:false,addr:AP_TAR,data:addr},{ap:true,rnw:true,addr:AP_DRW}];
+        const values=await this._transfer(twice?[...sample,...sample]:sample,0);
+        let value=values[values.length-1];
+        if(twice && values[0]!==values[1])value=(await this._transfer(sample,0))[0];
+        return u32leBytes(value>>>0);
+      }
       return this._readMemLocked(addr, len, 0);
     });
   }
@@ -1315,6 +1332,12 @@ export class WebUsbDapProbe {
   }
 
   async _writeMemOnce(addr, data, apIndex = 0){
+    if(this.device?.nativeService && this.device.atomicDapEnabled!==false && this.device.packedMemoryEnabled!==false && (addr&3)===0 && data.length===4){
+      await this._flushPosted();
+      await this._transfer([{ap:true,rnw:false,addr:AP_TAR,data:addr>>>0},
+        {ap:true,rnw:false,addr:AP_DRW,data:u32le(data,0)}],apIndex);
+      this._posted=true;return;
+    }
     if ((addr & 3) === 0 && (data.length & 3) === 0){
       const words = new Uint32Array(data.buffer, data.byteOffset, data.length >> 2);
       let i = 0;

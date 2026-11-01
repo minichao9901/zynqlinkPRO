@@ -59,7 +59,7 @@ class NativeUsbDevice extends EventTarget{
   constructor(info){super();Object.assign(this,info);this.nativeService=true;this.dapSynchronized=false;this.opened=false;this.owner=sessionOwner('usb',info.serialNumber);this.reads=new Map();this.commandPending=0;}
   async rpc(action,value={}){const started=performance.now();try{return await call('usb',action,{owner:this.owner,resourceEpoch:this.resourceEpoch,...value});}finally{this.rpcStats??={};const r=this.rpcStats[action]??={calls:0,milliseconds:0};r.calls++;r.milliseconds+=performance.now()-started;}}
   resetTransportStats(){this.rpcStats={};}
-  transportStats(){return {atomicDapEnabled:this.atomicDapEnabled!==false,actions:structuredClone(this.rpcStats||{})};}
+  transportStats(){return {atomicDapEnabled:this.atomicDapEnabled!==false,packedMemoryEnabled:this.packedMemoryEnabled!==false,actions:structuredClone(this.rpcStats||{})};}
   async open(){Object.assign(this,await this.rpc('open'));this.opened=true;this.dapSynchronized=false;this.reads=new Map();this.commandPending=0;}
   async close(){const epoch=this.resourceEpoch;await this.rpc('close');if(epoch===this.resourceEpoch){this.opened=false;this.commandPending=0;}}
   async selectConfiguration(number){Object.assign(this,await this.rpc('configuration',{number}));}
