@@ -1214,3 +1214,9 @@ Web窗口元数据在DDR模式以硬件ticks/ref计算实际时长，主机下�
 这次36MHz失败后没有补跑下一轮。清理及原Flash固件重启成功，RCC回到CPU48MHz基线，随后额外10次精确CDC echo通过。此阶段仍无运行时逐线IDELAY校准，36MHz不能标成支持；接下来需在真实接收路径加入可装载/读回的独立tap，完成偏斜/毛刺/停钟仿真和新bit/ELF时序、上板对照。SRAM试验不替代Flash FPB起点或H743验收。
 
 源码冻结b72ec89后重新构建两份SRAM ELF，SHA与实际加载验收文件一致，交付到[SRAM时钟对照产物及manifest](../prebuilt/f103ze-cdc-ram-clock-20261101/manifest.json)；[24MHz通过与36MHz首错的原始FRM1、可导入记录、CDC及恢复证据](validation/etm-ram-clock-board-20261101/README.md)已入库，3项SRAM安全边界检查和8项项目CLI检查通过。另记录一项元数据问题待修：capture.usb.json的rangeBytes/sentBytes/downloadState保留的是下载前快照，可能显示前一次传输状态；本次ZDD1 header身份/范围及最后TX退休条件在代码中已严格核对。这三个快照字段不用于本次输入质量结论，后续应修正输出为明确的传输后状态。
+
+### 2026-11-01：恢复Golden后的30次开关与20轮Web采集压力
+
+完成SRAM提频试验并复位返回原Golden target后，纯Web操作再做30次打开/关闭，以及20轮打开→交替cdc_poll/cdc_tx_poll断点→100ms DDR采集→C++原生解码→恢复/关闭，全部通过；没有失败重试。每轮硬件窗口内有4～6次完整精确CDC echo，RCC前后一致，传输loss=false、packetIssues合计0、清理错误0；结束后额外13次精确CDC echo也通过。探针打开0.523～0.806秒、中位0.632秒。采后只读FCLK119,999,998Hz、SWCLK999,999.9833Hz。20份自包含etmrecord、逐轮地址/阶段计数、CDC摘要和最终页面已归档：[压力结果与重放证据](validation/etm-web-soak-after-ram-20261101/analysis.json)。限于24MHz及本轮有限次数，不代替高频或长期可靠性结论。
+
+逐线校准实现须注意：当前RAW4绕过旧FIXED tap数据输出，必须把新可调延迟接入实际接收路径，不能只改旧常量。AMD UG471的VAR_LOAD控制由独立的有效C时钟同步装载CNTVALUEIN并读回CNTVALUEOUT，IDELAY_VALUE在该模式不能当作初始化已完成。规划在采集前装载并核对所有lane，配置提交未完成或采集中拒绝改tap；仿真要包含停钟、逐线偏斜、毛刺、错误读回和跨时钟提交。硬件tap参考校准与从实际数据选择采样窗口是两个步骤。[UG471输入延迟说明，第116～123页](https://docs.amd.com/api/khub/documents/IbGcnPFe6eF19RHma_Y~IA/content)。该段是下一阶段约束，尚未声称新RTL/bit或自适应校准已经实现。
