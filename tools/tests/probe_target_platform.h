@@ -9,6 +9,7 @@
 #define SLCR_LOCK_ADDR 0xf8000004U
 #define SWD_CFG 0x40010008U
 #define IO_PLL_HZ 1000000000U
+#include "../../firmware/xusbps_daplink_dma/DAP/Include/ps_fclk.h"
 typedef struct {
     uint32_t debug_port,clock_delay,fast_clock;
     struct {uint8_t count,index,ir_length[8];uint16_t ir_before[8],ir_after[8];} jtag_dev;

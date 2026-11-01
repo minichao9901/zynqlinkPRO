@@ -27,9 +27,26 @@ class ClockPlanning(unittest.TestCase):
 
     def test_rejects_short_pulse_or_wrong_pll(self):
         for control,pll,cfg in [(1|(1<<8)|(15<<20),54<<12,1<<19),
-                                 (0x11|(1<<8)|(15<<20),54<<12,0),
                                  (1|(1<<8)|(15<<20),(54<<12)|16,0)]:
             with self.assertRaises(ValueError):plan(control,pll,cfg,150000000)
+
+    def test_arm_capture_profile_only_changes_fclk_source_and_control_rate(self):
+        p=plan((1<<8)|(18<<20),0x36008,0,133333333,
+               destination_source=2,destination_pll=0x28008,allow_link_reduction=True)
+        self.assertEqual(p['FCLK_Hz'],133333332)
+        self.assertEqual((p['control']>>4)&3,2)
+        self.assertEqual(p['halfPeriod'],2)
+        self.assertTrue(p['controlRateReduced'])
+        self.assertEqual(p['linkHz'],33333333)
+        self.assertEqual(p['cfg']&(7<<17),1<<17)
+
+    def test_io_alias_source_and_arm_readback(self):
+        p=plan((1<<4)|(1<<8)|(15<<20),0x36008,59<<13,120000000)
+        self.assertEqual(p['oldFclkHz'],119999998)
+        p=plan((2<<4)|(10<<8)|(1<<20),0x28008,1<<13,133333333,
+               destination_source=2,destination_pll=0x28008)
+        self.assertTrue(p['waveformPreserved'])
+        self.assertEqual(p['FCLK_Hz'],133333332)
 
     def test_untrusted_or_excessive_profile_never_opens_hardware(self):
         root=Path(__file__).resolve().parents[2]

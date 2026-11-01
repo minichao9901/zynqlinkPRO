@@ -36,9 +36,10 @@ def main():
     try:
         report['boot_mode']=session.read_words(0xf800025c)[0]&15
         report['boot_trace']=session.read_words(0x03ff0000,8)
-        ctrl=session.read_words(0xf8000170)[0];pll=session.read_words(0xf8000108)[0]
-        report['FCLK_CTRL']=ctrl;report['IO_PLL_CTRL']=pll
-        report['initial_FCLK_Hz']=33333333*((pll>>12)&127)//((ctrl>>8)&63)//((ctrl>>20)&63)
+        from zynq_clock import snapshot
+        observed=snapshot(session.read_words)
+        report['clockSnapshot']=observed
+        report['initial_FCLK_Hz']=observed['FCLK_Hz']
         if a.require_qspi:
             t=report['boot_trace']
             assert report['boot_mode']==1 and t[0]==0x53544730 and t[3]==1 and t[5:8]==[0x600,0,1],t

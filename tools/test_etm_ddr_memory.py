@@ -179,7 +179,7 @@ def main(argv=None):
             finally:usb.util.dispose_resources(dev)
         if a.probe_fclk_hz is not None:
             from probe_clock_fixture import Fixture
-            profile=Fixture(pair/'probe.bit',pair/'application.elf',a.probe_fclk_hz,out/'probe-clock')
+            profile=Fixture(pair/'probe.bit',pair/'application.elf',a.probe_fclk_hz,out/'probe-clock',allow_link_reduction=True)
             report['probeClockProfile']=profile.apply();save()
         from probe_build_info import live_clock_snapshot
         from probe_flash import Session

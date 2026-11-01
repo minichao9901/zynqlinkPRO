@@ -64,9 +64,7 @@ static int clock_set(uint32_t hz) {
     return response[1] ? -1 : 0;
 }
 uint32_t probe_target_fclk(void) {
-    uint32_t c = Xil_In32(SLCR_FPGA0_CLK_CTRL);
-    uint32_t a = (c >> 8) & 63, b = (c >> 20) & 63;
-    return a && b ? IO_PLL_HZ / a / b : 100000000;
+    return ps_fclk0_hz();
 }
 int probe_target_claim(uint32_t hz) {
     uint32_t v = 0, i;

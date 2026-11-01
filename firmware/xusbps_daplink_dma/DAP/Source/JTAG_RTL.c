@@ -12,9 +12,7 @@ void DAP_JTAG_ClockChanged(void) {timing_dirty=1;}
 void DAP_JTAG_SetTiming(uint32_t value) {swd_write32(JTAG_TIMING,value&0x11U);timing_dirty=0;}
 /* FCLK currently driving the PL, recomputed from the SLCR dividers. */
 static uint32_t fclk_now(void) {
-    uint32_t reg=Xil_In32(SLCR_FPGA0_CLK_CTRL);
-    uint32_t d0=(reg>>8)&63U,d1=(reg>>20)&63U;
-    return (d0 && d1) ? IO_PLL_HZ/d0/d1 : 0U;
+    return ps_fclk0_hz();
 }
 /* Exercise DP/AP IR transitions with saved/restored CSW and TAR patterns,
  * plus reads of the read-only CPUID. SELECT is write-only on DPv0: preserve

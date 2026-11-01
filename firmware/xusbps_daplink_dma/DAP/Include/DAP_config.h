@@ -384,6 +384,7 @@ __STATIC_FORCEINLINE void swd_wait_idle(void) {
 
 #include "xil_io.h"
 #include "xil_misc_psreset_api.h"
+#include "ps_fclk.h"
 
 #define SLCR_LOCK_ADDR        0xF8000004U
 #define SLCR_FPGA0_CLK_CTRL   0xF8000170U
@@ -402,6 +403,9 @@ static int ps_set_fclk0_hz(u32 target_hz) {
   u32 best_err = 0xFFFFFFFFU;
   u32 div0, div1;
   u32 pll_hz = IO_PLL_HZ;
+  /* Ordinary DAP rates retain the Golden IO-PLL policy. The accepted
+   * 133.333 MHz offline capture profile uses ARM PLL via FCLK0 SRCSEL only;
+   * querying that profile must use ps_fclk0_hz(), not IO_PLL_HZ. */
 
   if (target_hz == 0) {
     return -1;
@@ -426,6 +430,7 @@ static int ps_set_fclk0_hz(u32 target_hz) {
   }
 
 found:
+  if (!best_div0 || !best_div1) return -1;
   Xil_Out32(XSLCR_UNLOCK_ADDR, XSLCR_UNLOCK_CODE);
 
   Xil_Out32(SLCR_FPGA0_CLK_CTRL,

@@ -18,6 +18,7 @@ static uint32_t selected=0x01000030U,posted;
 static uint32_t clock_value=(1U<<20)|(10U<<8),csw_value=0x23000052U,tar_value=0x20004a10U;
 static unsigned scans,valid_mode=17,mode_seen,ap_reads;
 uint32_t Xil_In32(uintptr_t a) {
+    if(a==0xf8000108U) return 30U<<12;
     if(a==SWD_FEATURES)return 15;
     if(a==SLCR_FPGA0_CLK_CTRL)return clock_value;
     assert(a>=JTAG_ROUTE && a<JTAG_RX_DATA);

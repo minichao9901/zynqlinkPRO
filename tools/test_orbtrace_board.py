@@ -155,7 +155,7 @@ def main():
         report['IDCODE'] = setup(out, inp, args.speed_khz).hex()
         if args.probe_fclk_hz is not None:
             from probe_clock_fixture import Fixture
-            probe_clock=Fixture(args.bit,args.elf,args.probe_fclk_hz,work/'probe-clock')
+            probe_clock=Fixture(args.bit,args.elf,args.probe_fclk_hz,work/'probe-clock',allow_link_reduction=True)
             report['probe_clock_profile']=probe_clock.apply()
         diagnostic = mem.transfer([0x80, 255])
         live_fclk, live_cfg = struct.unpack_from('<II', diagnostic, 4)

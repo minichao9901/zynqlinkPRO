@@ -59,10 +59,7 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
     case ID_DAP_Vendor0:
       { // Sampling diagnostics: phase 0/1, or 255 to query without changing.
         uint32_t cfg = swd_read32(SWD_CFG);
-        uint32_t fclk = Xil_In32(SLCR_FPGA0_CLK_CTRL);
-        uint32_t div0 = (fclk >> 8) & 63U;
-        uint32_t div1 = (fclk >> 20) & 63U;
-        uint32_t hz = (div0 && div1) ? IO_PLL_HZ / div0 / div1 : 0;
+        uint32_t hz = ps_fclk0_hz();
         uint8_t status = DAP_OK;
         uint32_t i;
         if (*request <= 1U) {

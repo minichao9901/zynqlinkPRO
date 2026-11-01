@@ -15,6 +15,7 @@ int DAP_JTAG_AutoConfigure(void) {
     DAP_Data.jtag_dev.ir_before[1]=4;return 0;
 }
 uint32_t Xil_In32(uintptr_t a) {
+    if(a==0xf8000108U) return 30U<<12;
     if(a==0x4001004c) return jtag_present ? 15 : 7;
     if(a>=JTAG_ROUTE && a<JTAG_RX_DATA) return jtag_regs[(a-JTAG_ROUTE)/4];
     return a==SWD_CFG ? cfg : clock_reg;
