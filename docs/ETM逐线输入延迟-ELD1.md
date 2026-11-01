@@ -35,3 +35,17 @@ python toolbox.py project run etm.lane-delay-sim -- --out build/lane-simulation-
 这不是模拟电气、亚稳态或零BER证明。当前没有完成自动选窗算法、真实杜邦线tap扫描、36MHz稳定性或H743验收。上板需先核对新配对身份及5个真实VAR_LOAD原语，验证旁路24MHz基线，再对SRAM72MHz target的36MHz首错基线做同条件扫描；记录所有失败点，保留原始数据。选择候选后再做原生解码和CDC/Web压力，不凭短窗无parser错误宣布成功。
 
 硬件依据：[AMD UG471，输入延迟及VAR_LOAD控制，第116～123页](https://docs.amd.com/api/khub/documents/IbGcnPFe6eF19RHma_Y~IA/content)。VAR_LOAD须显式LD及读回，不能用IDELAY_VALUE当作加载已完成；IDELAYCTRL参考校准也不等于从实际数据测得采样窗口。
+
+## 自动扫描实验入口
+
+`etm.lane-calibrate`先测旁路，再测公共data/clock粗网格，随后逐条lane测完整0～31 tap。每个不同配置的首次结果都保留；坏采样点是扫描数据，不是被重试后抹去的失败。遇到USB、DDR writer、FIFO丢帧、IDELAYCTRL RDY丢失或恢复失败立即停止，不能把它们当成输入相位评分。target RCC必须跨点一致。
+
+选窗只使用完整测过的、至少5个连续通过tap，不把31和0接成一段，不把缺失点当通过。还从输出formatter nibble检查4条data均有足够0/1及翻转；这是协议输出上的激励检查，不是独立pad眼图测量。最终配置下再检查每条lane的±1、±2 tap邻域，并用新100ms/1s采集、CDC和原生指令解码作独立验证。默认完成后恢复原选择，只有显式`--keep-candidate`且验证通过才保留候选；`--coarse-only`仅完成初步扫描，不意味着校准通过。
+
+需在真实加载、身份核对后的新配对上运行，并由SRAM fixture负责目标时钟。例如外层`etm.ram-fixture`的子命令可换成：
+
+```powershell
+python tools/calibrate_etm_lanes.py --pair prebuilt/NEW_VERIFIED_PAIR --target-elf prebuilt/f103ze-cdc-ram-clock-20261101/cpu72.elf --ram-image --out build/lane-scan-new --cdc-port COM34
+```
+
+尚未用真实板结果证明该自动搜索能改善杜邦线36MHz输入。本阶段的低错误区只是待验证候选，不能从功能仿真外推为硬件眼图或全频率自动校准能力。

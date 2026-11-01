@@ -1220,3 +1220,9 @@ Web窗口元数据在DDR模式以硬件ticks/ref计算实际时长，主机下�
 完成SRAM提频试验并复位返回原Golden target后，纯Web操作再做30次打开/关闭，以及20轮打开→交替cdc_poll/cdc_tx_poll断点→100ms DDR采集→C++原生解码→恢复/关闭，全部通过；没有失败重试。每轮硬件窗口内有4～6次完整精确CDC echo，RCC前后一致，传输loss=false、packetIssues合计0、清理错误0；结束后额外13次精确CDC echo也通过。探针打开0.523～0.806秒、中位0.632秒。采后只读FCLK119,999,998Hz、SWCLK999,999.9833Hz。20份自包含etmrecord、逐轮地址/阶段计数、CDC摘要和最终页面已归档：[压力结果与重放证据](validation/etm-web-soak-after-ram-20261101/analysis.json)。限于24MHz及本轮有限次数，不代替高频或长期可靠性结论。
 
 逐线校准实现须注意：当前RAW4绕过旧FIXED tap数据输出，必须把新可调延迟接入实际接收路径，不能只改旧常量。AMD UG471的VAR_LOAD控制由独立的有效C时钟同步装载CNTVALUEIN并读回CNTVALUEOUT，IDELAY_VALUE在该模式不能当作初始化已完成。规划在采集前装载并核对所有lane，配置提交未完成或采集中拒绝改tap；仿真要包含停钟、逐线偏斜、毛刺、错误读回和跨时钟提交。硬件tap参考校准与从实际数据选择采样窗口是两个步骤。[UG471输入延迟说明，第116～123页](https://docs.amd.com/api/khub/documents/IbGcnPFe6eF19RHma_Y~IA/content)。该段是下一阶段约束，尚未声称新RTL/bit或自适应校准已经实现。
+
+### 2026-11-01：ELD1实际输入延迟与仿真阶段
+
+源码0de5712为RAW4实际输入端接入5个独立VAR_LOAD IDELAY（4条data+clock），默认保留旁路。参考域显式装载并读回后确认，配置忙/失败阻止采集；两条采集中、DDR prepare、FIFO未排空、非法key/部分写均拒绝，不重放命令。RTL功能仿真通过：目标TRACECLK停止仍可装载；独立tap时间；强制读回错误及RDY中途丢失；显式恢复；同一组0.2/0.8/1.4/2ns逐线偏斜、约36MHz数字输入，旁路无正确帧而调整后16帧完全匹配；1ns脉冲不被当作有效时钟。原9项pins→DDR集成检查在旁路和启用状态下各通过一次。它是数字功能模型，不能证明模拟电气、亚稳态或零BER。
+
+新构建任务已以0de5712源码、RAW4/DDR/lane-delay=1、FCLK120MHz约束启动；尚未完成新bit/ELF时序和上板，不替代旧已知可用配对。自动扫描工具先保留每个坏点，再以完整连续tap区、翻转激励、最终邻域和100ms/1s原生解码验证候选，默认恢复原选择。5项主机边界检查通过。寄存器、CLI和实验限制集中在[ELD1说明](ETM逐线输入延迟-ELD1.md)；真实校准效果待新配对上板实测。
