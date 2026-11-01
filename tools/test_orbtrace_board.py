@@ -245,6 +245,17 @@ def main():
         report['config'] = config
         if args.ddr_physical or ddr_usb:
             def resume_ddr_target():
+                if probe_clock is not None:
+                    # Verify the shipping clock lock through the ordinary DAP
+                    # command while capture owns DDR. Vendor reads avoid slow
+                    # JTAG round trips inside the measured hardware window.
+                    clock_before=mem.transfer([0x80,255])
+                    changed=mem.transfer([0x11,*list((25000000).to_bytes(4,'little'))])
+                    clock_after=mem.transfer([0x80,255])
+                    locked=changed[:2]==bytes([0x11,0xff]) and clock_before[4:12]==clock_after[4:12]
+                    report['capture_clock_lock']=dict(requestedSWCLKHz=25000000,rejected=changed[:2]==bytes([0x11,0xff]),
+                        FCLK_Hz=struct.unpack_from('<I',clock_after,4)[0],configurationUnchanged=clock_before[4:12]==clock_after[4:12])
+                    if not locked:raise RuntimeError('Capture permitted a shared FCLK/serializer clock change')
                 mem.write_word(REG['etmcr'], cr & ~0x400)
                 wait_program(0)
                 usb_reconnect.restore()

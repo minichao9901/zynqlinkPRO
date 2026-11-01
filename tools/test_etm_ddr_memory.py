@@ -132,8 +132,10 @@ def main(argv=None):
     p.add_argument('--seed',type=lambda x:int(x,0),default=0x13dba917)
     p.add_argument('--rounds',type=int,default=1)
     p.add_argument('--clock-mode',choices=['dap','current'],default='dap',help='current isolates the initialized clock; dap exercises normal DAP setup')
+    p.add_argument('--probe-fclk-hz',type=int,help='STA-bounded FCLK for the whole physical pattern test; preserve external SWD clock')
     p.add_argument('--loader',type=Path,default=ROOT/'tools/download_dap_fpga.tcl',help='Explicit loader for controlled initialization A/B experiments')
     a=p.parse_args(argv);pair=a.pair.resolve();out=a.out.resolve();loader=a.loader.resolve()
+    if a.probe_fclk_hz is not None and a.clock_mode!='dap':p.error('--probe-fclk-hz requires --clock-mode dap')
     if not 1<=a.bytes<=0x20000000 or not 0<=a.seed<=0xffffffff or not 1<=a.rounds<=100 or a.bytes*a.rounds>1<<30:p.error('invalid finite count/seed/rounds; total readback limited to 1GiB')
     for path in [pair,out,loader]:
         if any(c in str(path) for c in '{}\r\n'):p.error('Tcl paths must not contain braces or newlines')
@@ -147,7 +149,7 @@ def main(argv=None):
     out.mkdir(parents=True,exist_ok=False)
     report=dict(hardware=True,traceCapture=False,flashWrites=False,source='address-dependent PL pattern',
         pair=str(pair),pairFiles=manifest['files'],base=base,bytesPerRound=a.bytes,seed=a.seed,requestedRounds=a.rounds,
-        reloadBetweenRounds=False,retryFailedRounds=False,clockMode=a.clock_mode,loader=str(loader),
+        reloadBetweenRounds=False,retryFailedRounds=False,clockMode=a.clock_mode,requestedProbeFclkHz=a.probe_fclk_hz,loader=str(loader),
         loaderSha256=hashlib.sha256(loader.read_bytes()).hexdigest(),runnerSha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         readbackPath='physical MEM-AP0; no Cortex-A9 memory/cache context',cases=[],passed=False,stage='load')
     result=out/'result.json'
@@ -156,6 +158,7 @@ def main(argv=None):
         run=subprocess.run(command,capture_output=True,text=True,errors='replace',timeout=120)
         (out/log).write_text(run.stdout+run.stderr,encoding='utf8')
         if run.returncode:raise RuntimeError('Failed; inspect '+str(out/log))
+    profile=None
     save()
     try:
         checked([sys.executable,str(ROOT/'tools/run_xsct.py'),str(loader),str(pair/'application.elf'),str(pair/'probe.bit'),str(pair/'ps7_init.tcl')],'load.txt')
@@ -173,6 +176,10 @@ def main(argv=None):
             dev,tx,rx=open_dap()
             try:setup(tx,rx,1000)
             finally:usb.util.dispose_resources(dev)
+        if a.probe_fclk_hz is not None:
+            from probe_clock_fixture import Fixture
+            profile=Fixture(pair/'probe.bit',pair/'application.elf',a.probe_fclk_hz,out/'probe-clock')
+            report['probeClockProfile']=profile.apply();save()
         from probe_build_info import live_clock_snapshot
         from probe_flash import Session
         from zynq_memory import PhysicalMemory
@@ -186,10 +193,17 @@ def main(argv=None):
             report['stage']='pattern-'+str(n+1)
             pattern_case(session,case_out,base,end,a.bytes,seed,live_clock_snapshot(),save_case)
             print('pattern',n+1,'verified',a.bytes,'bytes',flush=True)
+        if profile is not None:profile.check()
         report.update(passed=True,stage='done')
     except Exception as error:
         report.update(passed=False,error=str(error),failedStage=report['stage']);save();raise
-    finally:save()
+    finally:
+        try:
+            if profile is not None:
+                profile.restore();report['probeClockRestored']=profile.report['restored']
+        except Exception as error:
+            report.update(passed=False,probeClockCleanupError=str(error));raise
+        finally:save()
     print(json.dumps(dict(passed=True,rounds=len(report['cases']),clockMode=a.clock_mode)))
     return 0
 

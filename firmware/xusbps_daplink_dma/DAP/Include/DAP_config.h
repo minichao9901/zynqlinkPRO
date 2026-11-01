@@ -392,7 +392,11 @@ __STATIC_FORCEINLINE void swd_wait_idle(void) {
 #define PS_REF_HZ             33333333U
 #define IO_PLL_HZ             (PS_REF_HZ * ((Xil_In32(0xF8000108U) >> 12) & 0x7FU))
 
+extern unsigned etm_ddr_owned(void);
 static int ps_set_fclk0_hz(u32 target_hz) {
+  /* FCLK0 also clocks the HP1 writer. Ordinary DAP clock commands must not
+   * retune it during autonomous capture or identity-bound USB download. */
+  if (etm_ddr_owned()) return -1;
   u32 best_div0 = 0, best_div1 = 0;
   u32 best_hz = 0;
   u32 best_err = 0xFFFFFFFFU;
