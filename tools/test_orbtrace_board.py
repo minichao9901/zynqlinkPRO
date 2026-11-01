@@ -45,7 +45,7 @@ def main():
     ap.add_argument('--milliseconds', type=float, default=20)
     ap.add_argument('--speed-khz', type=int, default=10000, help='SWD control clock; independent of TRACECLK')
     ap.add_argument('--probe-fclk-hz',type=int,
-                    help='AI DDR acceptance: temporary STA-bounded probe FCLK; preserve the external control clock (e.g. 150MHz with --speed-khz 1000)')
+                    help='AI DDR acceptance: temporary STA-bounded probe FCLK; compatible non-short examples: 138.461MHz with --speed-khz 35000, 150MHz with 37500')
     ap.add_argument('--hclk-div', type=int, choices=(1, 2, 4), default=1,
                     help='Temporary AHB divider for signal-integrity diagnosis; restored on exit')
     ap.add_argument('--gpio-speed', type=int, choices=(1, 2, 3),

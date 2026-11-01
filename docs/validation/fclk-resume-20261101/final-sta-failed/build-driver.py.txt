@@ -1,0 +1,35 @@
+from pathlib import Path
+from datetime import datetime,timezone
+import hashlib,json,os,subprocess,sys,shutil
+root=Path(__file__).resolve().parents[2]
+sys.path.insert(0,str(root))
+from tools.run_cm3_sim import environment,VIVADO
+job=root/'build/fclk-resume-20261101/implementation-150-final-fixed-tail'
+job.mkdir(parents=True,exist_ok=False)
+gate=subprocess.run([sys.executable,str(root/'tools/compare_fclk_sim.py'),'--out',str(root/'build/fclk-resume-20261101/sim-final-fixed-tail'),'--phase','compare'],cwd=root,capture_output=True,text=True)
+(job/'simulation-gate.txt').write_text(gate.stdout+gate.stderr,encoding='utf8')
+if gate.returncode:raise SystemExit('Performance gate failed; synthesis not started')
+env=environment()
+env['RDI_JAVAROOT']=(VIVADO/'tps/win64/jre9.0.4').as_posix()
+tcl_runtime=root/'build/fclk-resume-20261101/runtime/tcl'
+for name in ['tcl8.5','tcl8']:
+    shutil.copytree(VIVADO/'tps/tcl'/name,tcl_runtime/name,dirs_exist_ok=True)
+env['TCL_LIBRARY']=(tcl_runtime/'tcl8.5').as_posix()
+options=dict(ZYNQLINK_RAW_TRACE='4',ZYNQLINK_ETM_DDR='1',ZYNQLINK_ETM_LANE_DELAY='1',ZYNQLINK_RTL_DEBUG='0',ZYNQLINK_IMPLEMENT_FCLK_HZ='150000000',ZYNQLINK_RUN_THREADS='8',ZYNQLINK_RUN_JOBS='4')
+env.update(options)
+env['ZYNQLINK_WORK_DIR']=str(root/'build/fclk-resume-20261101/repo-runtime')
+(root/'build/fclk-resume-20261101/repo-runtime/tmp').mkdir(parents=True,exist_ok=True)
+tmp=job/'tmp';tmp.mkdir()
+env['TMP']=env['TEMP']=str(tmp)
+revision=subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip()
+sources={str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest() for p in (root/'fpga').rglob('*') if p.is_file()}
+record=dict(source=revision,startedUtc=datetime.now(timezone.utc).isoformat(),options=options,sources=sources,phase='in_progress',hardwareAccess=False)
+(job/'job.json').write_text(json.dumps(record,indent=2)+'\n',encoding='utf8')
+command=[sys.executable,str(root/'tools/run_vivado.py'),'-mode','batch','-source',str(root/'fpga/build_dma.tcl'),'-log',str(job/'vivado.log'),'-journal',str(job/'vivado.jou'),'-tclargs','--fresh']
+with (job/'console.txt').open('w',encoding='utf8') as output:
+    done=subprocess.run(command,cwd=root,env=env,stdout=output,stderr=subprocess.STDOUT)
+record.update(finishedUtc=datetime.now(timezone.utc).isoformat(),returncode=done.returncode,phase='process_completed')
+record['sourceUnchanged']=all(hashlib.sha256((root/name).read_bytes()).hexdigest()==digest for name,digest in sources.items())
+(job/'job.json').write_text(json.dumps(record,indent=2)+'\n',encoding='utf8')
+print('FPGA150 process completed:',done.returncode,'source unchanged:',record['sourceUnchanged'])
+raise SystemExit(done.returncode)

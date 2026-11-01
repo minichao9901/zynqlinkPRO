@@ -132,7 +132,8 @@ def main(argv=None):
     p.add_argument('--seed',type=lambda x:int(x,0),default=0x13dba917)
     p.add_argument('--rounds',type=int,default=1)
     p.add_argument('--clock-mode',choices=['dap','current'],default='dap',help='current isolates the initialized clock; dap exercises normal DAP setup')
-    p.add_argument('--probe-fclk-hz',type=int,help='STA-bounded FCLK for the whole physical pattern test; preserve external SWD clock')
+    p.add_argument('--probe-fclk-hz',type=int,help='STA-bounded FCLK; needs a compatible non-short control profile')
+    p.add_argument('--speed-khz',type=int,default=1000,help='DAP control clock; compatible examples: 35000 for FCLK138.461MHz, 37500 for FCLK150MHz')
     p.add_argument('--loader',type=Path,default=ROOT/'tools/download_dap_fpga.tcl',help='Explicit loader for controlled initialization A/B experiments')
     a=p.parse_args(argv);pair=a.pair.resolve();out=a.out.resolve();loader=a.loader.resolve()
     if a.probe_fclk_hz is not None and a.clock_mode!='dap':p.error('--probe-fclk-hz requires --clock-mode dap')
@@ -174,7 +175,7 @@ def main(argv=None):
         if a.clock_mode=='dap':
             from dap_pipeline_bench import open_dap,setup
             dev,tx,rx=open_dap()
-            try:setup(tx,rx,1000)
+            try:setup(tx,rx,a.speed_khz)
             finally:usb.util.dispose_resources(dev)
         if a.probe_fclk_hz is not None:
             from probe_clock_fixture import Fixture

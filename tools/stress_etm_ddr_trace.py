@@ -31,7 +31,8 @@ def main():
     p.add_argument('--decode',action='store_true',help='Full native packet/range verification, may expand to large native.bin')
     p.add_argument('--download',choices=('usb','physical'),default='usb')
     p.add_argument('--verify-ddr-physical',action='store_true',help='Compare USB bytes with the same physical AP0 DDR buffer')
-    p.add_argument('--probe-fclk-hz',type=int,help='Temporary STA-bounded probe FCLK0; preserve the 1MHz external SWD control clock')
+    p.add_argument('--probe-fclk-hz',type=int,help='Temporary STA-bounded probe FCLK0; preserve a compatible non-short SWD control profile')
+    p.add_argument('--speed-khz',type=int,default=1000,help='Control profile: 35000 pairs with FCLK138.461MHz; 37500 pairs with FCLK150MHz; actual rate is recorded')
     a=p.parse_args()
     if a.ram_image:
         from f103_ram_image import plan
@@ -65,7 +66,7 @@ def main():
             echo.start()
             command=[sys.executable,str(ROOT/'tools/test_orbtrace_board.py'),'--target-elf',str(a.target_elf.resolve()),
                 '--bit',str(pair/'probe.bit'),'--elf',str(pair/'application.elf'),'--output',str(work),
-                '--milliseconds',str(duration*1000),'--speed-khz','1000']
+                '--milliseconds',str(duration*1000),'--speed-khz',str(a.speed_khz)]
             command+=['--ram-image'] if a.ram_image else ['--entry',function]
             command+=['--ddr-physical'] if a.download=='physical' else ['--transport','ddr']
             if a.verify_ddr_physical:command+=['--verify-ddr-physical']

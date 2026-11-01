@@ -1,0 +1,27 @@
+Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+-----------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2018.3 (win64) Build 2405991 Thu Dec  6 23:38:27 MST 2018
+| Date         : Sun Nov  1 15:02:42 2026
+| Host         : DESKTOP-0UKCPD3 running 64-bit major release  (build 9200)
+| Command      : report_clock_interaction -file E:/zynqlinkPRO/build/fpga_dma_global/clock_interaction.rpt
+| Design       : system_wrapper
+| Device       : 7z020-clg400
+| Speed File   : -2  PRODUCTION 1.11 2014-09-11
+-----------------------------------------------------------------------------------------------------------
+
+Clock Interaction Report
+
+Clock Interaction Table
+-----------------------
+
+                              WNS                            TNS Failing  TNS Total    WNS Path         Clock-Pair           Inter-Clock          
+From Clock     To Clock       Clock Edges  WNS(ns)  TNS(ns)    Endpoints    Endpoints  Requirement(ns)  Classification       Constraints          
+-------------  -------------  -----------  -------  -------  -----------  -----------  ---------------  -------------------  -------------------  
+clk_delay_ref  clk_delay_ref  rise - rise     0.36     0.00            0         2830             5.00  Clean                Timed                
+clk_delay_ref  clk_fpga_0                                              0          392                   Ignored              Asynchronous Groups  
+clk_fpga_0     clk_delay_ref                                           0          348                   Ignored              Asynchronous Groups  
+clk_fpga_0     clk_fpga_0     rise - rise    -0.26    -6.01           71        51860             6.67  Clean                Partial False Path   
+pad_swclk      clk_fpga_0                                              0            2                   Ignored              Asynchronous Groups  
+trace_clk      clk_delay_ref                                           0            5                   Ignored              False Path           
+
+

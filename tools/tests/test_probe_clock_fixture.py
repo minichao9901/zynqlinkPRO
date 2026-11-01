@@ -19,6 +19,12 @@ class ClockPlanning(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'preserve'):
             plan(1|(1<<8)|(15<<20),54<<12,0,150000000)
 
+    def test_real_nonshort_control_profiles_preserve_frequency(self):
+        for old_div,requested in ((26,138461539),(24,150000000)):
+            p=plan(1|(1<<8)|(old_div<<20),54<<12,1<<17,requested)
+            self.assertEqual(p['halfPeriod'],2)
+            self.assertLess(abs(p['linkHz']-p['oldLinkHz']),.51)
+
     def test_rejects_short_pulse_or_wrong_pll(self):
         for control,pll,cfg in [(1|(1<<8)|(15<<20),54<<12,1<<19),
                                  (0x11|(1<<8)|(15<<20),54<<12,0),
