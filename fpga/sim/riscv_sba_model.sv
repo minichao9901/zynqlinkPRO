@@ -24,7 +24,7 @@ module riscv_sba_model #(parameter real RETURN_NS=12)(
         begin
             bus_reads<=bus_reads+1;
             if(at==32'hf0407000)begin counter_reads<=counter_reads+1;sbdata<=counter_reads+1;end
-            else if(at[31:18]==14'h0041 || at[31:15]==17'h1e080)sbdata<=mem[at[14:2]];
+            else if(at[31:18]==14'h0041 || at[31:15]==17'h1e080 || at[31:19]==13'h0024)sbdata<=mem[at[14:2]];
             else if(at==32'h40010000)begin
                 mmio_reads<=mmio_reads+1;sbdata<=mmio_reads+1;
             end else begin out_of_range_reads<=out_of_range_reads+1;sbdata<=0;end

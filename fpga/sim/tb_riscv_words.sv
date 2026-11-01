@@ -73,6 +73,9 @@ module tb_riscv_words;
         chained_write(128);
         for(i=0;i<128;i=i+1)if(target.mem['h6000/4+i]!==(32'h8abc0000+i))$fatal(1,"RV write data %0d",i);
         call(5,'hf0406000,1);chained_read(128);
+        // HPM6880 AXI SRAM must use the same one-scan data pipeline.
+        call(5,'h01244000,1);chained_write(128);
+        call(5,'h01244000,1);chained_read(128);
         // A fence consumes the pending DMI response, but the next AP read
         // still owns that exact word, not the following word or SBCS.
         call(5,'hf0406000,1);call(15,0,1);call(15,0,1);
@@ -96,6 +99,9 @@ module tb_riscv_words;
         reads_before=target.bus_reads;call(5,'hf0407ffc,1);call(15,0,1);call(14,0,1);
         if(data!==32'h12341fff || target.bus_reads!=reads_before+1 || target.out_of_range_reads!=0)
             $fatal(1,"RV RAM boundary prefetch data=%h reads=%0d OOB=%0d",data,target.bus_reads-reads_before,target.out_of_range_reads);
+        reads_before=target.bus_reads;call(5,'h0127fffc,1);call(15,0,1);call(14,0,1);
+        if(data!==32'h12341fff || target.bus_reads!=reads_before+1 || target.out_of_range_reads!=0)
+            $fatal(1,"RV AXI boundary prefetch data=%h reads=%0d OOB=%0d",data,target.bus_reads-reads_before,target.out_of_range_reads);
         // Side-effecting MMIO is never prefetched, even if AP auto-inc is off.
         call(1,'h23000002,1);call(5,'h40010000,1);call(15,0,1);call(14,0,1);
         if(data!==1 || target.mmio_reads!=1)$fatal(1,"RV MMIO over-read %h / %0d",data,target.mmio_reads);

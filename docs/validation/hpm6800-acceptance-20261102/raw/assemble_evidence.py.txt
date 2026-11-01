@@ -1,0 +1,72 @@
+import json, hashlib, shutil, statistics
+from pathlib import Path
+
+root = Path.cwd()
+base = root/'build/hpm6800-acceptance-20261102'
+doc = root/'docs/validation/hpm6800-acceptance-20261102'
+raw = doc/'raw'
+pair = root/'prebuilt/hpm6800-jtag-20261102'
+
+def read(name):
+    return json.loads((base/name/'result.json').read_text())
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+sram, profile, stress, rtt, hss, long = [read(n) for n in (
+    'final-sram', 'final-sram-profile', 'final-sram-stress', 'final-rtt', 'final-hss', 'final-hss-long')]
+for report in (sram, profile, stress, rtt, hss, long):
+    assert not report.get('failure') and not report.get('restore_error')
+    assert report['restore'] and all(report['restore'].values())
+    assert int(report['final_dmstatus'], 16) & (1 << 10)
+    for label, file in [('bit', 'probe.bit'), ('elf', 'application.elf')]:
+        assert report['artifacts'][label]['sha256'] == sha(pair/file)
+for report in (sram, profile, stress):
+    assert all(r['passed'] and r['all_bytes_verified'] for r in report['rows'])
+assert all(r['passed'] and r['sequence_exact'] and r['all_published_received'] and r['errors'] == 0 for r in rtt['rows'])
+for report in (hss, long):
+    assert report['registers_match'] and all(s['zero_skip'] for s in report['summary'])
+    assert all(r['all_data_frames_verified'] and r['sample_count_match'] and r['errors'] == 0 for r in report['rows'])
+assert json.loads((base/'final-delivery-identity/result.json').read_text())['passed']
+for name in ('final-sram-profile', 'final-sram-stress', 'final-hss-long', 'final-delivery-identity'):
+    shutil.copytree(base/name, raw/name, ignore=shutil.ignore_patterns('*backup*.bin'), dirs_exist_ok=True)
+for p in (base/'preflight').iterdir():
+    if p.is_file() and p.suffix in ('.log', '.json', '.tcl', '.txt'):
+        shutil.copy2(p, raw/'preflight'/p.name)
+shutil.copy2(base/'final-state.json', raw/'final-state.json')
+newdrivers = doc/'drivers/delivered'
+newdrivers.mkdir(exist_ok=True)
+for name in ('validate_hpm6800_performance.py', 'validate_hpm6800_streams.py', 'benchmark_hpm5301.py'):
+    shutil.copy2(root/'tools'/name, newdrivers/name)
+rows = {(r['window'], r['requested_Hz']): r for d in (sram, profile) for r in d['rows']}
+summary = dict(complete=True, pair={n: sha(pair/n) for n in ('probe.bit', 'application.elf')},
+    table=[], hss_long=long['summary'], stress=stress['rows'],
+    boundary_failed_verify=[{k: r[k] for k in ('variables', 'period_ticks', 'repeat', 'skipped', 'skip_percent', 'errors')}
+        for r in long['rows'] if r.get('tag') == 'verify' and r['skipped']], all_restore_verified=True)
+table, htable = [], []
+for hz in (1000000, 5000000, 10000000, 15000000, 20000000, 25000000):
+    a, b = rows['axi', hz], rows['ahb', hz]
+    rate = statistics.median(r['probe_MB_s'] for r in rtt['rows'] if r['requested_clock_Hz'] == hz)
+    hh = {r['variables']: r for r in hss['summary'] if r['requested_Hz'] == hz}
+    result = dict(requested_Hz=hz, actual_TCK_Hz=a['actual_TCK_Hz'], FCLK_Hz=a['FCLK_Hz'],
+        axi_read_MB_s=a['read_MB_s'], axi_write_MB_s=a['write_MB_s'], ahb_read_MB_s=b['read_MB_s'],
+        ahb_write_MB_s=b['write_MB_s'], rtt_MB_s=rate,
+        hss_1_Hz=statistics.median(hh[1]['verified_Hz']), hss_8_Hz=statistics.median(hh[8]['verified_Hz']))
+    summary['table'].append(result)
+    table.append(f"| {hz/1e6:g} / {a['actual_TCK_Hz']/1e6:.6f} | {a['read_MB_s']:.4f} | {a['write_MB_s']:.4f} | {b['read_MB_s']:.4f} | {b['write_MB_s']:.4f} | {rate:.4f} |")
+    htable.append(f"| {hz/1e6:g} | {a['FCLK_Hz']/1e6:.6f} | {result['hss_1_Hz']/1000:.3f} | {result['hss_8_Hz']/1000:.3f} |")
+(doc/'summary.json').write_text(json.dumps(summary, indent=2)+'\n')
+(base/'table.txt').write_text('\n'.join(table), encoding='utf-8')
+(base/'hss-table.txt').write_text('\n'.join(htable), encoding='utf-8')
+manifest = json.loads((pair/'manifest.json').read_text())
+manifest.update(status='HPM6800EVK SRAM RTT HSS acceptance passed', accepted=True,
+    measured_frequencies_Hz=[1000000, 5000000, 10000000, 15000000, 20000000, 25000000],
+    sram_extra_requests_Hz=[12500000, 14000000],
+    hss_low_rate_api='explicit shared RTT clock setter; public HSS setter minimum remains 15MHz',
+    target_flash_writes=False, qspi_writes=False,
+    final_state='running target; idle services; FCLK49.999999MHz, TCK24.9999995MHz; mode0',
+    source_revision=None, measurement_summary='../../docs/validation/hpm6800-acceptance-20261102/summary.json')
+manifest['files'] = {p.name: dict(bytes=p.stat().st_size, sha256=sha(p)) for p in pair.iterdir()
+    if p.is_file() and p.name not in ('manifest.json', 'README.md')}
+(pair/'manifest.json').write_text(json.dumps(manifest, indent=2)+'\n')
+print('All final evidence passed; wrote summary and paired manifest')

@@ -1,0 +1,14 @@
+  1  DAP (AHB AP transaction error, DAP status 30000021)
+  2  xc7z020
+no targets found with "name =~ "APU"". available targets:
+  1  DAP (AHB AP transaction error, DAP status 30000021)
+  2  xc7z020
+    while executing
+"error "no targets found with \"$params(filter)\". available targets:$target_list""
+    (procedure "targets" line 177)
+    invoked from within
+"targets -set -filter {name =~ "APU"}"
+    (file "E:\zynqlinkPRO\tools\download_dap_fpga.tcl" line 12)
+    invoked from within
+"source $script"
+    (file "E:\zynqlinkPRO-work\runtime\xilinx\bootstrap.tcl" line 5)

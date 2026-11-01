@@ -107,9 +107,14 @@ def peak(mem, out, inp, pattern, loops=128, repeats=3):
     return dict(words=words, depth=depth, loops=loops, **rows)
 
 
-def hss_point(probe, mem, dev, speed, period, nvars, seconds, expected):
+def hss_point(probe, mem, dev, speed, period, nvars, seconds, expected, *, allow_low_clock=False):
     variables = [(HSS_BASE + 256 + 4 * i, 4, 4) for i in range(nvars)]
-    assert probe.action(0x32, 3, struct.pack('<I', speed))[0] == 0
+    clock_rc = probe.action(0x32, 3, struct.pack('<I', speed))[0]
+    if clock_rc == -6 and allow_low_clock and 1_000_000 <= speed < 15_000_000:
+        # Same explicit shared-clock path used by the ARM acceptance harness.
+        assert probe.action(0x31, 7, struct.pack('<IHBB', speed, 1024, 0, 1))[0] == 0
+    else:
+        assert clock_rc == 0, ('HSS clock', clock_rc, speed)
     config = struct.pack('<IBB', period, 0, nvars) + b''.join(struct.pack('<IBB', *v) for v in variables)
     assert probe.action(0x32, 10, config)[0] == 0
     drain_hss(dev)

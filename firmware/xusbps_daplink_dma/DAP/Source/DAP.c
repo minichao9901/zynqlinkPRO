@@ -469,6 +469,16 @@ static uint32_t DAP_SWJ_Clock(const uint8_t *request, uint8_t *response) {
   uint32_t narrow = DAP_Data.debug_port == DAP_PORT_SWD && clock < 35000000U &&
                     (swd_read32(SWD_FEATURES) & SWD_FEATURE_SHORT_CLOCK);
   uint32_t target_fclk = clock * 2U;
+  /* Low-rate RISC-V JTAG needs enough PL cycles for autonomous streams.
+   * Keep the requested TCK with the JTAG shifter's 4-bit integer divider.
+   * Higher rates retain the qualified undivided capture profile: increasing
+   * FCLK at 25MHz TCK did not pass the HPM6800 board acceptance.
+   */
+  if (DAP_Data.debug_port == DAP_PORT_JTAG && JTAG_IDCodeIR() == 1U && clock < 15000000U) {
+    divisor = DAP_MAX_SWCLK_HZ / clock;
+    if (divisor > 16U) divisor = 16U;
+    target_fclk = clock * 2U * divisor;
+  }
   if (narrow) {
     divisor = DAP_MAX_SWCLK_HZ / clock;
     if (divisor < 2U) divisor = 2U;

@@ -1,0 +1,24 @@
+usage: validate_hpm6800_performance.py [-h] --bit BIT --elf ELF --out OUT
+                                       [--speeds SPEEDS] [--windows WINDOWS]
+                                       [--loops LOOPS] [--repeats REPEATS]
+                                       [--sustain-seconds SUSTAIN_SECONDS]
+                                       [--skip-high-idcode]
+
+HPM6800EVK RAM-only acceptance; load/verify the probe pair separately. Never
+resets the target or writes Flash/PLL. SRAM windows are backed up while hart0
+is halted and restored byte-for-byte before its original state is resumed.
+
+options:
+  -h, --help            show this help message and exit
+  --bit BIT
+  --elf ELF             Probe PS ELF
+  --out OUT
+  --speeds SPEEDS
+  --windows WINDOWS
+  --loops LOOPS
+  --repeats REPEATS
+  --sustain-seconds SUSTAIN_SECONDS
+                        Additional alternating full-window byte-checked stress
+                        per accepted point
+  --skip-high-idcode    Diagnostic: identify/activate at 10MHz, then test DMI
+                        at requested TCK

@@ -1,0 +1,14 @@
+  1  DAP (AHB AP transaction error, DAP status 30000021)
+  2  xc7z020
+no targets found with "name == "DAP"". available targets:
+  1  DAP (AHB AP transaction error, DAP status 30000021)
+  2  xc7z020
+    while executing
+"error "no targets found with \"$params(filter)\". available targets:$target_list""
+    (procedure "targets" line 177)
+    invoked from within
+"targets -set -filter {name == "DAP"}"
+    (file "E:\zynqlinkPRO\build\hpm6800-acceptance-20261102\preflight\reset-probe.tcl" line 4)
+    invoked from within
+"source $script"
+    (file "E:\zynqlinkPRO-work\runtime\xilinx\bootstrap.tcl" line 5)

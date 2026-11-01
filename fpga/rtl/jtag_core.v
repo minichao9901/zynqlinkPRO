@@ -87,9 +87,14 @@ module jtag_core (
     // the same word, including the final word of a region.
     wire rv_local_ram=rv_tar[31:18]==14'h0041;
     wire rv_ahb_ram=rv_tar[31:15]==17'h1e080;
+    // HPM6880's general AXI SRAM is 0x01200000..0x0127ffff. Its
+    // core-local aliases differ from older HPM parts; do not classify the
+    // surrounding AXI/peripheral space as safe speculative memory.
+    wire rv_axi_ram=rv_tar[31:19]==13'h0024;
     wire rv_ram_last=(rv_local_ram && &rv_tar[17:2]) ||
-                     (rv_ahb_ram && &rv_tar[14:2]);
-    wire rv_read_ahead=(rv_local_ram || rv_ahb_ram) && (!rv_csw[4] || !rv_ram_last);
+                     (rv_ahb_ram && &rv_tar[14:2]) ||
+                     (rv_axi_ram && &rv_tar[18:2]);
+    wire rv_read_ahead=(rv_local_ram || rv_ahb_ram || rv_axi_ram) && (!rv_csw[4] || !rv_ram_last);
     wire [31:0] rv_wanted_cfg=32'h00040000 |
         (rv_csw[4] ? 32'h00010000 : 0) | (rv_read ? 32'h00100000 : 0) |
         (rv_read && rv_read_ahead ? 32'h00008000 : 0);

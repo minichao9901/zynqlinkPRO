@@ -1,0 +1,157 @@
+{
+  "status": "HPM6800EVK SRAM RTT HSS acceptance passed",
+  "accepted": true,
+  "scope": "HPM6800EVK RISC-V JTAG/RAM only; not an ARM/ETM/QSPI release",
+  "source_base_revision": "e0b8a513abe7cac4b167a28f2c7bed36120d2476",
+  "source_revision": null,
+  "rtl_source_sha256": {
+    "dap_transfer_block_engine.v": "e249a3d7153c0584e896fa99637e97673156d36ab4e1faba27778b480c551afb",
+    "jtag_core.v": "4460c67f63c057db5e23c8f980763a9c4216d3e47718e6ce2bd571ec764f24c6",
+    "jtag_shift.v": "5660cec2fd287cdaa9632fae53a915ab28179e6439f79b95367defb0d0970e9a",
+    "orbtrace_controller.v": "977e97a78edf74024812d5c74073ea062e207241ecf410c3ab2e8997cd2a2faa",
+    "orbtrace_ddr_capture.v": "6f6203f4608fb138cb9441f7afdb3f8922f7bf7a50bb107d3849466c3a94973f",
+    "orbtrace_ddr_controller.v": "8b1305e1ed0e2e63020cfcdab71f695e10e7a0cb7a329d6a6da0bfd4e2871b30",
+    "orbtrace_ddr_packetizer.v": "c16d02e839e21673113863b0b1eeb6716eb337ce83e43701c3ee79f2ad0fe0f3",
+    "orbtrace_ddr_writer.v": "84a0543a117372b17016fc5244c73fff7dc500bb3fb27563fa89824824270ada",
+    "orbtrace_frame_async_fifo.v": "56feed471d67ad818c2c4a86a69ba5f4cb4dfb3f120d9ef66c106bcbcb5afafc",
+    "orbtrace_frame_fifo.v": "e4d256a9406985e2f7016d2f53cc3f9589ef1292c02588551bf532f642ddb801",
+    "orbtrace_lane_delay.v": "f1f16c654ec6e2cc78e3b26ac2a30cbe0ccddeaef0000d3398a357d974bfb50c",
+    "orbtrace_parallel.v": "e8b1a6e4c6f2124d0784f6b1a0420caf53f2ca939027a68a8e8edb028529314d",
+    "orbtrace_ref_window.v": "b4c47b691b2079dd95ea20230e36ed038d4a0cb4b49112a3f05491ddabc76271",
+    "orbtrace_rx_diagnostics.v": "9344babda305f266a9b30b85e4c9ffd861901f3a7ddb0ec31946270c5e0046ed",
+    "orbtrace_sample_capture.v": "6a18ef0abe6390e8721377ffd49465eea21f2655c8a87b1ccf20b3d058e259bf",
+    "orbtrace_tpiu_demux.v": "8ee22425aceca214bb30b067704f26816dc322b9db60244fc451476caf2cb768",
+    "orbtrace_tpiu_stream.v": "18cf3c99b8c541b6ae97d5cac9686d296fbe88396d469a53fb5143196ff967b0",
+    "orbtrace_traceif.v": "e4c9adda46c34b8888c7084a6f01bb134836118263a73a64a857f8f4dc04fef1",
+    "probe_rtt_engine.v": "10136ba15bbf387677053d95226703ac7563998843c0fc55d8082eee40f60bea",
+    "probe_sample_engine.v": "7457fbb302291c699bd17dc040a3cd503c898e3e9ffdfd82c145918e293cb6e8",
+    "probe_stream_engine.v": "b184e5800f29ef973e1bdbad11f3c009f3b967324a828c4090e4c28819fcaec0",
+    "swd_batch_engine.v": "2147786073a8ed8aa4a66c0c6c16a4e7ba34e222789af20cd84e24b74df70c41",
+    "swd_controller.v": "d00966dde8db8b71ce594e9c85ed8a86b89aca5a41291bba213f55dadeac5cf4",
+    "swd_core.v": "c29460f183b54b09f5ffa52374e32d8cf8298a72205fff659529f71f003403c9"
+  },
+  "ps_source_sha256": {
+    "chry_ringbuffer.c": "e719548c6dd08de32f961d66fbfe7f071fd44b8650d7ab0074621b1892a08b16",
+    "chry_ringbuffer.h": "e267cf8eef1f4649f5b7f33f20bcbb76f1cb791381dfaa6f1d9a57cd00ef8600",
+    "dap_main.c": "92df3a1889d5a75164f888c9cfcb51556ebe29b93f76078f9b48c2d73dea1ef0",
+    "dap_main.h": "917c99ab647a6eca535957f9dcb107a4da9575c74d71abf3ed200d2e8276b845",
+    "etm_ddr_usb.c": "8e41d27555fed08b145e41c95a1a2406e02888b0e01d86303cf2dca97a787a5c",
+    "etm_ddr_usb.h": "238a756de3ccb5d9409820edf6660d14541f7305bcf02a0a83a108123efdff97",
+    "etm_stream.c": "517f12196b6bbc04a552fd2282102885ca3191d6eff1e4a5e25dbe7708d7b535",
+    "etm_stream.h": "05abfc19eb7455a070f7b18ae1326d4ff304d07558a905ee83d8c2d815da51dd",
+    "lscript.ld": "d9c4493e2ded38432848b67cb5daa262d132250171ec79b4784328fd52be51d9",
+    "probe_stream.c": "79506cbfae3a0da42f0cef64d41a1ff9564aacb5c39813afc836f825d276fb7d",
+    "probe_stream.h": "f66f5d64fa2226e129aee7f49fd8aa9fb134ff39cf91e10f778fb0375b78f5a0",
+    "probe_target.c": "6db99273351bb94e59160c3296530bbe1048d3e8f74537851e58f7195f2530ee",
+    "README.txt": "265e6e74d7913c397b2e78997cb08682ffdae7c838f321a3f21f521f51e92dbc",
+    "Xilinx.spec": "f100af82b444989adf5aad4ad612b9ae3b4ddac007f5d9653f1abf254235b085",
+    "xusbps_bos_desc.c": "f298c9b7184a3e78ae5fe5cb1053e4bd1c364947e413fdc6469b592fb41d7f49",
+    "xusbps_bos_desc.h": "46695a1d22fa6ab3f5d534f0f232a9d4c02084f74e08f0ca63bf30251547fb42",
+    "xusbps_ch9.c": "57cf7b7a45531179ae0bbbe7fa44ba343fb0f204a679c44907cb8e4c9c331a6a",
+    "xusbps_ch9.h": "d8c9dc12b1ed2dc7d259ae3ca418ba253c0663018ab9fea7e871babc08954163",
+    "xusbps_ch9_storage.c": "e656279828ed4012f6db03559c7aaf2d20e034c2a6f2870a5fe469e518bb0e66",
+    "xusbps_ch9_storage.h": "81df036fa976db4fa4f8b12b145204708fab74d5a4654e5572531c556ead20ec",
+    "xusbps_class_cdc.c": "565aa0cef1d3338518c71aee34c04ec64ce208dc75f5e7989fa2a3d45efc16d3",
+    "xusbps_class_cdc.h": "38f45f6b7f6fba99edbdb1581bac9baa818ab461c6734cbd6a370d1c9fb7949f",
+    "xusbps_intr.c": "9019a0bf69e6c5fdc4e93eae3972e79120201ff985d1e6b7f582d14cf6892353",
+    "xusbps_intr_example.c": "fe6b11bfd4c6d7c66aea2ef86936c33b123772469c7444c195a1667a744a4aa3",
+    "DAP\\Include\\DAP.h": "66d03cf55bc00ccfd80e0327d46bf94dcd9321ba3daf1e8ec6e196741cb679b7",
+    "DAP\\Include\\DAP_config.h": "0ea35531f3edfbd0fabcb95eb33503620aabd62d4e33181cfb178b9441abaae3",
+    "DAP\\Include\\dap_metrics.h": "754d5f29cd1e366a0999e41e9e754ca2381c2b3bded5fbed2461698ec84eb0bf",
+    "DAP\\Include\\jtag_rtl.h": "8b8dad83a60b3448fabfced095451395caaac155a04af17a1e36c35a460324f5",
+    "DAP\\Include\\ps_fclk.h": "2a2022053b2bade106d656050a82d385a8435834be6a0e57be87c5a41d766b9d",
+    "DAP\\Include\\swd_dma.h": "a36819ab5c3186c3b6c04a11b9cbe35143a6456afa6ec1cc36ee0749f35bf613",
+    "DAP\\Source\\DAP.c": "611ccbe32bd118de881e9abc19c6eb1dc9cc722a23647e98f3a1fd4d5011db8d",
+    "DAP\\Source\\dap_metrics.c": "e55609499f405df7e40b5bf4465180e929fb16c783d08198f461f09f853610dd",
+    "DAP\\Source\\DAP_vendor.c": "ddf836ccf0a07d2f25b092f6fc982cff4288e3488665b9388a2f3a3da698d931",
+    "DAP\\Source\\JTAG_DP.c": "227424b49e12f0d553bbb95cf28df879fe0b20645d6aab44e699b909ede280af",
+    "DAP\\Source\\JTAG_RTL.c": "2bb0a092afd9bc3202d5b5474f9d584e896688b64b22884f09bbbf7a5f28f833",
+    "DAP\\Source\\swd_dma.c": "61836ca8b1b6c1592656bc0d2da1dcb7b3da131976e76f15608e4f474f08406f",
+    "DAP\\Source\\SWO.c": "3c2d788c229ed27bc7062854adc740ba299efffdf6a4b053b32bc177f69fde00",
+    "DAP\\Source\\SW_DP.c": "2f1a32a041daad509b6eabe3ea1aeef069e8d6c13b5a53499db8fe5a46bd28b6",
+    "DAP\\Source\\UART.c": "a9d143bc67a93a6e652c0ea15acf5f343966434c4225c5e89959cc5854271a5b"
+  },
+  "timing": {
+    "FCLK_max_Hz": 120000000,
+    "SWCLK_max_Hz": 60000000,
+    "setup_slack_ns": 0.242,
+    "hold_slack_ns": 0.025,
+    "requested_FCLK_Hz": 120000000,
+    "RTL_DEBUG": 0,
+    "optional_observation_cells": 0,
+    "formal_product_acceptance": false
+  },
+  "actual_load_pair": "build/hpm6800-acceptance-20261102/pair",
+  "files": {
+    ".gitattributes": {
+      "bytes": 82,
+      "sha256": "4755b75e72fd2f2a7d496f077a9d7c04ba8a308ed3a8104515835fc5f509f0ab"
+    },
+    "application.elf": {
+      "bytes": 812484,
+      "sha256": "1abbff5018299b53e090e026eacbd26b3dcc9397d51c3161f3ad9eac09c15829"
+    },
+    "cdc.rpt": {
+      "bytes": 145693,
+      "sha256": "8e1d938ff22598292f635c6dd32e2b7177cf7dde369b6606c351815edca6c0f6"
+    },
+    "check_timing.rpt": {
+      "bytes": 3140,
+      "sha256": "e64ab3786b6758c378a7ffb8b94dc41a180b0905bb07c0e7b187a79f8a0cf1e7"
+    },
+    "clocks_verified.rpt": {
+      "bytes": 1685,
+      "sha256": "98f7941d85a0a333b07367525593334d5c8dcf2a3147059ba0288a2cfebaf49b"
+    },
+    "probe.bit": {
+      "bytes": 4045674,
+      "sha256": "fd4a3c91daa29334f9f3fca41e57f303fe95d529e8abcaee27093f0eb55976c1"
+    },
+    "ps-build.json": {
+      "bytes": 5426,
+      "sha256": "566adf1a934e18382e763f82859c85dd87aa27240ce8ea43c89d5bc4d6520390"
+    },
+    "ps7_init.tcl": {
+      "bytes": 35333,
+      "sha256": "d3eeab6707765ab59acb924e39ff5c77c013da8cbf598b181e9eb43578f29ece"
+    },
+    "rtl-stamp.json": {
+      "bytes": 2169,
+      "sha256": "b88d99152f5a959041f2138e7a61eaf744949b62c01a4a48a8d6b410f2e51d9f"
+    },
+    "swclk_launch.rpt": {
+      "bytes": 3765,
+      "sha256": "984603acff2d346bcd85b8355a9d15e8c4b023d3b54e349138ba9a73f5814a68"
+    },
+    "timing_verified.rpt": {
+      "bytes": 158173,
+      "sha256": "de5898be98581723f3a3eabcb7e99e3733ba9eb10f975c57711dbfb0f0361969"
+    },
+    "utilization.rpt": {
+      "bytes": 12760,
+      "sha256": "bd3dfe497d30b83752f6e5d69f9f9ff9940416fb4c6bf245cc32d344ff07c5d0"
+    },
+    "verified_clock.json": {
+      "bytes": 205,
+      "sha256": "797eb68b73403fb332f590d0d377a60628ada0d42903da655d3df13b52605fe0"
+    }
+  },
+  "report": "docs/validation/hpm6800-acceptance-20261102/README.md",
+  "measured_frequencies_Hz": [
+    1000000,
+    5000000,
+    10000000,
+    15000000,
+    20000000,
+    25000000
+  ],
+  "sram_extra_requests_Hz": [
+    12500000,
+    14000000
+  ],
+  "hss_low_rate_api": "explicit shared RTT clock setter; public HSS setter minimum remains 15MHz",
+  "target_flash_writes": false,
+  "qspi_writes": false,
+  "final_state": "running target; idle services; FCLK49.999999MHz, TCK24.9999995MHz; mode0",
+  "measurement_summary": "../../docs/validation/hpm6800-acceptance-20261102/summary.json"
+}
