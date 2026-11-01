@@ -58,7 +58,10 @@ class LaneWindowTests(unittest.TestCase):
             return SimpleNamespace(returncode=int(first),stdout=b'',stderr=b'')
         argv=['calibrate','--pair',str(pair),'--target-elf',str(elf),'--out',str(output),'--coarse','0','--coarse-only']
         caught=None;code=None
-        with patch.object(sys,'argv',argv),patch.object(calibration,'LaneDelay',return_value=Control()),patch.object(calibration,'Session'),patch.object(calibration,'PhysicalMemory'),patch.object(calibration,'Echo',Echo),patch.object(calibration.subprocess,'run',side_effect=capture),contextlib.redirect_stdout(io.StringIO()):
+        def session(folder,*args):
+            self.assertTrue(folder.is_dir(),'Session requires an existing output directory')
+            return object()
+        with patch.object(sys,'argv',argv),patch.object(calibration,'LaneDelay',return_value=Control()),patch.object(calibration,'Session',side_effect=session),patch.object(calibration,'PhysicalMemory'),patch.object(calibration,'Echo',Echo),patch.object(calibration.subprocess,'run',side_effect=capture),contextlib.redirect_stdout(io.StringIO()):
             try:code=calibration.main()
             except RuntimeError as e:caught=str(e)
         report=json.loads((output/'result.json').read_text())

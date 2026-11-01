@@ -55,11 +55,19 @@ set trace_idelay [get_cells -hier -filter {REF_NAME == IDELAYE2 && NAME =~ *orbt
 set trace_idelayctrl [get_cells -hier -filter {REF_NAME == IDELAYCTRL && NAME =~ *orbtrace_0*}]
 if {[info exists ::env(ZYNQLINK_ETM_LANE_DELAY)] && $::env(ZYNQLINK_ETM_LANE_DELAY)==1} {
     if {[llength $trace_idelay]!=5 || [llength $trace_idelayctrl]!=1} {error "Five active per-lane IDELAYE2 inputs and IDELAYCTRL are required"}
+    set trace_sampling_sinks {}
     foreach cell $trace_idelay {
         if {[get_property IDELAY_TYPE $cell] ne "VAR_LOAD"} {error "Per-lane delay is not dynamically loadable: $cell"}
-        set users [get_pins -of_objects [get_nets -of_objects [get_pins $cell/DATAOUT]] -filter {DIRECTION == IN}]
+        # DATAOUT now crosses module ports directly. A local net segment has
+        # no leaf load inside this hierarchy; follow it to the actual sampler.
+        set endpoints [all_fanout -flat -endpoints_only -from [get_pins $cell/DATAOUT]]
+        set users [filter $endpoints {NAME =~ *raw_oversample_filtered*pad_meta_reg*/D}]
         if {![llength $users]} {error "Input delay output is unused: $cell"}
+        foreach sink $users {lappend trace_sampling_sinks $sink}
+        puts "ORBTRACE_LANE_ENDPOINT $cell -> $users"
     }
+    if {[llength [lsort -unique $trace_sampling_sinks]]!=5} {error "Five distinct physical sampler endpoints required"}
+    puts "ORBTRACE_LANE_ENDPOINTS_VERIFIED count=5"
     puts "ORBTRACE_LANE_DELAY_VERIFIED count=5 VAR_LOAD=1 activeOutputs=5"
 } elseif {[info exists ::env(ZYNQLINK_RAW_TRACE)] && $::env(ZYNQLINK_RAW_TRACE) in {2 3 4}} {
     puts "ORBTRACE_DELAY_BYPASS_VERIFIED mode=$::env(ZYNQLINK_RAW_TRACE) IDELAYE2=[llength $trace_idelay] IDELAYCTRL=[llength $trace_idelayctrl]"

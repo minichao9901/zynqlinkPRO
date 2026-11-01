@@ -24,7 +24,7 @@ def preflight(job_path,log_path,fpga):
     if (job['rawMode'],job['etmDdr'],job['laneDelay'],job['implementFclkHz'])!=(4,1,1,120000000):
         raise ValueError('Not the intended RAW4/DDR/ELD1 FCLK120 build')
     log=log_path.read_text(encoding='utf8')
-    for proof in ('VERIFIED_BITSTREAM_READY','ORBTRACE_LANE_DELAY_VERIFIED count=5 VAR_LOAD=1 activeOutputs=5','ORBTRACE_OVERSAMPLE_VERIFIED META=5 SYNC=5'):
+    for proof in ('VERIFIED_BITSTREAM_READY','ORBTRACE_LANE_DELAY_VERIFIED count=5 VAR_LOAD=1 activeOutputs=5','ORBTRACE_LANE_ENDPOINTS_VERIFIED count=5','ORBTRACE_OVERSAMPLE_VERIFIED META=5 SYNC=5'):
         if not re.search('(?m)^'+re.escape(proof)+'$',log):raise ValueError('Missing completed implementation proof: '+proof)
     bit=fpga/'system_wrapper_verified.bit';clock=fpga/'verified_clock.json'
     start=datetime.fromisoformat(job['startedUtc']).timestamp()
@@ -39,10 +39,20 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--job',type=Path,required=True);p.add_argument('--log',type=Path,required=True)
     p.add_argument('--fpga-out',type=Path,required=True);p.add_argument('--ps-init',type=Path,required=True)
+    p.add_argument('--verification-job',type=Path,help='Separate post-route verifier with linked parent-build and bit hashes')
     p.add_argument('--out',type=Path,required=True);a=p.parse_args()
     job,timing=preflight(a.job,a.log,a.fpga_out)
-    if subprocess.run(['git','diff','--quiet',job['source'],'--','fpga'],cwd=ROOT).returncode:
-        raise ValueError('FPGA source differs from the frozen build commit')
+    changed=subprocess.check_output(['git','diff','--name-only',job['source'],'--','fpga'],cwd=ROOT,text=True).splitlines()
+    verification=None
+    if a.verification_job:
+        verification=json.loads(a.verification_job.read_text(encoding='utf-8-sig'))
+        if (verification['parentJobSha256']!=sha(a.job) or verification['inputBitSha256']!=sha(a.fpga_out/'system_wrapper_verified.bit')
+                or verification['verifierSha256']!=sha(ROOT/'fpga/verify_routed.tcl')):
+            raise ValueError('Post-route verifier is not bound to this build, bit and verification script')
+        if subprocess.run(['git','diff','--quiet',verification['source'],'--','fpga'],cwd=ROOT).returncode:
+            raise ValueError('Current FPGA files differ from the actual verification commit')
+    if changed and (not verification or set(changed)!={'fpga/verify_routed.tcl'}):
+        raise ValueError('FPGA source differs from the frozen build; only a separately bound verifier update is allowed')
     stamp=json.loads((ROOT/'build/fpga_dma_global/swd_rtl_built.stamp').read_text(encoding='utf8'))
     actual={s.name:sha(s) for s in (ROOT/'fpga/rtl').glob('*.v')}
     if stamp!=actual:raise ValueError('Synthesis stamp does not match actual RTL')
@@ -62,7 +72,7 @@ def main():
     reservation(sources['application.elf'])
     for name,path in sources.items():shutil.copy2(path,a.out/name)
     manifest=dict(status='ELD1 STA passed; board loading/calibration pending; not Golden',accepted=False,
-        rtlSourceRevision=job['source'],psSourceRevision=build['source_revision'],buildJob=job,
+        rtlSourceRevision=job['source'],psSourceRevision=build['source_revision'],buildJob=job,verificationJob=verification,
         buildOptions=dict(rawMode=4,etmDdr=1,laneDelay=1,implementFclkHz=120000000,maxSwclkHz=60000000),
         timing=timing,rtlSha256=actual,capabilities=dict(perLaneInputDelay=True,autoCalibrationBoardVerified=False),
         files={name:dict(bytes=(a.out/name).stat().st_size,sha256=sha(a.out/name)) for name in sources},

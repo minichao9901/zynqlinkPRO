@@ -19,7 +19,7 @@ class LanePackageTests(unittest.TestCase):
             bit.write_bytes(b'offline identity fixture');clock.write_text(json.dumps(dict(FCLK_max_Hz=120000000,setup_slack_ns=.1,hold_slack_ns=.01)))
             log.write_text('VERIFIED_BITSTREAM_READY\n')
             with self.assertRaisesRegex(ValueError,'proof'):preflight(job,log,root)
-            log.write_text('VERIFIED_BITSTREAM_READY\nORBTRACE_LANE_DELAY_VERIFIED count=5 VAR_LOAD=1 activeOutputs=5\nORBTRACE_OVERSAMPLE_VERIFIED META=5 SYNC=5\n')
+            log.write_text('VERIFIED_BITSTREAM_READY\nORBTRACE_LANE_DELAY_VERIFIED count=5 VAR_LOAD=1 activeOutputs=5\nORBTRACE_LANE_ENDPOINTS_VERIFIED count=5\nORBTRACE_OVERSAMPLE_VERIFIED META=5 SYNC=5\n')
             self.assertEqual(preflight(job,log,root)[1]['FCLK_max_Hz'],120000000)
             os.utime(bit,(now-100,now-100))
             with self.assertRaisesRegex(ValueError,'predates'):preflight(job,log,root)

@@ -82,7 +82,8 @@ def main():
         pair=str(pair),targetElf=str(elf),targetSha256=hashlib.sha256(elf.read_bytes()).hexdigest(),
         measuredElectricalEye=False,retryFailedPoints=False,rows=[],windows=[],candidate=None)
     def save():(a.out/'result.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf8')
-    control=LaneDelay(PhysicalMemory(Session(a.out/'jtag',Path('E:/Xilinx/SDK/2018.3'),'tcp:127.0.0.1:3121')))
+    jtag=a.out/'jtag';jtag.mkdir()
+    control=LaneDelay(PhysicalMemory(Session(jtag,Path('E:/Xilinx/SDK/2018.3'),'tcp:127.0.0.1:3121')))
     original=None;echo=None;cache={};keep=False;clock_baseline=None;save()
     def measure(taps,enabled=True,milliseconds=None,holdout=False):
         nonlocal clock_baseline
