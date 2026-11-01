@@ -1149,3 +1149,11 @@ Web窗口元数据在DDR模式以硬件ticks/ref计算实际时长，主机下�
 直接trace.py capture不指定transport，自动选到ddr-usb/1；100ms采集输出450,529字节ETM、1,805,794条指令、packetIssues=0、loss=false，完整CLI+解码4.543秒，硬件窗口0.100000001秒。目标RCC/FPB/CoreSight恢复通过；未写Flash。
 
 实际打开最后一条Web记录的火焰图，选0～2000区间，点击「导出当前火焰图SVG」，浏览器确认保存到Windows下载目录etm-flame-timeline (6).svg，15,166字节，XML解析成功；SHA、截图与SVG原文件见[最终Web证据](validation/etm-ddr-usb-board-20261101/web-final/verification.json)。页面显示生成大小、下载请求与重试链接。完整实测截图为[SVG下载画面](validation/etm-ddr-usb-board-20261101/web-final/svg-download.png)。
+
+### 2026-11-01：冻结桥EXE也完成离线及真机验证，性能继续优化
+
+便携包`dist/zynq-etm-bridge-ddr-usb-20261101.zip`，52,482,491字节，SHA256 f83dfe8bce1131812c1c0ab2e5afc56f078e2a399c67d0b48648ad044064264d，来自干净提交8896780；用户完整解压后双击EXE，不需要CLI、Python或Node。冻结EXE在PATH只有System32的环境中启动，1792文件指纹通过；F103同一1秒参考5,467,740条指令解码5.898秒，H743 ETMv4参考210,497条指令解码0.703秒，均packetIssues=0、原生TraceStore，无逐指令JSONL。重复启动复用已有实例通过。
+
+随后实际运行该EXE（不是Python服务替身），3次Web开关及2轮100ms换函数采集/解码+CDC全部通过，覆盖冻结后新FRM1原生工具路径与DAP epoch握手。两轮完整操作12.604/12.391秒，性能问题同样存在。[包身份及验证](validation/etm-ddr-usb-bridge-exe-20261101/delivery.json)。当前板仅通过JTAG/RAM加载候选，断电后需要重新加载；本轮未编程QSPI。
+
+用户指出superlinkPRO此前100ms可达1秒级，故继续优先拆分延迟。时间戳证据显示：约1秒Flash校验、约2秒断点/时钟、约3秒ETM配置、约3秒采集/解码到显示、约2秒重连/恢复。数字为页面日志秒级边界的粗分项，不能冒充逐阶段毫秒profile。主要三个原生引擎与E:/superlinkPRO的SHA完全相同；额外控制成本来自本地桥逐条HTTP封装的DAP寄存器操作，未回退成JSON解码。superlinkPRO的f9baa37验收记录也明确：3,675,477条指令的200ms历史数据，完整原生处理/索引约2.249秒且不含硬件/控制/浏览器。因此需统一计时边界和记录规模，并优化本项目控制往返，不能把12秒当作正常完成目标。
