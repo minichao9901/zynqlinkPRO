@@ -5,6 +5,7 @@ if {[file exists [file join $out zynqlink_dma.xpr]] && [lsearch -exact $argv --r
     source [file join $root fpga build_incremental.tcl]
     exit
 }
+set rtl_stamp [exec python [file join $root tools fpga_rtl_stamp.py]]
 set target_part xc7z020clg400-2
 if {[info exists ::env(ZYNQLINK_PART)]} {set target_part $::env(ZYNQLINK_PART)}
 create_project -force zynqlink_dma $out -part $target_part
@@ -81,6 +82,12 @@ source [file join $root fpga configure_runs.tcl]
 launch_runs synth_1 -jobs $::zynqlink_jobs
 wait_on_run synth_1
 if {[get_property PROGRESS [get_runs synth_1]] != "100%"} {error "Synthesis failed"}
+if {$rtl_stamp ne [exec python [file join $root tools fpga_rtl_stamp.py]]} {
+    error "RTL changed during synthesis; rebuild before implementation"
+}
+set stamp_file [open [file join $out swd_rtl_built.stamp] w]
+puts -nonewline $stamp_file $rtl_stamp
+close $stamp_file
 if {[lsearch -exact $argv --synth-only] >= 0} {
     puts "SYNTHESIS_ONLY_READY $out"
     exit

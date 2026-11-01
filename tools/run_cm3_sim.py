@@ -47,10 +47,15 @@ def main():
     ap.add_argument('--rtl', type=Path, default=Path(os.environ.get('CM3_RTL', DEFAULT_RTL)))
     ap.add_argument('--rebuild', action='store_true')
     ap.add_argument('--work-dir',type=Path,help='Isolated simulator output/library directory')
+    ap.add_argument('--dut-rtl',type=Path,default=ROOT/'fpga/rtl',
+                    help='DUT RTL directory; permits Golden and candidate with identical benches/model')
     ap.add_argument('--debug', choices=['off','typical','all'], default='off', help='Enable waveform/debug instrumentation only when needed')
     ap.add_argument('--compile-jobs', type=int, choices=range(1,9), default=int(os.environ.get('ZYNQLINK_SIM_JOBS','2')))
     ap.add_argument('plusargs', nargs='*')
     args = ap.parse_args()
+    dut_rtl=args.dut_rtl.resolve()
+    if not (dut_rtl/'swd_controller.v').is_file():
+        sys.exit(f'DUT RTL missing: {dut_rtl}')
 
     rtl = args.rtl.resolve()
     if not (rtl / 'cortexm3_integration.v').is_file():
@@ -71,7 +76,7 @@ def main():
 
     # A worktree has its own sources, and a prior failed compile may leave an
     # xsim.dir behind. Reuse only a successful snapshot of these exact inputs.
-    inputs = sorted([*(ROOT / 'fpga/rtl').glob('*.v'),
+    inputs = sorted([*dut_rtl.glob('*.v'),
                      *(ROOT / 'fpga/sim').glob('*.v'),
                      *(ROOT / 'fpga/sim').glob('*.sv'),
                      *(ROOT / 'fpga/sim').glob('*.svh'),
@@ -85,7 +90,7 @@ def main():
     if args.rebuild or not stamp.exists() or stamp.read_text().strip() != fingerprint:
         stamp.unlink(missing_ok=True)
         rtl_files = sorted(str(p) for p in rtl.glob('*.v'))
-        dut_files = sorted(str(p) for p in (ROOT / 'fpga/rtl').glob('*.v'))
+        dut_files = sorted(str(p) for p in dut_rtl.glob('*.v'))
         sim_v = [str(ROOT / 'fpga/sim/axi3_sram.v'),
                  str(ROOT / 'fpga/sim/sim_primitives.v')]
         sim_sv = [str(ROOT / 'fpga/sim/xpm_memory_tdpram.sv'),

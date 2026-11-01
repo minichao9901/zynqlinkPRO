@@ -32,9 +32,12 @@ module orbtrace_ddr_controller #(parameter ENABLE_TRACE_SOURCE=0,PREPARE_TIMEOUT
 );
   reg aw_pending,w_pending;
   reg [7:0] write_address;reg [31:0] write_data;reg [3:0] write_strobe;
-  reg [31:0] base_address,byte_limit,seed,capture_id,elapsed_cycles,mode,requested_ticks;
+  reg [31:0] base_address,byte_limit,seed,capture_id,elapsed_cycles,requested_ticks;
+  // Only two legal modes exist. Store the decoded two-bit value explicitly:
+  // a 32-bit equality on software write_data otherwise survives synthesis
+  // and fans into every writer byte-budget and RAM-enable path.
+  reg [1:0] mode,record_mode;
   reg [63:0] nonce,capture_nonce;
-  reg [31:0] record_mode;
   reg active,done_sticky,error_sticky,rejected;
   reg writer_start,writer_abort;
   reg [2:0] trace_phase;
@@ -64,7 +67,7 @@ module orbtrace_ddr_controller #(parameter ENABLE_TRACE_SOURCE=0,PREPARE_TIMEOUT
   wire [63:0] packet_data;wire [7:0] packet_keep;
   wire packet_last,packet_valid,packet_busy,packet_done,packet_empty,packet_rejected,packet_error,packet_limit,packet_frame_ready;
   wire [31:0] packet_input_bytes,packet_stream_bytes;
-  wire trace_mode=ENABLE_TRACE_SOURCE && mode==2;
+  wire trace_mode=ENABLE_TRACE_SOURCE && mode[1];
   wire [63:0] stream_data=trace_mode ? packet_data : pattern_data;
   wire [7:0] stream_keep=trace_mode ? packet_keep : pattern_keep;
   wire stream_last=trace_mode ? packet_last : remaining<=8;
@@ -190,7 +193,7 @@ module orbtrace_ddr_controller #(parameter ENABLE_TRACE_SOURCE=0,PREPARE_TIMEOUT
           3:if(!active)base_address<=write_data;else begin rejected<=1;s_axi_bresp<=2;end
           4:if(!active)byte_limit<=write_data;else begin rejected<=1;s_axi_bresp<=2;end
           5:if(!active)seed<=write_data;else begin rejected<=1;s_axi_bresp<=2;end
-          15:if(!active && (write_data==1 || (ENABLE_TRACE_SOURCE && write_data==2)))mode<=write_data;else begin rejected<=1;s_axi_bresp<=2;end
+          15:if(!active && (write_data==1 || (ENABLE_TRACE_SOURCE && write_data==2)))mode<=write_data[1:0];else begin rejected<=1;s_axi_bresp<=2;end
           16:if(!active)requested_ticks<=write_data;else begin rejected<=1;s_axi_bresp<=2;end
           31:if(!active)nonce[31:0]<=write_data;else begin rejected<=1;s_axi_bresp<=2;end
           32:if(!active)nonce[63:32]<=write_data;else begin rejected<=1;s_axi_bresp<=2;end

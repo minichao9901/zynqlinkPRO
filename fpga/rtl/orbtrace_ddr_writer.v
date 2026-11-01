@@ -36,10 +36,17 @@ module orbtrace_ddr_writer #(
   reg burst_last;
   reg [31:0] limit,next_address;
   function [3:0] byte_count(input [7:0] keep);
-    integer i;begin byte_count=0;for(i=0;i<8;i=i+1)byte_count=byte_count+keep[i];end
+    // The interface accepts only contiguous low-byte masks. Decode them
+    // directly instead of a general eight-input population-count adder.
+    // Invalid masks return zero and are rejected before any state/RAM write.
+    begin case(keep)
+      8'h01:byte_count=1;8'h03:byte_count=2;8'h07:byte_count=3;8'h0f:byte_count=4;
+      8'h1f:byte_count=5;8'h3f:byte_count=6;8'h7f:byte_count=7;8'hff:byte_count=8;
+      default:byte_count=0;
+    endcase end
   endfunction
   wire [3:0] incoming_bytes=byte_count(s_axis_tkeep);
-  wire legal_keep=s_axis_tkeep!=0 && (s_axis_tkeep & (s_axis_tkeep+8'd1))==0 &&
+  wire legal_keep=incoming_bytes!=0 &&
                   (s_axis_tlast || s_axis_tkeep==8'hff);
   // Registered remaining budget avoids a 32-bit add then 33-bit compare on
   // every RAM write-enable. Each beat is <=8B, so the guard needs only the
