@@ -1,5 +1,8 @@
 # Diagnostics are a build-time choice; protocol/register apertures stay intact.
-set want_diagnostics [expr {[lsearch -exact $argv --diagnostics] >= 0}]
+source [file join [file dirname [info script]] rtl_debug_profile.tcl]
+set want_diagnostics [zynqlink_rtl_debug_mode $argv]
+set ::zynqlink_rtl_debug $want_diagnostics
+puts "RTL_BUILD_MODE=[expr {$want_diagnostics ? {debug} : {release}}] RTL_DEBUG=$want_diagnostics"
 set swd [get_bd_cells swd_controller_0]
 set diagnostic_config_changed [expr {[get_property CONFIG.ENABLE_DIAGNOSTICS $swd] != $want_diagnostics}]
 if {$diagnostic_config_changed} {

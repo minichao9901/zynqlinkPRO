@@ -67,7 +67,7 @@ WORKFLOWS={
  'test.web':('Web主机自测',[('node',['--test','web/tools/selftest/*.test.mjs'])]),
  'test.cli':('统一CLI主机自测',[('python',['-m','unittest','discover','-s','tools/tests','-p','test_toolbox*.py'])]),
 }
-SUPPORT_TCL={'compact_config.tcl','run_threads.tcl','configure_runs.tcl','configure_ip_cache.tcl','ps7_init.tcl','ps7_config.tcl','probe_rtl.tcl','probe_io_timing.tcl','axi_pipeline.tcl'}
+SUPPORT_TCL={'compact_config.tcl','rtl_debug_profile.tcl','run_threads.tcl','configure_runs.tcl','configure_ip_cache.tcl','ps7_init.tcl','ps7_config.tcl','probe_rtl.tcl','probe_io_timing.tcl','axi_pipeline.tcl'}
 
 
 def paths(root=ROOT):
