@@ -128,33 +128,35 @@ def main():
         for data_tap in coarse:
             for clock_tap in coarse:coarse_rows.append(measure([data_tap]*4+[clock_tap]))
         best=min(coarse_rows,key=score);current=list(best['taps']);report['coarseBest']=best['index'];save()
-        if a.coarse_only:return 0
-        for lane in range(5):
-            rows=[]
-            for tap in range(32):
-                candidate=current.copy();candidate[lane]=tap;rows.append(measure(candidate))
-            window=choose_window({r['taps'][lane]:r['protocolPass'] for r in rows})
-            report['windows'].append(dict(lane=lane,otherTaps=current.copy(),window=window))
-            if window:current[lane]=window['tap']
-            else:current=list(min(rows,key=score)['taps'])
-            save()
-        report['candidate']=current;save()
-        # Check local margin under the final settings, since lane searches interact.
-        neighbors=[]
-        for lane in range(5):
-            if not 2<=current[lane]<=29:raise RuntimeError('Candidate has no two-tap margin inside the measured range')
-            for delta in (-2,-1,1,2):
-                candidate=current.copy();candidate[lane]+=delta;neighbors.append(measure(candidate))
-        if not all(r['protocolPass'] for r in neighbors):raise RuntimeError('Final-setting neighborhood did not pass')
-        from trace_signal_analysis import native_summary
-        for duration in (100,1000):
-            row=measure(current,milliseconds=duration,holdout=True)
-            if not row['protocolPass'] or not row['echoInsideHardwareWindow']:raise RuntimeError('Candidate holdout/CDC failed')
-            folder=a.out/f"point-{row['index']:03d}"
-            acceptance=json.loads((folder/'acceptance.json').read_text(encoding='utf8'))
-            row['decode']=native_summary((folder/'etm.bin').read_bytes(),elf,acceptance['config'],folder/'validation-decode');save()
-            if not row['decode']['interiorPass']:raise RuntimeError('Candidate failed native instruction decode')
-        report['passed']=True;keep=a.keep_candidate;save()
+        if a.coarse_only:
+            report['coarseComplete']=True;save()
+        else:
+            for lane in range(5):
+                rows=[]
+                for tap in range(32):
+                    candidate=current.copy();candidate[lane]=tap;rows.append(measure(candidate))
+                window=choose_window({r['taps'][lane]:r['protocolPass'] for r in rows})
+                report['windows'].append(dict(lane=lane,otherTaps=current.copy(),window=window))
+                if window:current[lane]=window['tap']
+                else:current=list(min(rows,key=score)['taps'])
+                save()
+            report['candidate']=current;save()
+            # Check local margin under the final settings, since lane searches interact.
+            neighbors=[]
+            for lane in range(5):
+                if not 2<=current[lane]<=29:raise RuntimeError('Candidate has no two-tap margin inside the measured range')
+                for delta in (-2,-1,1,2):
+                    candidate=current.copy();candidate[lane]+=delta;neighbors.append(measure(candidate))
+            if not all(r['protocolPass'] for r in neighbors):raise RuntimeError('Final-setting neighborhood did not pass')
+            from trace_signal_analysis import native_summary
+            for duration in (100,1000):
+                row=measure(current,milliseconds=duration,holdout=True)
+                if not row['protocolPass'] or not row['echoInsideHardwareWindow']:raise RuntimeError('Candidate holdout/CDC failed')
+                folder=a.out/f"point-{row['index']:03d}"
+                acceptance=json.loads((folder/'acceptance.json').read_text(encoding='utf8'))
+                row['decode']=native_summary((folder/'etm.bin').read_bytes(),elf,acceptance['config'],folder/'validation-decode');save()
+                if not row['decode']['interiorPass']:raise RuntimeError('Candidate failed native instruction decode')
+            report['passed']=True;keep=a.keep_candidate;save()
     except Exception as e:report['error']=str(e);save();raise
     finally:
         try:
@@ -166,6 +168,8 @@ def main():
         except Exception as e:report['restoreError']=str(e);report['passed']=False;raise
         finally:
             report['candidateRetained']=keep;save()
+    if a.coarse_only and report.get('coarseComplete') and not report.get('echoError'):
+        print(json.dumps(dict(coarseComplete=True,calibrationPassed=False)));return 0
     if not report['passed']:raise RuntimeError('Calibration/echo did not pass')
     print(json.dumps(dict(passed=True,candidate=report['candidate'],candidateRetained=keep)))
     return 0
