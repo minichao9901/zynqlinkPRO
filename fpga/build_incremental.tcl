@@ -119,7 +119,9 @@ if {!$fresh_impl && ![get_property NEEDS_REFRESH [get_runs impl_1]] &&
     return
 }
 reset_run impl_1
+set used_incremental 0
 if {!$fresh_impl && [file exists $ref]} {
+    set used_incremental 1
     set_property INCREMENTAL_CHECKPOINT $ref [get_runs impl_1]
     puts "INCREMENTAL_IMPLEMENTATION_REFERENCE=$ref"
 } else {
@@ -130,7 +132,7 @@ launch_runs impl_1 -to_step route_design -jobs $::zynqlink_jobs
 wait_on_run impl_1
 if {[get_property PROGRESS [get_runs impl_1]] != "100%"} {error "Implementation failed"}
 if {[catch {source [file join $root fpga verify_routed.tcl]} timing_error]} {
-    if {$fresh_impl || (![string match {*Routed timing failed*} $timing_error] &&
+    if {!$used_incremental || (![string match {*Routed timing failed*} $timing_error] &&
                        ![string match {*write_bitstream*} $timing_error])} {error $timing_error}
     # A changed timing-critical block may not fit the reference placement.
     # Reuse every synthesis DCP, but allow a fresh implementation once.

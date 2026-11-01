@@ -35,6 +35,10 @@ module orbtrace_ddr_writer #(
   reg [4:0] burst_beats;
   reg burst_last;
   reg [31:0] limit,next_address;
+  reg payload_valid;
+  reg [4:0] payload_address;
+  reg [63:0] payload_data;
+  reg [7:0] payload_keep;
   function [3:0] byte_count(input [7:0] keep);
     // The interface accepts only contiguous low-byte masks. Decode them
     // directly instead of a general eight-input population-count adder.
@@ -67,13 +71,26 @@ module orbtrace_ddr_writer #(
   assign m_axi_wlast={1'b0,send_index}+5'd1==burst_beats;
   assign m_axi_wvalid=state==DATA;
   assign m_axi_bready=state==RESPONSE;
-  // Keep payload storage outside the asynchronous state-reset process so
-  // Vivado can infer simple dual-port distributed RAM instead of reset FFs.
-  always @(posedge clk)
+  // Retire one accepted payload every clock. Budget/ownership are reserved
+  // on the input handshake; data/keep/address/valid travel together to RAM.
+  // A full bank can enter ADDRESS on the following edge, when its last RAM
+  // write retires. DATA starts only after AW, so no reader sees pending data.
+  // This removes byte-budget/decode logic from distributed RAM write enables
+  // without inserting a bubble or delaying accepted_bytes used by pattern mode.
+  always @(posedge clk or negedge rst_n)
+    if(!rst_n)payload_valid<=0;
+    else payload_valid<=input_fire && valid_beat;
+  // Payload storage and pipeline data need no asynchronous reset.
+  always @(posedge clk)begin
     if(rst_n && input_fire && valid_beat)begin
-      data_bank[{producer_bank,fill_index}]<=s_axis_tdata;
-      keep_bank[{producer_bank,fill_index}]<=s_axis_tkeep;
+      payload_address<={producer_bank,fill_index};
+      payload_data<=s_axis_tdata;payload_keep<=s_axis_tkeep;
     end
+    if(rst_n && payload_valid)begin
+      data_bank[payload_address]<=payload_data;
+      keep_bank[payload_address]<=payload_keep;
+    end
+  end
   always @(posedge clk or negedge rst_n)
     if(!rst_n)begin
       busy<=0;done<=0;error<=0;error_code<=0;command_rejected<=0;

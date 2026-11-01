@@ -78,6 +78,8 @@ module swd_core (
     localparam [4:0] ST_WTURN    = 5'd16;
 
     reg [7:0] active_request;
+    reg active_mode;
+    reg ext_wait_zero,ext_wait_one;
     reg  [4:0] state;
     reg  [8:0] lsm_cnt;
     reg  [15:0] delay_cnt;
@@ -117,7 +119,7 @@ module swd_core (
     wire        dbg_swdio_i;
     wire        dbg_swdio_t;
 
-    assign result_valid = (state == ST_DONE) && mode;
+    assign result_valid = (state == ST_DONE) && active_mode;
     assign next_ready = result_valid && delay_fast == 0 && ack == 1 && !parity_err;
     wire compact_ack = delay_fast == 0 && ack_delay == 0 && !data_phase;
     wire early_rx = rx_boundary && (ack_delay == 0);
@@ -168,6 +170,7 @@ module swd_core (
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             active_request <= 0;
+            active_mode<=0;ext_wait_zero<=0;ext_wait_one<=0;
             state           <= ST_IDLE;
             lsm_cnt         <= 8'd0;
             delay_cnt       <= 16'd0;
@@ -190,6 +193,11 @@ module swd_core (
             busy            <= 1'b0;
             timestamp       <= 16'd0;
         end else begin
+            // Earlier ACK bits and configuration are stable well before the
+            // final extended-ACK sample. Predecode both possibilities so the
+            // IDDR half-cycle path only selects a registered decision.
+            ext_wait_zero<=!data_phase && ack_samples[1:0]==2'b10;
+            ext_wait_one<=!data_phase && ack_samples[1:0]==2'b00;
             case (state)
                 ST_IDLE: begin
                     swclk      <= 1'b1;
@@ -205,6 +213,7 @@ module swd_core (
 
                     if (start) begin
                         active_request <= xfer_request;
+                        active_mode<=mode;
                         busy       <= 1'b1;
                         ack        <= 3'd0;
                         parity_err <= 1'b0;
@@ -514,9 +523,7 @@ module swd_core (
                                 // WAIT/FAULT take a dedicated turnaround cycle:
                                 // the target needs a full clock after ACK2
                                 // before it can accept the next header.
-                                if (!data_phase &&
-                                    (({swdio_sample_fsm, ack_samples[1:0]} == 3'b010) ||
-                                     ({swdio_sample_fsm, ack_samples[1:0]} == 3'b100))) begin
+                                if (swdio_sample_fsm ? ext_wait_one : ext_wait_zero) begin
                                     // WAIT/FAULT: two-turnaround cycle before the
                                     // next header, then decode the stored bits.
                                     state   <= ST_WTURN;

@@ -1,0 +1,1390 @@
+Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2018.3 (win64) Build 2405991 Thu Dec  6 23:38:27 MST 2018
+| Date         : Sun Nov  1 13:20:02 2026
+| Host         : DESKTOP-0UKCPD3 running 64-bit major release  (build 9200)
+| Command      : report_timing -delay_type min -to [all_registers -async_pins] -max_paths 30 -file E:/zynqlinkPRO/build/fpga_dma_global/removal_target.rpt
+| Design       : system_wrapper
+| Device       : 7z020-clg400
+| Speed File   : -2  PRODUCTION 1.11 2014-09-11
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Timing Report
+
+Slack (MET) :             0.490ns  (arrival time - required time)
+  Source:                 system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.gcc_rst.sckt_wr_rst_cc_reg[0]/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/rpntr/gc0.count_d1_reg[1]/CLR
+                            (removal check against rising-edge clock clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             **async_default**
+  Path Type:              Removal (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_fpga_0 rise@0.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        0.457ns  (logic 0.186ns (40.727%)  route 0.271ns (59.273%))
+  Logic Levels:           1  (LUT3=1)
+  Clock Path Skew:        0.034ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.249ns
+    Source Clock Delay      (SCD):    0.952ns
+    Clock Pessimism Removal (CPR):    0.263ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.310     0.310    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.616     0.952    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/clk
+    SLICE_X3Y20          FDRE                                         r  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.gcc_rst.sckt_wr_rst_cc_reg[0]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X3Y20          FDRE (Prop_fdre_C_Q)         0.141     1.093 f  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.gcc_rst.sckt_wr_rst_cc_reg[0]/Q
+                         net (fo=3, routed)           0.137     1.229    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/sckt_wr_rst_cc[0]
+    SLICE_X5Y20          LUT3 (Prop_lut3_I1_O)        0.045     1.274 f  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/gc0.count_d1[4]_i_2/O
+                         net (fo=32, routed)          0.134     1.408    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/rpntr/gc0.count_d1_reg[0]_0
+    SLICE_X4Y20          FDCE                                         f  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/rpntr/gc0.count_d1_reg[1]/CLR
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.337     0.337    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.883     1.249    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/rpntr/clk
+    SLICE_X4Y20          FDCE                                         r  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/rpntr/gc0.count_d1_reg[1]/C
+                         clock pessimism             -0.263     0.986    
+    SLICE_X4Y20          FDCE (Remov_fdce_C_CLR)     -0.067     0.919    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/rpntr/gc0.count_d1_reg[1]
+  -------------------------------------------------------------------
+                         required time                         -0.919    
+                         arrival time                           1.408    
+  -------------------------------------------------------------------
+                         slack                                  0.490    
+
+Slack (MET) :             0.490ns  (arrival time - required time)
+  Source:                 system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.gcc_rst.sckt_wr_rst_cc_reg[0]/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/rpntr/gc0.count_d1_reg[2]/CLR
+                            (removal check against rising-edge clock clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             **async_default**
+  Path Type:              Removal (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_fpga_0 rise@0.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        0.457ns  (logic 0.186ns (40.727%)  route 0.271ns (59.273%))
+  Logic Levels:           1  (LUT3=1)
+  Clock Path Skew:        0.034ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.249ns
+    Source Clock Delay      (SCD):    0.952ns
+    Clock Pessimism Removal (CPR):    0.263ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.310     0.310    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.616     0.952    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/clk
+    SLICE_X3Y20          FDRE                                         r  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.gcc_rst.sckt_wr_rst_cc_reg[0]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X3Y20          FDRE (Prop_fdre_C_Q)         0.141     1.093 f  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.gcc_rst.sckt_wr_rst_cc_reg[0]/Q
+                         net (fo=3, routed)           0.137     1.229    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/sckt_wr_rst_cc[0]
+    SLICE_X5Y20          LUT3 (Prop_lut3_I1_O)        0.045     1.274 f  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/gc0.count_d1[4]_i_2/O
+                         net (fo=32, routed)          0.134     1.408    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/rpntr/gc0.count_d1_reg[0]_0
+    SLICE_X4Y20          FDCE                                         f  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/rpntr/gc0.count_d1_reg[2]/CLR
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.337     0.337    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.883     1.249    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/rpntr/clk
+    SLICE_X4Y20          FDCE                                         r  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/rpntr/gc0.count_d1_reg[2]/C
+                         clock pessimism             -0.263     0.986    
+    SLICE_X4Y20          FDCE (Remov_fdce_C_CLR)     -0.067     0.919    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/rpntr/gc0.count_d1_reg[2]
+  -------------------------------------------------------------------
+                         required time                         -0.919    
+                         arrival time                           1.408    
+  -------------------------------------------------------------------
+                         slack                                  0.490    
+
+Slack (MET) :             0.490ns  (arrival time - required time)
+  Source:                 system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.gcc_rst.sckt_wr_rst_cc_reg[0]/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/rpntr/gc0.count_reg[1]/CLR
+                            (removal check against rising-edge clock clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             **async_default**
+  Path Type:              Removal (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_fpga_0 rise@0.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        0.457ns  (logic 0.186ns (40.727%)  route 0.271ns (59.273%))
+  Logic Levels:           1  (LUT3=1)
+  Clock Path Skew:        0.034ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.249ns
+    Source Clock Delay      (SCD):    0.952ns
+    Clock Pessimism Removal (CPR):    0.263ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.310     0.310    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.616     0.952    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/clk
+    SLICE_X3Y20          FDRE                                         r  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.gcc_rst.sckt_wr_rst_cc_reg[0]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X3Y20          FDRE (Prop_fdre_C_Q)         0.141     1.093 f  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.gcc_rst.sckt_wr_rst_cc_reg[0]/Q
+                         net (fo=3, routed)           0.137     1.229    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/sckt_wr_rst_cc[0]
+    SLICE_X5Y20          LUT3 (Prop_lut3_I1_O)        0.045     1.274 f  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/gc0.count_d1[4]_i_2/O
+                         net (fo=32, routed)          0.134     1.408    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/rpntr/gc0.count_d1_reg[0]_0
+    SLICE_X4Y20          FDCE                                         f  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/rpntr/gc0.count_reg[1]/CLR
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.337     0.337    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.883     1.249    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/rpntr/clk
+    SLICE_X4Y20          FDCE                                         r  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/rpntr/gc0.count_reg[1]/C
+                         clock pessimism             -0.263     0.986    
+    SLICE_X4Y20          FDCE (Remov_fdce_C_CLR)     -0.067     0.919    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/rpntr/gc0.count_reg[1]
+  -------------------------------------------------------------------
+                         required time                         -0.919    
+                         arrival time                           1.408    
+  -------------------------------------------------------------------
+                         slack                                  0.490    
+
+Slack (MET) :             0.490ns  (arrival time - required time)
+  Source:                 system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.gcc_rst.sckt_wr_rst_cc_reg[0]/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/rpntr/gc0.count_reg[2]/CLR
+                            (removal check against rising-edge clock clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             **async_default**
+  Path Type:              Removal (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_fpga_0 rise@0.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        0.457ns  (logic 0.186ns (40.727%)  route 0.271ns (59.273%))
+  Logic Levels:           1  (LUT3=1)
+  Clock Path Skew:        0.034ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.249ns
+    Source Clock Delay      (SCD):    0.952ns
+    Clock Pessimism Removal (CPR):    0.263ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.310     0.310    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.616     0.952    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/clk
+    SLICE_X3Y20          FDRE                                         r  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.gcc_rst.sckt_wr_rst_cc_reg[0]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X3Y20          FDRE (Prop_fdre_C_Q)         0.141     1.093 f  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.gcc_rst.sckt_wr_rst_cc_reg[0]/Q
+                         net (fo=3, routed)           0.137     1.229    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/sckt_wr_rst_cc[0]
+    SLICE_X5Y20          LUT3 (Prop_lut3_I1_O)        0.045     1.274 f  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/gc0.count_d1[4]_i_2/O
+                         net (fo=32, routed)          0.134     1.408    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/rpntr/gc0.count_d1_reg[0]_0
+    SLICE_X4Y20          FDCE                                         f  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/rpntr/gc0.count_reg[2]/CLR
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.337     0.337    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.883     1.249    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/rpntr/clk
+    SLICE_X4Y20          FDCE                                         r  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/rpntr/gc0.count_reg[2]/C
+                         clock pessimism             -0.263     0.986    
+    SLICE_X4Y20          FDCE (Remov_fdce_C_CLR)     -0.067     0.919    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/rpntr/gc0.count_reg[2]
+  -------------------------------------------------------------------
+                         required time                         -0.919    
+                         arrival time                           1.408    
+  -------------------------------------------------------------------
+                         slack                                  0.490    
+
+Slack (MET) :             0.494ns  (arrival time - required time)
+  Source:                 system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.gcc_rst.sckt_wr_rst_cc_reg[0]/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/rpntr/gc0.count_reg[0]/PRE
+                            (removal check against rising-edge clock clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             **async_default**
+  Path Type:              Removal (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_fpga_0 rise@0.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        0.457ns  (logic 0.186ns (40.727%)  route 0.271ns (59.273%))
+  Logic Levels:           1  (LUT3=1)
+  Clock Path Skew:        0.034ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.249ns
+    Source Clock Delay      (SCD):    0.952ns
+    Clock Pessimism Removal (CPR):    0.263ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.310     0.310    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.616     0.952    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/clk
+    SLICE_X3Y20          FDRE                                         r  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.gcc_rst.sckt_wr_rst_cc_reg[0]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X3Y20          FDRE (Prop_fdre_C_Q)         0.141     1.093 f  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.gcc_rst.sckt_wr_rst_cc_reg[0]/Q
+                         net (fo=3, routed)           0.137     1.229    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/sckt_wr_rst_cc[0]
+    SLICE_X5Y20          LUT3 (Prop_lut3_I1_O)        0.045     1.274 f  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/gc0.count_d1[4]_i_2/O
+                         net (fo=32, routed)          0.134     1.408    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/rpntr/gc0.count_d1_reg[0]_0
+    SLICE_X4Y20          FDPE                                         f  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/rpntr/gc0.count_reg[0]/PRE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.337     0.337    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.883     1.249    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/rpntr/clk
+    SLICE_X4Y20          FDPE                                         r  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/rpntr/gc0.count_reg[0]/C
+                         clock pessimism             -0.263     0.986    
+    SLICE_X4Y20          FDPE (Remov_fdpe_C_PRE)     -0.071     0.915    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/rpntr/gc0.count_reg[0]
+  -------------------------------------------------------------------
+                         required time                         -0.915    
+                         arrival time                           1.408    
+  -------------------------------------------------------------------
+                         slack                                  0.494    
+
+Slack (MET) :             0.515ns  (arrival time - required time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/C
+                            (rising edge-triggered cell FDPE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg1_reg[7]/CLR
+                            (removal check against rising-edge clock clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             **async_default**
+  Path Type:              Removal (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_delay_ref rise@0.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        0.387ns  (logic 0.148ns (38.276%)  route 0.239ns (61.724%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.017ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.219ns
+    Source Clock Delay      (SCD):    0.920ns
+    Clock Pessimism Removal (CPR):    0.282ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.310     0.310    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.584     0.920    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X62Y9          FDPE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X62Y9          FDPE (Prop_fdpe_C_Q)         0.148     1.068 f  system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/Q
+                         net (fo=342, routed)         0.239     1.306    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/out[0]
+    SLICE_X63Y3          FDCE                                         f  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg1_reg[7]/CLR
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.337     0.337    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.853     1.219    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/ref_clk
+    SLICE_X63Y3          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg1_reg[7]/C
+                         clock pessimism             -0.282     0.937    
+    SLICE_X63Y3          FDCE (Remov_fdce_C_CLR)     -0.145     0.791    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg1_reg[7]
+  -------------------------------------------------------------------
+                         required time                         -0.791    
+                         arrival time                           1.306    
+  -------------------------------------------------------------------
+                         slack                                  0.515    
+
+Slack (MET) :             0.515ns  (arrival time - required time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/C
+                            (rising edge-triggered cell FDPE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[7]/CLR
+                            (removal check against rising-edge clock clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             **async_default**
+  Path Type:              Removal (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_delay_ref rise@0.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        0.387ns  (logic 0.148ns (38.276%)  route 0.239ns (61.724%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.017ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.219ns
+    Source Clock Delay      (SCD):    0.920ns
+    Clock Pessimism Removal (CPR):    0.282ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.310     0.310    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.584     0.920    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X62Y9          FDPE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X62Y9          FDPE (Prop_fdpe_C_Q)         0.148     1.068 f  system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/Q
+                         net (fo=342, routed)         0.239     1.306    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/out[0]
+    SLICE_X63Y3          FDCE                                         f  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[7]/CLR
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.337     0.337    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.853     1.219    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/ref_clk
+    SLICE_X63Y3          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[7]/C
+                         clock pessimism             -0.282     0.937    
+    SLICE_X63Y3          FDCE (Remov_fdce_C_CLR)     -0.145     0.791    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[7]
+  -------------------------------------------------------------------
+                         required time                         -0.791    
+                         arrival time                           1.306    
+  -------------------------------------------------------------------
+                         slack                                  0.515    
+
+Slack (MET) :             0.515ns  (arrival time - required time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/C
+                            (rising edge-triggered cell FDPE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg_reg[0]/CLR
+                            (removal check against rising-edge clock clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             **async_default**
+  Path Type:              Removal (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_delay_ref rise@0.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        0.387ns  (logic 0.148ns (38.276%)  route 0.239ns (61.724%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.017ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.219ns
+    Source Clock Delay      (SCD):    0.920ns
+    Clock Pessimism Removal (CPR):    0.282ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.310     0.310    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.584     0.920    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X62Y9          FDPE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X62Y9          FDPE (Prop_fdpe_C_Q)         0.148     1.068 f  system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/Q
+                         net (fo=342, routed)         0.239     1.306    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/out[0]
+    SLICE_X63Y3          FDCE                                         f  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg_reg[0]/CLR
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.337     0.337    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.853     1.219    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/ref_clk
+    SLICE_X63Y3          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg_reg[0]/C
+                         clock pessimism             -0.282     0.937    
+    SLICE_X63Y3          FDCE (Remov_fdce_C_CLR)     -0.145     0.791    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg_reg[0]
+  -------------------------------------------------------------------
+                         required time                         -0.791    
+                         arrival time                           1.306    
+  -------------------------------------------------------------------
+                         slack                                  0.515    
+
+Slack (MET) :             0.515ns  (arrival time - required time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/C
+                            (rising edge-triggered cell FDPE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg_reg[2]/CLR
+                            (removal check against rising-edge clock clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             **async_default**
+  Path Type:              Removal (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_delay_ref rise@0.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        0.387ns  (logic 0.148ns (38.276%)  route 0.239ns (61.724%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.017ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.219ns
+    Source Clock Delay      (SCD):    0.920ns
+    Clock Pessimism Removal (CPR):    0.282ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.310     0.310    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.584     0.920    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X62Y9          FDPE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X62Y9          FDPE (Prop_fdpe_C_Q)         0.148     1.068 f  system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/Q
+                         net (fo=342, routed)         0.239     1.306    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/out[0]
+    SLICE_X63Y3          FDCE                                         f  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg_reg[2]/CLR
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.337     0.337    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.853     1.219    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/ref_clk
+    SLICE_X63Y3          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg_reg[2]/C
+                         clock pessimism             -0.282     0.937    
+    SLICE_X63Y3          FDCE (Remov_fdce_C_CLR)     -0.145     0.791    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg_reg[2]
+  -------------------------------------------------------------------
+                         required time                         -0.791    
+                         arrival time                           1.306    
+  -------------------------------------------------------------------
+                         slack                                  0.515    
+
+Slack (MET) :             0.515ns  (arrival time - required time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/C
+                            (rising edge-triggered cell FDPE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg_reg[3]/CLR
+                            (removal check against rising-edge clock clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             **async_default**
+  Path Type:              Removal (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_delay_ref rise@0.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        0.387ns  (logic 0.148ns (38.276%)  route 0.239ns (61.724%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.017ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.219ns
+    Source Clock Delay      (SCD):    0.920ns
+    Clock Pessimism Removal (CPR):    0.282ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.310     0.310    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.584     0.920    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X62Y9          FDPE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X62Y9          FDPE (Prop_fdpe_C_Q)         0.148     1.068 f  system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/Q
+                         net (fo=342, routed)         0.239     1.306    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/out[0]
+    SLICE_X63Y3          FDCE                                         f  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg_reg[3]/CLR
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.337     0.337    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.853     1.219    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/ref_clk
+    SLICE_X63Y3          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg_reg[3]/C
+                         clock pessimism             -0.282     0.937    
+    SLICE_X63Y3          FDCE (Remov_fdce_C_CLR)     -0.145     0.791    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg_reg[3]
+  -------------------------------------------------------------------
+                         required time                         -0.791    
+                         arrival time                           1.306    
+  -------------------------------------------------------------------
+                         slack                                  0.515    
+
+Slack (MET) :             0.515ns  (arrival time - required time)
+  Source:                 system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.gcc_rst.sckt_wr_rst_cc_reg[0]/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.wr/wpntr/gcc0.gc0.count_d1_reg[2]/CLR
+                            (removal check against rising-edge clock clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             **async_default**
+  Path Type:              Removal (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_fpga_0 rise@0.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        0.457ns  (logic 0.186ns (40.727%)  route 0.271ns (59.273%))
+  Logic Levels:           1  (LUT3=1)
+  Clock Path Skew:        0.034ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.249ns
+    Source Clock Delay      (SCD):    0.952ns
+    Clock Pessimism Removal (CPR):    0.263ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.310     0.310    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.616     0.952    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/clk
+    SLICE_X3Y20          FDRE                                         r  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.gcc_rst.sckt_wr_rst_cc_reg[0]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X3Y20          FDRE (Prop_fdre_C_Q)         0.141     1.093 f  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.gcc_rst.sckt_wr_rst_cc_reg[0]/Q
+                         net (fo=3, routed)           0.137     1.229    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/sckt_wr_rst_cc[0]
+    SLICE_X5Y20          LUT3 (Prop_lut3_I1_O)        0.045     1.274 f  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/gc0.count_d1[4]_i_2/O
+                         net (fo=32, routed)          0.134     1.408    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.wr/wpntr/AR[0]
+    SLICE_X5Y20          FDCE                                         f  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.wr/wpntr/gcc0.gc0.count_d1_reg[2]/CLR
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.337     0.337    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.883     1.249    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.wr/wpntr/clk
+    SLICE_X5Y20          FDCE                                         r  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.wr/wpntr/gcc0.gc0.count_d1_reg[2]/C
+                         clock pessimism             -0.263     0.986    
+    SLICE_X5Y20          FDCE (Remov_fdce_C_CLR)     -0.092     0.894    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.wr/wpntr/gcc0.gc0.count_d1_reg[2]
+  -------------------------------------------------------------------
+                         required time                         -0.893    
+                         arrival time                           1.408    
+  -------------------------------------------------------------------
+                         slack                                  0.515    
+
+Slack (MET) :             0.515ns  (arrival time - required time)
+  Source:                 system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.gcc_rst.sckt_wr_rst_cc_reg[0]/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.wr/wpntr/gcc0.gc0.count_d1_reg[3]/CLR
+                            (removal check against rising-edge clock clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             **async_default**
+  Path Type:              Removal (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_fpga_0 rise@0.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        0.457ns  (logic 0.186ns (40.727%)  route 0.271ns (59.273%))
+  Logic Levels:           1  (LUT3=1)
+  Clock Path Skew:        0.034ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.249ns
+    Source Clock Delay      (SCD):    0.952ns
+    Clock Pessimism Removal (CPR):    0.263ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.310     0.310    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.616     0.952    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/clk
+    SLICE_X3Y20          FDRE                                         r  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.gcc_rst.sckt_wr_rst_cc_reg[0]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X3Y20          FDRE (Prop_fdre_C_Q)         0.141     1.093 f  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.gcc_rst.sckt_wr_rst_cc_reg[0]/Q
+                         net (fo=3, routed)           0.137     1.229    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/sckt_wr_rst_cc[0]
+    SLICE_X5Y20          LUT3 (Prop_lut3_I1_O)        0.045     1.274 f  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/gc0.count_d1[4]_i_2/O
+                         net (fo=32, routed)          0.134     1.408    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.wr/wpntr/AR[0]
+    SLICE_X5Y20          FDCE                                         f  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.wr/wpntr/gcc0.gc0.count_d1_reg[3]/CLR
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.337     0.337    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.883     1.249    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.wr/wpntr/clk
+    SLICE_X5Y20          FDCE                                         r  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.wr/wpntr/gcc0.gc0.count_d1_reg[3]/C
+                         clock pessimism             -0.263     0.986    
+    SLICE_X5Y20          FDCE (Remov_fdce_C_CLR)     -0.092     0.894    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.wr/wpntr/gcc0.gc0.count_d1_reg[3]
+  -------------------------------------------------------------------
+                         required time                         -0.893    
+                         arrival time                           1.408    
+  -------------------------------------------------------------------
+                         slack                                  0.515    
+
+Slack (MET) :             0.515ns  (arrival time - required time)
+  Source:                 system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.gcc_rst.sckt_wr_rst_cc_reg[0]/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.wr/wpntr/gcc0.gc0.count_d1_reg[4]/CLR
+                            (removal check against rising-edge clock clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             **async_default**
+  Path Type:              Removal (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_fpga_0 rise@0.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        0.457ns  (logic 0.186ns (40.727%)  route 0.271ns (59.273%))
+  Logic Levels:           1  (LUT3=1)
+  Clock Path Skew:        0.034ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.249ns
+    Source Clock Delay      (SCD):    0.952ns
+    Clock Pessimism Removal (CPR):    0.263ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.310     0.310    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.616     0.952    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/clk
+    SLICE_X3Y20          FDRE                                         r  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.gcc_rst.sckt_wr_rst_cc_reg[0]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X3Y20          FDRE (Prop_fdre_C_Q)         0.141     1.093 f  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.gcc_rst.sckt_wr_rst_cc_reg[0]/Q
+                         net (fo=3, routed)           0.137     1.229    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/sckt_wr_rst_cc[0]
+    SLICE_X5Y20          LUT3 (Prop_lut3_I1_O)        0.045     1.274 f  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/gc0.count_d1[4]_i_2/O
+                         net (fo=32, routed)          0.134     1.408    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.wr/wpntr/AR[0]
+    SLICE_X5Y20          FDCE                                         f  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.wr/wpntr/gcc0.gc0.count_d1_reg[4]/CLR
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.337     0.337    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.883     1.249    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.wr/wpntr/clk
+    SLICE_X5Y20          FDCE                                         r  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.wr/wpntr/gcc0.gc0.count_d1_reg[4]/C
+                         clock pessimism             -0.263     0.986    
+    SLICE_X5Y20          FDCE (Remov_fdce_C_CLR)     -0.092     0.894    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.wr/wpntr/gcc0.gc0.count_d1_reg[4]
+  -------------------------------------------------------------------
+                         required time                         -0.893    
+                         arrival time                           1.408    
+  -------------------------------------------------------------------
+                         slack                                  0.515    
+
+Slack (MET) :             0.515ns  (arrival time - required time)
+  Source:                 system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.gcc_rst.sckt_wr_rst_cc_reg[0]/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.wr/wpntr/gcc0.gc0.count_reg[3]/CLR
+                            (removal check against rising-edge clock clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             **async_default**
+  Path Type:              Removal (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_fpga_0 rise@0.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        0.457ns  (logic 0.186ns (40.727%)  route 0.271ns (59.273%))
+  Logic Levels:           1  (LUT3=1)
+  Clock Path Skew:        0.034ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.249ns
+    Source Clock Delay      (SCD):    0.952ns
+    Clock Pessimism Removal (CPR):    0.263ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.310     0.310    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.616     0.952    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/clk
+    SLICE_X3Y20          FDRE                                         r  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.gcc_rst.sckt_wr_rst_cc_reg[0]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X3Y20          FDRE (Prop_fdre_C_Q)         0.141     1.093 f  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.gcc_rst.sckt_wr_rst_cc_reg[0]/Q
+                         net (fo=3, routed)           0.137     1.229    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/sckt_wr_rst_cc[0]
+    SLICE_X5Y20          LUT3 (Prop_lut3_I1_O)        0.045     1.274 f  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/gc0.count_d1[4]_i_2/O
+                         net (fo=32, routed)          0.134     1.408    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.wr/wpntr/AR[0]
+    SLICE_X5Y20          FDCE                                         f  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.wr/wpntr/gcc0.gc0.count_reg[3]/CLR
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.337     0.337    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.883     1.249    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.wr/wpntr/clk
+    SLICE_X5Y20          FDCE                                         r  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.wr/wpntr/gcc0.gc0.count_reg[3]/C
+                         clock pessimism             -0.263     0.986    
+    SLICE_X5Y20          FDCE (Remov_fdce_C_CLR)     -0.092     0.894    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.wr/wpntr/gcc0.gc0.count_reg[3]
+  -------------------------------------------------------------------
+                         required time                         -0.893    
+                         arrival time                           1.408    
+  -------------------------------------------------------------------
+                         slack                                  0.515    
+
+Slack (MET) :             0.515ns  (arrival time - required time)
+  Source:                 system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.gcc_rst.sckt_wr_rst_cc_reg[0]/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.wr/wpntr/gcc0.gc0.count_reg[4]/CLR
+                            (removal check against rising-edge clock clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             **async_default**
+  Path Type:              Removal (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_fpga_0 rise@0.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        0.457ns  (logic 0.186ns (40.727%)  route 0.271ns (59.273%))
+  Logic Levels:           1  (LUT3=1)
+  Clock Path Skew:        0.034ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.249ns
+    Source Clock Delay      (SCD):    0.952ns
+    Clock Pessimism Removal (CPR):    0.263ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.310     0.310    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.616     0.952    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/clk
+    SLICE_X3Y20          FDRE                                         r  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.gcc_rst.sckt_wr_rst_cc_reg[0]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X3Y20          FDRE (Prop_fdre_C_Q)         0.141     1.093 f  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.gcc_rst.sckt_wr_rst_cc_reg[0]/Q
+                         net (fo=3, routed)           0.137     1.229    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/sckt_wr_rst_cc[0]
+    SLICE_X5Y20          LUT3 (Prop_lut3_I1_O)        0.045     1.274 f  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/gc0.count_d1[4]_i_2/O
+                         net (fo=32, routed)          0.134     1.408    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.wr/wpntr/AR[0]
+    SLICE_X5Y20          FDCE                                         f  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.wr/wpntr/gcc0.gc0.count_reg[4]/CLR
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.337     0.337    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.883     1.249    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.wr/wpntr/clk
+    SLICE_X5Y20          FDCE                                         r  system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.wr/wpntr/gcc0.gc0.count_reg[4]/C
+                         clock pessimism             -0.263     0.986    
+    SLICE_X5Y20          FDCE (Remov_fdce_C_CLR)     -0.092     0.894    system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.wr/wpntr/gcc0.gc0.count_reg[4]
+  -------------------------------------------------------------------
+                         required time                         -0.893    
+                         arrival time                           1.408    
+  -------------------------------------------------------------------
+                         slack                                  0.515    
+
+Slack (MET) :             0.534ns  (arrival time - required time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/C
+                            (rising edge-triggered cell FDPE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[21]/CLR
+                            (removal check against rising-edge clock clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             **async_default**
+  Path Type:              Removal (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_delay_ref rise@0.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        0.424ns  (logic 0.148ns (34.940%)  route 0.276ns (65.060%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.035ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.218ns
+    Source Clock Delay      (SCD):    0.920ns
+    Clock Pessimism Removal (CPR):    0.263ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.310     0.310    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.584     0.920    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X62Y9          FDPE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X62Y9          FDPE (Prop_fdpe_C_Q)         0.148     1.068 f  system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/Q
+                         net (fo=342, routed)         0.276     1.343    system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset[1]
+    SLICE_X64Y9          FDCE                                         f  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[21]/CLR
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.337     0.337    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.852     1.218    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X64Y9          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[21]/C
+                         clock pessimism             -0.263     0.955    
+    SLICE_X64Y9          FDCE (Remov_fdce_C_CLR)     -0.145     0.810    system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[21]
+  -------------------------------------------------------------------
+                         required time                         -0.810    
+                         arrival time                           1.343    
+  -------------------------------------------------------------------
+                         slack                                  0.534    
+
+Slack (MET) :             0.537ns  (arrival time - required time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/C
+                            (rising edge-triggered cell FDPE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[16]/CLR
+                            (removal check against rising-edge clock clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             **async_default**
+  Path Type:              Removal (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_delay_ref rise@0.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        0.408ns  (logic 0.148ns (36.291%)  route 0.260ns (63.709%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.016ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.218ns
+    Source Clock Delay      (SCD):    0.920ns
+    Clock Pessimism Removal (CPR):    0.282ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.310     0.310    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.584     0.920    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X62Y9          FDPE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X62Y9          FDPE (Prop_fdpe_C_Q)         0.148     1.068 f  system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/Q
+                         net (fo=342, routed)         0.260     1.327    system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset[1]
+    SLICE_X60Y9          FDCE                                         f  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[16]/CLR
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.337     0.337    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.852     1.218    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X60Y9          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[16]/C
+                         clock pessimism             -0.282     0.936    
+    SLICE_X60Y9          FDCE (Remov_fdce_C_CLR)     -0.145     0.791    system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[16]
+  -------------------------------------------------------------------
+                         required time                         -0.791    
+                         arrival time                           1.327    
+  -------------------------------------------------------------------
+                         slack                                  0.537    
+
+Slack (MET) :             0.537ns  (arrival time - required time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/C
+                            (rising edge-triggered cell FDPE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[17]/CLR
+                            (removal check against rising-edge clock clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             **async_default**
+  Path Type:              Removal (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_delay_ref rise@0.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        0.408ns  (logic 0.148ns (36.291%)  route 0.260ns (63.709%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.016ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.218ns
+    Source Clock Delay      (SCD):    0.920ns
+    Clock Pessimism Removal (CPR):    0.282ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.310     0.310    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.584     0.920    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X62Y9          FDPE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X62Y9          FDPE (Prop_fdpe_C_Q)         0.148     1.068 f  system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/Q
+                         net (fo=342, routed)         0.260     1.327    system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset[1]
+    SLICE_X60Y9          FDCE                                         f  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[17]/CLR
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.337     0.337    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.852     1.218    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X60Y9          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[17]/C
+                         clock pessimism             -0.282     0.936    
+    SLICE_X60Y9          FDCE (Remov_fdce_C_CLR)     -0.145     0.791    system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[17]
+  -------------------------------------------------------------------
+                         required time                         -0.791    
+                         arrival time                           1.327    
+  -------------------------------------------------------------------
+                         slack                                  0.537    
+
+Slack (MET) :             0.537ns  (arrival time - required time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/C
+                            (rising edge-triggered cell FDPE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[18]/CLR
+                            (removal check against rising-edge clock clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             **async_default**
+  Path Type:              Removal (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_delay_ref rise@0.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        0.408ns  (logic 0.148ns (36.291%)  route 0.260ns (63.709%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.016ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.218ns
+    Source Clock Delay      (SCD):    0.920ns
+    Clock Pessimism Removal (CPR):    0.282ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.310     0.310    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.584     0.920    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X62Y9          FDPE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X62Y9          FDPE (Prop_fdpe_C_Q)         0.148     1.068 f  system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/Q
+                         net (fo=342, routed)         0.260     1.327    system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset[1]
+    SLICE_X60Y9          FDCE                                         f  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[18]/CLR
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.337     0.337    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.852     1.218    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X60Y9          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[18]/C
+                         clock pessimism             -0.282     0.936    
+    SLICE_X60Y9          FDCE (Remov_fdce_C_CLR)     -0.145     0.791    system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[18]
+  -------------------------------------------------------------------
+                         required time                         -0.791    
+                         arrival time                           1.327    
+  -------------------------------------------------------------------
+                         slack                                  0.537    
+
+Slack (MET) :             0.537ns  (arrival time - required time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/C
+                            (rising edge-triggered cell FDPE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[19]/CLR
+                            (removal check against rising-edge clock clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             **async_default**
+  Path Type:              Removal (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_delay_ref rise@0.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        0.408ns  (logic 0.148ns (36.291%)  route 0.260ns (63.709%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.016ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.218ns
+    Source Clock Delay      (SCD):    0.920ns
+    Clock Pessimism Removal (CPR):    0.282ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.310     0.310    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.584     0.920    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X62Y9          FDPE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X62Y9          FDPE (Prop_fdpe_C_Q)         0.148     1.068 f  system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/Q
+                         net (fo=342, routed)         0.260     1.327    system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset[1]
+    SLICE_X60Y9          FDCE                                         f  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[19]/CLR
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.337     0.337    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.852     1.218    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X60Y9          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[19]/C
+                         clock pessimism             -0.282     0.936    
+    SLICE_X60Y9          FDCE (Remov_fdce_C_CLR)     -0.145     0.791    system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[19]
+  -------------------------------------------------------------------
+                         required time                         -0.791    
+                         arrival time                           1.327    
+  -------------------------------------------------------------------
+                         slack                                  0.537    
+
+Slack (MET) :             0.540ns  (arrival time - required time)
+  Source:                 system_i/etm_ddr_bus/s00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.gcc_rst.sckt_wr_rst_cc_reg[0]/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/etm_ddr_bus/s00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/gr1.gr1_int.rfwft/gpregsm1.curr_fwft_state_reg[1]/CLR
+                            (removal check against rising-edge clock clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             **async_default**
+  Path Type:              Removal (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_fpga_0 rise@0.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        0.487ns  (logic 0.186ns (38.217%)  route 0.301ns (61.783%))
+  Logic Levels:           1  (LUT3=1)
+  Clock Path Skew:        0.014ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.187ns
+    Source Clock Delay      (SCD):    0.892ns
+    Clock Pessimism Removal (CPR):    0.281ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.310     0.310    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.556     0.892    system_i/etm_ddr_bus/s00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/clk
+    SLICE_X35Y61         FDRE                                         r  system_i/etm_ddr_bus/s00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.gcc_rst.sckt_wr_rst_cc_reg[0]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X35Y61         FDRE (Prop_fdre_C_Q)         0.141     1.033 f  system_i/etm_ddr_bus/s00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.gcc_rst.sckt_wr_rst_cc_reg[0]/Q
+                         net (fo=3, routed)           0.150     1.183    system_i/etm_ddr_bus/s00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/sckt_wr_rst_cc[0]
+    SLICE_X35Y61         LUT3 (Prop_lut3_I1_O)        0.045     1.228 f  system_i/etm_ddr_bus/s00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/gc0.count_d1[4]_i_2/O
+                         net (fo=32, routed)          0.150     1.378    system_i/etm_ddr_bus/s00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/gr1.gr1_int.rfwft/gpregsm1.user_valid_reg_0
+    SLICE_X34Y62         FDCE                                         f  system_i/etm_ddr_bus/s00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/gr1.gr1_int.rfwft/gpregsm1.curr_fwft_state_reg[1]/CLR
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.337     0.337    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.821     1.187    system_i/etm_ddr_bus/s00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/gr1.gr1_int.rfwft/clk
+    SLICE_X34Y62         FDCE                                         r  system_i/etm_ddr_bus/s00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/gr1.gr1_int.rfwft/gpregsm1.curr_fwft_state_reg[1]/C
+                         clock pessimism             -0.281     0.906    
+    SLICE_X34Y62         FDCE (Remov_fdce_C_CLR)     -0.067     0.839    system_i/etm_ddr_bus/s00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/gr1.gr1_int.rfwft/gpregsm1.curr_fwft_state_reg[1]
+  -------------------------------------------------------------------
+                         required time                         -0.839    
+                         arrival time                           1.378    
+  -------------------------------------------------------------------
+                         slack                                  0.540    
+
+Slack (MET) :             0.544ns  (arrival time - required time)
+  Source:                 system_i/etm_ddr_bus/s00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.gcc_rst.sckt_wr_rst_cc_reg[0]/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/etm_ddr_bus/s00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/gr1.gr1_int.rfwft/empty_fwft_fb_i_reg/PRE
+                            (removal check against rising-edge clock clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             **async_default**
+  Path Type:              Removal (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_fpga_0 rise@0.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        0.487ns  (logic 0.186ns (38.217%)  route 0.301ns (61.783%))
+  Logic Levels:           1  (LUT3=1)
+  Clock Path Skew:        0.014ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.187ns
+    Source Clock Delay      (SCD):    0.892ns
+    Clock Pessimism Removal (CPR):    0.281ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.310     0.310    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.556     0.892    system_i/etm_ddr_bus/s00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/clk
+    SLICE_X35Y61         FDRE                                         r  system_i/etm_ddr_bus/s00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.gcc_rst.sckt_wr_rst_cc_reg[0]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X35Y61         FDRE (Prop_fdre_C_Q)         0.141     1.033 f  system_i/etm_ddr_bus/s00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.gcc_rst.sckt_wr_rst_cc_reg[0]/Q
+                         net (fo=3, routed)           0.150     1.183    system_i/etm_ddr_bus/s00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/sckt_wr_rst_cc[0]
+    SLICE_X35Y61         LUT3 (Prop_lut3_I1_O)        0.045     1.228 f  system_i/etm_ddr_bus/s00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/gc0.count_d1[4]_i_2/O
+                         net (fo=32, routed)          0.150     1.378    system_i/etm_ddr_bus/s00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/gr1.gr1_int.rfwft/gpregsm1.user_valid_reg_0
+    SLICE_X34Y62         FDPE                                         f  system_i/etm_ddr_bus/s00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/gr1.gr1_int.rfwft/empty_fwft_fb_i_reg/PRE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.337     0.337    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.821     1.187    system_i/etm_ddr_bus/s00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/gr1.gr1_int.rfwft/clk
+    SLICE_X34Y62         FDPE                                         r  system_i/etm_ddr_bus/s00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/gr1.gr1_int.rfwft/empty_fwft_fb_i_reg/C
+                         clock pessimism             -0.281     0.906    
+    SLICE_X34Y62         FDPE (Remov_fdpe_C_PRE)     -0.071     0.835    system_i/etm_ddr_bus/s00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/gr1.gr1_int.rfwft/empty_fwft_fb_i_reg
+  -------------------------------------------------------------------
+                         required time                         -0.835    
+                         arrival time                           1.378    
+  -------------------------------------------------------------------
+                         slack                                  0.544    
+
+Slack (MET) :             0.547ns  (arrival time - required time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/C
+                            (rising edge-triggered cell FDPE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/FSM_onehot_state_reg[3]/CLR
+                            (removal check against rising-edge clock clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             **async_default**
+  Path Type:              Removal (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_delay_ref rise@0.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        0.418ns  (logic 0.148ns (35.392%)  route 0.270ns (64.608%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.016ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.218ns
+    Source Clock Delay      (SCD):    0.920ns
+    Clock Pessimism Removal (CPR):    0.282ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.310     0.310    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.584     0.920    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X62Y9          FDPE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X62Y9          FDPE (Prop_fdpe_C_Q)         0.148     1.068 f  system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/Q
+                         net (fo=342, routed)         0.270     1.338    system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset[1]
+    SLICE_X61Y8          FDCE                                         f  system_i/etm_ddr_0/inst/framed_capture.capture/FSM_onehot_state_reg[3]/CLR
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.337     0.337    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.852     1.218    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X61Y8          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/FSM_onehot_state_reg[3]/C
+                         clock pessimism             -0.282     0.936    
+    SLICE_X61Y8          FDCE (Remov_fdce_C_CLR)     -0.145     0.791    system_i/etm_ddr_0/inst/framed_capture.capture/FSM_onehot_state_reg[3]
+  -------------------------------------------------------------------
+                         required time                         -0.791    
+                         arrival time                           1.338    
+  -------------------------------------------------------------------
+                         slack                                  0.547    
+
+Slack (MET) :             0.547ns  (arrival time - required time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/C
+                            (rising edge-triggered cell FDPE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/FSM_onehot_state_reg[4]/CLR
+                            (removal check against rising-edge clock clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             **async_default**
+  Path Type:              Removal (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_delay_ref rise@0.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        0.418ns  (logic 0.148ns (35.392%)  route 0.270ns (64.608%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.016ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.218ns
+    Source Clock Delay      (SCD):    0.920ns
+    Clock Pessimism Removal (CPR):    0.282ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.310     0.310    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.584     0.920    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X62Y9          FDPE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X62Y9          FDPE (Prop_fdpe_C_Q)         0.148     1.068 f  system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/Q
+                         net (fo=342, routed)         0.270     1.338    system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset[1]
+    SLICE_X61Y8          FDCE                                         f  system_i/etm_ddr_0/inst/framed_capture.capture/FSM_onehot_state_reg[4]/CLR
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.337     0.337    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.852     1.218    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X61Y8          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/FSM_onehot_state_reg[4]/C
+                         clock pessimism             -0.282     0.936    
+    SLICE_X61Y8          FDCE (Remov_fdce_C_CLR)     -0.145     0.791    system_i/etm_ddr_0/inst/framed_capture.capture/FSM_onehot_state_reg[4]
+  -------------------------------------------------------------------
+                         required time                         -0.791    
+                         arrival time                           1.338    
+  -------------------------------------------------------------------
+                         slack                                  0.547    
+
+Slack (MET) :             0.551ns  (arrival time - required time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/C
+                            (rising edge-triggered cell FDPE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[12]/CLR
+                            (removal check against rising-edge clock clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             **async_default**
+  Path Type:              Removal (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_delay_ref rise@0.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        0.422ns  (logic 0.148ns (35.078%)  route 0.274ns (64.922%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.016ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.218ns
+    Source Clock Delay      (SCD):    0.920ns
+    Clock Pessimism Removal (CPR):    0.282ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.310     0.310    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.584     0.920    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X62Y9          FDPE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X62Y9          FDPE (Prop_fdpe_C_Q)         0.148     1.068 f  system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/Q
+                         net (fo=342, routed)         0.274     1.341    system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset[1]
+    SLICE_X60Y8          FDCE                                         f  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[12]/CLR
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.337     0.337    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.852     1.218    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X60Y8          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[12]/C
+                         clock pessimism             -0.282     0.936    
+    SLICE_X60Y8          FDCE (Remov_fdce_C_CLR)     -0.145     0.791    system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[12]
+  -------------------------------------------------------------------
+                         required time                         -0.791    
+                         arrival time                           1.341    
+  -------------------------------------------------------------------
+                         slack                                  0.551    
+
+Slack (MET) :             0.551ns  (arrival time - required time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/C
+                            (rising edge-triggered cell FDPE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[13]/CLR
+                            (removal check against rising-edge clock clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             **async_default**
+  Path Type:              Removal (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_delay_ref rise@0.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        0.422ns  (logic 0.148ns (35.078%)  route 0.274ns (64.922%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.016ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.218ns
+    Source Clock Delay      (SCD):    0.920ns
+    Clock Pessimism Removal (CPR):    0.282ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.310     0.310    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.584     0.920    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X62Y9          FDPE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X62Y9          FDPE (Prop_fdpe_C_Q)         0.148     1.068 f  system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/Q
+                         net (fo=342, routed)         0.274     1.341    system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset[1]
+    SLICE_X60Y8          FDCE                                         f  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[13]/CLR
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.337     0.337    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.852     1.218    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X60Y8          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[13]/C
+                         clock pessimism             -0.282     0.936    
+    SLICE_X60Y8          FDCE (Remov_fdce_C_CLR)     -0.145     0.791    system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[13]
+  -------------------------------------------------------------------
+                         required time                         -0.791    
+                         arrival time                           1.341    
+  -------------------------------------------------------------------
+                         slack                                  0.551    
+
+Slack (MET) :             0.551ns  (arrival time - required time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/C
+                            (rising edge-triggered cell FDPE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[14]/CLR
+                            (removal check against rising-edge clock clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             **async_default**
+  Path Type:              Removal (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_delay_ref rise@0.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        0.422ns  (logic 0.148ns (35.078%)  route 0.274ns (64.922%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.016ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.218ns
+    Source Clock Delay      (SCD):    0.920ns
+    Clock Pessimism Removal (CPR):    0.282ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.310     0.310    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.584     0.920    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X62Y9          FDPE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X62Y9          FDPE (Prop_fdpe_C_Q)         0.148     1.068 f  system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/Q
+                         net (fo=342, routed)         0.274     1.341    system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset[1]
+    SLICE_X60Y8          FDCE                                         f  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[14]/CLR
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.337     0.337    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.852     1.218    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X60Y8          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[14]/C
+                         clock pessimism             -0.282     0.936    
+    SLICE_X60Y8          FDCE (Remov_fdce_C_CLR)     -0.145     0.791    system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[14]
+  -------------------------------------------------------------------
+                         required time                         -0.791    
+                         arrival time                           1.341    
+  -------------------------------------------------------------------
+                         slack                                  0.551    
+
+Slack (MET) :             0.551ns  (arrival time - required time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/C
+                            (rising edge-triggered cell FDPE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[15]/CLR
+                            (removal check against rising-edge clock clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             **async_default**
+  Path Type:              Removal (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_delay_ref rise@0.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        0.422ns  (logic 0.148ns (35.078%)  route 0.274ns (64.922%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.016ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.218ns
+    Source Clock Delay      (SCD):    0.920ns
+    Clock Pessimism Removal (CPR):    0.282ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.310     0.310    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.584     0.920    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X62Y9          FDPE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X62Y9          FDPE (Prop_fdpe_C_Q)         0.148     1.068 f  system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset_reg[1]/Q
+                         net (fo=342, routed)         0.274     1.341    system_i/etm_ddr_0/inst/framed_capture.capture/ref_reset[1]
+    SLICE_X60Y8          FDCE                                         f  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[15]/CLR
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.337     0.337    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.852     1.218    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X60Y8          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[15]/C
+                         clock pessimism             -0.282     0.936    
+    SLICE_X60Y8          FDCE (Remov_fdce_C_CLR)     -0.145     0.791    system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[15]
+  -------------------------------------------------------------------
+                         required time                         -0.791    
+                         arrival time                           1.341    
+  -------------------------------------------------------------------
+                         slack                                  0.551    
+
+Slack (MET) :             0.552ns  (arrival time - required time)
+  Source:                 system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.sample_reset_reg[1]/C
+                            (rising edge-triggered cell FDPE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/pair_count_reg[0]/CLR
+                            (removal check against rising-edge clock clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             **async_default**
+  Path Type:              Removal (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_delay_ref rise@0.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        0.442ns  (logic 0.128ns (28.961%)  route 0.314ns (71.039%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.036ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.223ns
+    Source Clock Delay      (SCD):    0.924ns
+    Clock Pessimism Removal (CPR):    0.263ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.310     0.310    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.588     0.924    system_i/orbtrace_0/inst/receiver/malformed_reg
+    SLICE_X84Y8          FDPE                                         r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.sample_reset_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X84Y8          FDPE (Prop_fdpe_C_Q)         0.128     1.052 f  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.sample_reset_reg[1]/Q
+                         net (fo=361, routed)         0.314     1.365    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/out[0]
+    SLICE_X79Y5          FDCE                                         f  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/pair_count_reg[0]/CLR
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.337     0.337    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.857     1.223    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/malformed_reg_0
+    SLICE_X79Y5          FDCE                                         r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/pair_count_reg[0]/C
+                         clock pessimism             -0.263     0.960    
+    SLICE_X79Y5          FDCE (Remov_fdce_C_CLR)     -0.146     0.814    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/pair_count_reg[0]
+  -------------------------------------------------------------------
+                         required time                         -0.814    
+                         arrival time                           1.365    
+  -------------------------------------------------------------------
+                         slack                                  0.552    
+
+Slack (MET) :             0.552ns  (arrival time - required time)
+  Source:                 system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.sample_reset_reg[1]/C
+                            (rising edge-triggered cell FDPE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/pair_count_reg[2]/CLR
+                            (removal check against rising-edge clock clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             **async_default**
+  Path Type:              Removal (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_delay_ref rise@0.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        0.442ns  (logic 0.128ns (28.961%)  route 0.314ns (71.039%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.036ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.223ns
+    Source Clock Delay      (SCD):    0.924ns
+    Clock Pessimism Removal (CPR):    0.263ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.310     0.310    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.588     0.924    system_i/orbtrace_0/inst/receiver/malformed_reg
+    SLICE_X84Y8          FDPE                                         r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.sample_reset_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X84Y8          FDPE (Prop_fdpe_C_Q)         0.128     1.052 f  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.sample_reset_reg[1]/Q
+                         net (fo=361, routed)         0.314     1.365    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/out[0]
+    SLICE_X79Y5          FDCE                                         f  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/pair_count_reg[2]/CLR
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.337     0.337    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.857     1.223    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/malformed_reg_0
+    SLICE_X79Y5          FDCE                                         r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/pair_count_reg[2]/C
+                         clock pessimism             -0.263     0.960    
+    SLICE_X79Y5          FDCE (Remov_fdce_C_CLR)     -0.146     0.814    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/pair_count_reg[2]
+  -------------------------------------------------------------------
+                         required time                         -0.814    
+                         arrival time                           1.365    
+  -------------------------------------------------------------------
+                         slack                                  0.552    
+
+
+
+

@@ -105,6 +105,15 @@ report_timing -delay_type max -max_paths 60 -file [file join $out setup_target.r
 report_timing -delay_type min -max_paths 60 -file [file join $out hold_target.rpt]
 report_timing -delay_type max -to [all_registers -async_pins] -max_paths 30 -file [file join $out recovery_target.rpt]
 report_timing -delay_type min -to [all_registers -async_pins] -max_paths 30 -file [file join $out removal_target.rpt]
+foreach sampler {u_swdio_iddr u_tdo_iddr} {
+    foreach phase {Q1 Q2} {
+        set sample_pin [get_pins -quiet -hier -filter "NAME =~ */$sampler/$phase"]
+        if {[llength $sample_pin]} {
+            report_timing -from $sample_pin -delay_type max -max_paths 12 -file [file join $out setup_${sampler}_${phase}.rpt]
+            report_timing -from $sample_pin -delay_type min -max_paths 12 -file [file join $out hold_${sampler}_${phase}.rpt]
+        }
+    }
+}
 # One aggregate top-N can hide a second path family behind many byte-counter
 # endpoints. Keep independent endpoint reports for each functional block.
 foreach {family pattern} {ddr *etm_ddr_0* debug *swd_controller_0* cdma *cdma*} {
@@ -149,6 +158,10 @@ report_clocks -file [file join $out clocks_verified.rpt]
 report_utilization -file [file join $out utilization.rpt]
 report_utilization -hierarchical -file [file join $out utilization_hier.rpt]
 report_timing_summary -report_unconstrained -file [file join $out timing_verified.rpt]
+set all_timing [report_timing_summary -return_string]
+if {![string match {*All user specified timing constraints are met.*} $all_timing]} {
+    error "Routed timing summary includes a failing setup/hold/recovery/removal/pulse-width check"
+}
 set worst [get_property SLACK [get_timing_paths -max_paths 1 -delay_type max]]
 set hold [get_property SLACK [get_timing_paths -max_paths 1 -delay_type min]]
 puts "VERIFIED_SETUP_SLACK=$worst VERIFIED_HOLD_SLACK=$hold"

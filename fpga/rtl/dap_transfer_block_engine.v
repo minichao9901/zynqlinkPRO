@@ -55,7 +55,13 @@ module dap_transfer_block_engine #(
                      ST_FETCH_DATA_SAMPLE=14;
     reg [4:0] state;
     reg [31:0] hdr;
-    reg [15:0] count, index, result_index;
+    // The existing header guard rejects counts above 1023. Store that
+    // bound explicitly instead of carrying unconstrained 16-bit counters.
+    reg [9:0] count, index, result_index;
+    reg last_transfer;
+    wire [10:0] index_next={1'b0,index}+11'd1;
+    wire [10:0] index_after_next={1'b0,index}+11'd2;
+    wire [12:0] write_packet_bytes={1'b0,cmd_data[17:8],2'b00}+13'd4;
     reg [7:0] request;
     reg is_read, is_ap;
     reg seen_core_busy;
@@ -72,8 +78,8 @@ module dap_transfer_block_engine #(
 
     assign core_next_valid = ENABLE_CHAIN && state == ST_WAIT_CORE &&
                              seen_core_busy && !final_phase &&
-                             (is_read || index+1'b1 == count || prefetch_valid);
-    assign core_next_request = (index+1'b1 == count) ? 8'h0E : request;
+                             (is_read || last_transfer || prefetch_valid);
+    assign core_next_request = last_transfer ? 8'h0E : request;
     assign core_next_wdata = prefetched_data;
     wire chain_accept = core_next_valid && core_next_ready;
     initial state = ST_IDLE;
@@ -95,6 +101,7 @@ module dap_transfer_block_engine #(
             rsp_en <= 0; rsp_we <= 0; rsp_addr <= 0; rsp_data <= 0;
             core_start <= 0; core_mode <= 1; core_req <= 0; core_wdata <= 0;
             hdr <= 0; count <= 0; index <= 0; result_index <= 0;
+            last_transfer<=0;
             request <= 0; is_read <= 0; is_ap <= 0; seen_core_busy <= 0;
             last_ack <= 0; last_data <= 0; status_code <= 0;
             need_final_read <= 0;
@@ -126,6 +133,7 @@ module dap_transfer_block_engine #(
                         done <= 0;
                         error <= 0;
                         count <= 0;
+                        last_transfer<=0;
                         index <= 0;
                         result_index <= 0;
                         is_read <= 0;
@@ -147,12 +155,13 @@ module dap_transfer_block_engine #(
                     hdr <= cmd_data;
                     // cmd_data is the first four packet bytes in little endian.
                     if (cmd_data[7:0] != 8'h06 || packet_len < 4 ||
-                        cmd_data[23:8] == 0 || cmd_data[23:8] > 1023 ||
+                        cmd_data[23:8] == 0 || cmd_data[23:18] != 0 ||
                         (cmd_data[31:24] & 8'hF0) != 0 || !cmd_data[24] ||
-                        (!cmd_data[25] && packet_len < (4 + {cmd_data[23:8],2'b00}))) begin
+                        (!cmd_data[25] && packet_len < {3'd0,write_packet_bytes})) begin
                         error <= 1; status_code <= 8'h07; state <= ST_WRITE_HEADER;
                     end else begin
-                        count <= cmd_data[23:8];
+                        count <= cmd_data[17:8];
+                        last_transfer<=cmd_data[17:8]==1;
                         request <= cmd_data[31:24];
                         is_read <= cmd_data[25];
                         is_ap <= cmd_data[24];
@@ -169,9 +178,9 @@ module dap_transfer_block_engine #(
                     rsp_en <= 1;
                     rsp_we <= 4'b0111;
                     rsp_addr <= 0;
-                    rsp_data <= {8'd0, status_code, count};
+                    rsp_data <= {8'd0, status_code, 6'd0, count};
                     // Only reads carry data words behind the three-byte header.
-                    response_words <= is_read ? (count + 1'b1) : 16'd1;
+                    response_words <= is_read ? ({6'd0,count} + 16'd1) : 16'd1;
                     if (error || count == 0) state <= ST_DONE;
                     else state <= ST_NEXT;
                 end
@@ -207,7 +216,7 @@ module dap_transfer_block_engine #(
                     core_req <= request;
                     retry_left <= RETRY_MAX;
                     core_wait_cnt <= 24'h03FFFF;
-                    if (index + 1'b1 < count) begin
+                    if (index_next < {1'b0,count}) begin
                         cmd_en <= 1;
                         cmd_addr <= index + 2'd2;
                         prefetch_wait <= 2;
@@ -264,26 +273,28 @@ module dap_transfer_block_engine #(
                                 result_index <= result_index + 1'b1;
                             end
                             index <= index + 1'b1;
+                            last_transfer<=index_after_next=={1'b0,count};
                             // Completion already proves the core is idle. Start
                             // the next read directly, avoiding NEXT/START bubbles.
-                            core_req <= (index + 1'b1 == count) ? 8'h0E : request;
-                            final_phase <= (index + 1'b1 == count);
+                            core_req <= last_transfer ? 8'h0E : request;
+                            final_phase <= last_transfer;
                             core_start <= !chain_accept;
                             seen_core_busy <= chain_accept;
                             retry_left <= RETRY_MAX;
                             core_wait_cnt <= 24'h03FFFF;
                         end else begin
                             index <= index + 1'b1;
-                            if (index + 1'b1 == count || prefetch_valid) begin
-                                core_req <= (index + 1'b1 == count) ? 8'h0E : request;
-                                final_phase <= (index + 1'b1 == count);
+                            last_transfer<=index_after_next=={1'b0,count};
+                            if (last_transfer || prefetch_valid) begin
+                                core_req <= last_transfer ? 8'h0E : request;
+                                final_phase <= last_transfer;
                                 core_wdata <= prefetched_data;
                                 core_start <= !chain_accept;
                                 seen_core_busy <= chain_accept;
                                 retry_left <= RETRY_MAX;
                                 core_wait_cnt <= 24'h03FFFF;
                                 prefetch_valid <= 0;
-                                if (index + 2'd2 < count) begin
+                                if (index_after_next < {1'b0,count}) begin
                                     cmd_en <= 1;
                                     cmd_addr <= index + 2'd3;
                                     prefetch_wait <= 2;
@@ -315,8 +326,8 @@ module dap_transfer_block_engine #(
                     rsp_addr <= 0;
                     // Report only words actually completed, including partial
                     // reads when the posted pipeline fails before RDBUFF.
-                    rsp_data <= {8'd0,status_code,(is_read ? result_index : index)};
-                    response_words <= is_read ? result_index + 1'b1 : 16'd1;
+                    rsp_data <= {8'd0,status_code,6'd0,(is_read ? result_index : index)};
+                    response_words <= is_read ? {6'd0,result_index} + 16'd1 : 16'd1;
                     state <= ST_DONE;
                 end
                 ST_DONE: begin

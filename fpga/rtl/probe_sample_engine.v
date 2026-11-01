@@ -52,10 +52,16 @@ module probe_sample_engine #(
     reg [31:0] head, tail;
     reg [4:0] read_word;
     reg [31:0] tick, deadline, sample_time, period, skipped, errors;
+    // Signed distance deadline-tick while enabled. It is at most period
+    // (<=24,000,000) and at least -1 because tick advances by at most one
+    // per FCLK. Keep the absolute deadline for unchanged nominal timestamps.
+    reg [25:0] deadline_gap;
+    wire deadline_due=deadline_gap[25] || deadline_gap==0;
     // Fractional 24 MHz timer remains correct when PS changes FCLK.
     reg [31:0] clock_hz, fraction;
     wire [32:0] phase_sum = {1'b0,fraction}+33'd24000000;
     wire tick_en = phase_sum >= {1'b0,clock_hz};
+    wire [1:0] deadline_elapsed={1'b0,tick_en}+{1'b0,deadline_gap[25]};
     reg [2:0] phase;
     reg [7:0] retries;
     reg [$clog2(TIMEOUT+1)-1:0] watchdog;
@@ -130,6 +136,7 @@ module probe_sample_engine #(
         if(!rst_n) begin
             state<=IDLE; enabled<=0; fault<=0; fault_drain<=0; count<=0; plan_index<=0; fast_span<=0;span_last<=24'hffffff;
             item<=0; head<=0; tail<=0; read_word<=0; tick<=0; deadline<=0;
+            deadline_gap<=0;
             sample_time<=0; period<=2400; skipped<=0; errors<=0;
             clock_hz<=100000000; fraction<=0; phase<=0; retries<=0;
             watchdog<=0; setup_needed<=1; fixed_pipe<=0; pending<=0;
@@ -140,6 +147,7 @@ module probe_sample_engine #(
             if(!core_busy) fault_drain<=0;
             if(tick_en) begin tick<=tick+1'b1; fraction<=phase_sum-clock_hz; end
             else fraction<=phase_sum[31:0];
+            if(enabled && tick_en)deadline_gap<=deadline_gap-1'b1;
             if(take_word && used!=0) begin
                 if(pop) begin tail<=tail+1'b1; read_word<=0; end
                 else read_word<=read_word+1'b1;
@@ -151,7 +159,7 @@ module probe_sample_engine #(
                 3: if(plan_index<24) plan[plan_index]<={wdata[31:2],2'b00};
                 4: period<=wdata<24 ? 24 : (wdata>24000000 ? 24000000 : wdata);
                 6: begin clock_hz<=wdata<24000000 ? 24000000 : wdata; fraction<=0; end
-                7: begin tick<=wdata; deadline<=wdata; fraction<=0; end
+                7: begin tick<=wdata; deadline<=wdata; deadline_gap<=0; fraction<=0; end
                 default: ;
                 endcase
             end
@@ -171,13 +179,17 @@ module probe_sample_engine #(
                     for(integer si=0;si<24;si=si+1)
                         if(si==23) span_last[si]<=1;
                         else span_last[si]<=si+1>=wdata[12:8] || plan[si+1]!=plan[si]+4 || plan[si][9:0]==10'h3fc;
-                    deadline<=tick; fault<=0;
+                    deadline<=tick;deadline_gap<=tick_en ? {26{1'b1}} : 26'd0;fault<=0;
                 end
             end
             // One deadline per cycle avoids combinational division. Overruns
             // advance the nominal timeline instead of making catch-up samples.
-            if(enabled && $signed(tick-deadline)>=0 && !(ctrl && !wdata[0])) begin
+            if(enabled && deadline_due && !(ctrl && !wdata[0])) begin
                 deadline<=deadline+period;
+                // At a due edge the gap is 0 or -1. Refill directly from
+                // period; avoid subtracting two 32-bit timestamps in front
+                // of the deadline+period adder on every scheduling decision.
+                deadline_gap<={1'b0,period[24:0]}-deadline_elapsed;
                 // Reserve one FIFO slot for the final posted result. A DAP
                 // preemption can then flush and release SWD even if USB stalls.
                 if(state==IDLE && used<((fast_span && count==1) ? FIFO_SAMPLES-1 : FIFO_SAMPLES) && available) begin

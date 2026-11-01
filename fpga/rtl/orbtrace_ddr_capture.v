@@ -50,6 +50,8 @@ module orbtrace_ddr_capture #(
   reg [31:0] observed_ref,dropped_ref,parser_ref,sync_ref,highwater_ref,ready_losses_ref;
   reg previous_ready,finished_ref;
   wire [FIFO_ADDR_BITS:0] fifo_level;
+  reg [FIFO_ADDR_BITS:0] level_sample;
+  reg level_sample_valid;
   wire fifo_wr_ready;
   wire capture_frame=parser_enable && source_frame_event;
   wire fifo_wr_valid=capture_frame || state==EOF_WAIT;
@@ -71,6 +73,7 @@ module orbtrace_ddr_capture #(
       command_sync<=0;stop_sync<=0;ready_sync<=0;seen_command<=0;state<=WAIT_COMMAND;
       drain<=0;ticks_ref<=0;stop_reason_ref<=0;observed_ref<=0;dropped_ref<=0;parser_ref<=0;
       sync_ref<=0;highwater_ref<=0;ready_losses_ref<=0;previous_ready<=0;finished_ref<=0;
+      level_sample<=0;level_sample_valid<=0;
     end else begin
       command_sync<={command_sync[1:0],command_epoch};stop_sync<={stop_sync[0],stop_request};
       ready_sync<={ready_sync[0],receiver_ready};previous_ready<=ready_sync[1];
@@ -78,7 +81,12 @@ module orbtrace_ddr_capture #(
       if(capture_frame)begin observed_ref<=observed_ref+1'b1;if(!fifo_wr_ready)dropped_ref<=dropped_ref+1'b1;end
       if(parser_enable && source_parser_error)parser_ref<=parser_ref+1'b1;
       if(parser_enable && source_sync_event)sync_ref<=sync_ref+1'b1;
-      if(parser_enable && fifo_level>highwater_ref)highwater_ref<=fifo_level;
+      // Statistics only: split Gray decode/subtract from the maximum compare.
+      // Carry the original observation window with the sample. DRAIN/EOF and
+      // the snapshot handshake retire this stage before results are frozen.
+      // FIFO full/ready safety continues to use its independent Gray compare.
+      level_sample<=fifo_level;level_sample_valid<=parser_enable;
+      if(level_sample_valid && level_sample>highwater_ref)highwater_ref<=level_sample;
       if(parser_enable && previous_ready && !ready_sync[1])ready_losses_ref<=ready_losses_ref+1'b1;
       case(state)
         WAIT_COMMAND:if(command_sync[2]!=seen_command)begin seen_command<=command_sync[2];state<=SETTLE;end

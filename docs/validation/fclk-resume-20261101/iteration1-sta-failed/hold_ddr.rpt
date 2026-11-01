@@ -1,0 +1,918 @@
+Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2018.3 (win64) Build 2405991 Thu Dec  6 23:38:27 MST 2018
+| Date         : Sun Nov  1 13:20:02 2026
+| Host         : DESKTOP-0UKCPD3 running 64-bit major release  (build 9200)
+| Command      : report_timing -delay_type min -to [get_cells -quiet -hier -filter {NAME =~ *etm_ddr_0* && IS_SEQUENTIAL == 1}] -max_paths 20 -nworst 1 -file E:/zynqlinkPRO/build/fpga_dma_global/hold_ddr.rpt
+| Design       : system_wrapper
+| Device       : 7z020-clg400
+| Speed File   : -2  PRODUCTION 1.11 2014-09-11
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Timing Report
+
+Slack (MET) :             0.059ns  (arrival time - required time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg[36]/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[36]/D
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_fpga_0 rise@0.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        0.377ns  (logic 0.164ns (43.528%)  route 0.213ns (56.472%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.265ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.195ns
+    Source Clock Delay      (SCD):    0.895ns
+    Clock Pessimism Removal (CPR):    0.035ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.310     0.310    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.559     0.895    system_i/etm_ddr_0/inst/framed_capture.packetizer/clk
+    SLICE_X50Y2          FDRE                                         r  system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg[36]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X50Y2          FDRE (Prop_fdre_C_Q)         0.164     1.059 r  system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg[36]/Q
+                         net (fo=1, routed)           0.213     1.271    system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg_n_0_[36]
+    SLICE_X46Y4          FDRE                                         r  system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[36]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.337     0.337    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.829     1.195    system_i/etm_ddr_0/inst/framed_capture.packetizer/clk
+    SLICE_X46Y4          FDRE                                         r  system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[36]/C
+                         clock pessimism             -0.035     1.160    
+    SLICE_X46Y4          FDRE (Hold_fdre_C_D)         0.052     1.212    system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[36]
+  -------------------------------------------------------------------
+                         required time                         -1.212    
+                         arrival time                           1.271    
+  -------------------------------------------------------------------
+                         slack                                  0.059    
+
+Slack (MET) :             0.072ns  (arrival time - required time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg[20]/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[20]/D
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_fpga_0 rise@0.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        0.396ns  (logic 0.164ns (41.419%)  route 0.232ns (58.581%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.265ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.195ns
+    Source Clock Delay      (SCD):    0.895ns
+    Clock Pessimism Removal (CPR):    0.035ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.310     0.310    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.559     0.895    system_i/etm_ddr_0/inst/framed_capture.packetizer/clk
+    SLICE_X50Y2          FDRE                                         r  system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg[20]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X50Y2          FDRE (Prop_fdre_C_Q)         0.164     1.059 r  system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg[20]/Q
+                         net (fo=1, routed)           0.232     1.290    system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg_n_0_[20]
+    SLICE_X46Y4          FDRE                                         r  system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[20]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.337     0.337    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.829     1.195    system_i/etm_ddr_0/inst/framed_capture.packetizer/clk
+    SLICE_X46Y4          FDRE                                         r  system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[20]/C
+                         clock pessimism             -0.035     1.160    
+    SLICE_X46Y4          FDRE (Hold_fdre_C_D)         0.059     1.219    system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[20]
+  -------------------------------------------------------------------
+                         required time                         -1.219    
+                         arrival time                           1.290    
+  -------------------------------------------------------------------
+                         slack                                  0.072    
+
+Slack (MET) :             0.080ns  (arrival time - required time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg[25]/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[25]/D
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_fpga_0 rise@0.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        0.393ns  (logic 0.164ns (41.773%)  route 0.229ns (58.227%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.266ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.195ns
+    Source Clock Delay      (SCD):    0.894ns
+    Clock Pessimism Removal (CPR):    0.035ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.310     0.310    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.558     0.894    system_i/etm_ddr_0/inst/framed_capture.packetizer/clk
+    SLICE_X50Y5          FDRE                                         r  system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg[25]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X50Y5          FDRE (Prop_fdre_C_Q)         0.164     1.058 r  system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg[25]/Q
+                         net (fo=1, routed)           0.229     1.286    system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg_n_0_[25]
+    SLICE_X41Y6          FDRE                                         r  system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[25]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.337     0.337    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.829     1.195    system_i/etm_ddr_0/inst/framed_capture.packetizer/clk
+    SLICE_X41Y6          FDRE                                         r  system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[25]/C
+                         clock pessimism             -0.035     1.160    
+    SLICE_X41Y6          FDRE (Hold_fdre_C_D)         0.046     1.206    system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[25]
+  -------------------------------------------------------------------
+                         required time                         -1.206    
+                         arrival time                           1.286    
+  -------------------------------------------------------------------
+                         slack                                  0.080    
+
+Slack (MET) :             0.096ns  (arrival time - required time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg[57]/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[57]/D
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_fpga_0 rise@0.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        0.386ns  (logic 0.148ns (38.331%)  route 0.238ns (61.669%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.266ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.195ns
+    Source Clock Delay      (SCD):    0.894ns
+    Clock Pessimism Removal (CPR):    0.035ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.310     0.310    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.558     0.894    system_i/etm_ddr_0/inst/framed_capture.packetizer/clk
+    SLICE_X50Y5          FDRE                                         r  system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg[57]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X50Y5          FDRE (Prop_fdre_C_Q)         0.148     1.042 r  system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg[57]/Q
+                         net (fo=1, routed)           0.238     1.280    system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg_n_0_[57]
+    SLICE_X41Y6          FDRE                                         r  system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[57]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.337     0.337    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.829     1.195    system_i/etm_ddr_0/inst/framed_capture.packetizer/clk
+    SLICE_X41Y6          FDRE                                         r  system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[57]/C
+                         clock pessimism             -0.035     1.160    
+    SLICE_X41Y6          FDRE (Hold_fdre_C_D)         0.024     1.184    system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[57]
+  -------------------------------------------------------------------
+                         required time                         -1.184    
+                         arrival time                           1.280    
+  -------------------------------------------------------------------
+                         slack                                  0.096    
+
+Slack (MET) :             0.098ns  (arrival time - required time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/sync_count_reg[25]/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/etm_ddr_0/inst/result_sync_reg[25]/D
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_fpga_0 rise@0.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        0.485ns  (logic 0.209ns (43.068%)  route 0.276ns (56.932%))
+  Logic Levels:           1  (LUT2=1)
+  Clock Path Skew:        0.266ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.193ns
+    Source Clock Delay      (SCD):    0.892ns
+    Clock Pessimism Removal (CPR):    0.035ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.310     0.310    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.556     0.891    system_i/etm_ddr_0/inst/framed_capture.capture/clk
+    SLICE_X50Y11         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/sync_count_reg[25]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X50Y11         FDCE (Prop_fdce_C_Q)         0.164     1.056 r  system_i/etm_ddr_0/inst/framed_capture.capture/sync_count_reg[25]/Q
+                         net (fo=2, routed)           0.276     1.332    system_i/etm_ddr_0/inst/framed_capture.capture/capture_sync[25]
+    SLICE_X42Y11         LUT2 (Prop_lut2_I0_O)        0.045     1.377 r  system_i/etm_ddr_0/inst/framed_capture.capture/result_sync[25]_i_1/O
+                         net (fo=1, routed)           0.000     1.377    system_i/etm_ddr_0/inst/framed_capture.capture_n_263
+    SLICE_X42Y11         FDCE                                         r  system_i/etm_ddr_0/inst/result_sync_reg[25]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.337     0.337    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.827     1.193    system_i/etm_ddr_0/inst/clk
+    SLICE_X42Y11         FDCE                                         r  system_i/etm_ddr_0/inst/result_sync_reg[25]/C
+                         clock pessimism             -0.035     1.158    
+    SLICE_X42Y11         FDCE (Hold_fdce_C_D)         0.121     1.279    system_i/etm_ddr_0/inst/result_sync_reg[25]
+  -------------------------------------------------------------------
+                         required time                         -1.279    
+                         arrival time                           1.377    
+  -------------------------------------------------------------------
+                         slack                                  0.098    
+
+Slack (MET) :             0.102ns  (arrival time - required time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg[12]/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[12]/D
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_fpga_0 rise@0.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        0.413ns  (logic 0.141ns (34.131%)  route 0.272ns (65.869%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.265ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.195ns
+    Source Clock Delay      (SCD):    0.895ns
+    Clock Pessimism Removal (CPR):    0.035ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.310     0.310    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.559     0.895    system_i/etm_ddr_0/inst/framed_capture.packetizer/clk
+    SLICE_X53Y0          FDRE                                         r  system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg[12]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X53Y0          FDRE (Prop_fdre_C_Q)         0.141     1.036 r  system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg[12]/Q
+                         net (fo=1, routed)           0.272     1.308    system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg_n_0_[12]
+    SLICE_X43Y4          FDRE                                         r  system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[12]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.337     0.337    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.829     1.195    system_i/etm_ddr_0/inst/framed_capture.packetizer/clk
+    SLICE_X43Y4          FDRE                                         r  system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[12]/C
+                         clock pessimism             -0.035     1.160    
+    SLICE_X43Y4          FDRE (Hold_fdre_C_D)         0.046     1.206    system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[12]
+  -------------------------------------------------------------------
+                         required time                         -1.206    
+                         arrival time                           1.308    
+  -------------------------------------------------------------------
+                         slack                                  0.102    
+
+Slack (MET) :             0.104ns  (arrival time - required time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg[54]/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[54]/D
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_fpga_0 rise@0.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        0.389ns  (logic 0.128ns (32.924%)  route 0.261ns (67.076%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.265ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.195ns
+    Source Clock Delay      (SCD):    0.895ns
+    Clock Pessimism Removal (CPR):    0.035ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.310     0.310    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.559     0.895    system_i/etm_ddr_0/inst/framed_capture.packetizer/clk
+    SLICE_X53Y0          FDRE                                         r  system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg[54]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X53Y0          FDRE (Prop_fdre_C_Q)         0.128     1.023 r  system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg[54]/Q
+                         net (fo=1, routed)           0.261     1.283    system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg_n_0_[54]
+    SLICE_X43Y4          FDRE                                         r  system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[54]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.337     0.337    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.829     1.195    system_i/etm_ddr_0/inst/framed_capture.packetizer/clk
+    SLICE_X43Y4          FDRE                                         r  system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[54]/C
+                         clock pessimism             -0.035     1.160    
+    SLICE_X43Y4          FDRE (Hold_fdre_C_D)         0.019     1.179    system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[54]
+  -------------------------------------------------------------------
+                         required time                         -1.179    
+                         arrival time                           1.283    
+  -------------------------------------------------------------------
+                         slack                                  0.104    
+
+Slack (MET) :             0.107ns  (arrival time - required time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg[44]/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[44]/D
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_fpga_0 rise@0.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        0.381ns  (logic 0.148ns (38.829%)  route 0.233ns (61.171%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.265ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.195ns
+    Source Clock Delay      (SCD):    0.895ns
+    Clock Pessimism Removal (CPR):    0.035ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.310     0.310    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.559     0.895    system_i/etm_ddr_0/inst/framed_capture.packetizer/clk
+    SLICE_X50Y2          FDRE                                         r  system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg[44]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X50Y2          FDRE (Prop_fdre_C_Q)         0.148     1.043 r  system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg[44]/Q
+                         net (fo=1, routed)           0.233     1.276    system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg_n_0_[44]
+    SLICE_X46Y4          FDRE                                         r  system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[44]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.337     0.337    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.829     1.195    system_i/etm_ddr_0/inst/framed_capture.packetizer/clk
+    SLICE_X46Y4          FDRE                                         r  system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[44]/C
+                         clock pessimism             -0.035     1.160    
+    SLICE_X46Y4          FDRE (Hold_fdre_C_D)         0.009     1.169    system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[44]
+  -------------------------------------------------------------------
+                         required time                         -1.169    
+                         arrival time                           1.276    
+  -------------------------------------------------------------------
+                         slack                                  0.107    
+
+Slack (MET) :             0.110ns  (arrival time - required time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg[46]/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[46]/D
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_fpga_0 rise@0.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        0.397ns  (logic 0.148ns (37.260%)  route 0.249ns (62.740%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.266ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.195ns
+    Source Clock Delay      (SCD):    0.894ns
+    Clock Pessimism Removal (CPR):    0.035ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.310     0.310    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.558     0.894    system_i/etm_ddr_0/inst/framed_capture.packetizer/clk
+    SLICE_X50Y6          FDRE                                         r  system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg[46]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X50Y6          FDRE (Prop_fdre_C_Q)         0.148     1.042 r  system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg[46]/Q
+                         net (fo=1, routed)           0.249     1.291    system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg_n_0_[46]
+    SLICE_X41Y6          FDRE                                         r  system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[46]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.337     0.337    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.829     1.195    system_i/etm_ddr_0/inst/framed_capture.packetizer/clk
+    SLICE_X41Y6          FDRE                                         r  system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[46]/C
+                         clock pessimism             -0.035     1.160    
+    SLICE_X41Y6          FDRE (Hold_fdre_C_D)         0.021     1.181    system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[46]
+  -------------------------------------------------------------------
+                         required time                         -1.181    
+                         arrival time                           1.291    
+  -------------------------------------------------------------------
+                         slack                                  0.110    
+
+Slack (MET) :             0.118ns  (arrival time - required time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg1_reg[5]/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg2_reg[5]/D
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_fpga_0 rise@0.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        0.196ns  (logic 0.141ns (71.838%)  route 0.055ns (28.162%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.000ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.219ns
+    Source Clock Delay      (SCD):    0.920ns
+    Clock Pessimism Removal (CPR):    0.299ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.310     0.310    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.584     0.920    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/clk
+    SLICE_X59Y1          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg1_reg[5]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X59Y1          FDCE (Prop_fdce_C_Q)         0.141     1.061 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg1_reg[5]/Q
+                         net (fo=1, routed)           0.055     1.116    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg1[5]
+    SLICE_X59Y1          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg2_reg[5]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.337     0.337    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.853     1.219    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/clk
+    SLICE_X59Y1          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg2_reg[5]/C
+                         clock pessimism             -0.299     0.920    
+    SLICE_X59Y1          FDCE (Hold_fdce_C_D)         0.078     0.998    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg2_reg[5]
+  -------------------------------------------------------------------
+                         required time                         -0.998    
+                         arrival time                           1.116    
+  -------------------------------------------------------------------
+                         slack                                  0.118    
+
+Slack (MET) :             0.119ns  (arrival time - required time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg[14]/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[14]/D
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_fpga_0 rise@0.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        0.452ns  (logic 0.141ns (31.204%)  route 0.311ns (68.796%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.262ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.190ns
+    Source Clock Delay      (SCD):    0.893ns
+    Clock Pessimism Removal (CPR):    0.035ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.310     0.310    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.557     0.893    system_i/etm_ddr_0/inst/framed_capture.packetizer/clk
+    SLICE_X52Y9          FDRE                                         r  system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg[14]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X52Y9          FDRE (Prop_fdre_C_Q)         0.141     1.034 r  system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg[14]/Q
+                         net (fo=1, routed)           0.311     1.344    system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg_n_0_[14]
+    SLICE_X39Y13         FDRE                                         r  system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[14]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.337     0.337    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.824     1.190    system_i/etm_ddr_0/inst/framed_capture.packetizer/clk
+    SLICE_X39Y13         FDRE                                         r  system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[14]/C
+                         clock pessimism             -0.035     1.155    
+    SLICE_X39Y13         FDRE (Hold_fdre_C_D)         0.070     1.225    system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[14]
+  -------------------------------------------------------------------
+                         required time                         -1.225    
+                         arrival time                           1.344    
+  -------------------------------------------------------------------
+                         slack                                  0.119    
+
+Slack (MET) :             0.120ns  (arrival time - required time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg1_reg[3]/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg2_reg[3]/D
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_fpga_0 rise@0.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        0.196ns  (logic 0.141ns (71.838%)  route 0.055ns (28.162%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.000ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.220ns
+    Source Clock Delay      (SCD):    0.922ns
+    Clock Pessimism Removal (CPR):    0.298ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.310     0.310    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.586     0.922    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/clk
+    SLICE_X63Y2          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg1_reg[3]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X63Y2          FDCE (Prop_fdce_C_Q)         0.141     1.063 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg1_reg[3]/Q
+                         net (fo=1, routed)           0.055     1.118    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg1[3]
+    SLICE_X63Y2          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg2_reg[3]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.337     0.337    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.854     1.220    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/clk
+    SLICE_X63Y2          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg2_reg[3]/C
+                         clock pessimism             -0.298     0.922    
+    SLICE_X63Y2          FDCE (Hold_fdce_C_D)         0.076     0.998    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg2_reg[3]
+  -------------------------------------------------------------------
+                         required time                         -0.998    
+                         arrival time                           1.118    
+  -------------------------------------------------------------------
+                         slack                                  0.120    
+
+Slack (MET) :             0.120ns  (arrival time - required time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg1_reg[4]/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg2_reg[4]/D
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_fpga_0 rise@0.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        0.196ns  (logic 0.141ns (71.838%)  route 0.055ns (28.162%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.000ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.219ns
+    Source Clock Delay      (SCD):    0.920ns
+    Clock Pessimism Removal (CPR):    0.299ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.310     0.310    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.584     0.920    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/clk
+    SLICE_X59Y1          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg1_reg[4]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X59Y1          FDCE (Prop_fdce_C_Q)         0.141     1.061 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg1_reg[4]/Q
+                         net (fo=1, routed)           0.055     1.116    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg1[4]
+    SLICE_X59Y1          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg2_reg[4]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.337     0.337    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.853     1.219    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/clk
+    SLICE_X59Y1          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg2_reg[4]/C
+                         clock pessimism             -0.299     0.920    
+    SLICE_X59Y1          FDCE (Hold_fdce_C_D)         0.076     0.996    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg2_reg[4]
+  -------------------------------------------------------------------
+                         required time                         -0.996    
+                         arrival time                           1.116    
+  -------------------------------------------------------------------
+                         slack                                  0.120    
+
+Slack (MET) :             0.121ns  (arrival time - required time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg1_reg[0]/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg2_reg[0]/D
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_fpga_0 rise@0.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        0.196ns  (logic 0.141ns (71.838%)  route 0.055ns (28.162%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.000ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.220ns
+    Source Clock Delay      (SCD):    0.922ns
+    Clock Pessimism Removal (CPR):    0.298ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.310     0.310    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.586     0.922    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/clk
+    SLICE_X63Y2          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg1_reg[0]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X63Y2          FDCE (Prop_fdce_C_Q)         0.141     1.063 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg1_reg[0]/Q
+                         net (fo=1, routed)           0.055     1.118    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg1[0]
+    SLICE_X63Y2          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg2_reg[0]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.337     0.337    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.854     1.220    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/clk
+    SLICE_X63Y2          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg2_reg[0]/C
+                         clock pessimism             -0.298     0.922    
+    SLICE_X63Y2          FDCE (Hold_fdce_C_D)         0.075     0.997    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg2_reg[0]
+  -------------------------------------------------------------------
+                         required time                         -0.997    
+                         arrival time                           1.118    
+  -------------------------------------------------------------------
+                         slack                                  0.121    
+
+Slack (MET) :             0.121ns  (arrival time - required time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/active_sync_reg[0]/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/active_sync_reg[1]/D
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_fpga_0 rise@0.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        0.196ns  (logic 0.141ns (71.838%)  route 0.055ns (28.162%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.000ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.225ns
+    Source Clock Delay      (SCD):    0.927ns
+    Clock Pessimism Removal (CPR):    0.298ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.310     0.310    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.591     0.927    system_i/etm_ddr_0/inst/framed_capture.capture/clk
+    SLICE_X27Y5          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/active_sync_reg[0]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X27Y5          FDCE (Prop_fdce_C_Q)         0.141     1.067 r  system_i/etm_ddr_0/inst/framed_capture.capture/active_sync_reg[0]/Q
+                         net (fo=1, routed)           0.055     1.123    system_i/etm_ddr_0/inst/framed_capture.capture/active_sync[0]
+    SLICE_X27Y5          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/active_sync_reg[1]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.337     0.337    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.859     1.225    system_i/etm_ddr_0/inst/framed_capture.capture/clk
+    SLICE_X27Y5          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/active_sync_reg[1]/C
+                         clock pessimism             -0.298     0.927    
+    SLICE_X27Y5          FDCE (Hold_fdce_C_D)         0.075     1.002    system_i/etm_ddr_0/inst/framed_capture.capture/active_sync_reg[1]
+  -------------------------------------------------------------------
+                         required time                         -1.002    
+                         arrival time                           1.123    
+  -------------------------------------------------------------------
+                         slack                                  0.121    
+
+Slack (MET) :             0.121ns  (arrival time - required time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg1_reg[0]/C
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[0]/D
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_delay_ref rise@0.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        0.196ns  (logic 0.141ns (71.838%)  route 0.055ns (28.162%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.000ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.219ns
+    Source Clock Delay      (SCD):    0.920ns
+    Clock Pessimism Removal (CPR):    0.299ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.310     0.310    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.584     0.920    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/ref_clk
+    SLICE_X59Y2          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg1_reg[0]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X59Y2          FDCE (Prop_fdce_C_Q)         0.141     1.061 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg1_reg[0]/Q
+                         net (fo=1, routed)           0.055     1.116    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg1[0]
+    SLICE_X59Y2          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[0]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.337     0.337    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.853     1.219    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/ref_clk
+    SLICE_X59Y2          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[0]/C
+                         clock pessimism             -0.299     0.920    
+    SLICE_X59Y2          FDCE (Hold_fdce_C_D)         0.075     0.995    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[0]
+  -------------------------------------------------------------------
+                         required time                         -0.995    
+                         arrival time                           1.116    
+  -------------------------------------------------------------------
+                         slack                                  0.121    
+
+Slack (MET) :             0.121ns  (arrival time - required time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/finished_sync_reg[0]/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/finished_sync_reg[1]/D
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_fpga_0 rise@0.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        0.196ns  (logic 0.141ns (71.838%)  route 0.055ns (28.162%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.000ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.191ns
+    Source Clock Delay      (SCD):    0.895ns
+    Clock Pessimism Removal (CPR):    0.296ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.310     0.310    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.559     0.895    system_i/etm_ddr_0/inst/framed_capture.capture/clk
+    SLICE_X47Y12         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/finished_sync_reg[0]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X47Y12         FDCE (Prop_fdce_C_Q)         0.141     1.036 r  system_i/etm_ddr_0/inst/framed_capture.capture/finished_sync_reg[0]/Q
+                         net (fo=1, routed)           0.055     1.091    system_i/etm_ddr_0/inst/framed_capture.capture/finished_sync[0]
+    SLICE_X47Y12         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/finished_sync_reg[1]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.337     0.337    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.825     1.191    system_i/etm_ddr_0/inst/framed_capture.capture/clk
+    SLICE_X47Y12         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/finished_sync_reg[1]/C
+                         clock pessimism             -0.296     0.895    
+    SLICE_X47Y12         FDCE (Hold_fdce_C_D)         0.075     0.970    system_i/etm_ddr_0/inst/framed_capture.capture/finished_sync_reg[1]
+  -------------------------------------------------------------------
+                         required time                         -0.970    
+                         arrival time                           1.091    
+  -------------------------------------------------------------------
+                         slack                                  0.121    
+
+Slack (MET) :             0.123ns  (arrival time - required time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg[61]/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[61]/D
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_fpga_0 rise@0.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        0.391ns  (logic 0.128ns (32.710%)  route 0.263ns (67.290%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.266ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.194ns
+    Source Clock Delay      (SCD):    0.893ns
+    Clock Pessimism Removal (CPR):    0.035ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.310     0.310    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.557     0.893    system_i/etm_ddr_0/inst/framed_capture.packetizer/clk
+    SLICE_X51Y9          FDRE                                         r  system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg[61]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X51Y9          FDRE (Prop_fdre_C_Q)         0.128     1.021 r  system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg[61]/Q
+                         net (fo=1, routed)           0.263     1.284    system_i/etm_ddr_0/inst/framed_capture.packetizer/buffer_reg_n_0_[61]
+    SLICE_X44Y9          FDRE                                         r  system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[61]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.337     0.337    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.828     1.194    system_i/etm_ddr_0/inst/framed_capture.packetizer/clk
+    SLICE_X44Y9          FDRE                                         r  system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[61]/C
+                         clock pessimism             -0.035     1.159    
+    SLICE_X44Y9          FDRE (Hold_fdre_C_D)         0.002     1.161    system_i/etm_ddr_0/inst/framed_capture.packetizer/held_data_reg[61]
+  -------------------------------------------------------------------
+                         required time                         -1.161    
+                         arrival time                           1.284    
+  -------------------------------------------------------------------
+                         slack                                  0.123    
+
+Slack (MET) :             0.125ns  (arrival time - required time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg1_reg[2]/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg2_reg[2]/D
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_fpga_0 rise@0.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        0.196ns  (logic 0.141ns (71.838%)  route 0.055ns (28.162%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.000ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.220ns
+    Source Clock Delay      (SCD):    0.922ns
+    Clock Pessimism Removal (CPR):    0.298ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.310     0.310    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.586     0.922    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/clk
+    SLICE_X63Y2          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg1_reg[2]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X63Y2          FDCE (Prop_fdce_C_Q)         0.141     1.063 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg1_reg[2]/Q
+                         net (fo=1, routed)           0.055     1.118    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg1[2]
+    SLICE_X63Y2          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg2_reg[2]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.337     0.337    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20635, routed)       0.854     1.220    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/clk
+    SLICE_X63Y2          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg2_reg[2]/C
+                         clock pessimism             -0.298     0.922    
+    SLICE_X63Y2          FDCE (Hold_fdce_C_D)         0.071     0.993    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg2_reg[2]
+  -------------------------------------------------------------------
+                         required time                         -0.993    
+                         arrival time                           1.118    
+  -------------------------------------------------------------------
+                         slack                                  0.125    
+
+Slack (MET) :             0.125ns  (arrival time - required time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg1_reg[1]/C
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[1]/D
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_delay_ref rise@0.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        0.196ns  (logic 0.141ns (71.838%)  route 0.055ns (28.162%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.000ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.219ns
+    Source Clock Delay      (SCD):    0.920ns
+    Clock Pessimism Removal (CPR):    0.299ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.310     0.310    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.584     0.920    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/ref_clk
+    SLICE_X59Y2          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg1_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X59Y2          FDCE (Prop_fdce_C_Q)         0.141     1.061 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg1_reg[1]/Q
+                         net (fo=1, routed)           0.055     1.116    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg1[1]
+    SLICE_X59Y2          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[1]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.337     0.337    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=981, routed)         0.853     1.219    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/ref_clk
+    SLICE_X59Y2          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[1]/C
+                         clock pessimism             -0.299     0.920    
+    SLICE_X59Y2          FDCE (Hold_fdce_C_D)         0.071     0.991    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[1]
+  -------------------------------------------------------------------
+                         required time                         -0.991    
+                         arrival time                           1.116    
+  -------------------------------------------------------------------
+                         slack                                  0.125    
+
+
+
+
