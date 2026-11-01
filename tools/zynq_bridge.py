@@ -62,7 +62,7 @@ def application(backend, web, service_path, helpers, data, token_file, *, offlin
         for target in (app.app, backend_app):
             @target.after_request
             def offline_notice(response):
-                if response.mimetype == 'text/html' and response.status_code == 200:
+                if response.mimetype == 'text/html' and response.status_code == 200 and 'attachment' not in response.headers.get('Content-Disposition','').lower():
                     text=response.get_data(as_text=True)
                     response.set_data(text.replace('</body>', '<div role="status" style="position:fixed;bottom:0;right:0;z-index:99999;background:#663b00;color:white;padding:6px">离线验收：硬件访问已禁用</div></body>'))
                 return response
@@ -70,7 +70,8 @@ def application(backend, web, service_path, helpers, data, token_file, *, offlin
 
 
 def preflight(backend, web, service_path):
-    required=[backend / 'server.py', service_path, web / 'index.html', backend / 'web/index.html']
+    required=[backend / 'server.py', service_path, web / 'index.html', backend / 'web/index.html',
+              backend/'web/app/standalone-flame.js', backend/'web/app/standalone-flame.css']
     for path in required:
         if not path.is_file():
             raise ValueError('程序目录不完整，请保留完整程序目录：' + str(path))
@@ -86,7 +87,8 @@ def preflight(backend, web, service_path):
     import usb.core, libusb_package, hid, serial, capstone
     if libusb_package.get_libusb1_backend() is None:
         raise ValueError('桥包缺少libusb运行库')
-    return {'ok':True, 'native':versions, 'clockPolicy':'target-firmware-owned', 'hardwareAccess':False}
+    return {'ok':True, 'native':versions, 'clockPolicy':'target-firmware-owned', 'hardwareAccess':False,
+            'flameHtml':{'selfContained':True,'interactive':True},'offlineTraceCli':True}
 
 
 def main(argv=None):
@@ -94,12 +96,30 @@ def main(argv=None):
         if hasattr(stream, 'reconfigure'):
             stream.reconfigure(encoding='utf8', errors='replace')
     home, backend, web, service_path, helpers = locations()
+    arguments=list(sys.argv[1:] if argv is None else argv)
+    if arguments[:1]==['--trace-cli']:
+        commands={'export','query','verify','decode','import-record','record','elf'}
+        if len(arguments)==1 or arguments[1] in ('-h','--help'):
+            print('Offline Trace CLI: --trace-cli '+', '.join(sorted(commands)))
+            print('Example: --trace-cli export --record RECORD --format flame-html --flame-mode timeline --from-seq START --to-seq END --out flame.html')
+            return 0
+        if arguments[1] not in commands:
+            print('离线Trace CLI不支持该命令；仅允许 '+', '.join(sorted(commands)),file=sys.stderr)
+            return 2
+        for path in (helpers,backend/'tools',backend/'tools/la'):sys.path.insert(0,str(path))
+        from engine_profile import activate_native_profile
+        activate_native_profile()
+        import decode_trace
+        decode_trace.ROOT=backend
+        from trace_cli import main as trace_main
+        return trace_main(arguments[1:])
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--port', type=int, default=8882)
     parser.add_argument('--data-dir', type=Path, default=home / 'data')
     parser.add_argument('--no-browser', action='store_true')
     parser.add_argument('--check', action='store_true', help='离线检查运行库和C++工具；不访问硬件')
     parser.add_argument('--offline', action='store_true', help='离线验收：禁止USB/HID/串口和采集，仅浏览、导入和解码')
+    parser.add_argument('--trace-cli',action='store_true',help='离线记录CLI：--trace-cli export/query/verify/...；无需启动Web服务')
     args=parser.parse_args(argv)
     if not 1024 <= args.port <= 65535:
         raise ValueError('端口必须在1024～65535之间')

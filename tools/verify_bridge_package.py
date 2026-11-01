@@ -101,10 +101,29 @@ def main(argv=None):
             assert ET.fromstring(svg).tag=='{http://www.w3.org/2000/svg}svg'
             (out/(name+'-flame.svg')).write_bytes(svg)
             folder=out/'data/records'/sid
+            document=request('/etm/api/download/'+sid+'/flame-html?mode=timeline&weight=records&fromSeq=913&toSeq=977')
+            import re
+            match=re.search(rb'<script type="application/json" id="flame-data">(.*?)</script>',document,re.S)
+            assert match, 'HTML export payload missing'
+            payload=json.loads(match[1]);assert payload['mode']=='timeline' and payload['range']==[913,977]
+            assert payload['frames'] and all(913<=f[2]<f[3]<=978 for f in payload['frames'])
+            assert b'<script src=' not in document and b'<link ' not in document
+            (out/(name+'-flame.html')).write_bytes(document)
+            cli_html=out/(name+'-cli-flame.html')
+            cli=subprocess.run([str(exe),'--trace-cli','export','--record',str(folder),'--format','flame-html',
+                '--from-seq','913','--to-seq','977','--flame-mode','timeline','--out',str(cli_html)],
+                env=env,capture_output=True,text=True,encoding='utf8',timeout=45)
+            assert cli.returncode==0,(cli.stdout,cli.stderr)
+            assert cli_html.read_bytes()==document,'Frozen CLI and Web HTML differ'
+            queried=subprocess.run([str(exe),'--trace-cli','query','--record',str(folder),'--view','summary','--compact'],
+                env=env,capture_output=True,text=True,encoding='utf8',timeout=30)
+            assert queried.returncode==0,(queried.stdout,queried.stderr)
+            assert json.loads(queried.stdout)['result']['summary']['instructions']==expected
             assert (folder/'store/manifest.json').is_file()
             assert not (folder/'events.jsonl').exists() and not (folder/'native.jsonl').exists()
             report['records'].append({'target':name,'record':sid,'decodeSeconds':seconds,'summary':overview['summary'],
-                'flameBytes':len(svg),'traceStore':True,'perInstructionJsonl':False})
+                'flameBytes':len(svg),'flameHtmlBytes':len(document),'flameHtmlFrames':len(payload['frames']),
+                'frozenCliHtmlMatchesWeb':True,'traceStore':True,'perInstructionJsonl':False})
         # Launching it twice must reopen the existing instance, not spawn a second server.
         duplicate=subprocess.run([str(exe),'--port',str(a.port),'--data-dir',str(out/'data'),'--offline','--no-browser'],env=env,capture_output=True,timeout=30)
         assert duplicate.returncode==0,duplicate.stderr

@@ -356,7 +356,7 @@ on('stop',async()=>{state.captureCancelled=true;const id=state.job||state.failed
 on('decode',async()=>{if(!state.current)throw Error('请选择记录');await watchJob((await api('decode/'+state.current,{})).job);});
 async function download(kind){
   if(!state.current)throw Error('请选择记录');
-  if(kind==='flame-svg'){await history.exportFlame();return;}
+  if(kind==='flame-svg'||kind==='flame-html'){await history.exportFlame(undefined,{format:kind==='flame-html'?'html':'svg'});return;}
   const execution=['source','simplified','simplified-html','csv','reading-c','reading-html'].includes(kind);
   const url=apiBase+'download/'+state.current+'/'+kind+(history.range&&execution?'?fromSeq='+history.range.start+'&toSeq='+history.range.end:'');
   if(execution){

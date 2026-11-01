@@ -77,3 +77,10 @@ test('export failure remains visible and makes the button usable again',async()=
   await button.onclick();assert.equal(button.disabled,false);assert.match(status.textContent,/导出失败：frame limit/);
   assert.equal(status.children.length,0);assert.equal(reported,1);
 });
+
+test('interactive HTML flame download keeps the actual format and retry link',async()=>{
+  const {button}=ui();button.textContent='导出交互火焰图 HTML';
+  const status=wireFlameExport(button,async()=>({filename:'etm-flame-timeline.html',bytes:1234,downloadUrl:'blob:html',cliCaptured:true}));
+  await button.onclick();assert.match(status.textContent,/etm-flame-timeline.html/);assert.match(status.textContent,/CLI/);
+  assert.equal(status.children[0].textContent,'再次下载 HTML');assert.equal(button.textContent,'导出交互火焰图 HTML');
+});

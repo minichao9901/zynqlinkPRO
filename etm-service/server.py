@@ -1269,17 +1269,23 @@ def stop_owned_la_locked(jid):
 @app.get('/api/download/<sid>/<kind>')
 def download(sid, kind):
     folder = directory(sid)
-    if kind == 'flame-svg':
-        from flame_svg import export_svg
+    if kind in ('flame-svg', 'flame-html'):
         start=request.args.get('fromSeq');end=request.args.get('toSeq')
         if (start is None)!=(end is None):raise ValueError('必须同时提供fromSeq/toSeq')
         start=int(start) if start is not None else None;end=int(end) if end is not None else None
         mode=request.args.get('mode','timeline');weight=request.args.get('weight','records')
         root_path=request.args.get('rootPath','')
-        path=folder/('export-'+uuid.uuid4().hex+'.svg')
+        extension='html' if kind=='flame-html' else 'svg'
+        path=folder/('export-'+uuid.uuid4().hex+'.'+extension)
         try:
-            export_svg(browse_store(sid),path,start,end,mode,weight,root_path)
-            response=send_file(path,as_attachment=True,download_name='etm-flame-'+mode+'.svg',mimetype='image/svg+xml')
+            if kind=='flame-html':
+                from flame_html import export_html
+                export_html(browse_store(sid),path,start,end,mode,weight,root_path)
+            else:
+                from flame_svg import export_svg
+                export_svg(browse_store(sid),path,start,end,mode,weight,root_path)
+            response=send_file(path,as_attachment=True,download_name='etm-flame-'+mode+'.'+extension,
+                               mimetype='text/html' if extension=='html' else 'image/svg+xml')
         except BaseException:path.unlink(missing_ok=True);raise
         response.response=ClosingIterator(response.response,lambda:path.unlink(missing_ok=True))
         return response

@@ -158,7 +158,9 @@ def main(argv=None):
             'ETM模式默认使用10 MHz SWD做目标配置；CPU/TRACECLK仍由目标固件决定。\n'
             'Web：载入目标ELF与源码 → 连接探针 → 添加并选择函数起点 → 核对HSE/RCC → 联动采集。\n'
             '目标PLL、AHB/APB分频由target固件负责；桥只配置Trace接口，不自动降频、不烧录板卡。\n'
-            '保留F103ZE ETMv3及STM32H743 ETMv4识别/路由/解码；H743 Zynq链路待真机验收。\n'
+            '保留F103ZE ETMv3及STM32H743 ETMv4；H743 CPU60/TRACECLK20连续CLI采集已验收，Web完整起点流程另验。\n'
+            '火焰图：导出交互HTML，双击离线缩放/平移/查找，保留选定区间与完整调用深度。\n'
+            'AI离线导出：zynq-etm-bridge.exe --trace-cli export --record RECORD --format flame-html --out flame.html\n'
             '数据在本目录data/records，关闭控制台停止服务；用户无需Python、Node或CLI。\n'
             'AI离线检查：zynq-etm-bridge.exe --check --data-dir CHECK_DIR\n')
         (package/'使用说明.txt').write_text(readme,encoding='utf-8-sig')
@@ -174,6 +176,7 @@ def main(argv=None):
         files=[dict(path=p.relative_to(package).as_posix(),bytes=p.stat().st_size,sha256=sha(p)) for p in sorted(package.rglob('*')) if p.is_file()]
         manifest=dict(schema=1,platform='windows-x64',sourceRevision=revision,
             etmControlClockDefaultHz=10000000,
+            flameHtml=dict(interactive=True,selfContained=True,modes=['timeline','aggregate']),offlineTraceCli=True,
             sourceDirty=source_dirty,dependencies=dependencies,
             capturePath='Web button -> Zynq LA -> OpenCSD binary -> C++ TraceStore',
             clockPolicy='target-firmware-owned',requiresSystemPython=False,requiresNode=False,files=files)

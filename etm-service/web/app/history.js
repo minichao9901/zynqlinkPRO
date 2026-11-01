@@ -40,7 +40,8 @@ export class HistoryView{
     if(Number.isFinite(seconds)&&seconds>0)hint.title='采集与解码上限由本地服务能力声明；本页只读浏览历史记录';}
   setLoading(loading){this.loading=loading;for(const id of ['history-prev','history-next','jump','nav-mode','search','hide-skipped','toggle-summary'])$(id).disabled=loading||!this.result;for(const b of document.querySelectorAll('[data-view]'))b.disabled=loading||!this.result;this.pagination(this.result?this.pageTotal||0:0,this.offset);}
   unload(sid=null){
-    if(this._flameExportUrl){URL.revokeObjectURL(this._flameExportUrl);this._flameExportUrl=null;}
+    for(const url of this._flameExportUrls?.values()||[])URL.revokeObjectURL(url);
+    this._flameExportUrls=new Map();
     this.recordRevision=(this.recordRevision||0)+1;this.revision++;this.selectRevision++;
     this.sid=sid;this.result=null;this.range=null;this.rangeHistory=[];this.window=null;
     this.onScopeChange?.(null);
@@ -82,13 +83,15 @@ export class HistoryView{
     if(r&&Number.isInteger(r.totalStart)&&Number.isInteger(r.totalEnd))return {start:r.totalStart,end:r.totalEnd,totalStart:r.totalStart,totalEnd:r.totalEnd};
     const end=Math.max(0,(this.result?.eventCount||1)-1);return {start:0,end,totalStart:0,totalEnd:end};
   }
-  async exportFlame(options=this.view==='flame'&&this.flameExportOptions||{mode:'timeline',weight:'records',rootPath:''},{captureOnly=false}={}){
+  async exportFlame(options=this.view==='flame'&&this.flameExportOptions||{mode:'timeline',weight:'records',rootPath:''},{captureOnly=false,format=options.format||'html'}={}){
     if(!this.sid)throw Error('请选择记录');
-    const params=new URLSearchParams(options);this.scopeParams(params);
+    if(!['html','svg'].includes(format))throw Error('火焰图导出格式须为 html 或 svg');
+    const {format:ignored,...queryOptions}=options;
+    const params=new URLSearchParams(queryOptions);this.scopeParams(params);
     const base=this.downloadBase||'/api/';
-    const file=await fetchExecutionExport(base+'download/'+encodeURIComponent(this.sid)+'/flame-svg?'+params,{timeout:180000});
+    const file=await fetchExecutionExport(base+'download/'+encodeURIComponent(this.sid)+'/flame-'+format+'?'+params,{timeout:180000});
     const saved=saveExportFile(file,{retainUrl:!captureOnly,captureOnly});
-    if(!captureOnly){if(this._flameExportUrl)URL.revokeObjectURL(this._flameExportUrl);this._flameExportUrl=saved.downloadUrl;}
+    if(!captureOnly){this._flameExportUrls??=new Map();const old=this._flameExportUrls.get(format);if(old)URL.revokeObjectURL(old);this._flameExportUrls.set(format,saved.downloadUrl);}
     return {...file,...saved};
   }
   async render(){if(!this.result)return;const revision=++this.revision;for(const b of document.querySelectorAll('[data-view]'))b.classList.toggle('active',b.dataset.view===this.view);$('analysis-panes').classList.toggle('flame-layout',this.view==='flame');$('analysis-panes').classList.toggle('flame-source-collapsed',this.view==='flame'&&this.flameSourceCollapsed);const search=$('search').value.trim().toLowerCase();
