@@ -66,4 +66,4 @@ H743已有独立ETMv4连续原生capture实板验收：CPU60/TRACECLK20、SWD10M
 FRM1原生工具、PS USB采后下载、Web/CLI默认DDR能力分支已完成本阶段真机验证；更高频和逐线校准继续研究。
 `web.shared-sync --check`核对ETM共享驱动（当前10份）；`--write`从主工作台同步。web.check与bridge.build都会阻止驱动副本不一致。
 
-火焰图默认提供可离线缩放的HTML导出，SVG仍保留。源码CLI使用 `trace export --format flame-html`；新bridge EXE使用 `--trace-cli export --record ... --format flame-html --out ...`。Web CLI的 `history.exportFlame` 默认HTML，可用 `format:"svg"` 显式兼容旧格式，保留当前区间及下载捕获。见 [使用说明](flame-html-export.md)。
+火焰图默认提供可离线缩放的双标签HTML导出，默认Timeline，另有周期权重页；左键框选放大，Shift拖动平移，SVG仍保留。源码CLI使用 `trace export --format flame-html`；新bridge EXE使用 `--trace-cli export --record ... --format flame-html --out ...`。Web CLI的 `history.exportFlame` 默认HTML，可用 `format:"svg"` 显式兼容旧格式，保留当前区间及下载捕获。见 [使用说明](flame-html-export.md)。

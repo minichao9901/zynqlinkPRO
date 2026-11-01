@@ -54,7 +54,7 @@ function aggregateFlameView(result,onFunction,selectedFunction='',o={}){
   label.title='当前选择与权重口径';
   box.title='点击方块放大；可查看选中函数的执行流'+(selectedFunction?'；蓝框为当前光标所属函数':'');
   exportSvg.title='导出当前区间、当前权重和当前放大层级；SVG 宽度按函数名自动扩展，函数名完整显示';
-  exportHtml.title='导出当前区间、权重和放大节点；双击HTML可离线缩放、平移和查找函数';
+  exportHtml.title='导出当前区间的Timeline和周期权重双标签HTML，默认Timeline；支持框选放大、Shift拖动平移及查找函数';
   tools.append(reset,open,weightBtn,exportHtml,exportSvg,label);box.append(tools,canvas);
   const namespace='http://www.w3.org/2000/svg',original=result.analysis.flame;let selected=original;
   const levels=node=>1+Math.max(0,...node.children.map(levels));

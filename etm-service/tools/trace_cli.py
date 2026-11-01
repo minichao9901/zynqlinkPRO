@@ -855,7 +855,7 @@ def capabilities_command(args):
     return dict(protocol=VERSION,native=native,softwareCapabilities=dict(captureMaxSeconds=1,captureMaxSamples=500000000,
         queryMaxLimit=500,queryMaxBins=5000,queryViews=['summary','overview','page','event','navigate','window','timeline','issues','source','functions','hotspots','flame','integrity'],
         exportFormats=['simplified','source','html','csv','json','events-jsonl','flame-svg','flame-html','raw','etm','elf','record'],
-        flameHtml=dict(modes=['timeline','aggregate'],selfContained=True,interactive=True,exactCallPaths=True,fullDepth=True,maxFrames=200000),
+        flameHtml=dict(tabs=['timeline','cycles'],defaultTab='timeline',dragSelectZoom=True,modes=['timeline','aggregate'],selfContained=True,interactive=True,exactCallPaths=True,fullDepth=True,maxFrames=200000),
         flameSvg=dict(modes=['timeline','aggregate'],weights=['records','cycles'],exactCallPaths=True,fullDepth=True,maxFrames=200000),
         readingProjection=dict(schema=SCHEMA,available=available,formats=['simplified','html'],defaults=DEFAULTS,
             repeatThresholdMeaning='strictly greater than threshold; 10 means at least 11 iterations',

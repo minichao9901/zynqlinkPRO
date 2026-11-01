@@ -89,7 +89,7 @@ def preflight(backend, web, service_path):
     if libusb_package.get_libusb1_backend() is None:
         raise ValueError('桥包缺少libusb运行库')
     return {'ok':True, 'native':versions, 'clockPolicy':'target-firmware-owned', 'hardwareAccess':False,
-            'flameHtml':{'selfContained':True,'interactive':True},'offlineTraceCli':True}
+            'flameHtml':{'selfContained':True,'interactive':True,'tabs':['timeline','cycles'],'defaultTab':'timeline','dragSelectZoom':True},'offlineTraceCli':True}
 
 
 def main(argv=None):

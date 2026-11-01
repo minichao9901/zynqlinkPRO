@@ -94,7 +94,22 @@ def build_data(view, start=None, end=None, mode='timeline', weight='records', ro
 
 
 def export_html(view, output, start=None, end=None, mode='timeline', weight='records', root_path=''):
-    data = build_data(view, start, end, mode, weight, root_path)
+    # Keep validating the existing CLI/Web options, but every HTML now opens
+    # on the chronological view and contains a second, cycle-weighted tab.
+    requested = build_data(view, start, end, mode, weight, root_path)
+    data = requested if mode == 'timeline' else build_data(view, start, end)
+    analysis = (view.overview().get('analysis') if start is None
+                else view.window(start, end).get('analysis')) or {}
+    timing = analysis.get('timing') or {}
+    cycles = None
+    cycle_reason = '所选区间没有周期计数数据（目标未启用，或 ETMv3 不支持）；不能用指令记录数代替周期。'
+    if timing.get('timeFlameAvailable'):
+        cycles = (requested if mode == 'aggregate' and weight == 'cycles'
+                  else build_data(view, start, end, 'aggregate', 'cycles', root_path))
+        cycles['timingBasis'] = str(timing.get('basis') or '记录中的周期计数；不是逐指令精确时间戳')
+        cycle_reason = ''
+    data = dict(data, schema='etm-flame-html/2', defaultTab='timeline',
+                views={'timeline': data, 'cycles': cycles}, cycleUnavailableReason=cycle_reason)
     assets = backend_root()/'web/app'
     css = (assets/'standalone-flame.css').read_text(encoding='utf-8')
     js = (assets/'standalone-flame.js').read_text(encoding='utf-8')
@@ -107,14 +122,17 @@ def export_html(view, output, start=None, end=None, mode='timeline', weight='rec
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'none'; base-uri 'none'; form-action 'none'">
 <title>''' + title + ''' · 交互火焰图</title><style>''' + css + '''</style></head><body>
 <header><div class="eyebrow">ETM · 离线交互火焰图</div><h1 id="title"></h1><p id="subtitle"></p></header>
-<main><section class="toolbar" aria-label="火焰图控制">
+<main><div class="tabs" role="tablist" aria-label="火焰图视图"><button id="tab-timeline" role="tab" aria-selected="true" aria-controls="flame-panel">Timeline · 执行顺序</button><button id="tab-cycles" role="tab" aria-selected="false" tabindex="-1" aria-controls="flame-panel">周期权重火焰图</button></div>
+<section id="flame-panel" role="tabpanel" aria-labelledby="tab-timeline"><p id="unavailable" role="status" hidden></p><div id="chart-content"><section class="toolbar" aria-label="火焰图控制">
 <div class="buttons"><button id="zoom-in" title="放大（+）">＋ 放大</button><button id="zoom-out" title="缩小（−）">− 缩小</button><button id="reset" title="完整导出区间（Home）">复位</button><button id="back">上一级</button><button id="focus" disabled>放大选中调用</button></div>
 <div class="search"><input id="search" type="search" placeholder="查找函数，保留其他调用" aria-label="查找函数"><button id="previous-match">上一个</button><button id="next-match">下一个</button><span id="match-count"></span></div>
-</section><div class="range"><span id="range-label"></span><span id="hint">滚轮以指针为中心缩放 · 拖动平移 · 双击调用段放大</span></div>
+</section><div class="range"><span id="range-label"></span><span id="hint">左键拖动框选放大 · Shift＋拖动平移 · 滚轮缩放 · 双击调用段放大</span></div>
 <div id="axis" aria-hidden="true"></div><div id="viewport"><div id="spacer"></div><canvas id="chart" tabindex="0" role="img" aria-label="可缩放的调用火焰图"></canvas></div>
 <div id="tooltip" role="tooltip" hidden></div><section id="detail" aria-live="polite">悬停查看完整函数名和区间；点击保留调用详情。</section>
-<footer><span id="stats"></span><span>全部调用数据内嵌，可离线打开。窄调用段放大后可查看，完整调用深度保留。</span></footer></main>
+<footer><span id="stats"></span><span>全部调用数据内嵌，可离线打开。窄调用段放大后可查看，完整调用深度保留。</span></footer></div></section></main>
 <script type="application/json" id="flame-data">''' + payload + '''</script><script>''' + js + '''</script></body></html>'''
     output.write_text(document, encoding='utf-8')
     return dict(mode=mode, fromSeq=data['range'][0], toSeq=data['range'][1],
-                frames=len(data['frames']), depth=data['depth'], selfContained=True)
+                frames=len(data['frames']), depth=data['depth'], selfContained=True,
+                tabs=['timeline', 'cycles'], defaultTab='timeline',
+                cyclesAvailable=cycles is not None)

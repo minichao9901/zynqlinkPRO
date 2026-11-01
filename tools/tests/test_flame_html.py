@@ -77,6 +77,32 @@ class FlameHtmlTests(unittest.TestCase):
         self.assertIn("connect-src 'none'",text);self.assertTrue(info['selfContained'])
         self.assertIn('id="zoom-in"',text);self.assertIn('id="reset"',text)
 
+    def test_two_tabs_share_range_preserve_cycles_and_default_to_timeline(self):
+        with tempfile.TemporaryDirectory() as directory:
+            out=Path(directory)/'flame.html'
+            for mode, weight, root in [('timeline','records',''), ('aggregate','cycles','0'), ('aggregate','records','')]:
+                info=export_html(View(),out,1,3,mode,weight,root)
+                data=payload(out.read_text(encoding='utf-8'))
+                self.assertEqual(data['defaultTab'],'timeline')
+                self.assertEqual(data['mode'],'timeline')
+                self.assertEqual(data['views']['timeline'],build_data(View(),1,3))
+                cycles=data['views']['cycles']
+                expected=build_data(View(),1,3,'aggregate','cycles',root)
+                self.assertEqual(cycles['frames'],expected['frames'])
+                self.assertEqual(cycles['domain'],[0,12 if root else 20])
+                self.assertEqual(cycles['range'],[1,3])
+                self.assertTrue(info['cyclesAvailable'])
+
+    def test_missing_cycles_remain_explicit_without_losing_timeline(self):
+        view=View();view.analysis['timing']['timeFlameAvailable']=False
+        with tempfile.TemporaryDirectory() as directory:
+            out=Path(directory)/'flame.html';info=export_html(view,out)
+            data=payload(out.read_text(encoding='utf-8'))
+        self.assertFalse(info['cyclesAvailable'])
+        self.assertIsNone(data['views']['cycles'])
+        self.assertIn('不能用指令记录数代替周期',data['cycleUnavailableReason'])
+        self.assertEqual(data['views']['timeline'],build_data(View()))
+
     def test_offline_web_download_equals_cli_generator_and_cleans_temp_file(self):
         sys.path.insert(0,str(ROOT))
         from tools.zynq_bridge import application,locations

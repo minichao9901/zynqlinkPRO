@@ -106,6 +106,10 @@ def main(argv=None):
             match=re.search(rb'<script type="application/json" id="flame-data">(.*?)</script>',document,re.S)
             assert match, 'HTML export payload missing'
             payload=json.loads(match[1]);assert payload['mode']=='timeline' and payload['range']==[913,977]
+            assert payload['defaultTab']=='timeline' and set(payload['views'])=={'timeline','cycles'}
+            if payload['views']['cycles']:
+                assert payload['views']['cycles']['weight']=='cycles' and payload['views']['cycles']['range']==[913,977]
+            else:assert payload['cycleUnavailableReason']
             assert payload['frames'] and all(913<=f[2]<f[3]<=978 for f in payload['frames'])
             assert b'<script src=' not in document and b'<link ' not in document
             (out/(name+'-flame.html')).write_bytes(document)
