@@ -1,6 +1,23 @@
 """Read target identity and clock controls without writing peripheral registers."""
 
 
+def same_clock_configuration(before, after):
+    """Ignore only H7 read-only D1/D2 domain-ready flags, keeping raw evidence.
+
+    USB initialization can wake D2 without altering PLLs or bus divisors.
+    stm32h743xx.h defines RCC_CR_D1CKRDY/D2CKRDY at bits 14/15.
+    Oscillator/PLL enable and ready bits remain part of the strict comparison.
+    """
+    def configuration(value):
+        result = dict(value)
+        registers = dict(value['registers'])
+        if '0x58024400' in registers:
+            registers['0x58024400'] = hex(int(registers['0x58024400'], 0) & ~0xc000)
+        result['registers'] = registers
+        return result
+    return configuration(before) == configuration(after)
+
+
 def snapshot(mem):
     cpuid = mem.word(0xe000ed00)
     part = (cpuid >> 4) & 0xfff

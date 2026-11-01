@@ -1,0 +1,100 @@
+{
+  "targetElf": "prebuilt/targets/stm32h743-cdc-trace-20261101/cpu60-trace20/fw.elf",
+  "targetElfSha256": "246640bf79c8b1e568441a286812326dfb0ae68a0df061a0c023262c07cf221b",
+  "probePair": "prebuilt/fclk133-release-20261101",
+  "cpuMHz": 60,
+  "physicalTraceMHz": 20,
+  "swdKhz": 10000,
+  "hardwareSeconds": 2,
+  "flashWrites": false,
+  "sysresetForInitialization": true,
+  "entry": "trace_hook_entry @ 0x08000b7c",
+  "singleEchoVerified": true,
+  "singleEchoInsideHardwareWindow": true,
+  "echo": {
+    "armed": {
+      "armed": true,
+      "unix": 1793549113.7864358,
+      "monotonic": 201831.9925459
+    },
+    "port": "COM60",
+    "payload": "H743_SINGLE_ECHO_20261102_001\r\n",
+    "sentUnix": 1793549114.2166789,
+    "receivedUnix": 1793549114.2170205,
+    "exact": true,
+    "receivedHex": "483734335f53494e474c455f4543484f5f32303236313130325f3030310d0a",
+    "sentPackets": 1
+  },
+  "quality": {
+    "transport": "ddr-usb/1",
+    "captureId": 14,
+    "captureNonce": 15968030556814987728,
+    "loss": false,
+    "synced": true,
+    "bufferFull": false,
+    "bufferCapacityBytes": 104857600,
+    "captureComplete": true,
+    "requestedWindowComplete": true,
+    "completionReason": "time",
+    "ended": true,
+    "records": 325906,
+    "hardwareTicks": 399999996,
+    "requestedTicks": 399999996,
+    "refClockHz": 199999998,
+    "hardwareSeconds": 2.0,
+    "hardwareStartBracketUnix": [
+      1793549113.7857385,
+      1793549113.7864275
+    ],
+    "stopReason": 0,
+    "formatterBytes": 5214508,
+    "tailBytes": 12,
+    "tailAmbiguous": false,
+    "usbSeconds": 0.13785050000296906,
+    "usbPayloadMBps": 37.8272693961044,
+    "diagnostics": {
+      "implemented": true,
+      "frameDrops": 0,
+      "parserErrors": 0,
+      "idelayReadyLosses": 0,
+      "frameHighwater": 1,
+      "syncAcquisitions": 1,
+      "observedFrames": 325906,
+      "capacityReached": false,
+      "writerError": 0
+    }
+  },
+  "rcc_configuration_unchanged": true,
+  "svg": [
+    {
+      "file": "CDC初始化-执行顺序火焰图.svg",
+      "nativeOriginal": "cdc-init-timeline.svg",
+      "mode": "timeline",
+      "fromSeq": 7,
+      "toSeq": 42571,
+      "frames": 925,
+      "fullDepth": true,
+      "bytes": 316169,
+      "sha256": "8e7a4acaf4bdb4e6f4fe9e696595de57531e7624157e5d90b97b8d6b181237bf",
+      "identicalToWebSharedExporter": true,
+      "width": "4086272.000",
+      "height": "492"
+    },
+    {
+      "file": "单次echo-执行顺序火焰图.svg",
+      "nativeOriginal": "echo-timeline.svg",
+      "mode": "timeline",
+      "fromSeq": 7782088,
+      "toSeq": 7784098,
+      "frames": 60,
+      "fullDepth": true,
+      "bytes": 21513,
+      "sha256": "0776f8287227d73b2658a4c50d013d55a725aa54709681080af903e5361d1766",
+      "identicalToWebSharedExporter": true,
+      "width": "59022.674",
+      "height": "372"
+    }
+  ],
+  "exporter": "Unmodified shared flame_svg.export_svg used by server.py and trace_cli.py; timeline mode",
+  "finalStateNote": "Capture driver verified FPB restored and target running. User subsequently reassigned the board; all further USB/JTAG/state audits are stopped. Later unavailability is not classified as a new project fault."
+}

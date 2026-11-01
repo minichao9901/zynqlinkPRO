@@ -1,0 +1,590 @@
+{
+  "init": {
+    "start": 7,
+    "end": 42571,
+    "last": {
+      "event": {
+        "kind": "instruction",
+        "seq": 42571,
+        "offset": 4588,
+        "pc": 134219870,
+        "size": 2,
+        "bytes": "38bd",
+        "mnemonic": "pop",
+        "operands": "{r3, r4, r5, pc}",
+        "executed": true,
+        "function": "cdc_acm_init",
+        "file": "E:/zynqlinkPRO/firmware/target/stm32h743_cdc_trace/src/main.c",
+        "line": 240,
+        "cycleCount": 0,
+        "cycleSpan": 0,
+        "flow": "return",
+        "conditional": false,
+        "executionState": "executed",
+        "executionReason": "",
+        "callPath": [
+          "采集前调用栈未知",
+          "main",
+          "cdc_acm_init"
+        ],
+        "cycles": 0
+      },
+      "callPath": [
+        "采集前调用栈未知",
+        "main",
+        "cdc_acm_init"
+      ],
+      "stackBasis": "历史 trace 重建，包含未证实祖先；不是当前寄存器快照"
+    },
+    "after": {
+      "event": {
+        "kind": "instruction",
+        "seq": 42572,
+        "offset": 4592,
+        "pc": 134220216,
+        "size": 2,
+        "bytes": "48b1",
+        "mnemonic": "cbz",
+        "operands": "r0, #0x80009ce",
+        "executed": true,
+        "function": "main",
+        "file": "E:/zynqlinkPRO/firmware/target/stm32h743_cdc_trace/src/main.c",
+        "line": 446,
+        "cycleCount": 0,
+        "cycleSpan": 0,
+        "flow": "branch",
+        "conditional": false,
+        "executionState": "executed",
+        "executionReason": "",
+        "callPath": [
+          "采集前调用栈未知",
+          "main"
+        ],
+        "cycles": 0
+      },
+      "callPath": [
+        "采集前调用栈未知",
+        "main"
+      ],
+      "stackBasis": "历史 trace 重建，包含未证实祖先；不是当前寄存器快照"
+    }
+  },
+  "echoInCallback": {
+    "seq": 7784041,
+    "wrapped": false
+  },
+  "nonInstructions": [
+    {
+      "kind": "event",
+      "seq": 7781842,
+      "type": 9,
+      "offset": 1034976,
+      "text": "OCSD_GEN_TRC_ELEM_EXCEPTION(pref ret addr:0x8000a72; excep num (0x265) )",
+      "payload": 613,
+      "start": 0,
+      "end": 134220402,
+      "flags": 64
+    },
+    {
+      "kind": "event",
+      "seq": 7782014,
+      "type": 10,
+      "offset": 1035006,
+      "text": "OCSD_GEN_TRC_ELEM_EXCEPTION_RET()",
+      "payload": 0,
+      "start": 0,
+      "end": 0,
+      "flags": 0
+    },
+    {
+      "kind": "event",
+      "seq": 7782015,
+      "type": 9,
+      "offset": 1035007,
+      "text": "OCSD_GEN_TRC_ELEM_EXCEPTION(excep num (0x265) )",
+      "payload": 613,
+      "start": 0,
+      "end": 0,
+      "flags": 6144
+    },
+    {
+      "kind": "event",
+      "seq": 7782087,
+      "type": 10,
+      "offset": 1035029,
+      "text": "OCSD_GEN_TRC_ELEM_EXCEPTION_RET()",
+      "payload": 0,
+      "start": 0,
+      "end": 0,
+      "flags": 0
+    },
+    {
+      "kind": "event",
+      "seq": 7782088,
+      "type": 9,
+      "offset": 1035030,
+      "text": "OCSD_GEN_TRC_ELEM_EXCEPTION(excep num (0x265) )",
+      "payload": 613,
+      "start": 0,
+      "end": 0,
+      "flags": 6144
+    },
+    {
+      "kind": "event",
+      "seq": 7782356,
+      "type": 10,
+      "offset": 1035078,
+      "text": "OCSD_GEN_TRC_ELEM_EXCEPTION_RET()",
+      "payload": 0,
+      "start": 0,
+      "end": 0,
+      "flags": 0
+    },
+    {
+      "kind": "event",
+      "seq": 7782672,
+      "type": 9,
+      "offset": 1035106,
+      "text": "OCSD_GEN_TRC_ELEM_EXCEPTION(pref ret addr:0x8000540 [addr also prev br tgt]; excep num (0x265) )",
+      "payload": 613,
+      "start": 0,
+      "end": 134219072,
+      "flags": 2112
+    },
+    {
+      "kind": "event",
+      "seq": 7782990,
+      "type": 10,
+      "offset": 1035150,
+      "text": "OCSD_GEN_TRC_ELEM_EXCEPTION_RET()",
+      "payload": 0,
+      "start": 0,
+      "end": 0,
+      "flags": 0
+    },
+    {
+      "kind": "event",
+      "seq": 7783924,
+      "type": 9,
+      "offset": 1035255,
+      "text": "OCSD_GEN_TRC_ELEM_EXCEPTION(pref ret addr:0x80068c4 [addr also prev br tgt]; excep num (0x265) )",
+      "payload": 613,
+      "start": 0,
+      "end": 134244548,
+      "flags": 2112
+    },
+    {
+      "kind": "event",
+      "seq": 7784098,
+      "type": 10,
+      "offset": 1035299,
+      "text": "OCSD_GEN_TRC_ELEM_EXCEPTION_RET()",
+      "payload": 0,
+      "start": 0,
+      "end": 0,
+      "flags": 0
+    },
+    {
+      "kind": "event",
+      "seq": 7784757,
+      "type": 9,
+      "offset": 1035395,
+      "text": "OCSD_GEN_TRC_ELEM_EXCEPTION(pref ret addr:0x8000a3e; excep num (0x0f) )",
+      "payload": 15,
+      "start": 0,
+      "end": 134220350,
+      "flags": 64
+    },
+    {
+      "kind": "event",
+      "seq": 7784768,
+      "type": 10,
+      "offset": 1035406,
+      "text": "OCSD_GEN_TRC_ELEM_EXCEPTION_RET()",
+      "payload": 0,
+      "start": 0,
+      "end": 0,
+      "flags": 0
+    }
+  ],
+  "transitions": [
+    {
+      "seq": 7781842,
+      "kind": "event",
+      "function": null,
+      "flow": null,
+      "callPath": null,
+      "pc": null
+    },
+    {
+      "seq": 7781843,
+      "kind": "instruction",
+      "function": "OTG_FS_IRQHandler",
+      "flow": "linear",
+      "callPath": [
+        "中断 613",
+        "OTG_FS_IRQHandler"
+      ],
+      "pc": 134236200
+    },
+    {
+      "seq": 7782013,
+      "kind": "instruction",
+      "function": "OTG_FS_IRQHandler",
+      "flow": "return",
+      "callPath": [
+        "中断 613",
+        "OTG_FS_IRQHandler"
+      ],
+      "pc": 134236212
+    },
+    {
+      "seq": 7782014,
+      "kind": "event",
+      "function": null,
+      "flow": null,
+      "callPath": null,
+      "pc": null
+    },
+    {
+      "seq": 7782016,
+      "kind": "instruction",
+      "function": "OTG_FS_IRQHandler",
+      "flow": "linear",
+      "callPath": [
+        "采集前调用栈未知",
+        "OTG_FS_IRQHandler"
+      ],
+      "pc": 134236200
+    },
+    {
+      "seq": 7782086,
+      "kind": "instruction",
+      "function": "OTG_FS_IRQHandler",
+      "flow": "return",
+      "callPath": [
+        "采集前调用栈未知",
+        "OTG_FS_IRQHandler"
+      ],
+      "pc": 134236212
+    },
+    {
+      "seq": 7782087,
+      "kind": "event",
+      "function": null,
+      "flow": null,
+      "callPath": null,
+      "pc": null
+    },
+    {
+      "seq": 7782089,
+      "kind": "instruction",
+      "function": "OTG_FS_IRQHandler",
+      "flow": "linear",
+      "callPath": [
+        "中断 613",
+        "OTG_FS_IRQHandler"
+      ],
+      "pc": 134236200
+    },
+    {
+      "seq": 7782214,
+      "kind": "instruction",
+      "function": "usbd_cdc_acm_bulk_out",
+      "flow": "linear",
+      "callPath": [
+        "中断 613",
+        "OTG_FS_IRQHandler",
+        "USBD_IRQHandler",
+        "usbd_event_ep_out_complete_handler",
+        "usbd_cdc_acm_bulk_out"
+      ],
+      "pc": 134218892
+    },
+    {
+      "seq": 7782330,
+      "kind": "instruction",
+      "function": "usbd_cdc_acm_bulk_out",
+      "flow": "return",
+      "callPath": [
+        "中断 613",
+        "OTG_FS_IRQHandler",
+        "USBD_IRQHandler",
+        "usbd_event_ep_out_complete_handler",
+        "usbd_cdc_acm_bulk_out"
+      ],
+      "pc": 134218924
+    },
+    {
+      "seq": 7782355,
+      "kind": "instruction",
+      "function": "OTG_FS_IRQHandler",
+      "flow": "return",
+      "callPath": [
+        "中断 613",
+        "OTG_FS_IRQHandler"
+      ],
+      "pc": 134236212
+    },
+    {
+      "seq": 7782356,
+      "kind": "event",
+      "function": null,
+      "flow": null,
+      "callPath": null,
+      "pc": null
+    },
+    {
+      "seq": 7782455,
+      "kind": "instruction",
+      "function": "cdc_write",
+      "flow": "linear",
+      "callPath": [
+        "采集前调用栈未知",
+        "main",
+        "cdc_write"
+      ],
+      "pc": 134219016
+    },
+    {
+      "seq": 7782539,
+      "kind": "instruction",
+      "function": "cdc_write",
+      "flow": "linear",
+      "callPath": [
+        "采集前调用栈未知",
+        "main",
+        "cdc_write"
+      ],
+      "pc": 134219054
+    },
+    {
+      "seq": 7782672,
+      "kind": "event",
+      "function": null,
+      "flow": null,
+      "callPath": null,
+      "pc": null
+    },
+    {
+      "seq": 7782673,
+      "kind": "instruction",
+      "function": "OTG_FS_IRQHandler",
+      "flow": "linear",
+      "callPath": [
+        "中断 613",
+        "OTG_FS_IRQHandler"
+      ],
+      "pc": 134236200
+    },
+    {
+      "seq": 7782989,
+      "kind": "instruction",
+      "function": "OTG_FS_IRQHandler",
+      "flow": "return",
+      "callPath": [
+        "中断 613",
+        "OTG_FS_IRQHandler"
+      ],
+      "pc": 134236212
+    },
+    {
+      "seq": 7782990,
+      "kind": "event",
+      "function": null,
+      "flow": null,
+      "callPath": null,
+      "pc": null
+    },
+    {
+      "seq": 7782991,
+      "kind": "instruction",
+      "function": "cdc_write",
+      "flow": "linear",
+      "callPath": [
+        "采集前调用栈未知",
+        "main",
+        "cdc_write"
+      ],
+      "pc": 134219072
+    },
+    {
+      "seq": 7782998,
+      "kind": "instruction",
+      "function": "handle_command",
+      "flow": "linear",
+      "callPath": [
+        "采集前调用栈未知",
+        "main",
+        "handle_command"
+      ],
+      "pc": 134219448
+    },
+    {
+      "seq": 7783076,
+      "kind": "instruction",
+      "function": "handle_command",
+      "flow": "linear",
+      "callPath": [
+        "采集前调用栈未知",
+        "main",
+        "handle_command"
+      ],
+      "pc": 134219470
+    },
+    {
+      "seq": 7783129,
+      "kind": "instruction",
+      "function": "handle_command",
+      "flow": "branch",
+      "callPath": [
+        "采集前调用栈未知",
+        "main",
+        "handle_command"
+      ],
+      "pc": 134219528
+    },
+    {
+      "seq": 7783141,
+      "kind": "instruction",
+      "function": "handle_command",
+      "flow": "branch",
+      "callPath": [
+        "采集前调用栈未知",
+        "main",
+        "handle_command"
+      ],
+      "pc": 134219538
+    },
+    {
+      "seq": 7783153,
+      "kind": "instruction",
+      "function": "handle_command",
+      "flow": "linear",
+      "callPath": [
+        "采集前调用栈未知",
+        "main",
+        "handle_command"
+      ],
+      "pc": 134219548
+    },
+    {
+      "seq": 7783166,
+      "kind": "instruction",
+      "function": "handle_command",
+      "flow": "linear",
+      "callPath": [
+        "采集前调用栈未知",
+        "main",
+        "handle_command"
+      ],
+      "pc": 134219560
+    },
+    {
+      "seq": 7783179,
+      "kind": "instruction",
+      "function": "handle_command",
+      "flow": "linear",
+      "callPath": [
+        "采集前调用栈未知",
+        "main",
+        "handle_command"
+      ],
+      "pc": 134219572
+    },
+    {
+      "seq": 7783196,
+      "kind": "instruction",
+      "function": "handle_command",
+      "flow": "branch",
+      "callPath": [
+        "采集前调用栈未知",
+        "main",
+        "handle_command"
+      ],
+      "pc": 134219586
+    },
+    {
+      "seq": 7783924,
+      "kind": "event",
+      "function": null,
+      "flow": null,
+      "callPath": null,
+      "pc": null
+    },
+    {
+      "seq": 7783925,
+      "kind": "instruction",
+      "function": "OTG_FS_IRQHandler",
+      "flow": "linear",
+      "callPath": [
+        "中断 613",
+        "OTG_FS_IRQHandler"
+      ],
+      "pc": 134236200
+    },
+    {
+      "seq": 7784041,
+      "kind": "instruction",
+      "function": "usbd_cdc_acm_bulk_in",
+      "flow": "linear",
+      "callPath": [
+        "中断 613",
+        "OTG_FS_IRQHandler",
+        "USBD_IRQHandler",
+        "usbd_event_ep_in_complete_handler",
+        "usbd_cdc_acm_bulk_in"
+      ],
+      "pc": 134218944
+    },
+    {
+      "seq": 7784063,
+      "kind": "instruction",
+      "function": "usbd_cdc_acm_bulk_in",
+      "flow": "linear",
+      "callPath": [
+        "中断 613",
+        "OTG_FS_IRQHandler",
+        "USBD_IRQHandler",
+        "usbd_event_ep_in_complete_handler",
+        "usbd_cdc_acm_bulk_in"
+      ],
+      "pc": 134218968
+    },
+    {
+      "seq": 7784097,
+      "kind": "instruction",
+      "function": "OTG_FS_IRQHandler",
+      "flow": "return",
+      "callPath": [
+        "中断 613",
+        "OTG_FS_IRQHandler"
+      ],
+      "pc": 134236212
+    },
+    {
+      "seq": 7784098,
+      "kind": "event",
+      "function": null,
+      "flow": null,
+      "callPath": null,
+      "pc": null
+    },
+    {
+      "seq": 7784757,
+      "kind": "event",
+      "function": null,
+      "flow": null,
+      "callPath": null,
+      "pc": null
+    },
+    {
+      "seq": 7784768,
+      "kind": "event",
+      "function": null,
+      "flow": null,
+      "callPath": null,
+      "pc": null
+    }
+  ]
+}

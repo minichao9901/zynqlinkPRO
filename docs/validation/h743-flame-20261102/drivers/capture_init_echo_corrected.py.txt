@@ -1,0 +1,70 @@
+import sys,json,time,subprocess,threading,struct,hashlib
+from pathlib import Path
+import serial,serial.tools.list_ports,usb.util
+from elftools.elf.elffile import ELFFile
+sys.path.insert(0,'tools')
+from dap_pipeline_bench import open_dap,setup
+from test_probe_board import Memory
+from benchmark_rtt_forward import core_read
+from target_snapshot import snapshot
+root=Path.cwd();out=root/'build/h743-flame-20261102/corrected';elf=root/'prebuilt/targets/stm32h743-cdc-trace-20261101/cpu60-trace20/fw.elf';record=out/'init-single-echo';out.mkdir(exist_ok=False);report={'reset':True,'flashWrites':False,'record':str(record)}
+def save():(out/'capture-phase.json').write_text(json.dumps(report,indent=2)+'\n')
+with elf.open('rb') as f:
+ image=ELFFile(f);symbol=next(s for s in image.get_section_by_name('.symtab').iter_symbols() if s.name=='trace_hook_entry');entry=int(symbol['st_value'])&~1
+report['entry']=hex(entry);d,o,i=open_dap();m=Memory(o,i);saved=None;worker=None;stop=threading.Event();echo={}
+def wait_halt(timeout=5):
+ deadline=time.monotonic()+timeout
+ while time.monotonic()<deadline:
+  if m.word(0xe000edf0)&0x20000:return
+  time.sleep(.005)
+ raise RuntimeError('H743 halt timeout')
+def one_echo():
+ try:
+  ready=record/'ready.json';deadline=time.monotonic()+20
+  while time.monotonic()<deadline and not stop.is_set():
+   if ready.exists():break
+   time.sleep(.01)
+  armed=json.loads(ready.read_text());echo['armed']=armed
+  until=time.monotonic()+4
+  while time.monotonic()<until and not stop.is_set():
+   ports=[p.device for p in serial.tools.list_ports.comports() if p.vid==0xf055 and p.pid==0x7431]
+   if ports:
+    try:port=serial.Serial(ports[0],115200,timeout=.03,write_timeout=1);break
+    except serial.SerialException:pass
+   time.sleep(.02)
+  else:raise RuntimeError('H743 CDC did not enumerate')
+  with port:
+   echo['port']=port.port;time.sleep(.05);port.reset_input_buffer();payload=b'H743_SINGLE_ECHO_20261102_001\r\n';echo['payload']=payload.decode();echo['sentUnix']=time.time();port.write(payload);received=bytearray();until=time.monotonic()+3
+   while payload not in received and time.monotonic()<until:received.extend(port.read(port.in_waiting or 1))
+   echo.update(receivedUnix=time.time(),exact=payload in received,receivedHex=received.hex(),sentPackets=1)
+   assert echo['exact'],echo
+ except BaseException as e:echo['error']=repr(e)
+ finally:(out/'single-echo.json').write_text(json.dumps(echo,indent=2)+'\n')
+try:
+ setup(o,i,10000);report['target_before']=snapshot(m);assert int(report['target_before']['device'],16)&4095==0x450
+ with elf.open('rb') as f:
+  for s in ELFFile(f).iter_segments():
+   if s['p_type']=='PT_LOAD' and s['p_filesz'] and 0x08000000<=s['p_paddr']<0x08200000:assert m.read(s['p_paddr'],s['p_filesz'])==s.data()
+ ctrl=m.word(0xe0002000);n=((ctrl>>8)&0x70)|((ctrl>>4)&15);saved=dict(ctrl=ctrl,comparators=[m.word(0xe0002008+4*j) for j in range(n)],demcr=m.word(0xe000edfc),dhcsr=m.word(0xe000edf0));report['saved']=saved;save()
+ m.write_word(0xe000edf0,0xa05f0003);wait_halt();m.write_word(0xe000edfc,saved['demcr']|1);m.write_word(0xe000ed0c,0x05fa0004);time.sleep(.03);setup(o,i,10000);wait_halt();m.write_word(0xe000edf0,0xa05f0003)
+ report['reset_pc']=hex(core_read(m,15));rev=1+((m.word(0xe0002000)>>28)&15);assert rev in (1,2)
+ for j in range(n):m.write_word(0xe0002008+4*j,0)
+ encoded=(entry|1) if rev==2 else ((entry&0x1ffffffc)|(0x80000000 if entry&2 else 0x40000000)|1)
+ m.write_word(0xe0002008,encoded);m.write_word(0xe0002000,3);m.write_word(0xe000edfc,saved['demcr']&~1);m.write_word(0xe000edf0,0xa05f0001);wait_halt();report['hit_pc']=hex(core_read(m,15)&~1);assert int(report['hit_pc'],16)==entry
+ m.write_word(0xe0002008,0);report['target_at_entry']=snapshot(m);report['ready_before']=m.word(0x20003008);assert report['ready_before']==0;save();usb.util.dispose_resources(d);d=None
+ worker=threading.Thread(target=one_echo,daemon=True);worker.start()
+ argv=[sys.executable,'-X','utf8','toolbox.py','trace','capture','--elf',str(elf),'--bit','prebuilt/fclk133-release-20261101/probe.bit','--zynq-elf','prebuilt/fclk133-release-20261101/application.elf','--out',str(record),'--seconds','2','--gpio-speed','2','--swd-khz','10000','--ready-file',str(record/'ready.json'),'--json-out',str(out/'capture-result.json')]
+ report['argv']=argv;save();r=subprocess.run(argv,capture_output=True);(out/'capture.log').write_bytes(r.stdout+r.stderr);report['returncode']=r.returncode;worker.join(5);assert r.returncode==0,(r.stdout+r.stderr).decode(errors='replace')[-1500:];assert echo.get('exact') and not echo.get('error'),echo;report['passed']=True
+finally:
+ stop.set()
+ if worker:worker.join(5)
+ if d is None:d,o,i=open_dap();m=Memory(o,i)
+ try:
+  setup(o,i,10000)
+  if saved:
+   m.write_word(0xe000edf0,0xa05f0003);wait_halt()
+   for j,value in enumerate(saved['comparators']):m.write_word(0xe0002008+4*j,value)
+   m.write_word(0xe0002000,saved['ctrl']|2);m.write_word(0xe000edfc,saved['demcr']);report['fpb_restored']=all(m.word(0xe0002008+4*j)==value for j,value in enumerate(saved['comparators'])) and (m.word(0xe0002000)&1)==(saved['ctrl']&1);assert report['fpb_restored']
+   if not saved['dhcsr']&0x20000:m.write_word(0xe000edf0,0xa05f0001)
+  report['target_after']=snapshot(m);report['dhcsr_after']=hex(m.word(0xe000edf0));report['ready_after']=m.word(0x20003008);save();print(json.dumps(report))
+ finally:usb.util.dispose_resources(d)

@@ -1,0 +1,297 @@
+{
+  "trace_hook_entry": {
+    "address": "0x8000b7c",
+    "navigation": {
+      "seq": 2,
+      "wrapped": false
+    },
+    "event": {
+      "event": {
+        "kind": "instruction",
+        "seq": 2,
+        "offset": 25,
+        "pc": 134220668,
+        "size": 2,
+        "bytes": "00bf",
+        "mnemonic": "nop",
+        "operands": "",
+        "executed": true,
+        "function": "trace_hook_entry",
+        "file": "E:/zynqlinkPRO/firmware/target/stm32h743_cdc_trace/src/trace_hooks.c",
+        "line": 73,
+        "cycleCount": 0,
+        "cycleSpan": 0,
+        "flow": "linear",
+        "conditional": false,
+        "executionState": "executed",
+        "executionReason": "",
+        "callPath": [
+          "采集前调用栈未知",
+          "trace_hook_entry"
+        ],
+        "cycles": 0
+      },
+      "callPath": [
+        "采集前调用栈未知",
+        "trace_hook_entry"
+      ],
+      "stackBasis": "历史 trace 重建，包含未证实祖先；不是当前寄存器快照"
+    }
+  },
+  "cdc_acm_init": {
+    "address": "0x8000818",
+    "navigation": {
+      "seq": 7,
+      "wrapped": false
+    },
+    "event": {
+      "event": {
+        "kind": "instruction",
+        "seq": 7,
+        "offset": 31,
+        "pc": 134219800,
+        "size": 2,
+        "bytes": "38b5",
+        "mnemonic": "push",
+        "operands": "{r3, r4, r5, lr}",
+        "executed": true,
+        "function": "cdc_acm_init",
+        "file": "E:/zynqlinkPRO/firmware/target/stm32h743_cdc_trace/src/main.c",
+        "line": 231,
+        "cycleCount": 0,
+        "cycleSpan": 0,
+        "flow": "linear",
+        "conditional": false,
+        "executionState": "executed",
+        "executionReason": "",
+        "callPath": [
+          "采集前调用栈未知",
+          "main",
+          "cdc_acm_init"
+        ],
+        "cycles": 0
+      },
+      "callPath": [
+        "采集前调用栈未知",
+        "main",
+        "cdc_acm_init"
+      ],
+      "stackBasis": "历史 trace 重建，包含未证实祖先；不是当前寄存器快照"
+    }
+  },
+  "trace_hook_ready": {
+    "address": "0x8000b80",
+    "navigation": {
+      "seq": 46853,
+      "wrapped": false
+    },
+    "event": {
+      "event": {
+        "kind": "instruction",
+        "seq": 46853,
+        "offset": 4803,
+        "pc": 134220672,
+        "size": 2,
+        "bytes": "034b",
+        "mnemonic": "ldr",
+        "operands": "r3, [pc, #0xc]",
+        "executed": true,
+        "function": "trace_hook_ready",
+        "file": "E:/zynqlinkPRO/firmware/target/stm32h743_cdc_trace/src/trace_hooks.c",
+        "line": 78,
+        "cycleCount": 0,
+        "cycleSpan": 0,
+        "flow": "linear",
+        "conditional": false,
+        "executionState": "executed",
+        "executionReason": "",
+        "callPath": [
+          "采集前调用栈未知",
+          "main",
+          "trace_hook_ready"
+        ],
+        "cycles": 0
+      },
+      "callPath": [
+        "采集前调用栈未知",
+        "main",
+        "trace_hook_ready"
+      ],
+      "stackBasis": "历史 trace 重建，包含未证实祖先；不是当前寄存器快照"
+    }
+  },
+  "usbd_cdc_acm_bulk_out": {
+    "address": "0x800048c",
+    "navigation": {
+      "seq": 7782214,
+      "wrapped": false
+    },
+    "event": {
+      "event": {
+        "kind": "instruction",
+        "seq": 7782214,
+        "offset": 1035058,
+        "pc": 134218892,
+        "size": 2,
+        "bytes": "08b5",
+        "mnemonic": "push",
+        "operands": "{r3, lr}",
+        "executed": true,
+        "function": "usbd_cdc_acm_bulk_out",
+        "file": "E:/zynqlinkPRO/firmware/target/stm32h743_cdc_trace/src/main.c",
+        "line": 183,
+        "cycleCount": 0,
+        "cycleSpan": 0,
+        "flow": "linear",
+        "conditional": false,
+        "executionState": "executed",
+        "executionReason": "",
+        "callPath": [
+          "中断 613",
+          "OTG_FS_IRQHandler",
+          "USBD_IRQHandler",
+          "usbd_event_ep_out_complete_handler",
+          "usbd_cdc_acm_bulk_out"
+        ],
+        "cycles": 0
+      },
+      "callPath": [
+        "中断 613",
+        "OTG_FS_IRQHandler",
+        "USBD_IRQHandler",
+        "usbd_event_ep_out_complete_handler",
+        "usbd_cdc_acm_bulk_out"
+      ],
+      "stackBasis": "历史 trace 重建，包含未证实祖先；不是当前寄存器快照"
+    }
+  },
+  "cdc_write": {
+    "address": "0x8000508",
+    "navigation": {
+      "seq": 6769546,
+      "wrapped": false
+    },
+    "event": {
+      "event": {
+        "kind": "instruction",
+        "seq": 6769546,
+        "offset": 915512,
+        "pc": 134219016,
+        "size": 2,
+        "bytes": "38b5",
+        "mnemonic": "push",
+        "operands": "{r3, r4, r5, lr}",
+        "executed": true,
+        "function": "cdc_write",
+        "file": "E:/zynqlinkPRO/firmware/target/stm32h743_cdc_trace/src/main.c",
+        "line": 244,
+        "cycleCount": 0,
+        "cycleSpan": 0,
+        "flow": "linear",
+        "conditional": false,
+        "executionState": "executed",
+        "executionReason": "",
+        "callPath": [
+          "采集前调用栈未知",
+          "main",
+          "cdc_puts",
+          "cdc_write"
+        ],
+        "cycles": 0
+      },
+      "callPath": [
+        "采集前调用栈未知",
+        "main",
+        "cdc_puts",
+        "cdc_write"
+      ],
+      "stackBasis": "历史 trace 重建，包含未证实祖先；不是当前寄存器快照"
+    }
+  },
+  "handle_command": {
+    "address": "0x80006b8",
+    "navigation": {
+      "seq": 7782998,
+      "wrapped": false
+    },
+    "event": {
+      "event": {
+        "kind": "instruction",
+        "seq": 7782998,
+        "offset": 1035161,
+        "pc": 134219448,
+        "size": 2,
+        "bytes": "30b5",
+        "mnemonic": "push",
+        "operands": "{r4, r5, lr}",
+        "executed": true,
+        "function": "handle_command",
+        "file": "E:/zynqlinkPRO/firmware/target/stm32h743_cdc_trace/src/main.c",
+        "line": 283,
+        "cycleCount": 0,
+        "cycleSpan": 0,
+        "flow": "linear",
+        "conditional": false,
+        "executionState": "executed",
+        "executionReason": "",
+        "callPath": [
+          "采集前调用栈未知",
+          "main",
+          "handle_command"
+        ],
+        "cycles": 0
+      },
+      "callPath": [
+        "采集前调用栈未知",
+        "main",
+        "handle_command"
+      ],
+      "stackBasis": "历史 trace 重建，包含未证实祖先；不是当前寄存器快照"
+    }
+  },
+  "usbd_cdc_acm_bulk_in": {
+    "address": "0x80004c0",
+    "navigation": {
+      "seq": 6772024,
+      "wrapped": false
+    },
+    "event": {
+      "event": {
+        "kind": "instruction",
+        "seq": 6772024,
+        "offset": 915821,
+        "pc": 134218944,
+        "size": 2,
+        "bytes": "38b5",
+        "mnemonic": "push",
+        "operands": "{r3, r4, r5, lr}",
+        "executed": true,
+        "function": "usbd_cdc_acm_bulk_in",
+        "file": "E:/zynqlinkPRO/firmware/target/stm32h743_cdc_trace/src/main.c",
+        "line": 192,
+        "cycleCount": 0,
+        "cycleSpan": 0,
+        "flow": "linear",
+        "conditional": false,
+        "executionState": "executed",
+        "executionReason": "",
+        "callPath": [
+          "中断 613",
+          "OTG_FS_IRQHandler",
+          "USBD_IRQHandler",
+          "usbd_event_ep_in_complete_handler",
+          "usbd_cdc_acm_bulk_in"
+        ],
+        "cycles": 0
+      },
+      "callPath": [
+        "中断 613",
+        "OTG_FS_IRQHandler",
+        "USBD_IRQHandler",
+        "usbd_event_ep_in_complete_handler",
+        "usbd_cdc_acm_bulk_in"
+      ],
+      "stackBasis": "历史 trace 重建，包含未证实祖先；不是当前寄存器快照"
+    }
+  }
+}

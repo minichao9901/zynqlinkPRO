@@ -9,7 +9,7 @@ import struct
 import time
 
 from elftools.elf.elffile import ELFFile
-from target_snapshot import snapshot
+from target_snapshot import snapshot, same_clock_configuration
 
 ETM, FUNNEL, ETF, TPIU = 0xe0041000, 0x5c013000, 0x5c014000, 0x5c015000
 
@@ -150,7 +150,8 @@ def capture(args, dev, tx, rx, mem, report):
                         mem.write_word(address,saved[address])
                         report['restored'] &= mem.word(address)==saved[address]
                 report['rcc_after']=snapshot(mem)
-                assert report['rcc_after']==clocks, 'H743 target clocks changed'
+                report['rcc_configuration_unchanged'] = same_clock_configuration(clocks, report['rcc_after'])
+                assert report['rcc_configuration_unchanged'], 'H743 target clocks changed'
                 assert report['restored'], 'H743 CoreSight restoration mismatch'
             if not initial&(1<<17):mem.write_word(0xe000edf0,0xa05f0001)
             report['run_halt_restored'] = bool(mem.word(0xe000edf0)&(1<<17))==bool(initial&(1<<17))
