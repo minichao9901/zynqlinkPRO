@@ -1,0 +1,10 @@
+BUDGET words=256 read=0 idle=0 half_ns=5 cycles=23655 rises=11822 launches=257
+BUDGET words=256 read=1 idle=0 half_ns=5 cycles=23653 rises=11822 launches=257
+BUDGET words=1022 read=0 idle=0 half_ns=5 cycles=94127 rises=47058 launches=1023
+BUDGET words=1022 read=1 idle=0 half_ns=5 cycles=94125 rises=47058 launches=1023
+BUDGET words=8 read=0 idle=0 half_ns=5 cycles=868 rises=428 launches=10
+BUDGET words=8 read=1 idle=0 half_ns=5 cycles=866 rises=428 launches=10
+PASS chained partial error read=0 parity=0
+PASS chained partial error read=1 parity=0
+PASS chained partial error read=1 parity=1
+PASS real packet/core serial budget
