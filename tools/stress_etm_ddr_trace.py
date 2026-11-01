@@ -31,6 +31,7 @@ def main():
     p.add_argument('--decode',action='store_true',help='Full native packet/range verification, may expand to large native.bin')
     p.add_argument('--download',choices=('usb','physical'),default='usb')
     p.add_argument('--verify-ddr-physical',action='store_true',help='Compare USB bytes with the same physical AP0 DDR buffer')
+    p.add_argument('--probe-fclk-hz',type=int,help='Temporary STA-bounded probe FCLK0; preserve the 1MHz external SWD control clock')
     a=p.parse_args()
     if a.ram_image:
         from f103_ram_image import plan
@@ -50,6 +51,7 @@ def main():
     report=dict(hardwareAccess=True,webAcceptance=False,usbDdrDownload=a.download=='usb',flashWrites=False,
         pair=str(pair),files=manifest['files'],reloadBetweenRounds=False,retryFailedRounds=False,
         runnerSha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),ramImage=a.ram_image,
+        requestedProbeFclkHz=a.probe_fclk_hz,
         entryMode='free-running SRAM' if a.ram_image else 'Flash FPB function',rows=[],passed=False)
     def save():(out/'result.json').write_text(json.dumps(report,indent=2)+'\n')
     save()
@@ -67,6 +69,7 @@ def main():
             command+=['--ram-image'] if a.ram_image else ['--entry',function]
             command+=['--ddr-physical'] if a.download=='physical' else ['--transport','ddr']
             if a.verify_ddr_physical:command+=['--verify-ddr-physical']
+            if a.probe_fclk_hz is not None:command+=['--probe-fclk-hz',str(a.probe_fclk_hz)]
             started=time.time()
             # Wait for the target-restoration finally block; do not kill a capture subprocess.
             run=subprocess.run(command,capture_output=True)
