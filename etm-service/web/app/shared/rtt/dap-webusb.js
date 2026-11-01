@@ -501,7 +501,7 @@ export class WebUsbDapProbe {
     const writeTimeout = remaining();
     let exchanged=null;
     try {
-      if(this.device.nativeService && this.device.atomicDapEnabled!==false && typeof this.device.exchangeDap==='function'){
+      if(this.device.nativeService && this.device.atomicDapSupported===true && this.device.atomicDapEnabled!==false && typeof this.device.exchangeDap==='function'){
         const budget=Math.max(1,Math.floor(Math.min(2000,writeTimeout-100)));
         exchanged=await withTimeout(this.device.exchangeDap(req,this.pkt,budget),writeTimeout,'DAP 交换');
       }else await withTimeout(this.device.transferOut(this.epOut, req), writeTimeout, 'USB 写');
@@ -1125,6 +1125,44 @@ export class WebUsbDapProbe {
   }
 
   /** Keyed/self-clearing control writes: one send, no readback retry or healing. */
+  async readWordsDiagnostic(addresses){
+    if(!Array.isArray(addresses)||addresses.length<1||addresses.length>128||addresses.some(a=>!Number.isInteger(a)||a<0||a>0xffffffff||(a&3)))throw Error('批量读取需要1～128个对齐地址');
+    if(!this.device?.nativeService||this.device.packedMemoryEnabled===false){
+      const result=[];for(const a of addresses){const b=await this.readMemDiagnostic(a,4);result.push(u32le(b,0));}return result;
+    }
+    if(this._faulted||this._recovering)throw Error('调试口已有FAULT；批量读取未恢复目标');
+    return this._withLock(async()=>{
+      if(this._faulted||this._recovering)throw Error('调试口已有FAULT；批量读取未恢复目标');
+      await this._flushPosted();const result=[],limit=Math.min(63,Math.floor((this.pkt-3)/12));
+      if(limit<1)throw Error('DAP包容量不足');
+      for(let from=0;from<addresses.length;from+=limit){
+        const chunk=addresses.slice(from,from+limit),ops=[],samples=[];
+        for(const a of chunk){const n=a>=0xe0000000||!this.fast?2:1;samples.push(n);for(let i=0;i<n;i++)ops.push({ap:true,rnw:false,addr:AP_TAR,data:a},{ap:true,rnw:true,addr:AP_DRW});}
+        const values=await this._transfer(ops,0);let at=0;
+        for(let i=0;i<chunk.length;i++){
+          let value=values[at+samples[i]-1];
+          if(samples[i]===2&&values[at]!==value)value=(await this._transfer([{ap:true,rnw:false,addr:AP_TAR,data:chunk[i]},{ap:true,rnw:true,addr:AP_DRW}],0))[0];
+          result.push(value>>>0);at+=samples[i];
+        }
+      }
+      return result;
+    });
+  }
+  async writeWordsDiagnostic(entries){
+    if(!Array.isArray(entries)||entries.length<1||entries.length>128||entries.some(e=>!Number.isInteger(e.address)||e.address<0||e.address>0xffffffff||(e.address&3)||!Number.isInteger(e.value)||e.value<0||e.value>0xffffffff))throw Error('批量写入需要1～128个对齐地址及u32值');
+    if(!this.device?.nativeService||this.device.packedMemoryEnabled===false){for(const e of entries)await this.writeMemDiagnostic(e.address,u32leBytes(e.value));return;}
+    if(this._faulted||this._recovering)throw Error('调试口已有FAULT；批量写入未恢复目标');
+    return this._withLock(async()=>{
+      if(this._faulted||this._recovering)throw Error('调试口已有FAULT；批量写入未恢复目标');
+      await this._flushPosted();const limit=Math.min(85,Math.floor((this.pkt-3)/11));if(limit<1)throw Error('DAP包容量不足');
+      for(let from=0;from<entries.length;from+=limit){
+        const ops=[];
+        for(const e of entries.slice(from,from+limit))ops.push({ap:true,rnw:false,addr:AP_TAR,data:e.address},
+          {ap:true,rnw:false,addr:AP_DRW,data:e.value},{ap:false,rnw:true,addr:DP_RDBUFF});
+        await this._transfer(ops,0);this._posted=false;
+      }
+    });
+  }
   async writeMemDiagnostic(addr, bytes){
     if(this._faulted||this._recovering)throw new Error('调试口已有 FAULT；控制写未自动重初始化目标');
     return this._withLock(()=>{

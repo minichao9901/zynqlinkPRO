@@ -223,7 +223,7 @@ class NativeProbe:
                     except BaseException:
                         usb.util.release_interface(device,0);self.claimed.remove(0)
                         raise
-                    return {'ok':True,**synchronized}
+                    return {'ok':True,**synchronized,'atomicDapExchange':1}
                 elif action == 'release' and 0 in self.claimed:
                     usb.util.release_interface(device, 0)
                     self.claimed.remove(0)

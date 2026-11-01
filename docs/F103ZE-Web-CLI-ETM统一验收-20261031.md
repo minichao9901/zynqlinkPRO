@@ -1194,3 +1194,13 @@ Web窗口元数据在DDR模式以硬件ticks/ref计算实际时长，主机下�
 实际只有40个控制寄存器地址：TPIU 6个地址，整轮合计6次目标写（含配置与恢复），不是1589个TPIU配置。DHCSR读94次/写13次，ETMCR读50/写11，DEMCR读36/写9；RCC CR和CFGR各读28次。ETMIDR读14次、RCC每次检查双读并复核，与一次采集中7次完整inspect相符。另有20,168字节Flash、5,042字读取。大量小访问被重复检查和TAR/DRW展开，不应作为硬件必需命令量。
 
 当前ETM配套SWCLK设置为1MHz，vendor只读配置核对实测999,999.9833Hz，实际FCLK119,999,998Hz、半周期60个FCLK。物理TRACECLK仍24MHz，参考时钟约200MHz。SWCLK负责调试控制，不承载ETM数据；提高SWCLK不能替代消除这些HTTP往返。[阶段/地址与实际时钟证据](validation/etm-address-stage-profile-20261101/analysis.json)。66项Web检查通过，下一步去掉事务内重复检查并批量化必要访问。
+
+### 2026-11-01：多寄存器批量访问——734降至632条，收益有限
+
+本地桥默认把普通R/W配置、恢复以及RCC状态读取按包批量执行。每个地址仍重设TAR，PPB/慢档双读及不一致第三读保留；每次DRW写后都先读DP RDBUFF完成屏障，再访问下一个地址。配置保存原始掩码所有权，逐项回读校验，失败保留恢复信息。时钟门控、解锁、ETM编程握手及最终恢复顺序没有合并。主工作台和独立ETM共享驱动一致；旧桥未明确声明atomicDapExchange能力时回退原单条交换，避免新版页面调用旧桥不存在的端点。
+
+相同F103ZE固件、24MHz TRACECLK、1MHz SWCLK、cdc_poll入口、100ms窗口及CDC刺激，off/on交错6轮全部通过。标量路径8.541/7.221/7.622秒，批量路径7.119/7.275/7.839秒；中位7.622→7.275秒，仅改善约4.6%。命令/HTTP exchange每轮734→632，交换累计耗时中位2.410→2.136秒。这些完整流程数据包含采集、C++处理、索引及首屏；存在运行波动，不据此宣称达到1秒级。所有轮次RCC不变、loss=false、packetIssues=0，硬件窗口内每轮至少5次完整精确CDC echo。[原始记录、计数及A/B结果](validation/etm-register-batch-ab-20261101/analysis.json)。77项Web测试、10项本地桥测试及2项压力工具检查通过。
+
+本阶段只改主机软件，继续使用已经明确加载验收的`prebuilt/etm-ddr-usb-raw4-20261101`配对；采后只读核对FCLK119,999,998Hz、SWCLK999,999.9833Hz。没有修改RTL/PS、目标PLL/AHB/APB或Flash/QSPI。先前8896780便携EXE未包含本轮优化，不能把源码测得的耗时标成旧EXE性能。高频TRACECLK、逐线校准及H743真机仍未完成。
+
+随后默认批量路径真机压力验收：10次打开/关闭、10次100ms采集与原生解码，逐轮交替cdc_poll/cdc_tx_poll断点，均通过；每轮同步CDC echo且严格核对硬件窗口内完成的事务，首错即停、没有补跑。完整流程5.978～7.283秒，中位6.510秒，探针打开中位0.681秒；所有轮次packetIssues=0、无传输丢失、RCC及清理检查通过。[10轮压力原始证据与可重放记录](validation/etm-register-batch-ab-20261101/stress/analysis.json)。这证明本阶段改动在已测范围内通过，不是高频或长期稳定性上限。

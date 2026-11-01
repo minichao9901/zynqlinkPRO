@@ -128,6 +128,9 @@ class Stress(Streams):
                 if self.args.packed_memory!='auto':
                     packed=self.args.packed_memory=='on' or self.args.packed_memory=='alternate' and n%2==1
                     self.invoke('etm','setPackedMemory',packed,target='target');row['packedMemory']=packed
+                if self.args.register_batch!='auto':
+                    grouped=self.args.register_batch=='on' or self.args.register_batch=='alternate' and n%2==1
+                    self.invoke('etm','setRegisterBatch',grouped,target='target');row['registerBatch']=grouped
                 if self.args.profile_control:self.invoke('etm','resetTransportStats',target='target')
                 previous=self.page('etm','read',selector='#records')['value'];started=time.perf_counter()
                 row['captureAttemptUnix']=time.time()
@@ -220,6 +223,7 @@ def arguments(argv=None):
     p.add_argument('--profile-control',action='store_true',help='Record per-action native USB HTTP round-trip counters')
     p.add_argument('--native-exchange',choices=('auto','on','off','alternate'),default='auto',help='AI controlled A/B only; normal product default is on')
     p.add_argument('--packed-memory',choices=('auto','on','off','alternate'),default='auto',help='AI controlled scalar batching comparison')
+    p.add_argument('--register-batch',choices=('auto','on','off','alternate'),default='auto',help='AI controlled grouped-register comparison')
     p.add_argument('--rounds',type=int,default=30);p.add_argument('--capture-rounds',type=int,default=10)
     p.add_argument('--milliseconds',type=int,default=10);p.add_argument('--case-timeout',type=float,default=120)
     p.add_argument('--profile',choices=['stm32f103ze','stm32h743'],default='stm32f103ze')

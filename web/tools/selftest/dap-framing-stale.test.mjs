@@ -4,16 +4,23 @@ import {WebUsbDapProbe} from '../../../web/app/rtt/dap-webusb.js';
 import {WebUsbDapProbe as EtmDapProbe} from '../../../etm-service/web/app/shared/rtt/dap-webusb.js';
 
 for(const [name,Probe] of [['workbench',WebUsbDapProbe],['ETM standalone',EtmDapProbe]]){
+test(name+' older native bridge falls back before an unadvertised exchange',async()=>{
+  const probe=Object.create(Probe.prototype);let writes=0;
+  Object.assign(probe,{_ready:true,pkt:512,epOut:2,epIn:1,device:{nativeService:true,atomicDapSupported:false,
+    exchangeDap:async()=>{throw Error('unsupported exchange');},transferOut:async()=>{writes++;},
+    transferIn:async()=>{const b=Uint8Array.of(17,0);return {data:new DataView(b.buffer)};}}});
+  assert.deepEqual([...await probe._ctrl(17,Uint8Array.of(1))],[0]);assert.equal(writes,1);
+});
 test(name+' native control exchanges once and keeps response validation',async()=>{
   const probe=Object.create(Probe.prototype);let exchanges=0;
-  Object.assign(probe,{_ready:true,pkt:512,epOut:2,epIn:1,device:{nativeService:true,
+  Object.assign(probe,{_ready:true,pkt:512,epOut:2,epIn:1,device:{nativeService:true,atomicDapSupported:true,
     exchangeDap:async req=>{exchanges++;assert.deepEqual([...req],[17,1]);const b=Uint8Array.of(17,0);return {data:new DataView(b.buffer)};},
     transferOut:async()=>{throw Error('duplicate write');},transferIn:async()=>{throw Error('duplicate read');}}});
   assert.deepEqual([...await probe._ctrl(17,Uint8Array.of(1))],[0]);assert.equal(exchanges,1);
 });
 test(name+' native stale response never replays the control write',async()=>{
   const probe=Object.create(Probe.prototype);let exchanges=0,reads=0;
-  Object.assign(probe,{_ready:true,pkt:512,epOut:2,epIn:1,device:{nativeService:true,
+  Object.assign(probe,{_ready:true,pkt:512,epOut:2,epIn:1,device:{nativeService:true,atomicDapSupported:true,
     exchangeDap:async()=>{exchanges++;const b=Uint8Array.of(3,0);return {data:new DataView(b.buffer)};},
     transferOut:async()=>{throw Error('duplicate write');},transferIn:async()=>{reads++;const b=Uint8Array.of(17,0);return {data:new DataView(b.buffer)};}}});
   assert.deepEqual([...await probe._ctrl(17,Uint8Array.of(1))],[0]);assert.equal(exchanges,1);assert.equal(reads,1);

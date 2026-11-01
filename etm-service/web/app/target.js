@@ -55,9 +55,16 @@ export class EtmTarget {
   transportStats(){return this.probe?.device?.transportStats?.()||null;}
   setNativeExchange(enabled){if(typeof enabled!=='boolean')throw Error('交换模式须为boolean');if(!this.probe?.device?.nativeService)throw Error('仅本地桥提供HTTP交换测量');this.probe.device.atomicDapEnabled=enabled;}
   setPackedMemory(enabled){if(typeof enabled!=='boolean')throw Error('批量模式须为boolean');if(!this.probe?.device?.nativeService)throw Error('仅本地桥提供批量控制测量');this.probe.device.packedMemoryEnabled=enabled;}
+  setRegisterBatch(enabled){if(typeof enabled!=='boolean')throw Error('寄存器批量模式须为boolean');if(!this.probe?.device?.nativeService)throw Error('仅本地桥提供批量控制测量');this.probe.device.registerBatchEnabled=enabled;}
+  get registerBatch(){return !!this.probe?.device?.nativeService&&this.probe.device.registerBatchEnabled!==false&&typeof this.probe.readWordsDiagnostic==='function';}
   assertTransport(){if(this.transportFault)throw Error('SWD 已故障，已保留现场；请点击“恢复调试口”后重试');}
   accessError(e,operation,address){if(e.ack===4||this.probe?._faulted)this.debugFault=true;const wrapped=new Error(`${operation} ${hex(address)}：${e.message}`,{cause:e});wrapped.ack=e.ack;return wrapped;}
   async read(addr){if(!this.probe)throw Error('请先连接探针');this.assertTransport();try{const bytes=await this.probe.readMemDiagnostic(addr>>>0,4);return new DataView(bytes.buffer,bytes.byteOffset,4).getUint32(0,true);}catch(e){throw this.accessError(e,'读寄存器',addr);}}
+  async readMany(addresses){
+    this.assertTransport();
+    if(!this.registerBatch){const result=[];for(const a of addresses)result.push(await this.read(a));return result;}
+    try{return await this.probe.readWordsDiagnostic(addresses);}catch(e){throw this.accessError(e,'批量读寄存器',addresses[0]);}
+  }
   async write(addr,value,verify=true){this.assertTransport();if(!this.probe?.writeMemDiagnostic)throw Error(this.embedded?'主页面探针驱动缺少安全控制写接口，请先刷新整个主页面；仍缺少时更新完整 ETM 桥包':'探针驱动缺少安全控制写接口，请更新完整 ETM 桥包后重试');const bytes=new Uint8Array(4);new DataView(bytes.buffer).setUint32(0,value>>>0,true);try{await this.probe.writeMemDiagnostic(addr>>>0,bytes);}catch(e){throw this.accessError(e,'写寄存器',addr);}if(verify&&await this.read(addr)!==(value>>>0))throw Error(`寄存器回读不匹配 ${hex(addr)}`);}
   async recoverDebugPort(){
     if(!this.probe?.recoverDebugPort)throw Error('当前连接不支持调试口恢复，请重新连接探针');
@@ -75,6 +82,29 @@ export class EtmTarget {
     if(verify&&((await this.read(addr)^next)&mask)!==0)throw Error(`配置回读不匹配 ${hex(addr)}`);
   }
   async managed(addr,value,verify=true){return this.set(addr,0xffffffff,value,verify);}
+  async setMany(entries){
+    if(!Array.isArray(entries)||entries.length<1||entries.length>128||entries.some(e=>!Number.isInteger(e.address)||e.address<0||e.address>0xffffffff||(e.address&3)||!Number.isInteger(e.mask)||e.mask<0||e.mask>0xffffffff||!Number.isInteger(e.value)||e.value<0||e.value>0xffffffff))throw Error('批量配置需要对齐地址、u32掩码及值');
+    if(new Set(entries.map(e=>e.address)).size!==entries.length)throw Error('同一配置批次不允许重复地址');
+    if(!this.registerBatch||!this.probe.writeWordsDiagnostic){for(const e of entries)await this.set(e.address,e.mask,e.value);return;}
+    this.assertTransport();
+    const before=await this.readMany(entries.map(e=>e.address)),writes=[];
+    for(let i=0;i<entries.length;i++){
+      const e=entries[i],current=before[i],saved=this.saved.get(e.address);
+      if(saved){saved.before=(saved.before|(current&e.mask&~saved.mask))>>>0;saved.mask=(saved.mask|e.mask)>>>0;}
+      else this.saved.set(e.address,{before:current&e.mask,mask:e.mask>>>0});
+      writes.push({address:e.address,value:((current&~e.mask)|(e.value&e.mask))>>>0});
+    }
+    try{await this.probe.writeWordsDiagnostic(writes);}catch(e){throw this.accessError(e,'批量写配置',entries[0].address);}
+    const after=await this.readMany(entries.map(e=>e.address));
+    for(let i=0;i<entries.length;i++)if(((after[i]^writes[i].value)&entries[i].mask)!==0)throw Error('配置回读不匹配 '+hex(entries[i].address));
+  }
+  async restoreMany(addresses){
+    if(!this.registerBatch||!this.probe.writeWordsDiagnostic){for(const address of addresses){const s=this.saved.get(address);if(s)await this.write(address,((await this.read(address)&~s.mask)|(s.before&s.mask))>>>0);}return;}
+    const active=addresses.filter(a=>this.saved.has(a));if(!active.length)return;
+    const current=await this.readMany(active),writes=active.map((address,i)=>{const s=this.saved.get(address);return {address,value:((current[i]&~s.mask)|(s.before&s.mask))>>>0};});
+    try{await this.probe.writeWordsDiagnostic(writes);}catch(e){throw this.accessError(e,'批量恢复配置',active[0]);}
+    const after=await this.readMany(active);for(let i=0;i<after.length;i++)if(after[i]!==writes[i].value)throw Error('恢复回读不匹配 '+hex(active[i]));
+  }
   async unlock(base){if(!this.locks.has(base))this.locks.set(base,!!((await this.read(base+0xfb4))&2));await this.write(base+0xfb0,0xc5acce55,false);if((await this.read(base+0xfb4))&2)throw Error('CoreSight 解锁失败');}
   async stopFifo(){
     // Arm DDI0461B: flush/stop while enabled, wait Ready, then clear CTL.
@@ -142,9 +172,10 @@ export class EtmTarget {
       else{config.traceIoEnabled=!!(config.debugControl&(1<<5));config.traceMode=(config.debugControl>>>6)&3;}
     }
     this.config=traceSupported?config:null;
-    const rcc={};for(const [name,offset]of Object.entries(port.clockRegisters))rcc[name]=await this.read(port.rcc+offset);
+    const clockEntries=Object.entries(port.clockRegisters),clockAddresses=clockEntries.map(([,offset])=>port.rcc+offset);
+    const observed=await this.readMany(clockAddresses),rcc={};clockEntries.forEach(([name],i)=>{rcc[name]=observed[i];});
     let clocks=null,clockError=null;try{
-      for(const [name,offset]of Object.entries(port.clockRegisters))if(await this.read(port.rcc+offset)!==rcc[name])throw Error('RCC 正在变化，请暂停或重新读取');
+      const checked=await this.readMany(clockAddresses);for(let i=0;i<checked.length;i++)if(checked[i]!==observed[i])throw Error('RCC 正在变化，请暂停或重新读取');
       clocks=completeClocks(port,rcc,this.hseHz);
     }catch(e){clockError=e.message;}
     this.breakpoints.capacity=decodeFpCtrl(await this.read(0xe0002000)).numCode;
