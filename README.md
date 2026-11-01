@@ -1,5 +1,7 @@
 # zynqlinkPRO
 
+开发接手先读 [AGENTS.md](AGENTS.md)、[项目问题跟踪列表](docs/项目问题跟踪列表.md) 和 [CLI工作台](docs/toolbox-cli-ai.md)。发现或处理问题时同步更新问题表并随改动提交。
+
 Zynq-7020 CMSIS-DAP：PL SWD/JTAG/RTT/HSS 与并行 ETM，PS USB/OCM 固件，配套 Web/CLI。
 
 本机入口：双击`dist/zynq-etm-bridge/zynq-etm-bridge.exe`，在Web载入ELF、选函数、核对时钟、点击联动采集。请保留完整程序目录及`_internal`；分发ZIP时完整解压再启动。

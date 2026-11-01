@@ -7,7 +7,7 @@
 - hpm6800evk_rtt_kingst、xilinx_msc以及旧示例工程仍仅保留本地，正式构建/CM3仿真不依赖这些目录。HFLink worktree和分支已按用户要求退役，reference/HFLink仅为待手动清理的旧参考副本，不再要求保留。
 - docs/required-dependencies.json列出全部298个必需依赖文件及SHA-256；普通git clone即可取得，无需子模块或Git LFS。运行python tools/verify_dependencies.py可严格离线检查完整性。
 - etm-service/native、vendor/OpenCSD-1.8.3、CMakeLists.txt及source-provenance保留原生重建源码。
-- etm-service/build-native仅部署5个当前EXE，不是CMake缓存。它们的PE直接依赖仅Windows KERNEL32/msvcrt。
+- etm-service/build-native部署6个当前EXE：etm_decode、etm_frontend、etm_storebuild、etm_index、etm_export、etm_framed，不是CMake缓存。它们的PE直接依赖仅Windows KERNEL32/msvcrt。
 - prebuilt/golden/host/openocd保存此前使用的OpenOCD、配套DLL/scripts、GPL许可证及源码补丁。只验证版本启动，未在本轮重新测板。
 
 Python基础环境安装：python -m pip install -r etm-service/requirements.txt。部分构建/分析脚本另外使用pefile、pandas；Node用于Web语法/自测；Icarus/本机C编译器用于快速协议/主机自测。这些工具和Vivado/SDK安装包不放进仓库。
