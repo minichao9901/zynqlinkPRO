@@ -31,8 +31,8 @@ def main():
     p.add_argument('--decode',action='store_true',help='Full native packet/range verification, may expand to large native.bin')
     p.add_argument('--download',choices=('usb','physical'),default='usb')
     p.add_argument('--verify-ddr-physical',action='store_true',help='Compare USB bytes with the same physical AP0 DDR buffer')
-    p.add_argument('--probe-fclk-hz',type=int,help='Temporary STA-bounded probe FCLK0; preserve a compatible non-short SWD control profile')
-    p.add_argument('--speed-khz',type=int,default=1000,help='Control profile: 35000 pairs with FCLK138.461MHz; 37500 pairs with FCLK150MHz; actual rate is recorded')
+    p.add_argument('--probe-fclk-hz',type=int,help='Explicit STA-bounded capture profile; 133333333 uses existing ARM PLL /10')
+    p.add_argument('--speed-khz',type=int,default=1000,help='Initial control clock; ARM133 capture uses validated standard SWD <=1MHz and records the actual rate')
     a=p.parse_args()
     if a.ram_image:
         from f103_ram_image import plan

@@ -1,0 +1,42 @@
+from pathlib import Path
+import hashlib,json,subprocess,sys
+root=Path(__file__).resolve().parents[2];sys.path[:0]=[str(root),str(root/'tools')]
+from tools.stress_etm_web import Echo
+from probe_flash import Session
+from zynq_memory import PhysicalMemory
+out=root/'build/fclk-resume-20261101/board-133/etm-full';out.mkdir(exist_ok=False)
+pair=root/'prebuilt/fclk133-release-20261101'
+memory=PhysicalMemory(Session(out,Path('E:/Xilinx/SDK/2018.3'),'tcp:127.0.0.1:3121'))
+report=dict(passed=False,shippingUsbMaxSeconds=2,testOnlyHardwareTimeoutSeconds=12,
+            purpose='Verify fixed 100MiB full wins over timeout; no product API limit changed',
+            flashWrites=False,targetClockWrites=False)
+report['guardBefore']=memory.read_words(0x39bffff0,4)
+echo=Echo('COM34')
+try:
+    echo.start()
+    args=[sys.executable,str(root/'tools/test_orbtrace_board.py'),'--target-elf',str(root/'prebuilt/golden/f103ze-cdc48.elf'),
+          '--bit',str(pair/'probe.bit'),'--elf',str(pair/'application.elf'),'--output',str(out/'capture'),
+          '--milliseconds','12000','--speed-khz','1000','--entry','cdc_poll','--ddr-physical',
+          '--hardware-full-test','--probe-fclk-hz','133333333']
+    report['command']=args
+    with (out/'console.txt').open('w') as log:
+        p=subprocess.run(args,cwd=root,stdout=log,stderr=subprocess.STDOUT)
+    report['returnCode']=p.returncode
+finally:
+    report['echo']=echo.close()
+    report['guardAfter']=memory.read_words(0x39bffff0,4)
+    report['guardUnchanged']=report['guardBefore']==report['guardAfter']
+    if (out/'capture/acceptance.json').exists():report['capture']=json.loads((out/'capture/acceptance.json').read_text())
+    (out/'result.json').write_text(json.dumps(report,indent=2)+'\n')
+if p.returncode:raise RuntimeError('Full test failed; evidence retained')
+ddr=report['capture']['ddr']
+raw=out/'capture/ddr/capture.frm1'
+report.update(bytes=ddr['bytes'],sha256=hashlib.sha256(raw.read_bytes()).hexdigest(),
+              actualWindowSeconds=ddr['actualWindowSeconds'],stopReason=ddr['stopReason'],
+              capacityReached=ddr['capacityReached'],tailBytes=ddr['tailBytes'])
+report['passed']=all([ddr['passed'],ddr['bytes']==104857600,ddr['capacityReached'],ddr['stopReason']==2,
+                      ddr['tailBytes']==0,ddr['actualWindowSeconds']<12,report['guardUnchanged'],
+                      report['capture']['restored'],report['capture']['fpb_restored'],report['capture']['probe_clock_restored']])
+(out/'result.json').write_text(json.dumps(report,indent=2)+'\n')
+print(json.dumps({k:report[k] for k in ['passed','bytes','actualWindowSeconds','stopReason','capacityReached','tailBytes','guardUnchanged']}))
+if not report['passed']:raise RuntimeError('Full stop or restoration contract failed')

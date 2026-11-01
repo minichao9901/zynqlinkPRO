@@ -1,0 +1,1192 @@
+Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2018.3 (win64) Build 2405991 Thu Dec  6 23:38:27 MST 2018
+| Date         : Sun Nov  1 16:58:41 2026
+| Host         : DESKTOP-0UKCPD3 running 64-bit major release  (build 9200)
+| Command      : report_timing -delay_type max -to [get_cells -quiet -hier -filter {NAME =~ *etm_ddr_0* && IS_SEQUENTIAL == 1}] -max_paths 20 -nworst 1 -file E:/zynqlinkPRO/build/fclk-resume-20261101/release-133/setup_ddr.rpt
+| Design       : system_wrapper
+| Device       : 7z020-clg400
+| Speed File   : -2  PRODUCTION 1.11 2014-09-11
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Timing Report
+
+Slack (MET) :             0.363ns  (required time - arrival time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[1]/C
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg_reg[8]/D
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        4.511ns  (logic 1.504ns (33.342%)  route 3.007ns (66.658%))
+  Logic Levels:           5  (CARRY4=1 LUT4=1 LUT5=2 LUT6=1)
+  Clock Path Skew:        -0.121ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.225ns = ( 7.225 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.539ns
+    Clock Pessimism Removal (CPR):    0.193ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.460     2.539    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/ref_clk
+    SLICE_X56Y6          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X56Y6          FDCE (Prop_fdce_C_Q)         0.348     2.887 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[1]/Q
+                         net (fo=3, routed)           0.950     3.837    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2[1]
+    SLICE_X54Y6          LUT6 (Prop_lut6_I2_O)        0.239     4.076 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full_carry_i_4/O
+                         net (fo=1, routed)           0.000     4.076    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full_carry_i_4_n_0
+    SLICE_X54Y6          CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.423     4.499 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full_carry/CO[3]
+                         net (fo=7, routed)           1.041     5.540    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full
+    SLICE_X54Y10         LUT5 (Prop_lut5_I3_O)        0.125     5.665 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg[7]_i_4/O
+                         net (fo=17, routed)          0.549     6.214    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg[7]_i_4_n_0
+    SLICE_X52Y7          LUT4 (Prop_lut4_I0_O)        0.264     6.478 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg[8]_i_3/O
+                         net (fo=2, routed)           0.467     6.945    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg[8]_i_3_n_0
+    SLICE_X52Y7          LUT5 (Prop_lut5_I2_O)        0.105     7.050 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg[8]_i_1/O
+                         net (fo=1, routed)           0.000     7.050    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg0[8]
+    SLICE_X52Y7          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg_reg[8]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.243     7.225    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/ref_clk
+    SLICE_X52Y7          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg_reg[8]/C
+                         clock pessimism              0.193     7.418    
+                         clock uncertainty           -0.035     7.383    
+    SLICE_X52Y7          FDCE (Setup_fdce_C_D)        0.030     7.413    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg_reg[8]
+  -------------------------------------------------------------------
+                         required time                          7.413    
+                         arrival time                          -7.050    
+  -------------------------------------------------------------------
+                         slack                                  0.363    
+
+Slack (MET) :             0.399ns  (required time - arrival time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[1]/C
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg_reg[9]/D
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        4.514ns  (logic 1.507ns (33.386%)  route 3.007ns (66.614%))
+  Logic Levels:           5  (CARRY4=1 LUT4=1 LUT5=2 LUT6=1)
+  Clock Path Skew:        -0.121ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.225ns = ( 7.225 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.539ns
+    Clock Pessimism Removal (CPR):    0.193ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.460     2.539    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/ref_clk
+    SLICE_X56Y6          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X56Y6          FDCE (Prop_fdce_C_Q)         0.348     2.887 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[1]/Q
+                         net (fo=3, routed)           0.950     3.837    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2[1]
+    SLICE_X54Y6          LUT6 (Prop_lut6_I2_O)        0.239     4.076 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full_carry_i_4/O
+                         net (fo=1, routed)           0.000     4.076    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full_carry_i_4_n_0
+    SLICE_X54Y6          CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.423     4.499 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full_carry/CO[3]
+                         net (fo=7, routed)           1.041     5.540    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full
+    SLICE_X54Y10         LUT5 (Prop_lut5_I3_O)        0.125     5.665 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg[7]_i_4/O
+                         net (fo=17, routed)          0.549     6.214    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg[7]_i_4_n_0
+    SLICE_X52Y7          LUT4 (Prop_lut4_I0_O)        0.264     6.478 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg[8]_i_3/O
+                         net (fo=2, routed)           0.467     6.945    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg[8]_i_3_n_0
+    SLICE_X52Y7          LUT5 (Prop_lut5_I4_O)        0.108     7.053 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg[9]_i_1/O
+                         net (fo=1, routed)           0.000     7.053    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/next_wp__0[9]
+    SLICE_X52Y7          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg_reg[9]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.243     7.225    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/ref_clk
+    SLICE_X52Y7          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg_reg[9]/C
+                         clock pessimism              0.193     7.418    
+                         clock uncertainty           -0.035     7.383    
+    SLICE_X52Y7          FDCE (Setup_fdce_C_D)        0.069     7.452    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/wg_reg[9]
+  -------------------------------------------------------------------
+                         required time                          7.452    
+                         arrival time                          -7.053    
+  -------------------------------------------------------------------
+                         slack                                  0.399    
+
+Slack (MET) :             0.481ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/have_first_reg/C
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/DIBDI[26]
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        3.695ns  (logic 0.860ns (23.274%)  route 2.835ns (76.726%))
+  Logic Levels:           2  (LUT3=2)
+  Clock Path Skew:        -0.148ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.275ns = ( 7.275 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.531ns
+    Clock Pessimism Removal (CPR):    0.109ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.452     2.531    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/malformed_reg_0
+    SLICE_X65Y18         FDCE                                         r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/have_first_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X65Y18         FDCE (Prop_fdce_C_Q)         0.348     2.879 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/have_first_reg/Q
+                         net (fo=135, routed)         1.308     4.187    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/have_first
+    SLICE_X63Y7          LUT3 (Prop_lut3_I1_O)        0.245     4.432 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_tail[58]_INST_0/O
+                         net (fo=1, routed)           0.341     4.773    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/trace_tail[58]
+    SLICE_X62Y7          LUT3 (Prop_lut3_I0_O)        0.267     5.040 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0_i_40/O
+                         net (fo=1, routed)           1.186     6.226    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/fifo_wr_data[58]
+    RAMB36_X2Y0          RAMB36E1                                     r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/DIBDI[26]
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.292     7.275    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/ref_clk
+    RAMB36_X2Y0          RAMB36E1                                     r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/CLKBWRCLK
+                         clock pessimism              0.109     7.383    
+                         clock uncertainty           -0.035     7.348    
+    RAMB36_X2Y0          RAMB36E1 (Setup_ramb36e1_CLKBWRCLK_DIBDI[26])
+                                                     -0.641     6.707    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0
+  -------------------------------------------------------------------
+                         required time                          6.707    
+                         arrival time                          -6.226    
+  -------------------------------------------------------------------
+                         slack                                  0.481    
+
+Slack (MET) :             0.486ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/have_first_reg/C
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/DIBDI[18]
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        3.690ns  (logic 0.695ns (18.835%)  route 2.995ns (81.165%))
+  Logic Levels:           2  (LUT3=2)
+  Clock Path Skew:        -0.148ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.275ns = ( 7.275 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.531ns
+    Clock Pessimism Removal (CPR):    0.109ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.452     2.531    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/malformed_reg_0
+    SLICE_X65Y18         FDCE                                         r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/have_first_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X65Y18         FDCE (Prop_fdce_C_Q)         0.348     2.879 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/have_first_reg/Q
+                         net (fo=135, routed)         1.308     4.187    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/have_first
+    SLICE_X63Y7          LUT3 (Prop_lut3_I1_O)        0.242     4.429 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_tail[50]_INST_0/O
+                         net (fo=1, routed)           0.474     4.903    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/trace_tail[50]
+    SLICE_X62Y7          LUT3 (Prop_lut3_I0_O)        0.105     5.008 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0_i_48/O
+                         net (fo=1, routed)           1.213     6.221    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/fifo_wr_data[50]
+    RAMB36_X2Y0          RAMB36E1                                     r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/DIBDI[18]
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.292     7.275    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/ref_clk
+    RAMB36_X2Y0          RAMB36E1                                     r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/CLKBWRCLK
+                         clock pessimism              0.109     7.383    
+                         clock uncertainty           -0.035     7.348    
+    RAMB36_X2Y0          RAMB36E1 (Setup_ramb36e1_CLKBWRCLK_DIBDI[18])
+                                                     -0.641     6.707    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0
+  -------------------------------------------------------------------
+                         required time                          6.707    
+                         arrival time                          -6.221    
+  -------------------------------------------------------------------
+                         slack                                  0.486    
+
+Slack (MET) :             0.502ns  (required time - arrival time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[1]/C
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/WEBWE[6]
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        3.831ns  (logic 1.115ns (29.105%)  route 2.716ns (70.895%))
+  Logic Levels:           3  (CARRY4=1 LUT2=1 LUT6=1)
+  Clock Path Skew:        -0.156ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.275ns = ( 7.275 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.539ns
+    Clock Pessimism Removal (CPR):    0.109ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.460     2.539    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/ref_clk
+    SLICE_X56Y6          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X56Y6          FDCE (Prop_fdce_C_Q)         0.348     2.887 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[1]/Q
+                         net (fo=3, routed)           0.950     3.837    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2[1]
+    SLICE_X54Y6          LUT6 (Prop_lut6_I2_O)        0.239     4.076 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full_carry_i_4/O
+                         net (fo=1, routed)           0.000     4.076    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full_carry_i_4_n_0
+    SLICE_X54Y6          CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.423     4.499 f  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full_carry/CO[3]
+                         net (fo=7, routed)           0.513     5.012    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full
+    SLICE_X54Y7          LUT2 (Prop_lut2_I0_O)        0.105     5.117 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0_i_75/O
+                         net (fo=16, routed)          1.253     6.370    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0_i_75_n_0
+    RAMB36_X2Y0          RAMB36E1                                     r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/WEBWE[6]
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.292     7.275    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/ref_clk
+    RAMB36_X2Y0          RAMB36E1                                     r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/CLKBWRCLK
+                         clock pessimism              0.109     7.383    
+                         clock uncertainty           -0.035     7.348    
+    RAMB36_X2Y0          RAMB36E1 (Setup_ramb36e1_CLKBWRCLK_WEBWE[6])
+                                                     -0.476     6.872    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0
+  -------------------------------------------------------------------
+                         required time                          6.872    
+                         arrival time                          -6.370    
+  -------------------------------------------------------------------
+                         slack                                  0.502    
+
+Slack (MET) :             0.502ns  (required time - arrival time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[1]/C
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/WEBWE[7]
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        3.831ns  (logic 1.115ns (29.105%)  route 2.716ns (70.895%))
+  Logic Levels:           3  (CARRY4=1 LUT2=1 LUT6=1)
+  Clock Path Skew:        -0.156ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.275ns = ( 7.275 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.539ns
+    Clock Pessimism Removal (CPR):    0.109ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.460     2.539    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/ref_clk
+    SLICE_X56Y6          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X56Y6          FDCE (Prop_fdce_C_Q)         0.348     2.887 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[1]/Q
+                         net (fo=3, routed)           0.950     3.837    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2[1]
+    SLICE_X54Y6          LUT6 (Prop_lut6_I2_O)        0.239     4.076 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full_carry_i_4/O
+                         net (fo=1, routed)           0.000     4.076    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full_carry_i_4_n_0
+    SLICE_X54Y6          CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.423     4.499 f  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full_carry/CO[3]
+                         net (fo=7, routed)           0.513     5.012    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full
+    SLICE_X54Y7          LUT2 (Prop_lut2_I0_O)        0.105     5.117 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0_i_75/O
+                         net (fo=16, routed)          1.253     6.370    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0_i_75_n_0
+    RAMB36_X2Y0          RAMB36E1                                     r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/WEBWE[7]
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.292     7.275    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/ref_clk
+    RAMB36_X2Y0          RAMB36E1                                     r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/CLKBWRCLK
+                         clock pessimism              0.109     7.383    
+                         clock uncertainty           -0.035     7.348    
+    RAMB36_X2Y0          RAMB36E1 (Setup_ramb36e1_CLKBWRCLK_WEBWE[7])
+                                                     -0.476     6.872    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0
+  -------------------------------------------------------------------
+                         required time                          6.872    
+                         arrival time                          -6.370    
+  -------------------------------------------------------------------
+                         slack                                  0.502    
+
+Slack (MET) :             0.584ns  (required time - arrival time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[1]/C
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/WEBWE[0]
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        3.749ns  (logic 1.115ns (29.742%)  route 2.634ns (70.258%))
+  Logic Levels:           3  (CARRY4=1 LUT2=1 LUT6=1)
+  Clock Path Skew:        -0.156ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.275ns = ( 7.275 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.539ns
+    Clock Pessimism Removal (CPR):    0.109ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.460     2.539    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/ref_clk
+    SLICE_X56Y6          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X56Y6          FDCE (Prop_fdce_C_Q)         0.348     2.887 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[1]/Q
+                         net (fo=3, routed)           0.950     3.837    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2[1]
+    SLICE_X54Y6          LUT6 (Prop_lut6_I2_O)        0.239     4.076 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full_carry_i_4/O
+                         net (fo=1, routed)           0.000     4.076    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full_carry_i_4_n_0
+    SLICE_X54Y6          CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.423     4.499 f  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full_carry/CO[3]
+                         net (fo=7, routed)           0.513     5.012    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full
+    SLICE_X54Y7          LUT2 (Prop_lut2_I0_O)        0.105     5.117 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0_i_75/O
+                         net (fo=16, routed)          1.171     6.288    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0_i_75_n_0
+    RAMB36_X2Y0          RAMB36E1                                     r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/WEBWE[0]
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.292     7.275    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/ref_clk
+    RAMB36_X2Y0          RAMB36E1                                     r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/CLKBWRCLK
+                         clock pessimism              0.109     7.383    
+                         clock uncertainty           -0.035     7.348    
+    RAMB36_X2Y0          RAMB36E1 (Setup_ramb36e1_CLKBWRCLK_WEBWE[0])
+                                                     -0.476     6.872    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0
+  -------------------------------------------------------------------
+                         required time                          6.872    
+                         arrival time                          -6.288    
+  -------------------------------------------------------------------
+                         slack                                  0.584    
+
+Slack (MET) :             0.584ns  (required time - arrival time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[1]/C
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/WEBWE[3]
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        3.749ns  (logic 1.115ns (29.742%)  route 2.634ns (70.258%))
+  Logic Levels:           3  (CARRY4=1 LUT2=1 LUT6=1)
+  Clock Path Skew:        -0.156ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.275ns = ( 7.275 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.539ns
+    Clock Pessimism Removal (CPR):    0.109ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.460     2.539    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/ref_clk
+    SLICE_X56Y6          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X56Y6          FDCE (Prop_fdce_C_Q)         0.348     2.887 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[1]/Q
+                         net (fo=3, routed)           0.950     3.837    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2[1]
+    SLICE_X54Y6          LUT6 (Prop_lut6_I2_O)        0.239     4.076 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full_carry_i_4/O
+                         net (fo=1, routed)           0.000     4.076    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full_carry_i_4_n_0
+    SLICE_X54Y6          CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.423     4.499 f  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full_carry/CO[3]
+                         net (fo=7, routed)           0.513     5.012    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full
+    SLICE_X54Y7          LUT2 (Prop_lut2_I0_O)        0.105     5.117 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0_i_75/O
+                         net (fo=16, routed)          1.171     6.288    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0_i_75_n_0
+    RAMB36_X2Y0          RAMB36E1                                     r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/WEBWE[3]
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.292     7.275    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/ref_clk
+    RAMB36_X2Y0          RAMB36E1                                     r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/CLKBWRCLK
+                         clock pessimism              0.109     7.383    
+                         clock uncertainty           -0.035     7.348    
+    RAMB36_X2Y0          RAMB36E1 (Setup_ramb36e1_CLKBWRCLK_WEBWE[3])
+                                                     -0.476     6.872    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0
+  -------------------------------------------------------------------
+                         required time                          6.872    
+                         arrival time                          -6.288    
+  -------------------------------------------------------------------
+                         slack                                  0.584    
+
+Slack (MET) :             0.584ns  (required time - arrival time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[1]/C
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/WEBWE[4]
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        3.749ns  (logic 1.115ns (29.742%)  route 2.634ns (70.258%))
+  Logic Levels:           3  (CARRY4=1 LUT2=1 LUT6=1)
+  Clock Path Skew:        -0.156ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.275ns = ( 7.275 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.539ns
+    Clock Pessimism Removal (CPR):    0.109ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.460     2.539    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/ref_clk
+    SLICE_X56Y6          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X56Y6          FDCE (Prop_fdce_C_Q)         0.348     2.887 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[1]/Q
+                         net (fo=3, routed)           0.950     3.837    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2[1]
+    SLICE_X54Y6          LUT6 (Prop_lut6_I2_O)        0.239     4.076 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full_carry_i_4/O
+                         net (fo=1, routed)           0.000     4.076    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full_carry_i_4_n_0
+    SLICE_X54Y6          CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.423     4.499 f  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full_carry/CO[3]
+                         net (fo=7, routed)           0.513     5.012    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full
+    SLICE_X54Y7          LUT2 (Prop_lut2_I0_O)        0.105     5.117 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0_i_75/O
+                         net (fo=16, routed)          1.171     6.288    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0_i_75_n_0
+    RAMB36_X2Y0          RAMB36E1                                     r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/WEBWE[4]
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.292     7.275    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/ref_clk
+    RAMB36_X2Y0          RAMB36E1                                     r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/CLKBWRCLK
+                         clock pessimism              0.109     7.383    
+                         clock uncertainty           -0.035     7.348    
+    RAMB36_X2Y0          RAMB36E1 (Setup_ramb36e1_CLKBWRCLK_WEBWE[4])
+                                                     -0.476     6.872    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0
+  -------------------------------------------------------------------
+                         required time                          6.872    
+                         arrival time                          -6.288    
+  -------------------------------------------------------------------
+                         slack                                  0.584    
+
+Slack (MET) :             0.612ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/have_first_reg/C
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/DIBDI[29]
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        3.564ns  (logic 0.874ns (24.521%)  route 2.690ns (75.479%))
+  Logic Levels:           2  (LUT3=2)
+  Clock Path Skew:        -0.148ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.275ns = ( 7.275 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.531ns
+    Clock Pessimism Removal (CPR):    0.109ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.452     2.531    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/malformed_reg_0
+    SLICE_X65Y18         FDCE                                         r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/have_first_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X65Y18         FDCE (Prop_fdce_C_Q)         0.348     2.879 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/have_first_reg/Q
+                         net (fo=135, routed)         1.239     4.118    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/have_first
+    SLICE_X58Y10         LUT3 (Prop_lut3_I1_O)        0.262     4.380 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_tail[61]_INST_0/O
+                         net (fo=1, routed)           0.455     4.835    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/trace_tail[61]
+    SLICE_X57Y10         LUT3 (Prop_lut3_I0_O)        0.264     5.099 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0_i_37/O
+                         net (fo=1, routed)           0.996     6.095    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/fifo_wr_data[61]
+    RAMB36_X2Y0          RAMB36E1                                     r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/DIBDI[29]
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.292     7.275    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/ref_clk
+    RAMB36_X2Y0          RAMB36E1                                     r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/CLKBWRCLK
+                         clock pessimism              0.109     7.383    
+                         clock uncertainty           -0.035     7.348    
+    RAMB36_X2Y0          RAMB36E1 (Setup_ramb36e1_CLKBWRCLK_DIBDI[29])
+                                                     -0.641     6.707    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0
+  -------------------------------------------------------------------
+                         required time                          6.707    
+                         arrival time                          -6.095    
+  -------------------------------------------------------------------
+                         slack                                  0.612    
+
+Slack (MET) :             0.617ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/have_first_reg/C
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/DIBDI[4]
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        3.559ns  (logic 0.695ns (19.529%)  route 2.864ns (80.471%))
+  Logic Levels:           2  (LUT3=2)
+  Clock Path Skew:        -0.148ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.275ns = ( 7.275 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.531ns
+    Clock Pessimism Removal (CPR):    0.109ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.452     2.531    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/malformed_reg_0
+    SLICE_X65Y18         FDCE                                         r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/have_first_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X65Y18         FDCE (Prop_fdce_C_Q)         0.348     2.879 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/have_first_reg/Q
+                         net (fo=135, routed)         1.154     4.033    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/have_first
+    SLICE_X64Y9          LUT3 (Prop_lut3_I1_O)        0.242     4.275 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_tail[36]_INST_0/O
+                         net (fo=1, routed)           0.552     4.827    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/trace_tail[36]
+    SLICE_X64Y9          LUT3 (Prop_lut3_I0_O)        0.105     4.932 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0_i_62/O
+                         net (fo=1, routed)           1.158     6.090    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/fifo_wr_data[36]
+    RAMB36_X2Y0          RAMB36E1                                     r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/DIBDI[4]
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.292     7.275    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/ref_clk
+    RAMB36_X2Y0          RAMB36E1                                     r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/CLKBWRCLK
+                         clock pessimism              0.109     7.383    
+                         clock uncertainty           -0.035     7.348    
+    RAMB36_X2Y0          RAMB36E1 (Setup_ramb36e1_CLKBWRCLK_DIBDI[4])
+                                                     -0.641     6.707    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0
+  -------------------------------------------------------------------
+                         required time                          6.707    
+                         arrival time                          -6.090    
+  -------------------------------------------------------------------
+                         slack                                  0.617    
+
+Slack (MET) :             0.624ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/have_first_reg/C
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/DIBDI[12]
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        3.552ns  (logic 0.871ns (24.523%)  route 2.681ns (75.477%))
+  Logic Levels:           2  (LUT3=2)
+  Clock Path Skew:        -0.148ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.275ns = ( 7.275 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.531ns
+    Clock Pessimism Removal (CPR):    0.109ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.452     2.531    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/malformed_reg_0
+    SLICE_X65Y18         FDCE                                         r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/have_first_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X65Y18         FDCE (Prop_fdce_C_Q)         0.348     2.879 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/have_first_reg/Q
+                         net (fo=135, routed)         1.154     4.033    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/have_first
+    SLICE_X64Y9          LUT3 (Prop_lut3_I1_O)        0.256     4.289 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_tail[44]_INST_0/O
+                         net (fo=1, routed)           0.339     4.628    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/trace_tail[44]
+    SLICE_X64Y9          LUT3 (Prop_lut3_I0_O)        0.267     4.895 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0_i_54/O
+                         net (fo=1, routed)           1.188     6.083    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/fifo_wr_data[44]
+    RAMB36_X2Y0          RAMB36E1                                     r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/DIBDI[12]
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.292     7.275    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/ref_clk
+    RAMB36_X2Y0          RAMB36E1                                     r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/CLKBWRCLK
+                         clock pessimism              0.109     7.383    
+                         clock uncertainty           -0.035     7.348    
+    RAMB36_X2Y0          RAMB36E1 (Setup_ramb36e1_CLKBWRCLK_DIBDI[12])
+                                                     -0.641     6.707    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0
+  -------------------------------------------------------------------
+                         required time                          6.707    
+                         arrival time                          -6.083    
+  -------------------------------------------------------------------
+                         slack                                  0.624    
+
+Slack (MET) :             0.665ns  (required time - arrival time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[1]/C
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/WEBWE[1]
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        3.668ns  (logic 1.115ns (30.394%)  route 2.553ns (69.606%))
+  Logic Levels:           3  (CARRY4=1 LUT2=1 LUT6=1)
+  Clock Path Skew:        -0.156ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.275ns = ( 7.275 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.539ns
+    Clock Pessimism Removal (CPR):    0.109ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.460     2.539    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/ref_clk
+    SLICE_X56Y6          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X56Y6          FDCE (Prop_fdce_C_Q)         0.348     2.887 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[1]/Q
+                         net (fo=3, routed)           0.950     3.837    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2[1]
+    SLICE_X54Y6          LUT6 (Prop_lut6_I2_O)        0.239     4.076 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full_carry_i_4/O
+                         net (fo=1, routed)           0.000     4.076    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full_carry_i_4_n_0
+    SLICE_X54Y6          CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.423     4.499 f  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full_carry/CO[3]
+                         net (fo=7, routed)           0.513     5.012    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full
+    SLICE_X54Y7          LUT2 (Prop_lut2_I0_O)        0.105     5.117 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0_i_75/O
+                         net (fo=16, routed)          1.091     6.207    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0_i_75_n_0
+    RAMB36_X2Y0          RAMB36E1                                     r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/WEBWE[1]
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.292     7.275    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/ref_clk
+    RAMB36_X2Y0          RAMB36E1                                     r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/CLKBWRCLK
+                         clock pessimism              0.109     7.383    
+                         clock uncertainty           -0.035     7.348    
+    RAMB36_X2Y0          RAMB36E1 (Setup_ramb36e1_CLKBWRCLK_WEBWE[1])
+                                                     -0.476     6.872    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0
+  -------------------------------------------------------------------
+                         required time                          6.872    
+                         arrival time                          -6.207    
+  -------------------------------------------------------------------
+                         slack                                  0.665    
+
+Slack (MET) :             0.665ns  (required time - arrival time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[1]/C
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/WEBWE[2]
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        3.668ns  (logic 1.115ns (30.394%)  route 2.553ns (69.606%))
+  Logic Levels:           3  (CARRY4=1 LUT2=1 LUT6=1)
+  Clock Path Skew:        -0.156ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.275ns = ( 7.275 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.539ns
+    Clock Pessimism Removal (CPR):    0.109ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.460     2.539    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/ref_clk
+    SLICE_X56Y6          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X56Y6          FDCE (Prop_fdce_C_Q)         0.348     2.887 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[1]/Q
+                         net (fo=3, routed)           0.950     3.837    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2[1]
+    SLICE_X54Y6          LUT6 (Prop_lut6_I2_O)        0.239     4.076 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full_carry_i_4/O
+                         net (fo=1, routed)           0.000     4.076    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full_carry_i_4_n_0
+    SLICE_X54Y6          CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.423     4.499 f  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full_carry/CO[3]
+                         net (fo=7, routed)           0.513     5.012    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full
+    SLICE_X54Y7          LUT2 (Prop_lut2_I0_O)        0.105     5.117 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0_i_75/O
+                         net (fo=16, routed)          1.091     6.207    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0_i_75_n_0
+    RAMB36_X2Y0          RAMB36E1                                     r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/WEBWE[2]
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.292     7.275    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/ref_clk
+    RAMB36_X2Y0          RAMB36E1                                     r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/CLKBWRCLK
+                         clock pessimism              0.109     7.383    
+                         clock uncertainty           -0.035     7.348    
+    RAMB36_X2Y0          RAMB36E1 (Setup_ramb36e1_CLKBWRCLK_WEBWE[2])
+                                                     -0.476     6.872    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0
+  -------------------------------------------------------------------
+                         required time                          6.872    
+                         arrival time                          -6.207    
+  -------------------------------------------------------------------
+                         slack                                  0.665    
+
+Slack (MET) :             0.665ns  (required time - arrival time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[1]/C
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/WEBWE[5]
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        3.668ns  (logic 1.115ns (30.394%)  route 2.553ns (69.606%))
+  Logic Levels:           3  (CARRY4=1 LUT2=1 LUT6=1)
+  Clock Path Skew:        -0.156ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.275ns = ( 7.275 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.539ns
+    Clock Pessimism Removal (CPR):    0.109ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.460     2.539    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/ref_clk
+    SLICE_X56Y6          FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X56Y6          FDCE (Prop_fdce_C_Q)         0.348     2.887 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2_reg[1]/Q
+                         net (fo=3, routed)           0.950     3.837    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/rg2[1]
+    SLICE_X54Y6          LUT6 (Prop_lut6_I2_O)        0.239     4.076 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full_carry_i_4/O
+                         net (fo=1, routed)           0.000     4.076    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full_carry_i_4_n_0
+    SLICE_X54Y6          CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.423     4.499 f  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full_carry/CO[3]
+                         net (fo=7, routed)           0.513     5.012    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/full
+    SLICE_X54Y7          LUT2 (Prop_lut2_I0_O)        0.105     5.117 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0_i_75/O
+                         net (fo=16, routed)          1.091     6.207    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0_i_75_n_0
+    RAMB36_X2Y0          RAMB36E1                                     r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/WEBWE[5]
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.292     7.275    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/ref_clk
+    RAMB36_X2Y0          RAMB36E1                                     r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/CLKBWRCLK
+                         clock pessimism              0.109     7.383    
+                         clock uncertainty           -0.035     7.348    
+    RAMB36_X2Y0          RAMB36E1 (Setup_ramb36e1_CLKBWRCLK_WEBWE[5])
+                                                     -0.476     6.872    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0
+  -------------------------------------------------------------------
+                         required time                          6.872    
+                         arrival time                          -6.207    
+  -------------------------------------------------------------------
+                         slack                                  0.665    
+
+Slack (MET) :             0.672ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/have_first_reg/C
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/DIBDI[6]
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        3.504ns  (logic 0.695ns (19.833%)  route 2.809ns (80.167%))
+  Logic Levels:           2  (LUT3=2)
+  Clock Path Skew:        -0.148ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.275ns = ( 7.275 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.531ns
+    Clock Pessimism Removal (CPR):    0.109ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.452     2.531    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/malformed_reg_0
+    SLICE_X65Y18         FDCE                                         r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/have_first_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X65Y18         FDCE (Prop_fdce_C_Q)         0.348     2.879 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/have_first_reg/Q
+                         net (fo=135, routed)         1.051     3.930    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/have_first
+    SLICE_X64Y11         LUT3 (Prop_lut3_I1_O)        0.242     4.172 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_tail[38]_INST_0/O
+                         net (fo=1, routed)           0.551     4.723    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/trace_tail[38]
+    SLICE_X64Y11         LUT3 (Prop_lut3_I0_O)        0.105     4.828 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0_i_60/O
+                         net (fo=1, routed)           1.207     6.035    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/fifo_wr_data[38]
+    RAMB36_X2Y0          RAMB36E1                                     r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/DIBDI[6]
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.292     7.275    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/ref_clk
+    RAMB36_X2Y0          RAMB36E1                                     r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0/CLKBWRCLK
+                         clock pessimism              0.109     7.383    
+                         clock uncertainty           -0.035     7.348    
+    RAMB36_X2Y0          RAMB36E1 (Setup_ramb36e1_CLKBWRCLK_DIBDI[6])
+                                                     -0.641     6.707    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/memory_reg_0
+  -------------------------------------------------------------------
+                         required time                          6.707    
+                         arrival time                          -6.035    
+  -------------------------------------------------------------------
+                         slack                                  0.672    
+
+Slack (MET) :             0.691ns  (required time - arrival time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/FSM_onehot_state_reg[2]/C
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[24]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        4.055ns  (logic 0.904ns (22.292%)  route 3.151ns (77.708%))
+  Logic Levels:           5  (LUT3=2 LUT4=1 LUT5=1 LUT6=1)
+  Clock Path Skew:        -0.050ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.281ns = ( 7.281 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.524ns
+    Clock Pessimism Removal (CPR):    0.193ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.445     2.524    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X59Y22         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/FSM_onehot_state_reg[2]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X59Y22         FDCE (Prop_fdce_C_Q)         0.379     2.903 r  system_i/etm_ddr_0/inst/framed_capture.capture/FSM_onehot_state_reg[2]/Q
+                         net (fo=11, routed)          0.575     3.478    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/Q[1]
+    SLICE_X59Y22         LUT3 (Prop_lut3_I2_O)        0.105     3.583 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/trace_parser_enable_INST_0/O
+                         net (fo=9, routed)           0.582     4.165    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_parser_enable
+    SLICE_X66Y18         LUT5 (Prop_lut5_I2_O)        0.105     4.270 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_3/O
+                         net (fo=8, routed)           0.540     4.810    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_3_n_0
+    SLICE_X67Y21         LUT3 (Prop_lut3_I0_O)        0.105     4.915 f  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_parser_error_INST_0_i_5/O
+                         net (fo=1, routed)           0.340     5.254    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_parser_error_INST_0_i_5_n_0
+    SLICE_X64Y20         LUT6 (Prop_lut6_I5_O)        0.105     5.359 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_parser_error_INST_0/O
+                         net (fo=66, routed)          0.558     5.918    system_i/etm_ddr_0/inst/framed_capture.capture/trace_parser_error
+    SLICE_X61Y28         LUT4 (Prop_lut4_I3_O)        0.105     6.023 r  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref[0]_i_1/O
+                         net (fo=32, routed)          0.557     6.579    system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref0
+    SLICE_X60Y34         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[24]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.299     7.281    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X60Y34         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[24]/C
+                         clock pessimism              0.193     7.474    
+                         clock uncertainty           -0.035     7.439    
+    SLICE_X60Y34         FDCE (Setup_fdce_C_CE)      -0.168     7.271    system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[24]
+  -------------------------------------------------------------------
+                         required time                          7.271    
+                         arrival time                          -6.579    
+  -------------------------------------------------------------------
+                         slack                                  0.691    
+
+Slack (MET) :             0.691ns  (required time - arrival time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/FSM_onehot_state_reg[2]/C
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[25]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        4.055ns  (logic 0.904ns (22.292%)  route 3.151ns (77.708%))
+  Logic Levels:           5  (LUT3=2 LUT4=1 LUT5=1 LUT6=1)
+  Clock Path Skew:        -0.050ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.281ns = ( 7.281 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.524ns
+    Clock Pessimism Removal (CPR):    0.193ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.445     2.524    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X59Y22         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/FSM_onehot_state_reg[2]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X59Y22         FDCE (Prop_fdce_C_Q)         0.379     2.903 r  system_i/etm_ddr_0/inst/framed_capture.capture/FSM_onehot_state_reg[2]/Q
+                         net (fo=11, routed)          0.575     3.478    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/Q[1]
+    SLICE_X59Y22         LUT3 (Prop_lut3_I2_O)        0.105     3.583 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/trace_parser_enable_INST_0/O
+                         net (fo=9, routed)           0.582     4.165    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_parser_enable
+    SLICE_X66Y18         LUT5 (Prop_lut5_I2_O)        0.105     4.270 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_3/O
+                         net (fo=8, routed)           0.540     4.810    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_3_n_0
+    SLICE_X67Y21         LUT3 (Prop_lut3_I0_O)        0.105     4.915 f  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_parser_error_INST_0_i_5/O
+                         net (fo=1, routed)           0.340     5.254    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_parser_error_INST_0_i_5_n_0
+    SLICE_X64Y20         LUT6 (Prop_lut6_I5_O)        0.105     5.359 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_parser_error_INST_0/O
+                         net (fo=66, routed)          0.558     5.918    system_i/etm_ddr_0/inst/framed_capture.capture/trace_parser_error
+    SLICE_X61Y28         LUT4 (Prop_lut4_I3_O)        0.105     6.023 r  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref[0]_i_1/O
+                         net (fo=32, routed)          0.557     6.579    system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref0
+    SLICE_X60Y34         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[25]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.299     7.281    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X60Y34         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[25]/C
+                         clock pessimism              0.193     7.474    
+                         clock uncertainty           -0.035     7.439    
+    SLICE_X60Y34         FDCE (Setup_fdce_C_CE)      -0.168     7.271    system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[25]
+  -------------------------------------------------------------------
+                         required time                          7.271    
+                         arrival time                          -6.579    
+  -------------------------------------------------------------------
+                         slack                                  0.691    
+
+Slack (MET) :             0.691ns  (required time - arrival time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/FSM_onehot_state_reg[2]/C
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[26]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        4.055ns  (logic 0.904ns (22.292%)  route 3.151ns (77.708%))
+  Logic Levels:           5  (LUT3=2 LUT4=1 LUT5=1 LUT6=1)
+  Clock Path Skew:        -0.050ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.281ns = ( 7.281 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.524ns
+    Clock Pessimism Removal (CPR):    0.193ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.445     2.524    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X59Y22         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/FSM_onehot_state_reg[2]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X59Y22         FDCE (Prop_fdce_C_Q)         0.379     2.903 r  system_i/etm_ddr_0/inst/framed_capture.capture/FSM_onehot_state_reg[2]/Q
+                         net (fo=11, routed)          0.575     3.478    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/Q[1]
+    SLICE_X59Y22         LUT3 (Prop_lut3_I2_O)        0.105     3.583 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/trace_parser_enable_INST_0/O
+                         net (fo=9, routed)           0.582     4.165    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_parser_enable
+    SLICE_X66Y18         LUT5 (Prop_lut5_I2_O)        0.105     4.270 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_3/O
+                         net (fo=8, routed)           0.540     4.810    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_3_n_0
+    SLICE_X67Y21         LUT3 (Prop_lut3_I0_O)        0.105     4.915 f  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_parser_error_INST_0_i_5/O
+                         net (fo=1, routed)           0.340     5.254    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_parser_error_INST_0_i_5_n_0
+    SLICE_X64Y20         LUT6 (Prop_lut6_I5_O)        0.105     5.359 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_parser_error_INST_0/O
+                         net (fo=66, routed)          0.558     5.918    system_i/etm_ddr_0/inst/framed_capture.capture/trace_parser_error
+    SLICE_X61Y28         LUT4 (Prop_lut4_I3_O)        0.105     6.023 r  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref[0]_i_1/O
+                         net (fo=32, routed)          0.557     6.579    system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref0
+    SLICE_X60Y34         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[26]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.299     7.281    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X60Y34         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[26]/C
+                         clock pessimism              0.193     7.474    
+                         clock uncertainty           -0.035     7.439    
+    SLICE_X60Y34         FDCE (Setup_fdce_C_CE)      -0.168     7.271    system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[26]
+  -------------------------------------------------------------------
+                         required time                          7.271    
+                         arrival time                          -6.579    
+  -------------------------------------------------------------------
+                         slack                                  0.691    
+
+Slack (MET) :             0.691ns  (required time - arrival time)
+  Source:                 system_i/etm_ddr_0/inst/framed_capture.capture/FSM_onehot_state_reg[2]/C
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[27]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        4.055ns  (logic 0.904ns (22.292%)  route 3.151ns (77.708%))
+  Logic Levels:           5  (LUT3=2 LUT4=1 LUT5=1 LUT6=1)
+  Clock Path Skew:        -0.050ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.281ns = ( 7.281 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.524ns
+    Clock Pessimism Removal (CPR):    0.193ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.445     2.524    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X59Y22         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/FSM_onehot_state_reg[2]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X59Y22         FDCE (Prop_fdce_C_Q)         0.379     2.903 r  system_i/etm_ddr_0/inst/framed_capture.capture/FSM_onehot_state_reg[2]/Q
+                         net (fo=11, routed)          0.575     3.478    system_i/etm_ddr_0/inst/framed_capture.capture/fifo/Q[1]
+    SLICE_X59Y22         LUT3 (Prop_lut3_I2_O)        0.105     3.583 r  system_i/etm_ddr_0/inst/framed_capture.capture/fifo/trace_parser_enable_INST_0/O
+                         net (fo=9, routed)           0.582     4.165    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_parser_enable
+    SLICE_X66Y18         LUT5 (Prop_lut5_I2_O)        0.105     4.270 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_3/O
+                         net (fo=8, routed)           0.540     4.810    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_3_n_0
+    SLICE_X67Y21         LUT3 (Prop_lut3_I0_O)        0.105     4.915 f  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_parser_error_INST_0_i_5/O
+                         net (fo=1, routed)           0.340     5.254    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_parser_error_INST_0_i_5_n_0
+    SLICE_X64Y20         LUT6 (Prop_lut6_I5_O)        0.105     5.359 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_parser_error_INST_0/O
+                         net (fo=66, routed)          0.558     5.918    system_i/etm_ddr_0/inst/framed_capture.capture/trace_parser_error
+    SLICE_X61Y28         LUT4 (Prop_lut4_I3_O)        0.105     6.023 r  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref[0]_i_1/O
+                         net (fo=32, routed)          0.557     6.579    system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref0
+    SLICE_X60Y34         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[27]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.299     7.281    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X60Y34         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[27]/C
+                         clock pessimism              0.193     7.474    
+                         clock uncertainty           -0.035     7.439    
+    SLICE_X60Y34         FDCE (Setup_fdce_C_CE)      -0.168     7.271    system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[27]
+  -------------------------------------------------------------------
+                         required time                          7.271    
+                         arrival time                          -6.579    
+  -------------------------------------------------------------------
+                         slack                                  0.691    
+
+
+
+

@@ -1,0 +1,11 @@
+{
+  "firmwareServiceGroups": 7,
+  "firmwareServicesPassed": true,
+  "firmwareSource": "0118b1610e91c770cdf801863a576726b59f9f33",
+  "firmwareSourceHashesMatch": true,
+  "firmwareTestCommand": "python tools/test_probe_host.py",
+  "pythonGuardCommand": "python -m unittest tools.tests.test_probe_clock_fixture tools.tests.test_etm_ddr_memory_plan -v",
+  "pythonGuardCount": 11,
+  "pythonGuardsPassed": true,
+  "warning": "Existing USB descriptor signed/unsigned comparison warning retained; native/firmware tests otherwise passed"
+}

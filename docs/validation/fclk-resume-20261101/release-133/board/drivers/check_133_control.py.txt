@@ -1,0 +1,28 @@
+from pathlib import Path
+import json,sys,struct
+root=Path(__file__).resolve().parents[2];sys.path.insert(0,str(root/'tools'))
+from dap_pipeline_bench import open_dap,setup
+from test_probe_board import Memory
+from probe_clock_fixture import Fixture
+import usb.util
+out=root/'build/fclk-resume-20261101/board-133/control-low';out.mkdir(exist_ok=False)
+pair=root/'prebuilt/fclk133-release-20261101'
+dev,tx,rx=open_dap();mem=Memory(tx,rx);profile=None
+report=dict(passed=False,FlashWrites=False,TargetClockWrites=False)
+try:
+    report['idcode']=setup(tx,rx,1000).hex()
+    profile=Fixture(pair/'probe.bit',pair/'application.elf',133333333,out/'profile',allow_link_reduction=True)
+    report['profile']=profile.apply()
+    report['vendorClock']=mem.transfer([0x80,255]).hex()
+    report['cpuid']=[mem.word(0xe000ed00) for _ in range(32)]
+    assert len(set(report['cpuid']))==1 and report['cpuid'][0]==0x411fc231
+    report['targetId']=mem.word(0xe0042000)
+    assert report['targetId']&0xfff==0x414
+    profile.check();report['passed']=True
+finally:
+    if profile is not None:
+        profile.restore();report['restored']=profile.report['restored']
+    setup(tx,rx,50000)
+    usb.util.dispose_resources(dev)
+    (out/'result.json').write_text(json.dumps(report,indent=2)+'\n')
+print(json.dumps(report,indent=2))

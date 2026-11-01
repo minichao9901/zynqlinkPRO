@@ -1,0 +1,20 @@
+from pathlib import Path
+import hashlib,json,subprocess,sys
+root=Path(__file__).resolve().parents[2];sys.path.insert(0,str(root/'tools'))
+from probe_build_info import live_clock_snapshot
+out=root/'build/fclk-resume-20261101/board-133/final-load';out.mkdir(exist_ok=False)
+pair=root/'prebuilt/fclk133-release-20261101';manifest=json.loads((pair/'manifest.json').read_text())
+for name,row in manifest['files'].items():
+    assert hashlib.sha256((pair/name).read_bytes()).hexdigest()==row['sha256'],name
+for label,args in [('load',['tools/run_xsct.py','tools/download_dap_fpga.tcl',str(pair/'application.elf'),str(pair/'probe.bit'),str(pair/'ps7_init.tcl')]),
+                   ('identity',['tools/verify_probe_ocm_code.py','--elf',str(pair/'application.elf'),'--out-dir',str(out/'identity')])]:
+    print('Final pair',label,flush=True)
+    with (out/(label+'.txt')).open('w') as log:
+        p=subprocess.run([sys.executable,*args],cwd=root,stdout=log,stderr=subprocess.STDOUT)
+    if p.returncode:raise SystemExit(p.returncode)
+observed=live_clock_snapshot();assert observed['FCLK_Hz']==133333332 and observed['clockSource']==2
+report=dict(pair=str(pair),files=manifest['files'],actualBootClock=observed,passed=True,
+            serialTransferActive=False,FlashWrites=False,
+            note='Boot is ARM PLL /10; computed idle serializer rate is not an active TCK measurement. DAP requests cap 60MHz and use Golden IO-PLL policy.')
+(out/'result.json').write_text(json.dumps(report,indent=2)+'\n')
+print(json.dumps(dict(passed=True,FCLK_Hz=observed['FCLK_Hz'],source=observed['clockSource'])))

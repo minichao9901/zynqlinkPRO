@@ -48,6 +48,14 @@ class ClockPlanning(unittest.TestCase):
         self.assertTrue(p['waveformPreserved'])
         self.assertEqual(p['FCLK_Hz'],133333332)
 
+    def test_validated_arm_capture_control_ceiling(self):
+        p=plan((1<<8)|(18<<20),0x36008,0,133333333,destination_source=2,
+               destination_pll=0x28008,allow_link_reduction=True,control_limit_hz=1000000)
+        self.assertEqual(p['halfPeriod'],67)
+        self.assertLessEqual(p['linkHz'],1000000)
+        self.assertFalse(p['cfg']&(1<<19))
+        self.assertEqual(p['cfg']&(7<<17),1<<18)
+
     def test_untrusted_or_excessive_profile_never_opens_hardware(self):
         root=Path(__file__).resolve().parents[2]
         with tempfile.TemporaryDirectory(dir=root/'build') as temp:

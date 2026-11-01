@@ -1,0 +1,57 @@
+{
+  "requestedFclkHz": 133333333,
+  "timing": {
+    "FCLK_max_Hz": 133333333,
+    "SWCLK_max_Hz": 66666666,
+    "setup_slack_ns": 0.319,
+    "hold_slack_ns": 0.033,
+    "requested_FCLK_Hz": 133333333,
+    "RTL_DEBUG": 0,
+    "optional_observation_cells": 0,
+    "formal_product_acceptance": false
+  },
+  "flashWrites": false,
+  "scope": "temporary probe FCLK0 source/dividers and serializer only; PLLs unchanged",
+  "restored": true,
+  "before": {
+    "control": 15728896,
+    "cfg": 806185489,
+    "reference": 9437440
+  },
+  "protectedClockRegisters": {
+    "0": 163848,
+    "1": 131080,
+    "2": 221192,
+    "4": 1024544,
+    "5": 1229344,
+    "6": 1024576,
+    "8": 520094208,
+    "9": 203423747,
+    "12": 1055041,
+    "32": 9437440
+  },
+  "profile": {
+    "control": 1051168,
+    "cfg": 1074022929,
+    "source": 2,
+    "waveformPreserved": false,
+    "controlRateReduced": true,
+    "controlLimitHz": 1000000,
+    "oldFclkHz": 119999998,
+    "FCLK_Hz": 133333332,
+    "halfPeriod": 67,
+    "oldLinkHz": 999999.9833333333,
+    "linkHz": 995024.8656716418
+  },
+  "after": [
+    1051168,
+    1074022929,
+    9437440
+  ],
+  "clockStable": true,
+  "restoreRegisters": [
+    15728896,
+    806185489,
+    9437440
+  ]
+}

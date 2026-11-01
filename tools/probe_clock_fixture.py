@@ -12,7 +12,7 @@ try:from .zynq_clock import fclk_hz,pll_hz
 except ImportError:from zynq_clock import fclk_hz,pll_hz
 
 
-def plan(control, pll, cfg, requested, *, destination_source=0, destination_pll=None, allow_link_reduction=False):
+def plan(control, pll, cfg, requested, *, destination_source=0, destination_pll=None, allow_link_reduction=False, control_limit_hz=None):
     if pll & 0x13:
         raise ValueError('Requires running PLL source')
     destination_pll=pll if destination_pll is None else destination_pll
@@ -30,20 +30,23 @@ def plan(control, pll, cfg, requested, *, destination_source=0, destination_pll=
     half = round(hz * old_half / old_hz)
     # Integer register readouts can differ by one Hz due to floor operations.
     exact=not(cfg&(1<<19)) and 1<=half<=256 and abs(hz*old_half-old_hz*half)<=max(half,old_half)
+    if control_limit_hz is not None and hz/(2*max(1,half))>control_limit_hz:exact=False
     if not exact and not allow_link_reduction:
         raise ValueError('Requested FCLK cannot preserve the external link frequency')
     new_cfg = (cfg & ~0xf001e000) | (((half-1) & 15) << 13) | (((half-1) >> 4) << 28)
     if not exact:
         # Explicit offline SWD capture setup only: a standard (non-narrow)
         # waveform at or below the pre-profile/requested control bit rate.
-        half=math.ceil(hz*old_half/old_hz)
+        control_limit=old_hz/(2*old_half)
+        if control_limit_hz is not None:control_limit=min(control_limit,control_limit_hz)
+        half=math.ceil(hz/(2*control_limit))
         if not 1<=half<=256:raise ValueError('Control divider out of range')
         link=hz/(2*half)
         receive=(1<<18) if link<=30_000_000 else (1<<17) if link<=45_000_000 else 0
         new_cfg=(cfg & ~0xf00fe000)|(((half-1)&15)<<13)|(((half-1)>>4)<<28)|receive
     new_control=(control & ~0x03f03f30)|(destination_source<<4)|(a<<8)|(b<<20)
     return dict(control=new_control, cfg=new_cfg,source=destination_source,
-                waveformPreserved=exact,controlRateReduced=not exact,
+                waveformPreserved=exact,controlRateReduced=not exact,controlLimitHz=control_limit_hz,
                 oldFclkHz=old_hz, FCLK_Hz=hz, halfPeriod=half,
                 oldLinkHz=old_hz/(2*old_half), linkHz=hz/(2*half))
 
@@ -89,7 +92,8 @@ class Fixture:
         ref=clocks[32]
         destination=2 if self.requested in (133333332,133333333,133333334) else 0
         profile=plan(control,pll,cfg,self.requested,destination_source=destination,
-                     destination_pll=clocks[0 if destination==2 else 2],allow_link_reduction=self.allow_link_reduction)
+                     destination_pll=clocks[0 if destination==2 else 2],allow_link_reduction=self.allow_link_reduction,
+                     control_limit_hz=1000000 if destination==2 and self.allow_link_reduction else None)
         self.protected={i:clocks[i] for i in (0,1,2,4,5,6,8,9,12,32)}
         self.saved=(control,cfg,ref)
         self.report.update(before=dict(control=control,cfg=cfg,reference=ref),protectedClockRegisters=self.protected,profile=profile)

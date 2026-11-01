@@ -45,7 +45,7 @@ def main():
     ap.add_argument('--milliseconds', type=float, default=20)
     ap.add_argument('--speed-khz', type=int, default=10000, help='SWD control clock; independent of TRACECLK')
     ap.add_argument('--probe-fclk-hz',type=int,
-                    help='AI DDR acceptance: temporary STA-bounded probe FCLK; compatible non-short examples: 138.461MHz with --speed-khz 35000, 150MHz with 37500')
+                    help='AI DDR acceptance: explicit STA-bounded capture profile; 133333333 uses ARM PLL /10 and records any control-rate reduction')
     ap.add_argument('--hclk-div', type=int, choices=(1, 2, 4), default=1,
                     help='Temporary AHB divider for signal-integrity diagnosis; restored on exit')
     ap.add_argument('--gpio-speed', type=int, choices=(1, 2, 3),
@@ -58,20 +58,23 @@ def main():
     ap.add_argument('--ready-file', type=Path, help='Internal stimulus synchronization marker; new file only')
     ap.add_argument('--sync', action='store_true', help='Enable ITM/DWT periodic synchronization')
     ap.add_argument('--ddr-physical', action='store_true', help='AI acceptance only: bounded PL DDR capture and JTAG AP0 download')
+    ap.add_argument('--hardware-full-test',action='store_true',help='AI boundary test only: physical DDR may wait up to 12s for fixed 100MiB full; shipping USB remains <=2s')
     ap.add_argument('--transport',choices=('auto','ddr','legacy'),default='auto',help='Auto selects advertised post-capture DDR USB; legacy is explicit diagnostic only')
     ap.add_argument('--verify-ddr-physical',action='store_true',help='AI acceptance: compare the same USB capture against physical MEM-AP0')
     ap.add_argument('--raw', action='store_true', help='Capture diagnostic sampled DDR bytes, not decoded ETM')
     ap.add_argument('--raw-samples', action='store_true', help='RAW_DIAGNOSTIC=3: preserve packed 200MHz five-line samples')
     args = ap.parse_args()
-    if args.probe_fclk_hz is not None and (args.transport!='ddr' or args.ddr_physical or args.raw):
-        ap.error('--probe-fclk-hz requires explicit --transport ddr')
+    if args.probe_fclk_hz is not None and ((args.transport!='ddr' and not args.ddr_physical) or args.raw):
+        ap.error('--probe-fclk-hz requires explicit DDR transport')
+    if args.hardware_full_test and not args.ddr_physical:
+        ap.error('--hardware-full-test requires physical DDR, never the shipping USB API')
     ram_plan=None
     if args.ram_image:
         if args.entry or args.reset_to_entry or args.hclk_div!=1:
             ap.error('RAM experiment cannot use Flash FPB entry/reset or host clock override')
         from f103_ram_image import plan
         ram_plan=plan(args.target_elf)
-    if not 0 < args.milliseconds <= 2000:
+    if not 0 < args.milliseconds <= (12000 if args.hardware_full_test else 2000):
         ap.error('capture outside supported window')
     if args.ddr_physical and (args.raw or args.raw_samples or args.hclk_div != 1 or args.gpio_speed is not None):
         ap.error('DDR acceptance preserves target clock and requires framed RAW4 mode')
@@ -91,7 +94,7 @@ def main():
     report = dict(artifacts=provenance(args.bit, args.elf),
                   target_elf=str(args.target_elf.resolve()),
                   target_elf_sha256=sha(args.target_elf.read_bytes()),
-                  milliseconds=args.milliseconds, periodic_sync=args.sync, hclk_div=args.hclk_div,
+                  milliseconds=args.milliseconds, hardware_full_test=args.hardware_full_test, periodic_sync=args.sync, hclk_div=args.hclk_div,
                   raw_diagnostic=args.raw)
     dev, out, inp = open_dap()
     mem = Memory(out, inp)

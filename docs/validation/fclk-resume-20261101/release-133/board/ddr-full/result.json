@@ -1,0 +1,201 @@
+{
+  "hardware": true,
+  "traceCapture": false,
+  "flashWrites": false,
+  "source": "address-dependent PL pattern",
+  "pair": "E:\\zynqlinkPRO\\prebuilt\\fclk133-release-20261101",
+  "pairFiles": {
+    "probe.bit": {
+      "bytes": 4045674,
+      "sha256": "af1031d3caa0d7bd3b6adffa911d26efdab9e0bfb5223fb18f70dabb70ebeeed"
+    },
+    "application.elf": {
+      "bytes": 812036,
+      "sha256": "2137f7d0f507c08574f36223130103c0710645cbfdefb5c1d8c8efb0cfb990a0"
+    },
+    "verified_clock.json": {
+      "bytes": 205,
+      "sha256": "8c06a34b9a41617297edf4eeacbbefaf438aed9f81d4cd0762275e9f1233bb63"
+    },
+    "firmware-build.json": {
+      "bytes": 5426,
+      "sha256": "68b36298156aa2496ccc5cdf9da0fe5c79e0602ffcf5a38789a7a15cb6671ac0"
+    },
+    "fpga-verification-job.json": {
+      "bytes": 3416,
+      "sha256": "93ee4a8637efd37fee4775aa86034aaae7297c9ce1e558961fa552d5eb7caa10"
+    },
+    "ps7_init.tcl": {
+      "bytes": 35186,
+      "sha256": "485a028ff7ad9a256a64313b68527a055ca3800b3b85577ceb0554b0e0609c94"
+    },
+    "ps-init-clock-change.json": {
+      "bytes": 549,
+      "sha256": "a10ecef2f3a16ba6ea6ffd7282882b386388776c216f2f6f6cf7b5266216a8e3"
+    }
+  },
+  "base": 968884224,
+  "bytesPerRound": 104857600,
+  "seed": 333162775,
+  "requestedRounds": 1,
+  "reloadBetweenRounds": false,
+  "retryFailedRounds": false,
+  "clockMode": "dap",
+  "requestedProbeFclkHz": 133333333,
+  "loader": "E:\\zynqlinkPRO\\tools\\download_dap_fpga.tcl",
+  "loaderSha256": "78ed003b599778e0f07d88323f13861e4013b1af52150859060d5e2ce4d91b73",
+  "runnerSha256": "be44d93ebd449b8fd38f59efae3a026100576a93726765ddf44fc512c7d5c692",
+  "readbackPath": "physical MEM-AP0; no Cortex-A9 memory/cache context",
+  "cases": [
+    {
+      "bytes": 104857600,
+      "seed": 333162775,
+      "actualClocks": {
+        "FCLK_Hz": 133333332,
+        "cfg": "0x22a11",
+        "waveform": {
+          "SWCLK_Hz": 33333333.0,
+          "half_period_fclk": 2,
+          "short_high": false,
+          "intended_high_ns": 15.000000150000002
+        },
+        "clockSource": 2,
+        "clockControl": 1051168,
+        "sourcePllControl": 163848,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 33333333.0,
+        "clock_observation": "PS JTAG register read; no DAP command during stream"
+      },
+      "passed": true,
+      "stage": "done",
+      "expectedCaptureId": 1,
+      "guardBefore": {
+        "head": [
+          23616298,
+          2174781600,
+          1644527618,
+          318959684
+        ],
+        "tail": []
+      },
+      "hardwareRegisters": [
+        1162104113,
+        0,
+        2,
+        968884224,
+        104857600,
+        333162775,
+        104857600,
+        104857600,
+        34527338,
+        0,
+        1,
+        7,
+        968884224,
+        1073741824,
+        128,
+        1
+      ],
+      "writerSeconds": 0.25895503758955035,
+      "responseRateMBps": 404.92589360706586,
+      "timingBasis": "FCLK cycles through final OKAY B; counter rate is not verified payload throughput",
+      "guardAfter": {
+        "head": [
+          23616298,
+          2174781600,
+          1644527618,
+          318959684
+        ],
+        "tail": []
+      },
+      "adjacentGuardsUnchanged": true,
+      "readbackChunks": [
+        {
+          "offset": 0,
+          "bytes": 16777216,
+          "storedBytes": 16777216,
+          "sha256": "88beb320d922ceb373c5ab220def4563b93b53305c5bf682b783df29e226873d"
+        },
+        {
+          "offset": 16777216,
+          "bytes": 16777216,
+          "storedBytes": 16777216,
+          "sha256": "9e7dc3425ed3c5811e25f48c00ab55b54b8240bcaa8c8facfb10cdd8cf2d4bda"
+        },
+        {
+          "offset": 33554432,
+          "bytes": 16777216,
+          "storedBytes": 16777216,
+          "sha256": "c8abab24a306dbceec243b8d9ebc2c25d134649869f95c83eb45a38f4294d677"
+        },
+        {
+          "offset": 50331648,
+          "bytes": 16777216,
+          "storedBytes": 16777216,
+          "sha256": "16f2453b74fed779ec15b9b23b12558ab42b06749c416595d0cc63f99e8d5b75"
+        },
+        {
+          "offset": 67108864,
+          "bytes": 16777216,
+          "storedBytes": 16777216,
+          "sha256": "9f4cb4deeec1bc06090bf999fc9f6db13fe4d297581f7416b75af0bb5a866338"
+        },
+        {
+          "offset": 83886080,
+          "bytes": 16777216,
+          "storedBytes": 16777216,
+          "sha256": "3dd8da076e843c4e2a59f1d1a78e192d4d05bc79b39471eea2c6c532eda1cc60"
+        },
+        {
+          "offset": 100663296,
+          "bytes": 4194304,
+          "storedBytes": 4194304,
+          "sha256": "51c6cee73670b0bd6ad8417c314698b549cc234b8b6093275ec6571e9043d330"
+        }
+      ],
+      "readbackProgressBytes": 104857600,
+      "readbackBytesVerified": 104857600,
+      "readbackSha256": "183c495d9da1353d0fd21e4a49502669ae33f865c095fab6e2bc308fecc17bfa",
+      "expectedSha256": "183c495d9da1353d0fd21e4a49502669ae33f865c095fab6e2bc308fecc17bfa",
+      "firstMismatches": [],
+      "clocksAfter": {
+        "FCLK_Hz": 133333332,
+        "cfg": "0x22a11",
+        "waveform": {
+          "SWCLK_Hz": 33333333.0,
+          "half_period_fclk": 2,
+          "short_high": false,
+          "intended_high_ns": 15.000000150000002
+        },
+        "clockSource": 2,
+        "clockControl": 1051168,
+        "sourcePllControl": 163848,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 33333333.0,
+        "clock_observation": "PS JTAG register read; no DAP command during stream"
+      },
+      "clockStable": true,
+      "verifiedPatternMBps": 404.92589360706586
+    }
+  ],
+  "passed": true,
+  "stage": "done",
+  "usbEnumeratedBeforePattern": true,
+  "probeClockProfile": {
+    "control": 1051168,
+    "cfg": 141841,
+    "source": 2,
+    "waveformPreserved": false,
+    "controlRateReduced": true,
+    "oldFclkHz": 99999999,
+    "FCLK_Hz": 133333332,
+    "halfPeriod": 2,
+    "oldLinkHz": 49999999.5,
+    "linkHz": 33333333.0
+  },
+  "probeClockRestored": true
+}

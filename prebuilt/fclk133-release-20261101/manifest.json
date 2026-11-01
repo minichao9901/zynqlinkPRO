@@ -1,0 +1,110 @@
+{
+  "status": "F103 release133 board acceptance passed in documented isolated-function scope; not promoted over Golden",
+  "accepted": true,
+  "createdUtc": "2026-11-01T09:00:44.214949+00:00",
+  "rtlSourceRevision": "e749c426a018cab6f543415772bbe88efb6652e4",
+  "psSourceRevision": "0118b1610e91c770cdf801863a576726b59f9f33",
+  "verificationSource": "0118b1610e91c770cdf801863a576726b59f9f33",
+  "buildOptions": {
+    "rawMode": 4,
+    "etmDdr": 1,
+    "laneDelay": 1,
+    "RTL_DEBUG": 0,
+    "implementFclkHz": 133333333,
+    "maxSwclkHz": 60000000,
+    "FCLK0_source": "ARM PLL",
+    "FCLK0_divisor": 10
+  },
+  "ddrReservation": {
+    "base": "0x39c00000",
+    "endExclusive": "0x40000000",
+    "bytes": 104857600
+  },
+  "clockPolicy": "Boot/offline capture ARM PLL /10; normal DAP_SWJ_Clock retains Golden IO PLL policy and is rejected while DDR owned",
+  "timing": {
+    "FCLK_max_Hz": 133333333,
+    "SWCLK_max_Hz": 66666666,
+    "setup_slack_ns": 0.319,
+    "hold_slack_ns": 0.033,
+    "requested_FCLK_Hz": 133333333,
+    "RTL_DEBUG": 0,
+    "optional_observation_cells": 0,
+    "formal_product_acceptance": false
+  },
+  "rtlSha256": {
+    "dap_transfer_block_engine.v": "e249a3d7153c0584e896fa99637e97673156d36ab4e1faba27778b480c551afb",
+    "jtag_core.v": "f81361743a29584b78a1179264d1fa41c4e6fa0456ea486a437cd65e0ff6ed7b",
+    "jtag_shift.v": "5660cec2fd287cdaa9632fae53a915ab28179e6439f79b95367defb0d0970e9a",
+    "orbtrace_controller.v": "977e97a78edf74024812d5c74073ea062e207241ecf410c3ab2e8997cd2a2faa",
+    "orbtrace_ddr_capture.v": "6f6203f4608fb138cb9441f7afdb3f8922f7bf7a50bb107d3849466c3a94973f",
+    "orbtrace_ddr_controller.v": "8b1305e1ed0e2e63020cfcdab71f695e10e7a0cb7a329d6a6da0bfd4e2871b30",
+    "orbtrace_ddr_packetizer.v": "c16d02e839e21673113863b0b1eeb6716eb337ce83e43701c3ee79f2ad0fe0f3",
+    "orbtrace_ddr_writer.v": "84a0543a117372b17016fc5244c73fff7dc500bb3fb27563fa89824824270ada",
+    "orbtrace_frame_async_fifo.v": "56feed471d67ad818c2c4a86a69ba5f4cb4dfb3f120d9ef66c106bcbcb5afafc",
+    "orbtrace_frame_fifo.v": "e4d256a9406985e2f7016d2f53cc3f9589ef1292c02588551bf532f642ddb801",
+    "orbtrace_lane_delay.v": "f1f16c654ec6e2cc78e3b26ac2a30cbe0ccddeaef0000d3398a357d974bfb50c",
+    "orbtrace_parallel.v": "e8b1a6e4c6f2124d0784f6b1a0420caf53f2ca939027a68a8e8edb028529314d",
+    "orbtrace_ref_window.v": "b4c47b691b2079dd95ea20230e36ed038d4a0cb4b49112a3f05491ddabc76271",
+    "orbtrace_rx_diagnostics.v": "9344babda305f266a9b30b85e4c9ffd861901f3a7ddb0ec31946270c5e0046ed",
+    "orbtrace_sample_capture.v": "6a18ef0abe6390e8721377ffd49465eea21f2655c8a87b1ccf20b3d058e259bf",
+    "orbtrace_tpiu_demux.v": "8ee22425aceca214bb30b067704f26816dc322b9db60244fc451476caf2cb768",
+    "orbtrace_tpiu_stream.v": "18cf3c99b8c541b6ae97d5cac9686d296fbe88396d469a53fb5143196ff967b0",
+    "orbtrace_traceif.v": "e4c9adda46c34b8888c7084a6f01bb134836118263a73a64a857f8f4dc04fef1",
+    "probe_rtt_engine.v": "10136ba15bbf387677053d95226703ac7563998843c0fc55d8082eee40f60bea",
+    "probe_sample_engine.v": "7457fbb302291c699bd17dc040a3cd503c898e3e9ffdfd82c145918e293cb6e8",
+    "probe_stream_engine.v": "b184e5800f29ef973e1bdbad11f3c009f3b967324a828c4090e4c28819fcaec0",
+    "swd_batch_engine.v": "2147786073a8ed8aa4a66c0c6c16a4e7ba34e222789af20cd84e24b74df70c41",
+    "swd_controller.v": "d00966dde8db8b71ce594e9c85ed8a86b89aca5a41291bba213f55dadeac5cf4",
+    "swd_core.v": "c29460f183b54b09f5ffa52374e32d8cf8298a72205fff659529f71f003403c9"
+  },
+  "files": {
+    "probe.bit": {
+      "bytes": 4045674,
+      "sha256": "af1031d3caa0d7bd3b6adffa911d26efdab9e0bfb5223fb18f70dabb70ebeeed"
+    },
+    "application.elf": {
+      "bytes": 812036,
+      "sha256": "2137f7d0f507c08574f36223130103c0710645cbfdefb5c1d8c8efb0cfb990a0"
+    },
+    "verified_clock.json": {
+      "bytes": 205,
+      "sha256": "8c06a34b9a41617297edf4eeacbbefaf438aed9f81d4cd0762275e9f1233bb63"
+    },
+    "firmware-build.json": {
+      "bytes": 5426,
+      "sha256": "68b36298156aa2496ccc5cdf9da0fe5c79e0602ffcf5a38789a7a15cb6671ac0"
+    },
+    "fpga-verification-job.json": {
+      "bytes": 3416,
+      "sha256": "93ee4a8637efd37fee4775aa86034aaae7297c9ce1e558961fa552d5eb7caa10"
+    },
+    "ps7_init.tcl": {
+      "bytes": 35186,
+      "sha256": "485a028ff7ad9a256a64313b68527a055ca3800b3b85577ceb0554b0e0609c94"
+    },
+    "ps-init-clock-change.json": {
+      "bytes": 549,
+      "sha256": "a10ecef2f3a16ba6ea6ffd7282882b386388776c216f2f6f6cf7b5266216a8e3"
+    },
+    "validation.json": {
+      "bytes": 6464,
+      "sha256": "1b73068a3e0bcca92e6364e904891de9f7b060f95a60eead87da878cc06f6018"
+    },
+    "README.md": {
+      "bytes": 2021,
+      "sha256": "c2b567a9d7b89345690cacc37357ce213649d2e3ba0416276e9571bec673f674"
+    }
+  },
+  "boardAcceptancePassed": true,
+  "formalAllInterfacesSignedOff": false,
+  "validation": "validation.json",
+  "validationEvidence": "docs/validation/fclk-resume-20261101/release-133",
+  "knownLimitations": [
+    "Active target ETM output caused SWD60 RTT access failures on both Golden and candidate; disabling ETM for standalone RTT made both pass. Interaction mechanism not determined; concurrent output not accepted.",
+    "Old Golden and this candidate failed JTAG60 RTT; JTAG25 RTT is the accepted comparison.",
+    "The initial unvalidated ARM133/33.333MHz SWD control combination failed before ETM capture. ARM133 acceptance now caps standard SWD control at <=1MHz.",
+    "Five bidirectional GPIO/SWDIO ports lack external input/output delay coverage; internal unconstrained endpoints/no_clock are zero.",
+    "CDC report retains 35 CDC-1, 8 CDC-7, 4 CDC-10 critical findings and 9 CDC-6 /548 CDC-15 warnings; no formal blanket CDC/IO signoff is claimed.",
+    "Other targets, external PVT/SI margin and higher internal clock points are outside this acceptance."
+  ]
+}

@@ -11,7 +11,11 @@ def live_clock_snapshot():
         from .jtag_internal_trace import run
     except ImportError:
         from jtag_internal_trace import run
-    output=run('puts [format "LIVECLK %08X %08X %08X %08X %08X %08X %08X %08X" [mrd -force -value 0xf8000170] [mrd -force -value 0xf8000108] [mrd -force -value 0x40010008] [mrd -force -value 0x40010098] [mrd -force -value 0x40010080] [mrd -force -value 0xf8000100] [mrd -force -value 0xf8000104] [mrd -force -value 0xf800025c]]')
+    # CPU-context mrd can suspend/cache-synchronize the live forwarding owner.
+    # Select the APU MEM-AP explicitly, exactly as PhysicalMemory does, so this
+    # observer does not steal CPU execution while RTT/CDC is streaming.
+    output=run('targets -set -filter {name =~ "APU"}\n'
+               'puts [format "LIVECLK %08X %08X %08X %08X %08X %08X %08X %08X" [mrd -address-space AP0 -force -value 0xf8000170] [mrd -address-space AP0 -force -value 0xf8000108] [mrd -address-space AP0 -force -value 0x40010008] [mrd -address-space AP0 -force -value 0x40010098] [mrd -address-space AP0 -force -value 0x40010080] [mrd -address-space AP0 -force -value 0xf8000100] [mrd -address-space AP0 -force -value 0xf8000104] [mrd -address-space AP0 -force -value 0xf800025c]]')
     match=re.search(r'LIVECLK '+r'([0-9A-Fa-f]{8}) '*7+r'([0-9A-Fa-f]{8})',output)
     assert match,output
     control,io_pll,cfg,timing,route,arm_pll,ddr_pll,boot=[int(v,16) for v in match.groups()]
@@ -25,7 +29,7 @@ def live_clock_snapshot():
                 frequencyBasis='read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement',
                 JTAG_sampling_mode=timing&17,RISC_V_SBA_enabled=bool(route&4),
                 actual_link_Hz=swd_clock_details(fclk,cfg)['SWCLK_Hz'],
-                clock_observation='PS JTAG register read; no DAP command during stream')
+                clock_observation='physical MEM-AP0 read; no CPU debug context or DAP command during stream')
 
 
 def swd_clock_details(fclk_hz, cfg):
