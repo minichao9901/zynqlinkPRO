@@ -101,6 +101,15 @@ JTAG数字仿真已通过并与Golden一致。未写QSPI或目标Flash。
 
 ## 当前交付状态
 
+第二轮 RTL 源码提交 `a303a70`，原始仿真日志补充在 `5740d04`。完整 Golden 对比位于
+`iteration2-simulation/comparison.json`：60MHz SWD/JTAG 的 SRAM 读写、RTT、HSS 共十项指标与 Golden 一致。
+DDR writer 92 项、RAW4 集成、1022/1023 字包边界、SWD 线级周期预算、JTAG/RISC-V 延迟输入及 posted-read 收尾回归均通过。
+本轮 150MHz release 完成全部子模块与顶层综合，正在完整布局布线，尚无新 bitstream 验收结果。
+
+Golden 25MHz JTAG RTT 补测三次通过，主机速率中位数 0.976324MB/s，精确序列、全部发布字节接收及恢复均通过；
+此补充不撤销 60MHz 的失败记录。四象限 DDR 样本地址 `0x00800000/0x10800000/0x20800000/0x30800000`
+相互独立，四处各16字节测试后全部恢复，OCM 身份为原 Golden。该检查仅排除这些采样地址别名，不等于完整容量验收。
+
 本记录为开发基线与进行中证据，不代表新的 bit/ELF 已验收。已知可用配对保持原样。
 任何新配对均须记录源码、构建选项、真实加载 SHA-256、实际 FCLK/TCK、STA 与板测结果，
 明确区分仿真、静态时序和硬件验收。未写 QSPI 或 target Flash。
