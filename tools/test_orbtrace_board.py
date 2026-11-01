@@ -44,6 +44,8 @@ def main():
     ap.add_argument('--output', type=Path, required=True)
     ap.add_argument('--milliseconds', type=float, default=20)
     ap.add_argument('--speed-khz', type=int, default=10000, help='SWD control clock; independent of TRACECLK')
+    ap.add_argument('--probe-fclk-hz',type=int,
+                    help='AI DDR acceptance: temporary STA-bounded probe FCLK; preserve the external control clock (e.g. 150MHz with --speed-khz 1000)')
     ap.add_argument('--hclk-div', type=int, choices=(1, 2, 4), default=1,
                     help='Temporary AHB divider for signal-integrity diagnosis; restored on exit')
     ap.add_argument('--gpio-speed', type=int, choices=(1, 2, 3),
@@ -61,6 +63,8 @@ def main():
     ap.add_argument('--raw', action='store_true', help='Capture diagnostic sampled DDR bytes, not decoded ETM')
     ap.add_argument('--raw-samples', action='store_true', help='RAW_DIAGNOSTIC=3: preserve packed 200MHz five-line samples')
     args = ap.parse_args()
+    if args.probe_fclk_hz is not None and (args.transport!='ddr' or args.ddr_physical or args.raw):
+        ap.error('--probe-fclk-hz requires explicit --transport ddr')
     ram_plan=None
     if args.ram_image:
         if args.entry or args.reset_to_entry or args.hclk_div!=1:
@@ -99,6 +103,7 @@ def main():
     armed = False
     was_halted = None
     gpio_before = None
+    probe_clock = None
 
     def control(action=0):
         return struct.unpack('<8I', dev.ctrl_transfer(0xc0, 0x60, action, 0x4554, 32, timeout=3000))
@@ -148,6 +153,10 @@ def main():
 
     try:
         report['IDCODE'] = setup(out, inp, args.speed_khz).hex()
+        if args.probe_fclk_hz is not None:
+            from probe_clock_fixture import Fixture
+            probe_clock=Fixture(args.bit,args.elf,args.probe_fclk_hz,work/'probe-clock')
+            report['probe_clock_profile']=probe_clock.apply()
         diagnostic = mem.transfer([0x80, 255])
         live_fclk, live_cfg = struct.unpack_from('<II', diagnostic, 4)
         report['control_clock'] = dict(fclk_hz=live_fclk, cfg=hex(live_cfg),
@@ -334,11 +343,13 @@ def main():
             else:
                 report.update(etm_bytes=len(etm), etm_sha256=sha(etm))
             assert sequence_ok and capture_ok and synced and not loss and quality['ended'] and etm
+        if probe_clock is not None:probe_clock.check()
         report['capture_passed'] = True
     except BaseException as exc:
         report['error'] = repr(exc)
         # Reconnect/clear sticky MEM-AP errors before restoring saved state.
         try:
+            if probe_clock is not None:probe_clock.idle()
             setup(out, inp, args.speed_khz)
         except BaseException as reconnect:
             report['reconnect_error'] = repr(reconnect)
@@ -390,6 +401,14 @@ def main():
             report['target_cleanup_error'] = repr(exc)
             raise
         finally:
+            if probe_clock is not None:
+                try:
+                    probe_clock.restore()
+                    report['probe_clock_restored']=probe_clock.report['restored']
+                except BaseException as exc:
+                    report['probe_clock_cleanup_error']=repr(exc)
+                    report['capture_passed']=False
+                    report['error']=report.get('error',repr(exc))
             if args.raw and not args.raw_samples and records and not (work/'raw-ddr.bin').exists():
                 partial = bytes(records[i] for i in range(0, len(records), 2) if records[i+1] == 2)
                 (work/'raw-ddr.bin').write_bytes(partial)
@@ -401,6 +420,8 @@ def main():
             usb.util.release_interface(dev, 0)
             usb.util.dispose_resources(dev)
             print(json.dumps(report, indent=2))
+            if report.get('probe_clock_cleanup_error'):
+                raise RuntimeError(report['probe_clock_cleanup_error'])
 
 
 if __name__ == '__main__':
