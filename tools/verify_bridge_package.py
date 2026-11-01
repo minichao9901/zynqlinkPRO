@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import socket
 import subprocess
+import sys
 import time
 from urllib.error import HTTPError
 from urllib.request import Request,urlopen
@@ -18,6 +19,8 @@ ROOT=Path(__file__).resolve().parents[1]
 
 
 def main(argv=None):
+    for stream in (sys.stdout,sys.stderr):
+        if hasattr(stream,'reconfigure'):stream.reconfigure(encoding='utf8',errors='replace')
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--package',type=Path,required=True);p.add_argument('--out',type=Path,required=True)
     p.add_argument('--port',type=int,default=8890);p.add_argument('--keep-running',action='store_true')

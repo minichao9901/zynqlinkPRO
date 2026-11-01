@@ -178,10 +178,11 @@ def main(argv=None):
         (package/'package-manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n',encoding='utf8')
         # Full offline acceptance of this exact frozen candidate before replacing
         # the local program. Both native protocols, exports and reuse are checked.
-        verify=subprocess.run([sys.executable,str(ROOT/'tools/verify_bridge_package.py'),
-            '--package',str(package),'--out',str(work/'verified'),'--port','0'],capture_output=True,text=True,encoding='utf8')
-        (workbase/'latest-verification-output.txt').write_text(verify.stdout+verify.stderr,encoding='utf8')
-        if verify.returncode:raise ValueError('候选EXE离线验收失败，原程序未替换：'+verify.stdout+verify.stderr)
+        verify=subprocess.run([sys.executable,'-X','utf8',str(ROOT/'tools/verify_bridge_package.py'),
+            '--package',str(package),'--out',str(work/'verified'),'--port','0'],capture_output=True,text=True,encoding='utf8',errors='replace')
+        verification_output=(verify.stdout or '')+(verify.stderr or '')
+        (workbase/'latest-verification-output.txt').write_text(verification_output,encoding='utf8')
+        if verify.returncode:raise ValueError('候选EXE离线验收失败，原程序未替换：'+verification_output)
         shutil.copyfile(work/'verified/result.json',workbase/'latest-verification.json')
         publication=publish(package,out)
     result=dict(ok=True,directory=str(out),exe=str(out/'zynq-etm-bridge.exe'),archive=None,**publication)
