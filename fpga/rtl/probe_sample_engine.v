@@ -57,11 +57,23 @@ module probe_sample_engine #(
     // per FCLK. Keep the absolute deadline for unchanged nominal timestamps.
     reg [25:0] deadline_gap;
     wire deadline_due=deadline_gap[25] || deadline_gap==0;
+    // Preserve arithmetic boundaries: configuration/control loads belong
+    // after the adder, not on the carry inputs of a shared load/add chain.
+    (* keep="true" *) wire [31:0] advanced_deadline;
+    (* keep="true" *) wire [25:0] decremented_gap;
+    assign advanced_deadline=deadline+period;
+    assign decremented_gap=deadline_gap-26'd1;
+    reg [24:0] period_minus_one,period_minus_two;
+    // Period is configured while inactive. The first due edge is at least
+    // one edge after start, so both values are current before they are used.
+    always @(posedge clk)begin
+        period_minus_one<=period[24:0]-25'd1;
+        period_minus_two<=period[24:0]-25'd2;
+    end
     // Fractional 24 MHz timer remains correct when PS changes FCLK.
     reg [31:0] clock_hz, fraction;
     wire [32:0] phase_sum = {1'b0,fraction}+33'd24000000;
     wire tick_en = phase_sum >= {1'b0,clock_hz};
-    wire [1:0] deadline_elapsed={1'b0,tick_en}+{1'b0,deadline_gap[25]};
     reg [2:0] phase;
     reg [7:0] retries;
     reg [$clog2(TIMEOUT+1)-1:0] watchdog;
@@ -147,7 +159,7 @@ module probe_sample_engine #(
             if(!core_busy) fault_drain<=0;
             if(tick_en) begin tick<=tick+1'b1; fraction<=phase_sum-clock_hz; end
             else fraction<=phase_sum[31:0];
-            if(enabled && tick_en)deadline_gap<=deadline_gap-1'b1;
+            if(enabled && tick_en)deadline_gap<=decremented_gap;
             if(take_word && used!=0) begin
                 if(pop) begin tail<=tail+1'b1; read_word<=0; end
                 else read_word<=read_word+1'b1;
@@ -185,11 +197,13 @@ module probe_sample_engine #(
             // One deadline per cycle avoids combinational division. Overruns
             // advance the nominal timeline instead of making catch-up samples.
             if(enabled && deadline_due && !(ctrl && !wdata[0])) begin
-                deadline<=deadline+period;
+                deadline<=advanced_deadline;
                 // At a due edge the gap is 0 or -1. Refill directly from
                 // period; avoid subtracting two 32-bit timestamps in front
                 // of the deadline+period adder on every scheduling decision.
-                deadline_gap<={1'b0,period[24:0]}-deadline_elapsed;
+                deadline_gap<=deadline_gap[25] ?
+                    {1'b0,(tick_en ? period_minus_two : period_minus_one)} :
+                    {1'b0,(tick_en ? period_minus_one : period[24:0])};
                 // Reserve one FIFO slot for the final posted result. A DAP
                 // preemption can then flush and release SWD even if USB stalls.
                 if(state==IDLE && used<((fast_span && count==1) ? FIFO_SAMPLES-1 : FIFO_SAMPLES) && available) begin

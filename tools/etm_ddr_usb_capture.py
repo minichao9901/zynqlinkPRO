@@ -43,7 +43,7 @@ def capture(out,probe_elf,dev,tx,rx,seconds,ref_hz,resume,trace_id=2,verify_phys
                 usbMatchesPhysical=digest.hexdigest()==result['sha256'])
             save()
             if not report['usbMatchesPhysical']:raise RuntimeError('USB bytes differ from physical MEM-AP0')
-        if q['loss'] or not q['synced'] or not q['ended'] or result['ticks']!=t.requested_ticks or result['stopReason']!=0:
+        if q['loss'] or not q['synced'] or not q['ended'] or not q['captureComplete']:
             raise RuntimeError('DDR hardware quality/window failed; raw data retained')
         report['demux']=deformat(work/'capture.frm1',work/'demux',tail_bytes=result['tailBytes'],trace_id=trace_id)
         report['passed']=True;save()

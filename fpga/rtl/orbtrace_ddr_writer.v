@@ -4,8 +4,8 @@
 // response_bytes advances only on OKAY B handshake; memory readback/cache
 // acceptance is a separate gate. Abort drains an issued AW/W/B transaction.
 module orbtrace_ddr_writer #(
-  parameter [31:0] REGION_BASE=32'h10000000,
-  parameter [31:0] REGION_END=32'h30000000
+  parameter [31:0] REGION_BASE=32'h39c00000,
+  parameter [31:0] REGION_END=32'h40000000
 )(
   input wire clk,input wire rst_n,
   input wire start,input wire abort,input wire finish_empty,
@@ -52,13 +52,10 @@ module orbtrace_ddr_writer #(
   wire [3:0] incoming_bytes=byte_count(s_axis_tkeep);
   wire legal_keep=incoming_bytes!=0 &&
                   (s_axis_tlast || s_axis_tkeep==8'hff);
-  // Registered remaining budget avoids a 32-bit add then 33-bit compare on
-  // every RAM write-enable. Each beat is <=8B, so the guard needs only the
-  // low nibble unless any higher bit is set.
-  wire has_room=(|remaining_bytes[31:4]) || remaining_bytes[3:0]>=incoming_bytes;
-  wire at_limit=remaining_bytes==incoming_bytes;
   wire input_fire=s_axis_tvalid && s_axis_tready;
-  wire valid_beat=legal_keep && has_room && (!at_limit || s_axis_tlast);
+  // Capture owns a fixed reserved region and produces its final TLAST.
+  // No per-beat byte-capacity decision belongs on the payload path.
+  wire valid_beat=legal_keep;
   wire [32:0] end_address={1'b0,base_address}+{1'b0,byte_limit};
   wire legal_config=base_address[6:0]==0 && base_address>=REGION_BASE && byte_limit!=0 &&
                     end_address<={1'b0,REGION_END};
@@ -82,10 +79,10 @@ module orbtrace_ddr_writer #(
     else payload_valid<=input_fire && valid_beat;
   // Payload storage and pipeline data need no asynchronous reset.
   always @(posedge clk)begin
-    if(rst_n && input_fire && valid_beat)begin
-      payload_address<={producer_bank,fill_index};
-      payload_data<=s_axis_tdata;payload_keep<=s_axis_tkeep;
-    end
+    // Only payload_valid authorizes retirement. Invalid/stalled samples
+    // are disposable; do not put the budget predicate on 77 data CEs.
+    payload_address<={producer_bank,fill_index};
+    payload_data<=s_axis_tdata;payload_keep<=s_axis_tkeep;
     if(rst_n && payload_valid)begin
       data_bank[payload_address]<=payload_data;
       keep_bank[payload_address]<=payload_keep;
@@ -135,6 +132,10 @@ module orbtrace_ddr_writer #(
           if(aborting || abort)begin busy<=0;done<=1;bank_ready<=0;end
           else if(finish_empty && accepted_bytes==0 && bank_ready==0 && !s_axis_tvalid)begin
             busy<=0;done<=1;input_closed<=1;
+          end else if(bank_ready[reader_bank] && next_address>=REGION_END)begin
+            // Hard region guard only at a burst boundary. Non-final banks
+            // are exactly 128B and the start/end are 128B aligned.
+            busy<=0;done<=1;error<=1;error_code<=3;bank_ready<=0;
           end else if(bank_ready[reader_bank])begin
             m_axi_awaddr<=next_address;burst_beats<=bank_count[reader_bank];
             burst_bytes<=bank_bytes[reader_bank];burst_last<=bank_last[reader_bank];

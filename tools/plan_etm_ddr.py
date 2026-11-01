@@ -7,11 +7,11 @@ import re
 from elftools.elf.elffile import ELFFile
 
 ROOT=Path(__file__).resolve().parents[1]
-DEFAULT_BASE=0x10000000
-DEFAULT_CAPACITY=0x20000000
+DEFAULT_BASE=0x39c00000
+DEFAULT_CAPACITY=100*1024*1024
 
 
-def plan(trace_hz=200_000_000,seconds=2,format='raw8',base=DEFAULT_BASE,capacity=DEFAULT_CAPACITY,metadata=65536):
+def plan(trace_hz=200_000_000,seconds=2,format='raw8',base=DEFAULT_BASE,capacity=DEFAULT_CAPACITY,metadata=65536,elf=None):
     if trace_hz<=0 or seconds not in (1,2) or format not in ('raw8','record16') or capacity<=0 or metadata<0:
         raise ValueError('positive frequency/capacity, duration 1/2 s and raw8/record16 required')
     header=ROOT/'reference/legacy_zynq/ZYNQ_DAPLINK_RTL_100TO50MHz/ZYNQ_DAPLINK_RTL_100TO50MHz.sdk/usb_bsp/ps7_cortexa9_0/include/xparameters.h'
@@ -22,8 +22,12 @@ def plan(trace_hz=200_000_000,seconds=2,format='raw8',base=DEFAULT_BASE,capacity
         raise ValueError('candidate must be page-aligned and inside configured DDR map; this is not physical RAM attestation')
     payload=trace_hz*seconds*(1 if format=='raw8' else 2)
     required=(payload+metadata+4095)//4096*4096
-    elf=ROOT/'prebuilt/golden/application.elf'
-    occupied=[{'name':'linker dap_trace_mem reservation','start':0x3f000000,'end':0x3f100000}]
+    occupied=[{'name':'new linker dap_trace_mem reservation','start':0x39000000,'end':0x39100000}]
+    if elf is None:
+        elf=ROOT/'prebuilt/golden/application.elf'
+        occupied.append({'name':'old Golden diagnostic reservation; must move before activating tail buffer',
+                         'start':0x3f000000,'end':0x3f100000})
+    elf=Path(elf)
     with elf.open('rb') as stream:
         for section in ELFFile(stream).iter_sections():
             start,size=int(section['sh_addr']),int(section['sh_size'])
@@ -34,6 +38,7 @@ def plan(trace_hz=200_000_000,seconds=2,format='raw8',base=DEFAULT_BASE,capacity
         'input':{'pins':4,'doubleDataRate':True,'traceClockHz':trace_hz,'seconds':seconds,'format':format},
         'payloadBytes':payload,'metadataBudgetBytes':metadata,'requiredBytesAligned':required,'candidateBase':base,
         'candidateCapacityBytes':capacity,'configuredDdrStart':ddr_start,'configuredDdrEndExclusive':ddr_end,
+        'candidateCapacityMiB':capacity/(1024*1024),'capacityUnits':'MiB = 1,048,576 bytes',
         'knownOccupiedRegions':occupied,'staticOverlaps':overlaps,'fitsCapacity':required<=capacity,
         'safeForDeployment':False,'validationPending':['physical DDR size/address alias test','dynamic DMA/USB/heap region audit',
             'linker reservation and build assertions','DMA cache coherence and fences','PL-to-DDR throughput/backpressure/stop/readback test'],
@@ -48,7 +53,8 @@ def main(argv=None):
     p.add_argument('--base',type=lambda v:int(v,0),default=DEFAULT_BASE)
     p.add_argument('--capacity',type=lambda v:int(v,0),default=DEFAULT_CAPACITY)
     p.add_argument('--metadata',type=int,default=65536);p.add_argument('--out',type=Path)
-    a=p.parse_args(argv);value=plan(a.trace_hz,a.seconds,a.format,a.base,a.capacity,a.metadata)
+    p.add_argument('--elf',type=Path,help='Actual candidate ELF for allocated-section overlap checks; default is old Golden and reports its tail conflict')
+    a=p.parse_args(argv);value=plan(a.trace_hz,a.seconds,a.format,a.base,a.capacity,a.metadata,a.elf)
     output=json.dumps(value,ensure_ascii=False,indent=2)+'\n'
     if a.out:
         with a.out.open('x',encoding='utf8') as stream:stream.write(output)

@@ -137,6 +137,9 @@ set fd [open [file join $out frequency_timing.csv] w]
 puts $fd "FCLK_Hz,setup_slack_ns,hold_slack_ns"
 set rates [lsort -integer -unique -decreasing [concat {200000000 180000000 163636364 150000000 138461539 128571429 120000000 100000000} [list $requested_fclk]]]
 foreach rate $rates {
+    # Do not promote a release above the explicitly implemented work point.
+    # Higher-frequency exploration requires a separately authorized build.
+    if {$rate>$requested_fclk} {continue}
     create_clock -name clk_fpga_0 -period [expr {floor(1e12/$rate)/1000.0}] [get_pins {system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]}]
     set setup [get_property SLACK [get_timing_paths -max_paths 1 -delay_type max]]
     set h [get_property SLACK [get_timing_paths -max_paths 1 -delay_type min]]

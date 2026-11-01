@@ -54,12 +54,18 @@ class Transport:
         if (status['captureId'],status['nonce'])!=(self.capture_id,self.nonce):
             raise DdrError('DDR capture ID/nonce changed; refusing mixed data')
 
-    def arm(self,seconds,ref_hz,byte_limit=0x20000000,nonce=None):
-        if not 0<seconds<=2 or not 190000000<=ref_hz<=210000000 or not 1<=byte_limit<=0x20000000:
+    def arm(self,seconds,ref_hz,byte_limit=None,nonce=None):
+        if not 0<seconds<=2 or not 190000000<=ref_hz<=210000000:
             raise ValueError('invalid bounded DDR window/clock/capacity')
         before=self.snapshot()
         if not before['available']:raise DdrError('PS did not advertise DDR download')
         if before['active']:raise DdrError('previous DDR source remains active')
+        r=before['registers'];capacity=r[13]-r[12]
+        if (r[12],r[13]) not in ((0x39c00000,0x40000000),(0x10000000,0x30000000)):
+            raise DdrError('unrecognized reserved DDR region')
+        if byte_limit is None:byte_limit=capacity
+        if not 1<=byte_limit<=capacity or (capacity==100*1024*1024 and byte_limit!=capacity):
+            raise ValueError('capture uses the fixed 100 MiB region')
         self.nonce=nonce if nonce is not None else secrets.randbits(64) or 1
         if not 1<=self.nonce<=0xffffffffffffffff:raise ValueError('nonzero 64-bit nonce required')
         self.capture_id=(before['captureId']+1)&0xffffffff
@@ -110,7 +116,7 @@ class Transport:
         regs=status['registers'];count=status['bytes']
         if status['active'] or not status['done'] or regs[2]&16 or status['acceptedBytes']!=count:
             raise DdrError('DDR writer is not retired')
-        if status['format']!=0x46524d31 or regs[33]!=2 or not 0<=count<=0x20000000:
+        if status['format']!=0x46524d31 or regs[33]!=2 or not 0<=count<=regs[13]-regs[12]:
             raise DdrError('DDR record is not a bounded FRM1 capture')
         if path.exists():raise FileExistsError(path)
         started=time.perf_counter()
@@ -148,13 +154,18 @@ class Transport:
 
 def quality(status):
     r=status['registers']
+    loss=bool(r[2]&12 or r[9] or status['qualityFlags'])
+    full=bool(r[27]) and status['bytes']==r[13]-r[12] and status['stopReason']==2
+    timed=status['ticks']==status['requestedTicks'] and status['stopReason']==0
     return dict(transport='ddr-usb/1',captureId=status['captureId'],captureNonce=status['nonce'],
-        loss=bool(r[2]&12 or r[9] or status['qualityFlags'] or r[27]),synced=bool(r[24]),
-        ended=status['done'] and not status['active'],records=r[21],
+        loss=loss,synced=bool(r[24]),bufferFull=full,bufferCapacityBytes=r[13]-r[12],
+        captureComplete=(timed or full) and not loss,requestedWindowComplete=timed and not loss,
+        completionReason='buffer-full' if full else ('time' if timed else 'stopped'),
+        ended=status['done'] and not status['active'],records=status['bytes']//16,
         hardwareTicks=status['ticks'],requestedTicks=status['requestedTicks'],
         refClockHz=status['referenceHz'],hardwareSeconds=status['actualWindowSeconds'],
         hardwareStartBracketUnix=status['hardwareStartBracketUnix'],
         stopReason=status['stopReason'],formatterBytes=status['bytes'],tailBytes=status['tailBytes'],
         tailAmbiguous=status['tailAmbiguous'],usbSeconds=status['usbSeconds'],usbPayloadMBps=status['usbPayloadMBps'],
         diagnostics=dict(implemented=True,frameDrops=r[19],parserErrors=r[20],idelayReadyLosses=r[26],
-            frameHighwater=r[25],syncAcquisitions=r[24],capacityReached=bool(r[27]),writerError=r[9]))
+            frameHighwater=r[25],syncAcquisitions=r[24],observedFrames=r[21],capacityReached=bool(r[27]),writerError=r[9]))

@@ -250,7 +250,9 @@ def capture(argv):
         ddr=acceptance['ddr'];q=ddr['quality']
         metadata.update(captureQuality=q,captureExtent=dict(requestedSeconds=args.seconds,
             actualSeconds=ddr['actualWindowSeconds'],actualSamples=None,sampleCountMeasured=False,
-            complete=ddr['ticks']==ddr['requestedTicks'] and not q['loss'] and ddr['stopReason']==0,
+            complete=q.get('captureComplete',ddr['ticks']==ddr['requestedTicks'] and not q['loss'] and ddr['stopReason']==0),
+            requestedWindowComplete=q.get('requestedWindowComplete'),bufferFull=q.get('bufferFull',False),
+            completionReason=q.get('completionReason'),bufferCapacityBytes=q.get('bufferCapacityBytes'),
             known=True,hardwareTicks=ddr['ticks'],referenceClockHz=ddr['referenceHz'],
             basis='bounded hardware reference ticks, not host download time'))
         for source,name in [('capture.frm1','capture.frm1'),('capture.usb.json','ddr-capture.json')]:

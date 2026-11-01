@@ -8,7 +8,7 @@ module tb_orbtrace_ddr_controller;
   wire awvalid,wlast,wvalid,bready;wire [63:0] wdata;wire [7:0] wstrb;
   wire [3:0] awcache,awqos;wire [2:0] awprot;wire awlock;
   reg awready=1,wready=1,bvalid=0;reg [1:0] bresp=0;
-  orbtrace_ddr_controller dut(.clk(clk),.rst_n(rst_n),
+  orbtrace_ddr_controller #(.REGION_BASE(32'h10000000),.REGION_END(32'h30000000),.FIXED_CAPTURE_BYTES(0)) dut(.clk(clk),.rst_n(rst_n),
     .s_axi_awaddr(ax_awaddr),.s_axi_awprot(3'd0),.s_axi_awvalid(ax_awvalid),.s_axi_awready(ax_awready),
     .s_axi_wdata(ax_wdata),.s_axi_wstrb(ax_wstrb),.s_axi_wvalid(ax_wvalid),.s_axi_wready(ax_wready),
     .s_axi_bresp(ax_bresp),.s_axi_bvalid(ax_bvalid),.s_axi_bready(ax_bready),

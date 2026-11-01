@@ -38,7 +38,7 @@ def capture(out, probe_elf, seconds, ref_hz, resume, trace_id=2):
     marker, cancelled = work/'armed.json', work/'cancel'
     clock = live_clock_snapshot()
     report = dict(hardwareAccess=True, transport='physical MEM-AP0 after capture; not USB download',
-                  bytesLimit=64<<20, requestedTicks=ticks, referenceHz=ref_hz,
+                  bytesLimit=end-base, requestedTicks=ticks, referenceHz=ref_hz,
                   expectedCaptureId=expected_id, nonce=nonce, actualClocks=clock, passed=False)
     result = work/'result.json'
     def save(): result.write_text(json.dumps(report,indent=2)+'\n')
@@ -48,7 +48,7 @@ def capture(out, probe_elf, seconds, ref_hz, resume, trace_id=2):
         try:
             output.append(memory.run(f'''physwr -force {CSR+60:#x} 2
 physwr -force {CSR+12:#x} {base:#x}
-physwr -force {CSR+16:#x} {64<<20}
+physwr -force {CSR+16:#x} {end-base}
 physwr -force {CSR+64:#x} {ticks}
 physwr -force {CSR+124:#x} {nonce&0xffffffff}
 physwr -force {CSR+128:#x} {nonce>>32}
@@ -96,7 +96,7 @@ if {{!$terminal}} {{catch {{physwr -force {CSR+4:#x} 2}};error "capture timed ou
         if len(words)!=34 or words[10]!=expected_id or words[31:33]!=[nonce&0xffffffff,nonce>>32] or words[33]!=2:
             raise RuntimeError('DDR capture identity mismatch')
         count = words[7]
-        if count > 64<<20 or words[2]&1 or not words[2]&2 or words[6] != count:
+        if count > end-base or words[2]&1 or not words[2]&2 or words[6] != count:
             raise RuntimeError('DDR writer has not safely retired')
         data = work/'capture.frm1'
         # Keep binary TCF replies bounded, including a 2s acquisition.
@@ -118,7 +118,9 @@ if {{!$terminal}} {{catch {{physwr -force {CSR+4:#x} 2}};error "capture timed ou
         save()
         if words[28]!=0x46524d31: raise RuntimeError('record is not FRM1')
         # Preserve the failing raw capture and diagnostics before rejecting it.
-        if words[2]&0x1c or words[9] or words[18] or words[27] or words[17]!=ticks or words[23]!=0:
+        normal_full=bool(words[27]) and count==end-base and words[23]==2
+        normal_time=words[17]==ticks and words[23]==0
+        if words[2]&0x1c or words[9] or words[18] or not (normal_time or normal_full):
             raise RuntimeError('DDR hardware quality/window failed')
         demux = native_demux(data,work/'demux',tail_bytes=words[22],trace_id=trace_id)
         report.update(demux=demux, passed=True); save()

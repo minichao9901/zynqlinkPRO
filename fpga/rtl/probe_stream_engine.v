@@ -120,7 +120,13 @@ module probe_stream_engine (
     wire [31:0] period=config_words[2];
     wire [4:0] word_count=config_words[5][4:0];
     wire [8:0] payload_bytes=samples*frame_size;
-    wire gap=samples!=0 && stamp-last_stamp!=period;
+    // STAMP already precedes CHECK. Register the gap there so a timestamp
+    // subtract/compare cannot feed sample_pop, FIFO address and forwarding
+    // compare in one cycle. No additional consumption stage is inserted.
+    reg gap;
+    wire period_write=host_en && (&host_we) && host_addr[14:2]==7 &&
+                      mode==0 && config_index==2;
+    wire [31:0] period_at_stamp=period_write ? host_wdata : period;
     wire packet_safe=packet_validated || watermark_safe;
     assign fence_req=transport_jtag && state==HEADER && !packet_safe && !hss_transport_fault;
     assign sample_pop=(state==CHECK && !gap) || state==WORDS;
@@ -141,6 +147,7 @@ module probe_stream_engine (
             up_addr<=0;ring_addr<=0;ring_size<=0;initial_rd<=0;chunk<=2048;
             rtt_announced<=0;rtt_commit<=0;state<=EMPTY;cursor<=0;word_index<=0;
             stamp<=0;first_stamp<=0;last_stamp<=0;have_origin<=0;packet_started<=0;
+            gap<=0;
             sample_delta<=0;elapsed_ticks<=0;convert_input<=0;convert_quotient<=0;
             convert_bits<=0;convert_remainder<=0;
             position<=16;samples<=0;header_index<=0;mem_we<=0;mem_mask<=0;mem_addr<=0;mem_data<=0;
@@ -189,7 +196,11 @@ module probe_stream_engine (
                 else cursor<=cursor+1'b1;
             end
             STAMP: if(!sample_empty) begin
-                stamp<=sample_data;state<=CHECK;
+                stamp<=sample_data;
+                // A permitted period write on this edge is visible to the
+                // following CHECK, just as with the original combinational test.
+                gap<=samples!=0 && sample_data-last_stamp!=period_at_stamp;
+                state<=CHECK;
             end else if(samples!=0 && ((!sampler_active && mode==0) || tick-packet_started>=240000)) begin
                 header_index<=0;state<=VALIDATE;
             end else if(mode==0 && !sampler_active && samples==0) state<=EMPTY;

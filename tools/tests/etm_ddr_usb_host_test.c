@@ -35,9 +35,11 @@ int main(void){
   XUsbPs usb={0};uint32_t reply[44],args[6]={0},before;
   legacy_caps=0;assert(!etm_ddr_init() && ddr_reads==0 && mappings==0);
   legacy_caps=0x100;csr[0]=0x45444d31;csr[11]=7;csr[12]=DDR_BASE;csr[13]=DDR_END;
-  assert(etm_ddr_init() && mappings==512);
+  assert(etm_ddr_init() && mappings==100);
   etm_ddr_usb_configured(&usb);
-  args[0]=200000000;args[1]=64<<20;args[2]=0x1234;args[3]=0x5678;
+  args[0]=200000000;args[1]=64<<20;args[2]=1;
+  assert(etm_ddr_command(1,args,reply)==3 && !claimed);
+  args[0]=200000000;args[1]=DDR_END-DDR_BASE;args[2]=0x1234;args[3]=0x5678;
   assert(!etm_ddr_command(1,args,reply) && csr[10]==1 && csr[2]==ACTIVE && claimed);
   assert(etm_ddr_owned());before=send_calls;assert(etm_ddr_poll(&usb) && send_calls==before);
   assert(etm_ddr_command(1,args,reply)==2); // no overwrite of active capture

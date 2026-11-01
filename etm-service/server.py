@@ -684,7 +684,9 @@ def capture_extent(depth, rate, seconds, transport=None):
             if not isinstance(actual,(int,float)) or not math.isfinite(actual) or abs(actual-ticks/reference)>1e-9:
                 raise ValueError('DDR硬件窗口计数与时长不一致')
             return dict(known=True,requestedSeconds=seconds,requestedSamples=None,actualSeconds=actual,
-                actualSamples=None,complete=ticks==requested and transport.get('stopReason')==0 and not transport.get('loss'),
+                actualSamples=None,complete=transport.get('captureComplete',ticks==requested and transport.get('stopReason')==0 and not transport.get('loss')),
+                requestedWindowComplete=transport.get('requestedWindowComplete'),bufferFull=transport.get('bufferFull',False),
+                completionReason=transport.get('completionReason'),bufferCapacityBytes=transport.get('bufferCapacityBytes'),
                 hardwareTicks=ticks,referenceClockHz=reference,sampleCountMeasured=False,
                 hostReceiveSeconds=transport.get('hostSeconds'),basis='bounded hardware reference ticks; formatter bytes are not physical sample counts')
         # ZET1 has no physical sample count or hardware start/stop timestamp.

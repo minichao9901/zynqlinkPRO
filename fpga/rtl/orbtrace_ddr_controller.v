@@ -2,7 +2,11 @@
 // Bounded pattern or normalized framed-TPIU capture into the verified HP1 writer.
 // Trace capability is explicit and enabled only with the matching RAW4 tap.
 // USB configuration/reset has no connection to this hardware state machine.
-module orbtrace_ddr_controller #(parameter ENABLE_TRACE_SOURCE=0,PREPARE_TIMEOUT=1000000)(
+module orbtrace_ddr_controller #(
+  parameter ENABLE_TRACE_SOURCE=0,PREPARE_TIMEOUT=1000000,
+  parameter [31:0] REGION_BASE=32'h39c00000,REGION_END=32'h40000000,
+  parameter integer FIXED_CAPTURE_BYTES=104857600
+)(
   (* X_INTERFACE_PARAMETER="ASSOCIATED_BUSIF s_axi:m_axi, ASSOCIATED_RESET rst_n" *)
   input wire clk,input wire rst_n,
   (* X_INTERFACE_PARAMETER="FREQ_HZ 200000000" *) input wire ref_clk,
@@ -84,7 +88,7 @@ module orbtrace_ddr_controller #(parameter ENABLE_TRACE_SOURCE=0,PREPARE_TIMEOUT
       .elapsed_ticks(capture_ticks),.observed_frames(capture_frames),.dropped_frames(capture_drops),.parser_errors(capture_parser),
       .sync_count(capture_sync),.frame_highwater(capture_highwater),.ready_losses(capture_ready_losses),
       .tail_bytes(capture_tail),.tail_ambiguous(capture_ambiguous),.reason(capture_reason));
-    orbtrace_ddr_packetizer packetizer(.clk(clk),.rst(!rst_n || !trace_hold),.start(packet_start),.byte_limit(byte_limit),
+    orbtrace_ddr_packetizer #(.FIXED_CAPACITY_BYTES(FIXED_CAPTURE_BYTES)) packetizer(.clk(clk),.rst(!rst_n || !trace_hold),.start(packet_start),.byte_limit(byte_limit),
       .busy(packet_busy),.done(packet_done),.empty(packet_empty),.command_rejected(packet_rejected),
       .protocol_error(packet_error),.limit_reached(packet_limit),.frame_data(capture_frame_data),
       .frame_bytes(capture_frame_bytes),.frame_last(capture_frame_last),.frame_valid(capture_frame_valid && !discard_frames),
@@ -104,7 +108,7 @@ module orbtrace_ddr_controller #(parameter ENABLE_TRACE_SOURCE=0,PREPARE_TIMEOUT
     assign capture_frame_ready=0;
   end endgenerate
   assign m_axi_awcache=4'b0011;assign m_axi_awprot=0;assign m_axi_awlock=0;assign m_axi_awqos=0;
-  orbtrace_ddr_writer writer(.clk(clk),.rst_n(rst_n),.start(writer_start),.abort(writer_abort),.finish_empty(trace_mode && packet_done && packet_empty),
+  orbtrace_ddr_writer #(.REGION_BASE(REGION_BASE),.REGION_END(REGION_END)) writer(.clk(clk),.rst_n(rst_n),.start(writer_start),.abort(writer_abort),.finish_empty(trace_mode && packet_done && packet_empty),
     .base_address(base_address),.byte_limit(byte_limit),.busy(writer_busy),.done(writer_done),.error(writer_error),
     .error_code(writer_error_code),.command_rejected(writer_rejected),.accepted_bytes(accepted_bytes),.response_bytes(response_bytes),.remaining_bytes(remaining),
     .s_axis_tdata(stream_data),.s_axis_tkeep(stream_keep),.s_axis_tlast(stream_last),.s_axis_tvalid(stream_valid),.s_axis_tready(stream_ready),
@@ -120,7 +124,7 @@ module orbtrace_ddr_controller #(parameter ENABLE_TRACE_SOURCE=0,PREPARE_TIMEOUT
     if(!rst_n)begin
       aw_pending<=0;w_pending<=0;write_address<=0;write_data<=0;write_strobe<=0;
       s_axi_bvalid<=0;s_axi_bresp<=0;s_axi_rvalid<=0;s_axi_rdata<=0;
-      base_address<=32'h10000000;byte_limit<=0;seed<=0;capture_id<=0;elapsed_cycles<=0;
+      base_address<=REGION_BASE;byte_limit<=0;seed<=0;capture_id<=0;elapsed_cycles<=0;
       active<=0;done_sticky<=0;error_sticky<=0;rejected<=0;writer_start<=0;writer_abort<=0;
       mode<=1;record_mode<=1;requested_ticks<=0;nonce<=0;capture_nonce<=0;trace_hold<=0;trace_prepare<=0;trace_phase<=0;prepare_wait<=0;
       capture_start<=0;capture_stop<=0;capture_stop_reason<=0;writer_retired<=0;discard_frames<=0;packet_start<=0;eof_consumed<=0;
@@ -159,8 +163,14 @@ module orbtrace_ddr_controller #(parameter ENABLE_TRACE_SOURCE=0,PREPARE_TIMEOUT
           if(writer_retired && capture_snapshot && eof_consumed)begin
             result_ticks<=capture_ticks;result_frames<=capture_frames;result_drops<=capture_drops;
             result_parser<=capture_parser;result_sync<=capture_sync;result_highwater<=capture_highwater;
-            result_ready_losses<=capture_ready_losses;result_tail<=capture_tail;result_reason<=capture_reason;result_ambiguous<=capture_ambiguous;
-            error_sticky<=error_sticky || capture_drops!=0 || capture_parser!=0 || capture_ready_losses!=0 || capture_sync==0 || response_bytes==0 || capacity_reached;
+            result_ready_losses<=capture_ready_losses;
+            // Fixed-capacity records end on a complete formatter frame.
+            // Any source tail observed during stop/CDC drain was discarded
+            // and must not relabel the final stored full frame as partial.
+            result_tail<=(capacity_reached && FIXED_CAPTURE_BYTES!=0) ? 0 : capture_tail;
+            result_reason<=capture_reason;
+            result_ambiguous<=(capacity_reached && FIXED_CAPTURE_BYTES!=0) ? 0 : capture_ambiguous;
+            error_sticky<=error_sticky || capture_drops!=0 || capture_parser!=0 || capture_ready_losses!=0 || capture_sync==0 || response_bytes==0 || (capacity_reached && FIXED_CAPTURE_BYTES==0);
             active<=0;done_sticky<=1;trace_hold<=0;trace_phase<=0;
           end
         end
@@ -180,7 +190,10 @@ module orbtrace_ddr_controller #(parameter ENABLE_TRACE_SOURCE=0,PREPARE_TIMEOUT
               writer_epoch_valid<=0;controller_error<=0;
               result_ticks<=0;result_frames<=0;result_drops<=0;result_parser<=0;result_sync<=0;result_highwater<=0;
               result_ready_losses<=0;result_tail<=0;result_reason<=0;result_ambiguous<=0;
-              if(trace_mode)begin trace_prepare<=1;prepare_wait<=0;trace_phase<=1;end
+              if(trace_mode)begin
+                if(FIXED_CAPTURE_BYTES!=0)begin base_address<=REGION_BASE;byte_limit<=FIXED_CAPTURE_BYTES;end
+                trace_prepare<=1;prepare_wait<=0;trace_phase<=1;
+              end
             end else if(write_data==2 && active)begin
               if(trace_mode)begin
                 capture_stop<=1;capture_stop_reason<=1;
@@ -215,8 +228,8 @@ module orbtrace_ddr_controller #(parameter ENABLE_TRACE_SOURCE=0,PREPARE_TIMEOUT
           9:s_axi_rdata<=controller_error!=0 ? {28'd0,controller_error} : (writer_epoch_valid ? {28'd0,writer_error_code} : 0);
           10:s_axi_rdata<=capture_id;
           11:s_axi_rdata<=3 | (ENABLE_TRACE_SOURCE ? 4 : 0);
-          12:s_axi_rdata<=32'h10000000;
-          13:s_axi_rdata<=32'h30000000;
+          12:s_axi_rdata<=REGION_BASE;
+          13:s_axi_rdata<=REGION_END;
           14:s_axi_rdata<=128;
           15:s_axi_rdata<=mode;
           16:s_axi_rdata<=requested_ticks;

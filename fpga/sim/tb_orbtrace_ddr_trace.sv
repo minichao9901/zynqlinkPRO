@@ -1,5 +1,5 @@
 `timescale 1ns/1ps
-module tb_orbtrace_ddr_trace #(parameter LANE_DELAY=0);
+module tb_orbtrace_ddr_trace #(parameter LANE_DELAY=0,FIXED_BYTES=0);
   reg clk=0;always #4.166 clk=!clk;
   reg rst_n=0;reg [7:0] ax_awaddr=0,ax_araddr=0;reg [31:0] ax_wdata=0;
   reg [3:0] ax_wstrb=15;reg ax_awvalid=0,ax_wvalid=0,ax_bready=0,ax_arvalid=0,ax_rready=0;
@@ -29,7 +29,9 @@ module tb_orbtrace_ddr_trace #(parameter LANE_DELAY=0);
     .s_axi_bresp(l_bresp),.s_axi_bvalid(l_bvalid),.s_axi_bready(l_bready),
     .s_axi_araddr(8'd72),.s_axi_arprot(3'd0),.s_axi_arvalid(l_arvalid),.s_axi_arready(l_arready),
     .s_axi_rdata(l_rdata),.s_axi_rvalid(l_rvalid),.s_axi_rready(1'b1));
-  orbtrace_ddr_controller #(.ENABLE_TRACE_SOURCE(1),.PREPARE_TIMEOUT(1000)) dut(.clk(clk),.rst_n(rst_n),
+  orbtrace_ddr_controller #(.ENABLE_TRACE_SOURCE(1),.PREPARE_TIMEOUT(1000),
+    .REGION_BASE(32'h10000000),.REGION_END(FIXED_BYTES!=0 ? 32'h10000000+FIXED_BYTES : 32'h30000000),
+    .FIXED_CAPTURE_BYTES(FIXED_BYTES)) dut(.clk(clk),.rst_n(rst_n),
     .ref_clk(ref_clock),.trace_ready(trace_ready && allow_ready),.trace_idle(trace_idle),.trace_receiver_ready_ref(receiver_ready),
     .trace_frame(source_frame),.trace_tail(source_tail),.trace_tail_bytes(source_tail_bytes),.trace_frame_event(source_frame_event),
     .trace_parser_error(source_error),.trace_sync_event(source_sync),.trace_tail_ambiguous(source_ambiguous),
@@ -163,12 +165,18 @@ module tb_orbtrace_ddr_trace #(parameter LANE_DELAY=0);
     end
     checks=checks+1;
     // Capacity stop: retain exact prefix and wait for source EOF despite discarding overflow prefix.
+    if(FIXED_BYTES!=0)write_reg(64,FIXED_BYTES*32,0,0);
     write_reg(16,32,0,0);write_reg(4,1,0,0);synchronize_source();
-    for(integer k=0;k<512 && sampler_gate;k=k+1)put_byte(8'(16+k));
-    wait_done();if(!(value&4))$fatal(1,"capacity not reported");
-    read_reg(28,count);if(count!=32)$fatal(1,"capacity bytes");verify_payload(32);
+    for(integer k=0;k<(FIXED_BYTES!=0 ? FIXED_BYTES+512 : 512) && sampler_gate;k=k+1)put_byte(8'(16+k));
+    wait_done();if(FIXED_BYTES!=0 ? (value&4)!=0 : !(value&4))$fatal(1,"capacity status policy");
+    read_reg(28,count);if(count!=(FIXED_BYTES!=0 ? FIXED_BYTES : 32))$fatal(1,"capacity bytes");verify_payload(count);
     read_reg(92,value);if(value!=2)$fatal(1,"capacity reason %0d",value);
-    read_reg(68,actual_ticks);if(actual_ticks==0 || actual_ticks>=8000)$fatal(1,"capacity timing");
+    if(FIXED_BYTES!=0)begin
+      read_reg(88,value);if(value!=0)$fatal(1,"discarded source tail relabeled full capacity record");
+      read_reg(116,value);if(value!=0)$fatal(1,"discarded source tail ambiguity leaked into full record");
+    end
+    read_reg(68,actual_ticks);if(actual_ticks==0 || actual_ticks>=(FIXED_BYTES!=0 ? FIXED_BYTES*32 : 8000))$fatal(1,"capacity timing");
+    if(FIXED_BYTES!=0)write_reg(64,8000,0,0);
     checks=checks+1;
     // Manual stop: stopped target clock cannot prevent EOF/drain on the independent ref clock.
     write_reg(16,4096,0,0);write_reg(4,1,0,0);synchronize_source();

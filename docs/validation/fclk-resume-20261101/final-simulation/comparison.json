@@ -1,0 +1,240 @@
+{
+  "passed": true,
+  "hardware_access": false,
+  "checks": [
+    {
+      "top": "tb_cm3_swd",
+      "kind": "SIM_SRAM",
+      "golden": {
+        "kind": "SIM_SRAM",
+        "read": 0.0,
+        "bytes": 1024.0,
+        "elapsed_ns": 197424.126,
+        "MBps": 5.186803,
+        "waits": 1.0,
+        "fclk_cycles": 23689
+      },
+      "candidate": {
+        "kind": "SIM_SRAM",
+        "read": 0.0,
+        "bytes": 1024.0,
+        "elapsed_ns": 197424.126,
+        "MBps": 5.186803,
+        "waits": 1.0,
+        "fclk_cycles": 23689
+      },
+      "passed": true
+    },
+    {
+      "top": "tb_cm3_swd",
+      "kind": "SIM_SRAM",
+      "golden": {
+        "kind": "SIM_SRAM",
+        "read": 1.0,
+        "bytes": 1024.0,
+        "elapsed_ns": 197399.124,
+        "MBps": 5.18746,
+        "waits": 1.0,
+        "fclk_cycles": 23686
+      },
+      "candidate": {
+        "kind": "SIM_SRAM",
+        "read": 1.0,
+        "bytes": 1024.0,
+        "elapsed_ns": 197399.124,
+        "MBps": 5.18746,
+        "waits": 1.0,
+        "fclk_cycles": 23686
+      },
+      "passed": true
+    },
+    {
+      "top": "tb_cm3_swd",
+      "kind": "SIM_RTT",
+      "golden": {
+        "kind": "SIM_RTT",
+        "bytes": 1024.0,
+        "elapsed_ns": 206483.184,
+        "MBps": 4.959242,
+        "waits": 4.0,
+        "fclk_cycles": 24776
+      },
+      "candidate": {
+        "kind": "SIM_RTT",
+        "bytes": 1024.0,
+        "elapsed_ns": 206483.184,
+        "MBps": 4.959242,
+        "waits": 4.0,
+        "fclk_cycles": 24776
+      },
+      "passed": true
+    },
+    {
+      "top": "tb_cm3_swd",
+      "kind": "SIM_HSS",
+      "golden": {
+        "kind": "SIM_HSS",
+        "period": 24.0,
+        "produced": 124.0,
+        "skipped": 0.0,
+        "elapsed_ns": 124001.586,
+        "Hz": 999987.209841,
+        "skip_percent": 0.0,
+        "fclk_cycles": 14879
+      },
+      "candidate": {
+        "kind": "SIM_HSS",
+        "period": 24.0,
+        "produced": 124.0,
+        "skipped": 0.0,
+        "elapsed_ns": 124001.586,
+        "Hz": 999987.209841,
+        "skip_percent": 0.0,
+        "fclk_cycles": 14879
+      },
+      "passed": true
+    },
+    {
+      "top": "tb_cm3_swd",
+      "kind": "SIM_HSS",
+      "golden": {
+        "kind": "SIM_HSS",
+        "period": 27.0,
+        "produced": 124.0,
+        "skipped": 0.0,
+        "elapsed_ns": 139502.826,
+        "Hz": 888870.882085,
+        "skip_percent": 0.0,
+        "fclk_cycles": 16739
+      },
+      "candidate": {
+        "kind": "SIM_HSS",
+        "period": 27.0,
+        "produced": 124.0,
+        "skipped": 0.0,
+        "elapsed_ns": 139502.826,
+        "Hz": 888870.882085,
+        "skip_percent": 0.0,
+        "fclk_cycles": 16739
+      },
+      "passed": true
+    },
+    {
+      "top": "tb_cm3_jtag",
+      "kind": "SIM_SRAM",
+      "golden": {
+        "kind": "SIM_SRAM",
+        "read": 0.0,
+        "bytes": 1024.0,
+        "elapsed_ns": 403165.584,
+        "MBps": 2.539899,
+        "waits": 255.0,
+        "fclk_cycles": 48376
+      },
+      "candidate": {
+        "kind": "SIM_SRAM",
+        "read": 0.0,
+        "bytes": 1024.0,
+        "elapsed_ns": 403165.584,
+        "MBps": 2.539899,
+        "waits": 255.0,
+        "fclk_cycles": 48376
+      },
+      "passed": true
+    },
+    {
+      "top": "tb_cm3_jtag",
+      "kind": "SIM_SRAM",
+      "golden": {
+        "kind": "SIM_SRAM",
+        "read": 1.0,
+        "bytes": 1024.0,
+        "elapsed_ns": 403140.582,
+        "MBps": 2.540057,
+        "waits": 255.0,
+        "fclk_cycles": 48373
+      },
+      "candidate": {
+        "kind": "SIM_SRAM",
+        "read": 1.0,
+        "bytes": 1024.0,
+        "elapsed_ns": 403140.582,
+        "MBps": 2.540057,
+        "waits": 255.0,
+        "fclk_cycles": 48373
+      },
+      "passed": true
+    },
+    {
+      "top": "tb_cm3_jtag",
+      "kind": "SIM_RTT",
+      "golden": {
+        "kind": "SIM_RTT",
+        "bytes": 1024.0,
+        "elapsed_ns": 418583.484,
+        "MBps": 2.446346,
+        "waits": 257.0,
+        "fclk_cycles": 50226
+      },
+      "candidate": {
+        "kind": "SIM_RTT",
+        "bytes": 1024.0,
+        "elapsed_ns": 418583.484,
+        "MBps": 2.446346,
+        "waits": 257.0,
+        "fclk_cycles": 50226
+      },
+      "passed": true
+    },
+    {
+      "top": "tb_cm3_jtag",
+      "kind": "SIM_HSS",
+      "golden": {
+        "kind": "SIM_HSS",
+        "period": 24.0,
+        "produced": 64.0,
+        "skipped": 48.0,
+        "elapsed_ns": 112008.96,
+        "Hz": 571382.8608,
+        "skip_percent": 42.857143,
+        "fclk_cycles": 13440
+      },
+      "candidate": {
+        "kind": "SIM_HSS",
+        "period": 24.0,
+        "produced": 64.0,
+        "skipped": 48.0,
+        "elapsed_ns": 112008.96,
+        "Hz": 571382.8608,
+        "skip_percent": 42.857143,
+        "fclk_cycles": 13440
+      },
+      "passed": true
+    },
+    {
+      "top": "tb_cm3_jtag",
+      "kind": "SIM_HSS",
+      "golden": {
+        "kind": "SIM_HSS",
+        "period": 47.0,
+        "produced": 125.0,
+        "skipped": 1.0,
+        "elapsed_ns": 246769.74,
+        "Hz": 506545.089361,
+        "skip_percent": 0.793651,
+        "fclk_cycles": 29610
+      },
+      "candidate": {
+        "kind": "SIM_HSS",
+        "period": 47.0,
+        "produced": 125.0,
+        "skipped": 1.0,
+        "elapsed_ns": 246769.74,
+        "Hz": 506545.089361,
+        "skip_percent": 0.793651,
+        "fclk_cycles": 29610
+      },
+      "passed": true
+    }
+  ]
+}

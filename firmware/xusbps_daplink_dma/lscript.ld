@@ -24,10 +24,10 @@ _UNDEF_STACK_SIZE = DEFINED(_UNDEF_STACK_SIZE) ? _UNDEF_STACK_SIZE : 1024;
 MEMORY
 {
    /* Keep normal PS allocations below the PL capture reservation. No huge
-      NOLOAD section: startup/download must not clear 512MiB implicitly. */
+      NOLOAD section: startup/download must not clear 100MiB implicitly. */
    ps7_ddr_0 : ORIGIN = 0x100000, LENGTH = 0x0FF00000
-   etm_capture_mem : ORIGIN = 0x10000000, LENGTH = 0x20000000
-   dap_trace_mem : ORIGIN = 0x3F000000, LENGTH = 0x100000
+   etm_capture_mem : ORIGIN = 0x39C00000, LENGTH = 0x06400000
+   dap_trace_mem : ORIGIN = 0x39000000, LENGTH = 0x100000
    ps7_ram_0 : ORIGIN = 0x0, LENGTH = 0x30000
    ps7_ram_1 : ORIGIN = 0xFFFF0000, LENGTH = 0xFE00
 }
@@ -43,7 +43,8 @@ SECTIONS
 __etm_ddr_base = ABSOLUTE(ORIGIN(etm_capture_mem));
 __etm_ddr_end = ABSOLUTE(ORIGIN(etm_capture_mem) + LENGTH(etm_capture_mem));
 ASSERT(ORIGIN(ps7_ddr_0) + LENGTH(ps7_ddr_0) <= __etm_ddr_base, "PS DDR overlaps ETM reservation")
-ASSERT(__etm_ddr_end <= ORIGIN(dap_trace_mem), "ETM reservation overlaps diagnostic trace memory")
+ASSERT(ORIGIN(dap_trace_mem) + LENGTH(dap_trace_mem) <= __etm_ddr_base, "ETM reservation overlaps diagnostic trace memory")
+ASSERT(__etm_ddr_end == 0x40000000, "ETM reservation must end at physical DDR map end")
 .text : {
    KEEP (*(.vectors))
    *(.boot)
@@ -252,7 +253,7 @@ ASSERT(__etm_ddr_end <= ORIGIN(dap_trace_mem), "ETM reservation overlaps diagnos
    __dap_debug_end = .;
 } > ps7_ddr_0
 
-.dap_trace 0x3F000000 (NOLOAD) : {
+.dap_trace 0x39000000 (NOLOAD) : {
    __dap_trace_start = .;
    KEEP(*(.dap_trace))
    KEEP(*(.dap_trace.*))

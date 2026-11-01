@@ -1,0 +1,33 @@
+{
+  "passed": true,
+  "hardwareAccess": false,
+  "cases": [
+    "delay",
+    "pins-skew",
+    "ddr-bypass",
+    "ddr-delay",
+    "ddr-fixed-region"
+  ],
+  "note": "Functional delay and protocol model; not analog signal integrity or routed STA",
+  "sources": {
+    "fpga/rtl/orbtrace_controller.v": "977e97a78edf74024812d5c74073ea062e207241ecf410c3ab2e8997cd2a2faa",
+    "fpga/rtl/orbtrace_ddr_capture.v": "6f6203f4608fb138cb9441f7afdb3f8922f7bf7a50bb107d3849466c3a94973f",
+    "fpga/rtl/orbtrace_ddr_controller.v": "8b1305e1ed0e2e63020cfcdab71f695e10e7a0cb7a329d6a6da0bfd4e2871b30",
+    "fpga/rtl/orbtrace_ddr_packetizer.v": "c16d02e839e21673113863b0b1eeb6716eb337ce83e43701c3ee79f2ad0fe0f3",
+    "fpga/rtl/orbtrace_ddr_writer.v": "84a0543a117372b17016fc5244c73fff7dc500bb3fb27563fa89824824270ada",
+    "fpga/rtl/orbtrace_frame_async_fifo.v": "56feed471d67ad818c2c4a86a69ba5f4cb4dfb3f120d9ef66c106bcbcb5afafc",
+    "fpga/rtl/orbtrace_frame_fifo.v": "e4d256a9406985e2f7016d2f53cc3f9589ef1292c02588551bf532f642ddb801",
+    "fpga/rtl/orbtrace_lane_delay.v": "f1f16c654ec6e2cc78e3b26ac2a30cbe0ccddeaef0000d3398a357d974bfb50c",
+    "fpga/rtl/orbtrace_parallel.v": "e8b1a6e4c6f2124d0784f6b1a0420caf53f2ca939027a68a8e8edb028529314d",
+    "fpga/rtl/orbtrace_ref_window.v": "b4c47b691b2079dd95ea20230e36ed038d4a0cb4b49112a3f05491ddabc76271",
+    "fpga/rtl/orbtrace_rx_diagnostics.v": "9344babda305f266a9b30b85e4c9ffd861901f3a7ddb0ec31946270c5e0046ed",
+    "fpga/rtl/orbtrace_sample_capture.v": "6a18ef0abe6390e8721377ffd49465eea21f2655c8a87b1ccf20b3d058e259bf",
+    "fpga/rtl/orbtrace_tpiu_demux.v": "8ee22425aceca214bb30b067704f26816dc322b9db60244fc451476caf2cb768",
+    "fpga/rtl/orbtrace_tpiu_stream.v": "18cf3c99b8c541b6ae97d5cac9686d296fbe88396d469a53fb5143196ff967b0",
+    "fpga/rtl/orbtrace_traceif.v": "e4c9adda46c34b8888c7084a6f01bb134836118263a73a64a857f8f4dc04fef1",
+    "fpga/sim/sim_primitives.v": "bfe09c7444c3ab54081bdd169661507c2f695c19f8103ab20679e1472c000467",
+    "fpga/sim/tb_orbtrace_lane_delay.sv": "910fe015215cd14242dcf3041f96b7c91a868e560de64174402112a7ecab2f7b",
+    "fpga/sim/tb_orbtrace_lane_sampling.sv": "173e1b260fb9c0a18904c9e655989fa71bc9d1e3a44492f47c7887807b603c5c",
+    "fpga/sim/tb_orbtrace_ddr_trace.sv": "395b36d2ee07f560e16aa042d84c11dbba158349a019cd1c1f584d1bd597145d"
+  }
+}

@@ -12,7 +12,7 @@
 // #include "ch32h417_usbhs_device.h"
 
 /* Timing trace for USB/SWD bottleneck analysis.  The buffer lives in a
- * dedicated 1 MiB non-cacheable DDR section (0x3F000000) so JTAG reads see
+ * dedicated 1 MiB non-cacheable DDR section (0x39000000) so JTAG reads see
  * every entry without cache flushes. */
 #define DAP_TRACE_MAX 4096U
 typedef struct {
@@ -180,9 +180,9 @@ void chry_dap_init(void)
 #if DAP_ENABLE_TRACE
   XTime t0, t1;
 
-  /* The trace buffer sits at 0x3F000000 in DDR; keep it non-cacheable so
+  /* The trace buffer sits at 0x39000000 in DDR; keep it non-cacheable so
    * JTAG reads observe every entry. */
-  Xil_SetTlbAttributes(0x3F000000U, NORM_NONCACHE);
+  Xil_SetTlbAttributes(0x39000000U, NORM_NONCACHE);
 
   XTime_GetTime(&t0);
   sleep(1);

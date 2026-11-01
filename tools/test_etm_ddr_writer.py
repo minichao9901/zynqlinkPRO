@@ -27,7 +27,7 @@ def main():
     (out/'controller-simulation.txt').write_text(check.stdout+check.stderr,encoding='utf8')
     if check.returncode or 'PASS DDR controller' not in check.stdout:raise RuntimeError(check.stdout+check.stderr)
     report=dict(passed=True,hardwareAccess=False,actualDdrReadback=False,cases=92,repeatedCapturesWithoutReset=64,
-        scope='AXI channel stability, B-response completion, byte limits, 4KiB boundaries, partial WSTRB, ping-pong stalls, errors, empty input and draining abort',
+        scope='AXI channel stability, B-response completion, startup region validation, hard burst boundary, 4KiB boundaries, partial WSTRB, ping-pong stalls, errors, empty input and draining abort; no per-beat capacity decision',
         sources={f.relative_to(ROOT).as_posix():hashlib.sha256(f.read_bytes()).hexdigest() for f in files})
     report['controllerRegressionPassed']=True
     (out/'result.json').write_text(json.dumps(report,indent=2)+'\n');print(r.stdout+check.stdout)

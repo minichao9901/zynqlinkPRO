@@ -26,7 +26,10 @@ def reservation(elf):
             if not rows or rows[0]['st_shndx']!='SHN_ABS':raise ValueError('ELF lacks explicit absolute reservation: '+name)
             return rows[0]['st_value']
         lo,hi=symbol('__etm_ddr_base'),symbol('__etm_ddr_end')
-        if (lo,hi)!=(0x10000000,0x30000000):raise ValueError('Unvalidated DDR reservation')
+        # Keep the explicitly versioned old pilot pair reproducible. New
+        # production uses the final 100MiB; arbitrary reservations are rejected.
+        if (lo,hi) not in ((0x10000000,0x30000000),(0x39c00000,0x40000000)):
+            raise ValueError('Unvalidated DDR reservation')
         for section in image.iter_sections():
             address,length=section['sh_addr'],section['sh_size']
             if section['sh_flags']&2 and length and address<hi and lo<address+length:

@@ -9,8 +9,8 @@
 
 #define LEGACY_BASE 0x40030000U
 #define DDR_CSR 0x40040000U
-#define DDR_BASE 0x10000000U
-#define DDR_END 0x30000000U
+#define DDR_BASE 0x39c00000U
+#define DDR_END 0x40000000U
 #define DR(n) Xil_In32(DDR_CSR+4U*(n))
 #define DW(n,v) Xil_Out32(DDR_CSR+4U*(n),(v))
 #define ACTIVE 1U
@@ -79,7 +79,7 @@ unsigned etm_ddr_command(unsigned op,const uint32_t args[6],uint32_t reply[ETM_D
     // START: ticks, byte_limit, nonce_lo, nonce_hi, reserved, reserved.
     etm_reference_snapshot(reference);
     if(!args[0] || (uint64_t)args[0]>(uint64_t)reference[0]*2U ||
-       !args[1] || args[1]>DDR_END-DDR_BASE || !(args[2]|args[3]) || args[4] || args[5])result=3;
+       args[1]!=DDR_END-DDR_BASE || !(args[2]|args[3]) || args[4] || args[5])result=3;
     else if((DR(2)&ACTIVE) || download_phase || usb_busy)result=2;
     else if(!claim_endpoint())result=7;
     else {

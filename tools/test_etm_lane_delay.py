@@ -19,7 +19,8 @@ def main():
         ('delay','tb_orbtrace_lane_delay',[],'PASS lane delay:'),
         ('pins-skew','tb_orbtrace_lane_sampling',[],'PASS lane sampling:'),
         ('ddr-bypass','tb_orbtrace_ddr_trace',[],'PASS DDR trace integration cases=9'),
-        ('ddr-delay','tb_orbtrace_ddr_trace',['-Ptb_orbtrace_ddr_trace.LANE_DELAY=1'],'PASS DDR trace integration cases=9')]:
+        ('ddr-delay','tb_orbtrace_ddr_trace',['-Ptb_orbtrace_ddr_trace.LANE_DELAY=1'],'PASS DDR trace integration cases=9'),
+        ('ddr-fixed-region','tb_orbtrace_ddr_trace',['-Ptb_orbtrace_ddr_trace.LANE_DELAY=1','-Ptb_orbtrace_ddr_trace.FIXED_BYTES=8192'],'PASS DDR trace integration cases=9')]:
         exe=out/(name+'.vvp')
         compile=subprocess.run(['iverilog','-g2012','-s',top,*params,'-o',str(exe),*[str(s) for s in sources]],capture_output=True,text=True)
         (out/(name+'-compile.txt')).write_text(compile.stdout+compile.stderr,encoding='utf8')

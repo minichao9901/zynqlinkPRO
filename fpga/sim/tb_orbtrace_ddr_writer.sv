@@ -9,7 +9,7 @@ module tb_orbtrace_ddr_writer;
   wire [31:0] awaddr;wire [7:0] awlen;wire [2:0] awsize;wire [1:0] awburst;
   wire awvalid,wlast,wvalid,bready;wire [63:0] wdata;wire [7:0] wstrb;
   reg awready=0,wready=0,bvalid=0;reg [1:0] bresp=0,response_code=0;
-  orbtrace_ddr_writer dut(.clk(clk),.rst_n(rst_n),.start(start),.abort(abort),.finish_empty(finish_empty),
+  orbtrace_ddr_writer #(.REGION_BASE(32'h10000000),.REGION_END(32'h30000000)) dut(.clk(clk),.rst_n(rst_n),.start(start),.abort(abort),.finish_empty(finish_empty),
     .base_address(base_address),.byte_limit(byte_limit),.busy(busy),.done(done),.error(error),.error_code(error_code),
     .command_rejected(command_rejected),.accepted_bytes(accepted_bytes),.response_bytes(response_bytes),
     .s_axis_tdata(tdata),.s_axis_tkeep(tkeep),.s_axis_tlast(tlast),.s_axis_tvalid(tvalid),.s_axis_tready(tready),
@@ -149,7 +149,12 @@ module tb_orbtrace_ddr_writer;
     reset_case();launch();send_beat(0,3,0);await_terminal();if(!error || error_code!=2 || aw_count)$fatal(1,"short nonlast");tests=tests+1;
     reset_case();launch();@(negedge clk);tvalid=1;tkeep=8'h55;tlast=1;@(negedge clk);tvalid=0;
     await_terminal();if(!error || error_code!=2 || aw_count)$fatal(1,"sparse keep");tests=tests+1;
-    reset_case();byte_limit=8;launch();send_beat(0,8,0);await_terminal();if(!error || error_code!=3 || aw_count)$fatal(1,"limit without EOF");tests=tests+1;
+    // The writer no longer enforces arbitrary byte quotas on every beat.
+    // A malformed source still cannot issue a burst beyond the hard region.
+    reset_case();base_address=32'h2fffff80;byte_limit=128;launch();
+    for(integer p=0;p<256;p=p+8)send_beat(p,8,p==248);
+    await_terminal();if(!error || error_code!=3 || aw_count!=1 || response_bytes!=128)$fatal(1,"hard region guard");
+    verify_bytes(128);tests=tests+1;
     reset_case();force_awstall=1;byte_limit=128;launch();
     for(integer p=0;p<128;p=p+8)send_beat(p,8,p==120);
     wait(awvalid);launch();if(!command_rejected)$fatal(1,"busy restart accepted");

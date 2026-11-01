@@ -1,0 +1,211 @@
+{
+  "golden_revision": "954de8fd09f4a97aafb7dc42fa5e4a9a019c3f19",
+  "hardware_access": false,
+  "FCLK_Hz": 120000000,
+  "external_debug_Hz": 60000000,
+  "target_HCLK_Hz": 100000000,
+  "phase": "candidate",
+  "simulated_FCLK_Hz": 119990400.76793857,
+  "simulated_external_debug_Hz": 59995200.383969285,
+  "hss_minimum_period_ticks": 24,
+  "hss_maximum_requested_Hz": 1000000,
+  "model_manifest_sha256": "c63b3cc7c125a246237ead05ecf48ca09d64d763e666242ae64dac139ffc9b5e",
+  "sources": {
+    "dap_transfer_block_engine.v": "e249a3d7153c0584e896fa99637e97673156d36ab4e1faba27778b480c551afb",
+    "jtag_core.v": "f81361743a29584b78a1179264d1fa41c4e6fa0456ea486a437cd65e0ff6ed7b",
+    "jtag_shift.v": "5660cec2fd287cdaa9632fae53a915ab28179e6439f79b95367defb0d0970e9a",
+    "orbtrace_controller.v": "977e97a78edf74024812d5c74073ea062e207241ecf410c3ab2e8997cd2a2faa",
+    "orbtrace_ddr_capture.v": "6f6203f4608fb138cb9441f7afdb3f8922f7bf7a50bb107d3849466c3a94973f",
+    "orbtrace_ddr_controller.v": "8b1305e1ed0e2e63020cfcdab71f695e10e7a0cb7a329d6a6da0bfd4e2871b30",
+    "orbtrace_ddr_packetizer.v": "c16d02e839e21673113863b0b1eeb6716eb337ce83e43701c3ee79f2ad0fe0f3",
+    "orbtrace_ddr_writer.v": "84a0543a117372b17016fc5244c73fff7dc500bb3fb27563fa89824824270ada",
+    "orbtrace_frame_async_fifo.v": "56feed471d67ad818c2c4a86a69ba5f4cb4dfb3f120d9ef66c106bcbcb5afafc",
+    "orbtrace_frame_fifo.v": "e4d256a9406985e2f7016d2f53cc3f9589ef1292c02588551bf532f642ddb801",
+    "orbtrace_lane_delay.v": "f1f16c654ec6e2cc78e3b26ac2a30cbe0ccddeaef0000d3398a357d974bfb50c",
+    "orbtrace_parallel.v": "e8b1a6e4c6f2124d0784f6b1a0420caf53f2ca939027a68a8e8edb028529314d",
+    "orbtrace_ref_window.v": "b4c47b691b2079dd95ea20230e36ed038d4a0cb4b49112a3f05491ddabc76271",
+    "orbtrace_rx_diagnostics.v": "9344babda305f266a9b30b85e4c9ffd861901f3a7ddb0ec31946270c5e0046ed",
+    "orbtrace_sample_capture.v": "6a18ef0abe6390e8721377ffd49465eea21f2655c8a87b1ccf20b3d058e259bf",
+    "orbtrace_tpiu_demux.v": "8ee22425aceca214bb30b067704f26816dc322b9db60244fc451476caf2cb768",
+    "orbtrace_tpiu_stream.v": "18cf3c99b8c541b6ae97d5cac9686d296fbe88396d469a53fb5143196ff967b0",
+    "orbtrace_traceif.v": "e4c9adda46c34b8888c7084a6f01bb134836118263a73a64a857f8f4dc04fef1",
+    "probe_rtt_engine.v": "10136ba15bbf387677053d95226703ac7563998843c0fc55d8082eee40f60bea",
+    "probe_sample_engine.v": "7457fbb302291c699bd17dc040a3cd503c898e3e9ffdfd82c145918e293cb6e8",
+    "probe_stream_engine.v": "b184e5800f29ef973e1bdbad11f3c009f3b967324a828c4090e4c28819fcaec0",
+    "swd_batch_engine.v": "2147786073a8ed8aa4a66c0c6c16a4e7ba34e222789af20cd84e24b74df70c41",
+    "swd_controller.v": "d00966dde8db8b71ce594e9c85ed8a86b89aca5a41291bba213f55dadeac5cf4",
+    "swd_core.v": "c29460f183b54b09f5ffa52374e32d8cf8298a72205fff659529f71f003403c9"
+  },
+  "benches": {
+    "axi3_sram.v": "1158d2ba3742d437a54292946d105ff2c1d2b15df2d69df28c64105ff1ab113b",
+    "cm3_etm_tasks.svh": "1c7a26718dd148724323fa8136a837541afcdeb5c0fde2629cec1c9e1a16c877",
+    "cm3_perf_tasks.svh": "b292ffeb8bc0e117f38795256276f18ed685a26b9d84df763c090b1ed8418233",
+    "cm3_target.sv": "0494031922b009ef481d94f4fec0e5af3168ab59966fa75a962ea6fc268ba012",
+    "compare_swd_rx_core.tcl": "9e88cf5b00af8451f21c053d7a090f83f948808b3af9c2fcf71c7c3c6b67df11",
+    "jtag_dp_model.sv": "a2b94c9d8daa297427ed19943832984c9448945cf82049be286497ff109a05e0",
+    "jtag_dtm_model.sv": "41c2ab2b939c2796785ac39251922b10303773f09869c144e68e4f847aeaf446",
+    "probe_ap_model.sv": "aafc6ec566cb74063c480103e8b2f18d07fdabe3fb26b440586ef6739dde4ed4",
+    "riscv_sba_model.sv": "9a7f48c0448b30e5c17a137dbe8bd139f92ae1c596975561a2eb76261a184bc1",
+    "run_cortexm0.tcl": "cd98d2745133c7bb62586a513d4957d4b54ff89b5011aacb314f51ef9f734d39",
+    "sim_primitives.v": "bfe09c7444c3ab54081bdd169661507c2f695c19f8103ab20679e1472c000467",
+    "tb_batch_dma.sv": "8f07f9d14cb016ad987318909d099fc7c8b1af1cb6d6d49c83befc3a4cfd1277",
+    "tb_cm3_etm.sv": "f37f240c1334ab0e7422a31a59c29221855768818c29edde456b3e5be4e5ceba",
+    "tb_cm3_jtag.sv": "08415986bb3bf0ad884bd195767ea621f458b08d7e584c987043d77a4a0acf18",
+    "tb_cm3_smoke.sv": "ffde8ade98e0d6902b3ab6217ec903f4d99bc2c160c958821a6d37b5f1ef37c9",
+    "tb_cm3_swd.sv": "1cfe494cfdd23f479f9c306bfd1ee8e400580ebc1206af53737375783b81c492",
+    "tb_cortexm0_link.sv": "ad8f06f510d2c27afcd2366f3ef977eb23e1448ef4c7bffbb66b6aaad92ebca7",
+    "tb_dap_transfer_block_engine.sv": "aa4f7719e7db1c40acf15ffbf533088d9b2cca5f1498dde88db41bd8600adf7a",
+    "tb_engine_cases.sv": "ead99c15ae5e7ef237e962cdcec06ca3243669b9d29b48a3b5d7221c6c2dec4c",
+    "tb_engine_lat1.sv": "304eeb0174ed55004206549fe04c90f88932a6669db2fdc7db2780cbc02d01e0",
+    "tb_engine_retry.sv": "ede64626397be6b899bdd41891c1360bd77ea079483da3439a8265fe47360d52",
+    "tb_jtag_core.sv": "d7b688570bfdd981917b7a2be266f3b98aed396b149209b468b04f184f315c89",
+    "tb_jtag_pipeline.sv": "fe91c1a56e10449737e7184d7186920b9579e76e8611f619e3aff1d03ac1b590",
+    "tb_jtag_riscv.sv": "11fbff9661a25a21e507c5d6a63e67d3dded384c5324dcd548830c6788e8cafd",
+    "tb_jtag_timing.sv": "05f8c7743d11c9c7cf0555f349b1271eb72cfbdca919d27424b4f0b30545eea3",
+    "tb_jtag_vexriscv.sv": "efc8d495af8038afac18feb37d92418dcef9d1172f1a04431cbc4c635a8aff2d",
+    "tb_jtag_word_cost.sv": "61b447f7ec6db0ec3648b958aa8b26b8c4762802217be7f88944ad8af7019e7f",
+    "tb_orbtrace_controller.sv": "1dff51bbf1113cb1f8c03d535367efdbf016985395d9fa73c7076b18888317ab",
+    "tb_orbtrace_ddr_controller.sv": "7e4aaf88f7b7946e5ab22fadb07d63af2dc958778258f4ff1b94e69300e394ec",
+    "tb_orbtrace_ddr_trace.sv": "395b36d2ee07f560e16aa042d84c11dbba158349a019cd1c1f584d1bd597145d",
+    "tb_orbtrace_ddr_writer.sv": "31ab3fea9fd05dd29aca43d86ece9d440ceaa898deacc26e17f44e091551f71d",
+    "tb_orbtrace_diagnostics.sv": "cf336551f48c8832db0e66c2eb35a99b7cc98ab711822cacaed26ee7ada90eea",
+    "tb_orbtrace_lane_delay.sv": "910fe015215cd14242dcf3041f96b7c91a868e560de64174402112a7ecab2f7b",
+    "tb_orbtrace_lane_sampling.sv": "173e1b260fb9c0a18904c9e655989fa71bc9d1e3a44492f47c7887807b603c5c",
+    "tb_orbtrace_parallel.sv": "68d2998343987b4c169459c91db11440e3b18a88e7326a0280a3d1face852784",
+    "tb_orbtrace_raw.sv": "d9ab47fa99013a14a1219d46f09da7c2a76477a7450badee782fe35d831bae25",
+    "tb_orbtrace_replay.sv": "843cb7d80ef806d96e20b6dae3ba50d3bfec82bcf14e548d21eb07698792edfe",
+    "tb_orbtrace_samples.sv": "84e28087e80bb2aa3f485406877a37ade98684dd4c4594ea35b7b60f4af7fb03",
+    "tb_orbtrace_signal_replay.sv": "066fd905188128802a43969bf0e1ef50c12b6d7eea53ea31eeb2dd4a48e76877",
+    "tb_orbtrace_tpiu_stream.sv": "a11d0bff525f095e2f4172529a831fd800342affe7e5b743c3e5889f0b0139fb",
+    "tb_packet_axi.sv": "58efa531dbe873395fa9229cfb3f0366f538beaede4a1328f6e0e684fe053cc4",
+    "tb_packet_contract.sv": "17287cb552f7077deec9b683c0ad427de72ff203f593e88ee0580fdcb5f7fd7a",
+    "tb_packet_wire_budget.sv": "b8703a453d0864a7b4ecd123247b0a713c1bf90f6f69718d07b11ffd927360aa",
+    "tb_probe_sample.sv": "f782d26251924656b27c470c956df8f8b70317360c5a316bb2cc20cd521db14c",
+    "tb_probe_sample_pipe.sv": "d7cc65a45ecae4e1274ec24383be1dd63bec0d73994312e443248722adef019a",
+    "tb_probe_stream_dma.sv": "28887f6143b620eb118fa4619308d20387e7ef2eda5a6c9fc0d0380fbe4b86f0",
+    "tb_riscv_pipeline.sv": "45e18e63622fd5ec53431caafbc529d674ae2ef5400ff4f876ce136cbdae9539",
+    "tb_riscv_words.sv": "802a16a33a55ce284112f2d3482ea4d37f2d90f8cb4c4cf162bec3a7de2777df",
+    "tb_swd_ack_delay.sv": "6cd44a55e035a36a5db9da2d5fe13e2390bbc521de839db39c8f0612a04be520",
+    "tb_swd_stream.sv": "9543bc5039ce80c7bd2e7a5567a7bf41b40b0838588e244d386045499c0e5bba",
+    "xpm_memory_tdpram.sv": "88d31febf195af151b7dfef8b3d3a366f06f3bc270a3731dbcf2df5871239503"
+  },
+  "cases": [
+    {
+      "top": "tb_cm3_swd",
+      "passed": true,
+      "arguments": [
+        "half_ns=4.166667",
+        "rx_boundary=0",
+        "return_ns=16",
+        "target_clk_ns=10",
+        "benchmark"
+      ],
+      "metrics": [
+        {
+          "kind": "SIM_SRAM",
+          "read": 0.0,
+          "bytes": 1024.0,
+          "elapsed_ns": 197424.126,
+          "MBps": 5.186803,
+          "waits": 1.0,
+          "fclk_cycles": 23689
+        },
+        {
+          "kind": "SIM_SRAM",
+          "read": 1.0,
+          "bytes": 1024.0,
+          "elapsed_ns": 197399.124,
+          "MBps": 5.18746,
+          "waits": 1.0,
+          "fclk_cycles": 23686
+        },
+        {
+          "kind": "SIM_RTT",
+          "bytes": 1024.0,
+          "elapsed_ns": 206483.184,
+          "MBps": 4.959242,
+          "waits": 4.0,
+          "fclk_cycles": 24776
+        },
+        {
+          "kind": "SIM_HSS",
+          "period": 24.0,
+          "produced": 124.0,
+          "skipped": 0.0,
+          "elapsed_ns": 124001.586,
+          "Hz": 999987.209841,
+          "skip_percent": 0.0,
+          "fclk_cycles": 14879
+        },
+        {
+          "kind": "SIM_HSS",
+          "period": 27.0,
+          "produced": 124.0,
+          "skipped": 0.0,
+          "elapsed_ns": 139502.826,
+          "Hz": 888870.882085,
+          "skip_percent": 0.0,
+          "fclk_cycles": 16739
+        }
+      ]
+    },
+    {
+      "top": "tb_cm3_jtag",
+      "passed": true,
+      "arguments": [
+        "clk_ns=8.333333",
+        "target_clk_ns=10",
+        "benchmark"
+      ],
+      "metrics": [
+        {
+          "kind": "SIM_SRAM",
+          "read": 0.0,
+          "bytes": 1024.0,
+          "elapsed_ns": 403165.584,
+          "MBps": 2.539899,
+          "waits": 255.0,
+          "fclk_cycles": 48376
+        },
+        {
+          "kind": "SIM_SRAM",
+          "read": 1.0,
+          "bytes": 1024.0,
+          "elapsed_ns": 403140.582,
+          "MBps": 2.540057,
+          "waits": 255.0,
+          "fclk_cycles": 48373
+        },
+        {
+          "kind": "SIM_RTT",
+          "bytes": 1024.0,
+          "elapsed_ns": 418583.484,
+          "MBps": 2.446346,
+          "waits": 257.0,
+          "fclk_cycles": 50226
+        },
+        {
+          "kind": "SIM_HSS",
+          "period": 24.0,
+          "produced": 64.0,
+          "skipped": 48.0,
+          "elapsed_ns": 112008.96,
+          "Hz": 571382.8608,
+          "skip_percent": 42.857143,
+          "fclk_cycles": 13440
+        },
+        {
+          "kind": "SIM_HSS",
+          "period": 47.0,
+          "produced": 125.0,
+          "skipped": 1.0,
+          "elapsed_ns": 246769.74,
+          "Hz": 506545.089361,
+          "skip_percent": 0.793651,
+          "fclk_cycles": 29610
+        }
+      ]
+    }
+  ],
+  "cycle_count_method": "elapsed_ns / 8.334ns (1ps time precision)"
+}

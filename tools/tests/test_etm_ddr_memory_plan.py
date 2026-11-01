@@ -26,7 +26,9 @@ class MemoryPilotGuard(unittest.TestCase):
               '__etm_ddr_end':{'st_value':0x30000000,'st_shndx':'SHN_ABS'}}
         symbols=SimpleNamespace(get_symbol_by_name=lambda name:[rows[name]])
         sections=[];image=SimpleNamespace(get_section_by_name=lambda name:symbols,iter_sections=lambda:iter(sections))
-        with tempfile.TemporaryDirectory() as folder:
+        scratch=Path(__file__).resolve().parents[2]/'build/ddr-memory-guard-tests'
+        scratch.mkdir(parents=True,exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=scratch) as folder:
             elf=Path(folder)/'reserved.elf';elf.write_bytes(b'mocked ELF for guard branches')
             with patch('elftools.elf.elffile.ELFFile',return_value=image):
                 self.assertEqual(reservation(elf),(0x10000000,0x30000000))
@@ -35,6 +37,11 @@ class MemoryPilotGuard(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError,'overlaps DDR capture'):reservation(elf)
                 sections.clear();rows['__etm_ddr_base']['st_shndx']=3
                 with self.assertRaisesRegex(ValueError,'absolute reservation'):reservation(elf)
+                rows['__etm_ddr_base'].update(st_value=0x39c00000,st_shndx='SHN_ABS')
+                rows['__etm_ddr_end']['st_value']=0x40000000
+                self.assertEqual(reservation(elf),(0x39c00000,0x40000000))
+                sections.append(Section(sh_addr=0x3f000000,sh_size=64,sh_flags=2))
+                with self.assertRaisesRegex(ValueError,'overlaps DDR capture'):reservation(elf)
 
 
 if __name__=='__main__':unittest.main()
