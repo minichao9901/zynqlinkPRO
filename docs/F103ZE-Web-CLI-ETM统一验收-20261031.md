@@ -1244,3 +1244,11 @@ PS源码未改，本轮实际重新编译后ELF与旧版本字节相同，完整
 SRAM target CPU72MHz/TRACECLK36MHz首次扫描已完成110点，**没有无错误点**；零tap 10ms有2,062次parser错误，观测最低点D0/D1/D2/D3/CLK=14/24/24/24/8仍有1,736次，不能把单次最低值解释为稳定改善。第111点（14/24/22/24/8）在清理时Memory.address断言失败，响应原字节未被遗留断言保存，根因未定；按首个非采样质量故障停止，未重试。只完整扫完D0和D1，五条lane及最终候选验证均未完成。全部111点FRM1与元数据、失败日志及CDC摘要保留在[首次扫描](validation/etm-lane-delay-20261101/scan36-first/analysis.json)。
 
 外层随后验证原Flash字节不变、RCC恢复48MHz，tap归零，未保留候选；没有写目标Flash/QSPI。新配对非Golden，不能声明36MHz、自动校准或新配对Web压力通过。待处理：保留实际DAP请求/响应及会话队列现场，查清第111点清理故障，再决定是否调整过采样结构；当前证据仅表明已测IDELAY/RAW4设置尚不能让36MHz可用。用户随后清除自动目标，已停止后续推进；新研究配对仍在线，Web服务已关闭，已知配对与Golden均未覆盖。
+
+### 2026-11-01：本机只保留一个dist入口
+
+按用户要求，从main 4b8e3c2重新生成本机程序，固定入口`dist/zynq-etm-bridge/zynq-etm-bridge.exe`。默认不再生成ZIP；旧canonical程序及ZIP自动归档，另外3个旧目录和3个旧ZIP移至`build/bridge-archive/legacy-20261101-110928/`，dist只剩一个程序目录。四份旧目录均未发现data采集文件；更新器仍覆盖了保留data及发布失败回退的测试，今后更新保持同一路径。
+
+真实冻结EXE以System32-only PATH离线验收：F103ZE 5,467,740条、H743 210,497条指令，packetIssues均0，C++ TraceStore且没有逐指令JSONL；SVG分别2,531/2,187字节且XML有效；重复启动复用通过，验收进程已关闭。发布后1794个程序文件SHA与包manifest匹配。EXE SHA `b655096d3ddae1abf1140408f238066cf7f2f600c1cdfdace91954a704429193`。89项Python回归通过。本次只更新本机程序，没有进行板卡采集或改动板上固件。[交付记录](validation/bridge-local-20261101/delivery.json)。
+
+AI默认更新命令现在为`python toolbox.py bridge-build`；只有需分发时才加`--zip`，分发包不带用户data、记录或令牌。候选冻结程序先完成离线验收再替换当前目录，旧程序保留于build归档，失败自动恢复。首轮发布曾因Windows子进程中文编码不一致而中断，旧程序未替换；已统一UTF-8后重建、验收并发布成功。

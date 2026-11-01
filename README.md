@@ -2,7 +2,7 @@
 
 Zynq-7020 CMSIS-DAP：PL SWD/JTAG/RTT/HSS 与并行 ETM，PS USB/OCM 固件，配套 Web/CLI。
 
-用户入口：完整解压桥包并双击`zynq-etm-bridge.exe`，在Web载入ELF、选函数、核对时钟、点击联动采集。
+本机入口：双击`dist/zynq-etm-bridge/zynq-etm-bridge.exe`，在Web载入ELF、选函数、核对时钟、点击联动采集。请保留完整程序目录及`_internal`；分发ZIP时完整解压再启动。
 PLL和AHB/APB分频由target固件负责。CLI用于AI；一条命令打包：
 `python toolbox.py bridge-build`（固定更新`dist/zynq-etm-bridge/`，保留数据；仅需分发时加`--zip`）。
 保留F103ZE ETMv3和H743 ETMv4能力，H743接Zynq的真机验收待换板后进行。
