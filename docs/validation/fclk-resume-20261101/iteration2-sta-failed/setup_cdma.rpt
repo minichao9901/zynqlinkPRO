@@ -1,0 +1,1304 @@
+Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2018.3 (win64) Build 2405991 Thu Dec  6 23:38:27 MST 2018
+| Date         : Sun Nov  1 14:05:56 2026
+| Host         : DESKTOP-0UKCPD3 running 64-bit major release  (build 9200)
+| Command      : report_timing -delay_type max -to [get_cells -quiet -hier -filter {NAME =~ *cdma* && IS_SEQUENTIAL == 1}] -max_paths 20 -nworst 1 -file E:/zynqlinkPRO/build/fpga_dma_global/setup_cdma.rpt
+| Design       : system_wrapper
+| Device       : 7z020-clg400
+| Speed File   : -2  PRODUCTION 1.11 2014-09-11
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Timing Report
+
+Slack (MET) :             1.294ns  (required time - arrival time)
+  Source:                 system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[25]/D
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (clk_fpga_0 rise@6.666ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        5.249ns  (logic 1.838ns (35.013%)  route 3.411ns (64.987%))
+  Logic Levels:           9  (CARRY4=7 LUT4=2)
+  Clock Path Skew:        -0.027ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.236ns = ( 8.902 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.487ns
+    Clock Pessimism Removal (CPR):    0.224ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.408     2.487    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/m_axi_aclk
+    SLICE_X38Y43         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X38Y43         FDRE (Prop_fdre_C_Q)         0.433     2.920 f  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg/Q
+                         net (fo=69, routed)          1.891     4.811    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg_0
+    SLICE_X34Y47         LUT4 (Prop_lut4_I0_O)        0.105     4.916 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_addr_cntr_lsh_kh[31]_i_1__0/O
+                         net (fo=49, routed)          1.521     6.436    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_push_input_reg11_out
+    SLICE_X37Y40         LUT4 (Prop_lut4_I2_O)        0.105     6.541 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0[3]_i_9__0/O
+                         net (fo=1, routed)           0.000     6.541    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0[3]_i_9__0_n_0
+    SLICE_X37Y40         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.440     6.981 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[3]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     6.981    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[3]_i_1__0_n_0
+    SLICE_X37Y41         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.079 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[7]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.079    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[7]_i_1__0_n_0
+    SLICE_X37Y42         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.177 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[11]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.177    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[11]_i_1__0_n_0
+    SLICE_X37Y43         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.275 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[15]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.275    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[15]_i_1__0_n_0
+    SLICE_X37Y44         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.373 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[19]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.373    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[19]_i_1__0_n_0
+    SLICE_X37Y45         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.471 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[23]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.471    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[23]_i_1__0_n_0
+    SLICE_X37Y46         CARRY4 (Prop_carry4_CI_O[1])
+                                                      0.265     7.736 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[25]_i_2/O[1]
+                         net (fo=1, routed)           0.000     7.736    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[25]_i_2_n_6
+    SLICE_X37Y46         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[25]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      6.666     6.666 r  
+    PS7_X0Y0             PS7                          0.000     6.666 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     7.571    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     7.648 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.254     8.902    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/m_axi_aclk
+    SLICE_X37Y46         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[25]/C
+                         clock pessimism              0.224     9.126    
+                         clock uncertainty           -0.154     8.972    
+    SLICE_X37Y46         FDRE (Setup_fdre_C_D)        0.059     9.031    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[25]
+  -------------------------------------------------------------------
+                         required time                          9.031    
+                         arrival time                          -7.736    
+  -------------------------------------------------------------------
+                         slack                                  1.294    
+
+Slack (MET) :             1.378ns  (required time - arrival time)
+  Source:                 system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[24]/D
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (clk_fpga_0 rise@6.666ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        5.165ns  (logic 1.754ns (33.956%)  route 3.411ns (66.044%))
+  Logic Levels:           9  (CARRY4=7 LUT4=2)
+  Clock Path Skew:        -0.027ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.236ns = ( 8.902 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.487ns
+    Clock Pessimism Removal (CPR):    0.224ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.408     2.487    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/m_axi_aclk
+    SLICE_X38Y43         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X38Y43         FDRE (Prop_fdre_C_Q)         0.433     2.920 f  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg/Q
+                         net (fo=69, routed)          1.891     4.811    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg_0
+    SLICE_X34Y47         LUT4 (Prop_lut4_I0_O)        0.105     4.916 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_addr_cntr_lsh_kh[31]_i_1__0/O
+                         net (fo=49, routed)          1.521     6.436    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_push_input_reg11_out
+    SLICE_X37Y40         LUT4 (Prop_lut4_I2_O)        0.105     6.541 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0[3]_i_9__0/O
+                         net (fo=1, routed)           0.000     6.541    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0[3]_i_9__0_n_0
+    SLICE_X37Y40         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.440     6.981 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[3]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     6.981    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[3]_i_1__0_n_0
+    SLICE_X37Y41         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.079 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[7]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.079    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[7]_i_1__0_n_0
+    SLICE_X37Y42         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.177 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[11]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.177    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[11]_i_1__0_n_0
+    SLICE_X37Y43         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.275 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[15]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.275    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[15]_i_1__0_n_0
+    SLICE_X37Y44         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.373 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[19]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.373    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[19]_i_1__0_n_0
+    SLICE_X37Y45         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.471 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[23]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.471    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[23]_i_1__0_n_0
+    SLICE_X37Y46         CARRY4 (Prop_carry4_CI_O[0])
+                                                      0.181     7.652 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[25]_i_2/O[0]
+                         net (fo=1, routed)           0.000     7.652    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[25]_i_2_n_7
+    SLICE_X37Y46         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[24]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      6.666     6.666 r  
+    PS7_X0Y0             PS7                          0.000     6.666 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     7.571    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     7.648 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.254     8.902    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/m_axi_aclk
+    SLICE_X37Y46         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[24]/C
+                         clock pessimism              0.224     9.126    
+                         clock uncertainty           -0.154     8.972    
+    SLICE_X37Y46         FDRE (Setup_fdre_C_D)        0.059     9.031    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[24]
+  -------------------------------------------------------------------
+                         required time                          9.031    
+                         arrival time                          -7.652    
+  -------------------------------------------------------------------
+                         slack                                  1.378    
+
+Slack (MET) :             1.392ns  (required time - arrival time)
+  Source:                 system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[21]/D
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (clk_fpga_0 rise@6.666ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        5.151ns  (logic 1.740ns (33.777%)  route 3.411ns (66.223%))
+  Logic Levels:           8  (CARRY4=6 LUT4=2)
+  Clock Path Skew:        -0.027ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.236ns = ( 8.902 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.487ns
+    Clock Pessimism Removal (CPR):    0.224ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.408     2.487    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/m_axi_aclk
+    SLICE_X38Y43         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X38Y43         FDRE (Prop_fdre_C_Q)         0.433     2.920 f  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg/Q
+                         net (fo=69, routed)          1.891     4.811    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg_0
+    SLICE_X34Y47         LUT4 (Prop_lut4_I0_O)        0.105     4.916 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_addr_cntr_lsh_kh[31]_i_1__0/O
+                         net (fo=49, routed)          1.521     6.436    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_push_input_reg11_out
+    SLICE_X37Y40         LUT4 (Prop_lut4_I2_O)        0.105     6.541 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0[3]_i_9__0/O
+                         net (fo=1, routed)           0.000     6.541    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0[3]_i_9__0_n_0
+    SLICE_X37Y40         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.440     6.981 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[3]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     6.981    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[3]_i_1__0_n_0
+    SLICE_X37Y41         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.079 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[7]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.079    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[7]_i_1__0_n_0
+    SLICE_X37Y42         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.177 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[11]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.177    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[11]_i_1__0_n_0
+    SLICE_X37Y43         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.275 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[15]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.275    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[15]_i_1__0_n_0
+    SLICE_X37Y44         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.373 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[19]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.373    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[19]_i_1__0_n_0
+    SLICE_X37Y45         CARRY4 (Prop_carry4_CI_O[1])
+                                                      0.265     7.638 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[23]_i_1__0/O[1]
+                         net (fo=1, routed)           0.000     7.638    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[23]_i_1__0_n_6
+    SLICE_X37Y45         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[21]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      6.666     6.666 r  
+    PS7_X0Y0             PS7                          0.000     6.666 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     7.571    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     7.648 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.254     8.902    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/m_axi_aclk
+    SLICE_X37Y45         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[21]/C
+                         clock pessimism              0.224     9.126    
+                         clock uncertainty           -0.154     8.972    
+    SLICE_X37Y45         FDRE (Setup_fdre_C_D)        0.059     9.031    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[21]
+  -------------------------------------------------------------------
+                         required time                          9.031    
+                         arrival time                          -7.638    
+  -------------------------------------------------------------------
+                         slack                                  1.392    
+
+Slack (MET) :             1.397ns  (required time - arrival time)
+  Source:                 system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[23]/D
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (clk_fpga_0 rise@6.666ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        5.146ns  (logic 1.735ns (33.713%)  route 3.411ns (66.287%))
+  Logic Levels:           8  (CARRY4=6 LUT4=2)
+  Clock Path Skew:        -0.027ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.236ns = ( 8.902 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.487ns
+    Clock Pessimism Removal (CPR):    0.224ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.408     2.487    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/m_axi_aclk
+    SLICE_X38Y43         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X38Y43         FDRE (Prop_fdre_C_Q)         0.433     2.920 f  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg/Q
+                         net (fo=69, routed)          1.891     4.811    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg_0
+    SLICE_X34Y47         LUT4 (Prop_lut4_I0_O)        0.105     4.916 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_addr_cntr_lsh_kh[31]_i_1__0/O
+                         net (fo=49, routed)          1.521     6.436    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_push_input_reg11_out
+    SLICE_X37Y40         LUT4 (Prop_lut4_I2_O)        0.105     6.541 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0[3]_i_9__0/O
+                         net (fo=1, routed)           0.000     6.541    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0[3]_i_9__0_n_0
+    SLICE_X37Y40         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.440     6.981 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[3]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     6.981    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[3]_i_1__0_n_0
+    SLICE_X37Y41         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.079 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[7]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.079    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[7]_i_1__0_n_0
+    SLICE_X37Y42         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.177 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[11]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.177    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[11]_i_1__0_n_0
+    SLICE_X37Y43         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.275 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[15]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.275    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[15]_i_1__0_n_0
+    SLICE_X37Y44         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.373 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[19]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.373    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[19]_i_1__0_n_0
+    SLICE_X37Y45         CARRY4 (Prop_carry4_CI_O[3])
+                                                      0.260     7.633 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[23]_i_1__0/O[3]
+                         net (fo=1, routed)           0.000     7.633    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[23]_i_1__0_n_4
+    SLICE_X37Y45         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[23]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      6.666     6.666 r  
+    PS7_X0Y0             PS7                          0.000     6.666 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     7.571    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     7.648 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.254     8.902    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/m_axi_aclk
+    SLICE_X37Y45         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[23]/C
+                         clock pessimism              0.224     9.126    
+                         clock uncertainty           -0.154     8.972    
+    SLICE_X37Y45         FDRE (Setup_fdre_C_D)        0.059     9.031    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[23]
+  -------------------------------------------------------------------
+                         required time                          9.031    
+                         arrival time                          -7.633    
+  -------------------------------------------------------------------
+                         slack                                  1.397    
+
+Slack (MET) :             1.457ns  (required time - arrival time)
+  Source:                 system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[22]/D
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (clk_fpga_0 rise@6.666ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        5.086ns  (logic 1.675ns (32.931%)  route 3.411ns (67.069%))
+  Logic Levels:           8  (CARRY4=6 LUT4=2)
+  Clock Path Skew:        -0.027ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.236ns = ( 8.902 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.487ns
+    Clock Pessimism Removal (CPR):    0.224ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.408     2.487    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/m_axi_aclk
+    SLICE_X38Y43         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X38Y43         FDRE (Prop_fdre_C_Q)         0.433     2.920 f  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg/Q
+                         net (fo=69, routed)          1.891     4.811    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg_0
+    SLICE_X34Y47         LUT4 (Prop_lut4_I0_O)        0.105     4.916 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_addr_cntr_lsh_kh[31]_i_1__0/O
+                         net (fo=49, routed)          1.521     6.436    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_push_input_reg11_out
+    SLICE_X37Y40         LUT4 (Prop_lut4_I2_O)        0.105     6.541 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0[3]_i_9__0/O
+                         net (fo=1, routed)           0.000     6.541    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0[3]_i_9__0_n_0
+    SLICE_X37Y40         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.440     6.981 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[3]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     6.981    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[3]_i_1__0_n_0
+    SLICE_X37Y41         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.079 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[7]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.079    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[7]_i_1__0_n_0
+    SLICE_X37Y42         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.177 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[11]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.177    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[11]_i_1__0_n_0
+    SLICE_X37Y43         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.275 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[15]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.275    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[15]_i_1__0_n_0
+    SLICE_X37Y44         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.373 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[19]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.373    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[19]_i_1__0_n_0
+    SLICE_X37Y45         CARRY4 (Prop_carry4_CI_O[2])
+                                                      0.200     7.573 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[23]_i_1__0/O[2]
+                         net (fo=1, routed)           0.000     7.573    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[23]_i_1__0_n_5
+    SLICE_X37Y45         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[22]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      6.666     6.666 r  
+    PS7_X0Y0             PS7                          0.000     6.666 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     7.571    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     7.648 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.254     8.902    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/m_axi_aclk
+    SLICE_X37Y45         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[22]/C
+                         clock pessimism              0.224     9.126    
+                         clock uncertainty           -0.154     8.972    
+    SLICE_X37Y45         FDRE (Setup_fdre_C_D)        0.059     9.031    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[22]
+  -------------------------------------------------------------------
+                         required time                          9.031    
+                         arrival time                          -7.573    
+  -------------------------------------------------------------------
+                         slack                                  1.457    
+
+Slack (MET) :             1.476ns  (required time - arrival time)
+  Source:                 system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[20]/D
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (clk_fpga_0 rise@6.666ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        5.067ns  (logic 1.656ns (32.679%)  route 3.411ns (67.321%))
+  Logic Levels:           8  (CARRY4=6 LUT4=2)
+  Clock Path Skew:        -0.027ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.236ns = ( 8.902 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.487ns
+    Clock Pessimism Removal (CPR):    0.224ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.408     2.487    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/m_axi_aclk
+    SLICE_X38Y43         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X38Y43         FDRE (Prop_fdre_C_Q)         0.433     2.920 f  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg/Q
+                         net (fo=69, routed)          1.891     4.811    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg_0
+    SLICE_X34Y47         LUT4 (Prop_lut4_I0_O)        0.105     4.916 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_addr_cntr_lsh_kh[31]_i_1__0/O
+                         net (fo=49, routed)          1.521     6.436    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_push_input_reg11_out
+    SLICE_X37Y40         LUT4 (Prop_lut4_I2_O)        0.105     6.541 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0[3]_i_9__0/O
+                         net (fo=1, routed)           0.000     6.541    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0[3]_i_9__0_n_0
+    SLICE_X37Y40         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.440     6.981 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[3]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     6.981    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[3]_i_1__0_n_0
+    SLICE_X37Y41         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.079 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[7]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.079    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[7]_i_1__0_n_0
+    SLICE_X37Y42         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.177 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[11]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.177    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[11]_i_1__0_n_0
+    SLICE_X37Y43         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.275 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[15]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.275    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[15]_i_1__0_n_0
+    SLICE_X37Y44         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.373 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[19]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.373    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[19]_i_1__0_n_0
+    SLICE_X37Y45         CARRY4 (Prop_carry4_CI_O[0])
+                                                      0.181     7.554 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[23]_i_1__0/O[0]
+                         net (fo=1, routed)           0.000     7.554    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[23]_i_1__0_n_7
+    SLICE_X37Y45         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[20]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      6.666     6.666 r  
+    PS7_X0Y0             PS7                          0.000     6.666 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     7.571    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     7.648 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.254     8.902    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/m_axi_aclk
+    SLICE_X37Y45         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[20]/C
+                         clock pessimism              0.224     9.126    
+                         clock uncertainty           -0.154     8.972    
+    SLICE_X37Y45         FDRE (Setup_fdre_C_D)        0.059     9.031    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[20]
+  -------------------------------------------------------------------
+                         required time                          9.031    
+                         arrival time                          -7.554    
+  -------------------------------------------------------------------
+                         slack                                  1.476    
+
+Slack (MET) :             1.490ns  (required time - arrival time)
+  Source:                 system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[17]/D
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (clk_fpga_0 rise@6.666ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        5.053ns  (logic 1.642ns (32.493%)  route 3.411ns (67.507%))
+  Logic Levels:           7  (CARRY4=5 LUT4=2)
+  Clock Path Skew:        -0.027ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.236ns = ( 8.902 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.487ns
+    Clock Pessimism Removal (CPR):    0.224ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.408     2.487    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/m_axi_aclk
+    SLICE_X38Y43         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X38Y43         FDRE (Prop_fdre_C_Q)         0.433     2.920 f  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg/Q
+                         net (fo=69, routed)          1.891     4.811    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg_0
+    SLICE_X34Y47         LUT4 (Prop_lut4_I0_O)        0.105     4.916 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_addr_cntr_lsh_kh[31]_i_1__0/O
+                         net (fo=49, routed)          1.521     6.436    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_push_input_reg11_out
+    SLICE_X37Y40         LUT4 (Prop_lut4_I2_O)        0.105     6.541 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0[3]_i_9__0/O
+                         net (fo=1, routed)           0.000     6.541    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0[3]_i_9__0_n_0
+    SLICE_X37Y40         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.440     6.981 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[3]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     6.981    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[3]_i_1__0_n_0
+    SLICE_X37Y41         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.079 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[7]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.079    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[7]_i_1__0_n_0
+    SLICE_X37Y42         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.177 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[11]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.177    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[11]_i_1__0_n_0
+    SLICE_X37Y43         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.275 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[15]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.275    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[15]_i_1__0_n_0
+    SLICE_X37Y44         CARRY4 (Prop_carry4_CI_O[1])
+                                                      0.265     7.540 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[19]_i_1__0/O[1]
+                         net (fo=1, routed)           0.000     7.540    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[19]_i_1__0_n_6
+    SLICE_X37Y44         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[17]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      6.666     6.666 r  
+    PS7_X0Y0             PS7                          0.000     6.666 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     7.571    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     7.648 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.254     8.902    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/m_axi_aclk
+    SLICE_X37Y44         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[17]/C
+                         clock pessimism              0.224     9.126    
+                         clock uncertainty           -0.154     8.972    
+    SLICE_X37Y44         FDRE (Setup_fdre_C_D)        0.059     9.031    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[17]
+  -------------------------------------------------------------------
+                         required time                          9.031    
+                         arrival time                          -7.540    
+  -------------------------------------------------------------------
+                         slack                                  1.490    
+
+Slack (MET) :             1.495ns  (required time - arrival time)
+  Source:                 system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[19]/D
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (clk_fpga_0 rise@6.666ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        5.048ns  (logic 1.637ns (32.426%)  route 3.411ns (67.574%))
+  Logic Levels:           7  (CARRY4=5 LUT4=2)
+  Clock Path Skew:        -0.027ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.236ns = ( 8.902 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.487ns
+    Clock Pessimism Removal (CPR):    0.224ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.408     2.487    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/m_axi_aclk
+    SLICE_X38Y43         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X38Y43         FDRE (Prop_fdre_C_Q)         0.433     2.920 f  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg/Q
+                         net (fo=69, routed)          1.891     4.811    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg_0
+    SLICE_X34Y47         LUT4 (Prop_lut4_I0_O)        0.105     4.916 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_addr_cntr_lsh_kh[31]_i_1__0/O
+                         net (fo=49, routed)          1.521     6.436    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_push_input_reg11_out
+    SLICE_X37Y40         LUT4 (Prop_lut4_I2_O)        0.105     6.541 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0[3]_i_9__0/O
+                         net (fo=1, routed)           0.000     6.541    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0[3]_i_9__0_n_0
+    SLICE_X37Y40         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.440     6.981 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[3]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     6.981    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[3]_i_1__0_n_0
+    SLICE_X37Y41         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.079 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[7]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.079    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[7]_i_1__0_n_0
+    SLICE_X37Y42         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.177 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[11]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.177    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[11]_i_1__0_n_0
+    SLICE_X37Y43         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.275 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[15]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.275    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[15]_i_1__0_n_0
+    SLICE_X37Y44         CARRY4 (Prop_carry4_CI_O[3])
+                                                      0.260     7.535 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[19]_i_1__0/O[3]
+                         net (fo=1, routed)           0.000     7.535    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[19]_i_1__0_n_4
+    SLICE_X37Y44         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[19]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      6.666     6.666 r  
+    PS7_X0Y0             PS7                          0.000     6.666 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     7.571    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     7.648 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.254     8.902    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/m_axi_aclk
+    SLICE_X37Y44         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[19]/C
+                         clock pessimism              0.224     9.126    
+                         clock uncertainty           -0.154     8.972    
+    SLICE_X37Y44         FDRE (Setup_fdre_C_D)        0.059     9.031    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[19]
+  -------------------------------------------------------------------
+                         required time                          9.031    
+                         arrival time                          -7.535    
+  -------------------------------------------------------------------
+                         slack                                  1.495    
+
+Slack (MET) :             1.524ns  (required time - arrival time)
+  Source:                 system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/sig_cmd_stat_rst_user_reg_n_cdc_from_reg/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/sig_wdc_statcnt_reg[1]/R
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (clk_fpga_0 rise@6.666ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        4.410ns  (logic 0.538ns (12.200%)  route 3.872ns (87.800%))
+  Logic Levels:           1  (LUT1=1)
+  Clock Path Skew:        -0.155ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.220ns = ( 8.886 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.484ns
+    Clock Pessimism Removal (CPR):    0.109ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.405     2.484    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/m_axi_aclk
+    SLICE_X38Y37         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/sig_cmd_stat_rst_user_reg_n_cdc_from_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X38Y37         FDRE (Prop_fdre_C_Q)         0.433     2.917 f  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/sig_cmd_stat_rst_user_reg_n_cdc_from_reg/Q
+                         net (fo=32, routed)          0.991     3.908    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/sig_cmd_stat_rst_user_reg_n_cdc_from_reg_0
+    SLICE_X38Y47         LUT1 (Prop_lut1_I0_O)        0.105     4.013 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/sig_strb_reg_out[3]_i_1/O
+                         net (fo=218, routed)         2.881     6.894    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/SR[0]
+    SLICE_X50Y35         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/sig_wdc_statcnt_reg[1]/R
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      6.666     6.666 r  
+    PS7_X0Y0             PS7                          0.000     6.666 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     7.571    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     7.648 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.238     8.886    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/m_axi_aclk
+    SLICE_X50Y35         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/sig_wdc_statcnt_reg[1]/C
+                         clock pessimism              0.109     8.995    
+                         clock uncertainty           -0.154     8.841    
+    SLICE_X50Y35         FDRE (Setup_fdre_C_R)       -0.423     8.418    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/sig_wdc_statcnt_reg[1]
+  -------------------------------------------------------------------
+                         required time                          8.418    
+                         arrival time                          -6.894    
+  -------------------------------------------------------------------
+                         slack                                  1.524    
+
+Slack (MET) :             1.524ns  (required time - arrival time)
+  Source:                 system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/sig_cmd_stat_rst_user_reg_n_cdc_from_reg/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/sig_wdc_statcnt_reg[2]/R
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (clk_fpga_0 rise@6.666ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        4.410ns  (logic 0.538ns (12.200%)  route 3.872ns (87.800%))
+  Logic Levels:           1  (LUT1=1)
+  Clock Path Skew:        -0.155ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.220ns = ( 8.886 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.484ns
+    Clock Pessimism Removal (CPR):    0.109ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.405     2.484    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/m_axi_aclk
+    SLICE_X38Y37         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/sig_cmd_stat_rst_user_reg_n_cdc_from_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X38Y37         FDRE (Prop_fdre_C_Q)         0.433     2.917 f  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/sig_cmd_stat_rst_user_reg_n_cdc_from_reg/Q
+                         net (fo=32, routed)          0.991     3.908    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/sig_cmd_stat_rst_user_reg_n_cdc_from_reg_0
+    SLICE_X38Y47         LUT1 (Prop_lut1_I0_O)        0.105     4.013 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/sig_strb_reg_out[3]_i_1/O
+                         net (fo=218, routed)         2.881     6.894    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/SR[0]
+    SLICE_X50Y35         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/sig_wdc_statcnt_reg[2]/R
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      6.666     6.666 r  
+    PS7_X0Y0             PS7                          0.000     6.666 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     7.571    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     7.648 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.238     8.886    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/m_axi_aclk
+    SLICE_X50Y35         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/sig_wdc_statcnt_reg[2]/C
+                         clock pessimism              0.109     8.995    
+                         clock uncertainty           -0.154     8.841    
+    SLICE_X50Y35         FDRE (Setup_fdre_C_R)       -0.423     8.418    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/sig_wdc_statcnt_reg[2]
+  -------------------------------------------------------------------
+                         required time                          8.418    
+                         arrival time                          -6.894    
+  -------------------------------------------------------------------
+                         slack                                  1.524    
+
+Slack (MET) :             1.524ns  (required time - arrival time)
+  Source:                 system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/sig_cmd_stat_rst_user_reg_n_cdc_from_reg/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/sig_wdc_statcnt_reg[3]/R
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (clk_fpga_0 rise@6.666ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        4.410ns  (logic 0.538ns (12.200%)  route 3.872ns (87.800%))
+  Logic Levels:           1  (LUT1=1)
+  Clock Path Skew:        -0.155ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.220ns = ( 8.886 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.484ns
+    Clock Pessimism Removal (CPR):    0.109ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.405     2.484    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/m_axi_aclk
+    SLICE_X38Y37         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/sig_cmd_stat_rst_user_reg_n_cdc_from_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X38Y37         FDRE (Prop_fdre_C_Q)         0.433     2.917 f  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/sig_cmd_stat_rst_user_reg_n_cdc_from_reg/Q
+                         net (fo=32, routed)          0.991     3.908    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/sig_cmd_stat_rst_user_reg_n_cdc_from_reg_0
+    SLICE_X38Y47         LUT1 (Prop_lut1_I0_O)        0.105     4.013 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/sig_strb_reg_out[3]_i_1/O
+                         net (fo=218, routed)         2.881     6.894    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/SR[0]
+    SLICE_X50Y35         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/sig_wdc_statcnt_reg[3]/R
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      6.666     6.666 r  
+    PS7_X0Y0             PS7                          0.000     6.666 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     7.571    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     7.648 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.238     8.886    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/m_axi_aclk
+    SLICE_X50Y35         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/sig_wdc_statcnt_reg[3]/C
+                         clock pessimism              0.109     8.995    
+                         clock uncertainty           -0.154     8.841    
+    SLICE_X50Y35         FDRE (Setup_fdre_C_R)       -0.423     8.418    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/sig_wdc_statcnt_reg[3]
+  -------------------------------------------------------------------
+                         required time                          8.418    
+                         arrival time                          -6.894    
+  -------------------------------------------------------------------
+                         slack                                  1.524    
+
+Slack (MET) :             1.555ns  (required time - arrival time)
+  Source:                 system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[18]/D
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (clk_fpga_0 rise@6.666ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        4.988ns  (logic 1.577ns (31.613%)  route 3.411ns (68.387%))
+  Logic Levels:           7  (CARRY4=5 LUT4=2)
+  Clock Path Skew:        -0.027ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.236ns = ( 8.902 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.487ns
+    Clock Pessimism Removal (CPR):    0.224ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.408     2.487    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/m_axi_aclk
+    SLICE_X38Y43         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X38Y43         FDRE (Prop_fdre_C_Q)         0.433     2.920 f  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg/Q
+                         net (fo=69, routed)          1.891     4.811    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg_0
+    SLICE_X34Y47         LUT4 (Prop_lut4_I0_O)        0.105     4.916 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_addr_cntr_lsh_kh[31]_i_1__0/O
+                         net (fo=49, routed)          1.521     6.436    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_push_input_reg11_out
+    SLICE_X37Y40         LUT4 (Prop_lut4_I2_O)        0.105     6.541 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0[3]_i_9__0/O
+                         net (fo=1, routed)           0.000     6.541    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0[3]_i_9__0_n_0
+    SLICE_X37Y40         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.440     6.981 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[3]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     6.981    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[3]_i_1__0_n_0
+    SLICE_X37Y41         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.079 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[7]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.079    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[7]_i_1__0_n_0
+    SLICE_X37Y42         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.177 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[11]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.177    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[11]_i_1__0_n_0
+    SLICE_X37Y43         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.275 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[15]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.275    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[15]_i_1__0_n_0
+    SLICE_X37Y44         CARRY4 (Prop_carry4_CI_O[2])
+                                                      0.200     7.475 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[19]_i_1__0/O[2]
+                         net (fo=1, routed)           0.000     7.475    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[19]_i_1__0_n_5
+    SLICE_X37Y44         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[18]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      6.666     6.666 r  
+    PS7_X0Y0             PS7                          0.000     6.666 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     7.571    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     7.648 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.254     8.902    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/m_axi_aclk
+    SLICE_X37Y44         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[18]/C
+                         clock pessimism              0.224     9.126    
+                         clock uncertainty           -0.154     8.972    
+    SLICE_X37Y44         FDRE (Setup_fdre_C_D)        0.059     9.031    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[18]
+  -------------------------------------------------------------------
+                         required time                          9.031    
+                         arrival time                          -7.475    
+  -------------------------------------------------------------------
+                         slack                                  1.555    
+
+Slack (MET) :             1.574ns  (required time - arrival time)
+  Source:                 system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[16]/D
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (clk_fpga_0 rise@6.666ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        4.969ns  (logic 1.558ns (31.352%)  route 3.411ns (68.648%))
+  Logic Levels:           7  (CARRY4=5 LUT4=2)
+  Clock Path Skew:        -0.027ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.236ns = ( 8.902 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.487ns
+    Clock Pessimism Removal (CPR):    0.224ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.408     2.487    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/m_axi_aclk
+    SLICE_X38Y43         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X38Y43         FDRE (Prop_fdre_C_Q)         0.433     2.920 f  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg/Q
+                         net (fo=69, routed)          1.891     4.811    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg_0
+    SLICE_X34Y47         LUT4 (Prop_lut4_I0_O)        0.105     4.916 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_addr_cntr_lsh_kh[31]_i_1__0/O
+                         net (fo=49, routed)          1.521     6.436    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_push_input_reg11_out
+    SLICE_X37Y40         LUT4 (Prop_lut4_I2_O)        0.105     6.541 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0[3]_i_9__0/O
+                         net (fo=1, routed)           0.000     6.541    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0[3]_i_9__0_n_0
+    SLICE_X37Y40         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.440     6.981 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[3]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     6.981    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[3]_i_1__0_n_0
+    SLICE_X37Y41         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.079 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[7]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.079    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[7]_i_1__0_n_0
+    SLICE_X37Y42         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.177 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[11]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.177    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[11]_i_1__0_n_0
+    SLICE_X37Y43         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.275 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[15]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.275    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[15]_i_1__0_n_0
+    SLICE_X37Y44         CARRY4 (Prop_carry4_CI_O[0])
+                                                      0.181     7.456 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[19]_i_1__0/O[0]
+                         net (fo=1, routed)           0.000     7.456    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[19]_i_1__0_n_7
+    SLICE_X37Y44         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[16]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      6.666     6.666 r  
+    PS7_X0Y0             PS7                          0.000     6.666 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     7.571    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     7.648 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.254     8.902    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/m_axi_aclk
+    SLICE_X37Y44         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[16]/C
+                         clock pessimism              0.224     9.126    
+                         clock uncertainty           -0.154     8.972    
+    SLICE_X37Y44         FDRE (Setup_fdre_C_D)        0.059     9.031    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[16]
+  -------------------------------------------------------------------
+                         required time                          9.031    
+                         arrival time                          -7.456    
+  -------------------------------------------------------------------
+                         slack                                  1.574    
+
+Slack (MET) :             1.588ns  (required time - arrival time)
+  Source:                 system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[13]/D
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (clk_fpga_0 rise@6.666ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        4.955ns  (logic 1.544ns (31.158%)  route 3.411ns (68.842%))
+  Logic Levels:           6  (CARRY4=4 LUT4=2)
+  Clock Path Skew:        -0.027ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.236ns = ( 8.902 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.487ns
+    Clock Pessimism Removal (CPR):    0.224ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.408     2.487    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/m_axi_aclk
+    SLICE_X38Y43         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X38Y43         FDRE (Prop_fdre_C_Q)         0.433     2.920 f  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg/Q
+                         net (fo=69, routed)          1.891     4.811    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg_0
+    SLICE_X34Y47         LUT4 (Prop_lut4_I0_O)        0.105     4.916 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_addr_cntr_lsh_kh[31]_i_1__0/O
+                         net (fo=49, routed)          1.521     6.436    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_push_input_reg11_out
+    SLICE_X37Y40         LUT4 (Prop_lut4_I2_O)        0.105     6.541 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0[3]_i_9__0/O
+                         net (fo=1, routed)           0.000     6.541    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0[3]_i_9__0_n_0
+    SLICE_X37Y40         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.440     6.981 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[3]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     6.981    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[3]_i_1__0_n_0
+    SLICE_X37Y41         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.079 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[7]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.079    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[7]_i_1__0_n_0
+    SLICE_X37Y42         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.177 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[11]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.177    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[11]_i_1__0_n_0
+    SLICE_X37Y43         CARRY4 (Prop_carry4_CI_O[1])
+                                                      0.265     7.442 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[15]_i_1__0/O[1]
+                         net (fo=1, routed)           0.000     7.442    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[15]_i_1__0_n_6
+    SLICE_X37Y43         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[13]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      6.666     6.666 r  
+    PS7_X0Y0             PS7                          0.000     6.666 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     7.571    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     7.648 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.254     8.902    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/m_axi_aclk
+    SLICE_X37Y43         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[13]/C
+                         clock pessimism              0.224     9.126    
+                         clock uncertainty           -0.154     8.972    
+    SLICE_X37Y43         FDRE (Setup_fdre_C_D)        0.059     9.031    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[13]
+  -------------------------------------------------------------------
+                         required time                          9.031    
+                         arrival time                          -7.442    
+  -------------------------------------------------------------------
+                         slack                                  1.588    
+
+Slack (MET) :             1.593ns  (required time - arrival time)
+  Source:                 system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[15]/D
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (clk_fpga_0 rise@6.666ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        4.950ns  (logic 1.539ns (31.088%)  route 3.411ns (68.912%))
+  Logic Levels:           6  (CARRY4=4 LUT4=2)
+  Clock Path Skew:        -0.027ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.236ns = ( 8.902 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.487ns
+    Clock Pessimism Removal (CPR):    0.224ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.408     2.487    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/m_axi_aclk
+    SLICE_X38Y43         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X38Y43         FDRE (Prop_fdre_C_Q)         0.433     2.920 f  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg/Q
+                         net (fo=69, routed)          1.891     4.811    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_calc_error_reg_reg_0
+    SLICE_X34Y47         LUT4 (Prop_lut4_I0_O)        0.105     4.916 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_addr_cntr_lsh_kh[31]_i_1__0/O
+                         net (fo=49, routed)          1.521     6.436    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_push_input_reg11_out
+    SLICE_X37Y40         LUT4 (Prop_lut4_I2_O)        0.105     6.541 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0[3]_i_9__0/O
+                         net (fo=1, routed)           0.000     6.541    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0[3]_i_9__0_n_0
+    SLICE_X37Y40         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.440     6.981 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[3]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     6.981    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[3]_i_1__0_n_0
+    SLICE_X37Y41         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.079 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[7]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.079    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[7]_i_1__0_n_0
+    SLICE_X37Y42         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.098     7.177 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[11]_i_1__0/CO[3]
+                         net (fo=1, routed)           0.000     7.177    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[11]_i_1__0_n_0
+    SLICE_X37Y43         CARRY4 (Prop_carry4_CI_O[3])
+                                                      0.260     7.437 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[15]_i_1__0/O[3]
+                         net (fo=1, routed)           0.000     7.437    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[15]_i_1__0_n_4
+    SLICE_X37Y43         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[15]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      6.666     6.666 r  
+    PS7_X0Y0             PS7                          0.000     6.666 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     7.571    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     7.648 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.254     8.902    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/m_axi_aclk
+    SLICE_X37Y43         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[15]/C
+                         clock pessimism              0.224     9.126    
+                         clock uncertainty           -0.154     8.972    
+    SLICE_X37Y43         FDRE (Setup_fdre_C_D)        0.059     9.031    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[15]
+  -------------------------------------------------------------------
+                         required time                          9.031    
+                         arrival time                          -7.437    
+  -------------------------------------------------------------------
+                         slack                                  1.593    
+
+Slack (MET) :             1.595ns  (required time - arrival time)
+  Source:                 system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/sig_cmd_stat_rst_user_reg_n_cdc_from_reg/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/sig_wdc_statcnt_reg[0]/R
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (clk_fpga_0 rise@6.666ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        4.410ns  (logic 0.538ns (12.200%)  route 3.872ns (87.800%))
+  Logic Levels:           1  (LUT1=1)
+  Clock Path Skew:        -0.155ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.220ns = ( 8.886 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.484ns
+    Clock Pessimism Removal (CPR):    0.109ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.405     2.484    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/m_axi_aclk
+    SLICE_X38Y37         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/sig_cmd_stat_rst_user_reg_n_cdc_from_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X38Y37         FDRE (Prop_fdre_C_Q)         0.433     2.917 f  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/sig_cmd_stat_rst_user_reg_n_cdc_from_reg/Q
+                         net (fo=32, routed)          0.991     3.908    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/sig_cmd_stat_rst_user_reg_n_cdc_from_reg_0
+    SLICE_X38Y47         LUT1 (Prop_lut1_I0_O)        0.105     4.013 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/sig_strb_reg_out[3]_i_1/O
+                         net (fo=218, routed)         2.881     6.894    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/SR[0]
+    SLICE_X51Y35         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/sig_wdc_statcnt_reg[0]/R
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      6.666     6.666 r  
+    PS7_X0Y0             PS7                          0.000     6.666 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     7.571    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     7.648 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.238     8.886    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/m_axi_aclk
+    SLICE_X51Y35         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/sig_wdc_statcnt_reg[0]/C
+                         clock pessimism              0.109     8.995    
+                         clock uncertainty           -0.154     8.841    
+    SLICE_X51Y35         FDRE (Setup_fdre_C_R)       -0.352     8.489    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/sig_wdc_statcnt_reg[0]
+  -------------------------------------------------------------------
+                         required time                          8.489    
+                         arrival time                          -6.894    
+  -------------------------------------------------------------------
+                         slack                                  1.595    
+
+Slack (MET) :             1.599ns  (required time - arrival time)
+  Source:                 system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[2]/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_adjusted_addr_incr_ireg2_reg[4]/D
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (clk_fpga_0 rise@6.666ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        4.652ns  (logic 1.160ns (24.936%)  route 3.492ns (75.064%))
+  Logic Levels:           4  (LUT4=1 LUT5=3)
+  Clock Path Skew:        -0.060ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.233ns = ( 8.899 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.486ns
+    Clock Pessimism Removal (CPR):    0.193ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.407     2.486    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/m_axi_aclk
+    SLICE_X37Y40         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[2]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X37Y40         FDRE (Prop_fdre_C_Q)         0.379     2.865 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg[2]/Q
+                         net (fo=6, routed)           1.169     4.034    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_btt_cntr_im0_reg_n_0_[2]
+    SLICE_X29Y39         LUT4 (Prop_lut4_I0_O)        0.105     4.139 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_addr_cntr_incr_ireg2[2]_i_1__0/O
+                         net (fo=5, routed)           0.891     5.030    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_addr_cntr_incr_ireg2[2]_i_1__0_n_0
+    SLICE_X33Y38         LUT5 (Prop_lut5_I0_O)        0.119     5.149 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_adjusted_addr_incr_ireg2[3]_i_2__0/O
+                         net (fo=3, routed)           0.556     5.705    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_adjusted_addr_incr_ireg2[3]_i_2__0_n_0
+    SLICE_X31Y38         LUT5 (Prop_lut5_I4_O)        0.270     5.975 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_adjusted_addr_incr_ireg2[4]_i_2__0/O
+                         net (fo=1, routed)           0.730     6.705    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_adjusted_addr_incr_ireg2[4]_i_2__0_n_0
+    SLICE_X32Y38         LUT5 (Prop_lut5_I4_O)        0.287     6.992 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_adjusted_addr_incr_ireg2[4]_i_1__0/O
+                         net (fo=1, routed)           0.146     7.138    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_adjusted_addr_incr_ireg2[4]_i_1__0_n_0
+    SLICE_X33Y38         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_adjusted_addr_incr_ireg2_reg[4]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      6.666     6.666 r  
+    PS7_X0Y0             PS7                          0.000     6.666 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     7.571    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     7.648 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.251     8.899    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/m_axi_aclk
+    SLICE_X33Y38         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_adjusted_addr_incr_ireg2_reg[4]/C
+                         clock pessimism              0.193     9.092    
+                         clock uncertainty           -0.154     8.938    
+    SLICE_X33Y38         FDRE (Setup_fdre_C_D)       -0.201     8.737    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_INCLUDE_PCC.I_MSTR_PCC/sig_adjusted_addr_incr_ireg2_reg[4]
+  -------------------------------------------------------------------
+                         required time                          8.737    
+                         arrival time                          -7.138    
+  -------------------------------------------------------------------
+                         slack                                  1.599    
+
+Slack (MET) :             1.640ns  (required time - arrival time)
+  Source:                 system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/sig_cmd_stat_rst_user_reg_n_cdc_from_reg/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/I_WRESP_STATUS_FIFO/USE_SRL_FIFO.I_SYNC_FIFO/I_SRL_FIFO_RBU_F/CNTR_INCR_DECR_ADDN_F_I/INFERRED_GEN.cnt_i_reg[2]/S
+                            (rising edge-triggered cell FDSE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (clk_fpga_0 rise@6.666ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        4.294ns  (logic 0.538ns (12.528%)  route 3.756ns (87.472%))
+  Logic Levels:           1  (LUT1=1)
+  Clock Path Skew:        -0.154ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.221ns = ( 8.887 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.484ns
+    Clock Pessimism Removal (CPR):    0.109ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.405     2.484    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/m_axi_aclk
+    SLICE_X38Y37         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/sig_cmd_stat_rst_user_reg_n_cdc_from_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X38Y37         FDRE (Prop_fdre_C_Q)         0.433     2.917 f  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/sig_cmd_stat_rst_user_reg_n_cdc_from_reg/Q
+                         net (fo=32, routed)          0.991     3.908    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/sig_cmd_stat_rst_user_reg_n_cdc_from_reg_0
+    SLICE_X38Y47         LUT1 (Prop_lut1_I0_O)        0.105     4.013 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/sig_strb_reg_out[3]_i_1/O
+                         net (fo=218, routed)         2.765     6.778    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/I_WRESP_STATUS_FIFO/USE_SRL_FIFO.I_SYNC_FIFO/I_SRL_FIFO_RBU_F/CNTR_INCR_DECR_ADDN_F_I/SR[0]
+    SLICE_X50Y36         FDSE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/I_WRESP_STATUS_FIFO/USE_SRL_FIFO.I_SYNC_FIFO/I_SRL_FIFO_RBU_F/CNTR_INCR_DECR_ADDN_F_I/INFERRED_GEN.cnt_i_reg[2]/S
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      6.666     6.666 r  
+    PS7_X0Y0             PS7                          0.000     6.666 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     7.571    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     7.648 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.239     8.887    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/I_WRESP_STATUS_FIFO/USE_SRL_FIFO.I_SYNC_FIFO/I_SRL_FIFO_RBU_F/CNTR_INCR_DECR_ADDN_F_I/m_axi_aclk
+    SLICE_X50Y36         FDSE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/I_WRESP_STATUS_FIFO/USE_SRL_FIFO.I_SYNC_FIFO/I_SRL_FIFO_RBU_F/CNTR_INCR_DECR_ADDN_F_I/INFERRED_GEN.cnt_i_reg[2]/C
+                         clock pessimism              0.109     8.996    
+                         clock uncertainty           -0.154     8.842    
+    SLICE_X50Y36         FDSE (Setup_fdse_C_S)       -0.423     8.419    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/I_WRESP_STATUS_FIFO/USE_SRL_FIFO.I_SYNC_FIFO/I_SRL_FIFO_RBU_F/CNTR_INCR_DECR_ADDN_F_I/INFERRED_GEN.cnt_i_reg[2]
+  -------------------------------------------------------------------
+                         required time                          8.419    
+                         arrival time                          -6.778    
+  -------------------------------------------------------------------
+                         slack                                  1.640    
+
+Slack (MET) :             1.640ns  (required time - arrival time)
+  Source:                 system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/sig_cmd_stat_rst_user_reg_n_cdc_from_reg/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/I_WRESP_STATUS_FIFO/USE_SRL_FIFO.I_SYNC_FIFO/I_SRL_FIFO_RBU_F/CNTR_INCR_DECR_ADDN_F_I/INFERRED_GEN.cnt_i_reg[3]/S
+                            (rising edge-triggered cell FDSE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (clk_fpga_0 rise@6.666ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        4.294ns  (logic 0.538ns (12.528%)  route 3.756ns (87.472%))
+  Logic Levels:           1  (LUT1=1)
+  Clock Path Skew:        -0.154ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.221ns = ( 8.887 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.484ns
+    Clock Pessimism Removal (CPR):    0.109ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.405     2.484    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/m_axi_aclk
+    SLICE_X38Y37         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/sig_cmd_stat_rst_user_reg_n_cdc_from_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X38Y37         FDRE (Prop_fdre_C_Q)         0.433     2.917 f  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/sig_cmd_stat_rst_user_reg_n_cdc_from_reg/Q
+                         net (fo=32, routed)          0.991     3.908    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/sig_cmd_stat_rst_user_reg_n_cdc_from_reg_0
+    SLICE_X38Y47         LUT1 (Prop_lut1_I0_O)        0.105     4.013 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/sig_strb_reg_out[3]_i_1/O
+                         net (fo=218, routed)         2.765     6.778    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/I_WRESP_STATUS_FIFO/USE_SRL_FIFO.I_SYNC_FIFO/I_SRL_FIFO_RBU_F/CNTR_INCR_DECR_ADDN_F_I/SR[0]
+    SLICE_X50Y36         FDSE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/I_WRESP_STATUS_FIFO/USE_SRL_FIFO.I_SYNC_FIFO/I_SRL_FIFO_RBU_F/CNTR_INCR_DECR_ADDN_F_I/INFERRED_GEN.cnt_i_reg[3]/S
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      6.666     6.666 r  
+    PS7_X0Y0             PS7                          0.000     6.666 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     7.571    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     7.648 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.239     8.887    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/I_WRESP_STATUS_FIFO/USE_SRL_FIFO.I_SYNC_FIFO/I_SRL_FIFO_RBU_F/CNTR_INCR_DECR_ADDN_F_I/m_axi_aclk
+    SLICE_X50Y36         FDSE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/I_WRESP_STATUS_FIFO/USE_SRL_FIFO.I_SYNC_FIFO/I_SRL_FIFO_RBU_F/CNTR_INCR_DECR_ADDN_F_I/INFERRED_GEN.cnt_i_reg[3]/C
+                         clock pessimism              0.109     8.996    
+                         clock uncertainty           -0.154     8.842    
+    SLICE_X50Y36         FDSE (Setup_fdse_C_S)       -0.423     8.419    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/I_WRESP_STATUS_FIFO/USE_SRL_FIFO.I_SYNC_FIFO/I_SRL_FIFO_RBU_F/CNTR_INCR_DECR_ADDN_F_I/INFERRED_GEN.cnt_i_reg[3]
+  -------------------------------------------------------------------
+                         required time                          8.419    
+                         arrival time                          -6.778    
+  -------------------------------------------------------------------
+                         slack                                  1.640    
+
+Slack (MET) :             1.640ns  (required time - arrival time)
+  Source:                 system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/sig_cmd_stat_rst_user_reg_n_cdc_from_reg/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/sig_wdc_status_going_full_reg/R
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (clk_fpga_0 rise@6.666ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        4.294ns  (logic 0.538ns (12.528%)  route 3.756ns (87.472%))
+  Logic Levels:           1  (LUT1=1)
+  Clock Path Skew:        -0.154ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.221ns = ( 8.887 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.484ns
+    Clock Pessimism Removal (CPR):    0.109ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.994     0.994    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.405     2.484    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/m_axi_aclk
+    SLICE_X38Y37         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/sig_cmd_stat_rst_user_reg_n_cdc_from_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X38Y37         FDRE (Prop_fdre_C_Q)         0.433     2.917 f  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/sig_cmd_stat_rst_user_reg_n_cdc_from_reg/Q
+                         net (fo=32, routed)          0.991     3.908    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/sig_cmd_stat_rst_user_reg_n_cdc_from_reg_0
+    SLICE_X38Y47         LUT1 (Prop_lut1_I0_O)        0.105     4.013 r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/I_RESET/sig_strb_reg_out[3]_i_1/O
+                         net (fo=218, routed)         2.765     6.778    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/SR[0]
+    SLICE_X50Y36         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/sig_wdc_status_going_full_reg/R
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      6.666     6.666 r  
+    PS7_X0Y0             PS7                          0.000     6.666 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.905     7.571    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.077     7.648 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20629, routed)       1.239     8.887    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/m_axi_aclk
+    SLICE_X50Y36         FDRE                                         r  system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/sig_wdc_status_going_full_reg/C
+                         clock pessimism              0.109     8.996    
+                         clock uncertainty           -0.154     8.842    
+    SLICE_X50Y36         FDRE (Setup_fdre_C_R)       -0.423     8.419    system_i/cdma/U0/GEN_SIMPLE_MODE.I_SIMPLE_MODE_WRAP/GEN_DM_FULL.I_DATAMOVER_FULL/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/I_WR_STATUS_CNTLR/sig_wdc_status_going_full_reg
+  -------------------------------------------------------------------
+                         required time                          8.419    
+                         arrival time                          -6.778    
+  -------------------------------------------------------------------
+                         slack                                  1.640    
+
+
+
+

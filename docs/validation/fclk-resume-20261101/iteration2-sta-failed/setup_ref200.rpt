@@ -1,0 +1,1289 @@
+Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+----------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2018.3 (win64) Build 2405991 Thu Dec  6 23:38:27 MST 2018
+| Date         : Sun Nov  1 14:05:57 2026
+| Host         : DESKTOP-0UKCPD3 running 64-bit major release  (build 9200)
+| Command      : report_timing -delay_type max -group clk_delay_ref -max_paths 20 -file E:/zynqlinkPRO/build/fpga_dma_global/setup_ref200.rpt
+| Design       : system_wrapper
+| Device       : 7z020-clg400
+| Speed File   : -2  PRODUCTION 1.11 2014-09-11
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+Timing Report
+
+Slack (MET) :             0.424ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/input_calibration.delays/lane[2].delay/C
+                            (rising edge-triggered cell IDELAYE2 clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/orbtrace_0/inst/input_calibration.delays/enabled_ref_reg/D
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        4.257ns  (logic 1.681ns (39.485%)  route 2.576ns (60.515%))
+  Logic Levels:           5  (CARRY4=3 LUT6=2)
+  Clock Path Skew:        -0.315ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.386ns = ( 7.386 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.809ns
+    Clock Pessimism Removal (CPR):    0.109ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.730     2.809    system_i/orbtrace_0/inst/input_calibration.delays/load_reg_0
+    IDELAY_X1Y123        IDELAYE2                                     r  system_i/orbtrace_0/inst/input_calibration.delays/lane[2].delay/C
+  -------------------------------------------------------------------    -------------------
+    IDELAY_X1Y123        IDELAYE2 (Prop_idelaye2_C_CNTVALUEOUT[0])
+                                                      0.658     3.467 r  system_i/orbtrace_0/inst/input_calibration.delays/lane[2].delay/CNTVALUEOUT[0]
+                         net (fo=2, routed)           2.325     5.792    system_i/orbtrace_0/inst/input_calibration.delays/counts[10]
+    SLICE_X112Y76        LUT6 (Prop_lut6_I2_O)        0.105     5.897 r  system_i/orbtrace_0/inst/input_calibration.delays/valid_ref1_carry_i_1/O
+                         net (fo=1, routed)           0.000     5.897    system_i/orbtrace_0/inst/input_calibration.delays/valid_ref1_carry_i_1_n_0
+    SLICE_X112Y76        CARRY4 (Prop_carry4_S[3]_CO[3])
+                                                      0.314     6.211 r  system_i/orbtrace_0/inst/input_calibration.delays/valid_ref1_carry/CO[3]
+                         net (fo=1, routed)           0.000     6.211    system_i/orbtrace_0/inst/input_calibration.delays/valid_ref1_carry_n_0
+    SLICE_X112Y77        CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     6.311 r  system_i/orbtrace_0/inst/input_calibration.delays/valid_ref1_carry__0/CO[3]
+                         net (fo=1, routed)           0.000     6.311    system_i/orbtrace_0/inst/input_calibration.delays/valid_ref1_carry__0_n_0
+    SLICE_X112Y78        CARRY4 (Prop_carry4_CI_CO[0])
+                                                      0.207     6.518 r  system_i/orbtrace_0/inst/input_calibration.delays/valid_ref1_carry__1/CO[0]
+                         net (fo=3, routed)           0.251     6.769    system_i/orbtrace_0/inst/input_calibration.delays/valid_ref1
+    SLICE_X111Y78        LUT6 (Prop_lut6_I2_O)        0.297     7.066 r  system_i/orbtrace_0/inst/input_calibration.delays/enabled_ref_i_1/O
+                         net (fo=1, routed)           0.000     7.066    system_i/orbtrace_0/inst/input_calibration.delays/enabled_ref_i_1_n_0
+    SLICE_X111Y78        FDCE                                         r  system_i/orbtrace_0/inst/input_calibration.delays/enabled_ref_reg/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.403     7.386    system_i/orbtrace_0/inst/input_calibration.delays/load_reg_0
+    SLICE_X111Y78        FDCE                                         r  system_i/orbtrace_0/inst/input_calibration.delays/enabled_ref_reg/C
+                         clock pessimism              0.109     7.494    
+                         clock uncertainty           -0.035     7.459    
+    SLICE_X111Y78        FDCE (Setup_fdce_C_D)        0.032     7.491    system_i/orbtrace_0/inst/input_calibration.delays/enabled_ref_reg
+  -------------------------------------------------------------------
+                         required time                          7.491    
+                         arrival time                          -7.066    
+  -------------------------------------------------------------------
+                         slack                                  0.424    
+
+Slack (MET) :             0.424ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/input_calibration.delays/lane[2].delay/C
+                            (rising edge-triggered cell IDELAYE2 clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/orbtrace_0/inst/input_calibration.delays/valid_ref_reg/D
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        4.257ns  (logic 1.681ns (39.485%)  route 2.576ns (60.515%))
+  Logic Levels:           5  (CARRY4=3 LUT3=1 LUT6=1)
+  Clock Path Skew:        -0.315ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.386ns = ( 7.386 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.809ns
+    Clock Pessimism Removal (CPR):    0.109ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.730     2.809    system_i/orbtrace_0/inst/input_calibration.delays/load_reg_0
+    IDELAY_X1Y123        IDELAYE2                                     r  system_i/orbtrace_0/inst/input_calibration.delays/lane[2].delay/C
+  -------------------------------------------------------------------    -------------------
+    IDELAY_X1Y123        IDELAYE2 (Prop_idelaye2_C_CNTVALUEOUT[0])
+                                                      0.658     3.467 r  system_i/orbtrace_0/inst/input_calibration.delays/lane[2].delay/CNTVALUEOUT[0]
+                         net (fo=2, routed)           2.325     5.792    system_i/orbtrace_0/inst/input_calibration.delays/counts[10]
+    SLICE_X112Y76        LUT6 (Prop_lut6_I2_O)        0.105     5.897 r  system_i/orbtrace_0/inst/input_calibration.delays/valid_ref1_carry_i_1/O
+                         net (fo=1, routed)           0.000     5.897    system_i/orbtrace_0/inst/input_calibration.delays/valid_ref1_carry_i_1_n_0
+    SLICE_X112Y76        CARRY4 (Prop_carry4_S[3]_CO[3])
+                                                      0.314     6.211 r  system_i/orbtrace_0/inst/input_calibration.delays/valid_ref1_carry/CO[3]
+                         net (fo=1, routed)           0.000     6.211    system_i/orbtrace_0/inst/input_calibration.delays/valid_ref1_carry_n_0
+    SLICE_X112Y77        CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     6.311 r  system_i/orbtrace_0/inst/input_calibration.delays/valid_ref1_carry__0/CO[3]
+                         net (fo=1, routed)           0.000     6.311    system_i/orbtrace_0/inst/input_calibration.delays/valid_ref1_carry__0_n_0
+    SLICE_X112Y78        CARRY4 (Prop_carry4_CI_CO[0])
+                                                      0.207     6.518 r  system_i/orbtrace_0/inst/input_calibration.delays/valid_ref1_carry__1/CO[0]
+                         net (fo=3, routed)           0.251     6.769    system_i/orbtrace_0/inst/input_calibration.delays/valid_ref1
+    SLICE_X113Y77        LUT3 (Prop_lut3_I0_O)        0.297     7.066 r  system_i/orbtrace_0/inst/input_calibration.delays/valid_ref_i_1/O
+                         net (fo=1, routed)           0.000     7.066    system_i/orbtrace_0/inst/input_calibration.delays/valid_ref
+    SLICE_X113Y77        FDCE                                         r  system_i/orbtrace_0/inst/input_calibration.delays/valid_ref_reg/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.403     7.386    system_i/orbtrace_0/inst/input_calibration.delays/load_reg_0
+    SLICE_X113Y77        FDCE                                         r  system_i/orbtrace_0/inst/input_calibration.delays/valid_ref_reg/C
+                         clock pessimism              0.109     7.494    
+                         clock uncertainty           -0.035     7.459    
+    SLICE_X113Y77        FDCE (Setup_fdce_C_D)        0.032     7.491    system_i/orbtrace_0/inst/input_calibration.delays/valid_ref_reg
+  -------------------------------------------------------------------
+                         required time                          7.491    
+                         arrival time                          -7.066    
+  -------------------------------------------------------------------
+                         slack                                  0.424    
+
+Slack (MET) :             0.428ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/input_calibration.delays/lane[2].delay/C
+                            (rising edge-triggered cell IDELAYE2 clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/orbtrace_0/inst/input_calibration.delays/fault_ref_reg/D
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        4.255ns  (logic 1.681ns (39.504%)  route 2.574ns (60.496%))
+  Logic Levels:           5  (CARRY4=3 LUT3=1 LUT6=1)
+  Clock Path Skew:        -0.313ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.388ns = ( 7.388 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.809ns
+    Clock Pessimism Removal (CPR):    0.109ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.730     2.809    system_i/orbtrace_0/inst/input_calibration.delays/load_reg_0
+    IDELAY_X1Y123        IDELAYE2                                     r  system_i/orbtrace_0/inst/input_calibration.delays/lane[2].delay/C
+  -------------------------------------------------------------------    -------------------
+    IDELAY_X1Y123        IDELAYE2 (Prop_idelaye2_C_CNTVALUEOUT[0])
+                                                      0.658     3.467 r  system_i/orbtrace_0/inst/input_calibration.delays/lane[2].delay/CNTVALUEOUT[0]
+                         net (fo=2, routed)           2.325     5.792    system_i/orbtrace_0/inst/input_calibration.delays/counts[10]
+    SLICE_X112Y76        LUT6 (Prop_lut6_I2_O)        0.105     5.897 r  system_i/orbtrace_0/inst/input_calibration.delays/valid_ref1_carry_i_1/O
+                         net (fo=1, routed)           0.000     5.897    system_i/orbtrace_0/inst/input_calibration.delays/valid_ref1_carry_i_1_n_0
+    SLICE_X112Y76        CARRY4 (Prop_carry4_S[3]_CO[3])
+                                                      0.314     6.211 r  system_i/orbtrace_0/inst/input_calibration.delays/valid_ref1_carry/CO[3]
+                         net (fo=1, routed)           0.000     6.211    system_i/orbtrace_0/inst/input_calibration.delays/valid_ref1_carry_n_0
+    SLICE_X112Y77        CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.100     6.311 r  system_i/orbtrace_0/inst/input_calibration.delays/valid_ref1_carry__0/CO[3]
+                         net (fo=1, routed)           0.000     6.311    system_i/orbtrace_0/inst/input_calibration.delays/valid_ref1_carry__0_n_0
+    SLICE_X112Y78        CARRY4 (Prop_carry4_CI_CO[0])
+                                                      0.207     6.518 f  system_i/orbtrace_0/inst/input_calibration.delays/valid_ref1_carry__1/CO[0]
+                         net (fo=3, routed)           0.249     6.767    system_i/orbtrace_0/inst/input_calibration.delays/valid_ref1
+    SLICE_X113Y79        LUT3 (Prop_lut3_I0_O)        0.297     7.064 r  system_i/orbtrace_0/inst/input_calibration.delays/fault_ref_i_1/O
+                         net (fo=1, routed)           0.000     7.064    system_i/orbtrace_0/inst/input_calibration.delays/fault_ref_i_1_n_0
+    SLICE_X113Y79        FDCE                                         r  system_i/orbtrace_0/inst/input_calibration.delays/fault_ref_reg/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.405     7.388    system_i/orbtrace_0/inst/input_calibration.delays/load_reg_0
+    SLICE_X113Y79        FDCE                                         r  system_i/orbtrace_0/inst/input_calibration.delays/fault_ref_reg/C
+                         clock pessimism              0.109     7.496    
+                         clock uncertainty           -0.035     7.461    
+    SLICE_X113Y79        FDCE (Setup_fdce_C_D)        0.032     7.493    system_i/orbtrace_0/inst/input_calibration.delays/fault_ref_reg
+  -------------------------------------------------------------------
+                         required time                          7.493    
+                         arrival time                          -7.064    
+  -------------------------------------------------------------------
+                         slack                                  0.428    
+
+Slack (MET) :             0.525ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/fifo/wg_reg[3]/C
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/orbtrace_0/inst/receiver/diagnostics/highwater_gray_reg[1]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        4.244ns  (logic 1.662ns (39.158%)  route 2.582ns (60.842%))
+  Logic Levels:           7  (CARRY4=1 LUT2=1 LUT4=3 LUT5=2)
+  Clock Path Skew:        -0.027ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.288ns = ( 7.288 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.541ns
+    Clock Pessimism Removal (CPR):    0.226ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.462     2.541    system_i/orbtrace_0/inst/receiver/fifo/wp_reg[0]_0
+    SLICE_X80Y14         FDCE                                         r  system_i/orbtrace_0/inst/receiver/fifo/wg_reg[3]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X80Y14         FDCE (Prop_fdce_C_Q)         0.348     2.889 r  system_i/orbtrace_0/inst/receiver/fifo/wg_reg[3]/Q
+                         net (fo=7, routed)           0.574     3.463    system_i/orbtrace_0/inst/receiver/fifo/wg[3]
+    SLICE_X79Y14         LUT4 (Prop_lut4_I2_O)        0.239     3.702 r  system_i/orbtrace_0/inst/receiver/fifo/seen[0]_i_3/O
+                         net (fo=1, routed)           0.204     3.907    system_i/orbtrace_0/inst/receiver/fifo/seen[0]_i_3_n_0
+    SLICE_X79Y14         LUT5 (Prop_lut5_I4_O)        0.105     4.012 f  system_i/orbtrace_0/inst/receiver/fifo/seen[0]_i_2/O
+                         net (fo=4, routed)           0.340     4.351    system_i/orbtrace_0/inst/receiver/fifo/rg2_reg[0]_0
+    SLICE_X78Y14         LUT4 (Prop_lut4_I0_O)        0.105     4.456 r  system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_i_4/O
+                         net (fo=14, routed)          0.465     4.921    system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_i_2_n_0
+    SLICE_X79Y16         LUT5 (Prop_lut5_I1_O)        0.105     5.026 r  system_i/orbtrace_0/inst/receiver/fifo/highwater[0]_i_1/O
+                         net (fo=3, routed)           0.337     5.362    system_i/orbtrace_0/inst/receiver/fifo/raw_oversample_filtered.sample_reset_reg[1][0]
+    SLICE_X78Y16         LUT4 (Prop_lut4_I2_O)        0.105     5.467 r  system_i/orbtrace_0/inst/receiver/fifo/highwater0_carry_i_4/O
+                         net (fo=1, routed)           0.000     5.467    system_i/orbtrace_0/inst/receiver/diagnostics/S[0]
+    SLICE_X78Y16         CARRY4 (Prop_carry4_S[0]_CO[1])
+                                                      0.380     5.847 r  system_i/orbtrace_0/inst/receiver/diagnostics/highwater0_carry/CO[1]
+                         net (fo=1, routed)           0.235     6.082    system_i/orbtrace_0/inst/receiver/diagnostics/highwater0_carry_n_2
+    SLICE_X79Y16         LUT2 (Prop_lut2_I0_O)        0.275     6.357 r  system_i/orbtrace_0/inst/receiver/diagnostics/highwater[2]_i_1/O
+                         net (fo=7, routed)           0.428     6.785    system_i/orbtrace_0/inst/receiver/diagnostics/highwater
+    SLICE_X80Y16         FDCE                                         r  system_i/orbtrace_0/inst/receiver/diagnostics/highwater_gray_reg[1]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.306     7.288    system_i/orbtrace_0/inst/receiver/diagnostics/syncs_reg[0]_0
+    SLICE_X80Y16         FDCE                                         r  system_i/orbtrace_0/inst/receiver/diagnostics/highwater_gray_reg[1]/C
+                         clock pessimism              0.226     7.514    
+                         clock uncertainty           -0.035     7.479    
+    SLICE_X80Y16         FDCE (Setup_fdce_C_CE)      -0.168     7.311    system_i/orbtrace_0/inst/receiver/diagnostics/highwater_gray_reg[1]
+  -------------------------------------------------------------------
+                         required time                          7.311    
+                         arrival time                          -6.785    
+  -------------------------------------------------------------------
+                         slack                                  0.525    
+
+Slack (MET) :             0.525ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/fifo/wg_reg[3]/C
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/orbtrace_0/inst/receiver/diagnostics/highwater_gray_reg[2]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        4.244ns  (logic 1.662ns (39.158%)  route 2.582ns (60.842%))
+  Logic Levels:           7  (CARRY4=1 LUT2=1 LUT4=3 LUT5=2)
+  Clock Path Skew:        -0.027ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.288ns = ( 7.288 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.541ns
+    Clock Pessimism Removal (CPR):    0.226ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.462     2.541    system_i/orbtrace_0/inst/receiver/fifo/wp_reg[0]_0
+    SLICE_X80Y14         FDCE                                         r  system_i/orbtrace_0/inst/receiver/fifo/wg_reg[3]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X80Y14         FDCE (Prop_fdce_C_Q)         0.348     2.889 r  system_i/orbtrace_0/inst/receiver/fifo/wg_reg[3]/Q
+                         net (fo=7, routed)           0.574     3.463    system_i/orbtrace_0/inst/receiver/fifo/wg[3]
+    SLICE_X79Y14         LUT4 (Prop_lut4_I2_O)        0.239     3.702 r  system_i/orbtrace_0/inst/receiver/fifo/seen[0]_i_3/O
+                         net (fo=1, routed)           0.204     3.907    system_i/orbtrace_0/inst/receiver/fifo/seen[0]_i_3_n_0
+    SLICE_X79Y14         LUT5 (Prop_lut5_I4_O)        0.105     4.012 f  system_i/orbtrace_0/inst/receiver/fifo/seen[0]_i_2/O
+                         net (fo=4, routed)           0.340     4.351    system_i/orbtrace_0/inst/receiver/fifo/rg2_reg[0]_0
+    SLICE_X78Y14         LUT4 (Prop_lut4_I0_O)        0.105     4.456 r  system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_i_4/O
+                         net (fo=14, routed)          0.465     4.921    system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_i_2_n_0
+    SLICE_X79Y16         LUT5 (Prop_lut5_I1_O)        0.105     5.026 r  system_i/orbtrace_0/inst/receiver/fifo/highwater[0]_i_1/O
+                         net (fo=3, routed)           0.337     5.362    system_i/orbtrace_0/inst/receiver/fifo/raw_oversample_filtered.sample_reset_reg[1][0]
+    SLICE_X78Y16         LUT4 (Prop_lut4_I2_O)        0.105     5.467 r  system_i/orbtrace_0/inst/receiver/fifo/highwater0_carry_i_4/O
+                         net (fo=1, routed)           0.000     5.467    system_i/orbtrace_0/inst/receiver/diagnostics/S[0]
+    SLICE_X78Y16         CARRY4 (Prop_carry4_S[0]_CO[1])
+                                                      0.380     5.847 r  system_i/orbtrace_0/inst/receiver/diagnostics/highwater0_carry/CO[1]
+                         net (fo=1, routed)           0.235     6.082    system_i/orbtrace_0/inst/receiver/diagnostics/highwater0_carry_n_2
+    SLICE_X79Y16         LUT2 (Prop_lut2_I0_O)        0.275     6.357 r  system_i/orbtrace_0/inst/receiver/diagnostics/highwater[2]_i_1/O
+                         net (fo=7, routed)           0.428     6.785    system_i/orbtrace_0/inst/receiver/diagnostics/highwater
+    SLICE_X80Y16         FDCE                                         r  system_i/orbtrace_0/inst/receiver/diagnostics/highwater_gray_reg[2]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.306     7.288    system_i/orbtrace_0/inst/receiver/diagnostics/syncs_reg[0]_0
+    SLICE_X80Y16         FDCE                                         r  system_i/orbtrace_0/inst/receiver/diagnostics/highwater_gray_reg[2]/C
+                         clock pessimism              0.226     7.514    
+                         clock uncertainty           -0.035     7.479    
+    SLICE_X80Y16         FDCE (Setup_fdce_C_CE)      -0.168     7.311    system_i/orbtrace_0/inst/receiver/diagnostics/highwater_gray_reg[2]
+  -------------------------------------------------------------------
+                         required time                          7.311    
+                         arrival time                          -6.785    
+  -------------------------------------------------------------------
+                         slack                                  0.525    
+
+Slack (MET) :             0.571ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.sampled_byte_reg[1]/C
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref_reg[28]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        4.187ns  (logic 1.112ns (26.560%)  route 3.075ns (73.440%))
+  Logic Levels:           6  (LUT4=3 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.071ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.274ns = ( 7.274 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.538ns
+    Clock Pessimism Removal (CPR):    0.193ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.459     2.538    system_i/orbtrace_0/inst/receiver/malformed_reg
+    SLICE_X79Y15         FDCE                                         r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.sampled_byte_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X79Y15         FDCE (Prop_fdce_C_Q)         0.348     2.886 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.sampled_byte_reg[1]/Q
+                         net (fo=6, routed)           0.441     3.327    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/Q[1]
+    SLICE_X78Y15         LUT4 (Prop_lut4_I0_O)        0.239     3.566 f  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_16/O
+                         net (fo=2, routed)           0.409     3.975    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_16_n_0
+    SLICE_X79Y15         LUT5 (Prop_lut5_I0_O)        0.105     4.080 f  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_10/O
+                         net (fo=1, routed)           0.230     4.309    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_10_n_0
+    SLICE_X76Y15         LUT6 (Prop_lut6_I5_O)        0.105     4.414 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_4/O
+                         net (fo=2, routed)           0.479     4.893    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_4_n_0
+    SLICE_X73Y15         LUT6 (Prop_lut6_I0_O)        0.105     4.998 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_1/O
+                         net (fo=6, routed)           0.496     5.494    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_1_n_0
+    SLICE_X65Y16         LUT4 (Prop_lut4_I0_O)        0.105     5.599 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0/O
+                         net (fo=65, routed)          0.452     6.051    system_i/etm_ddr_0/inst/framed_capture.capture/trace_sync_event
+    SLICE_X62Y17         LUT4 (Prop_lut4_I3_O)        0.105     6.156 r  system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref[0]_i_1/O
+                         net (fo=32, routed)          0.569     6.725    system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref0
+    SLICE_X58Y21         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref_reg[28]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.292     7.274    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X58Y21         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref_reg[28]/C
+                         clock pessimism              0.193     7.467    
+                         clock uncertainty           -0.035     7.432    
+    SLICE_X58Y21         FDCE (Setup_fdce_C_CE)      -0.136     7.296    system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref_reg[28]
+  -------------------------------------------------------------------
+                         required time                          7.296    
+                         arrival time                          -6.725    
+  -------------------------------------------------------------------
+                         slack                                  0.571    
+
+Slack (MET) :             0.571ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.sampled_byte_reg[1]/C
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref_reg[29]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        4.187ns  (logic 1.112ns (26.560%)  route 3.075ns (73.440%))
+  Logic Levels:           6  (LUT4=3 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.071ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.274ns = ( 7.274 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.538ns
+    Clock Pessimism Removal (CPR):    0.193ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.459     2.538    system_i/orbtrace_0/inst/receiver/malformed_reg
+    SLICE_X79Y15         FDCE                                         r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.sampled_byte_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X79Y15         FDCE (Prop_fdce_C_Q)         0.348     2.886 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.sampled_byte_reg[1]/Q
+                         net (fo=6, routed)           0.441     3.327    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/Q[1]
+    SLICE_X78Y15         LUT4 (Prop_lut4_I0_O)        0.239     3.566 f  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_16/O
+                         net (fo=2, routed)           0.409     3.975    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_16_n_0
+    SLICE_X79Y15         LUT5 (Prop_lut5_I0_O)        0.105     4.080 f  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_10/O
+                         net (fo=1, routed)           0.230     4.309    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_10_n_0
+    SLICE_X76Y15         LUT6 (Prop_lut6_I5_O)        0.105     4.414 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_4/O
+                         net (fo=2, routed)           0.479     4.893    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_4_n_0
+    SLICE_X73Y15         LUT6 (Prop_lut6_I0_O)        0.105     4.998 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_1/O
+                         net (fo=6, routed)           0.496     5.494    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_1_n_0
+    SLICE_X65Y16         LUT4 (Prop_lut4_I0_O)        0.105     5.599 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0/O
+                         net (fo=65, routed)          0.452     6.051    system_i/etm_ddr_0/inst/framed_capture.capture/trace_sync_event
+    SLICE_X62Y17         LUT4 (Prop_lut4_I3_O)        0.105     6.156 r  system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref[0]_i_1/O
+                         net (fo=32, routed)          0.569     6.725    system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref0
+    SLICE_X58Y21         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref_reg[29]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.292     7.274    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X58Y21         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref_reg[29]/C
+                         clock pessimism              0.193     7.467    
+                         clock uncertainty           -0.035     7.432    
+    SLICE_X58Y21         FDCE (Setup_fdce_C_CE)      -0.136     7.296    system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref_reg[29]
+  -------------------------------------------------------------------
+                         required time                          7.296    
+                         arrival time                          -6.725    
+  -------------------------------------------------------------------
+                         slack                                  0.571    
+
+Slack (MET) :             0.571ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.sampled_byte_reg[1]/C
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref_reg[30]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        4.187ns  (logic 1.112ns (26.560%)  route 3.075ns (73.440%))
+  Logic Levels:           6  (LUT4=3 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.071ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.274ns = ( 7.274 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.538ns
+    Clock Pessimism Removal (CPR):    0.193ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.459     2.538    system_i/orbtrace_0/inst/receiver/malformed_reg
+    SLICE_X79Y15         FDCE                                         r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.sampled_byte_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X79Y15         FDCE (Prop_fdce_C_Q)         0.348     2.886 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.sampled_byte_reg[1]/Q
+                         net (fo=6, routed)           0.441     3.327    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/Q[1]
+    SLICE_X78Y15         LUT4 (Prop_lut4_I0_O)        0.239     3.566 f  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_16/O
+                         net (fo=2, routed)           0.409     3.975    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_16_n_0
+    SLICE_X79Y15         LUT5 (Prop_lut5_I0_O)        0.105     4.080 f  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_10/O
+                         net (fo=1, routed)           0.230     4.309    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_10_n_0
+    SLICE_X76Y15         LUT6 (Prop_lut6_I5_O)        0.105     4.414 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_4/O
+                         net (fo=2, routed)           0.479     4.893    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_4_n_0
+    SLICE_X73Y15         LUT6 (Prop_lut6_I0_O)        0.105     4.998 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_1/O
+                         net (fo=6, routed)           0.496     5.494    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_1_n_0
+    SLICE_X65Y16         LUT4 (Prop_lut4_I0_O)        0.105     5.599 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0/O
+                         net (fo=65, routed)          0.452     6.051    system_i/etm_ddr_0/inst/framed_capture.capture/trace_sync_event
+    SLICE_X62Y17         LUT4 (Prop_lut4_I3_O)        0.105     6.156 r  system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref[0]_i_1/O
+                         net (fo=32, routed)          0.569     6.725    system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref0
+    SLICE_X58Y21         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref_reg[30]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.292     7.274    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X58Y21         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref_reg[30]/C
+                         clock pessimism              0.193     7.467    
+                         clock uncertainty           -0.035     7.432    
+    SLICE_X58Y21         FDCE (Setup_fdce_C_CE)      -0.136     7.296    system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref_reg[30]
+  -------------------------------------------------------------------
+                         required time                          7.296    
+                         arrival time                          -6.725    
+  -------------------------------------------------------------------
+                         slack                                  0.571    
+
+Slack (MET) :             0.571ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.sampled_byte_reg[1]/C
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref_reg[31]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        4.187ns  (logic 1.112ns (26.560%)  route 3.075ns (73.440%))
+  Logic Levels:           6  (LUT4=3 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.071ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.274ns = ( 7.274 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.538ns
+    Clock Pessimism Removal (CPR):    0.193ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.459     2.538    system_i/orbtrace_0/inst/receiver/malformed_reg
+    SLICE_X79Y15         FDCE                                         r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.sampled_byte_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X79Y15         FDCE (Prop_fdce_C_Q)         0.348     2.886 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.sampled_byte_reg[1]/Q
+                         net (fo=6, routed)           0.441     3.327    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/Q[1]
+    SLICE_X78Y15         LUT4 (Prop_lut4_I0_O)        0.239     3.566 f  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_16/O
+                         net (fo=2, routed)           0.409     3.975    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_16_n_0
+    SLICE_X79Y15         LUT5 (Prop_lut5_I0_O)        0.105     4.080 f  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_10/O
+                         net (fo=1, routed)           0.230     4.309    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_10_n_0
+    SLICE_X76Y15         LUT6 (Prop_lut6_I5_O)        0.105     4.414 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_4/O
+                         net (fo=2, routed)           0.479     4.893    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_4_n_0
+    SLICE_X73Y15         LUT6 (Prop_lut6_I0_O)        0.105     4.998 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_1/O
+                         net (fo=6, routed)           0.496     5.494    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_1_n_0
+    SLICE_X65Y16         LUT4 (Prop_lut4_I0_O)        0.105     5.599 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0/O
+                         net (fo=65, routed)          0.452     6.051    system_i/etm_ddr_0/inst/framed_capture.capture/trace_sync_event
+    SLICE_X62Y17         LUT4 (Prop_lut4_I3_O)        0.105     6.156 r  system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref[0]_i_1/O
+                         net (fo=32, routed)          0.569     6.725    system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref0
+    SLICE_X58Y21         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref_reg[31]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.292     7.274    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X58Y21         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref_reg[31]/C
+                         clock pessimism              0.193     7.467    
+                         clock uncertainty           -0.035     7.432    
+    SLICE_X58Y21         FDCE (Setup_fdce_C_CE)      -0.136     7.296    system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref_reg[31]
+  -------------------------------------------------------------------
+                         required time                          7.296    
+                         arrival time                          -6.725    
+  -------------------------------------------------------------------
+                         slack                                  0.571    
+
+Slack (MET) :             0.603ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/first_byte_reg[2]/C
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[28]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        4.095ns  (logic 0.904ns (22.076%)  route 3.191ns (77.924%))
+  Logic Levels:           5  (LUT4=2 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.131ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.218ns = ( 7.218 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.542ns
+    Clock Pessimism Removal (CPR):    0.193ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.463     2.542    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/malformed_reg_0
+    SLICE_X76Y12         FDCE                                         r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/first_byte_reg[2]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X76Y12         FDCE (Prop_fdce_C_Q)         0.379     2.921 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/first_byte_reg[2]/Q
+                         net (fo=3, routed)           0.697     3.618    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/pair[10]
+    SLICE_X77Y12         LUT4 (Prop_lut4_I1_O)        0.105     3.723 f  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_tail_ambiguous_INST_0_i_2/O
+                         net (fo=1, routed)           0.322     4.045    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_tail_ambiguous_INST_0_i_2_n_0
+    SLICE_X76Y12         LUT5 (Prop_lut5_I4_O)        0.105     4.150 f  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_tail_ambiguous_INST_0_i_1/O
+                         net (fo=2, routed)           0.469     4.619    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_tail_ambiguous_INST_0_i_1_n_0
+    SLICE_X76Y13         LUT6 (Prop_lut6_I5_O)        0.105     4.724 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_parser_error_INST_0_i_1/O
+                         net (fo=9, routed)           0.514     5.238    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_parser_error_INST_0_i_1_n_0
+    SLICE_X71Y14         LUT6 (Prop_lut6_I0_O)        0.105     5.343 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_parser_error_INST_0/O
+                         net (fo=66, routed)          0.304     5.648    system_i/etm_ddr_0/inst/framed_capture.capture/trace_parser_error
+    SLICE_X67Y14         LUT4 (Prop_lut4_I3_O)        0.105     5.753 r  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref[0]_i_1/O
+                         net (fo=32, routed)          0.884     6.637    system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref0
+    SLICE_X50Y17         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[28]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.236     7.218    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X50Y17         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[28]/C
+                         clock pessimism              0.193     7.411    
+                         clock uncertainty           -0.035     7.376    
+    SLICE_X50Y17         FDCE (Setup_fdce_C_CE)      -0.136     7.240    system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[28]
+  -------------------------------------------------------------------
+                         required time                          7.240    
+                         arrival time                          -6.637    
+  -------------------------------------------------------------------
+                         slack                                  0.603    
+
+Slack (MET) :             0.603ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/first_byte_reg[2]/C
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[29]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        4.095ns  (logic 0.904ns (22.076%)  route 3.191ns (77.924%))
+  Logic Levels:           5  (LUT4=2 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.131ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.218ns = ( 7.218 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.542ns
+    Clock Pessimism Removal (CPR):    0.193ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.463     2.542    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/malformed_reg_0
+    SLICE_X76Y12         FDCE                                         r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/first_byte_reg[2]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X76Y12         FDCE (Prop_fdce_C_Q)         0.379     2.921 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/first_byte_reg[2]/Q
+                         net (fo=3, routed)           0.697     3.618    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/pair[10]
+    SLICE_X77Y12         LUT4 (Prop_lut4_I1_O)        0.105     3.723 f  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_tail_ambiguous_INST_0_i_2/O
+                         net (fo=1, routed)           0.322     4.045    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_tail_ambiguous_INST_0_i_2_n_0
+    SLICE_X76Y12         LUT5 (Prop_lut5_I4_O)        0.105     4.150 f  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_tail_ambiguous_INST_0_i_1/O
+                         net (fo=2, routed)           0.469     4.619    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_tail_ambiguous_INST_0_i_1_n_0
+    SLICE_X76Y13         LUT6 (Prop_lut6_I5_O)        0.105     4.724 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_parser_error_INST_0_i_1/O
+                         net (fo=9, routed)           0.514     5.238    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_parser_error_INST_0_i_1_n_0
+    SLICE_X71Y14         LUT6 (Prop_lut6_I0_O)        0.105     5.343 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_parser_error_INST_0/O
+                         net (fo=66, routed)          0.304     5.648    system_i/etm_ddr_0/inst/framed_capture.capture/trace_parser_error
+    SLICE_X67Y14         LUT4 (Prop_lut4_I3_O)        0.105     5.753 r  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref[0]_i_1/O
+                         net (fo=32, routed)          0.884     6.637    system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref0
+    SLICE_X50Y17         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[29]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.236     7.218    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X50Y17         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[29]/C
+                         clock pessimism              0.193     7.411    
+                         clock uncertainty           -0.035     7.376    
+    SLICE_X50Y17         FDCE (Setup_fdce_C_CE)      -0.136     7.240    system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[29]
+  -------------------------------------------------------------------
+                         required time                          7.240    
+                         arrival time                          -6.637    
+  -------------------------------------------------------------------
+                         slack                                  0.603    
+
+Slack (MET) :             0.603ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/first_byte_reg[2]/C
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[30]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        4.095ns  (logic 0.904ns (22.076%)  route 3.191ns (77.924%))
+  Logic Levels:           5  (LUT4=2 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.131ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.218ns = ( 7.218 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.542ns
+    Clock Pessimism Removal (CPR):    0.193ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.463     2.542    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/malformed_reg_0
+    SLICE_X76Y12         FDCE                                         r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/first_byte_reg[2]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X76Y12         FDCE (Prop_fdce_C_Q)         0.379     2.921 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/first_byte_reg[2]/Q
+                         net (fo=3, routed)           0.697     3.618    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/pair[10]
+    SLICE_X77Y12         LUT4 (Prop_lut4_I1_O)        0.105     3.723 f  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_tail_ambiguous_INST_0_i_2/O
+                         net (fo=1, routed)           0.322     4.045    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_tail_ambiguous_INST_0_i_2_n_0
+    SLICE_X76Y12         LUT5 (Prop_lut5_I4_O)        0.105     4.150 f  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_tail_ambiguous_INST_0_i_1/O
+                         net (fo=2, routed)           0.469     4.619    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_tail_ambiguous_INST_0_i_1_n_0
+    SLICE_X76Y13         LUT6 (Prop_lut6_I5_O)        0.105     4.724 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_parser_error_INST_0_i_1/O
+                         net (fo=9, routed)           0.514     5.238    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_parser_error_INST_0_i_1_n_0
+    SLICE_X71Y14         LUT6 (Prop_lut6_I0_O)        0.105     5.343 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_parser_error_INST_0/O
+                         net (fo=66, routed)          0.304     5.648    system_i/etm_ddr_0/inst/framed_capture.capture/trace_parser_error
+    SLICE_X67Y14         LUT4 (Prop_lut4_I3_O)        0.105     5.753 r  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref[0]_i_1/O
+                         net (fo=32, routed)          0.884     6.637    system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref0
+    SLICE_X50Y17         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[30]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.236     7.218    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X50Y17         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[30]/C
+                         clock pessimism              0.193     7.411    
+                         clock uncertainty           -0.035     7.376    
+    SLICE_X50Y17         FDCE (Setup_fdce_C_CE)      -0.136     7.240    system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[30]
+  -------------------------------------------------------------------
+                         required time                          7.240    
+                         arrival time                          -6.637    
+  -------------------------------------------------------------------
+                         slack                                  0.603    
+
+Slack (MET) :             0.603ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/first_byte_reg[2]/C
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[31]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        4.095ns  (logic 0.904ns (22.076%)  route 3.191ns (77.924%))
+  Logic Levels:           5  (LUT4=2 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.131ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.218ns = ( 7.218 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.542ns
+    Clock Pessimism Removal (CPR):    0.193ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.463     2.542    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/malformed_reg_0
+    SLICE_X76Y12         FDCE                                         r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/first_byte_reg[2]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X76Y12         FDCE (Prop_fdce_C_Q)         0.379     2.921 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/first_byte_reg[2]/Q
+                         net (fo=3, routed)           0.697     3.618    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/pair[10]
+    SLICE_X77Y12         LUT4 (Prop_lut4_I1_O)        0.105     3.723 f  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_tail_ambiguous_INST_0_i_2/O
+                         net (fo=1, routed)           0.322     4.045    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_tail_ambiguous_INST_0_i_2_n_0
+    SLICE_X76Y12         LUT5 (Prop_lut5_I4_O)        0.105     4.150 f  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_tail_ambiguous_INST_0_i_1/O
+                         net (fo=2, routed)           0.469     4.619    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_tail_ambiguous_INST_0_i_1_n_0
+    SLICE_X76Y13         LUT6 (Prop_lut6_I5_O)        0.105     4.724 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_parser_error_INST_0_i_1/O
+                         net (fo=9, routed)           0.514     5.238    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_parser_error_INST_0_i_1_n_0
+    SLICE_X71Y14         LUT6 (Prop_lut6_I0_O)        0.105     5.343 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_parser_error_INST_0/O
+                         net (fo=66, routed)          0.304     5.648    system_i/etm_ddr_0/inst/framed_capture.capture/trace_parser_error
+    SLICE_X67Y14         LUT4 (Prop_lut4_I3_O)        0.105     5.753 r  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref[0]_i_1/O
+                         net (fo=32, routed)          0.884     6.637    system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref0
+    SLICE_X50Y17         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[31]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.236     7.218    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X50Y17         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[31]/C
+                         clock pessimism              0.193     7.411    
+                         clock uncertainty           -0.035     7.376    
+    SLICE_X50Y17         FDCE (Setup_fdce_C_CE)      -0.136     7.240    system_i/etm_ddr_0/inst/framed_capture.capture/parser_ref_reg[31]
+  -------------------------------------------------------------------
+                         required time                          7.240    
+                         arrival time                          -6.637    
+  -------------------------------------------------------------------
+                         slack                                  0.603    
+
+Slack (MET) :             0.607ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.sampled_byte_reg[1]/C
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref_reg[0]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        4.157ns  (logic 1.112ns (26.748%)  route 3.045ns (73.252%))
+  Logic Levels:           6  (LUT4=3 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.064ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.281ns = ( 7.281 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.538ns
+    Clock Pessimism Removal (CPR):    0.193ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.459     2.538    system_i/orbtrace_0/inst/receiver/malformed_reg
+    SLICE_X79Y15         FDCE                                         r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.sampled_byte_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X79Y15         FDCE (Prop_fdce_C_Q)         0.348     2.886 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.sampled_byte_reg[1]/Q
+                         net (fo=6, routed)           0.441     3.327    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/Q[1]
+    SLICE_X78Y15         LUT4 (Prop_lut4_I0_O)        0.239     3.566 f  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_16/O
+                         net (fo=2, routed)           0.409     3.975    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_16_n_0
+    SLICE_X79Y15         LUT5 (Prop_lut5_I0_O)        0.105     4.080 f  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_10/O
+                         net (fo=1, routed)           0.230     4.309    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_10_n_0
+    SLICE_X76Y15         LUT6 (Prop_lut6_I5_O)        0.105     4.414 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_4/O
+                         net (fo=2, routed)           0.479     4.893    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_4_n_0
+    SLICE_X73Y15         LUT6 (Prop_lut6_I0_O)        0.105     4.998 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_1/O
+                         net (fo=6, routed)           0.496     5.494    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_1_n_0
+    SLICE_X65Y16         LUT4 (Prop_lut4_I0_O)        0.105     5.599 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0/O
+                         net (fo=65, routed)          0.452     6.051    system_i/etm_ddr_0/inst/framed_capture.capture/trace_sync_event
+    SLICE_X62Y17         LUT4 (Prop_lut4_I3_O)        0.105     6.156 r  system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref[0]_i_1/O
+                         net (fo=32, routed)          0.539     6.695    system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref0
+    SLICE_X58Y14         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref_reg[0]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.299     7.281    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X58Y14         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref_reg[0]/C
+                         clock pessimism              0.193     7.474    
+                         clock uncertainty           -0.035     7.439    
+    SLICE_X58Y14         FDCE (Setup_fdce_C_CE)      -0.136     7.303    system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref_reg[0]
+  -------------------------------------------------------------------
+                         required time                          7.303    
+                         arrival time                          -6.695    
+  -------------------------------------------------------------------
+                         slack                                  0.607    
+
+Slack (MET) :             0.607ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.sampled_byte_reg[1]/C
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref_reg[1]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        4.157ns  (logic 1.112ns (26.748%)  route 3.045ns (73.252%))
+  Logic Levels:           6  (LUT4=3 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.064ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.281ns = ( 7.281 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.538ns
+    Clock Pessimism Removal (CPR):    0.193ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.459     2.538    system_i/orbtrace_0/inst/receiver/malformed_reg
+    SLICE_X79Y15         FDCE                                         r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.sampled_byte_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X79Y15         FDCE (Prop_fdce_C_Q)         0.348     2.886 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.sampled_byte_reg[1]/Q
+                         net (fo=6, routed)           0.441     3.327    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/Q[1]
+    SLICE_X78Y15         LUT4 (Prop_lut4_I0_O)        0.239     3.566 f  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_16/O
+                         net (fo=2, routed)           0.409     3.975    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_16_n_0
+    SLICE_X79Y15         LUT5 (Prop_lut5_I0_O)        0.105     4.080 f  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_10/O
+                         net (fo=1, routed)           0.230     4.309    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_10_n_0
+    SLICE_X76Y15         LUT6 (Prop_lut6_I5_O)        0.105     4.414 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_4/O
+                         net (fo=2, routed)           0.479     4.893    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_4_n_0
+    SLICE_X73Y15         LUT6 (Prop_lut6_I0_O)        0.105     4.998 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_1/O
+                         net (fo=6, routed)           0.496     5.494    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_1_n_0
+    SLICE_X65Y16         LUT4 (Prop_lut4_I0_O)        0.105     5.599 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0/O
+                         net (fo=65, routed)          0.452     6.051    system_i/etm_ddr_0/inst/framed_capture.capture/trace_sync_event
+    SLICE_X62Y17         LUT4 (Prop_lut4_I3_O)        0.105     6.156 r  system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref[0]_i_1/O
+                         net (fo=32, routed)          0.539     6.695    system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref0
+    SLICE_X58Y14         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref_reg[1]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.299     7.281    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X58Y14         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref_reg[1]/C
+                         clock pessimism              0.193     7.474    
+                         clock uncertainty           -0.035     7.439    
+    SLICE_X58Y14         FDCE (Setup_fdce_C_CE)      -0.136     7.303    system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref_reg[1]
+  -------------------------------------------------------------------
+                         required time                          7.303    
+                         arrival time                          -6.695    
+  -------------------------------------------------------------------
+                         slack                                  0.607    
+
+Slack (MET) :             0.607ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.sampled_byte_reg[1]/C
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref_reg[2]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        4.157ns  (logic 1.112ns (26.748%)  route 3.045ns (73.252%))
+  Logic Levels:           6  (LUT4=3 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.064ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.281ns = ( 7.281 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.538ns
+    Clock Pessimism Removal (CPR):    0.193ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.459     2.538    system_i/orbtrace_0/inst/receiver/malformed_reg
+    SLICE_X79Y15         FDCE                                         r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.sampled_byte_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X79Y15         FDCE (Prop_fdce_C_Q)         0.348     2.886 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.sampled_byte_reg[1]/Q
+                         net (fo=6, routed)           0.441     3.327    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/Q[1]
+    SLICE_X78Y15         LUT4 (Prop_lut4_I0_O)        0.239     3.566 f  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_16/O
+                         net (fo=2, routed)           0.409     3.975    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_16_n_0
+    SLICE_X79Y15         LUT5 (Prop_lut5_I0_O)        0.105     4.080 f  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_10/O
+                         net (fo=1, routed)           0.230     4.309    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_10_n_0
+    SLICE_X76Y15         LUT6 (Prop_lut6_I5_O)        0.105     4.414 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_4/O
+                         net (fo=2, routed)           0.479     4.893    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_4_n_0
+    SLICE_X73Y15         LUT6 (Prop_lut6_I0_O)        0.105     4.998 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_1/O
+                         net (fo=6, routed)           0.496     5.494    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_1_n_0
+    SLICE_X65Y16         LUT4 (Prop_lut4_I0_O)        0.105     5.599 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0/O
+                         net (fo=65, routed)          0.452     6.051    system_i/etm_ddr_0/inst/framed_capture.capture/trace_sync_event
+    SLICE_X62Y17         LUT4 (Prop_lut4_I3_O)        0.105     6.156 r  system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref[0]_i_1/O
+                         net (fo=32, routed)          0.539     6.695    system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref0
+    SLICE_X58Y14         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref_reg[2]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.299     7.281    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X58Y14         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref_reg[2]/C
+                         clock pessimism              0.193     7.474    
+                         clock uncertainty           -0.035     7.439    
+    SLICE_X58Y14         FDCE (Setup_fdce_C_CE)      -0.136     7.303    system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref_reg[2]
+  -------------------------------------------------------------------
+                         required time                          7.303    
+                         arrival time                          -6.695    
+  -------------------------------------------------------------------
+                         slack                                  0.607    
+
+Slack (MET) :             0.607ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.sampled_byte_reg[1]/C
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref_reg[3]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        4.157ns  (logic 1.112ns (26.748%)  route 3.045ns (73.252%))
+  Logic Levels:           6  (LUT4=3 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.064ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.281ns = ( 7.281 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.538ns
+    Clock Pessimism Removal (CPR):    0.193ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.459     2.538    system_i/orbtrace_0/inst/receiver/malformed_reg
+    SLICE_X79Y15         FDCE                                         r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.sampled_byte_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X79Y15         FDCE (Prop_fdce_C_Q)         0.348     2.886 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.sampled_byte_reg[1]/Q
+                         net (fo=6, routed)           0.441     3.327    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/Q[1]
+    SLICE_X78Y15         LUT4 (Prop_lut4_I0_O)        0.239     3.566 f  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_16/O
+                         net (fo=2, routed)           0.409     3.975    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_16_n_0
+    SLICE_X79Y15         LUT5 (Prop_lut5_I0_O)        0.105     4.080 f  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_10/O
+                         net (fo=1, routed)           0.230     4.309    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_10_n_0
+    SLICE_X76Y15         LUT6 (Prop_lut6_I5_O)        0.105     4.414 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_4/O
+                         net (fo=2, routed)           0.479     4.893    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_4_n_0
+    SLICE_X73Y15         LUT6 (Prop_lut6_I0_O)        0.105     4.998 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_1/O
+                         net (fo=6, routed)           0.496     5.494    system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0_i_1_n_0
+    SLICE_X65Y16         LUT4 (Prop_lut4_I0_O)        0.105     5.599 r  system_i/orbtrace_0/inst/receiver/raw_oversample_filtered.parser/ddr_sync_event_INST_0/O
+                         net (fo=65, routed)          0.452     6.051    system_i/etm_ddr_0/inst/framed_capture.capture/trace_sync_event
+    SLICE_X62Y17         LUT4 (Prop_lut4_I3_O)        0.105     6.156 r  system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref[0]_i_1/O
+                         net (fo=32, routed)          0.539     6.695    system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref0
+    SLICE_X58Y14         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref_reg[3]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.299     7.281    system_i/etm_ddr_0/inst/framed_capture.capture/ref_clk
+    SLICE_X58Y14         FDCE                                         r  system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref_reg[3]/C
+                         clock pessimism              0.193     7.474    
+                         clock uncertainty           -0.035     7.439    
+    SLICE_X58Y14         FDCE (Setup_fdce_C_CE)      -0.136     7.303    system_i/etm_ddr_0/inst/framed_capture.capture/sync_ref_reg[3]
+  -------------------------------------------------------------------
+                         required time                          7.303    
+                         arrival time                          -6.695    
+  -------------------------------------------------------------------
+                         slack                                  0.607    
+
+Slack (MET) :             0.613ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/fifo/wg_reg[3]/C
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/orbtrace_0/inst/receiver/diagnostics/highwater_gray_reg[0]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        4.123ns  (logic 1.662ns (40.315%)  route 2.461ns (59.685%))
+  Logic Levels:           7  (CARRY4=1 LUT2=1 LUT4=3 LUT5=2)
+  Clock Path Skew:        -0.061ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.287ns = ( 7.287 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.541ns
+    Clock Pessimism Removal (CPR):    0.193ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.462     2.541    system_i/orbtrace_0/inst/receiver/fifo/wp_reg[0]_0
+    SLICE_X80Y14         FDCE                                         r  system_i/orbtrace_0/inst/receiver/fifo/wg_reg[3]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X80Y14         FDCE (Prop_fdce_C_Q)         0.348     2.889 r  system_i/orbtrace_0/inst/receiver/fifo/wg_reg[3]/Q
+                         net (fo=7, routed)           0.574     3.463    system_i/orbtrace_0/inst/receiver/fifo/wg[3]
+    SLICE_X79Y14         LUT4 (Prop_lut4_I2_O)        0.239     3.702 r  system_i/orbtrace_0/inst/receiver/fifo/seen[0]_i_3/O
+                         net (fo=1, routed)           0.204     3.907    system_i/orbtrace_0/inst/receiver/fifo/seen[0]_i_3_n_0
+    SLICE_X79Y14         LUT5 (Prop_lut5_I4_O)        0.105     4.012 f  system_i/orbtrace_0/inst/receiver/fifo/seen[0]_i_2/O
+                         net (fo=4, routed)           0.340     4.351    system_i/orbtrace_0/inst/receiver/fifo/rg2_reg[0]_0
+    SLICE_X78Y14         LUT4 (Prop_lut4_I0_O)        0.105     4.456 r  system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_i_4/O
+                         net (fo=14, routed)          0.465     4.921    system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_i_2_n_0
+    SLICE_X79Y16         LUT5 (Prop_lut5_I1_O)        0.105     5.026 r  system_i/orbtrace_0/inst/receiver/fifo/highwater[0]_i_1/O
+                         net (fo=3, routed)           0.337     5.362    system_i/orbtrace_0/inst/receiver/fifo/raw_oversample_filtered.sample_reset_reg[1][0]
+    SLICE_X78Y16         LUT4 (Prop_lut4_I2_O)        0.105     5.467 r  system_i/orbtrace_0/inst/receiver/fifo/highwater0_carry_i_4/O
+                         net (fo=1, routed)           0.000     5.467    system_i/orbtrace_0/inst/receiver/diagnostics/S[0]
+    SLICE_X78Y16         CARRY4 (Prop_carry4_S[0]_CO[1])
+                                                      0.380     5.847 r  system_i/orbtrace_0/inst/receiver/diagnostics/highwater0_carry/CO[1]
+                         net (fo=1, routed)           0.235     6.082    system_i/orbtrace_0/inst/receiver/diagnostics/highwater0_carry_n_2
+    SLICE_X79Y16         LUT2 (Prop_lut2_I0_O)        0.275     6.357 r  system_i/orbtrace_0/inst/receiver/diagnostics/highwater[2]_i_1/O
+                         net (fo=7, routed)           0.306     6.664    system_i/orbtrace_0/inst/receiver/diagnostics/highwater
+    SLICE_X79Y16         FDCE                                         r  system_i/orbtrace_0/inst/receiver/diagnostics/highwater_gray_reg[0]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.305     7.287    system_i/orbtrace_0/inst/receiver/diagnostics/syncs_reg[0]_0
+    SLICE_X79Y16         FDCE                                         r  system_i/orbtrace_0/inst/receiver/diagnostics/highwater_gray_reg[0]/C
+                         clock pessimism              0.193     7.480    
+                         clock uncertainty           -0.035     7.445    
+    SLICE_X79Y16         FDCE (Setup_fdce_C_CE)      -0.168     7.277    system_i/orbtrace_0/inst/receiver/diagnostics/highwater_gray_reg[0]
+  -------------------------------------------------------------------
+                         required time                          7.277    
+                         arrival time                          -6.664    
+  -------------------------------------------------------------------
+                         slack                                  0.613    
+
+Slack (MET) :             0.613ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/fifo/wg_reg[3]/C
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/orbtrace_0/inst/receiver/diagnostics/highwater_reg[0]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        4.123ns  (logic 1.662ns (40.315%)  route 2.461ns (59.685%))
+  Logic Levels:           7  (CARRY4=1 LUT2=1 LUT4=3 LUT5=2)
+  Clock Path Skew:        -0.061ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.287ns = ( 7.287 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.541ns
+    Clock Pessimism Removal (CPR):    0.193ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.462     2.541    system_i/orbtrace_0/inst/receiver/fifo/wp_reg[0]_0
+    SLICE_X80Y14         FDCE                                         r  system_i/orbtrace_0/inst/receiver/fifo/wg_reg[3]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X80Y14         FDCE (Prop_fdce_C_Q)         0.348     2.889 r  system_i/orbtrace_0/inst/receiver/fifo/wg_reg[3]/Q
+                         net (fo=7, routed)           0.574     3.463    system_i/orbtrace_0/inst/receiver/fifo/wg[3]
+    SLICE_X79Y14         LUT4 (Prop_lut4_I2_O)        0.239     3.702 r  system_i/orbtrace_0/inst/receiver/fifo/seen[0]_i_3/O
+                         net (fo=1, routed)           0.204     3.907    system_i/orbtrace_0/inst/receiver/fifo/seen[0]_i_3_n_0
+    SLICE_X79Y14         LUT5 (Prop_lut5_I4_O)        0.105     4.012 f  system_i/orbtrace_0/inst/receiver/fifo/seen[0]_i_2/O
+                         net (fo=4, routed)           0.340     4.351    system_i/orbtrace_0/inst/receiver/fifo/rg2_reg[0]_0
+    SLICE_X78Y14         LUT4 (Prop_lut4_I0_O)        0.105     4.456 r  system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_i_4/O
+                         net (fo=14, routed)          0.465     4.921    system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_i_2_n_0
+    SLICE_X79Y16         LUT5 (Prop_lut5_I1_O)        0.105     5.026 r  system_i/orbtrace_0/inst/receiver/fifo/highwater[0]_i_1/O
+                         net (fo=3, routed)           0.337     5.362    system_i/orbtrace_0/inst/receiver/fifo/raw_oversample_filtered.sample_reset_reg[1][0]
+    SLICE_X78Y16         LUT4 (Prop_lut4_I2_O)        0.105     5.467 r  system_i/orbtrace_0/inst/receiver/fifo/highwater0_carry_i_4/O
+                         net (fo=1, routed)           0.000     5.467    system_i/orbtrace_0/inst/receiver/diagnostics/S[0]
+    SLICE_X78Y16         CARRY4 (Prop_carry4_S[0]_CO[1])
+                                                      0.380     5.847 r  system_i/orbtrace_0/inst/receiver/diagnostics/highwater0_carry/CO[1]
+                         net (fo=1, routed)           0.235     6.082    system_i/orbtrace_0/inst/receiver/diagnostics/highwater0_carry_n_2
+    SLICE_X79Y16         LUT2 (Prop_lut2_I0_O)        0.275     6.357 r  system_i/orbtrace_0/inst/receiver/diagnostics/highwater[2]_i_1/O
+                         net (fo=7, routed)           0.306     6.664    system_i/orbtrace_0/inst/receiver/diagnostics/highwater
+    SLICE_X79Y16         FDCE                                         r  system_i/orbtrace_0/inst/receiver/diagnostics/highwater_reg[0]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.305     7.287    system_i/orbtrace_0/inst/receiver/diagnostics/syncs_reg[0]_0
+    SLICE_X79Y16         FDCE                                         r  system_i/orbtrace_0/inst/receiver/diagnostics/highwater_reg[0]/C
+                         clock pessimism              0.193     7.480    
+                         clock uncertainty           -0.035     7.445    
+    SLICE_X79Y16         FDCE (Setup_fdce_C_CE)      -0.168     7.277    system_i/orbtrace_0/inst/receiver/diagnostics/highwater_reg[0]
+  -------------------------------------------------------------------
+                         required time                          7.277    
+                         arrival time                          -6.664    
+  -------------------------------------------------------------------
+                         slack                                  0.613    
+
+Slack (MET) :             0.613ns  (required time - arrival time)
+  Source:                 system_i/orbtrace_0/inst/receiver/fifo/wg_reg[3]/C
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Destination:            system_i/orbtrace_0/inst/receiver/diagnostics/highwater_reg[1]/CE
+                            (rising edge-triggered cell FDCE clocked by clk_delay_ref  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             clk_delay_ref
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            5.000ns  (clk_delay_ref rise@5.000ns - clk_delay_ref rise@0.000ns)
+  Data Path Delay:        4.123ns  (logic 1.662ns (40.315%)  route 2.461ns (59.685%))
+  Logic Levels:           7  (CARRY4=1 LUT2=1 LUT4=3 LUT5=2)
+  Clock Path Skew:        -0.061ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.287ns = ( 7.287 - 5.000 ) 
+    Source Clock Delay      (SCD):    2.541ns
+    Clock Pessimism Removal (CPR):    0.193ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_delay_ref rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     0.994    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.085     1.079 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.462     2.541    system_i/orbtrace_0/inst/receiver/fifo/wp_reg[0]_0
+    SLICE_X80Y14         FDCE                                         r  system_i/orbtrace_0/inst/receiver/fifo/wg_reg[3]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X80Y14         FDCE (Prop_fdce_C_Q)         0.348     2.889 r  system_i/orbtrace_0/inst/receiver/fifo/wg_reg[3]/Q
+                         net (fo=7, routed)           0.574     3.463    system_i/orbtrace_0/inst/receiver/fifo/wg[3]
+    SLICE_X79Y14         LUT4 (Prop_lut4_I2_O)        0.239     3.702 r  system_i/orbtrace_0/inst/receiver/fifo/seen[0]_i_3/O
+                         net (fo=1, routed)           0.204     3.907    system_i/orbtrace_0/inst/receiver/fifo/seen[0]_i_3_n_0
+    SLICE_X79Y14         LUT5 (Prop_lut5_I4_O)        0.105     4.012 f  system_i/orbtrace_0/inst/receiver/fifo/seen[0]_i_2/O
+                         net (fo=4, routed)           0.340     4.351    system_i/orbtrace_0/inst/receiver/fifo/rg2_reg[0]_0
+    SLICE_X78Y14         LUT4 (Prop_lut4_I0_O)        0.105     4.456 r  system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_i_4/O
+                         net (fo=14, routed)          0.465     4.921    system_i/orbtrace_0/inst/receiver/fifo/mem_reg_0_i_2_n_0
+    SLICE_X79Y16         LUT5 (Prop_lut5_I1_O)        0.105     5.026 r  system_i/orbtrace_0/inst/receiver/fifo/highwater[0]_i_1/O
+                         net (fo=3, routed)           0.337     5.362    system_i/orbtrace_0/inst/receiver/fifo/raw_oversample_filtered.sample_reset_reg[1][0]
+    SLICE_X78Y16         LUT4 (Prop_lut4_I2_O)        0.105     5.467 r  system_i/orbtrace_0/inst/receiver/fifo/highwater0_carry_i_4/O
+                         net (fo=1, routed)           0.000     5.467    system_i/orbtrace_0/inst/receiver/diagnostics/S[0]
+    SLICE_X78Y16         CARRY4 (Prop_carry4_S[0]_CO[1])
+                                                      0.380     5.847 r  system_i/orbtrace_0/inst/receiver/diagnostics/highwater0_carry/CO[1]
+                         net (fo=1, routed)           0.235     6.082    system_i/orbtrace_0/inst/receiver/diagnostics/highwater0_carry_n_2
+    SLICE_X79Y16         LUT2 (Prop_lut2_I0_O)        0.275     6.357 r  system_i/orbtrace_0/inst/receiver/diagnostics/highwater[2]_i_1/O
+                         net (fo=7, routed)           0.306     6.664    system_i/orbtrace_0/inst/receiver/diagnostics/highwater
+    SLICE_X79Y16         FDCE                                         r  system_i/orbtrace_0/inst/receiver/diagnostics/highwater_reg[1]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_delay_ref rise edge)
+                                                      5.000     5.000 r  
+    PS7_X0Y0             PS7                          0.000     5.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.905     5.905    system_i/orbtrace_0/inst/ref_clk
+    BUFGCTRL_X0Y17       BUFG (Prop_bufg_I_O)         0.077     5.983 r  system_i/orbtrace_0/inst/delay_reference_buffer/O
+                         net (fo=990, routed)         1.305     7.287    system_i/orbtrace_0/inst/receiver/diagnostics/syncs_reg[0]_0
+    SLICE_X79Y16         FDCE                                         r  system_i/orbtrace_0/inst/receiver/diagnostics/highwater_reg[1]/C
+                         clock pessimism              0.193     7.480    
+                         clock uncertainty           -0.035     7.445    
+    SLICE_X79Y16         FDCE (Setup_fdce_C_CE)      -0.168     7.277    system_i/orbtrace_0/inst/receiver/diagnostics/highwater_reg[1]
+  -------------------------------------------------------------------
+                         required time                          7.277    
+                         arrival time                          -6.664    
+  -------------------------------------------------------------------
+                         slack                                  0.613    
+
+
+
+
