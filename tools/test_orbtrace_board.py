@@ -38,6 +38,7 @@ def sha(data):
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--target-elf', type=Path, required=True)
+    ap.add_argument('--ram-image',action='store_true',help='AI experiment: verify an already running SRAM-only ELF; no Flash FPB entry')
     ap.add_argument('--bit', type=Path, required=True)
     ap.add_argument('--elf', type=Path, required=True)
     ap.add_argument('--output', type=Path, required=True)
@@ -60,6 +61,12 @@ def main():
     ap.add_argument('--raw', action='store_true', help='Capture diagnostic sampled DDR bytes, not decoded ETM')
     ap.add_argument('--raw-samples', action='store_true', help='RAW_DIAGNOSTIC=3: preserve packed 200MHz five-line samples')
     args = ap.parse_args()
+    ram_plan=None
+    if args.ram_image:
+        if args.entry or args.reset_to_entry or args.hclk_div!=1:
+            ap.error('RAM experiment cannot use Flash FPB entry/reset or host clock override')
+        from f103_ram_image import plan
+        ram_plan=plan(args.target_elf)
     if not 0 < args.milliseconds <= 2000:
         ap.error('capture outside supported window')
     if args.ddr_physical and (args.raw or args.raw_samples or args.hclk_div != 1 or args.gpio_speed is not None):
@@ -148,17 +155,27 @@ def main():
         report['cpuid'] = hex(mem.word(0xe000ed00))
         assert mem.word(0xe0042000) & 0xfff == 0x414, 'requires F103xE'
         report['flash'] = []
-        with args.target_elf.open('rb') as f:
-            for segment in ELFFile(f).iter_segments():
-                if segment['p_type'] != 'PT_LOAD' or not segment['p_filesz']:
-                    continue
-                address = segment['p_paddr']
-                if 0x08000000 <= address < 0x08080000:
-                    expected = segment.data()
-                    actual = mem.read(address, len(expected))
-                    assert actual == expected, f'ELF/Flash mismatch at {address:#x}'
-                    report['flash'].append(dict(address=address, bytes=len(expected), sha256=sha(actual)))
-        assert report['flash'], 'no Flash image verified'
+        if ram_plan:
+            # The linker keeps code and initializers in a separate lower SRAM
+            # area; startup copies RW data to upper SRAM, leaving load bytes intact.
+            report['ram_image']=[]
+            for address,expected in ram_plan['payloads']:
+                actual=mem.read(address,len(expected))
+                assert actual==expected,f'ELF/SRAM load image mismatch at {address:#x}'
+                report['ram_image'].append(dict(address=address,bytes=len(expected),sha256=sha(actual)))
+            assert mem.word(0xe000ed08)==0x20000000,'SRAM vector table is not active'
+        else:
+            with args.target_elf.open('rb') as f:
+                for segment in ELFFile(f).iter_segments():
+                    if segment['p_type'] != 'PT_LOAD' or not segment['p_filesz']:
+                        continue
+                    address = segment['p_paddr']
+                    if 0x08000000 <= address < 0x08080000:
+                        expected = segment.data()
+                        actual = mem.read(address, len(expected))
+                        assert actual == expected, f'ELF/Flash mismatch at {address:#x}'
+                        report['flash'].append(dict(address=address, bytes=len(expected), sha256=sha(actual)))
+            assert report['flash'], 'no Flash image verified'
         report['reference'] = struct.unpack('<4I', dev.ctrl_transfer(0xc0, 0x61, 0, 0x4554, 16))
         assert 190_000_000 <= report['reference'][0] <= 210_000_000 and report['reference'][3] & 1
         ddr_usb=not args.ddr_physical and not args.raw and args.transport!='legacy' and bool(report['reference'][3]&0x200)

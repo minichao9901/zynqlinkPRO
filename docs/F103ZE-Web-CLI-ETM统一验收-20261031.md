@@ -1204,3 +1204,11 @@ Web窗口元数据在DDR模式以硬件ticks/ref计算实际时长，主机下�
 本阶段只改主机软件，继续使用已经明确加载验收的`prebuilt/etm-ddr-usb-raw4-20261101`配对；采后只读核对FCLK119,999,998Hz、SWCLK999,999.9833Hz。没有修改RTL/PS、目标PLL/AHB/APB或Flash/QSPI。先前8896780便携EXE未包含本轮优化，不能把源码测得的耗时标成旧EXE性能。高频TRACECLK、逐线校准及H743真机仍未完成。
 
 随后默认批量路径真机压力验收：10次打开/关闭、10次100ms采集与原生解码，逐轮交替cdc_poll/cdc_tx_poll断点，均通过；每轮同步CDC echo且严格核对硬件窗口内完成的事务，首错即停、没有补跑。完整流程5.978～7.283秒，中位6.510秒，探针打开中位0.681秒；所有轮次packetIssues=0、无传输丢失、RCC及清理检查通过。[10轮压力原始证据与可重放记录](validation/etm-register-batch-ab-20261101/stress/analysis.json)。这证明本阶段改动在已测范围内通过，不是高频或长期稳定性上限。
+
+### 2026-11-01：按用户优先级转回提频与逐线校准；SRAM时钟对照
+
+控制接口耗时优化暂停在9dc6e0b，保留记录待后续继续；当前重点为真实Web压力和TRACECLK提升、DDR输入采样校准。为遵守不写目标Flash、不由Web改分频的要求，为完整F103ZE CDC固件新增`-Ram`构建：下32KiB保存向量、代码及初始化数据加载镜像，上32KiB保存运行数据/栈，原RTT/诊断地址不变。48/72MHz由原target SystemClock_Config自行初始化，USB保持48MHz，VTOR指向SRAM。AI入口`etm.ram-fixture`先验证全部ELF段只在64KiB SRAM，再装载、回读和核对固件时钟诊断/RCC；实验前后核对原Flash字节，最后复位返回原Flash固件，不保留跨复位的应用RAM状态。
+
+使用相同已加载RAW4 DDR配对，SRAM CPU48MHz/TRACECLK24MHz的100ms、1s两轮通过；1s完整原生解析4,986,432包、20,392,676个执行范围，packetIssues=0、addressInaccessible=0，硬件窗口内62次完整精确CDC echo。SRAM CPU72MHz/TRACECLK36MHz首轮100ms即失败，保留原始FRM1 2,647,833字节：parserErrors=23,741、syncAcquisitions=23,742，但frameDrops=0、IDELAY ready loss=0、FIFO highwater=1、writerError=0、stopReason=0。采集中没有USB trace负载，采后下载约36.44MB/s。它把问题进一步定位到输入采样/成帧侧，不能归因为USB带宽；也不能仅凭parser错误断定是杜邦线电气问题，RAW4滤波与采样相位仍需对照。
+
+这次36MHz失败后没有补跑下一轮。清理及原Flash固件重启成功，RCC回到CPU48MHz基线，随后额外10次精确CDC echo通过。此阶段仍无运行时逐线IDELAY校准，36MHz不能标成支持；接下来需在真实接收路径加入可装载/读回的独立tap，完成偏斜/毛刺/停钟仿真和新bit/ELF时序、上板对照。SRAM试验不替代Flash FPB起点或H743验收。

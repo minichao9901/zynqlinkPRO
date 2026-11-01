@@ -4,6 +4,7 @@
 #   pwsh -NoProfile -File .\build.ps1                 # 默认 -Chip cb（在线板 F103CB/R8，64K/20K）
 #   pwsh -NoProfile -File .\build.ps1 -Chip ze        # F103ZE，默认 CPU 48 / TRACECLK 24 MHz
 #   pwsh -NoProfile -File .\build.ps1 -Chip ze -CpuMHz 72 # 72/36 MHz 对照档 fw-ze-72.*
+#   pwsh -NoProfile -File .\build.ps1 -Chip ze -CpuMHz 72 -Ram # SRAM-only 72/36 MHz, no Flash programming
 #
 # 产物：build\<chip>\fw.{elf,bin,hex}，并在根目录放 fw-<chip>.* 副本。
 # 本脚本**只编译不烧录**；烧录用 flash.ps1。
@@ -14,12 +15,14 @@ param(
     [string]$Gcc,
     [switch]$StandaloneEtm,
     [ValidateSet(24, 48, 72)][int]$CpuMHz = 72,
-    [switch]$TraceWorkload
+    [switch]$TraceWorkload,
+    [switch]$Ram
 )
 $ErrorActionPreference = 'Stop'
 $explicitCpuMHz = $PSBoundParameters.ContainsKey('CpuMHz')
 if ($Chip -eq 'ze' -and -not $explicitCpuMHz) { $CpuMHz = 48 }
 if ($StandaloneEtm -and $Chip -ne 'ze') { throw '独立 ETM 模式仅支持 F103ZE' }
+if ($Ram -and $Chip -ne 'ze') { throw 'RAM ETM 对照固件仅支持 F103ZE' }
 Import-Module (Join-Path $PSScriptRoot 'tools\BuildTools.psm1') -Force
 
 $root = $PSScriptRoot
@@ -30,6 +33,7 @@ $variant = if ($StandaloneEtm) { "$Chip-standalone" } else { $Chip }
 if (($CpuMHz -in @(24, 48) -and ($explicitCpuMHz -or $StandaloneEtm -or $TraceWorkload)) -or
     ($Chip -eq 'ze' -and $CpuMHz -eq 72)) { $variant += "-$CpuMHz" }
 if ($TraceWorkload) { $variant += '-workload' }
+if ($Ram) { $variant += '-ram' }
 $out  = Join-Path $root "build\$variant"
 New-Item -ItemType Directory -Path $out -Force | Out-Null
 
@@ -42,6 +46,7 @@ switch ($Chip) {
     'cb' { $def = 'STM32F103xB'; $startup = 'startup_stm32f103xb.s'; $ld = 'stm32f103cb.ld' }
     'ze' { $def = 'STM32F103xE'; $startup = 'startup_stm32f103xe.s'; $ld = 'stm32f103ze.ld' }
 }
+if ($Ram) { $ld = 'stm32f103ze-ram.ld' }
 
 $flags = @(
     '-mcpu=cortex-m3', '-mthumb',
@@ -70,6 +75,7 @@ if ($CpuMHz -eq 24) { $flags += '-DTRACE_CPU_24MHZ' }
 elseif ($CpuMHz -eq 48) { $flags += '-DTRACE_CPU_48MHZ' }
 else { $flags += '-DTRACE_CPU_72MHZ' }
 if ($TraceWorkload) { $flags += '-DTRACE_PATH_WORKLOAD' }
+if ($Ram) { $flags += '-DUSER_VECT_TAB_ADDRESS', '-DVECT_TAB_SRAM' }
 
 # ---------- 源文件 ----------
 $sources = @(

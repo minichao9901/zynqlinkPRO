@@ -22,6 +22,7 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--pair',type=Path,required=True)
     p.add_argument('--target-elf',type=Path,default=ROOT/'prebuilt/golden/f103ze-cdc48.elf')
+    p.add_argument('--ram-image',action='store_true',help='AI clock experiment: preloaded SRAM CDC firmware, free-running entry (F103 FPB cannot break here)')
     p.add_argument('--out',type=Path,required=True)
     p.add_argument('--rounds',type=int,default=2)
     p.add_argument('--seconds',default='1,2')
@@ -31,8 +32,12 @@ def main():
     p.add_argument('--download',choices=('usb','physical'),default='usb')
     p.add_argument('--verify-ddr-physical',action='store_true',help='Compare USB bytes with the same physical AP0 DDR buffer')
     a=p.parse_args()
+    if a.ram_image:
+        from f103_ram_image import plan
+        plan(a.target_elf)
+        if a.functions!='cdc_poll,cdc_tx_poll':p.error('RAM clock experiment does not support Flash FPB function entries')
     seconds=[float(x) for x in a.seconds.split(',')]
-    functions=a.functions.split(',')
+    functions=['RAM-running'] if a.ram_image else a.functions.split(',')
     if not 1<=a.rounds<=20 or not seconds or not all(0<x<=2 for x in seconds) or not all(functions):
         p.error('invalid finite rounds/windows/functions')
     pair=a.pair.resolve();out=a.out.resolve()
@@ -44,7 +49,8 @@ def main():
     out.mkdir(parents=True,exist_ok=False)
     report=dict(hardwareAccess=True,webAcceptance=False,usbDdrDownload=a.download=='usb',flashWrites=False,
         pair=str(pair),files=manifest['files'],reloadBetweenRounds=False,retryFailedRounds=False,
-        runnerSha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),rows=[],passed=False)
+        runnerSha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),ramImage=a.ram_image,
+        entryMode='free-running SRAM' if a.ram_image else 'Flash FPB function',rows=[],passed=False)
     def save():(out/'result.json').write_text(json.dumps(report,indent=2)+'\n')
     save()
     for index in range(a.rounds):
@@ -57,7 +63,8 @@ def main():
             echo.start()
             command=[sys.executable,str(ROOT/'tools/test_orbtrace_board.py'),'--target-elf',str(a.target_elf.resolve()),
                 '--bit',str(pair/'probe.bit'),'--elf',str(pair/'application.elf'),'--output',str(work),
-                '--milliseconds',str(duration*1000),'--speed-khz','1000','--entry',function]
+                '--milliseconds',str(duration*1000),'--speed-khz','1000']
+            command+=['--ram-image'] if a.ram_image else ['--entry',function]
             command+=['--ddr-physical'] if a.download=='physical' else ['--transport','ddr']
             if a.verify_ddr_physical:command+=['--verify-ddr-physical']
             started=time.time()
