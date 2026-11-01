@@ -49,3 +49,5 @@ python tools/calibrate_etm_lanes.py --pair prebuilt/NEW_VERIFIED_PAIR --target-e
 ```
 
 尚未用真实板结果证明该自动搜索能改善杜邦线36MHz输入。本阶段的低错误区只是待验证候选，不能从功能仿真外推为硬件眼图或全频率自动校准能力。
+
+`etm.lane-package`用于构建后绑定产物：检查本轮日志中实际打印的5条延迟/同步器与bitgen完成证明、bit/时序文件时间晚于本轮开始、120MHz时序通过，以及RTL提交/综合hash一致；随后重新编译配套PS ELF、核对DDR保留区并生成SHA manifest。编译中间文件留在build/，交付目录仅保留明确的配对及元数据。它不操作板、不写Flash，生成的配对仍标记上板验收待完成；旧verified文件或100MHz降档结果不能被此命令包装成120MHz通过。
