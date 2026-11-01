@@ -1,5 +1,5 @@
 `timescale 1ns/1ps
-module tb_orbtrace_ddr_trace;
+module tb_orbtrace_ddr_trace #(parameter LANE_DELAY=0);
   reg clk=0;always #4.166 clk=!clk;
   reg rst_n=0;reg [7:0] ax_awaddr=0,ax_araddr=0;reg [31:0] ax_wdata=0;
   reg [3:0] ax_wstrb=15;reg ax_awvalid=0,ax_wvalid=0,ax_bready=0,ax_arvalid=0,ax_rready=0;
@@ -15,17 +15,17 @@ module tb_orbtrace_ddr_trace;
   wire sampler_gate,parser_enable,parser_clear;
   wire [127:0] source_frame,source_tail;wire [4:0] source_tail_bytes;
   wire source_frame_event,source_error,source_sync,source_ambiguous;
-  reg [7:0] l_awaddr=0;reg [31:0] l_wdata=0;reg l_awvalid=0,l_wvalid=0,l_bready=1;
+  reg [7:0] l_awaddr=0;reg [31:0] l_wdata=0;reg [3:0] l_wstrb=15;reg l_awvalid=0,l_wvalid=0,l_bready=1;
   wire l_awready,l_wready,l_bvalid;wire [1:0] l_bresp;
   reg l_arvalid=0;wire l_arready,l_rvalid;wire [31:0] l_rdata;
-  orbtrace_controller #(.RAW_DIAGNOSTIC(4),.ENABLE_DDR(1)) receiver(
+  orbtrace_controller #(.RAW_DIAGNOSTIC(4),.ENABLE_DDR(1),.ENABLE_LANE_DELAY(LANE_DELAY)) receiver(
     .clk(clk),.rst_n(rst_n),.ref_clk(ref_input),.trace_clk(trace_clk),.trace_data(trace_data),
     .ddr_hold(trace_hold),.ddr_prepare(trace_prepare),.ddr_sampler_gate(sampler_gate),.ddr_parser_enable(parser_enable),.ddr_parser_clear(parser_clear),
     .ddr_ready(trace_ready),.ddr_idle(trace_idle),.ddr_receiver_ready_ref(receiver_ready),.ddr_ref_clk(ref_clock),
     .ddr_frame(source_frame),.ddr_tail(source_tail),.ddr_tail_bytes(source_tail_bytes),.ddr_frame_event(source_frame_event),
     .ddr_parser_error(source_error),.ddr_sync_event(source_sync),.ddr_tail_ambiguous(source_ambiguous),
     .s_axi_awaddr(l_awaddr),.s_axi_awprot(3'd0),.s_axi_awvalid(l_awvalid),.s_axi_awready(l_awready),
-    .s_axi_wdata(l_wdata),.s_axi_wstrb(4'hf),.s_axi_wvalid(l_wvalid),.s_axi_wready(l_wready),
+    .s_axi_wdata(l_wdata),.s_axi_wstrb(l_wstrb),.s_axi_wvalid(l_wvalid),.s_axi_wready(l_wready),
     .s_axi_bresp(l_bresp),.s_axi_bvalid(l_bvalid),.s_axi_bready(l_bready),
     .s_axi_araddr(8'd72),.s_axi_arprot(3'd0),.s_axi_arvalid(l_arvalid),.s_axi_arready(l_arready),
     .s_axi_rdata(l_rdata),.s_axi_rvalid(l_rvalid),.s_axi_rready(1'b1));
@@ -108,6 +108,14 @@ module tb_orbtrace_ddr_trace;
     end
   endtask
   reg [31:0] value,count,actual_ticks,flags;
+  task lane_config(input [31:0] cfg,input [3:0] strobe);
+    begin
+      @(negedge clk);l_awaddr=8'h54;l_wdata=cfg;l_wstrb=strobe;l_awvalid=1;l_wvalid=1;
+      do @(posedge clk);while(!l_awready || !l_wready);
+      @(negedge clk);l_awvalid=0;l_wvalid=0;while(!l_bvalid)@(negedge clk);
+      @(negedge clk);l_wstrb=15;
+    end
+  endtask
   integer checks=0;
   task wait_done;
     begin value=1;while(value&1)read_reg(8,value);if(!(value&2))$fatal(1,"missing done");end
@@ -120,12 +128,24 @@ module tb_orbtrace_ddr_trace;
     @(negedge clk);l_arvalid=1;
     do @(posedge clk);while(!l_arready);
     @(negedge clk);l_arvalid=0;wait(l_rvalid);
-    if(l_rdata!==32'h10f)$fatal(1,"DDR CSR presence was not advertised safely: %h",l_rdata);
+    if(l_rdata!==(LANE_DELAY ? 32'h30f : 32'h10f))$fatal(1,"DDR CSR presence was not advertised safely: %h",l_rdata);
+    if(LANE_DELAY)begin
+      wait(trace_ready);
+      // Distinct taps on every lane, enabled on the real pin->RAW4->DDR path.
+      lane_config({6'h2d,1'b1,5'd31,5'd24,5'd16,5'd8,5'd0},15);
+      repeat(24)@(negedge clk);
+      if(!trace_ready || receiver.lane_applied!=={1'b1,5'd31,5'd24,5'd16,5'd8,5'd0})$fatal(1,"integrated tap readback/ready");
+    end
     read_reg(44,value);if(value!=7)$fatal(1,"trace capability");
     write_reg(12,32'h10000000,0,0);write_reg(16,4096,1,0);write_reg(60,2,0,0);write_reg(64,8000,1,0);
     write_reg(124,32'habcd1234,0,0);write_reg(128,32'hdead5678,1,0);
     write_reg(4,1,0,0);synchronize_source();
     for(integer k=0;k<165;k=k+1)put_byte(8'(16+k));
+    if(LANE_DELAY)begin
+      if(!trace_hold)$fatal(1,"live configuration fixture did not overlap capture");
+      lane_config(32'hb4000000,15);
+      if(receiver.lane_rejected!=1 || receiver.lane_accepted!=1)$fatal(1,"active DDR capture accepted a tap change");
+    end
     legacy_reset(); // Emulate old USB ETM cleanup while DDR owns the source.
     wait_done();
     if(value&4)$fatal(1,"normal trace marked failed status=%0h",value);
@@ -137,6 +157,10 @@ module tb_orbtrace_ddr_trace;
     read_reg(92,value);if(value)$fatal(1,"normal stop reason");
     read_reg(124,value);if(value!=32'habcd1234)$fatal(1,"nonce binding");
     write_reg(124,32'h11112222,0,0);read_reg(124,value);if(value!=32'habcd1234)$fatal(1,"config relabeled old capture");
+    if(LANE_DELAY)begin
+      lane_config(0,15);lane_config(32'hb4000000,1);
+      if(receiver.lane_rejected!=3 || receiver.lane_accepted!=1)$fatal(1,"malformed AXI tap command was accepted");
+    end
     checks=checks+1;
     // Capacity stop: retain exact prefix and wait for source EOF despite discarding overflow prefix.
     write_reg(16,32,0,0);write_reg(4,1,0,0);synchronize_source();
@@ -196,6 +220,7 @@ module tb_orbtrace_ddr_trace;
     read_reg(24,count);if(count)$fatal(1,"early cancel reused accepted bytes");
     read_reg(28,count);if(count)$fatal(1,"early cancel reused response bytes");
     allow_ready=1;checks=checks+1;
+    if(LANE_DELAY && receiver.lane_applied!=={1'b1,5'd31,5'd24,5'd16,5'd8,5'd0})$fatal(1,"capture/reset changed tap identity");
     $display("PASS DDR trace integration cases=%0d: RAW4 pins, exact ref window, full/partial formatter frames, nonce, legacy reset isolation, capacity, stop and empty source",checks);
     $finish;
   end

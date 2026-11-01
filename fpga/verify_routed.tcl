@@ -53,7 +53,15 @@ if {[llength [get_cells -hier -filter {NAME =~ *orbtrace_0* && (REF_NAME == LDCE
 puts "ORBTRACE_IO_VERIFIED IDDR=[llength $trace_ddr] BUFIO=[llength $trace_bufio] BUFR=[llength $trace_bufr] latches=0"
 set trace_idelay [get_cells -hier -filter {REF_NAME == IDELAYE2 && NAME =~ *orbtrace_0*}]
 set trace_idelayctrl [get_cells -hier -filter {REF_NAME == IDELAYCTRL && NAME =~ *orbtrace_0*}]
-if {[info exists ::env(ZYNQLINK_RAW_TRACE)] && $::env(ZYNQLINK_RAW_TRACE) in {2 3 4}} {
+if {[info exists ::env(ZYNQLINK_ETM_LANE_DELAY)] && $::env(ZYNQLINK_ETM_LANE_DELAY)==1} {
+    if {[llength $trace_idelay]!=5 || [llength $trace_idelayctrl]!=1} {error "Five active per-lane IDELAYE2 inputs and IDELAYCTRL are required"}
+    foreach cell $trace_idelay {
+        if {[get_property IDELAY_TYPE $cell] ne "VAR_LOAD"} {error "Per-lane delay is not dynamically loadable: $cell"}
+        set users [get_pins -of_objects [get_nets -of_objects [get_pins $cell/DATAOUT]] -filter {DIRECTION == IN}]
+        if {![llength $users]} {error "Input delay output is unused: $cell"}
+    }
+    puts "ORBTRACE_LANE_DELAY_VERIFIED count=5 VAR_LOAD=1 activeOutputs=5"
+} elseif {[info exists ::env(ZYNQLINK_RAW_TRACE)] && $::env(ZYNQLINK_RAW_TRACE) in {2 3 4}} {
     puts "ORBTRACE_DELAY_BYPASS_VERIFIED mode=$::env(ZYNQLINK_RAW_TRACE) IDELAYE2=[llength $trace_idelay] IDELAYCTRL=[llength $trace_idelayctrl]"
 } elseif {[llength $trace_idelay] != 4 || [llength $trace_idelayctrl] != 1} {
     error "Parallel TRACE input delay/calibration primitives missing"

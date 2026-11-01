@@ -50,6 +50,16 @@ if {[get_property CONFIG.FIFO_ADDR_BITS [get_bd_cells orbtrace_0]] != $raw_fifo_
   error "ORBTrace diagnostic FIFO depth did not propagate"
 }
 puts "ORBTRACE_RAW_DIAGNOSTIC=$raw_diag FIFO_ADDR_BITS=$raw_fifo_bits"
+set want_lane_delay [expr {[info exists ::env(ZYNQLINK_ETM_LANE_DELAY)] && $::env(ZYNQLINK_ETM_LANE_DELAY)==1}]
+if {$want_lane_delay && $raw_diag!=4} {error "Per-lane input delay currently requires RAW4"}
+if {[lsearch -exact [list_property [get_bd_cells orbtrace_0]] CONFIG.ENABLE_LANE_DELAY] < 0} {
+  update_module_reference [get_ips system_orbtrace_0_0]
+}
+if {[get_property CONFIG.ENABLE_LANE_DELAY [get_bd_cells orbtrace_0]] != $want_lane_delay} {
+  set_property CONFIG.ENABLE_LANE_DELAY $want_lane_delay [get_bd_cells orbtrace_0]
+  set raw_trace_changed 1
+}
+puts "ORBTRACE_LANE_DELAY=$want_lane_delay"
 set want_ddr_tap [expr {[info exists ::env(ZYNQLINK_ETM_DDR)] && $::env(ZYNQLINK_ETM_DDR)==1 && $raw_diag==4}]
 if {[lsearch -exact [list_property [get_bd_cells orbtrace_0]] CONFIG.ENABLE_DDR] < 0 ||
     ![llength [get_bd_pins -quiet orbtrace_0/ddr_frame]]} {

@@ -6,7 +6,8 @@ module orbtrace_controller #(
   parameter C_S_AXI_ADDR_WIDTH=8,
   parameter FIFO_ADDR_BITS=12,
   parameter RAW_DIAGNOSTIC=0,
-  parameter ENABLE_DDR=0
+  parameter ENABLE_DDR=0,
+  parameter ENABLE_LANE_DELAY=0
 )(
   (* X_INTERFACE_PARAMETER="ASSOCIATED_BUSIF s_axi, ASSOCIATED_RESET rst_n" *)
   input wire clk,input wire rst_n,
@@ -34,6 +35,11 @@ module orbtrace_controller #(
   wire ddr_owned=ENABLE_DDR ? ddr_hold : 1'b0;
   wire ddr_clear=ENABLE_DDR ? ddr_prepare : 1'b0;
   wire clear;
+  localparam LANE_DELAY_ENABLED=ENABLE_LANE_DELAY && RAW_DIAGNOSTIC==4;
+  wire [4:0] sampled_pads;
+  wire lane_ready,lane_ready_ref,lane_busy;
+  wire [31:0] lane_status,lane_accepted,lane_rejected,lane_failures;
+  wire [25:0] lane_applied;
   reg [1:0] width;
   reg [5:0] clear_count;
   wire trace_clock,trace_io_clock;
@@ -52,8 +58,8 @@ module orbtrace_controller #(
   assign delay_ready=delay_ready_sync[1];
   assign ddr_ref_clk=delay_ref_clock;
   assign ddr_idle=!enable;
-  assign ddr_ready=!enable && level==0 && clear_count==0 && delay_ready;
-  assign ddr_receiver_ready_ref=delay_calibrated;
+  assign ddr_ready=!enable && level==0 && clear_count==0 && delay_ready && lane_ready;
+  assign ddr_receiver_ready_ref=delay_calibrated && lane_ready_ref;
   wire [7:0] byte_data;
   wire [6:0] source_id;
   wire byte_valid,receiver_synced,receiver_overflow;
@@ -61,8 +67,8 @@ module orbtrace_controller #(
   wire [31:0] dropped_frames,parser_errors,sync_acquisitions,frame_highwater;
   wire [FIFO_ADDR_BITS:0] level;
   wire fifo_full=level==(1<<FIFO_ADDR_BITS);
-  wire receiver_reset=!rst_n || !(enable || ddr_owned) || clear_count!=0 || !delay_ready;
-  orbtrace_parallel #(.USE_IO_CLOCK(1),.USE_INPUT_DELAY(1),.RAW_DIAGNOSTIC(RAW_DIAGNOSTIC),.SEPARATE_DIAGNOSTIC_RESET(1),.ENABLE_DDR_TAP(ENABLE_DDR)) receiver(.trace_clk(trace_clock),.trace_io_clk(trace_io_clock),.trace_pad_clk(trace_clk),.sample_clk(delay_ref_clock),.trace_data(trace_data),.width(width),
+  wire receiver_reset=!rst_n || !(enable || ddr_owned) || clear_count!=0 || !delay_ready || !lane_ready;
+  orbtrace_parallel #(.USE_IO_CLOCK(1),.USE_INPUT_DELAY(!LANE_DELAY_ENABLED),.RAW_DIAGNOSTIC(RAW_DIAGNOSTIC),.SEPARATE_DIAGNOSTIC_RESET(1),.ENABLE_DDR_TAP(ENABLE_DDR)) receiver(.trace_clk(trace_clock),.trace_io_clk(trace_io_clock),.trace_pad_clk(sampled_pads[4]),.sample_clk(delay_ref_clock),.trace_data(sampled_pads[3:0]),.width(width),
     .clk(clk),.rst(receiver_reset),.data(byte_data),.channel(source_id),
     .valid(byte_valid),.ready(!fifo_full && !receiver_reset),
     .synced(receiver_synced),.overflow(receiver_overflow),.diagnostic_reset(!rst_n || clear_count!=0 || clear),
@@ -89,6 +95,20 @@ module orbtrace_controller #(
   assign s_axi_bresp=0;
   assign s_axi_rresp=0;
   wire write_commit=aw_pending && w_pending && !s_axi_bvalid;
+  wire lane_write=write_commit && write_address[C_S_AXI_ADDR_WIDTH-1:2]==21;
+  wire lane_command_valid=write_strobe==4'hf && write_data[31:26]==6'h2d;
+  generate if(LANE_DELAY_ENABLED)begin: input_calibration
+    orbtrace_lane_delay delays(.clk(clk),.rst_n(rst_n),.ref_clk(delay_ref_clock),.calibrated(delay_calibrated),
+      .active(enable || ddr_owned || ddr_clear || level!=0 || clear_count!=0),
+      .apply(lane_write && lane_command_valid),.malformed(lane_write && !lane_command_valid),
+      .requested(write_data[25:0]),.pads({trace_clk,trace_data}),.sampled_pads(sampled_pads),
+      .ready(lane_ready),.ready_ref(lane_ready_ref),.busy(lane_busy),.status(lane_status),.applied(lane_applied),
+      .accepted(lane_accepted),.rejected(lane_rejected),.load_failures(lane_failures));
+  end else begin: no_input_calibration
+    assign sampled_pads={trace_clk,trace_data};
+    assign lane_ready=1'b1;assign lane_ready_ref=1'b1;assign lane_busy=1'b0;
+    assign lane_status=0;assign lane_applied=0;assign lane_accepted=0;assign lane_rejected=0;assign lane_failures=0;
+  end endgenerate
   assign clear=(write_commit && !ddr_owned && write_address[C_S_AXI_ADDR_WIDTH-1:2]==1 && write_strobe[0] && write_data[1]) || ddr_clear;
   wire read_accept=s_axi_arvalid && s_axi_arready;
   wire pop=read_accept && s_axi_araddr[C_S_AXI_ADDR_WIDTH-1:2]==4 && level!=0 && clear_count==0 && !clear;
@@ -116,7 +136,8 @@ module orbtrace_controller #(
       if(write_commit)begin
         aw_pending<=0;w_pending<=0;s_axi_bvalid<=1;
         if(write_address[C_S_AXI_ADDR_WIDTH-1:2]==1 && write_strobe[0] && !ddr_owned)begin
-          enable<=write_data[0];
+          // A legacy START cannot race an incomplete tap transaction.
+          if(!write_data[0] || lane_ready)enable<=write_data[0];
           // Width changes are accepted only with an explicit fresh capture.
           if(write_data[1] || !enable)width<=write_data[3:2];
         end
@@ -166,7 +187,13 @@ module orbtrace_controller #(
           16:s_axi_rdata<=sync_acquisitions;
           17:s_axi_rdata<=RAW_DIAGNOSTIC;
           // Bit8 proves the optional DDR CSR slave is present before PS probes it.
-          18:s_axi_rdata<=32'hb | ((RAW_DIAGNOSTIC==2 || RAW_DIAGNOSTIC==4) ? 32'h4 : 0) | (ENABLE_DDR ? 32'h100 : 0);
+          18:s_axi_rdata<=32'hb | ((RAW_DIAGNOSTIC==2 || RAW_DIAGNOSTIC==4) ? 32'h4 : 0) | (ENABLE_DDR ? 32'h100 : 0) | (LANE_DELAY_ENABLED ? 32'h200 : 0);
+          20:s_axi_rdata<=LANE_DELAY_ENABLED ? 32'h454c4431 : 0; // ELD1
+          21:s_axi_rdata<={6'd0,lane_applied};
+          22:s_axi_rdata<=lane_status;
+          23:s_axi_rdata<=lane_accepted;
+          24:s_axi_rdata<=lane_rejected;
+          25:s_axi_rdata<=lane_failures;
           default:s_axi_rdata<=0;
         endcase
       end

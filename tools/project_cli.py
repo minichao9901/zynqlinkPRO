@@ -50,6 +50,8 @@ ALIASES={
  'etm.ddr-load-stress':'tools/stress_etm_ddr_loads.py',
  'etm.ddr-trace-stress':'tools/stress_etm_ddr_trace.py',
  'etm.ram-fixture':'tools/run_f103_ram_fixture.py',
+ 'etm.lane-delay-sim':'tools/test_etm_lane_delay.py',
+ 'etm.lane-delay':'tools/etm_lane_delay.py',
  'deps.check':'tools/verify_dependencies.py',
  'target.fixtures':'tools/build_f103_fixtures.py','target.cdc-build':'firmware/target/stm32f103_cdc_trace/build.ps1',
  'target.cdc-tests':'firmware/target/stm32f103_cdc_trace/tests/run_tests.ps1',

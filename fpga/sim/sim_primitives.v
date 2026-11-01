@@ -24,9 +24,16 @@ module IDELAYE2 #(
   parameter real REFCLK_FREQUENCY=200.0,
   parameter HIGH_PERFORMANCE_MODE="FALSE",SIGNAL_PATTERN="DATA"
 )(input IDATAIN,DATAIN,C,CE,INC,LD,LDPIPEEN,REGRST,CINVCTRL,input [4:0] CNTVALUEIN,
-  output DATAOUT,output [4:0] CNTVALUEOUT);
-  assign #(0.6+IDELAY_VALUE*0.078) DATAOUT=IDATAIN;
-  assign CNTVALUEOUT=IDELAY_VALUE;
+  output reg DATAOUT,output [4:0] CNTVALUEOUT);
+  reg [4:0] tap=IDELAY_TYPE=="FIXED" || IDELAY_TYPE=="VARIABLE" ? IDELAY_VALUE : 0;
+  always @(posedge C)begin
+    if(LD)tap<=IDELAY_TYPE=="VARIABLE" ? IDELAY_VALUE : CNTVALUEIN;
+    else if(CE && IDELAY_TYPE!="FIXED")tap<=INC ? tap+1'b1 : tap-1'b1;
+  end
+  // Functional delay model only, not analog/jitter/setup-hold signoff.
+  // Transport assignment preserves injected narrow pulses for filter tests.
+  always @(IDATAIN or tap)DATAOUT<=#(0.6+tap*0.078) IDATAIN;
+  assign CNTVALUEOUT=tap;
 endmodule
 
 module IOBUF (input I, input T, output O, inout IO);
