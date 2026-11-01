@@ -85,8 +85,18 @@ HSS在最小周期24（请求1MHz）完成三轮2秒零跳采验证，所有帧�
 另一次峰值重复出现2121次跳采（0.105954%），其余峰值重复和零跳采验证为0；保留该坏点，
 不能把整个过程概括为从未跳采。该项将与候选按相同条件比较。
 
-Golden SWD 25/60MHz的普通SRAM矩阵均通过；JTAG两档均读到全零IDCODE，
-因此当前没有有效JTAG硬件基准，等待确认TDI/TDO/nTRST接线。没有把该故障归因于候选。
+Golden SWD 25/60MHz的普通SRAM矩阵均通过。JTAG初次两档均读到全零IDCODE；
+用户确认接线齐全后，只读比较目标Flash的两个加载段（20040+128字节），
+与 `prebuilt/golden/f103ze-cdc48.elf` 完全一致。其MSP源码明确执行SWJ_NOJTAG。
+使用仓库既有 `run_f103_jtag_fixture.py --restore-swj 2` 临时启用易失JTAG配置，
+IDCODE恢复为0x3ba00477；夹具按已核实源码恢复SWJ设置，因为该字段不能可靠读回。
+
+JTAG 25/60MHz SRAM矩阵和60MHz峰值均通过：峰值读2.421895MB/s、写2.397811MB/s。
+JTAG HSS峰值610500.674Hz、跳采0.793661%；三轮验证的最高零跳采请求率为324324.324Hz。
+所有帧/计数、目标RAM、AFIO可读位、APB使能、RCC及运行/暂停状态恢复通过。
+同一现场的Golden 60MHz JTAG RTT出现错误计数2，未形成有效吞吐结果；已保留失败JSON，
+其目标RAM/寄存器及外层夹具状态恢复均通过，没有为通过该项改变target时钟或擦除坏点。
+此为Golden当前现场限制，不能归因于尚未加载的候选，也不能把JTAG RTT写成通过。
 JTAG数字仿真已通过并与Golden一致。未写QSPI或目标Flash。
 
 ## 当前交付状态
