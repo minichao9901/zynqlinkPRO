@@ -17,12 +17,13 @@ def main():
     p.add_argument('--seconds',type=float,default=1)
     p.add_argument('--transports',default='swd,jtag')
     p.add_argument('--speeds',default='1000000,10000000,25000000,35000000,50000000,60000000')
+    p.add_argument('--bootstrap-speed-khz',type=int,default=50000)
     a=p.parse_args();a.output.parent.mkdir(parents=True,exist_ok=True)
     d,o,i=open_dap();probe=Probe();mem=Memory(o,i);backup=initial=None
     report=dict(artifacts=provenance(a.bit,a.elf),variables=1,variable_bytes=4,rows=[],summary=[])
     def persist():a.output.write_text(json.dumps(report,indent=2)+'\n')
     try:
-        stop(probe,d);setup(o,i,50000);initial=mem.word(0xe000edf0)
+        stop(probe,d);setup(o,i,a.bootstrap_speed_khz);initial=mem.word(0xe000edf0)
         if not initial&(1<<17):mem.write_word(0xe000edf0,0xa05f0003)
         backup=mem.read(0x20004000,4096);assert mem.read(0x20004000,4096)==backup
         a.output.with_suffix('.backup.bin').write_bytes(backup)
@@ -32,9 +33,9 @@ def main():
             for speed in map(int,a.speeds.split(',')):
                 current=[]
                 def point(period,tag,seconds=None):
-                    setup(o,i,50000,'swd')
+                    setup(o,i,a.bootstrap_speed_khz,'swd')
                     row=hss_point(probe,mem,d,speed,period,1,seconds or a.seconds,len(current),True,
-                                  lambda:setup(o,i,50000,transport),True)
+                                  lambda:setup(o,i,a.bootstrap_speed_khz,transport),True)
                     row.update(transport=transport,stage=tag,passed=True)
                     current.append(row);report['rows'].append(row);persist()
                     print(json.dumps({k:row[k] for k in ['transport','speed_hz','period_ticks','effective_Hz','skip_percent','stage','actual_link_Hz']}),flush=True)
@@ -78,7 +79,7 @@ def main():
         try:
             try:stop(probe,d)
             except RuntimeError:recover(d,i);stop(probe,d)
-            setup(o,i,50000,'swd')
+            setup(o,i,a.bootstrap_speed_khz,'swd')
             if backup is not None:
                 mem.write(0x20004000,backup);report['restore_match']=mem.read(0x20004000,4096)==backup;assert report['restore_match']
             if initial is not None and not initial&(1<<17):mem.write_word(0xe000edf0,0xa05f0001)

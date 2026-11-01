@@ -275,6 +275,9 @@ static uint32_t DAP_Connect(const uint8_t *request, uint8_t *response) {
 #endif
 #if (DAP_JTAG != 0)
     case DAP_PORT_JTAG:
+#if DAP_FIXED_FCLK0_TEST
+      port=DAP_PORT_DISABLED;break; /* This diagnostic firmware is SWD-only. */
+#endif
       if(!(swd_read32(SWD_FEATURES)&8U)) {port=DAP_PORT_DISABLED;break;}
       DAP_Data.debug_port = DAP_PORT_JTAG;
       PORT_JTAG_SETUP();
@@ -455,6 +458,14 @@ static uint32_t DAP_SWJ_Clock(const uint8_t *request, uint8_t *response) {
     return ((4U << 16) | 1U);
   }
   uint32_t divisor = 1U;
+#if DAP_FIXED_FCLK0_TEST
+  uint32_t narrow=0;
+  int fclk_hz=ps_set_fclk0_hz(133333333U);
+  if (fclk_hz<=0 || !(divisor=ps_fixed_half_period((uint32_t)fclk_hz,clock))) {
+    *response=DAP_ERROR;
+    return ((4U<<16)|1U);
+  }
+#else
   uint32_t narrow = DAP_Data.debug_port == DAP_PORT_SWD && clock < 35000000U &&
                     (swd_read32(SWD_FEATURES) & SWD_FEATURE_SHORT_CLOCK);
   uint32_t target_fclk = clock * 2U;
@@ -466,6 +477,7 @@ static uint32_t DAP_SWJ_Clock(const uint8_t *request, uint8_t *response) {
     if (target_fclk > DAP_MAX_SWCLK_HZ * 2U) target_fclk = DAP_MAX_SWCLK_HZ * 2U;
   }
   int fclk_hz = ps_set_fclk0_hz(target_fclk);
+#endif
   if (fclk_hz <= 0) {
     *response = DAP_ERROR;
     return ((4U << 16) | 1U);
@@ -475,11 +487,18 @@ static uint32_t DAP_SWJ_Clock(const uint8_t *request, uint8_t *response) {
    * two-cycle half-period needs the later receive boundary on this board.
    * Undivided rates retain their receive profiles and JTAG calibration. */
   uint32_t receive_profile = (link_clock_hz <= 35000000U) ? (1U << 17) : 0U;
+#if DAP_FIXED_FCLK0_TEST
+  /* Standard duty cycle: Q2, compact legacy boundary at half=1; the
+   * extended transfer schedule uses the early boundary at divided rates.
+   * Board validation must qualify this profile; no automatic fallback. */
+  receive_profile=divisor>1U ? (1U<<18) : 0U;
+#else
   if (DAP_Data.debug_port == DAP_PORT_SWD) {
     receive_profile = narrow ? (link_clock_hz <= 25000000U ? (1U << 18) : (1U << 17)) :
                       link_clock_hz <= 30000000U ? (1U << 18) :
                       link_clock_hz <= 45000000U ? (1U << 17) : 0U;
   }
+#endif
   uint32_t half_delay = divisor - 1U;
   uint32_t waveform = ((half_delay & 15U) << 13) | ((half_delay >> 4) << 28) |
                       (narrow ? (1U << 19) : 0U);

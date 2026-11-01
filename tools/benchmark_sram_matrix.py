@@ -16,12 +16,13 @@ def main():
     a.add_argument('--bit',type=Path,required=True);a.add_argument('--elf',type=Path,required=True)
     a.add_argument('--seconds',type=float,default=.4);a.add_argument('--repeats',type=int,default=3)
     a.add_argument('--transport',choices=['both','swd','jtag'],default='both')
+    a.add_argument('--bootstrap-speed-khz',type=int,default=50000,help='Known-safe setup/restore clock request')
     a.add_argument('--jtag-timing',type=int,choices=[0,1,16,17],help='Diagnostic: force sampling after normal setup; default remains automatic')
     a.add_argument('--speeds',default='1000000,10000000,25000000,35000000,50000000,60000000',
                    help='Comma-separated requested link rates in Hz')
     args=a.parse_args();args.output.parent.mkdir(parents=True,exist_ok=True)
     speeds=[int(v) for v in args.speeds.split(',')]
-    if not speeds or any(v<=0 or v%1000 for v in speeds):a.error('--speeds must contain positive whole-kHz rates in Hz')
+    if not speeds or any(v<=0 or v>0xffffffff for v in speeds):a.error('--speeds must contain positive integer Hz rates')
     d,o,i=open_dap();p=Probe();m=Memory(o,i);saved=initial=None;base=0x20004000
     report=dict(artifacts=provenance(args.bit,args.elf),block_bytes=1024,pipeline_depth=4,rows=[])
     pattern=random.Random(0x20261029).randbytes(1024)
@@ -41,7 +42,7 @@ def main():
         if mode=='write_pipe':assert m.read(base,4096)==pattern*4,'write readback mismatch'
         return dt
     try:
-        stop(p,d);setup(o,i,50000);initial=m.word(0xe000edf0)
+        stop(p,d);setup(o,i,args.bootstrap_speed_khz);initial=m.word(0xe000edf0)
         if not initial&(1<<17):m.write_word(0xe000edf0,0xa05f0003)
         report['RCC_before']=[m.word(0x40021000),m.word(0x40021004)]
         saved=m.read(base,4096);assert m.read(base,4096)==saved
@@ -51,9 +52,9 @@ def main():
         for transport in transports:
             for speed in speeds:
                 khz=speed//1000
-                row=dict(transport=transport,requested_Hz=khz*1000,passed=False)
+                row=dict(transport=transport,requested_Hz=speed,passed=False)
                 try:
-                    setup(o,i,khz,transport)
+                    setup(o,i,khz,transport,speed_hz=speed)
                     if transport=='jtag' and args.jtag_timing is not None:
                         timing=xfer(o,i,[0x89,args.jtag_timing])
                         assert timing[1]==0 and timing[2]==args.jtag_timing,timing.hex()
@@ -86,7 +87,7 @@ def main():
                     row['passed']=True
                 except Exception as exc:row['error']=repr(exc)
                 finally:
-                    recover(d,i);setup(o,i,50000)
+                    recover(d,i);setup(o,i,args.bootstrap_speed_khz)
                     m.write(base,saved);row['restore_match']=m.read(base,4096)==saved
                     assert row['restore_match']
                     report['rows'].append(row);args.output.write_text(json.dumps(report,indent=2)+'\n')
@@ -96,7 +97,7 @@ def main():
     except BaseException as exc:report['fatal_error']=repr(exc);raise
     finally:
         try:
-            recover(d,i);setup(o,i,50000)
+            recover(d,i);setup(o,i,args.bootstrap_speed_khz)
             if saved is not None:
                 m.write(base,saved);report['restore_match']=m.read(base,4096)==saved;assert report['restore_match']
             if initial is not None and not initial&(1<<17):m.write_word(0xe000edf0,0xa05f0001)

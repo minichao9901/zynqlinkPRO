@@ -398,6 +398,10 @@ static int ps_set_fclk0_hz(u32 target_hz) {
   /* FCLK0 also clocks the HP1 writer. Ordinary DAP clock commands must not
    * retune it during autonomous capture or identity-bound USB download. */
   if (etm_ddr_owned()) return -1;
+#if DAP_FIXED_FCLK0_TEST
+  if (!target_hz) return -1;
+  return ps_fixed133_select();
+#else
   u32 best_div0 = 0, best_div1 = 0;
   u32 best_hz = 0;
   u32 best_err = 0xFFFFFFFFU;
@@ -442,6 +446,7 @@ found:
   Xil_Out32(SLCR_LOCK_ADDR, 0x767BU);
 
   return (int)best_hz;
+#endif
 }
 
 

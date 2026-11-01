@@ -33,6 +33,8 @@ def expected(pattern, nbytes):
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--speed', type=int, default=60000)
+    ap.add_argument('--speed-hz',type=int,help='Exact Hz request, including non-whole-kHz fixed-FCLK divisors')
+    ap.add_argument('--bootstrap-speed-khz',type=int,default=50000)
     ap.add_argument('--transport', choices=['swd', 'jtag'], default='swd')
     ap.add_argument('--words', type=int, default=1024)
     ap.add_argument('--depth', type=int, default=8)
@@ -55,12 +57,12 @@ def main():
     jtag_ir = tuple(int(v) for v in args.jtag_ir.split(','))
     dev, out, inp = open_dap()
     mem = Memory(out, inp)
-    row = dict(transport=args.transport, requested_kHz=args.speed, words=args.words,
+    row = dict(transport=args.transport, requested_kHz=args.speed if args.speed_hz is None else args.speed_hz/1000, requested_Hz=args.speed*1000 if args.speed_hz is None else args.speed_hz, words=args.words,
                depth=args.depth, loops=args.loops, artifacts=provenance(args.bit,args.elf))
     saved = None
     initial = None
     try:
-        setup(out, inp, 50000)
+        setup(out, inp, args.bootstrap_speed_khz)
         initial = mem.word(0xE000EDF0)
         row['RCC_before'] = [mem.word(0x40021000), mem.word(0x40021004)]
         if not args.no_halt and not initial & (1 << 17):
@@ -71,7 +73,7 @@ def main():
         if args.output:
             args.output.parent.mkdir(parents=True, exist_ok=True)
             args.output.with_suffix('.backup.bin').write_bytes(saved)
-        setup(out, inp, args.speed, transport=args.transport, jtag_ir_lengths=jtag_ir)
+        setup(out, inp, args.speed, transport=args.transport, jtag_ir_lengths=jtag_ir,speed_hz=args.speed_hz)
         diag = xfer(out, inp, [0x80, 255])
         hz, cfg = struct.unpack_from('<II', diag, 4)
         row.update(FCLK_Hz=hz, cfg=hex(cfg), **swd_clock_details(hz, cfg))
@@ -137,7 +139,7 @@ def main():
     finally:
         try:
             recover(dev, inp)
-            setup(out, inp, 50000)
+            setup(out, inp, args.bootstrap_speed_khz)
             if saved is not None:
                 mem.write(base, saved)
                 restored = mem.read(base, len(saved))

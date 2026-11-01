@@ -23,6 +23,8 @@ def main():
                     help='Conservative firmware limit; cannot exceed the verified timing limit')
     ap.add_argument('--timing', type=Path,
                     help='Verified clock JSON for the actual paired bitstream; explicit path must exist')
+    ap.add_argument('--fixed-fclk133-swd-test',action='store_true',
+                    help='Diagnostic SWD-only firmware: ARM PLL /10 for every clock request; integer serializer division, never FCLK fallback')
     ap.add_argument('--bsp', default=None,
                     help='BSP directory (default: reference/legacy_zynq/.../usb_bsp/ps7_cortexa9_0); '
                          'a BSP root containing ps7_cortexa9_0 is also accepted')
@@ -60,6 +62,11 @@ def main():
             if args.max_swclk_hz <= 0 or args.max_swclk_hz > max_swclk:
                 ap.error(f'--max-swclk-hz must be between 1 and {max_swclk}')
             max_swclk = args.max_swclk_hz
+        if args.fixed_fclk133_swd_test:
+            if verified_clock is None or int(verified_clock['FCLK_max_Hz'])<133333332:
+                ap.error('Fixed FCLK133 test requires its passing routed timing metadata')
+            max_swclk=min(max_swclk,66666666)
+        flags += ['-DDAP_FIXED_FCLK0_TEST='+str(int(args.fixed_fclk133_swd_test))]
         flags += ['-DDAP_MAX_SWCLK_HZ=' + str(max_swclk)]
     includes = [src, src / 'DAP/Include', src / 'DAP/Source', bsp / 'include']
     cfiles = sorted(src.rglob('*.c'))

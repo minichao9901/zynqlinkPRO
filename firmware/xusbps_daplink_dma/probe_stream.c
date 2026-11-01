@@ -9,6 +9,11 @@
 #include "xusbps_class_cdc.h"
 #include "xusbps_endpoint.h"
 #include <string.h>
+#if defined(DAP_FIXED_FCLK0_TEST) && DAP_FIXED_FCLK0_TEST
+#define PROBE_MAX_LINK_HZ 66666666U
+#else
+#define PROBE_MAX_LINK_HZ 60000000U
+#endif
 
 // The standalone host state-machine harness supplies claim/release stubs but
 // does not link probe_target.c.  The ARM target provides the strong version.
@@ -830,7 +835,7 @@ static void control(const uint8_t *req, uint8_t *res) {
                 break;
             }
             uint32_t hz = get32(req + 4);
-            if (hz && (hz < 15000000 || hz > 60000000)) {
+            if (hz && (hz < 15000000 || hz > PROBE_MAX_LINK_HZ)) {
                 rc = -6;
                 break;
             }
@@ -936,7 +941,7 @@ static void control(const uint8_t *req, uint8_t *res) {
         rc = -9;
         break;
     }
-    if (requested_hz < 1000000 || requested_hz > 60000000) {
+    if (requested_hz < 1000000 || requested_hz > PROBE_MAX_LINK_HZ) {
         requested_hz = 50000000;
         rc = -6;
     }

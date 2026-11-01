@@ -144,6 +144,23 @@ int main(void) {
     command_req(req,0x32,9,2);control(req,res);assert(get32(res+8)==12 && get32(res+12)==0 && get32(res+16)==0x5a594e51);
     command_req(req,0x32,8,6);put32(req+4,12);control(req,res);fail_read=1;probe_poll(&usb);assert(!bench_active && bench_error==-4);fail_read=0;
     command_req(req,0x32,8,6);put32(req+4,12);control(req,res);probe_before_dap();assert(!bench_active && bench_error==-7);
-    puts("PASS production probe C: HID, 8 variables, HSS DEF/DATA/gaps, backpressure, RTT wrap/RdOff retry, DAP handoff, ZLP, reset, plan benchmark");
+    // Highest fixed-FCLK line request must survive both HID clock paths;
+    // ordinary firmware still rejects it. No silent 50MHz replacement.
+    mode=0;bench_active=0;rtt_pl_running=0;pending_len=0;dma_pending=0;
+    requested_hz=50000000;
+    command_req(req,0x32,3,6);put32(req+4,66666666);control(req,res);
+#if defined(DAP_FIXED_FCLK0_TEST) && DAP_FIXED_FCLK0_TEST
+    assert(res[3]==0 && requested_hz==66666666);
+#else
+    assert(res[3]==(uint8_t)-6 && requested_hz==50000000);
+#endif
+    command_req(req,0x32,3,6);put32(req+4,66666667);control(req,res);assert(res[3]==(uint8_t)-6);
+    command_req(req,0x31,7,10);put32(req+4,66666666);req[8]=0;req[9]=4;control(req,res);
+#if defined(DAP_FIXED_FCLK0_TEST) && DAP_FIXED_FCLK0_TEST
+    assert(res[3]==0 && requested_hz==66666666);
+#else
+    assert(res[3]==(uint8_t)-6 && requested_hz==50000000);
+#endif
+    puts("PASS production probe C: HID, 8 variables, HSS DEF/DATA/gaps, backpressure, RTT wrap/RdOff retry, DAP handoff, ZLP, reset, plan benchmark, explicit clock limits");
     return 0;
 }

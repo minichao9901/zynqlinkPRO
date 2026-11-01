@@ -146,6 +146,7 @@ def main():
     ap.add_argument('--chunks', default='128,256,512,1024')
     ap.add_argument('--repeats', type=int, default=1)
     ap.add_argument('--transport', choices=['swd', 'jtag'], default='swd')
+    ap.add_argument('--bootstrap-speed-khz',type=int,default=50000)
     ap.add_argument('--output', type=Path, required=True)
     ap.add_argument('--bit',type=Path)
     ap.add_argument('--elf',type=Path)
@@ -174,7 +175,7 @@ def main():
         # exchange; retry the setup instead of failing the whole run.
         for attempt in range(4):
             try:
-                setup(out, inp, 50000, 'swd')
+                setup(out, inp, args.bootstrap_speed_khz, 'swd')
                 break
             except RuntimeError as exc:
                 if attempt == 3:
@@ -194,9 +195,9 @@ def main():
         for speed in map(int, args.speeds.split(',')):
             for chunk in map(int, args.chunks.split(',')):
                 for repeat in range(args.repeats):
-                    setup(out,inp,50000,'swd')
+                    setup(out,inp,args.bootstrap_speed_khz,'swd')
                     row = point(probe, mem, port, code, speed, chunk, args.seconds, repeat,
-                                lambda:setup(out,inp,speed//1000,args.transport))
+                                lambda:setup(out,inp,speed//1000,args.transport,speed_hz=speed))
                     report['rows'].append(row)
                     args.output.write_text(json.dumps(report, indent=2))
                     print(json.dumps({k:v for k,v in row.items() if k not in ('s0','s1')}), flush=True)
@@ -211,7 +212,7 @@ def main():
         try:
             try:stop(probe,dev)
             except RuntimeError:recover(dev,inp);stop(probe,dev)
-            setup(out, inp, 50000, 'swd')
+            setup(out, inp, args.bootstrap_speed_khz, 'swd')
             mem.write_word(DHCSR, 0xa05f0003)
             if backup is not None:
                 mem.write(0x20000000, backup)
