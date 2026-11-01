@@ -51,6 +51,7 @@ export class EtmTarget {
   async disconnect(){const probe=this.probe;if(!probe)return;return withCleanup(async()=>{await this.clearEntryBreak();if(this.breakpoints.items.some(b=>b.lease)){const running=!(await this.isHalted());await this.halt();await this.breakpoints.suspend();if(running)await this.probe.run();}await this.restore();},async()=>{try{await probe.disconnect();}finally{this.probe=null;this.config=null;}},e=>this.log('USB 断开失败：'+e.message));}
   get transportFault(){return !!(this.debugFault||this.probe?._faulted||this.probe?._recovering);}
   resetTransportStats(){this.probe?.device?.resetTransportStats?.();}
+  setControlStage(name){this.profileDevice=this.probe?.device||this.profileDevice;this.profileDevice?.setControlStage?.(name);}
   transportStats(){return this.probe?.device?.transportStats?.()||null;}
   setNativeExchange(enabled){if(typeof enabled!=='boolean')throw Error('交换模式须为boolean');if(!this.probe?.device?.nativeService)throw Error('仅本地桥提供HTTP交换测量');this.probe.device.atomicDapEnabled=enabled;}
   setPackedMemory(enabled){if(typeof enabled!=='boolean')throw Error('批量模式须为boolean');if(!this.probe?.device?.nativeService)throw Error('仅本地桥提供批量控制测量');this.probe.device.packedMemoryEnabled=enabled;}

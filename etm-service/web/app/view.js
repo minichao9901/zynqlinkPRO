@@ -324,14 +324,14 @@ on('start',async()=>{const sync=$('sync').checked,seconds=Number($('duration').v
   if(state.elfInfo.segments.some(s=>s.address+atob(s.data).length>flashLimit))throw Error('ELF 超出当前目标的 Trace Flash 范围');
   const captureElf=state.elfInfo,captureElfId=state.elfId,captureSourceSnapshot=state.sourceSnapshot,requestedOptions=options(),selectedEntry=sync&&$('entry-before').checked?entry(true):null;
   let config={traceid:Number($('traceid').value),config:1},captureEntry=null,suspendedBps=[];
-  let stage='校验 ELF';
+  let stage='校验 ELF';const markStage=(name,metricName=name)=>{stage=name;target.setControlStage(metricName);};markStage(stage);
   await withCleanup(async()=>{try{
   log('采集步骤：'+stage);
-  if(sync){if(!target.probe)throw Error('请先连接探针');if(!target.info?.traceSupported)throw Error(target.info?.traceStatus||'目标 trace 未适配');await target.verifyElf(captureElf);stage='暂停本页断点';log('采集步骤：'+stage);suspendedBps=target.breakpoints.items.filter(b=>b.lease);state.pendingBreakpointRestore=suspendedBps;await target.breakpoints.suspend();renderBreakpoints();
-    stage=$('entry-before').checked?$('reset-before').checked?'复位并停在业务起点':'运行至业务起点':'暂停当前目标';log('采集步骤：'+stage);
+  if(sync){if(!target.probe)throw Error('请先连接探针');if(!target.info?.traceSupported)throw Error(target.info?.traceStatus||'目标 trace 未适配');await target.verifyElf(captureElf);markStage('暂停本页断点');log('采集步骤：'+stage);suspendedBps=target.breakpoints.items.filter(b=>b.lease);state.pendingBreakpointRestore=suspendedBps;await target.breakpoints.suspend();renderBreakpoints();
+    markStage($('entry-before').checked?$('reset-before').checked?'复位并停在业务起点':'运行至业务起点':'暂停当前目标');log('采集步骤：'+stage);
     if($('entry-before').checked){captureEntry=selectedEntry;state.waiting=true;controls();$('break-state').textContent='正在等待所选断点…最长 3 分钟，可点「取消等待」';try{await showTarget($('reset-before').checked?await target.reset({address:captureEntry}):await target.runTo(captureEntry));}finally{state.waiting=false;controls();}}
     else await target.halt();
-    stage='核对实际时钟';log('采集步骤：'+stage);const before=await target.inspect(),c=before.clocks;
+    markStage('核对实际时钟');log('采集步骤：'+stage);const before=await target.inspect(),c=before.clocks;
     if(!c?.coreHz||!c?.physicalTraceHz||Math.abs(c.coreHz-Number($('expected-cpu').value)*1e6)>100||Math.abs(c.physicalTraceHz-Number($('expected-trace').value)*1e6)>100){
       const fmt=(hz)=>hz?(hz/1e6).toFixed(3)+' MHz':'未知';
       const detail='实测 CPU '+fmt(c?.coreHz)+' / TRACECLK '+fmt(c?.physicalTraceHz)+
@@ -341,16 +341,16 @@ on('start',async()=>{const sync=$('sync').checked,seconds=Number($('duration').v
         : '。请在『2 时钟』页核对 HSE 与预期 CPU/TRACECLK';
       throw Error(detail+hint+'；目标保持暂停');
     }
-    stage='配置 ETM / TPIU';log('采集步骤：'+stage);await showTarget(await target.configure(requestedOptions));config=target.config;
+    markStage('配置 ETM / TPIU');log('采集步骤：'+stage);await showTarget(await target.configure(requestedOptions));config=target.config;
   }else config=externalDecodeConfig();
   // 新服务默认支持1 s实验长窗；本页按实际连接服务的能力校验。
   const captureSeconds=Number($('duration').value)/1000;
   if(!(captureSeconds>0)||captureSeconds>state.captureMaxSeconds)throw Error(`单次采集上限 ${Math.round(state.captureMaxSeconds*1000)} ms（一次采集 + 一次解码）；更长的覆盖请分多次采集。`);
-  stage='启动 Zynq ETM 接收';log('采集步骤：'+stage);
+  markStage('启动 Zynq ETM 接收','交接/采集/下载/解码/首屏');log('采集步骤：'+stage);
   if(sync){log('采集步骤：释放浏览器 USB，交给本地服务 arm/恢复 CPU');await target.suspendUsb();}
   const created=await api('capture',{rate:500000000,seconds:captureSeconds,sync,decode:$('auto-decode').checked,config,elfId:captureElfId,targetVerified:sync,targetSnapshot:sync?target.info:null,captureScope:sync?'business-unfiltered-window':'externally-configured-window',captureEntry,sourceSnapshot:captureSourceSnapshot});
   log('联动任务创建；起点 '+(captureEntry===null?'当前暂停位置':hex(captureEntry)));await watchJob(created.job,{resume:false,kind:'capture'});
-  }catch(e){throw new Error(stage+'失败：'+e.message,{cause:e});}},async()=>{if(sync){if(!target.probe)await target.resumeUsb();if(target.probe){target.assertTransport();await target.clearEntryBreak();await target.restore();await resumeBreakpoints(suspendedBps);await showTarget(await target.inspect());log('本次 trace 配置与断点已恢复；目标状态已刷新');}}},e=>log('采集后的清理/回读失败（未覆盖首次错误）：'+e.message));
+  }catch(e){throw new Error(stage+'失败：'+e.message,{cause:e});}},async()=>{try{if(sync){if(!target.probe){markStage('重新连接 USB');await target.resumeUsb();}if(target.probe){markStage('恢复配置/断点/刷新状态');target.assertTransport();await target.clearEntryBreak();await target.restore();await resumeBreakpoints(suspendedBps);await showTarget(await target.inspect());log('本次 trace 配置与断点已恢复；目标状态已刷新');}}}finally{target.setControlStage(null);}},e=>log('采集后的清理/回读失败（未覆盖首次错误）：'+e.message));
 });
 on('stop',async()=>{state.captureCancelled=true;const id=state.job||state.failedCaptureJob;if(id){await api('stop/'+id,{});state.failedCaptureJob=null;controls();}},{exclusive:false});
 on('decode',async()=>{if(!state.current)throw Error('请选择记录');await watchJob((await api('decode/'+state.current,{})).job);});

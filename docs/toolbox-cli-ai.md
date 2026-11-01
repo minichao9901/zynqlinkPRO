@@ -52,4 +52,4 @@ python toolbox.py project run etm.framed -- captured.frm1 --out build/framed-che
 DDR阶段验收仅针对F103，默认USB采后下载，1/2秒窗口、函数交替、CDC；可用物理AP0核对同一缓冲。不会写Flash或改目标分频。
 H743已有独立ETMv4 Web/Kingst入口与target.h743-build源码构建命令，不能用F103专用验收替代。
 FRM1原生工具、PS USB采后下载、Web/CLI默认DDR能力分支已完成本阶段真机验证；更高频和逐线校准继续研究。
-`web.shared-sync --check`核对9份ETM共享驱动；`--write`从主工作台同步。web.check与bridge.build都会阻止驱动副本不一致。
+`web.shared-sync --check`核对ETM共享驱动（当前10份）；`--write`从主工作台同步。web.check与bridge.build都会阻止驱动副本不一致。
