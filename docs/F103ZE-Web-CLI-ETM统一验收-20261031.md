@@ -1232,3 +1232,13 @@ Web窗口元数据在DDR模式以硬件ticks/ref计算实际时长，主机下�
 据此修正为每个输入只走IDELAY的一条物理路径，取消并行直通mux。新设计内部用显式加载的零tap作对照，仍有原语自身插入延迟；真正的直接输入基线继续使用旧已知配对。上电等IDELAYCTRL RDY后自动LD零tap并核对；启动LD期间RDY丢失也可在空闲时显式恢复。校准禁用时拒绝非零tap载荷。更新后的功能仿真通过，包括该启动故障、逐线偏斜、毛刺、采集中拒绝，以及原9项DDR边界的两种参数配置；8项主机检查通过。下一次实现须重新综合/布线、通过DRC和120MHz时序后才上板，此时尚未证明真实校准效果。
 
 等待e18dd7e第二轮实现时，旧已知可用bit/ELF继续在线，通过Web额外执行100次打开/关闭，全部通过、没有失败重试；RCC逐次不变。并行Vivado进程在该轮前后均确认存活。此测试只证明本轮旧配对在并行构建条件下的100次生命周期稳定性，不是新ELD1配对、高频或采集通过声明。[逐轮数据](validation/etm-lane-delay-20261101/web-100cycles/analysis.json)。
+
+### 2026-11-01：ELD1新配对上板与36MHz首次扫描结果
+
+新配对已实际加载并归档到[prebuilt/etm-lane-delay-raw4-20261101](../prebuilt/etm-lane-delay-raw4-20261101/manifest.json)：bit SHA `eac5a263c4966e664370a78f299600c47d034b905b897a083cdf154ee01264ae`，PS ELF SHA `1d55b321f95e15d43afb719380c7cefb4f05955c89f018e49c38bb3fb38ef559`。RTL e18dd7e，布线后AggressiveExplore/route使120MHz setup +0.013ns、hold +0.010ns、SWCLK launch余量+0.415ns；bitgen DRC 0错误。初版负载检查仅查询局部net片段而遗漏跨模块端口连接，226bcb2改为逐条追踪到真实pad_meta/D，确认5个独立端点，并记录验证脚本、父job、输入DCP和bit的SHA。没有降低检查等级或修改RTL来规避该检查。
+
+PS源码未改，本轮实际重新编译后ELF与旧版本字节相同，完整新编译日志已保留。上板OCM执行段匹配，2轮1MiB DDR模式/保护字通过，实际FCLK119,999,998Hz、SWCLK999,999.9833Hz；5条tap=0/8/16/24/31装载及物理计数读回通过，再归零。原Golden target CPU48MHz/TRACECLK24MHz的100ms、1s采集和原生解码通过，1s共4,785,714包、19,582,490个执行范围、packetIssues=0、addressInaccessible=0，硬件窗口内63次完整精确CDC echo。[实现、配对身份、板测及原始数据](validation/etm-lane-delay-20261101/README.md)。
+
+SRAM target CPU72MHz/TRACECLK36MHz首次扫描已完成110点，**没有无错误点**；零tap 10ms有2,062次parser错误，观测最低点D0/D1/D2/D3/CLK=14/24/24/24/8仍有1,736次，不能把单次最低值解释为稳定改善。第111点（14/24/22/24/8）在清理时Memory.address断言失败，响应原字节未被遗留断言保存，根因未定；按首个非采样质量故障停止，未重试。只完整扫完D0和D1，五条lane及最终候选验证均未完成。全部111点FRM1与元数据、失败日志及CDC摘要保留在[首次扫描](validation/etm-lane-delay-20261101/scan36-first/analysis.json)。
+
+外层随后验证原Flash字节不变、RCC恢复48MHz，tap归零，未保留候选；没有写目标Flash/QSPI。新配对非Golden，不能声明36MHz、自动校准或新配对Web压力通过。待处理：保留实际DAP请求/响应及会话队列现场，查清第111点清理故障，再决定是否调整过采样结构；当前证据仅表明已测IDELAY/RAW4设置尚不能让36MHz可用。用户随后清除自动目标，已停止后续推进；新研究配对仍在线，Web服务已关闭，已知配对与Golden均未覆盖。

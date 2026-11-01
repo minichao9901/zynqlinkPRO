@@ -1,0 +1,64 @@
+{
+  "passed": false,
+  "pointsStarted": 111,
+  "pointsCompleted": 110,
+  "protocolPassingPoints": 0,
+  "windowsCompleted": [
+    {
+      "lane": 0,
+      "otherTaps": [
+        24,
+        24,
+        24,
+        24,
+        8
+      ],
+      "window": null
+    },
+    {
+      "lane": 1,
+      "otherTaps": [
+        14,
+        24,
+        24,
+        24,
+        8
+      ],
+      "window": null
+    }
+  ],
+  "bestObserved": {
+    "index": 41,
+    "taps": [
+      14,
+      24,
+      24,
+      24,
+      8
+    ],
+    "parserErrorsPer10ms": 1736
+  },
+  "zeroTapParserErrorsPer10ms": 2062,
+  "firstUnexpectedFailure": {
+    "index": 111,
+    "taps": [
+      14,
+      24,
+      22,
+      24,
+      8
+    ],
+    "error": "Capture cleanup failed; scan stopped",
+    "detail": "First cleanup Memory.address reply was not retained by the legacy assertion"
+  },
+  "targetRestored": true,
+  "tapsRestored": [
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "candidateRetained": false,
+  "conclusion": "No error-free window demonstrated; incomplete five-lane search stopped on DAP cleanup failure. No claim of usable 36MHz or zero BER."
+}

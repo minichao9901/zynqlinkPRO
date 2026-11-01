@@ -1,0 +1,5 @@
+set root [file normalize [file join [file dirname [info script]] ../..]]
+set ::zynqlink_verify_out [file dirname [info script]]
+set ::zynqlink_verify_checkpoint [file join $root build etm-lane-delay-repair-20261101 output system_wrapper_routed.dcp]
+set ::zynqlink_verify_bit [file join $root build etm-lane-delay-repair-20261101 output system_wrapper.bit]
+source [file join $root fpga verify_routed.tcl]
