@@ -1,0 +1,101 @@
+{
+  "ok": true,
+  "sourceRevision": "eaa600d55bb83ed3d4b24fcaebe42dd504a4cfd9",
+  "hardwareRoutesDisabled": true,
+  "realWebButtonDownloaded": true,
+  "filename": "etm-flame-timeline.html",
+  "webCliDescribeAndInvoke": true,
+  "webCliDownloadMatchesButton": true,
+  "methodsDiscovered": [
+    "api",
+    "backRange",
+    "exportFlame",
+    "failTimeline",
+    "fetchTimeline",
+    "fullRange",
+    "jump",
+    "load",
+    "locatePC",
+    "measureZoom",
+    "navigate",
+    "onError",
+    "onScopeChange",
+    "pagination",
+    "path",
+    "refreshSources",
+    "render",
+    "renderTimeline",
+    "scopeParams",
+    "scrollSource",
+    "select",
+    "setCapability",
+    "setLoading",
+    "setRange",
+    "startTimelineLoad",
+    "startTimelineProgress",
+    "stopTimelineProgress",
+    "table",
+    "unload",
+    "updateZoomControlState",
+    "waitForDisplay",
+    "zoomRange"
+  ],
+  "calls": [
+    {
+      "args": [
+        "describe",
+        "--target",
+        "history"
+      ],
+      "ok": true
+    },
+    {
+      "args": [
+        "invoke",
+        "load",
+        "--target",
+        "history",
+        "--args",
+        "[\"record-a10a1bf598314f989128fb8fa071e7c8\", \"H743 offline export validation\"]"
+      ],
+      "ok": true
+    },
+    {
+      "args": [
+        "invoke",
+        "setRange",
+        "--target",
+        "history",
+        "--args",
+        "[{\"start\": 913, \"end\": 977}]"
+      ],
+      "ok": true
+    },
+    {
+      "args": [
+        "invoke",
+        "exportFlame",
+        "--target",
+        "history",
+        "--args",
+        "[{\"mode\": \"timeline\", \"format\": \"html\"}, {\"captureOnly\": true}]"
+      ],
+      "ok": true
+    },
+    {
+      "args": [
+        "downloads"
+      ],
+      "ok": true
+    },
+    {
+      "args": [
+        "download",
+        "1",
+        "E:\\zynqlinkPRO\\build\\flame-html-20261102\\frozen-ui-final-artifacts\\frozen-web-cli.html"
+      ],
+      "ok": true
+    }
+  ],
+  "scriptErrors": []
+}
