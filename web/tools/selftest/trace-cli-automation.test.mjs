@@ -15,7 +15,7 @@ function rig(){
   const device={productName:'akaLinkPro CMSIS-DAP',serialNumber:'probe'},calls=[],elements=new Map();
   const document={getElementById:id=>{if(!elements.has(id))elements.set(id,{value:'',checked:false,textContent:'passed',type:id==='f-verify'||id==='f-reset'?'checkbox':'text'});return elements.get(id);}};
   const session={connected:true,probe:{device},statusInfo:()=>({connected:true,halted:false}),bpList:()=>[],exclusive:async fn=>fn(),refresh:async()=>({halted:true}),halted:true,pc:0x08000000};
-  const t={probe:{device},info:{cpuid:1,device:2,profile:'stm32h743'},saved:new Map([[1,{mask:255,before:4}]]),locks:new Map(),osLocked:false,
+  const t={probe:{device,clockHz:10000000},info:{cpuid:1,device:2,profile:'stm32h743'},saved:new Map([[1,{mask:255,before:4}]]),locks:new Map(),osLocked:false,
     isHalted:async()=>false,inspect:async()=>t.info,read:async()=>5,halt:async()=>calls.push('halt'),run:async()=>calls.push('run'),
     clearEntryBreak:async()=>calls.push('clear'),restore:async()=>calls.push('restore'),verifyElf:async()=>10,
     reset:async options=>{calls.push(['reset',options]);return {entryPC:options.address};}};
@@ -67,6 +67,15 @@ test('target operations reuse the page object and release its busy guard',async(
   assert.deepEqual(r.calls[0],['reset',{address:0x08000100,timeout:3000}]);
   await r.a.dispatch({action:'target',op:'close',restore:true});
   assert.equal(r.e.state.operation,false);assert.ok(r.calls.includes('restore'));
+});
+
+test('CLI refuses a different existing ETM clock instead of silently claiming the requested rate',async()=>{
+  const r=rig();r.e.target.probe.clockHz=1000000;
+  await assert.rejects(r.a.dispatch({action:'target',op:'init',profile:'stm32h743',swdHz:10000000}),/SWD时钟/);
+  assert.equal(r.e.state.operation,false);assert.deepEqual(r.calls,[]);
+  await r.a.dispatch({action:'target',op:'init',profile:'stm32h743',swdHz:1000000});
+  await r.a.dispatch({action:'target',op:'close',restore:true});
+  assert.equal(r.e.target.probe.clockHz,1000000);
 });
 test('stale target state is rejected before changing saved register ownership',async()=>{
   const r=rig();await r.a.dispatch({action:'target',op:'init',profile:'stm32h743',probe:'probe'});

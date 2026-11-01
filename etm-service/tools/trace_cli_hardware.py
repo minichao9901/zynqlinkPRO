@@ -121,7 +121,7 @@ def web_request(request):
 
 class TargetBridge(WebPipe):
     """Reuse the real page's EtmTarget and ProbeManager, not another debugger."""
-    def __init__(self, probe_id, profile, hse_hz, swd_hz=1000000, timeout=210, purpose=None):
+    def __init__(self, probe_id, profile, hse_hz, swd_hz=10000000, timeout=210, purpose=None):
         super().__init__(timeout)
         self.probe_id, self.profile, self.hse_hz = probe_id, profile, hse_hz
         self.swd_hz = swd_hz

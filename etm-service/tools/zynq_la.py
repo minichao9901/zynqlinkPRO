@@ -44,6 +44,7 @@ class Session:
     """One open ZynqDAP handle and at most one ETM capture."""
 
     def __init__(self):
+        self.swd_hz = 10000000
         self.dev = None
         self.out = None
         self.inp = None
@@ -71,7 +72,7 @@ class Session:
         if self.dev is not None:
             return
         self.dev, self.out, self.inp = open_dap()
-        setup(self.out, self.inp, 1000)
+        setup(self.out, self.inp, self.swd_hz // 1000, speed_hz=self.swd_hz)
         self._dap_write32(0xE000EDF0, 0xA05F0003)   # keep the target halted
 
     def close(self):
@@ -370,6 +371,7 @@ class _Sock:
         if data != b"start":
             raise CaptureError("unsupported LA start command")
         s = session()
+        s.swd_hz = self.vis.swd_hz
         s.configure(self.vis.config, self.vis.traceid, self.vis.seconds)
         s.capture_directory=getattr(self.vis,'capture_directory',None)
         s.start()
@@ -401,6 +403,7 @@ class Vis:
     """Drop-in replacement for the Kingst VIS client used by server.py."""
 
     def __init__(self, *args, **kwargs):
+        self.swd_hz = 10000000
         self.config = {}
         self.traceid = 2
         self.seconds = 0.01

@@ -132,7 +132,8 @@ export function createTraceAutomation(tools, win=globalThis.window){
       try{
         return await tools.etm.run(async()=>{
           t.profile=m.profile;t.hseHz=m.hseHz;
-          if(!t.probe)await t.connect();
+          if(t.probe&&t.probe.clockHz!==(m.swdHz??10000000))throw Error('当前ETM连接的SWD时钟与请求不同，请先断开再选择时钟');
+          if(!t.probe){t.setControlClockKhz((m.swdHz??10000000)/1000);await t.connect();}
           checkProbe(t.probe,m.probe);
           transaction.initialHalted=await t.isHalted();transaction.initialized=true;
           const snapshot=await t.inspect();

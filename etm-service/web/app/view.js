@@ -348,7 +348,7 @@ on('start',async()=>{const sync=$('sync').checked,seconds=Number($('duration').v
   if(!(captureSeconds>0)||captureSeconds>state.captureMaxSeconds)throw Error(`单次采集上限 ${Math.round(state.captureMaxSeconds*1000)} ms（一次采集 + 一次解码）；更长的覆盖请分多次采集。`);
   markStage('启动 Zynq ETM 接收','交接/采集/下载/解码/首屏');log('采集步骤：'+stage);
   if(sync){log('采集步骤：释放浏览器 USB，交给本地服务 arm/恢复 CPU');await target.suspendUsb();}
-  const created=await api('capture',{rate:500000000,seconds:captureSeconds,sync,decode:$('auto-decode').checked,config,elfId:captureElfId,targetVerified:sync,targetSnapshot:sync?target.info:null,captureScope:sync?'business-unfiltered-window':'externally-configured-window',captureEntry,sourceSnapshot:captureSourceSnapshot});
+  const created=await api('capture',{rate:500000000,seconds:captureSeconds,swdHz:(target.suspendedClockKhz||target.controlClockKhz||10000)*1000,sync,decode:$('auto-decode').checked,config,elfId:captureElfId,targetVerified:sync,targetSnapshot:sync?target.info:null,captureScope:sync?'business-unfiltered-window':'externally-configured-window',captureEntry,sourceSnapshot:captureSourceSnapshot});
   log('联动任务创建；起点 '+(captureEntry===null?'当前暂停位置':hex(captureEntry)));await watchJob(created.job,{resume:false,kind:'capture'});
   }catch(e){throw new Error(stage+'失败：'+e.message,{cause:e});}},async()=>{try{if(sync){if(!target.probe){markStage('重新连接 USB');await target.resumeUsb();}if(target.probe){markStage('恢复配置/断点/刷新状态');target.assertTransport();await target.clearEntryBreak();await target.restore();await resumeBreakpoints(suspendedBps);await showTarget(await target.inspect());log('本次 trace 配置与断点已恢复；目标状态已刷新');}}}finally{target.setControlStage(null);}},e=>log('采集后的清理/回读失败（未覆盖首次错误）：'+e.message));
 });

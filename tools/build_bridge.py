@@ -155,6 +155,7 @@ def main(argv=None):
         for path in (ROOT/'etm-service/vendor/OpenCSD-1.8.3/LICENSE',ROOT/'etm-service/vendor/OpenCSD-1.8.3/NOTICES.txt',ROOT/'etm-service/native/SQLITE-LICENSE.txt',Path(sys.base_prefix)/'LICENSE.txt'):
             if path.is_file():shutil.copyfile(path,licenses/(path.parent.name+'-'+path.name))
         readme=('Zynq ETM 工作台\n\n双击 zynq-etm-bridge.exe，浏览器自动打开。请保留整个程序目录（包括_internal）。\n'
+            'ETM模式默认使用10 MHz SWD做目标配置；CPU/TRACECLK仍由目标固件决定。\n'
             'Web：载入目标ELF与源码 → 连接探针 → 添加并选择函数起点 → 核对HSE/RCC → 联动采集。\n'
             '目标PLL、AHB/APB分频由target固件负责；桥只配置Trace接口，不自动降频、不烧录板卡。\n'
             '保留F103ZE ETMv3及STM32H743 ETMv4识别/路由/解码；H743 Zynq链路待真机验收。\n'
@@ -172,6 +173,7 @@ def main(argv=None):
         revision=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
         files=[dict(path=p.relative_to(package).as_posix(),bytes=p.stat().st_size,sha256=sha(p)) for p in sorted(package.rglob('*')) if p.is_file()]
         manifest=dict(schema=1,platform='windows-x64',sourceRevision=revision,
+            etmControlClockDefaultHz=10000000,
             sourceDirty=source_dirty,dependencies=dependencies,
             capturePath='Web button -> Zynq LA -> OpenCSD binary -> C++ TraceStore',
             clockPolicy='target-firmware-owned',requiresSystemPython=False,requiresNode=False,files=files)

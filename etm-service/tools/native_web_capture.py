@@ -61,7 +61,7 @@ class NativeCapture:
         if not isinstance(options['decode'], bool):
             raise ValueError('decode必须为boolean')
         for name, default, allowed in [('gpioSpeed', 1, (1, 2, 3)),
-                                       ('traceId', 2, range(1, 112)), ('swdKhz', 1000, range(1, 50001))]:
+                                       ('traceId', 2, range(1, 112)), ('swdKhz', 10000, range(1, 50001))]:
             value = o.get(name, default)
             if isinstance(value, bool) or not isinstance(value, int) or value not in allowed:
                 raise ValueError('无效参数：' + name)

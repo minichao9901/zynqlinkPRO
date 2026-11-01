@@ -154,7 +154,7 @@ def capture(argv):
     parser.add_argument('--seconds', type=float, default=0.05, help='采集时长0..2 s；DDR固件默认采后下载，旧固件最多1秒')
     parser.add_argument('--transport',choices=('auto','ddr','legacy'),default='auto')
     parser.add_argument('--trace-id', type=int, default=2)
-    parser.add_argument('--swd-khz', type=int, default=1000, help='目标控制SWD时钟，默认1000 kHz')
+    parser.add_argument('--swd-khz', type=int, default=10000, help='目标控制SWD时钟，默认10000 kHz')
     parser.add_argument('--entry', help='采集起点函数名或0x地址')
     parser.add_argument('--reset-to-entry', action='store_true')
     parser.add_argument('--entry-timeout', type=float, default=5)

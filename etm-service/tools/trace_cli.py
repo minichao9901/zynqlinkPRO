@@ -481,6 +481,7 @@ def capture_command(args):
         # Match the Web preflight: do not halt/reset a target merely to find
         # out later that the analyser is unavailable or rejects the rate.
         v = Vis(host=args.la_host, port=args.la_port)
+        v.swd_hz = args.swd_hz
         rates = [int(n) for n in v.cmd('get-supported-sample-rate').split()]
         if args.rate not in rates:
             raise CliError('LA不支持所选采样率')
@@ -903,7 +904,7 @@ def build_parser():
         p.add_argument('--probe', help='精确探针序列号；只连一个时可省略')
         p.add_argument('--profile', choices=HARDWARE_PROFILES, default='stm32h743')
         p.add_argument('--hse', type=float, default=25, help='HSE MHz，仅用于计算，不修改PLL')
-        p.add_argument('--swd-hz', type=int, default=1000000)
+        p.add_argument('--swd-hz', type=int, default=10000000)
     def options(p):
         p.add_argument('--trace-id', type=int, choices=range(1,112), default=2)
         p.add_argument('--pin-speed', type=int, choices=(1,2,3), default=2)
@@ -1017,8 +1018,6 @@ def _main(argv=None):
             raise CliError('limit须为1～500；bins须为1～5000')
         if hasattr(args,'hse') and (not 0 < args.hse <= 100 or not 0 < args.swd_hz <= 50000000):
             raise CliError('HSE须为0～100MHz的正数，SWD须为正数且≤50MHz')
-        if args.command in ('target','capture') and args.swd_hz!=1000000:
-            raise CliError('Trace控制复用网页固定1MHz路径；调试会话可在web connect时选择其它SWD档位')
         if hasattr(args,'echo_interval') and not .001 <= args.echo_interval <= 1:
             raise CliError('echo间隔须为0.001～1秒')
         for name in ('timeout','entry_timeout'):

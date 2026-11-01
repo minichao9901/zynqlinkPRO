@@ -998,6 +998,7 @@ def capture_job(jid, sid, options):
         v = Vis()
         v.capture_directory=directory(sid)
         v.config = options['config']
+        v.swd_hz = options.get('swdHz', 10000000)
         v.traceid = int(options['config'].get('traceid', 2))
         v.seconds = options['seconds']
         # LA（KingstVIS socket）是**单客户端**资源：从连上到本任务结束（含逐片导出/解码）都算持有。
@@ -1154,7 +1155,11 @@ def start_capture():
         raise ValueError('载入的 ELF 已失效，请重新选择固件。')
     elf_info(elf)
     source_files = read_source_snapshot(o['elfId'],o['sourceSnapshot']) if o.get('sourceSnapshot') else o.get('sources', {})
+    swd_hz=o.get('swdHz',10000000)
+    if isinstance(swd_hz,bool) or not isinstance(swd_hz,int) or not 250000<=swd_hz<=50000000:
+        raise ValueError('SWD控制时钟须为250000～50000000 Hz整数')
     o = dict(rate=int(o.get('rate', 100000000)), seconds=float(o.get('seconds', .01)),
+             swdHz=swd_hz,
              threshold=1.65, sync=bool(o.get('sync', True)),
              decode=bool(o.get('decode')), clock=0, data=[1, 2, 3, 4],
              config=decoder_config(o.get('config', {})), elfId=o.get('elfId'),sourceSnapshot=o.get('sourceSnapshot'),

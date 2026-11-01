@@ -65,13 +65,18 @@ def cmd(out, inp, payload):
     return r
 
 
-def setup(out, inp, speed_khz, transport='swd', jtag_ir_lengths=(4, 5)):
+def setup(out, inp, speed_khz, transport='swd', jtag_ir_lengths=(4, 5), *, speed_hz=None):
     drain(inp)
     port = 2 if transport == 'jtag' else 1
     r = cmd(out, inp, [0x02, port])
     if r[1] != port:
         raise RuntimeError('Requested debug transport unavailable: '+r.hex(' '))
-    cmd(out, inp, [0x11] + le(speed_khz * 1000))
+    requested=speed_khz*1000 if speed_hz is None else speed_hz
+    if int(requested)!=requested or not 0<requested<=0xffffffff:
+        raise ValueError('Clock request must be a positive integer Hz value')
+    clock_reply=cmd(out, inp, [0x11] + le(int(requested)))
+    if len(clock_reply)<2 or clock_reply[1]!=0:
+        raise RuntimeError(f'DAP_SWJ_Clock rejected {requested} Hz: '+clock_reply.hex())
     cmd(out, inp, [0x13, 0x00])
     if transport == 'jtag':
         # ARM SWJ switch to JTAG, TAP reset, then Run-Test/Idle.

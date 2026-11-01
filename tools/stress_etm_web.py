@@ -85,7 +85,8 @@ class Stress(Streams):
             self.page('etm','upload',selector='#sources-files',files=files)
             self.wait('etm','#sources-label','已保存本地快照');self.ready('#choose-elf')
 
-    def connect(self):
+    def connect(self,clock_khz=None):
+        if clock_khz is not None:self.invoke('etm','setControlClockKhz',clock_khz,target='target')
         start=time.perf_counter();self.page('etm','click',selector='#connect');self.ready('#disconnect')
         info=self.invoke('etm','inspect',target='target')
         if info['profile']!=self.args.profile or info.get('clockError'):raise RuntimeError('Unexpected target: '+str(info))
@@ -114,8 +115,13 @@ class Stress(Streams):
             port=ports[0]
         rows=[];functions=self.args.functions.split(',')
         for n in range(self.args.capture_rounds):
-            info,opened=self.connect();function=functions[n%len(functions)];echo=None
-            row={'round':n+1,'function':function,'before':info,'openSeconds':opened}
+            clock=self.args.control_clocks_khz[n%len(self.args.control_clocks_khz)] if self.args.control_clocks_khz else None
+            info,opened=self.connect(clock);function=functions[n%len(functions)];echo=None
+            row={'round':n+1,'function':function,'before':info,'openSeconds':opened,'requestedControlClockKhz':clock}
+            if clock is not None:
+                from tools.probe_build_info import live_clock_snapshot
+                row['actualControlClock']=live_clock_snapshot()
+                if abs(row['actualControlClock']['actual_link_Hz']-clock*1000)>10:raise RuntimeError('Actual SWD clock differs from requested comparison clock')
             try:
                 if self.args.echo:
                     self.page('etm','click',selector='#run');self.ready('#disconnect')
@@ -156,6 +162,8 @@ class Stress(Streams):
                 decoded=json.loads((record/'decoded.json').read_text(encoding='utf8'))
                 if self.args.profile_control:row['controlTransport']=self.invoke('etm','transportStats',target='target')
                 quality=meta.get('captureQuality') or {}
+                if clock is not None and (quality.get('tckKhz') is None or abs(quality['tckKhz']-clock)>1):
+                    raise RuntimeError('Capture service changed the selected SWD clock: '+str(quality.get('tckKhz')))
                 if quality.get('transport')=='ddr-usb/1':
                     if not meta.get('captureExtent',{}).get('complete') or meta.get('captureWarning'):
                         raise RuntimeError('Measured DDR window metadata is inconsistent: '+str(meta.get('captureWarning')))
@@ -195,7 +203,7 @@ class Stress(Streams):
                     row['cleanupError']=str(cleanup)
                 if echo:
                     row['echo']=echo.close();self.save(self.out/f'echo-{n+1:03}.json',row['echo'])
-                    window=row.get('transport',{})
+                    window=row.get('transport') or {}
                     row['echoInsideWindow']=sum(r['exact'] and window.get('hostStartedUnix',float('inf'))<=r['receivedUnix']<=window.get('hostEndedUnix',0) for r in row['echo']['rows'])
                     if window.get('transport')=='ddr-usb/1':
                         earliest,latest=window['hardwareStartBracketUnix'];duration=window['hardwareSeconds']
@@ -221,6 +229,7 @@ def arguments(argv=None):
     p.add_argument('--runtime',required=True);p.add_argument('--artifacts',required=True)
     p.add_argument('--records-root',help='Explicit server record directory; default from runtime metadata')
     p.add_argument('--profile-control',action='store_true',help='Record per-action native USB HTTP round-trip counters')
+    p.add_argument('--control-clocks-khz',default='',help='Optional capture clock sequence, e.g. 1000,10000 for interleaved A/B')
     p.add_argument('--native-exchange',choices=('auto','on','off','alternate'),default='auto',help='AI controlled A/B only; normal product default is on')
     p.add_argument('--packed-memory',choices=('auto','on','off','alternate'),default='auto',help='AI controlled scalar batching comparison')
     p.add_argument('--register-batch',choices=('auto','on','off','alternate'),default='auto',help='AI controlled grouped-register comparison')
@@ -231,6 +240,8 @@ def arguments(argv=None):
     p.add_argument('--functions');p.add_argument('--echo',action='store_true');p.add_argument('--cdc-port')
     p.add_argument('--reset-before',action='store_true',help='Reset and run to entry; does not program Flash')
     a=p.parse_args(argv)
+    a.control_clocks_khz=[int(v) for v in a.control_clocks_khz.split(',') if v]
+    if any(v<250 or v>50000 for v in a.control_clocks_khz):p.error('control clock must be 250..50000 kHz')
     if not 1<=a.rounds<=1000 or not 0<=a.capture_rounds<=1000 or not 1<=a.milliseconds<=1000:raise ValueError('Invalid finite campaign bounds')
     if a.profile=='stm32h743':
         if not a.elf or not a.functions:p.error('H743 requires --elf and --functions for the firmware actually on the board')

@@ -20,9 +20,14 @@ export class EtmTarget {
     if(!this.Probe.supported())throw Error('请用支持 WebUSB 的桌面 Chrome / Edge 打开页面');
     let device=devices.length===1?devices[0]:null;
     if(!device){let timer;try{device=await Promise.race([navigator.usb.requestDevice({filters:[{vendorId:0x0d28}]}),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('浏览器仍在等待 USB 设备选择；请选中探针后重新连接')),30000);})]);}finally{clearTimeout(timer);}}
-    this.probe=await this.Probe.open(device,{clockKhz:1000});
+    this.probe=await this.Probe.open(device,{clockKhz:this.controlClockKhz??10000});
     this.debugFault=false;this.probe.onLog=this.log;
     try{return await this.inspect();}catch(e){try{await this.disconnect();}catch(cleanup){this.log('连接失败后的清理错误（保留首次错误）：'+cleanup.message);}throw e;}
+  }
+  setControlClockKhz(khz){
+    if(!Number.isInteger(khz)||khz<250||khz>50000)throw Error('ETM SWD时钟须为250～50000 kHz整数');
+    if(this.probe)throw Error('请先断开探针，再更改ETM SWD时钟');
+    this.controlClockKhz=khz;return {clockKhz:khz};
   }
   /** Release the WebUSB handle before the local Zynq service takes the probe.
    *  Target registers and ETM programming state stay untouched; the service
@@ -31,7 +36,7 @@ export class EtmTarget {
   async suspendUsb(){
     const probe = this.probe;
     if(!probe) return;
-    this.suspendedClockKhz = Math.max(100, Math.round((probe.clockHz || 1_000_000) / 1000));
+    this.suspendedClockKhz = Math.max(250, Math.round((probe.clockHz || (this.controlClockKhz??10000)*1000) / 1000));
     this.probe = null;
     try { await probe.disconnect(); }
     catch(e){ this.log('释放探针供本地服务采集失败：' + e.message); throw e; }
@@ -43,7 +48,7 @@ export class EtmTarget {
     if(this.probe) return;
     const devices = (await this.Probe.authorized()).filter(d => d.vendorId === 0x0d28 && d.productId === 0x0204);
     if(!devices.length) throw Error('采集后找不到已授权的 ZynqDAP；请重新点「连接探针」');
-    this.probe = await this.Probe.open(devices[0], { clockKhz: this.suspendedClockKhz || 1000 });
+    this.probe = await this.Probe.open(devices[0], { clockKhz: this.suspendedClockKhz || this.controlClockKhz || 10000 });
     this.probe.onLog = this.log;
     this.log('已重新认领 ZynqDAP，准备恢复目标 trace 设置');
   }
