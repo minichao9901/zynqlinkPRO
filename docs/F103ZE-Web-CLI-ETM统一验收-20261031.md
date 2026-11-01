@@ -1230,3 +1230,5 @@ Web窗口元数据在DDR模式以硬件ticks/ref计算实际时长，主机下�
 首轮实现未交付：200MHz输入参考域setup +0.195ns/hold +0.121ns，120MHz主域8条路径setup -0.020ns；随后bitgen DRC报告5条IBUF并行直通/延迟输入网部分未布线（RTSTAT-2），没有生成或加载新bit。[首轮失败日志及报告](validation/etm-lane-delay-20261101/failed-first-build/result.json)已保留。没有降低DRC等级，也没有把旧verified bit冒充新产物。
 
 据此修正为每个输入只走IDELAY的一条物理路径，取消并行直通mux。新设计内部用显式加载的零tap作对照，仍有原语自身插入延迟；真正的直接输入基线继续使用旧已知配对。上电等IDELAYCTRL RDY后自动LD零tap并核对；启动LD期间RDY丢失也可在空闲时显式恢复。校准禁用时拒绝非零tap载荷。更新后的功能仿真通过，包括该启动故障、逐线偏斜、毛刺、采集中拒绝，以及原9项DDR边界的两种参数配置；8项主机检查通过。下一次实现须重新综合/布线、通过DRC和120MHz时序后才上板，此时尚未证明真实校准效果。
+
+等待e18dd7e第二轮实现时，旧已知可用bit/ELF继续在线，通过Web额外执行100次打开/关闭，全部通过、没有失败重试；RCC逐次不变。并行Vivado进程在该轮前后均确认存活。此测试只证明本轮旧配对在并行构建条件下的100次生命周期稳定性，不是新ELD1配对、高频或采集通过声明。[逐轮数据](validation/etm-lane-delay-20261101/web-100cycles/analysis.json)。
