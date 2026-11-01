@@ -371,7 +371,8 @@ def main():
                 save(result_path, report)
                 print('INTERLEAVE', service, speed, 'PASS' if row['passed'] else 'FAIL',
                       'bursts', row.get('debug', {}).get('bursts'), 'error', row.get('error'), flush=True)
-                assert row['passed'], row
+                if not row['passed']:
+                    raise RuntimeError(f'{service}/{speed} failed: {row.get("error")}; see {result_path}')
                 stop(probe, d)
         report['passed'] = True
     except BaseException as exc:

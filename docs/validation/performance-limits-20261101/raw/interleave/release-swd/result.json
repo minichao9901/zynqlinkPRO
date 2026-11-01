@@ -1,0 +1,87 @@
+{
+  "artifacts": {
+    "git_head": "c7cd46d78b24bed0ebb635cb4b3a4f333261eb70",
+    "git_dirty": true,
+    "bit": {
+      "path": "E:\\zynqlinkPRO\\prebuilt\\fclk133-release-20261101\\probe.bit",
+      "sha256": "af1031d3caa0d7bd3b6adffa911d26efdab9e0bfb5223fb18f70dabb70ebeeed"
+    },
+    "elf": {
+      "path": "E:\\zynqlinkPRO\\prebuilt\\fclk133-release-20261101\\application.elf",
+      "sha256": "2137f7d0f507c08574f36223130103c0710645cbfdefb5c1d8c8efb0cfb990a0"
+    }
+  },
+  "driverSha256": "a9b62140acfc04bf40565c4751015a7a99897563fe9597a70b927476cbc5c1f8",
+  "transport": "swd",
+  "rows": [
+    {
+      "service": "rtt",
+      "speed_hz": 50000000,
+      "transport": "swd",
+      "passed": false,
+      "error": "RuntimeError('IDCODE read failed: 05 00 07')",
+      "reader_stopped": true
+    }
+  ],
+  "targetFlashWrites": false,
+  "targetClockWrites": false,
+  "backup_sha256": "1de8dd8c94d3c853cb3da0e0df3b2d5342d7e4f7a0c67d43e35febeef6980bce",
+  "registers_before": {
+    "0": 1,
+    "1": 2,
+    "2": 1,
+    "3": 1,
+    "4": 0,
+    "5": 4294966719,
+    "6": 915387784,
+    "7": 3040398030,
+    "8": 4294962943,
+    "9": 4259299324,
+    "10": 3113961384,
+    "11": 2328958968,
+    "12": 10,
+    "13": 536936424,
+    "14": 134219185,
+    "15": 134219170,
+    "16": 553648128,
+    "17": 536936424,
+    "18": 37207660,
+    "20": 1
+  },
+  "RCC_before": [
+    50548355,
+    5309450
+  ],
+  "ETMCR_before": "0x411",
+  "initial_halted": false,
+  "failure": "AssertionError({'service': 'rtt', 'speed_hz': 50000000, 'transport': 'swd', 'passed': False, 'error': \"RuntimeError('IDCODE read failed: 05 00 07')\", 'reader_stopped': True})",
+  "restore_match": true,
+  "registers_after": {
+    "0": 1,
+    "1": 2,
+    "2": 1,
+    "3": 1,
+    "4": 0,
+    "5": 4294966719,
+    "6": 915387784,
+    "7": 3040398030,
+    "8": 4294962943,
+    "9": 4259299324,
+    "10": 3113961384,
+    "11": 2328958968,
+    "12": 10,
+    "13": 536936424,
+    "14": 134219185,
+    "15": 134219170,
+    "16": 553648128,
+    "17": 536936424,
+    "18": 37207660,
+    "20": 1
+  },
+  "registers_match": true,
+  "RCC_after": [
+    50548355,
+    5309450
+  ],
+  "run_halt_restored": true
+}

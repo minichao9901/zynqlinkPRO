@@ -1,0 +1,101 @@
+{
+  "startedAtUtc": "2026-11-01T10:59:58.832293+00:00",
+  "pair": "E:\\zynqlinkPRO\\prebuilt\\fclk133-swd-fixed-test-20261101",
+  "files": {
+    "probe.bit": "ef9252c87529078c1d18ea1c05c3a19a333a20e1eee16205646b88518899ebe7",
+    "application.elf": "b7ffe71c0edc5b8ccbd04adb14a0e43fdb7e67082d1ee00655066ee2ddd0853f",
+    "ps7_init.tcl": "485a028ff7ad9a256a64313b68527a055ca3800b3b85577ceb0554b0e0609c94"
+  },
+  "phase": "load",
+  "targetFlashWrites": false,
+  "QSPIWrites": false,
+  "targetClockWrites": false,
+  "before": {
+    "recordedAtUtc": "2026-11-01T10:59:59.324039+00:00",
+    "registers": {
+      "FCLK0_CTRL": "0x100a20",
+      "FCLK1_CTRL": "0x900100",
+      "ARM_PLL": "0x28008",
+      "DDR_PLL": "0x20008",
+      "IO_PLL": "0x36008",
+      "CPU_CTRL": "0x1f000200",
+      "DDR_CTRL": "0xc200003",
+      "USB0_CTRL": "0x101941",
+      "USB1_CTRL": "0x101941",
+      "FEATURES": "0x30f",
+      "CAPTURE": "0x8",
+      "SWD_STATUS": "0x2",
+      "PACKET_STATUS": "0x0",
+      "DDR_STATUS": "0x0",
+      "CDMA_STATUS": "0x1002"
+    },
+    "allObservedEnginesIdle": true,
+    "xsctOutput": "SNAP FCLK0_CTRL 00100A20\nSNAP FCLK1_CTRL 00900100\nSNAP ARM_PLL 00028008\nSNAP DDR_PLL 00020008\nSNAP IO_PLL 00036008\nSNAP CPU_CTRL 1F000200\nSNAP DDR_CTRL 0C200003\nSNAP USB0_CTRL 00101941\nSNAP USB1_CTRL 00101941\nSNAP FEATURES 0000030F\nSNAP CAPTURE 00000008\nSNAP SWD_STATUS 00000002\nSNAP PACKET_STATUS 00000000\nSNAP DDR_STATUS 00000000\nSNAP CDMA_STATUS 00001002\n"
+  },
+  "target": {
+    "CPUID": "0x411fc231",
+    "deviceId": "0x10036414",
+    "DHCSR": "0x1010001",
+    "DEMCR": "0x1000000",
+    "ETMCR": "0x411",
+    "ETMSR": "0x2",
+    "ETMLSR": "0x3",
+    "RCC_CR": "0x3034e83",
+    "RCC_CFGR": "0x51040a",
+    "FlashSegments": [
+      {
+        "address": 134217728,
+        "bytes": 20040,
+        "sha256": "b5b09d9a0446795acc1981aff62ed55f36f10fa71a47544b77c3d0fe1a0610d1"
+      },
+      {
+        "address": 134237768,
+        "bytes": 128,
+        "sha256": "496d8b1d85d4a90921e45cc77629b2c80dcaae957a6ed79710200efa1d4cf341"
+      }
+    ],
+    "targetHalted": false
+  },
+  "clockAtSafeSpeed": {
+    "FCLK_Hz": 133333332,
+    "cfg": "0x40044a11",
+    "waveform": {
+      "SWCLK_Hz": 995024.8656716418,
+      "half_period_fclk": 67,
+      "short_high": false,
+      "intended_high_ns": 502.50000502500006
+    },
+    "clockSource": 2,
+    "clockControl": 1051168,
+    "sourcePllControl": 163848,
+    "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+    "JTAG_sampling_mode": 0,
+    "RISC_V_SBA_enabled": false,
+    "actual_link_Hz": 995024.8656716418,
+    "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+  },
+  "after": {
+    "recordedAtUtc": "2026-11-01T11:00:15.967521+00:00",
+    "registers": {
+      "FCLK0_CTRL": "0x100a20",
+      "FCLK1_CTRL": "0x900100",
+      "ARM_PLL": "0x28008",
+      "DDR_PLL": "0x20008",
+      "IO_PLL": "0x36008",
+      "CPU_CTRL": "0x1f000200",
+      "DDR_CTRL": "0xc200003",
+      "USB0_CTRL": "0x101941",
+      "USB1_CTRL": "0x101941",
+      "FEATURES": "0x30f",
+      "CAPTURE": "0x8",
+      "SWD_STATUS": "0x2",
+      "PACKET_STATUS": "0x0",
+      "DDR_STATUS": "0x0",
+      "CDMA_STATUS": "0x1002"
+    },
+    "allObservedEnginesIdle": true,
+    "xsctOutput": "SNAP FCLK0_CTRL 00100A20\nSNAP FCLK1_CTRL 00900100\nSNAP ARM_PLL 00028008\nSNAP DDR_PLL 00020008\nSNAP IO_PLL 00036008\nSNAP CPU_CTRL 1F000200\nSNAP DDR_CTRL 0C200003\nSNAP USB0_CTRL 00101941\nSNAP USB1_CTRL 00101941\nSNAP FEATURES 0000030F\nSNAP CAPTURE 00000008\nSNAP SWD_STATUS 00000002\nSNAP PACKET_STATUS 00000000\nSNAP DDR_STATUS 00000000\nSNAP CDMA_STATUS 00001002\n"
+  },
+  "completed": true,
+  "endedAtUtc": "2026-11-01T11:00:15.967549+00:00"
+}

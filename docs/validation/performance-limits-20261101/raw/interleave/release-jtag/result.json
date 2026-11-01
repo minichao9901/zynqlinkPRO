@@ -1,0 +1,2132 @@
+{
+  "artifacts": {
+    "git_head": "c7cd46d78b24bed0ebb635cb4b3a4f333261eb70",
+    "git_dirty": true,
+    "bit": {
+      "path": "E:\\zynqlinkPRO\\prebuilt\\fclk133-release-20261101\\probe.bit",
+      "sha256": "af1031d3caa0d7bd3b6adffa911d26efdab9e0bfb5223fb18f70dabb70ebeeed"
+    },
+    "elf": {
+      "path": "E:\\zynqlinkPRO\\prebuilt\\fclk133-release-20261101\\application.elf",
+      "sha256": "2137f7d0f507c08574f36223130103c0710645cbfdefb5c1d8c8efb0cfb990a0"
+    }
+  },
+  "driverSha256": "7a40ac42ef53bd3e7475f5a012ef5ef49e50acafd40c5e5e0af9e12fedb27cb0",
+  "transport": "jtag",
+  "rows": [
+    {
+      "service": "rtt",
+      "speed_hz": 50000000,
+      "transport": "jtag",
+      "passed": true,
+      "debug": {
+        "bursts": 65,
+        "verified_memory_operations": 1040,
+        "dap_requests_in_bursts": 1495,
+        "burst_latencies_s": [
+          0.028620900004170835,
+          0.02848830001312308,
+          0.028648600011365488,
+          0.02860980000696145,
+          0.028807700000470504,
+          0.028589499997906387,
+          0.02875040000071749,
+          0.028966200014110655,
+          0.02869549999013543,
+          0.029039900022326037,
+          0.02878620001138188,
+          0.028759900014847517,
+          0.028696099994704127,
+          0.028583499981323257,
+          0.02860849999706261,
+          0.028644099977100268,
+          0.028926099999807775,
+          0.029260599985718727,
+          0.028576800017617643,
+          0.02904409999609925,
+          0.02894020001986064,
+          0.028719800000544637,
+          0.029063499998301268,
+          0.02871060001780279,
+          0.028802099986933172,
+          0.028676699992502108,
+          0.029028799996012822,
+          0.028742099995724857,
+          0.02877130001434125,
+          0.028822599997511134,
+          0.028804500005207956,
+          0.028526100009912625,
+          0.028888000000733882,
+          0.028629599983105436,
+          0.028890699992189184,
+          0.028804599976865575,
+          0.028506600006949157,
+          0.029370400006882846,
+          0.02900689997477457,
+          0.029163400002289563,
+          0.028825599991250783,
+          0.028638699994189665,
+          0.028654800000367686,
+          0.02866589999757707,
+          0.028580600017448887,
+          0.02893149998271838,
+          0.028905300016049296,
+          0.028811900003347546,
+          0.028373400011332706,
+          0.028517300001112744,
+          0.028801500011468306,
+          0.028846399975009263,
+          0.02906040000380017,
+          0.028427100012777373,
+          0.029164800012949854,
+          0.02885740000056103,
+          0.028965700010303408,
+          0.029111200012266636,
+          0.028793100005714223,
+          0.028949600004125386,
+          0.029294800013303757,
+          0.029803200013702735,
+          0.02916549998917617,
+          0.02888560001156293,
+          0.02895919998991303
+        ],
+        "halt_step_resume": [
+          {
+            "pc_before": "0x20000016",
+            "pc_after": "0x2000000e",
+            "elapsed_s": 0.07729750001453795,
+            "stream_progress_after_resume": true
+          },
+          {
+            "pc_before": "0x2000000e",
+            "pc_after": "0x20000010",
+            "elapsed_s": 0.06455119999009185,
+            "stream_progress_after_resume": true
+          },
+          {
+            "pc_before": "0x20000014",
+            "pc_after": "0x20000016",
+            "elapsed_s": 0.08611629999359138,
+            "stream_progress_after_resume": true
+          }
+        ],
+        "stage_counters": [
+          {
+            "stage": "baseline_begin",
+            "metrics": [
+              65537,
+              536871424,
+              536871448,
+              487424,
+              31195613,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              822084608
+            ],
+            "received": 462848
+          },
+          {
+            "stage": "baseline_end",
+            "metrics": [
+              65537,
+              536871424,
+              536871448,
+              1465344,
+              93783448,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              822084608
+            ],
+            "received": 1429504
+          },
+          {
+            "stage": "debug_bursts_end",
+            "metrics": [
+              65537,
+              536871424,
+              536871448,
+              2832384,
+              181275346,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              822084608
+            ],
+            "received": 2813952
+          },
+          {
+            "stage": "halt_step_resume_end",
+            "metrics": [
+              65537,
+              536871424,
+              536871448,
+              2993152,
+              191763316,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              822084608
+            ],
+            "received": 2985984
+          },
+          {
+            "stage": "post_debug_end",
+            "metrics": [
+              65537,
+              536871424,
+              536871448,
+              3971072,
+              254351151,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              822084608
+            ],
+            "received": 3948544
+          }
+        ],
+        "post_debug_progress": 962560,
+        "max_debug_burst_s": 0.029803200013702735,
+        "median_debug_burst_s": 0.028804500005207956,
+        "clock_after_debug": {
+          "FCLK_Hz": 99999999,
+          "cfg": "0x11",
+          "waveform": {
+            "SWCLK_Hz": 49999999.5,
+            "half_period_fclk": 1,
+            "short_high": false,
+            "intended_high_ns": 10.000000100000001
+          },
+          "clockSource": 0,
+          "clockControl": 18874624,
+          "sourcePllControl": 221192,
+          "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+          "JTAG_sampling_mode": 17,
+          "RISC_V_SBA_enabled": false,
+          "actual_link_Hz": 49999999.5,
+          "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+        }
+      },
+      "final": [
+        65537,
+        536871424,
+        536871448,
+        5033980,
+        322381636,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        822084608
+      ],
+      "session_bytes": 5033980,
+      "all_published_received": true,
+      "sequence_exact": true,
+      "reader_stopped": true
+    },
+    {
+      "service": "hss",
+      "speed_hz": 50000000,
+      "transport": "jtag",
+      "variables": 8,
+      "period_ticks": 24000,
+      "requested_sample_Hz": 1000.0,
+      "passed": true,
+      "debug": {
+        "bursts": 78,
+        "verified_memory_operations": 1248,
+        "dap_requests_in_bursts": 1794,
+        "burst_latencies_s": [
+          0.023447300016414374,
+          0.02328339999075979,
+          0.023146499996073544,
+          0.02351290002116002,
+          0.023409899993566796,
+          0.023607299983268604,
+          0.024306700011948124,
+          0.028152999992016703,
+          0.023626500013051555,
+          0.023986699990928173,
+          0.023603000008733943,
+          0.023673999996390194,
+          0.02352170000085607,
+          0.023713600006885827,
+          0.023802900017471984,
+          0.023499200004152954,
+          0.02396769999177195,
+          0.02357950000441633,
+          0.02335430000675842,
+          0.02348220002022572,
+          0.023277000000234693,
+          0.023046799993608147,
+          0.023709200002485886,
+          0.023584499984281138,
+          0.023458799987565726,
+          0.02317230001790449,
+          0.023186699982034042,
+          0.023273700004210696,
+          0.023167200008174405,
+          0.023322499997448176,
+          0.023423699982231483,
+          0.023393599985865876,
+          0.02324909999151714,
+          0.023689099994953722,
+          0.023423300008289516,
+          0.023257399996509776,
+          0.023361500003375113,
+          0.023237999994307756,
+          0.023150499997427687,
+          0.023557800013804808,
+          0.023244300013175234,
+          0.02388960000826046,
+          0.023870399978477508,
+          0.023267399985343218,
+          0.023503799980971962,
+          0.023606900009326637,
+          0.02324909999151714,
+          0.023073999996995553,
+          0.023273900005733594,
+          0.02324479998787865,
+          0.02342430001590401,
+          0.023531600018031895,
+          0.023479600000428036,
+          0.023359199985861778,
+          0.02323590000742115,
+          0.023038599989376962,
+          0.023223800002597272,
+          0.0236301000113599,
+          0.023130100016715005,
+          0.025195299996994436,
+          0.023257499997271225,
+          0.023826599994208664,
+          0.023221999988891184,
+          0.023528599995188415,
+          0.023311099997954443,
+          0.023263799987034872,
+          0.02336619998095557,
+          0.023311199998715892,
+          0.023312600009376183,
+          0.023586800001794472,
+          0.02342730000964366,
+          0.02334849999169819,
+          0.023832300008507445,
+          0.023296200000913814,
+          0.023420400015311316,
+          0.023437900003045797,
+          0.02376339997863397,
+          0.023220000002766028
+        ],
+        "halt_step_resume": [
+          {
+            "pc_before": "0x20000004",
+            "pc_after": "0x20000006",
+            "elapsed_s": 0.08898749999934807,
+            "stream_progress_after_resume": true
+          },
+          {
+            "pc_before": "0x20000008",
+            "pc_after": "0x20000004",
+            "elapsed_s": 0.06845930000417866,
+            "stream_progress_after_resume": true
+          },
+          {
+            "pc_before": "0x20000004",
+            "pc_after": "0x20000006",
+            "elapsed_s": 0.058427599986316636,
+            "stream_progress_after_resume": true
+          }
+        ],
+        "stage_counters": [
+          {
+            "stage": "baseline_begin",
+            "metrics": [
+              827544392,
+              3728507691,
+              24000000,
+              252,
+              0,
+              0,
+              0,
+              0,
+              23,
+              11776,
+              24000,
+              256
+            ],
+            "received": 242
+          },
+          {
+            "stage": "baseline_end",
+            "metrics": [
+              827544392,
+              3740554529,
+              24000000,
+              754,
+              0,
+              0,
+              0,
+              0,
+              69,
+              35328,
+              24000,
+              256
+            ],
+            "received": 737
+          },
+          {
+            "stage": "debug_bursts_end",
+            "metrics": [
+              827544392,
+              3788934121,
+              24000000,
+              2713,
+              0,
+              0,
+              0,
+              1794,
+              1863,
+              953856,
+              24000,
+              256
+            ],
+            "received": 2676
+          },
+          {
+            "stage": "halt_step_resume_end",
+            "metrics": [
+              827544392,
+              3794165652,
+              24000000,
+              2931,
+              0,
+              0,
+              0,
+              1938,
+              2012,
+              1030144,
+              24000,
+              256
+            ],
+            "received": 2919
+          },
+          {
+            "stage": "post_debug_end",
+            "metrics": [
+              827544392,
+              3806212503,
+              24000000,
+              3433,
+              0,
+              0,
+              0,
+              1938,
+              2057,
+              1053184,
+              24000,
+              256
+            ],
+            "received": 3414
+          }
+        ],
+        "post_debug_progress": 495,
+        "max_debug_burst_s": 0.028152999992016703,
+        "median_debug_burst_s": 0.023421850011800416,
+        "clock_after_debug": {
+          "FCLK_Hz": 99999999,
+          "cfg": "0x11",
+          "waveform": {
+            "SWCLK_Hz": 49999999.5,
+            "half_period_fclk": 1,
+            "short_high": false,
+            "intended_high_ns": 10.000000100000001
+          },
+          "clockSource": 0,
+          "clockControl": 18874624,
+          "sourcePllControl": 221192,
+          "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+          "JTAG_sampling_mode": 17,
+          "RISC_V_SBA_enabled": false,
+          "actual_link_Hz": 49999999.5,
+          "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+        }
+      },
+      "final": [
+        827544392,
+        3823130948,
+        24000000,
+        3927,
+        0,
+        0,
+        0,
+        1938,
+        2104,
+        1077248,
+        24000,
+        0
+      ],
+      "session_samples": 3927,
+      "skipped": 0,
+      "DAP_yields": 1938,
+      "sample_count_match": true,
+      "all_data_frames_verified": true,
+      "first_DEF_verified": true,
+      "stat_duplicate_frames": 0,
+      "control_sequence_errors": [],
+      "timer_rebase_events": 1938,
+      "timer_rebase_examples": [
+        {
+          "previous": [
+            3740422801,
+            7
+          ],
+          "stamp": 3740603623,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 36822,
+          "phase_remainder_ticks": 12822
+        },
+        {
+          "previous": [
+            3740603623,
+            1
+          ],
+          "stamp": 3740628280,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 24657,
+          "phase_remainder_ticks": 657
+        },
+        {
+          "previous": [
+            3740628280,
+            1
+          ],
+          "stamp": 3740651400,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 23120,
+          "phase_remainder_ticks": 23120
+        },
+        {
+          "previous": [
+            3740651400,
+            1
+          ],
+          "stamp": 3740675437,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 24037,
+          "phase_remainder_ticks": 37
+        },
+        {
+          "previous": [
+            3740675437,
+            1
+          ],
+          "stamp": 3740700365,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 24928,
+          "phase_remainder_ticks": 928
+        },
+        {
+          "previous": [
+            3740700365,
+            1
+          ],
+          "stamp": 3740724712,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 24347,
+          "phase_remainder_ticks": 347
+        },
+        {
+          "previous": [
+            3740724712,
+            1
+          ],
+          "stamp": 3740748131,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 23419,
+          "phase_remainder_ticks": 23419
+        },
+        {
+          "previous": [
+            3740748131,
+            1
+          ],
+          "stamp": 3740772165,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 24034,
+          "phase_remainder_ticks": 34
+        },
+        {
+          "previous": [
+            3740772165,
+            1
+          ],
+          "stamp": 3740796507,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 24342,
+          "phase_remainder_ticks": 342
+        },
+        {
+          "previous": [
+            3740796507,
+            1
+          ],
+          "stamp": 3740820347,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 23840,
+          "phase_remainder_ticks": 23840
+        },
+        {
+          "previous": [
+            3740820347,
+            1
+          ],
+          "stamp": 3740845770,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 25423,
+          "phase_remainder_ticks": 1423
+        },
+        {
+          "previous": [
+            3740845770,
+            1
+          ],
+          "stamp": 3740870238,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 24468,
+          "phase_remainder_ticks": 468
+        },
+        {
+          "previous": [
+            3740870238,
+            1
+          ],
+          "stamp": 3740894401,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 24163,
+          "phase_remainder_ticks": 163
+        },
+        {
+          "previous": [
+            3740894401,
+            1
+          ],
+          "stamp": 3740918699,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 24298,
+          "phase_remainder_ticks": 298
+        },
+        {
+          "previous": [
+            3740918699,
+            1
+          ],
+          "stamp": 3740942608,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 23909,
+          "phase_remainder_ticks": 23909
+        },
+        {
+          "previous": [
+            3740942608,
+            1
+          ],
+          "stamp": 3740972572,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 29964,
+          "phase_remainder_ticks": 5964
+        }
+      ],
+      "timestamp_order_errors": [],
+      "sample_timestamps_monotonic": true,
+      "global_uniform_sample_phase_preserved": false,
+      "reader_stopped": true
+    },
+    {
+      "service": "hss",
+      "speed_hz": 50000000,
+      "transport": "jtag",
+      "variables": 1,
+      "period_ticks": 24,
+      "requested_sample_Hz": 1000000.0,
+      "passed": true,
+      "debug": {
+        "bursts": 79,
+        "verified_memory_operations": 1264,
+        "dap_requests_in_bursts": 1817,
+        "burst_latencies_s": [
+          0.023649799986742437,
+          0.023221899988129735,
+          0.023838699999032542,
+          0.023077399993781,
+          0.023063600005116314,
+          0.022900400013895705,
+          0.023142199992435053,
+          0.022986800002399832,
+          0.02400330000091344,
+          0.023158200026955456,
+          0.023251700011314824,
+          0.022958200017455965,
+          0.02284049999434501,
+          0.023116600001230836,
+          0.02308929999708198,
+          0.02290880001964979,
+          0.023173399997176602,
+          0.023020699998596683,
+          0.022739400010323152,
+          0.023029600008158013,
+          0.023832200007745996,
+          0.022774299985030666,
+          0.022998700005700812,
+          0.02281660001608543,
+          0.02289950000704266,
+          0.023421999998390675,
+          0.023137399984989315,
+          0.023359299986623228,
+          0.02275440000812523,
+          0.022859299991978332,
+          0.022862299985717982,
+          0.023024699999950826,
+          0.022886699996888638,
+          0.023029100004350767,
+          0.022705300012603402,
+          0.02337689997511916,
+          0.0233379999990575,
+          0.023096399992937222,
+          0.02340919998823665,
+          0.022924299992155284,
+          0.023385000007692724,
+          0.023026100010611117,
+          0.022974099993007258,
+          0.022961299982853234,
+          0.022954200016101822,
+          0.023014500009594485,
+          0.023000999994110316,
+          0.02314110001316294,
+          0.023103699990315363,
+          0.023346600006334484,
+          0.022826600004918873,
+          0.022872100002132356,
+          0.02334839999093674,
+          0.023760100011713803,
+          0.022933000000193715,
+          0.02325960001326166,
+          0.023262000002432615,
+          0.022781399980885908,
+          0.022921299998415634,
+          0.023077900026692078,
+          0.022826000000350177,
+          0.023211899999296293,
+          0.02365369998733513,
+          0.022968999983277172,
+          0.023025000002235174,
+          0.023690600006375462,
+          0.02275889998418279,
+          0.023255900014191866,
+          0.023339000006671995,
+          0.023667900008149445,
+          0.022980499983532354,
+          0.02312349999556318,
+          0.023390999995172024,
+          0.022832599992398173,
+          0.02314140001544729,
+          0.02285979999578558,
+          0.022887500002980232,
+          0.022867899999255314,
+          0.02323440002510324
+        ],
+        "halt_step_resume": [
+          {
+            "pc_before": "0x20000004",
+            "pc_after": "0x20000006",
+            "elapsed_s": 0.058801000006496906,
+            "stream_progress_after_resume": true
+          },
+          {
+            "pc_before": "0x20000004",
+            "pc_after": "0x20000006",
+            "elapsed_s": 0.0584697000158485,
+            "stream_progress_after_resume": true
+          },
+          {
+            "pc_before": "0x20000006",
+            "pc_after": "0x20000008",
+            "elapsed_s": 0.04830729999230243,
+            "stream_progress_after_resume": true
+          }
+        ],
+        "stage_counters": [
+          {
+            "stage": "baseline_begin",
+            "metrics": [
+              827544392,
+              3836665758,
+              24000000,
+              9594,
+              241946,
+              0,
+              0,
+              0,
+              9565,
+              4901376,
+              24,
+              256
+            ],
+            "received": 9613
+          },
+          {
+            "stage": "baseline_end",
+            "metrics": [
+              827544392,
+              3848736609,
+              24000000,
+              28683,
+              725809,
+              0,
+              0,
+              0,
+              28654,
+              14674944,
+              24,
+              256
+            ],
+            "received": 28685
+          },
+          {
+            "stage": "debug_bursts_end",
+            "metrics": [
+              827544392,
+              3897092174,
+              24000000,
+              44907,
+              1107735,
+              0,
+              0,
+              1817,
+              44878,
+              22981632,
+              24,
+              256
+            ],
+            "received": 44877
+          },
+          {
+            "stage": "halt_step_resume_end",
+            "metrics": [
+              827544392,
+              3901099833,
+              24000000,
+              46897,
+              1151515,
+              0,
+              0,
+              1961,
+              46826,
+              23979008,
+              24,
+              256
+            ],
+            "received": 46903
+          },
+          {
+            "stage": "post_debug_end",
+            "metrics": [
+              827544392,
+              3913146709,
+              24000000,
+              66063,
+              1634302,
+              0,
+              0,
+              1961,
+              65992,
+              33792000,
+              24,
+              256
+            ],
+            "received": 66039
+          }
+        ],
+        "post_debug_progress": 19072,
+        "max_debug_burst_s": 0.02400330000091344,
+        "median_debug_burst_s": 0.023029600008158013,
+        "clock_after_debug": {
+          "FCLK_Hz": 99999999,
+          "cfg": "0x11",
+          "waveform": {
+            "SWCLK_Hz": 49999999.5,
+            "half_period_fclk": 1,
+            "short_high": false,
+            "intended_high_ns": 10.000000100000001
+          },
+          "clockSource": 0,
+          "clockControl": 18874624,
+          "sourcePllControl": 221192,
+          "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+          "JTAG_sampling_mode": 17,
+          "RISC_V_SBA_enabled": false,
+          "actual_link_Hz": 49999999.5,
+          "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+        }
+      },
+      "final": [
+        827544392,
+        3930953041,
+        24000000,
+        86295,
+        2138037,
+        0,
+        0,
+        1961,
+        86240,
+        44154880,
+        24,
+        0
+      ],
+      "session_samples": 86295,
+      "skipped": 2138037,
+      "DAP_yields": 1961,
+      "sample_count_match": true,
+      "all_data_frames_verified": true,
+      "first_DEF_verified": true,
+      "stat_duplicate_frames": 0,
+      "control_sequence_errors": [],
+      "timer_rebase_events": 86238,
+      "timer_rebase_examples": [
+        {
+          "previous": [
+            3830628437,
+            1
+          ],
+          "stamp": 3830628581,
+          "samples": 2,
+          "gap_since_last_sample_ticks": 144,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            3830628581,
+            2
+          ],
+          "stamp": 3830628725,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 120,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            3830628725,
+            1
+          ],
+          "stamp": 3830628773,
+          "samples": 2,
+          "gap_since_last_sample_ticks": 48,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            3830628773,
+            2
+          ],
+          "stamp": 3830628917,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 120,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            3830628917,
+            1
+          ],
+          "stamp": 3830628965,
+          "samples": 2,
+          "gap_since_last_sample_ticks": 48,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            3830628965,
+            2
+          ],
+          "stamp": 3830629109,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 120,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            3830629109,
+            1
+          ],
+          "stamp": 3830629157,
+          "samples": 2,
+          "gap_since_last_sample_ticks": 48,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            3830629157,
+            2
+          ],
+          "stamp": 3830629301,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 120,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            3830629301,
+            1
+          ],
+          "stamp": 3830629349,
+          "samples": 2,
+          "gap_since_last_sample_ticks": 48,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            3830629349,
+            2
+          ],
+          "stamp": 3830629493,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 120,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            3830629493,
+            1
+          ],
+          "stamp": 3830629541,
+          "samples": 2,
+          "gap_since_last_sample_ticks": 48,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            3830629541,
+            2
+          ],
+          "stamp": 3830629685,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 120,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            3830629685,
+            1
+          ],
+          "stamp": 3830629733,
+          "samples": 2,
+          "gap_since_last_sample_ticks": 48,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            3830629733,
+            2
+          ],
+          "stamp": 3830629877,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 120,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            3830629877,
+            1
+          ],
+          "stamp": 3830629925,
+          "samples": 2,
+          "gap_since_last_sample_ticks": 48,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            3830629925,
+            2
+          ],
+          "stamp": 3830629997,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 48,
+          "phase_remainder_ticks": 0
+        }
+      ],
+      "timestamp_order_errors": [],
+      "sample_timestamps_monotonic": true,
+      "global_uniform_sample_phase_preserved": false,
+      "reader_stopped": true
+    },
+    {
+      "service": "rtt",
+      "speed_hz": 60000000,
+      "transport": "jtag",
+      "passed": true,
+      "debug": {
+        "bursts": 47,
+        "verified_memory_operations": 752,
+        "dap_requests_in_bursts": 1081,
+        "burst_latencies_s": [
+          0.040672100003575906,
+          0.04062740001245402,
+          0.04034979999414645,
+          0.04041369998594746,
+          0.04057410001405515,
+          0.040452999994158745,
+          0.04066080000484362,
+          0.0411780999857001,
+          0.041267699998570606,
+          0.04073360000620596,
+          0.04072949997498654,
+          0.04069989998242818,
+          0.04069619998335838,
+          0.04075869999360293,
+          0.040411699999822304,
+          0.040713099995628,
+          0.04069670001626946,
+          0.04075469999224879,
+          0.040515300002880394,
+          0.04075169999850914,
+          0.04035150000709109,
+          0.04044780001277104,
+          0.04052530002081767,
+          0.04066270001931116,
+          0.040760899981250986,
+          0.040629099996294826,
+          0.04036189999897033,
+          0.040614600002299994,
+          0.040604700014228,
+          0.04072359998826869,
+          0.04059309998410754,
+          0.04062129999510944,
+          0.040510599996196106,
+          0.0405031000263989,
+          0.04036680000717752,
+          0.04032599998754449,
+          0.04073940002126619,
+          0.040466400008881465,
+          0.04046709998510778,
+          0.040406899992376566,
+          0.04060449998360127,
+          0.04047310000169091,
+          0.040638400008901954,
+          0.04065720000653528,
+          0.041183299996191636,
+          0.040689999994356185,
+          0.04047000000718981
+        ],
+        "halt_step_resume": [
+          {
+            "pc_before": "0x20000010",
+            "pc_after": "0x20000012",
+            "elapsed_s": 0.08820230001583695,
+            "stream_progress_after_resume": true
+          },
+          {
+            "pc_before": "0x20000016",
+            "pc_after": "0x2000000e",
+            "elapsed_s": 0.0984640000096988,
+            "stream_progress_after_resume": true
+          },
+          {
+            "pc_before": "0x2000000e",
+            "pc_after": "0x20000010",
+            "elapsed_s": 0.08850949999759905,
+            "stream_progress_after_resume": true
+          }
+        ],
+        "stage_counters": [
+          {
+            "stage": "baseline_begin",
+            "metrics": [
+              65537,
+              536871424,
+              536871448,
+              578560,
+              37028406,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              989856768
+            ],
+            "received": 552960
+          },
+          {
+            "stage": "baseline_end",
+            "metrics": [
+              65537,
+              536871424,
+              536871448,
+              1742848,
+              111543975,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              989856768
+            ],
+            "received": 1712128
+          },
+          {
+            "stage": "debug_bursts_end",
+            "metrics": [
+              65537,
+              536871424,
+              536871448,
+              2766848,
+              177080978,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              989856768
+            ],
+            "received": 2758656
+          },
+          {
+            "stage": "halt_step_resume_end",
+            "metrics": [
+              65537,
+              536871424,
+              536871448,
+              2897920,
+              185667765,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              989856768
+            ],
+            "received": 2891776
+          },
+          {
+            "stage": "post_debug_end",
+            "metrics": [
+              65537,
+              536871424,
+              536871448,
+              4062208,
+              260183334,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              989856768
+            ],
+            "received": 4042752
+          }
+        ],
+        "post_debug_progress": 1150976,
+        "max_debug_burst_s": 0.041267699998570606,
+        "median_debug_burst_s": 0.04062129999510944,
+        "clock_after_debug": {
+          "FCLK_Hz": 119999998,
+          "cfg": "0x11",
+          "waveform": {
+            "SWCLK_Hz": 59999999.0,
+            "half_period_fclk": 1,
+            "short_high": false,
+            "intended_high_ns": 8.333333472222225
+          },
+          "clockSource": 0,
+          "clockControl": 15728896,
+          "sourcePllControl": 221192,
+          "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+          "JTAG_sampling_mode": 17,
+          "RISC_V_SBA_enabled": false,
+          "actual_link_Hz": 59999999.0,
+          "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+        }
+      },
+      "final": [
+        65537,
+        536871424,
+        536871448,
+        5326844,
+        341124962,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        989856768
+      ],
+      "session_bytes": 5326844,
+      "all_published_received": true,
+      "sequence_exact": true,
+      "reader_stopped": true
+    },
+    {
+      "service": "hss",
+      "speed_hz": 60000000,
+      "transport": "jtag",
+      "variables": 8,
+      "period_ticks": 24000,
+      "requested_sample_Hz": 1000.0,
+      "passed": true,
+      "debug": {
+        "bursts": 52,
+        "verified_memory_operations": 832,
+        "dap_requests_in_bursts": 1196,
+        "burst_latencies_s": [
+          0.03651669999817386,
+          0.036864400026388466,
+          0.036341500002890825,
+          0.036591999989468604,
+          0.03687439998611808,
+          0.036649800022132695,
+          0.03644629998598248,
+          0.03699079999933019,
+          0.036442400014493614,
+          0.037067299999762326,
+          0.036508900026092306,
+          0.03651230002287775,
+          0.036836199986282736,
+          0.03649900000891648,
+          0.03659669999615289,
+          0.03645439998945221,
+          0.036848399991868064,
+          0.0365468000236433,
+          0.03657520000706427,
+          0.036393300018971786,
+          0.036605200002668425,
+          0.03650519999791868,
+          0.03678559997933917,
+          0.036551800003508106,
+          0.0365276999946218,
+          0.0367479000124149,
+          0.03647550000459887,
+          0.03673160000471398,
+          0.03653510002186522,
+          0.036584599991329014,
+          0.036474699998507276,
+          0.036653999995905906,
+          0.03651549998903647,
+          0.037762599997222424,
+          0.036485399992670864,
+          0.03653050001594238,
+          0.036628800007747486,
+          0.03660599997965619,
+          0.03673389999312349,
+          0.03643740000552498,
+          0.03673390002222732,
+          0.03654860000824556,
+          0.0365678999805823,
+          0.036622999992687255,
+          0.03644860000349581,
+          0.03672149998601526,
+          0.03641820000484586,
+          0.03634369999053888,
+          0.037021399999503046,
+          0.036599400016712025,
+          0.036759300011908635,
+          0.036474799999268726
+        ],
+        "halt_step_resume": [
+          {
+            "pc_before": "0x20000008",
+            "pc_after": "0x20000004",
+            "elapsed_s": 0.08657820001826622,
+            "stream_progress_after_resume": true
+          },
+          {
+            "pc_before": "0x20000008",
+            "pc_after": "0x20000004",
+            "elapsed_s": 0.11710470000980422,
+            "stream_progress_after_resume": true
+          },
+          {
+            "pc_before": "0x20000008",
+            "pc_after": "0x20000004",
+            "elapsed_s": 0.12850109999999404,
+            "stream_progress_after_resume": true
+          }
+        ],
+        "stage_counters": [
+          {
+            "stage": "baseline_begin",
+            "metrics": [
+              827544392,
+              4051205993,
+              24000000,
+              252,
+              0,
+              0,
+              0,
+              0,
+              23,
+              11776,
+              24000,
+              256
+            ],
+            "received": 242
+          },
+          {
+            "stage": "baseline_end",
+            "metrics": [
+              827544392,
+              4063252907,
+              24000000,
+              754,
+              0,
+              0,
+              0,
+              0,
+              69,
+              35328,
+              24000,
+              256
+            ],
+            "received": 737
+          },
+          {
+            "stage": "debug_bursts_end",
+            "metrics": [
+              827544392,
+              4111872467,
+              24000000,
+              2057,
+              0,
+              0,
+              0,
+              1196,
+              1265,
+              647680,
+              24000,
+              256
+            ],
+            "received": 2021
+          },
+          {
+            "stage": "halt_step_resume_end",
+            "metrics": [
+              827544392,
+              4119887701,
+              24000000,
+              2307,
+              0,
+              0,
+              0,
+              1340,
+              1416,
+              724992,
+              24000,
+              256
+            ],
+            "received": 2297
+          },
+          {
+            "stage": "post_debug_end",
+            "metrics": [
+              827544392,
+              4131934601,
+              24000000,
+              2808,
+              0,
+              0,
+              0,
+              1340,
+              1462,
+              748544,
+              24000,
+              256
+            ],
+            "received": 2803
+          }
+        ],
+        "post_debug_progress": 506,
+        "max_debug_burst_s": 0.037762599997222424,
+        "median_debug_burst_s": 0.03657154999382328,
+        "clock_after_debug": {
+          "FCLK_Hz": 119999998,
+          "cfg": "0x11",
+          "waveform": {
+            "SWCLK_Hz": 59999999.0,
+            "half_period_fclk": 1,
+            "short_high": false,
+            "intended_high_ns": 8.333333472222225
+          },
+          "clockSource": 0,
+          "clockControl": 15728896,
+          "sourcePllControl": 221192,
+          "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+          "JTAG_sampling_mode": 17,
+          "RISC_V_SBA_enabled": false,
+          "actual_link_Hz": 59999999.0,
+          "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+        }
+      },
+      "final": [
+        827544392,
+        4150580875,
+        24000000,
+        3391,
+        0,
+        0,
+        0,
+        1340,
+        1517,
+        776704,
+        24000,
+        0
+      ],
+      "session_samples": 3391,
+      "skipped": 0,
+      "DAP_yields": 1340,
+      "sample_count_match": true,
+      "all_data_frames_verified": true,
+      "first_DEF_verified": true,
+      "stat_duplicate_frames": 0,
+      "control_sequence_errors": [],
+      "timer_rebase_events": 1340,
+      "timer_rebase_examples": [
+        {
+          "previous": [
+            4063111454,
+            8
+          ],
+          "stamp": 4063314840,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 35386,
+          "phase_remainder_ticks": 11386
+        },
+        {
+          "previous": [
+            4063314840,
+            1
+          ],
+          "stamp": 4063353603,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 38763,
+          "phase_remainder_ticks": 14763
+        },
+        {
+          "previous": [
+            4063353603,
+            1
+          ],
+          "stamp": 4063391214,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 37611,
+          "phase_remainder_ticks": 13611
+        },
+        {
+          "previous": [
+            4063391214,
+            1
+          ],
+          "stamp": 4063429374,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 38160,
+          "phase_remainder_ticks": 14160
+        },
+        {
+          "previous": [
+            4063429374,
+            1
+          ],
+          "stamp": 4063466858,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 37484,
+          "phase_remainder_ticks": 13484
+        },
+        {
+          "previous": [
+            4063466858,
+            1
+          ],
+          "stamp": 4063505408,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 38550,
+          "phase_remainder_ticks": 14550
+        },
+        {
+          "previous": [
+            4063505408,
+            1
+          ],
+          "stamp": 4063542477,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 37069,
+          "phase_remainder_ticks": 13069
+        },
+        {
+          "previous": [
+            4063542477,
+            1
+          ],
+          "stamp": 4063580798,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 38321,
+          "phase_remainder_ticks": 14321
+        },
+        {
+          "previous": [
+            4063580798,
+            1
+          ],
+          "stamp": 4063619526,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 38728,
+          "phase_remainder_ticks": 14728
+        },
+        {
+          "previous": [
+            4063619526,
+            1
+          ],
+          "stamp": 4063656812,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 37286,
+          "phase_remainder_ticks": 13286
+        },
+        {
+          "previous": [
+            4063656812,
+            1
+          ],
+          "stamp": 4063695892,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 39080,
+          "phase_remainder_ticks": 15080
+        },
+        {
+          "previous": [
+            4063695892,
+            1
+          ],
+          "stamp": 4063733931,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 38039,
+          "phase_remainder_ticks": 14039
+        },
+        {
+          "previous": [
+            4063733931,
+            1
+          ],
+          "stamp": 4063772237,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 38306,
+          "phase_remainder_ticks": 14306
+        },
+        {
+          "previous": [
+            4063772237,
+            1
+          ],
+          "stamp": 4063811535,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 39298,
+          "phase_remainder_ticks": 15298
+        },
+        {
+          "previous": [
+            4063811535,
+            1
+          ],
+          "stamp": 4063848916,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 37381,
+          "phase_remainder_ticks": 13381
+        },
+        {
+          "previous": [
+            4063848916,
+            1
+          ],
+          "stamp": 4063890238,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 41322,
+          "phase_remainder_ticks": 17322
+        }
+      ],
+      "timestamp_order_errors": [],
+      "sample_timestamps_monotonic": true,
+      "global_uniform_sample_phase_preserved": false,
+      "reader_stopped": true
+    },
+    {
+      "service": "hss",
+      "speed_hz": 60000000,
+      "transport": "jtag",
+      "variables": 1,
+      "period_ticks": 24,
+      "requested_sample_Hz": 1000000.0,
+      "passed": true,
+      "debug": {
+        "bursts": 52,
+        "verified_memory_operations": 832,
+        "dap_requests_in_bursts": 1196,
+        "burst_latencies_s": [
+          0.03610840000328608,
+          0.036288000002969056,
+          0.036323799984529614,
+          0.03679240000201389,
+          0.03679539999575354,
+          0.03645509999478236,
+          0.03642029999173246,
+          0.036137199989752844,
+          0.03688210001564585,
+          0.0362856000137981,
+          0.03641339999740012,
+          0.03651659999741241,
+          0.03660009999293834,
+          0.036864400026388466,
+          0.03596869998727925,
+          0.03623659998993389,
+          0.036502900009509176,
+          0.03659289999632165,
+          0.037067299999762326,
+          0.036206699995091185,
+          0.03630830001202412,
+          0.03628319999552332,
+          0.03625900001497939,
+          0.036331299983430654,
+          0.03618530000676401,
+          0.036329900001874194,
+          0.03720039999461733,
+          0.03647369999089278,
+          0.03641440000501461,
+          0.036107500025536865,
+          0.036520900001050904,
+          0.03647409999393858,
+          0.03635720000602305,
+          0.03616490002605133,
+          0.03641770000103861,
+          0.036519200017210096,
+          0.0363970999896992,
+          0.03656880001653917,
+          0.036280900007113814,
+          0.03641979998792522,
+          0.03651279999758117,
+          0.036083799990592524,
+          0.03698549998807721,
+          0.036359199992148206,
+          0.03627079998841509,
+          0.03624459999264218,
+          0.036317999998573214,
+          0.0362606999988202,
+          0.03623150000930764,
+          0.036950600013369694,
+          0.036260099994251505,
+          0.035966499999631196
+        ],
+        "halt_step_resume": [
+          {
+            "pc_before": "0x20000008",
+            "pc_after": "0x20000004",
+            "elapsed_s": 0.07674520000000484,
+            "stream_progress_after_resume": true
+          },
+          {
+            "pc_before": "0x20000004",
+            "pc_after": "0x20000006",
+            "elapsed_s": 0.07632720001856796,
+            "stream_progress_after_resume": true
+          },
+          {
+            "pc_before": "0x20000004",
+            "pc_after": "0x20000006",
+            "elapsed_s": 0.0868921999935992,
+            "stream_progress_after_resume": true
+          }
+        ],
+        "stage_counters": [
+          {
+            "stage": "baseline_begin",
+            "metrics": [
+              827544392,
+              4164451623,
+              24000000,
+              10758,
+              241182,
+              0,
+              0,
+              0,
+              9671,
+              4955648,
+              24,
+              256
+            ],
+            "received": 10735
+          },
+          {
+            "stage": "baseline_end",
+            "metrics": [
+              827544392,
+              4176498492,
+              24000000,
+              29503,
+              724389,
+              0,
+              0,
+              0,
+              28416,
+              14553088,
+              24,
+              256
+            ],
+            "received": 29487
+          },
+          {
+            "stage": "debug_bursts_end",
+            "metrics": [
+              827544392,
+              4224926073,
+              24000000,
+              40346,
+              982827,
+              0,
+              0,
+              1196,
+              39259,
+              20104704,
+              24,
+              256
+            ],
+            "received": 40367
+          },
+          {
+            "stage": "halt_step_resume_end",
+            "metrics": [
+              827544392,
+              4230733526,
+              24000000,
+              41975,
+              1018433,
+              0,
+              0,
+              1340,
+              40888,
+              20938752,
+              24,
+              256
+            ],
+            "received": 41967
+          },
+          {
+            "stage": "post_debug_end",
+            "metrics": [
+              827544392,
+              4242780439,
+              24000000,
+              61012,
+              1501351,
+              0,
+              0,
+              1340,
+              59925,
+              30685696,
+              24,
+              256
+            ],
+            "received": 61039
+          }
+        ],
+        "post_debug_progress": 19008,
+        "max_debug_burst_s": 0.03720039999461733,
+        "median_debug_burst_s": 0.03635819999908563,
+        "clock_after_debug": {
+          "FCLK_Hz": 119999998,
+          "cfg": "0x11",
+          "waveform": {
+            "SWCLK_Hz": 59999999.0,
+            "half_period_fclk": 1,
+            "short_high": false,
+            "intended_high_ns": 8.333333472222225
+          },
+          "clockSource": 0,
+          "clockControl": 15728896,
+          "sourcePllControl": 221192,
+          "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+          "JTAG_sampling_mode": 17,
+          "RISC_V_SBA_enabled": false,
+          "actual_link_Hz": 59999999.0,
+          "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+        }
+      },
+      "final": [
+        827544392,
+        4261714659,
+        24000000,
+        83151,
+        2057173,
+        0,
+        0,
+        1340,
+        82080,
+        42024960,
+        24,
+        0
+      ],
+      "session_samples": 83151,
+      "skipped": 2057173,
+      "DAP_yields": 1340,
+      "sample_count_match": true,
+      "all_data_frames_verified": true,
+      "first_DEF_verified": true,
+      "stat_duplicate_frames": 0,
+      "control_sequence_errors": [],
+      "timer_rebase_events": 82078,
+      "timer_rebase_examples": [
+        {
+          "previous": [
+            4158404700,
+            1
+          ],
+          "stamp": 4158404868,
+          "samples": 2,
+          "gap_since_last_sample_ticks": 168,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            4158404868,
+            2
+          ],
+          "stamp": 4158404988,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 96,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            4158404988,
+            1
+          ],
+          "stamp": 4158405036,
+          "samples": 3,
+          "gap_since_last_sample_ticks": 48,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            4158405036,
+            3
+          ],
+          "stamp": 4158405204,
+          "samples": 2,
+          "gap_since_last_sample_ticks": 120,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            4158405204,
+            2
+          ],
+          "stamp": 4158405324,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 96,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            4158405324,
+            1
+          ],
+          "stamp": 4158405372,
+          "samples": 3,
+          "gap_since_last_sample_ticks": 48,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            4158405372,
+            3
+          ],
+          "stamp": 4158405492,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 72,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            4158405492,
+            1
+          ],
+          "stamp": 4158405540,
+          "samples": 3,
+          "gap_since_last_sample_ticks": 48,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            4158405540,
+            3
+          ],
+          "stamp": 4158405660,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 72,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            4158405660,
+            1
+          ],
+          "stamp": 4158405708,
+          "samples": 3,
+          "gap_since_last_sample_ticks": 48,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            4158405708,
+            3
+          ],
+          "stamp": 4158405828,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 72,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            4158405828,
+            1
+          ],
+          "stamp": 4158405876,
+          "samples": 3,
+          "gap_since_last_sample_ticks": 48,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            4158405876,
+            3
+          ],
+          "stamp": 4158405996,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 72,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            4158405996,
+            1
+          ],
+          "stamp": 4158406044,
+          "samples": 4,
+          "gap_since_last_sample_ticks": 48,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            4158406044,
+            4
+          ],
+          "stamp": 4158406212,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 96,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            4158406212,
+            1
+          ],
+          "stamp": 4158406260,
+          "samples": 4,
+          "gap_since_last_sample_ticks": 48,
+          "phase_remainder_ticks": 0
+        }
+      ],
+      "timestamp_order_errors": [],
+      "sample_timestamps_monotonic": true,
+      "global_uniform_sample_phase_preserved": false,
+      "reader_stopped": true
+    }
+  ],
+  "targetFlashWrites": false,
+  "targetClockWrites": false,
+  "backup_sha256": "86f378ae44b887fc22b5ca5dac83b865efbb8ac064dc580468e63bfed5d5f351",
+  "registers_before": {
+    "0": 536877048,
+    "1": 2,
+    "2": 1,
+    "3": 536877048,
+    "4": 0,
+    "5": 4294966719,
+    "6": 915387784,
+    "7": 3040398030,
+    "8": 4294962943,
+    "9": 4259299324,
+    "10": 3113961384,
+    "11": 2328958968,
+    "12": 10,
+    "13": 536936424,
+    "14": 134219185,
+    "15": 134226534,
+    "16": 1090519040,
+    "17": 536936424,
+    "18": 37207660,
+    "20": 1
+  },
+  "RCC_before": [
+    50548355,
+    5309450
+  ],
+  "ETMCR_before": "0x411",
+  "initial_halted": true,
+  "passed": true,
+  "restore_match": true,
+  "registers_after": {
+    "0": 536877048,
+    "1": 2,
+    "2": 1,
+    "3": 536877048,
+    "4": 0,
+    "5": 4294966719,
+    "6": 915387784,
+    "7": 3040398030,
+    "8": 4294962943,
+    "9": 4259299324,
+    "10": 3113961384,
+    "11": 2328958968,
+    "12": 10,
+    "13": 536936424,
+    "14": 134219185,
+    "15": 134226534,
+    "16": 1090519040,
+    "17": 536936424,
+    "18": 37207660,
+    "20": 1
+  },
+  "registers_match": true,
+  "RCC_after": [
+    50548355,
+    5309450
+  ],
+  "run_halt_restored": true
+}

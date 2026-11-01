@@ -1,0 +1,91 @@
+{
+  "artifacts": {
+    "git_head": "90a429962be7b15a70301ae318658b6686ba61a1",
+    "git_dirty": true,
+    "bit": {
+      "path": "E:\\zynqlinkPRO\\prebuilt\\golden\\probe.bit",
+      "sha256": "1da17cb60175bbc2b7abd647770c7053bd7b7097e0d38aa819fb89678d564473"
+    },
+    "elf": {
+      "path": "E:\\zynqlinkPRO\\prebuilt\\golden\\application.elf",
+      "sha256": "e977914c2924ab4cac13f4075de0a5108d1e2e8cf48966fb8fbdea3a358e0b2c"
+    }
+  },
+  "kind": "continuous RAM producer RTT->CDC",
+  "transport": "swd",
+  "rows": [],
+  "backup_sha256": "2ba473ca403eb24333b365cf0df470ec6b7aa70f02b655b4b189de10de68e870",
+  "registers_before": {
+    "0": 1,
+    "1": 131072,
+    "2": 0,
+    "3": 843530,
+    "4": 536920064,
+    "5": 4294966719,
+    "6": 915387784,
+    "7": 3040398030,
+    "8": 4294962943,
+    "9": 4259299324,
+    "10": 3113961384,
+    "11": 2328958968,
+    "12": 10,
+    "13": 536936440,
+    "14": 134219259,
+    "15": 134219780,
+    "16": 553648128,
+    "17": 536936440,
+    "18": 37207660,
+    "20": 0
+  },
+  "RCC_before": [
+    50548355,
+    5309450
+  ],
+  "failure": "AssertionError()",
+  "failure_clock": {
+    "FCLK_Hz": 119999998,
+    "cfg": "0xa11",
+    "waveform": {
+      "SWCLK_Hz": 59999999.0,
+      "half_period_fclk": 1,
+      "short_high": false,
+      "intended_high_ns": 8.333333472222225
+    },
+    "clockSource": 0,
+    "clockControl": 15728896,
+    "sourcePllControl": 221192,
+    "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+    "JTAG_sampling_mode": 17,
+    "RISC_V_SBA_enabled": false,
+    "actual_link_Hz": 59999999.0,
+    "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+  },
+  "restore_match": true,
+  "registers_after": {
+    "0": 1,
+    "1": 131072,
+    "2": 0,
+    "3": 843530,
+    "4": 536920064,
+    "5": 4294966719,
+    "6": 915387784,
+    "7": 3040398030,
+    "8": 4294962943,
+    "9": 4259299324,
+    "10": 3113961384,
+    "11": 2328958968,
+    "12": 10,
+    "13": 536936440,
+    "14": 134219259,
+    "15": 134219780,
+    "16": 553648128,
+    "17": 536936440,
+    "18": 37207660,
+    "20": 0
+  },
+  "registers_match": true,
+  "RCC_after": [
+    50548355,
+    5309450
+  ]
+}

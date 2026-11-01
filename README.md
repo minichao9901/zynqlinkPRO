@@ -16,6 +16,8 @@ PLL和AHB/APB分频由target固件负责。CLI用于AI；一条命令打包：
 
 两套均保留原验收字节、来源和SHA-256。本轮精简没有重新综合或编译PL/PS，没有上板或写Flash。恢复包不代表新Golden的QSPI验收。
 
+133.333 MHz实验与普通DAP 50/60 MHz的最新板测见[极限性能与Golden对照](docs/validation/performance-limits-20261101/README.md)；固定133实验仍不是Golden替代品，ETM并发RTT限制单独保留。
+
 ```powershell
 # 明确需要上板时，以下命令只下载到RAM
 python tools/run_xsct.py tools/download_dap_fpga.tcl prebuilt/golden/application.elf prebuilt/golden/probe.bit prebuilt/golden/ps7_init.tcl
