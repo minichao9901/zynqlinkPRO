@@ -73,7 +73,7 @@ def preflight(backend, web, service_path):
     required=[backend / 'server.py', service_path, web / 'index.html', backend / 'web/index.html']
     for path in required:
         if not path.is_file():
-            raise ValueError('桥包不完整，请完整解压ZIP：' + str(path))
+            raise ValueError('程序目录不完整，请保留完整程序目录：' + str(path))
     versions={}
     for name in ('etm_decode', 'etm_frontend', 'etm_storebuild', 'etm_index', 'etm_export', 'etm_framed'):
         executable=backend / 'build-native' / (name + '.exe')

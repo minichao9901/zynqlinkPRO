@@ -51,7 +51,7 @@ def catalog():
             'trace': 'toolbox.py trace <existing trace CLI arguments>',
             'project': {'entry':'toolbox.py project list|describe|run','browserRequired':False,'validation':'入口覆盖不等于全部功能实测'},
             'bridge': 'toolbox.py bridge <OpenOCD/J-Link bridge arguments>',
-            'bridge-build': 'toolbox.py bridge-build --out NEW_DIR (Windows portable EXE + ZIP, AI build entry)',
+            'bridge-build': 'toolbox.py bridge-build (update dist/zynq-etm-bridge; preserve data; optional --zip)',
             'fixtures': 'toolbox.py fixtures rtt|scope --out NEW_DIR',
             'probe-flash': 'toolbox.py probe-flash [--image-dir BOOT_PACKAGE] [--dry-run|--verify-only|--backup-only] (direct JTAG, no browser/runtime)',
             'browserRequired': False, 'browserRequiredForPages': True,

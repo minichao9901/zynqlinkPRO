@@ -1,9 +1,10 @@
-"""Build a portable Windows bridge EXE plus runtime ZIP (no SDK/Node on user's PC).
+"""Build/update one local Windows bridge directory; ZIP is opt-in.
 
-AI entry: python toolbox.py bridge-build --out dist/zynq-etm-bridge-win64
+AI entry: python toolbox.py bridge-build
 The package uses the production Web button and never programs either board.
 """
 import argparse
+from datetime import datetime
 import hashlib
 import importlib.metadata
 import json
@@ -13,6 +14,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import uuid
 import zipfile
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -30,16 +32,63 @@ def tracked():
     return sorted(set(n for n in names if n))
 
 
+def publish(package,out,workspace=ROOT):
+    """Replace a known local bundle reversibly, preserving its external data."""
+    workspace=workspace.resolve();package=package.resolve();out=out.resolve()
+    if not out.is_relative_to(workspace) or out in (workspace,workspace/'dist'):
+        raise ValueError('输出须为工作区内独立程序目录')
+    if out.exists() and (not (out/'package-manifest.json').is_file() or not (out/'zynq-etm-bridge.exe').is_file()):
+        raise ValueError('已有目录不是可识别的桥包，拒绝替换：'+str(out))
+    if (package/'data').exists():raise ValueError('构建候选不能包含用户数据')
+    if (out/'data').exists() and not (out/'data').resolve().is_relative_to(out):
+        raise ValueError('数据目录链接到程序目录以外，请先单独保留该数据')
+    archive=workspace/'build/bridge-archive'/(datetime.now().strftime('%Y%m%d-%H%M%S')+'-'+uuid.uuid4().hex[:8])
+    archive.mkdir(parents=True,exist_ok=False)
+    previous=archive/'previous';old_zip=Path(str(out)+'.zip');saved_zip=archive/'previous.zip'
+    def move(source,destination):
+        # Validate both absolute targets immediately before every directory move.
+        source=source.resolve();destination=destination.resolve()
+        if not source.is_relative_to(workspace) or not destination.is_relative_to(workspace):
+            raise ValueError('更新移动超出工作区')
+        source.rename(destination)
+    had_old=out.exists();data_moved=False;zip_moved=False
+    if had_old:move(out,previous)
+    try:
+        out.parent.mkdir(parents=True,exist_ok=True)
+        shutil.copytree(package,out)
+        if (previous/'data').exists():
+            move(previous/'data',out/'data');data_moved=True
+        if old_zip.exists():move(old_zip,saved_zip);zip_moved=True
+    except BaseException:
+        if data_moved:move(out/'data',previous/'data')
+        if zip_moved:move(saved_zip,old_zip)
+        if out.exists():move(out,archive/'failed-candidate')
+        if had_old:move(previous,out)
+        raise
+    return dict(previousDirectory=str(previous) if had_old else None,
+        dataPreserved=data_moved,archiveDirectory=str(archive))
+
+
+def archive_application(out,archive):
+    manifest=json.loads((out/'package-manifest.json').read_text(encoding='utf8'))
+    with zipfile.ZipFile(archive,'x',zipfile.ZIP_DEFLATED,compresslevel=6) as target:
+        for name in [f['path'] for f in manifest['files']]+['package-manifest.json']:
+            path=(out/name).resolve()
+            if not path.is_relative_to(out.resolve()) or Path(name).parts[0].lower()=='data':
+                raise ValueError('分发包路径不能包含用户数据或超出程序目录')
+            target.write(path,'zynq-etm-bridge/'+name)
+
+
 def main(argv=None):
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--out',type=Path,default=ROOT/'dist/zynq-etm-bridge-win64',help='新输出目录；拒绝覆盖')
+    parser.add_argument('--out',type=Path,default=ROOT/'dist/zynq-etm-bridge',help='固定本机程序目录；更新时保留data并归档旧程序')
+    parser.add_argument('--zip',action='store_true',help='额外生成分发ZIP；本机默认不生成')
     args=parser.parse_args(argv)
     if os.name!='nt' or sys.maxsize<=2**32:raise ValueError('请使用Windows x64 Python构建')
     shared=subprocess.run([sys.executable,str(ROOT/'tools/sync_etm_shared.py'),'--check'],capture_output=True,text=True)
     if shared.returncode:raise ValueError('ETM共享驱动不是当前主驱动，请先运行web.shared-sync --write：'+shared.stdout+shared.stderr)
     out=args.out.resolve()
     archive=Path(str(out)+'.zip')
-    if out.exists() or archive.exists():raise ValueError('输出已存在，请选择新目录：'+str(out))
     source_dirty=bool(subprocess.check_output(['git','status','--porcelain','--untracked-files=all','--','.',
         ':(exclude)build/**',':(exclude)dist/**',':(exclude)releases/**'],cwd=ROOT))
     dependencies={name:importlib.metadata.version(name) for name in DEPENDENCIES}
@@ -105,7 +154,7 @@ def main(argv=None):
                         destination=licenses/name/member.name;destination.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(source,destination)
         for path in (ROOT/'etm-service/vendor/OpenCSD-1.8.3/LICENSE',ROOT/'etm-service/vendor/OpenCSD-1.8.3/NOTICES.txt',ROOT/'etm-service/native/SQLITE-LICENSE.txt',Path(sys.base_prefix)/'LICENSE.txt'):
             if path.is_file():shutil.copyfile(path,licenses/(path.parent.name+'-'+path.name))
-        readme=('Zynq ETM 工作台\n\n完整解压ZIP，双击 zynq-etm-bridge.exe，浏览器自动打开。请保留_internal目录。\n'
+        readme=('Zynq ETM 工作台\n\n双击 zynq-etm-bridge.exe，浏览器自动打开。请保留整个程序目录（包括_internal）。\n'
             'Web：载入目标ELF与源码 → 连接探针 → 添加并选择函数起点 → 核对HSE/RCC → 联动采集。\n'
             '目标PLL、AHB/APB分频由target固件负责；桥只配置Trace接口，不自动降频、不烧录板卡。\n'
             '保留F103ZE ETMv3及STM32H743 ETMv4识别/路由/解码；H743 Zynq链路待真机验收。\n'
@@ -127,11 +176,20 @@ def main(argv=None):
             capturePath='Web button -> Zynq LA -> OpenCSD binary -> C++ TraceStore',
             clockPolicy='target-firmware-owned',requiresSystemPython=False,requiresNode=False,files=files)
         (package/'package-manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n',encoding='utf8')
-        out.parent.mkdir(parents=True,exist_ok=True);shutil.copytree(package,out)
-    with zipfile.ZipFile(archive,'w',zipfile.ZIP_DEFLATED,compresslevel=6) as target:
-        for path in sorted(out.rglob('*')):
-            if path.is_file():target.write(path,'zynq-etm-bridge/'+path.relative_to(out).as_posix())
-    print(json.dumps(dict(ok=True,directory=str(out),exe=str(out/'zynq-etm-bridge.exe'),archive=str(archive),bytes=archive.stat().st_size,sha256=sha(archive)),ensure_ascii=False))
+        # Full offline acceptance of this exact frozen candidate before replacing
+        # the local program. Both native protocols, exports and reuse are checked.
+        verify=subprocess.run([sys.executable,str(ROOT/'tools/verify_bridge_package.py'),
+            '--package',str(package),'--out',str(work/'verified'),'--port','0'],capture_output=True,text=True,encoding='utf8')
+        (workbase/'latest-verification-output.txt').write_text(verify.stdout+verify.stderr,encoding='utf8')
+        if verify.returncode:raise ValueError('候选EXE离线验收失败，原程序未替换：'+verify.stdout+verify.stderr)
+        shutil.copyfile(work/'verified/result.json',workbase/'latest-verification.json')
+        publication=publish(package,out)
+    result=dict(ok=True,directory=str(out),exe=str(out/'zynq-etm-bridge.exe'),archive=None,**publication)
+    if args.zip:
+        # Distribute only application files; never include data/records or tokens.
+        archive_application(out,archive)
+        result.update(archive=str(archive),bytes=archive.stat().st_size,sha256=sha(archive))
+    print(json.dumps(result,ensure_ascii=False))
     return 0
 
 

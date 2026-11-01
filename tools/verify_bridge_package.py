@@ -5,6 +5,7 @@ import io
 import json
 import os
 from pathlib import Path
+import socket
 import subprocess
 import time
 from urllib.error import HTTPError
@@ -21,6 +22,9 @@ def main(argv=None):
     p.add_argument('--package',type=Path,required=True);p.add_argument('--out',type=Path,required=True)
     p.add_argument('--port',type=int,default=8890);p.add_argument('--keep-running',action='store_true')
     a=p.parse_args(argv);package=a.package.resolve();out=a.out.resolve();out.mkdir(parents=True,exist_ok=False)
+    if a.port==0:
+        with socket.socket() as available:
+            available.bind(('127.0.0.1',0));a.port=available.getsockname()[1]
     manifest=json.loads((package/'package-manifest.json').read_text(encoding='utf8'))
     for item in manifest['files']:
         path=(package/item['path']).resolve()
@@ -52,6 +56,14 @@ def main(argv=None):
                 if process.poll() is not None or time.monotonic()>deadline:raise RuntimeError('EXE startup failed; see '+str(out/'server.log'))
                 time.sleep(.1)
         assert health['decodeEngineProfile']['name']=='native' and health['frontend']['vectorized']
+        # Prove this is our isolated child before importing any fixture. A port
+        # collision must never send test records to another running workbench.
+        launcher=json.loads(request('/etm-launcher.json'))
+        state=json.loads((out/'data/bridge-state.json').read_text(encoding='utf8'))
+        assert process.poll() is None and state['pid']==process.pid
+        assert launcher['bootId']==state['bootId'] and launcher['offline'] is True
+        assert launcher['dataDirectory']==str((out/'data').resolve())
+        assert launcher['packageId']==hashlib.sha256((package/'package-manifest.json').read_bytes()).hexdigest()
         report['health']=health
         for path in ['/native-probe/usb/devices','/native-probe/hid/devices','/native-probe/serial/devices','/etm/api/capture']:
             try:request(path,{})

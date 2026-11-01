@@ -91,12 +91,16 @@ AI压力工具`toolbox.py project run etm.stress`现支持`--profile stm32h743`�
 ## AI打包命令
 
 ```powershell
-python -X utf8 toolbox.py bridge-build --out dist/zynq-etm-bridge-win64
+python -X utf8 toolbox.py bridge-build
 # 同一入口也可使用项目工具别名：
-python toolbox.py project run bridge.build -- --out dist/another-bridge
+python toolbox.py project run bridge.build
+# 仅需分发ZIP时增加：
+python toolbox.py bridge-build --zip
 ```
 
-构建机安装`requirements-bridge-build.txt`；输出为EXE+运行目录及完整ZIP，拒绝覆盖已有输出。
+构建机安装`requirements-bridge-build.txt`；本机默认只输出`dist/zynq-etm-bridge/`一个程序目录。
+更新前验收真实冻结EXE，确认F103/H743原生解码、导出和重复启动复用通过；随后保留原`data/`，将旧程序归档到`build/bridge-archive/`。更新失败会恢复原程序。关闭正在运行的桥后再更新。
+默认不生成ZIP；`--zip`才额外生成分发包，且只包含程序文件，不打包用户数据、采集记录或鉴权令牌。
 包内manifest记录源码提交、依赖版本、文件SHA-256。Golden bit/PS ELF不因打包改变，不包含SDK或Node。
 AI离线预检：`zynq-etm-bridge.exe --check --data-dir CHECK_DIR`，不连接目标。
 AI界面验收：加`--offline --no-browser`，硬件API明确拒绝，只允许导入、解码和浏览。
