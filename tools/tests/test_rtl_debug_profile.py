@@ -17,13 +17,13 @@ class RtlDebugProfileTests(unittest.TestCase):
 
     def test_explicit_release_debug_and_legacy_selection(self):
         t=self.interpreter()
-        self.assertEqual(t.call('zynqlink_rtl_debug_mode',''),0)
-        self.assertEqual(t.call('zynqlink_rtl_debug_mode','--diagnostics'),1)
+        self.assertEqual(int(t.call('zynqlink_rtl_debug_mode','')),0)
+        self.assertEqual(int(t.call('zynqlink_rtl_debug_mode','--diagnostics')),1)
         t.setvar('::env(ZYNQLINK_RTL_DEBUG)','0')
-        self.assertEqual(t.call('zynqlink_rtl_debug_mode',''),0)
+        self.assertEqual(int(t.call('zynqlink_rtl_debug_mode','')),0)
         with self.assertRaises(tkinter.TclError):t.call('zynqlink_rtl_debug_mode','--diagnostics')
         t.setvar('::env(ZYNQLINK_RTL_DEBUG)','1')
-        self.assertEqual(t.call('zynqlink_rtl_debug_mode',''),1)
+        self.assertEqual(int(t.call('zynqlink_rtl_debug_mode','')),1)
         for invalid in ('false','2','-1',''):
             t.setvar('::env(ZYNQLINK_RTL_DEBUG)',invalid)
             with self.assertRaises(tkinter.TclError):t.call('zynqlink_rtl_debug_mode','')
