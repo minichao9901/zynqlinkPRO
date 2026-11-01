@@ -1,0 +1,64 @@
+from pathlib import Path
+from playwright.sync_api import sync_playwright
+import json,re,sys
+root=Path.cwd();out=root/'build/flame-tabs-20261102';reports=[]
+inputs=[('init',925,14),('echo',60,10)]
+if len(sys.argv)>1:
+ inputs=[(name,count,depth) for name,count,depth in inputs]
+ source=Path(sys.argv[1])
+else:source=out
+
+def limits(page):
+ text=page.locator('#range-label').text_content().split(' · ')[0]
+ return [float(s.strip().replace('#','').replace(',','')) for s in text.split('→')]
+def pause(page):page.wait_for_timeout(60)
+def drag(page,a,b,shift=False,release=True):
+ box=page.locator('#chart').bounding_box();y=box['y']+40;x=lambda f:box['x']+6+(box['width']-12)*f
+ if shift:page.keyboard.down('Shift')
+ page.mouse.move(x(a),y);page.mouse.down();page.mouse.move(x(b),y,steps=12);pause(page)
+ if release:page.mouse.up()
+ if shift:page.keyboard.up('Shift')
+ pause(page)
+
+with sync_playwright() as p:
+ browser=p.chromium.launch(executable_path='C:/Users/Administrator/AppData/Local/Google/Chrome/Bin/chrome.exe',headless=True,args=['--disable-background-networking','--disable-extensions'])
+ try:
+  for name,count,depth in inputs:
+   context=browser.new_context(viewport={'width':1440,'height':1050},device_scale_factor=1);page=context.new_page();errors=[];requests=[];page.on('pageerror',lambda e:errors.append(str(e)));page.on('request',lambda r:requests.append(r.url));page.goto((source/(name+'.html')).as_uri());page.wait_for_selector('html[data-flame-ready=true]');pause(page)
+   data=json.loads(page.locator('#flame-data').text_content());assert len(data['frames'])==count and data['depth']==depth
+   assert page.locator('#tab-timeline').get_attribute('aria-selected')=='true';assert page.get_by_role('tab').count()==2
+   full=limits(page);drag(page,.2,.6,release=False);assert limits(page)==full
+   page.screenshot(path=str(out/(name+'-selection.png')),full_page=True);page.mouse.up();pause(page)
+   selected=limits(page);span=full[1]-full[0]+1
+   assert abs(selected[0]-(full[0]+span*.2))<2 and abs(selected[1]+1-(full[0]+span*.6))<2,(full,selected)
+   page.locator('#back').click();pause(page);assert limits(page)==full
+   drag(page,.6,.2);assert limits(page)==selected
+   drag(page,.6,.4,shift=True);panned=limits(page);assert panned!=selected and abs((panned[1]-panned[0])-(selected[1]-selected[0]))<1
+   page.locator('#back').click();pause(page);assert limits(page)==selected
+   # Escape cancels selection, pointer cancellation rolls back an unfinished pan.
+   drag(page,.1,.9,release=False);page.keyboard.press('Escape');page.mouse.up();pause(page);assert limits(page)==selected
+   drag(page,.5,.3,shift=True,release=False);page.locator('#chart').dispatch_event('pointercancel');page.mouse.up();pause(page);assert limits(page)==selected
+   page.locator('#tab-cycles').click();pause(page);assert page.locator('#tab-cycles').get_attribute('aria-selected')=='true';cycle_full=limits(page);assert cycle_full==data['views']['cycles']['domain']
+   drag(page,.7,.3);cycle_zoom=limits(page);assert abs((cycle_zoom[1]-cycle_zoom[0])/(cycle_full[1]-cycle_full[0])-.4)<.002
+   page.locator('#search').fill('cdc');pause(page);cycle_matches=page.locator('#match-count').text_content();assert cycle_matches!='0 处'
+   page.screenshot(path=str(out/(name+'-cycles.png')),full_page=True)
+   page.locator('#tab-timeline').click();pause(page);assert limits(page)==selected and page.locator('#search').input_value()==''
+   page.locator('#tab-cycles').click();pause(page);assert limits(page)==cycle_zoom and page.locator('#search').input_value()=='cdc' and page.locator('#match-count').text_content()==cycle_matches
+   page.locator('#tab-cycles').focus();page.keyboard.press('ArrowLeft');pause(page);assert page.locator('#tab-timeline').get_attribute('aria-selected')=='true'
+   page.locator('#reset').click();pause(page);assert limits(page)==full
+   drag(page,.4,.4);assert limits(page)==full
+   # Release beyond the chart: pointer capture clamps the selection to exported bounds.
+   drag(page,.8,1.2);bounded=limits(page);assert bounded[1]==full[1] and bounded[0]>=full[0]
+   page.locator('#reset').click();page.locator('#zoom-in').click();pause(page);assert limits(page)!=full
+   box=page.locator('#chart').bounding_box();page.mouse.move(box['x']+box['width']*.5,box['y']+40);before=limits(page);page.mouse.wheel(0,-250);pause(page);assert limits(page)!=before
+   page.locator('#reset').click();page.locator('#search').fill('cdc_acm_init' if name=='init' else 'cdc_write');page.locator('#next-match').click();pause(page);assert limits(page)!=full
+   page.locator('#reset').click();page.locator('#search').fill('');pause(page);page.screenshot(path=str(out/(name+'-timeline.png')),full_page=True)
+   assert not errors,errors;assert all(u.startswith('file:') for u in requests),requests
+   reports.append(dict(record=name,defaultTab='timeline',timelineFrames=count,cycles=data['views']['cycles']['domain'][1],forwardAndReverseSelection=True,selectionOverlay=True,shiftPan=True,escapeCancel=True,pointerCancelRollback=True,outsideReleaseClamped=True,independentTabState=True,keyboardTabs=True,clickWithoutZoom=True,oldZoomAndSearch=True,noExternalRequests=True,scriptErrors=errors));context.close()
+  # No-cycle records keep both tabs and display an honest unavailable state.
+  page=browser.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.goto((out/'no-cycles.html').as_uri());page.wait_for_selector('html[data-flame-ready=true]');page.locator('#tab-cycles').click();assert page.locator('#unavailable').is_visible();assert not page.locator('#chart-content').is_visible();page.locator('#tab-timeline').click();assert page.locator('#chart').is_visible();assert not errors;page.close()
+  page=browser.new_page(viewport={'width':1200,'height':900});page.goto((out/'deep.html').as_uri());page.wait_for_selector('html[data-flame-ready=true]');page.locator('#viewport').evaluate('(e)=>e.scrollTop=e.scrollHeight');pause(page);scroll=page.locator('#viewport').evaluate('(e)=>e.scrollTop');assert scroll>40000
+  page.locator('#tab-cycles').click();page.locator('#tab-timeline').click();pause(page);assert page.locator('#viewport').evaluate('(e)=>e.scrollTop')==scroll;page.close()
+ finally:browser.close()
+result=dict(ok=True,records=reports,noCycleTab=True,deep1500TabScrollPreserved=True,hardwareAccess=False)
+(out/'browser-qa.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf-8');print(json.dumps(result,ensure_ascii=False))

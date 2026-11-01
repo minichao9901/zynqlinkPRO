@@ -1,0 +1,15 @@
+....C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\helpers.py:611: DeprecationWarning: 'pkgutil.get_loader' is deprecated and slated for removal in Python 3.14; use importlib.util.find_spec() instead
+  loader = pkgutil.get_loader(import_name)
+C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\pkgutil.py:291: DeprecationWarning: 'pkgutil.find_loader' is deprecated and slated for removal in Python 3.14; use importlib.util.find_spec() instead
+  return find_loader(fullname)
+C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\scaffold.py:872: DeprecationWarning: 'pkgutil.get_loader' is deprecated and slated for removal in Python 3.14; use importlib.util.find_spec() instead
+  loader = pkgutil.get_loader(root_mod_name)
+.离线Trace CLI不支持该命令；仅允许 decode, elf, export, import-record, query, record, verify
+离线Trace CLI不支持该命令；仅允许 decode, elf, export, import-record, query, record, verify
+....
+----------------------------------------------------------------------
+Ran 9 tests in 1.556s
+
+OK
+Offline Trace CLI: --trace-cli decode, elf, export, import-record, query, record, verify
+Example: --trace-cli export --record RECORD --format flame-html --flame-mode timeline --from-seq START --to-seq END --out flame.html

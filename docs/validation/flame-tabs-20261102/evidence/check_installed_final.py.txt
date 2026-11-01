@@ -1,0 +1,7 @@
+from pathlib import Path
+import json,subprocess,os,hashlib
+root=Path.cwd();work=root/'build/flame-tabs-20261102';exe=root/'dist/zynq-etm-bridge/zynq-etm-bridge.exe';env={k:v for k,v in os.environ.items() if k not in ['PYTHONHOME','PYTHONPATH']};env['PATH']=str(Path(os.environ['SystemRoot'])/'System32');cases=[]
+for name,start,end in [('init',7,42571),('echo',7782088,7784098)]:
+ out=work/'installed-final'/(name+'.html');args=[str(exe),'--trace-cli','export','--record',str(root/'build/h743-flame-20261102/corrected/init-single-echo'),'--format','flame-html','--from-seq',str(start),'--to-seq',str(end),'--out',str(out)]
+ result=subprocess.run(args,env=env,capture_output=True,text=True,encoding='utf-8',timeout=90);assert result.returncode==0,(result.stdout,result.stderr);assert out.read_bytes()==(work/'source-final'/(name+'.html')).read_bytes();(work/(name+'-installed-final-export.json')).write_text(result.stdout,encoding='utf-8');cases.append(dict(name=name,sourceAndInstalledBytesEqual=True,sha256=hashlib.sha256(out.read_bytes()).hexdigest()))
+(work/'installed-cli-final.json').write_text(json.dumps(dict(ok=True,hardwareAccess=False,pythonOnPath=False,nodeOnPath=False,cases=cases),ensure_ascii=False,indent=2)+'\n',encoding='utf-8');print(cases)
