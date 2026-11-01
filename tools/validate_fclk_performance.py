@@ -63,17 +63,20 @@ def physical_snapshot():
                  'CPU_CTRL': 0xf8000120, 'DDR_CTRL': 0xf8000124,
                  'USB0_CTRL': 0xf8000130, 'USB1_CTRL': 0xf8000134,
                  'FEATURES': 0x40030048, 'CAPTURE': 0x40030008,
-                 'SWD_STATUS': 0x40010004, 'PACKET_STATUS': 0x42020004,
-                 'DDR_STATUS': 0x40040008, 'CDMA_STATUS': 0x40020004}
+                 'SWD_STATUS': 0x40010004, 'PACKET_STATUS': 0x42020004}
     body = 'targets -set -filter {name =~ "APU"}\n'
     for name, address in addresses.items():
         body += f'puts [format "SNAP {name} %08X" [mrd -address-space AP0 -force -value {address:#x}]]\n'
+    body += 'if {[mrd -address-space AP0 -force -value 0x40030048] & 0x100} {\n'
+    body += 'puts [format "SNAP DDR_STATUS %08X" [mrd -address-space AP0 -force -value 0x40040008]]\n'
+    body += 'puts [format "SNAP CDMA_STATUS %08X" [mrd -address-space AP0 -force -value 0x40020004]]\n}\n'
     log = xsct(body)
     values = {k: int(v, 16) for k, v in re.findall(r'SNAP (\w+) ([0-9A-Fa-f]{8})', log)}
-    assert len(values) == len(addresses), log
+    assert len(values) == len(addresses) + (2 if values['FEATURES'] & 0x100 else 0), log
     idle = not (values['SWD_STATUS'] & 1 or values['PACKET_STATUS'] & 15
-                or values['DDR_STATUS'] & 33 or values['CAPTURE'] & 1)
-    idle = idle and bool(values['CDMA_STATUS'] & 2)
+                or values.get('DDR_STATUS', 0) & 33 or values['CAPTURE'] & 1)
+    if 'CDMA_STATUS' in values:
+        idle = idle and bool(values['CDMA_STATUS'] & 2)
     return dict(recordedAtUtc=datetime.now(timezone.utc).isoformat(),
                 registers={k: hex(v) for k, v in values.items()},
                 allObservedEnginesIdle=idle, xsctOutput=log)
