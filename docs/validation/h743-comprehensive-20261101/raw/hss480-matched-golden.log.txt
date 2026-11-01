@@ -1,0 +1,13 @@
+swd 50000000 25 0 PASS
+swd 50000000 25 1 PASS
+swd 50000000 25 2 PASS
+swd 60000000 24 0 PASS
+swd 60000000 24 1 PASS
+Traceback (most recent call last):
+  File "E:\zynqlinkPRO\tools\validate_h743_hss_points.py", line 53, in <module>
+    if __name__=='__main__':main()
+                            ~~~~^^
+  File "E:\zynqlinkPRO\tools\validate_h743_hss_points.py", line 37, in main
+    assert row['skipped']==0 and abs(row['actual_link_Hz']-speed)<10,row
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: {'service': 'hss', 'speed_hz': 60000000, 'period_ticks': 24, 'FCLK_Hz': 119999998, 'cfg': '0xa11', 'waveform': {'SWCLK_Hz': 59999999.0, 'half_period_fclk': 1, 'short_high': False, 'intended_high_ns': 8.333333472222225}, 'clockSource': 0, 'clockControl': 15728896, 'sourcePllControl': 221192, 'frequencyBasis': 'read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement', 'JTAG_sampling_mode': 17, 'RISC_V_SBA_enabled': False, 'actual_link_Hz': 59999999.0, 'clock_observation': 'physical MEM-AP0 read; no CPU debug context or DAP command during stream', 'clock_setter_rc': 0, 'clock_method': 'HSS public clock setter', 'requested_Hz': 1000000.0, 'nominal_24MHz_requested_Hz': 1000000.0, 'period_clock_Hz': 24000000, 'variables': 1, 'repeat': 2, 'counter_window_s': 2.001816916666667, 'host_window_s': 2.0019933500152547, 'produced': 1974215, 'skipped': 27602, 'effective_Hz': 986211.5678827271, 'skip_percent': 1.3788473172123126, 'host_received_Hz': 985965.3130141314, 'swd_errors': 0, 'DAP_yields': 0, 'session_received_samples': 2927493, 'session_packets': 23886, 'all_data_frames_verified': True, 'data_frames_verified': 23884, 'stat_duplicate_frames': 0, 'all_frames_byte_exact': True, 'sample_count_match': True, 'control_sequence_errors': [], 'all_frame_sequences_valid': True, 'timeline_gaps_preserved': True, 'session_timeline_skipped': 27605, 'm0': (827544392, 2987362641, 24000000, 951269, 3, 0, 0, 0, 7673, 3928576, 24, 256), 'm1': (827544392, 3035406247, 24000000, 2925484, 27605, 0, 0, 0, 23867, 12220416, 24, 256), 'final': (827544392, 3040613748, 24000000, 2927493, 27605, 0, 0, 0, 23886, 12229632, 24, 0), 'transport': 'swd'}

@@ -1,0 +1,121 @@
+{
+  "schema": "zynqlink-target-golden/1",
+  "date": "2026-11-01",
+  "target": "STM32H743 Apollo HSE25MHz external VDD33USB",
+  "sourceBaseCommit": "dc2cbbbeb2c0d095503a6706986edb2e649ab311",
+  "sourceState": "New working-tree target files built and validated, committed together with these artifacts. Exact identity is the complete source/SDK per-file SHA list, not a claim that the base commit alone includes them.",
+  "sourceDirectory": "firmware/target/stm32h743_cdc_trace",
+  "sourceProvenanceSha256": "b7e528b3cd63db41305fef3526a82972a8c21388c31d601fec47daa4dfad8513",
+  "sourceFilesSha256": "96088ee9e8b401f63bda6f456c193c608af21a2c2f0ae75c6defe729df4393e4",
+  "compiler": "GNU Arm Embedded Toolchain 10.3-2021.10, gcc 10.3.1",
+  "probePair": "prebuilt/fclk133-release-20261101",
+  "probeBitSha256": "af1031d3caa0d7bd3b6adffa911d26efdab9e0bfb5223fb18f70dabb70ebeeed",
+  "probePsElfSha256": "2137f7d0f507c08574f36223130103c0710645cbfdefb5c1d8c8efb0cfb990a0",
+  "probeRtlOrPsRebuilt": false,
+  "validationReport": "docs/validation/h743-comprehensive-20261101/README.md",
+  "qspiProgrammed": false,
+  "profiles": [
+    {
+      "name": "cpu60-trace20",
+      "cpuMHz": 60,
+      "hclkMHz": 60,
+      "configuredPhysicalTraceMHz": 20,
+      "clockBasis": "Read-back RCC and nominal board HSE; not external frequency-counter measurement",
+      "accepted": true,
+      "scope": "Golden: SRAM/RTT/HSS six-rate study and 10/200/500/1000ms x3 ETMv4 continuous DDR USB with actual ~4.25ms CDC echo; no GUI entry/reset claim",
+      "buildArguments": [
+        "-CoreMHz",
+        "60",
+        "-TraceR",
+        "12",
+        "-BannerEveryMs",
+        "20",
+        "-UsbSupply",
+        "External",
+        "-NoPublish"
+      ],
+      "files": {
+        "fw.bin": {
+          "bytes": 31752,
+          "sha256": "bf589ef61ca141b5d57e54984cf02d5be880936e7da1aff59143c639797aedaa"
+        },
+        "fw.elf": {
+          "bytes": 2179000,
+          "sha256": "246640bf79c8b1e568441a286812326dfb0ae68a0df061a0c023262c07cf221b"
+        },
+        "fw.hex": {
+          "bytes": 89360,
+          "sha256": "a0cb3c2d0490692c33ddd9bca76762b94fc41ce82ef5b0eb745ae66e2471cba5"
+        }
+      }
+    },
+    {
+      "name": "cpu60-trace30",
+      "cpuMHz": 60,
+      "hclkMHz": 60,
+      "configuredPhysicalTraceMHz": 30,
+      "clockBasis": "Read-back RCC and nominal board HSE; not external frequency-counter measurement",
+      "accepted": false,
+      "scope": "Diagnostic only: 10ms had 17 formatter parser errors; do not use as Golden",
+      "buildArguments": [
+        "-CoreMHz",
+        "60",
+        "-TraceR",
+        "8",
+        "-BannerEveryMs",
+        "20",
+        "-UsbSupply",
+        "External",
+        "-NoPublish"
+      ],
+      "files": {
+        "fw.bin": {
+          "bytes": 31752,
+          "sha256": "39209c50817acb6abae82a20681838dae831942a8263bef214b71df77404115c"
+        },
+        "fw.elf": {
+          "bytes": 2179000,
+          "sha256": "daace2b094b054ffb8d004127cbfbbaf70b9a5d1961a172038a5554b291ea962"
+        },
+        "fw.hex": {
+          "bytes": 89360,
+          "sha256": "49249f17386b268c1abfa4475ac89750eabd9647e10d51ec558f9bcfa9d52af6"
+        }
+      }
+    },
+    {
+      "name": "cpu480-trace20",
+      "cpuMHz": 480,
+      "hclkMHz": 240,
+      "configuredPhysicalTraceMHz": 20,
+      "clockBasis": "Read-back RCC and nominal board HSE; not external frequency-counter measurement",
+      "accepted": true,
+      "scope": "Independent DAP/RTT/HSS throughput and debug-interleave profile; 1s ETM at CPU480 not validated",
+      "buildArguments": [
+        "-CoreMHz",
+        "480",
+        "-TraceR",
+        "24",
+        "-BannerEveryMs",
+        "20",
+        "-UsbSupply",
+        "External",
+        "-NoPublish"
+      ],
+      "files": {
+        "fw.bin": {
+          "bytes": 31756,
+          "sha256": "6cc1845ab0b62de34493fdd0cc7f093492fcf1788c45e5fc4a2404390e719d44"
+        },
+        "fw.elf": {
+          "bytes": 2179000,
+          "sha256": "db5d66656846eeffedb1e1c405afec9345a7a5d8561eb53f987508aa1ee9dc19"
+        },
+        "fw.hex": {
+          "bytes": 89368,
+          "sha256": "fe1ff9631c9fb2e746522d8cd072d0b79dc46cfa77d0506401855fc06533755a"
+        }
+      }
+    }
+  ]
+}

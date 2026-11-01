@@ -1,4 +1,4 @@
-"""F103 RTT/J-Scope + real CMSIS-DAP traffic, halt/resume and single step.
+"""F103/H743 RTT/J-Scope + real DAP traffic, halt/resume and single step.
 
 RAM-only fixtures with full SRAM/core/RCC/run-state restoration. Run exclusively
 after loading the explicitly named probe pair. No target Flash/QSPI writes.
@@ -25,9 +25,11 @@ from probe_build_info import provenance, live_clock_snapshot
 from probe_stream import Probe
 from test_probe_board import Memory, stop, drain_hss
 from test_swd_lowfreq_board import recover
+from target_snapshot import snapshot
 from validate_fclk_performance import ROOT, PAIRS, EXPECTED, command, save, physical_snapshot
 
 BASE, SIZE, SCRATCH = 0x20000000, 20480, 0x20004800
+TARGET_CPUID, TARGET_DPIDR = 0x411fc231, 0x1ba01477
 REGISTERS = list(range(19)) + [20]
 
 
@@ -76,7 +78,7 @@ def compile_producer(out, name):
     elf, binary = out / (name + '.elf'), out / (name + '.bin')
     source = ROOT / f'firmware/target/probe_{name}_ram.S'
     subprocess.run([str(gcc), '-mcpu=cortex-m3', '-mthumb', '-nostdlib',
-                    '-Wl,-Ttext=0x20000000', '-Wl,-e,producer', str(source), '-o', str(elf)], check=True)
+                    f'-Wl,-Ttext={BASE:#x}', f'-Wa,--defsym,FIXTURE_BASE={BASE:#x}', '-Wl,-e,producer', str(source), '-o', str(elf)], check=True)
     subprocess.run([str(objcopy), '-O', 'binary', str(elf), str(binary)], check=True)
     return binary.read_bytes()
 
@@ -93,11 +95,11 @@ def debug_burst(mem, o, i, transport, fixture, stats):
     start = time.perf_counter()
     if transport == 'swd':
         response = xfer(o, i, [5, 0, 1, 2])
-        assert response[:3] == bytes([5, 1, 1]) and int.from_bytes(response[3:7], 'little') == 0x1ba01477, response.hex()
+        assert response[:3] == bytes([5, 1, 1]) and int.from_bytes(response[3:7], 'little') == TARGET_DPIDR, response.hex()
     else:
         response = xfer(o, i, [0x16, 0])
         assert response[:2] == bytes([0x16, 0]) and int.from_bytes(response[2:6], 'little') & 0x0fff0fff == 0x0ba00477, response.hex()
-    assert mem.word(0xe000ed00) == 0x411fc231
+    assert mem.word(0xe000ed00) == TARGET_CPUID
     mem.word(DHCSR)
     # Read/write independent SRAM; no producer/ring/sample variables overlap.
     value = (stats['bursts'] ^ 0x61da9000) & 0xffffffff
@@ -117,8 +119,9 @@ def debug_burst(mem, o, i, transport, fixture, stats):
     for at in range(8):
         response = read_exact(i, 260)
         assert response[:4] == bytes([6, 64, 0, 1])
-        expected = bytearray(fixture[at * 256:(at + 1) * 256])
-        if at == 7:
+        index = at % 4 if (TARGET_CPUID >> 4) & 0xfff == 0xc27 else at
+        expected = bytearray(fixture[index * 256:(index + 1) * 256])
+        if index == 7:
             expected[0:4] = struct.pack('<I', value)
         assert response[4:] == expected, 'Pipelined debug SRAM read mismatch'
     elapsed = time.perf_counter() - start
@@ -209,8 +212,9 @@ def rtt_point(probe, mem, dev, o, i, code, speed, transport, seconds, full_recon
     fixture = random.Random(0xdab).randbytes(2048)
     mem.write_word(DHCSR, 0xa05f0003)
     mem.write(BASE, code)
-    mem.write(0x20000200, struct.pack('<16sII6II', b'SEGGER RTT', 1, 0, 0, 0x20001000, 8192, 0, 0, 0, 0))
+    mem.write(BASE+0x200, struct.pack('<16sII6II', b'SEGGER RTT', 1, 0, 0, BASE+0x1000, 8192, 0, 0, 0, 0))
     mem.write(SCRATCH, fixture)
+    prepare_code(mem)
     core_write(mem, 16, 0x01000000)
     core_write(mem, 20, 1)
     core_write(mem, 15, BASE | 1)
@@ -220,7 +224,7 @@ def rtt_point(probe, mem, dev, o, i, code, speed, transport, seconds, full_recon
     with serial.Serial(port, 115200, timeout=.025) as com:
         com.reset_input_buffer()
         assert probe.action(0x31, 7, struct.pack('<IHBB', speed, 1024, 0, 1))[0] == 0
-        assert probe.action(0x31, 1, struct.pack('<IIB', 0x20000200, 0x100, 0))[0] == 0
+        assert probe.action(0x31, 1, struct.pack('<IIB', BASE+0x200, 0x100, 0))[0] == 0
         reader = Reader(com)
         reader.start()
         try:
@@ -229,8 +233,8 @@ def rtt_point(probe, mem, dev, o, i, code, speed, transport, seconds, full_recon
                      row['debug'], full_reconnect)
             mem.write_word(DHCSR, 0xa05f0003)
             wait_halt(mem)
-            published = mem.word(0x20000230) * 4
-            wr = mem.word(0x20000224)
+            published = mem.word(BASE+0x230) * 4
+            wr = mem.word(BASE+0x224)
             in_flight = (wr - (published & 8191)) & 8191
             assert in_flight in (0, 4)
             published += in_flight
@@ -261,9 +265,10 @@ def hss_point(probe, mem, dev, o, i, code, speed, transport, seconds, variables,
     samples = random.Random(0x485353).randbytes(4 * variables)
     mem.write_word(DHCSR, 0xa05f0003)
     mem.write(BASE, code)
-    mem.write_word(0x20004000, 0)
-    mem.write(0x20004100, samples)
+    mem.write_word(BASE+0x4000, 0)
+    mem.write(BASE+0x4100, samples)
     mem.write(SCRATCH, fixture)
+    prepare_code(mem)
     core_write(mem, 16, 0x01000000)
     core_write(mem, 20, 1)
     core_write(mem, 15, BASE | 1)
@@ -271,7 +276,7 @@ def hss_point(probe, mem, dev, o, i, code, speed, transport, seconds, variables,
     assert probe.action(0x31, 12, bytes([2 if transport == 'jtag' else 1]))[0] == 0
     assert probe.action(0x32, 3, struct.pack('<I', speed))[0] == 0
     config = struct.pack('<IBB', period, 0, variables) + b''.join(
-        struct.pack('<IBB', 0x20004100 + 4 * n, 4, 4) for n in range(variables))
+        struct.pack('<IBB', BASE+0x4100 + 4 * n, 4, 4) for n in range(variables))
     assert probe.action(0x32, 10, config)[0] == 0
     drain_hss(dev)
     reader = ScopeReader(dev, samples, period, variables)
@@ -321,16 +326,25 @@ def hss_point(probe, mem, dev, o, i, code, speed, transport, seconds, variables,
     return row
 
 
+def prepare_code(mem):
+    if (TARGET_CPUID >> 4) & 0xfff == 0xc27:
+        assert not mem.word(0xe000ed14)&(1<<16), 'M7 fixture requires D-cache disabled'
+        mem.write_word(0xe000ef50, 0)
+
+
 def main():
+    global BASE, SCRATCH, TARGET_CPUID, TARGET_DPIDR
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--pair', choices=list(PAIRS), required=True)
     p.add_argument('--out', type=Path, required=True)
     p.add_argument('--transport', choices=['swd', 'jtag'], default='swd')
     p.add_argument('--speeds', default='50000000,60000000')
     p.add_argument('--seconds', type=float, default=2)
+    p.add_argument('--fixture-base',type=lambda v:int(v,0),choices=(0x20000000,0x24040000),default=0x20000000)
     p.add_argument('--full-reconnect', action='store_true',
                    help='Also perform full SWJ line reset/reinitialization while streaming; distinct from ordinary debug commands')
     a = p.parse_args()
+    BASE=a.fixture_base;SCRATCH=BASE+0x4800
     out = a.out.resolve()
     out.mkdir(parents=True, exist_ok=False)
     pair = ROOT / 'prebuilt' / PAIRS[a.pair]
@@ -347,7 +361,9 @@ def main():
     result_path = out / 'result.json'
     try:
         stop(probe, d)
-        setup(o, i, 1000)
+        identity=setup(o, i, 1000)
+        TARGET_DPIDR=int.from_bytes(identity[3:7],'little')
+        TARGET_CPUID=mem.word(0xe000ed00)
         initial = mem.word(DHCSR)
         mem.write_word(DHCSR, 0xa05f0003)
         wait_halt(mem)
@@ -355,9 +371,15 @@ def main():
         backup = mem.read(BASE, SIZE)
         (out / 'backup.bin').write_bytes(backup)
         report.update(backup_sha256=hashlib.sha256(backup).hexdigest(), registers_before=regs,
-                      RCC_before=[mem.word(0x40021000), mem.word(0x40021004)],
-                      ETMCR_before=hex(mem.word(0xe0041000)), initial_halted=bool(initial & (1 << 17)))
-        assert int(report['ETMCR_before'], 16) & 0x400, 'This study excludes active ETM output'
+                      RCC_before=snapshot(mem),fixture_base=hex(BASE),
+                      initial_halted=bool(initial & (1 << 17)))
+        if (TARGET_CPUID>>4)&0xfff == 0xc27:
+            report['DBG_CR_before']=hex(mem.word(0x5c001004))
+            report['ETM_PRGCTLR_before']=hex(mem.word(0xe0041004))
+            assert not int(report['ETM_PRGCTLR_before'],16)&1, 'This study excludes active H7 ETM output'
+        else:
+            report['ETMCR_before']=hex(mem.word(0xe0041000))
+            assert int(report['ETMCR_before'],16)&0x400, 'This study excludes active ETM output'
         save(result_path, report)
         for speed in map(int, a.speeds.split(',')):
             for service in ['rtt', 'hss8', 'hss1']:
@@ -398,7 +420,7 @@ def main():
                 report['registers_after'] = {n: core_read(mem, n) for n in regs}
                 report['registers_match'] = report['registers_after'] == regs
                 assert report['registers_match']
-            report['RCC_after'] = [mem.word(0x40021000), mem.word(0x40021004)]
+            report['RCC_after'] = snapshot(mem)
             assert report.get('RCC_before', report['RCC_after']) == report['RCC_after']
             if initial is not None and not initial & (1 << 17):
                 mem.write_word(DHCSR, 0xa05f0001)

@@ -18,6 +18,7 @@ from dap_pipeline_bench import open_dap, setup, send, xfer, le, read_exact
 from test_probe_board import Memory
 from test_swd_lowfreq_board import recover
 from probe_build_info import swd_clock_details, provenance
+from target_snapshot import snapshot
 
 
 def ap_select(out, inp, addr):
@@ -44,7 +45,7 @@ def main():
                     help='Extra alternating read/write soak on the same open session')
     ap.add_argument('--no-halt', action='store_true', help='leave the core running')
     ap.add_argument('--address', default='0x24040000')
-    ap.add_argument('--jtag-ir', default='4')
+    ap.add_argument('--jtag-ir', default='4,5')
     ap.add_argument('--output', type=Path)
     ap.add_argument('--bit', type=Path)
     ap.add_argument('--elf', type=Path)
@@ -64,7 +65,7 @@ def main():
     try:
         setup(out, inp, args.bootstrap_speed_khz)
         initial = mem.word(0xE000EDF0)
-        row['RCC_before'] = [mem.word(0x40021000), mem.word(0x40021004)]
+        row['RCC_before'] = snapshot(mem)
         if not args.no_halt and not initial & (1 << 17):
             mem.write_word(0xE000EDF0, 0xA05F0003)
         row['target_halted'] = bool(mem.word(0xE000EDF0) & (1 << 17))
@@ -146,7 +147,7 @@ def main():
                 row.setdefault('restore_match', restored == saved)
                 row['restore_sha256'] = hashlib.sha256(restored).hexdigest()
                 assert row['restore_match'], 'SRAM restoration mismatch'
-            row['RCC_after'] = [mem.word(0x40021000), mem.word(0x40021004)]
+            row['RCC_after'] = snapshot(mem)
             assert row['RCC_after'] == row['RCC_before'], 'Target RCC changed'
             if initial is not None and not args.no_halt and not initial & (1 << 17):
                 mem.write_word(0xE000EDF0, 0xA05F0001)
@@ -159,6 +160,8 @@ def main():
         print(json.dumps(row), flush=True)
         usb.util.release_interface(dev, 0)
         usb.util.dispose_resources(dev)
+    if not row.get('passed'):
+        raise SystemExit(1)
 
 
 if __name__ == '__main__':

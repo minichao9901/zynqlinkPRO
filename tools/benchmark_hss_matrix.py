@@ -8,6 +8,7 @@ from benchmark_probe_stream import hss_point
 from test_probe_board import Memory,stop
 from test_swd_lowfreq_board import recover
 from probe_build_info import provenance
+from target_snapshot import snapshot
 
 
 def main():
@@ -18,6 +19,7 @@ def main():
     p.add_argument('--transports',default='swd,jtag')
     p.add_argument('--speeds',default='1000000,10000000,25000000,35000000,50000000,60000000')
     p.add_argument('--bootstrap-speed-khz',type=int,default=50000)
+    p.add_argument('--jtag-ir',default='4,5')
     a=p.parse_args();a.output.parent.mkdir(parents=True,exist_ok=True)
     d,o,i=open_dap();probe=Probe();mem=Memory(o,i);backup=initial=None
     report=dict(artifacts=provenance(a.bit,a.elf),variables=1,variable_bytes=4,rows=[],summary=[])
@@ -27,7 +29,7 @@ def main():
         if not initial&(1<<17):mem.write_word(0xe000edf0,0xa05f0003)
         backup=mem.read(0x20004000,4096);assert mem.read(0x20004000,4096)==backup
         a.output.with_suffix('.backup.bin').write_bytes(backup)
-        report.update(backup_sha256=hashlib.sha256(backup).hexdigest(),RCC_before=[mem.word(0x40021000),mem.word(0x40021004)])
+        report.update(backup_sha256=hashlib.sha256(backup).hexdigest(),RCC_before=snapshot(mem))
         for transport in a.transports.split(','):
             assert probe.action(0x31,12,bytes([1 if transport=='swd' else 2]))[0]==0
             for speed in map(int,a.speeds.split(',')):
@@ -35,7 +37,7 @@ def main():
                 def point(period,tag,seconds=None):
                     setup(o,i,a.bootstrap_speed_khz,'swd')
                     row=hss_point(probe,mem,d,speed,period,1,seconds or a.seconds,len(current),True,
-                                  lambda:setup(o,i,a.bootstrap_speed_khz,transport),True)
+                                  lambda:setup(o,i,a.bootstrap_speed_khz,transport,jtag_ir_lengths=tuple(map(int,a.jtag_ir.split(',')))),True)
                     row.update(transport=transport,stage=tag,passed=True)
                     current.append(row);report['rows'].append(row);persist()
                     print(json.dumps({k:row[k] for k in ['transport','speed_hz','period_ticks','effective_Hz','skip_percent','stage','actual_link_Hz']}),flush=True)
@@ -69,7 +71,7 @@ def main():
                              all_data_frames_verified=True,all_sample_counts_match=True,
                              control_sequence_errors=sum(len(v.get('control_sequence_errors',[])) for v in current))
                 report['summary'].append(summary);persist();print('SUMMARY '+json.dumps(summary),flush=True)
-        report['RCC_after']=[mem.word(0x40021000),mem.word(0x40021004)]
+        report['RCC_after']=snapshot(mem)
         assert report['RCC_before']==report['RCC_after']
     except BaseException as exc:
         report['failure']=repr(exc)

@@ -21,9 +21,10 @@ class StartLifecycleTests(unittest.TestCase):
 
     def test_send_publishes_arm_before_recv_waits_for_end(self):
         session=SimpleNamespace(configure=Mock(),start=Mock(),wait=Mock(return_value=True),error=None)
-        socket=zynq_la._Sock(SimpleNamespace(config={'traceid':2},traceid=2,seconds=.1))
+        socket=zynq_la._Sock(SimpleNamespace(config={'traceid':2},traceid=2,seconds=.1,swd_hz=10000000))
         with patch.object(zynq_la,'session',return_value=session):
             socket.sendall(b'start')
+            self.assertEqual(session.swd_hz,10000000)
             session.start.assert_called_once();session.wait.assert_not_called()
             socket.settimeout(10)
             self.assertEqual(socket.recv(4096),b'ACK')
@@ -31,7 +32,7 @@ class StartLifecycleTests(unittest.TestCase):
 
     def test_receive_error_is_not_an_ack_or_replayed_start(self):
         session=SimpleNamespace(configure=Mock(),start=Mock(),wait=Mock(return_value=True),error='receiver lost')
-        socket=zynq_la._Sock(SimpleNamespace(config={},traceid=2,seconds=.1))
+        socket=zynq_la._Sock(SimpleNamespace(config={},traceid=2,seconds=.1,swd_hz=10000000))
         with patch.object(zynq_la,'session',return_value=session):
             socket.sendall(b'start')
             with self.assertRaises(zynq_la.CaptureError):socket.recv(4096)

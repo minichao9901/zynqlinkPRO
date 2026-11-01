@@ -25,6 +25,8 @@ ETM目标配置默认SWD为10 MHz，网页连接、本地采集服务接管和�
 
 F103ZE常用目标ELF为`prebuilt/golden/f103ze-cdc48.elf`。Zynq原生capture要求明确传`--elf`（目标MCU）、`--bit`（探针PL）和`--zynq-elf`（探针PS）；它不会加载所声明配对。doctor的默认Golden路径不证明板上身份；Golden、release及实验版的哈希/范围以各manifest和报告为准。业务记录清单在retained-records.json，数据包含源码和配置，不依赖旧build/worktree。
 
+H743已单独完成CPU/HCLK60MHz、TRACECLK20MHz、SWD10MHz的10/200/500/1000ms连续DDR USB实板验收，使用 `prebuilt/targets/stm32h743-cdc-trace-20261101/cpu60-trace20/fw.elf`。构建入口及SDK在 `firmware/target/stm32h743_cdc_trace/`；H743原生capture当前明确拒绝F103专用entry/reset选项。GUI起点/首屏及旧固定EXE不在此次验收范围，详见 [H743综合报告](validation/h743-comprehensive-20261101/README.md)。
+
 ```powershell
 # 硬件示例：先核对空闲并加载同一配对；输出目录须不存在。
 python -X utf8 toolbox.py trace capture --elf prebuilt/golden/f103ze-cdc48.elf --bit prebuilt/fclk133-release-20261101/probe.bit --zynq-elf prebuilt/fclk133-release-20261101/application.elf --out build/trace-capture-new --seconds 1 --swd-khz 10000

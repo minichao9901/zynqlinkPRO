@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "-X",
+    "utf8",
+    "tools/benchmark_hss_matrix.py",
+    "--transports",
+    "jtag",
+    "--jtag-ir",
+    "4,5",
+    "--speeds",
+    "1000000,10000000,25000000,35000000,50000000,60000000",
+    "--seconds",
+    ".5",
+    "--bit",
+    "E:\\zynqlinkPRO\\prebuilt\\fclk133-release-20261101\\probe.bit",
+    "--elf",
+    "E:\\zynqlinkPRO\\prebuilt\\fclk133-release-20261101\\application.elf",
+    "--bootstrap-speed-khz",
+    "1000",
+    "--output",
+    "build\\h743-comprehensive-20261101\\hss\\jtag.json"
+  ],
+  "startedAtUtc": "2026-11-01T14:20:16.327748+00:00",
+  "driverSha256": "fe2c8a389c7fa3d10d788ca26309c183f6f25e20401abc9939002e773fd15cb1",
+  "returncode": 1,
+  "endedAtUtc": "2026-11-01T14:20:17.727757+00:00"
+}

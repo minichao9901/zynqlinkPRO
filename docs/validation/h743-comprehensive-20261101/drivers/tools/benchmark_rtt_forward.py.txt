@@ -1,0 +1,249 @@
+"""Sustained RTT->CDC speed using a RAM-only producer on F103/H743.
+
+The producer writes monotonic u32 words into an 8KiB RTT ring. Reader validates
+all words, then producer is halted and the ring/CDC fully drained. Received bytes
+must equal published words*4. All 20KiB RAM and architectural core registers are
+backed up/restored; target clock and flash are not changed.
+"""
+import argparse
+import hashlib
+import json
+from pathlib import Path
+import shutil
+import struct
+import subprocess
+import threading
+import time
+
+import numpy as np
+import serial
+import serial.tools.list_ports
+import usb.util
+
+from dap_pipeline_bench import open_dap, setup
+from probe_stream import Probe
+from test_probe_board import Memory, stop
+from probe_build_info import provenance,live_clock_snapshot
+from test_swd_lowfreq_board import recover
+from target_snapshot import snapshot
+
+DHCSR, DCRSR, DCRDR = 0xe000edf0, 0xe000edf4, 0xe000edf8
+
+
+def core_read(mem, index):
+    mem.write_word(DCRSR, index)
+    for _ in range(100):
+        if mem.word(DHCSR) & (1 << 16):
+            return mem.word(DCRDR)
+    raise RuntimeError('DCRSR read timeout')
+
+
+def core_write(mem, index, value):
+    mem.write_word(DCRDR, value)
+    mem.write_word(DCRSR, index | 0x10000)
+    for _ in range(100):
+        if mem.word(DHCSR) & (1 << 16):
+            return
+    raise RuntimeError('DCRSR write timeout')
+
+
+class Reader(threading.Thread):
+    def __init__(self, com):
+        super().__init__(daemon=True)
+        self.com = com
+        self.quit = threading.Event()
+        self.count = 0
+        self.next_word = 0
+        self.pending = b''
+        self.error = None
+
+    def run(self):
+        try:
+            while not self.quit.is_set():
+                data = self.com.read(65536)
+                self.count += len(data)
+                data = self.pending+data
+                n = len(data) & ~3
+                if n:
+                    a = np.frombuffer(data[:n], dtype='<u4')
+                    assert int(a[0]) == self.next_word, (int(a[0]), self.next_word)
+                    assert np.all(np.diff(a) == 1)
+                    self.next_word = (int(a[-1])+1) & 0xffffffff
+                self.pending = data[n:]
+        except BaseException as exc:
+            self.error = repr(exc)
+
+
+def point(probe, mem, port, code, speed, chunk, seconds, repeat, activate_transport=None, base=0x20000000):
+    mem.write_word(DHCSR, 0xa05f0003)
+    mem.write(base, code)
+    mem.write(base+0x200, struct.pack('<16sII6II', b'SEGGER RTT', 1, 0, 0, base+0x1000, 8192, 0, 0, 0, 0))
+    assert mem.read(base,len(code))==code,'producer code did not verify'
+    if (mem.word(0xe000ed00)>>4)&0xfff == 0xc27:
+        assert not mem.word(0xe000ed14)&(1<<16), 'RAM fixture requires D-cache disabled'
+        mem.write_word(0xe000ef50, 0)  # ICIALLU: invalidate stale instructions after RAM writes.
+    core_write(mem, 16, 0x01000000)  # Clear inherited IT/condition state for the RAM entry.
+    core_write(mem, 20, 1)  # privileged, interrupts masked, no fixture stack use
+    core_write(mem, 15, base+1)
+    if activate_transport:activate_transport()
+    reader = None
+    with serial.Serial(port, 115200, timeout=0.025) as com:
+        com.reset_input_buffer()
+        assert probe.action(0x31, 7, struct.pack('<IHBB', speed, chunk, 0, 1))[0] == 0
+        assert probe.action(0x31, 1, struct.pack('<IIB', base+0x200, 0x100, 0))[0] == 0
+        reader = Reader(com)
+        reader.start()
+        try:
+            mem.write_word(DHCSR, 0xa05f0001)
+            time.sleep(0.3)
+            clock=live_clock_snapshot()
+            t0 = time.perf_counter()
+            rc, s0 = probe.action(0x31, 2)
+            t0 = (t0+time.perf_counter())/2
+            assert rc == 0 and s0[1] == base+0x200 and s0[3]>0, (rc, s0)
+            count0 = reader.count
+            time.sleep(seconds)
+            t1 = time.perf_counter()
+            rc, s1 = probe.action(0x31, 2)
+            t1 = (t1+time.perf_counter())/2
+            count1 = reader.count
+            assert rc == 0 and s1[5] == 0, (rc, s1)
+            mem.write_word(DHCSR, 0xa05f0003)
+            published_counter = mem.word(base+0x230)*4
+            wr = mem.word(base+0x224)
+            # Halt may land after publishing WrOff but before the stats store.
+            in_flight_publish = (wr-(published_counter & 8191)) & 8191
+            assert in_flight_publish in (0,4), (wr,published_counter)
+            published = published_counter+in_flight_publish
+            deadline = time.monotonic()+5
+            while time.monotonic() < deadline:
+                if reader.error:
+                    raise RuntimeError(reader.error)
+                if reader.count == published:
+                    break
+                time.sleep(0.02)
+            assert probe.action(0x31, 0)[0] == 0
+            time.sleep(0.05)
+            reader.quit.set()
+            reader.join(2)
+            assert reader.error is None, reader.error
+            assert reader.count == published and not reader.pending, (reader.count, published)
+            return {'speed_hz': speed, 'chunk': chunk, 'repeat': repeat,
+                    **clock,
+                    'window_s': t1-t0, 'host_bytes': count1-count0,
+                    'host_MB_s': (count1-count0)/(t1-t0)/1e6,
+                    'probe_bytes': (s1[3]-s0[3]) & 0xffffffff,
+                    'probe_MB_s': ((s1[3]-s0[3]) & 0xffffffff)/(t1-t0)/1e6,
+                    'session_bytes': published, 'sequence_exact': True,
+                    'all_published_received': True, 'errors': s1[5], 's0': s0, 's1': s1}
+        finally:
+            mem.write_word(DHCSR, 0xa05f0003)
+            probe.action(0x31, 0)
+            reader.quit.set()
+            reader.join(2)
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument('--seconds', type=float, default=3)
+    ap.add_argument('--speeds', default='50000000,60000000')
+    ap.add_argument('--chunks', default='128,256,512,1024')
+    ap.add_argument('--repeats', type=int, default=1)
+    ap.add_argument('--transport', choices=['swd', 'jtag'], default='swd')
+    ap.add_argument('--bootstrap-speed-khz',type=int,default=50000)
+    ap.add_argument('--fixture-base',type=lambda v:int(v,0),default=0x20000000,
+                    choices=(0x20000000,0x24040000),help='H743 uses AXI SRAM 0x24040000')
+    ap.add_argument('--jtag-ir',default='4,5')
+    ap.add_argument('--output', type=Path, required=True)
+    ap.add_argument('--bit',type=Path)
+    ap.add_argument('--elf',type=Path)
+    args = ap.parse_args()
+    root = Path(__file__).resolve().parents[1]
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    base=args.fixture_base
+    build = root/('build/rtt_ram_%08x'%base)
+    build.mkdir(parents=True, exist_ok=True)
+    gcc = Path(shutil.which('arm-none-eabi-gcc'))
+    objcopy = gcc.with_name('arm-none-eabi-objcopy.exe' if gcc.suffix == '.exe' else 'arm-none-eabi-objcopy')
+    elf, binary = build/'producer.elf', build/'producer.bin'
+    subprocess.run([str(gcc), '-mcpu=cortex-m3', '-mthumb', '-nostdlib',
+                    f'-Wl,-Ttext={base:#x}', f'-Wa,--defsym,FIXTURE_BASE={base:#x}', '-Wl,-e,producer',
+                    str(root/'firmware/target/probe_rtt_ram.S'), '-o', str(elf)], check=True)
+    subprocess.run([str(objcopy), '-O', 'binary', str(elf), str(binary)], check=True)
+    code = binary.read_bytes()
+    assert len(code) < 512
+    probe = Probe()
+    dev, out, inp = open_dap()
+    mem = Memory(out, inp)
+    backup, regs, initial = None, None, None
+    report = {'artifacts':provenance(args.bit,args.elf),'kind': 'continuous RAM producer RTT->CDC', 'transport':args.transport, 'rows': []}
+    try:
+        stop(probe, dev)
+        # A probe left in a stale HSS/route state can refuse the first SWJ/IDCODE
+        # exchange; retry the setup instead of failing the whole run.
+        for attempt in range(4):
+            try:
+                setup(out, inp, args.bootstrap_speed_khz, 'swd')
+                break
+            except RuntimeError as exc:
+                if attempt == 3:
+                    raise
+                print('setup retry %d: %s' % (attempt + 1, exc), flush=True)
+                time.sleep(0.5)
+        assert probe.action(0x31,12,bytes([2 if args.transport=='jtag' else 1]))[0]==0
+        initial = mem.word(DHCSR)
+        mem.write_word(DHCSR, 0xa05f0003)
+        regs = {i: core_read(mem, i) for i in list(range(19))+[20]}
+        backup = mem.read(base, 20480)
+        args.output.with_suffix('.backup.bin').write_bytes(backup)
+        report['backup_sha256'] = hashlib.sha256(backup).hexdigest()
+        report['registers_before'] = regs
+        report['RCC_before'] = snapshot(mem)
+        report['fixture_base'] = hex(base)
+        port = next(p.device for p in serial.tools.list_ports.comports() if p.vid == 0xd28 and p.pid == 0x204)
+        for speed in map(int, args.speeds.split(',')):
+            for chunk in map(int, args.chunks.split(',')):
+                for repeat in range(args.repeats):
+                    setup(out,inp,args.bootstrap_speed_khz,'swd')
+                    row = point(probe, mem, port, code, speed, chunk, args.seconds, repeat,
+                                lambda:setup(out,inp,speed//1000,args.transport,jtag_ir_lengths=tuple(map(int,args.jtag_ir.split(','))),speed_hz=speed),base=base)
+                    report['rows'].append(row)
+                    args.output.write_text(json.dumps(report, indent=2))
+                    print(json.dumps({k:v for k,v in row.items() if k not in ('s0','s1')}), flush=True)
+    except BaseException as exc:
+        report['failure']=repr(exc)
+        try:
+            report['failure_clock'] = live_clock_snapshot()
+        except Exception as clock_error:
+            report['failure_clock_error'] = repr(clock_error)
+        raise
+    finally:
+        try:
+            try:stop(probe,dev)
+            except RuntimeError:recover(dev,inp);stop(probe,dev)
+            setup(out, inp, args.bootstrap_speed_khz, 'swd')
+            mem.write_word(DHCSR, 0xa05f0003)
+            if backup is not None:
+                mem.write(base, backup)
+                report['restore_match'] = mem.read(base, 20480) == backup
+                assert report['restore_match']
+            if regs is not None:
+                for i, value in regs.items():
+                    core_write(mem, i, value)
+                after = {i: core_read(mem, i) for i in regs}
+                report['registers_after'] = after
+                report['registers_match'] = after == regs
+                assert report['registers_match'], (regs, after)
+            report['RCC_after'] = snapshot(mem)
+            assert report.get('RCC_before', report['RCC_after']) == report['RCC_after']
+            if initial is not None and not initial & (1 << 17):
+                mem.write_word(DHCSR, 0xa05f0001)
+        finally:
+            args.output.write_text(json.dumps(report, indent=2))
+            probe.close()
+            usb.util.release_interface(dev, 0)
+            usb.util.dispose_resources(dev)
+
+
+if __name__ == '__main__':
+    main()

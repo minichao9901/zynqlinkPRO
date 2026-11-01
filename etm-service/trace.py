@@ -242,7 +242,7 @@ def capture(argv):
                           'complete': None, 'known': False,
                           'hostReceiveSeconds':acceptance.get('capture_host_seconds'),
                           'basis': 'legacy transport does not measure the hardware window'},
-        'targetSnapshot': {'name': 'STM32F103ZE', 'clockPolicy': 'target-firmware-owned',
+        'targetSnapshot': {'name': 'STM32H743' if acceptance.get('target_profile')=='stm32h743' else 'STM32F103ZE', 'clockPolicy': 'target-firmware-owned',
                            'gpioSpeed': args.gpio_speed},
         'etmBytes': len(etm), 'etmSha256': acceptance.get('etm_sha256'),
     }

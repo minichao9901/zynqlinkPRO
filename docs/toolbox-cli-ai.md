@@ -61,7 +61,7 @@ python toolbox.py project run etm.ddr-trace-stress -- --pair prebuilt/etm-ddr-us
 python toolbox.py project run etm.framed -- captured.frm1 --out build/framed-check-new --tail-bytes 1 --trace-id 2
 ```
 
-DDR阶段验收仅针对F103，默认USB采后下载，1/2秒窗口、函数交替、CDC；可用物理AP0核对同一缓冲。不会写Flash或改目标分频。
-H743已有独立ETMv4 Web/Kingst入口与target.h743-build源码构建命令，不能用F103专用验收替代。
+上例DDR压力套件仍只针对F103，默认USB采后下载，1/2秒窗口、函数交替、CDC；可用物理AP0核对同一缓冲。不会写Flash或改目标分频。
+H743已有独立ETMv4连续原生capture实板验收：CPU60/TRACECLK20、SWD10MHz，10/200/500/1000ms各三次CDC负载。Golden源代码/SDK在`firmware/target/stm32h743_cdc_trace/`，`target.h743-build`已指向该目录；产物在`prebuilt/targets/stm32h743-cdc-trace-20261101/`。H743原生entry/reset仍拒绝，Web起点/导出另行验证，不能借F103压力套件背书。详见 [H743综合报告](validation/h743-comprehensive-20261101/README.md)。
 FRM1原生工具、PS USB采后下载、Web/CLI默认DDR能力分支已完成本阶段真机验证；更高频和逐线校准继续研究。
 `web.shared-sync --check`核对ETM共享驱动（当前10份）；`--write`从主工作台同步。web.check与bridge.build都会阻止驱动副本不一致。

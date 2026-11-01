@@ -5,6 +5,10 @@
 *.samples16 binary
 *.rttdata binary
 *.a binary
+firmware/target/stm32h743_cdc_trace/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+firmware/target/stm32h743_cdc_trace/sdk/** -text -whitespace
+docs/validation/h743-comprehensive-20261101/** -text -whitespace
+prebuilt/targets/stm32h743-cdc-trace-20261101/** -text -whitespace
 # Vendored model/BSP snapshots retain upstream byte identity on all checkouts.
 reference/** -text -whitespace
 firmware/target/stm32f103_rtt_seq72/** -text

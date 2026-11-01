@@ -1,0 +1,39 @@
+{
+  "artifacts": {
+    "git_head": "dc2cbbbeb2c0d095503a6706986edb2e649ab311",
+    "git_dirty": true,
+    "bit": {
+      "path": "E:\\zynqlinkPRO\\prebuilt\\fclk133-release-20261101\\probe.bit",
+      "sha256": "af1031d3caa0d7bd3b6adffa911d26efdab9e0bfb5223fb18f70dabb70ebeeed"
+    },
+    "elf": {
+      "path": "E:\\zynqlinkPRO\\prebuilt\\fclk133-release-20261101\\application.elf",
+      "sha256": "2137f7d0f507c08574f36223130103c0710645cbfdefb5c1d8c8efb0cfb990a0"
+    }
+  },
+  "variables": 1,
+  "variable_bytes": 4,
+  "rows": [],
+  "summary": [],
+  "backup_sha256": "799c1dac2d6314c2e0831fca22241d60629e737dce46e0dc7a2265b4c922acc4",
+  "RCC_before": {
+    "name": "STM32H743/H742/H750/H753",
+    "cpuid": "0x411fc271",
+    "device": "0x20036450",
+    "registers": {
+      "0x58024400": "0x3303c025",
+      "0x58024410": "0x1b",
+      "0x58024418": "0x40",
+      "0x5802441c": "0x440",
+      "0x58024420": "0x50",
+      "0x58024428": "0x1920052",
+      "0x5802442c": "0x1ff0309",
+      "0x58024430": "0xb010e5f",
+      "0x58024434": "0x0",
+      "0x58024438": "0x1010280",
+      "0x52002000": "0x32"
+    }
+  },
+  "failure": "AssertionError(('HSS start rejected', -6, 'requested clock', 1000000))",
+  "restore_match": true
+}

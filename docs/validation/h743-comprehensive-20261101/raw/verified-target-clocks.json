@@ -1,0 +1,50 @@
+{
+  "target30-state.json": {
+    "knownHz": 60000000,
+    "knownTraceHz": 60000000,
+    "coreHz": 60000000,
+    "traceHz": 60000000,
+    "external": true,
+    "source": "HSE → PLL1",
+    "path": "HSE 25 MHz ÷M5 ×(96) ÷P8 → CPU ÷1 → HCLK ÷1",
+    "tracePath": "PLL1 VCO ÷R8 → TRACEPORTCK",
+    "traceReady": true,
+    "busDivider": 1,
+    "coreDivider": 1,
+    "traceRelation": "并行 trace 输入 TRACEPORTCK：HSI / CSI / HSE / PLL1_R；物理 TRACECLK = 输入 / 2；CPU / HCLK 独立分频",
+    "physicalTraceHz": 30000000,
+    "hclkHz": 60000000
+  },
+  "target480-state.json": {
+    "knownHz": 480000000,
+    "knownTraceHz": 40000000,
+    "coreHz": 480000000,
+    "traceHz": 40000000,
+    "external": true,
+    "source": "HSE → PLL1",
+    "path": "HSE 25 MHz ÷M5 ×(192) ÷P2 → CPU ÷1 → HCLK ÷2",
+    "tracePath": "PLL1 VCO ÷R24 → TRACEPORTCK",
+    "traceReady": true,
+    "busDivider": 2,
+    "coreDivider": 1,
+    "traceRelation": "并行 trace 输入 TRACEPORTCK：HSI / CSI / HSE / PLL1_R；物理 TRACECLK = 输入 / 2；CPU / HCLK 独立分频",
+    "physicalTraceHz": 20000000,
+    "hclkHz": 240000000
+  },
+  "etm20-matrix/1000ms-1/acceptance.json": {
+    "knownHz": 60000000,
+    "knownTraceHz": 40000000,
+    "coreHz": 60000000,
+    "traceHz": 40000000,
+    "external": true,
+    "source": "HSE → PLL1",
+    "path": "HSE 25 MHz ÷M5 ×(96) ÷P8 → CPU ÷1 → HCLK ÷1",
+    "tracePath": "PLL1 VCO ÷R12 → TRACEPORTCK",
+    "traceReady": true,
+    "busDivider": 1,
+    "coreDivider": 1,
+    "traceRelation": "并行 trace 输入 TRACEPORTCK：HSI / CSI / HSE / PLL1_R；物理 TRACECLK = 输入 / 2；CPU / HCLK 独立分频",
+    "physicalTraceHz": 20000000,
+    "hclkHz": 60000000
+  }
+}

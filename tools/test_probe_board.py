@@ -23,13 +23,15 @@ from probe_build_info import provenance, swd_clock_details
 
 
 class Memory:
-    # AP TAR auto-increment wraps at 4 KiB on the STM32 AHB-AP (measured
+    # AP TAR auto-increment wraps at 4 KiB on the F103 AHB-AP (measured
     # 2026-10-29: a 1023-word read from page+0xC00 continues 1022,1023 then
     # 0,1,2 -- i.e. the 4 KiB page boundary, not the old 1 KiB assumption).
     # DAP_PACKET_SIZE is 4096 bytes on both directions: a read response carries
     # 4 header bytes (max 4092 payload = 1023 words), a write request carries
     # 5 header bytes (max 4088 payload = 1022 words).
-    TAR_WRAP = 0x1000
+    # Use the architectural 1 KiB minimum for control/backup transfers: H743
+    # actually wraps at 1 KiB. Explicit pipelined benches measure their own wrap.
+    TAR_WRAP = 0x400
     MAX_READ_BYTES = 4092
     MAX_WRITE_BYTES = 4088
 

@@ -1,0 +1,29 @@
+{
+  "argv": [
+    "E:\\zynqlinkPRO\\prebuilt\\golden\\host\\openocd\\openocd.exe",
+    "-s",
+    "E:\\zynqlinkPRO\\prebuilt\\golden\\host\\openocd\\scripts",
+    "-f",
+    "interface/cmsis-dap.cfg",
+    "-c",
+    "transport select swd",
+    "-f",
+    "target/stm32h7x.cfg",
+    "-c",
+    "adapter speed 1000",
+    "-c",
+    "init",
+    "-c",
+    "halt",
+    "-c",
+    "dump_image {E:/zynqlinkPRO/build/h743-comprehensive-20261101/target-original-flash.bin} 0x08000000 0x200000",
+    "-c",
+    "resume",
+    "-c",
+    "shutdown"
+  ],
+  "returncode": 0,
+  "seconds": 26.00828790664673,
+  "bytes": 2097152,
+  "sha256": "fff304656bc59d0f4910560aed321f933d24a3974f27e445441ef7e6987e6f46"
+}

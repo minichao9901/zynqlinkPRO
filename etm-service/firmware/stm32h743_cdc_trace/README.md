@@ -1,3 +1,5 @@
+> 2026-11-01：本目录保留迁入时的固定来源快照。当前自包含构建、H743 Golden及实板结果转到 [firmware/target/stm32h743_cdc_trace](../../../firmware/target/stm32h743_cdc_trace/README.md)。下文的“未找到SDK/未烧录/待验”是历史状态，不代表当前结论。
+
 # H743 CDC / ETMv4 换板用例
 
 从superlinkPRO固定提交迁入源代码、链接脚本、CherryUSB及其许可证、构建辅助模块。

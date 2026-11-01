@@ -1,0 +1,88 @@
+{
+  "transport": "swd",
+  "requested_kHz": 50000.0,
+  "requested_Hz": 50000000,
+  "words": 512,
+  "depth": 32,
+  "loops": 64,
+  "artifacts": {
+    "git_head": "dc2cbbbeb2c0d095503a6706986edb2e649ab311",
+    "git_dirty": true,
+    "bit": {
+      "path": "E:\\zynqlinkPRO\\prebuilt\\golden\\probe.bit",
+      "sha256": "1da17cb60175bbc2b7abd647770c7053bd7b7097e0d38aa819fb89678d564473"
+    },
+    "elf": {
+      "path": "E:\\zynqlinkPRO\\prebuilt\\golden\\application.elf",
+      "sha256": "e977914c2924ab4cac13f4075de0a5108d1e2e8cf48966fb8fbdea3a358e0b2c"
+    }
+  },
+  "RCC_before": {
+    "name": "STM32H743/H742/H750/H753",
+    "cpuid": "0x411fc271",
+    "device": "0x20036450",
+    "registers": {
+      "0x58024400": "0x3303c025",
+      "0x58024410": "0x1b",
+      "0x58024418": "0x48",
+      "0x5802441c": "0x440",
+      "0x58024420": "0x50",
+      "0x58024428": "0x1920052",
+      "0x5802442c": "0x1ff0309",
+      "0x58024430": "0x170102bf",
+      "0x58024434": "0x0",
+      "0x58024438": "0x1010280",
+      "0x52002000": "0x34"
+    }
+  },
+  "target_halted": true,
+  "backup_sha256": "9437a449622b765fd66906f02240fa77947fcf5fe55cdf29ca969c08d53369f6",
+  "FCLK_Hz": 99999999,
+  "cfg": "0xa11",
+  "SWCLK_Hz": 49999999.5,
+  "half_period_fclk": 1,
+  "short_high": false,
+  "intended_high_ns": 10.000000100000001,
+  "restore_ok": true,
+  "read": {
+    "MB_s": 4.048143354546381,
+    "samples": [
+      {
+        "MB_s": 4.044820381525833,
+        "seconds": 0.032404900004621595
+      },
+      {
+        "MB_s": 4.051697220372096,
+        "seconds": 0.03234990002238192
+      },
+      {
+        "MB_s": 4.048143354546381,
+        "seconds": 0.032378300005802885
+      }
+    ],
+    "blocks": 64,
+    "bytes": 131072
+  },
+  "write": {
+    "MB_s": 3.9930175804241617,
+    "samples": [
+      {
+        "MB_s": 3.9930175804241617,
+        "seconds": 0.03282530000433326
+      },
+      {
+        "MB_s": 3.9943439455075156,
+        "seconds": 0.03281440000864677
+      },
+      {
+        "MB_s": 3.988655315485361,
+        "seconds": 0.032861199986655265
+      }
+    ],
+    "blocks": 64,
+    "bytes": 131072
+  },
+  "error": "USBError(5, 'Input/Output Error')",
+  "recover_error": "USBError(5, 'Input/Output Error')",
+  "passed": false
+}

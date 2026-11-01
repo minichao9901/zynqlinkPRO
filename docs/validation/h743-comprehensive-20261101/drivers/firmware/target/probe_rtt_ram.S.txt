@@ -1,0 +1,29 @@
+.syntax unified
+.cpu cortex-m3
+.thumb
+.ifndef FIXTURE_BASE
+.equ FIXTURE_BASE, 0x20000000
+.endif
+.section .text
+.global producer
+.thumb_func
+producer:
+    cpsid i
+    ldr r0, =FIXTURE_BASE + 0x200
+    ldr r1, =FIXTURE_BASE + 0x1000
+    movw r7, #8191
+    movs r3, #0
+    movs r4, #0
+1:
+    ldr r5, [r0, #40]
+    adds r6, r3, #4
+    ands r6, r6, r7
+    cmp r6, r5
+    beq 1b
+    str r4, [r1, r3]
+    dmb
+    str r6, [r0, #36]
+    adds r4, #1
+    mov r3, r6
+    str r4, [r0, #48]
+    b 1b

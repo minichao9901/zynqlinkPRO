@@ -49,6 +49,8 @@ python -X utf8 tools/verify_dependencies.py
 - 对运行中的工作台：`python -X utf8 toolbox.py --runtime <运行目录> page etm describe --target target`。`click/set` 返回投递成功不代表业务完成；还要核对状态、数据质量、日志及恢复结果。
 - Zynq原生Trace不必依赖浏览器：先看 `python -X utf8 toolbox.py trace capture --help`。`--elf` 是**目标MCU ELF**，`--zynq-elf` 是**探针PS ELF**，不要混淆。
 
+H743 Golden源代码与自包含SDK位于 `firmware/target/stm32h743_cdc_trace/`，交付目标ELF位于 `prebuilt/targets/stm32h743-cdc-trace-20261101/`；旧 `etm-service/firmware/` 下同名目录是历史来源快照。先读 [H743综合报告](docs/validation/h743-comprehensive-20261101/README.md)。ETM基线为CPU/HCLK60MHz、TRACECLK20MHz；CPU480/HCLK240是独立吞吐配置，不混用其数据。H743原生CLI支持连续DDR USB窗口，拒绝F103专用entry/reset选项。H743控制/备份内存传输必须兼容1KiB TAR回绕；RTT RAM fixture用AXI SRAM并核对cache及恢复。JTAG低频1/10MHz可用于SRAM/RTT，但当前HSS因FCLK不足24MHz不能启动。
+
 ```powershell
 # 硬件采集示例：仅在已核对/加载配对、确认板卡空闲且任务允许操作硬件后执行。
 python -X utf8 toolbox.py trace capture --elf prebuilt/golden/f103ze-cdc48.elf --bit prebuilt/fclk133-release-20261101/probe.bit --zynq-elf prebuilt/fclk133-release-20261101/application.elf --out build/etm-capture-new --seconds 1 --swd-khz 10000

@@ -1,13 +1,16 @@
 .syntax unified
 .cpu cortex-m3
 .thumb
+.ifndef FIXTURE_BASE
+.equ FIXTURE_BASE, 0x20000000
+.endif
 .section .text
 .global producer
 .thumb_func
 producer:
     cpsid i
-    ldr r0, =0x20000200
-    ldr r1, =0x20001000
+    ldr r0, =FIXTURE_BASE + 0x200
+    ldr r1, =FIXTURE_BASE + 0x1000
     movw r7, #8191
     movs r3, #0
     movs r4, #0

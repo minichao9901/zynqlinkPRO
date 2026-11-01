@@ -79,7 +79,7 @@ def main():
     ap.add_argument('--loops', type=int, default=3, help='functional rounds per rate')
     ap.add_argument('--bench-loops', type=int, default=4096, help='1KiB blocks per rate')
     ap.add_argument('--depth', type=int, default=4)
-    ap.add_argument('--jtag-ir', default='4', help='comma-separated IR lengths of the JTAG chain')
+    ap.add_argument('--jtag-ir', default='4,5', help='comma-separated IR lengths of the JTAG chain')
     ap.add_argument('--output', type=Path, required=True)
     ap.add_argument('--bit', type=Path)
     ap.add_argument('--elf', type=Path)
@@ -95,12 +95,12 @@ def main():
                   window=args.window, depth=args.depth, rows=[])
     transports = ['swd', 'jtag'] if args.transport == 'both' else [args.transport]
     try:
-        setup(out, inp, 50000)
+        initial_identity = setup(out, inp, 50000)
         initial = mem.word(0xe000edf0)
         if not initial & (1 << 17):
             mem.write_word(0xe000edf0, 0xa05f0003)
         report['CPUID'] = hex(mem.word(0xe000ed00))
-        report['DPIDR'] = hex(mem.word(0xe000ed00))
+        report['DPIDR'] = hex(int.from_bytes(initial_identity[3:7],'little'))
         backup = mem.read(base, args.window)
         args.output.with_suffix('.backup.bin').write_bytes(backup)
         report['backup_sha256'] = hashlib.sha256(backup).hexdigest()
@@ -192,6 +192,8 @@ def main():
             args.output.write_text(json.dumps(report, indent=2))
             usb.util.release_interface(dev, 0)
             usb.util.dispose_resources(dev)
+    if any(not r.get('passed') or not r.get('restore_match') for r in report['rows']):
+        raise SystemExit(1)
 
 
 if __name__ == '__main__':

@@ -165,6 +165,10 @@ def main():
         report['control_clock'] = dict(fclk_hz=live_fclk, cfg=hex(live_cfg),
                                        **swd_clock_details(live_fclk, live_cfg))
         report['cpuid'] = hex(mem.word(0xe000ed00))
+        if (int(report['cpuid'], 16) >> 4) & 0xfff == 0xc27:
+            from h743_trace_capture import capture
+            capture(args, dev, out, inp, mem, report)
+            return
         assert mem.word(0xe0042000) & 0xfff == 0x414, 'requires F103xE'
         report['flash'] = []
         if ram_plan:

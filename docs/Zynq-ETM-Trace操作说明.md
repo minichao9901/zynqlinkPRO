@@ -27,10 +27,10 @@ H743可选superlinkPRO例程的`trace_hook_entry`或自己的循环业务入口�
 PLL、AHB/APB分频、CPU和Trace时钟由target固件负责。Web只读取RCC，用户填写板上真实HSE。
 “预期频率”只做核对，填写更低数字不会修改实际频率。生产Web/API不接受`hclkDiv`。
 F103ZE样例HSE为8MHz，48MHz固件默认HCLK48MHz、物理TRACECLK24MHz。
-H743阿波罗例程HSE为25MHz；superlinkPRO参考记录为CPU60MHz、TRACECLK30MHz。
+H743阿波罗Golden例程HSE为25MHz、CPU/HCLK60MHz、TRACECLK20MHz；30MHz在本次Zynq接线下未通过。
 H743 Trace时钟和CPU可独立，必须以实际RCC及板级HSE计算，不能套用F103的CPU/2。
 如果需要降低TRACECLK，应由target固件构建档位完成，并重新载入新固件的匹配ELF。
-这些基线不是H743接Zynq后的验收结论。
+H743本轮已验收范围是原生CLI连续DDR USB窗口，详见 [综合报告](validation/h743-comprehensive-20261101/README.md)，不能扩展成Web全部入口已验收。
 
 ## 3 采集：全程点击Web
 
@@ -46,10 +46,10 @@ H743保留ETMv4分支广播、返回栈和周期计数能力检测、Funnel/ETF/
 可设10/100/1000/2000ms；旧固件仍最多1000ms。采集时长以参考时钟计数核对，下载时间单列。
 F103ZE24MHz TRACECLK已完成1/2秒USB与物理数据对照、30次Web开关及10轮100ms换函数采集；
 每轮窗口内CDC回显、无丢帧/解码错误。100ms完整Web操作约12.5～14.9秒，尚不能称实时显示。
-H743继续使用自己的ETMv4配置与匹配固件，换板后仍需单独真机验收。
+H743已单独完成20MHz的10/200/500/1000ms原生连续采集；Web换函数起点、首屏/导出仍需单独验证，旧固定EXE未因此自动更新。
 
 Zynq接收必须有数据、已同步、完整结束且无丢失；失败保留原始数据和原因，不算成功。
-窗口由主机计时，不是逐指令周期时间；Web显示实际接收质量，不能把源码映射率当作无损证明。
+DDR窗口用硬件参考tick核对，不是逐指令周期时间；legacy主机接收跨度不能证明完整硬件窗口。Web显示实际接收质量，源码映射率不能作为无损证明。
 先10ms再100ms；长窗失败时缩短窗口、检查接线，必要时由target固件降低Trace频率。
 
 ## 接线
@@ -71,9 +71,9 @@ F103ZE的Trace脚为PE2～PE6；H743须按自己的板级引出核对这五根�
 H743继续使用superlinkPRO迁入的目标识别、ETMv4配置、Funnel/ETF/TPIU路由、
 C++解码、TraceStore和Web分析/导出；接收设备使用Zynq ETM-LA。
 F103专用的ETMv3编程模式重启不用于H743。诊断CSR和后续DDR后端不应按F103协议硬编码。
-旧Kingst参考只证明离线回归；尚未把H743接Zynq上板采集标记为已验收。
-可迁移target用例已保存到`etm-service/firmware/stm32h743_cdc_trace/`，
-含源文件、链接脚本、CherryUSB许可证和构建脚本；外部H743 SDK仍须提供，目标编译/上板待验。
+旧Kingst参考只证明离线回归。本轮H743接Zynq的连续原生CLI采集已单独验收，不能替代完整Web起点流程。
+当前自包含target Golden位于`firmware/target/stm32h743_cdc_trace/`，
+含源文件、SDK子集、许可证和构建脚本；旧`etm-service/firmware/`同名目录保留历史来源快照。
 
 换板后先核对接线、电平、板上HSE和实际固件，载入其匹配ELF/源码，
 选自己的循环入口；初始化入口`trace_hook_entry`需要复位后命中。
@@ -81,7 +81,7 @@ F103专用的ETMv3编程模式重启不用于H743。诊断CSR和后续DDR后端�
 同步/结束/丢失、ETMv4包错误及采集入口，再逐档增加Trace频率和窗口。
 每档记录Zynq bit/ELF与target ELF的SHA、接线、诊断计数和原始记录，
 完成反复开关探针、换函数采集、解码、缩放和SVG自动下载后再判定通过。
-本文的60/30MHz是superlinkPRO历史参考，不是Zynq当前承诺的H743上限。
+当前Zynq已验证CPU60/TRACECLK20MHz。30MHz未通过，不能自动重启更高频扫描；Web完整流程通过前仍保留上述检查项。
 
 AI压力工具`toolbox.py project run etm.stress`现支持`--profile stm32h743`，
 必须显式提供`--elf`和`--functions`，可设`--sources`、实际`--hse-mhz`及`--reset-before`。
