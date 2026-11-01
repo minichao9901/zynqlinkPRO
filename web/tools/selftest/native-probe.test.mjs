@@ -3,6 +3,18 @@ import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {nativeUsbDevices,nativeHidDevices,nativeSerialPorts} from '../../app/core/native-probe.js';
 
+test('offline lists never fetch and existing native devices cannot be opened',async t=>{
+  const originalWindow=globalThis.window,originalFetch=globalThis.fetch;
+  t.after(()=>{globalThis.window=originalWindow;globalThis.fetch=originalFetch;});
+  const dataset={nativeProbe:'1'};
+  globalThis.window={document:{body:{dataset}},location:{origin:'http://127.0.0.1:8882',search:'?trace-cli='+'a'.repeat(64)}};
+  globalThis.fetch=async()=>({ok:true,json:async()=>({ok:true,value:[{vendorId:1,productId:1,serialNumber:'offline-test'}]})});
+  const [device]=await nativeUsbDevices();dataset.nativeOffline='1';
+  globalThis.fetch=async()=>{throw Error('network forbidden');};
+  assert.deepEqual(await nativeUsbDevices(),[]);assert.deepEqual(await nativeHidDevices(),[]);assert.deepEqual(await nativeSerialPorts(),[]);
+  await assert.rejects(device.open(),/离线验收：硬件访问已禁用/);
+});
+
 test('native transport preserves real wire bytes, report IDs and serial reads after idle polls',async t=>{
   const originalWindow=globalThis.window,originalFetch=globalThis.fetch;
   t.after(()=>{globalThis.window=originalWindow;globalThis.fetch=originalFetch;});

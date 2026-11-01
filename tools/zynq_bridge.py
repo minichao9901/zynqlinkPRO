@@ -64,6 +64,7 @@ def application(backend, web, service_path, helpers, data, token_file, *, offlin
             def offline_notice(response):
                 if response.mimetype == 'text/html' and response.status_code == 200 and 'attachment' not in response.headers.get('Content-Disposition','').lower():
                     text=response.get_data(as_text=True)
+                    text=text.replace('<body','<body data-native-offline="1"',1)
                     response.set_data(text.replace('</body>', '<div role="status" style="position:fixed;bottom:0;right:0;z-index:99999;background:#663b00;color:white;padding:6px">离线验收：硬件访问已禁用</div></body>'))
                 return response
     return app

@@ -30,7 +30,7 @@ Web CLI沿用已有网页方法，先发现接口，再调用：
 python toolbox.py --runtime <运行目录> page etm describe --target history
 python toolbox.py --runtime <运行目录> page etm invoke exportFlame --target history --args '[{"mode":"timeline","format":"html"},{"captureOnly":true}]'
 python toolbox.py --runtime <运行目录> page etm downloads
-python toolbox.py --runtime <运行目录> page etm download <下载ID> --out flame.html
+python toolbox.py --runtime <运行目录> page etm download <下载ID> flame.html
 ```
 
 使用当前已选记录与区间；`captureOnly=true`只交给CLI下载捕获，普通点击仍触发浏览器下载，并保留“再次下载 HTML”链接。

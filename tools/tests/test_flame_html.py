@@ -86,6 +86,8 @@ class FlameHtmlTests(unittest.TestCase):
             data=Path(directory);token=data/'token';token.write_text('a'*64)
             _,backend,web,service,helpers=locations();app=application(backend,web,service,helpers,data,token,offline=True)
             module=sys.modules['etm_toolbox_backend'];folder=data/'records/capture-test';folder.mkdir(parents=True)
+            page=Client(app,Response).get('/',environ_overrides={'REMOTE_ADDR':'127.0.0.1'})
+            self.assertIn('data-native-offline="1"',page.get_data(as_text=True));page.close()
             with patch.object(module,'browse_store',return_value=View()):
                 client=Client(app,Response)
                 with client.get('/etm/api/download/capture-test/flame-html?fromSeq=0&toSeq=4',environ_overrides={'REMOTE_ADDR':'127.0.0.1'}) as response:
