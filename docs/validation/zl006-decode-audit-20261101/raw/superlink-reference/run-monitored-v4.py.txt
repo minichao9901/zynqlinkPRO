@@ -1,0 +1,31 @@
+from pathlib import Path
+import json,os,subprocess,time,psutil,sys
+m=json.loads(Path('C:/Users/Administrator/.codex/validation/current-h743-live-run.json').read_text(encoding='utf8'));root=Path(m['evidence']);label=sys.argv[1];durations=sys.argv[2];repeats=sys.argv[3]
+backend=[];kingst=[]
+for p in psutil.process_iter(['pid','name','cmdline']):
+ try:
+  cmd=p.info['cmdline'] or []
+  if any(str(x).endswith(('serve-acceptance.py','serve-acceptance-v2.py')) for x in cmd):backend.append(p)
+  if p.info['name']=='KingstVIS.exe':kingst.append(p)
+ except psutil.Error:pass
+assert len(backend)==1
+settings=dict(label=label,durations=durations,repeats=repeats,backendPid=backend[0].pid,kingstPids=[p.pid for p in kingst],sampleIntervalSeconds=.025)
+env=os.environ.copy();env.update(RUN_LABEL=label,DURATIONS=durations,REPEATS=repeats,CONTINUOUS='1',PIN_SPEED='2')
+peak=0;peakkingst=0;minavail=2**64;seen={};samples=0;started=time.time()
+with (root/(label+'.log')).open('x',encoding='utf8') as log,(root/(label+'-resources.jsonl')).open('x',encoding='utf8') as raw:
+ child=subprocess.Popen(['node',str(root/'capture-continuous-v4.mjs')],env=env,stdout=log,stderr=subprocess.STDOUT)
+ while True:
+  processes=backend+backend[0].children(recursive=True);rss=0;row=[];krss=0
+  for p in processes:
+   try:
+    mem=p.memory_info().rss;io=p.io_counters();rss+=mem;row.append(dict(pid=p.pid,name=p.name(),rss=mem,writeBytes=io.write_bytes));seen[p.pid]=dict(name=p.name(),writeBytes=max(io.write_bytes,seen.get(p.pid,{}).get('writeBytes',0)))
+   except psutil.Error:pass
+  for p in kingst:
+   try:krss+=p.memory_info().rss
+   except psutil.Error:pass
+  avail=psutil.virtual_memory().available;peak=max(peak,rss);peakkingst=max(peakkingst,krss);minavail=min(minavail,avail);samples+=1
+  raw.write(json.dumps(dict(time=time.time(),backendRss=rss,kingstRss=krss,available=avail,processes=row))+'\n')
+  if child.poll() is not None:break
+  time.sleep(.025)
+result=dict(**settings,started=started,finished=time.time(),exitCode=child.returncode,samples=samples,peakBackendTreeRss=peak,peakKingstRss=peakkingst,minSystemAvailable=minavail,processIo=seen)
+(root/(label+'-resources.json')).write_text(json.dumps(result,indent=2),encoding='utf8');print(json.dumps(result),flush=True);sys.exit(child.returncode)

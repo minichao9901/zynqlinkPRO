@@ -1,0 +1,169 @@
+{
+  "recordedAtUtc": "2026-11-01T13:09:06.969692+00:00",
+  "hardwareAccess": false,
+  "testRun": "20261023-codex-h743-live-19d7d53-db17fe80",
+  "SWDRequestedHz": 1000000,
+  "SWDBasis": "Explicit _targetInit request in retained v4 script; not external frequency counter",
+  "CPU_HCLK_Hz": 60000000,
+  "TRACECLK_Hz": 20000000,
+  "HSE_Hz": 25000000,
+  "sampleRateHz": 500000000,
+  "protocol": "ETMv4",
+  "CONFIGR": "0x1011",
+  "traceId": 2,
+  "returnStack": true,
+  "cycleCount": true,
+  "branchBroadcast": false,
+  "GPIO_speed": 2,
+  "fraction": 0.25,
+  "glitchFilterNs": 4,
+  "logicAnalyzer": "KingstVIS 3.6.6; 4-bit DDR; CH0 PE2, CH1..4 PE3..6",
+  "workload": "Warm continuous CPU, banner every20ms, CDC echo ~4ms, full RTT in nonblocking skip-debug-log mode",
+  "results": [
+    {
+      "trial": 1,
+      "instructions": 18356923,
+      "processingSeconds": 14.246650299999601,
+      "ETMBytes": 2174620,
+      "quality": {
+        "accountedBytes": 2174620,
+        "basis": "字节核算不等于采集无损证明；源码映射率不等于程序覆盖率",
+        "boundaryPresent": true,
+        "decoderLastError": 0,
+        "firstPathOffset": 554,
+        "initialPhysicalBytes": 141,
+        "inputBytes": 2174620,
+        "overflowPackets": 0,
+        "overlapBytes": 0,
+        "packetIssues": 0,
+        "processedBytes": 2174620,
+        "timing": {
+          "cycleElements": 229297,
+          "timeFlameAvailable": false
+        },
+        "trailingFrameBytes": 12,
+        "trailingSyncBytes": 0,
+        "unaccountedBytes": 0,
+        "unknownExecution": 8914,
+        "unknownSourceBytes": 60,
+        "unprocessedBytes": 0,
+        "unsynchronizedBytes": 528,
+        "unsynchronizedRecords": 66,
+        "validPackets": 2019069
+      }
+    },
+    {
+      "trial": 2,
+      "instructions": 18357489,
+      "processingSeconds": 14.109149500000058,
+      "ETMBytes": 2174725,
+      "quality": {
+        "accountedBytes": 2174725,
+        "basis": "字节核算不等于采集无损证明；源码映射率不等于程序覆盖率",
+        "boundaryPresent": true,
+        "decoderLastError": 0,
+        "firstPathOffset": 482,
+        "initialPhysicalBytes": 277,
+        "inputBytes": 2174725,
+        "overflowPackets": 0,
+        "overlapBytes": 0,
+        "packetIssues": 0,
+        "processedBytes": 2174725,
+        "timing": {
+          "cycleElements": 229303,
+          "timeFlameAvailable": false
+        },
+        "trailingFrameBytes": 8,
+        "trailingSyncBytes": 0,
+        "unaccountedBytes": 0,
+        "unknownExecution": 8915,
+        "unknownSourceBytes": 60,
+        "unprocessedBytes": 0,
+        "unsynchronizedBytes": 457,
+        "unsynchronizedRecords": 58,
+        "validPackets": 2019185
+      }
+    },
+    {
+      "trial": 3,
+      "instructions": 18356006,
+      "processingSeconds": 14.350394699999015,
+      "ETMBytes": 2174368,
+      "quality": {
+        "accountedBytes": 2174368,
+        "basis": "字节核算不等于采集无损证明；源码映射率不等于程序覆盖率",
+        "boundaryPresent": true,
+        "decoderLastError": 0,
+        "firstPathOffset": 441,
+        "initialPhysicalBytes": 738,
+        "inputBytes": 2174368,
+        "overflowPackets": 0,
+        "overlapBytes": 0,
+        "packetIssues": 0,
+        "processedBytes": 2174368,
+        "timing": {
+          "cycleElements": 229302,
+          "timeFlameAvailable": false
+        },
+        "trailingFrameBytes": 12,
+        "trailingSyncBytes": 0,
+        "unaccountedBytes": 0,
+        "unknownExecution": 8836,
+        "unknownSourceBytes": 60,
+        "unprocessedBytes": 0,
+        "unsynchronizedBytes": 415,
+        "unsynchronizedRecords": 52,
+        "validPackets": 2019044
+      }
+    }
+  ],
+  "requestToTaskCompleteSeconds": [
+    24.946,
+    24.666,
+    24.916
+  ],
+  "timingScope": "Processing includes physical frontend/TPIU/decode/store/index/default view publication; excludes acquisition/USB/save/upload/render. Request-to-done additionally excludes pre-request configuration/warmup and rendering.",
+  "performanceGate": {
+    "targetSeconds": 10,
+    "passed": false
+  },
+  "release": "native.13 opened 1s experimental duration by user decision; did not declare all performance gates passed",
+  "originalRawDirectoryExists": false,
+  "files": [
+    {
+      "source": "E:\\superlinkPRO\\docs\\validation\\20261023-codex-h743-live-19d7d53-db17fe80\\acceptance-final-1s.log",
+      "archivePath": "raw/superlink-reference/acceptance-final-1s.log.txt",
+      "bytes": 3833,
+      "sha256": "d1e20ad554951de42385857ae9f80fe6282c90698b402a0f02ed1265bcb511e4"
+    },
+    {
+      "source": "E:\\superlinkPRO\\docs\\validation\\20261023-codex-h743-live-19d7d53-db17fe80\\acceptance-final-1s-resources.json",
+      "archivePath": "raw/superlink-reference/acceptance-final-1s-resources.json",
+      "bytes": 1772,
+      "sha256": "7dc769e29fb216bbbee57c0938503c2d2acaff8339ae062cdcb1ddeacb3bb731"
+    },
+    {
+      "source": "E:\\superlinkPRO\\docs\\validation\\20261023-codex-h743-live-19d7d53-db17fe80\\capture-continuous-v4.mjs",
+      "archivePath": "raw/superlink-reference/capture-continuous-v4.mjs.txt",
+      "bytes": 8280,
+      "sha256": "c41bd510c5a6aa0769fe99895ca58dd496733437b18b10b30ca9f6285fe1fe40"
+    },
+    {
+      "source": "E:\\superlinkPRO\\docs\\validation\\20261023-codex-h743-live-19d7d53-db17fe80\\run-monitored-v4.py",
+      "archivePath": "raw/superlink-reference/run-monitored-v4.py.txt",
+      "bytes": 2286,
+      "sha256": "10eac509107edf89b0d2774e5a70e69d45f0a59695557869823dc73f502bc678"
+    },
+    {
+      "source": "E:\\superlinkPRO\\docs\\validation\\20261023-codex-h743-live-19d7d53-db17fe80\\environment-final.json",
+      "archivePath": "raw/superlink-reference/environment-final.json",
+      "bytes": 647,
+      "sha256": "430ad47d085b83cc8366b5d9688df80e28ae547523eec1aee3361b4b2f24222d"
+    }
+  ],
+  "reusedEvidence": [
+    "raw/superlink-reference/h743-1s-report.md",
+    "raw/superlink-reference/etm-1s-release-20261023.md"
+  ],
+  "comparisonBoundary": "18.36M H743 and19.57M F103 have similar path counts; cannot explain their gap with3.58x ratio from the smaller old F103 fixture. Same-input replay remains needed."
+}

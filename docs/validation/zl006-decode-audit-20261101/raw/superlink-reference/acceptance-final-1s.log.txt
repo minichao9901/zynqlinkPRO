@@ -1,0 +1,30 @@
+Identified stm32h743 {"knownHz":60000000,"knownTraceHz":40000000,"coreHz":60000000,"traceHz":40000000,"external":true,"source":"HSE → PLL1","path":"HSE 25 MHz ÷M5 ×(96) ÷P8 → CPU ÷1 → HCLK ÷1","tracePath":"PLL1 VCO ÷R12 → TRACEPORTCK","traceReady":true,"busDivider":1,"coreDivider":1,"traceRelation":"并行 trace 输入 TRACEPORTCK：HSI / CSI / HSE / PLL1_R；物理 TRACECLK = 输入 / 2；CPU / HCLK 独立分频","physicalTraceHz":20000000,"hclkHz":60000000}
+[target] ELF 校验通过：31856 字节目标 Flash 一致
+[target] ETM 已配置并回读，目标保持暂停
+Configured acceptance-final-1s-1000ms-1 {"idr0":134219489,"idr1":1090581505,"idr2":4,"idr8":1,"idr9":0,"idr10":0,"idr11":0,"idr12":1,"idr13":0,"config":4113,"traceid":2}
+acceptance-final-1s-1000ms-1 queued
+acceptance-final-1s-1000ms-1 armed
+acceptance-final-1s-1000ms-1 saving
+acceptance-final-1s-1000ms-1 decoding
+acceptance-final-1s-1000ms-1 done
+Quality {"accountedBytes":2174620,"basis":"字节核算不等于采集无损证明；源码映射率不等于程序覆盖率","boundaryPresent":true,"decoderLastError":0,"firstPathOffset":554,"initialPhysicalBytes":141,"inputBytes":2174620,"overflowPackets":0,"overlapBytes":0,"packetIssues":0,"processedBytes":2174620,"timing":{"cycleElements":229297,"timeFlameAvailable":false},"trailingFrameBytes":12,"trailingSyncBytes":0,"unaccountedBytes":0,"unknownExecution":8914,"unknownSourceBytes":60,"unprocessedBytes":0,"unsynchronizedBytes":528,"unsynchronizedRecords":66,"validPackets":2019069}
+PASS acceptance-final-1s-1000ms-1 instructions 18356923 pipeline 14.246650299999601
+[target] ETM 已配置并回读，目标保持暂停
+Configured acceptance-final-1s-1000ms-2 {"idr0":134219489,"idr1":1090581505,"idr2":4,"idr8":1,"idr9":0,"idr10":0,"idr11":0,"idr12":1,"idr13":0,"config":4113,"traceid":2}
+acceptance-final-1s-1000ms-2 queued
+acceptance-final-1s-1000ms-2 armed
+acceptance-final-1s-1000ms-2 saving
+acceptance-final-1s-1000ms-2 decoding
+acceptance-final-1s-1000ms-2 done
+Quality {"accountedBytes":2174725,"basis":"字节核算不等于采集无损证明；源码映射率不等于程序覆盖率","boundaryPresent":true,"decoderLastError":0,"firstPathOffset":482,"initialPhysicalBytes":277,"inputBytes":2174725,"overflowPackets":0,"overlapBytes":0,"packetIssues":0,"processedBytes":2174725,"timing":{"cycleElements":229303,"timeFlameAvailable":false},"trailingFrameBytes":8,"trailingSyncBytes":0,"unaccountedBytes":0,"unknownExecution":8915,"unknownSourceBytes":60,"unprocessedBytes":0,"unsynchronizedBytes":457,"unsynchronizedRecords":58,"validPackets":2019185}
+PASS acceptance-final-1s-1000ms-2 instructions 18357489 pipeline 14.109149500000058
+[target] ETM 已配置并回读，目标保持暂停
+Configured acceptance-final-1s-1000ms-3 {"idr0":134219489,"idr1":1090581505,"idr2":4,"idr8":1,"idr9":0,"idr10":0,"idr11":0,"idr12":1,"idr13":0,"config":4113,"traceid":2}
+acceptance-final-1s-1000ms-3 queued
+acceptance-final-1s-1000ms-3 armed
+acceptance-final-1s-1000ms-3 saving
+acceptance-final-1s-1000ms-3 decoding
+acceptance-final-1s-1000ms-3 done
+Quality {"accountedBytes":2174368,"basis":"字节核算不等于采集无损证明；源码映射率不等于程序覆盖率","boundaryPresent":true,"decoderLastError":0,"firstPathOffset":441,"initialPhysicalBytes":738,"inputBytes":2174368,"overflowPackets":0,"overlapBytes":0,"packetIssues":0,"processedBytes":2174368,"timing":{"cycleElements":229302,"timeFlameAvailable":false},"trailingFrameBytes":12,"trailingSyncBytes":0,"unaccountedBytes":0,"unknownExecution":8836,"unknownSourceBytes":60,"unprocessedBytes":0,"unsynchronizedBytes":415,"unsynchronizedRecords":52,"validPackets":2019044}
+PASS acceptance-final-1s-1000ms-3 instructions 18356006 pipeline 14.350394699999015
+[target] 已恢复采集前的 trace 配置与引脚状态
