@@ -26,8 +26,12 @@ module tb_orbtrace_lane_delay;
   reg [25:0] selected;
   initial begin
     #80;rst_n=1;settle();if(ready || ready_ref)$fatal(1,"not calibrated yet");
-    calibrated=1;settle();if(!ready || applied || status[3])$fatal(1,"initial bypass cannot claim a loaded tap");
-    pads=5'b10101;#0.001;if(sampled!==pads)$fatal(1,"bypass added a delay");pads=0;
+    calibrated=1;wait(dut.state==1);@(negedge refclk);calibrated=0;settle();
+    if(ready || !status[4])$fatal(1,"startup LD readiness failure was hidden");
+    calibrated=1;settle();command(0);settle();if(!ready || status[4] || accepted!=1)$fatal(1,"explicit startup recovery failed");
+    // Reset the fixture counters after proving recovery, then check normal boot.
+    rst_n=0;#20;rst_n=1;settle();if(!ready || applied || !status[3] || accepted)$fatal(1,"startup zero tap was not explicitly loaded");
+    pads=5'b10101;#0.001;if(sampled===pads)$fatal(1,"zero tap falsely treated as no insertion delay");#1;if(sampled!==pads)$fatal(1,"zero tap input pads=%b sampled=%b counts=%h",pads,sampled,dut.counts);pads=0;#5;
     // TRACECLK is stopped throughout this transaction. Only REFCLK is required.
     selected={1'b1,5'd31,5'd16,5'd7,5'd3,5'd0};command(selected);settle();
     if(!ready || !status[3] || applied!==selected || accepted!=1 || failures)$fatal(1,"independent tap load/readback");
@@ -52,7 +56,7 @@ module tb_orbtrace_lane_delay;
     command({1'b1,25'd0});wait(dut.state==1);@(negedge refclk);calibrated=0;settle();
     if(busy || ready || failures!=2 || !status[4])$fatal(1,"in-flight RDY failure not retired safely");
     calibrated=1;settle();if(ready)$fatal(1,"failed load silently recovered without a new command");
-    command(0);settle();if(!ready || applied || status[4] || accepted!=6)$fatal(1,"explicit bypass restore failed");
+    command(0);settle();if(!ready || applied || status[4] || accepted!=6)$fatal(1,"explicit zero tap restore failed");
     $display("PASS lane delay: independent physical timing, stopped TRACECLK, busy/active/key guards, readback failure, RDY failure, explicit recovery");$finish;
   end
   initial begin #100000;$fatal(1,"timeout");end

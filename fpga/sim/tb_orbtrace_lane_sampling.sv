@@ -47,7 +47,7 @@ module tb_orbtrace_lane_sampling;
   initial begin
     #80;rst_n=1;wait(ready);repeat(10)@(negedge refclk);rx_rst=0;frames();
     before_good=good;before_bad=bad;
-    if(good==16 && bad==0)$fatal(1,"skew fixture did not exercise a sampling error");
+    if(good==16 && bad==0)$fatal(1,"zero-tap skew fixture did not exercise a sampling error");
     rx_rst=1;repeat(10)@(negedge refclk);
     // Total modeled arrival time: data about 2.0ns, clock 2.028ns,
     // plus the common 0.6ns delay-element insertion delay.
@@ -58,7 +58,7 @@ module tb_orbtrace_lane_sampling;
     if(receiver.raw_oversample_filtered.half || receiver.raw_oversample_filtered.stable_clock)$fatal(1,"1ns pulse created a trace edge");
     fork frames();command(0);join
     if(good!=16 || bad || errors || rejected!=1)$fatal(1,"calibrated pin stream good=%0d bad=%0d errors=%0d rejects=%0d",good,bad,errors,rejected);
-    $display("PASS lane sampling: same skewed 36MHz-class pins bypass_good=%0d bypass_bad=%0d adjusted_good=%0d, 1ns glitches rejected, live update blocked",before_good,before_bad,good);$finish;
+    $display("PASS lane sampling: same skewed 36MHz-class pins zero_tap_good=%0d zero_tap_bad=%0d adjusted_good=%0d, 1ns glitches rejected, live update blocked",before_good,before_bad,good);$finish;
   end
   initial begin #200000;$fatal(1,"timeout");end
 endmodule

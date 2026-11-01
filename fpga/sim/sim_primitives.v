@@ -32,6 +32,7 @@ module IDELAYE2 #(
   end
   // Functional delay model only, not analog/jitter/setup-hold signoff.
   // Transport assignment preserves injected narrow pulses for filter tests.
+  initial begin #0;DATAOUT<=#(0.6+tap*0.078) IDATAIN;end
   always @(IDATAIN or tap)DATAOUT<=#(0.6+tap*0.078) IDATAIN;
   assign CNTVALUEOUT=tap;
 endmodule

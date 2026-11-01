@@ -14,10 +14,10 @@ module orbtrace_lane_delay (
 );
   reg [25:0] payload;
   reg request_toggle;
-  (* ASYNC_REG="TRUE" *) reg [1:0] acknowledge_sync,ready_sync,fault_sync,valid_sync,calibrated_sync;
+  (* ASYNC_REG="TRUE" *) reg [1:0] acknowledge_sync,ready_sync,fault_sync,valid_sync,calibrated_sync,initialized_sync;
   reg acknowledged;
   reg acknowledge_ref;
-  reg valid_ref,fault_ref,enabled_ref;
+  reg valid_ref,fault_ref,enabled_ref,initialized_ref;
   reg [24:0] readback_ref;
   assign busy=request_toggle!=acknowledge_sync[1];
   assign ready=!busy && ready_sync[1];
@@ -25,14 +25,15 @@ module orbtrace_lane_delay (
   always @(posedge clk or negedge rst_n)
     if(!rst_n)begin
       payload<=0;request_toggle<=0;acknowledge_sync<=0;ready_sync<=0;fault_sync<=0;valid_sync<=0;calibrated_sync<=0;
-      acknowledged<=0;applied<=0;accepted<=0;rejected<=0;load_failures<=0;
+      initialized_sync<=0;acknowledged<=0;applied<=0;accepted<=0;rejected<=0;load_failures<=0;
     end else begin
       acknowledge_sync<={acknowledge_sync[0],acknowledge_ref};
       ready_sync<={ready_sync[0],ready_ref};fault_sync<={fault_sync[0],fault_ref};valid_sync<={valid_sync[0],valid_ref};
       calibrated_sync<={calibrated_sync[0],calibrated};
-      if(malformed || (apply && (active || busy || !calibrated_sync[1])))rejected<=rejected+1'b1;
+      initialized_sync<={initialized_sync[0],initialized_ref};
+      if(malformed || (apply && (active || busy || !calibrated_sync[1] || !initialized_sync[1] || (!requested[25] && |requested[24:0]))))rejected<=rejected+1'b1;
       // A fresh explicit load can recover a readback failure while idle.
-      if(apply && !malformed && !active && !busy && calibrated_sync[1])begin
+      if(apply && !malformed && !active && !busy && calibrated_sync[1] && initialized_sync[1] && (requested[25] || requested[24:0]==0))begin
         payload<=requested;request_toggle<=!request_toggle;accepted<=accepted+1'b1;
       end
       if(acknowledge_sync[1]!=acknowledged)begin
@@ -47,30 +48,34 @@ module orbtrace_lane_delay (
   reg load;
   wire [24:0] counts;
   wire [4:0] delayed;
-  assign ready_ref=calibrated && !fault_ref && state==0 && request_sync[1]==acknowledge_ref;
-  // The bypass is the exact previous RAW4 path. Select only while quiescent.
-  assign sampled_pads=enabled_ref ? delayed : pads;
+  assign ready_ref=calibrated && valid_ref && !fault_ref && state==0 && request_sync[1]==acknowledge_ref;
+  // One routable ILOGIC input path per pad. A fabric mux between IBUF and
+  // IDELAY outputs creates partially routed nets in the 7-series implementation.
+  // The disabled setting means explicitly loaded zero taps, not zero insertion.
+  assign sampled_pads=delayed;
   always @(posedge ref_clk or negedge rst_n)
     if(!rst_n)begin
-      request_sync<=0;captured<=0;state<=0;load<=0;
-      acknowledge_ref<=0;valid_ref<=0;fault_ref<=0;enabled_ref<=0;readback_ref<=0;
+      request_sync<=0;captured<=0;state<=4;load<=0;
+      acknowledge_ref<=0;valid_ref<=0;fault_ref<=0;enabled_ref<=0;readback_ref<=0;initialized_ref<=0;
     end else begin
       request_sync<={request_sync[0],request_toggle};load<=0;
       case(state)
         0:if(request_sync[1]!=acknowledge_ref)begin captured<=payload;state<=1;end
         1:begin
           if(calibrated)begin load<=1;state<=2;end
-          else begin fault_ref<=1;valid_ref<=0;acknowledge_ref<=request_sync[1];state<=0;end
+          else begin initialized_ref<=1;fault_ref<=1;valid_ref<=0;acknowledge_ref<=request_sync[1];state<=0;end
         end
         2:state<=3; // IDELAY sees LD at this edge; CNTVALUEOUT updates after it.
         3:begin
+          initialized_ref<=1;
           readback_ref<=counts;
           if(calibrated && counts==captured[24:0])begin
             enabled_ref<=captured[25];valid_ref<=1;fault_ref<=0;
           end else begin valid_ref<=0;fault_ref<=1;end
           acknowledge_ref<=request_sync[1];state<=0;
         end
-        default:begin fault_ref<=1;valid_ref<=0;state<=0;acknowledge_ref<=request_sync[1];end
+        4:if(calibrated)begin captured<=0;state<=1;end // Explicit startup LD, even for tap zero.
+        default:begin initialized_ref<=1;fault_ref<=1;valid_ref<=0;state<=0;acknowledge_ref<=request_sync[1];end
       endcase
     end
   genvar i;

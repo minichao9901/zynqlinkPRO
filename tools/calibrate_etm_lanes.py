@@ -123,7 +123,7 @@ def main():
     try:
         original=control.snapshot();report['original']=original;save()
         echo=Echo(a.cdc_port);echo.start()
-        report['bypass']=measure(original['taps'],False)
+        report['zeroTapReference']=measure([0]*5,False)
         coarse_rows=[]
         for data_tap in coarse:
             for clock_tap in coarse:coarse_rows.append(measure([data_tap]*4+[clock_tap]))

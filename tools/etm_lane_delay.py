@@ -16,6 +16,7 @@ SIGNATURE=0x454c4431
 def payload(enabled,taps):
     if type(enabled) is not bool or len(taps)!=5 or any(type(v) is not int or not 0<=v<=31 for v in taps):
         raise ValueError('Requires boolean enabled and five taps 0..31 (D0,D1,D2,D3,CLK)')
+    if not enabled and any(taps):raise ValueError('Disabled calibration requires zero taps; IDELAY insertion is still present')
     return (int(enabled)<<25)|sum(v<<(5*i) for i,v in enumerate(taps))
 
 

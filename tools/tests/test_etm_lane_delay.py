@@ -14,7 +14,7 @@ class LaneDelayTests(unittest.TestCase):
         self.assertEqual(value>>26,0)
 
     def test_missing_capability_and_invalid_values_fail_before_io(self):
-        for enabled,taps in [(1,[0]*5),(True,[0]*4),(False,[0,0,0,0,32]),(False,[0,0,0,0,True])]:
+        for enabled,taps in [(1,[0]*5),(True,[0]*4),(False,[0,0,0,0,32]),(False,[0,0,0,0,True]),(False,[1,0,0,0,0])]:
             with self.assertRaises(ValueError):payload(enabled,taps)
         for words in [[0]*6,[SIGNATURE,0,64,0,0,0],[SIGNATURE,1<<26,0,0,0,0]]:
             with self.assertRaises(ValueError):decode(words)
