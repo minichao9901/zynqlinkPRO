@@ -322,6 +322,11 @@ def main():
         report['completed'] = True
     except BaseException as exc:
         report['failure'] = repr(exc)
+        if args.phase == 'load':
+            try:
+                report['failedLoadSnapshot'] = physical_snapshot()
+            except Exception as snapshot_error:
+                report['failedLoadSnapshotError'] = repr(snapshot_error)
         raise
     finally:
         report['endedAtUtc'] = datetime.now(timezone.utc).isoformat()
