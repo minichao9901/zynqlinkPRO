@@ -63,12 +63,19 @@ def main():
             if not passed:print((r.stdout+r.stderr)[-3000:]);return 1
         return 0
     base=json.loads((out/'golden.json').read_text());current=json.loads((out/'candidate.json').read_text())
+    expected_tops=['tb_cm3_swd','tb_cm3_jtag']
+    if [c['top'] for c in base['cases']]!=expected_tops or [c['top'] for c in current['cases']]!=expected_tops:
+        raise RuntimeError('Incomplete SWD/JTAG matrix; synthesis gate remains closed')
     if base['benches']!=current['benches']:raise RuntimeError('Golden/candidate benches changed; rerun both')
+    if current['sources']!={f.name:hashlib.sha256(f.read_bytes()).hexdigest() for f in (ROOT/'fpga/rtl').glob('*.v')}:
+        raise RuntimeError('Candidate RTL differs from tested source; rerun candidate')
+    if current['benches']!={f.name:hashlib.sha256(f.read_bytes()).hexdigest() for f in (ROOT/'fpga/sim').glob('*') if f.is_file()}:
+        raise RuntimeError('Current benches differ from comparison; rerun both')
     checks=[]
     for b,c in zip(base['cases'],current['cases'],strict=True):
-        if b['top']!=c['top'] or not b['passed'] or not c['passed']:raise RuntimeError('Incomplete or mismatched run')
+        if b['top']!=c['top'] or not b['passed'] or not c['passed'] or len(b['metrics'])!=5 or len(c['metrics'])!=5:raise RuntimeError('Incomplete or mismatched run')
         for bm,cm in zip(b['metrics'],c['metrics'],strict=True):
-            if bm['kind']!=cm['kind']:raise RuntimeError('Metric mismatch')
+            if bm['kind']!=cm['kind'] or bm.get('read')!=cm.get('read'):raise RuntimeError('Metric mismatch')
             key='Hz' if bm['kind']=='SIM_HSS' else 'MBps'
             passed=cm[key]>=bm[key]-0.000001
             if bm['kind']=='SIM_HSS':
