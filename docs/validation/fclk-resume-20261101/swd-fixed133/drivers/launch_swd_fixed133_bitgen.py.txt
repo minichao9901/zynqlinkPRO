@@ -1,0 +1,23 @@
+from pathlib import Path
+from datetime import datetime,timezone
+import hashlib,json,subprocess,sys
+root=Path(__file__).resolve().parents[2];sys.path.insert(0,str(root))
+from tools.run_cm3_sim import environment,VIVADO
+base=root/'build/fclk-resume-20261101/swd-fixed133'
+assert json.loads((base/'sta/result.json').read_text())['allSpecifiedChecksPassed']
+out=base/'bitgen';out.mkdir(exist_ok=False)
+sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+job=dict(source=subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip(),
+         startedUtc=datetime.now(timezone.utc).isoformat(),freshBitGenerated=True,newPlaceRoute=False,
+         RTL_DEBUG=0,requestedFclkHz=133333333,maxSwclkHz=66666666,
+         inputDcp=str(root/'build/fclk-resume-20261101/release-133/system_wrapper_verified.dcp'),
+         inputDcpSha256=sha(root/'build/fclk-resume-20261101/release-133/system_wrapper_verified.dcp'))
+env=environment();env['RDI_JAVAROOT']=(VIVADO/'tps/win64/jre9.0.4').as_posix()
+env['ZYNQLINK_WORK_DIR']=str(out/'runtime');(out/'runtime/tmp').mkdir(parents=True)
+with (out/'console.txt').open('w') as log:
+    p=subprocess.run([sys.executable,str(root/'tools/run_vivado.py'),'-mode','batch','-source',str(root/'build/fclk-resume-20261101/swd_fixed133_bitgen.tcl'),'-log',str(out/'vivado.log'),'-journal',str(out/'vivado.jou')],env=env,cwd=root,stdout=log,stderr=subprocess.STDOUT)
+job.update(returnCode=p.returncode,finishedUtc=datetime.now(timezone.utc).isoformat())
+if (out/'probe.bit').exists():job['bitSha256']=sha(out/'probe.bit')
+(out/'job.json').write_text(json.dumps(job,indent=2)+'\n')
+print('Fixed133/SWD66 fresh bitgen:',p.returncode)
+raise SystemExit(p.returncode)

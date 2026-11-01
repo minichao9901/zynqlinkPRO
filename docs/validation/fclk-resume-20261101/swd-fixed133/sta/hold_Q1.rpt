@@ -1,0 +1,479 @@
+Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2018.3 (win64) Build 2405991 Thu Dec  6 23:38:27 MST 2018
+| Date         : Sun Nov  1 18:30:43 2026
+| Host         : DESKTOP-0UKCPD3 running 64-bit major release  (build 9200)
+| Command      : report_timing -from [get_pins -hier -filter {NAME =~ */u_swdio_iddr/Q1}] -delay_type min -max_paths 10 -file E:/zynqlinkPRO/build/fclk-resume-20261101/swd-fixed133/sta/hold_Q1.rpt
+| Design       : system_wrapper
+| Device       : 7z020-clg400
+| Speed File   : -2  PRODUCTION 1.11 2014-09-11
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Timing Report
+
+Slack (MET) :             1.134ns  (arrival time - required time)
+  Source:                 system_i/swd_controller_0/inst/u_swdio_iddr/C
+                            (rising edge-triggered cell IDDR clocked by clk_fpga_0  {rise@0.000ns fall@3.750ns period=7.500ns})
+  Destination:            system_i/swd_controller_0/inst/u_swd_core/ack_samples_reg[1]/D
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@3.750ns period=7.500ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_fpga_0 rise@0.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        1.261ns  (logic 0.340ns (26.955%)  route 0.921ns (73.045%))
+  Logic Levels:           3  (LUT3=2 LUT6=1)
+  Clock Path Skew:        0.035ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.348ns
+    Source Clock Delay      (SCD):    1.045ns
+    Clock Pessimism Removal (CPR):    0.268ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.310     0.310    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20829, routed)       0.709     1.045    system_i/swd_controller_0/inst/clk
+    ILOGIC_X1Y142        IDDR                                         r  system_i/swd_controller_0/inst/u_swdio_iddr/C
+  -------------------------------------------------------------------    -------------------
+    ILOGIC_X1Y142        IDDR (Prop_iddr_C_Q1)        0.180     1.225 r  system_i/swd_controller_0/inst/u_swdio_iddr/Q1
+                         net (fo=4, routed)           0.531     1.756    system_i/swd_controller_0/inst/u_swd_core/swdio_i_rise_raw
+    SLICE_X113Y136       LUT3 (Prop_lut3_I0_O)        0.070     1.826 r  system_i/swd_controller_0/inst/u_swd_core/rd_samples[31]_i_8_replica_2/O
+                         net (fo=3, routed)           0.156     1.981    system_i/swd_controller_0/inst/u_swd_core/swdio_i_fall_repN_2
+    SLICE_X113Y136       LUT3 (Prop_lut3_I0_O)        0.045     2.026 r  system_i/swd_controller_0/inst/u_swd_core/ack_samples[1]_i_2/O
+                         net (fo=1, routed)           0.235     2.261    system_i/swd_controller_0/inst/u_swd_core/ack_samples[1]_i_2_n_0
+    SLICE_X107Y131       LUT6 (Prop_lut6_I0_O)        0.045     2.306 r  system_i/swd_controller_0/inst/u_swd_core/ack_samples[1]_i_1/O
+                         net (fo=1, routed)           0.000     2.306    system_i/swd_controller_0/inst/u_swd_core/ack_samples[1]_i_1_n_0
+    SLICE_X107Y131       FDCE                                         r  system_i/swd_controller_0/inst/u_swd_core/ack_samples_reg[1]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.337     0.337    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20829, routed)       0.982     1.348    system_i/swd_controller_0/inst/u_swd_core/clk
+    SLICE_X107Y131       FDCE                                         r  system_i/swd_controller_0/inst/u_swd_core/ack_samples_reg[1]/C
+                         clock pessimism             -0.268     1.080    
+    SLICE_X107Y131       FDCE (Hold_fdce_C_D)         0.092     1.172    system_i/swd_controller_0/inst/u_swd_core/ack_samples_reg[1]
+  -------------------------------------------------------------------
+                         required time                         -1.172    
+                         arrival time                           2.306    
+  -------------------------------------------------------------------
+                         slack                                  1.134    
+
+Slack (MET) :             1.194ns  (arrival time - required time)
+  Source:                 system_i/swd_controller_0/inst/u_swdio_iddr/C
+                            (rising edge-triggered cell IDDR clocked by clk_fpga_0  {rise@0.000ns fall@3.750ns period=7.500ns})
+  Destination:            system_i/swd_controller_0/inst/u_swd_core/parity_err_reg/D
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@3.750ns period=7.500ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_fpga_0 rise@0.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        1.320ns  (logic 0.385ns (29.160%)  route 0.935ns (70.840%))
+  Logic Levels:           4  (LUT3=1 LUT5=1 LUT6=2)
+  Clock Path Skew:        0.034ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.347ns
+    Source Clock Delay      (SCD):    1.045ns
+    Clock Pessimism Removal (CPR):    0.268ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.310     0.310    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20829, routed)       0.709     1.045    system_i/swd_controller_0/inst/clk
+    ILOGIC_X1Y142        IDDR                                         r  system_i/swd_controller_0/inst/u_swdio_iddr/C
+  -------------------------------------------------------------------    -------------------
+    ILOGIC_X1Y142        IDDR (Prop_iddr_C_Q1)        0.180     1.225 r  system_i/swd_controller_0/inst/u_swdio_iddr/Q1
+                         net (fo=4, routed)           0.531     1.756    system_i/swd_controller_0/inst/u_swd_core/swdio_i_rise_raw
+    SLICE_X113Y136       LUT3 (Prop_lut3_I0_O)        0.070     1.826 r  system_i/swd_controller_0/inst/u_swd_core/rd_samples[31]_i_8_replica_2/O
+                         net (fo=3, routed)           0.154     1.979    system_i/swd_controller_0/inst/u_swd_core/swdio_i_fall_repN_2
+    SLICE_X113Y135       LUT5 (Prop_lut5_I3_O)        0.045     2.024 f  system_i/swd_controller_0/inst/u_swd_core/parity_err_i_6/O
+                         net (fo=1, routed)           0.080     2.105    system_i/swd_controller_0/inst/u_swd_core/parity_err_i_6_n_0
+    SLICE_X113Y135       LUT6 (Prop_lut6_I4_O)        0.045     2.150 r  system_i/swd_controller_0/inst/u_swd_core/parity_err_i_2/O
+                         net (fo=1, routed)           0.171     2.320    system_i/swd_controller_0/inst/u_swd_core/parity_err_i_2_n_0
+    SLICE_X107Y130       LUT6 (Prop_lut6_I0_O)        0.045     2.365 r  system_i/swd_controller_0/inst/u_swd_core/parity_err_i_1/O
+                         net (fo=1, routed)           0.000     2.365    system_i/swd_controller_0/inst/u_swd_core/parity_err_i_1_n_0
+    SLICE_X107Y130       FDCE                                         r  system_i/swd_controller_0/inst/u_swd_core/parity_err_reg/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.337     0.337    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20829, routed)       0.981     1.347    system_i/swd_controller_0/inst/u_swd_core/clk
+    SLICE_X107Y130       FDCE                                         r  system_i/swd_controller_0/inst/u_swd_core/parity_err_reg/C
+                         clock pessimism             -0.268     1.079    
+    SLICE_X107Y130       FDCE (Hold_fdce_C_D)         0.092     1.171    system_i/swd_controller_0/inst/u_swd_core/parity_err_reg
+  -------------------------------------------------------------------
+                         required time                         -1.171    
+                         arrival time                           2.365    
+  -------------------------------------------------------------------
+                         slack                                  1.194    
+
+Slack (MET) :             1.213ns  (arrival time - required time)
+  Source:                 system_i/swd_controller_0/inst/u_swdio_iddr/C
+                            (rising edge-triggered cell IDDR clocked by clk_fpga_0  {rise@0.000ns fall@3.750ns period=7.500ns})
+  Destination:            system_i/swd_controller_0/inst/u_swd_core/ack_samples_reg[2]/D
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@3.750ns period=7.500ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_fpga_0 rise@0.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        1.341ns  (logic 0.295ns (22.005%)  route 1.046ns (77.995%))
+  Logic Levels:           2  (LUT3=1 LUT6=1)
+  Clock Path Skew:        0.007ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.320ns
+    Source Clock Delay      (SCD):    1.045ns
+    Clock Pessimism Removal (CPR):    0.268ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.310     0.310    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20829, routed)       0.709     1.045    system_i/swd_controller_0/inst/clk
+    ILOGIC_X1Y142        IDDR                                         r  system_i/swd_controller_0/inst/u_swdio_iddr/C
+  -------------------------------------------------------------------    -------------------
+    ILOGIC_X1Y142        IDDR (Prop_iddr_C_Q1)        0.180     1.225 r  system_i/swd_controller_0/inst/u_swdio_iddr/Q1
+                         net (fo=4, routed)           0.549     1.774    system_i/swd_controller_0/inst/u_swd_core/swdio_i_rise_raw
+    SLICE_X113Y137       LUT3 (Prop_lut3_I0_O)        0.070     1.844 r  system_i/swd_controller_0/inst/u_swd_core/rd_samples[31]_i_8/O
+                         net (fo=4, routed)           0.496     2.341    system_i/swd_controller_0/inst/u_swd_core/swdio_i_fall
+    SLICE_X104Y129       LUT6 (Prop_lut6_I0_O)        0.045     2.386 r  system_i/swd_controller_0/inst/u_swd_core/ack_samples[2]_i_1/O
+                         net (fo=1, routed)           0.000     2.386    system_i/swd_controller_0/inst/u_swd_core/ack_samples[2]_i_1_n_0
+    SLICE_X104Y129       FDCE                                         r  system_i/swd_controller_0/inst/u_swd_core/ack_samples_reg[2]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.337     0.337    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20829, routed)       0.954     1.320    system_i/swd_controller_0/inst/u_swd_core/clk
+    SLICE_X104Y129       FDCE                                         r  system_i/swd_controller_0/inst/u_swd_core/ack_samples_reg[2]/C
+                         clock pessimism             -0.268     1.052    
+    SLICE_X104Y129       FDCE (Hold_fdce_C_D)         0.121     1.173    system_i/swd_controller_0/inst/u_swd_core/ack_samples_reg[2]
+  -------------------------------------------------------------------
+                         required time                         -1.173    
+                         arrival time                           2.386    
+  -------------------------------------------------------------------
+                         slack                                  1.213    
+
+Slack (MET) :             1.215ns  (arrival time - required time)
+  Source:                 system_i/swd_controller_0/inst/u_swdio_iddr/C
+                            (rising edge-triggered cell IDDR clocked by clk_fpga_0  {rise@0.000ns fall@3.750ns period=7.500ns})
+  Destination:            system_i/swd_controller_0/inst/u_swd_core/ack_samples_reg[0]/D
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@3.750ns period=7.500ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_fpga_0 rise@0.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        1.342ns  (logic 0.295ns (21.989%)  route 1.047ns (78.011%))
+  Logic Levels:           2  (LUT3=1 LUT6=1)
+  Clock Path Skew:        0.007ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.320ns
+    Source Clock Delay      (SCD):    1.045ns
+    Clock Pessimism Removal (CPR):    0.268ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.310     0.310    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20829, routed)       0.709     1.045    system_i/swd_controller_0/inst/clk
+    ILOGIC_X1Y142        IDDR                                         r  system_i/swd_controller_0/inst/u_swdio_iddr/C
+  -------------------------------------------------------------------    -------------------
+    ILOGIC_X1Y142        IDDR (Prop_iddr_C_Q1)        0.180     1.225 r  system_i/swd_controller_0/inst/u_swdio_iddr/Q1
+                         net (fo=4, routed)           0.549     1.774    system_i/swd_controller_0/inst/u_swd_core/swdio_i_rise_raw
+    SLICE_X113Y137       LUT3 (Prop_lut3_I0_O)        0.070     1.844 r  system_i/swd_controller_0/inst/u_swd_core/rd_samples[31]_i_8/O
+                         net (fo=4, routed)           0.497     2.342    system_i/swd_controller_0/inst/u_swd_core/swdio_i_fall
+    SLICE_X104Y129       LUT6 (Prop_lut6_I0_O)        0.045     2.387 r  system_i/swd_controller_0/inst/u_swd_core/ack_samples[0]_i_1/O
+                         net (fo=1, routed)           0.000     2.387    system_i/swd_controller_0/inst/u_swd_core/ack_samples[0]_i_1_n_0
+    SLICE_X104Y129       FDCE                                         r  system_i/swd_controller_0/inst/u_swd_core/ack_samples_reg[0]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.337     0.337    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20829, routed)       0.954     1.320    system_i/swd_controller_0/inst/u_swd_core/clk
+    SLICE_X104Y129       FDCE                                         r  system_i/swd_controller_0/inst/u_swd_core/ack_samples_reg[0]/C
+                         clock pessimism             -0.268     1.052    
+    SLICE_X104Y129       FDCE (Hold_fdce_C_D)         0.120     1.172    system_i/swd_controller_0/inst/u_swd_core/ack_samples_reg[0]
+  -------------------------------------------------------------------
+                         required time                         -1.172    
+                         arrival time                           2.387    
+  -------------------------------------------------------------------
+                         slack                                  1.215    
+
+Slack (MET) :             1.271ns  (arrival time - required time)
+  Source:                 system_i/swd_controller_0/inst/u_swdio_iddr/C
+                            (rising edge-triggered cell IDDR clocked by clk_fpga_0  {rise@0.000ns fall@3.750ns period=7.500ns})
+  Destination:            system_i/swd_controller_0/inst/u_swd_core/rd_samples_reg[32]/D
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@3.750ns period=7.500ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_fpga_0 rise@0.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        1.375ns  (logic 0.340ns (24.727%)  route 1.035ns (75.273%))
+  Logic Levels:           3  (LUT3=2 LUT6=1)
+  Clock Path Skew:        0.012ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.325ns
+    Source Clock Delay      (SCD):    1.045ns
+    Clock Pessimism Removal (CPR):    0.268ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.310     0.310    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20829, routed)       0.709     1.045    system_i/swd_controller_0/inst/clk
+    ILOGIC_X1Y142        IDDR                                         r  system_i/swd_controller_0/inst/u_swdio_iddr/C
+  -------------------------------------------------------------------    -------------------
+    ILOGIC_X1Y142        IDDR (Prop_iddr_C_Q1)        0.180     1.225 r  system_i/swd_controller_0/inst/u_swdio_iddr/Q1
+                         net (fo=4, routed)           0.531     1.756    system_i/swd_controller_0/inst/u_swd_core/swdio_i_rise_raw
+    SLICE_X113Y136       LUT3 (Prop_lut3_I0_O)        0.070     1.826 r  system_i/swd_controller_0/inst/u_swd_core/rd_samples[31]_i_8_replica_2/O
+                         net (fo=3, routed)           0.167     1.992    system_i/swd_controller_0/inst/u_swd_core/swdio_i_fall_repN_2
+    SLICE_X111Y136       LUT3 (Prop_lut3_I0_O)        0.045     2.037 r  system_i/swd_controller_0/inst/u_swd_core/rd_samples[31]_i_2_replica/O
+                         net (fo=1, routed)           0.338     2.375    system_i/swd_controller_0/inst/u_swd_core/rd_samples[31]_i_2_n_0_repN
+    SLICE_X105Y134       LUT6 (Prop_lut6_I0_O)        0.045     2.420 r  system_i/swd_controller_0/inst/u_swd_core/rd_samples[32]_i_1/O
+                         net (fo=1, routed)           0.000     2.420    system_i/swd_controller_0/inst/u_swd_core/rd_samples[32]_i_1_n_0
+    SLICE_X105Y134       FDCE                                         r  system_i/swd_controller_0/inst/u_swd_core/rd_samples_reg[32]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.337     0.337    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20829, routed)       0.959     1.325    system_i/swd_controller_0/inst/u_swd_core/clk
+    SLICE_X105Y134       FDCE                                         r  system_i/swd_controller_0/inst/u_swd_core/rd_samples_reg[32]/C
+                         clock pessimism             -0.268     1.057    
+    SLICE_X105Y134       FDCE (Hold_fdce_C_D)         0.092     1.149    system_i/swd_controller_0/inst/u_swd_core/rd_samples_reg[32]
+  -------------------------------------------------------------------
+                         required time                         -1.149    
+                         arrival time                           2.420    
+  -------------------------------------------------------------------
+                         slack                                  1.271    
+
+Slack (MET) :             1.288ns  (arrival time - required time)
+  Source:                 system_i/swd_controller_0/inst/u_swdio_iddr/C
+                            (rising edge-triggered cell IDDR clocked by clk_fpga_0  {rise@0.000ns fall@3.750ns period=7.500ns})
+  Destination:            system_i/swd_controller_0/inst/u_swd_core/lsm_cnt_reg[3]/D
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@3.750ns period=7.500ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_fpga_0 rise@0.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        1.446ns  (logic 0.430ns (29.737%)  route 1.016ns (70.263%))
+  Logic Levels:           5  (LUT3=2 LUT6=3)
+  Clock Path Skew:        0.037ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.350ns
+    Source Clock Delay      (SCD):    1.045ns
+    Clock Pessimism Removal (CPR):    0.268ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.310     0.310    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20829, routed)       0.709     1.045    system_i/swd_controller_0/inst/clk
+    ILOGIC_X1Y142        IDDR                                         r  system_i/swd_controller_0/inst/u_swdio_iddr/C
+  -------------------------------------------------------------------    -------------------
+    ILOGIC_X1Y142        IDDR (Prop_iddr_C_Q1)        0.180     1.225 r  system_i/swd_controller_0/inst/u_swdio_iddr/Q1
+                         net (fo=4, routed)           0.549     1.774    system_i/swd_controller_0/inst/u_swd_core/swdio_i_rise_raw
+    SLICE_X113Y137       LUT3 (Prop_lut3_I0_O)        0.070     1.844 r  system_i/swd_controller_0/inst/u_swd_core/rd_samples[31]_i_8/O
+                         net (fo=4, routed)           0.102     1.946    system_i/swd_controller_0/inst/u_swd_core/swdio_i_fall
+    SLICE_X113Y137       LUT3 (Prop_lut3_I1_O)        0.045     1.991 f  system_i/swd_controller_0/inst/u_swd_core/lsm_cnt[3]_i_11/O
+                         net (fo=1, routed)           0.191     2.183    system_i/swd_controller_0/inst/u_swd_core/lsm_cnt[3]_i_11_n_0
+    SLICE_X112Y130       LUT6 (Prop_lut6_I3_O)        0.045     2.228 f  system_i/swd_controller_0/inst/u_swd_core/lsm_cnt[3]_i_8/O
+                         net (fo=1, routed)           0.053     2.281    system_i/swd_controller_0/inst/u_swd_core/lsm_cnt[3]_i_8_n_0
+    SLICE_X112Y130       LUT6 (Prop_lut6_I5_O)        0.045     2.326 r  system_i/swd_controller_0/inst/u_swd_core/lsm_cnt[3]_i_4/O
+                         net (fo=1, routed)           0.120     2.446    system_i/swd_controller_0/inst/u_swd_core/lsm_cnt[3]_i_4_n_0
+    SLICE_X112Y130       LUT6 (Prop_lut6_I3_O)        0.045     2.491 r  system_i/swd_controller_0/inst/u_swd_core/lsm_cnt[3]_i_1/O
+                         net (fo=1, routed)           0.000     2.491    system_i/swd_controller_0/inst/u_swd_core/lsm_cnt[3]_i_1_n_0
+    SLICE_X112Y130       FDCE                                         r  system_i/swd_controller_0/inst/u_swd_core/lsm_cnt_reg[3]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.337     0.337    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20829, routed)       0.984     1.350    system_i/swd_controller_0/inst/u_swd_core/clk
+    SLICE_X112Y130       FDCE                                         r  system_i/swd_controller_0/inst/u_swd_core/lsm_cnt_reg[3]/C
+                         clock pessimism             -0.268     1.082    
+    SLICE_X112Y130       FDCE (Hold_fdce_C_D)         0.121     1.203    system_i/swd_controller_0/inst/u_swd_core/lsm_cnt_reg[3]
+  -------------------------------------------------------------------
+                         required time                         -1.203    
+                         arrival time                           2.491    
+  -------------------------------------------------------------------
+                         slack                                  1.288    
+
+Slack (MET) :             1.345ns  (arrival time - required time)
+  Source:                 system_i/swd_controller_0/inst/u_swdio_iddr/C
+                            (rising edge-triggered cell IDDR clocked by clk_fpga_0  {rise@0.000ns fall@3.750ns period=7.500ns})
+  Destination:            system_i/swd_controller_0/inst/u_swd_core/rd_samples_reg[31]/D
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@3.750ns period=7.500ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_fpga_0 rise@0.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        1.426ns  (logic 0.295ns (20.687%)  route 1.131ns (79.313%))
+  Logic Levels:           2  (LUT3=2)
+  Clock Path Skew:        0.006ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.319ns
+    Source Clock Delay      (SCD):    1.045ns
+    Clock Pessimism Removal (CPR):    0.268ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.310     0.310    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20829, routed)       0.709     1.045    system_i/swd_controller_0/inst/clk
+    ILOGIC_X1Y142        IDDR                                         r  system_i/swd_controller_0/inst/u_swdio_iddr/C
+  -------------------------------------------------------------------    -------------------
+    ILOGIC_X1Y142        IDDR (Prop_iddr_C_Q1)        0.180     1.225 r  system_i/swd_controller_0/inst/u_swdio_iddr/Q1
+                         net (fo=4, routed)           0.549     1.774    system_i/swd_controller_0/inst/u_swd_core/swdio_i_rise_raw
+    SLICE_X113Y137       LUT3 (Prop_lut3_I0_O)        0.070     1.844 r  system_i/swd_controller_0/inst/u_swd_core/rd_samples[31]_i_8/O
+                         net (fo=4, routed)           0.156     2.000    system_i/swd_controller_0/inst/u_swd_core/swdio_i_fall
+    SLICE_X113Y137       LUT3 (Prop_lut3_I0_O)        0.045     2.045 r  system_i/swd_controller_0/inst/u_swd_core/rd_samples[31]_i_2/O
+                         net (fo=1, routed)           0.426     2.471    system_i/swd_controller_0/inst/u_swd_core/rd_samples[31]_i_2_n_0
+    SLICE_X103Y129       FDCE                                         r  system_i/swd_controller_0/inst/u_swd_core/rd_samples_reg[31]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.337     0.337    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20829, routed)       0.953     1.319    system_i/swd_controller_0/inst/u_swd_core/clk
+    SLICE_X103Y129       FDCE                                         r  system_i/swd_controller_0/inst/u_swd_core/rd_samples_reg[31]/C
+                         clock pessimism             -0.268     1.051    
+    SLICE_X103Y129       FDCE (Hold_fdce_C_D)         0.075     1.126    system_i/swd_controller_0/inst/u_swd_core/rd_samples_reg[31]
+  -------------------------------------------------------------------
+                         required time                         -1.126    
+                         arrival time                           2.471    
+  -------------------------------------------------------------------
+                         slack                                  1.345    
+
+Slack (MET) :             1.355ns  (arrival time - required time)
+  Source:                 system_i/swd_controller_0/inst/u_swdio_iddr/C
+                            (rising edge-triggered cell IDDR clocked by clk_fpga_0  {rise@0.000ns fall@3.750ns period=7.500ns})
+  Destination:            system_i/swd_controller_0/inst/u_swd_core/FSM_sequential_state_reg[1]/D
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@3.750ns period=7.500ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_fpga_0 rise@0.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        1.453ns  (logic 0.385ns (26.503%)  route 1.068ns (73.497%))
+  Logic Levels:           4  (LUT3=1 LUT6=3)
+  Clock Path Skew:        0.006ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.319ns
+    Source Clock Delay      (SCD):    1.045ns
+    Clock Pessimism Removal (CPR):    0.268ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.310     0.310    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20829, routed)       0.709     1.045    system_i/swd_controller_0/inst/clk
+    ILOGIC_X1Y142        IDDR                                         r  system_i/swd_controller_0/inst/u_swdio_iddr/C
+  -------------------------------------------------------------------    -------------------
+    ILOGIC_X1Y142        IDDR (Prop_iddr_C_Q1)        0.180     1.225 r  system_i/swd_controller_0/inst/u_swdio_iddr/Q1
+                         net (fo=4, routed)           0.361     1.586    system_i/swd_controller_0/inst/u_swd_core/swdio_i_rise_raw
+    SLICE_X112Y142       LUT3 (Prop_lut3_I0_O)        0.070     1.656 r  system_i/swd_controller_0/inst/u_swd_core/rd_samples[31]_i_8_replica_1/O
+                         net (fo=1, routed)           0.432     2.087    system_i/swd_controller_0/inst/u_swd_core/swdio_i_fall_repN_1
+    SLICE_X101Y132       LUT6 (Prop_lut6_I4_O)        0.045     2.132 r  system_i/swd_controller_0/inst/u_swd_core/FSM_sequential_state[1]_i_6/O
+                         net (fo=1, routed)           0.080     2.213    system_i/swd_controller_0/inst/u_swd_core/FSM_sequential_state[1]_i_6_n_0
+    SLICE_X101Y132       LUT6 (Prop_lut6_I4_O)        0.045     2.258 f  system_i/swd_controller_0/inst/u_swd_core/FSM_sequential_state[1]_i_2/O
+                         net (fo=1, routed)           0.195     2.453    system_i/swd_controller_0/inst/u_swd_core/FSM_sequential_state[1]_i_2_n_0
+    SLICE_X101Y129       LUT6 (Prop_lut6_I1_O)        0.045     2.498 r  system_i/swd_controller_0/inst/u_swd_core/FSM_sequential_state[1]_i_1/O
+                         net (fo=1, routed)           0.000     2.498    system_i/swd_controller_0/inst/u_swd_core/FSM_sequential_state[1]_i_1_n_0
+    SLICE_X101Y129       FDCE                                         r  system_i/swd_controller_0/inst/u_swd_core/FSM_sequential_state_reg[1]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.337     0.337    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20829, routed)       0.953     1.319    system_i/swd_controller_0/inst/u_swd_core/clk
+    SLICE_X101Y129       FDCE                                         r  system_i/swd_controller_0/inst/u_swd_core/FSM_sequential_state_reg[1]/C
+                         clock pessimism             -0.268     1.051    
+    SLICE_X101Y129       FDCE (Hold_fdce_C_D)         0.092     1.143    system_i/swd_controller_0/inst/u_swd_core/FSM_sequential_state_reg[1]
+  -------------------------------------------------------------------
+                         required time                         -1.143    
+                         arrival time                           2.498    
+  -------------------------------------------------------------------
+                         slack                                  1.355    
+
+Slack (MET) :             1.489ns  (arrival time - required time)
+  Source:                 system_i/swd_controller_0/inst/u_swdio_iddr/C
+                            (rising edge-triggered cell IDDR clocked by clk_fpga_0  {rise@0.000ns fall@3.750ns period=7.500ns})
+  Destination:            system_i/swd_controller_0/inst/u_swd_core/FSM_sequential_state_reg[3]/D
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@3.750ns period=7.500ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_fpga_0 rise@0.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        1.614ns  (logic 0.385ns (23.859%)  route 1.229ns (76.141%))
+  Logic Levels:           4  (LUT3=1 LUT6=3)
+  Clock Path Skew:        0.004ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.317ns
+    Source Clock Delay      (SCD):    1.045ns
+    Clock Pessimism Removal (CPR):    0.268ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.310     0.310    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026     0.336 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20829, routed)       0.709     1.045    system_i/swd_controller_0/inst/clk
+    ILOGIC_X1Y142        IDDR                                         r  system_i/swd_controller_0/inst/u_swdio_iddr/C
+  -------------------------------------------------------------------    -------------------
+    ILOGIC_X1Y142        IDDR (Prop_iddr_C_Q1)        0.180     1.225 r  system_i/swd_controller_0/inst/u_swdio_iddr/Q1
+                         net (fo=4, routed)           0.714     1.939    system_i/swd_controller_0/inst/u_swd_core/swdio_i_rise_raw
+    SLICE_X105Y137       LUT3 (Prop_lut3_I0_O)        0.070     2.009 r  system_i/swd_controller_0/inst/u_swd_core/rd_samples[31]_i_8_replica/O
+                         net (fo=1, routed)           0.193     2.203    system_i/swd_controller_0/inst/u_swd_core/swdio_i_fall_repN
+    SLICE_X104Y130       LUT6 (Prop_lut6_I3_O)        0.045     2.248 r  system_i/swd_controller_0/inst/u_swd_core/FSM_sequential_state[3]_i_6/O
+                         net (fo=1, routed)           0.225     2.472    system_i/swd_controller_0/inst/u_swd_core/FSM_sequential_state[3]_i_6_n_0
+    SLICE_X99Y127        LUT6 (Prop_lut6_I4_O)        0.045     2.517 f  system_i/swd_controller_0/inst/u_swd_core/FSM_sequential_state[3]_i_3/O
+                         net (fo=1, routed)           0.096     2.614    system_i/swd_controller_0/inst/u_swd_core/FSM_sequential_state[3]_i_3_n_0
+    SLICE_X100Y127       LUT6 (Prop_lut6_I5_O)        0.045     2.659 r  system_i/swd_controller_0/inst/u_swd_core/FSM_sequential_state[3]_i_1/O
+                         net (fo=1, routed)           0.000     2.659    system_i/swd_controller_0/inst/u_swd_core/FSM_sequential_state[3]_i_1_n_0
+    SLICE_X100Y127       FDCE                                         r  system_i/swd_controller_0/inst/u_swd_core/FSM_sequential_state_reg[3]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           0.337     0.337    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029     0.366 r  system_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=20829, routed)       0.951     1.317    system_i/swd_controller_0/inst/u_swd_core/clk
+    SLICE_X100Y127       FDCE                                         r  system_i/swd_controller_0/inst/u_swd_core/FSM_sequential_state_reg[3]/C
+                         clock pessimism             -0.268     1.049    
+    SLICE_X100Y127       FDCE (Hold_fdce_C_D)         0.121     1.170    system_i/swd_controller_0/inst/u_swd_core/FSM_sequential_state_reg[3]
+  -------------------------------------------------------------------
+                         required time                         -1.170    
+                         arrival time                           2.659    
+  -------------------------------------------------------------------
+                         slack                                  1.489    
+
+
+
+

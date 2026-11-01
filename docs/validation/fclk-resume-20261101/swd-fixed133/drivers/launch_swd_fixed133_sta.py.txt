@@ -1,0 +1,11 @@
+from pathlib import Path
+import hashlib,json,subprocess,sys
+root=Path(__file__).resolve().parents[2];sys.path.insert(0,str(root))
+from tools.run_cm3_sim import environment,VIVADO
+out=root/'build/fclk-resume-20261101/swd-fixed133/sta';out.mkdir(parents=True,exist_ok=False)
+env=environment();env['RDI_JAVAROOT']=(VIVADO/'tps/win64/jre9.0.4').as_posix()
+env['ZYNQLINK_WORK_DIR']=str(out/'runtime');(out/'runtime/tmp').mkdir(parents=True)
+with (out/'console.txt').open('w') as log:
+    p=subprocess.run([sys.executable,str(root/'tools/run_vivado.py'),'-mode','batch','-source',str(root/'build/fclk-resume-20261101/swd_fixed133_sta.tcl'),'-log',str(out/'vivado.log'),'-journal',str(out/'vivado.jou')],env=env,cwd=root,stdout=log,stderr=subprocess.STDOUT)
+print('Supplemental 133MHz/66.667MHz STA:',p.returncode)
+raise SystemExit(p.returncode)

@@ -1,0 +1,185 @@
+Vivado Simulator 2018.3
+Copyright 1986-1999, 2001-2018 Xilinx, Inc. All Rights Reserved.
+Running: E:\Xilinx\Vivado\2018.3\bin\unwrapped\win64.o\xelab.exe --mt 2 -s tb_cm3_swd_snap tb_cm3_swd 
+Using 2 slave threads.
+Starting static elaboration
+WARNING: [VRFC 10-3091] actual bit length 6 differs from formal bit length 8 for port 's_axi_awaddr' [E:\zynqlinkPRO\fpga\sim/cm3_etm_tasks.svh:24]
+WARNING: [VRFC 10-3091] actual bit length 6 differs from formal bit length 8 for port 's_axi_araddr' [E:\zynqlinkPRO\fpga\sim/cm3_etm_tasks.svh:27]
+WARNING: [VRFC 10-3645] port 's_axi_bresp' remains unconnected for this instance [E:/zynqlinkPRO/fpga/sim/tb_cm3_swd.sv:75]
+WARNING: [VRFC 10-3645] port 'ddr_hold' remains unconnected for this instance [E:\zynqlinkPRO\fpga\sim/cm3_etm_tasks.svh:23]
+WARNING: [VRFC 10-3645] port 'INTERNALSTATE' remains unconnected for this instance [E:/zynqlinkPRO/reference/cortex_m3_on_xc7a100t/cm3_core/Arm_ipi_repository/CM3DbgAXI/rtl/cortexm3_integration.v:1985]
+Completed static elaboration
+Starting simulation data flow analysis
+Completed simulation data flow analysis
+Time Resolution for simulation is 1ps
+Compiling module work.IOBUF
+Compiling module work.IDDR_default
+Compiling module work.IDDR(INIT_Q1=0,INIT_Q2=0)
+Compiling module work.probe_sample_engine_default
+Compiling module work.probe_rtt_engine
+Compiling module work.xpm_memory_tdpram(ADDR_WIDTH_A=1...
+Compiling module work.probe_stream_engine
+Compiling module work.xpm_memory_tdpram
+Compiling module work.swd_batch_engine
+Compiling module work.dap_transfer_block_engine(ENABLE...
+Compiling module work.swd_core
+Compiling module work.jtag_shift
+Compiling module work.jtag_core
+Compiling module work.swd_controller(ENABLE_DIAGNOSTIC...
+Compiling module work.AhbToAxiHtransSquelch
+Compiling module work.AhbToAxiIncrOverride
+Compiling module work.AhbToAxiStrbGen(DATA_WIDTH=32)
+Compiling module work.A11AhbLiteMToAxi(DATA_WIDTH=32)
+Compiling module work.AhbSToAxi(DATA_WIDTH=32)
+Compiling module work.cm3_tscnt_48
+Compiling module work.cm3_code_mux
+Compiling module work.cmsdk_ahb_to_sram(AW=32'b01111)
+Compiling module work.cm3_sync
+Compiling module work.cm3_clk_gate
+Compiling module work.cm3_dpu_fetch_ctl
+Compiling module work.cm3_dpu_fetch_ahbintf
+Compiling module work.cm3_dpu_fetch
+Compiling module work.cm3_dpu_16bit_dec
+Compiling module work.cm3_dpu_32bit_dec
+Compiling module work.cm3_dpu_br_dec
+Compiling module work.cm3_dpu_dec
+Compiling module work.cm3_dpu_exec
+Compiling module work.cm3_dpu_status
+Compiling module work.cm3_dpu_alu_ctl
+Compiling module work.cm3_dpu_alu_bshift
+Compiling module work.cm3_dpu_alu_srtdiv
+Compiling module work.cm3_dpu_alu_dp
+Compiling module work.cm3_dpu_alu
+Compiling module work.cm3_dpu_lsu_ctl
+Compiling module work.cm3_dpu_lsu_ahbintf
+Compiling module work.cm3_dpu_lsu
+Compiling module work.cm3_dpu_regfile
+Compiling module work.cm3_dpu_regbank
+Compiling module work.cm3_dpu_etmintf
+Compiling module work.cm3_dpu
+Compiling module work.cm3_nvic_ppb_intf(IRQ_WIDTH=48)
+Compiling module work.cm3_nvic_reg(IRQ_WIDTH=48,NUM_IN...
+Compiling module work.cm3_nvic_int_state(INTS=25)
+Compiling module work.cm3_nvic_preempt(LVL_WIDTH=3,IRQ...
+Compiling module work.cm3_nvic_cell
+Compiling module work.cm3_nvic_cell(NUM_WIDTH=1)
+Compiling module work.cm3_nvic_cell(NUM_WIDTH=2)
+Compiling module work.cm3_nvic_cell(NUM_WIDTH=3)
+Compiling module work.cm3_nvic_cell(NUM_WIDTH=4)
+Compiling module work.cm3_nvic_cell(NUM_WIDTH=5)
+Compiling module work.cm3_nvic_cell(NUM_WIDTH=6)
+Compiling module work.cm3_nvic_cell(NUM_WIDTH=7)
+Compiling module work.cm3_nvic_tree(MAX_WIDTH=768)
+Compiling module work.cm3_nvic_main(IRQ_WIDTH=48,MAX_W...
+Compiling module work.cm3_nvic
+Compiling module work.cm3_mpu_ppb_intf(MPU_PRESENT=1)
+Compiling module work.cm3_mpu_align(MPU_PRESENT=1)
+Compiling module work.cm3_mpu_maskgen(MPU_PRESENT=1)
+Compiling module work.cm3_mpu_comp(MPU_PRESENT=1)
+Compiling module work.cm3_mpu_region(MPU_PRESENT=1)
+Compiling module work.cm3_mpu_regions(MPU_PRESENT=1)
+Compiling module work.cm3_mpu_ahb_ctl(MPU_PRESENT=1)
+Compiling module work.cm3_mpu_full(MPU_PRESENT=1)
+Compiling module work.cm3_mpu_default(MPU_PRESENT=1)
+Compiling module work.cm3_mpu(MPU_PRESENT=1)
+Compiling module work.cm3_mtx_input_stage_dcore
+Compiling module work.cm3_mtx_input_stage_icore
+Compiling module work.cm3_mtx_input_stage_dap
+Compiling module work.cm3_mtx_decode_dcore
+Compiling module work.cm3_mtx_decode_icore
+Compiling module work.cm3_mtx_decode_dap
+Compiling module work.cm3_mtx_bit_master
+Compiling module work.cm3_mtx_output_stage_icode
+Compiling module work.cm3_mtx_output_stage_dcode
+Compiling module work.cm3_mtx_output_stage_sys
+Compiling module work.cm3_mtx_output_stage_ppb
+Compiling module work.cm3_bus_matrix
+Compiling module work.cm3_dap_ahb_ap_slv
+Compiling module work.cm3_dap_ahb_ap_mst
+Compiling module work.cm3_dap_ahb_ap_sync
+Compiling module work.cm3_dap_ahb_ap_sync(GLITCH_CHECK...
+Compiling module work.cm3_dap_ahb_ap
+Compiling module work.cm3_ppb_decoder
+Compiling module work.cm3_fpb
+Compiling module work.cm3_dwt_apb_if(TRACE_LVL=0)
+Compiling module work.cm3_dwt_comp(TRACE_LVL=0)
+Compiling module work.cm3_dwt_packet_state(TRACE_LVL=0...
+Compiling module work.cm3_dwt_packet_gen(TRACE_LVL=0)
+Compiling module work.cm3_dwt(TRACE_LVL=0)
+Compiling module work.cm3_ppb_ahb_to_apb
+Compiling module work.cm3_itm_if(TRACE_LVL=0)
+Compiling module work.cm3_itm_ts(TRACE_LVL=0)
+Compiling module work.cm3_itm_arb(TRACE_LVL=0)
+Compiling module work.cm3_itm_fifo_byte(TRACE_LVL=0)
+Compiling module work.cm3_itm_fifo(TRACE_LVL=0)
+Compiling module work.cm3_itm_emit(TRACE_LVL=0)
+Compiling module work.cm3_itm(TRACE_LVL=0)
+Compiling module work.cm3_htm_port(TRACE_LVL=0)
+Compiling module work.CORTEXM3(MPU_PRESENT=1,TRACE_LVL...
+Compiling module work.cm3_wic(WIC_LINES=3)
+Compiling module work.DAPSwjWatcher
+Compiling module work.DAPSwDpProtocol
+Compiling module work.DAPJtagDpProtocol
+Compiling module work.DAPDpIMux
+Compiling module work.DAPSwDpApbIf
+Compiling module work.DAPDpEnSync
+Compiling module work.DAPDpApbSync
+Compiling module work.DAPDpSync
+Compiling module work.DAPSwDpSync
+Compiling module work.DAPSWJDP
+Compiling module work.cm3_etm_apb_if(TRACE_LVL=0)
+Compiling module work.cm3_etm_control_reg(TRACE_LVL=0)
+Compiling module work.cm3_etm_clk_gate
+Compiling module work.cm3_etm_res_control(TRACE_LVL=0)
+Compiling module work.cm3_etm_event_gen(TRACE_LVL=0)
+Compiling module work.cm3_etm_trig_gen(TRACE_LVL=0)
+Compiling module work.cm3_etm_trc_en(TRACE_LVL=0)
+Compiling module work.cm3_etm_trigger(TRACE_LVL=0)
+Compiling module work.cm3_etm_gen(TRACE_LVL=0)
+Compiling module work.cm3_etm_fifo(TRACE_LVL=0)
+Compiling module work.cm3_etm_sync_count(TRACE_LVL=0)
+Compiling module work.cm3_etm_trace(TRACE_LVL=0)
+Compiling module work.cm3_etm_trace_out(TRACE_LVL=0)
+Compiling module work.CM3ETM(TRACE_LVL=0)
+Compiling module work.cm3_tpiu_apb_if(TRACE_LVL=0)
+Compiling module work.cm3_tpiu_atb_fifo(PORT_PRESENT=0...
+Compiling module work.cm3_tpiu_trace_fifo(PORT_PRESENT...
+Compiling module work.cm3_tpiu_formatter(TRACE_LVL=0)
+Compiling module work.cm3_tpiu_trace_out(TRACE_LVL=0)
+Compiling module work.cm3_tpiu_trace_clk(TRACE_LVL=0)
+Compiling module work.cm3_cdc_connect(IH=2)
+Compiling module work.cm3_cdc_connect
+Compiling module work.cm3_cdc_capt_sync
+Compiling module work.cm3_tpiu_atb_sync(TRACE_LVL=0)
+Compiling module work.cm3_tpiu_trace_sync(TRACE_LVL=0)
+Compiling module work.cm3_tpiu(TRACE_LVL=0)
+Compiling module work.cm3_rom_table(TRACE_LVL=0)
+Compiling module work.CORTEXM3INTEGRATION(TRACE_LVL=0)
+Compiling module work.X_TCMDBG(ADDR_WIDTH=32'b01101,IN...
+Compiling module work.X_TCMDBG(ADDR_WIDTH=32'b01101)
+Compiling module work.CortexM3DbgAXI(TRACE_LVL=0)
+Compiling module work.axi3_sram
+Compiling module work.axi3_sram(NAME="CODE")
+Compiling module work.cm3_target
+Compiling module work.BUFIO
+Compiling module work.BUFR
+Compiling module work.BUFG
+Compiling module work.IDELAYCTRL
+Compiling module work.IDELAYE2(IDELAY_VALUE=16,HIGH_PE...
+Compiling module work.IDDR(DDR_CLK_EDGE="SAME_EDGE_PIP...
+Compiling module work.orbtrace_traceif
+Compiling module work.orbtrace_frame_fifo
+Compiling module work.orbtrace_rx_diagnostics
+Compiling module work.orbtrace_tpiu_demux
+Compiling module work.orbtrace_parallel(USE_IO_CLOCK=1...
+Compiling module work.orbtrace_controller_default
+Compiling module work.tb_cm3_swd
+Built simulation snapshot tb_cm3_swd_snap
+
+****** Webtalk v2018.3 (64-bit)
+  **** SW Build 2405991 on Thu Dec  6 23:38:27 MST 2018
+  **** IP Build 2404404 on Fri Dec  7 01:43:56 MST 2018
+    ** Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+
+source E:/zynqlinkPRO/build/fclk-resume-20261101/swd-fixed133/sim/candidate/xsim.dir/tb_cm3_swd_snap/webtalk/xsim_webtalk.tcl -notrace
+INFO: [Common 17-206] Exiting Webtalk at Sun Nov  1 18:31:12 2026...
