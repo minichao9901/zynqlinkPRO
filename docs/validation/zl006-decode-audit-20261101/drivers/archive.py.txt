@@ -1,0 +1,48 @@
+from pathlib import Path
+from datetime import datetime,timezone
+import hashlib,json,shutil
+
+base=Path(__file__).resolve().parent;root=base.parents[1]
+dest=root/'docs/validation/zl006-decode-audit-20261101'
+raw=dest/'raw';raw.mkdir(exist_ok=False)
+def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+files=[]
+def copy(p,relative):
+    q=dest/relative;q.parent.mkdir(parents=True,exist_ok=True)
+    assert not q.exists();shutil.copyfile(p,q)
+    files.append(dict(source=str(p),archivePath=q.relative_to(dest).as_posix(),sha256=sha(q),bytes=q.stat().st_size))
+copy(base/'audit.json','audit.json')
+copy(base/'native-storebuild-difference.txt','raw/native-storebuild-difference.txt')
+copy(base/'summarize.py','drivers/summarize.py.txt')
+copy(Path(__file__),'drivers/archive.py.txt')
+for name in ['legacy','current']:
+    report=json.loads((base/(name+'-bench/results.json')).read_text(encoding='utf8'))
+    copy(base/(name+'-bench/results.json'),'raw/'+name+'-results.json')
+    for row in report['rows']:
+        folder=base/(name+'-bench/records')/row['record']
+        for item in ['session.json','decoded.json','decode-performance.json','store/manifest.json']:
+            copy(folder/item,'raw/'+name+'/trial-'+str(row['trial'])+'/'+item)
+    # The original console contains a loopback-only ephemeral auth URL.
+    log=(base/(name+'-bench-console.txt')).read_text(encoding='utf8',errors='replace')
+    log='\n'.join(line for line in log.splitlines() if not line.startswith('BROWSER_URL '))+'\n'
+    q=raw/(name+'-console.txt');q.write_text(log,encoding='utf8')
+    files.append(dict(source=str(base/(name+'-bench-console.txt')),archivePath=q.relative_to(dest).as_posix(),
+        sha256=sha(q),bytes=q.stat().st_size,projection='Ephemeral authentication URL omitted'))
+copy(base/'legacy-input/fixture-restoration.json','raw/fixture-restoration.json')
+for name in ['bench_etm_native_offline.py','prepare_etm_offline_fixture.py']:
+    copy(root/'tools'/name,'drivers/'+name+'.txt')
+for name in ['native_pipeline.py','native_storebuild.py','native_facts_index.py','trace_store_index.py',
+             'trace_store_write.py','decode_stream.py','decode_trace.py']:
+    copy(root/'etm-service/tools'/name,'drivers/'+name+'.txt')
+other=Path('E:/superlinkPRO')
+for name in ['etm-1s-release-20261023.md','etm-1s-hardware-checklist.md']:
+    copy(other/'docs'/name,'raw/superlink-reference/'+name)
+copy(other/'docs/validation/20261023-codex-h743-live-19d7d53-db17fe80/report.md',
+     'raw/superlink-reference/h743-1s-report.md')
+copy(other/'etm/tools/native_storebuild.py','drivers/superlink-native_storebuild.py.txt')
+manifest=dict(createdAtUtc=datetime.now(timezone.utc).isoformat(),hardwareAccess=False,
+    sourceHead=json.loads((base/'audit.json').read_text(encoding='utf8'))['sourceHead'],
+    files=files,localOutputs=str(base),
+    note='Raw inputs remain read-only; new native binaries/stores remain local. Their sizes/bindings/hashes are in trial manifests. Authentication URL/token files excluded. No product code or firmware was changed.')
+(dest/'evidence.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n',encoding='utf8')
+print('Archived',len(files),'files,',sum(r['bytes'] for r in files),'bytes; no native payload binaries')

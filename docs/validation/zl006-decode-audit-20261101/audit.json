@@ -1,0 +1,257 @@
+{
+  "recordedAtUtc": "2026-11-01T12:54:05.359830+00:00",
+  "hardwareAccess": false,
+  "sourceHead": "d3085c9a56f90c34faa35657a2c4f0373a7301dc",
+  "superlinkHead": "be75311236da2665a2edc54b9b4d4561f0219456",
+  "scope": "Fresh offline full API processing through native decode/store/index/browse preparation; no acquisition or browser rendering",
+  "legacyClock": {
+    "RCC_CFGR": 5308570,
+    "HCLK_Hz": 12000000,
+    "TRACECLK_Hz": 6000000
+  },
+  "currentClock": {
+    "RCC_CFGR": 5309450,
+    "HCLK_Hz": 48000000,
+    "TRACECLK_Hz": 24000000
+  },
+  "benchmarks": {
+    "legacy": {
+      "inputSha256": {
+        "capture.bin": "2cb5838887188cbdebf554967281ad44f03eca9aab2867cde82e548ca9873199",
+        "firmware.elf": "e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f",
+        "sources.json": "6533c1d4df3832ae8b9ad1013e6bb3c2fc5c8660e26531e2068d8891328bec44"
+      },
+      "sourceRecord": "E:\\zynqlinkPRO\\build\\zl006-audit-20261101\\legacy-input",
+      "runs": 3,
+      "inputUnchanged": true,
+      "summary": {
+        "packets": 1170388,
+        "ranges": 5467740,
+        "instructions": 5467740,
+        "executed": 5019787,
+        "sourceMapped": 5467740,
+        "exceptions": 250,
+        "gaps": 2,
+        "packetIssues": 0,
+        "unknownExecution": 89591,
+        "functions": {
+          "cdc_poll": 2508740,
+          "cdc_tx_poll": 1075086,
+          "main": 806324,
+          "usb_device_is_configured": 627137,
+          "HAL_IncTick": 1750,
+          "SysTick_Handler": 750
+        }
+      },
+      "completeProcessingSeconds": [
+        8.667074199998751,
+        8.237933299998986,
+        6.5591500000155065
+      ],
+      "decodeSeconds": [
+        7.321292500011623,
+        7.479897000011988,
+        5.9085875999880955
+      ],
+      "completeProcessingMedian": 8.237933299998986,
+      "decodeMedian": 7.321292500011623,
+      "phaseMedians": {
+        "imagePreparation": 0.020649399986723438,
+        "nativeInputPreparation": 0.0027858999965246767,
+        "openCsd": 0.8834654000238515,
+        "storeBuildAndIndex": 6.247922199981986
+      },
+      "storePhaseMedians": {
+        "decodeAndInputs": 0.820257,
+        "prescanAndStatic": 0.253008,
+        "nativeBuild": 1.911442,
+        "queryIndex": 1.75179,
+        "assemble": 0.515855,
+        "inputBindings": 0.538734,
+        "publish": 0.032099,
+        "cleanup": 0.091745
+      },
+      "ETMBytes": 1363722,
+      "nativeBinBytes": 360776440,
+      "allSummaryAndSharedQualityMatched": true,
+      "allNoLargeJsonl": true,
+      "engine": "native",
+      "fallback": false
+    },
+    "current": {
+      "inputSha256": {
+        "capture.bin": "3b54995365d440cb154c8249b2fc2a0319d9ccb42c2460b3ca861550c421ea78",
+        "firmware.elf": "e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f",
+        "sources.json": "683cdc23e76dd8524aafa8973b0e87880e6f092653e62c4cd7f226bd2f5d8c3d"
+      },
+      "sourceRecord": "E:\\zynqlinkPRO\\etm-service\\records\\capture-e61a64f34d0047e4a9c1c617b87099e1",
+      "runs": 3,
+      "inputUnchanged": true,
+      "summary": {
+        "packets": 4784167,
+        "ranges": 19565799,
+        "instructions": 19565799,
+        "executed": 16918237,
+        "sourceMapped": 19561326,
+        "exceptions": 1185,
+        "gaps": 2,
+        "packetIssues": 0,
+        "unknownExecution": 522998,
+        "functions": {
+          "cdc_poll": 5077621,
+          "cdc_tx_poll": 4535222,
+          "cdc_console_peek": 4201692,
+          "main": 1574800,
+          "usb_device_is_configured": 1224846,
+          "cdc_console_feed": 121590,
+          "cdc_console_write": 100800,
+          "fsdev_write_pma": 17262,
+          "fsdev_read_pma": 16492,
+          "USBD_IRQHandler": 14602,
+          "HAL_IncTick": 6979,
+          "usbd_ep_start_write": 5985,
+          "handle_line": 3276,
+          "strcmp": 2520,
+          "SysTick_Handler": 2991,
+          "usbd_cdc_acm_bulk_in": 2646,
+          "usbd_ep_start_read": 1701,
+          "usbd_event_ep_in_complete_handler": 1386,
+          "usbd_get_ep_mps": 1386,
+          "strncmp": 1071,
+          "usbd_cdc_acm_bulk_out": 1116,
+          "cdc_console_consume": 819,
+          "USB_LP_CAN1_RX0_IRQHandler": 752,
+          "usbd_event_ep_out_complete_handler": 682
+        }
+      },
+      "completeProcessingSeconds": [
+        22.749459100014064,
+        21.71150380000472,
+        22.030534399993485
+      ],
+      "decodeSeconds": [
+        20.443620299978647,
+        19.564600299985614,
+        19.879459599993424
+      ],
+      "completeProcessingMedian": 22.030534399993485,
+      "decodeMedian": 19.879459599993424,
+      "phaseMedians": {
+        "imagePreparation": 0.011055100010707974,
+        "nativeInputPreparation": 0.0045467999880202115,
+        "openCsd": 1.8882451000099536,
+        "storeBuildAndIndex": 17.976389299990842
+      },
+      "storePhaseMedians": {
+        "decodeAndInputs": 2.14357,
+        "prescanAndStatic": 0.792653,
+        "nativeBuild": 6.356176,
+        "queryIndex": 4.710659,
+        "assemble": 2.351293,
+        "inputBindings": 1.228599,
+        "publish": 0.02865,
+        "cleanup": 0.122247
+      },
+      "ETMBytes": 5892279,
+      "nativeBinBytes": 1305247716,
+      "allSummaryAndSharedQualityMatched": true,
+      "allNoLargeJsonl": true,
+      "engine": "native",
+      "fallback": false
+    }
+  },
+  "scaleRatios": {
+    "ETMBytes": 4.3207332579514,
+    "instructions": 3.578406983506897,
+    "nativeBinBytes": 3.617885125758212,
+    "completeProcessing": 2.6742792879855193
+  },
+  "binaryComparison": [
+    {
+      "name": "etm_decode.exe",
+      "currentSha256": "590a68798aeba9714a06a9a2da716936cca15483d42d9f62f2e8a5d7ddba600a",
+      "superlinkSha256": "590a68798aeba9714a06a9a2da716936cca15483d42d9f62f2e8a5d7ddba600a",
+      "equal": true
+    },
+    {
+      "name": "etm_export.exe",
+      "currentSha256": "89e43e62861334c85219e048473e2f6be06aa330d3d08bd0e72e6cb264682507",
+      "superlinkSha256": "89e43e62861334c85219e048473e2f6be06aa330d3d08bd0e72e6cb264682507",
+      "equal": true
+    },
+    {
+      "name": "etm_frontend.exe",
+      "currentSha256": "8224e590fbfa37a2245ab849e627695ca41ca2d135b51eb486c085b88aa31a74",
+      "superlinkSha256": "8224e590fbfa37a2245ab849e627695ca41ca2d135b51eb486c085b88aa31a74",
+      "equal": true
+    },
+    {
+      "name": "etm_index.exe",
+      "currentSha256": "65c822faae3b7e4ec3cdcabe83a1ec1aa4b86c5dc178624abbf69a3f37e259e4",
+      "superlinkSha256": "65c822faae3b7e4ec3cdcabe83a1ec1aa4b86c5dc178624abbf69a3f37e259e4",
+      "equal": true
+    },
+    {
+      "name": "etm_storebuild.exe",
+      "currentSha256": "40e87dd0f48acfb85efe9296f2543025e7de7838cf7f659edf651468dcaca658",
+      "superlinkSha256": "40e87dd0f48acfb85efe9296f2543025e7de7838cf7f659edf651468dcaca658",
+      "equal": true
+    }
+  ],
+  "sourceComparison": [
+    {
+      "name": "native_pipeline.py",
+      "currentSha256": "929a4d6e549745baf4ee8dcd99f774e6ff0c4a0684307ef1c40ea6d165e049cb",
+      "superlinkSha256": "929a4d6e549745baf4ee8dcd99f774e6ff0c4a0684307ef1c40ea6d165e049cb",
+      "equal": true
+    },
+    {
+      "name": "native_storebuild.py",
+      "currentSha256": "ee3e2fdee926633d4a13c97be9bc4626adc0f9ec73c13cef059eafab440f813a",
+      "superlinkSha256": "0c7537ba68fd95210539c86792b84e6e0f4b709a62ed5a78688f40f4e41f2cca",
+      "equal": false
+    },
+    {
+      "name": "native_facts_index.py",
+      "currentSha256": "67b285666eca3cc8a41e1b79d9279ca1ca0b56d667426eb010a6318703932e89",
+      "superlinkSha256": "67b285666eca3cc8a41e1b79d9279ca1ca0b56d667426eb010a6318703932e89",
+      "equal": true
+    },
+    {
+      "name": "trace_store_index.py",
+      "currentSha256": "072252d30e08a3a1e0748d380aa9cd1ce5c94846a55288c59752f390fb03d14a",
+      "superlinkSha256": "072252d30e08a3a1e0748d380aa9cd1ce5c94846a55288c59752f390fb03d14a",
+      "equal": true
+    },
+    {
+      "name": "trace_store_write.py",
+      "currentSha256": "c9d3fdb9d736d5923fc54a2420b860cf2d64d3c48d3b3bc5b507f8acfc972685",
+      "superlinkSha256": "c9d3fdb9d736d5923fc54a2420b860cf2d64d3c48d3b3bc5b507f8acfc972685",
+      "equal": true
+    },
+    {
+      "name": "decode_stream.py",
+      "currentSha256": "c199e6c55fe9c50cb533103b55f2321d3670f4750b608ca9e398268293c2dd05",
+      "superlinkSha256": "c199e6c55fe9c50cb533103b55f2321d3670f4750b608ca9e398268293c2dd05",
+      "equal": true
+    },
+    {
+      "name": "decode_trace.py",
+      "currentSha256": "8e93541e1e8175cbf9f030a4d1245f613db1e09b9e50b880f2c36733fa66e68d",
+      "superlinkSha256": "8e93541e1e8175cbf9f030a4d1245f613db1e09b9e50b880f2c36733fa66e68d",
+      "equal": true
+    }
+  ],
+  "prior12RunDecodePhases": {
+    "imagePreparation": 0.01433309999993071,
+    "nativeInputPreparation": 0.00598500001069624,
+    "openCsd": 2.4507187499984866,
+    "storeBuildAndIndex": 22.174833650002256
+  },
+  "limitations": [
+    "OS file cache not cleared; sequential services, not simultaneous performance runs",
+    "Same-byte old input retest does not prove all captures/platforms meet <=10s",
+    "Superlink H743 1s release report measured 14.109..14.350s processing, target <=10s was not passed",
+    "No source optimization, board, clock, PLL, Flash or FPGA/PS artifact change"
+  ]
+}
