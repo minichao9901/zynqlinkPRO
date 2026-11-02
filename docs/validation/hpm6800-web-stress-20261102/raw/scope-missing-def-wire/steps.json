@@ -1,0 +1,279 @@
+[
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "invoke",
+      "method": "saveRaw",
+      "args": [],
+      "target": "view"
+    },
+    "result": {
+      "job": "02e76d670fcc95f3aa9e8cc8b4d1c40b",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.2052772000006371
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "downloads"
+    },
+    "result": {
+      "job": "d6b870b43f766dd53bfd07224e07dbc8",
+      "ok": true,
+      "value": [
+        {
+          "browserDownloadRequested": true,
+          "bytes": 151552,
+          "id": "1",
+          "name": "scope-20261102-112526.jsp",
+          "type": "application/octet-stream"
+        }
+      ]
+    },
+    "seconds": 0.031527099999948405
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "download",
+      "id": "1",
+      "offset": 0,
+      "length": 151552
+    },
+    "result": {
+      "job": "cb6f2fc8f11213e9141ed89e8a9e8695",
+      "ok": true,
+      "value": {
+        "name": "scope-20261102-112526.jsp",
+        "offset": 0,
+        "total": 151552,
+        "base64Evidence": {
+          "bytes": 151552,
+          "sha256": "38cab5ee570454103ab1720b2d113a486161ddb930b69759ac00be694014fb9d"
+        }
+      }
+    },
+    "seconds": 0.15746729999955278
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "discard",
+      "id": "1"
+    },
+    "result": {
+      "job": "df4d0acc0103905e57a463bd96df554a",
+      "ok": true,
+      "value": {
+        "discarded": true
+      }
+    },
+    "seconds": 0.13647089999903983
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "invoke",
+      "method": "exportCsv",
+      "args": [],
+      "target": "view"
+    },
+    "result": {
+      "job": "931a8b3555b18aed7f593f030d55c039",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.029015699999945355
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "downloads"
+    },
+    "result": {
+      "job": "b2d36e0cb62787206bf37b80459bfc12",
+      "ok": true,
+      "value": [
+        {
+          "browserDownloadRequested": true,
+          "bytes": 139350,
+          "id": "2",
+          "name": "scope-20261102-112526.csv",
+          "type": "text/csv"
+        }
+      ]
+    },
+    "seconds": 0.015676400000302237
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "download",
+      "id": "2",
+      "offset": 0,
+      "length": 139350
+    },
+    "result": {
+      "job": "982fc3e80eb612470e7ffe1c5214fb99",
+      "ok": true,
+      "value": {
+        "name": "scope-20261102-112526.csv",
+        "offset": 0,
+        "total": 139350,
+        "base64Evidence": {
+          "bytes": 139350,
+          "sha256": "48e9950a038ee5bb59ab463f42e80c25cb9954e7dd9b1ee5639107933b83a96c"
+        }
+      }
+    },
+    "seconds": 0.11748470000020461
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "discard",
+      "id": "2"
+    },
+    "result": {
+      "job": "aad1bcd5c61c6831f7130323d57a9a82",
+      "ok": true,
+      "value": {
+        "discarded": true
+      }
+    },
+    "seconds": 0.1230095999999321
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "invoke",
+      "method": "summary",
+      "args": [],
+      "target": "view"
+    },
+    "result": {
+      "job": "921cc52f52315c41b0b7d6c87ddd0ee7",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": {
+          "awaitingDefinition": false,
+          "benchUs": null,
+          "blob": null,
+          "capacity": 22064,
+          "captureFlags": 224,
+          "connectErr": null,
+          "dapYields": 0,
+          "definitionReceived": false,
+          "elf": {
+            "name": "fw.elf",
+            "note": "",
+            "source": "dwarf",
+            "stats": {
+              "cu": 44,
+              "dies": 7988,
+              "vars": 1270
+            },
+            "versions": [
+              5
+            ]
+          },
+          "lod": false,
+          "lost": 0,
+          "lostGap": 0,
+          "lostProbe": 0,
+          "lostUsb": 0,
+          "metricsError": "样本未完整接收：收到 1792，探针 3244",
+          "mockVars": [
+            "mock0.f32",
+            "mock1.f32",
+            "mock2.i32",
+            "mock3.u16",
+            "mock4.i16",
+            "mock5.u8",
+            "mock6.i8",
+            "mock7.f64"
+          ],
+          "mode": "real",
+          "packets": 164,
+          "plan": {
+            "estHz": 21503,
+            "estUs": 46.51,
+            "frameBytes": 32,
+            "spans": 1
+          },
+          "probeMetrics": {
+            "bytes": 152064,
+            "errors": 0,
+            "flags": 96,
+            "hz": 24000000,
+            "periodTicks": 24000,
+            "produced": 3244,
+            "skipped": 0,
+            "tick": 330186970,
+            "tx": 297,
+            "usb": 0,
+            "yields": 0
+          },
+          "rateHz": 1000,
+          "raw": 68,
+          "readErrors": 0,
+          "receivedSamples": 1792,
+          "resyncs": 0,
+          "running": false,
+          "samples": 1792,
+          "stalePackets": 133,
+          "state": "已导出 CSV：1792 行 × 9 列",
+          "supportsMetrics": true,
+          "tailCountDelta": -1452,
+          "transport": null,
+          "trigger": {
+            "hit": -1,
+            "hits": 0,
+            "marker": false,
+            "mode": 0
+          },
+          "varCount": 8,
+          "vars": [
+            "g_v.tick:u32@0x1240000",
+            "g_v.u_hi:u32@0x1240004",
+            "g_v.f_sin:f32@0x1240008",
+            "g_v.f_tri:f32@0x124000c",
+            "g_v.i_sq1k:i32@0x1240010",
+            "g_v.i_sq5k:i32@0x1240014",
+            "g_v.u_ramp:u32@0x1240018",
+            "g_v.lfsr:u32@0x124001c"
+          ],
+          "view": {
+            "end": 1792,
+            "start": 0
+          }
+        },
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.04195410000102129
+  }
+]

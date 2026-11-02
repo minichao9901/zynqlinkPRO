@@ -30,6 +30,24 @@ int probe_target_transport(uint32_t port) {
     preferred_port=(uint8_t)port;
     return 0;
 }
+int probe_target_architecture(uint32_t riscv) {
+    if(riscv>1U) return -6;
+    uint32_t port=riscv ? DAP_PORT_JTAG : DAP_PORT_SWD;
+    if(DAP_Data.debug_port && DAP_Data.debug_port!=port) return -7;
+    int rc=probe_target_transport(port);
+    if(rc) return rc;
+    link_ready=0;
+    if(riscv) {
+        JTAG_SetIDCodeIR(1U);
+        memset(&DAP_Data.jtag_dev,0,sizeof DAP_Data.jtag_dev);
+        DAP_Data.jtag_dev.count=1;
+        DAP_Data.jtag_dev.ir_length[0]=5;
+    }
+    return 0;
+}
+int probe_target_is_riscv(void) {
+    return preferred_port==DAP_PORT_JTAG && JTAG_IDCodeIR()==1U;
+}
 void probe_target_forget(void) { claimed = saved = link_ready = 0; }
 int probe_target_claimed(void) { return claimed && probe_session_live(); }
 static uint8_t command[4112] __attribute__((aligned(32)));

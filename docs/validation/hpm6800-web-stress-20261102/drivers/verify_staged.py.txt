@@ -1,0 +1,31 @@
+from pathlib import Path
+import json,hashlib,subprocess
+def sha(data):return hashlib.sha256(data).hexdigest()
+roots=[Path('prebuilt/hpm6800-jtag66-133-20261102'),Path('prebuilt/hpm6800-web-133-20261102')]
+checks={}
+for root in roots:
+    manifest=json.loads((root/'manifest.json').read_text())
+    for name,info in manifest['files'].items():checks[(root/name).as_posix()]=info['sha256']
+for name in ('hpm6800-speed-completion-20261102','hpm6800-web-stress-20261102'):
+    root=Path('docs/validation')/name
+    evidence=json.loads((root/'evidence.json').read_text())
+    for filename,info in evidence['files'].items():checks[(root/filename).as_posix()]=info['sha256']
+for root in roots:
+    m=json.loads((root/'ps-build.json').read_text());assert sha((root/'application.elf').read_bytes())==m['elf_sha256']
+batch=subprocess.Popen(['git','cat-file','--batch'],stdin=subprocess.PIPE,stdout=subprocess.PIPE)
+for filename,expected in checks.items():
+    assert sha(Path(filename).read_bytes())==expected,('working SHA mismatch',filename)
+    batch.stdin.write((':'+filename+'\n').encode());batch.stdin.flush()
+    header=batch.stdout.readline().decode().split();assert len(header)==3 and header[1]=='blob',header
+    data=batch.stdout.read(int(header[2]));assert batch.stdout.read(1)==b'\n'
+    assert sha(data)==expected,('Staged bytes differ from manifest',filename)
+batch.stdin.close();assert batch.wait()==0
+for filename in ['prebuilt/golden/probe.bit','prebuilt/golden/application.elf','prebuilt/hpm6800-jtag-20261102/probe.bit','prebuilt/hpm6800-jtag-20261102/application.elf']:
+    data=subprocess.check_output(['git','show','HEAD:'+filename]);assert Path(filename).read_bytes()==data,filename
+files=subprocess.check_output(['git','diff','--cached','--name-only','-z']).decode().split('\0')
+assert not any(p.startswith(('build/','dist/')) for p in files)
+tokens=[p.read_text().strip().encode() for p in Path('build/hpm6800-web-stress-20261102').rglob('cli-token')]
+for filename in files:
+    if filename:
+        assert not any(t in Path(filename).read_bytes() for t in tokens),('Token in staged file',filename)
+print('Verified',len(checks),'manifest-bound files against staged bytes; baseline unchanged; no build/dist or runtime tokens staged.')

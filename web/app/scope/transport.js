@@ -269,7 +269,7 @@ export class VendorEpTransport {
      *    下一轮 —— 那时 `running` 又被 `start()` 置回 true，只判 running 的话它会"复活"继续收，
      *    而且已经不在 `workers` 里，后面的 `stop()` 再也等不到它（worker 数无界增长，2026-10 代码审查）。
      */
-    while (this.running && g === this.gen){
+    while ((this.running || this._draining) && g === this.gen){
       let r;
       try {
         const completed = await queue[0];
@@ -277,6 +277,7 @@ export class VendorEpTransport {
         if (completed.error) throw completed.error;
         r = completed.result;
       } catch (e){
+        if(this._draining && g===this.gen)this._drainError=e;
         /* 读抛异常（USB 抖动、探针复位）以前是直接 break —— 几条 worker 全退出后数据面就停了，
          * 而 `running` 还是 true、页面还显示"采样中"（2026-10 代码审查）。现在上报并整体停下。 */
         if (this.running && g === this.gen){
@@ -284,14 +285,16 @@ export class VendorEpTransport {
         }
         break;
       }
-      if (!this.running || g !== this.gen) break;     // 收尾 / 换轮：这一条读到了也不再用
+      if ((!this.running && !this._draining) || g !== this.gen) break;
       if (r.status === 'ok' && r.data?.byteLength){
         stalls = 0;
         this.chunks++; this.bytes += r.data.byteLength;
         // Keep the native USB request queue full before doing synchronous JS work.
-        queue.push(issue());
+        if(this.running)queue.push(issue());
         try { onChunk(new Uint8Array(r.data.buffer, r.data.byteOffset, r.data.byteLength)); }
         catch (e){ this._fail('数据解析失败：' + (e?.message || String(e))); break; }
+      } else if(this._draining && r.status==='ok' && !queue.length){
+        this._drainComplete=true;this._draining=false;break;
       } else if (r.status !== 'ok'){
         this.errors++; this.lastError = r.status;
         if (r.status === 'stall'){
@@ -309,6 +312,8 @@ export class VendorEpTransport {
           }
         }
       }
+      if(this._draining && performance.now()>=this._drainDeadline){this._draining=false;break;}
+      if(this._draining && !queue.length && g===this.gen)queue.push(issue());
       if (queue.length < this.inFlight && this.running && g === this.gen) queue.push(issue());
     }
     } finally {
@@ -318,6 +323,20 @@ export class VendorEpTransport {
   }
 
   /** Stop rearming while the producer can still finish already submitted reads. */
+  async drain(timeoutMs=2000){
+    // Call only AFTER producer STOP. Deliver this generation until an empty
+    // read proves all published tail packets have reached the consumer.
+    if(!this.workers.length)return;
+    this.running=false;this._draining=true;this._drainComplete=false;this._drainError=null;
+    this._drainDeadline=performance.now()+timeoutMs;
+    const done=await Promise.race([Promise.allSettled(this.workers).then(()=>true),sleep(timeoutMs).then(()=>false)]);
+    this._draining=false;
+    if(!done || !this._drainComplete || this._fatal){
+      this.gen++;dirtyDevices.add(this.device);
+      throw Error('无法确认采样尾部已排空'+(this._drainError ? '：'+this._drainError.message : ''));
+    }
+  }
+
   async quiesce(timeoutMs){
     if (timeoutMs === undefined){
       // Drain while the producer still runs. Under simultaneous SPI/CDC load

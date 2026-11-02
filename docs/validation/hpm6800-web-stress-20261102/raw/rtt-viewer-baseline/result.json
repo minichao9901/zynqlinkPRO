@@ -1,0 +1,46 @@
+{
+  "stage": "rtt",
+  "passed": true,
+  "start": {
+    "backend": "webusb",
+    "bufferedBytes": 0,
+    "connected": true,
+    "controlBlock": 19136512,
+    "displaySuppressed": false,
+    "error": "控制块 0x1240000，上行缓冲 32768 B（固件声明 3 个上行通道，本页读 ch0）",
+    "running": true,
+    "stats": {
+      "bytes": 0,
+      "corrupt": 0,
+      "hz": 0,
+      "lastBytes": 0,
+      "lastPolls": 0,
+      "lost": 0,
+      "polls": 0,
+      "rate": 0
+    }
+  },
+  "end": {
+    "backend": "webusb",
+    "bufferedBytes": 32767,
+    "connected": true,
+    "controlBlock": 19136512,
+    "displaySuppressed": false,
+    "error": "控制块 0x1240000，上行缓冲 32768 B（固件声明 3 个上行通道，本页读 ch0）",
+    "running": true,
+    "stats": {
+      "bytes": 32767,
+      "corrupt": 0,
+      "hz": 1.9972039145189298,
+      "lastBytes": 32767,
+      "lastPolls": 1,
+      "lost": 0,
+      "polls": 1,
+      "rate": 65442.38066704177
+    }
+  },
+  "bytes": 32767,
+  "patternExact": true,
+  "measuredBytesPerSecond": 6415.931482151206,
+  "limit": "Repeating text detects corrupt bytes/partial-line gaps; native sequence fixture separately checks full record loss."
+}

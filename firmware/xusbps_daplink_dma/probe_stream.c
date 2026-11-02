@@ -9,7 +9,10 @@
 #include "xusbps_class_cdc.h"
 #include "xusbps_endpoint.h"
 #include <string.h>
-#if defined(DAP_FIXED_FCLK0_TEST) && DAP_FIXED_FCLK0_TEST
+#if defined(DAP_MAX_SWCLK_HZ)
+// Share the explicitly timing-verified build limit with DAP_SWJ_Clock.
+#define PROBE_MAX_LINK_HZ DAP_MAX_SWCLK_HZ
+#elif defined(DAP_FIXED_FCLK0_TEST) && DAP_FIXED_FCLK0_TEST
 #define PROBE_MAX_LINK_HZ 66666666U
 #else
 #define PROBE_MAX_LINK_HZ 60000000U
@@ -709,7 +712,8 @@ static void status(uint8_t cmd, uint32_t out[12], int metrics) {
         out[10] = period;
         out[11] = flags | ((uint32_t)(mode == 2) << 8);
     } else {
-        out[0] = (mode == 2) | ((uint32_t)(mode == 2) << 16) | (1U << 2) | (1U << 4) |
+        out[0] = (mode == 2) | ((uint32_t)probe_target_is_riscv() << 1) |
+                 ((uint32_t)(mode == 2) << 16) | (1U << 2) | (1U << 4) |
                  ((uint32_t)nvars << 8) | ((uint32_t)nvars << 24);
         out[1] = actual_hz;
         out[2] = produced;
@@ -732,8 +736,8 @@ static int configure_hss(const uint8_t *req) {
     uint8_t n = req[9], f = req[8];
     if (mode == 2 || bench_active)
         return -7;
-    if (!n || n > 8 || req[1] < 8 + 6 * n || (f & 0x44))
-        return -6; // No RISC-V/trigger backend.
+    if (!n || n > 8 || req[1] < 8 + 6 * n || (f & 4) || ((f & 64) && !probe_target_is_riscv()))
+        return -6; // Trigger backend is not implemented; architecture must match.
     for (i = 0; i < n; i++) {
         const uint8_t *q = req + 10 + 6 * i;
         plan[i].addr = get32(q);
@@ -775,7 +779,7 @@ static int configure_hss(const uint8_t *req) {
     nvars = n;
     nwords = (uint8_t)w;
     frame_size = (uint8_t)bytes;
-    flags = f;
+    flags = (f & ~64U) | (probe_target_is_riscv() ? 64U : 0U);
     version = req[3] == 10 ? 2 : 1;
     if (version == 1) {
         if (p < 2)
@@ -916,8 +920,13 @@ static void control(const uint8_t *req, uint8_t *res) {
             rc = configure_hss(req);
             if (rc == -6 && mode != 2)
                 nvars = nwords = frame_size = 0;
-        } else if (act == 10)
-            rc = req[1] >= 3 && req[4] == 0 ? 0 : -9;
+        } else if (act == 10) {
+            rc = req[1] < 3 ? -6 : (mode || bench_active) ? -7 : probe_target_architecture(req[4]);
+            // Legacy RISC-V pages pass clockHz=0 (the software probe used
+            // that field for idle). Start this newly supported path at a
+            // qualified TCK; explicit native action12/clock tests are unchanged.
+            if(!rc && req[4]) requested_hz=10000000U;
+        }
         else if (req[1] < 10 || mode == 2 || pending_len || rtt_pl_running || dma_pending)
             rc = -7;
         else {

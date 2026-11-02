@@ -91,6 +91,30 @@ class NativeProbeTests(unittest.TestCase):
                 proxy.deliver(identity,body,operation)
             self.assertEqual(len(calls),1)
 
+    def test_sequence_delivery_survives_100000_requests_with_bounded_replay_history(self):
+        with tempfile.TemporaryDirectory() as folder:
+            token=Path(folder)/'token';token.write_text('c'*64)
+            proxy=NativeProbe(SimpleNamespace(),token)
+            calls=[0]
+            def execute():calls[0]+=1;return ({'ok':True,'value':calls[0]},200)
+            session='d'*32
+            # Out-of-order in-flight arrivals within the window are legal.
+            proxy.deliver('v2:'+session+':2',{},execute)
+            proxy.deliver('v2:'+session+':1',{},execute)
+            for seq in range(3,100010):proxy.deliver(f'v2:{session}:{seq}',{},execute)
+            self.assertEqual(calls[0],100009)
+            last=proxy.deliver(f'v2:{session}:100009',{},execute)
+            self.assertEqual(last[0]['value'],100009)
+            self.assertEqual(calls[0],100009)
+            with self.assertRaisesRegex(ValueError,'拒绝重放'):proxy.deliver('v2:'+session+':1',{},execute)
+            self.assertLessEqual(len(proxy.delivery_cache),256)
+            self.assertEqual(len(proxy.delivery_sessions),1)
+            self.assertLessEqual(proxy.delivery_sessions[session][1].bit_length(),4096)
+            self.assertFalse(proxy.delivery_seen)
+            with self.assertRaisesRegex(ValueError,'内容不一致'):
+                proxy.deliver(f'v2:{session}:100009',{'action':'reset'},execute)
+            self.assertEqual(calls[0],100009)
+
     def test_loopback_token_and_origin_are_required_before_hardware_dispatch(self):
         from flask import Flask
         app = Flask('native_probe_test')

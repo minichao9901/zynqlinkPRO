@@ -1,0 +1,13 @@
+import sys
+from pathlib import Path
+from elftools.elf.elffile import ELFFile
+sys.path.insert(0,'tools')
+from jtag_internal_trace import run
+with Path('build/hpm6800-speed-completion-20261102/pair66-arm/application.elf').open('rb') as f:
+    symbols={s.name:s.entry.st_value for s in ELFFile(f).get_section_by_name('.symtab').iter_symbols()}
+body='puts [rrd pc]\nputs [rrd r0]\nputs [rrd lr]\ntargets -set -filter {name =~ "APU"}\n'
+for n in ('swd_dma_errors','swd_dma_last_status','dap_dbg_exec_count','dap_dbg_usb_rx'):
+    body+=f'puts "STARTUP {n} [mrd -address-space AP0 -force -value {symbols[n]}]"\n'
+for a in (0x40020000,0x40020004,0xf8000170):
+    body+=f'puts "STARTUP {a:#x} [mrd -address-space AP0 -force -value {a}]"\n'
+print(run(body))

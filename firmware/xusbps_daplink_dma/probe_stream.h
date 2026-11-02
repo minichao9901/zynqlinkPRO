@@ -19,7 +19,9 @@ void probe_target_observe(uint32_t request, uint32_t data, uint8_t ack);
 uint32_t probe_target_dp_select(void);
 int probe_target_claim(uint32_t hz);
 int probe_target_claimed(void);
-int probe_target_transport(uint32_t port); // 0 auto, 1 SWD, 2 ARM JTAG
+int probe_target_transport(uint32_t port); // 0 auto, 1 SWD, 2 JTAG
+int probe_target_architecture(uint32_t riscv); // Web legacy target selector.
+int probe_target_is_riscv(void);
 void probe_target_release(void);
 void probe_target_forget(void);
 int probe_target_read(uint32_t addr, uint8_t *out, uint32_t size);

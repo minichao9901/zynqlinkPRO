@@ -1,0 +1,161 @@
+"""Real HPM6800 Web acceptance through the discovered authenticated page API.
+
+Requires an open toolbox browser worker and an explicitly verified probe pair.
+Flash stage programs the target. Use a new output directory; no automatic retry.
+"""
+import argparse
+import base64
+import hashlib
+import io
+import csv
+import json
+import math
+from pathlib import Path
+import sys
+import time
+
+ROOT=Path(__file__).resolve().parents[1]
+sys.path.insert(0,str(ROOT))
+from toolbox import Client,pack_file
+from elftools.elf.elffile import ELFFile
+
+
+def symbol(path,name):
+    with path.open('rb') as f:
+        found=ELFFile(f).get_section_by_name('.symtab').get_symbol_by_name(name)
+        if not found:raise ValueError('ELF symbol missing: '+name)
+        return int(found[0]['st_value'])
+
+
+def redacted(v):
+    if isinstance(v,list):return [redacted(x) for x in v]
+    if isinstance(v,dict):
+        out={k:redacted(x) for k,x in v.items() if k not in ('$base64','base64')}
+        for k in ('$base64','base64'):
+            if k in v:
+                data=base64.b64decode(v[k]);out[k+'Evidence']=dict(bytes=len(data),sha256=hashlib.sha256(data).hexdigest())
+        return out
+    return v
+
+
+class Web:
+    def __init__(self,a):
+        self.a=a;self.out=a.out;self.out.mkdir(parents=True,exist_ok=False)
+        self.client=Client(a.runtime,a.timeout);self.steps=[]
+        self.save('driver.py.txt',Path(__file__).read_text(encoding='utf-8'))
+    def save(self,name,value):
+        (self.out/name).write_text(value if isinstance(value,str) else json.dumps(value,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+    def call(self,payload):
+        started=time.perf_counter();r=self.client.request(payload)
+        self.steps.append(dict(request=redacted(payload),result=redacted(r),seconds=time.perf_counter()-started))
+        self.save('steps.json',self.steps);self.client.http('ack/'+r['job'],{})
+        if not r.get('ok'):raise RuntimeError(r.get('error') or str(r))
+        v=r.get('value')
+        if isinstance(v,dict) and v.get('returned'):
+            if v.get('errors'):raise RuntimeError('Browser errors: '+str(v['errors']))
+            return v.get('value')
+        return v
+    def page(self,p,op,**kw):return self.call(dict(action='workbench',page=p,op=op,**kw))
+    def invoke(self,p,m,*args,target='view'):return self.page(p,'invoke',method=m,args=list(args),target=target)
+    def set(self,p,s,v):return self.page(p,'set',selector=s,value=v)
+    def read(self,p,s):return self.page(p,'read',selector=s)
+    def upload(self,p,s,path,relative=None):return self.page(p,'upload',selector=s,files=[pack_file(path,relative)])
+    def wait(self,p,s,text,seconds=30):
+        end=time.monotonic()+seconds
+        while True:
+            v=self.read(p,s)
+            if text in v['text']:return v
+            if time.monotonic()>end:raise TimeoutError(s+' did not show '+text)
+            time.sleep(.1)
+    def download(self,p,path):
+        files=self.page(p,'downloads');assert files,'No browser download'
+        f=files[-1];data=bytearray();offset=0
+        while offset<f['bytes']:
+            r=self.page(p,'download',id=f['id'],offset=offset,length=min(1048576,f['bytes']-offset))
+            part=base64.b64decode(r['base64']);assert part;data+=part;offset+=len(part)
+        path.write_bytes(data);assert len(data)==f['bytes']
+        self.page(p,'discard',id=f['id']);return bytes(data)
+    def describe(self):
+        for p in ('flash','rtt','rttcdc','scope','dbg'):
+            self.save(p+'-describe.json',self.page(p,'describe'))
+        return dict(passed=True,scope='DOM/API discovery only; no hardware')
+    def protocol_probe(self):
+        self.page('scope','show');self.set('scope','#sc-target','riscv')
+        try:
+            self.invoke('scope','connectHid',False)
+            reply=self.invoke('scope','hidXfer',0x31,{'$base64':'CgE='})
+            values=reply['$bytes'];rc=values[2] if values[2]<128 else values[2]-256
+            result=dict(reply=values,rc=rc,summary=self.invoke('scope','summary'),
+                        status=self.read('scope','#sc-state'),passed=rc==0)
+            self.save('protocol.json',result);return result
+        finally:self.invoke('scope','disconnect')
+    def flash(self):
+        self.page('flash','show');self.set('flash','#f-backend','webusb');self.set('flash','#f-chip','hpm6800evk')
+        self.set('flash','#f-speed',self.a.clock);self.set('flash','#f-verify',True);self.set('flash','#f-reset',True)
+        path=self.a.elf.resolve();self.upload('flash','@file:view._fileInput',path)
+        # The file handler is asynchronous; await its visible parsed-file state.
+        self.wait('flash','#f-file-info',path.name)
+        rows=[]
+        for i in range(self.a.repeats):
+            self.page('flash','click',selector='#f-logclear')
+            started=time.perf_counter();self.invoke('flash','flash');seconds=time.perf_counter()-started
+            result=self.read('flash','#f-result')['text'];log=self.read('flash','#f-log')['text']
+            row=dict(repeat=i,seconds=seconds,result=result,log=log,passed='✅' in result,clockSelection=self.a.clock)
+            rows.append(row);self.save('flash.json',rows)
+            if not row['passed']:raise RuntimeError('Web Flash failed; do not repeat: '+result)
+        return dict(passed=True,rows=rows,elf=str(path),elf_sha256=hashlib.sha256(path.read_bytes()).hexdigest())
+    def scope(self):
+        self.page('scope','show');self.set('scope','#sc-target','riscv');self.set('scope','#sc-mock',False)
+        file=pack_file(self.a.elf.resolve());file['kind']='file'
+        self.invoke('scope','loadElfFile',file)
+        self.page('scope','click',selector='#sc-varclear')
+        addr=symbol(self.a.elf,'g_v')
+        fields=[('tick','u32'),('u_hi','u32'),('f_sin','f32'),('f_tri','f32'),('i_sq1k','i32'),('i_sq5k','i32'),('u_ramp','u32'),('lfsr','u32')]
+        for i,(name,scalar) in enumerate(fields[:self.a.channels]):
+            self.invoke('scope','toggleVar',dict(name='g_v.'+name,addr=addr+4*i,size=4,scalar=scalar),True)
+        self.set('scope','#sc-period',str(self.a.period));self.set('scope','#sc-seconds','20');self.set('scope','#sc-raw',True)
+        self.invoke('scope','connectHid',False);self.invoke('scope','connectUsb',False)
+        try:
+            self.invoke('scope','clear');self.invoke('scope','start')
+            time.sleep(self.a.seconds);self.invoke('scope','stop','HPM acceptance')
+            summary=self.invoke('scope','summary');self.save('scope-summary.json',summary)
+            assert summary['mode']=='real' and summary['samples']>0,summary
+            assert not any(summary.get(k) for k in ('connectErr','metricsError','lostUsb','lostGap','readErrors')),summary
+            self.invoke('scope','exportCsv');data=self.download('scope',self.out/'scope.csv')
+            rows=list(csv.DictReader(io.StringIO(data.decode('utf-8-sig'))));bad=0
+            times=[float(r['t_us']) for r in rows];assert all(b>a for a,b in zip(times,times[1:]))
+            for r in rows:
+                tick=int(float(r['g_v.tick']))
+                for name,scalar in fields[1:min(self.a.channels,7)]:
+                    value=float(r['g_v.'+name]);candidates=[]
+                    for t in (tick-1,tick,tick+1):
+                        p=t%20
+                        candidates.append(dict(u_hi=0x10000000|(t&65535),f_sin=round(math.sin(math.tau*t/20),6),
+                            f_tri=(p if p<10 else 20-p)/10-1,i_sq1k=1000 if t%10<5 else -1000,
+                            i_sq5k=1000 if t&1 else -1000,u_ramp=t%1000)[name])
+                    if not any(abs(value-x)<=(2e-6 if scalar=='f32' else 0) for x in candidates):bad+=1
+            assert rows and bad==0,('Scope contract mismatch',bad,len(rows))
+            self.invoke('scope','saveRaw');raw=self.download('scope',self.out/'scope.jsp')
+            self.page('scope','click',selector='#sc-zin');self.page('scope','click',selector='#sc-zout');self.invoke('scope','zoomToPoints')
+            self.invoke('scope','exportCsv');assert self.download('scope',self.out/'scope-after-view.csv')==data
+            return dict(passed=True,summary=summary,rowsChecked=len(rows),contractBad=bad,rawBytes=len(raw),viewDoesNotModifyData=True)
+        finally:
+            self.invoke('scope','stop','HPM cleanup');self.invoke('scope','disconnect')
+
+
+def main():
+    p=argparse.ArgumentParser(description=__doc__)
+    p.add_argument('--runtime',required=True);p.add_argument('--out',type=Path,required=True)
+    p.add_argument('--stage',choices=('describe','protocol-probe','flash','scope'),required=True)
+    p.add_argument('--elf',type=Path);p.add_argument('--clock',default='',help='Flash selector in kHz; blank exercises the default')
+    p.add_argument('--repeats',type=int,default=3);p.add_argument('--timeout',type=float,default=240)
+    p.add_argument('--seconds',type=float,default=2);p.add_argument('--period',type=float,default=1000);p.add_argument('--channels',type=int,choices=range(1,9),default=8)
+    a=p.parse_args()
+    if a.repeats<1 or a.seconds<=0 or a.period<=0 or (a.stage in ('flash','scope') and not a.elf):p.error('Invalid counts or missing target ELF')
+    w=Web(a);result=dict(stage=a.stage,passed=False)
+    try:result.update(getattr(w,a.stage.replace('-','_'))())
+    except BaseException as e:result['failure']=repr(e);raise
+    finally:w.save('result.json',result)
+
+
+if __name__=='__main__':main()

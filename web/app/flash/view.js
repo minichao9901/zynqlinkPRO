@@ -34,6 +34,7 @@ import { resolveHpmTarget, assertHpmIdentity } from '../targets/hpm/porting.js';
 import { selectedHpmBoard, rememberHpmBoard } from '../targets/hpm/select.js';
 import { AkaLinkHid } from '../hid/probe.js';
 import { FlashRunner } from './runner.js';
+import { DEFAULT_FLASH_CLOCK_KHZ } from './data-clock.js';
 import { parseFirmware, findGaps } from './image.js';
 import { bytes as fBytes } from '../core/format.js';
 import { waitMs } from '../core/pace.js';
@@ -251,6 +252,8 @@ export class FlashView {
     // 探针互斥：同页签的 RTT / J-Scope 会话先断开，再请别的页签让出探针
     if (!(await this._clearProbeUsers(name))) return;
 
+    this.lastFlash = null;
+    setStatus($('f-result'), '烧录中…', null);
     const t0 = Date.now();
     const timer = setInterval(() => {
       if ($('f-bar').hidden) this._status(`烧录中… 已耗时 ${((Date.now() - t0) / 1000) | 0}s`);
@@ -530,7 +533,7 @@ export class FlashView {
 
     const verify = $('f-verify').checked;
     const doReset = $('f-reset').checked;
-    const clockKhz = Number($('f-speed')?.value) || 1000;
+    const clockKhz = Number($('f-speed')?.value) || DEFAULT_FLASH_CLOCK_KHZ;
     const runner = new FlashRunner(this.probe, { clockKhz });
     this._log(`烧录数据时钟 ${clockKhz / 1000} MHz；执行控制 1 MHz`);
     lap('探针');
@@ -771,6 +774,9 @@ export class FlashView {
    *    但真实 JTAG 时序、ROM API 行为、output_mode 切换后的枚举都要等 bring-up。界面会明说这一点。
    */
   async _flashHpmRiscv(name){
+    const started = performance.now();
+    const timings = { prepareMs: 0, algorithmMs: 0, eraseMs: 0, programMs: 0, verifyMs: 0, resetMs: 0 };
+    const timed = async (key, fn) => { const at=performance.now(); try { return await fn(); } finally { timings[key]+=performance.now()-at; } };
     const board = hpmBoard($('f-chip').value);
     if (!board) throw new Error(`不认识的 HPM 板子：${$('f-chip').value}`);
 
@@ -846,7 +852,7 @@ export class FlashView {
     this.probe = probe;
     probe.fast = false;
     probe.onLog = s => this._log('   [usb] ' + s);
-    const clockKhz = Number($('f-speed')?.value) || 1000;
+    const clockKhz = Number($('f-speed')?.value) || DEFAULT_FLASH_CLOCK_KHZ;
     await probe.setClock(clockKhz * 1000);
     this._log(`烧录 JTAG 时钟 ${clockKhz / 1000} MHz`);
 
@@ -912,30 +918,37 @@ export class FlashView {
     const verify = $('f-verify').checked;
     const doReset = $('f-reset').checked;
     try {
-      const chipInfo = await flasher.setup();
+      timings.prepareMs = performance.now()-started;
+      const chipInfo = await timed('algorithmMs', () => flasher.setup());
       this._log(`   flashloader 就绪：容量 ${(chipInfo.totalBytes / 1048576).toFixed(2)} MB · 扇区 ${chipInfo.sectorBytes} B`);
 
       // ③ 擦 → 写 → 校验
       for (const seg of regions){
         this._status(`擦除 0x${seg.addr.toString(16)} 起 ${fBytes(seg.data.length)}…`);
-        await flasher.erase(seg.addr, seg.data.length);
+        await timed('eraseMs', () => flasher.erase(seg.addr, seg.data.length));
         this._log(`擦除 OK：0x${seg.addr.toString(16)} + ${seg.data.length} B`);
-        await flasher.program(seg.addr, seg.data);
+        await timed('programMs', () => flasher.program(seg.addr, seg.data));
         this._log(`烧写 OK：0x${seg.addr.toString(16)} + ${seg.data.length} B`);
         if (verify){
           this._status('校验（读回 flash 逐字节比）…');
-          await flasher.verify(seg.addr, seg.data);
+          await timed('verifyMs', () => flasher.verify(seg.addr, seg.data));
           this._log(`校验 OK：0x${seg.addr.toString(16)} + ${seg.data.length} B`);
         }
         done += seg.data.length;
       }
       this._bar(100);
-      await flasher.finish({ run: doReset });
+      await timed('resetMs', () => flasher.finish({ run: doReset }));
       if (doReset) this._log('已发系统复位（ndmreset），目标从 flash 启动');
       this._status(`烧录完成：${fBytes(done)} → ${board.name}（RISC-V/JTAG）`, 'ok');
       this._log(`小结：${fBytes(done)} · 校验${verify ? '开' : '关'} · 复位${doReset ? '开' : '关'} · ` +
         `JTAG 批次 ${jtag.summary().batches} 次 / ${jtag.summary().bytes} B · ` +
         `flash ${(chipInfo.totalBytes / 1048576).toFixed(2)} MB / 扇区 ${chipInfo.sectorBytes} B`);
+      timings.totalMs = performance.now()-started;
+      this.lastFlash = { ok: true, backend: 'hpm-riscv', target: board.id, clockKhz, bytes: done, verify, reset: doReset,
+        timings, jtag: jtag.summary() };
+      this._log('耗时小结：' + [['准备','prepareMs'],['算法','algorithmMs'],['擦除','eraseMs'],['写入','programMs'],['校验','verifyMs'],['复位','resetMs']]
+        .map(([label,key]) => `${label} ${(timings[key]/1000).toFixed(2)}s`).join(' · ') + ` · 合计 ${(timings.totalMs/1000).toFixed(2)}s`);
+      setStatus($('f-result'), `✅ ${board.name} · ${fBytes(done)}${verify ? ' · 校验通过' : ''}${doReset ? ' · 已复位运行' : ''}`, 'ok');
     } catch (e){
       try { await flasher.recoverAfterFailure(); this._log('   失败收尾：已尝试让目标停下来并系统复位（别把核扔在跑飞状态）'); } catch {}
       /**
@@ -978,7 +991,7 @@ export class FlashView {
          * 会直接连不上探针（跟 WebUSB 那边"谁占着调试器"是同一类问题）。
          */
         ...(useJlink ? { backend: 'jlink' } : {}),
-        speed: Number($('f-speed').value) || 0,
+        speed: Number($('f-speed').value) || DEFAULT_FLASH_CLOCK_KHZ,
       };
       if (cfg.target === 'custom'){
         cfg.cfgs = String($('f-cfgs').value || '').split(/[,\s;]+/).map(s => s.trim()).filter(Boolean);
@@ -999,6 +1012,8 @@ export class FlashView {
       if(this.bc===bridge)this.bc=null;
     }
   }
+
+  summary(){ return { busy: !!this.busy, lastFlash: this.lastFlash || null, result: $('f-result')?.textContent || '', clockSelection: $('f-speed')?.value || '' }; }
 
   // ================= 界面小工具 =================
   _bar(pct){

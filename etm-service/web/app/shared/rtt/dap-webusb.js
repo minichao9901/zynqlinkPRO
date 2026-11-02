@@ -671,7 +671,9 @@ export class WebUsbDapProbe {
   }
 
   async setClock(hz){
-    await this._ctrl(CMD.SWJ_Clock, u32leBytes(hz));
+    const reply = await this._ctrl(CMD.SWJ_Clock, u32leBytes(hz));
+    if (reply?.[0] !== 0) throw new Error(`探针拒绝调试时钟 ${hz} Hz（返回 ${reply?.[0] ?? '空'}）`);
+    this.requestedClockHz = hz;
   }
 
   /**

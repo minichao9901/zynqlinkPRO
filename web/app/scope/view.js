@@ -62,6 +62,7 @@ export class ScopeView {
     this.running = false;
     this.state = '空闲';
     this.packets = 0;
+    this.receivedSamples=0;this.tailCountDelta=null;
     this.lost = 0;
     this.decodeErr = 0;
     this.probeDropped = 0;
@@ -776,6 +777,7 @@ export class ScopeView {
   }
 
   _captureAlive(g){ return g === this._captureGen && !this._stopPromise && !this._releasing; }
+  _dataAlive(g){ return this._captureAlive(g) || (this._drainGen != null && this._drainGen===g); }
 
   async _stopData(){
     let failure;
@@ -796,7 +798,10 @@ export class ScopeView {
       }
     }}
     catch (e) { failure = e; }
-    try { if(drainBeforeQuiesce)await this.transport?.quiesce?.(); } catch (e) { failure ||= e; }
+    try { if(drainBeforeQuiesce){
+      if(this.transport?.drain)await this.transport.drain();
+      else await this.transport?.quiesce?.();
+    }} catch (e) { failure ||= e; }
     try { await this.transport?.stop(); } catch (e) { failure ||= e; }
     if (failure){
       this._stopUnconfirmed = true;
@@ -914,6 +919,7 @@ export class ScopeView {
     this.trigger = new Trigger();
     this.applyTrigger(true);
     this.packets = 0; this.lost = 0; this.decodeErr = 0; this.probeDropped = 0; this.raw = [];
+    this.receivedSamples=0;this.tailCountDelta=null;
     this.usbDrop = 0; this.probeYield = 0; this.readErrors = 0; this.probeMetrics = null; this.metricsError = null;
     this._metricsAt = 0; this._statAt = 0; this._qualityCounterRolled = false; this.periodActualUs = 0;
     this._qualityReplay = false; this._qualityStat = null;
@@ -968,7 +974,7 @@ export class ScopeView {
        *    早就被丢掉**，于是"等 DEF 当起跑线"的守卫永远等不到、新采集一个样本都没有。
        *    现在先 start() 读起来（顺便把上一轮的残留吃掉），再发 START。
        */
-      await this.transport.start(chunk => { if (this._captureAlive(g)) this.onChunk(chunk); }, e => { if (this._captureAlive(g)) this._onDataPlaneDead(e); });
+      await this.transport.start(chunk => { if (this._dataAlive(g)) this.onChunk(chunk); }, e => { if (this._captureAlive(g)) this._onDataPlaneDead(e); });
       if (!this._captureAlive(g)) return;
       if (!this.transport.running) throw new Error('数据端点未能启动');
       this._startWatchdog();          // 采集中途断流的兜底（见 _onDataPlaneDead 的说明）
@@ -1066,11 +1072,12 @@ export class ScopeView {
   async stop(reason){
     this.probeManager?.cancel('scope');
     if (this._stopPromise) return await this._stopPromise;
+    this._drainGen=this.transport?.epAddr===0x87 && this._capturing ? (this._captureGen || 0) : null;
     this._captureGen = (this._captureGen || 0) + 1;
     this._stopPromise = this._stopOnce(reason);
     try { return await this._stopPromise; }
     catch (e) { this.setStatusText(e.message, 'err'); throw e; }
-    finally { this._stopPromise = null; this.syncButtons(); }
+    finally { this._drainGen=null;this._capturing=false;this._stopPromise = null; this.syncButtons(); }
   }
 
   async _stopOnce(reason){
@@ -1086,13 +1093,18 @@ export class ScopeView {
     if (!this.running && !this._starting && !this.transport?.running && !this._stopUnconfirmed && !needsManagerConfirm) return;
     const hadData = this.running || this.transport?.running;
     this.running = false;
-    this._capturing = false;                 // DATA 分支据此停止入缓冲（见那里的说明）
+    if(this._drainGen==null)this._capturing = false;
     // 先给个即时反馈：后面两个 await（排空 + HID STOP）要几十毫秒，这期间界面上不该还写着"采样中"
     this.setStatusText('正在停止…', '');
     if (this._startPromise) await this._startPromise.catch(() => {});
     if (this._stopUnconfirmed && !this.hid) throw new Error('采样停止尚未确认，请先重新连接探针，再点停止');
     if (hadData || this._startTouched || this.transport?.running || this._stopUnconfirmed) await this._stopData();
+    this._capturing=false;this._drainGen=null;
     await this.readScopeMetrics({fresh: true}).catch(e => { this.metricsError = e.message; });
+    if(this.transport?.epAddr===0x87 && this.probeMetrics && !(this._captureFlags & P.SCOPE_FLAG.DISCARD)){
+      this.tailCountDelta=(this.receivedSamples || 0)-this.probeMetrics.produced;
+      if(this.tailCountDelta!==0)this.metricsError=`样本未完整接收：收到 ${this.receivedSamples || 0}，探针 ${this.probeMetrics.produced}`;
+    }
     const st = this.store;
     const spanUs = st?.count > 1 ? st.timeAt(st.count - 1) - st.timeAt(0) : 0;
     const why = reason || this._stopReason;
@@ -1101,7 +1113,8 @@ export class ScopeView {
     this.setStatusText(`已停止${why ? `（${why}）` : ''}：${st?.count || 0} 个样本` +
       (spanUs ? ` / ${fmtTime(spanUs)}` : '') +
       `，跳拍 ${this.probeDropped || 0} / USB 丢样本 ${this.usbDrop || 0} / 读错 ${this.readErrors || 0} / 包缺口 ${this.lost}`,
-      why === '缓冲已满' || this.lost || this.probeDropped || this.usbDrop || this.readErrors ? 'warn' : 'ok');
+      why === '缓冲已满' || this.lost || this.probeDropped || this.usbDrop || this.readErrors || this.metricsError ? 'warn' : 'ok');
+    if(this.metricsError)this.setStatusText(this.state+'；'+this.metricsError,'err');
     this.syncButtons();
     this._needDraw = true;
   }
@@ -1558,10 +1571,12 @@ export class ScopeView {
           const direct = this.trigger.mode === TRIG.NONE && vars.length === 1 &&
             vars[0].size === 4 && vars[0].scalar === 'u32' &&
             this.store.pushU32Packet(pkt.payload, pkt.n, t0, per) !== false;
+          let decoded=direct ? pkt.n : 0;
           if (!direct){
             const nums = P.decodeSamples(vars, pkt.payload, pkt.n, []);
             const fr = new Array(nv); // Reuse the frame; Trigger stores only scalar state.
             const fit = Math.min(pkt.n, Math.floor(nums.length / nv));
+            decoded=fit;
             for (let i = 0; i < fit; i++){
               for (let k = 0; k < nv; k++) fr[k] = nums[i * nv + k];
               const idx = this.store.count;
@@ -1571,6 +1586,7 @@ export class ScopeView {
               }
             }
           }
+          this.receivedSamples=(this.receivedSamples || 0)+decoded;
           /**
            * 🚨「时长」= **目标侧过了多久**，不是"攒够多少个样本"。
            *    老算法把缓冲按"名义速率 × 时长 × 1.25"开好、满了才停，而探针达不到名义速率时
@@ -1607,6 +1623,7 @@ export class ScopeView {
   }
 
   clear(){
+    if(!this._capturing){this.receivedSamples=0;this.tailCountDelta=null;}
     this.store?.reset();
     this.stream = new P.PacketStream();
     this.seqT = new P.SeqTracker();
@@ -1713,6 +1730,7 @@ export class ScopeView {
   /** 回放 .jsp：把当时的字节流重新喂一遍（不连硬件也能看波形 / 调触发）*/
   async replayFile(file){
     try {
+      this.receivedSamples=0;this.tailCountDelta=null;this.probeMetrics=null;
       this._qualityReplay = true; this._qualityConfig = { 文件: file.name || '原始包回放' };
       this.qualityHistory?.reset(); this.qualityHistory?.note('replay','从文件回放，不引用当前探针计数');
       const buf = new Uint8Array(await file.arrayBuffer());
@@ -1864,6 +1882,8 @@ export class ScopeView {
       plan: this.plan ? { spans: this.plan.spans.length, frameBytes: this.plan.frameBytes,
                           estUs: +this.plan.estUs.toFixed(2), estHz: this.plan.estHz } : null,
       samples: st?.count || 0,
+      receivedSamples:this.receivedSamples || 0,
+      tailCountDelta:this.tailCountDelta ?? null,
       capacity: st?.capacity || 0,
       packets: this.packets,
       lost: this.lost + (this.probeDropped || 0) + (this.usbDrop || 0) + (st?.overrun || 0),

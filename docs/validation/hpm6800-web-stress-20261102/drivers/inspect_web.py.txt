@@ -1,0 +1,13 @@
+import sys,json
+from pathlib import Path
+sys.path.insert(0,str(Path.cwd()))
+from toolbox import Client
+base=Path('build/hpm6800-web-stress-20261102')
+client=Client(str(base/'runtime'),60)
+for page in ('flash','rtt','rttcdc','scope','dbg'):
+    r=client.request(dict(action='workbench',page=page,op='describe'))
+    client.http('ack/'+r['job'],{})
+    assert r['ok'],r
+    v=r['value']
+    (base/(page+'-describe.json')).write_text(json.dumps(v,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+    print(page,dict(keys=list(v),methods=v.get('methods'),targets=v.get('targets')))

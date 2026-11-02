@@ -1,0 +1,77 @@
+{
+  "webFlashMedianSeconds": 21.905127199999697,
+  "openocdMedianSeconds": 2.9705424000003404,
+  "openocdFasterFactor": 7.374116996275558,
+  "loadBytes": 47856,
+  "actualClockHz": 9999999.833333334,
+  "random": [
+    {
+      "name": "random-seed-680020261102-v2",
+      "steps": 24,
+      "rawPassed": 7,
+      "flashTransitions": 22,
+      "seconds": 863.2026550769806
+    },
+    {
+      "name": "random-corrected-seed-680020261102",
+      "steps": 8,
+      "rawPassed": 5,
+      "flashTransitions": 7,
+      "seconds": 329.83089661598206
+    }
+  ],
+  "rawScopeFailures": [
+    {
+      "path": "random-corrected-seed-680020261102/02-scope/scope-failure.jsp",
+      "bytes": 107008,
+      "firstSequence": 1,
+      "definitions": 0,
+      "samples": 2283,
+      "probeProduced": 2283,
+      "uiReceived": 809
+    },
+    {
+      "path": "random-corrected-seed-680020261102/08-scope/scope-failure.jsp",
+      "bytes": 104960,
+      "firstSequence": 1,
+      "definitions": 0,
+      "samples": 2234,
+      "probeProduced": 2234,
+      "uiReceived": 782
+    }
+  ],
+  "cdcGap": {
+    "bytes": 958464,
+    "sha256": "5fab749d880a0134d0aee478a9df1b144272ac61f8251fa14450c267424eb799",
+    "phaseChanges": [
+      {
+        "offset": 733184,
+        "before": 0,
+        "after": 7
+      },
+      {
+        "offset": 749568,
+        "before": 7,
+        "after": 1
+      },
+      {
+        "offset": 794624,
+        "before": 1,
+        "after": 8
+      }
+    ],
+    "note": "Pattern phase change is fact; three lost 2048B chunks is a hypothesis, not proven loss count."
+  },
+  "requestPressure": {
+    "ok": true,
+    "value": {
+      "cached": 256,
+      "legacyRequests": 0,
+      "redeliveries": 0,
+      "requests": 316510,
+      "sequenceClients": 1
+    }
+  },
+  "originalFlashRestored": true,
+  "finalIdentityMatched": true
+}

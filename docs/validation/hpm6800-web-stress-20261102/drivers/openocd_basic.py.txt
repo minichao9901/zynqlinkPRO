@@ -1,0 +1,7 @@
+from pathlib import Path
+import subprocess,json
+b=Path(__file__).resolve().parent
+args=['E:/sdk_env_v1.11.0/tools/openocd/openocd.exe','-d2','-s','E:/sdk_env_v1.11.0/tools/openocd/tcl','-s','E:/sdk_env_v1.11.0/hpm_sdk/boards/openocd','-f',str(b/'hpm6800.cfg'),'-c','init','-c','halt','-c','resume','-c','shutdown']
+r=subprocess.run(args,capture_output=True,text=True,encoding='utf-8',errors='replace',timeout=30)
+(b/'openocd-after-web-basic.log').write_text(r.stdout+r.stderr,encoding='utf-8')
+print(r.returncode,r.stdout[-500:],r.stderr[-1800:])

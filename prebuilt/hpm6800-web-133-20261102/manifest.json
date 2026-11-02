@@ -1,0 +1,87 @@
+{
+  "status": "HPM6800 native speed and Web functional evidence; remaining ZL-005 missing DEF and ZL-094 CDC gaps, not a universal release",
+  "formal_product_release": false,
+  "source_revision": "pending final source commit",
+  "source_variant_base": "b5bb054",
+  "source_overlay": "../../docs/validation/hpm6800-web-stress-20261102/build-inputs/manifest.json",
+  "bit_reused_unchanged_from": "prebuilt/hpm6800-idle64-133-experimental-20261102/probe.bit",
+  "build": {
+    "opt": "3",
+    "compact_code": true,
+    "out": "build/hpm6800-web-stress-20261102/ps-web1",
+    "project": "xusbps_daplink_dma",
+    "trace": false,
+    "usb_trace": false,
+    "experimental_zero_idle": false,
+    "max_swclk_hz": 66666666,
+    "timing": "prebuilt\\hpm6800-idle64-133-experimental-20261102\\verified_clock.json",
+    "fixed_fclk133_swd_test": false,
+    "bsp": null,
+    "gcc": "E:\\Xilinx\\SDK\\2018.3\\gnu\\aarch32\\nt\\gcc-arm-none-eabi\\bin\\arm-none-eabi-gcc.exe"
+  },
+  "timing": {
+    "FCLK_max_Hz": 133333333,
+    "SWCLK_max_Hz": 66666666,
+    "setup_slack_ns": 0.179,
+    "hold_slack_ns": 0.034,
+    "requested_FCLK_Hz": 133333333,
+    "RTL_DEBUG": 0,
+    "optional_observation_cells": 0,
+    "formal_product_acceptance": false
+  },
+  "evidence": "../../docs/validation/hpm6800-web-stress-20261102/README.md",
+  "files": {
+    ".gitattributes": {
+      "bytes": 21,
+      "sha256": "ffe82f3c5b968ed009c2577fa38f32c83be167799ee565d40a18e3440c57b342"
+    },
+    "application.elf": {
+      "bytes": 818104,
+      "sha256": "e1bf65a6369273225c0e46684308e05a02a0b297029d2159e91e37cb98e62066"
+    },
+    "cdc.rpt": {
+      "bytes": 145693,
+      "sha256": "7e864df767aa7b5560e456eae6f54a2cbe529ddafed35a1315351cedc93d0566"
+    },
+    "check_timing.rpt": {
+      "bytes": 3140,
+      "sha256": "8aa38e3ba0e7b6bda81cfee04bf4f2989999e7ded166a85eb6442a580bdd0907"
+    },
+    "implemented-constraints.xdc": {
+      "bytes": 2359,
+      "sha256": "8d93be28e2bb23f466f9ff79cdef9f9f266b0507514d393bdf3619afecf37242"
+    },
+    "probe.bit": {
+      "bytes": 4045674,
+      "sha256": "106d579bc1b79c2b873fd1e3eb2609d468892a67613d85a6e41d4dc90c8fc177"
+    },
+    "ps-build.json": {
+      "bytes": 5481,
+      "sha256": "c7a6ca1306a617d37afdebbf1ee765dc82456cfa46061c5c90550b14de5625a9"
+    },
+    "ps7_init.tcl": {
+      "bytes": 35333,
+      "sha256": "d3eeab6707765ab59acb924e39ff5c77c013da8cbf598b181e9eb43578f29ece"
+    },
+    "rtl-stamp.json": {
+      "bytes": 2169,
+      "sha256": "feaee4385433ef1d91f04d52b7cc0ad07f4490aa4103e67275cf44303cb297cf"
+    },
+    "swclk_launch.rpt": {
+      "bytes": 3765,
+      "sha256": "98a6098de58014e657eccf8d02701969e061b2354a9aad2d9c6c06ace918ff28"
+    },
+    "timing_verified.rpt": {
+      "bytes": 160530,
+      "sha256": "7027e4278a0e44aca7efee1ab51ffa6ed0c81787a1de2854352d53669b7b2e28"
+    },
+    "utilization.rpt": {
+      "bytes": 12760,
+      "sha256": "a85cc4ed54f53138b15ed2e2158324f99da53605fc6869f3c5d2755111c99e18"
+    },
+    "verified_clock.json": {
+      "bytes": 205,
+      "sha256": "2132320b7829c261bd880bb0c0b898f5342f11d95c7e97e1dc0dc29e890fe557"
+    }
+  }
+}

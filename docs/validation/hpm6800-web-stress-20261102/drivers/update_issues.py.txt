@@ -1,0 +1,25 @@
+from pathlib import Path
+p=Path('docs/项目问题跟踪列表.md');s=p.read_text(encoding='utf-8');rows=s.splitlines()
+updates={
+'ZL-085':('已关闭','流上限统一DAP构建cap，显式RISC-V最高档采用ARM PLL/10，保留DDR所有权守卫。生产C双cap模型及15档×三SRAM窗口/RTT/HSS通过；实际66.667MHz/idle22/mode17 AXI3.448/3.401MB/s，三个窗口各30秒恢复通过。限定本133MHz实验配对，不代表所有平台release。'),
+'ZL-086':('已关闭','默认标签、FlashRunner/DataClock及RISC-V/桥fallback统一10MHz，保留显式选择和Cortex-M执行控制1MHz。物理MEM-AP0核对实际9999999.833Hz，三轮逐字节校验/复位通过；新冻结EXE默认标签及两套HPM靶子实烧通过。'),
+'ZL-087':('已关闭','兼容目标选择/IR1/5位元数据，HSS状态和DEF依据实际架构，保留原生action12与忙/端口守卫。旧PS页内返回-9，新PS返回0；九套生产C及真实Web CDC、8变量RISC-V采样/随机切换验证。缺首DEF另归ZL-005，未一并关闭。'),
+'ZL-088':('已关闭','HPM补成功结果、真实加载字节和分阶段计时；开始清旧结果。三套目标及随机29次镜像切换均完成校验/复位，冻结EXE结果可见。早期实际50MHz数据单列保留，不冒充10MHz。'),
+'ZL-089':('已关闭','每次Connect/Configure后重设最新成功时钟，含flashloader再次dm.init；setClock检查返回码。真实方法连接/重连/错误测试及修前50MHz、修后9999999.833Hz物理MEM-AP0快照齐备；10MHz Web/OpenOCD各三轮重测通过。'),
+'ZL-090':('已关闭','修正控件/摘要契约，summary暴露真实wrErr；不重设已选中的禁用控件。调试参数改在prologue存参后比较（入口地址断点不能用陈旧栈槽作判据）。保留原24步及CLI重复worker拒绝记录；修正后8步与冻结EXE功能对照完成，剩余失败分别登记ZL-005/094。'),
+'ZL-091':('已关闭','STOP确认后排空在飞/队列读，旧轮尾DATA在确认排空前继续接收，立即取消旧启动任务；新增收到/最终计数差，超时/缺样明确失败。四个尾部/并发/超时模型及本机native路径8变量完整RAW/计数复验通过。缺DEF病例RAW仍含全部DATA，单独ZL-005；未声称其他探针或Chrome直连全面验收。'),
+'ZL-092':('已关闭','升级每客户端单调序号+4096位有界已见窗口，保留256个结果和在飞项；回收/过旧请求拒绝重放，旧UUID兼容守卫保留。100009次模型、重载/iframe/乱序/内容冲突通过；真实32步压力达到316510次、缓存256、旧请求0，调试清理/最终引擎空闲通过。'),
+}
+for i,row in enumerate(rows):
+    if not row.startswith('| ZL-'):continue
+    fields=row.split('|');key=fields[1].strip()
+    if key in updates:
+        state,action=updates[key];fields[3]=' '+state+' ';fields[6]=' '+action+' ';rows[i]='|'.join(fields)
+    elif key=='ZL-070':
+        fields[6]=fields[6].rstrip()+' 本轮66.667MHz/idle22的3.375us单变量296.296k及8变量56.338k组/s各3×10秒零跳采窗口通过；保留旧60MHz坏点，不承诺任意时长。 '
+        fields[8]=fields[8].rstrip()+'；[R21] ';rows[i]='|'.join(fields)
+    elif key=='ZL-073':
+        fields[6]=fields[6].rstrip()+' 后续统一cap并完成实际66.667MHz/idle22/mode17，AXI3.448/3.401MB/s，三个窗口各30秒恢复、15档矩阵通过，仍是单板超规格研究。 '
+        fields[8]=fields[8].rstrip()+'；[R21] ';rows[i]='|'.join(fields)
+p.write_text('\n'.join(rows)+'\n',encoding='utf-8')
+print('Updated',','.join(updates),'and native frontier references.')

@@ -87,6 +87,10 @@ export class DapJtagTransport {
     // DAP_JTAG_Configure：请求 = 设备数 + 每个 TAP 的 IR 长度
     const cfg = await this.probe._ctrl(DAP.JTAG_CONFIGURE, Uint8Array.of(1, this.irLength));
     if (cfg[0] !== 0x00) throw new Error(`DAP_JTAG_Configure 失败（状态 0x${cfg[0].toString(16)}）`);
+    // DAP_Connect may restore probe defaults. Reapply the latest successful
+    // user request after EVERY connect, including flashloader dm.init().
+    // A new raw RISC-V connection without a selection starts at 10MHz.
+    await this.probe.setClock(Number(this.probe.requestedClockHz) || 10000000);
     this.jtag = true;
     this.log(`DAP 已切到 JTAG（IR 长度 ${this.irLength}，TAP 数 ${cfg[1] ?? 1}）`);
   }

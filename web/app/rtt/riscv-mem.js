@@ -90,6 +90,8 @@ export class RiscvMem {
       dmstatus: this.dm?.lastDmstatus,
       sbcs: this.dm?.lastSbcs,
       scans: this.dm?.scans,
+      jtag: this.jtag?.summary?.() || null,
+      packetBytes: this.probe?.pkt ?? null,
       clockKhz: this.clockKhz,
     };
   }

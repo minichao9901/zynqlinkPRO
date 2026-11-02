@@ -10,6 +10,33 @@ function host(){
 }
 export function nativeProbeEnabled(){return !!host();}
 const identity=()=>crypto.randomUUID().replaceAll('-','');
+function deliveryIdentity(w,token){
+  // Share one counter with same-origin workbench iframes. Persist it across
+  // reloads so an old request can never become a new hardware action.
+  try{
+    while(w.parent && w.parent!==w && w.parent.document.body?.dataset?.nativeProbe==='1' &&
+      new URLSearchParams(w.parent.location.search).get('trace-cli')===token)w=w.parent;
+  }catch{}
+  const key='native-delivery-v2:'+token;
+  let state=w.__nativeDeliveryV2;
+  if(!state || state.token!==token){
+    let saved;
+    try{saved=JSON.parse(w.sessionStorage.getItem(key));}catch{}
+    state={token,id:/^[0-9a-f]{32}$/.test(saved?.id||'')?saved.id:identity(),
+      sequence:Number.isSafeInteger(saved?.sequence)&&saved.sequence>=0?saved.sequence:0};
+    w.__nativeDeliveryV2=state;
+  }
+  // A back/forward-cached document may resume after another document has
+  // advanced this tab's persisted sequence. Never reuse those numbers.
+  try{
+    const saved=JSON.parse(w.sessionStorage.getItem(key));
+    if(saved?.id===state.id && Number.isSafeInteger(saved.sequence) && saved.sequence>state.sequence)state.sequence=saved.sequence;
+  }catch{}
+  if(state.sequence>=Number.MAX_SAFE_INTEGER){state.id=identity();state.sequence=0;}
+  state.sequence++;
+  try{w.sessionStorage.setItem(key,JSON.stringify({id:state.id,sequence:state.sequence}));}catch{}
+  return `v2:${state.id}:${state.sequence}`;
+}
 function sessionOwner(kind,key){
   const w=host();
   try{
@@ -34,7 +61,7 @@ async function call(kind,action,value={}){
     if(action==='list')return [];
     throw Error('离线验收：硬件访问已禁用');
   }
-  const delivery=identity();
+  const delivery=deliveryIdentity(w,token);
   let response,result;
   const attempts=w.document.body.dataset.nativeDelivery==='1'?3:1;
   for(let attempt=0;attempt<attempts;attempt++){

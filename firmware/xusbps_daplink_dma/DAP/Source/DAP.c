@@ -486,7 +486,17 @@ static uint32_t DAP_SWJ_Clock(const uint8_t *request, uint8_t *response) {
     target_fclk = clock * 2U * divisor;
     if (target_fclk > DAP_MAX_SWCLK_HZ * 2U) target_fclk = DAP_MAX_SWCLK_HZ * 2U;
   }
-  int fclk_hz = ps_set_fclk0_hz(target_fclk);
+  int fclk_hz;
+#if DAP_MAX_SWCLK_HZ >= 66666666U
+  /* The IO-PLL integer tree tops out at 64.286MHz TCK below this request.
+   * The separately timing-qualified 133.333MHz profile uses ARM PLL /10.
+   * Select it only for an explicit RISC-V maximum-rate request; lower
+   * rates and ARM/SWD retain their existing source/divider policy. */
+  if (DAP_Data.debug_port == DAP_PORT_JTAG && JTAG_IDCodeIR() == 1U && clock == 66666666U)
+    fclk_hz = etm_ddr_owned() ? -1 : ps_fixed133_select();
+  else
+#endif
+    fclk_hz = ps_set_fclk0_hz(target_fclk);
 #endif
   if (fclk_hz <= 0) {
     *response = DAP_ERROR;

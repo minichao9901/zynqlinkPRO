@@ -1,0 +1,660 @@
+[
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "invoke",
+      "method": "summary",
+      "args": [],
+      "target": "view"
+    },
+    "result": {
+      "job": "d49da9a28f3f3c97cd598f75252b8667",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": {
+          "awaitingDefinition": false,
+          "benchUs": null,
+          "blob": null,
+          "capacity": 0,
+          "captureFlags": 0,
+          "connectErr": null,
+          "dapYields": 0,
+          "definitionReceived": false,
+          "elf": {
+            "name": "fw.elf",
+            "note": "",
+            "source": "dwarf",
+            "stats": {
+              "cu": 44,
+              "dies": 7988,
+              "vars": 1270
+            },
+            "versions": [
+              5
+            ]
+          },
+          "lod": false,
+          "lost": 0,
+          "lostGap": 0,
+          "lostProbe": 0,
+          "lostUsb": 0,
+          "metricsError": null,
+          "mockVars": [
+            "mock0.f32",
+            "mock1.f32",
+            "mock2.i32",
+            "mock3.u16",
+            "mock4.i16",
+            "mock5.u8",
+            "mock6.i8",
+            "mock7.f64"
+          ],
+          "mode": "real",
+          "packets": 0,
+          "plan": {
+            "estHz": 81446,
+            "estUs": 12.28,
+            "frameBytes": 32,
+            "spans": 1
+          },
+          "probeMetrics": null,
+          "rateHz": 0,
+          "raw": 0,
+          "readErrors": 0,
+          "receivedSamples": 0,
+          "resyncs": 0,
+          "running": false,
+          "samples": 0,
+          "stalePackets": 0,
+          "state": "探针连接已关闭",
+          "supportsMetrics": false,
+          "tailCountDelta": null,
+          "transport": null,
+          "trigger": {
+            "hit": -1,
+            "hits": 0,
+            "marker": false,
+            "mode": 0
+          },
+          "varCount": 8,
+          "vars": [
+            "g_v.tick:u32@0x1240000",
+            "g_v.u_hi:u32@0x1240004",
+            "g_v.f_sin:f32@0x1240008",
+            "g_v.f_tri:f32@0x124000c",
+            "g_v.i_sq1k:i32@0x1240010",
+            "g_v.i_sq5k:i32@0x1240014",
+            "g_v.u_ramp:u32@0x1240018",
+            "g_v.lfsr:u32@0x124001c"
+          ],
+          "view": {
+            "end": 1,
+            "start": 0
+          }
+        },
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.014573200000086217
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rtt",
+      "op": "invoke",
+      "method": "summary",
+      "args": [],
+      "target": "view"
+    },
+    "result": {
+      "job": "5be85cba8f6fde9faf97cbd4cb00b9d2",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": {
+          "backend": "webusb",
+          "bufferedBytes": 32767,
+          "connected": true,
+          "controlBlock": 19136512,
+          "displaySuppressed": false,
+          "error": "控制块 0x1240000，上行缓冲 32768 B（固件声明 3 个上行通道，本页读 ch0）",
+          "running": true,
+          "stats": {
+            "bytes": 32767,
+            "corrupt": 0,
+            "hz": 0,
+            "lastBytes": 32767,
+            "lastPolls": 1,
+            "lost": 0,
+            "polls": 1,
+            "rate": 0
+          }
+        },
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.12494600000172795
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "dbg",
+      "op": "invoke",
+      "method": "summary",
+      "args": [],
+      "target": "view"
+    },
+    "result": {
+      "job": "1f3265b94b9dc1709f1767a42916ee13",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": {
+          "backend": "RISC-V/JTAG",
+          "bpCap": 8,
+          "bps": [],
+          "clockKhz": 10000,
+          "connected": false,
+          "elf": {
+            "files": 101,
+            "lines": 2795,
+            "name": "fw.elf",
+            "rtt": null,
+            "source": "dwarf",
+            "symbols": 906,
+            "vars": 51
+          },
+          "halted": false,
+          "lastStepMode": "into(insn)",
+          "lastStepOk": null,
+          "memAddr": "0x00000000",
+          "memLen": 0,
+          "outLines": 146,
+          "pc": 2147506020,
+          "regs": 0,
+          "rtt": null,
+          "src": {
+            "cur": {
+              "file": "E:/web-serial-rtt-tools/tools/target-firmware/hpm6800evk_dbgstress/src/engine.c",
+              "line": 7
+            },
+            "files": 5,
+            "ready": true,
+            "shown": 32
+          },
+          "symRows": 300,
+          "watch": [
+            {
+              "addr": 19136608,
+              "error": null,
+              "expr": "g_model.magic",
+              "value": "1297040453"
+            },
+            {
+              "addr": 19136616,
+              "error": null,
+              "expr": "g_model.flags.word",
+              "value": "2141320111"
+            },
+            {
+              "addr": 19136620,
+              "error": null,
+              "expr": "g_model.flags.bits.level",
+              "value": "7  (0x7)"
+            },
+            {
+              "addr": 19136628,
+              "error": null,
+              "expr": "g_model.flags.sbits.bias",
+              "value": "13  (0xd)"
+            },
+            {
+              "addr": 19136520,
+              "error": null,
+              "expr": "g_stage",
+              "value": "0"
+            }
+          ],
+          "watching": false
+        },
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.1047841999989032
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rttcdc",
+      "op": "invoke",
+      "method": "summary",
+      "args": [],
+      "target": "hid"
+    },
+    "result": {
+      "job": "ff99d0566b53035cd458a3ba97ec6900",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": {
+          "cbAddr": "0x1240000",
+          "connected": false,
+          "dapYield": 0,
+          "info": "已连接：ZynqLink probe control · 12345678 · FW 0.5-orbtrace · SN 12345678",
+          "label": "",
+          "mock": false,
+          "moved": 2949120,
+          "rdErr": 0,
+          "rescans": 0,
+          "running": false,
+          "stall": 0,
+          "startRc": 0,
+          "state": "未运行（点「启动转发」或「自动搜控制块」）",
+          "supported": true,
+          "swdMhz": 9,
+          "wrErr": 0
+        },
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.10470030000033148
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "invoke",
+      "method": "stop",
+      "args": [],
+      "target": "view"
+    },
+    "result": {
+      "job": "fa9cc073b054cff9204d1360fb8036d4",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.11862490000021353
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "invoke",
+      "method": "disconnect",
+      "args": [],
+      "target": "view"
+    },
+    "result": {
+      "job": "cb917c3be1fcd1133cf49c9084be134f",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": true,
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.12030890000096406
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rtt",
+      "op": "invoke",
+      "method": "disconnect",
+      "args": [],
+      "target": "view"
+    },
+    "result": {
+      "job": "f54cac0a92fc77be6673a9237b068835",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    },
+    "seconds": 2.0718010000000504
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rttcdc",
+      "op": "invoke",
+      "method": "stop",
+      "args": [],
+      "target": "hid"
+    },
+    "result": {
+      "job": "1c917db5e43c905609a61661e6e9904b",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.1054535000002943
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rttcdc",
+      "op": "invoke",
+      "method": "disconnect",
+      "args": [],
+      "target": "hid"
+    },
+    "result": {
+      "job": "0569add9329193689ed4c9f73812837d",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": true,
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.03164190000097733
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rttcdc",
+      "op": "invoke",
+      "method": "close",
+      "args": [],
+      "target": "session"
+    },
+    "result": {
+      "job": "9bf20bba88df512b9eeef7fba5517ba3",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.12591710000015155
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "invoke",
+      "method": "summary",
+      "args": [],
+      "target": "view"
+    },
+    "result": {
+      "job": "172f03e9f12cc271d065ff74c91b37cf",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": {
+          "awaitingDefinition": false,
+          "benchUs": null,
+          "blob": null,
+          "capacity": 0,
+          "captureFlags": 0,
+          "connectErr": null,
+          "dapYields": 0,
+          "definitionReceived": false,
+          "elf": {
+            "name": "fw.elf",
+            "note": "",
+            "source": "dwarf",
+            "stats": {
+              "cu": 44,
+              "dies": 7988,
+              "vars": 1270
+            },
+            "versions": [
+              5
+            ]
+          },
+          "lod": false,
+          "lost": 0,
+          "lostGap": 0,
+          "lostProbe": 0,
+          "lostUsb": 0,
+          "metricsError": null,
+          "mockVars": [
+            "mock0.f32",
+            "mock1.f32",
+            "mock2.i32",
+            "mock3.u16",
+            "mock4.i16",
+            "mock5.u8",
+            "mock6.i8",
+            "mock7.f64"
+          ],
+          "mode": "real",
+          "packets": 0,
+          "plan": {
+            "estHz": 81446,
+            "estUs": 12.28,
+            "frameBytes": 32,
+            "spans": 1
+          },
+          "probeMetrics": null,
+          "rateHz": 0,
+          "raw": 0,
+          "readErrors": 0,
+          "receivedSamples": 0,
+          "resyncs": 0,
+          "running": false,
+          "samples": 0,
+          "stalePackets": 0,
+          "state": "探针连接已关闭",
+          "supportsMetrics": false,
+          "tailCountDelta": null,
+          "transport": null,
+          "trigger": {
+            "hit": -1,
+            "hits": 0,
+            "marker": false,
+            "mode": 0
+          },
+          "varCount": 8,
+          "vars": [
+            "g_v.tick:u32@0x1240000",
+            "g_v.u_hi:u32@0x1240004",
+            "g_v.f_sin:f32@0x1240008",
+            "g_v.f_tri:f32@0x124000c",
+            "g_v.i_sq1k:i32@0x1240010",
+            "g_v.i_sq5k:i32@0x1240014",
+            "g_v.u_ramp:u32@0x1240018",
+            "g_v.lfsr:u32@0x124001c"
+          ],
+          "view": {
+            "end": 1,
+            "start": 0
+          }
+        },
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.13997229999949923
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rtt",
+      "op": "invoke",
+      "method": "summary",
+      "args": [],
+      "target": "view"
+    },
+    "result": {
+      "job": "8d9464dce2cc5b785e749c598a929069",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": {
+          "backend": "webusb",
+          "bufferedBytes": 32767,
+          "connected": false,
+          "controlBlock": null,
+          "displaySuppressed": false,
+          "error": "已断开",
+          "running": false,
+          "stats": {
+            "bytes": 32767,
+            "corrupt": 0,
+            "hz": 0,
+            "lastBytes": 32767,
+            "lastPolls": 1,
+            "lost": 0,
+            "polls": 1,
+            "rate": 0
+          }
+        },
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.12317020000045886
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "dbg",
+      "op": "invoke",
+      "method": "summary",
+      "args": [],
+      "target": "view"
+    },
+    "result": {
+      "job": "2cd04ed41bc3ee25a5b47e3592c9f003",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": {
+          "backend": "RISC-V/JTAG",
+          "bpCap": 8,
+          "bps": [],
+          "clockKhz": 10000,
+          "connected": false,
+          "elf": {
+            "files": 101,
+            "lines": 2795,
+            "name": "fw.elf",
+            "rtt": null,
+            "source": "dwarf",
+            "symbols": 906,
+            "vars": 51
+          },
+          "halted": false,
+          "lastStepMode": "into(insn)",
+          "lastStepOk": null,
+          "memAddr": "0x00000000",
+          "memLen": 0,
+          "outLines": 146,
+          "pc": 2147506020,
+          "regs": 0,
+          "rtt": null,
+          "src": {
+            "cur": {
+              "file": "E:/web-serial-rtt-tools/tools/target-firmware/hpm6800evk_dbgstress/src/engine.c",
+              "line": 7
+            },
+            "files": 5,
+            "ready": true,
+            "shown": 32
+          },
+          "symRows": 300,
+          "watch": [
+            {
+              "addr": 19136608,
+              "error": null,
+              "expr": "g_model.magic",
+              "value": "1297040453"
+            },
+            {
+              "addr": 19136616,
+              "error": null,
+              "expr": "g_model.flags.word",
+              "value": "2141320111"
+            },
+            {
+              "addr": 19136620,
+              "error": null,
+              "expr": "g_model.flags.bits.level",
+              "value": "7  (0x7)"
+            },
+            {
+              "addr": 19136628,
+              "error": null,
+              "expr": "g_model.flags.sbits.bias",
+              "value": "13  (0xd)"
+            },
+            {
+              "addr": 19136520,
+              "error": null,
+              "expr": "g_stage",
+              "value": "0"
+            }
+          ],
+          "watching": false
+        },
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.03138599999874714
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rttcdc",
+      "op": "invoke",
+      "method": "summary",
+      "args": [],
+      "target": "hid"
+    },
+    "result": {
+      "job": "a8504ef309bc5278d649667f0e945b9d",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": {
+          "cbAddr": "",
+          "connected": false,
+          "dapYield": 0,
+          "info": "未连接（点「连接探针」；首次使用或有多个设备时选择 akaLinkPro）",
+          "label": "",
+          "mock": false,
+          "moved": 0,
+          "rdErr": 0,
+          "rescans": 0,
+          "running": false,
+          "stall": 0,
+          "startRc": null,
+          "state": "—",
+          "supported": true,
+          "swdMhz": 0,
+          "wrErr": null
+        },
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.1403669000010268
+  }
+]

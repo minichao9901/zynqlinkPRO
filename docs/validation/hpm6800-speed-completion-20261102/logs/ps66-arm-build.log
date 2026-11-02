@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "E:\zynqlinkPRO\tools\build_xusbps_daplink.py", line 115, in <module>
+    main()
+    ~~~~^^
+  File "E:\zynqlinkPRO\tools\build_xusbps_daplink.py", line 91, in main
+    run([gcc, *flags, '-specs=' + str(src / 'Xilinx.spec'), '-Wl,-build-id=none', *(['-Wl,--gc-sections'] if args.compact_code else []), '-Wl,-T,' + str(linker), '-Wl,-Map,' + str(out / 'xusbps_daplink.map'), '-L' + str(bsp / 'lib'), '-o', elf, *objects, '-Wl,--start-group', '-lxil', '-lgcc', '-lc', '-Wl,--end-group'])
+    ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\zynqlinkPRO\tools\build_xusbps_daplink.py", line 81, in run
+    raise RuntimeError(p.stdout + p.stderr)
+RuntimeError: E:\zynqlinkPRO\build\hpm6800-speed-completion-20261102\ps66-arm\DAP\Source\DAP.o: In function `DAP_SWJ_Clock':
+E:\zynqlinkPRO\firmware\xusbps_daplink_dma\DAP\Source/DAP.c:496: undefined reference to `ps_fixed133_select'
+collect2.exe: error: ld returned 1 exit status
+

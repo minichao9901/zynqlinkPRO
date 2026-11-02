@@ -31,6 +31,7 @@ ALIASES={
  'probe.load':'tools/download_dap_fpga.tcl','probe.flash':'tools/probe_flash.py','probe.ocm-verify':'tools/verify_probe_ocm_code.py',
  'bench.sram':'tools/benchmark_sram_matrix.py','bench.rtt':'tools/benchmark_rtt_forward.py',
  'bench.hss':'tools/benchmark_hss_matrix.py','bench.sota':'tools/run_sota_regression.py',
+ 'hpm.web':'tools/validate_hpm6800_web.py','hpm.web-stress':'tools/stress_hpm6800_web.py',
  'probe.regression':'tools/run_probe_regression.py','etm.cli':'etm-service/trace.py',
  'etm.sweep':'tools/f103_trace_sweep.py','etm.samples':'tools/trace_signal_analysis.py',
  'etm.bench':'tools/bench_etm_native_offline.py','etm.web-bench':'tools/bench_etm_native_browser.py',
@@ -124,7 +125,7 @@ def describe_file(path,root=ROOT):
             'runnable':runnable,'coveredBy':covered_by,'role':'legacy-entry' if legacy and runnable else 'reference-entry' if path.startswith('etm-service/tools/') and runnable else 'entry' if runnable else 'support-library',
             'sourceOptions':sorted(set(flags)),'sourceSubcommands':sorted(set(subcommands)),
             'environmentKeys':sorted(set(re.findall(r'env\(([A-Za-z_][A-Za-z0-9_]*)\)',text))),
-            'requiresBrowser':bool(re.search(r'playwright|puppeteer|connectOverCDP',text)),
+            'requiresBrowser':bool(re.search(r'playwright|puppeteer|connectOverCDP|from toolbox import[^\n]*\bClient\b',text)),
             'validation':'not inferred from discoverability','aliases':[k for k,v in ALIASES.items() if v==path]}
 
 

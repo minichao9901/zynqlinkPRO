@@ -749,6 +749,7 @@ export class RttCdcView {
       dapYield: st?.dapYield ?? 0,
       rescans: st?.rescans ?? 0,
       rdErr: st?.rdErr ?? 0,
+      wrErr: st?.wrErr ?? null,
       swdMhz: st?.swdMhz ?? 0,
       stall: this._stall || 0,
       state: $('h-state').textContent,

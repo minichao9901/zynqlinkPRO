@@ -69,26 +69,52 @@ class NativeProbe:
         self.delivery_seen = set()
         self.delivery_cache = {}
         self.delivery_replays = 0
+        self.delivery_requests = 0
+        self.delivery_sessions = {}
 
     def deliver(self, delivery, body, execute):
         """An HTTP redelivery must never repeat a USB write/read/serial action."""
-        if not re.fullmatch(r'[0-9a-f]{32}', delivery or ''):
+        versioned = re.fullmatch(r'v2:([0-9a-f]{32}):([1-9][0-9]{0,15})', delivery or '')
+        if not versioned and not re.fullmatch(r'[0-9a-f]{32}', delivery or ''):
             raise ValueError('无效传输请求ID')
         signature = hashlib.sha256(json.dumps(body, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
         with self.delivery_lock:
-            if delivery in self.delivery_seen:
-                entry = self.delivery_cache.get(delivery)
-                if entry is None:
-                    raise ValueError('传输结果已回收；拒绝重放硬件动作')
+            entry = self.delivery_cache.get(delivery)
+            if entry is not None:
                 if entry['signature'] != signature:
                     raise ValueError('同一传输ID的内容不一致')
                 while not entry['done']:
                     self.delivery_lock.wait(timeout=1)
                 self.delivery_replays += 1
                 return entry['result']
-            if len(self.delivery_seen) >= 100000:
-                raise ValueError('本地传输会话已达100000请求；请停止硬件任务后重新启动服务')
-            self.delivery_seen.add(delivery)
+            if versioned:
+                session, sequence = versioned[1], int(versioned[2])
+                if sequence > 9007199254740991:
+                    raise ValueError('传输序号超出范围')
+                if session not in self.delivery_sessions:
+                    if len(self.delivery_sessions) >= 4096:
+                        raise ValueError('本地传输客户端数量过多；现有客户端仍可清理硬件')
+                    self.delivery_sessions[session] = (0, 0)
+                highest, bits = self.delivery_sessions[session]
+                if sequence > highest:
+                    shift = sequence - highest
+                    bits = 1 if shift >= 4096 else ((bits << shift) | 1) & ((1 << 4096) - 1)
+                    highest = sequence
+                else:
+                    offset = highest - sequence
+                    if offset >= 4096 or bits & (1 << offset):
+                        raise ValueError('传输结果已回收或序号过旧；拒绝重放硬件动作')
+                    bits |= 1 << offset
+                self.delivery_sessions[session] = (highest, bits)
+            else:
+                # Old clients retain fail-closed UUID tombstones. Updated
+                # clients use bounded sequence windows, without a request cap.
+                if delivery in self.delivery_seen:
+                    raise ValueError('传输结果已回收；拒绝重放硬件动作')
+                if len(self.delivery_seen) >= 100000:
+                    raise ValueError('旧版本地传输会话已达100000请求；请升级页面')
+                self.delivery_seen.add(delivery)
+            self.delivery_requests += 1
             entry = dict(signature=signature, done=False, result=None)
             self.delivery_cache[delivery] = entry
         try:
@@ -97,8 +123,8 @@ class NativeProbe:
             result = ({'ok': False, 'error': str(error), 'type': type(error).__name__}, 400)
         with self.delivery_lock:
             entry.update(done=True, result=result)
-            # Keep lightweight tombstones for every ID for this service's
-            # lifetime. Evicted results fail closed instead of being replayed.
+            # Pending replies stay pinned. Evicted v2 results remain marked
+            # in a bounded bit window; older sequence numbers fail closed.
             for key in list(self.delivery_cache):
                 if len(self.delivery_cache) <= 256:
                     break
@@ -441,8 +467,9 @@ def install(app, backend, token_file):
         try:
             if kind == 'meta' and action == 'status':
                 with proxy.delivery_lock:
-                    return jsonify(ok=True, value={'requests': len(proxy.delivery_seen),
-                        'redeliveries': proxy.delivery_replays, 'cached': len(proxy.delivery_cache)})
+                    return jsonify(ok=True, value={'requests': proxy.delivery_requests,
+                        'redeliveries': proxy.delivery_replays, 'cached': len(proxy.delivery_cache),
+                        'sequenceClients': len(proxy.delivery_sessions), 'legacyRequests': len(proxy.delivery_seen)})
             delivery = request.headers.get('X-Trace-Delivery')
             if delivery:
                 result, status = proxy.deliver(delivery, {'kind': kind, 'action': action, 'value': value}, execute)

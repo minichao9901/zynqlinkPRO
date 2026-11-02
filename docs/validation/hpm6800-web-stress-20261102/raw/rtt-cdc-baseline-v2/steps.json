@@ -1,0 +1,1273 @@
+[
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rttcdc",
+      "op": "show"
+    },
+    "result": {
+      "job": "c0832e8c485ed1ca8c87fcc0ef916e7a",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "dispatched": true,
+        "page": "rttcdc"
+      }
+    },
+    "seconds": 0.18141650000052323
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rttcdc",
+      "op": "set",
+      "selector": "#h-target",
+      "value": "riscv"
+    },
+    "result": {
+      "job": "8a4b70e78584046a8bdedcdb04a35076",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "control": {
+          "disabled": false,
+          "hidden": false,
+          "label": "目标类型\n          \n            SWD / ARM\n            RISC-V / JTAG",
+          "options": [
+            {
+              "disabled": false,
+              "label": "SWD / ARM",
+              "value": "swd"
+            },
+            {
+              "disabled": false,
+              "label": "RISC-V / JTAG",
+              "value": "riscv"
+            }
+          ],
+          "selector": "#h-target",
+          "tag": "select",
+          "text": "SWD / ARM\n            RISC-V / JTAG",
+          "title": "探针的全局目标类型（HID 0x31 action 10）。SWD/ARM 走 DAPLink 的 swd_host；RISC-V/JTAG 走探针里的 DMI+SBA 引擎（TAP 复位 + IR=0x11 + 唤醒 DM）。粘性：设一次就一直有效，采样器那个后端也跟着它走",
+          "type": "select-one",
+          "value": "riscv"
+        },
+        "dispatched": true
+      }
+    },
+    "seconds": 0.104045899999619
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rttcdc",
+      "op": "set",
+      "selector": "#h-addr",
+      "value": "0x1240000"
+    },
+    "result": {
+      "job": "24101179d3721f868139641079ace8af",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "control": {
+          "disabled": false,
+          "hidden": false,
+          "label": "RTT 地址",
+          "selector": "#h-addr",
+          "tag": "input",
+          "text": "",
+          "title": "控制块搜索起点。Cortex-M7（H743 / H7B3 等）的 DTCM 探针读不到，要给 AXI SRAM（如 0x24000000）",
+          "type": "text",
+          "value": "0x1240000"
+        },
+        "dispatched": true
+      }
+    },
+    "seconds": 0.03162559999964287
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rttcdc",
+      "op": "set",
+      "selector": "#h-size",
+      "value": "0x100"
+    },
+    "result": {
+      "job": "f4bc6e7bbc5db9b18fedc9f09d317635",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "control": {
+          "disabled": false,
+          "hidden": false,
+          "label": "搜索长度",
+          "selector": "#h-size",
+          "tag": "input",
+          "text": "",
+          "title": "0 = 探针默认 64 KB（从上面的地址起搜）",
+          "type": "text",
+          "value": "0x100"
+        },
+        "dispatched": true
+      }
+    },
+    "seconds": 0.014882399999805784
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rttcdc",
+      "op": "set",
+      "selector": "#h-chan",
+      "value": "0"
+    },
+    "result": {
+      "job": "fe365c8eca58918f8524f538c9eeb60d",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "control": {
+          "disabled": false,
+          "hidden": false,
+          "label": "通道",
+          "selector": "#h-chan",
+          "tag": "input",
+          "text": "",
+          "title": "RTT 上行通道号，0 = channel 0",
+          "type": "text",
+          "value": "0"
+        },
+        "dispatched": true
+      }
+    },
+    "seconds": 0.1403650000002017
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rttcdc",
+      "op": "invoke",
+      "method": "connect",
+      "args": [],
+      "target": "hid"
+    },
+    "result": {
+      "job": "fa482af380a4c883f194573702efd521",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": false,
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.13986100000056467
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rttcdc",
+      "op": "invoke",
+      "method": "applyTargetType",
+      "args": [],
+      "target": "hid"
+    },
+    "result": {
+      "job": "227c43971a0ff39dbbf734e02b453002",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.22067599999991216
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rttcdc",
+      "op": "invoke",
+      "method": "refreshPorts",
+      "args": [],
+      "target": "view"
+    },
+    "result": {
+      "job": "2f33ec662c639fe725d472e494f39ac9",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.11723470000015368
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rttcdc",
+      "op": "describe"
+    },
+    "result": {
+      "job": "fe2444112bcd38d8529363b1bc939d1b",
+      "ok": true,
+      "value": {
+        "controls": [
+          {
+            "disabled": true,
+            "hidden": false,
+            "label": "连接已授权探针；首次使用或有多个探针时弹出设备选择框",
+            "selector": "#h-connect",
+            "tag": "button",
+            "text": "连接探针",
+            "title": "连接已授权探针；首次使用或有多个探针时弹出设备选择框",
+            "type": "submit",
+            "value": ""
+          },
+          {
+            "disabled": false,
+            "hidden": false,
+            "label": "先停止探针侧 RTT 转发，再关闭 HID 连接；CDC 串口由串口页单独管理",
+            "selector": "#h-disconnect",
+            "tag": "button",
+            "text": "关闭探针",
+            "title": "先停止探针侧 RTT 转发，再关闭 HID 连接；CDC 串口由串口页单独管理",
+            "type": "submit",
+            "value": ""
+          },
+          {
+            "disabled": false,
+            "hidden": false,
+            "label": "RTT 地址",
+            "selector": "#h-addr",
+            "tag": "input",
+            "text": "",
+            "title": "控制块搜索起点。Cortex-M7（H743 / H7B3 等）的 DTCM 探针读不到，要给 AXI SRAM（如 0x24000000）",
+            "type": "text",
+            "value": "0x1240000"
+          },
+          {
+            "disabled": false,
+            "hidden": false,
+            "label": "从 ELF 里读 _SEGGER_RTT 符号，顺手把搜索长度收成 0x1000",
+            "selector": "#h-elf",
+            "tag": "button",
+            "text": "载入 ELF…",
+            "title": "从 ELF 里读 _SEGGER_RTT 符号，顺手把搜索长度收成 0x1000",
+            "type": "submit",
+            "value": ""
+          },
+          {
+            "disabled": false,
+            "hidden": false,
+            "label": "搜索长度",
+            "selector": "#h-size",
+            "tag": "input",
+            "text": "",
+            "title": "0 = 探针默认 64 KB（从上面的地址起搜）",
+            "type": "text",
+            "value": "0x100"
+          },
+          {
+            "disabled": false,
+            "hidden": false,
+            "label": "通道",
+            "selector": "#h-chan",
+            "tag": "input",
+            "text": "",
+            "title": "RTT 上行通道号，0 = channel 0",
+            "type": "text",
+            "value": "0"
+          },
+          {
+            "disabled": false,
+            "hidden": false,
+            "label": "目标类型\n          \n            SWD / ARM\n            RISC-V / JTAG",
+            "options": [
+              {
+                "disabled": false,
+                "label": "SWD / ARM",
+                "value": "swd"
+              },
+              {
+                "disabled": false,
+                "label": "RISC-V / JTAG",
+                "value": "riscv"
+              }
+            ],
+            "selector": "#h-target",
+            "tag": "select",
+            "text": "SWD / ARM\n            RISC-V / JTAG",
+            "title": "探针的全局目标类型（HID 0x31 action 10）。SWD/ARM 走 DAPLink 的 swd_host；RISC-V/JTAG 走探针里的 DMI+SBA 引擎（TAP 复位 + IR=0x11 + 唤醒 DM）。粘性：设一次就一直有效，采样器那个后端也跟着它走",
+            "type": "select-one",
+            "value": "riscv"
+          },
+          {
+            "disabled": true,
+            "hidden": false,
+            "label": "SWD 时钟\n          不改（用探针当前档位）20 MHz30 MHz36 MHz45 MHz（出厂默认）50 MHz60 MHz（需探针固件支持）",
+            "options": [
+              {
+                "disabled": false,
+                "label": "不改（用探针当前档位）",
+                "value": ""
+              },
+              {
+                "disabled": false,
+                "label": "20 MHz",
+                "value": "20000000"
+              },
+              {
+                "disabled": false,
+                "label": "30 MHz",
+                "value": "30000000"
+              },
+              {
+                "disabled": false,
+                "label": "36 MHz",
+                "value": "36000000"
+              },
+              {
+                "disabled": false,
+                "label": "45 MHz（出厂默认）",
+                "value": "45000000"
+              },
+              {
+                "disabled": false,
+                "label": "50 MHz",
+                "value": "50000000"
+              },
+              {
+                "disabled": false,
+                "label": "60 MHz（需探针固件支持）",
+                "value": "60000000"
+              }
+            ],
+            "selector": "#h-clock",
+            "tag": "select",
+            "text": "不改（用探针当前档位）20 MHz30 MHz36 MHz45 MHz（出厂默认）50 MHz60 MHz（需探针固件支持）",
+            "title": "RISC-V/JTAG 下必须留 0：这个字段在 JTAG 下是 DMI idle/delay 覆盖值，给成大数字会让探针读不到目标内存",
+            "type": "select-one",
+            "value": ""
+          },
+          {
+            "disabled": false,
+            "hidden": false,
+            "label": "启动转发",
+            "selector": "#h-start",
+            "tag": "button",
+            "text": "启动转发",
+            "title": null,
+            "type": "submit",
+            "value": ""
+          },
+          {
+            "disabled": false,
+            "hidden": false,
+            "label": "停止",
+            "selector": "#h-stop",
+            "tag": "button",
+            "text": "停止",
+            "title": null,
+            "type": "submit",
+            "value": ""
+          },
+          {
+            "disabled": false,
+            "hidden": false,
+            "label": "让探针自己从 0x20000000 起扫 64 KB 找 \"SEGGER RTT\" 签名",
+            "selector": "#h-auto",
+            "tag": "button",
+            "text": "自动搜控制块",
+            "title": "让探针自己从 0x20000000 起扫 64 KB 找 \"SEGGER RTT\" 签名",
+            "type": "submit",
+            "value": ""
+          },
+          {
+            "disabled": false,
+            "hidden": false,
+            "label": "刷新状态",
+            "selector": "#h-refresh",
+            "tag": "button",
+            "text": "刷新状态",
+            "title": null,
+            "type": "submit",
+            "value": ""
+          },
+          {
+            "disabled": false,
+            "hidden": false,
+            "label": "端口\n          串口 1 · COM5 · USB-SERIAL CH340 (COM5)串口 2 · COM33 · USB 串行设备 (COM33)",
+            "options": [
+              {
+                "disabled": false,
+                "label": "串口 1 · COM5 · USB-SERIAL CH340 (COM5)",
+                "value": "0"
+              },
+              {
+                "disabled": false,
+                "label": "串口 2 · COM33 · USB 串行设备 (COM33)",
+                "value": "1"
+              }
+            ],
+            "selector": "#c-port",
+            "tag": "select",
+            "text": "串口 1 · COM5 · USB-SERIAL CH340 (COM5)串口 2 · COM33 · USB 串行设备 (COM33)",
+            "title": null,
+            "type": "select-one",
+            "value": "0"
+          },
+          {
+            "disabled": false,
+            "hidden": false,
+            "label": "选择串口（浏览器会弹授权框，第一次必须手动选一次）",
+            "selector": "#c-pick",
+            "tag": "button",
+            "text": "选择…",
+            "title": "选择串口（浏览器会弹授权框，第一次必须手动选一次）",
+            "type": "submit",
+            "value": ""
+          },
+          {
+            "disabled": false,
+            "hidden": false,
+            "label": "刷新已授权端口列表",
+            "selector": "#c-scan",
+            "tag": "button",
+            "text": "刷新",
+            "title": "刷新已授权端口列表",
+            "type": "submit",
+            "value": ""
+          },
+          {
+            "disabled": false,
+            "hidden": false,
+            "label": "波特率",
+            "selector": "#c-baud",
+            "tag": "input",
+            "text": "",
+            "title": "CDC 虚拟串口不按波特率跑，填什么都行",
+            "type": "text",
+            "value": "115200"
+          },
+          {
+            "disabled": false,
+            "hidden": false,
+            "label": "连接",
+            "selector": "#c-open",
+            "tag": "button",
+            "text": "连接",
+            "title": null,
+            "type": "submit",
+            "value": ""
+          },
+          {
+            "disabled": true,
+            "hidden": false,
+            "label": "断开",
+            "selector": "#c-close",
+            "tag": "button",
+            "text": "断开",
+            "title": null,
+            "type": "submit",
+            "value": ""
+          },
+          {
+            "disabled": false,
+            "hidden": false,
+            "label": "ASCII",
+            "selector": ":scope > div:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(1)",
+            "tag": "button",
+            "text": "ASCII",
+            "title": null,
+            "type": "submit",
+            "value": ""
+          },
+          {
+            "disabled": false,
+            "hidden": false,
+            "label": "按 ANSI 转义码彩色渲染（像 MobaXterm）",
+            "selector": ":scope > div:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(2)",
+            "tag": "button",
+            "text": "ANSI",
+            "title": "按 ANSI 转义码彩色渲染（像 MobaXterm）",
+            "type": "submit",
+            "value": ""
+          },
+          {
+            "disabled": false,
+            "hidden": false,
+            "label": "HEX",
+            "selector": ":scope > div:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(3)",
+            "tag": "button",
+            "text": "HEX",
+            "title": null,
+            "type": "submit",
+            "value": ""
+          },
+          {
+            "disabled": false,
+            "hidden": false,
+            "label": "时间戳",
+            "selector": "#c-ts",
+            "tag": "input",
+            "text": "",
+            "title": null,
+            "type": "checkbox",
+            "value": false
+          },
+          {
+            "disabled": false,
+            "hidden": false,
+            "label": "绝对时间",
+            "selector": "#c-tsabs",
+            "tag": "input",
+            "text": "",
+            "title": null,
+            "type": "checkbox",
+            "value": false
+          },
+          {
+            "disabled": false,
+            "hidden": false,
+            "label": "自动滚动",
+            "selector": "#c-autoscroll",
+            "tag": "input",
+            "text": "",
+            "title": null,
+            "type": "checkbox",
+            "value": true
+          },
+          {
+            "disabled": false,
+            "hidden": false,
+            "label": "把接收区里的数据存成 txt（按当前 ASCII/HEX 与时间戳设置）",
+            "selector": "#c-save",
+            "tag": "button",
+            "text": "保存数据",
+            "title": "把接收区里的数据存成 txt（按当前 ASCII/HEX 与时间戳设置）",
+            "type": "submit",
+            "value": ""
+          },
+          {
+            "disabled": false,
+            "hidden": false,
+            "label": "暂停",
+            "selector": "#c-pause",
+            "tag": "button",
+            "text": "暂停",
+            "title": null,
+            "type": "submit",
+            "value": ""
+          },
+          {
+            "disabled": false,
+            "hidden": false,
+            "label": "清空",
+            "selector": "#c-clear",
+            "tag": "button",
+            "text": "清空",
+            "title": null,
+            "type": "submit",
+            "value": ""
+          },
+          {
+            "disabled": false,
+            "hidden": false,
+            "label": "把收到的字节直接写进本地文件（不走接收区 2MB 上限），高速采集用",
+            "selector": "#c-record",
+            "tag": "button",
+            "text": "● 记录到文件",
+            "title": "把收到的字节直接写进本地文件（不走接收区 2MB 上限），高速采集用",
+            "type": "submit",
+            "value": ""
+          },
+          {
+            "disabled": false,
+            "hidden": false,
+            "label": "记录带时间戳",
+            "selector": "#c-record-ts",
+            "tag": "input",
+            "text": "",
+            "title": null,
+            "type": "checkbox",
+            "value": true
+          },
+          {
+            "disabled": false,
+            "hidden": false,
+            "label": "连接自动记录",
+            "selector": "#c-record-auto",
+            "tag": "input",
+            "text": "",
+            "title": null,
+            "type": "checkbox",
+            "value": false
+          },
+          {
+            "disabled": false,
+            "hidden": false,
+            "label": "计数清零",
+            "selector": "#c-statclear",
+            "tag": "button",
+            "text": "计数清零",
+            "title": null,
+            "type": "submit",
+            "value": ""
+          },
+          {
+            "disabled": false,
+            "hidden": false,
+            "label": "质量",
+            "selector": "#c-quality",
+            "tag": "button",
+            "text": "质量",
+            "title": null,
+            "type": "submit",
+            "value": ""
+          },
+          {
+            "detachedFromPage": true,
+            "disabled": false,
+            "hidden": true,
+            "label": "",
+            "selector": "@file:hid._elfInput",
+            "tag": "input",
+            "text": "",
+            "title": null,
+            "type": "file",
+            "value": ""
+          }
+        ],
+        "globalControls": [
+          {
+            "disabled": false,
+            "hidden": false,
+            "label": "向目标 NRST 发送硬复位脉冲；EVKLite 使用 PA27/J3[23]，PA08 接 TRST 时仅复位 JTAG",
+            "selector": "#btn-global-reset",
+            "tag": "button",
+            "text": "全局复位",
+            "title": "向目标 NRST 发送硬复位脉冲；EVKLite 使用 PA27/J3[23]，PA08 接 TRST 时仅复位 JTAG",
+            "type": "button",
+            "value": ""
+          },
+          {
+            "disabled": true,
+            "hidden": false,
+            "label": "NRST 开漏",
+            "selector": "#global-nrst-open-drain",
+            "tag": "input",
+            "text": "",
+            "title": null,
+            "type": "checkbox",
+            "value": false
+          },
+          {
+            "disabled": false,
+            "hidden": false,
+            "label": "全屏显示工作台",
+            "selector": "#btn-fullscreen",
+            "tag": "button",
+            "text": "全屏",
+            "title": "全屏显示工作台",
+            "type": "button",
+            "value": ""
+          },
+          {
+            "disabled": false,
+            "hidden": false,
+            "label": "帮助与快捷键",
+            "selector": "#btn-help",
+            "tag": "button",
+            "text": "帮助与快捷键",
+            "title": null,
+            "type": "submit",
+            "value": ""
+          }
+        ],
+        "interrupts": [
+          "#h-stop"
+        ],
+        "methods": [
+          {
+            "name": "$",
+            "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+            "signature": "id => $(id === \"tab-rttcdc\" ? \"tab-\"+tab : id.replace(/^c-/, prefix+\"-\"))"
+          },
+          {
+            "name": "key",
+            "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+            "signature": "key => namespace+\".\"+key"
+          },
+          {
+            "name": "onShow",
+            "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+            "signature": "onShow()"
+          },
+          {
+            "name": "refreshPorts",
+            "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+            "signature": "async refreshPorts()"
+          },
+          {
+            "name": "pickPort",
+            "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+            "signature": "async pickPort()"
+          },
+          {
+            "name": "connect",
+            "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+            "signature": "async connect()"
+          },
+          {
+            "name": "captureWindow",
+            "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+            "signature": "async captureWindow("
+          },
+          {
+            "name": "save",
+            "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+            "signature": "save()"
+          },
+          {
+            "name": "summary",
+            "note": "原网页方法；参数含 DOM/回调的接口应改用控件接口",
+            "signature": "summary()"
+          }
+        ],
+        "page": "rttcdc",
+        "targets": [
+          "view",
+          "session",
+          "hid"
+        ]
+      }
+    },
+    "seconds": 0.031081900000572205
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rttcdc",
+      "op": "set",
+      "selector": "#c-port",
+      "value": "1"
+    },
+    "result": {
+      "job": "0017eed3e4c7322149a50f4fdca5d759",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "control": {
+          "disabled": false,
+          "hidden": false,
+          "label": "端口\n          串口 1 · COM5 · USB-SERIAL CH340 (COM5)串口 2 · COM33 · USB 串行设备 (COM33)",
+          "options": [
+            {
+              "disabled": false,
+              "label": "串口 1 · COM5 · USB-SERIAL CH340 (COM5)",
+              "value": "0"
+            },
+            {
+              "disabled": false,
+              "label": "串口 2 · COM33 · USB 串行设备 (COM33)",
+              "value": "1"
+            }
+          ],
+          "selector": "#c-port",
+          "tag": "select",
+          "text": "串口 1 · COM5 · USB-SERIAL CH340 (COM5)串口 2 · COM33 · USB 串行设备 (COM33)",
+          "title": null,
+          "type": "select-one",
+          "value": "1"
+        },
+        "dispatched": true
+      }
+    },
+    "seconds": 0.035153599999830476
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rttcdc",
+      "op": "invoke",
+      "method": "connect",
+      "args": [],
+      "target": "view"
+    },
+    "result": {
+      "job": "3efe81eb643fc516c75fa805ac0042aa",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.10482219999994413
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rttcdc",
+      "op": "click",
+      "selector": "#c-clear"
+    },
+    "result": {
+      "job": "689f5af41e9aed891111256e2eb95148",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "control": {
+          "disabled": false,
+          "hidden": false,
+          "label": "清空",
+          "selector": "#c-clear",
+          "tag": "button",
+          "text": "清空",
+          "title": null,
+          "type": "submit",
+          "value": ""
+        },
+        "dispatched": true
+      }
+    },
+    "seconds": 0.14001449999977922
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rttcdc",
+      "op": "click",
+      "selector": "#c-statclear"
+    },
+    "result": {
+      "job": "93ea066eeee1720d52af8fc080e7e876",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "control": {
+          "disabled": false,
+          "hidden": false,
+          "label": "计数清零",
+          "selector": "#c-statclear",
+          "tag": "button",
+          "text": "计数清零",
+          "title": null,
+          "type": "submit",
+          "value": ""
+        },
+        "dispatched": true
+      }
+    },
+    "seconds": 0.10497450000002573
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rttcdc",
+      "op": "invoke",
+      "method": "start",
+      "args": [],
+      "target": "hid"
+    },
+    "result": {
+      "job": "cfbcaa644c2ab4a50d47b1c506c38bb9",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.13164020000021992
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rttcdc",
+      "op": "invoke",
+      "method": "summary",
+      "args": [],
+      "target": "hid"
+    },
+    "result": {
+      "job": "f04c79c99385393d495ae6fe91dfe0a6",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": {
+          "cbAddr": "0x1240000",
+          "connected": true,
+          "dapYield": 0,
+          "info": "已连接：ZynqLink probe control · 12345678 · FW 0.5-orbtrace · SN 12345678",
+          "label": "ZynqLink probe control · 12345678",
+          "mock": false,
+          "moved": 4098,
+          "rdErr": 0,
+          "rescans": 0,
+          "running": true,
+          "stall": 0,
+          "startRc": 0,
+          "state": "运行中 · 控制块 0x1240000 · 上行缓冲 0x1240018 · 通道 0 · 已搬运 4.0 KB（3 次）· 轮询 4 · 读错 0 / RdOff 错 0 · 档位 9 MHz",
+          "supported": true,
+          "swdMhz": 9
+        },
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.016973099999631813
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rttcdc",
+      "op": "invoke",
+      "method": "captureWindow",
+      "args": [
+        {
+          "seconds": 5.0,
+          "maxMiB": 32
+        }
+      ],
+      "target": "view"
+    },
+    "result": {
+      "job": "84472c14131d72390cabceb2491d5592",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": {
+          "bytes": 3364864,
+          "bytesPerSecond": 672865.1415773727,
+          "complete": true,
+          "error": null,
+          "limitExceeded": false,
+          "name": "rtt-raw-20261102-105459.bin",
+          "observedBytes": 3364864,
+          "portClosed": false,
+          "seconds": 5.000799999999813
+        },
+        "verificationRequired": true
+      }
+    },
+    "seconds": 5.097565099999883
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rttcdc",
+      "op": "invoke",
+      "method": "stop",
+      "args": [],
+      "target": "hid"
+    },
+    "result": {
+      "job": "9a9c28e06b8bb7a463982c195831fa77",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.14032860000043001
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rttcdc",
+      "op": "invoke",
+      "method": "refresh",
+      "args": [],
+      "target": "hid"
+    },
+    "result": {
+      "job": "665c2cd16c713521094037f2098ef292",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.10375100000055681
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rttcdc",
+      "op": "invoke",
+      "method": "summary",
+      "args": [],
+      "target": "hid"
+    },
+    "result": {
+      "job": "4d43359bbae264df3ab31f3974237dc3",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": {
+          "cbAddr": "0x1240000",
+          "connected": true,
+          "dapYield": 0,
+          "info": "已连接：ZynqLink probe control · 12345678 · FW 0.5-orbtrace · SN 12345678",
+          "label": "ZynqLink probe control · 12345678",
+          "mock": false,
+          "moved": 3532802,
+          "rdErr": 0,
+          "rescans": 0,
+          "running": false,
+          "stall": 0,
+          "startRc": 0,
+          "state": "未运行（点「启动转发」或「自动搜控制块」）",
+          "supported": true,
+          "swdMhz": 9
+        },
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.02987929999926564
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rttcdc",
+      "op": "invoke",
+      "method": "summary",
+      "args": [],
+      "target": "view"
+    },
+    "result": {
+      "job": "78e3a5bc5565ce1ffbf307da9e8d0ae8",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": {
+          "buffered": 2097152,
+          "bytes": 3532802,
+          "frames": 1646,
+          "mode": "hex",
+          "open": true,
+          "paused": false,
+          "rate": 489472,
+          "recordBytes": 0,
+          "recording": false,
+          "shown": 6150,
+          "suppressed": true
+        },
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.10433220000049914
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rttcdc",
+      "op": "downloads"
+    },
+    "result": {
+      "job": "72e33cff0a77cc9f891be93b6ab28a2a",
+      "ok": true,
+      "value": [
+        {
+          "browserDownloadRequested": true,
+          "bytes": 3364864,
+          "id": "5",
+          "name": "rtt-raw-20261102-105459.bin",
+          "type": "application/octet-stream"
+        }
+      ]
+    },
+    "seconds": 0.030677300000206742
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rttcdc",
+      "op": "download",
+      "id": "5",
+      "offset": 0,
+      "length": 1048576
+    },
+    "result": {
+      "job": "52acfc96dff4914e06cebdff6b38b1c8",
+      "ok": true,
+      "value": {
+        "name": "rtt-raw-20261102-105459.bin",
+        "offset": 0,
+        "total": 3364864,
+        "base64Evidence": {
+          "bytes": 1048576,
+          "sha256": "c5f462d81cd54a21d054b6f238754e2164217c566dc0cb862b00aa97e8f2242f"
+        }
+      }
+    },
+    "seconds": 0.13553959999990184
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rttcdc",
+      "op": "download",
+      "id": "5",
+      "offset": 1048576,
+      "length": 1048576
+    },
+    "result": {
+      "job": "f5d2e18cdb481bf518e103e4b32930dc",
+      "ok": true,
+      "value": {
+        "name": "rtt-raw-20261102-105459.bin",
+        "offset": 1048576,
+        "total": 3364864,
+        "base64Evidence": {
+          "bytes": 1048576,
+          "sha256": "92ecbc2033166c732bf93b21a67edd30a7057d95d82c55e0bf3a890af33cb949"
+        }
+      }
+    },
+    "seconds": 0.1685632999997324
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rttcdc",
+      "op": "download",
+      "id": "5",
+      "offset": 2097152,
+      "length": 1048576
+    },
+    "result": {
+      "job": "ffababda57c469fff5b6f1343e4447ac",
+      "ok": true,
+      "value": {
+        "name": "rtt-raw-20261102-105459.bin",
+        "offset": 2097152,
+        "total": 3364864,
+        "base64Evidence": {
+          "bytes": 1048576,
+          "sha256": "af416cf77c022d544787bd00eb30d92c8da0c48c1751b51a35cf53057bcf3de0"
+        }
+      }
+    },
+    "seconds": 0.11882619999960298
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rttcdc",
+      "op": "download",
+      "id": "5",
+      "offset": 3145728,
+      "length": 219136
+    },
+    "result": {
+      "job": "8db751266165dfc2c719db5dbfadbaa3",
+      "ok": true,
+      "value": {
+        "name": "rtt-raw-20261102-105459.bin",
+        "offset": 3145728,
+        "total": 3364864,
+        "base64Evidence": {
+          "bytes": 219136,
+          "sha256": "aadd15030b3a80f835c3ed4d3faf0c968c7e6a452282cdcb04f50c3207c4319e"
+        }
+      }
+    },
+    "seconds": 0.14459829999941576
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rttcdc",
+      "op": "discard",
+      "id": "5"
+    },
+    "result": {
+      "job": "893b3cad3f119ae7ab35be6cc3ef0eea",
+      "ok": true,
+      "value": {
+        "discarded": true
+      }
+    },
+    "seconds": 0.1184995000003255
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rttcdc",
+      "op": "invoke",
+      "method": "stop",
+      "args": [],
+      "target": "hid"
+    },
+    "result": {
+      "job": "bd9bf3444d8d685b4387e3ac7634eb6d",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.1405944999996791
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rttcdc",
+      "op": "invoke",
+      "method": "disconnect",
+      "args": [],
+      "target": "hid"
+    },
+    "result": {
+      "job": "bedfa935d0d4f50dfc3c185a3e23a794",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": true,
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.1384371000003739
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "rttcdc",
+      "op": "invoke",
+      "method": "close",
+      "args": [],
+      "target": "session"
+    },
+    "result": {
+      "job": "b70b20759b82521f4662d467a30bbc8b",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.12461530000018683
+  }
+]

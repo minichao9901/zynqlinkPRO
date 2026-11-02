@@ -18,9 +18,9 @@ static inline uint32_t ps_fclk0_hz(void) {
     return hz/a/b;
 }
 
-#if DAP_FIXED_FCLK0_TEST
-/* Explicit SWD-only acceptance profile. Never retune any PLL, CPU/DDR
- * clock or FCLK1, and never let a SWJ rate request fall back to IO PLL. */
+#if DAP_FIXED_FCLK0_TEST || (defined(DAP_MAX_SWCLK_HZ) && DAP_MAX_SWCLK_HZ >= 66666666U)
+/* Explicit 133MHz profile: fixed-SWD experiment or opt-in RISC-V top rate.
+ * Never retune any PLL, CPU/DDR clock or FCLK1. */
 static inline int ps_fixed133_select(void) {
     uint32_t pll=Xil_In32(0xf8000100U);
     if (((pll>>12)&127U)!=40U || (pll&0x13U) ||

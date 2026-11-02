@@ -1,0 +1,39 @@
+"""Restore the interrupted debugger's step bit and verify its scratch backup.
+No probe reload, target reset, Flash, PLL or core-program replacement.
+"""
+from pathlib import Path
+import json,sys,hashlib
+sys.path.insert(0,str(Path.cwd()/'tools'))
+import usb.util
+from dap_pipeline_bench import open_dap
+from benchmark_hpm5301 import setup
+from riscv_target import RiscvTarget
+from validate_hpm6800_performance import SramMemory
+b=Path(__file__).resolve().parent
+steps=json.loads((b/'debug-baseline/steps.json').read_text(encoding='utf-8'))
+reads=[s['result']['value']['value']['$bytes'] for s in steps if s['request'].get('method')=='memRead' and s['result']['ok']]
+assert reads and len(reads[-1])==64
+expected=bytes(reads[-1])
+report=dict(probe_reload=False,target_reset=False,target_flash_writes=False)
+dev,out,inp=open_dap()
+try:
+    setup(out,inp,10_000_000,0,connect=True)
+    t=RiscvTarget(out,inp);t.active();status=t.dmi(0x11)
+    report['dmstatus_before']=hex(status)
+    if not status&(1<<9):t.halt()
+    report['dpc']=hex(t.register(0x7b1));dcsr=t.register(0x7b0)
+    report['dcsr_before']=hex(dcsr);t.register(0x7b0,dcsr&~4)
+    report['dcsr_after']=hex(t.register(0x7b0));assert not int(report['dcsr_after'],16)&4
+    setup(out,inp,10_000_000,0)
+    mem=SramMemory(out,inp);actual=mem.read(0x0127f000,64)
+    report['scratch_restore_needed']=actual!=expected
+    if actual!=expected:mem.write(0x0127f000,expected)
+    report['scratch_restored']=mem.read(0x0127f000,64)==expected
+    report['scratch_sha256']=hashlib.sha256(expected).hexdigest();assert report['scratch_restored']
+    t=RiscvTarget(out,inp);t.active();t.resume()
+    report['dmstatus_after']=hex(t.dmi(0x11));assert int(report['dmstatus_after'],16)&(1<<10)
+    report['passed']=True
+finally:
+    usb.util.release_interface(dev,0);usb.util.dispose_resources(dev)
+    (b/'request-cap-recovery.json').write_text(json.dumps(report,indent=2)+'\n')
+print(report)

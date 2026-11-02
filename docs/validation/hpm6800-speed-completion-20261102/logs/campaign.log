@@ -1,0 +1,12 @@
+START sram-low
+END sram-low 0 140.94
+START sram-mid
+END sram-mid 1 7.79
+Traceback (most recent call last):
+  File "E:\zynqlinkPRO\build\hpm6800-speed-completion-20261102\run_campaign.py", line 28, in <module>
+    run('sram-'+label,'validate_hpm6800_performance.py',['--speeds',speeds,'--windows','axi,ahb,axi-last','--idle',str(idle),'--modes',str(mode),'--loops','128','--repeats','3'])
+    ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\zynqlinkPRO\build\hpm6800-speed-completion-20261102\run_campaign.py", line 25, in run
+    if result.returncode:raise RuntimeError('Case failure; inspect '+name)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Case failure; inspect sram-mid

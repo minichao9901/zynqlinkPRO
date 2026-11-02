@@ -1,0 +1,10 @@
+import sys,json
+from pathlib import Path
+sys.path.insert(0,str(Path.cwd()))
+from toolbox import Client
+b=Path('build/hpm6800-web-stress-20261102');c=Client(str(b/'runtime'),60)
+for p,target in [('dbg','session'),('rttcdc','hid'),('rttcdc','session')]:
+    r=c.request(dict(action='workbench',page=p,op='describe',target=target));c.http('ack/'+r['job'],{})
+    assert r['ok'],r
+    (b/(p+'-'+target+'-describe.json')).write_text(json.dumps(r['value'],ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+    print(p,target,r['value']['methods'])

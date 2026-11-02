@@ -1,0 +1,46 @@
+"""Serial, identity-declared SRAM/RTT/HSS campaign. No target Flash writes."""
+from pathlib import Path
+import subprocess,sys,json,time
+BASE=Path(__file__).resolve().parent
+PAIR=BASE/'pair66-final'
+groups=[('low','1000000,5000000,10000000,15000000,20000000,25000000',8,0),
+ ('mid17','30000000,35000000',12,17),('high','40000000,45000000',15,17),
+ ('50','50000000',16,17),('56','56250000',18,17),('60','60000000',20,17),
+ ('64','65000000',21,17),('66','66666666',22,17)]
+report=dict(jobs=[],started=time.time(),target_flash_writes=False)
+def save():(BASE/'campaign.json').write_text(json.dumps(report,indent=2)+'\n')
+def run(name,tool,args):
+    if name=='sram-low':
+        prior=json.loads((BASE/name/'result.json').read_text())
+        assert all(r['passed'] for r in prior['rows']) and all(prior['restore'].values())
+        report['jobs'].append(dict(name=name,reused_completed=True,evidence=str(BASE/name/'result.json')));save()
+        return
+    cmd=[sys.executable,'-X','utf8','tools/'+tool,'--bit',str(PAIR/'probe.bit'),'--elf',str(PAIR/'application.elf'),'--out',str(BASE/name),*args]
+    entry=dict(name=name,argv=cmd,started=time.time())
+    report['jobs'].append(entry);save();print('START',name,flush=True)
+    with (BASE/(name+'.log')).open('w',encoding='utf-8') as log:
+        result=subprocess.run(cmd,stdout=log,stderr=subprocess.STDOUT,timeout=1200)
+    entry.update(returncode=result.returncode,seconds=time.time()-entry['started']);save()
+    print('END',name,result.returncode,round(entry['seconds'],2),flush=True)
+    p=BASE/name/'result.json'
+    if not p.is_file():raise RuntimeError('No result; inspect '+name)
+    d=json.loads(p.read_text(encoding='utf-8'))
+    if d.get('restore_error') or d.get('restore_match') is False or any(v is False for v in d.get('restore',{}).values()):
+        raise RuntimeError('Restoration failed; stop board traffic: '+name)
+    if result.returncode:raise RuntimeError('Case failure; inspect '+name)
+try:
+    for label,speeds,idle,mode in groups:
+        run('sram-'+label,'validate_hpm6800_performance.py',['--speeds',speeds,'--windows','axi,ahb,axi-last','--idle',str(idle),'--modes',str(mode),'--loops','128','--repeats','3'])
+    run('sram-66-stress','validate_hpm6800_performance.py',['--speeds','66666666','--windows','axi,ahb,axi-last','--idle','22','--modes','17','--loops','128','--repeats','3','--sustain-seconds','30'])
+    for label,speeds,idle,mode in groups:
+        run('rtt-'+label,'validate_hpm6800_streams.py',['--stage','rtt','--speeds',speeds,'--idle',str(idle),'--mode',str(mode),'--seconds','2','--repeats','3'])
+    for label,speeds,idle,mode in groups:
+        run('hss-'+label,'validate_hpm6800_streams.py',['--stage','hss','--speeds',speeds,'--idle',str(idle),'--mode',str(mode),'--seconds','2','--repeats','3','--hss-base','0x0123ff00'])
+    run('rtt-66-long','validate_hpm6800_streams.py',['--stage','rtt','--speeds','66666666','--idle','22','--mode','17','--seconds','10','--repeats','3'])
+    run('hss-66-single-long','validate_hpm6800_streams.py',['--stage','hss','--speeds','66666666','--idle','22','--mode','17','--seconds','10','--repeats','3','--hss-base','0x0123ff00','--periods','96,108','--variables','1','--observe-scans'])
+    run('hss-66-multi-long','validate_hpm6800_streams.py',['--stage','hss','--speeds','66666666','--idle','22','--mode','17','--seconds','10','--repeats','3','--hss-base','0x0123ff00','--periods','480','--variables','3,8','--observe-scans'])
+    report['completed']=True
+except BaseException as e:
+    report['failure']=repr(e)
+    raise
+finally:report['finished']=time.time();save()

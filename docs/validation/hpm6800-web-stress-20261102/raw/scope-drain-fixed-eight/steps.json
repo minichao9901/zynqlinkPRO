@@ -1,0 +1,740 @@
+[
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "show"
+    },
+    "result": {
+      "job": "1765f488338a9fec1ec668329b5f5293",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "dispatched": true,
+        "page": "scope"
+      }
+    },
+    "seconds": 0.2892038000009052
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "set",
+      "selector": "#sc-target",
+      "value": "riscv"
+    },
+    "result": {
+      "job": "6d106505a189b110aea1fe18f90db3f9",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "control": {
+          "disabled": false,
+          "hidden": false,
+          "label": "目标类型\n          \n            SWD / ARM\n            RISC-V / JTAG",
+          "options": [
+            {
+              "disabled": false,
+              "label": "SWD / ARM",
+              "value": "swd"
+            },
+            {
+              "disabled": false,
+              "label": "RISC-V / JTAG",
+              "value": "riscv"
+            }
+          ],
+          "selector": "#sc-target",
+          "tag": "select",
+          "text": "SWD / ARM\n            RISC-V / JTAG",
+          "title": "探针的全局目标类型（HID 0x31 action 10，与 RTT-over-JTAG 共用同一个开关）。粘性：设一次就一直有效。切到 RISC-V/JTAG 后本页后端也跟着换（探针侧采样器的传输后端 = 全局目标类型）",
+          "type": "select-one",
+          "value": "riscv"
+        },
+        "dispatched": true
+      }
+    },
+    "seconds": 0.139199400000507
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "set",
+      "selector": "#sc-mock",
+      "value": false
+    },
+    "result": {
+      "job": "78e674f7dc070b1394b1da04816f8322",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "control": {
+          "disabled": false,
+          "hidden": false,
+          "label": "模拟探针",
+          "selector": "#sc-mock",
+          "tag": "input",
+          "text": "",
+          "title": null,
+          "type": "checkbox",
+          "value": false
+        },
+        "dispatched": true
+      }
+    },
+    "seconds": 0.02897070000108215
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "invoke",
+      "method": "loadElfFile",
+      "args": [
+        {
+          "name": "fw.elf",
+          "kind": "file",
+          "$base64Evidence": {
+            "bytes": 338952,
+            "sha256": "e5124ca35a872c2c54f210df99c5cfc3ca7a0d8f6a64f1cfa29a907aeb9b73a9"
+          }
+        }
+      ],
+      "target": "view"
+    },
+    "result": {
+      "job": "2edd0a63346b8e2b7bf5559f2d8965e4",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.15473949999977776
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "click",
+      "selector": "#sc-varclear"
+    },
+    "result": {
+      "job": "02166465ab5cfe2a14f1bbd4f8270d11",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "control": {
+          "disabled": false,
+          "hidden": false,
+          "label": "清空勾选",
+          "selector": "#sc-varclear",
+          "tag": "button",
+          "text": "清空勾选",
+          "title": null,
+          "type": "submit",
+          "value": ""
+        },
+        "dispatched": true
+      }
+    },
+    "seconds": 0.10429619999922579
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "invoke",
+      "method": "toggleVar",
+      "args": [
+        {
+          "name": "g_v.tick",
+          "addr": 19136512,
+          "size": 4,
+          "scalar": "u32"
+        },
+        true
+      ],
+      "target": "view"
+    },
+    "result": {
+      "job": "673e3efb70856fb0b053e7ab11757057",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.035553200001231744
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "invoke",
+      "method": "toggleVar",
+      "args": [
+        {
+          "name": "g_v.u_hi",
+          "addr": 19136516,
+          "size": 4,
+          "scalar": "u32"
+        },
+        true
+      ],
+      "target": "view"
+    },
+    "result": {
+      "job": "3e2292259a5165c46c4c9b95b5a9470c",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.030585700000301586
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "invoke",
+      "method": "toggleVar",
+      "args": [
+        {
+          "name": "g_v.f_sin",
+          "addr": 19136520,
+          "size": 4,
+          "scalar": "f32"
+        },
+        true
+      ],
+      "target": "view"
+    },
+    "result": {
+      "job": "5ae18efed126686f9d2c5478666a4de4",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.10394959999939601
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "invoke",
+      "method": "toggleVar",
+      "args": [
+        {
+          "name": "g_v.f_tri",
+          "addr": 19136524,
+          "size": 4,
+          "scalar": "f32"
+        },
+        true
+      ],
+      "target": "view"
+    },
+    "result": {
+      "job": "2c9a6ba9903cd66bf87790a03743b916",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.11954899999909685
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "invoke",
+      "method": "toggleVar",
+      "args": [
+        {
+          "name": "g_v.i_sq1k",
+          "addr": 19136528,
+          "size": 4,
+          "scalar": "i32"
+        },
+        true
+      ],
+      "target": "view"
+    },
+    "result": {
+      "job": "3f692cfaf7c2dfea97bc91133c7e3118",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.10409830000025977
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "invoke",
+      "method": "toggleVar",
+      "args": [
+        {
+          "name": "g_v.i_sq5k",
+          "addr": 19136532,
+          "size": 4,
+          "scalar": "i32"
+        },
+        true
+      ],
+      "target": "view"
+    },
+    "result": {
+      "job": "413d4fc3571cbdcc2abaa6a64e27a73a",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.03718900000058056
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "invoke",
+      "method": "toggleVar",
+      "args": [
+        {
+          "name": "g_v.u_ramp",
+          "addr": 19136536,
+          "size": 4,
+          "scalar": "u32"
+        },
+        true
+      ],
+      "target": "view"
+    },
+    "result": {
+      "job": "fd48dddd1999bb968a00a965eae17943",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.10382690000005823
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "invoke",
+      "method": "toggleVar",
+      "args": [
+        {
+          "name": "g_v.lfsr",
+          "addr": 19136540,
+          "size": 4,
+          "scalar": "u32"
+        },
+        true
+      ],
+      "target": "view"
+    },
+    "result": {
+      "job": "9577eccaf5efc9b1afd473dc2aede6dc",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.10452019999866025
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "set",
+      "selector": "#sc-period",
+      "value": "1000.0"
+    },
+    "result": {
+      "job": "39ebf00989ed695cfe1205327858cded",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "control": {
+          "disabled": false,
+          "hidden": false,
+          "label": "周期µs",
+          "selector": "#sc-period",
+          "tag": "input",
+          "text": "",
+          "title": "µs，可填 2.25 / 2.5 / 2.75；小数周期需新版探针固件，按 24 MHz tick 量化",
+          "type": "text",
+          "value": "1000.0"
+        },
+        "dispatched": true
+      }
+    },
+    "seconds": 0.015173499999946216
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "set",
+      "selector": "#sc-seconds",
+      "value": "20"
+    },
+    "result": {
+      "job": "dda47ddda8b9e24f64df5aba30bf4df2",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "control": {
+          "disabled": false,
+          "hidden": false,
+          "label": "时长s",
+          "selector": "#sc-seconds",
+          "tag": "input",
+          "text": "",
+          "title": "缓冲容量 = 实测速率 × 时长（页面会显示占多少内存）",
+          "type": "text",
+          "value": "20"
+        },
+        "dispatched": true
+      }
+    },
+    "seconds": 0.12392980000004172
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "set",
+      "selector": "#sc-raw",
+      "value": true
+    },
+    "result": {
+      "job": "fb5e9ad8a383bda2a0f0caec14b51f6d",
+      "ok": true,
+      "value": {
+        "completed": false,
+        "control": {
+          "disabled": false,
+          "hidden": false,
+          "label": "记录原始包",
+          "selector": "#sc-raw",
+          "tag": "input",
+          "text": "",
+          "title": null,
+          "type": "checkbox",
+          "value": true
+        },
+        "dispatched": true
+      }
+    },
+    "seconds": 0.10402120000071591
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "invoke",
+      "method": "connectHid",
+      "args": [
+        false
+      ],
+      "target": "view"
+    },
+    "result": {
+      "job": "53da24dc8e0f47ddebaecfb9eae3d4f9",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.13377279999986058
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "invoke",
+      "method": "connectUsb",
+      "args": [
+        false
+      ],
+      "target": "view"
+    },
+    "result": {
+      "job": "95cd29152877a97ce3f7411f0c75f991",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.12312200000087614
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "invoke",
+      "method": "clear",
+      "args": [],
+      "target": "view"
+    },
+    "result": {
+      "job": "36a1928a4c907f31e5fae523551c0585",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.10670519999985117
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "invoke",
+      "method": "start",
+      "args": [],
+      "target": "view"
+    },
+    "result": {
+      "job": "efa916b1aad686e68c5aec99506ef2f0",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.25286570000025677
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "invoke",
+      "method": "stop",
+      "args": [
+        "HPM acceptance"
+      ],
+      "target": "view"
+    },
+    "result": {
+      "job": "8c3832f4b8ac17373c7df98a704ced7f",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.12451420000070357
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "invoke",
+      "method": "summary",
+      "args": [],
+      "target": "view"
+    },
+    "result": {
+      "job": "10ff3049ebd4cf0de8e7fc8d126f3149",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": {
+          "awaitingDefinition": false,
+          "benchUs": null,
+          "blob": null,
+          "capacity": 22064,
+          "captureFlags": 224,
+          "connectErr": null,
+          "dapYields": 0,
+          "definitionReceived": false,
+          "elf": {
+            "name": "fw.elf",
+            "note": "",
+            "source": "dwarf",
+            "stats": {
+              "cu": 44,
+              "dies": 7988,
+              "vars": 1270
+            },
+            "versions": [
+              5
+            ]
+          },
+          "lod": false,
+          "lost": 0,
+          "lostGap": 0,
+          "lostProbe": 0,
+          "lostUsb": 0,
+          "metricsError": "样本未完整接收：收到 1792，探针 3244",
+          "mockVars": [
+            "mock0.f32",
+            "mock1.f32",
+            "mock2.i32",
+            "mock3.u16",
+            "mock4.i16",
+            "mock5.u8",
+            "mock6.i8",
+            "mock7.f64"
+          ],
+          "mode": "real",
+          "packets": 164,
+          "plan": {
+            "estHz": 21503,
+            "estUs": 46.51,
+            "frameBytes": 32,
+            "spans": 1
+          },
+          "probeMetrics": {
+            "bytes": 152064,
+            "errors": 0,
+            "flags": 96,
+            "hz": 24000000,
+            "periodTicks": 24000,
+            "produced": 3244,
+            "skipped": 0,
+            "tick": 330186970,
+            "tx": 297,
+            "usb": 0,
+            "yields": 0
+          },
+          "rateHz": 1000,
+          "raw": 68,
+          "readErrors": 0,
+          "receivedSamples": 1792,
+          "resyncs": 0,
+          "running": false,
+          "samples": 1792,
+          "stalePackets": 133,
+          "state": "已停止（HPM acceptance）：1792 个样本 / 1.791 s，跳拍 0 / USB 丢样本 0 / 读错 0 / 包缺口 0；样本未完整接收：收到 1792，探针 3244",
+          "supportsMetrics": true,
+          "tailCountDelta": -1452,
+          "transport": {
+            "bytes": 151552,
+            "chunks": 68,
+            "errors": 0,
+            "lastError": null,
+            "running": false
+          },
+          "trigger": {
+            "hit": -1,
+            "hits": 0,
+            "marker": false,
+            "mode": 0
+          },
+          "varCount": 8,
+          "vars": [
+            "g_v.tick:u32@0x1240000",
+            "g_v.u_hi:u32@0x1240004",
+            "g_v.f_sin:f32@0x1240008",
+            "g_v.f_tri:f32@0x124000c",
+            "g_v.i_sq1k:i32@0x1240010",
+            "g_v.i_sq5k:i32@0x1240014",
+            "g_v.u_ramp:u32@0x1240018",
+            "g_v.lfsr:u32@0x124001c"
+          ],
+          "view": {
+            "end": 1792,
+            "start": 0
+          }
+        },
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.10433940000075381
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "invoke",
+      "method": "stop",
+      "args": [
+        "HPM cleanup"
+      ],
+      "target": "view"
+    },
+    "result": {
+      "job": "3f87559e7a6e058026d750d0a141d884",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": null,
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.10469410000041535
+  },
+  {
+    "request": {
+      "action": "workbench",
+      "page": "scope",
+      "op": "invoke",
+      "method": "disconnect",
+      "args": [],
+      "target": "view"
+    },
+    "result": {
+      "job": "45a2c5a95b2512c1f3ce4594056b8809",
+      "ok": true,
+      "value": {
+        "errors": [],
+        "returned": true,
+        "value": true,
+        "verificationRequired": true
+      }
+    },
+    "seconds": 0.017479199999797856
+  }
+]

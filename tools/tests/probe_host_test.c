@@ -49,6 +49,9 @@ void XUsbPs_EpBufferRelease(u32 x) {(void)x;}
 u8 usbd_cdc_acm_get_dtr(void) {return (u8)host_dtr;}
 int probe_target_claim(uint32_t hz) {(void)hz;claim_calls++;return 0;}
 int probe_target_transport(uint32_t port) {return port<=2 ? 0 : -6;}
+static int target_riscv;
+int probe_target_architecture(uint32_t riscv) {if(riscv>1U)return -6;target_riscv=(int)riscv;return 0;}
+int probe_target_is_riscv(void) {return target_riscv;}
 void probe_target_release(void) {release_calls++;}
 void probe_target_forget(void) {release_calls++;}
 uint32_t probe_target_fclk(void) {return 100000000;}
@@ -74,6 +77,16 @@ int main(void) {
     assert(probe_hid_descriptor(res,64,1)==29);
     command_req(req,0x31,1,2);control(req,res);assert((int8_t)res[3]==-6 && mode==0);
     command_req(req,0x32,99,2);control(req,res);assert((int8_t)res[3]==-9);
+    // The actual Web UI selects HPM with legacy RTT action10, not the
+    // native harness's action12. Rejecting it blocks all HPM stream pages.
+    command_req(req,0x31,10,3);req[4]=1;control(req,res);assert(res[3]==0);
+    assert(target_riscv && requested_hz==10000000);
+    command_req(req,0x32,2,2);control(req,res);assert(get32(res+4)&2);
+    command_req(req,0x32,10,14);put32(req+4,24000);req[8]=64;req[9]=1;put32(req+10,0x1240000);req[14]=4;req[15]=4;
+    control(req,res);assert(res[3]==0 && (flags&64));
+    mode=2;command_req(req,0x31,10,3);req[4]=0;control(req,res);assert((int8_t)res[3]==-7 && target_riscv);mode=0;
+    command_req(req,0x31,10,3);req[4]=0;control(req,res);assert(res[3]==0);
+    assert(!target_riscv);
     // Eight wide, unaligned variables fit 24 aligned word descriptors and 64-byte frames.
     command_req(req,0x32,10,56);put32(req+4,48);req[9]=8;
     for(i=0;i<8;i++) {put32(req+10+6*i,0x20000001+16*i);req[14+6*i]=8;req[15+6*i]=7;}
@@ -149,14 +162,14 @@ int main(void) {
     mode=0;bench_active=0;rtt_pl_running=0;pending_len=0;dma_pending=0;
     requested_hz=50000000;
     command_req(req,0x32,3,6);put32(req+4,66666666);control(req,res);
-#if defined(DAP_FIXED_FCLK0_TEST) && DAP_FIXED_FCLK0_TEST
+#if (defined(DAP_FIXED_FCLK0_TEST) && DAP_FIXED_FCLK0_TEST) || (defined(DAP_MAX_SWCLK_HZ) && DAP_MAX_SWCLK_HZ >= 66666666U)
     assert(res[3]==0 && requested_hz==66666666);
 #else
     assert(res[3]==(uint8_t)-6 && requested_hz==50000000);
 #endif
     command_req(req,0x32,3,6);put32(req+4,66666667);control(req,res);assert(res[3]==(uint8_t)-6);
     command_req(req,0x31,7,10);put32(req+4,66666666);req[8]=0;req[9]=4;control(req,res);
-#if defined(DAP_FIXED_FCLK0_TEST) && DAP_FIXED_FCLK0_TEST
+#if (defined(DAP_FIXED_FCLK0_TEST) && DAP_FIXED_FCLK0_TEST) || (defined(DAP_MAX_SWCLK_HZ) && DAP_MAX_SWCLK_HZ >= 66666666U)
     assert(res[3]==0 && requested_hz==66666666);
 #else
     assert(res[3]==(uint8_t)-6 && requested_hz==50000000);

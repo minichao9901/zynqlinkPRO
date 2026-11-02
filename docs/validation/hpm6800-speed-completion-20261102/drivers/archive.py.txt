@@ -1,0 +1,125 @@
+from pathlib import Path
+import json,hashlib,shutil,statistics,datetime
+ROOT=Path.cwd();BASE=ROOT/'build/hpm6800-speed-completion-20261102'
+DEST=ROOT/'docs/validation/hpm6800-speed-completion-20261102'
+PAIR=ROOT/'prebuilt/hpm6800-jtag66-133-20261102'
+def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+def load(p):return json.loads(p.read_text(encoding='utf-8'))
+def save(p,v):p.parent.mkdir(parents=True,exist_ok=True);p.write_text(json.dumps(v,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+def copy(p,q):q.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(p,q)
+PAIR.mkdir(exist_ok=True);DEST.mkdir(exist_ok=True)
+for p in (BASE/'pair66-final').iterdir():
+    if p.is_file():copy(p,PAIR/p.name)
+for p in (BASE/'speed-build-inputs').iterdir():copy(p,DEST/'build-inputs'/p.name)
+for src,name,overlay in [('pair66','io-only',['probe_stream.c']),('pair66-arm','arm-startup-failure',['probe_stream.c','DAP.c','ps_fclk.h'])]:
+    d=PAIR/'controls'/name;d.mkdir(parents=True,exist_ok=True)
+    for n in ('application.elf','ps-build.json'):copy(BASE/src/n,d/n)
+    save(d/'variant.json',dict(status='IO-only frontier control' if name=='io-only' else 'startup failed; OCM matched; USB missing; not accepted',
+        paired_bit='../../probe.bit',paired_bit_sha256=sha(PAIR/'probe.bit'),
+        source_base_revision='b5bb054',source_overlay_snapshots=overlay,
+        overlay_directory='../../../../docs/validation/hpm6800-speed-completion-20261102/build-inputs'))
+(PAIR/'.gitattributes').write_text('* -text -whitespace\n')
+(DEST/'.gitattributes').write_text('* -text -whitespace\n')
+for p in BASE.glob('*/result.json'):
+    copy(p,DEST/'raw'/p.parent.name/p.name)
+    for f in p.parent.glob('*.py.txt'):copy(f,DEST/'raw'/p.parent.name/f.name)
+    if p.parent.name.startswith('identity'):
+        for f in p.parent.iterdir():
+            if f.is_file():copy(f,DEST/'raw'/p.parent.name/f.name)
+for p in BASE.glob('*.log'):
+    if not p.name.startswith(('web-','flash-','shared-')):copy(p,DEST/'logs'/p.name)
+for n in ('preflight.json','campaign.json','campaign-first.json','final-state.json'):
+    copy(BASE/n,DEST/'raw'/n)
+for n in ('run_campaign.py','run_campaign-first.py.txt','final_state.py','startup_snapshot.py','archive.py'):
+    copy(BASE/n,DEST/'drivers'/(n if n.endswith('.txt') else n+'.txt'))
+for name in ('validate_hpm6800_performance.py','validate_hpm6800_streams.py','benchmark_hpm5301.py','characterize_hpm6800_idle.py'):
+    copy(ROOT/'tools'/name,DEST/'drivers'/name)
+cases=[p for p in BASE.glob('sram-*/result.json') if p.parent.name!='sram-mid']
+sram=[r for p in cases for r in load(p)['rows']]
+rtt=[r for p in BASE.glob('rtt-*/result.json') if not p.parent.name.endswith('long') for r in load(p)['rows']]
+hss=[s for p in BASE.glob('hss-*/result.json') for s in load(p).get('summary',[])]
+assert len([r for r in sram if 'sustained' not in r])==45
+assert all(r['passed'] and r['all_bytes_verified'] for r in sram)
+assert len(rtt)==45 and all(r['passed'] and r['sequence_exact'] and r['all_published_received'] for r in rtt)
+assert len(hss)==30 and all(s['zero_skip'] for s in hss)
+for p in BASE.glob('*/result.json'):
+    d=load(p)
+    assert not d.get('restore_error'),p
+    if 'restore' in d:assert all(d['restore'].values()),p
+    for r in d.get('rows',[]):
+        if 'restore_match' in r:assert r['restore_match'],p
+for name in ('hss-66-boundary-long','hss-66-eight-boundary-long','hss-66-single-long','hss-66-multi-long'):
+    assert all(r['skipped']==0 and r['errors']==0 and r['tail_count_delta']==0 for r in load(BASE/name/'result.json')['rows']),name
+rows=[]
+for hz in sorted({r['requested_Hz'] for r in sram}):
+    r=next(r for r in sram if r['requested_Hz']==hz and r['window']=='axi')
+    rr=[x for x in rtt if x['requested_clock_Hz']==hz]
+    hs={s['variables']:s for s in hss if s['requested_Hz']==hz}
+    rows.append(dict(requested_Hz=hz,actual_TCK_Hz=r['actual_TCK_Hz'],FCLK_Hz=r['FCLK_Hz'],
+        mode=r['accepted_mode'],idle=r['attempts'][-1]['effective_dmi_idle'],
+        read_MB_s=r['read_MB_s'],write_MB_s=r['write_MB_s'],
+        rtt_MB_s=statistics.median(x['probe_MB_s'] for x in rr),
+        hss1_Hz=statistics.median(hs[1]['verified_Hz']),hss8_Hz=statistics.median(hs[8]['verified_Hz'])))
+save(DEST/'summary.json',dict(rows=rows,sram_rows=len(sram),rtt_rows=len(rtt),hss_verified_frontiers=len(hss),
+    final_state=load(BASE/'final-state.json'),scope='native probe/JTAG channel; not Web E2E'))
+manifest=dict(status='HPM6800EVK native SRAM/RTT/HSS frequency validation passed; over-spec research',
+    formal_product_release=False,source_revision='pending final source commit',source_variant_base='b5bb054',
+    source_overlay='../../docs/validation/hpm6800-speed-completion-20261102/build-inputs/manifest.json',
+    build=load(PAIR/'ps-build.json')['options'],timing=load(PAIR/'verified_clock.json'),
+    bit_reused_unchanged_from='prebuilt/hpm6800-idle64-133-experimental-20261102/probe.bit',
+    files={str(p.relative_to(PAIR)).replace('\\','/'):dict(bytes=p.stat().st_size,sha256=sha(p))
+        for p in PAIR.rglob('*') if p.is_file() and p.name not in ('manifest.json','README.md')})
+save(PAIR/'manifest.json',manifest)
+table='\n'.join('|'+ '|'.join([f"{r['requested_Hz']/1e6:g}",f"{r['actual_TCK_Hz']/1e6:.3f}",str(r['idle']),str(r['mode']),
+    f"{r['read_MB_s']:.3f}/{r['write_MB_s']:.3f}",f"{r['rtt_MB_s']:.3f}",f"{r['hss1_Hz']/1000:.3f}",f"{r['hss8_Hz']/1000:.3f}"])+'|' for r in rows)
+state=load(BASE/'final-state.json');when=datetime.datetime.fromisoformat(state['time_UTC']).astimezone(datetime.timezone(datetime.timedelta(hours=8))).isoformat()
+report=f'''# HPM6800EVK测速补全：66.667MHz与完整分档
+
+2026-11-02，ZL-004/070/073/085。原生测速完成后再进入[R22 Web测试](../hpm6800-web-stress-20261102/README.md)。新PS显式cap66666666Hz，PL复用原133.333333MHz/7.5ns已通过bit，未修改RTL、未重做实现；setup+0.179ns、hold+0.034ns。配对见[prebuilt](../../../prebuilt/hpm6800-jtag66-133-20261102/README.md)。超25MHz均为单板超规格研究，不是芯片保证。
+
+## 最佳档和分档表
+
+实际FCLK133333332Hz/TCK66666666Hz，idle22、mode17：AXI读**3.448MB/s**、写**3.401MB/s**；AHB3.384/3.363，末4KiB2.710/2.646。三个SRAM窗口分别30秒随机/反相数据交替读写，逐字节及原数据恢复通过。RTT三轮10秒约**3.188MB/s**，序列、停止ACK及发布/交付总量精确匹配。
+
+HSS单变量81ticks/3.375us为**296.296kS/s**，8u32的426ticks/17.75us为**56.338k组/s**，各三轮10秒测量窗口零跳采、错误0、全部数据帧和尾计数核对通过。3u32/8u32在20us/50k组/s另各三轮10秒通过；4us/250k及4.5us/222.2k各三轮10秒通过。短窗与长窗不混用，速率是完整变量组数，不是单值总数。
+
+|请求TCK MHz|实际TCK MHz|idle|mode|AXI读/写MB/s|RTT MB/s|HSS1 kS/s|HSS8 k组/s|
+|---:|---:|---:|---:|---:|---:|---:|---:|
+{table}
+
+SRAM为512字事务、128循环、三次中位数；AXI队列深32，AHB16、末4KiB2。表中RTT每点3×2秒中位数；HSS每点先搜索，再3×2秒零跳采复验；最高档另有上述3×10秒。计时为原生探针通路，不冒充Web/GUI完整E2E。HSS稳态窗口在启动、settle及首快照后计时，原始首计数也保留（部分会话启动阶段已有1～2跳采）；没有宣称整个启动到退出零跳采。
+
+## 边界、失败与改进
+
+* 旧IO-only策略在61～66.667MHz请求实际最高64.286MHz；不是时序失败。新PS只在显式RISC-V最高档选择现有ARM PLL/10，其他请求仍IO PLL；没有写任何探针PLL、CPU/DDR分频或目标MCU PLL。时钟来自SRCSEL/PLL/分频寄存器计算，不是外部频率计测量。
+* 64.286MHz的idle20失败、21通过；66.667MHz的20/21失败、22通过，仍符合约0.33us的DTM等待量级。mode16/17均通过。更大idle会减速，参见[R20](../hpm6800-idle-frontier-20261102/README.md)。本轮到达当前133MHz实现下半速TCK档，没有在未验证的更高FCLK继续上探。
+* 高频识别与数据通路分开：34.615MHz mode0的公开IDCODE读错，三个窗口均保留失败/恢复；mode17在30～66.667MHz公开识别和随机读写通过。不是把识别坏点静默删除或拿低速识别冒充高频连接验证。
+* ZL-085：流时钟原硬编码60MHz，与DAP构建cap不一致，已统一。最高档选择保留DDR所有权守卫；生产C模型覆盖60/66 cap及占用时拒绝改钟。首次构建暴露133 helper被旧fixed宏隔离，已修正、重新链接，失败日志保留。
+* ZL-004：首次ARM档PS候选OCM匹配却停_exit/USB缺失，尚未测速。保留PC/物理寄存器及该ELF。新增经cache flush发布的probe_boot_diagnostic启动阶段/返回码，不绕过自检；新配对正常启动不代表偶发故障已修复。
+* ZL-070：前轮60MHz的250k三轮有坏点保留。本轮66.667MHz的上述窗口通过不证明任意时长或所有板卡的绝对上限。
+* ZL-080的2us极端过载短包问题未因这些成功点而关闭。本轮提高了可保持周期的采样率，没有取消真实gap检查。
+
+## 身份与可复测来源
+
+bit SHA256：`{sha(PAIR/'probe.bit')}`；PS ELF：`{sha(PAIR/'application.elf')}`。PS O3/Thumb compact，trace/zero-idle/fixed-FCLK关闭，API cap66.667MHz。原133/60配对与Golden字节保留。
+
+原生配对可由源码base b5bb054加build-inputs中的四个精确PS文件覆盖，在隔离工作树构建；Web阶段另有HID兼容修正，不能假定当前工作树与本原生ELF完全相同。目录中IO-only及startup-failure控制ELF分别附变体说明、指纹及相同bit引用；失败配对未标为通过。各原始结果绑定实际bit/ELF哈希，执行驱动快照保留。用户SRAM备份仅留build，未纳入Git。
+
+生产C九套、真实时钟/idle/搜索循环/参数四个单测通过。主机时钟测试执行真实DAP_SWJ_Clock，含未获DDR所有权时禁止最高档切换；PL未变，因此没有用重复仿真代替本轮分档实测。
+
+## 最后原生板上状态（随后已进入Web任务）
+
+{when}：原生配对，TCK25MHz/FCLK50MHz、mode0、idle8，目标运行、RTT/HSS/packet/采集空闲，物理MEM-AP0代码核对通过。全部临时ILM/AHB/AXI、核心/cache和目标时钟控制恢复。本原生阶段未写目标Flash/QSPI、未复位目标MCU。后续Web阶段会加载另一明确配对并按授权烧录目标，不能把这个快照当作最终Web状态。
+'''
+(DEST/'README.md').write_text(report,encoding='utf-8')
+(PAIR/'README.md').write_text('''# HPM6800EVK 66.667MHz原生测速配对
+
+PL复用已验收133.333MHz bit；新PS增加显式RISC-V ARM PLL/10最高档、统一DAP/流cap及启动诊断。不是fixed-FCLK SWD固件，不是全平台Golden。
+
+15请求频率×三个SRAM窗口、RTT及1/8变量HSS分档通过；66.667MHz/idle22/mode17 AXI读3.448/写3.401MB/s，三个窗口各30秒；RTT约3.188MB/s；HSS单变量296.296k、8变量56.338k组/s各三轮10秒零跳采窗口。详见[报告](../../docs/validation/hpm6800-speed-completion-20261102/README.md)和[manifest](manifest.json)。
+
+原生源码变体为b5bb054加报告build-inputs四个精确文件；Web阶段的HID兼容修改另交付，不能据当前工作树推断本ELF。controls保存实际使用的IO-only对照及启动失败候选，均引用同一bit，不冒充最终通过配对。
+''',encoding='utf-8')
+save(DEST/'evidence.json',dict(files={str(p.relative_to(DEST)).replace('\\','/'):dict(bytes=p.stat().st_size,sha256=sha(p))
+    for p in DEST.rglob('*') if p.is_file() and p.name!='evidence.json'}))
+print('Archived',len(rows),'frequencies, native pair and preserved controls; no target backups.')

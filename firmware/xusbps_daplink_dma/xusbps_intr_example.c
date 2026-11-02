@@ -136,21 +136,35 @@ static u8 cdc_write_buffer[4096] ALIGNMENT_CACHELINE;
  *
  ******************************************************************************/
 
+/* Flush a small startup record so MEM-AP0 can diagnose an early exit even
+ * when USB/UART never becomes available. This does not bypass any check. */
+volatile u32 probe_boot_diagnostic[8] __attribute__((aligned(32)));
+static void probe_boot_record(u32 stage, int status) {
+    probe_boot_diagnostic[0]=0x5a424f54U;
+    probe_boot_diagnostic[1]=stage;
+    probe_boot_diagnostic[2]=(u32)status;
+    Xil_DCacheFlushRange((INTPTR)probe_boot_diagnostic,sizeof probe_boot_diagnostic);
+}
+
 int main(void)
 {
 	int Status;
+	probe_boot_record(1U,0);
 	printf("hello cdc acm test!\n");
     xil_printf("[ETM] independent FCLK1 reference=%u Hz\r\n",etm_reference_init());
     extern uint32_t etm_ddr_init(void);
     xil_printf("[ETM] bounded DDR USB=%u\r\n",etm_ddr_init());
 	extern int swd_dma_selftest(void);
 	Status = swd_dma_selftest();
+	probe_boot_record(2U,Status);
 	xil_printf("[DMA] BRAM/CDMA/CACHE selftest=%d\r\n", Status);
 	if (Status) return XST_FAILURE;
 
 	/* Run the USB Interrupt example.*/
+	probe_boot_record(3U,0);
 	Status = UsbIntrExample(&IntcInstance, &UsbInstance,
 				XPAR_XUSBPS_0_DEVICE_ID, XPAR_XUSBPS_0_INTR);
+	probe_boot_record(4U,Status);
 	if (Status != XST_SUCCESS) {
 		return XST_FAILURE;
 	}

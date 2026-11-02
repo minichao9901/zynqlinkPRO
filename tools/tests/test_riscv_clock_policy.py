@@ -41,6 +41,9 @@ static uint32_t cfg,ir,fclk,calls;
 static uint32_t swd_read32(uint32_t at){assert(at==SWD_CFG || at==SWD_FEATURES);return at==SWD_CFG?cfg:SWD_FEATURE_SHORT_CLOCK;}
 static void swd_write32(uint32_t at,uint32_t value){assert(at==SWD_CFG);cfg=value;}
 static uint32_t JTAG_IDCodeIR(void){return ir;}
+static unsigned owned;
+static unsigned etm_ddr_owned(void){return owned;}
+static int ps_fixed133_select(void){fclk=133333332U;calls++;return (int)fclk;}
 static int ps_set_fclk0_hz(uint32_t requested){assert(requested<=120000000U);fclk=requested-1;calls++;return (int)fclk;}
 static void Set_Clock_Delay(uint32_t hz){(void)hz;}
 static void DAP_JTAG_ClockChanged(void){}
@@ -79,6 +82,16 @@ int main(void){
             libs = list((mingw/'lib/gcc/x86_64-w64-mingw32').glob('*'))
             compiler = ['clang', '--target=x86_64-w64-windows-gnu', '-isystem', str(mingw/'include'),
                         '-L'+str(mingw/'lib'), '-L'+str(libs[-1])]
+        subprocess.run([*compiler, '-std=c11', '-Wall', '-Wextra', str(cfile), '-o', str(exe)], check=True)
+        subprocess.run([str(exe)], check=True, timeout=10)
+        # Execute the same production function with the explicitly verified
+        # 133MHz build cap. Ordinary profiles must keep their prior policy.
+        extended = (shim.replace('#define DAP_MAX_SWCLK_HZ 60000000U', '#define DAP_MAX_SWCLK_HZ 66666666U')
+            .replace('requested<=120000000U', 'requested<=133333332U'))
+        extended_checks = (checks.replace('check(5000000,2,1,120000000,12)', 'check(5000000,2,1,130000000,13)')
+            .replace('check(60000001,2,1,0,0)', 'check(66666667,2,1,0,0);check(66666666,2,1,133333333,1);check(65000000,2,1,130000000,1)')
+            .replace(' return 0;', ' owned=1;check(66666666,2,1,0,0);return 0;'))
+        cfile.write_text(extended + production + extended_checks)
         subprocess.run([*compiler, '-std=c11', '-Wall', '-Wextra', str(cfile), '-o', str(exe)], check=True)
         subprocess.run([str(exe)], check=True, timeout=10)
 

@@ -1,0 +1,105 @@
+{
+  "stage": "scope",
+  "passed": true,
+  "summary": {
+    "awaitingDefinition": false,
+    "benchUs": null,
+    "blob": null,
+    "capacity": 22064,
+    "captureFlags": 224,
+    "connectErr": null,
+    "dapYields": 0,
+    "definitionReceived": true,
+    "elf": {
+      "name": "fw.elf",
+      "note": "",
+      "source": "dwarf",
+      "stats": {
+        "cu": 44,
+        "dies": 7988,
+        "vars": 1270
+      },
+      "versions": [
+        5
+      ]
+    },
+    "lod": false,
+    "lost": 0,
+    "lostGap": 0,
+    "lostProbe": 0,
+    "lostUsb": 0,
+    "metricsError": null,
+    "mockVars": [
+      "mock0.f32",
+      "mock1.f32",
+      "mock2.i32",
+      "mock3.u16",
+      "mock4.i16",
+      "mock5.u8",
+      "mock6.i8",
+      "mock7.f64"
+    ],
+    "mode": "real",
+    "packets": 287,
+    "plan": {
+      "estHz": 21503,
+      "estUs": 46.51,
+      "frameBytes": 32,
+      "spans": 1
+    },
+    "probeMetrics": {
+      "bytes": 151040,
+      "errors": 0,
+      "flags": 96,
+      "hz": 24000000,
+      "periodTicks": 24000,
+      "produced": 3216,
+      "skipped": 0,
+      "tick": 2173749489,
+      "tx": 295,
+      "usb": 0,
+      "yields": 0
+    },
+    "rateHz": 1000,
+    "raw": 63,
+    "readErrors": 0,
+    "resyncs": 0,
+    "running": false,
+    "samples": 3146,
+    "stalePackets": 0,
+    "state": "已停止（HPM acceptance）：3146 个样本 / 3.145 s，跳拍 0 / USB 丢样本 0 / 读错 0 / 包缺口 0",
+    "supportsMetrics": true,
+    "transport": {
+      "bytes": 150016,
+      "chunks": 64,
+      "errors": 0,
+      "lastError": null,
+      "running": false
+    },
+    "trigger": {
+      "hit": -1,
+      "hits": 0,
+      "marker": false,
+      "mode": 0
+    },
+    "varCount": 8,
+    "vars": [
+      "g_v.tick:u32@0x1240000",
+      "g_v.u_hi:u32@0x1240004",
+      "g_v.f_sin:f32@0x1240008",
+      "g_v.f_tri:f32@0x124000c",
+      "g_v.i_sq1k:i32@0x1240010",
+      "g_v.i_sq5k:i32@0x1240014",
+      "g_v.u_ramp:u32@0x1240018",
+      "g_v.lfsr:u32@0x124001c"
+    ],
+    "view": {
+      "end": 3146,
+      "start": 0
+    }
+  },
+  "rowsChecked": 3146,
+  "contractBad": 0,
+  "rawBytes": 146944,
+  "viewDoesNotModifyData": true
+}

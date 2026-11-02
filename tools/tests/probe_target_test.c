@@ -6,6 +6,9 @@ static uint32_t clock_reg=0x100a00,cfg=0x20010,ap_csw=0x23000052,ap_tar=0x200000
 static uint32_t dp_select=0x01000010,posted,blocks,sequences;
 static int inject_wait,inject_fault;
 static int jtag_present,jtag_calls,idcode_reads;
+static uint32_t idcode_ir=14;
+void JTAG_SetIDCodeIR(uint32_t value) {idcode_ir=value;}
+uint32_t JTAG_IDCodeIR(void) {return idcode_ir;}
 static uint32_t jtag_regs[8]={3,4,0,0,0,0,4,10};
 void DAP_JTAG_ClockChanged(void) {}
 uint32_t DAP_JTAG_RouteWord(void) {return 3U;}
@@ -91,6 +94,13 @@ int main(void) {
     probe_target_release();assert(DAP_Data.debug_port==0 && sequences==2);
     assert(!probe_target_claim(20000000));probe_target_release();assert(sequences==2);
     DAP_Data.debug_port=2;jtag_regs[6]=0;assert(probe_target_claim(20000000)==-7);
+    probe_target_forget();DAP_Data.debug_port=1;
+    assert(probe_target_architecture(1)==-7 && idcode_ir==14);
+    DAP_Data.debug_port=0;assert(!probe_target_architecture(1));
+    assert(probe_target_is_riscv() && idcode_ir==1 && DAP_Data.jtag_dev.count==1 && DAP_Data.jtag_dev.ir_length[0]==5);
+    claimed=1;assert(probe_target_architecture(0)==-7 && probe_target_is_riscv());claimed=0;
+    assert(!probe_target_architecture(0) && !probe_target_is_riscv());
+    assert(probe_target_architecture(2)==-6);
     puts("PASS production target C: WAIT, unaligned 1KiB split, overflow, SELECT/CSW/TAR/clock restore, independent initialization");
     return 0;
 }

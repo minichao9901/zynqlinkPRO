@@ -3,6 +3,21 @@ import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {nativeUsbDevices,nativeHidDevices,nativeSerialPorts} from '../../app/core/native-probe.js';
 
+test('delivery sequence survives reload and is shared with same-origin child pages',async t=>{
+  const originalWindow=globalThis.window,originalFetch=globalThis.fetch;
+  t.after(()=>{globalThis.window=originalWindow;globalThis.fetch=originalFetch;});
+  const data=new Map(),storage={getItem:k=>data.get(k)||null,setItem:(k,v)=>data.set(k,v)};
+  const make=()=>({document:{body:{dataset:{nativeProbe:'1'}}},location:{origin:'http://127.0.0.1:8882',search:'?trace-cli='+'a'.repeat(64)},sessionStorage:storage});
+  let root=make();root.parent=root;const firstRoot=root;globalThis.window=root;const ids=[];
+  globalThis.fetch=async(url,opts)=>{ids.push(opts.headers['X-Trace-Delivery']);return {ok:true,json:async()=>({ok:true,value:[]})};};
+  await nativeUsbDevices();const child=make();child.parent=root;globalThis.window=child;await nativeUsbDevices();
+  root=make();root.parent=root;globalThis.window=root;await nativeUsbDevices();
+  globalThis.window=firstRoot;await nativeUsbDevices();
+  assert.deepEqual(ids.map(id=>id.split(':')[2]),['1','2','3','4']);
+  assert.equal(new Set(ids.map(id=>id.split(':')[1])).size,1);
+  assert.ok(ids.every(id=>/^v2:[0-9a-f]{32}:\d+$/.test(id)));
+});
+
 test('offline lists never fetch and existing native devices cannot be opened',async t=>{
   const originalWindow=globalThis.window,originalFetch=globalThis.fetch;
   t.after(()=>{globalThis.window=originalWindow;globalThis.fetch=originalFetch;});

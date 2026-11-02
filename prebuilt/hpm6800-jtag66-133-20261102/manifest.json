@@ -1,0 +1,110 @@
+{
+  "status": "HPM6800EVK native SRAM/RTT/HSS frequency validation passed; over-spec research",
+  "formal_product_release": false,
+  "source_revision": "pending final source commit",
+  "source_variant_base": "b5bb054",
+  "source_overlay": "../../docs/validation/hpm6800-speed-completion-20261102/build-inputs/manifest.json",
+  "build": {
+    "opt": "3",
+    "compact_code": true,
+    "out": "build/hpm6800-speed-completion-20261102/ps66-arm-diag",
+    "project": "xusbps_daplink_dma",
+    "trace": false,
+    "usb_trace": false,
+    "experimental_zero_idle": false,
+    "max_swclk_hz": 66666666,
+    "timing": "prebuilt\\hpm6800-idle64-133-experimental-20261102\\verified_clock.json",
+    "fixed_fclk133_swd_test": false,
+    "bsp": null,
+    "gcc": "E:\\Xilinx\\SDK\\2018.3\\gnu\\aarch32\\nt\\gcc-arm-none-eabi\\bin\\arm-none-eabi-gcc.exe"
+  },
+  "timing": {
+    "FCLK_max_Hz": 133333333,
+    "SWCLK_max_Hz": 66666666,
+    "setup_slack_ns": 0.179,
+    "hold_slack_ns": 0.034,
+    "requested_FCLK_Hz": 133333333,
+    "RTL_DEBUG": 0,
+    "optional_observation_cells": 0,
+    "formal_product_acceptance": false
+  },
+  "bit_reused_unchanged_from": "prebuilt/hpm6800-idle64-133-experimental-20261102/probe.bit",
+  "files": {
+    ".gitattributes": {
+      "bytes": 21,
+      "sha256": "ffe82f3c5b968ed009c2577fa38f32c83be167799ee565d40a18e3440c57b342"
+    },
+    "application.elf": {
+      "bytes": 816924,
+      "sha256": "d819e0ed99bf9c6e9815f696409301e7fd582880d4c70149d7cc3d13a8af5318"
+    },
+    "cdc.rpt": {
+      "bytes": 145693,
+      "sha256": "7e864df767aa7b5560e456eae6f54a2cbe529ddafed35a1315351cedc93d0566"
+    },
+    "check_timing.rpt": {
+      "bytes": 3140,
+      "sha256": "8aa38e3ba0e7b6bda81cfee04bf4f2989999e7ded166a85eb6442a580bdd0907"
+    },
+    "implemented-constraints.xdc": {
+      "bytes": 2359,
+      "sha256": "8d93be28e2bb23f466f9ff79cdef9f9f266b0507514d393bdf3619afecf37242"
+    },
+    "probe.bit": {
+      "bytes": 4045674,
+      "sha256": "106d579bc1b79c2b873fd1e3eb2609d468892a67613d85a6e41d4dc90c8fc177"
+    },
+    "ps-build.json": {
+      "bytes": 5493,
+      "sha256": "f5a793f5ca7745e5a44d503b403efc83cc86fc686ea9dd5442e197bb0923ceaa"
+    },
+    "ps7_init.tcl": {
+      "bytes": 35333,
+      "sha256": "d3eeab6707765ab59acb924e39ff5c77c013da8cbf598b181e9eb43578f29ece"
+    },
+    "rtl-stamp.json": {
+      "bytes": 2169,
+      "sha256": "feaee4385433ef1d91f04d52b7cc0ad07f4490aa4103e67275cf44303cb297cf"
+    },
+    "swclk_launch.rpt": {
+      "bytes": 3765,
+      "sha256": "98a6098de58014e657eccf8d02701969e061b2354a9aad2d9c6c06ace918ff28"
+    },
+    "timing_verified.rpt": {
+      "bytes": 160530,
+      "sha256": "7027e4278a0e44aca7efee1ab51ffa6ed0c81787a1de2854352d53669b7b2e28"
+    },
+    "utilization.rpt": {
+      "bytes": 12760,
+      "sha256": "a85cc4ed54f53138b15ed2e2158324f99da53605fc6869f3c5d2755111c99e18"
+    },
+    "verified_clock.json": {
+      "bytes": 205,
+      "sha256": "2132320b7829c261bd880bb0c0b898f5342f11d95c7e97e1dc0dc29e890fe557"
+    },
+    "controls/arm-startup-failure/application.elf": {
+      "bytes": 816192,
+      "sha256": "aad36442de9f43ebfd4f0cf88ce33f9bbc741d057ea44f72ee797adc30734840"
+    },
+    "controls/arm-startup-failure/ps-build.json": {
+      "bytes": 5491,
+      "sha256": "311cdae180d3b257431d30fd25a56009b8f8799636b37b94fad0b78663dd3a5c"
+    },
+    "controls/arm-startup-failure/variant.json": {
+      "bytes": 437,
+      "sha256": "08e972fbd8e8b520b716215cfc9c808bf496e1788dcb85ed78c83d4b6d944c30"
+    },
+    "controls/io-only/application.elf": {
+      "bytes": 814508,
+      "sha256": "908a164a98cabc096f1930a8a2dd4b656e71769a290a0d64372834fb7c1c0dd6"
+    },
+    "controls/io-only/ps-build.json": {
+      "bytes": 5484,
+      "sha256": "6386e7b210893cc81297a9ada6bfdf89876a770ae0f960f1a558920b03f81c16"
+    },
+    "controls/io-only/variant.json": {
+      "bytes": 375,
+      "sha256": "df811705203aaa58fade62aabff93e5f1b9c137ea89fa6b859b2bbc6f33ff486"
+    }
+  }
+}
