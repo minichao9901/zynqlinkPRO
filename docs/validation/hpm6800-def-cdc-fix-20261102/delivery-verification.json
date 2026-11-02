@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "manifest_bound_staged_files": 1059,
+  "checks": [
+    "Exact staged bytes match all manifest SHA-256",
+    "PS build source and ELF match",
+    "Frozen EXE and backend/frontend source bytes match",
+    "Both RAM machine-code variants match ELF .text",
+    "Golden and R22 pair unchanged",
+    "No runtime tokens or private Flash/SRAM backups or build/dist staged",
+    "git diff --cached --check"
+  ],
+  "source_revision": "2d1ae54fa1f761dd9c0a431095c0ef915361fae0",
+  "board_commands_after_final_snapshot": false
+}

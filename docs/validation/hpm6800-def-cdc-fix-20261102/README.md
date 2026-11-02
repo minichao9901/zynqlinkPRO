@@ -73,7 +73,7 @@ RAM夹具五个状态目录（含最终fenced轮）均已恢复；有效数据�
 
 生产C九变体、执行真实Chapter9分支的IN/OUT模型、接收器4个并发/顺序/溢出/关闭模型、Web93项、CLI55项及定向Python19项通过，模块语法与共享副本一致。新增并发模型首版断言位置错误导致NameError的开发日志也保留，校正后负/正对照按预期。既有ResourceWarning保留。新入口通过`toolbox.py project describe hpm.usb-diagnose` / `hpm.usb-fixture` / `hpm.cdc-sequence` / `usb.pcap-analyze`发现；前三项会操作板卡，必须先核对空闲/配对，AXI夹具另需已验证PMA。
 
-`toolbox.py bridge-build`已更新固定`dist/zynq-etm-bridge/`，原程序归档、用户data保留、不生成ZIP；候选冻结环境无Python/Node可发现时完成离线F103/H743记录解码、查询、导出与包文件校验，再完成上述实际EXE验收。原package-manifest保留构建时HEAD035b187与dirty=true及精确文件SHA，最终源码承载提交另行绑定，不篡改构建时间来源。
+`toolbox.py bridge-build`已更新固定`dist/zynq-etm-bridge/`，原程序归档、用户data保留、不生成ZIP；候选冻结环境无Python/Node可发现时完成离线F103/H743记录解码、查询、导出与包文件校验，再完成上述实际EXE验收。原package-manifest保留构建时HEAD035b187与dirty=true及精确文件SHA，最终源码承载提交绑定为`2d1ae54fa1f761dd9c0a431095c0ef915361fae0`，见delivery-source.json；不篡改构建时间来源。实际固定EXE SHA256 `e89eef635122c42f6a8c87159e9e87ab97b627043b92d77019e2d03b657dfaa7`。
 
 原目标Flash完整65536B在本轮开始双读并与上轮恢复SHA一致；最终写回、复位启动、CPU progbuf独立读回**每个字节相同**，SHA `afdb834a734d0c18f9d2269b28d8a0abe6eacd5d694077657c961521025397d4`。探针QSPI从未写入；不是恢复旧PC/GPR继续执行的无缝回滚。
 

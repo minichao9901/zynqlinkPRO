@@ -1,6 +1,6 @@
 {
   "status": "HPM6800EVK ZL-005 and ZL-094 fix accepted within R23; HSS frontier ZL-070, span display ZL-097 and native-to-Web initial connection ZL-098 remain",
-  "source_revision": "pending final carrier commit",
+  "source_revision": "2d1ae54fa1f761dd9c0a431095c0ef915361fae0",
   "source_base_revision": "035b187ce70ffdc39c529e8aff5377b35039a564",
   "ps_source_overlay": "firmware/xusbps_daplink_dma/xusbps_ch9.c",
   "rtl_changes": false,
@@ -83,5 +83,7 @@
       "sha256": "2132320b7829c261bd880bb0c0b898f5342f11d95c7e97e1dc0dc29e890fe557"
     }
   },
-  "evidence": "../../docs/validation/hpm6800-def-cdc-fix-20261102/README.md"
+  "evidence": "../../docs/validation/hpm6800-def-cdc-fix-20261102/README.md",
+  "formal_product_release": false,
+  "source_revision_note": "Carrier commit containing exact PS change, unchanged reused bit, host fix and R23 acceptance; ps-build.json retains actual build-time base and source hashes."
 }
