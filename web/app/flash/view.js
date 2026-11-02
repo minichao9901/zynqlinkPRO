@@ -14,6 +14,7 @@ import { closeProbeUsbDevices } from '../core/probe-bus.js';
 import { DapJtagTransport, setOutputModeData, PROBE_OUTPUT_MODE } from './hpm/dap-transport.js';
 import { RiscvTransport } from './hpm/riscv-dm.js';
 import { HpmFlasher } from './hpm/flash.js';
+import { HpmNativeMemory } from './hpm/native-memory.js';
 import { resolveHpmTarget, assertHpmIdentity } from '../targets/hpm/porting.js';
 import { selectedHpmBoard, rememberHpmBoard } from '../targets/hpm/select.js';
 import { AkaLinkHid } from '../hid/probe.js';
@@ -706,8 +707,8 @@ export class FlashView {
    *   · 算法是 RV32 的（`tools/target-firmware/hpm_flash_algo/`，一份 blob 通吃 HPM 全系），
    *     它自己调芯片 ROM 里的 XPI NOR 驱动去擦写外部 flash。
    *
-   * ⚠️ **本轮没能在真机上验证**（探针被占用）：协议层、封包、流程都有离线自测（含模拟 DTM/模拟 flash），
-   *    但真实 JTAG 时序、ROM API 行为、output_mode 切换后的枚举都要等 bring-up。界面会明说这一点。
+   * HPM6800 日常本机通路及默认10MHz验收见 docs/validation/web-polish-flash-20261103/。
+   * 其它目标/频率仍按各自验收范围，不把同一 TAP IDCODE 当作板型身份。
    */
   async _flashHpmRiscv(name){
     const started = performance.now();
@@ -802,6 +803,8 @@ export class FlashView {
       throw new Error(`TAP IDCODE 是 0x${info.idcode.toString(16)}，不是 HPM 的 0x${port.debug.tapIdcode.toString(16)} —— ` +
         '检查：JTAG 接线（TCK/TMS/TDI/TDO/GND）、板子上电、探针 output_mode 是否切到 SWD+JTAG');
     }
+    const nativeMemory=HpmNativeMemory.eligible(probe,port)?new HpmNativeMemory(dm,probe,port).install():null;
+    if(nativeMemory)this._log('使用 Zynq 原生 TransferBlock 批量搬运 flashloader RAM；控制仍走原始 JTAG');
     await dm.activate(port.debug.hart);
     await dm.halt(port.debug.hart, 3000);
 
@@ -880,7 +883,7 @@ export class FlashView {
         `JTAG 批次 ${jtag.summary().batches} 次 / ${jtag.summary().bytes} B · ` +
         `flash ${(chipInfo.totalBytes / 1048576).toFixed(2)} MB / 扇区 ${chipInfo.sectorBytes} B`);
       timings.totalMs = performance.now()-started;
-      this.lastFlash = { ok: true, backend: 'hpm-riscv', target: board.id, clockKhz, bytes: done, verify, reset: doReset,
+      this.lastFlash = { ok: true, backend: 'hpm-riscv', target: board.id, clockKhz, bytes: done, verify, reset: doReset,nativeMemory:nativeMemory?{...nativeMemory.stats}:null,
         timings, jtag: jtag.summary() };
       this._log('耗时小结：' + [['准备','prepareMs'],['算法','algorithmMs'],['擦除','eraseMs'],['写入','programMs'],['校验','verifyMs'],['复位','resetMs']]
         .map(([label,key]) => `${label} ${(timings[key]/1000).toFixed(2)}s`).join(' · ') + ` · 合计 ${(timings.totalMs/1000).toFixed(2)}s`);

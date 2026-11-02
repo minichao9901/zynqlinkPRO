@@ -46,6 +46,12 @@ test('invalid files and unsupported machines do not become reusable ELF',async()
   assert.equal(c.elf,null);assert.equal(c.pending,false);
 });
 
+test('an unbound source ELF does not inherit a board identity from another page',async()=>{
+  const c=new SessionContext();c.setTarget(target('f103'));
+  await c.publishElf(elf(),'unknown.elf','scope',target('arm'));
+  assert.equal(c.elf.targetId,null);assert.equal(c.target.id,'f103');
+});
+
 test('open handles, pending connection/cleanup and recovery failures all block reuse',()=>{
   assert.equal(sessionContextBusy({}),false);
   for(const path of [['hid','dev','connected'],['scope','transport'],['scope','_hidConnectPromise'],

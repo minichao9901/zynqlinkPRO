@@ -119,7 +119,7 @@ class Web:
         finally:self.invoke('scope','disconnect')
     def flash(self):
         description=self.page('flash','describe')
-        self.page('flash','show');self.set('flash','#f-backend','webusb');self.set('flash','#f-chip','hpm6800evk')
+        self.page('flash','show');self.set('flash','#f-chip','hpm6800evk')
         self.set('flash','#f-speed',self.a.clock);self.set('flash','#f-verify',True);self.set('flash','#f-reset',True)
         path=self.a.elf.resolve();self.upload('flash','@file:view._fileInput',path)
         # The file handler is asynchronous; await its visible parsed-file state.
@@ -135,7 +135,10 @@ class Web:
             if not row['passed']:raise RuntimeError('Web Flash failed; do not repeat: '+result)
         return dict(passed=True,rows=rows,elf=str(path),elf_sha256=hashlib.sha256(path.read_bytes()).hexdigest())
     def scope(self):
-        self.page('scope','show');self.set('scope','#sc-target','riscv');self.set('scope','#sc-mock',False)
+        self.page('scope','show');self.page('scope','click',selector='#sc-side-capture-tab');self.set('scope','#sc-target','riscv');self.set('scope','#sc-mock',False)
+        described=self.page('scope','describe')
+        adopt=next((c for c in described.get('controls',[]) if c.get('selector')=='#sc-use-session-target'),None)
+        if adopt and not adopt.get('disabled'):self.page('scope','click',selector='#sc-use-session-target')
         file=pack_file(self.a.elf.resolve());file['kind']='file'
         self.invoke('scope','loadElfFile',file)
         self.page('scope','click',selector='#sc-varclear')
@@ -195,7 +198,7 @@ class Web:
             if not left_active:
                 self.invoke('scope','stop','HPM cleanup');self.invoke('scope','disconnect')
     def rtt(self):
-        self.page('rtt','show');self.set('rtt','#r-backend','webusb');self.set('rtt','#r-target','riscv')
+        self.page('rtt','show');self.set('rtt','#r-target','riscv')
         self.set('rtt','#r-chip','hpm6800evk');self.set('rtt','#r-usb-clock','10000')
         self.set('rtt','#r-addr',hex(symbol(self.a.elf,'_SEGGER_RTT')))
         self.page('rtt','click',selector='#r-clear')

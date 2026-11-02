@@ -1440,3 +1440,9 @@ fieldset,.toolbar,.sendbar,.stats,.an-measurements,.an-plot,
 .session-elf-reuse{min-width:0;margin:3px 0;display:flex;flex-direction:column;gap:3px}
 .session-elf-reuse button{max-width:100%;overflow:hidden;text-overflow:ellipsis}
 .session-elf-reuse[hidden]{display:none!important}
+.scope-empty-actions{position:absolute;top:calc(50% + 40px);left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:2;white-space:nowrap}
+.scope-empty-actions[hidden]{display:none!important}
+#tab-scope .stats{position:relative}
+.scope-counters{font-size:var(--text-xs);color:var(--fg2)}
+.scope-counters summary{cursor:pointer;white-space:nowrap}
+.scope-counters>span{position:absolute;bottom:calc(100% + 4px);right:0;max-width:340px;padding:8px;background:var(--bg2);border:1px solid var(--line);border-radius:4px;z-index:3}

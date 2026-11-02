@@ -24,7 +24,7 @@ export class SessionContext {
     }
     this.notify();
   }
-  async publishElf(bytes,name,source){
+  async publishElf(bytes,name,source,sourceTarget=this.target){
     const revision=++this._revision;
     this.pending=true;this.notify();
     try {
@@ -39,7 +39,7 @@ export class SessionContext {
       const sha256=Array.from(new Uint8Array(digest),v=>v.toString(16).padStart(2,'0')).join('');
       this._bytes=copy;
       this.elf=Object.freeze({name:name||'target.elf',size:copy.byteLength,sha256,arch,source,
-        targetId:this.target?.arch===arch?this.target.id:null});
+        targetId:sourceTarget?.arch===arch&&sourceTarget.id!==arch?sourceTarget.id:null});
       return this.elf;
     } finally {if(revision===this._revision){this.pending=false;this.notify();}}
   }

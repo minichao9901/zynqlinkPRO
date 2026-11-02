@@ -1,0 +1,176 @@
+{
+  "stage": "flash",
+  "passed": true,
+  "rows": [
+    {
+      "repeat": 0,
+      "seconds": 5.193418599999859,
+      "result": "✅ HPM6800EVK（HPM6880） · 46.7 KB · 校验通过 · 已复位运行",
+      "log": "── RISC-V 零安装烧录：fw.elf（46.7 KB）→ HPM6800EVK（HPM6880） ──   板级参数来自 SDK 的 boards/openocd/boards/hpm6800evk.cfg：flash 基址 0x80000000、XPI 0xf3000000、option0 0x7探针 output_mode = 0（1 = SWD+JTAG；已强制重设一次，JTAG 才拿得到口）已请求探针 RISC-V 引擎放掉 TAP（0x33 action 0）已请求探针停掉 RTT 桥（HID 0x31 action 0）—— 跨标签页残留的转发会话也会被它停掉烧录 JTAG 时钟 10 MHz   DAP 已切到 JTAG（IR 长度 5，TAP 数 1）   RISC-V DM：idcode=0x1000563d dtmcs=0x7071 dmstatus=0x4c0ca2（version=2）   IDCODE=0x1000563d（HPM 全系 0x1000563D）· dmstatus=0x4c0ca2使用 Zynq 原生 TransferBlock 批量搬运 flashloader RAM；控制仍走原始 JTAG   SBA 健康检查：干净   目标已 halt，开始加载 flashloader   DAP 已切到 JTAG（IR 长度 5，TAP 数 1）   RISC-V DM：idcode=0x1000563d dtmcs=0x7071 dmstatus=0x4c03a2（version=2）   准备 flashloader：1388 B（入口 7 个，偏移 init+0x0 erase+0x6 program+0xc read+0x12 info+0x18 eraseChip+0x1e deinit+0x24）   写完 flashloader：1388 B → SRAM 0x0   XIP 拷贝例程就绪：28 B → SRAM 0x600（verify 走 CPU 读 XIP 窗口，不用 ROM 的 flash_read）    dcsr: 0x400006c3 → 0x4000b6c3（置 ebreak*，算法收尾的 ebreak 才会停住核）    已 fence.i（progbuf 执行，刷指令预取）    dcsr = 0x4000b643（ebreak* 已置）    已 fence.i（progbuf 执行，刷指令预取）   flashloader 就绪：总容量 16.00 MB · 扇区 4096 B   flashloader 就绪：容量 16.00 MB · 扇区 4096 B   擦除范围对齐到扇区：0x80000000 + 8192 B（原 0x80000400 + 3216 B）    dcsr = 0x4000b643（ebreak* 已置）    已 fence.i（progbuf 执行，刷指令预取）   已擦除 0x80000000 起 8192 B擦除 OK：0x80000400 + 3216 B    dcsr = 0x4000b643（ebreak* 已置）    已 fence.i（progbuf 执行，刷指令预取）烧写 OK：0x80000400 + 3216 B    dcsr = 0x4000b643（ebreak* 已置）    已 fence.i（progbuf 执行，刷指令预取）校验 OK：0x80000400 + 3216 B   擦除范围对齐到扇区：0x80003000 + 45056 B（原 0x80003000 + 44640 B）    dcsr = 0x4000b643（ebreak* 已置）    已 fence.i（progbuf 执行，刷指令预取）   已擦除 0x80003000 起 45056 B擦除 OK：0x80003000 + 44640 B    dcsr = 0x4000b643（ebreak* 已置）    已 fence.i（progbuf 执行，刷指令预取）烧写 OK：0x80003000 + 44640 B    dcsr = 0x4000b643（ebreak* 已置）    已 fence.i（progbuf 执行，刷指令预取）校验 OK：0x80003000 + 44640 B    dcsr = 0x4000b643（ebreak* 已置）    已 fence.i（progbuf 执行，刷指令预取）已发系统复位（ndmreset），目标从 flash 启动小结：46.7 KB · 校验开 · 复位开 · JTAG 批次 920 次 / 6472 B · flash 16.00 MB / 扇区 4096 B耗时小结：准备 0.33s · 算法 0.84s · 擦除 1.06s · 写入 1.21s · 校验 1.41s · 复位 0.21s · 合计 5.05s",
+      "passed": true,
+      "clockSelection": "10000",
+      "summary": {
+        "busy": false,
+        "clockSelection": "10000",
+        "lastFlash": {
+          "backend": "hpm-riscv",
+          "bytes": 47856,
+          "clockKhz": 10000,
+          "jtag": {
+            "batches": 920,
+            "bytes": 6472,
+            "irLength": 5,
+            "jtag": true
+          },
+          "nativeMemory": {
+            "blocks": 206,
+            "nativeClock": {
+              "basis": "PS/PL register calculation, not external measurement",
+              "cfg": 172049,
+              "fclkHz": 119999998,
+              "tckHz": 9999999.833333334
+            },
+            "rawClock": {
+              "basis": "PS/PL register calculation, not external measurement",
+              "cfg": 131089,
+              "fclkHz": 19999999,
+              "tckHz": 9999999.5
+            },
+            "readBytes": 49244,
+            "reads": 3,
+            "writeBytes": 49244,
+            "writes": 3
+          },
+          "ok": true,
+          "reset": true,
+          "target": "hpm6800evk",
+          "timings": {
+            "algorithmMs": 836.6000000014901,
+            "eraseMs": 1056.3999999985099,
+            "prepareMs": 332.3999999985099,
+            "programMs": 1205.0000000074506,
+            "resetMs": 206.20000000298023,
+            "totalMs": 5048.39999999851,
+            "verifyMs": 1411.2999999895692
+          },
+          "verify": true
+        },
+        "result": "✅ HPM6800EVK（HPM6880） · 46.7 KB · 校验通过 · 已复位运行"
+      }
+    },
+    {
+      "repeat": 1,
+      "seconds": 5.2556459000043105,
+      "result": "✅ HPM6800EVK（HPM6880） · 46.7 KB · 校验通过 · 已复位运行",
+      "log": "── RISC-V 零安装烧录：fw.elf（46.7 KB）→ HPM6800EVK（HPM6880） ──   板级参数来自 SDK 的 boards/openocd/boards/hpm6800evk.cfg：flash 基址 0x80000000、XPI 0xf3000000、option0 0x7探针 output_mode = 0（1 = SWD+JTAG；已强制重设一次，JTAG 才拿得到口）已请求探针 RISC-V 引擎放掉 TAP（0x33 action 0）已请求探针停掉 RTT 桥（HID 0x31 action 0）—— 跨标签页残留的转发会话也会被它停掉烧录 JTAG 时钟 10 MHz   DAP 已切到 JTAG（IR 长度 5，TAP 数 1）   RISC-V DM：idcode=0x1000563d dtmcs=0x7071 dmstatus=0x4c0ca2（version=2）   IDCODE=0x1000563d（HPM 全系 0x1000563D）· dmstatus=0x4c0ca2使用 Zynq 原生 TransferBlock 批量搬运 flashloader RAM；控制仍走原始 JTAG   SBA 健康检查：干净   目标已 halt，开始加载 flashloader   DAP 已切到 JTAG（IR 长度 5，TAP 数 1）   RISC-V DM：idcode=0x1000563d dtmcs=0x7071 dmstatus=0x4c03a2（version=2）   准备 flashloader：1388 B（入口 7 个，偏移 init+0x0 erase+0x6 program+0xc read+0x12 info+0x18 eraseChip+0x1e deinit+0x24）   写完 flashloader：1388 B → SRAM 0x0   XIP 拷贝例程就绪：28 B → SRAM 0x600（verify 走 CPU 读 XIP 窗口，不用 ROM 的 flash_read）    dcsr: 0x400006c3 → 0x4000b6c3（置 ebreak*，算法收尾的 ebreak 才会停住核）    已 fence.i（progbuf 执行，刷指令预取）    dcsr = 0x4000b643（ebreak* 已置）    已 fence.i（progbuf 执行，刷指令预取）   flashloader 就绪：总容量 16.00 MB · 扇区 4096 B   flashloader 就绪：容量 16.00 MB · 扇区 4096 B   擦除范围对齐到扇区：0x80000000 + 8192 B（原 0x80000400 + 3216 B）    dcsr = 0x4000b643（ebreak* 已置）    已 fence.i（progbuf 执行，刷指令预取）   已擦除 0x80000000 起 8192 B擦除 OK：0x80000400 + 3216 B    dcsr = 0x4000b643（ebreak* 已置）    已 fence.i（progbuf 执行，刷指令预取）烧写 OK：0x80000400 + 3216 B    dcsr = 0x4000b643（ebreak* 已置）    已 fence.i（progbuf 执行，刷指令预取）校验 OK：0x80000400 + 3216 B   擦除范围对齐到扇区：0x80003000 + 45056 B（原 0x80003000 + 44640 B）    dcsr = 0x4000b643（ebreak* 已置）    已 fence.i（progbuf 执行，刷指令预取）   已擦除 0x80003000 起 45056 B擦除 OK：0x80003000 + 44640 B    dcsr = 0x4000b643（ebreak* 已置）    已 fence.i（progbuf 执行，刷指令预取）烧写 OK：0x80003000 + 44640 B    dcsr = 0x4000b643（ebreak* 已置）    已 fence.i（progbuf 执行，刷指令预取）校验 OK：0x80003000 + 44640 B    dcsr = 0x4000b643（ebreak* 已置）    已 fence.i（progbuf 执行，刷指令预取）已发系统复位（ndmreset），目标从 flash 启动小结：46.7 KB · 校验开 · 复位开 · JTAG 批次 908 次 / 6388 B · flash 16.00 MB / 扇区 4096 B耗时小结：准备 0.34s · 算法 0.86s · 擦除 1.03s · 写入 1.24s · 校验 1.41s · 复位 0.22s · 合计 5.11s",
+      "passed": true,
+      "clockSelection": "10000",
+      "summary": {
+        "busy": false,
+        "clockSelection": "10000",
+        "lastFlash": {
+          "backend": "hpm-riscv",
+          "bytes": 47856,
+          "clockKhz": 10000,
+          "jtag": {
+            "batches": 908,
+            "bytes": 6388,
+            "irLength": 5,
+            "jtag": true
+          },
+          "nativeMemory": {
+            "blocks": 206,
+            "nativeClock": {
+              "basis": "PS/PL register calculation, not external measurement",
+              "cfg": 172049,
+              "fclkHz": 119999998,
+              "tckHz": 9999999.833333334
+            },
+            "rawClock": {
+              "basis": "PS/PL register calculation, not external measurement",
+              "cfg": 131089,
+              "fclkHz": 19999999,
+              "tckHz": 9999999.5
+            },
+            "readBytes": 49244,
+            "reads": 3,
+            "writeBytes": 49244,
+            "writes": 3
+          },
+          "ok": true,
+          "reset": true,
+          "target": "hpm6800evk",
+          "timings": {
+            "algorithmMs": 863.6999999955297,
+            "eraseMs": 1031.6999999955297,
+            "prepareMs": 335.8999999985099,
+            "programMs": 1237.1000000014901,
+            "resetMs": 223.69999999552965,
+            "totalMs": 5107.29999999702,
+            "verifyMs": 1414.6000000014901
+          },
+          "verify": true
+        },
+        "result": "✅ HPM6800EVK（HPM6880） · 46.7 KB · 校验通过 · 已复位运行"
+      }
+    },
+    {
+      "repeat": 2,
+      "seconds": 5.4647632999985944,
+      "result": "✅ HPM6800EVK（HPM6880） · 46.7 KB · 校验通过 · 已复位运行",
+      "log": "── RISC-V 零安装烧录：fw.elf（46.7 KB）→ HPM6800EVK（HPM6880） ──   板级参数来自 SDK 的 boards/openocd/boards/hpm6800evk.cfg：flash 基址 0x80000000、XPI 0xf3000000、option0 0x7探针 output_mode = 0（1 = SWD+JTAG；已强制重设一次，JTAG 才拿得到口）已请求探针 RISC-V 引擎放掉 TAP（0x33 action 0）已请求探针停掉 RTT 桥（HID 0x31 action 0）—— 跨标签页残留的转发会话也会被它停掉烧录 JTAG 时钟 10 MHz   DAP 已切到 JTAG（IR 长度 5，TAP 数 1）   RISC-V DM：idcode=0x1000563d dtmcs=0x7071 dmstatus=0x4c0ca2（version=2）   IDCODE=0x1000563d（HPM 全系 0x1000563D）· dmstatus=0x4c0ca2使用 Zynq 原生 TransferBlock 批量搬运 flashloader RAM；控制仍走原始 JTAG   SBA 健康检查：干净   目标已 halt，开始加载 flashloader   DAP 已切到 JTAG（IR 长度 5，TAP 数 1）   RISC-V DM：idcode=0x1000563d dtmcs=0x7071 dmstatus=0x4c03a2（version=2）   准备 flashloader：1388 B（入口 7 个，偏移 init+0x0 erase+0x6 program+0xc read+0x12 info+0x18 eraseChip+0x1e deinit+0x24）   写完 flashloader：1388 B → SRAM 0x0   XIP 拷贝例程就绪：28 B → SRAM 0x600（verify 走 CPU 读 XIP 窗口，不用 ROM 的 flash_read）    dcsr: 0x400006c3 → 0x4000b6c3（置 ebreak*，算法收尾的 ebreak 才会停住核）    已 fence.i（progbuf 执行，刷指令预取）    dcsr = 0x4000b643（ebreak* 已置）    已 fence.i（progbuf 执行，刷指令预取）   flashloader 就绪：总容量 16.00 MB · 扇区 4096 B   flashloader 就绪：容量 16.00 MB · 扇区 4096 B   擦除范围对齐到扇区：0x80000000 + 8192 B（原 0x80000400 + 3216 B）    dcsr = 0x4000b643（ebreak* 已置）    已 fence.i（progbuf 执行，刷指令预取）   已擦除 0x80000000 起 8192 B擦除 OK：0x80000400 + 3216 B    dcsr = 0x4000b643（ebreak* 已置）    已 fence.i（progbuf 执行，刷指令预取）烧写 OK：0x80000400 + 3216 B    dcsr = 0x4000b643（ebreak* 已置）    已 fence.i（progbuf 执行，刷指令预取）校验 OK：0x80000400 + 3216 B   擦除范围对齐到扇区：0x80003000 + 45056 B（原 0x80003000 + 44640 B）    dcsr = 0x4000b643（ebreak* 已置）    已 fence.i（progbuf 执行，刷指令预取）   已擦除 0x80003000 起 45056 B擦除 OK：0x80003000 + 44640 B    dcsr = 0x4000b643（ebreak* 已置）    已 fence.i（progbuf 执行，刷指令预取）烧写 OK：0x80003000 + 44640 B    dcsr = 0x4000b643（ebreak* 已置）    已 fence.i（progbuf 执行，刷指令预取）校验 OK：0x80003000 + 44640 B    dcsr = 0x4000b643（ebreak* 已置）    已 fence.i（progbuf 执行，刷指令预取）已发系统复位（ndmreset），目标从 flash 启动小结：46.7 KB · 校验开 · 复位开 · JTAG 批次 892 次 / 6276 B · flash 16.00 MB / 扇区 4096 B耗时小结：准备 0.31s · 算法 0.84s · 擦除 1.03s · 写入 1.36s · 校验 1.47s · 复位 0.25s · 合计 5.25s",
+      "passed": true,
+      "clockSelection": "10000",
+      "summary": {
+        "busy": false,
+        "clockSelection": "10000",
+        "lastFlash": {
+          "backend": "hpm-riscv",
+          "bytes": 47856,
+          "clockKhz": 10000,
+          "jtag": {
+            "batches": 892,
+            "bytes": 6276,
+            "irLength": 5,
+            "jtag": true
+          },
+          "nativeMemory": {
+            "blocks": 206,
+            "nativeClock": {
+              "basis": "PS/PL register calculation, not external measurement",
+              "cfg": 172049,
+              "fclkHz": 119999998,
+              "tckHz": 9999999.833333334
+            },
+            "rawClock": {
+              "basis": "PS/PL register calculation, not external measurement",
+              "cfg": 131089,
+              "fclkHz": 19999999,
+              "tckHz": 9999999.5
+            },
+            "readBytes": 49244,
+            "reads": 3,
+            "writeBytes": 49244,
+            "writes": 3
+          },
+          "ok": true,
+          "reset": true,
+          "target": "hpm6800evk",
+          "timings": {
+            "algorithmMs": 843,
+            "eraseMs": 1033.2999999970198,
+            "prepareMs": 308,
+            "programMs": 1358,
+            "resetMs": 246,
+            "totalMs": 5254.10000000149,
+            "verifyMs": 1465.3999999985099
+          },
+          "verify": true
+        },
+        "result": "✅ HPM6800EVK（HPM6880） · 46.7 KB · 校验通过 · 已复位运行"
+      }
+    }
+  ],
+  "elf": "C:\\Users\\Administrator\\.codex\\worktrees\\web-ui-compact\\zynqlinkPRO\\firmware\\target\\hpm6800_web_validation\\scope\\fw.elf",
+  "elf_sha256": "e5124ca35a872c2c54f210df99c5cfc3ca7a0d8f6a64f1cfa29a907aeb9b73a9"
+}

@@ -7,28 +7,34 @@ import {rememberHpmBoard} from '../targets/hpm/select.js';
 export function initSessionContext(tools){
   const context=new SessionContext(),$=id=>document.getElementById(id);
   const pages=['flash','dbg','rtt','scope'],prefix={flash:'f',dbg:'d',rtt:'r',scope:'sc'};
-  const rows=new Map();let applying=false;
+  const rows=new Map(),localTargets=new Map(),elfBindings=new Map();let applying=false;
   const option=id=>{const el=$(id);return el?.selectedOptions?.[0]?.textContent||el?.value||'';};
-  const generic=arch=>context.target?.arch===arch?context.target:{id:arch,arch,label:arch==='arm'?'ARM / SWD':'RISC-V / JTAG'};
+  const generic=(page,arch)=>localTargets.get(page)?.arch===arch?localTargets.get(page):{id:arch,arch,label:arch==='arm'?'ARM / SWD（未绑定板型）':'RISC-V / JTAG（未绑定板型）'};
   const readTarget=page=>{
     if(page==='flash'){const id=$('f-chip').value;return {id,arch:hpmBoard(id)?'riscv':'arm',label:option('f-chip')};}
     if(page==='rtt'){const id=$('r-chip').value;return {id,arch:$('r-target').value==='riscv'?'riscv':'arm',label:option('r-chip')};}
     if(page==='dbg'){
       if($('d-backend').value==='mock')return null;
-      return $('d-backend').value==='riscv'?{id:$('d-hpm-target').value,arch:'riscv',label:option('d-hpm-target')}:generic('arm');
+      return $('d-backend').value==='riscv'?{id:$('d-hpm-target').value,arch:'riscv',label:option('d-hpm-target')}:generic(page,'arm');
     }
-    return generic($('sc-target').value==='riscv'?'riscv':'arm');
+    return generic(page,$('sc-target').value==='riscv'?'riscv':'arm');
   };
   const busy=()=>applying||sessionContextBusy(tools);
+  const publishTarget=selected=>{
+    // A generic architecture selection cannot erase a more precise session
+    // board. The page itself remains explicitly unbound until adoption.
+    if(selected.id===selected.arch&&context.target?.arch===selected.arch&&context.target.id!==selected.id)return;
+    context.setTarget(selected);
+  };
   const supports=(page,target)=>page==='flash'||page==='rtt'
     ? [...$(prefix[page]+'-chip').options].some(o=>o.value===target.id)
     : page!=='dbg'||target.arch==='arm'||[...$('d-hpm-target').options].some(o=>o.value===target.id);
   const sameTarget=(page,target)=>{
     const local=readTarget(page);
-    return local?.arch===target.arch&&(page==='scope'||page==='dbg'&&target.arch==='arm'||local.id===target.id);
+    return local?.arch===target.arch&&local.id===target.id;
   };
   const invalidate=page=>{
-    const view=tools[page];view.sharedElfSha=null;
+    const view=tools[page];view.sharedElfSha=null;elfBindings.delete(page);
     if(page==='rtt'){$('r-addr').value='';store.set('rtt.addr','');}
     if(page==='scope'){
       view.selected=[];view.all=[];view.elf=null;view.arrayGroups=[];view.dwarf=null;view.ram=[];view.skipped=[];
@@ -59,24 +65,29 @@ export function initSessionContext(tools){
       $('sc-target').value=target.arch==='riscv'?'riscv':'swd';store.set('rtt.target',$('sc-target').value);
       tools.scope.targetRiscv=target.arch==='riscv';tools.scope._applyBackendUi();
     }
+    localTargets.set(page,{...target});
   };
   const render=()=>{
     const locked=busy(),target=context.target,elf=context.elf;
     for(const [page,row] of rows){
       const local=readTarget(page),same=target&&sameTarget(page,target);
-      const key=JSON.stringify([locked,target,elf,context.pending,local,tools[page].sharedElfSha]);
+      const binding=elfBindings.get(page);
+      const key=JSON.stringify([locked,target,elf,context.pending,local,binding,tools[page].sharedElfSha]);
       if(row.key===key)continue;row.key=key;
-      row.target.textContent='会话目标：'+(target?.label||'尚未选择');
+      const label=t=>(t?.label||'未绑定').replace('（RISC-V，零安装）','');
+      row.target.textContent='会话目标：'+(target?label(target):'尚未选择');
+      row.local.textContent=same?'本页已采用此目标':'本页目标：'+label(local)+' · 尚未沿用';
       row.target.title='用户选择的配置，不代表已识别/加载的硬件身份；点击沿用后才替换本页配置。';
       row.adopt.disabled=locked||!target||same||!supports(page,target);
       row.adopt.title=locked?'请先断开探针并停止操作':same?'本页目标已一致':'沿用会话目标，清除本页旧文件/符号地址；不连接或复位硬件';
       const compatible=context.canReuse(local?.arch,local?.id);
-      row.elfRow.hidden=!elf&&!context.pending;
+      row.elfRow.hidden=!elf&&!context.pending&&!binding;
       row.reuse.textContent=elf?'复用 '+elf.name:context.pending?'正在准备共享 ELF…':'暂无共享 ELF';
       row.reuse.disabled=locked||!compatible||tools[page].sharedElfSha===elf?.sha256;
       const source={flash:'烧录器',dbg:'调试器',rtt:'RTT Viewer',scope:'波形'}[elf?.source]||'';
       row.reuse.title=elf?`${elf.arch.toUpperCase()} · SHA-256 ${elf.sha256} · 来自${source}；仅保存在当前页面会话`:'先在任一页面载入 ELF';
-      row.identity.textContent=elf?`${elf.arch.toUpperCase()} · ${elf.sha256.slice(0,12)}`:'ELF 仅在本次会话复用';
+      row.identity.textContent='本页 ELF：'+(binding?`${binding.name} · ${binding.sha256.slice(0,12)}`:'未载入共享 ELF');
+      if(elf)row.identity.textContent+=binding?.sha256===elf.sha256?' · 与共享一致':` · 共享 ${elf.arch.toUpperCase()} ${elf.sha256.slice(0,12)}`;
       if(elf&&!compatible)row.identity.textContent+=' · 请先选择匹配目标';
     }
   };
@@ -89,17 +100,20 @@ export function initSessionContext(tools){
   };
   for(const page of pages){
     const p=prefix[page],view=tools[page],panel=$('tab-'+page);
+    localTargets.set(page,readTarget(page));
     const card=document.createElement('fieldset');card.className='session-context-card';
     const legend=document.createElement('legend');legend.textContent='会话配置';card.append(legend);
     const target=document.createElement('span'),adopt=document.createElement('button'),note=document.createElement('span');
     adopt.type='button';adopt.textContent='沿用目标';adopt.className='mini';note.className='session-context-note';note.setAttribute('role','status');
-    card.append(target,adopt,note);
+    adopt.id=p+'-use-session-target';
+    const local=document.createElement('span');local.className='session-context-note';
+    card.append(target,adopt,local,note);
     (page==='dbg'?$('d-side-session-panel'):page==='scope'?$('sc-side-capture-panel'):panel.querySelector('.side')).prepend(card);
     const reuse=document.createElement('button'),identity=document.createElement('span'),elfRow=document.createElement('div');
     reuse.type='button';reuse.className='mini';reuse.id=p+'-reuse-elf';identity.className='session-context-note';elfRow.className='session-elf-reuse';elfRow.append(reuse,identity);
     const picker=$(page==='flash'?'f-pick':page==='dbg'?'d-elf-pick':page==='rtt'?'r-elf':'sc-elf');
     if(picker.parentElement.tagName==='FIELDSET')picker.after(elfRow);else picker.parentElement.after(elfRow);
-    rows.set(page,{target,adopt,note,reuse,identity,elfRow});
+    rows.set(page,{target,local,adopt,note,reuse,identity,elfRow});
     adopt.onclick=action(page,()=>applyTarget(page,context.target));
     reuse.onclick=action(page,async()=>{
       const current=context.elf,bytes=context.elfBytes(),local=readTarget(page);
@@ -111,22 +125,21 @@ export function initSessionContext(tools){
       if(page==='scope'){view.selected=[];ok=await view.loadElfFile(file,bytes);}
       if(page==='rtt')ok=await view.loadElfFile(file,bytes);
       if(!ok)throw new Error('本页无法使用该 ELF，请查看解析提示');
-      view.sharedElfSha=current.sha256;
+      view.sharedElfSha=current.sha256;elfBindings.set(page,{...current,targetId:readTarget(page)?.id});
     });
     view.onElfLoaded=(bytes,name)=>{
       const magic=new Uint8Array(bytes);
       if(page==='flash'&&(magic[0]!==127||magic[1]!==69||magic[2]!==76||magic[3]!==70)){context.clearElf();return;}
-      const selected=readTarget(page);if(selected)context.setTarget(selected);
-      context.publishElf(bytes,name,page).then(elf=>{if(elf){view.sharedElfSha=elf.sha256;render();}})
+      const selected=readTarget(page);if(selected)publishTarget(selected);
+      context.publishElf(bytes,name,page,selected).then(elf=>{if(elf){view.sharedElfSha=elf.sha256;elfBindings.set(page,{...elf,targetId:readTarget(page)?.id});render();}})
         .catch(error=>{note.textContent='共享 ELF：'+error.message;});
     };
     const ids={flash:['f-chip'],dbg:['d-backend','d-hpm-target'],rtt:['r-target','r-chip'],scope:['sc-target']}[page];
-    let previous=readTarget(page);
     for(const id of ids)$(id).addEventListener('change',()=>{
-      const selected=readTarget(page);
+      const previous=localTargets.get(page),selected=readTarget(page);
       if(selected){
         if(!busy()&&(previous?.id!==selected.id||previous?.arch!==selected.arch))invalidate(page);
-        previous=selected;context.setTarget(selected);
+        localTargets.set(page,{...selected});publishTarget(selected);
       }
     });
   }

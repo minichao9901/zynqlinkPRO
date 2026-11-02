@@ -770,6 +770,13 @@ export class ScopeView {
   }
 
   _captureAlive(g){ return g === this._captureGen && !this._stopPromise && !this._releasing; }
+  async confirmTargetArchitecture(){
+    if(this.usingMock)return;
+    const reply=await this.hidXfer(P.HID_CMD_RTT,P.targetTypeData(!!this.targetRiscv));
+    if(!reply||reply.length<3)throw Error('目标类型确认回包不完整；未配置或启动采样');
+    const rc=this.signed(reply[2]);
+    if(rc!==0)throw Error(`目标类型确认失败（${rc}）；请先停止并释放占用探针的功能，未配置或启动采样`);
+  }
   _dataAlive(g){ return this._captureAlive(g) || (this._drainGen != null && this._drainGen===g); }
 
   async _stopData(){
@@ -849,18 +856,11 @@ export class ScopeView {
           : '数据端点没连上：点「连接数据端点…」授权一次（采样数据走 EP 0x83，必须有它）', 'err');
         return;
       }
-      /**
-       * 🚨 重连后补发**目标类型**：探针侧是粘性状态，但探针被复位/别的页面重设过就回 SWD 了，
-       *    而界面下拉还显示 RISC-V —— 不补发的话采样会按 SWD 去握，报一些看不懂的错。
-       *    （start() 的 config 报文里也带 SCOPE_FLAG.RISCV，那是第二道保险。）
-       */
-      if (this.targetRiscv){
-        try { await this.hidXfer(P.HID_CMD_RTT, P.targetTypeData(true)); } catch { /* 交给 start() 的 flags */ }
-      }
       this.setStatusText('探针已自动重连，开始采样', 'ok');
     }
     if (!this.transport || !this.hid){ this.setStatusText(this.usingMock ? '假探针还没准备好' : '先连探针 + 数据端点', 'warn'); return; }
     if (this.isReal() && !this.transport?.device){ this.setStatusText('真机模式要先点「连接数据端点…」', 'warn'); return; }
+    await this.confirmTargetArchitecture();
 
     if (!this._captureAlive(g)) return;
     const periodUs = this.periodUs();
@@ -942,7 +942,7 @@ export class ScopeView {
       if (clockKhz > 0 && this.uiBackend() !== P.BACKEND.RISCV) await this.hidXfer(P.HID_CMD, P.clockData(clockKhz * 1000));
       /**
        * 🚨 **CONFIG 之后当场读一次 rc**（2026-10 代码审查）：固件的配置动作是**同步判定**的，
-       *    应答里那个返回码就是本次配置的结果（0 = 已采纳、-6 = 被拒：变量宽度非法）。
+       *    应答里那个返回码就是本次配置的结果（0 = 已采纳、-6 = 配置条件被拒）。
        *    不看它的话，被拒之后固件已经**把变量表清空了**，紧接着的 START 会回 -3 →
        *    页面显示"变量表为空（先在左侧选 1~8 个变量）"，而用户明明选了变量，方向全错。
        */
