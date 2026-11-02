@@ -1,0 +1,29 @@
+{
+  "hardwareAccess": false,
+  "tests": [
+    {
+      "command": "python -X utf8 -m unittest discover -s tools/tests -p test_etm_algorithm_pipeline.py",
+      "passed": 8
+    },
+    {
+      "command": "python -X utf8 -m unittest discover -s tools/tests -p test_etm_direct_index.py",
+      "passed": 4
+    },
+    {
+      "command": "python -X utf8 -m unittest discover -s tools/tests -p test_etm_benchmark_guard.py",
+      "passed": 1
+    },
+    {
+      "command": "python -X utf8 -m unittest discover -s tools/tests -p test_toolbox*.py",
+      "passed": 55
+    }
+  ],
+  "nativeSelfTests": [
+    "--self-test-shared-tracker: 50000 transitions passed",
+    "--self-test-replay-cache: 70000 unique ranges passed"
+  ],
+  "warnings": [
+    "Existing ResourceWarning for temporary files",
+    "Flask/pkgutil deprecation warnings"
+  ]
+}
