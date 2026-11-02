@@ -1422,3 +1422,14 @@ fieldset,.toolbar,.sendbar,.stats,.an-measurements,.an-plot,
 /* Configuration summaries use existing toolbar space when the sidebar is folded. */
 .workspace-summary{display:none;min-width:0;max-width:30%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--fg2);font-size:var(--text-xs)}
 .sidebar-collapsed .workspace-summary{display:inline-block}
+
+/* Search occupies one optional row; results never replace the retained bytes. */
+.log-search-bar{display:flex;align-items:center;flex-wrap:wrap;gap:6px;flex:none;padding:3px 2px;border-bottom:1px solid var(--line)}
+.log-search-bar input[type=search]{flex:1;min-width:140px;max-width:340px}
+.log-search-bar button{padding:2px 7px}
+.log-search-status{font-size:var(--text-xs);color:var(--fg2)}
+.log-search-results{flex:1;min-height:0;margin:0;padding:8px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;background:#0a0f15;font:13px/1.5 var(--mono)}
+.log-search-results mark{background:#d2992240;color:var(--fg);border-radius:2px}
+.log-search-results mark.current{background:#d29922;color:#0d1117;outline:1px solid #f2cc60}
+.log-search-bar[hidden],.log-search-results[hidden]{display:none!important}
+.log-searching .main>.rx,.log-searching .main>.termbox,.log-searching #r-empty{display:none!important}

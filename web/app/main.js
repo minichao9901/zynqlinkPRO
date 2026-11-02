@@ -11,6 +11,7 @@ import { initDockNavigation } from './ui/dock-navigation.js';
 import { initFullscreen } from './ui/fullscreen.js';
 import { initProbeStatus } from './ui/probe-status.js';
 import { initEventLogs } from './ui/event-logs.js';
+import { initLogSearch } from './ui/log-search.js';
 import { SerialSession } from './serial/session.js';
 import { Assistant } from './serial/assistant.js';
 import { TerminalView } from './serial/terminal.js';
@@ -66,6 +67,9 @@ stream.init();
 scope.init();
 dbg.init();
 etm.init();
+initLogSearch({page:'serial',prefix:'s',records:()=>assistant.rx.raw,isHex:()=>assistant.rx.mode==='hex',isSuppressed:()=>assistant.suppressed});
+initLogSearch({page:'rtt',prefix:'r',records:()=>rtt.records,isHex:()=>rtt.mode==='hex',isSuppressed:()=>rtt.suppressed});
+initLogSearch({page:'rttcdc',prefix:'c',records:()=>stream.rx.raw,isHex:()=>stream.rx.mode==='hex',isSuppressed:()=>stream.suppressed});
 initDockNavigation();
 installAcquisitionDiagnostics(tools);
 
