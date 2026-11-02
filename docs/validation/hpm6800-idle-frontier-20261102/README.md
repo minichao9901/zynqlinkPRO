@@ -109,3 +109,5 @@ PL fresh命令与版本见logs/fpga-133.log；约束/时序报告、PS选项随p
 ## 最后板上状态（时间快照）
 
 **2026-11-02 08:55:21 CST**，见[raw/final-state.json](raw/final-state.json)：最终133约束配对仍在板上，TCK24999999.5Hz/FCLK49999999Hz、mode0、有效idle8，DMSTATUS=0x430ca2、目标运行，RTT/HSS、packet/采集引擎空闲。随后identity-final-133用物理MEM-AP0核对75,692B可执行代码全匹配。各轮SRAM/ILM、核心/cache及目标时钟控制恢复通过。本轮未改目标PLL/AHB/APB，未写目标Flash/QSPI，未复位目标MCU；无本任务后台采集/Vivado进程，共享hw_server保留。
+
+源码、配对及板测证据提交：`36875ef0903640fa479256344f7b15d04aca1efa`。本次身份补记不重建、不重载；见[source-revision.json](source-revision.json)。

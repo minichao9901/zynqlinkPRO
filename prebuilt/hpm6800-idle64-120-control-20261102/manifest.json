@@ -1,7 +1,7 @@
 {
   "status": "experimental HPM6800EVK JTAG/RAM validation; not Golden/ARM/ETM/QSPI release",
   "source_base_revision": "22a398823aa7461a791598e467b6a6e12f08ccfb",
-  "source_revision": "pending source-and-artifact commit",
+  "source_revision": "36875ef0903640fa479256344f7b15d04aca1efa",
   "requested_constraint_Hz": 120000000,
   "runtime_clock_policy": "adaptive; API cap60MHz; actual60MHz TCK uses FCLK119999998Hz",
   "build_options": {
@@ -153,5 +153,6 @@
       "bytes": 13347,
       "sha256": "a8c42c1acc5799019be746843b61ea9c704121d0ecbd8a50744cd97c4ea95681"
     }
-  }
+  },
+  "source_hash_basis": "build-input SHA256 records hash exact working-tree bytes; archived snapshots preserve LF/CRLF. Source revision identifies editable code; 120-control constraints are its archived pre-133 variant."
 }
