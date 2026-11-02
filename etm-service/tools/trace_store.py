@@ -86,9 +86,10 @@ BLOCK_NAMES = {BLK_STRINGS: 'strings', BLK_STATIC: 'static', BLK_SEQUENCE: 'sequ
 NAV_BLOCK_TYPES = {BLK_STRINGS, BLK_STATIC, BLK_SEQUENCE, BLK_PACKETS, BLK_NAV, BLK_AGG,
                    BLK_META, BLK_SUMMARY, BLK_SOURCES, BLK_ISSUES, BLK_CHECKPOINTS,
                    BLK_QUERY}
-# 文件头 optional_features 位：存在 12 号查询索引块（required_features 恒为 0，
+# 文件头 optional_features 位：存在 12 号查询索引块（独立于 required_features，
 # 旧读取器读到未知块类型会明确报错而不是错读；见 docs/etm-r1-query-design.md §3.1）。
 QUERY_INDEX_FEATURE = 0x0001
+ISSUE_RUNS_FEATURE = 0x0002
 
 # 序列记录类型
 REC_RUN = 1
@@ -345,7 +346,7 @@ class _Container:
         if tag != generation_tag:
             raise TraceStoreError('generation 标记不符：文件 %d，manifest %d（拒绝混读两代结果）'
                                  % (tag, generation_tag))
-        if required:
+        if required & ~ISSUE_RUNS_FEATURE or (required & ISSUE_RUNS_FEATURE and file_type != FILE_TRACE):
             raise TraceStoreError('文件声明了本读取器不认识的强制特性位：0x%08x' % required)
         if _crc32(header[:48]) != header_crc:
             raise TraceStoreError('文件头校验和错误')
@@ -505,7 +506,7 @@ class _BlockSink:
         else:
             self.add(block_type, raw, len(raw))
 
-    def assemble(self, path, generation_tag, optional_features=0):
+    def assemble(self, path, generation_tag, optional_features=0, required_features=0):
         """把临时 payload 拼成最终文件；边写边算 sha256。"""
         blocks = len(self.entries)
         if blocks <= 0 or blocks > MAX_BLOCKS:
@@ -521,7 +522,7 @@ class _BlockSink:
         header = bytearray(HEADER_SIZE)
         header[0:8] = MAGIC
         struct.pack_into('<HHI', header, 8, SCHEMA_VERSION, FILE_TRACE, BYTE_ORDER_MARK)
-        struct.pack_into('<QIIQQII', header, 16, generation_tag, blocks, 0,
+        struct.pack_into('<QIIQQII', header, 16, generation_tag, blocks, int(required_features),
                          payload_bytes, file_bytes, 0, int(optional_features))
         struct.pack_into('<I', header, 48, _crc32(bytes(header[:48])))
         digest = hashlib.sha256()
@@ -1859,6 +1860,11 @@ class TraceStore:
         """issues（块 10）：首次访问时解析；打开期间产生的 query-index issue 一并合并。"""
         if self._issues is None:
             loaded = self._json_block(BLK_ISSUES, required=False, default=[])
+            if self.container.required_features & ISSUE_RUNS_FEATURE:
+                import issue_runs
+                loaded = issue_runs.unpack(loaded)
+            elif not isinstance(loaded, list):
+                raise TraceStoreError('诊断块缺少所需的格式特性标记')
             self._issues = list(loaded) + list(self._extra_issues)
             self._extra_issues = []
         elif self._extra_issues:

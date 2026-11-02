@@ -2347,7 +2347,8 @@ def build_store_index(store_dir, cell_size=DEFAULT_CELL_INSTRUCTIONS, progress=N
             sink.add(trace_store.BLK_QUERY, result['payload'], int(result['meta']['cells']))
             sink.handle.flush()
             info = sink.assemble(generation_dir / trace_store.STORE_FILE, generation_tag,
-                                 optional_features=trace_store.QUERY_INDEX_FEATURE)
+                                 optional_features=trace_store.QUERY_INDEX_FEATURE,
+                                 required_features=store.container.required_features)
         finally:
             sink.close()
             try:
@@ -2441,7 +2442,8 @@ def reencode_store_index(store_dir, container='v2', progress=None):
             sink.add(trace_store.BLK_QUERY, payload, int(meta.get('cells') or 0))
             sink.handle.flush()
             info = sink.assemble(generation_dir / trace_store.STORE_FILE, generation_tag,
-                                 optional_features=trace_store.QUERY_INDEX_FEATURE)
+                                 optional_features=trace_store.QUERY_INDEX_FEATURE,
+                                 required_features=store.container.required_features)
         finally:
             sink.close()
             try:

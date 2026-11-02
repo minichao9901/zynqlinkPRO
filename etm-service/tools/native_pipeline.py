@@ -104,6 +104,7 @@ def write(record_dir, store_dir, **options):
         since = now
 
     core = None
+    prepared_build = None
     published = False
     metadata_before = {}
     try:
@@ -131,7 +132,18 @@ def write(record_dir, store_dir, **options):
             raise ts.TraceStoreError('原生输入协议与配置不符')
         mark('decodeAndInputs')
         scan_path = work / 'ranges.bin'
-        if direct:
+        dictionary = work / 'static.bin'
+        facts_path = work / 'facts.bin'
+        index_facts_path = (work / 'index-facts.bin' if 'index-facts-v1' in
+                            (options.get('native_capabilities') or {}).get('capabilities', []) else None)
+        if direct and direct.get('deferred'):
+            prepared_build = native.build(native_path, dictionary, directory, generation=generation,
+                generation_tag=tag, analysis=True, facts_out=facts_path, index_facts_out=index_facts_path,
+                direct=direct, prepare=dict(ranges=scan_path, ready=work / 'static-input-ready.json'))
+            scan = prepared_build.scan
+            if scan['etmSha256'] != native_sha:
+                raise ts.TraceStoreError('Prepared decoder input identity differs')
+        elif direct:
             scan_path = Path(direct['ranges'])
             scan = direct['scan']
         else:
@@ -148,13 +160,13 @@ def write(record_dir, store_dir, **options):
         dictionary = work / 'static.bin'
         static_dict.write_static_dict(dictionary, entries, elf_sha)
         mark('prescanAndStatic')
-        facts_path = work / 'facts.bin'
-        index_facts_path = (work / 'index-facts.bin' if 'index-facts-v1' in
-                            (options.get('native_capabilities') or {}).get('capabilities', []) else None)
-        built = native.build(native_path, dictionary, directory, generation=generation,
-                             generation_tag=tag, analysis=True, facts_out=facts_path,
-                             reserve_instructions=scan.get('rangeInstructions'),
-                             index_facts_out=index_facts_path, direct=direct)
+        if prepared_build:
+            built = prepared_build.finish()
+        else:
+            built = native.build(native_path, dictionary, directory, generation=generation,
+                                 generation_tag=tag, analysis=True, facts_out=facts_path,
+                                 reserve_instructions=scan.get('rangeInstructions'),
+                                 index_facts_out=index_facts_path, direct=direct)
         if 'diagnostics' not in built:
             raise writer.NativeStorebuildUnavailable('原生 builder 缺少完整质量诊断，请重新构建')
         writer._validate_native_build_result(built,
@@ -222,14 +234,24 @@ def write(record_dir, store_dir, **options):
         decoded['traceStore'] = dict(format=ts.FULL_FORMAT_NAME,schemaVersion=1,store='store',source='etm.bin' if direct else 'native.bin',
                                     generation=generation,counts={k:counts[k] for k in ('events','instructions','runs','staticPcs','packets')})
         mark('summary')
-        issues = _issues(core, facts, quality, diagnostics)
+        import os
+        compact_issues = 'predicateIssues' in diagnostics and os.environ.get('ETM_COMPACT_ISSUES', '1') != '0'
+        if compact_issues:
+            import issue_runs
+            issues = issue_runs.from_native(core, facts, quality, diagnostics)
+            issue_count = issues['total']
+        else:
+            issues = _issues(core, facts, quality, diagnostics)
+            issue_count = len(issues)
         mark('issues')
-        meta = dict(core.meta, queryIndex=index_meta, issues=len(issues),
+        meta = dict(core.meta, queryIndex=index_meta, issues=issue_count,
                     verify=dict(elements=True,elementsVerified=counts['ranges'],image=True,
                                 machineCodeCrossCheck=True,staticPcs=counts['staticPcs']),
                     packetText=dict(available=False,reason='按需重放原始 ETM 生成包说明'))
         if direct:
             meta['record'] = dict(meta['record'], eventsSource='etm.bin')
+        meta['captureStartIndex'] = dict(version=1, firstRecoveredSeq=core.summary['firstSeq'],
+            firstRecoveredPC=entries[int(facts['ids'][0])]['pc'], staticPcsAreRecovered=True)
         stored_summary = dict(decoded,eventCount=counts['events'],packetCount=counts['packets'],
                               sourceFiles=list(source_data),firstSeq=core.summary['firstSeq'])
         sink = ts._BlockSink(work / 'publish.payload', expected_blocks=
@@ -242,7 +264,8 @@ def write(record_dir, store_dir, **options):
             sink.add(ts.BLK_QUERY, full['payload'], int(full['meta']['cells']))
             mark('copyBlocks')
             core.close();core=None
-            info=sink.assemble(directory/'store.bin',tag,optional_features=ts.QUERY_INDEX_FEATURE)
+            info=sink.assemble(directory/'store.bin',tag,optional_features=ts.QUERY_INDEX_FEATURE,
+                               required_features=ts.ISSUE_RUNS_FEATURE if compact_issues else 0)
         finally:sink.close()
         mark('assemble')
         hash_inputs=options.get('hash_inputs',True)
@@ -264,10 +287,12 @@ def write(record_dir, store_dir, **options):
                     raise ts.TraceStoreError('输入在构建期间变化：' + name)
         mark('inputBindings')
         engine=dict(name='native',version=built['engine']['buildSha'],fallback=False,
-                    buildCosts=dict(phases=phases,index=full['timings'],native=built.get('phases'),static=static_costs,
+                    buildCosts=dict(phases=phases,index=full['timings'],native=built.get('phases'),preparedDecode=dict(seconds=built.get('prepareSeconds'),replayBytes=built.get('replayBytes'),nativePeakRssBytes=built.get('peakRssBytes')),static=static_costs,
                                     image=getattr(image,'preparation',None)))
         bindings=dict(inputs=inputs,config=config,engine=engine,
-                      processing=dict(traceStore=1,engine='native',nativeFormat='direct-opencsd-v1' if direct else 'trace-bin native v1'))
+                      processing=dict(traceStore=1,engine='native',nativeFormat='direct-opencsd-v1' if direct else 'trace-bin native v1',
+                                      issueFormat='etm-issue-runs/1' if compact_issues else 'json-list',
+                                      decodeStrategy='typed-replay-v1' if prepared_build else 'direct-rescan' if direct else 'native-binary'))
         if not hash_inputs:bindings['inputHash']=dict(skipped=True,computed=False)
         manifest=dict(initial,files=[dict(name='store.bin',**info)],counts=counts,
                       fieldPresence=meta['fieldPresence'],bindings=bindings,queryIndex=index_meta,engine=engine)
@@ -310,7 +335,9 @@ def write(record_dir, store_dir, **options):
                     packetText=False, decodedWritten=bool(options.get('write_decoded')),
                     decodedPath=str(record_dir/'decoded.json') if options.get('write_decoded') else None,
                     warnings=warnings),decoded
-    except Exception:
+    except BaseException:
+        if prepared_build is not None:
+            prepared_build.abort()
         if core is not None:core.close()
         if not published:
             for destination, payload in metadata_before.items():

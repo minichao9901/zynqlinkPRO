@@ -14,6 +14,7 @@ def compare(expected, actual):
     result = dict(blocks={}, tables=[])
     with ts.TraceStore(expected) as left, ts.TraceStore(actual) as right:
         assert left.counts == right.counts, 'store counts differ'
+        assert left.summary.get('analysis') == right.summary.get('analysis'), 'complete analysis differs'
         # Static instructions, strings, complete execution stream, packets,
         # navigation and boundaries: every byte is compared, not sampled.
         for kind in (1, 2, 3, 4, 5, 6, 11):

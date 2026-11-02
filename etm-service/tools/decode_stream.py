@@ -154,20 +154,25 @@ def _run_native(id_stream, image, workdir, config, timings=None):
         if 'direct-opencsd-v1' not in info.get('capabilities', []):
             raise ValueError('Native builder lacks direct-opencsd-v1; rebuild the native tools')
         ranges = workdir / 'direct-ranges.bin'
-        scan = native_storebuild._run_json_command(
-            ['prescan', '--etm', str(workdir / 'etm.bin'), '--config', str(manifest_file),
-             '--out', str(ranges)], workdir / 'direct-scan.json', 900)
+        buffered = os.environ.get('ETM_BUFFERED_DECODE', '1') != '0'
+        if buffered and 'typed-replay-v1' not in info.get('capabilities', []):
+            raise ValueError('Native builder lacks typed-replay-v1; rebuild the native tools')
+        scan = None
+        if not buffered:
+            scan = native_storebuild._run_json_command(
+                ['prescan', '--etm', str(workdir / 'etm.bin'), '--config', str(manifest_file),
+                 '--out', str(ranges)], workdir / 'direct-scan.json', 900)
         files = [workdir / 'etm.bin', manifest_file] + list(workdir.glob('image-*.bin'))
         descriptor = dict(format='etm-direct-v1', etm=str(workdir / 'etm.bin'),
                           config=str(manifest_file), ranges=str(ranges), scan=scan,
-                          protocol=protocol,
+                          protocol=protocol, deferred=buffered,
                           inputs={str(p): hashlib.sha256(p.read_bytes()).hexdigest() for p in files})
         native_path = workdir / 'native-direct.json'
         native_path.write_text(json.dumps(descriptor), encoding='utf8')
         finished = time.perf_counter()
         if timings is not None:
             timings.update(inputPreparationSeconds=prepared-started, openCsdSeconds=finished-prepared,
-                           totalSeconds=finished-started, direct=True)
+                           totalSeconds=finished-started, direct=True, buffered=buffered)
         return native_path, protocol, fmt
     if fmt == 'binary':
         native_path = workdir / 'native.bin'
@@ -980,7 +985,7 @@ def decode_stream(id_stream, elf, workdir, config=None, sources=None, max_events
                     decodePhasesSeconds=dict(imagePreparation=image_seconds,
                         nativeInputPreparation=native_costs['inputPreparationSeconds'],
                         storeBuildAndIndex=time.perf_counter()-store_started,
-                        **{'directPrescan' if native_costs.get('direct') else 'openCsd': native_costs['openCsdSeconds']}),
+                        **{'directPreparation' if native_costs.get('buffered') else 'directPrescan' if native_costs.get('direct') else 'openCsd': native_costs['openCsdSeconds']}),
                     image=getattr(image,'preparation',None))
                 (workdir/'decoded.json').write_text(json.dumps(result,ensure_ascii=False),encoding='utf8')
             return result

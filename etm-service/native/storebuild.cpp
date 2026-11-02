@@ -1,23 +1,18 @@
-// R2 原生 store builder —— M0/M1：prescan 与 native.bin 诊断
+// Native TraceStore builder: binary reference, direct decode and bounded typed replay.
 //
-// 用法：
-//   etm_storebuild --version
-//   etm_storebuild --self-test
-//   etm_storebuild prescan --native <native.bin> [--out <ranges.bin>] [--json <out.json>]
-//                          [--max-unique-ranges N] [--limit-records N]
-//   etm_storebuild diagnose --native <native.bin> --static <static-dict.bin>
-//                           [--ranges <ranges.bin>] [--json <out.json>]
-//                           [--checkpoint-instructions N] [--max-run-instructions N]
-//                           [--limit-records N]
-//   etm_storebuild inspect-static --static <static-dict.bin> [--json <out.json>]
+//   etm_storebuild --version | --self-test
+//   etm_storebuild --self-test-shared-tracker | --self-test-replay-cache
+//   etm_storebuild prescan --native <native.bin> --out <ranges.bin>
+//   etm_storebuild prescan --etm <etm.bin> --config <config.txt> --out <ranges.bin>
+//   etm_storebuild build (--native <native.bin> | --etm <etm.bin> --config <config.txt>)
+//       --static <static.bin> --out-dir <generation> [--facts-out <facts.bin>]
+//       [--prepare-static <ready.json> --ranges-out <ranges.bin> --owner-pid <pid>]
 //
-// 本文件只实现 M0/M1（预扫描 + 诊断），不写 store.bin；完整 build 在 t16。
-// 设计：docs/etm-r2-native-builder-design.md §1–§4、§7.1、§8、§11。
-//
-// 结构约束：
-// * native.bin 单遍流式读取；元素/包/状态记录在同一循环内完成解析与计数；
-// * 不逐指令调用 Python / 不逐条输出 JSON；只在最终阶段输出一个 JSON；
-// * 静态字典在 native 流之前一次性读入；诊断的 run/谓词/周期状态机全部在 C++ 内完成。
+// Prepared mode decodes once into bounded private RAM, publishes the unique ranges,
+// then waits for <static.bin>.ready before replaying into the builder. Python owns
+// the worker and static metadata preparation; no per-instruction Python callbacks.
+// An unpublished generation is never a completed record. CRC/SHA and quality
+// diagnostics remain mandatory in the product profile.
 
 #include "decoder_sink.hpp"
 #include <algorithm>
@@ -25,6 +20,8 @@
 #include <chrono>
 #include <cstdint>
 #include <cstdio>
+#include <cstdlib>
+#include <thread>
 #include <openssl/sha.h>
 #include <cstring>
 #include <filesystem>
@@ -928,6 +925,153 @@ NativeCounters read_native(const std::string& name, bool collect_ranges,
 }
 
 // Direct OpenCSD input shares the builder visitor; no native record serialization.
+// Bounded transient typed replay. Common ranges carry only a plan ID and
+// offset; packet bytes and rare events retain their original visitor fields.
+// This is private RAM, never a second persisted trace representation.
+class ReplayCache final : public NativeVisitor {
+public:
+    explicit ReplayCache(uint64_t limit = 1ull << 30) : limit_(limit) {}
+    std::vector<RangeRecord> ranges;
+    uint64_t bytes = 0;
+    void on_range(uint32_t offset, uint64_t start, uint64_t end, uint32_t payload,
+                  uint8_t executed, uint32_t cycles) override {
+        const uint64_t key = (start << 32) | end;
+        auto found = plans_.find(key);
+        uint32_t id;
+        if (found == plans_.end()) {
+            id = static_cast<uint32_t>(ranges.size());
+            if (id >= 1000000) fail(kExitIo, "Replay cache has too many unique ranges");
+            plans_.emplace(key, id);
+            ranges.push_back({static_cast<uint32_t>(start), static_cast<uint32_t>(end), payload});
+        } else id = found->second;
+        if (ranges[id].payload != payload) {
+            auto* out = allocate(22); *out++ = 6;
+            put(out, offset); put(out, static_cast<uint32_t>(start)); put(out, static_cast<uint32_t>(end));
+            put(out, payload); put(out, cycles); *out = executed; return;
+        }
+        const bool wide = id >= 65536;
+        auto* out = allocate(1 + (wide ? 4 : 2) + 4 + (cycles ? 4 : 0));
+        *out++ = 1 | (cycles ? 16 : 0) | (executed ? 0 : 32) | (wide ? 64 : 0);
+        if (wide) put(out, id); else put(out, static_cast<uint16_t>(id));
+        put(out, offset); if (cycles) put(out, cycles);
+    }
+    void on_cycle(uint32_t offset, uint32_t cycles, uint32_t payload) override {
+        auto* out = allocate(13); *out++ = 2; put(out, offset); put(out, cycles); put(out, payload);
+    }
+    void on_event(uint16_t type, uint32_t offset, uint32_t payload, uint64_t start,
+                  uint64_t end, uint32_t flags, const std::string& text) override {
+        if (text.size() > 65535) fail(kExitInput, "Replay event text exceeds limit");
+        auto* out = allocate(33 + text.size()); *out++ = 3;
+        put(out, type); put(out, offset); put(out, payload); put(out, start); put(out, end);
+        put(out, flags); put(out, static_cast<uint16_t>(text.size()));
+        std::memcpy(out, text.data(), text.size());
+    }
+    void on_other(uint16_t type, uint32_t offset) override {
+        auto* out = allocate(7); *out++ = 4; put(out, type); put(out, offset);
+    }
+    void on_packet(uint32_t offset, uint32_t size, uint32_t type, const uint8_t* data) override {
+        auto* out = allocate(13ull + size); *out++ = 5;
+        put(out, offset); put(out, size); put(out, type); std::memcpy(out, data, size);
+    }
+    void replay(NativeVisitor& visitor) const {
+        for (size_t block = 0; block < blocks_.size(); ++block) {
+            const auto* in = blocks_[block].data();
+            const auto* end = in + used_[block];
+            while (in < end) {
+                const uint8_t kind = *in++;
+                if ((kind & 15) == 1) {
+                    const uint32_t id = (kind & 64) ? take<uint32_t>(in) : take<uint16_t>(in);
+                    const uint32_t offset = take<uint32_t>(in);
+                    const uint32_t cycles = (kind & 16) ? take<uint32_t>(in) : 0;
+                    const auto& plan = ranges.at(id);
+                    visitor.on_range(offset, plan.start, plan.end, plan.payload, (kind & 32) ? 0 : 1, cycles);
+                } else if (kind == 2) {
+                    auto offset = take<uint32_t>(in); auto cycles = take<uint32_t>(in); auto payload = take<uint32_t>(in);
+                    visitor.on_cycle(offset, cycles, payload);
+                } else if (kind == 3) {
+                    auto type = take<uint16_t>(in); auto offset = take<uint32_t>(in); auto payload = take<uint32_t>(in);
+                    auto start = take<uint64_t>(in); auto stop = take<uint64_t>(in); auto flags = take<uint32_t>(in);
+                    auto length = take<uint16_t>(in);
+                    visitor.on_event(type, offset, payload, start, stop, flags, std::string(reinterpret_cast<const char*>(in), length));
+                    in += length;
+                } else if (kind == 4) {
+                    auto type = take<uint16_t>(in); auto offset = take<uint32_t>(in); visitor.on_other(type, offset);
+                } else if (kind == 5) {
+                    auto offset = take<uint32_t>(in); auto length = take<uint32_t>(in); auto type = take<uint32_t>(in);
+                    visitor.on_packet(offset, length, type, in); in += length;
+                } else if (kind == 6) {
+                    auto offset = take<uint32_t>(in); auto start = take<uint32_t>(in); auto stop = take<uint32_t>(in);
+                    auto payload = take<uint32_t>(in); auto cycles = take<uint32_t>(in); auto executed = *in++;
+                    visitor.on_range(offset, start, stop, payload, executed, cycles);
+                } else fail(kExitConsistency, "Unknown private replay record");
+            }
+            if (in != end) fail(kExitConsistency, "Private replay record exceeds block");
+        }
+    }
+private:
+    uint64_t limit_;
+    std::unordered_map<uint64_t, uint32_t> plans_;
+    std::vector<std::vector<uint8_t>> blocks_;
+    std::vector<size_t> used_;
+    template <class T> static void put(uint8_t*& out, T value) { std::memcpy(out, &value, sizeof(value)); out += sizeof(value); }
+    template <class T> static T take(const uint8_t*& in) { T value; std::memcpy(&value, in, sizeof(value)); in += sizeof(value); return value; }
+    uint8_t* allocate(size_t size) {
+        if (size > limit_ || bytes > limit_ - size)
+            fail(kExitIo, "Typed replay exceeds 1 GiB; use ETM_BUFFERED_DECODE=0 for bounded streaming replay");
+        if (blocks_.empty() || blocks_.back().size() - used_.back() < size) {
+            blocks_.emplace_back(std::max<size_t>(8u << 20, size)); used_.push_back(0);
+        }
+        auto* result = blocks_.back().data() + used_.back(); used_.back() += size; bytes += size;
+        return result;
+    }
+};
+
+class ReplayDigest final : public NativeVisitor {
+public:
+    FastSha256 hash;
+    template <class T> void put(const T& value) { hash.update(&value, sizeof(value)); }
+    void on_range(uint32_t offset, uint64_t start, uint64_t end, uint32_t payload, uint8_t executed, uint32_t cycles) override {
+        put(uint8_t(1)); put(offset); put(start); put(end); put(payload); put(executed); put(cycles);
+    }
+    void on_cycle(uint32_t offset, uint32_t cycles, uint32_t payload) override {
+        put(uint8_t(2)); put(offset); put(cycles); put(payload);
+    }
+    void on_event(uint16_t type, uint32_t offset, uint32_t payload, uint64_t start, uint64_t end, uint32_t flags, const std::string& text) override {
+        put(uint8_t(3)); put(type); put(offset); put(payload); put(start); put(end); put(flags); put(uint64_t(text.size()));
+        hash.update(text.data(), text.size());
+    }
+    void on_other(uint16_t type, uint32_t offset) override { put(uint8_t(4)); put(type); put(offset); }
+    void on_packet(uint32_t offset, uint32_t size, uint32_t type, const uint8_t* raw) override {
+        put(uint8_t(5)); put(offset); put(size); put(type); hash.update(raw, size);
+    }
+};
+void self_test_replay_cache() {
+    ReplayCache cache;
+    ReplayDigest expected, actual;
+    for (uint32_t i = 0; i < 70000; ++i) {
+        uint64_t pc = 0x1000 + 4 * i;
+        cache.on_range(i, pc, pc + 2, 1, i % 2, i % 19);
+        expected.on_range(i, pc, pc + 2, 1, i % 2, i % 19);
+    }
+    const std::string text = "异常返回 / cache boundary";
+    std::vector<uint8_t> packet((8u << 20) + 17, 0xA5);
+    for (NativeVisitor* visitor : std::vector<NativeVisitor*>{&cache, &expected}) {
+        visitor->on_packet(42, static_cast<uint32_t>(packet.size()), 17, packet.data());
+        visitor->on_event(9, 123, 22, 1ull << 40, (1ull << 40) + 7, (1u << 12) | (1u << 6), text);
+        visitor->on_cycle(124, 0xFFFFFFFFu, 17);
+        visitor->on_other(0xFFFFu, 125);
+        visitor->on_range(126, 0x1000, 0x1002, 2, 1, 0); // payload variant uses the full record
+        visitor->on_range(127, 0x1000, 0x1002, 1, 0, 7);
+    }
+    cache.replay(actual);
+    if (expected.hash.hex_digest() != actual.hash.hex_digest())
+        fail(kExitConsistency, "Typed replay fields differ across wide IDs/block rotation");
+    bool rejected = false;
+    try { ReplayCache tiny(16); tiny.on_packet(0, 64, 0, packet.data()); }
+    catch (const BuildError&) { rejected = true; }
+    if (!rejected) fail(kExitConsistency, "Typed replay failed to enforce memory bound");
+}
+
 class DirectSink final : public etm_decode::Sink {
 public:
     NativeCounters counters;
@@ -1372,23 +1516,12 @@ struct DiagnoseVisitor : NativeVisitor {
 constexpr uint16_t trace_store_strings = 1;
 constexpr uint16_t trace_store_static = 2;
 uint32_t crc32_bytes(const uint8_t* data, size_t size) {
-    static uint32_t table[256];
-    static bool ready = false;
-    if (!ready) {
-        for (uint32_t index = 0; index < 256; ++index) {
-            uint32_t value = index;
-            for (int bit = 0; bit < 8; ++bit) {
-                value = (value & 1) ? (0xEDB88320u ^ (value >> 1)) : (value >> 1);
-            }
-            table[index] = value;
-        }
-        ready = true;
+    uLong result = crc32(0, Z_NULL, 0);
+    while (size) {
+        const auto take = static_cast<uInt>(std::min<size_t>(size, std::numeric_limits<uInt>::max()));
+        result = crc32(result, data, take); data += take; size -= take;
     }
-    uint32_t crc = 0xFFFFFFFFu;
-    for (size_t index = 0; index < size; ++index) {
-        crc = table[(crc ^ data[index]) & 0xFF] ^ (crc >> 8);
-    }
-    return crc ^ 0xFFFFFFFFu;
+    return static_cast<uint32_t>(result);
 }
 
 void wv(std::vector<uint8_t>& out, uint64_t value) {
@@ -1477,8 +1610,13 @@ struct BuildOutput {
 };
 
 
+struct FlameNode;
+
 struct TrackerFrame {
     std::string function;
+    mutable uint32_t path_node = 0xFFFFFFFFu;
+    mutable FlameNode* flame_node = nullptr;
+    uint32_t origin_stat = 0xFFFFFFFFu;
     bool has_return = false;
     uint64_t return_pc = 0;
     bool has_origin = false;
@@ -1486,6 +1624,7 @@ struct TrackerFrame {
 };
 
 struct TrackerPrevious {
+    uint32_t function_stat = 0xFFFFFFFFu;
     bool valid = false;
     uint64_t pc = 0;
     uint32_t size = 0;
@@ -1555,9 +1694,15 @@ struct FlameNode {
     }
 };
 
+struct StackObserver {
+    virtual ~StackObserver() = default;
+    virtual void on_stack(const std::vector<TrackerFrame>& frames, size_t context_depth) = 0;
+};
+
 class Tracker {
   public:
     Tracker() { root_.name = "已恢复执行区间"; }
+    void set_observer(StackObserver* observer) { observer_ = observer; }
     void set_analysis(bool enabled) { analysis_enabled_ = enabled; }
     void clear_all(bool clear_expected = true) {
         stack_.clear();
@@ -1664,6 +1809,7 @@ class Tracker {
         } else if (analysis_enabled_) {
             s_ptr = &statistics(fn);
         }
+        const uint32_t function_stat = analysis_enabled_ ? static_cast<uint32_t>(s_ptr - stats_.data()) : 0xFFFFFFFFu;
         TrackerStats& s = analysis_enabled_ ? *s_ptr : dummy_stats_;
         if (has_expected_) {
             if (pc != (expected_ & ~1ull)) {
@@ -1694,8 +1840,9 @@ class Tracker {
                 frame.return_pc = previous_.pc + previous_.size;
                 frame.has_origin = true;
                 frame.origin = fn;
+                frame.origin_stat = function_stat;
                 stack_.push_back(std::move(frame));
-                if (analysis_enabled_) { ++s.calls; add_edge(old_fn, fn, "call"); }
+                if (analysis_enabled_) { ++s.calls; add_edge(old_fn, fn, "call", previous_.function_stat, function_stat); }
                 sync();
             } else if (previous_.flow == kFlowReturn || previous_.flow == kFlowBranch) {
                 int match = -1;
@@ -1709,15 +1856,17 @@ class Tracker {
                     if (analysis_enabled_) {
                         for (size_t index = static_cast<size_t>(match); index < stack_.size(); ++index) {
                             if (stack_[index].has_origin) {
-                                ++statistics(stack_[index].origin).closed_calls;
+                                ++stats_[stack_[index].origin_stat].closed_calls;
                             }
                         }
                     }
                     stack_.resize(static_cast<size_t>(match));
                     sync();
                 } else if (old_fn != fn && previous_.flow == kFlowBranch) {
-                    if (analysis_enabled_) { ++s.tail_transfers; add_edge(old_fn, fn, "tail-transfer"); }
+                    if (analysis_enabled_) { ++s.tail_transfers; add_edge(old_fn, fn, "tail-transfer", previous_.function_stat, function_stat); }
                     stack_.back().function = fn;
+                    stack_.back().path_node = 0xFFFFFFFFu;
+                    stack_.back().flame_node = nullptr;
                     sync();
                 } else if (old_fn != fn) {
                     stack_.clear();
@@ -1754,9 +1903,9 @@ class Tracker {
             if (!path_nodes_valid_) {
                 path_nodes_.clear();
                 for (const TrackerFrame& frame : stack_) {
-                    FlameNode* child = node->child(frame.function);
-                    path_nodes_.push_back(child);
-                    node = child;
+                    if (!frame.flame_node) frame.flame_node = node->child(frame.function);
+                    node = frame.flame_node;
+                    path_nodes_.push_back(node);
                 }
                 path_nodes_valid_ = true;
             }
@@ -1784,6 +1933,7 @@ class Tracker {
             hot->unknown += executed == 2;
             hot->cycles += cycles;
         }
+        previous_.function_stat = function_stat;
         previous_.valid = true;
         previous_.pc = pc;
         previous_.size = size;
@@ -1808,20 +1958,22 @@ class Tracker {
         return stats_.back();
     }
     void add_edge(const std::string& caller, const std::string& callee,
-                  const std::string& kind) {
-        const std::string key = caller + "\x1f" + callee + "\x1f" + kind;
-        auto found = edge_index_.find(key);
-        if (found == edge_index_.end()) {
+                  const std::string& kind, uint32_t caller_id, uint32_t callee_id) {
+        // Function IDs are stable across vector growth and exception contexts.
+        auto& index = kind == "call" ? call_edge_index_ : tail_edge_index_;
+        const uint64_t key = (static_cast<uint64_t>(caller_id) << 32) | callee_id;
+        auto found = index.find(key);
+        if (found == index.end()) {
             edges_.push_back(TrackerEdge{caller, callee, kind, 1});
-            edge_index_.emplace(key, edges_.size() - 1);
-        } else {
-            ++edges_[found->second].count;
-        }
+            index.emplace(key, edges_.size() - 1);
+        } else ++edges_[found->second].count;
     }
     void sync() {
         path_nodes_.clear();
         path_nodes_valid_ = false;
+        if (observer_) observer_->on_stack(stack_, contexts_.size());
     }
+    StackObserver* observer_ = nullptr;
     std::vector<TrackerFrame> stack_;
     std::vector<TrackerContext> contexts_;
     TrackerPrevious previous_;
@@ -1837,7 +1989,7 @@ class Tracker {
     std::vector<TrackerHotspot> hotspots_;
     std::unordered_map<std::string, size_t> hotspot_index_;
     std::vector<TrackerEdge> edges_;
-    std::unordered_map<std::string, size_t> edge_index_;
+    std::unordered_map<uint64_t, size_t> call_edge_index_, tail_edge_index_;
     FlameNode root_;
     std::vector<FlameNode*> path_nodes_;
     bool path_nodes_valid_ = false;
@@ -2000,7 +2152,7 @@ struct FactsLabelTable {
 };
 
 // `_PathTracker` 的逐行等价移植（事件/指令喂入、sync 变化时切路径区间）。
-class PathTracker {
+class PathTracker : public StackObserver {
   public:
     struct Frame {
         std::string function;
@@ -2029,10 +2181,34 @@ class PathTracker {
     bool dirty() const { return dirty_; }
     void clear_dirty() { dirty_ = false; }
     uint32_t leaf() const { return leaf_; }
-    size_t context_depth() const { return contexts_.size(); }
+    size_t context_depth() const { return external_ ? external_depth_ : contexts_.size(); }
+    void follow_tracker() { external_ = true; }
+    void on_stack(const std::vector<TrackerFrame>& frames, size_t depth) override {
+        external_depth_ = depth;
+        // Frames retain their interned path node across calls, returns and
+        // exception context saves. Only newly pushed/renamed frames need work.
+        size_t begin = frames.size();
+        while (begin && frames[begin - 1].path_node == 0xFFFFFFFFu) --begin;
+        uint32_t node = begin ? frames[begin - 1].path_node : 0;
+        for (size_t i = begin; i < frames.size(); ++i) {
+            const uint32_t label = labels_.intern(frames[i].function);
+            const uint64_t key = (static_cast<uint64_t>(node) << 32) | label;
+            auto found = children_.find(key);
+            if (found == children_.end()) {
+                const uint32_t next = static_cast<uint32_t>(nodes_.size());
+                nodes_.push_back(std::make_pair(static_cast<int32_t>(node), label));
+                children_.emplace(key, next);
+                node = next;
+            } else node = found->second;
+            frames[i].path_node = node;
+        }
+        leaf_ = node;
+        dirty_ = true;
+    }
     uint64_t unknown_restarts() const { return unknown_restarts_; }
     const std::vector<std::pair<int32_t, uint32_t>>& nodes() const { return nodes_; }
     void feed_event(uint16_t etype, uint32_t flags, uint64_t payload, uint64_t end) {
+        if (external_) return;
         if (etype == 1 || etype == 2 || etype == 6 || etype == 7 || etype == 8) {
             stack_.clear();
             contexts_.clear();
@@ -2075,6 +2251,7 @@ class PathTracker {
     }
     void feed_instruction(const std::string& function, uint8_t executed, uint8_t flow,
                           uint64_t pc, uint32_t size) {
+        if (external_) return;
         static const std::string unknown_function = "(未知函数)";
         const std::string& fn = function.empty() ? unknown_function : function;
         if (flow == kFlowLinear && previous_.valid && previous_.flow == kFlowLinear
@@ -2157,9 +2334,10 @@ class PathTracker {
     }
 
   private:
-    void sync() {
+    void sync() { sync_stack(stack_); }
+    template <class Frames> void sync_stack(const Frames& frames) {
         uint32_t node = 0;
-        for (const Frame& frame : stack_) {
+        for (const auto& frame : frames) {
             const uint32_t label = labels_.intern(frame.function);
             const uint64_t key = (static_cast<uint64_t>(node) << 32) | label;
             auto found = children_.find(key);
@@ -2177,6 +2355,8 @@ class PathTracker {
         dirty_ = true;
         ++sync_count_;
     }
+    bool external_ = false;
+    size_t external_depth_ = 0;
     FactsLabelTable& labels_;
     std::vector<Frame> stack_;
     std::vector<Context> contexts_;
@@ -2190,6 +2370,49 @@ class PathTracker {
     bool dirty_ = false;
     uint64_t sync_count_ = 0;
 };
+
+// Differential oracle for shared state, including nested exceptions and
+// unknown/predicated execution. The old state machine remains independent.
+void self_test_shared_tracker() {
+    if (crc32_bytes(reinterpret_cast<const uint8_t*>("123456789"), 9) != 0xCBF43926u)
+        fail(kExitConsistency, "CRC32 known vector differs");
+    FactsLabelTable labels, oracle_labels;
+    PathTracker path(labels), oracle(oracle_labels);
+    Tracker tracker;
+    path.follow_tracker(); tracker.set_observer(&path);
+    auto verify = [&]() {
+        if (path.leaf() != oracle.leaf() || path.nodes() != oracle.nodes()
+                || labels.values != oracle_labels.values
+                || path.context_depth() != oracle.context_depth()
+                || path.dirty() != oracle.dirty())
+            fail(kExitConsistency, "shared tracker differs from independent path oracle");
+        path.clear_dirty(); oracle.clear_dirty();
+    };
+    auto event = [&](uint16_t type, uint32_t flags, uint32_t payload, uint64_t end) {
+        tracker.feed_event(type, flags, payload, end);
+        oracle.feed_event(type, flags, payload, end); verify();
+    };
+    uint32_t seed = 0x92a3751;
+    auto random = [&]() { seed = seed * 1664525u + 1013904223u; return seed; };
+    for (uint32_t i = 0; i < 50000; ++i) {
+        if (i % 64 == 0) { event(1, 0, 0, 0); continue; }
+        uint32_t r = random();
+        if ((r & 7) == 0) {
+            const uint16_t types[] = {1, 2, 6, 7, 8, 9, 10};
+            event(types[(r >> 8) % 7], ((r & 16) ? 1u << 12 : 0) | ((r & 32) ? 1u << 6 : 0),
+                  (r >> 16) % 16, 0x1000 + ((r >> 5) % 32) * 2);
+            continue;
+        }
+        const uint32_t site = (r >> 8) % 32;
+        const uint64_t pc = 0x1000 + site * 2;
+        const uint8_t flow = site % 5, state = (r >> 24) % 3;
+        const std::string function = site < 2 ? std::string() : "function-" + std::to_string(site / 4);
+        tracker.feed_instruction(function, "file.c", true, true, site + 1,
+                                 state, flow, pc, 2, (r & 64) ? 4 : 0, site);
+        oracle.feed_instruction(function.empty() ? "(未知函数)" : function, state, flow, pc, 2);
+        verify();
+    }
+}
 
 // facts 落盘：4 MiB 缓冲 + 临时文件 rename（失败删除半成品）。
 class FactsSink {
@@ -2836,6 +3059,11 @@ class BuildVisitor : public NativeVisitor {
         if (online) {
             online_facts_ = std::make_unique<ExecutionFacts>();
             online_facts_->initialize(dict_, static_entries_);
+            const char* shared = std::getenv("ETM_SHARED_TRACKER");
+            if (need_tracker_ && (!shared || std::string(shared) != "0")) {
+                online_facts_->fact_path->follow_tracker();
+                tracker_.set_observer(online_facts_->fact_path.get());
+            }
             // A prescan hint avoids repeated large vector reallocations. Cap
             // eager allocation; larger valid inputs can still grow normally.
             const size_t capacity = static_cast<size_t>(std::min<uint64_t>(reserve, 64ull << 20));
@@ -3379,9 +3607,6 @@ class BuildVisitor : public NativeVisitor {
                 const bool is_tail = position + 1 == count;
                 const uint8_t executed = is_tail ? tail_code
                     : (entry->predicated ? 2 : 0);
-                if (online_facts_)
-                    online_facts_->instruction(*entry, executed, start_seq + position,
-                                              location.first, location.second, static_cast<uint32_t>(position));
                 if (executed == 2) {
                     const uint64_t seq = start_seq + position;
                     auto& issues = output_.predicate_issues;
@@ -3407,6 +3632,9 @@ class BuildVisitor : public NativeVisitor {
                                               is_tail ? pending_.cycles : 0,
                                               entry->id);
                 }
+                if (online_facts_)
+                    online_facts_->instruction(*entry, executed, start_seq + position,
+                                              location.first, location.second, static_cast<uint32_t>(position));
                 ++position;
             }
         }
@@ -3746,8 +3974,18 @@ int main_utf8(int argc, char** argv) {
                       << ",\"buildSha\":" << quote(build_sha())
                       << ",\"formats\":{\"native\":\"trace-bin native v1\","
                          "\"staticDict\":1,\"ranges\":1}"
-                      << ",\"capabilities\":[\"prescan\",\"diagnose\",\"build\",\"facts-v3\",\"quality-diagnostics\",\"index-facts-v1\",\"direct-opencsd-v1\"]"
+                      << ",\"capabilities\":[\"prescan\",\"diagnose\",\"build\",\"facts-v3\",\"quality-diagnostics\",\"index-facts-v1\",\"direct-opencsd-v1\",\"typed-replay-v1\",\"shared-tracker-v1\"]"
                       << "}" << std::endl;
+            return kExitOk;
+        }
+        if (command == "--self-test-replay-cache") {
+            self_test_replay_cache();
+            std::cout << "{\"ok\":true,\"uniqueRanges\":70000,\"bounded\":true}" << std::endl;
+            return kExitOk;
+        }
+        if (command == "--self-test-shared-tracker") {
+            self_test_shared_tracker();
+            std::cout << "{\"ok\":true,\"transitions\":50000}" << std::endl;
             return kExitOk;
         }
         if (command == "--self-test") {
@@ -3938,6 +4176,8 @@ int main_utf8(int argc, char** argv) {
         if (command == "build") {
             std::string native_path;
             std::string etm_path, config_path;
+            std::string prepare_path, ranges_path;
+            uint32_t owner_pid = 0;
             std::string static_path;
             std::string out_dir;
             std::string generation;
@@ -3958,6 +4198,9 @@ int main_utf8(int argc, char** argv) {
                 if (arg == "--native") native_path = next("--native");
                 else if (arg == "--etm") etm_path = next("--etm");
                 else if (arg == "--config") config_path = next("--config");
+                else if (arg == "--owner-pid") owner_pid = static_cast<uint32_t>(std::stoul(next("--owner-pid")));
+                else if (arg == "--prepare-static") prepare_path = next("--prepare-static");
+                else if (arg == "--ranges-out") ranges_path = next("--ranges-out");
                 else if (arg == "--static") static_path = next("--static");
                 else if (arg == "--out-dir") out_dir = next("--out-dir");
                 else if (arg == "--generation") generation = next("--generation");
@@ -3975,6 +4218,49 @@ int main_utf8(int argc, char** argv) {
             if (native_path.empty() && (etm_path.empty() || config_path.empty())) fail(kExitUsage, "build requires --native or --etm/--config");
             if (static_path.empty()) fail(kExitUsage, "build 需要 --static");
             if (out_dir.empty()) fail(kExitUsage, "build 需要 --out-dir");
+            std::unique_ptr<ReplayCache> replay;
+            NativeCounters prepared;
+            double prepare_seconds = 0;
+            uint64_t replay_bytes = 0;
+            if (!prepare_path.empty()) {
+                if (etm_path.empty() || config_path.empty() || ranges_path.empty() || fs::exists(file_path(static_path)))
+                    fail(kExitUsage, "prepare-static requires a new static dictionary and ETM/config/ranges paths");
+#ifdef _WIN32
+                std::unique_ptr<void, decltype(&CloseHandle)> owner(nullptr, &CloseHandle);
+                if (owner_pid) {
+                    owner.reset(OpenProcess(SYNCHRONIZE, FALSE, owner_pid));
+                    if (!owner) fail(kExitIo, "Prepared build owner is unavailable");
+                }
+#endif
+                const auto prepare_started = std::chrono::steady_clock::now();
+                replay = std::make_unique<ReplayCache>();
+                prepared = read_direct(etm_path, config_path, false, nullptr, 1000000, nullptr, replay.get());
+                replay_bytes = replay->bytes;
+                std::ofstream ranges_out(file_path(ranges_path), std::ios::binary);
+                ranges_out.write("R2RANGES1", 9); write_u64(ranges_out, replay->ranges.size()); write_u64(ranges_out, prepared.range_records);
+                for (const auto& range : replay->ranges) {
+                    write_u32(ranges_out, range.start); write_u32(ranges_out, range.end); write_u32(ranges_out, range.payload);
+                }
+                ranges_out.close(); if (!ranges_out) fail(kExitIo, "Cannot publish replay ranges");
+                prepare_seconds = seconds_since(prepare_started);
+                const auto temporary_ready = prepare_path + ".tmp";
+                std::ofstream ready(file_path(temporary_ready));
+                ready << "{\"rangeInstructions\":" << (prepared.logical_seq - prepared.event_elements)
+                      << ",\"etmSha256\":" << quote(prepared.native_sha256)
+                      << ",\"replayBytes\":" << replay_bytes << "}";
+                ready.close(); if (!ready) fail(kExitIo, "Cannot publish replay handshake");
+                fs::rename(file_path(temporary_ready), file_path(prepare_path));
+                const auto waiting = std::chrono::steady_clock::now();
+                while (!fs::exists(file_path(static_path + ".ready"))) {
+#ifdef _WIN32
+                    if (owner && WaitForSingleObject(owner.get(), 0) != WAIT_TIMEOUT)
+                        fail(kExitIo, "Prepared build owner exited");
+#endif
+                    if (seconds_since(waiting) > 900) fail(kExitIo, "Static dictionary handshake timed out");
+                    std::this_thread::sleep_for(std::chrono::milliseconds(5));
+                }
+                if (!reserve_instructions) reserve_instructions = prepared.logical_seq - prepared.event_elements;
+            }
             StaticDict dict = load_static_dict(static_path);
             BuildOutput output;
             output.generation = generation.empty() ? fs::u8path(out_dir).filename().string() : generation;
@@ -3990,7 +4276,12 @@ int main_utf8(int argc, char** argv) {
             if (!facts_out.empty()) visitor.set_facts_out(facts_out, !native_index, reserve_instructions);
             if (!index_facts_out.empty()) visitor.set_index_facts_out(index_facts_out, reserve_instructions);
             const auto started = std::chrono::steady_clock::now();
-            NativeCounters counters = !etm_path.empty()
+            NativeCounters counters;
+            if (replay) {
+                replay->replay(visitor);
+                replay.reset();
+                counters = std::move(prepared);
+            } else counters = !etm_path.empty()
                 ? read_direct(etm_path, config_path, false, nullptr, 1000000, nullptr, &visitor)
                 : read_native(native_path, false, nullptr, 1000000, 0,
                                                    nullptr, true, &visitor);
@@ -4143,6 +4434,7 @@ int main_utf8(int argc, char** argv) {
                    << ",\"defaultViews\":0.0,\"writeBlocks\":"
                    << output.write_seconds << ",\"assembleFile\":"
                    << output.write_seconds << ",\"hashFile\":0.0},\n";
+            result << " \"prepareSeconds\":" << prepare_seconds << ",\"replayBytes\":" << replay_bytes << ",\n";
             result << " \"peakRssBytes\":" << output.peak_rss
                    << ",\"facts\":{\"format\":\"ETMFACT3\",\"version\":3,\"bytes\":"
                    << output.facts_bytes << ",\"pathRuns\":" << output.facts_path_runs

@@ -331,6 +331,17 @@ def capture_start_from_store(folder_or_store, metadata):
     store = trace_store.TraceStore(store_path, verify='sizes')
     try:
         first_seq = (store.summary or {}).get('firstSeq')
+        prepared = store.meta.get('captureStartIndex')
+        if prepared is not None:
+            if (not isinstance(prepared, dict) or prepared.get('version') != 1
+                    or prepared.get('firstRecoveredSeq') != first_seq
+                    or type(prepared.get('firstRecoveredPC')) is not int
+                    or prepared.get('staticPcsAreRecovered') is not True):
+                raise trace_store.TraceStoreError('采集起点索引与记录不一致')
+            first_pc = prepared['firstRecoveredPC']
+            return dict(selectedPC=entry, firstRecoveredPC=first_pc,
+                        entryRecovered=any(item.pc == entry for item in store.static),
+                        firstMatchesEntry=first_pc == entry)
         first_pc = None
         if isinstance(first_seq, int):
             first_pc = store.event(first_seq)['event'].get('pc')
