@@ -11,7 +11,7 @@
 - 输入采用原始ETM/ELF/config/镜像SHA及构建前后变化检查。direct结果绑定`etmSha256`，binary路径继续绑定`nativeSha256`；保留原始ETM和按需包重放能力。
 - 指令ordinal→逻辑seq改为按事件插入位置的一次搜索，保留开头和中间连续事件的映射。叶节点首次出现采用线性归约。大型诊断JSON改用快速压缩，保留全部条目及CRC/SHA检查。
 - 避免C++调用跟踪热路径反复复制旧函数名、销毁再分配previous函数字符串，并删除无消费者的path字符串副本。
-- 新增完整store差分工具和离线双路径重放工具；原生EXE与源码一起纳入本分支，准确文件SHA见[构建manifest](build-manifest.json)。原生程序内嵌buildSha是基线提交，不冒充包含本轮修改的源码身份；实际构建输入以逐文件SHA为准。
+- 新增完整store差分工具和离线双路径重放工具；原生EXE与源码一起纳入本分支，准确文件SHA见[构建manifest](build-manifest.json)。原生程序内嵌buildSha是基线提交，不冒充包含本轮修改的源码身份；实际构建输入以逐文件SHA为准。manifest另记Git blob SHA；C++与EXE原字节一致，6个Python文件仅存在Git LF/工作副本CRLF差异，已独立逐字节归一化核对。
 
 当前仍保留一次OpenCSD唯一范围预扫描，准备静态字典后再进行直接解码/build。因此它尚不是只解码一次的全流程；索引与发布仍有Python/NumPy参与。低层直接调用`trace_store_write.decode_to_native`继续提供binary参考能力，不能据本原型宣称所有入口均已全C++化。`directPrescan`只计预扫描，第二次OpenCSD包含在nativeBuild内；不将其误报成OpenCSD全部耗时。
 
