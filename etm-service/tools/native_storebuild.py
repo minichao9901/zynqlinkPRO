@@ -260,7 +260,7 @@ def build_local_index(store_dir, build_result):
 
 def build(native, static, out_dir, generation=None, generation_tag=None, result=None,
           timeout=DEFAULT_TIMEOUT, binary=None, analysis=False, local_index=False,
-          facts_out=None, native_index=False, reserve_instructions=None, index_facts_out=None, profile_detail=False):
+          facts_out=None, native_index=False, reserve_instructions=None, index_facts_out=None, profile_detail=False, direct=None):
     """调用原生 build（blocks 1-11；块 12/默认视图留给 t21）。
 
     ``facts_out`` 触发 facts v3 写出；index_facts_out 请求同遍数值归约。
@@ -274,8 +274,11 @@ def build(native, static, out_dir, generation=None, generation_tag=None, result=
         raise NativeStorebuildError('native.bin 不存在：%s' % native)
     if not static.is_file():
         raise NativeStorebuildError('static-dict.bin 不存在：%s' % static)
-    args = ['build', '--native', str(native), '--static', str(static),
-            '--out-dir', str(out_dir)]
+    args = ['build', '--static', str(static), '--out-dir', str(out_dir)]
+    if direct:
+        args.extend(['--etm', direct['etm'], '--config', direct['config']])
+    else:
+        args.extend(['--native', str(native)])
     if generation is not None:
         args.extend(['--generation', str(generation)])
     if generation_tag is not None:

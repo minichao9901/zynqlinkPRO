@@ -292,8 +292,11 @@ class _Block:
         self.block_type, self.flags, self.crc32 = block_type, flags, crc
 
 
-def _inflate(data, expected):
-    if expected < 0 or expected > MAX_BLOCK_BYTES:
+MAX_ISSUE_BYTES = 128 << 20
+
+
+def _inflate(data, expected, limit=MAX_BLOCK_BYTES):
+    if expected < 0 or expected > limit:
         raise TraceStoreError('压缩块声明解压长度无效：%d（拒绝巨量分配）' % expected)
     decompressor = zlib.decompressobj()
     output = decompressor.decompress(data, expected + 1)
@@ -398,7 +401,8 @@ class _Container:
                 raise TraceStoreError('块 %d 校验和错误（%s 块）'
                                       % (index, BLOCK_NAMES.get(entry.block_type, '?')))
             if entry.flags & 0x1:
-                payload = _inflate(payload, entry.count)
+                payload = _inflate(payload, entry.count,
+                                   MAX_ISSUE_BYTES if entry.block_type == BLK_ISSUES else MAX_BLOCK_BYTES)
             if len(self._cache) >= 8:
                 self._cache.pop(next(iter(self._cache)))
             self._cache[index] = payload
@@ -487,9 +491,12 @@ class _BlockSink:
             raise TraceStoreError('块 %d 被截断' % index)
         return data
 
-    def add_compressed_json(self, block_type, value):
+    def add_compressed_json(self, block_type, value, level=6):
         raw = _json_bytes(value)
-        compressed = zlib.compress(raw, 6)
+        limit = MAX_ISSUE_BYTES if block_type == BLK_ISSUES else MAX_BLOCK_BYTES
+        if len(raw) > limit:
+            raise TraceStoreError("JSON block exceeds bounded decompression limit")
+        compressed = zlib.compress(raw, level)
         if len(compressed) < len(raw):
             self.entries.append((self.total, len(compressed), len(raw), int(block_type), 1,
                                  _crc32(compressed)))

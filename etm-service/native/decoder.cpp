@@ -15,6 +15,9 @@
 #include <stdexcept>
 #include <iomanip>
 
+#include "decoder_sink.hpp"
+
+namespace etm_decode {
 namespace {
 
 // ---- 二进制记录流常量（与 native_binary.py 严格一致） --------------------------------------
@@ -45,28 +48,7 @@ static std::string quote(const char *text) {
 // 文本模式和二进制模式共用同一套取值规则，避免两条输出路径出现语义漂移。
 // 规则与原文本输出完全一致：只有范围元素带 isa/last*，只有范围/不可访问元素带 start，
 // 只有范围/带返回地址的异常元素带 end，其余字段按存在位归零。
-struct ElemView {
-    int etype;
-    uint8_t id;
-    int isa;
-    uint32_t flags;
-    uint32_t cycle;
-    bool has_cc;
-    uint64_t timestamp;
-    bool has_ts;
-    unsigned last_exec;
-    unsigned last_cond;
-    int last_type;
-    int last_subtype;
-    uint32_t payload;
-    uint64_t offset;
-    uint64_t start;
-    uint64_t end;
-    bool exception;
-    bool excep_ret;
-    bool range;
-    bool needs_text;
-};
+
 
 // events.jsonl 的 text 字段真正需要的稀有元素类型（与 decode_stream 的展开集合一致）。
 bool rare_text_type(int type) {
@@ -254,18 +236,20 @@ private:
 
 static ocsd_trace_protocol_t packet_protocol = OCSD_PROTOCOL_ETMV4I;
 static bool binary_mode = false;
+static Sink* direct_sink = nullptr;
 static BinaryWriter binary_writer;
 
 static ocsd_datapath_resp_t element(const void *, ocsd_trc_index_t index, uint8_t id, const ocsd_generic_trace_elem *e) {
     const ElemView view = make_view(e, index, id);
-    if (binary_mode) {
+    if (binary_mode || direct_sink) {
         // 正常路径不调用 ocsd_gen_elem_str：只有 events.jsonl 的 text 字段确实需要的
         // 稀有元素类型（NO_SYNC/TRACE_ON/EO_TRACE/I_RANGE_NOPATH/ADDR_NACC/ADDR_UNKNOWN/
         // EXCEPTION/EXCEPTION_RET）才生成说明文字。
         char text[2048];
         text[0] = 0;
         if (view.needs_text) ocsd_gen_elem_str(e, text, sizeof(text));
-        binary_writer.add_element(view, text);
+        if (direct_sink) direct_sink->element(view, text);
+        else binary_writer.add_element(view, text);
         return OCSD_RESP_CONT;
     }
     char text[2048] = {0}; ocsd_gen_elem_str(e,text,sizeof(text));
@@ -288,6 +272,10 @@ static uint32_t packet_type_code(const void *pkt) {
 
 static void packet(const void *, ocsd_datapath_op_t op, ocsd_trc_index_t index, const void *pkt, uint32_t size, const uint8_t *data) {
     if(op!=OCSD_OP_DATA || !pkt) return;
+    if (direct_sink) {
+        direct_sink->packet(index, packet_type_code(pkt), size, data);
+        return;
+    }
     if (binary_mode) {
         // 正常路径不调用 ocsd_pkt_str：包记录只存偏移/长度/类型码/原始字节。
         binary_writer.add_packet(index, packet_type_code(pkt), size, data);
@@ -307,7 +295,7 @@ static std::vector<uint8_t> read(const std::string &path) {
 }
 static void check(ocsd_err_t code) { if(code!=OCSD_OK) throw std::runtime_error("OpenCSD API error "+std::to_string(code)); }
 
-int main(int argc,char **argv) {
+int run(int argc,char **argv) {
     std::string binary_path;
     int first = 1;
     if (argc >= 2 && std::string(argv[1]) == "--binary") {
@@ -367,7 +355,9 @@ int main(int argc,char **argv) {
         char error[4096]={0}; uint8_t chan=0; ocsd_trc_index_t index=0;
         auto code=ocsd_get_last_err(&index,&chan,error,sizeof(error));
         const char *version = ocsd_get_version_str();
-        if (binary_mode) {
+        if (direct_sink) {
+            direct_sink->status(done, (int)code, version ? version : "", error);
+        } else if (binary_mode) {
             binary_writer.finish(done, (int)code, version ? version : "", error);
         } else {
             std::cout << "{\"kind\":\"status\",\"processed\":" << done << ",\"library\":" << quote(version ? version : "")
@@ -376,3 +366,17 @@ int main(int argc,char **argv) {
         ocsd_destroy_dcd_tree(tree); return 0;
     } catch(const std::exception &e) { if(tree) ocsd_destroy_dcd_tree(tree); std::cerr << e.what() << '\n'; return 1; }
 }
+
+int decode(const std::string& trace, const std::string& config, Sink& sink) {
+    // One decoder per worker process; the sink never escapes this invocation.
+    std::string program = "etm_decode";
+    char* args[] = {&program[0], const_cast<char*>(trace.c_str()), const_cast<char*>(config.c_str())};
+    direct_sink = &sink;
+    const int result = run(3, args);
+    direct_sink = nullptr;
+    return result;
+}
+} // namespace etm_decode
+#ifndef ETM_DECODER_LIBRARY
+int main(int argc, char** argv) { return etm_decode::run(argc, argv); }
+#endif

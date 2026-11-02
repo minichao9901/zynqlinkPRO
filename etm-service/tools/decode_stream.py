@@ -129,6 +129,7 @@ def _write_array(handle, source, key):
 
 def _run_native(id_stream, image, workdir, config, timings=None):
     """写 etm.bin/镜像段/manifest，跑一次 OpenCSD，返回原生产物路径、协议名与格式。"""
+    workdir = Path(workdir).resolve()
     started = time.perf_counter()
     protocol = 'ETMv3' if str(config.get('protocol', 'ETMv4')) == 'ETMv3' else 'ETMv4'
     (workdir / 'etm.bin').write_bytes(id_stream)
@@ -144,6 +145,30 @@ def _run_native(id_stream, image, workdir, config, timings=None):
 
     fmt = native_format()
     prepared = time.perf_counter()
+    if (fmt == 'binary' and store_write_enabled()
+            and os.environ.get('ETM_DIRECT_DECODE', '1') != '0'
+            and os.environ.get('ETM_STORE_ENGINE') == 'native'):
+        import native_storebuild
+        import hashlib
+        info = native_storebuild.probe()
+        if 'direct-opencsd-v1' not in info.get('capabilities', []):
+            raise ValueError('Native builder lacks direct-opencsd-v1; rebuild the native tools')
+        ranges = workdir / 'direct-ranges.bin'
+        scan = native_storebuild._run_json_command(
+            ['prescan', '--etm', str(workdir / 'etm.bin'), '--config', str(manifest_file),
+             '--out', str(ranges)], workdir / 'direct-scan.json', 900)
+        files = [workdir / 'etm.bin', manifest_file] + list(workdir.glob('image-*.bin'))
+        descriptor = dict(format='etm-direct-v1', etm=str(workdir / 'etm.bin'),
+                          config=str(manifest_file), ranges=str(ranges), scan=scan,
+                          protocol=protocol,
+                          inputs={str(p): hashlib.sha256(p.read_bytes()).hexdigest() for p in files})
+        native_path = workdir / 'native-direct.json'
+        native_path.write_text(json.dumps(descriptor), encoding='utf8')
+        finished = time.perf_counter()
+        if timings is not None:
+            timings.update(inputPreparationSeconds=prepared-started, openCsdSeconds=finished-prepared,
+                           totalSeconds=finished-started, direct=True)
+        return native_path, protocol, fmt
     if fmt == 'binary':
         native_path = workdir / 'native.bin'
         command = [str(_native()), '--binary', str(native_path), str(workdir / 'etm.bin'),
@@ -954,8 +979,8 @@ def decode_stream(id_stream, elf, workdir, config=None, sources=None, max_events
                     decodeSeconds=time.perf_counter()-started,
                     decodePhasesSeconds=dict(imagePreparation=image_seconds,
                         nativeInputPreparation=native_costs['inputPreparationSeconds'],
-                        openCsd=native_costs['openCsdSeconds'],
-                        storeBuildAndIndex=time.perf_counter()-store_started),
+                        storeBuildAndIndex=time.perf_counter()-store_started,
+                        **{'directPrescan' if native_costs.get('direct') else 'openCsd': native_costs['openCsdSeconds']}),
                     image=getattr(image,'preparation',None))
                 (workdir/'decoded.json').write_text(json.dumps(result,ensure_ascii=False),encoding='utf8')
             return result

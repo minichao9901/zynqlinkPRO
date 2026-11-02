@@ -46,7 +46,9 @@ if(SQLite3_FOUND)
 endif()
 
 # R2 原生 store builder（M0/M1：prescan + native.bin 诊断；不依赖 OpenCSD/SQLite/Python）。
-add_executable(etm_storebuild native/storebuild.cpp)
+add_executable(etm_storebuild native/storebuild.cpp native/decoder.cpp)
+target_compile_definitions(etm_storebuild PRIVATE ETM_DECODER_LIBRARY=1)
+target_link_libraries(etm_storebuild PRIVATE opencsd_c_api)
 set_property(TARGET etm_storebuild PROPERTY CXX_STANDARD 17)
 if(MINGW)
   target_link_libraries(etm_storebuild PRIVATE psapi z crypto)

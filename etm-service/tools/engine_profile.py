@@ -19,7 +19,7 @@ def current_profile():
               and settings['ETM_EXPORT_ENGINE'] == 'native'
               and settings['ETM_QUERY_ENGINE'] == 'native')
     return dict(name='native' if native else 'custom', settings=settings,
-                pipeline='OpenCSD binary -> C++ storebuild -> numeric query index',
+                pipeline='OpenCSD -> C++ storebuild (direct/binary) -> numeric query index',
                 perInstructionJsonl=False if native else None)
 
 

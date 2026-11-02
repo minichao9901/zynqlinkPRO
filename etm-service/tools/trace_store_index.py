@@ -1411,31 +1411,13 @@ class QueryIndex:
     def seq_of_insn(self, index):
         """指令序号 → 逻辑 seq（= 指令序号 + 该 seq 之前的事件数）。
 
-        不动点 ``seq = index + #{events < seq}``；若 ``seq`` 恰好落在事件上（记录开头常见
-        连续两条边界事件，例如 ``[0, 1]``），必须先跳过该事件并**重新做不动点**，否则
-        指令 0 会被算成事件 seq（t9 独立复现：原型返回 1，正确值 2）。
+        事件 seq 减去其事件序号得到插入前的指令数；一次右侧搜索计入全部连续事件。
         """
         index = np.asarray(index, dtype=np.int64)
-        events = self.event_seqs
-        count = len(events)
-        seq = index + np.searchsorted(events, index, side='left')
-        for _ in range(count + 4):
-            following = index + np.searchsorted(events, seq, side='left')
-            inner = 0
-            while not np.array_equal(following, seq):
-                seq = following
-                following = index + np.searchsorted(events, seq, side='left')
-                inner += 1
-                if inner > count + 4:
-                    raise RuntimeError('seq_of_insn 不动点迭代未收敛（事件表异常）')
-            if not count:
-                return seq
-            left = np.searchsorted(events, seq, side='left')
-            hit = (left < count) & (events[np.minimum(left, count - 1)] == seq)
-            if not hit.any():
-                return seq
-            seq = np.where(hit, seq + 1, seq)
-        raise RuntimeError('seq_of_insn 无法收敛（事件表异常）')
+        # Each event is inserted after (seq - event ordinal) instructions.
+        # right includes every event in a consecutive group before this instruction.
+        offsets = self.event_seqs - np.arange(len(self.event_seqs), dtype=np.int64)
+        return index + np.searchsorted(offsets, index, side='right')
 
     def next_instruction_seq(self, seq):
         """最小的一条指令 seq（≥ 参数；参数本身是指令时返回它）。"""
@@ -1615,11 +1597,14 @@ class QueryIndex:
         first = {0: i_lo}
         low = max(0, int(np.searchsorted(self.ps_start, i_lo, side='right')) - 1)
         high = int(np.searchsorted(self.ps_start, i_hi, side='right'))
-        leaves, positions = np.unique(self.ps_leaf[low:high], return_index=True)
-        for slot in np.argsort(positions):
-            position = low + int(positions[slot])
+        # Linear reduction avoids sorting every path segment just to find its first occurrence.
+        positions = np.full(self.node_count, high, dtype=np.int64)
+        np.minimum.at(positions, self.ps_leaf[low:high], np.arange(low, high, dtype=np.int64))
+        leaves = np.flatnonzero(positions < high)
+        for leaf in leaves[np.argsort(positions[leaves])]:
+            position = int(positions[leaf])
             ordinal = max(int(self.ps_start[position]), i_lo)
-            for node in self.chain_of_leaf(int(leaves[slot])):
+            for node in self.chain_of_leaf(int(leaf)):
                 first.setdefault(node, ordinal)
         return first
 

@@ -19,6 +19,7 @@
 // * 不逐指令调用 Python / 不逐条输出 JSON；只在最终阶段输出一个 JSON；
 // * 静态字典在 native 流之前一次性读入；诊断的 run/谓词/周期状态机全部在 C++ 内完成。
 
+#include "decoder_sink.hpp"
 #include <algorithm>
 #include <array>
 #include <chrono>
@@ -926,6 +927,161 @@ NativeCounters read_native(const std::string& name, bool collect_ranges,
     return counters;
 }
 
+// Direct OpenCSD input shares the builder visitor; no native record serialization.
+class DirectSink final : public etm_decode::Sink {
+public:
+    NativeCounters counters;
+    bool collect_ranges;
+    std::vector<RangeRecord>* ranges;
+    uint64_t max_unique_ranges;
+    NativeVisitor* visitor;
+    std::unordered_map<uint64_t, uint32_t> range_index;
+    DirectSink(bool collect, std::vector<RangeRecord>* out, uint64_t maximum, NativeVisitor* v)
+        : collect_ranges(collect), ranges(out), max_unique_ranges(maximum), visitor(v) {
+        if (ranges) ranges->clear();
+    }
+    void packet(uint64_t offset, uint32_t type_code, uint32_t size, const uint8_t* raw) override {
+        ++counters.saw_records;
+            ++counters.saw_packets;
+            if (offset < counters.previous_packet_offset)
+                fail(kExitInput, "native.bin packet offsets are not ordered");
+            counters.previous_packet_offset = offset;
+            const uint64_t stop = offset + size;
+            counters.packet_overlap += std::min<uint64_t>(size,
+                counters.packet_end > offset ? counters.packet_end - offset : 0);
+            if (stop > counters.packet_end)
+                counters.packet_covered += stop - std::max(offset, counters.packet_end);
+            counters.packet_end = std::max(counters.packet_end, stop);
+            if (packet_is_unsync(type_code, counters.header.protocol)) counters.unsync_bytes += size;
+            if (packet_is_unsync(type_code, counters.header.protocol)) ++counters.packet_unsync;
+            if (packet_is_invalid(type_code, counters.header.protocol)) {
+                ++counters.packet_invalid;
+                if (packet_is_overflow(type_code, counters.header.protocol)) ++counters.packet_overflow;
+                counters.packet_faults.push_back({offset, size, type_code});
+            }
+            if (visitor) {
+                visitor->on_packet(static_cast<uint32_t>(offset), size, type_code,
+                                   raw);
+            }
+
+    }
+    void element(const etm_decode::ElemView& e, const char* text) override {
+        ++counters.saw_records;
+        ++counters.saw_elements;
+        const auto etype = e.etype;
+        const auto element_offset = e.offset;
+        const auto payload = e.payload;
+        const auto last_executed = e.last_exec;
+        const auto cycle_count = e.cycle;
+        const auto start = e.start, end = e.end;
+        const auto flags = e.flags;
+        const size_t text_bytes = std::strlen(text);
+        const std::string element_text(text, text_bytes);
+        counters.type_counts[etype]++;
+        counters.text_bytes += text_bytes;
+        if (etype == kElementInstrRange) {
+            if (!counters.range_records) counters.first_range_offset = element_offset;
+            counters.logical_seq += payload;
+        } else if (is_event_type(etype)) {
+            counters.logical_events.push_back({counters.logical_seq++, element_offset});
+        }
+        if (visitor) {
+            if (etype == kElementInstrRange) {
+                visitor->on_range(static_cast<uint32_t>(element_offset), start, end, payload, last_executed, cycle_count);
+            } else if (etype == kElementCycleCount) {
+                visitor->on_cycle(static_cast<uint32_t>(element_offset), cycle_count, payload);
+            } else if (is_event_type(etype)) {
+                visitor->on_event(etype, static_cast<uint32_t>(element_offset), payload, start, end, flags, element_text);
+            } else {
+                visitor->on_other(etype, static_cast<uint32_t>(element_offset));
+            }
+        }
+        if (etype == kElementInstrRange) {
+            ++counters.range_records;
+            if (start > 0xFFFFFFFFull || end > 0xFFFFFFFFull) {
+                fail(kExitInput, "native.bin 范围地址超出 32 位");
+            }
+            if (end <= start) fail(kExitInput, "native.bin 范围 end <= start");
+            if (payload == 0) fail(kExitInput, "native.bin 范围 payload 为 0");
+            if (collect_ranges) {
+                const uint64_t key = (start << 32) | end;
+                auto found = range_index.find(key);
+                if (found == range_index.end()) {
+                    if (ranges->size() >= max_unique_ranges) {
+                        fail(kExitIo, "唯一范围数超过上限 " + std::to_string(max_unique_ranges));
+                    }
+                    range_index.emplace(key, static_cast<uint32_t>(ranges->size()));
+                    ranges->push_back({static_cast<uint32_t>(start), static_cast<uint32_t>(end),
+                                       payload});
+                } else {
+                    ++counters.duplicate_ranges;
+                    const RangeRecord& existing = ranges->at(found->second);
+                    if (existing.payload != payload) ++counters.payload_mismatches;
+                }
+            }
+        } else if (etype == kElementCycleCount) {
+            ++counters.cycle_elements;
+            counters.cycle_sum += cycle_count;
+        } else if (is_event_type(etype)) {
+            ++counters.event_elements;
+            if (etype == 9) ++counters.exceptions;
+            if (is_boundary_type(etype)) ++counters.boundaries;
+            if (is_gap_type(etype) || (etype == 2 && payload)) ++counters.gaps;
+            (void)flags;
+        } else {
+            ++counters.other_elements;
+        }
+
+    }
+    void status(uint32_t processed, int code, const char* library, const char* error) override {
+        counters.status.processed = processed;
+        counters.status.last_error_code = code;
+        counters.status.library = library;
+        counters.status.last_error = error;
+        counters.status.element_count = counters.saw_elements;
+        counters.status.packet_count = counters.saw_packets;
+        counters.status.present = true;
+    }
+};
+
+NativeCounters read_direct(const std::string& trace, const std::string& config,
+                          bool collect, std::vector<RangeRecord>* ranges,
+                          uint64_t maximum, std::ostream* range_out, NativeVisitor* visitor) {
+    DirectSink sink(collect, ranges, maximum, visitor);
+    std::ifstream cfg(fs::u8path(config));
+    std::string first;
+    if (!(cfg >> first)) fail(kExitInput, "Cannot read decoder config");
+    sink.counters.header.protocol = first == "ETMv3" ? 2 : 1;
+    std::ifstream input(fs::u8path(trace), std::ios::binary);
+    if (!input) fail(kExitInput, "Cannot read ETM input");
+    FastSha256 hash;
+    std::vector<char> buffer(1 << 20);
+    while (input) {
+        input.read(buffer.data(), buffer.size());
+        auto n = input.gcount();
+        if (n > 0) { hash.update(buffer.data(), n); sink.counters.native_bytes += n; }
+    }
+    if (etm_decode::decode(trace, config, sink) != 0 || !sink.counters.status.present)
+        fail(kExitInput, "Direct OpenCSD decode failed");
+    auto& c = sink.counters;
+    c.native_sha256 = hash.hex_digest();
+    c.header.record_count = c.saw_records;
+    c.header.element_count = c.saw_elements;
+    c.header.packet_count = c.saw_packets;
+    c.unique_ranges = ranges ? ranges->size() : 0;
+    if (range_out && ranges) {
+        range_out->write("R2RANGES1", 9);
+        write_u64(*range_out, ranges->size());
+        write_u64(*range_out, c.range_records);
+        for (const auto& r : *ranges) {
+            write_u32(*range_out, r.start); write_u32(*range_out, r.end); write_u32(*range_out, r.payload);
+        }
+        if (!*range_out) fail(kExitIo, "Writing direct ranges failed");
+    }
+    return c;
+}
+
+
 // ── 诊断状态机（与 trace_store_write._Assembler 同义）────────────────────────
 
 struct DiagnoseState {
@@ -1529,7 +1685,7 @@ class Tracker {
             sync();
         }
         if (previous_.valid && previous_.executed == 0) {
-            const std::string old_fn = previous_.function.empty() ? "(未知函数)"
+            const std::string& old_fn = previous_.function.empty() ? unknown_function
                                                                    : previous_.function;
             if (previous_.flow == kFlowCall) {
                 TrackerFrame frame;
@@ -1665,8 +1821,6 @@ class Tracker {
     void sync() {
         path_nodes_.clear();
         path_nodes_valid_ = false;
-        path_.clear();
-        for (const TrackerFrame& frame : stack_) path_.push_back(frame.function);
     }
     std::vector<TrackerFrame> stack_;
     std::vector<TrackerContext> contexts_;
@@ -1687,7 +1841,6 @@ class Tracker {
     FlameNode root_;
     std::vector<FlameNode*> path_nodes_;
     bool path_nodes_valid_ = false;
-    std::vector<std::string> path_;
 };
 
 std::string flame_json(const FlameNode& node) {
@@ -1951,7 +2104,7 @@ class PathTracker {
             sync();
         }
         if (previous_.valid && previous_.executed == 0) {
-            const std::string old_fn = previous_.function.empty() ? "(未知函数)"
+            const std::string& old_fn = previous_.function.empty() ? unknown_function
                                                                  : previous_.function;
             if (previous_.flow == kFlowCall) {
                 Frame frame;
@@ -1995,7 +2148,6 @@ class PathTracker {
         if (stack_.size() > 128) {
             fail(kExitConsistency, "调用层级超过 128，拒绝生成可能失真的调用图");
         }
-        previous_ = Previous();
         previous_.valid = true;
         previous_.pc = pc;
         previous_.size = size;
@@ -3594,7 +3746,7 @@ int main_utf8(int argc, char** argv) {
                       << ",\"buildSha\":" << quote(build_sha())
                       << ",\"formats\":{\"native\":\"trace-bin native v1\","
                          "\"staticDict\":1,\"ranges\":1}"
-                      << ",\"capabilities\":[\"prescan\",\"diagnose\",\"build\",\"facts-v3\",\"quality-diagnostics\",\"index-facts-v1\"]"
+                      << ",\"capabilities\":[\"prescan\",\"diagnose\",\"build\",\"facts-v3\",\"quality-diagnostics\",\"index-facts-v1\",\"direct-opencsd-v1\"]"
                       << "}" << std::endl;
             return kExitOk;
         }
@@ -3619,6 +3771,7 @@ int main_utf8(int argc, char** argv) {
         }
         if (command == "prescan") {
             std::string native_path;
+            std::string etm_path, config_path;
             std::string ranges_path;
             std::string json_path;
             uint64_t max_unique = kDefaultMaxUniqueRanges;
@@ -3630,13 +3783,16 @@ int main_utf8(int argc, char** argv) {
                     return argv[++index];
                 };
                 if (arg == "--native") native_path = next("--native");
+                else if (arg == "--etm") etm_path = next("--etm");
+                else if (arg == "--config") config_path = next("--config");
                 else if (arg == "--out") ranges_path = next("--out");
                 else if (arg == "--json") json_path = next("--json");
                 else if (arg == "--max-unique-ranges") max_unique = std::stoull(next("--max-unique-ranges"));
                 else if (arg == "--limit-records") limit_records = std::stoull(next("--limit-records"));
                 else fail(kExitUsage, "未知参数：" + arg);
             }
-            if (native_path.empty()) fail(kExitUsage, "prescan 需要 --native");
+            if (native_path.empty() && (etm_path.empty() || config_path.empty())) fail(kExitUsage, "prescan requires --native or --etm/--config");
+            if (!etm_path.empty() && limit_records) fail(kExitUsage, "direct prescan does not support limit-records");
             std::vector<RangeRecord> ranges;
             std::ofstream range_stream;
             if (!ranges_path.empty()) {
@@ -3644,7 +3800,9 @@ int main_utf8(int argc, char** argv) {
                 if (!range_stream) fail(kExitIo, "打不开 ranges 输出：" + ranges_path);
             }
             const auto started = std::chrono::steady_clock::now();
-            NativeCounters counters = read_native(native_path, true, &ranges, max_unique,
+            NativeCounters counters = !etm_path.empty()
+                ? read_direct(etm_path, config_path, true, &ranges, max_unique, ranges_path.empty() ? nullptr : &range_stream, nullptr)
+                : read_native(native_path, true, &ranges, max_unique,
                                                    limit_records,
                                                    ranges_path.empty() ? nullptr : &range_stream);
             const double seconds = seconds_since(started);
@@ -3779,6 +3937,7 @@ int main_utf8(int argc, char** argv) {
         }
         if (command == "build") {
             std::string native_path;
+            std::string etm_path, config_path;
             std::string static_path;
             std::string out_dir;
             std::string generation;
@@ -3797,6 +3956,8 @@ int main_utf8(int argc, char** argv) {
                     return argv[++index];
                 };
                 if (arg == "--native") native_path = next("--native");
+                else if (arg == "--etm") etm_path = next("--etm");
+                else if (arg == "--config") config_path = next("--config");
                 else if (arg == "--static") static_path = next("--static");
                 else if (arg == "--out-dir") out_dir = next("--out-dir");
                 else if (arg == "--generation") generation = next("--generation");
@@ -3811,7 +3972,7 @@ int main_utf8(int argc, char** argv) {
                 else if (arg == "--facts-out") facts_out = next("--facts-out");
                 else fail(kExitUsage, "未知参数：" + arg);
             }
-            if (native_path.empty()) fail(kExitUsage, "build 需要 --native");
+            if (native_path.empty() && (etm_path.empty() || config_path.empty())) fail(kExitUsage, "build requires --native or --etm/--config");
             if (static_path.empty()) fail(kExitUsage, "build 需要 --static");
             if (out_dir.empty()) fail(kExitUsage, "build 需要 --out-dir");
             StaticDict dict = load_static_dict(static_path);
@@ -3829,7 +3990,9 @@ int main_utf8(int argc, char** argv) {
             if (!facts_out.empty()) visitor.set_facts_out(facts_out, !native_index, reserve_instructions);
             if (!index_facts_out.empty()) visitor.set_index_facts_out(index_facts_out, reserve_instructions);
             const auto started = std::chrono::steady_clock::now();
-            NativeCounters counters = read_native(native_path, false, nullptr, 1000000, 0,
+            NativeCounters counters = !etm_path.empty()
+                ? read_direct(etm_path, config_path, false, nullptr, 1000000, nullptr, &visitor)
+                : read_native(native_path, false, nullptr, 1000000, 0,
                                                    nullptr, true, &visitor);
             visitor.finish();
             for (BuildBlock& block : output.blocks) {
@@ -3987,7 +4150,7 @@ int main_utf8(int argc, char** argv) {
                    << ",\"labels\":" << output.facts_labels
                    << ",\"events\":" << output.facts_events
                    << ",\"texts\":" << output.facts_texts << "},\n";
-            result << " \"inputs\":{\"nativeSha256\":" << quote(output.native_sha256)
+            result << " \"inputs\":{" << quote(etm_path.empty() ? "nativeSha256" : "etmSha256") << ":" << quote(output.native_sha256)
                    << ",\"nativeBytes\":" << counters.native_bytes
                    << ",\"elfSha256\":" << quote(output.elf_sha256)
                    << ",\"rangesSha256\":\"\",\"staticDictSha256\":"
@@ -4009,6 +4172,7 @@ int main_utf8(int argc, char** argv) {
         }
         if (command == "diagnose") {
             std::string native_path;
+            std::string etm_path, config_path;
             std::string static_path;
             std::string ranges_path;
             std::string json_path;
@@ -4023,6 +4187,8 @@ int main_utf8(int argc, char** argv) {
                     return argv[++index];
                 };
                 if (arg == "--native") native_path = next("--native");
+                else if (arg == "--etm") etm_path = next("--etm");
+                else if (arg == "--config") config_path = next("--config");
                 else if (arg == "--static") static_path = next("--static");
                 else if (arg == "--ranges") ranges_path = next("--ranges");
                 else if (arg == "--json") json_path = next("--json");
