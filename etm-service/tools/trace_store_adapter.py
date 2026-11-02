@@ -223,6 +223,14 @@ def verify_inputs(folder, manifest):
     for name in names:
         path = folder / name
         recorded = inputs.get(name)
+        source = bindings.get('sourceInput') or {}
+        if (name == 'native.bin' and not recorded
+                and name in (bindings.get('unconsumedDerivedInputs') or [])
+                and source.get('kind') == 'etm' and source.get('recordFile') == 'etm.bin'
+                and source.get('sha256')
+                and (inputs.get('etm.bin') or {}).get('sha256') == source['sha256']):
+            report['excluded'].append(name)
+            continue
         if not recorded:
             # 文件在记录里、但 manifest 没绑定（旧 store，或建成后才补进来的输入）。
             report['unbound'].append(name)

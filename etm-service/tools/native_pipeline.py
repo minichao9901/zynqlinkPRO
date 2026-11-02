@@ -122,7 +122,13 @@ def write(record_dir, store_dir, **options):
             for name, digest in direct['inputs'].items():
                 if ts._sha256_file(name) != digest:
                     raise ts.TraceStoreError('Direct input changed: ' + name)
-        native_sha = direct['inputs'][str(etm)] if direct else ts._sha256_file(native_path)
+        # Direct consumes raw ETM, not a native.bin left by an older decode.
+        # Keep distinct identities even though the private facts ABI uses one
+        # generic producer checksum for either source representation.
+        etm_sha = direct['inputs'][str(etm)] if direct else ts._sha256_file(etm) if etm.is_file() else None
+        native_sha = None if direct else ts._sha256_file(native_path)
+        source_sha = etm_sha if direct else native_sha
+        consumes_record_native = not direct and native_path.resolve() == (record_dir / 'native.bin').resolve()
         elf_sha = hashlib.sha256(image.bytes).hexdigest()
         if ts._sha256_file(elf) != elf_sha:
             raise ts.TraceStoreError('ELF 在读取期间发生变化')
@@ -141,7 +147,7 @@ def write(record_dir, store_dir, **options):
                 generation_tag=tag, analysis=True, facts_out=facts_path, index_facts_out=index_facts_path,
                 direct=direct, prepare=dict(ranges=scan_path, ready=work / 'static-input-ready.json'))
             scan = prepared_build.scan
-            if scan['etmSha256'] != native_sha:
+            if scan['etmSha256'] != etm_sha:
                 raise ts.TraceStoreError('Prepared decoder input identity differs')
         elif direct:
             scan_path = Path(direct['ranges'])
@@ -170,7 +176,7 @@ def write(record_dir, store_dir, **options):
         if 'diagnostics' not in built:
             raise writer.NativeStorebuildUnavailable('原生 builder 缺少完整质量诊断，请重新构建')
         writer._validate_native_build_result(built,
-            inputs={('etmSha256' if direct else 'nativeSha256'):native_sha, 'elfSha256':elf_sha},
+            inputs={('etmSha256' if direct else 'nativeSha256'):source_sha, 'elfSha256':elf_sha},
             static_dict_sha256=ts._sha256_file(dictionary))
         counts, diagnostics = built['counts'], built['diagnostics']
         if options.get('max_events') and counts['instructions'] > options['max_events']:
@@ -193,7 +199,7 @@ def write(record_dir, store_dir, **options):
         entries = _entries(core)  # facts IDs use core order, not the PC-sorted transport dictionary.
         if index_facts_path is not None:
             facts['indexFacts'] = native_facts_index.read_index_facts(
-                index_facts_path, facts, entries, native_sha)
+                index_facts_path, facts, entries, source_sha)
         full = native_facts_index.build_full_index(facts, entries, core.first_seq, core.last_seq,
                                                    view=core, static_first_seen=True)
         if full['meta']['compatPending']:
@@ -269,8 +275,10 @@ def write(record_dir, store_dir, **options):
         finally:sink.close()
         mark('assemble')
         hash_inputs=options.get('hash_inputs',True)
-        names=('etm.bin','native.bin','native-config.txt','firmware.elf','physical.json','framing.json','tpiu.bin',
+        names=('etm.bin','native-config.txt','firmware.elf','physical.json','framing.json','tpiu.bin',
                'session.json','sources.json')
+        if consumes_record_native:
+            names += ('native.bin',)
         names += tuple(p.name for p in record_dir.glob('image-*.bin'))
         capture=decoded.get('capture') or {}
         if capture.get('name'):names += (Path(capture['name']).name,)
@@ -282,9 +290,18 @@ def write(record_dir, store_dir, **options):
                 if ts._sha256_file(name) != digest:
                     raise ts.TraceStoreError('Direct input changed during build: ' + name)
         if hash_inputs:
-            for name, expected in (('firmware.elf', elf_sha), ('native.bin', native_sha)):
-                if name in inputs and inputs[name]['sha256'] != expected:
-                    raise ts.TraceStoreError('输入在构建期间变化：' + name)
+            consumed = [(elf, elf_sha)]
+            if etm_sha is not None:
+                consumed.append((etm, etm_sha))
+            if native_sha is not None:
+                consumed.append((native_path, native_sha))
+            for path, expected in consumed:
+                # Reuse a full hash already computed for this exact record
+                # path; external native inputs still need their own check.
+                recorded = inputs.get(path.name) if path.resolve() == (record_dir / path.name).resolve() else None
+                observed = recorded['sha256'] if recorded else ts._sha256_file(path)
+                if observed != expected:
+                    raise ts.TraceStoreError('输入在构建期间变化：' + path.name)
         mark('inputBindings')
         engine=dict(name='native',version=built['engine']['buildSha'],fallback=False,
                     buildCosts=dict(phases=phases,index=full['timings'],native=built.get('phases'),preparedDecode=dict(seconds=built.get('prepareSeconds'),replayBytes=built.get('replayBytes'),nativePeakRssBytes=built.get('peakRssBytes')),static=static_costs,
@@ -293,6 +310,14 @@ def write(record_dir, store_dir, **options):
                       processing=dict(traceStore=1,engine='native',nativeFormat='direct-opencsd-v1' if direct else 'trace-bin native v1',
                                       issueFormat='etm-issue-runs/1' if compact_issues else 'json-list',
                                       decodeStrategy='typed-replay-v1' if prepared_build else 'direct-rescan' if direct else 'native-binary'))
+        bindings['sourceInput'] = dict(kind='etm' if direct else 'native-binary',
+            recordFile='etm.bin' if direct and etm.resolve() == (record_dir / 'etm.bin').resolve()
+                       else 'native.bin' if consumes_record_native else None,
+            sha256=source_sha)
+        if not consumes_record_native:
+            # Preserve old/imported derivatives without treating them as inputs
+            # to this generation. Explicit binary mode can consume/bind them.
+            bindings['unconsumedDerivedInputs'] = ['native.bin']
         if not hash_inputs:bindings['inputHash']=dict(skipped=True,computed=False)
         manifest=dict(initial,files=[dict(name='store.bin',**info)],counts=counts,
                       fieldPresence=meta['fieldPresence'],bindings=bindings,queryIndex=index_meta,engine=engine)
