@@ -86,7 +86,7 @@ export class RttCdcStreamView {
     this.$('c-pause').addEventListener('click', () => {
       const on = !this.rx.paused;
       this.rx.setPaused(on);
-      this.$('c-pause').textContent = on ? '继续' : '暂停';
+      this.$('c-pause').textContent = on ? '恢复显示' : '暂停显示';
       this.$('c-pause').classList.toggle('primary', on);
       if (!on && this.ansiOn) this._ansiRedraw();
     });
@@ -213,7 +213,7 @@ export class RttCdcStreamView {
     this.$('c-buf').textContent = fBytes(this.rx?.bytes ?? 0);
     // 记录/落盘期间按钮要一直刷：字节数、待落盘量都得看得见（见 recorder.js 的说明）
     if (this.rec.active || this.rec.draining) this._recordBtn();
-    if (this.rx?.paused) this.$('c-pause').title = `暂停中，已缓存 ${fBytes(this.rx.bytes)}`;
+    if (this.rx?.paused) this.$('c-pause').title = `显示已暂停，接收/记录继续；缓冲 ${fBytes(this.rx.bytes)}`;
   }
 
   _highspeedGate(r){

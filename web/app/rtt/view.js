@@ -215,9 +215,12 @@ export class RttView {
                               : (OCD_RAM[armChipId()] || $('r-range').value);
       this._applyOcdTarget(false);
     };
-    applyTarget();
-    this._applyTargetUi = applyTarget;       // onShow 里要对账"别页切过目标类型"（同一个全局开关）
+    // Restore architecture before deriving chip, range, labels and reset capability.
     store.bind($('r-target'), 'rtt.target');
+    const savedRange = store.get('rtt.range', null);
+    applyTarget();
+    if (savedRange !== null) $('r-range').value = savedRange;
+    this._applyTargetUi = applyTarget;       // onShow 里要对账"别页切过目标类型"（同一个全局开关）
     const onTargetChanged = () => { applyTarget(); if (this.probe || this.bridge) this.disconnect(); };
     $('r-target').addEventListener('change', onTargetChanged);
     /**
@@ -867,7 +870,7 @@ export class RttView {
 
   _togglePause(){
     this.paused = !this.paused;
-    $('r-pause').textContent = this.paused ? '继续' : '暂停';
+    $('r-pause').textContent = this.paused ? '恢复显示' : '暂停显示';
     $('r-pause').classList.toggle('primary', this.paused);
     if (!this.paused) this._redrawAll();
   }
@@ -996,7 +999,7 @@ export class RttView {
       '缓冲水位：RTT 不重传，水位打到 3/4 以上说明目标写速 ≥ 主机读速，可能已有覆盖/丢弃。\n' +
       '（主机读速受调试器限制：OpenOCD RPC 实测约 17 KB/s，WebUSB 会快得多）';
     if (peak >= 75) $('r-full').classList.add('err');
-    if (this.paused) $('r-pause').title = '暂停中（数据仍在收，继续后补上）';
+    if (this.paused) $('r-pause').title = '显示已暂停，接收和记录继续；恢复后显示当前缓冲';
     // 记录/落盘期间按钮要一直刷：字节数与"待落盘"量都得看得见（见 recorder.js 的说明）
     if (this.rec.active || this.rec.draining) this._recordBtn();
     /**

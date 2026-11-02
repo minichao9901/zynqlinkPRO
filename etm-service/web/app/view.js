@@ -1,3 +1,4 @@
+import {initCaptureLayout} from './capture-layout.js';
 import {SourceStore} from './shared/dbg/source.js';
 import {readReferencedSources,sourceBatches} from './source-snapshot.js';
 import {withCleanup} from './operation.js';
@@ -277,9 +278,9 @@ async function loadRecord(id){if(!id)throw Error('请选择记录');history.rang
     const notice=document.createElement('p');notice.className=failed?'bad':'hint';
     notice.textContent=failed?'本次采集未通过，记录和失败原因已保留；重新解码不会修复接收丢失。':'在文件页点击“单独解码”；失败记录保留原始证据';
     $('table-container').replaceChildren(notice);$('source-code').textContent='尚未解码，没有可信源码定位';
-    $('source-location').textContent='';$('selected-instruction').textContent='';$('call-stack').textContent='尚未解码';return;
+    $('source-location').textContent='';$('selected-instruction').textContent='';$('call-stack').textContent='尚未解码';captureLayout.historyOpened();return;
   }
-  await history.load(id,m?.name);log('已按需载入记录 '+id);controls();syncSliceTimeline();
+  await history.load(id,m?.name);log('已按需载入记录 '+id);controls();syncSliceTimeline();captureLayout.historyOpened();
 }
 async function watchJob(id,{resume=false,kind='decode'}={}){
   state.job=id;state.jobKind=kind;state.jobPhase='queued';state.captureCancelled=false;controls();
@@ -365,7 +366,7 @@ async function download(kind){
     $('job-state').textContent='已生成 '+file.filename;log('导出已生成：'+file.filename);
   }else{const a=document.createElement('a');a.href=url;a.download='';a.click();}
 }
-on('record-source-settings',()=>{panel('target');$('choose-sources').closest('details').open=true;$('choose-sources').focus();},{exclusive:false});
+on('record-source-settings',()=>{captureLayout.show();panel('target');$('choose-sources').closest('details').open=true;$('choose-sources').focus();},{exclusive:false});
 on('save-record',()=>download('record'));on('export',()=>download($('export-type').value));on('choose-sources',async()=>{
   if(!SourceStore.supported()||state.sourceCompat){$('sources-files').click();return;}
   const store=new SourceStore(),paths=state.elfInfo?.sourceFiles||history.result?.sourceFiles||[];
@@ -448,8 +449,9 @@ bindFilePicker($('import'),$('capture-file'),{blocked:()=>state.operation||state
   }
   const saved=await api('import',form);await refreshRecords();await watchJob((await api('decode/'+saved.record,{})).job);
 },{hardware:false})});
-function sideButtonLabel(){$('toggle-settings').textContent=innerWidth<=780?'采集设置':document.body.classList.contains('side-hidden')?'显示控制':'收起控制';}
-$('help').onclick=()=>$('help-dialog').showModal();$('close-help').onclick=()=>$('help-dialog').close();$('toggle-settings').onclick=()=>{document.body.classList.toggle(innerWidth<=780?'settings-open':'side-hidden');sideButtonLabel();};window.addEventListener('resize',sideButtonLabel);sideButtonLabel();
+let layoutStorage;try{layoutStorage=window.localStorage;}catch{}
+const captureLayout=initCaptureLayout({body:document.body,button:$('toggle-settings'),storage:layoutStorage,width:()=>innerWidth});
+$('help').onclick=()=>$('help-dialog').showModal();$('close-help').onclick=()=>$('help-dialog').close();window.addEventListener('resize',captureLayout.refresh);
 $('toggle-source').onclick=()=>{const open=document.body.classList.toggle('source-open');$('toggle-source').textContent=open?'轨迹':'源码';$('toggle-source').setAttribute('aria-expanded',String(open));};
 const divider=document.querySelector('.pane-divider');function setRatio(percent){const value=Math.max(25,Math.min(75,percent));$('analysis-panes').style.setProperty('--trace-width',value+'%');divider.setAttribute('aria-valuenow',String(Math.round(value)));}
 divider.onpointerdown=e=>{divider.setPointerCapture(e.pointerId);divider.onpointermove=v=>{if(divider.hasPointerCapture(v.pointerId)){const box=$('analysis-panes').getBoundingClientRect();setRatio((v.clientX-box.left)/box.width*100);}};divider.onpointerup=v=>divider.releasePointerCapture(v.pointerId);};divider.onkeydown=e=>{if(['ArrowLeft','ArrowRight'].includes(e.key)){e.preventDefault();const value=parseFloat($('analysis-panes').style.getPropertyValue('--trace-width'))||52;setRatio(value+(e.key==='ArrowLeft'?-3:3));}};

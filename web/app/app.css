@@ -1453,3 +1453,7 @@ fieldset,.toolbar,.sendbar,.stats,.an-measurements,.an-plot,
 @media(max-width:860px){#tab-swo{overflow:auto}#tab-swo .sw-main{min-height:820px}#tab-swo .ws{height:auto;min-height:100%}}
 
 #tab-swo .sw-table tr.sw-selected{background:#5bae441f;color:#d9efc8}
+
+/* Configuration summaries use existing toolbar space when the sidebar is folded. */
+.workspace-summary{display:none;min-width:0;max-width:30%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--fg2);font-size:var(--text-xs)}
+.sidebar-collapsed .workspace-summary{display:inline-block}
