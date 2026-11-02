@@ -228,41 +228,6 @@ dialog form{margin-top:16px;text-align:right}
 /* 烧录器进度条 */
 #f-bar{width:220px;height:8px;accent-color:#58a6ff}
 
-/* ---------------- 工程生成 ---------------- */
-#tab-gen.dragging{outline:2px dashed var(--acc);outline-offset:-6px}
-#tab-gen .side .row>span:first-child{width:var(--label-w)}   /* 参数名比别的页长（OpenOCD 接口…） */
-/* 右列 = tab 面板（照 #spi/#i2c 那套）；左栏卡片按 `data-dock` 分组，切 tab 时只显示当组。
-   为什么 tab 化见 index.html 里的注释：13 个产物挤一条栏、桥包另占一行，且左栏太长。 */
-#tab-gen .main{gap:6px}
-#tab-gen .gendock{display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden;flex:1 1 auto}
-#tab-gen .dockpage{display:none;flex:1 1 auto;min-height:0;flex-direction:column;gap:6px}
-#tab-gen .dockpage.on{display:flex}
-#tab-gen .dockpage>.toolbar{margin:0;flex:none}
-#tab-gen .dockpage>p.hint{margin:0;flex:none}
-#g-files,#g-kit-files{flex-wrap:wrap;border-radius:var(--radius-control)}
-#g-dock-pill{color:var(--fg2)}
-/* 🚨 `.scroll` 是**按页写的**（`#tab-spi .scroll` / `#tab-i2c .scroll` / `#tab-panel .scroll`），
-   本页原来没有这条 → 「调试参数」的表格撑高后被 `.gendock{overflow:hidden}` 裁掉、**连滚动条都没有**
-   （用户 2026-10 现场："下面显示不全，还没有滑条"）。这里补上本页的滚动区规则：
-   吃满剩余高度 + 自己滚（`min-height:0` 是关键，flex 子项默认 min-height:auto 会顶破父容器）。 */
-#tab-gen .dockpage>.scroll{flex:1 1 auto;min-height:0;max-height:none;overflow:auto;
-  border:1px solid var(--line);border-radius:var(--radius-card);margin-top:0}
-/* 预览：代码别折行（横向滚），并吃掉剩余高度 */
-#g-preview,#g-kit-preview{white-space:pre;overflow:auto;flex:1 1 auto;min-height:0}
-.fixlist{margin:4px 0 0;padding-left:18px}
-.fixlist li{margin:3px 0}
-.fixlist code{font-size:var(--text-xs)}
-
-/* 「调试参数」tab 的参数一览表：左列参数名、右列值（等宽，长路径不截断、点一下复制） */
-.gparamtab{width:100%;border-collapse:collapse;font-size:var(--text-xs)}
-.gparamtab td{padding:2px 8px;border-bottom:1px solid rgba(255,255,255,.06);vertical-align:top}
-.gparamtab tr.gparamhead td{padding-top:8px;color:var(--acc);font-weight:600;font-size:var(--text-xs);
-  letter-spacing:.4px;border-bottom:1px solid var(--line);background:rgba(74,163,255,.06)}
-.gparamtab td.gpk{width:150px;color:var(--fg2);white-space:nowrap}
-.gparamtab td.gpv code{font-family:var(--mono);font-size:var(--text-xs);color:#cdd6e4;white-space:pre-wrap;
-  word-break:break-all;cursor:copy;border-bottom:1px dashed transparent}
-.gparamtab td.gpv code:hover{color:#9fd0ff;border-bottom-color:#9fd0ff}
-
 /* ---------------- 终端页的 RTT→CDC 转发面板 ---------------- */
 #tab-terminal .side .row>span:first-child{width:var(--label-w)}   /* 「RTT 地址 / 搜索长度」比默认 60px 宽些 */
 

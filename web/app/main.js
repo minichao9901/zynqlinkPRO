@@ -16,7 +16,6 @@ import { Assistant } from './serial/assistant.js';
 import { TerminalView } from './serial/terminal.js';
 import { RttView } from './rtt/view.js';
 import { FlashView } from './flash/view.js';
-import { GenView } from './gen/view.js';
 import { RttCdcView } from './hid/view.js';
 import { RttCdcStreamView } from './hid/stream.js';
 import { ScopeView } from './scope/view.js';
@@ -37,7 +36,6 @@ const assistant = new Assistant(session);
 const terminal = new TerminalView(session);
 const rtt = new RttView();
 const flash = new FlashView();
-const gen = new GenView();
 const hid = new RttCdcView();
 const stream = new RttCdcStreamView(session);
 const scope = new ScopeView();
@@ -47,7 +45,7 @@ const etm = new EtmView();
 
 // Install ownership before init(): automatic reconnect/start paths use the same manager.
 const probeBus = new ProbeBus('page');
-const tools = { session, assistant, terminal, rtt, flash, gen, hid, stream, scope, dbg, etm, probeBus, summary, errors };
+const tools = { session, assistant, terminal, rtt, flash, hid, stream, scope, dbg, etm, probeBus, summary, errors };
 const probeManager = installProbeManager(tools, { bus: probeBus });
 initProbeStatus(tools);
 initEventLogs();
@@ -63,7 +61,6 @@ assistant.init();
 terminal.init();
 rtt.init();
 flash.init();
-gen.init();
 hid.init();
 stream.init();
 scope.init();
@@ -72,7 +69,7 @@ etm.init();
 initDockNavigation();
 installAcquisitionDiagnostics(tools);
 
-const pages = { serial:assistant, terminal, rtt, rttcdc:stream, scope, flash, dbg, etm, gen };
+const pages = { serial:assistant, terminal, rtt, rttcdc:stream, scope, flash, dbg, etm };
 initTabs(name => {
   workspace.sync();
   requestAnimationFrame(() => {
@@ -109,7 +106,6 @@ function summary(){
     xtermLoaded: !!window.Terminal,
     tabs: [...document.querySelectorAll('#tabs .tab')].map(t => t.dataset.tab),
     quickSlots: document.querySelectorAll('#s-quick .qrow').length,
-    genFiles: (gen?.files || []).map(f => f.name),
     hid: hid?.summary?.() || null,
     stream: stream?.summary?.() || null,
     scope: scope?.summary?.() || null,

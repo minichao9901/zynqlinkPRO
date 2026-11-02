@@ -49,7 +49,7 @@ python -X utf8 toolbox.py --runtime build/workbench-new page etm describe --targ
 
 serve前须按实际任务核对板卡空闲及加载身份。运行时URL/令牌只限本机使用，不提交Git；旧runtime或已关闭服务的URL不能作为当前worker。`click/set`只确认事件投递，还要检查完成状态、质量和恢复结果。
 
-RTT桥若需此前OpenOCD部署，路径为prebuilt/golden/host/openocd/openocd.exe，scripts为同目录scripts。没有服务在本轮结束时自动重启。
+工作台调试探针后端统一为WebUSB；已移除OpenOCD/J-Link本地桥、`toolbox.py bridge`与工程生成页。`bridge-build`仍用于构建本机Zynq工作台EXE及其ETM/原生USB服务，与已退役的调试后端桥不同。历史板测工具和报告中的OpenOCD引用仅作取证。
 
 ## DDR研究路径（仅供AI阶段验收）
 

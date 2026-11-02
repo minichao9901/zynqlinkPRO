@@ -1,26 +1,10 @@
-/**
- * 烧录器：把 .elf / .hex / .bin 写进目标芯片，可校验、可复位运行。
- *
- * 两种后端：
- *   · WebUSB · 零安装（主通道，与 RTT 同一个探针）：页面解析固件 → 在目标 RAM 里跑
- *     flashloader 算法（flash/algos.js + runner.js）完成擦写 → 读回校验 → 复位运行。
- *     现覆盖 F0/F1/F4/F7/H7/L0/L4；进度条是真实百分比。
- *   · 本地桥 · OpenOCD（备用）：其余系列/特殊需求用，OpenOCD 的 program 一条龙
- *     （rpc 拿不到流式进度，只显示耗时）。
- *
- * 文件两种来源（浏览器不允许页面直接读任意路径，所以并存）：
- *   · 选择文件/拖拽 —— 网页把内容传给烧录逻辑（WebUSB 与桥都可用）；
- *   · 路径输入框 —— 只有桥后端能读（桥在本机直接读文件）。
- *
- * 与 RTT Viewer 复用同一个探针：同一时刻只能有一个占用，开烧前会把在跑的 RTT 会话断开。
- */
+/** WebUSB firmware selection, programming, verification and target reset. */
 import { prepareProbeHandoff } from '../core/probe-users.js';
 import { runProbeOperation } from '../core/probe-manager.js';
 import { $, setStatus, appendLogLine } from '../ui/dom.js';
 import { toast } from '../ui/toast.js';
 import { store } from '../core/store.js';
-import { CHIPS, fillChipSelect } from '../core/chips.js';
-import { BridgeClient } from '../rtt/bridge.js';
+import { CHIPS } from '../core/chips.js';
 import { WebUsbDapProbe, withTimeout } from '../rtt/dap-webusb.js';
 import { pulseTargetReset } from './target-reset.js';
 import { ALGOS, F1_DEV, checkFlashRange } from './algos.js';
@@ -38,11 +22,9 @@ import { DEFAULT_FLASH_CLOCK_KHZ } from './data-clock.js';
 import { parseFirmware, findGaps } from './image.js';
 import { bytes as fBytes } from '../core/format.js';
 import { waitMs } from '../core/pace.js';
-import { pickCfgs } from '../ui/cfgpicker.js';
 
 export class FlashView {
   constructor(){
-    this.bc = null;
     this.probe = null;
     this.file = null;          // { name, size, dataB64 } —— 「选择文件/拖拽」时有效
     this.busy = false;
@@ -54,29 +36,16 @@ export class FlashView {
   }
 
   init(){
-    fillChipSelect($('f-chip'));
-    store.bind($('f-backend'), 'flash.backend');
+    for (const chip of CHIPS.filter(c => ALGOS[c.v] || hpmBoard(c.v)))
+      $('f-chip').appendChild(new Option(chip.label, chip.v));
     store.bind($('f-chip'), 'flash.chip');
-    store.bind($('f-bridge-url'), 'flash.bridgeUrl');
-    store.bind($('f-path'), 'flash.path');
+    if (!$('f-chip').value) $('f-chip').selectedIndex = 0;
     store.bind($('f-base'), 'flash.base');
     store.bind($('f-verify'), 'flash.verify', 'checked');
     store.bind($('f-reset'), 'flash.reset', 'checked');
     store.bind($('f-speed'), 'flash.speed');
     $('f-chip').addEventListener('change', () => { rememberHpmBoard($('f-chip').value); this._applyChip(); });
-    $('f-backend').addEventListener('change', () => this._applyBackendUi());
     this._applyChip();
-    this._applyBackendUi();
-    // 「选择…」：列出桥所在机器的 OpenOCD cfg 让你挑（浏览器拿不到本地文件路径，列表只能由桥给）
-    $('f-cfgs-pick').addEventListener('click', async () => {
-      const v = await pickCfgs({
-        bridgeUrl: $('f-bridge-url').value,
-        current: $('f-cfgs').value,
-        title: '选择 OpenOCD cfg（烧录器用）',
-      });
-      if (v !== null){ $('f-cfgs').value = v; store.set('flash.cfgs', v); }
-    });
-
     // ---------- 固件文件 ----------
     this._fileInput = document.createElement('input');
     this._fileInput.type = 'file';
@@ -89,7 +58,6 @@ export class FlashView {
     });
     document.body.appendChild(this._fileInput);
     $('f-pick').addEventListener('click', () => this._fileInput.click());
-    $('f-path').addEventListener('input', () => { this.file = null; this._fileInfo(); });
     const drop = $('f-log');
     drop.addEventListener('dragover', e => e.preventDefault());
     drop.addEventListener('drop', e => { e.preventDefault(); this._onFile(e.dataTransfer?.files?.[0]); });
@@ -110,8 +78,6 @@ export class FlashView {
     try {
       const buf = await f.arrayBuffer();
       this.file = { name: f.name, size: f.size, dataB64: this._b64(new Uint8Array(buf)) };
-      $('f-path').value = '';
-      store.set('flash.path', '');
       this._fileInfo();
       toast(`已读入 ${f.name}（${fBytes(f.size)}），点「烧录」写入`, 'ok', 4000);
     } catch (e){
@@ -128,13 +94,9 @@ export class FlashView {
   }
 
   _fileInfo(){
-    const p = String($('f-path').value || '').trim();
-    const cur = this.file ? this.file.name : p;
     const el = $('f-file-info');
-    if (this.file) el.textContent = `已选择：${this.file.name}（${fBytes(this.file.size)}）`;
-    else if (p) el.textContent = `将用桥所在电脑上的路径：${p}（仅「本地桥」后端可读路径）`;
-    else el.textContent = '支持 .elf / .hex / .bin：点「选择文件…」或拖进右侧日志区；填路径仅「本地桥」后端支持';
-    $('f-base-row').hidden = !/\.bin$/i.test(cur);
+    el.textContent = this.file ? `已选择：${this.file.name}（${fBytes(this.file.size)}）` : '选择或拖入 .elf / .hex / .bin 固件文件';
+    $('f-base-row').hidden = !/\.bin$/i.test(this.file?.name || '');
   }
 
   onShow(){
@@ -143,15 +105,7 @@ export class FlashView {
     }
   }
 
-  _applyChip(){
-    const custom = $('f-chip').value === 'custom';
-    $('f-custom-cfgs-row').hidden = !custom;
-    $('f-custom-speed-row').hidden = false;
-  }
-
-  _applyBackendUi(){
-    if ($('f-bridge-settings')) $('f-bridge-settings').hidden = $('f-backend')?.value === 'webusb';
-  }
+  _applyChip(){ $('f-custom-speed-row').hidden = false; }
 
   // ================= 烧录 =================
   /** Managed acquisition already released conflicts; standalone views use the same adapters. */
@@ -174,7 +128,7 @@ export class FlashView {
 
   async flash(){
     if (this.busy) return;
-    if (!this.file && !String($('f-path')?.value || '').trim()) return await this._flashOnce();
+    if (!this.file) return await this._flashOnce();
     return await this._withProbeOwnership(() => this._flashOnce(), '烧录器要使用探针');
   }
 
@@ -192,7 +146,6 @@ export class FlashView {
       this.busy = false;
       if (!this._probeCloseFailed && !this.probeManager?.failures.has('flash')) this.probeManager?.forget('flash');
       for (const id of ['f-flash', 'f-idcode', 'btn-global-reset']) if ($(id)) $(id).disabled = false;
-      this._applyBackendUi();
     }
   }
 
@@ -237,17 +190,8 @@ export class FlashView {
   }
 
   async _flashOnce(){
-    const pathText = String($('f-path').value || '').trim();
-    const usePath = !this.file && !!pathText;
-    if (!this.file && !pathText){ toast('先指定固件：点「选择文件…」或填路径', 'warn'); return; }
-    // 零安装模式读不了磁盘路径（浏览器安全限制）——但别直接报错挡住用户：
-    // 只给了路径时**自动改用本地桥**，并明确写一行日志说明为什么换了后端。
-    if (usePath && $('f-backend').value === 'webusb'){
-      $('f-backend').value = 'openocd';
-      this._log('只给了磁盘路径：零安装（WebUSB）在后端读不了本地文件 → 自动改用「本地桥 · OpenOCD」。' +
-                '想用零安装，请点「选择文件…」把固件选进来。');
-    }
-    const name = this.file ? this.file.name : pathText;
+    if (!this.file){ toast('请选择或拖入固件文件', 'warn'); return; }
+    const name = this.file.name;
 
     // 探针互斥：同页签的 RTT / J-Scope 会话先断开，再请别的页签让出探针
     if (!(await this._clearProbeUsers(name))) return;
@@ -261,11 +205,7 @@ export class FlashView {
     this._hbStart();
     let operationError;
     try {
-      if ($('f-backend').value === 'webusb'){
-        await this._flashWebusb(name);
-      } else {
-        await this._flashBridge(name, pathText);
-      }
+      await this._flashWebusb(name);
       this._status(`空闲（上次烧录用时 ${((Date.now() - t0) / 1000).toFixed(1)}s）`);
     } catch (e){
       operationError = e;
@@ -480,7 +420,7 @@ export class FlashView {
     // RISC-V（HPM 系列）走另一条路：目标核不是 Cortex-M，烧录算法也不是 ARM 的 flashloader
     if (HPM_BOARDS.some(b => b.id === chip)) return await this._flashHpmRiscv(name);
     const algo = ALGOS[chip];
-    if (!algo) throw new Error(`「${chip}」暂未内置零安装烧录算法（现覆盖 F0/F1/F4/F7/H7/L0/L4 与 HPM 系列 RISC-V）：请换「本地桥 · OpenOCD」后端`);
+    if (!algo) throw new Error(`「${chip}」暂未内置零安装烧录算法（现覆盖 F0/F1/F4/F7/H7/L0/L4 与 HPM 系列 RISC-V）：请选择支持的芯片型号，或先为该目标适配 WebUSB 烧录算法`);
 
     // 解析固件（webusb 只吃页面里选的文件）
     const raw = Uint8Array.from(atob(this.file.dataB64), c => c.charCodeAt(0));
@@ -760,7 +700,7 @@ export class FlashView {
     }
   }
 
-  // ---------- 备用：本地桥（OpenOCD 或 J-Link） ----------
+
   /**
    * HPM 系列（RISC-V/JTAG）的零安装烧录。
    *
@@ -969,47 +909,6 @@ export class FlashView {
       throw new Error(`${e?.message || e}　—— 已尝试把目标复位回可用状态${wedge ? '，并重开了 USB 会话' : ''}；` +
         '直接再点一次「烧录」通常就过（这条 JTAG/SBA 通路偶发丢拍）；' +
         '连点两次都不过就先给板子断电重上电、并确认没有别的页签占着探针');
-    }
-  }
-
-  async _flashBridge(name, pathText){
-    const useJlink = $('f-backend').value === 'jlink';
-    this._bar(50);   // 桥烧录拿不到流式进度，只能示意
-    this._status(useJlink ? '桥烧录中…（J-Link Commander 完成后一次性返回结果）'
-                          : '桥烧录中…（OpenOCD 完成后一次性返回结果）');
-    this.bc = new BridgeClient($('f-bridge-url').value);
-    const bridge=this.bc;
-    try {
-      await this.bc.connect({ version: 1 });
-      const cfg = {
-        target: $('f-chip').value,
-        verify: $('f-verify').checked,
-        reset: $('f-reset').checked,
-        /**
-         * J-Link 这条路由桥自己起 JLink.exe 烧（见 bridge/rtt-bridge.mjs 的 jlinkFlash）：
-         * 桥会**先停掉 RTT 会话**再烧 —— J-Link 同一时刻只允许一个持有者，两个进程一起抢
-         * 会直接连不上探针（跟 WebUSB 那边"谁占着调试器"是同一类问题）。
-         */
-        ...(useJlink ? { backend: 'jlink' } : {}),
-        speed: Number($('f-speed').value) || DEFAULT_FLASH_CLOCK_KHZ,
-      };
-      if (cfg.target === 'custom'){
-        cfg.cfgs = String($('f-cfgs').value || '').split(/[,\s;]+/).map(s => s.trim()).filter(Boolean);
-        if (!cfg.cfgs.length) throw new Error('自定义目标要填 cfg 文件（逗号分隔）');
-      }
-      if (/\.bin$/i.test(name)) cfg.base = Number($('f-base').value) || 0;
-      if (this.file){ cfg.name = this.file.name; cfg.dataB64 = this.file.dataB64; cfg.size = this.file.size; }
-      else cfg.path = pathText;
-
-      const r = await this.bc.flash(cfg);
-      this._bar(100);
-      this._log(`── 桥烧录完成（${r.seconds.toFixed(1)}s）──\n${r.output || ''}`);
-      setStatus($('f-result'),
-        `✅ ${r.target} · ${fBytes(r.bytes)} · ${r.seconds.toFixed(1)}s${r.verify ? ' · 已校验' : ''}${r.reset ? ' · 已复位运行' : ''}`, 'ok');
-      toast('烧录成功', 'ok', 5000);
-    } finally {
-      await bridge.release();
-      if(this.bc===bridge)this.bc=null;
     }
   }
 

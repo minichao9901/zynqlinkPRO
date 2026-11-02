@@ -1,9 +1,5 @@
 import { HPM_BOARDS } from '../targets/hpm/porting.js';
-/**
- * 芯片预设表：烧录器与 RTT Viewer 共用的「芯片 → OpenOCD cfg / RAM 扫描范围」。
- * RTT 的下拉目前在 HTML 里手写（内容与此表一致），改这里记得同步那边。
- * ram 只给 STM32 系列（RTT 扫描范围用）；烧录不需要 ram，只认 v（bridge.config.json 的目标名）。
- */
+/** WebUSB target presets and RTT scan ranges. */
 export const CHIPS = [
   { v: 'stm32f103', label: 'STM32F1（F103 等）',  ram: '0x20000000-0x20005000' },
   { v: 'stm32f0',   label: 'STM32F0',             ram: '0x20000000-0x20002000' },
@@ -33,7 +29,6 @@ export const CHIPS = [
   { v: 'esp32s31',  label: 'ESP32-S31（板载 USB-JTAG）' },
   { v: 'esp32',     label: 'ESP32（Wrover Kit）' },
   ...HPM_BOARDS.map(b => ({ v: b.id, label: b.name + '（RISC-V，零安装）', ram: b.memory.rttRange })),
-  { v: 'custom',    label: '自定义 cfg…' },
 ];
 
 export function fillChipSelect(sel){

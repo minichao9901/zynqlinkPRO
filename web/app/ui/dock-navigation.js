@@ -1,7 +1,6 @@
 /** Layout-only keyboard/ARIA behavior for dock and generated-file tabs. */
 export function initDockNavigation(){
   const groups = [...document.querySelectorAll('.docktabs')].filter(g => g.querySelector('button[data-dock]'));
-  groups.push(...['g-files','g-kit-files','g-etm-files'].map(id => document.getElementById(id)).filter(Boolean));
   for (const group of groups){
     group.setAttribute('role','tablist');
     const sync = () => {
