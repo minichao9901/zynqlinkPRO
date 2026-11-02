@@ -34,6 +34,6 @@ python -X utf8 toolbox.py trace capture --elf prebuilt/golden/f103ze-cdc48.elf -
 
 新会话协作规则见根 [AGENTS.md](../AGENTS.md)。遇到异常或验收缺口时，同步更新 [项目问题跟踪列表](项目问题跟踪列表.md)，原始证据保留在`docs/validation/`对应目录。
 
-SVG支持timeline/aggregate及选定seq范围。完整timeline有200000段上限，超宽聚合图也有实际限制；精简不消除这些边界。HSS缺首DEF仍暂停。
+SVG支持timeline/aggregate及选定seq范围。完整timeline有200000段上限，超宽聚合图也有实际限制；精简不消除这些边界。HPM6800EVK缺首DEF已按用户恢复授权修复，修复配对/范围见[R23](validation/hpm6800-def-cdc-fix-20261102/README.md)；旧报告暂停结论仍按历史保留。
 
 交互火焰图新增 `--format flame-html`，HTML内含Timeline/周期权重双标签，默认Timeline，支持框选放大；可保留 `--from-seq/--to-seq` 区间并离线缩放、平移、查找。Web导出与CLI共用实现；bridge EXE也可用 `--trace-cli export/query/...` 直接操作记录，无需系统Python。完整用法见 [可缩放火焰图HTML](flame-html-export.md)。

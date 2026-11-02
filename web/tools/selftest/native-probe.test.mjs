@@ -65,3 +65,16 @@ test('native transport preserves real wire bytes, report IDs and serial reads af
   await reader.cancel();reader.releaseLock();await port.close();
   assert.equal(requests.filter(r=>r.route==='/native-probe/serial/read').length,3);
 });
+
+test('fatal native serial receive failure retires the readable stream for session cleanup',async t=>{
+  const originalWindow=globalThis.window,originalFetch=globalThis.fetch;
+  t.after(()=>{globalThis.window=originalWindow;globalThis.fetch=originalFetch;});
+  globalThis.window={document:{body:{dataset:{nativeProbe:'1'}}},location:{origin:'http://127.0.0.1:8882',search:'?trace-cli='+'b'.repeat(64)}};
+  globalThis.fetch=async(url)=>({ok:true,json:async()=>new URL(url).pathname.endsWith('/list')
+    ?{ok:true,value:[{path:'COM-overflow'}]}:new URL(url).pathname.endsWith('/read')
+      ?{ok:false,error:'本地串口接收队列溢出，数据不完整'}:{ok:true,value:{resourceEpoch:'overflow-test'}}});
+  const [port]=await nativeSerialPorts();await port.open({baudRate:115200});
+  const reader=port.readable.getReader();
+  await assert.rejects(reader.read(),/数据不完整/);assert.equal(port.readable,null);
+  reader.releaseLock();await port.close();
+});

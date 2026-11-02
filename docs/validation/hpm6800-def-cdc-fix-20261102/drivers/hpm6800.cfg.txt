@@ -1,0 +1,11 @@
+source [find interface/cmsis-dap.cfg]
+cmsis_dap_backend usb_bulk
+cmsis_dap_vid_pid 0x0d28 0x0204
+transport select jtag
+adapter speed 10000
+reset_config none
+source [find soc/hpm6880.cfg]
+# The SDK board file also installs DDR/PLL reset-init hooks. This campaign
+# does not need DDR; use its identical XPI bank parameters without those hooks.
+flash bank xpi0 hpm_xpi 0x80000000 0x2000000 1 1 $_TARGET0 0xF3000000 0x7
+$_TARGET0 configure -work-area-backup 1

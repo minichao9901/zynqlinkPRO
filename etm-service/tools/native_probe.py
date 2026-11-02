@@ -14,6 +14,7 @@ import threading
 import time
 from pathlib import Path
 from flask import abort, jsonify, request
+from native_serial import SerialReceiver
 
 
 def drain_dap_replies(device,quiet_ms=80,limit=32):
@@ -60,6 +61,7 @@ class NativeProbe:
         self.hid_owner = None
         self.hid_epoch = None
         self.ports = {}
+        self.serial_receivers = {}
         self.port_epochs = {}
         self.usb_lock = threading.RLock()
         self.hid_lock = threading.RLock()
@@ -373,6 +375,13 @@ class NativeProbe:
             raise ValueError('未知HID动作')
 
     def serial_call(self, action, value):
+        # Epoch validation and resource selection must be one operation.
+        # An old HTTP read/close cannot consume or retire a reopened port.
+        # Physical reception has its own thread and never needs this lock.
+        with self.port_lock:
+            return self._serial_call(action, value)
+
+    def _serial_call(self, action, value):
         import serial
         import serial.tools.list_ports
         if action == 'list':
@@ -386,7 +395,8 @@ class NativeProbe:
         if action == 'open':
             with self.port_lock:
                 if key in self.ports:
-                    self.ports.pop(key).close()
+                    self.serial_receivers[key].close()
+                    self.ports.pop(key).close();self.serial_receivers.pop(key)
                 if path not in {p.device for p in serial.tools.list_ports.comports()}:
                     raise ValueError('串口不存在')
                 if any(p == path for _, p in self.ports):
@@ -407,6 +417,7 @@ class NativeProbe:
                     raise
                 self.ports[key] = port
                 self.port_epochs[key]=secrets.token_hex(16)
+                self.serial_receivers[key]=SerialReceiver(port)
                 return {'opened': True,'resourceEpoch':self.port_epochs[key]}
         port = self.ports.get(key)
         if port is None:
@@ -417,9 +428,7 @@ class NativeProbe:
             if action == 'close':return {'closed':True,'superseded':True}
             raise ValueError('串口已重新打开；拒绝旧会话操作')
         if action == 'read':
-            data = port.read(1)
-            if data:
-                data += port.read(min(port.in_waiting, 262143))
+            data = self.serial_receivers[key].read()
             return {'data': self.encode(data)}
         if action == 'write':
             return {'bytesWritten': port.write(self.blob(value.get('data', '')))}
@@ -436,9 +445,11 @@ class NativeProbe:
             return {'clearToSend': port.cts, 'dataSetReady': port.dsr,
                     'ringIndicator': port.ri, 'dataCarrierDetect': port.cd}
         if action == 'close':
-            port.close()
             with self.port_lock:
+                self.serial_receivers[key].close()
+                port.close()
                 self.ports.pop(key, None)
+                self.serial_receivers.pop(key,None)
                 self.port_epochs.pop(key,None)
             return {'closed': True}
         raise ValueError('未知串口动作')

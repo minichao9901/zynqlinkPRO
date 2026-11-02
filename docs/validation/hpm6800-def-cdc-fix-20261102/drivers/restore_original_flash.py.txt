@@ -1,0 +1,45 @@
+"""Restore only the backed-up HPM target sectors, then independent CPU readback.
+Private original/readback binaries remain in build. Probe QSPI is never written.
+"""
+from pathlib import Path
+import subprocess,time,json,hashlib,sys
+sys.path.insert(0,str(Path.cwd()/'tools'))
+from dap_pipeline_bench import open_dap
+from benchmark_hpm5301 import setup
+from riscv_target import RiscvTarget
+import usb.util
+b=Path(__file__).resolve().parent;out=b/'original-flash-restore';out.mkdir(exist_ok=False)
+backup=b/'target-backup/flash-original.bin';data=backup.read_bytes()
+expected=json.loads((b/'backup-flash.json').read_text())['sha256']
+assert len(data)==65536 and hashlib.sha256(data).hexdigest()==expected
+base=['E:/sdk_env_v1.11.0/tools/openocd/openocd.exe','-s','E:/sdk_env_v1.11.0/tools/openocd/tcl',
+    '-s','E:/sdk_env_v1.11.0/hpm_sdk/boards/openocd','-f',str(b/'hpm6800.cfg')]
+report=dict(original_sha256=expected,bytes=len(data),target_flash_restore=True,probe_qspi_writes=False,phases=[])
+def save():(out/'result.json').write_text(json.dumps(report,indent=2)+'\n')
+def run(name,commands):
+    argv=base[:]
+    for command in commands:argv+=['-c',command]
+    start=time.perf_counter();r=subprocess.run(argv,capture_output=True,text=True,encoding='utf-8',errors='replace',timeout=180)
+    (out/(name+'.log')).write_text(r.stdout+r.stderr,encoding='utf-8')
+    report['phases'].append(dict(name=name,argv=argv,seconds=time.perf_counter()-start,returncode=r.returncode));save()
+    assert r.returncode==0,(name,r.stdout[-500:],r.stderr[-1000:])
+run('program-original',['init','halt','flash write_image erase {'+backup.as_posix()+'} 0x80000000 bin','reset run','shutdown'])
+# A reset has invalidated the old program's caches and boot configured XPI.
+# Halt and read through CPU progbuf, never SBA's forbidden XIP window.
+readback=out/'readback-private.bin'
+run('readback-after-boot',['init','halt','riscv set_mem_access progbuf','dump_image {'+readback.as_posix()+'} 0x80000000 65536','shutdown'])
+report['readback_sha256']=hashlib.sha256(readback.read_bytes()).hexdigest()
+report['byte_exact']=readback.read_bytes()==data;save();assert report['byte_exact'],'Original Flash mismatch; target left halted'
+dev,tx,rx=open_dap()
+try:
+    setup(tx,rx,10_000_000,0,connect=True);t=RiscvTarget(tx,rx);t.active();t.halt()
+    report['restored_dpc']=hex(t.register(0x7b1))
+    # Restore original debug-control bits, not the old program's runtime PC/GPRs.
+    old=json.loads(Path('build/hpm6800-speed-completion-20261102/rtt-low/result.json').read_text())['registers_before']['1968']
+    t.register(0x7b0,old&~4);report['dcsr']=hex(t.register(0x7b0))
+    assert (int(report['dcsr'],16)&0xbe17)==((old&~4)&0xbe17)
+    t.resume();report['dmstatus']=hex(t.dmi(0x11));assert int(report['dmstatus'],16)&(1<<10)
+    report['passed']=True
+finally:
+    usb.util.release_interface(dev,0);usb.util.dispose_resources(dev);save()
+print(report['byte_exact'],report.get('dmstatus'))

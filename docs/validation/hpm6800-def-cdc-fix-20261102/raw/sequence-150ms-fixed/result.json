@@ -1,0 +1,107 @@
+{
+  "rows": [
+    {
+      "batch": 4,
+      "passed": false,
+      "error": "RuntimeError('\u5148\u8fde\u63a5\u63a5\u6536\u4e32\u53e3')",
+      "producer": {
+        "published_bytes": 32764
+      },
+      "stopped": {
+        "published_bytes": 32764
+      }
+    },
+    {
+      "batch": 13,
+      "passed": false,
+      "error": "RuntimeError('\u5148\u8fde\u63a5\u63a5\u6536\u4e32\u53e3')",
+      "producer": {
+        "published_bytes": 32760
+      },
+      "stopped": {
+        "published_bytes": 32760
+      }
+    },
+    {
+      "batch": 127,
+      "passed": true,
+      "producer": {
+        "published_bytes": 3172333
+      },
+      "integrity": {
+        "sequenceExact": true,
+        "bytes": 3172333,
+        "mismatchedBytes": 0,
+        "firstMismatch": null,
+        "actualAtFirst": null,
+        "expectedAtFirst": null,
+        "sha256": "928ba85c5522f968a15e3c9e6cf73494ffe00fb21d8c557e49a0b88332d79983",
+        "expected_sha256": "928ba85c5522f968a15e3c9e6cf73494ffe00fb21d8c557e49a0b88332d79983"
+      },
+      "web": {
+        "passed": true,
+        "leftActive": false,
+        "window": {
+          "bytes": 3172333,
+          "bytesPerSecond": 392912.0994811164,
+          "complete": true,
+          "error": null,
+          "limitExceeded": false,
+          "name": "rtt-raw-20261102-152437.bin",
+          "observedBytes": 3172333,
+          "portClosed": false,
+          "seconds": 8.07389999999851
+        },
+        "engine": {
+          "cbAddr": "0x1240000",
+          "connected": true,
+          "dapYield": 0,
+          "info": "\u5df2\u8fde\u63a5\uff1aZynqLink probe control \u00b7 12345678 \u00b7 FW 0.5-orbtrace \u00b7 SN 12345678",
+          "label": "ZynqLink probe control \u00b7 12345678",
+          "mock": false,
+          "moved": 3172333,
+          "rdErr": 0,
+          "rescans": 0,
+          "running": false,
+          "stall": 0,
+          "startRc": 0,
+          "state": "\u672a\u8fd0\u884c\uff08\u70b9\u300c\u542f\u52a8\u8f6c\u53d1\u300d\u6216\u300c\u81ea\u52a8\u641c\u63a7\u5236\u5757\u300d\uff09",
+          "supported": true,
+          "swdMhz": 9,
+          "wrErr": 0
+        },
+        "summary": {
+          "buffered": 2013165,
+          "bytes": 3172333,
+          "frames": 29,
+          "mode": "ascii",
+          "open": true,
+          "paused": false,
+          "rate": 0,
+          "recordBytes": 0,
+          "recording": false,
+          "shown": 179197,
+          "suppressed": false
+        },
+        "bytes": 3172333,
+        "patternExact": true
+      },
+      "stopped": {
+        "published_bytes": 3172333
+      }
+    },
+    {
+      "batch": 2048,
+      "passed": false,
+      "error": "RuntimeError('\u5148\u8fde\u63a5\u63a5\u6536\u4e32\u53e3')",
+      "producer": {
+        "published_bytes": 30720
+      },
+      "stopped": {
+        "published_bytes": 30720
+      }
+    }
+  ],
+  "phase": "completed",
+  "passed": false
+}

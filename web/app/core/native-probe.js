@@ -173,7 +173,7 @@ class NativeSerialPort{
     const epoch=this.resourceEpoch;
     this.readable=new ReadableStream({pull:async controller=>{
       try{while(!this.cancelled&&epoch===this.resourceEpoch){const result=await this.rpc('read');if(this.cancelled||epoch!==this.resourceEpoch)return;const bytes=decoded(result.data);if(bytes.length){controller.enqueue(bytes);return;}}}
-      catch(error){if(!this.cancelled)controller.error(error);}
+      catch(error){if(!this.cancelled&&epoch===this.resourceEpoch){this.readable=null;controller.error(error);}}
     },cancel:()=>{this.cancelled=true;}});
     this.writable=new WritableStream({write:async bytes=>{await this.rpc('write',{data:encoded(bytes)});}});
   }

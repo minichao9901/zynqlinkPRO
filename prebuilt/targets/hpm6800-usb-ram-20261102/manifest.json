@@ -1,0 +1,52 @@
+{
+  "status": "Temporary RAM-only validation fixtures; never program target Flash",
+  "source": "firmware/target/hpm6800_usb_ram/producer.S",
+  "source_sha256": "b72851760982897186a2a0d751583456bee89b89643f420731e4316651029a32",
+  "compiler": "SDK v1.11.0 riscv32-unknown-elf-gcc",
+  "flags": [
+    "-march=rv32imac_zicsr_zifencei",
+    "-mabi=ilp32",
+    "-nostdlib",
+    "-Wl,-Ttext=0x10000",
+    "-Wl,-e,producer"
+  ],
+  "axi32_extra_flag": "-DHPM_USB_AXI_RING=1",
+  "validation": [
+    {
+      "variant": "ahb16",
+      "state": "restored",
+      "code_sha256": "da884ed1c583e78b2308e158f869552080d48e0d132a220aeb55e56dbccce706"
+    },
+    {
+      "variant": "axi32",
+      "state": "restored",
+      "code_sha256": "f99011e0ca401f65c9a3140757b2dab69cfc5cda489a8c5dfc83063845fdbe19"
+    }
+  ],
+  "files": {
+    ".gitattributes": {
+      "bytes": 21,
+      "sha256": "ffe82f3c5b968ed009c2577fa38f32c83be167799ee565d40a18e3440c57b342"
+    },
+    "ahb16.bin": {
+      "bytes": 188,
+      "sha256": "da884ed1c583e78b2308e158f869552080d48e0d132a220aeb55e56dbccce706"
+    },
+    "ahb16.elf": {
+      "bytes": 5160,
+      "sha256": "3f4fc634b395403a21f5ed1fd31bd22aa0363aa7fcab82d376fac1371e22097f"
+    },
+    "axi32.bin": {
+      "bytes": 188,
+      "sha256": "f99011e0ca401f65c9a3140757b2dab69cfc5cda489a8c5dfc83063845fdbe19"
+    },
+    "axi32.elf": {
+      "bytes": 5160,
+      "sha256": "54f09009d6fbf4252f58091c0c02c87b32f1859bbb1f29fc9bcf24ebe11b80a7"
+    },
+    "producer.S": {
+      "bytes": 1558,
+      "sha256": "b72851760982897186a2a0d751583456bee89b89643f420731e4316651029a32"
+    }
+  }
+}

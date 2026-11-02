@@ -63,6 +63,7 @@ class NativeProbeTests(unittest.TestCase):
     def test_native_serial_honors_the_web_requested_receive_buffer(self):
         class Port:
             def set_buffer_size(self,**kwargs):self.sizes=kwargs
+            def read(self,n):return b''
             def close(self):pass
         with tempfile.TemporaryDirectory() as folder:
             token=Path(folder)/'token';token.write_text('c'*64)
@@ -71,6 +72,7 @@ class NativeProbeTests(unittest.TestCase):
                 proxy.serial_call('open',{'owner':'a'*32,'path':'COM33','options':{'bufferSize':65536}})
                 self.assertEqual(port.sizes,{'rx_size':65536,'tx_size':65536})
                 self.assertIs(proxy.ports[('a'*32,'COM33')],port)
+                proxy.serial_call('close',{'owner':'a'*32,'path':'COM33'})
 
     def test_http_redelivery_returns_the_original_result_without_hardware_reexecution(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -90,6 +92,51 @@ class NativeProbeTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError,'拒绝重放'):
                 proxy.deliver(identity,body,operation)
             self.assertEqual(len(calls),1)
+
+    def test_serial_reopen_cannot_cross_an_old_read_epoch_check(self):
+        checked=threading.Event();release=threading.Event();opening=threading.Event();opened=threading.Event()
+        class Epochs(dict):
+            def get(self,key,default=None):
+                value=super().get(key,default)
+                if threading.current_thread().name=='old-read':
+                    checked.set();self.assert_release()
+                return value
+            def assert_release(self):
+                if not release.wait(2):raise RuntimeError('test barrier timed out')
+        class Port:
+            closed=False
+            def __init__(self,data=b''):self.data=data
+            def read(self,n):data,self.data=self.data,b'';return data
+            def close(self):self.closed=True
+            def set_buffer_size(self,**kw):pass
+        class Receiver:
+            def read(self):return b'old bytes'
+            def close(self):pass
+        with tempfile.TemporaryDirectory()as folder:
+            token=Path(folder)/'token';token.write_text('c'*64);proxy=NativeProbe(SimpleNamespace(),token)
+            key=('a'*32,'COM33');old=Port();new=Port(b'new bytes');proxy.ports[key]=old
+            proxy.serial_receivers[key]=Receiver();proxy.port_epochs=Epochs({key:'old'})
+            output=[];errors=[]
+            def read():
+                try:output.append(proxy.serial_call('read',dict(owner=key[0],path=key[1],resourceEpoch='old')))
+                except Exception as e:errors.append(e)
+            def reopen():
+                opening.set()
+                try:output.append(proxy.serial_call('open',dict(owner=key[0],path=key[1])))
+                except Exception as e:errors.append(e)
+                finally:opened.set()
+            with patch('serial.tools.list_ports.comports',return_value=[SimpleNamespace(device='COM33')]),patch('serial.Serial',return_value=new):
+                reader=threading.Thread(target=read,name='old-read');reader.start();self.assertTrue(checked.wait(1))
+                opener=threading.Thread(target=reopen);opener.start();self.assertTrue(opening.wait(1))
+                try:self.assertFalse(opened.wait(.05),'Reopen crossed the old epoch check')
+                finally:release.set();reader.join(2);opener.join(2)
+            self.assertFalse(reader.is_alive());self.assertFalse(opener.is_alive());self.assertFalse(errors,errors)
+            self.assertEqual(output[0]['data'],'b2xkIGJ5dGVz')
+            self.assertIs(proxy.ports[key],new)
+            self.assertTrue(proxy.serial_call('close',dict(owner=key[0],path=key[1],resourceEpoch='old'))['superseded'])
+            self.assertFalse(new.closed)
+            self.assertEqual(proxy.serial_call('read',dict(owner=key[0],path=key[1],resourceEpoch=proxy.port_epochs[key]))['data'],'bmV3IGJ5dGVz')
+            proxy.serial_call('close',dict(owner=key[0],path=key[1],resourceEpoch=proxy.port_epochs[key]))
 
     def test_sequence_delivery_survives_100000_requests_with_bounded_replay_history(self):
         with tempfile.TemporaryDirectory() as folder:

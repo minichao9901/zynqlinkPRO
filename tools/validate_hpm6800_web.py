@@ -227,7 +227,7 @@ class Web:
         return dict(passed=True,start=start,end=end,closed=closed,bytes=len(data),patternExact=True,infoBefore=info_before,infoAfter=info_after,
             measuredBytesPerSecond=(end['stats']['bytes']-start['stats']['bytes'])/dt,
             limit='Repeating text detects corrupt bytes/partial-line gaps; native sequence fixture separately checks full record loss.')
-    def rttcdc(self):
+    def rttcdc(self,pattern_check=text_pattern_ok):
         self.page('rttcdc','show');self.set('rttcdc','#h-target','riscv')
         self.set('rttcdc','#h-addr',hex(symbol(self.a.elf,'_SEGGER_RTT')));self.set('rttcdc','#h-size','0x100')
         self.set('rttcdc','#h-chan','0') # RISC-V UI deliberately disables this legacy clock control.
@@ -249,7 +249,7 @@ class Web:
             self.invoke('rttcdc','refresh',target='hid')
             end=self.invoke('rttcdc','summary',target='hid');summary=self.invoke('rttcdc','summary')
             data=self.download('rttcdc',self.out/'rttcdc.bin')
-            assert text_pattern_ok(data),'RTT CDC byte mismatch'
+            assert pattern_check(data),'RTT CDC byte mismatch'
             assert window['complete'] and window['bytes']==len(data) and not end['rdErr'] and not end['wrErr'],(window,end)
             left_active=bool(self.a.live)
             return dict(passed=True,leftActive=left_active,window=window,engine=end,summary=summary,bytes=len(data),patternExact=True)

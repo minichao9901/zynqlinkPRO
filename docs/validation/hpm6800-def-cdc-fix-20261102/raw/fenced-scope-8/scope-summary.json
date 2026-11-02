@@ -1,0 +1,99 @@
+{
+  "awaitingDefinition": false,
+  "benchUs": null,
+  "blob": null,
+  "capacity": 22064,
+  "captureFlags": 192,
+  "connectErr": null,
+  "dapYields": 0,
+  "definitionReceived": true,
+  "elf": {
+    "name": "fw.elf",
+    "note": "",
+    "source": "dwarf",
+    "stats": {
+      "cu": 44,
+      "dies": 7988,
+      "vars": 1270
+    },
+    "versions": [
+      5
+    ]
+  },
+  "lod": false,
+  "lost": 0,
+  "lostGap": 0,
+  "lostProbe": 0,
+  "lostUsb": 0,
+  "metricsError": null,
+  "mockVars": [
+    "mock0.f32",
+    "mock1.f32",
+    "mock2.i32",
+    "mock3.u16",
+    "mock4.i16",
+    "mock5.u8",
+    "mock6.i8",
+    "mock7.f64"
+  ],
+  "mode": "real",
+  "packets": 207,
+  "plan": {
+    "estHz": 21503,
+    "estUs": 46.51,
+    "frameBytes": 32,
+    "spans": 1
+  },
+  "probeMetrics": {
+    "bytes": 105984,
+    "errors": 0,
+    "flags": 64,
+    "hz": 24000000,
+    "periodTicks": 24000,
+    "produced": 2249,
+    "skipped": 0,
+    "tick": 1814464678,
+    "tx": 207,
+    "usb": 0,
+    "yields": 0
+  },
+  "rateHz": 1000,
+  "raw": 45,
+  "readErrors": 0,
+  "receivedSamples": 2249,
+  "resyncs": 0,
+  "running": false,
+  "samples": 2249,
+  "stalePackets": 0,
+  "state": "已停止（HPM acceptance）：2249 个样本 / 2.248 s，跳拍 0 / USB 丢样本 0 / 读错 0 / 包缺口 0",
+  "supportsMetrics": true,
+  "tailCountDelta": 0,
+  "transport": {
+    "bytes": 105984,
+    "chunks": 45,
+    "errors": 0,
+    "lastError": null,
+    "running": false
+  },
+  "trigger": {
+    "hit": -1,
+    "hits": 0,
+    "marker": false,
+    "mode": 0
+  },
+  "varCount": 8,
+  "vars": [
+    "g_v.tick:u32@0x1240000",
+    "g_v.u_hi:u32@0x1240004",
+    "g_v.f_sin:f32@0x1240008",
+    "g_v.f_tri:f32@0x124000c",
+    "g_v.i_sq1k:i32@0x1240010",
+    "g_v.i_sq5k:i32@0x1240014",
+    "g_v.u_ramp:u32@0x1240018",
+    "g_v.lfsr:u32@0x124001c"
+  ],
+  "view": {
+    "end": 2249,
+    "start": 0
+  }
+}

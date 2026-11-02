@@ -1,0 +1,223 @@
+{
+  "time": "2026-11-02T16:34:09.417685+08:00",
+  "artifacts": {
+    "git_head": "035b187ce70ffdc39c529e8aff5377b35039a564",
+    "git_dirty": true,
+    "bit": {
+      "path": "E:\\zynqlinkPRO\\prebuilt\\hpm6800-usb-fixed-133-20261102\\probe.bit",
+      "sha256": "106d579bc1b79c2b873fd1e3eb2609d468892a67613d85a6e41d4dc90c8fc177"
+    },
+    "elf": {
+      "path": "E:\\zynqlinkPRO\\prebuilt\\hpm6800-usb-fixed-133-20261102\\application.elf",
+      "sha256": "e93f1810d48e77f8d9aa097f643e40e0aaee32bdec1c263c1428f092909e608a"
+    }
+  },
+  "rows": [
+    {
+      "window": "axi-last",
+      "base": "0x127f000",
+      "requested_Hz": 66666666,
+      "passed": true,
+      "attempts": [
+        {
+          "mode": 17,
+          "effective_dmi_idle": 22,
+          "FCLK_Hz": 133333332,
+          "actual_TCK_Hz": 66666666.0,
+          "JTAG_sampling_mode": 17,
+          "cfg": "0xf1",
+          "dmi_idle_min": 8,
+          "clock_source": "PS FCLK divider and PL half_delay registers",
+          "functional_passed": true,
+          "restore_match": true
+        }
+      ],
+      "accepted_mode": 17,
+      "FCLK_Hz": 133333332,
+      "actual_TCK_Hz": 66666666.0,
+      "JTAG_sampling_mode": 17,
+      "cfg": "0xf1",
+      "dmi_idle_min": 8,
+      "clock_source": "PS FCLK divider and PL half_delay registers",
+      "words": 512,
+      "depth": 2,
+      "loops": 128,
+      "window_bytes": 4096,
+      "read_MB_s": 2.553188173671083,
+      "read_repeats_MB_s": [
+        2.6867137095219666,
+        2.553188173671083,
+        2.4749011055762344
+      ],
+      "read_seconds": [
+        0.09757050000189338,
+        0.10267320000275504,
+        0.1059209999984887
+      ],
+      "read_scan_stats": [
+        {
+          "phy_wait_fclk_cycles": 9185280,
+          "shifted_bits": 4526080,
+          "scans": 66560,
+          "scans_per_word": 1.015625,
+          "bits_per_word": 69.0625
+        },
+        {
+          "phy_wait_fclk_cycles": 9185280,
+          "shifted_bits": 4526080,
+          "scans": 66560,
+          "scans_per_word": 1.015625,
+          "bits_per_word": 69.0625
+        },
+        {
+          "phy_wait_fclk_cycles": 9185280,
+          "shifted_bits": 4526080,
+          "scans": 66560,
+          "scans_per_word": 1.015625,
+          "bits_per_word": 69.0625
+        }
+      ],
+      "write_MB_s": 2.4536197686417967,
+      "write_repeats_MB_s": [
+        2.4375488753131296,
+        2.4536197686417967,
+        2.597380464811358
+      ],
+      "write_seconds": [
+        0.10754409999935888,
+        0.10683970000172849,
+        0.10092629999780911
+      ],
+      "write_scan_stats": [
+        {
+          "phy_wait_fclk_cycles": 9132288,
+          "shifted_bits": 4499968,
+          "scans": 66176,
+          "scans_per_word": 1.009765625,
+          "bits_per_word": 68.6640625
+        },
+        {
+          "phy_wait_fclk_cycles": 9132288,
+          "shifted_bits": 4499968,
+          "scans": 66176,
+          "scans_per_word": 1.009765625,
+          "bits_per_word": 68.6640625
+        },
+        {
+          "phy_wait_fclk_cycles": 9132288,
+          "shifted_bits": 4499968,
+          "scans": 66176,
+          "scans_per_word": 1.009765625,
+          "bits_per_word": 68.6640625
+        }
+      ],
+      "all_bytes_verified": true
+    }
+  ],
+  "target": "HPM6800EVK / hart0",
+  "target_flash_writes": false,
+  "target_resets": false,
+  "target_clock_writes": false,
+  "driver_sha256": {
+    "tools/validate_hpm6800_performance.py": "250123c47ea3fb4738c79c0bbf4268defa59595c6a7c046cca0ed5d35af8cd4e",
+    "tools/validate_hpm6800_streams.py": "198e0b75c22ae583f120fb7f6bbb8b495fb6223ec51c7488f6621f8fc43f8cb2",
+    "tools/benchmark_hpm5301.py": "1a9380dee4385176c6f3dcf5f7be9c8a6efa08d200c86a401f3817b6cdea4850",
+    "tools/riscv_target.py": "a71d3c24d159b97c76df713d2d62da2a5a1bf398bb0eab1a78da0ef6a84e29d4",
+    "tools/test_probe_board.py": "68c484a2dfdfe274738eb1b0c532d8b791bbd466f2e553c68f107717dcc9bd72",
+    "tools/dap_pipeline_bench.py": "32089bd40ddd11bcd997d0b26a4b83649bf9626fee627d7dc4eb0d8de19fb69a",
+    "tools/probe_build_info.py": "8fe41b1dcdf7d8db6120149eba368358b8f1be727413d612f7c1e200ed9393f9",
+    "firmware/target/hpm6800_perf_ram.S": "d26b88fcbab8404ff7c29225f91f8777b824d45c8c92319f9724ff5add22e548"
+  },
+  "probe_before": {
+    "recordedAtUtc": "2026-11-02T08:34:10.072433+00:00",
+    "registers": {
+      "FCLK0_CTRL": "0xf00100",
+      "FCLK1_CTRL": "0x900100",
+      "ARM_PLL": "0x28008",
+      "DDR_PLL": "0x20008",
+      "IO_PLL": "0x36008",
+      "CPU_CTRL": "0x1f000200",
+      "DDR_CTRL": "0xc200003",
+      "USB0_CTRL": "0x101941",
+      "USB1_CTRL": "0x101941",
+      "FEATURES": "0xb",
+      "CAPTURE": "0x8",
+      "SWD_STATUS": "0x9010002",
+      "PACKET_STATUS": "0x0"
+    },
+    "allObservedEnginesIdle": true,
+    "xsctOutput": "SNAP FCLK0_CTRL 00F00100\nSNAP FCLK1_CTRL 00900100\nSNAP ARM_PLL 00028008\nSNAP DDR_PLL 00020008\nSNAP IO_PLL 00036008\nSNAP CPU_CTRL 1F000200\nSNAP DDR_CTRL 0C200003\nSNAP USB0_CTRL 00101941\nSNAP USB1_CTRL 00101941\nSNAP FEATURES 0000000B\nSNAP CAPTURE 00000008\nSNAP SWD_STATUS 09010002\nSNAP PACKET_STATUS 00000000\n"
+  },
+  "service_31_before": [
+    0,
+    [
+      65536,
+      4030726656,
+      4030726680,
+      9372668,
+      599929129,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1107297280
+    ]
+  ],
+  "service_32_before": [
+    0,
+    [
+      134219798,
+      66666666,
+      181328,
+      0,
+      30720,
+      0,
+      12092,
+      0,
+      3376044997,
+      792461312,
+      0,
+      1107427754
+    ]
+  ],
+  "initial_dmstatus": "0x4f0ca2",
+  "dpc": "0x80005c7e",
+  "target_clocks_before": {
+    "controls": {
+      "cpu0": "0x3020100",
+      "mchtmr0": "0x1010000",
+      "ahb": "0x5040203"
+    },
+    "basis": "Read-only qualified SYSCTL controls; target frequencies not inferred without qualified PLL outputs"
+  },
+  "target_clock_registers_before": [
+    "0x3020100",
+    "0x1010000"
+  ],
+  "backups": {
+    "axi-last": {
+      "base": "0x127f000",
+      "size": 4096,
+      "sha256": "7c02010e008c0f2d74d1de1abac8d09fa2eac27d3e2db1a8598dca9284da3079"
+    }
+  },
+  "throughput_goal_passed": true,
+  "restore": {
+    "axi-last": true
+  },
+  "target_clocks_after": {
+    "controls": {
+      "cpu0": "0x3020100",
+      "mchtmr0": "0x1010000",
+      "ahb": "0x5040203"
+    },
+    "basis": "Read-only qualified SYSCTL controls; target frequencies not inferred without qualified PLL outputs"
+  },
+  "target_clock_registers_after": [
+    "0x3020100",
+    "0x1010000"
+  ],
+  "final_dmstatus": "0x4f0ca2"
+}

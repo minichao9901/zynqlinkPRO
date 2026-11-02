@@ -479,10 +479,19 @@ static u8  	Reply[XUSBPS_REQ_REPLY_LEN];
 					XUsbPs_ClrBits(InstancePtr,
 						XUSBPS_EPCRn_OFFSET(EpNum & 0xF),
 						XUSBPS_EPCR_TXS_MASK);
+					/* USB 2.0 9.4.5 resets DATA0 even when HALT was clear.
+					 * Clearing only STALL desynchronizes the host PID and
+					 * silently ACKs/discards the next packet (HSS DEF). */
+					XUsbPs_SetBits(InstancePtr,
+						XUSBPS_EPCRn_OFFSET(EpNum & 0xF),
+						XUSBPS_EPCR_TXR_MASK);
 				}else { /* Out ep */
 					XUsbPs_ClrBits(InstancePtr,
 						XUSBPS_EPCRn_OFFSET(EpNum),
 						XUSBPS_EPCR_RXS_MASK);
+					XUsbPs_SetBits(InstancePtr,
+						XUSBPS_EPCRn_OFFSET(EpNum),
+						XUSBPS_EPCR_RXR_MASK);
 				}
 			}
 			/* Ack the host ? */

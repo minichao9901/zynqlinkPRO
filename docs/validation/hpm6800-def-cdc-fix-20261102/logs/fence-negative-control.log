@@ -1,0 +1,15 @@
+test_serial_reopen_cannot_cross_an_old_read_epoch_check (test_toolbox_native_probe.NativeProbeTests.test_serial_reopen_cannot_cross_an_old_read_epoch_check) ... FAIL
+
+======================================================================
+FAIL: test_serial_reopen_cannot_cross_an_old_read_epoch_check (test_toolbox_native_probe.NativeProbeTests.test_serial_reopen_cannot_cross_an_old_read_epoch_check)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\zynqlinkPRO\tools/tests\test_toolbox_native_probe.py", line 131, in test_serial_reopen_cannot_cross_an_old_read_epoch_check
+    try:self.assertFalse(opened.wait(.05),'Reopen crossed the old epoch check')
+        ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false : Reopen crossed the old epoch check
+
+----------------------------------------------------------------------
+Ran 1 test in 0.026s
+
+FAILED (failures=1)

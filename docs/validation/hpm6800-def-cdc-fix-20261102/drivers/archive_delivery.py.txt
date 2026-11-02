@@ -1,0 +1,109 @@
+"""Archive USB fix evidence, omitting private SRAM/Flash and runtime tokens."""
+from pathlib import Path
+import json,hashlib,shutil,gzip,statistics,datetime
+ROOT=Path.cwd();B=ROOT/'build/hpm6800-def-cdc-fix-20261102';D=ROOT/'docs/validation/hpm6800-def-cdc-fix-20261102'
+P=ROOT/'prebuilt/hpm6800-usb-fixed-133-20261102';T=ROOT/'prebuilt/targets/hpm6800-usb-ram-20261102'
+def load(p):return json.loads(p.read_text(encoding='utf-8-sig'))
+def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+def save(p,v):p.parent.mkdir(parents=True,exist_ok=True);p.write_text(json.dumps(v,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+tokens=[p.read_bytes().strip()for p in B.rglob('cli-token')]
+redactions={}
+def memory_hashes(value):
+    if isinstance(value,list):return [memory_hashes(v)for v in value]
+    if isinstance(value,dict):
+        out={k:memory_hashes(v)for k,v in value.items()if k!='$bytes'}
+        if '$bytes'in value:
+            data=bytes(value['$bytes']);out['$bytesEvidence']=dict(bytes=len(data),sha256=hashlib.sha256(data).hexdigest())
+        return out
+    return value
+def copy(p,q):
+    assert not any(t in p.read_bytes()for t in tokens),('Runtime token',p)
+    q.parent.mkdir(parents=True,exist_ok=True)
+    if p.name=='steps.json':
+        content=load(p);changed=False
+        for row in content:
+            if row.get('request',{}).get('method')in ('memRead','memWrite'):
+                row.update(memory_hashes(row));changed=True
+        if changed:
+            save(q,content);redactions[q.relative_to(D).as_posix()]=dict(original_sha256=sha(p),reason='Debugger temporary SRAM byte arrays retain length/SHA only; full source evidence remains in build')
+            return
+    shutil.copy2(p,q)
+def zipped(p,q):
+    q.parent.mkdir(parents=True,exist_ok=True)
+    if q.is_file()and gzip.decompress(q.read_bytes())==p.read_bytes():return
+    q.write_bytes(gzip.compress(p.read_bytes(),mtime=0))
+D.mkdir(exist_ok=True);T.mkdir(parents=True,exist_ok=True)
+for d in (D,P,T):(d/'.gitattributes').write_text('* -text -whitespace\n')
+skip={'target-backup','frozen-data','ps-toggle','usbpcap-reference','__pycache__'}
+for folder in B.iterdir():
+    if not folder.is_dir()or folder.name in skip or folder.name.startswith('runtime')or folder.name.startswith('frozen-')and folder.name.endswith('-data'):continue
+    for p in folder.rglob('*'):
+        if not p.is_file()or '__pycache__'in p.parts:continue
+        if p.suffix in ('.json','.txt','.log','.csv','.jsp','.tcl'):
+            copy(p,D/'raw'/p.relative_to(B))
+        elif p.suffix=='.bin'and p.name=='rttcdc.bin':zipped(p,D/'raw'/p.relative_to(B).with_suffix('.bin.gz'))
+        elif p.suffix=='.bin'and folder.name.startswith('identity'):zipped(p,D/'raw'/p.relative_to(B).with_suffix('.bin.gz'))
+for p in B.iterdir():
+    if not p.is_file()or p.name.startswith(('runtime','frozen-private'))or 'private'in p.name:continue
+    if p.suffix in ('.json','.log'):copy(p,D/'logs'/p.name)
+    elif p.suffix in ('.py','.cfg'):copy(p,D/'drivers'/(p.name+'.txt'))
+for name in ('sequence-ep3','sequence-axi32','delay-before','delay-fixed'):
+    zipped(B/(name+'.pcap'),D/'pcap'/(name+'.pcap.gz'))
+copy(B/'frozen-scope-proof-fenced.png',D/'frozen-scope-proof.png')
+copy(B/'frozen-scope-proof.png',D/'controls/host-before-fence/scope-proof.png')
+copy(B/'native-probe-before-fence.py.txt',D/'controls/host-before-fence/native_probe.py.txt')
+for n in ('latest-verification.json','latest-verification-output.txt'):
+    copy(ROOT/'build/bridge-package'/n,D/('package-'+n))
+for n in ('package-manifest.json','package-check.json'):copy(ROOT/'dist/zynq-etm-bridge'/n,D/n)
+for n in ('diagnose_hpm6800_usb.py','hpm6800_usb_fixture.py','validate_hpm6800_cdc_sequence.py','analyze_usbpcap_cdc.py','validate_hpm6800_web.py','stress_hpm6800_web.py'):
+    copy(ROOT/'tools'/n,D/'drivers'/(n+'.txt'))
+copy(ROOT/'firmware/xusbps_daplink_dma/xusbps_ch9.c',D/'build-inputs/xusbps_ch9.c')
+save(D/'build-inputs/manifest.json',dict(base_revision='035b187ce70ffdc39c529e8aff5377b35039a564',files={'xusbps_ch9.c':sha(D/'build-inputs/xusbps_ch9.c')},note='Only modified PS build input; full build-time hashes in prebuilt ps-build.json. Host sources are carried by final source commit and exact frozen payload.'))
+for source,name in [('ram-fixture16','ahb16'),('ram-fixture-fenced','axi32')]:
+    copy(B/source/'producer.elf',T/(name+'.elf'));copy(B/source/'producer.bin',T/(name+'.bin'))
+copy(ROOT/'firmware/target/hpm6800_usb_ram/producer.S',T/'producer.S')
+save(T/'manifest.json',dict(status='Temporary RAM-only validation fixtures; never program target Flash',source='firmware/target/hpm6800_usb_ram/producer.S',source_sha256=sha(T/'producer.S'),
+    compiler='SDK v1.11.0 riscv32-unknown-elf-gcc',flags=['-march=rv32imac_zicsr_zifencei','-mabi=ilp32','-nostdlib','-Wl,-Ttext=0x10000','-Wl,-e,producer'],axi32_extra_flag='-DHPM_USB_AXI_RING=1',
+    validation=[dict(variant=n,state=load(B/d/'state.json')['phase'],code_sha256=sha(T/(n+'.bin')))for d,n in [('ram-fixture16','ahb16'),('ram-fixture-fenced','axi32')]],
+    files={p.name:dict(bytes=p.stat().st_size,sha256=sha(p))for p in T.iterdir()if p.is_file()and p.name not in ('manifest.json','README.md')}))
+(T/'README.md').write_text('''# HPM6800EVK USB序号流RAM夹具
+
+AHB16占用32KiB内的16KiB环；AXI32在0x01240000、pBuffer=0x012400b8、环32KiB，复刻原RTT靶子布局。源/编译参数/实际使用代码SHA见manifest。AXI版要求目标已配置0x01240000..0x0127ffff非缓存PMA，工具不代改PMA。
+
+用`toolbox.py project describe hpm.usb-fixture`发现安装/控制/恢复工具，先核对探针身份与空闲状态。只加载到ILM 0x10000并备份/恢复GPR、DPC/DCSR/mstatus及指定SRAM，不写Flash/PLL，不提供独立启动初始化。用户SRAM备份不可提交Git。每个字节由递增little-endian u32序列确定；发布粒度可为4/13/127/2048B。最终恢复结果及接口验收见[R23](../../../docs/validation/hpm6800-def-cdc-fix-20261102/README.md)。
+''',encoding='utf-8')
+random=load(B/'frozen-random24-fenced/result.json');assert random['passed']and not random['cleanupErrors']and len(random['steps'])==24
+scopes={str(n):load(B/f'fenced-scope-{n}/result.json')for n in (1,3,8)};assert all(x['passed']for x in scopes.values())
+frozen=load(B/'frozen-sequence-fenced-final/result.json');assert frozen['passed']
+delay=load(B/'sequence-150ms-fixed-v2/result.json');assert delay['passed']
+restore=load(B/'original-flash-restore-fenced/result.json');state=load(B/'final-state-fenced.json');identity=load(B/'identity-final-fenced/result.json')
+assert restore['passed']and restore['byte_exact']and state['passed']and identity['passed']
+before=load(B/'toggle-before/result.json');after=load(B/'toggle-after/result.json')
+assert all(r['definitions']==1 for r in after['rows'])
+summary=dict(defBefore=[dict(clear=flag,rounds=sum(r['clearHalt']==flag for r in before['rows']),missing=sum(r['clearHalt']==flag and not r['definitions']for r in before['rows']))for flag in (False,True)],
+    defAfter=dict(rounds=len(after['rows']),allDefinition=True),
+    cdcNormal=load(B/'sequence-axi32-correlated/result.json'),cdcDelayBefore=load(B/'delay-before-correlated/result.json'),cdcDelayFixed=load(B/'delay-fixed-parsed-v2/result.json'),
+    frozenRandom=dict(steps=24,passed=True,flashTransitions=sum('flash'in r for r in random['steps']),seconds=random['finished']-random['started'],variant='final epoch-fenced EXE'),
+    frozenRandomBeforeFence=dict(steps=24,passed=load(B/'frozen-random24/result.json')['passed'],variant='continuous-reader EXE before final epoch fence; exact source/package evidence retained'),
+    scopes={n:dict(passed=v['passed'],samples=v['summary']['samples'],received=v['summary']['receivedSamples'],produced=v['summary']['probeMetrics']['produced'],rawBytes=v['rawBytes'],contractBad=v['contractBad'])for n,v in scopes.items()},
+    frozenSequence=[dict(batch=r['batch'],bytes=r['integrity']['bytes'],published=r['producer']['published_bytes'],sha256=r['integrity']['sha256'])for r in frozen['rows']],
+    delayed150ms=[dict(batch=r['batch'],bytes=r['integrity']['bytes'],published=r['producer']['published_bytes'],sha256=r['integrity']['sha256'])for r in delay['rows']],
+    finalState=state,flashRestore=restore,identityPassed=identity['passed'])
+save(D/'summary.json',summary)
+sources=dict(usb2_specification='https://bitsavers.trailing-edge.com/components/usb/USB_2.0_2000.pdf',
+    xilinx_example='https://github.com/Xilinx/embeddedsw/blob/master/XilinxProcessorIPLib/drivers/usbps/examples/xusbps_ch9.c',
+    usbpcap_format='https://desowin.org/usbpcap/captureformat.html',usbpcap_limitations='https://desowin.org/usbpcap/capture_limitations.html',
+    usbd_status_definition='https://raw.githubusercontent.com/libusb/libusb/master/libusb/os/windows_common.h',
+    windows_transfer_status='https://learn.microsoft.com/en-us/windows-hardware/drivers/usbcon/how-to-recover-from-usb-pipe-errors')
+save(D/'sources.json',sources)
+save(D/'redactions.json',redactions)
+manifest=load(P/'manifest.json');manifest['status']='HPM6800EVK ZL-005 and ZL-094 fix accepted within R23; HSS frontier ZL-070, span display ZL-097 and native-to-Web initial connection ZL-098 remain'
+manifest['evidence']='../../docs/validation/hpm6800-def-cdc-fix-20261102/README.md';save(P/'manifest.json',manifest)
+(P/'README.md').write_text('''# HPM6800EVK USB修复配对（133.333MHz约束）
+
+bit复用已验收133.333333MHz/7.5ns文件；新PS修复CLEAR_FEATURE(ENDPOINT_HALT)漏复位DATA0。不是fixed-SWD固件，不替换Golden，也未固化QSPI。CDC缺口修复在本机EXE后台连续接收器，两部分须使用对应版本。
+
+PS e93f1810…/bit106d579b…已实际加载并物理MEM-AP0匹配。100轮首DEF、冻结EXE24步随机、1/3/8通道完整窗口及严格序号流通过。SRAM主窗口约3.435/3.403MB/s；HSS上限波动、span元数据显示警告及原生转Web初连超时分别保留ZL-070/097/098。详见[R23](../../docs/validation/hpm6800-def-cdc-fix-20261102/README.md)、manifest和完整ps-build.json。PS源码基于035b187加报告build-inputs精确覆盖；提交后绑定承载源码提交。
+''',encoding='utf-8')
+save(D/'evidence.json',dict(files={p.relative_to(D).as_posix():dict(bytes=p.stat().st_size,sha256=sha(p))for p in D.rglob('*')if p.is_file()and p.name!='evidence.json'}))
+print('Archived public evidence, compressed CDC/USB bytes, probe pair and two RAM fixtures; no private backups/runtime tokens.')

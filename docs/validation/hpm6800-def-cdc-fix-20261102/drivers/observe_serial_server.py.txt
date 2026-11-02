@@ -1,0 +1,27 @@
+"""Observe the Windows flags pyserial normally clears; no changed read behavior."""
+import ctypes,json,threading,time,runpy,sys
+from pathlib import Path
+import serial.win32 as win32
+base=Path(__file__).resolve().parent
+original=win32.ClearCommError
+lock=threading.Lock();stats=dict(calls=0,maxQueued=0,errorEvents=[],started=time.time(),lastCall=None,maxCallGap=0)
+def observed(handle,flags,comstat):
+    ok=original(handle,flags,comstat)
+    if ok:
+        now=time.perf_counter();bits=ctypes.cast(flags,ctypes.POINTER(win32.DWORD)).contents.value
+        queued=ctypes.cast(comstat,ctypes.POINTER(win32.COMSTAT)).contents.cbInQue
+        with lock:
+            stats['calls']+=1;stats['maxQueued']=max(stats['maxQueued'],queued)
+            if stats['lastCall'] is not None:stats['maxCallGap']=max(stats['maxCallGap'],now-stats['lastCall'])
+            stats['lastCall']=now
+            if bits:stats['errorEvents'].append(dict(at=time.time(),flags=bits,queued=queued))
+    return ok
+win32.ClearCommError=observed
+def persist():
+    while True:
+        with lock:out=dict(stats)
+        (base/'serial-observer.json').write_text(json.dumps(out,indent=2)+'\n')
+        time.sleep(.5)
+threading.Thread(target=persist,daemon=True).start()
+sys.argv=['toolbox.py',*sys.argv[1:]]
+runpy.run_path('toolbox.py',run_name='__main__')

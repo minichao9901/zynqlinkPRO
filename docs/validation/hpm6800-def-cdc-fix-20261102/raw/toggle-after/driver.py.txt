@@ -1,0 +1,63 @@
+"""HPM6800 USB stream diagnosis. HSS reads SRAM only; no target halt/reset/Flash.
+
+Requires an idle, identity-verified probe. Keep each invocation serial.
+"""
+import argparse,json,struct,time,hashlib,sys
+from pathlib import Path
+import usb.core,usb.util
+from dap_pipeline_bench import open_dap,drain
+from benchmark_hpm5301 import setup
+from probe_stream import Probe
+from probe_build_info import provenance,live_clock_snapshot
+
+def main():
+    p=argparse.ArgumentParser(description=__doc__)
+    p.add_argument('--out',type=Path,required=True);p.add_argument('--bit',type=Path,required=True);p.add_argument('--elf',type=Path,required=True)
+    p.add_argument('--rounds',type=int,default=20);p.add_argument('--clear',choices=('always','never','alternate'),default='alternate')
+    a=p.parse_args();a.out.mkdir(parents=True,exist_ok=False)
+    report=dict(artifacts=provenance(a.bit,a.elf),rows=[],target_flash_writes=False,target_memory_writes=False,target_reset=False)
+    (a.out/'driver.py.txt').write_text(Path(__file__).read_text())
+    def save():(a.out/'result.json').write_text(json.dumps(report,indent=2)+'\n')
+    def read_until_quiet(dev):
+        packets=[]
+        while True:
+            try:data=bytes(dev.read(0x87,512,timeout=10))
+            except usb.core.USBTimeoutError:return packets
+            assert len(data)==512 and data[:2]==b'SJ',data[:20]
+            packets.append(data)
+    dev,tx,rx=open_dap();probe=Probe()
+    try:
+        for service in (0x31,0x32):
+            rc,info=probe.action(service,2);assert rc==0 and not info[0]&1,(service,rc,info)
+        drain(rx);setup(tx,rx,10_000_000,0,connect=True)
+        assert probe.action(0x31,10,b'\1')[0]==0
+        report['clock']=live_clock_snapshot()
+        for i in range(a.rounds):
+            leftover=read_until_quiet(dev)
+            clear=a.clear=='always' or a.clear=='alternate' and i%2==1
+            if clear:dev.clear_halt(0x87)
+            config=struct.pack('<IBBIBB',240000,64,1,0x01240000,4,4)
+            assert probe.action(0x32,10,config)[0]==0
+            rc,status=probe.action(0x32,1);assert rc==0,(rc,status)
+            packets=[];end=time.monotonic()+.065
+            while time.monotonic()<end:
+                try:packets.append(bytes(dev.read(0x87,512,timeout=10)))
+                except usb.core.USBTimeoutError:pass
+            for _ in range(50):
+                rc,_=probe.action(0x32,0)
+                packets+=read_until_quiet(dev)
+                if rc==0:break
+                assert rc==-7
+            assert rc==0
+            packets+=read_until_quiet(dev)
+            _,metrics=probe.action(0x32,11)
+            raw=b''.join(packets);(a.out/f'{i:03d}.jsp').write_bytes(raw)
+            row=dict(round=i,clearHalt=clear,leftoverPackets=len(leftover),packets=len(packets),
+                kinds=[x[3] for x in packets],sequences=[struct.unpack_from('<I',x,4)[0]for x in packets],
+                definitions=sum(x[3]==1 for x in packets),samples=sum(struct.unpack_from('<H',x,12)[0]for x in packets if x[3]==2),
+                metrics=list(metrics),raw_sha256=hashlib.sha256(raw).hexdigest())
+            report['rows'].append(row);save();print(i,clear,row['sequences'][:3],row['definitions'],len(raw),flush=True)
+        report['completed']=True;save()
+    finally:
+        probe.action(0x32,0);probe.close();usb.util.release_interface(dev,0);usb.util.dispose_resources(dev);save()
+if __name__=='__main__':main()

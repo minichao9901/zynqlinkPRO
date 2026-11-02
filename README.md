@@ -46,5 +46,5 @@ python toolbox.py project run sim.cm3 --dry-run -- --top tb_cm3_jtag
 - [验收与限制](docs/F103ZE-Web-CLI-ETM统一验收-20261031.md)
 - [精简说明](docs/slimming-20261031.md)
 
-HSS跨功能切换偶发缺首DEF仍按用户要求暂停，保留最小失败/对照证据，未宣称修复。
+2026-11-02：用户恢复定位后，HPM6800EVK缺首DEF已由PS USB DATA0复位修正，CDC字节缺口由本机连续大块接收修正；100轮首包与新EXE24步随机通过。实际修复配对在prebuilt/hpm6800-usb-fixed-133-20261102，详见[R23](docs/validation/hpm6800-def-cdc-fix-20261102/README.md)。旧Golden字节保留，临界HSS波动与span显示警告另列，历史暂停报告不改写。
 历史源码、逐轮报告和旧bit/ELF可从Git tag `archive/main-before-slim-20261031`追溯；该tag不含原本未跟踪的业务数据。
