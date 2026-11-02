@@ -38,4 +38,12 @@ python -X utf8 -m unittest discover -s tools/tests -p test_etm_source_bindings.p
 
 新增的工具明确检查子进程退出及JSON ok，不把失败JSON的shell退出0当作解码通过。main旧decoder在候选工作树输出Cannot write的另一个现象已登记[ZL-116](../etm-legacy-path-20261103/README.md)；根因未定。使用main/build新目录完成升级回归不算修复该路径边界，旧失败未删除。
 
-冻结候选的旧记录实际Web入口重解码、最终源码/文件身份绑定及交接状态在收尾后追加；此前不将其标为已验收。
+## 最终验收与身份
+
+修复源码fa0ec83；新冻结候选`build/etm-review-fixed-bridge/`的sourceRevision同为fa0ec83、sourceDirty=false。[身份manifest](build-manifest.json)绑定实际源码/Git blob双SHA、三份未改native EXE和新主EXE/包清单。未更改native C++源码，继续使用77bf1c2构建并已交付的同字节程序，不用旧bit/ELF冒充新构建。
+
+[冻结包标准离线验收](raw/frozen-package-verification.json)通过，禁止硬件访问、PATH无系统Python/Node；冻结实际Web入口对[main F103旧记录](raw/frozen-f103.json)、[main H743旧记录](raw/frozen-h743.json)重解码均通过，旧native原字节保留、新代发布、所有语义及60表相等。测试服务均已结束。17项绑定/算法单测和55项CLI通过；不以保留记录的gap/未知执行为零作为通过条件。
+
+ZL-107在本候选范围关闭；ZL-108的规范编号与分支别名已经同步建立，唯一性检查通过，保留另一Web工作树和历史原始证据。新编号以当前问题表为准。性能边界仍为本轮中位8.880秒、首轮10.173秒，不宣称所有轮次<10秒或硬件Web E2E通过。
+
+本候选尚未合入main或替换固定dist，未推送。main仅同步编号/审查处置文档，保留其他Probe/Web审查条目；ZL-116另保留待定位，未假称其已修复。
