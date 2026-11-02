@@ -1433,3 +1433,10 @@ fieldset,.toolbar,.sendbar,.stats,.an-measurements,.an-plot,
 .log-search-results mark.current{background:#d29922;color:#0d1117;outline:1px solid #f2cc60}
 .log-search-bar[hidden],.log-search-results[hidden]{display:none!important}
 .log-searching .main>.rx,.log-searching .main>.termbox,.log-searching #r-empty{display:none!important}
+.session-context-card{min-width:0;display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin:0 0 6px;padding:4px 2px;border:0;border-bottom:1px solid var(--line);border-radius:0}
+.session-context-card>span:first-of-type{flex:1;min-width:0;font-size:var(--text-xs);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.session-context-note{display:block;flex-basis:100%;font-size:var(--text-xs);color:var(--fg2);overflow-wrap:anywhere}
+.session-context-note:empty{display:none}
+.session-elf-reuse{min-width:0;margin:3px 0;display:flex;flex-direction:column;gap:3px}
+.session-elf-reuse button{max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.session-elf-reuse[hidden]{display:none!important}

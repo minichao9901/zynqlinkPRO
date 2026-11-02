@@ -323,8 +323,6 @@ export class DbgView {
   static supported(){ return typeof navigator !== 'undefined' && 'usb' in navigator; }
 
   onShow(){
-    if (!this.session.connected && !$('d-hpm-target')?.disabled && $('d-hpm-target'))
-      $('d-hpm-target').value = store.get('dbg.rvTarget') === 'riscv-other' ? 'riscv-other' : selectedHpmBoard();
     // 切回本页时对账一次状态（目标可能在别的页签里被复位/被烧录器抢走）
     // 🚨 用 tryExclusive：观察循环正在读的时候直接跳过这一拍，别和它抢 SWD
     if (this.session.connected){
@@ -1259,6 +1257,7 @@ export class DbgView {
       this._updatePcStrip();
       this.renderSource();
       this._renderSrcSuggest();          // 载入就能说"该选哪个源码目录"（DWARF 里存的是编译路径）
+      this.onElfLoaded?.(buf, name);
       return st;
     } catch (e){
       this._out('✗ 解析 ELF 失败：' + (e?.message || e), 'err');

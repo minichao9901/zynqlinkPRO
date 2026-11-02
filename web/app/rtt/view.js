@@ -146,7 +146,7 @@ export class RttView {
     const savedRange = store.get('rtt.range', null);
     applyTarget();
     if (savedRange !== null) $('r-range').value = savedRange;
-    this._applyTargetUi = applyTarget;       // onShow 里要对账"别页切过目标类型"（同一个全局开关）
+    this._applyTargetUi = applyTarget;       // 供明确的会话目标沿用入口刷新本地配置
     const onTargetChanged = () => { applyTarget(); if (this.probe) this.disconnect(); };
     $('r-target').addEventListener('change', onTargetChanged);
     /**
@@ -676,22 +676,6 @@ export class RttView {
 
   /** 切到本标签时调用（隐藏状态下建的终端在这里补尺寸/重放） */
   onShow(){
-    if (!this.probe && $('r-target').value === 'riscv' && hpmBoard(chipSel()?.value)) {
-      const previous = hpmBoard(chipSel().value);
-      const id = selectedHpmBoard();
-      if ($('r-range').value === previous.memory.rttRange) $('r-range').value = rvRange(id);
-      chipSel().value = id; // Preserve custom range and explicit ELF address.
-    }
-    /**
-     * 目标类型是**全局且粘**的（HID 0x31 action 10），波形页也能切、而且写的是同一个键
-     * （`rtt.target`）。用户很可能在那边刚切过 RISC-V —— 切回来时这一格得跟上，
-     * 否则"同一个开关，两页显示不一样"，看起来就像没生效。真不一致就按新值重摆界面。
-     */
-    const savedTarget = store.get('rtt.target', '');
-    if ((savedTarget === 'riscv' || savedTarget === 'swd') && savedTarget !== $('r-target').value && this._applyTargetUi){
-      $('r-target').value = savedTarget;
-      this._applyTargetUi();
-    }
     if (this.mode !== 'term' || !this.term) return;
     try { this.fit?.fit(); } catch {}
     if (this._termStale){ this._redrawAll(); this._termStale = false; }
@@ -810,16 +794,18 @@ export class RttView {
   }
 
   // ================= ELF =================
-  async _loadElf(){
-    const f = this._elfInput.files?.[0];
-    if (!f) return;
+  async _loadElf(){ return await this.loadElfFile(this._elfInput.files?.[0]); }
+  async loadElfFile(f, buffer){
+    if (!f) return false;
     try {
-      const buf = await f.arrayBuffer();
+      const buf = buffer || await f.arrayBuffer();
       const sym = findSymbol(buf, '_SEGGER_RTT');
       if (!sym){ toast(`${f.name} 里没有 _SEGGER_RTT 符号（strip 过了？）→ 改用扫描`, 'warn', 6000); return; }
       $('r-addr').value = '0x' + sym.addr.toString(16);
       store.set('rtt.addr', $('r-addr').value);
+      this.onElfLoaded?.(buf, f.name);
       toast(`从 ELF 拿到 _SEGGER_RTT = 0x${sym.addr.toString(16)}（${sym.size} B）`, 'ok', 6000);
+      return true;
     } catch (e){ this._err(e); }
   }
 

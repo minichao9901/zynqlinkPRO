@@ -73,12 +73,14 @@ export class FlashView {
   }
 
   // ================= 文件 =================
-  async _onFile(f){
+  async _onFile(f, buffer){
     if (!f) return;
     try {
-      const buf = await f.arrayBuffer();
+      const buf = buffer || await f.arrayBuffer();
+      if (this.busy) throw new Error('请等待烧录操作完成后再换固件');
       this.file = { name: f.name, size: f.size, dataB64: this._b64(new Uint8Array(buf)) };
       this._fileInfo();
+      this.onElfLoaded?.(buf, f.name);
       toast(`已读入 ${f.name}（${fBytes(f.size)}），点「烧录」写入`, 'ok', 4000);
     } catch (e){
       toast(`读文件失败：${e?.message || e}`, 'err');
@@ -97,12 +99,6 @@ export class FlashView {
     const el = $('f-file-info');
     el.textContent = this.file ? `已选择：${this.file.name}（${fBytes(this.file.size)}）` : '选择或拖入 .elf / .hex / .bin 固件文件';
     $('f-base-row').hidden = !/\.bin$/i.test(this.file?.name || '');
-  }
-
-  onShow(){
-    if (!this.probe && !this.busy && hpmBoard($('f-chip')?.value)) {
-      $('f-chip').value = selectedHpmBoard(); store.set('flash.chip', $('f-chip').value); this._applyChip();
-    }
   }
 
   _applyChip(){ $('f-custom-speed-row').hidden = false; }

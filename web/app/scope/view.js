@@ -261,17 +261,6 @@ export class ScopeView {
 
   onShow(){
     requestAnimationFrame(() => { this._needDraw = true; });
-    /**
-     * 每次切到本页都对一次**全局目标类型**（`rtt.target`，与 RTT Viewer 共用同一个键）：
-     * 用户很可能在 RTT 页刚切过 RISC-V —— 那边一改，这边得跟着（否则"同一个开关两页显示不一样"，
-     * 用户只会以为切换没生效）。真不一致就按新值刷新界面（时钟格名字/置灰/读计划）。
-     */
-    const saved = store.get('rtt.target', '');
-    if ((saved === 'riscv' || saved === 'swd') && saved !== $('sc-target').value){
-      $('sc-target').value = saved;
-      this.targetRiscv = saved === 'riscv';
-      this._applyBackendUi();
-    }
   }
 
   /** 键盘：Esc 清测量游标、Home/End 跳首尾（只在探针页可见、焦点不在输入框时生效）*/
@@ -525,9 +514,11 @@ export class ScopeView {
   }
 
   // ================================================================= ELF / 变量
-  async loadElfFile(file){
+  async loadElfFile(file, buffer){
     try {
-      const buf = new Uint8Array(await file.arrayBuffer());
+      if (this.running || this._starting) throw new Error('请先停止采样再载入 ELF');
+      const buf = new Uint8Array(buffer || await file.arrayBuffer());
+      if (this.running || this._starting) throw new Error('请先停止采样再载入 ELF');
       const elf = new Elf(buf);
       const r = listSampleable(elf);
       this.elf = { name: file.name, source: r.source, versions: r.versions, stats: r.stats, note: r.note || '' };
@@ -556,6 +547,8 @@ export class ScopeView {
       this.setStatusText(r.note
         ? `ELF 解析完成（${r.sampleable.length} 个通道，按符号表）—— ⚠ ${r.note}`
         : `ELF 解析完成：${r.sampleable.length} 个可采样通道`, r.note ? 'warn' : 'ok');
+      this.onElfLoaded?.(buf, file.name);
+      return true;
     } catch (e){
       $('sc-elfinfo').textContent = '解析失败：' + (e?.message || e);
       this.setStatusText('ELF 解析失败：' + (e?.message || e), 'err');
