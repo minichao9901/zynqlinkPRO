@@ -639,7 +639,7 @@ module swd_controller #(
                     ADDR_CTRL: begin
                         rdata_reg <= {16'd0, xfer_request, 5'd0, ctrl_timestamp_en, ctrl_mode, scalar_status_busy};
                     end
-                    ADDR_FEATURES: rdata_reg <= 32'h4450_001f;
+                    ADDR_FEATURES: rdata_reg <= 32'h4450_003f; // bit5: RISC-V extended idle, max64.
                     ADDR_ENGINE_RESET: rdata_reg <= engine_reset_count;
                     ADDR_TRACE_CTRL: rdata_reg <= {trace_frozen,trace_raw_mode,trace_raw_active,trace_raw_armed,8'd0,trace_count,trace_head};
                     ADDR_TRACE_INDEX: rdata_reg <= {28'd0,trace_index};
@@ -877,7 +877,9 @@ module swd_controller #(
         // A zero encoding keeps the legacy ARM default for older firmware.
         .idcode_ir(jtag_config[15:8]==0 ? 8'h0e : jtag_config[15:8]),
         .riscv_mode(jtag_config[2]),
-        .half_delay(cfg_delay_fast[3:0]),.idle_cycles(cfg_idle_cycles),
+        .half_delay(cfg_delay_fast[3:0]),
+        .idle_cycles(jtag_config[2] && jtag_config[23:16]!=0 ?
+                     (jtag_config[23:16]>64 ? 8'd64 : jtag_config[23:16]) : {4'd0,cfg_idle_cycles}),
         .late_return(jtag_return_late),
         // Both phases use the IOB IDDR. Q1 is consumed one FCLK after its
         // rising sample, Q2 half an FCLK after its falling sample. The DR

@@ -74,7 +74,10 @@ static uint32_t idcode_ir = JTAG_IDCODE;
 void JTAG_SetIDCodeIR(uint32_t value) { idcode_ir = value & 0xFFU; }
 uint32_t JTAG_IDCodeIR(void) { return idcode_ir; }
 uint32_t DAP_JTAG_RouteWord(void) {
-    return 3U | (idcode_ir<<8) | (idcode_ir==1U ? 4U : 0U);
+    uint32_t idle=DAP_Data.transfer.idle_cycles;
+    uint32_t extension=idcode_ir==1U && idle>15U && (swd_read32(SWD_FEATURES)&JTAG_FEATURE_EXTENDED_IDLE)
+        ? ((idle>64U ? 64U : idle)<<16) : 0U;
+    return 3U | (idcode_ir<<8) | (idcode_ir==1U ? 4U : 0U) | extension;
 }
 /* HPM's DTM needs a TAP reset between IDCODE/DTMCS and DMI. Merely
  * replacing IR leaves DMI unresponsive, even though the IR cache says 0x11.

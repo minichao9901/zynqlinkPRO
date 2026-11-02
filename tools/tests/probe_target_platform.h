@@ -12,6 +12,7 @@
 #include "../../firmware/xusbps_daplink_dma/DAP/Include/ps_fclk.h"
 typedef struct {
     uint32_t debug_port,clock_delay,fast_clock;
+    struct { uint8_t idle_cycles; } transfer;
     struct {uint8_t count,index,ir_length[8];uint16_t ir_before[8],ir_after[8];} jtag_dev;
 } DAP_Data_t;
 extern DAP_Data_t DAP_Data;

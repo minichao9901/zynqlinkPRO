@@ -8,8 +8,8 @@ set swclk_pad [get_ports swclk_0]
 set_max_delay 7.000 -datapath_only -from $swclk_launch -to $swclk_pad
 puts "SWCLK_LAUNCH_BUDGET=7.000ns SOURCE=$swclk_launch"
 # Optional internal work point for placement/route, not the target TRACECLK.
-# The PS boots at the BD clock and firmware may select 120MHz at run time;
-# optimizing only for 100MHz can leave that required work point unclosed.
+# The default XDC closes 133.333333MHz, independently of the lower FCLK a
+# transaction may select at runtime. Explicit experiments may override it.
 if {[info exists ::env(ZYNQLINK_IMPLEMENT_FCLK_HZ)]} {
     set implementation_hz $::env(ZYNQLINK_IMPLEMENT_FCLK_HZ)
     if {![string is integer -strict $implementation_hz] || $implementation_hz < 10000000 || $implementation_hz > 180000000} {

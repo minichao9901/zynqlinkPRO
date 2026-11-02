@@ -1,0 +1,233 @@
+"""Preserved-AHB-SRAM HPM6800 TCK/idle matrix; requires verified loaded pair.
+
+Uses the capability-gated idle setting (effective minimum 8; legacy max15,
+extended pair max64). Every requested idle is checked through live readback.
+No target reset, Flash/PLL writes, firmware loading or transparent retries.
+"""
+import argparse
+from datetime import datetime, timezone, timedelta
+import hashlib
+import json
+from pathlib import Path
+import random
+import struct
+
+import usb.util
+from benchmark_hpm5301 import setup, clock
+from dap_pipeline_bench import open_dap, drain, xfer, le
+from probe_build_info import provenance
+from probe_stream import Probe
+from riscv_target import RiscvTarget
+from validate_fclk_performance import physical_snapshot
+from validate_hpm6800_performance import SramMemory, peak, recover_link, target_clocks
+
+BASE, SIZE = 0xf0400000, 32768
+
+
+class DiagnosticMemory(SramMemory):
+    def __init__(self, out, inp):
+        super().__init__(out, inp)
+        self.recent = []
+
+    def transfer(self, packet):
+        reply = super().transfer(packet)
+        self.recent.append(dict(request_head=bytes(packet)[:32].hex(), reply_head=reply[:64].hex()))
+        self.recent = self.recent[-8:]
+        return reply
+
+
+def set_idle(out, inp, idle):
+    if not 0 <= idle <= 64:
+        raise ValueError('Idle must be 0..64')
+    reply = xfer(out, inp, [4, idle, 64, 0, 0, 0])
+    assert reply == b'\x04\x00', reply.hex()
+    live = clock(out, inp)
+    live['idle_csr'] = (int(live['cfg'], 16) >> 4) & 15
+    query = xfer(out, inp, [0x8d, 255])
+    if len(query) == 4 and query[:2] == b'\x8d\x00':
+        live['effective_dmi_idle'], live['idle_limit'] = query[2], query[3]
+    else:
+        live['effective_dmi_idle'], live['idle_limit'] = max(8, live['idle_csr']), 15
+    assert live['effective_dmi_idle'] == max(8, idle), ('Idle request not implemented by loaded pair', idle, live)
+    return live
+
+
+def dtmcs_without_tlr(out, inp):
+    # Observe sticky DMI status BEFORE TAP reset/recovery. Raw scans run at
+    # the known low control clock; this is not a high-TCK capture validation.
+    assert xfer(out, inp, [0x11] + le(10_000_000)) == b'\x11\x00'
+    target = object.__new__(RiscvTarget)
+    target.out, target.inp, target.ir = out, inp, None
+    target.select(16)
+    value = target.scan(0, 32)
+    return dict(raw=hex(value), version=value & 15, abits=(value >> 4) & 63,
+                dmistat=(value >> 10) & 3, idle_hint=(value >> 12) & 7,
+                observed_before_tap_reset=True, observed_at_low_control_clock=True)
+
+
+def main():
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument('--bit', type=Path, required=True)
+    p.add_argument('--elf', type=Path, required=True, help='Probe PS ELF')
+    p.add_argument('--out', type=Path, required=True)
+    p.add_argument('--speeds', default='25000000,26000000,27000000,28000000,29000000,30000000,31000000,32000000')
+    p.add_argument('--idles', default='8,10,12,15')
+    p.add_argument('--modes', default='0')
+    p.add_argument('--loops', type=int, default=32)
+    p.add_argument('--repeats', type=int, default=3)
+    p.add_argument('--stress-seconds', type=float, default=0)
+    p.add_argument('--high-idcode', action='store_true', help='Also test the public high-speed IDCODE/prime path')
+    a = p.parse_args()
+    speeds, idles, modes = [list(map(int, s.split(','))) for s in (a.speeds, a.idles, a.modes)]
+    if a.loops <= 0 or a.repeats <= 0 or a.stress_seconds < 0 or any(not 0 <= v <= 64 for v in idles) or any(v not in (0, 1, 16, 17) for v in modes):
+        p.error('Invalid count/idle/mode')
+    a.out.mkdir(parents=True, exist_ok=False)
+    (a.out/'driver.py.txt').write_bytes(Path(__file__).read_bytes())
+    report = dict(time=datetime.now(timezone(timedelta(hours=8))).isoformat(),
+        artifacts=provenance(a.bit, a.elf), rows=[], target_resets=False, target_flash_writes=False,
+        method='identify at 10MHz, then requested DR clock; no high-IDCODE gate unless explicitly selected',
+        driver_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest())
+    def save():
+        (a.out/'result.json').write_text(json.dumps(report, indent=2)+'\n')
+    report['probe_before'] = physical_snapshot()
+    save()
+    assert report['probe_before']['allObservedEnginesIdle']
+    dev, out, inp = open_dap()
+    probe, mem = Probe(), DiagnosticMemory(out, inp)
+    backup = initial = pc = initial_cfg = initial_mode = initial_idle = None
+    try:
+        for service in (0x31, 0x32):
+            rc, info = probe.action(service, 2)
+            assert rc == 0 and not info[0] & 1, (service, rc, info)
+        drain(inp)
+        live = clock(out, inp)
+        initial_cfg, initial_mode = int(live['cfg'], 16), live['JTAG_sampling_mode']
+        query = xfer(out, inp, [0x8d, 255])
+        initial_idle = query[2] if len(query) == 4 and query[:2] == b'\x8d\x00' else (initial_cfg >> 4) & 15
+        setup(out, inp, 10_000_000, 0, connect=True)
+        target = RiscvTarget(out, inp)
+        target.active()
+        initial = target.dmi(0x11)
+        target.halt()
+        pc = target.register(0x7b1)
+        report.update(initial_dmstatus=hex(initial), initial_dpc=hex(pc), clocks_before=target_clocks(target))
+        setup(out, inp, 10_000_000)
+        backup = mem.read(BASE, SIZE)
+        assert mem.read(BASE, SIZE) == backup
+        (a.out/'backup.bin').write_bytes(backup)
+        report['backup_sha256'] = hashlib.sha256(backup).hexdigest()
+        save()
+        pattern = random.Random(0x68002026).randbytes(SIZE)
+        for speed in speeds:
+            for idle in idles:
+                for mode in modes:
+                    row = dict(requested_Hz=speed, idle_requested=idle, mode=mode, passed=False, stage='prepare')
+                    try:
+                        recover_link(dev, out, inp)
+                        setup(out, inp, 10_000_000, 0)
+                        set_idle(out, inp, 8)
+                        mem.write(BASE, pattern)
+                        assert mem.read(BASE, SIZE) == pattern
+                        set_idle(out, inp, idle)
+                        # Route extension writes invalidate the TAP/IR cache.
+                        # Prime/activate at the low clock after changing idle.
+                        setup(out, inp, 10_000_000, 0)
+                        assert xfer(out, inp, [0x11] + le(speed)) == b'\x11\x00'
+                        assert xfer(out, inp, [0x89, mode])[:3] == bytes([0x89, 0, mode])
+                        row.update(set_idle(out, inp, idle))
+                        if a.high_idcode:
+                            row['stage'] = 'public_idcode_and_prime'
+                            reply = xfer(out, inp, [0x16, 0])
+                            row['idcode_reply'] = reply.hex()
+                            assert reply == bytes.fromhex('16003d560010'), reply.hex()
+                        row['stage'] = 'high_read'
+                        for _ in range(3):
+                            actual = mem.read(BASE, 4096)
+                            if actual != pattern[:4096]:
+                                row['mismatch_offset'] = next(i for i,(x,y) in enumerate(zip(actual, pattern)) if x != y)
+                                row['read_sha256'] = hashlib.sha256(actual).hexdigest()
+                                raise RuntimeError('High-TCK read mismatch')
+                        row['stage'] = 'high_write'
+                        data = random.Random(speed + idle + mode).randbytes(4096)
+                        mem.write(BASE, data)
+                        assert mem.read(BASE, 4096) == data, 'High-TCK write readback mismatch'
+                        mem.write(BASE, pattern)
+                        row['stage'] = 'peak'
+                        row.update(peak(mem, BASE, SIZE, pattern, a.loops, a.repeats))
+                        if a.stress_seconds:
+                            import time
+                            started, rounds = time.perf_counter(), 0
+                            variants = (pattern, bytes(v ^ 255 for v in pattern))
+                            while time.perf_counter() - started < a.stress_seconds:
+                                data = variants[rounds & 1]
+                                mem.write(BASE, data)
+                                assert mem.read(BASE, SIZE) == data, 'Sustained SRAM mismatch'
+                                rounds += 1
+                            row['stress'] = dict(seconds=time.perf_counter()-started, rounds=rounds, bytes_each_direction=rounds*SIZE)
+                        row.update(passed=True, stage='complete')
+                    except Exception as exc:
+                        row['error'] = repr(exc)
+                        row['recent_transfers'] = list(mem.recent)
+                    finally:
+                        try:
+                            row['dtmcs_before_recovery'] = dtmcs_without_tlr(out, inp)
+                            t = RiscvTarget(out, inp)
+                            t.select(16)
+                            t.scan(1 << 16, 32)
+                            t = RiscvTarget(out, inp)
+                            t.active()
+                            row['post_dtmreset_diagnostics'] = dict(sbcs=hex(t.dmi(0x38)), sbaddress=hex(t.dmi(0x39)), dmstatus=hex(t.dmi(0x11)))
+                        except Exception as exc:
+                            row['dtmcs_observation_error'] = repr(exc)
+                        report['active_row'] = row
+                        save()
+                        recover_link(dev, out, inp)
+                        set_idle(out, inp, 8)
+                        target = RiscvTarget(out, inp)
+                        target.active()
+                        row['recovered_dpc'] = hex(target.register(0x7b1))
+                        assert row['recovered_dpc'] == hex(pc), 'Target PC changed during high-TCK traffic'
+                        assert target.dmi(0x11) & (1 << 9), 'Target unexpectedly resumed'
+                        setup(out, inp, 10_000_000)
+                        mem.write(BASE, backup)
+                        row['restore_match'] = mem.read(BASE, SIZE) == backup
+                        assert row['restore_match']
+                        report['rows'].append(row)
+                        report.pop('active_row', None)
+                        save()
+                        print(json.dumps({k:v for k,v in row.items() if not k.endswith('_scan_stats')}), flush=True)
+    except BaseException as exc:
+        report['failure'] = repr(exc)
+        raise
+    finally:
+        try:
+            recover_link(dev, out, inp)
+            if initial_cfg is not None:
+                set_idle(out, inp, initial_idle)
+            if backup is not None:
+                mem.write(BASE, backup)
+                report['restore_match'] = mem.read(BASE, SIZE) == backup
+                assert report['restore_match']
+            if initial is not None:
+                t = RiscvTarget(out, inp)
+                t.active()
+                assert t.register(0x7b1) == pc
+                report['clocks_after'] = target_clocks(t)
+                assert report['clocks_after'] == report['clocks_before']
+                if initial & (1 << 10):
+                    t.resume()
+                report['final_dmstatus'] = hex(t.dmi(0x11))
+                assert bool(initial & (1 << 10)) == bool(int(report['final_dmstatus'], 16) & (1 << 10))
+            setup(out, inp, 25_000_000, initial_mode or 0)
+        except BaseException as exc:
+            report['restore_error'] = repr(exc)
+            raise
+        finally:
+            save()
+            probe.close()
+            usb.util.release_interface(dev, 0)
+            usb.util.dispose_resources(dev)
+
+
+if __name__ == '__main__':
+    main()

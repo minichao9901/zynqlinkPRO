@@ -1,5 +1,7 @@
 # 最小依赖与构建
 
+后续PL实现与路由时序验证默认约束133.333333MHz（7.5ns），见根AGENTS.md。历史Golden的120MHz记录保持原样；约束值不等于运行FCLK/TCK，运行时仍按PLL/分频寄存器读回记录。
+
 - Vivado/SDK2018.3安装在项目外，真实CM3加密RTL仅XSim可编译。
 - CM3默认目录reference/cortex_m3_on_xc7a100t下的34个RTL/include文件、上游许可证和README已纳入Git；文件身份见cm3-model.json。
 - PS默认BSP的include/lib/libsrc、Makefile与system.mss已纳入Git。libxil.a是必要的固定构建输入，其SHA-256与Golden及recovery的原构建清单一致；不提交可再生.o或SDK工作区元数据。

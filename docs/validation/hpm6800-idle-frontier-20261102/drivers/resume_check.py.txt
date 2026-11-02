@@ -1,0 +1,8 @@
+import sys
+sys.path.insert(0, 'tools')
+from jtag_internal_trace import run
+print(run('''puts [targets]
+targets -set -filter {name =~ "APU"}
+puts [format "FCLK %08X" [mrd -address-space AP0 -force -value 0xf8000170]]
+puts [format "FPGA %08X" [mrd -address-space AP0 -force -value 0xf800700c]]
+'''))

@@ -16,10 +16,10 @@ DAP_Data_t DAP_Data={.debug_port=2,.jtag_dev={.count=2,.ir_length={4,5},.ir_afte
 static uint32_t regs[8]={3,4|(5U<<19),256,0,0,0,0,14};
 static uint32_t selected=0x01000030U,posted;
 static uint32_t clock_value=(1U<<20)|(10U<<8),csw_value=0x23000052U,tar_value=0x20004a10U;
-static unsigned scans,valid_mode=17,mode_seen,ap_reads;
+static unsigned scans,valid_mode=17,mode_seen,ap_reads,features=15;
 uint32_t Xil_In32(uintptr_t a) {
     if(a==0xf8000108U) return 30U<<12;
-    if(a==SWD_FEATURES)return 15;
+    if(a==SWD_FEATURES)return features;
     if(a==SLCR_FPGA0_CLK_CTRL)return clock_value;
     assert(a>=JTAG_ROUTE && a<JTAG_RX_DATA);
     return regs[(a-JTAG_ROUTE)/4] | (a==JTAG_TIMING ? 4U : 0U);
@@ -78,6 +78,15 @@ int main(void) {
     assert(regs[0]==0x0107 && regs[1]==5 && regs[2]==0);
     assert(regs[6]==1 && ap_reads==old_ap_reads);
     assert(JTAG_ReadIDCode()==0x1000563dU && regs[7]==17U);
+    features|=JTAG_FEATURE_EXTENDED_IDLE;
+    DAP_Data.transfer.idle_cycles=24;
+    assert(DAP_JTAG_RouteWord()==(0x0107U|(24U<<16)));
+    DAP_Data.transfer.idle_cycles=255;
+    assert(DAP_JTAG_RouteWord()==(0x0107U|(64U<<16)));
+    DAP_Data.transfer.idle_cycles=8;
+    assert(DAP_JTAG_RouteWord()==0x0107U);
+    JTAG_SetIDCodeIR(14);
+    assert(DAP_JTAG_RouteWord()==0x0e03U);
     puts("PASS production JTAG calibration: all IDDR phases, TAR pattern/CPUID validation, SELECT/CSW/TAR/clock restore, no target memory writes");
     return 0;
 }

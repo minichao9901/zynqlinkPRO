@@ -18,7 +18,8 @@ module jtag_core (
     // IDCODE instruction; a RISC-V DTM needs 0x01 instead.
     input wire [7:0] idcode_ir,
     input wire riscv_mode,
-    input wire [3:0] half_delay,idle_cycles,
+    input wire [3:0] half_delay,
+    input wire [7:0] idle_cycles,
     input wire late_return,
     input wire tdo,tdo_alternate,tdi_sense,
     input wire next_valid,input wire [7:0] next_request,input wire [31:0] next_wdata,
@@ -65,7 +66,10 @@ module jtag_core (
     wire [63:0] debug_sense_frame=phy_sense_echo >> ((rv_active ? 3 : 5)+dr_before);
     reg [40:0] scan_result;
     reg [63:0] dr_tms_bits,dr_tdi_bits;
-    reg [6:0] dr_count;
+    reg [8:0] dr_count;
+    // Bound extended RISC-V idle so a complete scan remains within the
+    // shifter's 256-bit capture/index capacity. Legacy ARM idle stays 4-bit.
+    wire [7:0] rv_idle_cycles=idle_cycles<8 ? 8'd8 : idle_cycles>64 ? 8'd64 : idle_cycles;
     reg [3:0] capture_offset;
     reg phy_slow;
     reg phy_capture_rise;
@@ -259,10 +263,10 @@ module jtag_core (
                 dr_tms_bits<=(64'd3 << ((rv_active ? 2 : 4)+dr_before+(rv_active ? 41 : op==3 ? 32 : 35)+dr_after)) | 1;
                 dr_tdi_bits<=(rv_active ? {23'd0,rv_frame} : op==3 ? 64'd0 : {29'd0,(phase==0 ? value : 32'd0),scan_req[3:1]}) << ((rv_active ? 3 : 5)+dr_before);
                 dr_count<=7+dr_before+(rv_active ? 41 : op==3 ? 32 : 35)+dr_after+
-                          (rv_active && idle_cycles<8 ? 4'd8 : idle_cycles)-(rv_active ? 2 : 0);
+                          (rv_active ? rv_idle_cycles : idle_cycles)-(rv_active ? 2 : 0);
                 capture_offset<=3+dr_before+(late_return ? 1 : 0);state<=DR_PRE;
             end
-            DR_PRE: shift_segment({5'd0,dr_count},1,0,0,1,2,{192'd0,dr_tms_bits},{192'd0,dr_tdi_bits},EVALUATE);
+            DR_PRE: shift_segment({3'd0,dr_count},1,0,0,1,2,{192'd0,dr_tms_bits},{192'd0,dr_tdi_bits},EVALUATE);
             PHY_WAIT: begin
                 stat_cycles<=stat_cycles+1'b1;
                 if(phy_done) begin

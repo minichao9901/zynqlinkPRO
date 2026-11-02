@@ -13,6 +13,7 @@
 #define JTAG_STAT_CYCLES 0x400100c0U
 #define JTAG_STAT_BITS 0x400100c4U
 #define JTAG_STAT_TRANSFERS 0x400100c8U
+#define JTAG_FEATURE_EXTENDED_IDLE (1U << 5)
 int DAP_JTAG_Select(uint32_t index);
 int DAP_JTAG_AutoConfigure(void);
 void DAP_JTAG_ClockChanged(void);

@@ -35,10 +35,22 @@ def main():
     p.add_argument('--seconds', type=float, default=2)
     p.add_argument('--repeats', type=int, default=3)
     p.add_argument('--mode', type=int, choices=(0, 1, 16, 17), default=0)
+    p.add_argument('--periods', help='HSS direct period list in 24MHz ticks; skip frontier search')
+    p.add_argument('--variables', default='1,8', help='HSS channel counts (1..8)')
+    p.add_argument('--hss-base', type=lambda v: int(v, 0), choices=(AHB+0x4000, 0x0123ff00), default=AHB+0x4000,
+                   help='Fixture base; channels start at +0x100. AXI option samples 0x01240000')
+    p.add_argument('--observe-scans', action='store_true', help='Passive AP0 scan/sample counters; no DAP ownership changes')
+    p.add_argument('--idle', type=int, choices=range(65), help='Explicit TransferConfigure idle; >15 requires extended-idle pair')
     a = p.parse_args()
     if a.seconds <= 0 or a.repeats <= 0:
         p.error('--seconds and --repeats must be positive; verification cannot be skipped')
+    counts = list(map(int, a.variables.split(',')))
+    periods = list(map(int, a.periods.split(','))) if a.periods else None
+    if not counts or any(n < 1 or n > 8 for n in counts) or (periods and any(n < 24 or n > 24000000 for n in periods)):
+        p.error('Invalid HSS counts/periods')
     a.out.mkdir(parents=True, exist_ok=False)
+    (a.out/'driver.py.txt').write_bytes(Path(__file__).read_bytes())
+    (a.out/'benchmark-driver.py.txt').write_bytes((ROOT/'tools/benchmark_hpm5301.py').read_bytes())
     report = dict(artifacts=provenance(a.bit, a.elf), stage=a.stage, rows=[], summary=[],
                   target_flash_writes=False, target_resets=False, target_clock_writes=False)
     report['driver_sha256'] = driver_hashes()
@@ -83,6 +95,8 @@ def main():
         report['clock_registers_before'] = [hex(target.word(x)) for x in (0xf4001800, 0xf4001804, 0xf4001810)]
         setup(out, inp, 10_000_000)
         regions = [(AHB, 20480)] + ([(CODE, 256)] if binary else [])
+        if not binary and a.hss_base != AHB+0x4000:
+            regions.append((a.hss_base, 4096))
         for base, size in regions:
             data = mem.read(base, size)
             assert mem.read(base, size) == data, 'Backup not repeatable'
@@ -106,11 +120,18 @@ def main():
             port = next(p.device for p in comports() if p.vid == 0xd28 and p.pid == 0x204)
         else:
             fixture = random.Random(0x68004853).randbytes(4096)
-            mem.write(AHB+0x4000, fixture)
-            assert mem.read(AHB+0x4000, 4096) == fixture
+            mem.write(a.hss_base, fixture)
+            assert mem.read(a.hss_base, 4096) == fixture
         assert probe.action(0x31, 12, b'\x02')[0] == 0
         for speed in map(int, a.speeds.split(',')):
             try:
+                if a.idle is not None:
+                    setup(out, inp, 10_000_000, 0)
+                    assert mem.transfer([4, a.idle, 64, 0, 0, 0]) == b'\x04\x00'
+                    if a.idle > 15:
+                        query = mem.transfer([0x8d, 255])
+                        assert len(query) == 4 and query[:2] == b'\x8d\x00' and query[2] == a.idle, ('Extended idle not applied', query.hex())
+                    setup(out, inp, 10_000_000, 0)
                 setup(out, inp, speed, a.mode)
                 live = clock(out, inp)
             except Exception as exc:
@@ -137,11 +158,21 @@ def main():
                 assert rc == -6, ('Unexpected low-clock result', rc, info)
                 stop(probe, dev)
             else:
-                for nvars in (1, 8):
+                if periods:
+                    for nvars in counts:
+                        for period in periods:
+                            for repeat in range(a.repeats):
+                                row = hss_point(probe, mem, dev, speed, period, nvars, a.seconds, fixture[256:288],
+                                    allow_low_clock=True, base=a.hss_base, observe_scans=a.observe_scans, idle_cycles=a.idle)
+                                row.update(tag='direct', repeat=repeat, fixture_base=hex(a.hss_base))
+                                record(row)
+                    continue
+                for nvars in counts:
                     good, bad = None, None
                     points = []
                     for period in (24000, 2400, 600, 300, 160, 120, 96, 80, 64, 48, 32, 24):
-                        row = hss_point(probe, mem, dev, speed, period, nvars, .5, fixture[256:288], allow_low_clock=True)
+                        row = hss_point(probe, mem, dev, speed, period, nvars, .5, fixture[256:288],
+                            allow_low_clock=True, base=a.hss_base, observe_scans=a.observe_scans, idle_cycles=a.idle)
                         row['tag'] = 'scan'
                         record(row)
                         points.append(row)
@@ -156,7 +187,8 @@ def main():
                             if good - bad <= 1:
                                 break
                             period = (good + bad) // 2
-                            row = hss_point(probe, mem, dev, speed, period, nvars, .5, fixture[256:288], allow_low_clock=True)
+                            row = hss_point(probe, mem, dev, speed, period, nvars, .5, fixture[256:288],
+                                allow_low_clock=True, base=a.hss_base, observe_scans=a.observe_scans, idle_cycles=a.idle)
                             row['tag'] = 'refine'
                             record(row)
                             if row['skipped'] == 0:
@@ -167,7 +199,8 @@ def main():
                     for _ in range(4):
                         verified = []
                         for repeat in range(a.repeats):
-                            row = hss_point(probe, mem, dev, speed, good, nvars, a.seconds, fixture[256:288], allow_low_clock=True)
+                            row = hss_point(probe, mem, dev, speed, good, nvars, a.seconds, fixture[256:288],
+                                allow_low_clock=True, base=a.hss_base, observe_scans=a.observe_scans, idle_cycles=a.idle)
                             row.update(tag='verify', repeat=repeat)
                             record(row)
                             verified.append(row)

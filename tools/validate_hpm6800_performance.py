@@ -111,10 +111,16 @@ def main():
     p.add_argument('--repeats', type=int, default=3)
     p.add_argument('--sustain-seconds', type=float, default=0, help='Additional alternating full-window byte-checked stress per accepted point')
     p.add_argument('--skip-high-idcode', action='store_true', help='Diagnostic: identify/activate at 10MHz, then test DMI at requested TCK')
+    p.add_argument('--idle', type=int, choices=range(65), help='Explicit idle; >15 requires the extended-idle pair')
+    p.add_argument('--modes', default='0,1,17,16', help='Explicit capture profile order')
     a = p.parse_args()
     if a.loops <= 0 or a.repeats <= 0 or a.sustain_seconds < 0:
         p.error('--loops/--repeats must be positive and --sustain-seconds nonnegative')
+    modes = list(map(int, a.modes.split(',')))
+    if not modes or any(v not in (0, 1, 16, 17) for v in modes):
+        p.error('Invalid capture modes')
     a.out.mkdir(parents=True, exist_ok=False)
+    (a.out/'driver.py.txt').write_bytes(Path(__file__).read_bytes())
     report = dict(time=datetime.now(timezone(timedelta(hours=8))).isoformat(),
                   artifacts=provenance(a.bit, a.elf), rows=[], target='HPM6800EVK / hart0',
                   target_flash_writes=False, target_resets=False, target_clock_writes=False)
@@ -156,9 +162,16 @@ def main():
             save()
             for speed in map(int, a.speeds.split(',')):
                 row = dict(window=name, base=hex(base), requested_Hz=speed, passed=False, attempts=[])
-                for mode in (0, 1, 17, 16):
+                for mode in modes:
                     attempt = dict(mode=mode)
                     try:
+                        if a.idle is not None:
+                            setup(out, inp, 10_000_000, 0)
+                            assert mem.transfer([4, a.idle, 64, 0, 0, 0]) == b'\x04\x00'
+                            query = mem.transfer([0x8d, 255])
+                            assert len(query) == 4 and query[:2] == b'\x8d\x00' and query[2] == max(8, a.idle), ('Idle not applied', query.hex())
+                            attempt['effective_dmi_idle'] = query[2]
+                            setup(out, inp, 10_000_000, 0)
                         if a.skip_high_idcode:
                             setup(out, inp, 10_000_000, 0)
                             assert xfer(out, inp, [0x11] + le(speed)) == b'\x11\x00'

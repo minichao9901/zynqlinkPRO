@@ -1,0 +1,255 @@
+"""HPM6880 RAM-only RTT/HSS frequency acceptance, with full fixture restoration."""
+import argparse
+import hashlib
+import json
+from pathlib import Path
+import random
+import struct
+import subprocess
+import time
+
+from serial.tools.list_ports import comports
+import usb.util
+
+from benchmark_hpm5301 import setup, clock, hss_point, rtt_point
+from dap_pipeline_bench import open_dap, drain
+from probe_build_info import provenance
+from probe_stream import Probe
+from riscv_target import RiscvTarget
+from test_probe_board import stop
+from validate_fclk_performance import physical_snapshot
+from validate_hpm6800_performance import SramMemory, recover_link, target_clocks, driver_hashes
+
+ROOT = Path(__file__).resolve().parents[1]
+AHB, CODE = 0xf0400000, 0x00010000
+ENTRY = 0x10000
+
+
+def main():
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument('--stage', choices=('rtt', 'hss'), required=True)
+    p.add_argument('--bit', type=Path, required=True)
+    p.add_argument('--elf', type=Path, required=True)
+    p.add_argument('--out', type=Path, required=True)
+    p.add_argument('--speeds', default='1000000,10000000,15000000,20000000,25000000,30000000,35000000,40000000,50000000,60000000')
+    p.add_argument('--seconds', type=float, default=2)
+    p.add_argument('--repeats', type=int, default=3)
+    p.add_argument('--mode', type=int, choices=(0, 1, 16, 17), default=0)
+    p.add_argument('--periods', help='HSS direct period list in 24MHz ticks; skip frontier search')
+    p.add_argument('--variables', default='1,8', help='HSS channel counts (1..8)')
+    p.add_argument('--hss-base', type=lambda v: int(v, 0), choices=(AHB+0x4000, 0x0123ff00), default=AHB+0x4000,
+                   help='Fixture base; channels start at +0x100. AXI option samples 0x01240000')
+    p.add_argument('--observe-scans', action='store_true', help='Passive AP0 scan/sample counters; no DAP ownership changes')
+    p.add_argument('--idle', type=int, choices=range(65), help='Explicit TransferConfigure idle; >15 requires extended-idle pair')
+    a = p.parse_args()
+    if a.seconds <= 0 or a.repeats <= 0:
+        p.error('--seconds and --repeats must be positive; verification cannot be skipped')
+    counts = list(map(int, a.variables.split(',')))
+    periods = list(map(int, a.periods.split(','))) if a.periods else None
+    if not counts or any(n < 1 or n > 8 for n in counts) or (periods and any(n < 24 or n > 24000000 for n in periods)):
+        p.error('Invalid HSS counts/periods')
+    a.out.mkdir(parents=True, exist_ok=False)
+    (a.out/'driver.py.txt').write_bytes(Path(__file__).read_bytes())
+    (a.out/'benchmark-driver.py.txt').write_bytes((ROOT/'tools/benchmark_hpm5301.py').read_bytes())
+    report = dict(artifacts=provenance(a.bit, a.elf), stage=a.stage, rows=[], summary=[],
+                  target_flash_writes=False, target_resets=False, target_clock_writes=False)
+    report['driver_sha256'] = driver_hashes()
+    def save():
+        (a.out/'result.json').write_text(json.dumps(report, indent=2)+'\n', encoding='utf-8')
+    def record(row):
+        report['rows'].append(row)
+        save()
+        print(json.dumps(row), flush=True)
+    binary = None
+    if a.stage == 'rtt':
+        gcc = Path('E:/sdk_env_v1.11.0/toolchains/rv32imac_zicsr_zifencei_multilib_b_ext-win/bin/riscv32-unknown-elf-gcc.exe')
+        elf, binary = a.out/'producer.elf', a.out/'producer.bin'
+        subprocess.run([str(gcc), '-march=rv32imac_zicsr_zifencei', '-mabi=ilp32', '-nostdlib',
+                        '-Wl,-Ttext=0x10000', '-Wl,-e,producer', str(ROOT/'firmware/target/hpm6800_perf_ram.S'), '-o', str(elf)], check=True)
+        subprocess.run([str(gcc.with_name('riscv32-unknown-elf-objcopy.exe')), '-O', 'binary', str(elf), str(binary)], check=True)
+        assert binary.stat().st_size < 256
+        report['fixture'] = dict(elf_sha256=hashlib.sha256(elf.read_bytes()).hexdigest(),
+                                code_sha256=hashlib.sha256(binary.read_bytes()).hexdigest(), entry=hex(ENTRY), load=hex(CODE))
+    report['probe_before'] = physical_snapshot()
+    save()
+    assert report['probe_before']['allObservedEnginesIdle']
+    dev, out, inp = open_dap()
+    probe, mem = Probe(), SramMemory(out, inp)
+    backups, registers = {}, {}
+    initial = None
+    try:
+        for service in (0x31, 0x32):
+            rc, info = probe.action(service, 2)
+            assert not info[0] & 1, ('Service already active', service, rc, info)
+        drain(inp)
+        setup(out, inp, 10_000_000, 0, connect=True)
+        target = RiscvTarget(out, inp)
+        target.active()
+        initial = target.dmi(0x11)
+        target.halt()
+        regnos = [0x7b0, 0x7b1, 0x300] + list(range(0x1001, 0x1020))
+        registers = {n: target.register(n) for n in regnos}
+        report['registers_before'] = registers
+        report['cache_control'] = hex(target.register(0x7ca))
+        report['target_clocks_before'] = target_clocks(target)
+        report['clock_registers_before'] = [hex(target.word(x)) for x in (0xf4001800, 0xf4001804, 0xf4001810)]
+        setup(out, inp, 10_000_000)
+        regions = [(AHB, 20480)] + ([(CODE, 256)] if binary else [])
+        if not binary and a.hss_base != AHB+0x4000:
+            regions.append((a.hss_base, 4096))
+        for base, size in regions:
+            data = mem.read(base, size)
+            assert mem.read(base, size) == data, 'Backup not repeatable'
+            (a.out/f'backup-{base:08x}.bin').write_bytes(data)
+            backups[base] = data
+        report['backup_sha256'] = {hex(base): hashlib.sha256(data).hexdigest() for base, data in backups.items()}
+        save()
+        if binary:
+            code = binary.read_bytes()
+            mem.write(CODE, code)
+            assert mem.read(CODE, len(code)) == code
+            mem.write(AHB, bytes(20480))
+            target = RiscvTarget(out, inp)
+            target.active()
+            target.register(0x7b0, (registers[0x7b0] & ~7) | 3)  # M privilege, no single-step.
+            target.register(0x7b1, ENTRY)
+            target.resume()
+            setup(out, inp, 10_000_000)
+            time.sleep(.05)
+            assert mem.word(AHB) == 0x48504d50, 'RAM producer did not execute'
+            port = next(p.device for p in comports() if p.vid == 0xd28 and p.pid == 0x204)
+        else:
+            fixture = random.Random(0x68004853).randbytes(4096)
+            mem.write(a.hss_base, fixture)
+            assert mem.read(a.hss_base, 4096) == fixture
+        assert probe.action(0x31, 12, b'\x02')[0] == 0
+        for speed in map(int, a.speeds.split(',')):
+            try:
+                if a.idle is not None:
+                    setup(out, inp, 10_000_000, 0)
+                    assert mem.transfer([4, a.idle, 64, 0, 0, 0]) == b'\x04\x00'
+                    setup(out, inp, 10_000_000, 0)
+                setup(out, inp, speed, a.mode)
+                live = clock(out, inp)
+            except Exception as exc:
+                record(dict(requested_Hz=speed, supported=False, failure_stage='setup', error=repr(exc), failure_clock=clock(out, inp)))
+                recover_link(dev, out, inp)
+                continue
+            if a.stage == 'rtt':
+                for repeat in range(a.repeats):
+                    try:
+                        row = rtt_point(probe, mem, dev, out, inp, port, speed, a.mode, 1024, a.seconds)
+                        row.update(repeat=repeat, passed=True)
+                        record(row)
+                    except Exception as exc:
+                        record(dict(requested_Hz=speed, repeat=repeat, passed=False, error=repr(exc)))
+                        raise
+            elif live['FCLK_Hz'] < 24_000_000:
+                # Exercise the public lower-frequency path and preserve START
+                # rejection; do not silently raise the requested TCK/FCLK.
+                assert probe.action(0x31, 7, struct.pack('<IHBB', speed, 1024, 0, 1))[0] == 0
+                cfg = struct.pack('<IBB', 24000, 0, 1) + struct.pack('<IBB', AHB+0x4100, 4, 4)
+                assert probe.action(0x32, 10, cfg)[0] == 0
+                rc, info = probe.action(0x32, 1)
+                record(dict(requested_Hz=speed, supported=False, start_rc=rc, info=info, **live))
+                assert rc == -6, ('Unexpected low-clock result', rc, info)
+                stop(probe, dev)
+            else:
+                if periods:
+                    for nvars in counts:
+                        for period in periods:
+                            for repeat in range(a.repeats):
+                                row = hss_point(probe, mem, dev, speed, period, nvars, a.seconds, fixture[256:288],
+                                    allow_low_clock=True, base=a.hss_base, observe_scans=a.observe_scans, idle_cycles=a.idle)
+                                row.update(tag='direct', repeat=repeat, fixture_base=hex(a.hss_base))
+                                record(row)
+                    continue
+                for nvars in counts:
+                    good, bad = None, None
+                    points = []
+                    for period in (24000, 2400, 600, 300, 160, 120, 96, 80, 64, 48, 32, 24):
+                        row = hss_point(probe, mem, dev, speed, period, nvars, .5, fixture[256:288], allow_low_clock=True)
+                        row['tag'] = 'scan'
+                        record(row)
+                        points.append(row)
+                        if row['skipped'] == 0:
+                            good = period
+                        else:
+                            bad = period
+                            break
+                    assert good is not None, ('No zero-skip point', speed, nvars)
+                    if bad is not None:
+                        for _ in range(12):
+                            if good - bad <= 1:
+                                break
+                            period = (good + bad) // 2
+                            row = hss_point(probe, mem, dev, speed, period, nvars, .5, fixture[256:288], allow_low_clock=True)
+                            row['tag'] = 'refine'
+                            record(row)
+                            if row['skipped'] == 0:
+                                good = period
+                            else:
+                                bad = period
+                    verified = []
+                    for _ in range(4):
+                        verified = []
+                        for repeat in range(a.repeats):
+                            row = hss_point(probe, mem, dev, speed, good, nvars, a.seconds, fixture[256:288], allow_low_clock=True)
+                            row.update(tag='verify', repeat=repeat)
+                            record(row)
+                            verified.append(row)
+                        if all(r['skipped'] == 0 for r in verified):
+                            break
+                        good = (good * 11 + 9) // 10
+                    report['summary'].append(dict(requested_Hz=speed, variables=nvars, period=good,
+                        zero_skip=all(r['skipped'] == 0 for r in verified), verified_Hz=[r['effective_Hz'] for r in verified]))
+                    save()
+    except BaseException as exc:
+        report['failure'] = repr(exc)
+        raise
+    finally:
+        try:
+            stop(probe, dev)
+            recover_link(dev, out, inp)
+            target = RiscvTarget(out, inp)
+            target.active()
+            if initial is not None:
+                target.halt()
+            setup(out, inp, 10_000_000)
+            for base, data in backups.items():
+                mem.write(base, data)
+                report.setdefault('restore', {})[hex(base)] = mem.read(base, len(data)) == data
+                assert report['restore'][hex(base)], 'RAM restoration failed'
+            if registers:
+                target = RiscvTarget(out, inp)
+                target.active()
+                for regno, value in registers.items():
+                    target.register(regno, value)
+                after = {n: target.register(n) for n in registers}
+                report['registers_after'] = after
+                # DCSR cause is read-only and changes on our halt request.
+                report['registers_match'] = all((after[n] & ~0x1c0 if n == 0x7b0 else after[n]) ==
+                    (value & ~0x1c0 if n == 0x7b0 else value) for n, value in registers.items())
+                assert report['registers_match'], 'Core register restoration failed'
+                report['cache_control_after'] = hex(target.register(0x7ca))
+                assert report['cache_control_after'] == report['cache_control']
+                report['target_clocks_after'] = target_clocks(target)
+                assert report['target_clocks_after'] == report['target_clocks_before']
+                report['clock_registers_after'] = [hex(target.word(x)) for x in (0xf4001800, 0xf4001804, 0xf4001810)]
+                assert report['clock_registers_before'] == report['clock_registers_after']
+                if initial & (1 << 10):
+                    target.resume()
+                report['final_dmstatus'] = hex(target.dmi(0x11))
+                assert bool(initial & (1 << 10)) == bool(int(report['final_dmstatus'], 16) & (1 << 10))
+        except BaseException as exc:
+            report['restore_error'] = repr(exc)
+            raise
+        finally:
+            save()
+            probe.close()
+            usb.util.release_interface(dev, 0)
+            usb.util.dispose_resources(dev)
+
+
+if __name__ == '__main__':
+    main()

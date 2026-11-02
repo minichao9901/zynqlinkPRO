@@ -26,14 +26,14 @@ set_property PULLUP true [get_ports swdio_0]
 set_property SLEW FAST [get_ports swdio_0]
 set_property DRIVE 8 [get_ports swdio_0]
 
-# Production target: FCLK 120 MHz -> SWCLK 60 MHz. Place/route for the
+# Default implementation target: FCLK 133.333333 MHz. Place/route for the
 # frequency actually used by this branch; verify_routed still checks both
 # setup and hold and records the routed design's safe upper bound.
-create_clock -name clk_fpga_0 -period 8.333333 [get_pins {system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]}]
+create_clock -name clk_fpga_0 -period 7.500000 [get_pins {system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]}]
 
 # Passive clock-pad edge counter only. Counter values are read with the
 # interface stopped. No protocol decision is clocked by this feedback clock.
-create_clock -name pad_swclk -period 16.666666 -waveform {0 8.333333} [get_ports swclk_0]
+create_clock -name pad_swclk -period 15.000000 -waveform {0 7.500000} [get_ports swclk_0]
 set_clock_groups -asynchronous -group [get_clocks clk_fpga_0] -group [get_clocks pad_swclk]
 
 

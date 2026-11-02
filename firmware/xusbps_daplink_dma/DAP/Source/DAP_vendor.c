@@ -253,7 +253,18 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
         memcpy(response,reply,sizeof reply);num=(28U<<16)|(2U+sizeof reply);
       }
       break;
-    case ID_DAP_Vendor13: break;
+    case ID_DAP_Vendor13:
+      { // Read-only effective idle query. Setting remains TransferConfigure.
+        uint32_t route=swd_read32(JTAG_ROUTE),idle=(swd_read32(SWD_CFG)>>4)&15U;
+        uint32_t limit=(route&4U) && (swd_read32(SWD_FEATURES)&JTAG_FEATURE_EXTENDED_IDLE) ? 64U : 15U;
+        if((route&4U) && limit==64U && ((route>>16)&255U)) idle=(route>>16)&255U;
+        if(idle>limit)idle=limit;
+        if((route&4U) && idle<8U)idle=8U;
+        *response++=*request==255U ? DAP_OK : DAP_ERROR;
+        *response++=(uint8_t)idle;*response++=(uint8_t)limit;
+        num=(2U<<16)|4U;
+      }
+      break;
     case ID_DAP_Vendor14: break;
     case ID_DAP_Vendor15: break;
     case ID_DAP_Vendor16: break;

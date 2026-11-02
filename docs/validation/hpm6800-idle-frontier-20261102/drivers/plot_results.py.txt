@@ -1,0 +1,59 @@
+import json
+from pathlib import Path
+import numpy as np
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap, BoundaryNorm
+from matplotlib.patches import Patch
+
+base = Path(__file__).resolve().parent
+dest = Path('docs/validation/hpm6800-idle-frontier-20261102')
+rows = []
+for p in sorted(base.glob('*/result.json')):
+    d = json.loads(p.read_text())
+    for i, r in enumerate(d.get('rows', [])):
+        if 'idle_requested' in r and 'actual_TCK_Hz' in r:
+            rows.append(dict(r, record=p.parent.name, row=i,
+                bit_sha256=d.get('artifacts', {}).get('bit', {}).get('sha256')))
+xs = sorted({round(r['actual_TCK_Hz']/1e6, 6) for r in rows})
+ys = sorted({r['effective_dmi_idle'] for r in rows})
+colors = ['#eceff3', '#2b9d72', '#4b78bd', '#d25762', '#e4aa38']
+cmap = ListedColormap(colors)
+fig, axes = plt.subplots(2, 1, figsize=(13, 6.8), constrained_layout=True)
+for ax, mode in zip(axes, (0, 17)):
+    data = np.zeros((len(ys), len(xs)))
+    for xi, x in enumerate(xs):
+        for yi, idle in enumerate(ys):
+            rr = [r for r in rows if round(r['actual_TCK_Hz']/1e6, 6)==x and r['effective_dmi_idle']==idle and r['mode']==mode]
+            if not rr:
+                continue
+            good = sum(r['passed'] for r in rr)
+            data[yi, xi] = 1 if good==len(rr) else 4 if good else 2 if all(r.get('dtmcs_before_recovery', {}).get('dmistat')==3 for r in rr) else 3
+    ax.imshow(data, aspect='auto', origin='lower', cmap=cmap, norm=BoundaryNorm(np.arange(-.5,5), 5))
+    ax.set_xticks(range(len(xs)), [f'{v:.3f}' for v in xs], rotation=55, ha='right', fontsize=8)
+    ax.set_yticks(range(len(ys)), ys)
+    ax.set_ylabel('Effective RTI idle clocks')
+    ax.set_title('Default Q2 / current-bit window (mode 0)' if mode==0 else 'Q1 / previous-bit window (mode 17)', loc='left', fontsize=11)
+axes[-1].set_xlabel('Actual DR TCK (MHz); clock-tree readback, not external meter')
+fig.legend(handles=[Patch(color=c, label=l) for c,l in zip(colors, ('Untested','Pass','DTM BUSY=3','Other failure','Mixed repeats'))], loc='upper center', ncol=5, bbox_to_anchor=(.5,1.04), frameon=False)
+fig.savefig(dest/'idle-capture-map.png', dpi=170, bbox_inches='tight')
+plt.close(fig)
+
+fig, ax = plt.subplots(figsize=(10, 4.5), constrained_layout=True)
+best = []
+for x in xs:
+    rr = [r for r in rows if r['passed'] and round(r['actual_TCK_Hz']/1e6, 6)==x]
+    if rr:
+        best.append(max(rr, key=lambda r:min(r['read_MB_s'],r['write_MB_s'])))
+ax.plot([r['actual_TCK_Hz']/1e6 for r in best], [r['read_MB_s'] for r in best], 'o-', label='Read')
+ax.plot([r['actual_TCK_Hz']/1e6 for r in best], [r['write_MB_s'] for r in best], 's-', label='Write')
+ax.axhline(2.4, color='#888', ls='--', label='F103ZE reference 2.4 MB/s')
+ax.axvline(25, color='#b86845', ls=':', label='HPM datasheet maximum 25 MHz')
+ax.set(xlabel='Actual DR TCK (MHz)', ylabel='Decimal MB/s', title='AHB SRAM: best passing setting per clock; exploratory pairs, see row identities')
+ax.grid(alpha=.2)
+ax.legend(fontsize=9)
+fig.savefig(dest/'sram-frontier.png', dpi=170)
+plt.close(fig)
+(dest/'matrix-summary.json').write_text(json.dumps(dict(rows=rows, best=best), indent=2)+'\n')
+print('Plotted', len(rows), 'matrix observations')

@@ -107,8 +107,21 @@ def peak(mem, out, inp, pattern, loops=128, repeats=3):
     return dict(words=words, depth=depth, loops=loops, **rows)
 
 
-def hss_point(probe, mem, dev, speed, period, nvars, seconds, expected, *, allow_low_clock=False):
-    variables = [(HSS_BASE + 256 + 4 * i, 4, 4) for i in range(nvars)]
+def hss_scan_observation():
+    import re
+    from jtag_internal_trace import run
+    output = run('targets -set -filter {name =~ "APU"}\n'
+        'puts "HSSOBS [mrd -address-space AP0 -force -value 0x400100c0 3] [mrd -address-space AP0 -force -value 0x42020010] [mrd -address-space AP0 -force -value 0x4001007c] [mrd -address-space AP0 -force -value 0x40010078] [mrd -address-space AP0 -force -value 0x40010060] [mrd -address-space AP0 -force -value 0x40010080] [mrd -address-space AP0 -force -value 0x40010008]"')
+    values = [int(v, 0) for v in re.search(r'HSSOBS ([^\r\n]+)', output)[1].split()]
+    assert len(values) == 9
+    result = dict(zip(('phy_cycles', 'bits', 'scans', 'produced', 'skipped', 'tick', 'sampler_control', 'route', 'cfg'), values))
+    result['effective_idle'] = max(8, (result['route'] >> 16) & 255 or ((result['cfg'] >> 4) & 15))
+    return result
+
+
+def hss_point(probe, mem, dev, speed, period, nvars, seconds, expected, *, allow_low_clock=False,
+              base=HSS_BASE, observe_scans=False, idle_cycles=None):
+    variables = [(base + 256 + 4 * i, 4, 4) for i in range(nvars)]
     clock_rc = probe.action(0x32, 3, struct.pack('<I', speed))[0]
     if clock_rc == -6 and allow_low_clock and 1_000_000 <= speed < 15_000_000:
         # Same explicit shared-clock path used by the ARM acceptance harness.
@@ -117,6 +130,9 @@ def hss_point(probe, mem, dev, speed, period, nvars, seconds, expected, *, allow
         assert clock_rc == 0, ('HSS clock', clock_rc, speed)
     config = struct.pack('<IBB', period, 0, nvars) + b''.join(struct.pack('<IBB', *v) for v in variables)
     assert probe.action(0x32, 10, config)[0] == 0
+    if idle_cycles is not None:
+        assert 0 <= idle_cycles <= 64
+        assert mem.transfer([4, idle_cycles, 64, 0, 0, 0]) == b'\x04\x00'
     drain_hss(dev)
     reader = HssReader(dev, expected[:nvars * 4], period, allow_duplicate_stat=True)
     reader.start()
@@ -125,11 +141,13 @@ def hss_point(probe, mem, dev, speed, period, nvars, seconds, expected, *, allow
         assert rc == 0, ('HSS start', rc, info)
         time.sleep(.25)
         live = live_clock_snapshot()
+        scan_first = hss_scan_observation() if observe_scans else None
         rc, first = probe.action(0x32, 11)
         assert rc == 0
         time.sleep(seconds)
         rc, last = probe.action(0x32, 11)
         assert rc == 0
+        scan_last = hss_scan_observation() if observe_scans else None
         for _ in range(100):
             rc, _ = probe.action(0x32, 0)
             if rc == 0:
@@ -152,6 +170,13 @@ def hss_point(probe, mem, dev, speed, period, nvars, seconds, expected, *, allow
         delta = [(b - a) & 0xFFFFFFFF for a, b in zip(first, last)]
         dt = delta[1] / min(24000000, live['FCLK_Hz'])
         assert delta[6] == 0, ('HSS transport errors', delta)
+        observed = {}
+        if observe_scans:
+            delta_scan = {k: (scan_last[k] - scan_first[k]) & 0xffffffff for k in ('phy_cycles', 'bits', 'scans', 'produced', 'skipped', 'tick')}
+            assert delta_scan['produced'] > 0
+            observed = dict(scan_first=scan_first, scan_last=scan_last, scan_delta=delta_scan,
+                            scans_per_sample=delta_scan['scans']/delta_scan['produced'],
+                            bits_per_sample=delta_scan['bits']/delta_scan['produced'])
         return dict(service='hss', requested_clock_Hz=speed, variables=nvars, period_ticks=period,
                     effective_Hz=delta[3] / dt, produced=delta[3], skipped=delta[4],
                     skip_percent=100 * delta[4] / (delta[3] + delta[4]),
@@ -161,7 +186,7 @@ def hss_point(probe, mem, dev, speed, period, nvars, seconds, expected, *, allow
                     stat_duplicate_frames=len(reader.control_sequence_errors),
                     sample_count_match=tail_delta == 0, tail_count_delta=tail_delta,
                     all_data_frames_verified=True,
-                    session_samples=reader.samples, first=first, last=last)
+                    session_samples=reader.samples, first=first, last=last, **observed)
     finally:
         probe.action(0x32, 0)
         reader.quit.set()

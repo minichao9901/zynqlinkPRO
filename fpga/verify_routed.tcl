@@ -6,7 +6,7 @@ if {[info exists ::zynqlink_verify_checkpoint]} {set routed_checkpoint [file nor
 open_checkpoint $routed_checkpoint
 source [file join $root fpga rtl_debug_profile.tcl]
 set rtl_debug [zynqlink_rtl_debug_mode $argv]
-set requested_fclk 120000000
+set requested_fclk 133333333
 if {[info exists ::env(ZYNQLINK_IMPLEMENT_FCLK_HZ)]} {set requested_fclk $::env(ZYNQLINK_IMPLEMENT_FCLK_HZ)}
 if {![string is integer -strict $requested_fclk] || $requested_fclk<10000000 || $requested_fclk>200000000} {
     error "Verification FCLK must be 10000000..200000000"

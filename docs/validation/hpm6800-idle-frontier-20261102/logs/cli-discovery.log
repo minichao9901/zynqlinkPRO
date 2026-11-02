@@ -1,0 +1,30 @@
+{
+  "ok": true,
+  "value": {
+    "id": "tools/characterize_hpm6800_idle.py",
+    "source": "tools/characterize_hpm6800_idle.py",
+    "runtime": "python",
+    "category": "diagnostic",
+    "summary": "Preserved-AHB-SRAM HPM6800 TCK/idle matrix; requires verified loaded pair.",
+    "runnable": true,
+    "coveredBy": null,
+    "role": "entry",
+    "sourceOptions": [
+      "--bit",
+      "--elf",
+      "--high-idcode",
+      "--idles",
+      "--loops",
+      "--modes",
+      "--out",
+      "--repeats",
+      "--speeds",
+      "--stress-seconds"
+    ],
+    "sourceSubcommands": [],
+    "environmentKeys": [],
+    "requiresBrowser": false,
+    "validation": "not inferred from discoverability",
+    "aliases": []
+  }
+}

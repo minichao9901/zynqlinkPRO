@@ -1,0 +1,282 @@
+{
+  "time": "2026-11-02T07:22:05.660121+08:00",
+  "artifacts": {
+    "git_head": "22a398823aa7461a791598e467b6a6e12f08ccfb",
+    "git_dirty": true,
+    "bit": {
+      "path": "E:\\zynqlinkPRO\\build\\hpm6800-idle-frontier-20261102\\pair\\probe.bit",
+      "sha256": "18eff835d479ae8e199b56b8c385a98f1ddf8d8654e05b3481a01c97276c4b63"
+    },
+    "elf": {
+      "path": "E:\\zynqlinkPRO\\build\\hpm6800-idle-frontier-20261102\\pair\\application.elf",
+      "sha256": "7692e3c62b9823f1573c9aed5b3f6a208d6466b321f1695bb55c3db2a0412aee"
+    }
+  },
+  "rows": [
+    {
+      "requested_Hz": 60000000,
+      "idle_requested": 20,
+      "mode": 17,
+      "passed": true,
+      "stage": "complete",
+      "FCLK_Hz": 119999998,
+      "actual_TCK_Hz": 59999999.0,
+      "JTAG_sampling_mode": 17,
+      "cfg": "0xf1",
+      "dmi_idle_min": 8,
+      "clock_source": "PS FCLK divider and PL half_delay registers",
+      "idle_csr": 15,
+      "effective_dmi_idle": 20,
+      "idle_limit": 64,
+      "words": 512,
+      "depth": 16,
+      "loops": 128,
+      "window_bytes": 32768,
+      "read_MB_s": 3.060660015892426,
+      "read_repeats_MB_s": [
+        3.0990464435204035,
+        3.0051391753480816,
+        3.060660015892426
+      ],
+      "read_seconds": [
+        0.08458860000246204,
+        0.0872318999900017,
+        0.0856494999898132
+      ],
+      "read_scan_stats": [
+        {
+          "phy_wait_fclk_cycles": 8828992,
+          "shifted_bits": 4348608,
+          "scans": 65888,
+          "scans_per_word": 1.00537109375,
+          "bits_per_word": 66.3544921875
+        },
+        {
+          "phy_wait_fclk_cycles": 8828992,
+          "shifted_bits": 4348608,
+          "scans": 65888,
+          "scans_per_word": 1.00537109375,
+          "bits_per_word": 66.3544921875
+        },
+        {
+          "phy_wait_fclk_cycles": 8828992,
+          "shifted_bits": 4348608,
+          "scans": 65888,
+          "scans_per_word": 1.00537109375,
+          "bits_per_word": 66.3544921875
+        }
+      ],
+      "write_MB_s": 3.0960853669552413,
+      "write_repeats_MB_s": [
+        3.096070740227482,
+        3.0960853669552413,
+        3.112746581582037
+      ],
+      "write_seconds": [
+        0.08466990001033992,
+        0.08466950000729412,
+        0.08421630001976155
+      ],
+      "write_scan_stats": [
+        {
+          "phy_wait_fclk_cycles": 8822560,
+          "shifted_bits": 4345440,
+          "scans": 65840,
+          "scans_per_word": 1.004638671875,
+          "bits_per_word": 66.30615234375
+        },
+        {
+          "phy_wait_fclk_cycles": 8822560,
+          "shifted_bits": 4345440,
+          "scans": 65840,
+          "scans_per_word": 1.004638671875,
+          "bits_per_word": 66.30615234375
+        },
+        {
+          "phy_wait_fclk_cycles": 8822560,
+          "shifted_bits": 4345440,
+          "scans": 65840,
+          "scans_per_word": 1.004638671875,
+          "bits_per_word": 66.30615234375
+        }
+      ],
+      "all_bytes_verified": true,
+      "stress": {
+        "seconds": 10.02485339998384,
+        "rounds": 340,
+        "bytes_each_direction": 11141120
+      },
+      "dtmcs_before_recovery": {
+        "raw": "0x7071",
+        "version": 1,
+        "abits": 7,
+        "dmistat": 0,
+        "idle_hint": 7,
+        "observed_before_tap_reset": true,
+        "observed_at_low_control_clock": true
+      },
+      "post_dtmreset_diagnostics": {
+        "sbcs": "0x20150407",
+        "sbaddress": "0xf0408000",
+        "dmstatus": "0x4303a2"
+      },
+      "recovered_dpc": "0x8000762a",
+      "restore_match": true
+    },
+    {
+      "requested_Hz": 60000000,
+      "idle_requested": 24,
+      "mode": 17,
+      "passed": true,
+      "stage": "complete",
+      "FCLK_Hz": 119999998,
+      "actual_TCK_Hz": 59999999.0,
+      "JTAG_sampling_mode": 17,
+      "cfg": "0xf1",
+      "dmi_idle_min": 8,
+      "clock_source": "PS FCLK divider and PL half_delay registers",
+      "idle_csr": 15,
+      "effective_dmi_idle": 24,
+      "idle_limit": 64,
+      "words": 512,
+      "depth": 16,
+      "loops": 128,
+      "window_bytes": 32768,
+      "read_MB_s": 2.9875594334978905,
+      "read_repeats_MB_s": [
+        2.9929453246225988,
+        2.9875594334978905,
+        2.9821420032971875
+      ],
+      "read_seconds": [
+        0.0875872999895364,
+        0.08774519999860786,
+        0.08790460001910105
+      ],
+      "read_scan_stats": [
+        {
+          "phy_wait_fclk_cycles": 9356096,
+          "shifted_bits": 4612160,
+          "scans": 65888,
+          "scans_per_word": 1.00537109375,
+          "bits_per_word": 70.3759765625
+        },
+        {
+          "phy_wait_fclk_cycles": 9356096,
+          "shifted_bits": 4612160,
+          "scans": 65888,
+          "scans_per_word": 1.00537109375,
+          "bits_per_word": 70.3759765625
+        },
+        {
+          "phy_wait_fclk_cycles": 9356096,
+          "shifted_bits": 4612160,
+          "scans": 65888,
+          "scans_per_word": 1.00537109375,
+          "bits_per_word": 70.3759765625
+        }
+      ],
+      "write_MB_s": 2.955163678522024,
+      "write_repeats_MB_s": [
+        2.955163678522024,
+        2.9476936843026724,
+        2.962611361550186
+      ],
+      "write_seconds": [
+        0.08870710001792759,
+        0.0889319000125397,
+        0.08848410000791773
+      ],
+      "write_scan_stats": [
+        {
+          "phy_wait_fclk_cycles": 9349280,
+          "shifted_bits": 4608800,
+          "scans": 65840,
+          "scans_per_word": 1.004638671875,
+          "bits_per_word": 70.32470703125
+        },
+        {
+          "phy_wait_fclk_cycles": 9349280,
+          "shifted_bits": 4608800,
+          "scans": 65840,
+          "scans_per_word": 1.004638671875,
+          "bits_per_word": 70.32470703125
+        },
+        {
+          "phy_wait_fclk_cycles": 9349280,
+          "shifted_bits": 4608800,
+          "scans": 65840,
+          "scans_per_word": 1.004638671875,
+          "bits_per_word": 70.32470703125
+        }
+      ],
+      "all_bytes_verified": true,
+      "stress": {
+        "seconds": 10.0206535999896,
+        "rounds": 339,
+        "bytes_each_direction": 11108352
+      },
+      "dtmcs_before_recovery": {
+        "raw": "0x7071",
+        "version": 1,
+        "abits": 7,
+        "dmistat": 0,
+        "idle_hint": 7,
+        "observed_before_tap_reset": true,
+        "observed_at_low_control_clock": true
+      },
+      "post_dtmreset_diagnostics": {
+        "sbcs": "0x20150407",
+        "sbaddress": "0xf0408000",
+        "dmstatus": "0x4303a2"
+      },
+      "recovered_dpc": "0x8000762a",
+      "restore_match": true
+    }
+  ],
+  "target_resets": false,
+  "target_flash_writes": false,
+  "method": "identify at 10MHz, then requested DR clock; no high-IDCODE gate unless explicitly selected",
+  "driver_sha256": "9a90f9de654a77ea471d1e37cb58a7ffca7def9e9edcf13a27c3b8863fd0f47a",
+  "probe_before": {
+    "recordedAtUtc": "2026-11-01T23:22:06.353607+00:00",
+    "registers": {
+      "FCLK0_CTRL": "0x2400100",
+      "FCLK1_CTRL": "0x900100",
+      "ARM_PLL": "0x28008",
+      "DDR_PLL": "0x20008",
+      "IO_PLL": "0x36008",
+      "CPU_CTRL": "0x1f000200",
+      "DDR_CTRL": "0xc200003",
+      "USB0_CTRL": "0x101941",
+      "USB1_CTRL": "0x101941",
+      "FEATURES": "0xb",
+      "CAPTURE": "0x8",
+      "SWD_STATUS": "0x528d0002",
+      "PACKET_STATUS": "0x0"
+    },
+    "allObservedEnginesIdle": true,
+    "xsctOutput": "SNAP FCLK0_CTRL 02400100\nSNAP FCLK1_CTRL 00900100\nSNAP ARM_PLL 00028008\nSNAP DDR_PLL 00020008\nSNAP IO_PLL 00036008\nSNAP CPU_CTRL 1F000200\nSNAP DDR_CTRL 0C200003\nSNAP USB0_CTRL 00101941\nSNAP USB1_CTRL 00101941\nSNAP FEATURES 0000000B\nSNAP CAPTURE 00000008\nSNAP SWD_STATUS 528D0002\nSNAP PACKET_STATUS 00000000\n"
+  },
+  "initial_dmstatus": "0x430ca2",
+  "initial_dpc": "0x8000762a",
+  "clocks_before": {
+    "controls": {
+      "cpu0": "0x3020100",
+      "mchtmr0": "0x1010000",
+      "ahb": "0x5040203"
+    },
+    "basis": "Read-only qualified SYSCTL controls; target frequencies not inferred without qualified PLL outputs"
+  },
+  "backup_sha256": "94e583940e58ed5074a60145db077ce1cd5e72b45788f55a5ed3375f4cc6da6d",
+  "restore_match": true,
+  "clocks_after": {
+    "controls": {
+      "cpu0": "0x3020100",
+      "mchtmr0": "0x1010000",
+      "ahb": "0x5040203"
+    },
+    "basis": "Read-only qualified SYSCTL controls; target frequencies not inferred without qualified PLL outputs"
+  },
+  "final_dmstatus": "0x430ca2"
+}

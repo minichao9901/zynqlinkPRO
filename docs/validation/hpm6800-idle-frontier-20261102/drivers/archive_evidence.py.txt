@@ -1,0 +1,77 @@
+"""Archive this experiment's explicit outputs, excluding target SRAM backups."""
+from pathlib import Path
+import hashlib
+import json
+import shutil
+import subprocess
+
+ROOT = Path.cwd()
+BASE = ROOT/'build/hpm6800-idle-frontier-20261102'
+DEST = ROOT/'docs/validation/hpm6800-idle-frontier-20261102'
+DEST.mkdir(exist_ok=True)
+def sha(p): return hashlib.sha256(p.read_bytes()).hexdigest()
+def write(p, v):
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(json.dumps(v, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
+def copy(src, dest):
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(src, dest)
+
+pair_dirs = [('pair','hpm6800-idle64-120-control-20261102'),
+             ('pair-133','hpm6800-idle64-133-experimental-20261102')]
+for source, name in pair_dirs:
+    src, dest = BASE/source, ROOT/'prebuilt'/name
+    dest.mkdir(exist_ok=True)
+    for p in src.iterdir():
+        if p.is_file(): copy(p, dest/p.name)
+    (dest/'.gitattributes').write_text('* -text -whitespace\n')
+    manifest = dict(status='experimental HPM6800EVK JTAG/RAM validation; not Golden/ARM/ETM/QSPI release',
+        source_base_revision='22a398823aa7461a791598e467b6a6e12f08ccfb',
+        source_revision='pending source-and-artifact commit',
+        requested_constraint_Hz=133333333 if source=='pair-133' else 120000000,
+        runtime_clock_policy='adaptive; API cap60MHz; actual60MHz TCK uses FCLK119999998Hz',
+        build_options=json.loads((src/'ps-build.json').read_text())['options'],
+        timing=json.loads((src/'verified_clock.json').read_text()),
+        rtl_build_input_sha256=json.loads((src/'rtl-stamp.json').read_text()),
+        ps_build_input_sha256=json.loads((src/'ps-build.json').read_text())['source_sha256'],
+        evidence='../../docs/validation/hpm6800-idle-frontier-20261102/README.md',
+        files={p.name:dict(bytes=p.stat().st_size,sha256=sha(p)) for p in dest.iterdir() if p.is_file() and p.name not in ('manifest.json','README.md')})
+    write(dest/'manifest.json',manifest)
+
+(DEST/'.gitattributes').write_text('* -text -whitespace\n')
+for p in sorted(BASE.glob('*/result.json')):
+    name = p.parent.name
+    copy(p, DEST/'raw'/name/p.name)
+    for driver in p.parent.glob('*.py.txt'): copy(driver, DEST/'raw'/name/driver.name)
+    if 'identity' in name:
+        for f in p.parent.iterdir():
+            if f.is_file(): copy(f, DEST/'raw'/name/f.name)
+for p in BASE.glob('*/*.py.txt'):
+    copy(p, DEST/'raw'/p.parent.name/p.name)
+for name in ('final-state.json',):
+    copy(BASE/name, DEST/'raw'/name)
+for p in BASE.glob('*.log'): copy(p, DEST/'logs'/p.name)
+for name in ('preflight.json','resume_check.py','final_state.py','archive_evidence.py','plot_results.py','verify_evidence.py'):
+    p = BASE/name
+    copy(p, DEST/'drivers'/(name+'.txt' if p.suffix=='.py' else name))
+for p in (BASE/'history').iterdir():
+    if p.is_file(): copy(p,DEST/'history'/p.name)
+for name in ('characterize_hpm6800_idle.py','benchmark_hpm5301.py','validate_hpm6800_performance.py','validate_hpm6800_streams.py'):
+    copy(ROOT/'tools'/name, DEST/'drivers'/name)
+# Exact build-input bytes supplement the source commit on LF/CRLF checkouts.
+source_paths = [
+    'fpga/rtl/jtag_core.v','fpga/rtl/swd_controller.v','fpga/constraints/dap_pins.xdc',
+    'fpga/verify_routed.tcl','fpga/probe_io_timing.tcl',
+    'firmware/xusbps_daplink_dma/DAP/Include/jtag_rtl.h',
+    'firmware/xusbps_daplink_dma/DAP/Source/DAP.c',
+    'firmware/xusbps_daplink_dma/DAP/Source/DAP_vendor.c',
+    'firmware/xusbps_daplink_dma/DAP/Source/JTAG_RTL.c']
+for name in source_paths: copy(ROOT/name,DEST/'build-inputs'/(name+'.txt'))
+write(DEST/'build-inputs'/'sha256.json',{name:sha(ROOT/name) for name in source_paths})
+# Refresh only the explicitly corrected R19 README entry.
+old = ROOT/'docs/validation/hpm6800-acceptance-20261102'
+p = old/'evidence.json'
+d = json.loads(p.read_text(encoding='utf-8'))
+d['files']['README.md'] = dict(bytes=(old/'README.md').stat().st_size,sha256=sha(old/'README.md'))
+write(p,d)
+print('Archived explicit evidence; target backup*.bin remain local in build.')

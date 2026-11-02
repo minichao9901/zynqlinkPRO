@@ -5,12 +5,13 @@ module tb_riscv_words;
     reg clk=0;always #4.166667 clk=~clk;
     reg rst_n=0,start=0,fence=0,nv=0;
     reg [7:0] req=0,nreq=0;reg [31:0] value=0,nvalue=0;
+    reg [7:0] idle=1;
     wire valid,busy,nready,tck,tms,tdi,tdo,fd,fe;
     wire [2:0] ack;wire [31:0] data,cycles,bits,scans;
     jtag_core dut(.clk(clk),.rst_n(rst_n),.start(start),.invalidate(1'b0),
         .operation(3'd0),.request(req),.wdata(value),.seq_count(9'd0),.seq_data(256'd0),.seq_tms(1'b0),
         .ir_length(8'd5),.ir_before(11'd0),.ir_after(11'd0),.dr_before(8'd0),.dr_after(8'd0),
-        .idcode_ir(8'd1),.riscv_mode(1'b1),.half_delay(4'd1),.idle_cycles(4'd1),.late_return(1'b0),
+        .idcode_ir(8'd1),.riscv_mode(1'b1),.half_delay(4'd1),.idle_cycles(idle),.late_return(1'b0),
         .tdo(tdo),.tdo_alternate(tdo),.tdi_sense(tdi),
         .next_valid(nv),.next_request(nreq),.next_wdata(nvalue),.next_ready(nready),
         .result_valid(valid),.busy(busy),.ack(ack),.rdata(data),.tck(tck),.tms(tms),.tdi(tdi),
@@ -65,7 +66,7 @@ module tb_riscv_words;
             $display("PASS RV pipelined reads: words=%0d scans=%0d",count,scans-scans_start);
         end
     endtask
-    integer i,reads_before,writes_before;
+    integer i,reads_before,writes_before,bits_before,scans_before,delay_case;
     initial begin
         for(i=0;i<8192;i=i+1)target.mem[i]=32'h12340000+i;
         repeat(6)@(negedge clk);rst_n=1;
@@ -76,6 +77,17 @@ module tb_riscv_words;
         // HPM6880 AXI SRAM must use the same one-scan data pipeline.
         call(5,'h01244000,1);chained_write(128);
         call(5,'h01244000,1);chained_read(128);
+        // Extended idle must add actual RTI TCKs without truncating count or
+        // overwriting captured data. Exercise both an intermediate and max.
+        for(delay_case=0;delay_case<2;delay_case=delay_case+1)begin
+            idle=delay_case==0 ? 24 : 64;
+            call(5,'hf0406000,1);call(15,0,1);
+            bits_before=bits;scans_before=scans;call(15,0,1);
+            if(bits-bits_before!=46+idle || scans-scans_before!=1 || data!==32'h8abc0000)
+                $fatal(1,"RV extended idle=%0d bits=%0d scans=%0d data=%h",idle,bits-bits_before,scans-scans_before,data);
+            call(14,0,1);
+        end
+        idle=1;
         // A fence consumes the pending DMI response, but the next AP read
         // still owns that exact word, not the following word or SBCS.
         call(5,'hf0406000,1);call(15,0,1);call(15,0,1);
