@@ -83,3 +83,5 @@ ZL-092首次在100000次请求硬停，step确认和bpClear也被拒绝。保存
 ## 原始证据
 
 summary.json为提取索引，raw/保存每次页面调用、成功/失败、RAW/CSV/CDC字节、物理身份及恢复；drivers/保存执行版本和比较/恢复配置，logs/保存构建与检查。所有文件由evidence.json绑定SHA。build-inputs是实际Web PS六个修改输入的精确快照，完整PS输入哈希及构建选项在prebuilt的ps-build.json。未归档运行时令牌、私有Flash备份、用户记录；未推送远端。
+
+交付源码、实际配对及证据承载提交：`eb67e9c2995b898e22f9b476665b09a6c19c9cc0`；配对manifest已绑定该提交，原生/控制变体仍须按各自base+overlay复现。

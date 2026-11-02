@@ -49,3 +49,5 @@ bit SHA256：`106d579bc1b79c2b873fd1e3eb2609d468892a67613d85a6e41d4dc90c8fc177`�
 ## 最后原生板上状态（随后已进入Web任务）
 
 2026-11-02T10:04:35.318168+08:00：原生配对，TCK25MHz/FCLK50MHz、mode0、idle8，目标运行、RTT/HSS/packet/采集空闲，物理MEM-AP0代码核对通过。全部临时ILM/AHB/AXI、核心/cache和目标时钟控制恢复。本原生阶段未写目标Flash/QSPI、未复位目标MCU。后续Web阶段会加载另一明确配对并按授权烧录目标，不能把这个快照当作最终Web状态。
+
+交付源码、实际配对及证据承载提交：`eb67e9c2995b898e22f9b476665b09a6c19c9cc0`；配对manifest已绑定该提交，原生/控制变体仍须按各自base+overlay复现。
