@@ -2,7 +2,7 @@
 
 日期：2026-11-02（Asia/Shanghai）。分支`codex/etm-cpp-stage1`，继续使用独立worktree；基线为`1c83d8b`。本轮没有操作硬件、改目标时钟/Flash/QSPI或PL/PS，没有替换主工作区的固定EXE。
 
-当前初测完整离线API为**10.387 / 9.553 / 9.720秒，中位9.720秒**；中位首次≤10秒，首轮仍>10秒，不宣称每次或冷盘均≤10秒。固定输入和计时边界沿用[上一阶段](../zl006-cpp-stage1-20261102/README.md)。最终源码提交绑定、原生交付程序及冻结候选验收仍在收尾，本报告后续补充最终轮次。
+最终源码提交`77bf1c2`、配套原生程序的完整离线API为**9.290 / 8.877 / 8.848秒，中位8.877秒**，三次均<10秒，达到本阶段固定输入三次重建门禁。没有清空OS缓存，不宣称冷盘或所有负载均≤10秒。[构建与原字节身份](build-manifest.json)、[最终结果](raw/final-api-3.json)、[第1](raw/final-equivalence-r1.json)/[第2](raw/final-equivalence-r2.json)/[第3轮全量对照](raw/final-equivalence-r3.json)分别保留。先前初测10.387/9.553/9.720秒、首轮超10的事实仍保留于下文，不能与最终源码轮次混算。固定输入和计时边界沿用[上一阶段](../zl006-cpp-stage1-20261102/README.md)。冻结候选验收后补充结果。
 
 ## 算法与数据表示
 
@@ -29,9 +29,10 @@ BLK_ISSUES仍为有界zlib JSON，主要内容如下：
 ## 验证与证据
 
 - [交错状态机A/B](raw/tracker-ab.json)：独立/共享各三次，builder中位6.394/5.650秒，完整API中位13.622/13.242秒；单独状态合并不足以达到10秒。
+- 最终三个全新记录均完整重建，未复制native/store/索引；全部summary/共有quality相同，无native.bin/逐指令JSONL，三轮完整执行块、诊断、analysis及60表逐项相等。最终原生builder内嵌源码提交77bf1c2，逐文件构建输入/Git blob双SHA及三份EXE哈希见manifest，避免Git换行差异冒充源码身份。
 - [初测三轮](raw/initial-api-3.json)保留全部时间与真实质量；[完整对照](raw/initial-equivalence.json)包含所有静态/字符串/执行/包/导航/检查点块、全部诊断、完整analysis及60张查询表，不是抽样。保留F103原有2个gap、522998条未知执行。
 - [H743单次/双遍差分](raw/h743-buffered-differential.json)、[H743完整2秒差分](raw/h743-2s-differential.json)、[截断尾部差分](raw/truncated-differential.json)全部通过；两秒只是已有输入离线重放，不是新硬件验收。
-- C++合成检查：5万步状态oracle、7万唯一范围（覆盖16/32位计划ID）、超过8MiB块边界的包、稀有事件/64位字段、payload变体、缓存超限、CRC已知向量。13项新增/关联Python测试通过；[55项CLI](raw/cli-tests.log)通过，日志保留原有ResourceWarning。
+- C++合成检查：5万步状态oracle、7万唯一范围（覆盖16/32位计划ID）、超过8MiB块边界的包、稀有事件/64位字段、payload变体、缓存超限、CRC已知向量。13项新增/关联Python测试通过；[最终55项CLI](raw/final-cli-tests.log)通过，日志保留原有ResourceWarning。
 - [实际C++父进程退出](raw/owner-exit.json)及[静态准备失败/KeyboardInterrupt](raw/preparation-faults.json)验证worker退出且不发布manifest。Python自身的握手超时、非法字典与取消另有真实子进程测试。
 - [索引重编码](raw/reindex.json)验证新特性位及完整语义保留；原生CSV区间导出通过。编码器RLE策略[独立对照](raw/index-codec-ab.json)无明确收益且体积更大，未采用。
 - 所有探索轮次继续保留于`raw/exploratory-*`；它们属于不同开发版本，不能挑选单次最短值冒充最终版本结果。
