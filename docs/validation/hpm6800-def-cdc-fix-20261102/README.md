@@ -84,3 +84,7 @@ RAM夹具五个状态目录（含最终fenced轮）均已恢复；有效数据�
 ## 证据索引
 
 summary.json为提取索引；raw/保留成功/失败调用及计数；调试临时SRAM字节仅保留长度/SHA（redactions.json绑定原文件哈希，原始仅留build），CDC文件按原字节gzip；pcap/是仅探针过滤的原始USBPcap gzip，解压后由`analyze_usbpcap_cdc.py`重算；drivers/保存执行版本，logs/保存构建/检查/恢复。evidence.json绑定全部SHA。私有Flash/SRAM备份、读回与运行时令牌不入Git；不推送远端。旧报告及旧Golden不重写。
+
+## main同步复核（2026-11-02）
+
+按用户要求将本分支6个提交快进至本地main（7367baa）。合并后原字节验证发现core.autocrlf把ps_fclk.h与native_serial.py转换为CRLF；已核对差异仅换行，登记ZL-099，并对两条路径固定text eol=lf、恢复实际构建时LF字节。独立git checkout-index输出再次匹配PS构建SHA和冻结EXE内源码；全部产物及证据清单复核通过。原构建来源/哈希保持原值，没有重编译、加载或其他板卡操作，未推送远端。详见main-sync-verification.json。

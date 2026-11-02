@@ -1,0 +1,32 @@
+{
+  "recorded_at_utc": "2026-11-02T10:28:22.092237+00:00",
+  "operation": "Local main fast-forward plus checkout identity correction; no remote push",
+  "main_before": "22a3988",
+  "fast_forward_to": "7367baa4557c821a2a837fd66ccdf6f0ccfa6497",
+  "source_carrier": "2d1ae54fa1f761dd9c0a431095c0ef915361fae0",
+  "failed_post_merge_check": {
+    "assertion": "PS source SHA mismatch: DAP\\Include\\ps_fclk.h",
+    "root": "core.autocrlf=true transformed two LF source files to CRLF; LF-normalized content equal"
+  },
+  "fix": "Path-specific text eol=lf; original raw bytes restored. Original build/package hashes untouched.",
+  "checkout_checks": [
+    {
+      "path": "firmware/xusbps_daplink_dma/DAP/Include/ps_fclk.h",
+      "git_checkout_index_sha256": "dd1bed97d748a76fa233ef94169358c24cd15bcaadd9a160b5a5bd7e3014c3e5",
+      "expected_build_sha256": "dd1bed97d748a76fa233ef94169358c24cd15bcaadd9a160b5a5bd7e3014c3e5",
+      "byte_exact": true,
+      "contains_CRLF": false
+    },
+    {
+      "path": "etm-service/tools/native_serial.py",
+      "git_checkout_index_sha256": "b933efde2f61cb08bb9f611ad7ecf426a0e770f7a084deef5fc5a3daa5b17274",
+      "expected_build_sha256": "b933efde2f61cb08bb9f611ad7ecf426a0e770f7a084deef5fc5a3daa5b17274",
+      "byte_exact": true,
+      "contains_CRLF": false
+    }
+  ],
+  "manifest_bound_staged_files_before_this_note": 1061,
+  "delivery_verifier_passed": true,
+  "hardware_operations": false,
+  "bit_elf_exe_changes": false
+}

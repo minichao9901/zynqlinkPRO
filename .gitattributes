@@ -5,6 +5,9 @@
 *.samples16 binary
 *.rttdata binary
 *.a binary
+# Preserve build-time bytes for the HPM PS input and frozen COM receiver.
+firmware/xusbps_daplink_dma/DAP/Include/ps_fclk.h text eol=lf
+etm-service/tools/native_serial.py text eol=lf
 firmware/target/stm32h743_cdc_trace/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
 firmware/target/stm32h743_cdc_trace/sdk/** -text -whitespace
 docs/validation/h743-comprehensive-20261101/** -text -whitespace
