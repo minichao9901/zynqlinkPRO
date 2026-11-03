@@ -1,0 +1,201 @@
+{
+  "ok": true,
+  "summary": {
+    "packets": 2020196,
+    "ranges": 4322285,
+    "instructions": 18373686,
+    "executed": 16227666,
+    "sourceMapped": 18154689,
+    "exceptions": 2268,
+    "gaps": 1,
+    "packetIssues": 0,
+    "unknownExecution": 8759,
+    "functions": {
+      "main": 14095245,
+      "HAL_GetTick": 1568088,
+      "USBD_IRQHandler": 85156,
+      "_svfprintf_r": 44461,
+      "usb_memcpy": 43658,
+      "usbd_ep_start_write": 32376,
+      "dwc2_ep_write": 34254,
+      "dwc2_tx_fifo_empty_procecss": 30516,
+      "memmove": 26208,
+      "usbd_ep_start_read": 21996,
+      "__ssputs_r": 20597,
+      "_printf_i": 17550,
+      "handle_command": 16146,
+      "(未知函数)": 15210,
+      "memcpy": 18954,
+      "dwc2_ep_read": 17082,
+      "strlen": 17700,
+      "_printf_common": 11701,
+      "dwc2_get_inep_intstatus": 9656,
+      "strcmp": 7020,
+      "OTG_FS_IRQHandler": 8890,
+      "dwc2_get_glb_intstatus": 8890,
+      "_vsnprintf_r": 6552,
+      "cdc_write": 7100,
+      "HAL_IncTick": 6993,
+      "SEGGER_RTT_WriteNoLock": 5616,
+      "trace_log_printf": 5382,
+      "dwc2_get_ineps_intstatus": 5112,
+      "usbd_cdc_acm_bulk_in": 5112,
+      "SEGGER_RTT_Write": 3999,
+      "_WriteNoCheck": 3510,
+      "usbd_cdc_acm_bulk_out": 3510,
+      "usbd_event_ep_in_complete_handler": 3124,
+      "usbd_get_ep_mps": 3124,
+      "SysTick_Handler": 2997,
+      "usbd_event_ep_out_complete_handler": 2574,
+      "dwc2_get_outep_intstatus": 2574,
+      "strncmp": 2340,
+      "vsnprintf": 2340,
+      "dwc2_get_outeps_intstatus": 2106,
+      "_GetAvailWriteSpace": 1872,
+      "cdc_puts": 350,
+      "trace_hook_mark": 23,
+      "HAL_GPIO_WritePin": 2
+    }
+  },
+  "quality": {
+    "inputBytes": 2176688,
+    "unprocessedBytes": 0,
+    "processedBytes": 2176688,
+    "accountedBytes": 2176688,
+    "overlapBytes": 0,
+    "unaccountedBytes": 0,
+    "unsynchronizedBytes": 0,
+    "unsynchronizedRecords": 0,
+    "validPackets": 2020196,
+    "packetIssues": 0,
+    "overflowPackets": 0,
+    "decoderLastError": 0,
+    "unknownExecution": 8759,
+    "initialPhysicalBytes": null,
+    "unknownSourceBytes": null,
+    "trailingFrameBytes": null,
+    "trailingSyncBytes": 0,
+    "firstPathOffset": 25,
+    "boundaryPresent": false,
+    "timing": {
+      "cycleElements": 229257,
+      "timeFlameAvailable": false
+    },
+    "basis": "字节核算不等于采集无损证明；源码映射率不等于程序覆盖率"
+  },
+  "sourceInput": {
+    "kind": "etm",
+    "recordFile": "etm.bin",
+    "sha256": "974e5c2cf6bdaf44a33c67615f9813e83c388e7b0d4ae211ee88429fe13bf2b9"
+  },
+  "inputs": {
+    "etm.bin": {
+      "bytes": 2176688,
+      "sha256": "974e5c2cf6bdaf44a33c67615f9813e83c388e7b0d4ae211ee88429fe13bf2b9"
+    },
+    "native-config.txt": {
+      "bytes": 256,
+      "sha256": "eb72814af265dcfc7d52075b0763c8ccc85883f4b830033d0f14636aa642fc66"
+    },
+    "firmware.elf": {
+      "bytes": 2179000,
+      "sha256": "246640bf79c8b1e568441a286812326dfb0ae68a0df061a0c023262c07cf221b"
+    },
+    "session.json": {
+      "bytes": 3330,
+      "sha256": "6ce3d0e644d388267d878848abcc702daaab041732f9d6995037ee63bf241290"
+    },
+    "sources.json": {
+      "bytes": 823,
+      "sha256": "b5e523eee22e160963662853f1ee5c09e1c2d15015d3d339c88a3408abf89cf4"
+    },
+    "image-0.bin": {
+      "bytes": 31608,
+      "sha256": "8c44763d2bab0017e3fb2b8edae2ce138628e0a9b2c83919b1d040245f716798"
+    },
+    "image-1.bin": {
+      "bytes": 144,
+      "sha256": "96b68c9cac1f6cc3d0e744f80440b4d89e779b6df4ae111d69e8968c402bfd5d"
+    }
+  },
+  "verification": {
+    "verified": true,
+    "skipped": false,
+    "reason": "",
+    "declared": 7,
+    "present": 5,
+    "blockingHashed": 5,
+    "hashed": 7,
+    "hashedBytes": 4391849,
+    "hashSeconds": 0.008116,
+    "unverified": [],
+    "unbound": [],
+    "excluded": [
+      "native.bin"
+    ],
+    "metadata": [
+      {
+        "name": "session.json",
+        "bytes": 3330,
+        "expectedSha256": "6ce3d0e644d388267d878848abcc702daaab041732f9d6995037ee63bf241290",
+        "sha256": "6ce3d0e644d388267d878848abcc702daaab041732f9d6995037ee63bf241290",
+        "seconds": 0.000397,
+        "status": "ok"
+      },
+      {
+        "name": "sources.json",
+        "bytes": 823,
+        "expectedSha256": "b5e523eee22e160963662853f1ee5c09e1c2d15015d3d339c88a3408abf89cf4",
+        "sha256": "b5e523eee22e160963662853f1ee5c09e1c2d15015d3d339c88a3408abf89cf4",
+        "seconds": 0.000526,
+        "status": "ok"
+      }
+    ],
+    "metadataChanged": [],
+    "inputs": [
+      {
+        "name": "etm.bin",
+        "bytes": 2176688,
+        "expectedSha256": "974e5c2cf6bdaf44a33c67615f9813e83c388e7b0d4ae211ee88429fe13bf2b9",
+        "sha256": "974e5c2cf6bdaf44a33c67615f9813e83c388e7b0d4ae211ee88429fe13bf2b9",
+        "seconds": 0.003189,
+        "status": "ok"
+      },
+      {
+        "name": "native-config.txt",
+        "bytes": 256,
+        "expectedSha256": "eb72814af265dcfc7d52075b0763c8ccc85883f4b830033d0f14636aa642fc66",
+        "sha256": "eb72814af265dcfc7d52075b0763c8ccc85883f4b830033d0f14636aa642fc66",
+        "seconds": 0.000608,
+        "status": "ok"
+      },
+      {
+        "name": "firmware.elf",
+        "bytes": 2179000,
+        "expectedSha256": "246640bf79c8b1e568441a286812326dfb0ae68a0df061a0c023262c07cf221b",
+        "sha256": "246640bf79c8b1e568441a286812326dfb0ae68a0df061a0c023262c07cf221b",
+        "seconds": 0.00242,
+        "status": "ok"
+      },
+      {
+        "name": "image-0.bin",
+        "bytes": 31608,
+        "expectedSha256": "8c44763d2bab0017e3fb2b8edae2ce138628e0a9b2c83919b1d040245f716798",
+        "sha256": "8c44763d2bab0017e3fb2b8edae2ce138628e0a9b2c83919b1d040245f716798",
+        "seconds": 0.000537,
+        "status": "ok"
+      },
+      {
+        "name": "image-1.bin",
+        "bytes": 144,
+        "expectedSha256": "96b68c9cac1f6cc3d0e744f80440b4d89e779b6df4ae111d69e8968c402bfd5d",
+        "sha256": "96b68c9cac1f6cc3d0e744f80440b4d89e779b6df4ae111d69e8968c402bfd5d",
+        "seconds": 0.000437,
+        "status": "ok"
+      }
+    ],
+    "problems": [],
+    "elapsedSeconds": 0.009454
+  },
+  "hashSkipped": false
+}

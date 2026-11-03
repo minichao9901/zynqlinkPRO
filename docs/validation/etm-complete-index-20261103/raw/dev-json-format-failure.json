@@ -1,0 +1,10 @@
+{
+  "stage": "development regression test, before delivery",
+  "test": "test_native_json_roundtrip_matches_python_format",
+  "status": "initial failure retained",
+  "observed": "115336699991782588416.0",
+  "expected": "1.1533669999178259e+20",
+  "cause": "std::to_chars default formatting can select a fixed representation where Python repr uses scientific notation",
+  "change": "Generate the shortest scientific form, then apply Python fixed/scientific thresholds and exponent padding",
+  "validation": "Final 10008-value native/Python roundtrip test must pass"
+}
