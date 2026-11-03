@@ -1,6 +1,6 @@
 {
-  "implementationSourceCommit": "194aa67b84fd97bb2e7c4639256b89867a076c02",
-  "measuredNativeSourceCommit": "194aa67b84fd97bb2e7c4639256b89867a076c02",
+  "implementationSourceCommit": "48f38519bb9093b6d897b90d509e5b06019ebe1c",
+  "measuredNativeSourceCommit": "48f38519bb9093b6d897b90d509e5b06019ebe1c",
   "files": {
     "etm-service/CMakeLists.txt": {
       "bytes": 4882,
@@ -58,9 +58,9 @@
       "gitBlobSha256": "187cf3ed5131a4dbef1ca029837575b69619f38ad2c74a6d0c69b9063eeecf35"
     },
     "etm-service/native/native_query.hpp": {
-      "bytes": 114001,
-      "sha256": "5f5608dca045a11a27eb166f76be1904b9be928e5b8000d65d2a579599d13928",
-      "gitBlobSha256": "5f5608dca045a11a27eb166f76be1904b9be928e5b8000d65d2a579599d13928"
+      "bytes": 114790,
+      "sha256": "d11b92988ceb62258a084bcfadd0b3af415e16e2655c3c9446709e4ad1706c67",
+      "gitBlobSha256": "d11b92988ceb62258a084bcfadd0b3af415e16e2655c3c9446709e4ad1706c67"
     },
     "etm-service/native/reading_projection.hpp": {
       "bytes": 13368,
@@ -80,8 +80,8 @@
   },
   "artifacts": {
     "etm-service/build-native/etm_storebuild.exe": {
-      "bytes": 7467563,
-      "sha256": "747622358284ff6e29b8ad23e6bb2c500a9f3968ae6b5950d5ad9f5a2173dd82"
+      "bytes": 7469413,
+      "sha256": "0b2161f22bee57b09399a3c1bbafe01de5e6944b20bd0f7cd14c1fd4d14a16c9"
     },
     "etm-service/build-native/libdwarf.dll": {
       "bytes": 913628,
@@ -101,7 +101,7 @@
     "schema": 1,
     "abi": 1,
     "compiler": "gcc 16.1.0",
-    "buildSha": "194aa67b84fd",
+    "buildSha": "48f38519bb90",
     "formats": {
       "native": "trace-bin native v1",
       "staticDict": 1,
@@ -134,5 +134,7 @@
   },
   "qualification": "Pending final qualification. Vendored dependency identities in docs/required-dependencies.json; libdwarf is a replaceable shared DLL.",
   "nativeDeliveryCommit": "82d897e",
-  "benchmarkCandidateCommit": "82d897e"
+  "benchmarkCandidateCommit": "pending final timing",
+  "priorNativeImplementationSourceCommit": "194aa67b84fd97bb2e7c4639256b89867a076c02",
+  "initialBenchmarkCandidateCommit": "82d897e"
 }
