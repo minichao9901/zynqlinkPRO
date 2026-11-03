@@ -1,6 +1,6 @@
 {
   "accepted": false,
-  "status": "Current-source PS candidate paired with byte-identical previously routed DDR bit; board acceptance pending",
+  "status": "Intermediate board-tested pair, retained STAT defect ZL-136; superseded by statfix candidate",
   "psSourceRevision": "ae9b77456adb52705f76fbeb60ae5fcaf52bbb03",
   "bitReusedFrom": "prebuilt/fclk133-release-20261101",
   "rtlSourceRevision": "e749c426a018cab6f543415772bbe88efb6652e4",
@@ -28,5 +28,13 @@
       "bytes": 35186,
       "sha256": "485a028ff7ad9a256a64313b68527a055ca3800b3b85577ceb0554b0e0609c94"
     }
-  }
+  },
+  "validationReport": "docs/validation/main-web-hardware-20261103/README.md",
+  "validationHostRevision": "02d43aecdd7a8ff4496625a639594e04f8751959",
+  "validationLimits": [
+    "F103 only; no QSPI/cold-start acceptance",
+    "ZL-136 corrupt software STAT USB/reserved fields",
+    "ZL-137 calibration failure observed",
+    "Other final-candidate limits are not attributed to this earlier binary"
+  ]
 }

@@ -1,6 +1,6 @@
 {
   "accepted": false,
-  "status": "STAT slot initialization fix; board acceptance pending",
+  "status": "Board-tested F103 candidate; known HSS calibration/start/performance limits, no product promotion",
   "psSourceRevision": "ae9b77456adb52705f76fbeb60ae5fcaf52bbb03",
   "bitReusedFrom": "prebuilt/fclk133-release-20261101",
   "rtlSourceRevision": "e749c426a018cab6f543415772bbe88efb6652e4",
@@ -32,5 +32,14 @@
   "psSourceDirty": true,
   "psSourceFilesSha256": {
     "firmware/xusbps_daplink_dma/probe_stream.c": "26cb7b22f91bb3fafbff05be67e59a047926ef76a17a293c6ee3a6458acbaebf"
-  }
+  },
+  "validationReport": "docs/validation/main-web-hardware-20261103/README.md",
+  "validationHostRevision": "02d43aecdd7a8ff4496625a639594e04f8751959",
+  "validationLimits": [
+    "F103 only; no QSPI/cold-start acceptance",
+    "ZL-070 HSS long-window edge skips",
+    "ZL-137 calibration unstable at60MHz",
+    "ZL-140 hot-state Web RTT START failure",
+    "ZL-141 Web control/flash latency"
+  ]
 }

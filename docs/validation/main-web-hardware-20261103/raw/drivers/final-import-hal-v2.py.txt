@@ -1,0 +1,26 @@
+from pathlib import Path
+from types import SimpleNamespace
+import sys,json,time
+sys.path[:0]=[str(Path.cwd()),'tools']
+from validate_f103_main_web import Web
+from toolbox import pack_file
+work=Path('build/main-web-hardware-20261103');state=json.loads((work/'fixed-final-reconnected-data/bridge-state.json').read_text())
+w=Web(SimpleNamespace(runtime=state['runtime'],artifacts=work/'final-import-hal-v2',case_timeout=180))
+prior=json.loads((work/'hal-final-web-views/result.json').read_text());before=w.page('etm','read',selector='#records')['value']
+w.page('etm','show');w.page('etm','describe');w.page('etm','upload',selector='#capture-file',files=[pack_file(work/'hal-final-web-views/storage.etmrecord')])
+deadline=time.monotonic()+180
+while time.monotonic()<deadline:
+ sid=w.page('etm','read',selector='#records')['value'];folder=Path(state['recordsDirectory'])/sid
+ if sid and sid!=before and (folder/'decoded.json').is_file():break
+ time.sleep(.1)
+else:raise TimeoutError('HAL record import')
+w.ready('etm','#decode');w.ready('etm','#save-record');w.invoke('etm','waitForDisplay',target='history')
+actual=json.loads((folder/'decoded.json').read_text());expected=json.loads(Path('docs/validation/main-web-hardware-20261103/hal-storage-write-input/decoded.json').read_text())
+assert actual['summary']==expected['summary'] and actual['quality']==expected['quality']
+w.invoke('etm','setRange',dict(start=prior['range'][0],end=prior['range'][1]),target='history')
+w.invoke('etm','select',prior['selected']['seq'],True,target='history')
+w.page('etm','click',selector='[data-view="flame"]');w.invoke('etm','render',target='history');w.invoke('etm','waitForDisplay',target='history')
+source=w.page('etm','read',selector='#source-code')['text'];assert 'HAL_I2C_Mem_Write' in source
+w.save(w.out/'result.json',dict(passed=True,record=sid,summaryEqual=True,qualityEqual=True,halI2cSourceDisplayed=True,originalWebSeq=prior['selected']['seq']))
+print('Final frozen EXE imported exact HAL input and displays actual HAL I2C source')
+

@@ -1,0 +1,241 @@
+{
+  "passed": true,
+  "watch": [
+    {
+      "addr": 536920076,
+      "error": null,
+      "expr": "g_trace.loops",
+      "label": "g_trace.loops",
+      "typeName": "long unsigned int",
+      "value": {
+        "cls": "",
+        "hex": "0x18bbf1a",
+        "text": "25935642",
+        "type": "long unsigned int"
+      }
+    },
+    {
+      "addr": 536920064,
+      "error": null,
+      "expr": "g_trace",
+      "label": "g_trace",
+      "typeName": "结构体",
+      "value": {
+        "cls": "",
+        "hex": null,
+        "text": "{magic=827474772, sysclk_hz=48000000, ready=1, loops=25935642, …}",
+        "type": "结构体"
+      }
+    },
+    {
+      "addr": 1073876996,
+      "error": null,
+      "expr": "0x40021004",
+      "label": "0x40021004",
+      "typeName": "u32",
+      "value": {
+        "cls": "",
+        "hex": "0x51040a",
+        "text": "5309450",
+        "type": "u32"
+      }
+    }
+  ],
+  "backtrace": {
+    "frames": [
+      {
+        "cfa": 536936440,
+        "kind": "current",
+        "known": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "loc": {
+          "addr": 134219152,
+          "end": 134219154,
+          "file": "E:/zynqlinkPRO/build/f103-target-source-zip/firmware/stm32f103_cdc_trace/src/main.c",
+          "idx": 157,
+          "isStmt": true,
+          "line": 266,
+          "prologueEnd": false,
+          "seq": 14,
+          "seqEnd": false
+        },
+        "lookup": 134219152,
+        "name": "cdc_poll",
+        "pc": 134219152,
+        "regs": [
+          1073809408,
+          131072,
+          0,
+          25935642,
+          536920064,
+          8,
+          79764919,
+          0,
+          4294963199,
+          536871424,
+          968574952,
+          181475320,
+          10,
+          536936440,
+          134219791,
+          134219152
+        ],
+        "sp": 536936440
+      },
+      {
+        "cfa": 536936448,
+        "kind": "cfi",
+        "known": [
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          14,
+          15,
+          13
+        ],
+        "loc": {
+          "addr": 134219786,
+          "end": 134219790,
+          "file": "E:/zynqlinkPRO/build/f103-target-source-zip/firmware/stm32f103_cdc_trace/src/main.c",
+          "idx": 263,
+          "isStmt": true,
+          "line": 458,
+          "prologueEnd": false,
+          "seq": 20,
+          "seqEnd": false
+        },
+        "lookup": 134219788,
+        "name": "main+0x60",
+        "pc": 134219790,
+        "regs": [
+          0,
+          0,
+          0,
+          0,
+          536920064,
+          8,
+          79764919,
+          0,
+          4294963199,
+          536871424,
+          968574952,
+          181475320,
+          0,
+          536936440,
+          134219791,
+          134219791
+        ],
+        "sp": 536936440
+      },
+      {
+        "kind": "cfi",
+        "known": [
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          3,
+          14,
+          15,
+          13
+        ],
+        "loc": {
+          "addr": 134218358,
+          "end": 134218362,
+          "file": "E:/zynqlinkPRO/build/f103-target-source-zip/firmware/stm32f103_cdc_trace/sdk/Drivers/CMSIS/Device/ST/STM32F1xx/Source/Templates/gcc/startup_stm32f103xe.s",
+          "idx": 21,
+          "isStmt": true,
+          "line": 102,
+          "prologueEnd": false,
+          "seq": 0,
+          "seqEnd": false
+        },
+        "lookup": 134218360,
+        "name": "Reset_Handler+0x30",
+        "pc": 134218362,
+        "regs": [
+          0,
+          0,
+          0,
+          134218249,
+          536920064,
+          8,
+          79764919,
+          0,
+          4294963199,
+          536871424,
+          968574952,
+          181475320,
+          0,
+          536936448,
+          134218363,
+          134218363
+        ],
+        "sp": 536936448
+      }
+    ],
+    "reason": "ELF 缺少 .ARM.exidx 展开表；可用 bt scan 查看候选返回地址",
+    "scan": false
+  },
+  "locals": {
+    "function": "cdc_poll",
+    "reason": "",
+    "rows": [
+      {
+        "argument": false,
+        "error": "已优化掉或没有位置描述",
+        "name": "primask",
+        "scope": 4842,
+        "type": {
+          "alias": "uint32_t",
+          "kind": "scalar",
+          "name": "long unsigned int",
+          "scalar": "u32",
+          "size": 4
+        }
+      }
+    ]
+  },
+  "stepOver": {
+    "message": "单步跳过 → cmsis_gcc.h:386（0x8000592）",
+    "halted": true,
+    "pc": 134219154
+  },
+  "stepInto": {
+    "message": "单步进入（指令级）→ cmsis_gcc.h:142",
+    "halted": true,
+    "pc": 134219158
+  },
+  "stepOut": {
+    "message": "单步跳出 → main.c:464（0x800080e，按 LR 返回）",
+    "halted": true,
+    "pc": 134219790
+  },
+  "source": "452    trace_hook_ready();453454    for (;;) {455        g_trace.loops++;456457        /* 每轮只处理一包；RTT 日志与 USB 回调互不阻塞。 */458        cdc_poll();459460#ifdef TRACE_PATH_WORKLOAD461        trace_workload_round(g_trace.loops);462#endif463464        if ((g_trace.loops & 0xFFFFFu) == 0u) {465            trace_hook_mark();466        }467    }468}469",
+  "svd": "0x0051040A  （32 bit）"
+}

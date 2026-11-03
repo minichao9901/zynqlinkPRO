@@ -1,0 +1,77 @@
+{
+  "passed": true,
+  "rows": [
+    {
+      "repeat": 0,
+      "bytes": 16384,
+      "readSeconds": 0.39030819999970845,
+      "writeSeconds": 0.8766716999998607,
+      "readMBps": 0.041977083750769875,
+      "writeMBps": 0.018688866082939147,
+      "byteExact": true
+    }
+  ],
+  "registerRestored": true,
+  "sramRestored": true,
+  "pcBefore": 134219168,
+  "pcAfterStep": 134219170,
+  "breakpointPc": 134219152,
+  "state": {
+    "backend": "本地探针服务",
+    "bpCap": 6,
+    "bps": [
+      "0x08000590"
+    ],
+    "clockKhz": 10000,
+    "connected": true,
+    "elf": {
+      "files": 120,
+      "lines": 2788,
+      "name": "f103ze-cdc48.elf",
+      "rtt": 536915968,
+      "source": "dwarf",
+      "symbols": 733,
+      "vars": 70
+    },
+    "halted": true,
+    "lastStepMode": "dhcsr",
+    "lastStepOk": true,
+    "memAddr": "0x01000000",
+    "memLen": 0,
+    "outLines": 17,
+    "pc": 134219152,
+    "regs": 23,
+    "rtt": null,
+    "src": {
+      "cur": {
+        "file": "E:/zynqlinkPRO/build/f103-target-source-zip/firmware/stm32f103_cdc_trace/src/main.c",
+        "line": 266
+      },
+      "files": 0,
+      "ready": false,
+      "shown": 1
+    },
+    "symRows": 300,
+    "watch": [
+      {
+        "addr": 536920076,
+        "error": null,
+        "expr": "g_trace.loops",
+        "value": "99363061"
+      },
+      {
+        "addr": 536920064,
+        "error": null,
+        "expr": "g_trace",
+        "value": "{magic=827474772, sysclk_hz=48000000, ready=1, loops=99363061, …}"
+      },
+      {
+        "addr": 1073876996,
+        "error": null,
+        "expr": "0x40021004",
+        "value": "5309450"
+      }
+    ],
+    "watching": false
+  }
+}

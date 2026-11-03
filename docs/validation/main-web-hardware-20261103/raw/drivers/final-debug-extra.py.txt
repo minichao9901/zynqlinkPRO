@@ -1,0 +1,46 @@
+import sys,json,time
+from pathlib import Path
+from types import SimpleNamespace
+sys.path[:0]=[str(Path.cwd()),'tools']
+from validate_f103_main_web import Web
+from toolbox import pack_file
+work=Path('build/main-web-hardware-20261103');state=json.loads((work/'fixed-final-data/bridge-state.json').read_text())
+w=Web(SimpleNamespace(runtime=state['runtime'],artifacts=work/'final-debug-extra',case_timeout=180))
+report=dict(passed=False);connected=False
+try:
+ w.page('dbg','show');w.page('dbg','describe');w.set('dbg','#d-backend','webusb');w.set('dbg','#d-clock','10000')
+ elf=Path('prebuilt/golden/f103ze-cdc48.elf');w.invoke('dbg','loadElfBuffer',dict(kind='buffer',**pack_file(elf)),elf.name)
+ source=Path('prebuilt/golden/source-snapshot')
+ w.page('dbg','upload',selector='#d-src-dir',files=[pack_file(f,'source-snapshot/'+f.relative_to(source).as_posix()) for f in source.rglob('*')if f.is_file()])
+ w.invoke('dbg','connect');connected=True;assert w.invoke('dbg','summary')['connected']
+ w.page('dbg','describe',target='session');w.invoke('dbg','halt',target='session');w.invoke('dbg','bpClear',target='session')
+ w.invoke('dbg','bpAdd',0x08000590,'final source/watch',target='session');w.invoke('dbg','cont',target='session')
+ deadline=time.monotonic()+5
+ while time.monotonic()<deadline:
+  w.invoke('dbg','refreshAll')
+  if w.invoke('dbg','summary')['halted']:break
+  time.sleep(.05)
+ assert w.invoke('dbg','readReg','pc',target='session')==0x08000590
+ w.invoke('dbg','bpClear',target='session');w.invoke('dbg','clearWatch')
+ for expr in ['g_trace.loops','g_trace','0x40021004']:assert w.invoke('dbg','addWatch',expr)['ok']
+ w.invoke('dbg','refreshWatch',dict(force=True));report['watch']=w.invoke('dbg','watchItems')
+ assert all(not item['error'] and item['value'] for item in report['watch']),report['watch']
+ report['backtrace']=w.invoke('dbg','backtrace',target='session');assert report['backtrace']['frames']
+ report['locals']=w.invoke('dbg','locals',target='session')
+ for step in ['stepOver','stepInto','stepOut']:
+  message=w.invoke('dbg',step,target='session');w.invoke('dbg','refreshAll');halted=w.invoke('dbg','summary')['halted']
+  report[step]=dict(message=message,halted=halted,pc=w.invoke('dbg','readReg','pc',target='session'))
+  assert halted and '没停' not in message
+ report['source']=w.page('dbg','read',selector='#d-src')['text'];assert 'cdc_poll' in report['source'] or 'main(' in report['source']
+ w.invoke('dbg','loadBundledSvd','STM32F103xx')
+ controls=w.page('dbg','describe')['controls'];options=next(c['options']for c in controls if c['selector']=='#d-svd-periph')
+ w.set('dbg','#d-svd-periph',next(o['value']for o in options if o['label'].startswith('RCC ')))
+ options=next(c['options']for c in w.page('dbg','describe')['controls']if c['selector']=='#d-svd-reg')
+ w.set('dbg','#d-svd-reg',next(o['value']for o in options if o['label'].startswith('CFGR ')))
+ w.page('dbg','click',selector='#d-svd-read');report['svd']=w.wait('dbg','#d-svd-value','0051040A')['text']
+ report['passed']=True
+finally:
+ if connected:
+  w.invoke('dbg','bpClear',target='session');w.invoke('dbg','cont',target='session');w.invoke('dbg','disconnect')
+ w.save(w.out/'result.json',report)
+print('source/watch/CFI/locals/source steps/SVD:',report['passed'])

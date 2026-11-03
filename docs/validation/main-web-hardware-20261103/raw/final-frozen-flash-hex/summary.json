@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "rows": [
+    {
+      "repeat": 0,
+      "wallSeconds": 10.091600900002959,
+      "state": {
+        "busy": false,
+        "clockSelection": "10000",
+        "lastFlash": null,
+        "result": "✅ stm32f103 · 19.7 KB · 校验通过 · 已复位运行"
+      }
+    }
+  ],
+  "medianSeconds": 10.091600900002959,
+  "log": "已关掉本页签 1 个探针 USB 句柄（残留认领会挡住这次烧录）烧录数据时钟 10 MHz；执行控制 1 MHz── 零安装烧录：cdc48.hex（19.7 KB）→ stm32f103 ──复位后 PC=0x8000590（在刚烧进去的固件里 ✓）── 完成 ──耗时小结：探针 207ms · 加载算法 610ms · 读DEV_ID 15ms · 擦除 2851ms · 写入 4796ms · 校验 781ms · 复位 340ms · 合计 9.60s已关掉本页签 1 个探针 USB 句柄（残留认领会挡住这次烧录）──── 读目标身份（ARM/SWD · 零安装）────   ① DP IDCODE  0x1BA01477 → 设计者 ARM · SW-DP（DPv1） · 修订 1   ② CPUID      0x411FC231 → Cortex-M3 r1p1 · 实现者 0x41 · 架构 0xF   ③ DBGMCU     0xE0042000 = 0x10036414 → DEV_ID 0x414（STM32F10x 大容量（F103xC/D/E）） · REV_ID 0x1003   ④ flash 容量 0x1FFFF7E0 = 512 KB（F1/F3 的容量寄存器）   ⇒ 判读：STM32F103xC/D/E（大容量 512 KB） · Cortex-M3 · 512 KB flash · SW-DP（DPv1）──── 读完（191 ms）────"
+}

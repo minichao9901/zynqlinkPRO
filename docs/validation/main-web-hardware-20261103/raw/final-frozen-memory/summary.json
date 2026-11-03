@@ -1,0 +1,95 @@
+{
+  "passed": true,
+  "rows": [
+    {
+      "repeat": 0,
+      "bytes": 16384,
+      "readSeconds": 0.3523399000005156,
+      "writeSeconds": 0.9186688000008871,
+      "readMBps": 0.04650055244942745,
+      "writeMBps": 0.0178345014002698,
+      "byteExact": true
+    },
+    {
+      "repeat": 1,
+      "bytes": 16384,
+      "readSeconds": 0.4531047000018589,
+      "writeSeconds": 0.8278325999999652,
+      "readMBps": 0.03615941304500435,
+      "writeMBps": 0.0197914409265843,
+      "byteExact": true
+    },
+    {
+      "repeat": 2,
+      "bytes": 16384,
+      "readSeconds": 0.4507049999992887,
+      "writeSeconds": 0.901386999998067,
+      "readMBps": 0.03635193752016476,
+      "writeMBps": 0.01817643254233213,
+      "byteExact": true
+    }
+  ],
+  "registerRestored": true,
+  "sramRestored": true,
+  "pcBefore": 134219162,
+  "pcAfterStep": 134219164,
+  "breakpointPc": 134219152,
+  "state": {
+    "backend": "本地探针服务",
+    "bpCap": 6,
+    "bps": [
+      "0x08000590"
+    ],
+    "clockKhz": 10000,
+    "connected": true,
+    "elf": {
+      "files": 120,
+      "lines": 2788,
+      "name": "f103ze-cdc48.elf",
+      "rtt": 536915968,
+      "source": "dwarf",
+      "symbols": 733,
+      "vars": 70
+    },
+    "halted": true,
+    "lastStepMode": "dhcsr",
+    "lastStepOk": true,
+    "memAddr": "0x01000000",
+    "memLen": 0,
+    "outLines": 30,
+    "pc": 134219152,
+    "regs": 23,
+    "rtt": null,
+    "src": {
+      "cur": {
+        "file": "E:/zynqlinkPRO/build/f103-target-source-zip/firmware/stm32f103_cdc_trace/src/main.c",
+        "line": 266
+      },
+      "files": 0,
+      "ready": false,
+      "shown": 1
+    },
+    "symRows": 300,
+    "watch": [
+      {
+        "addr": 536920076,
+        "error": null,
+        "expr": "g_trace.loops",
+        "value": "197677363"
+      },
+      {
+        "addr": 536920064,
+        "error": null,
+        "expr": "g_trace",
+        "value": "{magic=827474772, sysclk_hz=48000000, ready=1, loops=197677363, …}"
+      },
+      {
+        "addr": 1073876996,
+        "error": null,
+        "expr": "0x40021004",
+        "value": "5309450"
+      }
+    ],
+    "watching": false
+  }
+}

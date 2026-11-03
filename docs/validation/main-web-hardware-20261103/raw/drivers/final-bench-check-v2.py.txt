@@ -1,0 +1,28 @@
+from pathlib import Path
+from types import SimpleNamespace
+import sys,json
+sys.path[:0]=[str(Path.cwd()),'tools']
+from validate_f103_main_web import Web
+from f103_ram_fixture import Fixture
+work=Path('build/main-web-hardware-20261103');state=json.loads((work/'fixed-final-reconnected-data/bridge-state.json').read_text())
+w=Web(SimpleNamespace(runtime=state['runtime'],artifacts=work/'final-bench-check-v2',case_timeout=180))
+report=dict(rows=[],allSucceeded=False)
+try:
+ with Fixture(w.out/'fixture') as f:
+  f.prepare_hss();w.page('scope','show');w.page('scope','describe');w.set('scope','#sc-mock',False);w.set('scope','#sc-target','swd')
+  w.set('scope','#sc-period','1000');w.set('scope','#sc-batch',True);w.set('scope','#sc-cdcoff',True)
+  fields=[('i8',0x21,1),('f64',0x101,8),('u8',0x300,1),('u16',0x304,2),('u32',0x3ff,4),('f32',0x580,4),('i16',0x6ff,2),('i32',0x7fd,4)]
+  for speed in ['20000','60000']:
+   for shape in ['one-aligned','eight-mixed']:
+    w.set('scope','#sc-clock',speed);w.invoke('scope','connectHid',False);w.invoke('scope','connectUsb',False)
+    try:
+     w.page('scope','click',selector='#sc-varclear')
+     selected=[('u32',256,4)]if shape=='one-aligned'else fields
+     for scalar,offset,size in selected:w.invoke('scope','toggleVar',dict(name='fixture.'+scalar,addr=0x20004000+offset,size=size,scalar=scalar),True)
+     returned=w.invoke('scope','bench');summary=w.invoke('scope','summary')
+     report['rows'].append(dict(speedKhz=int(speed),shape=shape,returned=returned,summary=summary))
+     print(speed,shape,summary['benchUs'],summary['state'],flush=True)
+    finally:w.invoke('scope','stop','calibration cleanup');w.invoke('scope','disconnect')
+ report['allSucceeded']=all(row['summary']['benchUs']for row in report['rows'])
+finally:w.save(w.out/'result.json',report)
+
