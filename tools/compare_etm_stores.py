@@ -28,6 +28,12 @@ def compare(expected, actual):
                 digests.append(dict(bytes=len(payload), sha256=hashlib.sha256(payload).hexdigest()))
             result['blocks'][str(kind)] = digests
         assert left.issues_list == right.issues_list, 'quality issues differ'
+        # String pools, function IDs, navigation contracts and default-view
+        # hashes affect queries too. Only the producer label may differ.
+        left_meta = {k: v for k, v in left.query_index.meta.items() if k != 'source'}
+        right_meta = {k: v for k, v in right.query_index.meta.items() if k != 'source'}
+        assert left_meta == right_meta, 'semantic query metadata differs'
+        result['semanticQueryMetadataMatches'] = True
         names = left.query_index.arrays._archive.files
         assert set(names) == set(right.query_index.arrays._archive.files)
         for name in names:

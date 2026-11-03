@@ -1,0 +1,111 @@
+{
+  "implementationSourceCommit": "d39965bbb3a52fb1657cf014d434c141c41d7520",
+  "measuredNativeSourceCommit": "d39965bbb3a52fb1657cf014d434c141c41d7520",
+  "files": {
+    "etm-service/CMakeLists.txt": {
+      "bytes": 3764,
+      "sha256": "a26ea91fb4c4846172fbda72342b331a6bb335e177d2e766ce7a2ecae551d3de",
+      "gitBlobSha256": "a26ea91fb4c4846172fbda72342b331a6bb335e177d2e766ce7a2ecae551d3de"
+    },
+    "etm-service/native/storebuild.cpp": {
+      "bytes": 233443,
+      "sha256": "901dbba35d785252becc336854ca72d15e594fab64f78835adac0d4bf943e3bb",
+      "gitBlobSha256": "901dbba35d785252becc336854ca72d15e594fab64f78835adac0d4bf943e3bb"
+    },
+    "etm-service/native/full_index.hpp": {
+      "bytes": 39654,
+      "sha256": "e24d9e8d28bde899e8b946863f7e0d442f2d046d812fc04c1a167add8c76b3e9",
+      "gitBlobSha256": "e24d9e8d28bde899e8b946863f7e0d442f2d046d812fc04c1a167add8c76b3e9"
+    },
+    "etm-service/native/complete_store.hpp": {
+      "bytes": 14827,
+      "sha256": "7aecdd5c7863ae182e6f1bff027e2dbd24609af65eba862ec30614a87af79f72",
+      "gitBlobSha256": "7aecdd5c7863ae182e6f1bff027e2dbd24609af65eba862ec30614a87af79f72"
+    },
+    "etm-service/native/decoder.cpp": {
+      "bytes": 18038,
+      "sha256": "5fa3be0d586468f445a7fa0f4d5d01e2eb49ee594c4be960d159b35eb6dbda2a",
+      "gitBlobSha256": "5fa3be0d586468f445a7fa0f4d5d01e2eb49ee594c4be960d159b35eb6dbda2a"
+    },
+    "etm-service/native/decoder_sink.hpp": {
+      "bytes": 849,
+      "sha256": "d10e8470ed27d67b18c4d4815f65831c6c38a051e38bb0c25761c5014825c3e3",
+      "gitBlobSha256": "d10e8470ed27d67b18c4d4815f65831c6c38a051e38bb0c25761c5014825c3e3"
+    },
+    "etm-service/tools/native_pipeline.py": {
+      "bytes": 24561,
+      "sha256": "9507d6354325b0650fbd3034a9a5f61053e9aeafc6274f9c88fb4ac48e76280e",
+      "gitBlobSha256": "698f0531d88b09c48faba352f4b0917e7646fe889fe12db71f4c50cc04c76056"
+    },
+    "etm-service/tools/native_storebuild.py": {
+      "bytes": 22701,
+      "sha256": "250d13e5ee9ad997230092a933d0d3a2ed5382691f91156d97412cfe8559ee7f",
+      "gitBlobSha256": "dd0f859e94a799c7be35e9c69027e93dbe752872851cd974fe604a047596f209"
+    },
+    "etm-service/tools/native_complete.py": {
+      "bytes": 10411,
+      "sha256": "e6992effc2224f34c181e856aa88518944220380489ff4ae37c30153cf476032",
+      "gitBlobSha256": "e6992effc2224f34c181e856aa88518944220380489ff4ae37c30153cf476032"
+    },
+    "etm-service/tools/engine_profile.py": {
+      "bytes": 1684,
+      "sha256": "7ff94b4e127860cd2f242565baba687981f781c1b2110481ccc362abeed82ab1",
+      "gitBlobSha256": "3402e49cd0027c4d66dc1347bbf7ce910e52ed0744cc32cb41351b0c204342fa"
+    },
+    "etm-service/tools/trace_store_write.py": {
+      "bytes": 91487,
+      "sha256": "b31857eb0ca2306eab531f3f676820aeed1b771ecf767353e598c1dcdca3f3d4",
+      "gitBlobSha256": "b5c4c733a9d14a4bdfe4e5b8c0cf956c2465bf3320acc8cba838a11562704185"
+    },
+    "etm-service/vendor/nlohmann-json-3.11.3/json.hpp": {
+      "bytes": 919975,
+      "sha256": "9bea4c8066ef4a1c206b2be5a36302f8926f7fdc6087af5d20b417d0cf103ea6",
+      "gitBlobSha256": "9bea4c8066ef4a1c206b2be5a36302f8926f7fdc6087af5d20b417d0cf103ea6"
+    }
+  },
+  "nativeBinaries": {
+    "etm-service/build-native/etm_storebuild.exe": {
+      "bytes": 5766464,
+      "sha256": "205647829f49dec1f9b19f396613593921bd2c22159bf4f7df5f39ae07fad33d"
+    },
+    "etm-service/build-native/etm_decode.exe": {
+      "bytes": 4174585,
+      "sha256": "c9ed0bcdede7e0bca779ad611c1bd95725694628e2d0f10847a8e3c09ba79336"
+    },
+    "etm-service/build-native/etm_export.exe": {
+      "bytes": 3459669,
+      "sha256": "9583d7bdcce448a527746729d990327fb7736eaf15ebc0e2677bbfa43e92901a"
+    }
+  },
+  "nativeBuilderVersion": {
+    "protocol": "etm-storebuild/1",
+    "schema": 1,
+    "abi": 1,
+    "compiler": "gcc 16.1.0",
+    "buildSha": "d39965bbb3a5",
+    "formats": {
+      "native": "trace-bin native v1",
+      "staticDict": 1,
+      "ranges": 1
+    },
+    "capabilities": [
+      "prescan",
+      "diagnose",
+      "build",
+      "facts-v3",
+      "quality-diagnostics",
+      "index-facts-v1",
+      "direct-opencsd-v1",
+      "typed-replay-v1",
+      "shared-tracker-v1",
+      "complete-index-v1"
+    ]
+  },
+  "unchangedDecoderExporterSourceCommit": "77bf1c245b6867cce511babea8abafde727c67de",
+  "configure": "cmake -S etm-service -B build/cpp-full-index-20261103/native-build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=C:/msys64/mingw64/bin/gcc.exe -DCMAKE_CXX_COMPILER=C:/msys64/mingw64/bin/g++.exe",
+  "build": "cmake --build build/cpp-full-index-20261103/native-build --target etm_storebuild --parallel 4",
+  "hardwareAccess": false,
+  "plPsChanged": false,
+  "finalPerformanceAndFrozenAcceptance": "pending subsequent evidence commit",
+  "notes": "Working-file SHA and Git blob SHA distinguish CRLF/LF. C++ headers/vendor use exact byte attributes. Native source version reports the implementation commit; delivery commit adds the corresponding EXE and provenance."
+}
