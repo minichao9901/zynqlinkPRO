@@ -59,16 +59,19 @@ def publish(record_dir, store_dir, directory, work, built, *, options, generatio
     path = directory / 'store.bin'
     if path.stat().st_size != files[0]['bytes'] or ts._sha256_file(path) != files[0]['sha256']:
         raise ts.TraceStoreError('原生最终库长度/SHA 校验失败')
-    container = ts._Container(path, ts.FILE_TRACE, tag)
+    if complete.get('nativeStatic') and complete.get('nativeFileVerified') is not True:
+        raise ts.TraceStoreError('原生闭环库缺少C++文件结构核验')
+    container = None if complete.get('nativeFileVerified') is True else ts._Container(path, ts.FILE_TRACE, tag)
     try:
         compact = os.environ.get('ETM_COMPACT_ISSUES', '1') != '0'
-        if container.optional_features != ts.QUERY_INDEX_FEATURE or container.required_features != (ts.ISSUE_RUNS_FEATURE if compact else 0):
+        if container is not None and (container.optional_features != ts.QUERY_INDEX_FEATURE or container.required_features != (ts.ISSUE_RUNS_FEATURE if compact else 0)):
             raise ts.TraceStoreError('原生最终库特性位不符')
-        stored_meta = container.of_type(ts.BLK_META)
-        if len(stored_meta) != 1 or json.loads(container.block(stored_meta[0])) != meta:
+        stored_meta = container.of_type(ts.BLK_META) if container is not None else None
+        if container is not None and (len(stored_meta) != 1 or json.loads(container.block(stored_meta[0])) != meta):
             raise ts.TraceStoreError('原生最终库元信息与返回结果不符')
     finally:
-        container.close()
+        if container is not None:
+            container.close()
     mark('verifyNativeStore')
     hash_inputs = options.get('hash_inputs', True)
     names = ('etm.bin', 'native-config.txt', 'firmware.elf', 'physical.json', 'framing.json',
@@ -126,7 +129,9 @@ def publish(record_dir, store_dir, directory, work, built, *, options, generatio
     published = False
     try:
         if options.get('write_decoded'):
-            sources = json.loads((work / 'complete-context.json').read_text(encoding='utf8'))['sources']
+            sources = complete.get('sources')
+            if sources is None:
+                sources = json.loads((work / 'complete-context.json').read_text(encoding='utf8'))['sources']
             for name, value in (('decoded.json', decoded), ('sources.json', sources)):
                 destination = record_dir / name
                 metadata_before[destination] = destination.read_bytes() if destination.exists() else None

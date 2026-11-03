@@ -60,6 +60,14 @@ _IMAGE_CACHE_ENTRIES = 4
 
 
 class Image:
+    def __new__(cls, path, sources=None):
+        if (cls is Image and os.environ.get('ETM_NATIVE_STATIC', '1') != '0'
+                and os.environ.get('ETM_COMPLETE_INDEX', '1') != '0'
+                and os.environ.get('ETM_STORE_ENGINE') == 'native'):
+            from native_core import Image as NativeImage
+            return NativeImage(path, sources)
+        return super().__new__(cls)
+
     def __init__(self, path, sources=None):
         started = time.perf_counter()
         self.path = Path(path)

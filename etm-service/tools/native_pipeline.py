@@ -66,6 +66,10 @@ def _issues(core, facts, quality, diagnostics):
 
 
 def write(record_dir, store_dir, **options):
+    import os
+    if os.environ.get('ETM_NATIVE_STATIC', '1') != '0' and os.environ.get('ETM_COMPLETE_INDEX', '1') != '0':
+        from native_closed import write as write_closed
+        return write_closed(record_dir, store_dir, **options)
     import decode_stream
     import native_binary
     import native_storebuild as native

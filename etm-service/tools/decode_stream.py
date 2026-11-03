@@ -965,6 +965,13 @@ def decode_stream(id_stream, elf, workdir, config=None, sources=None, max_events
     workdir = Path(workdir).resolve()
     workdir.mkdir(parents=True, exist_ok=True)
     config = decoder_config(config)
+    if (os.environ.get('ETM_NATIVE_STATIC', '1') != '0'
+            and os.environ.get('ETM_COMPLETE_INDEX', '1') != '0'
+            and os.environ.get('ETM_DIRECT_DECODE', '1') != '0'
+            and store_write_enabled() and os.environ.get('ETM_STORE_ENGINE') == 'native'):
+        from native_closed import decode as decode_closed
+        return decode_closed(id_stream, elf, workdir, config=config, sources=sources,
+                             max_events=max_events, framing=framing, physical=physical, capture=capture)
     image_started=time.perf_counter()
     image = Image(elf, sources)
     image_seconds=time.perf_counter()-image_started

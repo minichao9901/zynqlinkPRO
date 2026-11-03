@@ -61,6 +61,7 @@ class CompactIssuesTests(unittest.TestCase):
                         container.close()
 
 
+@patch.dict('os.environ', {'ETM_NATIVE_QUERY': '0'})
 class CaptureStartIndexTests(unittest.TestCase):
     def make_store(self):
         return SimpleNamespace(meta=dict(captureStartIndex=dict(version=1, firstRecoveredSeq=2,

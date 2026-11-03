@@ -39,6 +39,8 @@
 #include <unordered_map>
 #include <tuple>
 #include <vector>
+#include <deque>
+#include <regex>
 #include <charconv>
 #include <cmath>
 #include <ctime>
@@ -47,6 +49,9 @@
 #include <atomic>
 #include <mutex>
 #include "../vendor/nlohmann-json-3.11.3/json.hpp"
+#include <capstone/capstone.h>
+#include <libdwarf.h>
+#include <dwarf.h>
 
 #if defined(_WIN32)
 #include <windows.h>
@@ -60,6 +65,7 @@
 namespace fs = std::filesystem;
 
 namespace {
+using Json = nlohmann::ordered_json;
 
 fs::path file_path(const std::string& name) {
     auto path = fs::u8path(name);
@@ -650,6 +656,8 @@ struct RangeRecord {
     uint32_t end = 0;
     uint32_t payload = 0;
 };
+
+#include "native_image.hpp"
 
 bool is_event_type(uint16_t type) {
     for (uint16_t item : kEventTypes) if (item == type) return true;
@@ -4013,6 +4021,7 @@ std::string meta_json(const BuildOutput& output,
 }
 
 #include "complete_store.hpp"
+#include "native_query.hpp"
 
 }  // namespace
 
@@ -4024,6 +4033,51 @@ int main_utf8(int argc, char** argv) {
             return kExitUsage;
         }
         const std::string command = argv[1];
+        if(command=="text-test") {
+            if(argc!=3)fail(kExitUsage,"text-test requires a JSON string list file");
+            std::ifstream in(file_path(argv[2]),std::ios::binary);Json values=Json::parse(in),result=Json::array();
+            for(const auto& value:values)result.push_back(native_unicode_lower(value.get<std::string>()));
+            std::cout<<Json{{"ok",true},{"lower",result}}.dump()<<std::endl;return kExitOk;
+        }
+        if(command=="fault-name-test") {
+            Json result=Json::object();for(bool v3:{true,false})for(uint32_t code=0;code<1025;++code)if(packet_is_invalid(code,v3?2:1))result[v3?"ETMv3":"ETMv4"][std::to_string(code)]=native_fault_name(code,v3);
+            std::cout<<Json{{"ok",true},{"names",result}}.dump()<<std::endl;return kExitOk;
+        }
+        if (command=="query-server") {
+            if(argc!=3)fail(kExitUsage,"query-server requires manifest path");
+            const auto manifest_path=file_path(argv[2]);const auto manifest=NativeStore::read_json(manifest_path,16u<<20);
+            NativeStore store(manifest_path.parent_path(),manifest,true);
+            std::cout<<Json{{"ok",true},{"protocol","etm-query/1"},{"snapshot",store.snapshot()}}.dump()<<std::endl;
+            std::string line;while(std::getline(std::cin,line)) {
+                try {if(line.size()>(16u<<20))fail(kExitInput,"Query request exceeds limit");auto request=Json::parse(line);if(request.value("op",std::string())=="close")break;auto answer=store.call(request);std::cout<<Json{{"ok",true},{"result",std::move(answer)}}.dump()<<std::endl;}
+                catch(const std::exception& error){std::cout<<Json{{"ok",false},{"error",error.what()}}.dump()<<std::endl;}
+                if(!std::cout)break;
+            }
+            return kExitOk;
+        }
+        if (command == "image-info" || command == "image-server") {
+            if (argc != 3) fail(kExitUsage,"image command needs target ELF");
+            NativeImage image(argv[2]);
+            std::cout << Json{{"ok",true},{"image",image.info(command=="image-info")}}.dump() << std::endl;
+            if (command=="image-server") {
+                std::string line;
+                while(std::getline(std::cin,line)) {
+                    try {
+                        auto request=Json::parse(line);const auto op=request.at("op").get<std::string>();Json result;
+                        if(op=="close") break;
+                        if(op=="read") {auto data=image.read(request.at("address").get<uint64_t>(),request.at("size").get<size_t>());std::string hex;const char* digits="0123456789abcdef";for(size_t n=0;n<data.second;++n){hex+=digits[data.first[n]>>4];hex+=digits[data.first[n]&15];}result=hex;}
+                        else if(op=="location") {auto loc=image.location(request.at("address").get<uint64_t>());result=Json::array({std::get<0>(loc),std::get<1>(loc),std::get<2>(loc)<0?Json(nullptr):Json(std::get<2>(loc))});}
+                        else if(op=="segments")result=image.info(true).at("segments");
+                        else if(op=="elf-info")result=image.elf_info(argv[2]);
+                        else if(op=="source") {StaticDict dict;StaticEntry entry;entry.text_slots=4;dict.strings={"",request.at("file").get<std::string>(),"",""};dict.entries.push_back(entry);auto values=image.select_sources(dict,request.at("sources"),fs::u8path(request.at("root").get<std::string>()));result=values.value(request.at("file").get<std::string>(),std::string());}
+                        else fail(kExitUsage,"Unknown native image operation");
+                        std::cout<<Json{{"ok",true},{"result",std::move(result)}}.dump()<<std::endl;
+                    }catch(const std::exception& error){std::cout<<Json{{"ok",false},{"error",error.what()}}.dump()<<std::endl;}
+                    if(!std::cout)break;
+                }
+            }
+            return kExitOk;
+        }
         if (command == "--version") {
             std::cout << "{"
                       << "\"protocol\":" << quote(kProtocol)
@@ -4033,7 +4087,7 @@ int main_utf8(int argc, char** argv) {
                       << ",\"buildSha\":" << quote(build_sha())
                       << ",\"formats\":{\"native\":\"trace-bin native v1\","
                          "\"staticDict\":1,\"ranges\":1}"
-                      << ",\"capabilities\":[\"prescan\",\"diagnose\",\"build\",\"facts-v3\",\"quality-diagnostics\",\"index-facts-v1\",\"direct-opencsd-v1\",\"typed-replay-v1\",\"shared-tracker-v1\",\"complete-index-v1\"]"
+                      << ",\"capabilities\":[\"prescan\",\"diagnose\",\"build\",\"facts-v3\",\"quality-diagnostics\",\"index-facts-v1\",\"direct-opencsd-v1\",\"typed-replay-v1\",\"shared-tracker-v1\",\"complete-index-v1\",\"native-static-v1\",\"native-query-v1\"]"
                       << "}" << std::endl;
             return kExitOk;
         }
@@ -4246,7 +4300,7 @@ int main_utf8(int argc, char** argv) {
         if (command == "build") {
             std::string native_path;
             std::string etm_path, config_path;
-            std::string prepare_path, ranges_path, complete_context;
+            std::string prepare_path, ranges_path, complete_context, target_elf;
             uint32_t owner_pid = 0;
             std::string static_path;
             std::string out_dir;
@@ -4271,6 +4325,7 @@ int main_utf8(int argc, char** argv) {
                 else if (arg == "--owner-pid") owner_pid = static_cast<uint32_t>(std::stoul(next("--owner-pid")));
                 else if (arg == "--prepare-static") prepare_path = next("--prepare-static");
                 else if (arg == "--complete-context") complete_context = next("--complete-context");
+                else if (arg == "--elf") target_elf = next("--elf");
                 else if (arg == "--ranges-out") ranges_path = next("--ranges-out");
                 else if (arg == "--static") static_path = next("--static");
                 else if (arg == "--out-dir") out_dir = next("--out-dir");
@@ -4286,8 +4341,8 @@ int main_utf8(int argc, char** argv) {
                 else if (arg == "--facts-out") facts_out = next("--facts-out");
                 else fail(kExitUsage, "未知参数：" + arg);
             }
-            if (native_path.empty() && (etm_path.empty() || config_path.empty())) fail(kExitUsage, "build requires --native or --etm/--config");
-            if (static_path.empty()) fail(kExitUsage, "build 需要 --static");
+            if (native_path.empty() && (etm_path.empty() || config_path.empty() && target_elf.empty())) fail(kExitUsage, "build requires --native or --etm/--config or --elf");
+            if (static_path.empty() && target_elf.empty()) fail(kExitUsage, "build requires --static or --elf");
             if (out_dir.empty()) fail(kExitUsage, "build 需要 --out-dir");
             if (!complete_context.empty() && (native_index || !facts_out.empty() || !index_facts_out.empty() || !index_payload_path.empty()))
                 fail(kExitUsage, "Complete build cannot emit scratch facts or accept an external query index");
@@ -4295,7 +4350,28 @@ int main_utf8(int argc, char** argv) {
             NativeCounters prepared;
             double prepare_seconds = 0;
             uint64_t replay_bytes = 0;
-            if (!prepare_path.empty()) {
+            std::unique_ptr<NativeImage> image;
+            Json native_context,generated_inputs;
+            StaticDict dict;
+            if (!target_elf.empty()) {
+                if (complete_context.empty() || !prepare_path.empty()) fail(kExitUsage,"Native ELF build requires context and no external static handshake");
+                native_context=read_context(complete_context);
+                image=std::make_unique<NativeImage>(target_elf);
+                if(image->sha!=native_context.at("expectedElfSha256"))fail(kExitConsistency,"ELF changed before native parse");
+                const auto record=fs::u8path(native_context.at("recordDir").get<std::string>());
+                generated_inputs=image->materialize(record,native_context.at("config"),config_path);
+                generated_inputs[fs::absolute(fs::u8path(target_elf)).u8string()]=image->sha;
+                const auto started=std::chrono::steady_clock::now();replay=std::make_unique<ReplayCache>();
+                prepared=native_path.empty()?read_direct(etm_path,config_path,false,nullptr,1000000,nullptr,replay.get())
+                    :read_native(native_path,false,nullptr,1000000,0,nullptr,true,replay.get());
+                replay_bytes=replay->bytes;prepare_seconds=seconds_since(started);
+                const uint32_t expected=native_context.at("config").at("protocol")=="ETMv3"?2:1;
+                if(prepared.header.protocol!=expected)fail(kExitConsistency,"Native protocol differs from context");
+                generated_inputs[fs::absolute(fs::u8path(native_path.empty()?etm_path:native_path)).u8string()]=prepared.native_sha256;
+                dict=image->dictionary(replay->ranges);
+                native_context["sources"]=image->select_sources(dict,native_context.at("sourceSnapshot"),fs::u8path(native_context.at("sourceRoot").get<std::string>()));
+                if(!reserve_instructions)reserve_instructions=prepared.logical_seq-prepared.event_elements;
+            } else if (!prepare_path.empty()) {
                 if (etm_path.empty() || config_path.empty() || ranges_path.empty() || fs::exists(file_path(static_path)))
                     fail(kExitUsage, "prepare-static requires a new static dictionary and ETM/config/ranges paths");
 #ifdef _WIN32
@@ -4334,7 +4410,7 @@ int main_utf8(int argc, char** argv) {
                 }
                 if (!reserve_instructions) reserve_instructions = prepared.logical_seq - prepared.event_elements;
             }
-            StaticDict dict = load_static_dict(static_path);
+            if (target_elf.empty()) dict = load_static_dict(static_path);
             BuildOutput output;
             output.generation = generation.empty() ? fs::u8path(out_dir).filename().string() : generation;
             output.generation_tag = generation_tag;
@@ -4398,10 +4474,11 @@ int main_utf8(int argc, char** argv) {
             Json complete_result;
             if (!complete_context.empty()) {
                 const auto index_started = std::chrono::steady_clock::now();
-                const Json context = read_context(complete_context);
+                const Json context = target_elf.empty()?read_context(complete_context):native_context;
                 if (context.value("maxEvents",uint64_t(0)) && output.instructions>context["maxEvents"].get<uint64_t>())fail(kExitConsistency,"Instruction limit exceeded");
                 auto index = visitor.build_complete_index();
                 complete_result = finalize_complete_blocks(output,counters,visitor.execution_facts(),index,context,Json::parse(analysis),visitor.event_types());
+                if(image){complete_result["sources"]=context.at("sources");complete_result["consumedInputs"]=generated_inputs;complete_result["nativeStatic"]=Json{{"elfSha256",image->sha},{"dictionarySha256",dict.sha256},{"uniquePCs",dict.entries.size()},{"functions",image->functions.size()},{"lines",image->lines.size()},{"imageSeconds",image->parse_seconds},{"dictionarySeconds",image->static_seconds},{"predicateCount",image->predicates.size()},{"knownCount",image->known.size()}};}
                 output.index_seconds=chrono_seconds(index_started);
             } else if ((native_index || !facts_out.empty()) && index_payload_path.empty()) {
                 const auto index_started = std::chrono::steady_clock::now();
@@ -4444,6 +4521,13 @@ int main_utf8(int argc, char** argv) {
                 throw;
             }
             output.write_seconds = seconds_since(write_started);
+            if(!complete_context.empty()) {
+                std::ostringstream tag;tag<<"0x"<<std::hex<<output.generation_tag;
+                Json declaration{{"state","complete"},{"schemaVersion",1},{"generation",output.generation},{"generationTag",tag.str()},{"files",Json::array({Json{{"name","store.bin"},{"bytes",output.store_bytes},{"sha256",output.store_sha256}}})}};
+                NativeStore verification(directory,declaration,false,store_path);
+                if(verification.meta!=complete_result.at("meta"))fail(kExitConsistency,"Written native store differs from composed metadata");
+                complete_result["nativeFileVerified"]=true;
+            }
             output.peak_rss = std::max(output.peak_rss, peak_rss_bytes());
             std::ostringstream result;
             result << "{\n";

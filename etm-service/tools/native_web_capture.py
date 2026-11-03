@@ -12,6 +12,7 @@ import shutil
 import subprocess
 import sys
 import threading
+from threading import Thread as CaptureThread
 import time
 import uuid
 from flask import abort, jsonify, request
@@ -103,7 +104,7 @@ class NativeCapture:
                              created=time.time(), input='capture.bin', seconds=seconds,
                              captureScope='cli-web-service-continuous-window',
                              captureStatus='pending', targetVerified=False, rawFormat='bin'))
-            threading.Thread(target=self.run, args=(jid, sid, options), daemon=True).start()
+            CaptureThread(target=self.run, args=(jid, sid, options), daemon=True).start()
         except Exception as error:
             b.change(jid, state='error', error=str(error))
             with b.lock:

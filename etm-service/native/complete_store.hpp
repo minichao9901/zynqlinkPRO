@@ -1,6 +1,33 @@
 // Final JSON blocks are produced before the single store write. Only the
 // bounded record metadata/context and final result cross the Python boundary.
 #pragma once
+std::string native_fault_name(uint32_t code, bool v3) {
+    if (v3) {
+        if (code == 2)
+            return "INCOMPLETE_EOT.";
+        if (code == 23)
+            return "BAD_SEQUENCE";
+        if (code == 24)
+            return "BAD_TRACEMODE";
+        return "I_RESERVED";
+    }
+    switch (code) {
+    case 0x201:
+        return "I_INCOMPLETE_EOT";
+    case 0x300:
+        return "I_BAD_SEQUENCE";
+    case 0x301:
+        return "I_BAD_TRACEMODE";
+    case 0x302:
+        return "I_RESERVED";
+    case 0x303:
+        return "I_RESERVED_CFG";
+    case 0x105:
+        return "I_OVERFLOW";
+    default:
+        return "I_UNKNOWN";
+    }
+}
 Json read_context(const std::string &path) {
     std::error_code error;
     const auto size = fs::file_size(file_path(path), error);
@@ -134,12 +161,9 @@ Json finalize_complete_blocks(BuildOutput &out, const NativeCounters &c, Executi
                 reasons.push_back(reason);
             boundaries.push_back(Json::array({e.seq, offsets.at(e.seq), item.first->second}));
         }
-    // Packet text names are a small immutable OpenCSD enum dictionary supplied
-    // with the context, not a per-packet or per-instruction Python transfer.
+    // Fault names use the actual OpenCSD protocol, including legacy ETMv3.
     for (const auto &f : c.packet_faults) {
-        auto name =
-            context.at("packetNames")
-                .value(std::to_string(f[2]), context.at("packetDefault").get<std::string>());
+        auto name = native_fault_name(f[2], config.at("protocol") == "ETMv3");
         extra.push_back(Json{{"category", "packet"},
                              {"startSeq", nullptr},
                              {"endSeq", nullptr},
@@ -230,6 +254,7 @@ Json finalize_complete_blocks(BuildOutput &out, const NativeCounters &c, Executi
     index_meta["builtAtUnix"] = std::time(nullptr);
     index_meta["builtBy"] = "native-complete-index";
     Json meta = Json::parse(meta_json(out, event_types));
+    meta["record"]["protocol"] = config.at("protocol");
     meta["queryIndex"] = index_meta;
     meta["issues"] = issue_count;
     meta["verify"] = Json{{"elements", true},

@@ -352,6 +352,11 @@ def browse_issues(sid):return jsonify(browse_store(sid).issues(request.args.get(
 
 def elf_info(path):
     image = Image(path)
+    if hasattr(image, 'elf_info'):
+        try:
+            return image.elf_info()
+        finally:
+            image.close()
     flash=[s for s in image.elf.iter_segments() if s['p_type']=='PT_LOAD'
            and 0x08000000<=s['p_paddr']<0x08200000 and s['p_filesz']]
     if not flash or any(s['p_paddr']+s['p_filesz']>0x08200000 for s in flash):

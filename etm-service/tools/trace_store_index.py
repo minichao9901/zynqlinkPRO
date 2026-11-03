@@ -2317,6 +2317,11 @@ def build_store_index(store_dir, cell_size=DEFAULT_CELL_INSTRUCTIONS, progress=N
                        with_nav=True, container='v1'):
     """给已发布 store 建立查询索引：写新 generation（复制块 + 替换 meta + 追加 12 号块），
     最后原子发布 manifest；旧 generation 保留（现有语义）。失败不改变当前代。"""
+    if os.environ.get('ETM_NATIVE_QUERY', '1') != '0':
+        if cell_size != 4096 or container not in ('v1','v2'):
+            raise trace_store.TraceStoreError('原生索引重建使用4096单元格；研发对照请显式 ETM_NATIVE_QUERY=0')
+        from native_core import reindex
+        return reindex(store_dir, container=container)
     started = time.perf_counter()
     store_dir = Path(store_dir).resolve()
     store = trace_store.TraceStore(store_dir, verify='full')

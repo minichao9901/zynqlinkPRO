@@ -33,6 +33,9 @@ docs/validation/native-engine-offline-20261031/fixture/** -text whitespace=cr-at
 # Exact native-engine source snapshot and OpenCSD upstream bytes.
 etm-service/native/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
 etm-service/vendor/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+# Exact upstream dependency snapshots retain their own whitespace and bytes.
+etm-service/vendor/capstone-5.0.7/** -text -whitespace
+etm-service/vendor/libdwarf-2.3.3/** -text -whitespace conflict-marker-size=32
 etm-service/CMakeLists.txt -text whitespace=cr-at-eol
 etm-service/build-decoder.ps1 -text whitespace=cr-at-eol
 

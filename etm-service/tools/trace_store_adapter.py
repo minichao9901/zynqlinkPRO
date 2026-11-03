@@ -336,8 +336,11 @@ def capture_start_from_store(folder_or_store, metadata):
     store_path = folder_or_store
     if Path(store_path).name != STORE_DIR_NAME and (Path(store_path) / STORE_DIR_NAME).is_dir():
         store_path = Path(store_path) / STORE_DIR_NAME
-    store = trace_store.TraceStore(store_path, verify='sizes')
+    from native_core import reader
+    store = reader(store_path, verify='sizes')
     try:
+        if hasattr(store, 'capture_start'):
+            return store.capture_start(entry)
         first_seq = (store.summary or {}).get('firstSeq')
         prepared = store.meta.get('captureStartIndex')
         if prepared is not None:
@@ -372,7 +375,8 @@ def read_sources(folder):
     values = dict(overlay) if isinstance(overlay, dict) else {}
     try:
         if manifest_path(folder).is_file():
-            store = trace_store.TraceStore(store_dir(folder), verify='sizes')
+            from native_core import reader
+            store = reader(store_dir(folder), verify='sizes')
             try:
                 for name, text in (store.sources or {}).items():
                     values.setdefault(name, text)
@@ -450,7 +454,8 @@ class TraceStoreAdapter:
         """打开并校验 store（manifest sha256 + 块 CRC），并按内容核验绑定输入。"""
         started = time.perf_counter()
         try:
-            store = trace_store.TraceStore(self.path, verify='full')
+            from native_core import reader
+            store = reader(self.path, verify='full')
         except trace_store.TraceStoreError as error:
             raise ValueError('trace-store 不可用：%s' % error)
         try:
