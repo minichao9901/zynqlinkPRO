@@ -85,6 +85,10 @@ def main(argv=None):
     parser.add_argument('--zip',action='store_true',help='额外生成分发ZIP；本机默认不生成')
     args=parser.parse_args(argv)
     if os.name!='nt' or sys.maxsize<=2**32:raise ValueError('请使用Windows x64 Python构建')
+    from tools.verify_dependencies import verify
+    source_inputs=verify(ROOT,check_tracked=True)
+    if not source_inputs['ok']:
+        raise ValueError('构建依赖未完整纳入Git或身份不符：'+'；'.join(source_inputs['failures']))
     shared=subprocess.run([sys.executable,str(ROOT/'tools/sync_etm_shared.py'),'--check'],capture_output=True,text=True)
     if shared.returncode:raise ValueError('ETM共享驱动不是当前主驱动，请先运行web.shared-sync --write：'+shared.stdout+shared.stderr)
     out=args.out.resolve()
