@@ -5,8 +5,10 @@ from pathlib import PurePosixPath
 from capstone import Cs, CS_ARCH_ARM, CS_MODE_THUMB, CS_MODE_MCLASS
 
 
-def resolve_breakpoint(image, spec):
-    text = re.sub(r'^(?:b|break)\s+', '', str(spec).strip())
+def instruction_starts(image):
+    native = getattr(image, 'breakpoint_starts', None)
+    if callable(native):
+        return native()
     executable = [(s['p_vaddr'], s['p_vaddr'] + s['p_filesz'])
                   for s in image.elf.iter_segments() if s['p_type'] == 'PT_LOAD' and s['p_flags'] & 1]
     decoder = Cs(CS_ARCH_ARM, CS_MODE_THUMB | CS_MODE_MCLASS)
@@ -23,6 +25,12 @@ def resolve_breakpoint(image, spec):
                 if index >= 0 and mappings[index][1] != 't':
                     continue  # literal pools / ARM code are not Cortex-M Thumb instruction starts
                 starts.update(i.address for i in decoder.disasm(image.read(begin, end - begin), begin))
+    return starts
+
+
+def resolve_breakpoint(image, spec):
+    text = re.sub(r'^(?:b|break)\s+', '', str(spec).strip())
+    starts = instruction_starts(image)
     def candidate(address, label):
         if address not in starts:
             raise ValueError('该位置不是 ELF 中可确认的指令起点')

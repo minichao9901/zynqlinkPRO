@@ -126,6 +126,7 @@ class Image:
         self.lines = {v[0]: tuple(v[1:]) for v in info['lines']}
         self.line_starts = list(self.lines)
         self._segments = info['segments']
+        self._breakpoint_starts = None
         self.preparation = dict(native=True, cacheHit=False, sha256=self.sha256)
 
     @property
@@ -164,6 +165,11 @@ class Image:
 
     def location(self, address):
         return tuple(self.client.call('location', address=int(address)))
+
+    def breakpoint_starts(self):
+        if self._breakpoint_starts is None:
+            self._breakpoint_starts = frozenset(self.client.call('breakpoint-starts'))
+        return self._breakpoint_starts
 
     def source(self, file):
         from decode_trace import ROOT

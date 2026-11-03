@@ -4069,6 +4069,7 @@ int main_utf8(int argc, char** argv) {
                         else if(op=="location") {auto loc=image.location(request.at("address").get<uint64_t>());result=Json::array({std::get<0>(loc),std::get<1>(loc),std::get<2>(loc)<0?Json(nullptr):Json(std::get<2>(loc))});}
                         else if(op=="segments")result=image.info(true).at("segments");
                         else if(op=="elf-info")result=image.elf_info(argv[2]);
+                        else if(op=="breakpoint-starts")result=image.breakpoint_starts();
                         else if(op=="source") {StaticDict dict;StaticEntry entry;entry.text_slots=4;dict.strings={"",request.at("file").get<std::string>(),"",""};dict.entries.push_back(entry);auto values=image.select_sources(dict,request.at("sources"),fs::u8path(request.at("root").get<std::string>()));result=values.value(request.at("file").get<std::string>(),std::string());}
                         else fail(kExitUsage,"Unknown native image operation");
                         std::cout<<Json{{"ok",true},{"result",std::move(result)}}.dump()<<std::endl;
@@ -4087,7 +4088,7 @@ int main_utf8(int argc, char** argv) {
                       << ",\"buildSha\":" << quote(build_sha())
                       << ",\"formats\":{\"native\":\"trace-bin native v1\","
                          "\"staticDict\":1,\"ranges\":1}"
-                      << ",\"capabilities\":[\"prescan\",\"diagnose\",\"build\",\"facts-v3\",\"quality-diagnostics\",\"index-facts-v1\",\"direct-opencsd-v1\",\"typed-replay-v1\",\"shared-tracker-v1\",\"complete-index-v1\",\"native-static-v1\",\"native-query-v1\"]"
+                      << ",\"capabilities\":[\"prescan\",\"diagnose\",\"build\",\"facts-v3\",\"quality-diagnostics\",\"index-facts-v1\",\"direct-opencsd-v1\",\"typed-replay-v1\",\"shared-tracker-v1\",\"complete-index-v1\",\"native-static-v1\",\"native-query-v1\",\"native-breakpoint-starts-v1\"]"
                       << "}" << std::endl;
             return kExitOk;
         }

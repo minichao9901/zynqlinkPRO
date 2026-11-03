@@ -83,7 +83,7 @@ class HssReader(threading.Thread):
             self.error = repr(exc)
 
 
-def hss_point(probe, mem, dev, speed, period, nvars, seconds, repeat, allow_low_clock=False, activate_transport=None, allow_duplicate_stat=False):
+def hss_point(probe, mem, dev, speed, period, nvars, seconds, repeat, allow_low_clock=False, activate_transport=None, allow_duplicate_stat=False, flags=0):
     base = 0x20004000
     fixture = random.Random(0x485353).randbytes(4096)
     mem.write(base, fixture)
@@ -99,7 +99,7 @@ def hss_point(probe, mem, dev, speed, period, nvars, seconds, repeat, allow_low_
         assert probe.action(0x31,7,struct.pack('<IHBB',speed,1024,0,1))[0]==0
         clock_method='shared RTT clock setter (HSS public setter rejected low rate)'
     else:assert clock_rc==0,('HSS clock rejected',clock_rc,speed)
-    cfg = struct.pack('<IBB', period, 0, nvars)+b''.join(struct.pack('<IBB', *v) for v in variables)
+    cfg = struct.pack('<IBB', period, flags, nvars)+b''.join(struct.pack('<IBB', *v) for v in variables)
     assert probe.action(0x32, 10, cfg)[0] == 0
     drain_hss(dev)
     reader = HssReader(dev, expected, period,allow_duplicate_stat)
@@ -150,7 +150,7 @@ def hss_point(probe, mem, dev, speed, period, nvars, seconds, repeat, allow_low_
         dt = delta[1]/tick_hz
         produced, skipped = delta[3], delta[4]
         row = {'service': 'hss', 'speed_hz': speed, 'period_ticks': period,
-               **clock,
+               **clock, 'capture_flags': flags,
                'clock_setter_rc':clock_rc,'clock_method':clock_method,
                'requested_Hz': tick_hz/period,'nominal_24MHz_requested_Hz':24_000_000/period,
                'period_clock_Hz':tick_hz,'variables': nvars, 'repeat': repeat,
@@ -201,6 +201,7 @@ def main():
     ap.add_argument('--bit',type=Path)
     ap.add_argument('--elf',type=Path)
     ap.add_argument('--transport', choices=['swd','jtag'], default='swd')
+    ap.add_argument('--flags',type=lambda v:int(v,0),default=0,help='Explicit HSS config flags, e.g. 0xa1 for Web fast-batch/CDC-off/60MHz')
     ap.add_argument('--allow-duplicate-stat', action='store_true',
                     help='Diagnostic only: record repeated kind-3 status sequences; data/count checks remain strict')
     args = ap.parse_args()
@@ -229,7 +230,7 @@ def main():
                 for period in map(int, args.periods.split(',')):
                     for repeat in range(args.repeats):
                         row = hss_point(probe, mem, dev, speed, period, nv, args.seconds, repeat,
-                                        allow_duplicate_stat=args.allow_duplicate_stat)
+                                        allow_duplicate_stat=args.allow_duplicate_stat,flags=args.flags)
                         report['rows'].append(row)
                         args.output.write_text(json.dumps(report, indent=2))
                         print(json.dumps({k: v for k, v in row.items() if k not in ('m0','m1','final')}), flush=True)

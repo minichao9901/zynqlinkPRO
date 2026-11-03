@@ -1,6 +1,6 @@
 {
   "schema": "zynqlink-vendored-dependencies/1",
-  "date": "2026-11-03",
+  "date": "2026-11-04",
   "scope": "Required build/simulation inputs, including the complete native ETM index candidate; historical component fingerprints retained",
   "components": [
     {
@@ -942,6 +942,21 @@
         "etm-service/vendor/libdwarf-2.3.3/src/lib/libdwarf/NEWS": "553c13374d6c44bb9fa352a1bd04d12e2a2945b66036685fa0c6cca142f97900",
         "etm-service/vendor/libdwarf-2.3.3/src/lib/libdwarf/README": "fd5ef83f786599dbd344ab81529288f6dbdb214f5fc073fbc5b8a7d250c7f142",
         "etm-service/vendor/libdwarf-2.3.3/ZYNQLINK-PROVENANCE.json": "c0527d7cdef57fef3d7ba4212e88c0fa57d5c2338fa7ed55fb2e79ed4946fe2b"
+      }
+    },
+    {
+      "id": "f103-hal-storage-spi-i2c",
+      "purpose": "F103ZE Elite HAL NOR/EEPROM ETM workload",
+      "path": "firmware/target/stm32f103_hal_storage/vendor",
+      "source_url": "https://github.com/STMicroelectronics/stm32f1xx-hal-driver",
+      "source_commit": "77fbb30b7a1d02533980400083e48c559aae5a4f",
+      "license": "firmware/target/stm32f103_hal_storage/vendor/LICENSE.md",
+      "provenance": "firmware/target/stm32f103_hal_storage/vendor/provenance.json",
+      "files": {
+        "firmware/target/stm32f103_hal_storage/vendor/LICENSE.md": "dff179cfe1405dc3381dc6865bf4a5173b35605b65694d73356b01aaec1f09f1",
+        "firmware/target/stm32f103_hal_storage/vendor/provenance.json": "c0f14c23e0eb7229fdd41dca2e073795ed2c2094892ff44de771daff32827dde",
+        "firmware/target/stm32f103_hal_storage/vendor/stm32f1xx_hal_i2c.c": "a6d87b1d70134ddce7ee2270d8564f0927af43659af2b9e547a985eb2c53fb95",
+        "firmware/target/stm32f103_hal_storage/vendor/stm32f1xx_hal_spi.c": "74c20012ae5e579f6f720b941e66cae7b39ca47d80d873dc53d2274519795802"
       }
     }
   ],

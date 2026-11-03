@@ -1,0 +1,35 @@
+{
+  "stage": "web-button",
+  "rows": [],
+  "passed": false,
+  "lifecycle": [
+    {
+      "round": 1,
+      "openSeconds": 0.9051837000006344,
+      "closeSeconds": 0.28040949999922304,
+      "profile": "stm32f103ze",
+      "clocks": {
+        "busDivider": 1,
+        "coreDivider": 1,
+        "coreHz": 48000000,
+        "external": true,
+        "hclkHz": 48000000,
+        "knownHz": 48000000,
+        "knownTraceHz": 48000000,
+        "path": "HSE 8 MHz \u00f71 \u00d76 \u2192 AHB \u00f71",
+        "physicalTraceHz": 24000000,
+        "source": "HSE \u2192 PLL",
+        "traceHz": 48000000,
+        "tracePath": "HCLK \u2192 TRACEPORTCK\uff08\u4e0e CPU \u76f8\u540c\uff09",
+        "traceReady": true,
+        "traceRelation": "Trace \u8f93\u5165 = HCLK\uff1b4 \u4f4d DDR \u7684 TRACECLK = HCLK / 2"
+      },
+      "rcc": {
+        "cfgr": 1115146,
+        "cr": 50548355
+      },
+      "halted": false
+    }
+  ],
+  "error": "TimeoutError(\"Web control did not become ready: #start; 'Image' object has no attribute 'get_section_by_name'\")"
+}

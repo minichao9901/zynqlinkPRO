@@ -58,6 +58,7 @@ struct NativeImage {
     std::vector<Segment> segments;
     std::vector<Section> sections;
     std::vector<Function> functions;
+    std::vector<std::pair<uint64_t, char>> code_mappings;
     std::map<uint64_t, Line> lines;
     std::set<uint64_t> predicates, known;
     std::string sha;
@@ -203,17 +204,23 @@ struct NativeImage {
                 const auto &names = sections[s.link];
                 for (size_t i = 0; i < s.size; i += s.entry) {
                     size_t p = s.offset + i;
+                    const auto name = string_at(names.offset + number(p, 4),
+                                                uint64_t(names.offset) + names.size);
+                    if (name.size() >= 2 && name[0] == '$' &&
+                        (name[1] == 't' || name[1] == 'd' || name[1] == 'a') &&
+                        (name.size() == 2 || name[2] == '.'))
+                        code_mappings.emplace_back(number(p + 4, 4), name[1]);
                     if ((bytes.at(p + 12) & 15) != 2 || !number(p + 8, 4))
                         continue;
                     functions.push_back(Function{uint32_t(number(p + 4, 4) & ~uint64_t(1)),
                                                  uint32_t(number(p + 8, 4)),
-                                                 string_at(names.offset + number(p, 4),
-                                                           uint64_t(names.offset) + names.size)});
+                                                 name});
                 }
             }
         std::sort(functions.begin(), functions.end(), [](const Function &a, const Function &b) {
             return std::tie(a.address, a.size, a.name) < std::tie(b.address, b.size, b.name);
         });
+        std::sort(code_mappings.begin(), code_mappings.end());
         parse_lines();
         need(cs_open(CS_ARCH_ARM, cs_mode(CS_MODE_THUMB | CS_MODE_MCLASS), &decoder) == CS_ERR_OK,
              "Cannot initialize native Capstone");
@@ -400,6 +407,35 @@ struct NativeImage {
                 previous_file = file;
             }
         }
+    }
+    std::set<uint64_t> breakpoint_starts() {
+        std::set<uint64_t> starts;
+        for (const auto &f : functions) {
+            bool executable = false;
+            for (const auto &s : segments)
+                executable |= (s.flags & 1) && f.address >= s.address &&
+                              uint64_t(f.address) < uint64_t(s.address) + s.size;
+            if (!executable)
+                continue;
+            std::set<uint64_t> boundaries{f.address, uint64_t(f.address) + f.size};
+            for (const auto &mapping : code_mappings)
+                if (mapping.first > f.address && mapping.first < uint64_t(f.address) + f.size)
+                    boundaries.insert(mapping.first);
+            for (auto begin = boundaries.begin(), end = std::next(begin); end != boundaries.end();
+                 ++begin, ++end) {
+                auto mapping = std::upper_bound(code_mappings.begin(), code_mappings.end(),
+                                               std::make_pair(*begin, char(127)));
+                if (mapping != code_mappings.begin() && std::prev(mapping)->second != 't')
+                    continue;
+                auto data = read(*begin, *end - *begin);
+                cs_insn *instructions = nullptr;
+                size_t count = cs_disasm(decoder, data.first, data.second, *begin, 0, &instructions);
+                for (size_t i = 0; i < count; ++i)
+                    starts.insert(instructions[i].address);
+                cs_free(instructions, count);
+            }
+        }
+        return starts;
     }
     void prepare_addresses() {
         for (const auto &f : functions) {
