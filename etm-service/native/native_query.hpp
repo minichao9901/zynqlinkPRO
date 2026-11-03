@@ -276,6 +276,7 @@ class NativeStore {
     bool paths_ready = false;
     Json issue_values;
     bool issues_checked = false;
+    std::map<unsigned, std::vector<uint64_t>> navigation_cache;
     bool transient_index = false;
     static Json read_json(const fs::path &path, size_t cap) {
         std::error_code ec;
@@ -2366,20 +2367,33 @@ Json NativeStore::navigate(const Json &request) {
         return answer(nullptr);
     }
     unsigned nav_mode = mode == "call" ? 1 : mode == "return" ? 2 : mode == "exception" ? 3 : 4;
-    std::vector<uint64_t> values;
-    for (auto n : of_type(5)) {
-        auto data = block(n);
-        NativeCursor c(*data);
-        auto kind = c.le(1), count = c.uv();
-        uint64_t value = 0;
-        for (size_t i = 0; i < count; ++i) {
-            value += c.uv();
-            if (kind == nav_mode)
+    auto cached = navigation_cache.find(nav_mode);
+    if (cached == navigation_cache.end()) {
+        std::vector<uint64_t> values;
+        for (auto n : of_type(5)) {
+            auto data = block(n);
+            NativeCursor c(*data);
+            auto kind = c.le(1), count = c.uv();
+            if (count > c.size - c.pos)
+                fail(kExitInput, "Navigation count exceeds block bounds");
+            if (kind != nav_mode)
+                continue;
+            uint64_t value = 0;
+            for (size_t i = 0; i < count; ++i) {
+                auto delta = c.uv();
+                if (value > last || delta > last - value)
+                    fail(kExitInput, "Navigation sequence exceeds store bounds");
+                value += delta;
                 values.push_back(value);
+            }
+            if (c.pos != c.size)
+                fail(kExitInput, "Navigation block has trailing bytes");
         }
-        if (c.pos != c.size)
-            fail(kExitInput, "Navigation block has trailing bytes");
+        if (!std::is_sorted(values.begin(), values.end()))
+            fail(kExitInput, "Navigation sequence is not sorted");
+        cached = navigation_cache.emplace(nav_mode, std::move(values)).first;
     }
+    const auto &values = cached->second;
     if (forward) {
         auto p = std::upper_bound(values.begin(), values.end(), std::max(seq, lo - 1));
         if (p != values.end() && *p <= uint64_t(hi))
