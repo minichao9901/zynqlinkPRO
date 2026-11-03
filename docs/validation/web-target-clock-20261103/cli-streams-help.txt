@@ -1,0 +1,33 @@
+usage: validate_hpm6800_streams.py [-h] --stage {rtt,hss} --bit BIT --elf ELF
+                                   --out OUT [--speeds SPEEDS]
+                                   [--seconds SECONDS] [--repeats REPEATS]
+                                   [--mode {0,1,16,17}] [--periods PERIODS]
+                                   [--variables VARIABLES]
+                                   [--hss-base {4030742528,19136256}]
+                                   [--observe-scans]
+                                   [--idle {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64}]
+
+HPM6880 RAM-only RTT/HSS frequency acceptance, with full fixture restoration.
+
+options:
+  -h, --help            show this help message and exit
+  --stage {rtt,hss}
+  --bit BIT
+  --elf ELF
+  --out OUT
+  --speeds SPEEDS
+  --seconds SECONDS
+  --repeats REPEATS
+  --mode {0,1,16,17}
+  --periods PERIODS     HSS direct period list in 24MHz ticks; skip frontier
+                        search
+  --variables VARIABLES
+                        HSS channel counts (1..8)
+  --hss-base {4030742528,19136256}
+                        Fixture base; channels start at +0x100. AXI option
+                        samples 0x01240000
+  --observe-scans       Passive AP0 scan/sample counters; no DAP ownership
+                        changes
+  --idle {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64}
+                        Explicit TransferConfigure idle; >15 requires
+                        extended-idle pair

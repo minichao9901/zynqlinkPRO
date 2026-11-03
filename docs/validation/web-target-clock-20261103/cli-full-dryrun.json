@@ -1,0 +1,41 @@
+{
+  "ok": true,
+  "value": {
+    "id": "tools/validate_hpm6800_performance.py",
+    "requestedName": "tools/validate_hpm6800_performance.py",
+    "steps": [
+      {
+        "runtime": "python",
+        "executable": "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "arguments": [
+          "-X",
+          "utf8",
+          "C:\\Users\\Administrator\\.codex\\worktrees\\web-ui-compact\\zynqlinkPRO\\tools\\validate_hpm6800_performance.py",
+          "--bit",
+          "prebuilt/hpm6800-jtag66-133-20261102/probe.bit",
+          "--elf",
+          "prebuilt/hpm6800-jtag66-133-20261102/application.elf",
+          "--out",
+          "build/hpm-cli-high-example",
+          "--speeds",
+          "66666667",
+          "--idle",
+          "22",
+          "--modes",
+          "17",
+          "--windows",
+          "axi",
+          "--loops",
+          "128",
+          "--repeats",
+          "3"
+        ],
+        "cwd": "C:\\Users\\Administrator\\.codex\\worktrees\\web-ui-compact\\zynqlinkPRO"
+      }
+    ],
+    "environment": {},
+    "effects": "same as the underlying registered tool; no tool runs during planning",
+    "output": "underlying stdout/stderr and exit code are preserved",
+    "dependencyValidation": "interpreter discovery only; SDK/vendor/hardware requirements remain tool-specific"
+  }
+}

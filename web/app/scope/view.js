@@ -17,6 +17,8 @@ import { runProbeOperation } from '../core/probe-manager.js';
 import { waitMs } from '../core/pace.js';
 import { $, setStatus, seg, esc } from '../ui/dom.js';
 import { store } from '../core/store.js';
+import { webClockKhz } from '../core/target-clock.js';
+import { constrainClockSelect } from '../ui/target-clock.js';
 import { AkaLinkHid } from '../hid/probe.js';
 import { Elf } from '../elf/elf.js';
 import { listSampleable } from '../elf/dwarf.js';
@@ -101,6 +103,7 @@ export class ScopeView {
       clk.appendChild(o);
     }
     clk.value = '0';
+    constrainClockSelect(clk,'arm');
 
     // 触发模式 / 通道
     const tm = $('sc-trig-mode');
@@ -928,7 +931,7 @@ export class ScopeView {
       this.transport.configureReadAhead?.(wireBps);
       await this.transport.prepare?.();
       if (!this._captureAlive(g)) return;
-      const clockKhz = Number($('sc-clock').value) || 0;
+      const clockKhz = webClockKhz($('sc-clock').value,'arm');
       /**
        * flags：bit0 允许 60 MHz；bit4 SWD 空闲拍压 0；bit5 采样时暂停 CDC/串口桥；
        *        **bit6 强制本次会话走 RISC-V/JTAG**（不带就跟随全局目标类型）。
@@ -1349,7 +1352,7 @@ export class ScopeView {
       const vars = (this.selected.length ? this.selected : (this.usingMock ? this.mockVars() : []));
       if (!vars.length){ this.setStatusText('先选变量再标定（标定用的是当前计划）', 'warn'); return; }
       const inputKey = this.benchKeyOf();
-      const clockKhz = Number($('sc-clock').value) || 0;
+      const clockKhz = webClockKhz($('sc-clock').value,'arm');
       const riscv = this.uiBackend() === P.BACKEND.RISCV;      // 选中的是 JTAG 就别发 SWD 时钟档（探针会忽略）
       const flags = (clockKhz >= 60000 ? P.SCOPE_FLAG.ALLOW_60M : 0)
         | ($('sc-cdcoff')?.checked ? P.SCOPE_FLAG.CDC_OFF : 0)

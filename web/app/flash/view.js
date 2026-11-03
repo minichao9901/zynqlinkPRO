@@ -5,6 +5,8 @@ import { $, setStatus, appendLogLine } from '../ui/dom.js';
 import { toast } from '../ui/toast.js';
 import { store } from '../core/store.js';
 import { CHIPS } from '../core/chips.js';
+import { webClockKhz } from '../core/target-clock.js';
+import { constrainClockSelect } from '../ui/target-clock.js';
 import { WebUsbDapProbe, withTimeout } from '../rtt/dap-webusb.js';
 import { pulseTargetReset } from './target-reset.js';
 import { ALGOS, F1_DEV, checkFlashRange } from './algos.js';
@@ -37,13 +39,14 @@ export class FlashView {
   }
 
   init(){
-    for (const chip of CHIPS.filter(c => ALGOS[c.v] || hpmBoard(c.v)))
+    for (const chip of CHIPS.filter(c => (c.v.startsWith('stm32') && ALGOS[c.v]) || hpmBoard(c.v)))
       $('f-chip').appendChild(new Option(chip.label, chip.v));
     store.bind($('f-chip'), 'flash.chip');
     if (!$('f-chip').value) $('f-chip').selectedIndex = 0;
     store.bind($('f-base'), 'flash.base');
     store.bind($('f-verify'), 'flash.verify', 'checked');
     store.bind($('f-reset'), 'flash.reset', 'checked');
+    constrainClockSelect($('f-speed'),'arm'); // Add 25MHz before restoring a remembered selection.
     store.bind($('f-speed'), 'flash.speed');
     $('f-chip').addEventListener('change', () => { rememberHpmBoard($('f-chip').value); this._applyChip(); });
     this._applyChip();
@@ -102,7 +105,13 @@ export class FlashView {
     $('f-base-row').hidden = !/\.bin$/i.test(this.file?.name || '');
   }
 
-  _applyChip(){ $('f-custom-speed-row').hidden = false; }
+  _applyChip(){
+    $('f-custom-speed-row').hidden = false;
+    constrainClockSelect($('f-speed'),$('f-chip').value,v=>store.set('flash.speed',v));
+    $('f-speed').title=hpmBoard($('f-chip').value)
+      ? 'HPM JTAG 时钟最高 25 MHz；默认 10 MHz'
+      : 'ARM 烧录数据与校验时钟最高 60 MHz；执行控制保持 1 MHz';
+  }
 
   // ================= 烧录 =================
   /** Managed acquisition already released conflicts; standalone views use the same adapters. */
@@ -470,7 +479,7 @@ export class FlashView {
 
     const verify = $('f-verify').checked;
     const doReset = $('f-reset').checked;
-    const clockKhz = Number($('f-speed')?.value) || DEFAULT_FLASH_CLOCK_KHZ;
+    const clockKhz = webClockKhz($('f-speed')?.value,$('f-chip').value,DEFAULT_FLASH_CLOCK_KHZ);
     const runner = new FlashRunner(this.probe, { clockKhz });
     this._log(`烧录数据时钟 ${clockKhz / 1000} MHz；执行控制 1 MHz`);
     lap('探针');
@@ -789,7 +798,7 @@ export class FlashView {
     this.probe = probe;
     probe.fast = false;
     probe.onLog = s => this._log('   [usb] ' + s);
-    const clockKhz = Number($('f-speed')?.value) || DEFAULT_FLASH_CLOCK_KHZ;
+    const clockKhz = webClockKhz($('f-speed')?.value,board.id,DEFAULT_FLASH_CLOCK_KHZ);
     await probe.setClock(clockKhz * 1000);
     this._log(`烧录 JTAG 时钟 ${clockKhz / 1000} MHz`);
 

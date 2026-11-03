@@ -13,6 +13,7 @@ import { runProbeOperation } from '../core/probe-manager.js';
 import { $, setStatus, debounce } from '../ui/dom.js';
 import { toast } from '../ui/toast.js';
 import { store } from '../core/store.js';
+import { webClockKhz } from '../core/target-clock.js';
 import { bytes as fBytes } from '../core/format.js';
 import { findSymbol } from '../rtt/elf.js';
 import { AkaLinkHid, startRcText, START_PENDING } from './probe.js';
@@ -22,6 +23,7 @@ import { waitMs } from '../core/pace.js';
 const CLOCK_OPTIONS = [
   { v: '', label: '不改（用探针当前档位）' },
   { v: '20000000', label: '20 MHz' },
+  { v: '25000000', label: '25 MHz' },
   { v: '30000000', label: '30 MHz' },
   { v: '36000000', label: '36 MHz' },
   { v: '45000000', label: '45 MHz（出厂默认）' },
@@ -291,7 +293,7 @@ export class RttCdcView {
        *    探针的 RISC-V 引擎就再也读不出目标内存 —— 现象是"桥一直找不到 RTT 控制块、
        *    读错数一直涨"，而同一个探针用 `hpm6800_rtt_loss.py`（clock 传 0）1.39 MB/s 跑得好好的。
        */
-      clockHz: this.isRiscv ? 0 : (Number($('h-clock').value) || 0),
+      clockHz: this.isRiscv ? 0 : webClockKhz(Number($('h-clock').value)/1000,'arm')*1000,
     };
   }
 

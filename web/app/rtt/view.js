@@ -4,6 +4,8 @@ import { runProbeOperation } from '../core/probe-manager.js';
 import { $, seg, setStatus, mhzLabel, ensureSelectOption } from '../ui/dom.js';
 import { toast } from '../ui/toast.js';
 import { store } from '../core/store.js';
+import { webClockKhz,isHpmClockTarget } from '../core/target-clock.js';
+import { constrainClockSelect } from '../ui/target-clock.js';
 import { RxBuffer } from '../core/rxview.js';
 import { FileRecorder, recordButtonState } from '../core/recorder.js';
 import { Rtt } from './protocol.js';
@@ -173,6 +175,7 @@ export class RttView {
       const wantRv = arch === 'riscv';
       if (wantRv !== ($('r-target').value === 'riscv')){
         $('r-target').value = wantRv ? 'riscv' : 'swd';
+        store.set('rtt.target',$('r-target').value);
         onTargetChanged();
       } else {
         $('r-range').value = wantRv ? (rvRange(id)) : (OCD_RAM[id] || $('r-range').value);
@@ -194,6 +197,8 @@ export class RttView {
     store.bind($('r-usb-clock'), 'rtt.clockKhz');
     // 老版本这里是 select（0/1000/500/200/2000/4000/8000/12000/20000）：存过 8000/12000 的要能显示出来
     ensureSelectOption($('r-usb-clock'), store.get('rtt.clockKhz', ''), mhzLabel(store.get('rtt.clockKhz', '')));
+    $('r-usb-clock').value=String(store.get('rtt.clockKhz','0'));
+    this._applyClockLimit();
     store.bind($('r-record-ts'), 'rtt.recordTs', 'checked');
     store.bind($('r-record-auto'), 'rtt.recordAuto', 'checked');
     $('r-record').addEventListener('click', () => this._toggleRecord());
@@ -260,10 +265,18 @@ export class RttView {
 
 
   _applyChipUi(applyRange){
+    this._applyClockLimit();
     const t = armChipId();
     const note = $('r-chip-note');
     if (note) note.hidden = chipArchOf(chipSel()?.value || '') !== 'riscv';
     if (applyRange && $('r-target').value !== 'riscv' && OCD_RAM[t]) $('r-range').value = OCD_RAM[t];
+  }
+
+  _applyClockLimit(){
+    const target=chipSel()?.value;
+    constrainClockSelect($('r-usb-clock'),target,v=>store.set('rtt.clockKhz',v));
+    $('r-usb-clock').title=isHpmClockTarget(target)?'HPM JTAG TCK 最高 25 MHz；自动使用 10 MHz'
+      : $('r-target').value==='riscv'?'其他 RISC-V JTAG TCK 最高 60 MHz':'SWD 时钟最高 60 MHz；自动从高到低协商';
   }
 
   // ================= 连接 =================
@@ -290,7 +303,8 @@ export class RttView {
         if (g !== this._sessionGen) return;
       }
       if (b === 'webusb'){
-        const clockKhz = Number(store.get('rtt.clockKhz', 0)) || 0;
+        const clockKhz = webClockKhz($('r-usb-clock').value,chipSel()?.value,
+          isHpmClockTarget(chipSel()?.value)?10000:0);
         if ($('r-target').value === 'riscv'){
           /**
            * RISC-V/JTAG 走另一套底层：HID 切 SWD+JTAG → WebUSB 的 DAP_JTAG_Sequence → DMI → SBA
