@@ -1,0 +1,70 @@
+{
+  "time_UTC": "2026-11-03T01:32:08.455750+00:00",
+  "elf": "C:\\Users\\Administrator\\.codex\\worktrees\\web-ui-compact\\zynqlinkPRO\\prebuilt\\hpm6800-usb-fixed-133-20261102\\application.elf",
+  "elf_sha256": "e93f1810d48e77f8d9aa097f643e40e0aaee32bdec1c263c1428f092909e608a",
+  "downloads": false,
+  "probe_reset_or_continue": false,
+  "expected_executable_bytes": 76420,
+  "cycles": [
+    {
+      "cycle": 0,
+      "sections": [
+        {
+          "name": ".text",
+          "bytes": 73856,
+          "address": 0,
+          "equal": true,
+          "expected_sha256": "9cf9e434e43657c04ce642cfac03dc363696508a3cbe7c8309d52156e6e20766",
+          "live_sha256": "9cf9e434e43657c04ce642cfac03dc363696508a3cbe7c8309d52156e6e20766"
+        },
+        {
+          "name": ".ocm_text",
+          "bytes": 2540,
+          "address": 73856,
+          "equal": true,
+          "expected_sha256": "825bde62005ae2ae8e93bfd70f3b7a7ccea9aeea513e9aeca1484416c6ec42e6",
+          "live_sha256": "825bde62005ae2ae8e93bfd70f3b7a7ccea9aeea513e9aeca1484416c6ec42e6"
+        },
+        {
+          "name": ".init",
+          "bytes": 12,
+          "address": 76396,
+          "equal": true,
+          "expected_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6",
+          "live_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6"
+        },
+        {
+          "name": ".fini",
+          "bytes": 12,
+          "address": 76408,
+          "equal": true,
+          "expected_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6",
+          "live_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6"
+        }
+      ],
+      "differing_addresses": [],
+      "vector_word": "ea000049"
+    }
+  ],
+  "passed": true,
+  "memoryAccess": "physical MEM-AP0; independent of CPU memory/cache context",
+  "boot_mode": 0,
+  "boot_trace": [
+    4253697098,
+    3147530069,
+    2520096601,
+    4278054452,
+    985823053,
+    4219467427,
+    982964705,
+    3686775615
+  ],
+  "clockSnapshot": {
+    "control": 3147264,
+    "source": 0,
+    "pll": 221192,
+    "bootMode": 0,
+    "FCLK_Hz": 99999999
+  },
+  "initial_FCLK_Hz": 99999999
+}

@@ -255,8 +255,9 @@ export class RttCdcStreamView {
       throw Error('记录窗口须为0.1..30秒，缓存须为1..64MiB');
     this._windowRecording=true;
     const chunks=[],limit=maxMiB*1024*1024,started=performance.now();
-    let bytes=0,observedBytes=0,closed=false,error=null;
+    let bytes=0,observedBytes=0,closed=false,error=null,firstDataAt=null,lastDataAt=null,firstChunkBytes=0;
     const offData=this.s.on('data',b=>{
+      if(b.length){const now=performance.now();if(firstDataAt===null){firstDataAt=now;firstChunkBytes=b.length;}lastDataAt=now;}
       observedBytes+=b.length;
       const take=Math.min(b.length,limit-bytes);
       if(take>0){chunks.push(b.slice(0,take));bytes+=take;}
@@ -267,7 +268,9 @@ export class RttCdcStreamView {
     finally{offData();offClose();offError();this._windowRecording=false;}
     const elapsed=(performance.now()-started)/1000,name=`${this.owner}-raw-${fileStamp()}.bin`;
     download(name,new Blob(chunks,{type:'application/octet-stream'}));
-    return {name,bytes,observedBytes,seconds:elapsed,complete:bytes>0&&observedBytes===bytes&&!closed&&!error,
+    const activeSeconds=firstDataAt!==null&&lastDataAt>firstDataAt?(lastDataAt-firstDataAt)/1000:0;
+    return {name,bytes,observedBytes,seconds:elapsed,activeSeconds,firstChunkBytes,
+      activeBytesPerSecond:activeSeconds?(observedBytes-firstChunkBytes)/activeSeconds:0,complete:bytes>0&&observedBytes===bytes&&!closed&&!error,
       limitExceeded:observedBytes>bytes,portClosed:closed,error,bytesPerSecond:bytes/elapsed};
   }
 

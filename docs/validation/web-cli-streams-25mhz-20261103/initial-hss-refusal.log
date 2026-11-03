@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "C:\Users\Administrator\.codex\worktrees\web-ui-compact\zynqlinkPRO\tools\benchmark_web_cli_25.py", line 145, in <module>
+    if __name__=='__main__':main()
+                            ~~~~^^
+  File "C:\Users\Administrator\.codex\worktrees\web-ui-compact\zynqlinkPRO\tools\benchmark_web_cli_25.py", line 128, in main
+    start=w.invoke('scope','summary');assert start['running'],start
+                                             ~~~~~^^^^^^^^^^^
+AssertionError: {'awaitingDefinition': True, 'benchUs': None, 'blob': None, 'capacity': 758685, 'captureFlags': 64, 'connectErr': None, 'dapYields': 0, 'definitionReceived': False, 'elf': None, 'lod': False, 'lost': 0, 'lostGap': 0, 'lostProbe': 0, 'lostUsb': 0, 'metricsError': None, 'mockVars': ['mock0.f32', 'mock1.f32', 'mock2.i32', 'mock3.u16', 'mock4.i16', 'mock5.u8', 'mock6.i8', 'mock7.f64'], 'mode': 'real', 'packets': 0, 'plan': {'estHz': 139232, 'estUs': 7.18, 'frameBytes': 4, 'spans': 1}, 'probeMetrics': None, 'rateHz': 0, 'raw': 0, 'readErrors': 0, 'receivedSamples': 0, 'resyncs': 0, 'running': False, 'samples': 0, 'stalePackets': 0, 'state': '探针启动失败：探针采样、标定或收尾仍忙；请保持数据端点连接并等待停止确认', 'supportsMetrics': True, 'tailCountDelta': None, 'transport': {'bytes': 0, 'chunks': 0, 'errors': 0, 'lastError': None, 'running': False}, 'trigger': {'hit': -1, 'hits': 0, 'marker': False, 'mode': 0}, 'varCount': 1, 'vars': ['fixture.w0:u32@0xf0404100'], 'view': {'end': 1, 'start': 0}}

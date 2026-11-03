@@ -19,6 +19,8 @@ import { $, setStatus, seg, esc } from '../ui/dom.js';
 import { store } from '../core/store.js';
 import { webClockKhz } from '../core/target-clock.js';
 import { constrainClockSelect } from '../ui/target-clock.js';
+import { supportsRiscvStreamClock,streamClockHz } from '../core/stream-clock.js';
+import { rttConfigData } from '../hid/probe.js';
 import { AkaLinkHid } from '../hid/probe.js';
 import { Elf } from '../elf/elf.js';
 import { listSampleable } from '../elf/dwarf.js';
@@ -369,6 +371,7 @@ export class ScopeView {
         return;
       }
       $('sc-info').textContent = info + '（HID 已连接）';
+      this._applyBackendUi();
       this.setStatusText(`探针已连接：${info}`, hid.isProbe ? 'ok' : 'warn');
       if (!hid.isProbe){
         $('sc-info').textContent = info + '（HID 已连接 · ⚠ 不是 akaLinkPro 的 VID/PID）';
@@ -780,6 +783,13 @@ export class ScopeView {
     const rc=this.signed(reply[2]);
     if(rc!==0)throw Error(`目标类型确认失败（${rc}）；请先停止并释放占用探针的功能，未配置或启动采样`);
   }
+  async applyCaptureClock(){
+    if(this.usingMock)return;
+    const riscv=!!this.targetRiscv,hz=streamClockHz(this._probeInfo,riscv,Number($('sc-clock').value)*1000);
+    if(!hz)return;
+    const reply=await this.hidXfer(riscv?P.HID_CMD_RTT:P.HID_CMD,riscv?rttConfigData({clockHz:hz}):P.clockData(hz));
+    if(!reply||reply.length<3||this.signed(reply[2])!==0)throw Error('采样时钟配置未获确认，未启动采样');
+  }
   _dataAlive(g){ return this._captureAlive(g) || (this._drainGen != null && this._drainGen===g); }
 
   async _stopData(){
@@ -942,7 +952,7 @@ export class ScopeView {
         | (this._captureCdcOff ? P.SCOPE_FLAG.CDC_OFF : 0)
         | ($('sc-batch')?.checked ? P.SCOPE_FLAG.FAST_BATCH : 0)
         | (this.targetRiscv ? P.SCOPE_FLAG.RISCV : 0);
-      if (clockKhz > 0 && this.uiBackend() !== P.BACKEND.RISCV) await this.hidXfer(P.HID_CMD, P.clockData(clockKhz * 1000));
+      await this.applyCaptureClock();
       /**
        * 🚨 **CONFIG 之后当场读一次 rc**（2026-10 代码审查）：固件的配置动作是**同步判定**的，
        *    应答里那个返回码就是本次配置的结果（0 = 已采纳、-6 = 配置条件被拒）。
@@ -1208,13 +1218,15 @@ export class ScopeView {
     // SWD 专属：SWD 时钟档在 JTAG 下无效（探针忽略），置灰并说明；采样时暂停串口桥那个 checkbox 仍有效
     const clk = $('sc-clock');
     if (clk){
-      clk.disabled = riscv || !!(this.running || this._starting || this._stopPromise);
-      clk.title = riscv
+      const native=riscv&&supportsRiscvStreamClock(this._probeInfo);
+      constrainClockSelect(clk,native?'hpm':'arm');
+      clk.disabled = riscv&&!native || !!(this.running || this._starting || this._stopPromise);
+      clk.title = native?'Zynq RISC-V JTAG TCK，HPM 最高 25 MHz':riscv
         ? 'RISC-V/JTAG 下无意义：JTAG 时序由 DMI 汇编旋钮 + delay 决定，探针会忽略这个档位'
         : '与 RTT Viewer 同款档位；固件自带失败自动降档';
     }
     const clkRow = $('sc-clock-row');
-    if (clkRow) clkRow.classList.toggle('off', riscv);
+    if (clkRow) clkRow.classList.toggle('off', riscv&&!supportsRiscvStreamClock(this._probeInfo));
     /**
      * 那一格的**名字**要跟着目标类型改（用户 2026-09-30）：同一个档位在 SWD 下是 SWD 时钟，
      * 在 RISC-V/JTAG 下是 **JTAG 时钟（TCK）** —— 名字不改的话，切到 JTAG 后用户会以为
@@ -1359,7 +1371,7 @@ export class ScopeView {
         | ($('sc-batch')?.checked ? P.SCOPE_FLAG.FAST_BATCH : 0)
         | (this.targetRiscv ? P.SCOPE_FLAG.RISCV : 0);
       // JTAG 下 action 3（SWD 时钟）无效，别发
-      if (clockKhz > 0 && !riscv) await this.hidXfer(P.HID_CMD, P.clockData(clockKhz * 1000));
+      await this.applyCaptureClock();
       const configured = await this.configureScope({ periodUs: this.periodUs(), flags, vars });
       if (!configured || configured.length < 3 || this.signed(configured[2]) < 0) throw new Error('标定配置被拒');
       this.plan = this.updatePlan();
@@ -1771,7 +1783,7 @@ export class ScopeView {
     $('sc-stop').disabled = !!this._stopPromise || (!this.running && !this._starting);
     const target = $('sc-target'); if (target) target.disabled = !!(this.running || this._starting || this._stopPromise || this._releasing);
     for (const id of ['sc-period', 'sc-clock', 'sc-batch', 'sc-cdcoff', 'sc-bench', 'sc-recc']){
-      const el = $(id); if (el) el.disabled = !!(this.running || this._starting || this._stopPromise || this._releasing) || (id === 'sc-clock' && this.uiBackend() === P.BACKEND.RISCV);
+      const el = $(id); if (el) el.disabled = !!(this.running || this._starting || this._stopPromise || this._releasing) || (id === 'sc-clock' && this.uiBackend() === P.BACKEND.RISCV&&!supportsRiscvStreamClock(this._probeInfo));
     }
   }
 

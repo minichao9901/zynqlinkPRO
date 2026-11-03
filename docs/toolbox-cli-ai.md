@@ -53,7 +53,7 @@ serve前须按实际任务核对板卡空闲及加载身份。运行时URL/令�
 
 ### Web频率限制与原生RISC-V研发参数
 
-Web烧录、RTT Viewer、调试器按所选目标限制频率：HPM最高25MHz，其他ARM/RISC-V最高60MHz，提供25MHz档；切到HPM时旧高频选择降至25MHz。HPM RTT自动档显式使用10MHz，避免继承前一次研发高频。Web页CLI操作也沿用这些限制。波形/RTT转发的RISC-V数据流没有通用TCK下拉，当前Zynq目标类型确认后从10MHz启动；不要把其旧`clockHz`字段当作原生TCK旋钮。
+Web烧录、RTT Viewer、调试器按所选目标限制频率：HPM最高25MHz，其他ARM/RISC-V最高60MHz，提供25MHz档；切到HPM时旧高频选择降至25MHz。HPM RTT自动档显式使用10MHz，避免继承前一次研发高频。Web页CLI操作也沿用这些限制。波形/RTT转发连接并识别为ZynqLinkPro后，RISC-V可显式选择10/20/25MHz TCK，启动时先确认架构再设置并核对时钟ACK；自动档仍10MHz。旧软件探针的RISC-V `clockHz`仍按idle约定保持0，不向未知探针发送Hz。实测方法见[25MHz流对照](validation/web-cli-streams-25mhz-20261103/README.md)。
 
 独立原生研发CLI仍提供高频、idle及采样窗口配置，并未受Web25MHz上限影响：
 
