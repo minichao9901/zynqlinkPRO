@@ -1,7 +1,7 @@
 {
   "schema": "zynqlink-vendored-dependencies/1",
-  "date": "2026-11-01",
-  "scope": "Inputs required by current main builds and real-model simulations; no research tree import",
+  "date": "2026-11-03",
+  "scope": "Required build/simulation inputs, including the complete native ETM index candidate; historical component fingerprints retained",
   "components": [
     {
       "id": "cm3-designstart-model",
@@ -542,6 +542,19 @@
         "firmware/target/stm32h743_cdc_trace/sdk/RTT_TRACE_LOG/SEGGER_RTT_printf.c": "c9ec5e10701b2d8d0491e3d2a51fb8070a757a36379491fe23e5d302fdee0f2d",
         "firmware/target/stm32h743_cdc_trace/sdk/RTT_TRACE_LOG/trace_log.c": "ea917eb33fa8531cb90c36c917aa63cfe11f1b34a76d7766636ba7bdff1e0ebf",
         "firmware/target/stm32h743_cdc_trace/sdk/RTT_TRACE_LOG/trace_log.h": "73108e0c7455d5f7b9fdb7f685da3a21d99858e30551122bb5a9a706d70a69b2"
+      }
+    },
+    {
+      "id": "nlohmann-json",
+      "purpose": "Complete native ETM query index/default views/final store metadata",
+      "path": "etm-service/vendor/nlohmann-json-3.11.3",
+      "source_url": "https://github.com/nlohmann/json/releases/tag/v3.11.3",
+      "source_tag": "v3.11.3",
+      "license": "etm-service/vendor/nlohmann-json-3.11.3/LICENSE.MIT",
+      "files": {
+        "etm-service/vendor/nlohmann-json-3.11.3/json.hpp": "9bea4c8066ef4a1c206b2be5a36302f8926f7fdc6087af5d20b417d0cf103ea6",
+        "etm-service/vendor/nlohmann-json-3.11.3/LICENSE.MIT": "86b998c792894ccb911a1cb7994f7a9652894e7a094c0b5e45be2f553f45cf14",
+        "etm-service/vendor/nlohmann-json-3.11.3/README.md": "7473dd978ce3a31646cd2e7c50ba97c59072903e8f99a3258f068d3929ddb63f"
       }
     }
   ],

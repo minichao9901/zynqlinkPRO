@@ -7,7 +7,7 @@ import os
 
 KEYS = ('ETM_STORE_WRITE', 'ETM_STORE_ENGINE', 'ETM_DECODE_ENGINE',
         'ETM_NATIVE_FORMAT', 'ETM_STORE_ENGINE_FALLBACK', 'ETM_EXPORT_ENGINE',
-        'ETM_QUERY_ENGINE', 'ETM_PREPARE_CACHE')
+        'ETM_QUERY_ENGINE', 'ETM_PREPARE_CACHE', 'ETM_COMPLETE_INDEX')
 
 
 def current_profile():
@@ -18,8 +18,11 @@ def current_profile():
               and settings['ETM_DECODE_ENGINE'] == 'fast'
               and settings['ETM_EXPORT_ENGINE'] == 'native'
               and settings['ETM_QUERY_ENGINE'] == 'native')
+    complete = os.environ.get('ETM_COMPLETE_INDEX', '1') != '0'
     return dict(name='native' if native else 'custom', settings=settings,
-                pipeline='OpenCSD -> C++ storebuild (direct/binary) -> numeric query index',
+                pipeline=('OpenCSD -> C++ complete index/store -> atomic manifest publication'
+                          if complete else 'OpenCSD -> C++ core -> Python/NumPy reference index/finalizer'),
+                indexEngine='native-complete-index' if complete else 'python-reference',
                 perInstructionJsonl=False if native else None)
 
 

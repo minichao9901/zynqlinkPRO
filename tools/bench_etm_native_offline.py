@@ -29,11 +29,20 @@ def main():
     p.add_argument('--repeat',type=int,default=3)
     p.add_argument('--port',type=int,default=8883)
     p.add_argument('--tracker-modes', default='', help='Comma-separated 0=independent,1=shared; one per trial')
+    p.add_argument('--complete-index', choices=('0','1'), default=None,
+                   help='Explicit reference/native index selection; omitted uses product default')
+    p.add_argument('--storebuild', type=Path, help='Pinned native builder for offline baseline measurements only')
     a=p.parse_args()
     if not 1<=a.repeat<=10:p.error('repeat must be 1..10')
     tracker_modes=a.tracker_modes.split(',') if a.tracker_modes else []
     if tracker_modes and (len(tracker_modes)!=a.repeat or any(m not in ('0','1') for m in tracker_modes)):
         p.error('tracker-modes requires one 0/1 per trial')
+    if a.complete_index is not None:os.environ['ETM_COMPLETE_INDEX']=a.complete_index
+    if a.storebuild:
+        import native_storebuild
+        selected=a.storebuild.resolve()
+        if not selected.is_file():p.error('storebuild does not exist')
+        native_storebuild.binary_path=lambda root=None:selected
     # A previous benchmark intentionally remains available for inspection.
     # Refuse its port before creating records; never send it a decode request.
     with socket.socket() as check:
@@ -70,6 +79,8 @@ def main():
          'status':'serving','offline':True,'decodeEngineProfile':backend.current_profile()})
     report={'offline':True,'sourceRecord':str(original),'inputSha256':fingerprints,
             'engineProfile':backend.current_profile(),'rows':[]}
+    report['completeIndexSelection']=os.environ.get('ETM_COMPLETE_INDEX','default')
+    if a.storebuild:report['storebuildOverride']={'path':str(selected),'sha256':hashlib.sha256(selected.read_bytes()).hexdigest()}
     def api(path,value=None):
         data=json.dumps(value).encode() if value is not None else None
         try:

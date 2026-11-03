@@ -8,6 +8,7 @@ import shutil
 import subprocess
 import sys
 from unittest.mock import patch
+from contextlib import ExitStack
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -51,8 +52,7 @@ def worker(args):
     original_assemble = ts._BlockSink.assemble
     before = {name: sha(folder / name) for name in ('store/manifest.json', 'decoded.json') if (folder / name).exists()}
 
-    def mutate(sink, *positional, **keywords):
-        result = original_assemble(sink, *positional, **keywords)
+    def mutate_input():
         path = folder / ('native.bin' if args.fault == 'unused-native' else args.fault)
         data = path.read_bytes()
         stat = path.stat()
@@ -61,10 +61,23 @@ def worker(args):
         path.write_bytes(changed)
         os.utime(path, ns=(stat.st_atime_ns, stat.st_mtime_ns))
         state['changedSha'] = sha(path)
+
+    def mutate(sink, *positional, **keywords):
+        result = original_assemble(sink, *positional, **keywords)
+        mutate_input()
         return result
 
     try:
-        with patch.object(ts._BlockSink, 'assemble', mutate) if args.fault else patch.dict(os.environ, {}):
+        with ExitStack() as stack:
+            if args.fault:
+                stack.enter_context(patch.object(ts._BlockSink, 'assemble', mutate))
+                if (args.repo / 'etm-service/tools/native_complete.py').is_file():
+                    import native_complete
+                    original_publish = native_complete.publish
+                    def mutate_complete(*positional, **keywords):
+                        mutate_input()
+                        return original_publish(*positional, **keywords)
+                    stack.enter_context(patch.object(native_complete, 'publish', mutate_complete))
             decoded = decode_stream(raw, folder / 'firmware.elf', folder, metadata['config'],
                 json.loads((folder / 'sources.json').read_text(encoding='utf8')),
                 framing=metadata.get('framing'), physical=metadata.get('physical'), capture=metadata.get('capture'))

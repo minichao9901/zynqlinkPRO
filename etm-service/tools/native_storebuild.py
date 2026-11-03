@@ -151,6 +151,7 @@ def _run_json_command(args, json_path, timeout, binary=None):
             raise NativeStorebuildError('原生 builder 未生成结果 JSON：%s' % json_path)
         try:
             result = json.loads(json_path.read_text(encoding='utf-8'))
+            result.setdefault('controlResultBytes', json_path.stat().st_size)
         except (OSError, json.JSONDecodeError) as error:
             raise NativeStorebuildError('原生 builder 结果 JSON 不可读：%s' % error) from error
     finally:
@@ -203,6 +204,7 @@ class PreparedBuild:
             if self.process.returncode:
                 raise NativeStorebuildError('Native prepared build failed: ' + self.log_path.read_text(encoding='utf8', errors='replace'))
             result = json.loads(self.result.read_text(encoding='utf8'))
+            result.setdefault('controlResultBytes', self.result.stat().st_size)
             result.setdefault('wallSeconds', time.perf_counter() - self.started)
             return result
         except BaseException:
@@ -320,8 +322,8 @@ def build_local_index(store_dir, build_result):
 
 def build(native, static, out_dir, generation=None, generation_tag=None, result=None,
           timeout=DEFAULT_TIMEOUT, binary=None, analysis=False, local_index=False,
-          facts_out=None, native_index=False, reserve_instructions=None, index_facts_out=None, profile_detail=False, direct=None, prepare=None):
-    """调用原生 build（blocks 1-11；块 12/默认视图留给 t21）。
+          facts_out=None, native_index=False, reserve_instructions=None, index_facts_out=None, profile_detail=False, direct=None, prepare=None, complete_context=None):
+    """调用原生 build；complete_context 使完整索引及最终库在 C++ 内完成。
 
     ``facts_out`` 触发 facts v3 写出；index_facts_out 请求同遍数值归约。
     profile_detail 开启逐 RUN 计时（正常路径仅记录阶段总时间）。
@@ -335,6 +337,8 @@ def build(native, static, out_dir, generation=None, generation_tag=None, result=
     if not prepare and not static.is_file():
         raise NativeStorebuildError('static-dict.bin 不存在：%s' % static)
     args = ['build', '--static', str(static), '--out-dir', str(out_dir)]
+    if complete_context is not None:
+        args.extend(['--complete-context', str(complete_context)])
     if direct:
         args.extend(['--etm', direct['etm'], '--config', direct['config']])
     else:

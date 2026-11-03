@@ -1,7 +1,6 @@
-"""Native execution store + numeric facts index, published as one generation.
+"""Prepare static code, then publish a complete C++ execution store/index.
 
-Python handles unique-code preparation, vector reductions and publication. No
-Python per-instruction reconstruction or reference index participates in build.
+ETM_COMPLETE_INDEX=0 explicitly retains the facts/NumPy reference path.
 """
 import json
 import secrets
@@ -69,12 +68,14 @@ def _issues(core, facts, quality, diagnostics):
 def write(record_dir, store_dir, **options):
     import decode_stream
     import native_binary
-    import native_facts_index
     import native_storebuild as native
     import static_dict
-    import trace_store_index as query
     import trace_store_write as writer
     from decode_trace import Image, decoder_config
+    import os
+    complete = os.environ.get('ETM_COMPLETE_INDEX', '1') != '0'
+    if complete and 'complete-index-v1' not in (options.get('native_capabilities') or {}).get('capabilities', []):
+        raise writer.NativeStorebuildUnavailable('原生 builder 缺少 complete-index-v1，请重新构建；参考对照须显式 ETM_COMPLETE_INDEX=0')
 
     started = time.perf_counter()
     record_dir, store_dir = Path(record_dir).resolve(), Path(store_dir).resolve()
@@ -140,11 +141,13 @@ def write(record_dir, store_dir, **options):
         scan_path = work / 'ranges.bin'
         dictionary = work / 'static.bin'
         facts_path = work / 'facts.bin'
+        complete_context = work / 'complete-context.json' if complete else None
         index_facts_path = (work / 'index-facts.bin' if 'index-facts-v1' in
                             (options.get('native_capabilities') or {}).get('capabilities', []) else None)
         if direct and direct.get('deferred'):
             prepared_build = native.build(native_path, dictionary, directory, generation=generation,
-                generation_tag=tag, analysis=True, facts_out=facts_path, index_facts_out=index_facts_path,
+                generation_tag=tag, analysis=True, facts_out=None if complete else facts_path,
+                index_facts_out=None if complete else index_facts_path, complete_context=complete_context,
                 direct=direct, prepare=dict(ranges=scan_path, ready=work / 'static-input-ready.json'))
             scan = prepared_build.scan
             if scan['etmSha256'] != etm_sha:
@@ -165,14 +168,19 @@ def write(record_dir, store_dir, **options):
                                                        verify_image=options.get('verify_image', True))
         dictionary = work / 'static.bin'
         static_dict.write_static_dict(dictionary, entries, elf_sha)
+        if complete:
+            import native_complete
+            native_complete.write_context(complete_context, entries, image, record_dir,
+                metadata=metadata, config=config, elf=elf, etm=etm, direct=direct, options=options)
         mark('prescanAndStatic')
         if prepared_build:
             built = prepared_build.finish()
         else:
             built = native.build(native_path, dictionary, directory, generation=generation,
-                                 generation_tag=tag, analysis=True, facts_out=facts_path,
+                                 generation_tag=tag, analysis=True, facts_out=None if complete else facts_path,
                                  reserve_instructions=scan.get('rangeInstructions'),
-                                 index_facts_out=index_facts_path, direct=direct)
+                                 index_facts_out=None if complete else index_facts_path, direct=direct,
+                                 complete_context=complete_context)
         if 'diagnostics' not in built:
             raise writer.NativeStorebuildUnavailable('原生 builder 缺少完整质量诊断，请重新构建')
         writer._validate_native_build_result(built,
@@ -184,6 +192,20 @@ def write(record_dir, store_dir, **options):
         if not counts['instructions']:
             raise ts.TraceStoreError('没有恢复到可信指令范围')
         mark('nativeBuild')
+        if complete:
+            def publication_complete():
+                nonlocal published
+                published = True
+            result = native_complete.publish(record_dir, store_dir, directory, work, built,
+                options=options, generation=generation, tag=tag, phases=phases, mark=mark,
+                started=started, metadata=metadata, direct=direct, etm=etm, native_path=native_path,
+                consumes_record_native=consumes_record_native, etm_sha=etm_sha, native_sha=native_sha,
+                source_sha=source_sha, elf=elf, elf_sha=elf_sha, image=image,
+                static_costs=static_costs, decode_info=decode_info, on_published=publication_complete)
+            published = True
+            return result
+        import native_facts_index
+        import trace_store_index as query
         # Private manifest opens the completed core; public manifest is untouched.
         private = work / 'core'
         target = private / 'generations' / generation

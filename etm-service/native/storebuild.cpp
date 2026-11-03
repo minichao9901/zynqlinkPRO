@@ -39,12 +39,22 @@
 #include <unordered_map>
 #include <tuple>
 #include <vector>
+#include <charconv>
+#include <cmath>
+#include <ctime>
+#include <functional>
+#include <numeric>
+#include <atomic>
+#include <mutex>
+#include "../vendor/nlohmann-json-3.11.3/json.hpp"
 
 #if defined(_WIN32)
 #include <windows.h>
 #include <psapi.h>
+#include <io.h>
 #else
 #include <sys/resource.h>
+#include <unistd.h>
 #endif
 
 namespace fs = std::filesystem;
@@ -1558,6 +1568,7 @@ struct BuildBlock {
 };
 
 struct BuildOutput {
+    uint32_t required_features = 0, optional_features = 0;
     std::vector<std::array<uint64_t, 3>> predicate_issues;
     std::vector<BuildBlock> blocks;
     uint64_t generation_tag = 0;
@@ -2798,7 +2809,8 @@ struct V2Table {
 
 std::vector<uint8_t> zlib_compress(const std::vector<uint8_t>& input, int level = 6);
 
-std::vector<uint8_t> encode_v2_payload(const std::vector<V2Table>& tables) {
+std::vector<uint8_t> encode_v2_payload(const std::vector<V2Table>& tables, int level = 6,
+                                       unsigned workers = 1) {
     std::vector<std::string> names;
     names.reserve(tables.size());
     for (const V2Table& table : tables) names.push_back(table.name);
@@ -2813,12 +2825,33 @@ std::vector<uint8_t> encode_v2_payload(const std::vector<V2Table>& tables) {
     }
     const uint32_t count = static_cast<uint32_t>(names.size());
     std::vector<uint8_t> directory(static_cast<size_t>(count) * 64, 0);
-    std::vector<std::vector<uint8_t>> blobs;
-    blobs.reserve(count);
+    std::vector<std::vector<uint8_t>> blobs(count);
+    std::vector<uint32_t> checksums(count);
+    std::atomic<size_t> next{0};
+    std::exception_ptr failure;
+    std::mutex failure_mutex;
+    auto compress_tables = [&]() {
+        try {
+            for (size_t i; (i = next.fetch_add(1)) < names.size();) {
+                const auto& raw = by_name.at(names[i])->raw;
+                blobs[i] = zlib_compress(raw, level);
+                checksums[i] = crc32_bytes(raw.data(), raw.size());
+            }
+        } catch (...) {
+            std::lock_guard<std::mutex> lock(failure_mutex);
+            if (!failure) failure = std::current_exception();
+        }
+    };
+    std::vector<std::thread> threads;
+    for (unsigned i = 1; i < std::min<unsigned>(4, workers); ++i)
+        threads.emplace_back(compress_tables);
+    compress_tables();
+    for (auto& thread : threads) thread.join();
+    if (failure) std::rethrow_exception(failure);
     uint64_t data_offset = 20 + directory.size() + names_area.size();
     for (size_t index = 0; index < names.size(); ++index) {
         const V2Table& table = *by_name.at(names[index]);
-        std::vector<uint8_t> blob = zlib_compress(table.raw);
+        const auto& blob = blobs[index];
         uint8_t* row = directory.data() + index * 64;
         uint32_t off = name_offset.at(names[index]);
         uint16_t name_bytes = static_cast<uint16_t>(names[index].size());
@@ -2833,10 +2866,9 @@ std::vector<uint8_t> encode_v2_payload(const std::vector<V2Table>& tables) {
         const uint64_t uncompressed = table.raw.size();
         std::memcpy(row + 36, &compressed, 8);
         std::memcpy(row + 44, &uncompressed, 8);
-        const uint32_t crc = crc32_bytes(table.raw.data(), table.raw.size());
+        const uint32_t crc = checksums[index];
         std::memcpy(row + 52, &crc, 4);
         data_offset += blob.size();
-        blobs.push_back(std::move(blob));
     }
     std::vector<uint8_t> payload;
     payload.insert(payload.end(), {'E','T','M','Q','I','D','X','2'});
@@ -2852,6 +2884,8 @@ std::vector<uint8_t> encode_v2_payload(const std::vector<V2Table>& tables) {
     for (const auto& blob : blobs) payload.insert(payload.end(), blob.begin(), blob.end());
     return payload;
 }
+
+#include "full_index.hpp"
 
 
 uint64_t read_uv(const uint8_t* data, size_t size, size_t& position) {
@@ -3076,6 +3110,11 @@ class BuildVisitor : public NativeVisitor {
         index_facts_out_ = path;
         online_facts_->enable_index_facts(dict_, static_entries_, reserve);
     }
+    CompleteIndexResult build_complete_index() {
+        if (!online_facts_) fail(kExitConsistency, "Complete index requires online facts");
+        return CompleteIndex(dict_, static_entries_, *online_facts_, output_).build();
+    }
+    ExecutionFacts& execution_facts() { return *online_facts_; }
     std::vector<uint8_t> build_native_index(bool emit_index = true) {
         if (!emit_index && online_facts_) {
             online_facts_->finish(output_.instructions);
@@ -3838,6 +3877,13 @@ void write_store(const fs::path& path, BuildOutput& output) {
     // Compress execution blocks before writing either the private core or
     // final generation, keeping anchor offsets in the uncompressed sequence.
     for (auto& block : output.blocks) {
+        if (output.optional_features && !block.flags && block.type >= 7 && block.type <= 10) {
+            const size_t limit = block.type == 10 ? 128u << 20 : 64u << 20;
+            if (block.payload.size() > limit) fail(kExitConsistency, "JSON store block exceeds reader limit");
+            block.uncompressed = static_cast<uint32_t>(block.payload.size());
+            block.payload = zlib_compress(block.payload, block.type == 10 ? 1 : 6);
+            block.flags = 1;
+        }
         if (!block.flags && block.type == 3 && block.payload.size() >= (64u << 10)) {
             auto compressed = zlib_compress(block.payload, 1);
             if (compressed.size() < block.payload.size()) {
@@ -3865,12 +3911,13 @@ void write_store(const fs::path& path, BuildOutput& output) {
     std::memcpy(header.data() + 16, &tag, 8);
     const uint32_t block_count = static_cast<uint32_t>(blocks);
     std::memcpy(header.data() + 24, &block_count, 4);
-    const uint32_t required = 0;
+    const uint32_t required = output.required_features;
     std::memcpy(header.data() + 28, &required, 4);
     std::memcpy(header.data() + 32, &payload_bytes, 8);
     std::memcpy(header.data() + 40, &file_bytes, 8);
     const uint32_t checksum = crc32_bytes(header.data(), 48);
     std::memcpy(header.data() + 48, &checksum, 4);
+    std::memcpy(header.data() + 52, &output.optional_features, 4);
     std::vector<uint8_t> index(static_cast<size_t>(index_bytes), 0);
     uint64_t offset = 0;
     for (size_t position = 0; position < output.blocks.size(); ++position) {
@@ -3906,7 +3953,17 @@ void write_store(const fs::path& path, BuildOutput& output) {
     for (const BuildBlock& block : output.blocks) {
         emit(block.payload.data(), block.payload.size());
     }
-    if (std::fflush(out) != 0 || std::fclose(out) != 0) fail(kExitIo, "写 store.bin 失败");
+    const int flushed = std::fflush(out);
+    int synced = 0;
+    if (!flushed && output.optional_features) {
+#ifdef _WIN32
+        synced = _commit(_fileno(out));
+#else
+        synced = fsync(fileno(out));
+#endif
+    }
+    const int closed = std::fclose(out);
+    if (flushed || synced || closed) fail(kExitIo, "写入/持久化 store.bin 失败");
     output.store_sha256 = sha.hex_digest();
     output.store_bytes = file_bytes;
 }
@@ -3955,6 +4012,8 @@ std::string meta_json(const BuildOutput& output,
     return json.str();
 }
 
+#include "complete_store.hpp"
+
 }  // namespace
 
 int main_utf8(int argc, char** argv) {
@@ -3974,13 +4033,24 @@ int main_utf8(int argc, char** argv) {
                       << ",\"buildSha\":" << quote(build_sha())
                       << ",\"formats\":{\"native\":\"trace-bin native v1\","
                          "\"staticDict\":1,\"ranges\":1}"
-                      << ",\"capabilities\":[\"prescan\",\"diagnose\",\"build\",\"facts-v3\",\"quality-diagnostics\",\"index-facts-v1\",\"direct-opencsd-v1\",\"typed-replay-v1\",\"shared-tracker-v1\"]"
+                      << ",\"capabilities\":[\"prescan\",\"diagnose\",\"build\",\"facts-v3\",\"quality-diagnostics\",\"index-facts-v1\",\"direct-opencsd-v1\",\"typed-replay-v1\",\"shared-tracker-v1\",\"complete-index-v1\"]"
                       << "}" << std::endl;
             return kExitOk;
         }
         if (command == "--self-test-replay-cache") {
             self_test_replay_cache();
             std::cout << "{\"ok\":true,\"uniqueRanges\":70000,\"bounded\":true}" << std::endl;
+            return kExitOk;
+        }
+        if (command == "--self-test-json-format") {
+            Json values=Json::array({-0.0,0.0,1.0,1e-4,1e-5,1e15,1e16,1.2345678901234567});
+            uint32_t seed=0x18713291;
+            for (int i=0;i<10000;++i) {
+                seed=seed*1664525u+1013904223u;
+                const double mantissa=static_cast<int32_t>(seed)/2147483648.0;
+                values.push_back(std::ldexp(mantissa,static_cast<int>((seed>>16)%601)-300));
+            }
+            std::cout<<python_json(Json{{"values",values},{"strings",Json::array({"中文\\\"\n", "", "文件.c"})}})<<std::endl;
             return kExitOk;
         }
         if (command == "--self-test-shared-tracker") {
@@ -4176,7 +4246,7 @@ int main_utf8(int argc, char** argv) {
         if (command == "build") {
             std::string native_path;
             std::string etm_path, config_path;
-            std::string prepare_path, ranges_path;
+            std::string prepare_path, ranges_path, complete_context;
             uint32_t owner_pid = 0;
             std::string static_path;
             std::string out_dir;
@@ -4200,6 +4270,7 @@ int main_utf8(int argc, char** argv) {
                 else if (arg == "--config") config_path = next("--config");
                 else if (arg == "--owner-pid") owner_pid = static_cast<uint32_t>(std::stoul(next("--owner-pid")));
                 else if (arg == "--prepare-static") prepare_path = next("--prepare-static");
+                else if (arg == "--complete-context") complete_context = next("--complete-context");
                 else if (arg == "--ranges-out") ranges_path = next("--ranges-out");
                 else if (arg == "--static") static_path = next("--static");
                 else if (arg == "--out-dir") out_dir = next("--out-dir");
@@ -4218,6 +4289,8 @@ int main_utf8(int argc, char** argv) {
             if (native_path.empty() && (etm_path.empty() || config_path.empty())) fail(kExitUsage, "build requires --native or --etm/--config");
             if (static_path.empty()) fail(kExitUsage, "build 需要 --static");
             if (out_dir.empty()) fail(kExitUsage, "build 需要 --out-dir");
+            if (!complete_context.empty() && (native_index || !facts_out.empty() || !index_facts_out.empty() || !index_payload_path.empty()))
+                fail(kExitUsage, "Complete build cannot emit scratch facts or accept an external query index");
             std::unique_ptr<ReplayCache> replay;
             NativeCounters prepared;
             double prepare_seconds = 0;
@@ -4273,6 +4346,10 @@ int main_utf8(int argc, char** argv) {
             BuildVisitor visitor(dict, output, true);
             visitor.set_analysis(need_analysis);
             visitor.set_profile_detail(profile_detail);
+            if (!complete_context.empty()) {
+                visitor.set_facts_out("<in-memory>", true, reserve_instructions);
+                visitor.set_index_facts_out("<in-memory>", reserve_instructions);
+            }
             if (!facts_out.empty()) visitor.set_facts_out(facts_out, !native_index, reserve_instructions);
             if (!index_facts_out.empty()) visitor.set_index_facts_out(index_facts_out, reserve_instructions);
             const auto started = std::chrono::steady_clock::now();
@@ -4318,7 +4395,15 @@ int main_utf8(int argc, char** argv) {
             add_json_block(output, 8, summary.str());
             add_json_block(output, 9, "{}");
             add_json_block(output, 10, "[]");
-            if ((native_index || !facts_out.empty()) && index_payload_path.empty()) {
+            Json complete_result;
+            if (!complete_context.empty()) {
+                const auto index_started = std::chrono::steady_clock::now();
+                const Json context = read_context(complete_context);
+                if (context.value("maxEvents",uint64_t(0)) && output.instructions>context["maxEvents"].get<uint64_t>())fail(kExitConsistency,"Instruction limit exceeded");
+                auto index = visitor.build_complete_index();
+                complete_result = finalize_complete_blocks(output,counters,visitor.execution_facts(),index,context,Json::parse(analysis),visitor.event_types());
+                output.index_seconds=chrono_seconds(index_started);
+            } else if ((native_index || !facts_out.empty()) && index_payload_path.empty()) {
                 const auto index_started = std::chrono::steady_clock::now();
                 BuildBlock query;
                 query.type = 12;
@@ -4359,10 +4444,12 @@ int main_utf8(int argc, char** argv) {
                 throw;
             }
             output.write_seconds = seconds_since(write_started);
+            output.peak_rss = std::max(output.peak_rss, peak_rss_bytes());
             std::ostringstream result;
             result << "{\n";
             result << " \"protocol\":" << quote(kProtocol) << ", \"schema\":" << kSchema
                    << ", \"abi\":" << kAbi << ",\n";
+            if (!complete_context.empty()) result << "\"completeStore\":" << complete_result.dump() << ",\n";
             result << " \"engine\":{\"name\":\"etm_storebuild\",\"buildSha\":"
                    << quote(build_sha()) << ",\"compiler\":" << quote(compiler_string())
                    << ",\"nativeFormat\":\"trace-bin native v1\",\"storeSchema\":1,"
@@ -4379,7 +4466,9 @@ int main_utf8(int argc, char** argv) {
                    << ",\"overflow\":" << counters.packet_overflow
                    << ",\"packet_count\":" << counters.saw_packets
                    << ",\"cycle_elements\":" << counters.cycle_elements
-                   << ",\"elements\":" << counters.saw_elements << ",\"faults\":[";
+                   << ",\"elements\":" << counters.saw_elements;
+            if (complete_context.empty()) {
+            result << ",\"faults\":[";
             for (size_t i = 0; i < counters.packet_faults.size(); ++i) {
                 if (i) result << ',';
                 const auto& fault = counters.packet_faults[i];
@@ -4398,7 +4487,10 @@ int main_utf8(int argc, char** argv) {
                 const auto& item = output.predicate_issues[i];
                 result << '[' << item[0] << ',' << item[1] << ',' << item[2] << ']';
             }
-            result << "]},\n";
+            result << "]";
+            } else result << ",\"detailsStoredIn\":\"store.bin\",\"predicateIssueRuns\":" << output.predicate_issues.size()
+                          << ",\"firstRangeOffset\":" << counters.first_range_offset << ",\"packetEnd\":" << counters.packet_end;
+            result << "},\n";
             result << " \"generation\":" << quote(output.generation)
                    << ", \"generationTag\":" << quote("0x" + [&]() {
                           std::ostringstream tag;

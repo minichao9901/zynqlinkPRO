@@ -2,6 +2,8 @@
 
 统一入口`python -X utf8 toolbox.py trace`，转交`etm-service/trace.py`。该入口的`capture/doctor`是Zynq原生路径；离线decode/query/export等转交`etm-service/tools/cli_entry.py`及`trace_cli.py`，沿用原生二进制/TraceStore协议。
 
+优化分支的原生默认链现由C++直接构建完整查询索引、默认视图和最终store，Python保留静态字典及记录发布；要求配套具备 `complete-index-v1` 的 `etm_storebuild.exe`。离线研发显式设置 `ETM_COMPLETE_INDEX=0` 可运行旧facts/NumPy索引对照，缺少新能力时不会静默回退。此说明不表示主线或固定EXE已经集成该候选；范围以最新验收报告为准。
+
 ```powershell
 python toolbox.py trace --help
 python toolbox.py trace doctor --offline
