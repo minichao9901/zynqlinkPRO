@@ -152,7 +152,7 @@ def main(argv=None):
                     source=Path(distribution.locate_file(member))
                     if source.is_file():
                         destination=licenses/name/member.name;destination.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(source,destination)
-        for path in (ROOT/'etm-service/vendor/OpenCSD-1.8.3/LICENSE',ROOT/'etm-service/vendor/OpenCSD-1.8.3/NOTICES.txt',ROOT/'etm-service/native/SQLITE-LICENSE.txt',Path(sys.base_prefix)/'LICENSE.txt'):
+        for path in (ROOT/'etm-service/vendor/OpenCSD-1.8.3/LICENSE',ROOT/'etm-service/vendor/OpenCSD-1.8.3/NOTICES.txt',ROOT/'etm-service/vendor/nlohmann-json-3.11.3/LICENSE.MIT',ROOT/'etm-service/native/SQLITE-LICENSE.txt',Path(sys.base_prefix)/'LICENSE.txt'):
             if path.is_file():shutil.copyfile(path,licenses/(path.parent.name+'-'+path.name))
         readme=('Zynq ETM 工作台\n\n双击 zynq-etm-bridge.exe，浏览器自动打开。请保留整个程序目录（包括_internal）。\n'
             'ETM模式默认使用10 MHz SWD做目标配置；CPU/TRACECLK仍由目标固件决定。\n'
