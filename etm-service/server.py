@@ -479,6 +479,20 @@ def baseline_info():
     return jsonify(available=bool(data),**(data or {}))
 
 
+@app.get('/api/tutorial-example')
+def tutorial_example():
+    # Same historical reference already shipped in examples/. No hardware,
+    # user-path input or record mutation; importing uses the normal validator.
+    path = (Path(sys.executable).resolve().parent/'examples/h743-superlink-reference.etmrecord'
+            if getattr(sys, 'frozen', False) else ROOT.parent/'tools/tests/fixtures/h743-etmv4/h743.etmrecord')
+    if not path.is_file():
+        abort(404, description='教学示例缺失，请保留完整程序目录及 examples 文件夹')
+    data=path.read_bytes()
+    return jsonify(filename='h743-tutorial.etmrecord',sha256=hashlib.sha256(data).hexdigest(),
+                   base64=base64.b64encode(data).decode('ascii'),
+                   source='H743历史参考采集：superlinkPRO / Kingst LA；不是当前板卡记录')
+
+
 @app.get('/api/record-elf/<sid>')
 def record_elf(sid):
     info=elf_info(directory(sid)/'firmware.elf')

@@ -25,3 +25,20 @@ main{padding:6px 12px 4px}.record-toolbar{margin-bottom:3px;gap:5px}.record-tool
 #offline-config-json{width:100%;resize:vertical;box-sizing:border-box;background:var(--bg);color:var(--fg);border:1px solid var(--line);font:12px/1.5 monospace}
 
 .flame-export-status{display:block;margin:6px 0;font-size:12px;line-height:1.6;overflow-wrap:anywhere}.flame-export-status[hidden]{display:none!important}.flame-export-status a{margin-left:8px;color:#58a6ff}
+
+/* Temporary teaching UI; closed tutorials add no rows to the work area. */
+#etm-app .tutorial-chooser{width:min(540px,calc(100vw - 32px));max-height:calc(100vh - 32px);overflow:auto;box-sizing:border-box;background:var(--bg2);color:var(--fg);border:1px solid var(--line);padding:20px}
+#etm-app .tutorial-chooser h2{margin:0 0 6px;font-size:19px}
+#etm-app .tutorial-choices{display:grid;gap:8px;margin:14px 0}
+#etm-app .tutorial-choice{display:grid;gap:3px;padding:12px;text-align:left;white-space:normal}
+#etm-app .tutorial-choice strong{font-size:14px}
+#etm-app .tutorial-choice span{font-size:12px;color:var(--fg2)}
+.tutorial-ring{position:fixed;z-index:1000;pointer-events:none;box-sizing:border-box;border:2px solid #58a6ff;border-radius:5px;box-shadow:0 0 0 9999px #0004}
+#etm-app .tutorial-card{position:fixed;z-index:1001;width:min(350px,calc(100vw - 20px));max-height:calc(100vh - 20px);overflow:auto;box-sizing:border-box;padding:15px;background:var(--bg2);color:var(--fg);border:1px solid #58a6ff;border-radius:8px;box-shadow:0 8px 32px #0008}
+#etm-app .tutorial-card[hidden],.tutorial-ring[hidden]{display:none!important}
+#etm-app .tutorial-top{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--fg2);font-size:11px}
+#etm-app .tutorial-top button{font-size:11px;padding:3px 6px}
+#etm-app .tutorial-card h2{font-size:16px;margin:12px 0 7px;line-height:1.4}
+#etm-app .tutorial-card p{font-size:13px;line-height:1.65;margin:0 0 10px}
+#etm-app .tutorial-card .tutorial-note{font-size:11px;color:var(--fg2);border-top:1px solid var(--line);padding-top:9px}
+#etm-app .tutorial-actions{display:flex;justify-content:flex-end;gap:7px}

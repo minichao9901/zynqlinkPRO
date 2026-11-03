@@ -39,7 +39,7 @@ class EmbeddedDocument(HTMLParser):
     def mounted(self,embedded):
         moved=[];removed=set();body=False;toolbar=False;head=False
         if embedded:
-            for identifier in ('toggle-settings','help'):
+            for identifier in ('toggle-settings','tutorials','help'):
                 indices=[i for i,(kind,tag,attrs) in enumerate(self.tokens) if kind=='start' and tag=='button' and dict(attrs).get('id')==identifier]
                 if len(indices)!=1:raise ValueError('ETM 内嵌页缺少或重复控件：'+identifier)
                 start=indices[0];end=next((i for i in range(start+1,len(self.tokens)) if self.tokens[i][:2]==('end','button')),None)
