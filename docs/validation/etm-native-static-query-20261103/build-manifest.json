@@ -132,9 +132,28 @@
     "python": "3.13.5 (tags/v3.13.5:6cb20a2, Jun 11 2025, 16:15:46) [MSC v.1943 64 bit (AMD64)]",
     "platform": "Windows-11-10.0.26200-SP0"
   },
-  "qualification": "Pending final qualification. Vendored dependency identities in docs/required-dependencies.json; libdwarf is a replaceable shared DLL.",
+  "qualification": "Full 9-store/60-table comparison and 546 query DTO checks pass; 32 native tests and 55 CLI tests pass; frozen offline checks pass. Final upgrade evidence in raw/. No hardware access.",
   "nativeDeliveryCommit": "d6f8fd3",
   "benchmarkCandidateCommit": "d6f8fd3",
   "priorNativeImplementationSourceCommit": "194aa67b84fd97bb2e7c4639256b89867a076c02",
-  "initialBenchmarkCandidateCommit": "82d897e"
+  "initialBenchmarkCandidateCommit": "82d897e",
+  "frozen": {
+    "directory": "E:\\zynqlinkPRO-work\\etm-cpp-stage1-20261102\\build\\etm-native-static-query-bridge",
+    "sourceRevision": "6b9732cd0627b78ada3f14bba53339dc7ff699e1",
+    "sourceDirty": false,
+    "exeSha256": "6b94d3d13f633d2785ec22824a3f620ae19013cf466be96ac4dacbf605c7ad94",
+    "packageManifestSha256": "fd321e7d81eca85be8da6fcbf6859fa70ddd1830ada6e27b2138c293f00ed8cd",
+    "nativeBuilderSha256": "0b2161f22bee57b09399a3c1bbafe01de5e6944b20bd0f7cd14c1fd4d14a16c9",
+    "libdwarfSha256": "496ffb00a45586eb2c00cc72c5360fad4af2181156b8d2eee0c7d3db4a293a01",
+    "licenses": [
+      "licenses\\capstone-5.0.7\\LICENSE.TXT",
+      "licenses\\capstone-5.0.7\\LICENSE_LLVM.TXT",
+      "licenses\\capstone-5.0.7\\ZYNQLINK-PROVENANCE.json",
+      "licenses\\libdwarf-2.3.3\\COPYING",
+      "licenses\\libdwarf-2.3.3\\LGPL.txt",
+      "licenses\\libdwarf-2.3.3\\LIBDWARFCOPYRIGHT",
+      "licenses\\libdwarf-2.3.3\\REBUILD.txt",
+      "licenses\\libdwarf-2.3.3\\ZYNQLINK-PROVENANCE.json"
+    ]
+  }
 }
