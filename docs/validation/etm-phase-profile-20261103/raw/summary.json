@@ -1,0 +1,885 @@
+{
+  "scope": "offline source Web API, no acquisition or browser rendering",
+  "units": "seconds; wall time, not exclusive CPU time",
+  "notes": [
+    "Per-trial stages sum to completeProcessingWallSeconds.",
+    "Medians of separate stages do not necessarily sum to the median wall.",
+    "Native nested timings overlap: readNative=assemble; writeBlocks=assembleFile.",
+    "Native buildBlocks is inside readNative; online facts output is inside native queryIndex.",
+    "Index tablesSeconds includes finer table timings; do not sum them again.",
+    "Other includes imports, process startup/exit, handshakes, API scheduling and uninstrumented work.",
+    "Round 1 has empty application caches, but OS disk caches were not flushed."
+  ],
+  "cases": {
+    "f103": {
+      "sourceRecord": "E:\\zynqlinkPRO-work\\etm-cpp-stage1-20261102\\docs\\validation\\zl006-cpp-stage1-20261102\\f103-large-input",
+      "inputSha256": {
+        "capture.bin": "3b54995365d440cb154c8249b2fc2a0319d9ccb42c2460b3ca861550c421ea78",
+        "firmware.elf": "e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f",
+        "sources.json": "683cdc23e76dd8524aafa8973b0e87880e6f092653e62c4cd7f226bd2f5d8c3d"
+      },
+      "inputUnchanged": true,
+      "counts": {
+        "instructions": 19565799,
+        "ranges": 19565799,
+        "packets": 4784167,
+        "gaps": 2,
+        "unknownExecution": 522998
+      },
+      "wallMedianSeconds": 9.725046299994574,
+      "medianStagesSeconds": {
+        "imagePreparation": 0.012391099997330457,
+        "cppDecodeAndCache": 1.67272,
+        "pythonStaticDictionary": 0.051,
+        "nativeBuildAndWrapper": 3.471459,
+        "queryIndex": 2.30837,
+        "storeFinalization": 0.873,
+        "otherAndUnattributed": 0.719501599993615
+      },
+      "stageRangesSeconds": {
+        "imagePreparation": [
+          0.010893099999520928,
+          0.16500670000095852
+        ],
+        "cppDecodeAndCache": [
+          1.63471,
+          2.01098
+        ],
+        "pythonStaticDictionary": [
+          0.05,
+          0.125
+        ],
+        "nativeBuildAndWrapper": [
+          3.461916,
+          3.640197
+        ],
+        "queryIndex": [
+          2.296604,
+          2.491188
+        ],
+        "storeFinalization": [
+          0.871787,
+          0.9114329999999999
+        ],
+        "otherAndUnattributed": [
+          0.42226400000454944,
+          1.0322156000054257
+        ]
+      },
+      "medianIndexPartsSeconds": {
+        "tables": 0.7881,
+        "defaultViews": 0.7084,
+        "encode": 0.6666,
+        "readFactsAndOther": 0.14527
+      },
+      "medianWallTrial": 1,
+      "rows": [
+        {
+          "trial": 1,
+          "wallSeconds": 9.725046299994574,
+          "imageCacheHit": false,
+          "addressCacheHit": false,
+          "stagesSeconds": {
+            "imagePreparation": 0.16500670000095852,
+            "cppDecodeAndCache": 1.67272,
+            "pythonStaticDictionary": 0.125,
+            "nativeBuildAndWrapper": 3.640197,
+            "queryIndex": 2.491188,
+            "storeFinalization": 0.9114329999999999,
+            "otherAndUnattributed": 0.719501599993615
+          },
+          "indexPartsSeconds": {
+            "tables": 0.9095,
+            "defaultViews": 0.73,
+            "encode": 0.6686,
+            "readFactsAndOther": 0.18308800000000014
+          },
+          "nativeNestedSeconds": {
+            "readNative": 2.18955,
+            "assemble": 2.18955,
+            "rangeHits": 19565157,
+            "rangeMisses": 642,
+            "rangeWalk": 0,
+            "buildBlocks": 0.0284081,
+            "analysis": 0.0019597,
+            "queryIndex": 0.168838,
+            "facts": 0.125114,
+            "defaultViews": 0.0,
+            "writeBlocks": 0.834099,
+            "assembleFile": 0.834099,
+            "hashFile": 0.0
+          },
+          "staticDetails": {
+            "uniquePCs": 642,
+            "predicateFallback": 0,
+            "sourceMapped": 619,
+            "functions": 221,
+            "functionBytes": 18472,
+            "predicateCount": 73,
+            "knownCount": 7061,
+            "timings": {
+              "loadImageSeconds": 0.0,
+              "addressPreparationCacheHit": false,
+              "addressCacheSeconds": 0.07109369999670889,
+              "predicateAddressesSeconds": 0.053858400002354756,
+              "knownAddressesSeconds": 0.016412900004070252,
+              "instructionTableSeconds": 0.0004,
+              "disasmUniqueRangesSeconds": 0.0117,
+              "staticInfoSeconds": 0.0403
+            },
+            "buildSeconds": 0.125
+          },
+          "imageDetails": {
+            "cacheHit": false,
+            "sha256": "e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f",
+            "readAndHashSeconds": 0.00932729999476578,
+            "parseSeconds": 0.1547363999998197,
+            "waitSeconds": 1.3999961083754897e-06,
+            "totalSeconds": 0.16500019999512006
+          },
+          "replay": {
+            "seconds": 1.67272,
+            "replayBytes": 205259423,
+            "nativePeakRssBytes": 442966016
+          },
+          "jobPhasesSeconds": {
+            "metadataPreparation": 0.011305099993478507,
+            "decode": 9.511836200006655,
+            "captureStartAndMetadata": 0.054880299998330884,
+            "browsePreparation": 0.11293709999881685
+          }
+        },
+        {
+          "trial": 2,
+          "wallSeconds": 8.76215310000407,
+          "imageCacheHit": true,
+          "addressCacheHit": true,
+          "stagesSeconds": {
+            "imagePreparation": 0.010893099999520928,
+            "cppDecodeAndCache": 1.63471,
+            "pythonStaticDictionary": 0.051,
+            "nativeBuildAndWrapper": 3.461916,
+            "queryIndex": 2.30837,
+            "storeFinalization": 0.873,
+            "otherAndUnattributed": 0.42226400000454944
+          },
+          "indexPartsSeconds": {
+            "tables": 0.7881,
+            "defaultViews": 0.7084,
+            "encode": 0.6666,
+            "readFactsAndOther": 0.14527
+          },
+          "nativeNestedSeconds": {
+            "readNative": 2.1094,
+            "assemble": 2.1094,
+            "rangeHits": 19565157,
+            "rangeMisses": 642,
+            "rangeWalk": 0,
+            "buildBlocks": 0.0259235,
+            "analysis": 0.0002924,
+            "queryIndex": 0.155831,
+            "facts": 0.115013,
+            "defaultViews": 0.0,
+            "writeBlocks": 0.805323,
+            "assembleFile": 0.805323,
+            "hashFile": 0.0
+          },
+          "staticDetails": {
+            "uniquePCs": 642,
+            "predicateFallback": 0,
+            "sourceMapped": 619,
+            "functions": 221,
+            "functionBytes": 18472,
+            "predicateCount": 73,
+            "knownCount": 7061,
+            "timings": {
+              "loadImageSeconds": 0.0,
+              "addressPreparationCacheHit": true,
+              "addressCacheSeconds": 0.0007834000134607777,
+              "predicateAddressesSeconds": 0.0,
+              "knownAddressesSeconds": 0.0,
+              "instructionTableSeconds": 0.0004,
+              "disasmUniqueRangesSeconds": 0.0116,
+              "staticInfoSeconds": 0.0375
+            },
+            "buildSeconds": 0.051
+          },
+          "imageDetails": {
+            "cacheHit": true,
+            "sha256": "e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f",
+            "readAndHashSeconds": 0.009926999991876073,
+            "parseSeconds": 0.0,
+            "waitSeconds": 2.3000029614195228e-06,
+            "totalSeconds": 0.010886899995966814
+          },
+          "replay": {
+            "seconds": 1.63471,
+            "replayBytes": 205259423,
+            "nativePeakRssBytes": 442892288
+          },
+          "jobPhasesSeconds": {
+            "metadataPreparation": 0.010794400004670024,
+            "decode": 8.521569799995632,
+            "captureStartAndMetadata": 0.05291060000308789,
+            "browsePreparation": 0.13659529999131337
+          }
+        },
+        {
+          "trial": 3,
+          "wallSeconds": 9.745436700002756,
+          "imageCacheHit": true,
+          "addressCacheHit": true,
+          "stagesSeconds": {
+            "imagePreparation": 0.012391099997330457,
+            "cppDecodeAndCache": 2.01098,
+            "pythonStaticDictionary": 0.05,
+            "nativeBuildAndWrapper": 3.471459,
+            "queryIndex": 2.296604,
+            "storeFinalization": 0.871787,
+            "otherAndUnattributed": 1.0322156000054257
+          },
+          "indexPartsSeconds": {
+            "tables": 0.7816,
+            "defaultViews": 0.7054,
+            "encode": 0.6658,
+            "readFactsAndOther": 0.14380399999999982
+          },
+          "nativeNestedSeconds": {
+            "readNative": 2.06391,
+            "assemble": 2.06391,
+            "rangeHits": 19565157,
+            "rangeMisses": 642,
+            "rangeWalk": 0,
+            "buildBlocks": 0.0289974,
+            "analysis": 0.0003106,
+            "queryIndex": 0.159253,
+            "facts": 0.116877,
+            "defaultViews": 0.0,
+            "writeBlocks": 0.842985,
+            "assembleFile": 0.842985,
+            "hashFile": 0.0
+          },
+          "staticDetails": {
+            "uniquePCs": 642,
+            "predicateFallback": 0,
+            "sourceMapped": 619,
+            "functions": 221,
+            "functionBytes": 18472,
+            "predicateCount": 73,
+            "knownCount": 7061,
+            "timings": {
+              "loadImageSeconds": 0.0,
+              "addressPreparationCacheHit": true,
+              "addressCacheSeconds": 0.000782600007369183,
+              "predicateAddressesSeconds": 0.0,
+              "knownAddressesSeconds": 0.0,
+              "instructionTableSeconds": 0.0005,
+              "disasmUniqueRangesSeconds": 0.011,
+              "staticInfoSeconds": 0.0366
+            },
+            "buildSeconds": 0.05
+          },
+          "imageDetails": {
+            "cacheHit": true,
+            "sha256": "e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f",
+            "readAndHashSeconds": 0.011511599994264543,
+            "parseSeconds": 0.0,
+            "waitSeconds": 2.3999891709536314e-06,
+            "totalSeconds": 0.012385999987600371
+          },
+          "replay": {
+            "seconds": 2.01098,
+            "replayBytes": 205259423,
+            "nativePeakRssBytes": 442871808
+          },
+          "jobPhasesSeconds": {
+            "metadataPreparation": 0.01697329999296926,
+            "decode": 9.52446850000706,
+            "captureStartAndMetadata": 0.054858000003150664,
+            "browsePreparation": 0.13203680000151508
+          }
+        }
+      ]
+    },
+    "h743-1s": {
+      "sourceRecord": "E:\\zynqlinkPRO-work\\etm-cpp-stage1-20261102\\docs\\validation\\h743-comprehensive-20261101\\raw\\etm20-4ms-matrix\\1000ms-1",
+      "inputSha256": {
+        "capture.bin": "974e5c2cf6bdaf44a33c67615f9813e83c388e7b0d4ae211ee88429fe13bf2b9",
+        "firmware.elf": "246640bf79c8b1e568441a286812326dfb0ae68a0df061a0c023262c07cf221b",
+        "sources.json": "b5e523eee22e160963662853f1ee5c09e1c2d15015d3d339c88a3408abf89cf4"
+      },
+      "inputUnchanged": true,
+      "counts": {
+        "instructions": 18373686,
+        "ranges": 4322285,
+        "packets": 2020196,
+        "gaps": 1,
+        "unknownExecution": 8759
+      },
+      "wallMedianSeconds": 5.666551000002073,
+      "medianStagesSeconds": {
+        "imagePreparation": 0.011418599999160506,
+        "cppDecodeAndCache": 1.10922,
+        "pythonStaticDictionary": 0.11,
+        "nativeBuildAndWrapper": 2.051022,
+        "queryIndex": 1.710492,
+        "storeFinalization": 0.309417,
+        "otherAndUnattributed": 0.2894546000059872
+      },
+      "stageRangesSeconds": {
+        "imagePreparation": [
+          0.011177399996086024,
+          0.18354949999775272
+        ],
+        "cppDecodeAndCache": [
+          1.09858,
+          1.11871
+        ],
+        "pythonStaticDictionary": [
+          0.102,
+          0.195
+        ],
+        "nativeBuildAndWrapper": [
+          2.024706,
+          2.124354
+        ],
+        "queryIndex": [
+          1.6878,
+          1.738485
+        ],
+        "storeFinalization": [
+          0.302363,
+          0.32556
+        ],
+        "otherAndUnattributed": [
+          0.2467653000061576,
+          0.30755950000569765
+        ]
+      },
+      "medianIndexPartsSeconds": {
+        "tables": 0.6299,
+        "defaultViews": 0.4027,
+        "encode": 0.5497,
+        "readFactsAndOther": 0.1242850000000002
+      },
+      "medianWallTrial": 3,
+      "rows": [
+        {
+          "trial": 1,
+          "wallSeconds": 5.8840800000034506,
+          "imageCacheHit": false,
+          "addressCacheHit": false,
+          "stagesSeconds": {
+            "imagePreparation": 0.18354949999775272,
+            "cppDecodeAndCache": 1.10922,
+            "pythonStaticDictionary": 0.195,
+            "nativeBuildAndWrapper": 2.024706,
+            "queryIndex": 1.738485,
+            "storeFinalization": 0.32556,
+            "otherAndUnattributed": 0.30755950000569765
+          },
+          "indexPartsSeconds": {
+            "tables": 0.6384,
+            "defaultViews": 0.4235,
+            "encode": 0.5523,
+            "readFactsAndOther": 0.1242850000000002
+          },
+          "nativeNestedSeconds": {
+            "readNative": 1.24085,
+            "assemble": 1.24085,
+            "rangeHits": 4321866,
+            "rangeMisses": 419,
+            "rangeWalk": 0,
+            "buildBlocks": 0.0163337,
+            "analysis": 0.0006315,
+            "queryIndex": 0.135819,
+            "facts": 0.0991715,
+            "defaultViews": 0.0,
+            "writeBlocks": 0.592054,
+            "assembleFile": 0.592054,
+            "hashFile": 0.0
+          },
+          "staticDetails": {
+            "uniquePCs": 1403,
+            "predicateFallback": 0,
+            "sourceMapped": 1012,
+            "functions": 320,
+            "functionBytes": 28474,
+            "predicateCount": 87,
+            "knownCount": 10315,
+            "timings": {
+              "loadImageSeconds": 0.0,
+              "addressPreparationCacheHit": false,
+              "addressCacheSeconds": 0.08645079999405425,
+              "predicateAddressesSeconds": 0.06102399999508634,
+              "knownAddressesSeconds": 0.02404049999313429,
+              "instructionTableSeconds": 0.0004,
+              "disasmUniqueRangesSeconds": 0.0183,
+              "staticInfoSeconds": 0.088
+            },
+            "buildSeconds": 0.195
+          },
+          "imageDetails": {
+            "cacheHit": false,
+            "sha256": "246640bf79c8b1e568441a286812326dfb0ae68a0df061a0c023262c07cf221b",
+            "readAndHashSeconds": 0.011385299992980435,
+            "parseSeconds": 0.1709119000006467,
+            "waitSeconds": 1.7999991541728377e-06,
+            "totalSeconds": 0.1835426999896299
+          },
+          "replay": {
+            "seconds": 1.10922,
+            "replayBytes": 62107308,
+            "nativePeakRssBytes": 351408128
+          },
+          "jobPhasesSeconds": {
+            "metadataPreparation": 0.0012421999999787658,
+            "decode": 5.74975610000547,
+            "captureStartAndMetadata": 0.002936199991381727,
+            "browsePreparation": 0.1041150000091875
+          }
+        },
+        {
+          "trial": 2,
+          "wallSeconds": 5.507002900005318,
+          "imageCacheHit": true,
+          "addressCacheHit": true,
+          "stagesSeconds": {
+            "imagePreparation": 0.011418599999160506,
+            "cppDecodeAndCache": 1.09858,
+            "pythonStaticDictionary": 0.102,
+            "nativeBuildAndWrapper": 2.051022,
+            "queryIndex": 1.6878,
+            "storeFinalization": 0.309417,
+            "otherAndUnattributed": 0.2467653000061576
+          },
+          "indexPartsSeconds": {
+            "tables": 0.6234,
+            "defaultViews": 0.3953,
+            "encode": 0.5461,
+            "readFactsAndOther": 0.123
+          },
+          "nativeNestedSeconds": {
+            "readNative": 1.25922,
+            "assemble": 1.25922,
+            "rangeHits": 4321866,
+            "rangeMisses": 419,
+            "rangeWalk": 0,
+            "buildBlocks": 0.0171743,
+            "analysis": 0.0006989,
+            "queryIndex": 0.12836,
+            "facts": 0.0908167,
+            "defaultViews": 0.0,
+            "writeBlocks": 0.600303,
+            "assembleFile": 0.600303,
+            "hashFile": 0.0
+          },
+          "staticDetails": {
+            "uniquePCs": 1403,
+            "predicateFallback": 0,
+            "sourceMapped": 1012,
+            "functions": 320,
+            "functionBytes": 28474,
+            "predicateCount": 87,
+            "knownCount": 10315,
+            "timings": {
+              "loadImageSeconds": 0.0,
+              "addressPreparationCacheHit": true,
+              "addressCacheSeconds": 0.0012691999872913584,
+              "predicateAddressesSeconds": 0.0,
+              "knownAddressesSeconds": 0.0,
+              "instructionTableSeconds": 0.0004,
+              "disasmUniqueRangesSeconds": 0.0153,
+              "staticInfoSeconds": 0.0832
+            },
+            "buildSeconds": 0.102
+          },
+          "imageDetails": {
+            "cacheHit": true,
+            "sha256": "246640bf79c8b1e568441a286812326dfb0ae68a0df061a0c023262c07cf221b",
+            "readAndHashSeconds": 0.010192300003836863,
+            "parseSeconds": 0.0,
+            "waitSeconds": 2.7999922167509794e-06,
+            "totalSeconds": 0.011412199994083494
+          },
+          "replay": {
+            "seconds": 1.09858,
+            "replayBytes": 62107308,
+            "nativePeakRssBytes": 351547392
+          },
+          "jobPhasesSeconds": {
+            "metadataPreparation": 0.0014890000020386651,
+            "decode": 5.386378299997887,
+            "captureStartAndMetadata": 0.003202599997166544,
+            "browsePreparation": 0.09926190000260249
+          }
+        },
+        {
+          "trial": 3,
+          "wallSeconds": 5.666551000002073,
+          "imageCacheHit": true,
+          "addressCacheHit": true,
+          "stagesSeconds": {
+            "imagePreparation": 0.011177399996086024,
+            "cppDecodeAndCache": 1.11871,
+            "pythonStaticDictionary": 0.11,
+            "nativeBuildAndWrapper": 2.124354,
+            "queryIndex": 1.710492,
+            "storeFinalization": 0.302363,
+            "otherAndUnattributed": 0.2894546000059872
+          },
+          "indexPartsSeconds": {
+            "tables": 0.6299,
+            "defaultViews": 0.4027,
+            "encode": 0.5497,
+            "readFactsAndOther": 0.12819199999999986
+          },
+          "nativeNestedSeconds": {
+            "readNative": 1.33198,
+            "assemble": 1.33198,
+            "rangeHits": 4321866,
+            "rangeMisses": 419,
+            "rangeWalk": 0,
+            "buildBlocks": 0.0171293,
+            "analysis": 0.0006673,
+            "queryIndex": 0.141023,
+            "facts": 0.0982065,
+            "defaultViews": 0.0,
+            "writeBlocks": 0.596285,
+            "assembleFile": 0.596285,
+            "hashFile": 0.0
+          },
+          "staticDetails": {
+            "uniquePCs": 1403,
+            "predicateFallback": 0,
+            "sourceMapped": 1012,
+            "functions": 320,
+            "functionBytes": 28474,
+            "predicateCount": 87,
+            "knownCount": 10315,
+            "timings": {
+              "loadImageSeconds": 0.0,
+              "addressPreparationCacheHit": true,
+              "addressCacheSeconds": 0.001254599992535077,
+              "predicateAddressesSeconds": 0.0,
+              "knownAddressesSeconds": 0.0,
+              "instructionTableSeconds": 0.0004,
+              "disasmUniqueRangesSeconds": 0.0178,
+              "staticInfoSeconds": 0.089
+            },
+            "buildSeconds": 0.11
+          },
+          "imageDetails": {
+            "cacheHit": true,
+            "sha256": "246640bf79c8b1e568441a286812326dfb0ae68a0df061a0c023262c07cf221b",
+            "readAndHashSeconds": 0.00992289998976048,
+            "parseSeconds": 0.0,
+            "waitSeconds": 2.8999929782003164e-06,
+            "totalSeconds": 0.011171099991770461
+          },
+          "replay": {
+            "seconds": 1.11871,
+            "replayBytes": 62107308,
+            "nativePeakRssBytes": 351494144
+          },
+          "jobPhasesSeconds": {
+            "metadataPreparation": 0.0012130999966757372,
+            "decode": 5.51140370000212,
+            "captureStartAndMetadata": 0.0030177000007824972,
+            "browsePreparation": 0.11156629999459255
+          }
+        }
+      ]
+    },
+    "h743-2s": {
+      "sourceRecord": "E:\\zynqlinkPRO-work\\etm-cpp-stage1-20261102\\build\\phase-profile-20261103\\h743-2s-input",
+      "inputSha256": {
+        "capture.bin": "3bb82c465d926c43f857c47dcaa7afae0dc3976dd25b781dc492eb7d133650b6",
+        "firmware.elf": "246640bf79c8b1e568441a286812326dfb0ae68a0df061a0c023262c07cf221b",
+        "sources.json": "015aa3e517e62523fc88ed5684c59e6176bf814915c9751e5b59231ad58dcd25"
+      },
+      "inputUnchanged": true,
+      "counts": {
+        "instructions": 36022615,
+        "ranges": 8578894,
+        "packets": 3897725,
+        "gaps": 1,
+        "unknownExecution": 1139
+      },
+      "wallMedianSeconds": 11.861197899997933,
+      "medianStagesSeconds": {
+        "imagePreparation": 0.013393300003372133,
+        "cppDecodeAndCache": 2.29661,
+        "pythonStaticDictionary": 0.413,
+        "nativeBuildAndWrapper": 3.80679,
+        "queryIndex": 4.519661,
+        "storeFinalization": 0.5456179999999999,
+        "otherAndUnattributed": 0.38856859999456184
+      },
+      "stageRangesSeconds": {
+        "imagePreparation": [
+          0.011996999994153157,
+          0.19964880000043195
+        ],
+        "cppDecodeAndCache": [
+          2.12009,
+          2.3869
+        ],
+        "pythonStaticDictionary": [
+          0.31,
+          0.456
+        ],
+        "nativeBuildAndWrapper": [
+          3.682023,
+          3.807786
+        ],
+        "queryIndex": [
+          4.397218,
+          4.617554
+        ],
+        "storeFinalization": [
+          0.532415,
+          0.606615
+        ],
+        "otherAndUnattributed": [
+          0.37224490001072574,
+          0.4437751000068655
+        ]
+      },
+      "medianIndexPartsSeconds": {
+        "tables": 1.5929,
+        "defaultViews": 1.2669,
+        "encode": 1.3223,
+        "readFactsAndOther": 0.2993610000000002
+      },
+      "medianWallTrial": 2,
+      "rows": [
+        {
+          "trial": 1,
+          "wallSeconds": 12.444078900007298,
+          "imageCacheHit": false,
+          "addressCacheHit": false,
+          "stagesSeconds": {
+            "imagePreparation": 0.19964880000043195,
+            "cppDecodeAndCache": 2.3869,
+            "pythonStaticDictionary": 0.456,
+            "nativeBuildAndWrapper": 3.807786,
+            "queryIndex": 4.617554,
+            "storeFinalization": 0.532415,
+            "otherAndUnattributed": 0.4437751000068655
+          },
+          "indexPartsSeconds": {
+            "tables": 1.6912,
+            "defaultViews": 1.2271,
+            "encode": 1.3297,
+            "readFactsAndOther": 0.36955399999999994
+          },
+          "nativeNestedSeconds": {
+            "readNative": 2.56302,
+            "assemble": 2.56302,
+            "rangeHits": 8578057,
+            "rangeMisses": 837,
+            "rangeWalk": 0,
+            "buildBlocks": 0.0358516,
+            "analysis": 0.0018697,
+            "queryIndex": 0.419966,
+            "facts": 0.244226,
+            "defaultViews": 0.0,
+            "writeBlocks": 0.72511,
+            "assembleFile": 0.72511,
+            "hashFile": 0.0
+          },
+          "staticDetails": {
+            "uniquePCs": 4042,
+            "predicateFallback": 0,
+            "sourceMapped": 3581,
+            "functions": 320,
+            "functionBytes": 28474,
+            "predicateCount": 87,
+            "knownCount": 10315,
+            "timings": {
+              "loadImageSeconds": 0.0,
+              "addressPreparationCacheHit": false,
+              "addressCacheSeconds": 0.10075320000760257,
+              "predicateAddressesSeconds": 0.07052589999511838,
+              "knownAddressesSeconds": 0.02850889999535866,
+              "instructionTableSeconds": 0.0005,
+              "disasmUniqueRangesSeconds": 0.0542,
+              "staticInfoSeconds": 0.2945
+            },
+            "buildSeconds": 0.456
+          },
+          "imageDetails": {
+            "cacheHit": false,
+            "sha256": "246640bf79c8b1e568441a286812326dfb0ae68a0df061a0c023262c07cf221b",
+            "readAndHashSeconds": 0.012073400008375756,
+            "parseSeconds": 0.18607159999373835,
+            "waitSeconds": 3.100009053014219e-06,
+            "totalSeconds": 0.1996406999969622
+          },
+          "replay": {
+            "seconds": 2.3869,
+            "replayBytes": 121604190,
+            "nativePeakRssBytes": 733433856
+          },
+          "jobPhasesSeconds": {
+            "metadataPreparation": 0.00210089999018237,
+            "decode": 12.243098799997824,
+            "captureStartAndMetadata": 0.006084400010877289,
+            "browsePreparation": 0.17453530000057071
+          }
+        },
+        {
+          "trial": 2,
+          "wallSeconds": 11.861197899997933,
+          "imageCacheHit": true,
+          "addressCacheHit": true,
+          "stagesSeconds": {
+            "imagePreparation": 0.013393300003372133,
+            "cppDecodeAndCache": 2.29661,
+            "pythonStaticDictionary": 0.413,
+            "nativeBuildAndWrapper": 3.80679,
+            "queryIndex": 4.397218,
+            "storeFinalization": 0.5456179999999999,
+            "otherAndUnattributed": 0.38856859999456184
+          },
+          "indexPartsSeconds": {
+            "tables": 1.5368,
+            "defaultViews": 1.2669,
+            "encode": 1.2958,
+            "readFactsAndOther": 0.2977179999999997
+          },
+          "nativeNestedSeconds": {
+            "readNative": 2.55389,
+            "assemble": 2.55389,
+            "rangeHits": 8578057,
+            "rangeMisses": 837,
+            "rangeWalk": 0,
+            "buildBlocks": 0.0326022,
+            "analysis": 0.0018568,
+            "queryIndex": 0.428677,
+            "facts": 0.262719,
+            "defaultViews": 0.0,
+            "writeBlocks": 0.741733,
+            "assembleFile": 0.741733,
+            "hashFile": 0.0
+          },
+          "staticDetails": {
+            "uniquePCs": 4042,
+            "predicateFallback": 0,
+            "sourceMapped": 3581,
+            "functions": 320,
+            "functionBytes": 28474,
+            "predicateCount": 87,
+            "knownCount": 10315,
+            "timings": {
+              "loadImageSeconds": 0.0,
+              "addressPreparationCacheHit": true,
+              "addressCacheSeconds": 0.0013152000028640032,
+              "predicateAddressesSeconds": 0.0,
+              "knownAddressesSeconds": 0.0,
+              "instructionTableSeconds": 0.0004,
+              "disasmUniqueRangesSeconds": 0.0653,
+              "staticInfoSeconds": 0.3403
+            },
+            "buildSeconds": 0.413
+          },
+          "imageDetails": {
+            "cacheHit": true,
+            "sha256": "246640bf79c8b1e568441a286812326dfb0ae68a0df061a0c023262c07cf221b",
+            "readAndHashSeconds": 0.012393400000291876,
+            "parseSeconds": 0.0,
+            "waitSeconds": 1.6999983927235007e-06,
+            "totalSeconds": 0.013387600003625266
+          },
+          "replay": {
+            "seconds": 2.29661,
+            "replayBytes": 121604190,
+            "nativePeakRssBytes": 733474816
+          },
+          "jobPhasesSeconds": {
+            "metadataPreparation": 0.0027289999998174608,
+            "decode": 11.645168200004264,
+            "captureStartAndMetadata": 0.00844439999491442,
+            "browsePreparation": 0.1854145000106655
+          }
+        },
+        {
+          "trial": 3,
+          "wallSeconds": 11.622630900004879,
+          "imageCacheHit": true,
+          "addressCacheHit": true,
+          "stagesSeconds": {
+            "imagePreparation": 0.011996999994153157,
+            "cppDecodeAndCache": 2.12009,
+            "pythonStaticDictionary": 0.31,
+            "nativeBuildAndWrapper": 3.682023,
+            "queryIndex": 4.519661,
+            "storeFinalization": 0.606615,
+            "otherAndUnattributed": 0.37224490001072574
+          },
+          "indexPartsSeconds": {
+            "tables": 1.5929,
+            "defaultViews": 1.3051,
+            "encode": 1.3223,
+            "readFactsAndOther": 0.2993610000000002
+          },
+          "nativeNestedSeconds": {
+            "readNative": 2.42921,
+            "assemble": 2.42921,
+            "rangeHits": 8578057,
+            "rangeMisses": 837,
+            "rangeWalk": 0,
+            "buildBlocks": 0.0288223,
+            "analysis": 0.0018596,
+            "queryIndex": 0.410479,
+            "facts": 0.25122,
+            "defaultViews": 0.0,
+            "writeBlocks": 0.759681,
+            "assembleFile": 0.759681,
+            "hashFile": 0.0
+          },
+          "staticDetails": {
+            "uniquePCs": 4042,
+            "predicateFallback": 0,
+            "sourceMapped": 3581,
+            "functions": 320,
+            "functionBytes": 28474,
+            "predicateCount": 87,
+            "knownCount": 10315,
+            "timings": {
+              "loadImageSeconds": 0.0,
+              "addressPreparationCacheHit": true,
+              "addressCacheSeconds": 0.0014674999983981252,
+              "predicateAddressesSeconds": 0.0,
+              "knownAddressesSeconds": 0.0,
+              "instructionTableSeconds": 0.0005,
+              "disasmUniqueRangesSeconds": 0.041,
+              "staticInfoSeconds": 0.2629
+            },
+            "buildSeconds": 0.31
+          },
+          "imageDetails": {
+            "cacheHit": true,
+            "sha256": "246640bf79c8b1e568441a286812326dfb0ae68a0df061a0c023262c07cf221b",
+            "readAndHashSeconds": 0.01099199999589473,
+            "parseSeconds": 0.0,
+            "waitSeconds": 1.8999999156221747e-06,
+            "totalSeconds": 0.011993099993560463
+          },
+          "replay": {
+            "seconds": 2.12009,
+            "replayBytes": 121604190,
+            "nativePeakRssBytes": 733511680
+          },
+          "jobPhasesSeconds": {
+            "metadataPreparation": 0.0018280999938724563,
+            "decode": 11.418955600005575,
+            "captureStartAndMetadata": 0.007514900004025549,
+            "browsePreparation": 0.16898259999288712
+          }
+        }
+      ]
+    }
+  }
+}
