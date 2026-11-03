@@ -1,0 +1,114 @@
+{
+  "part": "xc7z020clg400-2",
+  "vivado": "2018.3",
+  "main": {
+    "commit": "d42b60180e82fccb428c51613a0316776c2bc4fc",
+    "bit": "E:/zynqlinkPRO/build/fpga_dma_global/system_wrapper_verified.bit",
+    "bit_bytes": 4045674,
+    "resources": {
+      "slice_luts": 10908,
+      "slice_registers": 15814,
+      "block_ram_tiles": 2,
+      "dsps": 0,
+      "carry4": 190
+    },
+    "timing": {
+      "fclk_max_hz": 150000000,
+      "swclk_max_hz": 75000000,
+      "setup_slack_ns": 0.148,
+      "hold_slack_ns": 0.026
+    }
+  },
+  "candidate": {
+    "commit": "2d20baa-retimed",
+    "bit": "build/fpga_dma_global/system_wrapper_unverified_retimed.bit",
+    "bit_bytes": 4045674,
+    "resources": {
+      "slice_luts": 18050,
+      "slice_registers": 23388,
+      "block_ram_tiles": 6,
+      "dsps": 1,
+      "carry4": 1086
+    },
+    "timing": {
+      "fclk_max_hz": null,
+      "swclk_max_hz": null,
+      "setup_slack_ns_at_150mhz": -4.684,
+      "hold_slack_ns_at_150mhz": 0.023,
+      "setup_slack_ns_at_100mhz": -1.35,
+      "hold_slack_ns_at_100mhz": 0.023,
+      "worst_path_data_delay_ns": 10.969,
+      "worst_path_logic_levels": 21,
+      "worst_path_source": "system_i/swd_controller_0/inst/u_swd_core/FSM_sequential_state_reg[2]/C",
+      "worst_path_destination": "system_i/swd_controller_0/inst/u_swd_core/FSM_sequential_state_reg[4]/CE"
+    }
+  },
+  "resource_delta": {
+    "slice_luts": {
+      "main": 10908,
+      "new": 17882,
+      "change": 6974,
+      "percent": 63.93
+    },
+    "slice_registers": {
+      "main": 15814,
+      "new": 22468,
+      "change": 6654,
+      "percent": 42.08
+    },
+    "block_ram_tiles": {
+      "main": 2,
+      "new": 6,
+      "change": 4,
+      "percent": 200.0
+    },
+    "dsps": {
+      "main": 0,
+      "new": 1,
+      "change": 1,
+      "percent": null
+    },
+    "carry4": {
+      "main": 190,
+      "new": 1086,
+      "change": 896,
+      "percent": 471.58
+    }
+  },
+  "timing_delta_at_150mhz": {
+    "setup_slack_ns": -4.832,
+    "hold_slack_ns": -0.003
+  },
+  "status": "candidate_bit_generated_but_timing_failed",
+  "validation": {
+    "route_drc_errors": 0,
+    "write_bitstream_drc_errors": 0,
+    "hardware_programmed": false,
+    "simulation_regressions": 80,
+    "simulation_waveform_mismatches": 0
+  },
+  "notes": [
+    "Main is the verified build at d42b601 with 150 MHz FCLK passing.",
+    "Candidate routed DCP and unverified bitstream were generated from d773dec using the same part and XDC.",
+    "Candidate timing fails before the main 150 MHz target; the bitstream is retained for diagnosis only and was not programmed.",
+    "The worst path traverses the new Q16 timing-register carry chain into the SWD timing generator/state machine.",
+    "The final retimed candidate keeps configuration local to the SWD core during a transaction; it improves the candidate from -5.131 ns to -4.684 ns at 150 MHz, but still fails the main target."
+  ],
+  "ooc_swd_controller": {
+    "main_verified_build": {
+      "slice_luts": 1924,
+      "slice_registers": 1590,
+      "block_ram_tiles": 2,
+      "dsps": 0,
+      "carry4": 64
+    },
+    "candidate_routed_build": {
+      "slice_luts": 7735,
+      "slice_registers": 7010,
+      "block_ram_tiles": 6,
+      "dsps": 1,
+      "carry4": 950
+    },
+    "note": "OOC numbers come from the generated system_swd_controller_0_0 synthesis reports; full-device delta also includes BD/IP integration."
+  }
+}\n
