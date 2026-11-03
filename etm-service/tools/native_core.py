@@ -25,14 +25,15 @@ class Client:
         self.timeout = timeout
         self.closed = False
         self.log = tempfile.TemporaryFile('w+b')
-        self.process = subprocess.Popen([str(native_storebuild.binary_path()), command, *map(str, args)],
-            stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=self.log,
-            creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
-        _CLIENTS.add(self)
-        self.reader = threading.Thread(target=self._pump,
-            args=(self.process.stdout, self.responses), daemon=True, name='native-etm-response')
-        self.reader.start()
+        self.process = self.reader = None
         try:
+            self.process = subprocess.Popen([str(native_storebuild.binary_path()), command, *map(str, args)],
+                stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=self.log,
+                creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
+            _CLIENTS.add(self)
+            self.reader = threading.Thread(target=self._pump,
+                args=(self.process.stdout, self.responses), daemon=True, name='native-etm-response')
+            self.reader.start()
             self.ready = self.receive()
         except BaseException:
             self.close()
@@ -89,16 +90,18 @@ class Client:
                 return
             self.closed = True
             try:
-                if self.process.stdin:
-                    self.process.stdin.close()
-                try:
-                    self.process.wait(timeout=2)
-                except subprocess.TimeoutExpired:
-                    self.process.kill()
-                    self.process.wait(timeout=10)
+                if self.process is not None:
+                    if self.process.stdin:
+                        self.process.stdin.close()
+                    try:
+                        self.process.wait(timeout=2)
+                    except subprocess.TimeoutExpired:
+                        self.process.kill()
+                        self.process.wait(timeout=10)
             finally:
-                self.reader.join(timeout=2)
-                if self.process.stdout:
+                if self.reader is not None and self.reader.ident is not None:
+                    self.reader.join(timeout=2)
+                if self.process is not None and self.process.stdout:
                     self.process.stdout.close()
                 self.log.close()
                 _CLIENTS.discard(self)

@@ -22,6 +22,16 @@ from trace_cli import engine_environment
 
 
 class NativeCoreTests(unittest.TestCase):
+    def test_failed_worker_start_closes_log_and_registers_no_session(self):
+        log = tempfile.TemporaryFile('w+b')
+        before = set(native_core._CLIENTS)
+        with patch.object(native_core.tempfile, 'TemporaryFile', return_value=log), \
+                patch.object(native_core.subprocess, 'Popen', side_effect=OSError('injected start failure')):
+            with self.assertRaisesRegex(OSError, 'injected start failure'):
+                native_core.Client('query-server', 'unused')
+        self.assertTrue(log.closed)
+        self.assertEqual(set(native_core._CLIENTS), before)
+
     def setUp(self):
         self.environment = patch.dict(os.environ, {})
         self.environment.start()
