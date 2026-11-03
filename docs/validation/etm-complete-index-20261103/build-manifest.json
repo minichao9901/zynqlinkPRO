@@ -106,6 +106,22 @@
   "build": "cmake --build build/cpp-full-index-20261103/native-build --target etm_storebuild --parallel 4",
   "hardwareAccess": false,
   "plPsChanged": false,
-  "finalPerformanceAndFrozenAcceptance": "pending subsequent evidence commit",
-  "notes": "Working-file SHA and Git blob SHA distinguish CRLF/LF. C++ headers/vendor use exact byte attributes. Native source version reports the implementation commit; delivery commit adds the corresponding EXE and provenance."
+  "notes": "Working-file SHA and Git blob SHA distinguish CRLF/LF. C++ headers/vendor use exact byte attributes. Native source version reports the implementation commit; delivery commit adds the corresponding EXE and provenance.",
+  "nativeDeliveryCommit": "48e4d3d",
+  "benchmarkReferenceCommit": "b03275a99f6c",
+  "benchmarkCandidateCommit": "48e4d3d",
+  "frozen": {
+    "directory": "E:\\zynqlinkPRO-work\\etm-cpp-stage1-20261102\\build\\etm-complete-index-bridge",
+    "sourceRevision": "5b7513195350289d76627746d7ae240eab3221bf",
+    "sourceDirty": false,
+    "exeSha256": "ea753c0560c45b8b8ea14de3d587d21b1bf1e4c832430745bfd1d0e99d80afd0",
+    "packageManifestSha256": "c39445213d9aa5c1a34d956b384ee545191f868abef02dfcd765903d01328705",
+    "nativeBuilderSha256": "205647829f49dec1f9b19f396613593921bd2c22159bf4f7df5f39ae07fad33d",
+    "licenseSha256": "86b998c792894ccb911a1cb7994f7a9652894e7a094c0b5e45be2f553f45cf14"
+  },
+  "runtime": {
+    "python": "3.13.5 (tags/v3.13.5:6cb20a2, Jun 11 2025, 16:15:46) [MSC v.1943 64 bit (AMD64)]",
+    "platform": "Windows-11-10.0.26200-SP0"
+  },
+  "qualification": "See raw/validation.json and raw/performance-summary.json; no hardware access"
 }
