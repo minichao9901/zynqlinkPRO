@@ -1,0 +1,487 @@
+{
+  "blocks": {
+    "1": [
+      {
+        "bytes": 11812,
+        "sha256": "85571ca55a8cda17b5d7cfa9cbd2c847cffe64789be13796e9004add15951aa1"
+      }
+    ],
+    "2": [
+      {
+        "bytes": 20312,
+        "sha256": "dd77cb13cb03573b3e60e6567b6604b33378ba08930e134f2887f2bf59172d4e"
+      }
+    ],
+    "3": [
+      {
+        "bytes": 1687823,
+        "sha256": "23be7628c6f687bfd597b9eb7b0fa6e67d11a83208a8697d61f81917f9b4f19e"
+      }
+    ],
+    "4": [
+      {
+        "bytes": 549933,
+        "sha256": "991a6eeb8b645df50024015c257de8fc50c26fdc3d6a3138a40883c592770817"
+      }
+    ],
+    "5": [
+      {
+        "bytes": 27196,
+        "sha256": "865115bc9b381b07ce62e6ef1f930d5ce5e27c11fe5995790af789e408abad5b"
+      },
+      {
+        "bytes": 27225,
+        "sha256": "3581a534e21280170f23ca189e5d164c9a6ca3b8127854d8493619c9fe1ecd00"
+      },
+      {
+        "bytes": 115,
+        "sha256": "230d962eddabe064190cf80235dbcb9667f17ff7f0b4e772982d5d0a35d6abcd"
+      },
+      {
+        "bytes": 42,
+        "sha256": "b5362b41167a9828368ce2b85f3e620754c1c322fff634abd4aa2d31ad212258"
+      },
+      {
+        "bytes": 119,
+        "sha256": "dcc5b5baa829283337c6fd8d0d57faf0cb73b633374b94011eaad008da9a76c3"
+      }
+    ],
+    "6": [
+      {
+        "bytes": 28,
+        "sha256": "f48b05496a222376ae3f896ef60a8ebf81c94e95a5f0df9385fcb203810847cf"
+      }
+    ],
+    "11": [
+      {
+        "bytes": 3,
+        "sha256": "709e80c88487a2411e1ee4dfb9f22a861492d20c4765150c0c794abd70f8147c"
+      }
+    ]
+  },
+  "tables": [
+    "call_pair_func",
+    "call_pair_seq",
+    "cell_anchor_block",
+    "cell_anchor_offset",
+    "cell_anchor_skip",
+    "cell_cycle_runs",
+    "cell_cycles",
+    "cell_executed",
+    "cell_first_seq",
+    "cell_hotspot_count",
+    "cell_hotspot_first",
+    "cell_hotspot_unknown",
+    "cell_insn",
+    "cell_node_value",
+    "cell_node_value_cycles",
+    "cell_not_taken",
+    "cell_unknown",
+    "cycle_anchor_cycles",
+    "cycle_anchor_hotspot",
+    "cycle_anchor_seq",
+    "default_timeline_json",
+    "default_window_json",
+    "ev_flags",
+    "ev_next_func",
+    "ev_payload",
+    "ev_seq",
+    "ev_text",
+    "ev_type",
+    "fs_count",
+    "fs_func",
+    "fs_start",
+    "h_file",
+    "h_func",
+    "h_line",
+    "hs_cycles_cells",
+    "hs_cycles_hotspots",
+    "hs_cycles_values",
+    "line_id",
+    "line_start",
+    "node_label",
+    "node_parent",
+    "node_self_cells",
+    "node_self_counts",
+    "node_self_cycles",
+    "node_self_nodes",
+    "not_taken_func",
+    "not_taken_seq",
+    "pc_cell_offsets",
+    "pc_cells",
+    "ps_count",
+    "ps_leaf",
+    "ps_start",
+    "st_flow",
+    "st_func",
+    "st_hotspot",
+    "st_pc",
+    "st_pred",
+    "st_size",
+    "unknown_func",
+    "unknown_seq"
+  ],
+  "semanticQueryMetadataMatches": true,
+  "ok": true,
+  "rows": [
+    {
+      "engine": "reference",
+      "seconds": 0.97804339999999,
+      "summary": {
+        "packets": 109714,
+        "ranges": 550466,
+        "instructions": 550466,
+        "executed": 496051,
+        "sourceMapped": 543278,
+        "exceptions": 29,
+        "gaps": 2,
+        "packetIssues": 0,
+        "unknownExecution": 32,
+        "functions": {
+          "cdc_poll": 243766,
+          "main": 243766,
+          "memset": 5688,
+          "_svfprintf_r": 361,
+          "USBD_IRQHandler": 322,
+          "memmove": 253,
+          "memcpy": 218,
+          "usbd_ep_open": 196,
+          "HAL_IncTick": 175,
+          "memchr": 138,
+          "_printf_i": 128,
+          "__ssputs_r": 110,
+          "usbd_class_event_notify_handler": 94,
+          "SysTick_Handler": 75,
+          "_vsnprintf_r": 56,
+          "_printf_common": 47,
+          "SEGGER_RTT_WriteNoLock": 48,
+          "trace_log_printf": 46,
+          "usbd_event_reset_handler": 43,
+          "usbd_add_endpoint": 40,
+          "cdc_session_reset": 40,
+          "cdc_console_reset": 34,
+          "NVIC_EncodePriority": 30,
+          "usbd_add_interface": 30,
+          "_WriteNoCheck": 28,
+          "cdc_acm_init": 29,
+          "HAL_PCD_MspInit": 28,
+          "SEGGER_RTT_Write": 26,
+          "usbd_initialize": 25,
+          "HAL_NVIC_SetPriority": 24,
+          "usbd_desc_register": 20,
+          "vsnprintf": 20,
+          "usb_dc_init": 18,
+          "__NVIC_EnableIRQ": 16,
+          "_GetAvailWriteSpace": 16,
+          "usbd_cdc_acm_init_intf": 16,
+          "__NVIC_SetPriority": 14,
+          "USB_LP_CAN1_RX0_IRQHandler": 16,
+          "usbd_event_handler": 13,
+          "usbd_set_address": 9,
+          "usb_dc_low_level_init": 8,
+          "__NVIC_GetPriorityGrouping": 8,
+          "trace_hook_ready": 7,
+          "HAL_NVIC_EnableIRQ": 6
+        }
+      },
+      "quality": {
+        "inputBytes": 111077,
+        "unprocessedBytes": 0,
+        "processedBytes": 111077,
+        "accountedBytes": 111077,
+        "overlapBytes": 0,
+        "unaccountedBytes": 0,
+        "unsynchronizedBytes": 0,
+        "unsynchronizedRecords": 0,
+        "validPackets": 109714,
+        "packetIssues": 0,
+        "overflowPackets": 0,
+        "decoderLastError": 0,
+        "unknownExecution": 32,
+        "initialPhysicalBytes": null,
+        "unknownSourceBytes": null,
+        "trailingFrameBytes": null,
+        "trailingSyncBytes": 0,
+        "firstPathOffset": 12,
+        "boundaryPresent": false,
+        "timing": {
+          "cycleElements": 0,
+          "timeFlameAvailable": false
+        },
+        "basis": "字节核算不等于采集无损证明；源码映射率不等于程序覆盖率"
+      },
+      "performance": {
+        "storePhasesSeconds": {
+          "decodeAndInputs": 0.012992,
+          "prescanAndStatic": 0.280238,
+          "nativeBuild": 0.121961,
+          "queryIndex": 0.160935,
+          "summary": 0.017488,
+          "issues": 0.001223,
+          "copyBlocks": 0.017946,
+          "assemble": 0.005383,
+          "inputBindings": 0.017751,
+          "publish": 0.01858,
+          "cleanup": 0.038686
+        },
+        "storeDetails": {
+          "phases": {
+            "decodeAndInputs": 0.012992,
+            "prescanAndStatic": 0.280238,
+            "nativeBuild": 0.121961,
+            "queryIndex": 0.160935,
+            "summary": 0.017488,
+            "issues": 0.001223,
+            "copyBlocks": 0.017946,
+            "assemble": 0.005383,
+            "inputBindings": 0.017751,
+            "publish": 0.01858,
+            "cleanup": 0.038686
+          },
+          "index": {
+            "staticMaps": 0.001,
+            "counts": 0.001,
+            "cycles": 0.0,
+            "firstSeq": 0.0004,
+            "hotspotFinalize": 0.0,
+            "v2Tables": 0.0043,
+            "remainingSeconds": 0.0103,
+            "tablesSeconds": 0.021,
+            "defaultViewsSeconds": 0.0706,
+            "encodeSeconds": 0.0281,
+            "totalSeconds": 0.1198
+          },
+          "native": {
+            "readNative": 0.0637288,
+            "assemble": 0.0637288,
+            "rangeHits": 549296,
+            "rangeMisses": 1170,
+            "rangeWalk": 0,
+            "buildBlocks": 0.0020424,
+            "analysis": 0.0009923,
+            "queryIndex": 0.0101405,
+            "facts": 0.0054049,
+            "defaultViews": 0.0,
+            "writeBlocks": 0.0155458,
+            "assembleFile": 0.0155458,
+            "hashFile": 0.0
+          },
+          "preparedDecode": {
+            "seconds": 0.0545615,
+            "replayBytes": 5395824,
+            "nativePeakRssBytes": 22261760
+          },
+          "static": {
+            "uniquePCs": 1170,
+            "predicateFallback": 0,
+            "sourceMapped": 785,
+            "functions": 221,
+            "functionBytes": 18472,
+            "predicateCount": 73,
+            "knownCount": 7061,
+            "timings": {
+              "loadImageSeconds": 0.0,
+              "addressPreparationCacheHit": false,
+              "addressCacheSeconds": 0.07021900000000869,
+              "predicateAddressesSeconds": 0.05150199999997085,
+              "knownAddressesSeconds": 0.017858399999965968,
+              "instructionTableSeconds": 0.0003,
+              "disasmUniqueRangesSeconds": 0.0205,
+              "staticInfoSeconds": 0.0735
+            },
+            "buildSeconds": 0.167
+          },
+          "image": {
+            "cacheHit": false,
+            "sha256": "e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f",
+            "readAndHashSeconds": 0.010511300000018764,
+            "parseSeconds": 0.17189910000001873,
+            "waitSeconds": 1.9999999949504854e-06,
+            "totalSeconds": 0.1834580000000301
+          }
+        },
+        "version": 1,
+        "generation": "g-20261103T201503-a5ae4456",
+        "scope": "offline-decode; excludes acquisition, upload and browser rendering",
+        "decodeSeconds": 0.9634230000000343,
+        "decodePhasesSeconds": {
+          "imagePreparation": 0.18347110000001976,
+          "nativeInputPreparation": 0.0018886999999949694,
+          "storeBuildAndIndex": 0.729301200000009,
+          "directPreparation": 0.04762740000001031
+        },
+        "image": {
+          "cacheHit": false,
+          "sha256": "e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f",
+          "readAndHashSeconds": 0.010511300000018764,
+          "parseSeconds": 0.17189910000001873,
+          "waitSeconds": 1.9999999949504854e-06,
+          "totalSeconds": 0.1834580000000301
+        }
+      }
+    },
+    {
+      "engine": "cpp",
+      "seconds": 0.4235831000000303,
+      "summary": {
+        "packets": 109714,
+        "ranges": 550466,
+        "instructions": 550466,
+        "executed": 496051,
+        "sourceMapped": 543278,
+        "exceptions": 29,
+        "gaps": 2,
+        "packetIssues": 0,
+        "unknownExecution": 32,
+        "functions": {
+          "cdc_poll": 243766,
+          "main": 243766,
+          "memset": 5688,
+          "_svfprintf_r": 361,
+          "USBD_IRQHandler": 322,
+          "memmove": 253,
+          "memcpy": 218,
+          "usbd_ep_open": 196,
+          "HAL_IncTick": 175,
+          "memchr": 138,
+          "_printf_i": 128,
+          "__ssputs_r": 110,
+          "usbd_class_event_notify_handler": 94,
+          "SysTick_Handler": 75,
+          "_vsnprintf_r": 56,
+          "_printf_common": 47,
+          "SEGGER_RTT_WriteNoLock": 48,
+          "trace_log_printf": 46,
+          "usbd_event_reset_handler": 43,
+          "usbd_add_endpoint": 40,
+          "cdc_session_reset": 40,
+          "cdc_console_reset": 34,
+          "NVIC_EncodePriority": 30,
+          "usbd_add_interface": 30,
+          "_WriteNoCheck": 28,
+          "cdc_acm_init": 29,
+          "HAL_PCD_MspInit": 28,
+          "SEGGER_RTT_Write": 26,
+          "usbd_initialize": 25,
+          "HAL_NVIC_SetPriority": 24,
+          "usbd_desc_register": 20,
+          "vsnprintf": 20,
+          "usb_dc_init": 18,
+          "__NVIC_EnableIRQ": 16,
+          "_GetAvailWriteSpace": 16,
+          "usbd_cdc_acm_init_intf": 16,
+          "__NVIC_SetPriority": 14,
+          "USB_LP_CAN1_RX0_IRQHandler": 16,
+          "usbd_event_handler": 13,
+          "usbd_set_address": 9,
+          "usb_dc_low_level_init": 8,
+          "__NVIC_GetPriorityGrouping": 8,
+          "trace_hook_ready": 7,
+          "HAL_NVIC_EnableIRQ": 6
+        }
+      },
+      "quality": {
+        "inputBytes": 111077,
+        "unprocessedBytes": 0,
+        "processedBytes": 111077,
+        "accountedBytes": 111077,
+        "overlapBytes": 0,
+        "unaccountedBytes": 0,
+        "unsynchronizedBytes": 0,
+        "unsynchronizedRecords": 0,
+        "validPackets": 109714,
+        "packetIssues": 0,
+        "overflowPackets": 0,
+        "decoderLastError": 0,
+        "unknownExecution": 32,
+        "initialPhysicalBytes": null,
+        "unknownSourceBytes": null,
+        "trailingFrameBytes": null,
+        "trailingSyncBytes": 0,
+        "firstPathOffset": 12,
+        "boundaryPresent": false,
+        "timing": {
+          "cycleElements": 0,
+          "timeFlameAvailable": false
+        },
+        "basis": "字节核算不等于采集无损证明；源码映射率不等于程序覆盖率"
+      },
+      "performance": {
+        "version": 2,
+        "generation": "g-20261103T201504-d2aa40eb",
+        "scope": "offline-decode; excludes acquisition, upload and browser rendering",
+        "storePhasesSeconds": {
+          "inputPreparation": 0.034436,
+          "nativeClosedBuild": 0.326714,
+          "verifyNativeStore": 0.002809,
+          "inputBindings": 0.022996,
+          "publish": 0.018501,
+          "cleanup": 0.000888
+        },
+        "storeDetails": {
+          "phases": {
+            "inputPreparation": 0.034436,
+            "nativeClosedBuild": 0.326714,
+            "verifyNativeStore": 0.002809,
+            "inputBindings": 0.022996,
+            "publish": 0.018501,
+            "cleanup": 0.000888
+          },
+          "index": {
+            "tablesSeconds": 0.0151344,
+            "defaultViewsSeconds": 0.0209492,
+            "encodeSeconds": 0.0204355,
+            "totalSeconds": 0.0566485
+          },
+          "native": {
+            "readNative": 0.0585384,
+            "assemble": 0.0585384,
+            "rangeHits": 549296,
+            "rangeMisses": 1170,
+            "rangeWalk": 0,
+            "buildBlocks": 0.0012918,
+            "analysis": 0.000443,
+            "queryIndex": 0.0689239,
+            "facts": 0,
+            "defaultViews": 0.0,
+            "writeBlocks": 0.0310162,
+            "assembleFile": 0.0310162,
+            "hashFile": 0.0
+          },
+          "preparedDecode": {
+            "seconds": 0.0573658,
+            "replayBytes": 5395824,
+            "nativePeakRssBytes": 28598272
+          },
+          "static": {
+            "native": true,
+            "uniquePCs": 1170,
+            "buildSeconds": 0.0118568,
+            "predicateCount": 73,
+            "knownCount": 7061
+          },
+          "image": {
+            "native": true,
+            "cacheHit": false,
+            "parseSeconds": 0.0193838,
+            "totalSeconds": 0.0193838
+          },
+          "completeIndex": true,
+          "scratchFactsWritten": false,
+          "storeWrites": 1,
+          "controlResultBytes": 517787
+        },
+        "decodeSeconds": 0.4074625999999739,
+        "decodePhasesSeconds": {
+          "nativeClosedPipeline": 0.40746319999999514
+        }
+      }
+    }
+  ],
+  "sourceRecord": "E:\\zynqlinkPRO\\etm-service\\records\\capture-2579cfda576445a3a7e9b12d8cf76627",
+  "sourceInputSha256": "1579278382f8340be9b2f7a4ce13f5964fa42dffd5b1b908937ebc88f563ee8b",
+  "decodedInputSha256": "15676c83970668a3dad275f211cfcf98ce22e231f40482945403b4f5107cd2af",
+  "truncate": 2,
+  "originalUnchanged": true,
+  "offline": true
+}

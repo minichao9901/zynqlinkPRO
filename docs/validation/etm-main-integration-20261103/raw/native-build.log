@@ -1,0 +1,734 @@
+[1/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/ocsd_code_follower.cpp.obj
+[2/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/cs_frame_mux_data.cpp.obj
+[3/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/ocsd_gen_elem_list.cpp.obj
+[4/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/ocsd_error.cpp.obj
+[5/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/ocsd_error_logger.cpp.obj
+[6/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/ocsd_gen_elem_stack.cpp.obj
+[7/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/ocsd_version.cpp.obj
+[8/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/ocsd_msg_logger.cpp.obj
+[9/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/trc_component.cpp.obj
+[10/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/ocsd_dcd_tree.cpp.obj
+[11/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/trc_core_arch_map.cpp.obj
+[12/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/trc_printable_elem.cpp.obj
+[13/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/trc_ret_stack.cpp.obj
+[14/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/trc_gen_elem.cpp.obj
+[15/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/etmv3/trc_cmp_cfg_etmv3.cpp.obj
+[16/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/ete/trc_cmp_cfg_ete.cpp.obj
+[17/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/trc_frame_deformatter.cpp.obj
+[18/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/ocsd_lib_dcd_register.cpp.obj
+[19/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/etmv3/trc_pkt_proc_etmv3.cpp.obj
+[20/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/etmv4/trc_cmp_cfg_etmv4.cpp.obj
+[21/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/etmv3/trc_pkt_decode_etmv3.cpp.obj
+[22/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/etmv3/trc_pkt_elem_etmv3.cpp.obj
+[23/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/etmv3/trc_pkt_proc_etmv3_impl.cpp.obj
+[24/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/etmv4/trc_etmv4_stack_elem.cpp.obj
+[25/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/i_dec/trc_i_decode.cpp.obj
+[26/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/i_dec/trc_idec_arminst.cpp.obj
+[27/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/etmv4/trc_pkt_elem_etmv4i.cpp.obj
+[28/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/itm/trc_pkt_decode_itm.cpp.obj
+[29/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/etmv4/trc_pkt_decode_etmv4i.cpp.obj
+[30/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/etmv4/trc_pkt_proc_etmv4i.cpp.obj
+In file included from E:/zynqlinkPRO/etm-service/vendor/OpenCSD-1.8.3/decoder/include/opencsd/etmv4/trc_pkt_proc_etmv4i.h:41,
+                 from E:/zynqlinkPRO/etm-service/vendor/OpenCSD-1.8.3/decoder/include/opencsd/etmv4/trc_pkt_proc_etmv4.h:42,
+                 from E:/zynqlinkPRO/etm-service/vendor/OpenCSD-1.8.3/decoder/source/etmv4/trc_pkt_proc_etmv4i.cpp:35:
+In member function 'void EtmV4ITrcPacket::setCondRF1(const uint32_t*, const uint8_t*, const uint8_t*, bool)',
+    inlined from 'void TrcPktProcEtmV4I::iPktCondResult(uint8_t)' at E:/zynqlinkPRO/etm-service/vendor/OpenCSD-1.8.3/decoder/source/etmv4/trc_pkt_proc_etmv4i.cpp:846:37:
+E:/zynqlinkPRO/etm-service/vendor/OpenCSD-1.8.3/decoder/include/opencsd/etmv4/trc_pkt_elem_etmv4i.h:390:23: warning: 'result[0]' may be used uninitialized [-Wmaybe-uninitialized]
+  390 |     cond_result.res_0 = res[0];
+      |     ~~~~~~~~~~~~~~~~~~^~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/OpenCSD-1.8.3/decoder/source/etmv4/trc_pkt_proc_etmv4i.cpp: In member function 'void TrcPktProcEtmV4I::iPktCondResult(uint8_t)':
+E:/zynqlinkPRO/etm-service/vendor/OpenCSD-1.8.3/decoder/source/etmv4/trc_pkt_proc_etmv4i.cpp:836:21: note: 'result[0]' was declared here
+  836 |             uint8_t result[2];
+      |                     ^~~~~~
+At global scope:
+cc1plus.exe: note: unrecognized command-line option '-Wno-invalid-token-paste' may have been intended to silence earlier diagnostics
+[31/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/itm/trc_pkt_elem_itm.cpp.obj
+[32/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/mem_acc/trc_mem_acc_bufptr.cpp.obj
+[33/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/mem_acc/trc_mem_acc_base.cpp.obj
+[34/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/mem_acc/trc_mem_acc_cb.cpp.obj
+[35/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/itm/trc_pkt_proc_itm.cpp.obj
+[36/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/mem_acc/trc_mem_acc_cache.cpp.obj
+[37/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/mem_acc/trc_mem_acc_mapper.cpp.obj
+[38/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/mem_acc/trc_mem_acc_file.cpp.obj
+[39/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/pkt_printers/gen_elem_printer.cpp.obj
+[40/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/ptm/trc_cmp_cfg_ptm.cpp.obj
+[41/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/pkt_printers/raw_frame_printer.cpp.obj
+[42/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/ptm/trc_pkt_elem_ptm.cpp.obj
+[43/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/ptm/trc_pkt_decode_ptm.cpp.obj
+[44/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/ptm/trc_pkt_proc_ptm.cpp.obj
+[45/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/pkt_printers/trc_print_fact.cpp.obj
+[46/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/stm/trc_pkt_decode_stm.cpp.obj
+[47/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/stm/trc_pkt_elem_stm.cpp.obj
+[48/132] Building C object vendor/capstone-5.0.7/CMakeFiles/capstone.dir/cs.c.obj
+[49/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd_c_api.dir/decoder/source/c_api/ocsd_c_api_custom_obj.cpp.obj
+[50/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd_c_api.dir/decoder/source/c_api/ocsd_c_api.cpp.obj
+[51/132] Building C object vendor/capstone-5.0.7/CMakeFiles/capstone.dir/Mapping.c.obj
+[52/132] Building C object vendor/capstone-5.0.7/CMakeFiles/capstone.dir/MCInstrDesc.c.obj
+[53/132] Building C object vendor/capstone-5.0.7/CMakeFiles/capstone.dir/MCInst.c.obj
+[54/132] Building C object vendor/capstone-5.0.7/CMakeFiles/capstone.dir/MCRegisterInfo.c.obj
+[55/132] Building C object vendor/capstone-5.0.7/CMakeFiles/capstone.dir/SStream.c.obj
+[56/132] Building C object vendor/capstone-5.0.7/CMakeFiles/capstone.dir/utils.c.obj
+[57/132] Building C object vendor/capstone-5.0.7/CMakeFiles/capstone.dir/arch/ARM/ARMMapping.c.obj
+[58/132] Building CXX object vendor/OpenCSD-1.8.3/CMakeFiles/opencsd.dir/decoder/source/stm/trc_pkt_proc_stm.cpp.obj
+[59/132] Building C object vendor/capstone-5.0.7/CMakeFiles/capstone.dir/arch/ARM/ARMModule.c.obj
+[60/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_abbrev.c.obj
+[61/132] Linking CXX static library vendor\OpenCSD-1.8.3\libopencsd.a
+[62/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_crc.c.obj
+[63/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_crc32.c.obj
+[64/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_alloc.c.obj
+[65/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_debug_sup.c.obj
+[66/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_arange.c.obj
+[67/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_debugaddr.c.obj
+[68/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_debuglink.c.obj
+[69/132] Building C object vendor/capstone-5.0.7/CMakeFiles/capstone.dir/arch/ARM/ARMInstPrinter.c.obj
+In file included from E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/utils.h:14,
+                 from E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMInstPrinter.c:31:
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:168:26: warning: 'get_detail' defined but not used [-Wunused-function]
+  168 | static inline cs_detail *get_detail(const MCInst *MI)
+      |                          ^~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:162:20: warning: 'detail_is_set' defined but not used [-Wunused-function]
+  162 | static inline bool detail_is_set(const MCInst *MI)
+      |                    ^~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:160:33: warning: 'TriCore_get_detail' defined but not used [-Wunused-function]
+  160 | DEFINE_get_arch_detail(tricore, TriCore);
+      |                                 ^~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:152:34: note: in definition of macro 'DEFINE_get_arch_detail'
+  152 |         static inline cs_##arch *ARCH##_get_detail(const MCInst *MI) \
+      |                                  ^~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:159:29: warning: 'PPC_get_detail' defined but not used [-Wunused-function]
+  159 | DEFINE_get_arch_detail(ppc, PPC);
+      |                             ^~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:152:34: note: in definition of macro 'DEFINE_get_arch_detail'
+  152 |         static inline cs_##arch *ARCH##_get_detail(const MCInst *MI) \
+      |                                  ^~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:158:29: warning: 'ARM_get_detail' defined but not used [-Wunused-function]
+  158 | DEFINE_get_arch_detail(arm, ARM);
+      |                             ^~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:152:34: note: in definition of macro 'DEFINE_get_arch_detail'
+  152 |         static inline cs_##arch *ARCH##_get_detail(const MCInst *MI) \
+      |                                  ^~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:145:20: warning: 'set_doing_mem' defined but not used [-Wunused-function]
+  145 | static inline void set_doing_mem(const MCInst *MI, bool status)
+      |                    ^~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:139:20: warning: 'doing_mem' defined but not used [-Wunused-function]
+  139 | static inline bool doing_mem(const MCInst *MI)
+      |                    ^~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:136:37: warning: 'TriCore_dec_op_count' defined but not used [-Wunused-function]
+  136 | DEFINE_dec_detail_op_count(tricore, TriCore);
+      |                                     ^~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:126:28: note: in definition of macro 'DEFINE_dec_detail_op_count'
+  126 |         static inline void ARCH##_dec_op_count(MCInst *MI) \
+      |                            ^~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:135:37: warning: 'TriCore_inc_op_count' defined but not used [-Wunused-function]
+  135 | DEFINE_inc_detail_op_count(tricore, TriCore);
+      |                                     ^~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:119:28: note: in definition of macro 'DEFINE_inc_detail_op_count'
+  119 |         static inline void ARCH##_inc_op_count(MCInst *MI) \
+      |                            ^~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:134:33: warning: 'PPC_dec_op_count' defined but not used [-Wunused-function]
+  134 | DEFINE_dec_detail_op_count(ppc, PPC);
+      |                                 ^~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:126:28: note: in definition of macro 'DEFINE_dec_detail_op_count'
+  126 |         static inline void ARCH##_dec_op_count(MCInst *MI) \
+      |                            ^~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:133:33: warning: 'PPC_inc_op_count' defined but not used [-Wunused-function]
+  133 | DEFINE_inc_detail_op_count(ppc, PPC);
+      |                                 ^~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:119:28: note: in definition of macro 'DEFINE_inc_detail_op_count'
+  119 |         static inline void ARCH##_inc_op_count(MCInst *MI) \
+      |                            ^~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:132:33: warning: 'ARM_dec_op_count' defined but not used [-Wunused-function]
+  132 | DEFINE_dec_detail_op_count(arm, ARM);
+      |                                 ^~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:126:28: note: in definition of macro 'DEFINE_dec_detail_op_count'
+  126 |         static inline void ARCH##_dec_op_count(MCInst *MI) \
+      |                            ^~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:131:33: warning: 'ARM_inc_op_count' defined but not used [-Wunused-function]
+  131 | DEFINE_inc_detail_op_count(arm, ARM);
+      |                                 ^~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:119:28: note: in definition of macro 'DEFINE_inc_detail_op_count'
+  119 |         static inline void ARCH##_inc_op_count(MCInst *MI) \
+      |                            ^~~~
+In file included from E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMInstPrinter.c:26:
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMBaseInfo.h:226:27: warning: 'ARMII_AddrModeToString' defined but not used [-Wunused-function]
+  226 | inline static const char *ARMII_AddrModeToString(ARMII_AddrMode addrmode)
+      |                           ^~~~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMBaseInfo.h:182:20: warning: 'isARMLowRegister' defined but not used [-Wunused-function]
+  182 | static inline bool isARMLowRegister(unsigned Reg)
+      |                    ^~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMBaseInfo.h:52:31: warning: 'ARMCC_getOppositeCondition' defined but not used [-Wunused-function]
+   52 | inline static ARMCC_CondCodes ARMCC_getOppositeCondition(ARMCC_CondCodes CC)
+      |                               ^~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMInstPrinter.c:25:
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:611:24: warning: 'createNEONModImm' defined but not used [-Wunused-function]
+  611 | static inline unsigned createNEONModImm(unsigned OpCmode, unsigned Val)
+      |                        ^~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:570:24: warning: 'getAM5FP16Opc' defined but not used [-Wunused-function]
+  570 | static inline unsigned getAM5FP16Opc(ARM_AM_AddrOpc Opc, unsigned char Offset)
+      |                        ^~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:544:24: warning: 'ARM_AM_getAM5Opc' defined but not used [-Wunused-function]
+  544 | static inline unsigned ARM_AM_getAM5Opc(ARM_AM_AddrOpc Opc, unsigned char Offset)
+      |                        ^~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:527:24: warning: 'getAM4ModeImm' defined but not used [-Wunused-function]
+  527 | static inline unsigned getAM4ModeImm(ARM_AM_AMSubMode SubMode)
+      |                        ^~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:522:32: warning: 'getAM4SubMode' defined but not used [-Wunused-function]
+  522 | static inline ARM_AM_AMSubMode getAM4SubMode(unsigned Mode)
+      |                                ^~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:502:24: warning: 'getAM3IdxMode' defined but not used [-Wunused-function]
+  502 | static inline unsigned getAM3IdxMode(unsigned AM3Opc)
+      |                        ^~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:485:24: warning: 'getAM3Opc' defined but not used [-Wunused-function]
+  485 | static inline unsigned getAM3Opc(ARM_AM_AddrOpc Opc, unsigned char Offset,
+      |                        ^~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:465:24: warning: 'getAM2IdxMode' defined but not used [-Wunused-function]
+  465 | static inline unsigned getAM2IdxMode(unsigned AM2Opc)
+      |                        ^~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:442:24: warning: 'ARM_AM_getAM2Opc' defined but not used [-Wunused-function]
+  442 | static inline unsigned ARM_AM_getAM2Opc(ARM_AM_AddrOpc Opc, unsigned Imm12, ARM_AM_ShiftOpc SO,
+      |                        ^~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:413:24: warning: 'getT2SOImmTwoPartSecond' defined but not used [-Wunused-function]
+  413 | static inline unsigned getT2SOImmTwoPartSecond(unsigned Imm)
+      |                        ^~~~~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:367:20: warning: 'isT2SOImmTwoPartVal' defined but not used [-Wunused-function]
+  367 | static inline bool isT2SOImmTwoPartVal (unsigned Imm)
+      |                    ^~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:278:24: warning: 'getThumbImmNonShiftedVal' defined but not used [-Wunused-function]
+  278 | static inline unsigned getThumbImmNonShiftedVal(unsigned V)
+      |                        ^~~~~~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:269:20: warning: 'isThumbImm16ShiftedVal' defined but not used [-Wunused-function]
+  269 | static inline bool isThumbImm16ShiftedVal(unsigned V)
+      |                    ^~~~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:248:20: warning: 'isThumbImmShiftedVal' defined but not used [-Wunused-function]
+  248 | static inline bool isThumbImmShiftedVal(unsigned V)
+      |                    ^~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:224:24: warning: 'getSOImmTwoPartSecond' defined but not used [-Wunused-function]
+  224 | static inline unsigned getSOImmTwoPartSecond(unsigned V)
+      |                        ^~~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:217:24: warning: 'getSOImmTwoPartFirst' defined but not used [-Wunused-function]
+  217 | static inline unsigned getSOImmTwoPartFirst(unsigned V)
+      |                        ^~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:203:20: warning: 'isSOImmTwoPartVal' defined but not used [-Wunused-function]
+  203 | static inline bool isSOImmTwoPartVal(unsigned V)
+      |                    ^~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:139:24: warning: 'getSOImmValRot' defined but not used [-Wunused-function]
+  139 | static inline unsigned getSOImmValRot(unsigned Imm)
+      |                        ^~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:132:24: warning: 'getSOImmValImm' defined but not used [-Wunused-function]
+  132 | static inline unsigned getSOImmValImm(unsigned Imm)
+      |                        ^~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:115:24: warning: 'getSORegOpc' defined but not used [-Wunused-function]
+  115 | static inline unsigned getSORegOpc(ARM_AM_ShiftOpc ShOp, unsigned Imm)
+      |                        ^~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:74:27: warning: 'ARM_AM_getAMSubModeStr' defined but not used [-Wunused-function]
+   74 | static inline const char *ARM_AM_getAMSubModeStr(ARM_AM_AMSubMode Mode)
+      |                           ^~~~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:55:24: warning: 'ARM_AM_getShiftOpcEncoding' defined but not used [-Wunused-function]
+   55 | static inline unsigned ARM_AM_getShiftOpcEncoding(ARM_AM_ShiftOpc Op)
+      |                        ^~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:21:
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:424:28: warning: 'countLeadingZeros' defined but not used [-Wunused-function]
+  424 | static inline unsigned int countLeadingZeros(int x)
+      |                            ^~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:413:23: warning: 'SignExtend64' defined but not used [-Wunused-function]
+  413 | static inline int64_t SignExtend64(uint64_t X, unsigned B) {
+      |                       ^~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:407:23: warning: 'SignExtend32' defined but not used [-Wunused-function]
+  407 | static inline int32_t SignExtend32(uint32_t X, unsigned B) {
+      |                       ^~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:401:23: warning: 'abs64' defined but not used [-Wunused-function]
+  401 | static inline int64_t abs64(int64_t x) {
+      |                       ^~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:394:24: warning: 'OffsetToAlignment' defined but not used [-Wunused-function]
+  394 | static inline uint64_t OffsetToAlignment(uint64_t Value, uint64_t Align) {
+      |                        ^~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:368:24: warning: 'NextPowerOf2' defined but not used [-Wunused-function]
+  368 | static inline uint64_t NextPowerOf2(uint64_t A) {
+      |                        ^~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:357:24: warning: 'MinAlign' defined but not used [-Wunused-function]
+  357 | static inline uint64_t MinAlign(uint64_t A, uint64_t B) {
+      |                        ^~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:346:24: warning: 'FloatToBits' defined but not used [-Wunused-function]
+  346 | static inline uint32_t FloatToBits(float Float) {
+      |                        ^~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:333:24: warning: 'DoubleToBits' defined but not used [-Wunused-function]
+  333 | static inline uint64_t DoubleToBits(double Double) {
+      |                        ^~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:320:21: warning: 'BitsToFloat' defined but not used [-Wunused-function]
+  320 | static inline float BitsToFloat(uint32_t Bits) {
+      |                     ^~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:309:22: warning: 'BitsToDouble' defined but not used [-Wunused-function]
+  309 | static inline double BitsToDouble(uint64_t Bits) {
+      |                      ^~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:298:24: warning: 'GreatestCommonDivisor64' defined but not used [-Wunused-function]
+  298 | static inline uint64_t GreatestCommonDivisor64(uint64_t A, uint64_t B) {
+      |                        ^~~~~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:292:24: warning: 'Log2_64_Ceil' defined but not used [-Wunused-function]
+  292 | static inline unsigned Log2_64_Ceil(uint64_t Value) {
+      |                        ^~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:286:24: warning: 'Log2_32_Ceil' defined but not used [-Wunused-function]
+  286 | static inline unsigned Log2_32_Ceil(uint32_t Value) {
+      |                        ^~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:279:24: warning: 'Log2_64' defined but not used [-Wunused-function]
+  279 | static inline unsigned Log2_64(uint64_t Value) {
+      |                        ^~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:273:24: warning: 'Log2_32' defined but not used [-Wunused-function]
+  273 | static inline unsigned Log2_32(uint32_t Value) {
+      |                        ^~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:259:24: warning: 'CountPopulation_64' defined but not used [-Wunused-function]
+  259 | static inline unsigned CountPopulation_64(uint64_t Value) {
+      |                        ^~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:247:24: warning: 'CountPopulation_32' defined but not used [-Wunused-function]
+  247 | static inline unsigned CountPopulation_32(uint32_t Value) {
+      |                        ^~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:240:24: warning: 'CountTrailingOnes_64' defined but not used [-Wunused-function]
+  240 | static inline unsigned CountTrailingOnes_64(uint64_t Value) {
+      |                        ^~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:210:24: warning: 'CountTrailingOnes_32' defined but not used [-Wunused-function]
+  210 | static inline unsigned CountTrailingOnes_32(uint32_t Value) {
+      |                        ^~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:182:24: warning: 'CountLeadingOnes_64' defined but not used [-Wunused-function]
+  182 | static inline unsigned CountLeadingOnes_64(uint64_t Value) {
+      |                        ^~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:124:24: warning: 'CountLeadingOnes_32' defined but not used [-Wunused-function]
+  124 | static inline unsigned CountLeadingOnes_32(uint32_t Value) {
+      |                        ^~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:87:20: warning: 'isPowerOf2_32' defined but not used [-Wunused-function]
+   87 | static inline bool isPowerOf2_32(uint32_t Value) {
+      |                    ^~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:81:20: warning: 'isShiftedMask_64' defined but not used [-Wunused-function]
+   81 | static inline bool isShiftedMask_64(uint64_t Value) {
+      |                    ^~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:75:20: warning: 'isShiftedMask_32' defined but not used [-Wunused-function]
+   75 | static inline bool isShiftedMask_32(uint32_t Value) {
+      |                    ^~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:48:20: warning: 'isUIntN' defined but not used [-Wunused-function]
+   48 | static inline bool isUIntN(unsigned N, uint64_t x) {
+      |                    ^~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:42:24: warning: 'Lo_32' defined but not used [-Wunused-function]
+   42 | static inline uint32_t Lo_32(uint64_t Value) {
+      |                        ^~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:37:24: warning: 'Hi_32' defined but not used [-Wunused-function]
+   37 | static inline uint32_t Hi_32(uint64_t Value) {
+      |                        ^~~~~
+[70/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_debugnames.c.obj
+[71/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_die_deliv.c.obj
+[72/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_dsc.c.obj
+[73/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_elf_rel_detector.c.obj
+[74/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_elfread.c.obj
+[75/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_error.c.obj
+[76/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_fill_in_attr_form.c.obj
+[77/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_find_sigref.c.obj
+[78/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_elf_load_headers.c.obj
+[79/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_fission_to_cu.c.obj
+[80/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_form_class_names.c.obj
+[81/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_form.c.obj
+[82/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_frame.c.obj
+[83/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_frame2.c.obj
+[84/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_frame_iter.c.obj
+[85/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_gdbindex.c.obj
+[86/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_gnu_index.c.obj
+[87/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_global.c.obj
+[88/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_groups.c.obj
+[89/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_harmless.c.obj
+[90/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_frame_cfa_read.c.obj
+[91/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_generic_init.c.obj
+[92/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_leb.c.obj
+[93/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_init_finish.c.obj
+[94/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_loc.c.obj
+[95/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_loclists.c.obj
+[96/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_local_malloc.c.obj
+[97/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_locationop_read.c.obj
+[98/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_lname_version.c.obj
+[99/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_lvn_name.c.obj
+[100/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_64machoread.c.obj
+[101/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_machoread.c.obj
+[102/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_line.c.obj
+[103/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_macro.c.obj
+[104/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_memcpy_swap.c.obj
+[105/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_object_read_common.c.obj
+[106/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_macro5.c.obj
+[107/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_names.c.obj
+[108/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_object_detector.c.obj
+[109/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_peread.c.obj
+[110/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_ranges.c.obj
+[111/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_safe_arithmetic.c.obj
+[112/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_safe_strcpy.c.obj
+[113/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_rnglists.c.obj
+[114/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_secname_ck.c.obj
+[115/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_query.c.obj
+[116/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_seekr.c.obj
+[117/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_stringsection.c.obj
+[118/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_setup_sections.c.obj
+[119/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_string.c.obj
+[120/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_tied.c.obj
+[121/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_str_offsets.c.obj
+[122/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_tsearchhash.c.obj
+[123/132] Building C object vendor/capstone-5.0.7/CMakeFiles/capstone.dir/arch/ARM/ARMDisassembler.c.obj
+In file included from E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/utils.h:14,
+                 from E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMDisassembler.c:29:
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:168:26: warning: 'get_detail' defined but not used [-Wunused-function]
+  168 | static inline cs_detail *get_detail(const MCInst *MI)
+      |                          ^~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:162:20: warning: 'detail_is_set' defined but not used [-Wunused-function]
+  162 | static inline bool detail_is_set(const MCInst *MI)
+      |                    ^~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:160:33: warning: 'TriCore_get_detail' defined but not used [-Wunused-function]
+  160 | DEFINE_get_arch_detail(tricore, TriCore);
+      |                                 ^~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:152:34: note: in definition of macro 'DEFINE_get_arch_detail'
+  152 |         static inline cs_##arch *ARCH##_get_detail(const MCInst *MI) \
+      |                                  ^~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:159:29: warning: 'PPC_get_detail' defined but not used [-Wunused-function]
+  159 | DEFINE_get_arch_detail(ppc, PPC);
+      |                             ^~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:152:34: note: in definition of macro 'DEFINE_get_arch_detail'
+  152 |         static inline cs_##arch *ARCH##_get_detail(const MCInst *MI) \
+      |                                  ^~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:158:29: warning: 'ARM_get_detail' defined but not used [-Wunused-function]
+  158 | DEFINE_get_arch_detail(arm, ARM);
+      |                             ^~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:152:34: note: in definition of macro 'DEFINE_get_arch_detail'
+  152 |         static inline cs_##arch *ARCH##_get_detail(const MCInst *MI) \
+      |                                  ^~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:145:20: warning: 'set_doing_mem' defined but not used [-Wunused-function]
+  145 | static inline void set_doing_mem(const MCInst *MI, bool status)
+      |                    ^~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:139:20: warning: 'doing_mem' defined but not used [-Wunused-function]
+  139 | static inline bool doing_mem(const MCInst *MI)
+      |                    ^~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:136:37: warning: 'TriCore_dec_op_count' defined but not used [-Wunused-function]
+  136 | DEFINE_dec_detail_op_count(tricore, TriCore);
+      |                                     ^~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:126:28: note: in definition of macro 'DEFINE_dec_detail_op_count'
+  126 |         static inline void ARCH##_dec_op_count(MCInst *MI) \
+      |                            ^~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:135:37: warning: 'TriCore_inc_op_count' defined but not used [-Wunused-function]
+  135 | DEFINE_inc_detail_op_count(tricore, TriCore);
+      |                                     ^~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:119:28: note: in definition of macro 'DEFINE_inc_detail_op_count'
+  119 |         static inline void ARCH##_inc_op_count(MCInst *MI) \
+      |                            ^~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:134:33: warning: 'PPC_dec_op_count' defined but not used [-Wunused-function]
+  134 | DEFINE_dec_detail_op_count(ppc, PPC);
+      |                                 ^~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:126:28: note: in definition of macro 'DEFINE_dec_detail_op_count'
+  126 |         static inline void ARCH##_dec_op_count(MCInst *MI) \
+      |                            ^~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:133:33: warning: 'PPC_inc_op_count' defined but not used [-Wunused-function]
+  133 | DEFINE_inc_detail_op_count(ppc, PPC);
+      |                                 ^~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:119:28: note: in definition of macro 'DEFINE_inc_detail_op_count'
+  119 |         static inline void ARCH##_inc_op_count(MCInst *MI) \
+      |                            ^~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:132:33: warning: 'ARM_dec_op_count' defined but not used [-Wunused-function]
+  132 | DEFINE_dec_detail_op_count(arm, ARM);
+      |                                 ^~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:126:28: note: in definition of macro 'DEFINE_dec_detail_op_count'
+  126 |         static inline void ARCH##_dec_op_count(MCInst *MI) \
+      |                            ^~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:131:33: warning: 'ARM_inc_op_count' defined but not used [-Wunused-function]
+  131 | DEFINE_inc_detail_op_count(arm, ARM);
+      |                                 ^~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/Mapping.h:119:28: note: in definition of macro 'DEFINE_inc_detail_op_count'
+  119 |         static inline void ARCH##_inc_op_count(MCInst *MI) \
+      |                            ^~~~
+In file included from E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMDisassembler.c:21:
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMBaseInfo.h:474:27: warning: 'ARM_TSB_TraceSyncBOptToString' defined but not used [-Wunused-function]
+  474 | static inline const char *ARM_TSB_TraceSyncBOptToString(unsigned val)
+      |                           ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMBaseInfo.h:469:35: warning: 'lookupMClassSysRegBy12bitSYSmValue' defined but not used [-Wunused-function]
+  469 | static inline const MClassSysReg *lookupMClassSysRegBy12bitSYSmValue(unsigned SYSm)
+      |                                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMBaseInfo.h:462:20: warning: 'MClassSysReg_isInRequiredFeatures' defined but not used [-Wunused-function]
+  462 | static inline bool MClassSysReg_isInRequiredFeatures(const MClassSysReg *TheReg, int TestFeatures)
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMBaseInfo.h:456:35: warning: 'lookupMClassSysRegBy8bitSYSmValue' defined but not used [-Wunused-function]
+  456 | static inline const MClassSysReg *lookupMClassSysRegBy8bitSYSmValue(unsigned SYSm)
+      |                                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMBaseInfo.h:451:35: warning: 'lookupMClassSysRegAPSRNonDeprecated' defined but not used [-Wunused-function]
+  451 | static inline const MClassSysReg *lookupMClassSysRegAPSRNonDeprecated(unsigned SYSm)
+      |                                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMBaseInfo.h:226:27: warning: 'ARMII_AddrModeToString' defined but not used [-Wunused-function]
+  226 | inline static const char *ARMII_AddrModeToString(ARMII_AddrMode addrmode)
+      |                           ^~~~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMBaseInfo.h:182:20: warning: 'isARMLowRegister' defined but not used [-Wunused-function]
+  182 | static inline bool isARMLowRegister(unsigned Reg)
+      |                    ^~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMBaseInfo.h:157:27: warning: 'ARM_ISB_InstSyncBOptToString' defined but not used [-Wunused-function]
+  157 | inline static const char *ARM_ISB_InstSyncBOptToString(unsigned val)
+      |                           ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMBaseInfo.h:114:27: warning: 'ARM_MB_MemBOptToString' defined but not used [-Wunused-function]
+  114 | inline static const char *ARM_MB_MemBOptToString(unsigned val, bool HasV8)
+      |                           ^~~~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMBaseInfo.h:105:27: warning: 'ARM_PROC_IModToString' defined but not used [-Wunused-function]
+  105 | inline static const char *ARM_PROC_IModToString(unsigned val)
+      |                           ^~~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMBaseInfo.h:95:27: warning: 'ARM_PROC_IFlagsToString' defined but not used [-Wunused-function]
+   95 | inline static const char *ARM_PROC_IFlagsToString(unsigned val)
+      |                           ^~~~~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMBaseInfo.h:73:27: warning: 'ARMCC_ARMCondCodeToString' defined but not used [-Wunused-function]
+   73 | inline static const char *ARMCC_ARMCondCodeToString(ARMCC_CondCodes CC)
+      |                           ^~~~~~~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMBaseInfo.h:52:31: warning: 'ARMCC_getOppositeCondition' defined but not used [-Wunused-function]
+   52 | inline static ARMCC_CondCodes ARMCC_getOppositeCondition(ARMCC_CondCodes CC)
+      |                               ^~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMDisassembler.c:20:
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:671:21: warning: 'getFPImmFloat' defined but not used [-Wunused-function]
+  671 | static inline float getFPImmFloat(unsigned Imm)
+      |                     ^~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:627:24: warning: 'ARM_AM_decodeNEONModImm' defined but not used [-Wunused-function]
+  627 | static inline uint64_t ARM_AM_decodeNEONModImm(unsigned ModImm, unsigned *EltBits)
+      |                        ^~~~~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:611:24: warning: 'createNEONModImm' defined but not used [-Wunused-function]
+  611 | static inline unsigned createNEONModImm(unsigned OpCmode, unsigned Val)
+      |                        ^~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:581:30: warning: 'getAM5FP16Op' defined but not used [-Wunused-function]
+  581 | static inline ARM_AM_AddrOpc getAM5FP16Op(unsigned AM5Opc)
+      |                              ^~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:576:29: warning: 'getAM5FP16Offset' defined but not used [-Wunused-function]
+  576 | static inline unsigned char getAM5FP16Offset(unsigned AM5Opc)
+      |                             ^~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:553:30: warning: 'ARM_AM_getAM5Op' defined but not used [-Wunused-function]
+  553 | static inline ARM_AM_AddrOpc ARM_AM_getAM5Op(unsigned AM5Opc)
+      |                              ^~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:549:29: warning: 'ARM_AM_getAM5Offset' defined but not used [-Wunused-function]
+  549 | static inline unsigned char ARM_AM_getAM5Offset(unsigned AM5Opc)
+      |                             ^~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:527:24: warning: 'getAM4ModeImm' defined but not used [-Wunused-function]
+  527 | static inline unsigned getAM4ModeImm(ARM_AM_AMSubMode SubMode)
+      |                        ^~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:522:32: warning: 'getAM4SubMode' defined but not used [-Wunused-function]
+  522 | static inline ARM_AM_AMSubMode getAM4SubMode(unsigned Mode)
+      |                                ^~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:502:24: warning: 'getAM3IdxMode' defined but not used [-Wunused-function]
+  502 | static inline unsigned getAM3IdxMode(unsigned AM3Opc)
+      |                        ^~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:497:30: warning: 'getAM3Op' defined but not used [-Wunused-function]
+  497 | static inline ARM_AM_AddrOpc getAM3Op(unsigned AM3Opc)
+      |                              ^~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:492:29: warning: 'getAM3Offset' defined but not used [-Wunused-function]
+  492 | static inline unsigned char getAM3Offset(unsigned AM3Opc)
+      |                             ^~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:485:24: warning: 'getAM3Opc' defined but not used [-Wunused-function]
+  485 | static inline unsigned getAM3Opc(ARM_AM_AddrOpc Opc, unsigned char Offset,
+      |                        ^~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:465:24: warning: 'getAM2IdxMode' defined but not used [-Wunused-function]
+  465 | static inline unsigned getAM2IdxMode(unsigned AM2Opc)
+      |                        ^~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:460:31: warning: 'getAM2ShiftOpc' defined but not used [-Wunused-function]
+  460 | static inline ARM_AM_ShiftOpc getAM2ShiftOpc(unsigned AM2Opc)
+      |                               ^~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:455:30: warning: 'getAM2Op' defined but not used [-Wunused-function]
+  455 | static inline ARM_AM_AddrOpc getAM2Op(unsigned AM2Opc)
+      |                              ^~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:450:24: warning: 'getAM2Offset' defined but not used [-Wunused-function]
+  450 | static inline unsigned getAM2Offset(unsigned AM2Opc)
+      |                        ^~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:413:24: warning: 'getT2SOImmTwoPartSecond' defined but not used [-Wunused-function]
+  413 | static inline unsigned getT2SOImmTwoPartSecond(unsigned Imm)
+      |                        ^~~~~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:367:20: warning: 'isT2SOImmTwoPartVal' defined but not used [-Wunused-function]
+  367 | static inline bool isT2SOImmTwoPartVal (unsigned Imm)
+      |                    ^~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:278:24: warning: 'getThumbImmNonShiftedVal' defined but not used [-Wunused-function]
+  278 | static inline unsigned getThumbImmNonShiftedVal(unsigned V)
+      |                        ^~~~~~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:269:20: warning: 'isThumbImm16ShiftedVal' defined but not used [-Wunused-function]
+  269 | static inline bool isThumbImm16ShiftedVal(unsigned V)
+      |                    ^~~~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:248:20: warning: 'isThumbImmShiftedVal' defined but not used [-Wunused-function]
+  248 | static inline bool isThumbImmShiftedVal(unsigned V)
+      |                    ^~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:224:24: warning: 'getSOImmTwoPartSecond' defined but not used [-Wunused-function]
+  224 | static inline unsigned getSOImmTwoPartSecond(unsigned V)
+      |                        ^~~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:217:24: warning: 'getSOImmTwoPartFirst' defined but not used [-Wunused-function]
+  217 | static inline unsigned getSOImmTwoPartFirst(unsigned V)
+      |                        ^~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:203:20: warning: 'isSOImmTwoPartVal' defined but not used [-Wunused-function]
+  203 | static inline bool isSOImmTwoPartVal(unsigned V)
+      |                    ^~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:184:19: warning: 'getSOImmVal' defined but not used [-Wunused-function]
+  184 | static inline int getSOImmVal(unsigned Arg)
+      |                   ^~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:139:24: warning: 'getSOImmValRot' defined but not used [-Wunused-function]
+  139 | static inline unsigned getSOImmValRot(unsigned Imm)
+      |                        ^~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:132:24: warning: 'getSOImmValImm' defined but not used [-Wunused-function]
+  132 | static inline unsigned getSOImmValImm(unsigned Imm)
+      |                        ^~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:125:31: warning: 'ARM_AM_getSORegShOp' defined but not used [-Wunused-function]
+  125 | static inline ARM_AM_ShiftOpc ARM_AM_getSORegShOp(unsigned Op)
+      |                               ^~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:120:24: warning: 'getSORegOffset' defined but not used [-Wunused-function]
+  120 | static inline unsigned getSORegOffset(unsigned Op)
+      |                        ^~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:115:24: warning: 'getSORegOpc' defined but not used [-Wunused-function]
+  115 | static inline unsigned getSORegOpc(ARM_AM_ShiftOpc ShOp, unsigned Imm)
+      |                        ^~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:74:27: warning: 'ARM_AM_getAMSubModeStr' defined but not used [-Wunused-function]
+   74 | static inline const char *ARM_AM_getAMSubModeStr(ARM_AM_AMSubMode Mode)
+      |                           ^~~~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:55:24: warning: 'ARM_AM_getShiftOpcEncoding' defined but not used [-Wunused-function]
+   55 | static inline unsigned ARM_AM_getShiftOpcEncoding(ARM_AM_ShiftOpc Op)
+      |                        ^~~~~~~~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:43:27: warning: 'ARM_AM_getShiftOpcStr' defined but not used [-Wunused-function]
+   43 | static inline const char *ARM_AM_getShiftOpcStr(ARM_AM_ShiftOpc Op)
+      |                           ^~~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:38:27: warning: 'ARM_AM_getAddrOpcStr' defined but not used [-Wunused-function]
+   38 | static inline const char *ARM_AM_getAddrOpcStr(ARM_AM_AddrOpc Op)
+      |                           ^~~~~~~~~~~~~~~~~~~~
+In file included from E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/arch/ARM/ARMAddressingModes.h:21:
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:424:28: warning: 'countLeadingZeros' defined but not used [-Wunused-function]
+  424 | static inline unsigned int countLeadingZeros(int x)
+      |                            ^~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:413:23: warning: 'SignExtend64' defined but not used [-Wunused-function]
+  413 | static inline int64_t SignExtend64(uint64_t X, unsigned B) {
+      |                       ^~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:401:23: warning: 'abs64' defined but not used [-Wunused-function]
+  401 | static inline int64_t abs64(int64_t x) {
+      |                       ^~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:394:24: warning: 'OffsetToAlignment' defined but not used [-Wunused-function]
+  394 | static inline uint64_t OffsetToAlignment(uint64_t Value, uint64_t Align) {
+      |                        ^~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:368:24: warning: 'NextPowerOf2' defined but not used [-Wunused-function]
+  368 | static inline uint64_t NextPowerOf2(uint64_t A) {
+      |                        ^~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:357:24: warning: 'MinAlign' defined but not used [-Wunused-function]
+  357 | static inline uint64_t MinAlign(uint64_t A, uint64_t B) {
+      |                        ^~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:346:24: warning: 'FloatToBits' defined but not used [-Wunused-function]
+  346 | static inline uint32_t FloatToBits(float Float) {
+      |                        ^~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:333:24: warning: 'DoubleToBits' defined but not used [-Wunused-function]
+  333 | static inline uint64_t DoubleToBits(double Double) {
+      |                        ^~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:320:21: warning: 'BitsToFloat' defined but not used [-Wunused-function]
+  320 | static inline float BitsToFloat(uint32_t Bits) {
+      |                     ^~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:309:22: warning: 'BitsToDouble' defined but not used [-Wunused-function]
+  309 | static inline double BitsToDouble(uint64_t Bits) {
+      |                      ^~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:298:24: warning: 'GreatestCommonDivisor64' defined but not used [-Wunused-function]
+  298 | static inline uint64_t GreatestCommonDivisor64(uint64_t A, uint64_t B) {
+      |                        ^~~~~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:292:24: warning: 'Log2_64_Ceil' defined but not used [-Wunused-function]
+  292 | static inline unsigned Log2_64_Ceil(uint64_t Value) {
+      |                        ^~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:286:24: warning: 'Log2_32_Ceil' defined but not used [-Wunused-function]
+  286 | static inline unsigned Log2_32_Ceil(uint32_t Value) {
+      |                        ^~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:279:24: warning: 'Log2_64' defined but not used [-Wunused-function]
+  279 | static inline unsigned Log2_64(uint64_t Value) {
+      |                        ^~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:273:24: warning: 'Log2_32' defined but not used [-Wunused-function]
+  273 | static inline unsigned Log2_32(uint32_t Value) {
+      |                        ^~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:259:24: warning: 'CountPopulation_64' defined but not used [-Wunused-function]
+  259 | static inline unsigned CountPopulation_64(uint64_t Value) {
+      |                        ^~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:247:24: warning: 'CountPopulation_32' defined but not used [-Wunused-function]
+  247 | static inline unsigned CountPopulation_32(uint32_t Value) {
+      |                        ^~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:240:24: warning: 'CountTrailingOnes_64' defined but not used [-Wunused-function]
+  240 | static inline unsigned CountTrailingOnes_64(uint64_t Value) {
+      |                        ^~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:210:24: warning: 'CountTrailingOnes_32' defined but not used [-Wunused-function]
+  210 | static inline unsigned CountTrailingOnes_32(uint32_t Value) {
+      |                        ^~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:182:24: warning: 'CountLeadingOnes_64' defined but not used [-Wunused-function]
+  182 | static inline unsigned CountLeadingOnes_64(uint64_t Value) {
+      |                        ^~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:124:24: warning: 'CountLeadingOnes_32' defined but not used [-Wunused-function]
+  124 | static inline unsigned CountLeadingOnes_32(uint32_t Value) {
+      |                        ^~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:87:20: warning: 'isPowerOf2_32' defined but not used [-Wunused-function]
+   87 | static inline bool isPowerOf2_32(uint32_t Value) {
+      |                    ^~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:81:20: warning: 'isShiftedMask_64' defined but not used [-Wunused-function]
+   81 | static inline bool isShiftedMask_64(uint64_t Value) {
+      |                    ^~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:75:20: warning: 'isShiftedMask_32' defined but not used [-Wunused-function]
+   75 | static inline bool isShiftedMask_32(uint32_t Value) {
+      |                    ^~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:48:20: warning: 'isUIntN' defined but not used [-Wunused-function]
+   48 | static inline bool isUIntN(unsigned N, uint64_t x) {
+      |                    ^~~~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:42:24: warning: 'Lo_32' defined but not used [-Wunused-function]
+   42 | static inline uint32_t Lo_32(uint64_t Value) {
+      |                        ^~~~~
+E:/zynqlinkPRO/etm-service/vendor/capstone-5.0.7/MathExtras.h:37:24: warning: 'Hi_32' defined but not used [-Wunused-function]
+   37 | static inline uint32_t Hi_32(uint64_t Value) {
+      |                        ^~~~~
+[124/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_xu_index.c.obj
+[125/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_util.c.obj
+[126/132] Linking CXX static library vendor\OpenCSD-1.8.3\libopencsd_c_api.a
+[127/132] Linking C static library vendor\capstone-5.0.7\libcapstone.a
+[128/132] Building C object vendor/libdwarf-2.3.3/src/lib/libdwarf/CMakeFiles/dwarf-shared.dir/dwarf_print_lines.c.obj
+[129/132] Linking C shared library vendor\libdwarf-2.3.3\src\lib\libdwarf\libdwarf.dll
+[130/132] Building CXX object CMakeFiles/etm_storebuild.dir/native/decoder.cpp.obj
+[131/132] Building CXX object CMakeFiles/etm_storebuild.dir/native/storebuild.cpp.obj
+In file included from E:/zynqlinkPRO/etm-service/native/storebuild.cpp:660:
+E:/zynqlinkPRO/etm-service/native/native_image.hpp: In function 'std::string {anonymous}::native_utf8_replace(const std::string&)':
+E:/zynqlinkPRO/etm-service/native/native_image.hpp:26:46: warning: suggest parentheses around '&&' within '||' [-Wparentheses]
+   26 |                 valid == 1 && (first == 0xe0 && b < 0xa0 || first == 0xed && b >= 0xa0 ||
+      |                                ~~~~~~~~~~~~~~^~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/native/native_image.hpp:27:46: warning: suggest parentheses around '&&' within '||' [-Wparentheses]
+   27 |                                first == 0xf0 && b < 0x90 || first == 0xf4 && b >= 0x90))
+      |                                ~~~~~~~~~~~~~~^~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/native/native_image.hpp:27:75: warning: suggest parentheses around '&&' within '||' [-Wparentheses]
+   27 |                                first == 0xf0 && b < 0x90 || first == 0xf4 && b >= 0x90))
+      |                                                             ~~~~~~~~~~~~~~^~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/native/native_image.hpp:26:28: warning: suggest parentheses around '&&' within '||' [-Wparentheses]
+   26 |                 valid == 1 && (first == 0xe0 && b < 0xa0 || first == 0xed && b >= 0xa0 ||
+      |                 ~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   27 |                                first == 0xf0 && b < 0x90 || first == 0xf4 && b >= 0x90))
+      |                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/native/native_image.hpp: In constructor '{anonymous}::NativeImage::NativeImage(const std::string&)':
+E:/zynqlinkPRO/etm-service/native/native_image.hpp:125:86: warning: suggest parentheses around '&&' within '||' [-Wparentheses]
+  125 |         need(shnum <= (1u << 20) && (!shnum || shsize >= 40 && shoff <= bytes.size() &&
+      |                                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~
+  126 |                                                    shnum <= (bytes.size() - shoff) / shsize),
+      |                                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/native/native_image.hpp:128:86: warning: suggest parentheses around '&&' within '||' [-Wparentheses]
+  128 |         need(phnum <= (1u << 20) && (!phnum || phsize >= 32 && phoff <= bytes.size() &&
+      |                                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~
+  129 |                                                    phnum <= (bytes.size() - phoff) / phsize),
+      |                                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/native/native_image.hpp:164:58: warning: suggest parentheses around '&&' within '||' [-Wparentheses]
+  164 |             need(s.type == 8 || s.offset <= bytes.size() && s.size <= bytes.size() - s.offset,
+      |                                 ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from E:/zynqlinkPRO/etm-service/native/storebuild.cpp:4024:
+E:/zynqlinkPRO/etm-service/native/native_query.hpp: In member function 'void {anonymous}::NativeStore::load_index(bool)':
+E:/zynqlinkPRO/etm-service/native/native_query.hpp:723:29: warning: suggest parentheses around '&&' within '||' [-Wparentheses]
+  723 |                 a.ndim == 2 && (a.cols && a.rows * width > uint64_t(-1) / a.cols) ||
+      |                 ~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/native/native_query.hpp: In member function 'void {anonymous}::NativeStore::load_npz()':
+E:/zynqlinkPRO/etm-service/native/native_query.hpp:884:39: warning: suggest parentheses around '&&' within '||' [-Wparentheses]
+  884 |                 a.ndim == 2 && a.cols && a.rows * width > (2ull << 30) / a.cols)
+      |                 ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/native/native_query.hpp: In member function 'void {anonymous}::NativeStore::validate_index()':
+E:/zynqlinkPRO/etm-service/native/native_query.hpp:915:19: warning: suggest parentheses around '&&' within '||' [-Wparentheses]
+  915 |                 i && ev.at(i) <= ev.at(i - 1))
+      |                 ~~^~~~~~~~~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/native/native_query.hpp: In member function '{anonymous}::Json {anonymous}::NativeStore::navigate(const {anonymous}::Json&)':
+E:/zynqlinkPRO/etm-service/native/native_query.hpp:2343:45: warning: suggest parentheses around '&&' within '||' [-Wparentheses]
+ 2343 |             if (!entry.at("line").is_null() &&
+      |                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~
+ 2344 |                     (entry.value("file", Json("")).is_null()
+      |                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 2345 |                          ? std::string()
+      |                          ~~~~~~~~~~~~~~~     
+ 2346 |                          : entry.at("file").get<std::string>()) != file ||
+      |                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/native/storebuild.cpp: In function 'int main_utf8(int, char**)':
+E:/zynqlinkPRO/etm-service/native/storebuild.cpp:4344:81: warning: suggest parentheses around '&&' within '||' [-Wparentheses]
+ 4344 |             if (native_path.empty() && (etm_path.empty() || config_path.empty() && target_elf.empty())) fail(kExitUsage, "build requires --native or --etm/--config or --elf");
+      |                                                             ~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~
+E:/zynqlinkPRO/etm-service/native/storebuild.cpp: At global scope:
+E:/zynqlinkPRO/etm-service/native/storebuild.cpp:477:10: warning: 'uint32_t {anonymous}::parse_hex_byte(char)' defined but not used [-Wunused-function]
+  477 | uint32_t parse_hex_byte(char ch) {
+      |          ^~~~~~~~~~~~~~
+cc1plus.exe: note: unrecognized command-line option '-Wno-invalid-token-paste' may have been intended to silence earlier diagnostics
+[132/132] Linking CXX executable etm_storebuild.exe

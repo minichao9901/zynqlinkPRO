@@ -11,6 +11,8 @@ PLL和AHB/APB分频由target固件负责。CLI用于AI；一条命令打包：
 
 火焰图可导出自包含交互HTML，双击默认打开Timeline，并有周期权重标签页；支持鼠标框选放大、Shift拖动平移及查找；Web、Trace CLI与bridge EXE离线接口共用实现，见 [HTML导出说明](docs/flame-html-export.md)。
 
+2026-11-03：ETM C++ 候选已合入 main；默认静态字典、解码/执行流、完整索引/建库和 TraceStore 读取由 C++ 执行，Python 保留任务/API、身份核验与发布。旧 Python 实现及合并前 main 的固定 tag 保留为 [Golden Reference](docs/etm-golden-reference.md)。固定程序身份和 F103/H743 离线回归见 [主线集成报告](docs/validation/etm-main-integration-20261103/README.md)。Web UI 候选仍在独立分支，本次未合入。
+
 2026-11-01：ETM研究成果已合并主线；最佳已验证基线tag为`etm-best-24mhz-ddr-usb-20261101`（F103ZE TRACECLK24MHz、1/2秒DDR＋USB采集及Web压力通过），配对在`prebuilt/etm-ddr-usb-raw4-20261101/`。ELD1/36MHz研究仍未通过高频验收；详见[主线合并与最佳基线](docs/ETM主线合并与最佳基线-20261101.md)。
 
 | 正式版本 | 目录 | 身份 |

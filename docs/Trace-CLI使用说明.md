@@ -6,6 +6,8 @@
 
 后续原生核心继续接管ELF/DWARF/Thumb静态字典和TraceStore查询读取，默认 `ETM_NATIVE_STATIC=1`、`ETM_NATIVE_QUERY=1`（未设置时同样启用）。Python保留任务、记录身份和发布；查询经私有常驻C++进程返回DTO，不由Python解析执行块或查询数组。显式设置这两个变量为0用于旧实现研发对照，不能把对照耗时算作默认原生路径。配套目录必须保留 `libdwarf.dll`；静态读取需要 `native-static-v1`，查询协议为 `etm-query/1`。main和固定EXE是否已集成，仍以对应报告为准。
 
+2026-11-03 已合入 main；固定程序与本轮记录回归以[主线集成报告](validation/etm-main-integration-20261103/README.md)为准。旧 Python 参考代码继续保留，合并前流程固定为 tag `archive/main-before-etm-cpp-20261103`，范围和复测方法见 [Golden Reference](etm-golden-reference.md)。
+
 ```powershell
 python toolbox.py trace --help
 python toolbox.py trace doctor --offline
