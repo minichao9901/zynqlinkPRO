@@ -49,6 +49,26 @@ class BridgeTests(unittest.TestCase):
                 self.assertEqual(response.json['decodeEngineProfile']['name'],'native')
             self.assertTrue((data/'records').is_dir());usb.assert_not_called()
 
+    def test_tutorial_example_is_readonly_and_available_without_hardware(self):
+        import base64,hashlib
+        from werkzeug.wrappers import Response
+        with tempfile.TemporaryDirectory(dir=self.scratch) as folder,patch.dict(os.environ),patch('usb.core.find',side_effect=AssertionError('USB forbidden')) as usb:
+            data=Path(folder);client=LocalClient(self.app(data,offline=True),Response)
+            before=list((data/'records').iterdir())
+            with client.get('/etm/api/tutorial-example') as response:
+                self.assertEqual(response.status_code,200)
+                example=base64.b64decode(response.json['base64'])
+                self.assertEqual(hashlib.sha256(example).hexdigest(),response.json['sha256'])
+                self.assertEqual(example,(ROOT/'tools/tests/fixtures/h743-etmv4/h743.etmrecord').read_bytes())
+                self.assertIn('不是当前板卡',response.json['source'])
+            with client.get('/etm/?embedded=1') as response:
+                page=response.get_data(as_text=True)
+                self.assertEqual(page.count('id="tutorials"'),1)
+                self.assertIn('embedded-actions',page)
+                self.assertGreater(page.index('id="tutorials"'),page.index('class="embedded-actions"'))
+            self.assertEqual(list((data/'records').iterdir()),before)
+            usb.assert_not_called()
+
     def test_web_capture_api_replays_both_protocols_through_real_native_decode(self):
         """Only external LA/USB is replaced. Upload, capture job, C++ and browse run."""
         from werkzeug.test import Client

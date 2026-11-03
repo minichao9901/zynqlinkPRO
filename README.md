@@ -5,13 +5,14 @@
 Zynq-7020 CMSIS-DAP：PL SWD/JTAG/RTT/HSS 与并行 ETM，PS USB/OCM 固件，配套 Web/CLI。
 
 本机入口：双击`dist/zynq-etm-bridge/zynq-etm-bridge.exe`，在Web载入ELF、选函数、核对时钟、点击联动采集。请保留完整程序目录及`_internal`；分发ZIP时完整解压再启动。
+ETM页面的「教学 Demo」提供离线示例分析、首次联动采集和记录导入三个分步引导；离线示例不需要硬件，真实硬件按钮始终由用户点击。
 PLL和AHB/APB分频由target固件负责。CLI用于AI；一条命令打包：
 `python toolbox.py bridge-build`（固定更新`dist/zynq-etm-bridge/`，保留数据；仅需分发时加`--zip`）。
 保留F103ZE ETMv3和H743 ETMv4能力；H743的SWD/JTAG分档性能及Zynq实板ETMv4连续窗口见 [H743综合报告](docs/validation/h743-comprehensive-20261101/README.md)，[Golden例程](firmware/target/stm32h743_cdc_trace/README.md)默认CPU60/TRACECLK20MHz。
 
 火焰图可导出自包含交互HTML，双击默认打开Timeline，并有周期权重标签页；支持鼠标框选放大、Shift拖动平移及查找；Web、Trace CLI与bridge EXE离线接口共用实现，见 [HTML导出说明](docs/flame-html-export.md)。
 
-2026-11-03：ETM C++ 候选已合入 main；默认静态字典、解码/执行流、完整索引/建库和 TraceStore 读取由 C++ 执行，Python 保留任务/API、身份核验与发布。旧 Python 实现及合并前 main 的固定 tag 保留为 [Golden Reference](docs/etm-golden-reference.md)。固定程序身份和 F103/H743 离线回归见 [主线集成报告](docs/validation/etm-main-integration-20261103/README.md)。Web UI 候选仍在独立分支，本次未合入。
+2026-11-03：ETM C++ 候选已合入 main；默认静态字典、解码/执行流、完整索引/建库和 TraceStore 读取由 C++ 执行，Python 保留任务/API、身份核验与发布。旧 Python 实现及合并前 main 的固定 tag 保留为 [Golden Reference](docs/etm-golden-reference.md)。固定程序身份和 F103/H743 离线回归见 [主线集成报告](docs/validation/etm-main-integration-20261103/README.md)。Web UI 紧凑布局、WebUSB收敛和ETM教学Demo现已合入，集成验证见 [Web UI主线集成报告](docs/validation/web-ui-main-integration-20261103/README.md)。
 
 2026-11-01：ETM研究成果已合并主线；最佳已验证基线tag为`etm-best-24mhz-ddr-usb-20261101`（F103ZE TRACECLK24MHz、1/2秒DDR＋USB采集及Web压力通过），配对在`prebuilt/etm-ddr-usb-raw4-20261101/`。ELD1/36MHz研究仍未通过高频验收；详见[主线合并与最佳基线](docs/ETM主线合并与最佳基线-20261101.md)。
 

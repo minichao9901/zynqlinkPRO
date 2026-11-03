@@ -49,7 +49,28 @@ python -X utf8 toolbox.py --runtime build/workbench-new page etm describe --targ
 
 serve前须按实际任务核对板卡空闲及加载身份。运行时URL/令牌只限本机使用，不提交Git；旧runtime或已关闭服务的URL不能作为当前worker。`click/set`只确认事件投递，还要检查完成状态、质量和恢复结果。
 
-RTT桥若需此前OpenOCD部署，路径为prebuilt/golden/host/openocd/openocd.exe，scripts为同目录scripts。没有服务在本轮结束时自动重启。
+工作台调试探针后端统一为WebUSB；已移除OpenOCD/J-Link本地桥、`toolbox.py bridge`与工程生成页。`bridge-build`仍用于构建本机Zynq工作台EXE及其ETM/原生USB服务，与已退役的调试后端桥不同。历史板测工具和报告中的OpenOCD引用仅作取证。
+
+### Web频率限制与原生RISC-V研发参数
+
+Web烧录、RTT Viewer、调试器按所选目标限制频率：HPM最高25MHz，其他ARM/RISC-V最高60MHz，提供25MHz档；切到HPM时旧高频选择降至25MHz。HPM RTT自动档显式使用10MHz，避免继承前一次研发高频。Web页CLI操作也沿用这些限制。波形/RTT转发连接并识别为ZynqLinkPro后，RISC-V可显式选择10/20/25MHz TCK，启动时先确认架构再设置并核对时钟ACK；自动档仍10MHz。旧软件探针的RISC-V `clockHz`仍按idle约定保持0，不向未知探针发送Hz。实测方法见[25MHz流对照](validation/web-cli-streams-25mhz-20261103/README.md)。
+
+独立原生研发CLI仍提供高频、idle及采样窗口配置，并未受Web25MHz上限影响：
+
+| 入口（`project run`后的工具ID） | 参数 | 单位/含义 |
+|---|---|---|
+| `tools/validate_hpm6800_performance.py` | `--speeds`、`--idle`、`--modes` | TCK请求Hz列表、idle拍数0～64、采样模式列表0/1/16/17 |
+| `tools/validate_hpm6800_streams.py` | `--stage rtt/hss`、`--speeds`、`--idle`、`--mode` | 同上，mode为单值；HSS另有`--periods`（24MHz ticks）、`--variables` |
+| `tools/characterize_hpm6800_idle.py` | `--speeds`、`--idles`、`--modes` | TCK/idle/采样模式的矩阵对照 |
+
+历史限定HPM6800EVK的66.667MHz通过配置为idle22、mode17；mode17是Q1/previous-bit返回窗口，不能只增加idle而忽略采样窗口。大于15拍需要扩展idle的PL/PS配对，66.667MHz还需要相应固件cap与FCLK策略；工具会核对有效idle和实际时钟。详见[历史高频报告](validation/hpm6800-speed-completion-20261102/README.md)。这不是所有HPM型号的频率保证，本次仅核查参数并修改Web，没有重新运行高频测试。
+
+下面只发现/打印计划，不操作板卡；真实执行前仍须核对空闲、加载配对并独立核对OCM：
+
+```powershell
+python -X utf8 toolbox.py project describe tools/validate_hpm6800_performance.py
+python -X utf8 toolbox.py project run tools/validate_hpm6800_performance.py --dry-run -- --bit prebuilt/hpm6800-jtag66-133-20261102/probe.bit --elf prebuilt/hpm6800-jtag66-133-20261102/application.elf --out build/hpm-cli-high-new --speeds 66666667 --idle 22 --modes 17 --windows axi --loops 128 --repeats 3
+```
 
 ## DDR研究路径（仅供AI阶段验收）
 

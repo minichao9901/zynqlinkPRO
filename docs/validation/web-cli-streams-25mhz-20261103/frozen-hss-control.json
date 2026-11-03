@@ -1,0 +1,293 @@
+{
+  "stage": "web-hss",
+  "rows": [
+    {
+      "variables": 1,
+      "periodTicks": 24000,
+      "repeat": 0,
+      "clock": {
+        "FCLK_Hz": 49999999,
+        "cfg": "0x20011",
+        "waveform": {
+          "SWCLK_Hz": 24999999.5,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 20.00000040000001
+        },
+        "clockSource": 0,
+        "clockControl": 37748992,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": true,
+        "actual_link_Hz": 24999999.5,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+        "effectiveIdle": 8
+      },
+      "measuredSeconds": 10.571026666666667,
+      "effectiveHz": 949.7658379444696,
+      "skipped": 376,
+      "first": {
+        "bytes": 177664,
+        "errors": 0,
+        "flags": 320,
+        "hz": 24000000,
+        "periodTicks": 24000,
+        "produced": 3817,
+        "skipped": 794,
+        "tick": 168493716,
+        "tx": 346,
+        "usb": 0,
+        "yields": 0
+      },
+      "last": {
+        "bytes": 645120,
+        "errors": 0,
+        "flags": 64,
+        "hz": 24000000,
+        "periodTicks": 24000,
+        "produced": 13857,
+        "skipped": 1170,
+        "tick": 422198356,
+        "tx": 1260,
+        "usb": 0,
+        "yields": 0
+      },
+      "final": {
+        "awaitingDefinition": false,
+        "benchUs": null,
+        "blob": null,
+        "capacity": 16564,
+        "captureFlags": 64,
+        "connectErr": null,
+        "dapYields": 0,
+        "definitionReceived": true,
+        "elf": null,
+        "lod": false,
+        "lost": 1170,
+        "lostGap": 0,
+        "lostProbe": 1170,
+        "lostUsb": 0,
+        "metricsError": null,
+        "mockVars": [
+          "mock0.f32",
+          "mock1.f32",
+          "mock2.i32",
+          "mock3.u16",
+          "mock4.i16",
+          "mock5.u8",
+          "mock6.i8",
+          "mock7.f64"
+        ],
+        "mode": "real",
+        "packets": 1260,
+        "plan": {
+          "estHz": 139232,
+          "estUs": 7.18,
+          "frameBytes": 4,
+          "spans": 1
+        },
+        "probeMetrics": {
+          "bytes": 645120,
+          "errors": 0,
+          "flags": 64,
+          "hz": 24000000,
+          "periodTicks": 24000,
+          "produced": 13857,
+          "skipped": 1170,
+          "tick": 422198356,
+          "tx": 1260,
+          "usb": 0,
+          "yields": 0
+        },
+        "rateHz": 922,
+        "raw": 189,
+        "readErrors": 0,
+        "receivedSamples": 13857,
+        "resyncs": 0,
+        "running": false,
+        "samples": 13857,
+        "stalePackets": 0,
+        "state": "已停止（时长到 15.005 s）：13857 个样本 / 15.026 s，跳拍 1170 / USB 丢样本 0 / 读错 0 / 包缺口 0",
+        "supportsMetrics": true,
+        "tailCountDelta": 0,
+        "transport": {
+          "bytes": 645120,
+          "chunks": 189,
+          "errors": 0,
+          "lastError": null,
+          "running": false
+        },
+        "trigger": {
+          "hit": -1,
+          "hits": 0,
+          "marker": false,
+          "mode": 0
+        },
+        "varCount": 1,
+        "vars": [
+          "fixture.w0:u32@0xf0404100"
+        ],
+        "view": {
+          "end": 13857,
+          "start": 0
+        }
+      },
+      "rawBytes": 645120,
+      "rawSamples": 13857,
+      "protocolVersions": [
+        1
+      ],
+      "allValuesExact": true,
+      "tailDelta": 0
+    },
+    {
+      "variables": 8,
+      "periodTicks": 24000,
+      "repeat": 0,
+      "clock": {
+        "FCLK_Hz": 49999999,
+        "cfg": "0x20011",
+        "waveform": {
+          "SWCLK_Hz": 24999999.5,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 20.00000040000001
+        },
+        "clockSource": 0,
+        "clockControl": 37748992,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": true,
+        "actual_link_Hz": 24999999.5,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+        "effectiveIdle": 8
+      },
+      "measuredSeconds": 10.090074875,
+      "effectiveHz": 999.9925793414887,
+      "skipped": 0,
+      "first": {
+        "bytes": 140288,
+        "errors": 0,
+        "flags": 320,
+        "hz": 24000000,
+        "periodTicks": 24000,
+        "produced": 3006,
+        "skipped": 0,
+        "tick": 539259628,
+        "tx": 274,
+        "usb": 0,
+        "yields": 0
+      },
+      "last": {
+        "bytes": 609792,
+        "errors": 0,
+        "flags": 320,
+        "hz": 24000000,
+        "periodTicks": 24000,
+        "produced": 13096,
+        "skipped": 0,
+        "tick": 781421425,
+        "tx": 1191,
+        "usb": 0,
+        "yields": 0
+      },
+      "final": {
+        "awaitingDefinition": false,
+        "benchUs": null,
+        "blob": null,
+        "capacity": 16564,
+        "captureFlags": 64,
+        "connectErr": null,
+        "dapYields": 0,
+        "definitionReceived": true,
+        "elf": null,
+        "lod": false,
+        "lost": 0,
+        "lostGap": 0,
+        "lostProbe": 0,
+        "lostUsb": 0,
+        "metricsError": null,
+        "mockVars": [
+          "mock0.f32",
+          "mock1.f32",
+          "mock2.i32",
+          "mock3.u16",
+          "mock4.i16",
+          "mock5.u8",
+          "mock6.i8",
+          "mock7.f64"
+        ],
+        "mode": "real",
+        "packets": 1205,
+        "plan": {
+          "estHz": 46865,
+          "estUs": 21.34,
+          "frameBytes": 32,
+          "spans": 1
+        },
+        "probeMetrics": {
+          "bytes": 616960,
+          "errors": 0,
+          "flags": 64,
+          "hz": 24000000,
+          "periodTicks": 24000,
+          "produced": 13223,
+          "skipped": 0,
+          "tick": 785956997,
+          "tx": 1205,
+          "usb": 0,
+          "yields": 0
+        },
+        "rateHz": 1000,
+        "raw": 226,
+        "readErrors": 0,
+        "receivedSamples": 13223,
+        "resyncs": 0,
+        "running": false,
+        "samples": 13223,
+        "stalePackets": 0,
+        "state": "已停止（25MHz comparison）：13223 个样本 / 13.222 s，跳拍 0 / USB 丢样本 0 / 读错 0 / 包缺口 0",
+        "supportsMetrics": true,
+        "tailCountDelta": 0,
+        "transport": {
+          "bytes": 616960,
+          "chunks": 226,
+          "errors": 0,
+          "lastError": null,
+          "running": false
+        },
+        "trigger": {
+          "hit": -1,
+          "hits": 0,
+          "marker": false,
+          "mode": 0
+        },
+        "varCount": 8,
+        "vars": [
+          "fixture.w0:u32@0xf0404100",
+          "fixture.w1:u32@0xf0404104",
+          "fixture.w2:u32@0xf0404108",
+          "fixture.w3:u32@0xf040410c",
+          "fixture.w4:u32@0xf0404110",
+          "fixture.w5:u32@0xf0404114",
+          "fixture.w6:u32@0xf0404118",
+          "fixture.w7:u32@0xf040411c"
+        ],
+        "view": {
+          "end": 13223,
+          "start": 0
+        }
+      },
+      "rawBytes": 616960,
+      "rawSamples": 13223,
+      "protocolVersions": [
+        1
+      ],
+      "allValuesExact": true,
+      "tailDelta": 0
+    }
+  ],
+  "passed": true
+}

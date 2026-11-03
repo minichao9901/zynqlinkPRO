@@ -14,7 +14,7 @@ from tools.toolbox_catalog import full_catalog
 class ToolboxTests(unittest.TestCase):
     def test_catalog_only_contains_shipped_pages_and_controls(self):
         catalog = full_catalog(ROOT, toolbox.catalog())
-        self.assertEqual(len(catalog['pages']), 9)
+        self.assertEqual(len(catalog['pages']), 8)
         for page in catalog['pages']:
             self.assertTrue((ROOT / page['source']).is_file())
             self.assertGreater(len(page['controls']), 0)
@@ -22,7 +22,9 @@ class ToolboxTests(unittest.TestCase):
         self.assertIn('#start', selectors['etm'])
         self.assertNotIn('#start', selectors['serial'])
         self.assertIn('#f-flash', selectors['flash'])
-        self.assertNotIn('#f-flash', selectors['gen'])
+        self.assertNotIn('gen', selectors)
+        self.assertNotIn('#f-backend', selectors['flash'])
+        self.assertNotIn('#r-backend', selectors['rtt'])
 
     def test_file_arguments_preserve_binary_content(self):
         import base64

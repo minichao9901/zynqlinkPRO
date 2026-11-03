@@ -1,7 +1,7 @@
 """Exercise the shipped CLI against a real, already-open Web worker.
 
 No target is opened/programmed and no hardware success is inferred. This
-checks all nine page inventories, actual file inputs and actual Blob exports.
+checks all eight page inventories and actual file inputs.
 Hardware acceptance must be recorded separately after browser authorization.
 """
 import argparse
@@ -56,24 +56,10 @@ def main():
     cli('page', 'dbg', 'invoke', '__proto__', ok=False)
     cli('page', 'dbg', 'read', 'button', ok=False)
     cli('page', 'dbg', 'interrupt', '#d-connect', ok=False)
-    cli('page', 'etm', 'upload', '#elf-file', str(ROOT / 'etm-service/firmware/stm32f103_cdc_trace/fw-ze.elf'))
-    cli('page', 'etm', 'wait', '#elf-label', '--contains', 'fw-ze.elf')
-    desc = cli('page', 'gen', 'describe')
-    control = next(c for c in desc['controls'] if c['tag'] == 'input' and c['type'] == 'text' and not c['disabled'])
-    cli('page', 'gen', 'set', control['selector'], json.dumps(control['value'], ensure_ascii=False))
-    cli('page', 'gen', 'event', control['selector'], 'input')
-    cli('page', 'gen', 'invoke', 'downloadCurrent')
-    files = cli('page', 'gen', 'downloads')
-    if not files:
-        raise RuntimeError('Web export produced no Blob')
-    file = files[-1]
-    destination = args.out / 'generated-download.bin'
-    cli('page', 'gen', 'download', file['id'], str(destination.resolve()))
-    if destination.stat().st_size != file['bytes']:
-        raise RuntimeError('Downloaded length differs from the Web Blob')
-    cli('page', 'gen', 'discard', file['id'])
+    cli('page', 'etm', 'upload', '#elf-file', str(ROOT / 'prebuilt/golden/f103ze-cdc48.elf'))
+    cli('page', 'etm', 'wait', '#elf-label', '--contains', 'f103ze-cdc48.elf')
     batch = args.out / 'requests.json'
-    batch.write_text(json.dumps([{'action': 'workbench', 'page': 'gen', 'op': 'state'},
+    batch.write_text(json.dumps([{'action': 'workbench', 'page': 'serial', 'op': 'state'},
                                   {'action': 'workbench', 'page': 'etm', 'op': 'read', 'selector': '#job-state'}]))
     cli('batch', str(batch))
     single = args.out / 'request.json'
@@ -82,9 +68,7 @@ def main():
     jid = results[-1]['result']['job']
     cli('job', jid)
     cli('ack', jid)
-    summary = {'ok': True, 'hardwareValidated': False, 'pages': len(PAGES), 'commands': len(results),
-               'downloadBytes': destination.stat().st_size,
-               'downloadSha256': hashlib.sha256(destination.read_bytes()).hexdigest()}
+    summary = {'ok': True, 'hardwareValidated': False, 'pages': len(PAGES), 'commands': len(results)}
     (args.out / 'summary.json').write_text(json.dumps(summary, indent=2))
     print(json.dumps(summary))
 

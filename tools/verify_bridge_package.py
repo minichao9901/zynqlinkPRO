@@ -1,5 +1,6 @@
 """AI offline acceptance of the real portable EXE; all hardware routes disabled."""
 import argparse
+import base64
 import hashlib
 import io
 import json
@@ -73,6 +74,11 @@ def main(argv=None):
             except HTTPError as error:assert error.code==403,(path,error.code)
             else:raise AssertionError('Hardware route was enabled: '+path)
         fixtures=ROOT/'tools/tests/fixtures'
+        tutorial=api('tutorial-example')
+        tutorial_bytes=base64.b64decode(tutorial['base64'])
+        assert tutorial_bytes==(package/'examples/h743-superlink-reference.etmrecord').read_bytes()
+        assert hashlib.sha256(tutorial_bytes).hexdigest()==tutorial['sha256']
+        report['tutorialExample']={'bytes':len(tutorial_bytes),'sha256':tutorial['sha256'],'hardwareAccess':False}
         f103=io.BytesIO()
         with zipfile.ZipFile(f103,'w',zipfile.ZIP_DEFLATED) as archive:
             for name in ('session.json','capture.bin','sources.json'):

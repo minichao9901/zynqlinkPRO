@@ -3,7 +3,7 @@ export const PAGES = {
   serial:['串口助手','assistant'], terminal:['终端','terminal'], rtt:['RTT Viewer','rtt'],
   rttcdc:['RTT 转发','stream'], scope:['J-Scope 波形','scope'],
   flash:['烧录器','flash'], dbg:['调试器','dbg'],
-  etm:['ETM 执行轨迹','etm'], gen:['工程生成','gen'],
+  etm:['ETM 执行轨迹','etm'],
 };
 export const INTERRUPTS={
   rttcdc:['#h-stop'],spicdc:['#si-stop'],scope:['#sc-stop'],dbg:['#d-rtt-stop'],

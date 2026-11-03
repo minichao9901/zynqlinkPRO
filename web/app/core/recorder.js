@@ -75,7 +75,7 @@ export function recordButtonState(rec){
     title: `记录失败：${rec.error.message || rec.error}。已写 ${fBytes(rec.written)} / 收到 ${fBytes(rec.pushed)}，文件可能不完整。`,
     primary: rec.needsClose,
   };
-  return { text: '● 记录到文件', title: '把收到的字节直接写进本地文件（不走接收区 2MB 上限），高速采集用', primary: false };
+  return { text: '● 持续记录', title: '持续记录接收字节到文件，不受显示缓冲上限限制；暂停显示时仍继续记录', primary: false };
 }
 
 export class FileRecorder {

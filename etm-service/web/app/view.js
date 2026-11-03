@@ -1,3 +1,5 @@
+import {initCaptureLayout} from './capture-layout.js';
+import {initTutorials} from './tutorial.js';
 import {SourceStore} from './shared/dbg/source.js';
 import {readReferencedSources,sourceBatches} from './source-snapshot.js';
 import {withCleanup} from './operation.js';
@@ -277,9 +279,9 @@ async function loadRecord(id){if(!id)throw Error('请选择记录');history.rang
     const notice=document.createElement('p');notice.className=failed?'bad':'hint';
     notice.textContent=failed?'本次采集未通过，记录和失败原因已保留；重新解码不会修复接收丢失。':'在文件页点击“单独解码”；失败记录保留原始证据';
     $('table-container').replaceChildren(notice);$('source-code').textContent='尚未解码，没有可信源码定位';
-    $('source-location').textContent='';$('selected-instruction').textContent='';$('call-stack').textContent='尚未解码';return;
+    $('source-location').textContent='';$('selected-instruction').textContent='';$('call-stack').textContent='尚未解码';captureLayout.historyOpened();return;
   }
-  await history.load(id,m?.name);log('已按需载入记录 '+id);controls();syncSliceTimeline();
+  await history.load(id,m?.name);log('已按需载入记录 '+id);controls();syncSliceTimeline();captureLayout.historyOpened();
 }
 async function watchJob(id,{resume=false,kind='decode'}={}){
   state.job=id;state.jobKind=kind;state.jobPhase='queued';state.captureCancelled=false;controls();
@@ -287,7 +289,7 @@ async function watchJob(id,{resume=false,kind='decode'}={}){
   try{await pollJob(id,{read:id=>api('jobs/'+id),shouldResume:()=>!state.captureCancelled,
     onState:job=>{state.jobPhase=job.state;$('job-state').classList.toggle('bad',job.state==='error');$('job-state').textContent={queued:'准备参数',starting:'正在启动采集',armed:'采集已就绪',saving:'保存原始数据',decoding:'解码与源码映射',done:'记录已保存',cancelled:'采集已取消',error:'操作失败'}[job.state];controls();},
     onResume:resume?async()=>{log('Zynq ETM 已就绪，CPU 由本地服务恢复');}:null,
-    onDone:async job=>{await refreshRecords();await loadRecord(job.record);}
+    onDone:async job=>{await refreshRecords();await loadRecord(job.record);if(kind==='capture')state.lastCaptureRecord=job.record;}
   });}catch(e){
     if(kind==='capture'){
       state.failedCaptureJob=id;
@@ -365,7 +367,7 @@ async function download(kind){
     $('job-state').textContent='已生成 '+file.filename;log('导出已生成：'+file.filename);
   }else{const a=document.createElement('a');a.href=url;a.download='';a.click();}
 }
-on('record-source-settings',()=>{panel('target');$('choose-sources').closest('details').open=true;$('choose-sources').focus();},{exclusive:false});
+on('record-source-settings',()=>{captureLayout.show();panel('target');$('choose-sources').closest('details').open=true;$('choose-sources').focus();},{exclusive:false});
 on('save-record',()=>download('record'));on('export',()=>download($('export-type').value));on('choose-sources',async()=>{
   if(!SourceStore.supported()||state.sourceCompat){$('sources-files').click();return;}
   const store=new SourceStore(),paths=state.elfInfo?.sourceFiles||history.result?.sourceFiles||[];
@@ -448,9 +450,41 @@ bindFilePicker($('import'),$('capture-file'),{blocked:()=>state.operation||state
   }
   const saved=await api('import',form);await refreshRecords();await watchJob((await api('decode/'+saved.record,{})).job);
 },{hardware:false})});
-function sideButtonLabel(){$('toggle-settings').textContent=innerWidth<=780?'采集设置':document.body.classList.contains('side-hidden')?'显示控制':'收起控制';}
-$('help').onclick=()=>$('help-dialog').showModal();$('close-help').onclick=()=>$('help-dialog').close();$('toggle-settings').onclick=()=>{document.body.classList.toggle(innerWidth<=780?'settings-open':'side-hidden');sideButtonLabel();};window.addEventListener('resize',sideButtonLabel);sideButtonLabel();
-$('toggle-source').onclick=()=>{const open=document.body.classList.toggle('source-open');$('toggle-source').textContent=open?'轨迹':'源码';$('toggle-source').setAttribute('aria-expanded',String(open));};
+let layoutStorage;try{layoutStorage=window.localStorage;}catch{}
+const captureLayout=initCaptureLayout({body:document.body,button:$('toggle-settings'),storage:layoutStorage,width:()=>innerWidth});
+async function loadTutorialExample(){
+  if(state.operation||state.job)throw Error('请先等待当前操作完成');
+  state.operation=true;controls();
+  try{
+    const sample=await api('tutorial-example');await refreshRecords();
+    let saved;try{saved=JSON.parse(layoutStorage?.getItem('etm.tutorialExample')||'null');}catch{}
+    let id=saved?.sha256===sample.sha256&&state.records.some(r=>r.id===saved.record)?saved.record:null;
+    if(!id){
+      const bytes=Uint8Array.from(atob(sample.base64),c=>c.charCodeAt(0));
+      const form=new FormData();form.append('capture',new Blob([bytes],{type:'application/octet-stream'}),sample.filename);
+      id=(await api('import',form)).record;await refreshRecords();
+    }
+    try{layoutStorage?.setItem('etm.tutorialExample',JSON.stringify({record:id,sha256:sample.sha256}));}catch{}
+    if(state.records.find(r=>r.id===id)?.decoded)await loadRecord(id);
+    else await watchJob((await api('decode/'+id,{})).job);
+    log('教学示例：H743 历史参考采集；未连接或操作当前目标');
+  }finally{state.operation=false;controls();}
+}
+const tutorials=initTutorials({busy:()=>state.operation||!!state.job,
+  state:()=>({hasElf:!!state.elfInfo,connected:!!target.probe&&!!target.info?.traceSupported,hasEntry:state.entryAddress!==null,
+    hasRecord:!!history.result,recordId:state.current,captureId:state.lastCaptureRecord,view:history.view,reportOpen:!$('summary-panel').hidden}),
+  loadExample:loadTutorialExample,
+  saveLayout:()=>{const saved={hidden:document.body.classList.contains('side-hidden'),open:document.body.classList.contains('settings-open'),source:document.body.classList.contains('source-open'),panel:document.querySelector('[data-panel][aria-selected="true"]')?.dataset.panel};
+    return()=>{document.body.classList.toggle('side-hidden',saved.hidden);document.body.classList.toggle('settings-open',saved.open);showSource(saved.source);if(saved.panel)panel(saved.panel);captureLayout.refresh();};},
+  prepare:async step=>{
+    if(step.panel){captureLayout.show();panel(step.panel);}
+    if(step.view&&history.result){history.view=step.view;history.offset=0;await history.render();}
+    showSource(!!step.source);
+  }
+});
+$('help').onclick=()=>$('help-dialog').showModal();$('close-help').onclick=()=>$('help-dialog').close();window.addEventListener('resize',captureLayout.refresh);
+function showSource(open){document.body.classList.toggle('source-open',open);$('toggle-source').textContent=open?'轨迹':'源码';$('toggle-source').setAttribute('aria-expanded',String(open));}
+$('toggle-source').onclick=()=>showSource(!document.body.classList.contains('source-open'));
 const divider=document.querySelector('.pane-divider');function setRatio(percent){const value=Math.max(25,Math.min(75,percent));$('analysis-panes').style.setProperty('--trace-width',value+'%');divider.setAttribute('aria-valuenow',String(Math.round(value)));}
 divider.onpointerdown=e=>{divider.setPointerCapture(e.pointerId);divider.onpointermove=v=>{if(divider.hasPointerCapture(v.pointerId)){const box=$('analysis-panes').getBoundingClientRect();setRatio((v.clientX-box.left)/box.width*100);}};divider.onpointerup=v=>divider.releasePointerCapture(v.pointerId);};divider.onkeydown=e=>{if(['ArrowLeft','ArrowRight'].includes(e.key)){e.preventDefault();const value=parseFloat($('analysis-panes').style.getPropertyValue('--trace-width'))||52;setRatio(value+(e.key==='ArrowLeft'?-3:3));}};
 async function init(){state.operation=true;controls();history.setLoading(true);renderSymbols();renderBreakpoints();try{await loadCapabilities();await refreshRecords();$('service-state').textContent='本地服务在线';$('service-state').className='status good';showClocks();}catch(e){error(e);}finally{state.operation=false;history.setLoading(false);controls();}}
@@ -499,7 +533,7 @@ async function openRecordForCli(id){
   state.operation=true;controls();
   try{if(!state.records.some(r=>r.id===id))await refreshRecords();return await loadRecord(id);}finally{state.operation=false;controls();}
 }
-window.__etm={target,state,history,api,captureNative,openRecord:openRecordForCli,measureOpenRecord:async id=>{
+window.__etm={target,state,history,api,tutorials,captureNative,openRecord:openRecordForCli,measureOpenRecord:async id=>{
   const started=performance.now();await openRecordForCli(id);const readerReady=performance.now();
   const display=await history.waitForDisplay();
   return {record:id,readerReadyMs:readerReady-started,...display,totalMs:performance.now()-started};

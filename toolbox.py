@@ -26,7 +26,6 @@ PAGES = {
     'dbg': ('调试器', 'dbg/view.js', 'ARM/RISC-V、断点/单步、寄存器/内存/变量/调用栈、异常、SVD'),
     'flash': ('烧录器', 'flash/view.js', 'ELF/HEX/BIN、目标算法、擦除/编程/校验、复位'),
     'etm': ('ETM 执行轨迹', 'etm/view.js', '目标/时钟、Zynq FPGA采集、导入/解码、全部查询/阅读/导出；另有 trace 原生CLI'),
-    'gen': ('工程生成', 'gen/view.js', 'uvprojx、Makefile/脚本、参数、预览/下载'),
 }
 
 
@@ -50,7 +49,6 @@ def catalog():
                       for key, value in PAGES.items()],
             'trace': 'toolbox.py trace <existing trace CLI arguments>',
             'project': {'entry':'toolbox.py project list|describe|run','browserRequired':False,'validation':'入口覆盖不等于全部功能实测'},
-            'bridge': 'toolbox.py bridge <OpenOCD/J-Link bridge arguments>',
             'bridge-build': 'toolbox.py bridge-build (update dist/zynq-etm-bridge; preserve data; optional --zip)',
             'fixtures': 'toolbox.py fixtures rtt|scope --out NEW_DIR',
             'probe-flash': 'toolbox.py probe-flash [--image-dir BOOT_PACKAGE] [--dry-run|--verify-only|--backup-only] (direct JTAG, no browser/runtime)',
@@ -245,7 +243,6 @@ def parser():
     sub.add_parser('project',help='全项目非Web工具的清单/描述/执行；project --help')
     sub.add_parser('bridge-build',help='AI：构建便携Windows工作台EXE；bridge-build --help')
     sub.add_parser('trace', help='原样转交全部现有ETM Trace CLI参数（trace之后的--help）')
-    sub.add_parser('bridge', help='启动可选OpenOCD/J-Link桥（bridge --help查看桥选项）')
     sub.add_parser('fixtures', help='构建F103ZE额定72MHz测试目标（fixtures --help查看参数）')
     sub.add_parser('probe-flash', help='备份并固化Zynq探针到QSPI（probe-flash --help查看参数）')
     v = sub.add_parser('validate', help='真实Web验收；scope/rttcdc会烧录目标，禁止Flash时用no-flash')
@@ -279,12 +276,6 @@ def main(argv=None):
         return subprocess.call([sys.executable, '-X', 'utf8', str(ROOT / 'etm-service/trace.py'), *argv[1:]])
     if argv and argv[0] == 'fixtures':
         return subprocess.call([sys.executable, '-X', 'utf8', str(ROOT / 'tools/build_f103_fixtures.py'), *argv[1:]])
-    if argv and argv[0] == 'bridge':
-        node = shutil.which('node')
-        if not node:
-            emit({'ok': False, 'error': '本地桥需要Node.js 18+'})
-            return 1
-        return subprocess.call([node, str(ROOT / 'web/bridge/rtt-bridge.mjs'), *argv[1:]])
     p = parser()
     args = p.parse_args(argv)
     try:

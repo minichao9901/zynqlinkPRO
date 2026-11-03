@@ -13,6 +13,7 @@ import { runProbeOperation } from '../core/probe-manager.js';
 import { $, setStatus, debounce } from '../ui/dom.js';
 import { toast } from '../ui/toast.js';
 import { store } from '../core/store.js';
+import { supportsRiscvStreamClock,streamClockHz } from '../core/stream-clock.js';
 import { bytes as fBytes } from '../core/format.js';
 import { findSymbol } from '../rtt/elf.js';
 import { AkaLinkHid, startRcText, START_PENDING } from './probe.js';
@@ -22,6 +23,7 @@ import { waitMs } from '../core/pace.js';
 const CLOCK_OPTIONS = [
   { v: '', label: '不改（用探针当前档位）' },
   { v: '20000000', label: '20 MHz' },
+  { v: '25000000', label: '25 MHz' },
   { v: '30000000', label: '30 MHz' },
   { v: '36000000', label: '36 MHz' },
   { v: '45000000', label: '45 MHz（出厂默认）' },
@@ -286,12 +288,12 @@ export class RttCdcView {
       size: num('h-size', 0),
       channel: num('h-chan', 0),
       /**
-       * 🚨 RISC-V/JTAG 下**必须发 0**（2026-10 真机踩到，见 `applyTargetType` 的说明）：
+       * 旧软件探针的 RISC-V/JTAG 必须发0；已识别的ZynqLinkPro使用Hz（最高25MHz）。
        *    这个字段在 JTAG 下是 DMI 的 idle/delay 覆盖值，把 45 MHz 这种数字塞进去，
        *    探针的 RISC-V 引擎就再也读不出目标内存 —— 现象是"桥一直找不到 RTT 控制块、
        *    读错数一直涨"，而同一个探针用 `hpm6800_rtt_loss.py`（clock 传 0）1.39 MB/s 跑得好好的。
        */
-      clockHz: this.isRiscv ? 0 : (Number($('h-clock').value) || 0),
+      clockHz: streamClockHz(this.info,this.isRiscv,$('h-clock').value),
     };
   }
 
@@ -306,12 +308,14 @@ export class RttCdcView {
   async applyClock(){
     this.persist();
     if (this.mock || this._disconnecting) return;
-    if (this.isRiscv){ toast('RISC-V/JTAG 下不用 SWD 时钟档（这个字段在 JTAG 下是 DMI idle，必须留 0）', 'warn'); return; }
+    if (this.isRiscv&&!supportsRiscvStreamClock(this.info)){ toast('此探针的 RISC-V 时钟字段是 DMI idle，保持 0', 'warn'); return; }
+    if(this.last?.running){toast('先停止转发，再修改调试时钟','warn');return;}
     const { clockHz } = this.params();
     if (!this.dev.connected || !clockHz) return;
     try {
       await runProbeOperation(this, 'hid', async () => {
-        await this.dev.configure({ clockHz });
+        const configured=await this.dev.configure({ clockHz });
+        if(configured.rc!==0)throw new Error(`时钟配置被拒（${configured.rc}）`);
         toast(`探针 SWD 时钟已设为 ${clockHz / 1e6} MHz`, 'ok');
         await this.refresh();
       }, { reason: 'RTT 转发要调整时钟', policy: 'reject' });
@@ -373,8 +377,17 @@ export class RttCdcView {
    */
   _applyTargetUi(){
     const riscv = this.isRiscv;
-    $('h-clock').disabled = riscv;
-    $('h-clock').title = riscv
+    const native=riscv&&supportsRiscvStreamClock(this.info),clock=$('h-clock');
+    if(clock.previousElementSibling)clock.previousElementSibling.textContent=riscv?'JTAG TCK':'SWD 时钟';
+    if(this._clockNative!==native){
+      const previous=clock.value,choices=native?[{v:'10000000',label:'10 MHz（默认）'},{v:'20000000',label:'20 MHz'},{v:'25000000',label:'25 MHz'}]:CLOCK_OPTIONS;
+      clock.innerHTML=choices.map(o=>`<option value="${o.v}">${o.label}</option>`).join('');
+      clock.value=native?String(streamClockHz(this.info,true,previous)):previous;
+      if(clock.selectedIndex<0)clock.value='';
+      this._clockNative=native;
+    }
+    clock.disabled = riscv&&!native;
+    clock.title = native?'Zynq RISC-V JTAG TCK，HPM 最高 25 MHz':riscv
       ? 'RISC-V/JTAG 下必须留 0：这个字段在 JTAG 下是 DMI idle/delay 覆盖值，给成大数字会让探针读不到目标内存'
       : '运行时调参（HID 0x31 action 7），改完立刻生效';
   }
@@ -471,7 +484,10 @@ export class RttCdcView {
         } catch { /* 补发失败不阻断启动：真失败会由 start 的 rc 报出来 */ }
         if (g !== this._engineGen) return;
       }
-      if (!auto && (p.clockHz || this.isRiscv) && !this.mock) await this.dev.configure({ clockHz: p.clockHz });
+      if ((!auto||this.isRiscv&&supportsRiscvStreamClock(this.info)) && (p.clockHz || this.isRiscv) && !this.mock){
+        const config=await this.dev.configure({ clockHz: p.clockHz });
+        if(config.rc!==0)throw new Error(`转发时钟配置被拒（${config.rc}），未启动`);
+      }
       if (g !== this._engineGen) return;
       const before = this.last?.startRc ?? 0;
       this._bridgeRequested = true;
@@ -672,7 +688,8 @@ export class RttCdcView {
     if ($('h-stop')) $('h-stop').disabled = this._disconnecting;
     if ($('h-refresh')) $('h-refresh').disabled = this._disconnecting || this._connecting;
     const target = $('h-target'); if (target) target.disabled = engineBusy;
-    const clock = $('h-clock'); if (clock) clock.disabled = engineBusy || this.isRiscv;
+    this._applyTargetUi();
+    const clock = $('h-clock'); if (clock) clock.disabled = engineBusy || !!this.last?.running || this.isRiscv&&!supportsRiscvStreamClock(this.info);
     const resetMode = $('global-nrst-open-drain'); if (resetMode) resetMode.disabled = !this._resetIoSupported || this._disconnecting;
     // 第一行：设备信息
     if (error && !dev.connected) setStatus($('h-info'), error, 'err');

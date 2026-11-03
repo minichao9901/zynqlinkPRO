@@ -1,0 +1,225 @@
+{
+  "artifacts": {
+    "git_head": "996c115aeb9a90b6f4dfb82d8446bdb457743ea2",
+    "git_dirty": true,
+    "bit": {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\web-ui-compact\\zynqlinkPRO\\prebuilt\\hpm6800-usb-fixed-133-20261102\\probe.bit",
+      "sha256": "106d579bc1b79c2b873fd1e3eb2609d468892a67613d85a6e41d4dc90c8fc177"
+    },
+    "elf": {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\web-ui-compact\\zynqlinkPRO\\prebuilt\\hpm6800-usb-fixed-133-20261102\\application.elf",
+      "sha256": "e93f1810d48e77f8d9aa097f643e40e0aaee32bdec1c263c1428f092909e608a"
+    }
+  },
+  "stage": "hss",
+  "rows": [
+    {
+      "service": "hss",
+      "requested_clock_Hz": 25000000,
+      "variables": 8,
+      "period_ticks": 921,
+      "effective_Hz": 26058.68653047759,
+      "produced": 260615,
+      "skipped": 0,
+      "skip_percent": 0.0,
+      "FCLK_Hz": 49999999,
+      "actual_TCK_Hz": 24999999.5,
+      "JTAG_sampling_mode": 0,
+      "errors": 0,
+      "data_frames_verified": 23015,
+      "stat_duplicate_frames": 0,
+      "sample_count_match": true,
+      "tail_count_delta": 0,
+      "all_data_frames_verified": true,
+      "session_samples": 345217,
+      "first": [
+        827544392,
+        58399045,
+        24000000,
+        84549,
+        0,
+        0,
+        0,
+        0,
+        5637,
+        2886144,
+        921,
+        320
+      ],
+      "last": [
+        827544392,
+        298424957,
+        24000000,
+        345164,
+        0,
+        0,
+        0,
+        0,
+        23011,
+        11781632,
+        921,
+        320
+      ],
+      "tag": "direct",
+      "repeat": 0,
+      "fixture_base": "0xf0404000"
+    },
+    {
+      "service": "hss",
+      "requested_clock_Hz": 25000000,
+      "variables": 8,
+      "period_ticks": 921,
+      "effective_Hz": 26058.68001651088,
+      "produced": 260615,
+      "skipped": 0,
+      "skip_percent": 0.0,
+      "FCLK_Hz": 49999999,
+      "actual_TCK_Hz": 24999999.5,
+      "JTAG_sampling_mode": 0,
+      "errors": 0,
+      "data_frames_verified": 18782,
+      "stat_duplicate_frames": 0,
+      "sample_count_match": true,
+      "tail_count_delta": 0,
+      "all_data_frames_verified": true,
+      "session_samples": 281718,
+      "first": [
+        827544392,
+        324102633,
+        24000000,
+        21050,
+        0,
+        0,
+        0,
+        0,
+        1404,
+        718848,
+        921,
+        320
+      ],
+      "last": [
+        827544392,
+        564128605,
+        24000000,
+        281665,
+        0,
+        0,
+        0,
+        0,
+        18778,
+        9614336,
+        921,
+        320
+      ],
+      "tag": "direct",
+      "repeat": 1,
+      "fixture_base": "0xf0404000"
+    },
+    {
+      "service": "hss",
+      "requested_clock_Hz": 25000000,
+      "variables": 8,
+      "period_ticks": 921,
+      "effective_Hz": 26058.57611896791,
+      "produced": 260614,
+      "skipped": 0,
+      "skip_percent": 0.0,
+      "FCLK_Hz": 49999999,
+      "actual_TCK_Hz": 24999999.5,
+      "JTAG_sampling_mode": 0,
+      "errors": 0,
+      "data_frames_verified": 18707,
+      "stat_duplicate_frames": 0,
+      "sample_count_match": true,
+      "tail_count_delta": 0,
+      "all_data_frames_verified": true,
+      "session_samples": 280598,
+      "first": [
+        827544392,
+        588726331,
+        24000000,
+        19930,
+        0,
+        0,
+        0,
+        0,
+        1329,
+        680448,
+        921,
+        320
+      ],
+      "last": [
+        827544392,
+        828752339,
+        24000000,
+        280544,
+        0,
+        0,
+        0,
+        0,
+        18703,
+        9575936,
+        921,
+        320
+      ],
+      "tag": "direct",
+      "repeat": 2,
+      "fixture_base": "0xf0404000"
+    }
+  ],
+  "summary": [],
+  "target_flash_writes": false,
+  "target_resets": false,
+  "target_clock_writes": false,
+  "driver_sha256": {
+    "tools/validate_hpm6800_performance.py": "060f54b89b36c62ea8f2617cc6b97192642a3b3f719f8acf01d652111e02c148",
+    "tools/validate_hpm6800_streams.py": "a9aa05269b7301a96e79f711b5e0d897c2e567f5a2834339c447ac8b5167b790",
+    "tools/benchmark_hpm5301.py": "1a9380dee4385176c6f3dcf5f7be9c8a6efa08d200c86a401f3817b6cdea4850",
+    "tools/riscv_target.py": "a71d3c24d159b97c76df713d2d62da2a5a1bf398bb0eab1a78da0ef6a84e29d4",
+    "tools/test_probe_board.py": "68c484a2dfdfe274738eb1b0c532d8b791bbd466f2e553c68f107717dcc9bd72",
+    "tools/dap_pipeline_bench.py": "32089bd40ddd11bcd997d0b26a4b83649bf9626fee627d7dc4eb0d8de19fb69a",
+    "tools/probe_build_info.py": "8fe41b1dcdf7d8db6120149eba368358b8f1be727413d612f7c1e200ed9393f9",
+    "firmware/target/hpm6800_perf_ram.S": "de4fd74f3255da69657b958b77f4980b4c5bdade5295d2a7e4042b553feff49a"
+  },
+  "probe_before": {
+    "recordedAtUtc": "2026-11-03T02:25:36.630248+00:00",
+    "allObservedEnginesIdle": true,
+    "xsctOutput": "SNAP FCLK0_CTRL 00F00100\nSNAP FCLK1_CTRL 00900100\nSNAP ARM_PLL 00028008\nSNAP DDR_PLL 00020008\nSNAP IO_PLL 00036008\nSNAP CPU_CTRL 1F000200\nSNAP DDR_CTRL 0C200003\nSNAP USB0_CTRL 00101941\nSNAP USB1_CTRL 00101941\nSNAP FEATURES 0000000B\nSNAP CAPTURE 00000008\nSNAP SWD_STATUS 95C70002\nSNAP PACKET_STATUS 00000000\n"
+  },
+  "cache_control": "0x7f03",
+  "target_clocks_before": {
+    "controls": {
+      "cpu0": "0x3020100",
+      "mchtmr0": "0x1010000",
+      "ahb": "0x5040203"
+    },
+    "basis": "Read-only qualified SYSCTL controls; target frequencies not inferred without qualified PLL outputs"
+  },
+  "clock_registers_before": [
+    "0x3020100",
+    "0x1010000",
+    "0x5040203"
+  ],
+  "backup_sha256": {
+    "0xf0400000": "f9e9d84dac1a48d67c156f4d2a1beb364d211316b7d5c396aa954252aefa6b53"
+  },
+  "restore": {
+    "0xf0400000": true
+  },
+  "registers_match": true,
+  "cache_control_after": "0x7f03",
+  "target_clocks_after": {
+    "controls": {
+      "cpu0": "0x3020100",
+      "mchtmr0": "0x1010000",
+      "ahb": "0x5040203"
+    },
+    "basis": "Read-only qualified SYSCTL controls; target frequencies not inferred without qualified PLL outputs"
+  },
+  "clock_registers_after": [
+    "0x3020100",
+    "0x1010000",
+    "0x5040203"
+  ],
+  "final_dmstatus": "0x4303a2"
+}

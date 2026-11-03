@@ -86,7 +86,7 @@ export class RttCdcStreamView {
     this.$('c-pause').addEventListener('click', () => {
       const on = !this.rx.paused;
       this.rx.setPaused(on);
-      this.$('c-pause').textContent = on ? '继续' : '暂停';
+      this.$('c-pause').textContent = on ? '恢复显示' : '暂停显示';
       this.$('c-pause').classList.toggle('primary', on);
       if (!on && this.ansiOn) this._ansiRedraw();
     });
@@ -213,7 +213,7 @@ export class RttCdcStreamView {
     this.$('c-buf').textContent = fBytes(this.rx?.bytes ?? 0);
     // 记录/落盘期间按钮要一直刷：字节数、待落盘量都得看得见（见 recorder.js 的说明）
     if (this.rec.active || this.rec.draining) this._recordBtn();
-    if (this.rx?.paused) this.$('c-pause').title = `暂停中，已缓存 ${fBytes(this.rx.bytes)}`;
+    if (this.rx?.paused) this.$('c-pause').title = `显示已暂停，接收/记录继续；缓冲 ${fBytes(this.rx.bytes)}`;
   }
 
   _highspeedGate(r){
@@ -255,8 +255,9 @@ export class RttCdcStreamView {
       throw Error('记录窗口须为0.1..30秒，缓存须为1..64MiB');
     this._windowRecording=true;
     const chunks=[],limit=maxMiB*1024*1024,started=performance.now();
-    let bytes=0,observedBytes=0,closed=false,error=null;
+    let bytes=0,observedBytes=0,closed=false,error=null,firstDataAt=null,lastDataAt=null,firstChunkBytes=0;
     const offData=this.s.on('data',b=>{
+      if(b.length){const now=performance.now();if(firstDataAt===null){firstDataAt=now;firstChunkBytes=b.length;}lastDataAt=now;}
       observedBytes+=b.length;
       const take=Math.min(b.length,limit-bytes);
       if(take>0){chunks.push(b.slice(0,take));bytes+=take;}
@@ -267,7 +268,9 @@ export class RttCdcStreamView {
     finally{offData();offClose();offError();this._windowRecording=false;}
     const elapsed=(performance.now()-started)/1000,name=`${this.owner}-raw-${fileStamp()}.bin`;
     download(name,new Blob(chunks,{type:'application/octet-stream'}));
-    return {name,bytes,observedBytes,seconds:elapsed,complete:bytes>0&&observedBytes===bytes&&!closed&&!error,
+    const activeSeconds=firstDataAt!==null&&lastDataAt>firstDataAt?(lastDataAt-firstDataAt)/1000:0;
+    return {name,bytes,observedBytes,seconds:elapsed,activeSeconds,firstChunkBytes,
+      activeBytesPerSecond:activeSeconds?(observedBytes-firstChunkBytes)/activeSeconds:0,complete:bytes>0&&observedBytes===bytes&&!closed&&!error,
       limitExceeded:observedBytes>bytes,portClosed:closed,error,bytesPerSecond:bytes/elapsed};
   }
 
