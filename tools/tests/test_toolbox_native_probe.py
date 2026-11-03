@@ -12,6 +12,50 @@ from native_probe import NativeProbe, install,reset_dap_session
 
 
 class NativeProbeTests(unittest.TestCase):
+    def _hss_proxy(self):
+        folder=tempfile.TemporaryDirectory();self.addCleanup(folder.cleanup)
+        token=Path(folder.name)/'token';token.write_text('c'*64)
+        backend=SimpleNamespace(lock=threading.RLock(),jobs={},ACTIVE=('queued',))
+        proxy=NativeProbe(backend,token);device=Mock()
+        proxy.usb=device;proxy.usb_owner='a'*32;proxy.usb_epoch='epoch';proxy.claimed={0}
+        return proxy,device
+
+    def test_hss_read_preserves_partial_batch_in_one_bulk_request(self):
+        import base64
+        proxy,device=self._hss_proxy()
+        receiver=Mock();receiver.read.return_value=bytes(range(256))*6
+        proxy.hss_receiver=receiver
+        result=proxy.usb_call('read',dict(owner='a'*32,resourceEpoch='epoch',endpoint=0x87,length=65536))
+        self.assertEqual(base64.b64decode(result['data']),bytes(range(256))*6)
+        self.assertFalse(result['timedOut'])
+        receiver.read.assert_called_once_with(65536)
+
+    def test_hss_empty_timeout_is_an_empty_completion_for_confirmed_drain(self):
+        import usb.core
+        proxy,device=self._hss_proxy()
+        receiver=Mock();receiver.read.return_value=b'';proxy.hss_receiver=receiver
+        proxy.usb=device;proxy.usb_owner='a'*32;proxy.usb_epoch='epoch';proxy.claimed={0}
+        self.assertEqual(proxy.usb_call('read',dict(owner='a'*32,resourceEpoch='epoch',endpoint=0x87,length=65536)),{'data':'','timedOut':True})
+
+    def test_hss_receiver_is_stopped_before_usb_release(self):
+        proxy,device=self._hss_proxy();receiver=Mock();proxy.hss_receiver=receiver
+        with patch('usb.util.release_interface') as release:
+            proxy.usb_call('release',dict(owner='a'*32,resourceEpoch='epoch',number=0))
+            receiver.close.assert_called_once();release.assert_called_once_with(device,0)
+        self.assertIsNone(proxy.hss_receiver)
+
+    def test_installed_libusb1_backend_returns_timeout_partial_bytes(self):
+        # Exercise the actual backend read contract without opening a device.
+        import array,ctypes,usb.backend.libusb1 as libusb1
+        buffer=array.array('B',[0])*4096
+        def transfer(handle,ep,data,length,transferred,timeout):
+            for n in range(512):data[n]=n&255
+            ctypes.cast(transferred,ctypes.POINTER(ctypes.c_int))[0]=512
+            return libusb1.LIBUSB_ERROR_TIMEOUT
+        count=libusb1._LibUSB._LibUSB__read(None,transfer,SimpleNamespace(handle=None),0x87,0,buffer,40)
+        self.assertEqual(count,512)
+        self.assertEqual(buffer[:count].tobytes(),bytes(range(256))*2)
+
     def test_atomic_dap_exchange_sends_once_then_reads_the_same_epoch(self):
         import base64
         backend=SimpleNamespace(lock=threading.RLock(),jobs={},ACTIVE=('queued',))

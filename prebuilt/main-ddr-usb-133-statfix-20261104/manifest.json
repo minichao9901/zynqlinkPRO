@@ -1,0 +1,36 @@
+{
+  "accepted": false,
+  "status": "STAT slot initialization fix; board acceptance pending",
+  "psSourceRevision": "ae9b77456adb52705f76fbeb60ae5fcaf52bbb03",
+  "bitReusedFrom": "prebuilt/fclk133-release-20261101",
+  "rtlSourceRevision": "e749c426a018cab6f543415772bbe88efb6652e4",
+  "newPlImplementation": false,
+  "timing": {
+    "FCLK_max_Hz": 133333333,
+    "SWCLK_max_Hz": 66666666,
+    "setup_slack_ns": 0.319,
+    "hold_slack_ns": 0.033,
+    "requested_FCLK_Hz": 133333333,
+    "RTL_DEBUG": 0,
+    "optional_observation_cells": 0,
+    "formal_product_acceptance": false
+  },
+  "files": {
+    "probe.bit": {
+      "bytes": 4045674,
+      "sha256": "af1031d3caa0d7bd3b6adffa911d26efdab9e0bfb5223fb18f70dabb70ebeeed"
+    },
+    "application.elf": {
+      "bytes": 813820,
+      "sha256": "ef62ea8171ff7c2affefdcb718c0e2a2fa3cd5630a408b7a83faaf02d5dafc41"
+    },
+    "ps7_init.tcl": {
+      "bytes": 35186,
+      "sha256": "485a028ff7ad9a256a64313b68527a055ca3800b3b85577ceb0554b0e0609c94"
+    }
+  },
+  "psSourceDirty": true,
+  "psSourceFilesSha256": {
+    "firmware/xusbps_daplink_dma/probe_stream.c": "26cb7b22f91bb3fafbff05be67e59a047926ef76a17a293c6ee3a6458acbaebf"
+  }
+}

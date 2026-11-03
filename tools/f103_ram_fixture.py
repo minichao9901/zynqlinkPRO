@@ -25,6 +25,7 @@ class Fixture:
         self.report['clockBefore']=snapshot(self.mem)
         self.mem.write_word(0xe000edf0,0xa05f0003)
         self.regs={i:core_read(self.mem,i) for i in list(range(19))+[20]}
+        (self.out/'core-private.json').write_text(json.dumps(self.regs))
         self.backup=self.mem.read(0x20000000,20480)
         (self.out/'sram-private.bin').write_bytes(self.backup)
         self.report['backupSha256']=hashlib.sha256(self.backup).hexdigest()
@@ -50,9 +51,10 @@ class Fixture:
         pending=(wr-(counter&8191))&8191;assert pending in (0,4),(wr,counter)
         return counter+pending
 
-    def prepare_hss(self):
+    def prepare_hss(self,pattern=None):
         self.mem.write_word(0xe000edf0,0xa05f0003)
-        self.pattern=random.Random(0x485353).randbytes(4096)
+        self.pattern=pattern if pattern is not None else random.Random(0x485353).randbytes(4096)
+        assert len(self.pattern)==4096
         self.mem.write(0x20004000,self.pattern)
         assert self.mem.read(0x20004000,4096)==self.pattern
         # Release native ownership before the real Web path configures the stream.

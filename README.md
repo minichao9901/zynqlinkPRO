@@ -51,3 +51,5 @@ python toolbox.py project run sim.cm3 --dry-run -- --top tb_cm3_jtag
 
 2026-11-02：用户恢复定位后，HPM6800EVK缺首DEF已由PS USB DATA0复位修正，CDC字节缺口由本机连续大块接收修正；100轮首包与新EXE24步随机通过。实际修复配对在prebuilt/hpm6800-usb-fixed-133-20261102，详见[R23](docs/validation/hpm6800-def-cdc-fix-20261102/README.md)。旧Golden字节保留，临界HSS波动与span显示警告另列，历史暂停报告不改写。
 历史源码、逐轮报告和旧bit/ELF可从Git tag `archive/main-before-slim-20261031`追溯；该tag不含原本未跟踪的业务数据。
+
+2026-11-04：新增精英板F103ZE [HAL SPI Flash / EEPROM Trace例程](firmware/target/stm32f103_hal_storage/README.md)及[实际目标ELF](prebuilt/targets/f103ze-hal-storage-20261104/README.md)。真实读写后恢复原外设内容；同一实际输入新旧完整60表/182查询一致。普通Web断点回归、HSS持续接收及STAT/回放修复和性能/剩余失败见[合并后真机报告](docs/validation/main-web-hardware-20261103/README.md)。

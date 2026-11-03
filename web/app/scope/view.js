@@ -1481,7 +1481,7 @@ export class ScopeView {
   /** 数据面回调：字节流 → 包 → 解码 → 缓冲（+触发 +统计）*/
   onChunk(chunk){
     this._lastPktAt = performance.now();       // 看门狗据此判"流断没断"（见 _startWatchdog）
-    if (this.captureRaw){
+    if (this.captureRaw && !this._replaying){
       const copy = chunk instanceof Uint8Array ? chunk.slice() : new Uint8Array(chunk);
       this.raw.push(copy); this.rawBytes = (this.rawBytes || 0) + copy.length;
     }
@@ -1557,7 +1557,7 @@ export class ScopeView {
            *    注意用 `_capturing` 而不是 `running`：起跑阶段（DEF 已到、START 还没 resolve）的新数据要收，
            *    但收工之后一律不收（`_capturing` 在 start 里打开、stop 里关掉）。
            */
-          if (!this._capturing) break;
+          if (!this._capturing && !this._replaying) break;
           if (this.defMismatch) break;              // 变量表对不上：不解码（见 DEF 分支的说明）
           const vars = this.defVars || this.store?.vars;
           if (!vars?.length) break;
@@ -1738,10 +1738,14 @@ export class ScopeView {
   /** 回放 .jsp：把当时的字节流重新喂一遍（不连硬件也能看波形 / 调触发）*/
   async replayFile(file){
     try {
+      if (this.running || this._capturing || this._starting || this._stopPromise)
+        throw new Error('先停止采样，再回放文件');
+      const buf = new Uint8Array(await file.arrayBuffer());
+      if (this.running || this._capturing || this._starting || this._stopPromise)
+        throw new Error('先停止采样，再回放文件');
       this.receivedSamples=0;this.tailCountDelta=null;this.probeMetrics=null;
       this._qualityReplay = true; this._qualityConfig = { 文件: file.name || '原始包回放' };
       this.qualityHistory?.reset(); this.qualityHistory?.note('replay','从文件回放，不引用当前探针计数');
-      const buf = new Uint8Array(await file.arrayBuffer());
       const vars = [...(this.selected.length ? this.selected : this.mockVars())].sort((a, b) => a.addr - b.addr);
       const periodUs = this.periodUs();
       this.store = new SampleStore(vars, Math.ceil(buf.length / 16) + 1024);
@@ -1753,9 +1757,15 @@ export class ScopeView {
       this.seqT = new P.SeqTracker();
       this.timeU = new P.TimeUnwrap();
       this.packets = 0; this.lost = 0; this.defVars = null;
+      this._awaitDef = false; this.defMismatch = null; this.stalePackets = 0;
+      this.probeDropped = 0; this.usbDrop = 0; this.readErrors = 0; this.metricsError = null;
+      this.trigger.reset();
       this.decodeErr = 0; this._qualityStat = null; this._statAt = 0; this._metricsAt = 0; this.probeMetrics = null;
       const chunk = 64 * 1024;
-      for (let o = 0; o < buf.length; o += chunk) this.onChunk(buf.subarray(o, o + chunk));
+      this._replaying = true;
+      try {
+        for (let o = 0; o < buf.length; o += chunk) this.onChunk(buf.subarray(o, o + chunk));
+      } finally { this._replaying = false; }
       this.renderer.fitAll();
       this.setStatusText(`回放完成：${this.store.count} 个样本 / ${this.packets} 个包`, 'ok');
       this._needDraw = true;

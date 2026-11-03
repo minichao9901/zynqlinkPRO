@@ -1,0 +1,26 @@
+{
+  "initialDHCSR": "0x1010001",
+  "clockBefore": {
+    "name": "STM32F103",
+    "cpuid": "0x411fc231",
+    "device": "0x10036414",
+    "registers": {
+      "0x40021000": "0x3034e83",
+      "0x40021004": "0x51040a"
+    }
+  },
+  "backupSha256": "42d2f5737b76851533e99107e88fb846a57550a632a939773cdba39f3bb50d3d",
+  "testError": "TypeError(\"'>' not supported between instances of 'NoneType' and 'int'\")",
+  "sramRestored": true,
+  "clockAfter": {
+    "name": "STM32F103",
+    "cpuid": "0x411fc231",
+    "device": "0x10036414",
+    "registers": {
+      "0x40021000": "0x3034e83",
+      "0x40021004": "0x51040a"
+    }
+  },
+  "finalDHCSR": "0x1010001",
+  "manualRecovery": "HSS bench assertion bypassed cleanup; public disconnect then exact SRAM restoration. Static fixture did not modify core registers; no independent before/after register comparison survived."
+}

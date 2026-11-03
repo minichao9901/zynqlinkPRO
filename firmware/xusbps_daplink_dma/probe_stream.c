@@ -357,6 +357,9 @@ static void stat_packet(void) {
     p = slot(&hss);
     header(p, 3, fill_time, 0, 0);
     q = p + 16;
+    // Slots previously carried DATA. Clear USB errors, discard/reserved fields
+    // and padding instead of exposing stale samples as STAT counters.
+    memset(q, 0, 512 - 16);
     put32(q, produced);
     put32(q + 4, skipped_base + R(7));
     put32(q + 8, seq);

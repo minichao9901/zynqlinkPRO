@@ -1,0 +1,156 @@
+{
+  "record": "capture-a8f56e3f9b4c44939353cd544740af05",
+  "views": [
+    {
+      "view": "instructions",
+      "renderedTextBytes": 7254
+    },
+    {
+      "view": "functions",
+      "renderedTextBytes": 231
+    },
+    {
+      "view": "flame",
+      "renderedTextBytes": 11625
+    },
+    {
+      "view": "hotspots",
+      "renderedTextBytes": 1283
+    },
+    {
+      "view": "packets",
+      "renderedTextBytes": 523
+    },
+    {
+      "view": "quality",
+      "renderedTextBytes": 11804
+    }
+  ],
+  "navigation": [
+    {
+      "mode": "instruction",
+      "cursor": "#799654 · 0x08002e10"
+    },
+    {
+      "mode": "source",
+      "cursor": "#799660 · 0x08002e1c"
+    },
+    {
+      "mode": "call",
+      "cursor": "#799660 · 0x08002e1c"
+    },
+    {
+      "mode": "return",
+      "cursor": "#799663 · 0x080015c8"
+    },
+    {
+      "mode": "exception",
+      "cursor": "#803008 · 边界/异常事件"
+    },
+    {
+      "mode": "issue",
+      "cursor": "#799906 · 0x080028e4"
+    }
+  ],
+  "exports": [
+    {
+      "format": "csv",
+      "actualUiButton": true,
+      "bytes": 363364,
+      "sha256": "1f7bc92c4229cf3232eda62914687e76a2d09671145fa6edfb663845fde3a02b"
+    },
+    {
+      "format": "simplified",
+      "actualUiButton": true,
+      "bytes": 42373,
+      "sha256": "52c61c114fb06bea057b5c43c418767db2cd52b35afc4e2861785d45f972f32e"
+    },
+    {
+      "format": "simplified-html",
+      "actualUiButton": true,
+      "bytes": 798333,
+      "sha256": "97a613f12e85a0fd31cc6e611b17b21494d4d6802f75e9a0e3ba40113d8d73dc"
+    },
+    {
+      "format": "source",
+      "actualUiButton": true,
+      "bytes": 340640,
+      "sha256": "0a45f436771f1127e2e5f9ae987d67b3135e2bcdebe36f5376f4a1d13a148fff"
+    },
+    {
+      "format": "flame-html",
+      "actualUiButton": true,
+      "bytes": 22870,
+      "sha256": "674cb3c679777e7ba72442092f8d0b279bceaf361194d7d31f6cb2e5765a3f3f"
+    },
+    {
+      "format": "flame-svg",
+      "actualUiButton": true,
+      "bytes": 26313,
+      "sha256": "903dbad268737694f8aad23070b08ea41ee5299ea48b3da7b05c9abcde8d5572"
+    },
+    {
+      "format": "json",
+      "actualUiButton": true,
+      "verifiedResponse": true,
+      "bytes": 181914,
+      "sha256": "a78f3d66f501f4e8c4bae78fcf5430e0b82c545dcca926d34ad140530ec71175"
+    },
+    {
+      "format": "record",
+      "actualUiButton": true,
+      "verifiedResponse": true,
+      "bytes": 18833526,
+      "sha256": "f65a605f45c8654e00ec50e9a4f7c6fdf55363f6b0d04822ccd0c30c804ee16c"
+    }
+  ],
+  "passed": false,
+  "selected": {
+    "bytes": "2de9f043",
+    "callPath": [
+      "采集前调用栈未知",
+      "storage_exercise",
+      "eeprom_write",
+      "HAL_I2C_Mem_Write"
+    ],
+    "conditional": false,
+    "cycleCount": 0,
+    "cycleSpan": 0,
+    "cycles": 0,
+    "executed": true,
+    "executionReason": "",
+    "executionState": "executed",
+    "file": "E:/zynqlinkPRO/firmware/target/stm32f103_hal_storage/vendor/stm32f1xx_hal_i2c.c",
+    "flow": "linear",
+    "function": "HAL_I2C_Mem_Write",
+    "kind": "instruction",
+    "line": 2561,
+    "mnemonic": "push.w",
+    "offset": 206093,
+    "operands": "{r4, r5, r6, r7, r8, sb, lr}",
+    "pc": 134229516,
+    "seq": 799653,
+    "size": 4
+  },
+  "range": [
+    799553,
+    801553
+  ],
+  "realHalSourceDisplayed": true,
+  "csvRows": 2001,
+  "recordPackageFiles": [
+    "session.json",
+    "capture.bin",
+    "firmware.elf",
+    "sources.json",
+    "capture.frm1",
+    "ddr-capture.json",
+    "ddr-demux.json",
+    "decoded.json",
+    "store/manifest.json",
+    "store/generations/g-20261104T013531-694954bc/store.bin"
+  ],
+  "cliWebCsvByteExact": true,
+  "importedRecord": "record-4662dc0dbe7449339dad3dff4e820e5d",
+  "importSummaryQualityEqual": true
+}

@@ -1,0 +1,33 @@
+test_closed_receiver_cannot_be_reused (tools.tests.test_native_hss_receiver.HssReceiverTests.test_closed_receiver_cannot_be_reused) ... ok
+test_empty_queue_with_pending_usb_data_is_not_an_eof (tools.tests.test_native_hss_receiver.HssReceiverTests.test_empty_queue_with_pending_usb_data_is_not_an_eof) ... ok
+test_order_partial_batches_and_fresh_quiet_completion (tools.tests.test_native_hss_receiver.HssReceiverTests.test_order_partial_batches_and_fresh_quiet_completion) ... ok
+test_overflow_is_explicit_and_never_a_truncated_success (tools.tests.test_native_hss_receiver.HssReceiverTests.test_overflow_is_explicit_and_never_a_truncated_success) ... ok
+test_atomic_dap_exchange_rejects_short_write_without_read_or_replay (tools.tests.test_toolbox_native_probe.NativeProbeTests.test_atomic_dap_exchange_rejects_short_write_without_read_or_replay) ... ok
+test_atomic_dap_exchange_sends_once_then_reads_the_same_epoch (tools.tests.test_toolbox_native_probe.NativeProbeTests.test_atomic_dap_exchange_sends_once_then_reads_the_same_epoch) ... ok
+test_binary_limits_and_capture_cleanup_guard (tools.tests.test_toolbox_native_probe.NativeProbeTests.test_binary_limits_and_capture_cleanup_guard) ... ok
+test_dap_epoch_reset_requires_idle_queues_and_a_new_epoch (tools.tests.test_toolbox_native_probe.NativeProbeTests.test_dap_epoch_reset_requires_idle_queues_and_a_new_epoch) ... ok
+test_dap_epoch_reset_uses_no_speculative_bulk_reads_or_whole_usb_reset (tools.tests.test_toolbox_native_probe.NativeProbeTests.test_dap_epoch_reset_uses_no_speculative_bulk_reads_or_whole_usb_reset) ... ok
+test_hss_empty_timeout_is_an_empty_completion_for_confirmed_drain (tools.tests.test_toolbox_native_probe.NativeProbeTests.test_hss_empty_timeout_is_an_empty_completion_for_confirmed_drain) ... ok
+test_hss_read_preserves_partial_batch_in_one_bulk_request (tools.tests.test_toolbox_native_probe.NativeProbeTests.test_hss_read_preserves_partial_batch_in_one_bulk_request) ... ok
+test_hss_receiver_is_stopped_before_usb_release (tools.tests.test_toolbox_native_probe.NativeProbeTests.test_hss_receiver_is_stopped_before_usb_release) ... ok
+test_http_redelivery_returns_the_original_result_without_hardware_reexecution (tools.tests.test_toolbox_native_probe.NativeProbeTests.test_http_redelivery_returns_the_original_result_without_hardware_reexecution) ... ok
+test_installed_libusb1_backend_returns_timeout_partial_bytes (tools.tests.test_toolbox_native_probe.NativeProbeTests.test_installed_libusb1_backend_returns_timeout_partial_bytes) ... ok
+test_late_close_cannot_close_a_reopened_usb_or_hid_handle (tools.tests.test_toolbox_native_probe.NativeProbeTests.test_late_close_cannot_close_a_reopened_usb_or_hid_handle) ... ok
+test_loopback_token_and_origin_are_required_before_hardware_dispatch (tools.tests.test_toolbox_native_probe.NativeProbeTests.test_loopback_token_and_origin_are_required_before_hardware_dispatch) ... C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\helpers.py:611: DeprecationWarning: 'pkgutil.get_loader' is deprecated and slated for removal in Python 3.14; use importlib.util.find_spec() instead
+  loader = pkgutil.get_loader(import_name)
+C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\pkgutil.py:291: DeprecationWarning: 'pkgutil.find_loader' is deprecated and slated for removal in Python 3.14; use importlib.util.find_spec() instead
+  return find_loader(fullname)
+C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\scaffold.py:872: DeprecationWarning: 'pkgutil.get_loader' is deprecated and slated for removal in Python 3.14; use importlib.util.find_spec() instead
+  loader = pkgutil.get_loader(root_mod_name)
+C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\testing.py:116: DeprecationWarning: The '__version__' attribute is deprecated and will be removed in Werkzeug 3.1. Use feature detection or 'importlib.metadata.version("werkzeug")' instead.
+  "HTTP_USER_AGENT": f"werkzeug/{werkzeug.__version__}",
+ok
+test_native_serial_honors_the_web_requested_receive_buffer (tools.tests.test_toolbox_native_probe.NativeProbeTests.test_native_serial_honors_the_web_requested_receive_buffer) ... ok
+test_other_owner_cannot_close_an_active_usb_session (tools.tests.test_toolbox_native_probe.NativeProbeTests.test_other_owner_cannot_close_an_active_usb_session) ... ok
+test_sequence_delivery_survives_100000_requests_with_bounded_replay_history (tools.tests.test_toolbox_native_probe.NativeProbeTests.test_sequence_delivery_survives_100000_requests_with_bounded_replay_history) ... ok
+test_serial_reopen_cannot_cross_an_old_read_epoch_check (tools.tests.test_toolbox_native_probe.NativeProbeTests.test_serial_reopen_cannot_cross_an_old_read_epoch_check) ... ok
+
+----------------------------------------------------------------------
+Ran 20 tests in 1.262s
+
+OK

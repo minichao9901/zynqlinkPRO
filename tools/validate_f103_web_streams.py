@@ -22,19 +22,57 @@ def sequence(data):
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--stage',choices=['hss','rttcdc'],required=True)
-    p.add_argument('--out',type=Path,required=True);p.add_argument('--runtime',required=True)
+    p.add_argument('--stage',choices=['hss','rttcdc','cli-rttcdc'],required=True)
+    p.add_argument('--out',type=Path,required=True);p.add_argument('--runtime')
     p.add_argument('--seconds',type=float,default=3);p.add_argument('--repeats',type=int,default=3)
     p.add_argument('--points',default='1:24000,8:24000,1:48,8:192')
     p.add_argument('--speeds',default='50000000,60000000')
     p.add_argument('--execute',action='store_true');a=p.parse_args()
     if not a.execute:print(json.dumps(dict(hardwareAccess=False,stage=a.stage)));return
+    if a.stage!='cli-rttcdc' and not a.runtime:p.error('Web execution requires --runtime')
     a.out.mkdir(parents=True,exist_ok=False);report=dict(stage=a.stage,rows=[],passed=False)
     def save():(a.out/'result.json').write_text(json.dumps(report,indent=2),encoding='utf8')
-    w=Web(SimpleNamespace(runtime=a.runtime,artifacts=a.out/'web',case_timeout=240))
+    w=Web(SimpleNamespace(runtime=a.runtime,artifacts=a.out/'web',case_timeout=240)) if a.stage!='cli-rttcdc' else None
     try:
         with Fixture(a.out/'fixture') as f:
-            if a.stage=='hss':
+            if a.stage=='cli-rttcdc':
+                import serial,struct
+                from benchmark_rtt_forward import Reader
+                port=next(p.device for p in comports() if p.vid==0xd28 and p.pid==0x204)
+                for speed in map(int,a.speeds.split(',')):
+                    for repeat in range(a.repeats):
+                        f.prepare_rtt()
+                        assert f.probe.action(0x31,12,b'\x01')[0]==0
+                        assert f.probe.action(0x31,7,struct.pack('<IHBB',speed,2048,0,255))[0]==0
+                        with serial.Serial(port,115200,timeout=.025) as com:
+                            com.reset_input_buffer()
+                            class Observed:
+                                first=last=None;first_bytes=0
+                                def read(self,n):
+                                    raw=com.read(n)
+                                    if raw:
+                                        now=time.perf_counter()
+                                        if self.first is None:self.first=now;self.first_bytes=len(raw)
+                                        self.last=now
+                                    return raw
+                            observed=Observed();reader=Reader(observed);reader.start()
+                            try:
+                                assert f.probe.action(0x31,1,struct.pack('<IIB',0x20000200,256,0))[0]==0
+                                clock=live_clock_snapshot();assert abs(clock['actual_link_Hz']-speed)<10
+                                began=time.perf_counter();f.resume();time.sleep(a.seconds)
+                                published=f.halt_producer();producer_seconds=time.perf_counter()-began
+                                deadline=time.monotonic()+3
+                                while reader.count<published and not reader.error and time.monotonic()<deadline:time.sleep(.01)
+                                assert not reader.error and reader.count==published and not reader.pending,(reader.error,reader.count,published)
+                                assert f.probe.action(0x31,0)[0]==0
+                                rc,final=f.probe.action(0x31,2);assert rc==0 and final[3]==published and not final[5]
+                            finally:
+                                f.mem.write_word(0xe000edf0,0xa05f0003);f.probe.action(0x31,0);reader.quit.set();reader.join(2)
+                            active=observed.last-observed.first;rate=(reader.count-observed.first_bytes)/active
+                            assert final[11]&0xffff==2048
+                            row=dict(speed=speed,repeat=repeat,clock=clock,published=published,received=reader.count,sequenceExact=True,chunkBytes=2048,delayOverride=255,producerSeconds=producer_seconds,firstChunkBytes=observed.first_bytes,activeSeconds=active,activeBytesPerSecond=rate,probeStatus=final)
+                            report['rows'].append(row);save();print(speed,repeat,rate/1e6,'MB/s, all published bytes received',flush=True)
+            elif a.stage=='hss':
                 f.prepare_hss();w.page('scope','show');w.page('scope','describe')
                 w.set('scope','#sc-mock',False);w.set('scope','#sc-target','swd')
                 w.invoke('scope','connectHid',False);w.invoke('scope','connectUsb',False)

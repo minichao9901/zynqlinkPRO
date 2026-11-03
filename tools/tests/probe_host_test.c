@@ -174,6 +174,13 @@ int main(void) {
 #else
     assert(res[3]==(uint8_t)-6 && requested_hz==50000000);
 #endif
-    puts("PASS production probe C: HID, 8 variables, HSS DEF/DATA/gaps, backpressure, RTT wrap/RdOff retry, DAP handoff, ZLP, reset, plan benchmark, explicit clock limits");
+    // Reused DATA storage must not become fictitious USB errors in saved STAT.
+    hss.in=hss.out=0;flags=0;memset(hss.data[0],0xcd,512);
+    produced=123;skipped_base=7;regs[7]=2;swd_errors=3;step=1000;actual_hz=60000000;
+    stat_packet();assert(get32(hss.data[0]+16)==123 && get32(hss.data[0]+20)==9);
+    assert(hss.data[0][28]==0 && hss.data[0][29]==0 && hss.data[0][30]==3);
+    assert(hss.data[0][36]==60);
+    for(unsigned k=37;k<512;k++)assert(hss.data[0][k]==0);
+    puts("PASS production probe C: HID, 8 variables, HSS DEF/DATA/gaps, backpressure, RTT wrap/RdOff retry, DAP handoff, ZLP, reset, plan benchmark, explicit clock limits, STAT reuse");
     return 0;
 }

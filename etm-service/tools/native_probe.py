@@ -15,6 +15,7 @@ import time
 from pathlib import Path
 from flask import abort, jsonify, request
 from native_serial import SerialReceiver
+from native_hss import HssReceiver
 
 
 def drain_dap_replies(device,quiet_ms=80,limit=32):
@@ -67,6 +68,7 @@ class NativeProbe:
         self.hid_lock = threading.RLock()
         self.port_lock = threading.RLock()
         self.hss_stopping = True
+        self.hss_receiver = None
         self.delivery_lock = threading.Condition()
         self.delivery_seen = set()
         self.delivery_cache = {}
@@ -182,6 +184,11 @@ class NativeProbe:
             raise ValueError('本地探针服务要求唯一ZynqDAP；当前数量：' + str(len(devices)))
         return devices[0]
 
+    def _stop_hss_receiver(self):
+        if self.hss_receiver is not None:
+            self.hss_receiver.close()
+            self.hss_receiver = None
+
     def usb_call(self, action, value):
         import usb.core
         import usb.util
@@ -207,6 +214,7 @@ class NativeProbe:
                 if self.usb is not None:
                     # A page reload/reprogram can retain this owner's logical
                     # identity while invalidating its old native OS handle.
+                    self._stop_hss_receiver()
                     for interface in list(self.claimed):
                         try: usb.util.release_interface(self.usb, interface)
                         except usb.core.USBError: pass
@@ -226,6 +234,7 @@ class NativeProbe:
                 if action == 'close':return {'closed':True,'superseded':True}
                 raise ValueError('USB通路已重新打开；拒绝旧会话操作')
             if action == 'close':
+                self._stop_hss_receiver()
                 for interface in list(self.claimed):
                     usb.util.release_interface(device, interface)
                     self.claimed.remove(interface)
@@ -238,6 +247,7 @@ class NativeProbe:
                 if value.get('number') != 1:
                     raise ValueError('只支持配置1')
                 if device.get_active_configuration().bConfigurationValue != 1:
+                    self._stop_hss_receiver()
                     device.set_configuration(1)
                 return self.descriptor(device)
             if action in ('claim', 'release'):
@@ -253,6 +263,7 @@ class NativeProbe:
                         raise
                     return {'ok':True,**synchronized,'atomicDapExchange':1}
                 elif action == 'release' and 0 in self.claimed:
+                    self._stop_hss_receiver()
                     usb.util.release_interface(device, 0)
                     self.claimed.remove(0)
                 return {'ok': True}
@@ -261,12 +272,14 @@ class NativeProbe:
                     raise ValueError('不支持此alternate')
                 return {'ok': True}
             if action == 'reset':
+                self._stop_hss_receiver()
                 device.reset()
                 return {'ok': True}
             ep = value.get('endpoint')
             if action == 'clear':
                 if ep not in (2, 0x81, 0x82, 0x87):
                     raise ValueError('不支持此端点')
+                if ep == 0x87:self._stop_hss_receiver()
                 device.clear_halt(ep)
                 return {'ok': True}
             if 0 not in self.claimed:
@@ -307,17 +320,10 @@ class NativeProbe:
                     except usb.core.USBTimeoutError:
                         return {'data': '', 'timedOut': True}
                 else:
-                    # Read complete HSS packets so a partial large libusb
-                    # timeout cannot silently discard already-received bytes.
-                    deadline = time.monotonic() + .04
-                    while len(data) + 512 <= length and time.monotonic() < deadline:
-                        try:
-                            chunk = bytes(device.read(ep, 512, timeout=10))
-                        except usb.core.USBTimeoutError:
-                            break
-                        data.extend(chunk)
-                        if len(chunk) < 512:
-                            break
+                    read_length = length // 512 * 512
+                    if read_length:
+                        if self.hss_receiver is None:self.hss_receiver=HssReceiver(device)
+                        data.extend(self.hss_receiver.read(read_length))
                 return {'data': self.encode(data), 'timedOut': not data}
             raise ValueError('未知USB动作')
 
