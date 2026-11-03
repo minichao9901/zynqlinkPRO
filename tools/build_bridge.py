@@ -116,6 +116,7 @@ def main(argv=None):
         native=payload/'build-native';native.mkdir()
         for name in ('etm_decode','etm_frontend','etm_storebuild','etm_index','etm_export','etm_framed'):
             shutil.copyfile(ROOT/'etm-service/build-native'/(name+'.exe'),native/(name+'.exe'))
+        shutil.copyfile(ROOT/'etm-service/build-native/libdwarf.dll',native/'libdwarf.dll')
         helpers=work/'hosttools';helpers.mkdir()
         shutil.copyfile(ROOT/'tools/dap_pipeline_bench.py',helpers/'dap_pipeline_bench.py')
         golden=work/'prebuilt/golden';golden.mkdir(parents=True)
@@ -152,8 +153,19 @@ def main(argv=None):
                     source=Path(distribution.locate_file(member))
                     if source.is_file():
                         destination=licenses/name/member.name;destination.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(source,destination)
-        for path in (ROOT/'etm-service/vendor/OpenCSD-1.8.3/LICENSE',ROOT/'etm-service/vendor/OpenCSD-1.8.3/NOTICES.txt',ROOT/'etm-service/native/SQLITE-LICENSE.txt',Path(sys.base_prefix)/'LICENSE.txt'):
+        for path in (ROOT/'etm-service/vendor/OpenCSD-1.8.3/LICENSE',ROOT/'etm-service/vendor/OpenCSD-1.8.3/NOTICES.txt',ROOT/'etm-service/vendor/nlohmann-json-3.11.3/LICENSE.MIT',ROOT/'etm-service/native/SQLITE-LICENSE.txt',Path(sys.base_prefix)/'LICENSE.txt'):
             if path.is_file():shutil.copyfile(path,licenses/(path.parent.name+'-'+path.name))
+        for component,files in [('capstone-5.0.7',('LICENSE.TXT','LICENSE_LLVM.TXT','ZYNQLINK-PROVENANCE.json')),
+                                ('libdwarf-2.3.3',('COPYING','src/lib/libdwarf/LGPL.txt','src/lib/libdwarf/LIBDWARFCOPYRIGHT','ZYNQLINK-PROVENANCE.json'))]:
+            for name in files:
+                source=ROOT/'etm-service/vendor'/component/name
+                if source.is_file():
+                    destination=licenses/component/Path(name).name;destination.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(source,destination)
+        (licenses/'libdwarf-2.3.3/REBUILD.txt').write_text(
+            'Unmodified libdwarf 2.3.3 is distributed as a replaceable native DLL.\n'
+            'Matching source: etm-service/vendor/libdwarf-2.3.3 in this project, with upstream URL and archive SHA in ZYNQLINK-PROVENANCE.json.\n'
+            'Rebuild: cmake -S etm-service -B build/native -G Ninja -DCMAKE_BUILD_TYPE=Release; cmake --build build/native --target dwarf-shared.\n'
+            'Replace _internal/backend/build-native/libdwarf.dll with your ABI-compatible build. No application relinking or signature is required.\n',encoding='utf8')
         readme=('Zynq ETM 工作台\n\n双击 zynq-etm-bridge.exe，浏览器自动打开。请保留整个程序目录（包括_internal）。\n'
             'ETM模式默认使用10 MHz SWD做目标配置；CPU/TRACECLK仍由目标固件决定。\n'
             'Web：载入目标ELF与源码 → 连接探针 → 添加并选择函数起点 → 核对HSE/RCC → 联动采集。\n'

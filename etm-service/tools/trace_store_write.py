@@ -875,7 +875,7 @@ def _validate_native_build_result(build_result, *, inputs, static_dict_sha256):
 
 
 def _write_native(record_dir, store_dir, **kwargs):
-    """原生核心 + facts-v3 + NumPy 完整索引；旧二进制必须明确拒绝。"""
+    """原生完整库/索引；显式 ETM_COMPLETE_INDEX=0 保留 facts/NumPy 对照。"""
     info = native_capabilities()
     capabilities = {str(item) for item in (info.get('capabilities') or ())}
     if 'build' not in capabilities:

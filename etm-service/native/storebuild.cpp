@@ -1,29 +1,27 @@
-// R2 原生 store builder —— M0/M1：prescan 与 native.bin 诊断
+// Native TraceStore builder: binary reference, direct decode and bounded typed replay.
 //
-// 用法：
-//   etm_storebuild --version
-//   etm_storebuild --self-test
-//   etm_storebuild prescan --native <native.bin> [--out <ranges.bin>] [--json <out.json>]
-//                          [--max-unique-ranges N] [--limit-records N]
-//   etm_storebuild diagnose --native <native.bin> --static <static-dict.bin>
-//                           [--ranges <ranges.bin>] [--json <out.json>]
-//                           [--checkpoint-instructions N] [--max-run-instructions N]
-//                           [--limit-records N]
-//   etm_storebuild inspect-static --static <static-dict.bin> [--json <out.json>]
+//   etm_storebuild --version | --self-test
+//   etm_storebuild --self-test-shared-tracker | --self-test-replay-cache
+//   etm_storebuild prescan --native <native.bin> --out <ranges.bin>
+//   etm_storebuild prescan --etm <etm.bin> --config <config.txt> --out <ranges.bin>
+//   etm_storebuild build (--native <native.bin> | --etm <etm.bin> --config <config.txt>)
+//       --static <static.bin> --out-dir <generation> [--facts-out <facts.bin>]
+//       [--prepare-static <ready.json> --ranges-out <ranges.bin> --owner-pid <pid>]
 //
-// 本文件只实现 M0/M1（预扫描 + 诊断），不写 store.bin；完整 build 在 t16。
-// 设计：docs/etm-r2-native-builder-design.md §1–§4、§7.1、§8、§11。
-//
-// 结构约束：
-// * native.bin 单遍流式读取；元素/包/状态记录在同一循环内完成解析与计数；
-// * 不逐指令调用 Python / 不逐条输出 JSON；只在最终阶段输出一个 JSON；
-// * 静态字典在 native 流之前一次性读入；诊断的 run/谓词/周期状态机全部在 C++ 内完成。
+// Prepared mode decodes once into bounded private RAM, publishes the unique ranges,
+// then waits for <static.bin>.ready before replaying into the builder. Python owns
+// the worker and static metadata preparation; no per-instruction Python callbacks.
+// An unpublished generation is never a completed record. CRC/SHA and quality
+// diagnostics remain mandatory in the product profile.
 
+#include "decoder_sink.hpp"
 #include <algorithm>
 #include <array>
 #include <chrono>
 #include <cstdint>
 #include <cstdio>
+#include <cstdlib>
+#include <thread>
 #include <openssl/sha.h>
 #include <cstring>
 #include <filesystem>
@@ -41,17 +39,33 @@
 #include <unordered_map>
 #include <tuple>
 #include <vector>
+#include <deque>
+#include <regex>
+#include <charconv>
+#include <cmath>
+#include <ctime>
+#include <functional>
+#include <numeric>
+#include <atomic>
+#include <mutex>
+#include "../vendor/nlohmann-json-3.11.3/json.hpp"
+#include <capstone/capstone.h>
+#include <libdwarf.h>
+#include <dwarf.h>
 
 #if defined(_WIN32)
 #include <windows.h>
 #include <psapi.h>
+#include <io.h>
 #else
 #include <sys/resource.h>
+#include <unistd.h>
 #endif
 
 namespace fs = std::filesystem;
 
 namespace {
+using Json = nlohmann::ordered_json;
 
 fs::path file_path(const std::string& name) {
     auto path = fs::u8path(name);
@@ -643,6 +657,8 @@ struct RangeRecord {
     uint32_t payload = 0;
 };
 
+#include "native_image.hpp"
+
 bool is_event_type(uint16_t type) {
     for (uint16_t item : kEventTypes) if (item == type) return true;
     return false;
@@ -925,6 +941,308 @@ NativeCounters read_native(const std::string& name, bool collect_ranges,
     }
     return counters;
 }
+
+// Direct OpenCSD input shares the builder visitor; no native record serialization.
+// Bounded transient typed replay. Common ranges carry only a plan ID and
+// offset; packet bytes and rare events retain their original visitor fields.
+// This is private RAM, never a second persisted trace representation.
+class ReplayCache final : public NativeVisitor {
+public:
+    explicit ReplayCache(uint64_t limit = 1ull << 30) : limit_(limit) {}
+    std::vector<RangeRecord> ranges;
+    uint64_t bytes = 0;
+    void on_range(uint32_t offset, uint64_t start, uint64_t end, uint32_t payload,
+                  uint8_t executed, uint32_t cycles) override {
+        const uint64_t key = (start << 32) | end;
+        auto found = plans_.find(key);
+        uint32_t id;
+        if (found == plans_.end()) {
+            id = static_cast<uint32_t>(ranges.size());
+            if (id >= 1000000) fail(kExitIo, "Replay cache has too many unique ranges");
+            plans_.emplace(key, id);
+            ranges.push_back({static_cast<uint32_t>(start), static_cast<uint32_t>(end), payload});
+        } else id = found->second;
+        if (ranges[id].payload != payload) {
+            auto* out = allocate(22); *out++ = 6;
+            put(out, offset); put(out, static_cast<uint32_t>(start)); put(out, static_cast<uint32_t>(end));
+            put(out, payload); put(out, cycles); *out = executed; return;
+        }
+        const bool wide = id >= 65536;
+        auto* out = allocate(1 + (wide ? 4 : 2) + 4 + (cycles ? 4 : 0));
+        *out++ = 1 | (cycles ? 16 : 0) | (executed ? 0 : 32) | (wide ? 64 : 0);
+        if (wide) put(out, id); else put(out, static_cast<uint16_t>(id));
+        put(out, offset); if (cycles) put(out, cycles);
+    }
+    void on_cycle(uint32_t offset, uint32_t cycles, uint32_t payload) override {
+        auto* out = allocate(13); *out++ = 2; put(out, offset); put(out, cycles); put(out, payload);
+    }
+    void on_event(uint16_t type, uint32_t offset, uint32_t payload, uint64_t start,
+                  uint64_t end, uint32_t flags, const std::string& text) override {
+        if (text.size() > 65535) fail(kExitInput, "Replay event text exceeds limit");
+        auto* out = allocate(33 + text.size()); *out++ = 3;
+        put(out, type); put(out, offset); put(out, payload); put(out, start); put(out, end);
+        put(out, flags); put(out, static_cast<uint16_t>(text.size()));
+        std::memcpy(out, text.data(), text.size());
+    }
+    void on_other(uint16_t type, uint32_t offset) override {
+        auto* out = allocate(7); *out++ = 4; put(out, type); put(out, offset);
+    }
+    void on_packet(uint32_t offset, uint32_t size, uint32_t type, const uint8_t* data) override {
+        auto* out = allocate(13ull + size); *out++ = 5;
+        put(out, offset); put(out, size); put(out, type); std::memcpy(out, data, size);
+    }
+    void replay(NativeVisitor& visitor) const {
+        for (size_t block = 0; block < blocks_.size(); ++block) {
+            const auto* in = blocks_[block].data();
+            const auto* end = in + used_[block];
+            while (in < end) {
+                const uint8_t kind = *in++;
+                if ((kind & 15) == 1) {
+                    const uint32_t id = (kind & 64) ? take<uint32_t>(in) : take<uint16_t>(in);
+                    const uint32_t offset = take<uint32_t>(in);
+                    const uint32_t cycles = (kind & 16) ? take<uint32_t>(in) : 0;
+                    const auto& plan = ranges.at(id);
+                    visitor.on_range(offset, plan.start, plan.end, plan.payload, (kind & 32) ? 0 : 1, cycles);
+                } else if (kind == 2) {
+                    auto offset = take<uint32_t>(in); auto cycles = take<uint32_t>(in); auto payload = take<uint32_t>(in);
+                    visitor.on_cycle(offset, cycles, payload);
+                } else if (kind == 3) {
+                    auto type = take<uint16_t>(in); auto offset = take<uint32_t>(in); auto payload = take<uint32_t>(in);
+                    auto start = take<uint64_t>(in); auto stop = take<uint64_t>(in); auto flags = take<uint32_t>(in);
+                    auto length = take<uint16_t>(in);
+                    visitor.on_event(type, offset, payload, start, stop, flags, std::string(reinterpret_cast<const char*>(in), length));
+                    in += length;
+                } else if (kind == 4) {
+                    auto type = take<uint16_t>(in); auto offset = take<uint32_t>(in); visitor.on_other(type, offset);
+                } else if (kind == 5) {
+                    auto offset = take<uint32_t>(in); auto length = take<uint32_t>(in); auto type = take<uint32_t>(in);
+                    visitor.on_packet(offset, length, type, in); in += length;
+                } else if (kind == 6) {
+                    auto offset = take<uint32_t>(in); auto start = take<uint32_t>(in); auto stop = take<uint32_t>(in);
+                    auto payload = take<uint32_t>(in); auto cycles = take<uint32_t>(in); auto executed = *in++;
+                    visitor.on_range(offset, start, stop, payload, executed, cycles);
+                } else fail(kExitConsistency, "Unknown private replay record");
+            }
+            if (in != end) fail(kExitConsistency, "Private replay record exceeds block");
+        }
+    }
+private:
+    uint64_t limit_;
+    std::unordered_map<uint64_t, uint32_t> plans_;
+    std::vector<std::vector<uint8_t>> blocks_;
+    std::vector<size_t> used_;
+    template <class T> static void put(uint8_t*& out, T value) { std::memcpy(out, &value, sizeof(value)); out += sizeof(value); }
+    template <class T> static T take(const uint8_t*& in) { T value; std::memcpy(&value, in, sizeof(value)); in += sizeof(value); return value; }
+    uint8_t* allocate(size_t size) {
+        if (size > limit_ || bytes > limit_ - size)
+            fail(kExitIo, "Typed replay exceeds 1 GiB; use ETM_BUFFERED_DECODE=0 for bounded streaming replay");
+        if (blocks_.empty() || blocks_.back().size() - used_.back() < size) {
+            blocks_.emplace_back(std::max<size_t>(8u << 20, size)); used_.push_back(0);
+        }
+        auto* result = blocks_.back().data() + used_.back(); used_.back() += size; bytes += size;
+        return result;
+    }
+};
+
+class ReplayDigest final : public NativeVisitor {
+public:
+    FastSha256 hash;
+    template <class T> void put(const T& value) { hash.update(&value, sizeof(value)); }
+    void on_range(uint32_t offset, uint64_t start, uint64_t end, uint32_t payload, uint8_t executed, uint32_t cycles) override {
+        put(uint8_t(1)); put(offset); put(start); put(end); put(payload); put(executed); put(cycles);
+    }
+    void on_cycle(uint32_t offset, uint32_t cycles, uint32_t payload) override {
+        put(uint8_t(2)); put(offset); put(cycles); put(payload);
+    }
+    void on_event(uint16_t type, uint32_t offset, uint32_t payload, uint64_t start, uint64_t end, uint32_t flags, const std::string& text) override {
+        put(uint8_t(3)); put(type); put(offset); put(payload); put(start); put(end); put(flags); put(uint64_t(text.size()));
+        hash.update(text.data(), text.size());
+    }
+    void on_other(uint16_t type, uint32_t offset) override { put(uint8_t(4)); put(type); put(offset); }
+    void on_packet(uint32_t offset, uint32_t size, uint32_t type, const uint8_t* raw) override {
+        put(uint8_t(5)); put(offset); put(size); put(type); hash.update(raw, size);
+    }
+};
+void self_test_replay_cache() {
+    ReplayCache cache;
+    ReplayDigest expected, actual;
+    for (uint32_t i = 0; i < 70000; ++i) {
+        uint64_t pc = 0x1000 + 4 * i;
+        cache.on_range(i, pc, pc + 2, 1, i % 2, i % 19);
+        expected.on_range(i, pc, pc + 2, 1, i % 2, i % 19);
+    }
+    const std::string text = "异常返回 / cache boundary";
+    std::vector<uint8_t> packet((8u << 20) + 17, 0xA5);
+    for (NativeVisitor* visitor : std::vector<NativeVisitor*>{&cache, &expected}) {
+        visitor->on_packet(42, static_cast<uint32_t>(packet.size()), 17, packet.data());
+        visitor->on_event(9, 123, 22, 1ull << 40, (1ull << 40) + 7, (1u << 12) | (1u << 6), text);
+        visitor->on_cycle(124, 0xFFFFFFFFu, 17);
+        visitor->on_other(0xFFFFu, 125);
+        visitor->on_range(126, 0x1000, 0x1002, 2, 1, 0); // payload variant uses the full record
+        visitor->on_range(127, 0x1000, 0x1002, 1, 0, 7);
+    }
+    cache.replay(actual);
+    if (expected.hash.hex_digest() != actual.hash.hex_digest())
+        fail(kExitConsistency, "Typed replay fields differ across wide IDs/block rotation");
+    bool rejected = false;
+    try { ReplayCache tiny(16); tiny.on_packet(0, 64, 0, packet.data()); }
+    catch (const BuildError&) { rejected = true; }
+    if (!rejected) fail(kExitConsistency, "Typed replay failed to enforce memory bound");
+}
+
+class DirectSink final : public etm_decode::Sink {
+public:
+    NativeCounters counters;
+    bool collect_ranges;
+    std::vector<RangeRecord>* ranges;
+    uint64_t max_unique_ranges;
+    NativeVisitor* visitor;
+    std::unordered_map<uint64_t, uint32_t> range_index;
+    DirectSink(bool collect, std::vector<RangeRecord>* out, uint64_t maximum, NativeVisitor* v)
+        : collect_ranges(collect), ranges(out), max_unique_ranges(maximum), visitor(v) {
+        if (ranges) ranges->clear();
+    }
+    void packet(uint64_t offset, uint32_t type_code, uint32_t size, const uint8_t* raw) override {
+        ++counters.saw_records;
+            ++counters.saw_packets;
+            if (offset < counters.previous_packet_offset)
+                fail(kExitInput, "native.bin packet offsets are not ordered");
+            counters.previous_packet_offset = offset;
+            const uint64_t stop = offset + size;
+            counters.packet_overlap += std::min<uint64_t>(size,
+                counters.packet_end > offset ? counters.packet_end - offset : 0);
+            if (stop > counters.packet_end)
+                counters.packet_covered += stop - std::max(offset, counters.packet_end);
+            counters.packet_end = std::max(counters.packet_end, stop);
+            if (packet_is_unsync(type_code, counters.header.protocol)) counters.unsync_bytes += size;
+            if (packet_is_unsync(type_code, counters.header.protocol)) ++counters.packet_unsync;
+            if (packet_is_invalid(type_code, counters.header.protocol)) {
+                ++counters.packet_invalid;
+                if (packet_is_overflow(type_code, counters.header.protocol)) ++counters.packet_overflow;
+                counters.packet_faults.push_back({offset, size, type_code});
+            }
+            if (visitor) {
+                visitor->on_packet(static_cast<uint32_t>(offset), size, type_code,
+                                   raw);
+            }
+
+    }
+    void element(const etm_decode::ElemView& e, const char* text) override {
+        ++counters.saw_records;
+        ++counters.saw_elements;
+        const auto etype = e.etype;
+        const auto element_offset = e.offset;
+        const auto payload = e.payload;
+        const auto last_executed = e.last_exec;
+        const auto cycle_count = e.cycle;
+        const auto start = e.start, end = e.end;
+        const auto flags = e.flags;
+        const size_t text_bytes = std::strlen(text);
+        const std::string element_text(text, text_bytes);
+        counters.type_counts[etype]++;
+        counters.text_bytes += text_bytes;
+        if (etype == kElementInstrRange) {
+            if (!counters.range_records) counters.first_range_offset = element_offset;
+            counters.logical_seq += payload;
+        } else if (is_event_type(etype)) {
+            counters.logical_events.push_back({counters.logical_seq++, element_offset});
+        }
+        if (visitor) {
+            if (etype == kElementInstrRange) {
+                visitor->on_range(static_cast<uint32_t>(element_offset), start, end, payload, last_executed, cycle_count);
+            } else if (etype == kElementCycleCount) {
+                visitor->on_cycle(static_cast<uint32_t>(element_offset), cycle_count, payload);
+            } else if (is_event_type(etype)) {
+                visitor->on_event(etype, static_cast<uint32_t>(element_offset), payload, start, end, flags, element_text);
+            } else {
+                visitor->on_other(etype, static_cast<uint32_t>(element_offset));
+            }
+        }
+        if (etype == kElementInstrRange) {
+            ++counters.range_records;
+            if (start > 0xFFFFFFFFull || end > 0xFFFFFFFFull) {
+                fail(kExitInput, "native.bin 范围地址超出 32 位");
+            }
+            if (end <= start) fail(kExitInput, "native.bin 范围 end <= start");
+            if (payload == 0) fail(kExitInput, "native.bin 范围 payload 为 0");
+            if (collect_ranges) {
+                const uint64_t key = (start << 32) | end;
+                auto found = range_index.find(key);
+                if (found == range_index.end()) {
+                    if (ranges->size() >= max_unique_ranges) {
+                        fail(kExitIo, "唯一范围数超过上限 " + std::to_string(max_unique_ranges));
+                    }
+                    range_index.emplace(key, static_cast<uint32_t>(ranges->size()));
+                    ranges->push_back({static_cast<uint32_t>(start), static_cast<uint32_t>(end),
+                                       payload});
+                } else {
+                    ++counters.duplicate_ranges;
+                    const RangeRecord& existing = ranges->at(found->second);
+                    if (existing.payload != payload) ++counters.payload_mismatches;
+                }
+            }
+        } else if (etype == kElementCycleCount) {
+            ++counters.cycle_elements;
+            counters.cycle_sum += cycle_count;
+        } else if (is_event_type(etype)) {
+            ++counters.event_elements;
+            if (etype == 9) ++counters.exceptions;
+            if (is_boundary_type(etype)) ++counters.boundaries;
+            if (is_gap_type(etype) || (etype == 2 && payload)) ++counters.gaps;
+            (void)flags;
+        } else {
+            ++counters.other_elements;
+        }
+
+    }
+    void status(uint32_t processed, int code, const char* library, const char* error) override {
+        counters.status.processed = processed;
+        counters.status.last_error_code = code;
+        counters.status.library = library;
+        counters.status.last_error = error;
+        counters.status.element_count = counters.saw_elements;
+        counters.status.packet_count = counters.saw_packets;
+        counters.status.present = true;
+    }
+};
+
+NativeCounters read_direct(const std::string& trace, const std::string& config,
+                          bool collect, std::vector<RangeRecord>* ranges,
+                          uint64_t maximum, std::ostream* range_out, NativeVisitor* visitor) {
+    DirectSink sink(collect, ranges, maximum, visitor);
+    std::ifstream cfg(fs::u8path(config));
+    std::string first;
+    if (!(cfg >> first)) fail(kExitInput, "Cannot read decoder config");
+    sink.counters.header.protocol = first == "ETMv3" ? 2 : 1;
+    std::ifstream input(fs::u8path(trace), std::ios::binary);
+    if (!input) fail(kExitInput, "Cannot read ETM input");
+    FastSha256 hash;
+    std::vector<char> buffer(1 << 20);
+    while (input) {
+        input.read(buffer.data(), buffer.size());
+        auto n = input.gcount();
+        if (n > 0) { hash.update(buffer.data(), n); sink.counters.native_bytes += n; }
+    }
+    if (etm_decode::decode(trace, config, sink) != 0 || !sink.counters.status.present)
+        fail(kExitInput, "Direct OpenCSD decode failed");
+    auto& c = sink.counters;
+    c.native_sha256 = hash.hex_digest();
+    c.header.record_count = c.saw_records;
+    c.header.element_count = c.saw_elements;
+    c.header.packet_count = c.saw_packets;
+    c.unique_ranges = ranges ? ranges->size() : 0;
+    if (range_out && ranges) {
+        range_out->write("R2RANGES1", 9);
+        write_u64(*range_out, ranges->size());
+        write_u64(*range_out, c.range_records);
+        for (const auto& r : *ranges) {
+            write_u32(*range_out, r.start); write_u32(*range_out, r.end); write_u32(*range_out, r.payload);
+        }
+        if (!*range_out) fail(kExitIo, "Writing direct ranges failed");
+    }
+    return c;
+}
+
 
 // ── 诊断状态机（与 trace_store_write._Assembler 同义）────────────────────────
 
@@ -1216,23 +1534,12 @@ struct DiagnoseVisitor : NativeVisitor {
 constexpr uint16_t trace_store_strings = 1;
 constexpr uint16_t trace_store_static = 2;
 uint32_t crc32_bytes(const uint8_t* data, size_t size) {
-    static uint32_t table[256];
-    static bool ready = false;
-    if (!ready) {
-        for (uint32_t index = 0; index < 256; ++index) {
-            uint32_t value = index;
-            for (int bit = 0; bit < 8; ++bit) {
-                value = (value & 1) ? (0xEDB88320u ^ (value >> 1)) : (value >> 1);
-            }
-            table[index] = value;
-        }
-        ready = true;
+    uLong result = crc32(0, Z_NULL, 0);
+    while (size) {
+        const auto take = static_cast<uInt>(std::min<size_t>(size, std::numeric_limits<uInt>::max()));
+        result = crc32(result, data, take); data += take; size -= take;
     }
-    uint32_t crc = 0xFFFFFFFFu;
-    for (size_t index = 0; index < size; ++index) {
-        crc = table[(crc ^ data[index]) & 0xFF] ^ (crc >> 8);
-    }
-    return crc ^ 0xFFFFFFFFu;
+    return static_cast<uint32_t>(result);
 }
 
 void wv(std::vector<uint8_t>& out, uint64_t value) {
@@ -1269,6 +1576,7 @@ struct BuildBlock {
 };
 
 struct BuildOutput {
+    uint32_t required_features = 0, optional_features = 0;
     std::vector<std::array<uint64_t, 3>> predicate_issues;
     std::vector<BuildBlock> blocks;
     uint64_t generation_tag = 0;
@@ -1321,8 +1629,13 @@ struct BuildOutput {
 };
 
 
+struct FlameNode;
+
 struct TrackerFrame {
     std::string function;
+    mutable uint32_t path_node = 0xFFFFFFFFu;
+    mutable FlameNode* flame_node = nullptr;
+    uint32_t origin_stat = 0xFFFFFFFFu;
     bool has_return = false;
     uint64_t return_pc = 0;
     bool has_origin = false;
@@ -1330,6 +1643,7 @@ struct TrackerFrame {
 };
 
 struct TrackerPrevious {
+    uint32_t function_stat = 0xFFFFFFFFu;
     bool valid = false;
     uint64_t pc = 0;
     uint32_t size = 0;
@@ -1399,9 +1713,15 @@ struct FlameNode {
     }
 };
 
+struct StackObserver {
+    virtual ~StackObserver() = default;
+    virtual void on_stack(const std::vector<TrackerFrame>& frames, size_t context_depth) = 0;
+};
+
 class Tracker {
   public:
     Tracker() { root_.name = "已恢复执行区间"; }
+    void set_observer(StackObserver* observer) { observer_ = observer; }
     void set_analysis(bool enabled) { analysis_enabled_ = enabled; }
     void clear_all(bool clear_expected = true) {
         stack_.clear();
@@ -1508,6 +1828,7 @@ class Tracker {
         } else if (analysis_enabled_) {
             s_ptr = &statistics(fn);
         }
+        const uint32_t function_stat = analysis_enabled_ ? static_cast<uint32_t>(s_ptr - stats_.data()) : 0xFFFFFFFFu;
         TrackerStats& s = analysis_enabled_ ? *s_ptr : dummy_stats_;
         if (has_expected_) {
             if (pc != (expected_ & ~1ull)) {
@@ -1529,7 +1850,7 @@ class Tracker {
             sync();
         }
         if (previous_.valid && previous_.executed == 0) {
-            const std::string old_fn = previous_.function.empty() ? "(未知函数)"
+            const std::string& old_fn = previous_.function.empty() ? unknown_function
                                                                    : previous_.function;
             if (previous_.flow == kFlowCall) {
                 TrackerFrame frame;
@@ -1538,8 +1859,9 @@ class Tracker {
                 frame.return_pc = previous_.pc + previous_.size;
                 frame.has_origin = true;
                 frame.origin = fn;
+                frame.origin_stat = function_stat;
                 stack_.push_back(std::move(frame));
-                if (analysis_enabled_) { ++s.calls; add_edge(old_fn, fn, "call"); }
+                if (analysis_enabled_) { ++s.calls; add_edge(old_fn, fn, "call", previous_.function_stat, function_stat); }
                 sync();
             } else if (previous_.flow == kFlowReturn || previous_.flow == kFlowBranch) {
                 int match = -1;
@@ -1553,15 +1875,17 @@ class Tracker {
                     if (analysis_enabled_) {
                         for (size_t index = static_cast<size_t>(match); index < stack_.size(); ++index) {
                             if (stack_[index].has_origin) {
-                                ++statistics(stack_[index].origin).closed_calls;
+                                ++stats_[stack_[index].origin_stat].closed_calls;
                             }
                         }
                     }
                     stack_.resize(static_cast<size_t>(match));
                     sync();
                 } else if (old_fn != fn && previous_.flow == kFlowBranch) {
-                    if (analysis_enabled_) { ++s.tail_transfers; add_edge(old_fn, fn, "tail-transfer"); }
+                    if (analysis_enabled_) { ++s.tail_transfers; add_edge(old_fn, fn, "tail-transfer", previous_.function_stat, function_stat); }
                     stack_.back().function = fn;
+                    stack_.back().path_node = 0xFFFFFFFFu;
+                    stack_.back().flame_node = nullptr;
                     sync();
                 } else if (old_fn != fn) {
                     stack_.clear();
@@ -1598,9 +1922,9 @@ class Tracker {
             if (!path_nodes_valid_) {
                 path_nodes_.clear();
                 for (const TrackerFrame& frame : stack_) {
-                    FlameNode* child = node->child(frame.function);
-                    path_nodes_.push_back(child);
-                    node = child;
+                    if (!frame.flame_node) frame.flame_node = node->child(frame.function);
+                    node = frame.flame_node;
+                    path_nodes_.push_back(node);
                 }
                 path_nodes_valid_ = true;
             }
@@ -1628,6 +1952,7 @@ class Tracker {
             hot->unknown += executed == 2;
             hot->cycles += cycles;
         }
+        previous_.function_stat = function_stat;
         previous_.valid = true;
         previous_.pc = pc;
         previous_.size = size;
@@ -1652,22 +1977,22 @@ class Tracker {
         return stats_.back();
     }
     void add_edge(const std::string& caller, const std::string& callee,
-                  const std::string& kind) {
-        const std::string key = caller + "\x1f" + callee + "\x1f" + kind;
-        auto found = edge_index_.find(key);
-        if (found == edge_index_.end()) {
+                  const std::string& kind, uint32_t caller_id, uint32_t callee_id) {
+        // Function IDs are stable across vector growth and exception contexts.
+        auto& index = kind == "call" ? call_edge_index_ : tail_edge_index_;
+        const uint64_t key = (static_cast<uint64_t>(caller_id) << 32) | callee_id;
+        auto found = index.find(key);
+        if (found == index.end()) {
             edges_.push_back(TrackerEdge{caller, callee, kind, 1});
-            edge_index_.emplace(key, edges_.size() - 1);
-        } else {
-            ++edges_[found->second].count;
-        }
+            index.emplace(key, edges_.size() - 1);
+        } else ++edges_[found->second].count;
     }
     void sync() {
         path_nodes_.clear();
         path_nodes_valid_ = false;
-        path_.clear();
-        for (const TrackerFrame& frame : stack_) path_.push_back(frame.function);
+        if (observer_) observer_->on_stack(stack_, contexts_.size());
     }
+    StackObserver* observer_ = nullptr;
     std::vector<TrackerFrame> stack_;
     std::vector<TrackerContext> contexts_;
     TrackerPrevious previous_;
@@ -1683,11 +2008,10 @@ class Tracker {
     std::vector<TrackerHotspot> hotspots_;
     std::unordered_map<std::string, size_t> hotspot_index_;
     std::vector<TrackerEdge> edges_;
-    std::unordered_map<std::string, size_t> edge_index_;
+    std::unordered_map<uint64_t, size_t> call_edge_index_, tail_edge_index_;
     FlameNode root_;
     std::vector<FlameNode*> path_nodes_;
     bool path_nodes_valid_ = false;
-    std::vector<std::string> path_;
 };
 
 std::string flame_json(const FlameNode& node) {
@@ -1847,7 +2171,7 @@ struct FactsLabelTable {
 };
 
 // `_PathTracker` 的逐行等价移植（事件/指令喂入、sync 变化时切路径区间）。
-class PathTracker {
+class PathTracker : public StackObserver {
   public:
     struct Frame {
         std::string function;
@@ -1876,10 +2200,34 @@ class PathTracker {
     bool dirty() const { return dirty_; }
     void clear_dirty() { dirty_ = false; }
     uint32_t leaf() const { return leaf_; }
-    size_t context_depth() const { return contexts_.size(); }
+    size_t context_depth() const { return external_ ? external_depth_ : contexts_.size(); }
+    void follow_tracker() { external_ = true; }
+    void on_stack(const std::vector<TrackerFrame>& frames, size_t depth) override {
+        external_depth_ = depth;
+        // Frames retain their interned path node across calls, returns and
+        // exception context saves. Only newly pushed/renamed frames need work.
+        size_t begin = frames.size();
+        while (begin && frames[begin - 1].path_node == 0xFFFFFFFFu) --begin;
+        uint32_t node = begin ? frames[begin - 1].path_node : 0;
+        for (size_t i = begin; i < frames.size(); ++i) {
+            const uint32_t label = labels_.intern(frames[i].function);
+            const uint64_t key = (static_cast<uint64_t>(node) << 32) | label;
+            auto found = children_.find(key);
+            if (found == children_.end()) {
+                const uint32_t next = static_cast<uint32_t>(nodes_.size());
+                nodes_.push_back(std::make_pair(static_cast<int32_t>(node), label));
+                children_.emplace(key, next);
+                node = next;
+            } else node = found->second;
+            frames[i].path_node = node;
+        }
+        leaf_ = node;
+        dirty_ = true;
+    }
     uint64_t unknown_restarts() const { return unknown_restarts_; }
     const std::vector<std::pair<int32_t, uint32_t>>& nodes() const { return nodes_; }
     void feed_event(uint16_t etype, uint32_t flags, uint64_t payload, uint64_t end) {
+        if (external_) return;
         if (etype == 1 || etype == 2 || etype == 6 || etype == 7 || etype == 8) {
             stack_.clear();
             contexts_.clear();
@@ -1922,6 +2270,7 @@ class PathTracker {
     }
     void feed_instruction(const std::string& function, uint8_t executed, uint8_t flow,
                           uint64_t pc, uint32_t size) {
+        if (external_) return;
         static const std::string unknown_function = "(未知函数)";
         const std::string& fn = function.empty() ? unknown_function : function;
         if (flow == kFlowLinear && previous_.valid && previous_.flow == kFlowLinear
@@ -1951,7 +2300,7 @@ class PathTracker {
             sync();
         }
         if (previous_.valid && previous_.executed == 0) {
-            const std::string old_fn = previous_.function.empty() ? "(未知函数)"
+            const std::string& old_fn = previous_.function.empty() ? unknown_function
                                                                  : previous_.function;
             if (previous_.flow == kFlowCall) {
                 Frame frame;
@@ -1995,7 +2344,6 @@ class PathTracker {
         if (stack_.size() > 128) {
             fail(kExitConsistency, "调用层级超过 128，拒绝生成可能失真的调用图");
         }
-        previous_ = Previous();
         previous_.valid = true;
         previous_.pc = pc;
         previous_.size = size;
@@ -2005,9 +2353,10 @@ class PathTracker {
     }
 
   private:
-    void sync() {
+    void sync() { sync_stack(stack_); }
+    template <class Frames> void sync_stack(const Frames& frames) {
         uint32_t node = 0;
-        for (const Frame& frame : stack_) {
+        for (const auto& frame : frames) {
             const uint32_t label = labels_.intern(frame.function);
             const uint64_t key = (static_cast<uint64_t>(node) << 32) | label;
             auto found = children_.find(key);
@@ -2025,6 +2374,8 @@ class PathTracker {
         dirty_ = true;
         ++sync_count_;
     }
+    bool external_ = false;
+    size_t external_depth_ = 0;
     FactsLabelTable& labels_;
     std::vector<Frame> stack_;
     std::vector<Context> contexts_;
@@ -2038,6 +2389,49 @@ class PathTracker {
     bool dirty_ = false;
     uint64_t sync_count_ = 0;
 };
+
+// Differential oracle for shared state, including nested exceptions and
+// unknown/predicated execution. The old state machine remains independent.
+void self_test_shared_tracker() {
+    if (crc32_bytes(reinterpret_cast<const uint8_t*>("123456789"), 9) != 0xCBF43926u)
+        fail(kExitConsistency, "CRC32 known vector differs");
+    FactsLabelTable labels, oracle_labels;
+    PathTracker path(labels), oracle(oracle_labels);
+    Tracker tracker;
+    path.follow_tracker(); tracker.set_observer(&path);
+    auto verify = [&]() {
+        if (path.leaf() != oracle.leaf() || path.nodes() != oracle.nodes()
+                || labels.values != oracle_labels.values
+                || path.context_depth() != oracle.context_depth()
+                || path.dirty() != oracle.dirty())
+            fail(kExitConsistency, "shared tracker differs from independent path oracle");
+        path.clear_dirty(); oracle.clear_dirty();
+    };
+    auto event = [&](uint16_t type, uint32_t flags, uint32_t payload, uint64_t end) {
+        tracker.feed_event(type, flags, payload, end);
+        oracle.feed_event(type, flags, payload, end); verify();
+    };
+    uint32_t seed = 0x92a3751;
+    auto random = [&]() { seed = seed * 1664525u + 1013904223u; return seed; };
+    for (uint32_t i = 0; i < 50000; ++i) {
+        if (i % 64 == 0) { event(1, 0, 0, 0); continue; }
+        uint32_t r = random();
+        if ((r & 7) == 0) {
+            const uint16_t types[] = {1, 2, 6, 7, 8, 9, 10};
+            event(types[(r >> 8) % 7], ((r & 16) ? 1u << 12 : 0) | ((r & 32) ? 1u << 6 : 0),
+                  (r >> 16) % 16, 0x1000 + ((r >> 5) % 32) * 2);
+            continue;
+        }
+        const uint32_t site = (r >> 8) % 32;
+        const uint64_t pc = 0x1000 + site * 2;
+        const uint8_t flow = site % 5, state = (r >> 24) % 3;
+        const std::string function = site < 2 ? std::string() : "function-" + std::to_string(site / 4);
+        tracker.feed_instruction(function, "file.c", true, true, site + 1,
+                                 state, flow, pc, 2, (r & 64) ? 4 : 0, site);
+        oracle.feed_instruction(function.empty() ? "(未知函数)" : function, state, flow, pc, 2);
+        verify();
+    }
+}
 
 // facts 落盘：4 MiB 缓冲 + 临时文件 rename（失败删除半成品）。
 class FactsSink {
@@ -2423,7 +2817,8 @@ struct V2Table {
 
 std::vector<uint8_t> zlib_compress(const std::vector<uint8_t>& input, int level = 6);
 
-std::vector<uint8_t> encode_v2_payload(const std::vector<V2Table>& tables) {
+std::vector<uint8_t> encode_v2_payload(const std::vector<V2Table>& tables, int level = 6,
+                                       unsigned workers = 1) {
     std::vector<std::string> names;
     names.reserve(tables.size());
     for (const V2Table& table : tables) names.push_back(table.name);
@@ -2438,12 +2833,33 @@ std::vector<uint8_t> encode_v2_payload(const std::vector<V2Table>& tables) {
     }
     const uint32_t count = static_cast<uint32_t>(names.size());
     std::vector<uint8_t> directory(static_cast<size_t>(count) * 64, 0);
-    std::vector<std::vector<uint8_t>> blobs;
-    blobs.reserve(count);
+    std::vector<std::vector<uint8_t>> blobs(count);
+    std::vector<uint32_t> checksums(count);
+    std::atomic<size_t> next{0};
+    std::exception_ptr failure;
+    std::mutex failure_mutex;
+    auto compress_tables = [&]() {
+        try {
+            for (size_t i; (i = next.fetch_add(1)) < names.size();) {
+                const auto& raw = by_name.at(names[i])->raw;
+                blobs[i] = zlib_compress(raw, level);
+                checksums[i] = crc32_bytes(raw.data(), raw.size());
+            }
+        } catch (...) {
+            std::lock_guard<std::mutex> lock(failure_mutex);
+            if (!failure) failure = std::current_exception();
+        }
+    };
+    std::vector<std::thread> threads;
+    for (unsigned i = 1; i < std::min<unsigned>(4, workers); ++i)
+        threads.emplace_back(compress_tables);
+    compress_tables();
+    for (auto& thread : threads) thread.join();
+    if (failure) std::rethrow_exception(failure);
     uint64_t data_offset = 20 + directory.size() + names_area.size();
     for (size_t index = 0; index < names.size(); ++index) {
         const V2Table& table = *by_name.at(names[index]);
-        std::vector<uint8_t> blob = zlib_compress(table.raw);
+        const auto& blob = blobs[index];
         uint8_t* row = directory.data() + index * 64;
         uint32_t off = name_offset.at(names[index]);
         uint16_t name_bytes = static_cast<uint16_t>(names[index].size());
@@ -2458,10 +2874,9 @@ std::vector<uint8_t> encode_v2_payload(const std::vector<V2Table>& tables) {
         const uint64_t uncompressed = table.raw.size();
         std::memcpy(row + 36, &compressed, 8);
         std::memcpy(row + 44, &uncompressed, 8);
-        const uint32_t crc = crc32_bytes(table.raw.data(), table.raw.size());
+        const uint32_t crc = checksums[index];
         std::memcpy(row + 52, &crc, 4);
         data_offset += blob.size();
-        blobs.push_back(std::move(blob));
     }
     std::vector<uint8_t> payload;
     payload.insert(payload.end(), {'E','T','M','Q','I','D','X','2'});
@@ -2477,6 +2892,8 @@ std::vector<uint8_t> encode_v2_payload(const std::vector<V2Table>& tables) {
     for (const auto& blob : blobs) payload.insert(payload.end(), blob.begin(), blob.end());
     return payload;
 }
+
+#include "full_index.hpp"
 
 
 uint64_t read_uv(const uint8_t* data, size_t size, size_t& position) {
@@ -2684,6 +3101,11 @@ class BuildVisitor : public NativeVisitor {
         if (online) {
             online_facts_ = std::make_unique<ExecutionFacts>();
             online_facts_->initialize(dict_, static_entries_);
+            const char* shared = std::getenv("ETM_SHARED_TRACKER");
+            if (need_tracker_ && (!shared || std::string(shared) != "0")) {
+                online_facts_->fact_path->follow_tracker();
+                tracker_.set_observer(online_facts_->fact_path.get());
+            }
             // A prescan hint avoids repeated large vector reallocations. Cap
             // eager allocation; larger valid inputs can still grow normally.
             const size_t capacity = static_cast<size_t>(std::min<uint64_t>(reserve, 64ull << 20));
@@ -2696,6 +3118,11 @@ class BuildVisitor : public NativeVisitor {
         index_facts_out_ = path;
         online_facts_->enable_index_facts(dict_, static_entries_, reserve);
     }
+    CompleteIndexResult build_complete_index() {
+        if (!online_facts_) fail(kExitConsistency, "Complete index requires online facts");
+        return CompleteIndex(dict_, static_entries_, *online_facts_, output_).build();
+    }
+    ExecutionFacts& execution_facts() { return *online_facts_; }
     std::vector<uint8_t> build_native_index(bool emit_index = true) {
         if (!emit_index && online_facts_) {
             online_facts_->finish(output_.instructions);
@@ -3227,9 +3654,6 @@ class BuildVisitor : public NativeVisitor {
                 const bool is_tail = position + 1 == count;
                 const uint8_t executed = is_tail ? tail_code
                     : (entry->predicated ? 2 : 0);
-                if (online_facts_)
-                    online_facts_->instruction(*entry, executed, start_seq + position,
-                                              location.first, location.second, static_cast<uint32_t>(position));
                 if (executed == 2) {
                     const uint64_t seq = start_seq + position;
                     auto& issues = output_.predicate_issues;
@@ -3255,6 +3679,9 @@ class BuildVisitor : public NativeVisitor {
                                               is_tail ? pending_.cycles : 0,
                                               entry->id);
                 }
+                if (online_facts_)
+                    online_facts_->instruction(*entry, executed, start_seq + position,
+                                              location.first, location.second, static_cast<uint32_t>(position));
                 ++position;
             }
         }
@@ -3458,6 +3885,13 @@ void write_store(const fs::path& path, BuildOutput& output) {
     // Compress execution blocks before writing either the private core or
     // final generation, keeping anchor offsets in the uncompressed sequence.
     for (auto& block : output.blocks) {
+        if (output.optional_features && !block.flags && block.type >= 7 && block.type <= 10) {
+            const size_t limit = block.type == 10 ? 128u << 20 : 64u << 20;
+            if (block.payload.size() > limit) fail(kExitConsistency, "JSON store block exceeds reader limit");
+            block.uncompressed = static_cast<uint32_t>(block.payload.size());
+            block.payload = zlib_compress(block.payload, block.type == 10 ? 1 : 6);
+            block.flags = 1;
+        }
         if (!block.flags && block.type == 3 && block.payload.size() >= (64u << 10)) {
             auto compressed = zlib_compress(block.payload, 1);
             if (compressed.size() < block.payload.size()) {
@@ -3485,12 +3919,13 @@ void write_store(const fs::path& path, BuildOutput& output) {
     std::memcpy(header.data() + 16, &tag, 8);
     const uint32_t block_count = static_cast<uint32_t>(blocks);
     std::memcpy(header.data() + 24, &block_count, 4);
-    const uint32_t required = 0;
+    const uint32_t required = output.required_features;
     std::memcpy(header.data() + 28, &required, 4);
     std::memcpy(header.data() + 32, &payload_bytes, 8);
     std::memcpy(header.data() + 40, &file_bytes, 8);
     const uint32_t checksum = crc32_bytes(header.data(), 48);
     std::memcpy(header.data() + 48, &checksum, 4);
+    std::memcpy(header.data() + 52, &output.optional_features, 4);
     std::vector<uint8_t> index(static_cast<size_t>(index_bytes), 0);
     uint64_t offset = 0;
     for (size_t position = 0; position < output.blocks.size(); ++position) {
@@ -3526,7 +3961,17 @@ void write_store(const fs::path& path, BuildOutput& output) {
     for (const BuildBlock& block : output.blocks) {
         emit(block.payload.data(), block.payload.size());
     }
-    if (std::fflush(out) != 0 || std::fclose(out) != 0) fail(kExitIo, "写 store.bin 失败");
+    const int flushed = std::fflush(out);
+    int synced = 0;
+    if (!flushed && output.optional_features) {
+#ifdef _WIN32
+        synced = _commit(_fileno(out));
+#else
+        synced = fsync(fileno(out));
+#endif
+    }
+    const int closed = std::fclose(out);
+    if (flushed || synced || closed) fail(kExitIo, "写入/持久化 store.bin 失败");
     output.store_sha256 = sha.hex_digest();
     output.store_bytes = file_bytes;
 }
@@ -3575,6 +4020,9 @@ std::string meta_json(const BuildOutput& output,
     return json.str();
 }
 
+#include "complete_store.hpp"
+#include "native_query.hpp"
+
 }  // namespace
 
 int main_utf8(int argc, char** argv) {
@@ -3585,6 +4033,51 @@ int main_utf8(int argc, char** argv) {
             return kExitUsage;
         }
         const std::string command = argv[1];
+        if(command=="text-test") {
+            if(argc!=3)fail(kExitUsage,"text-test requires a JSON string list file");
+            std::ifstream in(file_path(argv[2]),std::ios::binary);Json values=Json::parse(in),result=Json::array();
+            for(const auto& value:values)result.push_back(native_unicode_lower(value.get<std::string>()));
+            std::cout<<Json{{"ok",true},{"lower",result}}.dump()<<std::endl;return kExitOk;
+        }
+        if(command=="fault-name-test") {
+            Json result=Json::object();for(bool v3:{true,false})for(uint32_t code=0;code<1025;++code)if(packet_is_invalid(code,v3?2:1))result[v3?"ETMv3":"ETMv4"][std::to_string(code)]=native_fault_name(code,v3);
+            std::cout<<Json{{"ok",true},{"names",result}}.dump()<<std::endl;return kExitOk;
+        }
+        if (command=="query-server") {
+            if(argc!=3)fail(kExitUsage,"query-server requires manifest path");
+            const auto manifest_path=file_path(argv[2]);const auto manifest=NativeStore::read_json(manifest_path,16u<<20);
+            NativeStore store(manifest_path.parent_path(),manifest,true);
+            std::cout<<Json{{"ok",true},{"protocol","etm-query/1"},{"snapshot",store.snapshot()}}.dump()<<std::endl;
+            std::string line;while(std::getline(std::cin,line)) {
+                try {if(line.size()>(16u<<20))fail(kExitInput,"Query request exceeds limit");auto request=Json::parse(line);if(request.value("op",std::string())=="close")break;auto answer=store.call(request);std::cout<<Json{{"ok",true},{"result",std::move(answer)}}.dump()<<std::endl;}
+                catch(const std::exception& error){std::cout<<Json{{"ok",false},{"error",error.what()}}.dump()<<std::endl;}
+                if(!std::cout)break;
+            }
+            return kExitOk;
+        }
+        if (command == "image-info" || command == "image-server") {
+            if (argc != 3) fail(kExitUsage,"image command needs target ELF");
+            NativeImage image(argv[2]);
+            std::cout << Json{{"ok",true},{"image",image.info(command=="image-info")}}.dump() << std::endl;
+            if (command=="image-server") {
+                std::string line;
+                while(std::getline(std::cin,line)) {
+                    try {
+                        auto request=Json::parse(line);const auto op=request.at("op").get<std::string>();Json result;
+                        if(op=="close") break;
+                        if(op=="read") {auto data=image.read(request.at("address").get<uint64_t>(),request.at("size").get<size_t>());std::string hex;const char* digits="0123456789abcdef";for(size_t n=0;n<data.second;++n){hex+=digits[data.first[n]>>4];hex+=digits[data.first[n]&15];}result=hex;}
+                        else if(op=="location") {auto loc=image.location(request.at("address").get<uint64_t>());result=Json::array({std::get<0>(loc),std::get<1>(loc),std::get<2>(loc)<0?Json(nullptr):Json(std::get<2>(loc))});}
+                        else if(op=="segments")result=image.info(true).at("segments");
+                        else if(op=="elf-info")result=image.elf_info(argv[2]);
+                        else if(op=="source") {StaticDict dict;StaticEntry entry;entry.text_slots=4;dict.strings={"",request.at("file").get<std::string>(),"",""};dict.entries.push_back(entry);auto values=image.select_sources(dict,request.at("sources"),fs::u8path(request.at("root").get<std::string>()));result=values.value(request.at("file").get<std::string>(),std::string());}
+                        else fail(kExitUsage,"Unknown native image operation");
+                        std::cout<<Json{{"ok",true},{"result",std::move(result)}}.dump()<<std::endl;
+                    }catch(const std::exception& error){std::cout<<Json{{"ok",false},{"error",error.what()}}.dump()<<std::endl;}
+                    if(!std::cout)break;
+                }
+            }
+            return kExitOk;
+        }
         if (command == "--version") {
             std::cout << "{"
                       << "\"protocol\":" << quote(kProtocol)
@@ -3594,8 +4087,29 @@ int main_utf8(int argc, char** argv) {
                       << ",\"buildSha\":" << quote(build_sha())
                       << ",\"formats\":{\"native\":\"trace-bin native v1\","
                          "\"staticDict\":1,\"ranges\":1}"
-                      << ",\"capabilities\":[\"prescan\",\"diagnose\",\"build\",\"facts-v3\",\"quality-diagnostics\",\"index-facts-v1\"]"
+                      << ",\"capabilities\":[\"prescan\",\"diagnose\",\"build\",\"facts-v3\",\"quality-diagnostics\",\"index-facts-v1\",\"direct-opencsd-v1\",\"typed-replay-v1\",\"shared-tracker-v1\",\"complete-index-v1\",\"native-static-v1\",\"native-query-v1\"]"
                       << "}" << std::endl;
+            return kExitOk;
+        }
+        if (command == "--self-test-replay-cache") {
+            self_test_replay_cache();
+            std::cout << "{\"ok\":true,\"uniqueRanges\":70000,\"bounded\":true}" << std::endl;
+            return kExitOk;
+        }
+        if (command == "--self-test-json-format") {
+            Json values=Json::array({-0.0,0.0,1.0,1e-4,1e-5,1e15,1e16,1.2345678901234567});
+            uint32_t seed=0x18713291;
+            for (int i=0;i<10000;++i) {
+                seed=seed*1664525u+1013904223u;
+                const double mantissa=static_cast<int32_t>(seed)/2147483648.0;
+                values.push_back(std::ldexp(mantissa,static_cast<int>((seed>>16)%601)-300));
+            }
+            std::cout<<python_json(Json{{"values",values},{"strings",Json::array({"中文\\\"\n", "", "文件.c"})}})<<std::endl;
+            return kExitOk;
+        }
+        if (command == "--self-test-shared-tracker") {
+            self_test_shared_tracker();
+            std::cout << "{\"ok\":true,\"transitions\":50000}" << std::endl;
             return kExitOk;
         }
         if (command == "--self-test") {
@@ -3619,6 +4133,7 @@ int main_utf8(int argc, char** argv) {
         }
         if (command == "prescan") {
             std::string native_path;
+            std::string etm_path, config_path;
             std::string ranges_path;
             std::string json_path;
             uint64_t max_unique = kDefaultMaxUniqueRanges;
@@ -3630,13 +4145,16 @@ int main_utf8(int argc, char** argv) {
                     return argv[++index];
                 };
                 if (arg == "--native") native_path = next("--native");
+                else if (arg == "--etm") etm_path = next("--etm");
+                else if (arg == "--config") config_path = next("--config");
                 else if (arg == "--out") ranges_path = next("--out");
                 else if (arg == "--json") json_path = next("--json");
                 else if (arg == "--max-unique-ranges") max_unique = std::stoull(next("--max-unique-ranges"));
                 else if (arg == "--limit-records") limit_records = std::stoull(next("--limit-records"));
                 else fail(kExitUsage, "未知参数：" + arg);
             }
-            if (native_path.empty()) fail(kExitUsage, "prescan 需要 --native");
+            if (native_path.empty() && (etm_path.empty() || config_path.empty())) fail(kExitUsage, "prescan requires --native or --etm/--config");
+            if (!etm_path.empty() && limit_records) fail(kExitUsage, "direct prescan does not support limit-records");
             std::vector<RangeRecord> ranges;
             std::ofstream range_stream;
             if (!ranges_path.empty()) {
@@ -3644,7 +4162,9 @@ int main_utf8(int argc, char** argv) {
                 if (!range_stream) fail(kExitIo, "打不开 ranges 输出：" + ranges_path);
             }
             const auto started = std::chrono::steady_clock::now();
-            NativeCounters counters = read_native(native_path, true, &ranges, max_unique,
+            NativeCounters counters = !etm_path.empty()
+                ? read_direct(etm_path, config_path, true, &ranges, max_unique, ranges_path.empty() ? nullptr : &range_stream, nullptr)
+                : read_native(native_path, true, &ranges, max_unique,
                                                    limit_records,
                                                    ranges_path.empty() ? nullptr : &range_stream);
             const double seconds = seconds_since(started);
@@ -3779,6 +4299,9 @@ int main_utf8(int argc, char** argv) {
         }
         if (command == "build") {
             std::string native_path;
+            std::string etm_path, config_path;
+            std::string prepare_path, ranges_path, complete_context, target_elf;
+            uint32_t owner_pid = 0;
             std::string static_path;
             std::string out_dir;
             std::string generation;
@@ -3797,6 +4320,13 @@ int main_utf8(int argc, char** argv) {
                     return argv[++index];
                 };
                 if (arg == "--native") native_path = next("--native");
+                else if (arg == "--etm") etm_path = next("--etm");
+                else if (arg == "--config") config_path = next("--config");
+                else if (arg == "--owner-pid") owner_pid = static_cast<uint32_t>(std::stoul(next("--owner-pid")));
+                else if (arg == "--prepare-static") prepare_path = next("--prepare-static");
+                else if (arg == "--complete-context") complete_context = next("--complete-context");
+                else if (arg == "--elf") target_elf = next("--elf");
+                else if (arg == "--ranges-out") ranges_path = next("--ranges-out");
                 else if (arg == "--static") static_path = next("--static");
                 else if (arg == "--out-dir") out_dir = next("--out-dir");
                 else if (arg == "--generation") generation = next("--generation");
@@ -3811,10 +4341,76 @@ int main_utf8(int argc, char** argv) {
                 else if (arg == "--facts-out") facts_out = next("--facts-out");
                 else fail(kExitUsage, "未知参数：" + arg);
             }
-            if (native_path.empty()) fail(kExitUsage, "build 需要 --native");
-            if (static_path.empty()) fail(kExitUsage, "build 需要 --static");
+            if (native_path.empty() && (etm_path.empty() || config_path.empty() && target_elf.empty())) fail(kExitUsage, "build requires --native or --etm/--config or --elf");
+            if (static_path.empty() && target_elf.empty()) fail(kExitUsage, "build requires --static or --elf");
             if (out_dir.empty()) fail(kExitUsage, "build 需要 --out-dir");
-            StaticDict dict = load_static_dict(static_path);
+            if (!complete_context.empty() && (native_index || !facts_out.empty() || !index_facts_out.empty() || !index_payload_path.empty()))
+                fail(kExitUsage, "Complete build cannot emit scratch facts or accept an external query index");
+            std::unique_ptr<ReplayCache> replay;
+            NativeCounters prepared;
+            double prepare_seconds = 0;
+            uint64_t replay_bytes = 0;
+            std::unique_ptr<NativeImage> image;
+            Json native_context,generated_inputs;
+            StaticDict dict;
+            if (!target_elf.empty()) {
+                if (complete_context.empty() || !prepare_path.empty()) fail(kExitUsage,"Native ELF build requires context and no external static handshake");
+                native_context=read_context(complete_context);
+                image=std::make_unique<NativeImage>(target_elf);
+                if(image->sha!=native_context.at("expectedElfSha256"))fail(kExitConsistency,"ELF changed before native parse");
+                const auto record=fs::u8path(native_context.at("recordDir").get<std::string>());
+                generated_inputs=image->materialize(record,native_context.at("config"),config_path);
+                generated_inputs[fs::absolute(fs::u8path(target_elf)).u8string()]=image->sha;
+                const auto started=std::chrono::steady_clock::now();replay=std::make_unique<ReplayCache>();
+                prepared=native_path.empty()?read_direct(etm_path,config_path,false,nullptr,1000000,nullptr,replay.get())
+                    :read_native(native_path,false,nullptr,1000000,0,nullptr,true,replay.get());
+                replay_bytes=replay->bytes;prepare_seconds=seconds_since(started);
+                const uint32_t expected=native_context.at("config").at("protocol")=="ETMv3"?2:1;
+                if(prepared.header.protocol!=expected)fail(kExitConsistency,"Native protocol differs from context");
+                generated_inputs[fs::absolute(fs::u8path(native_path.empty()?etm_path:native_path)).u8string()]=prepared.native_sha256;
+                dict=image->dictionary(replay->ranges);
+                native_context["sources"]=image->select_sources(dict,native_context.at("sourceSnapshot"),fs::u8path(native_context.at("sourceRoot").get<std::string>()));
+                if(!reserve_instructions)reserve_instructions=prepared.logical_seq-prepared.event_elements;
+            } else if (!prepare_path.empty()) {
+                if (etm_path.empty() || config_path.empty() || ranges_path.empty() || fs::exists(file_path(static_path)))
+                    fail(kExitUsage, "prepare-static requires a new static dictionary and ETM/config/ranges paths");
+#ifdef _WIN32
+                std::unique_ptr<void, decltype(&CloseHandle)> owner(nullptr, &CloseHandle);
+                if (owner_pid) {
+                    owner.reset(OpenProcess(SYNCHRONIZE, FALSE, owner_pid));
+                    if (!owner) fail(kExitIo, "Prepared build owner is unavailable");
+                }
+#endif
+                const auto prepare_started = std::chrono::steady_clock::now();
+                replay = std::make_unique<ReplayCache>();
+                prepared = read_direct(etm_path, config_path, false, nullptr, 1000000, nullptr, replay.get());
+                replay_bytes = replay->bytes;
+                std::ofstream ranges_out(file_path(ranges_path), std::ios::binary);
+                ranges_out.write("R2RANGES1", 9); write_u64(ranges_out, replay->ranges.size()); write_u64(ranges_out, prepared.range_records);
+                for (const auto& range : replay->ranges) {
+                    write_u32(ranges_out, range.start); write_u32(ranges_out, range.end); write_u32(ranges_out, range.payload);
+                }
+                ranges_out.close(); if (!ranges_out) fail(kExitIo, "Cannot publish replay ranges");
+                prepare_seconds = seconds_since(prepare_started);
+                const auto temporary_ready = prepare_path + ".tmp";
+                std::ofstream ready(file_path(temporary_ready));
+                ready << "{\"rangeInstructions\":" << (prepared.logical_seq - prepared.event_elements)
+                      << ",\"etmSha256\":" << quote(prepared.native_sha256)
+                      << ",\"replayBytes\":" << replay_bytes << "}";
+                ready.close(); if (!ready) fail(kExitIo, "Cannot publish replay handshake");
+                fs::rename(file_path(temporary_ready), file_path(prepare_path));
+                const auto waiting = std::chrono::steady_clock::now();
+                while (!fs::exists(file_path(static_path + ".ready"))) {
+#ifdef _WIN32
+                    if (owner && WaitForSingleObject(owner.get(), 0) != WAIT_TIMEOUT)
+                        fail(kExitIo, "Prepared build owner exited");
+#endif
+                    if (seconds_since(waiting) > 900) fail(kExitIo, "Static dictionary handshake timed out");
+                    std::this_thread::sleep_for(std::chrono::milliseconds(5));
+                }
+                if (!reserve_instructions) reserve_instructions = prepared.logical_seq - prepared.event_elements;
+            }
+            if (target_elf.empty()) dict = load_static_dict(static_path);
             BuildOutput output;
             output.generation = generation.empty() ? fs::u8path(out_dir).filename().string() : generation;
             output.generation_tag = generation_tag;
@@ -3826,10 +4422,21 @@ int main_utf8(int argc, char** argv) {
             BuildVisitor visitor(dict, output, true);
             visitor.set_analysis(need_analysis);
             visitor.set_profile_detail(profile_detail);
+            if (!complete_context.empty()) {
+                visitor.set_facts_out("<in-memory>", true, reserve_instructions);
+                visitor.set_index_facts_out("<in-memory>", reserve_instructions);
+            }
             if (!facts_out.empty()) visitor.set_facts_out(facts_out, !native_index, reserve_instructions);
             if (!index_facts_out.empty()) visitor.set_index_facts_out(index_facts_out, reserve_instructions);
             const auto started = std::chrono::steady_clock::now();
-            NativeCounters counters = read_native(native_path, false, nullptr, 1000000, 0,
+            NativeCounters counters;
+            if (replay) {
+                replay->replay(visitor);
+                replay.reset();
+                counters = std::move(prepared);
+            } else counters = !etm_path.empty()
+                ? read_direct(etm_path, config_path, false, nullptr, 1000000, nullptr, &visitor)
+                : read_native(native_path, false, nullptr, 1000000, 0,
                                                    nullptr, true, &visitor);
             visitor.finish();
             for (BuildBlock& block : output.blocks) {
@@ -3864,7 +4471,16 @@ int main_utf8(int argc, char** argv) {
             add_json_block(output, 8, summary.str());
             add_json_block(output, 9, "{}");
             add_json_block(output, 10, "[]");
-            if ((native_index || !facts_out.empty()) && index_payload_path.empty()) {
+            Json complete_result;
+            if (!complete_context.empty()) {
+                const auto index_started = std::chrono::steady_clock::now();
+                const Json context = target_elf.empty()?read_context(complete_context):native_context;
+                if (context.value("maxEvents",uint64_t(0)) && output.instructions>context["maxEvents"].get<uint64_t>())fail(kExitConsistency,"Instruction limit exceeded");
+                auto index = visitor.build_complete_index();
+                complete_result = finalize_complete_blocks(output,counters,visitor.execution_facts(),index,context,Json::parse(analysis),visitor.event_types());
+                if(image){complete_result["sources"]=context.at("sources");complete_result["consumedInputs"]=generated_inputs;complete_result["nativeStatic"]=Json{{"elfSha256",image->sha},{"dictionarySha256",dict.sha256},{"uniquePCs",dict.entries.size()},{"functions",image->functions.size()},{"lines",image->lines.size()},{"imageSeconds",image->parse_seconds},{"dictionarySeconds",image->static_seconds},{"predicateCount",image->predicates.size()},{"knownCount",image->known.size()}};}
+                output.index_seconds=chrono_seconds(index_started);
+            } else if ((native_index || !facts_out.empty()) && index_payload_path.empty()) {
                 const auto index_started = std::chrono::steady_clock::now();
                 BuildBlock query;
                 query.type = 12;
@@ -3905,10 +4521,19 @@ int main_utf8(int argc, char** argv) {
                 throw;
             }
             output.write_seconds = seconds_since(write_started);
+            if(!complete_context.empty()) {
+                std::ostringstream tag;tag<<"0x"<<std::hex<<output.generation_tag;
+                Json declaration{{"state","complete"},{"schemaVersion",1},{"generation",output.generation},{"generationTag",tag.str()},{"files",Json::array({Json{{"name","store.bin"},{"bytes",output.store_bytes},{"sha256",output.store_sha256}}})}};
+                NativeStore verification(directory,declaration,false,store_path);
+                if(verification.meta!=complete_result.at("meta"))fail(kExitConsistency,"Written native store differs from composed metadata");
+                complete_result["nativeFileVerified"]=true;
+            }
+            output.peak_rss = std::max(output.peak_rss, peak_rss_bytes());
             std::ostringstream result;
             result << "{\n";
             result << " \"protocol\":" << quote(kProtocol) << ", \"schema\":" << kSchema
                    << ", \"abi\":" << kAbi << ",\n";
+            if (!complete_context.empty()) result << "\"completeStore\":" << complete_result.dump() << ",\n";
             result << " \"engine\":{\"name\":\"etm_storebuild\",\"buildSha\":"
                    << quote(build_sha()) << ",\"compiler\":" << quote(compiler_string())
                    << ",\"nativeFormat\":\"trace-bin native v1\",\"storeSchema\":1,"
@@ -3925,7 +4550,9 @@ int main_utf8(int argc, char** argv) {
                    << ",\"overflow\":" << counters.packet_overflow
                    << ",\"packet_count\":" << counters.saw_packets
                    << ",\"cycle_elements\":" << counters.cycle_elements
-                   << ",\"elements\":" << counters.saw_elements << ",\"faults\":[";
+                   << ",\"elements\":" << counters.saw_elements;
+            if (complete_context.empty()) {
+            result << ",\"faults\":[";
             for (size_t i = 0; i < counters.packet_faults.size(); ++i) {
                 if (i) result << ',';
                 const auto& fault = counters.packet_faults[i];
@@ -3944,7 +4571,10 @@ int main_utf8(int argc, char** argv) {
                 const auto& item = output.predicate_issues[i];
                 result << '[' << item[0] << ',' << item[1] << ',' << item[2] << ']';
             }
-            result << "]},\n";
+            result << "]";
+            } else result << ",\"detailsStoredIn\":\"store.bin\",\"predicateIssueRuns\":" << output.predicate_issues.size()
+                          << ",\"firstRangeOffset\":" << counters.first_range_offset << ",\"packetEnd\":" << counters.packet_end;
+            result << "},\n";
             result << " \"generation\":" << quote(output.generation)
                    << ", \"generationTag\":" << quote("0x" + [&]() {
                           std::ostringstream tag;
@@ -3980,6 +4610,7 @@ int main_utf8(int argc, char** argv) {
                    << ",\"defaultViews\":0.0,\"writeBlocks\":"
                    << output.write_seconds << ",\"assembleFile\":"
                    << output.write_seconds << ",\"hashFile\":0.0},\n";
+            result << " \"prepareSeconds\":" << prepare_seconds << ",\"replayBytes\":" << replay_bytes << ",\n";
             result << " \"peakRssBytes\":" << output.peak_rss
                    << ",\"facts\":{\"format\":\"ETMFACT3\",\"version\":3,\"bytes\":"
                    << output.facts_bytes << ",\"pathRuns\":" << output.facts_path_runs
@@ -3987,7 +4618,7 @@ int main_utf8(int argc, char** argv) {
                    << ",\"labels\":" << output.facts_labels
                    << ",\"events\":" << output.facts_events
                    << ",\"texts\":" << output.facts_texts << "},\n";
-            result << " \"inputs\":{\"nativeSha256\":" << quote(output.native_sha256)
+            result << " \"inputs\":{" << quote(etm_path.empty() ? "nativeSha256" : "etmSha256") << ":" << quote(output.native_sha256)
                    << ",\"nativeBytes\":" << counters.native_bytes
                    << ",\"elfSha256\":" << quote(output.elf_sha256)
                    << ",\"rangesSha256\":\"\",\"staticDictSha256\":"
@@ -4009,6 +4640,7 @@ int main_utf8(int argc, char** argv) {
         }
         if (command == "diagnose") {
             std::string native_path;
+            std::string etm_path, config_path;
             std::string static_path;
             std::string ranges_path;
             std::string json_path;
@@ -4023,6 +4655,8 @@ int main_utf8(int argc, char** argv) {
                     return argv[++index];
                 };
                 if (arg == "--native") native_path = next("--native");
+                else if (arg == "--etm") etm_path = next("--etm");
+                else if (arg == "--config") config_path = next("--config");
                 else if (arg == "--static") static_path = next("--static");
                 else if (arg == "--ranges") ranges_path = next("--ranges");
                 else if (arg == "--json") json_path = next("--json");

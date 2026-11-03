@@ -1,0 +1,164 @@
+{
+  "sourceCommit": "77bf1c245b6867cce511babea8abafde727c67de",
+  "buildType": "Release",
+  "nativeVersion": {
+    "protocol": "etm-storebuild/1",
+    "schema": 1,
+    "abi": 1,
+    "compiler": "gcc 16.1.0",
+    "buildSha": "77bf1c245b68",
+    "formats": {
+      "native": "trace-bin native v1",
+      "staticDict": 1,
+      "ranges": 1
+    },
+    "capabilities": [
+      "prescan",
+      "diagnose",
+      "build",
+      "facts-v3",
+      "quality-diagnostics",
+      "index-facts-v1",
+      "direct-opencsd-v1",
+      "typed-replay-v1",
+      "shared-tracker-v1"
+    ]
+  },
+  "vendorTree": "682d85d09c56c39b2a643d37b1234cce5116a181",
+  "configure": [
+    "cmake",
+    "-S",
+    "etm-service",
+    "-B",
+    "build/etm-native",
+    "-G",
+    "Ninja",
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DCMAKE_C_COMPILER=C:/msys64/mingw64/bin/gcc.exe",
+    "-DCMAKE_CXX_COMPILER=C:/msys64/mingw64/bin/g++.exe"
+  ],
+  "sources": {
+    "etm-service/CMakeLists.txt": {
+      "bytes": 3764,
+      "sha256": "a26ea91fb4c4846172fbda72342b331a6bb335e177d2e766ce7a2ecae551d3de",
+      "gitBlobBytes": 3764,
+      "gitBlobSha256": "a26ea91fb4c4846172fbda72342b331a6bb335e177d2e766ce7a2ecae551d3de"
+    },
+    "etm-service/native/decoder.cpp": {
+      "bytes": 18038,
+      "sha256": "5fa3be0d586468f445a7fa0f4d5d01e2eb49ee594c4be960d159b35eb6dbda2a",
+      "gitBlobBytes": 18038,
+      "gitBlobSha256": "5fa3be0d586468f445a7fa0f4d5d01e2eb49ee594c4be960d159b35eb6dbda2a"
+    },
+    "etm-service/native/decoder_sink.hpp": {
+      "bytes": 849,
+      "sha256": "d10e8470ed27d67b18c4d4815f65831c6c38a051e38bb0c25761c5014825c3e3",
+      "gitBlobBytes": 849,
+      "gitBlobSha256": "d10e8470ed27d67b18c4d4815f65831c6c38a051e38bb0c25761c5014825c3e3"
+    },
+    "etm-service/native/storebuild.cpp": {
+      "bytes": 228571,
+      "sha256": "e798bc1dd5e39cd503dd51f3e3115c531cffd6a2578c142f17158e6b0028f57c",
+      "gitBlobBytes": 228571,
+      "gitBlobSha256": "e798bc1dd5e39cd503dd51f3e3115c531cffd6a2578c142f17158e6b0028f57c"
+    },
+    "etm-service/native/export.cpp": {
+      "bytes": 31917,
+      "sha256": "a7537bf272341c4f46832cb84bb472853333bd5593ef8b6598de495eae92b829",
+      "gitBlobBytes": 31917,
+      "gitBlobSha256": "a7537bf272341c4f46832cb84bb472853333bd5593ef8b6598de495eae92b829"
+    },
+    "etm-service/native/reading_projection.hpp": {
+      "bytes": 13368,
+      "sha256": "8f820d0fafd95806ddc9c61b9b5011b3ed811af75e7fd61b220d759d7587b259",
+      "gitBlobBytes": 13368,
+      "gitBlobSha256": "8f820d0fafd95806ddc9c61b9b5011b3ed811af75e7fd61b220d759d7587b259"
+    },
+    "etm-service/tools/decode_stream.py": {
+      "bytes": 61638,
+      "sha256": "c08d16a1afed1ac8e460d1943359bd5cfd8114ae24a5103ecd71b7a1f2ba9c1c",
+      "gitBlobBytes": 60492,
+      "gitBlobSha256": "d911287d7e2c7ba0d3fed2874f9509d23c890493ae4dda189b1cb0f404d7d22e"
+    },
+    "etm-service/tools/native_pipeline.py": {
+      "bytes": 21382,
+      "sha256": "26f1564a507415f189e26973c7dcd1950ce2d946c48091a9d581b8746bc4dc2d",
+      "gitBlobBytes": 21031,
+      "gitBlobSha256": "81640f43ab08225df448d31fdff1b6efb9c13643a7b59523aa0c8b596f72dbe6"
+    },
+    "etm-service/tools/native_storebuild.py": {
+      "bytes": 22397,
+      "sha256": "b91ef5a4eefea313d6f5ac06e53989e572915a817113799d394f27159c0026f5",
+      "gitBlobBytes": 21931,
+      "gitBlobSha256": "bc6e6ca45e82cf4055c75cbc32f848c00cf666c46301ffda2526f1168ff156af"
+    },
+    "etm-service/tools/issue_runs.py": {
+      "bytes": 4449,
+      "sha256": "0b42b64b6d40dc76cb742d2d35e1c4229cbde59f4fc7be284398df6f104d5d0c",
+      "gitBlobBytes": 4358,
+      "gitBlobSha256": "94214ca864b59953ce39d478c550682c105e4aeb003fb0b6edf05cbb5047544f"
+    },
+    "etm-service/tools/trace_store.py": {
+      "bytes": 156793,
+      "sha256": "f6a474eab846d55177f7151e6a3beb9444f51e11bd4621fb19191fabb547e124",
+      "gitBlobBytes": 153701,
+      "gitBlobSha256": "864a868b7ebd9000d71547301be7a5ca75728119ef5532b16e2c00ae5b9f3f81"
+    },
+    "etm-service/tools/trace_store_adapter.py": {
+      "bytes": 35786,
+      "sha256": "4bb425539cf833b6109118b8e700d25ee674d0cc7ba2b4e933d80352ff8efa00",
+      "gitBlobBytes": 35049,
+      "gitBlobSha256": "721edd84ca09f5a4b77557581b5cdf38d9bde81867e3fbb5d9618f8df0d22ada"
+    },
+    "etm-service/tools/trace_store_index.py": {
+      "bytes": 134032,
+      "sha256": "a083f14a456647a21bbd6d0becebba6e7dbc5f1f598c2986514bd801e7285f38",
+      "gitBlobBytes": 131473,
+      "gitBlobSha256": "66efd9fd65b2cf9d47f49eef3e520dd0ae93f288a73073774ab90cfecb072dde"
+    },
+    "tools/bench_etm_native_offline.py": {
+      "bytes": 8451,
+      "sha256": "9b06f35956f9c6bba771fec9d50363a679f33bd69e1ae8e9c62f4d736d0f34f4",
+      "gitBlobBytes": 8324,
+      "gitBlobSha256": "7eb1915fd70c0b6c84d395b095c8df59690d683e71034868e9b883e417c2ca8d"
+    },
+    "tools/compare_etm_stores.py": {
+      "bytes": 2595,
+      "sha256": "2de6e7c7af3d520893b9e8019a9408094c8052c5d8835d4d48431b09dfee4936",
+      "gitBlobBytes": 2539,
+      "gitBlobSha256": "9224c0a59b3720f731ffb2617f39aaeeb05838dc540aae4212e8290c124eaf76"
+    },
+    "tools/validate_etm_direct_offline.py": {
+      "bytes": 3404,
+      "sha256": "6a9bd2c68de2bbea325622323da10091f45e36b73e5867bce02b38d86ec5a9da",
+      "gitBlobBytes": 3335,
+      "gitBlobSha256": "2f9fcf7065e5f91fef0e6b56425621db9cfa1cbb6749d8c68d18cf2e11e92fb9"
+    }
+  },
+  "binaries": {
+    "etm-service/build-native/etm_storebuild.exe": {
+      "bytes": 4945543,
+      "sha256": "8a591e565f02f2ee81ad3c9edc39ffa88d8d24f264b864d9434e25f28f542979"
+    },
+    "etm-service/build-native/etm_export.exe": {
+      "bytes": 3459669,
+      "sha256": "9583d7bdcce448a527746729d990327fb7736eaf15ebc0e2677bbfa43e92901a"
+    },
+    "etm-service/build-native/etm_decode.exe": {
+      "bytes": 4174585,
+      "sha256": "c9ed0bcdede7e0bca779ad611c1bd95725694628e2d0f10847a8e3c09ba79336"
+    }
+  },
+  "note": "sha256 identifies actual build/test input bytes; gitBlobSha256 identifies sourceCommit blobs. Any source differences were verified to be CRLF/LF only. Native C++ sources match committed bytes exactly.",
+  "verification": {
+    "fullApiSeconds": [
+      9.290375399999903,
+      8.87746569999581,
+      8.847986000000674
+    ],
+    "medianSeconds": 8.87746569999581,
+    "allThreeBelow10": true,
+    "allThreeFullStoreComparisons": true,
+    "hardwareAccess": false
+  }
+}

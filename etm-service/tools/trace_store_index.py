@@ -1411,31 +1411,13 @@ class QueryIndex:
     def seq_of_insn(self, index):
         """指令序号 → 逻辑 seq（= 指令序号 + 该 seq 之前的事件数）。
 
-        不动点 ``seq = index + #{events < seq}``；若 ``seq`` 恰好落在事件上（记录开头常见
-        连续两条边界事件，例如 ``[0, 1]``），必须先跳过该事件并**重新做不动点**，否则
-        指令 0 会被算成事件 seq（t9 独立复现：原型返回 1，正确值 2）。
+        事件 seq 减去其事件序号得到插入前的指令数；一次右侧搜索计入全部连续事件。
         """
         index = np.asarray(index, dtype=np.int64)
-        events = self.event_seqs
-        count = len(events)
-        seq = index + np.searchsorted(events, index, side='left')
-        for _ in range(count + 4):
-            following = index + np.searchsorted(events, seq, side='left')
-            inner = 0
-            while not np.array_equal(following, seq):
-                seq = following
-                following = index + np.searchsorted(events, seq, side='left')
-                inner += 1
-                if inner > count + 4:
-                    raise RuntimeError('seq_of_insn 不动点迭代未收敛（事件表异常）')
-            if not count:
-                return seq
-            left = np.searchsorted(events, seq, side='left')
-            hit = (left < count) & (events[np.minimum(left, count - 1)] == seq)
-            if not hit.any():
-                return seq
-            seq = np.where(hit, seq + 1, seq)
-        raise RuntimeError('seq_of_insn 无法收敛（事件表异常）')
+        # Each event is inserted after (seq - event ordinal) instructions.
+        # right includes every event in a consecutive group before this instruction.
+        offsets = self.event_seqs - np.arange(len(self.event_seqs), dtype=np.int64)
+        return index + np.searchsorted(offsets, index, side='right')
 
     def next_instruction_seq(self, seq):
         """最小的一条指令 seq（≥ 参数；参数本身是指令时返回它）。"""
@@ -1615,11 +1597,14 @@ class QueryIndex:
         first = {0: i_lo}
         low = max(0, int(np.searchsorted(self.ps_start, i_lo, side='right')) - 1)
         high = int(np.searchsorted(self.ps_start, i_hi, side='right'))
-        leaves, positions = np.unique(self.ps_leaf[low:high], return_index=True)
-        for slot in np.argsort(positions):
-            position = low + int(positions[slot])
+        # Linear reduction avoids sorting every path segment just to find its first occurrence.
+        positions = np.full(self.node_count, high, dtype=np.int64)
+        np.minimum.at(positions, self.ps_leaf[low:high], np.arange(low, high, dtype=np.int64))
+        leaves = np.flatnonzero(positions < high)
+        for leaf in leaves[np.argsort(positions[leaves])]:
+            position = int(positions[leaf])
             ordinal = max(int(self.ps_start[position]), i_lo)
-            for node in self.chain_of_leaf(int(leaves[slot])):
+            for node in self.chain_of_leaf(int(leaf)):
                 first.setdefault(node, ordinal)
         return first
 
@@ -2332,6 +2317,11 @@ def build_store_index(store_dir, cell_size=DEFAULT_CELL_INSTRUCTIONS, progress=N
                        with_nav=True, container='v1'):
     """给已发布 store 建立查询索引：写新 generation（复制块 + 替换 meta + 追加 12 号块），
     最后原子发布 manifest；旧 generation 保留（现有语义）。失败不改变当前代。"""
+    if os.environ.get('ETM_NATIVE_QUERY', '1') != '0':
+        if cell_size != 4096 or container not in ('v1','v2'):
+            raise trace_store.TraceStoreError('原生索引重建使用4096单元格；研发对照请显式 ETM_NATIVE_QUERY=0')
+        from native_core import reindex
+        return reindex(store_dir, container=container)
     started = time.perf_counter()
     store_dir = Path(store_dir).resolve()
     store = trace_store.TraceStore(store_dir, verify='full')
@@ -2362,7 +2352,8 @@ def build_store_index(store_dir, cell_size=DEFAULT_CELL_INSTRUCTIONS, progress=N
             sink.add(trace_store.BLK_QUERY, result['payload'], int(result['meta']['cells']))
             sink.handle.flush()
             info = sink.assemble(generation_dir / trace_store.STORE_FILE, generation_tag,
-                                 optional_features=trace_store.QUERY_INDEX_FEATURE)
+                                 optional_features=trace_store.QUERY_INDEX_FEATURE,
+                                 required_features=store.container.required_features)
         finally:
             sink.close()
             try:
@@ -2456,7 +2447,8 @@ def reencode_store_index(store_dir, container='v2', progress=None):
             sink.add(trace_store.BLK_QUERY, payload, int(meta.get('cells') or 0))
             sink.handle.flush()
             info = sink.assemble(generation_dir / trace_store.STORE_FILE, generation_tag,
-                                 optional_features=trace_store.QUERY_INDEX_FEATURE)
+                                 optional_features=trace_store.QUERY_INDEX_FEATURE,
+                                 required_features=store.container.required_features)
         finally:
             sink.close()
             try:

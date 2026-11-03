@@ -7,10 +7,12 @@ import os
 from pathlib import Path
 import secrets
 import shutil
+import socket
 import sys
 import threading
 import time
 from urllib.request import Request,urlopen
+from urllib.error import HTTPError
 
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'etm-service/tools'))
@@ -26,8 +28,27 @@ def main():
     p.add_argument('--out',type=Path,required=True)
     p.add_argument('--repeat',type=int,default=3)
     p.add_argument('--port',type=int,default=8883)
+    p.add_argument('--tracker-modes', default='', help='Comma-separated 0=independent,1=shared; one per trial')
+    p.add_argument('--complete-index', choices=('0','1'), default=None,
+                   help='Explicit reference/native index selection; omitted uses product default')
+    p.add_argument('--storebuild', type=Path, help='Pinned native builder for offline baseline measurements only')
     a=p.parse_args()
     if not 1<=a.repeat<=10:p.error('repeat must be 1..10')
+    tracker_modes=a.tracker_modes.split(',') if a.tracker_modes else []
+    if tracker_modes and (len(tracker_modes)!=a.repeat or any(m not in ('0','1') for m in tracker_modes)):
+        p.error('tracker-modes requires one 0/1 per trial')
+    if a.complete_index is not None:os.environ['ETM_COMPLETE_INDEX']=a.complete_index
+    if a.storebuild:
+        import native_storebuild
+        selected=a.storebuild.resolve()
+        if not selected.is_file():p.error('storebuild does not exist')
+        native_storebuild.binary_path=lambda root=None:selected
+    # A previous benchmark intentionally remains available for inspection.
+    # Refuse its port before creating records; never send it a decode request.
+    with socket.socket() as check:
+        check.settimeout(.5)
+        if check.connect_ex(('127.0.0.1', a.port)) == 0:
+            p.error('benchmark port is already listening; stop only your previous benchmark or choose a new port')
     output=a.out.resolve();output.mkdir(parents=True,exist_ok=False)
     original=a.record.resolve();metadata=json.loads((original/'session.json').read_text(encoding='utf8'))
     raw=original/metadata['input']
@@ -41,7 +62,10 @@ def main():
     service=importlib.util.module_from_spec(spec);spec.loader.exec_module(service)
     application=service.create_application(ROOT/'etm-service',ROOT/'web',runtime/'cli-token')
     backend=sys.modules['etm_toolbox_backend'];backend.RECORDS=output/'records';backend.RECORDS.mkdir()
+    identity=secrets.token_hex(16)
     from flask import request,jsonify,abort
+    @backend.app.get('/api/offline-benchmark-identity')
+    def benchmark_identity():return jsonify(identity=identity,pid=os.getpid())
     @backend.app.before_request
     def offline_guard():
         if request.path=='/api/status':
@@ -55,12 +79,19 @@ def main():
          'status':'serving','offline':True,'decodeEngineProfile':backend.current_profile()})
     report={'offline':True,'sourceRecord':str(original),'inputSha256':fingerprints,
             'engineProfile':backend.current_profile(),'rows':[]}
+    report['completeIndexSelection']=os.environ.get('ETM_COMPLETE_INDEX','default')
+    if a.storebuild:report['storebuildOverride']={'path':str(selected),'sha256':hashlib.sha256(selected.read_bytes()).hexdigest()}
     def api(path,value=None):
         data=json.dumps(value).encode() if value is not None else None
-        with urlopen(Request(url+'/etm/api/'+path,data=data,headers={'Content-Type':'application/json'}),timeout=30) as r:return json.load(r)
+        try:
+            with urlopen(Request(url+'/etm/api/'+path,data=data,headers={'Content-Type':'application/json'}),timeout=30) as r:return json.load(r)
+        except HTTPError as error:
+            raise RuntimeError('benchmark HTTP %d: %s' % (error.code,error.read(4000).decode('utf8','replace'))) from error
     def campaign():
         try:
+            assert api('offline-benchmark-identity')['identity']==identity, 'benchmark request reached a different runtime'
             for trial in range(1,a.repeat+1):
+                if tracker_modes:os.environ['ETM_SHARED_TRACKER']=tracker_modes[trial-1]
                 sid=f'record-native-1s-r{trial}-{secrets.token_hex(4)}';folder=backend.RECORDS/sid;folder.mkdir()
                 for f in ['capture.bin','firmware.elf','sources.json']:shutil.copy2(original/f,folder/f)
                 meta=dict(metadata,name=f'离线1s原生验收 · 第{trial}次',created=time.time(),decodeStatus='pending')
@@ -83,9 +114,10 @@ def main():
                 assert manifest['bindings']['processing']['engine']=='native'
                 old=json.loads((original/'decoded.json').read_text(encoding='utf8'))
                 assert decoded['summary']==old['summary'],'summary differs from retained text result'
+                if 'captureStart' in old:assert decoded.get('captureStart')==old['captureStart'], 'capture entry index differs'
                 for k,v in old['quality'].items():
                     if k in decoded['quality']:assert decoded['quality'][k]==v,(k,v,decoded['quality'][k])
-                row={'trial':trial,'record':sid,'completeProcessingWallSeconds':wall,'state':state['state'],
+                row={'trial':trial,'trackerMode':os.environ.get('ETM_SHARED_TRACKER','1'),'record':sid,'completeProcessingWallSeconds':wall,'state':state['state'],
                      'summaryMatchesLegacy':True,'sharedQualityMatchesLegacy':True,'summary':decoded['summary'],
                      'quality':decoded['quality'],'performance':json.loads((folder/'decode-performance.json').read_text(encoding='utf8')),
                      'files':{str(f.relative_to(folder)):f.stat().st_size for f in folder.rglob('*') if f.is_file()},

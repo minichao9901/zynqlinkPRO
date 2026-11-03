@@ -49,7 +49,7 @@ class NativeWebCaptureTests(unittest.TestCase):
                 rejected=client.post('/etm/api/native-capture',headers=headers,json={**options,'hclkDiv':divider})
                 self.assertEqual(rejected.status_code,400)
                 self.assertIn('target',rejected.json['error'])
-            with patch.object(native_web_capture.threading, 'Thread'):
+            with patch.object(native_web_capture, 'CaptureThread'):
                 response = client.post('/etm/api/native-capture', headers=headers, json=options)
                 self.assertEqual(response.status_code, 200, response.data)
                 job = response.json
@@ -76,7 +76,7 @@ class NativeWebCaptureTests(unittest.TestCase):
             self.assertTrue(backend.meta(job['record'])['targetVerified'])
             self.assertNotIn('_laLease', backend.jobs[job['job']])
 
-            with patch.object(native_web_capture.threading, 'Thread'):
+            with patch.object(native_web_capture, 'CaptureThread'):
                 cancelled = client.post('/etm/api/native-capture', headers=headers, json=options).json
             stop = client.post('/etm/api/stop/' + cancelled['job'], headers=headers)
             self.assertTrue(stop.json['restorePending'])
@@ -85,7 +85,7 @@ class NativeWebCaptureTests(unittest.TestCase):
                 run.assert_not_called()
             self.assertEqual(backend.jobs[cancelled['job']]['state'], 'cancelled')
 
-            with patch.object(native_web_capture.threading, 'Thread'):
+            with patch.object(native_web_capture, 'CaptureThread'):
                 failed = client.post('/etm/api/native-capture', headers=headers, json=options).json
             restored = False
             with patch.object(native_web_capture.subprocess, 'run', side_effect=transaction):

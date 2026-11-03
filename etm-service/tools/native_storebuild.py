@@ -151,6 +151,7 @@ def _run_json_command(args, json_path, timeout, binary=None):
             raise NativeStorebuildError('原生 builder 未生成结果 JSON：%s' % json_path)
         try:
             result = json.loads(json_path.read_text(encoding='utf-8'))
+            result.setdefault('controlResultBytes', json_path.stat().st_size)
         except (OSError, json.JSONDecodeError) as error:
             raise NativeStorebuildError('原生 builder 结果 JSON 不可读：%s' % error) from error
     finally:
@@ -161,6 +162,67 @@ def _run_json_command(args, json_path, timeout, binary=None):
                 pass
     result.setdefault('wallSeconds', round(elapsed, 3))
     return result
+
+
+
+class PreparedBuild:
+    """Own one C++ process while its static dictionary is prepared."""
+    def __init__(self, args, prepare, static, binary=None, timeout=DEFAULT_TIMEOUT):
+        self.process = None
+        self.log = None
+        self.started = time.perf_counter()
+        self.timeout = timeout
+        self.static = Path(static)
+        self.result = self.static.parent / 'prepared-build-result.json'
+        self.log_path = self.static.parent / 'prepared-build.log'
+        helper = Path(binary) if binary else binary_path()
+        if 'typed-replay-v1' not in probe(helper).get('capabilities', []):
+            raise NativeStorebuildMismatch('Native builder lacks typed-replay-v1')
+        command = list(args) + ['--prepare-static', str(prepare['ready']),
+                               '--ranges-out', str(prepare['ranges']), '--owner-pid', str(os.getpid()), '--json', str(self.result)]
+        try:
+            self.log = self.log_path.open('wb')
+            self.process = subprocess.Popen([str(helper)] + command, stdout=subprocess.DEVNULL, stderr=self.log,
+                                            creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
+            while not Path(prepare['ready']).is_file():
+                if self.process.poll() is not None:
+                    self.log.close()
+                    raise NativeStorebuildError('Native preparation failed: ' + self.log_path.read_text(encoding='utf8', errors='replace'))
+                if time.perf_counter() - self.started > timeout:
+                    raise NativeStorebuildError('Native preparation timed out')
+                time.sleep(.01)
+            self.scan = json.loads(Path(prepare['ready']).read_text(encoding='utf8'))
+        except BaseException:
+            self.abort()
+            raise
+
+    def finish(self):
+        try:
+            Path(str(self.static) + '.ready').write_text('ready', encoding='ascii')
+            self.process.wait(timeout=max(.01, self.timeout - (time.perf_counter() - self.started)))
+            self.log.close()
+            if self.process.returncode:
+                raise NativeStorebuildError('Native prepared build failed: ' + self.log_path.read_text(encoding='utf8', errors='replace'))
+            result = json.loads(self.result.read_text(encoding='utf8'))
+            result.setdefault('controlResultBytes', self.result.stat().st_size)
+            result.setdefault('wallSeconds', time.perf_counter() - self.started)
+            return result
+        except BaseException:
+            self.abort()
+            raise
+
+    def abort(self):
+        try:
+            if self.process is not None and self.process.poll() is None:
+                try:
+                    self.process.kill()
+                except OSError:
+                    if self.process.poll() is None:
+                        raise
+                self.process.wait(timeout=10)
+        finally:
+            if self.log is not None and not self.log.closed:
+                self.log.close()
 
 
 def prescan(native, out=None, json_path=None, max_unique_ranges=None,
@@ -260,8 +322,8 @@ def build_local_index(store_dir, build_result):
 
 def build(native, static, out_dir, generation=None, generation_tag=None, result=None,
           timeout=DEFAULT_TIMEOUT, binary=None, analysis=False, local_index=False,
-          facts_out=None, native_index=False, reserve_instructions=None, index_facts_out=None, profile_detail=False):
-    """调用原生 build（blocks 1-11；块 12/默认视图留给 t21）。
+          facts_out=None, native_index=False, reserve_instructions=None, index_facts_out=None, profile_detail=False, direct=None, prepare=None, complete_context=None):
+    """调用原生 build；complete_context 使完整索引及最终库在 C++ 内完成。
 
     ``facts_out`` 触发 facts v3 写出；index_facts_out 请求同遍数值归约。
     profile_detail 开启逐 RUN 计时（正常路径仅记录阶段总时间）。
@@ -272,10 +334,15 @@ def build(native, static, out_dir, generation=None, generation_tag=None, result=
     static = Path(static)
     if not native.is_file():
         raise NativeStorebuildError('native.bin 不存在：%s' % native)
-    if not static.is_file():
+    if not prepare and not static.is_file():
         raise NativeStorebuildError('static-dict.bin 不存在：%s' % static)
-    args = ['build', '--native', str(native), '--static', str(static),
-            '--out-dir', str(out_dir)]
+    args = ['build', '--static', str(static), '--out-dir', str(out_dir)]
+    if complete_context is not None:
+        args.extend(['--complete-context', str(complete_context)])
+    if direct:
+        args.extend(['--etm', direct['etm'], '--config', direct['config']])
+    else:
+        args.extend(['--native', str(native)])
     if generation is not None:
         args.extend(['--generation', str(generation)])
     if generation_tag is not None:
@@ -292,6 +359,10 @@ def build(native, static, out_dir, generation=None, generation_tag=None, result=
         args.extend(['--index-facts-out', str(index_facts_out)])
     if reserve_instructions:
         args.extend(['--reserve-instructions', str(int(reserve_instructions))])
+    if prepare:
+        if local_index or not direct:
+            raise NativeStorebuildError("Prepared build requires direct input and no local_index replay")
+        return PreparedBuild(args, prepare, static, binary=binary, timeout=timeout)
     if not local_index:
         return _run_json_command(args, result, timeout, binary=binary)
     first = _run_json_command(args, result, timeout, binary=binary)

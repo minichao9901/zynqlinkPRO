@@ -223,6 +223,14 @@ def verify_inputs(folder, manifest):
     for name in names:
         path = folder / name
         recorded = inputs.get(name)
+        source = bindings.get('sourceInput') or {}
+        if (name == 'native.bin' and not recorded
+                and name in (bindings.get('unconsumedDerivedInputs') or [])
+                and source.get('kind') == 'etm' and source.get('recordFile') == 'etm.bin'
+                and source.get('sha256')
+                and (inputs.get('etm.bin') or {}).get('sha256') == source['sha256']):
+            report['excluded'].append(name)
+            continue
         if not recorded:
             # 文件在记录里、但 manifest 没绑定（旧 store，或建成后才补进来的输入）。
             report['unbound'].append(name)
@@ -328,9 +336,23 @@ def capture_start_from_store(folder_or_store, metadata):
     store_path = folder_or_store
     if Path(store_path).name != STORE_DIR_NAME and (Path(store_path) / STORE_DIR_NAME).is_dir():
         store_path = Path(store_path) / STORE_DIR_NAME
-    store = trace_store.TraceStore(store_path, verify='sizes')
+    from native_core import reader
+    store = reader(store_path, verify='sizes')
     try:
+        if hasattr(store, 'capture_start'):
+            return store.capture_start(entry)
         first_seq = (store.summary or {}).get('firstSeq')
+        prepared = store.meta.get('captureStartIndex')
+        if prepared is not None:
+            if (not isinstance(prepared, dict) or prepared.get('version') != 1
+                    or prepared.get('firstRecoveredSeq') != first_seq
+                    or type(prepared.get('firstRecoveredPC')) is not int
+                    or prepared.get('staticPcsAreRecovered') is not True):
+                raise trace_store.TraceStoreError('采集起点索引与记录不一致')
+            first_pc = prepared['firstRecoveredPC']
+            return dict(selectedPC=entry, firstRecoveredPC=first_pc,
+                        entryRecovered=any(item.pc == entry for item in store.static),
+                        firstMatchesEntry=first_pc == entry)
         first_pc = None
         if isinstance(first_seq, int):
             first_pc = store.event(first_seq)['event'].get('pc')
@@ -353,7 +375,8 @@ def read_sources(folder):
     values = dict(overlay) if isinstance(overlay, dict) else {}
     try:
         if manifest_path(folder).is_file():
-            store = trace_store.TraceStore(store_dir(folder), verify='sizes')
+            from native_core import reader
+            store = reader(store_dir(folder), verify='sizes')
             try:
                 for name, text in (store.sources or {}).items():
                     values.setdefault(name, text)
@@ -431,7 +454,8 @@ class TraceStoreAdapter:
         """打开并校验 store（manifest sha256 + 块 CRC），并按内容核验绑定输入。"""
         started = time.perf_counter()
         try:
-            store = trace_store.TraceStore(self.path, verify='full')
+            from native_core import reader
+            store = reader(self.path, verify='full')
         except trace_store.TraceStoreError as error:
             raise ValueError('trace-store 不可用：%s' % error)
         try:

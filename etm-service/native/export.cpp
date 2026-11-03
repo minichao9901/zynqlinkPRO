@@ -381,7 +381,7 @@ static void readStore(const fs::path &path, const P &plan, Consumer &output) {
     require(h.le(8) == plan.tag, "store generation mismatch");
     auto count = h.le(4);
     require(count > 0 && count <= (1u << 20), "invalid block count");
-    require(h.le(4) == 0, "unsupported required store feature");
+    require((h.le(4) & ~uint64_t(2)) == 0, "unsupported required store feature"); // issue-runs does not alter execution blocks
     auto payloadBytes = h.le(8);
     require(h.le(8) == plan.storeBytes, "invalid store header size");
     require(h.le(4) == crc32(0, header.data(), 48), "store header CRC mismatch");
