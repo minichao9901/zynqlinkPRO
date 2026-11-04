@@ -1,0 +1,1028 @@
+{
+  "offline": true,
+  "sourceRecord": "E:\\zynqlinkPRO\\docs\\validation\\zl006-cpp-stage1-20261102\\f103-large-input",
+  "inputSha256": {
+    "capture.bin": "3b54995365d440cb154c8249b2fc2a0319d9ccb42c2460b3ca861550c421ea78",
+    "firmware.elf": "e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f",
+    "sources.json": "683cdc23e76dd8524aafa8973b0e87880e6f092653e62c4cd7f226bd2f5d8c3d"
+  },
+  "engineProfile": {
+    "name": "native",
+    "settings": {
+      "ETM_STORE_WRITE": "1",
+      "ETM_STORE_ENGINE": "native",
+      "ETM_DECODE_ENGINE": "fast",
+      "ETM_NATIVE_FORMAT": "binary",
+      "ETM_STORE_ENGINE_FALLBACK": "0",
+      "ETM_EXPORT_ENGINE": "native",
+      "ETM_QUERY_ENGINE": "native",
+      "ETM_PREPARE_CACHE": "1",
+      "ETM_COMPLETE_INDEX": null,
+      "ETM_NATIVE_STATIC": null,
+      "ETM_NATIVE_QUERY": null
+    },
+    "pipeline": "OpenCSD -> C++ complete index/store -> atomic manifest publication",
+    "indexEngine": "native-complete-index",
+    "staticEngine": "native",
+    "queryReader": "native",
+    "perInstructionJsonl": false
+  },
+  "rows": [
+    {
+      "blockCacheMode": "0",
+      "trial": 1,
+      "trackerMode": "1",
+      "record": "record-native-1s-r1-a1b9c0f9",
+      "completeProcessingWallSeconds": 6.914074899999832,
+      "state": "done",
+      "summaryMatchesLegacy": true,
+      "sharedQualityMatchesLegacy": true,
+      "summary": {
+        "packets": 4784167,
+        "ranges": 19565799,
+        "instructions": 19565799,
+        "executed": 16918237,
+        "sourceMapped": 19561326,
+        "exceptions": 1185,
+        "gaps": 2,
+        "packetIssues": 0,
+        "unknownExecution": 522998,
+        "functions": {
+          "cdc_poll": 5077621,
+          "cdc_tx_poll": 4535222,
+          "cdc_console_peek": 4201692,
+          "main": 1574800,
+          "usb_device_is_configured": 1224846,
+          "cdc_console_feed": 121590,
+          "cdc_console_write": 100800,
+          "fsdev_write_pma": 17262,
+          "fsdev_read_pma": 16492,
+          "USBD_IRQHandler": 14602,
+          "HAL_IncTick": 6979,
+          "usbd_ep_start_write": 5985,
+          "handle_line": 3276,
+          "strcmp": 2520,
+          "SysTick_Handler": 2991,
+          "usbd_cdc_acm_bulk_in": 2646,
+          "usbd_ep_start_read": 1701,
+          "usbd_event_ep_in_complete_handler": 1386,
+          "usbd_get_ep_mps": 1386,
+          "strncmp": 1071,
+          "usbd_cdc_acm_bulk_out": 1116,
+          "cdc_console_consume": 819,
+          "USB_LP_CAN1_RX0_IRQHandler": 752,
+          "usbd_event_ep_out_complete_handler": 682
+        }
+      },
+      "quality": {
+        "inputBytes": 5892279,
+        "unprocessedBytes": 0,
+        "processedBytes": 5892279,
+        "accountedBytes": 5892279,
+        "overlapBytes": 0,
+        "unaccountedBytes": 0,
+        "unsynchronizedBytes": 0,
+        "unsynchronizedRecords": 0,
+        "validPackets": 4784167,
+        "packetIssues": 0,
+        "overflowPackets": 0,
+        "decoderLastError": 0,
+        "unknownExecution": 522998,
+        "initialPhysicalBytes": null,
+        "unknownSourceBytes": null,
+        "trailingFrameBytes": null,
+        "trailingSyncBytes": 0,
+        "firstPathOffset": 12,
+        "boundaryPresent": false,
+        "timing": {
+          "cycleElements": 0,
+          "timeFlameAvailable": false
+        },
+        "basis": "字节核算不等于采集无损证明；源码映射率不等于程序覆盖率"
+      },
+      "performance": {
+        "version": 2,
+        "generation": "g-20261104T003315-f973b2fe",
+        "scope": "offline-decode; excludes acquisition, upload and browser rendering",
+        "storePhasesSeconds": {
+          "inputPreparation": 0.040654,
+          "nativeClosedBuild": 6.349206,
+          "verifyNativeStore": 0.081846,
+          "inputBindings": 0.021721,
+          "publish": 0.016576,
+          "cleanup": 0.000755
+        },
+        "storeDetails": {
+          "phases": {
+            "inputPreparation": 0.040654,
+            "nativeClosedBuild": 6.349206,
+            "verifyNativeStore": 0.081846,
+            "inputBindings": 0.021721,
+            "publish": 0.016576,
+            "cleanup": 0.000755
+          },
+          "index": {
+            "tablesSeconds": 0.4733474,
+            "defaultViewsSeconds": 0.052919,
+            "encodeSeconds": 0.4592816,
+            "totalSeconds": 0.9856732
+          },
+          "native": {
+            "readNative": 2.25409,
+            "assemble": 2.25409,
+            "rangeHits": 19565157,
+            "rangeMisses": 642,
+            "rangeWalk": 0,
+            "buildBlocks": 0.024965,
+            "analysis": 0.0002835,
+            "queryIndex": 1.08992,
+            "facts": 0,
+            "defaultViews": 0.0,
+            "writeBlocks": 1.07024,
+            "assembleFile": 1.07024,
+            "hashFile": 0.0
+          },
+          "preparedDecode": {
+            "seconds": 1.7911,
+            "replayBytes": 205259423,
+            "nativePeakRssBytes": 486596608
+          },
+          "static": {
+            "native": true,
+            "uniquePCs": 642,
+            "buildSeconds": 0.0091362,
+            "predicateCount": 73,
+            "knownCount": 7061
+          },
+          "image": {
+            "native": true,
+            "cacheHit": false,
+            "parseSeconds": 0.0169904,
+            "totalSeconds": 0.0169904
+          },
+          "completeIndex": true,
+          "scratchFactsWritten": false,
+          "storeWrites": 1,
+          "controlResultBytes": 256114
+        },
+        "decodeSeconds": 6.533343400000376,
+        "decodePhasesSeconds": {
+          "nativeClosedPipeline": 6.533343999999488
+        },
+        "jobSeconds": 6.876206399998409,
+        "jobPhasesSeconds": {
+          "metadataPreparation": 0.012517799999841372,
+          "decode": 6.554428100000223,
+          "captureStartAndMetadata": 0.15530239999861806,
+          "browsePreparation": 0.15395859999989625
+        }
+      },
+      "files": {
+        "capture.bin": 5892279,
+        "decode-performance.json": 1662,
+        "decoded.json": 60482,
+        "etm.bin": 5892279,
+        "firmware.elf": 1216624,
+        "image-0.bin": 20040,
+        "image-1.bin": 128,
+        "native-config.txt": 302,
+        "session.json": 4516,
+        "sources.json": 192947,
+        "store\\manifest.json": 5836,
+        "store\\generations\\g-20261104T003315-f973b2fe\\store.bin": 83805946
+      },
+      "largeJsonIntermediates": []
+    },
+    {
+      "blockCacheMode": "1",
+      "trial": 2,
+      "trackerMode": "1",
+      "record": "record-native-1s-r2-e42c21d4",
+      "completeProcessingWallSeconds": 7.082958099999814,
+      "state": "done",
+      "summaryMatchesLegacy": true,
+      "sharedQualityMatchesLegacy": true,
+      "summary": {
+        "packets": 4784167,
+        "ranges": 19565799,
+        "instructions": 19565799,
+        "executed": 16918237,
+        "sourceMapped": 19561326,
+        "exceptions": 1185,
+        "gaps": 2,
+        "packetIssues": 0,
+        "unknownExecution": 522998,
+        "functions": {
+          "cdc_poll": 5077621,
+          "cdc_tx_poll": 4535222,
+          "cdc_console_peek": 4201692,
+          "main": 1574800,
+          "usb_device_is_configured": 1224846,
+          "cdc_console_feed": 121590,
+          "cdc_console_write": 100800,
+          "fsdev_write_pma": 17262,
+          "fsdev_read_pma": 16492,
+          "USBD_IRQHandler": 14602,
+          "HAL_IncTick": 6979,
+          "usbd_ep_start_write": 5985,
+          "handle_line": 3276,
+          "strcmp": 2520,
+          "SysTick_Handler": 2991,
+          "usbd_cdc_acm_bulk_in": 2646,
+          "usbd_ep_start_read": 1701,
+          "usbd_event_ep_in_complete_handler": 1386,
+          "usbd_get_ep_mps": 1386,
+          "strncmp": 1071,
+          "usbd_cdc_acm_bulk_out": 1116,
+          "cdc_console_consume": 819,
+          "USB_LP_CAN1_RX0_IRQHandler": 752,
+          "usbd_event_ep_out_complete_handler": 682
+        }
+      },
+      "quality": {
+        "inputBytes": 5892279,
+        "unprocessedBytes": 0,
+        "processedBytes": 5892279,
+        "accountedBytes": 5892279,
+        "overlapBytes": 0,
+        "unaccountedBytes": 0,
+        "unsynchronizedBytes": 0,
+        "unsynchronizedRecords": 0,
+        "validPackets": 4784167,
+        "packetIssues": 0,
+        "overflowPackets": 0,
+        "decoderLastError": 0,
+        "unknownExecution": 522998,
+        "initialPhysicalBytes": null,
+        "unknownSourceBytes": null,
+        "trailingFrameBytes": null,
+        "trailingSyncBytes": 0,
+        "firstPathOffset": 12,
+        "boundaryPresent": false,
+        "timing": {
+          "cycleElements": 0,
+          "timeFlameAvailable": false
+        },
+        "basis": "字节核算不等于采集无损证明；源码映射率不等于程序覆盖率"
+      },
+      "performance": {
+        "version": 2,
+        "generation": "g-20261104T003322-956ec3f5",
+        "scope": "offline-decode; excludes acquisition, upload and browser rendering",
+        "storePhasesSeconds": {
+          "inputPreparation": 0.035407,
+          "nativeClosedBuild": 6.538388,
+          "verifyNativeStore": 0.082661,
+          "inputBindings": 0.023209,
+          "publish": 0.017572,
+          "cleanup": 0.00069
+        },
+        "storeDetails": {
+          "phases": {
+            "inputPreparation": 0.035407,
+            "nativeClosedBuild": 6.538388,
+            "verifyNativeStore": 0.082661,
+            "inputBindings": 0.023209,
+            "publish": 0.017572,
+            "cleanup": 0.00069
+          },
+          "index": {
+            "tablesSeconds": 0.5109183,
+            "defaultViewsSeconds": 0.0552395,
+            "encodeSeconds": 0.4781041,
+            "totalSeconds": 1.0443833
+          },
+          "native": {
+            "readNative": 2.38066,
+            "assemble": 2.38066,
+            "rangeHits": 19565157,
+            "rangeMisses": 642,
+            "rangeWalk": 0,
+            "buildBlocks": 0.0260312,
+            "analysis": 0.0002991,
+            "queryIndex": 1.14896,
+            "facts": 0,
+            "defaultViews": 0.0,
+            "writeBlocks": 1.0397,
+            "assembleFile": 1.0397,
+            "hashFile": 0.0
+          },
+          "preparedDecode": {
+            "seconds": 1.82053,
+            "replayBytes": 205259423,
+            "nativePeakRssBytes": 486518784
+          },
+          "static": {
+            "native": true,
+            "uniquePCs": 642,
+            "buildSeconds": 0.0094278,
+            "predicateCount": 73,
+            "knownCount": 7061
+          },
+          "image": {
+            "native": true,
+            "cacheHit": false,
+            "parseSeconds": 0.0167836,
+            "totalSeconds": 0.0167836
+          },
+          "completeIndex": true,
+          "scratchFactsWritten": false,
+          "storeWrites": 1,
+          "controlResultBytes": 256118
+        },
+        "decodeSeconds": 6.700300900000002,
+        "decodePhasesSeconds": {
+          "nativeClosedPipeline": 6.70030129999941
+        },
+        "jobSeconds": 7.067497699999876,
+        "jobPhasesSeconds": {
+          "metadataPreparation": 0.01137399999970512,
+          "decode": 6.719155000000683,
+          "captureStartAndMetadata": 0.16475159999936295,
+          "browsePreparation": 0.17221760000029462
+        }
+      },
+      "files": {
+        "capture.bin": 5892279,
+        "decode-performance.json": 1659,
+        "decoded.json": 60480,
+        "etm.bin": 5892279,
+        "firmware.elf": 1216624,
+        "image-0.bin": 20040,
+        "image-1.bin": 128,
+        "native-config.txt": 302,
+        "session.json": 4516,
+        "sources.json": 192947,
+        "store\\manifest.json": 5840,
+        "store\\generations\\g-20261104T003322-956ec3f5\\store.bin": 83805948
+      },
+      "largeJsonIntermediates": []
+    },
+    {
+      "blockCacheMode": "1",
+      "trial": 3,
+      "trackerMode": "1",
+      "record": "record-native-1s-r3-925a18ed",
+      "completeProcessingWallSeconds": 7.855951100000311,
+      "state": "done",
+      "summaryMatchesLegacy": true,
+      "sharedQualityMatchesLegacy": true,
+      "summary": {
+        "packets": 4784167,
+        "ranges": 19565799,
+        "instructions": 19565799,
+        "executed": 16918237,
+        "sourceMapped": 19561326,
+        "exceptions": 1185,
+        "gaps": 2,
+        "packetIssues": 0,
+        "unknownExecution": 522998,
+        "functions": {
+          "cdc_poll": 5077621,
+          "cdc_tx_poll": 4535222,
+          "cdc_console_peek": 4201692,
+          "main": 1574800,
+          "usb_device_is_configured": 1224846,
+          "cdc_console_feed": 121590,
+          "cdc_console_write": 100800,
+          "fsdev_write_pma": 17262,
+          "fsdev_read_pma": 16492,
+          "USBD_IRQHandler": 14602,
+          "HAL_IncTick": 6979,
+          "usbd_ep_start_write": 5985,
+          "handle_line": 3276,
+          "strcmp": 2520,
+          "SysTick_Handler": 2991,
+          "usbd_cdc_acm_bulk_in": 2646,
+          "usbd_ep_start_read": 1701,
+          "usbd_event_ep_in_complete_handler": 1386,
+          "usbd_get_ep_mps": 1386,
+          "strncmp": 1071,
+          "usbd_cdc_acm_bulk_out": 1116,
+          "cdc_console_consume": 819,
+          "USB_LP_CAN1_RX0_IRQHandler": 752,
+          "usbd_event_ep_out_complete_handler": 682
+        }
+      },
+      "quality": {
+        "inputBytes": 5892279,
+        "unprocessedBytes": 0,
+        "processedBytes": 5892279,
+        "accountedBytes": 5892279,
+        "overlapBytes": 0,
+        "unaccountedBytes": 0,
+        "unsynchronizedBytes": 0,
+        "unsynchronizedRecords": 0,
+        "validPackets": 4784167,
+        "packetIssues": 0,
+        "overflowPackets": 0,
+        "decoderLastError": 0,
+        "unknownExecution": 522998,
+        "initialPhysicalBytes": null,
+        "unknownSourceBytes": null,
+        "trailingFrameBytes": null,
+        "trailingSyncBytes": 0,
+        "firstPathOffset": 12,
+        "boundaryPresent": false,
+        "timing": {
+          "cycleElements": 0,
+          "timeFlameAvailable": false
+        },
+        "basis": "字节核算不等于采集无损证明；源码映射率不等于程序覆盖率"
+      },
+      "performance": {
+        "version": 2,
+        "generation": "g-20261104T003329-587b444f",
+        "scope": "offline-decode; excludes acquisition, upload and browser rendering",
+        "storePhasesSeconds": {
+          "inputPreparation": 0.043037,
+          "nativeClosedBuild": 7.043915,
+          "verifyNativeStore": 0.1051,
+          "inputBindings": 0.035447,
+          "publish": 0.026276,
+          "cleanup": 0.001286
+        },
+        "storeDetails": {
+          "phases": {
+            "inputPreparation": 0.043037,
+            "nativeClosedBuild": 7.043915,
+            "verifyNativeStore": 0.1051,
+            "inputBindings": 0.035447,
+            "publish": 0.026276,
+            "cleanup": 0.001286
+          },
+          "index": {
+            "tablesSeconds": 0.522343,
+            "defaultViewsSeconds": 0.0551856,
+            "encodeSeconds": 0.5003697,
+            "totalSeconds": 1.0780838
+          },
+          "native": {
+            "readNative": 2.42666,
+            "assemble": 2.42666,
+            "rangeHits": 19565157,
+            "rangeMisses": 642,
+            "rangeWalk": 0,
+            "buildBlocks": 0.0354021,
+            "analysis": 0.0005779,
+            "queryIndex": 1.18408,
+            "facts": 0,
+            "defaultViews": 0.0,
+            "writeBlocks": 1.06044,
+            "assembleFile": 1.06044,
+            "hashFile": 0.0
+          },
+          "preparedDecode": {
+            "seconds": 2.20917,
+            "replayBytes": 205259423,
+            "nativePeakRssBytes": 486400000
+          },
+          "static": {
+            "native": true,
+            "uniquePCs": 642,
+            "buildSeconds": 0.0100403,
+            "predicateCount": 73,
+            "knownCount": 7061
+          },
+          "image": {
+            "native": true,
+            "cacheHit": false,
+            "parseSeconds": 0.0241295,
+            "totalSeconds": 0.0241295
+          },
+          "completeIndex": true,
+          "scratchFactsWritten": false,
+          "storeWrites": 1,
+          "controlResultBytes": 256119
+        },
+        "decodeSeconds": 7.258312299998579,
+        "decodePhasesSeconds": {
+          "nativeClosedPipeline": 7.258312799998748
+        },
+        "jobSeconds": 7.830078200000571,
+        "jobPhasesSeconds": {
+          "metadataPreparation": 0.016437000000223634,
+          "decode": 7.28245330000027,
+          "captureStartAndMetadata": 0.2492404999993596,
+          "browsePreparation": 0.2819481000005908
+        }
+      },
+      "files": {
+        "capture.bin": 5892279,
+        "decode-performance.json": 1657,
+        "decoded.json": 60480,
+        "etm.bin": 5892279,
+        "firmware.elf": 1216624,
+        "image-0.bin": 20040,
+        "image-1.bin": 128,
+        "native-config.txt": 302,
+        "session.json": 4516,
+        "sources.json": 192947,
+        "store\\manifest.json": 5838,
+        "store\\generations\\g-20261104T003329-587b444f\\store.bin": 83805946
+      },
+      "largeJsonIntermediates": []
+    },
+    {
+      "blockCacheMode": "0",
+      "trial": 4,
+      "trackerMode": "1",
+      "record": "record-native-1s-r4-2034db0c",
+      "completeProcessingWallSeconds": 8.801716199999646,
+      "state": "done",
+      "summaryMatchesLegacy": true,
+      "sharedQualityMatchesLegacy": true,
+      "summary": {
+        "packets": 4784167,
+        "ranges": 19565799,
+        "instructions": 19565799,
+        "executed": 16918237,
+        "sourceMapped": 19561326,
+        "exceptions": 1185,
+        "gaps": 2,
+        "packetIssues": 0,
+        "unknownExecution": 522998,
+        "functions": {
+          "cdc_poll": 5077621,
+          "cdc_tx_poll": 4535222,
+          "cdc_console_peek": 4201692,
+          "main": 1574800,
+          "usb_device_is_configured": 1224846,
+          "cdc_console_feed": 121590,
+          "cdc_console_write": 100800,
+          "fsdev_write_pma": 17262,
+          "fsdev_read_pma": 16492,
+          "USBD_IRQHandler": 14602,
+          "HAL_IncTick": 6979,
+          "usbd_ep_start_write": 5985,
+          "handle_line": 3276,
+          "strcmp": 2520,
+          "SysTick_Handler": 2991,
+          "usbd_cdc_acm_bulk_in": 2646,
+          "usbd_ep_start_read": 1701,
+          "usbd_event_ep_in_complete_handler": 1386,
+          "usbd_get_ep_mps": 1386,
+          "strncmp": 1071,
+          "usbd_cdc_acm_bulk_out": 1116,
+          "cdc_console_consume": 819,
+          "USB_LP_CAN1_RX0_IRQHandler": 752,
+          "usbd_event_ep_out_complete_handler": 682
+        }
+      },
+      "quality": {
+        "inputBytes": 5892279,
+        "unprocessedBytes": 0,
+        "processedBytes": 5892279,
+        "accountedBytes": 5892279,
+        "overlapBytes": 0,
+        "unaccountedBytes": 0,
+        "unsynchronizedBytes": 0,
+        "unsynchronizedRecords": 0,
+        "validPackets": 4784167,
+        "packetIssues": 0,
+        "overflowPackets": 0,
+        "decoderLastError": 0,
+        "unknownExecution": 522998,
+        "initialPhysicalBytes": null,
+        "unknownSourceBytes": null,
+        "trailingFrameBytes": null,
+        "trailingSyncBytes": 0,
+        "firstPathOffset": 12,
+        "boundaryPresent": false,
+        "timing": {
+          "cycleElements": 0,
+          "timeFlameAvailable": false
+        },
+        "basis": "字节核算不等于采集无损证明；源码映射率不等于程序覆盖率"
+      },
+      "performance": {
+        "version": 2,
+        "generation": "g-20261104T003337-c0f003cb",
+        "scope": "offline-decode; excludes acquisition, upload and browser rendering",
+        "storePhasesSeconds": {
+          "inputPreparation": 0.072834,
+          "nativeClosedBuild": 8.225952,
+          "verifyNativeStore": 0.080979,
+          "inputBindings": 0.022795,
+          "publish": 0.015021,
+          "cleanup": 0.000668
+        },
+        "storeDetails": {
+          "phases": {
+            "inputPreparation": 0.072834,
+            "nativeClosedBuild": 8.225952,
+            "verifyNativeStore": 0.080979,
+            "inputBindings": 0.022795,
+            "publish": 0.015021,
+            "cleanup": 0.000668
+          },
+          "index": {
+            "tablesSeconds": 0.4784597,
+            "defaultViewsSeconds": 0.0533807,
+            "encodeSeconds": 0.4488925,
+            "totalSeconds": 0.9808641
+          },
+          "native": {
+            "readNative": 2.29957,
+            "assemble": 2.29957,
+            "rangeHits": 19565157,
+            "rangeMisses": 642,
+            "rangeWalk": 0,
+            "buildBlocks": 0.0242984,
+            "analysis": 0.0002862,
+            "queryIndex": 1.08309,
+            "facts": 0,
+            "defaultViews": 0.0,
+            "writeBlocks": 1.02865,
+            "assembleFile": 1.02865,
+            "hashFile": 0.0
+          },
+          "preparedDecode": {
+            "seconds": 3.59965,
+            "replayBytes": 205259423,
+            "nativePeakRssBytes": 486232064
+          },
+          "static": {
+            "native": true,
+            "uniquePCs": 642,
+            "buildSeconds": 0.0208363,
+            "predicateCount": 73,
+            "knownCount": 7061
+          },
+          "image": {
+            "native": true,
+            "cacheHit": false,
+            "parseSeconds": 0.0429207,
+            "totalSeconds": 0.0429207
+          },
+          "completeIndex": true,
+          "scratchFactsWritten": false,
+          "storeWrites": 1,
+          "controlResultBytes": 256120
+        },
+        "decodeSeconds": 8.423258700000588,
+        "decodePhasesSeconds": {
+          "nativeClosedPipeline": 8.42325879999953
+        },
+        "jobSeconds": 8.770773399999598,
+        "jobPhasesSeconds": {
+          "metadataPreparation": 0.02554720000080124,
+          "decode": 8.448191899999074,
+          "captureStartAndMetadata": 0.14686340000116616,
+          "browsePreparation": 0.15017129999978351
+        }
+      },
+      "files": {
+        "capture.bin": 5892279,
+        "decode-performance.json": 1663,
+        "decoded.json": 60484,
+        "etm.bin": 5892279,
+        "firmware.elf": 1216624,
+        "image-0.bin": 20040,
+        "image-1.bin": 128,
+        "native-config.txt": 302,
+        "session.json": 4515,
+        "sources.json": 192947,
+        "store\\manifest.json": 5844,
+        "store\\generations\\g-20261104T003337-c0f003cb\\store.bin": 83805946
+      },
+      "largeJsonIntermediates": []
+    },
+    {
+      "blockCacheMode": "0",
+      "trial": 5,
+      "trackerMode": "1",
+      "record": "record-native-1s-r5-c0bab48a",
+      "completeProcessingWallSeconds": 6.745049999999537,
+      "state": "done",
+      "summaryMatchesLegacy": true,
+      "sharedQualityMatchesLegacy": true,
+      "summary": {
+        "packets": 4784167,
+        "ranges": 19565799,
+        "instructions": 19565799,
+        "executed": 16918237,
+        "sourceMapped": 19561326,
+        "exceptions": 1185,
+        "gaps": 2,
+        "packetIssues": 0,
+        "unknownExecution": 522998,
+        "functions": {
+          "cdc_poll": 5077621,
+          "cdc_tx_poll": 4535222,
+          "cdc_console_peek": 4201692,
+          "main": 1574800,
+          "usb_device_is_configured": 1224846,
+          "cdc_console_feed": 121590,
+          "cdc_console_write": 100800,
+          "fsdev_write_pma": 17262,
+          "fsdev_read_pma": 16492,
+          "USBD_IRQHandler": 14602,
+          "HAL_IncTick": 6979,
+          "usbd_ep_start_write": 5985,
+          "handle_line": 3276,
+          "strcmp": 2520,
+          "SysTick_Handler": 2991,
+          "usbd_cdc_acm_bulk_in": 2646,
+          "usbd_ep_start_read": 1701,
+          "usbd_event_ep_in_complete_handler": 1386,
+          "usbd_get_ep_mps": 1386,
+          "strncmp": 1071,
+          "usbd_cdc_acm_bulk_out": 1116,
+          "cdc_console_consume": 819,
+          "USB_LP_CAN1_RX0_IRQHandler": 752,
+          "usbd_event_ep_out_complete_handler": 682
+        }
+      },
+      "quality": {
+        "inputBytes": 5892279,
+        "unprocessedBytes": 0,
+        "processedBytes": 5892279,
+        "accountedBytes": 5892279,
+        "overlapBytes": 0,
+        "unaccountedBytes": 0,
+        "unsynchronizedBytes": 0,
+        "unsynchronizedRecords": 0,
+        "validPackets": 4784167,
+        "packetIssues": 0,
+        "overflowPackets": 0,
+        "decoderLastError": 0,
+        "unknownExecution": 522998,
+        "initialPhysicalBytes": null,
+        "unknownSourceBytes": null,
+        "trailingFrameBytes": null,
+        "trailingSyncBytes": 0,
+        "firstPathOffset": 12,
+        "boundaryPresent": false,
+        "timing": {
+          "cycleElements": 0,
+          "timeFlameAvailable": false
+        },
+        "basis": "字节核算不等于采集无损证明；源码映射率不等于程序覆盖率"
+      },
+      "performance": {
+        "version": 2,
+        "generation": "g-20261104T003345-d5173a94",
+        "scope": "offline-decode; excludes acquisition, upload and browser rendering",
+        "storePhasesSeconds": {
+          "inputPreparation": 0.035692,
+          "nativeClosedBuild": 6.241022,
+          "verifyNativeStore": 0.079819,
+          "inputBindings": 0.020056,
+          "publish": 0.016041,
+          "cleanup": 0.000731
+        },
+        "storeDetails": {
+          "phases": {
+            "inputPreparation": 0.035692,
+            "nativeClosedBuild": 6.241022,
+            "verifyNativeStore": 0.079819,
+            "inputBindings": 0.020056,
+            "publish": 0.016041,
+            "cleanup": 0.000731
+          },
+          "index": {
+            "tablesSeconds": 0.5026041,
+            "defaultViewsSeconds": 0.0526808,
+            "encodeSeconds": 0.4827956,
+            "totalSeconds": 1.0381892
+          },
+          "native": {
+            "readNative": 2.20832,
+            "assemble": 2.20832,
+            "rangeHits": 19565157,
+            "rangeMisses": 642,
+            "rangeWalk": 0,
+            "buildBlocks": 0.0258299,
+            "analysis": 0.0003347,
+            "queryIndex": 1.14178,
+            "facts": 0,
+            "defaultViews": 0.0,
+            "writeBlocks": 1.00253,
+            "assembleFile": 1.00253,
+            "hashFile": 0.0
+          },
+          "preparedDecode": {
+            "seconds": 1.74716,
+            "replayBytes": 205259423,
+            "nativePeakRssBytes": 486572032
+          },
+          "static": {
+            "native": true,
+            "uniquePCs": 642,
+            "buildSeconds": 0.0098205,
+            "predicateCount": 73,
+            "knownCount": 7061
+          },
+          "image": {
+            "native": true,
+            "cacheHit": false,
+            "parseSeconds": 0.0163526,
+            "totalSeconds": 0.0163526
+          },
+          "completeIndex": true,
+          "scratchFactsWritten": false,
+          "storeWrites": 1,
+          "controlResultBytes": 256120
+        },
+        "decodeSeconds": 6.395565400000123,
+        "decodePhasesSeconds": {
+          "nativeClosedPipeline": 6.395565599999827
+        },
+        "jobSeconds": 6.716464699999051,
+        "jobPhasesSeconds": {
+          "metadataPreparation": 0.010790300000735442,
+          "decode": 6.4116082999989885,
+          "captureStartAndMetadata": 0.14036699999996927,
+          "browsePreparation": 0.15369939999982307
+        }
+      },
+      "files": {
+        "capture.bin": 5892279,
+        "decode-performance.json": 1666,
+        "decoded.json": 60485,
+        "etm.bin": 5892279,
+        "firmware.elf": 1216624,
+        "image-0.bin": 20040,
+        "image-1.bin": 128,
+        "native-config.txt": 302,
+        "session.json": 4515,
+        "sources.json": 192947,
+        "store\\manifest.json": 5844,
+        "store\\generations\\g-20261104T003345-d5173a94\\store.bin": 83805947
+      },
+      "largeJsonIntermediates": []
+    },
+    {
+      "blockCacheMode": "1",
+      "trial": 6,
+      "trackerMode": "1",
+      "record": "record-native-1s-r6-a2520116",
+      "completeProcessingWallSeconds": 6.673801099999764,
+      "state": "done",
+      "summaryMatchesLegacy": true,
+      "sharedQualityMatchesLegacy": true,
+      "summary": {
+        "packets": 4784167,
+        "ranges": 19565799,
+        "instructions": 19565799,
+        "executed": 16918237,
+        "sourceMapped": 19561326,
+        "exceptions": 1185,
+        "gaps": 2,
+        "packetIssues": 0,
+        "unknownExecution": 522998,
+        "functions": {
+          "cdc_poll": 5077621,
+          "cdc_tx_poll": 4535222,
+          "cdc_console_peek": 4201692,
+          "main": 1574800,
+          "usb_device_is_configured": 1224846,
+          "cdc_console_feed": 121590,
+          "cdc_console_write": 100800,
+          "fsdev_write_pma": 17262,
+          "fsdev_read_pma": 16492,
+          "USBD_IRQHandler": 14602,
+          "HAL_IncTick": 6979,
+          "usbd_ep_start_write": 5985,
+          "handle_line": 3276,
+          "strcmp": 2520,
+          "SysTick_Handler": 2991,
+          "usbd_cdc_acm_bulk_in": 2646,
+          "usbd_ep_start_read": 1701,
+          "usbd_event_ep_in_complete_handler": 1386,
+          "usbd_get_ep_mps": 1386,
+          "strncmp": 1071,
+          "usbd_cdc_acm_bulk_out": 1116,
+          "cdc_console_consume": 819,
+          "USB_LP_CAN1_RX0_IRQHandler": 752,
+          "usbd_event_ep_out_complete_handler": 682
+        }
+      },
+      "quality": {
+        "inputBytes": 5892279,
+        "unprocessedBytes": 0,
+        "processedBytes": 5892279,
+        "accountedBytes": 5892279,
+        "overlapBytes": 0,
+        "unaccountedBytes": 0,
+        "unsynchronizedBytes": 0,
+        "unsynchronizedRecords": 0,
+        "validPackets": 4784167,
+        "packetIssues": 0,
+        "overflowPackets": 0,
+        "decoderLastError": 0,
+        "unknownExecution": 522998,
+        "initialPhysicalBytes": null,
+        "unknownSourceBytes": null,
+        "trailingFrameBytes": null,
+        "trailingSyncBytes": 0,
+        "firstPathOffset": 12,
+        "boundaryPresent": false,
+        "timing": {
+          "cycleElements": 0,
+          "timeFlameAvailable": false
+        },
+        "basis": "字节核算不等于采集无损证明；源码映射率不等于程序覆盖率"
+      },
+      "performance": {
+        "version": 2,
+        "generation": "g-20261104T003352-6bc6b3e0",
+        "scope": "offline-decode; excludes acquisition, upload and browser rendering",
+        "storePhasesSeconds": {
+          "inputPreparation": 0.035476,
+          "nativeClosedBuild": 6.177884,
+          "verifyNativeStore": 0.078278,
+          "inputBindings": 0.020977,
+          "publish": 0.016291,
+          "cleanup": 0.000687
+        },
+        "storeDetails": {
+          "phases": {
+            "inputPreparation": 0.035476,
+            "nativeClosedBuild": 6.177884,
+            "verifyNativeStore": 0.078278,
+            "inputBindings": 0.020977,
+            "publish": 0.016291,
+            "cleanup": 0.000687
+          },
+          "index": {
+            "tablesSeconds": 0.4891331,
+            "defaultViewsSeconds": 0.0555195,
+            "encodeSeconds": 0.4604392,
+            "totalSeconds": 1.0052281
+          },
+          "native": {
+            "readNative": 2.20469,
+            "assemble": 2.20469,
+            "rangeHits": 19565157,
+            "rangeMisses": 642,
+            "rangeWalk": 0,
+            "buildBlocks": 0.0240042,
+            "analysis": 0.000273,
+            "queryIndex": 1.10706,
+            "facts": 0,
+            "defaultViews": 0.0,
+            "writeBlocks": 1.01243,
+            "assembleFile": 1.01243,
+            "hashFile": 0.0
+          },
+          "preparedDecode": {
+            "seconds": 1.71249,
+            "replayBytes": 205259423,
+            "nativePeakRssBytes": 486600704
+          },
+          "static": {
+            "native": true,
+            "uniquePCs": 642,
+            "buildSeconds": 0.0087594,
+            "predicateCount": 73,
+            "knownCount": 7061
+          },
+          "image": {
+            "native": true,
+            "cacheHit": false,
+            "parseSeconds": 0.0171618,
+            "totalSeconds": 0.0171618
+          },
+          "completeIndex": true,
+          "scratchFactsWritten": false,
+          "storeWrites": 1,
+          "controlResultBytes": 256119
+        },
+        "decodeSeconds": 6.331866099999388,
+        "decodePhasesSeconds": {
+          "nativeClosedPipeline": 6.331866300000911
+        },
+        "jobSeconds": 6.653121800000008,
+        "jobPhasesSeconds": {
+          "metadataPreparation": 0.010612300000502728,
+          "decode": 6.3493061999997735,
+          "captureStartAndMetadata": 0.14053059999969264,
+          "browsePreparation": 0.15267300000050454
+        }
+      },
+      "files": {
+        "capture.bin": 5892279,
+        "decode-performance.json": 1665,
+        "decoded.json": 60484,
+        "etm.bin": 5892279,
+        "firmware.elf": 1216624,
+        "image-0.bin": 20040,
+        "image-1.bin": 128,
+        "native-config.txt": 302,
+        "session.json": 4516,
+        "sources.json": 192947,
+        "store\\manifest.json": 5842,
+        "store\\generations\\g-20261104T003352-6bc6b3e0\\store.bin": 83805945
+      },
+      "largeJsonIntermediates": []
+    }
+  ],
+  "completeIndexSelection": "default",
+  "storebuildOverride": {
+    "path": "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\block-cache-native\\etm_storebuild.exe",
+    "sha256": "d0f7df7cd8a1415110bf1e091d8effc3627a5bd16cc6774834619812fb062478"
+  },
+  "inputUnchanged": true
+}

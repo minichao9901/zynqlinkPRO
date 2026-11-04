@@ -1,0 +1,93 @@
+diff --git a/etm-service/vendor/OpenCSD-1.8.3/decoder/include/common/ocsd_code_follower.h b/etm-service/vendor/OpenCSD-1.8.3/decoder/include/common/ocsd_code_follower.h
+index 2247a3b..56c823b 100644
+--- a/etm-service/vendor/OpenCSD-1.8.3/decoder/include/common/ocsd_code_follower.h
++++ b/etm-service/vendor/OpenCSD-1.8.3/decoder/include/common/ocsd_code_follower.h
+@@ -35,6 +35,8 @@
+ #ifndef ARM_OCSD_CODE_FOLLOWER_H_INCLUDED
+ #define ARM_OCSD_CODE_FOLLOWER_H_INCLUDED
+ 
++#include <vector>
++
+ #include "opencsd/ocsd_if_types.h"
+ #include "opencsd/trc_pkt_types.h"
+ #include "comp_attach_pt_t.h"
+@@ -109,6 +111,17 @@ private:
+     ocsd_err_t decodeSingleOpCode();      //!< decode single opcode address from current m_inst_info packet
+ 
+     ocsd_instr_info m_instr_info;
++    // Offline experiment only: immutable code buffers for the entire decoder
++    // lifetime. Errors are never memoized; all input instruction state and the
++    // memory-space selector are checked on a hit.
++    struct OfflineInstructionMemo {
++        bool valid = false;
++        ocsd_instr_info before, after;
++        ocsd_mem_space_acc_t rule;
++        uint8_t csid;
++    };
++    std::vector<OfflineInstructionMemo> m_offline_instructions;
++    uint64_t m_offline_hits = 0, m_offline_misses = 0;
+ 
+     ocsd_vaddr_t m_st_range_addr;   //!< start of excuted range - inclusive address.
+     ocsd_vaddr_t m_en_range_addr;   //!< end of executed range - exclusive address.
+diff --git a/etm-service/vendor/OpenCSD-1.8.3/decoder/source/ocsd_code_follower.cpp b/etm-service/vendor/OpenCSD-1.8.3/decoder/source/ocsd_code_follower.cpp
+index f1dbc35..ee48c73 100644
+--- a/etm-service/vendor/OpenCSD-1.8.3/decoder/source/ocsd_code_follower.cpp
++++ b/etm-service/vendor/OpenCSD-1.8.3/decoder/source/ocsd_code_follower.cpp
+@@ -34,9 +34,14 @@
+  */ 
+ 
+ #include "common/ocsd_code_follower.h"
++#include <cstdlib>
++#include <cstring>
++#include <cstdio>
+ 
+ OcsdCodeFollower::OcsdCodeFollower()
+ {
++    const char* offline=std::getenv("ETM_EXPERIMENT_IMMUTABLE_BLOCK_CACHE");
++    if(offline && std::strcmp(offline,"1")==0)m_offline_instructions.resize(16384);
+     m_instr_info.pe_type.arch = ARCH_UNKNOWN;
+     m_instr_info.pe_type.profile = profile_Unknown;
+     m_instr_info.isa = ocsd_isa_unknown;
+@@ -56,10 +61,14 @@ OcsdCodeFollower::OcsdCodeFollower()
+ 
+ OcsdCodeFollower::~OcsdCodeFollower()
+ {
++    if(!m_offline_instructions.empty())
++        std::fprintf(stderr,"OFFLINE_INSTRUCTION_CACHE hits=%llu misses=%llu slots=16384\n",
++            (unsigned long long)m_offline_hits,(unsigned long long)m_offline_misses);
+ }
+ 
+ void OcsdCodeFollower::initInterfaces(componentAttachPt<ITargetMemAccess> *pMemAccess, componentAttachPt<IInstrDecode> *pIDecode)
+ {
++    for(auto& item:m_offline_instructions)item.valid=false;
+     m_pMemAccess = pMemAccess;
+     m_pIDecode = pIDecode;
+ }
+@@ -136,6 +145,16 @@ ocsd_err_t OcsdCodeFollower::followSingleAtom(const ocsd_vaddr_t addrStart, cons
+ ocsd_err_t OcsdCodeFollower::decodeSingleOpCode()
+ {
+     ocsd_err_t err = OCSD_OK;
++    OfflineInstructionMemo* memo=nullptr;
++    ocsd_instr_info before;
++    if(!m_offline_instructions.empty()) {
++        memo=&m_offline_instructions[(m_instr_info.instr_addr>>1)&16383];
++        if(memo->valid && memo->rule==m_mem_acc_rule && memo->csid==m_mem_space_csid &&
++            std::memcmp(&memo->before,&m_instr_info,sizeof(m_instr_info))==0) {
++            ++m_offline_hits;m_instr_info=memo->after;return OCSD_OK;
++        }
++        ++m_offline_misses;std::memcpy(&before,&m_instr_info,sizeof(before));
++    }
+     // request 4 bytes for the opcode - even for Thumb which may be T32
+     uint32_t bytesReq = 4;  
+     uint32_t opcode;    // buffer for opcode
+@@ -151,6 +170,10 @@ ocsd_err_t OcsdCodeFollower::decodeSingleOpCode()
+     {
+         m_instr_info.opcode = opcode;
+         err = m_pIDecode->first()->DecodeInstruction(&m_instr_info);
++        if(memo && err==OCSD_OK) {
++            std::memcpy(&memo->before,&before,sizeof(before));memo->after=m_instr_info;
++            memo->rule=m_mem_acc_rule;memo->csid=m_mem_space_csid;memo->valid=true;
++        }
+     }
+     else       // otherwise memory unavailable.
+     {

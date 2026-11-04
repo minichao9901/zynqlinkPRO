@@ -1,0 +1,1016 @@
+{
+  "offline": true,
+  "binarySHA256": "177be412a6a4b97c768994f0062e61b95d01fa65a0b7797a1755893f4c568f4b",
+  "oldBinarySHA256": "233f80ad06e06391cb49d2f013dca7b5d0d66cb6d80ba0307753ae048527b912",
+  "micro": [
+    {
+      "command": [
+        "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\prebuilt\\etm-stream-offline-20261104\\etm_storebuild.exe",
+        "stream-experiment",
+        "--record",
+        "E:\\zynqlinkPRO\\docs\\validation\\zl006-cpp-stage1-20261102\\f103-large-input",
+        "--out",
+        "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\jt3-paged-final\\micro-0-old",
+        "--chunk-bytes",
+        "5893",
+        "--snapshot-ms",
+        "0"
+      ],
+      "flags": [
+        0,
+        0,
+        0
+      ],
+      "exitCode": 0,
+      "wallSeconds": 2.3488892000023043,
+      "stderr": "",
+      "trial": 0,
+      "mode": "old",
+      "equivalence": {
+        "totals": true,
+        "analysis": true,
+        "pcStatistics": true,
+        "ok": true
+      },
+      "decodeBusySeconds": 2.3000266
+    },
+    {
+      "command": [
+        "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\block-cache-native\\etm_storebuild.exe",
+        "stream-experiment",
+        "--record",
+        "E:\\zynqlinkPRO\\docs\\validation\\zl006-cpp-stage1-20261102\\f103-large-input",
+        "--out",
+        "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\jt3-paged-final\\micro-0-off",
+        "--chunk-bytes",
+        "5893",
+        "--snapshot-ms",
+        "0"
+      ],
+      "flags": [
+        0,
+        0,
+        0
+      ],
+      "exitCode": 0,
+      "wallSeconds": 2.339828699998179,
+      "stderr": "",
+      "trial": 0,
+      "mode": "off",
+      "equivalence": {
+        "totals": true,
+        "analysis": true,
+        "pcStatistics": true,
+        "ok": true
+      },
+      "decodeBusySeconds": 2.283790599999999
+    },
+    {
+      "command": [
+        "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\block-cache-native\\etm_storebuild.exe",
+        "stream-experiment",
+        "--record",
+        "E:\\zynqlinkPRO\\docs\\validation\\zl006-cpp-stage1-20261102\\f103-large-input",
+        "--out",
+        "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\jt3-paged-final\\micro-0-page",
+        "--chunk-bytes",
+        "5893",
+        "--snapshot-ms",
+        "0"
+      ],
+      "flags": [
+        1,
+        0,
+        0
+      ],
+      "exitCode": 0,
+      "wallSeconds": 1.747490600002493,
+      "stderr": "ETMV3_PAGE_CACHE hits=19565167 misses=642 slotBytes=20\r\n",
+      "trial": 0,
+      "mode": "page",
+      "equivalence": {
+        "totals": true,
+        "analysis": true,
+        "pcStatistics": true,
+        "ok": true
+      },
+      "decodeBusySeconds": 1.6936835999999997
+    },
+    {
+      "command": [
+        "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\block-cache-native\\etm_storebuild.exe",
+        "stream-experiment",
+        "--record",
+        "E:\\zynqlinkPRO\\docs\\validation\\zl006-cpp-stage1-20261102\\f103-large-input",
+        "--out",
+        "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\jt3-paged-final\\micro-0-stats",
+        "--chunk-bytes",
+        "5893",
+        "--snapshot-ms",
+        "0"
+      ],
+      "flags": [
+        0,
+        1,
+        1
+      ],
+      "exitCode": 0,
+      "wallSeconds": 2.153442399998312,
+      "stderr": "",
+      "trial": 0,
+      "mode": "stats",
+      "equivalence": {
+        "totals": true,
+        "analysis": true,
+        "pcStatistics": true,
+        "ok": true
+      },
+      "decodeBusySeconds": 2.1093908
+    },
+    {
+      "command": [
+        "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\block-cache-native\\etm_storebuild.exe",
+        "stream-experiment",
+        "--record",
+        "E:\\zynqlinkPRO\\docs\\validation\\zl006-cpp-stage1-20261102\\f103-large-input",
+        "--out",
+        "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\jt3-paged-final\\micro-0-all",
+        "--chunk-bytes",
+        "5893",
+        "--snapshot-ms",
+        "0"
+      ],
+      "flags": [
+        1,
+        1,
+        1
+      ],
+      "exitCode": 0,
+      "wallSeconds": 1.6299574000004213,
+      "stderr": "ETMV3_PAGE_CACHE hits=19565167 misses=642 slotBytes=20\r\n",
+      "trial": 0,
+      "mode": "all",
+      "equivalence": {
+        "totals": true,
+        "analysis": true,
+        "pcStatistics": true,
+        "ok": true
+      },
+      "decodeBusySeconds": 1.5847037999999989
+    },
+    {
+      "command": [
+        "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\block-cache-native\\etm_storebuild.exe",
+        "stream-experiment",
+        "--record",
+        "E:\\zynqlinkPRO\\docs\\validation\\zl006-cpp-stage1-20261102\\f103-large-input",
+        "--out",
+        "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\jt3-paged-final\\micro-1-all",
+        "--chunk-bytes",
+        "5893",
+        "--snapshot-ms",
+        "0"
+      ],
+      "flags": [
+        1,
+        1,
+        1
+      ],
+      "exitCode": 0,
+      "wallSeconds": 1.6046231000000262,
+      "stderr": "ETMV3_PAGE_CACHE hits=19565167 misses=642 slotBytes=20\r\n",
+      "trial": 1,
+      "mode": "all",
+      "equivalence": {
+        "totals": true,
+        "analysis": true,
+        "pcStatistics": true,
+        "ok": true
+      },
+      "decodeBusySeconds": 1.5489160999999978
+    },
+    {
+      "command": [
+        "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\block-cache-native\\etm_storebuild.exe",
+        "stream-experiment",
+        "--record",
+        "E:\\zynqlinkPRO\\docs\\validation\\zl006-cpp-stage1-20261102\\f103-large-input",
+        "--out",
+        "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\jt3-paged-final\\micro-1-stats",
+        "--chunk-bytes",
+        "5893",
+        "--snapshot-ms",
+        "0"
+      ],
+      "flags": [
+        0,
+        1,
+        1
+      ],
+      "exitCode": 0,
+      "wallSeconds": 2.137139800001023,
+      "stderr": "",
+      "trial": 1,
+      "mode": "stats",
+      "equivalence": {
+        "totals": true,
+        "analysis": true,
+        "pcStatistics": true,
+        "ok": true
+      },
+      "decodeBusySeconds": 2.0909587999999992
+    },
+    {
+      "command": [
+        "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\block-cache-native\\etm_storebuild.exe",
+        "stream-experiment",
+        "--record",
+        "E:\\zynqlinkPRO\\docs\\validation\\zl006-cpp-stage1-20261102\\f103-large-input",
+        "--out",
+        "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\jt3-paged-final\\micro-1-page",
+        "--chunk-bytes",
+        "5893",
+        "--snapshot-ms",
+        "0"
+      ],
+      "flags": [
+        1,
+        0,
+        0
+      ],
+      "exitCode": 0,
+      "wallSeconds": 1.75814900000114,
+      "stderr": "ETMV3_PAGE_CACHE hits=19565167 misses=642 slotBytes=20\r\n",
+      "trial": 1,
+      "mode": "page",
+      "equivalence": {
+        "totals": true,
+        "analysis": true,
+        "pcStatistics": true,
+        "ok": true
+      },
+      "decodeBusySeconds": 1.7129039000000024
+    },
+    {
+      "command": [
+        "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\block-cache-native\\etm_storebuild.exe",
+        "stream-experiment",
+        "--record",
+        "E:\\zynqlinkPRO\\docs\\validation\\zl006-cpp-stage1-20261102\\f103-large-input",
+        "--out",
+        "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\jt3-paged-final\\micro-1-off",
+        "--chunk-bytes",
+        "5893",
+        "--snapshot-ms",
+        "0"
+      ],
+      "flags": [
+        0,
+        0,
+        0
+      ],
+      "exitCode": 0,
+      "wallSeconds": 2.3413318999992043,
+      "stderr": "",
+      "trial": 1,
+      "mode": "off",
+      "equivalence": {
+        "totals": true,
+        "analysis": true,
+        "pcStatistics": true,
+        "ok": true
+      },
+      "decodeBusySeconds": 2.285746900000001
+    },
+    {
+      "command": [
+        "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\prebuilt\\etm-stream-offline-20261104\\etm_storebuild.exe",
+        "stream-experiment",
+        "--record",
+        "E:\\zynqlinkPRO\\docs\\validation\\zl006-cpp-stage1-20261102\\f103-large-input",
+        "--out",
+        "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\jt3-paged-final\\micro-1-old",
+        "--chunk-bytes",
+        "5893",
+        "--snapshot-ms",
+        "0"
+      ],
+      "flags": [
+        0,
+        0,
+        0
+      ],
+      "exitCode": 0,
+      "wallSeconds": 2.3971189000003505,
+      "stderr": "",
+      "trial": 1,
+      "mode": "old",
+      "equivalence": {
+        "totals": true,
+        "analysis": true,
+        "pcStatistics": true,
+        "ok": true
+      },
+      "decodeBusySeconds": 2.3395395000000008
+    },
+    {
+      "command": [
+        "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\block-cache-native\\etm_storebuild.exe",
+        "stream-experiment",
+        "--record",
+        "E:\\zynqlinkPRO\\docs\\validation\\zl006-cpp-stage1-20261102\\f103-large-input",
+        "--out",
+        "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\jt3-paged-final\\micro-2-stats",
+        "--chunk-bytes",
+        "5893",
+        "--snapshot-ms",
+        "0"
+      ],
+      "flags": [
+        0,
+        1,
+        1
+      ],
+      "exitCode": 0,
+      "wallSeconds": 2.1529119000006176,
+      "stderr": "",
+      "trial": 2,
+      "mode": "stats",
+      "equivalence": {
+        "totals": true,
+        "analysis": true,
+        "pcStatistics": true,
+        "ok": true
+      },
+      "decodeBusySeconds": 2.1038714000000005
+    },
+    {
+      "command": [
+        "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\prebuilt\\etm-stream-offline-20261104\\etm_storebuild.exe",
+        "stream-experiment",
+        "--record",
+        "E:\\zynqlinkPRO\\docs\\validation\\zl006-cpp-stage1-20261102\\f103-large-input",
+        "--out",
+        "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\jt3-paged-final\\micro-2-old",
+        "--chunk-bytes",
+        "5893",
+        "--snapshot-ms",
+        "0"
+      ],
+      "flags": [
+        0,
+        0,
+        0
+      ],
+      "exitCode": 0,
+      "wallSeconds": 2.386429099999077,
+      "stderr": "",
+      "trial": 2,
+      "mode": "old",
+      "equivalence": {
+        "totals": true,
+        "analysis": true,
+        "pcStatistics": true,
+        "ok": true
+      },
+      "decodeBusySeconds": 2.3390863999999993
+    },
+    {
+      "command": [
+        "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\block-cache-native\\etm_storebuild.exe",
+        "stream-experiment",
+        "--record",
+        "E:\\zynqlinkPRO\\docs\\validation\\zl006-cpp-stage1-20261102\\f103-large-input",
+        "--out",
+        "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\jt3-paged-final\\micro-2-all",
+        "--chunk-bytes",
+        "5893",
+        "--snapshot-ms",
+        "0"
+      ],
+      "flags": [
+        1,
+        1,
+        1
+      ],
+      "exitCode": 0,
+      "wallSeconds": 1.5871305000000575,
+      "stderr": "ETMV3_PAGE_CACHE hits=19565167 misses=642 slotBytes=20\r\n",
+      "trial": 2,
+      "mode": "all",
+      "equivalence": {
+        "totals": true,
+        "analysis": true,
+        "pcStatistics": true,
+        "ok": true
+      },
+      "decodeBusySeconds": 1.5428103000000002
+    },
+    {
+      "command": [
+        "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\block-cache-native\\etm_storebuild.exe",
+        "stream-experiment",
+        "--record",
+        "E:\\zynqlinkPRO\\docs\\validation\\zl006-cpp-stage1-20261102\\f103-large-input",
+        "--out",
+        "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\jt3-paged-final\\micro-2-page",
+        "--chunk-bytes",
+        "5893",
+        "--snapshot-ms",
+        "0"
+      ],
+      "flags": [
+        1,
+        0,
+        0
+      ],
+      "exitCode": 0,
+      "wallSeconds": 1.884142899998551,
+      "stderr": "ETMV3_PAGE_CACHE hits=19565167 misses=642 slotBytes=20\r\n",
+      "trial": 2,
+      "mode": "page",
+      "equivalence": {
+        "totals": true,
+        "analysis": true,
+        "pcStatistics": true,
+        "ok": true
+      },
+      "decodeBusySeconds": 1.8386466999999997
+    },
+    {
+      "command": [
+        "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\block-cache-native\\etm_storebuild.exe",
+        "stream-experiment",
+        "--record",
+        "E:\\zynqlinkPRO\\docs\\validation\\zl006-cpp-stage1-20261102\\f103-large-input",
+        "--out",
+        "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\jt3-paged-final\\micro-2-off",
+        "--chunk-bytes",
+        "5893",
+        "--snapshot-ms",
+        "0"
+      ],
+      "flags": [
+        0,
+        0,
+        0
+      ],
+      "exitCode": 0,
+      "wallSeconds": 2.521455199999764,
+      "stderr": "",
+      "trial": 2,
+      "mode": "off",
+      "equivalence": {
+        "totals": true,
+        "analysis": true,
+        "pcStatistics": true,
+        "ok": true
+      },
+      "decodeBusySeconds": 2.4649564000000015
+    }
+  ],
+  "checks": [
+    {
+      "name": "h743-1s-short",
+      "equivalence": {
+        "totals": true,
+        "analysis": true,
+        "pcStatistics": true,
+        "callbackSHA256": true,
+        "executionSHA256": true,
+        "ok": true
+      }
+    },
+    {
+      "name": "h743-1s-four-second-join",
+      "equivalence": {
+        "totals": true,
+        "analysis": true,
+        "pcStatistics": true,
+        "callbackSHA256": true,
+        "executionSHA256": true,
+        "ok": true
+      }
+    },
+    {
+      "name": "h743-2s-short",
+      "equivalence": {
+        "totals": true,
+        "analysis": true,
+        "pcStatistics": true,
+        "callbackSHA256": true,
+        "executionSHA256": true,
+        "ok": true
+      }
+    },
+    {
+      "name": "h743-2s-four-second-join",
+      "equivalence": {
+        "totals": true,
+        "analysis": true,
+        "pcStatistics": true,
+        "callbackSHA256": true,
+        "executionSHA256": true,
+        "ok": true
+      }
+    },
+    {
+      "name": "f103-1s-short",
+      "equivalence": {
+        "totals": true,
+        "analysis": true,
+        "pcStatistics": true,
+        "callbackSHA256": true,
+        "executionSHA256": true,
+        "ok": true
+      }
+    },
+    {
+      "name": "f103-1s-four-second-join",
+      "equivalence": {
+        "totals": true,
+        "analysis": true,
+        "pcStatistics": true,
+        "callbackSHA256": true,
+        "executionSHA256": true,
+        "ok": true
+      }
+    },
+    {
+      "name": "f103-20-second-exact-transcript",
+      "equivalence": {
+        "totals": true,
+        "analysis": true,
+        "pcStatistics": true,
+        "callbackSHA256": true,
+        "executionSHA256": true,
+        "ok": true
+      }
+    }
+  ],
+  "paced": [
+    {
+      "name": "f103-1x-1ms",
+      "complete": false,
+      "equivalence": {
+        "ok": false,
+        "reason": "input queue overflow"
+      },
+      "metrics": {
+        "inputBytes": 117845580,
+        "offeredBytes": 2339521,
+        "processedBytes": 2333628,
+        "chunks": 396,
+        "queueCapacityBytes": 1048576,
+        "queuePeakBytes": 1043061,
+        "queueOverflow": true,
+        "wallSeconds": 0.7039812,
+        "decodeBusySeconds": 0.6965663000000001,
+        "snapshotSeconds": 0.0011501,
+        "busyFraction": 1.761694533865552,
+        "processedTraceSeconds": 0.3960484559539696,
+        "scheduledSeconds": 20.0,
+        "drainSeconds": 0.0,
+        "maxLatencySeconds": 0.30761744404603036,
+        "p50LatencySeconds": 0.16300967202301522,
+        "p95LatencySeconds": 0.2948825913164329,
+        "p99LatencySeconds": 0.3052483335001109,
+        "lastLatencySeconds": 0.30761744404603036,
+        "maxProducerLatenessSeconds": 0.0009290982015786875,
+        "snapshotCount": 3,
+        "snapshotRenderedBytes": 152428,
+        "firstSnapshot": {
+          "processedBytes": 589300,
+          "traceSeconds": 0.10001223635201252,
+          "instructions": 1958795,
+          "unknownExecution": 52248,
+          "rssBytes": 20860928,
+          "analysisBytes": 50718,
+          "analysisSHA256": "10ea18abb20cec8ed961fb17d0ded81d060845db2d59678820c9d8379d571742",
+          "queuedBytes": 524477
+        },
+        "lastSnapshot": {
+          "processedBytes": 1767900,
+          "traceSeconds": 0.3000367090560376,
+          "instructions": 5870668,
+          "unknownExecution": 156908,
+          "rssBytes": 20897792,
+          "analysisBytes": 50885,
+          "analysisSHA256": "e18c2efa4e78ca640cdb69128909cc880fc19cb91e3bd53a82cd83c5d8b81bcb",
+          "queuedBytes": 565728
+        },
+        "rangePlans": 642,
+        "compositePlans": 179,
+        "staticSites": 642,
+        "maxDeferredSegments": 15,
+        "rssBytes": 18653184
+      },
+      "command": {
+        "command": [
+          "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\block-cache-native\\etm_storebuild.exe",
+          "stream-experiment",
+          "--record",
+          "E:\\zynqlinkPRO\\docs\\validation\\zl006-cpp-stage1-20261102\\f103-large-input",
+          "--out",
+          "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\jt3-paged-final\\f103-1x-1ms",
+          "--repeat",
+          "20",
+          "--seconds",
+          "1",
+          "--chunk-bytes",
+          "5893",
+          "--snapshot-ms",
+          "100"
+        ],
+        "flags": [
+          1,
+          1,
+          1
+        ],
+        "exitCode": 5,
+        "wallSeconds": 0.748707499999,
+        "stderr": "ETMV3_PAGE_CACHE hits=7748413 misses=642 slotBytes=20\r\n"
+      }
+    },
+    {
+      "name": "f103-1x-10ms",
+      "complete": false,
+      "equivalence": {
+        "ok": false,
+        "reason": "input queue overflow"
+      },
+      "metrics": {
+        "inputBytes": 117845580,
+        "offeredBytes": 2415843,
+        "processedBytes": 2356920,
+        "chunks": 40,
+        "queueCapacityBytes": 1048576,
+        "queuePeakBytes": 1001691,
+        "queueOverflow": true,
+        "wallSeconds": 0.7097437,
+        "decodeBusySeconds": 0.6963765,
+        "snapshotSeconds": 0.0016983,
+        "busyFraction": 1.7451807802000916,
+        "processedTraceSeconds": 0.4000014255944092,
+        "scheduledSeconds": 20.0,
+        "drainSeconds": 0.0,
+        "maxLatencySeconds": 0.30905557440559084,
+        "p50LatencySeconds": 0.16344058720279542,
+        "p95LatencySeconds": 0.28274124568531117,
+        "p99LatencySeconds": 0.296117310045451,
+        "lastLatencySeconds": 0.30905557440559084,
+        "maxProducerLatenessSeconds": 0.0005615010419567634,
+        "snapshotCount": 4,
+        "snapshotRenderedBytes": 203353,
+        "firstSnapshot": {
+          "processedBytes": 589230,
+          "traceSeconds": 0.1000003563986023,
+          "instructions": 1958571,
+          "unknownExecution": 52242,
+          "rssBytes": 20946944,
+          "analysisBytes": 50718,
+          "analysisSHA256": "984f16683f308ef47faf154e384d0a22a9b2730ebe953140f8f62b76d0b28797",
+          "queuedBytes": 530307
+        },
+        "lastSnapshot": {
+          "processedBytes": 2356920,
+          "traceSeconds": 0.4000014255944092,
+          "instructions": 7825616,
+          "unknownExecution": 209218,
+          "rssBytes": 20701184,
+          "analysisBytes": 50929,
+          "analysisSHA256": "a2b06ed66bb60d16ab9a4923e30cc8cc38cb0cc3e373312883b494860f957e68",
+          "queuedBytes": 0
+        },
+        "rangePlans": 642,
+        "compositePlans": 179,
+        "staticSites": 642,
+        "maxDeferredSegments": 15,
+        "rssBytes": 18669568
+      },
+      "command": {
+        "command": [
+          "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\block-cache-native\\etm_storebuild.exe",
+          "stream-experiment",
+          "--record",
+          "E:\\zynqlinkPRO\\docs\\validation\\zl006-cpp-stage1-20261102\\f103-large-input",
+          "--out",
+          "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\jt3-paged-final\\f103-1x-10ms",
+          "--repeat",
+          "20",
+          "--seconds",
+          "1",
+          "--chunk-bytes",
+          "58923",
+          "--snapshot-ms",
+          "100"
+        ],
+        "flags": [
+          1,
+          1,
+          1
+        ],
+        "exitCode": 5,
+        "wallSeconds": 0.7578806999990775,
+        "stderr": "ETMV3_PAGE_CACHE hits=7824980 misses=642 slotBytes=20\r\n"
+      }
+    },
+    {
+      "name": "f103-half-rate",
+      "complete": true,
+      "equivalence": {
+        "totals": true,
+        "analysis": true,
+        "pcStatistics": true,
+        "ok": true
+      },
+      "metrics": {
+        "inputBytes": 117845580,
+        "offeredBytes": 117845580,
+        "processedBytes": 117845580,
+        "chunks": 39989,
+        "queueCapacityBytes": 1048576,
+        "queuePeakBytes": 67781,
+        "queueOverflow": false,
+        "wallSeconds": 40.0040885,
+        "decodeBusySeconds": 34.85627240000003,
+        "snapshotSeconds": 0.13509780000000005,
+        "busyFraction": 0.8747842550000007,
+        "processedTraceSeconds": 40.0,
+        "scheduledSeconds": 40.0,
+        "drainSeconds": 0.004088500000001716,
+        "maxLatencySeconds": 0.02372375521916581,
+        "p50LatencySeconds": 0.0012646196558243616,
+        "p95LatencySeconds": 0.005632958164166979,
+        "p99LatencySeconds": 0.013583123537344477,
+        "lastLatencySeconds": 0.0012113000000013585,
+        "maxProducerLatenessSeconds": 0.001785233981074441,
+        "snapshotCount": 399,
+        "snapshotRenderedBytes": 20525801,
+        "firstSnapshot": {
+          "processedBytes": 294700,
+          "traceSeconds": 0.10002920771402712,
+          "instructions": 980988,
+          "unknownExecution": 26095,
+          "rssBytes": 20570112,
+          "analysisBytes": 50584,
+          "analysisSHA256": "7a49407e6a6d9b4ed39549e9771b9fd0a00c215cc5c3d14a1c181b17246b3316",
+          "queuedBytes": 17682
+        },
+        "lastSnapshot": {
+          "processedBytes": 117585300,
+          "traceSeconds": 39.91165387789682,
+          "instructions": 390450994,
+          "unknownExecution": 10436874,
+          "rssBytes": 21340160,
+          "analysisBytes": 51626,
+          "analysisSHA256": "a58e49c095d6742a5d0db6376a01b67d6acf079a9056924a71ed25c555cb872c",
+          "queuedBytes": 2947
+        },
+        "rangePlans": 642,
+        "compositePlans": 197,
+        "staticSites": 642,
+        "maxDeferredSegments": 15,
+        "rssBytes": 19202048
+      },
+      "command": {
+        "command": [
+          "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\block-cache-native\\etm_storebuild.exe",
+          "stream-experiment",
+          "--record",
+          "E:\\zynqlinkPRO\\docs\\validation\\zl006-cpp-stage1-20261102\\f103-large-input",
+          "--out",
+          "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\jt3-paged-final\\f103-half-rate",
+          "--repeat",
+          "20",
+          "--seconds",
+          "2",
+          "--chunk-bytes",
+          "2947",
+          "--snapshot-ms",
+          "100"
+        ],
+        "flags": [
+          1,
+          1,
+          1
+        ],
+        "exitCode": 0,
+        "wallSeconds": 40.08117050000146,
+        "stderr": "ETMV3_PAGE_CACHE hits=391315538 misses=642 slotBytes=20\r\n"
+      }
+    },
+    {
+      "name": "h743-1s-control",
+      "complete": true,
+      "equivalence": {
+        "totals": true,
+        "analysis": true,
+        "pcStatistics": true,
+        "ok": true
+      },
+      "metrics": {
+        "inputBytes": 43533760,
+        "offeredBytes": 43533760,
+        "processedBytes": 43533760,
+        "chunks": 2000,
+        "queueCapacityBytes": 1048576,
+        "queuePeakBytes": 195903,
+        "queueOverflow": false,
+        "wallSeconds": 20.0092826,
+        "decodeBusySeconds": 18.11703339999998,
+        "snapshotSeconds": 0.12674490000000002,
+        "busyFraction": 0.9121889149999989,
+        "processedTraceSeconds": 20.0,
+        "scheduledSeconds": 20.0,
+        "drainSeconds": 0.009282599999998808,
+        "maxLatencySeconds": 0.0923978718346401,
+        "p50LatencySeconds": 0.009299548168593574,
+        "p95LatencySeconds": 0.03516148907477756,
+        "p99LatencySeconds": 0.07953029877906381,
+        "lastLatencySeconds": 0.00873939999999962,
+        "maxProducerLatenessSeconds": 0.0009510277412285717,
+        "snapshotCount": 199,
+        "snapshotRenderedBytes": 18171571,
+        "firstSnapshot": {
+          "processedBytes": 217670,
+          "traceSeconds": 0.10000055129628133,
+          "instructions": 1836526,
+          "unknownExecution": 899,
+          "rssBytes": 19816448,
+          "analysisBytes": 86072,
+          "analysisSHA256": "5effa7e1a7e32ec0ff1bf0f7e0c617a240d47de94ad9b5bce7a7a46001f74a58",
+          "queuedBytes": 21767
+        },
+        "lastSnapshot": {
+          "processedBytes": 43316330,
+          "traceSeconds": 19.900109707959984,
+          "instructions": 365637852,
+          "unknownExecution": 174319,
+          "rssBytes": 20324352,
+          "analysisBytes": 91869,
+          "analysisSHA256": "5065114a3172391f53607a9538d07bab9131ded046e5888c33b118f3c1f057c2",
+          "queuedBytes": 0
+        },
+        "rangePlans": 419,
+        "compositePlans": 302,
+        "staticSites": 1403,
+        "maxDeferredSegments": 24,
+        "rssBytes": 19234816
+      },
+      "command": {
+        "command": [
+          "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\block-cache-native\\etm_storebuild.exe",
+          "stream-experiment",
+          "--record",
+          "E:\\zynqlinkPRO\\docs\\validation\\h743-comprehensive-20261101\\raw\\etm20-4ms-matrix\\1000ms-1",
+          "--out",
+          "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\jt3-paged-final\\h743-1s-control",
+          "--repeat",
+          "20",
+          "--seconds",
+          "1",
+          "--chunk-bytes",
+          "21767",
+          "--snapshot-ms",
+          "100"
+        ],
+        "flags": [
+          1,
+          1,
+          1
+        ],
+        "exitCode": 0,
+        "wallSeconds": 20.08669960000043,
+        "stderr": "OFFLINE_BLOCK_CACHE hits=86025272 misses=402467 instructions=365629464 slots=4096\r\n"
+      }
+    },
+    {
+      "name": "h743-2s-control",
+      "complete": false,
+      "equivalence": {
+        "ok": false,
+        "reason": "input queue overflow"
+      },
+      "metrics": {
+        "inputBytes": 48478510,
+        "offeredBytes": 31924080,
+        "processedBytes": 31899840,
+        "chunks": 1316,
+        "queueCapacityBytes": 1048576,
+        "queuePeakBytes": 1042320,
+        "queueOverflow": true,
+        "wallSeconds": 13.7450085,
+        "decodeBusySeconds": 12.655755499999996,
+        "snapshotSeconds": 0.26367999999999986,
+        "busyFraction": 0.9816898502956516,
+        "processedTraceSeconds": 13.16040447612767,
+        "scheduledSeconds": 20.0,
+        "drainSeconds": 0.0,
+        "maxLatencySeconds": 0.5857874385776913,
+        "p50LatencySeconds": 0.009855969271126419,
+        "p95LatencySeconds": 0.33138710914924907,
+        "p99LatencySeconds": 0.5427207268098577,
+        "lastLatencySeconds": 0.58418672387233,
+        "maxProducerLatenessSeconds": 0.0010090192799863118,
+        "snapshotCount": 131,
+        "snapshotRenderedBytes": 34917341,
+        "firstSnapshot": {
+          "processedBytes": 242400,
+          "traceSeconds": 0.100003073526806,
+          "instructions": 1808810,
+          "unknownExecution": 909,
+          "rssBytes": 22827008,
+          "analysisBytes": 113452,
+          "analysisSHA256": "46891038322024cad84a123f1625c7250c132e12583964171081add82256bd48",
+          "queuedBytes": 24240
+        },
+        "lastSnapshot": {
+          "processedBytes": 31754400,
+          "traceSeconds": 13.100402632011587,
+          "instructions": 236007933,
+          "unknownExecution": 7972,
+          "rssBytes": 25292800,
+          "analysisBytes": 269846,
+          "analysisSHA256": "9acb4d9f1232df91424947e1696a6a291ef6a48f77937b56f914ad4cddd33a90",
+          "queuedBytes": 145440
+        },
+        "rangePlans": 837,
+        "compositePlans": 549,
+        "staticSites": 4042,
+        "maxDeferredSegments": 24,
+        "rssBytes": 23613440
+      },
+      "command": {
+        "command": [
+          "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\block-cache-native\\etm_storebuild.exe",
+          "stream-experiment",
+          "--record",
+          "E:\\zynqlinkPRO\\docs\\validation\\h743-flame-20261102\\raw\\corrected\\record",
+          "--out",
+          "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\jt3-paged-final\\h743-2s-control",
+          "--repeat",
+          "10",
+          "--seconds",
+          "2",
+          "--chunk-bytes",
+          "24240",
+          "--snapshot-ms",
+          "100"
+        ],
+        "flags": [
+          1,
+          1,
+          1
+        ],
+        "exitCode": 5,
+        "wallSeconds": 13.815602200000285,
+        "stderr": "OFFLINE_BLOCK_CACHE hits=56404494 misses=47034 instructions=236873062 slots=4096\r\n"
+      }
+    }
+  ],
+  "microMedians": {
+    "old": 2.386429099999077,
+    "off": 2.3413318999992043,
+    "page": 1.75814900000114,
+    "stats": 2.1529119000006176,
+    "all": 1.6046231000000262
+  },
+  "apiMedians": {
+    "0": 7.189317299998947,
+    "1": 6.624535800001468
+  },
+  "apiEquivalence": [
+    {
+      "trial": 1,
+      "ok": true,
+      "tables": 60
+    },
+    {
+      "trial": 2,
+      "ok": true,
+      "tables": 60
+    },
+    {
+      "trial": 3,
+      "ok": true,
+      "tables": 60
+    },
+    {
+      "trial": 4,
+      "ok": true,
+      "tables": 60
+    },
+    {
+      "trial": 5,
+      "ok": true,
+      "tables": 60
+    },
+    {
+      "trial": 6,
+      "ok": true,
+      "tables": 60
+    }
+  ],
+  "allChildrenExited": true
+}

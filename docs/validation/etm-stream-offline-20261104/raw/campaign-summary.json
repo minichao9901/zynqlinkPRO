@@ -1,0 +1,600 @@
+{
+  "offline": true,
+  "binary": "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\block-cache-native\\etm_storebuild.exe",
+  "binarySHA256": "233f80ad06e06391cb49d2f013dca7b5d0d66cb6d80ba0307753ae048527b912",
+  "durationRequestSeconds": 20.0,
+  "records": {
+    "h743-1s": {
+      "source": "E:\\zynqlinkPRO\\docs\\validation\\h743-comprehensive-20261101\\raw\\etm20-4ms-matrix\\1000ms-1",
+      "duration": 1,
+      "sha256": {
+        "capture.bin": "974e5c2cf6bdaf44a33c67615f9813e83c388e7b0d4ae211ee88429fe13bf2b9",
+        "firmware.elf": "246640bf79c8b1e568441a286812326dfb0ae68a0df061a0c023262c07cf221b",
+        "sources.json": "b5e523eee22e160963662853f1ee5c09e1c2d15015d3d339c88a3408abf89cf4"
+      }
+    },
+    "h743-2s": {
+      "source": "E:\\zynqlinkPRO\\docs\\validation\\h743-flame-20261102\\raw\\corrected\\record",
+      "duration": 2,
+      "sha256": {
+        "capture.bin": "3bb82c465d926c43f857c47dcaa7afae0dc3976dd25b781dc492eb7d133650b6",
+        "firmware.elf": "246640bf79c8b1e568441a286812326dfb0ae68a0df061a0c023262c07cf221b",
+        "sources.json": "015aa3e517e62523fc88ed5684c59e6176bf814915c9751e5b59231ad58dcd25"
+      }
+    },
+    "f103-1s": {
+      "source": "E:\\zynqlinkPRO\\docs\\validation\\zl006-cpp-stage1-20261102\\f103-large-input",
+      "duration": 1,
+      "sha256": {
+        "capture.bin": "3b54995365d440cb154c8249b2fc2a0319d9ccb42c2460b3ca861550c421ea78",
+        "firmware.elf": "e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f",
+        "sources.json": "683cdc23e76dd8524aafa8973b0e87880e6f092653e62c4cd7f226bd2f5d8c3d"
+      }
+    }
+  },
+  "runs": [
+    {
+      "label": "h743-1s-full",
+      "record": "h743-1s",
+      "returncode": 0,
+      "result": "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\stream-campaign\\h743-1s-full\\result.json",
+      "wallSeconds": 2.9649365000004764,
+      "retainedAnalysisMatches": true
+    },
+    {
+      "label": "h743-1s-chunked",
+      "record": "h743-1s",
+      "returncode": 0,
+      "result": "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\stream-campaign\\h743-1s-chunked\\result.json",
+      "wallSeconds": 1.5352977000002284,
+      "equivalence": {
+        "totals": true,
+        "analysis": true,
+        "pcStatistics": true,
+        "callbackSHA256": true,
+        "executionSHA256": true,
+        "ok": true
+      }
+    },
+    {
+      "label": "h743-1s-prefix-full",
+      "record": "h743-1s",
+      "returncode": 0,
+      "result": "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\stream-campaign\\h743-1s-prefix-full\\result.json",
+      "wallSeconds": 0.10294129999965662
+    },
+    {
+      "label": "h743-1s-one-byte",
+      "record": "h743-1s",
+      "returncode": 0,
+      "result": "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\stream-campaign\\h743-1s-one-byte\\result.json",
+      "wallSeconds": 0.0839819999964675,
+      "equivalence": {
+        "totals": true,
+        "analysis": true,
+        "pcStatistics": true,
+        "callbackSHA256": true,
+        "executionSHA256": true,
+        "ok": true
+      }
+    },
+    {
+      "label": "h743-1s-continuous-full",
+      "record": "h743-1s",
+      "returncode": 0,
+      "result": "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\stream-campaign\\h743-1s-continuous-full\\result.json",
+      "wallSeconds": 48.28679209999973,
+      "referenceScope": "Full unchunked OpenCSD input; compact reducer checked against independent BuildVisitor/facts on original input"
+    },
+    {
+      "label": "h743-2s-full",
+      "record": "h743-2s",
+      "returncode": 0,
+      "result": "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\stream-campaign\\h743-2s-full\\result.json",
+      "wallSeconds": 6.087467099998321,
+      "retainedAnalysisMatches": true
+    },
+    {
+      "label": "h743-2s-chunked",
+      "record": "h743-2s",
+      "returncode": 0,
+      "result": "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\stream-campaign\\h743-2s-chunked\\result.json",
+      "wallSeconds": 2.916431699995883,
+      "equivalence": {
+        "totals": true,
+        "analysis": true,
+        "pcStatistics": true,
+        "callbackSHA256": true,
+        "executionSHA256": true,
+        "ok": true
+      }
+    },
+    {
+      "label": "h743-2s-continuous-full",
+      "record": "h743-2s",
+      "returncode": 0,
+      "result": "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\stream-campaign\\h743-2s-continuous-full\\result.json",
+      "wallSeconds": 43.05558230000315,
+      "referenceScope": "Full unchunked OpenCSD input; compact reducer checked against independent BuildVisitor/facts on original input"
+    },
+    {
+      "label": "f103-1s-full",
+      "record": "f103-1s",
+      "returncode": 0,
+      "result": "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\stream-campaign\\f103-1s-full\\result.json",
+      "wallSeconds": 5.191436100001738,
+      "retainedAnalysisMatches": true
+    },
+    {
+      "label": "f103-1s-chunked",
+      "record": "f103-1s",
+      "returncode": 0,
+      "result": "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\stream-campaign\\f103-1s-chunked\\result.json",
+      "wallSeconds": 4.021447999999509,
+      "equivalence": {
+        "totals": true,
+        "analysis": true,
+        "pcStatistics": true,
+        "callbackSHA256": true,
+        "executionSHA256": true,
+        "ok": true
+      }
+    },
+    {
+      "label": "f103-1s-prefix-full",
+      "record": "f103-1s",
+      "returncode": 0,
+      "result": "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\stream-campaign\\f103-1s-prefix-full\\result.json",
+      "wallSeconds": 0.07489579999673879
+    },
+    {
+      "label": "f103-1s-one-byte",
+      "record": "f103-1s",
+      "returncode": 0,
+      "result": "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\stream-campaign\\f103-1s-one-byte\\result.json",
+      "wallSeconds": 0.06726959999650717,
+      "equivalence": {
+        "totals": true,
+        "analysis": true,
+        "pcStatistics": true,
+        "callbackSHA256": true,
+        "executionSHA256": true,
+        "ok": true
+      }
+    },
+    {
+      "label": "f103-1s-continuous-full",
+      "record": "f103-1s",
+      "returncode": 0,
+      "result": "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\stream-campaign\\f103-1s-continuous-full\\result.json",
+      "wallSeconds": 85.89364050000586,
+      "referenceScope": "Full unchunked OpenCSD input; compact reducer checked against independent BuildVisitor/facts on original input"
+    },
+    {
+      "label": "h743-1s-paced-1ms",
+      "record": "h743-1s",
+      "returncode": 0,
+      "result": "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\stream-campaign\\h743-1s-paced-1ms\\result.json",
+      "wallSeconds": 20.04860490000283,
+      "metrics": {
+        "inputBytes": 43533760,
+        "offeredBytes": 43533760,
+        "processedBytes": 43533760,
+        "chunks": 19998,
+        "queueCapacityBytes": 1048576,
+        "queuePeakBytes": 76195,
+        "queueOverflow": false,
+        "wallSeconds": 20.0027925,
+        "decodeBusySeconds": 17.656094499999917,
+        "snapshotSeconds": 0.12705679999999994,
+        "busyFraction": 0.8891575649999958,
+        "processedTraceSeconds": 20.0,
+        "scheduledSeconds": 20.0,
+        "drainSeconds": 0.002792500000001752,
+        "maxLatencySeconds": 0.03558712508177564,
+        "p50LatencySeconds": 0.0013160632248627735,
+        "p95LatencySeconds": 0.01628906247730466,
+        "p99LatencySeconds": 0.025924751511653632,
+        "lastLatencySeconds": 0.00134660000000153,
+        "maxProducerLatenessSeconds": 0.0015683102247079361,
+        "snapshotCount": 199,
+        "snapshotRenderedBytes": 18171585,
+        "firstSnapshot": {
+          "processedBytes": 217700,
+          "traceSeconds": 0.10001433370331439,
+          "instructions": 1836798,
+          "unknownExecution": 899,
+          "rssBytes": 19038208,
+          "analysisBytes": 86067,
+          "analysisSHA256": "40e0d165579320d76ac097520a60fccfa0de6347637fde50276aa59c6a401bac",
+          "queuedBytes": 15239
+        },
+        "lastSnapshot": {
+          "processedBytes": 43322300,
+          "traceSeconds": 19.902852406959564,
+          "instructions": 365688041,
+          "unknownExecution": 174356,
+          "rssBytes": 19562496,
+          "analysisBytes": 91876,
+          "analysisSHA256": "7a57e778ad9fb07683ef6bcdf4bb1d108ae37add5ea9545017d266c48689ff20",
+          "queuedBytes": 2177
+        },
+        "rangePlans": 419,
+        "staticSites": 1403,
+        "maxDeferredSegments": 24,
+        "rssBytes": 18477056
+      },
+      "complete": true,
+      "equivalence": {
+        "totals": true,
+        "analysis": true,
+        "pcStatistics": true,
+        "ok": true
+      }
+    },
+    {
+      "label": "h743-1s-paced-10ms",
+      "record": "h743-1s",
+      "returncode": 0,
+      "result": "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\stream-campaign\\h743-1s-paced-10ms\\result.json",
+      "wallSeconds": 20.053764800002682,
+      "metrics": {
+        "inputBytes": 43533760,
+        "offeredBytes": 43533760,
+        "processedBytes": 43533760,
+        "chunks": 2000,
+        "queueCapacityBytes": 1048576,
+        "queuePeakBytes": 1023049,
+        "queueOverflow": false,
+        "wallSeconds": 20.0086524,
+        "decodeBusySeconds": 18.39405059999994,
+        "snapshotSeconds": 0.13144300000000003,
+        "busyFraction": 0.926274679999997,
+        "processedTraceSeconds": 20.0,
+        "scheduledSeconds": 20.0,
+        "drainSeconds": 0.008652399999999005,
+        "maxLatencySeconds": 0.47912705933565114,
+        "p50LatencySeconds": 0.0098949785935325,
+        "p95LatencySeconds": 0.3716026580948668,
+        "p99LatencySeconds": 0.4647941875208552,
+        "lastLatencySeconds": 0.008300800000000663,
+        "maxProducerLatenessSeconds": 0.0013778952985461501,
+        "snapshotCount": 199,
+        "snapshotRenderedBytes": 18171571,
+        "firstSnapshot": {
+          "processedBytes": 217670,
+          "traceSeconds": 0.10000055129628133,
+          "instructions": 1836526,
+          "unknownExecution": 899,
+          "rssBytes": 18935808,
+          "analysisBytes": 86072,
+          "analysisSHA256": "5effa7e1a7e32ec0ff1bf0f7e0c617a240d47de94ad9b5bce7a7a46001f74a58",
+          "queuedBytes": 21767
+        },
+        "lastSnapshot": {
+          "processedBytes": 43316330,
+          "traceSeconds": 19.900109707959984,
+          "instructions": 365637852,
+          "unknownExecution": 174319,
+          "rssBytes": 18628608,
+          "analysisBytes": 91869,
+          "analysisSHA256": "5065114a3172391f53607a9538d07bab9131ded046e5888c33b118f3c1f057c2",
+          "queuedBytes": 0
+        },
+        "rangePlans": 419,
+        "staticSites": 1403,
+        "maxDeferredSegments": 24,
+        "rssBytes": 18026496
+      },
+      "complete": true,
+      "equivalence": {
+        "totals": true,
+        "analysis": true,
+        "pcStatistics": true,
+        "ok": true
+      }
+    },
+    {
+      "label": "h743-2s-paced-1ms",
+      "record": "h743-2s",
+      "returncode": 0,
+      "result": "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\stream-campaign\\h743-2s-paced-1ms\\result.json",
+      "wallSeconds": 20.35918519999541,
+      "metrics": {
+        "inputBytes": 48478510,
+        "offeredBytes": 48478510,
+        "processedBytes": 48478510,
+        "chunks": 20000,
+        "queueCapacityBytes": 1048576,
+        "queuePeakBytes": 661752,
+        "queueOverflow": false,
+        "wallSeconds": 20.2922228,
+        "decodeBusySeconds": 17.74767639999995,
+        "snapshotSeconds": 0.40359990000000034,
+        "busyFraction": 0.9075638149999975,
+        "processedTraceSeconds": 20.0,
+        "scheduledSeconds": 20.0,
+        "drainSeconds": 0.2922228000000011,
+        "maxLatencySeconds": 0.29226684052094143,
+        "p50LatencySeconds": 0.0013734999241936663,
+        "p95LatencySeconds": 0.14783142990686216,
+        "p99LatencySeconds": 0.27738862875310843,
+        "lastLatencySeconds": 0.2908122999999989,
+        "maxProducerLatenessSeconds": 0.002653213146999178,
+        "snapshotCount": 199,
+        "snapshotRenderedBytes": 53283018,
+        "firstSnapshot": {
+          "processedBytes": 242400,
+          "traceSeconds": 0.100003073526806,
+          "instructions": 1808810,
+          "unknownExecution": 909,
+          "rssBytes": 21852160,
+          "analysisBytes": 113452,
+          "analysisSHA256": "46891038322024cad84a123f1625c7250c132e12583964171081add82256bd48",
+          "queuedBytes": 4848
+        },
+        "lastSnapshot": {
+          "processedBytes": 48237600,
+          "traceSeconds": 19.900611631834394,
+          "instructions": 358441873,
+          "unknownExecution": 11390,
+          "rssBytes": 24907776,
+          "analysisBytes": 270433,
+          "analysisSHA256": "c60a3360e6309706292f2299ab6e0b3986e32b54d8444bd6c7a75c7174884ea9",
+          "queuedBytes": 240910
+        },
+        "rangePlans": 837,
+        "staticSites": 4042,
+        "maxDeferredSegments": 24,
+        "rssBytes": 22732800
+      },
+      "complete": true,
+      "equivalence": {
+        "totals": true,
+        "analysis": true,
+        "pcStatistics": true,
+        "ok": true
+      }
+    },
+    {
+      "label": "h743-2s-paced-10ms",
+      "record": "h743-2s",
+      "returncode": 0,
+      "result": "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\stream-campaign\\h743-2s-paced-10ms\\result.json",
+      "wallSeconds": 20.084766199994192,
+      "metrics": {
+        "inputBytes": 48478510,
+        "offeredBytes": 48478510,
+        "processedBytes": 48478510,
+        "chunks": 2000,
+        "queueCapacityBytes": 1048576,
+        "queuePeakBytes": 315120,
+        "queueOverflow": false,
+        "wallSeconds": 20.0153882,
+        "decodeBusySeconds": 17.149366700000016,
+        "snapshotSeconds": 0.3864839,
+        "busyFraction": 0.8767925300000009,
+        "processedTraceSeconds": 20.0,
+        "scheduledSeconds": 20.0,
+        "drainSeconds": 0.015388200000000296,
+        "maxLatencySeconds": 0.13190390765390703,
+        "p50LatencySeconds": 0.00885842538539272,
+        "p95LatencySeconds": 0.03006788832076346,
+        "p99LatencySeconds": 0.11716034883246351,
+        "lastLatencySeconds": 0.014943099999999987,
+        "maxProducerLatenessSeconds": 0.00103025314129912,
+        "snapshotCount": 199,
+        "snapshotRenderedBytes": 53283018,
+        "firstSnapshot": {
+          "processedBytes": 242400,
+          "traceSeconds": 0.100003073526806,
+          "instructions": 1808810,
+          "unknownExecution": 909,
+          "rssBytes": 21934080,
+          "analysisBytes": 113452,
+          "analysisSHA256": "46891038322024cad84a123f1625c7250c132e12583964171081add82256bd48",
+          "queuedBytes": 48480
+        },
+        "lastSnapshot": {
+          "processedBytes": 48237600,
+          "traceSeconds": 19.900611631834394,
+          "instructions": 358441873,
+          "unknownExecution": 11390,
+          "rssBytes": 24186880,
+          "analysisBytes": 270433,
+          "analysisSHA256": "c60a3360e6309706292f2299ab6e0b3986e32b54d8444bd6c7a75c7174884ea9",
+          "queuedBytes": 24240
+        },
+        "rangePlans": 837,
+        "staticSites": 4042,
+        "maxDeferredSegments": 24,
+        "rssBytes": 22347776
+      },
+      "complete": true,
+      "equivalence": {
+        "totals": true,
+        "analysis": true,
+        "pcStatistics": true,
+        "ok": true
+      }
+    },
+    {
+      "label": "f103-1s-paced-1ms",
+      "record": "f103-1s",
+      "returncode": 5,
+      "result": "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\stream-campaign\\f103-1s-paced-1ms\\result.json",
+      "wallSeconds": 0.7507738999993308,
+      "metrics": {
+        "inputBytes": 117845580,
+        "offeredBytes": 1791472,
+        "processedBytes": 1785579,
+        "chunks": 303,
+        "queueCapacityBytes": 1048576,
+        "queuePeakBytes": 1043061,
+        "queueOverflow": true,
+        "wallSeconds": 0.7100909,
+        "decodeBusySeconds": 0.7045433000000003,
+        "snapshotSeconds": 0.0012281,
+        "busyFraction": 2.3289935640039454,
+        "processedTraceSeconds": 0.303037076146598,
+        "scheduledSeconds": 20.0,
+        "drainSeconds": 0.0,
+        "maxLatencySeconds": 0.40696742385340207,
+        "p50LatencySeconds": 0.21244420074494094,
+        "p95LatencySeconds": 0.385720181669724,
+        "p99LatencySeconds": 0.4014931133074826,
+        "lastLatencySeconds": 0.40696742385340207,
+        "maxProducerLatenessSeconds": 0.0007603969298975999,
+        "snapshotCount": 3,
+        "snapshotRenderedBytes": 152428,
+        "firstSnapshot": {
+          "processedBytes": 589300,
+          "traceSeconds": 0.10001223635201252,
+          "instructions": 1958795,
+          "unknownExecution": 52248,
+          "rssBytes": 18829312,
+          "analysisBytes": 50718,
+          "analysisSHA256": "10ea18abb20cec8ed961fb17d0ded81d060845db2d59678820c9d8379d571742",
+          "queuedBytes": 854485
+        },
+        "lastSnapshot": {
+          "processedBytes": 1767900,
+          "traceSeconds": 0.3000367090560376,
+          "instructions": 5870668,
+          "unknownExecution": 156908,
+          "rssBytes": 18231296,
+          "analysisBytes": 50885,
+          "analysisSHA256": "e18c2efa4e78ca640cdb69128909cc880fc19cb91e3bd53a82cd83c5d8b81bcb",
+          "queuedBytes": 17679
+        },
+        "rangePlans": 642,
+        "staticSites": 642,
+        "maxDeferredSegments": 15,
+        "rssBytes": 18259968
+      },
+      "complete": false,
+      "equivalence": {
+        "ok": false,
+        "reason": "Queue overrun; partial result cannot match full input"
+      }
+    },
+    {
+      "label": "f103-1s-paced-10ms",
+      "record": "f103-1s",
+      "returncode": 5,
+      "result": "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\stream-campaign\\f103-1s-paced-10ms\\result.json",
+      "wallSeconds": 0.7403716000044369,
+      "metrics": {
+        "inputBytes": 117845580,
+        "offeredBytes": 1767690,
+        "processedBytes": 1708767,
+        "chunks": 29,
+        "queueCapacityBytes": 1048576,
+        "queuePeakBytes": 1001691,
+        "queueOverflow": true,
+        "wallSeconds": 0.7004148,
+        "decodeBusySeconds": 0.6890847,
+        "snapshotSeconds": 0.0007277,
+        "busyFraction": 2.3786549707827924,
+        "processedTraceSeconds": 0.2900010335559467,
+        "scheduledSeconds": 20.0,
+        "drainSeconds": 0.0,
+        "maxLatencySeconds": 0.41033546644405333,
+        "p50LatencySeconds": 0.22149146540209652,
+        "p95LatencySeconds": 0.38372343772377376,
+        "p99LatencySeconds": 0.3972905020839136,
+        "lastLatencySeconds": 0.41033546644405333,
+        "maxProducerLatenessSeconds": 0.0005533297622363209,
+        "snapshotCount": 2,
+        "snapshotRenderedBytes": 101539,
+        "firstSnapshot": {
+          "processedBytes": 589230,
+          "traceSeconds": 0.1000003563986023,
+          "instructions": 1958571,
+          "unknownExecution": 52242,
+          "rssBytes": 18780160,
+          "analysisBytes": 50718,
+          "analysisSHA256": "984f16683f308ef47faf154e384d0a22a9b2730ebe953140f8f62b76d0b28797",
+          "queuedBytes": 883845
+        },
+        "lastSnapshot": {
+          "processedBytes": 1178460,
+          "traceSeconds": 0.2000007127972046,
+          "instructions": 3917389,
+          "unknownExecution": 104489,
+          "rssBytes": 18477056,
+          "analysisBytes": 50821,
+          "analysisSHA256": "1fa32e18bad3f12034e8f5c642b99d7a199580199adb703b9770f66472071182",
+          "queuedBytes": 530307
+        },
+        "rangePlans": 642,
+        "staticSites": 642,
+        "maxDeferredSegments": 15,
+        "rssBytes": 17788928
+      },
+      "complete": false,
+      "equivalence": {
+        "ok": false,
+        "reason": "Queue overrun; partial result cannot match full input"
+      }
+    },
+    {
+      "label": "h743-1s-continuous-chunked-digest",
+      "record": "h743-1s",
+      "returncode": 0,
+      "result": "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\stream-campaign\\h743-1s-continuous-chunked-digest\\result.json",
+      "wallSeconds": 29.655802400004177,
+      "equivalence": {
+        "totals": true,
+        "analysis": true,
+        "pcStatistics": true,
+        "callbackSHA256": true,
+        "executionSHA256": true,
+        "ok": true
+      }
+    },
+    {
+      "label": "h743-2s-continuous-chunked-digest",
+      "record": "h743-2s",
+      "returncode": 0,
+      "result": "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\stream-campaign\\h743-2s-continuous-chunked-digest\\result.json",
+      "wallSeconds": 29.525262800001656,
+      "equivalence": {
+        "totals": true,
+        "analysis": true,
+        "pcStatistics": true,
+        "callbackSHA256": true,
+        "executionSHA256": true,
+        "ok": true
+      }
+    },
+    {
+      "label": "f103-1s-continuous-chunked-digest",
+      "record": "f103-1s",
+      "returncode": 0,
+      "result": "E:\\zynqlinkPRO-work\\etm-block-cache-20261104\\build\\stream-campaign\\f103-1s-continuous-chunked-digest\\result.json",
+      "wallSeconds": 80.9040892999983,
+      "equivalence": {
+        "totals": true,
+        "analysis": true,
+        "pcStatistics": true,
+        "callbackSHA256": true,
+        "executionSHA256": true,
+        "ok": true
+      }
+    }
+  ],
+  "failures": [
+    {
+      "label": "f103-1s-paced-1ms",
+      "reason": "Queue overrun / incomplete input"
+    },
+    {
+      "label": "f103-1s-paced-10ms",
+      "reason": "Queue overrun / incomplete input"
+    }
+  ],
+  "inputsUnchanged": true,
+  "allChildrenExited": true,
+  "allCompletedResultsEquivalent": true
+}

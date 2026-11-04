@@ -1,0 +1,51 @@
+{
+  "date": "2026-11-04",
+  "timezone": "Asia/Shanghai",
+  "inputHashesRecheckedAfterInterruption": true,
+  "nativeStatuses": [
+    {
+      "record": "h743-1s",
+      "statusMatches": true,
+      "status": {
+        "processed": 2176688,
+        "lastErrorCode": 0,
+        "library": "1.8.3",
+        "lastError": ""
+      }
+    },
+    {
+      "record": "h743-2s",
+      "statusMatches": true,
+      "status": {
+        "processed": 4847851,
+        "lastErrorCode": 0,
+        "library": "1.8.3",
+        "lastError": ""
+      }
+    },
+    {
+      "record": "f103-1s",
+      "statusMatches": true,
+      "status": {
+        "processed": 5892279,
+        "lastErrorCode": 0,
+        "library": "1.8.3",
+        "lastError": ""
+      }
+    }
+  ],
+  "dependencies": {
+    "command": "python -X utf8 tools/verify_dependencies.py --tracked",
+    "ok": true,
+    "checkedFiles": 865
+  },
+  "pythonCompile": {
+    "ok": true,
+    "files": [
+      "tools/bench_etm_streaming.py",
+      "tools/check_etm_streaming_scenarios.py",
+      "tools/check_etm_streaming_default.py"
+    ]
+  },
+  "whitespaceCheck": true
+}

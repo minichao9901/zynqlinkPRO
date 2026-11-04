@@ -1,0 +1,58 @@
+{
+  "date": "2026-11-04",
+  "timezone": "Asia/Shanghai",
+  "baseCommit": "41e2cee015f76702d09190d776c0577e08f7b4a9",
+  "branch": "codex/etm-block-cache-20261104",
+  "compiler": "C:/msys64/mingw64/bin/g++.exe (GCC 16.1.0)",
+  "buildType": "Release",
+  "configureHeadEmbeddedInBinary": "41e2cee015f7",
+  "identityNote": "Built with the two hashed OpenCSD files modified on baseCommit. Embedded buildSha is configure-time base HEAD, not a claim that the base commit contains this patch. Source hashes and committed source diff identify the experiment. Measured EXE bytes are preserved unchanged.",
+  "sourceFiles": {
+    "etm-service/vendor/OpenCSD-1.8.3/decoder/include/opencsd/etmv4/trc_pkt_decode_etmv4i.h": {
+      "bytes": 13872,
+      "sha256": "80345e5a5d0cdb424db94fd614322353dff0ea938f154ada2dec3bb22fe8ea5b"
+    },
+    "etm-service/vendor/OpenCSD-1.8.3/decoder/source/etmv4/trc_pkt_decode_etmv4i.cpp": {
+      "bytes": 80001,
+      "sha256": "fd05e6139982eccfd624a9c8b4e32b5525870e09fb46310f656b312e7fa8c00a"
+    },
+    "tools/bench_etm_block_cache.py": {
+      "bytes": 4063,
+      "sha256": "6c9002314e9fc82f1a37a525fa654664b47642aec9ffb76f2894b42067fda97f"
+    },
+    "tools/bench_etm_native_offline.py": {
+      "bytes": 9833,
+      "sha256": "35a277f5ad13b3c1783747434e3845bfbdb1e1da0bfb46cf805d5039e943eb77"
+    },
+    "tools/validate_etm_block_cache.py": {
+      "bytes": 3017,
+      "sha256": "afc51e1feb84fba2c16162bc2a50d5f897b663a915bf65138a1a466de82d04b4"
+    }
+  },
+  "binaries": {
+    "prebuilt/etm-block-cache-offline-20261104/etm_storebuild.exe": {
+      "bytes": 7473537,
+      "sha256": "d0f7df7cd8a1415110bf1e091d8effc3627a5bd16cc6774834619812fb062478"
+    },
+    "prebuilt/etm-block-cache-offline-20261104/libdwarf.dll": {
+      "bytes": 913628,
+      "sha256": "12fdd53f657a972ca9fa7bda83cf6f90f32be1c1c64b4f2ee1a500bcd06d0a39"
+    }
+  },
+  "referenceDocuments": {
+    "docs/validation/etm-block-cache-20261104/reference/01-architecture.md": {
+      "bytes": 12386,
+      "sha256": "1fc5d4d96ce2149ed8fc96c87dfe7ffd527d82951925a7e0e4fbd45b5504092f"
+    },
+    "docs/validation/etm-block-cache-20261104/reference/02-decoder.md": {
+      "bytes": 14540,
+      "sha256": "7ec43403fe5d663b9a4ae7a7e62733e007d1de2e46712e202e99284c8cd1d9f0"
+    },
+    "docs/validation/etm-block-cache-20261104/reference/03-roadmap.md": {
+      "bytes": 5893,
+      "sha256": "434c3ac1b824171a4a30b651e59162eb8b9170f2426adf71cbc761bfbc671d0e"
+    }
+  },
+  "offlineOnly": true,
+  "productDefaultEnabled": false
+}
