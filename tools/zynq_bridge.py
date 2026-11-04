@@ -45,7 +45,10 @@ def browser_environment():
 def browser_broker(executable, url):
     # A system process provides a fresh Windows loader context if Chromium
     # rejects the inherited frozen process state. Values are data, never code.
-    command = "$ErrorActionPreference='Stop'; $shell=New-Object -ComObject Shell.Application; $shell.ShellExecute($env:ZYNQ_BROWSER_EXE,$env:ZYNQ_BROWSER_URL,'','open',1)"
+    command = ("$ErrorActionPreference='Stop'; $shell=New-Object -ComObject Shell.Application; "
+        "$location=0; $root=$null; $handle=0; "
+        "$desktop=$shell.Windows().FindWindowSW([ref]$location,[ref]$root,8,[ref]$handle,1); "
+        "$desktop.Document.Application.ShellExecute($env:ZYNQ_BROWSER_EXE,$env:ZYNQ_BROWSER_URL,'','open',1)")
     environment = browser_environment()
     environment.update(ZYNQ_BROWSER_EXE=str(executable), ZYNQ_BROWSER_URL=url)
     powershell = Path(os.environ['SystemRoot']) / 'System32/WindowsPowerShell/v1.0/powershell.exe'
