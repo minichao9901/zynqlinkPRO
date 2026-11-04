@@ -1,0 +1,15 @@
+# ZL-144：EXE自动打开浏览器
+
+日期：2026-11-04。仅主机启动修改，无硬件访问、固件加载或Flash写入。
+
+旧固定EXE在独立离线目录/8895启动后服务监听正常，但CLI ping返回HTTP 409：工作台CLI执行页面未连接。与截图中的旧8893病例一致；旧服务和数据保留到替换前。直接打开Chrome可以访问服务，说明服务可达不代表浏览器已打开。
+
+原实现仅调用`webbrowser.open`，忽略返回值，而且新启动在Waitress进入请求循环前调用。Windows Python实现调用`os.startfile`，Shell接受请求即可返回True，并不确认窗口或页面；本机默认Chrome关联含额外参数。冻结DLL目录继承是另一个兼容风险，但此前DLL对照不能证明它是本机唯一根因。
+
+修复统一首次启动和复用路径：Windows从用户/机器App Paths（32/64位）寻找Chrome、Edge，使用参数列表和`--new-window`直接启动，避免URL关联命令的额外参数；新服务在独立线程核对HTTP和bootId后启动浏览器。创建外部进程时暂时清除冻结DLL搜索目录并立即恢复。失败尝试下一浏览器/系统默认路径，最终提示手动打开，服务继续可用。`--no-browser`不变。
+
+源码离线8894自动启动后，真实浏览器worker的CLI ping返回`ready=true/hardwareAccessed=false`。13项浏览器、桥服务、发布/回滚测试通过，包括启动参数、失败回退、bootId检查及DLL目录异常恢复。
+
+原始本机输出：`build/bridge-browser-fix-20261104/`、`build/bridge-browser-fix-tests.txt`；其中runtime含令牌，不提交。最终冻结程序验收及身份随后补充。
+
+Windows UI验证工具因无法可靠识别浏览器URL停止操作，本轮采用真实浏览器worker及公开CLI确认页面业务已连接，未将启动进程成功作为页面验收。

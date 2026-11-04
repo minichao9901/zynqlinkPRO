@@ -14,12 +14,95 @@ import subprocess
 import sys
 import uuid
 import webbrowser
+import threading
+import time
+from contextlib import contextmanager
 from urllib.request import urlopen
 
 
 VERSION = '1.0.0'
 FROZEN = bool(getattr(sys, 'frozen', False))
 REPO = Path(__file__).resolve().parents[1]
+
+
+def windows_browsers():
+    """Discover installed WebUSB-capable browsers without replaying shell flags."""
+    import winreg
+    for name in ('chrome.exe', 'msedge.exe'):
+        for hive in (winreg.HKEY_CURRENT_USER, winreg.HKEY_LOCAL_MACHINE):
+            for view in (winreg.KEY_WOW64_64KEY, winreg.KEY_WOW64_32KEY):
+                try:
+                    with winreg.OpenKey(hive, 'Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\' + name,
+                                        0, winreg.KEY_READ | view) as key:
+                        path = Path(os.path.expandvars(winreg.QueryValueEx(key, '')[0]).strip('"'))
+                    if path.is_file():
+                        yield path
+                except OSError:
+                    pass
+
+
+@contextmanager
+def system_dll_search():
+    # PyInstaller's process-wide DLL directory is inherited by external apps.
+    # Restore it immediately so our bundled native tools retain their libraries.
+    if sys.platform != 'win32' or not FROZEN:
+        yield
+        return
+    import ctypes
+    kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+    kernel.GetDllDirectoryW.argtypes = [ctypes.c_uint32, ctypes.c_wchar_p]
+    kernel.SetDllDirectoryW.argtypes = [ctypes.c_wchar_p]
+    size = kernel.GetDllDirectoryW(0, None)
+    buffer = ctypes.create_unicode_buffer(size + 1)
+    kernel.GetDllDirectoryW(len(buffer), buffer)
+    if not kernel.SetDllDirectoryW(None):
+        raise ctypes.WinError(ctypes.get_last_error())
+    try:
+        yield
+    finally:
+        if not kernel.SetDllDirectoryW(buffer.value or None):
+            raise ctypes.WinError(ctypes.get_last_error())
+
+
+def open_workbench(url):
+    """Both fresh launch and reuse use the same external-browser launcher."""
+    try:
+        if sys.platform == 'win32':
+            for executable in dict.fromkeys(windows_browsers()):
+                try:
+                    with system_dll_search():
+                        child = subprocess.Popen([str(executable), '--new-window', url],
+                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                    try:
+                        code = child.wait(timeout=1)
+                    except subprocess.TimeoutExpired:
+                        code = None
+                    if code in (None, 0):
+                        print('已调用浏览器：' + executable.name, flush=True)
+                        return True
+                except OSError:
+                    continue
+        with system_dll_search():
+            if webbrowser.open(url):
+                return True
+    except OSError as error:
+        print('浏览器启动失败：' + str(error), file=sys.stderr, flush=True)
+    print('未能自动打开浏览器，请手动打开上方工作台网址。', file=sys.stderr, flush=True)
+    return False
+
+
+def open_when_ready(base_url, browser_url, boot):
+    # Binding a socket is not enough: Waitress must already be serving requests.
+    for _ in range(100):
+        try:
+            with urlopen(base_url + '/etm-launcher.json', timeout=.5) as response:
+                if json.load(response).get('bootId') == boot:
+                    open_workbench(browser_url)
+                    return
+        except (OSError, ValueError):
+            pass
+        time.sleep(.1)
+    print('服务启动等待超时，请手动打开上方工作台网址。', file=sys.stderr, flush=True)
 
 
 def locations():
@@ -137,7 +220,7 @@ def main(argv=None):
                 existing=json.load(response)
             if (existing.get('bootId')==state.get('bootId') and existing.get('packageId')==package_id
                     and existing.get('dataDirectory')==str(data) and existing.get('offline')==args.offline):
-                if not args.no_browser:webbrowser.open(state['browserUrl'])
+                if not args.no_browser:open_workbench(state['browserUrl'])
                 print('工作台已经运行：' + url + '/#etm', flush=True)
                 return 0
         except (OSError, ValueError):pass
@@ -175,7 +258,8 @@ def main(argv=None):
     print('数据目录：'+str(data), flush=True)
     print('工作台：'+browser_url, flush=True)
     print('浏览器中载入ELF → 连接探针 → 选择函数 → 核对时钟 → 联动采集；关闭本窗口停止服务。', flush=True)
-    if not args.no_browser:webbrowser.open(browser_url)
+    if not args.no_browser:
+        threading.Thread(target=open_when_ready, args=(url, browser_url, boot), daemon=True).start()
     try:server.run()
     except KeyboardInterrupt:pass
     finally:
