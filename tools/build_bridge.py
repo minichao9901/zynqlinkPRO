@@ -18,11 +18,27 @@ import uuid
 import zipfile
 
 ROOT=Path(__file__).resolve().parents[1]
-DEPENDENCIES=('PyInstaller','Flask','Werkzeug','waitress','pyelftools','capstone','numpy','pandas','pyusb','libusb-package','hidapi','pyserial','pywin32','Jinja2','MarkupSafe','itsdangerous','click')
+DEPENDENCIES=('PyInstaller','Flask','Werkzeug','waitress','pyelftools','capstone','numpy','pandas','pyusb','libusb-package','hidapi','pyserial','Jinja2','MarkupSafe','itsdangerous','click')
 
 
 def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def prepare_desktop_launcher(executable):
+    """Only the delivered launcher gets the normal desktop integrity label.
+
+    Build workspaces can inherit Low MIC. Executing a Low-labelled image lowers
+    its process and browser children even from a normal desktop user token.
+    Copying the candidate into dist inherits destination labels again.
+    """
+    if os.name != 'nt':
+        return
+    result = subprocess.run([str(Path(os.environ['SystemRoot'])/'System32/icacls.exe'),
+        str(executable), '/setintegritylevel', 'M'], capture_output=True)
+    if result.returncode:
+        raise ValueError('无法设置交付启动器的标准桌面完整性标签：' +
+                         result.stderr.decode('utf8', 'replace'))
 
 
 def tracked():
@@ -56,6 +72,7 @@ def publish(package,out,workspace=ROOT):
     try:
         out.parent.mkdir(parents=True,exist_ok=True)
         shutil.copytree(package,out)
+        prepare_desktop_launcher(out/'zynq-etm-bridge.exe')
         if (previous/'data').exists():
             move(previous/'data',out/'data');data_moved=True
         if old_zip.exists():move(old_zip,saved_zip);zip_moved=True
@@ -146,6 +163,7 @@ def main(argv=None):
         command.append(str(ROOT/'tools/zynq_bridge.py'))
         subprocess.run(command,cwd=ROOT,check=True)
         package=work/'dist/zynq-etm-bridge'
+        prepare_desktop_launcher(package/'zynq-etm-bridge.exe')
         examples=package/'examples';examples.mkdir()
         shutil.copyfile(ROOT/'tools/tests/fixtures/h743-etmv4/h743.etmrecord',examples/'h743-superlink-reference.etmrecord')
         shutil.copyfile(ROOT/'tools/tests/fixtures/h743-etmv4/manifest.json',examples/'h743-reference-provenance.json')
@@ -187,10 +205,13 @@ def main(argv=None):
         checked=subprocess.run([str(package/'zynq-etm-bridge.exe'),'--check','--data-dir',str(work/'check-data')],
             env=environment,capture_output=True,text=True,encoding='utf8',timeout=90)
         if checked.returncode:raise ValueError('冻结EXE离线预检失败：'+checked.stdout+checked.stderr)
+        if json.loads(checked.stdout).get('processIntegrityRid', 0) < 8192:
+            raise ValueError('冻结启动器仍处于低完整性；候选未发布')
         (package/'package-check.json').write_text(json.dumps(json.loads(checked.stdout),ensure_ascii=False,indent=2)+'\n',encoding='utf8')
         revision=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
         files=[dict(path=p.relative_to(package).as_posix(),bytes=p.stat().st_size,sha256=sha(p)) for p in sorted(package.rglob('*')) if p.is_file()]
         manifest=dict(schema=1,platform='windows-x64',sourceRevision=revision,
+            desktopLauncherIntegrity='medium',
             etmControlClockDefaultHz=10000000,
             flameHtml=dict(interactive=True,selfContained=True,modes=['timeline','aggregate'],tabs=['timeline','cycles'],defaultTab='timeline',dragSelectZoom=True),offlineTraceCli=True,
             sourceDirty=source_dirty,dependencies=dependencies,

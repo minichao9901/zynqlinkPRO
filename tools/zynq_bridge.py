@@ -14,139 +14,45 @@ import subprocess
 import sys
 import uuid
 import webbrowser
-import threading
-import time
-from contextlib import contextmanager
 from urllib.request import urlopen
 
 
 VERSION = '1.0.0'
 FROZEN = bool(getattr(sys, 'frozen', False))
 REPO = Path(__file__).resolve().parents[1]
-ORIGINAL_TEMP = {key: os.environ.get(key) for key in ('TEMP', 'TMP')}
 
 
-def browser_environment():
-    environment = dict(os.environ)
-    for key in list(environment):
-        if key.startswith('_PYI') or key in ('PYTHONHOME', 'PYTHONPATH'):
-            environment.pop(key)
-    for key, value in ORIGINAL_TEMP.items():
-        if value is not None:
-            environment[key] = value
-    if FROZEN:
-        runtime = Path(sys._MEIPASS).resolve()
-        environment['PATH'] = os.pathsep.join(part for part in environment.get('PATH', '').split(os.pathsep)
-            if part and not Path(part).resolve().is_relative_to(runtime))
-    return environment
-
-
-def browser_broker(executable, url):
-    # Ask the existing Explorer desktop to launch the browser with its own
-    # process environment, rather than inheriting our frozen loader context.
-    import pythoncom
-    import pywintypes
-    from win32com.client import VARIANT
-    from win32com.client.dynamic import Dispatch
-    pythoncom.CoInitialize()
-    try:
-        shell = Dispatch('Shell.Application')
-        desktop = shell.Windows().FindWindowSW(
-            VARIANT(pythoncom.VT_BYREF | pythoncom.VT_VARIANT, 0),
-            VARIANT(pythoncom.VT_BYREF | pythoncom.VT_VARIANT, None), 8,
-            VARIANT(pythoncom.VT_BYREF | pythoncom.VT_I4, 0), 1)
-        desktop.Document.Application.ShellExecute(str(executable), url, '', 'open', 1)
-        return True
-    except pywintypes.com_error as error:
-        print('桌面浏览器启动失败：' + str(error), file=sys.stderr, flush=True)
-        return False
-    finally:
-        pythoncom.CoUninitialize()
-
-
-def windows_browsers():
-    """Discover installed WebUSB-capable browsers without replaying shell flags."""
-    import winreg
-    for name in ('chrome.exe', 'msedge.exe'):
-        for hive in (winreg.HKEY_CURRENT_USER, winreg.HKEY_LOCAL_MACHINE):
-            for view in (winreg.KEY_WOW64_64KEY, winreg.KEY_WOW64_32KEY):
-                try:
-                    with winreg.OpenKey(hive, 'Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\' + name,
-                                        0, winreg.KEY_READ | view) as key:
-                        path = Path(os.path.expandvars(winreg.QueryValueEx(key, '')[0]).strip('"'))
-                    if path.is_file():
-                        yield path
-                except OSError:
-                    pass
-
-
-@contextmanager
-def system_dll_search():
-    # PyInstaller's process-wide DLL directory is inherited by external apps.
-    # Restore it immediately so our bundled native tools retain their libraries.
-    if sys.platform != 'win32' or not FROZEN:
-        yield
-        return
+def process_integrity_rid():
+    """Read the Windows MIC token label without changing process privileges."""
+    if sys.platform != 'win32':
+        return None
     import ctypes
+    from ctypes import wintypes
     kernel = ctypes.WinDLL('kernel32', use_last_error=True)
-    kernel.GetDllDirectoryW.argtypes = [ctypes.c_uint32, ctypes.c_wchar_p]
-    kernel.SetDllDirectoryW.argtypes = [ctypes.c_wchar_p]
-    size = kernel.GetDllDirectoryW(0, None)
-    buffer = ctypes.create_unicode_buffer(size + 1)
-    kernel.GetDllDirectoryW(len(buffer), buffer)
-    if not kernel.SetDllDirectoryW(None):
+    security = ctypes.WinDLL('advapi32', use_last_error=True)
+    kernel.GetCurrentProcess.restype = wintypes.HANDLE
+    kernel.CloseHandle.argtypes = [wintypes.HANDLE]
+    security.OpenProcessToken.argtypes = [wintypes.HANDLE, wintypes.DWORD, ctypes.POINTER(wintypes.HANDLE)]
+    security.GetTokenInformation.argtypes = [wintypes.HANDLE, ctypes.c_int, ctypes.c_void_p,
+        wintypes.DWORD, ctypes.POINTER(wintypes.DWORD)]
+    security.GetSidSubAuthorityCount.argtypes = [ctypes.c_void_p]
+    security.GetSidSubAuthorityCount.restype = ctypes.POINTER(ctypes.c_ubyte)
+    security.GetSidSubAuthority.argtypes = [ctypes.c_void_p, wintypes.DWORD]
+    security.GetSidSubAuthority.restype = ctypes.POINTER(wintypes.DWORD)
+    token = wintypes.HANDLE()
+    if not security.OpenProcessToken(kernel.GetCurrentProcess(), 8, ctypes.byref(token)):
         raise ctypes.WinError(ctypes.get_last_error())
     try:
-        yield
-    finally:
-        if not kernel.SetDllDirectoryW(buffer.value or None):
+        size = wintypes.DWORD()
+        security.GetTokenInformation(token, 25, None, 0, ctypes.byref(size))
+        buffer = ctypes.create_string_buffer(size.value)
+        if not security.GetTokenInformation(token, 25, buffer, size, ctypes.byref(size)):
             raise ctypes.WinError(ctypes.get_last_error())
-
-
-def open_workbench(url):
-    """Both fresh launch and reuse use the same external-browser launcher."""
-    try:
-        if sys.platform == 'win32':
-            for executable in dict.fromkeys(windows_browsers()):
-                try:
-                    if FROZEN and browser_broker(executable, url):
-                        print('已调用浏览器（桌面启动器）：' + executable.name, flush=True)
-                        return True
-                    with system_dll_search():
-                        child = subprocess.Popen([str(executable), '--new-window', url],
-                            env=browser_environment(), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                    try:
-                        code = child.wait(timeout=1)
-                    except subprocess.TimeoutExpired:
-                        code = None
-                    if code in (None, 0):
-                        print('已调用浏览器：' + executable.name, flush=True)
-                        return True
-                    print(f'浏览器启动返回错误：{executable.name} ({code})', file=sys.stderr, flush=True)
-                except OSError as error:
-                    print('浏览器启动失败：' + executable.name + ' ' + str(error), file=sys.stderr, flush=True)
-                    continue
-        with system_dll_search():
-            if webbrowser.open(url):
-                return True
-    except OSError as error:
-        print('浏览器启动失败：' + str(error), file=sys.stderr, flush=True)
-    print('未能自动打开浏览器，请手动打开上方工作台网址。', file=sys.stderr, flush=True)
-    return False
-
-
-def open_when_ready(base_url, browser_url, boot):
-    # Binding a socket is not enough: Waitress must already be serving requests.
-    for _ in range(100):
-        try:
-            with urlopen(base_url + '/etm-launcher.json', timeout=.5) as response:
-                if json.load(response).get('bootId') == boot:
-                    open_workbench(browser_url)
-                    return
-        except (OSError, ValueError):
-            pass
-        time.sleep(.1)
-    print('服务启动等待超时，请手动打开上方工作台网址。', file=sys.stderr, flush=True)
+        sid = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_void_p))[0]
+        count = security.GetSidSubAuthorityCount(sid)[0]
+        return security.GetSidSubAuthority(sid, count - 1)[0]
+    finally:
+        kernel.CloseHandle(token)
 
 
 def locations():
@@ -216,6 +122,7 @@ def preflight(backend, web, service_path):
     if libusb_package.get_libusb1_backend() is None:
         raise ValueError('桥包缺少libusb运行库')
     return {'ok':True, 'native':versions, 'clockPolicy':'target-firmware-owned', 'hardwareAccess':False,
+            'processIntegrityRid':process_integrity_rid(),
             'flameHtml':{'selfContained':True,'interactive':True,'tabs':['timeline','cycles'],'defaultTab':'timeline','dragSelectZoom':True},'offlineTraceCli':True}
 
 
@@ -249,6 +156,8 @@ def main(argv=None):
     parser.add_argument('--offline', action='store_true', help='离线验收：禁止USB/HID/串口和采集，仅浏览、导入和解码')
     parser.add_argument('--trace-cli',action='store_true',help='离线记录CLI：--trace-cli export/query/verify/...；无需启动Web服务')
     args=parser.parse_args(argv)
+    if FROZEN and not args.check and not args.no_browser and process_integrity_rid() < 8192:
+        raise ValueError('程序文件被标记为低完整性，无法正常启动桌面浏览器。请重新解压到普通用户目录，或用 bridge-build 重新发布程序。')
     if not 1024 <= args.port <= 65535:
         raise ValueError('端口必须在1024～65535之间')
     data=args.data_dir.resolve()
@@ -264,7 +173,7 @@ def main(argv=None):
                 existing=json.load(response)
             if (existing.get('bootId')==state.get('bootId') and existing.get('packageId')==package_id
                     and existing.get('dataDirectory')==str(data) and existing.get('offline')==args.offline):
-                if not args.no_browser:open_workbench(state['browserUrl'])
+                if not args.no_browser:webbrowser.open(state['browserUrl'])
                 print('工作台已经运行：' + url + '/#etm', flush=True)
                 return 0
         except (OSError, ValueError):pass
@@ -286,7 +195,7 @@ def main(argv=None):
     boot=uuid.uuid4().hex
     app.app.view_functions['launcher_info']=lambda:jsonify(protocol=1, portable=FROZEN, version=VERSION,
         packageId=package_id, bootId=boot, dataDirectory=str(data), offline=args.offline,
-        clockPolicy='target-firmware-owned')
+        clockPolicy='target-firmware-owned',processIntegrityRid=process_integrity_rid())
     try:
         server=create_server(app, host='127.0.0.1', port=args.port, threads=16,
             connection_limit=64, max_request_body_size=48 << 20)
@@ -302,17 +211,8 @@ def main(argv=None):
     print('数据目录：'+str(data), flush=True)
     print('工作台：'+browser_url, flush=True)
     print('浏览器中载入ELF → 连接探针 → 选择函数 → 核对时钟 → 联动采集；关闭本窗口停止服务。', flush=True)
-    try:
-        if args.no_browser:
-            server.run()
-        else:
-            # Keep Windows browser activation and its lazy platform imports on
-            # the main thread; serve HTTP concurrently before opening the page.
-            worker = threading.Thread(target=server.run, daemon=True)
-            worker.start()
-            open_when_ready(url, browser_url, boot)
-            while worker.is_alive():
-                worker.join(.5)
+    if not args.no_browser:webbrowser.open(browser_url)
+    try:server.run()
     except KeyboardInterrupt:pass
     finally:
         server.close()

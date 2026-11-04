@@ -11,6 +11,15 @@ from tools.build_bridge import publish,archive_application
 
 
 class PublishTests(unittest.TestCase):
+    def test_integrity_label_failure_rolls_back_program_and_preserves_data(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder);candidate,old=self.setup_packages(root)
+            with patch('tools.build_bridge.prepare_desktop_launcher',side_effect=ValueError('label denied')):
+                with self.assertRaisesRegex(ValueError,'label denied'):
+                    publish(candidate,old,root)
+            self.assertEqual((old/'zynq-etm-bridge.exe').read_bytes(),b'old')
+            self.assertEqual((old/'data/records/keep.json').read_text(),'user capture')
+
     def test_optional_zip_contains_only_program_files_and_never_user_records(self):
         with tempfile.TemporaryDirectory() as folder:
             root=Path(folder);_,out=self.setup_packages(root)
