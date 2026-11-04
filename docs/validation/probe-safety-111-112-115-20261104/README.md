@@ -70,3 +70,5 @@
 用户再次确认断电并接线。最初USB/CDC/JTAG均空，接线后COM34和Zynq JTAG出现；物理读取BOOT_MODE0、LVL_SHFTR0、FPGA_RST01F33F0F，确认是未初始化启动现场，未把断电前配对当作当前身份。重新RAM加载相同正式bit/ELF并在补验前后独立核对81324B执行代码一致。正式镜像15项边界测试再次通过，夹具完整SRAM/核心寄存器/时钟/运行状态恢复，CDC8192B完全一致；完整512KiB Flash仍与最初备份字节相同。
 
 最新状态以[resume-power-final/final-state.json](raw/resume-power-final/final-state.json)为准：CDC48运行、RCC_CFGR51040a，SWD约10MHz/FCLK约120MHz（寄存器推算），RTT/HSS/DDR/DMA空闲，wait和context恢复失败均0。这里的补验不是重新进行全部高频/故障矩阵，也不是QSPI冷启动验收；前述完整矩阵保留为断电前实测。共享hw_server12596在继续时已不存在；本轮确认3121无监听后由现有入口启动hw_server18092并保留，未结束其他会话服务。没有本任务Web/采集进程遗留。补跑60 CLI测试通过，869项依赖哈希检查通过。
+
+源码与实测产物提交：`4d5bd0130d64d6e033078af3160c40ef55205260`。提交后逐项核对43个编译输入与该提交的Git blob，仅允许CRLF/LF规范化，映射见[构建输入绑定](../../../prebuilt/probe-safety-111-112-115-20261104/source-binding.json)；编译时原始b066f1b/dirty/input SHA记录保持不变。

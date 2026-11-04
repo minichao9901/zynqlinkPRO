@@ -7,3 +7,5 @@ bit逐字节复用fclk133-release-20261101的133.333MHz已布线产物，WNS0.31
 F103ZE SWD/JTAG正常业务及故障隔离已验收，仅JTAG/RAM加载，未写QSPI或MCU Flash，不替代Golden/QSPI恢复包。历史失败/中间镜像位于独立子目录，accepted=false。
 
 [详细报告](../../docs/validation/probe-safety-111-112-115-20261104/README.md)。
+
+源码与实测产物提交：`4d5bd0130d64d6e033078af3160c40ef55205260`。提交后逐项核对43个编译输入与该提交的Git blob，仅允许CRLF/LF规范化，映射见[构建输入绑定](source-binding.json)；编译时原始b066f1b/dirty/input SHA记录保持不变。

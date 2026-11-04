@@ -31,7 +31,7 @@
   },
   "acceptanceScope": "Controlled PS fault injection on diagnostic ELF plus normal production ELF F103 SWD/JTAG, RTT/HSS/debug and CLI/frozen-Web ETM",
   "validationReport": "docs/validation/probe-safety-111-112-115-20261104/README.md",
-  "sourceCommitBinding": "Compile base plus exact input hashes retained; bind tested source commit after implementation/artifact commit",
+  "sourceCommitBinding": "source-binding.json: exact build bytes and committed Git blobs independently verified; compile base/dirty metadata preserved",
   "targetFlashWrites": false,
   "productionExecutableBytes": 81324,
   "diagnosticExecutableBytes": 81524,
@@ -43,5 +43,6 @@
     "No new H743/HPM physical validation",
     "PS observation fault injection is not physical electrical FAULT or a hung AXI bus",
     "Other existing issues retain their original status"
-  ]
+  ],
+  "sourceRevision": "4d5bd0130d64d6e033078af3160c40ef55205260"
 }
