@@ -52,7 +52,10 @@ int probe_target_transport(uint32_t port) {return port<=2 ? 0 : -6;}
 static int target_riscv;
 int probe_target_architecture(uint32_t riscv) {if(riscv>1U)return -6;target_riscv=(int)riscv;return 0;}
 int probe_target_is_riscv(void) {return target_riscv;}
-void probe_target_release(void) {release_calls++;}
+int probe_target_release(void) {release_calls++;return 0;}
+int probe_target_context_invalid(void) {return 0;}
+void probe_target_invalidate(void) {}
+void dap_wait_begin(void) {}
 void probe_target_forget(void) {release_calls++;}
 uint32_t probe_target_fclk(void) {return 100000000;}
 int probe_target_read(uint32_t addr,uint8_t *p,uint32_t n) {

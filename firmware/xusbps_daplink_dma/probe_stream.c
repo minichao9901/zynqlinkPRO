@@ -9,6 +9,7 @@
 #include "xusbps_class_cdc.h"
 #include "xusbps_endpoint.h"
 #include <string.h>
+#include "dap_wait.h"
 #if defined(DAP_MAX_SWCLK_HZ)
 // Share the explicitly timing-verified build limit with DAP_SWJ_Clock.
 #define PROBE_MAX_LINK_HZ DAP_MAX_SWCLK_HZ
@@ -400,26 +401,33 @@ static int sampler_arm(void) {
     W(0, 1 | ((uint32_t)nwords << 8));
     return 0;
 }
-void probe_before_dap(void) {
+int probe_before_dap(void) {
+    int failed=0;
     if(bench_active){bench_active=0;bench_error=-7;}
     if(pl_packets && mode==1 && rtt_pl_running) {
         uint32_t budget=1000000;
         PW(0,0);
         rtt_paused=1;
         while(((PR(1)&8U) || (Xil_In32(0x40010004)&1U)) && --budget) { }
-        if(!budget) { Xil_Out32(0x40010050,1);rtt_pl_running=0;dma_pending=0;mode=0;result=-4; }
+        if(!budget) { Xil_Out32(0x40010050,1);rtt_pl_running=0;dma_pending=0;mode=0;result=-4;failed=1; }
     }
     if (mode == 2) {
         if (sampler_stop()) {
             mode = 0;
             stopping = 0;
+            failed=1;
         }
         yields++;
     }
     // Read and restore AP registers while the PL core is quiescent.
-    probe_target_release();
+    if(failed)probe_target_invalidate();
+    if(failed || probe_target_release()) {
+        mode=0;stopping=0;rtt_pl_running=0;result=-4;swd_errors++;return -4;
+    }
+    return 0;
 }
 void probe_after_dap(void) {
+    if(probe_target_context_invalid())return;
     if(pl_packets && mode==1 && rtt_pl_running && !stopping && probe_session_live()) {
         int rc=probe_target_claim(requested_hz);
         if(rc && rc!=-7) { mode=0;result=-4; }
@@ -551,7 +559,7 @@ static int stop(void) {
             seq=PR(5);
         }
         if(mode==2) stat_packet();
-        probe_target_release();mode=0;stopping=0;rtt_pl_running=0;return 0;
+        rc=probe_target_release();mode=0;stopping=0;rtt_pl_running=0;return rc;
     }
     if (mode == 2) {
         stopping = 1;
@@ -570,7 +578,7 @@ static int stop(void) {
             return rc;
         }
     }
-    probe_target_release();
+    if(probe_target_release())rc=-4;
     mode = 0;
     stopping = 0;
     return rc;
@@ -811,6 +819,7 @@ static void control(const uint8_t *req, uint8_t *res) {
     unsigned i;
     uint8_t cmd = req[2], act = req[3];
     int rc = 0;
+    dap_wait_begin();
     memset(res, 0, 64);
     res[0] = 2;
     res[2] = cmd;
@@ -1008,7 +1017,7 @@ void probe_poll(XUsbPs *usb) {
                 bench_count++;
             }
             if(bench_count==bench_requested){bench_error=0;bench_active=0;}
-            if(!bench_active)probe_target_release();
+            if(!bench_active && probe_target_release())bench_error=-4;
         }
     }
     kick(usb, &hid);

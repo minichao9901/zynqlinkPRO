@@ -108,6 +108,7 @@ static void SWJ_SequenceChunk (uint32_t count, const uint8_t *data) {
   uint32_t words[8] = {0};
   uint32_t bytes = (count + 7U) / 8U;
   unsigned i;
+  if(dap_wait_command_error())return;
   /* DAP sequence bytes start at an arbitrary packet offset. A uint32_t cast
    * lets Thumb emit LDRD, which faults on the usual packet+2 address. Copy
    * exactly the supplied bytes into aligned storage, padding the unused tail. */
@@ -117,7 +118,7 @@ static void SWJ_SequenceChunk (uint32_t count, const uint8_t *data) {
     swd_write32(SWD_SWJ_DATA0 + 4U * i, words[i]);
   swd_write32(SWD_SWJ_COUNT, count);
   swd_write32(SWD_CTRL, 0x01);
-  swd_wait_idle();
+  (void)swd_wait_idle();
 }
 
 void SWJ_Sequence (uint32_t count, const uint8_t *data) {
@@ -355,8 +356,10 @@ uint8_t DAP_HOT_CODE SWD_Transfer(uint32_t request, uint32_t *data)
 {
   register volatile uint32_t *swd_base = (volatile uint32_t *)SWD_BASE_ADDR;
   register uint32_t cmd;
-  register uint32_t status;
+  uint32_t status;
   register uint8_t ack;
+
+  if(dap_wait_command_error())return DAP_TRANSFER_ERROR;
 
   cmd = ((request & 0xFF) << XFER_CMD_STS_REQUEST) | XFER_CMD_STS_MODE | XFER_CMD_STS_START;
 
@@ -368,10 +371,7 @@ uint8_t DAP_HOT_CODE SWD_Transfer(uint32_t request, uint32_t *data)
   // 启动传输
   swd_base[0] = cmd;  // SWD_CTRL = base + 0x00
 
-  // 等待完成并读取状态 - 使用数组索引让编译器优化地址计算
-  do {
-      status = swd_base[1];  // SWD_STATUS = base + 0x04
-  } while (__builtin_expect(status & 0x01, 0));
+  if(dap_wait_status(SWD_STATUS,1U,0U,512U,&status))return DAP_TRANSFER_ERROR;
 
   ack = (status >> 1) & 0x07;
 

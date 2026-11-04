@@ -72,6 +72,7 @@ static inline void dap_trace_bytes(uint32_t event_base, const uint8_t *data,
  * Slots remain owned until DMA completes, including a terminating ZLP. */
 static volatile uint32_t request_in, request_out, response_in, response_out;
 static volatile uint32_t session_epoch;
+uint32_t chry_dap_epoch(void) {return session_epoch;}
 static volatile uint8_t tx_active;
 static uint8_t USB_Request[DAP_PACKET_COUNT][DAP_PACKET_SIZE] __attribute__((aligned(32)));
 static uint8_t USB_Response[DAP_PACKET_COUNT][DAP_PACKET_SIZE] __attribute__((aligned(32)));
@@ -177,12 +178,15 @@ int chry_dap_usb_session_reset(void)
 
 void chry_dap_init(void)
 {
+  /* Safety diagnostics/one-shot validation controls are in the reserved
+   * trace MiB. MEM-AP0 observations must not depend on CPU cache visibility. */
+  Xil_SetTlbAttributes(0x39000000U,NORM_NONCACHE);
+  dap_wait_init();
 #if DAP_ENABLE_TRACE
   XTime t0, t1;
 
   /* The trace buffer sits at 0x39000000 in DDR; keep it non-cacheable so
    * JTAG reads observe every entry. */
-  Xil_SetTlbAttributes(0x39000000U, NORM_NONCACHE);
 
   XTime_GetTime(&t0);
   sleep(1);
@@ -234,11 +238,26 @@ void chry_dap_handle(void)
             ((execute_request[4]&2)?MET_EXEC06_READ:MET_EXEC06_WRITE):MET_EXEC05;
         dap_metric_end(MET_QUEUE_WAIT,request_time[req_slot],0);
         dap_trace_add(2U,execute_request[0]);
-        probe_before_dap();
-        if(execute_request[0]==0x8cU && request_length!=28U){
-            USB_Response[rsp_slot][0]=0x8cU;USB_Response[rsp_slot][1]=0xffU;USB_RespSize[rsp_slot]=2;
-        }else USB_RespSize[rsp_slot]=(uint16_t)DAP_ExecuteCommand(execute_request,USB_Response[rsp_slot]);
-        probe_after_dap();
+        dap_request_plan plan;
+        if(!DAP_ValidateCommand(execute_request,request_length,DAP_PACKET_SIZE,&plan)){
+            USB_Response[rsp_slot][0]=0xffU;USB_RespSize[rsp_slot]=1;
+        }else {
+            /* Validation may be preempted by USB reset. Do not adopt the new
+             * epoch for a request dequeued from the retired one. */
+            flags=irq_save();
+            if(epoch!=session_epoch){irq_restore(flags);break;}
+            dap_wait_begin();
+            irq_restore(flags);
+            int failed=probe_before_dap();
+            /* An explicit new Connect may clear DP errors and restore the
+             * retained snapshot. Never retry the rejected target operation. */
+            if(failed && execute_request[0]==2U)failed=probe_target_recover();
+            if(failed && execute_request[0]!=0U && execute_request[0]!=0x86U && execute_request[0]!=0x87U){
+                USB_Response[rsp_slot][0]=0xffU;USB_RespSize[rsp_slot]=1;
+            }else USB_RespSize[rsp_slot]=(uint16_t)DAP_ExecuteCommand(execute_request,request_length,USB_Response[rsp_slot],DAP_PACKET_SIZE);
+            if(dap_wait_command_error()){probe_target_invalidate();failed=1;}
+            if(!failed)probe_after_dap();
+        }
         dap_metric_end(metric_id,t,USB_RespSize[rsp_slot]);
         dap_trace_bytes(32U,USB_Response[rsp_slot],USB_RespSize[rsp_slot]);
         dap_trace_add(3U,USB_RespSize[rsp_slot]);dap_dbg_exec_count++;

@@ -1,0 +1,56 @@
+{
+  "stage": "write-fault",
+  "rows": [
+    {
+      "case": "scalar-write-timeout",
+      "targetWriteCommittedOnceDespiteError": true,
+      "noAutomaticReplay": true,
+      "reason": 1,
+      "failuresAdded": 1,
+      "responseHex": "050008",
+      "responseSeconds": 0.04042000000117696,
+      "oldEpochError": null,
+      "explicitRecoveryPassed": true,
+      "repeat": 0
+    },
+    {
+      "case": "scalar-write-timeout",
+      "targetWriteCommittedOnceDespiteError": true,
+      "noAutomaticReplay": true,
+      "reason": 1,
+      "failuresAdded": 1,
+      "responseHex": "050008",
+      "responseSeconds": 0.0405624999984866,
+      "oldEpochError": null,
+      "explicitRecoveryPassed": true,
+      "repeat": 1
+    },
+    {
+      "case": "scalar-write-timeout",
+      "targetWriteCommittedOnceDespiteError": true,
+      "noAutomaticReplay": true,
+      "reason": 1,
+      "failuresAdded": 1,
+      "responseHex": "050008",
+      "responseSeconds": 0.04037109999990207,
+      "oldEpochError": null,
+      "explicitRecoveryPassed": true,
+      "repeat": 2
+    }
+  ],
+  "passed": true,
+  "identity": {
+    "git_head": "b066f1b9d38aae98f603599ba2ea0e3dfc82c638",
+    "git_dirty": true,
+    "bit": {
+      "path": "E:\\zynqlinkPRO\\prebuilt\\probe-safety-111-112-115-20261104\\probe.bit",
+      "sha256": "af1031d3caa0d7bd3b6adffa911d26efdab9e0bfb5223fb18f70dabb70ebeeed"
+    },
+    "elf": {
+      "path": "E:\\zynqlinkPRO\\prebuilt\\probe-safety-111-112-115-20261104\\validation.elf",
+      "sha256": "6fac6cd9498fe86ee99b6a07e3a7ef64dec370b8b338d7c1c4661e8e6e77b7fb"
+    }
+  },
+  "targetFlashWrites": false,
+  "probeQspiWrites": false
+}

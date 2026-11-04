@@ -320,8 +320,9 @@ extern uint32_t UART_Transfer  (const uint8_t *request, uint8_t *response);
 extern uint8_t  USB_COM_PORT_Activate (uint32_t cmd);
 
 extern uint32_t DAP_ProcessVendorCommand (const uint8_t *request, uint8_t *response);
-extern uint32_t DAP_ProcessCommand       (const uint8_t *request, uint8_t *response);
-extern uint32_t DAP_ExecuteCommand       (const uint8_t *request, uint8_t *response);
+#include "dap_request.h"
+extern uint32_t DAP_ExecuteCommand(const uint8_t *request, uint32_t request_length,
+                                  uint8_t *response, uint32_t response_capacity);
 
 extern void     DAP_Setup (void);
 

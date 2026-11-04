@@ -1,0 +1,40 @@
+{
+  "command": [
+    "python",
+    "-X",
+    "utf8",
+    "tools/benchmark_sram_matrix.py",
+    "--transport",
+    "both",
+    "--speeds",
+    "1000000,10000000,50000000,60000000",
+    "--seconds",
+    ".2",
+    "--repeats",
+    "3",
+    "--bit",
+    "prebuilt/probe-safety-111-112-115-20261104/probe.bit",
+    "--elf",
+    "prebuilt/probe-safety-111-112-115-20261104/application.elf",
+    "--output",
+    "build/probe-safety-111-112-115-20261104/sram.json"
+  ],
+  "restore_swj_from_target_source": 2,
+  "initial_DHCSR": "0x1010001",
+  "APB2ENR": "0x404d",
+  "MAPR_readable_bits": "0x0",
+  "target_id": "0x10036414",
+  "RCC_before": [
+    50548355,
+    5309450
+  ],
+  "JTAG_IDCODE": "0x3ba00477",
+  "returncode": 0,
+  "MAPR_readable_restore_match": true,
+  "APB2ENR_restore_match": true,
+  "RCC_after": [
+    50548355,
+    5309450
+  ],
+  "run_halt_restore_match": true
+}

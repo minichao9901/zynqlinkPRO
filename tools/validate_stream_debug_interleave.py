@@ -335,7 +335,8 @@ def prepare_code(mem):
 def main():
     global BASE, SCRATCH, TARGET_CPUID, TARGET_DPIDR
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--pair', choices=list(PAIRS), required=True)
+    p.add_argument('--pair', choices=list(PAIRS))
+    p.add_argument('--pair-dir',type=Path,help='Explicit candidate tuple; verify its manifest and physical OCM instead of using historical labels')
     p.add_argument('--out', type=Path, required=True)
     p.add_argument('--transport', choices=['swd', 'jtag'], default='swd')
     p.add_argument('--speeds', default='50000000,60000000')
@@ -347,9 +348,14 @@ def main():
     BASE=a.fixture_base;SCRATCH=BASE+0x4800
     out = a.out.resolve()
     out.mkdir(parents=True, exist_ok=False)
-    pair = ROOT / 'prebuilt' / PAIRS[a.pair]
-    assert tuple(hashlib.sha256((pair / name).read_bytes()).hexdigest()
-                 for name in ['probe.bit', 'application.elf']) == EXPECTED[a.pair]
+    if not a.pair_dir and not a.pair:p.error('--pair or --pair-dir is required')
+    pair = a.pair_dir.resolve() if a.pair_dir else ROOT / 'prebuilt' / PAIRS[a.pair]
+    if a.pair_dir:
+        manifest=json.loads((pair/'manifest.json').read_text(encoding='utf-8-sig'))
+        assert all(hashlib.sha256((pair/name).read_bytes()).hexdigest()==manifest['files'][name]['sha256'] for name in ['probe.bit','application.elf'])
+    else:
+        assert tuple(hashlib.sha256((pair / name).read_bytes()).hexdigest()
+                     for name in ['probe.bit', 'application.elf']) == EXPECTED[a.pair]
     command(out, 'identity', ['tools/verify_probe_ocm_code.py', '--elf', pair / 'application.elf', '--out-dir', out / 'identity'])
     code_rtt, code_hss = compile_producer(out, 'rtt'), compile_producer(out, 'hss')
     report = dict(artifacts=provenance(pair / 'probe.bit', pair / 'application.elf'),

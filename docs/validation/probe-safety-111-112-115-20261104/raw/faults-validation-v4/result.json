@@ -1,0 +1,120 @@
+{
+  "stage": "faults",
+  "rows": [
+    {
+      "case": "restore-failure",
+      "stage": 2,
+      "before": [
+        3,
+        0,
+        0,
+        0,
+        587202642,
+        536887424
+      ],
+      "failed": [
+        7,
+        1,
+        2,
+        0,
+        587202642,
+        536887424
+      ],
+      "after": [
+        0,
+        1,
+        2,
+        0,
+        587202642,
+        536887424
+      ],
+      "rejectedTargetWrite": true,
+      "rejectedCachedRead": true,
+      "originalApContextRestored": true,
+      "sramUnchanged": true
+    },
+    {
+      "case": "restore-failure",
+      "stage": 3,
+      "before": [
+        3,
+        1,
+        2,
+        0,
+        587202642,
+        536887424
+      ],
+      "failed": [
+        7,
+        2,
+        2,
+        0,
+        587202642,
+        536887424
+      ],
+      "after": [
+        0,
+        2,
+        2,
+        0,
+        587202642,
+        536887424
+      ],
+      "rejectedTargetWrite": true,
+      "rejectedCachedRead": true,
+      "originalApContextRestored": true,
+      "sramUnchanged": true
+    },
+    {
+      "case": "scalar-timeout",
+      "reason": 1,
+      "failuresAdded": 1,
+      "responseHex": "050008",
+      "responseSeconds": 0.040259100002003834,
+      "oldEpochError": null,
+      "explicitRecoveryPassed": true
+    },
+    {
+      "case": "swj-timeout",
+      "reason": 1,
+      "failuresAdded": 1,
+      "responseHex": "12ff",
+      "responseSeconds": 0.040290199998707976,
+      "oldEpochError": null,
+      "explicitRecoveryPassed": true
+    },
+    {
+      "case": "scalar-abort",
+      "reason": 2,
+      "failuresAdded": 1,
+      "responseHex": "050008",
+      "responseSeconds": 0.4302234999995562,
+      "oldEpochError": null,
+      "explicitRecoveryPassed": true
+    },
+    {
+      "case": "scalar-usb-epoch",
+      "reason": 3,
+      "failuresAdded": 1,
+      "responseHex": "",
+      "responseSeconds": null,
+      "oldEpochError": "USBError(32, 'Pipe error')",
+      "explicitRecoveryPassed": true
+    }
+  ],
+  "passed": true,
+  "identity": {
+    "git_head": "b066f1b9d38aae98f603599ba2ea0e3dfc82c638",
+    "git_dirty": true,
+    "bit": {
+      "path": "E:\\zynqlinkPRO\\prebuilt\\probe-safety-111-112-115-20261104\\probe.bit",
+      "sha256": "af1031d3caa0d7bd3b6adffa911d26efdab9e0bfb5223fb18f70dabb70ebeeed"
+    },
+    "elf": {
+      "path": "E:\\zynqlinkPRO\\prebuilt\\probe-safety-111-112-115-20261104\\validation.elf",
+      "sha256": "600212b1c4352956a9105bda36e447533289b02e773feabed71124c38ed0ee59"
+    }
+  },
+  "targetFlashWrites": false,
+  "probeQspiWrites": false
+}

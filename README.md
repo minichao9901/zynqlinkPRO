@@ -53,3 +53,5 @@ python toolbox.py project run sim.cm3 --dry-run -- --top tb_cm3_jtag
 历史源码、逐轮报告和旧bit/ELF可从Git tag `archive/main-before-slim-20261031`追溯；该tag不含原本未跟踪的业务数据。
 
 2026-11-04：新增精英板F103ZE [HAL SPI Flash / EEPROM Trace例程](firmware/target/stm32f103_hal_storage/README.md)及[实际目标ELF](prebuilt/targets/f103ze-hal-storage-20261104/README.md)。真实读写后恢复原外设内容；同一实际输入新旧完整60表/182查询一致。普通Web断点回归、HSS持续接收及STAT/回放修复和性能/剩余失败见[合并后真机报告](docs/validation/main-web-hardware-20261103/README.md)。
+
+2026-11-04：ZL-111/112/115 的请求边界、AP恢复错误传播和有界等待已修复；[实板验收](docs/validation/probe-safety-111-112-115-20261104/README.md)覆盖故障注入及F103 SWD/JTAG、RTT/HSS/调试与CLI/固定Web ETM。实际[bit/双ELF配对](prebuilt/probe-safety-111-112-115-20261104/README.md)随源码交付；正式镜像无注入开关，仅RAM加载，未固化QSPI。

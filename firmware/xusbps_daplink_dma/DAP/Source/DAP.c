@@ -553,7 +553,7 @@ static uint32_t DAP_SWJ_Sequence(const uint8_t *request, uint8_t *response) {
 
 #if ((DAP_SWD != 0) || (DAP_JTAG != 0))
   SWJ_Sequence(count, request);
-  *response = DAP_OK;
+  *response = dap_wait_command_error() ? DAP_ERROR : DAP_OK;
 #else
   *response = DAP_ERROR;
 #endif
@@ -878,12 +878,7 @@ static uint32_t DAP_SWD_BatchRun(void) {
 
   if (profiling) XTime_GetTime(&start);
   swd_write32(SWD_BATCH_CTRL, DAP_SWD_BatchCtrlValue(1U, 1U));
-  do {
-    status = swd_read32(SWD_BATCH_STATUS);
-  } while (((status & 0x2U) == 0U) && !DAP_TransferAbort);
-
-  if (!(status & SWD_BATCH_STATUS_DONE) && DAP_TransferAbort) {
-    (void)swd_abort_engines();
+  if(dap_wait_status(SWD_BATCH_STATUS,2U,2U,1024U*512U,&status)) {
     status=SWD_BATCH_STATUS_DONE|SWD_BATCH_STATUS_ERROR;
   }
 
@@ -961,7 +956,6 @@ static uint32_t DAP_HOT_CODE DAP_SWD_Transfer(const uint8_t *request, uint8_t *r
   if (post) transfer_read_map[nr++] = (uint16_t)transfer_emit_read(DP_RDBUFF | DAP_TRANSFER_RnW);
   else if (check_write) (void)transfer_emit_read(DP_RDBUFF | DAP_TRANSFER_RnW);
   swd_dma_cmd[transfer_cmd_words++] = 0;
-  DAP_TransferAbort = 0;
   DAP_SWD_BatchClear();
   ack = DAP_TRANSFER_ERROR;
   if (swd_dma_upload(transfer_cmd_words)) goto failed;
@@ -1015,7 +1009,6 @@ static uint32_t DAP_HOT_CODE DAP_SWD_Transfer_Legacy(const uint8_t *request, uin
   response_head  = response;
   response      += 2;
 
-  DAP_TransferAbort = 0U;
 
   post_read   = 0U;
   check_write = 0U;
@@ -1289,7 +1282,6 @@ static uint32_t DAP_JTAG_Transfer(const uint8_t *request, uint8_t *response) {
   response_head  = response;
   response      += 2;
 
-  DAP_TransferAbort = 0U;
 
   ir        = 0U;
   post_read = 0U;
@@ -1638,7 +1630,7 @@ static uint32_t DAP_SWD_TransferBlock(const uint8_t *request, uint8_t *response)
     uint8_t *raw = (uint8_t *)swd_dma_cmd;
     uint32_t raw_len = 4U + ((req & DAP_TRANSFER_RnW) ? 0U : remaining * 4U);
     uint32_t words = (raw_len + 3U) / 4U;
-    uint32_t pstatus, rsp_words, packet_wait, packet_completed, rsp_header;
+    uint32_t pstatus, rsp_words, packet_completed, rsp_header;
     uint32_t *direct_rsp = ((req & DAP_TRANSFER_RnW) &&
                            (((uintptr_t)(response-1) & 31U)==0U)) ?
                            (uint32_t *)(response-1) : NULL;
@@ -1654,30 +1646,12 @@ static uint32_t DAP_SWD_TransferBlock(const uint8_t *request, uint8_t *response)
     DAP_SWD_BatchClear();
     /* The controller silently drops a launch while the previous packet is
      * still busy, so wait for idle before handing over the new command. */
-    packet_wait = 0;
-    while (swd_read32(SWD_PACKET_STATUS) & 1U) {
-      if (++packet_wait > 2000000U) {
-        dbg_pkt_fallback++; dbg_pkt_flush();
-        xil_printf("[DAP] PACKET_BUSY_STUCK\r\n");
-        goto packet_failed;
-      }
-    }
+    if(dap_wait_status(SWD_PACKET_STATUS,1U,0U,1024U*512U,&pstatus))goto packet_failed;
     if (swd_dma_upload(words)) { dbg_pkt_fallback++; dbg_pkt_flush(); goto packet_fallback; }
     metric_start=dap_metric_start();
     swd_write32(SWD_PACKET_LEN, raw_len);
     swd_write32(SWD_PACKET_CTRL, 1U);
-    packet_wait = 0;
-    do {
-      pstatus = swd_read32(SWD_PACKET_STATUS);
-      if (++packet_wait > 2000000U) {
-        dbg_pkt_status = pstatus;
-        dbg_pkt_fallback++;
-        dbg_pkt_flush();
-        xil_printf("[DAP] PACKET_TIMEOUT st=0x%08x len=%d req=0x%02x\r\n",
-               (unsigned)pstatus, (int)raw_len, (unsigned)req);
-        goto packet_failed;
-      }
-    } while (pstatus & 1U);
+    if(dap_wait_status(SWD_PACKET_STATUS,1U,0U,remaining*512U,&pstatus))goto packet_failed;
     dap_metric_end((req & DAP_TRANSFER_RnW)?MET_PACKET_READ:MET_PACKET_WRITE, metric_start, remaining*4U);
     dbg_pkt_status = pstatus;
     if (!(pstatus & 2U)) goto packet_failed;
@@ -1719,7 +1693,6 @@ packet_failed:
 packet_fallback:
     ;
   }
-  DAP_TransferAbort = 0;
   while (remaining && !DAP_TransferAbort) {
     // One repeat header replaces hundreds of individually written commands.
     // Leave room for posted read, write completion check and END.
@@ -1780,7 +1753,6 @@ static uint32_t DAP_SWD_TransferBlock_Legacy(const uint8_t *request, uint8_t *re
   response_head  = response;
   response      += 3;
 
-  DAP_TransferAbort = 0U;
 
   request++;            // Ignore DAP index
 
@@ -1884,7 +1856,6 @@ static uint32_t DAP_JTAG_TransferBlock(const uint8_t *request, uint8_t *response
   response_head  = response;
   response      += 3;
 
-  DAP_TransferAbort = 0U;
 
   // Device index (JTAP TAP)
   DAP_Data.jtag_dev.index = *request++;
@@ -2118,7 +2089,7 @@ __WEAK uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *respon
 //   response: pointer to response data
 //   return:   number of bytes in response (lower 16 bits)
 //             number of bytes in request (upper 16 bits)
-uint32_t DAP_ProcessCommand(const uint8_t *request, uint8_t *response) {
+static uint32_t DAP_ProcessCommand(const uint8_t *request, uint8_t *response) {
   uint32_t num;
 
   if ((*request >= ID_DAP_Vendor0) && (*request <= ID_DAP_Vendor31)) {
@@ -2249,24 +2220,36 @@ uint32_t DAP_ProcessCommand(const uint8_t *request, uint8_t *response) {
 //   response: pointer to response data
 //   return:   number of bytes in response (lower 16 bits)
 //             number of bytes in request (upper 16 bits)
-uint32_t DAP_HOT_CODE DAP_ExecuteCommand(const uint8_t *request, uint8_t *response) {
-  uint32_t cnt, num, n;
-
-  if (*request == ID_DAP_ExecuteCommands) {
-    *response++ = *request++;
-    cnt = *request++;
-    *response++ = (uint8_t)cnt;
-    num = (2U << 16) | 2U;
-    while (cnt--) {
-      n = DAP_ProcessCommand(request, response);
-      num += n;
-      request  += (uint16_t)(n >> 16);
-      response += (uint16_t) n;
-    }
-    return (num);
+uint32_t dap_info_response_size(uint8_t id) {
+  uint8_t data[255];
+  return 2U+DAP_Info(id,data);
+}
+__WEAK int dap_vendor_bounds(uint8_t command,dap_request_plan *plan) {
+  (void)command;(void)plan;return 0;
+}
+uint32_t DAP_HOT_CODE DAP_ExecuteCommand(const uint8_t *request,uint32_t length,
+                                       uint8_t *response,uint32_t capacity) {
+  dap_request_plan plan,child;uint32_t i,in=2,out=2,n;
+  if(!response || !capacity)return 0;
+  /* Validate the ENTIRE compound request before its first side effect. */
+  if(!DAP_ValidateCommand(request,length,capacity,&plan)) {
+    response[0]=ID_DAP_Invalid;return 1;
   }
-
-  return DAP_ProcessCommand(request, response);
+  if(request[0]!=ID_DAP_ExecuteCommands && request[0]!=ID_DAP_QueueCommands) {
+    n=DAP_ProcessCommand(request,response);
+    if(dap_wait_command_error() && request[0]!=5 && request[0]!=6 && (n&65535U)>1)
+      response[1]=DAP_ERROR;
+    return n;
+  }
+  response[0]=ID_DAP_ExecuteCommands;response[1]=request[1];
+  for(i=0;i<request[1];i++) {
+    (void)dap_validate_one(request+in,length-in,capacity-out,&child);
+    n=DAP_ProcessCommand(request+in,response+out)&65535U;
+    /* Advance input by its validated wire size, even if hardware failed early. */
+    in+=child.request_bytes;out+=n;
+    if(dap_wait_command_error()) {response[1]=(uint8_t)(i+1);break;}
+  }
+  return (in<<16)|out;
 }
 
 

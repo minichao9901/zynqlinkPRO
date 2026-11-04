@@ -1,0 +1,47 @@
+{
+  "accepted": true,
+  "status": "Accepted for ZL-111/112/115 fixes in the recorded F103ZE RAM-only scope; not a replacement Golden/QSPI release",
+  "baseRevision": "b066f1b9d38aae98f603599ba2ea0e3dfc82c638",
+  "sourceDirty": true,
+  "newPlImplementation": false,
+  "bitReusedFrom": "prebuilt/fclk133-release-20261101",
+  "constraintMHz": 133.333333,
+  "setupSlackNs": 0.319,
+  "holdSlackNs": 0.033,
+  "validationElfOnly": "validation.elf contains one-shot PS fault injection; not a production image",
+  "productionFaultControlsAbsent": true,
+  "probeQspiWrites": false,
+  "files": {
+    "probe.bit": {
+      "bytes": 4045674,
+      "sha256": "af1031d3caa0d7bd3b6adffa911d26efdab9e0bfb5223fb18f70dabb70ebeeed"
+    },
+    "application.elf": {
+      "bytes": 858896,
+      "sha256": "d70c8df96b3fa79bbd6881a3499014e588af902cde6d8e823d7fcfbc7f8a8c42"
+    },
+    "validation.elf": {
+      "bytes": 859508,
+      "sha256": "6fac6cd9498fe86ee99b6a07e3a7ef64dec370b8b338d7c1c4661e8e6e77b7fb"
+    },
+    "ps7_init.tcl": {
+      "bytes": 35186,
+      "sha256": "485a028ff7ad9a256a64313b68527a055ca3800b3b85577ceb0554b0e0609c94"
+    }
+  },
+  "acceptanceScope": "Controlled PS fault injection on diagnostic ELF plus normal production ELF F103 SWD/JTAG, RTT/HSS/debug and CLI/frozen-Web ETM",
+  "validationReport": "docs/validation/probe-safety-111-112-115-20261104/README.md",
+  "sourceCommitBinding": "Compile base plus exact input hashes retained; bind tested source commit after implementation/artifact commit",
+  "targetFlashWrites": false,
+  "productionExecutableBytes": 81324,
+  "diagnosticExecutableBytes": 81524,
+  "diagnosticCases": 21,
+  "normalWaitFailures": 0,
+  "normalContextRestoreFailures": 0,
+  "limits": [
+    "No QSPI/cold-start acceptance",
+    "No new H743/HPM physical validation",
+    "PS observation fault injection is not physical electrical FAULT or a hung AXI bus",
+    "Other existing issues retain their original status"
+  ]
+}

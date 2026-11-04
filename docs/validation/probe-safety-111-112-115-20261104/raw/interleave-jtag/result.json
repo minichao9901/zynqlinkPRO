@@ -1,0 +1,1910 @@
+{
+  "artifacts": {
+    "git_head": "b066f1b9d38aae98f603599ba2ea0e3dfc82c638",
+    "git_dirty": true,
+    "bit": {
+      "path": "E:\\zynqlinkPRO\\prebuilt\\probe-safety-111-112-115-20261104\\probe.bit",
+      "sha256": "af1031d3caa0d7bd3b6adffa911d26efdab9e0bfb5223fb18f70dabb70ebeeed"
+    },
+    "elf": {
+      "path": "E:\\zynqlinkPRO\\prebuilt\\probe-safety-111-112-115-20261104\\application.elf",
+      "sha256": "d70c8df96b3fa79bbd6881a3499014e588af902cde6d8e823d7fcfbc7f8a8c42"
+    }
+  },
+  "driverSha256": "90287cd230a9f0ae281e0b78dc69a8ca1213720e75ac93eddd6b65bd81ccd5c4",
+  "transport": "jtag",
+  "rows": [
+    {
+      "service": "rtt",
+      "speed_hz": 50000000,
+      "transport": "jtag",
+      "passed": true,
+      "debug": {
+        "bursts": 32,
+        "verified_memory_operations": 512,
+        "dap_requests_in_bursts": 736,
+        "burst_latencies_s": [
+          0.029468699998687953,
+          0.02947689999928116,
+          0.029316100000869483,
+          0.029757899999822257,
+          0.02923700000246754,
+          0.029563100000814302,
+          0.029424600001220824,
+          0.02964849999989383,
+          0.029450199999701,
+          0.02963619999718503,
+          0.02961509999659029,
+          0.029961500000354135,
+          0.029366200000367826,
+          0.029475999999704072,
+          0.02938480000011623,
+          0.029424200001813006,
+          0.02979619999678107,
+          0.029629699998622527,
+          0.029593499999464257,
+          0.029417200003081234,
+          0.02951579999717069,
+          0.02990499999941676,
+          0.034069900000758935,
+          0.03007939999952214,
+          0.029637600000569364,
+          0.035122500001307344,
+          0.02961890000005951,
+          0.029519300001993543,
+          0.029699400001845788,
+          0.02967519999947399,
+          0.029680699997697957,
+          0.029649300002347445
+        ],
+        "halt_step_resume": [
+          {
+            "pc_before": "0x20000014",
+            "pc_after": "0x20000016",
+            "elapsed_s": 0.08456049999949755,
+            "stream_progress_after_resume": true
+          },
+          {
+            "pc_before": "0x20000016",
+            "pc_after": "0x2000000e",
+            "elapsed_s": 0.06474239999806741,
+            "stream_progress_after_resume": true
+          },
+          {
+            "pc_before": "0x20000010",
+            "pc_after": "0x20000012",
+            "elapsed_s": 0.06447299999854295,
+            "stream_progress_after_resume": true
+          }
+        ],
+        "stage_counters": [
+          {
+            "stage": "baseline_begin",
+            "metrics": [
+              65537,
+              536871424,
+              536871448,
+              487424,
+              31195613,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              822084608
+            ],
+            "received": 430080
+          },
+          {
+            "stage": "baseline_end",
+            "metrics": [
+              65537,
+              536871424,
+              536871448,
+              1465344,
+              93783448,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              822084608
+            ],
+            "received": 1458176
+          },
+          {
+            "stage": "debug_bursts_end",
+            "metrics": [
+              65537,
+              536871424,
+              536871448,
+              2155520,
+              137955387,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              822084608
+            ],
+            "received": 2147328
+          },
+          {
+            "stage": "halt_step_resume_end",
+            "metrics": [
+              65537,
+              536871424,
+              536871448,
+              2294784,
+              147066507,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              822084608
+            ],
+            "received": 2277376
+          },
+          {
+            "stage": "post_debug_end",
+            "metrics": [
+              65537,
+              536871424,
+              536871448,
+              3271680,
+              209588805,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              822084608
+            ],
+            "received": 3248128
+          }
+        ],
+        "post_debug_progress": 970752,
+        "max_debug_burst_s": 0.035122500001307344,
+        "median_debug_burst_s": 0.0296169999983249,
+        "clock_after_debug": {
+          "FCLK_Hz": 99999999,
+          "cfg": "0x11",
+          "waveform": {
+            "SWCLK_Hz": 49999999.5,
+            "half_period_fclk": 1,
+            "short_high": false,
+            "intended_high_ns": 10.000000100000001
+          },
+          "clockSource": 0,
+          "clockControl": 18874624,
+          "sourcePllControl": 221192,
+          "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+          "JTAG_sampling_mode": 17,
+          "RISC_V_SBA_enabled": false,
+          "actual_link_Hz": 49999999.5,
+          "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+        }
+      },
+      "final": [
+        65537,
+        536871424,
+        536871448,
+        4544508,
+        291052805,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        822084608
+      ],
+      "session_bytes": 4544508,
+      "all_published_received": true,
+      "sequence_exact": true,
+      "reader_stopped": true
+    },
+    {
+      "service": "hss",
+      "speed_hz": 50000000,
+      "transport": "jtag",
+      "variables": 8,
+      "period_ticks": 24000,
+      "requested_sample_Hz": 1000.0,
+      "passed": true,
+      "debug": {
+        "bursts": 38,
+        "verified_memory_operations": 608,
+        "dap_requests_in_bursts": 874,
+        "burst_latencies_s": [
+          0.024901700002374128,
+          0.024783700002444675,
+          0.024379599999519996,
+          0.024445799997920403,
+          0.024612299999716925,
+          0.02642300000297837,
+          0.024483799999870826,
+          0.024421300000540214,
+          0.02833950000058394,
+          0.02440779999960796,
+          0.024428099997749086,
+          0.02434980000180076,
+          0.024181699998734985,
+          0.02427940000052331,
+          0.024121300000842893,
+          0.024316200000612298,
+          0.02405189999990398,
+          0.02411960000245017,
+          0.02406400000108988,
+          0.02403490000142483,
+          0.024009299999306677,
+          0.02413689999957569,
+          0.024348200000531506,
+          0.024182299999665702,
+          0.02478730000075302,
+          0.024309200001880527,
+          0.024397499997576233,
+          0.024101199996948708,
+          0.02406889999838313,
+          0.024339200001122663,
+          0.0244291000017256,
+          0.024261400001705624,
+          0.024215800000092713,
+          0.024115599997458048,
+          0.024203600001783343,
+          0.024333699999260716,
+          0.02405179999914253,
+          0.024384299998928327
+        ],
+        "halt_step_resume": [
+          {
+            "pc_before": "0x20000006",
+            "pc_after": "0x20000008",
+            "elapsed_s": 0.11267420000149286,
+            "stream_progress_after_resume": true
+          },
+          {
+            "pc_before": "0x20000004",
+            "pc_after": "0x20000006",
+            "elapsed_s": 0.06142050000198651,
+            "stream_progress_after_resume": true
+          },
+          {
+            "pc_before": "0x20000006",
+            "pc_after": "0x20000008",
+            "elapsed_s": 0.061044599999149796,
+            "stream_progress_after_resume": true
+          }
+        ],
+        "stage_counters": [
+          {
+            "stage": "baseline_begin",
+            "metrics": [
+              827544392,
+              4000450218,
+              24000000,
+              252,
+              0,
+              0,
+              0,
+              0,
+              23,
+              11776,
+              24000,
+              256
+            ],
+            "received": 242
+          },
+          {
+            "stage": "baseline_end",
+            "metrics": [
+              827544392,
+              4012497080,
+              24000000,
+              754,
+              0,
+              0,
+              0,
+              0,
+              69,
+              35328,
+              24000,
+              256
+            ],
+            "received": 737
+          },
+          {
+            "stage": "debug_bursts_end",
+            "metrics": [
+              827544392,
+              4036854857,
+              24000000,
+              1708,
+              0,
+              0,
+              0,
+              874,
+              943,
+              482816,
+              24000,
+              256
+            ],
+            "received": 1686
+          },
+          {
+            "stage": "halt_step_resume_end",
+            "metrics": [
+              827544392,
+              4042542335,
+              24000000,
+              1936,
+              0,
+              0,
+              0,
+              1018,
+              1093,
+              559616,
+              24000,
+              256
+            ],
+            "received": 1924
+          },
+          {
+            "stage": "post_debug_end",
+            "metrics": [
+              827544392,
+              4054589235,
+              24000000,
+              2437,
+              0,
+              0,
+              0,
+              1018,
+              1138,
+              582656,
+              24000,
+              256
+            ],
+            "received": 2419
+          }
+        ],
+        "post_debug_progress": 495,
+        "max_debug_burst_s": 0.02833950000058394,
+        "median_debug_burst_s": 0.024324949999936507,
+        "clock_after_debug": {
+          "FCLK_Hz": 99999999,
+          "cfg": "0x11",
+          "waveform": {
+            "SWCLK_Hz": 49999999.5,
+            "half_period_fclk": 1,
+            "short_high": false,
+            "intended_high_ns": 10.000000100000001
+          },
+          "clockSource": 0,
+          "clockControl": 18874624,
+          "sourcePllControl": 221192,
+          "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+          "JTAG_sampling_mode": 17,
+          "RISC_V_SBA_enabled": false,
+          "actual_link_Hz": 49999999.5,
+          "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+        }
+      },
+      "final": [
+        827544392,
+        4073091498,
+        24000000,
+        3030,
+        0,
+        0,
+        0,
+        1018,
+        1194,
+        611328,
+        24000,
+        0
+      ],
+      "session_samples": 3030,
+      "skipped": 0,
+      "DAP_yields": 1018,
+      "sample_count_match": true,
+      "all_data_frames_verified": true,
+      "first_DEF_verified": true,
+      "stat_duplicate_frames": 0,
+      "control_sequence_errors": [],
+      "timer_rebase_events": 1018,
+      "timer_rebase_examples": [
+        {
+          "previous": [
+            4012365621,
+            7
+          ],
+          "stamp": 4012547189,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 37568,
+          "phase_remainder_ticks": 13568
+        },
+        {
+          "previous": [
+            4012547189,
+            1
+          ],
+          "stamp": 4012573016,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 25827,
+          "phase_remainder_ticks": 1827
+        },
+        {
+          "previous": [
+            4012573016,
+            1
+          ],
+          "stamp": 4012597649,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 24633,
+          "phase_remainder_ticks": 633
+        },
+        {
+          "previous": [
+            4012597649,
+            1
+          ],
+          "stamp": 4012623208,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 25559,
+          "phase_remainder_ticks": 1559
+        },
+        {
+          "previous": [
+            4012623208,
+            1
+          ],
+          "stamp": 4012648117,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 24909,
+          "phase_remainder_ticks": 909
+        },
+        {
+          "previous": [
+            4012648117,
+            1
+          ],
+          "stamp": 4012673716,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 25599,
+          "phase_remainder_ticks": 1599
+        },
+        {
+          "previous": [
+            4012673716,
+            1
+          ],
+          "stamp": 4012699171,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 25455,
+          "phase_remainder_ticks": 1455
+        },
+        {
+          "previous": [
+            4012699171,
+            1
+          ],
+          "stamp": 4012724106,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 24935,
+          "phase_remainder_ticks": 935
+        },
+        {
+          "previous": [
+            4012724106,
+            1
+          ],
+          "stamp": 4012749208,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 25102,
+          "phase_remainder_ticks": 1102
+        },
+        {
+          "previous": [
+            4012749208,
+            1
+          ],
+          "stamp": 4012784883,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 35675,
+          "phase_remainder_ticks": 11675
+        },
+        {
+          "previous": [
+            4012784883,
+            1
+          ],
+          "stamp": 4012811044,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 26161,
+          "phase_remainder_ticks": 2161
+        },
+        {
+          "previous": [
+            4012811044,
+            1
+          ],
+          "stamp": 4012837167,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 26123,
+          "phase_remainder_ticks": 2123
+        },
+        {
+          "previous": [
+            4012837167,
+            1
+          ],
+          "stamp": 4012863161,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 25994,
+          "phase_remainder_ticks": 1994
+        },
+        {
+          "previous": [
+            4012863161,
+            1
+          ],
+          "stamp": 4012888608,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 25447,
+          "phase_remainder_ticks": 1447
+        },
+        {
+          "previous": [
+            4012888608,
+            1
+          ],
+          "stamp": 4012914555,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 25947,
+          "phase_remainder_ticks": 1947
+        },
+        {
+          "previous": [
+            4012914555,
+            1
+          ],
+          "stamp": 4012942977,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 28422,
+          "phase_remainder_ticks": 4422
+        }
+      ],
+      "timestamp_order_errors": [],
+      "sample_timestamps_monotonic": true,
+      "global_uniform_sample_phase_preserved": false,
+      "reader_stopped": true
+    },
+    {
+      "service": "hss",
+      "speed_hz": 50000000,
+      "transport": "jtag",
+      "variables": 1,
+      "period_ticks": 24,
+      "requested_sample_Hz": 1000000.0,
+      "passed": true,
+      "debug": {
+        "bursts": 39,
+        "verified_memory_operations": 624,
+        "dap_requests_in_bursts": 897,
+        "burst_latencies_s": [
+          0.023764500001561828,
+          0.023781700001563877,
+          0.02405480000015814,
+          0.024106400000164285,
+          0.02419200000076671,
+          0.02386770000157412,
+          0.02382249999936903,
+          0.023860200002673082,
+          0.02400850000049104,
+          0.02395070000056876,
+          0.0236259000012069,
+          0.02377120000164723,
+          0.025093899999774294,
+          0.023975200001586927,
+          0.02431819999765139,
+          0.02404200000091805,
+          0.02504380000027595,
+          0.02408099999956903,
+          0.023965399999724468,
+          0.024278600001707673,
+          0.02395510000133072,
+          0.023816100001567975,
+          0.02379609999843524,
+          0.023954300002515083,
+          0.02370859999791719,
+          0.023779399998602457,
+          0.024117700002534548,
+          0.023772199998347787,
+          0.023857199998019496,
+          0.02381760000207578,
+          0.024113999999826774,
+          0.024236600002041087,
+          0.02399149999837391,
+          0.023760799998854054,
+          0.023941600000398466,
+          0.02384410000013304,
+          0.02375720000054571,
+          0.02370829999927082,
+          0.023876499999460066
+        ],
+        "halt_step_resume": [
+          {
+            "pc_before": "0x20000004",
+            "pc_after": "0x20000006",
+            "elapsed_s": 0.04987070000061067,
+            "stream_progress_after_resume": true
+          },
+          {
+            "pc_before": "0x20000004",
+            "pc_after": "0x20000006",
+            "elapsed_s": 0.06059509999977308,
+            "stream_progress_after_resume": true
+          },
+          {
+            "pc_before": "0x20000004",
+            "pc_after": "0x20000006",
+            "elapsed_s": 0.04997430000003078,
+            "stream_progress_after_resume": true
+          }
+        ],
+        "stage_counters": [
+          {
+            "stage": "baseline_begin",
+            "metrics": [
+              827544392,
+              4086962280,
+              24000000,
+              9461,
+              242068,
+              0,
+              0,
+              0,
+              9430,
+              4832256,
+              24,
+              256
+            ],
+            "received": 9487
+          },
+          {
+            "stage": "baseline_end",
+            "metrics": [
+              827544392,
+              4099009126,
+              24000000,
+              28030,
+              725451,
+              0,
+              0,
+              0,
+              27999,
+              14339584,
+              24,
+              256
+            ],
+            "received": 28047
+          },
+          {
+            "stage": "debug_bursts_end",
+            "metrics": [
+              827544392,
+              4123606905,
+              24000000,
+              35887,
+              911822,
+              0,
+              0,
+              897,
+              35856,
+              18362368,
+              24,
+              256
+            ],
+            "received": 35855
+          },
+          {
+            "stage": "halt_step_resume_end",
+            "metrics": [
+              827544392,
+              4127494552,
+              24000000,
+              37375,
+              945731,
+              0,
+              0,
+              1041,
+              37344,
+              19124224,
+              24,
+              256
+            ],
+            "received": 37391
+          },
+          {
+            "stage": "post_debug_end",
+            "metrics": [
+              827544392,
+              4139541444,
+              24000000,
+              56642,
+              1428417,
+              0,
+              0,
+              1041,
+              56611,
+              28988928,
+              24,
+              256
+            ],
+            "received": 56655
+          }
+        ],
+        "post_debug_progress": 19200,
+        "max_debug_burst_s": 0.025093899999774294,
+        "median_debug_burst_s": 0.023941600000398466,
+        "clock_after_debug": {
+          "FCLK_Hz": 99999999,
+          "cfg": "0x11",
+          "waveform": {
+            "SWCLK_Hz": 49999999.5,
+            "half_period_fclk": 1,
+            "short_high": false,
+            "intended_high_ns": 10.000000100000001
+          },
+          "clockSource": 0,
+          "clockControl": 18874624,
+          "sourcePllControl": 221192,
+          "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+          "JTAG_sampling_mode": 17,
+          "RISC_V_SBA_enabled": false,
+          "actual_link_Hz": 49999999.5,
+          "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+        }
+      },
+      "final": [
+        827544392,
+        4157563762,
+        24000000,
+        76463,
+        1946562,
+        0,
+        0,
+        1041,
+        76449,
+        39141888,
+        24,
+        0
+      ],
+      "session_samples": 76463,
+      "skipped": 1946562,
+      "DAP_yields": 1041,
+      "sample_count_match": true,
+      "all_data_frames_verified": true,
+      "first_DEF_verified": true,
+      "stat_duplicate_frames": 0,
+      "control_sequence_errors": [],
+      "timer_rebase_events": 76446,
+      "timer_rebase_examples": [
+        {
+          "previous": [
+            4080925223,
+            1
+          ],
+          "stamp": 4080925367,
+          "samples": 2,
+          "gap_since_last_sample_ticks": 144,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            4080925367,
+            2
+          ],
+          "stamp": 4080925511,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 120,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            4080925511,
+            1
+          ],
+          "stamp": 4080925559,
+          "samples": 2,
+          "gap_since_last_sample_ticks": 48,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            4080925559,
+            2
+          ],
+          "stamp": 4080925703,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 120,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            4080925703,
+            1
+          ],
+          "stamp": 4080925751,
+          "samples": 2,
+          "gap_since_last_sample_ticks": 48,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            4080925751,
+            2
+          ],
+          "stamp": 4080925895,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 120,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            4080925895,
+            1
+          ],
+          "stamp": 4080925943,
+          "samples": 2,
+          "gap_since_last_sample_ticks": 48,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            4080925943,
+            2
+          ],
+          "stamp": 4080926087,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 120,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            4080926087,
+            1
+          ],
+          "stamp": 4080926135,
+          "samples": 2,
+          "gap_since_last_sample_ticks": 48,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            4080926135,
+            2
+          ],
+          "stamp": 4080926279,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 120,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            4080926279,
+            1
+          ],
+          "stamp": 4080926327,
+          "samples": 2,
+          "gap_since_last_sample_ticks": 48,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            4080926327,
+            2
+          ],
+          "stamp": 4080926471,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 120,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            4080926471,
+            1
+          ],
+          "stamp": 4080926519,
+          "samples": 2,
+          "gap_since_last_sample_ticks": 48,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            4080926519,
+            2
+          ],
+          "stamp": 4080926591,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 48,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            4080926591,
+            1
+          ],
+          "stamp": 4080926735,
+          "samples": 2,
+          "gap_since_last_sample_ticks": 144,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            4080926735,
+            2
+          ],
+          "stamp": 4080926807,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 48,
+          "phase_remainder_ticks": 0
+        }
+      ],
+      "timestamp_order_errors": [],
+      "sample_timestamps_monotonic": true,
+      "global_uniform_sample_phase_preserved": false,
+      "reader_stopped": true
+    },
+    {
+      "service": "rtt",
+      "speed_hz": 60000000,
+      "transport": "jtag",
+      "passed": true,
+      "debug": {
+        "bursts": 23,
+        "verified_memory_operations": 368,
+        "dap_requests_in_bursts": 529,
+        "burst_latencies_s": [
+          0.041348099999595433,
+          0.04108849999829545,
+          0.041417600001295796,
+          0.041315999998914776,
+          0.04136260000086622,
+          0.04138959999909275,
+          0.04119639999771607,
+          0.041069599999900674,
+          0.0414243000013812,
+          0.041209800001524854,
+          0.04102010000133305,
+          0.04134599999815691,
+          0.0414000999990094,
+          0.041415200001210906,
+          0.04137529999934486,
+          0.04129629999806639,
+          0.04112330000134534,
+          0.04112399999939953,
+          0.04102889999921899,
+          0.04133430000001681,
+          0.04179189999922528,
+          0.04129509999984293,
+          0.04173100000116392
+        ],
+        "halt_step_resume": [
+          {
+            "pc_before": "0x2000000e",
+            "pc_after": "0x20000010",
+            "elapsed_s": 0.08988870000030147,
+            "stream_progress_after_resume": true
+          },
+          {
+            "pc_before": "0x20000012",
+            "pc_after": "0x20000014",
+            "elapsed_s": 0.09057899999970687,
+            "stream_progress_after_resume": true
+          },
+          {
+            "pc_before": "0x20000012",
+            "pc_after": "0x20000014",
+            "elapsed_s": 0.08934410000074422,
+            "stream_progress_after_resume": true
+          }
+        ],
+        "stage_counters": [
+          {
+            "stage": "baseline_begin",
+            "metrics": [
+              65537,
+              536871424,
+              536871448,
+              579584,
+              37093943,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              989856768
+            ],
+            "received": 577536
+          },
+          {
+            "stage": "baseline_end",
+            "metrics": [
+              65537,
+              536871424,
+              536871448,
+              1743872,
+              111609512,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              989856768
+            ],
+            "received": 1736704
+          },
+          {
+            "stage": "debug_bursts_end",
+            "metrics": [
+              65537,
+              536871424,
+              536871448,
+              2247680,
+              143853722,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              989856768
+            ],
+            "received": 2239488
+          },
+          {
+            "stage": "halt_step_resume_end",
+            "metrics": [
+              65537,
+              536871424,
+              536871448,
+              2357248,
+              151064207,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              989856768
+            ],
+            "received": 2351104
+          },
+          {
+            "stage": "post_debug_end",
+            "metrics": [
+              65537,
+              536871424,
+              536871448,
+              3521536,
+              225579776,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              989856768
+            ],
+            "received": 3506176
+          }
+        ],
+        "post_debug_progress": 1155072,
+        "max_debug_burst_s": 0.04179189999922528,
+        "median_debug_burst_s": 0.04133430000001681,
+        "clock_after_debug": {
+          "FCLK_Hz": 119999998,
+          "cfg": "0x11",
+          "waveform": {
+            "SWCLK_Hz": 59999999.0,
+            "half_period_fclk": 1,
+            "short_high": false,
+            "intended_high_ns": 8.333333472222225
+          },
+          "clockSource": 0,
+          "clockControl": 15728896,
+          "sourcePllControl": 221192,
+          "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+          "JTAG_sampling_mode": 17,
+          "RISC_V_SBA_enabled": false,
+          "actual_link_Hz": 59999999.0,
+          "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+        }
+      },
+      "final": [
+        65537,
+        536871424,
+        536871448,
+        5005308,
+        320544642,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        989856768
+      ],
+      "session_bytes": 5005308,
+      "all_published_received": true,
+      "sequence_exact": true,
+      "reader_stopped": true
+    },
+    {
+      "service": "hss",
+      "speed_hz": 60000000,
+      "transport": "jtag",
+      "variables": 8,
+      "period_ticks": 24000,
+      "requested_sample_Hz": 1000.0,
+      "passed": true,
+      "debug": {
+        "bursts": 26,
+        "verified_memory_operations": 416,
+        "dap_requests_in_bursts": 598,
+        "burst_latencies_s": [
+          0.03710950000095181,
+          0.03700750000280095,
+          0.03704389999984414,
+          0.036927500001183944,
+          0.03705239999908372,
+          0.03712000000086846,
+          0.037026100002549356,
+          0.03703820000009728,
+          0.03735149999920395,
+          0.0370227999992494,
+          0.03754979999939678,
+          0.0369167999997444,
+          0.037769499998830725,
+          0.03752539999914006,
+          0.03725999999733176,
+          0.0372559999996156,
+          0.03744659999938449,
+          0.036987600000429666,
+          0.036987899999076035,
+          0.03709590000289609,
+          0.03733060000013211,
+          0.03707589999976335,
+          0.03710740000315127,
+          0.03732529999979306,
+          0.03690690000075847,
+          0.03702079999857233
+        ],
+        "halt_step_resume": [
+          {
+            "pc_before": "0x20000006",
+            "pc_after": "0x20000008",
+            "elapsed_s": 0.08744950000254903,
+            "stream_progress_after_resume": true
+          },
+          {
+            "pc_before": "0x20000006",
+            "pc_after": "0x20000008",
+            "elapsed_s": 0.12964370000190684,
+            "stream_progress_after_resume": true
+          },
+          {
+            "pc_before": "0x20000006",
+            "pc_after": "0x20000008",
+            "elapsed_s": 0.11907350000183214,
+            "stream_progress_after_resume": true
+          }
+        ],
+        "stage_counters": [
+          {
+            "stage": "baseline_begin",
+            "metrics": [
+              827544392,
+              4255810786,
+              24000000,
+              252,
+              0,
+              0,
+              0,
+              0,
+              23,
+              11776,
+              24000,
+              256
+            ],
+            "received": 242
+          },
+          {
+            "stage": "baseline_end",
+            "metrics": [
+              827544392,
+              4267857633,
+              24000000,
+              754,
+              0,
+              0,
+              0,
+              0,
+              69,
+              35328,
+              24000,
+              256
+            ],
+            "received": 737
+          },
+          {
+            "stage": "debug_bursts_end",
+            "metrics": [
+              827544392,
+              4292503424,
+              24000000,
+              1406,
+              0,
+              0,
+              0,
+              598,
+              667,
+              341504,
+              24000,
+              256
+            ],
+            "received": 1378
+          },
+          {
+            "stage": "halt_step_resume_end",
+            "metrics": [
+              827544392,
+              5647360,
+              24000000,
+              1654,
+              0,
+              0,
+              0,
+              742,
+              818,
+              418816,
+              24000,
+              256
+            ],
+            "received": 1644
+          },
+          {
+            "stage": "post_debug_end",
+            "metrics": [
+              827544392,
+              17718218,
+              24000000,
+              2157,
+              0,
+              0,
+              0,
+              742,
+              864,
+              442368,
+              24000,
+              256
+            ],
+            "received": 2139
+          }
+        ],
+        "post_debug_progress": 495,
+        "max_debug_burst_s": 0.037769499998830725,
+        "median_debug_burst_s": 0.03708590000132972,
+        "clock_after_debug": {
+          "FCLK_Hz": 119999998,
+          "cfg": "0x11",
+          "waveform": {
+            "SWCLK_Hz": 59999999.0,
+            "half_period_fclk": 1,
+            "short_high": false,
+            "intended_high_ns": 8.333333472222225
+          },
+          "clockSource": 0,
+          "clockControl": 15728896,
+          "sourcePllControl": 221192,
+          "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+          "JTAG_sampling_mode": 17,
+          "RISC_V_SBA_enabled": false,
+          "actual_link_Hz": 59999999.0,
+          "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+        }
+      },
+      "final": [
+        827544392,
+        34588682,
+        24000000,
+        2693,
+        0,
+        0,
+        0,
+        742,
+        915,
+        468480,
+        24000,
+        0
+      ],
+      "session_samples": 2693,
+      "skipped": 0,
+      "DAP_yields": 742,
+      "sample_count_match": true,
+      "all_data_frames_verified": true,
+      "first_DEF_verified": true,
+      "stat_duplicate_frames": 0,
+      "control_sequence_errors": [],
+      "timer_rebase_events": 742,
+      "timer_rebase_examples": [
+        {
+          "previous": [
+            4267716387,
+            8
+          ],
+          "stamp": 4267920029,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 35642,
+          "phase_remainder_ticks": 11642
+        },
+        {
+          "previous": [
+            4267920029,
+            1
+          ],
+          "stamp": 4267959169,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 39140,
+          "phase_remainder_ticks": 15140
+        },
+        {
+          "previous": [
+            4267959169,
+            1
+          ],
+          "stamp": 4267997303,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 38134,
+          "phase_remainder_ticks": 14134
+        },
+        {
+          "previous": [
+            4267997303,
+            1
+          ],
+          "stamp": 4268035798,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 38495,
+          "phase_remainder_ticks": 14495
+        },
+        {
+          "previous": [
+            4268035798,
+            1
+          ],
+          "stamp": 4268075380,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 39582,
+          "phase_remainder_ticks": 15582
+        },
+        {
+          "previous": [
+            4268075380,
+            1
+          ],
+          "stamp": 4268114313,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 38933,
+          "phase_remainder_ticks": 14933
+        },
+        {
+          "previous": [
+            4268114313,
+            1
+          ],
+          "stamp": 4268152966,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 38653,
+          "phase_remainder_ticks": 14653
+        },
+        {
+          "previous": [
+            4268152966,
+            1
+          ],
+          "stamp": 4268191655,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 38689,
+          "phase_remainder_ticks": 14689
+        },
+        {
+          "previous": [
+            4268191655,
+            1
+          ],
+          "stamp": 4268230525,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 38870,
+          "phase_remainder_ticks": 14870
+        },
+        {
+          "previous": [
+            4268230525,
+            1
+          ],
+          "stamp": 4268269281,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 38756,
+          "phase_remainder_ticks": 14756
+        },
+        {
+          "previous": [
+            4268269281,
+            1
+          ],
+          "stamp": 4268308946,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 39665,
+          "phase_remainder_ticks": 15665
+        },
+        {
+          "previous": [
+            4268308946,
+            1
+          ],
+          "stamp": 4268347878,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 38932,
+          "phase_remainder_ticks": 14932
+        },
+        {
+          "previous": [
+            4268347878,
+            1
+          ],
+          "stamp": 4268386702,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 38824,
+          "phase_remainder_ticks": 14824
+        },
+        {
+          "previous": [
+            4268386702,
+            1
+          ],
+          "stamp": 4268425637,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 38935,
+          "phase_remainder_ticks": 14935
+        },
+        {
+          "previous": [
+            4268425637,
+            1
+          ],
+          "stamp": 4268463866,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 38229,
+          "phase_remainder_ticks": 14229
+        },
+        {
+          "previous": [
+            4268463866,
+            1
+          ],
+          "stamp": 4268504563,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 40697,
+          "phase_remainder_ticks": 16697
+        }
+      ],
+      "timestamp_order_errors": [],
+      "sample_timestamps_monotonic": true,
+      "global_uniform_sample_phase_preserved": false,
+      "reader_stopped": true
+    },
+    {
+      "service": "hss",
+      "speed_hz": 60000000,
+      "transport": "jtag",
+      "variables": 1,
+      "period_ticks": 24,
+      "requested_sample_Hz": 1000000.0,
+      "passed": true,
+      "debug": {
+        "bursts": 26,
+        "verified_memory_operations": 416,
+        "dap_requests_in_bursts": 598,
+        "burst_latencies_s": [
+          0.03682739999931073,
+          0.03679330000159098,
+          0.03679740000006859,
+          0.03691140000228188,
+          0.03680249999888474,
+          0.036845300001004944,
+          0.03711000000112108,
+          0.03684359999897424,
+          0.03682169999956386,
+          0.03678380000201287,
+          0.036791700000321725,
+          0.037381999998615356,
+          0.036981499997637,
+          0.03752130000066245,
+          0.03714079999917885,
+          0.037012199998571305,
+          0.03673730000082287,
+          0.036881500000163214,
+          0.037155099998926744,
+          0.036956299998564646,
+          0.0366340999971726,
+          0.036817099997279,
+          0.036746000001585344,
+          0.03682870000193361,
+          0.03682920000210288,
+          0.03679240000201389
+        ],
+        "halt_step_resume": [
+          {
+            "pc_before": "0x20000004",
+            "pc_after": "0x20000006",
+            "elapsed_s": 0.08833980000053998,
+            "stream_progress_after_resume": true
+          },
+          {
+            "pc_before": "0x20000004",
+            "pc_after": "0x20000006",
+            "elapsed_s": 0.07727950000116834,
+            "stream_progress_after_resume": true
+          },
+          {
+            "pc_before": "0x20000004",
+            "pc_after": "0x20000006",
+            "elapsed_s": 0.09070190000056755,
+            "stream_progress_after_resume": true
+          }
+        ],
+        "stage_counters": [
+          {
+            "stage": "baseline_begin",
+            "metrics": [
+              827544392,
+              48531427,
+              24000000,
+              10481,
+              241452,
+              0,
+              0,
+              0,
+              9408,
+              4820992,
+              24,
+              256
+            ],
+            "received": 10465
+          },
+          {
+            "stage": "baseline_end",
+            "metrics": [
+              827544392,
+              60578307,
+              24000000,
+              29233,
+              724653,
+              0,
+              0,
+              0,
+              28160,
+              14422016,
+              24,
+              256
+            ],
+            "received": 29217
+          },
+          {
+            "stage": "debug_bursts_end",
+            "metrics": [
+              827544392,
+              85128063,
+              24000000,
+              34537,
+              850672,
+              0,
+              0,
+              598,
+              33464,
+              17137664,
+              24,
+              256
+            ],
+            "received": 34529
+          },
+          {
+            "stage": "halt_step_resume_end",
+            "metrics": [
+              827544392,
+              91319524,
+              24000000,
+              36109,
+              898030,
+              0,
+              0,
+              742,
+              35036,
+              17942528,
+              24,
+              256
+            ],
+            "received": 36129
+          },
+          {
+            "stage": "post_debug_end",
+            "metrics": [
+              827544392,
+              103366412,
+              24000000,
+              54833,
+              1381259,
+              0,
+              0,
+              742,
+              53760,
+              27529216,
+              24,
+              256
+            ],
+            "received": 54817
+          }
+        ],
+        "post_debug_progress": 18624,
+        "max_debug_burst_s": 0.03752130000066245,
+        "median_debug_burst_s": 0.036828950002018246,
+        "clock_after_debug": {
+          "FCLK_Hz": 119999998,
+          "cfg": "0x11",
+          "waveform": {
+            "SWCLK_Hz": 59999999.0,
+            "half_period_fclk": 1,
+            "short_high": false,
+            "intended_high_ns": 8.333333472222225
+          },
+          "clockSource": 0,
+          "clockControl": 15728896,
+          "sourcePllControl": 221192,
+          "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+          "JTAG_sampling_mode": 17,
+          "RISC_V_SBA_enabled": false,
+          "actual_link_Hz": 59999999.0,
+          "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+        }
+      },
+      "final": [
+        827544392,
+        120812779,
+        24000000,
+        73537,
+        1872523,
+        0,
+        0,
+        742,
+        72480,
+        37109760,
+        24,
+        0
+      ],
+      "session_samples": 73537,
+      "skipped": 1872523,
+      "DAP_yields": 742,
+      "sample_count_match": true,
+      "all_data_frames_verified": true,
+      "first_DEF_verified": true,
+      "stat_duplicate_frames": 0,
+      "control_sequence_errors": [],
+      "timer_rebase_events": 72478,
+      "timer_rebase_examples": [
+        {
+          "previous": [
+            42484676,
+            1
+          ],
+          "stamp": 42484796,
+          "samples": 2,
+          "gap_since_last_sample_ticks": 120,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            42484796,
+            2
+          ],
+          "stamp": 42484916,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 96,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            42484916,
+            1
+          ],
+          "stamp": 42484964,
+          "samples": 2,
+          "gap_since_last_sample_ticks": 48,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            42484964,
+            2
+          ],
+          "stamp": 42485084,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 96,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            42485084,
+            1
+          ],
+          "stamp": 42485132,
+          "samples": 2,
+          "gap_since_last_sample_ticks": 48,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            42485132,
+            2
+          ],
+          "stamp": 42485252,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 96,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            42485252,
+            1
+          ],
+          "stamp": 42485300,
+          "samples": 2,
+          "gap_since_last_sample_ticks": 48,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            42485300,
+            2
+          ],
+          "stamp": 42485420,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 96,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            42485420,
+            1
+          ],
+          "stamp": 42485468,
+          "samples": 2,
+          "gap_since_last_sample_ticks": 48,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            42485468,
+            2
+          ],
+          "stamp": 42485588,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 96,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            42485588,
+            1
+          ],
+          "stamp": 42485636,
+          "samples": 2,
+          "gap_since_last_sample_ticks": 48,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            42485636,
+            2
+          ],
+          "stamp": 42485756,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 96,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            42485756,
+            1
+          ],
+          "stamp": 42485804,
+          "samples": 2,
+          "gap_since_last_sample_ticks": 48,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            42485804,
+            2
+          ],
+          "stamp": 42485876,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 48,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            42485876,
+            1
+          ],
+          "stamp": 42485948,
+          "samples": 1,
+          "gap_since_last_sample_ticks": 72,
+          "phase_remainder_ticks": 0
+        },
+        {
+          "previous": [
+            42485948,
+            1
+          ],
+          "stamp": 42485996,
+          "samples": 2,
+          "gap_since_last_sample_ticks": 48,
+          "phase_remainder_ticks": 0
+        }
+      ],
+      "timestamp_order_errors": [],
+      "sample_timestamps_monotonic": true,
+      "global_uniform_sample_phase_preserved": false,
+      "reader_stopped": true
+    }
+  ],
+  "targetFlashWrites": false,
+  "targetClockWrites": false,
+  "backup_sha256": "093a98477a5a5e4b04545dd53abfb44be2d054ab3796db00ffd03ba132f36b51",
+  "RCC_before": {
+    "name": "STM32F103",
+    "cpuid": "0x411fc231",
+    "device": "0x10036414",
+    "registers": {
+      "0x40021000": "0x3034e83",
+      "0x40021004": "0x51040a"
+    }
+  },
+  "fixture_base": "0x20000000",
+  "initial_halted": true,
+  "ETMCR_before": "0x411",
+  "passed": true,
+  "restore_match": true,
+  "registers_match": true,
+  "RCC_after": {
+    "name": "STM32F103",
+    "cpuid": "0x411fc231",
+    "device": "0x10036414",
+    "registers": {
+      "0x40021000": "0x3034e83",
+      "0x40021004": "0x51040a"
+    }
+  },
+  "run_halt_restored": true
+}

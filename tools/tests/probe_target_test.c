@@ -4,9 +4,14 @@ int probe_session_live(void) {return 1;}
 DAP_Data_t DAP_Data={.debug_port=1,.clock_delay=7,.fast_clock=0};
 static uint32_t clock_reg=0x100a00,cfg=0x20010,ap_csw=0x23000052,ap_tar=0x20000040;
 static uint32_t dp_select=0x01000010,posted,blocks,sequences;
-static int inject_wait,inject_fault;
+static int inject_wait,inject_fault,drop_tar_write,bad_csw_read;
 static int jtag_present,jtag_calls,idcode_reads;
 static uint32_t idcode_ir=14;
+static unsigned restore_fault_stage;
+int dap_validation_restore_fault(unsigned stage) {if(stage!=restore_fault_stage)return 0;restore_fault_stage=0;return 1;}
+int swd_abort_engines(void) {return 0;}
+unsigned dap_wait_command_error(void) {return 0;}
+void dap_context_publish(uint32_t a,uint32_t b,uint32_t c,uint32_t d,uint32_t e,uint32_t f) {(void)a;(void)b;(void)c;(void)d;(void)e;(void)f;}
 void JTAG_SetIDCodeIR(uint32_t value) {idcode_ir=value;}
 uint32_t JTAG_IDCodeIR(void) {return idcode_ir;}
 static uint32_t jtag_regs[8]={3,4,0,0,0,0,4,10};
@@ -30,6 +35,7 @@ void Xil_Out32(uintptr_t a,uint32_t d) {
 int DAP_JTAG_Select(uint32_t index) {DAP_Data.jtag_dev.index=(uint8_t)index;return 0;}
 uint32_t JTAG_ReadIDCode(void) {idcode_reads++;return 0x4ba00477;}
 void JTAG_IR(uint32_t ir) {jtag_regs[7]=ir;}
+int DAP_JTAG_RestoreIR(uint32_t ir) {JTAG_IR(ir);return 0;}
 uint8_t DAP_JTAG_MemTransfer(uint32_t req,uint32_t *data) {jtag_calls++;return SWD_Transfer(req,data);}
 static uint32_t memory_word(uint32_t a) {return a^0x12345678;}
 uint8_t SWD_Transfer(uint32_t req,uint32_t *d) {
@@ -39,8 +45,8 @@ uint8_t SWD_Transfer(uint32_t req,uint32_t *d) {
     switch(req) {
     case 8: dp_select=value;break;
     case 1: ap_csw=value;break;
-    case 5: ap_tar=value;break;
-    case 3: *d=posted;posted=ap_csw;break;
+    case 5: if(!drop_tar_write)ap_tar=value;break;
+    case 3: *d=posted;posted=ap_csw^(bad_csw_read?1:0);break;
     case 7: *d=posted;posted=ap_tar;break;
     case 14: *d=posted;break;
     case 13: posted=0;break;
@@ -50,7 +56,8 @@ uint8_t SWD_Transfer(uint32_t req,uint32_t *d) {
     }
     probe_target_observe(req,value,1);return 1;
 }
-uint32_t DAP_ExecuteCommand(const uint8_t *p,uint8_t *q) {
+uint32_t DAP_ExecuteCommand(const uint8_t *p,uint32_t length,uint8_t *q,uint32_t capacity) {
+    assert(length && capacity>=1040);
     memset(q,0,1040);q[0]=p[0];
     if(p[0]==0x11) {DAP_Data.clock_delay=1;clock_reg=0x102800;cfg=0x10010;}
     else if(p[0]==2) {q[1]=p[1];DAP_Data.debug_port=p[1];}
@@ -82,7 +89,10 @@ int main(void) {
     // Failed claims restore the host clock/config too.
     inject_fault=1;assert(probe_target_claim(20000000)==-4);
     assert(clock_reg==old_clock && cfg==old_cfg && DAP_Data.clock_delay==7);
-    inject_fault=0;probe_target_forget();DAP_Data.debug_port=0;
+    assert(probe_target_context_invalid() && probe_target_claimed());
+    inject_fault=0;assert(probe_target_claim(20000000)==-4);
+    assert(!probe_target_recover() && !probe_target_context_invalid());
+    probe_target_forget();DAP_Data.debug_port=0;
     assert(!probe_target_claim(20000000));probe_target_release();assert(sequences==1 && DAP_Data.debug_port==0);
     assert(!probe_target_claim(20000000));probe_target_release();assert(sequences==1);
     assert(probe_target_transport(3)==-6 && probe_target_transport(2)==-10);
@@ -101,6 +111,31 @@ int main(void) {
     claimed=1;assert(probe_target_architecture(0)==-7 && probe_target_is_riscv());claimed=0;
     assert(!probe_target_architecture(0) && !probe_target_is_riscv());
     assert(probe_target_architecture(2)==-6);
+    // Every restore-write failure keeps the original snapshot and rejects
+    // further claims/data until explicit recovery completes and reads back.
+    for(unsigned stage=2;stage<=3;stage++) {
+        assert(!probe_target_claim(20000000));
+        assert(!probe_target_write_word(0x20000800,0x12345678));
+        restore_fault_stage=stage;
+        assert(probe_target_release()==-4 && context_invalid && claimed && saved);
+        unsigned previous=blocks;
+        assert(probe_target_read(0x20000000,data,4)==-4 && blocks==previous);
+        assert(probe_target_write_word(0x20000000,0)==-4);
+        assert(!probe_target_recover() && !claimed && !saved && !context_invalid);
+        assert(ap_tar==0x20000040 && dp_select==0x01000010);
+    }
+    // ACK=OK is not enough: ignored TAR writes and wrong CSW readback must
+    // also quarantine the context. Recovery never touches target DRW.
+    for(unsigned which=0;which<2;which++) {
+        assert(!probe_target_claim(20000000));
+        assert(!probe_target_write_word(0x20000800,0x12345678));
+        if(which)bad_csw_read=1;else drop_tar_write=1;
+        assert(probe_target_release()==-4 && context_invalid && claimed && saved);
+        drop_tar_write=bad_csw_read=0;
+        assert(!probe_target_recover() && ap_tar==0x20000040 && dp_select==0x01000010);
+    }
+    probe_target_invalidate();assert(probe_target_claim(20000000)==-4);
+    assert(!probe_target_recover() && ap_csw==0x23000052 && ap_tar==0 && dp_select==0);
     puts("PASS production target C: WAIT, unaligned 1KiB split, overflow, SELECT/CSW/TAR/clock restore, independent initialization");
     return 0;
 }

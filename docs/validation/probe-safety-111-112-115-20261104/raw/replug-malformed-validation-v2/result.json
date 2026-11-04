@@ -1,0 +1,123 @@
+{
+  "stage": "malformed",
+  "rows": [
+    {
+      "case": "short-clock",
+      "requestBytes": 1,
+      "reply": "ff",
+      "tarUnchanged": true,
+      "sramUnchanged": true
+    },
+    {
+      "case": "short-transfer",
+      "requestBytes": 4,
+      "reply": "ff",
+      "tarUnchanged": true,
+      "sramUnchanged": true
+    },
+    {
+      "case": "read-overflow-1024",
+      "requestBytes": 5,
+      "reply": "ff",
+      "tarUnchanged": true,
+      "sramUnchanged": true
+    },
+    {
+      "case": "read-overflow-65535",
+      "requestBytes": 5,
+      "reply": "ff",
+      "tarUnchanged": true,
+      "sramUnchanged": true
+    },
+    {
+      "case": "write-truncated-1023",
+      "requestBytes": 4096,
+      "reply": "ff",
+      "tarUnchanged": true,
+      "sramUnchanged": true
+    },
+    {
+      "case": "nested-execute",
+      "requestBytes": 4,
+      "reply": "ff",
+      "tarUnchanged": true,
+      "sramUnchanged": true
+    },
+    {
+      "case": "nested-queue",
+      "requestBytes": 4,
+      "reply": "ff",
+      "tarUnchanged": true,
+      "sramUnchanged": true
+    },
+    {
+      "case": "truncated-swd-sequence",
+      "requestBytes": 4,
+      "reply": "ff",
+      "tarUnchanged": true,
+      "sramUnchanged": true
+    },
+    {
+      "case": "truncated-jtag-sequence",
+      "requestBytes": 3,
+      "reply": "ff",
+      "tarUnchanged": true,
+      "sramUnchanged": true
+    },
+    {
+      "case": "truncated-ddr-vendor",
+      "requestBytes": 4,
+      "reply": "ff",
+      "tarUnchanged": true,
+      "sramUnchanged": true
+    },
+    {
+      "case": "compound-write-then-overflow",
+      "requestBytes": 15,
+      "reply": "ff",
+      "tarUnchanged": true,
+      "sramUnchanged": true
+    },
+    {
+      "case": "compound-cumulative-overflow",
+      "requestBytes": 12,
+      "reply": "ff",
+      "tarUnchanged": true,
+      "sramUnchanged": true
+    },
+    {
+      "case": "compound-write-then-short-vendor",
+      "requestBytes": 11,
+      "reply": "ff",
+      "tarUnchanged": true,
+      "sramUnchanged": true
+    },
+    {
+      "case": "legal-read-1023",
+      "responseBytes": 4096,
+      "allValuesExact": true,
+      "tarAfter": "0x20004ffc",
+      "dataSha256": "8007505a01df189ec0bbffa71f8492ca3e258ad2db5ef0dff3dc6863a8f1305a"
+    },
+    {
+      "case": "legal-write-1022",
+      "requestBytes": 4093,
+      "allValuesExact": true
+    }
+  ],
+  "passed": true,
+  "identity": {
+    "git_head": "b066f1b9d38aae98f603599ba2ea0e3dfc82c638",
+    "git_dirty": true,
+    "bit": {
+      "path": "E:\\zynqlinkPRO\\prebuilt\\probe-safety-111-112-115-20261104\\probe.bit",
+      "sha256": "af1031d3caa0d7bd3b6adffa911d26efdab9e0bfb5223fb18f70dabb70ebeeed"
+    },
+    "elf": {
+      "path": "E:\\zynqlinkPRO\\prebuilt\\probe-safety-111-112-115-20261104\\validation.elf",
+      "sha256": "82906777fa5eb2e2fbf0b9696eac20b021da0d49f2e3ff33b15442a0374724fa"
+    }
+  },
+  "targetFlashWrites": false,
+  "probeQspiWrites": false
+}

@@ -19,7 +19,7 @@ extern DAP_Data_t DAP_Data;
 static inline uint32_t swd_read32(uintptr_t a) {return Xil_In32(a);}
 static inline void swd_write32(uintptr_t a,uint32_t d) {Xil_Out32(a,d);}
 uint8_t SWD_Transfer(uint32_t,uint32_t *);
-uint32_t DAP_ExecuteCommand(const uint8_t *,uint8_t *);
+uint32_t DAP_ExecuteCommand(const uint8_t *,uint32_t,uint8_t *,uint32_t);
 uint32_t JTAG_ReadIDCode(void);
 void JTAG_SetIDCodeIR(uint32_t value);
 uint32_t JTAG_IDCodeIR(void);

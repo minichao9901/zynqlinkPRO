@@ -206,6 +206,12 @@ void JTAG_IR(uint32_t ir) {
     (void)run(2,0,&ir);
     swd_write32(JTAG_OPERATION,0);
 }
+int DAP_JTAG_RestoreIR(uint32_t ir) {
+    if(DAP_JTAG_Select(DAP_Data.jtag_dev.index))return -1;
+    uint8_t ack=run(2,0,&ir);
+    swd_write32(JTAG_OPERATION,0);
+    return ack==1 ? 0 : -1;
+}
 uint32_t JTAG_ReadIDCode(void) {
     uint32_t value=0;
     if(DAP_JTAG_Select(DAP_Data.jtag_dev.index)) return 0;

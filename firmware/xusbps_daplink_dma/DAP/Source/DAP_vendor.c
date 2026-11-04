@@ -33,6 +33,25 @@
 #include "xtime_l.h"
 #include <string.h>
 
+int dap_vendor_bounds(uint8_t command,dap_request_plan *p) {
+  p->request_bytes=2;p->response_bytes=1;
+  switch(command) {
+  case 0x80:p->response_bytes=12;break;
+  case 0x81:p->response_bytes=82;break;
+  case 0x82:p->request_bytes=1;break;
+  case 0x83:case 0x84:case 0x85:case 0x8b:p->response_bytes=3;break;
+  case 0x86:p->request_bytes=1;p->response_bytes=8+sizeof dap_metrics;break;
+  case 0x87:p->request_bytes=1;p->response_bytes=50;break;
+  case 0x88:p->response_bytes=70;break;
+  case 0x89:p->response_bytes=15;break;
+  case 0x8a:p->response_bytes=8;break;
+  case 0x8c:p->request_bytes=28;p->response_bytes=2+4*ETM_DDR_REPLY_WORDS;break;
+  case 0x8d:p->response_bytes=4;break;
+  default:return 0;
+  }
+  return 1;
+}
+
 //**************************************************************************************************
 /**
 \defgroup DAP_Vendor_Adapt_gr Adapt Vendor Commands

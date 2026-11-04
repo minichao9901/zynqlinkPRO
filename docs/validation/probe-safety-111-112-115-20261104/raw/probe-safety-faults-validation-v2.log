@@ -1,0 +1,67 @@
+restore stage 2 quarantined; explicit Connect restores verified context
+restore stage 3 quarantined; explicit Connect restores verified context
+scalar-timeout bounded failure/recovery passed
+swj-timeout bounded failure/recovery passed
+scalar-abort bounded failure/recovery passed
+Traceback (most recent call last):
+  File "E:\zynqlinkPRO\tools\validate_probe_safety.py", line 145, in wait_failures
+    assert reason==expected,(kind,reason,result)
+           ^^^^^^^^^^^^^^^^
+AssertionError: ('scalar-usb-epoch', 2, {'error': "USBError(32, 'Pipe error')"})
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "E:\zynqlinkPRO\tools\validate_probe_safety.py", line 175, in main
+    else:restore_failure(f,diag,report);wait_failures(f,diag,report)
+                                        ~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\zynqlinkPRO\tools\validate_probe_safety.py", line 161, in wait_failures
+    reconnect(f)
+    ~~~~~~~~~^^^
+  File "E:\zynqlinkPRO\tools\validate_probe_safety.py", line 41, in reconnect
+    r=xfer(f.tx,f.rx,b'\x02\x01');assert r==b'\x02\x01',r.hex()
+  File "E:\zynqlinkPRO\tools\dap_pipeline_bench.py", line 58, in xfer
+    return bytes(inp.read(PKT, timeout=5000))
+                 ~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\site-packages\usb\core.py", line 431, in read
+    return self.device.read(self, size_or_buffer, timeout)
+           ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\site-packages\usb\core.py", line 1043, in read
+    ret = fn(
+            self._ctx.handle,
+    ...<2 lines>...
+            buff,
+            self.__get_timeout(timeout))
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\site-packages\usb\backend\libusb1.py", line 850, in bulk_read
+    return self.__read(self.lib.libusb_bulk_transfer,
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                       dev_handle,
+                       ^^^^^^^^^^^
+    ...<2 lines>...
+                       buff,
+                       ^^^^^
+                       timeout)
+                       ^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\site-packages\usb\backend\libusb1.py", line 958, in __read
+    _check(retval)
+    ~~~~~~^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\site-packages\usb\backend\libusb1.py", line 602, in _check
+    raise USBTimeoutError(_strerror(ret), ret, _libusb_errno[ret])
+usb.core.USBTimeoutError: [Errno 10060] Operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "E:\zynqlinkPRO\tools\validate_probe_safety.py", line 179, in <module>
+    if __name__=='__main__':main()
+                            ~~~~^^
+  File "E:\zynqlinkPRO\tools\validate_probe_safety.py", line 173, in main
+    with Fixture(a.out/'fixture')as f:
+         ~~~~~~~^^^^^^^^^^^^^^^^^
+  File "E:\zynqlinkPRO\tools\f103_ram_fixture.py", line 77, in __exit__
+    stop(self.probe,self.dev);setup(self.tx,self.rx,1000)
+    ~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "E:\zynqlinkPRO\tools\test_probe_board.py", line 107, in stop
+    assert rc == -7, rc
+           ^^^^^^^^
+AssertionError: -4

@@ -1,0 +1,16 @@
+restore stage 2 quarantined; explicit Connect restores verified context
+restore stage 3 quarantined; explicit Connect restores verified context
+scalar-timeout bounded failure/recovery passed
+swj-timeout bounded failure/recovery passed
+scalar-abort bounded failure/recovery passed
+Traceback (most recent call last):
+  File "E:\zynqlinkPRO\tools\validate_probe_safety.py", line 195, in <module>
+    if __name__=='__main__':main()
+                            ~~~~^^
+  File "E:\zynqlinkPRO\tools\validate_probe_safety.py", line 191, in main
+    else:restore_failure(f,diag,report);wait_failures(f,diag,report)
+                                        ~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\zynqlinkPRO\tools\validate_probe_safety.py", line 154, in wait_failures
+    assert reason==expected,(kind,reason,result)
+           ^^^^^^^^^^^^^^^^
+AssertionError: ('scalar-usb-epoch', 2, {'error': "USBError(32, 'Pipe error')", 'finishedPerf': 19542.7933459})

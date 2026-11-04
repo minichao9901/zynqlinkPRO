@@ -4,8 +4,16 @@
 #include "probe_stream.h"
 #include "DAP/Include/jtag_rtl.h"
 #include <string.h>
+#include "dap_wait.h"
+#include "swd_dma.h"
 static uint32_t select_shadow, saved_select, saved_csw, saved_tar;
 static int claimed, saved, link_ready;
+static int context_invalid;
+volatile uint32_t probe_context_restore_failures,probe_context_first_failure;
+static void publish_context(void) {
+    dap_context_publish((claimed?1U:0U)|(saved?2U:0U)|(context_invalid?4U:0U),
+        probe_context_restore_failures,probe_context_first_failure,saved_select,saved_csw,saved_tar);
+}
 static uint32_t saved_clock, saved_cfg;
 static DAP_Data_t saved_dap;
 static DAP_Data_t cached_jtag;
@@ -48,8 +56,10 @@ int probe_target_architecture(uint32_t riscv) {
 int probe_target_is_riscv(void) {
     return preferred_port==DAP_PORT_JTAG && JTAG_IDCodeIR()==1U;
 }
-void probe_target_forget(void) { claimed = saved = link_ready = 0; }
+void probe_target_forget(void) { claimed = saved = link_ready = context_invalid = 0;publish_context(); }
 int probe_target_claimed(void) { return claimed && probe_session_live(); }
+int probe_target_context_invalid(void) {return context_invalid;}
+void probe_target_invalidate(void) {context_invalid=1;link_ready=0;publish_context();}
 static uint8_t command[4112] __attribute__((aligned(32)));
 static uint8_t response[4112] __attribute__((aligned(32)));
 static uint8_t scratch[4096] __attribute__((aligned(32)));
@@ -78,7 +88,7 @@ static int read_ap(uint32_t req, uint32_t *value) {
 static int clock_set(uint32_t hz) {
     command[0] = 0x11;
     memcpy(command + 1, &hz, 4);
-    DAP_ExecuteCommand(command, response);
+    DAP_ExecuteCommand(command, 5, response, sizeof response);
     return response[1] ? -1 : 0;
 }
 uint32_t probe_target_fclk(void) {
@@ -88,6 +98,7 @@ int probe_target_claim(uint32_t hz) {
     uint32_t v = 0, i;
     if (!probe_session_live())
         return -4;
+    if(context_invalid)return -4;
     if (claimed)
         return 0;
     uint32_t port=preferred_port ? preferred_port : (DAP_Data.debug_port==DAP_PORT_JTAG ? 2U : 1U);
@@ -112,7 +123,7 @@ int probe_target_claim(uint32_t hz) {
     if (DAP_Data.debug_port != port) {
         command[0] = 2;
         command[1] = (uint8_t)port;
-        DAP_ExecuteCommand(command, response);
+        DAP_ExecuteCommand(command, 2, response, sizeof response);
         if (response[1] != port || clock_set(hz ? hz : 50000000))
             goto init_failed;
         // Use the same 152-bit activation sequence as the verified host path.
@@ -123,7 +134,7 @@ int probe_target_claim(uint32_t hz) {
         command[11] = 0xe7;
         if(port==2) command[12]=0x1f;
         command[20] = 0;
-        DAP_ExecuteCommand(command, response);
+        DAP_ExecuteCommand(command, 2+(command[1]+7U)/8U, response, sizeof response);
         if(port==2) {
             if(!DAP_Data.jtag_dev.count && DAP_JTAG_AutoConfigure()) goto init_failed;
             if(DAP_JTAG_Select(DAP_Data.jtag_dev.index)) goto init_failed;
@@ -150,14 +161,14 @@ int probe_target_claim(uint32_t hz) {
     if(port==2) memcpy(&cached_jtag.jtag_dev,&DAP_Data.jtag_dev,sizeof(DAP_Data.jtag_dev));
     saved_select = select_shadow;
     saved = 0;
+    claimed = 1; /* SELECT is already part of the state we must restore. */
     if (write_reg(8, 0) || read_ap(3, &saved_csw) || read_ap(7, &saved_tar)) {
-        write_reg(8, saved_select);
-        if(has_jtag && saved_dap.debug_port==DAP_PORT_JTAG && saved_ir_valid) JTAG_IR(saved_instruction);
-        restore_clock();
+        (void)probe_target_release();
         return -4;
     }
     saved = 1;
     claimed = 1;
+    publish_context();
     if (write_reg(1, 0x23000052)) {
         probe_target_release();
         return -4;
@@ -168,36 +179,86 @@ init_failed:
     link_ready = 0;
     return -2;
 }
-void probe_target_release(void) {
+int probe_target_release(void) {
+    uint32_t value=0,stage=0;
     if (!probe_session_live()) {
         probe_target_forget();
-        return;
+        return 0; /* USB epoch invalidated the old host's caches. */
     }
+    if(context_invalid)return -4;
     if (claimed && saved) {
         // Restore the debug host's cached AP context before its next command.
-        write_reg(8, 0);
-        write_reg(1, saved_csw);
-        write_reg(5, saved_tar);
-        write_reg(8, saved_select);
-        if(has_jtag && saved_dap.debug_port==DAP_PORT_JTAG && saved_ir_valid) JTAG_IR(saved_instruction);
+        stage=1;if(write_reg(8,0))goto failed;
+        stage=2;if(dap_validation_restore_fault(stage) || write_reg(1,saved_csw))goto failed;
+        stage=3;if(dap_validation_restore_fault(stage) || write_reg(5,saved_tar))goto failed;
+        /* AP writes are posted. Read back CSW/TAR before restoring SELECT.
+         * CSW.TRINPROG is a transient read-only bit, not configuration. */
+        stage=4;if(read_ap(3,&value) || ((value^saved_csw)&~0x80U))goto failed;
+        stage=5;if(read_ap(7,&value) || value!=saved_tar)goto failed;
     }
-    if (claimed)
+    if(claimed) {
+        stage=6;if(write_reg(8,saved_select))goto failed;
+        stage=7;if(xfer(14,&value))goto failed;
+        stage=8;
+        if(has_jtag && saved_dap.debug_port==DAP_PORT_JTAG && saved_ir_valid &&
+           DAP_JTAG_RestoreIR(saved_instruction))goto failed;
         restore_clock();
+    }
     claimed = 0;
     saved = 0;
+    publish_context();
+    return 0;
+failed:
+    probe_context_restore_failures++;
+    if(!probe_context_first_failure)probe_context_first_failure=stage;
+    /* Retain the original snapshot. Neither a new claim nor an ordinary
+     * cached host memory access is safe until explicit recovery succeeds. */
+    probe_target_invalidate();restore_clock();return -4;
+}
+int probe_target_recover(void) {
+    uint32_t dummy=0;
+    if(dap_wait_command_error())return -4;
+    if(!context_invalid)return probe_target_release();
+    if(!probe_session_live())return -4;
+    if(!claimed) {
+        /* No service snapshot: a timed-out host transaction lost its AP
+         * cache contract. Explicit Connect establishes a verified baseline;
+         * only AP configuration is written, never AP DRW/target memory. */
+        if(swd_abort_engines())return -4;
+        uint32_t value=0,port=DAP_Data.debug_port;
+        if(!port)port=preferred_port?preferred_port:DAP_PORT_SWD;
+        if(has_jtag)swd_write32(JTAG_ROUTE,port==DAP_PORT_JTAG?DAP_JTAG_RouteWord():2U);
+        DAP_Data.debug_port=(uint8_t)port;
+        if(write_reg(0,0x1e) || write_reg(8,0) || write_reg(1,0x23000052) || write_reg(5,0) ||
+           read_ap(3,&value) || ((value^0x23000052U)&~0x80U) || read_ap(7,&value) || value ||
+           xfer(14,&dummy))return -4;
+        context_invalid=0;link_ready=0;publish_context();return 0;
+    }
+    DAP_Data.debug_port=link_port;
+    if(link_port==DAP_PORT_JTAG) {
+        memcpy(&DAP_Data.jtag_dev,&cached_jtag.jtag_dev,sizeof DAP_Data.jtag_dev);
+        swd_write32(JTAG_ROUTE,DAP_JTAG_RouteWord());
+        if(DAP_JTAG_Select(DAP_Data.jtag_dev.index))goto failed_recovery;
+    } else if(has_jtag)swd_write32(JTAG_ROUTE,2);
+    /* Only debug-port sticky flags, never a target memory write. */
+    if(write_reg(0,0x1e) || xfer(14,&dummy))goto failed_recovery;
+    context_invalid=0;
+    return probe_target_release();
+failed_recovery:
+    restore_clock();return -4;
 }
 static int read_words(uint32_t addr, uint8_t *out, uint32_t count) {
     uint32_t n;
     // claim() leaves SELECT/CSW cached for the stream.  Only TAR changes at
     // an AP page boundary; repeating SELECT+CSW here was a major RTT cost.
-    if (write_reg(5, addr))
+    if(context_invalid || write_reg(5, addr))
         return -4;
     command[0] = 6;
     command[1] = DAP_Data.debug_port==DAP_PORT_JTAG ? DAP_Data.jtag_dev.index : 0;
     command[2] = (uint8_t)count;
     command[3] = (uint8_t)(count >> 8);
     command[4] = 15;
-    DAP_ExecuteCommand(command, response);
+    DAP_ExecuteCommand(command, 5, response, sizeof response);
     n = (uint32_t)response[1] | ((uint32_t)response[2] << 8);
     if (response[3] != 1 || n != count)
         return -4;
@@ -226,7 +287,7 @@ int probe_target_read(uint32_t addr, uint8_t *out, uint32_t size) {
 }
 int probe_target_write_word(uint32_t addr, uint32_t value) {
     uint32_t dummy = 0;
-    return (addr & 3) || write_reg(8, 0) || write_reg(1, 0x23000052) || write_reg(5, addr) ||
+    return context_invalid || (addr & 3) || write_reg(8, 0) || write_reg(1, 0x23000052) || write_reg(5, addr) ||
                    write_reg(13, value) || xfer(14, &dummy)
                ? -4
                : 0;

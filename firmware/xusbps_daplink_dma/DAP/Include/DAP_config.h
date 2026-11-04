@@ -375,8 +375,10 @@ __STATIC_FORCEINLINE uint32_t swd_read32(uint32_t addr) {
 }
 
 // 等待操作完成
-__STATIC_FORCEINLINE void swd_wait_idle(void) {
-  while (swd_read32(SWD_STATUS) & 0x01);
+#include "dap_wait.h"
+__STATIC_FORCEINLINE int swd_wait_idle(void) {
+  uint32_t status;
+  return dap_wait_status(SWD_STATUS,1U,0U,512U,&status);
 }
 
 
