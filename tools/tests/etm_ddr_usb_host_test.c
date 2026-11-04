@@ -3,7 +3,7 @@
 #define NORM_NONCACHE 0x11de2U
 void Xil_SetTlbAttributes(uint32_t,uint32_t);
 #include "../../firmware/xusbps_daplink_dma/etm_ddr_usb.c"
-static uint32_t csr[34],legacy_signature=0x45544431U,legacy_caps=0x100U;
+static uint32_t csr[44],legacy_signature=0x45544431U,legacy_caps=0x100U;
 static unsigned ddr_reads,mappings,claims,claim_ok=1,send_ok=1,send_calls;
 static uint8_t *sent;
 static uint32_t sent_length;
@@ -14,9 +14,10 @@ uint32_t Xil_In32(uintptr_t address){
   ddr_reads++;return csr[(address-DDR_CSR)/4];
 }
 void Xil_Out32(uintptr_t address,uint32_t value){
-  unsigned n=(address-DDR_CSR)/4;assert(n<34);
+  unsigned n=(address-DDR_CSR)/4;assert(n<44);
   if(n==1){
-    if(value==1){csr[10]++;csr[2]=ACTIVE;csr[31]=csr[31];csr[28]=0x46524d31U;csr[33]=2;}
+    if(value==1){csr[10]++;csr[2]=ACTIVE;csr[28]=0x46524d31U;csr[33]=csr[15];csr[42]=0;}
+    else if(value==4){csr[42]|=8;}
     else {assert(value==2);csr[2]=DONE;}
   }else csr[n]=value;
 }
@@ -74,6 +75,21 @@ int main(void){
   assert(!etm_ddr_command(4,args,reply));
   args[0]=400000001;args[1]=1;args[2]=1;args[3]=0;args[4]=0;
   assert(etm_ddr_command(1,args,reply)==3);
+  // The new protocol is capability gated; old bitstreams are never probed
+  // speculatively beyond their CSR map.
+  assert(etm_ddr_command(7,args,reply)==1);
+  csr[11]|=0x100;args[0]=2000;args[1]=128;args[2]=0x1234;args[3]=0x5678;args[4]=0;
+  assert(!etm_ddr_command(5,args,reply) && csr[33]==3);
+  args[0]=csr[10];args[1]=0x1234;args[2]=0x5678;args[3]=args[4]=0;csr[30]=3;
+  assert(!etm_ddr_command(6,args,reply));assert(etm_ddr_command(6,args,reply)==2);
+  csr[2]=DONE;csr[6]=csr[7]=117;csr[34]=0x31525246;csr[35]=16;csr[36]=117;
+  csr[37]=645;csr[38]=0;csr[42]=15;csr[43]=2000;
+  assert(!etm_ddr_command(7,args,reply) && reply[4]==0x31525246 && reply[14]==128);
+  args[4]=117;assert(!etm_ddr_command(3,args,reply));
+  etm_ddr_poll(&usb);assert(((uint32_t*)sent)[1]==2 && ((uint32_t*)sent)[17]==16);complete();
+  etm_ddr_poll(&usb);assert((uintptr_t)sent==DDR_BASE+16 && sent_length==112);complete();
+  etm_ddr_poll(&usb);assert((uintptr_t)sent==DDR_BASE && sent_length==5);complete();
+  assert(sent_bytes==117 && !download_phase);assert(!etm_ddr_command(4,args,reply));
   puts("PASS DDR USB: capability guard, noncache reservation, identity/range/active guards, descriptor ownership, failed submit, reset-retained record");
   return 0;
 }

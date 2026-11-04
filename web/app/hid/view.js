@@ -10,6 +10,7 @@
  */
 import { prepareProbeHandoff } from '../core/probe-users.js';
 import { runProbeOperation } from '../core/probe-manager.js';
+import { nativeProbeEnabled } from '../core/native-probe.js';
 import { $, setStatus, debounce } from '../ui/dom.js';
 import { toast } from '../ui/toast.js';
 import { store } from '../core/store.js';
@@ -101,7 +102,9 @@ export class RttCdcView {
     };
     this.render();
     // 之前授权过的探针：静默接上（没授权就安静地保持未连接）
-    if (!this.mock && AkaLinkHid.supported()) this.reconnect({ silent: true });
+    // Native sessions are acquired by an explicit feature action. Merely
+    // opening the workbench must not hold HID and block a headless capture.
+    if (!this.mock && AkaLinkHid.supported() && !nativeProbeEnabled()) this.reconnect({ silent: true });
   }
 
   useMock(){

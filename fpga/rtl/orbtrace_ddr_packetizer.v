@@ -9,7 +9,7 @@ module orbtrace_ddr_packetizer #(
   parameter integer FIXED_CAPACITY_BYTES=0
 )(
   input wire clk,input wire rst,
-  input wire start,input wire [31:0] byte_limit,
+  input wire start,input wire [31:0] byte_limit,input wire ring_enable,
   output reg busy,output reg done,output reg empty,
   output reg command_rejected,output reg protocol_error,output reg limit_reached,
   input wire [127:0] frame_data,input wire [4:0] frame_bytes,input wire frame_last,
@@ -38,10 +38,10 @@ module orbtrace_ddr_packetizer #(
   wire output_fire=m_axis_tvalid && m_axis_tready;
   wire load_beat=busy && next_beat && (!held_valid || output_fire);
   wire [31:0] room=FIXED_CAPACITY_BYTES==0 ? limit-input_bytes : 0;
-  wire [4:0] accepted=FIXED_CAPACITY_BYTES!=0 ? frame_bytes :
+  wire [4:0] accepted=(ring_enable || FIXED_CAPACITY_BYTES!=0) ? frame_bytes :
                       (room<frame_bytes ? room[4:0] : frame_bytes);
-  wire fills_capacity=FIXED_CAPACITY_BYTES!=0 ?
-                      (last_capacity_frame && frame_bytes==16) : accepted==room;
+  wire fills_capacity=!ring_enable && (FIXED_CAPACITY_BYTES!=0 ?
+                      (last_capacity_frame && frame_bytes==16) : accepted==room);
   function [7:0] keep_mask(input [4:0] length);
     begin keep_mask=length>=8 ? 8'hff : (8'h1<<length)-1'b1;end
   endfunction
@@ -77,7 +77,7 @@ module orbtrace_ddr_packetizer #(
           buffer<=frame_data;remaining<=accepted;
           buffer_last<=frame_last || fills_capacity;
           input_bytes<=input_bytes+accepted;
-          if(FIXED_CAPACITY_BYTES!=0)begin
+          if(FIXED_CAPACITY_BYTES!=0 && !ring_enable)begin
             frames_left<=frames_left-1'b1;
             last_capacity_frame<=frames_left==2;
           end

@@ -1,5 +1,6 @@
 set root [file normalize [file join [file dirname [info script]] ..]]
 set out [file join $root build fpga_dma_global]
+if {[info exists ::env(ZYNQLINK_FPGA_OUT)]} {set out [file normalize $::env(ZYNQLINK_FPGA_OUT)]}
 if {[info exists ::zynqlink_verify_out]} {set out [file normalize $::zynqlink_verify_out]}
 set routed_checkpoint [file join $out zynqlink_dma.runs impl_1 system_wrapper_routed.dcp]
 if {[info exists ::zynqlink_verify_checkpoint]} {set routed_checkpoint [file normalize $::zynqlink_verify_checkpoint]}
@@ -179,6 +180,10 @@ file copy -force [file join $out system_wrapper_verified.bit] [file join $out sy
 set fd [open [file join $out verified_clock.json] w]
 puts $fd "{\"FCLK_max_Hz\":$verified_fclk,\"SWCLK_max_Hz\":[expr {$verified_fclk/2}],\"setup_slack_ns\":$worst,\"hold_slack_ns\":$hold,\"requested_FCLK_Hz\":$requested_fclk,\"RTL_DEBUG\":$rtl_debug,\"optional_observation_cells\":[llength $observation_cells],\"formal_product_acceptance\":false}"
 close $fd
-file mkdir [file join $root build checkpoints]
-file copy -force [file join $out system_wrapper_verified.dcp] [file join $root build checkpoints dma_routed_reference.dcp]
+if {[info exists ::env(ZYNQLINK_FPGA_OUT)]} {
+    file copy -force [file join $out system_wrapper_verified.dcp] [file join $out dma_routed_reference.dcp]
+} else {
+    file mkdir [file join $root build checkpoints]
+    file copy -force [file join $out system_wrapper_verified.dcp] [file join $root build checkpoints dma_routed_reference.dcp]
+}
 puts "VERIFIED_BITSTREAM_READY"

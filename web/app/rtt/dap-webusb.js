@@ -903,6 +903,7 @@ export class WebUsbDapProbe {
     const csw = await this._readAP(AP_CSW);
     const want = (csw & ~0x3f) | 0x02 | 0x10;
     if (want !== csw) await this._writeAP(AP_CSW, want);
+    this._memoryCsw=want>>>0;
     this.csw = want;
     // Failed discovery candidates may set the FAULT latch. Clear it only after
     // a fresh memory transaction proves that the selected AP actually works.
@@ -1263,6 +1264,11 @@ export class WebUsbDapProbe {
     addr = addr >>> 0;
     if (len <= 0) return new Uint8Array(0);
     if (len > (1 << 20)) throw new Error(`一次要读 ${len} 字节（>1MB），地址参数大概是错了`);
+    if(this.device?.bulkArmMemory && this._dapPort===1 && this._memoryCsw!==undefined && len>64 && len<=262144 &&
+       ((addr>=0x08000000 && addr+len<=0x10000000)||(addr>=0x20000000 && addr+len<=0x40000000))){
+      await this._flushPosted();
+      return this.device.memoryRead(addr,len,this.apIndex,this._memoryCsw);
+    }
     const start = (addr & ~3) >>> 0;
     const end = ((addr + len + 3) & ~3) >>> 0;
     const bytes = new Uint8Array(end - start);
@@ -1342,6 +1348,15 @@ export class WebUsbDapProbe {
     const data = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
     if (!data.length) return;
     await this._writeMemOnce(addr, data, apIndex);
+    if(this.device?.bulkArmMemory && this._dapPort===1 && this._memoryCsw!==undefined && data.length>4 &&
+       data.length<=262144 && addr>=0x20000000 && addr+data.length<=0x40000000){
+      if(this.verifyWrites!==false){
+        const back=await this._readMemOnce(addr,data.length,apIndex);
+        if(back.length!==data.length || back.some((v,i)=>v!==data[i]))
+          throw Error('SRAM写入回读不一致；目标可能已更新，未自动重写');
+      }
+      return;
+    }
     // MMIO includes write-only, write-one-to-clear and command registers.
     // Comparing their read value with the write can repeat reset/step/clear
     // side effects. Drain the posted AP write without reading the peripheral.
@@ -1372,6 +1387,11 @@ export class WebUsbDapProbe {
   }
 
   async _writeMemOnce(addr, data, apIndex = 0){
+    if(this.device?.bulkArmMemory && this._dapPort===1 && this._memoryCsw!==undefined && data.length>4 && data.length<=262144 &&
+       addr>=0x20000000 && addr+data.length<=0x40000000){
+      await this._flushPosted();
+      await this.device.memoryWrite(addr,data,this.apIndex,this._memoryCsw);this._posted=false;return;
+    }
     if(this.device?.nativeService && this.device.atomicDapEnabled!==false && this.device.packedMemoryEnabled!==false && (addr&3)===0 && data.length===4){
       await this._flushPosted();
       await this._transfer([{ap:true,rnw:false,addr:AP_TAR,data:addr>>>0},

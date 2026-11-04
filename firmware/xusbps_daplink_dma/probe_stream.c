@@ -397,8 +397,8 @@ static int sampler_arm(void) {
             packet_config(16+k++,4*vars[i].word+vars[i].offset+j);
         PW(0,1);
     }
-    W(7, now()); // Rebase after a DAP clock change while the sampler was paused.
-    W(0, 1 | ((uint32_t)nwords << 8));
+    W(7, now()); // Rebase elapsed time; matched RTL retains the nominal grid.
+    W(0, 1 | (mode==2 ? 4U : 0U) | ((uint32_t)nwords << 8));
     return 0;
 }
 int probe_before_dap(void) {
@@ -699,6 +699,13 @@ end:
     } else
         result = 0;
 }
+int probe_prepare_link_change(void) {
+    // A line reset/TAP initialization invalidates cached AP state. Do not
+    // restart an autonomous stream between the commands of a new handshake.
+    // STOP may need the host receiver to drain; failure rejects the original
+    // link-changing command before it changes the target interface.
+    return stop();
+}
 static void status(uint8_t cmd, uint32_t out[12], int metrics) {
     memset(out, 0, 48);
     if (cmd == 0x31) {
@@ -821,6 +828,10 @@ static void control(const uint8_t *req, uint8_t *res) {
     int rc = 0;
     dap_wait_begin();
     memset(res, 0, 64);
+    // Bytes60..63 are unused by every supported request/status payload.
+    // New hosts negotiate this echo with FW_VER, then reject stale same-CMD
+    // replies (START and STATUS historically had indistinguishable headers).
+    put32(res+60,get32(req+60));
     res[0] = 2;
     res[2] = cmd;
     res[1] = 2;
@@ -829,7 +840,7 @@ static void control(const uint8_t *req, uint8_t *res) {
         return;
     }
     if (cmd == 0x10 || cmd == 0x11 || cmd == 0x13) {
-        const char *s = cmd == 0x10 ? "ZynqLinkPro" : cmd == 0x11 ? "12345678" : "0.5-orbtrace";
+        const char *s = cmd == 0x10 ? "ZynqLinkPro" : cmd == 0x11 ? "12345678" : "0.6-nonce32";
         size_t n = strlen(s);
         memcpy(res + 3, s, n);
         res[1] = (uint8_t)(1 + n);

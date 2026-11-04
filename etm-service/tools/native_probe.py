@@ -16,6 +16,10 @@ from pathlib import Path
 from flask import abort, jsonify, request
 from native_serial import SerialReceiver
 from native_hss import HssReceiver
+from probe_coordinator import ProbeCoordinator
+from probe_memory import transfer as memory_transfer
+from probe_ownership import Ownership
+from probe_hid_control import HidControl
 
 
 def drain_dap_replies(device,quiet_ms=80,limit=32):
@@ -57,10 +61,12 @@ class NativeProbe:
         self.usb = None
         self.usb_owner = None
         self.usb_epoch = None
+        self.usb_tainted = None
         self.claimed = set()
         self.hid = None
         self.hid_owner = None
         self.hid_epoch = None
+        self.hid_control = None
         self.ports = {}
         self.serial_receivers = {}
         self.port_epochs = {}
@@ -75,6 +81,25 @@ class NativeProbe:
         self.delivery_replays = 0
         self.delivery_requests = 0
         self.delivery_sessions = {}
+        self.coordinator = ProbeCoordinator()
+        self.physical_owners = {}
+        self.capture_owners = {}
+
+    def begin_capture(self,record,restore_owner):
+        self.coordinator.begin_capture(record,restore_owner)
+        try:self.capture_owners[record]=Ownership()
+        except BaseException:
+            self.coordinator.release('capture',record);raise
+
+    def finish_capture(self,record,error=None):
+        if not self.coordinator.finish_capture(record,error):
+            lease=self.capture_owners.pop(record,None)
+            if lease:lease.close()
+
+    def complete_capture(self,record,owner):
+        self.coordinator.complete_capture(record,owner)
+        lease=self.capture_owners.pop(record,None)
+        if lease:lease.close()
 
     def deliver(self, delivery, body, execute):
         """An HTTP redelivery must never repeat a USB write/read/serial action."""
@@ -189,7 +214,64 @@ class NativeProbe:
             self.hss_receiver.close()
             self.hss_receiver = None
 
+    def session_call(self, action, value):
+        if action == 'status':
+            status=self.coordinator.snapshot()
+            status['transport']=dict(usbOpen=self.usb is not None,usbError=self.usb_tainted,
+                hidOpen=self.hid is not None,hidCorrelated=bool(self.hid_control and self.hid_control.correlated),
+                hidStaleReplies=self.hid_control.stale if self.hid_control else 0)
+            return status
+        owner = value.get('owner', '')
+        if not re.fullmatch(r'[0-9a-f]{32}', owner):
+            raise ValueError('无效探针会话身份')
+        if action == 'cancel':
+            result=self.coordinator.cancel(owner)
+            with self.backend.lock:
+                captures=[jid for jid,j in self.backend.jobs.items() if j.get('restoreOwner')==owner and j['state'] in self.backend.ACTIVE]
+            if len(captures)>1:raise ValueError('恢复会话对应多个活动采集，拒绝猜测停止对象')
+            if captures:
+                result['captureStop']=self.backend.stop_capture(captures[0]).get_json()
+            return result
+        raise ValueError('未知会话动作')
+
+    def _controlled(self, kind, action, value, execute):
+        owner = value.get('owner', 'inspect')
+        with self.coordinator.operation(owner, kind+'/'+action) as check:
+            if action == 'open':
+                self.coordinator.wait_for_restore(owner,check)
+                if self.busy():
+                    raise ValueError('ETM采集或清理尚未结束')
+                if getattr(self,kind) is not None and getattr(self,kind+'_owner') != owner:
+                    raise ValueError('另一Web会话仍持有本地探针通路')
+                self.coordinator.acquire(kind, owner)
+                try:
+                    if kind not in self.physical_owners:self.physical_owners[kind]=Ownership()
+                except BaseException:
+                    self.coordinator.release(kind,owner);raise
+            try:
+                result = execute(check)
+            except BaseException as error:
+                if action == 'open' and getattr(self, kind) is None:
+                    self.coordinator.release(kind, owner)
+                    lease=self.physical_owners.pop(kind,None)
+                    if lease:lease.close()
+                elif action in ('open', 'close', 'release'):
+                    self.coordinator.release(kind, owner, error)
+                raise
+            if action == 'close' and not result.get('superseded'):
+                self.coordinator.release(kind, owner)
+                if getattr(self,kind) is None:
+                    lease=self.physical_owners.pop(kind,None)
+                    if lease:lease.close()
+            return result
+
     def usb_call(self, action, value):
+        # A continuous HSS reader is a data plane, not a control operation.
+        if action == 'read' and value.get('endpoint') == 0x87:
+            return self._usb_call(action, value)
+        return self._controlled('usb', action, value, lambda check: self._usb_call(action, value, check))
+
+    def _usb_call(self, action, value, check=lambda: None):
         import usb.core
         import usb.util
         with self.usb_lock:
@@ -261,7 +343,8 @@ class NativeProbe:
                     except BaseException:
                         usb.util.release_interface(device,0);self.claimed.remove(0)
                         raise
-                    return {'ok':True,**synchronized,'atomicDapExchange':1}
+                    self.usb_tainted=None
+                    return {'ok':True,**synchronized,'atomicDapExchange':1,'bulkArmMemory':1}
                 elif action == 'release' and 0 in self.claimed:
                     self._stop_hss_receiver()
                     usb.util.release_interface(device, 0)
@@ -284,6 +367,35 @@ class NativeProbe:
                 return {'ok': True}
             if 0 not in self.claimed:
                 raise ValueError('请先认领USB接口0')
+            if action == 'recover':
+                if self.hid is not None or self.hss_receiver is not None:
+                    raise ValueError('请先停止数据流并关闭HID/HSS，再重建DAP会话')
+                synchronized=reset_dap_session(device)
+                self.usb_epoch=secrets.token_hex(16);self.usb_tainted=None
+                return {**synchronized,'resourceEpoch':self.usb_epoch,'targetReconnectRequired':True}
+            if self.usb_tainted and action in ('exchange','write','read','memory-read','memory-write'):
+                raise ValueError('前次DAP事务未完整确认，请显式恢复或断开重连：'+self.usb_tainted)
+            if action in ('memory-read', 'memory-write'):
+                if value.get('transport') != 'swd':
+                    raise ValueError('批量内存当前仅允许已连接的ARM SWD')
+                wire_started=False
+                def exchange(data):
+                    nonlocal wire_started
+                    wire_started=True
+                    written=device.write(2,data,timeout=2000)
+                    if written!=len(data):raise ValueError('DAP请求短写；未重放命令')
+                    if len(data)%512==0:device.write(2,b'',timeout=2000)
+                    return bytes(device.read(0x81,4096,timeout=2000))
+                try:
+                    result=memory_transfer(exchange,address=value.get('address'),length=value.get('length'),
+                        data=self.blob(value.get('data','')) if action=='memory-write' else None,
+                        ap=value.get('ap',0),csw=value.get('csw',0x23000052),check=check)
+                except Exception as error:
+                    # Validation errors have no effects; every other failure
+                    # may have consumed a request or partially written RAM.
+                    if wire_started:self.usb_tainted=str(error)
+                    raise
+                return {'bytesWritten':result} if action=='memory-write' else {'data':self.encode(result)}
             if action == 'exchange':
                 # One HTTP round trip for a serialized DAP write+read. A
                 # duplicate delivery ID is handled outside this lock and must
@@ -328,6 +440,9 @@ class NativeProbe:
             raise ValueError('未知USB动作')
 
     def hid_call(self, action, value):
+        return self._controlled('hid', action, value, lambda check: self._hid_call(action, value))
+
+    def _hid_call(self, action, value):
         import hid
         with self.hid_lock:
             if self.busy():
@@ -355,7 +470,9 @@ class NativeProbe:
                     for _ in range(32):
                         if not self.hid.read(64,1):break
                 self.hid_epoch=secrets.token_hex(16)
-                return {'opened': True,'resourceEpoch':self.hid_epoch}
+                self.hid_control=HidControl(self.hid)
+                correlated=self.hid_control.negotiate()
+                return {'opened': True,'resourceEpoch':self.hid_epoch,'correlatedHid':correlated}
             if self.hid is None or owner != self.hid_owner:
                 if action == 'close':
                     return {'closed': True}
@@ -371,13 +488,8 @@ class NativeProbe:
                 data = self.blob(value.get('data', ''), 63)
                 if value.get('reportId') != 1 or len(data) != 63:
                     raise ValueError('HID要求report 1 + 63-byte payload')
-                self.hid.write(bytes([1]) + data)
-                deadline = time.monotonic() + 2
-                while time.monotonic() < deadline:
-                    reply = bytes(self.hid.read(64, 100))
-                    if len(reply) == 64 and reply[0] == 2 and reply[2] == data[1]:
-                        return {'reportId': 2, 'data': self.encode(reply[1:])}
-                raise TimeoutError('本地HID响应超时；未重放命令')
+                reply=self.hid_control.exchange(data)
+                return {'reportId':2,'data':self.encode(reply[1:]),'staleReplies':self.hid_control.stale}
             raise ValueError('未知HID动作')
 
     def serial_call(self, action, value):
@@ -477,7 +589,8 @@ def install(app, backend, token_file):
         if not isinstance(value, dict) or (request.content_length or 0) > 400000:
             abort(400)
         def execute():
-            handlers = {'usb': proxy.usb_call, 'hid': proxy.hid_call, 'serial': proxy.serial_call}
+            handlers = {'usb': proxy.usb_call, 'hid': proxy.hid_call, 'serial': proxy.serial_call,
+                        'session': proxy.session_call}
             if kind not in handlers:
                 raise ValueError('未知本地探针通路')
             return ({'ok': True, 'value': handlers[kind](action, value)}, 200)
@@ -486,7 +599,8 @@ def install(app, backend, token_file):
                 with proxy.delivery_lock:
                     return jsonify(ok=True, value={'requests': proxy.delivery_requests,
                         'redeliveries': proxy.delivery_replays, 'cached': len(proxy.delivery_cache),
-                        'sequenceClients': len(proxy.delivery_sessions), 'legacyRequests': len(proxy.delivery_seen)})
+                        'sequenceClients': len(proxy.delivery_sessions), 'legacyRequests': len(proxy.delivery_seen),
+                        'control':proxy.coordinator.snapshot()})
             delivery = request.headers.get('X-Trace-Delivery')
             if delivery:
                 result, status = proxy.deliver(delivery, {'kind': kind, 'action': action, 'value': value}, execute)

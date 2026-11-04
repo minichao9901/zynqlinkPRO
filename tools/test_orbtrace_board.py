@@ -56,6 +56,12 @@ def main():
     ap.add_argument('--entry-timeout', type=float, default=5)
     ap.add_argument('--usb-reconnect', action='store_true', help='Hold PA12 low during reset/entry preparation')
     ap.add_argument('--ready-file', type=Path, help='Internal stimulus synchronization marker; new file only')
+    ap.add_argument('--flight',action='store_true',help='Ring recording; milliseconds is the post-trigger window')
+    ap.add_argument('--ring-bytes',type=int,default=8<<20)
+    ap.add_argument('--trigger',choices=('manual','fault','after'),default='manual')
+    ap.add_argument('--trigger-after',type=float,default=1)
+    ap.add_argument('--arm-timeout',type=float,default=30)
+    ap.add_argument('--trigger-file',type=Path)
     ap.add_argument('--sync', action='store_true', help='Enable ITM/DWT periodic synchronization')
     ap.add_argument('--ddr-physical', action='store_true', help='AI acceptance only: bounded PL DDR capture and JTAG AP0 download')
     ap.add_argument('--hardware-full-test',action='store_true',help='AI boundary test only: physical DDR may wait up to 12s for fixed 100MiB full; shipping USB remains <=2s')
@@ -64,6 +70,15 @@ def main():
     ap.add_argument('--raw', action='store_true', help='Capture diagnostic sampled DDR bytes, not decoded ETM')
     ap.add_argument('--raw-samples', action='store_true', help='RAW_DIAGNOSTIC=3: preserve packed 200MHz five-line samples')
     args = ap.parse_args()
+    if args.flight:
+        if args.transport=='legacy' or args.ddr_physical or args.raw or args.raw_samples:
+            ap.error('flight recording requires the DDR USB framed path')
+        if not 0<args.arm_timeout<=86400 or not 0<=args.trigger_after or (args.trigger=='after' and args.trigger_after>=args.arm_timeout):
+            ap.error('invalid flight arm timeout/trigger delay')
+        if not 128<=args.ring_bytes<=100*1024*1024 or args.ring_bytes%128:
+            ap.error('ring bytes must be 128-aligned within 100MiB')
+        if args.trigger_file and (args.trigger_file.exists() or args.trigger_file.with_suffix('.cancel').exists()):
+            ap.error('flight control files must not exist before arm')
     if args.probe_fclk_hz is not None and ((args.transport!='ddr' and not args.ddr_physical) or args.raw):
         ap.error('--probe-fclk-hz requires explicit DDR transport')
     if args.hardware_full_test and not args.ddr_physical:
@@ -166,6 +181,7 @@ def main():
                                        **swd_clock_details(live_fclk, live_cfg))
         report['cpuid'] = hex(mem.word(0xe000ed00))
         if (int(report['cpuid'], 16) >> 4) & 0xfff == 0xc27:
+            if args.flight:raise RuntimeError('本轮飞行记录目标范围为F103ZE；H743尚未验收')
             from h743_trace_capture import capture
             capture(args, dev, out, inp, mem, report)
             return
@@ -271,7 +287,10 @@ def main():
             if ddr_usb:
                 from etm_ddr_usb_capture import capture as capture_ddr
                 etm,ddr=capture_ddr(work,args.elf,dev,out,inp,args.milliseconds/1000,
-                    report['reference'][0],resume_ddr_target,config['traceid'],args.verify_ddr_physical)
+                    report['reference'][0],resume_ddr_target,config['traceid'],args.verify_ddr_physical,
+                    flight=dict(capacityBytes=args.ring_bytes,trigger=args.trigger,after=args.trigger_after,
+                        timeout=args.arm_timeout,controlFile=str(args.trigger_file.resolve()) if args.trigger_file else None) if args.flight else None,
+                    fault_read=lambda:mem.word(0xe000ed04))
                 report['quality']=ddr['quality']
                 report['quality'].update(fclk=live_fclk,tckKhz=report['control_clock']['SWCLK_Hz']/1000)
             else:

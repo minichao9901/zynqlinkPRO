@@ -1,0 +1,360 @@
+{
+  "artifacts": {
+    "git_head": "f466935c5499c318eb3b20612b044123b753e541",
+    "git_dirty": true,
+    "bit": {
+      "path": "E:\\zynqlinkPRO\\prebuilt\\session-flight-recorder-20261105\\probe.bit",
+      "sha256": "c1ecef1c9983b99f96d6f073ea1b14cd890ff77406b28db57b5b2994a1ee7110"
+    },
+    "elf": {
+      "path": "E:\\zynqlinkPRO\\prebuilt\\session-flight-recorder-20261105\\application.elf",
+      "sha256": "b77d93fb41ead71b2b00be90c07fc5656ce793f93d0d31a5d45150cabb1ec24f"
+    }
+  },
+  "target_elf": "E:\\zynqlinkPRO\\prebuilt\\golden\\f103ze-cdc48.elf",
+  "target_elf_sha256": "e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f",
+  "milliseconds": 10.0,
+  "hardware_full_test": false,
+  "periodic_sync": false,
+  "hclk_div": 1,
+  "raw_diagnostic": false,
+  "IDCODE": "0501017714a01b",
+  "control_clock": {
+    "fclk_hz": 119999998,
+    "cfg": "0xcaa11",
+    "SWCLK_Hz": 9999999.833333334,
+    "half_period_fclk": 6,
+    "short_high": true,
+    "intended_high_ns": 8.333333472222225
+  },
+  "cpuid": "0x411fc231",
+  "flash": [
+    {
+      "address": 134217728,
+      "bytes": 20040,
+      "sha256": "b5b09d9a0446795acc1981aff62ed55f36f10fa71a47544b77c3d0fe1a0610d1"
+    },
+    {
+      "address": 134237768,
+      "bytes": 128,
+      "sha256": "496d8b1d85d4a90921e45cc77629b2c80dcaae957a6ed79710200efa1d4cf341"
+    }
+  ],
+  "reference": [
+    199999998,
+    9437440,
+    221192,
+    769
+  ],
+  "transport": "ddr-usb",
+  "rcc_before": [
+    50548355,
+    5309450
+  ],
+  "rcc_capture": [
+    50548355,
+    5309450
+  ],
+  "gpio_before": [
+    16461,
+    1270594372
+  ],
+  "gpio_capture": 1091637572,
+  "tpiu_supported": 11,
+  "config": {
+    "protocol": "ETMv3",
+    "idr": 1091891777,
+    "ctrl": 2064,
+    "ccer": 100352,
+    "traceid": 2
+  },
+  "quality": {
+    "transport": "ddr-usb/1",
+    "captureId": 4,
+    "captureNonce": 9692380943945214974,
+    "loss": false,
+    "synced": true,
+    "bufferFull": false,
+    "bufferCapacityBytes": 1048576,
+    "captureComplete": true,
+    "requestedWindowComplete": true,
+    "completionReason": "trigger",
+    "ended": true,
+    "records": 65535,
+    "hardwareTicks": 5003312928,
+    "requestedTicks": 2000000,
+    "refClockHz": 199999998,
+    "hardwareSeconds": 25.01656489016565,
+    "hardwareStartBracketUnix": [
+      1793815008.223568,
+      1793815008.224138
+    ],
+    "stopReason": 0,
+    "formatterBytes": 1048570,
+    "tailBytes": 10,
+    "tailAmbiguous": false,
+    "usbSeconds": 0.02984940000169445,
+    "usbPayloadMBps": 35.12867930144245,
+    "diagnostics": {
+      "implemented": true,
+      "frameDrops": 0,
+      "parserErrors": 0,
+      "idelayReadyLosses": 0,
+      "frameHighwater": 1,
+      "syncAcquisitions": 1,
+      "observedFrames": 30313550,
+      "capacityReached": false,
+      "writerError": 0
+    },
+    "flight": {
+      "words": [
+        827478598,
+        574704,
+        1048570,
+        485016810,
+        0,
+        706345632,
+        1,
+        1,
+        15,
+        2000000,
+        1048576
+      ],
+      "oldestOffset": 574704,
+      "retainedBytes": 1048570,
+      "totalBytes": 485016810,
+      "triggerTicks": 5001312928,
+      "elapsedHigh": 1,
+      "flags": 15,
+      "postTicks": 2000000,
+      "capacityBytes": 1048576
+    },
+    "historyOverwritten": true,
+    "retainedHistoryBytes": 1048570,
+    "overwrittenBytes": 483968240,
+    "initialExecutionUnknown": true,
+    "windowBasis": "trigger-post-window; retained prefix is byte bounded",
+    "fclk": 119999998,
+    "tckKhz": 9999.999833333333
+  },
+  "ddr": {
+    "hardwareAccess": true,
+    "transport": "USB post-capture DDR download",
+    "passed": true,
+    "flashWrites": false,
+    "flightArmed": {
+      "unix": 1793815008.2251146,
+      "options": {
+        "capacityBytes": 1048576,
+        "trigger": "after",
+        "after": 25.0,
+        "timeout": 30.0,
+        "controlFile": "E:\\zynqlinkPRO\\build\\session-flight-20261105\\flight-counter-wrap\\flight-trigger.request"
+      }
+    },
+    "flightTrigger": {
+      "source": "after",
+      "observedValue": null,
+      "unix": 1793815033.2335048,
+      "detection": "host polling, 10ms requested interval; not a physical fault trigger"
+    },
+    "protocol": "zynq-ddr-usb/1",
+    "available": true,
+    "result": 0,
+    "registers": [
+      1162104113,
+      0,
+      2,
+      968884224,
+      1048576,
+      0,
+      1048570,
+      1048570,
+      3001987851,
+      0,
+      4,
+      263,
+      968884224,
+      1073741824,
+      128,
+      3,
+      2000000,
+      708345632,
+      0,
+      0,
+      0,
+      30313550,
+      10,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1179798833,
+      0,
+      0,
+      3080629246,
+      2256683293,
+      3
+    ],
+    "captureId": 4,
+    "nonce": 9692380943945214974,
+    "active": false,
+    "done": true,
+    "sourceActive": false,
+    "bytes": 1048570,
+    "acceptedBytes": 1048570,
+    "ticks": 708345632,
+    "qualityFlags": 0,
+    "tailBytes": 10,
+    "stopReason": 0,
+    "format": 1179798833,
+    "tailAmbiguous": false,
+    "transferId": 4,
+    "rangeOffset": 0,
+    "rangeBytes": 1048575,
+    "sentBytes": 1048575,
+    "downloadState": 65536,
+    "submitErrors": 0,
+    "sha256": "32d63349b3f9cd2e74e649ed6445baed4170e7134d122e7f7b14bd15de219723",
+    "usbSeconds": 0.02984940000169445,
+    "usbPayloadMBps": 35.12867930144245,
+    "submitErrorsAfter": 0,
+    "requestedTicks": 2000000,
+    "referenceHz": 199999998,
+    "hardwareStartBracketUnix": [
+      1793815008.223568,
+      1793815008.224138
+    ],
+    "actualWindowSeconds": 25.01656489016565,
+    "flight": {
+      "words": [
+        827478598,
+        574704,
+        1048570,
+        485016810,
+        0,
+        706345632,
+        1,
+        1,
+        15,
+        2000000,
+        1048576
+      ],
+      "oldestOffset": 574704,
+      "retainedBytes": 1048570,
+      "totalBytes": 485016810,
+      "triggerTicks": 5001312928,
+      "elapsedHigh": 1,
+      "flags": 15,
+      "postTicks": 2000000,
+      "capacityBytes": 1048576
+    },
+    "totalHardwareTicks": 5003312928,
+    "quality": {
+      "transport": "ddr-usb/1",
+      "captureId": 4,
+      "captureNonce": 9692380943945214974,
+      "loss": false,
+      "synced": true,
+      "bufferFull": false,
+      "bufferCapacityBytes": 1048576,
+      "captureComplete": true,
+      "requestedWindowComplete": true,
+      "completionReason": "trigger",
+      "ended": true,
+      "records": 65535,
+      "hardwareTicks": 5003312928,
+      "requestedTicks": 2000000,
+      "refClockHz": 199999998,
+      "hardwareSeconds": 25.01656489016565,
+      "hardwareStartBracketUnix": [
+        1793815008.223568,
+        1793815008.224138
+      ],
+      "stopReason": 0,
+      "formatterBytes": 1048570,
+      "tailBytes": 10,
+      "tailAmbiguous": false,
+      "usbSeconds": 0.02984940000169445,
+      "usbPayloadMBps": 35.12867930144245,
+      "diagnostics": {
+        "implemented": true,
+        "frameDrops": 0,
+        "parserErrors": 0,
+        "idelayReadyLosses": 0,
+        "frameHighwater": 1,
+        "syncAcquisitions": 1,
+        "observedFrames": 30313550,
+        "capacityReached": false,
+        "writerError": 0
+      },
+      "flight": {
+        "words": [
+          827478598,
+          574704,
+          1048570,
+          485016810,
+          0,
+          706345632,
+          1,
+          1,
+          15,
+          2000000,
+          1048576
+        ],
+        "oldestOffset": 574704,
+        "retainedBytes": 1048570,
+        "totalBytes": 485016810,
+        "triggerTicks": 5001312928,
+        "elapsedHigh": 1,
+        "flags": 15,
+        "postTicks": 2000000,
+        "capacityBytes": 1048576
+      },
+      "historyOverwritten": true,
+      "retainedHistoryBytes": 1048570,
+      "overwrittenBytes": 483968240,
+      "initialExecutionUnknown": true,
+      "windowBasis": "trigger-post-window; retained prefix is byte bounded",
+      "fclk": 119999998,
+      "tckKhz": 9999.999833333333
+    },
+    "droppedFrames": 0,
+    "parserErrors": 0,
+    "readyLosses": 0,
+    "fifoHighwater": 1,
+    "demux": {
+      "protocol": "etm-framed-native/1",
+      "format": "FRM1",
+      "inputBytes": 1048570,
+      "frames": 65535,
+      "trailingFrameBytes": 10,
+      "unknownBytes": 0,
+      "paddingBytes": 471233,
+      "idChanges": 249558,
+      "streams": {
+        "2": 248291
+      },
+      "seconds": 0.0036615,
+      "inputSha256": "32d63349b3f9cd2e74e649ed6445baed4170e7134d122e7f7b14bd15de219723",
+      "binarySha256": "2d9a2e45b180c621bee207fd3ff740dd238dcf612227bdf4676cd23933981e3e",
+      "traceId": 2,
+      "selectedStream": "E:\\zynqlinkPRO\\build\\session-flight-20261105\\flight-counter-wrap\\ddr\\demux\\id2.bin",
+      "streamSha256": {
+        "2": "e8b9ba64e7fb88bc6c02b88290715c84bb1496192fcfc66dc8d42909e1b4c0ff"
+      }
+    },
+    "usbOwnerReleased": true
+  },
+  "etm_bytes": 248291,
+  "etm_sha256": "e8b9ba64e7fb88bc6c02b88290715c84bb1496192fcfc66dc8d42909e1b4c0ff",
+  "capture_passed": true,
+  "restored": true,
+  "rcc_after": [
+    50548355,
+    5309450
+  ],
+  "fpb_restored": true,
+  "usb_reader_errors": []
+}

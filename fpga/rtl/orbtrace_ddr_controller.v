@@ -41,6 +41,17 @@ module orbtrace_ddr_controller #(
   // a 32-bit equality on software write_data otherwise survives synthesis
   // and fans into every writer byte-budget and RAM-enable path.
   reg [1:0] mode,record_mode;
+  reg flight_trigger;
+  reg [31:0] result_elapsed_high,result_trigger_ticks,result_trigger_high;
+  reg result_triggered;
+  wire flight_mode=mode==3;
+  wire [63:0] writer_total;
+  wire [31:0] writer_offset;
+  wire ring_wrapped=writer_total>{32'd0,byte_limit};
+  wire [31:0] rounded_offset=(writer_offset+15)&32'hfffffff0;
+  wire [31:0] ring_oldest=ring_wrapped ? (rounded_offset>=byte_limit ? 0 : rounded_offset) : 0;
+  wire [31:0] ring_trim=writer_offset[3:0]==0 ? 0 : 16-{28'd0,writer_offset[3:0]};
+  wire [31:0] ring_bytes=ring_wrapped ? byte_limit-ring_trim : response_bytes;
   reg [63:0] nonce,capture_nonce;
   reg active,done_sticky,error_sticky,rejected;
   reg writer_start,writer_abort;
@@ -67,6 +78,8 @@ module orbtrace_ddr_controller #(
   wire [4:0] capture_tail;
   wire [1:0] capture_reason;
   wire capture_ambiguous;
+  wire [31:0] capture_elapsed_high,capture_trigger_ticks,capture_trigger_high;
+  wire capture_triggered;
   reg packet_start;
   wire [63:0] packet_data;wire [7:0] packet_keep;
   wire packet_last,packet_valid,packet_busy,packet_done,packet_empty,packet_rejected,packet_error,packet_limit,packet_frame_ready;
@@ -78,6 +91,7 @@ module orbtrace_ddr_controller #(
   wire stream_valid=trace_mode ? packet_valid : active && writer_busy && remaining!=0;
   generate if(ENABLE_TRACE_SOURCE)begin: framed_capture
     orbtrace_ddr_capture capture(.clk(clk),.ref_clk(ref_clk),.rst_n(rst_n),.hold(trace_hold),
+      .flight_mode(flight_mode),.trigger_request(flight_trigger),
       .start(capture_start),.requested_ticks(requested_ticks),.stop_request(capture_stop),.stop_reason(capture_stop_reason),
       .source_frame(trace_frame),.source_tail(trace_tail),.source_tail_bytes(trace_tail_bytes),
       .source_frame_event(trace_frame_event),.source_parser_error(trace_parser_error),.source_sync_event(trace_sync_event),
@@ -87,8 +101,11 @@ module orbtrace_ddr_controller #(
       .frame_valid(capture_frame_valid),.frame_ready(capture_frame_ready),.source_active(capture_active),.snapshot_valid(capture_snapshot),
       .elapsed_ticks(capture_ticks),.observed_frames(capture_frames),.dropped_frames(capture_drops),.parser_errors(capture_parser),
       .sync_count(capture_sync),.frame_highwater(capture_highwater),.ready_losses(capture_ready_losses),
-      .tail_bytes(capture_tail),.tail_ambiguous(capture_ambiguous),.reason(capture_reason));
+      .tail_bytes(capture_tail),.tail_ambiguous(capture_ambiguous),.reason(capture_reason),
+      .elapsed_high(capture_elapsed_high),.trigger_ticks(capture_trigger_ticks),
+      .trigger_high(capture_trigger_high),.triggered(capture_triggered));
     orbtrace_ddr_packetizer #(.FIXED_CAPACITY_BYTES(FIXED_CAPTURE_BYTES)) packetizer(.clk(clk),.rst(!rst_n || !trace_hold),.start(packet_start),.byte_limit(byte_limit),
+      .ring_enable(flight_mode),
       .busy(packet_busy),.done(packet_done),.empty(packet_empty),.command_rejected(packet_rejected),
       .protocol_error(packet_error),.limit_reached(packet_limit),.frame_data(capture_frame_data),
       .frame_bytes(capture_frame_bytes),.frame_last(capture_frame_last),.frame_valid(capture_frame_valid && !discard_frames),
@@ -100,6 +117,7 @@ module orbtrace_ddr_controller #(
     assign capture_active=0;assign capture_snapshot=0;assign capture_ticks=0;assign capture_frames=0;
     assign capture_drops=0;assign capture_parser=0;assign capture_sync=0;assign capture_highwater=0;assign capture_ready_losses=0;
     assign capture_tail=0;assign capture_reason=0;assign capture_ambiguous=0;
+    assign capture_elapsed_high=0;assign capture_trigger_ticks=0;assign capture_trigger_high=0;assign capture_triggered=0;
     assign packet_data=0;assign packet_keep=0;assign packet_last=0;assign packet_valid=0;assign packet_busy=0;
     assign packet_done=0;assign packet_empty=0;assign packet_rejected=0;assign packet_error=0;assign packet_limit=0;
     assign packet_frame_ready=0;
@@ -109,6 +127,7 @@ module orbtrace_ddr_controller #(
   end endgenerate
   assign m_axi_awcache=4'b0011;assign m_axi_awprot=0;assign m_axi_awlock=0;assign m_axi_awqos=0;
   orbtrace_ddr_writer #(.REGION_BASE(REGION_BASE),.REGION_END(REGION_END)) writer(.clk(clk),.rst_n(rst_n),.start(writer_start),.abort(writer_abort),.finish_empty(trace_mode && packet_done && packet_empty),
+    .ring_enable(flight_mode),.total_committed(writer_total),.ring_offset(writer_offset),
     .base_address(base_address),.byte_limit(byte_limit),.busy(writer_busy),.done(writer_done),.error(writer_error),
     .error_code(writer_error_code),.command_rejected(writer_rejected),.accepted_bytes(accepted_bytes),.response_bytes(response_bytes),.remaining_bytes(remaining),
     .s_axis_tdata(stream_data),.s_axis_tkeep(stream_keep),.s_axis_tlast(stream_last),.s_axis_tvalid(stream_valid),.s_axis_tready(stream_ready),
@@ -131,6 +150,7 @@ module orbtrace_ddr_controller #(
       writer_epoch_valid<=0;controller_error<=0;
       result_ticks<=0;result_frames<=0;result_drops<=0;result_parser<=0;result_sync<=0;result_highwater<=0;
       result_ready_losses<=0;result_tail<=0;result_reason<=0;result_ambiguous<=0;capacity_reached<=0;
+      flight_trigger<=0;result_elapsed_high<=0;result_trigger_ticks<=0;result_trigger_high<=0;result_triggered<=0;
     end else begin
       writer_start<=0;writer_abort<=0;capture_start<=0;trace_prepare<=0;packet_start<=0;
       if(s_axi_awvalid && s_axi_awready)begin aw_pending<=1;write_address<=s_axi_awaddr;end
@@ -162,6 +182,8 @@ module orbtrace_ddr_controller #(
           end
           if(writer_retired && capture_snapshot && eof_consumed)begin
             result_ticks<=capture_ticks;result_frames<=capture_frames;result_drops<=capture_drops;
+            result_elapsed_high<=capture_elapsed_high;result_trigger_ticks<=capture_trigger_ticks;
+            result_trigger_high<=capture_trigger_high;result_triggered<=capture_triggered;
             result_parser<=capture_parser;result_sync<=capture_sync;result_highwater<=capture_highwater;
             result_ready_losses<=capture_ready_losses;
             // Fixed-capacity records end on a complete formatter frame.
@@ -186,14 +208,17 @@ module orbtrace_ddr_controller #(
               writer_start<=!trace_mode;active<=1;done_sticky<=0;error_sticky<=0;rejected<=0;
               elapsed_cycles<=0;capture_id<=capture_id+1'b1;
               capture_nonce<=nonce;record_mode<=mode;
+              flight_trigger<=0;result_elapsed_high<=0;result_trigger_ticks<=0;result_trigger_high<=0;result_triggered<=0;
               writer_retired<=0;capture_stop<=0;capture_stop_reason<=0;discard_frames<=0;capacity_reached<=0;eof_consumed<=0;
               writer_epoch_valid<=0;controller_error<=0;
               result_ticks<=0;result_frames<=0;result_drops<=0;result_parser<=0;result_sync<=0;result_highwater<=0;
               result_ready_losses<=0;result_tail<=0;result_reason<=0;result_ambiguous<=0;
               if(trace_mode)begin
-                if(FIXED_CAPTURE_BYTES!=0)begin base_address<=REGION_BASE;byte_limit<=FIXED_CAPTURE_BYTES;end
+                if(FIXED_CAPTURE_BYTES!=0 && !flight_mode)begin base_address<=REGION_BASE;byte_limit<=FIXED_CAPTURE_BYTES;end
                 trace_prepare<=1;prepare_wait<=0;trace_phase<=1;
               end
+            end else if(write_data==4 && active && flight_mode && trace_phase==3 && !flight_trigger)begin
+              flight_trigger<=1;
             end else if(write_data==2 && active)begin
               if(trace_mode)begin
                 capture_stop<=1;capture_stop_reason<=1;
@@ -206,7 +231,7 @@ module orbtrace_ddr_controller #(
           3:if(!active)base_address<=write_data;else begin rejected<=1;s_axi_bresp<=2;end
           4:if(!active)byte_limit<=write_data;else begin rejected<=1;s_axi_bresp<=2;end
           5:if(!active)seed<=write_data;else begin rejected<=1;s_axi_bresp<=2;end
-          15:if(!active && (write_data==1 || (ENABLE_TRACE_SOURCE && write_data==2)))mode<=write_data[1:0];else begin rejected<=1;s_axi_bresp<=2;end
+          15:if(!active && (write_data==1 || (ENABLE_TRACE_SOURCE && (write_data==2 || write_data==3))))mode<=write_data[1:0];else begin rejected<=1;s_axi_bresp<=2;end
           16:if(!active)requested_ticks<=write_data;else begin rejected<=1;s_axi_bresp<=2;end
           31:if(!active)nonce[31:0]<=write_data;else begin rejected<=1;s_axi_bresp<=2;end
           32:if(!active)nonce[63:32]<=write_data;else begin rejected<=1;s_axi_bresp<=2;end
@@ -222,20 +247,20 @@ module orbtrace_ddr_controller #(
           3:s_axi_rdata<=base_address;
           4:s_axi_rdata<=byte_limit;
           5:s_axi_rdata<=seed;
-          6:s_axi_rdata<=writer_epoch_valid ? accepted_bytes : 0;
-          7:s_axi_rdata<=writer_epoch_valid ? response_bytes : 0;
+          6:s_axi_rdata<=writer_epoch_valid ? (record_mode==3 && done_sticky ? ring_bytes : accepted_bytes) : 0;
+          7:s_axi_rdata<=writer_epoch_valid ? (record_mode==3 ? ring_bytes : response_bytes) : 0;
           8:s_axi_rdata<=elapsed_cycles;
           9:s_axi_rdata<=controller_error!=0 ? {28'd0,controller_error} : (writer_epoch_valid ? {28'd0,writer_error_code} : 0);
           10:s_axi_rdata<=capture_id;
-          11:s_axi_rdata<=3 | (ENABLE_TRACE_SOURCE ? 4 : 0);
+          11:s_axi_rdata<=3 | (ENABLE_TRACE_SOURCE ? 32'h104 : 0);
           12:s_axi_rdata<=REGION_BASE;
           13:s_axi_rdata<=REGION_END;
           14:s_axi_rdata<=128;
           15:s_axi_rdata<=mode;
           16:s_axi_rdata<=requested_ticks;
           17:s_axi_rdata<=result_ticks;
-          18:s_axi_rdata<={27'd0,(done_sticky && record_mode==2 && (!writer_epoch_valid || response_bytes==0)),
-            (result_sync==0 && record_mode==2),(result_ready_losses!=0),(result_parser!=0),(result_drops!=0)};
+          18:s_axi_rdata<={27'd0,(done_sticky && record_mode[1] && (!writer_epoch_valid || response_bytes==0)),
+            (result_sync==0 && record_mode[1]),(result_ready_losses!=0),(result_parser!=0),(result_drops!=0)};
           19:s_axi_rdata<=result_drops;
           20:s_axi_rdata<=result_parser;
           21:s_axi_rdata<=result_frames;
@@ -245,12 +270,22 @@ module orbtrace_ddr_controller #(
           25:s_axi_rdata<=result_highwater;
           26:s_axi_rdata<=result_ready_losses;
           27:s_axi_rdata<={31'd0,capacity_reached};
-          28:s_axi_rdata<=record_mode==2 ? 32'h46524d31 : 32'h50415431; // FRM1 or PAT1.
+          28:s_axi_rdata<=record_mode[1] ? 32'h46524d31 : 32'h50415431; // FRM1 or PAT1.
           29:s_axi_rdata<={31'd0,result_ambiguous};
           30:s_axi_rdata<=trace_phase;
           31:s_axi_rdata<=capture_nonce[31:0];
           32:s_axi_rdata<=capture_nonce[63:32];
           33:s_axi_rdata<=record_mode;
+          34:s_axi_rdata<=32'h31525246; // FRR1 extension, only capability bit8 authorizes reads.
+          35:s_axi_rdata<=ring_oldest;
+          36:s_axi_rdata<=ring_bytes;
+          37:s_axi_rdata<=writer_total[31:0];
+          38:s_axi_rdata<=writer_total[63:32];
+          39:s_axi_rdata<=result_trigger_ticks;
+          40:s_axi_rdata<=result_trigger_high;
+          41:s_axi_rdata<=result_elapsed_high;
+          42:s_axi_rdata<={28'd0,flight_trigger,ring_wrapped,result_triggered,(record_mode==3)};
+          43:s_axi_rdata<=requested_ticks;
           default:s_axi_rdata<=0;
         endcase
       end

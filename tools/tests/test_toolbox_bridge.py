@@ -105,7 +105,7 @@ class BridgeTests(unittest.TestCase):
                     if label=='loss':vis.capture_quality['loss']=True
                     if label=='unsynced':vis.capture_quality['synced']=False
                     if label=='unfinished':vis.capture_quality['ended']=False
-                with patch.object(backend,'Vis',ReplayLA),patch.object(backend,'do_export',export):
+                with patch.object(backend,'Vis',ReplayLA),patch.object(backend,'do_export',export),patch('native_probe.Ownership'):
                     with client.post('/etm/api/elf',data={'elf':(io.BytesIO(elf),label+'.elf')}) as upload:
                         self.assertEqual(upload.status_code,200,upload.data);elf_id=upload.json['elfId']
                     with client.post('/etm/api/capture',json={'elfId':elf_id,'config':config,'rate':500000000,'seconds':.01,'sync':True,'decode':True,'targetVerified':True,'libraryOrigin':'validation'}) as response:

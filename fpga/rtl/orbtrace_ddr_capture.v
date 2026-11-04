@@ -8,6 +8,7 @@ module orbtrace_ddr_capture #(
 )(
   input wire clk,input wire ref_clk,input wire rst_n,input wire hold,
   input wire start,input wire [31:0] requested_ticks,
+  input wire flight_mode,trigger_request,
   input wire stop_request,input wire [1:0] stop_reason,
   input wire [127:0] source_frame,source_tail,input wire [4:0] source_tail_bytes,
   input wire source_frame_event,source_parser_error,source_sync_event,
@@ -18,19 +19,22 @@ module orbtrace_ddr_capture #(
   output wire source_active,output reg snapshot_valid,
   output reg [31:0] elapsed_ticks,observed_frames,dropped_frames,parser_errors,
   output reg [31:0] sync_count,frame_highwater,ready_losses,
-  output reg [4:0] tail_bytes,output reg tail_ambiguous,output reg [1:0] reason
+  output reg [4:0] tail_bytes,output reg tail_ambiguous,output reg [1:0] reason,
+  output reg [31:0] elapsed_high,trigger_ticks,trigger_high,output reg triggered
 );
   wire reset=!rst_n || !hold;
   reg command_epoch;
   reg [31:0] ticks_held;
+  reg flight_held;
   always @(posedge clk or posedge reset)
-    if(reset)begin command_epoch<=0;ticks_held<=0;end
-    else if(start)begin command_epoch<=!command_epoch;ticks_held<=requested_ticks;end
+    if(reset)begin command_epoch<=0;ticks_held<=0;flight_held<=0;end
+    else if(start)begin command_epoch<=!command_epoch;ticks_held<=requested_ticks;flight_held<=flight_mode;end
   (* ASYNC_REG="TRUE" *) reg [1:0] ref_reset;
   always @(posedge ref_clk or posedge reset)
     if(reset)ref_reset<=3;else ref_reset<={ref_reset[0],1'b0};
   (* ASYNC_REG="TRUE" *) reg [2:0] command_sync;
   (* ASYNC_REG="TRUE" *) reg [1:0] stop_sync,ready_sync;
+  (* ASYNC_REG="TRUE" *) reg [1:0] trigger_sync;
   reg seen_command;
   reg [3:0] state;
   reg [2:0] drain;
@@ -38,14 +42,18 @@ module orbtrace_ddr_capture #(
   reg [1:0] stop_reason_ref;
   wire window_open,window_done,window_rejected;
   wire [31:0] elapsed_ref;
+  wire [31:0] high_ref,trigger_ref,trigger_high_ref;
+  wire triggered_ref;
   wire [1:0] reason_ref;
   localparam WAIT_COMMAND=0,SETTLE=1,CLEAR_PARSER=2,START_WINDOW=3,
              WAIT_OPEN=4,RUN=5,DRAIN=6,EOF_WAIT=7,FINISHED=8;
   assign sampler_gate=window_open;
   assign parser_clear=state==CLEAR_PARSER;
   assign parser_enable=state==WAIT_OPEN || state==RUN || state==DRAIN;
-  orbtrace_ref_window window(.ref_clk(ref_clk),.rst(ref_reset[1]),.start(state==START_WINDOW),
+  orbtrace_flight_window window(.ref_clk(ref_clk),.rst(ref_reset[1]),.start(state==START_WINDOW),
     .stop(stop_sync[1]),.stop_reason(stop_reason_ref),.requested_ticks(ticks_ref),
+    .flight(flight_held),.trigger(trigger_sync[1]),.triggered(triggered_ref),
+    .elapsed_high(high_ref),.trigger_ticks(trigger_ref),.trigger_high(trigger_high_ref),
     .window_open(window_open),.done(window_done),.rejected(window_rejected),.elapsed_ticks(elapsed_ref),.reason(reason_ref));
   reg [31:0] observed_ref,dropped_ref,parser_ref,sync_ref,highwater_ref,ready_losses_ref;
   reg previous_ready,finished_ref;
@@ -70,12 +78,13 @@ module orbtrace_ddr_capture #(
   end endgenerate
   always @(posedge ref_clk or posedge ref_reset[1])
     if(ref_reset[1])begin
-      command_sync<=0;stop_sync<=0;ready_sync<=0;seen_command<=0;state<=WAIT_COMMAND;
+      command_sync<=0;stop_sync<=0;ready_sync<=0;trigger_sync<=0;seen_command<=0;state<=WAIT_COMMAND;
       drain<=0;ticks_ref<=0;stop_reason_ref<=0;observed_ref<=0;dropped_ref<=0;parser_ref<=0;
       sync_ref<=0;highwater_ref<=0;ready_losses_ref<=0;previous_ready<=0;finished_ref<=0;
       level_sample<=0;level_sample_valid<=0;
     end else begin
       command_sync<={command_sync[1:0],command_epoch};stop_sync<={stop_sync[0],stop_request};
+      trigger_sync<={trigger_sync[0],trigger_request};
       ready_sync<={ready_sync[0],receiver_ready};previous_ready<=ready_sync[1];
       if(stop_sync[0])stop_reason_ref<=stop_reason==0 ? 2'd3 : stop_reason;
       if(capture_frame)begin observed_ref<=observed_ref+1'b1;if(!fifo_wr_ready)dropped_ref<=dropped_ref+1'b1;end
@@ -108,12 +117,14 @@ module orbtrace_ddr_capture #(
       finished_sync<=0;active_sync<=0;settle_snapshot<=0;snapshot_valid<=0;
       elapsed_ticks<=0;observed_frames<=0;dropped_frames<=0;parser_errors<=0;sync_count<=0;
       frame_highwater<=0;ready_losses<=0;tail_bytes<=0;tail_ambiguous<=0;reason<=0;
+      elapsed_high<=0;trigger_ticks<=0;trigger_high<=0;triggered<=0;
     end else begin
       finished_sync<={finished_sync[0],finished_ref};active_sync<={active_sync[0],window_open};
       if(finished_sync[1] && !snapshot_valid)begin
         if(settle_snapshot!=3)settle_snapshot<=settle_snapshot+1'b1;
         else begin
           snapshot_valid<=1;elapsed_ticks<=elapsed_ref;observed_frames<=observed_ref;dropped_frames<=dropped_ref;
+          elapsed_high<=high_ref;trigger_ticks<=trigger_ref;trigger_high<=trigger_high_ref;triggered<=triggered_ref;
           parser_errors<=parser_ref;sync_count<=sync_ref;frame_highwater<=highwater_ref;ready_losses<=ready_losses_ref;
           tail_bytes<=source_tail_bytes;tail_ambiguous<=source_tail_ambiguous;
           reason<=window_rejected && stop_sync[1] ? stop_reason_ref : reason_ref;

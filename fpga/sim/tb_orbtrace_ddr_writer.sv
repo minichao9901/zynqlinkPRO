@@ -10,6 +10,7 @@ module tb_orbtrace_ddr_writer;
   wire awvalid,wlast,wvalid,bready;wire [63:0] wdata;wire [7:0] wstrb;
   reg awready=0,wready=0,bvalid=0;reg [1:0] bresp=0,response_code=0;
   orbtrace_ddr_writer #(.REGION_BASE(32'h10000000),.REGION_END(32'h30000000)) dut(.clk(clk),.rst_n(rst_n),.start(start),.abort(abort),.finish_empty(finish_empty),
+    .ring_enable(1'b0),
     .base_address(base_address),.byte_limit(byte_limit),.busy(busy),.done(done),.error(error),.error_code(error_code),
     .command_rejected(command_rejected),.accepted_bytes(accepted_bytes),.response_bytes(response_bytes),
     .s_axis_tdata(tdata),.s_axis_tkeep(tkeep),.s_axis_tlast(tlast),.s_axis_tvalid(tvalid),.s_axis_tready(tready),

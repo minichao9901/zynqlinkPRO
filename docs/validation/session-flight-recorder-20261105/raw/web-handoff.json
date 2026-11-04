@@ -1,0 +1,250 @@
+{
+  "rows": [
+    {
+      "mode": "manual",
+      "record": "capture-891b078e85074ae0a905be61541be96d",
+      "quality": {
+        "records": 65535,
+        "loss": false,
+        "synced": true,
+        "ended": true,
+        "fclk": 119999998,
+        "tckKhz": 9999,
+        "captureId": 2,
+        "transport": "ddr-usb/1",
+        "hostStartedUnix": 1793814950.3889985,
+        "flightTrigger": {
+          "source": "manual",
+          "observedValue": null,
+          "hostUnix": 1793814950.5666404,
+          "detection": "host-polling",
+          "requestedPollSeconds": 0.01
+        },
+        "captureNonce": 6937858028919525346,
+        "bufferFull": false,
+        "bufferCapacityBytes": 1048576,
+        "captureComplete": true,
+        "requestedWindowComplete": true,
+        "completionReason": "trigger",
+        "hardwareTicks": 39985098,
+        "requestedTicks": 4000000,
+        "refClockHz": 199999998,
+        "hardwareSeconds": 0.1999254919992549,
+        "hardwareStartBracketUnix": [
+          1793814950.3863916,
+          1793814950.3869824
+        ],
+        "stopReason": 0,
+        "formatterBytes": 1048566,
+        "tailBytes": 6,
+        "tailAmbiguous": false,
+        "usbSeconds": 0.031016699998872355,
+        "usbPayloadMBps": 33.80649779112935,
+        "diagnostics": {
+          "implemented": true,
+          "frameDrops": 0,
+          "parserErrors": 0,
+          "idelayReadyLosses": 0,
+          "frameHighwater": 1,
+          "syncAcquisitions": 1,
+          "observedFrames": 239323,
+          "capacityReached": false,
+          "writerError": 0
+        },
+        "flight": {
+          "words": [
+            827478598,
+            683456,
+            1048566,
+            3829174,
+            0,
+            35985098,
+            0,
+            0,
+            15,
+            4000000,
+            1048576
+          ],
+          "oldestOffset": 683456,
+          "retainedBytes": 1048566,
+          "totalBytes": 3829174,
+          "triggerTicks": 35985098,
+          "elapsedHigh": 0,
+          "flags": 15,
+          "postTicks": 4000000,
+          "capacityBytes": 1048576
+        },
+        "historyOverwritten": true,
+        "retainedHistoryBytes": 1048566,
+        "overwrittenBytes": 2780608,
+        "initialExecutionUnknown": true,
+        "windowBasis": "trigger-post-window; retained prefix is byte bounded",
+        "nativeDemuxSeconds": 0.0055718,
+        "etmBytes": 248404,
+        "hostSeconds": 0.3529550000021118,
+        "hostEndedUnix": 1793814950.7419577,
+        "hostSecondsBasis": "resume through hardware completion, USB download and native deformat; not capture coverage"
+      },
+      "jobState": "记录已保存",
+      "coordinator": {
+        "cancelled": 0,
+        "completed": 471,
+        "current": null,
+        "failed": 1,
+        "pending": [],
+        "protocol": "probe-control/1",
+        "resources": {
+          "usb": {
+            "epoch": "48a537dae00d9dea4a5bf52462f55f3f",
+            "error": null
+          }
+        },
+        "transport": {
+          "hidCorrelated": false,
+          "hidOpen": false,
+          "hidStaleReplies": 0,
+          "usbError": null,
+          "usbOpen": true
+        }
+      }
+    },
+    {
+      "mode": "cancel",
+      "record": "capture-08655281341e42fba9ad6170821f0365",
+      "quality": null,
+      "jobState": "采集已取消",
+      "coordinator": {
+        "cancelled": 0,
+        "completed": 784,
+        "current": null,
+        "failed": 2,
+        "pending": [],
+        "protocol": "probe-control/1",
+        "resources": {
+          "usb": {
+            "epoch": "8455b77e28c67bca97471cb793213887",
+            "error": null
+          }
+        },
+        "transport": {
+          "hidCorrelated": false,
+          "hidOpen": false,
+          "hidStaleReplies": 0,
+          "usbError": null,
+          "usbOpen": true
+        }
+      }
+    }
+  ],
+  "before": {
+    "clockError": null,
+    "clocks": {
+      "busDivider": 1,
+      "coreDivider": 1,
+      "coreHz": 48000000,
+      "external": true,
+      "hclkHz": 48000000,
+      "knownHz": 48000000,
+      "knownTraceHz": 48000000,
+      "path": "HSE 8 MHz ÷1 ×6 → AHB ÷1",
+      "physicalTraceHz": 24000000,
+      "source": "HSE → PLL",
+      "traceHz": 48000000,
+      "tracePath": "HCLK → TRACEPORTCK（与 CPU 相同）",
+      "traceReady": true,
+      "traceRelation": "Trace 输入 = HCLK；4 位 DDR 的 TRACECLK = HCLK / 2"
+    },
+    "config": {
+      "ccer": 100352,
+      "ctrl": 1041,
+      "idr": 1091891777,
+      "protocol": "ETMv3",
+      "traceid": 0
+    },
+    "core": "Cortex-M3",
+    "cpuid": 1092600369,
+    "device": 268657684,
+    "etmVersion": "ETMv3.4",
+    "flashLimit": 134742016,
+    "halted": false,
+    "hseHz": 8000000,
+    "name": "STM32F103ZE / 高容量 F103（PE2～PE6）",
+    "profile": "stm32f103ze",
+    "rcc": {
+      "cfgr": 5309450,
+      "cr": 50548355
+    },
+    "traceOptions": {
+      "branchBroadcast": true,
+      "cycleCount": false,
+      "returnStack": false
+    },
+    "traceStatus": "F103ZE 48/24 MHz Kingst 联动与 ETMv3 解码已验收；封装须有 PE2～PE6",
+    "traceSupported": true,
+    "width": 1
+  },
+  "after": {
+    "clockError": null,
+    "clocks": {
+      "busDivider": 1,
+      "coreDivider": 1,
+      "coreHz": 48000000,
+      "external": true,
+      "hclkHz": 48000000,
+      "knownHz": 48000000,
+      "knownTraceHz": 48000000,
+      "path": "HSE 8 MHz ÷1 ×6 → AHB ÷1",
+      "physicalTraceHz": 24000000,
+      "source": "HSE → PLL",
+      "traceHz": 48000000,
+      "tracePath": "HCLK → TRACEPORTCK（与 CPU 相同）",
+      "traceReady": true,
+      "traceRelation": "Trace 输入 = HCLK；4 位 DDR 的 TRACECLK = HCLK / 2"
+    },
+    "config": {
+      "ccer": 100352,
+      "ctrl": 1041,
+      "idr": 1091891777,
+      "protocol": "ETMv3",
+      "traceid": 0
+    },
+    "core": "Cortex-M3",
+    "cpuid": 1092600369,
+    "device": 268657684,
+    "etmVersion": "ETMv3.4",
+    "flashLimit": 134742016,
+    "halted": false,
+    "hseHz": 8000000,
+    "name": "STM32F103ZE / 高容量 F103（PE2～PE6）",
+    "profile": "stm32f103ze",
+    "rcc": {
+      "cfgr": 5309450,
+      "cr": 50548355
+    },
+    "traceOptions": {
+      "branchBroadcast": true,
+      "cycleCount": false,
+      "returnStack": false
+    },
+    "traceStatus": "F103ZE 48/24 MHz Kingst 联动与 ETMv3 解码已验收；封装须有 PE2～PE6",
+    "traceSupported": true,
+    "width": 1
+  },
+  "passed": true,
+  "finalCoordinator": {
+    "cancelled": 0,
+    "completed": 830,
+    "current": null,
+    "failed": 2,
+    "pending": [],
+    "protocol": "probe-control/1",
+    "resources": {},
+    "transport": {
+      "hidCorrelated": false,
+      "hidOpen": false,
+      "hidStaleReplies": 0,
+      "usbError": null,
+      "usbOpen": false
+    }
+  }
+}

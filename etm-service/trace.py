@@ -160,12 +160,23 @@ def capture(argv):
     parser.add_argument('--entry-timeout', type=float, default=5)
     parser.add_argument('--usb-reconnect', action='store_true')
     parser.add_argument('--ready-file')
+    parser.add_argument('--flight',action='store_true',help='F103ZE环形飞行记录；seconds为触发后窗口')
+    parser.add_argument('--ring-bytes',type=int,default=8<<20,help='环形容量，128字节对齐，最多100MiB')
+    parser.add_argument('--trigger',choices=('manual','fault','after'),default='manual')
+    parser.add_argument('--trigger-after',type=float,default=1)
+    parser.add_argument('--arm-timeout',type=float,default=30)
+    parser.add_argument('--trigger-file',help='手动触发控制文件；默认新记录目录/flight-trigger.request')
     parser.add_argument('--gpio-speed', type=int, choices=(1, 2, 3), default=1)
     parser.add_argument('--bit', required=True, help='实际已通过JTAG加载的bit；不会自动加载')
     parser.add_argument('--zynq-elf', required=True, help='与bit实际配套加载的Zynq ELF')
     parser.add_argument('--no-decode', action='store_true')
     parser.add_argument('--json-out')
     args = parser.parse_args(argv)
+    if args.flight:
+        if args.transport=='legacy' or not 0<args.arm_timeout<=86400 or not 0<=args.trigger_after or (args.trigger=='after' and args.trigger_after>=args.arm_timeout):
+            return fail('capture','无效飞行记录传输/等待时间',2,started)
+        if not 128<=args.ring_bytes<=100*1024*1024 or args.ring_bytes%128:
+            return fail('capture','环形容量必须128字节对齐且不超过100MiB',2,started)
 
     if not 0 < args.seconds <= 2:
         return fail('capture', '采集时长必须为 0..2 s', 2, started)
@@ -219,6 +230,11 @@ def capture(argv):
             command.append('--usb-reconnect')
     if args.ready_file:
         command += ['--ready-file', args.ready_file]
+    if args.flight:
+        trigger_file=Path(args.trigger_file).resolve() if args.trigger_file else out/'flight-trigger.request'
+        command += ['--flight','--ring-bytes',str(args.ring_bytes),'--trigger',args.trigger,
+                    '--trigger-after',str(args.trigger_after),'--arm-timeout',str(args.arm_timeout),
+                    '--trigger-file',str(trigger_file)]
     completed = subprocess.run(command, cwd=str(REPO), text=True, capture_output=True)
     if completed.returncode:
         detail = (completed.stderr or completed.stdout or '').strip()[-1200:]
@@ -257,6 +273,10 @@ def capture(argv):
             basis='bounded hardware reference ticks, not host download time'))
         for source,name in [('capture.frm1','capture.frm1'),('capture.usb.json','ddr-capture.json')]:
             shutil.copy2(out/'ddr'/source,out/name)
+        if ddr.get('flight'):
+            metadata.update(captureScope='flight-recorder',flight=ddr['flight'],flightTrigger=ddr.get('flightTrigger'))
+            metadata['captureExtent'].update(hardwareTicks=ddr['totalHardwareTicks'],
+                basis='trigger post-window; retained history is byte bounded',historyOverwritten=q['historyOverwritten'])
     (out / 'session.json').write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     # Keep the board runner's actual target-before.json register snapshot intact.
     summary = None
@@ -298,13 +318,26 @@ def main(argv=None):
     argv = list(sys.argv[1:] if argv is None else argv)
     if not argv or argv[0] in ('-h', '--help'):
         print(__doc__)
-        print('命令：doctor | capture | sweep | samples | decode | query | verify | export | record | elf | import-record')
+        print('命令：doctor | capture | trigger | sweep | samples | decode | query | verify | export | record | elf | import-record')
         return 0
     command = argv[0]
     if command == 'doctor':
         return doctor(argv[1:])
     if command == 'capture':
         return capture(argv[1:])
+    if command == 'trigger':
+        import argparse
+        p=argparse.ArgumentParser(description='请求已有飞行记录触发或停止，不重新启动采集')
+        p.add_argument('--record',type=Path,required=True);p.add_argument('--cancel',action='store_true')
+        a=p.parse_args(argv[1:]);report=a.record/'ddr/result.json'
+        if not report.is_file():p.error('记录尚未arm；需要本次已有ddr/result.json')
+        state=json.loads(report.read_text(encoding='utf-8'))
+        control=(state.get('flightArmed') or {}).get('options',{}).get('controlFile')
+        if not control or state.get('flightTrigger') or state.get('usbOwnerReleased'):p.error('没有可触发的飞行记录')
+        path=Path(control)
+        if a.cancel:path=path.with_suffix('.cancel')
+        with path.open('x',encoding='utf-8') as output:output.write('requested\n')
+        print(json.dumps({'ok':True,'requested':True,'completed':False,'controlFile':str(path)}));return 0
     if command in ('samples', 'sweep'):
         script = REPO / 'tools' / ('trace_signal_analysis.py' if command == 'samples' else 'f103_trace_sweep.py')
         return subprocess.call([sys.executable, '-X', 'utf8', str(script), *argv[1:]])

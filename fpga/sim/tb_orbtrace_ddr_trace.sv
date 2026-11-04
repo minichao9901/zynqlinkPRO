@@ -138,7 +138,7 @@ module tb_orbtrace_ddr_trace #(parameter LANE_DELAY=0,FIXED_BYTES=0);
       repeat(24)@(negedge clk);
       if(!trace_ready || receiver.lane_applied!=={1'b1,5'd31,5'd24,5'd16,5'd8,5'd0})$fatal(1,"integrated tap readback/ready");
     end
-    read_reg(44,value);if(value!=7)$fatal(1,"trace capability");
+    read_reg(44,value);if(value!=32'h107)$fatal(1,"trace/flight capability");
     write_reg(12,32'h10000000,0,0);write_reg(16,4096,1,0);write_reg(60,2,0,0);write_reg(64,8000,1,0);
     write_reg(124,32'habcd1234,0,0);write_reg(128,32'hdead5678,1,0);
     write_reg(4,1,0,0);synchronize_source();
@@ -228,6 +228,23 @@ module tb_orbtrace_ddr_trace #(parameter LANE_DELAY=0,FIXED_BYTES=0);
     read_reg(24,count);if(count)$fatal(1,"early cancel reused accepted bytes");
     read_reg(28,count);if(count)$fatal(1,"early cancel reused response bytes");
     allow_ready=1;checks=checks+1;
+    // Wait beyond the old time limit, wrap five times, then preserve a
+    // partial final frame. Download order starts at a complete frame.
+    write_reg(60,3,0,0);write_reg(16,128,0,0);write_reg(64,2000,0,0);
+    write_reg(4,1,0,0);synchronize_source();
+    for(integer k=0;k<645;k=k+1)put_byte(8'(16+k));
+    if(!sampler_gate)$fatal(1,"flight stopped before trigger");
+    write_reg(4,4,0,0);wait_done();
+    if(value&4)$fatal(1,"ring capture failed %x",value);
+    read_reg(148,count);if(count!=645)$fatal(1,"ring committed total %d",count);
+    read_reg(140,value);if(value!=16)$fatal(1,"ring oldest offset %d",value);
+    read_reg(144,count);if(count!=117)$fatal(1,"ring retained bytes %d",count);
+    for(integer k=0;k<117;k=k+1)
+      if(memory[(16+k)%128]!==8'(16+528+k))$fatal(1,"ring chronological byte %d",k);
+    read_reg(168,value);if((value&7)!=7)$fatal(1,"ring flags %x",value);
+    read_reg(68,actual_ticks);read_reg(156,value);
+    if(actual_ticks-value!=2000)$fatal(1,"post-trigger window %d",actual_ticks-value);
+    $display("PASS flight ring: indefinite arm, five wraps, partial tail, chronological retained bytes, exact post-trigger window");
     if(LANE_DELAY && receiver.lane_applied!=={1'b1,5'd31,5'd24,5'd16,5'd8,5'd0})$fatal(1,"capture/reset changed tap identity");
     $display("PASS DDR trace integration cases=%0d: RAW4 pins, exact ref window, full/partial formatter frames, nonce, legacy reset isolation, capacity, stop and empty source",checks);
     $finish;

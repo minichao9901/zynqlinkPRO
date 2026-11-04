@@ -59,6 +59,17 @@ class NativeCapture:
         if isinstance(seconds, bool) or not isinstance(seconds, (int, float)) or not math.isfinite(seconds) or not 0 < seconds <= 2:
             raise ValueError('采集时长必须大于0且不超过2秒（需DDR固件）')
         options = {'seconds': seconds, 'decode': o.get('decode', True)}
+        options['flight']=o.get('flight',False)
+        if not isinstance(options['flight'],bool):raise ValueError('flight必须为boolean')
+        if options['flight']:
+            options['trigger']=o.get('trigger','manual')
+            options['ringBytes']=o.get('ringBytes',8<<20)
+            options['armTimeout']=o.get('armTimeout',60)
+            options['triggerAfter']=o.get('triggerAfter',1)
+            if options['trigger'] not in ('manual','fault','after'):raise ValueError('无效触发源')
+            if type(options['ringBytes']) is not int or not 128<=options['ringBytes']<=100*1024*1024 or options['ringBytes']%128:raise ValueError('无效环形容量')
+            if type(options['armTimeout']) not in (float,int) or not 0<options['armTimeout']<=86400:raise ValueError('无效等待时限')
+            if type(options['triggerAfter']) not in (float,int) or not 0<=options['triggerAfter'] or (options['trigger']=='after' and options['triggerAfter']>=options['armTimeout']):raise ValueError('无效触发延时')
         if not isinstance(options['decode'], bool):
             raise ValueError('decode必须为boolean')
         for name, default, allowed in [('gpioSpeed', 1, (1, 2, 3)),
@@ -89,8 +100,10 @@ class NativeCapture:
                    (j['state'] in b.ACTIVE or j.get('_laLease') or j.get('cleanupPending')) for j in b.jobs.values()):
                 raise ValueError('已有采集或清理任务，请等待完成')
             sid = 'capture-' + uuid.uuid4().hex
+            if proxy:
+                proxy.coordinator.acquire('capture', sid)
             jid = b.new_job(sid, 'queued')
-            b.jobs[jid].update(_nativeCapture=True, _laLease=True)
+            b.jobs[jid].update(_nativeCapture=True, _laLease=True,flight=options['flight'])
         try:
             folder = b.directory(sid)
             folder.mkdir()
@@ -109,6 +122,8 @@ class NativeCapture:
             b.change(jid, state='error', error=str(error))
             with b.lock:
                 b.jobs[jid].pop('_laLease', None)
+            if proxy:
+                proxy.coordinator.release('capture', sid)
             raise
         return jsonify(job=jid, record=sid)
 
@@ -134,6 +149,9 @@ class NativeCapture:
                     command.append('--reset-to-entry')
                 if options['usbReconnect']:
                     command.append('--usb-reconnect')
+            if options.get('flight'):
+                command += ['--flight','--ring-bytes',str(options['ringBytes']),'--trigger',options['trigger'],
+                            '--arm-timeout',str(options['armTimeout']),'--trigger-after',str(options['triggerAfter'])]
             if options.get('serialStimulus'):
                 ready_file = folder / 'raw/capture-ready.json'
                 command += ['--ready-file', str(ready_file)]
@@ -142,7 +160,27 @@ class NativeCapture:
             b.save_json(folder / 'native-command.json', command)
             # Killing the subprocess would bypass its target-restoration finally.
             # The runner bounds its capture and USB I/O; cancellation waits for it.
-            process = subprocess.run(command, cwd=b.ROOT.parent, capture_output=True, text=True, encoding='utf-8')
+            if options.get('flight'):
+                # File-backed pipes cannot deadlock on long diagnostics. Never
+                # kill a process responsible for restoring target registers.
+                with (folder/'native-stdout.txt').open('w',encoding='utf-8') as stdout, (folder/'native-stderr.txt').open('w',encoding='utf-8') as stderr:
+                    child=subprocess.Popen(command,cwd=b.ROOT.parent,stdout=stdout,stderr=stderr)
+                    armed=False
+                    while child.poll() is None:
+                        status_file=folder/'raw/ddr/result.json'
+                        try:live=b.load_json(status_file)
+                        except (OSError,ValueError):live={}
+                        if live.get('flightArmed'):
+                            if not armed:b.change(jid,state='armed');armed=True
+                            if b.jobs[jid].get('_stopped'):
+                                cancel=folder/'raw/flight-trigger.cancel'
+                                if not cancel.exists():cancel.write_text('cancel\n',encoding='utf-8')
+                        time.sleep(.05)
+                process=subprocess.CompletedProcess(command,child.returncode,
+                    (folder/'native-stdout.txt').read_text(encoding='utf-8'),
+                    (folder/'native-stderr.txt').read_text(encoding='utf-8'))
+            else:
+                process = subprocess.run(command, cwd=b.ROOT.parent, capture_output=True, text=True, encoding='utf-8')
             stimulus_report = stimulus.close() if stimulus else None
             stimulus = None
             if stimulus_report:
@@ -194,6 +232,10 @@ class NativeCapture:
                 b.save_json(folder / 'serial-stimulus.json', stimulus.close())
             with b.lock:
                 b.jobs[jid].pop('_laLease', None)
+                cleanup_error=b.jobs[jid].get('cleanupPending')
+            proxy=b.app.extensions.get('native_probe')
+            if proxy:
+                proxy.coordinator.release('capture',sid,'目标/USB恢复未确认' if cleanup_error else None)
 
     def stop(self):
         b = self.backend
@@ -213,10 +255,22 @@ class NativeCapture:
             return jsonify(ok=True, stopRequested=pending, restorePending=pending,
                            note='不终止硬件事务；等当前短窗与现场恢复完成')
 
+    def trigger(self,jid):
+        self.authorize();b=self.backend
+        with b.lock:
+            job=b.jobs.get(jid)
+            if not job or not job.get('flight') or job['state']!='armed':
+                raise ValueError('没有已就绪的飞行记录')
+            folder=b.directory(job['record'])
+            with (folder/'raw/flight-trigger.request').open('x',encoding='utf-8') as stream:
+                stream.write('trigger\n')
+        return jsonify(ok=True,requested=True,completed=False)
+
 
 def install(backend, token_file, bit, elf):
     capture = NativeCapture(backend, token_file, bit, elf)
     backend.app.add_url_rule('/api/native-capture', 'native_web_capture', capture.start, methods=['POST'])
+    backend.app.add_url_rule('/api/native-trigger/<jid>', 'native_web_trigger', capture.trigger, methods=['POST'])
     backend.app.before_request(capture.stop)
     backend.app.extensions['native_capture'] = capture
     return capture

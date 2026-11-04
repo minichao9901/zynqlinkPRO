@@ -81,6 +81,19 @@ class Client:
         except HTTPError as error:
             raise RuntimeError('队列HTTP %s: %s' % (error.code, error.read(4000).decode('utf-8', errors='replace'))) from error
 
+    def native(self, kind, action, value):
+        if kind not in ('session','usb','hid','serial') or not action.replace('-','').isalnum():
+            raise ValueError('无效本机服务通路或动作')
+        headers={**self.headers,'X-Trace-Delivery':secrets.token_hex(16)}
+        body=json.dumps(value).encode('utf-8')
+        if len(body)>400000:raise ValueError('本机服务请求超过400000字节')
+        try:
+            with urlopen(Request(self.url+'/native-probe/'+kind+'/'+action,data=body,headers=headers),timeout=self.timeout) as response:
+                return json.load(response)
+        except HTTPError as error:
+            raise RuntimeError(error.read(4000).decode('utf-8',errors='replace')) from error
+        # No transport retry: the action may already have reached the target.
+
     def result(self, jid):
         if len(jid) != 32 or any(c not in '0123456789abcdef' for c in jid):
             raise ValueError('无效job ID')
@@ -198,6 +211,15 @@ def parser():
     s.add_argument('--native-probe', action='store_true', help='通过鉴权本机服务使用实际USB/HID/COM，复用网页协议与界面')
     sub.add_parser('ping', help='检查浏览器worker就绪，不访问设备')
     sub.add_parser('status', help='工作台摘要')
+    n=sub.add_parser('probe',help='无需浏览器的统一探针服务；需要启用native-probe的runtime')
+    ns=n.add_subparsers(dest='probe_op',required=True)
+    ns.add_parser('status',help='读取服务队列/资源状态，不访问硬件')
+    nc=ns.add_parser('cancel',help='取消指定owner的排队/运行操作，运行操作在安全边界退出')
+    nc.add_argument('--owner',required=True)
+    nc=ns.add_parser('call',help='调用公开USB/HID/串口服务动作；JSON包含owner和resourceEpoch')
+    nc.add_argument('kind',choices=['usb','hid','serial'])
+    nc.add_argument('action')
+    nc.add_argument('--file',required=True,help='请求JSON文件；不重试硬件动作')
     s = sub.add_parser('job', help='查询超时/历史操作结果，不重试')
     s.add_argument('id')
     s = sub.add_parser('ack', help='删除已完成job结果，释放队列容量')
@@ -308,7 +330,14 @@ def main(argv=None):
             emit(run(args), args.out)
             return 0
         client = Client(args.runtime, args.timeout)
-        if args.command == 'job':
+        if args.command == 'probe':
+            if args.probe_op=='status':result=client.native('session','status',{})
+            elif args.probe_op=='cancel':result=client.native('session','cancel',{'owner':args.owner})
+            else:
+                value=load_json(args.file)
+                if not isinstance(value,dict):raise ValueError('服务请求必须为JSON对象')
+                result=client.native(args.kind,args.action,value)
+        elif args.command == 'job':
             result = {'ok': True, 'value': client.result(args.id)}
         elif args.command == 'ack':
             client.result(args.id)  # validate ID before composing an endpoint

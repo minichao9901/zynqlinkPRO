@@ -66,6 +66,9 @@ class Session:
         self.ddr = None
         self.capture_directory = None
         self.stream_file = None
+        self.flight = None
+        self.flight_requested=threading.Event()
+        self.flight_cancel=threading.Event()
 
     # ---------------- USB ----------------
     def open(self):
@@ -192,6 +195,7 @@ class Session:
             raise CaptureError("独立采样参考时钟未初始化到 200 MHz 范围")
         if self.ddr_supported:
             return self._start_ddr(ref,state)
+        if self.flight:raise CaptureError('飞行记录需要支持环形DDR的新配对')
         if self.seconds>1:
             raise CaptureError('当前探针固件不支持DDR采后下载；旧流式链路单次上限1秒')
         self._control(0x301)
@@ -226,7 +230,11 @@ class Session:
         self.stream_file=None
         self.ddr=Transport(self.dev,self.out,self.inp)
         try:
-            self.ddr.arm(self.seconds,ref)
+            if self.flight:
+                if self._dap_read32(0xe0042000)&0xfff!=0x414:raise CaptureError('本轮飞行记录仅支持F103ZE')
+                self.flight_requested.clear();self.flight_cancel.clear()
+                self.ddr.arm_flight(self.seconds,ref,self.flight['capacityBytes'])
+            else:self.ddr.arm(self.seconds,ref)
             self.ddr.wait_source()
             self._restart_trace()
             self._dap_write32(0xE000EDF0,0xA05F0001)
@@ -245,6 +253,23 @@ class Session:
         from zynq_ddr import quality
         from native_framed import run as deformat
         try:
+            if self.flight:
+                until=time.monotonic()+self.flight['timeout'];armed=time.monotonic();triggered=False
+                while time.monotonic()<until and not self.flight_cancel.is_set():
+                    observed=None
+                    if self.flight['trigger']=='fault':
+                        with self.ddr.command_lock:observed=self._dap_read32(0xe000ed04)
+                    if self.flight_requested.is_set() or (self.flight['trigger']=='after' and time.monotonic()-armed>=self.flight['after']) or (observed is not None and (observed&0x1ff) in (3,4,5,6)):
+                        self.ddr.trigger();triggered=True
+                        self.quality['flightTrigger']=dict(source='manual' if self.flight_requested.is_set() else self.flight['trigger'],
+                            observedValue=observed,hostUnix=time.time(),detection='host-polling',requestedPollSeconds=.01)
+                        break
+                    s=self.ddr.snapshot();self.ddr._identity(s)
+                    if not s['active']:raise CaptureError('飞行记录在触发前停止')
+                    self.flight_cancel.wait(.01)
+                if not triggered:
+                    self.ddr.stop()
+                    self.quality['flightTrigger']=dict(source='cancelled' if self.flight_cancel.is_set() else 'arm-timeout')
             self.ddr.wait(max(5,self.seconds+3))
             status=self.ddr.download(self.ddr_directory/'capture.frm1')
             self.quality.update(quality(status))
@@ -318,6 +343,10 @@ class Session:
         if not self.running and self.done.is_set():
             return
         if self.ddr is not None:
+            if self.flight:
+                self.flight_cancel.set()
+                if self._reader:self._reader.join(timeout=30)
+                return
             try:self.ddr.stop()
             except Exception as exc:self.error=self.error or str(exc)
             if self._reader:self._reader.join(timeout=30)
@@ -374,6 +403,7 @@ class _Sock:
         s.swd_hz = self.vis.swd_hz
         s.configure(self.vis.config, self.vis.traceid, self.vis.seconds)
         s.capture_directory=getattr(self.vis,'capture_directory',None)
+        s.flight=getattr(self.vis,'flight',None)
         s.start()
         # Like a socket sendall, start returns after arm/resume. recv owns the
         # completion wait, so the server can publish armed while capture runs.

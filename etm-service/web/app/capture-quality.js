@@ -11,5 +11,10 @@ export function captureTransportText(quality){
     const capacity=Number(quality.bufferCapacityBytes);
     parts.push(Number.isFinite(capacity)&&capacity>0?`缓冲区已满（${capacity/1048576} MiB）`:'缓冲区已满');
   }else if(quality.completionReason==='time')parts.push('采集时间到');
+  if(quality.flight){
+    parts.push(quality.completionReason==='trigger'?'触发后窗口完成':'飞行记录提前停止');
+    if(quality.historyOverwritten)parts.push(`旧历史已移除 ${quality.discardedHistoryBytes??quality.overwrittenBytes} 字节（覆盖/帧对齐）`);
+    parts.push('保留段起点需重新同步；未知执行不算已还原');
+  }
   return parts.join(' / ');
 }

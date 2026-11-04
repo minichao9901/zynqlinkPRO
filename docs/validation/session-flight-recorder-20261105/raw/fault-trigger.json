@@ -1,0 +1,134 @@
+{
+  "cliReturncode": 0,
+  "capture": {
+    "protocol": "trace-cli/1",
+    "runId": "20261105-020932-9a98a39e",
+    "command": "capture",
+    "ok": true,
+    "exitCode": 0,
+    "elapsedSeconds": 1.573,
+    "result": {
+      "record": "E:\\zynqlinkPRO\\build\\session-flight-20261105\\final-fault-trigger\\capture",
+      "etmBytes": 34254,
+      "etmSha256": "8646a3cfb2c2f4af5883af1925122113f0eaebdcd5836e437b942dbb15a4a7f0",
+      "quality": {
+        "transport": "ddr-usb/1",
+        "captureId": 1,
+        "captureNonce": 8308647146986776183,
+        "loss": false,
+        "synced": true,
+        "bufferFull": false,
+        "bufferCapacityBytes": 1048576,
+        "captureComplete": true,
+        "requestedWindowComplete": true,
+        "completionReason": "trigger",
+        "ended": true,
+        "records": 25370,
+        "hardwareTicks": 4508761,
+        "requestedTicks": 4000000,
+        "refClockHz": 199999998,
+        "hardwareSeconds": 0.022543805225438054,
+        "hardwareStartBracketUnix": [
+          1793815771.9112554,
+          1793815771.9119356
+        ],
+        "stopReason": 0,
+        "formatterBytes": 405931,
+        "tailBytes": 11,
+        "tailAmbiguous": false,
+        "usbSeconds": 0.011968699996941723,
+        "usbPayloadMBps": 33.91604769972718,
+        "diagnostics": {
+          "implemented": true,
+          "frameDrops": 0,
+          "parserErrors": 0,
+          "idelayReadyLosses": 0,
+          "frameHighwater": 1,
+          "syncAcquisitions": 1,
+          "observedFrames": 25370,
+          "capacityReached": false,
+          "writerError": 0
+        },
+        "flight": {
+          "words": [
+            827478598,
+            0,
+            405931,
+            405931,
+            0,
+            508761,
+            0,
+            0,
+            11,
+            4000000,
+            1048576
+          ],
+          "oldestOffset": 0,
+          "retainedBytes": 405931,
+          "totalBytes": 405931,
+          "triggerTicks": 508761,
+          "elapsedHigh": 0,
+          "flags": 11,
+          "postTicks": 4000000,
+          "capacityBytes": 1048576
+        },
+        "historyOverwritten": false,
+        "retainedHistoryBytes": 405931,
+        "discardedHistoryBytes": 0,
+        "overwrittenBytes": 0,
+        "alignmentDiscardedBytes": 0,
+        "initialExecutionUnknown": true,
+        "windowBasis": "trigger-post-window; retained prefix is byte bounded",
+        "fclk": 119999998,
+        "tckKhz": 9999.999833333333
+      },
+      "summary": null,
+      "config": {
+        "protocol": "ETMv3",
+        "idr": 1091891777,
+        "ctrl": 2064,
+        "ccer": 100352,
+        "traceid": 2
+      },
+      "captureSeconds": 0.02,
+      "clockPolicy": "target-firmware-owned",
+      "gpioSpeed": 1
+    }
+  },
+  "trigger": {
+    "source": "fault",
+    "observedValue": 67172355,
+    "unix": 1793815771.914071,
+    "detection": "host polling, 10ms requested interval; not a physical fault trigger"
+  },
+  "activeBeforeReturn": 3,
+  "exceptionReturned": true,
+  "faultRegistersRestored": true,
+  "restored": {
+    "initialDHCSR": "0x1010001",
+    "clockBefore": {
+      "name": "STM32F103",
+      "cpuid": "0x411fc231",
+      "device": "0x10036414",
+      "registers": {
+        "0x40021000": "0x3034e83",
+        "0x40021004": "0x51040a"
+      }
+    },
+    "backupSha256": "fe3890b7c8802b90b8becabd4414e22436cae869b16c56aef4c8e68867fc1fbf",
+    "sramRestored": true,
+    "registersRestored": true,
+    "clockAfter": {
+      "name": "STM32F103",
+      "cpuid": "0x411fc231",
+      "device": "0x10036414",
+      "registers": {
+        "0x40021000": "0x3034e83",
+        "0x40021004": "0x51040a"
+      }
+    },
+    "finalDHCSR": "0x1010001",
+    "restored": true
+  },
+  "passed": true
+}

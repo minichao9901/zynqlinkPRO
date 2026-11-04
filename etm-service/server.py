@@ -1,6 +1,7 @@
 """本地 ETM 页面、Zynq FPGA 采集任务、OpenCSD 解码与记录文件服务。"""
 import base64
 import hashlib
+import hmac
 import io
 import json
 import math
@@ -1020,6 +1021,7 @@ def capture_job(jid, sid, options):
         v.swd_hz = options.get('swdHz', 10000000)
         v.traceid = int(options['config'].get('traceid', 2))
         v.seconds = options['seconds']
+        v.flight=options.get('flight')
         # LA（KingstVIS socket）是**单客户端**资源：从连上到本任务结束（含逐片导出/解码）都算持有。
         # 只按 state 排他会漏掉 decoding 阶段 —— 那时后续分片还要用同一条连接和缓存（审查 R05）。
         with lock: jobs[jid]['_laLease'] = True
@@ -1038,7 +1040,7 @@ def capture_job(jid, sid, options):
             change(jid,state='starting')
             v.sock.settimeout(5)
             v.sock.sendall(b'start');started=True
-            v.sock.settimeout(60)
+            v.sock.settimeout((options['flight']['timeout']+60) if options.get('flight') else 60)
             change(jid, state='armed', started=time.time(), _socket=v.sock)
         raw = b''
         while True:
@@ -1099,7 +1101,7 @@ def capture_job(jid, sid, options):
             m['captureQuality']=transport
             save(sid,m)
             change(jid,captureQuality=transport)
-            if transport.get('loss') or not transport.get('synced') or not transport.get('ended'):
+            if transport.get('loss') or not transport.get('synced') or not transport.get('ended') or (transport.get('flight') and not transport.get('captureComplete')):
                 detail=transport.get('diagnostics') or {}
                 facts=[]
                 if detail.get('implemented'):
@@ -1152,13 +1154,19 @@ def capture_job(jid, sid, options):
         finally:
             # Never leave the probe claimed after a failed or finished job;
             # the browser must be able to reclaim it for target restore.
+            release_error=None
             try:
                 zynq_la.release()
-            except Exception:
-                pass
+            except Exception as error:
+                release_error=str(error)
             with lock:
                 jobs[jid].pop('_socket',None)
                 jobs[jid].pop('_laLease',None)
+                if release_error:jobs[jid].update(cleanupPending=True,cleanupError=release_error)
+                cleanup_pending=jobs[jid].get('cleanupPending')
+            proxy=app.extensions.get('native_probe')
+            if proxy:
+                proxy.finish_capture(sid,'采集清理未确认' if cleanup_pending else None)
 
 
 @app.post('/api/capture')
@@ -1174,11 +1182,18 @@ def start_capture():
         raise ValueError('载入的 ELF 已失效，请重新选择固件。')
     elf_info(elf)
     source_files = read_source_snapshot(o['elfId'],o['sourceSnapshot']) if o.get('sourceSnapshot') else o.get('sources', {})
+    from zynq_ddr import flight_options
+    flight=flight_options(o.get('flight'))
+    restore_owner=o.get('restoreOwner')
+    if restore_owner is not None and (not isinstance(restore_owner,str) or not re.fullmatch('[0-9a-f]{32}',restore_owner)):
+        raise ValueError('无效恢复会话身份')
+    if flight and not app.extensions.get('native_probe'):
+        raise ValueError('飞行记录需要统一本机探针服务')
     swd_hz=o.get('swdHz',10000000)
     if isinstance(swd_hz,bool) or not isinstance(swd_hz,int) or not 250000<=swd_hz<=50000000:
         raise ValueError('SWD控制时钟须为250000～50000000 Hz整数')
     o = dict(rate=int(o.get('rate', 100000000)), seconds=float(o.get('seconds', .01)),
-             swdHz=swd_hz,
+             swdHz=swd_hz,flight=flight,restoreOwner=restore_owner,
              threshold=1.65, sync=bool(o.get('sync', True)),
              decode=bool(o.get('decode')), clock=0, data=[1, 2, 3, 4],
              config=decoder_config(o.get('config', {})), elfId=o.get('elfId'),sourceSnapshot=o.get('sourceSnapshot'),
@@ -1196,7 +1211,12 @@ def start_capture():
         if any(j.get('kind','capture')=='capture' and (j['state'] in ('queued', 'starting', 'armed', 'saving', 'decoding') or j.get('_laLease') or j.get('cleanupPending')) for j in jobs.values()):
             raise ValueError('已有采集任务进行中；等它结束再采。')
         sid = 'capture-' + uuid.uuid4().hex
+        proxy=app.extensions.get('native_probe')
+        if proxy:
+            proxy.begin_capture(sid,restore_owner)
         jid = new_job(sid, 'queued')
+        jobs[jid]['flight']=bool(flight)
+        jobs[jid]['restoreOwner']=restore_owner
     try:
         folder = directory(sid);folder.mkdir()
         (folder / 'firmware.elf').write_bytes(elf.read_bytes())
@@ -1208,8 +1228,41 @@ def start_capture():
                        input='capture.'+o['rawFormat'], **o, configBasis='SWD snapshot' if o['targetVerified'] else 'provided trace configuration'))
         threading.Thread(target=capture_job, args=(jid, sid, o), daemon=True).start()
     except Exception as error:
-        change(jid,state='error',error=str(error));raise
+        change(jid,state='error',error=str(error))
+        if proxy:
+            proxy.coordinator.release('capture',sid)
+            proxy.finish_capture(sid)
+        raise
     return jsonify(job=jid, record=sid)
+
+
+@app.post('/api/capture-restored/<sid>')
+def capture_restored(sid):
+    proxy=app.extensions.get('native_probe')
+    if not proxy or not hmac.compare_digest(request.headers.get('X-Trace-CLI',''),proxy.token):abort(403)
+    if request.remote_addr not in ('127.0.0.1','::1'):abort(403)
+    if request.headers.get('Origin') and request.headers['Origin']!=request.host_url.rstrip('/'):abort(403)
+    value=request.get_json() or {};owner=value.get('owner')
+    with lock:
+        matches=[j for j in jobs.values() if j['record']==sid and j.get('restoreOwner')==owner]
+        if len(matches)!=1 or matches[0]['state'] in ACTIVE:raise ValueError('恢复任务仍在运行或身份不匹配')
+    proxy.complete_capture(sid,owner)
+    return jsonify(ok=True,released=True)
+
+
+@app.post('/api/flight-trigger/<jid>')
+def trigger_flight(jid):
+    proxy=app.extensions.get('native_probe')
+    if not proxy or not hmac.compare_digest(request.headers.get('X-Trace-CLI',''),proxy.token):abort(403)
+    if request.remote_addr not in ('127.0.0.1','::1'):abort(403)
+    if request.headers.get('Origin') and request.headers['Origin']!=request.host_url.rstrip('/'):abort(403)
+    with lock:
+        job=jobs.get(jid)
+        if not job or not job.get('flight') or job['state']!='armed':raise ValueError('没有已就绪的飞行记录')
+        active=zynq_la.session()
+        if not active.flight or not active.running:raise ValueError('飞行记录已结束')
+        active.flight_requested.set()
+    return jsonify(ok=True,requested=True,completed=False)
 
 
 @app.post('/api/stop/<jid>')

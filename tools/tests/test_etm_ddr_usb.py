@@ -95,5 +95,32 @@ class DdrUsbTests(unittest.TestCase):
         self.assertEqual(s.start(),'ddr-started');s._start_ddr.assert_called_once()
         self.assertEqual(s._control.call_count,1,'must not arm legacy ZET1 before DDR')
 
+    def test_ring_download_binds_metadata_and_preserves_chronological_payload(self):
+        w=words(count=117);w[4+33]=3;w[4+17]=52000;w[4+4]=128
+        metadata=[0x31525246,16,117,645,0,50000,0,0,15,2000,128]
+        extended=words();extended[4:15]=metadata
+        h=list(struct.unpack('<128I',header(w)));h[1]=2;h[16:27]=metadata
+        self.dev.ctrl_transfer.return_value=struct.pack('<44I',*w)
+        payload=bytes((16+528+k)&255 for k in range(117))
+        self.dev.read.side_effect=[struct.pack('<128I',*h),payload[:112],payload[112:]]
+        def command(out,inp,p):
+            return b'\x8c\0'+struct.pack('<44I',*(extended if p[1]==7 else w))
+        self.t.requested_ticks=2000
+        with tempfile.TemporaryDirectory(dir=self.scratch) as temp,patch.object(d,'xfer',side_effect=command):
+            path=Path(temp)/'ring.frm1';s=self.t.download(path);q=d.quality(s)
+            self.assertEqual(path.read_bytes(),payload)
+            self.assertTrue(q['historyOverwritten']);self.assertEqual(q['overwrittenBytes'],517)
+            self.assertEqual(q['alignmentDiscardedBytes'],11);self.assertEqual(q['discardedHistoryBytes'],528)
+            self.assertTrue(q['captureComplete']);self.assertFalse(q['loss'])
+            self.assertTrue(q['initialExecutionUnknown'])
+            s['registers'][20]=1;s['qualityFlags']=2
+            self.assertFalse(d.quality(s)['captureComplete'])
+
+    def test_flight_arm_rejects_old_capability_before_any_command(self):
+        self.t.snapshot=Mock(return_value=d.unpack(struct.pack('<44I',*words())))
+        self.t.command=Mock()
+        with self.assertRaisesRegex(d.DdrError,'advertise'):self.t.arm_flight(.1,200000000,128)
+        self.t.command.assert_not_called()
+
 
 if __name__=='__main__':unittest.main()

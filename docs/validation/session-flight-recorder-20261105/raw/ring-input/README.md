@@ -1,0 +1,1 @@
+25秒等待后的1MiB环形保留输入。目标ELF使用prebuilt/golden/f103ze-cdc48.elf（e379b4680925…），软件可重建解码库；原始捕获版本PS为b77d93…，见acceptance.json，不冒称最终8d8e3d版本产生。缺口及未知执行保留。

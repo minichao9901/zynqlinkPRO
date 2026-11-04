@@ -9,4 +9,5 @@ int dap_validate_one(const uint8_t *request, uint32_t length, uint32_t capacity,
                      dap_request_plan *plan);
 int DAP_ValidateCommand(const uint8_t *request, uint32_t length, uint32_t capacity,
                         dap_request_plan *plan);
+int dap_changes_link(const uint8_t *request,uint32_t length);
 #endif

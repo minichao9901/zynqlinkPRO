@@ -23,6 +23,7 @@ static volatile uint32_t claimed,download_phase,usb_busy,usb_epoch;
 static volatile uintptr_t inflight_pointer;
 static volatile uint32_t inflight_size,inflight_epoch;
 static volatile uint32_t transfer_id,range_offset,range_bytes,sent_bytes,submit_errors;
+static uint32_t download_oldest,download_capacity;
 static uint32_t header[128] __attribute__((aligned(32)));
 
 static uint32_t irq_save(void){uint32_t f=mfcpsr();mtcpsr(f|0x80U);return f;}
@@ -61,7 +62,7 @@ void etm_ddr_snapshot(uint32_t reply[ETM_DDR_REPLY_WORDS]){
 }
 
 static unsigned identity(const uint32_t args[6]){
-  return DR(10)==args[0] && DR(31)==args[1] && DR(32)==args[2] && DR(33)==2;
+  return DR(10)==args[0] && DR(31)==args[1] && DR(32)==args[2] && (DR(33)==2 || DR(33)==3);
 }
 static unsigned claim_endpoint(void){
   unsigned prior=claimed;
@@ -75,16 +76,17 @@ unsigned etm_ddr_command(unsigned op,const uint32_t args[6],uint32_t reply[ETM_D
   uint32_t total,reference[4],before_id,f;
   if(!available)result=1;
   else if(op==0){ /* read-only snapshot */ }
-  else if(op==1){
+  else if(op==1 || op==5){
     // START: ticks, byte_limit, nonce_lo, nonce_hi, reserved, reserved.
     etm_reference_snapshot(reference);
     if(!args[0] || (uint64_t)args[0]>(uint64_t)reference[0]*2U ||
-       args[1]!=DDR_END-DDR_BASE || !(args[2]|args[3]) || args[4] || args[5])result=3;
+       (op==1 ? args[1]!=DDR_END-DDR_BASE : (!(DR(11)&0x100U) || args[1]<128 || args[1]>DDR_END-DDR_BASE || (args[1]&127))) ||
+       !(args[2]|args[3]) || args[4] || args[5])result=3;
     else if((DR(2)&ACTIVE) || download_phase || usb_busy)result=2;
     else if(!claim_endpoint())result=7;
     else {
       before_id=DR(10);
-      DW(3,DDR_BASE);DW(4,args[1]);DW(15,2);DW(16,args[0]);DW(31,args[2]);DW(32,args[3]);DW(1,1);
+      DW(3,DDR_BASE);DW(4,args[1]);DW(15,op==5 ? 3 : 2);DW(16,args[0]);DW(31,args[2]);DW(32,args[3]);DW(1,1);
       if(DR(10)!=before_id+1U || !(DR(2)&ACTIVE))result=5;
     }
   }else if(op==2){
@@ -104,12 +106,20 @@ unsigned etm_ddr_command(unsigned op,const uint32_t args[6],uint32_t reply[ETM_D
       else if(!claim_endpoint())result=7;
       else {
         memset(header,0,sizeof header);
-        header[0]=0x3144445aU;header[1]=1;header[2]=++transfer_id;
+        header[0]=0x3144445aU;header[1]=DR(33)==3 ? 2 : 1;header[2]=++transfer_id;
         header[3]=args[0];header[4]=args[1];header[5]=args[2];
         header[6]=args[3];header[7]=args[4];header[8]=total;header[9]=DR(28);
         header[10]=DR(22);header[11]=DR(18);header[12]=DR(17);header[13]=DR(29);
         header[14]=sizeof header;header[15]=DR(2);
-        f=irq_save();range_offset=args[3];range_bytes=args[4];sent_bytes=0;download_phase=1;irq_restore(f);
+        download_oldest=0;download_capacity=DDR_END-DDR_BASE;
+        if(DR(33)==3) {
+          unsigned i;
+          download_oldest=DR(35);download_capacity=DR(4);
+          if(!download_capacity || download_capacity>DDR_END-DDR_BASE || download_oldest>=download_capacity || total>download_capacity)result=6;
+          for(i=0;i<10;i++)header[16+i]=DR(34+i);
+          header[26]=download_capacity;
+        }
+        if(!result){f=irq_save();range_offset=args[3];range_bytes=args[4];sent_bytes=0;download_phase=1;irq_restore(f);}
       }
     }
   }else if(op==4){
@@ -118,8 +128,20 @@ unsigned etm_ddr_command(unsigned op,const uint32_t args[6],uint32_t reply[ETM_D
     else if(!identity(args))result=4;
     else if(!claim_endpoint())result=7;
     else {f=irq_save();usb_epoch++;download_phase=usb_busy=claimed=0;irq_restore(f);}
+  }else if(op==6) {
+    if(!(DR(11)&0x100U) || DR(33)!=3 || !identity(args))result=4;
+    else if(!(DR(2)&ACTIVE) || DR(30)!=3 || args[3] || args[4] || args[5] || (DR(42)&8U))result=2;
+    else {DW(1,4);if(!(DR(42)&8U))result=5;}
+  }else if(op==7) {
+    if(!(DR(11)&0x100U))result=1;
   }else result=3;
   etm_ddr_snapshot(reply);reply[3]=result;
+  if(op==7 && !result) {
+    unsigned i;
+    for(i=4;i<ETM_DDR_REPLY_WORDS;i++)reply[i]=0;
+    for(i=0;i<10;i++)reply[4+i]=DR(34+i);
+    reply[14]=DR(4);
+  }
   return result;
 }
 
@@ -142,7 +164,10 @@ unsigned etm_ddr_poll(XUsbPs *usb){
     if(download_phase==1){data=(uint8_t *)header;length=sizeof header;}
     else {
       length=range_bytes-sent_bytes;if(length>CHUNK)length=CHUNK;
-      data=(uint8_t *)(uintptr_t)(DDR_BASE+range_offset+sent_bytes);
+      uint32_t offset=download_oldest+range_offset+sent_bytes;
+      if(offset>=download_capacity)offset-=download_capacity;
+      if(length>download_capacity-offset)length=download_capacity-offset;
+      data=(uint8_t *)(uintptr_t)(DDR_BASE+offset);
     }
     inflight_pointer=(uintptr_t)data;inflight_size=length;inflight_epoch=usb_epoch;usb_busy=1;
     if(XUsbPs_EpBufferSend(usb,ETM_BULKIN_EP,data,length)!=XST_SUCCESS){usb_busy=0;submit_errors++;}

@@ -12,6 +12,16 @@ from native_probe import NativeProbe, install,reset_dap_session
 
 
 class NativeProbeTests(unittest.TestCase):
+    def test_session_cancel_routes_capture_to_its_existing_stop_transaction(self):
+        owner='a'*32
+        backend=SimpleNamespace(lock=threading.RLock(),ACTIVE=('armed',),
+            jobs={'job':{'restoreOwner':owner,'state':'armed'}},
+            stop_capture=Mock(return_value=SimpleNamespace(get_json=lambda:{'ok':True})))
+        with tempfile.TemporaryDirectory() as folder:
+            token=Path(folder)/'token';token.write_text('c'*64)
+            proxy=NativeProbe(backend,token)
+            result=proxy.session_call('cancel',{'owner':owner})
+            self.assertTrue(result['captureStop']['ok']);backend.stop_capture.assert_called_once_with('job')
     def _hss_proxy(self):
         folder=tempfile.TemporaryDirectory();self.addCleanup(folder.cleanup)
         token=Path(folder.name)/'token';token.write_text('c'*64)

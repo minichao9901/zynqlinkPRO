@@ -11,6 +11,10 @@ import json
 from pathlib import Path
 import struct
 import time
+import sys
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'etm-service/tools'))
+from probe_ownership import Ownership
+from probe_hid_control import HidControl
 
 import hid
 
@@ -22,22 +26,22 @@ class Probe:
         if len(matches) != 1:
             raise RuntimeError(f'Expected one probe HID, found {len(matches)}; use --serial')
         self.device = hid.device()
-        self.device.open_path(matches[0]['path'])
+        self.ownership=Ownership()
+        try:
+            self.device.open_path(matches[0]['path'])
+            self.control=HidControl(self.device);self.control.negotiate()
+        except BaseException:
+            self.device.close();self.ownership.close();raise
 
     def close(self):
         self.device.close()
+        self.ownership.close()
 
     def request(self, command, data=b''):
         packet = bytes([1, 1+len(data), command])+data
         if len(packet) > 64:
             raise ValueError('HID request exceeds 64 bytes')
-        self.device.write(packet.ljust(64, b'\0'))
-        deadline = time.monotonic()+3
-        while time.monotonic() < deadline:
-            reply = bytes(self.device.read(64, 200))
-            if len(reply) == 64 and reply[0] == 2 and reply[2] == command:
-                return reply
-        raise TimeoutError(f'HID command {command:#x} timed out')
+        return self.control.exchange(packet.ljust(64,b'\0')[1:])
 
     def action(self, command, action, data=b''):
         reply = self.request(command, bytes([action])+data)

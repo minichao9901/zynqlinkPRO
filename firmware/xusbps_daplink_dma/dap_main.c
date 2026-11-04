@@ -72,6 +72,10 @@ static inline void dap_trace_bytes(uint32_t event_base, const uint8_t *data,
  * Slots remain owned until DMA completes, including a terminating ZLP. */
 static volatile uint32_t request_in, request_out, response_in, response_out;
 static volatile uint32_t session_epoch;
+static uint32_t queue_reject_remaining;
+static uint8_t link_wait_active;
+static uint32_t link_wait_epoch,link_wait_request;
+static XTime link_wait_started;
 uint32_t chry_dap_epoch(void) {return session_epoch;}
 static volatile uint8_t tx_active;
 static uint8_t USB_Request[DAP_PACKET_COUNT][DAP_PACKET_SIZE] __attribute__((aligned(32)));
@@ -154,6 +158,8 @@ void usbd_dap_bulk_in(XUsbPs *instance, u8 ep, void *buffer)
 static void chry_dap_state_init(void)
 {
     request_in=request_out=response_in=response_out=0;
+    queue_reject_remaining=0;
+    link_wait_active=0;
     tx_active=0;tx_final_buffer=0;dap_rx_deferred=0;
     memset(USB_RespSize,0,sizeof USB_RespSize);
 }
@@ -211,7 +217,8 @@ void chry_dap_handle(void)
         flags=irq_save();dap_rx_deferred=0;
         XUsbPs_DapResumeRx(g_dap_usb_instance);irq_restore(flags);
     }
-    while(request_in!=request_out){
+    unsigned service_budget=DAP_PACKET_COUNT;
+    while(request_in!=request_out && service_budget--){
         if((uint32_t)(response_in-response_out)>=DAP_PACKET_COUNT){
             dap_queue_backpressure++;break;
         }
@@ -226,7 +233,13 @@ void chry_dap_handle(void)
         if(USB_Request[req_slot][0]==0x7eU){
             uint32_t q=request_out;
             while(q!=request_in && USB_Request[q%DAP_PACKET_COUNT][0]==0x7eU)q++;
-            if(q==request_in){irq_restore(flags);break;}
+            if(q==request_in && !queue_reject_remaining){
+                if((uint32_t)(request_in-request_out)<DAP_PACKET_COUNT){irq_restore(flags);break;}
+                // A full Queue-only batch leaves no terminator slot. Reject
+                // every queued packet without target effects; never execute
+                // before the protocol's required non-Queue terminator.
+                queue_reject_remaining=DAP_PACKET_COUNT;
+            }
         }
         request_length=request_size[req_slot];
         memcpy(execute_request,USB_Request[req_slot],request_length);
@@ -239,7 +252,7 @@ void chry_dap_handle(void)
         dap_metric_end(MET_QUEUE_WAIT,request_time[req_slot],0);
         dap_trace_add(2U,execute_request[0]);
         dap_request_plan plan;
-        if(!DAP_ValidateCommand(execute_request,request_length,DAP_PACKET_SIZE,&plan)){
+        if(queue_reject_remaining || !DAP_ValidateCommand(execute_request,request_length,DAP_PACKET_SIZE,&plan)){
             USB_Response[rsp_slot][0]=0xffU;USB_RespSize[rsp_slot]=1;
         }else {
             /* Validation may be preempted by USB reset. Do not adopt the new
@@ -248,10 +261,22 @@ void chry_dap_handle(void)
             if(epoch!=session_epoch){irq_restore(flags);break;}
             dap_wait_begin();
             irq_restore(flags);
-            int failed=probe_before_dap();
+            int link_change=dap_changes_link(execute_request,request_length);
+            int failed=link_change ? probe_prepare_link_change() : 0;
+            if(failed==-7) {
+                XTime now;XTime_GetTime(&now);
+                if(!link_wait_active || link_wait_epoch!=epoch || link_wait_request!=request_out) {
+                    link_wait_active=1;link_wait_epoch=epoch;link_wait_request=request_out;link_wait_started=now;
+                }
+                // Yield to USB/HID/stream draining. The original request has
+                // not executed and remains at the head of this same epoch.
+                if(now-link_wait_started<COUNTS_PER_SECOND/4U)break;
+            }
+            link_wait_active=0;
+            if(!failed)failed=probe_before_dap();
             /* An explicit new Connect may clear DP errors and restore the
              * retained snapshot. Never retry the rejected target operation. */
-            if(failed && execute_request[0]==2U)failed=probe_target_recover();
+            if(failed && execute_request[0]==2U && probe_target_context_invalid())failed=probe_target_recover();
             if(failed && execute_request[0]!=0U && execute_request[0]!=0x86U && execute_request[0]!=0x87U){
                 USB_Response[rsp_slot][0]=0xffU;USB_RespSize[rsp_slot]=1;
             }else USB_RespSize[rsp_slot]=(uint16_t)DAP_ExecuteCommand(execute_request,request_length,USB_Response[rsp_slot],DAP_PACKET_SIZE);
@@ -264,7 +289,7 @@ void chry_dap_handle(void)
         flags=irq_save();
         // A bus reset may occur during SWD execution. Discard its old result
         // instead of inserting it into the newly configured USB session.
-        if(epoch==session_epoch){barrier();request_out++;response_in++;}
+        if(epoch==session_epoch){if(queue_reject_remaining)queue_reject_remaining--;barrier();request_out++;response_in++;}
         irq_restore(flags);
         if(epoch!=session_epoch)break;
         dap_service_tx();

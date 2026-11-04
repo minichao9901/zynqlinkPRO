@@ -8,6 +8,10 @@ import argparse
 import json
 import struct
 import time
+import sys
+from pathlib import Path
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'etm-service/tools'))
+from probe_ownership import Ownership,bind_usb
 
 import libusb_package
 import usb.core
@@ -21,10 +25,14 @@ def le(v):
 
 
 def open_dap():
-    dev = usb.core.find(idVendor=0x0D28, idProduct=0x0204,
-                        backend=libusb_package.get_libusb1_backend())
-    if dev is None:
-        raise RuntimeError("DAP not found")
+    lease=Ownership()
+    try:
+        dev = usb.core.find(idVendor=0x0D28, idProduct=0x0204,
+                            backend=libusb_package.get_libusb1_backend())
+        if dev is None:raise RuntimeError("DAP not found")
+        bind_usb(dev,lease)
+    except BaseException:
+        lease.close();raise
     intf = dev.get_active_configuration()[(0, 0)]
     usb.util.claim_interface(dev, 0)
     out = usb.util.find_descriptor(

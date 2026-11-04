@@ -85,8 +85,13 @@ function applyCaptureCapability(){const ms=Math.max(1,Math.round(state.captureMa
 async function loadCapabilities(){try{const value=await api('capabilities');if(!value||typeof value!=='object')return;const seconds=Number(value.captureMaxSeconds),samples=Number(value.captureMaxSamples);if(Number.isFinite(seconds)&&seconds>0)state.captureMaxSeconds=seconds;if(Number.isFinite(samples)&&samples>0)state.captureMaxSamples=samples;state.capabilities=value;for(const o of $('export-type')?.options||[])if(o.value.startsWith('reading-')){o.hidden=!value.readingProjection;o.disabled=!value.readingProjection;}applyCaptureCapability();}catch(e){/* 旧后端没有 /api/capabilities：保持 200 ms 默认上限 */}}
 /** 区间变化（点分片、火焰图拖选、缩放、重置）都回写分片时间轴的选中态。 */
 history.onScopeChange=()=>syncSliceTimeline();
-function on(id,fn,{exclusive=true}={}){$(id).onclick=async()=>{if(exclusive&&state.operation)return;const button=$(id),recordAction=id==='open-record',hardware=exclusive&&(id==='connect'||PROBE_ACTIONS.has(id)&&!!target.probe||id==='start'&&$('sync').checked);if(exclusive)state.operation=true;if(hardware)state.hardwareOperation=true;if(recordAction)history.setLoading(true);button.disabled=true;controls();try{await(hardware?runEmbedded(host,fn):fn());}catch(e){error(e);}finally{if(exclusive)state.operation=false;if(hardware)state.hardwareOperation=false;if(recordAction)history.setLoading(false);button.disabled=false;controls();}};}
+function on(id,fn,{exclusive=true}={}){$(id).onclick=async()=>{if(exclusive&&state.operation)return;const button=$(id),recordAction=id==='open-record',hardware=exclusive&&(id==='connect'||PROBE_ACTIONS.has(id)&&!!target.probe||(id==='start'||id==='flight-start')&&$('sync').checked);if(exclusive)state.operation=true;if(hardware)state.hardwareOperation=true;if(recordAction)history.setLoading(true);button.disabled=true;controls();try{await(hardware?runEmbedded(host,fn):fn());}catch(e){error(e);}finally{if(exclusive)state.operation=false;if(hardware)state.hardwareOperation=false;if(recordAction)history.setLoading(false);button.disabled=false;controls();}};}
 function controls(){const busy=state.operation||!!state.job,connected=!!target.probe;
+  if($('flight-start')){
+    $('flight-start').disabled=busy||!state.elfInfo||!host||!connected||target.info?.profile!=='stm32f103ze';
+    $('flight-trigger').disabled=!state.flightRecording||state.jobPhase!=='armed';
+    for(const id of ['flight-source','flight-capacity','flight-post','flight-timeout'])$(id).disabled=busy;
+  }
   for(const id of ['reset','halt','run','read-config','read-clock','apply-config','restore-config','run-to'])$(id).disabled=!connected||busy;
   $('reset').disabled=!connected||busy||state.entryAddress===null;$('run-to').disabled=!connected||busy||state.entryAddress===null;
   $('apply-config').disabled=!connected||busy||!target.info?.traceSupported||!state.elfInfo||state.entryAddress===null;
@@ -108,7 +113,7 @@ function controls(){const busy=state.operation||!!state.job,connected=!!target.p
   $('reset-before').disabled=busy||!$('entry-before').checked;
   $('expected-cpu').disabled=busy||$('auto-clock').checked;$('expected-trace').disabled=busy||$('auto-clock').checked;
   if(target.transportFault){for(const id of ['reset','halt','run','read-config','read-clock','apply-config','restore-config','run-to','start','remove-break'])$(id).disabled=true;for(const b of document.querySelectorAll('.symbol-row button,.breakpoint-row button,.breakpoint-row input'))b.disabled=true;}
-  $('recover-debug').hidden=!connected||!target.transportFault;$('recover-debug').disabled=busy;
+  $('recover-debug').hidden=!connected||!(target.transportFault||state.pendingCaptureRestore);$('recover-debug').disabled=busy;
   $('start').textContent=$('sync').checked?'联动采集':'直接采集';
 }
 function panel(name){for(const b of document.querySelectorAll('[data-panel]')){const active=b.dataset.panel===name;b.setAttribute('aria-selected',String(active));b.tabIndex=active?0:-1;$('panel-'+b.dataset.panel).hidden=!active;}document.querySelector('.sidebar-content').scrollTop=0;}
@@ -305,7 +310,7 @@ async function watchJob(id,{resume=false,kind='decode'}={}){
   }finally{state.job=null;state.jobKind=null;state.jobPhase=null;controls();}
 }
 on('connect',async()=>{state.lastTraceConfig=null;target.profile=$('target-profile').value;target.hseHz=null;const info=await target.connect();/* 手填优先于该板默认值，最后才是 auto 兜底 */const hse=state.hseOverride??state.hseValues[info.profile]??state.hseValues.auto;$('hse').value=hse??'';target.hseHz=hse?hse*1e6:null;if(state.hseValues.auto!==undefined){if(state.hseValues[info.profile]===undefined)state.hseValues[info.profile]=hse;delete state.hseValues.auto;}await showTarget(await target.inspect());if(state.elfInfo&&target.breakpoints.items.some(b=>b.enabled)){await target.verifyElf(state.elfInfo);await target.breakpoints.resume();await showTarget(await target.inspect());}});
-on('recover-debug',async()=>{await target.recoverDebugPort();if(state.pendingBreakpointRestore.length){await target.verifyElf(state.elfInfo);await resumeBreakpoints(state.pendingBreakpointRestore);}await showTarget(await target.inspect());$('job-state').classList.remove('bad');$('job-state').textContent='调试口已恢复，目标暂停；请重新联动采集';});
+on('recover-debug',async()=>{await target.recoverDebugPort();await target.restore();if(state.pendingBreakpointRestore.length){await target.verifyElf(state.elfInfo);await resumeBreakpoints(state.pendingBreakpointRestore);}await showTarget(await target.inspect());await confirmCaptureRestore();$('job-state').classList.remove('bad');$('job-state').textContent='调试口已恢复，目标暂停；请重新联动采集';});
 async function disconnectTarget(){await target.disconnect();target.info=null;showClocks();$('target-state').textContent='探针已断开';$('live-pc').textContent='当前 PC：未连接';renderBreakpoints();controls();}
 on('disconnect',disconnectTarget);
 on('read-config',async()=>{const info=await target.inspect();state.traceConfigDirty=false;await showTarget(info);});on('read-clock',async()=>showTarget(await target.inspect()));on('halt',async()=>{await target.halt();await showTarget(await target.inspect());});
@@ -317,21 +322,28 @@ on('cancel-wait',async()=>{target.cancelEntry=true;log('已请求取消等待断
 on('apply-config',async()=>{entry(true);const info=await target.configure(options());state.traceConfigDirty=false;await showTarget(info);});on('restore-config',async()=>{await target.restore();state.traceConfigDirty=false;await showTarget(await target.inspect());log('原 trace 设置已恢复并重新回读');});
 on('check-la',async()=>{const s=await api('status');const ok=s.zynq?.ready===true;$('la-state').textContent=ok?'Zynq ETM 接收端在线':'未找到 Zynq ETM 接收端';$('la-state').className='status '+(ok?'good':'bad');$('capture-capability-hint').textContent=ok?(s.zynq.message||'Zynq FPGA 直接接收四位 DDR ETM；单次采集上限 1000 ms。'):(s.zynq?.message||'请确认 ZynqDAP 已加载配套 bit/ELF 并连接');clockPlan();});
 on('open-record',()=>loadRecord($('records').value));
-on('start',async()=>{const sync=$('sync').checked,seconds=Number($('duration').value)/1000,requested=options();
+async function confirmCaptureRestore(){
+  const pending=state.pendingCaptureRestore;if(!pending)return;
+  await api('capture-restored/'+pending.record,{owner:pending.owner});state.pendingCaptureRestore=null;
+}
+async function startCapture(){const sync=$('sync').checked,seconds=Number($(state.flightRecording?'flight-post':'duration').value)/1000,requested=options();
+  const flight=state.flightRecording?{capacityBytes:Number($('flight-capacity').value)*1048576,timeout:Number($('flight-timeout').value),trigger:$('flight-source').value}:null;
+  if(flight&&!sync)throw Error('飞行记录需要服务端联动');
   // 采集上限由服务能力返回；Zynq 路径只按时长限制。
   if(!(seconds>0)||seconds>state.captureMaxSeconds)throw Error(`采集参数无效：单次上限 ${Math.round(state.captureMaxSeconds*1000)} ms；更长的覆盖请分多次采集；尚未操作目标`);
   if(!Number.isInteger(requested.traceid)||requested.traceid<1||requested.traceid>111)throw Error('Trace ID 范围为 1～111；尚未操作目标');
   log('采集步骤：检查 Zynq ETM 接收端');const available=await api('status');if(available.captureProtocol!==2)throw Error('本地 ETM 桥版本不匹配，请重启或更新完整桥包，避免新页面混用旧解码器；尚未操作目标');if(!available.zynq?.ready)throw Error('Zynq ETM 接收端未就绪：'+(available.zynq?.message||'请检查 bit/ELF 配对与 USB 连接')+'；尚未操作目标');
   const flashLimit=target.info?.flashLimit||0x08020000;
   if(state.elfInfo.segments.some(s=>s.address+atob(s.data).length>flashLimit))throw Error('ELF 超出当前目标的 Trace Flash 范围');
-  const captureElf=state.elfInfo,captureElfId=state.elfId,captureSourceSnapshot=state.sourceSnapshot,requestedOptions=options(),selectedEntry=sync&&$('entry-before').checked?entry(true):null;
+  const restoreOwner=sync?target.probe?.device?.owner:null;
+  const captureElf=state.elfInfo,captureElfId=state.elfId,captureSourceSnapshot=state.sourceSnapshot,requestedOptions=options(),selectedEntry=sync&&!flight&&$('entry-before').checked?entry(true):null;
   let config={traceid:Number($('traceid').value),config:1},captureEntry=null,suspendedBps=[];
   let stage='校验 ELF';const markStage=(name,metricName=name)=>{stage=name;target.setControlStage(metricName);};markStage(stage);
   await withCleanup(async()=>{try{
   log('采集步骤：'+stage);
   if(sync){if(!target.probe)throw Error('请先连接探针');if(!target.info?.traceSupported)throw Error(target.info?.traceStatus||'目标 trace 未适配');await target.verifyElf(captureElf);markStage('暂停本页断点');log('采集步骤：'+stage);suspendedBps=target.breakpoints.items.filter(b=>b.lease);state.pendingBreakpointRestore=suspendedBps;await target.breakpoints.suspend();renderBreakpoints();
     markStage($('entry-before').checked?$('reset-before').checked?'复位并停在业务起点':'运行至业务起点':'暂停当前目标');log('采集步骤：'+stage);
-    if($('entry-before').checked){captureEntry=selectedEntry;state.waiting=true;controls();$('break-state').textContent='正在等待所选断点…最长 3 分钟，可点「取消等待」';try{await showTarget($('reset-before').checked?await target.reset({address:captureEntry}):await target.runTo(captureEntry));}finally{state.waiting=false;controls();}}
+    if(!flight&&$('entry-before').checked){captureEntry=selectedEntry;state.waiting=true;controls();$('break-state').textContent='正在等待所选断点…最长 3 分钟，可点「取消等待」';try{await showTarget($('reset-before').checked?await target.reset({address:captureEntry}):await target.runTo(captureEntry));}finally{state.waiting=false;controls();}}
     else await target.halt();
     markStage('核对实际时钟');log('采集步骤：'+stage);const before=await target.inspect(),c=before.clocks;
     if(!c?.coreHz||!c?.physicalTraceHz||Math.abs(c.coreHz-Number($('expected-cpu').value)*1e6)>100||Math.abs(c.physicalTraceHz-Number($('expected-trace').value)*1e6)>100){
@@ -346,15 +358,23 @@ on('start',async()=>{const sync=$('sync').checked,seconds=Number($('duration').v
     markStage('配置 ETM / TPIU');log('采集步骤：'+stage);await showTarget(await target.configure(requestedOptions));config=target.config;
   }else config=externalDecodeConfig();
   // 新服务默认支持1 s实验长窗；本页按实际连接服务的能力校验。
-  const captureSeconds=Number($('duration').value)/1000;
+  const captureSeconds=seconds;
   if(!(captureSeconds>0)||captureSeconds>state.captureMaxSeconds)throw Error(`单次采集上限 ${Math.round(state.captureMaxSeconds*1000)} ms（一次采集 + 一次解码）；更长的覆盖请分多次采集。`);
   markStage('启动 Zynq ETM 接收','交接/采集/下载/解码/首屏');log('采集步骤：'+stage);
   if(sync){log('采集步骤：释放浏览器 USB，交给本地服务 arm/恢复 CPU');await target.suspendUsb();}
-  const created=await api('capture',{rate:500000000,seconds:captureSeconds,swdHz:(target.suspendedClockKhz||target.controlClockKhz||10000)*1000,sync,decode:$('auto-decode').checked,config,elfId:captureElfId,targetVerified:sync,targetSnapshot:sync?target.info:null,captureScope:sync?'business-unfiltered-window':'externally-configured-window',captureEntry,sourceSnapshot:captureSourceSnapshot});
+  const created=await api('capture',{restoreOwner,flight,rate:500000000,seconds:captureSeconds,swdHz:(target.suspendedClockKhz||target.controlClockKhz||10000)*1000,sync,decode:$('auto-decode').checked,config,elfId:captureElfId,targetVerified:sync,targetSnapshot:sync?target.info:null,captureScope:sync?'business-unfiltered-window':'externally-configured-window',captureEntry,sourceSnapshot:captureSourceSnapshot});
+  if(restoreOwner)state.pendingCaptureRestore={record:created.record,owner:restoreOwner};
   log('联动任务创建；起点 '+(captureEntry===null?'当前暂停位置':hex(captureEntry)));await watchJob(created.job,{resume:false,kind:'capture'});
-  }catch(e){throw new Error(stage+'失败：'+e.message,{cause:e});}},async()=>{try{if(sync){if(!target.probe){markStage('重新连接 USB');await target.resumeUsb();}if(target.probe){markStage('恢复配置/断点/刷新状态');target.assertTransport();await target.clearEntryBreak();await target.restore();await resumeBreakpoints(suspendedBps);await showTarget(await target.inspect());log('本次 trace 配置与断点已恢复；目标状态已刷新');}}}finally{target.setControlStage(null);}},e=>log('采集后的清理/回读失败（未覆盖首次错误）：'+e.message));
-});
+  }catch(e){throw new Error(stage+'失败：'+e.message,{cause:e});}},async()=>{try{if(sync){if(!target.probe){markStage('重新连接 USB');await target.resumeUsb();}if(target.probe){markStage('恢复配置/断点/刷新状态');target.assertTransport();await target.clearEntryBreak();await target.restore();await resumeBreakpoints(suspendedBps);await showTarget(await target.inspect());await confirmCaptureRestore();log('本次 trace 配置与断点已恢复；目标状态已刷新');}}}finally{target.setControlStage(null);}},e=>log('采集后的清理/回读失败（未覆盖首次错误）：'+e.message));
+}
+on('start',startCapture);
 on('stop',async()=>{state.captureCancelled=true;const id=state.job||state.failedCaptureJob;if(id){await api('stop/'+id,{});state.failedCaptureJob=null;controls();}},{exclusive:false});
+on('flight-start',async()=>{
+  state.flightRecording=true;
+  try{await startCapture();}
+  finally{state.flightRecording=false;controls();}
+});
+on('flight-trigger',async()=>{if(!state.job)throw Error('飞行记录未就绪');await api('flight-trigger/'+state.job,{});log('已请求触发，等待触发后窗口和现场恢复');},{exclusive:false});
 on('decode',async()=>{if(!state.current)throw Error('请选择记录');await watchJob((await api('decode/'+state.current,{})).job);});
 async function download(kind){
   if(!state.current)throw Error('请选择记录');

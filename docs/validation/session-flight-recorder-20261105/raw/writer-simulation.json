@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "hardwareAccess": false,
+  "actualDdrReadback": false,
+  "cases": 92,
+  "repeatedCapturesWithoutReset": 64,
+  "scope": "AXI channel stability, B-response completion, startup region validation, hard burst boundary, 4KiB boundaries, partial WSTRB, ping-pong stalls, errors, empty input and draining abort; no per-beat capacity decision",
+  "sources": {
+    "fpga/rtl/orbtrace_ddr_writer.v": "715b3798d201dd7f0c58947d3dcc6f8346bdf1d982e70409979ac8c2d7a113a7",
+    "fpga/sim/tb_orbtrace_ddr_writer.sv": "83a47d4d2ef116de2c1bb05df95e1961cfb4f0af8ccadb1aa129175e5ae364e2",
+    "fpga/rtl/orbtrace_ddr_controller.v": "7f793543c9561bd8505193a248abf2c3e44fdd442f293cbbf4dfa11195c42ca4",
+    "fpga/sim/tb_orbtrace_ddr_controller.sv": "7e4aaf88f7b7946e5ab22fadb07d63af2dc958778258f4ff1b94e69300e394ec"
+  },
+  "controllerRegressionPassed": true
+}

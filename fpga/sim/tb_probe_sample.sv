@@ -93,7 +93,19 @@ module tb_probe_sample;
         reset();configure();write_reg(0,32'h301);wait(busy);write_reg(0,0);
         repeat(500) @(negedge clk);read_reg(1,value);
         if(active || value[31:16]!=1) $fatal(1,"graceful stop did not finish one sample %x",value);
-        $display("PASS sampler: posted reads, 1KiB boundary, WAIT, FIFO backpressure, stop, FAULT, parity, watchdog");
+        // A DAP handoff rebases the timer but must retain the nominal grid.
+        reset();configure();write_reg(4,1000);write_reg(7,10000);write_reg(0,32'h301);
+        wait(dut.head==1);write_reg(0,0);repeat(100) @(negedge clk);
+        read_reg(5,previous);repeat(3)read_reg(5,value);
+        value=dut.tick+3500;write_reg(7,value);write_reg(0,32'h305);
+        wait(dut.head>=3);write_reg(0,0);repeat(100) @(negedge clk);
+        read_reg(7,skipped);if(skipped<3)$fatal(1,"handoff did not account skipped deadlines");
+        for(n=0;n<2;n=n+1)begin
+            read_reg(5,stamp);
+            if((stamp-previous)%1000!=0 || stamp-previous<1000)$fatal(1,"resume changed cadence %d -> %d",previous,stamp);
+            previous=stamp;repeat(3)read_reg(5,value);
+        end
+        $display("PASS sampler: posted reads, 1KiB boundary, WAIT, FIFO backpressure, stop, FAULT, parity, watchdog, phase-preserving resume with explicit gaps");
         $finish;
     end
     initial begin #2000000;$fatal(1,"test timeout");end

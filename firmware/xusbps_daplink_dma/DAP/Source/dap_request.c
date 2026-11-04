@@ -1,5 +1,24 @@
 #include "dap_request.h"
 
+int dap_changes_link(const uint8_t *p,uint32_t length) {
+    if(!length)return 0;
+    if(p[0]==0x7e || p[0]==0x7f) {
+        if(length<2)return 0;
+        unsigned offset=2;
+        for(unsigned i=0;i<p[1];i++) {
+            dap_request_plan child;
+            if(!dap_validate_one(p+offset,length-offset,4096,&child))return 0;
+            if(dap_changes_link(p+offset,child.request_bytes))return 1;
+            offset+=child.request_bytes;
+        }
+        return 0;
+    }
+    // JTAG_Sequence also carries ordinary RISC-V memory transactions: its
+    // command number alone must not terminate a compatible running stream.
+    return p[0]==2 || p[0]==3 || p[0]==0x0a || p[0]==0x12 || p[0]==0x15 ||
+           (p[0]==0x10 && length>=3 && (p[2]&0x80));
+}
+
 /* Sizes include the command byte. Bounds are checked before every payload
  * access, including commands that the wire executor may stop halfway through. */
 int dap_validate_one(const uint8_t *p, uint32_t length, uint32_t capacity,

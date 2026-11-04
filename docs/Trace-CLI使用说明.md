@@ -1,5 +1,7 @@
 # Trace CLI
 
+F103ZE新增环形飞行记录：`capture --flight --ring-bytes 8388608 --seconds 0.02 --trigger manual --arm-timeout 60`，其中seconds为触发后窗口；`trace trigger --record <记录目录>`从另一终端请求触发，`--cancel`请求停止。需要匹配的新bit/ELF；Fault模式为主机轮询，可错过短暂异常。覆盖/帧对齐移除及起点未知显式保留，详情与范围见[飞行记录验收](validation/session-flight-recorder-20261105/README.md)。
+
 统一入口`python -X utf8 toolbox.py trace`，转交`etm-service/trace.py`。该入口的`capture/doctor`是Zynq原生路径；离线decode/query/export等转交`etm-service/tools/cli_entry.py`及`trace_cli.py`，沿用原生二进制/TraceStore协议。
 
 优化分支上一阶段已由C++直接构建完整查询索引、默认视图和最终store，Python保留静态字典及记录发布；要求配套具备 `complete-index-v1` 的 `etm_storebuild.exe`。离线研发显式设置 `ETM_COMPLETE_INDEX=0` 可运行旧facts/NumPy索引对照，缺少新能力时不会静默回退。此说明不表示主线或固定EXE已经集成该候选；范围以最新验收报告为准。

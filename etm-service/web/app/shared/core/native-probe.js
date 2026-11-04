@@ -9,6 +9,8 @@ function host(){
   return null;
 }
 export function nativeProbeEnabled(){return !!host();}
+export const nativeProbeStatus=()=>call('session','status');
+export const nativeProbeCancel=owner=>call('session','cancel',{owner});
 const identity=()=>crypto.randomUUID().replaceAll('-','');
 function deliveryIdentity(w,token){
   // Share one counter with same-origin workbench iframes. Persist it across
@@ -96,7 +98,18 @@ class NativeUsbDevice extends EventTarget{
   async open(){Object.assign(this,await this.rpc('open'));this.opened=true;this.dapSynchronized=false;this.atomicDapSupported=false;this.reads=new Map();this.commandPending=0;this.dapProfile?.open();}
   async close(){const epoch=this.resourceEpoch;await this.rpc('close');if(epoch===this.resourceEpoch){this.opened=false;this.commandPending=0;}}
   async selectConfiguration(number){Object.assign(this,await this.rpc('configuration',{number}));}
-  async claimInterface(number){const r=await this.rpc('claim',{number});this.dapSynchronized=number===0&&r.syncProtocol==='zynq-dap-epoch/1'&&Number.isInteger(r.queueEpoch)&&r.queueState?.length===3&&r.queueState.every(v=>v===0);if(!this.dapSynchronized)throw Error('本地桥未确认DAP会话边界，请更新完整桥包');this.atomicDapSupported=r.atomicDapExchange===1;const i=this.configuration.interfaces.find(i=>i.interfaceNumber===number);if(i)i.claimed=true;}
+  async claimInterface(number){const r=await this.rpc('claim',{number});this.dapSynchronized=number===0&&r.syncProtocol==='zynq-dap-epoch/1'&&Number.isInteger(r.queueEpoch)&&r.queueState?.length===3&&r.queueState.every(v=>v===0);if(!this.dapSynchronized)throw Error('本地桥未确认DAP会话边界，请更新完整桥包');this.atomicDapSupported=r.atomicDapExchange===1;this.bulkArmMemory=r.bulkArmMemory===1;const i=this.configuration.interfaces.find(i=>i.interfaceNumber===number);if(i)i.claimed=true;}
+  async memoryRead(address,length,ap=0,csw=0x23000052){
+    const epoch=this.resourceEpoch;
+    const r=await this.rpc('memory-read',{address,length,ap,csw,transport:'swd'});
+    if(epoch!==this.resourceEpoch)throw Error('内存读取期间会话已改变');
+    const b=decoded(r.data);if(b.length!==length)throw Error('批量内存读取长度不一致');return b;
+  }
+  async memoryWrite(address,data,ap=0,csw=0x23000052){
+    const epoch=this.resourceEpoch;
+    const r=await this.rpc('memory-write',{address,data:encoded(data),ap,csw,transport:'swd'});
+    if(epoch!==this.resourceEpoch||r.bytesWritten!==data.length)throw Error('批量内存写入未完整确认；未重放');
+  }
   async releaseInterface(number){await this.rpc('release',{number});const i=this.configuration.interfaces.find(i=>i.interfaceNumber===number);if(i)i.claimed=false;}
   async selectAlternateInterface(number,alternate){await this.rpc('alternate',{number,alternate});const i=this.configuration.interfaces.find(i=>i.interfaceNumber===number);if(i)i.alternate=i.alternates.find(a=>a.alternateSetting===alternate);}
   async clearHalt(direction,endpoint){await this.rpc('clear',{endpoint:endpoint|(direction==='in'?128:0)});}

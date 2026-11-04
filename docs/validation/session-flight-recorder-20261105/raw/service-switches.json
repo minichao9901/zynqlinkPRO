@@ -1,0 +1,70 @@
+{
+  "passed": true,
+  "rows": [
+    {
+      "path": "direct",
+      "repeat": 0,
+      "readSeconds": 0.025333400000818074,
+      "writeSeconds": 0.027331899997079745
+    },
+    {
+      "path": "direct",
+      "repeat": 1,
+      "readSeconds": 0.025625499998568557,
+      "writeSeconds": 0.026243400003295392
+    },
+    {
+      "path": "direct",
+      "repeat": 2,
+      "readSeconds": 0.02492550000170013,
+      "writeSeconds": 0.02554719999898225
+    },
+    {
+      "path": "service",
+      "repeat": 0,
+      "readSeconds": 0.02837790000194218,
+      "writeSeconds": 0.030484699993394315
+    },
+    {
+      "path": "service",
+      "repeat": 1,
+      "readSeconds": 0.02703829999518348,
+      "writeSeconds": 0.054042899995693006
+    },
+    {
+      "path": "service",
+      "repeat": 2,
+      "readSeconds": 0.027411399998527486,
+      "writeSeconds": 0.0521496000001207
+    }
+  ],
+  "switches": 1000,
+  "bytes": 16384,
+  "swdHz": 10000000,
+  "restored": {
+    "initialDHCSR": "0x1010001",
+    "clockBefore": {
+      "name": "STM32F103",
+      "cpuid": "0x411fc231",
+      "device": "0x10036414",
+      "registers": {
+        "0x40021000": "0x3034e83",
+        "0x40021004": "0x51040a"
+      }
+    },
+    "backupSha256": "64685c04311c1e27fd4bfd0ef0fb2ef507ae1c96ddefa519ceaeaf4bee29b329",
+    "sramRestored": true,
+    "registersRestored": true,
+    "clockAfter": {
+      "name": "STM32F103",
+      "cpuid": "0x411fc231",
+      "device": "0x10036414",
+      "registers": {
+        "0x40021000": "0x3034e83",
+        "0x40021004": "0x51040a"
+      }
+    },
+    "finalDHCSR": "0x1010001",
+    "restored": true
+  }
+}

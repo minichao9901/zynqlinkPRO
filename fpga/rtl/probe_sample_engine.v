@@ -56,6 +56,8 @@ module probe_sample_engine #(
     // (<=24,000,000) and at least -1 because tick advances by at most one
     // per FCLK. Keep the absolute deadline for unchanged nominal timestamps.
     reg [25:0] deadline_gap;
+    reg resume_catchup;
+    reg [31:0] resume_gap;
     wire deadline_due=deadline_gap[25] || deadline_gap==0;
     // Preserve arithmetic boundaries: configuration/control loads belong
     // after the adder, not on the carry inputs of a shared load/add chain.
@@ -149,6 +151,7 @@ module probe_sample_engine #(
             state<=IDLE; enabled<=0; fault<=0; fault_drain<=0; count<=0; plan_index<=0; fast_span<=0;span_last<=24'hffffff;
             item<=0; head<=0; tail<=0; read_word<=0; tick<=0; deadline<=0;
             deadline_gap<=0;
+            resume_catchup<=0;resume_gap<=0;
             sample_time<=0; period<=2400; skipped<=0; errors<=0;
             clock_hz<=100000000; fraction<=0; phase<=0; retries<=0;
             watchdog<=0; setup_needed<=1; fixed_pipe<=0; pending<=0;
@@ -171,7 +174,9 @@ module probe_sample_engine #(
                 3: if(plan_index<24) plan[plan_index]<={wdata[31:2],2'b00};
                 4: period<=wdata<24 ? 24 : (wdata>24000000 ? 24000000 : wdata);
                 6: begin clock_hz<=wdata<24000000 ? 24000000 : wdata; fraction<=0; end
-                7: begin tick<=wdata; deadline<=wdata; deadline_gap<=0; fraction<=0; end
+                // Rebase elapsed time after FCLK changes, retaining the
+                // nominal sampling grid for a resume (CTRL bit2).
+                7: begin tick<=wdata; fraction<=0; end
                 default: ;
                 endcase
             end
@@ -180,7 +185,7 @@ module probe_sample_engine #(
                 if(wdata[1] && !active) begin
                     head<=0; tail<=0; read_word<=0; skipped<=0; errors<=0; fault<=0; fault_drain<=0;
                 end
-                if(!wdata[0]) enabled<=0;
+                if(!wdata[0]) begin enabled<=0;resume_catchup<=0;end
                 else if(!active && wdata[12:8]!=0 && wdata[12:8]<=24 && available) begin
                     enabled<=1; count<=wdata[12:8]; setup_needed<=1; fixed_pipe<=0; pending<=0;
                     fast_span<=1;
@@ -191,12 +196,28 @@ module probe_sample_engine #(
                     for(integer si=0;si<24;si=si+1)
                         if(si==23) span_last[si]<=1;
                         else span_last[si]<=si+1>=wdata[12:8] || plan[si+1]!=plan[si]+4 || plan[si][9:0]==10'h3fc;
-                    deadline<=tick;deadline_gap<=tick_en ? {26{1'b1}} : 26'd0;fault<=0;
+                    if(wdata[2])begin
+                        resume_catchup<=1;resume_gap<=deadline-tick-(tick_en ? 32'd1 : 32'd0);
+                    end else begin
+                        resume_catchup<=0;deadline<=tick;deadline_gap<=tick_en ? {26{1'b1}} : 26'd0;
+                    end
+                    fault<=0;
                 end
             end
             // One deadline per cycle avoids combinational division. Overruns
             // advance the nominal timeline instead of making catch-up samples.
-            if(enabled && deadline_due && !(ctrl && !wdata[0])) begin
+            // During handoff, missed deadlines are gaps, never catch-up
+            // samples. Keep this slow resume path off normal sample timing.
+            if(enabled && resume_catchup && !(ctrl && !wdata[0]))begin
+                if($signed(resume_gap)<=0)begin
+                    deadline<=advanced_deadline;skipped<=skipped+1'b1;
+                    resume_gap<=resume_gap+period-(tick_en ? 32'd1 : 32'd0);
+                end else begin
+                    resume_catchup<=0;
+                    deadline_gap<=resume_gap[25:0]-(tick_en ? 26'd1 : 26'd0);
+                end
+            end
+            if(enabled && !resume_catchup && deadline_due && !(ctrl && !wdata[0])) begin
                 deadline<=advanced_deadline;
                 // At a due edge the gap is 0 or -1. Refill directly from
                 // period; avoid subtracting two 32-bit timestamps in front

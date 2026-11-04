@@ -4,6 +4,8 @@
 
 Zynq-7020 CMSIS-DAP：PL SWD/JTAG/RTT/HSS 与并行 ETM，PS USB/OCM 固件，配套 Web/CLI。
 
+2026-11-05：新增统一探针控制服务与F103ZE ETM环形飞行记录（手动/Fault轮询触发），保留普通窗口路径。原生服务CLI见`toolbox.py --runtime R probe --help`；实现、实际配对、验收范围与交付状态见[统一控制与飞行记录](docs/validation/session-flight-recorder-20261105/README.md)。
+
 本机入口：双击`dist/zynq-etm-bridge/zynq-etm-bridge.exe`，在Web载入ELF、选函数、核对时钟、点击联动采集。请保留完整程序目录及`_internal`；分发ZIP时完整解压再启动。
 ETM页面的「教学 Demo」提供离线示例分析、首次联动采集和记录导入三个分步引导；离线示例不需要硬件，真实硬件按钮始终由用户点击。
 PLL和AHB/APB分频由target固件负责。CLI用于AI；一条命令打包：

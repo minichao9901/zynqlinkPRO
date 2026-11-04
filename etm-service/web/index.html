@@ -23,6 +23,14 @@
 <p id="capture-capability-hint" class="hint" role="status">DDR固件在硬件窗口内采集，结束后下载并解码，单次最多2000 ms；旧固件最多1000 ms。目标时钟由目标固件设置。</p>
 <label class="check"><input id="sync" type="checkbox" checked> 服务端联动：FPGA 就绪后由本地服务恢复 CPU</label>
 <label class="check"><input id="auto-decode" type="checkbox" checked> 保存后自动解码</label>
+<details id="flight-controls"><summary>飞行记录 · 等待事件并保留之前的轨迹</summary>
+<p class="hint">F103ZE，需要支持飞行记录的新配对。缓冲写满后覆盖最旧历史；触发后继续记录指定时长。异常触发轮询目标异常状态，可能错过短暂异常。</p>
+<label>触发方式<select id="flight-source"><option value="manual">手动触发</option><option value="fault">检测到Fault异常</option></select></label>
+<label>环形容量（MiB）<input id="flight-capacity" type="number" min="1" max="100" value="8"></label>
+<label>触发后记录（ms）<input id="flight-post" type="number" min="1" max="2000" value="100"></label>
+<label>最长等待（秒）<input id="flight-timeout" type="number" min="1" max="86400" value="60"></label>
+<div class="row equal"><button id="flight-start">开始飞行记录</button><button id="flight-trigger" disabled>立即触发</button></div>
+</details>
 <div hidden>
   <input id="rate" value="500000000"><input id="threshold" value="1.65"><input id="channels" value="0,1,2,3,4"><input id="fraction" value="0.25"><input id="glitch-ns" value="0">
 </div>

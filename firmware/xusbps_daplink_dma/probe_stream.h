@@ -14,6 +14,7 @@ void probe_usb_reset(void);
 int probe_session_live(void);
 void probe_poll(XUsbPs *usb);
 int probe_before_dap(void);
+int probe_prepare_link_change(void);
 void probe_after_dap(void);
 void probe_target_observe(uint32_t request, uint32_t data, uint8_t ack);
 uint32_t probe_target_dp_select(void);

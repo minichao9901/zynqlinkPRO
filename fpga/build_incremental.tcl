@@ -2,6 +2,7 @@
 set root [file normalize [file join [file dirname [info script]] ..]]
 set ::zynqlink_no_pipeline [expr {[lsearch -exact $argv --no-pipeline] >= 0}]
 set out [file join $root build fpga_dma_global]
+if {[info exists ::env(ZYNQLINK_FPGA_OUT)]} {set out [file normalize $::env(ZYNQLINK_FPGA_OUT)]}
 open_project [file join $out zynqlink_dma.xpr]
 source [file join $root fpga configure_ip_cache.tcl]
 source [file join $root fpga run_threads.tcl]
@@ -128,6 +129,9 @@ if {!$fresh_impl && [file exists $ref]} {
     set_property INCREMENTAL_CHECKPOINT {} [get_runs impl_1]
     set_property strategy Performance_Explore [get_runs impl_1]
 }
+# Selecting a strategy resets per-step Tcl hooks in Vivado 2018.3. Install
+# timing/thread hooks AFTER that selection, including fresh implementations.
+source [file join $root fpga configure_runs.tcl]
 launch_runs impl_1 -to_step route_design -jobs $::zynqlink_jobs
 wait_on_run impl_1
 if {[get_property PROGRESS [get_runs impl_1]] != "100%"} {error "Implementation failed"}
@@ -143,6 +147,7 @@ if {[catch {source [file join $root fpga verify_routed.tcl]} timing_error]} {
     reset_run impl_1
     set_property INCREMENTAL_CHECKPOINT {} [get_runs impl_1]
     set_property strategy Performance_Explore [get_runs impl_1]
+    source [file join $root fpga configure_runs.tcl]
     launch_runs impl_1 -to_step route_design -jobs $::zynqlink_jobs
     wait_on_run impl_1
     if {[get_property PROGRESS [get_runs impl_1]] != "100%"} {error "Implementation failed"}

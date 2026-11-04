@@ -1,5 +1,7 @@
 # CLI工作台
 
+统一本机探针控制：`toolbox.py --runtime <目录> probe status`读取队列/资源/错误状态，不访问板卡；`probe cancel --owner <会话ID>`取消排队或请求在运行操作边界退出；`probe call usb|hid|serial <动作> --file <JSON>`调用公开服务协议。后两者可能影响硬件，不能用作离线检查。原生服务不需要浏览器worker，沿用鉴权令牌、owner与resourceEpoch，失败不自动重放。跨进程锁及ETM恢复交接见[统一控制验收](validation/session-flight-recorder-20261105/README.md)。
+
 新会话先读根目录 [AGENTS.md](../AGENTS.md) 和 [项目问题跟踪列表](项目问题跟踪列表.md)。发现、复现、修复或变更问题状态时，同步更新该表，随相关改动提交。
 
 CLI用于AI自动化；用户直接双击`zynq-etm-bridge.exe`，在Web完成选ELF、选函数、配置与采集。

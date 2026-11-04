@@ -1,6 +1,7 @@
 set root [file normalize [file join [file dirname [info script]] ..]]
 set ::zynqlink_no_pipeline [expr {[lsearch -exact $argv --no-pipeline] >= 0}]
 set out [file join $root build fpga_dma_global]
+if {[info exists ::env(ZYNQLINK_FPGA_OUT)]} {set out [file normalize $::env(ZYNQLINK_FPGA_OUT)]}
 if {[file exists [file join $out zynqlink_dma.xpr]] && [lsearch -exact $argv --recreate] < 0} {
     source [file join $root fpga build_incremental.tcl]
     exit
