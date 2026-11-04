@@ -197,15 +197,69 @@ def rtt_reconnect(a):
     report.update(passed=True,restored=f.report);return report
 
 
+def web_memory(a):
+    from types import SimpleNamespace
+    sys.path.insert(0,str(ROOT))
+    from tools.validate_f103_main_web import Web
+    from toolbox import pack_file
+    from f103_ram_fixture import Fixture
+    report={'rows':[]};address=0x20001000;data=bytes((i*13+29)&255 for i in range(16384))
+    w=Web(SimpleNamespace(runtime=a.runtime,artifacts=a.out/'web',case_timeout=120,elf=ROOT/'prebuilt/golden/f103ze-cdc48.elf'))
+    with Fixture(a.out/'fixture') as f:
+        f.release_dap();connected=False
+        try:
+            w.page('dbg','show');w.page('dbg','describe')
+            w.set('dbg','#d-backend','webusb');w.set('dbg','#d-clock','10000')
+            w.invoke('dbg','loadElfBuffer',dict(kind='buffer',**pack_file(w.args.elf)),w.args.elf.name)
+            w.invoke('dbg','connect');connected=True;w.page('dbg','describe',target='session')
+            for repeat in range(a.rounds):
+                start=time.perf_counter();w.invoke('dbg','memWrite',address,{'$base64':base64.b64encode(data).decode()},target='session');written=time.perf_counter()-start
+                start=time.perf_counter();value=bytes(w.invoke('dbg','memRead',address,len(data),target='session')['$bytes']);read=time.perf_counter()-start
+                assert value==data
+                report['rows'].append(dict(repeat=repeat,bytes=len(data),writeSeconds=written,readSeconds=read,
+                    writeMBps=len(data)/written/1e6,readMBps=len(data)/read/1e6,byteExact=True))
+        finally:
+            if connected:w.invoke('dbg','disconnect')
+    report.update(passed=True,restored=f.report,swdHz=10000000,scope='real Web debugger memRead/memWrite including page CLI dispatch; write includes existing verification');return report
+
+
+def trace_address_guard(a):
+    from f103_ram_fixture import Fixture
+    from zynq_la import Session,CaptureError
+    report={'rows':[]}
+    with Fixture(a.out/'fixture') as f:
+        base=0x20004000;before=f.mem.read(base,64)
+        for operation in ('read','write'):
+            sent=[]
+            class CorruptedOut:
+                def write(self,data,timeout=None):
+                    data=bytes(data)
+                    # Transport fault fixture: truncate only the initial
+                    # address setup. Real PS preflight returns FF.
+                    actual=b'\x05' if not sent else data
+                    sent.append(actual.hex());return f.tx.write(actual,timeout=timeout)
+            f.mem.address(base);s=Session();s.out=CorruptedOut();s.inp=f.rx
+            try:
+                if operation=='read':s._dap_read32(0xe000ed04)
+                else:s._dap_write32(0xe000edf0,0xa05f0001)
+            except CaptureError as error:assert 'TAR' in str(error)
+            else:raise AssertionError('failed address setup was ignored')
+            assert sent==['05'],sent
+            assert f.mem.read(base,64)==before
+            report['rows'].append(dict(operation=operation,sent=sent,noDrwIssued=True,sramUnchanged=True))
+    report.update(passed=True,restored=f.report,injection='host adapter truncates address command; real PS response; not electrical fault')
+    return report
+
+
 def main():
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--stage',choices=['preflight','service-memory','board-control','rtt-reconnect'],required=True)
+    p.add_argument('--stage',choices=['preflight','service-memory','board-control','rtt-reconnect','web-memory','trace-address-guard'],required=True)
     p.add_argument('--out',type=Path,required=True);p.add_argument('--execute',action='store_true')
     p.add_argument('--runtime');p.add_argument('--rounds',type=int,default=3);p.add_argument('--switches',type=int,default=0)
     a=p.parse_args()
     if not a.execute:print(json.dumps(dict(stage=a.stage,hardwareAccess=False)));return
     a.out.mkdir(parents=True,exist_ok=False)
-    result=preflight(a.out) if a.stage=='preflight' else board_control(a) if a.stage=='board-control' else rtt_reconnect(a) if a.stage=='rtt-reconnect' else service_memory(a)
+    result=preflight(a.out) if a.stage=='preflight' else {'board-control':board_control,'rtt-reconnect':rtt_reconnect,'web-memory':web_memory,'service-memory':service_memory,'trace-address-guard':trace_address_guard}[a.stage](a)
     (a.out/'result.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
     print(json.dumps({k:v for k,v in result.items() if k not in ('ddr','streams')},ensure_ascii=False))
 

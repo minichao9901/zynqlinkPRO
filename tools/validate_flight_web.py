@@ -29,7 +29,7 @@ def main():
         report['before']=w.invoke('etm','inspect',target='target')
         w.set('etm','#entry-before',True);w.set('etm','#reset-before',False);w.set('etm','#entry-before',False)
         w.set('etm','#flight-capacity',1);w.set('etm','#flight-post',20);w.set('etm','#flight-timeout',10)
-        for mode in (['manual','cancel'] if a.skip_timeout else ['manual','cancel','timeout']):
+        for mode in (['manual','cancel','service-cancel'] if a.skip_timeout else ['manual','cancel','service-cancel','timeout']):
             if mode=='timeout':w.set('etm','#flight-timeout',1)
             before=set(a.records.glob('capture-*'))
             w.page('etm','click',selector='#flight-start');w.ready('etm','#flight-trigger')
@@ -40,6 +40,7 @@ def main():
             else:raise AssertionError('another client overtook capture')
             if mode=='manual':w.page('etm','click',selector='#flight-trigger')
             elif mode=='cancel':w.page('etm','click',selector='#stop')
+            elif mode=='service-cancel':w.client.native('session','cancel',{'owner':status['resources']['capture']['restoreOwner']})
             w.ready('etm','#flight-start')
             folders=set(a.records.glob('capture-*'))-before;assert len(folders)==1
             folder=folders.pop();m=json.loads((folder/'session.json').read_text(encoding='utf-8'))

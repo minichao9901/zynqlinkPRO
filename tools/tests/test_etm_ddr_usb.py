@@ -29,6 +29,15 @@ def header(w):
 
 
 class DdrUsbTests(unittest.TestCase):
+    def test_failed_address_setup_never_reaches_drw_or_fault_detection(self):
+        for operation in ('read','write'):
+            s=zynq_la.Session();s.out=Mock();s.inp=Mock()
+            with patch.object(zynq_la,'xfer',return_value=b'\x05\x02\x04') as transfer:
+                with self.assertRaisesRegex(zynq_la.CaptureError,'TAR'):
+                    if operation=='read':s._dap_read32(0xe000ed04)
+                    else:s._dap_write32(0xe000edf0,0xa05f0001)
+                transfer.assert_called_once()
+
     def setUp(self):
         self.dev=Mock();self.t=d.Transport(self.dev,Mock(),Mock())
         self.t.capture_id=1;self.t.nonce=2;self.t.ref_hz=200000000;self.t.requested_ticks=200000000

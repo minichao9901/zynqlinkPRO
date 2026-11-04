@@ -17,7 +17,7 @@ import webbrowser
 from urllib.request import urlopen
 
 
-VERSION = '1.1.0'
+VERSION = '1.1.1'
 FROZEN = bool(getattr(sys, 'frozen', False))
 REPO = Path(__file__).resolve().parents[1]
 

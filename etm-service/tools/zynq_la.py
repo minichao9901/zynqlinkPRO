@@ -130,19 +130,21 @@ class Session:
             receiverEnabled=bool(w[13]&1),fclkHz=w[14],recordCapacity=w[15])
 
     def _set_tar(self, addr):
-        xfer(self.out, self.inp, [5, 0, 3, 8] + le(0) + [1] + le(0x23000052) + [5] + le(addr))
+        reply=xfer(self.out, self.inp, [5, 0, 3, 8] + le(0) + [1] + le(0x23000052) + [5] + le(addr))
+        if bytes(reply)!=b'\x05\x03\x01':
+            raise CaptureError('DAP SELECT/CSW/TAR设置未完整确认；未继续访问目标或重放')
 
     def _dap_write32(self, addr, value):
         self._set_tar(addr)
         reply = xfer(self.out, self.inp, [6, 0, 1, 0, 0x0D] + le(value))
         # DAP_TransferBlock reply: [cmd, count_lo, count_hi, ack]; ack is byte 3.
-        if len(reply) < 4 or reply[1] != 1 or (reply[3] & 7) != 1:
+        if bytes(reply)!=b'\x06\x01\x00\x01':
             raise CaptureError("DAP 写 %#x 失败：%s" % (addr, reply[:8].hex()))
 
     def _dap_read32(self, addr):
         self._set_tar(addr)
         reply = xfer(self.out, self.inp, [6, 0, 1, 0, 0x0F])
-        if len(reply) < 8 or reply[1] != 1 or (reply[3] & 7) != 1:
+        if len(reply)!=8 or bytes(reply[:4])!=b'\x06\x01\x00\x01':
             raise CaptureError("DAP 读 %#x 失败：%s" % (addr, reply[:8].hex()))
         return struct.unpack_from("<I", reply, 4)[0]
 

@@ -77,3 +77,9 @@ python -X utf8 toolbox.py trace trigger --record build/my-flight
 ## 交付状态
 
 固定EXE构建与实板回归、最终整板恢复核对尚未完成。未进行H743/HPM新配对实板、QSPI冷启动、8小时压力或GPIO物理触发验收。历史003/140和烧录性能等未因此关闭。所有公开证据文件的SHA见[manifest](raw/manifest.json)；原Flash/SRAM/GPR备份、运行令牌留在本机build，不纳入Git。
+
+## 冻结候选与收尾补充
+
+1.1.0冻结包源5be7176、sourceDirty=false，EXE SHA290b10c5187fa6fca46487278433fb703d5eef971867ccaaf5463393d517edf1。普通冻结Web手动/页内取消/统一服务取消/1秒未触发超时四场景通过，恢复后资源为空；真实Web16KiB读写及完整现场恢复通过，中位读约0.108、写约0.124MB/s（含页面CLI投递与写后校验），不是服务内部27ms数据。冻结HSS8种标量、非对齐/跨1KiB、3268点全部RAW/CSV及回放精确；最终配对冻结服务另完成1000次重开/1000次旧epoch写拒绝，恢复通过。证据见raw/frozen-*.json。
+
+收尾补正：ZL-148通过限定路径Git属性保留实际元数据/证据字节，未改bit/ELF；ZL-149补充Trace地址设置ACK检查，源码真实失败回复验证已通过，最终1.1.1包重新构建/正常实板回归中。原1.1.0成功证据不改写为1.1.1重测。

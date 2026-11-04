@@ -24,7 +24,7 @@
 <label class="check"><input id="sync" type="checkbox" checked> 服务端联动：FPGA 就绪后由本地服务恢复 CPU</label>
 <label class="check"><input id="auto-decode" type="checkbox" checked> 保存后自动解码</label>
 <details id="flight-controls"><summary>飞行记录 · 等待事件并保留之前的轨迹</summary>
-<p class="hint">F103ZE，需要支持飞行记录的新配对。缓冲写满后覆盖最旧历史；触发后继续记录指定时长。异常触发轮询目标异常状态，可能错过短暂异常。</p>
+<p class="hint">F103ZE，需要支持飞行记录的新配对。缓冲写满后覆盖最旧历史；触发后继续记录指定时长。后窗过长可能覆盖触发前轨迹，请相应增加容量。异常触发轮询目标异常状态，可能错过短暂异常。</p>
 <label>触发方式<select id="flight-source"><option value="manual">手动触发</option><option value="fault">检测到Fault异常</option></select></label>
 <label>环形容量（MiB）<input id="flight-capacity" type="number" min="1" max="100" value="8"></label>
 <label>触发后记录（ms）<input id="flight-post" type="number" min="1" max="2000" value="100"></label>

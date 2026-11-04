@@ -18,6 +18,9 @@ firmware/target/stm32f103_rtt_seq72/** -text
 firmware/target/stm32f103_scope_rated/** -text
 # Preserve byte identity for loaded initialization files and hashed build inputs.
 prebuilt/**/ps7_init.tcl -text
+# Exact loaded pairs and hashed acceptance evidence, including CRLF reports.
+prebuilt/session-flight-recorder-20261105/** -text -whitespace
+docs/validation/session-flight-recorder-20261105/raw/** -text -whitespace
 prebuilt/**/firmware-build.json -text
 prebuilt/**/cdc-packet-boundary.patch -text
 # These are exact source/export evidence snapshots, not editable repo sources.
