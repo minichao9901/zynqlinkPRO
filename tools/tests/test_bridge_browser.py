@@ -7,6 +7,22 @@ from tools import zynq_bridge as bridge
 
 
 class BrowserTests(unittest.TestCase):
+    def test_external_environment_restores_temp_and_removes_frozen_loader_paths(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as folder, \
+             patch.object(bridge, 'FROZEN', True), patch.object(bridge.sys, '_MEIPASS', folder, create=True), \
+             patch.object(bridge, 'ORIGINAL_TEMP', {'TEMP': 'original-temp', 'TMP': 'original-tmp'}), \
+             patch.dict(bridge.os.environ, {'TEMP': 'private-runtime', 'TMP': 'private-runtime',
+                 '_PYI_ARCHIVE_FILE': 'bundle.exe', 'PYTHONPATH': 'bundled-python',
+                 'PATH': folder + bridge.os.pathsep + str(Path(folder).parent)}):
+            environment = bridge.browser_environment()
+            self.assertEqual(environment['TEMP'], 'original-temp')
+            self.assertEqual(environment['TMP'], 'original-tmp')
+            self.assertNotIn('_PYI_ARCHIVE_FILE', environment)
+            self.assertNotIn('PYTHONPATH', environment)
+            self.assertEqual(environment['PATH'], str(Path(folder).parent))
+            self.assertEqual(bridge.os.environ['TEMP'], 'private-runtime')
+
     def test_windows_uses_argument_list_and_new_window(self):
         child = Mock(); child.wait.return_value = 0
         with patch.object(bridge.sys, 'platform', 'win32'), patch.object(bridge, 'FROZEN', False), \

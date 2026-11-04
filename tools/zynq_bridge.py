@@ -45,7 +45,7 @@ def browser_environment():
 def browser_broker(executable, url):
     # A system process provides a fresh Windows loader context if Chromium
     # rejects the inherited frozen process state. Values are data, never code.
-    command = "$ErrorActionPreference='Stop'; $p=Start-Process -FilePath $env:ZYNQ_BROWSER_EXE -ArgumentList @('--new-window',$env:ZYNQ_BROWSER_URL) -PassThru; if ($p.WaitForExit(1500)) {exit $p.ExitCode}"
+    command = "$ErrorActionPreference='Stop'; $shell=New-Object -ComObject Shell.Application; $shell.ShellExecute($env:ZYNQ_BROWSER_EXE,$env:ZYNQ_BROWSER_URL,'','open',1)"
     environment = browser_environment()
     environment.update(ZYNQ_BROWSER_EXE=str(executable), ZYNQ_BROWSER_URL=url)
     powershell = Path(os.environ['SystemRoot']) / 'System32/WindowsPowerShell/v1.0/powershell.exe'
@@ -54,6 +54,8 @@ def browser_broker(executable, url):
             base64.b64encode(command.encode('utf-16le')).decode('ascii')],
             env=environment, cwd=os.environ['SystemRoot'], creationflags=subprocess.CREATE_NO_WINDOW,
             capture_output=True, timeout=10)
+    if result.returncode:
+        print('系统浏览器启动器返回错误：' + str(result.returncode), file=sys.stderr, flush=True)
     return result.returncode == 0
 
 
