@@ -1,6 +1,6 @@
 # 统一探针控制与 ETM 飞行记录验收
 
-2026-11-05（Asia/Shanghai），开发基线 `f466935`，分支 `codex/session-flight-recorder`。统一控制服务和F103ZE飞行记录已经实现并完成下列源码/实板检查；固定EXE交付验收仍在进行。本次没有写目标Flash、探针QSPI或修改目标PLL/AHB/APB。
+2026-11-05（Asia/Shanghai），开发基线 `f466935`，分支 `codex/session-flight-recorder`。统一控制服务和F103ZE飞行记录已经实现并完成下列源码/实板检查；固定EXE 1.1.1交付及最终现场恢复核对已完成。本次没有写目标Flash、探针QSPI或修改目标PLL/AHB/APB。
 
 ## 实现与产品边界
 
@@ -18,7 +18,7 @@ HID `0.6-nonce32`在协商后关联请求/回复，拒绝同命令号的旧STATU
 
 ## 实际配对与时序
 
-交付候选位于[prebuilt/session-flight-recorder-20261105](../../../prebuilt/session-flight-recorder-20261105/README.md)。原Golden/QSPI恢复包保留。构建时源码为`f466935`加实际工作区输入，不伪装为干净源码构建；PS/RTL输入指纹保留。
+已验收配对位于[prebuilt/session-flight-recorder-20261105](../../../prebuilt/session-flight-recorder-20261105/README.md)。原Golden/QSPI恢复包保留。构建时源码为`f466935`加实际工作区输入，不伪装为干净源码构建；PS/RTL输入指纹保留。
 
 | 项目 | 值 |
 |---|---|
@@ -54,7 +54,7 @@ SWD10MHz/16KiB，同配对服务初测读约27ms、直接CLI约25ms；写30–54
 
 ## 离线检查与失败保留
 
-130项Web、60项CLI、161模块语法、10份共享驱动同步通过。新增控制队列4项、跨进程所有权2项、HID关联3项、内存事务3项、DDR主机8项；生产C与50000边界输入检查通过。RAW4集成保留原9场景并增加五次回卷/部分尾帧/准确后窗，writer原92场景通过，HSS新增恢复网格仿真通过。
+130项Web、61项CLI、161模块语法、10份共享驱动同步通过。新增控制队列4项、跨进程所有权2项、HID关联3项、内存事务3项、DDR主机9项；生产C与50000边界输入检查通过。RAW4集成保留原9场景并增加五次回卷/部分尾帧/准确后窗，writer原92场景通过，HSS新增恢复网格仿真通过。
 
 失败不删除：首轮Vivado缺临时父目录；首个新项目遗漏DDR开关后主动停止；首次新环形仿真期望误算645 mod128，修正测试预期为5；首次服务测试器把超时当空字节导致排空循环不退出，经关闭本任务句柄进入finally完整恢复后修正；Web夹具先关entry再改已禁用reset控件的顺序失败，修正顺序后通过；CLI离线回放夹具与真实板测并行时抢占OS锁被拒绝，补充对外部所有权边界的mock，没有放宽生产锁；1秒手动等待被无关默认延时参数拒绝的问题已修正，冻结验收继续覆盖。
 
@@ -76,10 +76,25 @@ python -X utf8 toolbox.py trace trigger --record build/my-flight
 
 ## 交付状态
 
-固定EXE构建与实板回归、最终整板恢复核对尚未完成。未进行H743/HPM新配对实板、QSPI冷启动、8小时压力或GPIO物理触发验收。历史003/140和烧录性能等未因此关闭。所有公开证据文件的SHA见[manifest](raw/manifest.json)；原Flash/SRAM/GPR备份、运行令牌留在本机build，不纳入Git。
+固定EXE 1.1.1来自干净源码2a1b99f，最终四场景飞行记录与真实Web内存读写通过。板上保留本次RAM配对，目标运行；Flash、FPB和时钟与任务初始快照一致。未进行H743/HPM新配对实板、QSPI冷启动、8小时压力或GPIO物理触发验收。历史003/140和烧录性能等未因此关闭。所有公开证据文件的SHA见[manifest](raw/manifest.json)；原Flash/SRAM/GPR备份、运行令牌留在本机build，不纳入Git。
 
 ## 冻结候选与收尾补充
 
 1.1.0冻结包源5be7176、sourceDirty=false，EXE SHA290b10c5187fa6fca46487278433fb703d5eef971867ccaaf5463393d517edf1。普通冻结Web手动/页内取消/统一服务取消/1秒未触发超时四场景通过，恢复后资源为空；真实Web16KiB读写及完整现场恢复通过，中位读约0.108、写约0.124MB/s（含页面CLI投递与写后校验），不是服务内部27ms数据。冻结HSS8种标量、非对齐/跨1KiB、3268点全部RAW/CSV及回放精确；最终配对冻结服务另完成1000次重开/1000次旧epoch写拒绝，恢复通过。证据见raw/frozen-*.json。
 
-收尾补正：ZL-148通过限定路径Git属性保留实际元数据/证据字节，未改bit/ELF；ZL-149补充Trace地址设置ACK检查，源码真实失败回复验证已通过，最终1.1.1包重新构建/正常实板回归中。原1.1.0成功证据不改写为1.1.1重测。
+收尾补正：ZL-148通过限定路径Git属性保留实际元数据/证据字节，未改bit/ELF；ZL-149补充Trace地址设置ACK检查，源码真实失败回复验证已通过，最终1.1.1包重新构建与正常实板回归均通过。原1.1.0成功证据不改写为1.1.1重测。
+
+
+## 最终1.1.1交付与恢复
+
+固定程序：[dist/zynq-etm-bridge/zynq-etm-bridge.exe](../../../dist/zynq-etm-bridge/zynq-etm-bridge.exe)。构建源为`2a1b99f78927546e1d7e0dbfec96854ad4f06773`、sourceDirty=false；EXE SHA256为`ec5a07f558f916e0b33d25cf508ab18578142f5be4d3b02f45324fd49ba1b529`。本次收尾提交只补验收夹具、报告和证据，不更改冻结程序。旧程序由构建器归档，原31个用户数据文件路径、大小与SHA全部一致，未生成ZIP。
+
+最终1.1.1普通Web手动触发、页面取消、服务取消、未触发超时四场景全部通过，恢复后资源为空；16KiB真实Web读写3轮逐字节正确，中位读0.09775、写0.10456MB/s，包含页面CLI投递和写后校验开销。直接控制传输约25ms/16KiB与历史高频批量SRAM约4.8MB/s是不同SWD频率、事务方式与计时范围，不互相替代；本项交付重点是统一调度和可靠性，未声称Web页面E2E达到4.8MB/s。[最终飞行](raw/final-frozen-flight.json)、[最终内存](raw/final-frozen-memory.json)。
+
+最后整板核对发现FPB CTRL由初始0x260变为0x261，另外36字节完全相同：Web调试连接启用FPB，RAM验收夹具原未恢复该使能位。保留该失败快照，按初始备份恢复；补全`f103_ram_fixture.py`的完整FPB快照、KEY写入恢复和读回断言，使用同一1.1.1 EXE再次跑真实Web内存测试，FPB/SRAM/GPR/时钟/运行状态均恢复通过。ZL-142限定补足本轮夹具，旧报告缺失的起点和预置断点保留用例不补造。[差异](raw/final-board-before-fpb-restore.json)、[恢复](raw/fpb-restoration.json)、[修正夹具复测](raw/final-fpb-web-memory.json)。
+
+2026-11-05 06:50（Asia/Shanghai）最终核对：完整512KiB目标Flash和完整40B FPB与本任务最初备份逐字节相同，RCC配置相同，DHCSR=0x1010001（运行）。重新读物理MEM-AP0的85652B PS执行段与本次ELF全等，FCLK寄存器推算119999998Hz。未再次加载/复位、未改目标Flash或探针QSPI；历史中间产物仍保留原身份。测试EXE在确认无资源租约后停止，未结束共享硬件服务。[最终板状态](raw/final-board-restored.json)、[OCM复核](raw/final-ocm-recheck.json)、[交付核对](raw/delivery-verification.json)。
+
+最终EXE界面：
+
+![最终1.1.1飞行记录与已保存执行流](web-flight-final.jpg)

@@ -1,8 +1,8 @@
 {
-  "accepted": false,
+  "accepted": true,
   "sourceBaseline": "f466935",
   "sourceDirty": true,
-  "scope": "F103ZE; pending board acceptance; RAM only, no QSPI",
+  "scope": "F103ZE SWD session control, HSS/RTT reconnect, ETMv3 flight recorder; RAM loading only; no QSPI cold-boot acceptance",
   "files": {
     "probe.bit": {
       "bytes": 4045674,
@@ -35,5 +35,8 @@
     "ZYNQLINK_IMPLEMENT_FCLK_HZ": 133333333,
     "maxSWCLKHz": 60000000
   },
-  "hidControl": "0.6-nonce32"
+  "hidControl": "0.6-nonce32",
+  "acceptanceReport": "docs/validation/session-flight-recorder-20261105/README.md",
+  "sourceBinding": "source-binding.json",
+  "acceptedDate": "2026-11-05"
 }

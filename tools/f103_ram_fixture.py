@@ -16,7 +16,7 @@ class Fixture:
     def __init__(self, out):
         self.out=Path(out);self.out.mkdir(parents=True,exist_ok=False)
         self.dev,self.tx,self.rx=open_dap();self.mem=Memory(self.tx,self.rx)
-        self.probe=Probe();self.backup=None;self.regs=None
+        self.probe=Probe();self.backup=None;self.regs=None;self.fpb=None
         self.report={}
 
     def __enter__(self):
@@ -24,6 +24,13 @@ class Fixture:
         self.report['initialDHCSR']=hex(self.mem.word(0xe000edf0))
         self.report['clockBefore']=snapshot(self.mem)
         self.mem.write_word(0xe000edf0,0xa05f0003)
+        fpctrl=self.mem.word(0xe0002000)
+        comparators=((fpctrl>>4)&15)|((fpctrl>>8)&0x70)
+        comparators+=(fpctrl>>8)&15
+        assert comparators<=128
+        self.fpb=self.mem.read(0xe0002000,8+4*comparators)
+        (self.out/'fpb-private.bin').write_bytes(self.fpb)
+        self.report['fpbBeforeSha256']=hashlib.sha256(self.fpb).hexdigest()
         self.regs={i:core_read(self.mem,i) for i in list(range(19))+[20]}
         (self.out/'core-private.json').write_text(json.dumps(self.regs))
         self.backup=self.mem.read(0x20000000,20480)
@@ -76,6 +83,15 @@ class Fixture:
                 self.dev,self.tx,self.rx=open_dap();self.mem=Memory(self.tx,self.rx)
             stop(self.probe,self.dev);setup(self.tx,self.rx,1000)
             self.mem.write_word(0xe000edf0,0xa05f0003)
+            if self.fpb is not None:
+                # Disable while restoring REMAP/comparators; CTRL writes need KEY.
+                self.mem.write_word(0xe0002000,2)
+                self.mem.write(0xe0002004,self.fpb[4:])
+                self.mem.write_word(0xe0002000,2|(struct.unpack_from('<I',self.fpb)[0]&1))
+                restored_fpb=self.mem.read(0xe0002000,len(self.fpb))
+                self.report['fpbAfterSha256']=hashlib.sha256(restored_fpb).hexdigest()
+                self.report['fpbRestored']=restored_fpb==self.fpb
+                assert self.report['fpbRestored']
             if self.backup is not None:
                 self.mem.write(0x20000000,self.backup)
                 self.report['sramRestored']=self.mem.read(0x20000000,len(self.backup))==self.backup

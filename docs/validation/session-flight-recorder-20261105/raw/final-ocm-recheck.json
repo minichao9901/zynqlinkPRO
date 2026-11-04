@@ -1,0 +1,60 @@
+{
+  "time_UTC": "2026-11-04T22:49:14.967206+00:00",
+  "elf": "E:\\zynqlinkPRO\\prebuilt\\session-flight-recorder-20261105\\application.elf",
+  "elf_sha256": "8d8e3d7372a57c642c070c451d17d61779baa5d5e9baa20fcd3691716846bfbe",
+  "downloads": false,
+  "probe_reset_or_continue": false,
+  "expected_executable_bytes": 85652,
+  "cycles": [
+    {
+      "cycle": 0,
+      "sections": [
+        {
+          "name": ".text",
+          "bytes": 82672,
+          "address": 0,
+          "equal": true,
+          "expected_sha256": "8d5d91c4b1bfa503d7e728e278829b610ed9d69322b8ad61e1bfc3a5ef416c72",
+          "live_sha256": "8d5d91c4b1bfa503d7e728e278829b610ed9d69322b8ad61e1bfc3a5ef416c72"
+        },
+        {
+          "name": ".ocm_text",
+          "bytes": 2956,
+          "address": 82672,
+          "equal": true,
+          "expected_sha256": "26e5180713a4d12233c6669bf54b9c06fbcde3ca9748315460095378667fd869",
+          "live_sha256": "26e5180713a4d12233c6669bf54b9c06fbcde3ca9748315460095378667fd869"
+        },
+        {
+          "name": ".init",
+          "bytes": 12,
+          "address": 85628,
+          "equal": true,
+          "expected_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6",
+          "live_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6"
+        },
+        {
+          "name": ".fini",
+          "bytes": 12,
+          "address": 85640,
+          "equal": true,
+          "expected_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6",
+          "live_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6"
+        }
+      ],
+      "differing_addresses": [],
+      "vector_word": "ea000049"
+    }
+  ],
+  "passed": true,
+  "memoryAccess": "physical MEM-AP0; independent of CPU memory/cache context",
+  "boot_mode": 0,
+  "clockSnapshot": {
+    "control": 15728896,
+    "source": 0,
+    "pll": 221192,
+    "bootMode": 0,
+    "FCLK_Hz": 119999998
+  },
+  "initial_FCLK_Hz": 119999998
+}

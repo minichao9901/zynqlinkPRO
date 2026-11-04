@@ -1,0 +1,45 @@
+{
+  "rows": [
+    {
+      "repeat": 0,
+      "bytes": 16384,
+      "writeSeconds": 0.15080240000679623,
+      "readSeconds": 0.18550220000906847,
+      "writeMBps": 0.10864548574334108,
+      "readMBps": 0.08832240264104173,
+      "byteExact": true
+    }
+  ],
+  "passed": true,
+  "restored": {
+    "initialDHCSR": "0x1010001",
+    "clockBefore": {
+      "name": "STM32F103",
+      "cpuid": "0x411fc231",
+      "device": "0x10036414",
+      "registers": {
+        "0x40021000": "0x3034e83",
+        "0x40021004": "0x51040a"
+      }
+    },
+    "fpbBeforeSha256": "79e189b26af11d2c8c89090b3507def9e318a2a5a393eb77c61ceb0390394015",
+    "backupSha256": "577fd3f2e95d22ae034bb2ad4b5336f4a34f1a06541356dc1aa962efa5a706ea",
+    "fpbAfterSha256": "79e189b26af11d2c8c89090b3507def9e318a2a5a393eb77c61ceb0390394015",
+    "fpbRestored": true,
+    "sramRestored": true,
+    "registersRestored": true,
+    "clockAfter": {
+      "name": "STM32F103",
+      "cpuid": "0x411fc231",
+      "device": "0x10036414",
+      "registers": {
+        "0x40021000": "0x3034e83",
+        "0x40021004": "0x51040a"
+      }
+    },
+    "finalDHCSR": "0x1010001",
+    "restored": true
+  },
+  "swdHz": 10000000,
+  "scope": "real Web debugger memRead/memWrite including page CLI dispatch; write includes existing verification"
+}
