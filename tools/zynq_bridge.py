@@ -258,9 +258,17 @@ def main(argv=None):
     print('数据目录：'+str(data), flush=True)
     print('工作台：'+browser_url, flush=True)
     print('浏览器中载入ELF → 连接探针 → 选择函数 → 核对时钟 → 联动采集；关闭本窗口停止服务。', flush=True)
-    if not args.no_browser:
-        threading.Thread(target=open_when_ready, args=(url, browser_url, boot), daemon=True).start()
-    try:server.run()
+    try:
+        if args.no_browser:
+            server.run()
+        else:
+            # Keep Windows browser activation and its lazy platform imports on
+            # the main thread; serve HTTP concurrently before opening the page.
+            worker = threading.Thread(target=server.run, daemon=True)
+            worker.start()
+            open_when_ready(url, browser_url, boot)
+            while worker.is_alive():
+                worker.join(.5)
     except KeyboardInterrupt:pass
     finally:
         server.close()
