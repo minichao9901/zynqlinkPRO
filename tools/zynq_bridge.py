@@ -4,7 +4,6 @@ No firmware download, PLL/AHB changes, or USB enumeration occurs at startup.
 User captures and authentication state are outside the bundled application.
 """
 import argparse
-import base64
 import hashlib
 import importlib.util
 import json
@@ -43,23 +42,26 @@ def browser_environment():
 
 
 def browser_broker(executable, url):
-    # A system process provides a fresh Windows loader context if Chromium
-    # rejects the inherited frozen process state. Values are data, never code.
-    command = ("$ErrorActionPreference='Stop'; $shell=New-Object -ComObject Shell.Application; "
-        "$location=0; $root=$null; $handle=0; "
-        "$desktop=$shell.Windows().FindWindowSW([ref]$location,[ref]$root,8,[ref]$handle,1); "
-        "$desktop.Document.Application.ShellExecute($env:ZYNQ_BROWSER_EXE,$env:ZYNQ_BROWSER_URL,'','open',1)")
-    environment = browser_environment()
-    environment.update(ZYNQ_BROWSER_EXE=str(executable), ZYNQ_BROWSER_URL=url)
-    powershell = Path(os.environ['SystemRoot']) / 'System32/WindowsPowerShell/v1.0/powershell.exe'
-    with system_dll_search():
-        result = subprocess.run([str(powershell), '-NoProfile', '-NonInteractive', '-EncodedCommand',
-            base64.b64encode(command.encode('utf-16le')).decode('ascii')],
-            env=environment, cwd=os.environ['SystemRoot'], creationflags=subprocess.CREATE_NO_WINDOW,
-            capture_output=True, timeout=10)
-    if result.returncode:
-        print('系统浏览器启动器返回错误：' + str(result.returncode), file=sys.stderr, flush=True)
-    return result.returncode == 0
+    # Ask the existing Explorer desktop to launch the browser with its own
+    # process environment, rather than inheriting our frozen loader context.
+    import pythoncom
+    import pywintypes
+    from win32com.client import VARIANT
+    from win32com.client.dynamic import Dispatch
+    pythoncom.CoInitialize()
+    try:
+        shell = Dispatch('Shell.Application')
+        desktop = shell.Windows().FindWindowSW(
+            VARIANT(pythoncom.VT_BYREF | pythoncom.VT_VARIANT, 0),
+            VARIANT(pythoncom.VT_BYREF | pythoncom.VT_VARIANT, None), 8,
+            VARIANT(pythoncom.VT_BYREF | pythoncom.VT_I4, 0), 1)
+        desktop.Document.Application.ShellExecute(str(executable), url, '', 'open', 1)
+        return True
+    except pywintypes.com_error as error:
+        print('桌面浏览器启动失败：' + str(error), file=sys.stderr, flush=True)
+        return False
+    finally:
+        pythoncom.CoUninitialize()
 
 
 def windows_browsers():
@@ -107,6 +109,9 @@ def open_workbench(url):
         if sys.platform == 'win32':
             for executable in dict.fromkeys(windows_browsers()):
                 try:
+                    if FROZEN and browser_broker(executable, url):
+                        print('已调用浏览器（桌面启动器）：' + executable.name, flush=True)
+                        return True
                     with system_dll_search():
                         child = subprocess.Popen([str(executable), '--new-window', url],
                             env=browser_environment(), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -118,9 +123,6 @@ def open_workbench(url):
                         print('已调用浏览器：' + executable.name, flush=True)
                         return True
                     print(f'浏览器启动返回错误：{executable.name} ({code})', file=sys.stderr, flush=True)
-                    if FROZEN and browser_broker(executable, url):
-                        print('已调用浏览器（系统启动器）：' + executable.name, flush=True)
-                        return True
                 except OSError as error:
                     print('浏览器启动失败：' + executable.name + ' ' + str(error), file=sys.stderr, flush=True)
                     continue

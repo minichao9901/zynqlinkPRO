@@ -18,7 +18,7 @@ import uuid
 import zipfile
 
 ROOT=Path(__file__).resolve().parents[1]
-DEPENDENCIES=('PyInstaller','Flask','Werkzeug','waitress','pyelftools','capstone','numpy','pandas','pyusb','libusb-package','hidapi','pyserial','Jinja2','MarkupSafe','itsdangerous','click')
+DEPENDENCIES=('PyInstaller','Flask','Werkzeug','waitress','pyelftools','capstone','numpy','pandas','pyusb','libusb-package','hidapi','pyserial','pywin32','Jinja2','MarkupSafe','itsdangerous','click')
 
 
 def sha(path):
