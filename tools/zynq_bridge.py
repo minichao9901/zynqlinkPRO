@@ -80,7 +80,9 @@ def open_workbench(url):
                     if code in (None, 0):
                         print('已调用浏览器：' + executable.name, flush=True)
                         return True
-                except OSError:
+                    print(f'浏览器启动返回错误：{executable.name} ({code})', file=sys.stderr, flush=True)
+                except OSError as error:
+                    print('浏览器启动失败：' + executable.name + ' ' + str(error), file=sys.stderr, flush=True)
                     continue
         with system_dll_search():
             if webbrowser.open(url):
@@ -176,6 +178,9 @@ def preflight(backend, web, service_path):
 
 
 def main(argv=None):
+    if os.environ.get('ZYNQ_BROWSER_DIAGNOSTICS') == '1':
+        import faulthandler
+        faulthandler.dump_traceback_later(10, repeat=False)
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, 'reconfigure'):
             stream.reconfigure(encoding='utf8', errors='replace')
