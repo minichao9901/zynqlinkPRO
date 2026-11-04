@@ -4,6 +4,7 @@ No firmware download, PLL/AHB changes, or USB enumeration occurs at startup.
 User captures and authentication state are outside the bundled application.
 """
 import argparse
+import base64
 import hashlib
 import importlib.util
 import json
@@ -23,6 +24,37 @@ from urllib.request import urlopen
 VERSION = '1.0.0'
 FROZEN = bool(getattr(sys, 'frozen', False))
 REPO = Path(__file__).resolve().parents[1]
+ORIGINAL_TEMP = {key: os.environ.get(key) for key in ('TEMP', 'TMP')}
+
+
+def browser_environment():
+    environment = dict(os.environ)
+    for key in list(environment):
+        if key.startswith('_PYI') or key in ('PYTHONHOME', 'PYTHONPATH'):
+            environment.pop(key)
+    for key, value in ORIGINAL_TEMP.items():
+        if value is not None:
+            environment[key] = value
+    if FROZEN:
+        runtime = Path(sys._MEIPASS).resolve()
+        environment['PATH'] = os.pathsep.join(part for part in environment.get('PATH', '').split(os.pathsep)
+            if part and not Path(part).resolve().is_relative_to(runtime))
+    return environment
+
+
+def browser_broker(executable, url):
+    # A system process provides a fresh Windows loader context if Chromium
+    # rejects the inherited frozen process state. Values are data, never code.
+    command = "$ErrorActionPreference='Stop'; $p=Start-Process -FilePath $env:ZYNQ_BROWSER_EXE -ArgumentList @('--new-window',$env:ZYNQ_BROWSER_URL) -PassThru; if ($p.WaitForExit(1500)) {exit $p.ExitCode}"
+    environment = browser_environment()
+    environment.update(ZYNQ_BROWSER_EXE=str(executable), ZYNQ_BROWSER_URL=url)
+    powershell = Path(os.environ['SystemRoot']) / 'System32/WindowsPowerShell/v1.0/powershell.exe'
+    with system_dll_search():
+        result = subprocess.run([str(powershell), '-NoProfile', '-NonInteractive', '-EncodedCommand',
+            base64.b64encode(command.encode('utf-16le')).decode('ascii')],
+            env=environment, cwd=os.environ['SystemRoot'], creationflags=subprocess.CREATE_NO_WINDOW,
+            capture_output=True, timeout=10)
+    return result.returncode == 0
 
 
 def windows_browsers():
@@ -72,7 +104,7 @@ def open_workbench(url):
                 try:
                     with system_dll_search():
                         child = subprocess.Popen([str(executable), '--new-window', url],
-                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                            env=browser_environment(), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
                     try:
                         code = child.wait(timeout=1)
                     except subprocess.TimeoutExpired:
@@ -81,6 +113,9 @@ def open_workbench(url):
                         print('已调用浏览器：' + executable.name, flush=True)
                         return True
                     print(f'浏览器启动返回错误：{executable.name} ({code})', file=sys.stderr, flush=True)
+                    if FROZEN and browser_broker(executable, url):
+                        print('已调用浏览器（系统启动器）：' + executable.name, flush=True)
+                        return True
                 except OSError as error:
                     print('浏览器启动失败：' + executable.name + ' ' + str(error), file=sys.stderr, flush=True)
                     continue
@@ -178,9 +213,6 @@ def preflight(backend, web, service_path):
 
 
 def main(argv=None):
-    if os.environ.get('ZYNQ_BROWSER_DIAGNOSTICS') == '1':
-        import faulthandler
-        faulthandler.dump_traceback_later(10, repeat=False)
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, 'reconfigure'):
             stream.reconfigure(encoding='utf8', errors='replace')
