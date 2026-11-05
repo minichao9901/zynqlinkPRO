@@ -1,0 +1,161 @@
+"""Read-only JTAG smoke test with a reversible F103 SWJ pin fixture."""
+import argparse
+import hashlib
+import json
+from pathlib import Path
+import re
+import sys
+
+from elftools.elf.elffile import ELFFile
+import usb.util
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / 'tools'))
+from dap_pipeline_bench import cmd, open_dap, setup
+from jtag_internal_trace import run as xsct
+from probe_build_info import live_clock_snapshot
+from target_snapshot import same_clock_configuration, snapshot
+from test_probe_board import Memory
+
+DHCSR = 0xE000EDF0
+APB2ENR = 0x40021018
+MAPR = 0x40010004
+SWJ_MASK = 7 << 24
+
+
+def jtag_counters():
+    reply = xsct('targets -set -filter {name =~ "APU"}\n'
+                 'puts "JTAG_COUNTERS [mrd -address-space AP0 -force -value 0x400100c0 3]"')
+    match = re.search(r'JTAG_COUNTERS ([^\r\n]+)', reply)
+    if not match:
+        raise RuntimeError('Unable to observe the JTAG PHY counters')
+    return [int(value, 0) for value in match.group(1).split()]
+
+
+def identify_firmware(mem, part):
+    candidates = {
+        'STM32F103': [
+            ROOT / 'prebuilt/golden/f103ze-cdc48.elf',
+            *sorted((ROOT / 'prebuilt/targets/f103ze-hal-storage-20261104').glob('*.elf')),
+        ],
+        'STM32H743/H742/H750/H753': [
+            ROOT / 'prebuilt/targets/stm32h743-cdc-trace-20261101/cpu60-trace20/fw.elf',
+        ],
+    }
+    for candidate in candidates[part]:
+        segments = []
+        with candidate.open('rb') as stream:
+            for segment in ELFFile(stream).iter_segments():
+                address = segment['p_paddr']
+                if segment['p_type'] != 'PT_LOAD' or not segment['p_filesz'] or not 0x08000000 <= address < 0x08200000:
+                    continue
+                expected = segment.data()
+                actual = mem.read(address, len(expected))
+                segments.append({'address': hex(address), 'bytes': len(actual),
+                                 'sha256': hashlib.sha256(actual).hexdigest(), 'match': actual == expected})
+        if segments and all(row['match'] for row in segments):
+            return {'path': candidate.relative_to(ROOT).as_posix(), 'segments': segments,
+                    'sha256': hashlib.sha256(candidate.read_bytes()).hexdigest()}
+    return None
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--out', type=Path, required=True)
+    parser.add_argument('--identify-only', action='store_true')
+    args = parser.parse_args()
+    report = {'passed': False, 'rows': []}
+    dev = None
+    f103_fixture = False
+    initial = enabled = mapr = None
+    try:
+        dev, out, inp = open_dap()
+        mem = Memory(out, inp)
+        reply = setup(out, inp, 10000)
+        report['dpidr'] = hex(int.from_bytes(reply[3:7], 'little'))
+        before = snapshot(mem)
+        initial = mem.word(DHCSR)
+        report['before'] = before
+        report['initialDHCSR'] = hex(initial)
+        report['swdClock'] = live_clock_snapshot()
+        report['firmware'] = identify_firmware(mem, before['name'])
+        if not args.identify_only:
+            if before['name'] == 'STM32F103':
+                firmware = report['firmware']
+                if not firmware:
+                    raise RuntimeError('F103 fixture requires a verified ELF with known SWJ restoration policy')
+                f103_fixture = True
+                mem.write_word(DHCSR, 0xA05F0003)
+                if not mem.word(DHCSR) & (1 << 17):
+                    raise RuntimeError('Target did not enter debug halt')
+                enabled = mem.word(APB2ENR)
+                mem.write_word(APB2ENR, enabled | 1)
+                mapr = mem.word(MAPR) & ~SWJ_MASK
+                report['fixture'] = {'APB2ENR': hex(enabled), 'MAPRReadableBits': hex(mapr),
+                                     'restoreSWJFromVerifiedFirmwareSource': 2}
+                mem.write_word(MAPR, mapr)
+            expected = mem.read(0x08000000, 256)
+            for speed in (1000, 10000):
+                row = {'requestedTCKHz': speed * 1000, 'passed': False}
+                report['rows'].append(row)
+                reply = setup(out, inp, speed, 'jtag')
+                row['idcodeReply'] = reply.hex()
+                row['IDCODE'] = hex(int.from_bytes(reply[2:6], 'little'))
+                row['clock'] = live_clock_snapshot()
+                start_counters = jtag_counters()
+                for _ in range(16):
+                    if mem.word(0xE000ED00) != int(before['cpuid'], 16) or mem.read(0x08000000, 256) != expected:
+                        raise RuntimeError('JTAG MEM-AP mismatch against SWD')
+                cycles, bits, scans = [(end - start) & 0xffffffff
+                                      for end, start in zip(jtag_counters(), start_counters)]
+                row['phyCounters'] = {'waitCycles': cycles, 'bits': bits, 'scans': scans}
+                if not bits:
+                    raise RuntimeError('JTAG transfer did not increment physical scan counters')
+                row.update(passed=True, CPUID=before['cpuid'], verifiedBytes=4096,
+                           flashPageSHA256=hashlib.sha256(expected).hexdigest())
+        report['passed'] = True
+    except BaseException as error:
+        report['error'] = f'{type(error).__name__}: {error}'
+        raise
+    finally:
+        try:
+            if dev is not None and initial is not None:
+                try:
+                    if not args.identify_only:
+                        setup(out, inp, 10000)
+                    if f103_fixture:
+                        if mapr is not None:
+                            mem.write_word(MAPR, mapr | (2 << 24))
+                            if mem.word(MAPR) & ~SWJ_MASK != mapr:
+                                raise RuntimeError('AFIO MAPR restore readback mismatch')
+                        if enabled is not None:
+                            mem.write_word(APB2ENR, enabled)
+                            if mem.word(APB2ENR) != enabled:
+                                raise RuntimeError('APB2ENR restore readback mismatch')
+                        # Preserve debug enable, halt and interrupt-mask controls.
+                        mem.write_word(DHCSR, 0xA05F0000 | (initial & 0x0B))
+                    after = snapshot(mem)
+                    final = mem.word(DHCSR)
+                    report.update(after=after, finalDHCSR=hex(final),
+                                  resetObservedAfterInitialDHCSR=bool(final & (1 << 25)),
+                                  restored=same_clock_configuration(before, after)
+                                  and (initial ^ final) & 0x20000 == 0)
+                    if not args.identify_only and report['resetObservedAfterInitialDHCSR']:
+                        raise RuntimeError('Target system reset observed during JTAG test')
+                    if not report['restored']:
+                        raise RuntimeError('Target clock or run/halt state changed')
+                finally:
+                    cmd(out, inp, [3])
+        except BaseException as error:
+            report['restorationError'] = f'{type(error).__name__}: {error}'
+            report['passed'] = False
+            raise
+        finally:
+            if dev is not None:
+                usb.util.dispose_resources(dev)
+            args.out.write_text(json.dumps(report, indent=2) + '\n', encoding='utf8')
+    print(json.dumps(report))
+
+
+if __name__ == '__main__':
+    main()

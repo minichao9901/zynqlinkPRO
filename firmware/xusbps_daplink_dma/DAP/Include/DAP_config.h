@@ -463,6 +463,12 @@ P2: nRESET     - Output, active LOW (E19 is wired to the target nTRST on this fi
 #include "jtag_rtl.h"
 
 __STATIC_INLINE void PORT_JTAG_SETUP (void) {
+#ifdef DAP_J7_ADAPTER
+  /* The J7 adapter connects GPIO2 to nSRST and GPIO3 to nTRST.
+   * Release nSRST before driving it. The SWJ/TMS sequence resets the TAP. */
+  Xil_Out32(GPIO_DATA,0x4U);
+  Xil_Out32(GPIO_TRI,0xbU);
+#else
   /* E19 (AXI GPIO bit2) is wired to the target nTRST on this fixture. The PL
    * keeps that pin a plain GPIO in JTAG mode too, so a TRST pulse needs no
    * bitstream change: assert low, hold ~1 ms, release before any TCK runs. */
@@ -471,6 +477,7 @@ __STATIC_INLINE void PORT_JTAG_SETUP (void) {
   for (volatile uint32_t i=0;i<200000U;i++) { }
   Xil_Out32(GPIO_DATA,0xcU);  /* nTRST released (E19/E18 high) */
   for (volatile uint32_t i=0;i<2000U;i++) { }
+#endif
   swd_write32(JTAG_ROUTE,3);
   swd_write32(JTAG_OPERATION,0);
   swd_write32(JTAG_TIMING,0);DAP_JTAG_ClockChanged();

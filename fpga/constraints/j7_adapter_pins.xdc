@@ -1,0 +1,13 @@
+# Apply after releasing the old PACKAGE_PIN properties. Preserve I/O settings.
+set_property PACKAGE_PIN L16 [get_ports swdio_0]
+set_property PACKAGE_PIN L15 [get_ports swclk_0]
+set_property PACKAGE_PIN L14 [get_ports {gpio_rtl_0_tri_io[1]}]
+set_property PACKAGE_PIN M15 [get_ports {gpio_rtl_0_tri_io[0]}]
+set_property PACKAGE_PIN M14 [get_ports {gpio_rtl_0_tri_io[2]}]
+set_property PACKAGE_PIN N15 [get_ports {gpio_rtl_0_tri_io[3]}]
+set_property PACKAGE_PIN J16 [get_ports trace_clk]
+set_property PACKAGE_PIN K16 [get_ports {trace_data[0]}]
+set_property PACKAGE_PIN M18 [get_ports {trace_data[1]}]
+set_property PACKAGE_PIN M17 [get_ports {trace_data[2]}]
+set_property PACKAGE_PIN L17 [get_ports {trace_data[3]}]
+set_property -dict {PACKAGE_PIN H15 IOSTANDARD LVCMOS33} [get_ports rtck]

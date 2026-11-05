@@ -13,6 +13,8 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--opt', choices=['0', '3', 's'], default='3')
     ap.add_argument('--compact-code', action='store_true', help='Thumb code and unused section removal; preserve production queues and DDR buffers')
+    ap.add_argument('--j7-adapter', action='store_true',
+                    help='J7 adapter pinout: GPIO2 is nSRST and must stay released on JTAG connect')
     ap.add_argument('--validation-faults',action='store_true',help='Diagnostic ELF only: one-shot PS fault injection via JTAG, absent by default')
     ap.add_argument('--out', help='Separate output directory for clock/optimization profiles (default: build/<project>/<optimization>)')
     ap.add_argument('--project', choices=['xusbps_daplink_dma'], default='xusbps_daplink_dma')
@@ -50,6 +52,8 @@ def main():
         flags += ['-mthumb', '-ffunction-sections', '-fdata-sections']
     verified_clock = None
     if args.project == 'xusbps_daplink_dma':
+        if args.j7_adapter:
+            flags.append('-DDAP_J7_ADAPTER=1')
         flags += ['-DDAP_ALLOW_ZERO_IDLE='+str(int(args.experimental_zero_idle)), '-DDAP_VALIDATION_FAULTS='+str(int(args.validation_faults))]
         flags += ['-DDAP_ENABLE_TRACE=' + str(int(args.trace or args.usb_trace)), '-DDAP_MMIO_DIAGNOSTICS=' + str(int(args.trace))]
         timing_path = args.timing.resolve() if args.timing else ROOT / 'build/fpga_dma_global/verified_clock.json'

@@ -1,0 +1,127 @@
+{
+  "accepted": true,
+  "stage": "F103ZE JTAG and ETMv3 adapter smoke passed",
+  "sourceBaseline": "23e3c5cec04a2247da1a70ed470bb395745a98b7",
+  "sourceInputTree": "ab2ba0d1420530185e924979e7f2468d1a440bcf",
+  "pinRebindInputSHA256": {
+    "fpga/rebind_j7_adapter.tcl": "97b2c801301ae3d47dc1a69d34d1c302b3063c642da7c19f83af6f9258fcc0d8",
+    "fpga/constraints/j7_adapter_pins.xdc": "d28da829217a5f39dccf9cfdf0e9311edbed485ae1261a7b69d313bb7d6d46c5",
+    "fpga/probe_io_timing.tcl": "3c0a651d0112e4a02aa0415a00a2203809de4a4e75db142ffb652ff8830c9b06",
+    "fpga/verify_routed.tcl": "9d79aa91f7b3bf60092c04044dc4a5116fc07a5e0e23d981ba53bd5c0b0eebb2"
+  },
+  "part": "xc7z020clg400-2",
+  "vivado": "2018.3",
+  "j7Pins": {
+    "swclk_0": "L15",
+    "swdio_0": "L16",
+    "gpio_rtl_0_tri_io[0]": "M15",
+    "gpio_rtl_0_tri_io[1]": "L14",
+    "gpio_rtl_0_tri_io[2]": "M14",
+    "gpio_rtl_0_tri_io[3]": "N15",
+    "rtck": "H15",
+    "trace_clk": "J16",
+    "trace_data[0]": "K16",
+    "trace_data[1]": "M18",
+    "trace_data[2]": "M17",
+    "trace_data[3]": "L17"
+  },
+  "netlistReuse": {
+    "sourceCommit": "5be71767c19df0ec14362a5c8342bfa31c4195e8",
+    "checkpoint": "build/history-20261105/session-flight-20261105/fpga/zynqlink_dma.runs/impl_1/system_wrapper_opt.dcp",
+    "checkpointSHA256": "f18d0dfb52bfb566c5b7119d8ff66ffd1be02944a34febcee945d6702438fb86",
+    "referencePair": "prebuilt/session-flight-recorder-20261105"
+  },
+  "build": {
+    "fpgaTool": "fpga/rebind_j7_adapter.tcl",
+    "ZYNQLINK_RAW_TRACE": 4,
+    "ZYNQLINK_ETM_DDR": 1,
+    "FCLKConstraintHz": 133333333,
+    "maxSWCLKHz": 60000000,
+    "psArgs": [
+      "--j7-adapter",
+      "--compact-code",
+      "--opt",
+      "3",
+      "--max-swclk-hz",
+      "60000000"
+    ]
+  },
+  "timing": {
+    "FCLK_max_Hz": 133333333,
+    "SWCLK_max_Hz": 66666666,
+    "setup_slack_ns": 0.074,
+    "hold_slack_ns": 0.054,
+    "requested_FCLK_Hz": 133333333,
+    "RTL_DEBUG": 0,
+    "optional_observation_cells": 0,
+    "formal_product_acceptance": false
+  },
+  "files": {
+    "probe.bit": {
+      "bytes": 4045674,
+      "sha256": "792d4b6c8f38e47b1ba27d19a4ff5211e3a05be642edac7a526baa727df65abc"
+    },
+    "application.elf": {
+      "bytes": 874884,
+      "sha256": "1fbf6471e14669a809aa02a3e4a6fbb262370ea9b45511f2a460e6f52a5d4ee5"
+    },
+    "ps7_init.tcl": {
+      "bytes": 35186,
+      "sha256": "485a028ff7ad9a256a64313b68527a055ca3800b3b85577ceb0554b0e0609c94"
+    },
+    "verified_clock.json": {
+      "bytes": 205,
+      "sha256": "3463b217a0bad38142433278e9ea9ba95525f0e482632afc08a16a77a509d624"
+    },
+    "ps-build.json": {
+      "bytes": 5974,
+      "sha256": "a303ee6d601a2ced2edb3f827f21918524ca60114281d212d96ee241c5a5ef1e"
+    },
+    "ocm-layout.json": {
+      "bytes": 2701,
+      "sha256": "1bc882c5aa420d4681c3146f9018c803c284003fd4253996f2539ccdb8c96fb2"
+    },
+    "rtl-inputs.json": {
+      "bytes": 2263,
+      "sha256": "baae83a22b3f4a1c1e16e3b5b86b643637ea047fe981c28a440703c59071657b"
+    }
+  },
+  "report": "docs/validation/j7-adapter-20261106/README.md",
+  "acceptedDate": "2026-11-06",
+  "hardware": {
+    "load": "JTAG volatile PL + PS OCM",
+    "targetELFSHA256": "e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f",
+    "psOCMExecutableBytesMatched": 85580,
+    "jtag": [
+      {
+        "IDCODE": "0x3ba00477",
+        "requestedTCKHz": 1000000,
+        "verifiedBytes": 4096,
+        "FCLKHz": 1999999,
+        "TCKHzFromRegisters": 999999.5
+      },
+      {
+        "IDCODE": "0x3ba00477",
+        "requestedTCKHz": 10000000,
+        "verifiedBytes": 4096,
+        "FCLKHz": 19999999,
+        "TCKHzFromRegisters": 9999999.5
+      }
+    ],
+    "etm": {
+      "windowSeconds": 0.100000001,
+      "instructions": 1891730,
+      "packetIssues": 0,
+      "rawSHA256": "3637938bd891cf00d9f6a4fea7c7772ce10a7bbf1857754a9ff5c0d6b570a6d8"
+    },
+    "finalTargetRunning": true,
+    "finalEnginesIdle": true,
+    "initialLegacyPSResetObserved": true
+  },
+  "pinRebindGitSHA256": {
+    "fpga/rebind_j7_adapter.tcl": "97b2c801301ae3d47dc1a69d34d1c302b3063c642da7c19f83af6f9258fcc0d8",
+    "fpga/constraints/j7_adapter_pins.xdc": "d28da829217a5f39dccf9cfdf0e9311edbed485ae1261a7b69d313bb7d6d46c5",
+    "fpga/probe_io_timing.tcl": "d0cf0fe23f98bd4e52f7742d9a75253d2be61d7930f4eb3c4fc252548fbea2eb",
+    "fpga/verify_routed.tcl": "10308ac3d51ba5310486ce70061a931a72e5e22cbb16c01822474420c4af3a39"
+  }
+}
