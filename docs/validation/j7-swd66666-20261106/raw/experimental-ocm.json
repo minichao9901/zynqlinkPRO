@@ -1,0 +1,70 @@
+{
+  "time_UTC": "2026-11-05T21:58:46.616556+00:00",
+  "elf": "E:\\zynqlinkPRO\\build\\j7-swd66666-20261106\\candidate\\application.elf",
+  "elf_sha256": "c58d209f882af3dc1ed1d15671444f4e910b00e4e42077f19d590930385df374",
+  "downloads": false,
+  "probe_reset_or_continue": false,
+  "expected_executable_bytes": 85068,
+  "cycles": [
+    {
+      "cycle": 0,
+      "sections": [
+        {
+          "name": ".text",
+          "bytes": 82088,
+          "address": 0,
+          "equal": true,
+          "expected_sha256": "a1ecdc10d27db752a3256e4bec40a8a3c5ea768aad88753aa683b898e7540c91",
+          "live_sha256": "a1ecdc10d27db752a3256e4bec40a8a3c5ea768aad88753aa683b898e7540c91"
+        },
+        {
+          "name": ".ocm_text",
+          "bytes": 2956,
+          "address": 82088,
+          "equal": true,
+          "expected_sha256": "9dbed64710efb01fe57a3f10b60e213247dd5c7c99d890f44064f2610f20624f",
+          "live_sha256": "9dbed64710efb01fe57a3f10b60e213247dd5c7c99d890f44064f2610f20624f"
+        },
+        {
+          "name": ".init",
+          "bytes": 12,
+          "address": 85044,
+          "equal": true,
+          "expected_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6",
+          "live_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6"
+        },
+        {
+          "name": ".fini",
+          "bytes": 12,
+          "address": 85056,
+          "equal": true,
+          "expected_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6",
+          "live_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6"
+        }
+      ],
+      "differing_addresses": [],
+      "vector_word": "ea000049"
+    }
+  ],
+  "passed": true,
+  "memoryAccess": "physical MEM-AP0; independent of CPU memory/cache context",
+  "boot_mode": 0,
+  "boot_trace": [
+    2030568458,
+    2995477824,
+    2216795737,
+    3155551796,
+    973238336,
+    3145461792,
+    848482593,
+    2452593471
+  ],
+  "clockSnapshot": {
+    "control": 1051168,
+    "source": 2,
+    "pll": 163848,
+    "bootMode": 0,
+    "FCLK_Hz": 133333332
+  },
+  "initial_FCLK_Hz": 133333332
+}

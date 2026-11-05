@@ -1,0 +1,179 @@
+"""Load one experimental pair, benchmark it, and restore the original pair."""
+from contextlib import redirect_stdout
+import hashlib
+import json
+from pathlib import Path
+import subprocess
+import sys
+
+import usb.util
+
+WORK = Path(__file__).resolve().parent
+ROOT = WORK.parents[1]
+sys.path[:0] = [str(ROOT/'tools'), str(ROOT/'etm-service/tools')]
+from benchmark_rtt_forward import core_read, DCRDR, DHCSR
+from dap_pipeline_bench import cmd, open_dap, setup
+import h743_peak
+import load_pair
+from probe_build_info import live_clock_snapshot
+from probe_ownership import Ownership
+from probe_stream import Probe
+from run_f103_ram_fixture import flash_plan, verify
+from target_snapshot import snapshot
+from test_probe_board import Memory
+from validate_fclk_performance import physical_snapshot
+
+PRODUCTION = ROOT/'prebuilt/j7-adapter-20261106'
+EXPERIMENT = WORK/'candidate'
+SRAM = 0x20000000
+CORE_REGS = [*range(19),20]
+EXPECTED_FLASH = flash_plan(ROOT/'prebuilt/golden/f103ze-cdc48.elf')
+
+
+def require(condition, detail):
+    if not condition:
+        raise RuntimeError(detail)
+
+
+def verify_ocm(pair, label):
+    with (WORK/(label+'-ocm.log')).open('wb') as log:
+        subprocess.run([sys.executable,'-X','utf8',str(ROOT/'tools/verify_probe_ocm_code.py'),
+                        '--elf',str(pair/'application.elf'),'--out-dir',str(WORK/(label+'-ocm'))],
+                       cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, check=True)
+
+
+def invoke(function, argv, name):
+    previous = sys.argv
+    try:
+        sys.argv = list(map(str, argv))
+        with (WORK/(name+'.log')).open('w',encoding='utf8') as log, redirect_stdout(log):
+            function()
+    finally:
+        sys.argv = previous
+
+
+def load(pair, label):
+    invoke(load_pair.main, ['load_pair', pair, '--replace-running'], label)
+    for name in ('final-before-load.txt','before-reload-idle.json','final-load.txt'):
+        (WORK/name).rename(WORK/(label+'-'+name))
+
+
+def open_mem(speed):
+    dev, tx, rx = open_dap()
+    try:
+        setup(tx, rx, speed)
+    except BaseException:
+        usb.util.dispose_resources(dev)
+        raise
+    return dev, Memory(tx,rx)
+
+
+def check_idle():
+    state = physical_snapshot()
+    p = Probe()
+    try:
+        state['streams'] = {name:p.action(c,2) for name,c in [('rtt',0x31),('hss',0x32)]}
+    finally:
+        p.close()
+    require(state['allObservedEnginesIdle'] and all(rc==0 and not words[0]&1 for rc,words in state['streams'].values()),'Probe occupied')
+    return state
+
+
+def run():
+    report = dict(restored=False, flashWrites=False, qspiWrites=False)
+    lease = Ownership()
+    initial = sram = fpb = core = debug = None
+    replacement_started = False
+    try:
+        report['initialProbe'] = check_idle()
+        verify_ocm(PRODUCTION, 'production-before')
+        dev, mem = open_mem(10000)
+        try:
+            before = snapshot(mem)
+            require(before['device'].endswith('414') and before['registers']['0x40021004']=='0x51040a','Expected F103ZE CDC48 clock')
+            report['targetBefore'] = before
+            report['flashBefore'] = verify(mem,EXPECTED_FLASH)
+            initial = mem.word(DHCSR)
+            mem.write_word(DHCSR,0xa05f0003)
+            require(mem.word(DHCSR)&(1<<17),'Target did not halt')
+            debug = mem.word(DCRDR)
+            core = {n:core_read(mem,n) for n in CORE_REGS}
+            fpb = mem.read(0xe0002000,40)
+            sram = mem.read(SRAM,65536)
+            require(mem.read(SRAM,65536)==sram,'Backup changed while halted')
+            (WORK/'sram-private.bin').write_bytes(sram)
+            report.update(initialDHCSR=hex(initial),sramSHA256=hashlib.sha256(sram).hexdigest(),
+                          traceBefore=hex(mem.word(0xe0041000)))
+        finally:
+            usb.util.dispose_resources(dev)
+
+        replacement_started = True
+        load(EXPERIMENT, 'experimental')
+        verify_ocm(EXPERIMENT, 'experimental')
+        dev, mem = open_mem(1000)
+        try:
+            state = mem.word(DHCSR)
+            require(state&(1<<17) and not state&(1<<25),'Target reset or was released during probe load')
+            require(snapshot(mem)==before,'Target clocks changed')
+            report['experimentalSafeClock'] = live_clock_snapshot()
+            report['traceDuring'] = hex(mem.word(0xe0041000))
+        finally:
+            usb.util.dispose_resources(dev)
+
+        print('Experimental OCM verified; starting 66,666,666 Hz SRAM and 60 s soak',flush=True)
+        invoke(h743_peak.main, ['h743_peak','--transport','swd','--speed-hz','66666666',
+              '--bootstrap-speed-khz','1000','--address','0x20008000','--words','512','--depth','32',
+              '--loops','256','--repeats','3','--soak-seconds','60','--bit',EXPERIMENT/'probe.bit',
+              '--elf',EXPERIMENT/'application.elf','--output',WORK/'sram666.json'], 'sram666')
+        v=json.loads((WORK/'sram666.json').read_text())
+        require(v['passed'] and v['restore_match'] and v['SWCLK_Hz']==66666666,'Benchmark did not pass at exact frequency')
+        report['benchmarkPassed']=True
+    except BaseException as error:
+        report['error']=repr(error)
+        if replacement_started:
+            try:report['failureClock']=live_clock_snapshot()
+            except Exception as clock_error:report['failureClockError']=repr(clock_error)
+        raise
+    finally:
+        try:
+            if replacement_started:
+                load(PRODUCTION,'production-restored')
+                verify_ocm(PRODUCTION,'production-restored')
+            if initial is not None:
+                dev, mem = open_mem(10000)
+                try:
+                    state=mem.word(DHCSR)
+                    require(state&(1<<17) and not state&(1<<25),'Target reset or was released before restoration')
+                    if sram is not None:
+                        now=mem.read(SRAM,len(sram))
+                        offsets=[n for n in range(0,len(sram),1024) if now[n:n+1024]!=sram[n:n+1024]]
+                        report['repairOffsets']=offsets
+                        for n in offsets:mem.write(SRAM+n,sram[n:n+1024])
+                        require(mem.read(SRAM,len(sram))==sram,'SRAM restore mismatch')
+                        report['wholeSramRestored']=True
+                    if core is not None:
+                        require({n:core_read(mem,n) for n in CORE_REGS}==core,'Core register mismatch')
+                        report['coreMatched']=True
+                    if fpb is not None:
+                        require(mem.read(0xe0002000,40)==fpb,'FPB mismatch')
+                        report['fpbMatched']=True
+                    if debug is not None:mem.write_word(DCRDR,debug)
+                    require(snapshot(mem)==before,'Target clock mismatch')
+                    report['flashAfter']=verify(mem,EXPECTED_FLASH)
+                    report['traceAfter']=hex(mem.word(0xe0041000))
+                    require(report['traceBefore']==report['traceAfter'],'ETMCR changed')
+                    mem.write_word(DHCSR,0xa05f0000|(initial&0x0b))
+                    final=mem.word(DHCSR)
+                    require((initial^final)&(1<<17)==0 and not final&(1<<25),'Target run/halt mismatch')
+                    report['finalDHCSR']=hex(final)
+                    cmd(mem.out,mem.inp,[3])
+                finally:
+                    usb.util.dispose_resources(dev)
+            report['finalProbe']=check_idle()
+            report['restored']=True
+        finally:
+            (WORK/'run666.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf8')
+            lease.close()
+
+
+if __name__=='__main__':run()
