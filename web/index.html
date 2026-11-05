@@ -664,14 +664,39 @@
         </fieldset>
       </div>
     </aside>
-    <section class="main">
+    <section class="main" id="f-main">
       <div class="toolbar">
         <span id="f-status">空闲</span>
         <progress id="f-bar" value="0" max="100" hidden></progress>
         <span class="spacer"></span>
         <button id="f-logclear">清空日志</button>
       </div>
-      <pre class="rx eventlog" data-empty="烧录、身份读取和复位的进度与结果显示在这里。" id="f-log" tabindex="0"></pre>
+      <nav class="firmware-tabs" role="tablist" aria-label="固件查看">
+        <button id="f-tab-log" role="tab" aria-selected="true" aria-controls="f-log">日志</button>
+        <button id="f-tab-bytes" role="tab" aria-selected="false" aria-controls="f-pane-bytes" tabindex="-1">固件字节</button>
+        <button id="f-tab-elf" role="tab" aria-selected="false" aria-controls="f-pane-elf" tabindex="-1">ELF 解析</button>
+      </nav>
+      <pre class="rx eventlog" data-empty="烧录、身份读取和复位的进度与结果显示在这里。" id="f-log" role="tabpanel" aria-labelledby="f-tab-log" tabindex="0"></pre>
+      <section id="f-pane-bytes" class="firmware-pane" role="tabpanel" aria-labelledby="f-tab-bytes" hidden>
+        <p id="f-byte-info" class="hint"></p>
+        <div class="firmware-tools">
+          <select id="f-byte-source" aria-label="字节来源"><option value="image">烧录映像</option><option value="raw">原文件字节</option></select>
+          <select id="f-byte-region" aria-label="固件区段"></select>
+          <input id="f-byte-address" aria-label="定位固件地址" placeholder="烧录地址，如 0x08000000">
+          <button id="f-byte-go">定位</button>
+        </div>
+        <pre id="f-byte-content" class="firmware-hex" tabindex="0" aria-label="十六进制与 ASCII 字节"></pre>
+        <div class="firmware-tools"><button id="f-byte-prev">上一页</button><button id="f-byte-next">下一页</button><span id="f-byte-page" role="status"></span></div>
+      </section>
+      <section id="f-pane-elf" class="firmware-pane" role="tabpanel" aria-labelledby="f-tab-elf" hidden>
+        <p id="f-elf-note" class="hint"></p>
+        <div class="firmware-tools">
+          <select id="f-elf-view" aria-label="ELF 结构"><option value="header">文件头</option><option value="programs">程序头 / 加载段</option><option value="sections">节表</option><option value="symbols">符号表</option></select>
+          <input id="f-elf-search" placeholder="搜索名称、地址或字段…" aria-label="搜索 ELF 结构">
+        </div>
+        <div id="f-elf-content" class="firmware-table" tabindex="0"></div>
+        <div class="firmware-tools"><button id="f-elf-prev">上一页</button><button id="f-elf-next">下一页</button><span id="f-elf-page" role="status"></span></div>
+      </section>
       <div class="stats">
         <span id="f-result">—</span>
         <span class="spacer"></span>

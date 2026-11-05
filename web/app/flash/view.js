@@ -23,6 +23,7 @@ import { AkaLinkHid } from '../hid/probe.js';
 import { FlashRunner } from './runner.js';
 import { DEFAULT_FLASH_CLOCK_KHZ } from './data-clock.js';
 import { parseFirmware, findGaps } from './image.js';
+import { FirmwareInspector } from './inspector-view.js';
 import { bytes as fBytes } from '../core/format.js';
 import { waitMs } from '../core/pace.js';
 
@@ -39,6 +40,8 @@ export class FlashView {
   }
 
   init(){
+    this.inspector = new FirmwareInspector();
+    this.inspector.init();
     for (const chip of CHIPS.filter(c => (c.v.startsWith('stm32') && ALGOS[c.v]) || hpmBoard(c.v)))
       $('f-chip').appendChild(new Option(chip.label, chip.v));
     store.bind($('f-chip'), 'flash.chip');
@@ -62,7 +65,7 @@ export class FlashView {
     });
     document.body.appendChild(this._fileInput);
     $('f-pick').addEventListener('click', () => this._fileInput.click());
-    const drop = $('f-log');
+    const drop = $('f-main');
     drop.addEventListener('dragover', e => e.preventDefault());
     drop.addEventListener('drop', e => { e.preventDefault(); this._onFile(e.dataTransfer?.files?.[0]); });
     this._fileInfo();
@@ -79,11 +82,14 @@ export class FlashView {
   // ================= 文件 =================
   async _onFile(f, buffer){
     if (!f) return;
+    const revision = this._fileRevision = (this._fileRevision || 0) + 1;
     try {
       const buf = buffer || await f.arrayBuffer();
+      if (revision !== this._fileRevision) return;
       if (this.busy) throw new Error('请等待烧录操作完成后再换固件');
       this.file = { name: f.name, size: f.size, dataB64: this._b64(new Uint8Array(buf)) };
       this._fileInfo();
+      this.inspector?.load(f.name, buf);
       this.onElfLoaded?.(buf, f.name);
       toast(`已读入 ${f.name}（${fBytes(f.size)}），点「烧录」写入`, 'ok', 4000);
     } catch (e){
@@ -198,6 +204,7 @@ export class FlashView {
   async _flashOnce(){
     if (!this.file){ toast('请选择或拖入固件文件', 'warn'); return; }
     const name = this.file.name;
+    this.inspector?.show('log');
 
     // 探针互斥：同页签的 RTT / J-Scope 会话先断开，再请别的页签让出探针
     if (!(await this._clearProbeUsers(name))) return;

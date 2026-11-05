@@ -1446,3 +1446,19 @@ fieldset,.toolbar,.sendbar,.stats,.an-measurements,.an-plot,
 .scope-counters{font-size:var(--text-xs);color:var(--fg2)}
 .scope-counters summary{cursor:pointer;white-space:nowrap}
 .scope-counters>span{position:absolute;bottom:calc(100% + 4px);right:0;max-width:340px;padding:8px;background:var(--bg2);border:1px solid var(--line);border-radius:4px;z-index:3}
+
+/* Firmware inspection stays local; large files render one page at a time. */
+#f-main [hidden]{display:none!important}
+.firmware-tabs{display:flex;gap:4px;padding:6px 10px;border-bottom:1px solid var(--line);flex:none}
+.firmware-tabs [aria-selected=true]{color:var(--acc);border-color:var(--acc);background:var(--bg3)}
+.firmware-pane{display:flex;flex:1;flex-direction:column;min-height:0;min-width:0;gap:8px;padding:10px;overflow:auto}
+.firmware-pane>.hint{margin:0;overflow-wrap:anywhere;flex:none}
+.firmware-tools{display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex:none}
+.firmware-tools>input{min-width:100px;flex:1;max-width:320px}
+.firmware-tools>select{min-width:0;max-width:100%}
+.firmware-hex,.firmware-table{flex:1;min-height:100px;overflow:auto;margin:0;background:#0a0f15;border:1px solid var(--line);border-radius:4px;padding:8px}
+.firmware-hex{font:12px/1.7 var(--mono);white-space:pre;tab-size:4}
+.firmware-table table{border-collapse:collapse;white-space:nowrap;font:12px/1.6 var(--mono);width:100%}
+.firmware-table th,.firmware-table td{text-align:left;padding:5px 10px;border-bottom:1px solid var(--line)}
+.firmware-table th{position:sticky;top:-8px;background:var(--bg2)}
+.firmware-table td{max-width:600px;overflow-wrap:anywhere;white-space:normal}

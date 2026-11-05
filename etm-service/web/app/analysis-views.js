@@ -1,39 +1,22 @@
 import {wireFlameExport} from './flame-export-ui.js';
 import {rangeFromPixels,wheelRange} from './execution-window.js';
 import {createZoomControls} from './zoom-controls.js';
-import {traceSettingsText} from './trace-options.js';
+import {recordReport} from './record-report.js';
 const make=(tag,text,className='')=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;e.className=className;if(className.split(/\s+/).includes('hint')&&text!==undefined)e.title=String(text);return e;};
 const n=value=>Number(value).toLocaleString('zh-CN');
 
 export function integrityView(result){
-  const q=result.quality,box=make('div',undefined,'integrity-panel'),title=make('h3','完整性分层核算');
-  const t=result.analysis?.timing;
-  const cycleRow=t?.timeFlameAvailable
-    ? `${q.timing.cycleElements} 个 · 合计 ${n(t.totalCycles)} 周期${t.cpi?` · CPI ${t.cpi.toFixed(2)}`:''}${t.coreHz?` · 覆盖 ${(t.totalCycles/t.coreHz*1e6).toFixed(1)} µs`:''}`
-    : `${q.timing.cycleElements} 个（未启用，或 ETMv3/F103 不支持 → 没有时间轴）`;
-  const rows=[['OpenCSD 输入',`${n(q.processedBytes)} 字节`],['包记录字节覆盖',`${n(q.accountedBytes)} 字节；重叠 ${q.overlapBytes}，遗漏 ${q.unaccountedBytes}`],['已识别包',`${n(q.validPackets)} 个`],['未同步 ETM 数据',`${n(q.unsynchronizedBytes)} 字节 / ${q.unsynchronizedRecords} 条占位记录`],['TPIU 同步前',`${q.initialPhysicalBytes??'未记录'} 字节`],['未知源 ID 数据',`${q.unknownSourceBytes??'未记录'} 字节`],['尾部不完整帧',`${q.trailingFrameBytes??'未记录'} 字节`],['执行状态未知',`${q.unknownExecution} 条指令记录`],['溢出 / 包问题',`${q.overflowPackets} / ${q.packetIssues}`],['首个恢复区间的 ETM 偏移',q.firstPathOffset??'无'],['周期计数元素',cycleRow]];
-  const physical=result.physical;
-  rows[0][0]='OpenCSD 已处理';rows.unshift(['ETM 原始输入',`${n(q.inputBytes??q.processedBytes)} 字节`],['未处理输入',`${n(q.unprocessedBytes??0)} 字节`]);
-  const depth=Number(physical?.sample_depth),rate=Number(physical?.sample_rate),span=physical?.window_seconds;
-  const actual=depth>0&&rate>0?depth/rate:
-    Array.isArray(span)&&span.length===2&&span.every(Number.isFinite)&&span[1]>span[0]?span[1]-span[0]:null;
-  if(Number.isFinite(actual)&&actual>0){
-    const requested=result.captureExtent?.requestedSeconds;
-    rows.unshift(['实际采集时长',`${(actual*1000).toFixed(3)} ms`+
-      (Number.isFinite(requested)&&requested>0?` · 请求 ${(requested*1000).toFixed(3)} ms`:'' )]);
+  const box=make('div',undefined,'integrity-panel'),nav=make('nav',undefined,'record-report-nav'),panels=[],buttons=[];
+  nav.setAttribute('aria-label','报告分类');box.append(nav);
+  const labels={'记录身份与配置':'概况','采集窗口与传输':'采集','解码完整性':'完整性','执行周期与耗时口径':'周期','处理性能 Profile':'Profile'};
+  for(const group of recordReport(result)){
+    const panel=make('section'),button=make('button',labels[group.title]||group.title);
+    button.type='button';button.onclick=()=>{panels.forEach((p,i)=>{const selected=p===panel;p.hidden=!selected;buttons[i].setAttribute('aria-pressed',String(selected));});};
+    buttons.push(button);panels.push(panel);nav.append(button);panel.append(make('h3',group.title));
+    for(const [label,value]of group.rows){const row=make('div',undefined,'integrity-row');row.append(make('span',label),make('strong',String(value)));panel.append(row);}
+    if(group.note)panel.append(make('p',group.note,'hint'));box.append(panel);
   }
-  if(physical){rows.push(['物理时钟段',`${physical.clock_runs?.length??1} 段`],['长时钟间隔',`${physical.clock_gaps?.length??0} 处`],['最小数据跳变距离',`${physical.min_data_transition_distance_ns?.toFixed(3)??'—'} ns`]);}
-  const snapshot=result.targetSnapshot;
-  rows.push(['尾部同步标记残片',`${q.trailingSyncBytes??0} 字节（保留为捕获边界）`]);
-  rows.push(['ETM 选项（配置快照）',traceSettingsText(result.config||snapshot?.config)]);
-  const filter=result.laFilter;
-  if(filter?.channels){const active=filter.channels.filter(x=>x.enabled);rows.push(['LA 毛刺滤波快照',active.length?active.map(x=>`CH${x.channel} ≤${x.samples} 点 (${x.widthNs?.toFixed(1)??'—'} ns)`).join('；'):'全部关闭']);}
-  else rows.push(['LA 毛刺滤波快照','未记录，不能由磁盘预设推断']);
-  if(snapshot?.clocks){const c=snapshot.clocks;rows.push(['SWD 时钟回读',`CPU ${(c.coreHz/1e6).toFixed(3)} / TRACECLK ${(c.physicalTraceHz/1e6).toFixed(3)} MHz`]);}
-  if(result.samplingValidation){const s=result.samplingValidation;rows.push(['采样相位检查',`${s.phases.length} 个位置 / ${s.distinctStreams} 种数据流`],['所选相位的稳定窗',`${s.stableWindow[0].toFixed(2)}～${s.stableWindow[1].toFixed(2)}，约 ${s.stableWindowNs.toFixed(2)} ns${s.sensitive?' · 余量不足':''}`]);}
-  if(result.spiValidation){const v=result.spiValidation;rows.push(['直接分支落点核对',`${n(v.branchTransitionsChecked)} 次`],['完整 SPI 发送核对',`${v.closedSpiCalls} 次，每次 ${v.bytesPerClosedTransfer} 字节`]);}
-  box.append(title);for(const [label,value]of rows){const row=make('div',undefined,'integrity-row');row.append(make('span',label),make('strong',String(value)));box.append(row);}
-  box.append(make('p',q.basis,'hint'),make('p','未同步、采集前调用栈与缺口保留为未知。普通调用、尾跳转和中断进入分开计数；此报告不等于无丢失保证。','hint'));
+  buttons[result.captureQuality?1:2].onclick();
   return box;
 }
 
