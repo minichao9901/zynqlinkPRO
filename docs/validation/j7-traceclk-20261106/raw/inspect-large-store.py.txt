@@ -1,0 +1,88 @@
+"""Inspect the rejected candidate before normal failed-generation cleanup."""
+import hashlib
+import json
+from pathlib import Path
+import struct
+import sys
+import zlib
+
+WORK = Path(__file__).resolve().parent
+ROOT = WORK.parents[1]
+sys.path.insert(0, str(ROOT/'etm-service/tools'))
+from decode_stream import decode_stream
+from engine_profile import activate_native_profile
+import native_storebuild
+
+LIMIT = 128 << 20
+
+
+def describe(path):
+    size = path.stat().st_size
+    with path.open('rb') as file:
+        header = struct.unpack('<8sHHIQIIQQII', file.read(56))
+        assert header[0] == b'ETMTSv1\0' and header[8] == size
+        count = header[5]
+        index = file.read(count*24)
+        blocks = list(struct.iter_unpack('<QIIHHI', index))
+        next_offset = 56+count*24
+        bad = []
+        tables = []
+        for i, (offset,length,raw,type_,flags,crc) in enumerate(blocks):
+            problems = []
+            if offset!=next_offset or offset>size or length>size-offset:problems.append('extent')
+            if length>LIMIT:problems.append('length exceeds 128 MiB')
+            if type_<1 or type_>12 or flags & ~1:problems.append('type/flags')
+            if problems:
+                bad.append(dict(index=i,type=type_,offset=offset,length=length,countField=raw,flags=flags,problems=problems))
+            if type_==8:
+                file.seek(offset)
+                payload=file.read(length)
+                assert zlib.crc32(payload)==crc
+                summary=json.loads(zlib.decompress(payload) if flags&1 else payload)
+            if type_==12:
+                file.seek(offset)
+                tag, version, n, _=struct.unpack('<8sIII',file.read(20))
+                assert tag==b'ETMQIDX2' and version==2 and not flags
+                entries=list(struct.iter_unpack('<IHBBIQQQQQIII',file.read(n*64)))
+                name_start=offset+20+n*64
+                for name_offset,name_size,dtype,ndim,reserved,rows,cols,at,length_,raw_,crc_,_r1,_r2 in entries:
+                    file.seek(name_start+name_offset)
+                    tables.append(dict(name=file.read(name_size).decode('utf8'),rows=rows,encodedBytes=length_,rawBytes=raw_))
+            next_offset+=length
+        assert next_offset==size
+    return dict(storeBytes=size,blockCount=count,violations=bad,candidateSummary=summary,
+                indexTables=sorted(tables,key=lambda item:item['encodedBytes'],reverse=True))
+
+
+activate_native_profile()
+out = WORK/'large-store-diagnosis'
+out.mkdir(exist_ok=False)
+source = WORK/'trace32-2000ms-r1'
+data = (source/'etm.bin').read_bytes()
+config = json.loads((source/'acceptance.json').read_text(encoding='utf8'))['config']
+original = native_storebuild._run_json_command
+report = dict(inputSHA256=hashlib.sha256(data).hexdigest(),binarySHA256=hashlib.sha256(native_storebuild.binary_path().read_bytes()).hexdigest())
+
+
+def observe(args, *a, **kw):
+    try:
+        return original(args, *a, **kw)
+    except native_storebuild.NativeStorebuildError:
+        generation = Path(args[args.index('--out-dir')+1])
+        assert generation.is_relative_to(out)
+        report.update(describe(generation/'store.bin'))
+        raise
+
+
+native_storebuild._run_json_command = observe
+try:
+    decode_stream(data, WORK/'trace-workload.elf', out, config)
+except native_storebuild.NativeStorebuildError as exc:
+    report['error'] = str(exc)
+    assert report.get('violations'), report
+else:
+    raise RuntimeError('Expected original native-reader rejection')
+finally:
+    native_storebuild._run_json_command = original
+    (WORK/'large-store-diagnosis.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf8')
+print(json.dumps(report['violations']))

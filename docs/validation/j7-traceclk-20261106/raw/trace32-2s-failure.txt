@@ -1,0 +1,26 @@
+Traceback (most recent call last):
+  File "E:\zynqlinkPRO\build\j7-traceclk-20261106\sweep.py", line 301, in <module>
+    run()
+    ~~~^^
+  File "E:\zynqlinkPRO\build\j7-traceclk-20261106\sweep.py", line 228, in run
+    report['fullWindows32MHz'] = [point(32,2000,n) for n in (1,2,3)]
+                                  ~~~~~^^^^^^^^^^^
+  File "E:\zynqlinkPRO\build\j7-traceclk-20261106\sweep.py", line 176, in point
+    decoded = decode_stream(data, ELF, folder, a['config'])
+  File "E:\zynqlinkPRO\etm-service\tools\decode_stream.py", line 973, in decode_stream
+    return decode_closed(id_stream, elf, workdir, config=config, sources=sources,
+                         max_events=max_events, framing=framing, physical=physical, capture=capture)
+  File "E:\zynqlinkPRO\etm-service\tools\native_closed.py", line 116, in decode
+    result, decoded = write(folder, folder / 'store', elf=elf, config=config, sources=sources,
+                      ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        input_bytes=len(raw), max_events=max_events, framing=framing, physical=physical,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        capture=capture, write_decoded=True, prefer_raw=True)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\zynqlinkPRO\etm-service\tools\native_closed.py", line 86, in write
+    built = native._run_json_command(args, work / 'native-result.json', native.DEFAULT_TIMEOUT)
+  File "E:\zynqlinkPRO\etm-service\tools\native_storebuild.py", line 147, in _run_json_command
+    raise NativeStorebuildError(
+        '原生 builder %s 失败（退出码 %d）：%s'
+        % (command[0], completed.returncode, stderr or '(无输出)'))
+native_storebuild.NativeStorebuildError: 原生 builder build 失败（退出码 3）：etm_storebuild 失败（退出码 3）：Invalid native store block

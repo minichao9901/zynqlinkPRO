@@ -1,0 +1,143 @@
+{
+  "rows": [
+    {
+      "traceMHz": 32,
+      "milliseconds": 100,
+      "round": 1,
+      "gpio": 3,
+      "passed": true,
+      "clock": {
+        "hclkHz": 64000000,
+        "traceClkHz": 32000000,
+        "rccCr": "0x3034e83",
+        "rccCfgr": "0x59c40a",
+        "pllInputHz": 8000000,
+        "pllMultiplier": 8
+      },
+      "DWT": {
+        "cycles": 12851954,
+        "hostSeconds": 0.2007083499993314,
+        "hclkHz": 64032981.18908761
+      },
+      "captureHostSeconds": 9.792987799999537,
+      "quality": {
+        "transport": "ddr-usb/1",
+        "captureId": 21,
+        "captureNonce": 15183476465119116960,
+        "loss": false,
+        "synced": true,
+        "bufferFull": false,
+        "bufferCapacityBytes": 104857600,
+        "captureComplete": true,
+        "requestedWindowComplete": true,
+        "completionReason": "trigger",
+        "ended": true,
+        "records": 6553599,
+        "hardwareTicks": 1220226955,
+        "requestedTicks": 20000000,
+        "refClockHz": 199999998,
+        "hardwareSeconds": 6.101134836011348,
+        "hardwareStartBracketUnix": [
+          1793914745.6611931,
+          1793914745.6617439
+        ],
+        "stopReason": 0,
+        "formatterBytes": 104857585,
+        "tailBytes": 1,
+        "tailAmbiguous": true,
+        "usbSeconds": 2.762892800001282,
+        "usbPayloadMBps": 37.95210042168532,
+        "diagnostics": {
+          "implemented": true,
+          "frameDrops": 0,
+          "parserErrors": 0,
+          "idelayReadyLosses": 0,
+          "frameHighwater": 1,
+          "syncAcquisitions": 1,
+          "observedFrames": 9388207,
+          "capacityReached": false,
+          "writerError": 0
+        },
+        "flight": {
+          "words": [
+            827478598,
+            45353728,
+            104857585,
+            150211313,
+            0,
+            1200226955,
+            0,
+            0,
+            15,
+            20000000,
+            104857600
+          ],
+          "oldestOffset": 45353728,
+          "retainedBytes": 104857585,
+          "totalBytes": 150211313,
+          "triggerTicks": 1200226955,
+          "elapsedHigh": 0,
+          "flags": 15,
+          "postTicks": 20000000,
+          "capacityBytes": 104857600
+        },
+        "historyOverwritten": true,
+        "retainedHistoryBytes": 104857585,
+        "discardedHistoryBytes": 45353728,
+        "overwrittenBytes": 45353713,
+        "alignmentDiscardedBytes": 15,
+        "initialExecutionUnknown": true,
+        "windowBasis": "trigger-post-window; retained prefix is byte bounded"
+      },
+      "capturePassed": true,
+      "formatterSHA256": "3e7565e212205815e8171e8890ad60262ce52da47e299d936c745812327f6a6e",
+      "etmSHA256": "c130e74ad7f00224893aecb68acfe8e533592c3df95aa1d3ed7e97b490a705f2"
+    }
+  ],
+  "fixtureSHA256": "fa8b60e092e6e504f6556baa1930127b5366cecc306711b8d564a9f90b14cfe7",
+  "gpioSpeed": 3,
+  "restored": true,
+  "flashBefore": [
+    {
+      "address": 134217728,
+      "bytes": 20040,
+      "sha256": "b5b09d9a0446795acc1981aff62ed55f36f10fa71a47544b77c3d0fe1a0610d1"
+    },
+    {
+      "address": 134237768,
+      "bytes": 128,
+      "sha256": "496d8b1d85d4a90921e45cc77629b2c80dcaae957a6ed79710200efa1d4cf341"
+    }
+  ],
+  "initialDHCSR": "0x1010001",
+  "clockBefore": {
+    "CR": 50548355,
+    "CFGR": 5309450,
+    "APB1ENR": 276824064,
+    "FLASH_ACR": 49
+  },
+  "sramSHA256": "809d9dd20e9939d670f5971a07d62d6921d3ebcb3e530b369562734d05cb8336",
+  "fpbSHA256": "120a8cf053d3eef39dc97c543aa8d986ae40dc1f0d7d68d879fc857426e453eb",
+  "ring32MHz": true,
+  "clockAfter": {
+    "CR": 50548355,
+    "CFGR": 5309450,
+    "APB1ENR": 276824064,
+    "FLASH_ACR": 49
+  },
+  "wholeSramRestored": true,
+  "coreRestored": true,
+  "flashAfter": [
+    {
+      "address": 134217728,
+      "bytes": 20040,
+      "sha256": "b5b09d9a0446795acc1981aff62ed55f36f10fa71a47544b77c3d0fe1a0610d1"
+    },
+    {
+      "address": 134237768,
+      "bytes": 128,
+      "sha256": "496d8b1d85d4a90921e45cc77629b2c80dcaae957a6ed79710200efa1d4cf341"
+    }
+  ],
+  "finalDHCSR": "0x1010001"
+}

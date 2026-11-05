@@ -1,0 +1,63 @@
+{
+  "passed": true,
+  "rows": [],
+  "dpidr": "0x1ba01477",
+  "before": {
+    "name": "STM32F103",
+    "cpuid": "0x411fc231",
+    "device": "0x10036414",
+    "registers": {
+      "0x40021000": "0x3034e83",
+      "0x40021004": "0x51040a"
+    }
+  },
+  "initialDHCSR": "0x1010001",
+  "swdClock": {
+    "FCLK_Hz": 119999998,
+    "cfg": "0xcaa11",
+    "waveform": {
+      "SWCLK_Hz": 9999999.833333334,
+      "half_period_fclk": 6,
+      "short_high": true,
+      "intended_high_ns": 8.333333472222225
+    },
+    "clockSource": 0,
+    "clockControl": 15728896,
+    "sourcePllControl": 221192,
+    "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+    "JTAG_sampling_mode": 17,
+    "RISC_V_SBA_enabled": false,
+    "actual_link_Hz": 9999999.833333334,
+    "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+  },
+  "firmware": {
+    "path": "prebuilt/golden/f103ze-cdc48.elf",
+    "segments": [
+      {
+        "address": "0x8000000",
+        "bytes": 20040,
+        "sha256": "b5b09d9a0446795acc1981aff62ed55f36f10fa71a47544b77c3d0fe1a0610d1",
+        "match": true
+      },
+      {
+        "address": "0x8004e48",
+        "bytes": 128,
+        "sha256": "496d8b1d85d4a90921e45cc77629b2c80dcaae957a6ed79710200efa1d4cf341",
+        "match": true
+      }
+    ],
+    "sha256": "e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f"
+  },
+  "after": {
+    "name": "STM32F103",
+    "cpuid": "0x411fc231",
+    "device": "0x10036414",
+    "registers": {
+      "0x40021000": "0x3034e83",
+      "0x40021004": "0x51040a"
+    }
+  },
+  "finalDHCSR": "0x1010001",
+  "resetObservedAfterInitialDHCSR": false,
+  "restored": true
+}
