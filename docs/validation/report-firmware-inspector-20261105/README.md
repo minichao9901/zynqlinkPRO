@@ -18,4 +18,6 @@ ELF页支持ELF32/64、大小端与扩展表编号，提供文件头、程序头
 
 源码真实浏览器通过BIN分页/改基址/定位、稀疏HEX/空洞/原文件、ELF四种表/搜索/分页、坏ELF及ELF切BIN无残留，见source-web.json。首轮坏ELF等待文件名超时：页面已正确拒绝文件，但错误文案缺少当前文件名，补充后新目录复测通过，失败步骤留build/firmware-inspector-source-check。
 
-固定EXE 1.2.0构建与最终离线页面验收待完成。测试全程不连接/烧录硬件。用户data须保留并核对，最终身份与截图在收尾补充。
+固定EXE 1.2.0由干净源码a0f1fc4构建，候选预检1823文件和F103/H743双协议离线验收通过；真实冻结页面完整复测BIN/HEX/ELF两Tab及飞行记录报告/Profile通过，见frozen-web.json和三张截图。固定目录已更新，1823文件逐项与候选manifest尺寸/SHA一致，EXE SHA256为ecf70301a350c517deb1f153f2e4929d72bfe26927a9bef2c5da8397ea23854b，固定EXE --check通过，原16份用户记录路径/尺寸/SHA不变。测试全程不连接/烧录硬件。
+
+原子目录替换遇到本机继承的 Everyone DENY Delete Child ACL，旧目录移动失败时未改动原包；随后在归档旧程序1820个文件并逐项核对后，采用逐文件更新，全部1823个文件安装与读回哈希通过，data原位不动。归档位于build/bridge-archive/20261105-file-update-081601；用户要求去掉旧副本，但自动审批拒绝递归删除，当前保留该可恢复的本地build副本，不纳入Git。
