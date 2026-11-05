@@ -1,0 +1,967 @@
+{
+  "blockBytes": 1024,
+  "pipelineDepth": 4,
+  "blocksPerRepeat": 128,
+  "repeats": 3,
+  "rows": [
+    {
+      "transport": "swd",
+      "requestedHz": 10000000,
+      "readPassed": true,
+      "writePassed": true,
+      "stage": "done",
+      "idcodeReply": "0501017714a01b",
+      "clock": {
+        "FCLK_Hz": 119999998,
+        "cfg": "0xcaa11",
+        "waveform": {
+          "SWCLK_Hz": 9999999.833333334,
+          "half_period_fclk": 6,
+          "short_high": true,
+          "intended_high_ns": 8.333333472222225
+        },
+        "clockSource": 0,
+        "clockControl": 15728896,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 9999999.833333334,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+      },
+      "readSeconds": [
+        0.16267979999975068,
+        0.1627652000024682,
+        0.16229699999894365
+      ],
+      "readMBps": 0.8057054409963677,
+      "writeSeconds": [
+        0.16454689999955008,
+        0.16400770000109333,
+        0.16388329999972484
+      ],
+      "writeMBps": 0.7991819896207693,
+      "restored": true
+    },
+    {
+      "transport": "swd",
+      "requestedHz": 20000000,
+      "readPassed": true,
+      "writePassed": true,
+      "stage": "done",
+      "idcodeReply": "0501017714a01b",
+      "clock": {
+        "FCLK_Hz": 119999998,
+        "cfg": "0xc4a11",
+        "waveform": {
+          "SWCLK_Hz": 19999999.666666668,
+          "half_period_fclk": 3,
+          "short_high": true,
+          "intended_high_ns": 8.333333472222225
+        },
+        "clockSource": 0,
+        "clockControl": 15728896,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 19999999.666666668,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+      },
+      "readSeconds": [
+        0.0841136999988521,
+        0.08397170000171172,
+        0.0848139000008814
+      ],
+      "readMBps": 1.558271720323666,
+      "writeSeconds": [
+        0.08535429999756161,
+        0.08574810000209254,
+        0.08536710000043968
+      ],
+      "writeMBps": 1.5353924404053192,
+      "restored": true
+    },
+    {
+      "transport": "swd",
+      "requestedHz": 25000000,
+      "readPassed": true,
+      "writePassed": true,
+      "stage": "done",
+      "idcodeReply": "0501017714a01b",
+      "clock": {
+        "FCLK_Hz": 99999999,
+        "cfg": "0xc2a11",
+        "waveform": {
+          "SWCLK_Hz": 24999999.75,
+          "half_period_fclk": 2,
+          "short_high": true,
+          "intended_high_ns": 10.000000100000001
+        },
+        "clockSource": 0,
+        "clockControl": 18874624,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 24999999.75,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+      },
+      "readSeconds": [
+        0.06882380000024568,
+        0.0691791999997804,
+        0.06842280000273604
+      ],
+      "readMBps": 1.9044574696475944,
+      "writeSeconds": [
+        0.07009269999980461,
+        0.06997620000038296,
+        0.07002379999903496
+      ],
+      "writeMBps": 1.8718207238368436,
+      "restored": true
+    },
+    {
+      "transport": "swd",
+      "requestedHz": 30000000,
+      "readPassed": true,
+      "writePassed": true,
+      "stage": "done",
+      "idcodeReply": "0501017714a01b",
+      "clock": {
+        "FCLK_Hz": 119999998,
+        "cfg": "0xa2a11",
+        "waveform": {
+          "SWCLK_Hz": 29999999.5,
+          "half_period_fclk": 2,
+          "short_high": true,
+          "intended_high_ns": 8.333333472222225
+        },
+        "clockSource": 0,
+        "clockControl": 15728896,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 29999999.5,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+      },
+      "readSeconds": [
+        0.0611879999996745,
+        0.06131459999960498,
+        0.060597399999096524
+      ],
+      "readMBps": 2.1421193698224696,
+      "writeSeconds": [
+        0.06117680000170367,
+        0.060623900000791764,
+        0.06068090000189841
+      ],
+      "writeMBps": 2.160020698372954,
+      "restored": true
+    },
+    {
+      "transport": "swd",
+      "requestedHz": 35000000,
+      "readPassed": true,
+      "writePassed": true,
+      "stage": "done",
+      "idcodeReply": "0501017714a01b",
+      "clock": {
+        "FCLK_Hz": 69230768,
+        "cfg": "0x20a11",
+        "waveform": {
+          "SWCLK_Hz": 34615384.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 14.444444701234572
+        },
+        "clockSource": 0,
+        "clockControl": 27263232,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 34615384.0,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+      },
+      "readSeconds": [
+        0.0515004000008048,
+        0.052071000001888024,
+        0.05107800000041607
+      ],
+      "readMBps": 2.5450676110855786,
+      "writeSeconds": [
+        0.051734499997110106,
+        0.0521374999989348,
+        0.05188300000008894
+      ],
+      "writeMBps": 2.526299558617954,
+      "restored": true
+    },
+    {
+      "transport": "swd",
+      "requestedHz": 40000000,
+      "readPassed": true,
+      "writePassed": true,
+      "stage": "done",
+      "idcodeReply": "0501017714a01b",
+      "clock": {
+        "FCLK_Hz": 78260868,
+        "cfg": "0x20a11",
+        "waveform": {
+          "SWCLK_Hz": 39130434.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 12.77777803333334
+        },
+        "clockSource": 0,
+        "clockControl": 24117504,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 39130434.0,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+      },
+      "readSeconds": [
+        0.045782999997754814,
+        0.04560690000289469,
+        0.046285700002044905
+      ],
+      "readMBps": 2.862896708525604,
+      "writeSeconds": [
+        0.04646660000071279,
+        0.04778689999875496,
+        0.04781359999833512
+      ],
+      "writeMBps": 2.7428437501368563,
+      "restored": true
+    },
+    {
+      "transport": "swd",
+      "requestedHz": 45000000,
+      "readPassed": true,
+      "writePassed": true,
+      "stage": "done",
+      "idcodeReply": "0501017714a01b",
+      "clock": {
+        "FCLK_Hz": 89999999,
+        "cfg": "0x20a11",
+        "waveform": {
+          "SWCLK_Hz": 44999999.5,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 11.111111234567902
+        },
+        "clockSource": 0,
+        "clockControl": 20971776,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 44999999.5,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+      },
+      "readSeconds": [
+        0.040051299998594914,
+        0.04157599999962258,
+        0.04034289999981411
+      ],
+      "readMBps": 3.2489483899423184,
+      "writeSeconds": [
+        0.04140140000163228,
+        0.041014000002178364,
+        0.041001200002938276
+      ],
+      "writeMBps": 3.195786804336042,
+      "restored": true
+    },
+    {
+      "transport": "swd",
+      "requestedHz": 50000000,
+      "readPassed": true,
+      "writePassed": true,
+      "stage": "done",
+      "idcodeReply": "0501017714a01b",
+      "clock": {
+        "FCLK_Hz": 99999999,
+        "cfg": "0xa11",
+        "waveform": {
+          "SWCLK_Hz": 49999999.5,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 10.000000100000001
+        },
+        "clockSource": 0,
+        "clockControl": 18874624,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 49999999.5,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+      },
+      "readSeconds": [
+        0.036769700000149896,
+        0.036806200001592515,
+        0.03643939999892609
+      ],
+      "readMBps": 3.564674174645582,
+      "writeSeconds": [
+        0.03750220000074478,
+        0.03754760000083479,
+        0.03779450000001816
+      ],
+      "writeMBps": 3.4908223161290173,
+      "restored": true
+    },
+    {
+      "transport": "swd",
+      "requestedHz": 54000000,
+      "readPassed": true,
+      "writePassed": true,
+      "stage": "done",
+      "idcodeReply": "0501017714a01b",
+      "clock": {
+        "FCLK_Hz": 105882351,
+        "cfg": "0xa11",
+        "waveform": {
+          "SWCLK_Hz": 52941175.5,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 9.444444617592596
+        },
+        "clockSource": 0,
+        "clockControl": 17826048,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 52941175.5,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+      },
+      "readSeconds": [
+        0.03482650000296417,
+        0.03501979999782634,
+        0.035190200000215555
+      ],
+      "readMBps": 3.742796932253627,
+      "writeSeconds": [
+        0.03598039999997127,
+        0.036054000000149244,
+        0.035826499999529915
+      ],
+      "writeMBps": 3.64287223043948,
+      "restored": true
+    },
+    {
+      "transport": "swd",
+      "requestedHz": 57000000,
+      "readPassed": true,
+      "writePassed": true,
+      "stage": "done",
+      "idcodeReply": "0501017714a01b",
+      "clock": {
+        "FCLK_Hz": 112499998,
+        "cfg": "0xa11",
+        "waveform": {
+          "SWCLK_Hz": 56249999.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 8.888889046913583
+        },
+        "clockSource": 0,
+        "clockControl": 16777472,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 56249999.0,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+      },
+      "readSeconds": [
+        0.03315370000200346,
+        0.03324349999820697,
+        0.0334729000023799
+      ],
+      "readMBps": 3.94278580796455,
+      "writeSeconds": [
+        0.03465670000150567,
+        0.034040799997455906,
+        0.034152299998822855
+      ],
+      "writeMBps": 3.837867435122019,
+      "restored": true
+    },
+    {
+      "transport": "swd",
+      "requestedHz": 60000000,
+      "readPassed": true,
+      "writePassed": true,
+      "stage": "done",
+      "idcodeReply": "0501017714a01b",
+      "clock": {
+        "FCLK_Hz": 119999998,
+        "cfg": "0xa11",
+        "waveform": {
+          "SWCLK_Hz": 59999999.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 8.333333472222225
+        },
+        "clockSource": 0,
+        "clockControl": 15728896,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 59999999.0,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+      },
+      "readSeconds": [
+        0.03196369999932358,
+        0.032361599998694146,
+        0.031722699997772
+      ],
+      "readMBps": 4.100651676832587,
+      "writeSeconds": [
+        0.03359529999943334,
+        0.0325102999995579,
+        0.03267280000000028
+      ],
+      "writeMBps": 4.011654954579922,
+      "clockAboveCapReply": "11ff",
+      "restored": true
+    },
+    {
+      "transport": "jtag",
+      "requestedHz": 10000000,
+      "readPassed": true,
+      "writePassed": true,
+      "stage": "done",
+      "idcodeReply": "16007704a03b",
+      "clock": {
+        "FCLK_Hz": 19999999,
+        "cfg": "0x20011",
+        "waveform": {
+          "SWCLK_Hz": 9999999.5,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 50.00000250000012
+        },
+        "clockSource": 0,
+        "clockControl": 47186432,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 9999999.5,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+      },
+      "readSeconds": [
+        0.16880969999692752,
+        0.16889670000091428,
+        0.16912130000127945
+      ],
+      "readMBps": 0.7760483182873938,
+      "writeSeconds": [
+        0.16927660000146716,
+        0.16973329999746056,
+        0.169453299997258
+      ],
+      "writeMBps": 0.7734992472977567,
+      "jtagPHYDelta": [
+        18488292,
+        9009274,
+        210662
+      ],
+      "restored": true
+    },
+    {
+      "transport": "jtag",
+      "requestedHz": 20000000,
+      "readPassed": true,
+      "writePassed": true,
+      "stage": "done",
+      "idcodeReply": "16007704a03b",
+      "clock": {
+        "FCLK_Hz": 39999999,
+        "cfg": "0x20011",
+        "waveform": {
+          "SWCLK_Hz": 19999999.5,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 25.000000625000016
+        },
+        "clockSource": 0,
+        "clockControl": 47186176,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 19999999.5,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+      },
+      "readSeconds": [
+        0.12364499999966938,
+        0.12409339999794611,
+        0.12374980000095093
+      ],
+      "readMBps": 1.0591693885484488,
+      "writeSeconds": [
+        0.12231179999798769,
+        0.12366329999713344,
+        0.12516120000145747
+      ],
+      "writeMBps": 1.05991025634152,
+      "jtagPHYDelta": [
+        26589012,
+        12969626,
+        300670
+      ],
+      "restored": true
+    },
+    {
+      "transport": "jtag",
+      "requestedHz": 25000000,
+      "readPassed": true,
+      "writePassed": true,
+      "stage": "done",
+      "idcodeReply": "16007704a03b",
+      "clock": {
+        "FCLK_Hz": 49999999,
+        "cfg": "0x20011",
+        "waveform": {
+          "SWCLK_Hz": 24999999.5,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 20.00000040000001
+        },
+        "clockSource": 0,
+        "clockControl": 37748992,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 24999999.5,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+      },
+      "readSeconds": [
+        0.1349378999984765,
+        0.1347980999998981,
+        0.13435070000195992
+      ],
+      "readMBps": 0.9723579189921748,
+      "writeSeconds": [
+        0.13559130000066943,
+        0.13527609999800916,
+        0.13566899999932502
+      ],
+      "writeMBps": 0.9666696904547185,
+      "jtagPHYDelta": [
+        36572892,
+        17850634,
+        411602
+      ],
+      "restored": true
+    },
+    {
+      "transport": "jtag",
+      "requestedHz": 30000000,
+      "readPassed": true,
+      "writePassed": true,
+      "stage": "done",
+      "idcodeReply": "16007704a03b",
+      "clock": {
+        "FCLK_Hz": 59999999,
+        "cfg": "0x20011",
+        "waveform": {
+          "SWCLK_Hz": 29999999.5,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 16.66666694444445
+        },
+        "clockSource": 0,
+        "clockControl": 31457536,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 17,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 29999999.5,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+      },
+      "readSeconds": [
+        0.11272979999921517,
+        0.11319630000070902,
+        0.11331689999860828
+      ],
+      "readMBps": 1.1579177057834842,
+      "writeSeconds": [
+        0.11394490000020596,
+        0.11386620000121184,
+        0.11353230000167969
+      ],
+      "writeMBps": 1.1511054202090265,
+      "jtagPHYDelta": [
+        36572892,
+        17850634,
+        411602
+      ],
+      "restored": true
+    },
+    {
+      "transport": "jtag",
+      "requestedHz": 35000000,
+      "readPassed": true,
+      "writePassed": true,
+      "stage": "done",
+      "idcodeReply": "16007704a03b",
+      "clock": {
+        "FCLK_Hz": 69230768,
+        "cfg": "0x20011",
+        "waveform": {
+          "SWCLK_Hz": 34615384.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 14.444444701234572
+        },
+        "clockSource": 0,
+        "clockControl": 27263232,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 17,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 34615384.0,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+      },
+      "readSeconds": [
+        0.0988904999976512,
+        0.0991342999986955,
+        0.09835299999758718
+      ],
+      "readMBps": 1.3254255970301814,
+      "writeSeconds": [
+        0.09925039999870933,
+        0.09957550000035553,
+        0.09944490000270889
+      ],
+      "writeMBps": 1.318036420132451,
+      "jtagPHYDelta": [
+        36572892,
+        17850634,
+        411602
+      ],
+      "restored": true
+    },
+    {
+      "transport": "jtag",
+      "requestedHz": 40000000,
+      "readPassed": true,
+      "writePassed": true,
+      "stage": "done",
+      "idcodeReply": "16007704a03b",
+      "clock": {
+        "FCLK_Hz": 78260868,
+        "cfg": "0x11",
+        "waveform": {
+          "SWCLK_Hz": 39130434.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 12.77777803333334
+        },
+        "clockSource": 0,
+        "clockControl": 24117504,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 17,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 39130434.0,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+      },
+      "readSeconds": [
+        0.08806370000093011,
+        0.087737300000299,
+        0.08787369999845396
+      ],
+      "readMBps": 1.491595323769297,
+      "writeSeconds": [
+        0.08845470000233036,
+        0.08818569999857573,
+        0.08863120000023628
+      ],
+      "writeMBps": 1.481798027651972,
+      "jtagPHYDelta": [
+        36572892,
+        17850634,
+        411602
+      ],
+      "restored": true
+    },
+    {
+      "transport": "jtag",
+      "requestedHz": 45000000,
+      "readPassed": true,
+      "writePassed": true,
+      "stage": "done",
+      "idcodeReply": "16007704a03b",
+      "clock": {
+        "FCLK_Hz": 89999999,
+        "cfg": "0x11",
+        "waveform": {
+          "SWCLK_Hz": 44999999.5,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 11.111111234567902
+        },
+        "clockSource": 0,
+        "clockControl": 20971776,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 17,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 44999999.5,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+      },
+      "readSeconds": [
+        0.07681570000204374,
+        0.07718599999861908,
+        0.07674979999865172
+      ],
+      "readMBps": 1.7063178490401407,
+      "writeSeconds": [
+        0.07794110000031651,
+        0.07809079999788082,
+        0.07792380000319099
+      ],
+      "writeMBps": 1.6816801405095352,
+      "jtagPHYDelta": [
+        36572892,
+        17850634,
+        411602
+      ],
+      "restored": true
+    },
+    {
+      "transport": "jtag",
+      "requestedHz": 50000000,
+      "readPassed": true,
+      "writePassed": true,
+      "stage": "done",
+      "idcodeReply": "16007704a03b",
+      "clock": {
+        "FCLK_Hz": 99999999,
+        "cfg": "0x11",
+        "waveform": {
+          "SWCLK_Hz": 49999999.5,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 10.000000100000001
+        },
+        "clockSource": 0,
+        "clockControl": 18874624,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 17,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 49999999.5,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+      },
+      "readSeconds": [
+        0.06979670000146143,
+        0.07003379999878234,
+        0.06970060000094236
+      ],
+      "readMBps": 1.8779111332950635,
+      "writeSeconds": [
+        0.07061980000071344,
+        0.07062840000071446,
+        0.070687800001906
+      ],
+      "writeMBps": 1.855797384602711,
+      "jtagPHYDelta": [
+        36572892,
+        17850634,
+        411602
+      ],
+      "restored": true
+    },
+    {
+      "transport": "jtag",
+      "requestedHz": 54000000,
+      "readPassed": true,
+      "writePassed": true,
+      "stage": "done",
+      "idcodeReply": "16007704a03b",
+      "clock": {
+        "FCLK_Hz": 105882351,
+        "cfg": "0x11",
+        "waveform": {
+          "SWCLK_Hz": 52941175.5,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 9.444444617592596
+        },
+        "clockSource": 0,
+        "clockControl": 17826048,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 17,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 52941175.5,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+      },
+      "readSeconds": [
+        0.06611279999924591,
+        0.06667150000066613,
+        0.06655880000107572
+      ],
+      "readMBps": 1.9692662727976107,
+      "writeSeconds": [
+        0.06688909999866155,
+        0.06692919999841251,
+        0.06679150000127265
+      ],
+      "writeMBps": 1.9595419881957261,
+      "jtagPHYDelta": [
+        36572892,
+        17850634,
+        411602
+      ],
+      "restored": true
+    },
+    {
+      "transport": "jtag",
+      "requestedHz": 57000000,
+      "readPassed": true,
+      "writePassed": true,
+      "stage": "done",
+      "idcodeReply": "16007704a03b",
+      "clock": {
+        "FCLK_Hz": 112499998,
+        "cfg": "0x11",
+        "waveform": {
+          "SWCLK_Hz": 56249999.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 8.888889046913583
+        },
+        "clockSource": 0,
+        "clockControl": 16777472,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 17,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 56249999.0,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+      },
+      "readSeconds": [
+        0.06269450000036159,
+        0.062676300000021,
+        0.06313660000159871
+      ],
+      "readMBps": 2.0906459099162453,
+      "writeSeconds": [
+        0.06367449999743258,
+        0.06357240000215825,
+        0.06330660000094213
+      ],
+      "writeMBps": 2.0617752357241534,
+      "jtagPHYDelta": [
+        36572892,
+        17850634,
+        411602
+      ],
+      "restored": true
+    },
+    {
+      "transport": "jtag",
+      "requestedHz": 60000000,
+      "readPassed": true,
+      "writePassed": true,
+      "stage": "done",
+      "idcodeReply": "16007704a03b",
+      "clock": {
+        "FCLK_Hz": 119999998,
+        "cfg": "0x11",
+        "waveform": {
+          "SWCLK_Hz": 59999999.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 8.333333472222225
+        },
+        "clockSource": 0,
+        "clockControl": 15728896,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 17,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 59999999.0,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+      },
+      "readSeconds": [
+        0.05912679999892134,
+        0.05899480000152835,
+        0.05904999999984284
+      ],
+      "readMBps": 2.219678238786602,
+      "writeSeconds": [
+        0.05985370000053081,
+        0.0600267999980133,
+        0.06029990000024554
+      ],
+      "writeMBps": 2.183558010827465,
+      "jtagPHYDelta": [
+        36572892,
+        17850634,
+        411602
+      ],
+      "clockAboveCapReply": "11ff",
+      "restored": true
+    }
+  ],
+  "initialDHCSR": "0x1010001",
+  "targetBefore": {
+    "name": "STM32F103",
+    "cpuid": "0x411fc231",
+    "device": "0x10036414",
+    "registers": {
+      "0x40021000": "0x3034e83",
+      "0x40021004": "0x51040a"
+    }
+  },
+  "targetFirmware": {
+    "path": "prebuilt/golden/f103ze-cdc48.elf",
+    "segments": [
+      {
+        "address": "0x8000000",
+        "bytes": 20040,
+        "sha256": "b5b09d9a0446795acc1981aff62ed55f36f10fa71a47544b77c3d0fe1a0610d1",
+        "match": true
+      },
+      {
+        "address": "0x8004e48",
+        "bytes": 128,
+        "sha256": "496d8b1d85d4a90921e45cc77629b2c80dcaae957a6ed79710200efa1d4cf341",
+        "match": true
+      }
+    ],
+    "sha256": "e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f"
+  },
+  "sramSHA256": "c55afa2c7a3289cefdccc714e4658f3822f09bf32fdd4397b4cc011d7928d719",
+  "AFIORestored": true,
+  "wholeSramRestored": true,
+  "coreMatched": true,
+  "fpbMatched": true,
+  "targetAfter": {
+    "name": "STM32F103",
+    "cpuid": "0x411fc231",
+    "device": "0x10036414",
+    "registers": {
+      "0x40021000": "0x3034e83",
+      "0x40021004": "0x51040a"
+    }
+  },
+  "finalDHCSR": "0x1010001",
+  "restored": true
+}

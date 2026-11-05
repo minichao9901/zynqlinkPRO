@@ -1,0 +1,201 @@
+"""Fixed-workload read/write frontier on the verified J7/F103ZE pair."""
+import argparse
+import hashlib
+import json
+from pathlib import Path
+import random
+import statistics
+import sys
+import time
+
+import usb.util
+
+WORK = Path(__file__).resolve().parent
+ROOT = WORK.parents[1]
+sys.path.insert(0, str(ROOT / 'tools'))
+from benchmark_rtt_forward import core_read
+from dap_pipeline_bench import block_read_req, cmd, le, open_dap, send, setup, xfer
+from dap_transport_control import engine_snapshot
+from probe_build_info import live_clock_snapshot
+from probe_stream import Probe
+from target_smoke import APB2ENR, DHCSR, MAPR, SWJ_MASK, identify_firmware, jtag_counters
+from target_snapshot import snapshot
+from test_probe_board import Memory
+from test_swd_lowfreq_board import recover
+from validate_fclk_performance import physical_snapshot
+
+SAFE = 10000
+BASE = 0x20004000
+SRAM = 0x20000000
+DEPTH = 4
+RATES = [10, 20, 25, 30, 35, 40, 45, 50, 54, 57, 60]
+PATTERN = random.Random(20261106).randbytes(4096)
+CORE_REGS = [*range(19), 20]
+
+
+def sha(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def save(path, report):
+    path.write_text(json.dumps(report, indent=2) + '\n', encoding='utf8')
+
+
+def transfer_blocks(mem, direction, data, blocks):
+    mem.address(BASE)
+    requests = ([bytes(block_read_req(256))] * 4 if direction == 'read' else
+                [b'\x06\x00\x00\x01\x0d' + data[n:n+1024] for n in range(0, 4096, 1024)])
+    started = time.perf_counter()
+    for start in range(0, blocks, DEPTH):
+        count = min(DEPTH, blocks - start)
+        for n in range(start, start + count):
+            send(mem.out, requests[n % 4])
+        for n in range(start, start + count):
+            response = bytes(mem.inp.read(4096, timeout=5000))
+            offset = (n % 4) * 1024
+            expected = b'\x06\x00\x01\x01' + (data[offset:offset+1024] if direction == 'read' else b'')
+            if response != expected:
+                mismatch = next((i for i, (a, b) in enumerate(zip(response, expected)) if a != b), None)
+                raise RuntimeError(f'{direction} block {n}: response length {len(response)}, header {response[:16].hex()}, first mismatch {mismatch}')
+    return time.perf_counter() - started
+
+
+def run():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--top-only', action='store_true', help='Sustain 60 MHz with 4 MiB per repeat')
+    args = parser.parse_args()
+    name = 'sram-60mhz-sustained' if args.top_only else 'sram-limits'
+    path = WORK / (name + '.json')
+    if path.exists():
+        parser.error(f'Refusing to overwrite {path}')
+    loops = 4096 if args.top_only else 128
+    rates = [60] if args.top_only else RATES
+    report = dict(blockBytes=1024, pipelineDepth=DEPTH, blocksPerRepeat=loops, repeats=3, rows=[])
+    dev, tx, rx = open_dap()
+    mem = Memory(tx, rx)
+    initial = backup = core = fpb = apb = mapr = None
+    before = None
+    selected = False
+    try:
+        engines = physical_snapshot()
+        probe = Probe()
+        try:
+            streams = [probe.action(c, 2) for c in (0x31, 0x32)]
+        finally:
+            probe.close()
+        assert engines['allObservedEnginesIdle'] and all(rc == 0 and not words[0] & 1 for rc, words in streams)
+        selected = True
+        setup(tx, rx, SAFE)
+        before = snapshot(mem)
+        assert before['device'].endswith('414') and before['name'] == 'STM32F103'
+        firmware = identify_firmware(mem, before['name'])
+        assert firmware and firmware['path'] == 'prebuilt/golden/f103ze-cdc48.elf'
+        initial = mem.word(DHCSR)
+        report.update(initialDHCSR=hex(initial), targetBefore=before, targetFirmware=firmware)
+        mem.write_word(DHCSR, 0xa05f0003)
+        assert mem.word(DHCSR) & (1 << 17)
+        fpb = mem.read(0xe0002000, 40)
+        core = {n: core_read(mem, n) for n in CORE_REGS}
+        backup = mem.read(SRAM, 65536)
+        assert mem.read(SRAM, 65536) == backup
+        (WORK / (name + '-private.bin')).write_bytes(backup)
+        report['sramSHA256'] = sha(backup)
+        saved = backup[BASE-SRAM:BASE-SRAM+4096]
+        for transport in ('swd', 'jtag'):
+            if transport == 'jtag':
+                apb = mem.word(APB2ENR)
+                mem.write_word(APB2ENR, apb | 1)
+                mapr = mem.word(MAPR) & ~SWJ_MASK
+                mem.write_word(MAPR, mapr)
+            for rate in rates:
+                row = dict(transport=transport, requestedHz=rate * 1000000, readPassed=False, writePassed=False)
+                report['rows'].append(row)
+                mem.write(BASE, PATTERN)
+                assert mem.read(BASE, 4096) == PATTERN
+                try:
+                    row['stage'] = 'setup'
+                    row['idcodeReply'] = setup(tx, rx, rate * 1000, transport).hex()
+                    row['clock'] = live_clock_snapshot()
+                    counter = jtag_counters() if transport == 'jtag' else None
+                    row['stage'] = 'read and wrap'
+                    transfer_blocks(mem, 'read', PATTERN, 8)
+                    times = [transfer_blocks(mem, 'read', PATTERN, loops) for _ in range(3)]
+                    row['readSeconds'] = times
+                    row['readMBps'] = loops * 1024 / statistics.median(times) / 1e6
+                    row['readPassed'] = True
+                    row['stage'] = 'write and readback'
+                    row['writeSeconds'] = []
+                    for repeat in range(3):
+                        data = random.Random(20261106 + rate * 7 + repeat).randbytes(4096)
+                        elapsed = transfer_blocks(mem, 'write', data, loops)
+                        if mem.read(BASE, 4096) != data:
+                            raise RuntimeError(f'Write repeat {repeat} readback mismatch')
+                        row['writeSeconds'].append(elapsed)
+                    row['writeMBps'] = loops * 1024 / statistics.median(row['writeSeconds']) / 1e6
+                    row['writePassed'] = True
+                    if counter is not None:
+                        row['jtagPHYDelta'] = [(new - old) & 0xffffffff for new, old in zip(jtag_counters(), counter)]
+                    if rate == 60:
+                        row['clockAboveCapReply'] = cmd(tx, rx, [0x11, *le(60000001)]).hex()
+                    row['stage'] = 'done'
+                except Exception as error:
+                    row['error'] = repr(error)
+                    row['engineStatus'] = engine_snapshot(dev)
+                    if 'clock' not in row:
+                        row['clock'] = live_clock_snapshot()
+                finally:
+                    save(path, report)
+                    if 'error' in row:
+                        recover(dev, rx)
+                    setup(tx, rx, SAFE)
+                    halted = mem.word(DHCSR)
+                    assert halted & (1 << 17) and not halted & (1 << 25), hex(halted)
+                    mem.write(BASE, saved)
+                    row['restored'] = mem.read(BASE, 4096) == saved
+                    save(path, report)
+                    assert row['restored']
+                    print(json.dumps({k: v for k, v in row.items() if k not in ('clock', 'readSeconds', 'writeSeconds')}
+                                     | {'actualHz': row['clock']['actual_link_Hz']}), flush=True)
+    finally:
+        try:
+            if initial is not None:
+                setup(tx, rx, SAFE)
+                if mapr is not None:
+                    mem.write_word(MAPR, mapr | (2 << 24))
+                    assert mem.word(MAPR) & ~SWJ_MASK == mapr
+                if apb is not None:
+                    mem.write_word(APB2ENR, apb)
+                    assert mem.word(APB2ENR) == apb
+                report['AFIORestored'] = True
+                if backup is not None:
+                    actual = mem.read(SRAM, len(backup))
+                    if actual != backup:
+                        changed = [n for n in range(0, len(backup), 1024) if actual[n:n+1024] != backup[n:n+1024]]
+                        report['sramChangedBeforeFinalRestore'] = [hex(SRAM+n) for n in changed]
+                        for n in changed:
+                            mem.write(SRAM + n, backup[n:n+1024])
+                    report['wholeSramRestored'] = mem.read(SRAM, len(backup)) == backup
+                    assert report['wholeSramRestored']
+                if core is not None:
+                    report['coreMatched'] = {n: core_read(mem, n) for n in CORE_REGS} == core
+                    assert report['coreMatched']
+                report['fpbMatched'] = mem.read(0xe0002000, 40) == fpb
+                assert report['fpbMatched']
+                report['targetAfter'] = snapshot(mem)
+                assert report['targetAfter'] == before
+                mem.write_word(DHCSR, 0xa05f0000 | (initial & 0x0b))
+                final = mem.word(DHCSR)
+                assert (initial ^ final) & (1 << 17) == 0
+                report['finalDHCSR'] = hex(final)
+                report['restored'] = True
+        finally:
+            save(path, report)
+            try:
+                if selected:
+                    cmd(tx, rx, [3])
+            finally:
+                usb.util.dispose_resources(dev)
+
+
+if __name__ == '__main__':
+    run()
