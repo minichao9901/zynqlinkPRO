@@ -31,6 +31,10 @@ foreach pad [get_cells -hier -filter {REF_NAME == IOBUF && NAME =~ *g_aux*}] {
     set tpin [get_pins -of_objects $pad -filter {REF_PIN_NAME == T}]
     set tnet [get_nets -of_objects $tpin]
     set driver [get_cells -of_objects [get_pins -of_objects $tnet -filter {DIRECTION == OUT}]]
+    if {[string first {g_aux[1]} $pad] >= 0 && [llength [filter $driver {REF_NAME == VCC}]] == 1} {
+        puts "TDO_INPUT_ONLY_VERIFIED pad=$pad"
+        continue
+    }
     if {[llength [filter $driver {REF_NAME == VCC || REF_NAME == GND}]]} {
         error "GPIO pad output-enable is constant: $pad ($tnet)"
     }
@@ -47,6 +51,28 @@ foreach phase {Q1 Q2} {
     }
 }
 puts "JTAG_TDO_IDDR_VERIFIED LOC=[get_property LOC $tdo_ddr] phases=Q1,Q2"
+if {[info exists ::env(ZYNQLINK_VERIFY_TDO_INPUT_ONLY)] && $::env(ZYNQLINK_VERIFY_TDO_INPUT_ONLY)==1} {
+    set tdo_input_buffers 0
+    set tdo_disabled_outputs 0
+    foreach buffer [get_cells -hier -filter {NAME =~ *g_aux* && (REF_NAME == IBUF || REF_NAME == IOBUF || REF_NAME == OBUF || REF_NAME == OBUFT)}] {
+        if {[string first {g_aux[1]} $buffer] < 0} {continue}
+        set primitive [get_property REF_NAME $buffer]
+        if {$primitive eq "IOBUF" || $primitive eq "OBUFT"} {
+            set tri_net [get_nets -segments -of_objects [get_pins $buffer/T]]
+            set tri_driver [get_cells -of_objects [get_pins -of_objects $tri_net -filter {DIRECTION == OUT}]]
+            if {[llength [filter $tri_driver {REF_NAME == VCC}]] != 1} {
+                error "TDO output-disable is not tied high: $buffer"
+            }
+            if {$primitive eq "OBUFT"} {incr tdo_disabled_outputs}
+        } elseif {$primitive eq "IBUF"} {
+            incr tdo_input_buffers
+        } elseif {$primitive ne "IBUF"} {
+            error "TDO retained an uncontrolled output buffer: $buffer"
+        }
+    }
+    if {$tdo_input_buffers!=1 || $tdo_disabled_outputs>1} {error "Unexpected TDO primitive topology"}
+    puts "TDO_INPUT_ISOLATION_VERIFIED inputBuffers=1 outputEnable=constant0"
+}
 set trace_ddr [get_cells -hier -filter {REF_NAME == IDDR && NAME =~ *orbtrace_0*}]
 if {[info exists ::env(ZYNQLINK_RAW_TRACE)] && $::env(ZYNQLINK_RAW_TRACE) in {2 3 4}} {
     if {[llength $trace_ddr] != 0} {error "Oversample mode must bypass normal TRACE IDDRs"}

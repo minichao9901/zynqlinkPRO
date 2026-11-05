@@ -599,7 +599,11 @@ static uint32_t DAP_SWD_Sequence(const uint8_t *request, uint8_t *response) {
   uint32_t count;
 
 #if (DAP_SWD != 0)
-  *response++ = DAP_OK;
+  /* Older bitstreams lack the manual SWDIO direction bit. Never fall back
+   * to the old GPIO1 pin, which is now the target's TDO input. */
+  const uint32_t supported = DAP_Data.debug_port == DAP_PORT_SWD &&
+      (swd_read32(SWD_FEATURES) & SWD_FEATURE_MANUAL_DIRECTION);
+  *response++ = supported ? DAP_OK : DAP_ERROR;
 #else
   *response++ = DAP_ERROR;
 #endif
@@ -615,14 +619,18 @@ static uint32_t DAP_SWD_Sequence(const uint8_t *request, uint8_t *response) {
     }
     count = (count + 7U) / 8U;
 #if (DAP_SWD != 0)
-    if ((sequence_info & SWD_SEQUENCE_DIN) != 0U) {
-      PIN_SWDIO_OUT_DISABLE();
-    } else {
-      PIN_SWDIO_OUT_ENABLE();
-    }
-    SWD_Sequence(sequence_info, request, response);
-    if (sequence_count == 0U) {
-      PIN_SWDIO_OUT_ENABLE();
+    if (supported) {
+      if ((sequence_info & SWD_SEQUENCE_DIN) != 0U) {
+        PIN_SWDIO_OUT_DISABLE();
+      } else {
+        PIN_SWDIO_OUT_ENABLE();
+      }
+      SWD_Sequence(sequence_info, request, response);
+      if (sequence_count == 0U) {
+        PIN_SWDIO_OUT_ENABLE();
+      }
+    } else if ((sequence_info & SWD_SEQUENCE_DIN) != 0U) {
+      memset(response, 0, count);
     }
 #endif
     if ((sequence_info & SWD_SEQUENCE_DIN) != 0U) {

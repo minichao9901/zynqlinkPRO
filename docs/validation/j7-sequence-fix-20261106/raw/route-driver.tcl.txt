@@ -1,0 +1,23 @@
+set work [file normalize [file dirname [info script]]]
+set root [file normalize [file join $work ../..]]
+set source_project [file join $root build j7-eld1-20261106 source-project]
+set ::env(ZYNQLINK_RAW_TRACE) 4
+set ::env(ZYNQLINK_ETM_DDR) 1
+set ::env(ZYNQLINK_ETM_LANE_DELAY) 1
+set ::env(ZYNQLINK_IMPLEMENT_FCLK_HZ) 133333333
+set ::env(ZYNQLINK_VERIFY_TDO_INPUT_ONLY) 1
+open_project [file join $source_project zynqlink_dma.xpr]
+source [file join $root fpga configure_runs.tcl]
+reset_run impl_1
+launch_runs impl_1 -to_step opt_design -jobs $::zynqlink_jobs
+wait_on_run impl_1
+set impl [file join $source_project zynqlink_dma.runs impl_1]
+set checkpoint [file join $impl system_wrapper_opt.dcp]
+if {![file isfile $checkpoint] || ![file isfile [file join $impl .opt_design.end.rst]] ||
+    ![file isfile [file join $impl .vivado.end.rst]] || [file exists [file join $impl .vivado.error.rst]]} {
+    error "Sequence fix opt stage failed"
+}
+close_project
+set ::env(ZYNQLINK_FPGA_OUT) [file join $work rebound]
+set argv [list $checkpoint]
+source [file join $root fpga rebind_j7_adapter.tcl]

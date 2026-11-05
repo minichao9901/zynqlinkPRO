@@ -1,0 +1,145 @@
+"""Verify raw SWD compatibility, normal transport and ETM on the final pair."""
+from contextlib import redirect_stdout
+import hashlib
+import json
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+
+import usb.util
+
+WORK=Path(__file__).resolve().parent
+ROOT=WORK.parents[1]
+sys.path[:0]=[str(ROOT/'tools'),str(ROOT/'etm-service/tools')]
+from dap_pipeline_bench import cmd,open_dap,setup
+import h743_peak
+from jtag_internal_trace import run as xsct
+from etm_lane_delay import LaneDelay
+import load_pair
+from probe_flash import Session
+from probe_ownership import Ownership
+from probe_stream import Probe
+import raw_sequence_check
+from run_f103_jtag_fixture import main as jtag_fixture
+import target_smoke
+from validate_fclk_performance import physical_snapshot
+from zynq_memory import PhysicalMemory
+
+PRODUCTION=ROOT/'prebuilt/j7-adapter-20261106'
+FINAL=WORK/'candidate'
+
+
+def save(path,data):
+    path.write_text(json.dumps(data,indent=2)+'\n',encoding='utf8')
+
+
+def call(function,argv,name):
+    previous=sys.argv
+    try:
+        sys.argv=list(map(str,argv))
+        with (WORK/(name+'.log')).open('w',encoding='utf8') as log,redirect_stdout(log):
+            try:
+                function()
+            except SystemExit as error:
+                if error.code not in (0,None):
+                    raise
+    finally:sys.argv=previous
+
+
+def load(pair,label):
+    call(load_pair.main,['load',pair,'--replace-running'],label)
+    for name in ('final-before-load.txt','before-reload-idle.json','final-load.txt'):
+        (WORK/name).rename(WORK/(label+'-'+name))
+
+
+def verify(pair,label):
+    with (WORK/(label+'-ocm.log')).open('wb') as log:
+        subprocess.run([sys.executable,'-X','utf8',str(ROOT/'tools/verify_probe_ocm_code.py'),
+                        '--elf',str(pair/'application.elf'),'--out-dir',str(WORK/(label+'-ocm'))],
+                       cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,check=True)
+
+
+def compatibility_pair():
+    pair=WORK/'old-bit-compatibility'
+    shutil.copytree(FINAL,pair)
+    shutil.copyfile(PRODUCTION/'probe.bit',pair/'probe.bit')
+    m=json.loads((pair/'manifest.json').read_text())
+    m['files']['probe.bit']['sha256']=hashlib.sha256((pair/'probe.bit').read_bytes()).hexdigest()
+    m['files']['probe.bit']['bytes']=(pair/'probe.bit').stat().st_size
+    save(pair/'manifest.json',m)
+    return pair
+
+
+def main():
+    lease=Ownership()
+    final_passed=False
+    report={}
+    try:
+        verify(PRODUCTION,'initial')
+        call(target_smoke.main,['target','--identify-only','--out',WORK/'target-before.json'],'target-before')
+        load(compatibility_pair(),'old-bit-compatibility')
+        verify(WORK/'old-bit-compatibility','compatibility')
+        dev,tx,rx=open_dap()
+        try:
+            setup(tx,rx,10000)
+            before=xsct('targets -set -filter {name =~ "APU"}\nputs "GUARD [mrd -address-space AP0 -force -value 0x40000004] [mrd -address-space AP0 -force -value 0x40010094]"')
+            replies=[cmd(tx,rx,payload).hex() for payload in ([0x1d,1,8,0xff],[0x1d,1,0x88])]
+            after=xsct('targets -set -filter {name =~ "APU"}\nputs "GUARD [mrd -address-space AP0 -force -value 0x40000004] [mrd -address-space AP0 -force -value 0x40010094]"')
+            if replies!=['1dff','1dff00'] or before!=after:
+                raise RuntimeError('Old-bit refusal altered pins or returned incorrect status')
+            save(WORK/'old-bit-guard.json',dict(passed=True,replies=replies,before=before,after=after))
+            cmd(tx,rx,[3])
+        finally:usb.util.dispose_resources(dev)
+        load(FINAL,'final')
+        verify(FINAL,'final')
+        tap_evidence=WORK/'tap-startup'
+        tap_evidence.mkdir(exist_ok=False)
+        taps=LaneDelay(PhysicalMemory(Session(tap_evidence,Path('E:/Xilinx/SDK/2018.3'),'tcp:127.0.0.1:3121'))).snapshot()
+        if not taps['ready'] or not taps['loaded'] or any(taps['taps']) or taps['fault']:
+            raise RuntimeError('New pair ELD1 startup not at verified zero taps')
+        report['startupTaps']=taps
+        call(raw_sequence_check.main,['raw'],'raw-sequence')
+        call(target_smoke.main,['target','--out',WORK/'jtag-final.json'],'jtag-final')
+        common=['--speed','60000','--bootstrap-speed-khz','10000','--address','0x20008000',
+                '--words','512','--depth','32','--loops','256','--repeats','3','--soak-seconds','10',
+                '--bit',FINAL/'probe.bit','--elf',FINAL/'application.elf']
+        call(h743_peak.main,['peak','--transport','swd',*common,'--output',WORK/'swd60.json'],'swd60')
+        call(jtag_fixture,['fixture','--restore-swj','2','--output',WORK/'jtag-fixture.json','--',
+             sys.executable,'-X','utf8',str(ROOT/'tools/h743_peak.py'),'--transport','jtag',*common,
+             '--output',WORK/'jtag60.json'],'jtag60')
+        # Reuse the reversible SRAM clock fixture from the calibrated experiment.
+        import final_etm
+        final_etm.run(direct=True)
+        report['etmResult']=json.loads((WORK/'direct-control.json').read_text())
+        if not report['etmResult']['restored']:
+            raise RuntimeError('Final ETM target restoration incomplete')
+        call(target_smoke.main,['target','--identify-only','--out',WORK/'target-final.json'],'target-final')
+        verify(FINAL,'final-after')
+        state=physical_snapshot()
+        probe=Probe()
+        try:state['streams']={name:probe.action(c,2) for name,c in [('rtt',0x31),('hss',0x32)]}
+        finally:probe.close()
+        if not state['allObservedEnginesIdle'] or any(rc or words[0]&1 for rc,words in state['streams'].values()):
+            raise RuntimeError('Final probe not idle')
+        report.update(finalIdle=state,passed=True,finalPair='candidate')
+        final_passed=True
+    except BaseException as error:
+        report['error']=repr(error)
+        raise
+    finally:
+        try:
+            if not final_passed:
+                # Do not reset the probe over an incompletely restored target fixture.
+                p=WORK/'direct-control.json'
+                fixture=json.loads(p.read_text()) if p.exists() else {}
+                if not fixture.get('targetHaltAttempted') or fixture.get('restored'):
+                    load(PRODUCTION,'failure-production-restored')
+                    verify(PRODUCTION,'failure-production-restored')
+                    report['productionRestoredAfterFailure']=True
+        finally:
+            save(WORK/'board-summary.json',report)
+            lease.close()
+
+
+if __name__=='__main__':main()

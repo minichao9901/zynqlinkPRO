@@ -344,6 +344,7 @@ Configures the DAP Hardware I/O pins for JTAG mode:
 #define SWD_PACKET_STATUS   (SWD_BASE_ADDR + 0x48)
 #define SWD_FEATURES        (SWD_BASE_ADDR + 0x4C)
 #define SWD_FEATURE_SHORT_CLOCK (1U << 4) /* CFG[19], extended transfer divider */
+#define SWD_FEATURE_MANUAL_DIRECTION (1U << 6) /* JTAG_PINS[9], SWDIO input enable */
 #define SWD_ENGINE_RESET    (SWD_BASE_ADDR + 0x50)
 
 /* Low-rate bring-up counters.  Defined in dap_main.c and deliberately kept
@@ -591,21 +592,15 @@ __STATIC_FORCEINLINE void     PIN_SWDIO_TMS_CLR (void) {
 \return Current status of the SWDIO DAP hardware I/O pin.
 */
 __STATIC_FORCEINLINE uint32_t PIN_SWDIO_IN      (void) {
-  return (Xil_In32(GPIO_DATA) & 0x2U) >> 1U;
+  return (swd_read32(JTAG_PINS) >> 1) & 1U;
 }
 
 /** SWDIO I/O pin: Set Output (used in SWD mode only).
 \param bit Output value for the SWDIO DAP hardware I/O pin.
 */
 __STATIC_FORCEINLINE void     PIN_SWDIO_OUT     (uint32_t bit) {
-    if(bit & 0x01)
-    {
-      Xil_Out32(GPIO_DATA, Xil_In32(GPIO_DATA) | 0x2U);
-    }
-    else
-    {
-      Xil_Out32(GPIO_DATA, Xil_In32(GPIO_DATA) & ~0x2U);
-    }
+  uint32_t pins = swd_read32(JTAG_PINS);
+  swd_write32(JTAG_PINS, (pins & ~2U) | ((bit & 1U) << 1) | 0x100U);
 }
 
 /** SWDIO I/O pin: Switch to Output mode (used in SWD mode only).
@@ -613,7 +608,7 @@ Configure the SWDIO DAP hardware I/O pin to output mode. This function is
 called prior \ref PIN_SWDIO_OUT function calls.
 */
 __STATIC_FORCEINLINE void     PIN_SWDIO_OUT_ENABLE  (void) {
-  Xil_Out32(GPIO_TRI, Xil_In32(GPIO_TRI) & ~0x2U);
+  swd_write32(JTAG_PINS, (swd_read32(JTAG_PINS) & ~0x200U) | 0x100U);
 }
 
 /** SWDIO I/O pin: Switch to Input mode (used in SWD mode only).
@@ -621,7 +616,7 @@ Configure the SWDIO DAP hardware I/O pin to input mode. This function is
 called prior \ref PIN_SWDIO_IN function calls.
 */
 __STATIC_FORCEINLINE void     PIN_SWDIO_OUT_DISABLE (void) {
-  Xil_Out32(GPIO_TRI, Xil_In32(GPIO_TRI) | 0x2U);
+  swd_write32(JTAG_PINS, swd_read32(JTAG_PINS) | 0x300U);
 }
 
 

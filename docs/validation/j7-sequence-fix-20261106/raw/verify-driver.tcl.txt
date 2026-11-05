@@ -1,0 +1,11 @@
+set work [file normalize [file dirname [info script]]]
+set root [file normalize [file join $work ../..]]
+set ::env(ZYNQLINK_FPGA_OUT) [file join $work rebound]
+set ::env(ZYNQLINK_RAW_TRACE) 4
+set ::env(ZYNQLINK_ETM_DDR) 1
+set ::env(ZYNQLINK_ETM_LANE_DELAY) 1
+set ::env(ZYNQLINK_IMPLEMENT_FCLK_HZ) 133333333
+set ::env(ZYNQLINK_VERIFY_TDO_INPUT_ONLY) 1
+set ::zynqlink_verify_checkpoint [file join $work rebound j7_adapter_routed.dcp]
+set argv {}
+source [file join $root fpga verify_routed.tcl]

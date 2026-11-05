@@ -19,6 +19,8 @@
 
 RTCK 保留为输入，JTAG 使用固定 TCK。J16 是普通 I/O。沿用 RAW4 对五路信号的独立 200 MHz 过采样，DDR 采后下载路径保持同一设计。专用 BUFIO 采样路径需要时钟能力引脚。 [AMD UG472](https://docs.amd.com/v/u/en-US/ug472_7Series_Clocking)
 
+后续逐项复核确认，生产 RAW4 bit 是直接输入版，五路 IDELAYE2/ELD1 未实例化。端口方向、原始 `0x1D`、TCK 断开状态与未覆盖验收项目见 [J7 改脚复核](../j7-eld1-20261106/j7-production-audit.md)。
+
 改脚采用上次 RAW4+DDR 的 post-opt DCP。该网表已链接、未放置，对应 `5be7176`，FPGA 和 PS 源码与本轮基线 `23e3c5c` 相同。最初新建工程并接入 RTCK GPIO 读回触发整套 IP 综合，随后停下该流程。最终方案在网表上增加无负载的 RTCK 输入缓冲，释放旧球号后统一应用新约束。H15 直接赋值在试验中因旧 TRACED0 占用被 Vivado 拒绝，保留日志。布局、物理优化、布线、时序、DRC 和 bitgen 均针对新球号重新运行。
 
 ```powershell

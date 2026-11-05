@@ -1,0 +1,396 @@
+"""Reversible F103ZE TRACECLK sweep with one fixed SRAM-only workload."""
+from collections import deque
+from contextlib import redirect_stdout
+import hashlib
+import json
+from pathlib import Path
+from statistics import median
+import sys
+import time
+
+import usb.util
+
+WORK = Path(__file__).resolve().parent
+ROOT = WORK.parents[1]
+sys.path[:0] = [str(ROOT / 'tools'), str(ROOT / 'etm-service/tools')]
+from benchmark_rtt_forward import core_read, core_write
+from calibrate_etm_lanes import choose_window, excitation
+from dap_pipeline_bench import cmd, open_dap, setup
+from decode_stream import decode_stream
+from engine_profile import activate_native_profile
+from etm_lane_delay import LaneDelay
+from f103_ram_image import plan
+from probe_flash import Session
+from probe_ownership import Ownership
+from probe_stream import Probe
+from run_f103_clock_fixture import APB1ENR, CFGR, CR, FLASH, hsi, restore, wait_bits
+from run_f103_ram_fixture import flash_plan, verify
+import test_orbtrace_board
+from test_probe_board import Memory
+from validate_fclk_performance import physical_snapshot
+from zynq_memory import PhysicalMemory
+
+SAFE = 10000
+SRAM = 0x20000000
+DHCSR = 0xe000edf0
+DCRDR = 0xe000edf8
+VTOR = 0xe000ed08
+DEMCR = 0xe000edfc
+DWT = 0xe0001000
+FPB = 0xe0002000
+CORE_REGS = [*range(19), 20]
+CLOCK_REGS = dict(CR=CR, CFGR=CFGR, APB1ENR=APB1ENR, FLASH_ACR=FLASH)
+PAIR = WORK / 'candidate'
+ELF = WORK / 'trace-workload.elf'
+
+
+def require(check, message):
+    if not check:
+        raise RuntimeError(message)
+
+
+def sha(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def write_json(path, data):
+    path.write_text(json.dumps(data, indent=2) + '\n', encoding='utf8')
+
+
+def set_hclk(mem, baseline, trace_mhz):
+    hclk = trace_mhz * 2
+    prediv = 1 if hclk % 8 == 0 else 2
+    mul = hclk // (8 // prediv)
+    require(24 <= trace_mhz <= 36 and 2 <= mul <= 16 and hclk == mul * (8 // prediv), 'Invalid in-spec PLL point')
+    mem.write_word(FLASH, (baseline['FLASH_ACR'] & ~7) | 2)
+    mem.write_word(APB1ENR, baseline['APB1ENR'] & ~(1 << 23))
+    hsi(mem)
+    mem.write_word(CR, mem.word(CR) & ~(1 << 24))
+    wait_bits(mem, CR, 1 << 25, 0)
+    require(mem.word(CR) & (1 << 17), 'HSE is not ready')
+    # AHB /1, APB1 /2, APB2 /1 and ADC /8 throughout the experiment.
+    config = (baseline['CFGR'] & ~0x3fffff) | (4 << 8) | (3 << 14) | (1 << 16)
+    config |= ((prediv == 2) << 17) | ((mul - 2) << 18)
+    mem.write_word(CFGR, config)
+    mem.write_word(CR, mem.word(CR) | (1 << 24))
+    wait_bits(mem, CR, 1 << 25, 1 << 25)
+    mem.write_word(CFGR, config | 2)
+    current = wait_bits(mem, CFGR, 12, 8)
+    require(current == (config | 10), f'Unexpected clock readback {current:#x}')
+    return dict(hclkHz=hclk*1_000_000, traceClkHz=trace_mhz*1_000_000, rccCr=hex(mem.word(CR)),
+                rccCfgr=hex(current), pllInputHz=8_000_000//prediv, pllMultiplier=mul)
+
+
+def cycle_check(mem, hclk):
+    def read_count():
+        begin = time.perf_counter()
+        count = mem.word(DWT + 4)
+        return (begin + time.perf_counter()) / 2, count
+
+    mem.write_word(DHCSR, 0xa05f0001)
+    try:
+        start, first = read_count()
+        time.sleep(.2)
+        end, last = read_count()
+    finally:
+        mem.write_word(DHCSR, 0xa05f0003)
+    cycles = (last - first) & 0xffffffff
+    frequency = cycles / (end - start)
+    require(abs(frequency / hclk - 1) < .02, f'DWT CPU clock differs: {frequency}')
+    return dict(cycles=cycles, hostSeconds=end-start, hclkHz=frequency)
+
+
+def run(*, direct=False):
+    result = WORK / ('direct-control.json' if direct else 'calibration.json')
+    pair = ROOT/'prebuilt/j7-adapter-20261106' if direct else PAIR
+    require(not result.exists(), 'Use fresh sweep evidence')
+    image = plan(ELF)
+    trap = image['symbols']['trace_trap'] & ~1
+    expected_flash = flash_plan(ROOT / 'prebuilt/golden/f103ze-cdc48.elf')
+    report = dict(rows=[], laneWindows=[], inputPath='direct' if direct else 'ELD1',
+                  fixtureSHA256=sha(ELF.read_bytes()), gpioSpeed=3, restored=False)
+    lane_delay = None
+    if not direct:
+        tap_io = WORK/'tap-io'
+        tap_io.mkdir(exist_ok=False)
+        lane_delay = LaneDelay(PhysicalMemory(Session(tap_io, Path('E:/Xilinx/SDK/2018.3'), 'tcp:127.0.0.1:3121')))
+    activate_native_profile()
+    dev = mem = initial = saved = core = fpb = sram = debug = None
+    original_taps = None
+    current_clock = None
+    current_taps = None
+    reference_instructions = None
+    if not direct:
+        baseline=json.loads((WORK/'direct-control.json').read_text(encoding='utf8'))
+        reference_counts=[r['summary']['instructions'] for r in baseline['rows']
+                          if r['traceMHz']==32 and r['milliseconds']==100 and r['passed']]
+        require(reference_counts,'Direct 32 MHz control has no valid instruction-count reference')
+        reference_instructions=median(reference_counts)
+        report['direct32MHzReferenceInstructions100ms']=reference_instructions
+    last_dap = deque(maxlen=32)
+    base_transfer = Memory.transfer
+
+    def traced_transfer(self, packet):
+        if len(packet)!=18 or list(packet[:4])!=[5,0,3,8] or packet[8]!=1 or packet[13]!=5:
+            return base_transfer(self,packet)
+        item = {'addressSetupRequest': bytes(packet).hex()}
+        last_dap.append(item)
+        reply = base_transfer(self, packet)
+        item.update(replyBytes=len(reply), replyHead=reply[:8].hex())
+        return reply
+
+    def connect():
+        nonlocal dev, mem
+        dev, tx, rx = open_dap()
+        setup(tx, rx, SAFE)
+        mem = Memory(tx, rx)
+
+    def close():
+        nonlocal dev
+        if dev is not None:
+            usb.util.dispose_resources(dev)
+            dev = None
+
+    def point(trace_mhz, ms, taps, phase, *, enabled=True, decode=False, physical=False):
+        nonlocal current_clock, current_taps
+        taps = list(taps)
+        index = len(report['rows'])+1
+        row = dict(index=index, traceMHz=trace_mhz, milliseconds=ms, taps=taps, enabled=enabled,
+                   phase=phase, passed=False)
+        report['rows'].append(row)
+        folder = WORK / f'{"direct" if direct else "point"}-{index:03d}'
+        require(not folder.exists(), 'Capture output already exists')
+        if not current_clock or current_clock['traceClkHz'] != trace_mhz*1_000_000:
+            current_clock = set_hclk(mem, saved, trace_mhz)
+            core_write(mem, 15, image['entry'])
+            row['DWT'] = cycle_check(mem, current_clock['hclkHz'])
+            require((image['entry'] & ~1) <= core_read(mem, 15) < trap, 'SRAM fixture did not run in expected loop')
+        row['clock'] = current_clock
+        core_write(mem, 15, image['entry'])
+        if lane_delay is not None and current_taps != (enabled,taps):
+            row['configuration'] = lane_delay.configure(enabled,taps)
+            current_taps = (enabled,taps)
+        write_json(result, report)
+        close()
+        previous_argv = sys.argv
+        started = time.perf_counter()
+        try:
+            sys.argv = ['test_orbtrace_board', '--ram-image', '--target-elf', str(ELF),
+                        '--bit', str(pair/'probe.bit'), '--elf', str(pair/'application.elf'),
+                        '--output', str(folder), '--milliseconds', str(ms),
+                        '--speed-khz', str(SAFE), '--gpio-speed', '3', '--transport', 'ddr']
+            if physical:
+                sys.argv.append('--verify-ddr-physical')
+            with (WORK / (folder.name + '.log')).open('w', encoding='utf8') as log, redirect_stdout(log):
+                test_orbtrace_board.main()
+        except Exception as error:
+            row['captureError'] = repr(error)
+        finally:
+            sys.argv = previous_argv
+        row['captureHostSeconds'] = time.perf_counter() - started
+        connect()
+        halt = mem.word(DHCSR)
+        require(halt & (1 << 17) and not halt & (1 << 25), f'Fixture did not remain halted without reset: {halt:#x}')
+        a = json.loads((folder/'acceptance.json').read_text(encoding='utf8'))
+        require(a.get('restored') and a.get('fpb_restored') and
+                not any(a.get(k) for k in ('target_cleanup_error','usb_cleanup_error','reconnect_error','usb_reader_errors')),
+                'Per-capture cleanup failed')
+        require(a['rcc_before']==a['rcc_after'] and int(row['clock']['rccCfgr'],16)==a['rcc_before'][1],
+                'RCC changed during capture')
+        ddr = json.loads((folder/'ddr/result.json').read_text(encoding='utf8'))
+        require(ddr.get('usbOwnerReleased') and not ddr.get('cleanupError'), 'DDR owner did not release')
+        row.update(quality=ddr.get('quality'), capturePassed=a.get('capture_passed',False),
+                   formatterSHA256=sha((folder/'ddr/capture.frm1').read_bytes()),probeClock=a['control_clock'])
+        q = row['quality']
+        d = q['diagnostics']
+        require(q['ended'] and not q['stopReason'] and q['hardwareTicks']==q['requestedTicks'] and
+                not any(d[k] for k in ('frameDrops','writerError','idelayReadyLosses')),
+                'Non-input capture failure')
+        if not row['capturePassed']:
+            require('DDR hardware quality/window failed' in a.get('error',''), 'Unexpected capture failure')
+        row['excitation'] = excitation(folder/'ddr/capture.frm1')
+        if physical:
+            require(ddr.get('usbMatchesPhysical'), 'Physical DDR readback differs from USB')
+            row['usbMatchesPhysical']=True
+            row['physicalSHA256']=ddr['physicalSha256']
+        if row['capturePassed']:
+            data = (folder/'etm.bin').read_bytes()
+            row['etmSHA256'] = sha(data)
+            row['passed'] = bool(q['requestedWindowComplete'] and not d['parserErrors'] and
+                                 q['formatterBytes']>=ms*1000 and row['excitation']['excited'])
+            if decode and row['passed']:
+                t = time.perf_counter()
+                decoded = decode_stream(data, ELF, folder, a['config'])
+                row['decodeSeconds'] = time.perf_counter()-t
+                row['summary'] = decoded['summary']
+                row['passed'] = bool(decoded['summary']['packetIssues'] == 0 and decoded['summary']['instructions'] > 0 and
+                    {'trace_loop','trace_mix'} <= decoded['summary']['functions'].keys())
+                if reference_instructions is not None:
+                    expected=reference_instructions*trace_mhz/32*ms/100
+                    ratio=decoded['summary']['instructions']/expected
+                    row['instructionCountVsDirect32Scaled']=ratio
+                    row['passed']=row['passed'] and .95<=ratio<=1.05
+        write_json(result, report)
+        print(f"{index:03d} {phase} {trace_mhz}MHz {ms}ms {taps} parser={d['parserErrors']} passed={row['passed']}",flush=True)
+        return row
+
+    lease=Ownership()
+    try:
+        Memory.transfer = traced_transfer
+        state = physical_snapshot()
+        p = Probe()
+        try:
+            streams = [p.action(c, 2) for c in (0x31, 0x32)]
+        finally:
+            p.close()
+        require(state['allObservedEnginesIdle'] and all(rc == 0 and not words[0]&1 for rc, words in streams), 'Probe occupied')
+        if lane_delay is not None:
+            original_taps = lane_delay.snapshot()
+            require(original_taps['ready'] and original_taps['loaded'] and not original_taps['fault'], 'ELD1 startup taps not ready')
+            report['originalTaps'] = original_taps
+        connect()
+        require(mem.word(0xe0042000)&0xfff == 0x414, 'F103ZE required')
+        report['flashBefore'] = verify(mem, expected_flash)
+        original = mem.word(DHCSR)
+        report['targetHaltAttempted'] = True
+        initial = original
+        mem.write_word(DHCSR, 0xa05f0003)
+        require(mem.word(DHCSR)&(1 << 17), 'Target did not halt')
+        dcrdr = mem.word(DCRDR)
+        core = {n:core_read(mem,n) for n in CORE_REGS}
+        require(not core[16]&0x1ff, 'Target halted in an exception handler')
+        saved = {k:mem.word(a) for k,a in CLOCK_REGS.items()}
+        require(saved['CFGR'] == 0x51040a and saved['CR'] & (1<<17), 'Expected original CDC48 clock')
+        fpb = mem.read(FPB, 40)
+        sram = mem.read(SRAM, 65536)
+        require(mem.read(SRAM,65536) == sram,'SRAM changed while halted')
+        (WORK/(result.stem+'-sram-private.bin')).write_bytes(sram)
+        (WORK/(result.stem+'-core-private.json')).write_text(json.dumps(core), encoding='utf8')
+        debug = dict(dcrdr=dcrdr, vtor=mem.word(VTOR), demcr=mem.word(DEMCR))
+        mem.write_word(DEMCR, debug['demcr'] | (1 << 24))
+        debug.update(dwt=mem.word(DWT), cycles=mem.word(DWT+4))
+        write_json(WORK/(result.stem+'-restore-private.json'), dict(initial=initial, clock=saved, core=core,
+                   fpb=fpb.hex(), debug=debug, sramFile=result.stem+'-sram-private.bin'))
+        report.update(initialDHCSR=hex(initial), clockBefore=saved, sramSHA256=sha(sram), fpbSHA256=sha(fpb))
+        write_json(result, report)
+        mem.write_word(DWT, debug['dwt'] | 1)
+        mem.write_word(FPB, 2)
+        for address, data in image['payloads']:
+            mem.write(address, data)
+        verify(mem, image['payloads'])
+        mem.write_word(VTOR, SRAM)
+        core_write(mem, 20, 1)
+        core_write(mem, 17, image['stack'])
+        core_write(mem, 13, image['stack'])
+        core_write(mem, 16, 0x01000000)
+
+        zero = [0]*5
+        if direct:
+            for mhz in (32,36):
+                rows=[point(mhz,100,zero,'direct-control',enabled=False,decode=True) for _ in range(3)]
+                if mhz==36 and all(r['passed'] for r in rows):
+                    report['directLong36']=[point(36,1000,zero,'direct-long',enabled=False,decode=True)['index'] for _ in range(3)]
+            return
+        require(point(24,100,zero,'zero-control',enabled=False,decode=True)['passed'],'24 MHz zero-tap control failed')
+        report['zero32'] = point(32,100,zero,'zero-control',enabled=False,decode=True)['index']
+        zero36 = [point(36,100,zero,'zero-control',enabled=False,decode=True) for _ in range(3)]
+        report['zero36'] = [r['index'] for r in zero36]
+        if all(r['passed'] for r in zero36):
+            report['zeroLong36']=[point(36,1000,zero,'zero-long',enabled=False,decode=True)['index'] for _ in range(3)]
+        grid = (0,8,16,24,31)
+        coarse = [point(36,20,[d]*4+[c],'common-grid') for d in grid for c in grid]
+
+        def score(row):
+            return (not row['passed'], not row['excitation']['excited'], not row['quality']['synced'],
+                    row['quality']['diagnostics']['parserErrors'], -row['quality']['formatterBytes'])
+
+        current = min(coarse,key=score)['taps'].copy()
+        report['coarseBest'] = current.copy()
+        for lane in range(5):
+            results = []
+            for tap in range(32):
+                trial = current.copy()
+                trial[lane] = tap
+                results.append(point(36,20,trial,f'lane-{lane}'))
+            window = choose_window({r['taps'][lane]: r['passed'] for r in results})
+            report['laneWindows'].append(dict(lane=lane,otherTaps=current.copy(),window=window))
+            current[lane] = window['tap'] if window else min(results,key=score)['taps'][lane]
+        report['candidate'] = current.copy()
+        holdout = [point(36,100,current,'holdout',decode=True,physical=(n==0)) for n in range(3)]
+        report['holdout'] = [r['index'] for r in holdout]
+        report['confirmed36MHz'] = False
+        if all(r['passed'] for r in holdout):
+            long_checks = [point(36,1000,current,'long-window',decode=True) for n in range(3)]
+            report['longChecks'] = [r['index'] for r in long_checks]
+            if all(r['passed'] for r in long_checks):
+                neighbors = []
+                for lane in range(5):
+                    for delta in (-2,-1,1,2):
+                        taps=current.copy()
+                        taps[lane]+=delta
+                        if 0<=taps[lane]<=31:
+                            neighbors.append(point(36,100,taps,'final-margin'))
+                report['neighbors'] = [r['index'] for r in neighbors]
+                report['confirmed36MHz'] = len(neighbors)==20 and all(r['passed'] for r in neighbors)
+        if not report['confirmed36MHz']:
+            report['fallback32'] = [point(32,1000,zero,'zero-fallback',enabled=False,decode=True)['index'] for n in range(3)]
+    except BaseException as error:
+        report['error'] = repr(error)
+        report['lastDAPTransactions'] = list(last_dap)
+        raise
+    finally:
+        try:
+            if original_taps is not None:
+                try:
+                    report['tapRestoration'] = lane_delay.configure(original_taps['enabled'],original_taps['taps'])
+                except Exception as error:
+                    report['tapRestoreError']=repr(error)
+            if initial is not None:
+                if dev is None:connect()
+                mem.write_word(DHCSR,0xa05f0003)
+                require(mem.word(DHCSR)&(1<<17), 'Cannot halt for restoration')
+                if saved is not None:
+                    restore(mem, saved)
+                    after = {k:mem.word(a) for k,a in CLOCK_REGS.items()}
+                    report['clockAfter'] = after
+                    require(after==saved,'Target clock restore mismatch')
+                if sram is not None:
+                    current = mem.read(SRAM,len(sram))
+                    for offset in range(0,len(sram),1024):
+                        if current[offset:offset+1024]!=sram[offset:offset+1024]:
+                            mem.write(SRAM+offset,sram[offset:offset+1024])
+                    require(mem.read(SRAM,len(sram))==sram,'Full SRAM restore mismatch')
+                    report['wholeSramRestored']=True
+                if fpb is not None:
+                    mem.write(FPB+4,fpb[4:])
+                    mem.write_word(FPB,2|(int.from_bytes(fpb[:4],'little')&1))
+                    require(mem.read(FPB,40)==fpb,'FPB restore mismatch')
+                if debug is not None:
+                    mem.write_word(VTOR,debug['vtor'])
+                    mem.write_word(DWT+4,debug['cycles'])
+                    mem.write_word(DWT,debug['dwt'])
+                    require(mem.word(VTOR)==debug['vtor'] and mem.word(DWT)==debug['dwt'] and mem.word(DWT+4)==debug['cycles'], 'VTOR or DWT restore mismatch')
+                    mem.write_word(DEMCR,debug['demcr'])
+                    require(mem.word(DEMCR)==debug['demcr'],'DEMCR restore mismatch')
+                if core is not None:
+                    # Restore banked SP and special controls before R13 and PC.
+                    for n in (17,18,20,*range(17)):
+                        core_write(mem,n,core[n])
+                    require({n:core_read(mem,n) for n in CORE_REGS}==core,'Core register restore mismatch')
+                    report['coreRestored']=True
+                if debug is not None:mem.write_word(DCRDR,debug['dcrdr'])
+                report['flashAfter']=verify(mem,expected_flash)
+                mem.write_word(DHCSR,0xa05f0000|(initial&0x0b))
+                final=mem.word(DHCSR)
+                require((initial^final)&(1<<17)==0 and not final&(1<<25),'Original run/halt state not restored')
+                report.update(finalDHCSR=hex(final),restored=True)
+                cmd(mem.out,mem.inp,[3])
+        finally:
+            Memory.transfer = base_transfer
+            close()
+            lease.close()
+            write_json(result, report)
+
+
+if __name__ == '__main__':
+    run()

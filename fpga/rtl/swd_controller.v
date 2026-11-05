@@ -145,7 +145,7 @@ module swd_controller #(
         .IO(swdio),
         .I (manual_pins[8] ? manual_pins[1] : jtag_enabled ? jtag_tms : swdio_o),
         .O (swdio_i_raw),
-        .T (!jtag_config[1] || (!manual_pins[8] && !jtag_enabled && swdio_t))
+        .T (!jtag_config[1] || (manual_pins[8] ? manual_pins[9] : !jtag_enabled && swdio_t))
     );
     `ifndef SYNTHESIS
         assign #(SWDIO_IN_DELAY_NS) swdio_i = swdio_i_raw;
@@ -210,7 +210,8 @@ module swd_controller #(
     end endgenerate
     for(genvar gi=0;gi<4;gi=gi+1) begin:g_aux
         wire pin_o=gi==0 && jtag_enabled ? (manual_pins[8] ? manual_pins[2] : jtag_tdi) : gpio_out[gi];
-        wire pin_t=!jtag_config[1] || (gi==1 && jtag_enabled) || (!(gi==0 && jtag_enabled) && gpio_tri[gi]);
+        // GPIO1 is the target's TDO input in both SWD and JTAG modes.
+        wire pin_t=!jtag_config[1] || gi==1 || (!(gi==0 && jtag_enabled) && gpio_tri[gi]);
         IOBUF u_pin(.IO(gpio_aux[gi]),.I(pin_o),.T(pin_t),.O(gpio_in[gi]));
     end
 
@@ -639,7 +640,7 @@ module swd_controller #(
                     ADDR_CTRL: begin
                         rdata_reg <= {16'd0, xfer_request, 5'd0, ctrl_timestamp_en, ctrl_mode, scalar_status_busy};
                     end
-                    ADDR_FEATURES: rdata_reg <= 32'h4450_003f; // bit5: RISC-V extended idle, max64.
+                    ADDR_FEATURES: rdata_reg <= 32'h4450_007f; // bit6: manual SWDIO direction; bit5: extended idle.
                     ADDR_ENGINE_RESET: rdata_reg <= engine_reset_count;
                     ADDR_TRACE_CTRL: rdata_reg <= {trace_frozen,trace_raw_mode,trace_raw_active,trace_raw_armed,8'd0,trace_count,trace_head};
                     ADDR_TRACE_INDEX: rdata_reg <= {28'd0,trace_index};
@@ -693,7 +694,7 @@ module swd_controller #(
                     8'h88:rdata_reg<=jtag_dr_config;
                     8'h8c:rdata_reg<={29'd0,jtag_operation};
                     8'h90:rdata_reg<={31'd0,jtag_seq_tms};
-                    8'h94:rdata_reg<={23'd0,manual_pins[8],gpio_in[2],1'b0,gpio_in[3],1'b0,gpio_in[1],gpio_in[0],swdio_i_raw,clock_feedback};
+                    8'h94:rdata_reg<={22'd0,manual_pins[9],manual_pins[8],gpio_in[2],1'b0,gpio_in[3],1'b0,gpio_in[1],gpio_in[0],swdio_i_raw,clock_feedback};
                     8'h98:rdata_reg<={27'd0,jtag_return_late,jtag_fence_error,jtag_cache_valid,jtag_busy,jtag_sample_early};
                     8'h9c:rdata_reg<=jtag_cached_ir;
                     8'ha0:rdata_reg<=jtag_sequence_data[31:0];

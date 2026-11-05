@@ -34,6 +34,7 @@ rtl = root/'fpga/rtl/dap_transfer_block_engine.v'
 for name in ['tb_dap_transfer_block_engine', 'tb_engine_cases', 'tb_engine_retry', 'tb_engine_lat1', 'tb_packet_contract']:
     run(name, rtl, 'current')
 run('tb_packet_axi', rtl, 'current', integration=True)
+run('tb_swd_sequence_pins', rtl, 'current', integration=True)
 if a.compare_ref:
     baseline = subprocess.check_output(['git', 'show', f'{a.compare_ref}:fpga/rtl/dap_transfer_block_engine.v'], cwd=root)
     ref = out/'baseline_packet.v'

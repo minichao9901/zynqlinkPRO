@@ -1,0 +1,710 @@
+{
+  "rows": [
+    {
+      "index": 1,
+      "traceMHz": 32,
+      "milliseconds": 100,
+      "taps": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "enabled": false,
+      "phase": "direct-control",
+      "passed": true,
+      "DWT": {
+        "cycles": 12865129,
+        "hostSeconds": 0.2008595500010415,
+        "hclkHz": 64050372.51120642
+      },
+      "clock": {
+        "hclkHz": 64000000,
+        "traceClkHz": 32000000,
+        "rccCr": "0x3034e83",
+        "rccCfgr": "0x59c40a",
+        "pllInputHz": 8000000,
+        "pllMultiplier": 8
+      },
+      "captureHostSeconds": 0.6704011000001628,
+      "quality": {
+        "transport": "ddr-usb/1",
+        "captureId": 1,
+        "captureNonce": 5831451005028271482,
+        "loss": false,
+        "synced": true,
+        "bufferFull": false,
+        "bufferCapacityBytes": 104857600,
+        "captureComplete": true,
+        "requestedWindowComplete": true,
+        "completionReason": "time",
+        "ended": true,
+        "records": 151354,
+        "hardwareTicks": 20000000,
+        "requestedTicks": 20000000,
+        "refClockHz": 199999998,
+        "hardwareSeconds": 0.100000001,
+        "hardwareStartBracketUnix": [
+          1793920031.6523554,
+          1793920031.6529343
+        ],
+        "stopReason": 0,
+        "formatterBytes": 2421675,
+        "tailBytes": 11,
+        "tailAmbiguous": true,
+        "usbSeconds": 0.06682770000043092,
+        "usbPayloadMBps": 36.23759309364806,
+        "diagnostics": {
+          "implemented": true,
+          "frameDrops": 0,
+          "parserErrors": 0,
+          "idelayReadyLosses": 0,
+          "frameHighwater": 1,
+          "syncAcquisitions": 1,
+          "observedFrames": 151354,
+          "capacityReached": false,
+          "writerError": 0
+        }
+      },
+      "capturePassed": true,
+      "formatterSHA256": "6c5a3bd363b3e2fb4f4f70456a7040bfe45db45d9545300068173d01edc8fd7d",
+      "probeClock": {
+        "fclk_hz": 119999998,
+        "cfg": "0xcaa11",
+        "SWCLK_Hz": 9999999.833333334,
+        "half_period_fclk": 6,
+        "short_high": true,
+        "intended_high_ns": 8.333333472222225
+      },
+      "excitation": {
+        "estimatedFrom": "Normalized formatter nibbles, not independent analog pad measurements",
+        "dataLanes": [
+          {
+            "ones": 913622,
+            "zeros": 3929728,
+            "transitions": 1637349
+          },
+          {
+            "ones": 367051,
+            "zeros": 4476299,
+            "transitions": 598536
+          },
+          {
+            "ones": 1258815,
+            "zeros": 3584535,
+            "transitions": 2096839
+          },
+          {
+            "ones": 907563,
+            "zeros": 3935787,
+            "transitions": 1206002
+          }
+        ],
+        "excited": true
+      },
+      "etmSHA256": "39c211d53aac58ead3df9260965ec3be538f2ae8b06917d81c60df2129f818b9",
+      "decodeSeconds": 1.1970368000002054,
+      "summary": {
+        "packets": 751099,
+        "ranges": 2697723,
+        "instructions": 2697723,
+        "executed": 2548035,
+        "sourceMapped": 2697723,
+        "exceptions": 0,
+        "gaps": 2,
+        "packetIssues": 0,
+        "unknownExecution": 0,
+        "functions": {
+          "trace_loop": 1349047,
+          "trace_mix": 1198988
+        }
+      }
+    },
+    {
+      "index": 2,
+      "traceMHz": 32,
+      "milliseconds": 100,
+      "taps": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "enabled": false,
+      "phase": "direct-control",
+      "passed": true,
+      "clock": {
+        "hclkHz": 64000000,
+        "traceClkHz": 32000000,
+        "rccCr": "0x3034e83",
+        "rccCfgr": "0x59c40a",
+        "pllInputHz": 8000000,
+        "pllMultiplier": 8
+      },
+      "captureHostSeconds": 0.552530699998897,
+      "quality": {
+        "transport": "ddr-usb/1",
+        "captureId": 2,
+        "captureNonce": 16259918214741522831,
+        "loss": false,
+        "synced": true,
+        "bufferFull": false,
+        "bufferCapacityBytes": 104857600,
+        "captureComplete": true,
+        "requestedWindowComplete": true,
+        "completionReason": "time",
+        "ended": true,
+        "records": 155555,
+        "hardwareTicks": 20000000,
+        "requestedTicks": 20000000,
+        "refClockHz": 199999998,
+        "hardwareSeconds": 0.100000001,
+        "hardwareStartBracketUnix": [
+          1793920033.6881785,
+          1793920033.6888523
+        ],
+        "stopReason": 0,
+        "formatterBytes": 2488894,
+        "tailBytes": 14,
+        "tailAmbiguous": false,
+        "usbSeconds": 0.07558670000071288,
+        "usbPayloadMBps": 32.92767113760128,
+        "diagnostics": {
+          "implemented": true,
+          "frameDrops": 0,
+          "parserErrors": 0,
+          "idelayReadyLosses": 0,
+          "frameHighwater": 1,
+          "syncAcquisitions": 1,
+          "observedFrames": 155555,
+          "capacityReached": false,
+          "writerError": 0
+        }
+      },
+      "capturePassed": true,
+      "formatterSHA256": "bdebd138c1a96311a2def866c42a183b9ff9187cc245b36a543794c784210654",
+      "probeClock": {
+        "fclk_hz": 119999998,
+        "cfg": "0xcaa11",
+        "SWCLK_Hz": 9999999.833333334,
+        "half_period_fclk": 6,
+        "short_high": true,
+        "intended_high_ns": 8.333333472222225
+      },
+      "excitation": {
+        "estimatedFrom": "Normalized formatter nibbles, not independent analog pad measurements",
+        "dataLanes": [
+          {
+            "ones": 900023,
+            "zeros": 4077765,
+            "transitions": 1607035
+          },
+          {
+            "ones": 341081,
+            "zeros": 4636707,
+            "transitions": 591184
+          },
+          {
+            "ones": 1275775,
+            "zeros": 3702013,
+            "transitions": 2098979
+          },
+          {
+            "ones": 924952,
+            "zeros": 4052836,
+            "transitions": 1224150
+          }
+        ],
+        "excited": true
+      },
+      "etmSHA256": "4e5c5362c0f37d3d7fac529fc15155155cdd6dc4d326382ccb590ed2a235782d",
+      "decodeSeconds": 1.0926644000028318,
+      "summary": {
+        "packets": 751728,
+        "ranges": 2699910,
+        "instructions": 2699910,
+        "executed": 2550086,
+        "sourceMapped": 2699910,
+        "exceptions": 0,
+        "gaps": 2,
+        "packetIssues": 0,
+        "unknownExecution": 0,
+        "functions": {
+          "trace_loop": 1350126,
+          "trace_mix": 1199960
+        }
+      }
+    },
+    {
+      "index": 3,
+      "traceMHz": 32,
+      "milliseconds": 100,
+      "taps": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "enabled": false,
+      "phase": "direct-control",
+      "passed": true,
+      "clock": {
+        "hclkHz": 64000000,
+        "traceClkHz": 32000000,
+        "rccCr": "0x3034e83",
+        "rccCfgr": "0x59c40a",
+        "pllInputHz": 8000000,
+        "pllMultiplier": 8
+      },
+      "captureHostSeconds": 0.6181177999969805,
+      "quality": {
+        "transport": "ddr-usb/1",
+        "captureId": 3,
+        "captureNonce": 3559089789764455489,
+        "loss": false,
+        "synced": true,
+        "bufferFull": false,
+        "bufferCapacityBytes": 104857600,
+        "captureComplete": true,
+        "requestedWindowComplete": true,
+        "completionReason": "time",
+        "ended": true,
+        "records": 150523,
+        "hardwareTicks": 20000000,
+        "requestedTicks": 20000000,
+        "refClockHz": 199999998,
+        "hardwareSeconds": 0.100000001,
+        "hardwareStartBracketUnix": [
+          1793920035.600821,
+          1793920035.6015363
+        ],
+        "stopReason": 0,
+        "formatterBytes": 2408378,
+        "tailBytes": 10,
+        "tailAmbiguous": true,
+        "usbSeconds": 0.0658186000000569,
+        "usbPayloadMBps": 36.591145967825476,
+        "diagnostics": {
+          "implemented": true,
+          "frameDrops": 0,
+          "parserErrors": 0,
+          "idelayReadyLosses": 0,
+          "frameHighwater": 1,
+          "syncAcquisitions": 1,
+          "observedFrames": 150523,
+          "capacityReached": false,
+          "writerError": 0
+        }
+      },
+      "capturePassed": true,
+      "formatterSHA256": "623e668384d3f88e30b6e77430a2f4ac9aa926834f8c21e503d800ff2a8ca844",
+      "probeClock": {
+        "fclk_hz": 119999998,
+        "cfg": "0xcaa11",
+        "SWCLK_Hz": 9999999.833333334,
+        "half_period_fclk": 6,
+        "short_high": true,
+        "intended_high_ns": 8.333333472222225
+      },
+      "excitation": {
+        "estimatedFrom": "Normalized formatter nibbles, not independent analog pad measurements",
+        "dataLanes": [
+          {
+            "ones": 908663,
+            "zeros": 3908093,
+            "transitions": 1627863
+          },
+          {
+            "ones": 364393,
+            "zeros": 4452363,
+            "transitions": 595010
+          },
+          {
+            "ones": 1251911,
+            "zeros": 3564845,
+            "transitions": 2085041
+          },
+          {
+            "ones": 902627,
+            "zeros": 3914129,
+            "transitions": 1199340
+          }
+        ],
+        "excited": true
+      },
+      "etmSHA256": "7a651d10abccd27db2f90469160c79f9a2f34b810bbae51c6b000a8dfee66ece",
+      "decodeSeconds": 1.0714537000021664,
+      "summary": {
+        "packets": 746885,
+        "ranges": 2682466,
+        "instructions": 2682466,
+        "executed": 2533606,
+        "sourceMapped": 2682466,
+        "exceptions": 0,
+        "gaps": 2,
+        "packetIssues": 0,
+        "unknownExecution": 0,
+        "functions": {
+          "trace_loop": 1341398,
+          "trace_mix": 1192208
+        }
+      }
+    },
+    {
+      "index": 4,
+      "traceMHz": 36,
+      "milliseconds": 100,
+      "taps": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "enabled": false,
+      "phase": "direct-control",
+      "passed": false,
+      "DWT": {
+        "cycles": 14467346,
+        "hostSeconds": 0.20074559999920893,
+        "hclkHz": 72068060.27159256
+      },
+      "clock": {
+        "hclkHz": 72000000,
+        "traceClkHz": 36000000,
+        "rccCr": "0x3034e83",
+        "rccCfgr": "0x5dc40a",
+        "pllInputHz": 8000000,
+        "pllMultiplier": 9
+      },
+      "captureError": "RuntimeError('DDR hardware quality/window failed; raw data retained')",
+      "captureHostSeconds": 0.5781483999999182,
+      "quality": {
+        "transport": "ddr-usb/1",
+        "captureId": 4,
+        "captureNonce": 2022210230480045476,
+        "loss": true,
+        "synced": true,
+        "bufferFull": false,
+        "bufferCapacityBytes": 104857600,
+        "captureComplete": false,
+        "requestedWindowComplete": false,
+        "completionReason": "time",
+        "ended": true,
+        "records": 170050,
+        "hardwareTicks": 20000000,
+        "requestedTicks": 20000000,
+        "refClockHz": 199999998,
+        "hardwareSeconds": 0.100000001,
+        "hardwareStartBracketUnix": [
+          1793920037.652373,
+          1793920037.653076
+        ],
+        "stopReason": 0,
+        "formatterBytes": 2720804,
+        "tailBytes": 4,
+        "tailAmbiguous": true,
+        "usbSeconds": 0.0726745000029041,
+        "usbPayloadMBps": 37.438221107696315,
+        "diagnostics": {
+          "implemented": true,
+          "frameDrops": 0,
+          "parserErrors": 4,
+          "idelayReadyLosses": 0,
+          "frameHighwater": 1,
+          "syncAcquisitions": 5,
+          "observedFrames": 170050,
+          "capacityReached": false,
+          "writerError": 0
+        }
+      },
+      "capturePassed": false,
+      "formatterSHA256": "172555245bfeb311f05b823f74feea9929092373d403a25506869e17a0677c93",
+      "probeClock": {
+        "fclk_hz": 119999998,
+        "cfg": "0xcaa11",
+        "SWCLK_Hz": 9999999.833333334,
+        "half_period_fclk": 6,
+        "short_high": true,
+        "intended_high_ns": 8.333333472222225
+      },
+      "excitation": {
+        "estimatedFrom": "Normalized formatter nibbles, not independent analog pad measurements",
+        "dataLanes": [
+          {
+            "ones": 1026379,
+            "zeros": 4415229,
+            "transitions": 1839083
+          },
+          {
+            "ones": 411870,
+            "zeros": 5029738,
+            "transitions": 671730
+          },
+          {
+            "ones": 1414336,
+            "zeros": 4027272,
+            "transitions": 2355805
+          },
+          {
+            "ones": 1020035,
+            "zeros": 4421573,
+            "transitions": 1354932
+          }
+        ],
+        "excited": true
+      }
+    },
+    {
+      "index": 5,
+      "traceMHz": 36,
+      "milliseconds": 100,
+      "taps": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "enabled": false,
+      "phase": "direct-control",
+      "passed": false,
+      "clock": {
+        "hclkHz": 72000000,
+        "traceClkHz": 36000000,
+        "rccCr": "0x3034e83",
+        "rccCfgr": "0x5dc40a",
+        "pllInputHz": 8000000,
+        "pllMultiplier": 9
+      },
+      "captureError": "RuntimeError('DDR hardware quality/window failed; raw data retained')",
+      "captureHostSeconds": 0.6052652999969723,
+      "quality": {
+        "transport": "ddr-usb/1",
+        "captureId": 5,
+        "captureNonce": 6149862259747424874,
+        "loss": true,
+        "synced": true,
+        "bufferFull": false,
+        "bufferCapacityBytes": 104857600,
+        "captureComplete": false,
+        "requestedWindowComplete": false,
+        "completionReason": "time",
+        "ended": true,
+        "records": 170455,
+        "hardwareTicks": 20000000,
+        "requestedTicks": 20000000,
+        "refClockHz": 199999998,
+        "hardwareSeconds": 0.100000001,
+        "hardwareStartBracketUnix": [
+          1793920038.4820232,
+          1793920038.4826987
+        ],
+        "stopReason": 0,
+        "formatterBytes": 2727291,
+        "tailBytes": 11,
+        "tailAmbiguous": false,
+        "usbSeconds": 0.08158269999694312,
+        "usbPayloadMBps": 33.42977126403258,
+        "diagnostics": {
+          "implemented": true,
+          "frameDrops": 0,
+          "parserErrors": 4,
+          "idelayReadyLosses": 0,
+          "frameHighwater": 1,
+          "syncAcquisitions": 5,
+          "observedFrames": 170455,
+          "capacityReached": false,
+          "writerError": 0
+        }
+      },
+      "capturePassed": false,
+      "formatterSHA256": "d7ec92f14df69b3aa98337046033877b1331d6f2954fa3322f55f98b21f692a0",
+      "probeClock": {
+        "fclk_hz": 119999998,
+        "cfg": "0xcaa11",
+        "SWCLK_Hz": 9999999.833333334,
+        "half_period_fclk": 6,
+        "short_high": true,
+        "intended_high_ns": 8.333333472222225
+      },
+      "excitation": {
+        "estimatedFrom": "Normalized formatter nibbles, not independent analog pad measurements",
+        "dataLanes": [
+          {
+            "ones": 1028795,
+            "zeros": 4425787,
+            "transitions": 1843405
+          },
+          {
+            "ones": 412832,
+            "zeros": 5041750,
+            "transitions": 673312
+          },
+          {
+            "ones": 1417669,
+            "zeros": 4036913,
+            "transitions": 2361367
+          },
+          {
+            "ones": 1022456,
+            "zeros": 4432126,
+            "transitions": 1358150
+          }
+        ],
+        "excited": true
+      }
+    },
+    {
+      "index": 6,
+      "traceMHz": 36,
+      "milliseconds": 100,
+      "taps": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "enabled": false,
+      "phase": "direct-control",
+      "passed": false,
+      "clock": {
+        "hclkHz": 72000000,
+        "traceClkHz": 36000000,
+        "rccCr": "0x3034e83",
+        "rccCfgr": "0x5dc40a",
+        "pllInputHz": 8000000,
+        "pllMultiplier": 9
+      },
+      "captureError": "RuntimeError('DDR hardware quality/window failed; raw data retained')",
+      "captureHostSeconds": 0.5788484000004246,
+      "quality": {
+        "transport": "ddr-usb/1",
+        "captureId": 6,
+        "captureNonce": 13256790457442619729,
+        "loss": true,
+        "synced": true,
+        "bufferFull": false,
+        "bufferCapacityBytes": 104857600,
+        "captureComplete": false,
+        "requestedWindowComplete": false,
+        "completionReason": "time",
+        "ended": true,
+        "records": 174979,
+        "hardwareTicks": 20000000,
+        "requestedTicks": 20000000,
+        "refClockHz": 199999998,
+        "hardwareSeconds": 0.100000001,
+        "hardwareStartBracketUnix": [
+          1793920039.2797594,
+          1793920039.2803876
+        ],
+        "stopReason": 0,
+        "formatterBytes": 2799669,
+        "tailBytes": 5,
+        "tailAmbiguous": true,
+        "usbSeconds": 0.07414950000020326,
+        "usbPayloadMBps": 37.75708534774106,
+        "diagnostics": {
+          "implemented": true,
+          "frameDrops": 0,
+          "parserErrors": 1,
+          "idelayReadyLosses": 0,
+          "frameHighwater": 1,
+          "syncAcquisitions": 2,
+          "observedFrames": 174979,
+          "capacityReached": false,
+          "writerError": 0
+        }
+      },
+      "capturePassed": false,
+      "formatterSHA256": "1be0f477cdcf97d97afce466ae26c1b5b02bcb7798566562fecd2ca9482a5af1",
+      "probeClock": {
+        "fclk_hz": 119999998,
+        "cfg": "0xcaa11",
+        "SWCLK_Hz": 9999999.833333334,
+        "half_period_fclk": 6,
+        "short_high": true,
+        "intended_high_ns": 8.333333472222225
+      },
+      "excitation": {
+        "estimatedFrom": "Normalized formatter nibbles, not independent analog pad measurements",
+        "dataLanes": [
+          {
+            "ones": 1012597,
+            "zeros": 4586741,
+            "transitions": 1807109
+          },
+          {
+            "ones": 383073,
+            "zeros": 5216265,
+            "transitions": 663932
+          },
+          {
+            "ones": 1434473,
+            "zeros": 4164865,
+            "transitions": 2360175
+          },
+          {
+            "ones": 1040397,
+            "zeros": 4558941,
+            "transitions": 1376728
+          }
+        ],
+        "excited": true
+      }
+    }
+  ],
+  "laneWindows": [],
+  "inputPath": "direct",
+  "fixtureSHA256": "fa8b60e092e6e504f6556baa1930127b5366cecc306711b8d564a9f90b14cfe7",
+  "gpioSpeed": 3,
+  "restored": true,
+  "flashBefore": [
+    {
+      "address": 134217728,
+      "bytes": 20040,
+      "sha256": "b5b09d9a0446795acc1981aff62ed55f36f10fa71a47544b77c3d0fe1a0610d1"
+    },
+    {
+      "address": 134237768,
+      "bytes": 128,
+      "sha256": "496d8b1d85d4a90921e45cc77629b2c80dcaae957a6ed79710200efa1d4cf341"
+    }
+  ],
+  "targetHaltAttempted": true,
+  "initialDHCSR": "0x1010001",
+  "clockBefore": {
+    "CR": 50548355,
+    "CFGR": 5309450,
+    "APB1ENR": 276824064,
+    "FLASH_ACR": 49
+  },
+  "sramSHA256": "06f673e77f0580173a83b3c653e4ae3d0e8bb16a1821566ec43a4eebe880a419",
+  "fpbSHA256": "120a8cf053d3eef39dc97c543aa8d986ae40dc1f0d7d68d879fc857426e453eb",
+  "clockAfter": {
+    "CR": 50548355,
+    "CFGR": 5309450,
+    "APB1ENR": 276824064,
+    "FLASH_ACR": 49
+  },
+  "wholeSramRestored": true,
+  "coreRestored": true,
+  "flashAfter": [
+    {
+      "address": 134217728,
+      "bytes": 20040,
+      "sha256": "b5b09d9a0446795acc1981aff62ed55f36f10fa71a47544b77c3d0fe1a0610d1"
+    },
+    {
+      "address": 134237768,
+      "bytes": 128,
+      "sha256": "496d8b1d85d4a90921e45cc77629b2c80dcaae957a6ed79710200efa1d4cf341"
+    }
+  ],
+  "finalDHCSR": "0x1010001"
+}

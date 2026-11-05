@@ -4,6 +4,8 @@
 
 使用同目录的 `probe.bit`、`application.elf` 和 `ps7_init.tcl`。`application.elf` 是转接板专用 PS 构建，保持 nSRST 在 JTAG Connect 时释放。RTCK 为输入，JTAG 使用固定 TCK。实际通过 JTAG 下载到 PL / PS OCM。
 
+此生产 bit 的 TRACE 使用 RAW4 直接输入和 200 MHz 过采样，网表没有 ELD1 的 IDELAYE2。调校 tap 需使用单独的 ELD1 配对。原始 `SWD_Sequence`（`0x1D`）、TCK 断开电平和外部时序缺口见 [J7 改脚复核](../../docs/validation/j7-eld1-20261106/j7-production-audit.md)。
+
 ```powershell
 python -X utf8 tools/run_xsct.py tools/download_dap_fpga.tcl prebuilt/j7-adapter-20261106/application.elf prebuilt/j7-adapter-20261106/probe.bit prebuilt/j7-adapter-20261106/ps7_init.tcl
 ```

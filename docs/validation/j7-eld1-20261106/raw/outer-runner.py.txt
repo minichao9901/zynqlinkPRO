@@ -1,0 +1,98 @@
+"""Guard the J7 ELD1 SRAM experiment and restore the production RAM pair."""
+from contextlib import redirect_stdout
+import json
+from pathlib import Path
+import subprocess
+import sys
+
+WORK = Path(__file__).resolve().parent
+ROOT = WORK.parents[1]
+sys.path[:0] = [str(ROOT/'tools'), str(ROOT/'etm-service/tools')]
+import load_pair
+import sweep
+import target_smoke
+from probe_ownership import Ownership
+from probe_stream import Probe
+from validate_fclk_performance import physical_snapshot
+
+PRODUCTION = ROOT/'prebuilt/j7-adapter-20261106'
+EXPERIMENT = WORK/'candidate'
+
+
+def run_cli(function, argv, name):
+    previous = sys.argv
+    try:
+        sys.argv = list(map(str,argv))
+        with (WORK/(name+'.log')).open('w',encoding='utf8') as log, redirect_stdout(log):
+            function()
+    finally:
+        sys.argv = previous
+
+
+def verify_ocm(pair, label):
+    with (WORK/(label+'-ocm.log')).open('wb') as log:
+        subprocess.run([sys.executable,'-X','utf8',str(ROOT/'tools/verify_probe_ocm_code.py'),
+                        '--elf',str(pair/'application.elf'),'--out-dir',str(WORK/(label+'-ocm'))],
+                       cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, check=True)
+
+
+def load(pair, label):
+    run_cli(load_pair.main, ['load_pair',pair,'--replace-running'], label)
+    for name in ('final-before-load.txt','before-reload-idle.json','final-load.txt'):
+        (WORK/name).rename(WORK/(label+'-'+name))
+
+
+def idle():
+    state=physical_snapshot()
+    probe=Probe()
+    try:
+        state['streams']={name:probe.action(c,2) for name,c in [('rtt',0x31),('hss',0x32)]}
+    finally:
+        probe.close()
+    if not state['allObservedEnginesIdle'] or any(rc!=0 or words[0]&1 for rc,words in state['streams'].values()):
+        raise RuntimeError('Probe engines are not idle')
+    return state
+
+
+def main():
+    lease=Ownership()
+    replacement_started=False
+    report={}
+    try:
+        report['idleBefore']=idle()
+        verify_ocm(PRODUCTION,'production-before')
+        run_cli(target_smoke.main,['target_smoke','--identify-only','--out',WORK/'target-before.json'],'target-before')
+        print('Measuring direct-input 32/36 MHz controls',flush=True)
+        sweep.run(direct=True)
+        replacement_started=True
+        load(EXPERIMENT,'eld1')
+        verify_ocm(EXPERIMENT,'eld1')
+        print('ELD1 pair loaded and physical OCM verified',flush=True)
+        sweep.run()
+    except BaseException as error:
+        report['error']=repr(error)
+        raise
+    finally:
+        try:
+            if replacement_started:
+                result_path=WORK/'calibration.json'
+                result=json.loads(result_path.read_text()) if result_path.exists() else {}
+                if result.get('targetHaltAttempted') and not result.get('restored'):
+                    raise RuntimeError('Target fixture restoration incomplete; keep evidence for explicit recovery')
+                load(PRODUCTION,'production-restored')
+                verify_ocm(PRODUCTION,'production-restored')
+                run_cli(target_smoke.main,['target_smoke','--identify-only','--out',WORK/'target-after.json'],'target-after')
+                before=json.loads((WORK/'target-before.json').read_text())
+                after=json.loads((WORK/'target-after.json').read_text())
+                assert before['firmware']==after['firmware'] and before['before']==after['after']
+                assert (int(before['initialDHCSR'],16)^int(after['finalDHCSR'],16))&(1<<17)==0
+                report['idleAfter']=idle()
+                report['productionRestored']=True
+                print('Production pair and target verified restored',flush=True)
+        finally:
+            (WORK/'board-summary.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf8')
+            lease.close()
+
+
+if __name__=='__main__':
+    main()

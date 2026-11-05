@@ -1,0 +1,69 @@
+"""Validate real CMSIS-DAP raw SWD reads while observing the J7 pad controls."""
+import json
+from pathlib import Path
+import sys
+
+import usb.util
+
+WORK = Path(__file__).resolve().parent
+ROOT = WORK.parents[1]
+sys.path.insert(0,str(ROOT/'tools'))
+from dap_pipeline_bench import cmd,open_dap,setup
+from jtag_internal_trace import run as xsct
+from test_probe_board import Memory
+
+
+def main():
+    report={'passed':False,'rows':[]}
+    dev,tx,rx=open_dap()
+    try:
+        normal=setup(tx,rx,1000)
+        expected=int.from_bytes(normal[3:7],'little')
+        print('Expected DPID',hex(expected),flush=True)
+        report['initialIDCODE']=normal.hex()
+        mem=Memory(tx,rx)
+        initial=mem.word(0xe000edf0)
+        rcc=[mem.word(0x40021000),mem.word(0x40021004)]
+        features=xsct('targets -set -filter {name =~ "APU"}\n'
+            'puts "PADS_BEFORE [mrd -address-space AP0 -force -value 0x40000004] [mrd -address-space AP0 -force -value 0x4001004c]"')
+        report['physicalBefore']=features
+        # A real DP read is split across turnaround, ACK, 32 data bits/parity,
+        # target-to-host turnaround and host idle output. All use command 0x1D.
+        for n in range(16):
+            cmd(tx,rx,[0x12,64,*([255]*8)])
+            cmd(tx,rx,[0x12,8,0])
+            reply=cmd(tx,rx,[0x1d,5,8,0xa5,0x84,0xa1,0x81,8,0])
+            row={'reply':reply.hex()}
+            report['rows'].append(row)
+            if len(reply)!=9 or reply[:2]!=b'\x1d\x00':
+                raise RuntimeError('Raw DP response length/status mismatch')
+            ack=(reply[2]>>1)&7
+            data=int.from_bytes(reply[3:7],'little')
+            parity=reply[7]&1
+            row.update(ack=ack,DPID=hex(data),parity=parity)
+            if ack!=1 or data!=expected or parity!=(data.bit_count()&1):
+                raise RuntimeError('Raw DPID ACK/data/parity mismatch')
+        pins=xsct('targets -set -filter {name =~ "APU"}\n'
+            'puts "PADS_AFTER [mrd -address-space AP0 -force -value 0x40000004] [mrd -address-space AP0 -force -value 0x40010094]"')
+        report['physicalAfter']=pins
+        # Non-byte lengths and the zero encoding of 64 bits exercise the normal entry.
+        for count in (1,7,8,9,31,32,33,63,64):
+            bytes_=(count+7)//8
+            reply=cmd(tx,rx,[0x1d,1,count&63,*([255]*bytes_)])
+            if reply!=b'\x1d\x00':
+                raise RuntimeError('Raw output sequence failed')
+        setup(tx,rx,10000)
+        if mem.word(0xe000ed00)!=0x411fc231 or rcc!=[mem.word(0x40021000),mem.word(0x40021004)]:
+            raise RuntimeError('Normal SWD reconnect/clock comparison failed')
+        final=mem.word(0xe000edf0)
+        if (initial^final)&(1<<17) or final&(1<<25):
+            raise RuntimeError('Target reset/run state changed')
+        report.update(passed=True,initialDHCSR=hex(initial),finalDHCSR=hex(final),RCC=rcc)
+    finally:
+        try:cmd(tx,rx,[3])
+        finally:usb.util.dispose_resources(dev)
+        (WORK/'raw-sequence.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf8')
+    print(json.dumps(report))
+
+
+if __name__=='__main__':main()

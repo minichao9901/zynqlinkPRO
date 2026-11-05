@@ -1,0 +1,519 @@
+
+****** Vivado v2018.3 (64-bit)
+  **** SW Build 2405991 on Thu Dec  6 23:38:27 MST 2018
+  **** IP Build 2404404 on Fri Dec  7 01:43:56 MST 2018
+    ** Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+
+source build/j7-eld1-20261106/route-eld1.tcl
+# set work [file normalize [file dirname [info script]]]
+# set root [file normalize [file join $work ../..]]
+# set source_project [file join $work source-project]
+# set ::env(ZYNQLINK_RAW_TRACE) 4
+# set ::env(ZYNQLINK_ETM_DDR) 1
+# set ::env(ZYNQLINK_ETM_LANE_DELAY) 1
+# set ::env(ZYNQLINK_IMPLEMENT_FCLK_HZ) 133333333
+# open_project [file join $source_project zynqlink_dma.xpr]
+Scanning sources...
+Finished scanning sources
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1704] No user IP repositories specified
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository 'E:/Xilinx/Vivado/2018.3/data/ip'.
+open_project: Time (s): cpu = 00:00:07 ; elapsed = 00:00:08 . Memory (MB): peak = 324.559 ; gain = 51.035
+# source [file join $root fpga configure_runs.tcl]
+## set hook [file join [file dirname [info script]] run_threads.tcl]
+## set ::zynqlink_jobs 4
+## if {[info exists ::env(ZYNQLINK_RUN_JOBS)]} {
+##     set ::zynqlink_jobs $::env(ZYNQLINK_RUN_JOBS)
+##     if {![string is integer -strict $::zynqlink_jobs] || $::zynqlink_jobs < 1 || $::zynqlink_jobs > 4} {
+##         error "ZYNQLINK_RUN_JOBS must be an integer from 1 to 4"
+##     }
+## }
+## foreach run [get_runs -filter {IS_SYNTHESIS}] {
+##     set_property STEPS.SYNTH_DESIGN.TCL.PRE $hook $run
+## }
+WARNING: [Runs 36-537] File E:/zynqlinkPRO/fpga/run_threads.tcl is not part of fileset utils_1, but has specified as a Tcl hook script for run(s) system_xbar_0_synth_1. This file will not be handled as part of the project for archive and other project based functionality.
+WARNING: [Runs 36-537] File E:/zynqlinkPRO/fpga/run_threads.tcl is not part of fileset utils_1, but has specified as a Tcl hook script for run(s) system_processing_system7_0_0_synth_1. This file will not be handled as part of the project for archive and other project based functionality.
+WARNING: [Runs 36-537] File E:/zynqlinkPRO/fpga/run_threads.tcl is not part of fileset utils_1, but has specified as a Tcl hook script for run(s) system_swd_controller_0_0_synth_1. This file will not be handled as part of the project for archive and other project based functionality.
+WARNING: [Runs 36-537] File E:/zynqlinkPRO/fpga/run_threads.tcl is not part of fileset utils_1, but has specified as a Tcl hook script for run(s) system_orbtrace_0_0_synth_1. This file will not be handled as part of the project for archive and other project based functionality.
+WARNING: [Runs 36-537] File E:/zynqlinkPRO/fpga/run_threads.tcl is not part of fileset utils_1, but has specified as a Tcl hook script for run(s) system_etm_ddr_0_0_synth_1. This file will not be handled as part of the project for archive and other project based functionality.
+## foreach run [get_runs -filter {IS_IMPLEMENTATION}] {
+##     set_property STEPS.INIT_DESIGN.TCL.PRE $hook $run
+##     set_property STEPS.OPT_DESIGN.TCL.PRE [file join [file dirname [info script]] probe_io_timing.tcl] $run
+## }
+WARNING: [Runs 36-537] File E:/zynqlinkPRO/fpga/run_threads.tcl is not part of fileset utils_1, but has specified as a Tcl hook script for run(s) system_xbar_0_impl_1. This file will not be handled as part of the project for archive and other project based functionality.
+WARNING: [Runs 36-537] File E:/zynqlinkPRO/fpga/probe_io_timing.tcl is not part of fileset utils_1, but has specified as a Tcl hook script for run(s) system_xbar_0_impl_1. This file will not be handled as part of the project for archive and other project based functionality.
+WARNING: [Runs 36-537] File E:/zynqlinkPRO/fpga/run_threads.tcl is not part of fileset utils_1, but has specified as a Tcl hook script for run(s) system_processing_system7_0_0_impl_1. This file will not be handled as part of the project for archive and other project based functionality.
+WARNING: [Runs 36-537] File E:/zynqlinkPRO/fpga/probe_io_timing.tcl is not part of fileset utils_1, but has specified as a Tcl hook script for run(s) system_processing_system7_0_0_impl_1. This file will not be handled as part of the project for archive and other project based functionality.
+WARNING: [Runs 36-537] File E:/zynqlinkPRO/fpga/run_threads.tcl is not part of fileset utils_1, but has specified as a Tcl hook script for run(s) system_swd_controller_0_0_impl_1. This file will not be handled as part of the project for archive and other project based functionality.
+WARNING: [Runs 36-537] File E:/zynqlinkPRO/fpga/probe_io_timing.tcl is not part of fileset utils_1, but has specified as a Tcl hook script for run(s) system_swd_controller_0_0_impl_1. This file will not be handled as part of the project for archive and other project based functionality.
+WARNING: [Runs 36-537] File E:/zynqlinkPRO/fpga/run_threads.tcl is not part of fileset utils_1, but has specified as a Tcl hook script for run(s) system_orbtrace_0_0_impl_1. This file will not be handled as part of the project for archive and other project based functionality.
+WARNING: [Runs 36-537] File E:/zynqlinkPRO/fpga/probe_io_timing.tcl is not part of fileset utils_1, but has specified as a Tcl hook script for run(s) system_orbtrace_0_0_impl_1. This file will not be handled as part of the project for archive and other project based functionality.
+WARNING: [Runs 36-537] File E:/zynqlinkPRO/fpga/run_threads.tcl is not part of fileset utils_1, but has specified as a Tcl hook script for run(s) system_etm_ddr_0_0_impl_1. This file will not be handled as part of the project for archive and other project based functionality.
+WARNING: [Runs 36-537] File E:/zynqlinkPRO/fpga/probe_io_timing.tcl is not part of fileset utils_1, but has specified as a Tcl hook script for run(s) system_etm_ddr_0_0_impl_1. This file will not be handled as part of the project for archive and other project based functionality.
+# launch_runs impl_1 -to_step opt_design -jobs $::zynqlink_jobs
+[Fri Nov  6 06:58:40 2026] Launched impl_1...
+Run output will be captured here: E:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.runs/impl_1/runme.log
+launch_runs: Time (s): cpu = 00:00:00 ; elapsed = 00:00:11 . Memory (MB): peak = 346.082 ; gain = 20.398
+# wait_on_run impl_1
+[Fri Nov  6 06:58:40 2026] Waiting for impl_1 to finish...
+
+*** Running vivado
+    with args -log system_wrapper.vdi -applog -m64 -product Vivado -messageDb vivado.pb -mode batch -source system_wrapper.tcl -notrace
+
+
+****** Vivado v2018.3 (64-bit)
+  **** SW Build 2405991 on Thu Dec  6 23:38:27 MST 2018
+  **** IP Build 2404404 on Fri Dec  7 01:43:56 MST 2018
+    ** Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+
+source system_wrapper.tcl -notrace
+source E:/zynqlinkPRO/fpga/run_threads.tcl
+ZYNQLINK_RUN_MAX_THREADS=8
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1704] No user IP repositories specified
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository 'E:/Xilinx/Vivado/2018.3/data/ip'.
+add_files: Time (s): cpu = 00:00:06 ; elapsed = 00:00:12 . Memory (MB): peak = 326.699 ; gain = 70.586
+Command: link_design -top system_wrapper -part xc7z020clg400-2
+Design is defaulting to srcset: sources_1
+Design is defaulting to constrset: constrs_1
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_axi_gpio_0_0/system_axi_gpio_0_0.dcp' for cell 'system_i/axi_gpio_0'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_cdma_0/system_cdma_0.dcp' for cell 'system_i/cdma'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_cmd_mem_0/system_cmd_mem_0.dcp' for cell 'system_i/cmd_mem'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_etm_ddr_0_0/system_etm_ddr_0_0.dcp' for cell 'system_i/etm_ddr_0'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_orbtrace_0_0/system_orbtrace_0_0.dcp' for cell 'system_i/orbtrace_0'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_pkt_mem_0/system_pkt_mem_0.dcp' for cell 'system_i/pkt_mem'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_processing_system7_0_0/system_processing_system7_0_0.dcp' for cell 'system_i/processing_system7_0'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_rsp_mem_0/system_rsp_mem_0.dcp' for cell 'system_i/rsp_mem'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_rst_ps7_0_50M_0/system_rst_ps7_0_50M_0.dcp' for cell 'system_i/rst_ps7_0_50M'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_swd_controller_0_0/system_swd_controller_0_0.dcp' for cell 'system_i/swd_controller_0'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_xbar_2/system_xbar_2.dcp' for cell 'system_i/cmd_bus/xbar'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m00_regslice_2/system_m00_regslice_2.dcp' for cell 'system_i/cmd_bus/m00_couplers/m00_regslice'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_s00_regslice_3/system_s00_regslice_3.dcp' for cell 'system_i/cmd_bus/s00_couplers/s00_regslice'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_s01_regslice_0/system_s01_regslice_0.dcp' for cell 'system_i/cmd_bus/s01_couplers/s01_regslice'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_xbar_1/system_xbar_1.dcp' for cell 'system_i/dma_bus/xbar'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_auto_pc_6/system_auto_pc_6.dcp' for cell 'system_i/dma_bus/m00_couplers/auto_pc'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_auto_rs_0/system_auto_rs_0.dcp' for cell 'system_i/dma_bus/m00_couplers/auto_rs'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_auto_us_0/system_auto_us_0.dcp' for cell 'system_i/dma_bus/m00_couplers/auto_us'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m00_regslice_1/system_m00_regslice_1.dcp' for cell 'system_i/dma_bus/m00_couplers/m00_regslice'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m01_regslice_1/system_m01_regslice_1.dcp' for cell 'system_i/dma_bus/m01_couplers/m01_regslice'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m02_regslice_1/system_m02_regslice_1.dcp' for cell 'system_i/dma_bus/m02_couplers/m02_regslice'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m03_regslice_1/system_m03_regslice_1.dcp' for cell 'system_i/dma_bus/m03_couplers/m03_regslice'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_s00_regslice_2/system_s00_regslice_2.dcp' for cell 'system_i/dma_bus/s00_couplers/s00_regslice'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_auto_pc_7/system_auto_pc_7.dcp' for cell 'system_i/etm_ddr_bus/s00_couplers/auto_pc'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_s00_regslice_0/system_s00_regslice_0.dcp' for cell 'system_i/etm_ddr_bus/s00_couplers/s00_regslice'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_xbar_4/system_xbar_4.dcp' for cell 'system_i/pkt_bus/xbar'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m00_regslice_4/system_m00_regslice_4.dcp' for cell 'system_i/pkt_bus/m00_couplers/m00_regslice'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_s00_regslice_5/system_s00_regslice_5.dcp' for cell 'system_i/pkt_bus/s00_couplers/s00_regslice'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_s01_regslice_2/system_s01_regslice_2.dcp' for cell 'system_i/pkt_bus/s01_couplers/s01_regslice'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_xbar_0/system_xbar_0.dcp' for cell 'system_i/ps7_0_axi_periph/xbar'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_auto_pc_0/system_auto_pc_0.dcp' for cell 'system_i/ps7_0_axi_periph/m00_couplers/auto_pc'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m00_regslice_0/system_m00_regslice_0.dcp' for cell 'system_i/ps7_0_axi_periph/m00_couplers/m00_regslice'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_auto_pc_1/system_auto_pc_1.dcp' for cell 'system_i/ps7_0_axi_periph/m01_couplers/auto_pc'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m01_regslice_0/system_m01_regslice_0.dcp' for cell 'system_i/ps7_0_axi_periph/m01_couplers/m01_regslice'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_auto_pc_2/system_auto_pc_2.dcp' for cell 'system_i/ps7_0_axi_periph/m02_couplers/auto_pc'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m02_regslice_0/system_m02_regslice_0.dcp' for cell 'system_i/ps7_0_axi_periph/m02_couplers/m02_regslice'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m03_regslice_0/system_m03_regslice_0.dcp' for cell 'system_i/ps7_0_axi_periph/m03_couplers/m03_regslice'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m04_regslice_0/system_m04_regslice_0.dcp' for cell 'system_i/ps7_0_axi_periph/m04_couplers/m04_regslice'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m05_regslice_0/system_m05_regslice_0.dcp' for cell 'system_i/ps7_0_axi_periph/m05_couplers/m05_regslice'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_auto_pc_3/system_auto_pc_3.dcp' for cell 'system_i/ps7_0_axi_periph/m06_couplers/auto_pc'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m06_regslice_0/system_m06_regslice_0.dcp' for cell 'system_i/ps7_0_axi_periph/m06_couplers/m06_regslice'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_auto_pc_4/system_auto_pc_4.dcp' for cell 'system_i/ps7_0_axi_periph/m07_couplers/auto_pc'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m07_regslice_0/system_m07_regslice_0.dcp' for cell 'system_i/ps7_0_axi_periph/m07_couplers/m07_regslice'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_auto_pc_5/system_auto_pc_5.dcp' for cell 'system_i/ps7_0_axi_periph/s00_couplers/auto_pc'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_s00_regslice_1/system_s00_regslice_1.dcp' for cell 'system_i/ps7_0_axi_periph/s00_couplers/s00_regslice'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_xbar_3/system_xbar_3.dcp' for cell 'system_i/rsp_bus/xbar'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m00_regslice_3/system_m00_regslice_3.dcp' for cell 'system_i/rsp_bus/m00_couplers/m00_regslice'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_s00_regslice_4/system_s00_regslice_4.dcp' for cell 'system_i/rsp_bus/s00_couplers/s00_regslice'
+INFO: [Project 1-454] Reading design checkpoint 'e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_s01_regslice_1/system_s01_regslice_1.dcp' for cell 'system_i/rsp_bus/s01_couplers/s01_regslice'
+INFO: [Netlist 29-17] Analyzing 2086 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 0 CPU seconds
+INFO: [Project 1-479] Netlist was created with Vivado 2018.3
+INFO: [Device 21-403] Loading part xc7z020clg400-2
+INFO: [Project 1-570] Preparing netlist for logic optimization
+WARNING: [Constraints 18-550] Could not create 'DRIVE' constraint because net 'system_i/swd_controller_0/gpio_in[0]' is not directly connected to top level port. Synthesis is ignored for DRIVE but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'IBUF_LOW_PWR' constraint because net 'system_i/swd_controller_0/gpio_in[0]' is not directly connected to top level port. Synthesis is ignored for IBUF_LOW_PWR but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'SLEW' constraint because net 'system_i/swd_controller_0/gpio_in[0]' is not directly connected to top level port. Synthesis is ignored for SLEW but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'DRIVE' constraint because net 'system_i/swd_controller_0/gpio_in[1]' is not directly connected to top level port. Synthesis is ignored for DRIVE but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'IBUF_LOW_PWR' constraint because net 'system_i/swd_controller_0/gpio_in[1]' is not directly connected to top level port. Synthesis is ignored for IBUF_LOW_PWR but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'SLEW' constraint because net 'system_i/swd_controller_0/gpio_in[1]' is not directly connected to top level port. Synthesis is ignored for SLEW but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'DRIVE' constraint because net 'system_i/swd_controller_0/gpio_in[2]' is not directly connected to top level port. Synthesis is ignored for DRIVE but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'IBUF_LOW_PWR' constraint because net 'system_i/swd_controller_0/gpio_in[2]' is not directly connected to top level port. Synthesis is ignored for IBUF_LOW_PWR but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'SLEW' constraint because net 'system_i/swd_controller_0/gpio_in[2]' is not directly connected to top level port. Synthesis is ignored for SLEW but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'DRIVE' constraint because net 'system_i/swd_controller_0/gpio_in[3]' is not directly connected to top level port. Synthesis is ignored for DRIVE but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'IBUF_LOW_PWR' constraint because net 'system_i/swd_controller_0/gpio_in[3]' is not directly connected to top level port. Synthesis is ignored for IBUF_LOW_PWR but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'SLEW' constraint because net 'system_i/swd_controller_0/gpio_in[3]' is not directly connected to top level port. Synthesis is ignored for SLEW but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'DRIVE' constraint because net 'system_i/swd_controller_0/gpio_out[1]' is not directly connected to top level port. Synthesis is ignored for DRIVE but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'IBUF_LOW_PWR' constraint because net 'system_i/swd_controller_0/gpio_out[1]' is not directly connected to top level port. Synthesis is ignored for IBUF_LOW_PWR but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'SLEW' constraint because net 'system_i/swd_controller_0/gpio_out[1]' is not directly connected to top level port. Synthesis is ignored for SLEW but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'DRIVE' constraint because net 'system_i/swd_controller_0/gpio_out[2]' is not directly connected to top level port. Synthesis is ignored for DRIVE but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'IBUF_LOW_PWR' constraint because net 'system_i/swd_controller_0/gpio_out[2]' is not directly connected to top level port. Synthesis is ignored for IBUF_LOW_PWR but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'SLEW' constraint because net 'system_i/swd_controller_0/gpio_out[2]' is not directly connected to top level port. Synthesis is ignored for SLEW but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'DRIVE' constraint because net 'system_i/swd_controller_0/gpio_out[3]' is not directly connected to top level port. Synthesis is ignored for DRIVE but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'IBUF_LOW_PWR' constraint because net 'system_i/swd_controller_0/gpio_out[3]' is not directly connected to top level port. Synthesis is ignored for IBUF_LOW_PWR but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'SLEW' constraint because net 'system_i/swd_controller_0/gpio_out[3]' is not directly connected to top level port. Synthesis is ignored for SLEW but preserved for implementation.
+Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_axi_gpio_0_0/system_axi_gpio_0_0_board.xdc] for cell 'system_i/axi_gpio_0/U0'
+Finished Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_axi_gpio_0_0/system_axi_gpio_0_0_board.xdc] for cell 'system_i/axi_gpio_0/U0'
+Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_axi_gpio_0_0/system_axi_gpio_0_0.xdc] for cell 'system_i/axi_gpio_0/U0'
+Finished Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_axi_gpio_0_0/system_axi_gpio_0_0.xdc] for cell 'system_i/axi_gpio_0/U0'
+Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_processing_system7_0_0/system_processing_system7_0_0.xdc] for cell 'system_i/processing_system7_0/inst'
+Finished Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_processing_system7_0_0/system_processing_system7_0_0.xdc] for cell 'system_i/processing_system7_0/inst'
+Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_rst_ps7_0_50M_0/system_rst_ps7_0_50M_0_board.xdc] for cell 'system_i/rst_ps7_0_50M/U0'
+Finished Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_rst_ps7_0_50M_0/system_rst_ps7_0_50M_0_board.xdc] for cell 'system_i/rst_ps7_0_50M/U0'
+Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_rst_ps7_0_50M_0/system_rst_ps7_0_50M_0.xdc] for cell 'system_i/rst_ps7_0_50M/U0'
+Finished Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_rst_ps7_0_50M_0/system_rst_ps7_0_50M_0.xdc] for cell 'system_i/rst_ps7_0_50M/U0'
+Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_cdma_0/system_cdma_0.xdc] for cell 'system_i/cdma/U0'
+Finished Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_cdma_0/system_cdma_0.xdc] for cell 'system_i/cdma/U0'
+Parsing XDC File [E:/zynqlinkPRO/fpga/constraints/orbtrace_pins.xdc]
+CRITICAL WARNING: [Constraints 18-1055] Clock 'clk_delay_ref' completely overrides clock 'clk_fpga_1', which is referenced by one or more other constraints. Any constraints that refer to the overridden clock will be ignored.
+New: create_clock -period 5.000 -name clk_delay_ref [get_pins {system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]}], [E:/zynqlinkPRO/fpga/constraints/orbtrace_pins.xdc:16]
+Previous: create_clock -period 5.000 -name clk_fpga_1 [get_pins {system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]}], [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_processing_system7_0_0/system_processing_system7_0_0.xdc:20]
+Resolution: Review the constraint files and remove the redundant clock definition(s). If the clock constraints are not saved in a file, you can first save the constraints to an XDC file and reload the design once the constraints have been corrected.
+Finished Parsing XDC File [E:/zynqlinkPRO/fpga/constraints/orbtrace_pins.xdc]
+Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_s00_regslice_1/system_s00_regslice_1_clocks.xdc] for cell 'system_i/ps7_0_axi_periph/s00_couplers/s00_regslice/inst'
+Finished Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_s00_regslice_1/system_s00_regslice_1_clocks.xdc] for cell 'system_i/ps7_0_axi_periph/s00_couplers/s00_regslice/inst'
+Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m00_regslice_0/system_m00_regslice_0_clocks.xdc] for cell 'system_i/ps7_0_axi_periph/m00_couplers/m00_regslice/inst'
+Finished Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m00_regslice_0/system_m00_regslice_0_clocks.xdc] for cell 'system_i/ps7_0_axi_periph/m00_couplers/m00_regslice/inst'
+Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m01_regslice_0/system_m01_regslice_0_clocks.xdc] for cell 'system_i/ps7_0_axi_periph/m01_couplers/m01_regslice/inst'
+Finished Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m01_regslice_0/system_m01_regslice_0_clocks.xdc] for cell 'system_i/ps7_0_axi_periph/m01_couplers/m01_regslice/inst'
+Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m02_regslice_0/system_m02_regslice_0_clocks.xdc] for cell 'system_i/ps7_0_axi_periph/m02_couplers/m02_regslice/inst'
+Finished Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m02_regslice_0/system_m02_regslice_0_clocks.xdc] for cell 'system_i/ps7_0_axi_periph/m02_couplers/m02_regslice/inst'
+Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m03_regslice_0/system_m03_regslice_0_clocks.xdc] for cell 'system_i/ps7_0_axi_periph/m03_couplers/m03_regslice/inst'
+Finished Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m03_regslice_0/system_m03_regslice_0_clocks.xdc] for cell 'system_i/ps7_0_axi_periph/m03_couplers/m03_regslice/inst'
+Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m04_regslice_0/system_m04_regslice_0_clocks.xdc] for cell 'system_i/ps7_0_axi_periph/m04_couplers/m04_regslice/inst'
+Finished Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m04_regslice_0/system_m04_regslice_0_clocks.xdc] for cell 'system_i/ps7_0_axi_periph/m04_couplers/m04_regslice/inst'
+Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m05_regslice_0/system_m05_regslice_0_clocks.xdc] for cell 'system_i/ps7_0_axi_periph/m05_couplers/m05_regslice/inst'
+Finished Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m05_regslice_0/system_m05_regslice_0_clocks.xdc] for cell 'system_i/ps7_0_axi_periph/m05_couplers/m05_regslice/inst'
+Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m06_regslice_0/system_m06_regslice_0_clocks.xdc] for cell 'system_i/ps7_0_axi_periph/m06_couplers/m06_regslice/inst'
+Finished Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m06_regslice_0/system_m06_regslice_0_clocks.xdc] for cell 'system_i/ps7_0_axi_periph/m06_couplers/m06_regslice/inst'
+Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m07_regslice_0/system_m07_regslice_0_clocks.xdc] for cell 'system_i/ps7_0_axi_periph/m07_couplers/m07_regslice/inst'
+Finished Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m07_regslice_0/system_m07_regslice_0_clocks.xdc] for cell 'system_i/ps7_0_axi_periph/m07_couplers/m07_regslice/inst'
+Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_s00_regslice_2/system_s00_regslice_2_clocks.xdc] for cell 'system_i/dma_bus/s00_couplers/s00_regslice/inst'
+Finished Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_s00_regslice_2/system_s00_regslice_2_clocks.xdc] for cell 'system_i/dma_bus/s00_couplers/s00_regslice/inst'
+Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m00_regslice_1/system_m00_regslice_1_clocks.xdc] for cell 'system_i/dma_bus/m00_couplers/m00_regslice/inst'
+Finished Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m00_regslice_1/system_m00_regslice_1_clocks.xdc] for cell 'system_i/dma_bus/m00_couplers/m00_regslice/inst'
+Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_auto_us_0/system_auto_us_0_clocks.xdc] for cell 'system_i/dma_bus/m00_couplers/auto_us/inst'
+Finished Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_auto_us_0/system_auto_us_0_clocks.xdc] for cell 'system_i/dma_bus/m00_couplers/auto_us/inst'
+Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_auto_rs_0/system_auto_rs_0_clocks.xdc] for cell 'system_i/dma_bus/m00_couplers/auto_rs/inst'
+Finished Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_auto_rs_0/system_auto_rs_0_clocks.xdc] for cell 'system_i/dma_bus/m00_couplers/auto_rs/inst'
+Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m01_regslice_1/system_m01_regslice_1_clocks.xdc] for cell 'system_i/dma_bus/m01_couplers/m01_regslice/inst'
+Finished Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m01_regslice_1/system_m01_regslice_1_clocks.xdc] for cell 'system_i/dma_bus/m01_couplers/m01_regslice/inst'
+Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m02_regslice_1/system_m02_regslice_1_clocks.xdc] for cell 'system_i/dma_bus/m02_couplers/m02_regslice/inst'
+Finished Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m02_regslice_1/system_m02_regslice_1_clocks.xdc] for cell 'system_i/dma_bus/m02_couplers/m02_regslice/inst'
+Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m03_regslice_1/system_m03_regslice_1_clocks.xdc] for cell 'system_i/dma_bus/m03_couplers/m03_regslice/inst'
+Finished Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m03_regslice_1/system_m03_regslice_1_clocks.xdc] for cell 'system_i/dma_bus/m03_couplers/m03_regslice/inst'
+Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_s00_regslice_3/system_s00_regslice_3_clocks.xdc] for cell 'system_i/cmd_bus/s00_couplers/s00_regslice/inst'
+Finished Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_s00_regslice_3/system_s00_regslice_3_clocks.xdc] for cell 'system_i/cmd_bus/s00_couplers/s00_regslice/inst'
+Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_s01_regslice_0/system_s01_regslice_0_clocks.xdc] for cell 'system_i/cmd_bus/s01_couplers/s01_regslice/inst'
+Finished Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_s01_regslice_0/system_s01_regslice_0_clocks.xdc] for cell 'system_i/cmd_bus/s01_couplers/s01_regslice/inst'
+Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m00_regslice_2/system_m00_regslice_2_clocks.xdc] for cell 'system_i/cmd_bus/m00_couplers/m00_regslice/inst'
+Finished Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m00_regslice_2/system_m00_regslice_2_clocks.xdc] for cell 'system_i/cmd_bus/m00_couplers/m00_regslice/inst'
+Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_s00_regslice_4/system_s00_regslice_4_clocks.xdc] for cell 'system_i/rsp_bus/s00_couplers/s00_regslice/inst'
+Finished Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_s00_regslice_4/system_s00_regslice_4_clocks.xdc] for cell 'system_i/rsp_bus/s00_couplers/s00_regslice/inst'
+Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_s01_regslice_1/system_s01_regslice_1_clocks.xdc] for cell 'system_i/rsp_bus/s01_couplers/s01_regslice/inst'
+Finished Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_s01_regslice_1/system_s01_regslice_1_clocks.xdc] for cell 'system_i/rsp_bus/s01_couplers/s01_regslice/inst'
+Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m00_regslice_3/system_m00_regslice_3_clocks.xdc] for cell 'system_i/rsp_bus/m00_couplers/m00_regslice/inst'
+Finished Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m00_regslice_3/system_m00_regslice_3_clocks.xdc] for cell 'system_i/rsp_bus/m00_couplers/m00_regslice/inst'
+Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_s00_regslice_5/system_s00_regslice_5_clocks.xdc] for cell 'system_i/pkt_bus/s00_couplers/s00_regslice/inst'
+Finished Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_s00_regslice_5/system_s00_regslice_5_clocks.xdc] for cell 'system_i/pkt_bus/s00_couplers/s00_regslice/inst'
+Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_s01_regslice_2/system_s01_regslice_2_clocks.xdc] for cell 'system_i/pkt_bus/s01_couplers/s01_regslice/inst'
+Finished Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_s01_regslice_2/system_s01_regslice_2_clocks.xdc] for cell 'system_i/pkt_bus/s01_couplers/s01_regslice/inst'
+Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m00_regslice_4/system_m00_regslice_4_clocks.xdc] for cell 'system_i/pkt_bus/m00_couplers/m00_regslice/inst'
+Finished Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_m00_regslice_4/system_m00_regslice_4_clocks.xdc] for cell 'system_i/pkt_bus/m00_couplers/m00_regslice/inst'
+Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_s00_regslice_0/system_s00_regslice_0_clocks.xdc] for cell 'system_i/etm_ddr_bus/s00_couplers/s00_regslice/inst'
+Finished Parsing XDC File [e:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.srcs/sources_1/bd/system/ip/system_s00_regslice_0/system_s00_regslice_0_clocks.xdc] for cell 'system_i/etm_ddr_bus/s00_couplers/s00_regslice/inst'
+Parsing XDC File [E:/zynqlinkPRO/fpga/constraints/dap_pins.xdc]
+WARNING: [Constraints 18-619] A clock with name 'clk_fpga_0' already exists, overwriting the previous clock with the same name. [E:/zynqlinkPRO/fpga/constraints/dap_pins.xdc:32]
+Finished Parsing XDC File [E:/zynqlinkPRO/fpga/constraints/dap_pins.xdc]
+Parsing XDC File [E:/zynqlinkPRO/fpga/constraints/orbtrace_raw_oversample.xdc]
+Finished Parsing XDC File [E:/zynqlinkPRO/fpga/constraints/orbtrace_raw_oversample.xdc]
+Sourcing Tcl File [E:/Xilinx/Vivado/2018.3/data/ip/xpm/xpm_cdc/tcl/xpm_cdc_async_rst.tcl] for cell 'system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_READ.USE_SPLIT_R.read_addr_inst/USE_R_CHANNEL.cmd_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.rst_wr_reg2_inst'
+INFO: [Timing 38-35] Done setting XDC timing constraints. [E:/Xilinx/Vivado/2018.3/data/ip/xpm/xpm_cdc/tcl/xpm_cdc_async_rst.tcl:2]
+all_registers: Time (s): cpu = 00:00:11 ; elapsed = 00:00:09 . Memory (MB): peak = 1455.449 ; gain = 524.336
+Finished Sourcing Tcl File [E:/Xilinx/Vivado/2018.3/data/ip/xpm/xpm_cdc/tcl/xpm_cdc_async_rst.tcl] for cell 'system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_READ.USE_SPLIT_R.read_addr_inst/USE_R_CHANNEL.cmd_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.rst_wr_reg2_inst'
+Sourcing Tcl File [E:/Xilinx/Vivado/2018.3/data/ip/xpm/xpm_cdc/tcl/xpm_cdc_async_rst.tcl] for cell 'system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_BURSTS.cmd_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.rst_wr_reg2_inst'
+Finished Sourcing Tcl File [E:/Xilinx/Vivado/2018.3/data/ip/xpm/xpm_cdc/tcl/xpm_cdc_async_rst.tcl] for cell 'system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_BURSTS.cmd_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.rst_wr_reg2_inst'
+Sourcing Tcl File [E:/Xilinx/Vivado/2018.3/data/ip/xpm/xpm_cdc/tcl/xpm_cdc_async_rst.tcl] for cell 'system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.rst_wr_reg2_inst'
+Finished Sourcing Tcl File [E:/Xilinx/Vivado/2018.3/data/ip/xpm/xpm_cdc/tcl/xpm_cdc_async_rst.tcl] for cell 'system_i/dma_bus/m00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.rst_wr_reg2_inst'
+Sourcing Tcl File [E:/Xilinx/Vivado/2018.3/data/ip/xpm/xpm_cdc/tcl/xpm_cdc_async_rst.tcl] for cell 'system_i/etm_ddr_bus/s00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.rst_wr_reg2_inst'
+Finished Sourcing Tcl File [E:/Xilinx/Vivado/2018.3/data/ip/xpm/xpm_cdc/tcl/xpm_cdc_async_rst.tcl] for cell 'system_i/etm_ddr_bus/s00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_B_CHANNEL.cmd_b_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.rst_wr_reg2_inst'
+Sourcing Tcl File [E:/Xilinx/Vivado/2018.3/data/ip/xpm/xpm_cdc/tcl/xpm_cdc_async_rst.tcl] for cell 'system_i/etm_ddr_bus/s00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_BURSTS.cmd_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.rst_wr_reg2_inst'
+Finished Sourcing Tcl File [E:/Xilinx/Vivado/2018.3/data/ip/xpm/xpm_cdc/tcl/xpm_cdc_async_rst.tcl] for cell 'system_i/etm_ddr_bus/s00_couplers/auto_pc/inst/gen_axi4_axi3.axi3_conv_inst/USE_WRITE.write_addr_inst/USE_BURSTS.cmd_queue/inst/fifo_gen_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/rstblk/ngwrdrst.grst.g7serrst.gnsckt_wrst.rst_wr_reg2_inst'
+Sourcing Tcl File [E:/Xilinx/Vivado/2018.3/data/ip/xpm/xpm_memory/tcl/xpm_memory_xdc.tcl] for cell 'system_i/swd_controller_0/inst/u_probe_stream/u_packet_bram'
+Finished Sourcing Tcl File [E:/Xilinx/Vivado/2018.3/data/ip/xpm/xpm_memory/tcl/xpm_memory_xdc.tcl] for cell 'system_i/swd_controller_0/inst/u_probe_stream/u_packet_bram'
+Sourcing Tcl File [E:/Xilinx/Vivado/2018.3/data/ip/xpm/xpm_memory/tcl/xpm_memory_xdc.tcl] for cell 'system_i/swd_controller_0/inst/u_swd_batch_engine/u_rsp_bram'
+Finished Sourcing Tcl File [E:/Xilinx/Vivado/2018.3/data/ip/xpm/xpm_memory/tcl/xpm_memory_xdc.tcl] for cell 'system_i/swd_controller_0/inst/u_swd_batch_engine/u_rsp_bram'
+Sourcing Tcl File [E:/Xilinx/Vivado/2018.3/data/ip/xpm/xpm_memory/tcl/xpm_memory_xdc.tcl] for cell 'system_i/swd_controller_0/inst/u_swd_batch_engine/u_cmd_bram'
+Finished Sourcing Tcl File [E:/Xilinx/Vivado/2018.3/data/ip/xpm/xpm_memory/tcl/xpm_memory_xdc.tcl] for cell 'system_i/swd_controller_0/inst/u_swd_batch_engine/u_cmd_bram'
+INFO: [Opt 31-138] Pushed 0 inverter(s) to 0 load pin(s).
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.017 . Memory (MB): peak = 1456.133 ; gain = 0.000
+INFO: [Project 1-111] Unisim Transformation Summary:
+  A total of 37 instances were transformed.
+  IOBUF => IOBUF (IBUF, OBUFT): 6 instances
+  RAM32M => RAM32M (RAMD32, RAMD32, RAMD32, RAMD32, RAMD32, RAMD32, RAMS32, RAMS32): 23 instances
+  RAM32X1D => RAM32X1D (RAMD32, RAMD32): 1 instances
+  RAM64X1D => RAM64X1D (RAMD64E, RAMD64E): 7 instances
+
+60 Infos, 22 Warnings, 1 Critical Warnings and 0 Errors encountered.
+link_design completed successfully
+link_design: Time (s): cpu = 00:00:28 ; elapsed = 00:00:33 . Memory (MB): peak = 1456.133 ; gain = 1129.434
+INFO: [Common 17-600] The following parameters have non-default value.
+general.maxThreads
+source E:/zynqlinkPRO/fpga/probe_io_timing.tcl
+SWCLK_LAUNCH_BUDGET=7.000ns SOURCE=system_i/swd_controller_0/inst/short_core_clock_reg
+IMPLEMENTATION_FCLK_HZ=133333333
+Command: opt_design
+Attempting to get a license for feature 'Implementation' and/or device 'xc7z020'
+INFO: [Common 17-349] Got license for feature 'Implementation' and/or device 'xc7z020'
+Running DRC as a precondition to command opt_design
+
+Starting DRC Task
+INFO: [DRC 23-27] Running DRC with 8 threads
+INFO: [Project 1-461] DRC finished with 0 Errors
+INFO: [Project 1-462] Please refer to the DRC report (report_drc) for more information.
+
+Time (s): cpu = 00:00:02 ; elapsed = 00:00:01 . Memory (MB): peak = 1456.133 ; gain = 0.000
+
+Starting Cache Timing Information Task
+INFO: [Timing 38-35] Done setting XDC timing constraints.
+Ending Cache Timing Information Task | Checksum: 119b69b26
+
+Time (s): cpu = 00:00:04 ; elapsed = 00:00:01 . Memory (MB): peak = 1466.465 ; gain = 10.203
+
+Starting Logic Optimization Task
+
+Phase 1 Retarget
+INFO: [Opt 31-138] Pushed 5 inverter(s) to 36 load pin(s).
+INFO: [Opt 31-49] Retargeted 0 cell(s).
+Phase 1 Retarget | Checksum: d88b5038
+
+Time (s): cpu = 00:00:05 ; elapsed = 00:00:03 . Memory (MB): peak = 1559.262 ; gain = 0.000
+INFO: [Opt 31-389] Phase Retarget created 96 cells and removed 289 cells
+INFO: [Opt 31-1021] In phase Retarget, 30 netlist objects are constrained preventing optimization. Please run opt_design with -debug_log to get more detail. 
+
+Phase 2 Constant propagation
+INFO: [Opt 31-138] Pushed 5 inverter(s) to 13 load pin(s).
+Phase 2 Constant propagation | Checksum: c608fa39
+
+Time (s): cpu = 00:00:06 ; elapsed = 00:00:04 . Memory (MB): peak = 1559.262 ; gain = 0.000
+INFO: [Opt 31-389] Phase Constant propagation created 457 cells and removed 1851 cells
+INFO: [Opt 31-1021] In phase Constant propagation, 25 netlist objects are constrained preventing optimization. Please run opt_design with -debug_log to get more detail. 
+
+Phase 3 Sweep
+Phase 3 Sweep | Checksum: d81c2163
+
+Time (s): cpu = 00:00:09 ; elapsed = 00:00:07 . Memory (MB): peak = 1559.262 ; gain = 0.000
+INFO: [Opt 31-389] Phase Sweep created 0 cells and removed 2193 cells
+INFO: [Opt 31-1021] In phase Sweep, 130 netlist objects are constrained preventing optimization. Please run opt_design with -debug_log to get more detail. 
+
+Phase 4 BUFG optimization
+Phase 4 BUFG optimization | Checksum: d81c2163
+
+Time (s): cpu = 00:00:10 ; elapsed = 00:00:08 . Memory (MB): peak = 1559.262 ; gain = 0.000
+INFO: [Opt 31-662] Phase BUFG optimization created 0 cells of which 0 are BUFGs and removed 0 cells.
+
+Phase 5 Shift Register Optimization
+Phase 5 Shift Register Optimization | Checksum: 151a65d80
+
+Time (s): cpu = 00:00:14 ; elapsed = 00:00:12 . Memory (MB): peak = 1559.262 ; gain = 0.000
+INFO: [Opt 31-389] Phase Shift Register Optimization created 0 cells and removed 0 cells
+
+Phase 6 Post Processing Netlist
+Phase 6 Post Processing Netlist | Checksum: 151a65d80
+
+Time (s): cpu = 00:00:15 ; elapsed = 00:00:12 . Memory (MB): peak = 1559.262 ; gain = 0.000
+INFO: [Opt 31-389] Phase Post Processing Netlist created 0 cells and removed 0 cells
+INFO: [Opt 31-1021] In phase Post Processing Netlist, 26 netlist objects are constrained preventing optimization. Please run opt_design with -debug_log to get more detail. 
+Opt_design Change Summary
+=========================
+
+
+-------------------------------------------------------------------------------------------------------------------------
+|  Phase                        |  #Cells created  |  #Cells Removed  |  #Constrained objects preventing optimizations  |
+-------------------------------------------------------------------------------------------------------------------------
+|  Retarget                     |              96  |             289  |                                             30  |
+|  Constant propagation         |             457  |            1851  |                                             25  |
+|  Sweep                        |               0  |            2193  |                                            130  |
+|  BUFG optimization            |               0  |               0  |                                              0  |
+|  Shift Register Optimization  |               0  |               0  |                                              0  |
+|  Post Processing Netlist      |               0  |               0  |                                             26  |
+-------------------------------------------------------------------------------------------------------------------------
+
+
+
+Starting Connectivity Check Task
+
+Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.132 . Memory (MB): peak = 1559.262 ; gain = 0.000
+Ending Logic Optimization Task | Checksum: 151a65d80
+
+Time (s): cpu = 00:00:15 ; elapsed = 00:00:13 . Memory (MB): peak = 1559.262 ; gain = 0.000
+
+Starting Power Optimization Task
+INFO: [Pwropt 34-132] Skipping clock gating for clocks with a period < 2.00 ns.
+INFO: [Timing 38-35] Done setting XDC timing constraints.
+INFO: [Pwropt 34-9] Applying IDT optimizations ...
+INFO: [Pwropt 34-10] Applying ODC optimizations ...
+INFO: [Physopt 32-619] Estimated Timing Summary | WNS=-0.300 | TNS=-5.380 |
+Running Vector-less Activity Propagation...
+
+Finished Running Vector-less Activity Propagation
+
+
+Starting PowerOpt Patch Enables Task
+INFO: [Pwropt 34-162] WRITE_MODE attribute of 0 BRAM(s) out of a total of 41 has been updated to save power. Run report_power_opt to get a complete listing of the BRAMs updated.
+INFO: [Pwropt 34-201] Structural ODC has moved 4 WE to EN ports
+Number of BRAM Ports augmented: 30 newly gated: 5 Total Ports: 82
+Ending PowerOpt Patch Enables Task | Checksum: 1660c5a6f
+
+Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.369 . Memory (MB): peak = 2126.391 ; gain = 0.000
+Ending Power Optimization Task | Checksum: 1660c5a6f
+
+Time (s): cpu = 00:00:35 ; elapsed = 00:00:11 . Memory (MB): peak = 2126.391 ; gain = 567.129
+
+Starting Final Cleanup Task
+Ending Final Cleanup Task | Checksum: 1660c5a6f
+
+Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 2126.391 ; gain = 0.000
+
+Starting Netlist Obfuscation Task
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.028 . Memory (MB): peak = 2126.391 ; gain = 0.000
+Ending Netlist Obfuscation Task | Checksum: 1c4db32e5
+
+Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.028 . Memory (MB): peak = 2126.391 ; gain = 0.000
+INFO: [Common 17-83] Releasing license: Implementation
+87 Infos, 22 Warnings, 1 Critical Warnings and 0 Errors encountered.
+opt_design completed successfully
+opt_design: Time (s): cpu = 00:00:57 ; elapsed = 00:00:29 . Memory (MB): peak = 2126.391 ; gain = 670.258
+INFO: [Common 17-600] The following parameters have non-default value.
+general.maxThreads
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.016 . Memory (MB): peak = 2126.391 ; gain = 0.000
+INFO: [Timing 38-480] Writing timing data to binary archive.
+Writing placer database...
+Writing XDEF routing.
+Writing XDEF routing logical nets.
+Writing XDEF routing special nets.
+Write XDEF Complete: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.093 . Memory (MB): peak = 2126.391 ; gain = 0.000
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.024 . Memory (MB): peak = 2126.391 ; gain = 0.000
+INFO: [Common 17-1381] The checkpoint 'E:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.runs/impl_1/system_wrapper_opt.dcp' has been generated.
+write_checkpoint: Time (s): cpu = 00:00:12 ; elapsed = 00:00:07 . Memory (MB): peak = 2126.391 ; gain = 0.000
+INFO: [runtcl-4] Executing : report_drc -file system_wrapper_drc_opted.rpt -pb system_wrapper_drc_opted.pb -rpx system_wrapper_drc_opted.rpx
+Command: report_drc -file system_wrapper_drc_opted.rpt -pb system_wrapper_drc_opted.pb -rpx system_wrapper_drc_opted.rpx
+INFO: [IP_Flow 19-1839] IP Catalog is up to date.
+INFO: [DRC 23-27] Running DRC with 8 threads
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+INFO: [Common 17-14] Message 'Designutils 20-3303' appears 100 times and further instances of the messages will be disabled. Use the Tcl command set_msg_config to change the current settings.
+INFO: [Coretcl 2-168] The results of DRC are in file E:/zynqlinkPRO/build/j7-eld1-20261106/source-project/zynqlink_dma.runs/impl_1/system_wrapper_drc_opted.rpt.
+report_drc completed successfully
+INFO: [Common 17-206] Exiting Vivado at Fri Nov  6 07:00:14 2026...
+[Fri Nov  6 07:00:16 2026] impl_1 finished
+wait_on_run: Time (s): cpu = 00:00:01 ; elapsed = 00:01:35 . Memory (MB): peak = 348.535 ; gain = 2.453
+# set checkpoint [file join $source_project zynqlink_dma.runs impl_1 system_wrapper_opt.dcp]
+# if {![file isfile $checkpoint] || ![string match {*opt_design Complete*} [get_property STATUS [get_runs impl_1]]]} {
+#     error "ELD1 opt stage failed"
+# }
+ELD1 opt stage failed
+    while executing
+"error "ELD1 opt stage failed""
+    invoked from within
+"if {![file isfile $checkpoint] || ![string match {*opt_design Complete*} [get_property STATUS [get_runs impl_1]]]} {
+    error "ELD1 opt stage failed"..."
+    (file "build/j7-eld1-20261106/route-eld1.tcl" line 13)
+INFO: [Common 17-206] Exiting Vivado at Fri Nov  6 07:00:16 2026...

@@ -1,0 +1,50 @@
+"""Finish ETM and final-state checks on the already verified source/bit/ELF."""
+import json
+from pathlib import Path
+
+import run_board as common
+from probe_ownership import Ownership
+from probe_stream import Probe
+from validate_fclk_performance import physical_snapshot
+
+WORK=Path(__file__).resolve().parent
+
+
+def main():
+    lease=Ownership()
+    report={'passed':False}
+    try:
+        jtag=json.loads((WORK/'jtag60.json').read_text())
+        assert jtag['passed'] and jtag['restore_match']
+        common.load(common.FINAL,'accepted-final')
+        common.verify(common.FINAL,'accepted-final')
+        import final_etm
+        final_etm.run(direct=True)
+        result=json.loads((WORK/'direct-control.json').read_text())
+        assert result['restored'] and all(r['passed'] for r in result['rows'])
+        common.call(common.target_smoke.main,['target','--identify-only','--out',WORK/'target-final.json'],'target-final')
+        common.verify(common.FINAL,'accepted-final-after')
+        state=physical_snapshot()
+        probe=Probe()
+        try:state['streams']={name:probe.action(c,2) for name,c in [('rtt',0x31),('hss',0x32)]}
+        finally:probe.close()
+        assert state['allObservedEnginesIdle'] and all(rc==0 and not words[0]&1 for rc,words in state['streams'].values())
+        report.update(passed=True,finalIdle=state,targetRestored=result['restored'],finalPair='candidate')
+    except BaseException as error:
+        report['error']=repr(error)
+        raise
+    finally:
+        try:
+            if not report['passed']:
+                p=WORK/'direct-control.json'
+                result=json.loads(p.read_text()) if p.exists() else {}
+                if not result.get('targetHaltAttempted') or result.get('restored'):
+                    common.load(common.PRODUCTION,'final-failure-restore')
+                    common.verify(common.PRODUCTION,'final-failure-restore')
+                    report['productionRestoredAfterFailure']=True
+        finally:
+            common.save(WORK/'accepted-board-summary.json',report)
+            lease.close()
+
+
+if __name__=='__main__':main()

@@ -1,0 +1,85 @@
+{
+  "accepted": false,
+  "sourceCommit": "0be2aff33564652c7c5cff5a29a332b89b5b796a",
+  "scope": "J7 RAW4+DDR ELD1 calibration candidate",
+  "j7Pins": {
+    "swclk_0": "L15",
+    "swdio_0": "L16",
+    "gpio_rtl_0_tri_io[0]": "M15",
+    "gpio_rtl_0_tri_io[1]": "L14",
+    "gpio_rtl_0_tri_io[2]": "M14",
+    "gpio_rtl_0_tri_io[3]": "N15",
+    "rtck": "H15",
+    "trace_clk": "J16",
+    "trace_data[0]": "K16",
+    "trace_data[1]": "M18",
+    "trace_data[2]": "M17",
+    "trace_data[3]": "L17"
+  },
+  "timing": {
+    "FCLK_max_Hz": 133333333,
+    "SWCLK_max_Hz": 66666666,
+    "setup_slack_ns": 0.044,
+    "hold_slack_ns": 0.041,
+    "requested_FCLK_Hz": 133333333,
+    "RTL_DEBUG": 0,
+    "optional_observation_cells": 0,
+    "formal_product_acceptance": false
+  },
+  "build": {
+    "RAW_TRACE": 4,
+    "ETM_DDR": 1,
+    "ETM_LANE_DELAY": 1,
+    "IMPLEMENT_FCLK_HZ": 133333333,
+    "part": "xc7z020clg400-2",
+    "vivado": "2018.3",
+    "maxSWCLKHz": 60000000
+  },
+  "files": {
+    "application.elf": {
+      "bytes": 874884,
+      "sha256": "1fbf6471e14669a809aa02a3e4a6fbb262370ea9b45511f2a460e6f52a5d4ee5"
+    },
+    "probe.bit": {
+      "bytes": 4045674,
+      "sha256": "0f20227a3ed159065834cad1106ff7a2d6c50c64e576f2c20038c7ffd7dabfde"
+    },
+    "ps-build.json": {
+      "bytes": 5956,
+      "sha256": "0676fbd4e58402ca6bf40730588202b7c7d222d5cc3572beffb74d44327fca42"
+    },
+    "ps7_init.tcl": {
+      "bytes": 35186,
+      "sha256": "485a028ff7ad9a256a64313b68527a055ca3800b3b85577ceb0554b0e0609c94"
+    },
+    "rtl-inputs.json": {
+      "bytes": 2263,
+      "sha256": "c97bfd8aa45dcce169540322526927bbb608989f1a530ecc897038ffb661c10d"
+    },
+    "verified_clock.json": {
+      "bytes": 205,
+      "sha256": "0520178ad9bcb6bacc9d30c641bb7f3f584ac440d08f0f31ade6344cf1f6a7e1"
+    }
+  },
+  "productionPsBinaryIdentical": true,
+  "calibrationCandidate": [
+    28,
+    18,
+    15,
+    20,
+    15
+  ],
+  "confirmed36MHz": false,
+  "passedWindows36MHzMs": [
+    100,
+    100,
+    100,
+    1000,
+    1000,
+    1000
+  ],
+  "calibrationMarginPassed": false,
+  "calibrationRows": 219,
+  "productionRestored": true,
+  "report": "docs/validation/j7-eld1-20261106/README.md"
+}

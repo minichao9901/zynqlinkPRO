@@ -1,0 +1,75 @@
+{
+  "artifacts": {
+    "git_head": "0be2aff33564652c7c5cff5a29a332b89b5b796a",
+    "git_dirty": true,
+    "bit": {
+      "path": "E:\\zynqlinkPRO\\build\\j7-eld1-20261106\\candidate\\probe.bit",
+      "sha256": "0f20227a3ed159065834cad1106ff7a2d6c50c64e576f2c20038c7ffd7dabfde"
+    },
+    "elf": {
+      "path": "E:\\zynqlinkPRO\\build\\j7-eld1-20261106\\candidate\\application.elf",
+      "sha256": "1fbf6471e14669a809aa02a3e4a6fbb262370ea9b45511f2a460e6f52a5d4ee5"
+    }
+  },
+  "target_elf": "E:\\zynqlinkPRO\\build\\j7-eld1-20261106\\trace-workload.elf",
+  "target_elf_sha256": "fa8b60e092e6e504f6556baa1930127b5366cecc306711b8d564a9f90b14cfe7",
+  "milliseconds": 100.0,
+  "hardware_full_test": false,
+  "periodic_sync": false,
+  "hclk_div": 1,
+  "raw_diagnostic": false,
+  "IDCODE": "0501017714a01b",
+  "control_clock": {
+    "fclk_hz": 119999998,
+    "cfg": "0xcaa11",
+    "SWCLK_Hz": 9999999.833333334,
+    "half_period_fclk": 6,
+    "short_high": true,
+    "intended_high_ns": 8.333333472222225
+  },
+  "cpuid": "0x411fc231",
+  "flash": [],
+  "ram_image": [
+    {
+      "address": 536870912,
+      "bytes": 296,
+      "sha256": "8fc657c71bcd59faf8ab33a9df5cd9e71f83b0a531c2f6f9125c58da9dcb4744"
+    }
+  ],
+  "reference": [
+    199999998,
+    9437440,
+    221192,
+    769
+  ],
+  "transport": "ddr-usb",
+  "rcc_before": [
+    50548355,
+    6145034
+  ],
+  "rcc_capture": [
+    50548355,
+    6145034
+  ],
+  "gpio_before": [
+    16461,
+    1270594372
+  ],
+  "gpio_capture": 1127428932,
+  "tpiu_supported": 11,
+  "config": {
+    "protocol": "ETMv3",
+    "idr": 1091891777,
+    "ctrl": 2064,
+    "ccer": 100352,
+    "traceid": 2
+  },
+  "error": "RuntimeError('DDR hardware quality/window failed; raw data retained')",
+  "restored": true,
+  "rcc_after": [
+    50548355,
+    6145034
+  ],
+  "fpb_restored": true,
+  "usb_reader_errors": []
+}

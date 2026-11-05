@@ -1,5 +1,7 @@
 # ELD1逐线输入延迟实验
 
+2026-11-06 J7 补充：新球号 ELD1 已按 133.333333 MHz 实现并上板。219 点扫描后的 `28,18,15,20,15` 在 36 MHz 通过三轮 1 秒完整解码，但 ±1/±2 tap 邻域仍有坏点，保留候选状态。32 MHz 零 tap 三轮 1 秒通过。以下 120 MHz 构建参数及旧板未完成结论保留原阶段范围。 [J7 校准报告](validation/j7-eld1-20261106/README.md)
+
 本阶段为RAW4实际输入端增加5个IDELAYE2：D0、D1、D2、D3、TRACECLK各自0～31 tap。每个输入只有一条IDELAY→200MHz同步器与稳定两点滤波→formatter/DDR路径。默认启动时显式装载全部零tap并核对；禁用校准同样指零tap，仍有IDELAY自身插入延迟。原bit保留为真正的直接输入基线。它仍是过采样接收器，不是新增的源同步IDDR接收模式，不能据此承诺超过过采样结构的频率上限。
 
 构建须同时设置`ZYNQLINK_RAW_TRACE=4`、`ZYNQLINK_ETM_DDR=1`、`ZYNQLINK_ETM_LANE_DELAY=1`。时钟STA选项沿用`ZYNQLINK_IMPLEMENT_FCLK_HZ=120000000`。默认生产构建不启用新参数；旧Golden与当前已知可用配对不变。新bit/ELF须另行生成、明确加载和验收，仿真不能替代。

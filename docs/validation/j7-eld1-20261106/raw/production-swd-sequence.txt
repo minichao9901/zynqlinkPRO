@@ -1,0 +1,22 @@
+
+      6b6e:	08ff      	lsrne	r7, r7, #3
+      6b70:	f010 0f80 	tst.w	r0, #128	; 0x80
+      6b74:	f040 82f3 	bne.w	715e <DAP_ProcessCommand+0x7b2>
+      6b78:	f023 0302 	bic.w	r3, r3, #2
+      6b7c:	f8c8 3000 	str.w	r3, [r8]
+>     6b80:	f003 fb1c 	bl	a1bc <SWD_Sequence>
+      6b84:	2e00      	cmp	r6, #0
+      6b86:	f000 8752 	beq.w	7a2e <SLCRlockKey+0x3b3>
+      6b8a:	f116 36ff 	adds.w	r6, r6, #4294967295
+      6b8e:	f10a 0a01 	add.w	sl, sl, #1
+      7156:	f024 0404 	biceq.w	r4, r4, #4
+      715a:	603c      	str	r4, [r7, #0]
+      715c:	e79a      	b.n	7094 <DAP_ProcessCommand+0x6e8>
+      715e:	f043 0302 	orr.w	r3, r3, #2
+      7162:	f8c8 3000 	str.w	r3, [r8]
+>     7166:	f003 f829 	bl	a1bc <SWD_Sequence>
+      716a:	2e00      	cmp	r6, #0
+      716c:	f000 8204 	beq.w	7578 <DAP_ProcessCommand+0xbcc>
+      7170:	f10a 0a01 	add.w	sl, sl, #1
+      7174:	44b9      	add	r9, r7
+
