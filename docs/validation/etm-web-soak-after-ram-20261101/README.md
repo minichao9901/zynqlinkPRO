@@ -1,5 +1,7 @@
 # SRAM实验恢复后的Web压力验收
 
+> 2026-11-05整理：本报告保留历史结论；逐轮原始证据/一次性驱动已固定在 Git tag `archive/main-before-cleanup-20261105`。恢复方法和逐文件SHA见[归档索引](../README.md)。历史路径及命令不表示当前可直接执行。
+
 同一已加载prebuilt/etm-ddr-usb-raw4-20261101配对，target已通过复位返回原Golden CPU48MHz / TRACECLK24MHz固件。没有写Flash/QSPI，没有由Web改目标分频。新runtime本地桥默认C++ binary/TraceStore链，界面由AI CLI实际操作。
 
 ```powershell

@@ -1,5 +1,7 @@
 # 四个历史研究分支的保留价值审查
 
+> 2026-11-05整理：本报告保留历史结论；逐轮原始证据/一次性驱动已固定在 Git tag `archive/main-before-cleanup-20261105`。恢复方法和逐文件SHA见[归档索引](../README.md)。历史路径及命令不表示当前可直接执行。
+
 日期：2026-11-03（Asia/Shanghai），对照 main `4111dfa`。用户要求判断是否比当前方案更好。本轮只读检查分支、工作目录和已有证据，并运行离线 RTL 对照；没有上板、加载、改时钟、重新综合或改生产代码，没有删除这些分支/worktree。
 
 结论：没有发现值得直接合入、可替代当前实现的更优方案。需要保留的是部分研究方法、负例与固定基线，不需要把这些旧分支长期当作活跃开发线。
@@ -15,7 +17,7 @@
 
 分支头 `1d63086` 可从 main 追溯，无独有提交。交付、24MHz 基线和 ELD1 都已进入主线，详见 [原合并与最佳基线说明](../../ETM主线合并与最佳基线-20261101.md)。`etm-best-24mhz-ddr-usb-20261101` 有长期复测价值；它不是当前主机软件性能的回退建议，也不是已完成36MHz/逐线自动校准的证明。ZL-008/009的暂停与失败边界继续保留。
 
-本地 `build/` 发现107个 `.bit/.elf` 文件，去重后12种内容，其中8种已匹配main已跟踪的 `prebuilt/`。另4种未匹配 `prebuilt/`：早期DDR pilot/USB编译/diagnostic PS中间ELF，以及旧H743记录中的目标ELF。未匹配不等于未在Git其它位置或记录包出现，也不等于更快/可交付；没有新的验收依据可将它们晋升。保留了逐路径SHA清单：[产物清单](raw/etm-build-artifacts.json)。将来清理此目录时先留存这些唯一中间产物和失败证据，不能把整个 `build/` 当作已验收配对。
+本地 `build/` 发现107个 `.bit/.elf` 文件，去重后12种内容，其中8种已匹配main已跟踪的 `prebuilt/`。另4种未匹配 `prebuilt/`：早期DDR pilot/USB编译/diagnostic PS中间ELF，以及旧H743记录中的目标ELF。未匹配不等于未在Git其它位置或记录包出现，也不等于更快/可交付；没有新的验收依据可将它们晋升。保留了逐路径SHA清单：产物清单（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/research-branch-review-20261103/raw/etm-build-artifacts.json`）。将来清理此目录时先留存这些唯一中间产物和失败证据，不能把整个 `build/` 当作已验收配对。
 
 ## FCLK 时序分支的未提交修改
 
@@ -23,7 +25,7 @@
 
 main还额外具备：133333333Hz默认工作点、IDDR Q1/Q2路径报告、DDR/debug/CDMA独立端点报告、参考时钟组及check_timing、禁止高于明确工作点的自动晋级、完整时序摘要签核，以及从当前打开的checkpoint重新生成bit。旧稿仍默认120MHz，允许频率向上探索，缺少这些后续检查，并按文件mtime复用已有bit。按文件时间不能独立确认bit与当前DCP身份，不能用它替换主线实现。
 
-未提交文件保持原样，快照为 [原文件](raw/fclk-uncommitted-verify_routed.tcl.txt)、[相对旧分支的补丁](raw/fclk-uncommitted.patch)。没有为了清理而覆盖其工作目录，也没有把快照当作可执行验收入口。
+未提交文件保持原样，快照为 原文件（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/research-branch-review-20261103/raw/fclk-uncommitted-verify_routed.tcl.txt`）、相对旧分支的补丁（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/research-branch-review-20261103/raw/fclk-uncommitted.patch`）。没有为了清理而覆盖其工作目录，也没有把快照当作可执行验收入口。
 
 ## SWD 时序发生器
 
@@ -31,7 +33,7 @@ main还额外具备：133333333Hz默认工作点、IDDR Q1/Q2路径报告、DDR/
 
 归档构建标记 `candidate_bit_generated_but_timing_failed`，150MHz setup相对当时main恶化4.832ns。后续retimed记录仍未通过当时工作点；分支头再整理ACK/数据RX事件，但未找到其新的已验收route/板测胜出证据。这些数字属于当年的同条件比较，不是当前main全设计资源，也不能用当年150MHz替代当前133MHz约束。仿真等价、生成bit不等于时序和实板通过，不应因灵活参数更多而判定更优。
 
-保留 [原始构建记录](raw/swd-build-comparison.json.txt) 与 [解析摘要](raw/swd-summary.json)。原Git对象在JSON结束后含字面量反斜杠n，原字节未改；摘要仅提取首个JSON对象。详细方法可用 `git show codex/swd-timing-generator:docs/SWD时序发生器重构与仿真.md` 及同分支 `SWD时序可配置接口.md` 查看，后续删除分支时使用上述tag仍可读取。
+保留 原始构建记录（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/research-branch-review-20261103/raw/swd-build-comparison.json.txt`） 与 解析摘要（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/research-branch-review-20261103/raw/swd-summary.json`）。原Git对象在JSON结束后含字面量反斜杠n，原字节未改；摘要仅提取首个JSON对象。详细方法可用 `git show codex/swd-timing-generator:docs/SWD时序发生器重构与仿真.md` 及同分支 `SWD时序可配置接口.md` 查看，后续删除分支时使用上述tag仍可读取。
 
 ## RISC-V SBA WIP
 
@@ -45,10 +47,10 @@ main还额外具备：133333333Hz默认工作点、IDDR Q1/Q2路径报告、DDR/
 | WIP核心＋当前模型 | 部分场景通过；一组128字读取用了644次扫描，触发非流水断言 |
 | WIP核心＋其原模型 | 部分场景通过；随后posted读取第1项得到0，触发读值断言 |
 
-见 [完整输出](raw/riscv-comparison.json)。这是当前测试台的集成兼容对照，不是对旧分支原始环境的全面验收，也不是新的板级MB/s测量。644/136约4.74倍扫描，足以否定“直接换上就比main快”，不宜推广到所有输入。
+见 完整输出（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/research-branch-review-20261103/raw/riscv-comparison.json`）。这是当前测试台的集成兼容对照，不是对旧分支原始环境的全面验收，也不是新的板级MB/s测量。644/136约4.74倍扫描，足以否定“直接换上就比main快”，不宜推广到所有输入。
 
 另有确定的静态协议问题：WIP `EVALUATE` 用 `scan_result[1:0]==1` 进入标为“DTM busy”的重试状态，而实际DMI返回BUSY编码是3；规范还要求清除DTMCS的sticky busy状态再重试。参见 [RISC-V官方调试实现说明](https://docs.riscv.org/reference/debug/v1.0/debugger_implementation.html)、[官方0.13.2规范](https://riscv.org/wp-content/uploads/2024/12/riscv-debug-release.pdf)。不能把当前模型中人为注入的非零无效响应当成真实BUSY验证。main在此处对非零状态报错，并没有使用这个错误的BUSY自动重试分支。
 
 首响应同步、SBA W1C错误恢复值得作为需求和负例保存，但DTM恢复与SBA错误恢复是不同层次，不能仅改一个编码便称已修复。当前没有修改或合入WIP代码。登记ZL-128限定历史候选问题，影响不外推为当前main已有相同缺陷。
 
-本轮比较未改变任何bit/ELF或固定EXE；无须为文档审查重新打包或上板。分支头、独有提交数量、覆盖tag见 [分支清单](raw/branches.json)。
+本轮比较未改变任何bit/ELF或固定EXE；无须为文档审查重新打包或上板。分支头、独有提交数量、覆盖tag见 分支清单（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/research-branch-review-20261103/raw/branches.json`）。

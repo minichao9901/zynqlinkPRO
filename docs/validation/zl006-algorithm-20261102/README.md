@@ -1,10 +1,12 @@
 # ZL-006：执行状态合并、单次解码与紧凑诊断
 
+> 2026-11-05整理：本报告保留历史结论；逐轮原始证据/一次性驱动已固定在 Git tag `archive/main-before-cleanup-20261105`。恢复方法和逐文件SHA见[归档索引](../README.md)。历史路径及命令不表示当前可直接执行。
+
 编号协调（2026-11-02）：本文历史ZL-103/ZL-104规范编号分别为ZL-109/ZL-110。原文结论与原始证据保留；分支历史别名见[编号映射](../../问题编号别名-20261102.md)。
 
 日期：2026-11-02（Asia/Shanghai）。分支`codex/etm-cpp-stage1`，继续使用独立worktree；基线为`1c83d8b`。本轮没有操作硬件、改目标时钟/Flash/QSPI或PL/PS，没有替换主工作区的固定EXE。
 
-最终源码提交`77bf1c2`、配套原生程序的完整离线API为**9.290 / 8.877 / 8.848秒，中位8.877秒**，三次均<10秒，达到本阶段固定输入三次重建门禁。没有清空OS缓存，不宣称冷盘或所有负载均≤10秒。[构建与原字节身份](build-manifest.json)、[最终结果](raw/final-api-3.json)、[第1](raw/final-equivalence-r1.json)/[第2](raw/final-equivalence-r2.json)/[第3轮全量对照](raw/final-equivalence-r3.json)分别保留。先前初测10.387/9.553/9.720秒、首轮超10的事实仍保留于下文，不能与最终源码轮次混算。固定输入和计时边界沿用[上一阶段](../zl006-cpp-stage1-20261102/README.md)。独立冻结候选已完成以下离线验收。
+最终源码提交`77bf1c2`、配套原生程序的完整离线API为**9.290 / 8.877 / 8.848秒，中位8.877秒**，三次均<10秒，达到本阶段固定输入三次重建门禁。没有清空OS缓存，不宣称冷盘或所有负载均≤10秒。[构建与原字节身份](build-manifest.json)、最终结果（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/zl006-algorithm-20261102/raw/final-api-3.json`）、第1（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/zl006-algorithm-20261102/raw/final-equivalence-r1.json`）/第2（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/zl006-algorithm-20261102/raw/final-equivalence-r2.json`）/第3轮全量对照（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/zl006-algorithm-20261102/raw/final-equivalence-r3.json`）分别保留。先前初测10.387/9.553/9.720秒、首轮超10的事实仍保留于下文，不能与最终源码轮次混算。固定输入和计时边界沿用[上一阶段](../zl006-cpp-stage1-20261102/README.md)。独立冻结候选已完成以下离线验收。
 
 ## 算法与数据表示
 
@@ -30,28 +32,28 @@ BLK_ISSUES仍为有界zlib JSON，主要内容如下：
 
 ## 验证与证据
 
-- [交错状态机A/B](raw/tracker-ab.json)：独立/共享各三次，builder中位6.394/5.650秒，完整API中位13.622/13.242秒；单独状态合并不足以达到10秒。
+- 交错状态机A/B（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/zl006-algorithm-20261102/raw/tracker-ab.json`）：独立/共享各三次，builder中位6.394/5.650秒，完整API中位13.622/13.242秒；单独状态合并不足以达到10秒。
 - 最终三个全新记录均完整重建，未复制native/store/索引；全部summary/共有quality相同，无native.bin/逐指令JSONL，三轮完整执行块、诊断、analysis及60表逐项相等。最终原生builder内嵌源码提交77bf1c2，逐文件构建输入/Git blob双SHA及三份EXE哈希见manifest，避免Git换行差异冒充源码身份。
-- [初测三轮](raw/initial-api-3.json)保留全部时间与真实质量；[完整对照](raw/initial-equivalence.json)包含所有静态/字符串/执行/包/导航/检查点块、全部诊断、完整analysis及60张查询表，不是抽样。保留F103原有2个gap、522998条未知执行。
-- [H743单次/双遍差分](raw/h743-buffered-differential.json)、[H743完整2秒差分](raw/h743-2s-differential.json)、[截断尾部差分](raw/truncated-differential.json)全部通过；两秒只是已有输入离线重放，不是新硬件验收。
-- C++合成检查：5万步状态oracle、7万唯一范围（覆盖16/32位计划ID）、超过8MiB块边界的包、稀有事件/64位字段、payload变体、缓存超限、CRC已知向量。13项新增/关联Python测试通过；[最终55项CLI](raw/final-cli-tests.log)通过，日志保留原有ResourceWarning。
-- [实际C++父进程退出](raw/owner-exit.json)及[静态准备失败/KeyboardInterrupt](raw/preparation-faults.json)验证worker退出且不发布manifest。Python自身的握手超时、非法字典与取消另有真实子进程测试。
-- [索引重编码](raw/reindex.json)验证新特性位及完整语义保留；原生CSV区间导出通过。编码器RLE策略[独立对照](raw/index-codec-ab.json)无明确收益且体积更大，未采用。
+- 初测三轮（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/zl006-algorithm-20261102/raw/initial-api-3.json`）保留全部时间与真实质量；完整对照（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/zl006-algorithm-20261102/raw/initial-equivalence.json`）包含所有静态/字符串/执行/包/导航/检查点块、全部诊断、完整analysis及60张查询表，不是抽样。保留F103原有2个gap、522998条未知执行。
+- H743单次/双遍差分（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/zl006-algorithm-20261102/raw/h743-buffered-differential.json`）、H743完整2秒差分（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/zl006-algorithm-20261102/raw/h743-2s-differential.json`）、截断尾部差分（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/zl006-algorithm-20261102/raw/truncated-differential.json`）全部通过；两秒只是已有输入离线重放，不是新硬件验收。
+- C++合成检查：5万步状态oracle、7万唯一范围（覆盖16/32位计划ID）、超过8MiB块边界的包、稀有事件/64位字段、payload变体、缓存超限、CRC已知向量。13项新增/关联Python测试通过；最终55项CLI（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/zl006-algorithm-20261102/raw/final-cli-tests.log`）通过，日志保留原有ResourceWarning。
+- 实际C++父进程退出（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/zl006-algorithm-20261102/raw/owner-exit.json`）及静态准备失败/KeyboardInterrupt（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/zl006-algorithm-20261102/raw/preparation-faults.json`）验证worker退出且不发布manifest。Python自身的握手超时、非法字典与取消另有真实子进程测试。
+- 索引重编码（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/zl006-algorithm-20261102/raw/reindex.json`）验证新特性位及完整语义保留；原生CSV区间导出通过。编码器RLE策略独立对照（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/zl006-algorithm-20261102/raw/index-codec-ab.json`）无明确收益且体积更大，未采用。
 - 所有探索轮次继续保留于`raw/exploratory-*`；它们属于不同开发版本，不能挑选单次最短值冒充最终版本结果。
 
 ## 独立冻结候选
 
 候选目录为`E:/zynqlinkPRO-work/etm-cpp-stage1-20261102/build/etm-algorithm-bridge/`，由`toolbox.py bridge-build --out build/etm-algorithm-bridge`构建；打包源提交9e4318a，sourceDirty=false，配套三个native EXE与Git中已验收字节相同。完整文件清单由包内package-manifest.json绑定，主EXE与清单SHA见[frozen-candidate.json](frozen-candidate.json)。本机固定dist未替换，没有生成ZIP或推送。
 
-- [内置离线验收](raw/frozen-package-verification.json)通过：两协议、导出、重复启动复用、文件身份核对，PATH中无系统Python/Node；hardwareAccess=false、hardwareRoutesDisabled=true、keptRunning=false。
-- 冻结程序可读新紧凑[诊断条目](raw/frozen-issues-query.json)；[原生CSV导出](raw/frozen-export.json)与源码逐字节相同，SHA为1388ca85cf2469f5b0fd5a22469b721d216e4bec024696faf6364618ae0c1a82。
-- 固定大输入在冻结程序中完成重建约9.306秒，无native.bin；[全部执行/诊断/analysis/60表](raw/frozen-large-equivalence.json)与原结果相同。**该次CLI命令仍返回exit 5**：[严格拒绝](raw/frozen-large-strict-rejection.json)保留原有2个gap和BIN格式无法证明采集时长的事实；源码CLI[同样返回5](raw/source-large-strict-rejection.json)，[质量/时长/summary完全相同](raw/frozen-gate-parity.json)。此拒绝未改为通过，不计入三次成功API计时，也不能当作完整执行流全部已知。
+- 内置离线验收（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/zl006-algorithm-20261102/raw/frozen-package-verification.json`）通过：两协议、导出、重复启动复用、文件身份核对，PATH中无系统Python/Node；hardwareAccess=false、hardwareRoutesDisabled=true、keptRunning=false。
+- 冻结程序可读新紧凑诊断条目（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/zl006-algorithm-20261102/raw/frozen-issues-query.json`）；原生CSV导出（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/zl006-algorithm-20261102/raw/frozen-export.json`）与源码逐字节相同，SHA为1388ca85cf2469f5b0fd5a22469b721d216e4bec024696faf6364618ae0c1a82。
+- 固定大输入在冻结程序中完成重建约9.306秒，无native.bin；全部执行/诊断/analysis/60表（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/zl006-algorithm-20261102/raw/frozen-large-equivalence.json`）与原结果相同。**该次CLI命令仍返回exit 5**：严格拒绝（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/zl006-algorithm-20261102/raw/frozen-large-strict-rejection.json`）保留原有2个gap和BIN格式无法证明采集时长的事实；源码CLI同样返回5（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/zl006-algorithm-20261102/raw/source-large-strict-rejection.json`），质量/时长/summary完全相同（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/zl006-algorithm-20261102/raw/frozen-gate-parity.json`）。此拒绝未改为通过，不计入三次成功API计时，也不能当作完整执行流全部已知。
 
 新格式的冻结读取、原生导出及重建一致性已经验证；实际硬件采集与浏览器绘制、冷盘保证、持续实时吞吐和≤5秒目标尚未验证。ZL-006继续保留“部分解决”，本轮完成的是固定大输入的第一阶段处理性能门禁。
 
 ## ZL-104：离线基准可能错投旧服务
 
-工具完成后原本保持服务供检查；重用同端口时，曾向旧runtime投递新record ID，得到旧目录缺session的HTTP400。该轮失败保留于[证据](raw/failed-stale-port.json)，未计入成功性能轮次。
+工具完成后原本保持服务供检查；重用同端口时，曾向旧runtime投递新record ID，得到旧目录缺session的HTTP400。该轮失败保留于证据（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/zl006-algorithm-20261102/raw/failed-stale-port.json`），未计入成功性能轮次。
 
 现增加启动前端口占用拒绝，以及投递任何decode前的随机runtime身份核对；HTTP错误保留响应原因。真实占用端口测试证明拒绝前不创建记录、不发送HTTP请求；不会停止占用服务。只关闭本任务服务后重测。问题表同步更新，登记/修复范围仅为本离线工具。
 

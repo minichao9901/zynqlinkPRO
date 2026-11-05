@@ -1,5 +1,7 @@
 # HPM6800EVK Web压力、缺陷修正及10MHz烧录对比
 
+> 2026-11-05整理：本报告保留历史结论；逐轮原始证据/一次性驱动已固定在 Git tag `archive/main-before-cleanup-20261105`。恢复方法和逐文件SHA见[归档索引](../README.md)。历史路径及命令不表示当前可直接执行。
+
 2026-11-02，先完成[R21原生分档测速](../hpm6800-speed-completion-20261102/README.md)，再开展本报告。**Web压力已执行并归档，不能判全通过**：ZL-005缺首DEF仍复现（保持暂停），另新增ZL-094随机CDC字节缺口待定位；性能差距ZL-093待改进。其余本轮修复和限定验收范围见问题表ZL-085～092。
 
 ## 配对、目标与测试边界
@@ -78,7 +80,7 @@ ZL-092首次在100000次请求硬停，step确认和bpClear也被拒绝。保存
 
 最终快照 **2026-11-02T13:00:09.671353+08:00**：Web配对仍在板上，物理MEM-AP0核对76380B代码一致；FCLK49999999Hz/TCK24999999.5Hz、mode0、idle8；DMSTATUS0x430ca2、原目标程序运行，RTT/HSS/packet/采集空闲。自有Python/Web/EXE/OpenOCD/XSCT采集进程均结束；共享hw_server PID19676保留。见raw/identity-final、logs/final-state.json、raw/original-flash-restore/result.json、logs/final-processes.json。之后未再操作板卡。
 
-![新EXE默认10MHz和烧录成功界面](frozen-flash-proof.png)
+新EXE默认10MHz和烧录成功界面（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/hpm6800-web-stress-20261102/frozen-flash-proof.png`）
 
 ## 原始证据
 

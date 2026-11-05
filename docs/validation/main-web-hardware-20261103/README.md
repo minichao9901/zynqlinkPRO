@@ -1,5 +1,7 @@
 # main 合并后 F103ZE 真机验收与 HAL 存储 Trace
 
+> 2026-11-05整理：本报告保留历史结论；逐轮原始证据/一次性驱动已固定在 Git tag `archive/main-before-cleanup-20261105`。恢复方法和逐文件SHA见[归档索引](../README.md)。历史路径及命令不表示当前可直接执行。
+
 2026-11-03～04，Asia/Shanghai。起点main 41e2cee；首批修复/新例程提交ae9b774。本轮不推送、不写探针QSPI。所有结果均限定实际F103ZE及下列配对；不推广到未在线H743/HPM。
 
 新HAL例程与旧CDC共同提供了实际输入。**本轮实际HAL记录的新旧完整60张表及182项查询一致**，普通Web按钮的断点合并回归已修复。8页主流程均已操作；不能宣称所有功能零问题：ZL-130原配对STOP尾包、ZL-131长暂停后的CDC、ZL-137的60MHz标定仍有失败证据。最终固定EXE/新STAT配对已完成下列收尾；ZL-140启动失败和ZL-141控制/烧录性能差距同样保留，不判全功能/全性能通过。
@@ -79,11 +81,11 @@ CDC当前CLI较本机重测旧tag中位缩短56.6%，普通Web比CLI约15.5%；H
 
 旧参考tag archive/main-before-etm-cpp-20261103（06452f2），参考worktree未改。相同HAL CLI输入及最终普通Web输入分别验证：全函数/行区间/segments/Web ELF DTO一致；完整执行块、诊断、analysis、默认视图、语义meta、**60数组dtype/shape/每个值完全相同**；旧Golden真实生成库与new direct/binary/rescan/repeat四种路径一致；5种实际输入变更拒绝；**182个深度查询DTO一致**。最终Web实际store再与重建cpp全60表相等，含源码。限定这些实际输入，不宣称所有可能程序均正确。
 
-最终普通Web记录约1724万路径，入口包含storage_exercise→eeprom_write→HAL_I2C_Mem_Write，源码/指令/火焰图可见。完整输入保存在[hal-storage-write-input](hal-storage-write-input/manifest.json)，PNG在下。六视图、六导航、八导出、导入完成证据见raw/hal-web-views-finish/result.json；原脚本在异步导入清理阶段过早切换的失败保留，纠正等待后通过。
+最终普通Web记录约1724万路径，入口包含storage_exercise→eeprom_write→HAL_I2C_Mem_Write，源码/指令/火焰图可见。完整输入保存在hal-storage-write-input（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/main-web-hardware-20261103/hal-storage-write-input/manifest.json`），PNG在下。六视图、六导航、八导出、导入完成证据见raw/hal-web-views-finish/result.json；原脚本在异步导入清理阶段过早切换的失败保留，纠正等待后通过。
 
-![最终固定EXE打开实际HAL_I2C_Mem_Write源码及执行火焰图](hal-final-exe-trace.png)
+最终固定EXE打开实际HAL_I2C_Mem_Write源码及执行火焰图（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/main-web-hardware-20261103/hal-final-exe-trace.png`）
 
-[自包含交互火焰图HTML](hal-storage-flame.html)。本机完整可导入包位于build/main-web-hardware-20261103/hal-final-web-views/storage.etmrecord；已保存Git中的完整raw/ELF/source输入可用于独立重建。
+自包含交互火焰图HTML（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/main-web-hardware-20261103/hal-storage-flame.html`）。本机完整可导入包位于build/main-web-hardware-20261103/hal-final-web-views/storage.etmrecord；已保存Git中的完整raw/ELF/source输入可用于独立重建。
 
 ## 修复、检查与未完成边界
 
@@ -93,9 +95,9 @@ CDC当前CLI较本机重测旧tag中位缩短56.6%，普通Web比CLI约15.5%；H
 - ZL-137：60MHz标定首读err=-4/完成0；最终20MHz两种计划成功，60MHz单变量失败后混合又成功。10MHz另为时钟请求被拒，不能混作同一错误。
 - ZL-130原配对缺尾、ZL-131长RAM暂停CDC枚举但WinError31仍待定位。CDC已有CaptureEntry+UsbReconnect PA12短拉低/恢复流程，精确回显恢复不等于关闭根因。
 
-检查：161模块语法、130 Web自测、60 CLI自测、20 HSS/代理专项、9生产C模型通过；共享驱动sync --check通过。原生断点13专项、3ELF静态及HAL完整差分另通过。[原生编译身份](raw/native-build-identity.json)保留实际41e2源码底及输入SHA，不能改写为后来报告提交编译。
+检查：161模块语法、130 Web自测、60 CLI自测、20 HSS/代理专项、9生产C模型通过；共享驱动sync --check通过。原生断点13专项、3ELF静态及HAL完整差分另通过。原生编译身份（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/main-web-hardware-20261103/raw/native-build-identity.json`）保留实际41e2源码底及输入SHA，不能改写为后来报告提交编译。
 
-[公开证据索引](raw/evidence-manifest.json)仅归档有界诊断与已知测试模式，不含运行令牌和私有备份。完整工作输出build/main-web-hardware-20261103/。最终收尾结果见下节。
+公开证据索引（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/main-web-hardware-20261103/raw/evidence-manifest.json`）仅归档有界诊断与已知测试模式，不含运行令牌和私有备份。完整工作输出build/main-web-hardware-20261103/。最终收尾结果见下节。
 
 ## 最终固定EXE与板上收尾（2026-11-04）
 

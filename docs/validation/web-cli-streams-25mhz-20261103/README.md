@@ -1,5 +1,7 @@
 # HPM6800EVK：Web与CLI的25MHz RTT转发/HSS实测
 
+> 2026-11-05整理：本报告保留历史结论；逐轮原始证据/一次性驱动已固定在 Git tag `archive/main-before-cleanup-20261105`。恢复方法和逐文件SHA见[归档索引](../README.md)。历史路径及命令不表示当前可直接执行。
+
 日期：2026-11-03（Asia/Shanghai），分支`codex/web-ui-compact`，基于`996c115`。用户明确要求只测25MHz、比较Web与CLI。先核对占用；用户确认重新插拔电后加载指定探针配对。**RTT转发接近；Web HSS的连续采样稳定性明显弱于CLI，不能判本轮全通过。**
 
 ## 主要结果

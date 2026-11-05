@@ -395,7 +395,7 @@ Golden/recovery及生产PL/PS均未改变，本轮未综合、未连接板卡或
 [完整发行身份与范围](validation/bridge-exe-20261101/release.json)、
 [冻结EXE回归](validation/bridge-exe-20261101/frozen-api.json)、
 [浏览器测量](validation/bridge-exe-20261101/browser-timing.json)、
-[H743页面证据](validation/bridge-exe-20261101/web-h743.jpg)。
+H743页面证据（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/bridge-exe-20261101/web-h743.jpg`）。
 
 本文件集中记录本轮结论。**2026-10-31追加离线原生链路复测：同一份1s数据完整处理中位7.208s，
 解码后完整首屏中位221.5ms；首次半段缩放1.12～1.39s。此前268s与GB级JSONL来自入口漏配，
@@ -981,7 +981,7 @@ cmake --build build/etm-native-rebuild --parallel 2
 特别纠正计数边界：此Zynq固件的HSS metrics word5和STAT usbErr字段未实现，回0不能排除USB侧丢弃。
 已提出旧异步读消费首包、发送退役/publish边界等假设，尚未定根因。不把这些猜测写成结论。
 未验收的readEpoch实验已从运行源码撤出，补丁和测试原样归档，后续可继续研究；未修改PL/PS或Flash。
-[完整复现、对照与实验归档](validation/combined-etm-web-20261031/deferred-hss/issue.json)。
+完整复现、对照与实验归档（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/combined-etm-web-20261031/deferred-hss/issue.json`）。
 
 `validate no-flash --skip-scope`可显式跳过这一项，报告仍标DEFERRED；不能因此宣称全套通过。
 接下来工作转为火焰图Web导出和全项目Web/非Web CLI覆盖审计。
@@ -1022,7 +1022,7 @@ list/describe/dry-run不需要浏览器；具体工具如自身需要SDK、USB�
 
 `web.check`恢复自superlinkPRO提交`be75311236da2665a2edc54b9b4d4561f0219456`的check-syntax.mjs，
 使用当前目录自动遍历，不需Node依赖包。CLI清单、9页describe和测试日志见
-[覆盖证据](validation/cli-coverage-20261031/summary.json)。用法统一收在[CLI手册](toolbox-cli-ai.md)。
+覆盖证据（较早归档：`git show archive/main-before-slim-20261031:docs/validation/cli-coverage-20261031/summary.json`）。用法统一收在[CLI手册](toolbox-cli-ai.md)。
 
 对同一6MHz、1s已解码记录（5,467,630个事件）重新通过**显式CLI捕获**导出：
 
@@ -1046,7 +1046,7 @@ list/describe/dry-run不需要浏览器；具体工具如自身需要SDK、USB�
 10,391,585条指令记录，loss=false、synced/ended=true、packetIssues=0，整体14.842秒。
 实际FCLK119,999,998Hz、ref199,999,998Hz；运行后恢复RCC/FPB，未写Flash。
 这不是更高频极限或实时显示证明；与6MHz的离线1s基准输入不同，不用于直接性能比较。
-[直接CLI原始返回](validation/cli-coverage-20261031/direct-cli-12mhz.json)。
+直接CLI原始返回（较早归档：`git show archive/main-before-slim-20261031:docs/validation/cli-coverage-20261031/direct-cli-12mhz.json`）。
 
 ### 2026-11-01：真实RAW4接收器接入有界DDR窗口，RTL阶段冻结
 
@@ -1056,7 +1056,7 @@ list/describe/dry-run不需要浏览器；具体工具如自身需要SDK、USB�
 
 DDR格式FRM1为去掉TPIU同步的连续16字节formatter帧，末尾不足16字节单独记录长度/歧义标志；**它不是可直接送ETM指令解码器的BIN**。必须先通过原生C++解复用恢复源ID与数据位，再调用现有ETMv3/v4解码。计时、实际写入字节数、窗口stop原因、溢出/解析错误/同步计数分别上报，不以主机下载时间冒充硬件覆盖时间。
 
-离线验证：9项真实RAW4引脚→解析→异步FIFO→AXI DDR集成场景、92项DDR writer场景及原接收器11项回归通过。覆盖完整帧+5字节尾部、精确窗口、32字节容量停止、目标时钟停止后的手动结束、无信号空记录、最终B响应延迟、512帧FIFO溢出、B错误、准备超时与取消。结果及源码SHA见[本轮仿真归档](validation/etm-ddr-trace-rtl-20261101/integration/result.json)。所有测试hardwareAccess=false，未将仿真结论扩大为板上频率结论。
+离线验证：9项真实RAW4引脚→解析→异步FIFO→AXI DDR集成场景、92项DDR writer场景及原接收器11项回归通过。覆盖完整帧+5字节尾部、精确窗口、32字节容量停止、目标时钟停止后的手动结束、无信号空记录、最终B响应延迟、512帧FIFO溢出、B错误、准备超时与取消。结果及源码SHA见本轮仿真归档（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-ddr-trace-rtl-20261101/integration/result.json`）。所有测试hardwareAccess=false，未将仿真结论扩大为板上频率结论。
 
 当前DDR引脚入口限制为RAW4，传输格式与F103 ETMv3/H743 ETMv4无关；H743原有Kingst接入、目标识别、独立时钟读取、ETMv4配置与原生解码保留。此阶段没有修改任何目标PLL/AHB/APB寄存器，没有写目标Flash/QSPI。后续需完成新bit时序、配套ELF、真实DDR采集和USB采后下载，才可将此路径接为Web默认。每条lane校准及高频上板仍未完成。
 
@@ -1068,7 +1068,7 @@ DDR格式FRM1为去掉TPIU同步的连续16字节formatter帧，末尾不足16�
 
 48项离线检查全部通过：28种尾部有效载荷长度、多源切换、15种残帧长度、非法ID和长度拒绝，以及两份真实ETM字节流重封装的一致性。F103原1s数据1,363,722字节经1,558,544字节FRM1恢复后逐字节一致，原生解复用段7.17ms；H743 ETMv4 15,306字节恢复后逐字节一致，原生段0.325ms。这些时间只涵盖解复用，不包含SHA、进程启动或完整指令解码；测试FRM1由已保存ETM流重封装，不是真实DDR采集。结论是新增阶段保持两种协议的输入字节，H743 Zynq实机和完整性能仍待验收。[48项结果](validation/etm-framed-native-20261101/result.json)。
 
-FRM1后续主机检查：新增超大尾部参数拒绝用例，共49项通过；修正后的F103原生段6.72ms，时间口径同上。[最终EXE哈希及源码哈希](validation/etm-framed-native-20261101/v2/build.json)。桥启动预检可运行全部6个原生工具，现有3项Web完整测试再次通过（含真实F103/H743 C++解码及损坏采集不能冒充通过）；5项传输生命周期检查通过。EXE打包脚本仅复制6个明确运行工具，不把本地CMake缓存/对象/静态库打包。此处尚未重新交付桥ZIP。
+FRM1后续主机检查：新增超大尾部参数拒绝用例，共49项通过；修正后的F103原生段6.72ms，时间口径同上。最终EXE哈希及源码哈希（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-framed-native-20261101/v2/build.json`）。桥启动预检可运行全部6个原生工具，现有3项Web完整测试再次通过（含真实F103/H743 C++解码及损坏采集不能冒充通过）；5项传输生命周期检查通过。EXE打包脚本仅复制6个明确运行工具，不把本地CMake缓存/对象/静态库打包。此处尚未重新交付桥ZIP。
 
 新增AI真机验收选项`tools/test_orbtrace_board.py --ddr-physical`，沿用原F103 ELF/Flash只读核对、断点/CoreSight恢复；拒绝搭配目标分频或GPIO诊断改写。硬件窗口完成后通过物理AP0分块读DDR，再由C++解复用。nonce/captureId不符即拒绝读取负载，2项主机安全边界测试通过。该入口是DDR源首次上板的JTAG验收工具，不是用户Web操作入口，也不等于PS USB下载接口已实现。新RTL120MHz时序通过，setup +0.060ns、hold +0.003ns、SWCLK clock-to-pad 6.389ns/7ns；新bit/ELF及实际加载结果在完成后单独登记。
 
@@ -1080,7 +1080,7 @@ FRM1后续主机检查：新增超大尾部参数拒绝用例，共49项通过�
 
 OpenCSD实际处理全部4,567,468字节，packetIssues=0、unsyncBytes=0、addressInaccessible=0、lastErrorCode=0；3,919,374个packet、18,306,718个指令范围元素。范围数不是指令数；本次没有以Python展开逐指令JSONL。验证统计工具扫描原生二进制的时间也不是生产C++解码耗时。Flash与ELF逐段只读匹配，目标CoreSight、FPB与RCC均恢复，没有改目标时钟、目标Flash或QSPI。
 
-[加载/模式数据与首轮完整证据](validation/etm-ddr-trace-board-20261101/first-1s/acceptance.json)、[原生解码结果](validation/etm-ddr-trace-board-20261101/first-1s/decode/summary.json)、[真实FRM1压缩原始数据](validation/etm-ddr-trace-board-20261101/first-1s/capture.frm1.gz)、[可回放记录](validation/etm-ddr-trace-board-20261101/first-1s/capture.etmrecord)。原始压缩前SHA与native工具版本在ddr/result.json，可以离线复现解复用。
+加载/模式数据与首轮完整证据（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-ddr-trace-board-20261101/first-1s/acceptance.json`）、原生解码结果（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-ddr-trace-board-20261101/first-1s/decode/summary.json`）、真实FRM1压缩原始数据（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-ddr-trace-board-20261101/first-1s/capture.frm1.gz`）、可回放记录（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-ddr-trace-board-20261101/first-1s/capture.etmrecord`）。原始压缩前SHA与native工具版本在ddr/result.json，可以离线复现解复用。
 
 结论限于首轮1秒24MHz实际链路；这是解决下游排空瓶颈后的新证据，不证明更高频、零BER、实时显示或完整Web验收。此版本没有PS USB DDR下载接口，也没有逐线IDELAY校准。保留原Golden；F103 1/2秒更换函数+CDC压力、H743 Zynq实机、USB采后传输和逐线校准继续推进。
 
@@ -1097,7 +1097,7 @@ OpenCSD实际处理全部4,567,468字节，packetIssues=0、unsyncBytes=0、addr
 
 在这个实际负载下，每秒约19.7MB formatter、5.8MB ETM；这给采后USB下载设计提供大小依据，但本轮仍走JTAG物理AP0读回，**没有测得新DDR路径的USB吞吐、Web首屏或实时显示性能**。当前证据说明消除USB边采边排空后，24MHz TRACECLK可完成1/2秒有限采集；2轮不是长时间稳定性上限，也不替代更高频及逐线校准实验。
 
-[两轮完整结果、CDC逐事务与解码统计](validation/etm-ddr-trace-board-20261101/stress/result.json)。每轮实际FRM1压缩原始数据、可导入的etmrecord、目标状态及XSCT脚本一起归档，worktree删除后仍能复现。CLI `etm.ddr-trace-stress`保留该F103专用验收入口；H743不借用F103寄存器流程，沿用独立ETMv4入口，待换板后实测。
+两轮完整结果、CDC逐事务与解码统计（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-ddr-trace-board-20261101/stress/result.json`）。每轮实际FRM1压缩原始数据、可导入的etmrecord、目标状态及XSCT脚本一起归档，worktree删除后仍能复现。CLI `etm.ddr-trace-stress`保留该F103专用验收入口；H743不借用F103寄存器流程，沿用独立ETMv4入口，待换板后实测。
 
 补充交付身份核对：新增目录沿用`-text`保留加载文件字节，已重新登记JSON文件的原始换行；Git对象及工作区都必须逐项与manifest SHA一致。原始Vivado/PS构建日志和频率扫描CSV也显式纳入Git，不能因全局忽略规则而漏掉证据。此版本仍accepted=false、非Golden，待PS USB/Web/校准完整验收后再决定合并与晋级。
 
@@ -1109,7 +1109,7 @@ OpenCSD实际处理全部4,567,468字节，packetIssues=0、unsyncBytes=0、addr
 
 下载先发512字节ZDD1身份头，再从非缓存DDR直接按最大16KiB USB描述符发送原始FRM1，不产生每字节或每指令JSON。固件验证done、写入/响应字节数、记录格式、ID/nonce及范围后才占有EP2；最后描述符TX完成前不推进已完成字节计数。新START不能覆盖正在下载的记录，USB旧发送回调通过指针/epoch识别。DDR源与USB传输阶段分开，Web无需改目标PLL/AHB/APB。
 
-主机C验证覆盖旧bit能力保护、512个1MiB非缓存映射、采集中下载拒绝、身份/范围/加法溢出保护、完整头与尾部3字节、descriptor持有、失败提交不推进计数、USB复位保留源和记录；旧ETM/探针服务5组检查通过。RTL 9项集成及旧11项回归通过，包括新增的CSR存在声明核对。[源码冻结主机证据](validation/etm-ddr-usb-host-20261101/production-c-tests.txt)。此阶段不声称USB吞吐、Web默认DDR或新PS已上板完成。
+主机C验证覆盖旧bit能力保护、512个1MiB非缓存映射、采集中下载拒绝、身份/范围/加法溢出保护、完整头与尾部3字节、descriptor持有、失败提交不推进计数、USB复位保留源和记录；旧ETM/探针服务5组检查通过。RTL 9项集成及旧11项回归通过，包括新增的CSR存在声明核对。源码冻结主机证据（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-ddr-usb-host-20261101/production-c-tests.txt`）。此阶段不声称USB吞吐、Web默认DDR或新PS已上板完成。
 
 ### 2026-11-01：Web/CLI默认DDR能力分支与原始记录保存（主机验证通过）
 
@@ -1133,7 +1133,7 @@ Web窗口元数据在DDR模式以硬件ticks/ref计算实际时长，主机下�
 
 三轮USB下载数据与**同一缓冲区采后物理MEM-AP0全部读回**SHA一致，验证了非缓存区/USB DMA交接；不是跨两次采集比较。三轮帧丢失、parserErrors、readyLosses及USB submitErrors均0，OpenCSD处理全部ETM输入、packetIssues=0、无INCOMPLETE、无地址不可访问。1/2秒未重载或重试，改变cdc_poll/cdc_tx_poll入口，目标CoreSight/FPB/RCC均恢复。
 
-本负载约19.9MB/s formatter、5.9MB/s ETM；USB负载吞吐约36～38MB/s，说明采后下载具有足够带宽余量。它不证明旧PS逐条MMIO排空能跑同样速率，不把下载+解码时间等同实时显示：本路径仍先采集后下载。完整处理/首屏/缩放须在同一新记录上另测。[完整USB/物理对照及可回放记录](validation/etm-ddr-usb-board-20261101/stress/result.json)。
+本负载约19.9MB/s formatter、5.9MB/s ETM；USB负载吞吐约36～38MB/s，说明采后下载具有足够带宽余量。它不证明旧PS逐条MMIO排空能跑同样速率，不把下载+解码时间等同实时显示：本路径仍先采集后下载。完整处理/首屏/缩放须在同一新记录上另测。完整USB/物理对照及可回放记录（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-ddr-usb-board-20261101/stress/result.json`）。
 
 真实Web验收保留了多个失败阶段：首次连接0x03/0x00错位；ETM共享驱动漏掉主驱动的旧回包修复（9份镜像中仅DAP文件有差异）；同步后一次30次开关和10ms采集通过，但脚本硬编码旧records目录而中断；新服务首次连接仍能出现同步失败，不能把一次30次通过当作全部稳定。原生队列审计首个Info(0xff)读到旧Info(0)响应，证明同命令回显也不足以辨别记录身份。所有失败结果保留在web-history目录，没有抹掉或当作重试通过。
 
@@ -1150,7 +1150,7 @@ Web窗口元数据在DDR模式以硬件ticks/ref计算实际时长，主机下�
 
 直接trace.py capture不指定transport，自动选到ddr-usb/1；100ms采集输出450,529字节ETM、1,805,794条指令、packetIssues=0、loss=false，完整CLI+解码4.543秒，硬件窗口0.100000001秒。目标RCC/FPB/CoreSight恢复通过；未写Flash。
 
-实际打开最后一条Web记录的火焰图，选0～2000区间，点击「导出当前火焰图SVG」，浏览器确认保存到Windows下载目录etm-flame-timeline (6).svg，15,166字节，XML解析成功；SHA、截图与SVG原文件见[最终Web证据](validation/etm-ddr-usb-board-20261101/web-final/verification.json)。页面显示生成大小、下载请求与重试链接。完整实测截图为[SVG下载画面](validation/etm-ddr-usb-board-20261101/web-final/svg-download.png)。
+实际打开最后一条Web记录的火焰图，选0～2000区间，点击「导出当前火焰图SVG」，浏览器确认保存到Windows下载目录etm-flame-timeline (6).svg，15,166字节，XML解析成功；SHA、截图与SVG原文件见最终Web证据（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-ddr-usb-board-20261101/web-final/verification.json`）。页面显示生成大小、下载请求与重试链接。完整实测截图为SVG下载画面（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-ddr-usb-board-20261101/web-final/svg-download.png`）。
 
 ### 2026-11-01：冻结桥EXE也完成离线及真机验证，性能继续优化
 
@@ -1205,7 +1205,7 @@ Web窗口元数据在DDR模式以硬件ticks/ref计算实际时长，主机下�
 
 本阶段只改主机软件，继续使用已经明确加载验收的`prebuilt/etm-ddr-usb-raw4-20261101`配对；采后只读核对FCLK119,999,998Hz、SWCLK999,999.9833Hz。没有修改RTL/PS、目标PLL/AHB/APB或Flash/QSPI。先前8896780便携EXE未包含本轮优化，不能把源码测得的耗时标成旧EXE性能。高频TRACECLK、逐线校准及H743真机仍未完成。
 
-随后默认批量路径真机压力验收：10次打开/关闭、10次100ms采集与原生解码，逐轮交替cdc_poll/cdc_tx_poll断点，均通过；每轮同步CDC echo且严格核对硬件窗口内完成的事务，首错即停、没有补跑。完整流程5.978～7.283秒，中位6.510秒，探针打开中位0.681秒；所有轮次packetIssues=0、无传输丢失、RCC及清理检查通过。[10轮压力原始证据与可重放记录](validation/etm-register-batch-ab-20261101/stress/analysis.json)。这证明本阶段改动在已测范围内通过，不是高频或长期稳定性上限。
+随后默认批量路径真机压力验收：10次打开/关闭、10次100ms采集与原生解码，逐轮交替cdc_poll/cdc_tx_poll断点，均通过；每轮同步CDC echo且严格核对硬件窗口内完成的事务，首错即停、没有补跑。完整流程5.978～7.283秒，中位6.510秒，探针打开中位0.681秒；所有轮次packetIssues=0、无传输丢失、RCC及清理检查通过。10轮压力原始证据与可重放记录（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-register-batch-ab-20261101/stress/analysis.json`）。这证明本阶段改动在已测范围内通过，不是高频或长期稳定性上限。
 
 ### 2026-11-01：按用户优先级转回提频与逐线校准；SRAM时钟对照
 
@@ -1229,11 +1229,11 @@ Web窗口元数据在DDR模式以硬件ticks/ref计算实际时长，主机下�
 
 新构建任务已以0de5712源码、RAW4/DDR/lane-delay=1、FCLK120MHz约束启动；尚未完成新bit/ELF时序和上板，不替代旧已知可用配对。自动扫描工具先保留每个坏点，再以完整连续tap区、翻转激励、最终邻域和100ms/1s原生解码验证候选，默认恢复原选择。5项主机边界检查通过。寄存器、CLI和实验限制集中在[ELD1说明](ETM逐线输入延迟-ELD1.md)；真实校准效果待新配对上板实测。
 
-首轮实现未交付：200MHz输入参考域setup +0.195ns/hold +0.121ns，120MHz主域8条路径setup -0.020ns；随后bitgen DRC报告5条IBUF并行直通/延迟输入网部分未布线（RTSTAT-2），没有生成或加载新bit。[首轮失败日志及报告](validation/etm-lane-delay-20261101/failed-first-build/result.json)已保留。没有降低DRC等级，也没有把旧verified bit冒充新产物。
+首轮实现未交付：200MHz输入参考域setup +0.195ns/hold +0.121ns，120MHz主域8条路径setup -0.020ns；随后bitgen DRC报告5条IBUF并行直通/延迟输入网部分未布线（RTSTAT-2），没有生成或加载新bit。首轮失败日志及报告（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-lane-delay-20261101/failed-first-build/result.json`）已保留。没有降低DRC等级，也没有把旧verified bit冒充新产物。
 
 据此修正为每个输入只走IDELAY的一条物理路径，取消并行直通mux。新设计内部用显式加载的零tap作对照，仍有原语自身插入延迟；真正的直接输入基线继续使用旧已知配对。上电等IDELAYCTRL RDY后自动LD零tap并核对；启动LD期间RDY丢失也可在空闲时显式恢复。校准禁用时拒绝非零tap载荷。更新后的功能仿真通过，包括该启动故障、逐线偏斜、毛刺、采集中拒绝，以及原9项DDR边界的两种参数配置；8项主机检查通过。下一次实现须重新综合/布线、通过DRC和120MHz时序后才上板，此时尚未证明真实校准效果。
 
-等待e18dd7e第二轮实现时，旧已知可用bit/ELF继续在线，通过Web额外执行100次打开/关闭，全部通过、没有失败重试；RCC逐次不变。并行Vivado进程在该轮前后均确认存活。此测试只证明本轮旧配对在并行构建条件下的100次生命周期稳定性，不是新ELD1配对、高频或采集通过声明。[逐轮数据](validation/etm-lane-delay-20261101/web-100cycles/analysis.json)。
+等待e18dd7e第二轮实现时，旧已知可用bit/ELF继续在线，通过Web额外执行100次打开/关闭，全部通过、没有失败重试；RCC逐次不变。并行Vivado进程在该轮前后均确认存活。此测试只证明本轮旧配对在并行构建条件下的100次生命周期稳定性，不是新ELD1配对、高频或采集通过声明。逐轮数据（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-lane-delay-20261101/web-100cycles/analysis.json`）。
 
 ### 2026-11-01：ELD1新配对上板与36MHz首次扫描结果
 
@@ -1241,7 +1241,7 @@ Web窗口元数据在DDR模式以硬件ticks/ref计算实际时长，主机下�
 
 PS源码未改，本轮实际重新编译后ELF与旧版本字节相同，完整新编译日志已保留。上板OCM执行段匹配，2轮1MiB DDR模式/保护字通过，实际FCLK119,999,998Hz、SWCLK999,999.9833Hz；5条tap=0/8/16/24/31装载及物理计数读回通过，再归零。原Golden target CPU48MHz/TRACECLK24MHz的100ms、1s采集和原生解码通过，1s共4,785,714包、19,582,490个执行范围、packetIssues=0、addressInaccessible=0，硬件窗口内63次完整精确CDC echo。[实现、配对身份、板测及原始数据](validation/etm-lane-delay-20261101/README.md)。
 
-SRAM target CPU72MHz/TRACECLK36MHz首次扫描已完成110点，**没有无错误点**；零tap 10ms有2,062次parser错误，观测最低点D0/D1/D2/D3/CLK=14/24/24/24/8仍有1,736次，不能把单次最低值解释为稳定改善。第111点（14/24/22/24/8）在清理时Memory.address断言失败，响应原字节未被遗留断言保存，根因未定；按首个非采样质量故障停止，未重试。只完整扫完D0和D1，五条lane及最终候选验证均未完成。全部111点FRM1与元数据、失败日志及CDC摘要保留在[首次扫描](validation/etm-lane-delay-20261101/scan36-first/analysis.json)。
+SRAM target CPU72MHz/TRACECLK36MHz首次扫描已完成110点，**没有无错误点**；零tap 10ms有2,062次parser错误，观测最低点D0/D1/D2/D3/CLK=14/24/24/24/8仍有1,736次，不能把单次最低值解释为稳定改善。第111点（14/24/22/24/8）在清理时Memory.address断言失败，响应原字节未被遗留断言保存，根因未定；按首个非采样质量故障停止，未重试。只完整扫完D0和D1，五条lane及最终候选验证均未完成。全部111点FRM1与元数据、失败日志及CDC摘要保留在首次扫描（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-lane-delay-20261101/scan36-first/analysis.json`）。
 
 外层随后验证原Flash字节不变、RCC恢复48MHz，tap归零，未保留候选；没有写目标Flash/QSPI。新配对非Golden，不能声明36MHz、自动校准或新配对Web压力通过。待处理：保留实际DAP请求/响应及会话队列现场，查清第111点清理故障，再决定是否调整过采样结构；当前证据仅表明已测IDELAY/RAW4设置尚不能让36MHz可用。用户随后清除自动目标，已停止后续推进；新研究配对仍在线，Web服务已关闭，已知配对与Golden均未覆盖。
 

@@ -1,6 +1,6 @@
 # zynqlinkPRO
 
-开发接手先读 [AGENTS.md](AGENTS.md)、[项目问题跟踪列表](docs/项目问题跟踪列表.md) 和 [CLI工作台](docs/toolbox-cli-ai.md)。发现或处理问题时同步更新问题表并随改动提交。
+开发接手先读 [AGENTS.md](AGENTS.md)、[项目问题跟踪列表](docs/项目问题跟踪列表.md) 和 [CLI工作台](docs/toolbox-cli-ai.md)。全部文档从[文档入口](docs/README.md)导航，脚本从[工具入口](tools/README.md)发现。发现或处理问题时同步更新问题表并随改动提交。
 
 Zynq-7020 CMSIS-DAP：PL SWD/JTAG/RTT/HSS 与并行 ETM，PS USB/OCM 固件，配套 Web/CLI。
 
@@ -42,7 +42,7 @@ python toolbox.py project run etm.records-check
 python toolbox.py project run sim.cm3 --dry-run -- --top tb_cm3_jtag
 ```
 
-业务记录只保留F103ZE CDC-ETM最新有效1s和100ms，见[记录清单](docs/retained-records.json)。记录包含原始输入、目标ELF、源码和trace-store；可重建的native.bin已省略。自动测试另保留最小固定哈希夹具。
+业务记录保留5份：F103旧格式1s/100ms、H743初始化/单次echo 2s、F103 HAL存储1s、最终冻结版手动飞行记录，见[记录清单](docs/retained-records.json)。包含原始输入、目标ELF、源码和trace-store；缺失源码正文的补充来源单独记录，不冒称采集时快照。自动测试另保留最小固定哈希夹具。2026-11-05[工程整理](docs/validation/cleanup-20261105/README.md)将重复记录/回放移入回收站，历史逐轮证据及8个一次性旧脚本固定在tag `archive/main-before-cleanup-20261105`，当前树保留报告、摘要和关键回归输入。
 
 正式PS构建所需BSP、真实CM3模型和main的VexRiscv仿真模型均随Git提供，来源及哈希见[必需依赖清单](docs/required-dependencies.json)。换机需安装对应工具链，详见依赖与构建说明。
 

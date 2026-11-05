@@ -1,5 +1,7 @@
 # J-Link ETMv3分析资料评估：分页后继缓存与批量统计实验
 
+> 2026-11-05整理：本报告保留历史结论；逐轮原始证据/一次性驱动已固定在 Git tag `archive/main-before-cleanup-20261105`。恢复方法和逐文件SHA见[归档索引](../README.md)。历史路径及命令不表示当前可直接执行。
+
 > **main归档说明（2026-11-04）：用户暂不采纳，相关研究暂停。** 本目录仅同步历史文档与证据，候选源码、工具和EXE未并入main。原worktree/运行目录为当时路径，已按本次归档流程移除；不可据其描述推断当前main能力或当前板上身份。完整研究树及程序保留在Git tag `archive/etm-offline-research-20261104`（`0732f67`），取回方法与状态见[归档索引](../etm-offline-research-archive-20261104/README.md)。原实验分支的ETM写文件问题号“ZL-132”与main HAL问题重号，main中改用 **ZL-143**；原始JSON、manifest与历史正文保留原编号。
 
 日期：2026-11-04（Asia/Shanghai）。问题 **ZL-006，仍部分解决**；附带补充 ZL-132。沿用 `E:/zynqlinkPRO-work/etm-block-cache-20261104`、`codex/etm-block-cache-20261104`，基于 `60602de`。本轮只读保存Trace/ELF并执行主机实验，没有访问板卡、加载bit/ELF、修改目标时钟/Flash/QSPI，没有更新main或固定bridge EXE。
@@ -8,7 +10,7 @@
 
 ## 资料核对
 
-原材料：[JT_ETM3_decoder_reversed.md](reference/JT_ETM3_decoder_reversed.md)，用户路径 `E:/ozone_disc/JT_ETM3_decoder_reversed.md`。材料实际标注 `JLink_x64.dll 8.68`；本轮没有加载商业DLL、CPU插件，也没有独立复核其RVA/反汇编。验证对象是设计思路在本仓库上的收益，不能把以下实验当作证明SEGGER内部实现。
+原材料：JT_ETM3_decoder_reversed.md（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etmv3-jlink-analysis-20261104/reference/JT_ETM3_decoder_reversed.md`），用户路径 `E:/ozone_disc/JT_ETM3_decoder_reversed.md`。材料实际标注 `JLink_x64.dll 8.68`；本轮没有加载商业DLL、CPU插件，也没有独立复核其RVA/反汇编。验证对象是设计思路在本仓库上的收益，不能把以下实验当作证明SEGGER内部实现。
 
 | 材料内容 | 对当前仓库的判断 |
 |---|---|
@@ -51,7 +53,7 @@
 | 仅直接统计索引/组合计划 | 2.425 / 2.354 / 2.328 | **2.354** |
 | 全部开启 | 1.786 / 1.708 / 1.717 | **1.717** |
 
-逐轮实际值以 [最终summary](raw/jt3-paged-specialized-summary.json) 为准。组合开启相对旧原型缩短31.3%；只换缓存相对同候选关闭约缩短26.6%。**关闭新开关的研究流式入口本轮仍比旧程序约慢7.2%**，不能把它隐去当作零代价补丁；后续合入前还应消除这部分开销并扩大性能回归。主线/固定程序未替换。
+逐轮实际值以 最终summary（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etmv3-jlink-analysis-20261104/raw/jt3-paged-specialized-summary.json`） 为准。组合开启相对旧原型缩短31.3%；只换缓存相对同候选关闭约缩短26.6%。**关闭新开关的研究流式入口本轮仍比旧程序约慢7.2%**，不能把它隐去当作零代价补丁；后续合入前还应消除这部分开销并扩大性能回归。主线/固定程序未替换。
 
 早期简单分页缓存六轮对照中位曾为3.489→2.197s（约37%），后续三个源码阶段组合结果约31%–33%；保留所有组，使用最终同期旧程序比较作主结论，不用不同阶段最快轮次拼出大倍数。
 
@@ -66,7 +68,7 @@
 
 最终中位缩短 **2.9%**，但三组对应开关配对中两组变慢、一组变快，**尚未证明稳定整体提速**。前两源码阶段分别为7.189→6.625s（7.9%）、6.825→6.616s（3.1%）。这三组不混算；保留阶段/程序身份差异及波动，不声称稳定整体8%或10倍。它也再次说明完整建库的重放、索引与压缩成本仍在。
 
-最终6个普通API输出全部对既有已验证旧库比较：静态/字符串/完整执行流/包/导航/检查点块原字节、诊断、analysis、查询语义meta及全部60表相同。见 [API证据](raw/api/)。输入指纹保存在各组API结果中。
+最终6个普通API输出全部对既有已验证旧库比较：静态/字符串/完整执行流/包/导航/检查点块原字节、诊断、analysis、查询语义meta及全部60表相同。见 API证据（历史目录：`archive/main-before-cleanup-20261105:docs/validation/etmv3-jlink-analysis-20261104/raw/api`，按验收索引恢复）。输入指纹保存在各组API结果中。
 
 ## 持续输入：仍不能宣布F103原速通过
 
@@ -82,15 +84,15 @@
 
 处理预算比是decode/snapshot墙钟分区相对已消费输入时间，不是CPU利用率；平均字节率均匀回放不等于真实引脚突发。无节拍更快不代表定时输入就一定有足够余量。
 
-**失败/对照未删除：** 初版把优化也用于H743时，H7432s回放溢出；仅运行时限制后，F103半速及H743两组也出现溢出。额外在同一机器配对运行旧程序，旧程序本轮H7432s同样溢出；同时候选无节拍H743比旧程序慢约7%，不能把失败全归给主机或全归给单一代码变化。最终分开编译后上表场景通过，但历史失败仍保留；没有通过反复重试选一轮来宣称任意负载稳定实时。见 [阶段汇总](raw/jt3-paged-final-summary.json)、[运行时限制汇总](raw/jt3-paged-scoped-summary.json)、[同机旧/新对照](raw/jt3-host-controls-summary.json)。
+**失败/对照未删除：** 初版把优化也用于H743时，H7432s回放溢出；仅运行时限制后，F103半速及H743两组也出现溢出。额外在同一机器配对运行旧程序，旧程序本轮H7432s同样溢出；同时候选无节拍H743比旧程序慢约7%，不能把失败全归给主机或全归给单一代码变化。最终分开编译后上表场景通过，但历史失败仍保留；没有通过反复重试选一轮来宣称任意负载稳定实时。见 阶段汇总（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etmv3-jlink-analysis-20261104/raw/jt3-paged-final-summary.json`）、运行时限制汇总（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etmv3-jlink-analysis-20261104/raw/jt3-paged-scoped-summary.json`）、同机旧/新对照（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etmv3-jlink-analysis-20261104/raw/jt3-host-controls-summary.json`）。
 
 ## 正确性与未完成项
 
 - 三份原始记录、三份4秒拼接，各与原完整BuildVisitor/ExecutionFacts基准比较全部analysis、每PC成立/未成立/未知/周期、范围/run/event计数，及规范化包/范围/事件顺序SHA、逐条PC/执行状态/周期SHA，全部相同。接缝不插入reset/EOT。
 - F10320秒连续字节流再次对整流基准完成上述顺序SHA/PC/analysis对拍。长流参考仍沿用上一轮已核对的紧凑累计器，不能冒充20秒完整历史60表建库对拍。
 - 成功定时回放的全量累计统计相同；过载后的部分输入不当作通过。F103原有未知执行/间隙定义保持，不把高命中率当作采集无损。
-- 三个真实16KiB前缀，对旧 `etm_decode.exe` 与页缓存开启的新程序比较完整旧JSONL stdout，所有字段和字节一致（补足仅比较建库消费字段的范围）。见 [native-jsonl-check.json](raw/native-jsonl-check.json)。
-- 辅助尝试旧程序 `--binary` 落盘时再次失败，改用完整stdout逐字节比较；关联ZL-132，不声称这次缓存修复了I/O问题或已确定与旧prescan同根因。[失败记录](raw/legacy-binary-output-failure.json)。
+- 三个真实16KiB前缀，对旧 `etm_decode.exe` 与页缓存开启的新程序比较完整旧JSONL stdout，所有字段和字节一致（补足仅比较建库消费字段的范围）。见 native-jsonl-check.json（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etmv3-jlink-analysis-20261104/raw/native-jsonl-check.json`）。
+- 辅助尝试旧程序 `--binary` 落盘时再次失败，改用完整stdout逐字节比较；关联ZL-132，不声称这次缓存修复了I/O问题或已确定与旧prescan同根因。失败记录（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etmv3-jlink-analysis-20261104/raw/legacy-binary-output-failure.json`）。
 - 最终storebuild/decoder目标构建、865个依赖输入核对、Python工具py_compile及diff whitespace检查通过，既有编译警告保留。没有重跑无关硬件/冻结EXE套件。
 - 未验证动态代码、所有架构/配置切换、任意稀疏地址内存预算、真实USB/PL/DDR/TPIU链路、GUI和长稳；默认新开关关闭，ZL-006不关闭。F103原速仍需进一步定位每指令回调/归约等成本，尚无CPU采样证据把某一处列为唯一根因。
 

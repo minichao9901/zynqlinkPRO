@@ -1,5 +1,7 @@
 # ETM 优化独立代码审查：main 与 codex/etm-cpp-stage1
 
+> 2026-11-05整理：本报告保留历史结论；逐轮原始证据/一次性驱动已固定在 Git tag `archive/main-before-cleanup-20261105`。恢复方法和逐文件SHA见[归档索引](../README.md)。历史路径及命令不表示当前可直接执行。
+
 日期：2026-11-02（Asia/Shanghai）。结论：**优化方向合理，已测执行语义一致、性能改善可复现；先修复 ZL-107，再合并交付。** 本轮审查没有修改候选实现，没有操作硬件、目标时钟、Flash/QSPI，也没有更新固定 EXE。
 
 ## 比较身份与范围
@@ -7,7 +9,7 @@
 - 候选 worktree：`E:/zynqlinkPRO-work/etm-cpp-stage1-20261102`，提交 `c38b6a8943154e274c7fd1334d8990d3e2dd6330`。算法源码提交 `77bf1c2`，交付原生程序提交 `9e4318a`。
 - 起始 main：`e6f26cc`。审查过程中另一会话提交了 `5966fa3`，只涉及 Web 评审文档及问题表；已核对 `git diff e6f26cc 5966fa3 -- etm-service tools` 为空，四组对照使用的 main 实现不变。
 - 对比全部新增/修改的生产 C++、Python、构建配置、测试和验收工具；读取两阶段报告、产物 manifest 与原始结果。主关注点是 direct 输入的语义、状态机共享、缓存重放、诊断格式、输入身份、发布失败及升级兼容性。
-- 独立核对构建 manifest 中 16 份源码和 3 份 EXE：当前原字节 SHA 全匹配，源码 Git blob SHA 及内容匹配；见 [provenance.json](raw/provenance.json)。没有重新编译 native 程序，也没有重新验收冻结候选。
+- 独立核对构建 manifest 中 16 份源码和 3 份 EXE：当前原字节 SHA 全匹配，源码 Git blob SHA 及内容匹配；见 provenance.json（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-optimization-review-20261102/raw/provenance.json`）。没有重新编译 native 程序，也没有重新验收冻结候选。
 
 ## 需要修改：ZL-107 / P1，旧记录重新解码必然失败
 
@@ -22,7 +24,7 @@
 3. 再次复现前后计算 native.bin、etm.bin、firmware.elf 和旧 store manifest 的 SHA：四者全部未变。新一代没有发布，旧 manifest 保留。
 4. 同一输入在候选的全新目录成功，并与 main 完整结果一致。
 
-证据：[upgrade-failure.json](raw/upgrade-failure.json)。其中保留实际堆栈和前后 SHA。现有差分/基准工具每轮创建新目录，未覆盖升级重解码。
+证据：upgrade-failure.json（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-optimization-review-20261102/raw/upgrade-failure.json`）。其中保留实际堆栈和前后 SHA。现有差分/基准工具每轮创建新目录，未覆盖升级重解码。
 
 建议把原始 ETM SHA 与 native SHA 分开命名、校验和绑定；direct 路径仅将其实际消费的原始 ETM 指纹作为构建结果身份，明确处理旧 native 派生文件。不能通过关闭 hash_inputs 或自动删除用户记录绕过。补充“main 生成旧记录 → 新版本重解码”和 binary→direct→binary 的回归，并继续验证真正被修改的输入会拒绝发布。**本轮仅审查，未修复。**
 
@@ -41,10 +43,10 @@
 
 每组检查：summary/quality 完全相等；静态、字符串、执行序列、包、导航、聚合及检查点块（1/2/3/4/5/6/11）解压后逐字节相等；完整 analysis、全部展开诊断、60 张查询数组逐项相等。元数据中的 generation、路径、构建计时和诊断编码形式不要求字节一致。
 
-- [F103 小输入](raw/main-candidate-small.json)、[F103 大输入](raw/main-candidate-large.json)、[H743 夹具](raw/main-candidate-h743.json)、[H743 两秒](raw/main-candidate-h743-2s.json)。
-- [输入 SHA、计时及完整 summary/quality](raw/replay-results.json)。H743 两秒源输入取自候选已有 `build/stage2-h743-2s/direct/etm.bin`，SHA 为 `3bb82c465d926c43f857c47dcaa7afae0dc3976dd25b781dc492eb7d133650b6`，与候选已归档两秒报告相同；只读取 raw/ELF/配置/源码，不复制派生 store。
+- F103 小输入（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-optimization-review-20261102/raw/main-candidate-small.json`）、F103 大输入（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-optimization-review-20261102/raw/main-candidate-large.json`）、H743 夹具（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-optimization-review-20261102/raw/main-candidate-h743.json`）、H743 两秒（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-optimization-review-20261102/raw/main-candidate-h743-2s.json`）。
+- 输入 SHA、计时及完整 summary/quality（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-optimization-review-20261102/raw/replay-results.json`）。H743 两秒源输入取自候选已有 `build/stage2-h743-2s/direct/etm.bin`，SHA 为 `3bb82c465d926c43f857c47dcaa7afae0dc3976dd25b781dc492eb7d133650b6`，与候选已归档两秒报告相同；只读取 raw/ELF/配置/源码，不复制派生 store。
 - F103 大输入原有 2 个 gap、522998 条未知执行未消失；H743 两秒保留 1 个 gap、1139 条未知执行、429343 个周期元素。结果一致不意味着执行流完整或周期精度获得了新的硬件证明。
-- Python 13 项针对性测试、55 项 CLI 测试通过；C++ 5 万步共享状态 oracle 和 7 万唯一范围 replay 自检通过。已有 ResourceWarning、Flask/pkgutil 弃用警告仍存在。[检查摘要](raw/checks.json)。
+- Python 13 项针对性测试、55 项 CLI 测试通过；C++ 5 万步共享状态 oracle 和 7 万唯一范围 replay 自检通过。已有 ResourceWarning、Flask/pkgutil 弃用警告仍存在。检查摘要（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-optimization-review-20261102/raw/checks.json`）。
 
 ## 代码判断与证据边界
 
@@ -61,7 +63,7 @@
 
 ## 复现与交接
 
-同目录 [replay.py](replay.py) 是本轮实际使用的离线驱动；参数依次为代码仓库根、含 decoded.json/原始 ETM/ELF 的源记录目录、输出目录。它为保留失败证据捕获异常并写 result JSON，因此 shell 退出 0 不代表解码成功，必须检查 JSON 的 `ok`。
+同目录 replay.py（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-optimization-review-20261102/replay.py`） 是本轮实际使用的离线驱动；参数依次为代码仓库根、含 decoded.json/原始 ETM/ELF 的源记录目录、输出目录。它为保留失败证据捕获异常并写 result JSON，因此 shell 退出 0 不代表解码成功，必须检查 JSON 的 `ok`。
 
 ```powershell
 python -X utf8 docs/validation/etm-optimization-review-20261102/replay.py E:/zynqlinkPRO E:/zynqlinkPRO/etm-service/records/capture-2579cfda576445a3a7e9b12d8cf76627 E:/zynqlinkPRO/build/etm-review-upgrade-new

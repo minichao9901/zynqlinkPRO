@@ -1,5 +1,7 @@
 # Web 紧凑工作台第一批实现
 
+> 2026-11-05整理：本报告保留历史结论；逐轮原始证据/一次性驱动已固定在 Git tag `archive/main-before-cleanup-20261105`。恢复方法和逐文件SHA见[归档索引](../README.md)。历史路径及命令不表示当前可直接执行。
+
 日期：2026-11-02（Asia/Shanghai）。分支 `codex/web-ui-compact`，基于 `e6f26cc` 创建独立 worktree。对应评审及问题 ZL-100、ZL-101、ZL-102。
 
 ## 本批行为
@@ -18,7 +20,7 @@
 - 源码服务8898，不启用native probe。1280×720浏览器：保存的HPM6800/RISC-V配置显示JTAG TCK与对应芯片/范围；手填`0x01241000-0x01242000`刷新保留，随后还原测试前范围。未核对硬件实际下发参数，ZL-100保留部分解决。
 - 串口演示模式：0 B、906 B、2.7 KB均无重复单位；暂停显示后计数从906 B继续增长到2.7 KB，按钮显示恢复显示。全部为页面模拟串口，没有打开真实COM口。
 - ETM打开版本管理的100ms记录`capture-2579cfda576445a3a7e9b12d8cf76627`，550478路径；默认side-hidden，执行流和源码占满宽度。主动展开后再次打开同记录保持展开。
-- 截图：[ETM分析](etm-analysis.png)、[串口宽工作区](serial-wide.png)。实际浏览器检查不替代实板资源交接/采集回归。
+- 截图：ETM分析（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/web-ui-compact-20261102/etm-analysis.png`）、串口宽工作区（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/web-ui-compact-20261102/serial-wide.png`）。实际浏览器检查不替代实板资源交接/采集回归。
 
 ## 后续范围
 

@@ -1,5 +1,7 @@
 # SRAM固件24/36MHz输入对照
 
+> 2026-11-05整理：本报告保留历史结论；逐轮原始证据/一次性驱动已固定在 Git tag `archive/main-before-cleanup-20261105`。恢复方法和逐文件SHA见[归档索引](../README.md)。历史路径及命令不表示当前可直接执行。
+
 实验使用同一已加载PL/PS配对prebuilt/etm-ddr-usb-raw4-20261101；没有改RTL/PS，没有新bit或新的STA验收声明。target固件由prebuilt/f103ze-cdc-ram-clock-20261101加载到SRAM，CPU频率来自target自身SystemClock_Config，RCC和固件诊断均已核对。SWCLK为1MHz，TRACECLK值按目标HCLK/2推算。
 
 trace24mhz：100ms、1s采集和完整原生packet/range检查通过，保存FRM1及ETM原始数据、解码总结和可导入记录。trace36mhz：首轮100ms就失败，没有重试或执行下一轮；保留原始capture.frm1和具体错误计数，不用不可信数据创建通过的解码记录。USB在硬件窗口结束后才下载。

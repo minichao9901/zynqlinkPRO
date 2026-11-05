@@ -1,5 +1,7 @@
 # Web目标系列/频率策略与CLI高频配置核查
 
+> 2026-11-05整理：本报告保留历史结论；逐轮原始证据/一次性驱动已固定在 Git tag `archive/main-before-cleanup-20261105`。恢复方法和逐文件SHA见[归档索引](../README.md)。历史路径及命令不表示当前可直接执行。
+
 2026-11-03，`codex/web-ui-compact`，基于`2e7acbf`；ZL-109/110。本轮按用户明确要求收敛Web产品频率，不重新操作探针/目标板，不写Flash/QSPI、不改PL/PS。
 
 ## 修改

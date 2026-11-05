@@ -1,10 +1,12 @@
 # 双标签交互火焰图与bridge交付（2026-11-02）
 
+> 2026-11-05整理：本报告保留历史结论；逐轮原始证据/一次性驱动已固定在 Git tag `archive/main-before-cleanup-20261105`。恢复方法和逐文件SHA见[归档索引](../README.md)。历史路径及命令不表示当前可直接执行。
+
 ZL-012追加鼠标框选放大和双标签导出。每个自包含HTML默认打开 **Timeline · 执行顺序**，另有同一区间的 **周期权重火焰图**。两个视图分别保留缩放历史、搜索、选中调用及纵向滚动。左键双向拖动框选，松开后放大；Shift＋拖动平移，Esc取消正在进行的操作。SVG导出保持原有接口。
 
-- [CDC初始化双标签HTML](CDC初始化-双标签交互火焰图.html)：seq7～42571，Timeline925段/14层，周期页55段/15层、62237周期。
-- [单次echo双标签HTML](单次echo-双标签交互火焰图.html)：seq7782088～7784098，Timeline60段/10层，周期页27段/9层、4539周期。
-- [Timeline预览](init-timeline.png)、[周期页预览](init-cycles.png)、[框选预览](selection-preview.png)、[实际冻结Web页面](frozen-web-ui.png)、[CLI及操作说明](../../flame-html-export.md)。
+- CDC初始化双标签HTML（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/flame-tabs-20261102/CDC初始化-双标签交互火焰图.html`）：seq7～42571，Timeline925段/14层，周期页55段/15层、62237周期。
+- 单次echo双标签HTML（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/flame-tabs-20261102/单次echo-双标签交互火焰图.html`）：seq7782088～7784098，Timeline60段/10层，周期页27段/9层、4539周期。
+- Timeline预览（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/flame-tabs-20261102/init-timeline.png`）、周期页预览（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/flame-tabs-20261102/init-cycles.png`）、框选预览（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/flame-tabs-20261102/selection-preview.png`）、实际冻结Web页面（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/flame-tabs-20261102/frozen-web-ui.png`）、[CLI及操作说明](../../flame-html-export.md)。
 
 周期页使用TraceStore中可求和的周期计数及其调用树，不以指令记录数冒充耗时，也不声称每条指令都有精确时间戳。缺少周期时保留第二标签并说明不可用。各视图保留200000调用段上限；HTML的聚合导出也必须能容纳其Timeline区间。旧模式/权重参数继续校验，聚合root应用于周期页，HTML始终默认Timeline；SVG仍按参数导出单个视图。
 

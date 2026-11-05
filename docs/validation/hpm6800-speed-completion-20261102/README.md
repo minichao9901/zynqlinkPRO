@@ -1,5 +1,7 @@
 # HPM6800EVK测速补全：66.667MHz与完整分档
 
+> 2026-11-05整理：本报告保留历史结论；逐轮原始证据/一次性驱动已固定在 Git tag `archive/main-before-cleanup-20261105`。恢复方法和逐文件SHA见[归档索引](../README.md)。历史路径及命令不表示当前可直接执行。
+
 2026-11-02，ZL-004/070/073/085。原生测速完成后再进入[R22 Web测试](../hpm6800-web-stress-20261102/README.md)。新PS显式cap66666666Hz，PL复用原133.333333MHz/7.5ns已通过bit，未修改RTL、未重做实现；setup+0.179ns、hold+0.034ns。配对见[prebuilt](../../../prebuilt/hpm6800-jtag66-133-20261102/README.md)。超25MHz均为单板超规格研究，不是芯片保证。
 
 ## 最佳档和分档表

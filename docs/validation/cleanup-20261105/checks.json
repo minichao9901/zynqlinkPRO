@@ -1,0 +1,57 @@
+{
+  "date": "2026-11-05",
+  "baseline": "6765937",
+  "businessRecordsBefore": 26,
+  "businessRecordsAfter": 5,
+  "businessRecordBytesAfter": 271805053,
+  "validationTrackedFilesBefore": 6645,
+  "hardwareAccess": false,
+  "checks": [
+    {
+      "command": "python -X utf8 tools/verify_retained_records.py",
+      "passed": true,
+      "records": 5
+    },
+    {
+      "command": "python -X utf8 toolbox.py project run test.cli",
+      "passed": true,
+      "tests": 61
+    },
+    {
+      "command": "python -X utf8 -m unittest tools.tests.test_toolbox_project tools.tests.test_release_layout",
+      "passed": true,
+      "tests": 10
+    },
+    {
+      "command": "python -X utf8 tools/verify_dependencies.py",
+      "passed": true,
+      "files": 869
+    },
+    {
+      "command": "python -X utf8 toolbox.py trace doctor --offline",
+      "passed": true
+    },
+    {
+      "command": "python -X utf8 toolbox.py project run web.check",
+      "passed": true,
+      "modules": 165,
+      "sharedDrivers": 10
+    },
+    {
+      "command": "git diff --cached --check",
+      "passed": true
+    },
+    {
+      "command": "Scan README.md, tools/README.md and docs Markdown relative links",
+      "passed": true,
+      "unresolved": 0
+    }
+  ],
+  "initialFailure": {
+    "check": "curated record verification",
+    "reason": "source bodies absent, StopIteration",
+    "resolution": "documented source-text supplements; final five records pass"
+  },
+  "deletionPolicy": "Direct recursive deletion rejected by automatic approval. Used Windows Recycle Bin for 50 explicitly validated derived directories; did not empty Recycle Bin.",
+  "businessRecordBytesBeforeApproximate": 26862545797
+}

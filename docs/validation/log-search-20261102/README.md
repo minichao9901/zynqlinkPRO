@@ -1,5 +1,7 @@
 # 日志查找、过滤与高亮
 
+> 2026-11-05整理：本报告保留历史结论；逐轮原始证据/一次性驱动已固定在 Git tag `archive/main-before-cleanup-20261105`。恢复方法和逐文件SHA见[归档索引](../README.md)。历史路径及命令不表示当前可直接执行。
+
 2026-11-02（Asia/Shanghai），codex/web-ui-compact，基于f659909。关联ZL-102、ZL-105。
 
 ## 行为与边界
@@ -21,7 +23,7 @@
 
 ## 浏览器补充与程序交付
 
-串口实时匹配从171处增长至254处；RTT转发通过共享模拟串口检索到258处。RTT Viewer使用内置mock与`addr=0x20001000`：`info`不区分大小写检索94处，勾选区分大小写后无匹配（源为大写INFO）；结果区Esc关闭、顶部入口获得焦点时Ctrl+F打开均通过，清空接收缓冲后检索同步为0 B/0处。控制台无error。截图：[串口检索](serial-search.png)、[RTT检索](rtt-search.png)。
+串口实时匹配从171处增长至254处；RTT转发通过共享模拟串口检索到258处。RTT Viewer使用内置mock与`addr=0x20001000`：`info`不区分大小写检索94处，勾选区分大小写后无匹配（源为大写INFO）；结果区Esc关闭、顶部入口获得焦点时Ctrl+F打开均通过，清空接收缓冲后检索同步为0 B/0处。控制台无error。截图：串口检索（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/log-search-20261102/serial-search.png`）、RTT检索（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/log-search-20261102/rtt-search.png`）。
 
 本worktree中的`dist/zynq-etm-bridge/zynq-etm-bridge.exe`已重建，旧程序归档并保留data；原E盘工作区程序未更新。EXE SHA-256：`572d08e409089858d609e23c70606a742e7ab1bc8a83ef3c0e9bcf45bf1ccbcb`。
 

@@ -1,5 +1,7 @@
 # 极限 SWD 与 Golden 50/60 MHz 性能复核
 
+> 2026-11-05整理：本报告保留历史结论；逐轮原始证据/一次性驱动已固定在 Git tag `archive/main-before-cleanup-20261105`。恢复方法和逐文件SHA见[归档索引](../README.md)。历史路径及命令不表示当前可直接执行。
+
 本轮接续 `ec6d028` 交接，使用已经纳入 Git 的三个 bit/ELF 配对，未修改或重建 RTL、Zynq 固件、目标 Flash 或 QSPI。实验配对继续 `accepted=false`，没有替代 release 或 Golden。新的主机验证驱动位于 `tools/validate_fclk_performance.py`、`tools/validate_fclk_edge_cases.py` 和 `tools/run_fclk_comparison.py`。
 
 用户补充的业务边界：ETM 模式仅使用低频 SWD 做配置（例如10 MHz），不要求高频 ETM 与 RTT 并发。本文高频 ETM 输出实验仅保留为范围外诊断，不作为产品退化判据。补充验收重点是 RTT/J-Scope 运行时插入普通调试命令、暂停/单步/恢复是否卡死。

@@ -1,1 +1,0 @@
-Historical executed drivers, not live entry points. Read current toolbox help and hardware ownership/identity first. Runtime/data paths are task snapshots, not credentials or current board state. Formal reusable tools are in tools/validate_f103_*.py.

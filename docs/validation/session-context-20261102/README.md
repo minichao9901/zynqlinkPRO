@@ -1,5 +1,7 @@
 # 目标与 ELF 显式复用
 
+> 2026-11-05整理：本报告保留历史结论；逐轮原始证据/一次性驱动已固定在 Git tag `archive/main-before-cleanup-20261105`。恢复方法和逐文件SHA见[归档索引](../README.md)。历史路径及命令不表示当前可直接执行。
+
 2026-11-02（Asia/Shanghai），codex/web-ui-compact，基于36df637。关联ZL-102、ZL-106。
 
 ## 使用流程
@@ -26,7 +28,7 @@ ETM历史记录保留自身ELF/源码身份，本批不将历史ELF自动推广�
 - 同为ARM的本地H743选择不允许复用已绑定F103的ELF；沿用F103后可复用。原先已匹配的目标按钮按设计禁用，首次测试尝试点击该禁用按钮被浏览器拒绝，后按匹配流程继续，不算产品失败。
 - 模拟调试连接保持连接时，波形复用被禁用；断开后恢复。没有打开真实探针。
 - 更换共享目标到HPM6800后，烧录页旧固件与共享ELF失效；切到RTT仍保留本地F103选择，点沿用后切至HPM且旧RTT地址为空。波形沿用后DWARF/数组提示要求重载，调试器沿用后显示未载入ELF/RISC-V。控制台无error。
-- 截图：[波形复用](scope-reused-elf.png)、[调试器复用](debugger-reused-elf.png)。仅做源码页面、真实文件离线解析和内置模拟连接检查，不替代实板配置/恢复验收。
+- 截图：波形复用（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/session-context-20261102/scope-reused-elf.png`）、调试器复用（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/session-context-20261102/debugger-reused-elf.png`）。仅做源码页面、真实文件离线解析和内置模拟连接检查，不替代实板配置/恢复验收。
 
 ## 独立程序
 

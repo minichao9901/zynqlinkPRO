@@ -1,6 +1,8 @@
 # Probe RTL / C 固件架构与鲁棒性审查
 
-2026-11-02（Asia/Shanghai）。审查基线 `main@7ec002a`，被测生产RTL/C哈希见 [raw/results.json](raw/results.json)。起始工作区只有原有未跟踪 `build/`。审查期间另一工作提交 e360a24 调整ETM问题编号，生产RTL/C未变；本轮避让109/110并使用111～115。本轮不修改生产 RTL/C，不访问 USB/JTAG/板卡，不构建或替换 bit/ELF，不重新判定历史板测和板上身份。
+> 2026-11-05整理：本报告保留历史结论；逐轮原始证据/一次性驱动已固定在 Git tag `archive/main-before-cleanup-20261105`。恢复方法和逐文件SHA见[归档索引](../README.md)。历史路径及命令不表示当前可直接执行。
+
+2026-11-02（Asia/Shanghai）。审查基线 `main@7ec002a`，被测生产RTL/C哈希见 raw/results.json（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/probe-rtl-c-review-20261102/raw/results.json`）。起始工作区只有原有未跟踪 `build/`。审查期间另一工作提交 e360a24 调整ETM问题编号，生产RTL/C未变；本轮避让109/110并使用111～115。本轮不修改生产 RTL/C，不访问 USB/JTAG/板卡，不构建或替换 bit/ELF，不重新判定历史板测和板上身份。
 
 结论：**PL 承担协议时序、批量传输和采样，PS 承担 USB、会话和调度，这个方向合理，值得保留。正常路径已有较好的验证基础；异常输入、失败恢复、长期运行与物理签核仍不足以支撑“任意工况下可靠”的结论。优先修边界和恢复，再做局部吞吐优化。** 本轮新增 ZL-111～115；没有证据将这些缺陷直接认定为 ZL-002/003/004/098 的根因。
 
@@ -14,7 +16,7 @@
 - 复现 B：原样提取生产 `DAP_SWD_TransferBlock` 函数，mock 成功 DMA，输入 1024 个 DP read，输出 **4100B**，覆盖名义 4096B 响应槽后的四字节哨兵 `78 56 34 12`。使用 4128B arena 安全观察越界，不故意破坏宿主进程；不是 ASan 全固件覆盖。真实 USB 槽紧邻其他槽，实际后果取决于队列位置。
 - 影响：主机错误包、版本不匹配或损坏长度可导致旧参数被执行、越界读取/写入、其他在飞响应被破坏。默认主机正确分包不消除固件防线缺口。
 - 建议：入口统一 checked executor，带 `request_length`/`response_capacity`；先完整验证复合命令的输入消耗与最大响应，再执行任何有副作用的操作。读块最多 `(capacity-4)/4`，写块还必须验证输入负载；子命令扣除外层头预算。不能靠 memset 或事后截断 response 修复已发生的副作用/越界。
-- 证据：[dap_ingress.log](raw/dap_ingress.log)、[response_capacity.log](raw/boundary/response_capacity.log)。
+- 证据：dap_ingress.log（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/probe-rtl-c-review-20261102/raw/dap_ingress.log`）、response_capacity.log（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/probe-rtl-c-review-20261102/raw/boundary/response_capacity.log`）。
 
 ### ZL-112 / P1：AP 上下文恢复失败仍被当作所有权已释放
 
@@ -22,7 +24,7 @@
 - 复现：复用已有 production target C harness，正常 claim 并改变 TAR，在 release 前注入 FAULT。结果 claimed=false，但 TAR=`0x20000800`（应为 `0x20000040`），SELECT=0（应为 `0x01000010`）。
 - 影响：上位调试器缓存的 AP 状态与目标实际状态分离；若下一条命令复用缓存、直接访问 DRW，可能访问错误地址。实际错误内存写未上板复现。
 - 建议：release 返回完整结果，保留首次错误和恢复错误；恢复失败进入明确的 context-invalid 状态，拒绝依赖旧上下文的命令。恢复过程验证 posted AP 写完成，必要时读回可读寄存器；由受控重建恢复有效状态，不静默重放原目标写入。
-- 证据：[restore_failure.log](raw/restore_failure.log)。与 ZL-002/003 的历史现象相关，但尚无因果闭环。
+- 证据：restore_failure.log（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/probe-rtl-c-review-20261102/raw/restore_failure.log`）。与 ZL-002/003 的历史现象相关，但尚无因果闭环。
 
 ### ZL-115 / P1：标量/SWJ 等待缺少超时和 Abort 退出
 
@@ -30,14 +32,14 @@
 - 复现：原样提取实际生效的 SWD_Transfer，MMIO mock 保持 BUSY=1，DAP_TransferAbort=1。宿主在 2 秒超时后终止该进程；没有函数返回。该注入证明持续 BUSY 的处理缺口，不证明正常 SWD FAULT 必然让 PL 卡住。
 - 影响：USB IRQ 可能仍响应，但主循环无法进入 probe_poll/etm_poll，正常控制/停流不能前进；外部 EP0 engine reset 若可用可能救回，不等于本路径具备有界恢复。
 - 建议：公共 MMIO wait 使用独立 PS 时间源，按最长合法事务和最低速档设置 deadline，检查取消/epoch；失败保存状态并确认软复位结果。批量路径的 2000000 次轮询和 sampler 的 1000000 次轮询也应改为明确时间预算。AXI 本身挂死与普通 BUSY 不退应区分，后者加软件超时不能修复前者。
-- 证据：[scalar_busy.log](raw/boundary/scalar_busy.log)。
+- 证据：scalar_busy.log（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/probe-rtl-c-review-20261102/raw/boundary/scalar_busy.log`）。
 
 ### ZL-113 / P2：QueueCommands 填满接收环后没有前进路径
 
 - `dap_main.c:222-225` 只有找到非 0x7e 请求才开始消费排队命令；16 个槽全部是 0x7e 时直接 break，RX-ready 又因为满环返回 false。
 - 复现：投递 16 个排队包，调用 handler 100 次，执行数始终 0、队列深度16、不能接收执行终止包。正常保留一个终止包槽位的主机流程不受本例影响；未声称现有 Web/OpenOCD 已触发。
 - 建议：按 QueueCommands 协议定义队列满时的执行/拒绝行为和终止包通路，验证 15+Execute、16×Queue、reset/abort/短包及响应背压组合，避免“等结束标记”与“不给结束标记入队”互相等待。
-- 证据：[dap_ingress.log](raw/dap_ingress.log)。
+- 证据：dap_ingress.log（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/probe-rtl-c-review-20261102/raw/dap_ingress.log`）。
 
 ### ZL-114 / P2：SWD AXI 寄存器写入忽略 WSTRB
 
@@ -45,7 +47,7 @@
 - 复现：真实 controller，PACKET_LEN 先置 `0x1234`，再以 `WSTRB=0` 写 `0x5678`，读回变成 `0x5678`。输入/握手都来自仿真，未在板上写 CSR。
 - 影响：字节/半字写或零 strobe 事务可能改动无效字节、甚至触发控制动作。目前生产 Xil_Out32 全字路径不是该例触发条件。
 - 建议：统一 CSR 写策略；数据寄存器按 strobe 合并，命令寄存器限定有效字节，或对不支持的窄写明确拒绝。测试独立 AW/W、R/B 背压、各 strobe、busy 时写配置及启动脉冲。
-- 证据：[zero_strobe.log](raw/zero_strobe.log)。
+- 证据：zero_strobe.log（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/probe-rtl-c-review-20261102/raw/zero_strobe.log`）。
 
 ## 2. 框架评价
 
@@ -109,7 +111,7 @@ CDC 专项复核：`orbtrace_frame_async_fifo.v` 使用 Gray 指针及两级 ASY
 
 ## 5. 本轮验证、证据与复测
 
-执行 [review_checks.py](review_checks.py) 与 [boundary_checks.py](boundary_checks.py)，只调用本机编译器/仿真器。前者隔离复用现有 `tools/test_probe_host.py` 的9组生产C模型；RTL覆盖 packet contract/AXI、stream DMA、sample pipe、ARM JTAG、RISC-V、DDR writer/controller/trace。DDR writer输出92项、DDR trace输出9项；不把这些项等同于独立硬件场景数量。编译日志无错误。
+执行 review_checks.py（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/probe-rtl-c-review-20261102/review_checks.py`） 与 boundary_checks.py（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/probe-rtl-c-review-20261102/boundary_checks.py`），只调用本机编译器/仿真器。前者隔离复用现有 `tools/test_probe_host.py` 的9组生产C模型；RTL覆盖 packet contract/AXI、stream DMA、sample pipe、ARM JTAG、RISC-V、DDR writer/controller/trace。DDR writer输出92项、DDR trace输出9项；不把这些项等同于独立硬件场景数量。编译日志无错误。
 
 针对性复现：6个注入/边界场景归入5个问题（ZL-111含短包和响应容量两个场景）。REPRO代表**当前缺陷被成功观察到**，不是产品通过，更不是修复关闭。常规基线通过与异常场景失败并存。
 
@@ -120,4 +122,4 @@ python -X utf8 docs/validation/probe-rtl-c-review-20261102/boundary_checks.py --
 
 脚本要求输出目录不存在，Windows使用本机Clang/MinGW和Icarus。源码函数提取仅替换外部依赖；标量BUSY模型超时后子进程由subprocess终止。真实CM3 SoC、全部RISC-V采样相位、形式验证、重新综合/布线和实板压力不在本轮执行范围。
 
-归档：原始输出和生产源码哈希在 [raw/results.json](raw/results.json)，补充边界结果在 [raw/boundary/results.json](raw/boundary/results.json)。问题状态同步 [项目问题跟踪列表](../../项目问题跟踪列表.md)。本轮只交付审查、复现驱动和证据；没有生产代码修复，没有新增可交付bit/ELF，未改变板上状态，未留下本任务后台进程。
+归档：原始输出和生产源码哈希在 raw/results.json（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/probe-rtl-c-review-20261102/raw/results.json`），补充边界结果在 raw/boundary/results.json（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/probe-rtl-c-review-20261102/raw/boundary/results.json`）。问题状态同步 [项目问题跟踪列表](../../项目问题跟踪列表.md)。本轮只交付审查、复现驱动和证据；没有生产代码修复，没有新增可交付bit/ELF，未改变板上状态，未留下本任务后台进程。

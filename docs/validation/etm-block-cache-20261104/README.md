@@ -1,5 +1,7 @@
 # DeepSeek / Ozone 解码资料评估与离线基本块缓存实验
 
+> 2026-11-05整理：本报告保留历史结论；逐轮原始证据/一次性驱动已固定在 Git tag `archive/main-before-cleanup-20261105`。恢复方法和逐文件SHA见[归档索引](../README.md)。历史路径及命令不表示当前可直接执行。
+
 > **main归档说明（2026-11-04）：用户暂不采纳，相关研究暂停。** 本目录仅同步历史文档与证据，候选源码、工具和EXE未并入main。原worktree/运行目录为当时路径，已按本次归档流程移除；不可据其描述推断当前main能力或当前板上身份。完整研究树及程序保留在Git tag `archive/etm-offline-research-20261104`（`0732f67`），取回方法与状态见[归档索引](../etm-offline-research-archive-20261104/README.md)。原实验分支的ETM写文件问题号“ZL-132”与main HAL问题重号，main中改用 **ZL-143**；原始JSON、manifest与历史正文保留原编号。
 
 日期：2026-11-04（Asia/Shanghai）。问题：ZL-006；附带发现 ZL-132。独立 worktree `E:/zynqlinkPRO-work/etm-block-cache-20261104`，分支 `codex/etm-block-cache-20261104`，基于 `41e2cee`。全程离线，没有访问板卡，没有修改 PL/PS、目标程序/时钟/Flash/QSPI，没有合入 main 或替换固定 EXE。
@@ -8,7 +10,7 @@
 
 ## 资料与现有方案
 
-原始资料在 [reference](reference/)，逐文件 SHA 见 [manifest.json](manifest.json)。来源是用户指定的 `E:/ozone_disc/etraced/docs/`，只作为评估材料；没有执行其中的操作指令或采用其排期/性能数字作为实测结论。
+原始资料在 reference（历史目录：`archive/main-before-cleanup-20261105:docs/validation/etm-block-cache-20261104/reference`，按验收索引恢复），逐文件 SHA 见 [manifest.json](manifest.json)。来源是用户指定的 `E:/ozone_disc/etraced/docs/`，只作为评估材料；没有执行其中的操作指令或采用其排期/性能数字作为实测结论。
 
 | 资料建议 | 当前主线 / 判断 |
 |---|---|
@@ -60,15 +62,15 @@ F103 不走新增缓存，其波动不证明有性能收益或已定位回归。
 
 完整输入 prescan 的独立命中诊断：H743 1s 命中 4,300,971 / 未命中 20,415，跳过 18,280,090 条逐条走查；H743 2s 命中 8,569,778 / 未命中 7,493，跳过 35,988,283 条走查（均超过99%命中）。缓存本身有界，但完整建库仍有 facts/index/replay 内存；两组开启缓存的 decode 准备峰值 RSS 约 359 MiB / 744 MiB，**不是低内存流式解码验收**。大部分剩余耗时仍在重放/执行流分析、索引和压缩/写库，因此局部 2.2× 不会成为总体 2.2×。
 
-原始 [汇总](raw/summary.json)、[H743 1s](raw/h743-1s-api.json)、[H743 2s](raw/h743-2s-api.json)、[F103](raw/f103-1s-api.json)。输入路径与完整 SHA 均记录其中。
+原始 汇总（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-block-cache-20261104/raw/summary.json`）、H743 1s（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-block-cache-20261104/raw/h743-1s-api.json`）、H743 2s（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-block-cache-20261104/raw/h743-2s-api.json`）、F103（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-block-cache-20261104/raw/f103-1s-api.json`）。输入路径与完整 SHA 均记录其中。
 
 ## 一致性、失败及边界
 
 - 18 个 API job 全部 done；每轮 summary 和双方共有 quality 与保存记录相同，所有原始输入前后 SHA 不变。F103 原有 2 gap / 522998 未知执行、H743 1s 1 / 8759、H743 2s 1 / 1139 保留，没有把缓存命中等同采集无损。
 - **九组开关配对全部**比较完整执行/静态/字符串/包/导航/检查点块原始字节、完整 analysis、展开诊断、语义查询 meta 和全部60张查询表，全部通过；比较在所有计时结束后运行，逐组证据在 raw 的 `*-equivalence-*.json`，不是首屏抽样。
-- 三份真实完整输入及各自尾部减2字节的变体，对未修改 main EXE、新程序关闭/开启共18次 prescan；完整语义计数、唯一范围与输入 SHA 一致，忽略墙钟/RSS。这是额外控制，**prescan 一致本身不是完整地址流相等的证明**；完整流证明范围是上面的9组完整输入配对。截断变体不冒充完整采集。见 [prescan-validation.json](raw/prescan-validation.json)。
+- 三份真实完整输入及各自尾部减2字节的变体，对未修改 main EXE、新程序关闭/开启共18次 prescan；完整语义计数、唯一范围与输入 SHA 一致，忽略墙钟/RSS。这是额外控制，**prescan 一致本身不是完整地址流相等的证明**；完整流证明范围是上面的9组完整输入配对。截断变体不冒充完整采集。见 prescan-validation.json（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-block-cache-20261104/raw/prescan-validation.json`）。
 - 同一 OpenCSD 路径的差分只证明有限输入不改变原有输出，不是独立协议正确性证明，也未覆盖所有 IT/投机/动态镜像组合；未购买/操作 J-Trace/Ozone，没有商业实现同期测试。
-- 辅助验证首次使用现有 main `etm_storebuild.exe prescan --json` 时退出7，父目录存在但无法创建 JSON。相对路径、绝对路径及正斜杠均失败；同一程序 stdout 控制通过，新重建程序相同路径可写。根因待定位，**没有声称本次缓存修复了它**。脚本随后改为捕获 stdout 并由 Python 保存，完成上述18次控制。登记 ZL-132，保留 [失败](raw/main-prescan-json-failure.json)。首次 CMake 配置仍在运行时曾过早尝试 build，报 cache 不存在；等待配置结束后正常构建，不计作功能/性能结果。
+- 辅助验证首次使用现有 main `etm_storebuild.exe prescan --json` 时退出7，父目录存在但无法创建 JSON。相对路径、绝对路径及正斜杠均失败；同一程序 stdout 控制通过，新重建程序相同路径可写。根因待定位，**没有声称本次缓存修复了它**。脚本随后改为捕获 stdout 并由 Python 保存，完成上述18次控制。登记 ZL-132，保留 失败（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-block-cache-20261104/raw/main-prescan-json-failure.json`）。首次 CMake 配置仍在运行时曾过早尝试 build，报 cache 不存在；等待配置结束后正常构建，不计作功能/性能结果。
 - Python 两个新增工具及修改的 benchmark 通过 py_compile，Git diff whitespace 检查、`verify_dependencies.py --tracked` 的865个依赖输入核对通过；原生 Release 构建成功，保留既有编译警告。没有重跑无关硬件/冻结 EXE 套件。
 
 ## 复测

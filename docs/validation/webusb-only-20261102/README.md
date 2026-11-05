@@ -1,5 +1,7 @@
 # WebUSB 单后端收敛
 
+> 2026-11-05整理：本报告保留历史结论；逐轮原始证据/一次性驱动已固定在 Git tag `archive/main-before-cleanup-20261105`。恢复方法和逐文件SHA见[归档索引](../README.md)。历史路径及命令不表示当前可直接执行。
+
 2026-11-02（Asia/Shanghai），分支codex/web-ui-compact，基于defd04a。关联ZL-103、ZL-104。
 
 用户要求仅保留WebUSB，且明确选择移除整个工程生成页。本轮实现：
@@ -18,7 +20,7 @@
 - test.cli：55/55通过，目录断言改为8页，确认烧录/RTT目录不再暴露后端选择。
 - [实际Web CLI验收](cli-acceptance.json)：8页45步通过，包含页内描述、状态/控件、ETM方法发现和真实目标ELF上传；未连接硬件。原生成器的下载步骤随功能退役。
 - 首轮验收暴露驱动仍引用退役ELF路径，保留[原失败](cli-first-failure.json)。改为prebuilt/golden/f103ze-cdc48.elf复验通过（ZL-104）。首次实现期间，未暂存删除时工具目录仍看到旧桥脚本；暂存删除后按当前索引正常发现，不作为产品失败。
-- 浏览器1280×720：8个入口，烧录无后端/路径输入，RTT直接展示WebUSB连接；无未处理脚本错误。截图：[烧录](flash-webusb.png)、[RTT](rtt-webusb.png)。
+- 浏览器1280×720：8个入口，烧录无后端/路径输入，RTT直接展示WebUSB连接；无未处理脚本错误。截图：烧录（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/webusb-only-20261102/flash-webusb.png`）、RTT（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/webusb-only-20261102/rtt-webusb.png`）。
 
 本轮只有离线及模拟检查，没有枚举/连接真实探针、目标复位、烧录或采集。能力边界变化属于用户授权的移除，不将主机通过称为实板回归。
 

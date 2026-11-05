@@ -1,5 +1,7 @@
 # ETM 流式解码与增量统计：离线持续输入实验
 
+> 2026-11-05整理：本报告保留历史结论；逐轮原始证据/一次性驱动已固定在 Git tag `archive/main-before-cleanup-20261105`。恢复方法和逐文件SHA见[归档索引](../README.md)。历史路径及命令不表示当前可直接执行。
+
 > **main归档说明（2026-11-04）：用户暂不采纳，相关研究暂停。** 本目录仅同步历史文档与证据，候选源码、工具和EXE未并入main。原worktree/运行目录为当时路径，已按本次归档流程移除；不可据其描述推断当前main能力或当前板上身份。完整研究树及程序保留在Git tag `archive/etm-offline-research-20261104`（`0732f67`），取回方法与状态见[归档索引](../etm-offline-research-archive-20261104/README.md)。原实验分支的ETM写文件问题号“ZL-132”与main HAL问题重号，main中改用 **ZL-143**；原始JSON、manifest与历史正文保留原编号。
 
 2026-11-04（Asia/Shanghai）。问题 **ZL-006，仍为部分解决**。在既有 worktree `E:/zynqlinkPRO-work/etm-block-cache-20261104`、分支 `codex/etm-block-cache-20261104`，基于 `41ec0e2` 继续实验。全程未访问硬件，没有加载/修改 bit、PS ELF、MCU、时钟或 Flash/QSPI，没有修改 main 或固定 bridge EXE。
@@ -23,7 +25,7 @@
 
 ## 输入与持续输入模型
 
-使用上一轮相同的三份 raw ETM + ELF；路径与完整SHA见 [campaign-summary.json](raw/campaign-summary.json)。它们已经是解复用后的 ETM 字节，不包含 LA/FRM1/TPIU 前端工作。
+使用上一轮相同的三份 raw ETM + ELF；路径与完整SHA见 campaign-summary.json（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-stream-offline-20261104/raw/campaign-summary.json`）。它们已经是解复用后的 ETM 字节，不包含 LA/FRM1/TPIU 前端工作。
 
 | 原输入 | 原窗口 | ETM字节 | 指令记录 | 范围回调 |
 |---|---:|---:|---:|---:|
@@ -61,7 +63,7 @@ H743四组没有队列溢出、全部字节消费完毕，累计结果一致；�
 - **H743每10ms生成完整累计analysis JSON**：约1ms输入块，持续20秒，生成1999份快照；处理预算比 **96.1%**，快照生成/hash合计1.295s，P99约50.5ms、最大63.2ms、最后排空2.5ms，队列峰值约131.8KiB。完整消费并与同一个20秒基准一致。相较普通10Hz快照，100Hz已非常接近预算；不包括GUI绘图，不能据此承诺100FPS界面。
 - **F103三分之一输入速率**：同样20份1秒fixture，60秒持续投递，599份快照，处理预算比88.7%，P99约122.2ms、最大177.8ms、最后排空5.4ms，完整消费391,315,980条记录，全部累计统计与完整连续输入基准一致。说明流式状态/统计逻辑可工作，1倍速吞吐仍不足。
 
-见 [extra-summary.json](raw/extra-summary.json) 和 [逐次轻量快照](raw/snapshots/)。快照日志含累计指令数、已消费字节、队列/工作集和完整analysis的SHA，统计不断累积，绝非只保留最后1ms/10ms的计数。
+见 extra-summary.json（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-stream-offline-20261104/raw/extra-summary.json`） 和 逐次轻量快照（历史目录：`archive/main-before-cleanup-20261105:docs/validation/etm-stream-offline-20261104/raw/snapshots`，按验收索引恢复）。快照日志含累计指令数、已消费字节、队列/工作集和完整analysis的SHA，统计不断累积，绝非只保留最后1ms/10ms的计数。
 
 ## 对拍分层与范围
 
@@ -69,15 +71,15 @@ H743四组没有队列溢出、全部字节消费完毕，累计结果一致；�
 2. **四秒拼接：独立完整旧算法覆盖接缝。** 三组负载（ETMv3/ETMv4）各自拼成4秒，继续使用完整BuildVisitor/ExecutionFacts基准，与不插入EOT/reset的分块流逐项及两种顺序SHA对拍，覆盖跨原记录接缝的状态。（结果见 `join-oracle-summary.json`。）
 3. **二十秒拼接：完整连续字节输入基准。** 将整个拼接文件一次提交OpenCSD，使用已在第1/2层核对的紧凑统计器；避免完整facts/历史store使基准内存与时间膨胀。对三组20秒不规则分块流做完整规范化回调及逐条执行SHA、每PC统计和analysis比较，全部相等。此层验证长流分块/接缝，不冒充独立的20秒完整历史索引对拍。原正常建库会消费的范围/周期/事件/包字段进入回调SHA，不声称对比OpenCSD所有未使用字段。
 4. **定时回放：** 四组H74320秒、100Hz压力及F103低速控制的完整累计analysis、全部每PC记录数/成立/未成立/未知/周期、范围/run/event计数与连续基准完全相同。性能组关闭昂贵的逐条调试SHA，顺序SHA在上述独立无节拍回放中核对；没有把不完整的F103过载结果写成一致通过。
-5. **原普通建库回归：** 最终源码重新编译的程序，在三个原记录上通过普通离线API各完整建库一次；执行/静态/字符串/包/导航/检查点块原字节、诊断、analysis、语义meta和全部60表与上一轮已验证库一致。见 [default-regression-summary.json](raw/default-regression-summary.json)。这验证旧路径未变，不表示流式阶段生成了60张在线历史查询表。
+5. **原普通建库回归：** 最终源码重新编译的程序，在三个原记录上通过普通离线API各完整建库一次；执行/静态/字符串/包/导航/检查点块原字节、诊断、analysis、语义meta和全部60表与上一轮已验证库一致。见 default-regression-summary.json（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-stream-offline-20261104/raw/default-regression-summary.json`）。这验证旧路径未变，不表示流式阶段生成了60张在线历史查询表。
 
 全套主实验22个进程场景中有两个明确的F103吞吐失败，均保留；输入文件SHA前后不变。用户报告断电/重连后，又核对了证据完整性、原输入SHA和进程状态，没有用重连当作硬件验收。所有本任务服务和原生进程已退出。
 
 ## 保留的开发失败与未采用方案
 
-- 初始逐条增量版：H7435秒回放结束仍约66ms积压，处理预算接近100%；首个批量版本10秒测试在消费约7.37秒时填满1MiB队列。随后用范围频次归约、同栈帧批量更新及精确保留首条状态转换，得到上述最终结果。原结果及源码快照在 [pilots](raw/pilots/) / [development-source.tar.gz](raw/development-source.tar.gz)。
-- 另试ETMv3单指令缓存：短记录约98%命中，所有短记录对拍字段一致，但1倍速仍约193%的处理预算并溢出。该补丁已撤回最终源码，保留 [补丁](raw/etmv3-cache-experiment.patch)、[控制结果](raw/etmv3-cache-experiment-summary.json) 和试跑JSON；没有把高命中率当成实时能力。
-- 首次编译因把系统头放在匿名namespace内失败，修正include位置后构建通过，原日志保留于 [build](raw/build/)。最终两项原生目标构建成功，保留既有编译警告；865个依赖输入核对、三个Python工具py_compile及diff whitespace检查通过。
+- 初始逐条增量版：H7435秒回放结束仍约66ms积压，处理预算接近100%；首个批量版本10秒测试在消费约7.37秒时填满1MiB队列。随后用范围频次归约、同栈帧批量更新及精确保留首条状态转换，得到上述最终结果。原结果及源码快照在 pilots（历史目录：`archive/main-before-cleanup-20261105:docs/validation/etm-stream-offline-20261104/raw/pilots`，按验收索引恢复） / development-source.tar.gz（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-stream-offline-20261104/raw/development-source.tar.gz`）。
+- 另试ETMv3单指令缓存：短记录约98%命中，所有短记录对拍字段一致，但1倍速仍约193%的处理预算并溢出。该补丁已撤回最终源码，保留 补丁（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-stream-offline-20261104/raw/etmv3-cache-experiment.patch`）、控制结果（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-stream-offline-20261104/raw/etmv3-cache-experiment-summary.json`） 和试跑JSON；没有把高命中率当成实时能力。
+- 首次编译因把系统头放在匿名namespace内失败，修正include位置后构建通过，原日志保留于 build（历史目录：`archive/main-before-cleanup-20261105:docs/validation/etm-stream-offline-20261104/raw/build`，按验收索引恢复）。最终两项原生目标构建成功，保留既有编译警告；865个依赖输入核对、三个Python工具py_compile及diff whitespace检查通过。
 
 ## 仍未完成
 
@@ -88,7 +90,7 @@ H743四组没有队列溢出、全部字节消费完毕，累计结果一致；�
 
 ## 程序身份与复测
 
-实测程序在 [prebuilt/etm-stream-offline-20261104](../etm-offline-research-archive-20261104/README.md#source)，完整SHA及源码/证据身份见 [manifest.json](manifest.json)。逐案大JSON、构建日志和开发源码快照已无损压缩；[archive-index.json](raw/archive-index.json)记录解压后的SHA/大小，轻量汇总和快照日志保持可直接阅读。内嵌buildSha是旧build目录配置时HEAD `41e2cee`，本次源码为 `41ec0e2` 加列明的stream改动；不能用内嵌值冒充源码无修改。保留实测原字节；提交前重新编译的另一组字节用于普通建库回归，身份另记，未替换实测证据。
+实测程序在 [prebuilt/etm-stream-offline-20261104](../etm-offline-research-archive-20261104/README.md#source)，完整SHA及源码/证据身份见 [manifest.json](manifest.json)。逐案大JSON、构建日志和开发源码快照已无损压缩；archive-index.json（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-stream-offline-20261104/raw/archive-index.json`）记录解压后的SHA/大小，轻量汇总和快照日志保持可直接阅读。内嵌buildSha是旧build目录配置时HEAD `41e2cee`，本次源码为 `41ec0e2` 加列明的stream改动；不能用内嵌值冒充源码无修改。保留实测原字节；提交前重新编译的另一组字节用于普通建库回归，身份另记，未替换实测证据。
 
 在本worktree根目录执行，输出目录必须新建。`--source-root`指向仍保留上述原始输入的主目录。默认实验缓存关闭，工具仅在各自离线子进程中开启。
 

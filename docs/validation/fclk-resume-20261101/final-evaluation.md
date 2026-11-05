@@ -1,4 +1,6 @@
-> 最新交付：用户选定的133.333 MHz已完成配对产物、完整已定义STA和F103范围板测，见[133.333 MHz验收](release-133/README.md)。ETM输出与60 MHz RTT并行场景仍有原Golden也存在的失败，详见报告；下文150/135/138 MHz为历史过程记录。
+> 最新交付：用户选定的133.333 MHz已完成配对产物、完整已定义STA和F103范围板测，见133.333 MHz验收（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/fclk-resume-20261101/release-133/README.md`）。ETM输出与60 MHz RTT并行场景仍有原Golden也存在的失败，详见报告；下文150/135/138 MHz为历史过程记录。
+
+> 2026-11-05整理：本报告保留历史结论；逐轮原始证据/一次性驱动已固定在 Git tag `archive/main-before-cleanup-20261105`。恢复方法和逐文件SHA见[归档索引](../README.md)。历史路径及命令不表示当前可直接执行。
 
 # 本轮最终评估
 

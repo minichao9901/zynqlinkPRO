@@ -1,10 +1,12 @@
 # 交互火焰图HTML与bridge交付（2026-11-02）
 
+> 2026-11-05整理：本报告保留历史结论；逐轮原始证据/一次性驱动已固定在 Git tag `archive/main-before-cleanup-20261105`。恢复方法和逐文件SHA见[归档索引](../README.md)。历史路径及命令不表示当前可直接执行。
+
 ZL-012新增自包含交互HTML，默认按原始执行序号导出。完整调用深度、事件和未知祖先标记保留；不依赖超宽SVG画布。Web按钮/下载API、Trace CLI、bridge EXE离线接口共用生成器。SVG兼容导出仍保留，200000调用段边界未取消。
 
-- [CDC初始化：交互执行顺序火焰图](CDC初始化-交互火焰图.html)：seq7～42571，925个调用段、14层。
-- [单次echo：交互执行顺序火焰图](单次echo-交互火焰图.html)：seq7782088～7784098，60个调用段、10层。
-- [使用说明及CLI](../../flame-html-export.md)，[初始化预览](init-preview.png)、[echo预览](echo-preview.png)、[冻结程序实际Web页面](frozen-web-ui.png)。
+- CDC初始化：交互执行顺序火焰图（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/flame-html-20261102/CDC初始化-交互火焰图.html`）：seq7～42571，925个调用段、14层。
+- 单次echo：交互执行顺序火焰图（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/flame-html-20261102/单次echo-交互火焰图.html`）：seq7782088～7784098，60个调用段、10层。
+- [使用说明及CLI](../../flame-html-export.md)，初始化预览（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/flame-html-20261102/init-preview.png`）、echo预览（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/flame-html-20261102/echo-preview.png`）、冻结程序实际Web页面（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/flame-html-20261102/frozen-web-ui.png`）。
 
 双击HTML即可离线打开；支持缩放按钮、滚轮围绕指针缩放、拖动平移、复位/上一级、选中调用定位、完整名称悬停、函数查找与深调用栈纵向滚动。键盘+/-、左右方向键和Home可操作。像素不足时裁剪文字，完整调用数据仍内嵌，放大后查看；没有分桶/聚合执行顺序数据。横轴不是逐指令精确时间。
 

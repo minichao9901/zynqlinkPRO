@@ -1,5 +1,7 @@
 # ZL-006：C++直接回调原型与第一阶段性能门禁
 
+> 2026-11-05整理：本报告保留历史结论；逐轮原始证据/一次性驱动已固定在 Git tag `archive/main-before-cleanup-20261105`。恢复方法和逐文件SHA见[归档索引](../README.md)。历史路径及命令不表示当前可直接执行。
+
 编号协调（2026-11-02）：本文历史ZL-103规范编号为ZL-109。原文结论与原始证据保留；分支历史别名见[编号映射](../../问题编号别名-20261102.md)。
 
 日期：2026-11-02（Asia/Shanghai）。独立 worktree：`E:/zynqlinkPRO-work/etm-cpp-stage1-20261102`，分支 `codex/etm-cpp-stage1`，基于 `e6f26cc`。本轮仅离线主机处理，没有连接、加载或改变板卡，没有修改PL/PS/目标固件，没有更新主工作区或固定bridge EXE。
@@ -29,16 +31,16 @@
 | 2 | 12.654 | 同上，另作全量store对照 |
 | 3 | 12.546 | 同上 |
 
-中位轮次：nativeBuild6.008秒、queryIndex2.435秒、诊断构造0.340秒、块复制/JSON压缩1.186秒、最终assemble0.118秒；这些阶段之外还有预扫描、任务准备等，不能把部分分项之和当作完整API时间。[完整结果](raw/f103-api-results.json)保留全部原始数值和阶段。
+中位轮次：nativeBuild6.008秒、queryIndex2.435秒、诊断构造0.340秒、块复制/JSON压缩1.186秒、最终assemble0.118秒；这些阶段之外还有预扫描、任务准备等，不能把部分分项之和当作完整API时间。完整结果（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/zl006-cpp-stage1-20261102/raw/f103-api-results.json`）保留全部原始数值和阶段。
 
-[11月1日审计](../zl006-decode-audit-20261101/README.md)的同一输入API中位22.031秒是历史参照，未在本轮用原提交再做同时期A/B，因此不宣称严格同条件提速百分比。早期探索结果也保留在`raw/exploratory-*`：不同版本曾有16～19秒结果；`stage1-fast`计时期间有另外的验证进程，不能用作正式性能结论。最终三次串行运行，没有并行基准或硬件测试。提交后的单次`OPENCSD_MEMACC_CACHE_OFF=1`对照为14.146秒，未取得明确收益，未采用缓存策略变更；[记录](raw/exploratory-cache-off.json)单独保留。
+[11月1日审计](../zl006-decode-audit-20261101/README.md)的同一输入API中位22.031秒是历史参照，未在本轮用原提交再做同时期A/B，因此不宣称严格同条件提速百分比。早期探索结果也保留在`raw/exploratory-*`：不同版本曾有16～19秒结果；`stage1-fast`计时期间有另外的验证进程，不能用作正式性能结论。最终三次串行运行，没有并行基准或硬件测试。提交后的单次`OPENCSD_MEMACC_CACHE_OFF=1`对照为14.146秒，未取得明确收益，未采用缓存策略变更；记录（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/zl006-cpp-stage1-20261102/raw/exploratory-cache-off.json`）单独保留。
 
 ## 正确性与范围
 
-- 最终F103大记录：完整静态表、字符串表、全部执行序列块、全部包、导航和检查点按解压后字节相等；全量诊断条目和**60张查询表**逐项相等，包含默认window/timeline数据。[证据](raw/f103-equivalence.json)。保留2个gap和522998条未知执行，不把重建一致说成完整执行流全部已知。
-- H743/ETMv4完整1秒大记录：binary与direct串行完整重放，summary/quality、上述全量语义块、诊断和60张查询表相等。[证据](raw/h743-differential.json)。这是离线处理，不能当作新的CLI硬件或GUI E2E验收。
-- 旧F103小输入，以及末尾截去17字节的输入：binary/direct完整差分通过。[小输入](raw/small-differential.json)、[截断输入](raw/truncated-differential.json)。截断输入的质量结果保持两条路径一致，不用重试或归零掩盖尾部状态。
-- 4项单元测试覆盖随机事件布置、连续事件、64位序号及诊断块有限上限；C++ SHA自检通过。`project run test.cli`的55项通过，[日志](raw/cli-tests.log)保留已有临时文件ResourceWarning，未将警告描述成测试失败或在本轮定位其来源。
+- 最终F103大记录：完整静态表、字符串表、全部执行序列块、全部包、导航和检查点按解压后字节相等；全量诊断条目和**60张查询表**逐项相等，包含默认window/timeline数据。证据（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/zl006-cpp-stage1-20261102/raw/f103-equivalence.json`）。保留2个gap和522998条未知执行，不把重建一致说成完整执行流全部已知。
+- H743/ETMv4完整1秒大记录：binary与direct串行完整重放，summary/quality、上述全量语义块、诊断和60张查询表相等。证据（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/zl006-cpp-stage1-20261102/raw/h743-differential.json`）。这是离线处理，不能当作新的CLI硬件或GUI E2E验收。
+- 旧F103小输入，以及末尾截去17字节的输入：binary/direct完整差分通过。小输入（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/zl006-cpp-stage1-20261102/raw/small-differential.json`）、截断输入（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/zl006-cpp-stage1-20261102/raw/truncated-differential.json`）。截断输入的质量结果保持两条路径一致，不用重试或归零掩盖尾部状态。
+- 4项单元测试覆盖随机事件布置、连续事件、64位序号及诊断块有限上限；C++ SHA自检通过。`project run test.cli`的55项通过，日志（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/zl006-cpp-stage1-20261102/raw/cli-tests.log`）保留已有临时文件ResourceWarning，未将警告描述成测试失败或在本轮定位其来源。
 - 未验证冻结EXE、真实浏览器交互或当前硬件状态；未关闭ZL-006。没有本任务后台服务留存。
 
 ## ZL-103：原有大记录诊断块超过统一解压上限

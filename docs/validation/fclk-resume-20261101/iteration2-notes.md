@@ -1,5 +1,7 @@
 # 第二轮结构优化
 
+> 2026-11-05整理：本报告保留历史结论；逐轮原始证据/一次性驱动已固定在 Git tag `archive/main-before-cleanup-20261105`。恢复方法和逐文件SHA见[归档索引](../README.md)。历史路径及命令不表示当前可直接执行。
+
 首轮完整综合及布线来源 `becba616b153a522e7c93c8612a5e8bf7febaafc`，目标 FCLK0=150MHz、RAW4/DDR/逐线延迟开启、RTL_DEBUG=0。
 实际 setup=-0.962ns、hold=+0.059ns；独立 200MHz 域 setup=-0.064ns，因此单纯降低 FCLK0 也不能通过。
 完整失败报告及输入指纹见 `iteration1-sta-failed/`。未生成或加载新 bitstream。

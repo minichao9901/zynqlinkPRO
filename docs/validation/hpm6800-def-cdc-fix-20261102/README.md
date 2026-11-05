@@ -1,6 +1,8 @@
 # HPM6800EVK 缺首DEF与CDC字节缺口：定位、修复及冻结EXE验收
 
-2026-11-02，用户明确要求继续修复，恢复ZL-005的定位；原暂停记录[R4](../combined-etm-web-20261031/deferred-hss/issue.json)、[R22](../hpm6800-web-stress-20261102/README.md)保持历史原文。**本轮HPM复现链ZL-005、ZL-094已修复并完成对照与回归**。两个根因都不在RTL：前者是PS USB标准请求处理，后者是本机COM读取方式。ZL-070临界HSS波动、ZL-093性能差距及新发现ZL-097的span元数据警告、ZL-098的原生→Web初连超时分别保留，未宣称全平台、任意负载全通过。
+> 2026-11-05整理：本报告保留历史结论；逐轮原始证据/一次性驱动已固定在 Git tag `archive/main-before-cleanup-20261105`。恢复方法和逐文件SHA见[归档索引](../README.md)。历史路径及命令不表示当前可直接执行。
+
+2026-11-02，用户明确要求继续修复，恢复ZL-005的定位；原暂停记录R4（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/combined-etm-web-20261031/deferred-hss/issue.json`）、[R22](../hpm6800-web-stress-20261102/README.md)保持历史原文。**本轮HPM复现链ZL-005、ZL-094已修复并完成对照与回归**。两个根因都不在RTL：前者是PS USB标准请求处理，后者是本机COM读取方式。ZL-070临界HSS波动、ZL-093性能差距及新发现ZL-097的span元数据警告、ZL-098的原生→Web初连超时分别保留，未宣称全平台、任意负载全通过。
 
 ## 配对与执行范围
 
@@ -79,7 +81,7 @@ RAM夹具五个状态目录（含最终fenced轮）均已恢复；有效数据�
 
 最终 **2026-11-02T18:01:54.591481+08:00**：原程序恢复后再次RAM加载同一USB修复配对，最终冻结EXE公开readIdcode方法读得TAP 0x1000563D、DMSTATUS0x400ca2，确认原目标程序运行。随后只做探针时钟/idle配置与只读身份核对，不激活原生虚拟内存后端、不做SBA访问；该收尾路径避免重复ZL-098触发上下文，但不构成其修复。物理MEM-AP0匹配76420B代码；FCLK19999999Hz、TCK9999999.5Hz、mode0、idle8，各采集/RTT/HSS/packet引擎空闲。正常raw JTAG上下文idle查询上限15，原生虚拟内存后端为64；初稿脚本误将扩展mode回复当固定3B、将上限固定64，断言失败日志保留，修正为相应契约后通过，未修改产品。时钟来自寄存器，不是外部频率计；133.333MHz是PL实现约束，不等于收尾FCLK，未直接改目标PLL。所有自有服务/EXE/OpenOCD/XSCT/USBPcap进程结束，保留共享hw_server PID19676。此后未再操作板卡。
 
-![冻结EXE八通道完整采样；span警告另列ZL-097](frozen-scope-proof.png)
+冻结EXE八通道完整采样；span警告另列ZL-097（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/hpm6800-def-cdc-fix-20261102/frozen-scope-proof.png`）
 
 ## 证据索引
 

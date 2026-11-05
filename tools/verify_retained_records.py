@@ -30,7 +30,9 @@ def validate(records):
                 response=client.get(f'/api/download/{sid}/flame-svg?mode={mode}&weight=records&fromSeq=913&toSeq=977')
                 assert response.status_code==200 and b'<svg' in response.data;response.close()
             response=client.get(f'/api/download/{sid}/raw');assert response.status_code==200
-            expected=json.loads((folder/'session.json').read_text())['etmSha256'];assert hashlib.sha256(response.data).hexdigest()==expected;response.close()
+            metadata=json.loads((folder/'session.json').read_text(encoding='utf8'))
+            expected=metadata.get('etmSha256') or hashlib.sha256((folder/metadata['input']).read_bytes()).hexdigest()
+            assert hashlib.sha256(response.data).hexdigest()==expected;response.close()
             rows.append(dict(id=sid,passed=True,rawSHA256=expected,nativeIntermediateRetained=(folder/'native.bin').exists(),checks=checks))
         return dict(hardwareAccess=False,records=rows)
 

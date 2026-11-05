@@ -1,5 +1,7 @@
 # H743综合性能与Golden对照（2026-11-01）
 
+> 2026-11-05整理：本报告保留历史结论；逐轮原始证据/一次性驱动已固定在 Git tag `archive/main-before-cleanup-20261105`。恢复方法和逐文件SHA见[归档索引](../README.md)。历史路径及命令不表示当前可直接执行。
+
 本轮使用用户换上的阿波罗STM32H743，完成SWD/JTAG六档SRAM、RTT、HSS，50/60MHz Golden对照及调试插入；并将指定superlinkPRO例程复制为本工程H743 Golden，完成20MHz TRACECLK的真实CDC负载ETMv4验收。没有修改或重建探针RTL/PS固件，没有写QSPI。失败、边界和较低负载对照全部保留。
 
 ## 配对、目标与方法

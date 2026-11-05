@@ -1,5 +1,7 @@
 # 紧凑 Web 打磨与 HPM WebUSB Flash 实测
 
+> 2026-11-05整理：本报告保留历史结论；逐轮原始证据/一次性驱动已固定在 Git tag `archive/main-before-cleanup-20261105`。恢复方法和逐文件SHA见[归档索引](../README.md)。历史路径及命令不表示当前可直接执行。
+
 日期：2026-11-03（Asia/Shanghai）。工作区 `codex/web-ui-compact`，基于 `8a059d6`；最终代码随本报告提交。用户要求保留大工作区、窄边框、导航与状态同排；明确统一 WebUSB、删除工程生成页，并授权空闲 HPM6800EVK 写入测试固件测速。未推送、未合并 main。
 
 ## 本轮结果

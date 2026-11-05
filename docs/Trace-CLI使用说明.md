@@ -4,9 +4,9 @@ F103ZE新增环形飞行记录：`capture --flight --ring-bytes 8388608 --second
 
 统一入口`python -X utf8 toolbox.py trace`，转交`etm-service/trace.py`。该入口的`capture/doctor`是Zynq原生路径；离线decode/query/export等转交`etm-service/tools/cli_entry.py`及`trace_cli.py`，沿用原生二进制/TraceStore协议。
 
-优化分支上一阶段已由C++直接构建完整查询索引、默认视图和最终store，Python保留静态字典及记录发布；要求配套具备 `complete-index-v1` 的 `etm_storebuild.exe`。离线研发显式设置 `ETM_COMPLETE_INDEX=0` 可运行旧facts/NumPy索引对照，缺少新能力时不会静默回退。此说明不表示主线或固定EXE已经集成该候选；范围以最新验收报告为准。
+主线和固定EXE已集成C++完整查询索引、默认视图和最终store；要求配套具备 `complete-index-v1` 的 `etm_storebuild.exe`。离线研发显式设置 `ETM_COMPLETE_INDEX=0` 可运行旧facts/NumPy索引对照，缺少新能力时不会静默回退。集成范围见[主线验收](validation/etm-main-integration-20261103/README.md)。
 
-后续原生核心继续接管ELF/DWARF/Thumb静态字典和TraceStore查询读取，默认 `ETM_NATIVE_STATIC=1`、`ETM_NATIVE_QUERY=1`（未设置时同样启用）。Python保留任务、记录身份和发布；查询经私有常驻C++进程返回DTO，不由Python解析执行块或查询数组。显式设置这两个变量为0用于旧实现研发对照，不能把对照耗时算作默认原生路径。配套目录必须保留 `libdwarf.dll`；静态读取需要 `native-static-v1`，查询协议为 `etm-query/1`。main和固定EXE是否已集成，仍以对应报告为准。
+原生核心已接管ELF/DWARF/Thumb静态字典和TraceStore查询读取，默认 `ETM_NATIVE_STATIC=1`、`ETM_NATIVE_QUERY=1`（未设置时同样启用）。Python保留任务、记录身份和发布；查询经私有常驻C++进程返回DTO，不由Python解析执行块或查询数组。显式设置这两个变量为0用于旧实现研发对照，不能把对照耗时算作默认原生路径。配套目录必须保留 `libdwarf.dll`；静态读取需要 `native-static-v1`，查询协议为 `etm-query/1`。主线和固定EXE的验收范围见下述集成报告。
 
 2026-11-03 已合入 main；固定程序与本轮记录回归以[主线集成报告](validation/etm-main-integration-20261103/README.md)为准。旧 Python 参考代码继续保留，合并前流程固定为 tag `archive/main-before-etm-cpp-20261103`，范围和复测方法见 [Golden Reference](etm-golden-reference.md)。
 

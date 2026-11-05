@@ -1,5 +1,7 @@
 # HPM6800EVK：idle摸高、133.333MHz配对与HSS对照
 
+> 2026-11-05整理：本报告保留历史结论；逐轮原始证据/一次性驱动已固定在 Git tag `archive/main-before-cleanup-20261105`。恢复方法和逐文件SHA见[归档索引](../README.md)。历史路径及命令不表示当前可直接执行。
+
 2026-11-02，ZL-070/073/078/080/081/082/083。25MHz不是本板不可跨越的物理墙。增加必要idle并调整TDO窗口后，实际约60MHz TCK下AXI SRAM读 **3.200MB/s**、写 **3.156MB/s**，超过用户给出的F103ZE 2.4MB/s参考数；这不是相同条件的跨MCU对照。25MHz仍是手册保证上限，本轮高频结果属于单板超规格研究。
 
 最终bit按 **133.333333MHz / 7.5ns** fresh实现，setup **+0.179ns**、hold **+0.034ns**。默认XDC、verify、AGENTS及依赖文档已同步，今后无明确对照要求不退回120MHz。先前120MHz研究配对独立保留，没有冒充133MHz验收。
@@ -37,14 +39,14 @@ Golden及原HPM保证配对字节不变。原1～25MHz完整分档见[R19](../hp
 | 56.250 | 18 | 17 |
 | 60.000 | 20 | 17 |
 
-![idle与采样窗口](idle-capture-map.png)
+idle与采样窗口（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/hpm6800-idle-frontier-20261102/idle-capture-map.png`）
 
 1. **DTM等待不足。** idle8在28.125MHz出现DTMCS.dmistat=3；50MHz的15失败/16通过，56.25MHz的17失败/18通过，60MHz的19失败/20通过。低速观测DTMCS在TAP reset之前进行，随后清协议状态并核对SRAM/DPC恢复；没有复位MCU。
 2. **TDO返回窗口。** 约36MHz以上，部分mode0失败而mode16/17通过，并非都带DTM BUSY。mode0是Q2/current-bit，17是Q1/previous-bit晚返回窗口，16是Q2/previous-bit。多加idle不能代替窗口调整。
 3. 最小等待时间大致为 **0.30～0.33µs量级**。异步相位、取整和窗口导致阈值非严格单调，如36/37.5MHz的12/11拍；这是实测规律，不是已证明的内部DTM时钟模型。
 4. **idle过大反而变慢。** 最终133配对60MHz/mode17，AHB的idle20读写3.152/3.110MB/s；24为2.988/2.974，32为2.717/2.695，64为1.972/1.981。64是配置上限，不是速度推荐值。
 
-![SRAM探索曲线](sram-frontier.png)
+SRAM探索曲线（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/hpm6800-idle-frontier-20261102/sram-frontier.png`）
 
 ## 实现、瓶颈与改进空间
 
@@ -68,7 +70,7 @@ RTT每档3×2秒，1024B chunk、RAM producer，50MHz探针侧2.4665～2.4670MB/
 
 ## HSS对照superlinkPRO
 
-只读查阅`E:/superlinkPRO`。旧JSON、报告和实际采样源码的路径/哈希见[history/manifest.json](history/manifest.json)，提取行见[history/summary.json](history/summary.json)。
+只读查阅`E:/superlinkPRO`。旧JSON、报告和实际采样源码的路径/哈希见history/manifest.json（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/hpm6800-idle-frontier-20261102/history/manifest.json`），提取行见history/summary.json（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/hpm6800-idle-frontier-20261102/history/summary.json`）。
 
 | 单变量周期 | superlinkPRO历史优化记录 | 最终133配对，60MHz/idle20 |
 |---|---|---|
@@ -94,7 +96,7 @@ ZL-080保持部分解决：后续研究每包fence批处理，或能表达逐样
 * RISC-V核心/完整流水三采样模式、24/64拍，ARM JTAG核心/完整流水三模式，packet六套、生产C八套、idle/clock/验收参数三个单测、CLI53项均通过。既有编译/ResourceWarning保留在日志。
 * ZL-084：收尾修复HSS自动搜索分支未传递新增AXI/observe/idle选项；真实搜索循环模型覆盖scan/refine/verify。>15拍请求增加有效值读回守卫，旧bit不能静默降为15。本轮硬件结果均用direct分支，原执行快照保留；此主机修正不改变bit/ELF或已测数字。
 
-[raw/](raw/)保留逐点成功/失败及恢复，[logs/](logs/)保留构建/运行/回归，[drivers/](drivers/)保留执行脚本快照，[build-inputs/](build-inputs/)保留精确输入字节。用户原SRAM备份只在本地build，没有纳入Git。构建stamp哈希为工作树原始字节，快照避免LF/CRLF歧义；manifest另定位可编辑源码提交。
+raw/（历史目录：`archive/main-before-cleanup-20261105:docs/validation/hpm6800-idle-frontier-20261102/raw`，按验收索引恢复）保留逐点成功/失败及恢复，logs/（历史目录：`archive/main-before-cleanup-20261105:docs/validation/hpm6800-idle-frontier-20261102/logs`，按验收索引恢复）保留构建/运行/回归，drivers/（历史目录：`archive/main-before-cleanup-20261105:docs/validation/hpm6800-idle-frontier-20261102/drivers`，按验收索引恢复）保留执行脚本快照，build-inputs/（历史目录：`archive/main-before-cleanup-20261105:docs/validation/hpm6800-idle-frontier-20261102/build-inputs`，按验收索引恢复）保留精确输入字节。用户原SRAM备份只在本地build，没有纳入Git。构建stamp哈希为工作树原始字节，快照避免LF/CRLF歧义；manifest另定位可编辑源码提交。
 
 ```powershell
 # 声明bit/ELF身份不会加载；先显式RAM加载，再独立核对。不会写目标Flash/QSPI。
@@ -108,6 +110,6 @@ PL fresh命令与版本见logs/fpga-133.log；约束/时序报告、PS选项随p
 
 ## 最后板上状态（时间快照）
 
-**2026-11-02 08:55:21 CST**，见[raw/final-state.json](raw/final-state.json)：最终133约束配对仍在板上，TCK24999999.5Hz/FCLK49999999Hz、mode0、有效idle8，DMSTATUS=0x430ca2、目标运行，RTT/HSS、packet/采集引擎空闲。随后identity-final-133用物理MEM-AP0核对75,692B可执行代码全匹配。各轮SRAM/ILM、核心/cache及目标时钟控制恢复通过。本轮未改目标PLL/AHB/APB，未写目标Flash/QSPI，未复位目标MCU；无本任务后台采集/Vivado进程，共享hw_server保留。
+**2026-11-02 08:55:21 CST**，见raw/final-state.json（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/hpm6800-idle-frontier-20261102/raw/final-state.json`）：最终133约束配对仍在板上，TCK24999999.5Hz/FCLK49999999Hz、mode0、有效idle8，DMSTATUS=0x430ca2、目标运行，RTT/HSS、packet/采集引擎空闲。随后identity-final-133用物理MEM-AP0核对75,692B可执行代码全匹配。各轮SRAM/ILM、核心/cache及目标时钟控制恢复通过。本轮未改目标PLL/AHB/APB，未写目标Flash/QSPI，未复位目标MCU；无本任务后台采集/Vivado进程，共享hw_server保留。
 
 源码、配对及板测证据提交：`36875ef0903640fa479256344f7b15d04aca1efa`。本次身份补记不重建、不重载；见[source-revision.json](source-revision.json)。

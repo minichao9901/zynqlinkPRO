@@ -1,6 +1,8 @@
 # ZL-006：ETM 离线处理分阶段耗时
 
-日期：2026-11-03（Asia/Shanghai）。按用户要求先测量，再决定迁移范围；本轮没有修改生产算法、增加热路径计时、重建原生程序或替换固定 EXE，没有硬件访问。测量代码为优化分支 `codex/etm-cpp-stage1` 的 `a1d805d`，C++ 程序仍为 `77bf1c2` 源码构建的已交付字节。主机 AMD Ryzen 7 PRO 5850U，软件和文件 SHA 见 [provenance.json](raw/provenance.json)。
+> 2026-11-05整理：本报告保留历史结论；逐轮原始证据/一次性驱动已固定在 Git tag `archive/main-before-cleanup-20261105`。恢复方法和逐文件SHA见[归档索引](../README.md)。历史路径及命令不表示当前可直接执行。
+
+日期：2026-11-03（Asia/Shanghai）。按用户要求先测量，再决定迁移范围；本轮没有修改生产算法、增加热路径计时、重建原生程序或替换固定 EXE，没有硬件访问。测量代码为优化分支 `codex/etm-cpp-stage1` 的 `a1d805d`，C++ 程序仍为 `77bf1c2` 源码构建的已交付字节。主机 AMD Ryzen 7 PRO 5850U，软件和文件 SHA 见 provenance.json（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-phase-profile-20261103/raw/provenance.json`）。
 
 结论：**优先优化完整查询索引，其次继续分析 C++ 重放/建库；目前不值得先整体迁移静态字典。** Python 并非仅剩接口，但 Python 静态准备不是主要瓶颈。没有在本轮据此启动重构。
 
@@ -34,7 +36,7 @@ F103 第 3 轮缓存命中仍较慢：C++ 解码/缓存准备为 2.011s，而前
 
 ## 分阶段耗时
 
-下表为**各阶段分别取三轮中位数**，因此各列相加不必等于 API 中位数。每一轮的分区均可准确加回该轮 API 总时间；公式与逐轮明细见 [summary.json](raw/summary.json) 和 [summarize.py](summarize.py)。这是墙钟耗时分区，不是按语言独占 CPU 采样。
+下表为**各阶段分别取三轮中位数**，因此各列相加不必等于 API 中位数。每一轮的分区均可准确加回该轮 API 总时间；公式与逐轮明细见 summary.json（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-phase-profile-20261103/raw/summary.json`） 和 summarize.py（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-phase-profile-20261103/summarize.py`）。这是墙钟耗时分区，不是按语言独占 CPU 采样。
 
 | 阶段 | 实现及范围 | F103 大输入 | H743 1s | H743 2s |
 |---|---|---:|---:|---:|
@@ -71,12 +73,12 @@ C++ 内部非独占计时：重放与 visitor.finish (`readNative`) 中位约 2.
 ## 一致性与证据范围
 
 - 九次 API job 均 done，逐轮完整 summary 及双方共有 quality 字段与输入记录一致，无逐指令 JSONL，默认 direct/replay 路径未生成 native.bin。
-- 每组选择 API 墙钟中位数的实际轮次，在测速结束后对全部执行/静态/包/导航/检查点块逐字节比较，完整 analysis、展开诊断及 60 张查询表全部相等；没有声称其余六轮也逐块完成同一验证。见 [F103](raw/f103-api-equivalence.json)、[H743 1s](raw/h743-api-equivalence.json)、[H743 2s](raw/h743-2s-api-equivalence.json)。F103 对照上轮已验证候选，H743 1s 对照上轮 main 原生建库，H743 2s 对照已验证的 stage2 direct 库；本轮未重新建立 main 性能 A/B。
-- 首次尝试对照 H743 综合报告中的 store，其 manifest 引用的 generation 文件缺失，比较工具退出失败。发生于计时之外，未作为一次解码性能失败或产品执行流差异；改用上轮 ZL-107 套件保留的完整 main 库，核对 raw/ELF SHA 后完成全量比较。[原失败与替代路径](raw/reference-resolution.json)保留，不冒充缺失基准已恢复。
+- 每组选择 API 墙钟中位数的实际轮次，在测速结束后对全部执行/静态/包/导航/检查点块逐字节比较，完整 analysis、展开诊断及 60 张查询表全部相等；没有声称其余六轮也逐块完成同一验证。见 F103（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-phase-profile-20261103/raw/f103-api-equivalence.json`）、H743 1s（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-phase-profile-20261103/raw/h743-api-equivalence.json`）、H743 2s（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-phase-profile-20261103/raw/h743-2s-api-equivalence.json`）。F103 对照上轮已验证候选，H743 1s 对照上轮 main 原生建库，H743 2s 对照已验证的 stage2 direct 库；本轮未重新建立 main 性能 A/B。
+- 首次尝试对照 H743 综合报告中的 store，其 manifest 引用的 generation 文件缺失，比较工具退出失败。发生于计时之外，未作为一次解码性能失败或产品执行流差异；改用上轮 ZL-107 套件保留的完整 main 库，核对 raw/ELF SHA 后完成全量比较。原失败与替代路径（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-phase-profile-20261103/raw/reference-resolution.json`）保留，不冒充缺失基准已恢复。
 - 原有 gap、未知执行及周期能力边界保留，结果一致不等于证明物理采集无损或绝对解码正确。CPU/HCLK/TRACECLK 沿用保存记录的历史身份，本轮没有核查当前板上状态。
-- [validation.json](raw/validation.json)记录输入不变、默认处理策略、完整性绑定、原生程序身份及服务退出。本轮仅测量和归档，不重跑无关硬件/冻结包验收，不更新用户固定程序。
+- validation.json（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-phase-profile-20261103/raw/validation.json`）记录输入不变、默认处理策略、完整性绑定、原生程序身份及服务退出。本轮仅测量和归档，不重跑无关硬件/冻结包验收，不更新用户固定程序。
 
-原始三轮：[F103](raw/f103-api.json)、[H743 1s](raw/h743-api.json)、[H743 2s](raw/h743-2s-api.json)。原始工作目录 `build/phase-profile-20261103/` 保留，不纳入整体提交；令牌/runtime 文件未归档。
+原始三轮：F103（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-phase-profile-20261103/raw/f103-api.json`）、H743 1s（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-phase-profile-20261103/raw/h743-api.json`）、H743 2s（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-phase-profile-20261103/raw/h743-2s-api.json`）。原始工作目录 `build/phase-profile-20261103/` 保留，不纳入整体提交；令牌/runtime 文件未归档。
 
 ## 复测
 

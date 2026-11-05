@@ -1,8 +1,10 @@
 # ZL-006：C++ 完整索引与最终建库迁移
 
+> 2026-11-05整理：本报告保留历史结论；逐轮原始证据/一次性驱动已固定在 Git tag `archive/main-before-cleanup-20261105`。恢复方法和逐文件SHA见[归档索引](../README.md)。历史路径及命令不表示当前可直接执行。
+
 日期：2026-11-03（Asia/Shanghai）。按用户要求完成默认解码构建链的完整索引和最终 store 迁移，在独立 worktree `E:/zynqlinkPRO-work/etm-cpp-stage1-20261102`、分支 `codex/etm-cpp-stage1` 验证。没有访问硬件或改变 PL/PS、MCU 时钟/Flash/QSPI，没有替换固定 `dist/zynq-etm-bridge/`。main 只同步报告和问题索引，生产实现尚未合并。
 
-实现源码 **d39965b**，配套 `etm_storebuild.exe` 及构建身份 **48e4d3d**，冻结包构建/许可证收录提交 **5b75131**。同批三轮离线 API，中位时间 F103 **10.507 → 6.809s（减少35.2%）**、H743 1s **5.673 → 5.003s（11.8%）**、H743 2s **11.487 → 9.665s（15.9%）**。九轮新输出全部逐块/逐表对照一致。H743 2s 新首轮 **12.002s**，不能宣称每轮都低于10s或获得持续实时能力。[源码/原生程序/冻结包身份](build-manifest.json)、[性能汇总](raw/performance-summary.json)、[全部九轮对照](raw/api-equivalence-all.json)。
+实现源码 **d39965b**，配套 `etm_storebuild.exe` 及构建身份 **48e4d3d**，冻结包构建/许可证收录提交 **5b75131**。同批三轮离线 API，中位时间 F103 **10.507 → 6.809s（减少35.2%）**、H743 1s **5.673 → 5.003s（11.8%）**、H743 2s **11.487 → 9.665s（15.9%）**。九轮新输出全部逐块/逐表对照一致。H743 2s 新首轮 **12.002s**，不能宣称每轮都低于10s或获得持续实时能力。[源码/原生程序/冻结包身份](build-manifest.json)、性能汇总（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-complete-index-20261103/raw/performance-summary.json`）、全部九轮对照（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-complete-index-20261103/raw/api-equivalence-all.json`）。
 
 ## 实现与数据边界
 
@@ -31,7 +33,7 @@
 | H743 ETMv4 / CDC持续负载1s | 18,373,686 | 6.081 / 5.673 / 5.640 | 5.293 / 4.849 / 5.003 | **5.673 → 5.003** | 11.8% |
 | H743 ETMv4 / 初始化及单次回显2s | 36,022,615 | 11.737 / 11.487 / 11.379 | 12.002 / 9.329 / 9.665 | **11.487 → 9.665** | 15.9% |
 
-原始结果：[旧F103](raw/api-reference-f103.json)、[新F103](raw/api-cpp-f103.json)、[旧H743 1s](raw/api-reference-h743-1s.json)、[新H743 1s](raw/api-cpp-h743-1s.json)、[旧H743 2s](raw/api-reference-h743-2s.json)、[新H743 2s](raw/api-cpp-h743-2s.json)。完整输入 SHA 在这些文件及汇总中；F103 raw为 `3b549953…ea78`，H743 1s为 `974e5c2c…f2b9`，H743 2s为 `3bb82c46…50b6`，与此前已保存记录一致。
+原始结果：旧F103（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-complete-index-20261103/raw/api-reference-f103.json`）、新F103（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-complete-index-20261103/raw/api-cpp-f103.json`）、旧H743 1s（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-complete-index-20261103/raw/api-reference-h743-1s.json`）、新H743 1s（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-complete-index-20261103/raw/api-cpp-h743-1s.json`）、旧H743 2s（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-complete-index-20261103/raw/api-reference-h743-2s.json`）、新H743 2s（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-complete-index-20261103/raw/api-cpp-h743-2s.json`）。完整输入 SHA 在这些文件及汇总中；F103 raw为 `3b549953…ea78`，H743 1s为 `974e5c2c…f2b9`，H743 2s为 `3bb82c46…50b6`，与此前已保存记录一致。
 
 索引内部计时（分别取三轮中位数，不含最终store写入，不把嵌套计时重复相加）：
 
@@ -46,27 +48,27 @@ F103还减少了诊断数组回传和重复封装。H743 2s的新首轮协议/�
 
 ## 正确性与失败路径
 
-- **全部18个API任务完成**；旧/新每个对应轮次 summary 和共有 quality 完全一致，原始输入前后SHA不变。**全部九个新结果**对对应旧结果的静态/字符串/完整执行流/包/导航/聚合/检查点块逐字节比较，完整 analysis、展开诊断、全部60表逐项一致。默认视图JSON也按字节比较。查询字符串池、函数映射、导航合同、覆盖范围和默认视图SHA等语义meta一致，仅忽略明确不同的producer标签 `source`。逐轮证据在 [汇总](raw/api-equivalence-all.json)及同目录 `api-equivalence-*-r*.json`，不是抽样首屏检查。
+- **全部18个API任务完成**；旧/新每个对应轮次 summary 和共有 quality 完全一致，原始输入前后SHA不变。**全部九个新结果**对对应旧结果的静态/字符串/完整执行流/包/导航/聚合/检查点块逐字节比较，完整 analysis、展开诊断、全部60表逐项一致。默认视图JSON也按字节比较。查询字符串池、函数映射、导航合同、覆盖范围和默认视图SHA等语义meta一致，仅忽略明确不同的producer标签 `source`。逐轮证据在 汇总（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-complete-index-20261103/raw/api-equivalence-all.json`）及同目录 `api-equivalence-*-r*.json`，不是抽样首屏检查。
 - F103原有 **2 gap / 522998未知执行**，H743 1s为 **1 / 8759**，H743 2s为 **1 / 1139** 均保留。有限输入对照共用OpenCSD，不能给出绝对正确率或证明物理采集完整；目标时钟沿用记录的历史身份，本轮没有核查当前板上状态。
-- [F103尾部截断2字节](raw/truncated-f103.json)与[H743尾部截断2字节](raw/truncated-h743.json)均在相同变体输入上通过完整差分，不把变体当原始完整采集；这些功能对照与冻结构建可并行，内部seconds不计入上述正式串行API性能表。
-- F103与H743都先用未迁移的main生成真实旧记录，再做同目录升级、binary/direct/rescan切换、重复重建、五类真输入变更（ETM/ELF/config/image/已消费native）注入及未消费native变更。实际输入变更均拒绝发布并保持旧manifest/decoded；旧native原字节保留。每协议11个控制场景，源码和5个成功重建场景的完整数据比较见 [F103](raw/upgrade-f103/result.json)、[H743](raw/upgrade-h743/result.json)；各子JSON保留拒绝原因/变更已施加/旧发布未变的证据。
-- **23项针对性测试 + 55项CLI（共78项）通过**：[针对性](raw/targeted-tests.log)、[CLI](raw/cli-tests.log)。新增六项包括禁止Python数据写入、manifest失败恢复、发布后清理失败保留已提交代、同长度最终库损坏拒绝、10008个浮点/Unicode JSON格式对照、仅native输入记录的正确processed字节数。保留既有ResourceWarning；没有为文档重跑硬件。
-- 原生 [SHA/共享状态5万步/7万唯一范围缓存自检](raw/native-self-tests.json)通过。新浮点格式测试开发期首轮失败 `115336699991782588416.0` 对 `1.1533669999178259e+20`，已改为最短科学形式加Python格式阈值，最终10008值通过；[原失败](raw/dev-json-format-failure.json)保留，不冒充从未失败。
-- 区间CSV导出在F103大记录/H743 2s的新旧库间逐字节一致；冻结程序的两协议CSV也与源码CLI一致：[CSV证据](raw/csv-equivalence.json)。
+- F103尾部截断2字节（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-complete-index-20261103/raw/truncated-f103.json`）与H743尾部截断2字节（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-complete-index-20261103/raw/truncated-h743.json`）均在相同变体输入上通过完整差分，不把变体当原始完整采集；这些功能对照与冻结构建可并行，内部seconds不计入上述正式串行API性能表。
+- F103与H743都先用未迁移的main生成真实旧记录，再做同目录升级、binary/direct/rescan切换、重复重建、五类真输入变更（ETM/ELF/config/image/已消费native）注入及未消费native变更。实际输入变更均拒绝发布并保持旧manifest/decoded；旧native原字节保留。每协议11个控制场景，源码和5个成功重建场景的完整数据比较见 F103（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-complete-index-20261103/raw/upgrade-f103/result.json`）、H743（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-complete-index-20261103/raw/upgrade-h743/result.json`）；各子JSON保留拒绝原因/变更已施加/旧发布未变的证据。
+- **23项针对性测试 + 55项CLI（共78项）通过**：针对性（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-complete-index-20261103/raw/targeted-tests.log`）、CLI（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-complete-index-20261103/raw/cli-tests.log`）。新增六项包括禁止Python数据写入、manifest失败恢复、发布后清理失败保留已提交代、同长度最终库损坏拒绝、10008个浮点/Unicode JSON格式对照、仅native输入记录的正确processed字节数。保留既有ResourceWarning；没有为文档重跑硬件。
+- 原生 SHA/共享状态5万步/7万唯一范围缓存自检（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-complete-index-20261103/raw/native-self-tests.json`）通过。新浮点格式测试开发期首轮失败 `115336699991782588416.0` 对 `1.1533669999178259e+20`，已改为最短科学形式加Python格式阈值，最终10008值通过；原失败（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-complete-index-20261103/raw/dev-json-format-failure.json`）保留，不冒充从未失败。
+- 区间CSV导出在F103大记录/H743 2s的新旧库间逐字节一致；冻结程序的两协议CSV也与源码CLI一致：CSV证据（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-complete-index-20261103/raw/csv-equivalence.json`）。
 
 ## 冻结程序与交付身份
 
 候选目录 `build/etm-complete-index-bridge/`，`sourceRevision=5b75131`、`sourceDirty=false`。builder内嵌源码d39965b，SHA与Git中交付程序相同；decoder/exporter保留77bf1c2对应的原字节。本轮只重建主机builder和冻结应用，不涉及bit/PS ELF。[精确EXE/包清单SHA](build-manifest.json)。新增固定版本 nlohmann-json 3.11.3（MIT）源码/许可证及上游发布SHA已纳入Git，冻结包也含许可证；494项依赖离线指纹核对通过。
 
-- [冻结包标准验收](raw/frozen-standard-verification.json)：PATH无系统Python/Node，两协议导入/重建、Web/CLI查询与HTML导出、SVG、重复启动复用通过；硬件接口禁用，服务已退出。该报告package路径是发布前临时候选路径，实际发布候选由同一EXE/包清单SHA绑定，不把已清理的临时目录当作运行中服务。
-- 实际冻结Web入口对main旧[F103](raw/frozen-upgrade-f103.json)/[H743](raw/frozen-upgrade-h743.json)原地重建通过，旧native保留、全量语义与60表一致。标准F103为5467740指令/H743为210497指令；额外旧记录升级为F103550478指令/H74318373686指令，不能把它们计作上述大输入性能轮次。
-- [冻结默认链核对](raw/frozen-pipeline-check.json)直接检查两份新manifest均为 `native-complete-index`、不写scratch facts、单次最终store写出，许可证存在。冻结CLI导出验证见CSV证据。
+- 冻结包标准验收（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-complete-index-20261103/raw/frozen-standard-verification.json`）：PATH无系统Python/Node，两协议导入/重建、Web/CLI查询与HTML导出、SVG、重复启动复用通过；硬件接口禁用，服务已退出。该报告package路径是发布前临时候选路径，实际发布候选由同一EXE/包清单SHA绑定，不把已清理的临时目录当作运行中服务。
+- 实际冻结Web入口对main旧F103（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-complete-index-20261103/raw/frozen-upgrade-f103.json`）/H743（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-complete-index-20261103/raw/frozen-upgrade-h743.json`）原地重建通过，旧native保留、全量语义与60表一致。标准F103为5467740指令/H743为210497指令；额外旧记录升级为F103550478指令/H74318373686指令，不能把它们计作上述大输入性能轮次。
+- 冻结默认链核对（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-complete-index-20261103/raw/frozen-pipeline-check.json`）直接检查两份新manifest均为 `native-complete-index`、不写scratch facts、单次最终store写出，许可证存在。冻结CLI导出验证见CSV证据。
 
 ## 保留的问题与范围
 
 ZL-006继续**部分解决**：本阶段完整索引/最终建库迁移及固定记录正确性验证完成，Python静态准备/查询读取等后续迁移、冷盘、持续实时、真实硬件Web E2E及每轮≤10s均未由本报告证明。没有修改目标时钟或缩小执行/诊断信息来换时间。
 
-新增 **ZL-117 / P3待修复** 为本轮审计发现的既有问题：旧原生 `meta.record.protocol` 固定ETMv4，即使F103的实际config/decoded为ETMv3，错误包说明可能用ETMv4名字。本迁移为保持差分合同保留该标签/诊断命名行为，真实协议解码继续按实际配置；本轮正常输入包错误均0。[旧/新实测标签](raw/legacy-protocol-label.json)保留，需另做双协议错误包标签修正，不能称其已关闭。ZL-107原输入身份修复在新发布路径及冻结包中继续通过。
+新增 **ZL-117 / P3待修复** 为本轮审计发现的既有问题：旧原生 `meta.record.protocol` 固定ETMv4，即使F103的实际config/decoded为ETMv3，错误包说明可能用ETMv4名字。本迁移为保持差分合同保留该标签/诊断命名行为，真实协议解码继续按实际配置；本轮正常输入包错误均0。旧/新实测标签（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-complete-index-20261103/raw/legacy-protocol-label.json`）保留，需另做双协议错误包标签修正，不能称其已关闭。ZL-107原输入身份修复在新发布路径及冻结包中继续通过。
 
 ## 复测入口
 
@@ -82,4 +84,4 @@ python -X utf8 docs/validation/etm-complete-index-20261103/summarize.py
 
 单次差分在同一进程先旧后新，第二次应用缓存可能命中，其seconds只用于功能检查；正式A/B使用分开的b03275a/48e4d3d服务进程与三轮API结果。基准出现 `OFFLINE_BENCH_READY` 后停止自己的进程再测下一组；Ctrl+C退出码不等于decode任务失败。复测输出目录必须新建，端口须空闲，不能借用其它运行服务。
 
-工作输出 `build/cpp-full-index-20261103/` 和两个main下的升级夹具目录保留，未批量纳入Git；运行时令牌/URL不归档。[最终检查](raw/validation.json)记录进程退出和身份核对。所有本任务服务/worker均已结束，未合并生产代码至main、未替换固定EXE、未推送。
+工作输出 `build/cpp-full-index-20261103/` 和两个main下的升级夹具目录保留，未批量纳入Git；运行时令牌/URL不归档。最终检查（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-complete-index-20261103/raw/validation.json`）记录进程退出和身份核对。所有本任务服务/worker均已结束，未合并生产代码至main、未替换固定EXE、未推送。

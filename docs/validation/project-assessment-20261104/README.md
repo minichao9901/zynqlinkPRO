@@ -70,7 +70,7 @@ SEGGER 自身也有 HSS、RTT 与 J-Scope；当前官方 J-Scope 页面对部分
 
 来源：[合并后实板验收](../main-web-hardware-20261103/README.md)、[安全修复](../probe-safety-111-112-115-20261104/README.md)。J-Trace 官方4MB/s是 RAM 下载指标，不能与项目 RTT 接收或 SRAM读峰值横比。历史5MB/s级实验也不代表当前统一产品所有路径。
 
-频率口径补正：0.64MB/s来自`tools/validate_f103_main_web.py`的`cli_memory`，明确`setup(tx,rx,10000)`，单位kHz；计时只包围16KiB的`Memory.read/write`，不含连接、备份和恢复。该助手按1KiB边界逐块设置AP地址并等待响应。另一个F103流水测试实际SWCLK59999999Hz、512 words/块、depth32、256块累计512KiB，读中位4.8315MB/s、写4.7385MB/s，见[60MHz原始结果](../main-web-hardware-20261103/raw/powered/cli-sram-60000000.json)。两组频率、事务组织及配对不同，不能把0.64与4.8的差距全部归为软件开销，也不能称CLI只能达到0.64MB/s。前版评估表漏标10MHz，现已补正；Web/CLI的10MHz同口径对比仍有效。
+频率口径补正：0.64MB/s来自`tools/validate_f103_main_web.py`的`cli_memory`，明确`setup(tx,rx,10000)`，单位kHz；计时只包围16KiB的`Memory.read/write`，不含连接、备份和恢复。该助手按1KiB边界逐块设置AP地址并等待响应。另一个F103流水测试实际SWCLK59999999Hz、512 words/块、depth32、256块累计512KiB，读中位4.8315MB/s、写4.7385MB/s，见60MHz原始结果（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/main-web-hardware-20261103/raw/powered/cli-sram-60000000.json`）。两组频率、事务组织及配对不同，不能把0.64与4.8的差距全部归为软件开销，也不能称CLI只能达到0.64MB/s。前版评估表漏标10MHz，现已补正；Web/CLI的10MHz同口径对比仍有效。
 
 ## 最值得增加的五项能力
 

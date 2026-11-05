@@ -1,5 +1,7 @@
 # 独立 Web UI 分支评审
 
+> 2026-11-05整理：本报告保留历史结论；逐轮原始证据/一次性驱动已固定在 Git tag `archive/main-before-cleanup-20261105`。恢复方法和逐文件SHA见[归档索引](../README.md)。历史路径及命令不表示当前可直接执行。
+
 日期：2026-11-02（Asia/Shanghai）。对比 main=e6f26cc 与 codex/web-ui-compact=ee4beba，共4个提交、67个文件。评审只写文档与离线复现，不修改候选产品代码、不合并、不更新EXE、不操作硬件。
 
 ## 结论

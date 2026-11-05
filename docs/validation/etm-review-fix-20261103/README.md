@@ -1,5 +1,7 @@
 # ETM独立review处理：ZL-107、ZL-108
 
+> 2026-11-05整理：本报告保留历史结论；逐轮原始证据/一次性驱动已固定在 Git tag `archive/main-before-cleanup-20261105`。恢复方法和逐文件SHA见[归档索引](../README.md)。历史路径及命令不表示当前可直接执行。
+
 日期：2026-11-03（Asia/Shanghai）。在`codex/etm-cpp-stage1`处理[独立审查](../etm-optimization-review-20261102/README.md)，未操作硬件、目标时钟、Flash/QSPI或PL/PS。main仅提交本任务编号协调/观察文档，尚未集成优化代码或替换固定EXE。
 
 ## ZL-107：分离消费输入身份，保留旧派生文件
@@ -15,7 +17,7 @@
 
 两组均注入同长度、恢复原mtime的实际输入修改：ETM、ELF、native-config、image-0及binary实际消费的native，全部拒绝新发布，旧manifest/decoded字节不变。故意修改**未消费**native的direct则成功发布，结果相等；测试结束恢复测试副本。没有对用户原始记录注入。
 
-证据：[F103结果](raw/f103-result.json)、[H743结果](raw/h743-result.json)及同目录逐例JSON。4项绑定验证单测、13项既有算法测试、55项CLI通过；[CLI日志](raw/cli-tests.log)保留既有ResourceWarning。
+证据：F103结果（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-review-fix-20261103/raw/f103-result.json`）、H743结果（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-review-fix-20261103/raw/h743-result.json`）及同目录逐例JSON。4项绑定验证单测、13项既有算法测试、55项CLI通过；CLI日志（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-review-fix-20261103/raw/cli-tests.log`）保留既有ResourceWarning。
 
 ## ZL-108：规范编号与历史别名
 
@@ -23,7 +25,7 @@ main已预留ETM规范ZL-109（历史ETM:103）和ZL-110（历史ETM:104）；We
 
 ## 性能及范围
 
-同一F103大输入的本轮完整离线API三次 **10.173 / 8.823 / 8.880秒，中位8.880秒**；包含建库、索引、发布及任务准备，不含硬件/浏览器绘制，未清OS缓存。[原始结果](raw/performance.json)、[全量对照](raw/large-equivalence.json)。首轮超10秒，不宣称稳定所有轮次<10秒，也不将旧快速轮次覆盖本次结果。
+同一F103大输入的本轮完整离线API三次 **10.173 / 8.823 / 8.880秒，中位8.880秒**；包含建库、索引、发布及任务准备，不含硬件/浏览器绘制，未清OS缓存。原始结果（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-review-fix-20261103/raw/performance.json`）、全量对照（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-review-fix-20261103/raw/large-equivalence.json`）。首轮超10秒，不宣称稳定所有轮次<10秒，也不将旧快速轮次覆盖本次结果。
 
 原始gap/未知执行仍保留。ZL-006维持部分解决；≤5秒、冷盘、持续实时及实际硬件Web E2E未由本修复证明。C++、RTL和Zynq固件没有修改，本轮不重建/替换它们；修复位于Python身份校验/绑定层。
 
@@ -42,7 +44,7 @@ python -X utf8 -m unittest discover -s tools/tests -p test_etm_source_bindings.p
 
 修复源码fa0ec83；新冻结候选`build/etm-review-fixed-bridge/`的sourceRevision同为fa0ec83、sourceDirty=false。[身份manifest](build-manifest.json)绑定实际源码/Git blob双SHA、三份未改native EXE和新主EXE/包清单。未更改native C++源码，继续使用77bf1c2构建并已交付的同字节程序，不用旧bit/ELF冒充新构建。
 
-[冻结包标准离线验收](raw/frozen-package-verification.json)通过，禁止硬件访问、PATH无系统Python/Node；冻结实际Web入口对[main F103旧记录](raw/frozen-f103.json)、[main H743旧记录](raw/frozen-h743.json)重解码均通过，旧native原字节保留、新代发布、所有语义及60表相等。测试服务均已结束。17项绑定/算法单测和55项CLI通过；不以保留记录的gap/未知执行为零作为通过条件。
+冻结包标准离线验收（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-review-fix-20261103/raw/frozen-package-verification.json`）通过，禁止硬件访问、PATH无系统Python/Node；冻结实际Web入口对main F103旧记录（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-review-fix-20261103/raw/frozen-f103.json`）、main H743旧记录（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/etm-review-fix-20261103/raw/frozen-h743.json`）重解码均通过，旧native原字节保留、新代发布、所有语义及60表相等。测试服务均已结束。17项绑定/算法单测和55项CLI通过；不以保留记录的gap/未知执行为零作为通过条件。
 
 ZL-107在本候选范围关闭；ZL-108的规范编号与分支别名已经同步建立，唯一性检查通过，保留另一Web工作树和历史原始证据。新编号以当前问题表为准。性能边界仍为本轮中位8.880秒、首轮10.173秒，不宣称所有轮次<10秒或硬件Web E2E通过。
 

@@ -1,0 +1,281 @@
+{
+  "artifacts": {
+    "git_head": "41e2cee015f76702d09190d776c0577e08f7b4a9",
+    "git_dirty": true,
+    "bit": {
+      "path": "E:\\zynqlinkPRO\\prebuilt\\fclk133-release-20261101\\probe.bit",
+      "sha256": "af1031d3caa0d7bd3b6adffa911d26efdab9e0bfb5223fb18f70dabb70ebeeed"
+    },
+    "elf": {
+      "path": "E:\\zynqlinkPRO\\prebuilt\\fclk133-release-20261101\\application.elf",
+      "sha256": "2137f7d0f507c08574f36223130103c0710645cbfdefb5c1d8c8efb0cfb990a0"
+    }
+  },
+  "target_elf": "E:\\zynqlinkPRO\\build\\main-web-hardware-20261103\\hal-storage-build-v3\\fw.elf",
+  "target_elf_sha256": "dbaff7a388bb66fb2d1439f729f60c4f6620ff464c623bda80e2a3f7ef6a4d44",
+  "milliseconds": 1000.0,
+  "hardware_full_test": false,
+  "periodic_sync": false,
+  "hclk_div": 1,
+  "raw_diagnostic": false,
+  "IDCODE": "0501017714a01b",
+  "control_clock": {
+    "fclk_hz": 119999998,
+    "cfg": "0xcaa11",
+    "SWCLK_Hz": 9999999.833333334,
+    "half_period_fclk": 6,
+    "short_high": true,
+    "intended_high_ns": 8.333333472222225
+  },
+  "cpuid": "0x411fc231",
+  "flash": [
+    {
+      "address": 134217728,
+      "bytes": 13840,
+      "sha256": "660b66a6b73c344e332389dd34d4aac41e4e3f3b05a1b13c6823640e6e4cb06d"
+    },
+    {
+      "address": 134231568,
+      "bytes": 124,
+      "sha256": "907a255becd51aab011d5a88b82e08f81e7dd71a7c7244024d29e0e2a96ee212"
+    }
+  ],
+  "reference": [
+    199999998,
+    9437440,
+    221192,
+    769
+  ],
+  "transport": "ddr-usb",
+  "entry": {
+    "address": 134220956,
+    "pc": 134220956,
+    "resetToEntry": false,
+    "matched": true,
+    "savedFpb": {
+      "control": 609,
+      "comparators": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "rcc_before": [
+    50548355,
+    1115146
+  ],
+  "rcc_capture": [
+    50548355,
+    1115146
+  ],
+  "gpio_before": [
+    73,
+    1270594372
+  ],
+  "gpio_capture": 1091637572,
+  "tpiu_supported": 11,
+  "config": {
+    "protocol": "ETMv3",
+    "idr": 1091891777,
+    "ctrl": 2064,
+    "ccer": 100352,
+    "traceid": 2
+  },
+  "quality": {
+    "transport": "ddr-usb/1",
+    "captureId": 3,
+    "captureNonce": 4503635588116200896,
+    "loss": false,
+    "synced": true,
+    "bufferFull": false,
+    "bufferCapacityBytes": 104857600,
+    "captureComplete": true,
+    "requestedWindowComplete": true,
+    "completionReason": "time",
+    "ended": true,
+    "records": 1103610,
+    "hardwareTicks": 199999998,
+    "requestedTicks": 199999998,
+    "refClockHz": 199999998,
+    "hardwareSeconds": 1.0,
+    "hardwareStartBracketUnix": [
+      1793724061.4184637,
+      1793724061.4191456
+    ],
+    "stopReason": 0,
+    "formatterBytes": 17657773,
+    "tailBytes": 13,
+    "tailAmbiguous": false,
+    "usbSeconds": 0.4644110000008368,
+    "usbPayloadMBps": 38.021866407057935,
+    "diagnostics": {
+      "implemented": true,
+      "frameDrops": 0,
+      "parserErrors": 0,
+      "idelayReadyLosses": 0,
+      "frameHighwater": 1,
+      "syncAcquisitions": 1,
+      "observedFrames": 1103610,
+      "capacityReached": false,
+      "writerError": 0
+    },
+    "fclk": 119999998,
+    "tckKhz": 9999.999833333333
+  },
+  "ddr": {
+    "hardwareAccess": true,
+    "transport": "USB post-capture DDR download",
+    "passed": true,
+    "flashWrites": false,
+    "protocol": "zynq-ddr-usb/1",
+    "available": true,
+    "result": 0,
+    "registers": [
+      1162104113,
+      0,
+      2,
+      968884224,
+      104857600,
+      0,
+      17657773,
+      17657773,
+      120000192,
+      0,
+      3,
+      7,
+      968884224,
+      1073741824,
+      128,
+      2,
+      199999998,
+      199999998,
+      0,
+      0,
+      0,
+      1103610,
+      13,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1179798833,
+      0,
+      0,
+      3279502784,
+      1048584372,
+      2
+    ],
+    "captureId": 3,
+    "nonce": 4503635588116200896,
+    "active": false,
+    "done": true,
+    "sourceActive": false,
+    "bytes": 17657773,
+    "acceptedBytes": 17657773,
+    "ticks": 199999998,
+    "qualityFlags": 0,
+    "tailBytes": 13,
+    "stopReason": 0,
+    "format": 1179798833,
+    "tailAmbiguous": false,
+    "transferId": 3,
+    "rangeOffset": 0,
+    "rangeBytes": 1486353,
+    "sentBytes": 1486353,
+    "downloadState": 65536,
+    "submitErrors": 0,
+    "sha256": "5c3c342853278515316bd055fd9aed4f523dc8bdbd0200de4e1f2c49083d34f4",
+    "usbSeconds": 0.4644110000008368,
+    "usbPayloadMBps": 38.021866407057935,
+    "submitErrorsAfter": 0,
+    "requestedTicks": 199999998,
+    "referenceHz": 199999998,
+    "hardwareStartBracketUnix": [
+      1793724061.4184637,
+      1793724061.4191456
+    ],
+    "actualWindowSeconds": 1.0,
+    "quality": {
+      "transport": "ddr-usb/1",
+      "captureId": 3,
+      "captureNonce": 4503635588116200896,
+      "loss": false,
+      "synced": true,
+      "bufferFull": false,
+      "bufferCapacityBytes": 104857600,
+      "captureComplete": true,
+      "requestedWindowComplete": true,
+      "completionReason": "time",
+      "ended": true,
+      "records": 1103610,
+      "hardwareTicks": 199999998,
+      "requestedTicks": 199999998,
+      "refClockHz": 199999998,
+      "hardwareSeconds": 1.0,
+      "hardwareStartBracketUnix": [
+        1793724061.4184637,
+        1793724061.4191456
+      ],
+      "stopReason": 0,
+      "formatterBytes": 17657773,
+      "tailBytes": 13,
+      "tailAmbiguous": false,
+      "usbSeconds": 0.4644110000008368,
+      "usbPayloadMBps": 38.021866407057935,
+      "diagnostics": {
+        "implemented": true,
+        "frameDrops": 0,
+        "parserErrors": 0,
+        "idelayReadyLosses": 0,
+        "frameHighwater": 1,
+        "syncAcquisitions": 1,
+        "observedFrames": 1103610,
+        "capacityReached": false,
+        "writerError": 0
+      },
+      "fclk": 119999998,
+      "tckKhz": 9999.999833333333
+    },
+    "droppedFrames": 0,
+    "parserErrors": 0,
+    "readyLosses": 0,
+    "fifoHighwater": 1,
+    "demux": {
+      "protocol": "etm-framed-native/1",
+      "format": "FRM1",
+      "inputBytes": 17657773,
+      "frames": 1103610,
+      "trailingFrameBytes": 13,
+      "unknownBytes": 0,
+      "paddingBytes": 7660320,
+      "idChanges": 4189804,
+      "streams": {
+        "2": 4632959
+      },
+      "seconds": 0.0669843,
+      "inputSha256": "5c3c342853278515316bd055fd9aed4f523dc8bdbd0200de4e1f2c49083d34f4",
+      "binarySha256": "2d9a2e45b180c621bee207fd3ff740dd238dcf612227bdf4676cd23933981e3e",
+      "traceId": 2,
+      "selectedStream": "E:\\zynqlinkPRO\\build\\main-web-hardware-20261103\\hal-storage-cli-write-1s-r1\\ddr\\demux\\id2.bin",
+      "streamSha256": {
+        "2": "132becf58260bf801d3b61073bffd4c627135d7858d7f5a8d3e3998232c14966"
+      }
+    },
+    "usbOwnerReleased": true
+  },
+  "etm_bytes": 4632959,
+  "etm_sha256": "132becf58260bf801d3b61073bffd4c627135d7858d7f5a8d3e3998232c14966",
+  "capture_passed": true,
+  "restored": true,
+  "rcc_after": [
+    50548355,
+    1115146
+  ],
+  "fpb_restored": true,
+  "usb_reader_errors": []
+}

@@ -1,0 +1,114 @@
+{
+  "date": "2026-11-05",
+  "purpose": "ETMv4：CPU60/TRACECLK20，初始化和一次真实CDC echo；保留未知祖先与缺口",
+  "source": "docs/validation/h743-flame-20261102/raw/corrected/record",
+  "originalFilesSHA256": {
+    "capture.bin": "3bb82c465d926c43f857c47dcaa7afae0dc3976dd25b781dc492eb7d133650b6",
+    "etm.bin": "3bb82c465d926c43f857c47dcaa7afae0dc3976dd25b781dc492eb7d133650b6",
+    "capture.frm1": "63de8e966ec4323cf13af2960120d2b709cdeaa20d824f4d1616c0f7ffcb4c0e",
+    "firmware.elf": "246640bf79c8b1e568441a286812326dfb0ae68a0df061a0c023262c07cf221b",
+    "session.json": "0c916f98469e988ddcda51c0483254c29c7739efa01ca4bd63e069f71ce7385f",
+    "sources.json": "015aa3e517e62523fc88ed5684c59e6176bf814915c9751e5b59231ad58dcd25",
+    "decoded.json": "96ef33dc6dec9bd9c3a303d85971ddde286b539e2377450034667ee29b472c90",
+    "acceptance.json": "bcd4ee679fd913c758c8ea6b2002543852aa26605b3d85774ce2e146074b0fc8"
+  },
+  "sourceTextSupplements": [
+    {
+      "path": "E:/zynqlinkPRO/firmware/target/stm32h743_cdc_trace/cherryusb/class/cdc/usbd_cdc_acm.c",
+      "sha256": "bbb5836dedc069ca66cee1a76cff68f90ba2afa225085fd0f5fbaf9564277d84",
+      "sourceRevision": "6765937",
+      "basis": "current tracked source at exact recorded path; not claimed to be a capture-time snapshot"
+    },
+    {
+      "path": "E:/zynqlinkPRO/firmware/target/stm32h743_cdc_trace/cherryusb/common/usb_memcpy.h",
+      "sha256": "f8293845dd5fbf8bc8b566e4aed2f1b577c8f0ca54213a1d11d5521d65fb06e7",
+      "sourceRevision": "6765937",
+      "basis": "current tracked source at exact recorded path; not claimed to be a capture-time snapshot"
+    },
+    {
+      "path": "E:/zynqlinkPRO/firmware/target/stm32h743_cdc_trace/cherryusb/core/usbd_core.c",
+      "sha256": "f2669fc61b2681086f323981d210670b7fd4e894eb7d84eaf74ddbdbfaf8434e",
+      "sourceRevision": "6765937",
+      "basis": "current tracked source at exact recorded path; not claimed to be a capture-time snapshot"
+    },
+    {
+      "path": "E:/zynqlinkPRO/firmware/target/stm32h743_cdc_trace/cherryusb/port/dwc2/usb_dc_dwc2.c",
+      "sha256": "547948f2a5d49723b326ae40c31f229c16361669c08c51eca40487d6773f216c",
+      "sourceRevision": "6765937",
+      "basis": "current tracked source at exact recorded path; not claimed to be a capture-time snapshot"
+    },
+    {
+      "path": "E:/zynqlinkPRO/firmware/target/stm32h743_cdc_trace/cherryusb/port/dwc2/usb_dwc2_param.h",
+      "sha256": "6000033a2af5fcb716332d572372d777d957a6d6f7b5d0b80976bb84edc2d302",
+      "sourceRevision": "6765937",
+      "basis": "current tracked source at exact recorded path; not claimed to be a capture-time snapshot"
+    },
+    {
+      "path": "E:/zynqlinkPRO/firmware/target/stm32h743_cdc_trace/cherryusb/port/dwc2/usb_glue_st_h7b0.c",
+      "sha256": "b3bd87dca15864938f8d9232a10128173e917ec477334d1583b9b19afac0b057",
+      "sourceRevision": "6765937",
+      "basis": "current tracked source at exact recorded path; not claimed to be a capture-time snapshot"
+    },
+    {
+      "path": "E:/zynqlinkPRO/firmware/target/stm32h743_cdc_trace/sdk/Drivers/CMSIS/Include/core_cm7.h",
+      "sha256": "ff629c5bf98a8caadf360d0bcc48e1042fefa19995f7b64855d5e81e4c2e81cb",
+      "sourceRevision": "6765937",
+      "basis": "current tracked source at exact recorded path; not claimed to be a capture-time snapshot"
+    },
+    {
+      "path": "E:/zynqlinkPRO/firmware/target/stm32h743_cdc_trace/sdk/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal.c",
+      "sha256": "feaa798cea6b1c390726ad0a67ff2de82a3d265cda0650dfd1cd0e10d9e66812",
+      "sourceRevision": "6765937",
+      "basis": "current tracked source at exact recorded path; not claimed to be a capture-time snapshot"
+    },
+    {
+      "path": "E:/zynqlinkPRO/firmware/target/stm32h743_cdc_trace/sdk/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_cortex.c",
+      "sha256": "e9b0f8354d70b4fa4e2103631332d318a1e62274d0d83801eb324644b0671c63",
+      "sourceRevision": "6765937",
+      "basis": "current tracked source at exact recorded path; not claimed to be a capture-time snapshot"
+    },
+    {
+      "path": "E:/zynqlinkPRO/firmware/target/stm32h743_cdc_trace/sdk/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_gpio.c",
+      "sha256": "4272b517b061fd8a039d72cf6d24d5e53a828e8bf89014b3fe53136af3c57db4",
+      "sourceRevision": "6765937",
+      "basis": "current tracked source at exact recorded path; not claimed to be a capture-time snapshot"
+    },
+    {
+      "path": "E:/zynqlinkPRO/firmware/target/stm32h743_cdc_trace/sdk/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_rcc.c",
+      "sha256": "b7277991a9e6195ce22cab6e5bb1c3295f49b81d74f314363c2a5f0b44e7529d",
+      "sourceRevision": "6765937",
+      "basis": "current tracked source at exact recorded path; not claimed to be a capture-time snapshot"
+    },
+    {
+      "path": "E:/zynqlinkPRO/firmware/target/stm32h743_cdc_trace/sdk/RTT_TRACE_LOG/SEGGER_RTT.c",
+      "sha256": "ec4c63c1659bc3d83cc9227eddf4a086e90f102867699b56200517a19bbdf159",
+      "sourceRevision": "6765937",
+      "basis": "current tracked source at exact recorded path; not claimed to be a capture-time snapshot"
+    },
+    {
+      "path": "E:/zynqlinkPRO/firmware/target/stm32h743_cdc_trace/src/boot_probe.c",
+      "sha256": "bd6af261399a103035b44b3afdd4fd52b338adf0f69ff6a45e62b87ae260fa7d",
+      "sourceRevision": "6765937",
+      "basis": "current tracked source at exact recorded path; not claimed to be a capture-time snapshot"
+    },
+    {
+      "path": "E:/zynqlinkPRO/firmware/target/stm32h743_cdc_trace/src/main.c",
+      "sha256": "eb73fbce9aabf9cf929f0e63cfa6f876aa93d8fdc96ab4d039eda6a74cd89a00",
+      "sourceRevision": "6765937",
+      "basis": "current tracked source at exact recorded path; not claimed to be a capture-time snapshot"
+    },
+    {
+      "path": "E:/zynqlinkPRO/firmware/target/stm32h743_cdc_trace/src/trace_hooks.c",
+      "sha256": "20a80dfd8d931bd04e8fc22eb039b91166f9c1d1cb93a715328d9fa534d63065",
+      "sourceRevision": "6765937",
+      "basis": "current tracked source at exact recorded path; not claimed to be a capture-time snapshot"
+    },
+    {
+      "path": "E:/zynqlinkPRO/firmware/target/stm32h743_cdc_trace/src/usb_dc_low_level.c",
+      "sha256": "ba210bdefd490f99f32239cde830b295a11af11598dd0c5bb5d45fec187802c1",
+      "sourceRevision": "6765937",
+      "basis": "current tracked source at exact recorded path; not claimed to be a capture-time snapshot"
+    }
+  ],
+  "unchanged": "Raw input, target ELF, session capture/quality and decoded summary bytes copied exactly; store is copied or regenerated offline."
+}

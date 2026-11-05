@@ -1,5 +1,7 @@
 # 多寄存器访问 A/B
 
+> 2026-11-05整理：本报告保留历史结论；逐轮原始证据/一次性驱动已固定在 Git tag `archive/main-before-cleanup-20261105`。恢复方法和逐文件SHA见[归档索引](../README.md)。历史路径及命令不表示当前可直接执行。
+
 同板、同已加载bit/ELF、相同目标ELF和100ms采集窗口；默认C++二进制/TraceStore链路。逐轮CSV等价数据见analysis.json，完整控制地址/阶段计数在captures.json，etmrecord包括原始ETM、FRM1、目标ELF、源码及采集/解码元数据。
 
 AI复测命令（工作台须已打开对应runtime的鉴权URL，输出目录须为新目录）：

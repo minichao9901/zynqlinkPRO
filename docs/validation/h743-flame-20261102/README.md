@@ -1,9 +1,11 @@
 # H743 CDC初始化与单次echo：执行顺序SVG
 
+> 2026-11-05整理：本报告保留历史结论；逐轮原始证据/一次性驱动已固定在 Git tag `archive/main-before-cleanup-20261105`。恢复方法和逐文件SHA见[归档索引](../README.md)。历史路径及命令不表示当前可直接执行。
+
 按用户要求使用Web共用的原生区间SVG导出实现，`--flame-mode timeline`。没有聚合、分桶或删除调用深度，也没有对SVG内容做自定义渲染改写。横轴是原始执行序号，表示先后顺序，不是逐指令精确时间。
 
-- [CDC初始化：执行顺序火焰图](CDC初始化-执行顺序火焰图.svg)：seq **7～42571**，925个连续调用段、14层；从 `cdc_acm_init` 首指令至其return，下一条回到main，覆盖该函数及内部USB控制器初始化。
-- [一次echo：执行顺序火焰图](单次echo-执行顺序火焰图.svg)：seq **7782088～7784098**，60个调用段、10层；USB OUT接收中断→main数据复制/`cdc_write`→`handle_command`及原有日志→USB IN完成中断返回。包含真实日志开销、未知祖先/未知函数和中断间隙。
+- CDC初始化：执行顺序火焰图（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/h743-flame-20261102/CDC初始化-执行顺序火焰图.svg`）：seq **7～42571**，925个连续调用段、14层；从 `cdc_acm_init` 首指令至其return，下一条回到main，覆盖该函数及内部USB控制器初始化。
+- 一次echo：执行顺序火焰图（历史归档：`git show archive/main-before-cleanup-20261105:docs/validation/h743-flame-20261102/单次echo-执行顺序火焰图.svg`）：seq **7782088～7784098**，60个调用段、10层；USB OUT接收中断→main数据复制/`cdc_write`→`handle_command`及原有日志→USB IN完成中断返回。包含真实日志开销、未知祖先/未知函数和中断间隙。
 
 两个文件与对应英文原生导出文件逐字节一致，SHA和尺寸见 `svg-manifest.json`。原生导出为保留完整函数名会生成宽图：初始化4086272px、echo约59022.674px；保留ZL-012所述超宽边界，需下载后缩放或横向查看。
 
