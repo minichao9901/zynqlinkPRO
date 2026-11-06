@@ -8,6 +8,11 @@ import re
 import subprocess
 import sys
 import time
+import zlib
+try:
+    from .sdk_runtime import prepare
+except ImportError:
+    from sdk_runtime import prepare
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -79,14 +84,38 @@ class Session:
         if destination.stat().st_size != (length+3)//4*4:
             raise RuntimeError('Incomplete flash readback')
 
+    def program_boot(self,image,boot):
+        self.run('rst -processor\nsource {'+(image/'ps7_init.tcl').as_posix()+'}\nps7_init\n'
+                 'dow {'+(image/'qspi_program.elf').as_posix()+'}\ncon')
+        for _ in range(30):
+            words=self.read_words(0x03ff0000,4)
+            if words[0]==0x51535750:break
+            if words[3]&0xffff0000==0xdead0000:raise RuntimeError('Programmer initialization failed: '+str(words))
+            time.sleep(.2)
+        else:raise TimeoutError('Programmer not ready')
+        if words[1]!=0xef4019 or words[2]&0x7d:raise RuntimeError('Programmer flash guard rejected: '+str(words))
+        crc=zlib.crc32(boot.read_bytes())
+        self.run('catch {stop}\ndow -data {'+boot.as_posix()+'} 0x04000000\n'
+                 f'mwr -force 0x03ff0010 {boot.stat().st_size}\n'
+                 f'mwr -force 0x03ff0014 {crc}\nmwr -force 0x03ff0028 0x46575231\n'
+                 'mwr -force 0x03ff000c 1\ncon')
+        deadline=time.monotonic()+900
+        while True:
+            words=self.read_words(0x03ff0000,11)
+            if words[3]==2:return dict(mailbox=words,crc32=f'{crc:08x}',backend='zynq-bounded-helper')
+            if words[3]&0xffff0000==0xdead0000:raise RuntimeError('Programmer failed: '+str(words))
+            if time.monotonic()>deadline:raise TimeoutError('Programmer timed out: '+str(words))
+            time.sleep(3)
+
 
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--image-dir', type=Path, default=ROOT/'prebuilt/recovery')
+    p.add_argument('--image-dir', type=Path, default=ROOT/'prebuilt/qspi-release-20261106')
     p.add_argument('--sdk', type=Path, default=Path('E:/Xilinx/SDK/2018.3'))
     p.add_argument('--url', default='tcp:127.0.0.1:3121')
     p.add_argument('--out', type=Path)
     p.add_argument('--dry-run', action='store_true', help='validate files and display plan without touching hardware')
+    p.add_argument('--backend',choices=['helper','sdk'],default='helper',help='bounded Zynq BOOT writer or legacy SDK writer')
     modes=p.add_mutually_exclusive_group()
     modes.add_argument('--backup-only', action='store_true')
     modes.add_argument('--verify-only', action='store_true', help='read back the existing image and test reset boot without erasing/programming')
@@ -96,6 +125,8 @@ def main(argv=None):
     required = {'BOOT.bin','fsbl_programmer.elf','qspi_read.elf','ps7_init.tcl','probe.bit','application.elf'}
     if not required <= manifest['files'].keys():
         raise ValueError('Boot package manifest is missing required files')
+    if a.backend=='helper' and not (a.backup_only or a.verify_only) and 'qspi_program.elf' not in manifest['files']:
+        raise ValueError('This package requires --backend sdk; no bounded writer ELF')
     for name, expected in manifest['files'].items():
         if Path(name).name != name or sha(image/name) != expected:
             raise ValueError('Image file SHA-256 mismatch: '+name)
@@ -103,15 +134,18 @@ def main(argv=None):
     if not 0 < boot.stat().st_size < 16<<20:
         raise ValueError('Boot image must fit in first 16MiB')
     out = (a.out or ROOT/'build'/('probe-flash-'+datetime.datetime.now().strftime('%Y%m%d-%H%M%S'))).resolve()
-    plan = dict(image_dir=str(image), out=str(out), boot_sha256=sha(boot),
+    plan = dict(image_dir=str(image), out=str(out), boot_sha256=sha(boot),backend=a.backend,
                 operation=('backup only' if a.backup_only else 'verify existing image -> system reset' if a.verify_only
                     else 'full backup -> program/verify -> full readback SHA-256 -> system reset'))
     print(json.dumps(plan, indent=2), flush=True)
     if a.dry_run:
         return 0
+    sys.path.insert(0,str(ROOT/'etm-service/tools'))
+    from probe_ownership import Ownership
     out.mkdir(parents=True, exist_ok=False)
     session = Session(out, a.sdk, a.url)
     report = dict(plan, status='started', source=manifest)
+    lease=Ownership()
     try:
         mode = session.read_words(0xf800025c)[0]&15
         part = session.read_words(0xf8000530)[0]
@@ -134,16 +168,19 @@ def main(argv=None):
         if a.backup_only:
             report['status']='backup_complete'
             return 0
-        command = [str(a.sdk/'bin/program_flash.bat'), '-f', str(boot), '-offset', '0',
-                   '-flash_type', 'qspi-x4-single', '-fsbl', str(image/'fsbl_programmer.elf'),
-                   '-blank_check', '-verify', '-url', a.url]
         if not a.verify_only:
             print('Backup complete. Programming and verifying BOOT.bin...', flush=True)
-            report['program_command']=command
-            result = subprocess.run(command,capture_output=True,text=True,errors='replace',timeout=1200)
-            (out/'program_flash.log').write_text(result.stdout+result.stderr)
-            if result.returncode or 'Flash Operation Successful' not in result.stdout:
-                raise RuntimeError('program_flash failed; inspect program_flash.log and keep original backup')
+            if a.backend=='helper':report['programmer']=session.program_boot(image,boot)
+            else:
+                programmer,environment=prepare(a.sdk,'rdi_zynq_flash')
+                command=[str(programmer),'-f',str(boot),'-offset','0','-flash_type','qspi-x4-single',
+                         '-fsbl',str(image/'fsbl_programmer.elf'),'-blank_check','-verify','-url',a.url]
+                report['program_command']=command
+                result = subprocess.run(command,env=environment,capture_output=True,text=True,errors='replace',timeout=1200)
+                (out/'program_flash.log').write_text(result.stdout+result.stderr)
+                report['program_returncode']=result.returncode
+                if result.returncode or 'Flash Operation Successful' not in result.stdout:
+                    raise RuntimeError('program_flash failed; inspect program_flash.log and keep original backup')
             session.reader(image)
         readback = out/'programmed_readback.bin'
         session.read_flash(boot.stat().st_size if a.verify_only else 32<<20,readback)
@@ -175,7 +212,8 @@ def main(argv=None):
         report.update(status='failed',error=str(error))
         raise
     finally:
-        (out/'result.json').write_text(json.dumps(report,indent=2)+'\n')
+        try:(out/'result.json').write_text(json.dumps(report,indent=2)+'\n')
+        finally:lease.close()
 
 
 if __name__=='__main__':

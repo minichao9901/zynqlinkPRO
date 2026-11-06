@@ -32,7 +32,7 @@ def main():
                  if name.replace('\\','/').endswith('/hardware/ps7_init.tcl')]
     if init_hashes!=[digest(a.ps_init)]:p.error('PS initialization does not match the loader build')
     required=['BOOT.bin','BOOT.bif','fsbl_stage0.elf','fsbl_stage2.elf',
-              'fsbl_stage2.bin','fsbl_programmer.elf','qspi_read.elf']
+              'fsbl_stage2.bin','fsbl_programmer.elf','qspi_read.elf','qspi_program.elf']
     for name in required:
         if digest(source/name)!=manifest['files'][name]:p.error('Loader artifact SHA mismatch: '+name)
     partitions(source/'BOOT.bin')  # verify headers, partition bounds and MD5

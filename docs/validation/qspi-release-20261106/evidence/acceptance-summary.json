@@ -1,0 +1,83 @@
+{
+  "accepted": true,
+  "scope": "F103ZE/J7: full QSPI backup/program/readback, autonomous reset and user power-cycle, OCM identity, WebUSB, SWD10/JTAG1/10 and ETMv3 24MHz/100ms",
+  "date": "2026-11-06",
+  "buildBaseCommit": "602131d24dc8df27d60d5fb82bc756ebb0a8b678",
+  "workingTreeBuild": true,
+  "BOOT_SHA256": "fd8d0411388767d4ec37aa690b3ae375f7df64c071cd221fd80fa02954dda6bf",
+  "bitSHA256": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6",
+  "psElfSHA256": "5895eeb0e79a3681a6b3b966dbea4c82ebfcd01ea7553e094d8a61ed2cf89802",
+  "programmerElfSHA256": "523adf26558f2847a49284286dc4e2479c82c9b60ba028e8877d27f48fa45088",
+  "fullOriginalFlashSHA256": "aaefdf33d45219bfe31d1bbd8008039e5239540b8dd834849d6261cd7425ae2d",
+  "fullReadbackSHA256": "7b4b3a2e15d6fc09fd814acde957556a4aaffbf1bbc574bdc5cf4cf148579606",
+  "originalFlashBytes": 33554432,
+  "BOOTBytes": 4281040,
+  "eraseEndExclusive": 4284416,
+  "outsideErasedRangeUnchanged": true,
+  "programBackend": "zynq-bounded-helper",
+  "resetBoot": true,
+  "coldBoot": true,
+  "coldBootDownloads": false,
+  "coldBootExecutableBytes": 85844,
+  "bootFCLKHz": 99999999,
+  "finalFCLKHz": 119999998,
+  "targetState": {
+    "initialDHCSR": "0x3010000",
+    "beforeRestore": "0x1010001",
+    "finalDHCSR": "0x1010000",
+    "rcc": {
+      "0x40021000": "0x3034e83",
+      "0x40021004": "0x51040a"
+    }
+  },
+  "ETMQuality": {
+    "transport": "ddr-usb/1",
+    "captureId": 1,
+    "captureNonce": 7964092062640041208,
+    "loss": false,
+    "synced": true,
+    "bufferFull": false,
+    "bufferCapacityBytes": 104857600,
+    "captureComplete": true,
+    "requestedWindowComplete": true,
+    "completionReason": "time",
+    "ended": true,
+    "records": 119022,
+    "hardwareTicks": 20000000,
+    "requestedTicks": 20000000,
+    "refClockHz": 199999998,
+    "hardwareSeconds": 0.100000001,
+    "hardwareStartBracketUnix": [
+      1793935290.22757,
+      1793935290.2282908
+    ],
+    "stopReason": 0,
+    "formatterBytes": 1904361,
+    "tailBytes": 9,
+    "tailAmbiguous": false,
+    "usbSeconds": 0.05057010000018636,
+    "usbPayloadMBps": 37.6578452483381,
+    "diagnostics": {
+      "implemented": true,
+      "frameDrops": 0,
+      "parserErrors": 0,
+      "idelayReadyLosses": 0,
+      "frameHighwater": 1,
+      "syncAcquisitions": 1,
+      "observedFrames": 119022,
+      "capacityReached": false,
+      "writerError": 0
+    },
+    "fclk": 119999998,
+    "tckKhz": 9999.999833333333
+  },
+  "report": "docs/validation/qspi-release-20261106/README.md",
+  "deliveryToolSHA256": {
+    "tools/probe_flash.py": "bb75fb85974c7c923886738da959cea26abe8705b6979defbabf49177ef3df4f",
+    "tools/sdk_runtime.py": "271b6efb204ef5cabbbf623438b7cc37837d2baaea7b32f5dbdf6fdabb3c5645",
+    "tools/build_probe_boot.py": "42abe14d3727a52a6a37192bae9a6a6abb9bd4df2beec62ea0159407e359ae47",
+    "tools/build_boot_bsp.py": "285a09c673eede0ee021525277b1c63700f98c8d25c7f9c770c0915621e0f8df",
+    "tools/package_probe_boot.py": "2fe721a0e01864f220b972e49b8108e9f78edda44b8e282b0c70f758863c8017",
+    "firmware/boot/qspi_program.c": "63716289331c46f796910953eb2ea57f6f4ffd36a949b892c26dcd91c2b1e025"
+  }
+}

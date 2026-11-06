@@ -113,6 +113,7 @@ Trace五路输入包含ELD1延时单元，默认零tap。RTCK自适应、断开�
 | 产物 | 说明 |
 |---|---|
 | [J7 release-20261106](prebuilt/release-20261106/README.md) | 当前bit/ELF：ELD1、原始SWD序列修复、WebUSB网页入口；F103ZE限定验收 |
+| [J7 QSPI启动包](prebuilt/qspi-release-20261106/README.md) | 同一bit/ELF的固化版本，整片回读、范围外比较、实体冷启动及F103ZE回归通过 |
 | [Golden](prebuilt/golden/README.md) | 原已验证比较与回退配对 |
 | [QSPI恢复包](prebuilt/recovery/README.md) | 已验收的历史恢复镜像，身份和适用范围独立记录 |
 | [目标固件](prebuilt/README.md) | F103ZE/H743等目标ELF及来源 |

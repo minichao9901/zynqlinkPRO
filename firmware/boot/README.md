@@ -1,4 +1,4 @@
-> 本轮精简没有生成或烧写新BOOT。当前recovery包是旧已验收恢复版本，构建新Golden BOOT后必须另行验收。
+> 当前J7启动包为 `prebuilt/qspi-release-20261106/`。旧 `prebuilt/recovery/` 保留原始验收字节；不能用其历史冷启动结果代替新镜像验收。
 
 # Zynq-7020 QSPI 启动，应用保留在 OCM
 
@@ -10,15 +10,20 @@ SDK 原 FSBL 执行于低 OCM，不能直接让加载到地址零的应用覆盖
 
 QSPI MIO1..6、单片 x4、反馈时钟关闭（MIO8 供现有 USB PHY 复位）、参考时钟200MHz。DDR/USB/FCLK 保留相应硬件配置。`hardware/system.hdf` 与生成的 `ps7_init.c/h/tcl` 纳入版本管理。它们供启动加载器初始化 PS，FPGA bit 沿用本次已通过 STA/实板的优化产物。
 
-构建（Windows SDK 2018.3；所有输出放独立 worktree）：
+构建（Windows SDK 2018.3；所有输出放独立目录）：
 
 ```powershell
-E:/Xilinx/SDK/2018.3/bin/hsi.bat -source firmware/boot/hardware/generate_bsp.tcl -tclargs build/qspi_boot/bsp
-# 将 SDK GCC 与 gnuwin/bin 加入 PATH，RDI_PLATFORM=win64；BSP 必须串行构建：
-make -C build/qspi_boot/bsp -j1
-python tools/build_probe_boot.py --bsp build/qspi_boot/bsp `
-  --bit prebuilt/golden/probe.bit `
-  --elf prebuilt/golden/application.elf
+python -X utf8 toolbox.py project run boot.bsp -- --out build/qspi-bsp-new
+python -X utf8 toolbox.py project run boot.build -- --bsp build/qspi-bsp-new/bsp `
+  --bit prebuilt/release-20261106/probe.bit `
+  --elf prebuilt/release-20261106/application.elf --out build/qspi-loader-new
+python -X utf8 toolbox.py project run boot.package -- `
+  --loader-dir build/qspi-loader-new --bit prebuilt/release-20261106/probe.bit `
+  --elf prebuilt/release-20261106/application.elf `
+  --ps-init firmware/boot/hardware/ps7_init.tcl --output-dir build/qspi-package-new
+python -X utf8 toolbox.py probe-flash --image-dir build/qspi-package-new --dry-run
+# 以下会写探针QSPI；先确认独占板卡且BOOT_MODE=1：
+python -X utf8 toolbox.py probe-flash --image-dir build/qspi-package-new --out build/qspi-program-new
 ```
 
 编译使用 `-Os`、函数/数据分节、GC，固定 FSBL 构建时间字符串。输出 stage0/stage2/programmer ELF、只读 `qspi_read.elf`、Bootgen BIF/BOOT.bin、分区/MD5 检查、来源哈希和链接 map。`fsbl_programmer.elf` 强制加载器采用 JTAG 分支，供真实启动拨码已经是 QSPI 的板子使用 `program_flash`。
@@ -28,3 +33,11 @@ python tools/build_probe_boot.py --bsp build/qspi_boot/bsp `
 固化由 `tools/probe_flash.py` 负责：输入包哈希核对、芯片/拨码/Flash 型号检查、整片原备份、SDK 擦除检查与编程校验、整片独立回读、擦写范围外比对、无暂停系统复位及 OCM 应用交接诊断。先复位 CPU0 再加载 ARM 备份程序，避免此前 Thumb 应用的 CPSR/MMU 状态污染。SDK `rst -system` 自带 suspend=1，自动验证使用同一 XilinxReset 服务的 suspend=0，不需要调试器随后 `con`。
 
 只有实际加载测试通过的启动包才标为已验收。断电/实体按键检查结果、边界和 SHA-256 见对应 `prebuilt/` 启动包及 `docs/validation/orbtrace-qspi-20261031/`。原 Flash 备份在本机 build 目录，不纳入公开 Git。
+
+## 受限写入后端
+
+默认CLI后端是 `qspi_program.elf`，限JEDEC EF4019、BOOT偏移0和低16MiB。写使能前验证显式arm key、BOOT头、长度、DDR镜像CRC32和保护状态；退出4字节模式后读取扩展地址寄存器，只有bank0才使用标准20h/02h擦写，不写状态寄存器、不整片擦除。每扇区擦除后全量blank-check，每页编程后读回；busy轮询及主机等待均有上界。只读13h路径不依赖当前地址模式。
+
+主机仍先备份整片32MiB，最后重新加载独立只读helper整片回读，核对BOOT SHA和擦写范围外所有字节，再做无暂停QSPI复位启动。备份仅保存在本机输出目录，不公开提交。C模型覆盖错误key/器件/长度/头/CRC、保护与bank拒绝、256B与4KiB边界、busy超时和读回错误；模型通过不能代替板测。
+
+旧SDK后端用 `--backend sdk` 显式选择；SDK 2018.3的本机原生写入库崩溃仍为ZL-167待定位。构建端的 `sdk_runtime.py` 仅复制SDK运行库到隔离目录，不修改SDK或系统安装。HSI生成后检查输出、串行make后检查QSPI头文件及库，Bootgen检查实际BOOT存在，避免旧bat静默成功。

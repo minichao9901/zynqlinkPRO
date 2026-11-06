@@ -11,6 +11,10 @@ from pathlib import Path
 import shutil
 import struct
 import subprocess
+try:
+    from .sdk_runtime import prepare
+except ImportError:
+    from sdk_runtime import prepare
 
 
 def loads(elf):
@@ -189,6 +193,14 @@ def main():
         'static XQspiPsInstFormat FlashInst[] = {',
         'static XQspiPsInstFormat FlashInst[] = {\n {0x13, 4, XQSPIPS_TXD_00_OFFSET},'))
     compile_link('qspi_read', [boot/'qspi_read.c', reader_driver], [], out/'reader.ld')
+    program_driver=src/'program_xqspips.c'
+    program_driver.write_text(driver.read_text().replace(
+        'static XQspiPsInstFormat FlashInst[] = {',
+        'static XQspiPsInstFormat FlashInst[] = {\n'
+        ' {0x13, 4, XQSPIPS_TXD_00_OFFSET},\n'
+        ' {0xe9, 1, XQSPIPS_TXD_01_OFFSET},\n'
+        ' {0xc8, 2, XQSPIPS_TXD_10_OFFSET},'))
+    compile_link('qspi_program',[boot/'qspi_program.c',program_driver],[],out/'reader.ld')
     for elf, lo, hi in [(stage0, 0, 0x30000), (programmer, 0, 0x30000),
                         (stage2, 0x02000000, 0x02200000)]:
         entry, segments = loads(elf)
@@ -205,7 +217,12 @@ def main():
         bif.write_text('the_ROM_image:\n{\n [bootloader] "'+str(stage0).replace('\\','/')+'"\n'
                        ' [checksum=md5] "'+str(a.bit.resolve()).replace('\\','/')+'"\n'
                        ' [checksum=md5] "'+str(a.elf.resolve()).replace('\\','/')+'"\n}\n')
-        run([a.sdk/'bin/bootgen.bat', '-arch', 'zynq', '-image', bif, '-o', out/'BOOT.bin', '-w', 'on'])
+        bootgen,environment=prepare(a.sdk,'bootgen')
+        command=[str(bootgen),'-arch','zynq','-image',str(bif),'-o',str(out/'BOOT.bin'),'-w','on']
+        generated=subprocess.run(command,env=environment,capture_output=True,text=True,errors='replace')
+        (out/'bootgen.log').write_text(generated.stdout+generated.stderr,encoding='utf8')
+        if generated.returncode or not (out/'BOOT.bin').is_file():
+            raise RuntimeError('Bootgen failed; see '+str(out/'bootgen.log'))
     sha = lambda path: hashlib.sha256(path.read_bytes()).hexdigest()
     manifest = dict(architecture='OCM stage0 -> DDR32MiB stage2 -> PL + OCM application',
                     stage2_reserved=[0x02000000, 0x02200000], trace_address=0x03FF0000,

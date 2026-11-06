@@ -10,6 +10,7 @@
 | 仿真、探针回归 | `sim.cm3`、`sim.matrix`、`probe.regression` |
 | Trace | `toolbox.py trace --help`、`etm.bench`、`etm.equivalence` |
 | 板卡加载与身份 | `probe.load`、`probe.ocm-verify`；`probe.flash`会写QSPI |
+| QSPI启动包 | `boot.bsp`、`boot.build`、`boot.package`；[构建与固化](../firmware/boot/README.md) |
 
 保留构建/运行依赖、测试、可复用诊断和当前验收工具；Python Golden参考不属于冗余代码。2026-11-05退出活跃树的8个一次性旧测速、改频和打包脚本，以及历史报告内的驱动副本，见[归档清单](../docs/validation/cleanup-20261105/archived-files.json)。其原始字节保存在tag `archive/main-before-cleanup-20261105`。
 

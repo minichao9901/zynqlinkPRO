@@ -17,12 +17,12 @@ PL显式复用未改变RTL的bc9ced6配对，未声称重新综合。7020/120MHz
 
 主应用代码继续在OCM执行。空闲启动FCLK100MHz，请求SWCLK/TCK60MHz时切换FCLK120MHz。FSBL、BIF、构建来源/选项/哈希、实际bit/ELF均在本目录；只读Flash辅助程序用于整片备份与独立回读。
 
-统一CLI默认使用本包：
+当前CLI默认使用J7正式QSPI包。本历史恢复包需显式选择，仅用于匹配原接线的回退；本机SDK原生写入库问题另见ZL-167：
 
 ```powershell
-python -X utf8 toolbox.py probe-flash
-python -X utf8 toolbox.py probe-flash --dry-run
-python -X utf8 toolbox.py probe-flash --verify-only
+python -X utf8 toolbox.py probe-flash --image-dir prebuilt/recovery --backend sdk
+python -X utf8 toolbox.py probe-flash --image-dir prebuilt/recovery --backend sdk --dry-run
+python -X utf8 toolbox.py probe-flash --image-dir prebuilt/recovery --verify-only
 ```
 
 完整固化流程为整片32MiB备份 → SDK擦除检查/写后校验 → 独立整片回读和擦写范围外对比 → 无暂停QSPI复位启动。旧包`20261031_orbtrace_opt_qspi_7020_120`仅保留历史，含已确认的USB空指针问题，不是当前默认。

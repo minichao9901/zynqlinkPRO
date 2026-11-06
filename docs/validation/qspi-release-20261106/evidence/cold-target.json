@@ -1,0 +1,133 @@
+{
+  "passed": true,
+  "rows": [
+    {
+      "requestedTCKHz": 1000000,
+      "passed": true,
+      "idcodeReply": "16007704a03b",
+      "IDCODE": "0x3ba00477",
+      "clock": {
+        "FCLK_Hz": 1999999,
+        "cfg": "0x20011",
+        "waveform": {
+          "SWCLK_Hz": 999999.5,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 500.000250000125
+        },
+        "clockSource": 0,
+        "clockControl": 62918400,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 999999.5,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+      },
+      "phyCounters": {
+        "waitCycles": 128224,
+        "bits": 60352,
+        "scans": 1840
+      },
+      "CPUID": "0x411fc231",
+      "verifiedBytes": 4096,
+      "flashPageSHA256": "7b59382c535b252a819345b2f9cefc83ae047aa37bbe6ccbbcd68ea008e55dde"
+    },
+    {
+      "requestedTCKHz": 10000000,
+      "passed": true,
+      "idcodeReply": "16007704a03b",
+      "IDCODE": "0x3ba00477",
+      "clock": {
+        "FCLK_Hz": 19999999,
+        "cfg": "0x20011",
+        "waveform": {
+          "SWCLK_Hz": 9999999.5,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 50.00000250000012
+        },
+        "clockSource": 0,
+        "clockControl": 47186432,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 9999999.5,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+      },
+      "phyCounters": {
+        "waitCycles": 128224,
+        "bits": 60352,
+        "scans": 1840
+      },
+      "CPUID": "0x411fc231",
+      "verifiedBytes": 4096,
+      "flashPageSHA256": "7b59382c535b252a819345b2f9cefc83ae047aa37bbe6ccbbcd68ea008e55dde"
+    }
+  ],
+  "dpidr": "0x1ba01477",
+  "before": {
+    "name": "STM32F103",
+    "cpuid": "0x411fc231",
+    "device": "0x10036414",
+    "registers": {
+      "0x40021000": "0x3034e83",
+      "0x40021004": "0x51040a"
+    }
+  },
+  "initialDHCSR": "0x3010000",
+  "swdClock": {
+    "FCLK_Hz": 119999998,
+    "cfg": "0xcaa11",
+    "waveform": {
+      "SWCLK_Hz": 9999999.833333334,
+      "half_period_fclk": 6,
+      "short_high": true,
+      "intended_high_ns": 8.333333472222225
+    },
+    "clockSource": 0,
+    "clockControl": 15728896,
+    "sourcePllControl": 221192,
+    "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+    "JTAG_sampling_mode": 0,
+    "RISC_V_SBA_enabled": false,
+    "actual_link_Hz": 9999999.833333334,
+    "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+  },
+  "firmware": {
+    "path": "prebuilt/golden/f103ze-cdc48.elf",
+    "segments": [
+      {
+        "address": "0x8000000",
+        "bytes": 20040,
+        "sha256": "b5b09d9a0446795acc1981aff62ed55f36f10fa71a47544b77c3d0fe1a0610d1",
+        "match": true
+      },
+      {
+        "address": "0x8004e48",
+        "bytes": 128,
+        "sha256": "496d8b1d85d4a90921e45cc77629b2c80dcaae957a6ed79710200efa1d4cf341",
+        "match": true
+      }
+    ],
+    "sha256": "e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f"
+  },
+  "fixture": {
+    "APB2ENR": "0x404d",
+    "MAPRReadableBits": "0x0",
+    "restoreSWJFromVerifiedFirmwareSource": 2
+  },
+  "after": {
+    "name": "STM32F103",
+    "cpuid": "0x411fc231",
+    "device": "0x10036414",
+    "registers": {
+      "0x40021000": "0x3034e83",
+      "0x40021004": "0x51040a"
+    }
+  },
+  "finalDHCSR": "0x1010000",
+  "resetObservedAfterInitialDHCSR": false,
+  "restored": true
+}

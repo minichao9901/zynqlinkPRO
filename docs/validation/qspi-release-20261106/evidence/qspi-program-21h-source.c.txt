@@ -1,0 +1,104 @@
+/* Bounded BOOT-only W25Q256 programmer. No status/address-mode/chip erase. */
+#include "xqspips.h"
+#include "xparameters.h"
+#include "xil_cache.h"
+#include "sleep.h"
+#include <stdint.h>
+#include <string.h>
+
+#define LIMIT 0x01000000U
+#define ARM_KEY 0x46575231U
+static XQspiPs q;
+static unsigned char tx[264] __attribute__((aligned(4)));
+static unsigned char rx[264] __attribute__((aligned(4)));
+#ifndef PROGRAM_MODEL
+#define MAIL ((volatile unsigned *)0x03ff0000U)
+#define DATA ((const unsigned char *)0x04000000U)
+#endif
+
+static int transfer(unsigned n) { return XQspiPs_PolledTransfer(&q,tx,rx,n); }
+static int status(unsigned *value) {
+    tx[0]=5;tx[1]=0;
+    if(transfer(2)) return 1;
+    *value=rx[1];return 0;
+}
+static int ready(unsigned milliseconds) {
+    unsigned value;
+    while(milliseconds--) {
+        if(status(&value)) return 1;
+        if(!(value&1)) return 0;
+        usleep(1000);
+    }
+    return 1;
+}
+static int enable_write(void) {
+    unsigned value;
+    if(ready(5000)) return 1;
+    tx[0]=6;if(transfer(1)) return 1;
+    return status(&value) || (value&0x7f)!=2;
+}
+static void address(unsigned opcode,unsigned a) {
+    tx[0]=opcode;tx[1]=a>>24;tx[2]=a>>16;tx[3]=a>>8;tx[4]=a;
+}
+static unsigned crc32(const unsigned char *data,unsigned size) {
+    unsigned crc=~0U;
+    for(unsigned i=0;i<size;i++) {
+        crc^=data[i];
+        for(unsigned bit=0;bit<8;bit++) crc=(crc>>1)^((0U-(crc&1U))&0xedb88320U);
+    }
+    return ~crc;
+}
+static unsigned program_boot(unsigned length,unsigned expected_crc,unsigned key,unsigned jedec) {
+    unsigned value;
+    /* All guards precede WRITE ENABLE. Offset is fixed at zero. */
+    if(key!=ARM_KEY || jedec!=0xef4019 || length<0x100 || length>LIMIT) return 1;
+    if(memcmp(DATA+0x20,"\x66\x55\x99\xaa\x58\x4e\x4c\x58",8)) return 2;
+    MAIL[6]=crc32(DATA,length);
+    if(MAIL[6]!=expected_crc) return 3;
+    if(status(&value) || value&0x7d) return 4;
+    MAIL[8]=1;
+    for(unsigned a=0;a<((length+4095U)&~4095U);a+=4096) {
+        MAIL[7]=a;
+        if(enable_write()) return 5;
+        address(0x21,a);if(transfer(5) || ready(5000)) return 6;
+        /* Verify every erased byte, including the final sector padding. */
+        for(unsigned b=0;b<4096;b+=256) {
+            address(0x13,a+b);memset(tx+5,0,256);
+            if(transfer(261)) return 7;
+            for(unsigned i=0;i<256;i++) if(rx[5+i]!=255) return 8;
+        }
+    }
+    MAIL[8]=2;
+    for(unsigned a=0;a<length;a+=256) {
+        unsigned n=length-a;if(n>256)n=256;
+        MAIL[7]=a;
+        if(enable_write()) return 9;
+        address(0x12,a);memcpy(tx+5,DATA+a,n);
+        if(transfer(n+5) || ready(100)) return 10;
+        address(0x13,a);memset(tx+5,0,n);
+        if(transfer(n+5) || memcmp(rx+5,DATA+a,n)) return 11;
+    }
+    tx[0]=4;if(transfer(1)) return 12; /* WRDI */
+    if(status(&value) || value&3) return 13;
+    MAIL[7]=length;MAIL[8]=3;return 0;
+}
+#ifndef PROGRAM_MODEL
+int main(void) {
+    Xil_DCacheDisable();MAIL[0]=0;MAIL[3]=0;
+    XQspiPs_Config *config=XQspiPs_LookupConfig(XPAR_XQSPIPS_0_DEVICE_ID);
+    if(!config || XQspiPs_CfgInitialize(&q,config,config->BaseAddress)) {
+        MAIL[3]=0xdead0100;for(;;);
+    }
+    XQspiPs_SetOptions(&q,XQSPIPS_MANUAL_START_OPTION|XQSPIPS_FORCE_SSELECT_OPTION|XQSPIPS_HOLD_B_DRIVE_OPTION);
+    XQspiPs_SetClkPrescaler(&q,XQSPIPS_CLK_PRESCALE_8);XQspiPs_SetSlaveSelect(&q);
+    tx[0]=0x9f;if(transfer(4)){MAIL[3]=0xdead0101;for(;;);}
+    unsigned jedec=((unsigned)rx[1]<<16)|((unsigned)rx[2]<<8)|rx[3];MAIL[1]=jedec;
+    unsigned value=0;if(status(&value)){MAIL[3]=0xdead0102;for(;;);}
+    MAIL[2]=value;MAIL[0]=0x51535750;
+    for(;;) if(MAIL[3]==1) {
+        unsigned result=program_boot(MAIL[4],MAIL[5],MAIL[10],jedec);
+        MAIL[10]=0;MAIL[9]=result;
+        __asm__ volatile("dsb sy" ::: "memory");MAIL[3]=result?0xdead0000|result:2;
+    }
+}
+#endif

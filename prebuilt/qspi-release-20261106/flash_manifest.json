@@ -1,0 +1,28 @@
+{
+  "files": {
+    "application.elf": "5895eeb0e79a3681a6b3b966dbea4c82ebfcd01ea7553e094d8a61ed2cf89802",
+    "BOOT.bif": "b6ef988ea4df2e07da24c1273c5ccce84f78d814a9c1f7a5dc20b538aed7b7bb",
+    "BOOT.bin": "fd8d0411388767d4ec37aa690b3ae375f7df64c071cd221fd80fa02954dda6bf",
+    "build_manifest.json": "03d0895a44784ee748e5cf6875fe55743bbfe0043de5dad56e32933f544878d5",
+    "fsbl_programmer.elf": "05197a9d48fc88dcabfea8afa5e81c4d4c0dd5d874346ee6945866fcf2bfca60",
+    "fsbl_stage0.elf": "7dfb1658eeaae0811a6f29915e3be150e0ad6edb14076fd44e7a1c403747c9f8",
+    "fsbl_stage2.bin": "f18bd49242ad78e3a28d99f7f486377bbe056f904dc6766119a788b3e561ecf8",
+    "fsbl_stage2.elf": "6953c570ec2d9109d9206e93202261d39a692b1e4bff54cb971b0521ba14a631",
+    "probe.bit": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6",
+    "ps7_init.tcl": "d3eeab6707765ab59acb924e39ff5c77c013da8cbf598b181e9eb43578f29ece",
+    "qspi_program.elf": "523adf26558f2847a49284286dc4e2479c82c9b60ba028e8877d27f48fa45088",
+    "qspi_read.elf": "25542e6f40d00aeb5ccaa95ebd2cf9ea6006a988929192a5db132d97e680a358",
+    "rebuild.bif": "bc263aef78a1be0cd12ba3a31868ea1c632d05037aaa567a353955e126751699",
+    "acceptance.json": "297358eeb6094c8e31d0ade3d2de946b64786cddfbc5f701316723bd550dab3b"
+  },
+  "device": "xc7z020clg400-2",
+  "input_pair": {
+    "bit_sha256": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6",
+    "elf_sha256": "5895eeb0e79a3681a6b3b966dbea4c82ebfcd01ea7553e094d8a61ed2cf89802"
+  },
+  "source_revision": "602131d24dc8df27d60d5fb82bc756ebb0a8b678",
+  "boot_validation": "PASS: full backup/program/independent 32MiB readback, autonomous reset and user cold power-cycle; F103ZE/J7 scoped acceptance",
+  "note": "Run board acceptance and record results before marking this package accepted.",
+  "accepted": true,
+  "acceptance_report": "docs/validation/qspi-release-20261106/README.md"
+}

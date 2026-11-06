@@ -1,0 +1,15 @@
+{
+  "image_dir": "E:\\zynqlinkPRO\\prebuilt\\qspi-release-20261106",
+  "out": "E:\\zynqlinkPRO\\build\\qspi-release-20261106\\flash-layout",
+  "boot_sha256": "fd8d0411388767d4ec37aa690b3ae375f7df64c071cd221fd80fa02954dda6bf",
+  "operation": "full backup -> program/verify -> full readback SHA-256 -> system reset"
+}
+Backing up full 32MiB flash...
+Backup complete. Programming and verifying BOOT.bin...
+Traceback (most recent call last):
+  File "E:\zynqlinkPRO\tools\probe_flash.py", line 189, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "E:\zynqlinkPRO\tools\probe_flash.py", line 152, in main
+    raise RuntimeError('program_flash failed; inspect program_flash.log and keep original backup')
+RuntimeError: program_flash failed; inspect program_flash.log and keep original backup

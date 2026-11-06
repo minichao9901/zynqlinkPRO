@@ -1,0 +1,56 @@
+{
+  "image_dir": "E:\\zynqlinkPRO\\prebuilt\\qspi-release-20261106",
+  "out": "E:\\zynqlinkPRO\\build\\qspi-release-20261106\\flash",
+  "boot_sha256": "fd8d0411388767d4ec37aa690b3ae375f7df64c071cd221fd80fa02954dda6bf",
+  "operation": "full backup -> program/verify -> full readback SHA-256 -> system reset",
+  "status": "failed",
+  "source": {
+    "files": {
+      "application.elf": "5895eeb0e79a3681a6b3b966dbea4c82ebfcd01ea7553e094d8a61ed2cf89802",
+      "BOOT.bif": "cc3fdd0530151dc9293e8e1c1cfa26a063e8a28b01341efe2fa87f5f4ed88524",
+      "BOOT.bin": "fd8d0411388767d4ec37aa690b3ae375f7df64c071cd221fd80fa02954dda6bf",
+      "build_manifest.json": "a126e1b5cbeb42b14d8513683c8214d23e027e4c5e164a19e0769ed1aeb2ca20",
+      "fsbl_programmer.elf": "92a83033ee030ba5a85a8809a2d74df276e27bbddb40791c37f91473c6e4188b",
+      "fsbl_stage0.elf": "3b44c5f589fae952ff16edaa33767b0acf96948f8473ee251f7e31739969a79e",
+      "fsbl_stage2.bin": "f18bd49242ad78e3a28d99f7f486377bbe056f904dc6766119a788b3e561ecf8",
+      "fsbl_stage2.elf": "79fcac6889bbd2fea620554dd0dd6df8e68f6b0f2a09023de2606739911e6580",
+      "probe.bit": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6",
+      "ps7_init.tcl": "d3eeab6707765ab59acb924e39ff5c77c013da8cbf598b181e9eb43578f29ece",
+      "qspi_read.elf": "692299ca68a469ee131910782beabcf74726fedaa79ea2c1b527bdc2b807deb3",
+      "rebuild.bif": "bc263aef78a1be0cd12ba3a31868ea1c632d05037aaa567a353955e126751699"
+    },
+    "device": "xc7z020clg400-2",
+    "input_pair": {
+      "bit_sha256": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6",
+      "elf_sha256": "5895eeb0e79a3681a6b3b966dbea4c82ebfcd01ea7553e094d8a61ed2cf89802"
+    },
+    "source_revision": "602131d24dc8df27d60d5fb82bc756ebb0a8b678",
+    "boot_validation": "NOT PERFORMED: packaging only",
+    "note": "Run board acceptance and record results before marking this package accepted."
+  },
+  "boot_mode": 1,
+  "ps_idcode": "23727093",
+  "jedec_id": "ef4019",
+  "flash_bytes": 33554432,
+  "backup": {
+    "path": "E:\\zynqlinkPRO\\build\\qspi-release-20261106\\flash\\original_flash_32MiB.bin",
+    "bytes": 33554432,
+    "sha256": "aaefdf33d45219bfe31d1bbd8008039e5239540b8dd834849d6261cd7425ae2d"
+  },
+  "program_command": [
+    "E:\\zynqlinkPRO-work\\runtime\\sdk-rdi_zynq_flash\\rdi_zynq_flash.exe",
+    "-f",
+    "E:\\zynqlinkPRO\\prebuilt\\qspi-release-20261106\\BOOT.bin",
+    "-offset",
+    "0",
+    "-flash_type",
+    "qspi-x4-single",
+    "-fsbl",
+    "E:\\zynqlinkPRO\\prebuilt\\qspi-release-20261106\\fsbl_programmer.elf",
+    "-blank_check",
+    "-verify",
+    "-url",
+    "tcp:127.0.0.1:3121"
+  ],
+  "error": "program_flash failed; inspect program_flash.log and keep original backup"
+}

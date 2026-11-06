@@ -1,0 +1,42 @@
+{
+  "image_dir": "E:\\zynqlinkPRO\\prebuilt\\qspi-release-20261106",
+  "out": "E:\\zynqlinkPRO\\build\\qspi-release-20261106\\flash-bounded",
+  "boot_sha256": "fd8d0411388767d4ec37aa690b3ae375f7df64c071cd221fd80fa02954dda6bf",
+  "operation": "full backup -> program/verify -> full readback SHA-256 -> system reset",
+  "status": "failed",
+  "source": {
+    "files": {
+      "application.elf": "5895eeb0e79a3681a6b3b966dbea4c82ebfcd01ea7553e094d8a61ed2cf89802",
+      "BOOT.bif": "12337806220abdf030f9561336dc64c67e75627c0062a39b92cf0bac547b27b4",
+      "BOOT.bin": "fd8d0411388767d4ec37aa690b3ae375f7df64c071cd221fd80fa02954dda6bf",
+      "build_manifest.json": "0d87d38625d59a5c3ca04c01c5ac641c010a73297ed6e4e702e7d456019e671d",
+      "fsbl_programmer.elf": "9d2b4b0ed5c007d82ec1e80051d83d6b61fa05371f2aa5b4169f3dfafd5d83f4",
+      "fsbl_stage0.elf": "4784cd38d200987e102135f822ce5d628ab190c9bd4d92c76fe44a5b42c052ab",
+      "fsbl_stage2.bin": "f18bd49242ad78e3a28d99f7f486377bbe056f904dc6766119a788b3e561ecf8",
+      "fsbl_stage2.elf": "918e92124e78ab3bc97adfe9a711a04d8ce77eb65010e9ca2c477591a4fe253f",
+      "probe.bit": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6",
+      "ps7_init.tcl": "d3eeab6707765ab59acb924e39ff5c77c013da8cbf598b181e9eb43578f29ece",
+      "qspi_program.elf": "04452e5bf73528faf3983416f054febca38bb992db10100727a5159cdcdafe3d",
+      "qspi_read.elf": "7335559f7195b1d8f51f35e9612b4eaeeb8ebe39c1b87441d69903dcd911e3ae",
+      "rebuild.bif": "bc263aef78a1be0cd12ba3a31868ea1c632d05037aaa567a353955e126751699"
+    },
+    "device": "xc7z020clg400-2",
+    "input_pair": {
+      "bit_sha256": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6",
+      "elf_sha256": "5895eeb0e79a3681a6b3b966dbea4c82ebfcd01ea7553e094d8a61ed2cf89802"
+    },
+    "source_revision": "602131d24dc8df27d60d5fb82bc756ebb0a8b678",
+    "boot_validation": "NOT PERFORMED: packaging only",
+    "note": "Run board acceptance and record results before marking this package accepted."
+  },
+  "boot_mode": 1,
+  "ps_idcode": "23727093",
+  "jedec_id": "ef4019",
+  "flash_bytes": 33554432,
+  "backup": {
+    "path": "E:\\zynqlinkPRO\\build\\qspi-release-20261106\\flash-bounded\\original_flash_32MiB.bin",
+    "bytes": 33554432,
+    "sha256": "aaefdf33d45219bfe31d1bbd8008039e5239540b8dd834849d6261cd7425ae2d"
+  },
+  "error": "Programmer failed: [1364416336, 15679513, 0, 3735879688, 4281040, 158534538, 158534538, 0, 1, 8, 0]"
+}

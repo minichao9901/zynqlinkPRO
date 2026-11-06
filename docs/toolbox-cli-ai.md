@@ -25,6 +25,8 @@ python -X utf8 toolbox.py project run bridge.verify -- --package dist/zynq-etm-b
 
 ## 项目工具
 
+当前J7固化入口为 `python -X utf8 toolbox.py probe-flash --dry-run`（只核对包与计划）；实际执行用 `probe-flash --out build/qspi-program-new`，会写探针QSPI。默认包 `prebuilt/qspi-release-20261106/` 和受限Zynq helper，要求BOOT_MODE=1；自动独占、整片备份、写后独立整片回读、范围外比较及无暂停复位启动。实体断电冷启动仍需实际操作后核对，不能用RAM加载代替。构建入口 `project run boot.bsp` / `boot.build` / `boot.package`，完整参数见[启动链](../firmware/boot/README.md)。旧SDK写入后端仅显式 `--backend sdk`，本机库问题见ZL-167。
+
 入口python toolbox.py，Web与非Web工具统一从project list/describe/run访问。索引来自当前Git跟踪源码，历史实验已退出活跃列表；旧371项是归档版本的计数。
 
 ```powershell

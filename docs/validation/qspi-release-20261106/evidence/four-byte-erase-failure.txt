@@ -1,0 +1,19 @@
+{
+  "image_dir": "E:\\zynqlinkPRO\\prebuilt\\qspi-release-20261106",
+  "out": "E:\\zynqlinkPRO\\build\\qspi-release-20261106\\flash-bounded",
+  "boot_sha256": "fd8d0411388767d4ec37aa690b3ae375f7df64c071cd221fd80fa02954dda6bf",
+  "operation": "full backup -> program/verify -> full readback SHA-256 -> system reset"
+}
+Backing up full 32MiB flash...
+Backup complete. Programming and verifying BOOT.bin...
+Traceback (most recent call last):
+  File "E:\zynqlinkPRO\tools\probe_flash.py", line 218, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "E:\zynqlinkPRO\tools\probe_flash.py", line 174, in main
+    if a.backend=='helper':report['programmer']=session.program_boot(image,boot)
+                                                ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "E:\zynqlinkPRO\tools\probe_flash.py", line 103, in program_boot
+    if words[3]&0xffff0000==0xdead0000:raise RuntimeError('Programmer failed: '+str(words))
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Programmer failed: [1364416336, 15679513, 0, 3735879688, 4281040, 158534538, 158534538, 0, 1, 8, 0]
