@@ -6,7 +6,7 @@
 
 ## 配对、目标与测试边界
 
-本轮Web实际配对为[prebuilt/hpm6800-web-133-20261102](../../../prebuilt/hpm6800-web-133-20261102/README.md)：
+本轮Web实际配对为prebuilt/hpm6800-web-133-20261102（历史归档 `archive/main-before-formal-release-20261106:prebuilt/hpm6800-web-133-20261102/README.md`）：
 
 * bit SHA256 `106d579bc1b79c2b873fd1e3eb2609d468892a67613d85a6e41d4dc90c8fc177`。
 * Zynq ELF SHA256 `e1bf65a6369273225c0e46684308e05a02a0b297029d2159e91e37cb98e62066`。

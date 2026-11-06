@@ -48,6 +48,43 @@ def tracked():
     return sorted(set(n for n in names if n))
 
 
+def publish_in_place(package,out,previous):
+    """ACL fallback: journal program bytes, leaving data/ completely untouched.
+
+    A DENY DELETE_CHILD on dist can forbid renaming its bundle directory while
+    still allowing normal file updates. Never change that shared ACL.
+    """
+    def program_files(folder):
+        result={}
+        for path in folder.rglob('*'):
+            name=path.relative_to(folder)
+            if name.parts[0].lower()=='data':continue
+            if path.is_symlink():raise ValueError('程序目录不能包含符号链接：'+str(path))
+            if path.is_file():result[name]=path
+        return result
+    old=program_files(out);new=program_files(package)
+    previous.mkdir()
+    # Finish and verify the complete backup before modifying a single old byte.
+    for name,path in old.items():
+        target=previous/name;target.parent.mkdir(parents=True,exist_ok=True)
+        shutil.copyfile(path,target)
+        if sha(target)!=sha(path):raise ValueError('归档旧程序校验失败：'+str(name))
+    def install(files):
+        for name,path in files.items():
+            target=out/name;target.parent.mkdir(parents=True,exist_ok=True)
+            shutil.copyfile(path,target)
+            if sha(target)!=sha(path):raise ValueError('程序更新校验失败：'+str(name))
+    try:
+        install(new)
+        prepare_desktop_launcher(out/'zynq-etm-bridge.exe')
+        for name in old.keys()-new.keys():(out/name).unlink()
+    except BaseException:
+        install({name:previous/name for name in old})
+        for name in new.keys()-old.keys():
+            if (out/name).is_file():(out/name).unlink()
+        raise
+
+
 def publish(package,out,workspace=ROOT):
     """Replace a known local bundle reversibly, preserving its external data."""
     workspace=workspace.resolve();package=package.resolve();out=out.resolve()
@@ -68,7 +105,18 @@ def publish(package,out,workspace=ROOT):
             raise ValueError('更新移动超出工作区')
         source.rename(destination)
     had_old=out.exists();data_moved=False;zip_moved=False
-    if had_old:move(out,previous)
+    if had_old:
+        try:move(out,previous)
+        except PermissionError:
+            # Only this initial rename gets a fallback. Later failures use the
+            # ordinary rollback path and are never misclassified as ACL issues.
+            publish_in_place(package,out,previous)
+            if old_zip.exists():
+                shutil.copyfile(old_zip,saved_zip)
+                if sha(old_zip)!=sha(saved_zip):raise ValueError('旧ZIP归档校验失败')
+                old_zip.unlink()
+            return dict(previousDirectory=str(previous),dataPreserved=(out/'data').exists(),
+                        archiveDirectory=str(archive),publicationMode='verified-file-update')
     try:
         out.parent.mkdir(parents=True,exist_ok=True)
         shutil.copytree(package,out)

@@ -8,7 +8,7 @@
 
 ## 配对与时钟
 
-最终交付：[prebuilt/hpm6800-idle64-133-experimental-20261102](../../../prebuilt/hpm6800-idle64-133-experimental-20261102/README.md)。
+最终交付：prebuilt/hpm6800-idle64-133-experimental-20261102（历史归档 `archive/main-before-formal-release-20261106:prebuilt/hpm6800-idle64-133-experimental-20261102/README.md`）。
 
 | 文件 | SHA-256 |
 |---|---|

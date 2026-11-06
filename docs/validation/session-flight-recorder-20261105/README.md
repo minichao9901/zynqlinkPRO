@@ -18,7 +18,7 @@ HID `0.6-nonce32`在协商后关联请求/回复，拒绝同命令号的旧STATU
 
 ## 实际配对与时序
 
-已验收配对位于[prebuilt/session-flight-recorder-20261105](../../../prebuilt/session-flight-recorder-20261105/README.md)。原Golden/QSPI恢复包保留。构建时源码为`f466935`加实际工作区输入，不伪装为干净源码构建；PS/RTL输入指纹保留。
+已验收配对位于prebuilt/session-flight-recorder-20261105（历史归档 `archive/main-before-formal-release-20261106:prebuilt/session-flight-recorder-20261105/README.md`）。原Golden/QSPI恢复包保留。构建时源码为`f466935`加实际工作区输入，不伪装为干净源码构建；PS/RTL输入指纹保留。
 
 | 项目 | 值 |
 |---|---|

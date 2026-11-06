@@ -21,7 +21,7 @@ def main():
     p.add_argument('--stage',choices=['cli','web','web-button'],required=True)
     p.add_argument('--elf',type=Path,required=True);p.add_argument('--backup',type=Path,required=True)
     p.add_argument('--out',type=Path,required=True);p.add_argument('--runtime')
-    p.add_argument('--pair',type=Path,default=ROOT/'prebuilt/fclk133-release-20261101')
+    p.add_argument('--pair',type=Path,default=ROOT/'prebuilt/release-20261106')
     p.add_argument('--seconds',type=float,default=1);p.add_argument('--rounds',type=int,default=3)
     p.add_argument('--sources-from-record',type=Path,help='Attach exact source file contents named by a previous record')
     p.add_argument('--execute',action='store_true');a=p.parse_args()

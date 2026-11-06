@@ -28,8 +28,8 @@ const u8 USBD_BinaryObjectStoreDescriptor[] = {
 	/* BOS Descriptor Header */
 	0x05,				/* bLength */
 	USB_DESC_TYPE_BOS,		/* bDescriptorType */
-	0x21, 0x00,			/* wTotalLength: 33 bytes */
-	0x01,				/* bNumDeviceCaps: 1 */
+	0x39, 0x00,			/* wTotalLength: 57 bytes */
+	0x02,				/* bNumDeviceCaps: MS OS 2.0 + WebUSB */
 
 	/* Platform Capability Descriptor (Microsoft OS 2.0) */
 	0x1C,				/* bLength: 28 bytes */
@@ -45,10 +45,29 @@ const u8 USBD_BinaryObjectStoreDescriptor[] = {
 	0x00, 0x00, 0x03, 0x06,		/* dwWindowsVersion: Windows 8.1 (0x06030000) */
 	0xB2, 0x00,			/* wMSOSDescriptorSetTotalLength: 178 bytes */
 	MS_OS_20_VENDOR_CODE,		/* bMS_VendorCode: 0x20 */
-	0x00				/* bAltEnumCode: 0 */
+	0x00,				/* bAltEnumCode: 0 */
+
+	/* WebUSB platform capability, UUID {3408b638-09a9-47a0-8bfd-a0768815b665}. */
+	0x18, USB_DESC_TYPE_DEVICE_CAPABILITY, USB_DESC_TYPE_PLATFORM, 0x00,
+	0x38, 0xB6, 0x08, 0x34, 0xA9, 0x09, 0xA0, 0x47,
+	0x8B, 0xFD, 0xA0, 0x76, 0x88, 0x15, 0xB6, 0x65,
+	0x00, 0x01, /* bcdVersion 1.00 */
+	WEBUSB_VENDOR_CODE, WEBUSB_LANDING_PAGE
 };
 
 const u32 USBD_BinaryObjectStoreDescriptorLen = sizeof(USBD_BinaryObjectStoreDescriptor);
+
+/* Do not send the C string terminator as part of the URL descriptor. */
+u32 XUsbPs_Ch9SetupWebUsbUrlReply(u8 *BufPtr, u32 BufLen)
+{
+	u32 length = 3 + sizeof(WEBUSB_LANDING_URL) - 1;
+	if (!BufPtr || BufLen < length) return 0;
+	BufPtr[0] = (u8)length;
+	BufPtr[1] = 0x03; /* WEBUSB_URL descriptor */
+	BufPtr[2] = 0x01; /* https:// */
+	memcpy(BufPtr + 3, WEBUSB_LANDING_URL, length - 3);
+	return length;
+}
 
 /*
  * Microsoft OS 2.0 Descriptor Set

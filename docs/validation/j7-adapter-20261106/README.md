@@ -34,7 +34,7 @@ python -X utf8 toolbox.py project run firmware.build -- --j7-adapter --compact-c
 
 新 bit 在 7.5 ns FCLK 约束下，setup 余量 0.074 ns，hold 余量 0.054 ns。短 SWCLK 输出路径 6.644 ns，余量 0.356 ns。36661 条可布线网络全部完成，bitgen DRC 为 0 error、47 warning，仍保留 ZL-007 的 IO/CDC 签核范围。实际 I/O 报告逐项核对 12 个球号、Bank 35 和 LVCMOS33。RAW4 DDR 离线集成 9 场景及环形回绕通过，CLI 工具入口与交付布局 10 项通过。
 
-最终配对通过 JTAG 下载到 PL 和 PS OCM，启动后物理 MEM-AP0 核对 85580 字节执行段一致。装载前记录 JTAG 启动模式、PL 隔离及单个 XC7Z020。替换首轮 PS 前核对探针租约、采集、DMA、RTT 和 HSS 空闲。配对和逐文件 SHA 见[交付目录](../../../prebuilt/j7-adapter-20261106/README.md)，时序、I/O 及下载见[证据清单](raw/manifest.json)。
+最终配对通过 JTAG 下载到 PL 和 PS OCM，启动后物理 MEM-AP0 核对 85580 字节执行段一致。装载前记录 JTAG 启动模式、PL 隔离及单个 XC7Z020。替换首轮 PS 前核对探针租约、采集、DMA、RTT 和 HSS 空闲。配对和逐文件 SHA 见交付目录（历史归档 `archive/main-before-formal-release-20261106:prebuilt/j7-adapter-20261106/README.md`），时序、I/O 及下载见[证据清单](raw/manifest.json)。
 
 ## JTAG 与 ETM 实测
 

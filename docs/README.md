@@ -4,6 +4,7 @@
 
 | 用途 | 文档 |
 |---|---|
+| 当前bit/ELF、WebUSB、EXE与在线发布 | [正式交付](validation/release-20261106/README.md)、[GitHub发布](github-release.md) |
 | CLI发现、Web工作台、构建交付 | [CLI工作台](toolbox-cli-ai.md) |
 | 采集、飞行记录、离线查询与导出 | [Trace CLI](Trace-CLI使用说明.md) |
 | 连接、接线和操作 | [ETM操作说明](Zynq-ETM-Trace操作说明.md) |

@@ -6,7 +6,7 @@
 
 ## 配对与执行范围
 
-实际加载并最终留板配对：[prebuilt/hpm6800-usb-fixed-133-20261102](../../../prebuilt/hpm6800-usb-fixed-133-20261102/README.md)。bit SHA256 `106d579bc1b79c2b873fd1e3eb2609d468892a67613d85a6e41d4dc90c8fc177`，Zynq ELF `e93f1810d48e77f8d9aa097f643e40e0aaee32bdec1c263c1428f092909e608a`。PL复用133.333333MHz/7.5ns已验证bit（setup+0.179ns、hold+0.034ns），未改RTL、未重新路由；新PS只修改Chapter9的CLEAR_FEATURE分支，O3/Thumb compact、cap66666666Hz，未启用zero-idle或fixed-SWD。完整构建选项、源文件哈希在ps-build.json；最终物理MEM-AP0核对**76420B**可执行代码匹配。
+实际加载并最终留板配对：prebuilt/hpm6800-usb-fixed-133-20261102（历史归档 `archive/main-before-formal-release-20261106:prebuilt/hpm6800-usb-fixed-133-20261102/README.md`）。bit SHA256 `106d579bc1b79c2b873fd1e3eb2609d468892a67613d85a6e41d4dc90c8fc177`，Zynq ELF `e93f1810d48e77f8d9aa097f643e40e0aaee32bdec1c263c1428f092909e608a`。PL复用133.333333MHz/7.5ns已验证bit（setup+0.179ns、hold+0.034ns），未改RTL、未重新路由；新PS只修改Chapter9的CLEAR_FEATURE分支，O3/Thumb compact、cap66666666Hz，未启用zero-idle或fixed-SWD。完整构建选项、源文件哈希在ps-build.json；最终物理MEM-AP0核对**76420B**可执行代码匹配。
 
 旧PS对照为[R22](../hpm6800-web-stress-20261102/README.md)的e1bf65a6…，bit相同。新PS先修DEF，CDC仍能复现；随后CDC修复前后使用**同一新PS、同一RAM靶子与时钟**，没有用重载、MCU复位、Flash替换或降频制造通过。最终冻结EXE则按用户实际路径验收，非模拟探针。
 

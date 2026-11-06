@@ -7,7 +7,7 @@
 | 同场直通输入 | `792d4b6c8f38e47b1ba27d19a4ff5211e3a05be642edac7a526baa727df65abc` | `1fbf6471e14669a809aa02a3e4a6fbb262370ea9b45511f2a460e6f52a5d4ee5` |
 | ELD1 实验 | `0f20227a3ed159065834cad1106ff7a2d6c50c64e576f2c20038c7ffd7dabfde` | 同上；本轮重新编译，字节相同 |
 
-新建 ELD1 工程复用 44 个缓存 IP，采用源码已有的延时模块。首次 opt 阶段成功后，驱动对 Vivado 状态文案匹配过窄而误报失败。核对 opt 结束标志、成功日志和 DCP 后继续原网表，保留首次驱动日志。五路 tap 功能、错误装载和采集集成仿真通过。 [工件配对](../../../prebuilt/j7-eld1-calibration-20261106/README.md) · [实施摘要](raw/implementation-summary.txt)
+新建 ELD1 工程复用 44 个缓存 IP，采用源码已有的延时模块。首次 opt 阶段成功后，驱动对 Vivado 状态文案匹配过窄而误报失败。核对 opt 结束标志、成功日志和 DCP 后继续原网表，保留首次驱动日志。五路 tap 功能、错误装载和采集集成仿真通过。 工件配对（历史归档 `archive/main-before-formal-release-20261106:prebuilt/j7-eld1-calibration-20261106/README.md`） · [实施摘要](raw/implementation-summary.txt)
 
 ## 结果
 

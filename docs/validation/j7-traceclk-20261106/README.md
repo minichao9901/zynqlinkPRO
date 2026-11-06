@@ -1,6 +1,6 @@
 # J7 转接板同口径 SOTA 复测与 TRACECLK 边界
 
-2026-11-06（上海时间）。SOTA 指仓库内有原始证据的历史最好值，按目标、频率、工作负载、事务组织和计时范围区分。使用已验收 J7 配对。bit SHA-256 `792d4b6c8f38e47b1ba27d19a4ff5211e3a05be642edac7a526baa727df65abc`，PS ELF `1fbf6471e14669a809aa02a3e4a6fbb262370ea9b45511f2a460e6f52a5d4ee5`。测速前核对占用并重载，装载与收尾均核对物理 MEM-AP0 的 85580 B 执行段。 [配对](../../../prebuilt/j7-adapter-20261106/README.md) · [历史对照清单](raw/reference-baselines.json)
+2026-11-06（上海时间）。SOTA 指仓库内有原始证据的历史最好值，按目标、频率、工作负载、事务组织和计时范围区分。使用已验收 J7 配对。bit SHA-256 `792d4b6c8f38e47b1ba27d19a4ff5211e3a05be642edac7a526baa727df65abc`，PS ELF `1fbf6471e14669a809aa02a3e4a6fbb262370ea9b45511f2a460e6f52a5d4ee5`。测速前核对占用并重载，装载与收尾均核对物理 MEM-AP0 的 85580 B 执行段。 配对（历史归档 `archive/main-before-formal-release-20261106:prebuilt/j7-adapter-20261106/README.md`） · [历史对照清单](raw/reference-baselines.json)
 
 ## SWD 和 JTAG
 

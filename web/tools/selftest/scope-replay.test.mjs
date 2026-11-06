@@ -16,7 +16,7 @@ function rig(){
 
 test('real F103 mixed-scalar capture replays all values after stop without recording itself',async()=>{
   globalThis.document={getElementById:()=>({value:'60000'})};
-  const bytes=await readFile(new URL('../../../docs/validation/main-web-hardware-20261103/raw/hss-mixed-scalars.jsp',import.meta.url));
+  const bytes=await readFile(new URL('./fixtures/hss-mixed-scalars.jsp',import.meta.url));
   const p=rig();p._awaitDef=true;p.usbDrop=99;
   await p.replayFile({name:'mixed.jsp',arrayBuffer:async()=>bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength)});
   assert.equal(p.store.count,3231);assert.equal(p.receivedSamples,3231);

@@ -64,6 +64,8 @@ ALIASES={
  'target.scope-build':'firmware/target/stm32f103_scope/build.ps1','target.hpm-build':'firmware/target/hpm5301_perf/build.ps1',
  'native.build':'etm-service/build-decoder.ps1',
  'web.shared-sync':'tools/sync_etm_shared.py',
+ 'web.publish':'tools/publish_github.py',
+ 'usb.landing-check':'tools/verify_webusb_landing.py',
 }
 WORKFLOWS={
  'web.check':('共享驱动一致性与Web模块语法检查',[('python',['tools/sync_etm_shared.py','--check']),('node',['web/tools/dev/check-syntax.mjs'])]),

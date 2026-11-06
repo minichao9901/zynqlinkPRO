@@ -5,6 +5,7 @@
 | 类别 | 常用入口 |
 |---|---|
 | 构建、交付 | `bridge.build`、`bridge.verify`、`fpga.build`、`fpga.verify`、`firmware.build` |
+| GitHub页面与下载、WebUSB描述符 | `web.publish`、`usb.landing-check`；发布步骤见[说明](../docs/github-release.md) |
 | 依赖、离线检查 | `deps.check`、`etm.records-check`、`web.check`、`test.web`、`test.cli` |
 | 仿真、探针回归 | `sim.cm3`、`sim.matrix`、`probe.regression` |
 | Trace | `toolbox.py trace --help`、`etm.bench`、`etm.equivalence` |

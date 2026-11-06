@@ -1,0 +1,104 @@
+{
+  "accepted": true,
+  "sourceCommit": "641f1bce2d98171773112bbfaaa6e290dcae30fd",
+  "sourceDirty": true,
+  "implementationInputsSHA256": {
+    "fpga/rtl/swd_controller.v": "80463b50816d72e7dec3291d3030020420011b7f2954d6f24bd7f2ec144a25be",
+    "fpga/verify_routed.tcl": "7a542c2547d4622828b2cc1ddd8a0744a445d83631312886215d39826f7c1763",
+    "fpga/rebind_j7_adapter.tcl": "97b2c801301ae3d47dc1a69d34d1c302b3063c642da7c19f83af6f9258fcc0d8",
+    "fpga/constraints/j7_adapter_pins.xdc": "d28da829217a5f39dccf9cfdf0e9311edbed485ae1261a7b69d313bb7d6d46c5",
+    "fpga/probe_io_timing.tcl": "3c0a651d0112e4a02aa0415a00a2203809de4a4e75db142ffb652ff8830c9b06"
+  },
+  "scope": "F103ZE/J7: WebUSB EP0 + raw 0x1D + SWD10/JTAG1/10 read-only + 100ms ETMv3 24MHz; PL60/32MHz qualification inherited from same bit, not rerun",
+  "j7Pins": {
+    "swclk_0": "L15",
+    "swdio_0": "L16",
+    "gpio_rtl_0_tri_io[0]": "M15",
+    "gpio_rtl_0_tri_io[1]": "L14",
+    "gpio_rtl_0_tri_io[2]": "M14",
+    "gpio_rtl_0_tri_io[3]": "N15",
+    "rtck": "H15",
+    "trace_clk": "J16",
+    "trace_data[0]": "K16",
+    "trace_data[1]": "M18",
+    "trace_data[2]": "M17",
+    "trace_data[3]": "L17"
+  },
+  "timing": {
+    "FCLK_max_Hz": 133333333,
+    "SWCLK_max_Hz": 66666666,
+    "setup_slack_ns": 0.067,
+    "hold_slack_ns": 0.044,
+    "requested_FCLK_Hz": 133333333,
+    "RTL_DEBUG": 0,
+    "optional_observation_cells": 0,
+    "formal_product_acceptance": false
+  },
+  "build": {
+    "RAW_TRACE": 4,
+    "ETM_DDR": 1,
+    "ETM_LANE_DELAY": 1,
+    "IMPLEMENT_FCLK_HZ": 133333333,
+    "part": "xc7z020clg400-2",
+    "vivado": "2018.3",
+    "maxSWCLKHz": 60000000
+  },
+  "files": {
+    "application.elf": {
+      "bytes": 875944,
+      "sha256": "5895eeb0e79a3681a6b3b966dbea4c82ebfcd01ea7553e094d8a61ed2cf89802"
+    },
+    "probe.bit": {
+      "bytes": 4045674,
+      "sha256": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6"
+    },
+    "ps-build.json": {
+      "bytes": 5948,
+      "sha256": "361328fbf75b5224f64c60435f378140c17bb041d330bef45d0fb15ba1c53bd0"
+    },
+    "ps7_init.tcl": {
+      "bytes": 35186,
+      "sha256": "485a028ff7ad9a256a64313b68527a055ca3800b3b85577ceb0554b0e0609c94"
+    },
+    "rtl-inputs.json": {
+      "bytes": 2263,
+      "sha256": "d5f6e5918055a493e35877ad54f2fd8b99e37fecdcf2a3357b3bba635ccdb1bd"
+    },
+    "verified_clock.json": {
+      "bytes": 205,
+      "sha256": "8a7562a23eff6e93de22290138a900f932da23e17a0d4c043a34983108a4a687"
+    },
+    "source-binding.json": {
+      "bytes": 25867,
+      "sha256": "234ab79edfbd06899e33fe5d239a59212061917a0efad7c4d7594216f91b233e"
+    }
+  },
+  "productionPsBinaryIdentical": false,
+  "acceptedDate": "2026-11-06",
+  "boardPsOCMExecutableBytes": 85844,
+  "defaultTaps": [
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "capabilities": {
+    "perLaneInputDelay": true,
+    "rawSWDSequence": true,
+    "tdoOutputDisabledByHardware": true,
+    "rtckAdaptive": false
+  },
+  "report": "docs/validation/j7-sequence-fix-20261106/README.md",
+  "webUSB": {
+    "vendorCode": 33,
+    "landingPage": 1,
+    "url": "https://minichao9901.github.io/zynqlinkPRO/#download"
+  },
+  "acceptanceReport": "docs/validation/release-20261106/README.md",
+  "inheritedPLQualification": {
+    "tag": "archive/main-before-formal-release-20261106",
+    "pair": "prebuilt/j7-eld1-sequence-fixed-20261106",
+    "bitSHA256": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6"
+  }
+}

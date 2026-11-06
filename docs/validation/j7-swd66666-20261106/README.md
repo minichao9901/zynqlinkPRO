@@ -1,6 +1,6 @@
 # J7 转接板 SWD 66.666 MHz 性能
 
-2026-11-06（上海时间）。沿用 J7 已验收 bit `792d4b6c…65abc` 及 7.5 ns 实现时序，setup/hold 余量 0.074/0.054 ns。由源码 `8ce26c56` 重新编译转接板专用固定时钟 PS，ELF SHA-256 `c58d209f882af3dc1ed1d15671444f4e910b00e4e42077f19d590930385df374`。核对探针租约、DDR、DMA、HSS 和 RTT 空闲后，用 JTAG/RAM 加载实际配对。物理 MEM-AP0 核对实验 PS 的 85068 B 执行段。 [实验配对](../../../prebuilt/j7-swd66666-20261106/README.md) · [OCM 核对](raw/experimental-ocm.json)
+2026-11-06（上海时间）。沿用 J7 已验收 bit `792d4b6c…65abc` 及 7.5 ns 实现时序，setup/hold 余量 0.074/0.054 ns。由源码 `8ce26c56` 重新编译转接板专用固定时钟 PS，ELF SHA-256 `c58d209f882af3dc1ed1d15671444f4e910b00e4e42077f19d590930385df374`。核对探针租约、DDR、DMA、HSS 和 RTT 空闲后，用 JTAG/RAM 加载实际配对。物理 MEM-AP0 核对实验 PS 的 85068 B 执行段。 实验配对（历史归档 `archive/main-before-formal-release-20261106:prebuilt/j7-swd66666-20261106/README.md`） · [OCM 核对](raw/experimental-ocm.json)
 
 目标 F103ZE CDC48，CPU/HCLK 48 MHz，ETMCR `0x411`。FCLK 133333332 Hz，SWCLK 66666666 Hz，按物理寄存器读回的 ARM PLL 来源和分频推算。`CFG=0xa11`，单 FCLK 半周期，标准占空比，Q2/legacy 边界。目标 PLL、总线分频和 Flash 内容与前一轮 60 MHz 保持相同。
 

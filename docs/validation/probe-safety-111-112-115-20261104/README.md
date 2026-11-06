@@ -14,7 +14,7 @@
 
 ## 实际产物与身份
 
-目录[prebuilt/probe-safety-111-112-115-20261104](../../../prebuilt/probe-safety-111-112-115-20261104/README.md)。正式application.elf与诊断validation.elf均实际重建。bit复用已有133.333MHz（7.5ns）release布线字节，未修改RTL/未新做PL实现；原WNS0.319ns/hold0.033ns仅为该复用bit的既有结果。
+目录prebuilt/probe-safety-111-112-115-20261104（历史归档 `archive/main-before-formal-release-20261106:prebuilt/probe-safety-111-112-115-20261104/README.md`）。正式application.elf与诊断validation.elf均实际重建。bit复用已有133.333MHz（7.5ns）release布线字节，未修改RTL/未新做PL实现；原WNS0.319ns/hold0.033ns仅为该复用bit的既有结果。
 
 | 文件 | SHA-256 |
 |---|---|
@@ -71,4 +71,4 @@
 
 最新状态以[resume-power-final/final-state.json](raw/resume-power-final/final-state.json)为准：CDC48运行、RCC_CFGR51040a，SWD约10MHz/FCLK约120MHz（寄存器推算），RTT/HSS/DDR/DMA空闲，wait和context恢复失败均0。这里的补验不是重新进行全部高频/故障矩阵，也不是QSPI冷启动验收；前述完整矩阵保留为断电前实测。共享hw_server12596在继续时已不存在；本轮确认3121无监听后由现有入口启动hw_server18092并保留，未结束其他会话服务。没有本任务Web/采集进程遗留。补跑60 CLI测试通过，869项依赖哈希检查通过。
 
-源码与实测产物提交：`4d5bd0130d64d6e033078af3160c40ef55205260`。提交后逐项核对43个编译输入与该提交的Git blob，仅允许CRLF/LF规范化，映射见[构建输入绑定](../../../prebuilt/probe-safety-111-112-115-20261104/source-binding.json)；编译时原始b066f1b/dirty/input SHA记录保持不变。
+源码与实测产物提交：`4d5bd0130d64d6e033078af3160c40ef55205260`。提交后逐项核对43个编译输入与该提交的Git blob，仅允许CRLF/LF规范化，映射见构建输入绑定（历史归档 `archive/main-before-formal-release-20261106:prebuilt/probe-safety-111-112-115-20261104/source-binding.json`）；编译时原始b066f1b/dirty/input SHA记录保持不变。

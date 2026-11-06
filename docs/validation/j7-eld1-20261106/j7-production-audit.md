@@ -17,6 +17,6 @@
 
 **ZL-158，原始 SWD 序列可能驱动 TDO。** 生产 PS 的 `DAP_SWD=1`。命令 `0x1D` 可进入 `DAP_SWD_Sequence`。其中旧 `PIN_SWDIO_OUT_ENABLE` 清除 AXI GPIO TRI bit1，旧 `SWD_Sequence` 也通过该 GPIO 位收发。J7 的该位已接到 L14/TDO。SWD 模式使能 GPIO 路由后，清 TRI bit1 会使 L14 变成输出。生产 ELF 的 `DAP_ProcessCommand` 中可见清 bit1 后调用 `SWD_Sequence` 的指令。若连接的目标同时驱动 TDO，存在输出争用风险。此次按源码、网表绑定和生产反汇编确认，未在板上发该命令。普通 `SWJ_Sequence`（`0x12`）和 MEM-AP 读写走现有硬件路径，校准使用这两条路径。 [DAP 命令实现](../../../firmware/xusbps_daplink_dma/DAP/Source/DAP.c) · [GPIO 与管脚函数](../../../firmware/xusbps_daplink_dma/DAP/Include/DAP_config.h)
 
-**ZL-159，断开时 TCK 输出仍常使能。** `PORT_OFF` 的注释描述调试脚高阻。RTL 的 SWDIO/辅助管脚有三态控制，但 L15 的 `u_clock_iobuf` 的 `T` 固定为 `0`，所以断开后 L15 仍驱动空闲电平。此为已有实现与隔离行为的差异，本次按源码和实际配对的 RTL 输入指纹复核，未使用第二个调试器做争用试验。 [SWD 控制器](../../../fpga/rtl/swd_controller.v) · [配对 RTL 指纹](../../../prebuilt/j7-adapter-20261106/rtl-inputs.json)
+**ZL-159，断开时 TCK 输出仍常使能。** `PORT_OFF` 的注释描述调试脚高阻。RTL 的 SWDIO/辅助管脚有三态控制，但 L15 的 `u_clock_iobuf` 的 `T` 固定为 `0`，所以断开后 L15 仍驱动空闲电平。此为已有实现与隔离行为的差异，本次按源码和实际配对的 RTL 输入指纹复核，未使用第二个调试器做争用试验。 [SWD 控制器](../../../fpga/rtl/swd_controller.v) · 配对 RTL 指纹（历史归档 `archive/main-before-formal-release-20261106:prebuilt/j7-adapter-20261106/rtl-inputs.json`）
 
 [原布线 I/O](../j7-adapter-20261106/raw/j7-adapter-io.rpt) · [原实现摘要](../j7-adapter-20261106/raw/implementation-summary.txt) · [60 MHz 板测](../j7-adapter-limits-20261106/README.md)

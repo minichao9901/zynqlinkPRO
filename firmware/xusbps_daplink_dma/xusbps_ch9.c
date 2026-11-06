@@ -696,6 +696,23 @@ static u8	Reply[XUSBPS_REQ_REPLY_LEN];
     }
 
 
+	/* A landing URL advertises this device to desktop Chromium. It neither
+	 * opens a page automatically nor grants access to its USB interface. */
+	if (SetupData->bRequest == WEBUSB_VENDOR_CODE) {
+		if (SetupData->bmRequestType != 0xC0 ||
+		    SetupData->wIndex != WEBUSB_GET_URL ||
+		    SetupData->wValue != WEBUSB_LANDING_PAGE) {
+			/* The IRQ caller ignores XST_FAILURE: stall explicitly. */
+			XUsbPs_EpStall(InstancePtr, 0, XUSBPS_EP_DIRECTION_IN |
+					XUSBPS_EP_DIRECTION_OUT);
+			return XST_FAILURE;
+		}
+		ReplyLen = XUsbPs_Ch9SetupWebUsbUrlReply(Reply, sizeof(Reply));
+		if (!ReplyLen) return XST_FAILURE;
+		if (ReplyLen > SetupData->wLength) ReplyLen = SetupData->wLength;
+		return XUsbPs_EpBufferSend(InstancePtr, EpNum, Reply, ReplyLen);
+	}
+
 	/* Check for Microsoft OS 2.0 Descriptor request
 	 * bRequest = Vendor Code (0x20)
 	 * wIndex = 0x07 (MS_OS_20_REQUEST_DESCRIPTOR)

@@ -1215,7 +1215,7 @@ Web窗口元数据在DDR模式以硬件ticks/ref计算实际时长，主机下�
 
 这次36MHz失败后没有补跑下一轮。清理及原Flash固件重启成功，RCC回到CPU48MHz基线，随后额外10次精确CDC echo通过。此阶段仍无运行时逐线IDELAY校准，36MHz不能标成支持；接下来需在真实接收路径加入可装载/读回的独立tap，完成偏斜/毛刺/停钟仿真和新bit/ELF时序、上板对照。SRAM试验不替代Flash FPB起点或H743验收。
 
-源码冻结b72ec89后重新构建两份SRAM ELF，SHA与实际加载验收文件一致，交付到[SRAM时钟对照产物及manifest](../prebuilt/f103ze-cdc-ram-clock-20261101/manifest.json)；[24MHz通过与36MHz首错的原始FRM1、可导入记录、CDC及恢复证据](validation/etm-ram-clock-board-20261101/README.md)已入库，3项SRAM安全边界检查和8项项目CLI检查通过。另记录一项元数据问题待修：capture.usb.json的rangeBytes/sentBytes/downloadState保留的是下载前快照，可能显示前一次传输状态；本次ZDD1 header身份/范围及最后TX退休条件在代码中已严格核对。这三个快照字段不用于本次输入质量结论，后续应修正输出为明确的传输后状态。
+源码冻结b72ec89后重新构建两份SRAM ELF，SHA与实际加载验收文件一致，交付到SRAM时钟对照产物及manifest（历史归档 `archive/main-before-formal-release-20261106:prebuilt/f103ze-cdc-ram-clock-20261101/manifest.json`）；[24MHz通过与36MHz首错的原始FRM1、可导入记录、CDC及恢复证据](validation/etm-ram-clock-board-20261101/README.md)已入库，3项SRAM安全边界检查和8项项目CLI检查通过。另记录一项元数据问题待修：capture.usb.json的rangeBytes/sentBytes/downloadState保留的是下载前快照，可能显示前一次传输状态；本次ZDD1 header身份/范围及最后TX退休条件在代码中已严格核对。这三个快照字段不用于本次输入质量结论，后续应修正输出为明确的传输后状态。
 
 ### 2026-11-01：恢复Golden后的30次开关与20轮Web采集压力
 
@@ -1237,7 +1237,7 @@ Web窗口元数据在DDR模式以硬件ticks/ref计算实际时长，主机下�
 
 ### 2026-11-01：ELD1新配对上板与36MHz首次扫描结果
 
-新配对已实际加载并归档到[prebuilt/etm-lane-delay-raw4-20261101](../prebuilt/etm-lane-delay-raw4-20261101/manifest.json)：bit SHA `eac5a263c4966e664370a78f299600c47d034b905b897a083cdf154ee01264ae`，PS ELF SHA `1d55b321f95e15d43afb719380c7cefb4f05955c89f018e49c38bb3fb38ef559`。RTL e18dd7e，布线后AggressiveExplore/route使120MHz setup +0.013ns、hold +0.010ns、SWCLK launch余量+0.415ns；bitgen DRC 0错误。初版负载检查仅查询局部net片段而遗漏跨模块端口连接，226bcb2改为逐条追踪到真实pad_meta/D，确认5个独立端点，并记录验证脚本、父job、输入DCP和bit的SHA。没有降低检查等级或修改RTL来规避该检查。
+新配对已实际加载并归档到prebuilt/etm-lane-delay-raw4-20261101（历史归档 `archive/main-before-formal-release-20261106:prebuilt/etm-lane-delay-raw4-20261101/manifest.json`）：bit SHA `eac5a263c4966e664370a78f299600c47d034b905b897a083cdf154ee01264ae`，PS ELF SHA `1d55b321f95e15d43afb719380c7cefb4f05955c89f018e49c38bb3fb38ef559`。RTL e18dd7e，布线后AggressiveExplore/route使120MHz setup +0.013ns、hold +0.010ns、SWCLK launch余量+0.415ns；bitgen DRC 0错误。初版负载检查仅查询局部net片段而遗漏跨模块端口连接，226bcb2改为逐条追踪到真实pad_meta/D，确认5个独立端点，并记录验证脚本、父job、输入DCP和bit的SHA。没有降低检查等级或修改RTL来规避该检查。
 
 PS源码未改，本轮实际重新编译后ELF与旧版本字节相同，完整新编译日志已保留。上板OCM执行段匹配，2轮1MiB DDR模式/保护字通过，实际FCLK119,999,998Hz、SWCLK999,999.9833Hz；5条tap=0/8/16/24/31装载及物理计数读回通过，再归零。原Golden target CPU48MHz/TRACECLK24MHz的100ms、1s采集和原生解码通过，1s共4,785,714包、19,582,490个执行范围、packetIssues=0、addressInaccessible=0，硬件窗口内63次完整精确CDC echo。[实现、配对身份、板测及原始数据](validation/etm-lane-delay-20261101/README.md)。
 

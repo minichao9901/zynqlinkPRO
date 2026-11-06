@@ -10,7 +10,7 @@ RTL 将 L14/TDO 在 SWD 和 JTAG 模式下均设为输入，阻止旧 GPIO TRI b
 
 Vivado 的展开网表同时列出 IOBUF 宏及内部 IBUF/OBUFT，首次修订仍被子 OBUFT 拒绝。最终验证逐项核对宏和 OBUFT 的 T 为固定高电平，且恰有一条输入路径，记录 `TDO_INPUT_ISOLATION_VERIFIED`。133.333333 MHz 下最终 setup/hold 余量为 0.067/0.044 ns，五路 ELD1 的 DATAOUT 均到达独立采样端点。 [实现摘要](raw/implementation-summary.txt) · [时序](raw/timing.rpt)
 
-最终配对是本轮新生成并实际装载的 bit `dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6` 和 PS ELF `3cef987ab54e784a2103d9d0e88d5ecc42caf207b99ecf6d13795cd47994496b`。物理 MEM-AP0 的 85636 B PS 执行段完全一致。构建基线 `0be2aff3` 加实际工作区输入，源码 SHA 和换行差异单独绑定。 [交付配对](../../../prebuilt/j7-eld1-sequence-fixed-20261106/README.md)
+最终配对是本轮新生成并实际装载的 bit `dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6` 和 PS ELF `3cef987ab54e784a2103d9d0e88d5ecc42caf207b99ecf6d13795cd47994496b`。物理 MEM-AP0 的 85636 B PS 执行段完全一致。构建基线 `0be2aff3` 加实际工作区输入，源码 SHA 和换行差异单独绑定。 交付配对（历史归档 `archive/main-before-formal-release-20261106:prebuilt/j7-eld1-sequence-fixed-20261106/README.md`）
 
 | 实板检查 | 结果 |
 |---|---|

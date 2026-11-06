@@ -28,6 +28,12 @@ extern "C" {
 /* Vendor Code for Microsoft OS 2.0 Descriptors */
 #define MS_OS_20_VENDOR_CODE		0x20
 
+/* WebUSB GET_URL: device recipient, URL index 1, HTTPS scheme. */
+#define WEBUSB_VENDOR_CODE 0x21
+#define WEBUSB_GET_URL 0x02
+#define WEBUSB_LANDING_PAGE 0x01
+#define WEBUSB_LANDING_URL "minichao9901.github.io/zynqlinkPRO/#download"
+
 /************************** Type Definitions *********************************/
 
 /* BOS Descriptor Structure */
@@ -81,6 +87,7 @@ extern const u32 USBD_WinUSBDescriptorSetDescriptorLen;
 
 u32 XUsbPs_Ch9SetupBosDescReply(u8 *BufPtr, u32 BufLen);
 u32 XUsbPs_Ch9SetupMsOs20DescReply(u8 *BufPtr, u32 BufLen);
+u32 XUsbPs_Ch9SetupWebUsbUrlReply(u8 *BufPtr, u32 BufLen);
 
 #ifdef __cplusplus
 }

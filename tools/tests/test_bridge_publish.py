@@ -11,6 +11,34 @@ from tools.build_bridge import publish,archive_application
 
 
 class PublishTests(unittest.TestCase):
+    def test_acl_denied_bundle_rename_updates_files_and_preserves_user_data(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder);candidate,old=self.setup_packages(root)
+            (old/'obsolete').write_text('old file')
+            original=Path.rename
+            def rename(path,destination):
+                if path==old.resolve():raise PermissionError('DENY DELETE_CHILD')
+                return original(path,destination)
+            with patch.object(Path,'rename',rename),patch('tools.build_bridge.prepare_desktop_launcher'):
+                result=publish(candidate,old,root)
+            self.assertEqual(result['publicationMode'],'verified-file-update')
+            self.assertEqual((old/'zynq-etm-bridge.exe').read_bytes(),b'new')
+            self.assertEqual((old/'data/records/keep.json').read_text(),'user capture')
+            self.assertFalse((old/'obsolete').exists())
+            self.assertEqual((Path(result['previousDirectory'])/'obsolete').read_text(),'old file')
+
+    def test_acl_fallback_label_failure_restores_program_bytes(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder);candidate,old=self.setup_packages(root)
+            original=Path.rename
+            def rename(path,destination):
+                if path==old.resolve():raise PermissionError('DENY DELETE_CHILD')
+                return original(path,destination)
+            with patch.object(Path,'rename',rename),patch('tools.build_bridge.prepare_desktop_launcher',side_effect=ValueError('label denied')):
+                with self.assertRaisesRegex(ValueError,'label denied'):publish(candidate,old,root)
+            self.assertEqual((old/'zynq-etm-bridge.exe').read_bytes(),b'old')
+            self.assertEqual((old/'data/records/keep.json').read_text(),'user capture')
+
     def test_integrity_label_failure_rolls_back_program_and_preserves_data(self):
         with tempfile.TemporaryDirectory() as folder:
             root=Path(folder);candidate,old=self.setup_packages(root)

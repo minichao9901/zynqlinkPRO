@@ -19,17 +19,12 @@ firmware/target/stm32f103_scope_rated/** -text
 # Preserve byte identity for loaded initialization files and hashed build inputs.
 prebuilt/**/ps7_init.tcl -text
 # Exact loaded pairs and hashed acceptance evidence, including CRLF reports.
-prebuilt/session-flight-recorder-20261105/** -text -whitespace
 docs/validation/session-flight-recorder-20261105/raw/** -text -whitespace
-prebuilt/j7-adapter-20261106/** -text -whitespace
 docs/validation/j7-adapter-20261106/raw/** -text -whitespace
 docs/validation/j7-adapter-limits-20261106/raw/** -text -whitespace
 docs/validation/j7-traceclk-20261106/raw/** -text -whitespace
-prebuilt/j7-swd66666-20261106/** -text -whitespace
 docs/validation/j7-swd66666-20261106/raw/** -text -whitespace
-prebuilt/j7-eld1-calibration-20261106/** -text -whitespace
 docs/validation/j7-eld1-20261106/raw/** -text -whitespace
-prebuilt/j7-eld1-sequence-fixed-20261106/** -text -whitespace
 docs/validation/j7-sequence-fix-20261106/raw/** -text -whitespace
 prebuilt/**/firmware-build.json -text
 prebuilt/**/cdc-packet-boundary.patch -text
@@ -46,9 +41,6 @@ firmware/target/stm32f103_hal_storage/vendor/** -text -whitespace
 prebuilt/targets/f103ze-hal-storage-20261104/** -text whitespace=cr-at-eol
 docs/validation/main-web-hardware-20261103/raw/** -text -whitespace
 docs/validation/main-web-hardware-20261103/hal-storage-write-input/** -text -whitespace
-prebuilt/main-ddr-usb-133-20261104/** -text -whitespace
-prebuilt/main-ddr-usb-133-statfix-20261104/** -text -whitespace
-prebuilt/probe-safety-111-112-115-20261104/** -text -whitespace
 docs/validation/probe-safety-111-112-115-20261104/raw/** -text -whitespace
 docs/validation/native-engine-offline-20261031/fixture/** -text whitespace=cr-at-eol
 
@@ -64,22 +56,14 @@ etm-service/build-decoder.ps1 -text whitespace=cr-at-eol
 # Fixed H743 source export and the identity-bound diagnostic delivery pair.
 etm-service/firmware/stm32h743_cdc_trace/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
 etm-service/firmware/tools/BuildTools.psm1 -text whitespace=cr-at-eol
-prebuilt/etm-diag-raw4-20261101/** -text whitespace=cr-at-eol
 docs/validation/etm-diag-board-20261101/** -text -whitespace
-prebuilt/etm-ddr-pilot-raw4-20261101/** -text -whitespace
 docs/validation/etm-ddr-pilot-board-20261101/** -text -whitespace
 docs/validation/etm-ddr-physical-readback-20261101/** -text -whitespace
 docs/validation/etm-ddr-full512-20261101/** -text -whitespace
 docs/validation/etm-ddr-load-stress-20261101/** -text -whitespace
-prebuilt/etm-ddr-trace-raw4-20261101/** -text -whitespace
 docs/validation/etm-ddr-trace-build-20261101/** -text -whitespace
 docs/validation/etm-ddr-trace-board-20261101/** -text -whitespace
-prebuilt/etm-ddr-usb-raw4-20261101/** -text -whitespace
-prebuilt/f103ze-cdc-ram-clock-20261101/** -text -whitespace
 docs/validation/etm-ram-clock-board-20261101/** -text -whitespace
-prebuilt/etm-lane-delay-raw4-20261101/** -text -whitespace
-prebuilt/fclk133-release-20261101/** -text -whitespace
-prebuilt/fclk133-swd-fixed-test-20261101/** -text -whitespace
 docs/validation/fclk-resume-20261101/release-133/** -text -whitespace
 docs/validation/fclk-resume-20261101/swd-fixed133/** -text -whitespace
 
@@ -98,3 +82,7 @@ docs/validation/combined-etm-web-20261031/deferred-hss/**/*.jsp binary
 docs/validation/combined-etm-web-20261031/deferred-hss/*.patch -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
 docs/validation/h743-flame-20261102/** -text -whitespace
 docs/validation/research-branch-review-20261103/raw/** -text -whitespace
+# Formal delivery and exact acceptance bytes.
+prebuilt/release-20261106/** -text -whitespace
+docs/validation/release-20261106/evidence/** -text -whitespace
+web/tools/selftest/fixtures/*.jsp -text -whitespace

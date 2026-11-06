@@ -3,9 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build:web": "node tools/dev/build-svd.mjs && node tools/dev/build-web.mjs",
-    "check:web": "node tools/dev/build-web.mjs --check",
-    "test:etm": "python tools/dev/test-etm.py"
+    "build:web": "python ../tools/publish_github.py stage",
+    "check:web": "node tools/dev/check-syntax.mjs",
+    "test:etm": "node --test tools/selftest/etm-*.test.mjs"
   },
   "devDependencies": {
     "esbuild": "0.25.12",

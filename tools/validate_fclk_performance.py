@@ -65,6 +65,11 @@ def physical_snapshot():
                  'FEATURES': 0x40030048, 'CAPTURE': 0x40030008,
                  'SWD_STATUS': 0x40010004, 'PACKET_STATUS': 0x42020004}
     body = 'targets -set -filter {name =~ "APU"}\n'
+    # AXI reads while PL is isolated/reset can poison the MEM-AP until a probe
+    # reset. Check PS-only registers before touching any PL address.
+    body += ('if {([mrd -address-space AP0 -force -value 0xf8000900] & 15) != 15 || '
+             '([mrd -address-space AP0 -force -value 0xf8000240] & 15) != 0} '
+             '{error "PL is isolated/reset; do not read AXI status"}\n')
     for name, address in addresses.items():
         body += f'puts [format "SNAP {name} %08X" [mrd -address-space AP0 -force -value {address:#x}]]\n'
     body += 'if {[mrd -address-space AP0 -force -value 0x40030048] & 0x100} {\n'
