@@ -59,15 +59,7 @@ zynqlinkPRO 将 FPGA 调试引擎、并行 Trace 采集和主机分析工具整�
 
 ## ETM 执行轨迹
 
-```mermaid
-flowchart LR
-    MCU[目标 Cortex-M] -->|TRACECLK + TRACED 0..3| PL[FPGA 接收与成帧]
-    PL --> DDR[DDR 窗口 / 环形缓冲]
-    DDR -->|USB 2.0 HS| HOST[本机原生解码与 TraceStore]
-    ELF[目标 ELF / DWARF / 源码] --> HOST
-    HOST --> WEB[Web 执行流 / 函数 / 火焰图]
-    WEB -->|CMSIS-DAP · SWD / JTAG| MCU
-```
+![zynqlinkPRO 硬件采集与本机分析流程](docs/assets/probe-architecture.svg)
 
 - **协议与目标**：保留 F103ZE ETMv3 和 STM32H743 ETMv4，TPIU 解复用后由 OpenCSD 解码。
 - **源码级分析**：指令与源码映射、执行流查询、函数统计、源码回放和报告导出；ETMv4 周期统计取决于目标配置及记录中实际存在的周期信息。
