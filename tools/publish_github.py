@@ -45,6 +45,8 @@ def stage(out):
         dest.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(source, dest)
     (out/'.nojekyll').write_text('', encoding='utf8')
+    # Preserve the bytes bound by site-manifest across Windows Git autocrlf.
+    (out/'.gitattributes').write_text('* -text\n',encoding='ascii',newline='\n')
     (out/'README.md').write_text(
         '# ZynqDAP 官方工作台与下载\n\n'
         f'[在线工作台]({SITE}) · [工程下载]({SITE}#download) · '
@@ -75,6 +77,23 @@ class GitHub:
         with urllib.request.urlopen(request, timeout=180) as response:
             payload = response.read()
             return json.loads(payload) if payload else None
+
+    def upload(self,url,path):
+        # Windows' urllib/proxy path can terminate a large TLS write with EOF.
+        # Stream through system curl; keep Authorization only on stdin, never
+        # in command-line arguments, logs or a temporary credential file.
+        config='\n'.join('header = '+json.dumps(k+': '+v) for k,v in self.headers.items())+'\n'
+        process=subprocess.run(['curl.exe','--http1.1','--limit-rate','1M','--silent','--show-error','--fail-with-body',
+            '--config','-','--request','POST','--header','Content-Type: application/octet-stream',
+            '--data-binary','@'+str(path),'--url',url],input=config,
+            capture_output=True,text=True,encoding='utf8',timeout=240)
+        if process.returncode:
+            raise ValueError('Release upload failed: '+process.stderr+' '+process.stdout[:500])
+        asset=json.loads(process.stdout)
+        if asset['size']!=path.stat().st_size:raise ValueError('Remote upload size differs')
+        if asset.get('digest') and asset['digest']!='sha256:'+sha(path):
+            raise ValueError('Remote upload SHA differs')
+        return asset
 
 
 def publish(out, package, tag):
@@ -122,7 +141,11 @@ def publish(out, package, tag):
         release = api.request('/repos/'+REPO+'/releases/tags/'+tag)
     except urllib.error.HTTPError as error:
         if error.code!=404:raise
-        release = api.request('/repos/'+REPO+'/releases','POST',{
+        # GET-by-tag can return 404 for an unpublished draft with no Git tag.
+        # Reuse that draft after network failures instead of duplicating it.
+        release=next((r for r in api.request('/repos/'+REPO+'/releases')
+                      if r['tag_name']==tag and r['draft']),None)
+        if release is None:release = api.request('/repos/'+REPO+'/releases','POST',{
             'tag_name':tag,'name':'Zynq ETM 工作台 '+tag,'draft':True,
             'body':f'Windows x64 完整便携包，解压后双击 zynq-etm-bridge.exe。保留 _internal；更新前退出旧程序并保留 data。\n\n'
                    f'工程下载：{SITE}#download\n\nSHA-256 ({ASSET}): `{sha(package)}`\n\n'
@@ -135,8 +158,8 @@ def publish(out, package, tag):
     for path,name in [(package,ASSET),(checksums,'SHA256SUMS.txt')]:
         if name in existing:
             api.request('/repos/'+REPO+'/releases/assets/'+str(existing[name]['id']),'DELETE')
-        api.request(release['upload_url'].split('{')[0]+'?name='+name,'POST',path.read_bytes(),'application/octet-stream')
-    api.request('/repos/'+REPO+'/releases/'+str(release['id']),'PATCH',{'draft':False,'make_latest':'true'})
+        api.upload(release['upload_url'].split('{')[0]+'?name='+name,path)
+    release=api.request('/repos/'+REPO+'/releases/'+str(release['id']),'PATCH',{'draft':False,'make_latest':'true'})
     return {'site':SITE,'release':release['html_url'],'sha256':sha(package),'siteCommit':git('rev-parse','HEAD',cwd=out)}
 
 

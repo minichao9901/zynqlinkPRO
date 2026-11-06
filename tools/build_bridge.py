@@ -110,11 +110,14 @@ def publish(package,out,workspace=ROOT):
         except PermissionError:
             # Only this initial rename gets a fallback. Later failures use the
             # ordinary rollback path and are never misclassified as ACL issues.
-            publish_in_place(package,out,previous)
             if old_zip.exists():
                 shutil.copyfile(old_zip,saved_zip)
                 if sha(old_zip)!=sha(saved_zip):raise ValueError('旧ZIP归档校验失败')
-                old_zip.unlink()
+                old_zip.unlink();zip_moved=True
+            try:publish_in_place(package,out,previous)
+            except BaseException:
+                if zip_moved:shutil.copyfile(saved_zip,old_zip)
+                raise
             return dict(previousDirectory=str(previous),dataPreserved=(out/'data').exists(),
                         archiveDirectory=str(archive),publicationMode='verified-file-update')
     try:

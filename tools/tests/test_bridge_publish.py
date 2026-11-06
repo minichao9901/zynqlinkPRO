@@ -39,6 +39,19 @@ class PublishTests(unittest.TestCase):
             self.assertEqual((old/'zynq-etm-bridge.exe').read_bytes(),b'old')
             self.assertEqual((old/'data/records/keep.json').read_text(),'user capture')
 
+    def test_acl_fallback_restores_old_zip_when_candidate_install_fails(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder);candidate,old=self.setup_packages(root)
+            archive=Path(str(old)+'.zip');archive.write_bytes(b'old zip')
+            original=Path.rename
+            def rename(path,destination):
+                if path==old.resolve():raise PermissionError('DENY DELETE_CHILD')
+                return original(path,destination)
+            with patch.object(Path,'rename',rename),patch('tools.build_bridge.prepare_desktop_launcher',side_effect=ValueError('label denied')):
+                with self.assertRaisesRegex(ValueError,'label denied'):publish(candidate,old,root)
+            self.assertEqual(archive.read_bytes(),b'old zip')
+            self.assertEqual((old/'zynq-etm-bridge.exe').read_bytes(),b'old')
+
     def test_integrity_label_failure_rolls_back_program_and_preserves_data(self):
         with tempfile.TemporaryDirectory() as folder:
             root=Path(folder);candidate,old=self.setup_packages(root)

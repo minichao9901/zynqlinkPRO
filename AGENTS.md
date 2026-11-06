@@ -53,7 +53,7 @@ H743 Golden源代码与自包含SDK位于 `firmware/target/stm32h743_cdc_trace/`
 
 ```powershell
 # 硬件采集示例：仅在已核对/加载配对、确认板卡空闲且任务允许操作硬件后执行。
-python -X utf8 toolbox.py trace capture --elf prebuilt/golden/f103ze-cdc48.elf --bit prebuilt/fclk133-release-20261101/probe.bit --zynq-elf prebuilt/fclk133-release-20261101/application.elf --out build/etm-capture-new --seconds 1 --swd-khz 10000
+python -X utf8 toolbox.py trace capture --elf prebuilt/golden/f103ze-cdc48.elf --bit prebuilt/release-20261106/probe.bit --zynq-elf prebuilt/release-20261106/application.elf --out build/etm-capture-new --seconds 1 --swd-khz 10000
 # 已保存记录的离线查询示例，不采集、不烧录。
 python -X utf8 toolbox.py trace query --record <记录目录> --view summary
 ```
@@ -81,8 +81,8 @@ ETM配置默认SWD为 **10MHz**，前端、本地采集服务接管和恢复连�
 
 - 单板操作不能并行抢占；先查占用、采集/DDR/DMA状态，再动时钟或加载。只停止本任务进程，不结束共享 `hw_server` 或其他会话服务。
 - 默认保持目标PLL、AHB/APB、Flash和QSPI；需要改变时按任务授权执行，不能用重刷、复位或降频掩盖失败。临时SRAM/核心寄存器/AFIO/Trace夹具必须备份并核对恢复，记录最终运行/暂停状态。
-- 已知DAP Golden在 `prebuilt/golden/`，QSPI恢复包在 `prebuilt/recovery/`；`prebuilt/fclk133-release-20261101/` 是限定F103范围的release，不能把RAM加载等同其QSPI冷启动验收。ETM 24MHz研究基线另见 [主线/基线说明](docs/ETM主线合并与最佳基线-20261101.md)。
-- 固定133MHz实验 `prebuilt/fclk133-swd-fixed-test-20261101/` 是SWD-only，不能代替正式release；其中60MHz请求实际可落到33.333MHz。测试必须记录实际FCLK/SWCLK/TCK和来源，不只写请求频率；寄存器计算频率不冒充外部频率计实测。
+- 已知DAP Golden在 `prebuilt/golden/`，QSPI恢复包在 `prebuilt/recovery/`；`prebuilt/release-20261106/` 是当前J7、限定F103范围的release（WebUSB/ELD1/原始SWD修复），不能把RAM加载等同其QSPI冷启动验收。ETM 24MHz研究基线另见 [主线/基线说明](docs/ETM主线合并与最佳基线-20261101.md)。
+- 固定133MHz实验 `prebuilt/fclk133-swd-fixed-test-20261101/` 已归档在tag `archive/main-before-formal-release-20261106`，是SWD-only，不能代替正式release；其中60MHz请求实际可落到33.333MHz。测试必须记录实际FCLK/SWCLK/TCK和来源，不只写请求频率；寄存器计算频率不冒充外部频率计实测。
 - 当前ETM业务只要求低频SWD配置；高频ETM输出+RTT并发不是产品必验组合。150MHz FCLK/36MHz TRACECLK等已暂停研究不可因新会话而自动重启。
 - DDR/OCM身份核对使用物理MEM-AP0，CPU上下文 `mrd -force` 不能保证绕过缓存。包错误为0、FIFO无丢帧或IDELAYCTRL RDY不能单独证明完整窗口、完整执行流或完成逐线校准。
 - 性能对比固定配对、目标固件/时钟、事务规模、队列深度、窗口和重复次数；分别报告控制、硬件窗口、下载、解码/索引与首屏。离线时间、估算和旧JSON路径不得冒充当前E2E。

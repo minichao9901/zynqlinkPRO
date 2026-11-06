@@ -6,7 +6,7 @@
 
 2026-11-05整理后，当前树保留各阶段报告与顶层摘要、最终会话/飞行记录、固件查看器和探针安全的完整公开证据；另保留原生差分依赖的 F103 大输入、H743 1s 与 H743 2s 固定原始输入。业务库仅有[5份精选记录](../retained-records.json)。自动测试夹具独立保留。
 
-历史逐轮输出、截图和一次性驱动固定在 annotated tag `archive/main-before-cleanup-20261105`，对应清理前提交 `6765937`。逐文件路径、尺寸和SHA见[归档清单](cleanup-20261105/archived-files.json)。本地tag未推送；原Git历史仍在。
+历史逐轮输出、截图和一次性驱动固定在 annotated tag `archive/main-before-cleanup-20261105`，对应清理前提交 `6765937`。逐文件路径、尺寸和SHA见[归档清单](cleanup-20261105/archived-files.json)。该归档tag已于2026-11-06随正式发布推送；原Git历史仍在。
 
 查看单个历史文件：
 

@@ -1,0 +1,15 @@
+Everything up-to-date
+Traceback (most recent call last):
+  File "E:\zynqlinkPRO\tools\publish_github.py", line 175, in <module>
+    if __name__=='__main__':main()
+                            ~~~~^^
+  File "E:\zynqlinkPRO\tools\publish_github.py", line 171, in main
+    result=stage(args.out) if args.action=='stage' else publish(args.out.resolve(),args.package.resolve(),args.tag)
+                                                        ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\zynqlinkPRO\tools\publish_github.py", line 159, in publish
+    api.upload(release['upload_url'].split('{')[0]+'?name='+name,path)
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\zynqlinkPRO\tools\publish_github.py", line 89, in upload
+    raise ValueError('Release upload failed: '+process.stderr+' '+process.stdout[:500])
+ValueError: Release upload failed: curl: (55) Send failure: Connection was reset
+ 

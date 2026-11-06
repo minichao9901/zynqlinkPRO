@@ -1,0 +1,43 @@
+{
+  "ok": true,
+  "native": {
+    "etm_decode": {
+      "response": "Usage: etm_decode trace.bin config-and-memory.txt\r\n       etm_decode --binary out.bin trace.bin config-and-memory.txt",
+      "sha256": "c9ed0bcdede7e0bca779ad611c1bd95725694628e2d0f10847a8e3c09ba79336"
+    },
+    "etm_frontend": {
+      "response": "{\"protocol\": \"trace-frontend-native/1\", \"schema\": 1, \"compiler\": \"gcc 16.1.0\", \"built\": \"Oct 24 2026 10:53:33\", \"inputFormats\": [\"kvdat\"]}",
+      "sha256": "8224e590fbfa37a2245ab849e627695ca41ca2d135b51eb486c085b88aa31a74"
+    },
+    "etm_storebuild": {
+      "response": "{\"protocol\":\"etm-storebuild/1\",\"schema\":1,\"abi\":1,\"compiler\":\"gcc 16.1.0\",\"buildSha\":\"41e2cee015f7\",\"formats\":{\"native\":\"trace-bin native v1\",\"staticDict\":1,\"ranges\":1},\"capabilities\":[\"prescan\",\"diagnose\",\"build\",\"facts-v3\",\"quality-diagnostics\",\"index-facts-v1\",\"direct-opencsd-v1\",\"typed-replay-v1\",\"shared-tracker-v1\",\"complete-index-v1\",\"native-static-v1\",\"native-query-v1\",\"native-breakpoint-starts-v1\"]}",
+      "sha256": "9bbe18dc963b28c7935d163a411fdda360c8bf04d880508580b5c996763b9003"
+    },
+    "etm_index": {
+      "response": "usage: etm_index database events sidecar expected_count",
+      "sha256": "65c822faae3b7e4ec3cdcabe83a1ec1aa4b86c5dc178624abbf69a3f37e259e4"
+    },
+    "etm_export": {
+      "response": "{\"protocol\":\"etm-export/1\",\"abi\":1,\"storeSchema\":1,\"formats\":[\"simplified\",\"source\",\"simplified-html\",\"csv\"],\"features\":[\"select-v1\",\"reading-v1\"]}",
+      "sha256": "9583d7bdcce448a527746729d990327fb7736eaf15ebc0e2677bbfa43e92901a"
+    },
+    "etm_framed": {
+      "response": "{\"protocol\":\"etm-framed-native/1\",\"format\":\"FRM1\"}",
+      "sha256": "2d9a2e45b180c621bee207fd3ff740dd238dcf612227bdf4676cd23933981e3e"
+    }
+  },
+  "clockPolicy": "target-firmware-owned",
+  "hardwareAccess": false,
+  "processIntegrityRid": 8192,
+  "flameHtml": {
+    "selfContained": true,
+    "interactive": true,
+    "tabs": [
+      "timeline",
+      "cycles"
+    ],
+    "defaultTab": "timeline",
+    "dragSelectZoom": true
+  },
+  "offlineTraceCli": true
+}

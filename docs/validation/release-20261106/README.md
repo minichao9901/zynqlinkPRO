@@ -31,6 +31,16 @@ ETM解码记录1814411 instructions、2 gaps、29727 unknownExecution，保留�
 
 ## 主机与发布状态
 
-139 Web自测、61 CLI自测、9项发布器/生产C测试通过；869构建依赖身份通过。[Web](evidence/web-tests.txt) · [CLI](evidence/cli-tests.txt) · [主机C/发布器](evidence/host-tests.txt)。
+139 Web自测、61 CLI自测、10项发布器/生产C测试通过；869构建依赖身份通过。[Web](evidence/web-tests.txt) · [CLI](evidence/cli-tests.txt) · [主机C/发布器](evidence/host-tests.txt)。
 
-冻结包、匿名下载与Pages上线结果将在完成后补入本报告；当前不把源码通过当成已发布。
+EXE 1.3.0 已从干净提交 `4d87c78cafd9a38ed35333c7ff176177fe8e0f62` 冻结，1824个包文件逐项校验；F103/H743离线解码、查询、HTML导出及重复启动复用通过，无系统Python/Node、硬件路由关闭。[冻结验收](evidence/frozen-verification.json) · [交付摘要](evidence/package-summary.json)。固定程序已更新，49份用户data文件路径和SHA全部保持一致。实际本机更新使用普通目录重命名成功；新增ACL回退目前为专项模型覆盖，不能据此声称真实DENY ACL场景已关闭。
+
+[原仓库在线页面](https://minichao9901.github.io/zynqlinkPRO/#download)已由gh-pages提交 `d603898b28bf945bb50a28b69847808cfd4ab8b5` 发布，Pages状态built，匿名首页200；浏览器完整初始化、下载链接及布局通过。[网页截图](download-page.jpg)。初次静态发布受Windows Git autocrlf影响，index/main.js字节与manifest不符，现通过静态分支 `* -text` 保留字节，145个Git blob逐项SHA一致，4个在线关键资源也匹配（ZL-165）。[字节验证](evidence/site-byte-verification.json)。
+
+[Release v1.3.0](https://github.com/minichao9901/zynqlinkPRO/releases/tag/v1.3.0)已公开，完整ZIP为54391206 B，SHA-256 `5ba2605e93218625ff4f610d6fdc6bdbf8bcecf932bbc306c87f03f719792777`；匿名从latest固定链接完整下载并逐字节哈希一致。[上线及下载证据](evidence/published.json)。大包先经urllib与普通curl两次连接中断，限速1 MiB/s流式上传成功，草稿查询改为兼容未创建tag的草稿；失败与成功日志保留（ZL-164）。网络中断的根因未定，不声称限速解决所有网络故障。
+
+本地29个旧输出目录共41.291568 GiB已可逆移至 `E:/zynqlinkPRO-local-archive-20261106`，没有删除用户唯一记录或共享缓存，[移动清单](evidence/local-archive.json)。前后两次Git归档tag均已推送，历史报告中的失败和暂停结论继续有效。工具及根README导航收敛到当前正式入口。
+
+最后板上仍为上述正式bit/ELF，目标CPU/HCLK48 MHz、TRACECLK24 MHz；SWD配置读回FCLK119999998 / SWCLK约10 MHz。所有采集/DDR/DMA/RTT/HSS空闲，DHCSR最终 `0x01010000`，目标运行；原始序列测试使C_DEBUGEN为1，已按最初控制位恢复为0并读回。RCC与初始匹配，未写目标Flash/QSPI。[最终板状态](evidence/final-board.json)。测试EXE和本任务9017预览服务均已停止，保留共享hw_server。
+
+用户要求删除刚创建的空仓库 `zynqlinkPRO-web`。当前Git凭据仅repo/workflow，无delete_repo，删除API返回403；本机浏览器窗口激活也失败，因此该删除尚未完成，需要账号管理页面操作。此仓库没有发布网页或上传产物，所有正式链接已使用原仓库。
