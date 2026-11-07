@@ -32,3 +32,21 @@ Windows 候选来源为 `b24dfa73a354e3231d867f86b8b9727097ed48c6`，EXE SHA-256
 网页释放 WASM 会话后，原生服务仍负责布防 FPGA 和放行 CPU。采后 WASM 仅重连原探针并沿用所选 SWD 档。离线测试覆盖 250 kHz 的真实 WASM 配置、10 MHz 默认档、1 MHz 对照档、释放失败保留所有权、拒绝用另一支探针恢复，以及 DHCSR 单次放行。旧网页驱动的 HTTP 原子交换、批量内存和寄存器对照开关不用于 WASM 会话。
 
 板验仍需以 F103ZE 和 H743 分别验证 AP0/实际时钟、采集前后 FPB/DEMCR/RCC 状态、起点和配置恢复、完整窗口及数据质量。原生 `trace capture` 的独立入口继续使用 Zynq 原生控制与采集。
+
+新版候选为 `build/openocd-wasm-20261108/windows-etm-candidate/zynq-etm-bridge.exe`，来源 `85fd9cc6c9d90a6a35f7e3e38dda10c10501a3b5`，EXE SHA-256 为 `42d71bbf33e71dbf10ddbc7aa42e93ed44f3703b38d2b6ca90860024871d39c3`。Web 145/145、CLI 62/62、177 个主页面模块语法检查和 ETM 改动模块语法通过。冻结包校验 1841 个文件、两条离线 Trace 记录以及内嵌和独立路径的 WASM 资源。Edge 从冻结 EXE 页面核对了内嵌 ETM 后端，独立路径启动真实 Worker 并返回 `mem_ap`。离线硬件访问保持禁用。
+
+## 所有控制和低速通道核查
+
+以 `85fd9cc6` 的实际入口为准。superlinkPRO 的 `dc3d4e9` 也仍由 J-Scope 调用 `AkaLinkHid.xfer`，其验收报告将 WASM RTT 与探针高速采样分开。两仓均未达到所有控制和低速通道走 WASM 的要求。
+
+| 入口 | 实际控制和数据路径 | 迁移状态 |
+|---|---|---|
+| 调试器、烧录器、RTT Viewer | `OpenOcdProbe`、WASM Worker、CMSIS-DAP。RTT 上下行经 WASM 读写目标环。烧录后的目标软件复位在 WASM 会话中完成 | 已切换，待实板 |
+| ETM 网页目标控制 | `OpenOcdEtmProbe` 的物理 MEM-AP0。读写、暂停/继续、入口与配置恢复均用它 | 已切换，待实板 |
+| ETM 联动采集、独立 `trace capture` | 网页移交后，`zynq_la.py` 经原生 DAP 和 EP0 厂商请求布防、放行及查询；`zynq_ddr.py` 管理 DDR 下载；OpenCSD 做离线解码 | 联动控制和独立 CLI 的目标控制待迁移。高速回传单独核算 |
+| J-Scope / HSS | `scope/view.js` 的 `hidXfer` 直达 `AkaLinkHid.xfer`。`0x31` 选架构，`0x32` 配置/设时钟/标定/启停/读取状态和计数；固件经 EP7 IN 送样本。调慢采样周期仍走这一条通路 | 控制未迁移，低频采样无 WASM 分支 |
+| RTT 转发 | `hid/view.js` 与 `hid/probe.js` 的 `0x31` 控制目标选择、扫描、速率、启停和状态；固件读目标 RTT 环，CDC 送字节 | 私有控制未迁移。RTT Viewer 已迁移 |
+| 全局硬复位和复位脚模式 | `flash/target-reset.js` 发原始 CMSIS-DAP `DAP_Connect` 和 `DAP_SWJ_Pins`；复位脚模式经 `hid/probe.js` 的私有 HID | 未迁移 |
+| 通用串口 / 终端与原生直调入口 | `serial/session.js` 用 Web Serial 或本机串口；`toolbox probe call` 直达本机 USB/HID/serial 代理，另有原生诊断/验收脚本 | 未迁移，单独列出以明确范围 |
+
+J7 现有 PS 固件在 `probe_stream.c` 接收 HID `0x31/0x32`。现有 CMSIS-DAP 厂商处理器 `DAP_vendor.c` 的 `0x80–0x8d` 没有等效的 HSS／RTT 转发接口。后续需要让 WASM 执行这些私有控制事务并通过受管传输发送，保留同一设备身份、请求/响应关联、失败不重放、HSS 停机排空和尾计数。低频采样需要实际从 WASM 读取目标内存，按实际采样间隔与缺样记录结果。原生 ETM 的布防/放行迁移另验同一所有权下的时序和现场恢复。跟踪 ZL-172。
