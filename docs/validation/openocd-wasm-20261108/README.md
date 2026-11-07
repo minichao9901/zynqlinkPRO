@@ -71,3 +71,7 @@ J7 现有 PS 固件在 `probe_stream.c` 接收 HID `0x31/0x32`。现有 CMSIS-DA
 | superlinkPRO 专有工具 | SPI/QSPI、SPI 屏、SPI 转发、I²C、ADC/DAC、SWO 有各自的 HID、WebUSB 或串口通路 | 工作台不提供这些工具 |
 
 离线测试使用真实 WASM 和模拟 CMSIS-DAP，核对了 NRST 命令及拉低出错仍尝试释放、AP0 读写与 1 KiB TAR 边界。Edge 从实际页面验证 9999/10000 µs 分流、显式探针模式、两段内存值、逐样本时间、停止后 USB 释放及 JSP 回放。浏览器样本来自模拟内存。低频帧时间记录主机开始读取时刻，多段读取没有硬件同时性。未接入板卡，留待 F103ZE、H743、HPM6800EVK 核对实测时钟、复位线、采集窗口及交接恢复。
+
+Web 149/149、CLI 63/63、179 个模块语法检查及 `trace doctor --offline` 通过。新 Windows 候选路径为 `build/zl172-wasm-20261108/windows-candidate/zynq-etm-bridge.exe`，源码 `18dd2ce9656d816a093232a10e566a441457ffd1`，EXE SHA-256 为 `3487717e77792b768c7eefac3649ab1544011eda3bfc9a82a0b9520d4ef25865`。冻结验收核对 1843 个文件与两条离线 Trace 记录。冻结页面重跑低频采样和回放，模拟两段内存得到 4 帧、8 次读，值和逐帧时间相同，停止后释放一次。源码工作区原有未提交文件，清单标记 `sourceDirty:true`。
+
+实现入口 [低频采样](../../../web/app/scope/wasm-poll.js)、[NRST](../../../web/app/flash/target-reset.js)、[原生 Trace 目标适配](../../../etm-service/tools/openocd_native.py)。对照入口 [superlinkPRO 采样页](https://github.com/minichao9901/superlinkPRO/blob/11441e50514f6b83358c0c332fe6f7486159a670/web/app/scope/view.js)、[superlinkPRO 复位入口](https://github.com/minichao9901/superlinkPRO/blob/11441e50514f6b83358c0c332fe6f7486159a670/web/app/flash/view.js)、[superlinkPRO 原生 Wasm 执行器](https://github.com/minichao9901/superlinkPRO/blob/11441e50514f6b83358c0c332fe6f7486159a670/etm/tools/node-transport/openocd-worker.mjs)。
