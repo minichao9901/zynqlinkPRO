@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {WebUsbDapProbe} from '../../app/rtt/dap-webusb.js';
-import {WebUsbDapProbe as EtmProbe} from '../../../etm-service/web/app/shared/rtt/dap-webusb.js';
+import {WebUsbDapProbe} from './fixtures/legacy-dap-webusb.js';
 
-for(const [name,Probe] of [['workbench',WebUsbDapProbe],['ETM',EtmProbe]]){
+{
+const name='legacy DAP', Probe=WebUsbDapProbe;
   test(name+' invalid transfer counts never reach USB',async()=>{
     const p=Object.create(Probe.prototype);p._ctrl=async()=>{throw Error('must not send');};
     await assert.rejects(p._transfer([]),/条数/);

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {HpmNativeMemory} from '../../app/flash/hpm/native-memory.js';
+import {HpmNativeMemory} from './fixtures/native-memory.js';
 
 function fixture(fail){
   const calls=[],ram=new Uint8Array(4096);let address=0,mode=0x0e;

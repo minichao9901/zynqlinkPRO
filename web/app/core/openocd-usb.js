@@ -1,6 +1,6 @@
+import { withTimeout } from './pace.js';
 import { UsbLease } from './usb-device.js';
 import { nativeProbeEnabled, nativeUsbDevices } from './native-probe.js';
-import { withTimeout } from '../rtt/dap-webusb.js';
 
 const filter = { vendorId:0x0d28 };
 const readResult = ({ status, data }) => ({ status, data });

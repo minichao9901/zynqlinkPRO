@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { DapJtagTransport } from '../../app/flash/hpm/dap-transport.js';
-import { WebUsbDapProbe } from '../../app/rtt/dap-webusb.js';
+import { DapJtagTransport } from './fixtures/dap-transport.js';
+import { WebUsbDapProbe } from './fixtures/legacy-dap-webusb.js';
 
 test('RISC-V reconnect restores the latest requested clock after a resetting DAP_Connect', async () => {
   const calls=[];

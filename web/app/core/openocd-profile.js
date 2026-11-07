@@ -27,8 +27,9 @@ export function makeOpenOcdProfile({ arch = 'arm', clockKhz = 1000, dpidr, tapId
   const lines = ['adapter driver cmsis-dap', `transport select ${riscv ? 'jtag' : 'swd'}`,
     `adapter speed ${clock}`, 'reset_config none'];
   if (memoryAp){
-    lines.push(`swd newdap workbench cpu${expected}`, 'dap create workbench.dap -chain-position workbench.cpu',
-      `target create ${target} mem_ap -dap workbench.dap -ap-num 0`);
+    lines.push(rp2350 ? 'swd newdap workbench cpu -expected-id 0x00040927' : `swd newdap workbench cpu${expected}`,
+      rp2350 ? 'dap create workbench.dap -adiv6 -tap workbench.cpu' : 'dap create workbench.dap -chain-position workbench.cpu',
+      `target create ${target} mem_ap -dap workbench.dap -ap-num ${rp2350 ? '0x2000' : '0'}`);
   } else if (riscv){
     const ir = integer(port?.debug.irLength ?? irLength, 2, 32);
     lines.push(`jtag newtap workbench cpu -irlen ${ir}${expected}`,

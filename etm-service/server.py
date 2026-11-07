@@ -397,7 +397,7 @@ def openocd_asset(name):
         'core/openocd-session.js', 'core/openocd-usb.js', 'core/openocd-worker.mjs',
         'core/openocd-runtime/openocd-core.mjs', 'core/openocd-runtime/openocd-core.wasm',
         'core/native-probe.js', 'core/usb-device.js', 'core/dap-profile.js',
-        'core/bin.js', 'core/operation-budget.js', 'core/pace.js', 'rtt/dap-webusb.js',
+        'core/pace.js',
     }
     if name not in assets:
         abort(404)

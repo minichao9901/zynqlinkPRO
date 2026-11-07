@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {WebUsbDapProbe} from '../../app/rtt/dap-webusb.js';
+import {WebUsbDapProbe} from './fixtures/legacy-dap-webusb.js';
 
 test('MMIO writes flush once without re-reading or replaying command/W1C registers',async()=>{
   const p=Object.create(WebUsbDapProbe.prototype),calls=[];

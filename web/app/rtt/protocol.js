@@ -69,11 +69,6 @@ export const MAX_READ_PER_POLL = 64 * 1024;
 const sleepMs = waitMs;
 const allZero = b => b.length > 0 && b.every(x => x === 0);
 const hasCbId = b => b.length >= CB_ID.length && latin1(b.subarray(0, CB_ID.length)) === CB_ID;
-/**
- * 让链路自己重启一次（能做就做）：RISC-V 那条路是**复位调试模块**（见 riscv-mem.js 的 recover），
- * ARM/WebUSB 那条路也能重激活 SWD。没有 recover 的 mem（模拟器、桥）就当无事发生。
- */
-async function recoverMem(mem){ try { await mem?.recover?.(); } catch {} }
 
 export class Rtt {
   constructor(mem, opts = {}){
@@ -154,11 +149,10 @@ export class Rtt {
        *    探针的 RISC-V/SBA 读会**偶发返回全 0**（同一地址连读 20 次全对，但中间会插一次全 0；
        *    实测还见过 `sbcs.sbbusy` 常驻的挂起事务），一次就把"控制块好好的目标"判成
        *    「没有 "SEGGER RTT" 标识」—— 界面表现正是用户说的"Viewer 时好时坏、连不上"。
-       *    读失败或读到全 0 就**重启一次链路再读**，最多 3 次；3 次都不行才认账。
+       *    读到无效标识就等待后重读，最多 3 次；3 次都不行才认账。
        */
       let hdr = await budget.step('读取标识', () => mem.readMem(addr, 24));
       for (let i = 0; i < 2 && !hasCbId(hdr); i++){
-        await budget.step('恢复读取链路', () => recoverMem(mem));
         await sleepMs(80);
         hdr = await budget.step('重新读取标识', () => mem.readMem(addr, 24));
       }
@@ -218,9 +212,6 @@ export class Rtt {
    *    这类垃圾几乎都过不了下面的合理性校验，所以"按需重读"比"无脑读两遍"划算得多
    *    （后者把 RTT 吞吐砍掉一半，实测 330 → 154 KB/s）。
    *
-   * 🚨 2026-10 HPM6800EVK 追加：RISC-V/SBA 那条路会**偶发读回全 0 / 挂起**，
-   *    第二次失败时顺手让链路自愈一次（`mem.recover()` = 复位调试模块）再试 —— 用户看到的现象
-   *    是"轮询在跑但一个字节都不来 / 一会儿好一会儿坏"，重试+自愈能把它拉回来。
    */
   async _entry(base, i){
     let lastErr = null;
@@ -229,7 +220,6 @@ export class Rtt {
       try { return await this._entryOnce(base, i); }
       catch (e){
         lastErr = e;
-        if (attempt === 1) await recoverMem(this.mem);
       }
     }
     throw lastErr;
@@ -398,8 +388,16 @@ export class Rtt {
 
   // ---------------- 下行（主机 → 目标） ----------------
   /** 写多少算多少（目标不来取就只能写满缓冲）；返回实际写入字节数 */
-  async writeDown(ch, bytes){
-    const data = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+  writeDown(ch, bytes){
+    const data = new Uint8Array(bytes);
+    const write = (this._downTail ?? Promise.resolve()).then(() => this._writeDown(ch, data));
+    this._downTail = write.catch(() => {});
+    return write;
+  }
+
+  async drainWrites(){ await this._downTail; }
+
+  async _writeDown(ch, data){
     if (!data.length) return 0;
     const e = await this._entry(this.downBase, ch);
     this.down[ch] = e;

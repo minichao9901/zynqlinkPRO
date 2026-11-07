@@ -211,10 +211,14 @@ export function parseDef(payload, version = VERSION){
   // **生效**后端：DEF flags bit6 = 这次真的在走 RISC-V/JTAG（不是你下发的那个）
   if (version === VERSION_TICKS) out.periodUs = usForTicks(out.periodUs);
   out.riscv = !!(out.flags & SCOPE_FLAG.RISCV);
+  if (!out.nvars || out.nvars > MAX_VARS || 12 + out.nvars * 8 > payload.length)
+    throw Error('DEF 变量数量无效');
   let o = 12;
   for (let i = 0; i < out.nvars; i++){
+    const type = TYPES[payload[o + 5]];
+    if (!type || type.size !== payload[o + 4]) throw Error('DEF 变量类型或大小无效');
     out.vars.push({ addr: dv.getUint32(o, true), size: payload[o + 4], type: payload[o + 5],
-                    scalar: TYPES[payload[o + 5]]?.name || null });
+                    scalar: type.name });
     o += 8;
   }
   return out;

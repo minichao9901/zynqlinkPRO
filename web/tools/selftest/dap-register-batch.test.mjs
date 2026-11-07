@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {WebUsbDapProbe} from '../../app/rtt/dap-webusb.js';
-import {WebUsbDapProbe as EtmProbe} from '../../../etm-service/web/app/shared/rtt/dap-webusb.js';
+import {WebUsbDapProbe} from './fixtures/legacy-dap-webusb.js';
 import {EtmTarget} from '../../../etm-service/web/app/target.js';
 
-for(const [name,Probe] of [['workbench',WebUsbDapProbe],['ETM',EtmProbe]]){
+{
+const name='legacy DAP', Probe=WebUsbDapProbe;
   test(name+' grouped reads preserve per-address double/third samples and reset TAR',async()=>{
     const p=Object.create(Probe.prototype);let calls=0,flush=0;
     Object.assign(p,{device:{nativeService:true},pkt:512,_withLock:f=>f(),_flushPosted:async()=>{flush++;},

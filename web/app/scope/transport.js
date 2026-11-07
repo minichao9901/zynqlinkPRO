@@ -1,4 +1,4 @@
-import { waitMs } from '../core/pace.js';
+import { waitMs, withTimeout } from '../core/pace.js';
 /**
  * 数据面传输：把"512 B 包流"从探针搬到页面。两种实现**同形**，页面不用管用的是哪个：
  *   · `VendorEpTransport` —— 真家伙：WebUSB 认领 interface 0，走**空闲的 bulk IN 端点 0x83**
@@ -8,10 +8,9 @@ import { waitMs } from '../core/pace.js';
  * 收流的两条纪律（都是踩过的坑换来的）：
  *  1. **保持多条 transferIn 在飞**：一条 USB 读一次往返 ~0.2~0.5 ms，串行读会把速率锁死在
  *     几百 KB/s；批量读 4 KB + 2~4 条在飞才能吃满 bulk 带宽。
- *  2. **收尾必须先停推流、再收干净**：WebUSB 没有取消接口（app/rtt/dap-webusb.js:39-49 记着
+ *  2. **收尾必须先停推流、再收干净**：WebUSB 没有取消接口（历史 DAP 驱动曾记录
  *     这个坑），挂起的 transferIn 会偷走下一场的响应 —— 所以 stop() 里要等在飞的读自己回来。
  */
-import { withTimeout } from '../rtt/dap-webusb.js';
 import { MockScopeProbe } from './mock.js';
 import { UsbLease, isUsbResourceConflict } from '../core/usb-device.js';
 import {nativeProbeEnabled,nativeUsbDevices} from '../core/native-probe.js';

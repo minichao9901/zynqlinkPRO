@@ -8,6 +8,7 @@ import { CHIPS } from '../core/chips.js';
 import { webClockKhz } from '../core/target-clock.js';
 import { constrainClockSelect } from '../ui/target-clock.js';
 import { OpenOcdProbe } from '../core/openocd-probe.js';
+import { OpenOcdEtmProbe } from '../core/openocd-etm.js';
 import { selectOpenOcdDevice } from '../core/openocd-usb.js';
 import { OpenOcdResetSession, pulseTargetReset } from './target-reset.js';
 import { hasOpenOcdFlash, makeOpenOcdProfile, ocdHex } from '../core/openocd-profile.js';
@@ -214,10 +215,12 @@ export class FlashView {
     const family = $('f-chip').value;
     const port = hpmBoard(family);
     const imported = this.importedTarget?.id === family ? this.importedTarget.cfg : null;
-    const cfg = imported || makeOpenOcdProfile({ arch:port ? 'riscv' : 'arm', port, family, flash,
+    const memoryAp = !flash && (imported ? imported.arch === 'arm' : !port);
+    const cfg = imported ? { ...imported, memoryAp } : makeOpenOcdProfile({ memoryAp, arch:port ? 'riscv' : 'arm', port, family, flash,
       clockKhz:webClockKhz($('f-speed').value, family, port ? 10000 : 1000) });
     const device = await selectOpenOcdDevice();
-    this.probe = new OpenOcdProbe(device, cfg, line => this._log(line));
+    const Probe = memoryAp ? OpenOcdEtmProbe : OpenOcdProbe;
+    this.probe = new Probe(device, cfg, line => this._log(line));
     await this.probe.connect();
   }
 

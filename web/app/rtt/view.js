@@ -10,6 +10,7 @@ import { RxBuffer } from '../core/rxview.js';
 import { FileRecorder, recordButtonState } from '../core/recorder.js';
 import { Rtt } from './protocol.js';
 import { OpenOcdProbe } from '../core/openocd-probe.js';
+import { OpenOcdEtmProbe } from '../core/openocd-etm.js';
 import { openOcdUsbSupported, selectOpenOcdDevice } from '../core/openocd-usb.js';
 import { makeOpenOcdProfile } from '../core/openocd-profile.js';
 import { HPM_BOARDS, hpmBoard } from '../targets/hpm/porting.js';
@@ -317,14 +318,17 @@ export class RttView {
       if (b === 'webusb'){
         const family = chipSel()?.value || 'stm32f103';
         const arch = $('r-target').value === 'riscv' ? 'riscv' : 'arm';
-        const cfg = this.importedTarget?.id === family ? this.importedTarget.cfg : makeOpenOcdProfile({
+        const imported = this.importedTarget?.id === family ? this.importedTarget.cfg : null;
+        const memoryAp = (imported?.arch ?? arch) === 'arm';
+        const cfg = imported ? { ...imported, memoryAp } : makeOpenOcdProfile({ memoryAp,
           arch, family, port:hpmBoard(family), clockKhz:webClockKhz($('r-usb-clock').value, family, 10000),
         });
         const forcePick = !!this._forcePick;
         this._forcePick = false;
         const device = await selectOpenOcdDevice({ all:$('r-usb-all').checked, forcePick });
         if (g !== this._sessionGen) return;
-        this.probe = new OpenOcdProbe(device, cfg, line => console.debug('[OpenOCD]', line), true);
+        const Probe = memoryAp ? OpenOcdEtmProbe : OpenOcdProbe;
+        this.probe = new Probe(device, cfg, line => console.debug('[OpenOCD]', line), true);
         this._opening = this.probe.connect();
         try { await this._opening; }
         finally { this._opening = null; }
@@ -375,7 +379,7 @@ export class RttView {
     this.probeManager?.cancel('rtt');
     this._sessionGen = (this._sessionGen || 0) + 1;
     this.running = false;
-    clearTimeout(this.timer); clearTimeout(this._idleTimer); clearTimeout(this._resetTimer);
+    clearTimeout(this.timer); clearTimeout(this._resetTimer);
     if (this._disconnectPromise) return await this._disconnectPromise;
     this._disconnectPromise = this._disconnectNow();
     try {
@@ -394,8 +398,9 @@ export class RttView {
     if (this._opening) await this._opening.catch(() => {});
     // A readUp transaction can still be reading/writing RdOff. Let it retire
     // before DAP_Disconnect and native USB close consume the same reply queue.
-    if(this._pollTask)await this._pollTask.catch(()=>{});
-    this._pollTask=null;
+    await this._drainRtt();
+    await this._scanTask?.catch(() => {});
+    await this._resetTask?.catch(() => {});
     if (this.rec.active || this.rec.needsClose || this.rec.starting || this.rec.draining){
       const info = await this.rec.stop();
       this._recordBtn();
@@ -409,6 +414,7 @@ export class RttView {
     }
     if (failure) throw failure;
     this.rtt = null;
+    this._needsRttReconnect = false;
     this.suppManual = false;
     if (this.suppressed) this._setSuppressed(false);
     this._uiConnected(false);
@@ -422,22 +428,44 @@ export class RttView {
     if (!on){ $('r-cb').textContent = '—'; $('r-up').textContent = '0'; $('r-down').textContent = '0'; }
   }
 
+  async _drainRtt(){
+    const rtt = this.rtt;
+    this.rtt = null;
+    await rtt?.drainWrites();
+    await this._pollTask?.catch(() => {});
+    this._pollTask = null;
+  }
+
   async _startRtt(g){
-    if (!this.probe) return;
+    if (!this.probe || this._disconnectPromise || this._resetTask) return;
+    if (this._scanTask) return await this._scanTask;
+    this._scanTask = this._scanRtt(g);
+    try { return await this._scanTask; }
+    finally { this._scanTask = null; }
+  }
+
+  async _scanRtt(g){
     if (g === undefined) g = this._sessionGen = (this._sessionGen || 0) + 1;
     const probe = this.probe;
     const active = () => g === this._sessionGen && this.probe === probe;
     this.running = false;
     clearTimeout(this.timer);
+    await this._drainRtt();
+    if (!active()) return;
+    if (this._needsRttReconnect || probe._faulted){
+      if (typeof probe.recoverDebugPort !== 'function') throw Error('请断开并重新连接探针');
+      setStatus($('r-err'), '正在重新连接原探针并检查 RTT 控制块…');
+      await probe.recoverDebugPort();
+      if (!active()) return;
+    }
     const addrText = String($('r-addr').value || '').trim();
     const addr = addrText ? Number(addrText) : 0;
     const ranges = parseRanges($('r-range').value);
     setStatus($('r-err'), '正在查找 RTT 控制块…');
-    // 定位是"一次性的关键动作" → 严格档（扫描要跨很多地址，读到残渣就会锁错控制块）
-    const locate = a => this._strict(() => Rtt.locate(probe, {
+    const locate = a => Rtt.locate(probe, {
       addr: a, ranges,
       onProgress: (p, at) => setStatus($('r-err'), `扫描控制块 ${(p * 100) | 0}%  @0x${at.toString(16)}`),
-    }));
+    });
     let found;
     try {
       found = await locate(addr);
@@ -471,35 +499,11 @@ export class RttView {
     const nm = await rtt.name('up', 0);
     if (!active()) return;
     this.rtt = rtt;
+    this._needsRttReconnect = false;
     $('r-chlabel').textContent = `下行 ch0${nm ? ' · ' + nm : ''}`;
     const sz = inff.up[0]?.size || 0;
     setStatus($('r-err'), `控制块 0x${found.toString(16)}，上行缓冲 ${sz} B${inff.maxUp > 1 ? `（固件声明 ${inff.maxUp} 个上行通道，本页读 ch0）` : ''}`, 'ok');
     this._startPoll(g);
-    this._armIdleWatchdog();
-  }
-
-  /**
-   * 看门狗：控制块找到了、却一个字节都不来 —— 十有八九是**目标被停住了**
-   * （上一次调试会话 halt 了它，或探针 connect 时默认 halt）。
-   * 这时主动让它跑起来，并在状态条上说清楚，别让用户以为工具坏了。
-   */
-  _armIdleWatchdog(){
-    const g = this._sessionGen, probe = this.probe;
-    clearTimeout(this._idleTimer);
-    this._idleTimer = setTimeout(async () => {
-      if (g !== this._sessionGen || !this.running || this.stats.bytes > 0) return;
-      if (typeof this.probe?.run !== 'function') return;
-      try {
-        // ⚠️ 只在**确实停住**时才写 DHCSR 让它跑。
-        //    早期版本无条件写 run()，结果把一个正在运行的固件"弄停"了：
-        //    现象是"连上后读到几 KB 就不再来数据"（时间点正好在看门狗触发处）。
-        const halted = await probe.isHalted?.();
-        if (g !== this._sessionGen || probe !== this.probe) return;
-        if (halted) await probe.run();
-        else { setStatus($('r-err'), '两秒内没收到数据，但目标在运行中（检查固件有没有在写 RTT）', null); return; }
-        setStatus($('r-err'), '目标原本处于 halt 状态（固件不跑就没数据），已自动继续运行', 'ok');
-      } catch (e){ /* 不支持就算了 */ }
-    }, 2000);
   }
 
   _startPoll(g){
@@ -509,10 +513,9 @@ export class RttView {
     clearTimeout(this.timer);
     this.running = true;
 
-    if (this.probe && typeof this.probe.fast === 'boolean') this.probe.fast = true;
     this.stats.polls = 0; this.stats.bytes = 0; this.stats.lost = 0;
     this.stats.lastBytes=0;this.stats.lastPolls=0;this._lastStatsAt=performance.now();
-    this.fullPolls = 0; this.highPolls = 0; this.peak = 0; this._faults = 0;
+    this.fullPolls = 0; this.highPolls = 0; this.peak = 0; this._faults = 0; this._corruptRun = 0;
     this._pollT0 = Date.now(); this._zeroHinted = false; this._zeroHintSet = false;   // 见 _stats 里的"零速率"诊断
 
     const minGap = 0;
@@ -522,6 +525,7 @@ export class RttView {
       try {
         const { bytes, lost, high, level, corrupt } = await rtt.readUp(0);
         if (!active()) return;
+        this._faults = 0;
         if (bytes.length) this._ingest(bytes, new Date());
         if (lost) this.stats.lost += lost;
         if (high) this.highPolls++;
@@ -536,52 +540,20 @@ export class RttView {
             if (!this.suppressed) setStatus($('r-err'),
               '检测到错位读（读回了控制块内容，已丢弃并重读）—— 查 SWD 时钟、接线与共地', 'err');
           }
-          // 🚨 连续错位读说明不是偶发：多半是 USB 响应流错位（所有 Transfer 响应回显都是 0x05，
-          //    错位后回显照样匹配，读回来的全是别的命令的答案）或 SWD 链路半死。
-          //    升级自愈：recover() 重激活 SWD；不行就 reopen() 重开 USB 会话（resync 只在这条路上跑）。
-          if (this._corruptRun === 15 || (this._corruptRun > 15 && this._corruptRun % 60 === 0)){
-            if (!this.suppressed) setStatus($('r-err'), `连续 ${this._corruptRun} 轮错位读，正在自愈（SWD 重激活 → 必要时重开 USB 会话）…`, 'err');
-            try { await probe?.recover?.();
-            if (!active()) return; } catch {}
-            let ok = false;
-            try {
-              const hdr = await probe.readMem(rtt.addr, 16);
-              ok = String.fromCharCode(...hdr.subarray(0, 10)) === 'SEGGER RTT';
-            } catch {}
-            if (!ok){
-              try { await probe.reopen?.(); } catch {}
-            }
-          }
-          if (this._corruptRun > 150){
-            this._fail(new Error('连续错位读且自愈无效 —— SWD 链路不稳定：查接线/共地，或把 SWD 时钟调低'));
+          if (this._corruptRun >= 15){
+            this._fail(new Error('连续读到错位数据'));
             return;
           }
         } else {
           this._corruptRun = 0;
         }
       } catch (e){
-        /**
-         * 🚨 手动断开时，在飞的 readUp 稍后会抛"探针未连接" —— 不在这儿让路的话，
-         *    `_fail()` 会把状态栏从"已断开"覆盖成"读取失败"（看起来像出了故障，其实是我们自己停的）。
-         */
         if (!active()) return;
         const msg = String(e?.message || e);
-        // SWD 访问出错 / 控制块内容不可信 → 先自愈（重新初始化调试口），别立刻放弃
-        if (/FAULT|NO ACK|不可信|不合理|没在运行/.test(msg)){
-          this._faults = (this._faults || 0) + 1;
-          if (this._faults === 3 || this._faults % 15 === 0){
-            setStatus($('r-err'), `SWD 访问出错，正在自愈（第 ${this._faults} 次）：${msg}`, 'err');
-            try {
-              await probe?.recover?.();
-            if (!active()) return;
-              const hdr = await probe.readMem(rtt.addr, 16);
-              const id = String.fromCharCode(...hdr.subarray(0, 10));
-              if (id === 'SEGGER RTT'){ this._faults = 0; setStatus($('r-err'), '', null); }
-              else setStatus($('r-err'), '目标似乎没在运行（RTT 控制块不见了）：点「复位目标」，或确认固件在跑', 'err');
-            } catch { /* 继续重试 */ }
-          }
-          if (this._faults > 80){ this._fail(new Error('连续 SWD 访问失败，已放弃：' + msg)); return; }
-        } else { this._fail(e); return; }
+        if (!/FAULT|NO ACK|不可信|不合理|没在运行/i.test(msg) || ++this._faults >= 3){
+          this._fail(e);
+          return;
+        }
       }
       if (!active()) return;
       this.stats.polls++;
@@ -596,7 +568,8 @@ export class RttView {
   _fail(e){
     this.running = false;
     clearTimeout(this.timer);
-    setStatus($('r-err'), '读取失败：' + (e?.message || e), 'err');
+    this._needsRttReconnect = true;
+    setStatus($('r-err'), '读取失败：' + (e?.message || e) + '。重新扫描控制块可重连原探针。', 'err');
   }
 
   _err(e){
@@ -732,29 +705,25 @@ export class RttView {
     return b;
   }
 
-  /**
-   * 临时切到**严格档**跑一段（探针 fast=false）：小块读双读、写必回读。
-   * 用于用户手动动作（下行发送、复位、定位控制块）——这些一秒钟也就几次，
-   * 稳妥优先；后台轮询则用快速档换吞吐（见 _startPoll 里对 probe.fast 的设置）。
-   */
-  async _strict(fn){
-    const p = this.probe;
-    if (!p || typeof p.fast !== 'boolean') return await fn();
-    const prev = p.fast;
-    p.fast = false;
-    try { return await fn(); } finally { p.fast = prev; }
-  }
-
   async _sendBytes(bytes){
     try {
-      if (!this.rtt) throw new Error('RTT 还没就绪（先扫描控制块）');
-      const n = await this._strict(() => this.rtt.writeDown(0, bytes));
+      const rtt = this.rtt;
+      if (!this.running || !rtt) throw new Error('RTT 还没就绪（先扫描控制块）');
+      const n = await rtt.writeDown(0, bytes);
+      if (this.rtt !== rtt || !this.running) return;
       if (n < bytes.length) toast(`下行缓冲只写进 ${n}/${bytes.length} 字节（固件没在取？）`, 'warn');
       setStatus($('r-err'), '', null);
     } catch (e){ this._err(e); }
   }
 
   async resetTarget(){
+    if (this._resetTask || this._scanTask || this._disconnectPromise) return;
+    this._resetTask = this._resetTargetNow();
+    try { await this._resetTask; }
+    finally { this._resetTask = null; }
+  }
+
+  async _resetTargetNow(){
     if (!this.probe){ toast('先连接一个后端', 'warn'); return; }
     if (typeof this.probe.reset !== 'function'){
       toast('当前会话没有目标复位能力', 'warn', 7000);
@@ -763,11 +732,11 @@ export class RttView {
     const probe = this.probe;
     const generation = this._sessionGen = (this._sessionGen || 0) + 1;
     this.running = false;
-    clearTimeout(this.timer); clearTimeout(this._idleTimer); clearTimeout(this._resetTimer);
+    clearTimeout(this.timer); clearTimeout(this._resetTimer);
     try {
-      if (this._pollTask) await this._pollTask.catch(() => {});
+      await this._drainRtt();
       if (generation !== this._sessionGen || probe !== this.probe) return;
-      const how = await this._strict(() => probe.reset());   // 复位是关键动作 → 严格档
+      const how = await probe.reset();
       if (generation !== this._sessionGen || probe !== this.probe) return;
       toast(`已复位目标（${how}），2 秒后重新读取控制块…`, 'ok');
       const g = generation;

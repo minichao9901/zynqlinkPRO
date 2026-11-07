@@ -376,7 +376,7 @@ export class EtmTarget {
       await sleep(10);
       await this.write(0xe000edfc,demcr&~1,false);             // 清 VC_CORERESET
       this.log(`已停在复位处 ${hex(resetPC)}；比较器已装好，放行至 ${hex(address)}`);
-      // 这颗探针的 PPB 写偶发不落地（见 app/rtt/dap-webusb.js 的历史教训）：放行后必须
+      // 这颗探针的 PPB 写偶发不落地：放行后必须
       // 回读确认 C_HALT 真的掉了，没掉就重写。
       //
       // 🚨 2026-10 真机定因（审查 R02，H743 + 本仓 target.js）：**"停机"不等于"放行失败"**。

@@ -17,9 +17,8 @@
  *      由 dap-webusb 在 disconnect 时做端口复位。所以这里所有等待都带超时。
  */
 
-import { withTimeout } from '../rtt/dap-webusb.js';
 import { OpenOcdProbe } from '../core/openocd-probe.js';
-import { waitMs, sleep } from '../core/pace.js';
+import { waitMs, sleep, withTimeout } from '../core/pace.js';
 import { CFBP_SEL, CORE_REGS, SPECIAL_REGS, cfbpGet, cfbpSet, isCfbpSub, regInfo } from './regs.js';
 import { FPB, FP_CTRL_KEY, canBreak, compAddr, decodeFpCtrl, planComparators } from './bp.js';
 import { align2, hex32, u32leBytes } from './fmt.js';
@@ -187,7 +186,7 @@ export class DebugSession {
       try { seen.push((await this.probe._readWord(DHCSR)) >>> 0); }
       catch { seen.push(0xdeadbeef); }
     }
-    const bad = seen.some(v => v === 0 || v === 0xffffffff || v === 0xdeadbeef) || new Set(seen).size > 1;
+    const bad = seen.some(v => v === 0 || v === 0xffffffff || v === 0xdeadbeef) || new Set(seen.map(v => v & 0x2f)).size > 1; // Compare C_* bits only.
     if (!bad) return { ok: true, hz: this.clockHz, checked: true, seen };
     const was = this.clockHz;
     await this.probe.setClock(PPB_SAFE_HZ);
@@ -205,11 +204,16 @@ export class DebugSession {
       await this.dwt.clear();
     }
     // Retain the backend and ownership until hardware cleanup and USB close succeed.
-    if (p instanceof OpenOcdProbe && this.bps.length){
-      const wasHalted = await p.isHalted();
-      if (!wasHalted) await p.halt();
-      try { await this.bpClear(); }
-      finally { if (!wasHalted) await p.run(); }
+    if (p instanceof OpenOcdProbe && (this.bps.length || this._fpbUnconfirmed)){
+      if (!await p.isHalted()){
+        this._resumeAfterFpbCleanup = true;
+        await p.halt();
+      }
+      await this.bpClear();
+    }
+    if (this._resumeAfterFpbCleanup){
+      await p.run();
+      this._resumeAfterFpbCleanup = false;
     }
     if (p?.disconnect) await p.disconnect();
     this.dwt = new DwtWatchpoints(this);
@@ -252,6 +256,7 @@ export class DebugSession {
   }
 
   async run(){
+    if (this._fpbUnconfirmed) throw Error('FPB 状态未确认，请先重新配置或清除断点');
     this.clearFrames();
     await this._clearDfsr();
     await this.probe.run();
@@ -355,17 +360,23 @@ export class DebugSession {
     if (hit === undefined) return await fn();
     const a = align2(addr);
     const saved = this.bps.slice();
-    this.bps = saved.filter(b => align2(b) !== a);
-    await this._programBps();
+    const savedNotes = new Map(this.bpNotes);
+    const temporary = saved.filter(b => align2(b) !== a);
+    await this._programFpb(temporary);
+    this.bps = temporary;
     let stepError;
     try { return await fn(); }
     catch (error){ stepError = error; throw error; }
     finally {
-      this.bps = saved;
-      try { await this._programBps(); }
+      try { await this._programFpb(saved); }
       catch (cleanup){
         if (!stepError) throw cleanup;
         this._log('恢复断点失败：' + cleanup.message, 'err');
+      }
+      finally {
+        // These breakpoints still belong to the session if restoration fails.
+        this.bps = saved;
+        this.bpNotes = savedNotes;
       }
     }
   }
@@ -374,6 +385,7 @@ export class DebugSession {
    * 正确握手仍失败时保留断点兜底；不能把未释放暂停误报成探针不支持。
    */
   async step(){
+    if (this._fpbUnconfirmed) throw Error('FPB 状态未确认，请先重新配置或清除断点');
     this.clearFrames();
     if (!this.halted) throw new Error('目标在运行 —— 先「暂停」再单步');
     const pc = align2(await this.readReg('PC'));
@@ -1035,27 +1047,29 @@ export class DebugSession {
     const dup = this.bps.findIndex(b => align2(b) === addr);
     if (dup >= 0) return { index: dup, warn: '这个地址上已经有断点了' };
     if (this.bps.length >= this.caps.numCode) throw new Error(`硬件断点已用完（上限 ${this.caps.numCode} 个）—— 先删掉一个`);
-    this.bps.push(addr);
+    const next = [...this.bps, addr];
+    await this._programFpb(next);
+    this.bps = next;
     if (note) this.bpNotes.set(addr, note);
-    await this._programFpb();
     return { index: this.bps.length - 1 };
   }
 
   async bpDel(addr){
     addr = align2(addr);
     const n = this.bps.length;
-    this.bps = this.bps.filter(b => align2(b) !== addr);
-    if (this.bps.length === n) return false;
+    const next = this.bps.filter(b => align2(b) !== addr);
+    if (next.length === n) return false;
+    await this._programFpb(next);
+    this.bps = next;
     this.bpNotes.delete(addr);
-    await this._programFpb();
     return true;
   }
 
   async bpClear(){
     const n = this.bps.length;
+    await this._programFpb([]);
     this.bps = [];
     this.bpNotes.clear();
-    await this._programFpb();
     return n;
   }
 
@@ -1076,20 +1090,22 @@ export class DebugSession {
   }
 
   /** 把断点表写进比较器（每次都整体重排：第 i 个断点 = 第 i 号比较器，顺序稳定好排查） */
-  async _programFpb(){
-    const { slots, overflow, bad } = planComparators(this.bps, this.caps.numCode, this.caps.rev);
-    if (overflow.length) this._log(`⚠ ${overflow.length} 个断点装不下（比较器只有 ${this.caps.numCode} 个）`, 'err');
-    if (bad.length) this._log(`⚠ ${bad.length} 个断点地址超出 FPB rev${this.caps.rev} 的匹配范围`, 'err');
+  async _programFpb(breakpoints = this.bps){
+    const { slots, overflow, bad } = planComparators(breakpoints, this.caps.numCode, this.caps.rev);
+    if (overflow.length || bad.length) throw Error('断点列表超出 FPB 比较器数量或地址范围');
+    this._fpbUnconfirmed = true;
     for (let i = 0; i < slots.length; i++){
       await this.probe.writeMem(compAddr(i), u32leBytes(slots[i] || 0));
     }
-    const enable = this.bps.length && this.caps.numCode ? 1 : 0;
+    const enable = breakpoints.length && this.caps.numCode ? 1 : 0;
     await this.probe.writeMem(FPB.CTRL, u32leBytes(FP_CTRL_KEY | enable));
     // 回读对账：这颗探针的 PPB 写偶发不落地，断点静默失效最难查
     for (let i = 0; i < slots.length; i++){
       const want = slots[i] || 0;
       const got = (await this.probe._readWord(compAddr(i))) >>> 0;
-      if (got !== want) this._log(`⚠ 比较器 ${i} 回读 0x${got.toString(16)} ≠ 写入 0x${want.toString(16)}（断点可能不生效）`, 'warn');
+      if (got !== want) throw new Error(`⚠ 比较器 ${i} 回读 0x${got.toString(16)} ≠ 写入 0x${want.toString(16)}（断点状态未确认）`);
     }
+    if (((await this.probe._readWord(FPB.CTRL)) & 1) !== enable) throw new Error('FPB 使能状态回读不一致');
+    this._fpbUnconfirmed = false;
   }
 }

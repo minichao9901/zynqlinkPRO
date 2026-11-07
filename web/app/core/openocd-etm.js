@@ -66,6 +66,22 @@ export class OpenOcdEtmProbe extends OpenOcdProbe {
     await this.writeDhcsr(DEBUG_ENABLE);
   }
 
+  async reset(){
+    const resetSeen = 1 << 25;
+    await this.readDhcsr(); // Discard an old sticky reset indication.
+    const request = Uint8Array.of(4, 0, 0xfa, 5);
+    let writeError;
+    try { await this.writeMemDiagnostic(0xe000ed0c, request); }
+    catch (error){ writeError = error; }
+    // Reset can drop the debug connection. Reacquire it without replaying AIRCR.
+    await this.recoverDebugPort();
+    const status = await this.readDhcsr();
+    if (!(status & resetSeen))
+      throw new Error('未确认目标复位', { cause:writeError });
+    if (status & HALTED) throw new Error('已确认目标复位，目标当前处于暂停状态');
+    return '软件复位（AIRCR.SYSRESETREQ）';
+  }
+
   writeDhcsr(bits){
     const bytes = new Uint8Array(4);
     new DataView(bytes.buffer).setUint32(0, (DEBUG_KEY | bits) >>> 0, true);

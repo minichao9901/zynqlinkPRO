@@ -46,6 +46,23 @@ test('the bundled Wasm registers ARM, HPM and RP2350 profiles and resolves impor
   assert.deepEqual(cfg.cores,[{ target:'workbench.cpu', arch:'arm' }]);
   assert.equal(cfg.flashBase, '0x08000000');
   assert.match(cfg.hash,/^[0-9a-f]{64}$/);
+  const memory = new OpenOcdEtmProbe(null, { ...cfg, memoryAp:true });
+  const importedLink = new OpenOcdTargetSession();
+  try {
+    await importedLink.open(cfg);
+    const name = await memory._selectTarget(importedLink, [cfg.target]);
+    assert.equal(await importedLink.command(`capture {${name} cget -type}`), 'mem_ap');
+    assert.equal(await importedLink.command(`${name} cget -dap`), 'workbench.dap');
+    assert.equal(Number(await importedLink.command(`${name} cget -ap-num`)), 0);
+  } finally { await importedLink.close(); }
+  const rp2350 = makeOpenOcdProfile({ family:'rp2350' });
+  const rpLink = new OpenOcdTargetSession();
+  try {
+    await rpLink.open(rp2350);
+    const probe = new OpenOcdEtmProbe(null, { ...rp2350, memoryAp:true, raw:{} });
+    const name = await probe._selectTarget(rpLink, [rp2350.target]);
+    assert.equal(Number(await rpLink.command(`${name} cget -ap-num`)), 0x2000);
+  } finally { await rpLink.close(); }
   await assert.rejects(inspectOpenOcdCfg(board, entry));
   await assert.rejects(inspectOpenOcdCfg(target, '../escape.cfg'), /所选脚本目录/);
   const etm = new OpenOcdTargetSession();
@@ -78,6 +95,20 @@ test('ETM core control uses physical DHCSR and issues only one resume per reques
   await probe.halt();
   await probe.run();
   assert.deepEqual(writes, [0xa05f0003, 0xa05f0003, 0xa05f0001]);
+});
+
+test('ARM RTT reset confirms the sticky reset bit after reconnect without replaying AIRCR', async () => {
+  const probe = new OpenOcdEtmProbe({}, makeOpenOcdProfile({ memoryAp:true }));
+  const status = [0, 1 << 25];
+  const operations = [];
+  probe.readDhcsr = async () => status.shift();
+  probe.writeMemDiagnostic = async (addr, bytes) => {
+    operations.push([addr, ...bytes]);
+    throw Error('debug transport dropped during reset');
+  };
+  probe.recoverDebugPort = async () => { operations.push('reconnect'); };
+  assert.match(await probe.reset(), /SYSRESETREQ/);
+  assert.deepEqual(operations, [[0xe000ed0c,4,0,0xfa,5], 'reconnect']);
 });
 
 test('global reset runs real Wasm adapter commands without examining a target', async t => {

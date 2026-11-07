@@ -2159,12 +2159,12 @@ export class DbgView {
        * **打脏**——之后 `session.memRead` 不再报错、而是**静默返回全 0**（实测控制块 24 B 全 0，
        * 另一次是 `SEGGER RTT` 变成乱码），只有 `dm.init()` 才恢复。用户看到的就是
        * "定位 RTT 报错之后，调试读什么都变味了"。
-       * RTT Viewer 的 RISC-V 通路（app/rtt/riscv-mem.js）本来就是这么接的，这里补齐。
+       * RTT Viewer 的 RISC-V 通路本来就是这么接的，这里补齐。
        */
       const mem = {
         readMem: (a, n) => this.session.memRead(a, n),
         writeMem: (a, b) => this.session.memWrite(a, b),
-        // RISC-V：通道名指针常落在 XIP flash，SBA 读那个窗口会把事务挂住（见 app/rtt/riscv-mem.js）
+        // RISC-V：通道名指针常落在 XIP flash，SBA 读那个窗口会把事务挂住
         skipNames: !!this.session.isRiscv,
       };
       const rtt = new Rtt(mem, { addr });

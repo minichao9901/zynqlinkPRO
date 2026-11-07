@@ -41,19 +41,36 @@ export class OpenOcdProbe {
 
   get _faulted(){ return !!this.link && !this.link.worker; }
 
+  async _selectTarget(link, targets){
+    const { target, raw, memoryAp } = this.cfg;
+    if (!raw) return target;
+    if (!memoryAp){
+      await link.command(`targets ${target}`);
+      return target;
+    }
+    const name = 'workbench.memory';
+    if (targets.includes(name)) throw Error('CFG 已占用工作台 MEM-AP 目标名');
+    // Use the configured DAP/AP but keep every original core unexamined.
+    await link.command('foreach core [target names] { $core configure -defer-examine }');
+    await link.command(`if {[catch {${target} cget -ap-num} ap]} {if {$ap ne "AP number not configured"} {error $ap}; set ap 0}; target create ${name} mem_ap -dap [${target} cget -dap] -ap-num $ap`);
+    await link.command('reset_config none');
+    await link.command(`targets ${name}`);
+    return name;
+  }
+
   async connect(){
     const link = this.link = new OpenOcdTargetSession(line => this.onLog?.(line));
     try {
       await link.open(this.cfg, this.device);
       const targets = (await link.command('target names')).split(/\s+/);
       if (!targets.includes(this.cfg.target)) throw Error('OpenOCD CFG 目标不匹配');
-      if (this.cfg.raw) await link.command(`targets ${this.cfg.target}`);
+      const target = this.target = await this._selectTarget(link, targets);
       await link.command('init');
       if (this.cfg.raw){
-        await link.command(`targets ${this.cfg.target}`);
+        await link.command(`targets ${target}`);
         // The workbench controls one selected core. A peer can be parked in
         // ROM and make a group resume fail even after the selected core halted.
-        if (this.cfg.cores?.length > 1 && !this.isRiscv) await link.command('cortex_m smp off');
+        if (!this.cfg.memoryAp && this.cfg.cores?.length > 1 && !this.isRiscv) await link.command('cortex_m smp off');
       }
       if (!this.cfg.memoryAp){
         let status = await link.command(`${this.cfg.target} curstate`);
@@ -74,7 +91,7 @@ export class OpenOcdProbe {
           throw Error('OpenOCD 未识别 CFG 中的 JTAG TAP');
         if (this.physical) await link.command(`${this.cfg.target} riscv mem_access sysbus`);
       } else {
-        const dap = `${this.cfg.target} cget -dap`;
+        const dap = `${target} cget -dap`;
         this.idcode = Number(await link.command(`capture {[${dap}] dpreg 0}`)) >>> 0;
         if (!this.idcode || this.idcode === 0xffffffff || this.cfg.dpidr != null && this.idcode !== this.cfg.dpidr)
           throw Error('OpenOCD 未确认目标 SWD DPIDR');
@@ -93,7 +110,7 @@ export class OpenOcdProbe {
     return value;
   }
 
-  targetCommand(line){ return this.command(`${this.cfg.target} ${line}`); }
+  targetCommand(line){ return this.command(`${this.target ?? this.cfg.target} ${line}`); }
 
   async disconnect(){
     await this.link?.close();
