@@ -319,7 +319,7 @@ export class Rtt {
 
     if (n === 0) return empty;
     /** 本轮实际读多少：见 MAX_READ_PER_POLL（大积压 + 慢链路时一次读完整段会直接失败）*/
-    const readNow = Math.min(n, MAX_READ_PER_POLL);
+    const readNow = Math.min(n, MAX_READ_PER_POLL, this.mem.rttPollLimit ?? Infinity);
 
     let data;
     /**

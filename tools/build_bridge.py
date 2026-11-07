@@ -260,9 +260,13 @@ def main(argv=None):
             raise ValueError('冻结启动器仍处于低完整性；候选未发布')
         (package/'package-check.json').write_text(json.dumps(json.loads(checked.stdout),ensure_ascii=False,indent=2)+'\n',encoding='utf8')
         revision=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
+        wasm=package/'_internal/toolbox/app/core/openocd-runtime/openocd-core.wasm'
+        if wasm.read_bytes()[:8]!=b'\0asm\x01\0\0\0':
+            raise ValueError('候选包缺少有效的 OpenOCD Wasm')
         files=[dict(path=p.relative_to(package).as_posix(),bytes=p.stat().st_size,sha256=sha(p)) for p in sorted(package.rglob('*')) if p.is_file()]
         manifest=dict(schema=1,platform='windows-x64',sourceRevision=revision,
             desktopLauncherIntegrity='medium',
+            debugBackend=dict(name='OpenOCD Wasm',sha256=sha(wasm)),
             etmControlClockDefaultHz=10000000,
             flameHtml=dict(interactive=True,selfContained=True,modes=['timeline','aggregate'],tabs=['timeline','cycles'],defaultTab='timeline',dragSelectZoom=True),offlineTraceCli=True,
             sourceDirty=source_dirty,dependencies=dependencies,

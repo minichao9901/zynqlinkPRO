@@ -28,7 +28,12 @@ import { constrainClockSelect } from '../ui/target-clock.js';
 import { InspectorTable, flashValue } from '../ui/inspector-table.js';
 import { waitMs } from '../core/pace.js';
 import { DebugSession, DEFAULT_CLOCK_KHZ } from './session.js';
-import { RiscvDebugSession } from './riscv.js';
+import { OpenOcdRiscvSession } from './openocd-riscv.js';
+import { makeOpenOcdProfile } from '../core/openocd-profile.js';
+import { selectOpenOcdDevice } from '../core/openocd-usb.js';
+import { CHIPS } from '../core/chips.js';
+import { hpmBoard } from '../targets/hpm/porting.js';
+import { inspectOpenOcdCfg, readCfgDirectory, cfgPath } from './openocd-cfg.js';
 import { fillHpmSelect, selectedHpmBoard, rememberHpmBoard } from '../targets/hpm/select.js';
 import { runCmd } from './cmd.js';
 import { SymTab } from './symbols.js';
@@ -113,8 +118,21 @@ export class DbgView {
       rememberHpmBoard($('d-hpm-target').value);
       this._applyClockLimit();
     });
+    const arm = $('d-arm-target');
+    if (arm){
+      for (const chip of CHIPS.filter(c => c.ram && !hpmBoard(c.v))) arm.add(new Option(chip.label, chip.v));
+      store.bind(arm, 'dbg.armTarget');
+      if (!arm.value) arm.value = 'arm';
+    }
     const be = $('d-backend');
-    if (be){ store.bind(be, 'dbg.backend'); be.addEventListener('change', () => this._syncBackend()); }
+    if (be){
+      store.bind(be, 'dbg.backend');
+      be.addEventListener('change', () => {
+        if (this._activeCfg()) $('d-cfg-core').value = '';
+        this._syncBackend();
+      });
+    }
+    this._initCfgUi();
     const clk = $('d-clock');
     if (clk){
       constrainClockSelect(clk,'arm');
@@ -419,33 +437,114 @@ export class DbgView {
 
   /**
    * 后端换了就**换 session 对象**（ARM/Cortex-M 与 RISC-V 的硬件访问完全不同，
-   * 但源码级那一层是同一套 —— `RiscvDebugSession` 继承 `DebugSession` 只换低层）。
+   * 但源码级那一层是同一套 —— `OpenOcdRiscvSession` 继承 `DebugSession` 只换低层）。
    * 换之前先把旧连接断干净，别让两个后端抢同一支探针。
    * @returns {boolean} 是否真的换了对象
    */
   async _ensureSession(riscv, { preserveAcquisition = false } = {}){
-    if (riscv === (this.session instanceof RiscvDebugSession)) return false;
+    if (riscv === (this.session instanceof OpenOcdRiscvSession)) return false;
     if (this.session?.connected) await this.disconnect({ preserveAcquisition });
-    if (riscv === (this.session instanceof RiscvDebugSession)) return false;
-    this.session = riscv ? new RiscvDebugSession() : new DebugSession();
+    if (riscv === (this.session instanceof OpenOcdRiscvSession)) return false;
+    this.session = riscv ? new OpenOcdRiscvSession() : new DebugSession();
     this._bindSessionLog();
     this.session.sym = this.sym || null;
     return true;
+  }
+
+  _initCfgUi(){
+    const file = $('d-cfg-file'), directory = $('d-cfg-dir'), entry = $('d-cfg-entry'), core = $('d-cfg-core');
+    if (!file || !directory || !entry || !core) return;
+    const report = error => this._out('CFG：' + error.message, 'err');
+    $('d-cfg-pick').onclick = () => file.click();
+    $('d-cfg-dir-pick').onclick = () => directory.click();
+    file.onchange = async () => {
+      const selected = file.files[0];
+      file.value = '';
+      if (selected) await this.importCfg(selected).catch(report);
+    };
+    directory.onchange = async () => {
+      if (!directory.files.length) return;
+      try {
+        const scripts = await readCfgDirectory(directory.files);
+        if (this.session.connected || this._connecting) throw Error('请先断开调试器');
+        this._cfgFiles = scripts;
+        entry.replaceChildren(new Option('选择入口 CFG…', ''), ...[...scripts.keys()]
+          .filter(name => /\.cfg$/i.test(name)).sort().map(name => new Option(name, name)));
+        entry.hidden = false;
+      } catch (error){ report(error); }
+      finally { directory.value = ''; }
+    };
+    entry.onchange = () => {
+      if (!entry.value) return;
+      const name = entry.value;
+      entry.value = '';
+      this._importCfg(this._cfgFiles.get(name), name, this._cfgFiles).catch(report);
+    };
+    core.onchange = () => this._selectCfg().catch(report);
+  }
+
+  async importCfg(file){
+    if (!(file instanceof File) || file.size > 8 * 1024 * 1024) throw Error('请选择 8 MiB 以内的 OpenOCD CFG');
+    return this._importCfg(await file.text(), cfgPath(file.name));
+  }
+
+  async _importCfg(text, entry, files){
+    if (this.session.connected || this._connecting || this._cfgImporting) throw Error('请先断开调试器并等待导入完成');
+    this._cfgImporting = true;
+    try {
+      const cfg = await inspectOpenOcdCfg(text, entry, files);
+      if (this.session.connected || this._connecting) throw Error('请先断开调试器');
+      this.importedCfg = cfg;
+      const core = $('d-cfg-core');
+      core.replaceChildren(new Option('内置目标', ''), ...cfg.cores.map(c => new Option(cfg.name + ' · ' + c.target, c.target)));
+      core.value = cfg.target;
+      return await this._selectCfg();
+    } finally { this._cfgImporting = false; }
+  }
+
+  _activeCfg(){
+    const cfg = this.importedCfg;
+    const core = cfg?.cores.find(c => c.target === $('d-cfg-core')?.value);
+    if (!core) return null;
+    const hpm = /^hpm\d+[.]cpu\d+$/i.test(core.target) && core.arch === 'riscv';
+    return { ...cfg, ...core, sbaFence:hpm ? hpmBoard('hpm6800evk').memory.sbaReadForbidden : undefined };
+  }
+
+  _cfgTarget(){
+    const cfg = this._activeCfg();
+    return cfg && { id:'cfg:' + cfg.hash + ':' + cfg.target, arch:cfg.arch, label:cfg.name + ' · ' + cfg.target, cfg };
+  }
+
+  cfgInfo(){
+    const cfg = this._activeCfg();
+    return cfg && { name:cfg.name, target:cfg.target, arch:cfg.arch, sha256:cfg.hash, clockKhz:cfg.clockKhz, hasFlash:cfg.hasFlash };
+  }
+
+  async _selectCfg(){
+    if (this.session.connected || this._connecting) throw Error('请先断开调试器');
+    const cfg = this._activeCfg();
+    if (cfg) $('d-backend').value = cfg.arch === 'riscv' ? 'riscv' : 'webusb';
+    await this._syncBackend();
+    this.onTargetConfigChanged?.();
+    return this.cfgInfo();
   }
 
   async _syncBackend(){
     const v = $('d-backend')?.value || 'webusb';
     const mock = v === 'mock';
     const riscv = v === 'riscv';
+    const cfg = this._activeCfg();
     this._applyClockLimit();
     await this._ensureSession(riscv);
     if ($('d-hpm-target-row')) {
-      $('d-hpm-target-row').hidden = !riscv;
-      $('d-hpm-target-row').style.display = riscv ? '' : 'none';
+      $('d-hpm-target-row').hidden = !riscv || !!cfg;
+      $('d-hpm-target-row').style.display = riscv && !cfg ? '' : 'none';
     }
+    if ($('d-arm-target-row')) $('d-arm-target-row').hidden = mock || riscv || !!cfg;
     const clk = $('d-clock');
     if (clk){
-      clk.disabled = mock;
+      clk.disabled = mock || !!cfg;
+      if (cfg) clk.title = `沿用 CFG 的 ${cfg.clockKhz} kHz`;
       // RISC-V 那条路的时钟是 **JTAG TCK**（DAP_SWJ_Clock），名字要说清楚
       const lab = clk.previousElementSibling;
       if (lab && /时钟/.test(lab.textContent || '')) lab.textContent = riscv ? 'JTAG 时钟' : 'SWD 时钟';
@@ -468,7 +567,8 @@ export class DbgView {
     this.faultPanel?.sync();
     if(!this.session.connected || !this.session.halted || (this._btSnapshotValid && this.session.pc!==this._btSnapshotPc)) this._invalidateBacktrace();
     const c = connected ?? this.session.connected;
-    if ($('d-hpm-target')) $('d-hpm-target').disabled = c || !!this._connecting;
+    for (const id of ['d-backend','d-arm-target','d-hpm-target','d-cfg-pick','d-cfg-dir-pick','d-cfg-entry','d-cfg-core'])
+      if ($(id)) $(id).disabled = c || !!this._connecting;
     const h = halted ?? this.session.halted;
     for (const id of ['d-cont', 'd-step', 'd-halt', 'd-mem-read']){
       const el = $(id);
@@ -494,10 +594,10 @@ export class DbgView {
   // ================================================================ 连接
 
   async connect(){
-    if (this._connecting || this._disconnecting) return false;
+    if (this._connecting || this._disconnecting || this._cfgImporting || this.session.connected) return false;
     const generation = this._connectionGen = (this._connectionGen || 0) + 1;
     this._connecting = true;
-    if ($('d-hpm-target')) $('d-hpm-target').disabled = true;
+    this._syncButtons();
     try {
       return await runProbeOperation(this, 'dbg', () => this._connectNow(generation), {
         mock: $('d-backend')?.value === 'mock', reason: '调试器要使用探针', recovery: true,
@@ -505,7 +605,7 @@ export class DbgView {
     } catch (e){ this._out('✗ 连接失败：' + e.message, 'err'); toast(e.message, 'err'); return false; }
     finally {
       this._connecting = false; this._connectionTask = null;
-      if ($('d-hpm-target')) $('d-hpm-target').disabled = !!this.session?.connected;
+      this._syncButtons();
     }
   }
 
@@ -515,22 +615,27 @@ export class DbgView {
     const riscv = backend === 'riscv';
     /**
      * 换后端 = 换一个 session 对象（ARM/Cortex-M 与 RISC-V 的硬件访问完全不同，
-     * 但源码级那一层是同一套 —— `RiscvDebugSession` 继承 `DebugSession` 只换低层）。
+     * 但源码级那一层是同一套 —— `OpenOcdRiscvSession` 继承 `DebugSession` 只换低层）。
      * 正常路径上 `_syncBackend()` 已经换过了，这里再兜一次（幂等）。
      */
     await this._ensureSession(riscv, { preserveAcquisition: true });
     if (this._disconnecting || generation !== this._connectionGen) return false;
-    const clockKhz = webClockKhz($('d-clock')?.value,riscv?$('d-hpm-target')?.value:'arm',DEFAULT_CLOCK_KHZ);
+    const family = riscv ? $('d-hpm-target')?.value || selectedHpmBoard() : $('d-arm-target')?.value || 'arm';
+    const clockKhz = this._activeCfg()?.clockKhz ?? webClockKhz($('d-clock')?.value, family, DEFAULT_CLOCK_KHZ);
     this._out('', 'dim');
     this._out(`──── 连接（${mock ? '模拟目标' : riscv ? 'RISC-V/JTAG' : 'WebUSB'}${mock ? '' : ` · ${clockKhz} kHz`}）────`, 'dim');
     if (this.clockMigrated){ this._out('（SWD 时钟默认值已从 1 MHz 改为 10 MHz —— 真机实测 PPB/内存都正常；不想要就在上面改回去）', 'dim'); this.clockMigrated = false; }
     try {
       if (!mock) await prepareProbeHandoff(this, 'dbg', '调试器要使用探针');
       if (this._disconnecting || generation !== this._connectionGen) return false;
-      this._connectionTask = this.session.exclusive(() => this.session.connect({
-        mock, clockKhz, bus: null, stopBridge: false,
-        ...(riscv ? { target: $('d-hpm-target')?.value || selectedHpmBoard() } : {}),
-      }));
+      const cfg = mock ? null : this._activeCfg() || makeOpenOcdProfile({
+        arch:riscv ? 'riscv' : 'arm', family, port:hpmBoard(family), clockKhz,
+      });
+      this._connectionTask = this.session.exclusive(async () => {
+        const device = mock ? null : await selectOpenOcdDevice();
+        if (generation !== this._connectionGen) return;
+        await this.session.connect({ mock, cfg, device });
+      });
       await this._connectionTask;
       if (this._disconnecting || generation !== this._connectionGen) return false;
     } catch (e){
@@ -543,7 +648,7 @@ export class DbgView {
      * 下拉框得跟着改，否则界面显示的档位和实际用的不一致（用户会以为寄存器坏了）。
      */
     const nowKhz = Math.round((this.session.clockHz || 0) / 1000);
-    if (nowKhz && nowKhz !== clockKhz){
+    if (!this._activeCfg() && nowKhz && nowKhz !== clockKhz){
       const clk = $('d-clock');
       if (clk){ ensureSelectOption(clk, String(nowKhz), nowKhz + ' kHz'); clk.value = String(nowKhz); store.set('dbg.clock', clk.value); }
       this._out(`（实际用的是 SWD ${nowKhz} kHz —— 上面那格已同步）`, 'warn');

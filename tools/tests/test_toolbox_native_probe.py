@@ -114,6 +114,18 @@ class NativeProbeTests(unittest.TestCase):
             self.assertTrue(proxy.hid_call('close',old)['superseded'])
             self.assertIs(proxy.usb,device);self.assertIs(proxy.hid,device)
 
+    def test_wasm_reads_only_standard_descriptors_from_the_current_usb_epoch(self):
+        proxy, device = self._hss_proxy()
+        proxy.claimed.clear()  # libusb reads descriptors before claiming DAP.
+        device.ctrl_transfer.return_value = b'\x12\x01'
+        request = {'owner':'a'*32,'resourceEpoch':'epoch','value':0x100,'index':0,'length':18}
+        self.assertEqual(proxy.usb_call('read-descriptor', request), {'data':'EgE='})
+        with self.assertRaisesRegex(ValueError, '拒绝旧会话'):
+            proxy.usb_call('read-descriptor', {**request, 'resourceEpoch':'old'})
+        with self.assertRaisesRegex(ValueError, '只允许读取标准'):
+            proxy.usb_call('read-descriptor', {**request, 'value':0x0f00})
+        device.ctrl_transfer.assert_called_once_with(0x80, 6, 0x100, 0, 18, timeout=2000)
+
     def test_native_serial_honors_the_web_requested_receive_buffer(self):
         class Port:
             def set_buffer_size(self,**kwargs):self.sizes=kwargs

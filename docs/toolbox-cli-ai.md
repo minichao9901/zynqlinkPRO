@@ -53,11 +53,19 @@ python -X utf8 toolbox.py --runtime build/workbench-new page etm describe --targ
 
 serve前须按实际任务核对板卡空闲及加载身份。运行时URL/令牌只限本机使用，不提交Git；旧runtime或已关闭服务的URL不能作为当前worker。`click/set`只确认事件投递，还要检查完成状态、质量和恢复结果。
 
-工作台调试探针后端统一为WebUSB；已移除OpenOCD/J-Link本地桥、`toolbox.py bridge`与工程生成页。`bridge-build`仍用于构建本机Zynq工作台EXE及其ETM/原生USB服务，与已退役的调试后端桥不同。历史板测工具和报告中的OpenOCD引用仅作取证。
+### OpenOCD Wasm 目标配置
+
+工作台的调试器、烧录器和 RTT Viewer 由同一份 OpenOCD Wasm 处理 Cortex-M/SWD 和 RISC-V/JTAG。在线页使用 WebUSB，本机桥包可使用已鉴权的本机 USB 服务。两种入口均使用 CMSIS-DAP v2。RTT 转发与 J-Scope 走探针固件数据通路，ETM 走 Zynq 采集与本机解码。独立 Trace CLI 见 [Trace CLI](Trace-CLI使用说明.md)。
+
+调试器可选内置芯片，也可用「导入 OpenOCD CFG…」打开单文件。遇到 `source [find …]` 依赖时，选择脚本根目录并选择入口 CFG。可在「配置与核心」切换已导入配置的核心，或切回内置目标。只使用与板卡匹配且可信的脚本。导入阶段在断开 USB 的 Worker 中解析，实际连接时会执行所选 CFG 的目标事件。烧录器可沿用声明了 Flash bank 的配置。RTT Viewer 沿用 CFG 后，从匹配 ELF 取得控制块地址，或手填地址和 RAM 范围。
+
+自动化先用 `page dbg describe` 发现 `importCfg` 和 `cfgInfo`。用 `page dbg upload` 向 `#d-cfg-file` 交付单文件后，读取导入结果与当前核心。烧录器和 RTT Viewer 各自提供「沿用目标」控件。原 Web CLI 的调试和烧录命令也经上述页面后端。
+
+内置烧录默认 SWD 1 MHz、HPM JTAG 10 MHz。显式选择的频率用于该 OpenOCD 会话，导入配置使用 CFG 声明的频率。页面显示请求档，实际时钟以板上读回为准。见 [Zynq 迁移与验收范围](validation/openocd-wasm-20261108/README.md)。
 
 ### Web频率限制与原生RISC-V研发参数
 
-Web烧录、RTT Viewer、调试器按所选目标限制频率：HPM最高25MHz，其他ARM/RISC-V最高60MHz，提供25MHz档；切到HPM时旧高频选择降至25MHz。HPM RTT自动档显式使用10MHz，避免继承前一次研发高频。Web页CLI操作也沿用这些限制。波形/RTT转发连接并识别为ZynqLinkPro后，RISC-V可显式选择10/20/25MHz TCK，启动时先确认架构再设置并核对时钟ACK；自动档仍10MHz。旧软件探针的RISC-V `clockHz`仍按idle约定保持0，不向未知探针发送Hz。实测方法见[25MHz流对照](validation/web-cli-streams-25mhz-20261103/README.md)。
+Web烧录、RTT Viewer、调试器按所选目标限制频率：HPM最高25MHz，其他ARM/RISC-V最高60MHz，提供25MHz档；切到HPM时旧高频选择降至25MHz。RTT Viewer 默认使用10MHz。Web页CLI操作也沿用这些限制。波形/RTT转发连接并识别为ZynqLinkPro后，RISC-V可显式选择10/20/25MHz TCK，启动时先确认架构再设置并核对时钟ACK；自动档仍10MHz。旧软件探针的RISC-V `clockHz`仍按idle约定保持0，不向未知探针发送Hz。实测方法见[25MHz流对照](validation/web-cli-streams-25mhz-20261103/README.md)。
 
 独立原生研发CLI仍提供高频、idle及采样窗口配置，并未受Web25MHz上限影响：
 

@@ -50,6 +50,7 @@ function collectMjs(dir, out = []){
 
 const files = [
   ...collectJs(join(root, 'app')),
+  ...collectMjs(join(root, 'app')),
   ...collectMjs(join(root, 'bridge')),
   /* `tools/**` 也一起查：真机套件与校验脚本同样会被"改一行就语法错"咬到，
      而它们以前完全不在 `make check` 的视野里（2026-10）。 */

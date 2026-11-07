@@ -1,5 +1,7 @@
 # 调试器页（`#dbg`）—— 零安装的极简调试前端
 
+当前 Cortex-M/SWD 和 RISC-V/JTAG 使用 OpenOCD Wasm。配置导入、核心选择与烧录和 RTT Viewer 的配置沿用见 [工作台使用说明](../../docs/toolbox-cli-ai.md#openocd-wasm-目标配置)。本文中涉及旧 WebUSB 直连实现的板测记录保留原验证范围。
+
 异常现场使用右侧「异常」页签，支持 Cortex-M3/M4/M7 和 RV32 的只读诊断与报告；操作和证据边界见 [异常诊断与采集质量](diagnostics.md)。
 
 ## RAM 模式填充

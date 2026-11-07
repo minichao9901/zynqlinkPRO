@@ -60,7 +60,7 @@
          连接后 app/hid/view.js 的 _setResetIoUi() 会按 HID 0x3A 的真实状态清掉 indeterminate。 */
       (function(){ var c = document.getElementById('global-nrst-open-drain'); if (c) c.indeterminate = true; })();
     </script>
-    <button id="btn-global-reset" class="mini" type="button" title="向目标 NRST 发送硬复位脉冲；EVKLite 使用 PA27/J3[23]，PA08 接 TRST 时仅复位 JTAG">全局复位</button>
+    <button id="btn-global-reset" class="mini" type="button" title="向转接板的目标 NRST 发送硬复位脉冲">全局复位</button>
     <button id="btn-fullscreen" class="mini" type="button" aria-pressed="false" title="全屏显示工作台">全屏</button>
     <span id="probe-flag" class="flag flag-off" role="status">探针：未使用</span>
     <details class="app-more" id="app-more">
@@ -292,7 +292,7 @@
             <button id="r-usb-disconnect" disabled>断开</button>
           </div>
           <label class="row"><span>目标类型</span>
-            <select id="r-target" title="零安装通路的两种目标：ARM/Cortex-M 走 SWD + AHB-AP（浏览器里做 ADIv5）；RISC-V（HPM 等）走 JTAG + DMI + SBA 系统总线读。两者都只用 WebUSB，不需要装驱动">
+            <select id="r-target" title="OpenOCD Wasm 通过 CMSIS-DAP 连接 Cortex-M/SWD 或 RISC-V/JTAG">
               <option value="swd">SWD / ARM（Cortex-M，默认）</option>
               <option value="riscv">RISC-V / JTAG（HPM、CH32V…）</option>
             </select>
@@ -347,6 +347,8 @@
               <option value="stm32c0">STM32C0</option>
               <option value="stm32wb">STM32WB</option>
               <option value="stm32wl">STM32WL</option>
+              <option value="nrf52">Nordic nRF52</option>
+              <option value="rp2350">Raspberry Pi RP2350</option>
 
             </optgroup>
             <optgroup label="RISC-V（只能 JTAG · 控制块要在非缓存区）" data-arch="riscv">
@@ -646,18 +648,18 @@
         <legend>目标与连接</legend>
 
         <label class="row"><span>芯片</span>
-          <select id="f-chip" title="选择与目标匹配的 WebUSB 烧录算法"></select>
+          <select id="f-chip" title="选择与目标匹配的 OpenOCD Flash 配置"></select>
         </label>
         <div class="row btnrow">
-          <button id="f-idcode" title="只读地认目标（不动 flash、不改运行状态）：ARM/SWD 读 DP IDCODE + CPUID + STM32 DBGMCU DEV_ID/REV_ID + flash 容量寄存器；RISC-V/JTAG 读 TAP IDCODE。选错芯片也能读 —— 这个按钮不吃「芯片」那一格（按目标类型选择 SWD 或 JTAG）。">读 IDCODE</button>
+          <button id="f-idcode" title="按当前 OpenOCD 配置连接并读取目标身份">读 IDCODE</button>
         </div>
       </fieldset>
       <div class="tool-side-panel">
         <fieldset>
           <legend>烧录时钟</legend>
           <label class="row" id="f-custom-speed-row"><span>时钟</span>
-            <select id="f-speed" title="WebUSB Cortex-M：所选档用于 RAM 数据与 Flash 校验，执行控制保留 1 MHz；RISC-V 使用整体调试时钟。高频传输不稳定时请降低档位。">
-              <option value="">默认（10 MHz）</option>
+            <select id="f-speed" title="OpenOCD 调试与烧录时钟">
+              <option value="">默认（SWD 1 MHz / HPM JTAG 10 MHz）</option>
               <option value="1000">1 MHz</option>
               <option value="4000">4 MHz</option>
               <option value="5000">5 MHz</option>
@@ -747,16 +749,27 @@
       <div id="d-side-session-panel" role="tabpanel" aria-labelledby="d-side-session-tab">
       <fieldset>
         <legend>连接</legend>
-        <label class="row"><span>后端</span>
-          <select id="d-backend" title="调试连接方式">
+        <label class="row"><span>调试接口</span>
+          <select id="d-backend" title="OpenOCD Wasm / CMSIS-DAP">
             <option value="webusb">SWD / ARM</option>
             <option value="riscv">JTAG / RISC-V</option>
             <option value="mock">模拟目标</option>
           </select>
         </label>
+        <label class="row" id="d-arm-target-row"><span>芯片型号</span>
+          <select id="d-arm-target"><option value="arm">通用 Cortex-M / SWD</option></select>
+        </label>
         <label class="row" id="d-hpm-target-row" hidden style="display:none"><span>目标板卡</span>
           <select id="d-hpm-target" title="选择板卡以使用对应的内存与复位配置"></select>
         </label>
+        <div class="row btnrow">
+          <button id="d-cfg-pick" type="button" title="仅导入与板卡匹配且可信的脚本">导入 OpenOCD CFG…</button>
+          <button id="d-cfg-dir-pick" type="button">选择 CFG 目录…</button>
+        </div>
+        <input id="d-cfg-file" type="file" accept=".cfg,.tcl" hidden>
+        <input id="d-cfg-dir" type="file" webkitdirectory multiple hidden>
+        <label class="row"><span>配置与核心</span><select id="d-cfg-core"><option value="">内置目标</option></select></label>
+        <select id="d-cfg-entry" aria-label="入口 CFG" hidden></select>
         <label class="row"><span>SWD 时钟</span>
           <select id="d-clock" title="连接后校验通信，必要时降频">
             <option value="10000">10 MHz（默认）</option>

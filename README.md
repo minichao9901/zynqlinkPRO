@@ -57,6 +57,8 @@ zynqlinkPRO 将 FPGA 调试引擎、并行 Trace 采集和主机分析工具整�
 
 探针固件已提供 WebUSB 网页入口描述符，指向本项目的工程下载页。插入后的通知显示与 USB 授权由浏览器控制。
 
+调试器、烧录器和 RTT Viewer 共用 **OpenOCD Wasm**。在调试器导入与目标匹配的 OpenOCD CFG 后，可在烧录器和 RTT Viewer 点击「沿用目标」。可用目标、导入方式及当前验收范围见 [CLI 工作台](docs/toolbox-cli-ai.md#openocd-wasm-目标配置)。
+
 ## ETM 执行轨迹
 
 ![zynqlinkPRO 硬件采集与本机分析流程](docs/assets/probe-architecture.svg)

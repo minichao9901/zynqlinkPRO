@@ -51,6 +51,7 @@ export function createTraceAutomation(tools, win=globalThis.window){
   async function debugConnect(m){
     if(!tools.dbg.session?.connected){
       await authorized(m.probe);
+      if(doc.getElementById('d-cfg-core'))set('d-cfg-core','');
       set('d-backend','webusb');set('d-clock',(m.swdHz||1000000)/1000);set('d-rtt-on',false);
       await tools.dbg._syncBackend();
       if(!await tools.dbg.connect())throw Error('网页调试器连接失败；详情见调试页日志');

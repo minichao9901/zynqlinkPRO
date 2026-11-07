@@ -69,6 +69,16 @@ def main(argv=None):
         assert launcher['dataDirectory']==str((out/'data').resolve())
         assert launcher['packageId']==hashlib.sha256((package/'package-manifest.json').read_bytes()).hexdigest()
         report['health']=health
+        if 'debugBackend' in manifest:
+            with urlopen(url+'/app/core/openocd-runtime/openocd-core.wasm', timeout=15) as response:
+                wasm=response.read()
+                assert response.headers.get_content_type()=='application/wasm'
+            assert wasm[:8]==b'\0asm\x01\0\0\0'
+            assert hashlib.sha256(wasm).hexdigest()==manifest['debugBackend']['sha256']
+            with urlopen(url+'/app/core/openocd-worker.mjs', timeout=15) as response:
+                assert response.headers.get_content_type() in ('text/javascript','application/javascript')
+                assert b'createOpenOcdDispatcher' in response.read()
+            report['debugBackend']=manifest['debugBackend']
         for path in ['/native-probe/usb/devices','/native-probe/hid/devices','/native-probe/serial/devices','/etm/api/capture']:
             try:request(path,{})
             except HTTPError as error:assert error.code==403,(path,error.code)

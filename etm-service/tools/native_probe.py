@@ -325,6 +325,13 @@ class NativeProbe:
                 return {'closed': True}
             if self.busy():
                 raise ValueError('ETM采集期间禁止竞争USB通路')
+            if action == 'read-descriptor':
+                descriptor, index, length = (value.get(key) for key in ('value', 'index', 'length'))
+                if (type(descriptor) is not int or descriptor >> 8 not in (1, 2, 3) or
+                        type(index) is not int or not 0 <= index <= 0xffff or
+                        type(length) is not int or not 1 <= length <= 4096):
+                    raise ValueError('只允许读取标准 USB 设备、配置或字符串描述符')
+                return {'data': self.encode(device.ctrl_transfer(0x80, 6, descriptor, index, length, timeout=2000))}
             if action == 'configuration':
                 if value.get('number') != 1:
                     raise ValueError('只支持配置1')

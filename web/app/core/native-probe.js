@@ -98,6 +98,12 @@ class NativeUsbDevice extends EventTarget{
   async open(){Object.assign(this,await this.rpc('open'));this.opened=true;this.dapSynchronized=false;this.atomicDapSupported=false;this.reads=new Map();this.commandPending=0;this.dapProfile?.open();}
   async close(){const epoch=this.resourceEpoch;await this.rpc('close');if(epoch===this.resourceEpoch){this.opened=false;this.commandPending=0;}}
   async selectConfiguration(number){Object.assign(this,await this.rpc('configuration',{number}));}
+  async controlTransferIn({ requestType, recipient, request, value, index }, length){
+    if (requestType !== 'standard' || recipient !== 'device' || request !== 6)
+      throw Error('本机 USB 仅支持标准描述符读取');
+    const result=await this.rpc('read-descriptor',{value,index,length});
+    return {status:'ok',data:new DataView(decoded(result.data).buffer)};
+  }
   async claimInterface(number){const r=await this.rpc('claim',{number});this.dapSynchronized=number===0&&r.syncProtocol==='zynq-dap-epoch/1'&&Number.isInteger(r.queueEpoch)&&r.queueState?.length===3&&r.queueState.every(v=>v===0);if(!this.dapSynchronized)throw Error('本地桥未确认DAP会话边界，请更新完整桥包');this.atomicDapSupported=r.atomicDapExchange===1;this.bulkArmMemory=r.bulkArmMemory===1;const i=this.configuration.interfaces.find(i=>i.interfaceNumber===number);if(i)i.claimed=true;}
   async memoryRead(address,length,ap=0,csw=0x23000052){
     const epoch=this.resourceEpoch;
