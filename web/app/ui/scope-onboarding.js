@@ -5,12 +5,13 @@ export function scopeNextAction(s){
   if(s.canAdopt)return {kind:'adopt',label:'沿用会话目标'};
   if(!s.hasElf)return {kind:s.canReuse?'reuse':'choose',label:s.canReuse?'复用 ELF 并选变量':'载入 ELF 并选变量'};
   if(!s.selected)return {kind:'variables',label:'选择采样变量'};
+  if(s.wasm)return {kind:'start',label:'开始 WASM 轮询'};
   if(!s.hasHid)return {kind:'connect',label:'连接探针'};
   if(!s.hasTransport)return {kind:'data',label:'连接数据端点'};
   return {kind:'start',label:'开始采样'};
 }
 export function scopeHasWarnings(s){
-  return !!(s.probeDropped||s.usbDrop||s.lost||s.readErrors||s.store?.overrun||s.planMismatch||s.defMismatch||s.metricsError||s.stream?.resyncs);
+  return !!(s.hostPollSkipped||s.probeDropped||s.usbDrop||s.lost||s.readErrors||s.store?.overrun||s.planMismatch||s.defMismatch||s.metricsError||s.stream?.resyncs);
 }
 export function initScopeOnboarding(scope){
   const $=id=>document.getElementById(id),panel=$('tab-scope');
@@ -19,7 +20,7 @@ export function initScopeOnboarding(scope){
   const replay=document.createElement('button');replay.type='button';replay.textContent='打开离线回放';replay.onclick=()=>$('sc-open').click();row.append(next,replay);$('sc-canvas').parentElement.append(row);
   const state=()=>({hasData:!!scope.store?.count,running:scope.running,starting:scope._starting,mock:scope.usingMock,
     canAdopt:!!$('sc-use-session-target')&&!$('sc-use-session-target').disabled,hasElf:!!scope.elf,
-    canReuse:!!$('sc-reuse-elf')&&!$('sc-reuse-elf').disabled,selected:scope.selected.length,hasHid:!!scope.hid,hasTransport:!!scope.transport});
+    canReuse:!!$('sc-reuse-elf')&&!$('sc-reuse-elf').disabled,selected:scope.selected.length,wasm:scope.usesWasmPolling?.(),hasHid:!!scope.hid,hasTransport:!!scope.transport});
   const variables=()=>{if($('sc-layout-sidebar').getAttribute('aria-expanded')==='false')$('sc-layout-sidebar').click();$('sc-side-variables-tab').click();};
   next.onclick=()=>{
     const action=scopeNextAction(state());if(!action)return;

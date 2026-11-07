@@ -536,6 +536,10 @@
         <fieldset>
         <legend>采样</legend>
         <label class="row"><span>周期</span><input id="sc-period" class="num" value="100" inputmode="decimal" title="µs，可填 2.25 / 2.5 / 2.75；小数周期需新版探针固件，按 24 MHz tick 量化"><em class="unit">µs</em></label>
+        <label class="row"><span>采样通路</span><select id="sc-sampling-path">
+          <option value="auto">自动（≥10 ms 使用 WASM）</option>
+          <option value="probe">探针硬件采样</option>
+        </select></label>
         <label class="row"><span>时长</span><input id="sc-seconds" class="num" value="20" inputmode="numeric" title="缓冲容量 = 实测速率 × 时长（页面会显示占多少内存）"><em class="unit">s</em></label>
         <label class="row" id="sc-target-row"><span>目标类型</span>
           <select id="sc-target" title="探针的全局目标类型（HID 0x31 action 10，与 RTT-over-JTAG 共用同一个开关）。粘性：设一次就一直有效。切到 RISC-V/JTAG 后本页后端也跟着换（探针侧采样器的传输后端 = 全局目标类型）">

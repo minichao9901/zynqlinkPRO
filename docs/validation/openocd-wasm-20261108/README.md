@@ -50,3 +50,24 @@ Windows 候选来源为 `b24dfa73a354e3231d867f86b8b9727097ed48c6`，EXE SHA-256
 | 通用串口 / 终端与原生直调入口 | `serial/session.js` 用 Web Serial 或本机串口；`toolbox probe call` 直达本机 USB/HID/serial 代理，另有原生诊断/验收脚本 | 未迁移，单独列出以明确范围 |
 
 J7 现有 PS 固件在 `probe_stream.c` 接收 HID `0x31/0x32`。现有 CMSIS-DAP 厂商处理器 `DAP_vendor.c` 的 `0x80–0x8d` 没有等效的 HSS／RTT 转发接口。后续需要让 WASM 执行这些私有控制事务并通过受管传输发送，保留同一设备身份、请求/响应关联、失败不重放、HSS 停机排空和尾计数。低频采样需要实际从 WASM 读取目标内存，按实际采样间隔与缺样记录结果。原生 ETM 的布防/放行迁移另验同一所有权下的时序和现场恢复。跟踪 ZL-172。
+
+## ZL-172 迁移及逐项核对
+
+用户随后确认保留 HSS、RTT 转发及复位脚模式的私有 HID 控制，也保留高速数据回传。此次切换低频 J-Scope 目标内存访问、CMSIS-DAP 硬复位和源码原生 Trace CLI 的目标控制。对照 superlinkPRO `11441e50514f6b83358c0c332fe6f7486159a670` 的已提交实现。其 J-Scope 验收文档区分了 Wasm 内存原型和生产硬件采样。 [superlinkPRO 源码](https://github.com/minichao9901/superlinkPRO/tree/11441e50514f6b83358c0c332fe6f7486159a670)
+
+| 功能 | superlinkPRO | zynqlinkPRO |
+|---|---|---|
+| 调试器、烧录、RTT Viewer | `OpenOcdProbe` 和 Wasm，USB 走 CMSIS-DAP v2。导入 CFG 可跨页复用 | 同样使用 Wasm/CMSIS-DAP v2。Windows 工作台的 USB 可经本机代理 |
+| 软件复位 | 调试器与烧录使用 Wasm 的目标复位命令，HPM 使用专用 DMI 序列 | 同样由 Wasm 控制，HPM 使用目标对应的 DMI 复位 |
+| 全局复位按钮 | `flash/view.js::resetTarget` 打开所选目标后执行 Wasm 软件复位 | `OpenOcdResetSession` 只初始化 CMSIS-DAP，发 SWJ_Pins 拉低、保持并回读释放 NRST；目标 SWD 不通时仍可发脉冲 |
+| 复位脚输出模式、探针身份/状态 | 私有 HID，能力由探针固件决定 | 私有 HID，能力由探针固件决定 |
+| 低频 J-Scope | 生产页仍走私有 HID 和硬件采样；HPM Wasm 运行态内存读取是单独原型 | 自动模式周期 ≥10 ms 时，Wasm 经 ARM MEM-AP0 或 RISC-V 运行态 SBA 读变量。主机打点并记录错拍 |
+| HSS / 高频 J-Scope | 私有 HID `0x31/0x32`，探针采样，WebUSB Bulk IN3 | 同类私有 HID 控制，探针采样，Zynq HSS Bulk IN7。可显式选择探针模式 |
+| RTT 转发 | 私有 HID `0x31`，探针读目标环，CDC 回传 | 同类私有 HID 和 CDC |
+| ETM 网页目标控制 | Wasm Cortex-M 目标 | Wasm 物理 MEM-AP0，ETM 页管理 CoreSight 和 FPB 的备份、读回及恢复 |
+| 原生 Trace CLI 目标控制 | Node 复用浏览器 Wasm 执行器，由 Node USB 适配器供给 USB 设备 | Node 复用同一 Wasm 执行器；PyUSB 宿主保留唯一采集句柄，MEM-AP0 完成目标控制。源码入口需要 Node.js |
+| ETM 采集硬件与数据 | KingstVIS 命令、逻辑分析仪采样及 OpenCSD | FPGA 布防、状态、DDR 命令和 Bulk IN2 原生。源码 CLI 的 CPU 放行经 Wasm。网页联动进入本机服务后的放行仍是原生 DAP |
+| 通用串口与低层诊断 | Web Serial 与探针私有接口另行处理；仓库保留硬件诊断工具 | Web Serial 或本机串口。`toolbox probe call` 与板测脚本仍可明确走原生协议 |
+| superlinkPRO 专有工具 | SPI/QSPI、SPI 屏、SPI 转发、I²C、ADC/DAC、SWO 有各自的 HID、WebUSB 或串口通路 | 工作台不提供这些工具 |
+
+离线测试使用真实 WASM 和模拟 CMSIS-DAP，核对了 NRST 命令及拉低出错仍尝试释放、AP0 读写与 1 KiB TAR 边界。Edge 从实际页面验证 9999/10000 µs 分流、显式探针模式、两段内存值、逐样本时间、停止后 USB 释放及 JSP 回放。浏览器样本来自模拟内存。低频帧时间记录主机开始读取时刻，多段读取没有硬件同时性。未接入板卡，留待 F103ZE、H743、HPM6800EVK 核对实测时钟、复位线、采集窗口及交接恢复。

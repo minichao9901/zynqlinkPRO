@@ -63,6 +63,8 @@ serve前须按实际任务核对板卡空闲及加载身份。运行时URL/令�
 
 内置烧录默认 SWD 1 MHz、HPM JTAG 10 MHz。显式选择的频率用于该 OpenOCD 会话，导入配置使用 CFG 声明的频率。页面显示请求档，实际时钟以板上读回为准。见 [Zynq 迁移与验收范围](validation/openocd-wasm-20261108/README.md)。
 
+J-Scope 的「采样通路」默认自动。周期达到 10 ms 时，Wasm 直接轮询目标内存，使用主机单调时间戳并记录错过的轮询；多段地址依次读取。短于 10 ms 时走探针硬件采样，也可显式选该通路。硬件采样和 RTT 转发使用探针私有 HID，数据分别通过 HSS Bulk 和 CDC 回传。全局硬复位用 Wasm 发送 CMSIS-DAP 的 nRESET 脉冲；复位脚输出模式仍用私有 HID。
+
 ### Web频率限制与原生RISC-V研发参数
 
 Web烧录、RTT Viewer、调试器按所选目标限制频率：HPM最高25MHz，其他ARM/RISC-V最高60MHz，提供25MHz档；切到HPM时旧高频选择降至25MHz。RTT Viewer 默认使用10MHz。Web页CLI操作也沿用这些限制。波形/RTT转发连接并识别为ZynqLinkPro后，RISC-V可显式选择10/20/25MHz TCK，启动时先确认架构再设置并核对时钟ACK；自动档仍10MHz。旧软件探针的RISC-V `clockHz`仍按idle约定保持0，不向未知探针发送Hz。实测方法见[25MHz流对照](validation/web-cli-streams-25mhz-20261103/README.md)。

@@ -55,6 +55,7 @@ def main():
     ap.add_argument('--reset-to-entry', action='store_true')
     ap.add_argument('--entry-timeout', type=float, default=5)
     ap.add_argument('--usb-reconnect', action='store_true', help='Hold PA12 low during reset/entry preparation')
+    ap.add_argument('--wasm-target-control', action='store_true', help='Use OpenOCD Wasm MEM-AP0 for target access')
     ap.add_argument('--ready-file', type=Path, help='Internal stimulus synchronization marker; new file only')
     ap.add_argument('--flight',action='store_true',help='Ring recording; milliseconds is the post-trigger window')
     ap.add_argument('--ring-bytes',type=int,default=8<<20)
@@ -111,8 +112,12 @@ def main():
                   target_elf_sha256=sha(args.target_elf.read_bytes()),
                   milliseconds=args.milliseconds, hardware_full_test=args.hardware_full_test, periodic_sync=args.sync, hclk_div=args.hclk_div,
                   raw_diagnostic=args.raw)
+    if args.wasm_target_control:
+        from openocd_native import WasmMemory, node_runtime
+        node_runtime()
     dev, out, inp = open_dap()
-    mem = Memory(out, inp)
+    raw_memory = Memory(out, inp)
+    mem = WasmMemory(dev,out,inp,args.speed_khz) if args.wasm_target_control else raw_memory
     capture_entry = CaptureEntry(mem)
     usb_reconnect = UsbReconnect(mem)
     before, locks, reader = {}, {}, None
@@ -170,12 +175,13 @@ def main():
             ended.set()
 
     try:
-        report['IDCODE'] = setup(out, inp, args.speed_khz).hex()
+        report['target_control'] = 'openocd-wasm/mem-ap0' if args.wasm_target_control else 'native-cmsis-dap'
+        report['IDCODE'] = f'{mem.open():08x}' if args.wasm_target_control else setup(out, inp, args.speed_khz).hex()
         if args.probe_fclk_hz is not None:
             from probe_clock_fixture import Fixture
             probe_clock=Fixture(args.bit,args.elf,args.probe_fclk_hz,work/'probe-clock',allow_link_reduction=True)
             report['probe_clock_profile']=probe_clock.apply()
-        diagnostic = mem.transfer([0x80, 255])
+        diagnostic = raw_memory.transfer([0x80, 255])
         live_fclk, live_cfg = struct.unpack_from('<II', diagnostic, 4)
         report['control_clock'] = dict(fclk_hz=live_fclk, cfg=hex(live_cfg),
                                        **swd_clock_details(live_fclk, live_cfg))
@@ -272,9 +278,9 @@ def main():
                     # Verify the shipping clock lock through the ordinary DAP
                     # command while capture owns DDR. Vendor reads avoid slow
                     # JTAG round trips inside the measured hardware window.
-                    clock_before=mem.transfer([0x80,255])
-                    changed=mem.transfer([0x11,*list((25000000).to_bytes(4,'little'))])
-                    clock_after=mem.transfer([0x80,255])
+                    clock_before=raw_memory.transfer([0x80,255])
+                    changed=raw_memory.transfer([0x11,*list((25000000).to_bytes(4,'little'))])
+                    clock_after=raw_memory.transfer([0x80,255])
                     locked=changed[:2]==bytes([0x11,0xff]) and clock_before[4:12]==clock_after[4:12]
                     report['capture_clock_lock']=dict(requestedSWCLKHz=25000000,rejected=changed[:2]==bytes([0x11,0xff]),
                         FCLK_Hz=struct.unpack_from('<I',clock_after,4)[0],configurationUnchanged=clock_before[4:12]==clock_after[4:12])
@@ -387,7 +393,9 @@ def main():
         # Reconnect/clear sticky MEM-AP errors before restoring saved state.
         try:
             if probe_clock is not None:probe_clock.idle()
-            setup(out, inp, args.speed_khz)
+            if args.wasm_target_control:
+                if was_halted is not None:mem.reconnect()
+            else:setup(out, inp, args.speed_khz)
         except BaseException as reconnect:
             report['reconnect_error'] = repr(reconnect)
         raise
@@ -453,9 +461,16 @@ def main():
                 report['partial_raw_sha256'] = sha(partial)
             (work/'usb-wire.bin').write_bytes(wire)
             report['usb_reader_errors'] = errors
-            (work/'acceptance.json').write_text(json.dumps(report, indent=2)+'\n')
-            usb.util.release_interface(dev, 0)
-            usb.util.dispose_resources(dev)
+            try:
+                if args.wasm_target_control:mem.close()
+            except BaseException as exc:
+                report['target_control_close_error']=repr(exc)
+                report['capture_passed']=False
+                raise
+            finally:
+                (work/'acceptance.json').write_text(json.dumps(report, indent=2)+'\n')
+                usb.util.release_interface(dev, 0)
+                usb.util.dispose_resources(dev)
             print(json.dumps(report, indent=2))
             if report.get('probe_clock_cleanup_error'):
                 raise RuntimeError(report['probe_clock_cleanup_error'])

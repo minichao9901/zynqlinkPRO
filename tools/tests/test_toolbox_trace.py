@@ -45,7 +45,8 @@ class TraceCaptureTests(unittest.TestCase):
         self.record.mkdir(exist_ok=True)
         (self.record / 'target-before.json').write_text('{"etmcr":123}')
         (self.record / 'acceptance.json').write_text(json.dumps({
-            'config': {'protocol': 'ETMv3', 'traceid': 7}, 'quality': {'loss': False}, 'etm_sha256': 'test'}))
+            'config': {'protocol': 'ETMv3', 'traceid': 7}, 'quality': {'loss': False}, 'etm_sha256': 'test',
+            'target_control':'openocd-wasm/mem-ap0'}))
         (self.record / 'etm.bin').write_bytes(b'actual captured bytes')
         return SimpleNamespace(returncode=0)
 
@@ -61,6 +62,8 @@ class TraceCaptureTests(unittest.TestCase):
         command = self.calls[0]
         self.assertEqual(command[command.index('--trace-id') + 1], '7')
         self.assertEqual(command[command.index('--speed-khz') + 1], '999')
+        self.assertIn('--wasm-target-control', command)
+        self.assertEqual(result['result']['targetControl'], 'openocd-wasm/mem-ap0')
         self.assertEqual(json.loads((self.record / 'target-before.json').read_text()), {'etmcr': 123})
         self.assertFalse(result['result']['quality']['loss'])
 

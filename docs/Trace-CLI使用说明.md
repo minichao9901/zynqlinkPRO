@@ -4,6 +4,8 @@ F103ZE新增环形飞行记录：`capture --flight --ring-bytes 8388608 --second
 
 统一入口`python -X utf8 toolbox.py trace`，转交`etm-service/trace.py`。该入口的`capture/doctor`是Zynq原生路径；离线decode/query/export等转交`etm-service/tools/cli_entry.py`及`trace_cli.py`，沿用原生二进制/TraceStore协议。
 
+源码 `trace capture` 的目标访问由 Node.js 执行同一份 OpenOCD Wasm，通过采集进程已持有的 USB 句柄操作物理 MEM-AP0。目标识别、ELF 读回、寄存器配置、暂停/继续、起点、故障轮询和恢复均由该适配器执行。FPGA 布防、窗口/DDR 协议和 Bulk 下载使用原生采集通路。需要 PATH 中的 Node.js，`trace doctor --offline` 会核对依赖且不枚举探针。原生采集结果的 `targetControl` 为 `openocd-wasm/mem-ap0`。
+
 主线和固定EXE已集成C++完整查询索引、默认视图和最终store；要求配套具备 `complete-index-v1` 的 `etm_storebuild.exe`。离线研发显式设置 `ETM_COMPLETE_INDEX=0` 可运行旧facts/NumPy索引对照，缺少新能力时不会静默回退。集成范围见[主线验收](validation/etm-main-integration-20261103/README.md)。
 
 原生核心已接管ELF/DWARF/Thumb静态字典和TraceStore查询读取，默认 `ETM_NATIVE_STATIC=1`、`ETM_NATIVE_QUERY=1`（未设置时同样启用）。Python保留任务、记录身份和发布；查询经私有常驻C++进程返回DTO，不由Python解析执行块或查询数组。显式设置这两个变量为0用于旧实现研发对照，不能把对照耗时算作默认原生路径。配套目录必须保留 `libdwarf.dll`；静态读取需要 `native-static-v1`，查询协议为 `etm-query/1`。主线和固定EXE的验收范围见下述集成报告。

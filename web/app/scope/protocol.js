@@ -402,6 +402,7 @@ export const ACT_NAME = { 0: '停止', 1: '启动', 2: '查状态', 3: '设 SWD 
  */
 export const SCOPE_FLAG = { ALLOW_60M: 0x01, DISCARD: 0x02, TRIGGER: 0x04, NO_YIELD: 0x08,
                             DELAY0: 0x10, CDC_OFF: 0x20, RISCV: 0x40, FAST_BATCH: 0x80 };
+export const HOST_POLL = 0x100; // Host-generated JSP definition, with one timestamp per sample.
 
 /** 后端（生效值）。JTAG 下 action 3 / flags bit4 / swdHz / blob+clock_delay 都无意义。 */
 export const BACKEND = { SWD: 'swd', RISCV: 'riscv' };

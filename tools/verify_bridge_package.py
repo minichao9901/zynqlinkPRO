@@ -81,6 +81,9 @@ def main(argv=None):
             if manifest['debugBackend'].get('etmControl') == 'mem-ap0':
                 assert request('/etm/app/openocd/core/openocd-etm.js') == request('/app/core/openocd-etm.js')
                 assert request('/etm/app/openocd/core/openocd-runtime/openocd-core.wasm') == wasm
+            if manifest['debugBackend'].get('scopePolling') == 'target-memory':
+                assert b'WasmScopePoll' in request('/app/scope/wasm-poll.js')
+                assert b'cmsis-dap cmd 0x10' in request('/app/flash/target-reset.js')
             report['debugBackend']=manifest['debugBackend']
         for path in ['/native-probe/usb/devices','/native-probe/hid/devices','/native-probe/serial/devices','/etm/api/capture']:
             try:request(path,{})

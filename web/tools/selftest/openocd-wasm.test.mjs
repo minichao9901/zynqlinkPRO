@@ -9,6 +9,7 @@ import { createOpenOcdDispatcher } from '../../app/core/openocd-worker.mjs';
 import { inspectOpenOcdCfg } from '../../app/dbg/openocd-cfg.js';
 import { programOpenOcdFlash } from '../../app/flash/openocd-program.js';
 import { hpmBoard } from '../../app/targets/hpm/porting.js';
+import { OpenOcdResetSession, pulseTargetReset } from '../../app/flash/target-reset.js';
 
 test('the bundled Wasm registers ARM, HPM and RP2350 profiles and resolves imported Tcl without USB', async t => {
   const wasmBinary = await readFile(new URL('../../app/core/openocd-runtime/openocd-core.wasm', import.meta.url));
@@ -77,6 +78,75 @@ test('ETM core control uses physical DHCSR and issues only one resume per reques
   await probe.halt();
   await probe.run();
   assert.deepEqual(writes, [0xa05f0003, 0xa05f0003, 0xa05f0001]);
+});
+
+test('global reset runs real Wasm adapter commands without examining a target', async t => {
+  const wasmBinary = await readFile(new URL('../../app/core/openocd-runtime/openocd-core.wasm', import.meta.url));
+  const writes = [];
+  let selected, command;
+  const result = bytes => ({ status:'ok', data:new DataView(Uint8Array.from(bytes).buffer) });
+  const device = {
+    vendorId:0x0d28, productId:0x0204, productName:'CMSIS-DAP', serialNumber:'FAKE',
+    async open(){ this.configuration = { configurationValue:1 }; },
+    async close(){},
+    async claimInterface(number){ assert.equal(number,0); },
+    async releaseInterface(){},
+    async controlTransferIn({value}, length){
+      const descriptors = {
+        0x100:[18,1,16,2,0xef,2,1,64,40,13,4,2,0,1,0,2,3,1],
+        0x200:[9,2,32,0,1,1,0,128,50,9,4,0,0,2,255,0,0,0,7,5,2,2,0,2,0,7,5,0x81,2,0,2,0],
+        0x300:[4,3,9,4],
+      };
+      const name = value === 0x302 ? 'CMSIS-DAP' : 'FAKE';
+      return result((descriptors[value] || [2 + name.length * 2, 3, ...Array.from(name,c=>[c.charCodeAt(0),0]).flat()]).slice(0,length));
+    },
+    async transferOut(endpoint, bytes){
+      assert.equal(endpoint,2);
+      command = [...bytes]; writes.push(command);
+      return { status:'ok',bytesWritten:bytes.length };
+    },
+    async transferIn(endpoint){
+      assert.equal(endpoint,1);
+      const [op,arg] = command;
+      if (op === 0){
+        const data = { 0xf0:[1], 0xfe:[1], 0xff:[64,0] }[arg] || [];
+        return result([0,data.length,...data]);
+      }
+      return result([op, op === 2 ? 1 : op === 0x10 ? arg & 0x80 : 0, 0, 0, 0]);
+    },
+  };
+  const old = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
+  Object.defineProperty(globalThis, 'navigator', { configurable:true, value:{ usb:{ async getDevices(){ return selected ? [device] : []; } } } });
+  t.after(() => Object.defineProperty(globalThis, 'navigator', old));
+  t.mock.method(OpenOcdTargetSession, 'createWorker', () => {
+    const worker = { terminate(){} };
+    const dispatch = createOpenOcdDispatcher({ wasmBinary,
+      select:value => { selected = value; },
+      post:data => queueMicrotask(() => worker.onmessage({ data })),
+    });
+    worker.postMessage = dispatch;
+    return worker;
+  });
+  const session = new OpenOcdResetSession();
+  try {
+    await session.connect(device);
+    await pulseTargetReset(session);
+  } finally { await session.close(); }
+  assert.deepEqual(writes.filter(row => row[0] === 0x10 && row[2] !== 0), [
+    [0x10,0,0x80,0,0,0,0], [0x10,0x80,0x80,0x50,0xc3,0,0],
+  ]);
+  assert.ok(!writes.some(row => row[0] === 5 || row[0] === 6));
+});
+
+test('reset still releases NRST after a failed assert, and surfaces the first error', async () => {
+  const values = [];
+  const probe = { async swjResetPin(value){
+    values.push(value);
+    if (!value) throw Error('assert failed');
+    return true;
+  } };
+  await assert.rejects(pulseTargetReset(probe), /assert failed/);
+  assert.deepEqual(values,[0,0x80]);
 });
 
 test('the Zynq lease synchronizes DAP and terminates aligned OUT packets without touching ETM', async () => {

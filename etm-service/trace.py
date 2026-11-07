@@ -26,6 +26,8 @@ REPO = SERVICE.parent
 TOOLS = SERVICE / 'tools'
 CLI = TOOLS / 'trace_cli.py'
 BOARD = REPO / 'tools' / 'test_orbtrace_board.py'
+WASM_WORKER = TOOLS / 'openocd-native.mjs'
+WASM_CORE = REPO / 'web/app/core/openocd-runtime/openocd-core.wasm'
 DEFAULT_TARGET_ELF = REPO / 'prebuilt/golden/f103ze-cdc48.elf'
 DEFAULT_BIT = REPO / 'prebuilt/golden/probe.bit'
 DEFAULT_ZYNQ_ELF = REPO / 'prebuilt/golden/application.elf'
@@ -109,6 +111,8 @@ def doctor(argv=None):
     exes = ['etm_decode.exe', 'etm_export.exe', 'etm_frontend.exe', 'etm_index.exe', 'etm_storebuild.exe','etm_framed.exe']
     checks['native'] = {'ok': all((SERVICE / 'build-native' / n).is_file() for n in exes),
                         'files': {n: (SERVICE / 'build-native' / n).is_file() for n in exes}}
+    checks['target_control'] = {'ok':bool(shutil.which('node') and WASM_WORKER.is_file() and WASM_CORE.is_file()),
+                                'backend':'openocd-wasm/mem-ap0','runtime':'node'}
     checks['zynq'] = ({'ok':True,'ready':False,'skipped':True,'message':'offline: hardware not inspected'}
                       if args.offline else zynq_status())
     try:
@@ -209,6 +213,8 @@ def capture(argv):
         sys.path.insert(0, str(TOOLS))
         from engine_profile import activate_native_profile
         activate_native_profile()
+    if not (shutil.which('node') and WASM_WORKER.is_file() and WASM_CORE.is_file()):
+        return fail('capture', '缺少原生 Trace 的 Node.js / OpenOCD Wasm 运行时', 3, started)
     status = zynq_status()
     if not status['ready']:
         return fail('capture', 'Zynq ETM 接收端未就绪：' + status['message'], 4, started, status)
@@ -221,7 +227,7 @@ def capture(argv):
                '--milliseconds', str(args.seconds * 1000),
                '--trace-id', str(args.trace_id),
                '--speed-khz', str(args.swd_khz),
-               '--gpio-speed', str(args.gpio_speed),'--transport',args.transport]
+               '--gpio-speed', str(args.gpio_speed),'--transport',args.transport,'--wasm-target-control']
     if args.entry is not None:
         command += ['--entry', args.entry, '--entry-timeout', str(args.entry_timeout)]
         if args.reset_to_entry:
@@ -240,6 +246,8 @@ def capture(argv):
         detail = (completed.stderr or completed.stdout or '').strip()[-1200:]
         return fail('capture', '上板采集失败', 4, started, {'command': command, 'output': detail})
     acceptance = json.loads((out / 'acceptance.json').read_text(encoding='utf-8'))
+    if acceptance.get('target_control') != 'openocd-wasm/mem-ap0':
+        return fail('capture', '采集报告未确认 OpenOCD Wasm 目标控制', 4, started, {'record': str(out)})
     etm = (out / 'etm.bin').read_bytes()
     if not etm:
         return fail('capture', '采集没有 source ID %d 的 ETM 字节' % args.trace_id, 5, started,
@@ -252,6 +260,7 @@ def capture(argv):
         'name': '%s · CLI %s' % (config.get('protocol', 'ETM'), time.strftime('%Y-%m-%d %H:%M:%S')),
         'created': time.time(), 'input': 'capture.bin', 'seconds': args.seconds,
         'config': config, 'quality': acceptance.get('quality'), 'rawFormat': 'bin',
+        'targetControl': acceptance.get('target_control'),
         'targetVerified': True, 'captureScope': 'cli-entry-window' if args.entry else 'cli-continuous-window',
         'captureEntry': (acceptance.get('entry') or {}).get('address'),
         'captureExtent': {'requestedSeconds': args.seconds, 'actualSeconds': None,
@@ -292,6 +301,7 @@ def capture(argv):
             decode_error = str(error)
     result = {'record': str(out), 'etmBytes': len(etm), 'etmSha256': metadata['etmSha256'],
               'quality': acceptance.get('quality'), 'summary': summary,
+              'targetControl': acceptance.get('target_control'),
               'config': config, 'captureSeconds': args.seconds,
               'clockPolicy': 'target-firmware-owned', 'gpioSpeed': args.gpio_speed}
     if decode_error:

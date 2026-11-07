@@ -2,6 +2,22 @@ import { finding as f, metric as m } from './report.js';
 
 export function scopeQuality(s, now = Date.now()){
   const st = s.store, probe = s.probeMetrics;
+  if (s.sampleSource === 'openocd-wasm'){
+    const skipped = s._qualityReplay ? null : s.hostPollSkipped ?? 0;
+    const errors = s._qualityReplay ? null : s.readErrors ?? 0;
+    const findings = [];
+    if (skipped) findings.push(f('已确认','主机未赶上部分轮询时刻',`${skipped} 拍`));
+    if (errors) findings.push(f('已确认','目标内存读取失败',`${errors} 次`));
+    if (s.lost || s.decodeErr || s.stream?.resyncs) findings.push(f('已确认','样本包有缺口或解析异常'));
+    if (st?.overrun) findings.push(f('已确认','网页采集缓冲已满',`${st.overrun} 个样本未保留`));
+    return {
+      settings:{ 状态:s.state, 数据:s._qualityReplay?'文件回放':'OpenOCD Wasm 主机轮询', ...s._qualityConfig },
+      metrics:[m('网页保留样本',st?.count ?? 0,'样本'),
+        m('实测平均采样率',st?.count > 1 ? st.rate() : null,'Hz','主机开始读取的单调时间戳'),
+        m('主机错过轮询',skipped,'拍','主机'),m('目标读取失败',errors,'次','主机')],
+      findings, notes:['每帧时间为主机开始读取的时刻。多个内存范围依次读取，通道值可能来自不同时刻。'],
+    };
+  }
   const historical = !s.running && !s._starting;
   const fresh = !s._qualityReplay && !!s._metricsAt && (historical || now - s._metricsAt < 5000);
   const full = fresh && !!probe && !s.metricsError;

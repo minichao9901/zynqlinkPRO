@@ -123,7 +123,7 @@ export class SampleStore {
       name: v.name, scalar: v.scalar || 'f32', capacity,
       scale: opts.scale?.[v.name] ?? 1, offset: opts.offset?.[v.name] ?? 0,
     }));
-    this.tsEvery = 64;
+    this.tsEvery = opts.exactTime ? 1 : 64;
     this.tsUs = new Float64Array(Math.ceil(capacity / this.tsEvery) + 2);
     this.tsN = 0;
     this.count = 0;

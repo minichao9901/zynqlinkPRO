@@ -9,8 +9,7 @@ import { webClockKhz } from '../core/target-clock.js';
 import { constrainClockSelect } from '../ui/target-clock.js';
 import { OpenOcdProbe } from '../core/openocd-probe.js';
 import { selectOpenOcdDevice } from '../core/openocd-usb.js';
-import { WebUsbDapProbe, withTimeout } from '../rtt/dap-webusb.js';
-import { pulseTargetReset } from './target-reset.js';
+import { OpenOcdResetSession, pulseTargetReset } from './target-reset.js';
 import { hasOpenOcdFlash, makeOpenOcdProfile, ocdHex } from '../core/openocd-profile.js';
 import { hpmBoard } from '../targets/hpm/porting.js';
 import { rememberHpmBoard } from '../targets/hpm/select.js';
@@ -182,7 +181,9 @@ export class FlashView {
     try {
       if (!(await this._clearProbeUsers('全局硬复位'))) return false;
       this._status('连接探针，准备硬复位目标…');
-      this.probe = await withTimeout(WebUsbDapProbe.open(await selectOpenOcdDevice(), { skipTargetInit:true }), 15000, '连接探针');
+      const device = await selectOpenOcdDevice();
+      this.probe = new OpenOcdResetSession(line => this._log(line));
+      await this.probe.connect(device);
       await pulseTargetReset(this.probe);
     } catch (e){
       operationError = e;

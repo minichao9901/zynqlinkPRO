@@ -7,6 +7,7 @@ test('empty workspace gives a concrete next step and disappears with data or sam
   assert.equal(scopeNextAction({canReuse:true}).kind,'reuse');
   assert.equal(scopeNextAction({hasElf:true}).kind,'variables');
   assert.equal(scopeNextAction({hasElf:true,selected:1}).kind,'connect');
+  assert.equal(scopeNextAction({hasElf:true,selected:1,wasm:true}).label,'开始 WASM 轮询');
   assert.equal(scopeNextAction({hasElf:true,selected:1,hasHid:true}).kind,'data');
   assert.equal(scopeNextAction({hasElf:true,selected:1,hasHid:true,hasTransport:true}).kind,'start');
   assert.equal(scopeNextAction({mock:true}).kind,'start');
@@ -14,6 +15,6 @@ test('empty workspace gives a concrete next step and disappears with data or sam
 });
 test('nonzero loss and unavailable metrics remain prominent when detailed counters are folded',()=>{
   assert.equal(scopeHasWarnings({}),false);
-  for(const flag of ['probeDropped','usbDrop','lost','readErrors','planMismatch','defMismatch','metricsError'])assert.equal(scopeHasWarnings({[flag]:1}),true);
+  for(const flag of ['hostPollSkipped','probeDropped','usbDrop','lost','readErrors','planMismatch','defMismatch','metricsError'])assert.equal(scopeHasWarnings({[flag]:1}),true);
   assert.equal(scopeHasWarnings({store:{overrun:1}}),true);assert.equal(scopeHasWarnings({stream:{resyncs:1}}),true);
 });
