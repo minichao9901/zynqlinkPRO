@@ -10,7 +10,11 @@
 | Edge 工作台 | 真实页面加载 `.mjs` 和 `.wasm`，导入 CFG 后烧录器和 RTT Viewer 沿用同一核心。另解析 HPM SDK 1.11.0 的原版入口及上游 RP2350 双核 CFG |
 | 模拟 USB | 浏览器 Worker 通过描述符选中接口 0、OUT2、IN1，完成 CMSIS-DAP Info 交换。夹具故意返回无 SWD 能力，建链报错后接口与设备均关闭。模型另核对 ZLP、队列 epoch、禁止访问 ETM 端点和原生描述符请求隔离 |
 | Flash 安全模型 | 固件所有地址在擦除前预检，保留未覆盖的扇区字节，烧录后比较完整扇区 |
-| 既有入口 | Web、CLI、共享驱动检查及 `trace doctor --offline`。Edge 首轮发现 RTT 初始化仍引用旧类名，修正后重新加载通过 |
+| 既有入口 | Web 142/142、CLI 62/62、176 个模块语法检查、共享驱动检查及 `trace doctor --offline`。Edge 首轮发现 RTT 初始化仍引用旧类名，修正后重新加载通过 |
+| 静态站点候选 | `build/openocd-wasm-20261108/pages-candidate/`，运行时 JS 和 WASM 与 Git blob 的 SHA-256 一致 |
+| Windows 候选 | `build/openocd-wasm-20261108/windows-candidate/zynq-etm-bridge.exe`，校验 1840 个包文件及 HTTP 的 Worker、WASM 类型和指纹。冻结 EXE 的 F103ZE、H743 保存记录分别解码 5,467,740 和 210,497 条指令，原生 TraceStore 和 Web/CLI 火焰图对账通过。Edge 从冻结 EXE 的鉴权页面重跑上述 CFG 和模拟 USB 检查 |
+
+Windows 候选来源为 `b24dfa73a354e3231d867f86b8b9727097ed48c6`，EXE SHA-256 为 `7e51b288fb4ce839e95fcb2914099577cf635ce2b963fd31da8ea6413811103d`。构建时工作区有一条原有的未提交问题记录，故清单标注 `sourceDirty:true`。候选使用独立目录，可直接启动并保留其 `_internal`。冻结 Edge 夹具先以端口 0 和无鉴权 URL 启动失败，改为有效的空闲端口与启动器提供的 URL 后通过。
 
 ## 上板验收顺序
 
