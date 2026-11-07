@@ -22,7 +22,7 @@ python toolbox.py project run etm.cli --dry-run -- query --help
 doctor --offline只检查本地依赖、当前Golden路径，不枚举USB、不访问服务，不证明板上版本。普通doctor会检查设备/服务，不属于离线验证。
 capture是实际硬件动作；decode/query/export作用于保存记录。各命令的精确参数用--help查询，CLI保留JSON信封与底层失败状态，不用重试掩盖失败。
 
-ETM目标配置默认SWD为10 MHz，网页连接、本地采集服务接管和恢复连接保持同一档位；不改变目标CPU/TRACECLK。参数单位按入口区分：
+ETM目标配置默认SWD为10 MHz。网页控制使用 OpenOCD Wasm 的物理 MEM-AP0，联动采集由 Zynq 原生服务布防、放行和下载。网页连接、服务接管和采后恢复保持同一请求档位；不改变目标CPU/TRACECLK。参数单位按入口区分：
 
 | 入口 | 时钟参数 | 显式1 MHz对照 |
 |---|---|---|

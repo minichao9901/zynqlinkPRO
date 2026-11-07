@@ -13,7 +13,7 @@ export const hasOpenOcdFlash = family => Object.hasOwn(ARM_BANKS, family);
 // Only numeric fields and known drivers enter generated Tcl. Imported target
 // settings use the existing restricted CFG parser before reaching here.
 export function makeOpenOcdProfile({ arch = 'arm', clockKhz = 1000, dpidr, tapIdcode, irLength = 5,
-  hart = 0, port, family, name, flash = false } = {}){
+  hart = 0, port, family, name, flash = false, memoryAp = false } = {}){
   const riscv = arch === 'riscv';
   const rp2350 = !riscv && family === 'rp2350';
   const target = 'workbench.cpu';
@@ -26,7 +26,10 @@ export function makeOpenOcdProfile({ arch = 'arm', clockKhz = 1000, dpidr, tapId
   const clock = integer(clockKhz, 1, riscv && port ? 25000 : 60000);
   const lines = ['adapter driver cmsis-dap', `transport select ${riscv ? 'jtag' : 'swd'}`,
     `adapter speed ${clock}`, 'reset_config none'];
-  if (riscv){
+  if (memoryAp){
+    lines.push(`swd newdap workbench cpu${expected}`, 'dap create workbench.dap -chain-position workbench.cpu',
+      `target create ${target} mem_ap -dap workbench.dap -ap-num 0`);
+  } else if (riscv){
     const ir = integer(port?.debug.irLength ?? irLength, 2, 32);
     lines.push(`jtag newtap workbench cpu -irlen ${ir}${expected}`,
       `target create ${target} riscv -chain-position workbench.cpu -coreid ${integer(port?.debug.hart ?? hart, 0, 1023)}`);
@@ -56,5 +59,5 @@ export function makeOpenOcdProfile({ arch = 'arm', clockKhz = 1000, dpidr, tapId
   }
   return { name:name || family || port?.id || arch, arch, target, clockKhz:clock, dpidr,
     tapIdcode:riscv ? id : undefined, family, boardId:port?.id,
-    sbaFence:port?.memory.sbaReadForbidden, script:lines.join('\n') + '\n' };
+    sbaFence:port?.memory.sbaReadForbidden, memoryAp, script:lines.join('\n') + '\n' };
 }

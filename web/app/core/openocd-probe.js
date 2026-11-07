@@ -55,14 +55,16 @@ export class OpenOcdProbe {
         // ROM and make a group resume fail even after the selected core halted.
         if (this.cfg.cores?.length > 1 && !this.isRiscv) await link.command('cortex_m smp off');
       }
-      let status = await link.command(`${this.cfg.target} curstate`);
-      // Cortex-M examination can finish before the first DHCSR poll updates curstate.
-      if (!this.isRiscv && status === 'unknown'){
-        await link.command('poll');
-        status = await link.command(`${this.cfg.target} curstate`);
+      if (!this.cfg.memoryAp){
+        let status = await link.command(`${this.cfg.target} curstate`);
+        // Cortex-M examination can finish before the first DHCSR poll updates curstate.
+        if (!this.isRiscv && status === 'unknown'){
+          await link.command('poll');
+          status = await link.command(`${this.cfg.target} curstate`);
+        }
+        if (!['running', 'halted', 'reset', 'sleeping'].includes(status))
+          throw Error('OpenOCD 未识别目标：' + status);
       }
-      if (!['running', 'halted', 'reset', 'sleeping'].includes(status))
-        throw Error('OpenOCD 未识别目标：' + status);
       if (this.isRiscv){
         const tap = await link.command(`${this.cfg.target} cget -chain-position`);
         const chain = await link.command('capture {scan_chain}');

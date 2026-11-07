@@ -1,4 +1,3 @@
-import {WebUsbDapProbe} from './shared/rtt/dap-webusb.js';
 import {ProbeBus} from './shared/core/probe-bus.js';
 import {identifyTarget,completeClocks} from './clock.js';
 import {Breakpoints} from './breakpoints.js';
@@ -12,16 +11,26 @@ const ETM=0xe0041000,FUNNEL=0x5c013000,ETF=0x5c014000,TPIU=0x5c015000;
 const hex=n=>'0x'+(n>>>0).toString(16).padStart(8,'0');
 
 export class EtmTarget {
-  constructor(log=()=>{},{host=null}={}){this.probe=null;this.log=log;this.embedded=!!host;this.canRelease=()=>true;this.Probe=host?.probeType||WebUsbDapProbe;this.bus=host?{requestRelease:async()=>{},close:()=>{}}:new ProbeBus('etm');this.bus.onRelease=()=>{if(!this.canRelease())throw Error('ETM 正在操作目标或采集，请先停止后再切换探针');return this.disconnect();};this.config=null;this.saved=new Map();this.locks=new Map();this.hseHz=null;this.osLocked=null;this.info=null;this.profile='auto';this.breakpoints=new Breakpoints(this);}
+  constructor(log=()=>{},{host=null}={}){this.probe=null;this.log=log;this.embedded=!!host;this.canRelease=()=>true;this.Probe=host?.probeType;this.bus=host?{requestRelease:async()=>{},close:()=>{}}:new ProbeBus('etm');this.bus.onRelease=()=>{if(!this.canRelease())throw Error('ETM 正在操作目标或采集，请先停止后再切换探针');return this.disconnect();};this.config=null;this.saved=new Map();this.locks=new Map();this.hseHz=null;this.osLocked=null;this.info=null;this.profile='auto';this.breakpoints=new Breakpoints(this);}
+  async _probeBackend(){
+    this.Probe ??= (await import('./openocd/core/openocd-etm.js')).OpenOcdEtmProbe;
+    if(!this.Probe.supported())throw Error('ETM 目标控制需要 WebUSB 或已启用的本机探针服务');
+    return this.Probe;
+  }
+  async _openProbe(Probe,device,clockKhz){
+    this.probe=await Probe.open(device,{clockKhz,onLog:this.log,retain:probe=>{this.probe=probe;this.debugFault=true;}});
+    this.controlDevice=device;
+    this.probe.onLog=this.log;
+    this.debugFault=false;
+  }
   async connect(){
     if(this.probe)return this.inspect();
     await this.bus.requestRelease({why:'ETM 页面连接'});
-    const devices=(await this.Probe.authorized()).filter(d=>d.vendorId===0x0d28);
-    if(!this.Probe.supported())throw Error('请用支持 WebUSB 的桌面 Chrome / Edge 打开页面');
+    const Probe=await this._probeBackend();
+    const devices=(await Probe.authorized()).filter(d=>d.vendorId===0x0d28);
     let device=devices.length===1?devices[0]:null;
     if(!device){let timer;try{device=await Promise.race([navigator.usb.requestDevice({filters:[{vendorId:0x0d28}]}),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('浏览器仍在等待 USB 设备选择；请选中探针后重新连接')),30000);})]);}finally{clearTimeout(timer);}}
-    this.probe=await this.Probe.open(device,{clockKhz:this.controlClockKhz??10000});
-    this.debugFault=false;this.probe.onLog=this.log;
+    await this._openProbe(Probe,device,this.controlClockKhz??10000);
     try{return await this.inspect();}catch(e){try{await this.disconnect();}catch(cleanup){this.log('连接失败后的清理错误（保留首次错误）：'+cleanup.message);}throw e;}
   }
   setControlClockKhz(khz){
@@ -37,30 +46,45 @@ export class EtmTarget {
     const probe = this.probe;
     if(!probe) return;
     this.suspendedClockKhz = Math.max(250, Math.round((probe.clockHz || (this.controlClockKhz??10000)*1000) / 1000));
-    this.probe = null;
-    try { await probe.disconnect(); }
-    catch(e){ this.log('释放探针供本地服务采集失败：' + e.message); throw e; }
+    await this._releaseProbe();
     this.log('已释放 USB 探针；本地服务将 arm FPGA 并恢复 CPU');
   }
 
   /** Reclaim the authorized ZynqDAP after the capture job finishes. */
   async resumeUsb(){
     if(this.probe) return;
-    const devices = (await this.Probe.authorized()).filter(d => d.vendorId === 0x0d28 && d.productId === 0x0204);
-    if(!devices.length) throw Error('采集后找不到已授权的 ZynqDAP；请重新点「连接探针」');
-    this.probe = await this.Probe.open(devices[0], { clockKhz: this.suspendedClockKhz || this.controlClockKhz || 10000 });
-    this.probe.onLog = this.log;
+    const Probe=await this._probeBackend(),previous=this.controlDevice;
+    const devices=(await Probe.authorized()).filter(d=>d===previous || previous?.serialNumber &&
+      d.vendorId===previous.vendorId && d.productId===previous.productId && d.serialNumber===previous.serialNumber);
+    if(devices.length!==1)throw Error('采集后无法唯一确认原探针，拒绝将恢复寄存器写到另一台设备');
+    await this._openProbe(Probe,devices[0],this.suspendedClockKhz || this.controlClockKhz || 10000);
     this.log('已重新认领 ZynqDAP，准备恢复目标 trace 设置');
   }
 
-  async disconnect(){const probe=this.probe;if(!probe)return;return withCleanup(async()=>{await this.clearEntryBreak();if(this.breakpoints.items.some(b=>b.lease)){const running=!(await this.isHalted());await this.halt();await this.breakpoints.suspend();if(running)await this.probe.run();}await this.restore();},async()=>{try{await probe.disconnect();}finally{this.probe=null;this.config=null;}},e=>this.log('USB 断开失败：'+e.message));}
+  async _releaseProbe(){
+    try { await this.probe.disconnect(); }
+    catch(e){ this.debugFault=true;throw e; }
+    this.probe=null;
+  }
+
+  async disconnect(){if(!this.probe)return;return withCleanup(async()=>{await this.clearEntryBreak();if(this.breakpoints.items.some(b=>b.lease)){const running=!(await this.isHalted());await this.halt();await this.breakpoints.suspend();if(running)await this.probe.run();}await this.restore();},async()=>{await this._releaseProbe();this.config=null;},e=>this.log('USB 断开失败：'+e.message));}
   get transportFault(){return !!(this.debugFault||this.probe?._faulted||this.probe?._recovering);}
   resetTransportStats(){this.probe?.device?.resetTransportStats?.();}
   setControlStage(name){this.profileDevice=this.probe?.device||this.profileDevice;this.profileDevice?.setControlStage?.(name);}
-  transportStats(){return this.probe?.device?.transportStats?.()||null;}
-  setNativeExchange(enabled){if(typeof enabled!=='boolean')throw Error('交换模式须为boolean');if(!this.probe?.device?.nativeService)throw Error('仅本地桥提供HTTP交换测量');this.probe.device.atomicDapEnabled=enabled;}
-  setPackedMemory(enabled){if(typeof enabled!=='boolean')throw Error('批量模式须为boolean');if(!this.probe?.device?.nativeService)throw Error('仅本地桥提供批量控制测量');this.probe.device.packedMemoryEnabled=enabled;}
-  setRegisterBatch(enabled){if(typeof enabled!=='boolean')throw Error('寄存器批量模式须为boolean');if(!this.probe?.device?.nativeService)throw Error('仅本地桥提供批量控制测量');this.probe.device.registerBatchEnabled=enabled;}
+  transportStats(){
+    const stats=this.probe?.device?.transportStats?.();
+    if(!stats)return null;
+    if(!this.probe?.cfg?.memoryAp)return stats;
+    return {...stats,backend:'openocd-wasm',atomicDapEnabled:false,packedMemoryEnabled:false,registerBatchEnabled:false,dap:null};
+  }
+  _legacyTransport(){
+    if(this.probe?.cfg?.memoryAp)throw Error('OpenOCD Wasm 自行调度 CMSIS-DAP；此选项属于旧驱动对照');
+    if(!this.probe?.device?.nativeService)throw Error('仅本地桥提供控制传输测量');
+    return this.probe.device;
+  }
+  setNativeExchange(enabled){if(typeof enabled!=='boolean')throw Error('交换模式须为boolean');this._legacyTransport().atomicDapEnabled=enabled;}
+  setPackedMemory(enabled){if(typeof enabled!=='boolean')throw Error('批量模式须为boolean');this._legacyTransport().packedMemoryEnabled=enabled;}
+  setRegisterBatch(enabled){if(typeof enabled!=='boolean')throw Error('寄存器批量模式须为boolean');this._legacyTransport().registerBatchEnabled=enabled;}
   get registerBatch(){return !!this.probe?.device?.nativeService&&this.probe.device.registerBatchEnabled!==false&&typeof this.probe.readWordsDiagnostic==='function';}
   assertTransport(){if(this.transportFault)throw Error('SWD 已故障，已保留现场；请点击“恢复调试口”后重试');}
   accessError(e,operation,address){if(e.ack===4||this.probe?._faulted)this.debugFault=true;const wrapped=new Error(`${operation} ${hex(address)}：${e.message}`,{cause:e});wrapped.ack=e.ack;return wrapped;}

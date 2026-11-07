@@ -44,6 +44,7 @@ from werkzeug.wsgi import ClosingIterator
 from trace_port import frontend_accel
 
 app = Flask(__name__, static_folder='web', static_url_path='')
+app.config['OPENOCD_WEB_APP'] = ROOT.parent / 'web' / 'app'
 # 200 ms 单窗的 capture.csv 实测约 500 MB（500 MSa/s × 0.2 s）。旧的 150 MiB 上传/解压
 # 成员上限会让“自己导出的记录包导不回来”（2026-10-18 审查 F01）。统一放宽，同时保留
 # 单成员/整包总量预算，并用流式解压落盘（不把整个成员读进内存）。
@@ -386,6 +387,21 @@ def shared_source_store():
     # Serve the copy committed with this project so page behavior is stable
     # regardless of which SWO checkout happens to be beside it at runtime.
     return send_file(ROOT/'web/app/shared/dbg/source.js',mimetype='text/javascript')
+
+
+@app.get('/app/openocd/<path:name>')
+def openocd_asset(name):
+    """Serve the workbench's canonical public Wasm modules to standalone ETM."""
+    assets = {
+        'core/openocd-etm.js', 'core/openocd-probe.js', 'core/openocd-profile.js',
+        'core/openocd-session.js', 'core/openocd-usb.js', 'core/openocd-worker.mjs',
+        'core/openocd-runtime/openocd-core.mjs', 'core/openocd-runtime/openocd-core.wasm',
+        'core/native-probe.js', 'core/usb-device.js', 'core/dap-profile.js',
+        'core/bin.js', 'core/operation-budget.js', 'core/pace.js', 'rtt/dap-webusb.js',
+    }
+    if name not in assets:
+        abort(404)
+    return send_from_directory(app.config['OPENOCD_WEB_APP'], name)
 
 
 @app.get('/api/health')

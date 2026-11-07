@@ -76,6 +76,7 @@ def create_application(etm_root,serial_root=ROOT,cli_token_file=None,native_pair
     spec=importlib.util.spec_from_file_location('etm_toolbox_backend',source)
     backend=importlib.util.module_from_spec(spec);sys.modules[spec.name]=backend;spec.loader.exec_module(backend)
     backend.app.static_folder=str(etm_root/'web')
+    backend.app.config['OPENOCD_WEB_APP']=serial_root/'app'
     if native_pair:
         if not cli_token_file:raise ValueError('本地服务采集必须启用CLI鉴权')
         from native_web_capture import install

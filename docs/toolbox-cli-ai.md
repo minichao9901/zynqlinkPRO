@@ -55,7 +55,7 @@ serve前须按实际任务核对板卡空闲及加载身份。运行时URL/令�
 
 ### OpenOCD Wasm 目标配置
 
-工作台的调试器、烧录器和 RTT Viewer 由同一份 OpenOCD Wasm 处理 Cortex-M/SWD 和 RISC-V/JTAG。在线页使用 WebUSB，本机桥包可使用已鉴权的本机 USB 服务。两种入口均使用 CMSIS-DAP v2。RTT 转发与 J-Scope 走探针固件数据通路，ETM 走 Zynq 采集与本机解码。独立 Trace CLI 见 [Trace CLI](Trace-CLI使用说明.md)。
+工作台的调试器、烧录器和 RTT Viewer 由同一份 OpenOCD Wasm 处理 Cortex-M/SWD 和 RISC-V/JTAG。在线页使用 WebUSB，本机桥包可使用已鉴权的本机 USB 服务。两种入口均使用 CMSIS-DAP v2。ETM 网页的目标读写、暂停/继续、起点与配置恢复经 Wasm 的物理 MEM-AP0。联动采集由本机服务接管探针，完成 FPGA 布防、CPU 放行、DDR 下载及 OpenCSD 解码。RTT 转发与 J-Scope 走探针固件数据通路。独立 Trace CLI 见 [Trace CLI](Trace-CLI使用说明.md)。
 
 调试器可选内置芯片，也可用「导入 OpenOCD CFG…」打开单文件。遇到 `source [find …]` 依赖时，选择脚本根目录并选择入口 CFG。可在「配置与核心」切换已导入配置的核心，或切回内置目标。只使用与板卡匹配且可信的脚本。导入阶段在断开 USB 的 Worker 中解析，实际连接时会执行所选 CFG 的目标事件。烧录器可沿用声明了 Flash bank 的配置。RTT Viewer 沿用 CFG 后，从匹配 ELF 取得控制块地址，或手填地址和 RAM 范围。
 

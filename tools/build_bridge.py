@@ -266,7 +266,7 @@ def main(argv=None):
         files=[dict(path=p.relative_to(package).as_posix(),bytes=p.stat().st_size,sha256=sha(p)) for p in sorted(package.rglob('*')) if p.is_file()]
         manifest=dict(schema=1,platform='windows-x64',sourceRevision=revision,
             desktopLauncherIntegrity='medium',
-            debugBackend=dict(name='OpenOCD Wasm',sha256=sha(wasm)),
+            debugBackend=dict(name='OpenOCD Wasm',sha256=sha(wasm),etmControl='mem-ap0'),
             etmControlClockDefaultHz=10000000,
             flameHtml=dict(interactive=True,selfContained=True,modes=['timeline','aggregate'],tabs=['timeline','cycles'],defaultTab='timeline',dragSelectZoom=True),offlineTraceCli=True,
             sourceDirty=source_dirty,dependencies=dependencies,

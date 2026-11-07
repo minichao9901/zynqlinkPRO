@@ -518,7 +518,8 @@ const embeddedBridge={probe:()=>target.probe,busy:()=>!!(state.hardwareOperation
   },
   release:async()=>{if(target.transportFault)throw Error('旧调试口仍故障；先点击恢复调试口，避免丢失待恢复的配置');if(embeddedBridge.busy())throw Error('ETM正在操作或采集，请先停止');await disconnectTarget();},
   recoverForRelease:async()=>{if(embeddedBridge.busy())throw Error('旧任务仍在清理，不能恢复或释放探针');await target.recoverDebugPort();},
-  summary:()=>({record:state.current,job:state.job,target:target.info?.name||null,transportFault:target.transportFault})};
+  summary:()=>({record:state.current,job:state.job,target:target.info?.name||null,
+    controlBackend:target.probe?.name||null,transportFault:target.transportFault})};
 window.__etmBridge=embeddedBridge;
 target.canRelease=()=>!embeddedBridge.busy()&&!target.transportFault;
 let attached=true;

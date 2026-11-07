@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { OpenOcdTargetSession } from '../../app/core/openocd-session.js';
 import { OpenOcdUsb } from '../../app/core/openocd-usb.js';
+import { OpenOcdEtmProbe } from '../../app/core/openocd-etm.js';
 import { makeOpenOcdProfile } from '../../app/core/openocd-profile.js';
 import { createOpenOcdDispatcher } from '../../app/core/openocd-worker.mjs';
 import { inspectOpenOcdCfg } from '../../app/dbg/openocd-cfg.js';
@@ -46,6 +47,36 @@ test('the bundled Wasm registers ARM, HPM and RP2350 profiles and resolves impor
   assert.match(cfg.hash,/^[0-9a-f]{64}$/);
   await assert.rejects(inspectOpenOcdCfg(board, entry));
   await assert.rejects(inspectOpenOcdCfg(target, '../escape.cfg'), /所选脚本目录/);
+  const etm = new OpenOcdTargetSession();
+  try {
+    await etm.open(makeOpenOcdProfile({ clockKhz:250, memoryAp:true }));
+    assert.equal(await etm.command('command mode'), 'config');
+    assert.equal(await etm.command('capture {workbench.cpu cget -type}'), 'mem_ap');
+    assert.equal(await etm.command('workbench.cpu cget -dap'), 'workbench.dap');
+    assert.match(await etm.command('capture {adapter speed}'), /250 kHz/);
+  } finally { await etm.close(); }
+});
+
+test('ETM core control uses physical DHCSR and issues only one resume per request', async () => {
+  const probe = new OpenOcdEtmProbe({}, makeOpenOcdProfile({ memoryAp:true }));
+  const writes = [];
+  let status = 0;
+  probe.readMemDiagnostic = async (addr, length) => {
+    assert.deepEqual([addr, length], [0xe000edf0, 4]);
+    const bytes = new Uint8Array(4);
+    new DataView(bytes.buffer).setUint32(0, status, true);
+    return bytes;
+  };
+  probe.writeMemDiagnostic = async (addr, data) => {
+    assert.equal(addr, 0xe000edf0);
+    writes.push(new DataView(data.buffer).getUint32(0, true));
+  };
+  await probe.run();
+  await probe.halt();
+  status = (1 << 17) | 8;
+  await probe.halt();
+  await probe.run();
+  assert.deepEqual(writes, [0xa05f0003, 0xa05f0003, 0xa05f0001]);
 });
 
 test('the Zynq lease synchronizes DAP and terminates aligned OUT packets without touching ETM', async () => {

@@ -78,6 +78,9 @@ def main(argv=None):
             with urlopen(url+'/app/core/openocd-worker.mjs', timeout=15) as response:
                 assert response.headers.get_content_type() in ('text/javascript','application/javascript')
                 assert b'createOpenOcdDispatcher' in response.read()
+            if manifest['debugBackend'].get('etmControl') == 'mem-ap0':
+                assert request('/etm/app/openocd/core/openocd-etm.js') == request('/app/core/openocd-etm.js')
+                assert request('/etm/app/openocd/core/openocd-runtime/openocd-core.wasm') == wasm
             report['debugBackend']=manifest['debugBackend']
         for path in ['/native-probe/usb/devices','/native-probe/hid/devices','/native-probe/serial/devices','/etm/api/capture']:
             try:request(path,{})
