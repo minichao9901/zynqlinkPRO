@@ -114,4 +114,10 @@ Web普通联动按钮1秒捕获：18,340,417路径、2,017,583包，packetIssues
 - 最终H743为原CPU/HCLK60MHz、TRACECLK20MHz配置，完整2MiB Flash SHA-256 `f4cbd9f002921026f7f1036a7743ed2bb3832f4a9e54d4f394045b1ed05a2b82` 与测试前相同。临时AXI/DTCM及工作区均在复位前逐字节恢复；复位后允许固件正常重新初始化运行内存，不把旧USB运行结构覆盖回运行中的目标。
 - 最终DHCSR `0x01010000`，运行且C_DEBUGEN=0；FPB/DEMCR/CCR/VTOR与原快照一致，CFSR/HFSR=0，ETM PRGCTLR和ETF CTL=0，RTT/HSS/DDR均非活动。单独发送PING/INFO得到PONG、sysclk=60000000Hz、hclk=60000000Hz、clk_err=0，echo已恢复。
 - 最终探针物理读回FCLK约119.999998MHz、SWCLK约9.999999833MHz，JTAG采样模式0，RISC-V SBA关。正式bit/ELF保持RAM加载状态，不等同QSPI冷启动验收。
-- 关闭本任务页面及服务，只回收本任务创建且无外部连接的hw_server；原始工程无关修改、build/dist用户数据均保留。1497个临时文件（约875MB）所在的两个测试目录已移入Windows回收站，原路径不存在，详见 [cleanup.json](cleanup.json)；没有永久清空回收站。最终程序交付另见本目录的delivery记录。
+- 关闭本任务页面及服务，只回收本任务创建且无外部连接的hw_server；原始工程无关修改、build/dist用户数据均保留。1497个临时文件（约875MB）所在的两个测试目录已移入Windows回收站，原路径不存在，详见 [cleanup.json](cleanup.json)；没有永久清空回收站。最终程序包的版本、哈希与验证结果见 [delivery.json](delivery.json)。
+
+## EXE 与分发 ZIP
+
+`8afebc9b` 修复了 ZL-192 在安装目录中的触发条件。打包时为启动器及六个原生辅助 EXE 设置标准桌面完整性标签。原安装版的同一解帧输入在工程外创建目录失败，新候选、固定安装版和 ZIP 解压版均通过。ZIP 解压使用系统临时目录。旧安装版失败记录见 [delivery-native-before.json](delivery-native-before.json)。
+
+安装版与解压版均核对了 1816 个程序文件的 SHA-256，F103ZE 与 H743 离线记录的解码、索引、查询与 SVG/HTML 导出通过。两组记录的包错误为零，Web 与冻结 CLI 的 HTML 一致。固定安装目录的 49 个用户数据文件按路径和内容计算的哈希与更新前一致。ZIP 包含程序目录和交付清单，离线验证目录已回收。具体身份和测试结果见 [delivery.json](delivery.json)。
