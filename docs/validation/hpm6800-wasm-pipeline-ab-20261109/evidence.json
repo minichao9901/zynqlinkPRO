@@ -1,0 +1,1752 @@
+{
+  "source": "9d852037",
+  "build": {
+    "upstream": "9f2d8762b3a75b4d7b2155affcf3d8bb8eb8849a",
+    "jim": "d5243a25c488dfe751ef218828f13516e04ea2ba",
+    "libusb": "87a55632db62c9bdc58cd31d3ccfa673f1bb017f",
+    "compiler": "emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 4.0.10 (b7dc6e5747465580df5984e723b9d1f10d8e804b)",
+    "patchSha256": "11c9577dc529698a5295a681e7effaa43e62853a59344c29850c46d392c3382a",
+    "driverLayoutVerified": true,
+    "recompiledDrivers": [
+      "libocdjtagdrivers_la-cmsis_dap.lo",
+      "libocdjtagdrivers_la-cmsis_dap_tcp.lo",
+      "libocdjtagdrivers_la-cmsis_dap_usb_bulk.lo"
+    ],
+    "variants": {
+      "A": {
+        "wasm": "098be8c32791c5a24573a605292aec2cfe7d1a7d2d0dacc030006a723b5918dc",
+        "js": "c4e99f080fbf6b50204a01d626fd650ef9b92e90969d5062580c27e589b81279",
+        "bytes": 5631038,
+        "maxPending": 4,
+        "readMemoryBuffer": 4096,
+        "writeMemoryBuffer": 4096,
+        "dumpBuffer": 65536
+      },
+      "A-rebuilt": {
+        "wasm": "c86eb0e32322668987839791f2e7e2fac6f2d058f9d6a02cd2e6804847579b63",
+        "js": "5a55691c948f503d13bc233902d4a74782bee82e7276d9ad7d52d8394053700a",
+        "bytes": 5631561,
+        "maxPending": 4,
+        "readMemoryBuffer": 4096,
+        "writeMemoryBuffer": 4096,
+        "dumpBuffer": 65536
+      },
+      "B": {
+        "wasm": "1977164ce62a8595753be9dfa741751c0b3f2459a95aa6bd03f25afe72d554fe",
+        "js": "5a55691c948f503d13bc233902d4a74782bee82e7276d9ad7d52d8394053700a",
+        "bytes": 5631647,
+        "maxPending": 8,
+        "readMemoryBuffer": 65536,
+        "writeMemoryBuffer": 65536,
+        "dumpBuffer": 65536
+      }
+    }
+  },
+  "initialOCM": {
+    "elf_sha256": "5895eeb0e79a3681a6b3b966dbea4c82ebfcd01ea7553e094d8a61ed2cf89802",
+    "expected_executable_bytes": 85844,
+    "passed": true,
+    "initial_FCLK_Hz": 49999999
+  },
+  "test": {
+    "address": "0x126f000",
+    "guardBytesEach": 64,
+    "initial": {
+      "dmstatus": "0x430ca2",
+      "clocks": {
+        "controls": {
+          "cpu0": "0x3020100",
+          "mchtmr0": "0x1010000",
+          "ahb": "0x5040203"
+        },
+        "basis": "Read-only qualified SYSCTL controls; target frequencies not inferred without qualified PLL outputs"
+      },
+      "backupSha256": "4af260e92efcb5bfb17239092f2fe743443a09e9a86bd40168d139b4bee5484c",
+      "effectiveIdle": 8
+    },
+    "rows": [
+      {
+        "backend": "A",
+        "turn": 0,
+        "mode": "text",
+        "size": 20480,
+        "read": {
+          "seconds": 0.6523509999969974,
+          "commandMs": 650.4744000000001,
+          "usbCalls": {
+            "write": 311,
+            "read": 311,
+            "cmd_0x14": 311
+          },
+          "usbSeconds": 0.4846303,
+          "packetDepthObserved": 1
+        },
+        "write": {
+          "seconds": 0.5997792999987723,
+          "commandMs": 596.9389999999999,
+          "usbCalls": {
+            "write": 331,
+            "read": 331,
+            "cmd_0x14": 331
+          },
+          "usbSeconds": 0.4895077,
+          "packetDepthObserved": 1
+        },
+        "settings": {
+          "wasmSha256": "098be8c32791c5a24573a605292aec2cfe7d1a7d2d0dacc030006a723b5918dc",
+          "jsSha256": "c4e99f080fbf6b50204a01d626fd650ef9b92e90969d5062580c27e589b81279",
+          "idcode": 268457533,
+          "version": "Open On-Chip Debugger 0.12.0+dev-g9f2d876-dirty (2026-11-08-19:23)",
+          "target": "running",
+          "clock": "adapter speed: 25000 kHz",
+          "live": {
+            "FCLK_Hz": 49999999,
+            "actual_link_Hz": 24999999.5,
+            "JTAG_sampling_mode": 0,
+            "RISC_V_SBA_enabled": true
+          }
+        },
+        "readMBs": 0.03139414211075673,
+        "writeMBs": 0.03414589333116685,
+        "byteExact": true
+      },
+      {
+        "backend": "A",
+        "turn": 0,
+        "mode": "text",
+        "size": 65536,
+        "read": {
+          "seconds": 2.437658199996804,
+          "commandMs": 2431.4298,
+          "usbCalls": {
+            "write": 993,
+            "read": 993,
+            "cmd_0x14": 993
+          },
+          "usbSeconds": 1.5676136,
+          "packetDepthObserved": 1
+        },
+        "write": {
+          "seconds": 1.929459399994812,
+          "commandMs": 1922.0732000000007,
+          "usbCalls": {
+            "write": 1057,
+            "read": 1057,
+            "cmd_0x14": 1057
+          },
+          "usbSeconds": 1.5637232,
+          "packetDepthObserved": 1
+        },
+        "settings": {
+          "wasmSha256": "098be8c32791c5a24573a605292aec2cfe7d1a7d2d0dacc030006a723b5918dc",
+          "jsSha256": "c4e99f080fbf6b50204a01d626fd650ef9b92e90969d5062580c27e589b81279",
+          "idcode": 268457533,
+          "version": "Open On-Chip Debugger 0.12.0+dev-g9f2d876-dirty (2026-11-08-19:23)",
+          "target": "running",
+          "clock": "adapter speed: 25000 kHz",
+          "live": {
+            "FCLK_Hz": 49999999,
+            "actual_link_Hz": 24999999.5,
+            "JTAG_sampling_mode": 0,
+            "RISC_V_SBA_enabled": true
+          }
+        },
+        "readMBs": 0.026884819208897265,
+        "writeMBs": 0.033965990681211644,
+        "byteExact": true
+      },
+      {
+        "backend": "A",
+        "turn": 0,
+        "mode": "image",
+        "size": 65536,
+        "read": {
+          "seconds": 1.861159599997336,
+          "commandMs": 1860.1231000000007,
+          "usbCalls": {
+            "write": 904,
+            "read": 904,
+            "cmd_0x14": 904
+          },
+          "usbSeconds": 1.5406391,
+          "packetDepthObserved": 1
+        },
+        "write": {
+          "seconds": 1.9030477999986033,
+          "commandMs": 1902.2325,
+          "usbCalls": {
+            "write": 1027,
+            "read": 1027,
+            "cmd_0x14": 1027
+          },
+          "usbSeconds": 1.5542393,
+          "packetDepthObserved": 1
+        },
+        "settings": {
+          "wasmSha256": "098be8c32791c5a24573a605292aec2cfe7d1a7d2d0dacc030006a723b5918dc",
+          "jsSha256": "c4e99f080fbf6b50204a01d626fd650ef9b92e90969d5062580c27e589b81279",
+          "idcode": 268457533,
+          "version": "Open On-Chip Debugger 0.12.0+dev-g9f2d876-dirty (2026-11-08-19:23)",
+          "target": "running",
+          "clock": "adapter speed: 25000 kHz",
+          "live": {
+            "FCLK_Hz": 49999999,
+            "actual_link_Hz": 24999999.5,
+            "JTAG_sampling_mode": 0,
+            "RISC_V_SBA_enabled": true
+          }
+        },
+        "readMBs": 0.035212455718517534,
+        "writeMBs": 0.034437390379815,
+        "byteExact": true
+      },
+      {
+        "backend": "B",
+        "turn": 1,
+        "mode": "text",
+        "size": 20480,
+        "read": {
+          "seconds": 0.6482128000061493,
+          "commandMs": 646.3659,
+          "usbCalls": {
+            "write": 287,
+            "read": 287,
+            "cmd_0x14": 287
+          },
+          "usbSeconds": 0.4842296,
+          "packetDepthObserved": 1
+        },
+        "write": {
+          "seconds": 0.5922537000005832,
+          "commandMs": 589.7901999999999,
+          "usbCalls": {
+            "write": 323,
+            "read": 323,
+            "cmd_0x14": 323
+          },
+          "usbSeconds": 0.4849632,
+          "packetDepthObserved": 1
+        },
+        "settings": {
+          "wasmSha256": "1977164ce62a8595753be9dfa741751c0b3f2459a95aa6bd03f25afe72d554fe",
+          "jsSha256": "5a55691c948f503d13bc233902d4a74782bee82e7276d9ad7d52d8394053700a",
+          "idcode": 268457533,
+          "version": "Open On-Chip Debugger 0.12.0+dev-g9f2d876-dirty (2026-11-09-13:36)",
+          "target": "running",
+          "clock": "adapter speed: 25000 kHz",
+          "live": {
+            "FCLK_Hz": 49999999,
+            "actual_link_Hz": 24999999.5,
+            "JTAG_sampling_mode": 0,
+            "RISC_V_SBA_enabled": true
+          }
+        },
+        "readMBs": 0.03159456277291302,
+        "writeMBs": 0.03457977552521805,
+        "byteExact": true
+      },
+      {
+        "backend": "B",
+        "turn": 1,
+        "mode": "text",
+        "size": 65536,
+        "read": {
+          "seconds": 2.40083869999944,
+          "commandMs": 2394.5212,
+          "usbCalls": {
+            "write": 903,
+            "read": 903,
+            "cmd_0x14": 903
+          },
+          "usbSeconds": 1.5405102,
+          "packetDepthObserved": 1
+        },
+        "write": {
+          "seconds": 1.9206888999979128,
+          "commandMs": 1913.2541,
+          "usbCalls": {
+            "write": 1027,
+            "read": 1027,
+            "cmd_0x14": 1027
+          },
+          "usbSeconds": 1.5543359,
+          "packetDepthObserved": 1
+        },
+        "settings": {
+          "wasmSha256": "1977164ce62a8595753be9dfa741751c0b3f2459a95aa6bd03f25afe72d554fe",
+          "jsSha256": "5a55691c948f503d13bc233902d4a74782bee82e7276d9ad7d52d8394053700a",
+          "idcode": 268457533,
+          "version": "Open On-Chip Debugger 0.12.0+dev-g9f2d876-dirty (2026-11-09-13:36)",
+          "target": "running",
+          "clock": "adapter speed: 25000 kHz",
+          "live": {
+            "FCLK_Hz": 49999999,
+            "actual_link_Hz": 24999999.5,
+            "JTAG_sampling_mode": 0,
+            "RISC_V_SBA_enabled": true
+          }
+        },
+        "readMBs": 0.027297127458006772,
+        "writeMBs": 0.03412109061497217,
+        "byteExact": true
+      },
+      {
+        "backend": "B",
+        "turn": 1,
+        "mode": "image",
+        "size": 65536,
+        "read": {
+          "seconds": 1.8684850999998162,
+          "commandMs": 1867.348,
+          "usbCalls": {
+            "write": 904,
+            "read": 904,
+            "cmd_0x14": 904
+          },
+          "usbSeconds": 1.5383598,
+          "packetDepthObserved": 1
+        },
+        "write": {
+          "seconds": 1.9031552000014926,
+          "commandMs": 1902.3706000000002,
+          "usbCalls": {
+            "write": 1027,
+            "read": 1027,
+            "cmd_0x14": 1027
+          },
+          "usbSeconds": 1.5533064,
+          "packetDepthObserved": 1
+        },
+        "settings": {
+          "wasmSha256": "1977164ce62a8595753be9dfa741751c0b3f2459a95aa6bd03f25afe72d554fe",
+          "jsSha256": "5a55691c948f503d13bc233902d4a74782bee82e7276d9ad7d52d8394053700a",
+          "idcode": 268457533,
+          "version": "Open On-Chip Debugger 0.12.0+dev-g9f2d876-dirty (2026-11-09-13:36)",
+          "target": "running",
+          "clock": "adapter speed: 25000 kHz",
+          "live": {
+            "FCLK_Hz": 49999999,
+            "actual_link_Hz": 24999999.5,
+            "JTAG_sampling_mode": 0,
+            "RISC_V_SBA_enabled": true
+          }
+        },
+        "readMBs": 0.03507440332278082,
+        "writeMBs": 0.03443544698821652,
+        "byteExact": true
+      },
+      {
+        "backend": "native",
+        "turn": 2,
+        "mode": "native",
+        "size": 20480,
+        "read": {
+          "seconds": 0.012831499996536877,
+          "usbDepth": 10,
+          "packetBytes": 2048
+        },
+        "write": {
+          "seconds": 0.013055700001132209,
+          "usbDepth": 10,
+          "packetBytes": 2048
+        },
+        "settings": {
+          "idle": 8,
+          "live": {
+            "FCLK_Hz": 49999999,
+            "actual_link_Hz": 24999999.5,
+            "JTAG_sampling_mode": 0,
+            "RISC_V_SBA_enabled": true
+          }
+        },
+        "readMBs": 1.596072166584374,
+        "writeMBs": 1.5686634955018839,
+        "byteExact": true
+      },
+      {
+        "backend": "native",
+        "turn": 2,
+        "mode": "native",
+        "size": 65536,
+        "read": {
+          "seconds": 0.04034930000489112,
+          "usbDepth": 32,
+          "packetBytes": 2048
+        },
+        "write": {
+          "seconds": 0.040433499998471234,
+          "usbDepth": 32,
+          "packetBytes": 2048
+        },
+        "settings": {
+          "idle": 8,
+          "live": {
+            "FCLK_Hz": 49999999,
+            "actual_link_Hz": 24999999.5,
+            "JTAG_sampling_mode": 0,
+            "RISC_V_SBA_enabled": true
+          }
+        },
+        "readMBs": 1.6242165289622315,
+        "writeMBs": 1.620834209318458,
+        "byteExact": true
+      },
+      {
+        "backend": "B",
+        "turn": 3,
+        "mode": "text",
+        "size": 20480,
+        "read": {
+          "seconds": 0.6432331999967573,
+          "commandMs": 641.3034,
+          "usbCalls": {
+            "write": 287,
+            "read": 287,
+            "cmd_0x14": 287
+          },
+          "usbSeconds": 0.4806337,
+          "packetDepthObserved": 1
+        },
+        "write": {
+          "seconds": 0.5892310999988695,
+          "commandMs": 586.4143999999999,
+          "usbCalls": {
+            "write": 323,
+            "read": 323,
+            "cmd_0x14": 323
+          },
+          "usbSeconds": 0.4843238,
+          "packetDepthObserved": 1
+        },
+        "settings": {
+          "wasmSha256": "1977164ce62a8595753be9dfa741751c0b3f2459a95aa6bd03f25afe72d554fe",
+          "jsSha256": "5a55691c948f503d13bc233902d4a74782bee82e7276d9ad7d52d8394053700a",
+          "idcode": 268457533,
+          "version": "Open On-Chip Debugger 0.12.0+dev-g9f2d876-dirty (2026-11-09-13:36)",
+          "target": "running",
+          "clock": "adapter speed: 25000 kHz",
+          "live": {
+            "FCLK_Hz": 49999999,
+            "actual_link_Hz": 24999999.5,
+            "JTAG_sampling_mode": 0,
+            "RISC_V_SBA_enabled": true
+          }
+        },
+        "readMBs": 0.03183915258121509,
+        "writeMBs": 0.03475716064552481,
+        "byteExact": true
+      },
+      {
+        "backend": "B",
+        "turn": 3,
+        "mode": "text",
+        "size": 65536,
+        "read": {
+          "seconds": 2.3917783999932,
+          "commandMs": 2385.4725999999996,
+          "usbCalls": {
+            "write": 903,
+            "read": 903,
+            "cmd_0x14": 903
+          },
+          "usbSeconds": 1.5378118,
+          "packetDepthObserved": 1
+        },
+        "write": {
+          "seconds": 1.9073655000029248,
+          "commandMs": 1899.9119,
+          "usbCalls": {
+            "write": 1027,
+            "read": 1027,
+            "cmd_0x14": 1027
+          },
+          "usbSeconds": 1.5512177,
+          "packetDepthObserved": 1
+        },
+        "settings": {
+          "wasmSha256": "1977164ce62a8595753be9dfa741751c0b3f2459a95aa6bd03f25afe72d554fe",
+          "jsSha256": "5a55691c948f503d13bc233902d4a74782bee82e7276d9ad7d52d8394053700a",
+          "idcode": 268457533,
+          "version": "Open On-Chip Debugger 0.12.0+dev-g9f2d876-dirty (2026-11-09-13:36)",
+          "target": "running",
+          "clock": "adapter speed: 25000 kHz",
+          "live": {
+            "FCLK_Hz": 49999999,
+            "actual_link_Hz": 24999999.5,
+            "JTAG_sampling_mode": 0,
+            "RISC_V_SBA_enabled": true
+          }
+        },
+        "readMBs": 0.027400531755026436,
+        "writeMBs": 0.03435943451839698,
+        "byteExact": true
+      },
+      {
+        "backend": "B",
+        "turn": 3,
+        "mode": "image",
+        "size": 65536,
+        "read": {
+          "seconds": 1.8695120999982464,
+          "commandMs": 1868.4097000000002,
+          "usbCalls": {
+            "write": 904,
+            "read": 904,
+            "cmd_0x14": 904
+          },
+          "usbSeconds": 1.5426526,
+          "packetDepthObserved": 1
+        },
+        "write": {
+          "seconds": 1.9036147000006167,
+          "commandMs": 1902.7240000000002,
+          "usbCalls": {
+            "write": 1027,
+            "read": 1027,
+            "cmd_0x14": 1027
+          },
+          "usbSeconds": 1.5526443,
+          "packetDepthObserved": 1
+        },
+        "settings": {
+          "wasmSha256": "1977164ce62a8595753be9dfa741751c0b3f2459a95aa6bd03f25afe72d554fe",
+          "jsSha256": "5a55691c948f503d13bc233902d4a74782bee82e7276d9ad7d52d8394053700a",
+          "idcode": 268457533,
+          "version": "Open On-Chip Debugger 0.12.0+dev-g9f2d876-dirty (2026-11-09-13:36)",
+          "target": "running",
+          "clock": "adapter speed: 25000 kHz",
+          "live": {
+            "FCLK_Hz": 49999999,
+            "actual_link_Hz": 24999999.5,
+            "JTAG_sampling_mode": 0,
+            "RISC_V_SBA_enabled": true
+          }
+        },
+        "readMBs": 0.0350551355083829,
+        "writeMBs": 0.034427134860840675,
+        "byteExact": true
+      },
+      {
+        "backend": "A",
+        "turn": 4,
+        "mode": "text",
+        "size": 20480,
+        "read": {
+          "seconds": 0.6555358000041451,
+          "commandMs": 653.8246,
+          "usbCalls": {
+            "write": 311,
+            "read": 311,
+            "cmd_0x14": 311
+          },
+          "usbSeconds": 0.4884424,
+          "packetDepthObserved": 1
+        },
+        "write": {
+          "seconds": 0.592877099996258,
+          "commandMs": 590.0169000000001,
+          "usbCalls": {
+            "write": 331,
+            "read": 331,
+            "cmd_0x14": 331
+          },
+          "usbSeconds": 0.4859893,
+          "packetDepthObserved": 1
+        },
+        "settings": {
+          "wasmSha256": "098be8c32791c5a24573a605292aec2cfe7d1a7d2d0dacc030006a723b5918dc",
+          "jsSha256": "c4e99f080fbf6b50204a01d626fd650ef9b92e90969d5062580c27e589b81279",
+          "idcode": 268457533,
+          "version": "Open On-Chip Debugger 0.12.0+dev-g9f2d876-dirty (2026-11-08-19:23)",
+          "target": "running",
+          "clock": "adapter speed: 25000 kHz",
+          "live": {
+            "FCLK_Hz": 49999999,
+            "actual_link_Hz": 24999999.5,
+            "JTAG_sampling_mode": 0,
+            "RISC_V_SBA_enabled": true
+          }
+        },
+        "readMBs": 0.03124161945063946,
+        "writeMBs": 0.03454341549054477,
+        "byteExact": true
+      },
+      {
+        "backend": "A",
+        "turn": 4,
+        "mode": "text",
+        "size": 65536,
+        "read": {
+          "seconds": 2.4527938999963226,
+          "commandMs": 2446.3830000000003,
+          "usbCalls": {
+            "write": 993,
+            "read": 993,
+            "cmd_0x14": 993
+          },
+          "usbSeconds": 1.5733755,
+          "packetDepthObserved": 1
+        },
+        "write": {
+          "seconds": 1.9409335999953328,
+          "commandMs": 1933.5192000000006,
+          "usbCalls": {
+            "write": 1057,
+            "read": 1057,
+            "cmd_0x14": 1057
+          },
+          "usbSeconds": 1.5660274,
+          "packetDepthObserved": 1
+        },
+        "settings": {
+          "wasmSha256": "098be8c32791c5a24573a605292aec2cfe7d1a7d2d0dacc030006a723b5918dc",
+          "jsSha256": "c4e99f080fbf6b50204a01d626fd650ef9b92e90969d5062580c27e589b81279",
+          "idcode": 268457533,
+          "version": "Open On-Chip Debugger 0.12.0+dev-g9f2d876-dirty (2026-11-08-19:23)",
+          "target": "running",
+          "clock": "adapter speed: 25000 kHz",
+          "live": {
+            "FCLK_Hz": 49999999,
+            "actual_link_Hz": 24999999.5,
+            "JTAG_sampling_mode": 0,
+            "RISC_V_SBA_enabled": true
+          }
+        },
+        "readMBs": 0.026718918373083957,
+        "writeMBs": 0.033765194234443456,
+        "byteExact": true
+      },
+      {
+        "backend": "A",
+        "turn": 4,
+        "mode": "image",
+        "size": 65536,
+        "read": {
+          "seconds": 1.8646387999979197,
+          "commandMs": 1863.4147999999986,
+          "usbCalls": {
+            "write": 904,
+            "read": 904,
+            "cmd_0x14": 904
+          },
+          "usbSeconds": 1.5395599,
+          "packetDepthObserved": 1
+        },
+        "write": {
+          "seconds": 1.8963841000004322,
+          "commandMs": 1895.5581000000002,
+          "usbCalls": {
+            "write": 1027,
+            "read": 1027,
+            "cmd_0x14": 1027
+          },
+          "usbSeconds": 1.555498,
+          "packetDepthObserved": 1
+        },
+        "settings": {
+          "wasmSha256": "098be8c32791c5a24573a605292aec2cfe7d1a7d2d0dacc030006a723b5918dc",
+          "jsSha256": "c4e99f080fbf6b50204a01d626fd650ef9b92e90969d5062580c27e589b81279",
+          "idcode": 268457533,
+          "version": "Open On-Chip Debugger 0.12.0+dev-g9f2d876-dirty (2026-11-08-19:23)",
+          "target": "running",
+          "clock": "adapter speed: 25000 kHz",
+          "live": {
+            "FCLK_Hz": 49999999,
+            "actual_link_Hz": 24999999.5,
+            "JTAG_sampling_mode": 0,
+            "RISC_V_SBA_enabled": true
+          }
+        },
+        "readMBs": 0.03514675335516622,
+        "writeMBs": 0.03455839985158338,
+        "byteExact": true
+      },
+      {
+        "backend": "native",
+        "turn": 5,
+        "mode": "native",
+        "size": 20480,
+        "read": {
+          "seconds": 0.012884800002211705,
+          "usbDepth": 10,
+          "packetBytes": 2048
+        },
+        "write": {
+          "seconds": 0.012941399996634573,
+          "usbDepth": 10,
+          "packetBytes": 2048
+        },
+        "settings": {
+          "idle": 8,
+          "live": {
+            "FCLK_Hz": 49999999,
+            "actual_link_Hz": 24999999.5,
+            "JTAG_sampling_mode": 0,
+            "RISC_V_SBA_enabled": true
+          }
+        },
+        "readMBs": 1.5894697625484728,
+        "writeMBs": 1.582518120553097,
+        "byteExact": true
+      },
+      {
+        "backend": "native",
+        "turn": 5,
+        "mode": "native",
+        "size": 65536,
+        "read": {
+          "seconds": 0.0403160999994725,
+          "usbDepth": 32,
+          "packetBytes": 2048
+        },
+        "write": {
+          "seconds": 0.04053109999949811,
+          "usbDepth": 32,
+          "packetBytes": 2048
+        },
+        "settings": {
+          "idle": 8,
+          "live": {
+            "FCLK_Hz": 49999999,
+            "actual_link_Hz": 24999999.5,
+            "JTAG_sampling_mode": 0,
+            "RISC_V_SBA_enabled": true
+          }
+        },
+        "readMBs": 1.6255540590696393,
+        "writeMBs": 1.6169311960645412,
+        "byteExact": true
+      },
+      {
+        "backend": "A",
+        "turn": 6,
+        "mode": "text",
+        "size": 20480,
+        "read": {
+          "seconds": 0.6568839999963529,
+          "commandMs": 655.1415,
+          "usbCalls": {
+            "write": 311,
+            "read": 311,
+            "cmd_0x14": 311
+          },
+          "usbSeconds": 0.4872964,
+          "packetDepthObserved": 1
+        },
+        "write": {
+          "seconds": 0.5958574999967823,
+          "commandMs": 593.3559,
+          "usbCalls": {
+            "write": 331,
+            "read": 331,
+            "cmd_0x14": 331
+          },
+          "usbSeconds": 0.4879183,
+          "packetDepthObserved": 1
+        },
+        "settings": {
+          "wasmSha256": "098be8c32791c5a24573a605292aec2cfe7d1a7d2d0dacc030006a723b5918dc",
+          "jsSha256": "c4e99f080fbf6b50204a01d626fd650ef9b92e90969d5062580c27e589b81279",
+          "idcode": 268457533,
+          "version": "Open On-Chip Debugger 0.12.0+dev-g9f2d876-dirty (2026-11-08-19:23)",
+          "target": "running",
+          "clock": "adapter speed: 25000 kHz",
+          "live": {
+            "FCLK_Hz": 49999999,
+            "actual_link_Hz": 24999999.5,
+            "JTAG_sampling_mode": 0,
+            "RISC_V_SBA_enabled": true
+          }
+        },
+        "readMBs": 0.031177498614844795,
+        "writeMBs": 0.03437063391853018,
+        "byteExact": true
+      },
+      {
+        "backend": "A",
+        "turn": 6,
+        "mode": "text",
+        "size": 65536,
+        "read": {
+          "seconds": 2.4377143000019714,
+          "commandMs": 2430.9998,
+          "usbCalls": {
+            "write": 993,
+            "read": 993,
+            "cmd_0x14": 993
+          },
+          "usbSeconds": 1.5673315,
+          "packetDepthObserved": 1
+        },
+        "write": {
+          "seconds": 1.9302021999974386,
+          "commandMs": 1922.0405,
+          "usbCalls": {
+            "write": 1057,
+            "read": 1057,
+            "cmd_0x14": 1057
+          },
+          "usbSeconds": 1.5664104,
+          "packetDepthObserved": 1
+        },
+        "settings": {
+          "wasmSha256": "098be8c32791c5a24573a605292aec2cfe7d1a7d2d0dacc030006a723b5918dc",
+          "jsSha256": "c4e99f080fbf6b50204a01d626fd650ef9b92e90969d5062580c27e589b81279",
+          "idcode": 268457533,
+          "version": "Open On-Chip Debugger 0.12.0+dev-g9f2d876-dirty (2026-11-08-19:23)",
+          "target": "running",
+          "clock": "adapter speed: 25000 kHz",
+          "live": {
+            "FCLK_Hz": 49999999,
+            "actual_link_Hz": 24999999.5,
+            "JTAG_sampling_mode": 0,
+            "RISC_V_SBA_enabled": true
+          }
+        },
+        "readMBs": 0.026884200498781586,
+        "writeMBs": 0.033952919543914606,
+        "byteExact": true
+      },
+      {
+        "backend": "A",
+        "turn": 6,
+        "mode": "image",
+        "size": 65536,
+        "read": {
+          "seconds": 1.8452135999978054,
+          "commandMs": 1843.828599999999,
+          "usbCalls": {
+            "write": 904,
+            "read": 904,
+            "cmd_0x14": 904
+          },
+          "usbSeconds": 1.5347979,
+          "packetDepthObserved": 1
+        },
+        "write": {
+          "seconds": 1.8946461999948951,
+          "commandMs": 1893.7873,
+          "usbCalls": {
+            "write": 1027,
+            "read": 1027,
+            "cmd_0x14": 1027
+          },
+          "usbSeconds": 1.5576102,
+          "packetDepthObserved": 1
+        },
+        "settings": {
+          "wasmSha256": "098be8c32791c5a24573a605292aec2cfe7d1a7d2d0dacc030006a723b5918dc",
+          "jsSha256": "c4e99f080fbf6b50204a01d626fd650ef9b92e90969d5062580c27e589b81279",
+          "idcode": 268457533,
+          "version": "Open On-Chip Debugger 0.12.0+dev-g9f2d876-dirty (2026-11-08-19:23)",
+          "target": "running",
+          "clock": "adapter speed: 25000 kHz",
+          "live": {
+            "FCLK_Hz": 49999999,
+            "actual_link_Hz": 24999999.5,
+            "JTAG_sampling_mode": 0,
+            "RISC_V_SBA_enabled": true
+          }
+        },
+        "readMBs": 0.03551675535020875,
+        "writeMBs": 0.03459009919644975,
+        "byteExact": true
+      },
+      {
+        "backend": "B",
+        "turn": 7,
+        "mode": "text",
+        "size": 20480,
+        "read": {
+          "seconds": 0.6442248000021209,
+          "commandMs": 642.3979999999999,
+          "usbCalls": {
+            "write": 287,
+            "read": 287,
+            "cmd_0x14": 287
+          },
+          "usbSeconds": 0.4804508,
+          "packetDepthObserved": 1
+        },
+        "write": {
+          "seconds": 0.5877636000004713,
+          "commandMs": 585.2508,
+          "usbCalls": {
+            "write": 323,
+            "read": 323,
+            "cmd_0x14": 323
+          },
+          "usbSeconds": 0.4835892,
+          "packetDepthObserved": 1
+        },
+        "settings": {
+          "wasmSha256": "1977164ce62a8595753be9dfa741751c0b3f2459a95aa6bd03f25afe72d554fe",
+          "jsSha256": "5a55691c948f503d13bc233902d4a74782bee82e7276d9ad7d52d8394053700a",
+          "idcode": 268457533,
+          "version": "Open On-Chip Debugger 0.12.0+dev-g9f2d876-dirty (2026-11-09-13:36)",
+          "target": "running",
+          "clock": "adapter speed: 25000 kHz",
+          "live": {
+            "FCLK_Hz": 49999999,
+            "actual_link_Hz": 24999999.5,
+            "JTAG_sampling_mode": 0,
+            "RISC_V_SBA_enabled": true
+          }
+        },
+        "readMBs": 0.03179014530321182,
+        "writeMBs": 0.03484394065910781,
+        "byteExact": true
+      },
+      {
+        "backend": "B",
+        "turn": 7,
+        "mode": "text",
+        "size": 65536,
+        "read": {
+          "seconds": 2.371098499999789,
+          "commandMs": 2365.0343999999996,
+          "usbCalls": {
+            "write": 903,
+            "read": 903,
+            "cmd_0x14": 903
+          },
+          "usbSeconds": 1.5395792,
+          "packetDepthObserved": 1
+        },
+        "write": {
+          "seconds": 1.9209429999973509,
+          "commandMs": 1913.5369,
+          "usbCalls": {
+            "write": 1027,
+            "read": 1027,
+            "cmd_0x14": 1027
+          },
+          "usbSeconds": 1.555205,
+          "packetDepthObserved": 1
+        },
+        "settings": {
+          "wasmSha256": "1977164ce62a8595753be9dfa741751c0b3f2459a95aa6bd03f25afe72d554fe",
+          "jsSha256": "5a55691c948f503d13bc233902d4a74782bee82e7276d9ad7d52d8394053700a",
+          "idcode": 268457533,
+          "version": "Open On-Chip Debugger 0.12.0+dev-g9f2d876-dirty (2026-11-09-13:36)",
+          "target": "running",
+          "clock": "adapter speed: 25000 kHz",
+          "live": {
+            "FCLK_Hz": 49999999,
+            "actual_link_Hz": 24999999.5,
+            "JTAG_sampling_mode": 0,
+            "RISC_V_SBA_enabled": true
+          }
+        },
+        "readMBs": 0.027639509704048916,
+        "writeMBs": 0.03411657711868097,
+        "byteExact": true
+      },
+      {
+        "backend": "B",
+        "turn": 7,
+        "mode": "image",
+        "size": 65536,
+        "read": {
+          "seconds": 1.8712950999979512,
+          "commandMs": 1869.9809000000005,
+          "usbCalls": {
+            "write": 904,
+            "read": 904,
+            "cmd_0x14": 904
+          },
+          "usbSeconds": 1.5499685,
+          "packetDepthObserved": 1
+        },
+        "write": {
+          "seconds": 1.8990320000011707,
+          "commandMs": 1898.280999999999,
+          "usbCalls": {
+            "write": 1027,
+            "read": 1027,
+            "cmd_0x14": 1027
+          },
+          "usbSeconds": 1.5544304,
+          "packetDepthObserved": 1
+        },
+        "settings": {
+          "wasmSha256": "1977164ce62a8595753be9dfa741751c0b3f2459a95aa6bd03f25afe72d554fe",
+          "jsSha256": "5a55691c948f503d13bc233902d4a74782bee82e7276d9ad7d52d8394053700a",
+          "idcode": 268457533,
+          "version": "Open On-Chip Debugger 0.12.0+dev-g9f2d876-dirty (2026-11-09-13:36)",
+          "target": "running",
+          "clock": "adapter speed: 25000 kHz",
+          "live": {
+            "FCLK_Hz": 49999999,
+            "actual_link_Hz": 24999999.5,
+            "JTAG_sampling_mode": 0,
+            "RISC_V_SBA_enabled": true
+          }
+        },
+        "readMBs": 0.03502173441274536,
+        "writeMBs": 0.034510213624604325,
+        "byteExact": true
+      },
+      {
+        "backend": "native",
+        "turn": 8,
+        "mode": "native",
+        "size": 20480,
+        "read": {
+          "seconds": 0.012960400003066752,
+          "usbDepth": 10,
+          "packetBytes": 2048
+        },
+        "write": {
+          "seconds": 0.012901300004159566,
+          "usbDepth": 10,
+          "packetBytes": 2048
+        },
+        "settings": {
+          "idle": 8,
+          "live": {
+            "FCLK_Hz": 49999999,
+            "actual_link_Hz": 24999999.5,
+            "JTAG_sampling_mode": 0,
+            "RISC_V_SBA_enabled": true
+          }
+        },
+        "readMBs": 1.5801981416587392,
+        "writeMBs": 1.5874369244492377,
+        "byteExact": true
+      },
+      {
+        "backend": "native",
+        "turn": 8,
+        "mode": "native",
+        "size": 65536,
+        "read": {
+          "seconds": 0.04029660000378499,
+          "usbDepth": 32,
+          "packetBytes": 2048
+        },
+        "write": {
+          "seconds": 0.040462400000251364,
+          "usbDepth": 32,
+          "packetBytes": 2048
+        },
+        "settings": {
+          "idle": 8,
+          "live": {
+            "FCLK_Hz": 49999999,
+            "actual_link_Hz": 24999999.5,
+            "JTAG_sampling_mode": 0,
+            "RISC_V_SBA_enabled": true
+          }
+        },
+        "readMBs": 1.6263406836766456,
+        "writeMBs": 1.6196765391967078,
+        "byteExact": true
+      },
+      {
+        "backend": "A-rebuilt",
+        "turn": 9,
+        "mode": "text",
+        "size": 20480,
+        "read": {
+          "seconds": 0.6549756000022171,
+          "commandMs": 652.9889,
+          "usbCalls": {
+            "write": 311,
+            "read": 311,
+            "cmd_0x14": 311
+          },
+          "usbSeconds": 0.4884479,
+          "packetDepthObserved": 1
+        },
+        "write": {
+          "seconds": 0.5947614000033354,
+          "commandMs": 592.1197000000002,
+          "usbCalls": {
+            "write": 331,
+            "read": 331,
+            "cmd_0x14": 331
+          },
+          "usbSeconds": 0.486311,
+          "packetDepthObserved": 1
+        },
+        "settings": {
+          "wasmSha256": "c86eb0e32322668987839791f2e7e2fac6f2d058f9d6a02cd2e6804847579b63",
+          "jsSha256": "5a55691c948f503d13bc233902d4a74782bee82e7276d9ad7d52d8394053700a",
+          "idcode": 268457533,
+          "version": "Open On-Chip Debugger 0.12.0+dev-g9f2d876-dirty (2026-11-09-13:36)",
+          "target": "running",
+          "clock": "adapter speed: 25000 kHz",
+          "live": {
+            "FCLK_Hz": 49999999,
+            "actual_link_Hz": 24999999.5,
+            "JTAG_sampling_mode": 0,
+            "RISC_V_SBA_enabled": true
+          }
+        },
+        "readMBs": 0.03126834037776472,
+        "writeMBs": 0.034433976380923756,
+        "byteExact": true
+      },
+      {
+        "backend": "A-rebuilt",
+        "turn": 9,
+        "mode": "text",
+        "size": 65536,
+        "read": {
+          "seconds": 2.441942999997991,
+          "commandMs": 2435.221,
+          "usbCalls": {
+            "write": 993,
+            "read": 993,
+            "cmd_0x14": 993
+          },
+          "usbSeconds": 1.5650096,
+          "packetDepthObserved": 1
+        },
+        "write": {
+          "seconds": 1.942064599999867,
+          "commandMs": 1934.5006000000003,
+          "usbCalls": {
+            "write": 1057,
+            "read": 1057,
+            "cmd_0x14": 1057
+          },
+          "usbSeconds": 1.567853,
+          "packetDepthObserved": 1
+        },
+        "settings": {
+          "wasmSha256": "c86eb0e32322668987839791f2e7e2fac6f2d058f9d6a02cd2e6804847579b63",
+          "jsSha256": "5a55691c948f503d13bc233902d4a74782bee82e7276d9ad7d52d8394053700a",
+          "idcode": 268457533,
+          "version": "Open On-Chip Debugger 0.12.0+dev-g9f2d876-dirty (2026-11-09-13:36)",
+          "target": "running",
+          "clock": "adapter speed: 25000 kHz",
+          "live": {
+            "FCLK_Hz": 49999999,
+            "actual_link_Hz": 24999999.5,
+            "JTAG_sampling_mode": 0,
+            "RISC_V_SBA_enabled": true
+          }
+        },
+        "readMBs": 0.026837645268564383,
+        "writeMBs": 0.03374553040099927,
+        "byteExact": true
+      },
+      {
+        "backend": "A-rebuilt",
+        "turn": 9,
+        "mode": "image",
+        "size": 65536,
+        "read": {
+          "seconds": 1.863390899998194,
+          "commandMs": 1862.3647,
+          "usbCalls": {
+            "write": 904,
+            "read": 904,
+            "cmd_0x14": 904
+          },
+          "usbSeconds": 1.5397434,
+          "packetDepthObserved": 1
+        },
+        "write": {
+          "seconds": 1.8991045000002487,
+          "commandMs": 1898.255799999999,
+          "usbCalls": {
+            "write": 1027,
+            "read": 1027,
+            "cmd_0x14": 1027
+          },
+          "usbSeconds": 1.5522879,
+          "packetDepthObserved": 1
+        },
+        "settings": {
+          "wasmSha256": "c86eb0e32322668987839791f2e7e2fac6f2d058f9d6a02cd2e6804847579b63",
+          "jsSha256": "5a55691c948f503d13bc233902d4a74782bee82e7276d9ad7d52d8394053700a",
+          "idcode": 268457533,
+          "version": "Open On-Chip Debugger 0.12.0+dev-g9f2d876-dirty (2026-11-09-13:36)",
+          "target": "running",
+          "clock": "adapter speed: 25000 kHz",
+          "live": {
+            "FCLK_Hz": 49999999,
+            "actual_link_Hz": 24999999.5,
+            "JTAG_sampling_mode": 0,
+            "RISC_V_SBA_enabled": true
+          }
+        },
+        "readMBs": 0.03517029089283602,
+        "writeMBs": 0.03450889616658347,
+        "byteExact": true
+      },
+      {
+        "backend": "A-rebuilt",
+        "turn": 10,
+        "mode": "text",
+        "size": 20480,
+        "read": {
+          "seconds": 0.6566221000030055,
+          "commandMs": 654.7252999999998,
+          "usbCalls": {
+            "write": 311,
+            "read": 311,
+            "cmd_0x14": 311
+          },
+          "usbSeconds": 0.4892695,
+          "packetDepthObserved": 1
+        },
+        "write": {
+          "seconds": 0.5949854999998934,
+          "commandMs": 592.2794999999999,
+          "usbCalls": {
+            "write": 331,
+            "read": 331,
+            "cmd_0x14": 331
+          },
+          "usbSeconds": 0.4883788,
+          "packetDepthObserved": 1
+        },
+        "settings": {
+          "wasmSha256": "c86eb0e32322668987839791f2e7e2fac6f2d058f9d6a02cd2e6804847579b63",
+          "jsSha256": "5a55691c948f503d13bc233902d4a74782bee82e7276d9ad7d52d8394053700a",
+          "idcode": 268457533,
+          "version": "Open On-Chip Debugger 0.12.0+dev-g9f2d876-dirty (2026-11-09-13:36)",
+          "target": "running",
+          "clock": "adapter speed: 25000 kHz",
+          "live": {
+            "FCLK_Hz": 49999999,
+            "actual_link_Hz": 24999999.5,
+            "JTAG_sampling_mode": 0,
+            "RISC_V_SBA_enabled": true
+          }
+        },
+        "readMBs": 0.03118993405781843,
+        "writeMBs": 0.03442100689849361,
+        "byteExact": true
+      },
+      {
+        "backend": "A-rebuilt",
+        "turn": 10,
+        "mode": "text",
+        "size": 65536,
+        "read": {
+          "seconds": 2.4712631999937003,
+          "commandMs": 2463.9752999999996,
+          "usbCalls": {
+            "write": 993,
+            "read": 993,
+            "cmd_0x14": 993
+          },
+          "usbSeconds": 1.5768207,
+          "packetDepthObserved": 1
+        },
+        "write": {
+          "seconds": 1.9392233000035048,
+          "commandMs": 1931.8255,
+          "usbCalls": {
+            "write": 1057,
+            "read": 1057,
+            "cmd_0x14": 1057
+          },
+          "usbSeconds": 1.5684801,
+          "packetDepthObserved": 1
+        },
+        "settings": {
+          "wasmSha256": "c86eb0e32322668987839791f2e7e2fac6f2d058f9d6a02cd2e6804847579b63",
+          "jsSha256": "5a55691c948f503d13bc233902d4a74782bee82e7276d9ad7d52d8394053700a",
+          "idcode": 268457533,
+          "version": "Open On-Chip Debugger 0.12.0+dev-g9f2d876-dirty (2026-11-09-13:36)",
+          "target": "running",
+          "clock": "adapter speed: 25000 kHz",
+          "live": {
+            "FCLK_Hz": 49999999,
+            "actual_link_Hz": 24999999.5,
+            "JTAG_sampling_mode": 0,
+            "RISC_V_SBA_enabled": true
+          }
+        },
+        "readMBs": 0.026519231136597293,
+        "writeMBs": 0.03379497348236356,
+        "byteExact": true
+      },
+      {
+        "backend": "A-rebuilt",
+        "turn": 10,
+        "mode": "image",
+        "size": 65536,
+        "read": {
+          "seconds": 1.8717172000033315,
+          "commandMs": 1870.4457000000002,
+          "usbCalls": {
+            "write": 904,
+            "read": 904,
+            "cmd_0x14": 904
+          },
+          "usbSeconds": 1.544894,
+          "packetDepthObserved": 1
+        },
+        "write": {
+          "seconds": 1.9108654000010574,
+          "commandMs": 1910.0847000000012,
+          "usbCalls": {
+            "write": 1027,
+            "read": 1027,
+            "cmd_0x14": 1027
+          },
+          "usbSeconds": 1.5624304,
+          "packetDepthObserved": 1
+        },
+        "settings": {
+          "wasmSha256": "c86eb0e32322668987839791f2e7e2fac6f2d058f9d6a02cd2e6804847579b63",
+          "jsSha256": "5a55691c948f503d13bc233902d4a74782bee82e7276d9ad7d52d8394053700a",
+          "idcode": 268457533,
+          "version": "Open On-Chip Debugger 0.12.0+dev-g9f2d876-dirty (2026-11-09-13:36)",
+          "target": "running",
+          "clock": "adapter speed: 25000 kHz",
+          "live": {
+            "FCLK_Hz": 49999999,
+            "actual_link_Hz": 24999999.5,
+            "JTAG_sampling_mode": 0,
+            "RISC_V_SBA_enabled": true
+          }
+        },
+        "readMBs": 0.03501383649190345,
+        "writeMBs": 0.034296502516589465,
+        "byteExact": true
+      }
+    ],
+    "restored": true,
+    "probeBefore": {
+      "recordedAtUtc": "2026-11-09T13:45:29.645307+00:00",
+      "registers": {
+        "FCLK0_CTRL": "0x2400100",
+        "FCLK1_CTRL": "0x900100",
+        "ARM_PLL": "0x28008",
+        "DDR_PLL": "0x20008",
+        "IO_PLL": "0x36008",
+        "CPU_CTRL": "0x1f000200",
+        "DDR_CTRL": "0xc200003",
+        "USB0_CTRL": "0x101941",
+        "USB1_CTRL": "0x101941",
+        "FEATURES": "0x30f",
+        "CAPTURE": "0x8",
+        "SWD_STATUS": "0x0",
+        "PACKET_STATUS": "0x0",
+        "DDR_STATUS": "0x0",
+        "CDMA_STATUS": "0x1002"
+      },
+      "allObservedEnginesIdle": true,
+      "xsctOutput": "SNAP FCLK0_CTRL 02400100\nSNAP FCLK1_CTRL 00900100\nSNAP ARM_PLL 00028008\nSNAP DDR_PLL 00020008\nSNAP IO_PLL 00036008\nSNAP CPU_CTRL 1F000200\nSNAP DDR_CTRL 0C200003\nSNAP USB0_CTRL 00101941\nSNAP USB1_CTRL 00101941\nSNAP FEATURES 0000030F\nSNAP CAPTURE 00000008\nSNAP SWD_STATUS 00000000\nSNAP PACKET_STATUS 00000000\nSNAP DDR_STATUS 00000000\nSNAP CDMA_STATUS 00001002\n"
+    },
+    "independentReadback": [
+      {
+        "turn": 0,
+        "backend": "A",
+        "match": true
+      },
+      {
+        "turn": 1,
+        "backend": "B",
+        "match": true
+      },
+      {
+        "turn": 2,
+        "backend": "native",
+        "match": true
+      },
+      {
+        "turn": 3,
+        "backend": "B",
+        "match": true
+      },
+      {
+        "turn": 4,
+        "backend": "A",
+        "match": true
+      },
+      {
+        "turn": 5,
+        "backend": "native",
+        "match": true
+      },
+      {
+        "turn": 6,
+        "backend": "A",
+        "match": true
+      },
+      {
+        "turn": 7,
+        "backend": "B",
+        "match": true
+      },
+      {
+        "turn": 8,
+        "backend": "native",
+        "match": true
+      },
+      {
+        "turn": 9,
+        "backend": "A-rebuilt",
+        "match": true
+      },
+      {
+        "turn": 10,
+        "backend": "A-rebuilt",
+        "match": true
+      }
+    ],
+    "finalClock": {
+      "FCLK_Hz": 49999999,
+      "actual_TCK_Hz": 24999999.5,
+      "JTAG_sampling_mode": 0,
+      "cfg": "0x20081",
+      "dmi_idle_min": 8,
+      "clock_source": "PS FCLK divider and PL half_delay registers",
+      "idle_csr": 8,
+      "effective_dmi_idle": 8,
+      "idle_limit": 64
+    },
+    "heartbeats": [
+      42972031,
+      42973044
+    ],
+    "finalDmstatus": "0x430ca2",
+    "probeAfter": {
+      "recordedAtUtc": "2026-11-09T13:47:36.767600+00:00",
+      "registers": {
+        "FCLK0_CTRL": "0x2400100",
+        "FCLK1_CTRL": "0x900100",
+        "ARM_PLL": "0x28008",
+        "DDR_PLL": "0x20008",
+        "IO_PLL": "0x36008",
+        "CPU_CTRL": "0x1f000200",
+        "DDR_CTRL": "0xc200003",
+        "USB0_CTRL": "0x101941",
+        "USB1_CTRL": "0x101941",
+        "FEATURES": "0x30f",
+        "CAPTURE": "0x8",
+        "SWD_STATUS": "0x0",
+        "PACKET_STATUS": "0x0",
+        "DDR_STATUS": "0x0",
+        "CDMA_STATUS": "0x1002"
+      },
+      "allObservedEnginesIdle": true,
+      "xsctOutput": "SNAP FCLK0_CTRL 02400100\nSNAP FCLK1_CTRL 00900100\nSNAP ARM_PLL 00028008\nSNAP DDR_PLL 00020008\nSNAP IO_PLL 00036008\nSNAP CPU_CTRL 1F000200\nSNAP DDR_CTRL 0C200003\nSNAP USB0_CTRL 00101941\nSNAP USB1_CTRL 00101941\nSNAP FEATURES 0000030F\nSNAP CAPTURE 00000008\nSNAP SWD_STATUS 00000000\nSNAP PACKET_STATUS 00000000\nSNAP DDR_STATUS 00000000\nSNAP CDMA_STATUS 00001002\n"
+    }
+  },
+  "summary": {
+    "text20480": {
+      "A": {
+        "read": {
+          "wallMBs": 0.03124161945063946,
+          "repetitionsMBs": [
+            0.03139414211075673,
+            0.03124161945063946,
+            0.031177498614844795
+          ],
+          "cmd0x14": 311,
+          "maxDepth": 1,
+          "wasmCommandMBs": 0.031323385507366956
+        },
+        "write": {
+          "wallMBs": 0.03437063391853018,
+          "repetitionsMBs": [
+            0.03414589333116685,
+            0.03454341549054477,
+            0.03437063391853018
+          ],
+          "cmd0x14": 331,
+          "maxDepth": 1,
+          "wasmCommandMBs": 0.03451554117857428
+        }
+      },
+      "B": {
+        "read": {
+          "wallMBs": 0.03179014530321182,
+          "repetitionsMBs": [
+            0.03159456277291302,
+            0.03183915258121509,
+            0.03179014530321182
+          ],
+          "cmd0x14": 287,
+          "maxDepth": 1,
+          "wasmCommandMBs": 0.031880547573311255
+        },
+        "write": {
+          "wallMBs": 0.03475716064552481,
+          "repetitionsMBs": [
+            0.03457977552521805,
+            0.03475716064552481,
+            0.03484394065910781
+          ],
+          "cmd0x14": 323,
+          "maxDepth": 1,
+          "wasmCommandMBs": 0.03492410827564944
+        }
+      },
+      "A-rebuilt": {
+        "read": {
+          "wallMBs": 0.031229137217791574,
+          "repetitionsMBs": [
+            0.03126834037776472,
+            0.03118993405781843
+          ],
+          "cmd0x14": 311,
+          "maxDepth": 1,
+          "wasmCommandMBs": 0.0313218838001398
+        },
+        "write": {
+          "wallMBs": 0.03442749163970868,
+          "repetitionsMBs": [
+            0.034433976380923756,
+            0.03442100689849361
+          ],
+          "cmd0x14": 331,
+          "maxDepth": 1,
+          "wasmCommandMBs": 0.03458293516714598
+        }
+      },
+      "native": {
+        "read": {
+          "wallMBs": 1.5894697625484728,
+          "repetitionsMBs": [
+            1.596072166584374,
+            1.5894697625484728,
+            1.5801981416587392
+          ]
+        },
+        "write": {
+          "wallMBs": 1.582518120553097,
+          "repetitionsMBs": [
+            1.5686634955018839,
+            1.582518120553097,
+            1.5874369244492377
+          ]
+        }
+      },
+      "B_vs_A_pct": {
+        "read": 1.7557535819774372,
+        "write": 1.1245842247507687
+      },
+      "B_vs_rebuilt_pct": {
+        "read": 1.7964251830199007,
+        "write": 0.9575748627468794
+      }
+    },
+    "text65536": {
+      "A": {
+        "read": {
+          "wallMBs": 0.026884200498781586,
+          "repetitionsMBs": [
+            0.026884819208897265,
+            0.026718918373083957,
+            0.026884200498781586
+          ],
+          "cmd0x14": 993,
+          "maxDepth": 1,
+          "wasmCommandMBs": 0.026953687908242305
+        },
+        "write": {
+          "wallMBs": 0.033952919543914606,
+          "repetitionsMBs": [
+            0.033965990681211644,
+            0.033765194234443456,
+            0.033952919543914606
+          ],
+          "cmd0x14": 1057,
+          "maxDepth": 1,
+          "wasmCommandMBs": 0.034096516199278976
+        }
+      },
+      "B": {
+        "read": {
+          "wallMBs": 0.027400531755026436,
+          "repetitionsMBs": [
+            0.027297127458006772,
+            0.027400531755026436,
+            0.027639509704048916
+          ],
+          "cmd0x14": 903,
+          "maxDepth": 1,
+          "wasmCommandMBs": 0.02747296279990808
+        },
+        "write": {
+          "wallMBs": 0.03412109061497217,
+          "repetitionsMBs": [
+            0.03412109061497217,
+            0.03435943451839698,
+            0.03411657711868097
+          ],
+          "cmd0x14": 1027,
+          "maxDepth": 1,
+          "wasmCommandMBs": 0.03425368329277329
+        }
+      },
+      "A-rebuilt": {
+        "read": {
+          "wallMBs": 0.02667843820258084,
+          "repetitionsMBs": [
+            0.026837645268564383,
+            0.026519231136597293
+          ],
+          "cmd0x14": 993,
+          "maxDepth": 1,
+          "wasmCommandMBs": 0.026754697548989723
+        },
+        "write": {
+          "wallMBs": 0.033770251941681415,
+          "repetitionsMBs": [
+            0.03374553040099927,
+            0.03379497348236356
+          ],
+          "cmd0x14": 1057,
+          "maxDepth": 1,
+          "wasmCommandMBs": 0.03390093317452861
+        }
+      },
+      "native": {
+        "read": {
+          "wallMBs": 1.6255540590696393,
+          "repetitionsMBs": [
+            1.6242165289622315,
+            1.6255540590696393,
+            1.6263406836766456
+          ]
+        },
+        "write": {
+          "wallMBs": 1.6196765391967078,
+          "repetitionsMBs": [
+            1.620834209318458,
+            1.6169311960645412,
+            1.6196765391967078
+          ]
+        }
+      },
+      "B_vs_A_pct": {
+        "read": 1.9205750837494762,
+        "write": 0.49530665791508444
+      },
+      "B_vs_rebuilt_pct": {
+        "read": 2.706656015477482,
+        "write": 1.038898596008786
+      }
+    },
+    "image65536": {
+      "A": {
+        "read": {
+          "wallMBs": 0.035212455718517534,
+          "repetitionsMBs": [
+            0.035212455718517534,
+            0.03514675335516622,
+            0.03551675535020875
+          ],
+          "cmd0x14": 904,
+          "maxDepth": 1,
+          "wasmCommandMBs": 0.035232076844806656
+        },
+        "write": {
+          "wallMBs": 0.03455839985158338,
+          "repetitionsMBs": [
+            0.034437390379815,
+            0.03455839985158338,
+            0.03459009919644975
+          ],
+          "cmd0x14": 1027,
+          "maxDepth": 1,
+          "wasmCommandMBs": 0.034573458866810784
+        }
+      },
+      "B": {
+        "read": {
+          "wallMBs": 0.0350551355083829,
+          "repetitionsMBs": [
+            0.03507440332278082,
+            0.0350551355083829,
+            0.03502173441274536
+          ],
+          "cmd0x14": 904,
+          "maxDepth": 1,
+          "wasmCommandMBs": 0.03507581875645368
+        },
+        "write": {
+          "wallMBs": 0.03443544698821652,
+          "repetitionsMBs": [
+            0.03443544698821652,
+            0.034427134860840675,
+            0.034510213624604325
+          ],
+          "cmd0x14": 1027,
+          "maxDepth": 1,
+          "wasmCommandMBs": 0.03444964929546324
+        }
+      },
+      "A-rebuilt": {
+        "read": {
+          "wallMBs": 0.03509206369236974,
+          "repetitionsMBs": [
+            0.03517029089283602,
+            0.03501383649190345
+          ],
+          "cmd0x14": 904,
+          "maxDepth": 1,
+          "wasmCommandMBs": 0.035113654389081275
+        },
+        "write": {
+          "wallMBs": 0.03440269934158647,
+          "repetitionsMBs": [
+            0.03450889616658347,
+            0.034296502516589465
+          ],
+          "cmd0x14": 1027,
+          "maxDepth": 1,
+          "wasmCommandMBs": 0.03441742263757167
+        }
+      },
+      "native": {
+        "read": {
+          "wallMBs": 1.6255540590696393,
+          "repetitionsMBs": [
+            1.6242165289622315,
+            1.6255540590696393,
+            1.6263406836766456
+          ]
+        },
+        "write": {
+          "wallMBs": 1.6196765391967078,
+          "repetitionsMBs": [
+            1.620834209318458,
+            1.6169311960645412,
+            1.6196765391967078
+          ]
+        }
+      },
+      "B_vs_A_pct": {
+        "read": -0.44677432154185404,
+        "write": -0.35578286001348713
+      },
+      "B_vs_rebuilt_pct": {
+        "read": -0.10523229500141174,
+        "write": 0.09518917775868108
+      }
+    }
+  },
+  "rejectedIncrementalBuild": {
+    "excludedRows": 8,
+    "restored": true,
+    "cause": "MSYS2 configured build did not rebuild CMSIS-DAP transport objects after changing shared header"
+  },
+  "transport": "Node.js OpenOCD dispatcher over existing Python/WinUSB adapter; no browser, HTTP or web worker service",
+  "finalOCM": {
+    "elf_sha256": "5895eeb0e79a3681a6b3b966dbea4c82ebfcd01ea7553e094d8a61ed2cf89802",
+    "expected_executable_bytes": 85844,
+    "passed": true,
+    "initial_FCLK_Hz": 49999999
+  },
+  "handback": {
+    "ownedHardwarePids": [
+      12544
+    ],
+    "tempRetained": true,
+    "remainingTaskProcesses": 0,
+    "browserStarted": false
+  }
+}
