@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 import sys
 import tempfile
 import unittest
@@ -7,7 +8,21 @@ import json
 import zipfile
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[2]))
-from tools.build_bridge import publish,archive_application
+from tools.build_bridge import publish,archive_application,prepare_desktop_launcher
+
+
+class DesktopImageIntegrityTests(unittest.TestCase):
+    def test_known_helpers_are_prepared_without_relabeling_user_files(self):
+        if os.name != 'nt':self.skipTest('Windows desktop integrity labels')
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp);launcher=root/'zynq-etm-bridge.exe';launcher.write_bytes(b'launcher')
+            helper=root/'_internal/backend/build-native/etm_framed.exe';helper.parent.mkdir(parents=True);helper.write_bytes(b'helper')
+            user=root/'data/user.exe';user.parent.mkdir();user.write_bytes(b'user')
+            with patch('tools.build_bridge.subprocess.run') as run:
+                run.return_value.returncode=0
+                prepare_desktop_launcher(launcher)
+            self.assertEqual([Path(c.args[0][1]) for c in run.call_args_list],[launcher,helper])
+            self.assertTrue(all(c.args[0][2:]==['/setintegritylevel','M'] for c in run.call_args_list))
 
 
 class PublishTests(unittest.TestCase):

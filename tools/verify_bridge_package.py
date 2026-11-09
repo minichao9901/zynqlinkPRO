@@ -9,6 +9,7 @@ from pathlib import Path
 import socket
 import subprocess
 import sys
+import tempfile
 import time
 from urllib.error import HTTPError
 from urllib.request import Request,urlopen
@@ -17,6 +18,21 @@ import xml.etree.ElementTree as ET
 import zipfile
 
 ROOT=Path(__file__).resolve().parents[1]
+
+
+def verify_native_user_output(package, env):
+    # Checkout/output can both inherit Low MIC and hide a helper-label bug.
+    # Exercise the child in the normal system temporary directory instead.
+    with tempfile.TemporaryDirectory(prefix='zynq-bridge-native-output-') as external:
+        external=Path(external);source=external/'capture.frm1';source.write_bytes(bytes([5,16])+bytes(14))
+        converted=subprocess.run([str(package/'_internal/backend/build-native/etm_framed.exe'),
+            str(source),str(external/'demux'),'--tail-bytes','0'],env=env,capture_output=True,timeout=30)
+        if converted.returncode:
+            raise ValueError('交付辅助程序不能写入普通用户目录：'+converted.stderr.decode('utf8','replace'))
+        result=json.loads((external/'demux/result.json').read_text(encoding='utf8'))
+        assert result['protocol']=='etm-framed-native/1' and result['streams']['2']==14
+        return {'passed':True,'streams':result['streams'],
+            'location':'system temporary directory, outside checkout','hardwareAccess':False}
 
 
 def main(argv=None):
@@ -53,6 +69,7 @@ def main(argv=None):
         'package':str(package),'sourceRevision':manifest['sourceRevision'],'packageFilesVerified':len(manifest['files']),'records':[]}
     passed=False
     try:
+        report['nativeHelperExternalOutput']=verify_native_user_output(package,env)
         deadline=time.monotonic()+30
         while True:
             try:health=api('health');break

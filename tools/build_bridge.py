@@ -19,6 +19,7 @@ import zipfile
 
 ROOT=Path(__file__).resolve().parents[1]
 DEPENDENCIES=('PyInstaller','Flask','Werkzeug','waitress','pyelftools','capstone','numpy','pandas','pyusb','libusb-package','hidapi','pyserial','Jinja2','MarkupSafe','itsdangerous','click')
+NATIVE_IMAGES=('etm_decode','etm_frontend','etm_storebuild','etm_index','etm_export','etm_framed')
 
 
 def sha(path):
@@ -26,7 +27,7 @@ def sha(path):
 
 
 def prepare_desktop_launcher(executable):
-    """Only the delivered launcher gets the normal desktop integrity label.
+    """Give delivered runtime images the normal desktop integrity label.
 
     Build workspaces can inherit Low MIC. Executing a Low-labelled image lowers
     its process and browser children even from a normal desktop user token.
@@ -34,11 +35,18 @@ def prepare_desktop_launcher(executable):
     """
     if os.name != 'nt':
         return
-    result = subprocess.run([str(Path(os.environ['SystemRoot'])/'System32/icacls.exe'),
-        str(executable), '/setintegritylevel', 'M'], capture_output=True)
-    if result.returncode:
-        raise ValueError('无法设置交付启动器的标准桌面完整性标签：' +
-                         result.stderr.decode('utf8', 'replace'))
+    executable=Path(executable)
+    # Only these package-owned images are executable children. Never relabel
+    # the checkout, a directory tree, or anything inside the user's data/.
+    images=[executable]+[executable.parent/'_internal/backend/build-native'/(name+'.exe')
+                         for name in NATIVE_IMAGES]
+    for image in images:
+        if image != executable and not image.is_file():continue
+        result = subprocess.run([str(Path(os.environ['SystemRoot'])/'System32/icacls.exe'),
+            str(image), '/setintegritylevel', 'M'], capture_output=True)
+        if result.returncode:
+            raise ValueError('无法设置交付程序的标准桌面完整性标签：' + str(image) + '：' +
+                             result.stderr.decode('utf8', 'replace'))
 
 
 def tracked():
@@ -186,7 +194,7 @@ def main(argv=None):
         # An in-tree CMake build also contains caches, objects and vendor
         # archives. Only these statically linked runtime tools ship to users.
         native=payload/'build-native';native.mkdir()
-        for name in ('etm_decode','etm_frontend','etm_storebuild','etm_index','etm_export','etm_framed'):
+        for name in NATIVE_IMAGES:
             shutil.copyfile(ROOT/'etm-service/build-native'/(name+'.exe'),native/(name+'.exe'))
         shutil.copyfile(ROOT/'etm-service/build-native/libdwarf.dll',native/'libdwarf.dll')
         helpers=work/'hosttools';helpers.mkdir()
@@ -265,7 +273,7 @@ def main(argv=None):
             raise ValueError('候选包缺少有效的 OpenOCD Wasm')
         files=[dict(path=p.relative_to(package).as_posix(),bytes=p.stat().st_size,sha256=sha(p)) for p in sorted(package.rglob('*')) if p.is_file()]
         manifest=dict(schema=1,platform='windows-x64',sourceRevision=revision,
-            desktopLauncherIntegrity='medium',
+            desktopLauncherIntegrity='medium',nativeHelperIntegrity='medium',
             debugBackend=dict(name='OpenOCD Wasm',sha256=sha(wasm),etmControl='mem-ap0',
                 scopePolling='target-memory',globalReset='cmsis-dap-swj-pins'),
             etmControlClockDefaultHz=10000000,
