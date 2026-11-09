@@ -137,6 +137,24 @@ int main(void) {
     timer+=2000;kick(&usb,&cdc);assert(cdc.busy && cdc.zlp && sent_len[3]==0 && cdc.out==1);
     probe_usb_event(&usb,3,XUSBPS_EP_EVENT_DATA_TX,(void *)sent_buffer[3]);
     assert(!cdc.busy && !cdc_needs_zlp && cdc.out==1); // ZLP owns no payload slot.
+    // Match the upstream stop-tail lengths on the Zynq endpoint. The data
+    // slot must retire independently of the optional short packet.
+    const uint16_t tail_lengths[] = {511,512,513,1024};
+    for (i=0; i<sizeof(tail_lengths)/sizeof(tail_lengths[0]); i++) {
+        uint32_t out=cdc.out;
+        cdc.len[out%QSIZE]=tail_lengths[i];cdc.in=out+1;
+        kick(&usb,&cdc);assert(cdc.busy && sent_len[3]==tail_lengths[i]);
+        probe_usb_event(&usb,3,XUSBPS_EP_EVENT_DATA_TX,(void *)sent_buffer[3]);
+        assert(!cdc.busy && cdc.out==out+1);
+        timer+=2000;
+        kick(&usb,&cdc);
+        if ((tail_lengths[i]%512U)==0U) {
+            assert(cdc.busy && cdc.zlp && sent_len[3]==0);
+            probe_usb_event(&usb,3,XUSBPS_EP_EVENT_DATA_TX,(void *)sent_buffer[3]);
+        }
+        assert(!cdc.busy && !cdc_needs_zlp && cdc.out==out+1);
+        kick(&usb,&cdc);assert(!cdc.busy);
+    }
     // Reset invalidates every old queue and stops sampling, including late completions.
     probe_usb_reset();probe_poll(&usb);assert(mode==0 && cdc.in==cdc.out && hss.in==hss.out && pending_len==0);
     probe_usb_event(&usb,3,XUSBPS_EP_EVENT_DATA_TX,(void *)(sent_buffer[3]+512));assert(cdc.out==0);

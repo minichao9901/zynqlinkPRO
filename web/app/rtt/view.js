@@ -7,6 +7,7 @@ import { store } from '../core/store.js';
 import { webClockKhz,isHpmClockTarget } from '../core/target-clock.js';
 import { constrainClockSelect } from '../ui/target-clock.js';
 import { RxBuffer } from '../core/rxview.js';
+import { AnsiDisplay, terminalBytes } from '../core/display-stream.js';
 import { FileRecorder, recordButtonState } from '../core/recorder.js';
 import { Rtt } from './protocol.js';
 import { OpenOcdProbe } from '../core/openocd-probe.js';
@@ -91,7 +92,7 @@ export class RttView {
     this.hist = [];
     this.histIdx = -1;
     this.rec = new FileRecorder();      // 高速采集落文件（见 core/recorder.js）
-    this._lastWasCR = false;            // 终端模式补 \r 用的跨包状态（\r\n 不能补成 \r\r\n）
+    this.lastWasCR = false;             // 终端模式补 CR 的跨包状态
     this.suppressed = false;            // 高速自动关显示（见 _highspeedGate）
     this.suppManual = false;            // 用户手动恢复过显示：暂不再自动关，速率回落后重新武装
     this.suppBytes = 0;                 // 关显示期间省略渲染的字节数
@@ -431,7 +432,7 @@ export class RttView {
   async _drainRtt(){
     const rtt = this.rtt;
     this.rtt = null;
-    await rtt?.drainWrites();
+    await rtt?.drain();
     await this._pollTask?.catch(() => {});
     this._pollTask = null;
   }
@@ -596,18 +597,17 @@ export class RttView {
   }
 
   _termWrite(bytes, t){
-    if (!this.term) return;
-    if (this.ts) this.term.write(`\x1b[90m[${stampOf(t)}]\x1b[0m `);
-    // 很多固件只发 \n 不发 \r，直接塞给 xterm 会变成阶梯状 → 按字节自动补 \r
-    //（和终端标签页 terminal.js 同一套规则；不能按字符串处理，多字节 UTF-8 会被拆坏）
-    const out = [];
-    for (let i = 0; i < bytes.length; i++){
-      const b = bytes[i];
-      if (b === 0x0a && !this._lastWasCR) out.push(0x0d);
-      out.push(b);
-      this._lastWasCR = (b === 0x0d);
-    }
-    this.term.write(Uint8Array.from(out));
+    this.ansiDisplay?.push(bytes, t);
+  }
+
+  _formatTerminal(bytes, t){
+    const body = terminalBytes(bytes, this);
+    if (!this.ts) return body;
+    const prefix = textToBytes(`\x1b[90m[${stampOf(t)}]\x1b[0m `);
+    const out = new Uint8Array(prefix.length + body.length);
+    out.set(prefix);
+    out.set(body, prefix.length);
+    return out;
   }
 
   _ensureTerm(){
@@ -621,6 +621,12 @@ export class RttView {
     try { this.fit = new FitAddon.FitAddon(); this.term.loadAddon(this.fit); } catch {}
     this._termStale = !$('tab-rtt').classList.contains('active');   // 在隐藏状态下创建的话，第一次显示时要重放
     this.term.open($('r-term'));
+    this.ansiDisplay = new AnsiDisplay(this.term, {
+      visible: () => this.mode === 'term' && !this.paused && $('tab-rtt').classList.contains('active'),
+      format: (bytes, t) => this._formatTerminal(bytes, t),
+      onSkip: () => { this.lastWasCR = false; },
+      onError: e => setStatus($('r-err'), '终端显示失败，接收和记录继续：' + e.message, 'err'),
+    });
     this.fit?.fit();
     // 允许直接在终端里敲（等价于下行 ch0），像 JLinkRTTViewer 的 Terminal 模式
     this.term.onData(d => {
@@ -637,6 +643,7 @@ export class RttView {
     if (this.mode !== 'term' || !this.term) return;
     try { this.fit?.fit(); } catch {}
     if (this._termStale){ this._redrawAll(); this._termStale = false; }
+    this.ansiDisplay?.flush();
   }
 
   _setMode(m){
@@ -656,6 +663,8 @@ export class RttView {
   _redrawAll(){
     if (this.mode === 'term'){
       if (!this.term) return;
+      this.ansiDisplay?.clear();
+      this.lastWasCR = false;
       this.term.clear();
       for (const r of this.records) this._termWrite(r.b, r.t);
     } else {
@@ -674,6 +683,8 @@ export class RttView {
   _clear(){
     this.records = []; this.recBytes = 0; this.truncated = false;
     this.tx.clear();
+    this.ansiDisplay?.clear();
+    this.lastWasCR = false;
     this.term?.clear();
     this._updateEmptyHint();
   }
@@ -822,7 +833,7 @@ export class RttView {
   static HS_ON  = 50 * 1024;    // 降到 50KB/s 以下才自动恢复（回滞）
 
   _highspeedGate(r){
-    if (!this.probe){
+    if (!this.probe || (this.probe.rttLivePreview && this.mode === 'term')){
       if (this.suppressed) this._setSuppressed(false);
       this.suppManual = false;
       return;

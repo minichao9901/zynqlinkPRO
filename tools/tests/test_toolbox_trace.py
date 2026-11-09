@@ -3,6 +3,7 @@ import importlib.util
 import io
 import json
 import os
+import subprocess
 from pathlib import Path
 import tempfile
 from types import SimpleNamespace
@@ -16,6 +17,26 @@ spec.loader.exec_module(trace)
 
 
 class TraceCaptureTests(unittest.TestCase):
+    def test_native_frontend_discards_temporary_report_on_timeout(self):
+        path = ROOT / 'etm-service/tools/native_frontend.py'
+        spec = importlib.util.spec_from_file_location('frontend_cleanup_test',path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        temporary = []
+        def time_out(binary,args,timeout):
+            report = Path(args[args.index('--json')+1])
+            self.assertTrue(report.exists())
+            temporary.append(report)
+            raise subprocess.TimeoutExpired(binary,timeout)
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory)/'fixture.kvdat'
+            source.touch()
+            with patch.object(module,'probe'), patch.object(module,'_run_binary',side_effect=time_out):
+                with self.assertRaisesRegex(module.NativeFrontendError,'原生前端超时'):
+                    module.run(source,binary='model')
+        self.assertEqual(len(temporary),1)
+        self.assertFalse(temporary[0].exists())
+
     def test_zynq_cli_selects_native_profile_before_capture_and_decode(self):
         original_board=self.board
         def board(*args,**kwargs):

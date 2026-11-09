@@ -280,7 +280,11 @@ export class Rtt {
    *   level = 环里**未读数据**占缓冲容量（size-1）的比例；high = 水位 ≥ 3/4；
    *   backlog = 这一轮读完还剩多少没读（>0 说明数据比链路快，下一轮接着排）。
    */
-  async readUp(ch = 0){
+  readUp(ch = 0){
+    return this._transaction(() => this._readUp(ch));
+  }
+
+  async _readUp(ch){
     const e = await this._entry(this.upBase, ch);            // 每次整项重读：WrOff/RdOff 一致，且能跟上固件重新初始化缓冲
     this.up[ch] = e;
     const empty = { bytes: new Uint8Array(0), lost: 0, full: false, high: false, level: 0, wr: e.wr, rd: e.rd, backlog: 0 };
@@ -390,12 +394,16 @@ export class Rtt {
   /** 写多少算多少（目标不来取就只能写满缓冲）；返回实际写入字节数 */
   writeDown(ch, bytes){
     const data = new Uint8Array(bytes);
-    const write = (this._downTail ?? Promise.resolve()).then(() => this._writeDown(ch, data));
-    this._downTail = write.catch(() => {});
-    return write;
+    return this._transaction(() => this._writeDown(ch, data));
   }
 
-  async drainWrites(){ await this._downTail; }
+  _transaction(operation){
+    const result = (this._pending ?? Promise.resolve()).then(operation);
+    this._pending = result.catch(() => {});
+    return result;
+  }
+
+  async drain(){ await this._pending; }
 
   async _writeDown(ch, data){
     if (!data.length) return 0;

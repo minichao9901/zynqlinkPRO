@@ -43,6 +43,7 @@ import { bytes as fmtBytes, fileStamp, download } from '../core/format.js';
 const CLOCKS = [[0, '自动'], [1000, '1 MHz'], [5000, '5 MHz'], [10000, '10 MHz'], [20000, '20 MHz'],
                 [30000, '30 MHz'], [40000, '40 MHz'], [45000, '45 MHz'], [50000, '50 MHz'], [60000, '60 MHz']];
 
+const SAMPLE_BUFFER_LIMIT = 128 * 1024 * 1024;
 const MAX_VARS = 8;
 const sleep = waitMs;
 
@@ -1001,26 +1002,16 @@ export class ScopeView {
      * 1.1 的余量够用：探针的周期是下限，实得速率不会超过名义速率；
      * 真超了也还有"缓冲满就停"兜底。老代码用 1.25 还指望它凑时长，白占 25% 内存。
      */
-    let capacity = Math.ceil(nominalHz * this.seconds() * 1.1) + 64;
+    const requested = Math.ceil(nominalHz * this.seconds() * 1.1) + 64;
+    const capacity = SampleStore.fitCapacity(vars, requested, SAMPLE_BUFFER_LIMIT);
     this._stopAfterUs = Math.round(this.seconds() * 1e6);
     this._stopReason = null;
-    /**
-     * 🚨 内存闸：周期可以设到 2 µs、时长可以设到几百秒，两者一乘就是几千万样本 ——
-     *    8 通道 × 2 B × 1200 万 = 两百多 MB，标签页会卡死甚至崩。
-     *    这里按"每样本字节数 × 通道数 × 1.35（LOD 开销）"估一下，超了就把容量砍到 256 MB 以内
-     *    并**明说**砍了多少（宁可少存点，也不能让页面挂掉还不知道为什么）。
-     */
-    const bytesPerFrame = vars.reduce((s, v) => s + (P.SCALARS[v.scalar]?.size || 4), 0);
+    // Raw USB retention is accounted for separately from typed samples.
+    const bytesPerFrame = vars.reduce((sum, v) => sum + (P.SCALARS[v.scalar]?.size || 4), 0);
     this._frameBytes = bytesPerFrame;
-    const LIMIT = 128 * 1024 * 1024;
-    let capNote = '';
-    const est = cap => cap * bytesPerFrame * 1.35 + vars.length * 8192;
-    if (est(capacity) > LIMIT){
-      const capped = Math.max(1024, Math.floor((LIMIT - vars.length * 8192) / (bytesPerFrame * 1.35)));
-      capNote = `　⚠️ 缓冲按内存上限（128 MB）从 ${capacity} 收到 ${capped} 个样本` +
-        `（${((capped / nominalHz)).toFixed(2)} s @${(nominalHz / 1000).toFixed(1)} kHz）`;
-      capacity = capped;
-    }
+    const capNote = capacity / nominalHz < this._stopAfterUs / 1e6
+      ? `　⚠️ 128 MiB 样本缓冲最多存 ${capacity} 组（${(capacity / nominalHz).toFixed(2)} s）`
+      : '';
     // DATA traffic includes the packet header and unused payload tail. There is
     // no fixed 1.75 MB/s ceiling; sustained throughput is measured separately.
     const wireBps = P.PACKET / Math.floor(P.PAYLOAD / bytesPerFrame) * nominalHz;
@@ -1874,6 +1865,8 @@ export class ScopeView {
         name:this.selected.find(s => s.addr === v.addr && s.scalar === v.scalar && s.size === v.size)?.name
           || '0x' + v.addr.toString(16),
       }));
+      const maxSamples = SampleStore.fitCapacity(vars, capacity, SAMPLE_BUFFER_LIMIT, { exactTime:host });
+      if (maxSamples !== capacity) throw Error(`回放包含 ${capacity} 组样本，超过 128 MiB 样本缓冲上限（可存 ${maxSamples} 组）`);
       this.sampleSource = host ? 'openocd-wasm' : 'replay';
       this.hostPollSkipped = 0;
       this.store = new SampleStore(vars, capacity, { exactTime:host });

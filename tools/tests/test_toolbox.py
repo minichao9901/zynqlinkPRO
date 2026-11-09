@@ -3,7 +3,9 @@ import json
 from pathlib import Path
 import sys
 import tempfile
+from types import SimpleNamespace
 import unittest
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
@@ -12,6 +14,37 @@ from tools.toolbox_catalog import full_catalog
 
 
 class ToolboxTests(unittest.TestCase):
+    def test_expired_worker_can_transfer_only_unclaimed_read_only_jobs(self):
+        from flask import Flask
+        spec = importlib.util.spec_from_file_location('queue_test', ROOT / 'etm-service/tools/web_cli_queue.py')
+        queue = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(queue)
+        for action, claim, expected in [('describe',False,200), ('describe',True,409), ('click',False,409)]:
+            with self.subTest(action=action, claimed=claim), tempfile.TemporaryDirectory() as directory:
+                clock = SimpleNamespace(now=100)
+                with patch.object(queue,'time',SimpleNamespace(monotonic=lambda:clock.now)), \
+                     patch.object(queue.threading.Condition,'wait',return_value=False):
+                    app = Flask(__name__)
+                    path = Path(directory) / 'token'
+                    queue.install_web_cli(app,path)
+                    client = app.test_client()
+                    headers = {'X-Trace-CLI':path.read_text()}
+                    old, new = {'worker':'a'*32}, {'worker':'b'*32}
+                    poll = lambda value: client.post('/trace-cli/poll',headers=headers,json=value)
+                    self.assertEqual(poll(old).status_code,200)
+                    job = client.post('/trace-cli/request',headers=headers,json={
+                        'action':'workbench','op':action,'page':'dbg',
+                    }).json['id']
+                    if claim:
+                        self.assertEqual(poll(old).json['job']['id'],job)
+                    self.assertEqual(poll(new).status_code,409)
+                    clock.now += 16
+                    self.assertFalse(client.get('/trace-cli/health',headers=headers).json['ready'])
+                    result = poll(new)
+                    self.assertEqual(result.status_code,expected)
+                    if expected == 200:
+                        self.assertEqual(result.json['job']['id'],job)
+
     def test_catalog_only_contains_shipped_pages_and_controls(self):
         catalog = full_catalog(ROOT, toolbox.catalog())
         self.assertEqual(len(catalog['pages']), 8)

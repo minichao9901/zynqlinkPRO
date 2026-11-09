@@ -72,6 +72,10 @@ test('the bundled Wasm registers ARM, HPM and RP2350 profiles and resolves impor
     assert.equal(await etm.command('capture {workbench.cpu cget -type}'), 'mem_ap');
     assert.equal(await etm.command('workbench.cpu cget -dap'), 'workbench.dap');
     assert.match(await etm.command('capture {adapter speed}'), /250 kHz/);
+    const first = Number(await etm.command('ms'));
+    await new Promise(resolve => setTimeout(resolve, 25));
+    const second = Number(await etm.command('ms'));
+    assert.ok(first >= 0 && second > first, `Wasm monotonic clock: ${first} → ${second}`);
   } finally { await etm.close(); }
 });
 

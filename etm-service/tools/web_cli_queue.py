@@ -6,6 +6,12 @@ import threading
 import time
 
 
+def _read_only_request(value):
+    return value['action'] in ('ping', 'status', 'help') or (
+        value['action'] == 'workbench' and
+        value.get('op') in ('describe', 'state', 'read', 'downloads'))
+
+
 def install_web_cli(app, token_file):
     from flask import request, jsonify, abort
     path = Path(token_file).resolve()
@@ -48,7 +54,8 @@ def install_web_cli(app, token_file):
                 if now-jobs[key]['created'] > 3600 and jobs[key]['state'] == 'done':
                     del jobs[key]
             if len(pending) >= 20 or len(jobs) >= 200:
-                abort(429)
+                return jsonify(error='CLI 队列已满，请保存已完成结果后用 ack 回收',
+                               pending=len(pending), retained=len(jobs)),429
             if not worker['id'] or now-worker['seen'] > 15:
                 return jsonify(error='工作台CLI执行页面未连接；请打开带CLI授权的本地工作台'),409
             jid = secrets.token_hex(16)
@@ -74,6 +81,12 @@ def install_web_cli(app, token_file):
             del jobs[jid]
             return jsonify(removed=True)
 
+    @app.get('/trace-cli/health')
+    def health():
+        with condition:
+            return jsonify(ready=bool(worker['id'] and time.monotonic()-worker['seen'] <= 15),
+                           pending=len(pending),retained=len(jobs))
+
     @app.post('/trace-cli/poll')
     def poll():
         data = request.get_json()
@@ -82,7 +95,12 @@ def install_web_cli(app, token_file):
         with condition:
             now=time.monotonic()
             if worker['id'] and worker['id'] != wid:
-                return jsonify(error='已有另一工作台CLI执行页面；关闭服务后再更换'),409
+                # Only queued inspections have never touched the original page.
+                unfinished = (job for job in jobs.values() if job['state'] != 'done')
+                if now-worker['seen'] <= 15 or any(
+                        job['state'] != 'queued' or not _read_only_request(job['request'])
+                        for job in unfinished):
+                    return jsonify(error='另一工作台仍持有 CLI 会话或未完成的操作'),409
             worker.update(id=wid,seen=now)
             if not pending:condition.wait(timeout=2)
             worker['seen']=time.monotonic()

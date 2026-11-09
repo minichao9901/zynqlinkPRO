@@ -28,7 +28,7 @@ export class AnsiDisplay {
     const chunks = []; let size = 0;
     if (this.skipped){
       this.onSkip();
-      chunks.push(new TextEncoder().encode(`\r\n（显示省略了 ${this.skipped} 字节；完整数据请记录到文件）\r\n`));
+      chunks.push(new TextEncoder().encode(`\x18\x1b[0m\r\n（显示省略了 ${this.skipped} 字节；完整数据请记录到文件）\r\n`));
       this.skipped = 0;
     }
     let records = 0;

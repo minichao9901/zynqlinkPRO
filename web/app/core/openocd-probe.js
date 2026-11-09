@@ -36,7 +36,8 @@ export class OpenOcdProbe {
     this.skipNames = this.isRiscv;
     // Release the producer cursor between shorter transfers while its
     // noncacheable AXI ring is being written by the running HPM6800.
-    this.rttPollLimit = this.physical && cfg.boardId === 'hpm6800evk' ? 8192 : undefined;
+    this.rttLivePreview = this.physical && !cfg.boardId;
+    this.rttPollLimit = this.physical && (!cfg.boardId || cfg.boardId === 'hpm6800evk') ? 8192 : undefined;
   }
 
   get _faulted(){ return !!this.link && !this.link.worker; }
@@ -59,6 +60,7 @@ export class OpenOcdProbe {
   }
 
   async connect(){
+    this._f103HighDensity = undefined;
     const link = this.link = new OpenOcdTargetSession(line => this.onLog?.(line));
     try {
       await link.open(this.cfg, this.device);
@@ -140,23 +142,40 @@ export class OpenOcdProbe {
     // even when the assert command fails.
     if (!await this.isHalted()) await this.halt();
     await this.targetCommand('riscv exec_progbuf 0x00000013');
+    const pollMode = /background polling: (on|off)\b/.exec(await this.command('capture {poll}'))?.[1];
+    if (!pollMode) throw Error('未确认 OpenOCD 后台轮询状态');
     const status = async () => Number(await this.targetCommand('riscv dmi_read 0x11'));
     const control = bits => this.targetCommand(`riscv dmi_write 0x10 ${ocdHex(bits)}`);
     const active = 1, ack = 0x10000000, resetSeen = 0x40000;
     const request = active + (halt ? 0x80000000 : 0);
-    await control(ack + active);
-    if (await status() & resetSeen) throw Error('HPM 旧复位标志未清除');
+    let failure;
     try {
-      await control(request + 2);
-      await new Promise(resolve => setTimeout(resolve, 50));
-    } finally { await control(request); }
-    const mask = resetSeen | (halt ? 0x200 : 0x800);
-    const end = performance.now() + 3000;
-    while (((await status()) & mask) !== mask){
-      if (performance.now() >= end) throw Error('未确认 HPM 复位后的运行状态');
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await this.command('poll off');
+      await control(ack + active);
+      if (await status() & resetSeen) throw Error('HPM 旧复位标志未清除');
+      try {
+        await control(request + 2);
+        await new Promise(resolve => setTimeout(resolve, 50));
+      } finally { await control(request); }
+      const released = Number(await this.targetCommand('riscv dmi_read 0x10'));
+      if (!Number.isInteger(released) || (released & 3) !== active) throw Error('未确认 HPM 系统复位已释放');
+      const mask = resetSeen | (halt ? 0x200 : 0x800);
+      const end = performance.now() + 3000;
+      while (((await status()) & mask) !== mask){
+        if (performance.now() >= end) throw Error('未确认 HPM 复位后的运行状态');
+        await new Promise(resolve => setTimeout(resolve, 10));
+      }
+      await control(ack + active);
+    } catch (error){
+      failure = error;
+      throw error;
+    } finally {
+      try { await this.command('poll ' + pollMode); }
+      catch (error){
+        if (failure) throw new AggregateError([failure,error], failure.message + '；恢复后台轮询失败：' + error.message);
+        throw error;
+      }
     }
-    await control(ack + active);
     if (await this.isHalted() !== halt) throw Error('OpenOCD 未确认 HPM 复位后的运行状态');
     return 'HPM 系统复位';
   }
@@ -209,13 +228,30 @@ export class OpenOcdProbe {
     return values.map(Number);
   }
 
+  async _memoryImageOptions(address, length){
+    if (this.physical && isHpm6800BulkSram(this.cfg, address, length)) return { physical:true };
+    if (this.isRiscv || this.cfg.family !== 'stm32f103' || this.cfg.raw ||
+        length < 4096 || address % 4 || length % 4 ||
+        address < 0x20000000 || address + length > 0x20010000) return null;
+    if (this._f103HighDensity === undefined){
+      const device = await this._readWord(0xe0042000).catch(error => {
+        if (this._faulted) throw error;
+        return null;
+      });
+      if (device === null) return null;
+      this._f103HighDensity = (device & 0xfff) === 0x414;
+    }
+    return this._f103HighDensity ? { physical:false } : null;
+  }
+
   async readMem(address, length){
     checkRange(address, length);
     const start = this.physical && length ? address - address % 4 : address;
     const end = this.physical && length ? Math.ceil((address + length) / 4) * 4 : address + length;
     this._checkFence(start, end - start);
-    if (this.physical && isHpm6800BulkSram(this.cfg, start, end - start)){
-      const { bytes } = await this.link.request('memoryImage', { address:start, length:end - start });
+    const image = await this._memoryImageOptions(start, end - start);
+    if (image){
+      const { bytes } = await this.link.request('memoryImage', { address:start, length:end - start, ...image });
       if (bytes?.length !== end - start) throw Error('OpenOCD 二进制内存回读长度不匹配');
       return bytes.subarray(address - start, address - start + length);
     }
@@ -238,8 +274,9 @@ export class OpenOcdProbe {
   async writeMem(address, bytes){
     checkRange(address, bytes.length);
     this._checkFence(address, bytes.length);
-    if (this.physical && isHpm6800BulkSram(this.cfg, address, bytes.length)){
-      await this.link.request('memoryImage', { address, length:bytes.length, input:bytes });
+    const image = await this._memoryImageOptions(address, bytes.length);
+    if (image){
+      await this.link.request('memoryImage', { address, length:bytes.length, input:bytes, ...image });
       return;
     }
     const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
