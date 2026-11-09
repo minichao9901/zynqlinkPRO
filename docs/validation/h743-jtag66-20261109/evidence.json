@@ -1,0 +1,4571 @@
+{
+  "dateShanghai": "2026-11-09T19:03:20.852823+08:00",
+  "metrics": {
+    "read66": 5.044267029486813,
+    "write66": 4.775571250997707,
+    "rtt66": 2.574951107565293,
+    "rttHost66": 2.574114868381627,
+    "rttIdle66": 1,
+    "readDeltaPct": 8.545528351981035,
+    "writeDeltaPct": 8.548131181177254,
+    "rttDeltaPct": 10.95058518375951
+  },
+  "preflight": {
+    "initialIdle": {
+      "rtt": [
+        0,
+        [
+          65536,
+          604307968,
+          604307992,
+          25267196,
+          1617127314,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          989856768
+        ]
+      ],
+      "hss": [
+        0,
+        [
+          134219796,
+          59999999,
+          10173,
+          0,
+          13312,
+          0,
+          538,
+          0,
+          1453380398,
+          35258368,
+          0,
+          989855844
+        ]
+      ],
+      "queues": {
+        "pending_requests": 0,
+        "pending_responses": 0,
+        "tx_active": 0,
+        "session_epoch": 76,
+        "backpressure_events": 11988,
+        "submit_errors": 0,
+        "nonfinal_callbacks": 8,
+        "rx_deferred": 0
+      },
+      "engines": {
+        "features": 1146093695,
+        "reset_count": 77,
+        "core_status": 2,
+        "batch_status": 4096,
+        "packet_status": 131074,
+        "recovery_errors": 0
+      },
+      "ddr": {
+        "active": false,
+        "sourceActive": false,
+        "downloadState": 0,
+        "submitErrors": 0
+      }
+    },
+    "physical": {
+      "recordedAtUtc": "2026-11-09T10:54:54.828712+00:00",
+      "registers": {
+        "FCLK0_CTRL": "0xf00100",
+        "FCLK1_CTRL": "0x900100",
+        "ARM_PLL": "0x28008",
+        "DDR_PLL": "0x20008",
+        "IO_PLL": "0x36008",
+        "CPU_CTRL": "0x1f000200",
+        "DDR_CTRL": "0xc200003",
+        "USB0_CTRL": "0x101941",
+        "USB1_CTRL": "0x101941",
+        "FEATURES": "0x30f",
+        "CAPTURE": "0xa",
+        "SWD_STATUS": "0x2",
+        "PACKET_STATUS": "0x0",
+        "DDR_STATUS": "0x2",
+        "CDMA_STATUS": "0x1002"
+      },
+      "allObservedEnginesIdle": true,
+      "xsctOutput": "SNAP FCLK0_CTRL 00F00100\nSNAP FCLK1_CTRL 00900100\nSNAP ARM_PLL 00028008\nSNAP DDR_PLL 00020008\nSNAP IO_PLL 00036008\nSNAP CPU_CTRL 1F000200\nSNAP DDR_CTRL 0C200003\nSNAP USB0_CTRL 00101941\nSNAP USB1_CTRL 00101941\nSNAP FEATURES 0000030F\nSNAP CAPTURE 0000000A\nSNAP SWD_STATUS 00000002\nSNAP PACKET_STATUS 00000000\nSNAP DDR_STATUS 00000002\nSNAP CDMA_STATUS 00001002\n"
+    },
+    "initialClock": {
+      "FCLK_Hz": 119999998,
+      "cfg": "0xcaa11",
+      "waveform": {
+        "SWCLK_Hz": 9999999.833333334,
+        "half_period_fclk": 6,
+        "short_high": true,
+        "intended_high_ns": 8.333333472222225
+      },
+      "clockSource": 0,
+      "clockControl": 15728896,
+      "sourcePllControl": 221192,
+      "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+      "JTAG_sampling_mode": 0,
+      "RISC_V_SBA_enabled": false,
+      "actual_link_Hz": 9999999.833333334,
+      "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+    },
+    "probeInfo": "0006322e312e3100",
+    "pair": {
+      "git_head": "a4ea59e847ebffd99a7e92858a95d1759a7ec38d",
+      "git_dirty": true,
+      "bit": {
+        "path": "E:\\zynqlinkPRO\\prebuilt\\release-20261106\\probe.bit",
+        "sha256": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6"
+      },
+      "elf": {
+        "path": "E:\\zynqlinkPRO\\prebuilt\\release-20261106\\application.elf",
+        "sha256": "5895eeb0e79a3681a6b3b966dbea4c82ebfcd01ea7553e094d8a61ed2cf89802"
+      }
+    },
+    "target": {
+      "name": "STM32H743/H742/H750/H753",
+      "cpuid": "0x411fc271",
+      "device": "0x20036450",
+      "registers": {
+        "0x58024400": "0x3303c025",
+        "0x58024410": "0x1b",
+        "0x58024418": "0x40",
+        "0x5802441c": "0x440",
+        "0x58024420": "0x50",
+        "0x58024428": "0x1920052",
+        "0x5802442c": "0x1ff0309",
+        "0x58024430": "0xb010e5f",
+        "0x58024434": "0x0",
+        "0x58024438": "0x1010280",
+        "0x52002000": "0x32"
+      }
+    },
+    "dhcsr": "0x1010000",
+    "ccr": "0x60200",
+    "debug": {
+      "0xe000edfc": "0x1000000",
+      "0xe0002000": "0x10000080",
+      "0xe000ed08": "0x8000000",
+      "0xe000ed28": "0x0",
+      "0xe000ed2c": "0x0"
+    },
+    "initialIdleQuery": "8d00010f",
+    "profileMatches": {
+      "cpu60-trace20": true,
+      "cpu480-trace20": false
+    }
+  },
+  "targetOriginal": {
+    "mode": "backup",
+    "timeUTC": "2026-11-09T10:54:59.865272+00:00",
+    "idle": {
+      "rtt": [
+        0,
+        [
+          65536,
+          604307968,
+          604307992,
+          25267196,
+          1617127314,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          989856768
+        ]
+      ],
+      "hss": [
+        0,
+        [
+          134219796,
+          59999999,
+          10173,
+          0,
+          13312,
+          0,
+          538,
+          0,
+          1453380398,
+          35258368,
+          0,
+          989855844
+        ]
+      ],
+      "queues": {
+        "pending_requests": 0,
+        "pending_responses": 0,
+        "tx_active": 0,
+        "session_epoch": 76,
+        "backpressure_events": 11988,
+        "submit_errors": 0,
+        "nonfinal_callbacks": 8,
+        "rx_deferred": 0
+      },
+      "engines": {
+        "features": 1146093695,
+        "reset_count": 77,
+        "core_status": 2,
+        "batch_status": 4096,
+        "packet_status": 14680066,
+        "recovery_errors": 0
+      },
+      "ddr": {
+        "active": false,
+        "sourceActive": false,
+        "downloadState": 0,
+        "submitErrors": 0
+      }
+    },
+    "target": {
+      "name": "STM32H743/H742/H750/H753",
+      "cpuid": "0x411fc271",
+      "device": "0x20036450",
+      "registers": {
+        "0x58024400": "0x3303c025",
+        "0x58024410": "0x1b",
+        "0x58024418": "0x40",
+        "0x5802441c": "0x440",
+        "0x58024420": "0x50",
+        "0x58024428": "0x1920052",
+        "0x5802442c": "0x1ff0309",
+        "0x58024430": "0xb010e5f",
+        "0x58024434": "0x0",
+        "0x58024438": "0x1010280",
+        "0x52002000": "0x32"
+      }
+    },
+    "dhcsr": "0x1010000",
+    "ccr": "0x60200",
+    "debug": {
+      "0xe000edfc": "0x1000000",
+      "0xe0002000": "0x10000080",
+      "0xe000ed08": "0x8000000",
+      "0xe000ed28": "0x0",
+      "0xe000ed2c": "0x0"
+    },
+    "initialIdleQuery": "8d00010f",
+    "initialClock": {
+      "FCLK_Hz": 119999998,
+      "cfg": "0xcaa11",
+      "waveform": {
+        "SWCLK_Hz": 9999999.833333334,
+        "half_period_fclk": 6,
+        "short_high": true,
+        "intended_high_ns": 8.333333472222225
+      },
+      "clockSource": 0,
+      "clockControl": 15728896,
+      "sourcePllControl": 221192,
+      "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+      "JTAG_sampling_mode": 0,
+      "RISC_V_SBA_enabled": false,
+      "actual_link_Hz": 9999999.833333334,
+      "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+    },
+    "flashSha256": "f4cbd9f002921026f7f1036a7743ed2bb3832f4a9e54d4f394045b1ed05a2b82",
+    "workAreaSha256": "fb34de82c7a02838059420179e11a71a3bf66d8b7997dd4c6a98184c7496887e",
+    "pair": {
+      "git_head": "a4ea59e847ebffd99a7e92858a95d1759a7ec38d",
+      "git_dirty": true,
+      "bit": {
+        "path": "E:\\zynqlinkPRO\\prebuilt\\release-20261106\\probe.bit",
+        "sha256": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6"
+      },
+      "elf": {
+        "path": "E:\\zynqlinkPRO\\prebuilt\\release-20261106\\application.elf",
+        "sha256": "5895eeb0e79a3681a6b3b966dbea4c82ebfcd01ea7553e094d8a61ed2cf89802"
+      }
+    },
+    "passed": true
+  },
+  "target480": {
+    "mode": "cpu480",
+    "timeUTC": "2026-11-09T10:55:50.297330+00:00",
+    "idle": {
+      "rtt": [
+        0,
+        [
+          65536,
+          604307968,
+          604307992,
+          25267196,
+          1617127314,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          989856768
+        ]
+      ],
+      "hss": [
+        0,
+        [
+          134219796,
+          59999999,
+          10173,
+          0,
+          13312,
+          0,
+          538,
+          0,
+          1453380398,
+          35258368,
+          0,
+          989855844
+        ]
+      ],
+      "queues": {
+        "pending_requests": 0,
+        "pending_responses": 0,
+        "tx_active": 0,
+        "session_epoch": 78,
+        "backpressure_events": 11988,
+        "submit_errors": 0,
+        "nonfinal_callbacks": 9,
+        "rx_deferred": 0
+      },
+      "engines": {
+        "features": 1146093695,
+        "reset_count": 79,
+        "core_status": 0,
+        "batch_status": 1024,
+        "packet_status": 0,
+        "recovery_errors": 0
+      },
+      "ddr": {
+        "active": false,
+        "sourceActive": false,
+        "downloadState": 0,
+        "submitErrors": 0
+      }
+    },
+    "target": {
+      "name": "STM32H743/H742/H750/H753",
+      "cpuid": "0x411fc271",
+      "device": "0x20036450",
+      "registers": {
+        "0x58024400": "0x3303c025",
+        "0x58024410": "0x1b",
+        "0x58024418": "0x48",
+        "0x5802441c": "0x440",
+        "0x58024420": "0x50",
+        "0x58024428": "0x1920052",
+        "0x5802442c": "0x1ff0309",
+        "0x58024430": "0x170102bf",
+        "0x58024434": "0x0",
+        "0x58024438": "0x1010280",
+        "0x52002000": "0x34"
+      }
+    },
+    "dhcsr": "0x3010001",
+    "ccr": "0x60200",
+    "debug": {
+      "0xe000edfc": "0x1000000",
+      "0xe0002000": "0x10000081",
+      "0xe000ed08": "0x8000000",
+      "0xe000ed28": "0x0",
+      "0xe000ed2c": "0x0"
+    },
+    "initialIdleQuery": "8d00010f",
+    "initialClock": {
+      "FCLK_Hz": 119999998,
+      "cfg": "0xcaa11",
+      "waveform": {
+        "SWCLK_Hz": 9999999.833333334,
+        "half_period_fclk": 6,
+        "short_high": true,
+        "intended_high_ns": 8.333333472222225
+      },
+      "clockSource": 0,
+      "clockControl": 15728896,
+      "sourcePllControl": 221192,
+      "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+      "JTAG_sampling_mode": 0,
+      "RISC_V_SBA_enabled": false,
+      "actual_link_Hz": 9999999.833333334,
+      "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+    },
+    "flashSha256": "1514e464846705292f6eda06786d2b8ddfca1ee68f00605e83d078ded792baad",
+    "workAreaSha256": "fb34de82c7a02838059420179e11a71a3bf66d8b7997dd4c6a98184c7496887e",
+    "pair": {
+      "git_head": "a4ea59e847ebffd99a7e92858a95d1759a7ec38d",
+      "git_dirty": true,
+      "bit": {
+        "path": "E:\\zynqlinkPRO\\prebuilt\\release-20261106\\probe.bit",
+        "sha256": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6"
+      },
+      "elf": {
+        "path": "E:\\zynqlinkPRO\\prebuilt\\release-20261106\\application.elf",
+        "sha256": "5895eeb0e79a3681a6b3b966dbea4c82ebfcd01ea7553e094d8a61ed2cf89802"
+      }
+    },
+    "verified480": true,
+    "targetElfSha256": "db5d66656846eeffedb1e1c405afec9345a7a5d8561eb53f987508aa1ee9dc19",
+    "passed": true
+  },
+  "flash480": {
+    "mode": "cpu480",
+    "file": "fw.elf",
+    "fileSha256": "db5d66656846eeffedb1e1c405afec9345a7a5d8561eb53f987508aa1ee9dc19",
+    "result": {
+      "bytes": 31756,
+      "reset": true,
+      "sectors": 1,
+      "verified": true
+    },
+    "elapsedSeconds": 7.16794469999877,
+    "summary": {
+      "busy": false,
+      "clockSelection": "10000",
+      "lastFlash": {
+        "bytes": 31756,
+        "reset": true,
+        "sectors": 1,
+        "verified": true
+      },
+      "result": "已烧录 31.0 KB，读回校验通过"
+    },
+    "nrst": true,
+    "passed": true
+  },
+  "candidate": {
+    "mode": "candidate",
+    "pair": {
+      "git_head": "a4ea59e847ebffd99a7e92858a95d1759a7ec38d",
+      "git_dirty": true,
+      "bit": {
+        "path": "E:\\zynqlinkPRO\\prebuilt\\release-20261106\\probe.bit",
+        "sha256": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6"
+      },
+      "elf": {
+        "path": "<temporary-test-directory>\\candidate\\xusbps_daplink_dma.elf",
+        "sha256": "daf4cf7275b7581ba62bf7eba2957e2587432495f96f625a16df3de683534c38"
+      }
+    },
+    "init_sha256": "485a028ff7ad9a256a64313b68527a055ca3800b3b85577ceb0554b0e0609c94",
+    "usbIdle": {
+      "rtt": [
+        0,
+        [
+          65536,
+          604307968,
+          604307992,
+          25267196,
+          1617127314,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          989856768
+        ]
+      ],
+      "hss": [
+        0,
+        [
+          134219796,
+          59999999,
+          10173,
+          0,
+          13312,
+          0,
+          538,
+          0,
+          1453380398,
+          35258368,
+          0,
+          989855844
+        ]
+      ],
+      "queues": {
+        "pending_requests": 0,
+        "pending_responses": 0,
+        "tx_active": 0,
+        "session_epoch": 78,
+        "backpressure_events": 11988,
+        "submit_errors": 0,
+        "nonfinal_callbacks": 9,
+        "rx_deferred": 0
+      },
+      "engines": {
+        "features": 1146093695,
+        "reset_count": 79,
+        "core_status": 2,
+        "batch_status": 4096,
+        "packet_status": 16842754,
+        "recovery_errors": 0
+      },
+      "ddr": {
+        "active": false,
+        "sourceActive": false,
+        "downloadState": 0,
+        "submitErrors": 0
+      }
+    },
+    "physicalBefore": {
+      "recordedAtUtc": "2026-11-09T10:55:55.935808+00:00",
+      "registers": {
+        "FCLK0_CTRL": "0xf00100",
+        "FCLK1_CTRL": "0x900100",
+        "ARM_PLL": "0x28008",
+        "DDR_PLL": "0x20008",
+        "IO_PLL": "0x36008",
+        "CPU_CTRL": "0x1f000200",
+        "DDR_CTRL": "0xc200003",
+        "USB0_CTRL": "0x101941",
+        "USB1_CTRL": "0x101941",
+        "FEATURES": "0x30f",
+        "CAPTURE": "0xa",
+        "SWD_STATUS": "0x2",
+        "PACKET_STATUS": "0x0",
+        "DDR_STATUS": "0x2",
+        "CDMA_STATUS": "0x1002"
+      },
+      "allObservedEnginesIdle": true,
+      "xsctOutput": "SNAP FCLK0_CTRL 00F00100\nSNAP FCLK1_CTRL 00900100\nSNAP ARM_PLL 00028008\nSNAP DDR_PLL 00020008\nSNAP IO_PLL 00036008\nSNAP CPU_CTRL 1F000200\nSNAP DDR_CTRL 0C200003\nSNAP USB0_CTRL 00101941\nSNAP USB1_CTRL 00101941\nSNAP FEATURES 0000030F\nSNAP CAPTURE 0000000A\nSNAP SWD_STATUS 00000002\nSNAP PACKET_STATUS 00000000\nSNAP DDR_STATUS 00000002\nSNAP CDMA_STATUS 00001002\n"
+    },
+    "download": "  1  APU\n     2  ARM Cortex-A9 MPCore #0 (Running)\n     3  ARM Cortex-A9 MPCore #1 (Suspended)\n  4  xc7z020\n\ninitializing\n  0%    0MB   0.0MB/s  ??:?? ETA\n 28%    1MB   2.2MB/s  ??:?? ETA\n 49%    1MB   1.9MB/s  ??:?? ETA\n 70%    2MB   1.8MB/s  ??:?? ETA\n 92%    3MB   1.7MB/s  ??:?? ETA\n100%    3MB   1.7MB/s  00:02    \nLOADED_SWD_FEATURES=0x4450007F\nLOADED_PACKET_SIGNATURE=0x53545232\n\nDownloading Program -- C:/Users/Administrator/AppData/Local/Temp/zynq-h743-jtag66-b7aca328/candidate/xusbps_daplink_dma.elf\n\tsection, .text: 0x00000000 - 0x000144f7\n\tsection, .ocm_text: 0x000144f8 - 0x00015083\n\tsection, .init: 0x00015084 - 0x0001508f\n\tsection, .fini: 0x00015090 - 0x0001509b\n\tsection, .rodata: 0x0001509c - 0x0001577d\n\tsection, .data: 0x00015780 - 0x000163c1\n\tsection, .mmu_tbl: 0x00018000 - 0x0001bfff\n\tsection, .ARM.exidx: 0x0001c000 - 0x0001c007\n\tsection, .init_array: 0x0001c008 - 0x0001c00b\n\tsection, .fini_array: 0x0001c00c - 0x0001c00f\n\tsection, .ocm_bss: 0x0001c020 - 0x0001c080\n\tsection, .dap_debug: 0x00100000 - 0x001000e3\n\tsection, .dap_trace: 0x39000000 - 0x390000f7\n\tsection, .bss: 0x00100100 - 0x001addf3\n\tsection, .heap: 0x0001c081 - 0x0001e08f\n\tsection, .stack: 0x0001e090 - 0x0002188f\n\n  0%    0MB   0.0MB/s  ??:?? ETA\n100%    0MB   0.6MB/s  00:00    \n\nSetting PC to Program Start Address 0x00000000\nSuccessfully downloaded C:/Users/Administrator/AppData/Local/Temp/zynq-h743-jtag66-b7aca328/candidate/xusbps_daplink_dma.elf\nPC=pc: 0001441a\n\n",
+    "identity": {
+      "time_UTC": "2026-11-09T10:56:03.033786+00:00",
+      "elf": "<temporary-test-directory>\\candidate\\xusbps_daplink_dma.elf",
+      "elf_sha256": "daf4cf7275b7581ba62bf7eba2957e2587432495f96f625a16df3de683534c38",
+      "downloads": false,
+      "probe_reset_or_continue": false,
+      "expected_executable_bytes": 86172,
+      "cycles": [
+        {
+          "cycle": 0,
+          "sections": [
+            {
+              "name": ".text",
+              "bytes": 83192,
+              "address": 0,
+              "equal": true,
+              "expected_sha256": "95080a251551989af773e91ae9f0e225284db4e386396d48b47ac14ed4660f64",
+              "live_sha256": "95080a251551989af773e91ae9f0e225284db4e386396d48b47ac14ed4660f64"
+            },
+            {
+              "name": ".ocm_text",
+              "bytes": 2956,
+              "address": 83192,
+              "equal": true,
+              "expected_sha256": "603dadcf92dcbb0788e04b97260cd4a522f6c796a3608dbc828c310157a29370",
+              "live_sha256": "603dadcf92dcbb0788e04b97260cd4a522f6c796a3608dbc828c310157a29370"
+            },
+            {
+              "name": ".init",
+              "bytes": 12,
+              "address": 86148,
+              "equal": true,
+              "expected_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6",
+              "live_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6"
+            },
+            {
+              "name": ".fini",
+              "bytes": 12,
+              "address": 86160,
+              "equal": true,
+              "expected_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6",
+              "live_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6"
+            }
+          ],
+          "differing_addresses": [],
+          "vector_word": "ea000049"
+        }
+      ],
+      "passed": true,
+      "memoryAccess": "physical MEM-AP0; independent of CPU memory/cache context",
+      "boot_mode": 0,
+      "boot_trace": [
+        4253566538,
+        3147529557,
+        2519047769,
+        4269663797,
+        985822541,
+        3145463459,
+        982700513,
+        3686771519
+      ],
+      "clockSnapshot": {
+        "control": 1051168,
+        "source": 2,
+        "pll": 163848,
+        "bootMode": 0,
+        "FCLK_Hz": 133333332
+      },
+      "initial_FCLK_Hz": 133333332
+    },
+    "physicalAfter": {
+      "recordedAtUtc": "2026-11-09T10:56:06.794152+00:00",
+      "registers": {
+        "FCLK0_CTRL": "0x100a20",
+        "FCLK1_CTRL": "0x900100",
+        "ARM_PLL": "0x28008",
+        "DDR_PLL": "0x20008",
+        "IO_PLL": "0x36008",
+        "CPU_CTRL": "0x1f000200",
+        "DDR_CTRL": "0xc200003",
+        "USB0_CTRL": "0x101941",
+        "USB1_CTRL": "0x101941",
+        "FEATURES": "0x30f",
+        "CAPTURE": "0x8",
+        "SWD_STATUS": "0x0",
+        "PACKET_STATUS": "0x0",
+        "DDR_STATUS": "0x0",
+        "CDMA_STATUS": "0x1002"
+      },
+      "allObservedEnginesIdle": true,
+      "xsctOutput": "SNAP FCLK0_CTRL 00100A20\nSNAP FCLK1_CTRL 00900100\nSNAP ARM_PLL 00028008\nSNAP DDR_PLL 00020008\nSNAP IO_PLL 00036008\nSNAP CPU_CTRL 1F000200\nSNAP DDR_CTRL 0C200003\nSNAP USB0_CTRL 00101941\nSNAP USB1_CTRL 00101941\nSNAP FEATURES 0000030F\nSNAP CAPTURE 00000008\nSNAP SWD_STATUS 00000000\nSNAP PACKET_STATUS 00000000\nSNAP DDR_STATUS 00000000\nSNAP CDMA_STATUS 00001002\n"
+    },
+    "passed": true
+  },
+  "scan": {
+    "artifacts": {
+      "git_head": "a4ea59e847ebffd99a7e92858a95d1759a7ec38d",
+      "git_dirty": true,
+      "bit": {
+        "path": "E:\\zynqlinkPRO\\prebuilt\\release-20261106\\probe.bit",
+        "sha256": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6"
+      },
+      "elf": {
+        "path": "<temporary-test-directory>\\candidate\\xusbps_daplink_dma.elf",
+        "sha256": "daf4cf7275b7581ba62bf7eba2957e2587432495f96f625a16df3de683534c38"
+      }
+    },
+    "preflight": {
+      "mode": "cpu480",
+      "timeUTC": "2026-11-09T10:55:50.297330+00:00",
+      "idle": {
+        "rtt": [
+          0,
+          [
+            65536,
+            604307968,
+            604307992,
+            25267196,
+            1617127314,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            989856768
+          ]
+        ],
+        "hss": [
+          0,
+          [
+            134219796,
+            59999999,
+            10173,
+            0,
+            13312,
+            0,
+            538,
+            0,
+            1453380398,
+            35258368,
+            0,
+            989855844
+          ]
+        ],
+        "queues": {
+          "pending_requests": 0,
+          "pending_responses": 0,
+          "tx_active": 0,
+          "session_epoch": 78,
+          "backpressure_events": 11988,
+          "submit_errors": 0,
+          "nonfinal_callbacks": 9,
+          "rx_deferred": 0
+        },
+        "engines": {
+          "features": 1146093695,
+          "reset_count": 79,
+          "core_status": 0,
+          "batch_status": 1024,
+          "packet_status": 0,
+          "recovery_errors": 0
+        },
+        "ddr": {
+          "active": false,
+          "sourceActive": false,
+          "downloadState": 0,
+          "submitErrors": 0
+        }
+      },
+      "target": {
+        "name": "STM32H743/H742/H750/H753",
+        "cpuid": "0x411fc271",
+        "device": "0x20036450",
+        "registers": {
+          "0x58024400": "0x3303c025",
+          "0x58024410": "0x1b",
+          "0x58024418": "0x48",
+          "0x5802441c": "0x440",
+          "0x58024420": "0x50",
+          "0x58024428": "0x1920052",
+          "0x5802442c": "0x1ff0309",
+          "0x58024430": "0x170102bf",
+          "0x58024434": "0x0",
+          "0x58024438": "0x1010280",
+          "0x52002000": "0x34"
+        }
+      },
+      "dhcsr": "0x3010001",
+      "ccr": "0x60200",
+      "debug": {
+        "0xe000edfc": "0x1000000",
+        "0xe0002000": "0x10000081",
+        "0xe000ed08": "0x8000000",
+        "0xe000ed28": "0x0",
+        "0xe000ed2c": "0x0"
+      },
+      "initialIdleQuery": "8d00010f",
+      "initialClock": {
+        "FCLK_Hz": 119999998,
+        "cfg": "0xcaa11",
+        "waveform": {
+          "SWCLK_Hz": 9999999.833333334,
+          "half_period_fclk": 6,
+          "short_high": true,
+          "intended_high_ns": 8.333333472222225
+        },
+        "clockSource": 0,
+        "clockControl": 15728896,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 9999999.833333334,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+      },
+      "flashSha256": "1514e464846705292f6eda06786d2b8ddfca1ee68f00605e83d078ded792baad",
+      "workAreaSha256": "fb34de82c7a02838059420179e11a71a3bf66d8b7997dd4c6a98184c7496887e",
+      "pair": {
+        "git_head": "a4ea59e847ebffd99a7e92858a95d1759a7ec38d",
+        "git_dirty": true,
+        "bit": {
+          "path": "E:\\zynqlinkPRO\\prebuilt\\release-20261106\\probe.bit",
+          "sha256": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6"
+        },
+        "elf": {
+          "path": "E:\\zynqlinkPRO\\prebuilt\\release-20261106\\application.elf",
+          "sha256": "5895eeb0e79a3681a6b3b966dbea4c82ebfcd01ea7553e094d8a61ed2cf89802"
+        }
+      },
+      "verified480": true,
+      "targetElfSha256": "db5d66656846eeffedb1e1c405afec9345a7a5d8561eb53f987508aa1ee9dc19"
+    },
+    "clockPolicy": "unchanged target firmware clocks",
+    "fixtureBase": "0x24050000",
+    "flashWritesDuringScan": false,
+    "targetResets": false,
+    "sram": [
+      {
+        "speed_hz": 60000000,
+        "idle": 1,
+        "passed": true,
+        "FCLK_Hz": 119999998,
+        "cfg": "0x11",
+        "effective_idle": 1,
+        "SWCLK_Hz": 59999999.0,
+        "half_period_fclk": 1,
+        "short_high": false,
+        "intended_high_ns": 8.333333472222225,
+        "JTAG_sampling_mode": 17,
+        "read": {
+          "samples": [
+            2.417865404386396,
+            2.4184855313469504,
+            2.414177990872529
+          ],
+          "median": 2.417865404386396
+        },
+        "write": {
+          "samples": [
+            2.399865241752759,
+            2.3972492501392155,
+            2.397271172504985
+          ],
+          "median": 2.397271172504985
+        },
+        "readCounterDiagnostic": {
+          "measurement_MB_s": 2.4170271776226278,
+          "before": [
+            48506326,
+            23691739,
+            542899
+          ],
+          "after": [
+            54425466,
+            26583169,
+            609089
+          ],
+          "delta": [
+            5919140,
+            2891430,
+            66190
+          ]
+        }
+      },
+      {
+        "speed_hz": 60000000,
+        "idle": 2,
+        "passed": true,
+        "FCLK_Hz": 119999998,
+        "cfg": "0x21",
+        "effective_idle": 2,
+        "SWCLK_Hz": 59999999.0,
+        "half_period_fclk": 1,
+        "short_high": false,
+        "intended_high_ns": 8.333333472222225,
+        "JTAG_sampling_mode": 17,
+        "read": {
+          "samples": [
+            4.643217719185171,
+            4.641902205887461,
+            4.570488075922808
+          ],
+          "median": 4.641902205887461
+        },
+        "write": {
+          "samples": [
+            2.3502367771487096,
+            2.348480776269816,
+            2.347340992462583
+          ],
+          "median": 2.348480776269816
+        },
+        "readCounterDiagnostic": {
+          "measurement_MB_s": 4.63397560539156,
+          "before": [
+            91503840,
+            44696843,
+            1016077
+          ],
+          "after": [
+            94545552,
+            46182263,
+            1049563
+          ],
+          "delta": [
+            3041712,
+            1485420,
+            33486
+          ]
+        }
+      },
+      {
+        "speed_hz": 60000000,
+        "idle": 4,
+        "passed": true,
+        "FCLK_Hz": 119999998,
+        "cfg": "0x41",
+        "effective_idle": 4,
+        "SWCLK_Hz": 59999999.0,
+        "half_period_fclk": 1,
+        "short_high": false,
+        "intended_high_ns": 8.333333472222225,
+        "JTAG_sampling_mode": 17,
+        "read": {
+          "samples": [
+            4.470685344312416,
+            4.465232899562,
+            4.478429925275063
+          ],
+          "median": 4.470685344312416
+        },
+        "write": {
+          "samples": [
+            4.394466683701939,
+            4.397754686367303,
+            4.404419473818307
+          ],
+          "median": 4.397754686367303
+        },
+        "readCounterDiagnostic": {
+          "measurement_MB_s": 4.47683910672179,
+          "before": [
+            120575266,
+            58903448,
+            1324710
+          ],
+          "after": [
+            123748842,
+            60454800,
+            1358196
+          ],
+          "delta": [
+            3173576,
+            1551352,
+            33486
+          ]
+        }
+      },
+      {
+        "speed_hz": 60000000,
+        "idle": 1,
+        "passed": true,
+        "FCLK_Hz": 119999998,
+        "cfg": "0x11",
+        "effective_idle": 1,
+        "SWCLK_Hz": 59999999.0,
+        "half_period_fclk": 1,
+        "short_high": false,
+        "intended_high_ns": 8.333333472222225,
+        "JTAG_sampling_mode": 17,
+        "read": {
+          "samples": [
+            2.4151388402253913,
+            2.421036299364781,
+            2.420325475173754
+          ],
+          "median": 2.420325475173754
+        },
+        "write": {
+          "samples": [
+            2.397201021963031,
+            2.394052859297951,
+            2.3976790046697487
+          ],
+          "median": 2.397201021963031
+        },
+        "readCounterDiagnostic": {
+          "measurement_MB_s": 2.41521004488209,
+          "before": [
+            172255168,
+            84146539,
+            1901095
+          ],
+          "after": [
+            178174308,
+            87037969,
+            1967285
+          ],
+          "delta": [
+            5919140,
+            2891430,
+            66190
+          ]
+        }
+      },
+      {
+        "speed_hz": 66666666,
+        "idle": 1,
+        "passed": true,
+        "FCLK_Hz": 133333332,
+        "cfg": "0x11",
+        "effective_idle": 1,
+        "SWCLK_Hz": 66666666.0,
+        "half_period_fclk": 1,
+        "short_high": false,
+        "intended_high_ns": 7.500000075000001,
+        "JTAG_sampling_mode": 16,
+        "read": {
+          "samples": [
+            2.6811437080136855,
+            2.6808749985925098,
+            2.6814069857623224
+          ],
+          "median": 2.6811437080136855
+        },
+        "write": {
+          "samples": [
+            2.656258233110739,
+            2.656182871976786,
+            2.6525115197694427
+          ],
+          "median": 2.656182871976786
+        },
+        "readCounterDiagnostic": {
+          "measurement_MB_s": 2.671994128766759,
+          "before": [
+            3519700504,
+            1719742644,
+            38432282
+          ],
+          "after": [
+            3525619644,
+            1722634074,
+            38498472
+          ],
+          "delta": [
+            5919140,
+            2891430,
+            66190
+          ]
+        }
+      },
+      {
+        "speed_hz": 66666666,
+        "idle": 15,
+        "passed": true,
+        "FCLK_Hz": 133333332,
+        "cfg": "0xf1",
+        "effective_idle": 15,
+        "SWCLK_Hz": 66666666.0,
+        "half_period_fclk": 1,
+        "short_high": false,
+        "intended_high_ns": 7.500000075000001,
+        "JTAG_sampling_mode": 16,
+        "read": {
+          "samples": [
+            4.105969807396379,
+            4.01596926230099,
+            4.104761099080596
+          ],
+          "median": 4.104761099080596
+        },
+        "write": {
+          "samples": [
+            4.043784631568834,
+            4.039572225752563,
+            4.047518319600261
+          ],
+          "median": 4.043784631568834
+        },
+        "readCounterDiagnostic": {
+          "measurement_MB_s": 4.108299221130834,
+          "before": [
+            3557593666,
+            1738327366,
+            38773630
+          ],
+          "after": [
+            3561492494,
+            1740241344,
+            38807116
+          ],
+          "delta": [
+            3898828,
+            1913978,
+            33486
+          ]
+        }
+      },
+      {
+        "speed_hz": 66666666,
+        "idle": 14,
+        "passed": true,
+        "FCLK_Hz": 133333332,
+        "cfg": "0xe1",
+        "effective_idle": 14,
+        "SWCLK_Hz": 66666666.0,
+        "half_period_fclk": 1,
+        "short_high": false,
+        "intended_high_ns": 7.500000075000001,
+        "JTAG_sampling_mode": 16,
+        "read": {
+          "samples": [
+            4.106317121997629,
+            4.161174394544793,
+            4.166001849661586
+          ],
+          "median": 4.161174394544793
+        },
+        "write": {
+          "samples": [
+            4.107063401397568,
+            4.100728653400602,
+            4.091895317984066
+          ],
+          "median": 4.100728653400602
+        },
+        "readCounterDiagnostic": {
+          "measurement_MB_s": 4.167273397705797,
+          "before": [
+            3592926156,
+            1755664456,
+            39082274
+          ],
+          "after": [
+            3596759052,
+            1757545468,
+            39115760
+          ],
+          "delta": [
+            3832896,
+            1881012,
+            33486
+          ]
+        }
+      },
+      {
+        "speed_hz": 66666666,
+        "idle": 5,
+        "passed": true,
+        "FCLK_Hz": 133333332,
+        "cfg": "0x51",
+        "effective_idle": 5,
+        "SWCLK_Hz": 66666666.0,
+        "half_period_fclk": 1,
+        "short_high": false,
+        "intended_high_ns": 7.500000075000001,
+        "JTAG_sampling_mode": 16,
+        "read": {
+          "samples": [
+            4.860927741763734,
+            4.856479096005632,
+            4.85035080897538
+          ],
+          "median": 4.856479096005632
+        },
+        "write": {
+          "samples": [
+            4.78242784792515,
+            4.778156499127343,
+            4.712446968992225
+          ],
+          "median": 4.778156499127343
+        },
+        "readCounterDiagnostic": {
+          "measurement_MB_s": 4.8615046812588085,
+          "before": [
+            3623329474,
+            1770536960,
+            39390918
+          ],
+          "after": [
+            3626568982,
+            1772121278,
+            39424404
+          ],
+          "delta": [
+            3239508,
+            1584318,
+            33486
+          ]
+        }
+      },
+      {
+        "speed_hz": 66666666,
+        "idle": 9,
+        "passed": true,
+        "FCLK_Hz": 133333332,
+        "cfg": "0x91",
+        "effective_idle": 9,
+        "SWCLK_Hz": 66666666.0,
+        "half_period_fclk": 1,
+        "short_high": false,
+        "intended_high_ns": 7.500000075000001,
+        "JTAG_sampling_mode": 16,
+        "read": {
+          "samples": [
+            4.526420117563607,
+            4.527968162660893,
+            4.528093303236826
+          ],
+          "median": 4.527968162660893
+        },
+        "write": {
+          "samples": [
+            4.4595206096694895,
+            4.450798156481342,
+            4.416767758712573
+          ],
+          "median": 4.450798156481342
+        },
+        "readCounterDiagnostic": {
+          "measurement_MB_s": 4.527358200396335,
+          "before": [
+            3655300844,
+            1786193490,
+            39699562
+          ],
+          "after": [
+            3658804080,
+            1787909672,
+            39733048
+          ],
+          "delta": [
+            3503236,
+            1716182,
+            33486
+          ]
+        }
+      },
+      {
+        "speed_hz": 66666666,
+        "idle": 3,
+        "passed": true,
+        "FCLK_Hz": 133333332,
+        "cfg": "0x31",
+        "effective_idle": 3,
+        "SWCLK_Hz": 66666666.0,
+        "half_period_fclk": 1,
+        "short_high": false,
+        "intended_high_ns": 7.500000075000001,
+        "JTAG_sampling_mode": 16,
+        "read": {
+          "samples": [
+            5.04588851302239,
+            5.046957124634067,
+            5.05265754833762
+          ],
+          "median": 5.046957124634067
+        },
+        "write": {
+          "samples": [
+            2.5541732923698555,
+            2.554014029684361,
+            2.5530141157252513
+          ],
+          "median": 2.554014029684361
+        },
+        "readCounterDiagnostic": {
+          "measurement_MB_s": 5.038130380638122,
+          "before": [
+            3696686366,
+            1806425260,
+            40140042
+          ],
+          "after": [
+            3699794010,
+            1807943646,
+            40173528
+          ],
+          "delta": [
+            3107644,
+            1518386,
+            33486
+          ]
+        }
+      },
+      {
+        "speed_hz": 66666666,
+        "idle": 4,
+        "passed": true,
+        "FCLK_Hz": 133333332,
+        "cfg": "0x41",
+        "effective_idle": 4,
+        "SWCLK_Hz": 66666666.0,
+        "half_period_fclk": 1,
+        "short_high": false,
+        "intended_high_ns": 7.500000075000001,
+        "JTAG_sampling_mode": 16,
+        "read": {
+          "samples": [
+            4.951681513815866,
+            4.949344287706906,
+            4.960939865414311
+          ],
+          "median": 4.951681513815866
+        },
+        "write": {
+          "samples": [
+            2.5025202382942724,
+            2.5036722641381304,
+            2.5036340053078794
+          ],
+          "median": 2.5036340053078794
+        },
+        "readCounterDiagnostic": {
+          "measurement_MB_s": 4.940631903044556,
+          "before": [
+            3738480328,
+            1826861250,
+            40580522
+          ],
+          "after": [
+            3741653904,
+            1828412602,
+            40614008
+          ],
+          "delta": [
+            3173576,
+            1551352,
+            33486
+          ]
+        }
+      },
+      {
+        "speed_hz": 66666666,
+        "idle": 7,
+        "passed": true,
+        "FCLK_Hz": 133333332,
+        "cfg": "0x71",
+        "effective_idle": 7,
+        "SWCLK_Hz": 66666666.0,
+        "half_period_fclk": 1,
+        "short_high": false,
+        "intended_high_ns": 7.500000075000001,
+        "JTAG_sampling_mode": 16,
+        "read": {
+          "samples": [
+            4.683534805496375,
+            4.688644688767276,
+            4.694438176944883
+          ],
+          "median": 4.688644688767276
+        },
+        "write": {
+          "samples": [
+            4.582344241510616,
+            4.606452519965318,
+            4.617227239567589
+          ],
+          "median": 4.606452519965318
+        },
+        "readCounterDiagnostic": {
+          "measurement_MB_s": 4.686247519784287,
+          "before": [
+            3769305046,
+            1841944454,
+            40889166
+          ],
+          "after": [
+            3772676418,
+            1843594704,
+            40922652
+          ],
+          "delta": [
+            3371372,
+            1650250,
+            33486
+          ]
+        }
+      },
+      {
+        "speed_hz": 66666666,
+        "idle": 10,
+        "passed": true,
+        "FCLK_Hz": 133333332,
+        "cfg": "0xa1",
+        "effective_idle": 10,
+        "SWCLK_Hz": 66666666.0,
+        "half_period_fclk": 1,
+        "short_high": false,
+        "intended_high_ns": 7.500000075000001,
+        "JTAG_sampling_mode": 16,
+        "read": {
+          "samples": [
+            4.4437965114784435,
+            4.449287317241479,
+            4.450767929399229
+          ],
+          "median": 4.449287317241479
+        },
+        "write": {
+          "samples": [
+            4.378436521190602,
+            4.36529795948646,
+            4.373323367779519
+          ],
+          "median": 4.373323367779519
+        },
+        "readCounterDiagnostic": {
+          "measurement_MB_s": 4.452521765891244,
+          "before": [
+            3801948640,
+            1857937096,
+            41197810
+          ],
+          "after": [
+            3805517808,
+            1859686244,
+            41231296
+          ],
+          "delta": [
+            3569168,
+            1749148,
+            33486
+          ]
+        }
+      },
+      {
+        "speed_hz": 66666666,
+        "idle": 8,
+        "passed": true,
+        "FCLK_Hz": 133333332,
+        "cfg": "0x81",
+        "effective_idle": 8,
+        "SWCLK_Hz": 66666666.0,
+        "half_period_fclk": 1,
+        "short_high": false,
+        "intended_high_ns": 7.500000075000001,
+        "JTAG_sampling_mode": 16,
+        "read": {
+          "samples": [
+            4.605173934070697,
+            4.5838826896387515,
+            4.60473711206093
+          ],
+          "median": 4.60473711206093
+        },
+        "write": {
+          "samples": [
+            4.5327440543183535,
+            4.527123643806264,
+            4.5280776601442865
+          ],
+          "median": 4.5280776601442865
+        },
+        "readCounterDiagnostic": {
+          "measurement_MB_s": 4.590641635765843,
+          "before": [
+            3833709310,
+            1873488276,
+            41506454
+          ],
+          "after": [
+            3837146614,
+            1875171492,
+            41539940
+          ],
+          "delta": [
+            3437304,
+            1683216,
+            33486
+          ]
+        }
+      },
+      {
+        "speed_hz": 66666666,
+        "idle": 12,
+        "passed": true,
+        "FCLK_Hz": 133333332,
+        "cfg": "0xc1",
+        "effective_idle": 12,
+        "SWCLK_Hz": 66666666.0,
+        "half_period_fclk": 1,
+        "short_high": false,
+        "intended_high_ns": 7.500000075000001,
+        "JTAG_sampling_mode": 16,
+        "read": {
+          "samples": [
+            4.302393902109981,
+            4.298978979683968,
+            4.305050565081173
+          ],
+          "median": 4.302393902109981
+        },
+        "write": {
+          "samples": [
+            4.243611369215574,
+            4.216079205793362,
+            4.232880782348445
+          ],
+          "median": 4.232880782348445
+        },
+        "readCounterDiagnostic": {
+          "measurement_MB_s": 4.299472537819052,
+          "before": [
+            3867499556,
+            1890054244,
+            41815098
+          ],
+          "after": [
+            3871200588,
+            1891869324,
+            41848584
+          ],
+          "delta": [
+            3701032,
+            1815080,
+            33486
+          ]
+        }
+      },
+      {
+        "speed_hz": 66666666,
+        "idle": 2,
+        "passed": true,
+        "FCLK_Hz": 133333332,
+        "cfg": "0x21",
+        "effective_idle": 2,
+        "SWCLK_Hz": 66666666.0,
+        "half_period_fclk": 1,
+        "short_high": false,
+        "intended_high_ns": 7.500000075000001,
+        "JTAG_sampling_mode": 16,
+        "read": {
+          "samples": [
+            2.6307053441814676,
+            2.6219381680771945,
+            2.6119950261328806
+          ],
+          "median": 2.6219381680771945
+        },
+        "write": {
+          "samples": [
+            2.6032691812518935,
+            2.606183402091572,
+            2.602478342925933
+          ],
+          "median": 2.6032691812518935
+        },
+        "readCounterDiagnostic": {
+          "measurement_MB_s": 2.6285634069876775,
+          "before": [
+            3920783114,
+            1916099116,
+            42391494
+          ],
+          "after": [
+            3926833594,
+            1919056216,
+            42457684
+          ],
+          "delta": [
+            6050480,
+            2957100,
+            66190
+          ]
+        }
+      },
+      {
+        "speed_hz": 66666666,
+        "idle": 11,
+        "passed": true,
+        "FCLK_Hz": 133333332,
+        "cfg": "0xb1",
+        "effective_idle": 11,
+        "SWCLK_Hz": 66666666.0,
+        "half_period_fclk": 1,
+        "short_high": false,
+        "intended_high_ns": 7.500000075000001,
+        "JTAG_sampling_mode": 16,
+        "read": {
+          "samples": [
+            4.372987778311113,
+            4.30972179734918,
+            4.369940655263171
+          ],
+          "median": 4.369940655263171
+        },
+        "write": {
+          "samples": [
+            4.312047031423592,
+            4.312103776223004,
+            4.307951198740689
+          ],
+          "median": 4.312047031423592
+        },
+        "readCounterDiagnostic": {
+          "measurement_MB_s": 4.373673603106215,
+          "before": [
+            3956646176,
+            1933668788,
+            42732842
+          ],
+          "after": [
+            3960281276,
+            1935450902,
+            42766328
+          ],
+          "delta": [
+            3635100,
+            1782114,
+            33486
+          ]
+        }
+      },
+      {
+        "speed_hz": 66666666,
+        "idle": 6,
+        "passed": true,
+        "FCLK_Hz": 133333332,
+        "cfg": "0x61",
+        "effective_idle": 6,
+        "SWCLK_Hz": 66666666.0,
+        "half_period_fclk": 1,
+        "short_high": false,
+        "intended_high_ns": 7.500000075000001,
+        "JTAG_sampling_mode": 16,
+        "read": {
+          "samples": [
+            4.772137289186209,
+            4.766757222320143,
+            4.7553431949006155
+          ],
+          "median": 4.766757222320143
+        },
+        "write": {
+          "samples": [
+            4.694051499741327,
+            4.685962704929999,
+            4.692438225998738
+          ],
+          "median": 4.692438225998738
+        },
+        "readCounterDiagnostic": {
+          "measurement_MB_s": 4.770521994504011,
+          "before": [
+            3987392058,
+            1948712574,
+            43041486
+          ],
+          "after": [
+            3990697498,
+            1950329858,
+            43074972
+          ],
+          "delta": [
+            3305440,
+            1617284,
+            33486
+          ]
+        }
+      },
+      {
+        "speed_hz": 66666666,
+        "idle": 13,
+        "passed": true,
+        "FCLK_Hz": 133333332,
+        "cfg": "0xd1",
+        "effective_idle": 13,
+        "SWCLK_Hz": 66666666.0,
+        "half_period_fclk": 1,
+        "short_high": false,
+        "intended_high_ns": 7.500000075000001,
+        "JTAG_sampling_mode": 16,
+        "read": {
+          "samples": [
+            4.228510962838556,
+            4.232265731037926,
+            4.229070342310017
+          ],
+          "median": 4.229070342310017
+        },
+        "write": {
+          "samples": [
+            4.161134762878364,
+            4.16782994444923,
+            4.168360127006541
+          ],
+          "median": 4.16782994444923
+        },
+        "readCounterDiagnostic": {
+          "measurement_MB_s": 4.231937777081983,
+          "before": [
+            4021590800,
+            1965482790,
+            43350130
+          ],
+          "after": [
+            4025357764,
+            1967330836,
+            43383616
+          ],
+          "delta": [
+            3766964,
+            1848046,
+            33486
+          ]
+        }
+      },
+      {
+        "speed_hz": 66666666,
+        "idle": 1,
+        "passed": true,
+        "FCLK_Hz": 133333332,
+        "cfg": "0x11",
+        "effective_idle": 1,
+        "SWCLK_Hz": 66666666.0,
+        "half_period_fclk": 1,
+        "short_high": false,
+        "intended_high_ns": 7.500000075000001,
+        "JTAG_sampling_mode": 16,
+        "read": {
+          "samples": [
+            2.680990153234486,
+            2.6827461139472004,
+            2.6817526161102645
+          ],
+          "median": 2.6817526161102645
+        },
+        "write": {
+          "samples": [
+            2.6552304630684302,
+            2.6532149017642865,
+            2.6548593698577676
+          ],
+          "median": 2.6548593698577676
+        },
+        "readCounterDiagnostic": {
+          "measurement_MB_s": 2.679641819990721,
+          "before": [
+            4073864426,
+            1991022696,
+            43926526
+          ],
+          "after": [
+            4079783566,
+            1993914126,
+            43992716
+          ],
+          "delta": [
+            5919140,
+            2891430,
+            66190
+          ]
+        }
+      }
+    ],
+    "rtt": [
+      {
+        "speed_hz": 60000000,
+        "idle": 1,
+        "repeat": 0,
+        "passed": true,
+        "beforeRTT": {
+          "FCLK_Hz": 119999998,
+          "cfg": "0x11",
+          "effective_idle": 1,
+          "SWCLK_Hz": 59999999.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 8.333333472222225,
+          "JTAG_sampling_mode": 17
+        },
+        "chunk": 1024,
+        "FCLK_Hz": 119999998,
+        "cfg": "0x11",
+        "waveform": {
+          "SWCLK_Hz": 59999999.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 8.333333472222225
+        },
+        "clockSource": 0,
+        "clockControl": 15728896,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 17,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 59999999.0,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+        "window_s": 2.002246850002848,
+        "host_bytes": 4702208,
+        "host_MB_s": 2.3484656749457797,
+        "probe_bytes": 4646912,
+        "probe_MB_s": 2.3208487005452847,
+        "session_bytes": 6726652,
+        "sequence_exact": true,
+        "all_published_received": true,
+        "errors": 0,
+        "s0": [
+          65537,
+          604307968,
+          604307992,
+          2068480,
+          132384741,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          989856768
+        ],
+        "s1": [
+          65537,
+          604307968,
+          604307992,
+          6715392,
+          429791647,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          989856768
+        ]
+      },
+      {
+        "speed_hz": 60000000,
+        "idle": 2,
+        "repeat": 0,
+        "passed": true,
+        "beforeRTT": {
+          "FCLK_Hz": 119999998,
+          "cfg": "0x21",
+          "effective_idle": 2,
+          "SWCLK_Hz": 59999999.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 8.333333472222225,
+          "JTAG_sampling_mode": 17
+        },
+        "chunk": 1024,
+        "FCLK_Hz": 119999998,
+        "cfg": "0x21",
+        "waveform": {
+          "SWCLK_Hz": 59999999.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 8.333333472222225
+        },
+        "clockSource": 0,
+        "clockControl": 15728896,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 17,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 59999999.0,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+        "window_s": 2.002049150003586,
+        "host_bytes": 4546560,
+        "host_MB_s": 2.2709532380820208,
+        "probe_bytes": 4553728,
+        "probe_MB_s": 2.2745335697636815,
+        "session_bytes": 6563836,
+        "sequence_exact": true,
+        "all_published_received": true,
+        "errors": 0,
+        "s0": [
+          65537,
+          604307968,
+          604307992,
+          1997824,
+          127862688,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          989856768
+        ],
+        "s1": [
+          65537,
+          604307968,
+          604307992,
+          6551552,
+          419305727,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          989856768
+        ]
+      },
+      {
+        "speed_hz": 60000000,
+        "idle": 4,
+        "repeat": 0,
+        "passed": true,
+        "beforeRTT": {
+          "FCLK_Hz": 119999998,
+          "cfg": "0x41",
+          "effective_idle": 4,
+          "SWCLK_Hz": 59999999.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 8.333333472222225,
+          "JTAG_sampling_mode": 17
+        },
+        "chunk": 1024,
+        "FCLK_Hz": 119999998,
+        "cfg": "0x41",
+        "waveform": {
+          "SWCLK_Hz": 59999999.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 8.333333472222225
+        },
+        "clockSource": 0,
+        "clockControl": 15728896,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 17,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 59999999.0,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+        "window_s": 2.001747599999362,
+        "host_bytes": 4427776,
+        "host_MB_s": 2.2119551935525794,
+        "probe_bytes": 4402176,
+        "probe_MB_s": 2.199166368427969,
+        "session_bytes": 6322172,
+        "sequence_exact": true,
+        "all_published_received": true,
+        "errors": 0,
+        "s0": [
+          65537,
+          604307968,
+          604307992,
+          1908736,
+          122160969,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          989856768
+        ],
+        "s1": [
+          65537,
+          604307968,
+          604307992,
+          6310912,
+          403904532,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          989856768
+        ]
+      },
+      {
+        "speed_hz": 60000000,
+        "idle": 1,
+        "repeat": 0,
+        "passed": true,
+        "beforeRTT": {
+          "FCLK_Hz": 119999998,
+          "cfg": "0x11",
+          "effective_idle": 1,
+          "SWCLK_Hz": 59999999.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 8.333333472222225,
+          "JTAG_sampling_mode": 17
+        },
+        "chunk": 1024,
+        "FCLK_Hz": 119999998,
+        "cfg": "0x11",
+        "waveform": {
+          "SWCLK_Hz": 59999999.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 8.333333472222225
+        },
+        "clockSource": 0,
+        "clockControl": 15728896,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 17,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 59999999.0,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+        "window_s": 2.0019941000064136,
+        "host_bytes": 4698112,
+        "host_MB_s": 2.346716206598685,
+        "probe_bytes": 4646912,
+        "probe_MB_s": 2.321141705654933,
+        "session_bytes": 6758396,
+        "sequence_exact": true,
+        "all_published_received": true,
+        "errors": 0,
+        "s0": [
+          65537,
+          604307968,
+          604307992,
+          2100224,
+          134416388,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          989856768
+        ],
+        "s1": [
+          65537,
+          604307968,
+          604307992,
+          6747136,
+          431823294,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          989856768
+        ]
+      },
+      {
+        "speed_hz": 66666666,
+        "idle": 1,
+        "repeat": 0,
+        "passed": true,
+        "beforeRTT": {
+          "FCLK_Hz": 133333332,
+          "cfg": "0x11",
+          "effective_idle": 1,
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001,
+          "JTAG_sampling_mode": 16
+        },
+        "chunk": 1024,
+        "FCLK_Hz": 133333332,
+        "cfg": "0x11",
+        "waveform": {
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001
+        },
+        "clockSource": 2,
+        "clockControl": 1051168,
+        "sourcePllControl": 163848,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 16,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 66666666.0,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+        "window_s": 2.0023676499986323,
+        "host_bytes": 5165056,
+        "host_MB_s": 2.5794743537749065,
+        "probe_bytes": 5155840,
+        "probe_MB_s": 2.574871802390296,
+        "session_bytes": 7703548,
+        "sequence_exact": true,
+        "all_published_received": true,
+        "errors": 0,
+        "s0": [
+          65537,
+          604307968,
+          604307992,
+          2535424,
+          162269613,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ],
+        "s1": [
+          65537,
+          604307968,
+          604307992,
+          7691264,
+          492248408,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ]
+      },
+      {
+        "speed_hz": 66666666,
+        "idle": 15,
+        "repeat": 0,
+        "passed": true,
+        "beforeRTT": {
+          "FCLK_Hz": 133333332,
+          "cfg": "0xf1",
+          "effective_idle": 15,
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001,
+          "JTAG_sampling_mode": 16
+        },
+        "chunk": 1024,
+        "FCLK_Hz": 133333332,
+        "cfg": "0xf1",
+        "waveform": {
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001
+        },
+        "clockSource": 2,
+        "clockControl": 1051168,
+        "sourcePllControl": 163848,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 16,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 66666666.0,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+        "window_s": 2.0020025000048918,
+        "host_bytes": 4059136,
+        "host_MB_s": 2.0275379276449863,
+        "probe_bytes": 4040704,
+        "probe_MB_s": 2.018331145935196,
+        "session_bytes": 5842940,
+        "sequence_exact": true,
+        "all_published_received": true,
+        "errors": 0,
+        "s0": [
+          65537,
+          604307968,
+          604307992,
+          1790976,
+          114624214,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ],
+        "s1": [
+          65537,
+          604307968,
+          604307992,
+          5831680,
+          373233216,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ]
+      },
+      {
+        "speed_hz": 66666666,
+        "idle": 14,
+        "repeat": 0,
+        "passed": true,
+        "beforeRTT": {
+          "FCLK_Hz": 133333332,
+          "cfg": "0xe1",
+          "effective_idle": 14,
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001,
+          "JTAG_sampling_mode": 16
+        },
+        "chunk": 1024,
+        "FCLK_Hz": 133333332,
+        "cfg": "0xe1",
+        "waveform": {
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001
+        },
+        "clockSource": 2,
+        "clockControl": 1051168,
+        "sourcePllControl": 163848,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 16,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 66666666.0,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+        "window_s": 2.002290249998623,
+        "host_bytes": 4132864,
+        "host_MB_s": 2.064068383693544,
+        "probe_bytes": 4105216,
+        "probe_MB_s": 2.050260195794702,
+        "session_bytes": 6006780,
+        "sequence_exact": true,
+        "all_published_received": true,
+        "errors": 0,
+        "s0": [
+          65537,
+          604307968,
+          604307992,
+          1890304,
+          120981303,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ],
+        "s1": [
+          65537,
+          604307968,
+          604307992,
+          5995520,
+          383719136,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ]
+      },
+      {
+        "speed_hz": 66666666,
+        "idle": 5,
+        "repeat": 0,
+        "passed": true,
+        "beforeRTT": {
+          "FCLK_Hz": 133333332,
+          "cfg": "0x51",
+          "effective_idle": 5,
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001,
+          "JTAG_sampling_mode": 16
+        },
+        "chunk": 1024,
+        "FCLK_Hz": 133333332,
+        "cfg": "0x51",
+        "waveform": {
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001
+        },
+        "clockSource": 2,
+        "clockControl": 1051168,
+        "sourcePllControl": 163848,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 16,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 66666666.0,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+        "window_s": 2.0021793999985675,
+        "host_bytes": 4775936,
+        "host_MB_s": 2.3853686637687996,
+        "probe_bytes": 4769792,
+        "probe_MB_s": 2.382300007683334,
+        "session_bytes": 7043068,
+        "sequence_exact": true,
+        "all_published_received": true,
+        "errors": 0,
+        "s0": [
+          65537,
+          604307968,
+          604307992,
+          2262016,
+          144771234,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ],
+        "s1": [
+          65537,
+          604307968,
+          604307992,
+          7031808,
+          450042580,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ]
+      },
+      {
+        "speed_hz": 66666666,
+        "idle": 9,
+        "repeat": 0,
+        "passed": true,
+        "beforeRTT": {
+          "FCLK_Hz": 133333332,
+          "cfg": "0x91",
+          "effective_idle": 9,
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001,
+          "JTAG_sampling_mode": 16
+        },
+        "chunk": 1024,
+        "FCLK_Hz": 133333332,
+        "cfg": "0x91",
+        "waveform": {
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001
+        },
+        "clockSource": 2,
+        "clockControl": 1051168,
+        "sourcePllControl": 163848,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 16,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 66666666.0,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+        "window_s": 2.002604600005725,
+        "host_bytes": 4476928,
+        "host_MB_s": 2.2355526397908014,
+        "probe_bytes": 4464640,
+        "probe_MB_s": 2.2294166307154377,
+        "session_bytes": 6590460,
+        "sequence_exact": true,
+        "all_published_received": true,
+        "errors": 0,
+        "s0": [
+          65537,
+          604307968,
+          604307992,
+          2113536,
+          135268369,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ],
+        "s1": [
+          65537,
+          604307968,
+          604307992,
+          6578176,
+          421009689,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ]
+      },
+      {
+        "speed_hz": 66666666,
+        "idle": 3,
+        "repeat": 0,
+        "passed": true,
+        "beforeRTT": {
+          "FCLK_Hz": 133333332,
+          "cfg": "0x31",
+          "effective_idle": 3,
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001,
+          "JTAG_sampling_mode": 16
+        },
+        "chunk": 1024,
+        "FCLK_Hz": 133333332,
+        "cfg": "0x31",
+        "waveform": {
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001
+        },
+        "clockSource": 2,
+        "clockControl": 1051168,
+        "sourcePllControl": 163848,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 16,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 66666666.0,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+        "window_s": 2.001805100007914,
+        "host_bytes": 4993024,
+        "host_MB_s": 2.494260804900667,
+        "probe_bytes": 4955136,
+        "probe_MB_s": 2.475333887390141,
+        "session_bytes": 7207932,
+        "sequence_exact": true,
+        "all_published_received": true,
+        "errors": 0,
+        "s0": [
+          65537,
+          604307968,
+          604307992,
+          2240512,
+          143394957,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ],
+        "s1": [
+          65537,
+          604307968,
+          604307992,
+          7195648,
+          460528500,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ]
+      },
+      {
+        "speed_hz": 66666666,
+        "idle": 4,
+        "repeat": 0,
+        "passed": true,
+        "beforeRTT": {
+          "FCLK_Hz": 133333332,
+          "cfg": "0x41",
+          "effective_idle": 4,
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001,
+          "JTAG_sampling_mode": 16
+        },
+        "chunk": 1024,
+        "FCLK_Hz": 133333332,
+        "cfg": "0x41",
+        "waveform": {
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001
+        },
+        "clockSource": 2,
+        "clockControl": 1051168,
+        "sourcePllControl": 163848,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 16,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 66666666.0,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+        "window_s": 2.0019771000006585,
+        "host_bytes": 4825088,
+        "host_MB_s": 2.4101614349127236,
+        "probe_bytes": 4859904,
+        "probe_MB_s": 2.4275522432291563,
+        "session_bytes": 7212028,
+        "sequence_exact": true,
+        "all_published_received": true,
+        "errors": 0,
+        "s0": [
+          65537,
+          604307968,
+          604307992,
+          2339840,
+          149752046,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ],
+        "s1": [
+          65537,
+          604307968,
+          604307992,
+          7199744,
+          460790648,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ]
+      },
+      {
+        "speed_hz": 66666666,
+        "idle": 7,
+        "repeat": 0,
+        "passed": true,
+        "beforeRTT": {
+          "FCLK_Hz": 133333332,
+          "cfg": "0x71",
+          "effective_idle": 7,
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001,
+          "JTAG_sampling_mode": 16
+        },
+        "chunk": 1024,
+        "FCLK_Hz": 133333332,
+        "cfg": "0x71",
+        "waveform": {
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001
+        },
+        "clockSource": 2,
+        "clockControl": 1051168,
+        "sourcePllControl": 163848,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 16,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 66666666.0,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+        "window_s": 2.0021323999972083,
+        "host_bytes": 4591616,
+        "host_MB_s": 2.2933628165681763,
+        "probe_bytes": 4601856,
+        "probe_MB_s": 2.2984773634383107,
+        "session_bytes": 6761468,
+        "sequence_exact": true,
+        "all_published_received": true,
+        "errors": 0,
+        "s0": [
+          65537,
+          604307968,
+          604307992,
+          2147328,
+          137431090,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ],
+        "s1": [
+          65537,
+          604307968,
+          604307992,
+          6749184,
+          431954368,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ]
+      },
+      {
+        "speed_hz": 66666666,
+        "idle": 10,
+        "repeat": 0,
+        "passed": true,
+        "beforeRTT": {
+          "FCLK_Hz": 133333332,
+          "cfg": "0xa1",
+          "effective_idle": 10,
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001,
+          "JTAG_sampling_mode": 16
+        },
+        "chunk": 1024,
+        "FCLK_Hz": 133333332,
+        "cfg": "0xa1",
+        "waveform": {
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001
+        },
+        "clockSource": 2,
+        "clockControl": 1051168,
+        "sourcePllControl": 163848,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 16,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 66666666.0,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+        "window_s": 2.0020779999977094,
+        "host_bytes": 4382720,
+        "host_MB_s": 2.1890855401263156,
+        "probe_bytes": 4385792,
+        "probe_MB_s": 2.190619945878741,
+        "session_bytes": 6519804,
+        "sequence_exact": true,
+        "all_published_received": true,
+        "errors": 0,
+        "s0": [
+          65537,
+          604307968,
+          604307992,
+          2122752,
+          135858202,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ],
+        "s1": [
+          65537,
+          604307968,
+          604307992,
+          6508544,
+          416553173,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ]
+      },
+      {
+        "speed_hz": 66666666,
+        "idle": 8,
+        "repeat": 0,
+        "passed": true,
+        "beforeRTT": {
+          "FCLK_Hz": 133333332,
+          "cfg": "0x81",
+          "effective_idle": 8,
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001,
+          "JTAG_sampling_mode": 16
+        },
+        "chunk": 1024,
+        "FCLK_Hz": 133333332,
+        "cfg": "0x81",
+        "waveform": {
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001
+        },
+        "clockSource": 2,
+        "clockControl": 1051168,
+        "sourcePllControl": 163848,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 16,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 66666666.0,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+        "window_s": 2.0022520499915117,
+        "host_bytes": 4550656,
+        "host_MB_s": 2.2727688055154154,
+        "probe_bytes": 4533248,
+        "probe_MB_s": 2.264074595413309,
+        "session_bytes": 6564860,
+        "sequence_exact": true,
+        "all_published_received": true,
+        "errors": 0,
+        "s0": [
+          65537,
+          604307968,
+          604307992,
+          2020352,
+          129304502,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ],
+        "s1": [
+          65537,
+          604307968,
+          604307992,
+          6553600,
+          419436801,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ]
+      },
+      {
+        "speed_hz": 66666666,
+        "idle": 12,
+        "repeat": 0,
+        "passed": true,
+        "beforeRTT": {
+          "FCLK_Hz": 133333332,
+          "cfg": "0xc1",
+          "effective_idle": 12,
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001,
+          "JTAG_sampling_mode": 16
+        },
+        "chunk": 1024,
+        "FCLK_Hz": 133333332,
+        "cfg": "0xc1",
+        "waveform": {
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001
+        },
+        "clockSource": 2,
+        "clockControl": 1051168,
+        "sourcePllControl": 163848,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 16,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 66666666.0,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+        "window_s": 2.002220349997515,
+        "host_bytes": 4259840,
+        "host_MB_s": 2.127558038257521,
+        "probe_bytes": 4240384,
+        "probe_MB_s": 2.1178408260635564,
+        "session_bytes": 6238204,
+        "sequence_exact": true,
+        "all_published_received": true,
+        "errors": 0,
+        "s0": [
+          65537,
+          604307968,
+          604307992,
+          1985536,
+          127076244,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ],
+        "s1": [
+          65537,
+          604307968,
+          604307992,
+          6225920,
+          398464961,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ]
+      },
+      {
+        "speed_hz": 66666666,
+        "idle": 2,
+        "repeat": 0,
+        "passed": true,
+        "beforeRTT": {
+          "FCLK_Hz": 133333332,
+          "cfg": "0x21",
+          "effective_idle": 2,
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001,
+          "JTAG_sampling_mode": 16
+        },
+        "chunk": 1024,
+        "FCLK_Hz": 133333332,
+        "cfg": "0x21",
+        "waveform": {
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001
+        },
+        "clockSource": 2,
+        "clockControl": 1051168,
+        "sourcePllControl": 163848,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 16,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 66666666.0,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+        "window_s": 2.0027103000029456,
+        "host_bytes": 5095424,
+        "host_MB_s": 2.544264140446327,
+        "probe_bytes": 5055488,
+        "probe_MB_s": 2.5243231634613177,
+        "session_bytes": 7396348,
+        "sequence_exact": true,
+        "all_published_received": true,
+        "errors": 0,
+        "s0": [
+          65537,
+          604307968,
+          604307992,
+          2328576,
+          149031139,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ],
+        "s1": [
+          65537,
+          604307968,
+          604307992,
+          7384064,
+          472587308,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ]
+      },
+      {
+        "speed_hz": 66666666,
+        "idle": 11,
+        "repeat": 0,
+        "passed": true,
+        "beforeRTT": {
+          "FCLK_Hz": 133333332,
+          "cfg": "0xb1",
+          "effective_idle": 11,
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001,
+          "JTAG_sampling_mode": 16
+        },
+        "chunk": 1024,
+        "FCLK_Hz": 133333332,
+        "cfg": "0xb1",
+        "waveform": {
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001
+        },
+        "clockSource": 2,
+        "clockControl": 1051168,
+        "sourcePllControl": 163848,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 16,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 66666666.0,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+        "window_s": 2.0019902499916498,
+        "host_bytes": 4272128,
+        "host_MB_s": 2.1339404625061578,
+        "probe_bytes": 4312064,
+        "probe_MB_s": 2.1538886116043696,
+        "session_bytes": 6215676,
+        "sequence_exact": true,
+        "all_published_received": true,
+        "errors": 0,
+        "s0": [
+          65537,
+          604307968,
+          604307992,
+          1892352,
+          121112377,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ],
+        "s1": [
+          65537,
+          604307968,
+          604307992,
+          6204416,
+          397088684,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ]
+      },
+      {
+        "speed_hz": 66666666,
+        "idle": 6,
+        "repeat": 0,
+        "passed": true,
+        "beforeRTT": {
+          "FCLK_Hz": 133333332,
+          "cfg": "0x61",
+          "effective_idle": 6,
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001,
+          "JTAG_sampling_mode": 16
+        },
+        "chunk": 1024,
+        "FCLK_Hz": 133333332,
+        "cfg": "0x61",
+        "waveform": {
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001
+        },
+        "clockSource": 2,
+        "clockControl": 1051168,
+        "sourcePllControl": 163848,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 16,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 66666666.0,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+        "window_s": 2.001939150002727,
+        "host_bytes": 4673536,
+        "host_MB_s": 2.3345045227741483,
+        "probe_bytes": 4682752,
+        "probe_MB_s": 2.339108059300215,
+        "session_bytes": 6817788,
+        "sequence_exact": true,
+        "all_published_received": true,
+        "errors": 0,
+        "s0": [
+          65537,
+          604307968,
+          604307992,
+          2122752,
+          135858202,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ],
+        "s1": [
+          65537,
+          604307968,
+          604307992,
+          6805504,
+          435558903,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ]
+      },
+      {
+        "speed_hz": 66666666,
+        "idle": 13,
+        "repeat": 0,
+        "passed": true,
+        "beforeRTT": {
+          "FCLK_Hz": 133333332,
+          "cfg": "0xd1",
+          "effective_idle": 13,
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001,
+          "JTAG_sampling_mode": 16
+        },
+        "chunk": 1024,
+        "FCLK_Hz": 133333332,
+        "cfg": "0xd1",
+        "waveform": {
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001
+        },
+        "clockSource": 2,
+        "clockControl": 1051168,
+        "sourcePllControl": 163848,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 16,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 66666666.0,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+        "window_s": 2.0022075500019128,
+        "host_bytes": 4132864,
+        "host_MB_s": 2.0641536388153425,
+        "probe_bytes": 4171776,
+        "probe_MB_s": 2.083588187446409,
+        "session_bytes": 6182908,
+        "sequence_exact": true,
+        "all_published_received": true,
+        "errors": 0,
+        "s0": [
+          65537,
+          604307968,
+          604307992,
+          1998848,
+          127928225,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ],
+        "s1": [
+          65537,
+          604307968,
+          604307992,
+          6170624,
+          394925963,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ]
+      },
+      {
+        "speed_hz": 66666666,
+        "idle": 1,
+        "repeat": 0,
+        "passed": true,
+        "beforeRTT": {
+          "FCLK_Hz": 133333332,
+          "cfg": "0x11",
+          "effective_idle": 1,
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001,
+          "JTAG_sampling_mode": 16
+        },
+        "chunk": 1024,
+        "FCLK_Hz": 133333332,
+        "cfg": "0x11",
+        "waveform": {
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001
+        },
+        "clockSource": 2,
+        "clockControl": 1051168,
+        "sourcePllControl": 163848,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 16,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 66666666.0,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+        "window_s": 2.00224065000657,
+        "host_bytes": 5156864,
+        "host_MB_s": 2.575546550802012,
+        "probe_bytes": 5155840,
+        "probe_MB_s": 2.5750351237665074,
+        "session_bytes": 7491580,
+        "sequence_exact": true,
+        "all_published_received": true,
+        "errors": 0,
+        "s0": [
+          65537,
+          604307968,
+          604307992,
+          2322432,
+          148637916,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ],
+        "s1": [
+          65537,
+          604307968,
+          604307992,
+          7478272,
+          478616712,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ]
+      }
+    ],
+    "sramConfirm": [
+      {
+        "speed_hz": 60000000,
+        "idle": 1,
+        "passed": true,
+        "FCLK_Hz": 119999998,
+        "cfg": "0x11",
+        "effective_idle": 1,
+        "SWCLK_Hz": 59999999.0,
+        "half_period_fclk": 1,
+        "short_high": false,
+        "intended_high_ns": 8.333333472222225,
+        "JTAG_sampling_mode": 17,
+        "read": {
+          "samples": [
+            2.4202092792235903,
+            2.4189988260706903,
+            2.4197848128136985
+          ],
+          "median": 2.4197848128136985
+        },
+        "write": {
+          "samples": [
+            2.397170332112806,
+            2.3983502556743956,
+            2.3961185920866237
+          ],
+          "median": 2.397170332112806
+        },
+        "soak": {
+          "seconds": 10.015012099996966,
+          "pairs": 89,
+          "read": 2.4195123390470195,
+          "write": 2.3959609103895456,
+          "minRead": 2.370263207729111,
+          "minWrite": 2.375146779410712,
+          "errors": 0
+        }
+      },
+      {
+        "speed_hz": 60000000,
+        "idle": 2,
+        "passed": true,
+        "FCLK_Hz": 119999998,
+        "cfg": "0x21",
+        "effective_idle": 2,
+        "SWCLK_Hz": 59999999.0,
+        "half_period_fclk": 1,
+        "short_high": false,
+        "intended_high_ns": 8.333333472222225,
+        "JTAG_sampling_mode": 17,
+        "read": {
+          "samples": [
+            4.643480909649919,
+            4.646328580433655,
+            4.640456000996326
+          ],
+          "median": 4.643480909649919
+        },
+        "write": {
+          "samples": [
+            2.3499291822204995,
+            2.3510208766913783,
+            2.3488174556221666
+          ],
+          "median": 2.3499291822204995
+        },
+        "soak": {
+          "seconds": 10.064249499999278,
+          "pairs": 116,
+          "read": 4.647144019723914,
+          "write": 2.349461624196493,
+          "minRead": 4.571157541777204,
+          "minWrite": 2.3258933798678463,
+          "errors": 0
+        }
+      },
+      {
+        "speed_hz": 60000000,
+        "idle": 4,
+        "passed": true,
+        "FCLK_Hz": 119999998,
+        "cfg": "0x41",
+        "effective_idle": 4,
+        "SWCLK_Hz": 59999999.0,
+        "half_period_fclk": 1,
+        "short_high": false,
+        "intended_high_ns": 8.333333472222225,
+        "JTAG_sampling_mode": 17,
+        "read": {
+          "samples": [
+            4.469526728930466,
+            4.463073879991267,
+            4.469496246928128
+          ],
+          "median": 4.469496246928128
+        },
+        "write": {
+          "samples": [
+            4.396633559094899,
+            4.388478369356926,
+            4.396913787320035
+          ],
+          "median": 4.396633559094899
+        },
+        "soak": {
+          "seconds": 10.027026299998397,
+          "pairs": 162,
+          "read": 4.470982718198229,
+          "write": 4.3994965173806815,
+          "minRead": 4.359765833082088,
+          "minWrite": 4.224926265611112,
+          "errors": 0
+        }
+      },
+      {
+        "speed_hz": 66666666,
+        "idle": 1,
+        "passed": true,
+        "FCLK_Hz": 133333332,
+        "cfg": "0x11",
+        "effective_idle": 1,
+        "SWCLK_Hz": 66666666.0,
+        "half_period_fclk": 1,
+        "short_high": false,
+        "intended_high_ns": 7.500000075000001,
+        "JTAG_sampling_mode": 16,
+        "read": {
+          "samples": [
+            2.6831634931192965,
+            2.683229406608393,
+            2.6814398989668278
+          ],
+          "median": 2.6831634931192965
+        },
+        "write": {
+          "samples": [
+            2.656312064606725,
+            2.650478643980265,
+            2.6530913801083065
+          ],
+          "median": 2.6530913801083065
+        },
+        "soak": {
+          "seconds": 60.05557670000417,
+          "pairs": 590,
+          "read": 2.682123033655216,
+          "write": 2.65424917381098,
+          "minRead": 2.618250970267329,
+          "minWrite": 2.6033829358298273,
+          "errors": 0
+        }
+      },
+      {
+        "speed_hz": 66666666,
+        "idle": 3,
+        "passed": true,
+        "FCLK_Hz": 133333332,
+        "cfg": "0x31",
+        "effective_idle": 3,
+        "SWCLK_Hz": 66666666.0,
+        "half_period_fclk": 1,
+        "short_high": false,
+        "intended_high_ns": 7.500000075000001,
+        "JTAG_sampling_mode": 16,
+        "read": {
+          "samples": [
+            5.041172601795402,
+            5.0480456308396535,
+            5.050515947554785
+          ],
+          "median": 5.0480456308396535
+        },
+        "write": {
+          "samples": [
+            2.5360855063826984,
+            2.550674098139085,
+            2.553357281219071
+          ],
+          "median": 2.550674098139085
+        },
+        "soak": {
+          "seconds": 60.04319280000345,
+          "pairs": 750,
+          "read": 5.044267029486813,
+          "write": 2.552581559866956,
+          "minRead": 4.77681565074,
+          "minWrite": 2.48738015909606,
+          "errors": 0
+        }
+      },
+      {
+        "speed_hz": 66666666,
+        "idle": 5,
+        "passed": true,
+        "FCLK_Hz": 133333332,
+        "cfg": "0x51",
+        "effective_idle": 5,
+        "SWCLK_Hz": 66666666.0,
+        "half_period_fclk": 1,
+        "short_high": false,
+        "intended_high_ns": 7.500000075000001,
+        "JTAG_sampling_mode": 16,
+        "read": {
+          "samples": [
+            4.85615522172714,
+            4.861865336518629,
+            4.859720219034411
+          ],
+          "median": 4.859720219034411
+        },
+        "write": {
+          "samples": [
+            4.7787139566777075,
+            4.772606451757149,
+            4.772797617013568
+          ],
+          "median": 4.772797617013568
+        },
+        "soak": {
+          "seconds": 60.04990379999799,
+          "pairs": 1052,
+          "read": 4.8582161605080305,
+          "write": 4.775571250997707,
+          "minRead": 4.310954993298532,
+          "minWrite": 4.442591557767843,
+          "errors": 0
+        }
+      }
+    ],
+    "rttConfirm": [
+      {
+        "speed_hz": 60000000,
+        "idle": 1,
+        "repeat": 0,
+        "passed": true,
+        "beforeRTT": {
+          "FCLK_Hz": 119999998,
+          "cfg": "0x11",
+          "effective_idle": 1,
+          "SWCLK_Hz": 59999999.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 8.333333472222225,
+          "JTAG_sampling_mode": 17
+        },
+        "chunk": 1024,
+        "FCLK_Hz": 119999998,
+        "cfg": "0x11",
+        "waveform": {
+          "SWCLK_Hz": 59999999.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 8.333333472222225
+        },
+        "clockSource": 0,
+        "clockControl": 15728896,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 17,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 59999999.0,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+        "window_s": 2.001972450001631,
+        "host_bytes": 4624384,
+        "host_MB_s": 2.309913905157003,
+        "probe_bytes": 4646912,
+        "probe_MB_s": 2.3211668072636136,
+        "session_bytes": 6717436,
+        "sequence_exact": true,
+        "all_published_received": true,
+        "errors": 0,
+        "s0": [
+          65537,
+          604307968,
+          604307992,
+          2059264,
+          131794908,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          989856768
+        ],
+        "s1": [
+          65537,
+          604307968,
+          604307992,
+          6706176,
+          429201813,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          989856768
+        ]
+      },
+      {
+        "speed_hz": 60000000,
+        "idle": 1,
+        "repeat": 1,
+        "passed": true,
+        "beforeRTT": {
+          "FCLK_Hz": 119999998,
+          "cfg": "0x11",
+          "effective_idle": 1,
+          "SWCLK_Hz": 59999999.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 8.333333472222225,
+          "JTAG_sampling_mode": 17
+        },
+        "chunk": 1024,
+        "FCLK_Hz": 119999998,
+        "cfg": "0x11",
+        "waveform": {
+          "SWCLK_Hz": 59999999.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 8.333333472222225
+        },
+        "clockSource": 0,
+        "clockControl": 15728896,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 17,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 59999999.0,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+        "window_s": 2.002143249992514,
+        "host_bytes": 4689920,
+        "host_MB_s": 2.342449772271557,
+        "probe_bytes": 4646912,
+        "probe_MB_s": 2.3209687918271453,
+        "session_bytes": 6759420,
+        "sequence_exact": true,
+        "all_published_received": true,
+        "errors": 0,
+        "s0": [
+          65537,
+          604307968,
+          604307992,
+          2101248,
+          134481925,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          989856768
+        ],
+        "s1": [
+          65537,
+          604307968,
+          604307992,
+          6748160,
+          431888831,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          989856768
+        ]
+      },
+      {
+        "speed_hz": 60000000,
+        "idle": 1,
+        "repeat": 2,
+        "passed": true,
+        "beforeRTT": {
+          "FCLK_Hz": 119999998,
+          "cfg": "0x11",
+          "effective_idle": 1,
+          "SWCLK_Hz": 59999999.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 8.333333472222225,
+          "JTAG_sampling_mode": 17
+        },
+        "chunk": 1024,
+        "FCLK_Hz": 119999998,
+        "cfg": "0x11",
+        "waveform": {
+          "SWCLK_Hz": 59999999.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 8.333333472222225
+        },
+        "clockSource": 0,
+        "clockControl": 15728896,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 17,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 59999999.0,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+        "window_s": 2.0022065499942983,
+        "host_bytes": 4694016,
+        "host_MB_s": 2.344421458422143,
+        "probe_bytes": 4645888,
+        "probe_MB_s": 2.3203839783728757,
+        "session_bytes": 6827004,
+        "sequence_exact": true,
+        "all_published_received": true,
+        "errors": 0,
+        "s0": [
+          65537,
+          604307968,
+          604307992,
+          2168832,
+          138807367,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          989856768
+        ],
+        "s1": [
+          65537,
+          604307968,
+          604307992,
+          6814720,
+          436148736,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          989856768
+        ]
+      },
+      {
+        "speed_hz": 60000000,
+        "idle": 1,
+        "repeat": 3,
+        "passed": true,
+        "beforeRTT": {
+          "FCLK_Hz": 119999998,
+          "cfg": "0x11",
+          "effective_idle": 1,
+          "SWCLK_Hz": 59999999.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 8.333333472222225,
+          "JTAG_sampling_mode": 17
+        },
+        "chunk": 1024,
+        "FCLK_Hz": 119999998,
+        "cfg": "0x11",
+        "waveform": {
+          "SWCLK_Hz": 59999999.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 8.333333472222225
+        },
+        "clockSource": 0,
+        "clockControl": 15728896,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 17,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 59999999.0,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+        "window_s": 10.002140000004147,
+        "host_bytes": 23273472,
+        "host_MB_s": 2.3268492542586237,
+        "probe_bytes": 23213056,
+        "probe_MB_s": 2.320808946884404,
+        "session_bytes": 25534460,
+        "sequence_exact": true,
+        "all_published_received": true,
+        "errors": 0,
+        "s0": [
+          65537,
+          604307968,
+          604307992,
+          2310144,
+          147851472,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          989856768
+        ],
+        "s1": [
+          65537,
+          604307968,
+          604307992,
+          25523200,
+          1633509726,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          989856768
+        ]
+      },
+      {
+        "speed_hz": 66666666,
+        "idle": 1,
+        "repeat": 0,
+        "passed": true,
+        "beforeRTT": {
+          "FCLK_Hz": 133333332,
+          "cfg": "0x11",
+          "effective_idle": 1,
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001,
+          "JTAG_sampling_mode": 16
+        },
+        "chunk": 1024,
+        "FCLK_Hz": 133333332,
+        "cfg": "0x11",
+        "waveform": {
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001
+        },
+        "clockSource": 2,
+        "clockControl": 1051168,
+        "sourcePllControl": 163848,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 16,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 66666666.0,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+        "window_s": 2.0020331000050646,
+        "host_bytes": 5160960,
+        "host_MB_s": 2.5778594769421863,
+        "probe_bytes": 5155840,
+        "probe_MB_s": 2.5753020766674424,
+        "session_bytes": 7541756,
+        "sequence_exact": true,
+        "all_published_received": true,
+        "errors": 0,
+        "s0": [
+          65537,
+          604307968,
+          604307992,
+          2373632,
+          151914767,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ],
+        "s1": [
+          65537,
+          604307968,
+          604307992,
+          7529472,
+          481893562,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ]
+      },
+      {
+        "speed_hz": 66666666,
+        "idle": 1,
+        "repeat": 1,
+        "passed": true,
+        "beforeRTT": {
+          "FCLK_Hz": 133333332,
+          "cfg": "0x11",
+          "effective_idle": 1,
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001,
+          "JTAG_sampling_mode": 16
+        },
+        "chunk": 1024,
+        "FCLK_Hz": 133333332,
+        "cfg": "0x11",
+        "waveform": {
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001
+        },
+        "clockSource": 2,
+        "clockControl": 1051168,
+        "sourcePllControl": 163848,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 16,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 66666666.0,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+        "window_s": 2.0019877499944414,
+        "host_bytes": 5165056,
+        "host_MB_s": 2.5799638384472336,
+        "probe_bytes": 5155840,
+        "probe_MB_s": 2.5753604136760155,
+        "session_bytes": 7448572,
+        "sequence_exact": true,
+        "all_published_received": true,
+        "errors": 0,
+        "s0": [
+          65537,
+          604307968,
+          604307992,
+          2280448,
+          145950900,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ],
+        "s1": [
+          65537,
+          604307968,
+          604307992,
+          7436288,
+          475929695,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ]
+      },
+      {
+        "speed_hz": 66666666,
+        "idle": 1,
+        "repeat": 2,
+        "passed": true,
+        "beforeRTT": {
+          "FCLK_Hz": 133333332,
+          "cfg": "0x11",
+          "effective_idle": 1,
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001,
+          "JTAG_sampling_mode": 16
+        },
+        "chunk": 1024,
+        "FCLK_Hz": 133333332,
+        "cfg": "0x11",
+        "waveform": {
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001
+        },
+        "clockSource": 2,
+        "clockControl": 1051168,
+        "sourcePllControl": 163848,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 16,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 66666666.0,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+        "window_s": 2.002127100000507,
+        "host_bytes": 5173248,
+        "host_MB_s": 2.583875918765941,
+        "probe_bytes": 5155840,
+        "probe_MB_s": 2.575181166070173,
+        "session_bytes": 7623676,
+        "sequence_exact": true,
+        "all_published_received": true,
+        "errors": 0,
+        "s0": [
+          65537,
+          604307968,
+          604307992,
+          2455552,
+          157157727,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ],
+        "s1": [
+          65537,
+          604307968,
+          604307992,
+          7611392,
+          487136522,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ]
+      },
+      {
+        "speed_hz": 66666666,
+        "idle": 1,
+        "repeat": 3,
+        "passed": true,
+        "beforeRTT": {
+          "FCLK_Hz": 133333332,
+          "cfg": "0x11",
+          "effective_idle": 1,
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001,
+          "JTAG_sampling_mode": 16
+        },
+        "chunk": 1024,
+        "FCLK_Hz": 133333332,
+        "cfg": "0x11",
+        "waveform": {
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001
+        },
+        "clockSource": 2,
+        "clockControl": 1051168,
+        "sourcePllControl": 163848,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 16,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 66666666.0,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+        "window_s": 60.00197189999744,
+        "host_bytes": 154451968,
+        "host_MB_s": 2.574114868381627,
+        "probe_bytes": 154502144,
+        "probe_MB_s": 2.574951107565293,
+        "session_bytes": 156739580,
+        "sequence_exact": true,
+        "all_published_received": true,
+        "errors": 0,
+        "s0": [
+          65537,
+          604307968,
+          604307992,
+          2225152,
+          142411902,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ],
+        "s1": [
+          65537,
+          604307968,
+          604307992,
+          156727296,
+          1440634335,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ]
+      }
+    ],
+    "restoration": {
+      "rttStop": 0,
+      "hssStop": 0,
+      "ram": true,
+      "registers": true,
+      "targetClock": true,
+      "initialDHCSR": "0x1010001",
+      "finalDHCSR": "0x1010001",
+      "debug": {
+        "0xe000edfc": "0x1000000",
+        "0xe0002000": "0x10000081",
+        "0xe000ed08": "0x8000000",
+        "0xe000ed28": "0x0",
+        "0xe000ed2c": "0x0"
+      },
+      "idleCfg": {
+        "FCLK_Hz": 119999998,
+        "cfg": "0xcaa11",
+        "effective_idle": 1,
+        "SWCLK_Hz": 9999999.833333334,
+        "half_period_fclk": 6,
+        "short_high": true,
+        "intended_high_ns": 8.333333472222225,
+        "JTAG_sampling_mode": 0
+      },
+      "idleStatus": {
+        "rtt": [
+          0,
+          [
+            65536,
+            604307968,
+            604307992,
+            156739580,
+            1441422715,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1107297280
+          ]
+        ],
+        "hss": [
+          0,
+          [
+            20,
+            66666666,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1107296356
+          ]
+        ],
+        "queues": {
+          "pending_requests": 0,
+          "pending_responses": 0,
+          "tx_active": 0,
+          "session_epoch": 3,
+          "backpressure_events": 1143,
+          "submit_errors": 0,
+          "nonfinal_callbacks": 0,
+          "rx_deferred": 0
+        },
+        "engines": {
+          "features": 1146093695,
+          "reset_count": 4,
+          "core_status": 2,
+          "batch_status": 4096,
+          "packet_status": 131074,
+          "recovery_errors": 0
+        },
+        "ddr": {
+          "active": false,
+          "sourceActive": false,
+          "downloadState": 0,
+          "submitErrors": 0
+        }
+      },
+      "physical": {
+        "recordedAtUtc": "2026-11-09T11:02:44.614575+00:00",
+        "registers": {
+          "FCLK0_CTRL": "0xf00100",
+          "FCLK1_CTRL": "0x900100",
+          "ARM_PLL": "0x28008",
+          "DDR_PLL": "0x20008",
+          "IO_PLL": "0x36008",
+          "CPU_CTRL": "0x1f000200",
+          "DDR_CTRL": "0xc200003",
+          "USB0_CTRL": "0x101941",
+          "USB1_CTRL": "0x101941",
+          "FEATURES": "0x30f",
+          "CAPTURE": "0x8",
+          "SWD_STATUS": "0x2",
+          "PACKET_STATUS": "0x0",
+          "DDR_STATUS": "0x0",
+          "CDMA_STATUS": "0x1002"
+        },
+        "allObservedEnginesIdle": true,
+        "xsctOutput": "SNAP FCLK0_CTRL 00F00100\nSNAP FCLK1_CTRL 00900100\nSNAP ARM_PLL 00028008\nSNAP DDR_PLL 00020008\nSNAP IO_PLL 00036008\nSNAP CPU_CTRL 1F000200\nSNAP DDR_CTRL 0C200003\nSNAP USB0_CTRL 00101941\nSNAP USB1_CTRL 00101941\nSNAP FEATURES 0000030F\nSNAP CAPTURE 00000008\nSNAP SWD_STATUS 00000002\nSNAP PACKET_STATUS 00000000\nSNAP DDR_STATUS 00000000\nSNAP CDMA_STATUS 00001002\n"
+      },
+      "finalClock": {
+        "FCLK_Hz": 119999998,
+        "cfg": "0xcaa11",
+        "waveform": {
+          "SWCLK_Hz": 9999999.833333334,
+          "half_period_fclk": 6,
+          "short_high": true,
+          "intended_high_ns": 8.333333472222225
+        },
+        "clockSource": 0,
+        "clockControl": 15728896,
+        "sourcePllControl": 221192,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 9999999.833333334,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+      },
+      "verified": true
+    },
+    "before": {
+      "rtt": [
+        0,
+        [
+          65536,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2048
+        ]
+      ],
+      "hss": [
+        0,
+        [
+          20,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          100
+        ]
+      ],
+      "queues": {
+        "pending_requests": 0,
+        "pending_responses": 0,
+        "tx_active": 0,
+        "session_epoch": 2,
+        "backpressure_events": 0,
+        "submit_errors": 0,
+        "nonfinal_callbacks": 0,
+        "rx_deferred": 0
+      },
+      "engines": {
+        "features": 1146093695,
+        "reset_count": 3,
+        "core_status": 0,
+        "batch_status": 1024,
+        "packet_status": 0,
+        "recovery_errors": 0
+      },
+      "ddr": {
+        "active": false,
+        "sourceActive": false,
+        "downloadState": 0,
+        "submitErrors": 0
+      }
+    },
+    "targetBefore": {
+      "name": "STM32H743/H742/H750/H753",
+      "cpuid": "0x411fc271",
+      "device": "0x20036450",
+      "registers": {
+        "0x58024400": "0x3303c025",
+        "0x58024410": "0x1b",
+        "0x58024418": "0x48",
+        "0x5802441c": "0x440",
+        "0x58024420": "0x50",
+        "0x58024428": "0x1920052",
+        "0x5802442c": "0x1ff0309",
+        "0x58024430": "0x170102bf",
+        "0x58024434": "0x0",
+        "0x58024438": "0x1010280",
+        "0x52002000": "0x34"
+      }
+    },
+    "backupSha256": "2f3f1dfe47a9a110e16d5d18d237c94d29a8ba913b4bf8b5c8c43e406b01f836",
+    "requested20EffectiveIdle": 15
+  },
+  "flashRestore": {
+    "mode": "restore",
+    "file": "original-sector0.bin",
+    "fileSha256": "c2c22dbaaa3f08063e1bb57a79994d01a416a181209326728cf6eed0ca47ca7c",
+    "result": {
+      "bytes": 131072,
+      "reset": true,
+      "sectors": 1,
+      "verified": true
+    },
+    "elapsedSeconds": 6.148036399994453,
+    "summary": {
+      "busy": false,
+      "clockSelection": "10000",
+      "lastFlash": {
+        "bytes": 131072,
+        "reset": true,
+        "sectors": 1,
+        "verified": true
+      },
+      "result": "已烧录 128.0 KB，读回校验通过"
+    },
+    "nrst": true,
+    "passed": true
+  },
+  "production": {
+    "mode": "production",
+    "pair": {
+      "git_head": "a4ea59e847ebffd99a7e92858a95d1759a7ec38d",
+      "git_dirty": true,
+      "bit": {
+        "path": "E:\\zynqlinkPRO\\prebuilt\\release-20261106\\probe.bit",
+        "sha256": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6"
+      },
+      "elf": {
+        "path": "E:\\zynqlinkPRO\\prebuilt\\release-20261106\\application.elf",
+        "sha256": "5895eeb0e79a3681a6b3b966dbea4c82ebfcd01ea7553e094d8a61ed2cf89802"
+      }
+    },
+    "init_sha256": "485a028ff7ad9a256a64313b68527a055ca3800b3b85577ceb0554b0e0609c94",
+    "usbIdle": {
+      "rtt": [
+        0,
+        [
+          65536,
+          604307968,
+          604307992,
+          156739580,
+          1441422715,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107297280
+        ]
+      ],
+      "hss": [
+        0,
+        [
+          20,
+          66666666,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1107296356
+        ]
+      ],
+      "queues": {
+        "pending_requests": 0,
+        "pending_responses": 0,
+        "tx_active": 0,
+        "session_epoch": 3,
+        "backpressure_events": 1143,
+        "submit_errors": 0,
+        "nonfinal_callbacks": 0,
+        "rx_deferred": 0
+      },
+      "engines": {
+        "features": 1146093695,
+        "reset_count": 4,
+        "core_status": 2,
+        "batch_status": 4096,
+        "packet_status": 131074,
+        "recovery_errors": 0
+      },
+      "ddr": {
+        "active": false,
+        "sourceActive": false,
+        "downloadState": 0,
+        "submitErrors": 0
+      }
+    },
+    "physicalBefore": {
+      "recordedAtUtc": "2026-11-09T11:02:53.542002+00:00",
+      "registers": {
+        "FCLK0_CTRL": "0xf00100",
+        "FCLK1_CTRL": "0x900100",
+        "ARM_PLL": "0x28008",
+        "DDR_PLL": "0x20008",
+        "IO_PLL": "0x36008",
+        "CPU_CTRL": "0x1f000200",
+        "DDR_CTRL": "0xc200003",
+        "USB0_CTRL": "0x101941",
+        "USB1_CTRL": "0x101941",
+        "FEATURES": "0x30f",
+        "CAPTURE": "0x8",
+        "SWD_STATUS": "0x2",
+        "PACKET_STATUS": "0x0",
+        "DDR_STATUS": "0x0",
+        "CDMA_STATUS": "0x1002"
+      },
+      "allObservedEnginesIdle": true,
+      "xsctOutput": "SNAP FCLK0_CTRL 00F00100\nSNAP FCLK1_CTRL 00900100\nSNAP ARM_PLL 00028008\nSNAP DDR_PLL 00020008\nSNAP IO_PLL 00036008\nSNAP CPU_CTRL 1F000200\nSNAP DDR_CTRL 0C200003\nSNAP USB0_CTRL 00101941\nSNAP USB1_CTRL 00101941\nSNAP FEATURES 0000030F\nSNAP CAPTURE 00000008\nSNAP SWD_STATUS 00000002\nSNAP PACKET_STATUS 00000000\nSNAP DDR_STATUS 00000000\nSNAP CDMA_STATUS 00001002\n"
+    },
+    "download": "  1  APU\n     2  ARM Cortex-A9 MPCore #0 (Running)\n     3  ARM Cortex-A9 MPCore #1 (Suspended)\n  4  xc7z020\n\ninitializing\n  0%    0MB   0.0MB/s  ??:?? ETA\n 28%    1MB   2.2MB/s  ??:?? ETA\n 49%    1MB   1.9MB/s  ??:?? ETA\n 70%    2MB   1.8MB/s  ??:?? ETA\n 92%    3MB   1.7MB/s  ??:?? ETA\n100%    3MB   1.7MB/s  00:02    \nLOADED_SWD_FEATURES=0x4450007F\nLOADED_PACKET_SIGNATURE=0x53545232\n\nDownloading Program -- E:/zynqlinkPRO/prebuilt/release-20261106/application.elf\n\tsection, .text: 0x00000000 - 0x000143af\n\tsection, .ocm_text: 0x000143b0 - 0x00014f3b\n\tsection, .init: 0x00014f3c - 0x00014f47\n\tsection, .fini: 0x00014f48 - 0x00014f53\n\tsection, .rodata: 0x00014f54 - 0x00015581\n\tsection, .data: 0x00015588 - 0x000161c9\n\tsection, .mmu_tbl: 0x00018000 - 0x0001bfff\n\tsection, .ARM.exidx: 0x0001c000 - 0x0001c007\n\tsection, .init_array: 0x0001c008 - 0x0001c00b\n\tsection, .fini_array: 0x0001c00c - 0x0001c00f\n\tsection, .ocm_bss: 0x0001c020 - 0x0001c080\n\tsection, .dap_debug: 0x00100000 - 0x001000e3\n\tsection, .dap_trace: 0x39000000 - 0x390000f7\n\tsection, .bss: 0x00100100 - 0x001addf3\n\tsection, .heap: 0x0001c081 - 0x0001e08f\n\tsection, .stack: 0x0001e090 - 0x0002188f\n\n  0%    0MB   0.0MB/s  ??:?? ETA\n100%    0MB   0.6MB/s  00:00    \n\nSetting PC to Program Start Address 0x00000000\nSuccessfully downloaded E:/zynqlinkPRO/prebuilt/release-20261106/application.elf\nPC=pc: 0000d972\n\n",
+    "identity": {
+      "time_UTC": "2026-11-09T11:03:00.673351+00:00",
+      "elf": "E:\\zynqlinkPRO\\prebuilt\\release-20261106\\application.elf",
+      "elf_sha256": "5895eeb0e79a3681a6b3b966dbea4c82ebfcd01ea7553e094d8a61ed2cf89802",
+      "downloads": false,
+      "probe_reset_or_continue": false,
+      "expected_executable_bytes": 85844,
+      "cycles": [
+        {
+          "cycle": 0,
+          "sections": [
+            {
+              "name": ".text",
+              "bytes": 82864,
+              "address": 0,
+              "equal": true,
+              "expected_sha256": "f92f11fe526eb35f297a1e8de4eeb80dab7a8d7c77ce932e61e8ff2a5783aa19",
+              "live_sha256": "f92f11fe526eb35f297a1e8de4eeb80dab7a8d7c77ce932e61e8ff2a5783aa19"
+            },
+            {
+              "name": ".ocm_text",
+              "bytes": 2956,
+              "address": 82864,
+              "equal": true,
+              "expected_sha256": "46afc5ca341774008579ed38b73dae1aecb02fb71657034253783348db9fdadd",
+              "live_sha256": "46afc5ca341774008579ed38b73dae1aecb02fb71657034253783348db9fdadd"
+            },
+            {
+              "name": ".init",
+              "bytes": 12,
+              "address": 85820,
+              "equal": true,
+              "expected_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6",
+              "live_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6"
+            },
+            {
+              "name": ".fini",
+              "bytes": 12,
+              "address": 85832,
+              "equal": true,
+              "expected_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6",
+              "live_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6"
+            }
+          ],
+          "differing_addresses": [],
+          "vector_word": "ea000049"
+        }
+      ],
+      "passed": true,
+      "memoryAccess": "physical MEM-AP0; independent of CPU memory/cache context",
+      "boot_mode": 0,
+      "boot_trace": [
+        4253566538,
+        3147529557,
+        2519047769,
+        4269663797,
+        985822541,
+        3145463459,
+        982700513,
+        3686771519
+      ],
+      "clockSnapshot": {
+        "control": 1051168,
+        "source": 2,
+        "pll": 163848,
+        "bootMode": 0,
+        "FCLK_Hz": 133333332
+      },
+      "initial_FCLK_Hz": 133333332
+    },
+    "physicalAfter": {
+      "recordedAtUtc": "2026-11-09T11:03:04.450947+00:00",
+      "registers": {
+        "FCLK0_CTRL": "0x100a20",
+        "FCLK1_CTRL": "0x900100",
+        "ARM_PLL": "0x28008",
+        "DDR_PLL": "0x20008",
+        "IO_PLL": "0x36008",
+        "CPU_CTRL": "0x1f000200",
+        "DDR_CTRL": "0xc200003",
+        "USB0_CTRL": "0x101941",
+        "USB1_CTRL": "0x101941",
+        "FEATURES": "0x30f",
+        "CAPTURE": "0x8",
+        "SWD_STATUS": "0x0",
+        "PACKET_STATUS": "0x0",
+        "DDR_STATUS": "0x0",
+        "CDMA_STATUS": "0x1002"
+      },
+      "allObservedEnginesIdle": true,
+      "xsctOutput": "SNAP FCLK0_CTRL 00100A20\nSNAP FCLK1_CTRL 00900100\nSNAP ARM_PLL 00028008\nSNAP DDR_PLL 00020008\nSNAP IO_PLL 00036008\nSNAP CPU_CTRL 1F000200\nSNAP DDR_CTRL 0C200003\nSNAP USB0_CTRL 00101941\nSNAP USB1_CTRL 00101941\nSNAP FEATURES 0000030F\nSNAP CAPTURE 00000008\nSNAP SWD_STATUS 00000000\nSNAP PACKET_STATUS 00000000\nSNAP DDR_STATUS 00000000\nSNAP CDMA_STATUS 00001002\n"
+    },
+    "passed": true
+  },
+  "restoredTarget": {
+    "mode": "restore",
+    "timeUTC": "2026-11-09T11:03:13.629419+00:00",
+    "idle": {
+      "rtt": [
+        0,
+        [
+          65536,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2048
+        ]
+      ],
+      "hss": [
+        0,
+        [
+          20,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          100
+        ]
+      ],
+      "queues": {
+        "pending_requests": 0,
+        "pending_responses": 0,
+        "tx_active": 0,
+        "session_epoch": 4,
+        "backpressure_events": 0,
+        "submit_errors": 0,
+        "nonfinal_callbacks": 1,
+        "rx_deferred": 0
+      },
+      "engines": {
+        "features": 1146093695,
+        "reset_count": 5,
+        "core_status": 0,
+        "batch_status": 1024,
+        "packet_status": 0,
+        "recovery_errors": 0
+      },
+      "ddr": {
+        "active": false,
+        "sourceActive": false,
+        "downloadState": 0,
+        "submitErrors": 0
+      }
+    },
+    "target": {
+      "name": "STM32H743/H742/H750/H753",
+      "cpuid": "0x411fc271",
+      "device": "0x20036450",
+      "registers": {
+        "0x58024400": "0x3303c025",
+        "0x58024410": "0x1b",
+        "0x58024418": "0x40",
+        "0x5802441c": "0x440",
+        "0x58024420": "0x50",
+        "0x58024428": "0x1920052",
+        "0x5802442c": "0x1ff0309",
+        "0x58024430": "0xb010e5f",
+        "0x58024434": "0x0",
+        "0x58024438": "0x1010280",
+        "0x52002000": "0x32"
+      }
+    },
+    "dhcsr": "0x1010000",
+    "ccr": "0x60200",
+    "debug": {
+      "0xe000edfc": "0x1000000",
+      "0xe0002000": "0x10000080",
+      "0xe000ed08": "0x8000000",
+      "0xe000ed28": "0x0",
+      "0xe000ed2c": "0x0"
+    },
+    "initialIdleQuery": "8d00010f",
+    "initialClock": {
+      "FCLK_Hz": 119999998,
+      "cfg": "0xcaa11",
+      "waveform": {
+        "SWCLK_Hz": 9999999.833333334,
+        "half_period_fclk": 6,
+        "short_high": true,
+        "intended_high_ns": 8.333333472222225
+      },
+      "clockSource": 0,
+      "clockControl": 15728896,
+      "sourcePllControl": 221192,
+      "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+      "JTAG_sampling_mode": 0,
+      "RISC_V_SBA_enabled": false,
+      "actual_link_Hz": 9999999.833333334,
+      "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+    },
+    "flashSha256": "f4cbd9f002921026f7f1036a7743ed2bb3832f4a9e54d4f394045b1ed05a2b82",
+    "workAreaSha256": "fb34de82c7a02838059420179e11a71a3bf66d8b7997dd4c6a98184c7496887e",
+    "pair": {
+      "git_head": "a4ea59e847ebffd99a7e92858a95d1759a7ec38d",
+      "git_dirty": true,
+      "bit": {
+        "path": "E:\\zynqlinkPRO\\prebuilt\\release-20261106\\probe.bit",
+        "sha256": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6"
+      },
+      "elf": {
+        "path": "E:\\zynqlinkPRO\\prebuilt\\release-20261106\\application.elf",
+        "sha256": "5895eeb0e79a3681a6b3b966dbea4c82ebfcd01ea7553e094d8a61ed2cf89802"
+      }
+    },
+    "debugBeforeFinalRestore": {
+      "0xe000edfc": "0x1000000",
+      "0xe0002000": "0x10000081",
+      "0xe000ed08": "0x8000000",
+      "0xe000ed28": "0x0",
+      "0xe000ed2c": "0x0"
+    },
+    "verifiedRestore": true,
+    "passed": true
+  },
+  "final": {
+    "usbIdle": {
+      "rtt": [
+        0,
+        [
+          65536,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2048
+        ]
+      ],
+      "hss": [
+        0,
+        [
+          20,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          100
+        ]
+      ],
+      "queues": {
+        "pending_requests": 0,
+        "pending_responses": 0,
+        "tx_active": 0,
+        "session_epoch": 4,
+        "backpressure_events": 0,
+        "submit_errors": 0,
+        "nonfinal_callbacks": 1,
+        "rx_deferred": 0
+      },
+      "engines": {
+        "features": 1146093695,
+        "reset_count": 5,
+        "core_status": 2,
+        "batch_status": 4096,
+        "packet_status": 131074,
+        "recovery_errors": 0
+      },
+      "ddr": {
+        "active": false,
+        "sourceActive": false,
+        "downloadState": 0,
+        "submitErrors": 0
+      }
+    },
+    "physical": {
+      "recordedAtUtc": "2026-11-09T11:03:19.988734+00:00",
+      "registers": {
+        "FCLK0_CTRL": "0xf00100",
+        "FCLK1_CTRL": "0x900100",
+        "ARM_PLL": "0x28008",
+        "DDR_PLL": "0x20008",
+        "IO_PLL": "0x36008",
+        "CPU_CTRL": "0x1f000200",
+        "DDR_CTRL": "0xc200003",
+        "USB0_CTRL": "0x101941",
+        "USB1_CTRL": "0x101941",
+        "FEATURES": "0x30f",
+        "CAPTURE": "0x8",
+        "SWD_STATUS": "0x2",
+        "PACKET_STATUS": "0x0",
+        "DDR_STATUS": "0x0",
+        "CDMA_STATUS": "0x1002"
+      },
+      "allObservedEnginesIdle": true,
+      "xsctOutput": "SNAP FCLK0_CTRL 00F00100\nSNAP FCLK1_CTRL 00900100\nSNAP ARM_PLL 00028008\nSNAP DDR_PLL 00020008\nSNAP IO_PLL 00036008\nSNAP CPU_CTRL 1F000200\nSNAP DDR_CTRL 0C200003\nSNAP USB0_CTRL 00101941\nSNAP USB1_CTRL 00101941\nSNAP FEATURES 0000030F\nSNAP CAPTURE 00000008\nSNAP SWD_STATUS 00000002\nSNAP PACKET_STATUS 00000000\nSNAP DDR_STATUS 00000000\nSNAP CDMA_STATUS 00001002\n"
+    },
+    "clock": {
+      "FCLK_Hz": 119999998,
+      "cfg": "0xcaa11",
+      "waveform": {
+        "SWCLK_Hz": 9999999.833333334,
+        "half_period_fclk": 6,
+        "short_high": true,
+        "intended_high_ns": 8.333333472222225
+      },
+      "clockSource": 0,
+      "clockControl": 15728896,
+      "sourcePllControl": 221192,
+      "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+      "JTAG_sampling_mode": 0,
+      "RISC_V_SBA_enabled": false,
+      "actual_link_Hz": 9999999.833333334,
+      "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream"
+    },
+    "protectedClockRegistersMatch": true,
+    "cdcEchoExact": true,
+    "passed": true
+  }
+}

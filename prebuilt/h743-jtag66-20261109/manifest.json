@@ -1,0 +1,33 @@
+{
+  "acceptedProduction": false,
+  "scope": "Single STM32H743 board, CPU480/HCLK240, JTAG 60/66.666 MHz experiment",
+  "sourceRevision": "a4ea59e847ebffd99a7e92858a95d1759a7ec38d",
+  "patchSha256": "1b9561fd8a7d3dadfd1954ac53b58ff8882e3e46dec4c1cf6ff7b681c974483e",
+  "bit": {
+    "path": "../release-20261106/probe.bit",
+    "sha256": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6"
+  },
+  "elf": {
+    "path": "application.elf",
+    "sha256": "daf4cf7275b7581ba62bf7eba2957e2587432495f96f625a16df3de683534c38"
+  },
+  "psInit": {
+    "path": "../release-20261106/ps7_init.tcl",
+    "sha256": "485a028ff7ad9a256a64313b68527a055ca3800b3b85577ceb0554b0e0609c94"
+  },
+  "timing": {
+    "path": "../release-20261106/verified_clock.json",
+    "value": {
+      "FCLK_max_Hz": 133333333,
+      "SWCLK_max_Hz": 66666666,
+      "setup_slack_ns": 0.067,
+      "hold_slack_ns": 0.044,
+      "requested_FCLK_Hz": 133333333,
+      "RTL_DEBUG": 0,
+      "optional_observation_cells": 0,
+      "formal_product_acceptance": false
+    }
+  },
+  "verifiedLiveCodeBytes": 86172,
+  "report": "../../docs/validation/h743-jtag66-20261109/README.md"
+}
