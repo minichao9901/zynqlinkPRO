@@ -56,6 +56,8 @@ export function makeOpenOcdProfile({ arch = 'arm', clockKhz = 1000, dpidr, tapId
     if (rp2350) lines.push(`${target} configure -work-area-phys 0x20010000 -work-area-size 0x10000 -work-area-backup 1`,
       `${target} configure -event reset-init { rp2xxx rom_api_call FC }`);
     lines.push(`flash bank internal ${driver} ${base} 0 0 0 ${target}`);
+    if (driver === 'stm32h7x')
+      lines.push(`${target} configure -work-area-phys 0x24060000 -work-area-size 0x10000 -work-area-backup 1`);
     if (family === 'stm32h7') lines.push(`flash bank internal2 stm32h7x 0x08100000 0 0 0 ${target}`);
   }
   return { name:name || family || port?.id || arch, arch, target, clockKhz:clock, dpidr,

@@ -74,11 +74,11 @@ def capture(args, dev, tx, rx, mem, report):
             locks[base] = mem.word(base+0xfb4)
             mem.write_word(base+0xfb0, 0xc5acce55)
             assert not mem.word(base+0xfb4) & 2
-        oslocked = bool(mem.word(ETM+0x314) & 2)
+        oslocked = bool(mem.word(ETM+0x304) & 2)
         report['locks_before'] = {hex(base):hex(status) for base,status in locks.items()}
         report['oslock_before'] = oslocked
-        mem.write_word(ETM+0x310, 0)
-        wait(ETM+0x314, 2, 0)
+        mem.write_word(ETM+0x300, 0)
+        wait(ETM+0x304, 2, 0)
         put(ETM+4, 0)
         wait(ETM+0xc, 1, 1)
         put(FUNNEL, 0x301)
@@ -128,7 +128,7 @@ def capture(args, dev, tx, rx, mem, report):
                 for base in locks:
                     mem.write_word(base+0xfb0,0xc5acce55)
                 if ETM+4 in saved:
-                    mem.write_word(ETM+0x310,0)
+                    mem.write_word(ETM+0x300,0)
                     mem.write_word(ETM+4,0); wait(ETM+0xc,1,1)
                 if ETF+0x20 in saved:
                     stop_fifo()
@@ -138,8 +138,8 @@ def capture(args, dev, tx, rx, mem, report):
                     mem.write_word(address,saved[address])
                 report['restored'] = all(mem.word(a)==saved[a] for a in order)
                 if oslocked is not None:
-                    mem.write_word(ETM+0x310,int(oslocked))
-                    report['oslock_restored'] = bool(mem.word(ETM+0x314)&2)==oslocked
+                    mem.write_word(ETM+0x300,int(oslocked))
+                    report['oslock_restored'] = bool(mem.word(ETM+0x304)&2)==oslocked
                     assert report['oslock_restored'], 'H743 OS lock restoration mismatch'
                 for base,status in locks.items():
                     if status&2:mem.write_word(base+0xfb0,0)

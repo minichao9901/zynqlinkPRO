@@ -46,6 +46,9 @@ def decoder_config(config=None):
     for key in V3_REG_ORDER if protocol=='ETMv3' else REG_ORDER:
         if isinstance(config[key],bool) or not isinstance(config[key],int) or not 0<=config[key]<=0xffffffff:
             raise ValueError('ETM 寄存器必须是 32 位无符号整数：'+key)
+    # Legacy H7 records omit the protocol. Native builders require the explicit
+    # discriminator even though the Python decoder has always defaulted to v4.
+    config['protocol'] = protocol
     return config
 
 

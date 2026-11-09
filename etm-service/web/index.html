@@ -63,7 +63,7 @@
 <p>F103ZE 基线：HSE 8 MHz、CPU/HCLK 48 MHz、Trace 输入 48 MHz、引脚 TRACECLK 24 MHz。H7B0 基线为 CPU 70 MHz、TRACECLK 35 MHz，Trace 输入来自 PLL1_R。支持能力以识别和回读结果为准，F103CB 没有 ETM。</p>
 <p>F103 的返回栈压缩和周期准确模式不支持，页面禁用并拒绝下发；GPIO 使用已验收 50 MHz 复用推挽。恢复 F103 设置时 TPIU 保持并行模式，切换 SWO 前应复位目标并重新配置。</p>
 <p>ETM 常用选项在采集页可选并回读：分支广播增加地址输出和带宽压力，默认关闭；返回栈压缩减少返回地址输出；周期计数增加数据量。选项按芯片能力启用，不支持的选项会禁用并拒绝下发。F103 CDC 建议 CPU 48 MHz / TRACECLK 24 MHz，关闭分支广播；仅降频仍可能 overflow。实际寄存器配置随记录保存。</p><p>Zynq 基线：J7.16=TRACECLK、J7.15/17/18/19=D0～D3、J7.14=GND；四位 DDR，目标 TRACECLK ≤ 50 MHz。FPGA 直接输出解复用后的 source ID 2 ETM 字节，页面不再有 LA 采样率、阈值、通道或软件滤波。</p>
-<p>H743 阿波罗板：HSE 25 MHz，建议先用 CPU 60 MHz / TRACECLK 30 MHz、500 MSa/s、CH0～4=PE2～PE6、门限 1.65 V。超过 30 MHz 的物理 Trace 时钟需重新验证信号与解码质量；同 DEV_ID 的其他型号未验收。初始化起点选 trace_hook_entry；它位于时钟初始化之后、CDC 初始化之前。长记录自动使用磁盘分页，旧版超大结果需要重新解码。帧错误会明确报错，不能将字节核算或源码映射率当作无损证明。</p><p>右侧浏览保存的历史不会单步目标。灰色祖先、未知条件和失同步不补猜。Timeline/火焰图横轴为执行序号，不代表耗时；指令 Trace 不提供变量值或局部变量历史。</p>
+<p>H743 阿波罗板：HSE 25 MHz，默认 Golden 为 CPU/HCLK 60 MHz、TRACECLK 20 MHz，使用 Zynq 四位 DDR 采集。30 MHz 配置保留为失败对照；其他频率及同 DEV_ID 的其他型号须独立验收。初始化起点选 trace_hook_entry；它位于时钟初始化之后、CDC 初始化之前。长记录自动使用磁盘分页，旧版超大结果需要重新解码。帧错误会明确报错，不能将字节核算或源码映射率当作无损证明。</p><p>右侧浏览保存的历史不会单步目标。灰色祖先、未知条件和失同步不补猜。Timeline/火焰图横轴为执行序号，不代表耗时；指令 Trace 不提供变量值或局部变量历史。</p>
 <button id="close-help" class="primary">知道了</button></dialog><script type="module" src="/app/view.js"></script></body></html>
 
 

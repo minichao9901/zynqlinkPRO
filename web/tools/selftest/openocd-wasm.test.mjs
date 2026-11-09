@@ -4,12 +4,61 @@ import { readFile } from 'node:fs/promises';
 import { OpenOcdTargetSession } from '../../app/core/openocd-session.js';
 import { OpenOcdUsb } from '../../app/core/openocd-usb.js';
 import { OpenOcdEtmProbe } from '../../app/core/openocd-etm.js';
+import { OpenOcdProbe } from '../../app/core/openocd-probe.js';
 import { makeOpenOcdProfile } from '../../app/core/openocd-profile.js';
 import { createOpenOcdDispatcher } from '../../app/core/openocd-worker.mjs';
 import { inspectOpenOcdCfg } from '../../app/dbg/openocd-cfg.js';
 import { programOpenOcdFlash } from '../../app/flash/openocd-program.js';
 import { hpmBoard } from '../../app/targets/hpm/porting.js';
 import { OpenOcdResetSession, pulseTargetReset } from '../../app/flash/target-reset.js';
+
+test('ARM JTAG confirms the selected TAP without reading a SWD DPIDR', async t => {
+  t.mock.method(OpenOcdTargetSession.prototype,'open',async()=>{});
+  t.mock.method(OpenOcdTargetSession.prototype,'close',async()=>{});
+  t.mock.method(OpenOcdTargetSession.prototype,'command',async line => {
+    const replies = {'target names':'h743.cpu0', init:'', 'h743.cpu0 curstate':'running',
+      'h743.cpu0 cget -chain-position':'h743.cpu',
+      'capture {scan_chain}':'0 h743.cpu Y 0x6ba00477\n1 h743.boundary Y 0x06450041'};
+    assert.ok(Object.hasOwn(replies,line),line);
+    return replies[line];
+  });
+  const probe = new OpenOcdProbe(null,{target:'h743.cpu0',clockKhz:50000,arch:'arm',transport:'jtag'});
+  await probe.connect();
+  assert.equal(probe.idcode,0x6ba00477);
+  await probe.disconnect();
+});
+
+test('H7 work area is restored and checked after successful and failed block writes', async () => {
+  for (const scenario of ['success','write-failure','short-backup']){
+    const failWrite = scenario === 'write-failure';
+    const original = Uint8Array.of(1,2,3,4,5,6,7,8);
+    let ram = original.slice(), image, flash;
+    let erased = false;
+    const probe = {target:'h743.cpu0',halt:async()=>{},
+      readMem:async()=>scenario === 'short-backup' ? ram.slice(0,4) : ram.slice(),writeMem:async(_a,b)=>{ram=b.slice();},
+      command:async line => {
+        if (line === 'capture {flash banks}') return '#0 : internal (stm32h7x) at 0x08000000, size 0x00000004';
+        if (line.includes('flash info')) return '#0 : internal (stm32h7x) at 0x08000000, size 0x00000004\n # 0: 0x00000000 (0x00000004 0 KiB)';
+        if (line.endsWith('cget -work-area-phys')) return '0x24060000';
+        if (line.endsWith('cget -work-area-size')) return '8';
+        if (line.startsWith('flash erase_sector')) erased = true;
+        if (line.startsWith('flash write_bank')){
+          ram.fill(0xee);if(failWrite)throw Error('write failed');flash=image.slice();
+        }
+        return '';
+      },link:{request:async(_t,p)=>{
+        if(p?.input)image=p.input;
+        return p?.read?{bytes:flash.slice()}:{};
+      }},
+    };
+    const run=()=>programOpenOcdFlash(probe,[{addr:0x08000000,data:Uint8Array.of(9,8,7,6)}],{verify:true,progress(){}});
+    if(scenario === 'short-backup'){
+      await assert.rejects(run(),/备份不完整/);
+      assert.equal(erased,false);
+    }else if(failWrite)await assert.rejects(run(),/write failed/);else await run();
+    assert.deepEqual(ram,original);
+  }
+});
 
 test('the bundled Wasm registers ARM, HPM and RP2350 profiles and resolves imported Tcl without USB', async t => {
   const wasmBinary = await readFile(new URL('../../app/core/openocd-runtime/openocd-core.wasm', import.meta.url));
@@ -45,6 +94,14 @@ test('the bundled Wasm registers ARM, HPM and RP2350 profiles and resolves impor
   assert.equal(cfg.clockKhz, 4000);
   assert.deepEqual(cfg.cores,[{ target:'workbench.cpu', arch:'arm' }]);
   assert.equal(cfg.flashBase, '0x08000000');
+  const jtagScript = 'adapter driver cmsis-dap\ntransport select jtag\n' +
+    'jtag newtap h743 cpu -irlen 4\njtag newtap h743 boundary -irlen 5\n' +
+    'dap create h743.dap -chain-position h743.cpu\n' +
+    'target create h743.cpu0 cortex_m -dap h743.dap\n';
+  const jtag = await inspectOpenOcdCfg(jtagScript,'h743.cfg');
+  assert.equal(jtag.transport,'jtag');
+  assert.equal(jtag.arch,'arm');
+  assert.equal(jtag.target,'h743.cpu0');
   assert.match(cfg.hash,/^[0-9a-f]{64}$/);
   const memory = new OpenOcdEtmProbe(null, { ...cfg, memoryAp:true });
   const importedLink = new OpenOcdTargetSession();

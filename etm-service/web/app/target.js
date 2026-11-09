@@ -151,8 +151,8 @@ export class EtmTarget {
     if(!this.info.traceSupported)return;
     if(this.info.profile==='stm32f103ze')return stopF103(this);
     for(const base of [ETM,FUNNEL,ETF,TPIU])await this.unlock(base);
-    if(this.osLocked===null)this.osLocked=!!((await this.read(ETM+0x314))&2);
-    await this.write(ETM+0x310,0,false);
+    if(this.osLocked===null)this.osLocked=!!((await this.read(ETM+0x304))&2);
+    await this.write(ETM+0x300,0,false);
     await this.managed(ETM+4,0);await this.wait(ETM+0xc,1,1);
     await this.stopFifo();
     if(!(await this.read(TPIU+0x300)&2)){
@@ -168,12 +168,12 @@ export class EtmTarget {
     await this.write(0x5c001004,(await this.read(0x5c001004))|0x700000);
     for(const base of this.locks.keys())await this.write(base+0xfb0,0xc5acce55,false);
     const restoreOne=async(addr)=>{const s=this.saved.get(addr);if(s){await this.write(addr,((await this.read(addr)&~s.mask)|(s.before&s.mask))>>>0);}};
-    if(this.saved.has(ETM+4)){await this.write(ETM+0x310,0,false);await this.write(ETM+4,0);await this.wait(ETM+0xc,1,1);}
+    if(this.saved.has(ETM+4)){await this.write(ETM+0x300,0,false);await this.write(ETM+4,0);await this.wait(ETM+0xc,1,1);}
     if(this.saved.has(ETF+0x20))await this.stopFifo();
     const last=[ETF+0x20,ETM+4,0x580244e0,0xe000edfc,0x5c001004];
     for(const addr of [...this.saved.keys()].reverse())if(!last.includes(addr))await restoreOne(addr);
     await restoreOne(ETF+0x20);await restoreOne(ETM+4);
-    if(this.osLocked!==null)await this.write(ETM+0x310,this.osLocked?1:0,false);
+    if(this.osLocked!==null){await this.write(ETM+0x300,this.osLocked?1:0,false);await this.wait(ETM+0x304,2,this.osLocked?2:0);}
     for(const [base,locked]of this.locks)if(locked)await this.write(base+0xfb0,0,false);
     for(const addr of last.slice(2))await restoreOne(addr);
     this.saved.clear();this.locks.clear();this.osLocked=null;this.config=null;
@@ -192,6 +192,7 @@ export class EtmTarget {
       this.traceFamily='f103';const f=await inspectF103(this);Object.assign(config,f.config);width=f.width;
     }else if(traceSupported){
       this.traceFamily='h7';
+      config.protocol='ETMv4';
       await this.set(0x5c001004,0x700000,0x700000);await this.set(0xe000edfc,0x1000000,0x1000000);
       for(const [name,offset]of Object.entries({idr0:0x1e0,idr1:0x1e4,idr2:0x1e8,idr8:0x180,idr9:0x184,idr10:0x188,idr11:0x18c,idr12:0x190,idr13:0x194,config:0x10,traceid:0x40}))config[name]=await this.read(ETM+offset);
       width=await this.read(TPIU+4);
@@ -483,8 +484,8 @@ export class EtmTarget {
     const gpio=0x58021000,mask=0x3ff0;
     await this.set(gpio,mask,0x2aa0);await this.set(gpio+4,0x7c,0);await this.set(gpio+8,mask,pinSpeed*0x1550);await this.set(gpio+12,mask,0);await this.set(gpio+0x20,0x0fffff00,0);
     for(const base of [ETM,FUNNEL,ETF,TPIU])await this.unlock(base);
-    if(this.osLocked===null)this.osLocked=!!((await this.read(ETM+0x314))&2);
-    await this.write(ETM+0x310,0,false);await this.wait(ETM+0x314,2,0);
+    if(this.osLocked===null)this.osLocked=!!((await this.read(ETM+0x304))&2);
+    await this.write(ETM+0x300,0,false);await this.wait(ETM+0x304,2,0);
     await this.managed(ETM+4,0);await this.wait(ETM+0xc,1,1);
     await this.managed(FUNNEL,0x301);await this.stopFifo();
     await this.managed(ETF+0x28,2);await this.managed(ETF+0x304,3);await this.managed(ETF+0x20,1);

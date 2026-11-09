@@ -6,7 +6,8 @@ const sectorRows = /^\s*#\s*(\d+):\s*(0x[\da-f]+)\s+\((0x[\da-f]+)\s/gim;
 
 export async function programOpenOcdFlash(probe, regions, { verify, progress }){
   const command = (line, timeout) => probe.command(line, timeout);
-  const banks = Array.from((await command('capture {flash banks}')).matchAll(bankRows),
+  const bankText = await command('capture {flash banks}');
+  const banks = Array.from(bankText.matchAll(bankRows),
     ([row, index, base]) => ({ index:Number(index), base:Number(base), alias:/\(virtual\)/i.test(row) }))
     .sort((a,b) => a.base - b.base || Number(b.alias) - Number(a.alias));
   if (!banks.length) throw Error('OpenOCD CFG 没有定义 Flash bank');
@@ -57,19 +58,49 @@ export async function programOpenOcdFlash(probe, regions, { verify, progress }){
     sector.data = full ? new Uint8Array(sector.length) : await read(sector);
     for (const patch of sector.patches) sector.data.set(patch.bytes, patch.offset);
   }
-  for (const [i, sector] of plan.entries()){
-    await probe.link.request('flashFile', { input:sector.data });
-    try {
-      await command(`flash erase_sector ${sector.bank} ${sector.index} ${sector.index}`, TIMEOUT);
-      await command(`flash write_bank ${sector.bank} /flash-input.bin ${sector.offset}`, TIMEOUT);
-    } finally {
-      await probe.link.request('flashFile').catch(() => {});
+  // H7 block algorithms use RAM. Keep an independent copy: the Wasm backend
+  // was observed leaving its final literal word behind despite backup=1.
+  let workArea, savedWorkArea;
+  if (/\bstm32h7x\b/.test(bankText)){
+    const address = Number(await command(`${probe.target} cget -work-area-phys`));
+    const length = Number(await command(`${probe.target} cget -work-area-size`));
+    if (address && length){
+      if (!Number.isSafeInteger(address) || !Number.isSafeInteger(length) || length < 0 || length > 0x100000)
+        throw Error('H7 Flash 工作区范围无效');
+      workArea = {address, length};
+      savedWorkArea = await probe.readMem(address, length);
+      if (savedWorkArea.length !== length) throw Error('H7 Flash 工作区备份不完整');
     }
-    if (verify){
-      const actual = await read(sector);
-      if (!sector.data.every((byte, offset) => byte === actual[offset])) throw Error(`Flash 扇区 ${sector.index} 读回校验失败`);
+  }
+  let operationError;
+  try {
+    for (const [i, sector] of plan.entries()){
+      await probe.link.request('flashFile', { input:sector.data });
+      try {
+        await command(`flash erase_sector ${sector.bank} ${sector.index} ${sector.index}`, TIMEOUT);
+        await command(`flash write_bank ${sector.bank} /flash-input.bin ${sector.offset}`, TIMEOUT);
+      } finally {
+        await probe.link.request('flashFile').catch(() => {});
+      }
+      if (verify){
+        const actual = await read(sector);
+        if (!sector.data.every((byte, offset) => byte === actual[offset])) throw Error(`Flash 扇区 ${sector.index} 读回校验失败`);
+      }
+      progress((i + 1) / plan.length);
     }
-    progress((i + 1) / plan.length);
+  } catch (error){ operationError = error; throw error; }
+  finally {
+    if (workArea){
+      try {
+        await probe.halt();
+        await probe.writeMem(workArea.address, savedWorkArea);
+        const actual = await probe.readMem(workArea.address, workArea.length);
+        if (!savedWorkArea.every((value,i) => value === actual[i])) throw Error('H7 Flash 工作区恢复校验失败');
+      } catch (error){
+        if (operationError) throw new AggregateError([operationError,error], '烧录失败，且 H7 Flash 工作区恢复未确认');
+        throw error;
+      }
+    }
   }
   return { bytes:sorted.reduce((sum, region) => sum + region.data.length, 0), sectors:plan.length, verified:verify };
 }

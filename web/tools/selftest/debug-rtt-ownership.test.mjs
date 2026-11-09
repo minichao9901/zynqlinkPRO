@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { DebugSession } from '../../app/dbg/session.js';
-import { FPB, compAddr } from '../../app/dbg/bp.js';
+import { FPB, compAddr, encodeComparator } from '../../app/dbg/bp.js';
 import { OpenOcdProbe } from '../../app/core/openocd-probe.js';
 import { Rtt } from '../../app/rtt/protocol.js';
 import { RttView } from '../../app/rtt/view.js';
@@ -11,15 +11,26 @@ test('partial FPB cleanup retains ownership and resumes only after a verified re
   const session = new DebugSession();
   const probe = session.probe = new OpenOcdProbe(null, { clockKhz:10000, arch:'arm' });
   const words = new Map();
+  const installed = new Map();
   let halted = false, closed = false, dropWrite = false;
   probe.isHalted = async () => halted;
   probe.halt = async () => { halted = true; };
   probe.run = async () => { halted = false; };
   probe.disconnect = async () => { closed = true; };
   probe._readWord = async addr => words.get(addr) ?? 0;
-  probe.writeMem = async (addr, bytes) => {
-    if (dropWrite && addr === compAddr(1)) throw Error('USB failed mid-FPB write');
-    words.set(addr, new DataView(bytes.buffer, bytes.byteOffset).getUint32(0, true));
+  probe.command = async line => {
+    if (line === 'capture {bp}') return [...installed.keys()].map(a => `Hardware breakpoint(IVA): addr=0x${a.toString(16)}, len=2`).join('\n');
+    const [op,text] = line.split(' '), address = Number(text);
+    if (op === 'bp'){
+      const slot = [0,1].find(i => ![...installed.values()].includes(i));
+      installed.set(address,slot); words.set(compAddr(slot),encodeComparator(address,1));
+    } else {
+      assert.equal(op,'rbp');const slot = installed.get(address);
+      if (dropWrite && slot === 1) throw Error('USB failed mid-FPB write');
+      installed.delete(address);words.set(compAddr(slot),0);
+    }
+    words.set(FPB.CTRL,installed.size ? 1 : 0);
+    return '';
   };
   session.caps = { numCode:2, rev:1 };
   await session.bpAdd(0x08000100, 'first');
@@ -39,6 +50,38 @@ test('partial FPB cleanup retains ownership and resumes only after a verified re
   assert.equal(words.get(FPB.CTRL) & 1, 0);
   assert.equal(halted, false);
   assert.equal(closed, true);
+});
+
+test('OpenOCD owns FPB registrations and failed removal remains retryable', async () => {
+  const session = new DebugSession();
+  const probe = session.probe = new OpenOcdProbe(null, { clockKhz:10000, arch:'arm' });
+  session.caps = { numCode:2, rev:2 };
+  const installed = new Set(), words = new Map();
+  let failRemoval = false, corruptReadback = false;
+  probe._readWord = async a => corruptReadback && a === compAddr(0) ? 0 : words.get(a) ?? 0;
+  probe.command = async line => {
+    if (line === 'capture {bp}') return [...installed].map(a => `Hardware breakpoint(IVA): addr=0x${a.toString(16)}, len=2`).join('\n');
+    const [op, text] = line.split(' '), address = Number(text);
+    if (op === 'rbp' && failRemoval) throw Error('remove failed');
+    if (op === 'bp') installed.add(address); else if (op === 'rbp') installed.delete(address); else assert.fail(line);
+    words.set(FPB.CTRL, installed.size ? 1 : 0);
+    const values = [...installed].map(a => encodeComparator(a,2));
+    for (let i=0;i<2;i++) words.set(compAddr(i), values[i] ?? 0);
+    return '';
+  };
+  await session.bpAdd(0x08000100);
+  failRemoval = true;
+  await assert.rejects(session.bpClear(), /remove failed/);
+  assert.deepEqual(session.bps,[0x08000100]);
+  failRemoval = false;
+  await session.bpClear();
+  assert.equal(installed.size,0);
+  corruptReadback = true;
+  await assert.rejects(session.bpAdd(0x08000200), /比较器/);
+  assert.deepEqual(session.bps,[]);
+  corruptReadback = false;
+  await session.bpClear();
+  assert.equal(installed.size,0, 'failed additions must also be removed');
 });
 
 test('unconfirmed FPB readback never commits an added breakpoint', async () => {

@@ -57,10 +57,10 @@ export async function inspectOpenOcdCfg(text, entry, directory){
     const cores = [];
     for (const target of names){
       const type = await session.command(`capture {${target} cget -type}`);
-      if (transport === 'swd' && type === 'cortex_m') cores.push({target,arch:'arm'});
+      if (['swd','jtag'].includes(transport) && type === 'cortex_m') cores.push({target,arch:'arm'});
       if (transport === 'jtag' && type === 'riscv') cores.push({target,arch:'riscv'});
     }
-    if (!cores.length) throw Error('CFG 没有 Cortex-M / SWD 或 RISC-V / JTAG 核');
+    if (!cores.length) throw Error('CFG 没有 Cortex-M / SWD、Cortex-M / JTAG 或 RISC-V / JTAG 核');
     const clock = await session.command('capture {adapter speed}');
     const clockKhz = Number(clock.match(/(\d+)\s*kHz/i)?.[1]);
     const maxClock = hpmSdk || cores.some(core => /^hpm\d+[.]cpu/i.test(core.target)) ? 25000 : 60000;

@@ -84,7 +84,7 @@ export class OpenOcdProbe {
         if (!['running', 'halted', 'reset', 'sleeping'].includes(status))
           throw Error('OpenOCD 未识别目标：' + status);
       }
-      if (this.isRiscv){
+      if (this.isRiscv || this.cfg.transport === 'jtag'){
         const tap = await link.command(`${this.cfg.target} cget -chain-position`);
         const chain = await link.command('capture {scan_chain}');
         const id = [...chain.matchAll(/^\s*\d+\s+(\S+)\s+Y\s+(0x[0-9a-f]{8})\b/gim)].find(row => row[1] === tap);

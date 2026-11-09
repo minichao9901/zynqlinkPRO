@@ -1089,11 +1089,52 @@ export class DebugSession {
     return ((v >>> 17) & 1) === 1;
   }
 
-  /** 把断点表写进比较器（每次都整体重排：第 i 个断点 = 第 i 号比较器，顺序稳定好排查） */
+  async _syncOpenOcdBreakpoints(breakpoints){
+    const desired = new Set(breakpoints);
+    const owned = this._openOcdOwnedBreakpoints ??= new Set();
+    // Retain every attempted address until the backend confirms its removal.
+    for (const addr of desired) owned.add(addr);
+    const installed = async () => {
+      const output = await this.probe.command('capture {bp}');
+      return new Set(Array.from(output.matchAll(/Hardware breakpoint\(IVA\): addr=(0x[\da-f]+)/gi),
+        ([,address]) => Number(address)));
+    };
+    const before = await installed();
+    for (const addr of before){
+      if (owned.has(addr) && !desired.has(addr)) await this.probe.command('rbp ' + addr);
+    }
+    for (const addr of desired){
+      if (!before.has(addr)) await this.probe.command('bp ' + addr + ' 2 hw');
+    }
+    const after = await installed();
+    if ([...desired].some(addr => !after.has(addr)) ||
+        [...owned].some(addr => !desired.has(addr) && after.has(addr)))
+      throw Error('OpenOCD 硬件断点列表未确认');
+    const expected = planComparators(breakpoints, this.caps.numCode, this.caps.rev).slots
+      .filter(value => value & 1).sort((a,b) => a-b);
+    const actual = [];
+    for (let i = 0; i < this.caps.numCode; i++){
+      const value = (await this.probe._readWord(compAddr(i))) >>> 0;
+      if (value & 1) actual.push(value);
+    }
+    actual.sort((a,b) => a-b);
+    if (actual.length !== expected.length || actual.some((value,i) => value !== expected[i]))
+      throw Error('FPB 比较器与 OpenOCD 硬件断点不一致');
+    if (expected.length && !((await this.probe._readWord(FPB.CTRL)) & 1))
+      throw Error('FPB 使能状态未确认');
+    this._openOcdOwnedBreakpoints = desired;
+  }
+
+  /** OpenOCD 管理真实比较器槽位；其他后端按本地列表写入并回读。 */
   async _programFpb(breakpoints = this.bps){
     const { slots, overflow, bad } = planComparators(breakpoints, this.caps.numCode, this.caps.rev);
     if (overflow.length || bad.length) throw Error('断点列表超出 FPB 比较器数量或地址范围');
     this._fpbUnconfirmed = true;
+    if (this.probe instanceof OpenOcdProbe){
+      await this._syncOpenOcdBreakpoints(breakpoints);
+      this._fpbUnconfirmed = false;
+      return;
+    }
     for (let i = 0; i < slots.length; i++){
       await this.probe.writeMem(compAddr(i), u32leBytes(slots[i] || 0));
     }
