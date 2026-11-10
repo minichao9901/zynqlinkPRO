@@ -1,0 +1,257 @@
+{
+  "date": "2026-11-10",
+  "sourceRevision": "02bf554b38ad872e79f56e16566874f1183ec13f",
+  "sourceDirty": false,
+  "installedDirectory": "E:\\zynqlinkPRO\\dist\\zynq-etm-bridge",
+  "exeSha256": "a3ed87c14a309e014547b1db805847b4ea07b6d6e98494ed5a8ca88dd9cc1f20",
+  "programFilesVerified": 1816,
+  "runtime": {
+    "name": "OpenOCD Wasm",
+    "sha256": "1977164ce62a8595753be9dfa741751c0b3f2459a95aa6bd03f25afe72d554fe",
+    "etmControl": "mem-ap0",
+    "scopePolling": "target-memory",
+    "globalReset": "cmsis-dap-swj-pins"
+  },
+  "preflight": {
+    "ok": true,
+    "native": {
+      "etm_decode": {
+        "response": "Usage: etm_decode trace.bin config-and-memory.txt\r\n       etm_decode --binary out.bin trace.bin config-and-memory.txt",
+        "sha256": "c9ed0bcdede7e0bca779ad611c1bd95725694628e2d0f10847a8e3c09ba79336"
+      },
+      "etm_frontend": {
+        "response": "{\"protocol\": \"trace-frontend-native/1\", \"schema\": 1, \"compiler\": \"gcc 16.1.0\", \"built\": \"Oct 24 2026 10:53:33\", \"inputFormats\": [\"kvdat\"]}",
+        "sha256": "8224e590fbfa37a2245ab849e627695ca41ca2d135b51eb486c085b88aa31a74"
+      },
+      "etm_storebuild": {
+        "response": "{\"protocol\":\"etm-storebuild/1\",\"schema\":1,\"abi\":1,\"compiler\":\"gcc 16.1.0\",\"buildSha\":\"41e2cee015f7\",\"formats\":{\"native\":\"trace-bin native v1\",\"staticDict\":1,\"ranges\":1},\"capabilities\":[\"prescan\",\"diagnose\",\"build\",\"facts-v3\",\"quality-diagnostics\",\"index-facts-v1\",\"direct-opencsd-v1\",\"typed-replay-v1\",\"shared-tracker-v1\",\"complete-index-v1\",\"native-static-v1\",\"native-query-v1\",\"native-breakpoint-starts-v1\"]}",
+        "sha256": "9bbe18dc963b28c7935d163a411fdda360c8bf04d880508580b5c996763b9003"
+      },
+      "etm_index": {
+        "response": "usage: etm_index database events sidecar expected_count",
+        "sha256": "65c822faae3b7e4ec3cdcabe83a1ec1aa4b86c5dc178624abbf69a3f37e259e4"
+      },
+      "etm_export": {
+        "response": "{\"protocol\":\"etm-export/1\",\"abi\":1,\"storeSchema\":1,\"formats\":[\"simplified\",\"source\",\"simplified-html\",\"csv\"],\"features\":[\"select-v1\",\"reading-v1\"]}",
+        "sha256": "9583d7bdcce448a527746729d990327fb7736eaf15ebc0e2677bbfa43e92901a"
+      },
+      "etm_framed": {
+        "response": "{\"protocol\":\"etm-framed-native/1\",\"format\":\"FRM1\"}",
+        "sha256": "2d9a2e45b180c621bee207fd3ff740dd238dcf612227bdf4676cd23933981e3e"
+      }
+    },
+    "clockPolicy": "target-firmware-owned",
+    "hardwareAccess": false,
+    "processIntegrityRid": 8192,
+    "flameHtml": {
+      "selfContained": true,
+      "interactive": true,
+      "tabs": [
+        "timeline",
+        "cycles"
+      ],
+      "defaultTab": "timeline",
+      "dragSelectZoom": true
+    },
+    "offlineTraceCli": true
+  },
+  "offlineVerification": {
+    "hardwareAccess": false,
+    "hardwareRoutesDisabled": true,
+    "pythonOnPath": false,
+    "nodeOnPath": false,
+    "package": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\zynq-watch-edit-dd0e5954\\package-source\\build\\bridge-package\\package-gwsy0q03\\dist\\zynq-etm-bridge",
+    "sourceRevision": "02bf554b38ad872e79f56e16566874f1183ec13f",
+    "packageFilesVerified": 1816,
+    "records": [
+      {
+        "target": "F103ZE",
+        "record": "record-eabb299c90b64d0eb64f96629a870459",
+        "decodeSeconds": 2.1587285000132397,
+        "summary": {
+          "exceptions": 250,
+          "executed": 5019787,
+          "functions": {
+            "HAL_IncTick": 1750,
+            "SysTick_Handler": 750,
+            "cdc_poll": 2508740,
+            "cdc_tx_poll": 1075086,
+            "main": 806324,
+            "usb_device_is_configured": 627137
+          },
+          "gaps": 2,
+          "instructions": 5467740,
+          "packetIssues": 0,
+          "packets": 1170388,
+          "ranges": 5467740,
+          "sourceMapped": 5467740,
+          "unknownExecution": 89591
+        },
+        "flameBytes": 2531,
+        "flameHtmlBytes": 19330,
+        "flameHtmlFrames": 6,
+        "frozenCliHtmlMatchesWeb": true,
+        "traceStore": true,
+        "perInstructionJsonl": false
+      },
+      {
+        "target": "H743",
+        "record": "record-b12763ec0adf4b6eb789f3c021bf9754",
+        "decodeSeconds": 0.5420939000032376,
+        "summary": {
+          "exceptions": 11,
+          "executed": 182006,
+          "functions": {
+            "(未知函数)": 2870,
+            "HAL_GPIO_Init": 226,
+            "HAL_IncTick": 70,
+            "HAL_NVIC_ClearPendingIRQ": 3,
+            "HAL_NVIC_EnableIRQ": 3,
+            "HAL_NVIC_SetPriority": 12,
+            "HAL_PCD_MspInit": 55,
+            "NVIC_EncodePriority": 15,
+            "OTG_FS_IRQHandler": 7,
+            "SEGGER_RTT_Write": 595,
+            "SEGGER_RTT_WriteNoLock": 665,
+            "SysTick_Handler": 30,
+            "USBD_IRQHandler": 38,
+            "_WriteBlocking": 1260,
+            "__NVIC_ClearPendingIRQ": 9,
+            "__NVIC_EnableIRQ": 8,
+            "__NVIC_GetPriorityGrouping": 4,
+            "__NVIC_SetPriority": 6,
+            "__ssputs_r": 4092,
+            "_printf_common": 2130,
+            "_printf_i": 3145,
+            "_svfprintf_r": 6797,
+            "_vsnprintf_r": 980,
+            "cdc_acm_init": 28,
+            "dwc2_core_init": 14,
+            "dwc2_flush_rxfifo": 31,
+            "dwc2_flush_txfifo": 32,
+            "dwc2_get_glb_intstatus": 7,
+            "dwc2_get_hwparams": 120,
+            "dwc2_get_user_params": 9,
+            "dwc2_reset": 39,
+            "dwc2_set_mode": 28,
+            "dwc2_set_txfifo": 485,
+            "main": 136324,
+            "memcpy": 2819,
+            "memmove": 4318,
+            "memset": 6792,
+            "probe_gpio_init": 26,
+            "probe_stage": 5642,
+            "trace_hook_entry": 2,
+            "trace_hook_ready": 7,
+            "trace_log_printf": 805,
+            "usb_dc_init": 836,
+            "usb_dc_low_level_init": 15,
+            "usb_memcpy": 71,
+            "usbd_add_endpoint": 40,
+            "usbd_add_interface": 30,
+            "usbd_cdc_acm_init_intf": 16,
+            "usbd_class_event_notify_handler": 45,
+            "usbd_desc_register": 20,
+            "usbd_event_handler": 5,
+            "usbd_event_suspend_handler": 7,
+            "usbd_initialize": 23,
+            "vsnprintf": 350
+          },
+          "gaps": 1,
+          "instructions": 210497,
+          "packetIssues": 0,
+          "packets": 14265,
+          "ranges": 46121,
+          "sourceMapped": 172127,
+          "unknownExecution": 979
+        },
+        "flameBytes": 2187,
+        "flameHtmlBytes": 19284,
+        "flameHtmlFrames": 5,
+        "frozenCliHtmlMatchesWeb": true,
+        "traceStore": true,
+        "perInstructionJsonl": false
+      }
+    ],
+    "nativeHelperExternalOutput": {
+      "passed": true,
+      "streams": {
+        "2": 14
+      },
+      "location": "system temporary directory, outside checkout",
+      "hardwareAccess": false
+    },
+    "health": {
+      "captureFormats": [
+        "bin"
+      ],
+      "captureProtocol": 2,
+      "decodeEngineProfile": {
+        "indexEngine": "native-complete-index",
+        "name": "native",
+        "perInstructionJsonl": false,
+        "pipeline": "OpenCSD -> C++ complete index/store -> atomic manifest publication",
+        "queryReader": "native",
+        "settings": {
+          "ETM_COMPLETE_INDEX": null,
+          "ETM_DECODE_ENGINE": "fast",
+          "ETM_EXPORT_ENGINE": "native",
+          "ETM_NATIVE_FORMAT": "binary",
+          "ETM_NATIVE_QUERY": null,
+          "ETM_NATIVE_STATIC": null,
+          "ETM_PREPARE_CACHE": "1",
+          "ETM_QUERY_ENGINE": "native",
+          "ETM_STORE_ENGINE": "native",
+          "ETM_STORE_ENGINE_FALLBACK": "0",
+          "ETM_STORE_WRITE": "1"
+        },
+        "staticEngine": "native"
+      },
+      "decoder": true,
+      "frontend": {
+        "kvdat": true,
+        "numpy": true,
+        "pandas": true,
+        "vectorized": true
+      },
+      "nativeIndexer": true,
+      "ok": true
+    },
+    "debugBackend": {
+      "name": "OpenOCD Wasm",
+      "sha256": "1977164ce62a8595753be9dfa741751c0b3f2459a95aa6bd03f25afe72d554fe",
+      "etmControl": "mem-ap0",
+      "scopePolling": "target-memory",
+      "globalReset": "cmsis-dap-swj-pins"
+    },
+    "tutorialExample": {
+      "bytes": 717485,
+      "sha256": "734611966188b8a0d1c611b545f0fcd080944a7d298f581d83027e43f8335706",
+      "hardwareAccess": false
+    },
+    "ok": true,
+    "pid": 26576,
+    "port": 54139,
+    "duplicateLaunchReused": true,
+    "keptRunning": false
+  },
+  "installedBrowserChecks": {
+    "hex": true,
+    "decimal": true,
+    "write": true,
+    "overflowRejected": true,
+    "cancel": true,
+    "writtenBytes": [
+      120,
+      86,
+      52,
+      18
+    ],
+    "pCommandLog": "SystemCoreClock @ 0x20000010  :  long unsigned int = 0x12345678"
+  },
+  "userData": {
+    "files": 49,
+    "contentsAndPathsUnchanged": true
+  },
+  "previousProgramDirectory": "E:\\zynqlinkPRO\\build\\bridge-archive\\20261110-233456-f9a2b1f8\\previous"
+}

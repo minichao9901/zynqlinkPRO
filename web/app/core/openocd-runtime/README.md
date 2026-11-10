@@ -1,6 +1,6 @@
 # OpenOCD Wasm runtime
 
-This runtime promotes the verified HPM pipeline candidate from [the headless A/B](../../../../../docs/validation/hpm6800-wasm-pipeline-ab-20261109/README.md). It keeps the runtime integration from superlinkPRO commit `c9454d0c639493946b0b446b51e9dff0f99a3074` and reports OpenOCD `0.12.0+dev-g9f2d876-dirty`. This browser build uses Asyncify, a monotonic Emscripten clock, the full Flash registry, and WebUSB CMSIS-DAP v2. [Corresponding superlinkPRO runtime and integration](https://github.com/minichao9901/superlinkPRO/tree/c9454d0c639493946b0b446b51e9dff0f99a3074/web/app/core/openocd-runtime)
+This runtime promotes the verified HPM pipeline candidate from [the headless A/B](../../../../docs/validation/hpm6800-wasm-pipeline-ab-20261109/README.md). It keeps the runtime integration from superlinkPRO commit `c9454d0c639493946b0b446b51e9dff0f99a3074` and reports OpenOCD `0.12.0+dev-g9f2d876-dirty`. This browser build uses Asyncify, a monotonic Emscripten clock, the full Flash registry, and WebUSB CMSIS-DAP v2. [Corresponding superlinkPRO runtime and integration](https://github.com/minichao9901/superlinkPRO/tree/c9454d0c639493946b0b446b51e9dff0f99a3074/web/app/core/openocd-runtime)
 
 | File | SHA-256 |
 |---|---|
