@@ -1,0 +1,216 @@
+{
+  "date": "2026-11-11",
+  "timezone": "Asia/Shanghai",
+  "sourceRevision": "31dfd591937ee5bdfd8a61c84b2a47051dca54fa",
+  "runtime": {
+    "wasmSha256": "1977164ce62a8595753be9dfa741751c0b3f2459a95aa6bd03f25afe72d554fe",
+    "loaderSha256": "5a55691c948f503d13bc233902d4a74782bee82e7276d9ad7d52d8394053700a"
+  },
+  "pair": {
+    "bit": "prebuilt/release-20261106/probe.bit",
+    "bitSha256": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6",
+    "elf": "prebuilt/release-20261106/application.elf",
+    "elfSha256": "5895eeb0e79a3681a6b3b966dbea4c82ebfcd01ea7553e094d8a61ed2cf89802",
+    "identityBefore": true,
+    "identityAfter": true,
+    "physicalCodeBytes": 85844,
+    "clockBefore": {
+      "control": 1051168,
+      "source": 2,
+      "pll": 163848,
+      "bootMode": 0,
+      "FCLK_Hz": 133333332
+    },
+    "clockAfter": {
+      "control": 15728896,
+      "source": 0,
+      "pll": 221192,
+      "bootMode": 0,
+      "FCLK_Hz": 119999998
+    }
+  },
+  "target": {
+    "cpuid": "0x411fc271",
+    "device": "0x20036450",
+    "initialDhcsr": "0x10000",
+    "pausedPc": "0xc000b6c6",
+    "flashBytes": 2097152,
+    "flashSha256Before": "077331beb888de9366761c11edacb0d0b805f00ac1cb394429c3a15bd3601631",
+    "flashSha256After": "077331beb888de9366761c11edacb0d0b805f00ac1cb394429c3a15bd3601631",
+    "rccBefore": {
+      "0x58024400": "0x303c025",
+      "0x58024410": "0x1b",
+      "0x58024418": "0x840",
+      "0x5802441c": "0x440",
+      "0x58024420": "0x40",
+      "0x58024428": "0x52",
+      "0x5802442c": "0x70009",
+      "0x58024430": "0x130f029f",
+      "0x58024434": "0x0",
+      "0x58024438": "0x0",
+      "0x52002000": "0x34"
+    },
+    "rccAfter": {
+      "0x58024400": "0x303c025",
+      "0x58024410": "0x1b",
+      "0x58024418": "0x840",
+      "0x5802441c": "0x440",
+      "0x58024420": "0x40",
+      "0x58024428": "0x52",
+      "0x5802442c": "0x70009",
+      "0x58024430": "0x130f029f",
+      "0x58024434": "0x0",
+      "0x58024438": "0x0",
+      "0x52002000": "0x34"
+    }
+  },
+  "fixture": {
+    "symbol": "accept_watch_u32",
+    "address": "0x24060004",
+    "windowAddress": "0x24060000",
+    "backupBytes": 32,
+    "backupSha256": "cd7681366c456b8c46feadba23ba71e79be16c01c5c0fb3117082be41143153c",
+    "symbolElfSha256": "00c20b150a7fc3d707bd87e9f7bb70c8fe04fa79ff3b49d84bebb46e6594adae",
+    "symbolElfUse": "type metadata only",
+    "originalDebugControl": 0,
+    "temporaryDebugControl": "0x600007"
+  },
+  "ui": {
+    "hardware": "STM32H743",
+    "backend": "OpenOCD Wasm",
+    "mock": false,
+    "passed": true,
+    "decimal": "42",
+    "hex": "0x0000002a",
+    "editedHex": "0x12345678",
+    "readbackBytes": [
+      120,
+      86,
+      52,
+      18
+    ],
+    "adjacentBytesPreserved": true,
+    "printDecimal": true,
+    "printHex": true,
+    "command": "p/x accept_watch_u32",
+    "fixtureValueRestoredThroughUi": true,
+    "disconnected": true
+  },
+  "commandValues": [
+    "305419896",
+    "0x12345678"
+  ],
+  "restoration": {
+    "restored": true,
+    "haltedAtCleanup": true,
+    "sramRestored": true,
+    "sramSha256": "cd7681366c456b8c46feadba23ba71e79be16c01c5c0fb3117082be41143153c",
+    "coreRegistersMatch": true,
+    "coreRegisterDifferences": {},
+    "clocksMatch": true,
+    "flashMatch": true,
+    "debugRegistersMatch": true,
+    "beforeResumeDhcsr": "0x30003",
+    "finalDhcsrBeforeDebugClockRestore": "0x10000",
+    "runHaltRestored": true,
+    "finalDebugControl": 0,
+    "debugClockControlRestored": true
+  },
+  "coreRegistersCompared": 20,
+  "probeFinal": {
+    "streams": {
+      "rtt": [
+        0,
+        [
+          65536,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2048
+        ]
+      ],
+      "hss": [
+        0,
+        [
+          20,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          100
+        ]
+      ]
+    },
+    "queue": {
+      "pending_requests": 0,
+      "pending_responses": 0,
+      "tx_active": 0,
+      "session_epoch": 4,
+      "backpressure_events": 0,
+      "submit_errors": 0,
+      "nonfinal_callbacks": 0,
+      "rx_deferred": 0
+    },
+    "engines": {
+      "features": 1146093695,
+      "reset_count": 5,
+      "core_status": 2,
+      "batch_status": 4096,
+      "packet_status": 131074,
+      "recovery_errors": 0
+    },
+    "FCLK_Hz": 119999998,
+    "clockConfig": "0xcaa11",
+    "waveform": {
+      "SWCLK_Hz": 9999999.833333334,
+      "half_period_fclk": 6,
+      "short_high": true,
+      "intended_high_ns": 8.333333472222225
+    },
+    "frequencyBasis": "probe diagnostic and independent physical MEM-AP0 PS clock readback; not an external counter"
+  },
+  "probePhysicalFinal": {
+    "clockConfig": 829969,
+    "ddrWords": [
+      1162104113,
+      0,
+      0,
+      968884224
+    ],
+    "ddrActive": false
+  },
+  "testingScope": "real H743; browser workbench through authenticated native USB transport; temporary u32 in paused SRAM",
+  "initialAccess": {
+    "uninitializedDdrReadFailed": true,
+    "probePowerCycleRequired": true,
+    "recovered": true,
+    "ap2Identity": "0x20036450",
+    "ap0LowPowerReadsUnreliable": true,
+    "lowPowerDebugControlRestored": true
+  },
+  "cleanup": {
+    "disposition": "Windows Recycle Bin",
+    "temporaryDirectoryAbsent": true,
+    "files": 2162,
+    "bytes": 217472559,
+    "taskProcessesStopped": [
+      2896,
+      17092,
+      12540
+    ],
+    "taskProcessesRemaining": 0
+  }
+}
