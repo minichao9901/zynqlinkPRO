@@ -87,3 +87,5 @@ ZL-200 的候选在擦除前读取 H7 MPU 状态。启用 MPU 时将当前 OpenO
 两轮完整 2 MiB 独立双读均与本轮烧录前一致（原 ELF 已在目标上运行），分别核对两个 `PT_LOAD` 共 61,208 字节及区间外 2,035,944 字节。整片 SHA-256 `d8ceb22dafabac56f74014eb60fc9a038315d556a003d8d54ee9b724a661231e`。最终探针采集、DDR、CDMA、RTT、HSS 空闲。本轮 Flash 修改限定上述目标扇区，使用已有 bit/ELF 配对，未写 QSPI。
 
 ZynqLink 烧录器内置列表现从同版本上游选取 29 个原版 target/board CFG，按同一导入函数解析。板级 CFG 的 HPM FTDI 适配器引用由加载器绑定到原版 CMSIS-DAP 接口脚本，板级文件及其 Flash 参数保留原样。固定上游版本没有 HPM6P00EVK 对应 CFG，移出烧录器内置列表，匹配的外部 CFG 仍可导入。F2/F3/F4/F7 原版 CFG 在 Flash 探测前的基址可为零，烧录器现在先读实测几何再映射 ELF。29 个条目均通过实际 Wasm 离线配置加载，H743 为本轮实板验收对象。原始 Flash/日志留在本机 `build/h743-upstream-cfg-20261112/`。
+
+源码 `bcd87ad8` 的 159 项 Web、65 项 CLI、共享驱动一致性及冻结 EXE 离线回归通过。45 份 CFG/Tcl 文件与固定上游提交逐字节一致，Pages 暂存及冻结 EXE 的 HTTP 读回均完整匹配。候选 EXE SHA-256 `d0288906249ea0e613e039c1f42cfe452e6835e9c16cd6482ce5b3e968aaaf82`，位于 `build/h743-upstream-cfg-20261112/package-source/dist/zynq-etm-bridge/`。本轮源码与候选已就绪，固定 EXE 和线上 Pages 仍为上次正式版。任务测试服务已退出，共享 `hw_server` 保留。
