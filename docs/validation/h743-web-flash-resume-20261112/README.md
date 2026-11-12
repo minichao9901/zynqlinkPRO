@@ -70,4 +70,5 @@ ZL-200 的候选在擦除前读取 H7 MPU 状态。启用 MPU 时将当前 OpenO
 
 - ZynqLink 的 `main` 已推送板验提交 `6970dfca`。Pages 已构建静态分支 `bfe0685`，公开站点 manifest 对应 `8e653631`。GitHub v1.3.1 是最新 Release，ZIP 56,108,523 字节，公开资产 SHA-256 与本机包一致。[Pages](https://minichao9901.github.io/zynqlinkPRO/) · [Release](https://github.com/minichao9901/zynqlinkPRO/releases/tag/v1.3.1)
 - SuperlinkPRO 的 `main` 已推送 `c9bca36c`，Pages Actions 部署成功。公开下载 manifest 为 `1.1.0-web.13`，源提交、ZIP 字节数和 SHA-256 与本机分发包一致。[Pages](https://minichao9901.github.io/superlinkPRO/) · [部署记录](https://github.com/minichao9901/superlinkPRO/actions/runs/43177323045)
+- 两个公开下载端点均返回 HTTP 206，首 4,096 字节与各自本机 ZIP 一致，`Content-Range` 声明的总长度分别为 56,108,523 和 103,222,601 字节。
 - GitHub 推送首轮返回 HTTP 408，改用 HTTP/1.1 和缓冲发送后成功。Zynq ZIP 的流式重试遇到连接重置，之后由仓库发布器在同一草稿内完成限速上传，按远端资产 SHA-256 和大小核对后发布。失败证据保留于本轮本机目录（ZL-164）。
