@@ -59,7 +59,7 @@ serve前须按实际任务核对板卡空闲及加载身份。运行时URL/令�
 
 调试器可选内置芯片，也可用「导入 OpenOCD CFG…」打开单文件。遇到 `source [find …]` 依赖时，选择脚本根目录并选择入口 CFG。可在「配置与核心」切换已导入配置的核心，或切回内置目标。只使用与板卡匹配且可信的脚本。导入阶段在断开 USB 的 Worker 中解析，实际连接时会执行所选 CFG 的目标事件。烧录器可沿用声明了 Flash bank 的配置。RTT Viewer 沿用 CFG 后，从匹配 ELF 取得控制块地址，或手填地址和 RAM 范围。
 
-烧录器内置列表随包提供与 Wasm 源码版本一致的 OpenOCD 原版 target/board CFG 和依赖，并使用与手动导入相同的解析入口。内置项由工作台指定探针传输方式和烧录时钟。HPM 原版板级 CFG 的 FTDI 引用在此探针上绑定到原版 CMSIS-DAP 接口脚本。固定上游版本没有 HPM6P00EVK 的烧录 CFG，该板可走匹配的外部 CFG 导入。[H743 对照与范围](validation/h743-web-flash-resume-20261112/README.md#openocd-原版-cfg-对照与内置列表迁移)
+烧录器内置列表随包提供与 Wasm 源码版本一致的 OpenOCD 原版 target CFG，以及 HPM SDK v1.11.0 的原版 board、SoC 和入口 CFG。两者与手动导入使用同一解析入口。内置 HPM 项通过 SDK 的 `BOARD` 和 `PROBE=cmsis_dap` 参数选择相应板和探针，包括 HPM6P00EVK。内置项的烧录时钟仍由工作台所选档位决定。[H743 对照与范围](validation/h743-web-flash-resume-20261112/README.md#openocd-原版-cfg-对照与内置列表迁移)
 
 自动化先用 `page dbg describe` 发现 `importCfg` 和 `cfgInfo`。用 `page dbg upload` 向 `#d-cfg-file` 交付单文件后，读取导入结果与当前核心。烧录器和 RTT Viewer 各自提供「沿用目标」控件。原 Web CLI 的调试和烧录命令也经上述页面后端。
 

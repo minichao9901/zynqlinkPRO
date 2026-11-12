@@ -9,8 +9,8 @@ import { makeOpenOcdProfile } from '../../app/core/openocd-profile.js';
 import { createOpenOcdDispatcher } from '../../app/core/openocd-worker.mjs';
 import { inspectOpenOcdCfg } from '../../app/dbg/openocd-cfg.js';
 import { programOpenOcdFlash, resetAfterFlash } from '../../app/flash/openocd-program.js';
-import { loadUpstreamFlashCfg } from '../../app/flash/upstream-config.js';
-import { upstreamFlashConfigs } from '../../app/flash/openocd-cfgs/catalog.js';
+import { loadBuiltinFlashCfg } from '../../app/flash/upstream-config.js';
+import { upstreamFlashConfigs, hpmSdkFlashConfigs } from '../../app/flash/openocd-cfgs/catalog.js';
 import { OpenOcdResetSession, pulseTargetReset } from '../../app/flash/target-reset.js';
 
 test('ARM JTAG confirms the selected TAP without reading a SWD DPIDR', async t => {
@@ -105,14 +105,18 @@ test('the bundled Wasm registers ARM, HPM and RP2350 profiles and resolves impor
     return worker;
   });
   serveUpstreamFiles(t);
-  for (const family of Object.keys(upstreamFlashConfigs)){
+  for (const family of [...Object.keys(upstreamFlashConfigs), ...Object.keys(hpmSdkFlashConfigs)]){
     const hpm = family.startsWith('hpm');
-    const cfg = await loadUpstreamFlashCfg(family,hpm ? 10000 : 1000);
+    const cfg = await loadBuiltinFlashCfg(family,hpm ? 10000 : 1000);
     assert.equal(cfg.arch,hpm ? 'riscv' : 'arm',family);
     assert.equal(cfg.transport,hpm ? 'jtag' : 'swd',family);
     assert.equal(cfg.clockKhz,hpm ? 10000 : 1000,family);
     assert.equal(cfg.flashBase,hpm ? '0x80000000' : family === 'nrf52' ? '0x00000000' :
       family === 'rp2350' ? '0x10000000' : '0x08000000',family);
+    if (hpm){
+      assert.equal(cfg.raw.hpmSdk,true,family);
+      assert.equal(cfg.raw.connection.board,family);
+    }
   }
   const entry = 'board/selected.cfg';
   const board = 'set BOARD_FREQ 4000\nsource [find target/nested.cfg]';

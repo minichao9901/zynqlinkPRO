@@ -95,86 +95,49 @@ export const upstreamFlashConfigs = {
   ],
   "rp2350": [
     "target/rp2350.cfg"
-  ],
+  ]
+};
+
+// HPM SDK v1.11.0: board ID to all-in-one entry and single-core SoC.
+export const hpmSdkFlashConfigs = {
   "hpm5300evk": [
-    "board/hpmicro/hpm5300evk.cfg",
-    "interface/hpmicro/hpmicro_evk.cfg",
-    "target/hpmicro/hpm5300.cfg",
-    "target/hpmicro/hpm_common.cfg",
-    "target/hpmicro/hpm_reset.cfg",
-    "target/hpmicro/hpm_common_csr_lite.cfg",
-    "interface/cmsis-dap.cfg"
+    "5300",
+    "5300"
   ],
   "hpm5301evklite": [
-    "board/hpmicro/hpm5301evklite.cfg",
-    "interface/hpmicro/hpmicro_evk.cfg",
-    "target/hpmicro/hpm5300.cfg",
-    "target/hpmicro/hpm_common.cfg",
-    "target/hpmicro/hpm_reset.cfg",
-    "target/hpmicro/hpm_common_csr_lite.cfg",
-    "interface/cmsis-dap.cfg"
+    "5300",
+    "5300"
   ],
   "hpm5e00evk": [
-    "board/hpmicro/hpm5e00evk.cfg",
-    "interface/hpmicro/hpmicro_evk.cfg",
-    "target/hpmicro/hpm5e00.cfg",
-    "target/hpmicro/hpm_common.cfg",
-    "target/hpmicro/hpm_reset.cfg",
-    "target/hpmicro/hpm_common_csr.cfg",
-    "interface/cmsis-dap.cfg"
+    "5e00",
+    "5e00"
   ],
   "hpm6200evk": [
-    "board/hpmicro/hpm6200evk.cfg",
-    "interface/hpmicro/hpmicro_evk.cfg",
-    "target/hpmicro/hpm6280-single-core.cfg",
-    "target/hpmicro/hpm_common.cfg",
-    "target/hpmicro/hpm_reset.cfg",
-    "target/hpmicro/hpm_common_csr.cfg",
-    "interface/cmsis-dap.cfg"
+    "6280",
+    "6280-single-core"
   ],
   "hpm6300evk": [
-    "board/hpmicro/hpm6300evk.cfg",
-    "interface/hpmicro/hpmicro_evk.cfg",
-    "target/hpmicro/hpm6360.cfg",
-    "target/hpmicro/hpm_common.cfg",
-    "target/hpmicro/hpm_reset.cfg",
-    "target/hpmicro/hpm_common_csr.cfg",
-    "interface/cmsis-dap.cfg"
+    "6300",
+    "6360"
   ],
   "hpm6750evk2": [
-    "board/hpmicro/hpm6750evk2.cfg",
-    "interface/hpmicro/hpmicro_evk.cfg",
-    "target/hpmicro/hpm6750-single-core.cfg",
-    "target/hpmicro/hpm_common.cfg",
-    "target/hpmicro/hpm_reset.cfg",
-    "target/hpmicro/hpm_common_csr.cfg",
-    "interface/cmsis-dap.cfg"
+    "6750",
+    "6750-single-core"
   ],
   "hpm6750evkmini": [
-    "board/hpmicro/hpm6750evkmini.cfg",
-    "interface/hpmicro/hpmicro_evk.cfg",
-    "target/hpmicro/hpm6750-single-core.cfg",
-    "target/hpmicro/hpm_common.cfg",
-    "target/hpmicro/hpm_reset.cfg",
-    "target/hpmicro/hpm_common_csr.cfg",
-    "interface/cmsis-dap.cfg"
+    "6750",
+    "6750-single-core"
   ],
   "hpm6800evk": [
-    "board/hpmicro/hpm6800evk.cfg",
-    "interface/hpmicro/hpmicro_evk.cfg",
-    "target/hpmicro/hpm6880.cfg",
-    "target/hpmicro/hpm_common.cfg",
-    "target/hpmicro/hpm_reset.cfg",
-    "target/hpmicro/hpm_common_csr.cfg",
-    "interface/cmsis-dap.cfg"
+    "6800",
+    "6880"
   ],
   "hpm6e00evk": [
-    "board/hpmicro/hpm6e00evk.cfg",
-    "interface/hpmicro/hpmicro_evk.cfg",
-    "target/hpmicro/hpm6e80-single-core.cfg",
-    "target/hpmicro/hpm_common.cfg",
-    "target/hpmicro/hpm_reset.cfg",
-    "target/hpmicro/hpm_common_csr.cfg",
-    "interface/cmsis-dap.cfg"
+    "6e00",
+    "6e80-single-core"
+  ],
+  "hpm6p00evk": [
+    "6p00",
+    "6p80-single-core"
   ]
 };

@@ -1,7 +1,8 @@
 import { inspectOpenOcdCfg } from '../dbg/openocd-cfg.js';
-import { upstreamFlashConfigs } from './openocd-cfgs/catalog.js';
+import { upstreamFlashConfigs, hpmSdkFlashConfigs } from './openocd-cfgs/catalog.js';
 
-export const hasUpstreamFlashCfg = family => Object.hasOwn(upstreamFlashConfigs, family);
+export const hasBuiltinFlashCfg = family => Object.hasOwn(upstreamFlashConfigs, family) ||
+  Object.hasOwn(hpmSdkFlashConfigs, family);
 
 const scripts = new Map();
 
@@ -14,19 +15,18 @@ async function loadScript(path){
   return scripts.get(path);
 }
 
-export async function loadUpstreamFlashCfg(family, clockKhz){
-  const paths = upstreamFlashConfigs[family];
-  if (!paths) throw Error('没有可用的 OpenOCD 官方 Flash CFG');
+export async function loadBuiltinFlashCfg(family, clockKhz){
+  if (!hasBuiltinFlashCfg(family)) throw Error('没有可用的官方 OpenOCD Flash CFG');
+  const hpm = hpmSdkFlashConfigs[family];
+  const paths = hpm ? [
+    `hpm${hpm[0]}_all_in_one.cfg`, `boards/${family}.cfg`, `soc/hpm${hpm[1]}.cfg`, 'probes/cmsis_dap.cfg',
+    'soc/hpm_common.cfg', 'soc/hpm_reset.cfg', 'soc/hpm_common_csr.cfg', 'soc/hpm_common_csr_lite.cfg',
+  ] : upstreamFlashConfigs[family];
   const [entry] = paths;
-  const hpm = entry.startsWith('board/hpmicro/');
-  const files = new Map(await Promise.all(paths.map(async path => [path, await loadScript(path)])));
-  if (hpm){
-    // The unchanged upstream board script includes its FTDI adapter. Bind
-    // that include to the official CMSIS-DAP script for this probe.
-    files.set('interface/hpmicro/hpmicro_evk.cfg', files.get('interface/cmsis-dap.cfg'));
-  }
+  const files = new Map(await Promise.all(paths.map(async path => [path, await loadScript(hpm ? `hpm-sdk/${path}` : path)])));
+  if (hpm) files.set('interface/cmsis-dap.cfg', await loadScript('interface/cmsis-dap.cfg'));
   const cfg = await inspectOpenOcdCfg(files.get(entry), entry, files, {
-    transport:hpm ? 'jtag' : 'swd', clockKhz,
+    transport:hpm ? 'jtag' : 'swd', clockKhz, ...(hpm && {board:family}),
   });
   if (!cfg.hasFlash) throw Error('OpenOCD 官方 CFG 没有定义 Flash bank：' + entry);
   return cfg;

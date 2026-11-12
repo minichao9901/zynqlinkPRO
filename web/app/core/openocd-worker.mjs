@@ -72,6 +72,10 @@ export function createOpenOcdDispatcher({ post, select, wasmBinary, onExit }){
       args.push('-c', `transport select ${connection.transport}`);
     }
     if (hpmSdk) args.push('-c', 'set HPM_SDK_BASE /sdk; set PROBE cmsis_dap');
+    if (connection?.board !== undefined){
+      if (!hpmSdk || !/^hpm[a-z0-9]+$/.test(connection.board)) throw Error('HPM SDK 板卡参数无效');
+      args.push('-c', `set BOARD ${connection.board}`);
+    }
     args.push('-f', directory + '/' + (raw?.entry ?? 'workbench.cfg'),
       '-c', 'noinit; gdb port disabled; tcl port disabled; telnet port disabled; cmsis-dap backend usb_bulk');
     if (hpmSdk) args.push('-c', 'reset_config none');
