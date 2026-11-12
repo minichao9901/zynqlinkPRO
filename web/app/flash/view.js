@@ -17,6 +17,7 @@ import { rememberHpmBoard } from '../targets/hpm/select.js';
 import { DBGMCU_BASES, FLASH_SIZE_REGS, decodeCpuid, decodeDpIdcode, decodeStm32Dev, refineByFlash, saneFlashKb } from './devid.js';
 import { parseFirmware } from './image.js';
 import { programOpenOcdFlash } from './openocd-program.js';
+import { OpenOcdH7FlashProbe } from './openocd-h7.js';
 import { FirmwareInspector } from './inspector-view.js';
 import { bytes as fBytes } from '../core/format.js';
 
@@ -219,7 +220,7 @@ export class FlashView {
     const cfg = imported ? { ...imported, memoryAp } : makeOpenOcdProfile({ memoryAp, arch:port ? 'riscv' : 'arm', port, family, flash,
       clockKhz:webClockKhz($('f-speed').value, family, port ? 10000 : 1000) });
     const device = await selectOpenOcdDevice();
-    const Probe = memoryAp ? OpenOcdEtmProbe : OpenOcdProbe;
+    const Probe = cfg.h7DebugTarget ? OpenOcdH7FlashProbe : memoryAp ? OpenOcdEtmProbe : OpenOcdProbe;
     this.probe = new Probe(device, cfg, line => this._log(line));
     await this.probe.connect();
   }

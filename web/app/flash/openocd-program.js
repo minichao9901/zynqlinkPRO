@@ -67,9 +67,20 @@ export async function programOpenOcdFlash(probe, regions, { verify, progress }){
     if (address && length){
       if (!Number.isSafeInteger(address) || !Number.isSafeInteger(length) || length < 0 || length > 0x100000)
         throw Error('H7 Flash 工作区范围无效');
-      workArea = {address, length};
-      savedWorkArea = await probe.readMem(address, length);
-      if (savedWorkArea.length !== length) throw Error('H7 Flash 工作区备份不完整');
+      const mpu = await probe.readMem(0xe000ed94, 4);
+      if (mpu.length !== 4) throw Error('H7 MPU 状态回读不完整');
+      if (mpu[0] & 1){
+        // A live MPU can forbid instruction fetches from the work area.
+        // A zero-sized work area makes stm32h7x program via the debug port.
+        await command(`${probe.target} configure -work-area-size 0`);
+        if (Number(await command(`${probe.target} cget -work-area-size`)) !== 0)
+          throw Error('H7 Flash 工作区禁用未确认');
+        probe.onLog?.('STM32H7 MPU 已启用，经调试端口直接烧录');
+      } else {
+        workArea = {address, length};
+        savedWorkArea = await probe.readMem(address, length);
+        if (savedWorkArea.length !== length) throw Error('H7 Flash 工作区备份不完整');
+      }
     }
   }
   let operationError;

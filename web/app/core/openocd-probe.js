@@ -59,6 +59,8 @@ export class OpenOcdProbe {
     return name;
   }
 
+  async _initTarget(link){ await link.command('init'); }
+
   async connect(){
     this._f103HighDensity = undefined;
     const link = this.link = new OpenOcdTargetSession(line => this.onLog?.(line));
@@ -67,7 +69,7 @@ export class OpenOcdProbe {
       const targets = (await link.command('target names')).split(/\s+/);
       if (!targets.includes(this.cfg.target)) throw Error('OpenOCD CFG 目标不匹配');
       const target = this.target = await this._selectTarget(link, targets);
-      await link.command('init');
+      await this._initTarget(link);
       if (this.cfg.raw){
         await link.command(`targets ${target}`);
         // The workbench controls one selected core. A peer can be parked in
