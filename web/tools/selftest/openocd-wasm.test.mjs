@@ -173,6 +173,21 @@ test('real Wasm H743 Flash probes AP2 when the AP0 DBGMCU alias returns zero', a
   }
 });
 
+test('H7 reset checks physical DHCSR after transient failures without resetting again', async t => {
+  const probe = new OpenOcdH7FlashProbe(null, {arch:'arm',clockKhz:10000});
+  const command = t.mock.method(probe,'command',async () => '');
+  const samples = [new Error('AP0 unavailable'),0,0x90001,0x1010001];
+  t.mock.method(probe,'_readWord',async address => {
+    assert.equal(address,0xe000edf0);
+    const sample = samples.shift();
+    if (sample instanceof Error) throw sample;
+    return sample;
+  });
+  assert.match(await probe.reset(),/复位/);
+  assert.deepEqual(command.mock.calls.map(call => call.arguments),[['reset run']]);
+  assert.deepEqual(samples,[]);
+});
+
 test('H7 work area is restored after block writes and skipped when the MPU is enabled', async () => {
   for (const scenario of ['success','write-failure','short-backup','mpu-enabled','short-mpu','disable-rejected']){
     const failWrite = scenario === 'write-failure';

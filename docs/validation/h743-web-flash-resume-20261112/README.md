@@ -46,3 +46,11 @@ ZL-200 的候选在擦除前读取 H7 MPU 状态。启用 MPU 时将当前 OpenO
 | SuperlinkPRO web.13 | 隔离源码 `a513f848`，EXE SHA-256 `f7dfec4f6f8d3f95af96d19eea869549b87fede59e46e816aaec06386433aae3`。首次冻结验收缺 `etm/tools/node-transport` 的锁定依赖，补齐后重建，3,414 个文件校验、冻结服务及 CLI、离线解码导出和下载校验通过。候选目录 `build/h743-release-20261111/super-source/web/tmp/etm-package-37bb84ce/dist/superlinkPRO/`。 |
 
 两套候选均使用本报告所列 Wasm。固定安装目录等待实板复测，GitHub Pages 未发布。
+
+## 15:20 USB 恢复后的完整烧录
+
+重新枚举 CMSIS-DAP WinUSB、HID 和 CDC 后，物理 OCM 85,844 字节再次与正式 J7 ELF 一致，PL 的 ELD1/DDR 特征吻合。探针队列、采集、DDR、CDMA、RTT 和 HSS 均空闲。SWD 10 MHz 烧录期间读回 FCLK 119,999,998 Hz、SWCLK 9,999,999.83 Hz。
+
+目标恢复为运行中的 SDRAM 应用，`MPU_CTRL=1`，`DBGMCU_CR=0x0070003f`。两次独立 2 MiB Flash 备份一致，SHA-256 为 `077331beb888de9366761c11edacb0d0b805f00ac1cb394429c3a15bd3601631`。冻结候选经实际工作台进入 AP2 识别和 MPU 直接烧录路径，使用原 `fw.elf` 及默认「校验」和「烧录后复位运行」选项。复位后独立读回两个 `PT_LOAD` 文件区间（61,056 和 152 字节），共 61,208 字节全相等。区间外 2,035,944 字节与备份相等。64 KiB AXI 工作区哈希一致，Flash 整片 SHA-256 为 `d8ceb22dafabac56f74014eb60fc9a038315d556a003d8d54ee9b724a661231e`。
+
+旧候选在复位后的首次 `poll` 返回失败，页面未报告成功（ZL-201）。独立读回确认 VTOR 已指向新固件 `0x08000000`，核心运行且未锁死，CFSR/HFSR 为零。修订后的 H7 路径在单次复位命令后直接读 DHCSR，短暂读失败时限时重读，拒绝零值、锁死或状态不符。模拟测试覆盖首次读失败、零值及锁死后再读成功，并确认复位仅发一次。
