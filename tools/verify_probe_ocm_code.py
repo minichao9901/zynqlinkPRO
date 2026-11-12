@@ -58,7 +58,12 @@ def main():
         report['initial_FCLK_Hz']=observed['FCLK_Hz']
         if a.require_qspi:
             t=report['boot_trace']
-            assert report['boot_mode']==1 and t[0]==0x53544730 and t[3]==1 and t[5:8]==[0x600,0,1],t
+            if report['boot_mode'] != 1:
+                report['error'] = f"BOOT_MODE={report['boot_mode']:#x}。请切到 QSPI 并给探针断电重上电。"
+                raise SystemExit(report['error'])
+            if t[0] != 0x53544730 or t[3] != 1 or t[5:8] != [0x600, 0, 1]:
+                report['error'] = '启动标记未确认 QSPI 已进入正式应用。请检查探针的 BOOT 镜像。'
+                raise SystemExit(report['error'])
         for cycle in range(a.usb_config_cycles+1):
             row=dict(cycle=cycle)
             if cycle:

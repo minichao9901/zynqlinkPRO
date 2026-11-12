@@ -255,6 +255,7 @@ def main(argv=None):
             '火焰图：导出双标签HTML，默认Timeline，另有周期权重；左键框选放大、Shift拖动平移。\n'
             'AI离线导出：zynq-etm-bridge.exe --trace-cli export --record RECORD --format flame-html --out flame.html\n'
             '数据在本目录data/records，关闭控制台停止服务；用户无需Python、Node或CLI。\n'
+            '可执行手册使用仓库和系统 Python。桥包位于仓库 dist 目录时自动找到仓库，独立解压时用 --workspace 指定。\n'
             'AI离线检查：zynq-etm-bridge.exe --check --data-dir CHECK_DIR\n')
         (package/'使用说明.txt').write_text(readme,encoding='utf-8-sig')
         # Validate the frozen runtime before publishing an output directory.

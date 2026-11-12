@@ -114,6 +114,8 @@ def create_application(etm_root,serial_root=ROOT,cli_token_file=None,native_pair
         if path == 'index.html':
             text=(serial_root/path).read_text(encoding='utf-8')
             marker=(' data-native-capture="1"' if native_pair else '')+(' data-native-probe="1" data-native-delivery="1"' if native_probe else '')
+            if app.config.get('COMMAND_MANUAL'):
+                marker += ' data-command-manual="1"'
             return text.replace('<body', '<body data-etm-base="/etm"'+marker, 1)
         return send_from_directory(serial_root,path)
     @app.after_request

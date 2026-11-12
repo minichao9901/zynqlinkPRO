@@ -78,7 +78,12 @@ initLogSearch({page:'rttcdc',prefix:'c',records:()=>stream.rx.raw,isHex:()=>stre
 initDockNavigation();
 installAcquisitionDiagnostics(tools);
 
-const pages = { serial:assistant, terminal, rtt, rttcdc:stream, scope, flash, dbg, etm };
+const manualTab = document.querySelector('[data-tab="manual"]');
+const localManual = document.body.dataset.commandManual === '1';
+if (localManual) manualTab.hidden = false;
+else manualTab.remove();
+const pages = { serial:assistant, terminal, rtt, rttcdc:stream, scope, flash, dbg, etm,
+  manual:{ onShow:async () => (await import('./command-manual.js')).showManual() } };
 initTabs(name => {
   workspace.sync();
   requestAnimationFrame(() => {

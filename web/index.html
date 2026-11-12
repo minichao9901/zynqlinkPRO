@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="app/vendor/xterm/xterm.css">
 <link rel="stylesheet" href="app/app.css">
 <link rel="stylesheet" href="app/download.css">
+<link rel="stylesheet" href="app/command-manual.css">
 <script>
 (function(){
   // 本仓库只维护源码模块，不使用 superlinkPRO 的合并包 app/site/main.js。
@@ -47,6 +48,7 @@
       <button class="tab" data-tab="dbg">调试器</button>
       <button class="tab" data-tab="etm">ETM 执行轨迹</button>
       <button class="tab" data-tab="download">工程下载</button>
+      <button class="tab" data-tab="manual" hidden>可执行手册</button>
     </div>
 
   </nav>
@@ -74,6 +76,13 @@
 </header>
 
 <main>
+
+<section class="panel" id="tab-manual" aria-labelledby="manual-heading">
+  <div class="command-manual">
+    <h1 id="manual-heading">可执行手册</h1>
+    <div id="manual-document"></div>
+  </div>
+</section>
 
 <section class="panel" id="tab-download" aria-labelledby="download-heading">
   <div class="download-page">

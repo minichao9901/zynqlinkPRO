@@ -10,6 +10,7 @@ import json
 import os
 from pathlib import Path
 import secrets
+import shutil
 import subprocess
 import sys
 import uuid
@@ -69,7 +70,7 @@ def load_service(path):
     return module
 
 
-def application(backend, web, service_path, helpers, data, token_file, *, offline=False):
+def application(backend, web, service_path, helpers, data, token_file, *, offline=False, workspace=None):
     for path in (helpers, backend / 'tools', backend / 'tools/la'):
         sys.path.insert(0, str(path))
     os.environ['WEB_ETM_RECORDS'] = str(data / 'records')
@@ -79,6 +80,12 @@ def application(backend, web, service_path, helpers, data, token_file, *, offlin
     # The normal Web button is the production capture path. It preserves the
     # firmware's RCC settings, releases USB, arms Zynq, and restores the target.
     app = service.create_application(backend, web, token_file, native_probe=True)
+    if __package__:
+        from .command_manual import install as install_manual
+    else:
+        from command_manual import install as install_manual
+    install_manual(app.app, token_file, workspace if FROZEN else workspace or REPO,
+                   shutil.which('python') if FROZEN else sys.executable, offline=offline)
     import decode_trace
     decode_trace.ROOT = backend  # frozen modules' __file__ is not the asset root
     backend_app = app.mounts['/etm']
@@ -152,10 +159,19 @@ def main(argv=None):
     parser.add_argument('--port', type=int, default=8882)
     parser.add_argument('--data-dir', type=Path, default=home / 'data')
     parser.add_argument('--no-browser', action='store_true')
+    parser.add_argument('--workspace', type=Path, help='可执行手册使用的 ZynqLinkPRO 仓库目录')
     parser.add_argument('--check', action='store_true', help='离线检查运行库和C++工具；不访问硬件')
     parser.add_argument('--offline', action='store_true', help='离线验收：禁止USB/HID/串口和采集，仅浏览、导入和解码')
     parser.add_argument('--trace-cli',action='store_true',help='离线记录CLI：--trace-cli export/query/verify/...；无需启动Web服务')
     args=parser.parse_args(argv)
+    workspace = args.workspace.resolve() if args.workspace else REPO if not FROZEN else None
+    if workspace is None and home.parent.name == 'dist':
+        candidate = home.parent.parent
+        if (candidate / 'docs/toolbox-cli-first-run.md').is_file() and (candidate / 'toolbox.py').is_file():
+            workspace = candidate
+    if workspace and not ((workspace / 'docs/toolbox-cli-first-run.md').is_file() and (workspace / 'toolbox.py').is_file()):
+        raise ValueError('--workspace 需要含 CLI 入门手册和 toolbox.py 的 ZynqLinkPRO 仓库')
+    workspace_key = str(workspace) if workspace else None
     if FROZEN and not args.check and not args.no_browser and process_integrity_rid() < 8192:
         raise ValueError('程序文件被标记为低完整性，无法正常启动桌面浏览器。请重新解压到普通用户目录，或用 bridge-build 重新发布程序。')
     if not 1024 <= args.port <= 65535:
@@ -172,7 +188,8 @@ def main(argv=None):
             with urlopen(url+'/etm-launcher.json', timeout=1) as response:
                 existing=json.load(response)
             if (existing.get('bootId')==state.get('bootId') and existing.get('packageId')==package_id
-                    and existing.get('dataDirectory')==str(data) and existing.get('offline')==args.offline):
+                    and existing.get('dataDirectory')==str(data) and existing.get('offline')==args.offline
+                    and state.get('workspace')==workspace_key):
                 if not args.no_browser:webbrowser.open(state['browserUrl'])
                 print('工作台已经运行：' + url + '/#etm', flush=True)
                 return 0
@@ -185,7 +202,7 @@ def main(argv=None):
     temporary=folder / 'tmp'
     temporary.mkdir()
     os.environ['TEMP']=os.environ['TMP']=str(temporary)
-    app=application(backend, web, service_path, helpers, data, token_file, offline=args.offline)
+    app=application(backend, web, service_path, helpers, data, token_file, offline=args.offline, workspace=workspace)
     proof=preflight(backend, web, service_path)
     if args.check:
         print(json.dumps(proof, ensure_ascii=False), flush=True)
@@ -204,7 +221,7 @@ def main(argv=None):
     browser_url=url+'/?trace-cli='+token+'#etm'
     state={'protocol':'workbench/1','url':url,'browserUrl':browser_url,'pid':os.getpid(),
         'status':'serving','bootId':boot,'nativeProbe':True,'offline':args.offline,'runtime':str(folder),
-        'recordsDirectory':str(data/'records')}
+        'recordsDirectory':str(data/'records'),'workspace':workspace_key}
     for path in (folder / 'toolbox-runtime.json', state_path):
         path.write_text(json.dumps(state, ensure_ascii=False, indent=2)+'\n', encoding='utf8')
     print('Zynq ETM 工作台 '+VERSION+'；时钟由target固件负责', flush=True)

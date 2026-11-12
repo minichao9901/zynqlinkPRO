@@ -175,6 +175,8 @@ def serve(args):
     os.environ['TEMP'] = os.environ['TMP'] = str(temporary)
     pair = (args.bit, args.zynq_elf) if args.bit else None
     app = service.create_application(ROOT / 'etm-service', ROOT / 'web', folder / 'cli-token', pair, args.native_probe)
+    from tools.command_manual import install as install_manual
+    install_manual(app.app, folder / 'cli-token', ROOT, sys.executable)
     # Keep HTTP/1.1 connections alive. Closing every byte-level USB RPC can
     # exhaust Windows' 16384 ephemeral TCP ports during debug pressure tests.
     server = create_server(app, host='127.0.0.1', port=args.port, threads=16,
