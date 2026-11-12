@@ -65,3 +65,9 @@ ZL-200 的候选在擦除前读取 H7 MPU 状态。启用 MPU 时将当前 OpenO
 | SuperlinkPRO 1.1.0-web.13 | 源码 `31af88de`，日常 EXE SHA-256 `b3fe01b302bafdc5225c29a3a0d34a44d79f9b39ed76ecd90190a70c5ed40f6c`。冻结候选及安装后 CLI、HTTP、离线解码和下载检查通过。原 `data` 66 个文件逐字节哈希一致，旧程序归档。Windows ZIP SHA-256 `6b309cf0028ea3657ab27009ea61056284892b78486eec5481d83aae44de615f`。 |
 
 两套日常包均含 AP2 识别及复位后直接读 DHCSR 的确认逻辑。H743 真机擦写使用 ZynqLink，SuperlinkPRO 覆盖共享修订的定向回归和冻结包验证。板验后的本任务工作台进程均已退出，既有 `hw_server` 继续运行。
+
+## GitHub 与 Pages
+
+- ZynqLink 的 `main` 已推送板验提交 `6970dfca`。Pages 已构建静态分支 `bfe0685`，公开站点 manifest 对应 `8e653631`。GitHub v1.3.1 是最新 Release，ZIP 56,108,523 字节，公开资产 SHA-256 与本机包一致。[Pages](https://minichao9901.github.io/zynqlinkPRO/) · [Release](https://github.com/minichao9901/zynqlinkPRO/releases/tag/v1.3.1)
+- SuperlinkPRO 的 `main` 已推送 `c9bca36c`，Pages Actions 部署成功。公开下载 manifest 为 `1.1.0-web.13`，源提交、ZIP 字节数和 SHA-256 与本机分发包一致。[Pages](https://minichao9901.github.io/superlinkPRO/) · [部署记录](https://github.com/minichao9901/superlinkPRO/actions/runs/43177323045)
+- GitHub 推送首轮返回 HTTP 408，改用 HTTP/1.1 和缓冲发送后成功。Zynq ZIP 的流式重试遇到连接重置，之后由仓库发布器在同一草稿内完成限速上传，按远端资产 SHA-256 和大小核对后发布。失败证据保留于本轮本机目录（ZL-164）。
