@@ -28,9 +28,14 @@ import { constrainClockSelect } from '../ui/target-clock.js';
 import { InspectorTable, flashValue } from '../ui/inspector-table.js';
 import { waitMs } from '../core/pace.js';
 import { DebugSession, DEFAULT_CLOCK_KHZ } from './session.js';
-import { RiscvDebugSession } from './riscv.js';
+import { OpenOcdRiscvSession } from './openocd-riscv.js';
+import { makeOpenOcdProfile } from '../core/openocd-profile.js';
+import { selectOpenOcdDevice } from '../core/openocd-usb.js';
+import { CHIPS } from '../core/chips.js';
+import { hpmBoard } from '../targets/hpm/porting.js';
+import { inspectOpenOcdCfg, readCfgDirectory, cfgPath } from './openocd-cfg.js';
 import { fillHpmSelect, selectedHpmBoard, rememberHpmBoard } from '../targets/hpm/select.js';
-import { runCmd } from './cmd.js';
+import { runCmd, decodeScalar } from './cmd.js';
 import { SymTab } from './symbols.js';
 /**
  * 寄存器名**不分大小写**比。
@@ -43,7 +48,7 @@ import { SymTab } from './symbols.js';
  *    就撞上 `抽象命令失败（读寄存器 0x7b0）：cmderr=4`。一个大小写，串起两个症状。
  */
 const regIs = (name, want) => String(name ?? '').toUpperCase() === want;
-import { WatchList, resolveWatch, formatWatchValue, treeRows, summarizeTree, TREE_LIMITS } from './watch.js';
+import { WatchList, resolveWatch, formatWatchValue, treeRows, summarizeTree, TREE_LIMITS, canEditWatch, writeWatchValue } from './watch.js';
 import { completeLine } from './complete.js';
 import { SourceStore, sourceRootSuggestions } from './source.js';
 import { sourceTokens } from './source-syntax.js';
@@ -113,8 +118,21 @@ export class DbgView {
       rememberHpmBoard($('d-hpm-target').value);
       this._applyClockLimit();
     });
+    const arm = $('d-arm-target');
+    if (arm){
+      for (const chip of CHIPS.filter(c => c.ram && !hpmBoard(c.v))) arm.add(new Option(chip.label, chip.v));
+      store.bind(arm, 'dbg.armTarget');
+      if (!arm.value) arm.value = 'arm';
+    }
     const be = $('d-backend');
-    if (be){ store.bind(be, 'dbg.backend'); be.addEventListener('change', () => this._syncBackend()); }
+    if (be){
+      store.bind(be, 'dbg.backend');
+      be.addEventListener('change', () => {
+        if (this._activeCfg()) $('d-cfg-core').value = '';
+        this._syncBackend();
+      });
+    }
+    this._initCfgUi();
     const clk = $('d-clock');
     if (clk){
       constrainClockSelect(clk,'arm');
@@ -183,6 +201,8 @@ export class DbgView {
     if (wi) wi.addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); this.addWatch(wi.value); } });
     on('d-watch-refresh', 'click', () => this.refreshWatch({ force: true }));
     on('d-watch-clear', 'click', () => this.clearWatch());
+    const radix = $('d-watch-radix');
+    if (radix){ store.bind(radix, 'dbg.watchRadix'); radix.addEventListener('change', () => this.renderWatch()); }
     const wl = $('d-watch-list');
     if (wl){
       wl.addEventListener('click', (e) => {
@@ -419,33 +439,114 @@ export class DbgView {
 
   /**
    * 后端换了就**换 session 对象**（ARM/Cortex-M 与 RISC-V 的硬件访问完全不同，
-   * 但源码级那一层是同一套 —— `RiscvDebugSession` 继承 `DebugSession` 只换低层）。
+   * 但源码级那一层是同一套 —— `OpenOcdRiscvSession` 继承 `DebugSession` 只换低层）。
    * 换之前先把旧连接断干净，别让两个后端抢同一支探针。
    * @returns {boolean} 是否真的换了对象
    */
   async _ensureSession(riscv, { preserveAcquisition = false } = {}){
-    if (riscv === (this.session instanceof RiscvDebugSession)) return false;
+    if (riscv === (this.session instanceof OpenOcdRiscvSession)) return false;
     if (this.session?.connected) await this.disconnect({ preserveAcquisition });
-    if (riscv === (this.session instanceof RiscvDebugSession)) return false;
-    this.session = riscv ? new RiscvDebugSession() : new DebugSession();
+    if (riscv === (this.session instanceof OpenOcdRiscvSession)) return false;
+    this.session = riscv ? new OpenOcdRiscvSession() : new DebugSession();
     this._bindSessionLog();
     this.session.sym = this.sym || null;
     return true;
+  }
+
+  _initCfgUi(){
+    const file = $('d-cfg-file'), directory = $('d-cfg-dir'), entry = $('d-cfg-entry'), core = $('d-cfg-core');
+    if (!file || !directory || !entry || !core) return;
+    const report = error => this._out('CFG：' + error.message, 'err');
+    $('d-cfg-pick').onclick = () => file.click();
+    $('d-cfg-dir-pick').onclick = () => directory.click();
+    file.onchange = async () => {
+      const selected = file.files[0];
+      file.value = '';
+      if (selected) await this.importCfg(selected).catch(report);
+    };
+    directory.onchange = async () => {
+      if (!directory.files.length) return;
+      try {
+        const scripts = await readCfgDirectory(directory.files);
+        if (this.session.connected || this._connecting) throw Error('请先断开调试器');
+        this._cfgFiles = scripts;
+        entry.replaceChildren(new Option('选择入口 CFG…', ''), ...[...scripts.keys()]
+          .filter(name => /\.cfg$/i.test(name)).sort().map(name => new Option(name, name)));
+        entry.hidden = false;
+      } catch (error){ report(error); }
+      finally { directory.value = ''; }
+    };
+    entry.onchange = () => {
+      if (!entry.value) return;
+      const name = entry.value;
+      entry.value = '';
+      this._importCfg(this._cfgFiles.get(name), name, this._cfgFiles).catch(report);
+    };
+    core.onchange = () => this._selectCfg().catch(report);
+  }
+
+  async importCfg(file){
+    if (!(file instanceof File) || file.size > 8 * 1024 * 1024) throw Error('请选择 8 MiB 以内的 OpenOCD CFG');
+    return this._importCfg(await file.text(), cfgPath(file.name));
+  }
+
+  async _importCfg(text, entry, files){
+    if (this.session.connected || this._connecting || this._cfgImporting) throw Error('请先断开调试器并等待导入完成');
+    this._cfgImporting = true;
+    try {
+      const cfg = await inspectOpenOcdCfg(text, entry, files);
+      if (this.session.connected || this._connecting) throw Error('请先断开调试器');
+      this.importedCfg = cfg;
+      const core = $('d-cfg-core');
+      core.replaceChildren(new Option('内置目标', ''), ...cfg.cores.map(c => new Option(cfg.name + ' · ' + c.target, c.target)));
+      core.value = cfg.target;
+      return await this._selectCfg();
+    } finally { this._cfgImporting = false; }
+  }
+
+  _activeCfg(){
+    const cfg = this.importedCfg;
+    const core = cfg?.cores.find(c => c.target === $('d-cfg-core')?.value);
+    if (!core) return null;
+    const hpm = /^hpm\d+[.]cpu\d+$/i.test(core.target) && core.arch === 'riscv';
+    return { ...cfg, ...core, sbaFence:hpm ? hpmBoard('hpm6800evk').memory.sbaReadForbidden : undefined };
+  }
+
+  _cfgTarget(){
+    const cfg = this._activeCfg();
+    return cfg && { id:'cfg:' + cfg.hash + ':' + cfg.target, arch:cfg.arch, label:cfg.name + ' · ' + cfg.target, cfg };
+  }
+
+  cfgInfo(){
+    const cfg = this._activeCfg();
+    return cfg && { name:cfg.name, target:cfg.target, arch:cfg.arch, sha256:cfg.hash, clockKhz:cfg.clockKhz, hasFlash:cfg.hasFlash };
+  }
+
+  async _selectCfg(){
+    if (this.session.connected || this._connecting) throw Error('请先断开调试器');
+    const cfg = this._activeCfg();
+    if (cfg) $('d-backend').value = cfg.arch === 'riscv' ? 'riscv' : 'webusb';
+    await this._syncBackend();
+    this.onTargetConfigChanged?.();
+    return this.cfgInfo();
   }
 
   async _syncBackend(){
     const v = $('d-backend')?.value || 'webusb';
     const mock = v === 'mock';
     const riscv = v === 'riscv';
+    const cfg = this._activeCfg();
     this._applyClockLimit();
     await this._ensureSession(riscv);
     if ($('d-hpm-target-row')) {
-      $('d-hpm-target-row').hidden = !riscv;
-      $('d-hpm-target-row').style.display = riscv ? '' : 'none';
+      $('d-hpm-target-row').hidden = !riscv || !!cfg;
+      $('d-hpm-target-row').style.display = riscv && !cfg ? '' : 'none';
     }
+    if ($('d-arm-target-row')) $('d-arm-target-row').hidden = mock || riscv || !!cfg;
     const clk = $('d-clock');
     if (clk){
-      clk.disabled = mock;
+      clk.disabled = mock || !!cfg;
+      if (cfg) clk.title = `沿用 CFG 的 ${cfg.clockKhz} kHz`;
       // RISC-V 那条路的时钟是 **JTAG TCK**（DAP_SWJ_Clock），名字要说清楚
       const lab = clk.previousElementSibling;
       if (lab && /时钟/.test(lab.textContent || '')) lab.textContent = riscv ? 'JTAG 时钟' : 'SWD 时钟';
@@ -468,7 +569,8 @@ export class DbgView {
     this.faultPanel?.sync();
     if(!this.session.connected || !this.session.halted || (this._btSnapshotValid && this.session.pc!==this._btSnapshotPc)) this._invalidateBacktrace();
     const c = connected ?? this.session.connected;
-    if ($('d-hpm-target')) $('d-hpm-target').disabled = c || !!this._connecting;
+    for (const id of ['d-backend','d-arm-target','d-hpm-target','d-cfg-pick','d-cfg-dir-pick','d-cfg-entry','d-cfg-core'])
+      if ($(id)) $(id).disabled = c || !!this._connecting;
     const h = halted ?? this.session.halted;
     for (const id of ['d-cont', 'd-step', 'd-halt', 'd-mem-read']){
       const el = $(id);
@@ -494,10 +596,10 @@ export class DbgView {
   // ================================================================ 连接
 
   async connect(){
-    if (this._connecting || this._disconnecting) return false;
+    if (this._connecting || this._disconnecting || this._cfgImporting || this.session.connected) return false;
     const generation = this._connectionGen = (this._connectionGen || 0) + 1;
     this._connecting = true;
-    if ($('d-hpm-target')) $('d-hpm-target').disabled = true;
+    this._syncButtons();
     try {
       return await runProbeOperation(this, 'dbg', () => this._connectNow(generation), {
         mock: $('d-backend')?.value === 'mock', reason: '调试器要使用探针', recovery: true,
@@ -505,7 +607,7 @@ export class DbgView {
     } catch (e){ this._out('✗ 连接失败：' + e.message, 'err'); toast(e.message, 'err'); return false; }
     finally {
       this._connecting = false; this._connectionTask = null;
-      if ($('d-hpm-target')) $('d-hpm-target').disabled = !!this.session?.connected;
+      this._syncButtons();
     }
   }
 
@@ -515,22 +617,27 @@ export class DbgView {
     const riscv = backend === 'riscv';
     /**
      * 换后端 = 换一个 session 对象（ARM/Cortex-M 与 RISC-V 的硬件访问完全不同，
-     * 但源码级那一层是同一套 —— `RiscvDebugSession` 继承 `DebugSession` 只换低层）。
+     * 但源码级那一层是同一套 —— `OpenOcdRiscvSession` 继承 `DebugSession` 只换低层）。
      * 正常路径上 `_syncBackend()` 已经换过了，这里再兜一次（幂等）。
      */
     await this._ensureSession(riscv, { preserveAcquisition: true });
     if (this._disconnecting || generation !== this._connectionGen) return false;
-    const clockKhz = webClockKhz($('d-clock')?.value,riscv?$('d-hpm-target')?.value:'arm',DEFAULT_CLOCK_KHZ);
+    const family = riscv ? $('d-hpm-target')?.value || selectedHpmBoard() : $('d-arm-target')?.value || 'arm';
+    const clockKhz = this._activeCfg()?.clockKhz ?? webClockKhz($('d-clock')?.value, family, DEFAULT_CLOCK_KHZ);
     this._out('', 'dim');
     this._out(`──── 连接（${mock ? '模拟目标' : riscv ? 'RISC-V/JTAG' : 'WebUSB'}${mock ? '' : ` · ${clockKhz} kHz`}）────`, 'dim');
     if (this.clockMigrated){ this._out('（SWD 时钟默认值已从 1 MHz 改为 10 MHz —— 真机实测 PPB/内存都正常；不想要就在上面改回去）', 'dim'); this.clockMigrated = false; }
     try {
       if (!mock) await prepareProbeHandoff(this, 'dbg', '调试器要使用探针');
       if (this._disconnecting || generation !== this._connectionGen) return false;
-      this._connectionTask = this.session.exclusive(() => this.session.connect({
-        mock, clockKhz, bus: null, stopBridge: false,
-        ...(riscv ? { target: $('d-hpm-target')?.value || selectedHpmBoard() } : {}),
-      }));
+      const cfg = mock ? null : this._activeCfg() || makeOpenOcdProfile({
+        arch:riscv ? 'riscv' : 'arm', family, port:hpmBoard(family), clockKhz,
+      });
+      this._connectionTask = this.session.exclusive(async () => {
+        const device = mock ? null : await selectOpenOcdDevice();
+        if (generation !== this._connectionGen) return;
+        await this.session.connect({ mock, cfg, device });
+      });
       await this._connectionTask;
       if (this._disconnecting || generation !== this._connectionGen) return false;
     } catch (e){
@@ -543,7 +650,7 @@ export class DbgView {
      * 下拉框得跟着改，否则界面显示的档位和实际用的不一致（用户会以为寄存器坏了）。
      */
     const nowKhz = Math.round((this.session.clockHz || 0) / 1000);
-    if (nowKhz && nowKhz !== clockKhz){
+    if (!this._activeCfg() && nowKhz && nowKhz !== clockKhz){
       const clk = $('d-clock');
       if (clk){ ensureSelectOption(clk, String(nowKhz), nowKhz + ' kHz'); clk.value = String(nowKhz); store.set('dbg.clock', clk.value); }
       this._out(`（实际用的是 SWD ${nowKhz} kHz —— 上面那格已同步）`, 'warn');
@@ -1636,7 +1743,7 @@ export class DbgView {
             if (f.cls !== 'err') ok++;
             continue;
           }
-          it.bytes = null;
+          it.bytes = bytes;
           const f = formatWatchValue(it, bytes);
           it.prev = it.value;
           it.value = f;
@@ -1656,6 +1763,11 @@ export class DbgView {
   }
 
   renderWatch(){
+    if (this._watchEditing){
+      const edit = this._watchEditing;
+      if (this.session === edit.session && this.sym === edit.sym && this.watch.items.includes(edit.item) && this.session.connected && this.session.halted) return;
+      this._watchEditing = null;
+    }
     const table=this._inspector('watch');
     if(!table)return;
     const box=table.body;
@@ -1692,10 +1804,14 @@ export class DbgView {
       nm.title = `${it.expr}${it.addr !== undefined ? ' @ ' + hex32(it.addr) : ''}${it.typeName ? ' : ' + it.typeName : ''}`;
       const vl = document.createElement('span');
       vl.className = 'vl';
-      const v = it.value;
+      const radix = $('d-watch-radix')?.value === 'hex' ? 'hex' : 'dec';
+      const v = it.bytes ? expandable
+        ? { ...it.value, text: summarizeTree(it, it.bytes, { radix }) }
+        : formatWatchValue(it, it.bytes, radix) : it.value;
       vl.textContent = it.error ? it.error : (v ? String(v.text) : '—');
       vl.title=!it.error&&v?.hex?`${v.text}\n原始值：${v.hex}`:vl.textContent;
       if(v?.cls)vl.classList.add(v.cls);
+      this._watchValueEditor(vl, it, i, null, it.bytes);
       const previous=this._watchPaint.get(it);
       const fingerprint=JSON.stringify([it.error||'',v?.text,v?.hex,v?.cls]);
       if(previous&&previous.fingerprint!==fingerprint){row.classList.add('chg');flashValue(vl);}
@@ -1718,7 +1834,7 @@ export class DbgView {
 
       // 展开的树：成员 / 数组元素 / 位域（一次读回的字节里解出来的，已按偏移排好）
       if (expandable && it.expanded){
-        const kids = it.bytes ? treeRows(it, it.bytes) : [];
+        const kids = it.bytes ? treeRows(it, it.bytes, { radix }) : [];
         if (!kids.length){
           const d = document.createElement('div');
           d.className = 'hint';
@@ -1726,7 +1842,7 @@ export class DbgView {
           d.textContent = '（还没读到数据：停下目标，或点「刷新值」）';
           box.appendChild(d);
         }
-        for (const k of kids){
+        for (const [memberIndex, k] of kids.entries()){
           const kr = document.createElement('div');
           kr.className = 'wkid' + (k.cls === 'dim' ? ' dim' : '') + (k.bitfield ? ' bf' : '');
           table.row(kr);
@@ -1741,6 +1857,7 @@ export class DbgView {
           if(k.cls==='dim')kv.classList.add('dim');
           kv.textContent = String(k.text ?? '');
           kv.title=k.hex?`${kv.textContent}\n原始值：${k.hex}`:kv.textContent;
+          if (k.edit && !k.cls) this._watchValueEditor(kv, k.edit, i, memberIndex, it.bytes.subarray(k.off, k.off + k.size));
           const key=`${k.off}:${k.name}`,member=JSON.stringify([k.text,k.hex]);
           memberValues.set(key,member);
           if(previous?.members.has(key)&&previous.members.get(key)!==member)flashValue(kv);
@@ -1756,6 +1873,70 @@ export class DbgView {
         }
       }
       this._watchPaint.set(it,{fingerprint,members:memberValues});
+    });
+  }
+
+  /** One explicit write with type validation and readback, shared by the UI and page CLI. */
+  async writeWatch(index, text, memberIndex = null){
+    const session = this.session, sym = this.sym, item = this.watch.items[index];
+    if (!item) throw Error('监视项已不存在');
+    return await session.exclusive(async () => {
+      if (this.session !== session || this.sym !== sym || this.watch.items[index] !== item || this._disconnecting)
+        throw Error('目标或监视项已改变，请重新编辑');
+      const fresh = resolveWatch(item.expr, sym);
+      const value = memberIndex === null ? fresh : treeRows(fresh, item.bytes)[memberIndex]?.edit;
+      if (!value) throw Error('此成员没有可写类型');
+      this.faultPanel?.invalidate('变量写入，现场转为历史记录');
+      const bytes = await writeWatchValue(session, value, text);
+      await this._refreshWatchLocked({ force: true });
+      return { address: value.addr, bytes: [...bytes], verified: true };
+    });
+  }
+
+  _watchValueEditor(cell, value, index, memberIndex, bytes){
+    if (!canEditWatch(value) || !bytes?.length) return;
+    cell.classList.add('watch-editable');
+    cell.tabIndex = 0;
+    cell.title += '\n暂停后双击或按 Enter 修改';
+    const open = () => {
+      if (this._watchEditing) return;
+      if (!this.session.connected || !this.session.halted){ toast('请先连接并暂停目标，再修改变量', 'warn'); return; }
+      const original = formatWatchValue(value, bytes, $('d-watch-radix')?.value);
+      const input = document.createElement('input');
+      input.className = 'mono watch-value-input'; input.spellcheck = false;
+      input.setAttribute('aria-label', '修改变量值');
+      input.value = value.scalar?.startsWith('f') ? String(decodeScalar(value.scalar, bytes))
+        : original.text.split(/\s/)[0];
+      const save = document.createElement('button'); save.className = 'mini'; save.textContent = '写入';
+      const cancel = document.createElement('button'); cancel.className = 'mini'; cancel.textContent = '取消';
+      const status = document.createElement('span'); status.className = 'err'; status.setAttribute('role', 'status');
+      const token = this._watchEditing = { session: this.session, sym: this.sym, item: this.watch.items[index] };
+      const close = () => { this._watchEditing = null; this.renderWatch(); };
+      const submit = async () => {
+        if (input.disabled) return;
+        input.disabled = save.disabled = cancel.disabled = true;
+        try {
+          if (this.session !== token.session || this.sym !== token.sym || this.watch.items[index] !== token.item)
+            throw Error('目标或监视项已改变，请取消后重新编辑');
+          await this.writeWatch(index, input.value, memberIndex);
+          close();
+        } catch (error){
+          status.textContent = error.message;
+          input.disabled = save.disabled = cancel.disabled = false;
+          input.focus();
+        }
+      };
+      input.addEventListener('keydown', e => {
+        if (e.key === 'Enter'){ e.preventDefault(); e.stopPropagation(); submit(); }
+        if (e.key === 'Escape' && !input.disabled){ e.preventDefault(); e.stopPropagation(); close(); }
+      });
+      save.onclick = submit; cancel.onclick = close;
+      cell.replaceChildren(input, save, cancel, status);
+      input.focus(); input.select();
+    };
+    cell.addEventListener('dblclick', open);
+    cell.addEventListener('keydown', e => {
+      if (e.target === cell && e.key === 'Enter'){ e.preventDefault(); e.stopPropagation(); open(); }
     });
   }
 
@@ -2054,12 +2235,12 @@ export class DbgView {
        * **打脏**——之后 `session.memRead` 不再报错、而是**静默返回全 0**（实测控制块 24 B 全 0，
        * 另一次是 `SEGGER RTT` 变成乱码），只有 `dm.init()` 才恢复。用户看到的就是
        * "定位 RTT 报错之后，调试读什么都变味了"。
-       * RTT Viewer 的 RISC-V 通路（app/rtt/riscv-mem.js）本来就是这么接的，这里补齐。
+       * RTT Viewer 的 RISC-V 通路本来就是这么接的，这里补齐。
        */
       const mem = {
         readMem: (a, n) => this.session.memRead(a, n),
         writeMem: (a, b) => this.session.memWrite(a, b),
-        // RISC-V：通道名指针常落在 XIP flash，SBA 读那个窗口会把事务挂住（见 app/rtt/riscv-mem.js）
+        // RISC-V：通道名指针常落在 XIP flash，SBA 读那个窗口会把事务挂住
         skipNames: !!this.session.isRiscv,
       };
       const rtt = new Rtt(mem, { addr });

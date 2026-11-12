@@ -4,7 +4,6 @@
  *
  * 用途：
  *   · 网页演示（GitHub Pages 首屏就能看到东西在动）
- *   · 无头自检（tools/selftest/ui.selftest.mjs 用它跑端到端用例）
  * 打开方式：?demo=serial
  */
 

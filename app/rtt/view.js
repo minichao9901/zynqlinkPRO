@@ -7,18 +7,20 @@ import { store } from '../core/store.js';
 import { webClockKhz,isHpmClockTarget } from '../core/target-clock.js';
 import { constrainClockSelect } from '../ui/target-clock.js';
 import { RxBuffer } from '../core/rxview.js';
+import { AnsiDisplay, terminalBytes } from '../core/display-stream.js';
 import { FileRecorder, recordButtonState } from '../core/recorder.js';
 import { Rtt } from './protocol.js';
-import { WebUsbDapProbe, withTimeout } from './dap-webusb.js';
-import { openRiscvMem } from './riscv-mem.js';
+import { OpenOcdProbe } from '../core/openocd-probe.js';
+import { OpenOcdEtmProbe } from '../core/openocd-etm.js';
+import { openOcdUsbSupported, selectOpenOcdDevice } from '../core/openocd-usb.js';
+import { makeOpenOcdProfile } from '../core/openocd-profile.js';
 import { HPM_BOARDS, hpmBoard } from '../targets/hpm/porting.js';
 import { selectedHpmBoard, rememberHpmBoard } from '../targets/hpm/select.js';
 import { MockProbe } from './mock.js';
 import { findSymbol } from './elf.js';
 import { parseRanges } from '../core/bin.js';
 import { parseHex, textToBytes } from '../core/hex.js';
-import { closeProbeUsbDevices } from '../core/probe-bus.js';
-import { sleep,waitMs,yieldTask } from '../core/pace.js';
+import { waitMs,yieldTask } from '../core/pace.js';
 import { rate as fRate, bytes as fBytes, fileStamp, download, stamp as stampOf } from '../core/format.js';
 
 const EOL = { cr: '\r', crlf: '\r\n', lf: '\n', none: '' };
@@ -90,7 +92,7 @@ export class RttView {
     this.hist = [];
     this.histIdx = -1;
     this.rec = new FileRecorder();      // 高速采集落文件（见 core/recorder.js）
-    this._lastWasCR = false;            // 终端模式补 \r 用的跨包状态（\r\n 不能补成 \r\r\n）
+    this.lastWasCR = false;             // 终端模式补 CR 的跨包状态
     this.suppressed = false;            // 高速自动关显示（见 _highspeedGate）
     this.suppManual = false;            // 用户手动恢复过显示：暂不再自动关，速率回落后重新武装
     this.suppBytes = 0;                 // 关显示期间省略渲染的字节数
@@ -127,15 +129,7 @@ export class RttView {
       const rv = $('r-target').value === 'riscv';
       const clkLbl = $('r-usb-clock')?.closest('label')?.querySelector('span');
       if (clkLbl) clkLbl.textContent = rv ? 'JTAG TCK' : 'SWD 时钟';
-      $('r-usb-clock').title = rv
-        ? 'RISC-V/JTAG 下它是 JTAG TCK 频率（DAP_SWJ_Clock），留「自动」即可；'
-          + '注意它与 HID 0x31 action 7 那个 clockHz 字段不是一回事（后者是 DMI idle，必须 0）'
-        : 'SWD 时钟：自动 = 从高到低试到通为止';
-      $('r-reset').disabled = rv;
-      $('r-reset').title = rv
-        ? 'RISC-V 下没有 Cortex-M 的 DHCSR/AIRCR 复位语义（探针的 RISC-V 引擎只管 halt/resume）—— 要复位就按板子上的复位键'
-        : '复位目标（AIRCR.SYSRESETREQ；探针没接 NRST 时靠软复位）';
-
+      $('r-reset').title = '经 OpenOCD Wasm 复位目标并重新定位 RTT';
       if (chip) chip.value = rv ? (store.get('rtt.rvChip', '') || selectedHpmBoard())
                                 : (store.get('rtt.armChip', store.get('rtt.ocdTarget', '')) || 'stm32f103');
       if (chip && !chip.value) chip.value = rv ? selectedHpmBoard() : 'stm32f103';
@@ -150,6 +144,18 @@ export class RttView {
     if (savedRange !== null) $('r-range').value = savedRange;
     this._applyTargetUi = applyTarget;       // 供明确的会话目标沿用入口刷新本地配置
     const onTargetChanged = () => { applyTarget(); if (this.probe) this.disconnect(); };
+    this._applyImportedTarget = target => {
+      const option = new Option(target.label, target.id);
+      const group = chip.querySelector(`optgroup[data-arch="${target.arch}"]`);
+      const previous = this.importedTarget;
+      if (previous) [...chip.options].find(o => o.value === previous.id)?.remove();
+      group.append(option);
+      this.importedTarget = target;
+      $('r-target').value = target.arch === 'riscv' ? 'riscv' : 'swd';
+      chip.value = target.id;
+      $('r-range').value = '';
+      this._applyChipUi(false);
+    };
     $('r-target').addEventListener('change', onTargetChanged);
     /**
      * 合并后的芯片下拉：换芯片 = ① 记到**那一组自己的键**（两块各自记住上次选的）
@@ -159,7 +165,7 @@ export class RttView {
      */
     chip?.addEventListener('change', () => {
       const id = chip.value, arch = chipArchOf(id);
-      store.set(arch === 'riscv' ? 'rtt.rvChip' : 'rtt.armChip', id);
+      if (!id.startsWith('cfg:')) store.set(arch === 'riscv' ? 'rtt.rvChip' : 'rtt.armChip', id);
       if (arch === 'riscv') rememberHpmBoard(id);
       /**
        * 🚨 **换芯片必须清掉手填的 RTT 地址**：`#r-addr` 绑的是 `rtt.addr`，它是"上一个目标
@@ -171,6 +177,12 @@ export class RttView {
         $('r-addr').value = '';
         store.set('rtt.addr', '');
         setStatus($('r-err'), '换了芯片：已清空手填的 RTT 地址（下次连接会按新 RAM 范围自动扫描）');
+      }
+      if (id === this.importedTarget?.id){
+        $('r-target').value = arch === 'riscv' ? 'riscv' : 'swd';
+        $('r-range').value = '';
+        this._applyChipUi(false);
+        return;
       }
       const wantRv = arch === 'riscv';
       if (wantRv !== ($('r-target').value === 'riscv')){
@@ -244,7 +256,7 @@ export class RttView {
         setStatus($('r-err'), '', null);
       }
     });
-    if (!WebUsbDapProbe.supported()) setStatus($('r-err'), '这个浏览器没有 WebUSB（Chrome/Edge 桌面版才有）', 'err');
+    if (!openOcdUsbSupported()) setStatus($('r-err'), '需要 WebUSB 或本机探针服务', 'err');
 
     // URL 参数：?backend=mock&auto=1 直接连上（做演示链接/自测用）
     const q = new URLSearchParams(location.search);
@@ -275,8 +287,10 @@ export class RttView {
   _applyClockLimit(){
     const target=chipSel()?.value;
     constrainClockSelect($('r-usb-clock'),target,v=>store.set('rtt.clockKhz',v));
-    $('r-usb-clock').title=isHpmClockTarget(target)?'HPM JTAG TCK 最高 25 MHz；自动使用 10 MHz'
-      : $('r-target').value==='riscv'?'其他 RISC-V JTAG TCK 最高 60 MHz':'SWD 时钟最高 60 MHz；自动从高到低协商';
+    const imported = this.importedTarget?.id === target ? this.importedTarget.cfg : null;
+    $('r-usb-clock').disabled = !!imported || !!this.probe;
+    $('r-usb-clock').title = imported ? `沿用 CFG 的 ${imported.clockKhz} kHz` :
+      isHpmClockTarget(target) ? 'HPM JTAG TCK 最高 25 MHz；默认 10 MHz' : '调试时钟最高 60 MHz；默认 10 MHz';
   }
 
   // ================= 连接 =================
@@ -303,70 +317,29 @@ export class RttView {
         if (g !== this._sessionGen) return;
       }
       if (b === 'webusb'){
-        const clockKhz = webClockKhz($('r-usb-clock').value,chipSel()?.value,
-          isHpmClockTarget(chipSel()?.value)?10000:0);
-        if ($('r-target').value === 'riscv'){
-          /**
-           * RISC-V/JTAG 走另一套底层：HID 切 SWD+JTAG → WebUSB 的 DAP_JTAG_Sequence → DMI → SBA
-           * （见 app/rtt/riscv-mem.js）。它自己会把探针侧那个占着 TAP 的 RISC-V 引擎/RTT 桥停掉，
-           * 所以这里不用再管 `authorized()` 那套 ARM 的时钟协商（那套按 SWD 走，RISC-V 上必 NO ACK）。
-           */
-          const target = rvChipId();
-          const openOnce = () => openRiscvMem({ target, clockKhz, all: $('r-usb-all').checked, log: s => console.log('[riscv]', s) });
-          try {
-            this.probe = await openOnce();
-          } catch (e1){
-            setStatus($('r-err'), `RISC-V 第一次连接失败（${e1.message}）—— 等 1.2 s 重试一次…`, 'warn');
-            await sleep(1200);
-            try { await closeProbeUsbDevices(); } catch { /* 关不掉就继续试 */ }
-            this.probe = await openOnce();
-          }
-          const inf = this.probe.info();
-          toast(`RISC-V 已就绪：${this.probe.name} · IDCODE 0x${Number(inf.idcode || 0).toString(16)}`, 'ok');
-                if (g !== this._sessionGen) return;
-      this._uiConnected(true);
-          if ($('r-record-auto').checked && !this.rec.active) this._autoStartRecord();
-          await this._startRtt(g);
-          return;
-        }
-        // 已经授权过的探针**不用再弹选择框**（用户体验也好得多）；想换设备点「换设备…」
-        // 🚨 全部加超时：USB 服务被挂起传输搞脏时，getDevices()/open() 会永远不返回，
-        //    界面看着像"点了一下就没反应"（实测卡过 90 秒）。宁可 5 秒报错并给出自救提示。
-        let auth;
-        try {
-          auth = this._forcePick ? [] : await withTimeout(WebUsbDapProbe.authorized(), 5000, '枚举已授权探针');
-        } catch (e){
-          throw new Error(`${e.message} —— 浏览器 USB 服务可能被上一次中断的会话卡住了：刷新页面（或拔插一次探针）再试`);
-        }
+        const family = chipSel()?.value || 'stm32f103';
+        const arch = $('r-target').value === 'riscv' ? 'riscv' : 'arm';
+        const imported = this.importedTarget?.id === family ? this.importedTarget.cfg : null;
+        const memoryAp = (imported?.arch ?? arch) === 'arm';
+        const cfg = imported ? { ...imported, memoryAp } : makeOpenOcdProfile({ memoryAp,
+          arch, family, port:hpmBoard(family), clockKhz:webClockKhz($('r-usb-clock').value, family, 10000),
+        });
+        const forcePick = !!this._forcePick;
         this._forcePick = false;
-        if (auth.length){
-          /**
-           * 🚨 **刚被别的会话用过的探针，第一次常常连不上**（2026-10 真机复现多次）：
-           *    烧录器/上一个页签刚断开时，浏览器释放 USB 接口要一会儿，紧接着 open() 会拿到
-           *    脏响应（`SWD ACK=0 / ACK=5`、`响应回显 0x3 ≠ 命令 0x0`）或 `Unable to claim interface`。
-           *    界面上的提示一直是"再点一次就好了" —— 那就**自己再点一次**：等 1.2 s、
-           *    把本页签残留的探针句柄 close 掉（僵尸认领会挡住重新认领），再开一次。
-           *    只重试一次：真坏了（没插/被别的程序占着）第二次照样会报错，不会无限转。
-           */
-          const openOnce = () => withTimeout(WebUsbDapProbe.open(auth[0], { clockKhz }), 20000, '连接探针');
-          try {
-            this.probe = await openOnce();
-          } catch (e1){
-            setStatus($('r-err'), `第一次连接失败（${e1.message}）—— 等 1.2 s 重试一次…`, 'warn');
-            await sleep(1200);
-            try { await closeProbeUsbDevices(); } catch { /* 关不掉就继续试 */ }
-            this.probe = await openOnce();          // 还失败就把错抛给上层（带着第二次的原因）
-          }
-          toast('使用已授权探针：' + this.probe.name, 'ok');
-        } else {
-          this.probe = await withTimeout(WebUsbDapProbe.request($('r-usb-all').checked, { clockKhz }), 60000, '等你在浏览器里选探针');
-          toast('探针已连接：' + this.probe.name, 'ok');
-        }
+        const device = await selectOpenOcdDevice({ all:$('r-usb-all').checked, forcePick });
+        if (g !== this._sessionGen) return;
+        const Probe = memoryAp ? OpenOcdEtmProbe : OpenOcdProbe;
+        this.probe = new Probe(device, cfg, line => console.debug('[OpenOCD]', line), true);
+        this._opening = this.probe.connect();
+        try { await this._opening; }
+        finally { this._opening = null; }
+        toast('探针已连接：' + this.probe.name, 'ok');
       } else if (b === 'mock'){
         this.probe = new MockProbe();
         await this.probe.connect();
         toast('模拟目标已启动（内存里有个假 RTT 控制块）', 'ok');
       } else { throw new Error('仅支持 WebUSB 连接'); }
+      if (g !== this._sessionGen) return;
       this._uiConnected(true);
       if ($('r-record-auto').checked && !this.rec.active) this._autoStartRecord();
       /**
@@ -407,7 +380,7 @@ export class RttView {
     this.probeManager?.cancel('rtt');
     this._sessionGen = (this._sessionGen || 0) + 1;
     this.running = false;
-    clearTimeout(this.timer); clearTimeout(this._idleTimer); clearTimeout(this._resetTimer);
+    clearTimeout(this.timer); clearTimeout(this._resetTimer);
     if (this._disconnectPromise) return await this._disconnectPromise;
     this._disconnectPromise = this._disconnectNow();
     try {
@@ -423,10 +396,12 @@ export class RttView {
   async _disconnectNow(){
     this.running = false;
     clearTimeout(this.timer);
+    if (this._opening) await this._opening.catch(() => {});
     // A readUp transaction can still be reading/writing RdOff. Let it retire
     // before DAP_Disconnect and native USB close consume the same reply queue.
-    if(this._pollTask)await this._pollTask.catch(()=>{});
-    this._pollTask=null;
+    await this._drainRtt();
+    await this._scanTask?.catch(() => {});
+    await this._resetTask?.catch(() => {});
     if (this.rec.active || this.rec.needsClose || this.rec.starting || this.rec.draining){
       const info = await this.rec.stop();
       this._recordBtn();
@@ -440,6 +415,7 @@ export class RttView {
     }
     if (failure) throw failure;
     this.rtt = null;
+    this._needsRttReconnect = false;
     this.suppManual = false;
     if (this.suppressed) this._setSuppressed(false);
     this._uiConnected(false);
@@ -448,25 +424,49 @@ export class RttView {
 
   _uiConnected(on){
     $('r-usb-connect').disabled = on; $('r-usb-pick').disabled = on; $('r-usb-disconnect').disabled = !on;
+    for (const id of ['r-target','r-chip']) $(id).disabled = on;
+    this._applyClockLimit();
     if (!on){ $('r-cb').textContent = '—'; $('r-up').textContent = '0'; $('r-down').textContent = '0'; }
   }
 
+  async _drainRtt(){
+    const rtt = this.rtt;
+    this.rtt = null;
+    await rtt?.drain();
+    await this._pollTask?.catch(() => {});
+    this._pollTask = null;
+  }
+
   async _startRtt(g){
-    if (!this.probe) return;
+    if (!this.probe || this._disconnectPromise || this._resetTask) return;
+    if (this._scanTask) return await this._scanTask;
+    this._scanTask = this._scanRtt(g);
+    try { return await this._scanTask; }
+    finally { this._scanTask = null; }
+  }
+
+  async _scanRtt(g){
     if (g === undefined) g = this._sessionGen = (this._sessionGen || 0) + 1;
     const probe = this.probe;
     const active = () => g === this._sessionGen && this.probe === probe;
     this.running = false;
     clearTimeout(this.timer);
+    await this._drainRtt();
+    if (!active()) return;
+    if (this._needsRttReconnect || probe._faulted){
+      if (typeof probe.recoverDebugPort !== 'function') throw Error('请断开并重新连接探针');
+      setStatus($('r-err'), '正在重新连接原探针并检查 RTT 控制块…');
+      await probe.recoverDebugPort();
+      if (!active()) return;
+    }
     const addrText = String($('r-addr').value || '').trim();
     const addr = addrText ? Number(addrText) : 0;
     const ranges = parseRanges($('r-range').value);
     setStatus($('r-err'), '正在查找 RTT 控制块…');
-    // 定位是"一次性的关键动作" → 严格档（扫描要跨很多地址，读到残渣就会锁错控制块）
-    const locate = a => this._strict(() => Rtt.locate(probe, {
+    const locate = a => Rtt.locate(probe, {
       addr: a, ranges,
       onProgress: (p, at) => setStatus($('r-err'), `扫描控制块 ${(p * 100) | 0}%  @0x${at.toString(16)}`),
-    }));
+    });
     let found;
     try {
       found = await locate(addr);
@@ -500,35 +500,11 @@ export class RttView {
     const nm = await rtt.name('up', 0);
     if (!active()) return;
     this.rtt = rtt;
+    this._needsRttReconnect = false;
     $('r-chlabel').textContent = `下行 ch0${nm ? ' · ' + nm : ''}`;
     const sz = inff.up[0]?.size || 0;
     setStatus($('r-err'), `控制块 0x${found.toString(16)}，上行缓冲 ${sz} B${inff.maxUp > 1 ? `（固件声明 ${inff.maxUp} 个上行通道，本页读 ch0）` : ''}`, 'ok');
     this._startPoll(g);
-    this._armIdleWatchdog();
-  }
-
-  /**
-   * 看门狗：控制块找到了、却一个字节都不来 —— 十有八九是**目标被停住了**
-   * （上一次调试会话 halt 了它，或探针 connect 时默认 halt）。
-   * 这时主动让它跑起来，并在状态条上说清楚，别让用户以为工具坏了。
-   */
-  _armIdleWatchdog(){
-    const g = this._sessionGen, probe = this.probe;
-    clearTimeout(this._idleTimer);
-    this._idleTimer = setTimeout(async () => {
-      if (g !== this._sessionGen || !this.running || this.stats.bytes > 0) return;
-      if (typeof this.probe?.run !== 'function') return;
-      try {
-        // ⚠️ 只在**确实停住**时才写 DHCSR 让它跑。
-        //    早期版本无条件写 run()，结果把一个正在运行的固件"弄停"了：
-        //    现象是"连上后读到几 KB 就不再来数据"（时间点正好在看门狗触发处）。
-        const halted = await probe.isHalted?.();
-        if (g !== this._sessionGen || probe !== this.probe) return;
-        if (halted) await probe.run();
-        else { setStatus($('r-err'), '两秒内没收到数据，但目标在运行中（检查固件有没有在写 RTT）', null); return; }
-        setStatus($('r-err'), '目标原本处于 halt 状态（固件不跑就没数据），已自动继续运行', 'ok');
-      } catch (e){ /* 不支持就算了 */ }
-    }, 2000);
   }
 
   _startPoll(g){
@@ -538,10 +514,9 @@ export class RttView {
     clearTimeout(this.timer);
     this.running = true;
 
-    if (this.probe && typeof this.probe.fast === 'boolean') this.probe.fast = true;
     this.stats.polls = 0; this.stats.bytes = 0; this.stats.lost = 0;
     this.stats.lastBytes=0;this.stats.lastPolls=0;this._lastStatsAt=performance.now();
-    this.fullPolls = 0; this.highPolls = 0; this.peak = 0; this._faults = 0;
+    this.fullPolls = 0; this.highPolls = 0; this.peak = 0; this._faults = 0; this._corruptRun = 0;
     this._pollT0 = Date.now(); this._zeroHinted = false; this._zeroHintSet = false;   // 见 _stats 里的"零速率"诊断
 
     const minGap = 0;
@@ -551,6 +526,7 @@ export class RttView {
       try {
         const { bytes, lost, high, level, corrupt } = await rtt.readUp(0);
         if (!active()) return;
+        this._faults = 0;
         if (bytes.length) this._ingest(bytes, new Date());
         if (lost) this.stats.lost += lost;
         if (high) this.highPolls++;
@@ -565,52 +541,20 @@ export class RttView {
             if (!this.suppressed) setStatus($('r-err'),
               '检测到错位读（读回了控制块内容，已丢弃并重读）—— 查 SWD 时钟、接线与共地', 'err');
           }
-          // 🚨 连续错位读说明不是偶发：多半是 USB 响应流错位（所有 Transfer 响应回显都是 0x05，
-          //    错位后回显照样匹配，读回来的全是别的命令的答案）或 SWD 链路半死。
-          //    升级自愈：recover() 重激活 SWD；不行就 reopen() 重开 USB 会话（resync 只在这条路上跑）。
-          if (this._corruptRun === 15 || (this._corruptRun > 15 && this._corruptRun % 60 === 0)){
-            if (!this.suppressed) setStatus($('r-err'), `连续 ${this._corruptRun} 轮错位读，正在自愈（SWD 重激活 → 必要时重开 USB 会话）…`, 'err');
-            try { await probe?.recover?.();
-            if (!active()) return; } catch {}
-            let ok = false;
-            try {
-              const hdr = await probe.readMem(rtt.addr, 16);
-              ok = String.fromCharCode(...hdr.subarray(0, 10)) === 'SEGGER RTT';
-            } catch {}
-            if (!ok){
-              try { await probe.reopen?.(); } catch {}
-            }
-          }
-          if (this._corruptRun > 150){
-            this._fail(new Error('连续错位读且自愈无效 —— SWD 链路不稳定：查接线/共地，或把 SWD 时钟调低'));
+          if (this._corruptRun >= 15){
+            this._fail(new Error('连续读到错位数据'));
             return;
           }
         } else {
           this._corruptRun = 0;
         }
       } catch (e){
-        /**
-         * 🚨 手动断开时，在飞的 readUp 稍后会抛"探针未连接" —— 不在这儿让路的话，
-         *    `_fail()` 会把状态栏从"已断开"覆盖成"读取失败"（看起来像出了故障，其实是我们自己停的）。
-         */
         if (!active()) return;
         const msg = String(e?.message || e);
-        // SWD 访问出错 / 控制块内容不可信 → 先自愈（重新初始化调试口），别立刻放弃
-        if (/FAULT|NO ACK|不可信|不合理|没在运行/.test(msg)){
-          this._faults = (this._faults || 0) + 1;
-          if (this._faults === 3 || this._faults % 15 === 0){
-            setStatus($('r-err'), `SWD 访问出错，正在自愈（第 ${this._faults} 次）：${msg}`, 'err');
-            try {
-              await probe?.recover?.();
-            if (!active()) return;
-              const hdr = await probe.readMem(rtt.addr, 16);
-              const id = String.fromCharCode(...hdr.subarray(0, 10));
-              if (id === 'SEGGER RTT'){ this._faults = 0; setStatus($('r-err'), '', null); }
-              else setStatus($('r-err'), '目标似乎没在运行（RTT 控制块不见了）：点「复位目标」，或确认固件在跑', 'err');
-            } catch { /* 继续重试 */ }
-          }
-          if (this._faults > 80){ this._fail(new Error('连续 SWD 访问失败，已放弃：' + msg)); return; }
-        } else { this._fail(e); return; }
+        if (!/FAULT|NO ACK|不可信|不合理|没在运行/i.test(msg) || ++this._faults >= 3){
+          this._fail(e);
+          return;
+        }
       }
       if (!active()) return;
       this.stats.polls++;
@@ -625,7 +569,8 @@ export class RttView {
   _fail(e){
     this.running = false;
     clearTimeout(this.timer);
-    setStatus($('r-err'), '读取失败：' + (e?.message || e), 'err');
+    this._needsRttReconnect = true;
+    setStatus($('r-err'), '读取失败：' + (e?.message || e) + '。重新扫描控制块可重连原探针。', 'err');
   }
 
   _err(e){
@@ -652,18 +597,17 @@ export class RttView {
   }
 
   _termWrite(bytes, t){
-    if (!this.term) return;
-    if (this.ts) this.term.write(`\x1b[90m[${stampOf(t)}]\x1b[0m `);
-    // 很多固件只发 \n 不发 \r，直接塞给 xterm 会变成阶梯状 → 按字节自动补 \r
-    //（和终端标签页 terminal.js 同一套规则；不能按字符串处理，多字节 UTF-8 会被拆坏）
-    const out = [];
-    for (let i = 0; i < bytes.length; i++){
-      const b = bytes[i];
-      if (b === 0x0a && !this._lastWasCR) out.push(0x0d);
-      out.push(b);
-      this._lastWasCR = (b === 0x0d);
-    }
-    this.term.write(Uint8Array.from(out));
+    this.ansiDisplay?.push(bytes, t);
+  }
+
+  _formatTerminal(bytes, t){
+    const body = terminalBytes(bytes, this);
+    if (!this.ts) return body;
+    const prefix = textToBytes(`\x1b[90m[${stampOf(t)}]\x1b[0m `);
+    const out = new Uint8Array(prefix.length + body.length);
+    out.set(prefix);
+    out.set(body, prefix.length);
+    return out;
   }
 
   _ensureTerm(){
@@ -677,6 +621,12 @@ export class RttView {
     try { this.fit = new FitAddon.FitAddon(); this.term.loadAddon(this.fit); } catch {}
     this._termStale = !$('tab-rtt').classList.contains('active');   // 在隐藏状态下创建的话，第一次显示时要重放
     this.term.open($('r-term'));
+    this.ansiDisplay = new AnsiDisplay(this.term, {
+      visible: () => this.mode === 'term' && !this.paused && $('tab-rtt').classList.contains('active'),
+      format: (bytes, t) => this._formatTerminal(bytes, t),
+      onSkip: () => { this.lastWasCR = false; },
+      onError: e => setStatus($('r-err'), '终端显示失败，接收和记录继续：' + e.message, 'err'),
+    });
     this.fit?.fit();
     // 允许直接在终端里敲（等价于下行 ch0），像 JLinkRTTViewer 的 Terminal 模式
     this.term.onData(d => {
@@ -693,6 +643,7 @@ export class RttView {
     if (this.mode !== 'term' || !this.term) return;
     try { this.fit?.fit(); } catch {}
     if (this._termStale){ this._redrawAll(); this._termStale = false; }
+    this.ansiDisplay?.flush();
   }
 
   _setMode(m){
@@ -712,6 +663,8 @@ export class RttView {
   _redrawAll(){
     if (this.mode === 'term'){
       if (!this.term) return;
+      this.ansiDisplay?.clear();
+      this.lastWasCR = false;
       this.term.clear();
       for (const r of this.records) this._termWrite(r.b, r.t);
     } else {
@@ -730,6 +683,8 @@ export class RttView {
   _clear(){
     this.records = []; this.recBytes = 0; this.truncated = false;
     this.tx.clear();
+    this.ansiDisplay?.clear();
+    this.lastWasCR = false;
     this.term?.clear();
     this._updateEmptyHint();
   }
@@ -761,42 +716,38 @@ export class RttView {
     return b;
   }
 
-  /**
-   * 临时切到**严格档**跑一段（探针 fast=false）：小块读双读、写必回读。
-   * 用于用户手动动作（下行发送、复位、定位控制块）——这些一秒钟也就几次，
-   * 稳妥优先；后台轮询则用快速档换吞吐（见 _startPoll 里对 probe.fast 的设置）。
-   */
-  async _strict(fn){
-    const p = this.probe;
-    if (!p || typeof p.fast !== 'boolean') return await fn();
-    const prev = p.fast;
-    p.fast = false;
-    try { return await fn(); } finally { p.fast = prev; }
-  }
-
   async _sendBytes(bytes){
     try {
-      if (!this.rtt) throw new Error('RTT 还没就绪（先扫描控制块）');
-      const n = await this._strict(() => this.rtt.writeDown(0, bytes));
+      const rtt = this.rtt;
+      if (!this.running || !rtt) throw new Error('RTT 还没就绪（先扫描控制块）');
+      const n = await rtt.writeDown(0, bytes);
+      if (this.rtt !== rtt || !this.running) return;
       if (n < bytes.length) toast(`下行缓冲只写进 ${n}/${bytes.length} 字节（固件没在取？）`, 'warn');
       setStatus($('r-err'), '', null);
     } catch (e){ this._err(e); }
   }
 
   async resetTarget(){
+    if (this._resetTask || this._scanTask || this._disconnectPromise) return;
+    this._resetTask = this._resetTargetNow();
+    try { await this._resetTask; }
+    finally { this._resetTask = null; }
+  }
+
+  async _resetTargetNow(){
     if (!this.probe){ toast('先连接一个后端', 'warn'); return; }
     if (typeof this.probe.reset !== 'function'){
-      toast('当前目标（RISC-V）没有软复位通路：探针的 RISC-V 引擎只管 halt/resume，要复位请按板子上的复位键', 'warn', 7000);
+      toast('当前会话没有目标复位能力', 'warn', 7000);
       return;
     }
     const probe = this.probe;
     const generation = this._sessionGen = (this._sessionGen || 0) + 1;
     this.running = false;
-    clearTimeout(this.timer); clearTimeout(this._idleTimer); clearTimeout(this._resetTimer);
+    clearTimeout(this.timer); clearTimeout(this._resetTimer);
     try {
-      if (this._pollTask) await this._pollTask.catch(() => {});
+      await this._drainRtt();
       if (generation !== this._sessionGen || probe !== this.probe) return;
-      const how = await this._strict(() => probe.reset());   // 复位是关键动作 → 严格档
+      const how = await probe.reset();
       if (generation !== this._sessionGen || probe !== this.probe) return;
       toast(`已复位目标（${how}），2 秒后重新读取控制块…`, 'ok');
       const g = generation;
@@ -882,7 +833,7 @@ export class RttView {
   static HS_ON  = 50 * 1024;    // 降到 50KB/s 以下才自动恢复（回滞）
 
   _highspeedGate(r){
-    if (!this.probe){
+    if (!this.probe || (this.probe.rttLivePreview && this.mode === 'term')){
       if (this.suppressed) this._setSuppressed(false);
       this.suppManual = false;
       return;

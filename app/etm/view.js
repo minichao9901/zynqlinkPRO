@@ -1,4 +1,5 @@
 import {store} from '../core/store.js';
+import {OpenOcdEtmProbe} from '../core/openocd-etm.js';
 
 /**
  * ETM 执行轨迹页 = superlinkPRO 原始 ETM 工作台，由本地 Zynq 服务直接托管。
@@ -35,6 +36,7 @@ export async function probeEtmService(origin = etmOrigin(), timeoutMs = 2500){
 export class EtmView {
   constructor(){
     this.ready = false;
+    this.probeType = OpenOcdEtmProbe;
     this.info = null;
     this.origin = etmOrigin();
   }

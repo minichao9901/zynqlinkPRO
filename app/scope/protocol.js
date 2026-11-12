@@ -211,10 +211,14 @@ export function parseDef(payload, version = VERSION){
   // **生效**后端：DEF flags bit6 = 这次真的在走 RISC-V/JTAG（不是你下发的那个）
   if (version === VERSION_TICKS) out.periodUs = usForTicks(out.periodUs);
   out.riscv = !!(out.flags & SCOPE_FLAG.RISCV);
+  if (!out.nvars || out.nvars > MAX_VARS || 12 + out.nvars * 8 > payload.length)
+    throw Error('DEF 变量数量无效');
   let o = 12;
   for (let i = 0; i < out.nvars; i++){
+    const type = TYPES[payload[o + 5]];
+    if (!type || type.size !== payload[o + 4]) throw Error('DEF 变量类型或大小无效');
     out.vars.push({ addr: dv.getUint32(o, true), size: payload[o + 4], type: payload[o + 5],
-                    scalar: TYPES[payload[o + 5]]?.name || null });
+                    scalar: type.name });
     o += 8;
   }
   return out;
@@ -402,6 +406,7 @@ export const ACT_NAME = { 0: '停止', 1: '启动', 2: '查状态', 3: '设 SWD 
  */
 export const SCOPE_FLAG = { ALLOW_60M: 0x01, DISCARD: 0x02, TRIGGER: 0x04, NO_YIELD: 0x08,
                             DELAY0: 0x10, CDC_OFF: 0x20, RISCV: 0x40, FAST_BATCH: 0x80 };
+export const HOST_POLL = 0x100; // Host-generated JSP definition, with one timestamp per sample.
 
 /** 后端（生效值）。JTAG 下 action 3 / flags bit4 / swdHz / blob+clock_delay 都无意义。 */
 export const BACKEND = { SWD: 'swd', RISCV: 'riscv' };

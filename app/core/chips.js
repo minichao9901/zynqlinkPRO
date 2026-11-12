@@ -26,6 +26,8 @@ export const CHIPS = [
   { v: 'stm32c0',   label: 'STM32C0',             ram: '0x20000000-0x20003000' },
   { v: 'stm32wb',   label: 'STM32WB',             ram: '0x20000000-0x20040000' },
   { v: 'stm32wl',   label: 'STM32WL',             ram: '0x20000000-0x20010000' },
+  { v: 'nrf52',     label: 'Nordic nRF52',        ram: '0x20000000-0x20006000' },
+  { v: 'rp2350',    label: 'Raspberry Pi RP2350', ram: '0x20000000-0x20080000' },
   { v: 'esp32s31',  label: 'ESP32-S31（板载 USB-JTAG）' },
   { v: 'esp32',     label: 'ESP32（Wrover Kit）' },
   ...HPM_BOARDS.map(b => ({ v: b.id, label: b.name + '（RISC-V，零安装）', ram: b.memory.rttRange })),

@@ -1,7 +1,7 @@
 /**
  * 调试会话：把 CMSIS-DAP 探针包装成"一个简单调试器该有的动作"（**不碰 DOM**）。
  *
- * 底座全部是已有的东西（`app/rtt/dap-webusb.js` 的 WebUsbDapProbe）：
+ * Cortex-M 调试通过 OpenOCD Wasm 探针适配器，模拟目标复用同一会话逻辑：
  *   halt/run/isHalted/_dhcsr、regRead/regWrite（DCRSR/DCRDR）、readMem/writeMem。
  * 这一层新增的只有三样：
  *   ① **硬件断点**（FPB，见 app/dbg/bp.js）—— 网页侧原来没有；
@@ -17,9 +17,8 @@
  *      由 dap-webusb 在 disconnect 时做端口复位。所以这里所有等待都带超时。
  */
 
-import { WebUsbDapProbe, withTimeout } from '../rtt/dap-webusb.js';
-import { closeProbeUsbDevices } from '../core/probe-bus.js';
-import { waitMs, sleep } from '../core/pace.js';
+import { OpenOcdProbe } from '../core/openocd-probe.js';
+import { waitMs, sleep, withTimeout } from '../core/pace.js';
 import { CFBP_SEL, CORE_REGS, SPECIAL_REGS, cfbpGet, cfbpSet, isCfbpSub, regInfo } from './regs.js';
 import { FPB, FP_CTRL_KEY, canBreak, compAddr, decodeFpCtrl, planComparators } from './bp.js';
 import { align2, hex32, u32leBytes } from './fmt.js';
@@ -66,7 +65,7 @@ export class DebugSession {
     this.halted = false;
     this.pc = 0;
     this.clockHz = DEFAULT_CLOCK_KHZ * 1000;
-    this.backendName = 'WebUSB';
+    this.backendName = 'OpenOCD Wasm';
     this.name = '';
     this.idcode = 0;
     this.regs = [];                        // refreshRegs() 的缓存
@@ -75,7 +74,7 @@ export class DebugSession {
     /**
      * 架构描述子：寄存器名 / 指令长度 / 调用解码 / 落点计算 / 返回地址校验。
      * 默认是 ARM/Cortex-M（app/dbg/thumb.js 的 ARM_ARCH）；RISC-V 那份在 rv.js（RV_ARCH），
-     * 由 `RiscvDebugSession`（app/dbg/riscv.js）覆盖低层硬件访问 + 换掉这个对象。
+     * RISC-V 会话覆盖寄存器、停走、内存及硬件断点实现。
      */
     this.arch = ARM_ARCH;
     /**
@@ -142,72 +141,33 @@ export class DebugSession {
    *   mock=true 用内置的假目标（自测/演示，不需要硬件）
    *   bus = core/probe-bus.js 的 ProbeBus（会先请别的页签让出探针）
    */
-  async connect(opts = {}){
-    const { mock = false, clockKhz = DEFAULT_CLOCK_KHZ, all = false, bus = null, stopBridge = true, forcePick = false } = opts;
-    if (this.probe) throw new Error('已经连接了（先断开）');
-    this.backendName = mock ? '模拟目标' : 'WebUSB';
+  async connect({ mock = false, cfg, device } = {}){
+    if (this.probe) throw Error('已经连接了（先断开）');
+    this.backendName = mock ? '模拟目标' : 'OpenOCD Wasm';
     if (mock){
       const { MockTarget } = await import('./mock.js');
       this.probe = new MockTarget();
       await this.probe.connect();
+    } else {
+      if (!device || !cfg) throw Error('请先选择探针和 Cortex-M 目标配置');
+      this.probe = new OpenOcdProbe(device, cfg, line => this._log(line, 'dim'));
+    }
+    try {
+      if (!mock) await this.probe.connect();
       this.name = this.probe.name;
       this.idcode = this.probe.idcode >>> 0;
-    } else {
-      /**
-       * ① 先请别的页签让出探针。WebUSB 一个接口同时只能被一个连接认领，
-       *    别的页签还占着时这里只会拿到 `Unable to claim interface`（reset 也救不回来）。
-       */
-      if (bus?.supported){
-        const r = await bus.requestRelease({ why: '调试页要占用探针' });
-        if (r.asked) this._log(`跨页签协调：请 ${r.asked} 个其他页签让出探针，${r.acked} 个确认（等了 ${r.ms} ms）`, 'dim');
-      }
-      /**
-       * ② 停掉本页「RTT 转发」的探针桥：它在**探针侧**轮询目标内存（约 1 kHz），
-       *    与这里的寄存器/内存访问抢同一条 SWD —— 不停的话单步一次要等好几秒。
-       */
-      if (stopBridge){
-        const fw = globalThis.__tools?.hid;
-        if (fw?.last?.running){
-          try { await fw.stop(); this._log('已停掉「RTT 转发」的探针桥（它一直在轮询目标内存，会跟调试抢探针）', 'warn'); }
-          catch (e){ this._log('停 RTT 转发失败（继续）：' + (e?.message || e), 'warn'); }
-        }
-      }
-      /** ③ 清掉本页签可能残留的僵尸连接（接口认领挂在连接上，丢引用不 close 会挡住重新认领） */
-      try { const n = await closeProbeUsbDevices(); if (n) this._log(`关掉 ${n} 个残留的探针句柄`, 'dim'); } catch {}
-
-      const openOnce = () => withTimeout(WebUsbDapProbe.open(this._auth[0], { clockKhz }), 20000, '连接探针');
-      // 已经授权过的探针不用再弹选择框（也能让自动化跑起来）
-      let auth = [];
-      if (!forcePick){
-        try { auth = await withTimeout(WebUsbDapProbe.authorized(), 5000, '枚举已授权探针'); }
-        catch (e){ throw new Error(`${e.message} —— 浏览器 USB 服务可能被上一次中断的会话卡住了：刷新页面（或拔插一次探针）再试`); }
-      }
-      if (!auth.length){
-        this.probe = await withTimeout(WebUsbDapProbe.request(all, { clockKhz }), 60000, '等你在浏览器里选探针');
-      } else {
-        this._auth = auth;
-        try { this.probe = await openOnce(); }
-        catch (e1){
-          // 刚被别的会话用过的探针第一次常常连不上（接口还没释放干净）：等 1.2 s 再试一次
-          this._log(`第一次连接失败（${e1.message}）—— 等 1.2 s 重试一次…`, 'warn');
-          await sleep(1200);
-          try { await closeProbeUsbDevices(); } catch {}
-          this.probe = await openOnce();
-        }
-      }
-      this.probe.onLog = s => this._log('   [usb] ' + s, 'dim');
-      this.probe.fast = false;             // 严格档：调试动作全都要回读确认
-      this.name = this.probe.name || 'CMSIS-DAP';
-      if(this.probe.device?.nativeService)this.backendName='本地探针服务';
-      this.idcode = this.probe.idcode >>> 0;
-      this.clockHz = this.probe.clockHz || clockKhz * 1000;
+      this.clockHz = this.probe.clockHz || DEFAULT_CLOCK_KHZ * 1000;
+      this._cStepWorks = null;
+      await this.refresh();
+      if (!mock && !cfg.raw) await this.verifyClock();
+      await this.bpInit();
+      this._log(`已连接：${this.name} · ${this.clockHz / 1000} kHz 请求 · IDCODE ${hex32(this.idcode)}`, 'ok');
+      return this;
+    } catch (error){
+      try { await this.disconnect(); }
+      catch (cleanup){ throw new AggregateError([error, cleanup], `${error.message}；探针清理失败：${cleanup.message}`); }
+      throw error;
     }
-    this._log(`已连接：${this.name}　SWD ${(this.clockHz / 1000).toFixed(0)} kHz　IDCODE=0x${this.idcode.toString(16).toUpperCase()}`, 'ok');
-    this._cStepWorks = null;               // 新的一次连接：C_STEP 支不支持重新探（粘性结论只在本会话内有效）
-    await this.refresh();
-    if (!mock) await this.verifyClock();
-    await this.bpInit();
-    return this;
   }
 
   /**
@@ -226,7 +186,7 @@ export class DebugSession {
       try { seen.push((await this.probe._readWord(DHCSR)) >>> 0); }
       catch { seen.push(0xdeadbeef); }
     }
-    const bad = seen.some(v => v === 0 || v === 0xffffffff || v === 0xdeadbeef) || new Set(seen).size > 1;
+    const bad = seen.some(v => v === 0 || v === 0xffffffff || v === 0xdeadbeef) || new Set(seen.map(v => v & 0x2f)).size > 1; // Compare C_* bits only.
     if (!bad) return { ok: true, hz: this.clockHz, checked: true, seen };
     const was = this.clockHz;
     await this.probe.setClock(PPB_SAFE_HZ);
@@ -244,11 +204,23 @@ export class DebugSession {
       await this.dwt.clear();
     }
     // Retain the backend and ownership until hardware cleanup and USB close succeed.
+    if (p instanceof OpenOcdProbe && (this.bps.length || this._fpbUnconfirmed)){
+      if (!await p.isHalted()){
+        this._resumeAfterFpbCleanup = true;
+        await p.halt();
+      }
+      await this.bpClear();
+    }
+    if (this._resumeAfterFpbCleanup){
+      await p.run();
+      this._resumeAfterFpbCleanup = false;
+    }
     if (p?.disconnect) await p.disconnect();
     this.dwt = new DwtWatchpoints(this);
     this.probe = null;
     this.halted = false; this.regs = []; this._prev = null;
     this.bps = [];
+    this.bpNotes.clear();
     this._cStepWorks = null;              // 换了目标/重连之后重新探一次 C_STEP
     if (p) this._log('已断开探针', 'dim');
   }
@@ -284,6 +256,7 @@ export class DebugSession {
   }
 
   async run(){
+    if (this._fpbUnconfirmed) throw Error('FPB 状态未确认，请先重新配置或清除断点');
     this.clearFrames();
     await this._clearDfsr();
     await this.probe.run();
@@ -387,16 +360,32 @@ export class DebugSession {
     if (hit === undefined) return await fn();
     const a = align2(addr);
     const saved = this.bps.slice();
-    this.bps = saved.filter(b => align2(b) !== a);
-    await this._programBps();
+    const savedNotes = new Map(this.bpNotes);
+    const temporary = saved.filter(b => align2(b) !== a);
+    await this._programFpb(temporary);
+    this.bps = temporary;
+    let stepError;
     try { return await fn(); }
-    finally { this.bps = saved; await this._programBps(); }
+    catch (error){ stepError = error; throw error; }
+    finally {
+      try { await this._programFpb(saved); }
+      catch (cleanup){
+        if (!stepError) throw cleanup;
+        this._log('恢复断点失败：' + cleanup.message, 'err');
+      }
+      finally {
+        // These breakpoints still belong to the session if restoration fails.
+        this.bps = saved;
+        this.bpNotes = savedNotes;
+      }
+    }
   }
 
   /** 指令单步：先在暂停状态设置中断掩码，再清 C_HALT 触发 C_STEP。
    * 正确握手仍失败时保留断点兜底；不能把未释放暂停误报成探针不支持。
    */
   async step(){
+    if (this._fpbUnconfirmed) throw Error('FPB 状态未确认，请先重新配置或清除断点');
     this.clearFrames();
     if (!this.halted) throw new Error('目标在运行 —— 先「暂停」再单步');
     const pc = align2(await this.readReg('PC'));
@@ -407,6 +396,14 @@ export class DebugSession {
      */
     this.lastStepOk = null;
     await this._withBpCleared(pc, async () => {
+      if (this.probe instanceof OpenOcdProbe){
+        // OpenOCD's automatic ISR mode would use a workbench-owned FPB slot.
+        await this.probe.command('cortex_m maskisr steponly; step');
+        this.lastStepMode = 'openocd';
+        this.lastStepOk = await this.probe.isHalted();
+        if (!this.lastStepOk) throw Error('OpenOCD 单步后未确认停机');
+        return;
+      }
       // 不重复探测本会话已确认失败的握手；重连会重置此状态。
       if (this._cStepWorks !== false){
         if (await this._stepByDhcsr(pc)){ this._cStepWorks = true; this.lastStepMode = 'dhcsr'; this.lastStepOk = true; return; }
@@ -851,6 +848,11 @@ export class DebugSession {
    *    复位完必须把这一位清掉，否则接下来"复位并运行"也会被咬住停在向量上。
    */
   async _resetCore(){
+    if (this.probe instanceof OpenOcdProbe){
+      await this.probe.reset(true);
+      await this._programBps();
+      return;
+    }
     const demcr0 = await this._readDemcr();
     if (demcr0 != null) await this._writeDemcr(demcr0 | VC_CORERESET);   // ① 开向量捕获
     await this.probe._dhcsr(DBGKEY | C_DEBUGEN | C_HALT);               // ② 再请求停住（双保险）
@@ -924,9 +926,13 @@ export class DebugSession {
   /** 读回全部寄存器（21 次 PPB 往返，1 MHz 下几十毫秒），并标出与上次相比变了的 */
   async refreshRegs(){
     if (!this.probe) return [];
+    if (this.probe instanceof OpenOcdProbe && !this.halted) return this.regs;
+    const batch = this.probe instanceof OpenOcdProbe
+      ? await this.probe.armRegisters(CORE_REGS.map(reg => reg.name.toLowerCase()))
+      : null;
     const list = [];
     for (const r of CORE_REGS){
-      const v = await this.readReg(r.name);
+      const v = batch ? batch.get(r.name.toLowerCase()) : await this.readReg(r.name);
       list.push({ name: r.name, value: v >>> 0, note: r.note, kind: 'core' });
     }
     const cfbp = await this._readCfbp();
@@ -972,6 +978,7 @@ export class DebugSession {
    * 指向了只写的寄存器。链路本身在探针层会自动修（见 dap-webusb 的 `_healIfFaulted`）。
    */
   async memRead(addr, len){
+    if (this.probe instanceof OpenOcdProbe) return this.probe.readMem(addr, len);
     if (!len) return new Uint8Array(0);
     const a = addr >>> 0;
     const budget = Math.max(3000, Math.ceil(len / 32) * 200);
@@ -985,6 +992,7 @@ export class DebugSession {
 
   async memWrite(addr, bytes){
     this.clearFrames();
+    if (this.probe instanceof OpenOcdProbe) return this.probe.writeMem(addr, bytes);
     const a = addr >>> 0;
     const budget = Math.max(3000, Math.ceil(bytes.length / 32) * 200);
     try {
@@ -1039,27 +1047,29 @@ export class DebugSession {
     const dup = this.bps.findIndex(b => align2(b) === addr);
     if (dup >= 0) return { index: dup, warn: '这个地址上已经有断点了' };
     if (this.bps.length >= this.caps.numCode) throw new Error(`硬件断点已用完（上限 ${this.caps.numCode} 个）—— 先删掉一个`);
-    this.bps.push(addr);
+    const next = [...this.bps, addr];
+    await this._programFpb(next);
+    this.bps = next;
     if (note) this.bpNotes.set(addr, note);
-    await this._programFpb();
     return { index: this.bps.length - 1 };
   }
 
   async bpDel(addr){
     addr = align2(addr);
     const n = this.bps.length;
-    this.bps = this.bps.filter(b => align2(b) !== addr);
-    if (this.bps.length === n) return false;
+    const next = this.bps.filter(b => align2(b) !== addr);
+    if (next.length === n) return false;
+    await this._programFpb(next);
+    this.bps = next;
     this.bpNotes.delete(addr);
-    await this._programFpb();
     return true;
   }
 
   async bpClear(){
     const n = this.bps.length;
+    await this._programFpb([]);
     this.bps = [];
     this.bpNotes.clear();
-    await this._programFpb();
     return n;
   }
 
@@ -1079,21 +1089,64 @@ export class DebugSession {
     return ((v >>> 17) & 1) === 1;
   }
 
-  /** 把断点表写进比较器（每次都整体重排：第 i 个断点 = 第 i 号比较器，顺序稳定好排查） */
-  async _programFpb(){
-    const { slots, overflow, bad } = planComparators(this.bps, this.caps.numCode, this.caps.rev);
-    if (overflow.length) this._log(`⚠ ${overflow.length} 个断点装不下（比较器只有 ${this.caps.numCode} 个）`, 'err');
-    if (bad.length) this._log(`⚠ ${bad.length} 个断点地址超出 FPB rev${this.caps.rev} 的匹配范围`, 'err');
+  async _syncOpenOcdBreakpoints(breakpoints){
+    const desired = new Set(breakpoints);
+    const owned = this._openOcdOwnedBreakpoints ??= new Set();
+    // Retain every attempted address until the backend confirms its removal.
+    for (const addr of desired) owned.add(addr);
+    const installed = async () => {
+      const output = await this.probe.command('capture {bp}');
+      return new Set(Array.from(output.matchAll(/Hardware breakpoint\(IVA\): addr=(0x[\da-f]+)/gi),
+        ([,address]) => Number(address)));
+    };
+    const before = await installed();
+    for (const addr of before){
+      if (owned.has(addr) && !desired.has(addr)) await this.probe.command('rbp ' + addr);
+    }
+    for (const addr of desired){
+      if (!before.has(addr)) await this.probe.command('bp ' + addr + ' 2 hw');
+    }
+    const after = await installed();
+    if ([...desired].some(addr => !after.has(addr)) ||
+        [...owned].some(addr => !desired.has(addr) && after.has(addr)))
+      throw Error('OpenOCD 硬件断点列表未确认');
+    const expected = planComparators(breakpoints, this.caps.numCode, this.caps.rev).slots
+      .filter(value => value & 1).sort((a,b) => a-b);
+    const actual = [];
+    for (let i = 0; i < this.caps.numCode; i++){
+      const value = (await this.probe._readWord(compAddr(i))) >>> 0;
+      if (value & 1) actual.push(value);
+    }
+    actual.sort((a,b) => a-b);
+    if (actual.length !== expected.length || actual.some((value,i) => value !== expected[i]))
+      throw Error('FPB 比较器与 OpenOCD 硬件断点不一致');
+    if (expected.length && !((await this.probe._readWord(FPB.CTRL)) & 1))
+      throw Error('FPB 使能状态未确认');
+    this._openOcdOwnedBreakpoints = desired;
+  }
+
+  /** OpenOCD 管理真实比较器槽位；其他后端按本地列表写入并回读。 */
+  async _programFpb(breakpoints = this.bps){
+    const { slots, overflow, bad } = planComparators(breakpoints, this.caps.numCode, this.caps.rev);
+    if (overflow.length || bad.length) throw Error('断点列表超出 FPB 比较器数量或地址范围');
+    this._fpbUnconfirmed = true;
+    if (this.probe instanceof OpenOcdProbe){
+      await this._syncOpenOcdBreakpoints(breakpoints);
+      this._fpbUnconfirmed = false;
+      return;
+    }
     for (let i = 0; i < slots.length; i++){
       await this.probe.writeMem(compAddr(i), u32leBytes(slots[i] || 0));
     }
-    const enable = this.bps.length && this.caps.numCode ? 1 : 0;
+    const enable = breakpoints.length && this.caps.numCode ? 1 : 0;
     await this.probe.writeMem(FPB.CTRL, u32leBytes(FP_CTRL_KEY | enable));
     // 回读对账：这颗探针的 PPB 写偶发不落地，断点静默失效最难查
     for (let i = 0; i < slots.length; i++){
       const want = slots[i] || 0;
       const got = (await this.probe._readWord(compAddr(i))) >>> 0;
-      if (got !== want) this._log(`⚠ 比较器 ${i} 回读 0x${got.toString(16)} ≠ 写入 0x${want.toString(16)}（断点可能不生效）`, 'warn');
+      if (got !== want) throw new Error(`⚠ 比较器 ${i} 回读 0x${got.toString(16)} ≠ 写入 0x${want.toString(16)}（断点状态未确认）`);
     }
+    if (((await this.probe._readWord(FPB.CTRL)) & 1) !== enable) throw new Error('FPB 使能状态回读不一致');
+    this._fpbUnconfirmed = false;
   }
 }

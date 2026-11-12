@@ -29,6 +29,13 @@ import * as P from './protocol.js';
 import { SampleStore, Trigger, TRIG, TRIG_NAME, findTrigger, windowFor } from './store.js';
 import { ScopeRenderer, legendRows, fmtTime, fmtVal, fmtHz } from './render.js';
 import { VendorEpTransport, MockTransport } from './transport.js';
+import { OpenOcdEtmProbe } from '../core/openocd-etm.js';
+import { OpenOcdProbe } from '../core/openocd-probe.js';
+import { makeOpenOcdProfile } from '../core/openocd-profile.js';
+import { selectOpenOcdDevice } from '../core/openocd-usb.js';
+import { hpmBoard } from '../targets/hpm/porting.js';
+import { selectedHpmBoard } from '../targets/hpm/select.js';
+import { WASM_POLL_MIN_US, WasmScopePoll } from './wasm-poll.js';
 import { MockScopeProbe } from './mock.js';
 import { bytes as fmtBytes, fileStamp, download } from '../core/format.js';
 
@@ -36,6 +43,7 @@ import { bytes as fmtBytes, fileStamp, download } from '../core/format.js';
 const CLOCKS = [[0, '自动'], [1000, '1 MHz'], [5000, '5 MHz'], [10000, '10 MHz'], [20000, '20 MHz'],
                 [30000, '30 MHz'], [40000, '40 MHz'], [45000, '45 MHz'], [50000, '50 MHz'], [60000, '60 MHz']];
 
+const SAMPLE_BUFFER_LIMIT = 128 * 1024 * 1024;
 const MAX_VARS = 8;
 const sleep = waitMs;
 
@@ -119,6 +127,10 @@ export class ScopeView {
     $('sc-connect').addEventListener('click', () => this.connectHid(true));
     $('sc-disconnect')?.addEventListener('click', () => this.disconnect());
     $('sc-usb').addEventListener('click', () => this.connectUsb(true));
+    if ($('sc-sampling-path')){
+      store.bind($('sc-sampling-path'), 'scope.samplingPath');
+      $('sc-sampling-path').addEventListener('change', () => this._applyBackendUi());
+    }
     $('sc-mock').addEventListener('change', e => this.setMock(e.target.checked));
     $('sc-elf').addEventListener('click', () => this.elfInput.click());
     $('sc-varclear').addEventListener('click', () => { this.selected = []; this.renderVars(); this.updatePlan(); });
@@ -142,8 +154,9 @@ export class ScopeView {
     store.bind($('sc-target'), 'rtt.target');       // 这一页改 = 改同一个全局开关，落回同一个键
     $('sc-bench').addEventListener('click', () => this.bench());
     $('sc-recc').addEventListener('click', () => this.applyRecPeriod());
-    for (const id of ['sc-period', 'sc-clock', 'sc-batch', 'sc-cdcoff'])
-      $(id).addEventListener(id === 'sc-period' ? 'input' : 'change', () => this.updatePlan());
+    $('sc-period').addEventListener('input', () => this._applyBackendUi());
+    for (const id of ['sc-clock', 'sc-batch', 'sc-cdcoff'])
+      $(id).addEventListener('change', () => this.updatePlan());
     $('sc-clear').addEventListener('click', () => this.clear());
     $('sc-fit').addEventListener('click', () => { this.renderer.fitAll(); this.follow = true; this._needDraw = true; });
     $('sc-zin').addEventListener('click', () => { this.renderer.zoomBy(1.6, 0.5); this._needDraw = true; });
@@ -516,7 +529,7 @@ export class ScopeView {
       $('sc-usbinfo').textContent = '未连接数据端点（假探针模式不需要）';
       this.setStatusText('已切回真机模式：先连探针，再连数据端点', '');
     }
-    this.syncButtons();
+    this._applyBackendUi();
   }
 
   // ================================================================= ELF / 变量
@@ -636,9 +649,36 @@ export class ScopeView {
   }
 
   updatePlan(){
-    const vars = this.selected.length ? this.selected : this.mockVars();
-    const plan = P.planReads(vars, { fastWordUs: this.fastWordUs(), swdMhz: this.planClockMhz() });
+    const wasm = this.usesWasmPolling();
+    const vars = this.selected.length ? this.selected : wasm ? [] : this.mockVars();
+    const plan = P.planReads(vars, wasm ? { maxGapBytes:0 } : { fastWordUs:this.fastWordUs(), swdMhz:this.planClockMhz() });
     this.plan = plan;
+    if (wasm){
+      const text = 'WASM 主机轮询：每次按计划读内存，按主机时间戳记录样本和错拍。';
+      const hint = $('sc-rate-advice');
+      if (hint){ setStatus(hint, text); hint.title = text; }
+      const detail = $('sc-rate-detail');
+      if (detail) detail.textContent = `周期低于 ${WASM_POLL_MIN_US} µs 时，自动模式切换到探针硬件采样。`;
+      $('sc-plan').textContent = vars.length ? '读取 ' + plan.spans.length + ' 个连续内存范围，每帧 ' + plan.frameBytes + ' B' : '请选择要轮询的变量';
+    } else {
+      this._showHardwarePlan(vars, plan);
+    }
+    this.syncButtons();
+    // 触发通道下拉跟着变量走
+    const sel = $('sc-trig-ch');
+    const want = (this._qualityReplay && this.store ? this.store.vars : vars).map((v, i) => `${i}: ${v.name}`);
+    if (sel.options.length !== want.length || [...sel.options].some((o, i) => o.value !== String(i) || o.textContent !== want[i])){
+      sel.innerHTML = '';
+      want.forEach((n, i) => {
+        const o = document.createElement('option');
+        o.value = String(i); o.textContent = n;
+        sel.appendChild(o);
+      });
+    }
+    return plan;
+  }
+
+  _showHardwarePlan(vars, plan){
     const khz = Math.round(plan.estHz / 1000);
     /**
      * 计划行的主数字用 `bestUs`：单字 span 走固件的**流水快路径**时它是实测的 1.55 µs，
@@ -710,18 +750,6 @@ export class ScopeView {
           ? `（JTAG 单字历史读取耗时 ${rv.single} µs；周期比读取耗时短会跳拍）`
           : '（周期下限 2 µs；周期 < 读一次的耗时就会跳拍丢样本）'))
       : '选好变量后会显示读计划与预计上限';
-    // 触发通道下拉跟着变量走
-    const sel = $('sc-trig-ch');
-    const want = vars.map(v => v.name);
-    if (sel.options.length !== want.length || [...sel.options].some((o, i) => o.value !== String(i) || o.textContent !== want[i])){
-      sel.innerHTML = '';
-      want.forEach((n, i) => {
-        const o = document.createElement('option');
-        o.value = String(i); o.textContent = `${i}: ${n}`;
-        sel.appendChild(o);
-      });
-    }
-    return plan;
   }
 
   /** 假探针内置的 8 个通道（没载 ELF 时给界面用）*/
@@ -745,6 +773,11 @@ export class ScopeView {
   seconds(){ return Math.max(0.5, Number($('sc-seconds').value) || 20); }
 
   // ================================================================= 采样
+  usesWasmPolling(){
+    return !this.usingMock && $('sc-sampling-path')?.value !== 'probe' &&
+      Number($('sc-period')?.value) >= WASM_POLL_MIN_US;
+  }
+
   async start(){
     if (this.running || this._startPromise || this._stopPromise || this._releasing) return;
     if (!this.selected.length && (!this.usingMock || !this.mockVars().length)){
@@ -753,12 +786,13 @@ export class ScopeView {
     const g = this._captureGen = (this._captureGen || 0) + 1;
     this._starting = true;
     this._startTouched = false;
-    this._captureCdcOff = !!$('sc-cdcoff')?.checked;
+    const wasmPoll = this.usesWasmPolling();
+    this._captureCdcOff = !wasmPoll && !!$('sc-cdcoff')?.checked;
     this.syncButtons();
-    this._startPromise = runProbeOperation(this, 'scope', () => this._startOnce(g), {
+    this._startPromise = runProbeOperation(this, 'scope', () => this._startOnce(g, wasmPoll), {
       mock: this.usingMock, reason: 'J-Scope 要开始采样',
       resources: this._captureCdcOff ? ['cdc-port','cdc-mode'] : [],
-      rejectResources: ['cdc-port'],
+      rejectResources: wasmPoll ? [] : ['cdc-port'],
       conflictMessage: 'CDC 串口正在使用：请先关闭串口，或取消 JScope 的暂停 CDC 选项',
     });
     try { return await this._startPromise; }
@@ -766,8 +800,9 @@ export class ScopeView {
     finally {
       if (g === this._captureGen && !this.running){
         this._capturing = false; this._stopWatchdog();
-        if (this._startTouched || this.transport?.running){
-          try { await this._stopData(); } catch (e) { this.setStatusText('采样收尾失败：' + e.message, 'err'); }
+        if (this.wasmPoll || this._startTouched || this.transport?.running){
+          try { if (this.wasmPoll) await this._closeWasmPoll(); else await this._stopData(); }
+          catch (e) { this.setStatusText('采样收尾失败：' + e.message, 'err'); }
         }
       }
       if (!this._cdcPausedRequested) this.probeManager?.narrow('scope');
@@ -828,7 +863,87 @@ export class ScopeView {
     this.probeManager?.narrow('scope');
   }
 
-  async _startOnce(g){
+  _initCaptureBuffer(vars, periodUs, capacity, exactTime = false){
+    this._qualityReplay = false;
+    this.plan = this.updatePlan();
+    this.defVars = null;
+    this._periodUs = periodUs;
+    this._capacity = capacity;
+    this.store = new SampleStore(vars, capacity, { exactTime });
+    this.renderer.setStore(this.store);
+    this.renderer.setTrigger(null);
+    this.renderer.clearMarks();     // 新的一轮 = 新的样本编号，旧游标位置没意义
+    this.renderer.cursor = null;
+    this._lastPktT = null; this._lastPktN = 0;    // 包内间隔估计也要重新起头（见 DATA 分支）
+    this.stream = new P.PacketStream();
+    this.seqT = new P.SeqTracker();
+    this.timeU = new P.TimeUnwrap();
+    this._awaitDef = true;          // 起跑线：丢掉上一轮的残留包，等新一轮的 DEF
+    this.stalePackets = 0;
+    this.trigger = new Trigger();
+    this.applyTrigger(true);
+    this.packets = 0; this.lost = 0; this.decodeErr = 0; this.probeDropped = 0; this.raw = [];
+    this.receivedSamples=0;this.tailCountDelta=null;
+    this.usbDrop = 0; this.probeYield = 0; this.readErrors = 0; this.probeMetrics = null; this.metricsError = null;
+    this._metricsAt = 0; this._statAt = 0; this._qualityCounterRolled = false; this.periodActualUs = 0;
+    this._qualityStat = null;
+    this.qualityHistory?.reset();
+    this.rawBytes = 0;
+  }
+
+  async _startWasmPoll(g, vars){
+    this.sampleSource = 'openocd-wasm';
+    if (this.transport){
+      await this.transport.close();
+      this.transport = null;
+      $('sc-usbinfo').textContent = 'WASM 轮询使用目标内存通道';
+    }
+    if (this.hid){
+      await this.hid.close();
+      this.hid = null;
+    }
+    if (!this._captureAlive(g)) return;
+    const device = await selectOpenOcdDevice();
+    if (!this._captureAlive(g)) return;
+    const port = this.targetRiscv ? hpmBoard(selectedHpmBoard()) : null;
+    const clockKhz = webClockKhz($('sc-clock').value, port?.id || 'arm', 10000);
+    const probe = this.targetRiscv
+      ? new OpenOcdProbe(device, makeOpenOcdProfile({ arch:'riscv', port, clockKhz }), undefined, true)
+      : new OpenOcdEtmProbe(device, makeOpenOcdProfile({ memoryAp:true, clockKhz }));
+    const periodUs = this.periodUs();
+    const poll = this.wasmPoll = new WasmScopePoll(probe, vars, periodUs);
+    await probe.connect();
+    if (!this._captureAlive(g)) return;
+    this.hostPollSkipped = 0;
+    this._stopAfterUs = Math.round(this.seconds() * 1e6);
+    this._stopReason = null;
+    this._captureFlags = P.HOST_POLL;
+    this.swdMhz = null;
+    this._initCaptureBuffer(vars, periodUs, Math.min(1_000_000, Math.ceil(this._stopAfterUs / periodUs) + 64), true);
+    this._qualityConfig = { ELF:this.elf || '未加载', 采样:'OpenOCD Wasm 主机轮询', 请求周期_us:periodUs, 请求时钟_kHz:clockKhz };
+    this.running = this._capturing = this.follow = true;
+    this.setStatusText(`WASM 轮询中：${vars.length} 通道，请求周期 ${fmtTime(periodUs)}`, 'ok');
+    poll.start(chunk => {
+      if (!this._captureAlive(g)) return;
+      this.hostPollSkipped = poll.skipped;
+      this.onChunk(chunk);
+    }, error => {
+      if (!this._captureAlive(g)) return;
+      this.readErrors++;
+      this._onDataPlaneDead(error);
+    });
+    return true;
+  }
+
+  async _closeWasmPoll(releaseOwner = true){
+    try { await this.wasmPoll.close(); }
+    catch (error){ this.probeManager?.fail('scope', error); throw error; }
+    this.wasmPoll = null;
+    this.probeManager?.confirm('scope');
+    if (releaseOwner) this.probeManager?.forget('scope');
+  }
+
+  async _startOnce(g, wasmPoll = false){
     if (!P.samplingRateAdvice(Number($('sc-period').value), 0).valid){
       this.setStatusText('采样周期必须是大于 0 的有限数值；请修改后再开始', 'err');
       this.updatePlan();
@@ -849,6 +964,10 @@ export class ScopeView {
       catch (e) { this.setStatusText(e.message, 'err'); return; }
       if (!this._captureAlive(g)) return;
     }
+    if (this.wasmPoll) await this._closeWasmPoll(false);
+    if (wasmPoll) return this._startWasmPoll(g, vars);
+    this.sampleSource = this.usingMock ? 'mock' : 'probe-hss';
+    this.hostPollSkipped = 0;
     /**
      * 🚨 **没连上就自动连一次，别甩一句"探针没连上"**（2026-10 用户现场）：
      *    烧录页/RTT 页的探针会话**不会带给波形页**（每页各连各的），而且烧录会重设 USB 端口，
@@ -883,59 +1002,26 @@ export class ScopeView {
      * 1.1 的余量够用：探针的周期是下限，实得速率不会超过名义速率；
      * 真超了也还有"缓冲满就停"兜底。老代码用 1.25 还指望它凑时长，白占 25% 内存。
      */
-    let capacity = Math.ceil(nominalHz * this.seconds() * 1.1) + 64;
+    const requested = Math.ceil(nominalHz * this.seconds() * 1.1) + 64;
+    const capacity = SampleStore.fitCapacity(vars, requested, SAMPLE_BUFFER_LIMIT);
     this._stopAfterUs = Math.round(this.seconds() * 1e6);
     this._stopReason = null;
-    /**
-     * 🚨 内存闸：周期可以设到 2 µs、时长可以设到几百秒，两者一乘就是几千万样本 ——
-     *    8 通道 × 2 B × 1200 万 = 两百多 MB，标签页会卡死甚至崩。
-     *    这里按"每样本字节数 × 通道数 × 1.35（LOD 开销）"估一下，超了就把容量砍到 256 MB 以内
-     *    并**明说**砍了多少（宁可少存点，也不能让页面挂掉还不知道为什么）。
-     */
-    const bytesPerFrame = vars.reduce((s, v) => s + (P.SCALARS[v.scalar]?.size || 4), 0);
+    // Raw USB retention is accounted for separately from typed samples.
+    const bytesPerFrame = vars.reduce((sum, v) => sum + (P.SCALARS[v.scalar]?.size || 4), 0);
     this._frameBytes = bytesPerFrame;
-    const LIMIT = 128 * 1024 * 1024;
-    let capNote = '';
-    const est = cap => cap * bytesPerFrame * 1.35 + vars.length * 8192;
-    if (est(capacity) > LIMIT){
-      const capped = Math.max(1024, Math.floor((LIMIT - vars.length * 8192) / (bytesPerFrame * 1.35)));
-      capNote = `　⚠️ 缓冲按内存上限（128 MB）从 ${capacity} 收到 ${capped} 个样本` +
-        `（${((capped / nominalHz)).toFixed(2)} s @${(nominalHz / 1000).toFixed(1)} kHz）`;
-      capacity = capped;
-    }
+    const capNote = capacity / nominalHz < this._stopAfterUs / 1e6
+      ? `　⚠️ 128 MiB 样本缓冲最多存 ${capacity} 组（${(capacity / nominalHz).toFixed(2)} s）`
+      : '';
     // DATA traffic includes the packet header and unused payload tail. There is
     // no fixed 1.75 MB/s ceiling; sustained throughput is measured separately.
     const wireBps = P.PACKET / Math.floor(P.PAYLOAD / bytesPerFrame) * nominalHz;
     const wireNote = `　预计 DATA 流量 ${(wireBps / 1048576).toFixed(2)} MB/s（另有状态包）；稳定上限以实采跳拍/USB 计数为准`;
-    this.plan = this.updatePlan();
-    this.defVars = null;
-    this._periodUs = periodUs;
-    this._capacity = capacity;
-    this.store = new SampleStore(vars, capacity);
-    this.renderer.setStore(this.store);
-    this.renderer.setTrigger(null);
-    this.renderer.clearMarks();     // 新的一轮 = 新的样本编号，旧游标位置没意义
-    this.renderer.cursor = null;
-    this._lastPktT = null; this._lastPktN = 0;    // 包内间隔估计也要重新起头（见 DATA 分支）
-    this.stream = new P.PacketStream();
-    this.seqT = new P.SeqTracker();
-    this.timeU = new P.TimeUnwrap();
-    this._awaitDef = true;          // 起跑线：丢掉上一轮的残留包，等新一轮的 DEF
-    this.stalePackets = 0;
-    this.trigger = new Trigger();
-    this.applyTrigger(true);
-    this.packets = 0; this.lost = 0; this.decodeErr = 0; this.probeDropped = 0; this.raw = [];
-    this.receivedSamples=0;this.tailCountDelta=null;
-    this.usbDrop = 0; this.probeYield = 0; this.readErrors = 0; this.probeMetrics = null; this.metricsError = null;
-    this._metricsAt = 0; this._statAt = 0; this._qualityCounterRolled = false; this.periodActualUs = 0;
-    this._qualityReplay = false; this._qualityStat = null;
-    this.qualityHistory?.reset();
+    this._initCaptureBuffer(vars, periodUs, capacity);
     this._qualityConfig = { ELF: this.elf || '未加载', 请求周期_us: periodUs, 请求时长_s: Number($('sc-seconds')?.value) || null,
       探针: this.usingMock ? '模拟探针' : this.hid?.label || '未知',
       探针固件: this.usingMock ? '模拟' : this._probeInfo?.fw || '未知',
       请求时钟_kHz: Number($('sc-clock').value) || '自动', 通道: vars.map(v => `${v.name}:${v.scalar}@0x${v.addr.toString(16)}`).join(', '),
       单字短批次: !!$('sc-batch')?.checked, 暂停串口桥: !!this._captureCdcOff };
-    this.rawBytes = 0;
 
     try {
       this.transport.configureReadAhead?.(wireBps);
@@ -1096,17 +1182,21 @@ export class ScopeView {
      * the manager failure as an active stop request instead of returning early.
      */
     const needsManagerConfirm = this.probeManager?.failures?.has('scope') === true;
-    if (!this.running && !this._starting && !this.transport?.running && !this._stopUnconfirmed && !needsManagerConfirm) return;
+    const host = this.sampleSource === 'openocd-wasm' || !!this.wasmPoll;
+    if (!this.running && !this._starting && !this.transport?.running && !this._stopUnconfirmed && !needsManagerConfirm && !this.wasmPoll) return;
     const hadData = this.running || this.transport?.running;
     this.running = false;
     if(this._drainGen==null)this._capturing = false;
     // 先给个即时反馈：后面两个 await（排空 + HID STOP）要几十毫秒，这期间界面上不该还写着"采样中"
     this.setStatusText('正在停止…', '');
     if (this._startPromise) await this._startPromise.catch(() => {});
-    if (this._stopUnconfirmed && !this.hid) throw new Error('采样停止尚未确认，请先重新连接探针，再点停止');
-    if (hadData || this._startTouched || this.transport?.running || this._stopUnconfirmed) await this._stopData();
+    if (this.wasmPoll) await this._closeWasmPoll();
+    else if (!host){
+      if (this._stopUnconfirmed && !this.hid) throw new Error('采样停止尚未确认，请先重新连接探针，再点停止');
+      if (hadData || this._startTouched || this.transport?.running || this._stopUnconfirmed) await this._stopData();
+      await this.readScopeMetrics({fresh: true}).catch(e => { this.metricsError = e.message; });
+    }
     this._capturing=false;this._drainGen=null;
-    await this.readScopeMetrics({fresh: true}).catch(e => { this.metricsError = e.message; });
     if(this.transport?.epAddr===0x87 && this.probeMetrics && !(this._captureFlags & P.SCOPE_FLAG.DISCARD)){
       this.tailCountDelta=(this.receivedSamples || 0)-this.probeMetrics.produced;
       if(this.tailCountDelta!==0)this.metricsError=`样本未完整接收：收到 ${this.receivedSamples || 0}，探针 ${this.probeMetrics.produced}`;
@@ -1118,8 +1208,9 @@ export class ScopeView {
     this.state = why ? `已停止（${why}）` : '已停止';
     this.setStatusText(`已停止${why ? `（${why}）` : ''}：${st?.count || 0} 个样本` +
       (spanUs ? ` / ${fmtTime(spanUs)}` : '') +
-      `，跳拍 ${this.probeDropped || 0} / USB 丢样本 ${this.usbDrop || 0} / 读错 ${this.readErrors || 0} / 包缺口 ${this.lost}`,
-      why === '缓冲已满' || this.lost || this.probeDropped || this.usbDrop || this.readErrors || this.metricsError ? 'warn' : 'ok');
+      (host ? `，主机错过 ${this.hostPollSkipped || 0} 拍 / 读错 ${this.readErrors || 0}`
+        : `，跳拍 ${this.probeDropped || 0} / USB 丢样本 ${this.usbDrop || 0} / 读错 ${this.readErrors || 0} / 包缺口 ${this.lost}`),
+      why === '缓冲已满' || this.lost || this.probeDropped || this.usbDrop || this.readErrors || this.hostPollSkipped || this.metricsError ? 'warn' : 'ok');
     if(this.metricsError)this.setStatusText(this.state+'；'+this.metricsError,'err');
     this.syncButtons();
     this._needDraw = true;
@@ -1204,29 +1295,28 @@ export class ScopeView {
   /** 后端相关的界面联动：显示、SWD 专属控件置灰、速率/建议周期提示。
    *  `uiBackend()` = 生效后端优先、还没回报就按你选的目标类型（见那个函数的注释）。 */
   _applyBackendUi(){
-    const cur = this.uiBackend();
-    const riscv = cur === P.BACKEND.RISCV;
+    const wasm = this.usesWasmPolling();
+    const riscv = wasm ? this.targetRiscv : this.uiBackend() === P.BACKEND.RISCV;
     const el = $('sc-backend');
     if (el){
       const asked = this.targetRiscv == null ? null : (this.targetRiscv ? P.BACKEND.RISCV : P.BACKEND.SWD);
       const mismatch = asked && this.backend && asked !== this.backend;
-      el.textContent = this.backend
+      el.textContent = wasm ? `采样通路：WASM 主机轮询 · ${P.backendName(riscv ? P.BACKEND.RISCV : P.BACKEND.SWD)}` : this.backend
         ? `生效后端：${P.backendName(this.backend)}` + (mismatch ? `　⚠ 你选的是 ${P.backendName(asked)}，探针换了一条路` : '')
         : (asked ? `生效后端：未开始（你选的是 ${P.backendName(asked)}，采样后由探针回报）` : '生效后端：未开始（采样后由探针回报）');
-      el.className = 'hint' + (mismatch ? ' err' : '');
+      el.className = 'hint' + (!wasm && mismatch ? ' err' : '');
     }
     // SWD 专属：SWD 时钟档在 JTAG 下无效（探针忽略），置灰并说明；采样时暂停串口桥那个 checkbox 仍有效
     const clk = $('sc-clock');
     if (clk){
       const native=riscv&&supportsRiscvStreamClock(this._probeInfo);
-      constrainClockSelect(clk,native?'hpm':'arm');
-      clk.disabled = riscv&&!native || !!(this.running || this._starting || this._stopPromise);
-      clk.title = native?'Zynq RISC-V JTAG TCK，HPM 最高 25 MHz':riscv
+      constrainClockSelect(clk,riscv&&(native||wasm)?'hpm':'arm');
+      clk.title = wasm?'OpenOCD Wasm 请求时钟':native?'Zynq RISC-V JTAG TCK，HPM 最高 25 MHz':riscv
         ? 'RISC-V/JTAG 下无意义：JTAG 时序由 DMI 汇编旋钮 + delay 决定，探针会忽略这个档位'
         : '与 RTT Viewer 同款档位；固件自带失败自动降档';
     }
     const clkRow = $('sc-clock-row');
-    if (clkRow) clkRow.classList.toggle('off', riscv&&!supportsRiscvStreamClock(this._probeInfo));
+    if (clkRow) clkRow.classList.toggle('off', riscv&&!wasm&&!supportsRiscvStreamClock(this._probeInfo));
     /**
      * 那一格的**名字**要跟着目标类型改（用户 2026-09-30）：同一个档位在 SWD 下是 SWD 时钟，
      * 在 RISC-V/JTAG 下是 **JTAG 时钟（TCK）** —— 名字不改的话，切到 JTAG 后用户会以为
@@ -1346,6 +1436,7 @@ export class ScopeView {
    *  顺带读固件回报的 **实际装载了哪个 blob** 与 `clock_delay` —— 没有这个数就分不出
    *  "时钟命令被忽略" 和 "生效了但没差别"（他们的 README 里就是被这个坑咬过）。*/
   async bench(){
+    if (this.usesWasmPolling()) return;
     if (this.probeManager && !this.usingMock && this.hid && !this.running && !this._starting && !this._stopPromise){
       try {
         return await runProbeOperation(this, 'scope', () => this._benchNow(), {
@@ -1423,15 +1514,17 @@ export class ScopeView {
 
   /** 把周期填成标定给出的建议值（没标定过就先标一次） */
   async applyRecPeriod(){
+    if (this.usesWasmPolling()) return;
     // 标定值过期（变量/时钟改过）就重新标一次 —— 别拿"上一次那两个变量"的数字往下走
     if (!this.recPeriodUs || !this.benchFresh()) await this.bench();
+    if (this.usesWasmPolling()) return;
     if (!this.benchFresh()){ this.setStatusText('标定未成功，建议周期未更改；请检查连接和变量地址后重新标定', 'warn'); return; }
     const us = this.benchUs;
     const rec = this.recPeriodUsFor(us);
     if (!rec){ this.setStatusText('先点「标定真实速率」', 'warn'); return; }
     this.recPeriodUs = rec;
     $('sc-period').value = String(rec);
-    this.updatePlan();
+    this._applyBackendUi();
     this.setStatusText(`周期已设为 ${rec} µs（≈${Math.round(1e3 / rec)} kHz）—— 依据：` +
       (this.benchFresh() ? `标定值 ${us.toFixed(3)} µs` : `单字快路径实测 ${us.toFixed(2)} µs`) +
       (this.uiBackend() === P.BACKEND.RISCV ? ' × 1.5 余量' : ' × 1.15 + 1 µs 余量') + '；这是起始建议，需实采验证跳拍和 USB 计数', 'ok');
@@ -1540,9 +1633,13 @@ export class ScopeView {
            *    硬解下去就是"通道与数据整体错位"的垃圾波形（实测踩过），
            *    宁可报错停在这儿 —— 数据错了比没数据更坏。
            */
-          const want = this.store?.vars.length || 0;
-          if (want && d.vars.length !== want){
-            this.defMismatch = `探针回报 ${d.vars.length} 个变量，本地缓冲是 ${want} 个 —— 解码已暂停（配置没生效？）`;
+          const expected = this.store?.vars;
+          const want = expected?.length || 0;
+          const mismatch = want && (d.vars.length !== want || d.vars.some((v, i) =>
+            v.addr !== expected[i].addr || v.size !== expected[i].size || v.scalar !== expected[i].scalar));
+          if (mismatch){
+            this.defMismatch = `DEF 变量定义与缓冲不一致（${d.vars.length} / ${want} 路），已停止解码`;
+            if (this._replaying) throw Error(this.defMismatch);
             this.setStatusText('⚠ ' + this.defMismatch, 'err');
           } else {
             this.defMismatch = null;
@@ -1746,9 +1843,33 @@ export class ScopeView {
       this.receivedSamples=0;this.tailCountDelta=null;this.probeMetrics=null;
       this._qualityReplay = true; this._qualityConfig = { 文件: file.name || '原始包回放' };
       this.qualityHistory?.reset(); this.qualityHistory?.note('replay','从文件回放，不引用当前探针计数');
-      const vars = [...(this.selected.length ? this.selected : this.mockVars())].sort((a, b) => a.addr - b.addr);
-      const periodUs = this.periodUs();
-      this.store = new SampleStore(vars, Math.ceil(buf.length / 16) + 1024);
+      const chunk = 64 * 1024;
+      const scan = new P.PacketStream();
+      let first, frameBytes = 0, capacity = 0;
+      for (let o = 0; o < buf.length; o += chunk){
+        for (const pkt of scan.push(buf.subarray(o, o + chunk))){
+          if (!first && pkt.kind === P.KIND.DEF){
+            first = P.parseDef(pkt.payload, pkt.version);
+            frameBytes = first.vars.reduce((total, v) => total + v.size, 0);
+          }
+          if (first && pkt.kind === P.KIND.DATA){
+            if (pkt.aux !== pkt.n * frameBytes) throw Error('DATA 样本长度与 DEF 定义不一致');
+            capacity += pkt.n;
+          }
+        }
+      }
+      if (!first) throw Error('文件缺少 DEF 变量定义');
+      if (!capacity || scan.buf.length || scan.junk) throw Error('文件无样本或包含损坏/不完整的包');
+      const host = !!(first.flags & P.HOST_POLL);
+      const vars = first.vars.map(v => ({...v,
+        name:this.selected.find(s => s.addr === v.addr && s.scalar === v.scalar && s.size === v.size)?.name
+          || '0x' + v.addr.toString(16),
+      }));
+      const maxSamples = SampleStore.fitCapacity(vars, capacity, SAMPLE_BUFFER_LIMIT, { exactTime:host });
+      if (maxSamples !== capacity) throw Error(`回放包含 ${capacity} 组样本，超过 128 MiB 样本缓冲上限（可存 ${maxSamples} 组）`);
+      this.sampleSource = host ? 'openocd-wasm' : 'replay';
+      this.hostPollSkipped = 0;
+      this.store = new SampleStore(vars, capacity, { exactTime:host });
       this.renderer.setStore(this.store);
       this.renderer.clearMarks();
       this.renderer.cursor = null;
@@ -1757,15 +1878,16 @@ export class ScopeView {
       this.seqT = new P.SeqTracker();
       this.timeU = new P.TimeUnwrap();
       this.packets = 0; this.lost = 0; this.defVars = null;
-      this._awaitDef = false; this.defMismatch = null; this.stalePackets = 0;
+      this._awaitDef = true; this._awaitDefSince = 0; this.defMismatch = null; this.stalePackets = 0;
       this.probeDropped = 0; this.usbDrop = 0; this.readErrors = 0; this.metricsError = null;
       this.trigger.reset();
       this.decodeErr = 0; this._qualityStat = null; this._statAt = 0; this._metricsAt = 0; this.probeMetrics = null;
-      const chunk = 64 * 1024;
       this._replaying = true;
       try {
         for (let o = 0; o < buf.length; o += chunk) this.onChunk(buf.subarray(o, o + chunk));
       } finally { this._replaying = false; }
+      if (this.defMismatch || this.decodeErr || this.store.count !== capacity)
+        throw Error(this.defMismatch || '文件样本数量或包顺序不一致');
       this.renderer.fitAll();
       this.setStatusText(`回放完成：${this.store.count} 个样本 / ${this.packets} 个包`, 'ok');
       this._needDraw = true;
@@ -1784,7 +1906,7 @@ export class ScopeView {
 
   syncButtons(){
     const pending = !!(this._hidConnectPromise || this._usbConnectPromise);
-    const connected = this.usingMock || !!this.hid || !!this.transport;
+    const connected = this.usingMock || !!this.hid || !!this.transport || !!this.wasmPoll;
     const recoverable = !!(this._stopUnconfirmed || this.probeManager?.failures?.has('scope'));
     const connect = $('sc-connect'); if (connect) connect.disabled = !!(this._releasing || this._hidConnectPromise || this.usingMock || this.hid?.connected);
     const disconnect = $('sc-disconnect'); if (disconnect) disconnect.disabled = !!(this._releasing || !(connected || pending || recoverable));
@@ -1792,9 +1914,18 @@ export class ScopeView {
     $('sc-start').disabled = !!(this.running || this._starting || this._stopPromise || this._releasing);
     $('sc-stop').disabled = !!this._stopPromise || (!this.running && !this._starting);
     const target = $('sc-target'); if (target) target.disabled = !!(this.running || this._starting || this._stopPromise || this._releasing);
-    for (const id of ['sc-period', 'sc-clock', 'sc-batch', 'sc-cdcoff', 'sc-bench', 'sc-recc']){
-      const el = $(id); if (el) el.disabled = !!(this.running || this._starting || this._stopPromise || this._releasing) || (id === 'sc-clock' && this.uiBackend() === P.BACKEND.RISCV&&!supportsRiscvStreamClock(this._probeInfo));
+    const busy = !!(this.running || this._starting || this._stopPromise || this._releasing);
+    const wasm = this.usesWasmPolling();
+    for (const id of ['sc-batch', 'sc-cdcoff', 'sc-bench', 'sc-recc']){
+      const el = $(id);
+      if (el) el.disabled = busy || wasm;
     }
+    for (const id of ['sc-period', 'sc-sampling-path']){
+      const el = $(id);
+      if (el) el.disabled = busy;
+    }
+    const clock = $('sc-clock');
+    if (clock) clock.disabled = busy || !wasm && this.uiBackend() === P.BACKEND.RISCV && !supportsRiscvStreamClock(this._probeInfo);
   }
 
   _loop(){
@@ -1900,6 +2031,8 @@ export class ScopeView {
       plan: this.plan ? { spans: this.plan.spans.length, frameBytes: this.plan.frameBytes,
                           estUs: +this.plan.estUs.toFixed(2), estHz: this.plan.estHz } : null,
       samples: st?.count || 0,
+      sampleSource: this.sampleSource || null,
+      hostPollSkipped: this.hostPollSkipped || 0,
       receivedSamples:this.receivedSamples || 0,
       tailCountDelta:this.tailCountDelta ?? null,
       capacity: st?.capacity || 0,

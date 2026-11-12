@@ -36,7 +36,7 @@ export const PROBE_FEATURES = Object.freeze([
     id: 'scope', label: 'J-Scope', client: t => t.scope, usbKind: 'scope',
     resources: ['target-engine', 'debug-pins', 'scope-stream'],
     active: t => !!(t.scope && !t.scope.usingMock &&
-      (t.scope.running || t.scope.transport || (t.scope.hid && t.scope.hid !== t.scope.mockProbe))),
+      (t.scope.running || t.scope.wasmPoll || t.scope.transport || (t.scope.hid && t.scope.hid !== t.scope.mockProbe))),
     release: (t, why) => t.scope.releaseProbe(why),
   },
   {

@@ -63,3 +63,10 @@ export async function waitMs(ms){
     while (performance.now() - t0 < ms) await hop();
   } finally { try { ch.port1.close(); } catch { /* 同上 */ } }
 }
+
+/** 给任意 promise 套超时（超时只是放弃等待；USB 层要靠 dirty+reset 收拾） */
+export async function withTimeout(p, ms, what){
+  let t;
+  const timeout = new Promise((_, rej) => { t = setTimeout(() => rej(new Error(`${what} 超时（${ms}ms）：探针没响应`)), ms); });
+  try { return await Promise.race([p, timeout]); } finally { clearTimeout(t); }
+}

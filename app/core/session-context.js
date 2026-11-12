@@ -3,7 +3,7 @@ export function sessionContextBusy(t){
   const manager=t.probeManager?.summary();
   return !!(manager?.owners.length||manager?.pending.length||manager?.failures.length||
     t.flash?.busy||t.flash?.probe||t.rtt?.probe||t.rtt?._connectPromise||t.rtt?._disconnectPromise||
-    t.scope?.hid||t.scope?.transport||t.scope?.running||t.scope?._starting||t.scope?._stopPromise||
+    t.scope?.hid||t.scope?.transport||t.scope?.wasmPoll||t.scope?.running||t.scope?._starting||t.scope?._stopPromise||
     t.scope?._hidConnectPromise||t.scope?._usbConnectPromise||t.scope?._releasing||
     t.dbg?.session?.connected||t.dbg?.session?.busy||t.dbg?._connecting||t.dbg?._disconnecting||
     t.hid?.dev?.connected||t.hid?._connecting||t.hid?._disconnecting||t.hid?.last?.running||t.hid?._bridgeRequested||

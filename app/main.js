@@ -176,19 +176,5 @@ document.body.appendChild(box);
   })();
 }
 
-// ---------- 浏览器端端到端自检：?demo=serial&selftest=1 ----------
-const q = new URLSearchParams(location.search);
-if (q.get('selftest') === '1'){
-  box.textContent = 'selftest: running';
-  (async () => {
-    try {
-      const { runUiSelfTest } = await import('../tools/selftest/ui.selftest.mjs');
-      const res = await runUiSelfTest(window.__tools);
-      box.textContent = JSON.stringify({ ...summary(), selftest: res });
-    } catch (e){
-      box.textContent = JSON.stringify({ ...summary(), selftestError: String(e?.message || e) });
-    }
-  })();
-} else {
-  setTimeout(() => { box.textContent = JSON.stringify(summary()); }, 500);
-}
+// Keep the local diagnostics summary for automation and offline smoke checks.
+setTimeout(() => { box.textContent = JSON.stringify(summary()); }, 500);
