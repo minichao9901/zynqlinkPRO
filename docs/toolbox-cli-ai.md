@@ -2,7 +2,18 @@
 
 在仓库根目录用 PowerShell 7 执行。输出目录示例均为新目录，重跑时换一个目录名。硬件操作前核对板卡和文件配对，结束正在运行的采集，并断开其他工作台或 CLI 对同一探针的连接。项目协作规则与故障记录见 [AGENTS.md](../AGENTS.md) 和 [项目问题跟踪列表](项目问题跟踪列表.md)。
 
-[探针临时加载](#探针-bit--elf-临时加载) · [探针 QSPI 固化](#探针-qspi-固化) · [启动与操作 Web](#启动与操作-web) · [目标 MCU 烧录](#目标-mcu-烧录) · [OpenOCD CFG](#openocd-wasm-目标配置) · [Trace](#etm-trace) · [构建与检查](#构建与检查)
+[探针版本](#探针版本) · [探针临时加载](#探针-bit--elf-临时加载) · [探针 QSPI 固化](#探针-qspi-固化) · [启动与操作 Web](#启动与操作-web) · [目标 MCU 烧录](#目标-mcu-烧录) · [OpenOCD CFG](#openocd-wasm-目标配置) · [Trace](#etm-trace) · [构建与检查](#构建与检查)
+
+## 探针版本
+
+**当前 J7 日常使用 `prebuilt/release-20261106/` 的正式 bit + PS ELF。** 临时是指经 JTAG 加载后断电丢失。QSPI 启动包内的 bit 和 PS ELF 与这套正式文件的 SHA-256 分别相同，两种启动方式各用自己的初始化文件。
+
+| 目录 | 用途 |
+|---|---|
+| [release-20261106](../prebuilt/release-20261106/README.md) | 当前正式 J7 配对。直接加载用同目录的 `probe.bit`、`application.elf` 和 `ps7_init.tcl`。 |
+| [qspi-release-20261106](../prebuilt/qspi-release-20261106/README.md) | 当前正式 J7 QSPI 启动包。固化使用包内的 `BOOT.bin`，其中包含同一 bit/PS ELF 及 QSPI 启动链。 |
+| [golden](../prebuilt/golden/README.md) | 旧 7020/120 MHz JTAG 基线，用于历史对照和回退。该目录里的 `f103ze-cdc48.elf` 另属目标 MCU 固件。 |
+| [recovery](../prebuilt/recovery/README.md) | 旧 QSPI 恢复包，仅用于匹配原接线的回退。 |
 
 ## 查找命令
 
@@ -521,6 +532,8 @@
 Windows 日常入口为 `dist/zynq-etm-bridge/zynq-etm-bridge.exe`，默认打开 Web，记录在旁边的 `data/records`。完整分发包需保留 `_internal`。测试可用 EXE 的 `--data-dir` 指定独立数据目录，`--offline` 可禁用 USB/HID/串口和采集。
 
 ## 研发验收工具
+
+HPM 高频对照和 DDR 压力测试示例需要从 `archive/main-before-formal-release-20261106` 取回各自的实验配对。目录名和取回方法见 [正式产物索引](../prebuilt/README.md)。
 
 1. 预览 HPM6800EVK 的原生 TCK、idle 和采样窗口对照。历史 66.667 MHz 结果限定于该配对、idle22 和 mode17。[HPM6800EVK 历史报告](validation/hpm6800-speed-completion-20261102/README.md)
 
