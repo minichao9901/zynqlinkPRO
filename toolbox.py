@@ -51,7 +51,9 @@ def catalog():
             'project': {'entry':'toolbox.py project list|describe|run','browserRequired':False,'validation':'入口覆盖不等于全部功能实测'},
             'bridge-build': 'toolbox.py bridge-build (update dist/zynq-etm-bridge; preserve data; optional --zip)',
             'fixtures': 'toolbox.py fixtures rtt|scope --out NEW_DIR',
+            'probe-load': 'toolbox.py probe-load [--dry-run|--check-only] (JTAG RAM load and OCM verification)',
             'probe-flash': 'toolbox.py probe-flash [--image-dir BOOT_PACKAGE] [--dry-run|--verify-only|--backup-only] (direct JTAG, no browser/runtime)',
+            'target-flash': 'toolbox.py --runtime DIR target-flash --chip CHIP --file FILE [--prepare-only] (workbench OpenOCD Wasm)',
             'browserRequired': False, 'browserRequiredForPages': True,
             'hardwareValidationReport': 'docs/F103ZE-Web-CLI-ETM统一验收-20261031.md',
             'completion': '事件投递不代表业务完成；读取状态/质量/日志验证。invoke等待原方法返回，原方法可能自行捕获错误。'}
@@ -147,8 +149,15 @@ def expand_arguments(value):
 
 
 def serve(args):
-    if not 1024 <= args.port <= 65535:
-        raise ValueError('端口须为1024～65535')
+    if args.port != 0 and not 1024 <= args.port <= 65535:
+        raise ValueError('端口须为 0（自动）或 1024～65535')
+    if args.j7:
+        if args.bit or args.zynq_elf:
+            raise ValueError('--j7 使用正式配对，请移除 --bit 和 --zynq-elf')
+        from tools.probe_load import RELEASE
+        args.bit = str(RELEASE / 'probe.bit')
+        args.zynq_elf = str(RELEASE / 'application.elf')
+        args.native_probe = True
     if bool(args.bit) != bool(args.zynq_elf):
         raise ValueError('--bit与--zynq-elf必须同时指定')
     # Reuse the existing full application, ETM API and authenticated loopback queue.
@@ -170,7 +179,7 @@ def serve(args):
     # exhaust Windows' 16384 ephemeral TCP ports during debug pressure tests.
     server = create_server(app, host='127.0.0.1', port=args.port, threads=16,
                            connection_limit=64, max_request_body_size=48 << 20)
-    state = {'protocol': 'workbench/1', 'url': 'http://127.0.0.1:' + str(args.port), 'pid': os.getpid(), 'status': 'serving'}
+    state = {'protocol': 'workbench/1', 'url': 'http://127.0.0.1:' + str(server.effective_port), 'pid': os.getpid(), 'status': 'serving'}
     state['nativeProbe']=bool(args.native_probe)
     state['recordsDirectory']=str(sys.modules['etm_toolbox_backend'].RECORDS)
     from engine_profile import current_profile
@@ -182,10 +191,15 @@ def serve(args):
                                   'elfSha256': hashlib.sha256(Path(args.zynq_elf).read_bytes()).hexdigest(),
                                   'note': '声明采集配对；服务不会加载板卡，请先通过JTAG加载相同文件'}
     emit(state, folder / 'toolbox-runtime.json')
-    emit({**state, 'browserUrl': state['url'] + '/?trace-cli=' + token + '#flash',
+    browser_url = state['url'] + '/?trace-cli=' + token + '#flash'
+    emit({**state, 'browserUrl': browser_url,
           'note': ('已启用本地探针通路；在浏览器打开browserUrl并保持页面打开。Ctrl+C退出服务。'
                    if args.native_probe else '在Chrome/Edge打开browserUrl，保持页面打开；首次硬件授权需在网页完成。Ctrl+C退出服务。')})
     try:
+        if args.open_browser:
+            import webbrowser
+            if not webbrowser.open(browser_url):
+                print('无法打开默认浏览器，请手动打开上方 browserUrl。', file=sys.stderr, flush=True)
         server.run()
     except KeyboardInterrupt:
         pass
@@ -194,6 +208,30 @@ def serve(args):
         server.task_dispatcher.shutdown()
         state['status'] = 'stopped'
         (folder / 'toolbox-runtime.json').write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding='utf-8')
+
+
+def target_flash(client, args):
+    path = Path(args.file)
+    if path.suffix.lower() not in {'.elf', '.axf', '.out', '.hex', '.ihex', '.bin'}:
+        raise ValueError('固件格式须为 ELF/AXF/OUT、HEX/IHEX 或 BIN')
+    if path.suffix.lower() == '.bin' and not (args.base and 0 < args.base <= 0xffffffff):
+        raise ValueError('BIN 须指定 --base，例如 --base 0x08000000')
+    if path.suffix.lower() != '.bin' and args.base is not None:
+        raise ValueError('--base 仅用于 BIN，ELF 和 HEX 自带地址')
+    firmware = {**pack_file(path), 'kind': 'file'}
+    digest = hashlib.sha256(base64.b64decode(firmware['$base64'])).hexdigest()
+    result = client.request({
+        'action': 'workbench', 'page': 'flash', 'op': 'invoke', 'method': 'programFile',
+        'args': [firmware, {'chip': args.chip, 'clockKhz': args.swd_khz, 'base': args.base,
+                            'reset': not args.keep_halted, 'prepareOnly': args.prepare_only}],
+    })
+    if result.get('ok'):
+        value = result['value']['value']
+        key = 'prepared' if args.prepare_only else 'verified'
+        if not isinstance(value, dict) or value.get(key) is not True:
+            return {**result, 'ok': False, 'error': '烧录器未确认本次操作成功；请查看页面日志。'}
+        value['sha256'] = digest
+    return result
 
 
 def parser():
@@ -205,12 +243,21 @@ def parser():
     c = sub.add_parser('catalog', help='离线列出全部页面分类和功能范围')
     c.add_argument('--full', action='store_true', help='输出总清单，包括静态控件、选项和方法源码位置')
     s = sub.add_parser('serve', help='启动本机工作台和CLI队列，前台运行')
-    s.add_argument('--port', type=int, default=8878)
+    s.add_argument('--port', type=int, default=8878, help='本机端口，0 自动选空闲端口')
     s.add_argument('--bit', help='显式启用本地服务ETM采集：已加载的探针bit路径')
     s.add_argument('--zynq-elf', help='已加载的配套探针ELF；与--bit一起指定')
     s.add_argument('--native-probe', action='store_true', help='通过鉴权本机服务使用实际USB/HID/COM，复用网页协议与界面')
+    s.add_argument('--j7', action='store_true', help='启用本机服务，声明已加载的正式 J7 配对')
+    s.add_argument('--open-browser', action='store_true', help='用系统默认浏览器打开工作台')
     sub.add_parser('ping', help='检查浏览器worker就绪，不访问设备')
     sub.add_parser('status', help='工作台摘要')
+    s = sub.add_parser('target-flash', help='用网页 OpenOCD Wasm 烧录目标 MCU 并校验')
+    s.add_argument('--chip', required=True, help='烧录器芯片选项值，如 stm32h7')
+    s.add_argument('--file', required=True, help='目标 MCU 固件文件')
+    s.add_argument('--swd-khz', type=int, help='烧录时钟档位，省略时用所选配置默认值；JTAG 目标同单位')
+    s.add_argument('--base', type=lambda value: int(value, 0), help='仅 BIN 需要，指定目标 Flash 基地址')
+    s.add_argument('--keep-halted', action='store_true', help='校验后不复位运行')
+    s.add_argument('--prepare-only', action='store_true', help='检查镜像并设置页面，不连接设备')
     n=sub.add_parser('probe',help='无需浏览器的统一探针服务；需要启用native-probe的runtime')
     ns=n.add_subparsers(dest='probe_op',required=True)
     ns.add_parser('status',help='读取服务队列/资源状态，不访问硬件')
@@ -333,7 +380,9 @@ def main(argv=None):
             emit(run(args), args.out)
             return 0
         client = Client(args.runtime, args.timeout)
-        if args.command == 'probe':
+        if args.command == 'target-flash':
+            result = target_flash(client, args)
+        elif args.command == 'probe':
             if args.probe_op=='status':result=client.native('session','status',{})
             elif args.probe_op=='cancel':result=client.native('session','cancel',{'owner':args.owner})
             else:

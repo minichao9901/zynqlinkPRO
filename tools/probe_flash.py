@@ -205,7 +205,8 @@ def main(argv=None):
         report['boot_trace']=trace
         if trace[0]!=0x53544730 or trace[3]!=1 or trace[5]!=0x600 or trace[6]!=0 or trace[7]!=1:
             raise RuntimeError('QSPI reset boot did not reach OCM application handoff: '+str(trace))
-        report['status']='programmed_verified_reset_boot'
+        report['status']='verified_reset_boot' if a.verify_only else 'programmed_verified_reset_boot'
+        report['programmed']=not a.verify_only
         print('Flash verified; QSPI reset boot reached OCM application.',flush=True)
         return 0
     except Exception as error:

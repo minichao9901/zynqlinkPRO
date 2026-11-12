@@ -1,5 +1,7 @@
 # ZynqLinkPRO CLI 命令清单
 
+第一次操作按 [从接线到验收](toolbox-cli-first-run.md) 依次完成。下文可按用途查单条命令。
+
 在仓库根目录用 PowerShell 7 执行。输出目录示例均为新目录，重跑时换一个目录名。硬件操作前核对板卡和文件配对，结束正在运行的采集，并断开其他工作台或 CLI 对同一探针的连接。项目协作规则与故障记录见 [AGENTS.md](../AGENTS.md) 和 [项目问题跟踪列表](项目问题跟踪列表.md)。
 
 [探针版本](#探针版本) · [探针临时加载](#探针-bit--elf-临时加载) · [探针 QSPI 固化](#探针-qspi-固化) · [启动与操作 Web](#启动与操作-web) · [目标 MCU 烧录](#目标-mcu-烧录) · [OpenOCD CFG](#openocd-wasm-目标配置) · [Trace](#etm-trace) · [构建与检查](#构建与检查)
@@ -63,19 +65,25 @@
    python -X utf8 toolbox.py probe-load --dry-run
    ```
 
-3. 临时加载正式 J7 的 bit 和 PS ELF，经物理 MEM-AP0 读回 OCM 执行代码并保存 `result.json`。
+3. 只读检查 JTAG、启动模式和探针忙闲。
+
+   ```powershell
+   python -X utf8 toolbox.py probe-load --check-only --out build/probe-check-new
+   ```
+
+4. 临时加载正式 J7 的 bit 和 PS ELF，经物理 MEM-AP0 读回 OCM 执行代码并保存 `result.json`。
 
    ```powershell
    python -X utf8 toolbox.py probe-load --out build/probe-load-j7-new
    ```
 
-4. 显式指定一套 bit、Zynq PS ELF 和 PS 初始化 Tcl。换配对时将三条路径一起替换为对应文件。
+5. 显式指定一套 bit、Zynq PS ELF 和 PS 初始化 Tcl。换配对时将三条路径一起替换为对应文件。
 
    ```powershell
    python -X utf8 toolbox.py probe-load --bit prebuilt/release-20261106/probe.bit --zynq-elf prebuilt/release-20261106/application.elf --ps-init prebuilt/release-20261106/ps7_init.tcl --out build/probe-load-explicit-new
    ```
 
-5. 独立核对当前板上 OCM 执行代码与指定 PS ELF 是否一致，并记录 FCLK。
+6. 独立核对当前板上 OCM 执行代码与指定 PS ELF 是否一致，并记录 FCLK。
 
    ```powershell
    python -X utf8 toolbox.py project run probe.ocm-verify -- --elf prebuilt/release-20261106/application.elf --out-dir build/probe-identity-new
@@ -289,6 +297,14 @@
 
 ## 目标 MCU 烧录
 
+1. 查看一条命令完成目标烧录和读回校验的参数。顺序操作见 [入门手册](toolbox-cli-first-run.md#4-烧录目标-mcu-并确认结果)。
+
+   ```powershell
+   python -X utf8 toolbox.py target-flash --help
+   ```
+
+### 逐项操作烧录页面
+
 下面用仓库内的 F103ZE ELF 举例，会写入通过 SWD 连接的 **STM32F103ZE 目标 MCU**。换板时换成匹配的芯片、固件和频率，并先断开占用探针的页面。使用本机工作台时启用 `--native-probe`。
 
 1. 打开烧录器页面。
@@ -493,7 +509,7 @@
    python -X utf8 toolbox.py project run bridge.verify -- --package dist/zynq-etm-bridge --out build/bridge-check-new
    ```
 
-7. 检查本机的 Python、Node 和工具链依赖。
+7. 核对随 Git 提供的依赖文件及其哈希。
 
    ```powershell
    python -X utf8 tools/verify_dependencies.py

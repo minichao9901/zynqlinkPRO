@@ -5,7 +5,7 @@ import sys
 import tempfile
 from types import SimpleNamespace
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
@@ -68,6 +68,27 @@ class ToolboxTests(unittest.TestCase):
             self.assertEqual(base64.b64decode(result['$base64']), file.read_bytes())
             with self.assertRaises(ValueError):
                 toolbox.expand_arguments({'$file': str(file), 'kind': 'eval'})
+
+    def test_target_flash_delivers_a_browser_file_and_requires_readback_confirmation(self):
+        import base64
+        with tempfile.TemporaryDirectory() as directory:
+            image = Path(directory) / 'target.bin'
+            image.write_bytes(bytes([0, 128, 255]))
+            args = toolbox.parser().parse_args([
+                'target-flash', '--chip', 'stm32h7', '--file', str(image), '--base', '0x08000000',
+            ])
+            reply = {'job': 'test', 'ok': True, 'value': {'value': {'bytes': 3, 'verified': False}}}
+            client = Mock(spec=toolbox.Client)
+            client.request.return_value = reply
+            result = toolbox.target_flash(client, args)
+            payload = client.request.call_args.args[0]
+            file, options = payload['args']
+            self.assertEqual(payload['method'], 'programFile')
+            self.assertEqual(file['kind'], 'file')
+            self.assertEqual(base64.b64decode(file['$base64']), image.read_bytes())
+            self.assertEqual(options['base'], 0x08000000)
+            self.assertFalse(result['ok'])
+            self.assertEqual(result['job'], 'test')
 
     def test_runtime_rejects_non_loopback_and_invalid_token(self):
         with tempfile.TemporaryDirectory() as directory:

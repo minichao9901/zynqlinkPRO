@@ -50,10 +50,12 @@ def probe_state(session):
     output = PhysicalMemory(session).run('''
 set part [physrd -force -value 0xf8000530]
 if {($part & 0x0fffffff) != 0x03727093} {error "Expected XC7Z020"}
+puts [format "LOAD_STATE PS_IDCODE %08x" $part]
 set isolation [physrd -force -value 0xf8000900]
 set reset [physrd -force -value 0xf8000240]
 puts [format "LOAD_STATE LEVEL_SHIFTERS %08x" $isolation]
 puts [format "LOAD_STATE FPGA_RESET %08x" $reset]
+puts [format "LOAD_STATE BOOT_MODE %08x" [expr {[physrd -force -value 0xf800025c] & 15}]]
 if {($isolation & 15) == 15 && ($reset & 15) == 0} {
     set features [physrd -force -value 0x40030048]
     foreach {name addr} {CAPTURE 0x40030008 SWD 0x40010004} {
@@ -111,6 +113,9 @@ def execute(plan, out, sdk):
         lease = Ownership()
         result['streams'] = check_streams()
         result['before'] = probe_state(Session(out, sdk, 'tcp:127.0.0.1:3121'))
+        if plan['operation'] == 'check':
+            result.update(stage='complete', passed=True)
+            return 0
         for stage, log in [('load', 'load.log'), ('verify', 'verify.log')]:
             result['stage'] = stage
             with (out / log).open('w', encoding='utf8') as stream:
@@ -128,7 +133,7 @@ def execute(plan, out, sdk):
         if lease is not None:
             lease.close()
         (out / 'result.json').write_text(json.dumps(result, indent=2, ensure_ascii=False) + '\n', encoding='utf8')
-    print(json.dumps(result, indent=2, ensure_ascii=False), flush=True)
+        print(json.dumps(result, indent=2, ensure_ascii=False), flush=True)
     return 0 if result['passed'] else 1
 
 
@@ -140,7 +145,9 @@ def main(argv=None):
     parser.add_argument('--ps-init', type=Path, help='配套初始化 Tcl，自选时默认取 ELF 同目录 ps7_init.tcl')
     parser.add_argument('--out', type=Path, help='新证据目录，默认 build/probe-load-<时间>')
     parser.add_argument('--sdk', type=Path, default=Path('E:/Xilinx/SDK/2018.3'), help='Xilinx SDK 2018.3 目录')
-    parser.add_argument('--dry-run', action='store_true', help='核对输入并显示计划，离线执行')
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument('--dry-run', action='store_true', help='核对输入并显示计划，离线执行')
+    mode.add_argument('--check-only', action='store_true', help='只读检查 JTAG、BOOT_MODE 和探针忙闲')
     args = parser.parse_args(argv)
     try:
         files = inputs(args)
@@ -157,7 +164,10 @@ def main(argv=None):
         'verify': [*python, str(TOOLS / 'verify_probe_ocm_code.py'), '--elf', files['zynq_elf']['path'],
                    '--out-dir', str(out / 'ocm'), '--sdk', str(sdk)],
     }
-    plan = {'operation': 'JTAG/RAM', 'dryRun': args.dry_run, 'out': str(out), 'files': files, 'commands': commands}
+    plan = {'operation': 'check' if args.check_only else 'JTAG/RAM', 'dryRun': args.dry_run,
+            'out': str(out), 'files': files}
+    if not args.check_only:
+        plan['commands'] = commands
     if args.dry_run:
         print(json.dumps(plan, indent=2, ensure_ascii=False))
         return 0
