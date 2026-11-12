@@ -64,10 +64,22 @@ export function createOpenOcdDispatcher({ post, select, wasmBinary, onExit }){
     const args = ['openocd', '-s', directory, '-c', 'noinit; adapter driver cmsis-dap',
       '-c', 'gdb port disabled; tcl port disabled; telnet port disabled'];
     if (raw) args.push('-c', 'adapter speed 1000');
+    const connection = raw?.connection;
+    if (connection){
+      if (!['swd','jtag'].includes(connection.transport) || !Number.isInteger(connection.clockKhz) ||
+          connection.clockKhz < 1 || connection.clockKhz > 60000)
+        throw Error('OpenOCD 连接参数无效');
+      args.push('-c', `transport select ${connection.transport}`);
+    }
     if (hpmSdk) args.push('-c', 'set HPM_SDK_BASE /sdk; set PROBE cmsis_dap');
+    if (connection?.board !== undefined){
+      if (!hpmSdk || !/^hpm[a-z0-9]+$/.test(connection.board)) throw Error('HPM SDK 板卡参数无效');
+      args.push('-c', `set BOARD ${connection.board}`);
+    }
     args.push('-f', directory + '/' + (raw?.entry ?? 'workbench.cfg'),
       '-c', 'noinit; gdb port disabled; tcl port disabled; telnet port disabled; cmsis-dap backend usb_bulk');
     if (hpmSdk) args.push('-c', 'reset_config none');
+    if (connection) args.push('-c', `adapter speed ${connection.clockKhz}`);
     const argv = core._malloc((args.length + 1) * 4);
     const strings = args.map(arg => core.stringToNewUTF8(arg));
     for (const [i, ptr] of strings.entries()) core.setValue(argv + i * 4, ptr, 'i32');

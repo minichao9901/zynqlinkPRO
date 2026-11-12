@@ -4,23 +4,43 @@ const TIMEOUT = 180000;
 const bankRows = /^#(\d+)\s*:\s*[^\n]+?\bat\s+(0x[\da-f]+),\s*size\s+(0x[\da-f]+)/gim;
 const sectorRows = /^\s*#\s*(\d+):\s*(0x[\da-f]+)\s+\((0x[\da-f]+)\s/gim;
 
+export async function resetAfterFlash(probe){
+  if (probe.isRiscv) return probe.reset();
+  await probe.command('reset run');
+  // Read the Cortex-M status directly. A failed read during startup must
+  // never replay the reset or report a locked core as running.
+  const deadline = performance.now() + 2000;
+  do {
+    const status = await probe._readWord(0xe000edf0).catch(() => null);
+    if ((status & (1 << 16)) && !(status & ((1 << 17) | (1 << 19)))) return;
+    await new Promise(resolve => setTimeout(resolve, 25));
+  } while (performance.now() < deadline);
+  throw Error('Flash 写入完成，未确认复位后的核心运行状态');
+}
+
 export async function programOpenOcdFlash(probe, regions, { verify, progress }){
   const command = (line, timeout) => probe.command(line, timeout);
   const bankText = await command('capture {flash banks}');
   const banks = Array.from(bankText.matchAll(bankRows),
-    ([row, index, base]) => ({ index:Number(index), base:Number(base), alias:/\(virtual\)/i.test(row) }))
-    .sort((a,b) => a.base - b.base || Number(b.alias) - Number(a.alias));
+    ([row, index, base]) => ({ index:Number(index), base:Number(base), alias:/\(virtual\)/i.test(row) }));
   if (!banks.length) throw Error('OpenOCD CFG 没有定义 Flash bank');
 
   async function probeBank(bank){
     await command(`flash probe ${bank.index}`, TIMEOUT);
     const info = await command(`if {[catch {flash info ${bank.index} sectors} geometry] && $errorCode ne {OpenOCD -908}} {error $geometry}; set geometry`, TIMEOUT);
     const row = Array.from(info.matchAll(bankRows)).find(([, index]) => Number(index) === bank.index);
-    if (!row || Number(row[2]) !== bank.base || !Number(row[3])) throw Error('Flash bank 容量或地址未确认');
+    if (!row || (bank.base && Number(row[2]) !== bank.base) || !Number(row[3]))
+      throw Error('Flash bank 容量或地址未确认');
+    bank.base = Number(row[2]);
     bank.sectors = Array.from(info.matchAll(sectorRows), ([, index, offset, length]) =>
       ({ index:Number(index), offset:Number(offset), length:Number(length), patches:[] }));
     bank.end = bank.base + Number(row[3]);
   }
+
+  // Some official CFGs leave the bank base at zero until the driver probes
+  // it. Resolve those bases before choosing a bank for an image address.
+  for (const bank of banks) if (!bank.base) await probeBank(bank);
+  banks.sort((a,b) => a.base - b.base || Number(b.alias) - Number(a.alias));
 
   const sorted = [...regions].sort((a,b) => a.addr - b.addr);
   let previousEnd = 0;
