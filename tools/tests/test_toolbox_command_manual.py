@@ -51,3 +51,14 @@ class CommandManualTests(unittest.TestCase):
             self.assertEqual(argv[argv.index('--file') + 1], str(image.resolve()))
             self.assertEqual(argv[argv.index('--runtime') + 1], str(folder))
             self.assertFalse(launch.call_args.kwargs.get('shell', False))
+
+    def test_cold_boot_checks_use_a_fresh_evidence_directory_per_click(self):
+        with tempfile.TemporaryDirectory() as directory:
+            runtime = Path(directory)
+            command = command_manual.BY_NAME['qspi-cold']
+            with (runtime / 'log').open('wb') as log, patch.object(command_manual.subprocess, 'Popen') as launch:
+                for job in ('first', 'second'):
+                    command_manual.start_command(command, '', ROOT, runtime, runtime / job, sys.executable, log)
+            for call, job in zip(launch.call_args_list, ('first', 'second')):
+                argv, = call.args
+                self.assertEqual(argv[argv.index('--out-dir') + 1], str(runtime / job / 'artifacts'))

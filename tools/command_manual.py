@@ -106,8 +106,9 @@ def start_command(command, value, workspace, runtime, folder, python, output):
         raise ValueError('未找到系统 Python。安装后重新启动本机工作台。')
     substitutions = {'build/first-run-web': str(runtime), '$Firmware': value, 'JOB_ID': value}
     args = shlex.split(command.line)[1:]
-    if '--out' in args:
-        substitutions[args[args.index('--out') + 1]] = str(folder / 'artifacts')
+    for option in ('--out', '--out-dir'):
+        if option in args:
+            substitutions[args[args.index(option) + 1]] = str(folder / 'artifacts')
     args = [substitutions.get(argument, argument) for argument in args]
     output.write((subprocess.list2cmdline(['python', *args]) + '\n\n').encode('utf8'))
     output.flush()
