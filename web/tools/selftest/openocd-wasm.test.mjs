@@ -136,8 +136,8 @@ test('real Wasm H743 Flash probes AP2 when the AP0 DBGMCU alias returns zero', a
     return worker;
   });
   const cfg = makeOpenOcdProfile({ family:'stm32h7',clockKhz:10000,flash:true });
-  for (const [ap0Id, ap2Id, legacy, flashKb] of [[0,0x20036450,true],[0,0x20036450,false],
-    [0x20036450,0,false],[0,0,false],[0,0x20036450,false,0]]){
+  for (const [ap0Id, ap2Id, legacy, flashKb, directWrite] of [[0,0x20036450,true],[0,0x20036450,false],
+    [0x20036450,0,false],[0,0,false],[0,0x20036450,false,0],[0,0x20036450,false,2048,true]]){
     device = h743FlashUsb({ ap0Id,ap2Id,flashKb });
     const profile = legacy ? { ...cfg,script:cfg.script.replaceAll(' -dbgmcu-target workbench.h7dbg','') } : cfg;
     const probe = new OpenOcdH7FlashProbe(device,profile);
@@ -154,13 +154,22 @@ test('real Wasm H743 Flash probes AP2 when the AP0 DBGMCU alias returns zero', a
         assert.match(banks,/at 0x08100000, size 0x00100000/);
         await probe.targetCommand('configure -work-area-size 0');
         assert.equal(Number(await probe.targetCommand('cget -work-area-size')),0);
+        if (directWrite){
+          await probe.halt();
+          const bytes = Uint8Array.from({length:32},(_, index) => 31 - index);
+          await probe.link.request('flashFile',{input:bytes});
+          await probe.command('flash write_bank 0 /flash-input.bin 0');
+          await probe.command('flash read_bank 0 /flash-readback.bin 0 32');
+          assert.deepEqual((await probe.link.request('flashFile',{read:true})).bytes,bytes);
+        }
       }
       assert.equal(device.reads.some(([ap,address]) => ap === 0 && address === 0x5c001000),legacy || !ap2Id);
     } finally { await probe.disconnect(); }
     assert.equal(device.debugControl,0x00100000);
     assert.deepEqual(device.writes.filter(([ap]) => ap === 2), ap2Id ?
       [[2,0xe00e1004,0x00700007],[2,0xe00e1004,0x00100000]] : []);
-    assert.ok(!device.writes.some(([,address]) => address >= 0x52002000 && address < 0x52002200));
+    assert.equal(device.writes.some(([,address]) => address >= 0x52002000 && address < 0x52002200),!!directWrite);
+    assert.ok(!device.writes.some(([,address]) => address >= 0x24060000 && address < 0x24070000));
   }
 });
 

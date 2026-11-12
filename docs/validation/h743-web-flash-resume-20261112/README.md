@@ -32,8 +32,17 @@
 
 以同一 Web 路径回写原首扇区 BIN，26.982 秒完成 131,072 字节写入和扇区校验，保持复位关闭。随后独立连续两次读回 2 MiB，均恢复到原 SHA-256 `077331beb888de9366761c11edacb0d0b805f00ac1cb394429c3a15bd3601631`。64 KiB 工作区、RCC、VTOR、CCR、DEMCR、FPB、DWT 和 `DBGMCU_CR=0` 均与测试前读回一致。工作台回写后 CPU 仍暂停，20 个核心寄存器和一页 SDRAM 栈与原现场存在差异。两次无复位异常返回尝试均未恢复原 SVCall，随后调试寄存器回写也未能重建 IPSR。探针之后从 Windows PnP 枚举消失，最后能确认的是 Flash 已恢复、CPU 已暂停，原应用暂停现场未完整恢复。本轮未主动复位目标、改目标时钟或写探针 QSPI。
 
-ZL-200 的候选在擦除前读取 H7 MPU 状态。启用 MPU 时将当前 OpenOCD 会话的 Flash 工作区大小设为 0 并读回确认，由 `stm32h7x` 经调试端口直接写入。关闭 MPU 时继续走原 64 KiB 工作区路径和独立备份校验。专项覆盖短 MPU 回读、工作区禁用未确认、成功和失败后的工作区恢复，以及实际 Wasm 在目标已连接后配置工作区大小。10 项 Wasm、159 项 Web、65 项 CLI 及共享驱动一致性通过。候选完整实板擦写仍待复测。
+ZL-200 的候选在擦除前读取 H7 MPU 状态。启用 MPU 时将当前 OpenOCD 会话的 Flash 工作区大小设为 0 并读回确认，由 `stm32h7x` 经调试端口直接写入。关闭 MPU 时继续走原 64 KiB 工作区路径和独立备份校验。专项覆盖短 MPU 回读、工作区禁用未确认、成功和失败后的工作区恢复。实际 Wasm 通过模拟 CMSIS-DAP 在工作区大小为 0 时写入并读回一个 32 字节 Flash 字，核对 AXI 工作区无写入。10 项 Wasm、159 项 Web、65 项 CLI 及共享驱动一致性通过。候选完整实板擦写仍待复测。
 
 原 Flash、SRAM 备份和逐阶段日志保存在本机 `build/h743-web-flash-accept-20261112/`。该目录的原始数据和工作台令牌未纳入 Git。
 
-探针 USB 消失后，首次只读 JTAG 检查遇到 PL 隔离或复位状态并停止 AXI 读取。之后再次读取时，物理 OCM 仍与正式 ELF 匹配，FCLK 读回约 50 MHz，但 Windows 尚未重新枚举 CMSIS-DAP。暂未确认状态变化原因及当前目标状态。
+探针 USB 于 07:57:43 从 Windows 移除，同一集线器的 4 号端口在 07:58:05 出现“设备描述符请求失败”（问题码 43）。仅重启该设备实例后错误复现。首次只读 JTAG 检查遇到 PL 隔离或复位状态并停止 AXI 读取。之后物理 OCM 仍与正式 ELF 匹配，FCLK 读回约 50 MHz，PL 特征寄存器读取超时。状态变化原因及当前目标状态待核实。本任务网页、工作台服务和 JTAG 客户端已退出，共享 `hw_server` 保留。
+
+## Windows 候选包
+
+| 工作台 | 候选身份与验证 |
+| --- | --- |
+| ZynqLink | 源码 `bf7ab89d`，EXE SHA-256 `b039b23ae82c70f4a7f371790c4af724cd2e4a0e2030c5803d266e85950c9a35`。冻结进程 RID `8192`，1,817 个文件校验及 F103ZE/H743 离线记录解码、索引、查询和导出通过。候选目录 `build/h743-web-flash-accept-20261112/zynq-candidate/`。 |
+| SuperlinkPRO web.13 | 隔离源码 `a513f848`，EXE SHA-256 `f7dfec4f6f8d3f95af96d19eea869549b87fede59e46e816aaec06386433aae3`。首次冻结验收缺 `etm/tools/node-transport` 的锁定依赖，补齐后重建，3,414 个文件校验、冻结服务及 CLI、离线解码导出和下载校验通过。候选目录 `build/h743-release-20261111/super-source/web/tmp/etm-package-37bb84ce/dist/superlinkPRO/`。 |
+
+两套候选均使用本报告所列 Wasm。固定安装目录等待实板复测，GitHub Pages 未发布。
