@@ -266,6 +266,7 @@ def parser():
     sub.add_parser('bridge-build',help='AI：构建便携Windows工作台EXE；bridge-build --help')
     sub.add_parser('trace', help='原样转交全部现有ETM Trace CLI参数（trace之后的--help）')
     sub.add_parser('fixtures', help='构建F103ZE额定72MHz测试目标（fixtures --help查看参数）')
+    sub.add_parser('probe-load', help='经 JTAG 临时加载 ZynqLinkPRO 探针 bit + PS ELF，并核对 OCM')
     sub.add_parser('probe-flash', help='备份并固化Zynq探针到QSPI（probe-flash --help查看参数）')
     v = sub.add_parser('validate', help='真实Web验收；scope/rttcdc会烧录目标，禁止Flash时用no-flash')
     v.add_argument('suite', choices=['capacity', 'debug', 'scope', 'rttcdc', 'no-flash', 'flame-export'])
@@ -292,6 +293,8 @@ def main(argv=None):
         return build_bridge(argv[1:])
     if argv and argv[0] == 'project':
         return subprocess.call([sys.executable,'-X','utf8',str(ROOT/'tools/project_cli.py'),*argv[1:]])
+    if argv and argv[0] == 'probe-load':
+        return subprocess.call([sys.executable, '-X', 'utf8', str(ROOT / 'tools/probe_load.py'), *argv[1:]])
     if argv and argv[0] == 'probe-flash':
         return subprocess.call([sys.executable, '-X', 'utf8', str(ROOT / 'tools/probe_flash.py'), *argv[1:]])
     if argv and argv[0] == 'trace':

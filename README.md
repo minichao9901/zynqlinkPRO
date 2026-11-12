@@ -120,7 +120,7 @@ Trace五路输入包含ELD1延时单元，默认零tap。RTCK自适应、断开�
 | [QSPI恢复包](prebuilt/recovery/README.md) | 已验收的历史恢复镜像，身份和适用范围独立记录 |
 | [目标固件](prebuilt/README.md) | F103ZE/H743等目标ELF及来源 |
 
-加载与固化必须使用同一manifest声明的bit/ELF。JTAG/RAM加载不会自动写入QSPI；当前QSPI固化状态见[正式产物索引](prebuilt/README.md)。
+加载与固化使用同一 manifest 声明的 bit/ELF。用 `python -X utf8 toolbox.py probe-load` 经 JTAG 临时加载默认 J7 配对并读回 OCM 执行代码。写入探针 QSPI 用 `python -X utf8 toolbox.py probe-flash`。[CLI 命令清单](docs/toolbox-cli-ai.md#探针-bit--elf-临时加载) · [正式产物索引](prebuilt/README.md)
 
 ## 开发与文档
 

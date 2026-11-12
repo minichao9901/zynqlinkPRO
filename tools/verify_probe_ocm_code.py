@@ -6,8 +6,26 @@ import json
 from pathlib import Path
 import struct
 
-from probe_flash import Session
-from zynq_memory import PhysicalMemory
+try:
+    from .probe_flash import Session
+    from .zynq_memory import PhysicalMemory
+except ImportError:
+    from probe_flash import Session
+    from zynq_memory import PhysicalMemory
+
+
+def read_ocm_code(elf):
+    blob = elf.read_bytes()
+    h = struct.unpack_from('<16sHHIIIIIHHHHHH', blob)
+    if h[0][:6] != b'\x7fELF\x01\x01' or h[2] != 40:
+        raise ValueError('Expected little-endian ARM ELF32')
+    all_sections = [struct.unpack_from('<10I', blob, h[6]+i*h[11]) for i in range(h[12])]
+    string = all_sections[h[13]]
+    names = blob[string[4]:string[4]+string[5]]
+    sections = [s for s in all_sections if s[1] == 1 and s[2]&6 == 6 and s[5]]
+    if not sections or any(s[3]+s[5] > 0x30000 or s[4]+s[5] > len(blob) for s in sections):
+        raise ValueError('Executable sections must be present and fit in low OCM')
+    return blob, names, sections
 
 
 def main():
@@ -19,12 +37,10 @@ def main():
     p.add_argument('--sdk',type=Path,default=Path('E:/Xilinx/SDK/2018.3'))
     a=p.parse_args()
     if not 0<=a.usb_config_cycles<=10:p.error('USB cycles must be between 0 and 10')
-    blob=a.elf.read_bytes();h=struct.unpack_from('<16sHHIIIIIHHHHHH',blob)
-    if h[0][:6]!=b'\x7fELF\x01\x01' or h[2]!=40:p.error('Expected little-endian ARM ELF32')
-    all_sections=[struct.unpack_from('<10I',blob,h[6]+i*h[11]) for i in range(h[12])]
-    string=all_sections[h[13]];names=blob[string[4]:string[4]+string[5]]
-    sections=[s for s in all_sections if s[1]==1 and s[2]&6==6 and s[5]]
-    if not sections or any(s[3]+s[5]>0x30000 for s in sections):p.error('Executable sections must be in low OCM')
+    try:
+        blob,names,sections=read_ocm_code(a.elf)
+    except (ValueError, IndexError, struct.error) as error:
+        p.error(str(error))
     end=max(s[3]+s[5] for s in sections)
     dest=a.out_dir.resolve();dest.mkdir(parents=True,exist_ok=False)
     session=PhysicalMemory(Session(dest,a.sdk,'tcp:127.0.0.1:3121'))

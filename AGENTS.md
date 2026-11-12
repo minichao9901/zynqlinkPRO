@@ -64,7 +64,7 @@ ETM配置默认SWD为 **10MHz**，前端、本地采集服务接管和恢复连�
 
 - `python -X utf8 toolbox.py bridge-build`：候选先验收，再更新固定 `dist/zynq-etm-bridge/`，保留用户data、归档旧程序。默认不生成ZIP；仅需分发时加 `--zip`。修改主机代码不会自动更新已冻结EXE。
 - PL/PS入口、工具链与BSP见依赖文档及 `project describe`；不要直接双击 `docs/validation/` 中的 `.py.txt/.tcl.txt` 历史驱动，它们可能含旧路径和硬件动作。
-- 仅JTAG/RAM加载的通用入口：`python tools/run_xsct.py tools/download_dap_fpga.tcl <Zynq_ELF> <BIT> <PS_INIT_TCL>`；随后用 `python tools/verify_probe_ocm_code.py --elf <Zynq_ELF> --out-dir <新目录>` 独立核对运行代码。
+- `python -X utf8 toolbox.py probe-load` 经 JTAG 临时加载默认 J7 bit/PS ELF，并通过物理 MEM-AP0 核对 OCM 执行代码。加 `--dry-run` 离线核对输入和查看计划。自选配对参数及独立核对命令见 [CLI 命令清单](docs/toolbox-cli-ai.md#探针-bit--elf-临时加载)。
 - `probe-flash` 是QSPI写入路径，不是普通RAM加载；`validate` 的部分套件也会写目标Flash。先读帮助/实现，不能把它们当离线检查或无Flash回归。
 - 当前J7 QSPI默认包为 `prebuilt/qspi-release-20261106/`；同一正式bit/ELF已完成实体冷启动和F103ZE限定回归。默认受限helper在EF4019的bank0写BOOT；SDK原生后端故障另见ZL-167。构建/固化步骤见 `firmware/boot/README.md`，备份和失败证据不能删除或公开提交原Flash内容。
 

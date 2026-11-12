@@ -1,106 +1,555 @@
-# CLI工作台
+# ZynqLinkPRO CLI 命令清单
 
-统一本机探针控制：`toolbox.py --runtime <目录> probe status`读取队列/资源/错误状态，不访问板卡；`probe cancel --owner <会话ID>`取消排队或请求在运行操作边界退出；`probe call usb|hid|serial <动作> --file <JSON>`调用公开服务协议。后两者可能影响硬件，不能用作离线检查。原生服务不需要浏览器worker，沿用鉴权令牌、owner与resourceEpoch，失败不自动重放。跨进程锁及ETM恢复交接见[统一控制验收](validation/session-flight-recorder-20261105/README.md)。
+在仓库根目录用 PowerShell 7 执行。输出目录示例均为新目录，重跑时换一个目录名。硬件操作前核对板卡和文件配对，结束正在运行的采集，并断开其他工作台或 CLI 对同一探针的连接。项目协作规则与故障记录见 [AGENTS.md](../AGENTS.md) 和 [项目问题跟踪列表](项目问题跟踪列表.md)。
 
-新会话先读根目录 [AGENTS.md](../AGENTS.md) 和 [项目问题跟踪列表](项目问题跟踪列表.md)。发现、复现、修复或变更问题状态时，同步更新该表，随相关改动提交。
+[探针临时加载](#探针-bit--elf-临时加载) · [探针 QSPI 固化](#探针-qspi-固化) · [启动与操作 Web](#启动与操作-web) · [目标 MCU 烧录](#目标-mcu-烧录) · [OpenOCD CFG](#openocd-wasm-目标配置) · [Trace](#etm-trace) · [构建与检查](#构建与检查)
 
-CLI用于AI自动化；用户直接双击`zynq-etm-bridge.exe`，在Web完成选ELF、选函数、配置与采集。
-PLL、AHB/APB分频属于target固件，生产Web/API与Trace capture CLI不再设置AHB分频。
+## 查找命令
 
-## Windows桥包构建与离线验收
+1. 查看统一 CLI 的顶层命令。
 
-```powershell
-# 构建机：已验证Windows x64 / Python 3.13，依赖见requirements-bridge-build.txt
-python -X utf8 toolbox.py bridge-build
-# 仅需分发时额外生成ZIP：
-python -X utf8 toolbox.py bridge-build --zip
-# 包含冻结EXE自身预检；完整回归用独立新目录，明确禁用所有硬件接口：
-python -X utf8 toolbox.py project run bridge.verify -- --package dist/zynq-etm-bridge --out build/bridge-check-new
-```
+   ```powershell
+   python -X utf8 toolbox.py --help
+   ```
 
-固定本机目录是`dist/zynq-etm-bridge/`，包含EXE和`_internal`运行库。默认不生成ZIP；加`--zip`时才额外生成分发包，不带用户data、记录或令牌。分发包需完整解压，不能只复制EXE。
-候选完成冻结预检和离线验收后，更新器保留data、归档旧程序，再替换固定目录；失败可回滚。它不是无条件拒绝更新已有合法程序目录。单独验收的输出目录必须新建；manifest保存源码提交、依赖版本、文件SHA，预检子进程PATH无Python/Node。
-默认双击直接打开Web，数据放EXE旁`data/records`。AI可用`--data-dir`隔离测试数据；
-`--offline`明确拒绝USB/HID/串口及采集，只允许导入/解码/浏览。保留H743 ETMv4与F103ZE ETMv3。
+2. 离线列出 Web 页面、控件和方法的源码位置。
 
-## 项目工具
+   ```powershell
+   python -X utf8 toolbox.py catalog --full
+   ```
 
-当前J7固化入口为 `python -X utf8 toolbox.py probe-flash --dry-run`（只核对包与计划）；实际执行用 `probe-flash --out build/qspi-program-new`，会写探针QSPI。默认包 `prebuilt/qspi-release-20261106/` 和受限Zynq helper，要求BOOT_MODE=1；自动独占、整片备份、写后独立整片回读、范围外比较及无暂停复位启动。实体断电冷启动仍需实际操作后核对，不能用RAM加载代替。构建入口 `project run boot.bsp` / `boot.build` / `boot.package`，完整参数见[启动链](../firmware/boot/README.md)。旧SDK写入后端仅显式 `--backend sdk`，本机库问题见ZL-167。
+3. 列出当前可运行的项目工具。
 
-入口python toolbox.py，Web与非Web工具统一从project list/describe/run访问。索引来自当前Git跟踪源码，历史实验已退出活跃列表；旧371项是归档版本的计数。
+   ```powershell
+   python -X utf8 toolbox.py project list
+   ```
 
-```powershell
-python toolbox.py --help
-python toolbox.py project list
-python toolbox.py project describe probe.regression
-python toolbox.py project run sim.cm3 --dry-run -- --top tb_cm3_jtag
-python toolbox.py project run web.check
-python toolbox.py project run test.web
-python toolbox.py project run test.cli
-python toolbox.py trace doctor --offline
-```
+4. 查看探针回归套件的入口、依赖和使用范围。
 
-run默认执行底层工具并保留退出码；只看计划必须用--dry-run，底层参数放在--后面。list/describe/--dry-run不操作板。
-Trace原始CLI见 [Trace-CLI使用说明.md](Trace-CLI使用说明.md)。页内控制、串口/调试/RTT/J-Scope/烧录命令先用`toolbox.py page --help`与`page <页面> describe`查询；其硬件动作不能用作离线检查。
+   ```powershell
+   python -X utf8 toolbox.py project describe probe.regression
+   ```
 
-需要启动工作台时用serve子命令，每次使用新的runtime目录。启用本机硬件通路时，显式声明实际已加载配对；下面以release133为例，不要求所有任务强制使用Golden，也不会自动下载所声明文件：
+5. 预览 Cortex-M3 JTAG 仿真命令，底层工具参数放在 `--` 后。
 
-```powershell
-python -X utf8 toolbox.py --runtime build/workbench-new serve --port 8878 --native-probe --bit prebuilt/fclk133-release-20261101/probe.bit --zynq-elf prebuilt/fclk133-release-20261101/application.elf
-# 浏览器打开服务打印的鉴权URL后，在另一终端查询公开页内方法：
-python -X utf8 toolbox.py --runtime build/workbench-new page etm describe --target target
-```
+   ```powershell
+   python -X utf8 toolbox.py project run sim.cm3 --dry-run -- --top tb_cm3_jtag
+   ```
 
-serve前须按实际任务核对板卡空闲及加载身份。运行时URL/令牌只限本机使用，不提交Git；旧runtime或已关闭服务的URL不能作为当前worker。`click/set`只确认事件投递，还要检查完成状态、质量和恢复结果。
+## 探针 bit + ELF 临时加载
 
-### OpenOCD Wasm 目标配置
+使用 PC 到 **Zynq 探针本体**的 JTAG 下载线。临时加载会复位 Zynq、配置 FPGA、加载并运行 PS ELF。断电会丢失这次加载，探针 QSPI 和目标 MCU Flash 不写入。
 
-工作台的调试器、烧录器和 RTT Viewer 由同一份 OpenOCD Wasm 处理 Cortex-M/SWD 和 RISC-V/JTAG。在线页使用 WebUSB，本机桥包可使用已鉴权的本机 USB 服务。两种入口均使用 CMSIS-DAP v2。ETM 网页的目标读写、暂停/继续、起点与配置恢复经 Wasm 的物理 MEM-AP0。联动采集由本机服务接管探针，完成 FPGA 布防、CPU 放行、DDR 下载及 OpenCSD 解码。RTT 转发与 J-Scope 走探针固件数据通路。独立 Trace CLI 见 [Trace CLI](Trace-CLI使用说明.md)。
+1. 查看探针加载参数。
 
-调试器可选内置芯片，也可用「导入 OpenOCD CFG…」打开单文件。遇到 `source [find …]` 依赖时，选择脚本根目录并选择入口 CFG。可在「配置与核心」切换已导入配置的核心，或切回内置目标。只使用与板卡匹配且可信的脚本。导入阶段在断开 USB 的 Worker 中解析，实际连接时会执行所选 CFG 的目标事件。烧录器可沿用声明了 Flash bank 的配置。RTT Viewer 沿用 CFG 后，从匹配 ELF 取得控制块地址，或手填地址和 RAM 范围。
+   ```powershell
+   python -X utf8 toolbox.py probe-load --help
+   ```
 
-烧录器内置列表随包提供与 Wasm 源码版本一致的 OpenOCD 原版 target CFG，以及 HPM SDK v1.11.0 的原版 board、SoC 和入口 CFG。两者与手动导入使用同一解析入口。内置 HPM 项通过 SDK 的 `BOARD` 和 `PROBE=cmsis_dap` 参数选择相应板和探针，包括 HPM6P00EVK。内置项的烧录时钟仍由工作台所选档位决定。[H743 对照与范围](validation/h743-web-flash-resume-20261112/README.md#openocd-原版-cfg-对照与内置列表迁移)
+2. 离线核对正式 J7 配对及初始化 Tcl 的 SHA-256，打印实际加载计划。
 
-自动化先用 `page dbg describe` 发现 `importCfg` 和 `cfgInfo`。用 `page dbg upload` 向 `#d-cfg-file` 交付单文件后，读取导入结果与当前核心。烧录器和 RTT Viewer 各自提供「沿用目标」控件。原 Web CLI 的调试和烧录命令也经上述页面后端。
+   ```powershell
+   python -X utf8 toolbox.py probe-load --dry-run
+   ```
 
-内置烧录默认 SWD 1 MHz、HPM JTAG 10 MHz。显式选择的频率用于该 OpenOCD 会话，导入配置使用 CFG 声明的频率。页面显示请求档，实际时钟以板上读回为准。见 [Zynq 迁移与验收范围](validation/openocd-wasm-20261108/README.md)。
+3. 临时加载正式 J7 的 bit 和 PS ELF，经物理 MEM-AP0 读回 OCM 执行代码并保存 `result.json`。
 
-J-Scope 的「采样通路」默认自动。周期达到 10 ms 时，Wasm 直接轮询目标内存，使用主机单调时间戳并记录错过的轮询；多段地址依次读取。短于 10 ms 时走探针硬件采样，也可显式选该通路。硬件采样和 RTT 转发使用探针私有 HID，数据分别通过 HSS Bulk 和 CDC 回传。全局硬复位用 Wasm 发送 CMSIS-DAP 的 nRESET 脉冲；复位脚输出模式仍用私有 HID。
+   ```powershell
+   python -X utf8 toolbox.py probe-load --out build/probe-load-j7-new
+   ```
 
-### Web频率限制与原生RISC-V研发参数
+4. 显式指定一套 bit、Zynq PS ELF 和 PS 初始化 Tcl。换配对时将三条路径一起替换为对应文件。
 
-Web烧录、RTT Viewer、调试器按所选目标限制频率：HPM最高25MHz，其他ARM/RISC-V最高60MHz，提供25MHz档；切到HPM时旧高频选择降至25MHz。RTT Viewer 默认使用10MHz。Web页CLI操作也沿用这些限制。波形/RTT转发连接并识别为ZynqLinkPro后，RISC-V可显式选择10/20/25MHz TCK，启动时先确认架构再设置并核对时钟ACK；自动档仍10MHz。旧软件探针的RISC-V `clockHz`仍按idle约定保持0，不向未知探针发送Hz。实测方法见[25MHz流对照](validation/web-cli-streams-25mhz-20261103/README.md)。
+   ```powershell
+   python -X utf8 toolbox.py probe-load --bit prebuilt/release-20261106/probe.bit --zynq-elf prebuilt/release-20261106/application.elf --ps-init prebuilt/release-20261106/ps7_init.tcl --out build/probe-load-explicit-new
+   ```
 
-独立原生研发CLI仍提供高频、idle及采样窗口配置，并未受Web25MHz上限影响：
+5. 独立核对当前板上 OCM 执行代码与指定 PS ELF 是否一致，并记录 FCLK。
 
-| 入口（`project run`后的工具ID） | 参数 | 单位/含义 |
-|---|---|---|
-| `tools/validate_hpm6800_performance.py` | `--speeds`、`--idle`、`--modes` | TCK请求Hz列表、idle拍数0～64、采样模式列表0/1/16/17 |
-| `tools/validate_hpm6800_streams.py` | `--stage rtt/hss`、`--speeds`、`--idle`、`--mode` | 同上，mode为单值；HSS另有`--periods`（24MHz ticks）、`--variables` |
-| `tools/characterize_hpm6800_idle.py` | `--speeds`、`--idles`、`--modes` | TCK/idle/采样模式的矩阵对照 |
+   ```powershell
+   python -X utf8 toolbox.py project run probe.ocm-verify -- --elf prebuilt/release-20261106/application.elf --out-dir build/probe-identity-new
+   ```
 
-历史限定HPM6800EVK的66.667MHz通过配置为idle22、mode17；mode17是Q1/previous-bit返回窗口，不能只增加idle而忽略采样窗口。大于15拍需要扩展idle的PL/PS配对，66.667MHz还需要相应固件cap与FCLK策略；工具会核对有效idle和实际时钟。详见[历史高频报告](validation/hpm6800-speed-completion-20261102/README.md)。这不是所有HPM型号的频率保证，本次仅核查参数并修改Web，没有重新运行高频测试。
+加载结果以 `result.json` 的 `passed` 为准。失败时查对应阶段日志，核对加载内容见 `ocm/result.json`。工具链安装见 [依赖说明](dependencies.md)。
 
-下面只发现/打印计划，不操作板卡；真实执行前仍须核对空闲、加载配对并独立核对OCM：
+## 探针 QSPI 固化
 
-```powershell
-python -X utf8 toolbox.py project describe tools/validate_hpm6800_performance.py
-python -X utf8 toolbox.py project run tools/validate_hpm6800_performance.py --dry-run -- --bit prebuilt/hpm6800-jtag66-133-20261102/probe.bit --elf prebuilt/hpm6800-jtag66-133-20261102/application.elf --out build/hpm-cli-high-new --speeds 66666667 --idle 22 --modes 17 --windows axi --loops 128 --repeats 3
-```
+硬件操作需要 Zynq JTAG 下载线和空闲探针。写入或校验 BOOT 区要求上电读回 `BOOT_MODE=1`。默认 J7 镜像包为 `prebuilt/qspi-release-20261106/`，默认写入后端限 JEDEC EF4019 的 bank 0。备份留在本机。固化完成后执行实体断电重启，核对探针重新枚举及实际配对。[启动包和冷启动记录](../prebuilt/qspi-release-20261106/README.md)
 
-## DDR研究路径（仅供AI阶段验收）
+1. 离线校验默认 BOOT 包并预览固化步骤。
 
-主流程仍为双击bridge EXE后使用Web。下列命令用于研发验收，不要求用户输入CLI。
-先按配对manifest加载并验证指定bit/ELF，再运行；不会自动切换板上固件。
+   ```powershell
+   python -X utf8 toolbox.py probe-flash --dry-run
+   ```
 
-```powershell
-python toolbox.py project run etm.ddr-trace-stress -- --pair prebuilt/etm-ddr-usb-raw4-20261101 --out build/ddr-trace-check-new --rounds 2 --seconds 1,2 --cdc-port COM34 --decode --verify-ddr-physical
-python toolbox.py project run etm.framed -- captured.frm1 --out build/framed-check-new --tail-bytes 1 --trace-id 2
-```
+2. 备份探针整片 QSPI，写入默认 BOOT 镜像，独立读回校验，核对擦写范围外内容并复位启动。
 
-上例DDR压力套件仍只针对F103，默认USB采后下载，1/2秒窗口、函数交替、CDC；可用物理AP0核对同一缓冲。不会写Flash或改目标分频。
-H743已有独立ETMv4连续原生capture实板验收：CPU60/TRACECLK20、SWD10MHz，10/200/500/1000ms各三次CDC负载。Golden源代码/SDK在`firmware/target/stm32h743_cdc_trace/`，`target.h743-build`已指向该目录；产物在`prebuilt/targets/stm32h743-cdc-trace-20261101/`。H743原生entry/reset仍拒绝，Web起点/导出另行验证，不能借F103压力套件背书。详见 [H743综合报告](validation/h743-comprehensive-20261101/README.md)。
-FRM1原生工具、PS USB采后下载、Web/CLI默认DDR能力分支已完成本阶段真机验证；更高频和逐线校准继续研究。
-`web.shared-sync --check`核对ETM共享驱动（当前10份）；`--write`从主工作台同步。web.check与bridge.build都会阻止驱动副本不一致。
+   ```powershell
+   python -X utf8 toolbox.py probe-flash --out build/qspi-program-new
+   ```
 
-火焰图默认提供可离线缩放的双标签HTML导出，默认Timeline，另有周期权重页；左键框选放大，Shift拖动平移，SVG仍保留。源码CLI使用 `trace export --format flame-html`；新bridge EXE使用 `--trace-cli export --record ... --format flame-html --out ...`。Web CLI的 `history.exportFlame` 默认HTML，可用 `format:"svg"` 显式兼容旧格式，保留当前区间及下载捕获。见 [使用说明](flame-html-export.md)。
+3. 只备份当前探针 QSPI。读取程序会接管 Zynq PS，备份完成后需手动恢复原运行方式。
+
+   ```powershell
+   python -X utf8 toolbox.py probe-flash --backup-only --out build/qspi-backup-new
+   ```
+
+4. 读回现有 BOOT 区并与镜像比较，随后复位测试启动。此操作无擦写。
+
+   ```powershell
+   python -X utf8 toolbox.py probe-flash --verify-only --out build/qspi-verify-new
+   ```
+
+5. 实体断电重启后检查 QSPI 启动交接、FCLK 和板上 OCM 执行代码。
+
+   ```powershell
+   python -X utf8 toolbox.py project run probe.ocm-verify -- --elf prebuilt/release-20261106/application.elf --require-qspi --out-dir build/qspi-cold-boot-new
+   ```
+
+6. 为自建 QSPI 包生成 SDK BSP。
+
+   ```powershell
+   python -X utf8 toolbox.py project run boot.bsp -- --out build/qspi-bsp-new
+   ```
+
+7. 使用上一步的 BSP 和配对产物编译 QSPI 加载器及读写辅助程序。
+
+   ```powershell
+   python -X utf8 toolbox.py project run boot.build -- --bsp build/qspi-bsp-new/bsp --bit prebuilt/release-20261106/probe.bit --elf prebuilt/release-20261106/application.elf --out build/qspi-loader-new
+   ```
+
+8. 使用支持 QSPI 的 PS 初始化 Tcl 生成 BOOT 镜像和 manifest。
+
+   ```powershell
+   python -X utf8 toolbox.py project run boot.package -- --loader-dir build/qspi-loader-new --bit prebuilt/release-20261106/probe.bit --elf prebuilt/release-20261106/application.elf --ps-init firmware/boot/hardware/ps7_init.tcl --output-dir build/qspi-package-new
+   ```
+
+9. 离线检查自建 BOOT 包并预览固化步骤。
+
+   ```powershell
+   python -X utf8 toolbox.py probe-flash --image-dir build/qspi-package-new --dry-run
+   ```
+
+10. 固化已核对的自建 BOOT 包并读回校验。
+
+    ```powershell
+    python -X utf8 toolbox.py probe-flash --image-dir build/qspi-package-new --out build/qspi-custom-program-new
+    ```
+
+固化成功时检查输出的 `result.json` 和 `readback_sha256`。旧 SDK 写入后端的故障记录见 ZL-167。[QSPI 启动链](../firmware/boot/README.md)
+
+## 启动与操作 Web
+
+在终端 A 启动以下任一服务，用浏览器打开该终端打印的鉴权 URL 并保持页面运行。控制命令在终端 B 执行，`--runtime` 填实际服务目录。URL 和令牌仅供本机使用。使用完毕可在终端 A 按 Ctrl+C 结束本次服务。
+
+1. 启动源码工作台，浏览器可使用其 WebUSB 通路。选用此命令时，后续示例的运行目录换成 `build/workbench-web-new`。
+
+   ```powershell
+   python -X utf8 toolbox.py --runtime build/workbench-web-new serve --port 8878
+   ```
+
+2. 启动带本机 USB/HID/串口服务的工作台。这里声明板上已经加载的探针 bit 和 PS ELF，加载须先完成。
+
+   ```powershell
+   python -X utf8 toolbox.py --runtime build/workbench-j7-new serve --port 8878 --native-probe --bit prebuilt/release-20261106/probe.bit --zynq-elf prebuilt/release-20261106/application.elf
+   ```
+
+3. 检查浏览器 worker 是否就绪，无设备访问。
+
+   ```powershell
+   python -X utf8 toolbox.py --runtime build/workbench-j7-new ping
+   ```
+
+4. 查看工作台和命令队列摘要。
+
+   ```powershell
+   python -X utf8 toolbox.py --runtime build/workbench-j7-new status
+   ```
+
+5. 查看 CLI 可操作的页面标识。
+
+   ```powershell
+   python -X utf8 toolbox.py page --help
+   ```
+
+6. 查看串口助手的端口、波特率、连接及发送控件。
+
+   ```powershell
+   python -X utf8 toolbox.py --runtime build/workbench-j7-new page serial describe
+   ```
+
+7. 设定串口助手的波特率。
+
+   ```powershell
+   python -X utf8 toolbox.py --runtime build/workbench-j7-new page serial set '#s-baud' 115200
+   ```
+
+8. 打开串口助手已选中的端口，端口须先在页面选好。
+
+   ```powershell
+   python -X utf8 toolbox.py --runtime build/workbench-j7-new page serial click '#s-open'
+   ```
+
+9. 关闭串口助手当前的端口。
+
+   ```powershell
+   python -X utf8 toolbox.py --runtime build/workbench-j7-new page serial click '#s-close'
+   ```
+
+10. 连接调试器当前所选目标，等待网页连接方法结束。
+
+    ```powershell
+    python -X utf8 toolbox.py --runtime build/workbench-j7-new page dbg invoke connect
+    ```
+
+11. 断开调试器，释放其探针连接。
+
+    ```powershell
+    python -X utf8 toolbox.py --runtime build/workbench-j7-new page dbg invoke disconnect
+    ```
+
+12. 查看 RTT Viewer 的目标、ELF 和控制块设置。
+
+    ```powershell
+    python -X utf8 toolbox.py --runtime build/workbench-j7-new page rtt describe
+    ```
+
+13. 按 RTT Viewer 已选的目标和控制块设置启动连接。
+
+    ```powershell
+    python -X utf8 toolbox.py --runtime build/workbench-j7-new page rtt invoke connectProbe
+    ```
+
+14. 读取 RTT Viewer 的当前状态和连接摘要。
+
+    ```powershell
+    python -X utf8 toolbox.py --runtime build/workbench-j7-new page rtt state
+    ```
+
+15. 断开 RTT Viewer。
+
+    ```powershell
+    python -X utf8 toolbox.py --runtime build/workbench-j7-new page rtt invoke disconnect
+    ```
+
+16. 查看 J-Scope 的 ELF、变量和采样通路控件。
+
+    ```powershell
+    python -X utf8 toolbox.py --runtime build/workbench-j7-new page scope describe
+    ```
+
+17. 按 J-Scope 已选的变量及采样设置启动采样。
+
+    ```powershell
+    python -X utf8 toolbox.py --runtime build/workbench-j7-new page scope invoke start
+    ```
+
+18. 停止 J-Scope 采样。
+
+    ```powershell
+    python -X utf8 toolbox.py --runtime build/workbench-j7-new page scope invoke stop
+    ```
+
+19. 查询已提交操作的结果。将 `JOB_ID` 替换为 CLI 返回的 ID，超时先查这个 ID 再决定后续操作。
+
+    ```powershell
+    python -X utf8 toolbox.py --runtime build/workbench-j7-new job JOB_ID
+    ```
+
+20. 读取本机探针服务的队列和资源状态，无板卡访问，可在浏览器未打开时使用。
+
+    ```powershell
+    python -X utf8 toolbox.py --runtime build/workbench-j7-new probe status
+    ```
+
+21. 取消指定会话的排队任务，运行中的操作在安全边界退出。将 `OWNER_ID` 替换为实际 owner。
+
+    ```powershell
+    python -X utf8 toolbox.py --runtime build/workbench-j7-new probe cancel --owner OWNER_ID
+    ```
+
+22. 查看原生探针服务的请求格式。调用 USB/HID/串口动作时按协议传递 owner 和 resourceEpoch。[服务协议与验收](validation/session-flight-recorder-20261105/README.md)
+
+    ```powershell
+    python -X utf8 toolbox.py probe call --help
+    ```
+
+`click`、`set` 和 `upload` 返回事件投递结果。业务完成情况通过页面状态、日志或操作结果核对。`invoke` 等待被调用的公开方法返回。
+
+## 目标 MCU 烧录
+
+下面用仓库内的 F103ZE ELF 举例，会写入通过 SWD 连接的 **STM32F103ZE 目标 MCU**。换板时换成匹配的芯片、固件和频率，并先断开占用探针的页面。使用本机工作台时启用 `--native-probe`。
+
+1. 打开烧录器页面。
+
+   ```powershell
+   python -X utf8 toolbox.py --runtime build/workbench-j7-new page flash show
+   ```
+
+2. 列出烧录器可选芯片、时钟和文件控件。
+
+   ```powershell
+   python -X utf8 toolbox.py --runtime build/workbench-j7-new page flash describe
+   ```
+
+3. 选择内置的 STM32F103 OpenOCD CFG。
+
+   ```powershell
+   python -X utf8 toolbox.py --runtime build/workbench-j7-new page flash set '#f-chip' '"stm32f103"'
+   ```
+
+4. 将该次 SWD 烧录时钟设为 10 MHz，控件单位为 kHz。
+
+   ```powershell
+   python -X utf8 toolbox.py --runtime build/workbench-j7-new page flash set '#f-speed' 10000
+   ```
+
+5. 上传目标 MCU ELF。
+
+   ```powershell
+   python -X utf8 toolbox.py --runtime build/workbench-j7-new page flash upload '@file:view._fileInput' prebuilt/golden/f103ze-cdc48.elf
+   ```
+
+6. 等待页面显示已读入的 ELF 文件名。
+
+   ```powershell
+   python -X utf8 toolbox.py --runtime build/workbench-j7-new page flash wait '#f-file-info' --contains 'f103ze-cdc48.elf'
+   ```
+
+7. 启用烧录后读回校验。
+
+   ```powershell
+   python -X utf8 toolbox.py --runtime build/workbench-j7-new page flash set '#f-verify' true
+   ```
+
+8. 启用校验完成后的目标复位运行。任务要求烧完保持暂停时，将此布尔值改为 `false`。
+
+   ```powershell
+   python -X utf8 toolbox.py --runtime build/workbench-j7-new page flash set '#f-reset' true
+   ```
+
+9. 执行目标 MCU 烧录及校验，CLI 最长等待 240 秒。
+
+   ```powershell
+   python -X utf8 toolbox.py --runtime build/workbench-j7-new --timeout 240 page flash invoke flash
+   ```
+
+10. 读取烧录结果，确认页面显示「读回校验通过」。
+
+    ```powershell
+    python -X utf8 toolbox.py --runtime build/workbench-j7-new page flash read '#f-result'
+    ```
+
+11. 读取 OpenOCD 烧录日志，核对识别、写入和校验过程。
+
+    ```powershell
+    python -X utf8 toolbox.py --runtime build/workbench-j7-new page flash read '#f-log'
+    ```
+
+## OpenOCD Wasm 目标配置
+
+调试器、烧录器和 RTT Viewer 共用 OpenOCD Wasm。内置烧录列表提供与 Wasm 源码版本配对的 OpenOCD 原版 target CFG，以及 HPM SDK v1.11.0 原版 board、SoC 和入口 CFG。内置与手动导入共用解析入口。HPM 内置项通过 SDK 的 `BOARD` 和 `PROBE=cmsis_dap` 选择板卡及探针，包括 HPM6P00EVK。[H743 对照与 HPM 发布](validation/hpm-sdk-cfg-release-20261112/README.md)
+
+在调试器断开时导入匹配且可信的 CFG。单文件直接上传。有 `source [find …]` 依赖时，上传脚本根目录再选入口。导入时在断开 USB 的 Worker 解析，目标事件在实际连接时执行。
+
+1. 查看调试器当前的 CFG 导入控件、入口选项和核心列表。
+
+   ```powershell
+   python -X utf8 toolbox.py --runtime build/workbench-j7-new page dbg describe
+   ```
+
+2. 导入单个 CFG，将示例路径替换为实际文件。
+
+   ```powershell
+   python -X utf8 toolbox.py --runtime build/workbench-j7-new page dbg upload '#d-cfg-file' 'E:/configs/my-target.cfg'
+   ```
+
+3. 上传含依赖脚本的目录，保留目录内相对路径。
+
+   ```powershell
+   python -X utf8 toolbox.py --runtime build/workbench-j7-new page dbg upload '#d-cfg-dir' 'E:/configs/openocd' --directory
+   ```
+
+4. 选择目录内的入口 CFG，将 `board/my-board.cfg` 换成上一步目录内实际入口的相对路径。
+
+   ```powershell
+   python -X utf8 toolbox.py --runtime build/workbench-j7-new page dbg set '#d-cfg-entry' '"board/my-board.cfg"'
+   ```
+
+5. 读取当前导入的核心、CFG SHA-256、频率和 Flash 能力。结果为空时检查导入状态，选择 CFG 后应核对名称及哈希。
+
+   ```powershell
+   python -X utf8 toolbox.py --runtime build/workbench-j7-new page dbg invoke cfgInfo
+   ```
+
+6. 让烧录器沿用已导入且声明 Flash bank 的目标。执行后检查烧录器的芯片下拉框。
+
+   ```powershell
+   python -X utf8 toolbox.py --runtime build/workbench-j7-new page flash click '#f-use-session-target'
+   ```
+
+7. 让 RTT Viewer 沿用当前导入目标，随后选择匹配的 ELF 或填写控制块地址及 RAM 范围。
+
+   ```powershell
+   python -X utf8 toolbox.py --runtime build/workbench-j7-new page rtt click '#r-use-session-target'
+   ```
+
+内置烧录默认 SWD 1 MHz、HPM JTAG 10 MHz。调试器、烧录器和 RTT Viewer 的内置 HPM 档最高 25 MHz，其他 ARM/RISC-V 最高 60 MHz。RTT Viewer 默认 10 MHz。导入项使用 CFG 自带频率，实际时钟以板上读回为准。J-Scope 自动模式在采样周期达到 10 ms 时使用 Wasm 轮询，短周期使用探针硬件采样。RTT 转发和硬件采样通过探针私有 HID 控制，数据走 CDC 和 HSS Bulk。[Wasm 迁移与验收范围](validation/openocd-wasm-20261108/README.md)
+
+## ETM Trace
+
+原生采集可直接从 CLI 操作。这里的 `--elf` 指目标 MCU ELF，`--zynq-elf` 指探针 PS ELF，`--bit` 与 `--zynq-elf` 须填写已加载配对。原生采集的 `--swd-khz` 单位为 kHz，底层 Trace Web 命令的 `--swd-hz` 单位为 Hz。[Trace CLI 参数和结果](Trace-CLI使用说明.md)
+
+1. 离线检查原生采集依赖。
+
+   ```powershell
+   python -X utf8 toolbox.py trace doctor --offline
+   ```
+
+2. 查看原生采集参数。
+
+   ```powershell
+   python -X utf8 toolbox.py trace capture --help
+   ```
+
+3. 在实际运行匹配目标固件的 F103ZE 上采集 1 秒，SWD 请求 10 MHz，输出到新目录。
+
+   ```powershell
+   python -X utf8 toolbox.py trace capture --elf prebuilt/golden/f103ze-cdc48.elf --bit prebuilt/release-20261106/probe.bit --zynq-elf prebuilt/release-20261106/application.elf --out build/trace-f103-new --seconds 1 --swd-khz 10000
+   ```
+
+4. 离线查询上一步记录的摘要。
+
+   ```powershell
+   python -X utf8 toolbox.py trace query --record build/trace-f103-new --view summary
+   ```
+
+5. 将已有解码记录导出为可离线缩放的火焰图 HTML。
+
+   ```powershell
+   python -X utf8 toolbox.py trace export --record build/trace-f103-new --format flame-html --out build/trace-f103-flame.html
+   ```
+
+6. 使用冻结 EXE 导出同一记录的火焰图 HTML。
+
+   ```powershell
+   .\dist\zynq-etm-bridge\zynq-etm-bridge.exe --trace-cli export --record build/trace-f103-new --format flame-html --out build/trace-f103-exe-flame.html
+   ```
+
+7. 查看 ETM 页面的目标控制方法。
+
+   ```powershell
+   python -X utf8 toolbox.py --runtime build/workbench-j7-new page etm describe --target target
+   ```
+
+火焰图 HTML 包含 Timeline 和周期权重页，左键框选放大，Shift 拖动平移。Web 的 `history.exportFlame` 默认导出 HTML，可显式选择 SVG。[HTML 导出说明](flame-html-export.md)
+
+## 构建与检查
+
+1. 查看 FPGA 构建入口和工具链。
+
+   ```powershell
+   python -X utf8 toolbox.py project describe fpga.build
+   ```
+
+2. 预览 FPGA 构建命令。
+
+   ```powershell
+   python -X utf8 toolbox.py project run fpga.build --dry-run
+   ```
+
+3. 调用 Vivado 构建 FPGA bitstream，输出在项目构建目录，板卡无操作。
+
+   ```powershell
+   python -X utf8 toolbox.py project run fpga.build
+   ```
+
+4. 构建并验收 Windows EXE 候选，成功后更新日常目录并保留用户数据。
+
+   ```powershell
+   python -X utf8 toolbox.py bridge-build
+   ```
+
+5. 构建并更新 Windows EXE，额外生成含 `_internal` 的完整分发 ZIP。
+
+   ```powershell
+   python -X utf8 toolbox.py bridge-build --zip
+   ```
+
+6. 对固定目录里的冻结 EXE 做独立离线验收，输出写入新目录。
+
+   ```powershell
+   python -X utf8 toolbox.py project run bridge.verify -- --package dist/zynq-etm-bridge --out build/bridge-check-new
+   ```
+
+7. 检查本机的 Python、Node 和工具链依赖。
+
+   ```powershell
+   python -X utf8 tools/verify_dependencies.py
+   ```
+
+8. 运行 Web 静态检查。
+
+   ```powershell
+   python -X utf8 toolbox.py project run web.check
+   ```
+
+9. 运行 Web 离线测试。
+
+   ```powershell
+   python -X utf8 toolbox.py project run test.web
+   ```
+
+10. 运行统一 CLI 主机测试。
+
+    ```powershell
+    python -X utf8 toolbox.py project run test.cli
+    ```
+
+11. 核对主工作台和 ETM 的共享驱动副本。
+
+    ```powershell
+    python -X utf8 toolbox.py project run web.shared-sync -- --check
+    ```
+
+12. 将主工作台的共享驱动同步到 ETM 副本。
+
+    ```powershell
+    python -X utf8 toolbox.py project run web.shared-sync -- --write
+    ```
+
+Windows 日常入口为 `dist/zynq-etm-bridge/zynq-etm-bridge.exe`，默认打开 Web，记录在旁边的 `data/records`。完整分发包需保留 `_internal`。测试可用 EXE 的 `--data-dir` 指定独立数据目录，`--offline` 可禁用 USB/HID/串口和采集。
+
+## 研发验收工具
+
+1. 预览 HPM6800EVK 的原生 TCK、idle 和采样窗口对照。历史 66.667 MHz 结果限定于该配对、idle22 和 mode17。[HPM6800EVK 历史报告](validation/hpm6800-speed-completion-20261102/README.md)
+
+   ```powershell
+   python -X utf8 toolbox.py project run tools/validate_hpm6800_performance.py --dry-run -- --bit prebuilt/hpm6800-jtag66-133-20261102/probe.bit --elf prebuilt/hpm6800-jtag66-133-20261102/application.elf --out build/hpm-cli-high-new --speeds 66666667 --idle 22 --modes 17 --windows axi --loops 128 --repeats 3
+   ```
+
+2. 查看原生 HPM6800 RTT/HSS 的时钟、idle 及采样周期参数。
+
+   ```powershell
+   python -X utf8 toolbox.py project run tools/validate_hpm6800_streams.py -- --help
+   ```
+
+3. 查看原生 HPM6800 采样窗口与 idle 的矩阵扫描参数。
+
+   ```powershell
+   python -X utf8 toolbox.py project run tools/characterize_hpm6800_idle.py -- --help
+   ```
+
+4. 对已加载实验配对的 F103 执行 DDR Trace 压力测试，按实际连线替换 COM 口，采样后下载并用物理 MEM-AP0 核对缓冲。
+
+   ```powershell
+   python -X utf8 toolbox.py project run etm.ddr-trace-stress -- --pair prebuilt/etm-ddr-usb-raw4-20261101 --out build/ddr-trace-check-new --rounds 2 --seconds 1,2 --cdc-port COM34 --decode --verify-ddr-physical
+   ```
+
+5. 离线检查 FRM1 数据，将 `captured.frm1` 替换为实际输入路径。
+
+   ```powershell
+   python -X utf8 toolbox.py project run etm.framed -- captured.frm1 --out build/framed-check-new --tail-bytes 1 --trace-id 2
+   ```
+
+H743 ETMv4 连续采集见 [H743 综合报告](validation/h743-comprehensive-20261101/README.md)。PLL、AHB/APB 分频由目标固件管理。
