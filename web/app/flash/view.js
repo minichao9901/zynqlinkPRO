@@ -11,13 +11,13 @@ import { OpenOcdProbe } from '../core/openocd-probe.js';
 import { OpenOcdEtmProbe } from '../core/openocd-etm.js';
 import { selectOpenOcdDevice } from '../core/openocd-usb.js';
 import { OpenOcdResetSession, pulseTargetReset } from './target-reset.js';
-import { hasOpenOcdFlash, makeOpenOcdProfile, ocdHex } from '../core/openocd-profile.js';
+import { ocdHex } from '../core/openocd-profile.js';
 import { hpmBoard } from '../targets/hpm/porting.js';
 import { rememberHpmBoard } from '../targets/hpm/select.js';
 import { DBGMCU_BASES, FLASH_SIZE_REGS, decodeCpuid, decodeDpIdcode, decodeStm32Dev, refineByFlash, saneFlashKb } from './devid.js';
 import { parseFirmware } from './image.js';
-import { programOpenOcdFlash } from './openocd-program.js';
-import { OpenOcdH7FlashProbe } from './openocd-h7.js';
+import { programOpenOcdFlash, resetAfterFlash } from './openocd-program.js';
+import { hasUpstreamFlashCfg, loadUpstreamFlashCfg } from './upstream-config.js';
 import { FirmwareInspector } from './inspector-view.js';
 import { bytes as fBytes } from '../core/format.js';
 
@@ -32,7 +32,7 @@ export class FlashView {
   init(){
     this.inspector = new FirmwareInspector();
     this.inspector.init();
-    for (const chip of CHIPS.filter(c => hasOpenOcdFlash(c.v) || hpmBoard(c.v)))
+    for (const chip of CHIPS.filter(c => hasUpstreamFlashCfg(c.v)))
       $('f-chip').appendChild(new Option(chip.label, chip.v));
     $('f-chip').value = store.get('flash.chip', 'stm32f103');
     if (!$('f-chip').value) $('f-chip').selectedIndex = 0;
@@ -217,10 +217,11 @@ export class FlashView {
     const port = hpmBoard(family);
     const imported = this.importedTarget?.id === family ? this.importedTarget.cfg : null;
     const memoryAp = !flash && (imported ? imported.arch === 'arm' : !port);
-    const cfg = imported ? { ...imported, memoryAp } : makeOpenOcdProfile({ memoryAp, arch:port ? 'riscv' : 'arm', port, family, flash,
-      clockKhz:webClockKhz($('f-speed').value, family, port ? 10000 : 1000) });
+    const profile = imported || await loadUpstreamFlashCfg(family,
+      webClockKhz($('f-speed').value, family, port ? 10000 : 1000));
+    const cfg = { ...profile, memoryAp };
     const device = await selectOpenOcdDevice();
-    const Probe = cfg.h7DebugTarget ? OpenOcdH7FlashProbe : memoryAp ? OpenOcdEtmProbe : OpenOcdProbe;
+    const Probe = memoryAp ? OpenOcdEtmProbe : OpenOcdProbe;
     this.probe = new Probe(device, cfg, line => this._log(line));
     await this.probe.connect();
   }
@@ -248,7 +249,7 @@ export class FlashView {
     try {
       this.lastFlash = await this._usingTarget(true, async probe => {
         const result = await this._program(probe, regions, verify);
-        if (reset) await probe.reset();
+        if (reset) await resetAfterFlash(probe);
         return { ...result, reset };
       });
       this._bar(100);

@@ -135,7 +135,7 @@ export class OpenOcdProbe {
   async halt(){ await this.command('halt'); }
   async run(){ await this.command('resume'); }
   async reset(halt = false){
-    if (!this.isRiscv || !(this.cfg.boardId || this.cfg.raw?.hpmSdk)){
+    if (!this.isRiscv || !(this.cfg.boardId || this.cfg.raw?.hpmSdk || this.cfg.hpmFlash)){
       await this.command(halt ? 'reset halt' : 'reset run');
       if (await this.isHalted() !== halt) throw Error('未确认目标复位后的运行状态');
       return 'OpenOCD 目标复位';

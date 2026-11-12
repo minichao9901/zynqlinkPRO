@@ -72,3 +72,18 @@ ZL-200 的候选在擦除前读取 H7 MPU 状态。启用 MPU 时将当前 OpenO
 - SuperlinkPRO 的 `main` 已推送 `c9bca36c`，Pages Actions 部署成功。公开下载 manifest 为 `1.1.0-web.13`，源提交、ZIP 字节数和 SHA-256 与本机分发包一致。[Pages](https://minichao9901.github.io/superlinkPRO/) · [部署记录](https://github.com/minichao9901/superlinkPRO/actions/runs/43177323045)
 - 两个公开下载端点均返回 HTTP 206，首 4,096 字节与各自本机 ZIP 一致，`Content-Range` 声明的总长度分别为 56,108,523 和 103,222,601 字节。
 - GitHub 推送首轮返回 HTTP 408，改用 HTTP/1.1 和缓冲发送后成功。Zynq ZIP 的流式重试遇到连接重置，之后由仓库发布器在同一草稿内完成限速上传，按远端资产 SHA-256 和大小核对后发布。失败证据保留于本轮本机目录（ZL-164）。
+
+## OpenOCD 原版 CFG 对照与内置列表迁移
+
+2026-11-12 续验同一 H743、正式 J7 探针和原 `fw.elf`。探针在线 85,844 字节 OCM 执行段与前文配对一致，ELD1、DDR 特征吻合。实测配置读回 FCLK 119,999,998 Hz、SWCLK 9,999,999.83 Hz。目标开始运行上次写入的应用，`VTOR=0x08000000`、`MPU_CTRL=5`。首轮对照前经 AP2 将 `DBGMCU_CR` 暂置零，以复现旧失败中关键的调试时钟初值。上次暂停在 SDRAM 应用的完整现场不属于本轮覆盖范围。
+
+从 OpenOCD `9f2d8762b3a75b4d7b2155affcf3d8bb8eb8849a` 提取原版 `target/stm32h7x.cfg`，SHA-256 `d42bb124e23066b16a8145800ef22f8ed28ea0dff638563b84e3e5c8a76f45ec`。依赖同版本 `target/swj-dp.tcl`、`mem_helper.tcl`。对照入口只选 CMSIS-DAP/SWD、设置 `DUAL_BANK=1` 并在原脚本后选 10 MHz。Wasm 从 `aa5372c4` 取成对 `.mjs/.wasm`，Wasm SHA-256 `1977164ce62a8595753be9dfa741751c0b3f2459a95aa6bd03f25afe72d554fe`，`stm32h7x` 驱动未加 AP2 读 ID 补丁。上游 CFG 仍通过 AP2 初始化 `DBGMCU`。[OpenOCD 原版配置](https://github.com/openocd-org/openocd/blob/9f2d8762b3a75b4d7b2155affcf3d8bb8eb8849a/tcl/target/stm32h7x.cfg)
+
+| 入口 | 结果 |
+| --- | --- |
+| 调试器导入 CFG → 烧录器沿用目标 | 88.463 秒。成功识别、擦写首个 128 KiB 扇区并校验原 ELF 的 61,208 字节。运行中的 MPU 启用，工作台走现有直接写入保护路径。本轮复位关闭，独立读回后复核并恢复 CFG 涉及的调试时钟、看门狗冻结、Trace Funnel 和目标运行状态。 |
+| 烧录器内置 STM32H7 | 76.767 秒。使用上游 `stm32h7x_dual_bank.cfg` 加载同一原版 `stm32h7x.cfg`，同一未加补丁的 Wasm。烧录、校验及复位运行均通过，`DHCSR=0x01010001`，`VTOR=0x08000000`，CFSR/HFSR 为零。 |
+
+两轮完整 2 MiB 独立双读均与本轮烧录前一致（原 ELF 已在目标上运行），分别核对两个 `PT_LOAD` 共 61,208 字节及区间外 2,035,944 字节。整片 SHA-256 `d8ceb22dafabac56f74014eb60fc9a038315d556a003d8d54ee9b724a661231e`。最终探针采集、DDR、CDMA、RTT、HSS 空闲。本轮 Flash 修改限定上述目标扇区，使用已有 bit/ELF 配对，未写 QSPI。
+
+ZynqLink 烧录器内置列表现从同版本上游选取 29 个原版 target/board CFG，按同一导入函数解析。板级 CFG 的 HPM FTDI 适配器引用由加载器绑定到原版 CMSIS-DAP 接口脚本，板级文件及其 Flash 参数保留原样。固定上游版本没有 HPM6P00EVK 对应 CFG，移出烧录器内置列表，匹配的外部 CFG 仍可导入。F2/F3/F4/F7 原版 CFG 在 Flash 探测前的基址可为零，烧录器现在先读实测几何再映射 ELF。29 个条目均通过实际 Wasm 离线配置加载，H743 为本轮实板验收对象。原始 Flash/日志留在本机 `build/h743-upstream-cfg-20261112/`。

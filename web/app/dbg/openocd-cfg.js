@@ -33,7 +33,7 @@ export async function readCfgDirectory(files){
 const targetName = /^[A-Za-z0-9_.-]{1,100}$/;
 
 /** Ask OpenOCD to interpret the uploaded files with USB disconnected. */
-export async function inspectOpenOcdCfg(text, entry, directory){
+export async function inspectOpenOcdCfg(text, entry, directory, connection){
   entry = cfgPath(entry);
   const scripts = directory || new Map([[entry,text]]);
   if (!scripts.has(entry)) throw Error('CFG 目录缺少入口：' + entry);
@@ -42,7 +42,7 @@ export async function inspectOpenOcdCfg(text, entry, directory){
   if (files.length > 4096 || new TextEncoder().encode(files.map(([, body]) => body).join('')).length > 8 * 1024 * 1024)
     throw Error('CFG 内容超过限制');
   const hpmSdk = /^hpm\w+_all_in_one\.cfg$/i.test(entry) && scripts.has('probes/cmsis_dap.cfg');
-  const raw = { entry, files, hpmSdk };
+  const raw = { entry, files, hpmSdk, ...(connection && {connection}) };
   const session = new OpenOcdTargetSession();
   try {
     await session.open({raw});
@@ -65,10 +65,15 @@ export async function inspectOpenOcdCfg(text, entry, directory){
     const clockKhz = Number(clock.match(/(\d+)\s*kHz/i)?.[1]);
     const maxClock = hpmSdk || cores.some(core => /^hpm\d+[.]cpu/i.test(core.target)) ? 25000 : 60000;
     if (!(clockKhz >= 1 && clockKhz <= maxClock)) throw Error(`CFG 时钟须在 1–${maxClock} kHz`);
-    const banks = [...(await session.command('capture {flash banks}')).matchAll(/^#\d+\s*:\s*[^\n]+?\bat\s+(0x[\da-f]+),/gim)];
+    const bankText = await session.command('capture {flash banks}');
+    const banks = [...bankText.matchAll(/^#\d+\s*:\s*[^\n]+?\(([^)]+)\)\s+at\s+(0x[\da-f]+),/gim)];
+    const [, driver, address] = banks[0] ?? [];
+    // The STM32 drivers infer the main bank location when probing. For BIN
+    // display use its conventional address, and validate it live at write time.
+    const flashBase = Number(address) === 0 && driver.startsWith('stm32') ? '0x08000000' : address;
     const digest = new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(raw))));
     const hash = Array.from(digest,b=>b.toString(16).padStart(2,'0')).join('');
     return { raw, hash, name:entry, transport, clockKhz, cores,
-      hasFlash:!!banks.length, flashBase:banks[0]?.[1], ...cores[0] };
+      hasFlash:!!banks.length, flashBase, hpmFlash:banks.some(([, name]) => name === 'hpm_xpi'), ...cores[0] };
   } finally { await session.close(); }
 }
