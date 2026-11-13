@@ -38,3 +38,13 @@ Viewer 断开后，旧夹具直接走 DAP 数据命令停止生产者失败，�
 HPM6800EVK 已运行原应用。首 131,072 B Flash 试前试后各双读并逐字节相等，SHA-256 `e02c28713f8804d31ef4b3ffa4289b9ddb0da57920deefaceff7aba3e82b4c4b`。五个 RTT RAM 夹具均核对恢复 ILM/AHB 区和核心寄存器；文档中的软件复位已正常重启应用。探针仍运行原 QSPI 配对，最后读钟 FCLK `119,999,998 Hz`，TCK 约 10 MHz。RTT、HSS、DDR 采集与 DMA 均空闲。测试浏览器页和本任务服务已关闭，共享 hw_server 保持运行。
 
 本机原始证据在 `build/hpm6800-e2e-20261114/`。重点为 `powered-before/snapshot.json`、`debug-e2e/result.json`、`source-e2e/result.json`、`reset-e2e/result.json`、`handoff-e2e/`、`flash-guard/restore.json`、`flash-bin/`、`flash-elf/`、`rtt-e2e/`、`rtt-down-verified.json`、`cdc-e2e-run/`、`cdc-clock-confirm/`、`scope-rate-repeat/`、`scope-e2e/`、`final/snapshot.json` 和 `probe-final/result.json`。Flash/SRAM 备份和运行令牌留在本机，不入 Git。验收覆盖本机源码 Web 路径，未重新打包固定 EXE 或部署 Pages。
+
+## RTT Viewer 吞吐追查（2026-11-14）
+
+最接近的旧口径为 11-09 同 J7 型号、实际 TCK 24,999,999.5 Hz、本机 USB 代理和 AXI 序号环。[原始验收证据](../hpm6800-workbench-acceptance-20261109/evidence.json) `viewer.viewerCfg` 为 65,536 B / 4.126394 s = 15.882 kB/s，8 轮 × 8 KiB。11-14 E2E 的 16 KiB AHB 环同样每轮读满 8 KiB，49,152 B / 约 6.1 s，共完成 6 轮。8.06 kB/s 是完整窗口的中位数，`stats.rate` 中约 16.4 kB/s 是最近约 500 ms 内单批完成时的瞬时统计。
+
+按当前同一 0.8-nonce32 J7、源码和本机代理，实际 FCLK 49,999,999 Hz、TCK 24,999,999.5 Hz，轮询设置 5 ms，1024 B 发布批次，每种环三轮约 5 s。AHB 16 KiB 环三窗 6.414/8.139/6.385 kB/s，非缓存 AXI 32 KiB 环三窗 6.369/6.365/7.958 kB/s。逐窗每轮均为 8,192 B，连续序号对照通过。切换到二进制大块读取覆盖的 AXI 地址仍未恢复旧 15.88 kB/s，环所属内存支路不足以解释差距。
+
+AXI 独立计时窗 49,152 B / 6.124 s = 8.026 kB/s，完成 6 轮。服务端边界记录同窗 777 次 USB 写、778 次 USB 读，`NativeProbe._usb_call` 累计 0.345 s（包含底层 USB 等待）。约 94% 的墙钟时间落在该函数之外。当前 Wasm JTAG 顺序发出 DAP 序列，本机代理把 USB OUT 与 IN 各装在一个请求中。结果把瓶颈定位到密集同步请求的往返及调度，尚未拆分浏览器 Worker、HTTP、鉴权/排队各自的份额，也未锁定 11-09 到 11-14 的单一回归提交。关联 ZL-093。原始指标 `viewer-ab-results.json`、`viewer-prof-results.json`、`viewer-profile-summary.json`。
+
+补测只安装 RAM 夹具，未改 Flash、PLL 或 PMA。AXI 非缓存范围 `0x01240000..0x0127ffff` 经运行现场 PMA 核对。两个 A/B 夹具和独立计时夹具全部恢复 RAM 与寄存器，试后 Flash 首 128 KiB 双读与原基线一致，目标运行，临时测试页面与服务已退出。
