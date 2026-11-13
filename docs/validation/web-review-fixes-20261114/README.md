@@ -4,9 +4,9 @@
 
 ## 主机回归
 
-- `python -B -X utf8 toolbox.py project run test.web` 覆盖稀疏 HEX 经实际扇区规划后只修改文件指定的两个字节、HEX 顺序和重叠、BIN 零基址、换 ELF 清理旧类型和值、异步监视读写绑定、32 位有符号位域极值、文件积压与错误关闭、HSS/主机轮询 JSP 回放以及 CSV 快照与科学计数法。
+- `python -B -X utf8 toolbox.py project run test.web` 通过 174 项。覆盖稀疏 HEX 经实际扇区规划后只修改文件指定的两个字节、HEX 顺序和重叠、BIN 零基址、换 ELF 清理旧类型和值、异步监视读写绑定、32 位有符号位域极值、文件积压与错误关闭、HSS/主机轮询 JSP 回放以及 CSV 快照与科学计数法。
 - `python -B -X utf8 toolbox.py project run test.cli` 通过 74 项，包含 nRF52 BIN 零地址参数交给浏览器的检查。该芯片未接入本轮台架。
-- `python -B -X utf8 toolbox.py project run web.check` 验证共享文件一致性与 Web 模块语法。
+- `python -B -X utf8 toolbox.py project run web.check` 通过共享文件一致性和 169 个 Web 模块语法检查。
 
 ## 离线量测
 
@@ -31,3 +31,9 @@ FileRecorder 模拟慢写，用 1 MiB 分片连续输入 25 MiB。只接受前 1
 独立收尾核对 H743 2 MiB Flash 双读 SHA-256 与试前一致，核心运行，时钟、异常、调试配置和 RTT 头一致。J7 物理 OCM 的 85,716 B 执行代码仍匹配其 ELF。没有写目标 Flash 或 SRAM，没有复位。
 
 台架同时存在 zynqlinkPRO 与 superlinkPRO 时，二者 VID/PID 相同，native bridge 拒绝多个匹配设备。本轮为验收服务进程限定 J7 序列号后继续，产品路径的多设备边界记入 ZL-224。
+
+## 已提交代码复测及现场交接
+
+- 在 `cba2d8be` 的源码服务中独立复测。限定 USB 与 HID 为序列号 `12345678` 的 zynqlinkPRO J7，浏览器通过本机桥接送达。J7 从 QSPI 运行，物理 MEM-AP0 核对 85,716 B OCM 执行段。配对 `prebuilt/qspi-probe-hid-20261114/` 的 bit SHA-256 为 `dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6`，Zynq ELF 为 `64d00fe597030175920b994e39ff51db8a683dbb8d5f907c0f8d73f8d55044b9`。FCLK 读回 119,999,998 Hz。
+- H743 两路现有 AXI 变量 `g_loops`、`g_ms`。请求 SWD 20 MHz，DEF 回报 19,999,999 Hz，周期 20 µs，配置时长 4 s。采样中 `清空` 和 `记录原始包` 均禁用，CLI 调用也保持既有缓冲和记录设置。硬件生成与页面接收均为 202,448 组，尾差、序号缺口、探针跳拍和读错均为零。1,673,216 B JSP 与 3,993,422 B CSV 的两路值逐样本一致，回放恢复全部 202,448 组。原始证据在本机 `build/web-review-accept-20261114/scope-board-final.json`、`h743-final.jsp` 和 `h743-final.csv`。
+- 验收仅读取目标变量，无 Flash、SRAM 夹具或 QSPI 写入。试后目标仍运行，2 MiB Flash 双读 SHA-256 为 `7b6a4f9e7b83de0b9cf81236fe38508b5bcd519b7dc85fd9b811befdb77e666b`，与试前一致。VTOR、异常、调试和时钟寄存器抽查一致。J7 的 RTT 与 HSS 均空闲，浏览器测试页和本轮硬件服务已关闭。未连接 superlinkPRO 的 COM34。文件记录慢写故障、稀疏烧录和 nRF52 零地址路径的结论限上述离线验证。
