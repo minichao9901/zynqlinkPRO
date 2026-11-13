@@ -1367,7 +1367,7 @@ export class DbgView {
       this._out(`已载入符号：${name || 'ELF'} —— ${info}`, st.note ? 'warn' : 'ok');
       if (st.lines) this._out(`　${st.lines.summary()}`, 'dim');
       // 监视项重新解析一遍（换了 ELF 之后地址/类型都可能变）
-      for (const it of this.watch.items) Object.assign(it, resolveWatch(it.expr, st), { value: null });
+      this.watch.resolveAll(st);
       this.renderRegs(); this.renderBps(); this.renderSyms(); this.renderWatch();
       this._renderRttSym();
       this._updatePcStrip();
@@ -1720,10 +1720,14 @@ export class DbgView {
     if (this.watchBusy) return 0;
     if (!force && !this.session.halted && !$('d-watch-live')?.checked) return 0;
     this.watchBusy = true;
+    const { session, sym } = this;
+    const items = this.watch.items;
+    const current = () => session === this.session && sym === this.sym && items === this.watch.items;
     let ok = 0;
     try {
-      for (const it of this.watch.items){
-        if (it.error) continue;
+      for (const it of [...items]){
+        if (!current()) break;
+        if (it.error || !items.includes(it)) continue;
         try {
           /**
            * 结构体/数组：**一次读整块**（上限 TREE_LIMITS.maxBytes），树在本地按偏移解 ——
@@ -1731,7 +1735,9 @@ export class DbgView {
            */
           const isTree = it.kind === 'struct' || it.kind === 'union' || it.kind === 'array';
           const want = isTree ? Math.max(1, Math.min(it.size || 1, TREE_LIMITS.maxBytes)) : (it.size || 4);
-          const bytes = await this.session.memRead(it.addr, want);
+          const bytes = await session.memRead(it.addr, want);
+          if (!current()) break;
+          if (!items.includes(it)) continue;
           if (isTree){
             it.bytes = bytes;
             const f = { text: summarizeTree(it, bytes), hex: null, cls: '', type: it.typeName };
@@ -1746,6 +1752,8 @@ export class DbgView {
           it.value = f;
           if (f.cls !== 'err') ok++;
         } catch (e){
+          if (!current()) break;
+          if (!items.includes(it)) continue;
           it.prev = it.value;
           it.bytes = null; // Failed reads must not leave old struct members looking current.
           const waiting = e?.code === 'MEMORY_NOT_READY';
@@ -1755,7 +1763,7 @@ export class DbgView {
     } finally {
       this.watchBusy = false;
     }
-    this.renderWatch();
+    if (current()) this.renderWatch();
     return ok;
   }
 
@@ -1877,14 +1885,17 @@ export class DbgView {
   async writeWatch(index, text, memberIndex = null){
     const session = this.session, sym = this.sym, item = this.watch.items[index];
     if (!item) throw Error('监视项已不存在');
-    return await session.exclusive(async () => {
+    const assertCurrent = () => {
       if (this.session !== session || this.sym !== sym || this.watch.items[index] !== item || this._disconnecting)
         throw Error('目标或监视项已改变，请重新编辑');
+    };
+    return await session.exclusive(async () => {
+      assertCurrent();
       const fresh = resolveWatch(item.expr, sym);
       const value = memberIndex === null ? fresh : treeRows(fresh, item.bytes)[memberIndex]?.edit;
       if (!value) throw Error('此成员没有可写类型');
       this.faultPanel?.invalidate('变量写入，现场转为历史记录');
-      const bytes = await writeWatchValue(session, value, text);
+      const bytes = await writeWatchValue(session, value, text, assertCurrent);
       await this._refreshWatchLocked({ force: true });
       return { address: value.addr, bytes: [...bytes], verified: true };
     });

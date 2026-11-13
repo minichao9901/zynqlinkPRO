@@ -192,7 +192,7 @@ export function encodeWatchValue(item, text, original){
   return bytes;
 }
 
-export async function writeWatchValue(session, item, text){
+export async function writeWatchValue(session, item, text, assertCurrent = () => {}){
   if (!session.connected || !session.halted) throw Error('请先连接并暂停目标，再修改变量');
   // Reject invalid input before even reading target memory.
   encodeWatchValue(item, text, item.bit ? new Uint8Array(item.size) : undefined);
@@ -200,6 +200,7 @@ export async function writeWatchValue(session, item, text){
   if (!session.connected || !session.halted) throw Error('目标已运行，请重新暂停后修改变量');
   const original = item.bit ? await session.memRead(item.addr, item.size) : undefined;
   const bytes = encodeWatchValue(item, text, original);
+  assertCurrent();
   await session.memWrite(item.addr, bytes);
   const actual = await session.memRead(item.addr, bytes.length);
   if (actual.length !== bytes.length || !bytes.every((v,i) => actual[i] === v)) throw Error('变量写入后的回读不一致，请刷新确认目标状态');
@@ -233,7 +234,8 @@ export function readBits(bytes, bitOffset, bitSize){
 
 /** 位域按声明类型做符号扩展（`int32_t bias : 6` 要能解出 -32..31） */
 export function signExtend(v, bits){
-  if (!(bits > 0) || bits >= 32) return v >>> 0;
+  if (bits === 32) return v | 0;
+  if (!(bits > 0) || bits > 32) return v >>> 0;
   const m = 1 << (bits - 1);
   return ((v & ((1 << bits) - 1)) ^ m) - m;
 }
@@ -452,6 +454,13 @@ export class WatchList {
   }
 
   clear(){ this.items = []; }
+
+  /** Replace resolved fields and live values when symbols change. */
+  resolveAll(sym){
+    this.items = this.items.map(({ expr, expanded }) => ({
+      ...resolveWatch(expr, sym), expanded: !!expanded, value: null,
+    }));
+  }
 
   /** 存 store 用（值不带进去；**展开状态要留着**，刷新页面别把用户展开的树收起来） */
   toJSON(){ return this.items.map(({ expr, name, kind, addr, size, scalar, typeName, label, expanded }) =>

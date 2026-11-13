@@ -629,13 +629,13 @@
           <button data-v="overlay" class="on">叠加</button><button data-v="lanes">分道</button>
         </div>
         <label class="chk" title="叠加模式下：所有通道共用一个 Y 轴量程；关掉则每个通道各自自适应。（分道模式下每路天生就是自己的量程）"><input type="checkbox" id="sc-shared"> 共用 Y 轴</label>
-        <label class="chk" title="把原始 512 B 包另存一份，可离线回放（也方便把现场数据留给排查）"><input type="checkbox" id="sc-raw"> 记录原始包</label>
+        <label class="chk" title="启动采样前设置；记录本轮原始包，可离线回放"><input type="checkbox" id="sc-raw"> 记录原始包</label>
         <span class="spacer"></span>
         <button id="sc-mark-clear" title="清除测量游标 A/B（Esc 也行）">清游标</button>
-        <button id="sc-csv" title="按当前缓冲导出 CSV（分块生成，长采集也不会卡死）">导出 CSV</button>
-        <button id="sc-save" title="把记录的原始包存成 .jsp（可以离线回放）">保存原始</button>
+        <button id="sc-csv" title="导出点击时的样本快照（分批生成）">导出 CSV</button>
+        <button id="sc-save" title="停止并排空后，把本轮原始包存成 .jsp">保存原始</button>
         <button id="sc-open" title="打开 .jsp 回放 —— 不用连硬件也能看波形/调触发">打开回放</button>
-        <button id="sc-clear">清空</button>
+        <button id="sc-clear" title="停止采样后清空波形、原始包和计数">清空</button>
       </div>
       <div class="plotwrap">
         <canvas id="sc-canvas"></canvas>

@@ -216,7 +216,7 @@ def target_flash(client, args):
     path = Path(args.file)
     if path.suffix.lower() not in {'.elf', '.axf', '.out', '.hex', '.ihex', '.bin'}:
         raise ValueError('固件格式须为 ELF/AXF/OUT、HEX/IHEX 或 BIN')
-    if path.suffix.lower() == '.bin' and not (args.base and 0 < args.base <= 0xffffffff):
+    if path.suffix.lower() == '.bin' and not (args.base is not None and 0 <= args.base <= 0xffffffff):
         raise ValueError('BIN 须指定 --base，例如 --base 0x08000000')
     if path.suffix.lower() != '.bin' and args.base is not None:
         raise ValueError('--base 仅用于 BIN，ELF 和 HEX 自带地址')

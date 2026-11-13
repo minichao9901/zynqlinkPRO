@@ -71,9 +71,7 @@ export function elfTable(elf,view,search='',offset=0,limit=100){
 }
 export function firmwareRegions(name,bytes,base){
   if(/\.(elf|axf|out|hex|ihex)$/i.test(name))return parseFirmware(name,bytes,0);
-  const address=Number(base);
-  if(!Number.isSafeInteger(address)||address<=0||address>0xffffffff)throw Error('BIN 烧录基地址须为有效的非零 32 位地址；原文件字节无需地址');
-  if(address+bytes.length>0x100000000)throw Error('BIN 地址范围超过 32 位');
+  const address=String(base ?? '').trim() ? Number(base) : null;
   return parseFirmware(name,bytes,address);
 }
 export function hexPage(bytes,base=0,offset=0,length=512){

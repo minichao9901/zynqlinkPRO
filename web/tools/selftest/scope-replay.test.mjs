@@ -2,8 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {ScopeView} from '../../app/scope/view.js';
-import {Trigger} from '../../app/scope/store.js';
-import { buildData, buildDef, HOST_POLL } from '../../app/scope/protocol.js';
+import {SampleStore,Trigger} from '../../app/scope/store.js';
+import { buildData, buildDef, HOST_POLL, PacketStream, SeqTracker, TimeUnwrap } from '../../app/scope/protocol.js';
 
 function rig(){
   const p=Object.create(ScopeView.prototype);
@@ -76,4 +76,76 @@ test('automatic 10 ms polling disables hardware-only advice and controls until t
   p.updatePlan();
   assert.equal(hardwarePlans,1);
   assert.equal(fields.get('sc-bench').disabled,false);
+});
+
+test('capture preserves a replayable JSP through clear and raw toggle attempts', async t => {
+  globalThis.document = { getElementById:() => ({ value:'0' }) };
+  t.after(() => { delete globalThis.document; });
+  const vars = [{addr:0x20000000,size:1,scalar:'u8',name:'x'}];
+  for (const flags of [0, HOST_POLL]){
+    const p = rig();
+    p.selected = vars;
+    p._starting = true;
+    assert.equal(p.clear(), false);
+    assert.equal(p.setRawCapture(false), true);
+    p._starting = false;
+    p._capturing = true;
+    p.store = new SampleStore(vars, 3);
+    p.stream = new PacketStream();
+    p.seqT = new SeqTracker();
+    p.timeU = new TimeUnwrap();
+    p._awaitDef = true;
+    p.packets = p.lost = p.decodeErr = 0;
+    p.onChunk(buildDef({ vars, flags, periodUs:10000 }));
+    p.onChunk(buildData({seq:1,n:1,payload:Uint8Array.of(17)}));
+    p._stopPromise = Promise.resolve();
+    assert.equal(p.clear(), false);
+    assert.equal(p.setRawCapture(false), true);
+    assert.equal(p.saveRaw(), false);
+    p.onChunk(buildData({seq:2,n:1,payload:Uint8Array.of(42)}));
+    p._capturing = false;
+    p._stopPromise = null;
+    assert.equal(p.setRawCapture(false), false);
+    const saved = new Blob(p.raw);
+    const replay = rig();
+    await replay.replayFile({arrayBuffer:() => saved.arrayBuffer()});
+    assert.match(replay.state, /回放完成：2 个样本/);
+    assert.deepEqual([replay.store.channel(0).at(0), replay.store.channel(0).at(1)], [17,42]);
+  }
+  const p = rig();
+  p.captureRaw = false;
+  p.running = true;
+  assert.equal(p.setRawCapture(true), false);
+});
+
+test('CSV yields between batches and exports the original time/sample prefix', async t => {
+  const p = rig();
+  const vars = [{name:'x',size:8,scalar:'f64'}];
+  const samples = p.store = new SampleStore(vars, 5000);
+  for(let i = 0; i < 4097; i++) samples.pushFrame([i === 0 ? 1e-10 : i], i * 2);
+  let blob;
+  t.mock.method(URL, 'createObjectURL', value => { blob = value; return 'blob:scope-test'; });
+  t.mock.method(URL, 'revokeObjectURL', () => {});
+  const buttons = new Map();
+  globalThis.document = {
+    getElementById(id){ if (!buttons.has(id)) buttons.set(id, {}); return buttons.get(id); },
+    createElement(){ return {click(){},remove(){}}; },
+    body:{appendChild(){}},
+  };
+  t.after(() => { delete globalThis.document; });
+  const exported = p.exportCsv();
+  assert.equal(blob, undefined);
+  assert.equal(buttons.get('sc-csv').disabled, true);
+  assert.equal(await p.exportCsv(), false);
+  // More samples can arrive, with a different time slope at the tail.
+  samples.pushFrame([99999], 50000);
+  assert.equal(p.clear(), false);
+  const result = await exported;
+  assert.equal(result.rows, 4097);
+  const lines = (await blob.text()).trimEnd().split('\n');
+  assert.equal(lines.length, 4098);
+  assert.equal(lines[0], 't_us,x');
+  assert.equal(lines[1], '0,1e-10');
+  assert.equal(lines.at(-1), '8192,4096');
+  assert.equal(buttons.get('sc-csv').disabled, false);
 });

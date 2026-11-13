@@ -146,8 +146,6 @@ export class FlashView {
     if (!(file instanceof File) || !file.size) throw Error('请选择非空目标固件');
     const binary = /\.bin$/i.test(file.name);
     if (!/\.(elf|axf|out|hex|ihex|bin)$/i.test(file.name)) throw Error('不支持此固件格式');
-    if (binary && (!Number.isInteger(base) || base <= 0 || base > 0xffffffff))
-      throw Error('BIN 需要有效的 Flash 基地址');
     const buffer = await file.arrayBuffer();
     const regions = parseFirmware(file.name, new Uint8Array(buffer), base);
     if (this.busy) throw Error('烧录器正在操作，请等待完成');
@@ -270,9 +268,8 @@ export class FlashView {
   async _flashOnce(){
     if (!this.file){ toast('请选择或拖入固件文件', 'warn'); return; }
     const { name, dataB64 } = this.file;
-    const base = /\.bin$/i.test(name) ? Number($('f-base').value) : 0;
-    if (/\.bin$/i.test(name) && (!$('f-base').value.trim() || !Number.isInteger(base) || base < 0 || base > 0xffffffff))
-      throw Error('请输入有效的 BIN 烧录基地址');
+    const baseText = /\.bin$/i.test(name) ? $('f-base').value.trim() : '';
+    const base = baseText ? Number(baseText) : null;
     const regions = parseFirmware(name, Uint8Array.from(atob(dataB64), ch => ch.charCodeAt(0)), base);
     const verify = $('f-verify').checked;
     const reset = $('f-reset').checked;

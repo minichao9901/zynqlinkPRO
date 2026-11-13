@@ -90,6 +90,19 @@ class ToolboxTests(unittest.TestCase):
             self.assertFalse(result['ok'])
             self.assertEqual(result['job'], 'test')
 
+    def test_target_flash_preserves_explicit_zero_bin_base(self):
+        with tempfile.TemporaryDirectory() as directory:
+            image = Path(directory) / 'target.bin'
+            image.write_bytes(b'\x01')
+            client = Mock(spec=toolbox.Client)
+            client.request.return_value = {'ok': True, 'value': {'value': {'prepared': True}}}
+            cli = ['target-flash', '--chip', 'nrf52', '--file', str(image), '--prepare-only']
+            args = toolbox.parser().parse_args([*cli, '--base', '0'])
+            self.assertTrue(toolbox.target_flash(client, args)['ok'])
+            self.assertEqual(client.request.call_args.args[0]['args'][1]['base'], 0)
+            with self.assertRaises(ValueError):
+                toolbox.target_flash(client, toolbox.parser().parse_args(cli))
+
     def test_runtime_rejects_non_loopback_and_invalid_token(self):
         with tempfile.TemporaryDirectory() as directory:
             folder = Path(directory)

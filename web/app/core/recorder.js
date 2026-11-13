@@ -1,10 +1,10 @@
 /**
- * 采集落文件：收到的字节**边收边写进本地文件**，不占页面内存。
+ * 采集落文件：收到的字节**边收边写进本地文件**，待写队列设有上限。
  *
  * 为什么需要它：接收区是"显示优先"的 —— raw 上限 2 MB（`RxBuffer.maxRaw`），
  * 高速采集几秒就撑爆（WebUSB 实测 330 KB/s → 2 MB 只够 6 秒），超出的只能丢；
  * 「保存数据」也只能保存没被丢的那部分。落文件的字节**不进显示缓冲**，
- * 采集多久都不丢，页面卡不卡、有没有被限速都不影响已经写下去的字节。
+ * 写盘持续跟不上时，停止本次记录并保留已接受的前缀。
  *
  * 两条路：
  *   ① File System Access API（`showSaveFilePicker` + `createWritable`）——
@@ -41,6 +41,8 @@ import { stamp as stampOf, fileStamp, download, bytes as fBytes } from './format
 const FLUSH_BYTES = 256 * 1024;
 const FLUSH_MS = 300;
 const MEM_CAP = 64 * 1024 * 1024;
+const FILE_BACKLOG_CAP = 16 * 1024 * 1024;
+const MAX_RETAINED_CHUNKS = 65536;
 /** 积压超过这个数就认为"写盘跟不上"，界面要明确告警 */
 const BACKLOG_WARN = 4 * 1024 * 1024;
 
@@ -57,7 +59,7 @@ export function recordButtonState(rec){
   const back = rec.backlog();
   if (rec.starting) return { text: '正在选择记录文件…', title: '等待文件选择完成', primary: true };
   if (rec.draining) return {
-    text: `■ 正在落盘… ${fBytes(rec.written)} / ${fBytes(rec.pushed)}`,
+    text: `${rec.overflow ? '⚠ 记录不完整，正在落盘' : '■ 正在落盘'}… ${fBytes(rec.written)} / ${fBytes(rec.pushed)}`,
     title: `正在把积压写进文件（已写 ${fBytes(rec.written)}，共 ${fBytes(rec.pushed)}）。写完 Chrome 才会把 ${rec.name}.crswap 改名成正式文件。`,
     primary: true,
   };
@@ -93,16 +95,16 @@ export class FileRecorder {
     this.written = 0;               // **已经写进文件**的字节（进度用）
     this.frames = 0;
     this.t0 = 0;
-    this.overflow = false;          // 内存兜底模式攒爆了
+    this.overflow = false;          // 文件积压或内存记录超过上限
     this.error = null;
     this.onChange = null;           // 供界面刷新按钮文字（写盘进度也会触发）
     this.onNote = null;             // 给用户的一句提醒（toast）
     this._w = null;                 // FileSystemWritableFileStream
     this._wq = Promise.resolve();   // 写队列（保证顺序、终止时可等）
     this._chunks = [];
+    this._retainedChunks = 0;
     this._pend = 0;
     this._mem = [];
-    this._memBytes = 0;
     this._timer = null;
     this._progTimer = null;
     this._notifiedAt = 0;
@@ -152,12 +154,14 @@ export class FileRecorder {
     }
     this.bytes = 0; this.frames = 0; this.pushed = 0; this.written = 0;
     this._wq = Promise.resolve(); this._chunks = []; this._pend = 0;
-    this._mem = []; this._memBytes = 0;
-    this.overflow = false; this.error = null; this.draining = false;
+    this._mem = [];
+    this.overflow = false; this._overflowReason = null; this.error = null; this.draining = false;
+    this._retainedChunks = 0;
     this.t0 = Date.now();
     if (timestamps){
       const head = enc.encode(`[${stampOf()}]\n`);
       this._chunks.push(head);
+      this._retainedChunks++;
       this._pend += head.length;            // 文件头不计入 bytes（那是原始字节数）
       this.pushed += head.length;
     }
@@ -170,8 +174,21 @@ export class FileRecorder {
 
   /** 收流：只入队，不做 I/O（高速通路上不要在这里写盘）。正文永远原样字节流 */
   push(bytes, t = new Date()){
-    if (!this.active || !bytes?.length) return;
-    this._chunks.push(bytes);
+    if (!this.active || this.overflow || !bytes?.length) return;
+    const pending = this._w ? this.backlog() : this.pushed;
+    const limit = this._w ? FILE_BACKLOG_CAP : MEM_CAP;
+    if (pending + bytes.length > limit || this._retainedChunks >= MAX_RETAINED_CHUNKS){
+      // Do not enqueue any part of a rejected chunk. Finish the accepted
+      // prefix in order. Setting error here would discard those writes.
+      this.overflow = true;
+      this._overflowReason = pending + bytes.length > limit ? fBytes(limit) : MAX_RETAINED_CHUNKS + ' 段';
+      void this.stop().catch(error => this._fail(error));
+      try { this.onNote?.(`记录达到 ${this._overflowReason} 的缓冲上限，正在结束记录，文件不完整`); } catch {}
+      return;
+    }
+    // Keep small views from retaining an arbitrarily large backing buffer.
+    this._chunks.push(bytes.byteLength === bytes.buffer.byteLength ? bytes : bytes.slice());
+    this._retainedChunks++;
     this._pend += bytes.length;
     this.bytes += bytes.length;
     this.pushed += bytes.length;
@@ -204,11 +221,10 @@ export class FileRecorder {
         }
         this.written += total;
         this._notify(true);
-      }).catch(e => this._fail(e));
+      }).catch(e => this._fail(e)).finally(() => { this._retainedChunks -= chunks.length; });
     } else {
       for (const c of chunks){
-        if (this._memBytes + c.length > MEM_CAP){ this.overflow = true; return; }
-        this._mem.push(c); this._memBytes += c.length;
+        this._mem.push(c);
       }
       this.written += total;
     }
@@ -227,6 +243,7 @@ export class FileRecorder {
     this.error = e;
     this.active = false;
     clearInterval(this._timer); this._timer = null;
+    this._retainedChunks -= this._chunks.length;
     this._chunks = []; this._pend = 0;
     try { this.onNote?.(`记录写入失败：${e.message || e}。已停止接收，文件可能不完整，请点「结束失败记录」关闭文件`); } catch {}
     this._notify(true);
@@ -297,14 +314,19 @@ export class FileRecorder {
       try { await this._w.close(); } catch (e){ info.error = info.error || e; this.error = info.error; }
       this._w = null;
     } else if (this._mem.length){
-      download(this.name, new Blob(this._mem, { type: 'application/octet-stream' }));
+      try { download(this.name, new Blob(this._mem, { type: 'application/octet-stream' })); }
+      catch (e){ info.error ||= e; this.error = info.error; }
     }
     this.draining = false;
+    if (this.overflow && !info.error){
+      info.error = new Error(`记录超过 ${this._overflowReason} 的缓冲上限，已保存超限前的数据，文件不完整`);
+      this.error = info.error;
+    }
     info.pushed = this.pushed;
     info.written = this.written;
-    this._mem = []; this._memBytes = 0;
+    this._mem = [];
     this._disarmGuards();
-    this.onChange?.();
+    this._notify(true);
     return info;
   }
 }

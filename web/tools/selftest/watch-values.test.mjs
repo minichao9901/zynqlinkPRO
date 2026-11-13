@@ -1,9 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { canEditWatch, encodeWatchValue, formatWatchValue, resolveWatch, treeRows, writeWatchValue } from '../../app/dbg/watch.js';
+import { canEditWatch, encodeWatchValue, formatWatchValue, resolveWatch, treeRows, writeWatchValue, WatchList } from '../../app/dbg/watch.js';
 import { runCmd } from '../../app/dbg/cmd.js';
 import { completeLine } from '../../app/dbg/complete.js';
 import { Dwarf } from '../../app/elf/dwarf.js';
+import { DbgView } from '../../app/dbg/view.js';
 import { SymTab } from '../../app/dbg/symbols.js';
 
 const addr = 0x20000000;
@@ -89,4 +90,59 @@ test('p/x uses the same scalar, bitfield and tree hex values and supports comple
   assert.match((await runCmd('p/x bits',s)).lines[0].t,/= 0x7/);
   assert.match((await runCmd('p/x tree',s)).lines[1].t,/0xffffffff/);
   assert.equal(completeLine('p/x val',{sym:{vars:[{name:'value'}],funcs:[],objs:[]}}).value.trim(),'p/x value');
+});
+
+test('resolving a new ELF replaces old error, type and value data', () => {
+  const watch = new WatchList();
+  watch.add('x', null);
+  assert.match(watch.items[0].error, /载入/);
+  Object.assign(watch.items[0], { expanded:true, bit:{size:3}, bytes:Uint8Array.of(7), prev:'old' });
+  watch.resolveAll({ typeOf:() => ({ addr, type:{ kind:'scalar', scalar:'u32', size:4 } }), find:() => null });
+  const [item] = watch.items;
+  assert.equal(item.expr, 'x');
+  assert.equal(item.expanded, true);
+  for (const field of ['error','bit','bytes','prev']) assert.equal(item[field], undefined);
+  assert.equal(formatWatchValue(item, Uint8Array.of(255,255,255,255)).text, '4294967295');
+});
+
+test('an in-flight read or write cannot carry over an old ELF binding', async () => {
+  const sym = { typeOf:() => ({ addr, type:{ kind:'scalar', scalar:'u32', size:4 } }), find:() => null };
+  const next = { ...sym };
+  const watch = new WatchList();
+  watch.add('x', sym);
+  const old = watch.items[0];
+  let finishRead, finishRefresh, writes = 0;
+  const view = Object.assign(Object.create(DbgView.prototype), {
+    sym, watch, renderWatch(){},
+    session:{
+      connected:true, halted:true,
+      exclusive:fn => fn(),
+      memRead:() => new Promise(resolve => { finishRead = resolve; }),
+      refresh:() => new Promise(resolve => { finishRefresh = resolve; }),
+      memWrite(){ writes++; },
+    },
+  });
+  const read = view._refreshWatchLocked({ force:true });
+  const write = view.writeWatch(0, '7');
+  view.sym = next;
+  watch.resolveAll(next);
+  finishRead(Uint8Array.of(3,0,0,0));
+  finishRefresh();
+  assert.equal(await read, 0);
+  await assert.rejects(write, /监视项已改变/);
+  assert.equal(old.bytes, undefined);
+  assert.equal(watch.items[0].bytes, undefined);
+  assert.equal(writes, 0);
+});
+
+test('full-width signed bitfields display signed values and keep their hex bits', () => {
+  const item = { addr, size:4, bit:{size:32, inUnit:0, signed:true} };
+  for (const [bytes, value, hex] of [
+    [[255,255,255,255],'-1','0xffffffff'],
+    [[0,0,0,128],'-2147483648','0x80000000'],
+    [[255,255,255,127],'2147483647','0x7fffffff'],
+  ]){
+    assert.match(formatWatchValue(item, Uint8Array.from(bytes)).text, new RegExp('^' + value + ' '));
+    assert.equal(formatWatchValue(item, Uint8Array.from(bytes), 'hex').text, hex);
+  }
 });
