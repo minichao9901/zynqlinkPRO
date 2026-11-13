@@ -11,7 +11,7 @@ export const TUTORIALS=[
   ]},
   {id:'capture',title:'第一次联动采集',description:'需要目标板与探针 · 一步一步熟悉真实录制流程',steps:[
     {target:'#choose-elf',panel:'target',title:'载入目标实际运行的 ELF',text:'点击载入与目标 Flash 一致的 ELF。它用于校验镜像、解析函数和重建执行流；载入文件本身不是烧录。',done:'elf'},
-    {target:'#connect',panel:'target',title:'连接并确认芯片能力',text:'确认板卡空闲、Trace 接线和供电正确，再由你点击「连接探针」。检查识别型号和 ETM 支持情况，不能仅凭芯片系列推断支持。',done:'connected'},
+    {target:'#target-state',panel:'target',title:'连接并确认芯片能力',text:'确认板卡空闲、Trace 接线和供电正确，再点工作台顶栏的「连接探针」。单独打开 ETM 时，用左侧按钮连接。检查此处显示的型号和 ETM 支持情况。',done:'connected'},
     {target:'#symbol-search',panel:'target',title:'选择初始化后的业务函数',text:'搜索函数，点击函数前的 ＋ 添加断点，再用断点列表圆点选为采集起点。优先选择初始化后的业务函数，避免一开始就在启动代码中采集。',done:'entry'},
     {target:'#read-clock',panel:'clock',title:'核对板级输入与回读时钟',text:'按板卡填写真实 HSE，点击重新读取 RCC，再核对 CPU 与 TRACECLK。这里的预期值不会替你修改目标 PLL；不要直接照抄示例板频率。',observe:'#read-clock'},
     {target:'#panel-trace',panel:'trace',title:'从短窗口和默认配置开始',text:'核对 Trace ID、芯片支持的选项和接收端。首次可选择较短采集窗口，例如 10ms，再按需要加长；不必一次修改所有高级选项。'},

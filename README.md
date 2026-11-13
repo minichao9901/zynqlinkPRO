@@ -53,7 +53,7 @@ zynqlinkPRO 将 FPGA 调试引擎、并行 Trace 采集和主机分析工具整�
 
 ### 使用在线调试工具
 
-打开[在线工作台](https://minichao9901.github.io/zynqlinkPRO/)，使用桌面版 Chrome / Edge，进入所需工具并点击连接、选择 USB 或串口设备。在线站点提供静态前端；**ETM 采集和解码使用本地 EXE 服务**。
+打开[在线工作台](https://minichao9901.github.io/zynqlinkPRO/)，使用桌面版 Chrome 或 Edge。进入所需工具后点顶栏「连接探针」，首次使用时在 USB 和 HID 各自的授权框选择同一只探针。「断开连接」释放当前页面的探针会话。串口助手和终端共用单独的串口连接。ETM 采集和解码使用本地 EXE 服务。
 
 探针固件已提供 WebUSB 网页入口描述符，指向本项目的工程下载页。插入后的通知显示与 USB 授权由浏览器控制。
 

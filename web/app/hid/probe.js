@@ -20,6 +20,27 @@ export const USAGE_PAGE = 0xFF00;   // 厂商自定义页
 export const VID = 0x0d28;          // akaLinkPro：CMSIS-DAP + CDC + HID + WebUSB + DFU 复合设备
 export const PID = 0x0204;
 export const PAYLOAD = 63;          // 64 - 1（Report ID）
+const probeFilter = { vendorId: VID, productId: PID, usagePage: USAGE_PAGE };
+let selectedDevice = null;
+
+export function rememberHidDevice(device){ selectedDevice = device; }
+
+export async function authorizedHidDevices(){
+  if (nativeProbeEnabled()) return await nativeHidDevices();
+  const devices = await globalThis.navigator?.hid?.getDevices() || [];
+  return devices.includes(selectedDevice) ? [selectedDevice] : devices;
+}
+
+export async function selectHidDevice({ forcePick = false } = {}){
+  if (!AkaLinkHid.supported()) throw Error('HID 需要桌面版 Chrome、Edge 或本机工作台');
+  const devices = forcePick && !nativeProbeEnabled() ? [] : (await authorizedHidDevices()).filter(device =>
+    device.vendorId === VID && device.productId === PID && device.collections?.some(c => c.usagePage === USAGE_PAGE));
+  if (devices.length === 1) return devices[0];
+  if (nativeProbeEnabled()) throw Error('本机工作台需要唯一的 ZynqDAP HID');
+  const picked = await navigator.hid.requestDevice({ filters:[probeFilter] });
+  if (!picked.length) throw Error('未选择 HID 探针');
+  return picked[0];
+}
 
 export const CMD = {
   GET_CONFIG: 0x01, SET_CONFIG: 0x02, GET_VOLTAGE: 0x03, SAVE_CONFIG: 0x04,
@@ -27,7 +48,6 @@ export const CMD = {
   HW_DATE: 0x15, FW_DATE: 0x16, BL_DATE: 0x17,
   RTT: 0x31,
   RISCV: 0x33,
-  RESET_IO: 0x3a,
   RESET: 0xfe, DFU: 0xff,
 };
 
@@ -45,10 +65,6 @@ export const RTT_ACT = {
   STOP: 0, START: 1, STATUS: 2, AUTOSTART: 3, RAW_DAP: 4, PEEK: 5,
   RAW_RESULT: 6, CONFIG: 7, BENCH: 8, BENCH_RESULT: 9, TARGET: 10,
 };
-
-/** HID 0x3A: change/query EVKLite reset output mode. */
-export const RESET_IO_ACT = { GET: 0, SET_NRST_MODE: 1 };
-export function resetIoData(action, openDrain = 0){ return Uint8Array.of(action & 0xff, openDrain ? 1 : 0); }
 
 /** action 10：切全局目标类型。Byte[0]=10（action）、Byte[1]=0 SWD/ARM | 1 RISC-V/JTAG。
  *  ⚠️ 这是**0x31** 的动作，不是 0x32 —— J-Scope 那边要发它得用 HID_CMD_RTT（见 scope/protocol.js）。*/
@@ -94,21 +110,6 @@ export function rttConfigData({ clockHz = 0, chunkBytes = 0, discard = false, de
 }
 
 const s8 = v => (v & 0xff) > 127 ? (v & 0xff) - 256 : (v & 0xff);
-
-/** Parse the 0x3A response payload: cmd, rc, mode, capability bits. */
-export function parseResetIoResponse(res){
-  if (!res || res[1] !== CMD.RESET_IO){
-    if (res?.[1] === 0) throw new Error('探针固件不支持复位输出设置（请升级 akaLinkPro 固件）');
-    throw new Error('复位输出设置响应格式错误');
-  }
-  if (res.length < 5 || res[0] !== 4 || res[3] > 1) throw new Error('复位输出设置响应不完整或格式错误');
-  const rc = s8(res[2]);
-  if (rc === -1) throw new Error('当前探针板型不支持复位输出模式设置');
-  if (rc === -2) throw new Error('探针拒绝了未知的复位输出操作');
-  if (rc !== 0) throw new Error(`复位输出设置失败（返回码 ${rc}）`);
-  const caps = res[4] || 0;
-  return { openDrain: !!res[3], supportsMode: !!(caps & 1), dualReset: !!(caps & 2), pa27Configurable: !!(caps & 4), capabilities: caps };
-}
 
 /**
  * 12 个状态字（48 字节）→ 好用的对象。字序与位域见协议文档「状态字」表。
@@ -256,34 +257,26 @@ export class AkaLinkHid {
 
   /** 弹设备选择框。过滤条件带上 VID/PID —— 否则选择框里会混进触摸板这类同样有 0xFF00 的设备 */
   async request(){
-    if(nativeProbeEnabled()){
-      const devices=await nativeHidDevices();const device=AkaLinkHid.pick(devices);if(!device)throw Error('本地服务未发现ZynqDAP HID');await this.open(device);return device;
-    }
-    if (!AkaLinkHid.supported()) throw new Error('这个浏览器没有 WebHID（Chrome / Edge 桌面版才有）');
-    const devs = await navigator.hid.requestDevice({
-      filters: [{ vendorId: VID, productId: PID, usagePage: USAGE_PAGE }],
-    });
-    if (!devs.length) throw new Error('没有选择设备');
-    await this.open(devs[0]);
-    return this.device;
+    const device = await selectHidDevice({ forcePick:true });
+    await this.open(device);
+    return device;
   }
 
   /** 默认复用唯一已授权的探针；首次或多设备时选择。true 强制选择，false 只用授权设备。 */
   async connect(interactive = null){
     if (interactive === true) return await this.request();
     if (interactive === false) return await this.reconnect();
-    if (!AkaLinkHid.supported()) throw new Error('这个浏览器没有 WebHID（Chrome / Edge 桌面版才有）');
-    const devices = (await (nativeProbeEnabled()?nativeHidDevices():navigator.hid.getDevices())).filter(d =>
-      d.vendorId === VID && d.productId === PID && d.collections?.some(c => c.usagePage === USAGE_PAGE));
-    if (devices.length !== 1) return await this.request();
-    await this.open(devices[0]);
-    return devices[0];
+    const device = await selectHidDevice();
+    await this.open(device);
+    return device;
   }
 
   /** 用之前授权过的探针直接连（浏览器记住过就不用再点弹框） */
   async reconnect(){
     if (!AkaLinkHid.supported()) throw new Error('这个浏览器没有 WebHID（Chrome / Edge 桌面版才有）');
-    const devs = await (nativeProbeEnabled()?nativeHidDevices():navigator.hid.getDevices());
+    const devs = await authorizedHidDevices();
+    const matches = devs.filter(d => d.vendorId === VID && d.productId === PID);
+    if (matches.length > 1) throw Error('发现多只 HID 探针，请在顶栏选择设备');
     const d = AkaLinkHid.pick(devs);
     if (!d){
       const names = devs.map(x => x.productName || '(无名)').join('、');
@@ -348,7 +341,7 @@ export class AkaLinkHid {
     // else until its reply is consumed (or physical unplug ends that channel).
     const orphan = channel.fault;
     if (orphan){
-      if (res[1] === orphan.cmd || (orphan.cmd === CMD.RESET_IO && res[0] === 1 && res[1] === 0)){
+      if (res[1] === orphan.cmd){
         orphan.replyReceived = true;
         if (orphan.writeSettled) channel.fault = null;
       }
@@ -361,7 +354,7 @@ export class AkaLinkHid {
     // Older firmware answers unknown custom commands with CMD_NOT_SUPPORT (0)
     // instead of echoing the request command. Consume that reply so capability
     // checks fail promptly without poisoning the HID channel until timeout.
-    if (res[1] !== p.cmd && !(p.cmd === CMD.RESET_IO && res[0] === 1 && res[1] === 0)) return;
+    if (res[1] !== p.cmd) return;
     p.replyReceived = true;
     this._pending = null;
     this._settle(p);                      // 清掉这条请求的超时定时器，再放行
@@ -397,7 +390,7 @@ export class AkaLinkHid {
    */
   async _reacquire(){
     if (!AkaLinkHid.supported()) throw new Error('这个浏览器没有 WebHID');
-    const devs = await navigator.hid.getDevices();
+    const devs = await authorizedHidDevices();
     const d = AkaLinkHid.pick(devs);
     if (!d) throw new Error('浏览器里已经没有已授权的探针了（点「连接探针」重新授权一次）');
     await this.open(d);
@@ -542,12 +535,6 @@ export class AkaLinkHid {
    *  粘性：设一次一直有效，J-Scope 采样器的传输后端也跟着它走。 */
   setTargetType(riscv){ return this.rtt(RTT_ACT.TARGET, targetTypeData(!!riscv)); }
 
-  resetIo(action = RESET_IO_ACT.GET, openDrain = 0){
-    return this.xfer(CMD.RESET_IO, resetIoData(action, openDrain)).then(parseResetIoResponse);
-  }
-
-  getResetOutputMode(){ return this.resetIo(RESET_IO_ACT.GET); }
-  setResetOutputMode(openDrain){ return this.resetIo(RESET_IO_ACT.SET_NRST_MODE, openDrain); }
 
   /**
    * 让探针自己的 RISC-V 引擎**放掉 JTAG TAP**（HID 0x33 action 0）。

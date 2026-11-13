@@ -10,7 +10,6 @@
  */
 import { prepareProbeHandoff } from '../core/probe-users.js';
 import { runProbeOperation } from '../core/probe-manager.js';
-import { nativeProbeEnabled } from '../core/native-probe.js';
 import { $, setStatus, debounce } from '../ui/dom.js';
 import { toast } from '../ui/toast.js';
 import { store } from '../core/store.js';
@@ -43,7 +42,6 @@ export class RttCdcView {
     this.last = null;         // 最近一次 status
     this._elfInput = null;
     this._bound = false;
-    this._resetIoSupported = false;
     this._connecting = false;
     this._disconnecting = false;
     this._disconnectPromise = null;
@@ -82,8 +80,6 @@ export class RttCdcView {
     this._applyTargetUi();
     $('h-target').addEventListener('change', () => this.applyTargetType());
 
-    $('h-connect').addEventListener('click', () => this.connect());
-    $('h-disconnect')?.addEventListener('click', () => this.disconnect());
     $('h-elf').addEventListener('click', () => this._elfInput.click());
     this._elfInput.addEventListener('change', () => this.loadElf());
     $('h-start').addEventListener('click', () => this.start());
@@ -91,20 +87,14 @@ export class RttCdcView {
     $('h-stop').addEventListener('click', () => this.stop().catch(e => toast(e.message, 'err')));
     $('h-refresh').addEventListener('click', () => this.refresh());
     $('h-clock').addEventListener('change', debounce(() => this.applyClock(), 60));
-    $('global-nrst-open-drain')?.addEventListener('change', () => this.applyResetOutputMode());
 
     // ?hid=mock：没插硬件也能把这张面板走一遍（自测/演示）
     if (new URLSearchParams(location.search).get('hid') === 'mock') this.useMock();
 
     this.dev.onDisconnect = () => {
-      this._setResetIoUi(null);
       this.render({ error: '探针断开了（USB 被拔？）' });
     };
     this.render();
-    // 之前授权过的探针：静默接上（没授权就安静地保持未连接）
-    // Native sessions are acquired by an explicit feature action. Merely
-    // opening the workbench must not hold HID and block a headless capture.
-    if (!this.mock && AkaLinkHid.supported() && !nativeProbeEnabled()) this.reconnect({ silent: true });
   }
 
   useMock(){
@@ -115,20 +105,23 @@ export class RttCdcView {
   }
 
   // ---------------------------------------------------------------- 连接
-  async connect(){
+  async connect(device){
     if (this._connecting || this._disconnecting || this.dev.connected) return false;
     this._connecting = true;
     this.render();
     try {
       if (this.mock) await this.dev.request();
+      else if (device) await this.dev.open(device);
       else await this.dev.connect();
       this.info = await this.dev.info();
       this._statusError = null;
-      await this.syncResetOutputMode({ silent: true });
+      await this.refresh();
       this.render();
       toast(`已连接：${this.dev.label}${this.info.fw ? ' · FW ' + this.info.fw : ''}`, 'ok');
       return true;
     } catch (e){
+      try { await this.dev.close(); }
+      catch (cleanup){ this.probeManager?.fail('hid', cleanup); }
       this._statusError = e?.message || String(e);
       this.render({ error: this._statusError });
       toast('连接探针失败：' + (e?.message || e), 'err');
@@ -147,7 +140,6 @@ export class RttCdcView {
       await this.dev.reconnect();
       this.info = await this.dev.info();
       this._statusError = null;
-      await this.syncResetOutputMode({ silent: true });
       this.render();
       if (!silent) toast(`已重连：${this.dev.label}`, 'ok');
       /**
@@ -177,16 +169,17 @@ export class RttCdcView {
   }
 
   /** 停止探针侧 RTT 桥后关闭本页 HID 会话；CDC 串口仍由串口页单独管理。 */
-  async disconnect(){
+  async disconnect({ fromManager = false } = {}){
     if (this._disconnectPromise) return await this._disconnectPromise;
     if (this._connecting || this._disconnecting) return false;
     this._disconnecting = true;
     this.render();
     this._disconnectPromise = (async () => {
       const needsStop = !!(this._starting || this.last?.running || this._bridgeRequested ||
-        this.probeManager?.leases?.has('hid') || this.probeManager?.failures?.has('hid'));
+        this.probeManager?.failures?.has('hid'));
       if (needsStop){
-        const stopped = await this.stop();
+        if (!this.dev.connected) await this.dev.reconnect();
+        const stopped = await this.stop({ fromManager });
         if (stopped === false) throw new Error('停止 RTT 转发未确认，探针连接仍保持打开');
       }
       clearInterval(this._timer);
@@ -201,13 +194,14 @@ export class RttCdcView {
       this._bridgeRequested = false;
       this._stall = 0;
       this._lastMoved = null;
-      this._setResetIoUi(null);
+      this.probeManager?.forget('hid');
       this.render();
       toast('探针连接已关闭', 'ok');
       return true;
     })();
     try { return await this._disconnectPromise; }
     catch (e){
+      if (fromManager) throw e;
       this._statusError = e?.message || String(e);
       if (this.dev.connected) this.probeManager?.fail?.('hid', e);
       this.render({ error: this._statusError });
@@ -217,62 +211,6 @@ export class RttCdcView {
       this._disconnecting = false;
       this._disconnectPromise = null;
       this.render({ error: this._statusError });
-    }
-  }
-
-  _setResetIoUi(state){
-    const input = $('global-nrst-open-drain');
-    const label = $('global-nrst-control');
-    if (!input) return;
-    this._resetIoSupported = !!(state?.supportsMode && state?.dualReset && state?.pa27Configurable && !this.mock);
-    if (this._resetIoSupported) input.checked = !!state.openDrain;
-    input.disabled = !this._resetIoSupported;
-    // 没连探针 / 连的是老固件时，这一格是"未知"，不是"开漏"：
-    // 用 indeterminate 画成横杠，避免用户把它当成探针的真实状态
-    //（2026-10-18 起固件默认改成推挽，页面默认值也必须跟上）。
-    input.indeterminate = !this._resetIoSupported;
-    if (label){
-      label.title = this._resetIoSupported
-        ? `J3[23]/PA27 NRST：${state.openDrain ? '开漏' : '推挽'}；J5[3]/PA08 固定开漏（只由 CMSIS-DAP nTRST 驱动，两路互不联动）。`
-        : '未知：连接支持 PA27 NRST 电气模式切换的新版 akaLinkPro 固件后才能读取/修改（固件默认推挽）。';
-    }
-  }
-
-  async syncResetOutputMode({ silent = false } = {}){
-    if (this.mock || !this.dev.connected){ this._setResetIoUi(null); return null; }
-    try {
-      const state = await this.dev.getResetOutputMode();
-      this._setResetIoUi(state);
-      return state;
-    } catch (e){
-      this._setResetIoUi(null);
-      if (!silent) toast('读取复位输出模式失败：' + (e?.message || e), 'err');
-      return null;
-    }
-  }
-
-  async applyResetOutputMode(){
-    const input = $('global-nrst-open-drain');
-    if (!input || !this._resetIoSupported || this._disconnecting) return;
-    if (this.last?.running || this._starting){
-      input.checked = !input.checked;
-      toast('先停止 RTT 转发，再切换复位输出方式', 'warn');
-      return;
-    }
-    const requested = input.checked;
-    input.disabled = true;
-    try {
-      const state = await runProbeOperation(this, 'hid', async () => {
-        if (!this.dev.connected) await this.dev.reconnect();
-        return await this.dev.setResetOutputMode(requested ? 1 : 0);
-      }, { reason: '更改目标复位输出方式', policy: 'reject' });
-      if (!state) throw new Error('探针操作已取消');
-      this._setResetIoUi(state);
-      toast(`J3[23]/PA27 NRST 输出已切为${state.openDrain ? '开漏' : '推挽'}`, 'ok');
-    } catch (e){
-      input.checked = !requested;
-      this._setResetIoUi(null); // A lost reply leaves the actual mode unknown; require a fresh query.
-      toast('切换复位输出方式失败：' + (e?.message || e), 'err', 6000);
     }
   }
 
@@ -426,7 +364,6 @@ export class RttCdcView {
     try {
       await this.dev.reconnect();
       this.info = await this.dev.info().catch(() => this.info);
-      await this.syncResetOutputMode({ silent: true });
       /**
        * 🚨 **重连之后要把"目标类型"补发一遍**：目标类型是探针侧的**粘性**状态，
        *    但探针被复位/别的页面重设过之后就回到 SWD 了 —— 而界面上下拉仍然显示 RISC-V
@@ -441,7 +378,7 @@ export class RttCdcView {
       toast('探针已自动重连' + (this.isRiscv ? '（并补发了 RISC-V/JTAG 目标类型）' : ''), 'ok');
       return this.dev.connected;
     } catch (e){
-      toast('探针没连上：点「连接探针」授权一次（' + (e?.message || e) + '）', 'err', 6000);
+      toast('探针没连上：点顶栏「连接探针」（' + (e?.message || e) + '）', 'err', 6000);
       return false;
     }
   }
@@ -682,9 +619,6 @@ export class RttCdcView {
   // ---------------------------------------------------------------- 渲染
   render({ error } = {}){
     const dev = this.dev;
-    const connectionBusy = this._connecting || this._disconnecting;
-    if ($('h-connect')) $('h-connect').disabled = connectionBusy || !!dev.connected;
-    if ($('h-disconnect')) $('h-disconnect').disabled = connectionBusy || !dev.connected;
     const engineBusy = this._disconnecting || this._starting || !!this._stopPromise;
     if ($('h-start')) $('h-start').disabled = engineBusy;
     if ($('h-auto')) $('h-auto').disabled = engineBusy;
@@ -693,10 +627,9 @@ export class RttCdcView {
     const target = $('h-target'); if (target) target.disabled = engineBusy;
     this._applyTargetUi();
     const clock = $('h-clock'); if (clock) clock.disabled = engineBusy || !!this.last?.running || this.isRiscv&&!supportsRiscvStreamClock(this.info);
-    const resetMode = $('global-nrst-open-drain'); if (resetMode) resetMode.disabled = !this._resetIoSupported || this._disconnecting;
     // 第一行：设备信息
     if (error && !dev.connected) setStatus($('h-info'), error, 'err');
-    else if (!dev.connected) setStatus($('h-info'), '未连接（点「连接探针」；首次使用或有多个设备时选择 akaLinkPro）', '');
+    else if (!dev.connected) setStatus($('h-info'), '未连接 · 请使用顶栏「连接探针」', '');
     else{
       const i = this.info || {};
       setStatus($('h-info'), `已连接：${dev.label}${i.fw ? ' · FW ' + i.fw : ''}${i.sn ? ' · SN ' + i.sn : ''}`, 'ok');

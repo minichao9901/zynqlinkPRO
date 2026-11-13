@@ -42,8 +42,8 @@ export const PROBE_FEATURES = Object.freeze([
   {
     id: 'hid', label: 'RTT 转发', client: t => t.hid,
     resources: ['target-engine', 'debug-pins', 'rtt-ring', 'cdc-mode'],
-    active: t => !t.hid?.mock && !!(t.hid?.last?.running || t.hid?._bridgeRequested),
-    release: async t => { await t.hid.stop({ fromManager: true }); await t.hid.dev?.close?.(); },
+    active: t => !t.hid?.mock && !!(t.hid?.dev?.connected || t.hid?.last?.running || t.hid?._bridgeRequested),
+    release: t => t.hid.disconnect({ fromManager: true }),
   },
   {
     id: 'serial', label: 'CDC 串口', client: t => t.session,

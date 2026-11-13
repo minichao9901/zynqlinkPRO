@@ -23,13 +23,15 @@ export class EtmTarget {
     this.probe.onLog=this.log;
     this.debugFault=false;
   }
-  async connect(){
+  async connect(device){
     if(this.probe)return this.inspect();
     await this.bus.requestRelease({why:'ETM 页面连接'});
     const Probe=await this._probeBackend();
-    const devices=(await Probe.authorized()).filter(d=>d.vendorId===0x0d28);
-    let device=devices.length===1?devices[0]:null;
-    if(!device){let timer;try{device=await Promise.race([navigator.usb.requestDevice({filters:[{vendorId:0x0d28}]}),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('浏览器仍在等待 USB 设备选择；请选中探针后重新连接')),30000);})]);}finally{clearTimeout(timer);}}
+    if(!device){
+      const devices=(await Probe.authorized()).filter(d=>d.vendorId===0x0d28);
+      device=devices.length===1?devices[0]:null;
+      if(!device){let timer;try{device=await Promise.race([navigator.usb.requestDevice({filters:[{vendorId:0x0d28}]}),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('浏览器仍在等待 USB 设备选择；请选中探针后重新连接')),30000);})]);}finally{clearTimeout(timer);}}
+    }
     await this._openProbe(Probe,device,this.controlClockKhz??10000);
     try{return await this.inspect();}catch(e){try{await this.disconnect();}catch(cleanup){this.log('连接失败后的清理错误（保留首次错误）：'+cleanup.message);}throw e;}
   }

@@ -309,7 +309,23 @@ async function watchJob(id,{resume=false,kind='decode'}={}){
     throw e;
   }finally{state.job=null;state.jobKind=null;state.jobPhase=null;controls();}
 }
-on('connect',async()=>{state.lastTraceConfig=null;target.profile=$('target-profile').value;target.hseHz=null;const info=await target.connect();/* 手填优先于该板默认值，最后才是 auto 兜底 */const hse=state.hseOverride??state.hseValues[info.profile]??state.hseValues.auto;$('hse').value=hse??'';target.hseHz=hse?hse*1e6:null;if(state.hseValues.auto!==undefined){if(state.hseValues[info.profile]===undefined)state.hseValues[info.profile]=hse;delete state.hseValues.auto;}await showTarget(await target.inspect());if(state.elfInfo&&target.breakpoints.items.some(b=>b.enabled)){await target.verifyElf(state.elfInfo);await target.breakpoints.resume();await showTarget(await target.inspect());}});
+async function connectTarget(device){
+  state.lastTraceConfig=null;target.profile=$('target-profile').value;target.hseHz=null;
+  const info=await target.connect(device);
+  // 手填优先于该板默认值，最后才由 auto 兜底。
+  const hse=state.hseOverride??state.hseValues[info.profile]??state.hseValues.auto;
+  $('hse').value=hse??'';target.hseHz=hse?hse*1e6:null;
+  if(state.hseValues.auto!==undefined){
+    if(state.hseValues[info.profile]===undefined)state.hseValues[info.profile]=hse;
+    delete state.hseValues.auto;
+  }
+  await showTarget(await target.inspect());
+  if(state.elfInfo&&target.breakpoints.items.some(b=>b.enabled)){
+    await target.verifyElf(state.elfInfo);await target.breakpoints.resume();await showTarget(await target.inspect());
+  }
+}
+on('connect',()=>connectTarget());
+if(host)$('connect').parentElement.style.display='none';
 on('recover-debug',async()=>{await target.recoverDebugPort();await target.restore();if(state.pendingBreakpointRestore.length){await target.verifyElf(state.elfInfo);await resumeBreakpoints(state.pendingBreakpointRestore);}await showTarget(await target.inspect());await confirmCaptureRestore();$('job-state').classList.remove('bad');$('job-state').textContent='调试口已恢复，目标暂停；请重新联动采集';});
 async function disconnectTarget(){await target.disconnect();target.info=null;showClocks();$('target-state').textContent='探针已断开';$('live-pc').textContent='当前 PC：未连接';renderBreakpoints();controls();}
 on('disconnect',disconnectTarget);
@@ -509,6 +525,12 @@ const divider=document.querySelector('.pane-divider');function setRatio(percent)
 divider.onpointerdown=e=>{divider.setPointerCapture(e.pointerId);divider.onpointermove=v=>{if(divider.hasPointerCapture(v.pointerId)){const box=$('analysis-panes').getBoundingClientRect();setRatio((v.clientX-box.left)/box.width*100);}};divider.onpointerup=v=>divider.releasePointerCapture(v.pointerId);};divider.onkeydown=e=>{if(['ArrowLeft','ArrowRight'].includes(e.key)){e.preventDefault();const value=parseFloat($('analysis-panes').style.getPropertyValue('--trace-width'))||52;setRatio(value+(e.key==='ArrowLeft'?-3:3));}};
 async function init(){state.operation=true;controls();history.setLoading(true);renderSymbols();renderBreakpoints();try{await loadCapabilities();await refreshRecords();$('service-state').textContent='本地服务在线';$('service-state').className='status good';showClocks();}catch(e){error(e);}finally{state.operation=false;history.setLoading(false);controls();}}
 const embeddedBridge={probe:()=>target.probe,busy:()=>!!(state.hardwareOperation||state.jobKind==='capture'||target.probe&&(state.job||state.waiting)),
+  connect:async device=>{
+    if(state.operation||state.job)throw Error('ETM 正在处理任务，请稍后连接');
+    if(target.probe)return true;
+    await perform(()=>connectTarget(device),{hardware:true});
+    return !!target.probe&&!target.transportFault;
+  },
   requestStop:async()=>{
     target.cancelEntry=true;state.captureCancelled=true;
     if(state.jobKind==='decode')throw Error('正在解码，等待结束或超时后再重新检测');

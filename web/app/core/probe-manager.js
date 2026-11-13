@@ -121,16 +121,17 @@ export class ProbeManager {
   confirm(owner){ this.failures.delete(owner); }
   forget(owner){ this.leases.delete(owner); this.confirm(owner); }
 
-  async releaseOthers(keep, reason = '另一个功能要使用探针'){
+  async releaseOthers(keep, reason = '另一个功能要使用探针', { preserve = [] } = {}){
     // Compatibility calls made inside setup have already been arbitrated by run().
     if (keep && this.current?.owner === keep) return;
-    const all = new Set([...this.clients.values()].flatMap(c => [...c.resources]));
+    const clients = [...this.clients].filter(([id]) => id !== keep && !preserve.includes(id));
+    const all = new Set([...this.clients].filter(([id]) => !preserve.includes(id)).flatMap(([, c]) => [...c.resources]));
     this._checkProtected(keep, all);
-    for (const t of this.pending) if (t.owner !== keep) t.controller.abort();
+    for (const t of this.pending) if (t.owner !== keep && !preserve.includes(t.owner)) t.controller.abort();
     return await this._enqueue(async () => {
       this._checkProtected(keep, all);
-      for (const [id, c] of this.clients){
-        if (id === keep || (!this.leases.has(id) && !c.active())) continue;
+      for (const [id, c] of clients){
+        if (!this.leases.has(id) && !c.active()) continue;
         try { await c.release(reason); }
         catch (e){ this.fail(id, e); throw e; }
         this.leases.delete(id);

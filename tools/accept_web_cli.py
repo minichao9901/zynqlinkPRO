@@ -55,7 +55,7 @@ def main():
     cli('page', 'dbg', 'invoke', 'summary')
     cli('page', 'dbg', 'invoke', '__proto__', ok=False)
     cli('page', 'dbg', 'read', 'button', ok=False)
-    cli('page', 'dbg', 'interrupt', '#d-connect', ok=False)
+    cli('page', 'dbg', 'interrupt', '#btn-probe-connect', ok=False)
     cli('page', 'etm', 'upload', '#elf-file', str(ROOT / 'prebuilt/golden/f103ze-cdc48.elf'))
     cli('page', 'etm', 'wait', '#elf-label', '--contains', 'f103ze-cdc48.elf')
     batch = args.out / 'requests.json'

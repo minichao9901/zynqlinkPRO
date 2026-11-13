@@ -10,6 +10,7 @@ import { initSidebarTabs } from './ui/sidebar-tabs.js';
 import { initDockNavigation } from './ui/dock-navigation.js';
 import { initFullscreen } from './ui/fullscreen.js';
 import { initProbeStatus } from './ui/probe-status.js';
+import { initProbeConnection } from './ui/probe-connection.js';
 import { initProbeFirmwareInfo } from './ui/probe-firmware-info.js';
 import { initEventLogs } from './ui/event-logs.js';
 import { initLogSearch } from './ui/log-search.js';
@@ -86,8 +87,10 @@ if (localManual) manualTab.hidden = false;
 else manualTab.remove();
 const pages = { serial:assistant, terminal, rtt, rttcdc:stream, scope, flash, dbg, etm,
   manual:{ onShow:async () => (await import('./command-manual.js')).showManual() } };
+const renderProbeConnection = initProbeConnection(tools);
 initTabs(name => {
   workspace.sync();
+  renderProbeConnection();
   requestAnimationFrame(() => {
     if (!document.getElementById('tab-'+name)?.classList.contains('active')) return;
     Promise.resolve().then(() => pages[name]?.onShow?.()).catch(error => {

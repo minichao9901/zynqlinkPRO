@@ -196,9 +196,6 @@ export class RttView {
     });
 
     // ---------- 连接按钮 ----------
-    $('r-usb-connect').addEventListener('click', () => this.connectProbe());
-    $('r-usb-pick').addEventListener('click', () => { this._forcePick = true; this.connectProbe(); });
-    $('r-usb-disconnect').addEventListener('click', () => this.disconnect());
     $('r-find').addEventListener('click', () => this._startRtt().catch(e => this._err(e)));
     $('r-restart').addEventListener('click', () => this._startRtt().catch(e => this._err(e)));
     $('r-reset').addEventListener('click', () => this.resetTarget());
@@ -294,12 +291,12 @@ export class RttView {
   }
 
   // ================= 连接 =================
-  async connectProbe(){
+  async connectProbe(device){
     if (this._connectPromise || this._disconnectPromise || this.probe) return;
     const g = this._sessionGen = (this._sessionGen || 0) + 1;
     const backend = this.backend || 'webusb';
     this._probeMock = backend === 'mock';
-    this._connectPromise = runProbeOperation(this, 'rtt', () => this._connectProbe(g, backend), {
+    this._connectPromise = runProbeOperation(this, 'rtt', () => this._connectProbe(g, backend, device), {
       mock: this._probeMock, reason: 'RTT Viewer 要使用探针', recovery: true,
     });
     try { return await this._connectPromise; }
@@ -310,7 +307,7 @@ export class RttView {
     }
   }
 
-  async _connectProbe(g, b = this.backend || 'webusb'){
+  async _connectProbe(g, b = this.backend || 'webusb', device){
     try {
       if (b !== 'mock'){
         await prepareProbeHandoff(this, 'rtt', 'RTT Viewer 要使用探针');
@@ -324,9 +321,7 @@ export class RttView {
         const cfg = imported ? { ...imported, memoryAp } : makeOpenOcdProfile({ memoryAp,
           arch, family, port:hpmBoard(family), clockKhz:webClockKhz($('r-usb-clock').value, family, 10000),
         });
-        const forcePick = !!this._forcePick;
-        this._forcePick = false;
-        const device = await selectOpenOcdDevice({ all:$('r-usb-all').checked, forcePick });
+        device ??= await selectOpenOcdDevice({ all:$('r-usb-all').checked });
         if (g !== this._sessionGen) return;
         const Probe = memoryAp ? OpenOcdEtmProbe : OpenOcdProbe;
         this.probe = new Probe(device, cfg, line => console.debug('[OpenOCD]', line), true);
@@ -423,7 +418,6 @@ export class RttView {
   }
 
   _uiConnected(on){
-    $('r-usb-connect').disabled = on; $('r-usb-pick').disabled = on; $('r-usb-disconnect').disabled = !on;
     for (const id of ['r-target','r-chip']) $(id).disabled = on;
     this._applyClockLimit();
     if (!on){ $('r-cb').textContent = '—'; $('r-up').textContent = '0'; $('r-down').textContent = '0'; }

@@ -7,7 +7,7 @@ export function scopeNextAction(s){
   if(!s.selected)return {kind:'variables',label:'选择采样变量'};
   if(s.wasm)return {kind:'start',label:'开始 WASM 轮询'};
   if(!s.hasHid)return {kind:'connect',label:'连接探针'};
-  if(!s.hasTransport)return {kind:'data',label:'连接数据端点'};
+  if(!s.hasTransport)return {kind:'data',label:'连接探针数据端点'};
   return {kind:'start',label:'开始采样'};
 }
 export function scopeHasWarnings(s){
@@ -28,7 +28,7 @@ export function initScopeOnboarding(scope){
     if(['choose','reuse','variables'].includes(action.kind)){
       variables();if(action.kind==='choose')$('sc-elf').click();if(action.kind==='reuse')$('sc-reuse-elf').click();return;
     }
-    $(action.kind==='connect'?'sc-connect':action.kind==='data'?'sc-usb':'sc-start').click();
+    $(action.kind==='connect'||action.kind==='data'?'btn-probe-connect':'sc-start').click();
   };
   const update=()=>{
     const action=scopeNextAction(state());row.hidden=!action;

@@ -113,6 +113,11 @@ export class EtmView {
     return this;
   }
   run(fn){ return this.probeManager ? this.probeManager.run('etm', fn, {reason:'ETM 执行轨迹使用探针'}) : fn(); }
+  async connect(device){
+    if (!this.bridge) throw Error('内嵌 ETM 工作台尚未就绪，请确认本机 ETM 服务已启动');
+    if (device.vendorId !== 0x0d28) throw Error('ETM 需要选择 ZynqDAP 探针');
+    return await this.bridge.connect(device);
+  }
   async releaseProbe(){
     if (this.busy) throw Error('ETM 正在操作目标或采集，请先停止');
     if (this.bridge) await this.bridge.release();
