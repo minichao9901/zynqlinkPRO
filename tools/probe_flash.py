@@ -119,6 +119,7 @@ def main(argv=None):
     modes=p.add_mutually_exclusive_group()
     modes.add_argument('--backup-only', action='store_true')
     modes.add_argument('--verify-only', action='store_true', help='read back the existing image and test reset boot without erasing/programming')
+    modes.add_argument('--skip-backup', action='store_true', help='program and verify BOOT without backing up the original flash')
     a = p.parse_args(argv)
     image = a.image_dir.resolve()
     manifest = json.loads((image/'flash_manifest.json').read_text())
@@ -134,8 +135,11 @@ def main(argv=None):
     if not 0 < boot.stat().st_size < 16<<20:
         raise ValueError('Boot image must fit in first 16MiB')
     out = (a.out or ROOT/'build'/('probe-flash-'+datetime.datetime.now().strftime('%Y%m%d-%H%M%S'))).resolve()
+    backup_requested = not (a.verify_only or a.skip_backup)
     plan = dict(image_dir=str(image), out=str(out), boot_sha256=sha(boot),backend=a.backend,
+                backup_requested=backup_requested,
                 operation=('backup only' if a.backup_only else 'verify existing image -> system reset' if a.verify_only
+                    else 'program/verify -> BOOT readback SHA-256 -> system reset' if a.skip_backup
                     else 'full backup -> program/verify -> full readback SHA-256 -> system reset'))
     print(json.dumps(plan, indent=2), flush=True)
     if a.dry_run:
@@ -160,7 +164,7 @@ def main(argv=None):
             raise RuntimeError(f'Flash busy/protected: status {info[2]:02x}')
         report.update(boot_mode=mode, ps_idcode=f'{part:08x}', jedec_id=f'{info[1]:06x}', flash_bytes=32<<20)
         backup = out/'original_flash_32MiB.bin'
-        if not a.verify_only:
+        if backup_requested:
             print('Backing up full 32MiB flash...', flush=True)
             session.read_flash(32<<20, backup)
             report['backup'] = dict(path=str(backup), bytes=backup.stat().st_size, sha256=sha(backup))
@@ -169,7 +173,7 @@ def main(argv=None):
             report['status']='backup_complete'
             return 0
         if not a.verify_only:
-            print('Backup complete. Programming and verifying BOOT.bin...', flush=True)
+            print('Programming and verifying BOOT.bin...', flush=True)
             if a.backend=='helper':report['programmer']=session.program_boot(image,boot)
             else:
                 programmer,environment=prepare(a.sdk,'rdi_zynq_flash')
@@ -183,11 +187,11 @@ def main(argv=None):
                     raise RuntimeError('program_flash failed; inspect program_flash.log and keep original backup')
             session.reader(image)
         readback = out/'programmed_readback.bin'
-        session.read_flash(boot.stat().st_size if a.verify_only else 32<<20,readback)
+        session.read_flash(32<<20 if backup_requested else boot.stat().st_size,readback)
         if readback.read_bytes()[:boot.stat().st_size] != boot.read_bytes():
             raise RuntimeError('Flash readback differs from BOOT.bin')
         report['readback_sha256']=hashlib.sha256(readback.read_bytes()[:boot.stat().st_size]).hexdigest()
-        if not a.verify_only:
+        if backup_requested:
             erase_end=(boot.stat().st_size+4095)&~4095
             report['outside_erased_range_unchanged']=readback.read_bytes()[erase_end:]==backup.read_bytes()[erase_end:]
             if not report['outside_erased_range_unchanged']:

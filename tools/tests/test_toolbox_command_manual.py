@@ -25,8 +25,11 @@ class CommandManualTests(unittest.TestCase):
             rows = client.get('/command-manual', headers=headers).json['rows']
             commands = [row for row in rows if 'id' in row]
             self.assertEqual({row['id'] for row in commands}, set(command_manual.BY_NAME))
-            self.assertEqual(len(commands), 21)
+            self.assertEqual(len(commands), 27)
             self.assertTrue(next(row for row in commands if row['id'] == 'program')['disabled'])
+            self.assertTrue(next(row for row in commands if row['id'] == 'qspi-write-no-backup')['disabled'])
+            self.assertTrue(next(row for row in commands if row['id'] == 'qspi-rebuilt-write')['disabled'])
+            self.assertFalse(next(row for row in commands if row['id'] == 'qspi-package')['disabled'])
             self.assertEqual(client.post('/command-manual/run', headers={**headers, 'Origin': 'http://other'},
                                          json={'id': 'python'}).status_code, 403)
             self.assertEqual(client.post('/command-manual/run', headers=headers,

@@ -146,12 +146,52 @@
    python -X utf8 toolbox.py probe-flash --out build/first-run-qspi-program
    ```
 
+4. 已决定跳过原镜像备份时，用以下命令替代第 3 步。命令仍逐字节核对 BOOT 并验证复位启动。写前备份是比较擦写范围外字节的依据，这种模式只校验 BOOT。
+
+   ```powershell
+   python -X utf8 toolbox.py probe-flash --skip-backup --out build/first-run-qspi-program-no-backup
+   ```
+
 将探针本体实际断电后重新上电。等探针 USB 重新出现，保留 JTAG 下载线。此时可以直接做下列只读检查。
 
-4. 核对板子从 QSPI 走完启动链，并比对正式 PS ELF 的 OCM 执行代码。成功时 `result.json` 显示 `"boot_mode": 1`、`"passed": true` 和 85,844 字节。
+5. 核对板子从 QSPI 走完启动链，并比对正式 PS ELF 的 OCM 执行代码。成功时 `result.json` 显示 `"boot_mode": 1`、`"passed": true` 和 85,844 字节。
 
    ```powershell
    python -X utf8 toolbox.py project run probe.ocm-verify -- --elf prebuilt/release-20261106/application.elf --require-qspi --out-dir build/first-run-qspi-cold
    ```
 
 若已有正式固化镜像，只想检查 BOOT 字节并验证复位启动，可使用 `probe-flash --verify-only`；实体冷启动仍用断电后的只读核对。其他芯片、CFG 导入、Trace、编译和故障处理命令见 [CLI 命令清单](toolbox-cli-ai.md)。
+
+## 6. 重新打包 QSPI 镜像
+
+本流程用 Xilinx SDK 2018.3 从专用启动 HDF 生成 BSP，再用正式 J7 bit 和 PS ELF 生成新的 BOOT.bin。本机工作台每次点第 1 步都会开启一个新目录，后续按钮使用同一组产物。使用终端时请为每轮换一个新的 `build/qspi-repack-new` 目录名，并在整组命令中使用同一名称。前四步可在探针断开的情况下完成。
+
+1. 从仓库中的启动 HDF 生成并编译 QSPI BSP。
+
+   ```powershell
+   python -X utf8 toolbox.py project run boot.bsp -- --out build/qspi-repack-new/platform
+   ```
+
+2. 编译两阶段启动程序和 QSPI 读写辅助程序，使用正式 J7 bit 和 PS ELF 生成 BOOT.bin。
+
+   ```powershell
+   python -X utf8 toolbox.py project run boot.build -- --bsp build/qspi-repack-new/platform/bsp --bit prebuilt/release-20261106/probe.bit --elf prebuilt/release-20261106/application.elf --out build/qspi-repack-new/loader
+   ```
+
+3. 校验分区与输入配对，把 BOOT.bin、辅助程序和清单打到新的镜像目录。
+
+   ```powershell
+   python -X utf8 toolbox.py project run boot.package -- --loader-dir build/qspi-repack-new/loader --bit prebuilt/release-20261106/probe.bit --elf prebuilt/release-20261106/application.elf --ps-init firmware/boot/hardware/ps7_init.tcl --output-dir build/qspi-repack-new/image
+   ```
+
+4. 离线核对新包的文件哈希，并确认计划里的 `image_dir` 指向本次重包结果。
+
+   ```powershell
+   python -X utf8 toolbox.py probe-flash --image-dir build/qspi-repack-new/image --dry-run
+   ```
+
+5. 若要写入这个新包，先按第 5 节第 1 步确认探针空闲且 `BOOT_MODE=0x1`，再执行下列命令。写后按第 5 节断电重上电并核对 OCM。
+
+   ```powershell
+   python -X utf8 toolbox.py probe-flash --image-dir build/qspi-repack-new/image --out build/qspi-repack-new/programmed
+   ```

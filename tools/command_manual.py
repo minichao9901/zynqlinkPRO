@@ -16,6 +16,8 @@ from flask import abort, jsonify, request
 MANUAL = 'docs/toolbox-cli-first-run.md'
 WEB = 'python -X utf8 toolbox.py --runtime build/first-run-web '
 TARGET = 'target-flash --chip stm32h7 --swd-khz 10000 --file "$Firmware"'
+QSPI_WORK = 'build/qspi-repack-new'
+QSPI_PAIR = '--bit prebuilt/release-20261106/probe.bit --elf prebuilt/release-20261106/application.elf'
 
 
 @dataclass(frozen=True)
@@ -50,8 +52,16 @@ COMMANDS = {item.line: item for item in (
     Command('qspi-plan', 'python -X utf8 toolbox.py probe-flash --dry-run'),
     Command('qspi-write', 'python -X utf8 toolbox.py probe-flash --out build/first-run-qspi-program', True,
             '备份并写入 Zynq 探针本体的 QSPI，随后复位验证。'),
+    Command('qspi-write-no-backup', 'python -X utf8 toolbox.py probe-flash --skip-backup --out build/first-run-qspi-program-no-backup', True,
+            '直接写入正式 BOOT，不备份原镜像。写后读回 BOOT 并复位验证。'),
     Command('qspi-cold', 'python -X utf8 toolbox.py project run probe.ocm-verify -- '
             '--elf prebuilt/release-20261106/application.elf --require-qspi --out-dir build/first-run-qspi-cold', True),
+    Command('qspi-bsp', f'python -X utf8 toolbox.py project run boot.bsp -- --out {QSPI_WORK}/platform'),
+    Command('qspi-build', f'python -X utf8 toolbox.py project run boot.build -- --bsp {QSPI_WORK}/platform/bsp {QSPI_PAIR} --out {QSPI_WORK}/loader'),
+    Command('qspi-package', f'python -X utf8 toolbox.py project run boot.package -- --loader-dir {QSPI_WORK}/loader {QSPI_PAIR} --ps-init firmware/boot/hardware/ps7_init.tcl --output-dir {QSPI_WORK}/image'),
+    Command('qspi-rebuilt-plan', f'python -X utf8 toolbox.py probe-flash --image-dir {QSPI_WORK}/image --dry-run'),
+    Command('qspi-rebuilt-write', f'python -X utf8 toolbox.py probe-flash --image-dir {QSPI_WORK}/image --out {QSPI_WORK}/programmed', True,
+            '备份探针 QSPI 并写入本次重新打包的 BOOT，读回后复位验证。'),
 )}
 BY_NAME = {item.name: item for item in COMMANDS.values()}
 FENCE = re.compile(r'^   ```powershell\n([^\n]+)\n   ```$', re.M)
@@ -83,7 +93,7 @@ def firmware_path(value):
     return str(path.resolve())
 
 
-def start_command(command, value, workspace, runtime, folder, python, output):
+def start_command(command, value, workspace, runtime, folder, python, output, qspi_work=None):
     if command.field == 'firmware':
         value = firmware_path(value)
     elif command.field == 'job' and not re.fullmatch('[0-9a-f]{32}', value):
@@ -106,9 +116,15 @@ def start_command(command, value, workspace, runtime, folder, python, output):
         raise ValueError('未找到系统 Python。安装后重新启动本机工作台。')
     substitutions = {'build/first-run-web': str(runtime), '$Firmware': value, 'JOB_ID': value}
     args = shlex.split(command.line)[1:]
+    if any(argument.startswith(QSPI_WORK + '/') for argument in args):
+        if qspi_work is None:
+            raise ValueError('请先执行本页的生成 QSPI BSP 步骤。')
+        for argument in args:
+            if argument.startswith(QSPI_WORK + '/'):
+                substitutions[argument] = str(qspi_work / argument.removeprefix(QSPI_WORK + '/'))
     for option in ('--out', '--out-dir'):
         if option in args:
-            substitutions[args[args.index(option) + 1]] = str(folder / 'artifacts')
+            substitutions.setdefault(args[args.index(option) + 1], str(folder / 'artifacts'))
     args = [substitutions.get(argument, argument) for argument in args]
     output.write((subprocess.list2cmdline(['python', *args]) + '\n\n').encode('utf8'))
     output.flush()
@@ -124,6 +140,7 @@ def install(app, token_file, workspace, python, *, offline=False):
     runtime = token_file.parent.resolve()
     jobs = {}
     lock = threading.Lock()
+    qspi_work = None
 
     def authorize():
         supplied = request.headers.get('X-Trace-CLI', '').encode('utf8')
@@ -144,6 +161,7 @@ def install(app, token_file, workspace, python, *, offline=False):
 
     @app.post('/command-manual/run')
     def run_manual_command():
+        nonlocal qspi_work
         authorize()
         body = request.get_json(silent=True)
         if not isinstance(body, dict) or not isinstance(body.get('id'), str):
@@ -162,13 +180,15 @@ def install(app, token_file, workspace, python, *, offline=False):
             if any(process is not None and process.poll() is None for process, _, _ in jobs.values()):
                 return jsonify(error='手册中已有命令在运行，请等它结束。'), 409
             job = uuid.uuid4().hex
+            if command.name == 'qspi-bsp':
+                qspi_work = workspace / 'build' / 'qspi-repack' / job[:12]
             folder = runtime / 'manual' / job
             folder.mkdir(parents=True)
             log = folder / 'output.log'
             exit_code = 0
             with log.open('wb') as output:
                 try:
-                    process = start_command(command, value.strip(), workspace, runtime, folder, python, output)
+                    process = start_command(command, value.strip(), workspace, runtime, folder, python, output, qspi_work)
                 except (OSError, ValueError, KeyError) as error:
                     output.write(f'{error}\n'.encode('utf8'))
                     process = None

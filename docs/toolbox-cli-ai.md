@@ -155,7 +155,13 @@
     python -X utf8 toolbox.py probe-flash --image-dir build/qspi-package-new --out build/qspi-custom-program-new
     ```
 
-固化成功时检查输出的 `result.json` 和 `readback_sha256`。旧 SDK 写入后端的故障记录见 ZL-167。[QSPI 启动链](../firmware/boot/README.md)
+11. 直接固化正式 BOOT 并读回校验。选用此模式时，验收覆盖写入的 BOOT 区和复位启动。
+
+    ```powershell
+    python -X utf8 toolbox.py probe-flash --skip-backup --out build/qspi-program-no-backup-new
+    ```
+
+固化成功时检查输出的 `result.json` 和 `readback_sha256`。旧 SDK 写入后端的故障记录见 ZL-167。[可执行手册的重新打包流程](toolbox-cli-first-run.md#6-重新打包-qspi-镜像) · [QSPI 启动链](../firmware/boot/README.md)
 
 ## 启动与操作 Web
 
