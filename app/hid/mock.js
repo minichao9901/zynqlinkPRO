@@ -13,7 +13,7 @@ const DEFAULT_CB = 0x20000000;
 
 export class MockAkaLinkHid {
   constructor(){
-    this.device = { productName: 'akaLinkPro (mock)', serialNumber: 'MOCK-0001', opened: true };
+    this.device = { productName: '模拟探针', serialNumber: 'MOCK-0001', opened: true };
     this.running = false;
     this.riscv = false;              // 全局目标类型（HID 0x31 action 10，粘性）
     this.cbAddr = 0;
@@ -36,12 +36,12 @@ export class MockAkaLinkHid {
 
   static supported(){ return true; }
   get connected(){ return true; }
-  get label(){ return 'akaLinkPro (mock) · MOCK-0001'; }
+  get label(){ return '模拟探针 · MOCK-0001'; }
 
   async request(){ this.calls.push('request'); return this.device; }
   async reconnect(){ this.calls.push('reconnect'); return this.device; }
   async close(){ this.running = false; this.calls.push('close'); }
-  async info(){ return { model: 'akaLink CMSIS-DAP (mock)', fw: 'mock-1.0', sn: 'MOCK-0001' }; }
+  async info(){ return { model: '模拟探针', fw: '', sn: 'MOCK-0001' }; }
 
   /** 主循环那一拍：把排队的启动落实 */
   _tick(){

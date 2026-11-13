@@ -1,4 +1,4 @@
-# ZynqDAP 官方工作台与下载
+# zynqlinkPRO 官方工作台与下载
 
 [在线工作台](https://minichao9901.github.io/zynqlinkPRO/) · [工程下载](https://minichao9901.github.io/zynqlinkPRO/#download) · [Windows 完整包](https://github.com/minichao9901/zynqlinkPRO/releases/latest/download/zynq-etm-bridge-win64.zip)
 

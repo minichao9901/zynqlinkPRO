@@ -84,7 +84,7 @@ export class VendorEpTransport {
   /** 弹设备框 → 打开 → 认领接口（注意：必须给浏览器一个可见窗口，否则 requestDevice 直接回空数组）*/
   static async request(opts = {}){
     if(nativeProbeEnabled()){
-      const devices=await nativeUsbDevices();if(devices.length!==1)throw Error('本地服务需要唯一ZynqDAP');
+      const devices=await nativeUsbDevices();if(devices.length!==1)throw Error('本地服务需要唯一的 zynqlinkPRO 探针');
       const transport=new VendorEpTransport(devices[0],opts);await transport.open();return transport;
     }
     if (!VendorEpTransport.supported()) throw new Error('这个浏览器没有 WebUSB（桌面版 Chrome / Edge 才有）');
@@ -97,7 +97,7 @@ export class VendorEpTransport {
   get label(){
     const d = this.device;
     const addr = (this.epAddr || (this.ep | 0x80)).toString(16);
-    return `${d?.nativeService?'本地服务 · ':''}${d?.productName || 'akaLinkPro'} · EP 0x${addr} · ${this.chunkBytes} B/读 × ${this.inFlight}`;
+    return `${d?.nativeService?'本地服务 · ':''}${d?.productName || 'USB 探针'} · EP 0x${addr} · ${this.chunkBytes} B/读 × ${this.inFlight}`;
   }
 
   /** 打开设备、找到带 0x83 的那个接口并认领 */

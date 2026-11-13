@@ -370,25 +370,25 @@ export class ScopeView {
       if (!connected){
         this.hid = null;
         this.setStatusText('连接探针失败：' + (lastErr || '浏览器里没有已授权的探针') +
-          ' —— 点「连接探针」在弹出的列表里选 akaLinkPro（授权过一次以后就直连，不再弹框）', 'err');
+          ' —— 在顶栏打开探针连接选项，点「连接 HID」并选择探针', 'err');
         return;
       }
       this.hid = hid;
       let info = '';
-      try { const i = await hid.info(); this._probeInfo=i; info = `${i.model || 'akaLinkPro'}${i.fw ? ' · FW ' + i.fw : ''}`; }
+      try { const i = await hid.info(); this._probeInfo=i; info = `${i.model || 'HID 探针'}${i.fw ? ' · FW ' + i.fw : ''}`; }
       catch {
         // 连上了但问不出型号 —— 十有八九选错了设备（触摸板/键盘也有 0xFF00 的 collection）
         info = hid.label || '未知 HID 设备';
         $('sc-info').textContent = info + '（HID 已连接，但问不出型号）';
         this.setStatusText(`连到的 HID 设备是「${info}」，但它不响应探针协议 —— ` +
-          '选错设备了？请点「连接探针」并在弹框里选 akaLinkPro', 'err');
+          '请从顶栏的 HID 设备列表重新选择探针', 'err');
         return;
       }
       $('sc-info').textContent = info + '（HID 已连接）';
       this._applyBackendUi();
       this.setStatusText(`探针已连接：${info}`, hid.isProbe ? 'ok' : 'warn');
       if (!hid.isProbe){
-        $('sc-info').textContent = info + '（HID 已连接 · ⚠ 不是 akaLinkPro 的 VID/PID）';
+        $('sc-info').textContent = info + '（HID 已连接 · ⚠ VID/PID 与探针不匹配）';
         this.setStatusText(`⚠ 连到的是「${info}」（VID/PID 不是 0d28:0204）—— 可能选错设备了`, 'warn');
       }
     } catch (e){

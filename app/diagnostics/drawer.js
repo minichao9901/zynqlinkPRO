@@ -10,7 +10,7 @@ export function reportHtml(r){
     <details><summary>事件 · ${r.history?.events?.length || 0} 条</summary>${(r.history?.events || []).slice().reverse().map(e=>`<p class="hint">${esc(e.at)} · ${esc(e.detail)}</p>`).join('')}${r.history?.omitted ? `<p>更早 ${r.history.omitted} 条已裁剪</p>` : ''}</details>`;
 }
 export function exportReport(r, format){
-  download(`akalink-${r.kind}-${fileStamp()}.${format === 'json' ? 'json' : 'md'}`,
+  download(`zynqlinkPRO-${r.kind}-${fileStamp()}.${format === 'json' ? 'json' : 'md'}`,
     format === 'json' ? JSON.stringify(r, null, 2) : reportMarkdown(r), format === 'json' ? 'application/json' : 'text/markdown;charset=utf-8');
 }
 

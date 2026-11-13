@@ -18,7 +18,7 @@ export async function showDownloadRelease(){
     if (!response.ok) return;
     const release = await response.json();
     const tag = release.tag_name;
-    if (typeof tag !== 'string' || !/^v\d+\.\d+\.\d+$/.test(tag) ||
+    if (release.draft || release.prerelease || typeof tag !== 'string' || !/^v\d+\.\d+\.\d+$/.test(tag) ||
         !release.assets?.some(entry => entry.name === asset && entry.state === 'uploaded')) return;
     download.href = `${releases}/download/${tag}/${asset}`;
     details.href = `${releases}/tag/${tag}`;
