@@ -33,6 +33,7 @@ export function initProbeConnection(tools){
   const activeTab = () => document.querySelector('#tabs [aria-current="page"]')?.dataset.tab;
   const mock = tab => tab === 'dbg' && $('d-backend').value === 'mock' ||
     tab === 'rtt' && tools.rtt.backend === 'mock' || tab === 'rttcdc' && !!tools.hid.mock;
+  const awaitingHid = () => !native && hidSupported && !!usb && !hid && authorizedHid.length !== 1;
 
   function render(){
     const { owners, pending, failures } = tools.probeManager.summary();
@@ -53,7 +54,10 @@ export function initProbeConnection(tools){
     const state = `USB ${usb ? '就绪' : '未连接'} · HID ${hid ? '就绪' : '未连接'}`;
     const detail = offline ? '离线验收模式，硬件访问已禁用' : [message, state].filter(Boolean).join('\n');
     if (status.textContent !== detail) status.textContent = detail;
-    connect.title = `准备 USB 和 HID，并连接当前工具。\n${state}`;
+    const finishHid = awaitingHid() && !mock(activeTab());
+    const label = finishHid ? '连接 HID' : '连接探针';
+    if (connect.textContent !== label) connect.textContent = label;
+    connect.title = `${finishHid ? '继续完成 HID 授权' : '准备 USB 和 HID，并连接当前工具'}。\n${state}`;
   }
 
   async function attach(tab, dap, control){
@@ -101,15 +105,18 @@ export function initProbeConnection(tools){
       }
       const all = kind === 'both';
       const wantUsb = kind === 'usb' || all && usbSupported;
-      const wantHid = kind === 'hid' || all && hidSupported;
+      // Chrome device choosers can dismiss each other. The second chooser
+      // needs its own click when neither permission has been granted.
+      const chooseUsb = !native && wantUsb && (kind === 'usb' || authorizedUsb.length !== 1);
+      const wantHid = kind === 'hid' || all && hidSupported && (!chooseUsb || authorizedHid.length === 1);
       const useUsb = () => !wantUsb ? null : native ? selectOpenOcdDevice()
         : kind !== 'usb' && authorizedUsb.length === 1 ? authorizedUsb[0]
         : selectOpenOcdDevice({ all:tab === 'rtt' && $('r-usb-all').checked, forcePick:true });
       const useHid = () => !wantHid ? null : native ? selectHidDevice()
         : kind !== 'hid' && authorizedHid.length === 1 ? authorizedHid[0]
         : selectHidDevice({ forcePick:true });
-      // Browser enumeration can outlast transient user activation. Initiate both
-      // missing choosers from the original click. Local RPCs share a control queue.
+      // Browser enumeration can outlast transient user activation. Start the
+      // chooser from the original click. Local RPCs share a control queue.
       const settle = async task => {
         try { return { value:await task() }; }
         catch (error) { return { error }; }
@@ -142,6 +149,7 @@ export function initProbeConnection(tools){
       if (activeTab() === tab && await attach(tab, usb, hid) === false)
         errors.push('当前工具未接通，请查看工具状态');
       message = errors.join('；');
+      if (!message && all && awaitingHid()) message = 'USB 已授权，请点顶栏「连接 HID」完成第二步';
       if (message) toast(message, 'warn', 6000);
       else toast('探针通路已就绪', 'ok');
     } catch (error){
