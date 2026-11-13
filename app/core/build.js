@@ -12,5 +12,5 @@
  * `main.js` 会把它显示在标题栏，并在加载后做一次自检：用 cache-buster 重新拉本文件，
  * 若里面的 BUILD 与内存里的不一致 → 说明页面是旧的，提示刷新。
  */
-export const BUILD = 'v1.3.4 (OpenOCD Wasm)';
-export const WEB_BUILT_AT = "2026-11-13T13:59:23+00:00";
+export const BUILD = 'v1.3.5 (OpenOCD Wasm)';
+export const WEB_BUILT_AT = "2026-11-13T14:35:50+00:00";
