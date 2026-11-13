@@ -13,4 +13,4 @@
  * 若里面的 BUILD 与内存里的不一致 → 说明页面是旧的，提示刷新。
  */
 export const BUILD = 'v1.3.5 (OpenOCD Wasm)';
-export const WEB_BUILT_AT = "2026-11-13T14:35:50+00:00";
+export const WEB_BUILT_AT = "2026-11-13T14:57:14+00:00";

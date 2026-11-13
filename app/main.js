@@ -86,7 +86,8 @@ const localManual = document.body.dataset.commandManual === '1';
 if (localManual) manualTab.hidden = false;
 else manualTab.remove();
 const pages = { serial:assistant, terminal, rtt, rttcdc:stream, scope, flash, dbg, etm,
-  manual:{ onShow:async () => (await import('./command-manual.js')).showManual() } };
+  manual:{ onShow:async () => (await import('./command-manual.js')).showManual() },
+  download:{ onShow:async () => (await import('./ui/download-release.js')).showDownloadRelease() } };
 const renderProbeConnection = initProbeConnection(tools);
 initTabs(name => {
   workspace.sync();
