@@ -839,8 +839,14 @@ static void control(const uint8_t *req, uint8_t *res) {
         res[3] = (uint8_t)-6;
         return;
     }
-    if (cmd == 0x10 || cmd == 0x11 || cmd == 0x13) {
-        const char *s = cmd == 0x10 ? "ZynqLinkPro" : cmd == 0x11 ? "12345678" : "0.6-nonce32";
+    if (cmd == 0x10 || cmd == 0x11 || cmd == 0x13 || cmd == 0x16) {
+        const char *s;
+        switch (cmd) {
+        case 0x10: s = "ZynqLinkPro"; break;
+        case 0x11: s = "12345678"; break;
+        case 0x13: s = "0.7-nonce32"; break;
+        default: s = __DATE__ " " __TIME__; break;
+        }
         size_t n = strlen(s);
         memcpy(res + 3, s, n);
         res[1] = (uint8_t)(1 + n);

@@ -10,6 +10,7 @@ import { initSidebarTabs } from './ui/sidebar-tabs.js';
 import { initDockNavigation } from './ui/dock-navigation.js';
 import { initFullscreen } from './ui/fullscreen.js';
 import { initProbeStatus } from './ui/probe-status.js';
+import { initProbeFirmwareInfo } from './ui/probe-firmware-info.js';
 import { initEventLogs } from './ui/event-logs.js';
 import { initLogSearch } from './ui/log-search.js';
 import { initSessionContext } from './ui/session-context.js';
@@ -27,7 +28,7 @@ import { installAcquisitionDiagnostics } from './diagnostics/acquisition.js';
 import { ProbeBus, closeProbeUsbDevices } from './core/probe-bus.js';
 import { toast } from './ui/toast.js';
 import { EtmView } from './etm/view.js';
-import { BUILD } from './core/build.js';
+import { BUILD, WEB_BUILT_AT } from './core/build.js';
 
 // ---------- 错误收集（自检/排障用；平时看不见） ----------
 const errors = [];
@@ -51,6 +52,7 @@ const probeBus = new ProbeBus('page');
 const tools = { session, assistant, terminal, rtt, flash, hid, stream, scope, dbg, etm, probeBus, summary, errors };
 const probeManager = installProbeManager(tools, { bus: probeBus });
 initProbeStatus(tools);
+initProbeFirmwareInfo(tools);
 initEventLogs();
 window.__tools = tools;
 if(new URLSearchParams(location.search).has('trace-cli')){
@@ -168,7 +170,8 @@ document.body.appendChild(box);
     try {
       const r = await fetch(self.href + '?t=' + Date.now(), { cache: 'no-store' });
       const txt = await r.text();
-      if (!r.ok || !txt.includes(`BUILD = '${BUILD}'`)){
+      if (!r.ok || !txt.includes(`BUILD = '${BUILD}'`) ||
+          !txt.includes(`WEB_BUILT_AT = ${JSON.stringify(WEB_BUILT_AT)};`)){
         stamp.textContent = '⚠ 页面是旧版，请 Ctrl+Shift+R';
         stamp.style.color = '#c60';
         stamp.title = '线上有更新的版本（HTTP 缓存最多 10 分钟）；按 Ctrl+Shift+R 强制刷新即可';

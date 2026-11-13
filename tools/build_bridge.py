@@ -4,7 +4,7 @@ AI entry: python toolbox.py bridge-build
 The package uses the production Web button and never programs either board.
 """
 import argparse
-from datetime import datetime
+from datetime import datetime, timezone
 import hashlib
 import importlib.metadata
 import json
@@ -20,6 +20,18 @@ import zipfile
 ROOT=Path(__file__).resolve().parents[1]
 DEPENDENCIES=('PyInstaller','Flask','Werkzeug','waitress','pyelftools','capstone','numpy','pandas','pyusb','libusb-package','hidapi','pyserial','Jinja2','MarkupSafe','itsdangerous','click')
 NATIVE_IMAGES=('etm_decode','etm_frontend','etm_storebuild','etm_index','etm_export','etm_framed')
+
+
+def stamp_web_build(folder):
+    path = folder / 'app/core/build.js'
+    source = path.read_text(encoding='utf8')
+    marker = 'export const WEB_BUILT_AT = null;'
+    if source.count(marker) != 1:
+        raise ValueError('Web build timestamp placeholder is missing or duplicated')
+    built_at = datetime.now(timezone.utc).isoformat(timespec='seconds')
+    path.write_text(source.replace(marker, 'export const WEB_BUILT_AT = ' + json.dumps(built_at) + ';'),
+                    encoding='utf8')
+    return built_at
 
 
 def sha(path):
@@ -191,6 +203,7 @@ def main(argv=None):
                 destination=payload/Path(name).relative_to('etm-service')
             else:continue
             destination.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/name,destination)
+        web_built_at = stamp_web_build(toolbox)
         # An in-tree CMake build also contains caches, objects and vendor
         # archives. Only these statically linked runtime tools ship to users.
         native=payload/'build-native';native.mkdir()
@@ -273,7 +286,7 @@ def main(argv=None):
         if wasm.read_bytes()[:8]!=b'\0asm\x01\0\0\0':
             raise ValueError('候选包缺少有效的 OpenOCD Wasm')
         files=[dict(path=p.relative_to(package).as_posix(),bytes=p.stat().st_size,sha256=sha(p)) for p in sorted(package.rglob('*')) if p.is_file()]
-        manifest=dict(schema=1,platform='windows-x64',sourceRevision=revision,
+        manifest=dict(schema=1,platform='windows-x64',sourceRevision=revision,webBuiltAt=web_built_at,
             desktopLauncherIntegrity='medium',nativeHelperIntegrity='medium',
             debugBackend=dict(name='OpenOCD Wasm',sha256=sha(wasm),etmControl='mem-ap0',
                 scopePolling='target-memory',globalReset='cmsis-dap-swj-pins'),

@@ -69,12 +69,23 @@
       <summary>帮助</summary>
       <div class="more-menu">
         <button class="ghost" id="btn-help">帮助与快捷键</button>
+        <button class="ghost" id="btn-probe-info" type="button">版本与构建信息</button>
         <a class="ghost" id="lnk-github" href="https://github.com/minichao9901/zynqlinkPRO" target="_blank" rel="noopener">GitHub</a>
       </div>
     </details>
   </div>
 </header>
 
+<dialog id="probe-info-dialog" aria-labelledby="probe-info-heading">
+  <form method="dialog">
+    <h2 id="probe-info-heading">版本与构建信息</h2>
+    <h3>Web 工作台</h3>
+    <pre id="web-build-info"></pre>
+    <h3>当前探针</h3>
+    <pre id="probe-info-result" role="status"></pre>
+    <button type="submit">关闭</button>
+  </form>
+</dialog>
 <main>
 
 <section class="panel" id="tab-manual" aria-labelledby="manual-heading">

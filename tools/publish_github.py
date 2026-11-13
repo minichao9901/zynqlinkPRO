@@ -44,6 +44,8 @@ def stage(out):
             raise ValueError('Refuse symlink in public website: '+name)
         dest.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(source, dest)
+    from build_bridge import stamp_web_build
+    web_built_at = stamp_web_build(out)
     (out/'.nojekyll').write_text('', encoding='utf8')
     # Preserve the bytes bound by site-manifest across Windows Git autocrlf.
     (out/'.gitattributes').write_text('* -text\n',encoding='ascii',newline='\n')
@@ -55,7 +57,7 @@ def stage(out):
         '`zynq-etm-bridge.exe`；无需 Python / Node。保留 `_internal` 目录。\n\n'
         'gh-pages 分支发布静态前端；正式安装包位于 Releases，不含用户记录或运行令牌。'
         '安装包的来源提交、依赖许可证与逐文件 SHA-256 见包内 manifest / licenses。\n', encoding='utf8')
-    manifest = {'sourceRevision':git('rev-parse','HEAD'),
+    manifest = {'sourceRevision':git('rev-parse','HEAD'), 'webBuiltAt':web_built_at,
                 'files':{p.relative_to(out).as_posix():sha(p) for p in sorted(out.rglob('*')) if p.is_file()}}
     (out/'site-manifest.json').write_text(json.dumps(manifest,indent=2)+'\n',encoding='utf8')
     return manifest

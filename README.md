@@ -114,6 +114,8 @@ Trace五路输入包含ELD1延时单元，默认零tap。RTCK自适应、断开�
 
 从接线开始操作 J7 探针、目标烧录与 QSPI 固化，见 [CLI 入门手册](docs/toolbox-cli-first-run.md)。
 
+工作台右上角的「帮助 → 版本与构建信息」显示当前 Web 版本、构建时间以及探针经 HID 报告的固件版本和编译时间。
+
 | 产物 | 说明 |
 |---|---|
 | [J7 release-20261106](prebuilt/release-20261106/README.md) | 当前bit/ELF：ELD1、原始SWD序列修复、WebUSB网页入口；F103ZE限定验收 |
