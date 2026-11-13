@@ -39,7 +39,7 @@ async function syncZynqQueue(device){
 export async function selectOpenOcdDevice({ all = false, forcePick = false } = {}){
   if (nativeProbeEnabled()){
     const devices = await nativeUsbDevices();
-    if (devices.length !== 1) throw Error('本机探针服务需要唯一 ZynqDAP');
+    if (devices.length !== 1) throw Error('本机探针服务需要唯一的 zynqlinkPRO 探针');
     return devices[0];
   }
   const usb = globalThis.navigator?.usb;

@@ -50,7 +50,7 @@ def stage(out):
     # Preserve the bytes bound by site-manifest across Windows Git autocrlf.
     (out/'.gitattributes').write_text('* -text\n',encoding='ascii',newline='\n')
     (out/'README.md').write_text(
-        '# ZynqDAP 官方工作台与下载\n\n'
+        '# zynqlinkPRO 官方工作台与下载\n\n'
         f'[在线工作台]({SITE}) · [工程下载]({SITE}#download) · '
         f'[Windows 完整包](https://github.com/{REPO}/releases/latest/download/{ASSET})\n\n'
         '使用桌面版 Chrome / Edge。ETM 采集与解码请下载完整包，解压后运行 '
@@ -104,6 +104,8 @@ def publish(out, package, tag):
     with zipfile.ZipFile(package) as archive:
         names = archive.namelist()
         manifest = json.loads(archive.read('zynq-etm-bridge/package-manifest.json'))
+        if manifest.get('version') and 'v'+manifest['version'] != tag:
+            raise ValueError('Release tag differs from the Windows package version')
         if manifest.get('sourceDirty'):
             raise ValueError('Release requires a clean-source EXE build')
         if any('data' in Path(n).parts or '..' in Path(n).parts for n in names):
@@ -131,7 +133,7 @@ def publish(out, package, tag):
             git('update-ref','refs/heads/gh-pages',git('rev-parse','FETCH_HEAD',cwd=out),cwd=out)
             git('read-tree','HEAD',cwd=out)
         git('add','--all',cwd=out)
-        git('commit','-m','Publish ZynqDAP workbench '+tag,cwd=out)
+        git('commit','-m','Publish zynqlinkPRO workbench '+tag,cwd=out)
     git('push','-u','origin','gh-pages',cwd=out)
     try:
         api.request('/repos/'+REPO+'/pages')
@@ -148,7 +150,7 @@ def publish(out, package, tag):
         release=next((r for r in api.request('/repos/'+REPO+'/releases')
                       if r['tag_name']==tag and r['draft']),None)
         if release is None:release = api.request('/repos/'+REPO+'/releases','POST',{
-            'tag_name':tag,'name':'Zynq ETM 工作台 '+tag,'draft':True,
+            'tag_name':tag,'name':'zynqlinkPRO 工作台 '+tag,'draft':True,
             'body':f'Windows x64 完整便携包，解压后双击 zynq-etm-bridge.exe。保留 _internal；更新前退出旧程序并保留 data。\n\n'
                    f'工程下载：{SITE}#download\n\nSHA-256 ({ASSET}): `{sha(package)}`\n\n'
                    f'EXE 来源提交：`{manifest["sourceRevision"]}`。'

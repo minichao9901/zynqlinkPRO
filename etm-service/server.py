@@ -441,9 +441,9 @@ def status():
     except Exception:
         device = None
     zynq = dict(ready=bool(device is not None and trace),
-                message=('ZynqDAP 已连接，采集时由本地服务独占 USB' if (device is not None and trace)
-                         else ('当前探针没有 ETM bulk-in 0x82（可能是 akaLinkPro）；请换 ZynqDAP 并加载配套 bit/ELF'
-                               if device is not None else '未找到 ZynqDAP；请检查 USB 与 bit/ELF 配对')))
+                message=('zynqlinkPRO 探针已连接，采集时由本地服务独占 USB' if (device is not None and trace)
+                         else ('当前探针没有 ETM bulk-in 0x82，请接入 zynqlinkPRO 探针并核对 bit/ELF'
+                               if device is not None else '未找到 zynqlinkPRO 探针，请检查 USB 与 bit/ELF 配对')))
     return jsonify(connected=bool(device), rates=[500000000], error='',
                    zynq=zynq, captureProtocol=CAPTURE_PROTOCOL, softwareFilter=False,
                    decoder=(ROOT / 'build-native/etm_decode.exe').exists())

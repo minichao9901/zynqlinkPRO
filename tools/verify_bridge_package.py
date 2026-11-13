@@ -85,6 +85,8 @@ def main(argv=None):
         assert launcher['bootId']==state['bootId'] and launcher['offline'] is True
         assert launcher['dataDirectory']==str((out/'data').resolve())
         assert launcher['packageId']==hashlib.sha256((package/'package-manifest.json').read_bytes()).hexdigest()
+        if 'version' in manifest:
+            assert launcher['version'] == manifest['version']
         report['health']=health
         if 'debugBackend' in manifest:
             with urlopen(url+'/app/core/openocd-runtime/openocd-core.wasm', timeout=15) as response:

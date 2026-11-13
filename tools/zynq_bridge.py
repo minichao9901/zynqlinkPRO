@@ -9,6 +9,7 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import re
 import secrets
 import shutil
 import subprocess
@@ -18,9 +19,15 @@ import webbrowser
 from urllib.request import urlopen
 
 
-VERSION = '1.3.3'
 FROZEN = bool(getattr(sys, 'frozen', False))
 REPO = Path(__file__).resolve().parents[1]
+
+def read_web_version(web):
+    source = (web / 'app/core/build.js').read_text(encoding='utf8')
+    match = re.search(r"^export const BUILD = 'v(\d+\.\d+\.\d+) \(", source, re.MULTILINE)
+    if not match:
+        raise ValueError('无法读取 zynqlinkPRO Web 版本')
+    return match[1]
 
 
 def process_integrity_rid():
@@ -210,7 +217,8 @@ def main(argv=None):
     from waitress.server import create_server
     from flask import jsonify
     boot=uuid.uuid4().hex
-    app.app.view_functions['launcher_info']=lambda:jsonify(protocol=1, portable=FROZEN, version=VERSION,
+    version = read_web_version(web)
+    app.app.view_functions['launcher_info']=lambda:jsonify(protocol=1, portable=FROZEN, version=version,
         packageId=package_id, bootId=boot, dataDirectory=str(data), offline=args.offline,
         clockPolicy='target-firmware-owned',processIntegrityRid=process_integrity_rid())
     try:
@@ -224,7 +232,7 @@ def main(argv=None):
         'recordsDirectory':str(data/'records'),'workspace':workspace_key}
     for path in (folder / 'toolbox-runtime.json', state_path):
         path.write_text(json.dumps(state, ensure_ascii=False, indent=2)+'\n', encoding='utf8')
-    print('Zynq ETM 工作台 '+VERSION+'；时钟由target固件负责', flush=True)
+    print('zynqlinkPRO 工作台 v'+version+'，目标时钟由目标固件负责', flush=True)
     print('数据目录：'+str(data), flush=True)
     print('工作台：'+browser_url, flush=True)
     print('浏览器中载入ELF → 连接探针 → 选择函数 → 核对时钟 → 联动采集；关闭本窗口停止服务。', flush=True)

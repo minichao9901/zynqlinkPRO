@@ -2,7 +2,7 @@
 
 源码、网页和 Windows 包均使用 `minichao9901/zynqlinkPRO`。`main` 保存工程与正式 bit/ELF，`gh-pages` 只保存静态前端，Releases 保存完整便携 ZIP。在线地址为 `https://minichao9901.github.io/zynqlinkPRO/`，下载标签为 `#download`。
 
-1. 更新工作台版本，同步问题表，完成必要回归，提交源码及已验 bit/ELF。下载卡片从 GitHub 的最新正式 Release 读取版本，API 不可用时显示「最新发布」并保留下载链接。
+1. 在 `web/app/core/build.js` 更新工作台版本，同步问题表，完成必要回归，提交源码及已验 bit/ELF。Windows 启动器和包清单从同一模块读取版本。下载卡片从 GitHub 的最新正式 Release 读取版本，API 不可用时显示「最新发布」并保留下载链接。
 2. 运行 `python -X utf8 toolbox.py bridge-build --zip`。候选先完成冻结预检和 F103/H743 离线验收，再更新固定程序，保留 `data` 并归档旧程序。不要在工作区有源码修改时发布包。
 3. `python -X utf8 tools/publish_github.py stage --out build/pages-<版本>` 只复制 Git 跟踪的静态前端，生成逐文件 SHA；不复制记录、后端或令牌。先在浏览器检查页面。
 4. `python -X utf8 tools/publish_github.py publish --out build/pages-<版本> --package dist/zynq-etm-bridge.zip --tag v1.3.0` 核验 ZIP 全部文件及源码干净标记，推送静态分支，设置 Pages，上传 ZIP/SHA256SUMS 后才发布 Release。凭据只经 Git credential helper 读入内存。

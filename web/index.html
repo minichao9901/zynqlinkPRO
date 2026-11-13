@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ZynqDAP 工作台 —— 串口 · RTT · 调试 · ETM 执行轨迹</title>
+<title>zynqlinkPRO 工作台 —— 串口 · RTT · 调试 · ETM 执行轨迹</title>
 <meta name="description" content="零安装的网页工具：Web Serial 串口助手（SSCOM 风格）、ANSI 终端（Xshell 风格）、以及走 WebUSB/CMSIS-DAP 的 SEGGER RTT Viewer。">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230d1117'/%3E%3Ctext x='16' y='22' font-size='16' text-anchor='middle' fill='%2358a6ff'%3E%3E_%3C/text%3E%3C/svg%3E">
 <link rel="stylesheet" href="app/vendor/xterm/xterm.css">
@@ -36,7 +36,7 @@
 </div>
 
 <header class="topbar">
-  <div class="brand" title="ZynqDAP 工作台"><span class="brand-title">ZynqDAP 工作台</span></div>
+  <div class="brand" title="zynqlinkPRO 工作台"><span class="brand-title">zynqlinkPRO 工作台</span></div>
   <nav class="tabs" id="tabs" aria-label="工具切换">
     <div class="primary-tabs">
       <button class="tab" data-tab="serial">串口助手</button>
@@ -103,11 +103,11 @@
 
 <section class="panel" id="tab-download" aria-labelledby="download-heading">
   <div class="download-page">
-    <p class="download-eyebrow">ZYNQLINK PRO · 官方发布</p>
+    <p class="download-eyebrow">官方发布</p>
     <h1 id="download-heading">工程下载</h1>
     <p class="download-intro">下载 ETM 工作台，在本机采集、解码和分析执行轨迹。</p>
     <article class="download-card">
-      <div class="download-card-heading"><h2>Zynq ETM 工作台</h2><span class="download-version" id="download-version">最新发布</span></div>
+      <div class="download-card-heading"><h2>zynqlinkPRO 工作台</h2><span class="download-version" id="download-version">最新发布</span></div>
       <p>Windows 10 / 11 · x64 · 免安装便携版</p>
       <p class="download-description">支持 F103ZE ETMv3、STM32H743 ETMv4、离线记录与火焰图。完整包已包含运行库，无需另装 Python 或 Node.js。</p>
       <div class="download-actions">
@@ -133,7 +133,7 @@
   <div id="etm-notice">
     <h2>ETM 执行轨迹</h2>
     <p id="etm-status">正在检测本地 Zynq ETM 服务…</p>
-    <p>ETM 页由 superlinkPRO 原始工作台托管，采集与解码由本地服务完成。</p>
+    <p>ETM 采集与解码由 zynqlinkPRO 本地服务完成。</p>
     <label class="row"><span>服务地址</span>
       <input id="etm-service" type="text" inputmode="url" autocomplete="off" spellcheck="false"
              placeholder="127.0.0.1:8766"
@@ -294,7 +294,7 @@
           <button id="t-save">保存输出</button>
         </div>
         <p class="hint">选中即复制（Ctrl+Shift+C）；Ctrl+Shift+V 粘贴；Ctrl+Shift+L 清屏。</p>
-        <p class="hint">RTT→CDC 转发（akaLinkPro）在「<b>RTT 转发</b>」那一页。</p>
+        <p class="hint">在「<b>RTT 转发</b>」页接收探针通过 CDC 转发的 RTT 数据。</p>
       </fieldset>
     </aside>
     <section class="main">
@@ -1028,7 +1028,7 @@
     <li>⚠️ <b>独占</b>：SSCOM / 串口监视器 / idf.py monitor 开着同一个口时，这里打不开。</li>
   </ol>
   <h3>ETM 执行轨迹</h3>
-  <p>「ETM 执行轨迹」直接用 Zynq FPGA 接收目标的四位并行 ETM，不经过逻辑分析仪。先载入与目标 Flash 匹配的 ELF，连接 ZynqDAP，选择起点断点，再在「2 时钟 / 3 采集」里配置并采集。停止后由浏览器内的 OpenCSD 解码，右侧可看执行流、调用统计、火焰图、热点、ETM 包和可信区段；没有硬件时可载入内置 F103ZE 实板样例体验完整流程。</p>
+  <p>「ETM 执行轨迹」由 zynqlinkPRO 探针的 FPGA 接收目标的四位并行 ETM。先载入与目标 Flash 匹配的 ELF，连接探针，选择起点断点，再在「2 时钟 / 3 采集」里配置并采集。停止后由本机服务使用 OpenCSD 解码，右侧可查看执行流、调用统计、火焰图、热点、ETM 包和可信区段。离线可打开「教学 Demo」查看实板记录。</p>
   <h3>RTT 使用要点</h3>
   <ul>
     <li>固件里必须编进了 SEGGER RTT（<code>SEGGER_RTT_Init()</code> 会被自动调用）。</li>
@@ -1038,7 +1038,7 @@
       过载信号（≥75% 就算高位）；「溢出丢弃」只在主机侧读指针落后时才算得出来 —— 两个数字都当下限看。
       大流量场景可选择 RTT 转发，并核对实际接收质量。</li>
   </ul>
-  <h3>RTT → CDC 转发（「RTT 转发」那一页，akaLinkPro 探针）</h3>
+  <h3>RTT → CDC 转发</h3>
   <ul>
     <li>让<b>探针自己</b>通过 SWD 轮询目标的 RTT 控制块、把数据塞进它的 CDC 串口 —— 主机只要读一个 COM 口，
         比主机侧轮询快得多（本机实测 <b>2.4 MB/s</b>）。</li>

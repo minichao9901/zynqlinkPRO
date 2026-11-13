@@ -206,7 +206,7 @@ class NativeProbe:
         devices = list(usb.core.find(find_all=True, idVendor=0x0D28, idProduct=0x0204,
                                     backend=libusb_package.get_libusb1_backend()))
         if len(devices) != 1:
-            raise ValueError('本地探针服务要求唯一ZynqDAP；当前数量：' + str(len(devices)))
+            raise ValueError('本地探针服务需要唯一的 zynqlinkPRO 探针，当前数量：' + str(len(devices)))
         return devices[0]
 
     def _stop_hss_receiver(self):
@@ -470,7 +470,7 @@ class NativeProbe:
                 if self.hid is None:
                     matches = [d for d in hid.enumerate(0x0D28, 0x0204) if d['usage_page'] == 0xFF00]
                     if len(matches) != 1:
-                        raise ValueError('需要唯一ZynqDAP HID')
+                        raise ValueError('需要唯一的 zynqlinkPRO HID 接口')
                     self.hid = hid.device()
                     self.hid.open_path(matches[0]['path'])
                     self.hid_owner = owner

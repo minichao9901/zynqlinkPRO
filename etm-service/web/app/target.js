@@ -60,7 +60,7 @@ export class EtmTarget {
       d.vendorId===previous.vendorId && d.productId===previous.productId && d.serialNumber===previous.serialNumber);
     if(devices.length!==1)throw Error('采集后无法唯一确认原探针，拒绝将恢复寄存器写到另一台设备');
     await this._openProbe(Probe,devices[0],this.suspendedClockKhz || this.controlClockKhz || 10000);
-    this.log('已重新认领 ZynqDAP，准备恢复目标 trace 设置');
+    this.log('已重新连接 zynqlinkPRO 探针，准备恢复目标 Trace 设置');
   }
 
   async _releaseProbe(){

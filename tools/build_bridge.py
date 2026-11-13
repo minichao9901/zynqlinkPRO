@@ -16,6 +16,10 @@ import sys
 import tempfile
 import uuid
 import zipfile
+try:
+    from .zynq_bridge import read_web_version
+except ImportError:
+    from zynq_bridge import read_web_version
 
 ROOT=Path(__file__).resolve().parents[1]
 DEPENDENCIES=('PyInstaller','Flask','Werkzeug','waitress','pyelftools','capstone','numpy','pandas','pyusb','libusb-package','hidapi','pyserial','Jinja2','MarkupSafe','itsdangerous','click')
@@ -204,6 +208,7 @@ def main(argv=None):
             else:continue
             destination.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/name,destination)
         web_built_at = stamp_web_build(toolbox)
+        version = read_web_version(toolbox)
         # An in-tree CMake build also contains caches, objects and vendor
         # archives. Only these statically linked runtime tools ship to users.
         native=payload/'build-native';native.mkdir()
@@ -260,7 +265,7 @@ def main(argv=None):
             'Matching source: etm-service/vendor/libdwarf-2.3.3 in this project, with upstream URL and archive SHA in ZYNQLINK-PROVENANCE.json.\n'
             'Rebuild: cmake -S etm-service -B build/native -G Ninja -DCMAKE_BUILD_TYPE=Release; cmake --build build/native --target dwarf-shared.\n'
             'Replace _internal/backend/build-native/libdwarf.dll with your ABI-compatible build. No application relinking or signature is required.\n',encoding='utf8')
-        readme=('Zynq ETM 工作台\n\n双击 zynq-etm-bridge.exe，浏览器自动打开。请保留整个程序目录（包括_internal）。\n'
+        readme=(f'zynqlinkPRO 工作台 v{version}\n\n双击 zynq-etm-bridge.exe，浏览器自动打开。请保留整个程序目录（包括_internal）。\n'
             'ETM模式默认使用10 MHz SWD做目标配置；CPU/TRACECLK仍由目标固件决定。\n'
             'Web：载入目标ELF与源码 → 连接探针 → 添加并选择函数起点 → 核对HSE/RCC → 联动采集。\n'
             '目标PLL、AHB/APB分频由target固件负责；桥只配置Trace接口，不自动降频、不烧录板卡。\n'
@@ -286,7 +291,7 @@ def main(argv=None):
         if wasm.read_bytes()[:8]!=b'\0asm\x01\0\0\0':
             raise ValueError('候选包缺少有效的 OpenOCD Wasm')
         files=[dict(path=p.relative_to(package).as_posix(),bytes=p.stat().st_size,sha256=sha(p)) for p in sorted(package.rglob('*')) if p.is_file()]
-        manifest=dict(schema=1,platform='windows-x64',sourceRevision=revision,webBuiltAt=web_built_at,
+        manifest=dict(schema=1,platform='windows-x64',version=version,sourceRevision=revision,webBuiltAt=web_built_at,
             desktopLauncherIntegrity='medium',nativeHelperIntegrity='medium',
             debugBackend=dict(name='OpenOCD Wasm',sha256=sha(wasm),etmControl='mem-ap0',
                 scopePolling='target-memory',globalReset='cmsis-dap-swj-pins'),

@@ -36,7 +36,7 @@ export async function selectHidDevice({ forcePick = false } = {}){
   const devices = forcePick && !nativeProbeEnabled() ? [] : (await authorizedHidDevices()).filter(device =>
     device.vendorId === VID && device.productId === PID && device.collections?.some(c => c.usagePage === USAGE_PAGE));
   if (devices.length === 1) return devices[0];
-  if (nativeProbeEnabled()) throw Error('本机工作台需要唯一的 ZynqDAP HID');
+  if (nativeProbeEnabled()) throw Error('本机工作台需要唯一的 zynqlinkPRO HID 接口');
   const picked = await navigator.hid.requestDevice({ filters:[probeFilter] });
   if (!picked.length) throw Error('未选择 HID 探针');
   return picked[0];
@@ -227,7 +227,7 @@ export class AkaLinkHid {
   get label(){
     const d = this.device;
     if (!d) return '';
-    return [d.productName || 'akaLinkPro', d.serialNumber ? '· ' + d.serialNumber : ''].join(' ').trim();
+    return [d.productName || 'HID 探针', d.serialNumber ? '· ' + d.serialNumber : ''].join(' ').trim();
   }
 
   /** 这个句柄是不是探针（按 VID/PID 判；厂商改名字也不影响）*/
