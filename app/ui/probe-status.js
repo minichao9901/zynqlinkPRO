@@ -18,9 +18,12 @@ export function probeStatus(tools){
   const active = PROBE_FEATURES.filter(f => f.active(tools)).map(f => f.label);
   if(!active.length && Object.keys(service?.resources||{}).length)return {text:'探针：服务已占用',kind:'on',
     title:'当前资源：'+Object.keys(service.resources).join('、')+'；先断开原功能再交接'};
-  return active.length
-    ? { text:`探针：${active.length === 1 ? active[0] : `${active.length} 项连接`}`, kind:'on', title:`当前连接：${active.join('、')}` }
-    : { text:'探针：未使用', kind:'off', title:'当前页面没有功能连接实体探针；串口连接状态单独显示。' };
+  if(active.length)
+    return {text:`探针：${active.length === 1 ? active[0] : `${active.length} 项连接`}`, kind:'on', title:`当前连接：${active.join('、')}`};
+  const { usb, hid } = tools.probeConnection || {};
+  if(usb || hid)
+    return {text:usb && hid ? 'USB + HID 就绪' : usb ? 'USB 就绪' : 'HID 就绪', kind:'on', title:'探针通路已准备，由工具按需打开'};
+  return {text:'探针：未使用', kind:'off', title:'当前页面没有功能连接实体探针；串口连接状态单独显示。'};
 }
 
 export function initProbeStatus(tools){

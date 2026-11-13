@@ -13,6 +13,7 @@ import { waitMs, withTimeout } from '../core/pace.js';
  */
 import { MockScopeProbe } from './mock.js';
 import { UsbLease, isUsbResourceConflict } from '../core/usb-device.js';
+import { authorizedOpenOcdDevices } from '../core/openocd-usb.js';
 import {nativeProbeEnabled,nativeUsbDevices} from '../core/native-probe.js';
 
 /** 探针上那个空闲的 bulk IN 端点（SWO 端点，SWO_STREAM=0 所以没人用）*/
@@ -77,7 +78,7 @@ export class VendorEpTransport {
   static async authorized(){
     if(nativeProbeEnabled())return nativeUsbDevices();
     if (!VendorEpTransport.supported()) return [];
-    try { return (await navigator.usb.getDevices()).filter(d => d.vendorId === VID); } catch { return []; }
+    try { return (await authorizedOpenOcdDevices()).filter(d => d.vendorId === VID); } catch { return []; }
   }
 
   /** 弹设备框 → 打开 → 认领接口（注意：必须给浏览器一个可见窗口，否则 requestDevice 直接回空数组）*/

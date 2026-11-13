@@ -11,7 +11,7 @@ export const INTERRUPTS={
   panel:['#pn-run-abort','#pn-code-stop','#pn-read-stop','#pn-anim-stop'],
   i2c:['#i2-run-stop'],analog:['#an-stop','#an-dac-stop'],
 };
-const GLOBAL_CONTROLS=['btn-global-reset','global-nrst-open-drain','btn-fullscreen','btn-help'];
+const GLOBAL_CONTROLS=['btn-probe-connect','btn-probe-disconnect','btn-probe-usb','btn-probe-hid','btn-global-reset','btn-fullscreen','btn-help'];
 
 function methods(object){
   const result=new Map();

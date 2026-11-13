@@ -1,7 +1,6 @@
 import { OpenOcdProbe } from './openocd-probe.js';
 import { makeOpenOcdProfile } from './openocd-profile.js';
-import { openOcdUsbSupported } from './openocd-usb.js';
-import { nativeProbeEnabled, nativeUsbDevices } from './native-probe.js';
+import { authorizedOpenOcdDevices, openOcdUsbSupported } from './openocd-usb.js';
 
 const DHCSR = 0xe000edf0;
 const DEBUG_KEY = 0xa05f0000;
@@ -16,7 +15,7 @@ export class OpenOcdEtmProbe extends OpenOcdProbe {
 
   static authorized(){
     if (!this.supported()) throw Error('ETM 目标控制需要 WebUSB 或已启用的本机探针服务');
-    return nativeProbeEnabled() ? nativeUsbDevices() : navigator.usb.getDevices();
+    return authorizedOpenOcdDevices();
   }
 
   static async open(device, { clockKhz, onLog, retain }){

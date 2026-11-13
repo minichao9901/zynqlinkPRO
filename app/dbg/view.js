@@ -153,8 +153,6 @@ export class DbgView {
       }
       clk.addEventListener('change', () => store.set('dbg.clock', clk.value));
     }
-    on('d-connect', 'click', () => this.connect());
-    on('d-disconnect', 'click', () => this.disconnect());
     on('d-elf-pick', 'click', () => $('d-elf-file')?.click());
     on('d-elf-file', 'change', e => this._loadElfFile(e.target.files?.[0]));
     on('d-image-pick', 'click', () => this.pickImageDirectory());
@@ -587,21 +585,20 @@ export class DbgView {
     if (haltBtn) haltBtn.disabled = !c || h;
     const cont = $('d-cont');
     if (cont) cont.disabled = !c || !h;
-    for (const id of ['d-connect']) { const el = $(id); if (el) el.disabled = c; }
-    for (const id of ['d-disconnect', 'd-reset-halt', 'd-reset-run', 'd-rtt-locate', 'd-wp-add', 'd-wp-clear', 'd-bt', 'd-bt-scan']){ const el = $(id); if (el) el.disabled = !c; }
+    for (const id of ['d-reset-halt', 'd-reset-run', 'd-rtt-locate', 'd-wp-add', 'd-wp-clear', 'd-bt', 'd-bt-scan']){ const el = $(id); if (el) el.disabled = !c; }
     for(const id of ['d-bt','d-bt-scan']){ const el=$(id); if(el) el.disabled=!c||!h; }
     setFlag($('d-state'), !c ? '未连接' : (h ? '已停止' : '运行中'), !c ? null : (h ? 'warn' : 'on'));
   }
 
   // ================================================================ 连接
 
-  async connect(){
+  async connect(device){
     if (this._connecting || this._disconnecting || this._cfgImporting || this.session.connected) return false;
     const generation = this._connectionGen = (this._connectionGen || 0) + 1;
     this._connecting = true;
     this._syncButtons();
     try {
-      return await runProbeOperation(this, 'dbg', () => this._connectNow(generation), {
+      return await runProbeOperation(this, 'dbg', () => this._connectNow(generation, device), {
         mock: $('d-backend')?.value === 'mock', reason: '调试器要使用探针', recovery: true,
       });
     } catch (e){ this._out('✗ 连接失败：' + e.message, 'err'); toast(e.message, 'err'); return false; }
@@ -611,7 +608,7 @@ export class DbgView {
     }
   }
 
-  async _connectNow(generation = this._connectionGen = (this._connectionGen || 0) + 1){
+  async _connectNow(generation = this._connectionGen = (this._connectionGen || 0) + 1, device){
     const backend = $('d-backend')?.value || 'webusb';
     const mock = backend === 'mock';
     const riscv = backend === 'riscv';
@@ -634,7 +631,7 @@ export class DbgView {
         arch:riscv ? 'riscv' : 'arm', family, port:hpmBoard(family), clockKhz,
       });
       this._connectionTask = this.session.exclusive(async () => {
-        const device = mock ? null : await selectOpenOcdDevice();
+        device = mock ? null : device ?? await selectOpenOcdDevice();
         if (generation !== this._connectionGen) return;
         await this.session.connect({ mock, cfg, device });
       });

@@ -4,6 +4,17 @@ import { nativeProbeEnabled, nativeUsbDevices } from './native-probe.js';
 
 const filter = { vendorId:0x0d28 };
 const readResult = ({ status, data }) => ({ status, data });
+let selectedDevice = null;
+
+export function rememberOpenOcdDevice(device){ selectedDevice = device; }
+
+export async function authorizedOpenOcdDevices(){
+  if (nativeProbeEnabled()) return await nativeUsbDevices();
+  const usb = globalThis.navigator?.usb;
+  if (!usb) return [];
+  const devices = await withTimeout(usb.getDevices(), 5000, '枚举已授权探针');
+  return devices.includes(selectedDevice) ? [selectedDevice] : devices;
+}
 
 async function syncZynqQueue(device){
   const control = (request, length) => device.controlTransferIn({
@@ -33,9 +44,11 @@ export async function selectOpenOcdDevice({ all = false, forcePick = false } = {
   }
   const usb = globalThis.navigator?.usb;
   if (!usb) throw Error('OpenOCD Wasm 需要 WebUSB 或本机探针服务');
-  const devices = forcePick ? [] : await withTimeout(usb.getDevices(), 5000, '枚举已授权探针');
+  const devices = forcePick ? [] : await authorizedOpenOcdDevices();
+  if (devices.includes(selectedDevice)) return selectedDevice;
   const matching = devices.filter(d => d.vendorId === filter.vendorId || /CMSIS-DAP/i.test(d.productName));
-  return matching.length === 1 ? matching[0] : usb.requestDevice({ filters:all ? [] : [filter] });
+  if (matching.length === 1) return matching[0];
+  return await usb.requestDevice({ filters:all ? [] : [filter] });
 }
 
 export const openOcdUsbSupported = () => nativeProbeEnabled() || !!globalThis.navigator?.usb;
