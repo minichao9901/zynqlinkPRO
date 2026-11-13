@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="app/vendor/xterm/xterm.css">
 <link rel="stylesheet" href="app/app.css">
 <link rel="stylesheet" href="app/download.css">
+<link rel="stylesheet" href="app/command-manual.css">
 <script>
 (function(){
   // 本仓库只维护源码模块，不使用 superlinkPRO 的合并包 app/site/main.js。
@@ -47,6 +48,7 @@
       <button class="tab" data-tab="dbg">调试器</button>
       <button class="tab" data-tab="etm">ETM 执行轨迹</button>
       <button class="tab" data-tab="download">工程下载</button>
+      <button class="tab" data-tab="manual" hidden>可执行手册</button>
     </div>
 
   </nav>
@@ -67,13 +69,31 @@
       <summary>帮助</summary>
       <div class="more-menu">
         <button class="ghost" id="btn-help">帮助与快捷键</button>
+        <button class="ghost" id="btn-probe-info" type="button">版本与构建信息</button>
         <a class="ghost" id="lnk-github" href="https://github.com/minichao9901/zynqlinkPRO" target="_blank" rel="noopener">GitHub</a>
       </div>
     </details>
   </div>
 </header>
 
+<dialog id="probe-info-dialog" aria-labelledby="probe-info-heading">
+  <form method="dialog">
+    <h2 id="probe-info-heading">版本与构建信息</h2>
+    <h3>Web 工作台</h3>
+    <pre id="web-build-info"></pre>
+    <h3>当前探针</h3>
+    <pre id="probe-info-result" role="status"></pre>
+    <button type="submit">关闭</button>
+  </form>
+</dialog>
 <main>
+
+<section class="panel" id="tab-manual" aria-labelledby="manual-heading">
+  <div class="command-manual">
+    <h1 id="manual-heading">可执行手册</h1>
+    <div id="manual-document"></div>
+  </div>
+</section>
 
 <section class="panel" id="tab-download" aria-labelledby="download-heading">
   <div class="download-page">

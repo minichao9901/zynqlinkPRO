@@ -512,6 +512,16 @@ export class AkaLinkHid {
     return { model, fw, sn };
   }
 
+  async firmwareInfo(){
+    const info = await this.info();
+    // Older ZynqLink firmware returns an error byte for unknown commands.
+    // Avoid an extra request on versions that do not advertise this field.
+    const supportsDate = Number(info.fw.match(/^0\.(\d+)-nonce32$/)?.[1]) >= 7;
+    const raw = info.model === 'ZynqLinkPro' && !supportsDate ? '' : await this.text(CMD.FW_DATE);
+    const buildTime = /^(?:[A-Z][a-z]{2} [ \d]\d \d{4} \d{2}:\d{2}:\d{2}|\d{4}[\/-]\d{2}[\/-]\d{2} \d{2}:\d{2}:\d{2})$/.test(raw) ? raw : null;
+    return { ...info, buildTime };
+  }
+
   /** 0x31：发一个动作，回 { rc, status } */
   async rtt(action, data, timeout = 3000){
     const res = await this.xfer(CMD.RTT, data || rttData(action), timeout);
