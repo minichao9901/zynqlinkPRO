@@ -33,6 +33,22 @@ function serveUpstreamFiles(t){
   t.mock.method(globalThis, 'fetch', async url => new Response(await readFile(url)));
 }
 
+test('H7 CFG prepares AP2 clocks before examine and reports an unexamined core before polling', async t => {
+  const cfg = {raw:{},target:'stm32h7x.cpu0',clockKhz:10000,arch:'arm',stm32h7Flash:true};
+  const probe = new OpenOcdProbe(null, cfg);
+  const calls = [];
+  const link = { async command(line){ calls.push(line); return '0'; } };
+  await assert.rejects(probe._initTarget(link), /内核检查失败，Flash 尚未擦写/);
+  assert.match(calls[0], /-ap-num\] == 2/);
+  assert.match(calls[0], /configure -event examine-start/);
+  assert.match(calls[0], /cget -event examine-start/);
+  assert.match(calls[0], /0x0060003f/);
+  assert.deepEqual(calls.slice(1), ['init', 'stm32h7x.cpu0 was_examined']);
+  calls.length = 0;
+  await new OpenOcdProbe(null,{...cfg,memoryAp:true})._initTarget(link);
+  assert.deepEqual(calls,['init']);
+});
+
 test('H7 reset checks physical DHCSR after transient failures without resetting again', async t => {
   const probe = new OpenOcdProbe(null, {arch:'arm',clockKhz:10000});
   const command = t.mock.method(probe,'command',async () => '');
@@ -108,6 +124,7 @@ test('the bundled Wasm registers ARM, HPM and RP2350 profiles and resolves impor
   for (const family of [...Object.keys(upstreamFlashConfigs), ...Object.keys(hpmSdkFlashConfigs)]){
     const hpm = family.startsWith('hpm');
     const cfg = await loadBuiltinFlashCfg(family,hpm ? 10000 : 1000);
+    assert.equal(cfg.stm32h7Flash, ['stm32h7','stm32h7b0'].includes(family), family);
     assert.equal(cfg.arch,hpm ? 'riscv' : 'arm',family);
     assert.equal(cfg.transport,hpm ? 'jtag' : 'swd',family);
     assert.equal(cfg.clockKhz,hpm ? 10000 : 1000,family);

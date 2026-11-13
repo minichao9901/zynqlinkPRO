@@ -59,7 +59,42 @@ export class OpenOcdProbe {
     return name;
   }
 
-  async _initTarget(link){ await link.command('init'); }
+  async _initTarget(link){
+    const { target, raw, memoryAp, stm32h7Flash } = this.cfg;
+    if (!raw || memoryAp || !stm32h7Flash){
+      await link.command('init');
+      return;
+    }
+
+    // The vendor CFG enables debug in examine-end. In low-power firmware
+    // AP0 can return an invalid CPUID before that event ever runs.
+    await link.command(`
+proc workbench_h7_examine_start {ap original} {
+  set clock 0xe00e1004
+  set mask 0x0060003f
+  set current [$ap read_memory $clock 32 1]
+  if {($current & $mask) != $mask} {
+    $ap mww $clock [expr {$current | $mask}]
+    if {([$ap read_memory $clock 32 1] & $mask) != $mask} {
+      error "STM32H7 DBGMCU debug clocks not confirmed"
+    }
+  }
+  if {$original ne ""} {uplevel #0 $original}
+}
+set workbench_h7_dap [${target} cget -dap]
+foreach workbench_h7_ap [target names] {
+  if {[$workbench_h7_ap cget -type] ne "mem_ap"} {continue}
+  if {[$workbench_h7_ap cget -dap] eq $workbench_h7_dap &&
+      [$workbench_h7_ap cget -ap-num] == 2} {
+    ${target} configure -event examine-start [list workbench_h7_examine_start $workbench_h7_ap [${target} cget -event examine-start]]
+    break
+  }
+}
+`);
+    await link.command('init');
+    if (await link.command(`${target} was_examined`) !== '1')
+      throw Error('STM32H7 内核检查失败，Flash 尚未擦写。请查看日志中的 AP2、DBGMCU 和 CPUID 信息');
+  }
 
   async connect(){
     this._f103HighDensity = undefined;

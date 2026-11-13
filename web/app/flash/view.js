@@ -309,7 +309,8 @@ export class FlashView {
         if (probe.isRiscv) return { id };
         const word = addr => probe._readWord(addr).catch(() => null);
         const cpuid = await word(0xe000ed00);
-        if (cpuid != null) this._log(decodeCpuid(cpuid).text);
+        if (cpuid != null && cpuid !== 0 && cpuid !== 0xffffffff) this._log(decodeCpuid(cpuid).text);
+        else this._log('核心 CPUID 暂不可读，继续核对探针和目标芯片身份');
         if (probe.cfg.family === 'rp2350'){
           const chipId = await word(0x40000000);
           if (chipId == null || (chipId & 0x0fffffff) !== 0x4927)
