@@ -336,7 +336,7 @@ on('run-to',async()=>{await target.verifyElf(state.elfInfo);$('break-state').tex
 on('remove-break',async()=>{if(target.probe)await target.halt();await target.breakpoints.clear();state.entryAddress=null;renderSymbols();renderBreakpoints();if(target.probe)await showTarget(await target.inspect());});
 on('cancel-wait',async()=>{target.cancelEntry=true;log('已请求取消等待断点');},{exclusive:false});
 on('apply-config',async()=>{entry(true);const info=await target.configure(options());state.traceConfigDirty=false;await showTarget(info);});on('restore-config',async()=>{await target.restore();state.traceConfigDirty=false;await showTarget(await target.inspect());log('原 trace 设置已恢复并重新回读');});
-on('check-la',async()=>{const s=await api('status');const ok=s.zynq?.ready===true;$('la-state').textContent=ok?'Zynq ETM 接收端在线':'未找到 Zynq ETM 接收端';$('la-state').className='status '+(ok?'good':'bad');$('capture-capability-hint').textContent=ok?(s.zynq.message||'Zynq FPGA 直接接收四位 DDR ETM；单次采集上限 1000 ms。'):(s.zynq?.message||'请确认 ZynqDAP 已加载配套 bit/ELF 并连接');clockPlan();});
+on('check-la',async()=>{const s=await api('status');const ok=s.zynq?.ready===true;$('la-state').textContent=ok?'ETM 接收端在线':'未找到 ETM 接收端';$('la-state').className='status '+(ok?'good':'bad');$('capture-capability-hint').textContent=ok?(s.zynq.message||'Zynq FPGA 直接接收四位 DDR ETM；单次采集上限 1000 ms。'):(s.zynq?.message||'请连接已加载配套 bit/ELF 的 zynqlinkPRO 探针');clockPlan();});
 on('open-record',()=>loadRecord($('records').value));
 async function confirmCaptureRestore(){
   const pending=state.pendingCaptureRestore;if(!pending)return;
