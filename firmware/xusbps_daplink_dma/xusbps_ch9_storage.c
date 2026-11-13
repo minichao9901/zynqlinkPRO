@@ -296,7 +296,7 @@ u32 XUsbPs_Ch9SetupDevDescReply(u8 *BufPtr, u32 BufLen)
 		USB_ENDPOINT0_MAXP,		/* bMaxPacketSize0: 64 */
 		be2les(DAPLINK_VID),		/* idVendor: 0x0D28 (ARM) */
 		be2les(DAPLINK_PID),		/* idProduct: 0x0204 (CMSIS-DAP) */
-		be2les(0x0101),			/* bcdDevice: 1.00 */
+		be2les(0x0102),			/* bcdDevice: 1.02, refresh cached Windows descriptors */
 		0x01,				/* iManufacturer */
 		0x02,				/* iProduct */
 		0x03,				/* iSerialNumber */
@@ -538,7 +538,7 @@ u32 XUsbPs_Ch9SetupStrDescReply(u8 *BufPtr, u32 BufLen, u8 Index)
 		"CherryUSB",            /* iManufacturer */
 		"CMSIS-DAP",            /* iProduct */
 		"12345678",             /* iSerialNumber */
-        "ZynqLink probe control",
+        "zynqlinkPRO HID",
 	};
 	char *String;
 	u32 StringLen;

@@ -17,6 +17,7 @@ URL='https://minichao9901.github.io/zynqlinkPRO/#download'
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--out',type=Path,required=True)
+    parser.add_argument('--hid-name', help='Also verify the HID name and serial with Windows-sized string requests')
     args=parser.parse_args()
     if args.out.exists():parser.error('Use a new output JSON')
     report={'passed':False,'expectedURL':URL,'requests':[]}
@@ -57,6 +58,33 @@ def main():
         assert control(0xc0,vendor,1,2,255)==url
         info=cmd(tx,rx,[0,0xff])
         assert len(info)>=4 and info[1]==2
+        if args.hid_name:
+            device=control(0x80,6,0x0100,0,18)
+            serial_index=device[16]
+            config_header=control(0x80,6,0x0200,0,9)
+            config=control(0x80,6,0x0200,0,int.from_bytes(config_header[2:4],'little'))
+            offset=0
+            hid_index=0
+            while offset<len(config):
+                size,kind=config[offset:offset+2]
+                assert size>=2 and offset+size<=len(config)
+                if kind==4 and size>=9 and config[offset+5]==3:
+                    hid_index=config[offset+8]
+                    break
+                offset+=size
+            assert hid_index and serial_index
+            for index in (hid_index,serial_index):
+                full=control(0x80,6,0x0300|index,0x0409,1026)
+                assert full[:2]==bytes([len(full),3])
+                assert control(0x80,6,0x0300|index,0x0409,4094)==full
+                assert control(0x80,6,0x0300|index,0x0409,2)==full[:2]
+                value=full[2:].decode('utf-16-le')
+                if index==hid_index:
+                    assert value==args.hid_name,value
+                    report['hidName']=value
+                else:
+                    assert value,value
+                    report['hidSerial']=value
         report.update(passed=True,url=actual,bosBytes=len(bos),winusbBytes=len(windows),dapPacketSize=int.from_bytes(info[2:4],'little'))
     finally:
         usb.util.dispose_resources(dev)

@@ -844,7 +844,7 @@ static void control(const uint8_t *req, uint8_t *res) {
         switch (cmd) {
         case 0x10: s = "ZynqLinkPro"; break;
         case 0x11: s = "12345678"; break;
-        case 0x13: s = "0.7-nonce32"; break;
+        case 0x13: s = "0.8-nonce32"; break;
         default: s = __DATE__ " " __TIME__; break;
         }
         size_t n = strlen(s);

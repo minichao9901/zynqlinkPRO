@@ -39,3 +39,34 @@ test('an empty completion cannot hide data in other already submitted reads',asy
   pending[0](packet(1));pending[1]({status:'ok',data:new DataView(new ArrayBuffer(0))});pending[2](packet(2));
   await drained;assert.deepEqual(received,[1,2]);assert.equal(reads,4);await t.stop();
 });
+
+test('Zynq WebUSB chooses whole-frame reads and retires only after the final count matches', async()=>{
+  const reads=[];
+  const t=new VendorEpTransport({transferIn(_ep,size){
+    assert.equal(size,512);
+    return new Promise(resolve=>reads.push(resolve));
+  }});
+  t.epAddr=0x87;
+  t.claimed=true;
+  t.configureReadAhead(900000);
+  assert.equal(t.chunkBytes,512);
+  let retired=false,received=0;
+  t._retireReads=async()=>{retired=true;return true;};
+  await t.start(bytes=>{received+=bytes.length;});
+  const stop=t.drainCounted(()=>received===2,1000);
+  reads[0](packet(1));
+  await Promise.resolve();
+  assert.equal(retired,false);
+  reads[1](packet(2));
+  await stop;
+  assert.equal(retired,true);
+  assert.equal(t.running,false);
+  assert.equal(received,2);
+  for (const resolve of reads.slice(2)) resolve(packet(3));
+});
+
+test('a count deficit never cancels outstanding reads as a successful stop', async()=>{
+  const t=new VendorEpTransport({});
+  t._retireReads=async()=>{throw Error('must not retire incomplete capture');};
+  await assert.rejects(t.drainCounted(()=>false,5),/未收到探针报告的全部采样包/);
+});

@@ -177,10 +177,14 @@ static u8  	Reply[XUSBPS_REQ_REPLY_LEN];
 	static u8  	Reply[XUSBPS_REQ_REPLY_LEN] ALIGNMENT_CACHELINE;
 #endif
 
-	/* Check that the requested reply length is not bigger than our reply
-	 * buffer. This should never happen...
+	/* String replies are bounded by the descriptor's own length, regardless
+	 * of host wLength. Windows HID can request 1026 bytes for a short string.
 	 */
-	if (SetupData->wLength > XUSBPS_REQ_REPLY_LEN) {
+	if (SetupData->wLength > XUSBPS_REQ_REPLY_LEN &&
+	    !(SetupData->bRequest == XUSBPS_REQ_GET_DESCRIPTOR &&
+	      (SetupData->wValue >> 8) == XUSBPS_TYPE_STRING_DESC)) {
+		XUsbPs_EpStall(InstancePtr, 0, XUSBPS_EP_DIRECTION_IN |
+						XUSBPS_EP_DIRECTION_OUT);
 		return;
 	}
 
@@ -354,6 +358,10 @@ static u8  	Reply[XUSBPS_REQ_REPLY_LEN];
 			ReplyLen = XUsbPs_Ch9SetupStrDescReply(
 						Reply, XUSBPS_REQ_REPLY_LEN,
 						SetupData->wValue & 0xFF);
+			if (!ReplyLen) {
+				Error = 1;
+				break;
+			}
 
 			ReplyLen = ReplyLen > SetupData->wLength ?
 						SetupData->wLength : ReplyLen;
