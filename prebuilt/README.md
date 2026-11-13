@@ -4,6 +4,7 @@
 |---|---|
 | [release-20261106](release-20261106/README.md) | 当前 J7 转接板：ELD1、原始 SWD 序列修复与 WebUSB 网页入口；F103ZE 限定验收 |
 | [qspi-release-20261106](qspi-release-20261106/README.md) | 当前J7 QSPI启动包，同一bit/ELF，已固化并完成实体冷启动及F103ZE回归 |
+| [qspi-probe-fw-info-20261113](qspi-probe-fw-info-20261113/README.md) | J7 探针固件 0.7-nonce32 QSPI 包，固化、冷启动、BOOT 和 OCM 读回以及 Web 版本显示通过 |
 | [golden](golden/README.md) | 原 7020/120 MHz Golden 比较、目标 ELF、构建输入与回退 |
 | [recovery](recovery/README.md) | 已验收 QSPI 恢复包，保留原始字节与来源 |
 | targets/ | 正式目标固件与源码身份 |
