@@ -4,6 +4,8 @@
 
 临时加载到探针后，Windows Chrome 在同一站点与配置中复用 USB 和 HID 授权。实机通过物理 MEM-AP0 独立核对 85,716 字节 OCM 执行区。此配对用于 JTAG RAM 加载，验收后探针回到已有的 0.7-nonce32 QSPI 镜像。
 
+后续已将同一 bit/ELF [重包并固化至 QSPI](../qspi-probe-hid-20261114/README.md)，实体冷启动通过。
+
 ```powershell
 python -X utf8 toolbox.py probe-load --bit prebuilt/j7-probe-hid-20261114/probe.bit --elf prebuilt/j7-probe-hid-20261114/application.elf --ps-init prebuilt/j7-probe-hid-20261114/ps7_init.tcl
 ```

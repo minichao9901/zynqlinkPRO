@@ -1,0 +1,27 @@
+{
+  "files": {
+    "application.elf": "64d00fe597030175920b994e39ff51db8a683dbb8d5f907c0f8d73f8d55044b9",
+    "BOOT.bif": "5d9e85391a1c5ed4374258b90442dbc7102511ed54cbc4333e394bb686f04bd9",
+    "BOOT.bin": "34576b1fecd0b76ef40d25856f7f60b549298a014943353df1454934505980de",
+    "build_manifest.json": "52e2ddc584d28c9bbfa10c05773ccacfa05bed4e3aa314f5318b0bd3a1c45ede",
+    "fsbl_programmer.elf": "f2c87060fecbf35da5114af6b8f7ac642b6c098baf8ef7dc783c773f752e96cc",
+    "fsbl_stage0.elf": "c5e07cf573f34a541acbd7dddd9a06e85804a60a8735ab566b523afc9a184f7c",
+    "fsbl_stage2.bin": "f18bd49242ad78e3a28d99f7f486377bbe056f904dc6766119a788b3e561ecf8",
+    "fsbl_stage2.elf": "9b497f8af895d982b2ca3167e6818a41df4cc36dc941ed79418c22a68a465550",
+    "probe.bit": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6",
+    "ps7_init.tcl": "d3eeab6707765ab59acb924e39ff5c77c013da8cbf598b181e9eb43578f29ece",
+    "qspi_program.elf": "ac9db6c2809dad6ea19a9ca82778331c1410167b48db2e1e25165b954226a910",
+    "qspi_read.elf": "dff4d149f464a5b063a0541c2114648fd683d2feb6f39ab4ae2412aec3898b81",
+    "rebuild.bif": "bc263aef78a1be0cd12ba3a31868ea1c632d05037aaa567a353955e126751699",
+    "acceptance.json": "6794313d0b718d397a12fed4d39faea1f286c4def1a7cff1bdcae183756063b8",
+    "README.md": "6270e23e86ef0dcf165fac9e899757a3f414d6c3f48646a1ebc4832d225fd2b6"
+  },
+  "device": "xc7z020clg400-2",
+  "input_pair": {
+    "bit_sha256": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6",
+    "elf_sha256": "64d00fe597030175920b994e39ff51db8a683dbb8d5f907c0f8d73f8d55044b9"
+  },
+  "source_revision": "816dacae6d720fe4cc51ca5098202f83d9a974f8",
+  "boot_validation": "Passed write and complete BOOT readback, physical cold boot, OCM identity, Chrome grant reuse, and H743 stream regressions with the fixed Web modules.",
+  "note": "See acceptance.json for results and online v1.3.6 limitations."
+}

@@ -1,0 +1,113 @@
+{
+  "date": "2026-11-14",
+  "source_revision": "816dacae6d720fe4cc51ca5098202f83d9a974f8",
+  "input_pair": {
+    "bit_sha256": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6",
+    "elf_sha256": "64d00fe597030175920b994e39ff51db8a683dbb8d5f907c0f8d73f8d55044b9"
+  },
+  "firmware": {
+    "model": "ZynqLinkPro",
+    "fw": "0.8-nonce32",
+    "sn": "12345678",
+    "buildTime": "Nov 14 2026 00:08:09"
+  },
+  "qspi": {
+    "boot_mode": 1,
+    "jedec_id": "ef4019",
+    "backup_requested": false,
+    "boot_bytes": 4281040,
+    "boot_sha256": "34576b1fecd0b76ef40d25856f7f60b549298a014943353df1454934505980de",
+    "first_write_interrupted": "JTAG reported DDR controller held in reset after erase progress at 1773568 bytes",
+    "write_status": "programmed_verified_reset_boot",
+    "write_readback_sha256": "34576b1fecd0b76ef40d25856f7f60b549298a014943353df1454934505980de",
+    "physical_cold_boot_confirmed": true,
+    "cold_ocm_executable_bytes": 85716,
+    "boot_handoff": [
+      1398032176,
+      539365425,
+      65544,
+      1,
+      2,
+      1536,
+      0,
+      1
+    ],
+    "fclk_after_cold_boot_hz": 99999999,
+    "post_cold_status": "verified_reset_boot",
+    "post_cold_readback_sha256": "34576b1fecd0b76ef40d25856f7f60b549298a014943353df1454934505980de"
+  },
+  "chrome": {
+    "version": "156.0.8078.48",
+    "public_site": "https://minichao9901.github.io/zynqlinkPRO/",
+    "requests_after_cold_boot": [],
+    "first_cdc_requests": [
+      "serial"
+    ],
+    "requests_after_reopen": [],
+    "descriptor_check_passed": true
+  },
+  "hss": {
+    "requested_period_us": 10,
+    "variables": [
+      "g_loops",
+      "g_ms"
+    ],
+    "reported_swd_hz": 59999999,
+    "public_v1.3.6_missing_samples": 97,
+    "fixed_web_received": [
+      500287,
+      500187,
+      500187,
+      500187,
+      499818
+    ],
+    "fixed_web_skipped": [
+      0,
+      0,
+      0,
+      0,
+      369
+    ],
+    "native_cli_received": [
+      502490,
+      502390,
+      500490
+    ],
+    "fixed_web_and_cli_missing_samples": 0,
+    "fixed_web_and_cli_sequence_breaks": 0
+  },
+  "rtt": {
+    "public_v1.3.6_restart_passed": false,
+    "fixed_web_restart_rounds": 4,
+    "fixed_web_long_window_bytes": [
+      58617856,
+      58613760,
+      58613760,
+      58609665
+    ],
+    "fixed_web_long_window_MBps": [
+      3.907649,
+      3.90735,
+      3.907376,
+      3.907259
+    ],
+    "native_cli_window": {
+      "bytes": 234291200,
+      "seconds": 60.006736,
+      "MBs": 3.904414991168915,
+      "repeatedPatternExact": true
+    },
+    "ordered_fixture": {
+      "lastRdOff": 15744,
+      "expected": 15744,
+      "restoredBytes": 16384
+    }
+  },
+  "target": {
+    "flash_before_equal": true,
+    "flash_sha256": "7b6a4f9e7b83de0b9cf81236fe38508b5bcd519b7dc85fd9b811befdb77e666b",
+    "streams_idle": true,
+    "core_running": true
+  },
+  "report": "../../docs/validation/qspi-probe-hid-20261114/README.md"
+}
