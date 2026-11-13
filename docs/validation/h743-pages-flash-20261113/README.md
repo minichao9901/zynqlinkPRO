@@ -9,3 +9,5 @@ GitHub Pages v1.3.4 使用实际 Chrome WebUSB、内置 STM32H7、SWD 10 MHz 复
 J7 探针处于 QSPI 模式，物理 MEM-AP0 的 85,828 字节 OCM 程序与 `0.7-nonce32` ELF 一致，初始 FCLK 由寄存器推算为 119,999,998 Hz。原始数据、命令记录和 Flash 快照留在本机 `build/h743-pages-*`。
 
 烧前和烧后分别独立双读 2 MiB Flash。烧后 1,192 字节与 ELF 全等，区间外 2,095,960 字节及 64 KiB AXI 工作区与烧前一致。复位后 `VTOR=0x08000000`、`DHCSR=0x01010001`、CFSR/HFSR 为零，目标运行用户指定固件。最终探针队列、采集、DDR、CDMA、RTT、HSS 为空闲。轮询状态误导的旧现象见 ZL-201，本次停在擦写前的内核检查问题登记为 ZL-208。
+
+160 项 Web 自测、73 项 CLI 自测及 165 个模块语法检查通过。线上 v1.3.5 的构建时间为 `2026-11-13 14:35:50 UTC`，源码提交 `984fe0af0093db2c0fde41e33b18da895511d6e5`。匿名 Chromium 打开烧录页及版本窗口通过。线上首页、连接修订模块、CFG 导入模块、官方 STM32H7 CFG 和 Wasm 的 SHA-256 与暂存清单一致。实机完整烧录使用发布前同一源码的 WebUSB 页面。[Pages 部署](https://github.com/minichao9901/zynqlinkPRO/actions/runs/43444302102)
