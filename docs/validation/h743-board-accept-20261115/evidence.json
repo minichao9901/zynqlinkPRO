@@ -1,0 +1,630 @@
+{
+  "campaign": {
+    "board": "h743",
+    "revision": "e791818f0c87a401060a470bd9b098d24afbce17",
+    "sourceDirty": true,
+    "priorTrackedChange": "docs/项目问题跟踪列表.md, ZL-006",
+    "startedAt": "2026-11-14T16:00:18.138314+00:00",
+    "finishedAt": "2026-11-14T16:00:25.850282+00:00",
+    "seed": 680014,
+    "probeSerial": "12345678",
+    "status": "fail",
+    "accepted": false,
+    "counts": {
+      "pass": 0,
+      "fail": 1,
+      "pending": 0,
+      "not-applicable": 0,
+      "blocked": 22
+    },
+    "files": {
+      "bit": {
+        "path": "prebuilt/qspi-release/probe.bit",
+        "sha256": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6"
+      },
+      "zynqElf": {
+        "path": "prebuilt/qspi-release/application.elf",
+        "sha256": "64d00fe597030175920b994e39ff51db8a683dbb8d5f907c0f8d73f8d55044b9"
+      },
+      "targetElf": {
+        "path": "prebuilt/targets/stm32h743-cdc-trace-20261101/cpu480-trace20/fw.elf",
+        "sha256": "db5d66656846eeffedb1e1c405afec9345a7a5d8561eb53f987508aa1ee9dc19"
+      },
+      "etmElf": {
+        "path": "prebuilt/targets/stm32h743-cdc-trace-20261101/cpu60-trace20/fw.elf",
+        "sha256": "246640bf79c8b1e568441a286812326dfb0ae68a0df061a0c023262c07cf221b"
+      }
+    },
+    "results": [
+      {
+        "id": "preflight",
+        "status": "fail",
+        "secondsElapsed": 7.682,
+        "error": "IDCODE read failed: 05 00 07"
+      },
+      {
+        "id": "swd-sram",
+        "transport": "swd",
+        "requestedHz": 50000000,
+        "status": "blocked",
+        "secondsElapsed": 0.0,
+        "reason": "IDCODE read failed: 05 00 07"
+      },
+      {
+        "id": "swd-flash",
+        "transport": "swd",
+        "requestedHz": 50000000,
+        "status": "blocked",
+        "secondsElapsed": 0.0,
+        "reason": "IDCODE read failed: 05 00 07"
+      },
+      {
+        "id": "swd-debug",
+        "transport": "swd",
+        "requestedHz": 50000000,
+        "status": "blocked",
+        "secondsElapsed": 0.0,
+        "reason": "IDCODE read failed: 05 00 07"
+      },
+      {
+        "id": "swd-rtt-viewer",
+        "transport": "swd",
+        "requestedHz": 50000000,
+        "status": "blocked",
+        "secondsElapsed": 0.0,
+        "reason": "IDCODE read failed: 05 00 07"
+      },
+      {
+        "id": "swd-rtt-forward",
+        "transport": "swd",
+        "requestedHz": 50000000,
+        "status": "blocked",
+        "secondsElapsed": 0.0,
+        "reason": "IDCODE read failed: 05 00 07"
+      },
+      {
+        "id": "swd-jscope-1",
+        "transport": "swd",
+        "requestedHz": 50000000,
+        "channels": 1,
+        "seconds": 60,
+        "status": "blocked",
+        "secondsElapsed": 0.0,
+        "reason": "IDCODE read failed: 05 00 07"
+      },
+      {
+        "id": "swd-jscope-8",
+        "transport": "swd",
+        "requestedHz": 50000000,
+        "channels": 8,
+        "seconds": 60,
+        "status": "blocked",
+        "secondsElapsed": 0.0,
+        "reason": "IDCODE read failed: 05 00 07"
+      },
+      {
+        "id": "swd-stress-1",
+        "transport": "swd",
+        "requestedHz": 50000000,
+        "round": 1,
+        "actions": [
+          {
+            "business": "rtt-forward",
+            "ending": "switch"
+          },
+          {
+            "business": "rtt-viewer",
+            "ending": "idle-disconnect"
+          },
+          {
+            "business": "debug",
+            "ending": "usb-disconnect"
+          },
+          {
+            "business": "jscope",
+            "ending": "active-disconnect"
+          }
+        ],
+        "status": "blocked",
+        "secondsElapsed": 0.0,
+        "reason": "IDCODE read failed: 05 00 07"
+      },
+      {
+        "id": "swd-stress-2",
+        "transport": "swd",
+        "requestedHz": 50000000,
+        "round": 2,
+        "actions": [
+          {
+            "business": "rtt-forward",
+            "ending": "active-disconnect"
+          },
+          {
+            "business": "jscope",
+            "ending": "usb-disconnect"
+          },
+          {
+            "business": "rtt-viewer",
+            "ending": "switch"
+          },
+          {
+            "business": "debug",
+            "ending": "idle-disconnect"
+          }
+        ],
+        "status": "blocked",
+        "secondsElapsed": 0.0,
+        "reason": "IDCODE read failed: 05 00 07"
+      },
+      {
+        "id": "swd-stress-3",
+        "transport": "swd",
+        "requestedHz": 50000000,
+        "round": 3,
+        "actions": [
+          {
+            "business": "debug",
+            "ending": "active-disconnect"
+          },
+          {
+            "business": "rtt-forward",
+            "ending": "idle-disconnect"
+          },
+          {
+            "business": "jscope",
+            "ending": "switch"
+          },
+          {
+            "business": "rtt-viewer",
+            "ending": "usb-disconnect"
+          }
+        ],
+        "status": "blocked",
+        "secondsElapsed": 0.0,
+        "reason": "IDCODE read failed: 05 00 07"
+      },
+      {
+        "id": "jtag-sram",
+        "transport": "jtag",
+        "requestedHz": 50000000,
+        "status": "blocked",
+        "secondsElapsed": 0.0,
+        "reason": "IDCODE read failed: 05 00 07"
+      },
+      {
+        "id": "jtag-flash",
+        "transport": "jtag",
+        "requestedHz": 50000000,
+        "status": "blocked",
+        "secondsElapsed": 0.0,
+        "reason": "IDCODE read failed: 05 00 07"
+      },
+      {
+        "id": "jtag-debug",
+        "transport": "jtag",
+        "requestedHz": 50000000,
+        "status": "blocked",
+        "secondsElapsed": 0.0,
+        "reason": "IDCODE read failed: 05 00 07"
+      },
+      {
+        "id": "jtag-rtt-viewer",
+        "transport": "jtag",
+        "requestedHz": 50000000,
+        "status": "blocked",
+        "secondsElapsed": 0.0,
+        "reason": "IDCODE read failed: 05 00 07"
+      },
+      {
+        "id": "jtag-rtt-forward",
+        "transport": "jtag",
+        "requestedHz": 50000000,
+        "status": "blocked",
+        "secondsElapsed": 0.0,
+        "reason": "IDCODE read failed: 05 00 07"
+      },
+      {
+        "id": "jtag-jscope-1",
+        "transport": "jtag",
+        "requestedHz": 50000000,
+        "channels": 1,
+        "seconds": 60,
+        "status": "blocked",
+        "secondsElapsed": 0.0,
+        "reason": "IDCODE read failed: 05 00 07"
+      },
+      {
+        "id": "jtag-jscope-8",
+        "transport": "jtag",
+        "requestedHz": 50000000,
+        "channels": 8,
+        "seconds": 60,
+        "status": "blocked",
+        "secondsElapsed": 0.0,
+        "reason": "IDCODE read failed: 05 00 07"
+      },
+      {
+        "id": "jtag-stress-1",
+        "transport": "jtag",
+        "requestedHz": 50000000,
+        "round": 1,
+        "actions": [
+          {
+            "business": "rtt-forward",
+            "ending": "switch"
+          },
+          {
+            "business": "rtt-viewer",
+            "ending": "idle-disconnect"
+          },
+          {
+            "business": "debug",
+            "ending": "usb-disconnect"
+          },
+          {
+            "business": "jscope",
+            "ending": "active-disconnect"
+          }
+        ],
+        "status": "blocked",
+        "secondsElapsed": 0.0,
+        "reason": "IDCODE read failed: 05 00 07"
+      },
+      {
+        "id": "jtag-stress-2",
+        "transport": "jtag",
+        "requestedHz": 50000000,
+        "round": 2,
+        "actions": [
+          {
+            "business": "rtt-forward",
+            "ending": "active-disconnect"
+          },
+          {
+            "business": "jscope",
+            "ending": "usb-disconnect"
+          },
+          {
+            "business": "rtt-viewer",
+            "ending": "switch"
+          },
+          {
+            "business": "debug",
+            "ending": "idle-disconnect"
+          }
+        ],
+        "status": "blocked",
+        "secondsElapsed": 0.0,
+        "reason": "IDCODE read failed: 05 00 07"
+      },
+      {
+        "id": "jtag-stress-3",
+        "transport": "jtag",
+        "requestedHz": 50000000,
+        "round": 3,
+        "actions": [
+          {
+            "business": "debug",
+            "ending": "active-disconnect"
+          },
+          {
+            "business": "rtt-forward",
+            "ending": "idle-disconnect"
+          },
+          {
+            "business": "jscope",
+            "ending": "switch"
+          },
+          {
+            "business": "rtt-viewer",
+            "ending": "usb-disconnect"
+          }
+        ],
+        "status": "blocked",
+        "secondsElapsed": 0.0,
+        "reason": "IDCODE read failed: 05 00 07"
+      },
+      {
+        "id": "etm",
+        "transport": "swd",
+        "requestedHz": 10000000,
+        "seconds": 1,
+        "status": "blocked",
+        "secondsElapsed": 0.0,
+        "reason": "IDCODE read failed: 05 00 07"
+      },
+      {
+        "id": "final-state",
+        "status": "blocked",
+        "secondsElapsed": 0.0,
+        "reason": "IDCODE read failed: 05 00 07"
+      }
+    ]
+  },
+  "workbench": "版本　v1.3.8 (OpenOCD Wasm)\n构建时间　源码模式，未打包",
+  "probe": {
+    "identity": {
+      "usbSerial": "12345678",
+      "cableSerial": "210299008529",
+      "challenge": [
+        16,
+        17,
+        1
+      ],
+      "originalJtagTiming": 0,
+      "restored": true,
+      "livePlRegisters": {
+        "0x4001004c": "0x4450007f",
+        "0x40030048": "0x30f",
+        "0x40030050": "0x454c4431",
+        "0x40040000": "0x45444d31"
+      },
+      "declaredBitSha256": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6",
+      "plVerification": "qualified live register profile"
+    },
+    "usb": {
+      "vendorId": 3368,
+      "productId": 516,
+      "productName": "CMSIS-DAP",
+      "serialNumber": "12345678"
+    },
+    "hid": {
+      "collections": [
+        {
+          "usage": 1,
+          "usagePage": 65280
+        }
+      ],
+      "productId": 516,
+      "productName": "zynqlinkPRO HID",
+      "serialNumber": "12345678",
+      "vendorId": 3368
+    },
+    "ports": [
+      {
+        "path": "COM33",
+        "productName": "USB 串行设备 (COM33)",
+        "serialNumber": "12345678",
+        "usbProductId": 516,
+        "usbVendorId": 3368
+      },
+      {
+        "path": "COM34",
+        "productName": "USB-SERIAL CH340 (COM34)",
+        "serialNumber": "",
+        "usbProductId": 29987,
+        "usbVendorId": 6790
+      }
+    ],
+    "qspiBootMode": 1,
+    "qspiStartupMarker": [
+      1398032176,
+      539365425,
+      65544,
+      1,
+      2,
+      1536,
+      0,
+      1
+    ],
+    "ocmExecutableBytes": 85716,
+    "ocmSections": [
+      {
+        "name": ".text",
+        "bytes": 82736,
+        "address": 0,
+        "equal": true,
+        "expected_sha256": "b1b6d882f4a81787b4ef049058e6812a8a7e620b8c1b03c7418a06d919323cc4",
+        "live_sha256": "b1b6d882f4a81787b4ef049058e6812a8a7e620b8c1b03c7418a06d919323cc4"
+      },
+      {
+        "name": ".ocm_text",
+        "bytes": 2956,
+        "address": 82736,
+        "equal": true,
+        "expected_sha256": "5d7f7afc8467e286592da089d27c5c9eeb43331c6d31b6561eee5909704f5a4d",
+        "live_sha256": "5d7f7afc8467e286592da089d27c5c9eeb43331c6d31b6561eee5909704f5a4d"
+      },
+      {
+        "name": ".init",
+        "bytes": 12,
+        "address": 85692,
+        "equal": true,
+        "expected_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6",
+        "live_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6"
+      },
+      {
+        "name": ".fini",
+        "bytes": 12,
+        "address": 85704,
+        "equal": true,
+        "expected_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6",
+        "live_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6"
+      }
+    ],
+    "ocmMemoryPath": "physical MEM-AP0; independent of CPU memory/cache context",
+    "initialClock": {
+      "control": 3147264,
+      "source": 0,
+      "pll": 221192,
+      "bootMode": 1,
+      "FCLK_Hz": 99999999
+    },
+    "finalClock": {
+      "control": 18874624,
+      "source": 0,
+      "pll": 221192,
+      "bootMode": 1,
+      "FCLK_Hz": 99999999
+    },
+    "finalEngines": {
+      "PS_IDCODE": "0x23727093",
+      "LEVEL_SHIFTERS": "0xf",
+      "FPGA_RESET": "0x0",
+      "BOOT_MODE": "0x1",
+      "CAPTURE": "0x8",
+      "SWD": "0xe",
+      "PACKET": "0x0",
+      "DDR": "0x0",
+      "CDMA": "0x1002"
+    },
+    "finalRouteAndPins": {
+      "0x40000000": "0x0",
+      "0x40000004": "0xf",
+      "0x40010008": "0xa11",
+      "0x40010080": "0x0",
+      "0x40010094": "0x2",
+      "0x40010098": "0x0"
+    },
+    "finalNativeSession": {
+      "cancelled": 0,
+      "completed": 6,
+      "current": null,
+      "failed": 0,
+      "pending": [],
+      "protocol": "probe-control/1",
+      "resources": {},
+      "transport": {
+        "hidCorrelated": false,
+        "hidOpen": false,
+        "hidStaleReplies": 0,
+        "usbError": null,
+        "usbOpen": false
+      }
+    },
+    "finalStreams": {
+      "rtt": {
+        "rc": 0,
+        "word0": 65536
+      },
+      "hss": {
+        "rc": 0,
+        "word0": 20
+      }
+    }
+  },
+  "targetDiagnostics": {
+    "firstFailure": {
+      "engines": {
+        "PS_IDCODE": "0x23727093",
+        "LEVEL_SHIFTERS": "0xf",
+        "FPGA_RESET": "0x0",
+        "BOOT_MODE": "0x1",
+        "CAPTURE": "0x8",
+        "SWD": "0x0",
+        "PACKET": "0x0",
+        "DDR": "0x0",
+        "CDMA": "0x1002"
+      },
+      "streams": {
+        "rtt": 65536,
+        "hss": 20
+      },
+      "error": "RuntimeError('IDCODE read failed: 05 00 07')"
+    },
+    "rawHandshakeMatrix": [
+      {
+        "link": "swd",
+        "requestedHz": 1000000,
+        "connect": "02 01",
+        "clockReply": "11 00",
+        "pinsAfterConnect": "10 82",
+        "config": "13 00",
+        "select": "12 00",
+        "retryConfig": "04 00",
+        "dpidr": "05 00 07",
+        "fclkHz": 119999998,
+        "cfg": "0x300d6a11",
+        "actualLinkHz": 999999.9833333333,
+        "clockBasis": "probe PLL/divider report",
+        "disconnect": "03 00",
+        "idlePins": "10 02"
+      },
+      {
+        "link": "swd",
+        "requestedHz": 10000000,
+        "connect": "02 01",
+        "clockReply": "11 00",
+        "pinsAfterConnect": "10 82",
+        "config": "13 00",
+        "select": "12 00",
+        "retryConfig": "04 00",
+        "dpidr": "05 00 07",
+        "fclkHz": 119999998,
+        "cfg": "0xcaa11",
+        "actualLinkHz": 9999999.833333334,
+        "clockBasis": "probe PLL/divider report",
+        "disconnect": "03 00",
+        "idlePins": "10 02"
+      },
+      {
+        "link": "jtag",
+        "requestedHz": 1000000,
+        "connect": "02 02",
+        "clockReply": "11 00",
+        "pinsAfterConnect": "10 82",
+        "config": "13 00",
+        "configJtag": "15 00",
+        "retryConfig": "04 00",
+        "cpuTap": "16 00 00 00 00 00",
+        "boundaryTap": "16 00 00 00 00 00",
+        "fclkHz": 1999999,
+        "cfg": "0x20011",
+        "actualLinkHz": 999999.5,
+        "clockBasis": "probe PLL/divider report",
+        "jtagTiming": "89 00 00 a6 13 00 00 d0 05 00 00 43 00 00 00",
+        "disconnect": "03 00",
+        "idlePins": "10 02"
+      },
+      {
+        "link": "jtag",
+        "requestedHz": 50000000,
+        "connect": "02 02",
+        "clockReply": "11 00",
+        "pinsAfterConnect": "10 82",
+        "config": "13 00",
+        "configJtag": "15 00",
+        "retryConfig": "04 00",
+        "cpuTap": "16 00 00 00 00 00",
+        "boundaryTap": "16 00 00 00 00 00",
+        "fclkHz": 99999999,
+        "cfg": "0x11",
+        "actualLinkHz": 49999999.5,
+        "clockBasis": "probe PLL/divider report",
+        "jtagTiming": "89 00 00 18 1c 00 00 8c 08 00 00 64 00 00 00",
+        "disconnect": "03 00",
+        "idlePins": "10 02"
+      },
+      {
+        "link": "swd",
+        "requestedHz": 50000000,
+        "connect": "02 01",
+        "clockReply": "11 00",
+        "pinsAfterConnect": "10 82",
+        "config": "13 00",
+        "select": "12 00",
+        "retryConfig": "04 00",
+        "dpidr": "05 00 07",
+        "fclkHz": 99999999,
+        "cfg": "0xa11",
+        "actualLinkHz": 49999999.5,
+        "clockBasis": "probe PLL/divider report",
+        "disconnect": "03 00",
+        "idlePins": "10 02"
+      }
+    ],
+    "targetIdentityVerified": false,
+    "targetApplicationVerified": false,
+    "targetRunningStateVerified": false,
+    "targetWriteOrResetIssued": false
+  },
+  "cleanup": {
+    "browserAndServiceExited": true,
+    "orphanedTaskProcesses": 0,
+    "runtimeRemoved": true,
+    "privateLogRemoved": true,
+    "sharedHwServerPid": 12776,
+    "sharedHwServerProcessName": "hw_server"
+  },
+  "localRawEvidence": "build/h743-board-accept-20261114/"
+}
