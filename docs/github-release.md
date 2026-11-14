@@ -12,4 +12,10 @@
 
 J7 使用[固定 QSPI 目录](../prebuilt/qspi-release/README.md)。只更新探针镜像时，把验收通过的 BOOT、配套 bit/ELF、辅助程序和清单一起提交并推送到 `main` 的 `prebuilt/qspi-release/`。Pages 链接始终指向该目录，本机 Web 手册和 CLI 使用本机仓库同一路径，用户更新仓库即可选用新镜像。单独更新镜像无需再发布 Pages 或重打 Windows 包。
 
+## v1.3.8 发布验收
+
+2026-11-14。来源提交 `3255b515`，Pages 静态提交 `97ac02bc`。公开 Pages 显示 v1.3.8，构建时间 `08:24:06 UTC`，工程下载页的 QSPI 链接指向 `main` 固定目录。核对线上清单及相关文件字节，浏览器检查说明、版本窗口和下载目标。
+
+公开 Windows ZIP 完整下载 56,200,968 B，SHA-256 为 `7ed9bcde00d2ae120d13cd1b9a945beb31234fb4f1ada8a7c9502188e8d7199e`，与 Release 资产和构建产物一致。保留 `data/` 并更新固定 EXE，构建时间 `08:24:18 UTC`。固定 EXE 的 Web 手册实际执行 QSPI 预检成功，15 个镜像包文件哈希全部通过，冷启动和重包命令引用同一配对。Web 177 项、CLI 76 项，冻结版 F103/H743 离线回归通过。本次未重刷。 [Pages](https://minichao9901.github.io/zynqlinkPRO/#download) · [Release](https://github.com/minichao9901/zynqlinkPRO/releases/tag/v1.3.8)
+
 WebUSB 采用与 superlinkPRO 相同的标准 BOS platform capability / GET_URL，vendor code `0x21`，URL index `1`，保留原 WinUSB `0x20`。逐项实板检查：`python tools/verify_webusb_landing.py --out build/usb-landing-new.json`。描述符宣告网址，浏览器控制是否显示设备通知，不强制弹窗或自动授权。改网页 URL 时须同步固件并重建、验收、提交配对。
