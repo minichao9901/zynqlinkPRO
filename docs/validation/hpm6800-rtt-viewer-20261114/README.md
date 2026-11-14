@@ -18,3 +18,7 @@ zynqlinkPRO 同样运行 OpenOCD Wasm。J7 的[原始 E2E](../hpm6800-e2e-202611
 J7 PS/PL 的物理状态读回空闲，OCM 执行代码 85,716 B 与 0.8-nonce32 QSPI 配对一致。开始测量前 Windows 未枚举到 J7 USB `12345678`（COM33），仅枚举到 SuperLinkPRO 的 USB（COM34）。未对任一探针重新加载、复位或写入，未安装 RAM 夹具。
 
 候选软件覆盖边缘字节保留、8 KiB 分块、短响应停止、渲染保护和同 VID/PID 枚举。新旧浏览器路径同板吞吐、序号连续性、上下行和扫描、软件复位交接仍待 J7 恢复 USB 枚举后实测。
+
+## 在线 RTT 转发补测状态
+
+2026-11-14 补测前确认 Windows 仅枚举到一个 CMSIS-DAP 串口 COM5，对应 J7 序列号 `12345678`。J7 的 HPM6800 TAP 为 `0x1000563d`，目标运行，首 128 KiB Flash 双读与原快照一致，RTT、HSS 和物理采集引擎均空闲。Chrome 已运行逐文件校验的 v1.3.7 Pages 资源，硬件通路为浏览器直连。原授权绑定于旧的 Windows 设备实例，本轮打开 COM5 授权对话框，300 秒内未收到授权，未安装 RAM 夹具、未打开串口、未启动转发。之前 CLI 实际 TCK 24,999,999.5 Hz，两窗中位 1.553 MB/s。线上同 TCK 的速度、上行全量序号和 STOP 尾包仍待授权后复测。补测等待记录 `build/hpm6800-e2e-20261114/online-cdc-tail-100931/result.json`。
