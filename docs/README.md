@@ -12,6 +12,7 @@
 | 工具链、SDK、仿真模型 | [依赖与构建](dependencies.md) |
 | 精选业务trace与逐文件SHA | [记录清单](retained-records.json) |
 | 当前能力、限制和主要成果 | [项目能力评估](validation/project-assessment-20261104/README.md) |
+| 三块目标板的最小实板验收、性能和交付更新 | [板卡精简验收与交付](板卡精简验收与交付.md) |
 | 历史验收、失败证据与恢复方法 | [验收索引](validation/README.md) |
 | 本轮精简范围与验证 | [工程整理](validation/cleanup-20261105/README.md) |
 

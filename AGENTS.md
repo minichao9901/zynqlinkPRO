@@ -80,6 +80,8 @@ ETM配置默认SWD为 **10MHz**，前端、本地采集服务接管和恢复连�
 
 ## 硬件和验收边界
 
+F103ZE、H743、HPM6800EVK 的必验项目、固定档位、性能判据和验收后的更新范围见 [板卡精简验收与交付](docs/板卡精简验收与交付.md)。开始验收前按本次范围选项，交接时逐项记录结果和交付状态。
+
 - 单板操作不能并行抢占；先查占用、采集/DDR/DMA状态，再动时钟或加载。只停止本任务进程，不结束共享 `hw_server` 或其他会话服务。
 - 默认保持目标PLL、AHB/APB、Flash和QSPI；需要改变时按任务授权执行，不能用重刷、复位或降频掩盖失败。临时SRAM/核心寄存器/AFIO/Trace夹具必须备份并核对恢复，记录最终运行/暂停状态。
 - 已知DAP Golden在 `prebuilt/golden/`，QSPI恢复包在 `prebuilt/recovery/`；`prebuilt/release-20261106/` 是当前J7、限定F103范围的release（WebUSB/ELD1/原始SWD修复），不能把RAM加载等同其QSPI冷启动验收。ETM 24MHz研究基线另见 [主线/基线说明](docs/ETM主线合并与最佳基线-20261101.md)。
