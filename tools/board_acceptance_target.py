@@ -15,7 +15,9 @@ DEMCR = 0xe000edfc
 S_RESET_ST = 1 << 25
 FPB = 0xe0002000
 ARM_REGISTERS = tuple(range(19)) + (20,)
-RV_REGISTERS = (0x7b0, 0x7b1, 0x300, 0x305, 0x340, 0x341, 0x342, 0x343,
+RV_DCSR = 0x7b0
+RV_DCSR_STEP = 1 << 2
+RV_REGISTERS = (RV_DCSR, 0x7b1, 0x300, 0x305, 0x340, 0x341, 0x342, 0x343,
                 *range(0x1001, 0x1020))
 RV_STATE = 0xf0400000
 RV_CODE = 0x10000
@@ -323,6 +325,7 @@ class Target:
         """Keep the application's advanced PC, stack and RAM coherent."""
         folder.mkdir()
         saved = breakpoint_state = None
+        step_before = None
         halt_attempted = False
         try:
             with self.link() as (_, mem, target, _):
@@ -332,6 +335,7 @@ class Target:
                 halt_attempted = True
                 self.halt(mem, target)
                 if self.rv:
+                    step_before = target.register(RV_DCSR) & RV_DCSR_STEP
                     snapshot = self.trigger_snapshot(target)
                     if any(control >> 28 not in (0, 2, 6, 15) or
                            control >> 28 in (2, 6) and control & 7 for control, _ in snapshot[1]):
@@ -343,7 +347,8 @@ class Target:
                         raise Pending('An existing FPB breakpoint is configured')
                     breakpoint_state = snapshot
             write_json(folder / 'before.json', dict(state=saved,
-                breakpoints=breakpoint_state if self.rv else breakpoint_state.hex()))
+                breakpoints=breakpoint_state if self.rv else breakpoint_state.hex(),
+                dcsrStep=bool(step_before) if self.rv else None))
             yield
         finally:
             if halt_attempted:
@@ -356,10 +361,20 @@ class Target:
                                 self.restore_triggers(target, breakpoint_state)
                             else:
                                 self.fpb_restore(mem, breakpoint_state)
+                        if self.rv and step_before is not None:
+                            # OpenOCD may leave step set after an instruction
+                            # step. A raw DM resume would then halt after one
+                            # more instruction instead of restoring execution.
+                            dcsr = target.register(RV_DCSR)
+                            if dcsr & RV_DCSR_STEP != step_before:
+                                target.register(RV_DCSR, (dcsr & ~RV_DCSR_STEP) | step_before)
+                            checked(target.register(RV_DCSR) & RV_DCSR_STEP == step_before,
+                                    'RISC-V DCSR.step restoration not confirmed')
                         after = self.restore_state(mem, target, saved)
                     write_json(folder / 'restored.json', dict(state=after, runStateRestored=True,
                         breakpointsRestored=breakpoint_state is not None, ramRestored=None,
-                        registersRestored=None, applicationProgressPreserved=True))
+                        registersRestored=None, applicationProgressPreserved=True,
+                        dcsrStepRestored=step_before is not None))
                 except (Exception, KeyboardInterrupt) as error:
                     self.uncertain = f'Live debug restoration unconfirmed at {folder}: {error!r}'
                     raise Unsafe(self.uncertain) from error

@@ -419,6 +419,44 @@ class TestBoardAcceptance(unittest.TestCase):
                 self.fail('a paused application was modified')
             self.assertEqual(target.halt.call_count, count)
 
+    def test_hpm_live_debug_restores_only_the_step_bit_before_native_resume(self):
+        from tools.board_acceptance_target import RV_DCSR, RV_DCSR_STEP, Target
+        for fail in (False, True):
+            with self.subTest(fail=fail), tempfile.TemporaryDirectory() as temp:
+                target = Target(SimpleNamespace(board='hpm6800evk'))
+                registers = {RV_DCSR: 0x4000b743, 0x7b1: 0x80006452}
+                writes = []
+                def register(number, value=None):
+                    if value is not None:
+                        writes.append((number, value))
+                        registers[number] = value
+                    return registers[number]
+
+                chip = SimpleNamespace(register=register)
+                state = {'halted': False}
+                target.link = lambda: contextlib.nullcontext((None, object(), chip, {}))
+                target.state = Mock(return_value=state)
+                target.halt = Mock()
+                trigger = (0, [(0x21801000, 0)])
+                target.trigger_snapshot = Mock(return_value=trigger)
+                target.restore_triggers = Mock()
+                def resume(_mem, _chip, _saved):
+                    self.assertEqual(registers[RV_DCSR], 0x4000b703)
+                    self.assertEqual(registers[0x7b1], 0x80006456)
+                    return state
+
+                target.restore_state = Mock(side_effect=resume)
+                folder = Path(temp) / 'debug'
+                context = self.assertRaisesRegex(ValueError, 'injected') if fail else contextlib.nullcontext()
+                with context, target.live_debug(folder, Mock()):
+                    registers[RV_DCSR] = 0x4000b703 | RV_DCSR_STEP
+                    registers[0x7b1] = 0x80006456
+                    if fail:
+                        raise ValueError('injected')
+                self.assertEqual(writes, [(RV_DCSR, 0x4000b703)])
+                target.restore_triggers.assert_called_once_with(chip, trigger)
+                self.assertTrue(json.loads((folder/'restored.json').read_text())['dcsrStepRestored'])
+
     def test_probe_identity_checks_live_profile_and_restores_usb_on_wrong_cable(self):
         from tools.board_acceptance import J7_PL_REGISTERS, JTAG_TIMING
         for same_board, matching_pl in [(True, True), (False, True), (True, False)]:
