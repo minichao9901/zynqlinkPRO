@@ -8,6 +8,8 @@
 4. `python -X utf8 tools/publish_github.py publish --out build/pages-<版本> --package dist/zynq-etm-bridge.zip --tag v1.3.0` 核验 ZIP 全部文件及源码干净标记，推送静态分支，设置 Pages，上传 ZIP/SHA256SUMS 后才发布 Release。凭据只经 Git credential helper 读入内存。
 5. 匿名打开工程下载页，核对卡片版本、版本说明与实际下载包的标签一致。核对远端资产 SHA，再提交发布证据并 push main。已发布 Release 不覆盖，后续版本换 tag。
 
+主工作树有其他改动时，从已提交的发布源码创建独立工作树打包，发布前核对 ZIP 与 Pages 的来源提交一致。TLS 中断后先查看远端分支和同 tag 草稿、资产状态，再续传。固定 EXE 更新后从固定路径启动，实际点手册的离线预检；静态页面则对照线上版本窗口、清单和公开完整下载。各项证据记录具体版本，离线验收与板测记录分别留存。
+
 固定下载链接为 `https://github.com/minichao9901/zynqlinkPRO/releases/latest/download/zynq-etm-bridge-win64.zip`。网页不托管 ETM 后端，ETM 用户运行本地 EXE。
 
 J7 使用[固定 QSPI 目录](../prebuilt/qspi-release/README.md)。只更新探针镜像时，把验收通过的 BOOT、配套 bit/ELF、辅助程序和清单一起提交并推送到 `main` 的 `prebuilt/qspi-release/`。Pages 链接始终指向该目录，本机 Web 手册和 CLI 使用本机仓库同一路径，用户更新仓库即可选用新镜像。单独更新镜像无需再发布 Pages 或重打 Windows 包。
