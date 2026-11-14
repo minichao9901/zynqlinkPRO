@@ -124,12 +124,13 @@ export class OpenOcdUsb {
       // STM32F103ZE and STM32H743 expose the ARM DP and a boundary TAP.
       // The ARM MEM-AP timing calibration runs against the CPU TAP, so
       // read both reset-default IDCODEs in one raw 64-bit DR scan.
-      const sequence = [0x14, 5, 0x46, 0x3f, 1, 0, 0x42, 3, 1, 0, 0x80, ...Array(8).fill(0xff)];
+      // TLR -> Idle -> Select-DR -> Capture-DR -> Shift-DR.
+      const sequence = [0x14, 5, 0x46, 0x3f, 1, 0, 0x41, 1, 2, 0, 0x80, ...Array(8).fill(0xff)];
       const observed = await send(sequence, 0, 10);
       const cpu = observed.getUint32(2, true), boundary = observed.getUint32(6, true);
       if (!((cpu === 0x3ba00477 && boundary === 0x06414041) ||
             (cpu === 0x6ba00477 && boundary === 0x06450041)))
-        throw Error('ARM/JTAG 未识别到受支持的 STM32F103ZE/H743 双 TAP');
+        throw Error(`ARM/JTAG 未识别到受支持的 STM32F103ZE/H743 双 TAP（0x${cpu.toString(16)} / 0x${boundary.toString(16)}）`);
       await send([0x14, 2, 0x46, 0x3f, 1, 0], 0);
       await send([0x15, 2, 4, 5], 0);
       const hz = new Uint8Array(4);

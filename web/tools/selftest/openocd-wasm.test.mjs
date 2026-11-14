@@ -404,6 +404,8 @@ test('ARM/JTAG stream binds the same USB and HID and verifies the complete chain
       async exchangeDap(packet){
         const [command, arg] = packet;
         events.push([command,arg]);
+        if (command === 0x14 && arg === 5)
+          assert.deepEqual([...packet], [0x14,5,0x46,0x3f,1,0,0x41,1,2,0,0x80,...Array(8).fill(0xff)]);
         const reply = command === 0x16 ? bytes(command, 0x6ba00477)
           : command === 0x14 && arg === 5 ? [...bytes(command,0x6ba00477), ...bytes(command,boundary).slice(2)]
           : command === 0x8b ? [command,0,arg] : [command,command === 2 ? 2 : 0];
