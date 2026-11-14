@@ -162,7 +162,6 @@ class NativeProbeTests(unittest.TestCase):
     def test_native_serial_honors_the_web_requested_receive_buffer(self):
         class Port:
             def set_buffer_size(self,**kwargs):self.sizes=kwargs
-            def open(self):self.signals_on_open = (self.dtr, self.rts)
             def read(self,n):return b''
             def close(self):pass
         with tempfile.TemporaryDirectory() as folder:
@@ -172,10 +171,40 @@ class NativeProbeTests(unittest.TestCase):
                 result = proxy.serial_call('open', {'owner':'a'*32, 'path':'COM33',
                                           'options':{'bufferSize':65536, 'dtr':True}})
                 self.assertEqual(port.sizes,{'rx_size':65536,'tx_size':65536})
-                self.assertEqual(port.signals_on_open, (True, False))
-                self.assertTrue(result['initialSignals'])
+                self.assertFalse(result['initialSignals'])
                 self.assertIs(proxy.ports[('a'*32,'COM33')],port)
                 proxy.serial_call('close',{'owner':'a'*32,'path':'COM33'})
+
+    @unittest.skipUnless(sys.platform == 'win32', 'Windows probe CDC')
+    def test_windows_probe_rtt_configures_control_lines_and_timeouts_before_reading(self):
+        events = []
+        class Port:
+            def open(self):
+                events.append((self.port, self.dtr, self.rts))
+            def read(self, size):
+                return b''
+            def close(self):
+                pass
+
+        def configure(port):
+            events.append('configure-read-timeouts')
+
+        with tempfile.TemporaryDirectory() as folder:
+            token = Path(folder) / 'token'
+            token.write_text('c'*64)
+            proxy = NativeProbe(SimpleNamespace(), token)
+            info = SimpleNamespace(device='COM33', vid=0x0d28, pid=0x0204)
+            args = {'owner':'a'*32, 'path':'COM33', 'options':{'owner':'rtt', 'rts':True}}
+            with patch('serial.tools.list_ports.comports', return_value=[info]), \
+                 patch('serial.Serial', return_value=Port()) as factory, \
+                 patch('native_probe.configure_windows_probe_read', side_effect=configure), \
+                 patch('native_probe.SerialReceiver') as receiver:
+                receiver.side_effect = lambda port: events.append('start-reader')
+                result = proxy.serial_call('open', args)
+            self.assertTrue(result['initialSignals'])
+            self.assertIsNone(factory.call_args.args[0])
+            self.assertIsNone(factory.call_args.kwargs['timeout'])
+            self.assertEqual(events, [('COM33', False, True), 'configure-read-timeouts', 'start-reader'])
 
     @unittest.skipUnless(sys.platform == 'win32', 'Windows COM timeouts')
     def test_windows_probe_read_removes_total_deadline_and_keeps_write_timeout(self):
@@ -246,7 +275,6 @@ class NativeProbeTests(unittest.TestCase):
         class Port:
             closed=False
             def __init__(self,data=b''):self.data=data
-            def open(self):pass
             def read(self,n):data,self.data=self.data,b'';return data
             def close(self):self.closed=True
             def set_buffer_size(self,**kw):pass

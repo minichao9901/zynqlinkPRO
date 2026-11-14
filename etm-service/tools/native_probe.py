@@ -552,15 +552,16 @@ class NativeProbe:
                 probe_rtt = (sys.platform == 'win32' and o.get('owner') == 'rtt'
                              and (getattr(port_info, 'vid', None), getattr(port_info, 'pid', None))
                              == (0x0d28, 0x0204))
-                port = serial.Serial(None, baudrate=int(o.get('baudRate', 115200)),
+                port = serial.Serial(None if probe_rtt else path, baudrate=int(o.get('baudRate', 115200)),
                     bytesize=int(o.get('dataBits', 8)), stopbits=int(o.get('stopBits', 1)),
                     parity={'none': 'N', 'even': 'E', 'odd': 'O'}[o.get('parity', 'none')],
                     rtscts=o.get('flowControl') == 'hardware',
                     timeout=None if probe_rtt else .015, write_timeout=2)
-                port.port = path
-                port.dtr = bool(o.get('dtr'))
-                port.rts = bool(o.get('rts'))
-                port.open()
+                if probe_rtt:
+                    port.port = path
+                    port.dtr = bool(o.get('dtr'))
+                    port.rts = bool(o.get('rts'))
+                    port.open()
                 try:
                     if hasattr(port, 'set_buffer_size'):
                         port.set_buffer_size(rx_size=size, tx_size=size)
@@ -572,7 +573,7 @@ class NativeProbe:
                 self.ports[key] = port
                 self.port_epochs[key]=secrets.token_hex(16)
                 self.serial_receivers[key]=SerialReceiver(port)
-                return {'opened': True,'resourceEpoch':self.port_epochs[key], 'initialSignals': True}
+                return {'opened': True,'resourceEpoch':self.port_epochs[key], 'initialSignals': probe_rtt}
         port = self.ports.get(key)
         if port is None:
             if action == 'close':
