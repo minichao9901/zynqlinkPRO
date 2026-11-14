@@ -5,6 +5,7 @@ const references = {
   'dependencies.md': 'docs/dependencies.md',
   '../README.md#硬件与接线': 'README.md#硬件与接线',
   'toolbox-cli-ai.md': 'docs/toolbox-cli-ai.md',
+  '../prebuilt/qspi-release/README.md': 'prebuilt/qspi-release/README.md',
 };
 let loading = false;
 let loaded = false;
