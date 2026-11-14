@@ -120,16 +120,23 @@ export class OpenOcdUsb {
       connected = true;
       const instruction = await send([0x8b, 0x0e], 0, 3);
       if (instruction.getUint8(2) !== 0x0e) throw Error('ARM/JTAG IDCODE 指令回读不符');
+      await send([0x11, 0x40, 0x42, 0x0f, 0], 0);
       // STM32F103ZE and STM32H743 expose the ARM DP and a boundary TAP.
+      // The ARM MEM-AP timing calibration runs against the CPU TAP, so
+      // read both reset-default IDCODEs in one raw 64-bit DR scan.
+      const sequence = [0x14, 5, 0x46, 0x3f, 1, 0, 0x42, 3, 1, 0, 0x80, ...Array(8).fill(0xff)];
+      const observed = await send(sequence, 0, 10);
+      const cpu = observed.getUint32(2, true), boundary = observed.getUint32(6, true);
+      if (!((cpu === 0x3ba00477 && boundary === 0x06414041) ||
+            (cpu === 0x6ba00477 && boundary === 0x06450041)))
+        throw Error('ARM/JTAG 未识别到受支持的 STM32F103ZE/H743 双 TAP');
+      await send([0x14, 2, 0x46, 0x3f, 1, 0], 0);
       await send([0x15, 2, 4, 5], 0);
       const hz = new Uint8Array(4);
       new DataView(hz.buffer).setUint32(0, clockHz, true);
       await send([0x11, ...hz], 0);
-      const cpu = (await send([0x16, 0], 0, 6)).getUint32(2, true);
-      const boundary = (await send([0x16, 1], 0, 6)).getUint32(2, true);
-      if (!((cpu === 0x3ba00477 && boundary === 0x06414041) ||
-            (cpu === 0x6ba00477 && boundary === 0x06450041)))
-        throw Error('ARM/JTAG 未识别到受支持的 STM32F103ZE/H743 双 TAP');
+      if ((await send([0x16, 0], 0, 6)).getUint32(2, true) !== cpu)
+        throw Error('ARM/JTAG CPU TAP 未在所选 TCK 读回');
       return {cpu, boundary};
     } finally {
       try { if (connected && framed) await send([3], 0); }

@@ -404,7 +404,8 @@ test('ARM/JTAG stream binds the same USB and HID and verifies the complete chain
       async exchangeDap(packet){
         const [command, arg] = packet;
         events.push([command,arg]);
-        const reply = command === 0x16 ? bytes(command, arg === 0 ? 0x6ba00477 : boundary)
+        const reply = command === 0x16 ? bytes(command, 0x6ba00477)
+          : command === 0x14 && arg === 5 ? [...bytes(command,0x6ba00477), ...bytes(command,boundary).slice(2)]
           : command === 0x8b ? [command,0,arg] : [command,command === 2 ? 2 : 0];
         return { status:'ok', data:new DataView(Uint8Array.from(reply).buffer) };
       },
@@ -417,9 +418,10 @@ test('ARM/JTAG stream binds the same USB and HID and verifies the complete chain
       assert.deepEqual(await prepareArmJtagStream(hid,50_000_000,device),{cpu:0x6ba00477,boundary});
     else await assert.rejects(prepareArmJtagStream(hid,50_000_000,device), /双 TAP/);
     const handoff = [
-      'claim',[2,2],[0x11,0x40],[0x12,88],[3,undefined],[2,2],[0x8b,0x0e],[0x15,2],
-      [0x11,0x80],[0x16,0],[0x16,1],[3,undefined],'release','close',
+      'claim',[2,2],[0x11,0x40],[0x12,88],[3,undefined],[2,2],[0x8b,0x0e],[0x11,0x40],[0x14,5],
     ];
+    if (boundary === 0x06450041) handoff.push([0x14,2],[0x15,2],[0x11,0x80],[0x16,0]);
+    handoff.push([3,undefined],'release','close');
     if (boundary === 0x06450041) handoff.push([12,12,2]);
     assert.deepEqual(events, handoff);
   }
