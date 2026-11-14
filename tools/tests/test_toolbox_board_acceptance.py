@@ -54,6 +54,17 @@ class TestBoardAcceptance(unittest.TestCase):
         self.assertLessEqual(down + 64, board.scope_address())
         self.assertLessEqual(board.scope_address() + 32, base + 0x5200)
 
+    def test_hpm_source_step_rejects_instruction_level_fallback(self):
+        from tools.board_acceptance import BoardAcceptance
+        from tools.run_board_acceptance import ROOT
+        elf = ROOT / BOARDS['hpm6800evk'][2]
+        board = BoardAcceptance(SimpleNamespace(board='hpm6800evk', serial='12345678'), None)
+        board.debug_call = Mock(side_effect=[None, None, None, 0x87fd0,
+                                            '单步进入（指令级）→ model.c:161', 0x800063dc])
+        with self.assertRaisesRegex(RuntimeError, 'did not source-step'):
+            board.hpm_source_steps(elf, lambda: {'halted': True, 'pc': 0x800056fa})
+        board.debug_call.assert_any_call('bpAdd', 0x800056fa, 'HPM source call')
+
     def test_plan_uses_one_link_rate_and_two_scope_windows(self):
         for board, (hz, links, _) in BOARDS.items():
             cases = plan(board, None, FEATURES, 14)

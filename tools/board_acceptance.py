@@ -559,6 +559,8 @@ class BoardAcceptance:
                 steps = {}
                 if self.args.board == 'h743':
                     steps, frames = self.h743_source_steps(elf, refresh)
+                elif self.rv:
+                    steps, frames = self.hpm_source_steps(elf, refresh)
                 else:
                     for method in ('stepInto', 'stepOver', 'stepOut'):
                         before = self.debug_call('readReg', 'pc')
@@ -582,23 +584,28 @@ class BoardAcceptance:
                     backtrace=frames, register=value, connectSeconds=connected, haltSeconds=halted,
                     stepSeconds=stepped, watchSeconds=watch_s)
 
-    def h743_source_steps(self, elf, refresh):
+    @staticmethod
+    def source_line_addresses(elf, filename, line):
         from elftools.elf.elffile import ELFFile
         from pathlib import PurePosixPath
 
-        # Use the periodic main-loop call that reaches a returning, non-leaf
-        # function. Resolve the instruction from DWARF and verify its target.
         with elf.open('rb') as stream:
             image = ELFFile(stream)
             dwarf = image.get_dwarf_info()
             addresses = set()
             for unit in dwarf.iter_CUs():
                 unit_name = unit.get_top_DIE().attributes.get('DW_AT_name')
-                if not unit_name or PurePosixPath(unit_name.value.decode().replace('\\', '/')).name != 'main.c':
+                if not unit_name or PurePosixPath(unit_name.value.decode().replace('\\', '/')).name != filename:
                     continue
                 for row in dwarf.line_program_for_CU(unit).get_entries():
-                    if row.state and not row.state.end_sequence and row.state.line == 480:
+                    if row.state and not row.state.end_sequence and row.state.line == line:
                         addresses.add(row.state.address)
+        return addresses
+
+    def h743_source_steps(self, elf, refresh):
+        # Use the periodic main-loop call that reaches a returning, non-leaf
+        # function. Resolve the instruction from DWARF and verify its target.
+        addresses = self.source_line_addresses(elf, 'main.c', 480)
         mark = symbol(elf, 'trace_hook_mark') & ~1
         _, segments = elf_contents(elf)
         calls = set()
@@ -647,6 +654,57 @@ class BoardAcceptance:
         return dict(stepInto=dict(before=call, after=into_pc, outcome=into),
                     stepOver=dict(before=into_pc, after=over_pc, outcome=over),
                     stepOut=dict(before=over_pc, after=return_pc, outcome=out, returnSp=return_sp)), frames
+
+    def hpm_source_steps(self, elf, refresh):
+        callee = symbol(elf, 'model_checksum')
+        _, segments = elf_contents(elf)
+        calls = set()
+        for address in self.source_line_addresses(elf, 'main.c', 98):
+            for start, data, flags in segments:
+                if not flags & 1 or not start <= address <= start+len(data)-4:
+                    continue
+                instruction = struct.unpack_from('<I', data, address-start)[0]
+                if instruction & 0xfff != 0x0ef:  # JAL ra, signed PC-relative displacement.
+                    continue
+                offset = ((instruction >> 21) & 0x3ff) << 1
+                offset |= ((instruction >> 20) & 1) << 11 | instruction & 0xff000
+                offset -= (instruction >> 31) << 20
+                if address+offset == callee:
+                    calls.add(address)
+        checked(len(calls) == 1, 'HPM baseline must have one verified main.c:98 call to model_checksum')
+        call = calls.pop()
+        return_address = call+4
+        self.debug_call('bpAdd', call, 'HPM source call')
+        self.debug_call('cont')
+        hit = wait_for(refresh, lambda state: state['halted'], 6, 'HPM source call was not hit')
+        checked(hit['pc'] == call, 'HPM source call stopped at the wrong PC')
+        self.debug_call('bpClear')
+        stack = self.debug_call('readReg', 'sp')
+        into = self.debug_call('stepInto')
+        into_pc = self.debug_call('readReg', 'pc')
+        checked('单步进入 →' in into and into_pc == callee
+                and into_pc in self.source_line_addresses(elf, 'model.c', 161)
+                and self.debug_call('readReg', 'ra') == return_address,
+                f'HPM did not source-step into model_checksum: {into}')
+        over = self.debug_call('stepOver')
+        over_pc = self.debug_call('readReg', 'pc')
+        checked('单步跳过 →' in over and over_pc > into_pc
+                and over_pc in self.source_line_addresses(elf, 'model.c', 162),
+                f'HPM did not step over to the next model_checksum line: {over}')
+        frames = self.debug_call('backtrace', {'maxFrames': 8})
+        caller = frames.get('frames', [])
+        checked(len(caller) >= 2 and caller[0]['name'].split('+')[0] == 'model_checksum'
+                and caller[1]['name'].split('+')[0] == 'main'
+                and (caller[1]['pc'], caller[1]['sp']) == (return_address, stack),
+                'HPM backtrace did not verify the caller PC and SP')
+        out = self.debug_call('stepOut')
+        pc = self.debug_call('readReg', 'pc')
+        sp = self.debug_call('readReg', 'sp')
+        checked('单步跳出 →' in out and (pc, sp) == (return_address, stack),
+                f'HPM did not return to the verified caller: {out}')
+        return dict(stepInto=dict(before=call, after=into_pc, outcome=into),
+                    stepOver=dict(before=into_pc, after=over_pc, outcome=over),
+                    stepOut=dict(before=over_pc, after=pc, outcome=out, returnSp=sp)), frames
 
     def rtt_addresses(self):
         base = RTT_BASE[self.args.board]
