@@ -136,14 +136,21 @@ def jsp_data(buffer, address, channels, clock, timestamps=None):
     checked(len(buffer) >= 1024 and len(buffer) % 512 == 0, 'Truncated JSP')
     expected = np.array(SCOPE_VALUES[:channels], dtype='<u4')
     groups, previous_seq, first_tick, previous_tick, period = 0, None, None, None, None
+    protocol = None
+    previous_frame_tick = None
+    wrap_ticks = 0
     for offset in range(0, len(buffer), 512):
         packet = memoryview(buffer)[offset:offset+512]
         magic, version, kind, seq, tick, count, length = struct.unpack_from('<HBBIIHH', packet)
-        checked(magic == 0x4a53 and version == 2, 'Expected tick-based JSP')
+        checked(magic == 0x4a53 and version in (1, 2) and protocol in (None, version), 'Invalid JSP protocol')
+        protocol = version
+        unit_ticks = 24 if version == 1 else 1
+        tick *= unit_ticks
         checked(previous_seq is None or seq == (previous_seq+1) & 0xffffffff, 'JSP frame sequence discontinuity')
         previous_seq = seq
         if kind == 1:
             rate, period = struct.unpack_from('<II', packet, 16)
+            period *= unit_ticks
             checked(offset == 0 and abs(rate-clock) <= clock*.001 and packet[26] == channels and period > 0,
                     'Scope DEF did not confirm the requested link and channels')
             for index in range(channels):
@@ -154,6 +161,11 @@ def jsp_data(buffer, address, channels, clock, timestamps=None):
                     'JSP DATA layout or missing DEF')
             values = np.frombuffer(packet[16:16+length], dtype='<u4').reshape(count, channels)
             checked(bool(np.all(values == expected)), 'JSP fixture value mismatch')
+            if previous_frame_tick is not None and tick < previous_frame_tick:
+                checked(previous_frame_tick - tick > (1 << 31) * unit_ticks, 'JSP frame timestamp moved backwards')
+                wrap_ticks += (1 << 32) * unit_ticks
+            previous_frame_tick = tick
+            tick += wrap_ticks
             if first_tick is None:
                 first_tick = tick
             else:
@@ -234,7 +246,7 @@ class BoardAcceptance:
         return re.findall(r'^ACCEPT_CABLE ([A-Za-z0-9_.:-]+)\s*$', result.stdout, re.M)
 
     def verify_live_probe(self):
-        from dap_pipeline_bench import drain, open_dap, xfer
+        from tools.dap_pipeline_bench import drain, open_dap, xfer
         import usb.util
         registers = {}
         for address, expected in J7_PL_REGISTERS:
@@ -278,15 +290,15 @@ class BoardAcceptance:
             usb.util.dispose_resources(dev)
 
     def probe_identity(self):
-        usb = self.web.client.native('usb', 'list', {})
-        hid = self.web.client.native('hid', 'list', {})
+        usb = self.web.client.native('usb', 'list', {})['value']
+        hid = self.web.client.native('hid', 'list', {})['value']
         for key, rows in [('USB', usb), ('HID', hid)]:
             checked(len(rows) == 1 and rows[0].get('serialNumber') == self.args.serial,
                     f'{key} does not identify only J7 {self.args.serial}')
         return dict(serial=self.args.serial, usb=usb[0]['productName'], hid=hid[0]['productName'])
 
     def port(self):
-        ports = self.web.client.native('serial', 'list', {})
+        ports = self.web.client.native('serial', 'list', {})['value']
         eligible = [row['path'] for row in ports if row['serialNumber'] == self.args.serial
                     and (row['usbVendorId'], row['usbProductId']) == (0x0d28, 0x0204)]
         checked(len(eligible) == 1, f'Expected one COM port for J7, found {eligible}')
@@ -303,7 +315,7 @@ class BoardAcceptance:
 
     def check_idle(self):
         self.probe_identity()
-        status = self.web.client.native('session', 'status', {})
+        status = self.web.client.native('session', 'status', {})['value']
         checked(not status.get('resources') and not status.get('current') and not status.get('pending')
                 and not status.get('transport', {}).get('usbOpen') and not status.get('transport', {}).get('hidOpen'),
                 f'Probe session is still occupied: {status}')
@@ -969,7 +981,12 @@ class BoardAcceptance:
                 finally:
                     self.invoke('scope', 'disconnect')
                     write_json(folder / 'points.json', rows)
-            candidates = sorted({max(48, round(seed_ticks * scale)) for scale in (.85, 1, 1.2, 1.5, 2)})
+            # The page stores typed values, LOD min/max and timestamps under
+            # a 128 MiB cap. Reserve room for the 68 s session, including the
+            # acquisition and control overhead outside the 60 s window.
+            usable_bytes = 120 * 1024 * 1024
+            min_ticks = (68 * 24_000_000 * channels * 4 + usable_bytes - 1) // usable_bytes
+            candidates = sorted({max(48, min_ticks, round(seed_ticks * scale)) for scale in (.85, 1, 1.2, 1.5, 2)})
             best = None
             for ticks in candidates:
                 try:
@@ -1174,8 +1191,11 @@ class BoardAcceptance:
         if self.args.board == 'f103ze':
             self.case = dict(self.case, transport='swd')
         try:
-            with self.web_debug(folder):
-                self.debug_call('resetRun')
+            # This run deliberately reboots the application. Restore debug
+            # configuration alone, keeping the actual post-reset context.
+            with self.target.live_debug(folder / 'boot-debug', self.check_idle):
+                with self.web_debug(folder):
+                    self.debug_call('resetRun')
         finally:
             self.case = previous_case
 
@@ -1189,10 +1209,18 @@ class BoardAcceptance:
         import threading
         import libusb_package
         import usb.core
-        matches = list(usb.core.find(find_all=True, idVendor=0x0d28, idProduct=0x0204,
-                                     serial_number=self.args.serial, backend=libusb_package.get_libusb1_backend()))
-        checked(len(matches) == 1 and matches[0].manufacturer == 'CherryUSB'
-                and matches[0].product == 'CMSIS-DAP', 'OpenOCD serial is ambiguous or does not identify J7')
+        import usb.util
+        # Reading string descriptors opens WinUSB handles. Dispose those
+        # explicitly before a different process claims the selected probe.
+        devices = list(usb.core.find(find_all=True, idVendor=0x0d28, idProduct=0x0204,
+                                     backend=libusb_package.get_libusb1_backend()))
+        try:
+            matches = [dev for dev in devices if dev.serial_number == self.args.serial]
+            checked(len(matches) == 1 and matches[0].manufacturer == 'CherryUSB'
+                    and matches[0].product == 'CMSIS-DAP', 'OpenOCD serial is ambiguous or does not identify J7')
+        finally:
+            for dev in devices:
+                usb.util.dispose_resources(dev)
         # OpenOCD is the only writer to the target until it exits. Observe
         # the physical clock while it owns DAP, independently of its logs.
         gate = log_path.with_suffix('.go')
@@ -1253,7 +1281,9 @@ class BoardAcceptance:
                         reader.join(5)
                     child.stdout.close()
         output = log_path.read_text(encoding='utf-8', errors='replace').lower()
-        checked(code == 0 and ready.is_set() and 'zl_flash_done' in output and 'verified' in output,
+        # Some Jim Tcl builds return verify_image's text without printing it
+        # when another command follows. The marker executes after verify.
+        checked(code == 0 and ready.is_set() and 'zl_flash_done' in output,
                 f'Native Flash did not verify. See {log_path}')
         if clock_path:
             checked(clock_path.is_file(), 'Native Flash actual clock was not confirmed')
@@ -1274,10 +1304,15 @@ class BoardAcceptance:
         expected = self.report.value['files']['etmElf']
         import libusb_package
         import usb.core
+        import usb.util
         matches = list(usb.core.find(find_all=True, idVendor=0x0d28, idProduct=0x0204,
                                      backend=libusb_package.get_libusb1_backend()))
-        if len(matches) != 1 or matches[0].serial_number != self.args.serial:
-            raise Pending('Native ETM capture requires J7 to be the only attached CMSIS-DAP VID/PID')
+        try:
+            if len(matches) != 1 or matches[0].serial_number != self.args.serial:
+                raise Pending('Native ETM capture requires J7 to be the only attached CMSIS-DAP VID/PID')
+        finally:
+            for device in matches:
+                usb.util.dispose_resources(device)
         with self.target.link() as (_, mem, chip, _):
             target_evidence = self.verify_target_image(mem, elf, expected)
             name, offset = HEARTBEAT[self.args.board]
@@ -1358,13 +1393,14 @@ class BoardAcceptance:
                 try:
                     port = self.cdc_start()
                     clock = self.clock()
-                    self.invoke('rttcdc', 'saveRaw')
+                    window = self.invoke('rttcdc', 'captureWindow', {'seconds': .25, 'maxMiB': 8})
                     data = self.web.download('rttcdc', folder / 'up.bin')
+                    checked(window['complete'] and window['bytes'] == len(data), 'RTT stress recording incomplete')
                     first = self.invoke('rttcdc', 'summary')['bytes']
                     next_state = wait_for(lambda: self.invoke('rttcdc', 'summary'),
                                           lambda s: s['open'] and s['bytes'] > first,
                                           3, 'RTT forwarding stopped before disconnect')
-                    yield dict(clock=clock, port=port, sequence=sequence(data), received=next_state['bytes'])
+                    yield dict(clock=clock, port=port, sequence=self.sequence_window(data), received=next_state['bytes'])
                 finally:
                     try:
                         self.cdc_stop()
@@ -1372,14 +1408,16 @@ class BoardAcceptance:
                         self.cdc_close()
             else:
                 try:
-                    summary = self.scope_start(1, 2400, 12)
+                    summary = self.scope_start(1, 2400, 75)
                     clock = self.clock()
-                    # Capture a short raw prefix while acquisition is active.
-                    self.invoke('scope', 'saveRaw')
-                    data = self.web.download('scope', folder / 'prefix.jsp')
-                    groups, _, _, _ = jsp_data(data, self.scope_address(), 1, self.case['requestedHz'])
-                    checked(self.invoke('scope', 'summary')['running'], 'Scope stopped before the handoff')
-                    yield dict(clock=clock, groups=groups, state=summary['state'])
+                    observed = wait_for(lambda: self.invoke('scope', 'summary'),
+                                        lambda s: s['running'] and s['samples'] > summary['samples'],
+                                        5, 'Scope stopped before the handoff')
+                    yield dict(clock=clock, groups=observed['samples'], state=observed['state'])
+                    if self.invoke('scope', 'summary')['receivedSamples'] > 0:
+                        self.invoke('scope', 'saveRaw')
+                        data = self.web.download('scope', folder / 'prefix.jsp')
+                        jsp_data(data, self.scope_address(), 1, self.case['requestedHz'])
                 finally:
                     self.close_scope()
 

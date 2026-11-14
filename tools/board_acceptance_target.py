@@ -83,7 +83,7 @@ class Target:
         if self.uncertain:
             raise Unsafe(self.uncertain)
         import usb.util
-        from dap_pipeline_bench import open_dap, setup, xfer, drain
+        from tools.dap_pipeline_bench import open_dap, setup, xfer, drain
         from test_probe_board import Memory
         from probe_build_info import swd_clock_details
         dev, tx, rx = open_dap(self.args.serial)

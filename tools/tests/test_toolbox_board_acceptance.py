@@ -147,6 +147,16 @@ class TestBoardAcceptance(unittest.TestCase):
         self.assertEqual(jsp_data(definition + data, 0xf0404800, 1, 25_000_000, timestamps),
                          (2, 500, 740, 240))
         self.assertEqual(timestamps, [500, 740])
+        wrapped = bytearray(data)
+        struct.pack_into('<II', data, 4, 1, 0xfffffe00)
+        struct.pack_into('<II', wrapped, 4, 2, 32)
+        self.assertEqual(jsp_data(definition + data + wrapped, 0xf0404800, 1, 25_000_000)[2],
+                         (1 << 32) + 272)
+        struct.pack_into('<I', data, 8, 500)
+        definition[2] = data[2] = 1
+        struct.pack_into('<I', definition, 20, 10)
+        self.assertEqual(jsp_data(definition + data, 0xf0404800, 1, 25_000_000),
+                         (2, 12000, 12240, 240))
         data[20] ^= 1
         with self.assertRaises(RuntimeError):
             jsp_data(definition + data, 0xf0404800, 1, 25_000_000)
@@ -183,6 +193,20 @@ class TestBoardAcceptance(unittest.TestCase):
             [setting] = [call.args[2] for call in driver.web.set.call_args_list if call.args[1] == '#h-clock']
             self.assertIn(setting, values)
             self.assertEqual(int(setting), hz)
+
+    def test_probe_status_unwraps_the_native_service_response(self):
+        driver = self.driver()
+        driver.web = Mock()
+        driver.web.client.native.side_effect = [
+            {'ok': True, 'value': [{'productName': 'CMSIS-DAP', 'serialNumber': '12345678'}]},
+            {'ok': True, 'value': [{'productName': 'zynqlinkPRO HID', 'serialNumber': '12345678'}]},
+            {'ok': True, 'value': {'resources': {'usb': {'owner': 'occupied'}}}},
+            {'ok': True, 'value': [{'path': 'COM33', 'serialNumber': '12345678',
+                                    'usbVendorId': 0x0d28, 'usbProductId': 0x0204}]},
+        ]
+        with self.assertRaisesRegex(RuntimeError, 'session is still occupied'):
+            driver.check_idle()
+        self.assertEqual(driver.port(), 'COM33')
 
     def test_aborted_flash_proves_backup_before_preserving_original_error(self):
         driver = self.driver()
@@ -230,18 +254,22 @@ class TestBoardAcceptance(unittest.TestCase):
 
     def test_native_writer_is_reaped_on_startup_interrupt(self):
         driver = self.driver()
-        probe = SimpleNamespace(manufacturer='CherryUSB', product='CMSIS-DAP')
+        probe = SimpleNamespace(manufacturer='CherryUSB', product='CMSIS-DAP', serial_number='12345678')
         child = Mock(stdout=io.BytesIO())
         child.poll.side_effect = [None, 1]
         with tempfile.TemporaryDirectory() as temp:
             folder = Path(temp)
-            with patch('usb.core.find', return_value=[probe]), \
+            with patch('usb.core.find', return_value=[probe]), patch('usb.util.dispose_resources') as dispose, \
                  patch('libusb_package.get_libusb1_backend'), \
-                 patch('subprocess.Popen', return_value=child), \
+                 patch('subprocess.Popen', return_value=child) as popen, \
                  patch('threading.Thread.start', side_effect=KeyboardInterrupt):
+                actions = Mock()
+                actions.attach_mock(dispose, 'dispose')
+                actions.attach_mock(popen, 'popen')
                 with self.assertRaises(KeyboardInterrupt):
                     driver.native_flash('openocd', folder, folder / 'board.cfg', folder / 'private.bin',
                                         0x08000000, folder / 'writer.log', geometry=(0x08000000, 0x08000800, 0x800))
+                self.assertEqual([call[0] for call in actions.mock_calls], ['dispose', 'popen'])
         child.kill.assert_called_once()
         child.wait.assert_called_once_with(timeout=10)
 
@@ -316,7 +344,7 @@ class TestBoardAcceptance(unittest.TestCase):
 
             fake_dap = SimpleNamespace(open_dap=Mock(return_value=(object(), None, None)),
                                        drain=Mock(), xfer=timing)
-            with patch.dict(sys.modules, {'dap_pipeline_bench': fake_dap}), patch('usb.util.dispose_resources'):
+            with patch.dict(sys.modules, {'tools.dap_pipeline_bench': fake_dap}), patch('usb.util.dispose_resources'):
                 if same_board and matching_pl:
                     result = driver.verify_live_probe()
                     self.assertEqual(result['cableSerial'], 'J7-cable')
