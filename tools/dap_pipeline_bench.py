@@ -24,23 +24,36 @@ def le(v):
     return [v & 0xFF, (v >> 8) & 0xFF, (v >> 16) & 0xFF, (v >> 24) & 0xFF]
 
 
-def open_dap():
+def open_dap(serial=None):
     lease=Ownership()
+    dev=None
     try:
-        dev = usb.core.find(idVendor=0x0D28, idProduct=0x0204,
-                            backend=libusb_package.get_libusb1_backend())
+        usb_args = dict(idVendor=0x0D28, idProduct=0x0204, backend=libusb_package.get_libusb1_backend())
+        if serial:
+            matches = [device for device in usb.core.find(find_all=True, serial_number=serial, **usb_args)
+                       if device.manufacturer == 'CherryUSB' and device.product == 'CMSIS-DAP']
+            if len(matches) != 1:
+                raise RuntimeError(f'Expected one ZynqLinkPRO DAP with serial {serial}, found {len(matches)}')
+            dev = matches[0]
+        else:
+            dev = usb.core.find(**usb_args)
         if dev is None:raise RuntimeError("DAP not found")
         bind_usb(dev,lease)
+        intf = dev.get_active_configuration()[(0, 0)]
+        usb.util.claim_interface(dev, 0)
+        out = usb.util.find_descriptor(
+            intf, custom_match=lambda e: usb.util.endpoint_direction(
+                e.bEndpointAddress) == usb.util.ENDPOINT_OUT)
+        inp = usb.util.find_descriptor(
+            intf, custom_match=lambda e: usb.util.endpoint_direction(
+                e.bEndpointAddress) == usb.util.ENDPOINT_IN)
     except BaseException:
-        lease.close();raise
-    intf = dev.get_active_configuration()[(0, 0)]
-    usb.util.claim_interface(dev, 0)
-    out = usb.util.find_descriptor(
-        intf, custom_match=lambda e: usb.util.endpoint_direction(
-            e.bEndpointAddress) == usb.util.ENDPOINT_OUT)
-    inp = usb.util.find_descriptor(
-        intf, custom_match=lambda e: usb.util.endpoint_direction(
-            e.bEndpointAddress) == usb.util.ENDPOINT_IN)
+        try:
+            if dev is not None:
+                usb.util.dispose_resources(dev)
+        finally:
+            lease.close()
+        raise
     return dev, out, inp
 
 

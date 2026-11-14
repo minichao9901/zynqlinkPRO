@@ -555,6 +555,8 @@ Windows 日常入口为 `dist/zynq-etm-bridge/zynq-etm-bridge.exe`，默认打�
 
 ## 研发验收工具
 
+三块目标板的统一实板入口为 `python -X utf8 toolbox.py project run board.accept -- --board f103ze`，默认预览计划。执行参数、每轮 JSON 结果和最终验收状态见 [板卡精简验收与交付](板卡精简验收与交付.md#一键执行)。
+
 HPM 高频对照和 DDR 压力测试示例需要从 `archive/main-before-formal-release-20261106` 取回各自的实验配对。目录名和取回方法见 [正式产物索引](../prebuilt/README.md)。
 
 1. 预览 HPM6800EVK 的原生 TCK、idle 和采样窗口对照。历史 66.667 MHz 结果限定于该配对、idle22 和 mode17。[HPM6800EVK 历史报告](validation/hpm6800-speed-completion-20261102/README.md)

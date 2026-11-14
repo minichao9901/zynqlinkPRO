@@ -1,0 +1,1337 @@
+"""Versioned Web and native checks driven by the board acceptance runner."""
+
+import base64
+from contextlib import contextmanager
+import csv
+import io
+import json
+from pathlib import Path
+import random
+import re
+import struct
+import subprocess
+import sys
+import time
+from types import SimpleNamespace
+
+from toolbox import pack_file
+from tools.board_acceptance_target import (DHCSR, FLASH, RTT_BASE, RV_CODE, SRAM, Target,
+                                           checked, elf_contents, sha, verify_baseline_rates, verify_clock, wait_for)
+from tools.f103_stream_acceptance import symbol
+from tools.run_board_acceptance import Pending, ROOT, Unsafe, digest, write_json
+from tools.validate_hpm6800_web import Web, redacted
+
+CHIPS = {'f103ze': 'stm32f103', 'h743': 'stm32h7', 'hpm6800evk': 'hpm6800evk'}
+BREAKPOINTS = {'f103ze': 'cdc_poll', 'h743': 'HAL_GetTick', 'hpm6800evk': 'engine_leaf'}
+HEARTBEAT = {'f103ze': ('g_trace', 12), 'h743': ('g_trace', 12), 'hpm6800evk': ('g_ticks', 0)}
+SCOPE_VALUES = tuple(0x68002000 + n * 0x10203 for n in range(8))
+RTT_DOWN = bytes.fromhex('00a5ff31320a8055')
+SCOPE_PERIODS = {('f103ze', 'swd'): (48, 192), ('f103ze', 'jtag'): (74, 440),
+                 ('h743', 'swd'): (48, 238), ('h743', 'jtag'): (89, 529),
+                 ('hpm6800evk', 'jtag'): (240, 1012)}
+
+
+class AcceptanceWeb(Web):
+    def __init__(self, args, target):
+        super().__init__(args)
+        self.target = target
+
+    def call(self, payload):
+        if self.target.uncertain:
+            raise Unsafe(self.target.uncertain)
+        started = time.perf_counter()
+        try:
+            result = self.client.request(payload)
+        except Exception as error:
+            if '操作可能仍在执行' in str(error) or '是否已排队未知' in str(error):
+                self.target.uncertain = f'Browser operation state is uncertain: {error}'
+                raise Unsafe(self.target.uncertain) from error
+            raise
+        except KeyboardInterrupt:
+            self.target.uncertain = 'Interrupted while a browser request was in flight'
+            raise
+        row = dict(request=redacted(payload), result=redacted(result), seconds=time.perf_counter()-started)
+        with (self.out / 'steps.jsonl').open('a', encoding='utf-8') as stream:
+            stream.write(json.dumps(row, ensure_ascii=False) + '\n')
+        self.client.http('ack/' + result['job'], {})
+        if not result.get('ok'):
+            raise RuntimeError(result.get('error') or str(result))
+        value = result.get('value')
+        if isinstance(value, dict) and value.get('returned'):
+            checked(not value.get('errors'), f'Browser errors: {value["errors"]}')
+            return value.get('value')
+        return value
+
+
+def b64(data):
+    return {'$base64': base64.b64encode(data).decode('ascii')}
+
+
+def sequence(data, first=0):
+    import numpy as np
+    checked(len(data) >= 8 and len(data) % 4 == 0, f'Invalid RTT sequence length: {len(data)}')
+    words = np.frombuffer(data, dtype='<u4')
+    checked(first is None or int(words[0]) == first, f'Unexpected first RTT sequence: {int(words[0])}')
+    checked(bool(np.all(np.diff(words) == 1)), 'RTT sequence gap, duplicate or misalignment')
+    return dict(bytes=len(data), first=int(words[0]), last=int(words[-1]), words=len(words))
+
+
+def capture_quality(summary):
+    metrics = summary.get('probeMetrics') or {}
+    produced, skipped = metrics.get('produced', 0), metrics.get('skipped', 0)
+    checked(summary.get('sampleSource') == 'probe-hss' and summary['definitionReceived'] and produced > 0,
+            'Scope did not prove real hardware acquisition')
+    checked(not any(summary.get(key) for key in ('lostGap', 'lostUsb', 'readErrors', 'metricsError')),
+            f'Scope integrity counters: {summary}')
+    checked(summary.get('tailCountDelta') == 0 and summary.get('receivedSamples') == produced,
+            'Scope STOP count differs from received samples')
+    return skipped / (produced + skipped)
+
+
+def jsp_data(buffer, address, channels, clock, timestamps=None):
+    import numpy as np
+    checked(len(buffer) >= 1024 and len(buffer) % 512 == 0, 'Truncated JSP')
+    expected = np.array(SCOPE_VALUES[:channels], dtype='<u4')
+    groups, previous_seq, first_tick, previous_tick, period = 0, None, None, None, None
+    for offset in range(0, len(buffer), 512):
+        packet = memoryview(buffer)[offset:offset+512]
+        magic, version, kind, seq, tick, count, length = struct.unpack_from('<HBBIIHH', packet)
+        checked(magic == 0x4a53 and version == 2, 'Expected tick-based JSP')
+        checked(previous_seq is None or seq == (previous_seq+1) & 0xffffffff, 'JSP frame sequence discontinuity')
+        previous_seq = seq
+        if kind == 1:
+            rate, period = struct.unpack_from('<II', packet, 16)
+            checked(offset == 0 and abs(rate-clock) <= clock*.001 and packet[26] == channels and period > 0,
+                    'Scope DEF did not confirm the requested link and channels')
+            for index in range(channels):
+                actual, width = struct.unpack_from('<IB', packet, 28+index*8)
+                checked(actual == address + index*4 and width == 4, 'Scope DEF variable mismatch')
+        elif kind == 2:
+            checked(period is not None and count > 0 and length == count*channels*4 and length <= 496,
+                    'JSP DATA layout or missing DEF')
+            values = np.frombuffer(packet[16:16+length], dtype='<u4').reshape(count, channels)
+            checked(bool(np.all(values == expected)), 'JSP fixture value mismatch')
+            if first_tick is None:
+                first_tick = tick
+            else:
+                checked(tick > previous_tick, 'JSP sample timestamps did not advance')
+            previous_tick = tick + (count-1)*period
+            if timestamps is not None:
+                timestamps.extend(tick + sample*period for sample in range(count))
+            groups += count
+    checked(groups > 0, 'JSP has no complete groups')
+    return groups, first_tick, previous_tick, period
+
+
+class BoardAcceptance:
+    def __init__(self, args, report):
+        self.args = args
+        self.report = report
+        self.target = Target(args)
+        self.rv = self.target.rv
+        self.chip = CHIPS[args.board]
+        self.web = None
+        self.case = None
+        self.physical = None
+
+    def preflight(self):
+        from probe_flash import Session
+        from zynq_memory import PhysicalMemory
+        self.web = AcceptanceWeb(SimpleNamespace(runtime=self.args.runtime, timeout=300,
+                                                 out=self.report.folder / 'web'), self.target)
+        self.runtime = json.loads((self.args.runtime / 'toolbox-runtime.json').read_text(encoding='utf-8'))
+        checked(self.runtime.get('nativeProbe'), 'Use a dedicated toolbox serve --native-probe session')
+        pair = self.runtime.get('nativeCapture', {})
+        for key, path in [('bitSha256', self.args.bit), ('elfSha256', self.args.zynq_elf)]:
+            checked(pair.get(key) == digest(path)['sha256'], f'Runtime probe pair mismatch: {key}')
+        checked(self.web.call({'action': 'ping'}).get('ready'), 'Browser worker not ready')
+        self.probe_identity()
+        inventory = self.cable_inventory()
+        checked(len(inventory) == 1, 'XSCT must resolve exactly one connected Zynq Cortex-A9 #0 for AP0 evidence')
+        physical_dir = self.report.folder / 'physical'
+        physical_dir.mkdir()
+        self.physical = PhysicalMemory(Session(physical_dir, self.args.sdk, 'tcp:127.0.0.1:3121'))
+        with (self.report.folder / 'ocm.log').open('wb') as log:
+            subprocess.run([sys.executable, str(ROOT / 'tools/verify_probe_ocm_code.py'),
+                            '--elf', self.args.zynq_elf.resolve(), '--sdk', self.args.sdk,
+                            '--out-dir', self.report.folder / 'ocm'],
+                           cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, check=True, timeout=180)
+        checked(self.check_idle(), 'Probe not idle')
+        with self.target.link() as (_, mem, chip, clock):
+            state = self.target.state(mem, chip)
+        for page in ('flash', 'dbg', 'rtt', 'rttcdc', 'scope'):
+            self.web.save(f'{page}-api.json', self.web.page(page, 'describe'))
+        version = self.web.page('dbg', 'read', selector='#web-build-info')['text']
+        return dict(probe=self.probe_identity(), target=state, clock=clock, ocm='ocm/result.json',
+                    jtagCableInventory=inventory,
+                    workbenchBuild=version)
+
+    def cable_inventory(self):
+        path = self.report.folder / 'xsct-inventory.tcl'
+        path.write_text('connect -url tcp:127.0.0.1:3121\n'
+                        'set cpus [targets -filter {name =~ "ARM Cortex-A9 MPCore #0*"}]\n'
+                        'puts $cpus\ndisconnect\nexit\n', encoding='ascii')
+        result = subprocess.run([sys.executable, ROOT / 'tools/run_xsct.py', path, '--sdk', self.args.sdk],
+                                capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=45)
+        (self.report.folder / 'xsct-inventory.log').write_text(result.stdout + result.stderr, encoding='utf-8')
+        checked(result.returncode == 0, 'XSCT inventory failed')
+        return [line.strip() for line in result.stdout.splitlines() if re.match(r'^\s*\d+\s+\*?\s*ARM Cortex-A9 MPCore #0', line)]
+
+    def probe_identity(self):
+        usb = self.web.client.native('usb', 'list', {})
+        hid = self.web.client.native('hid', 'list', {})
+        for key, rows in [('USB', usb), ('HID', hid)]:
+            checked(len(rows) == 1 and rows[0].get('serialNumber') == self.args.serial,
+                    f'{key} does not identify only J7 {self.args.serial}')
+        return dict(serial=self.args.serial, usb=usb[0]['productName'], hid=hid[0]['productName'])
+
+    def port(self):
+        ports = self.web.client.native('serial', 'list', {})
+        eligible = [row['path'] for row in ports if row['serialNumber'] == self.args.serial
+                    and (row['usbVendorId'], row['usbProductId']) == (0x0d28, 0x0204)]
+        checked(len(eligible) == 1, f'Expected one COM port for J7, found {eligible}')
+        return eligible[0]
+
+    def invoke(self, page, method, *args, target='view'):
+        return self.web.invoke(page, method, *args, target=target)
+
+    def click(self, page, selector):
+        return self.web.page(page, 'click', selector=selector)
+
+    def debug_call(self, method, *args):
+        return self.invoke('dbg', method, *args, target='session')
+
+    def check_idle(self):
+        self.probe_identity()
+        status = self.web.client.native('session', 'status', {})
+        checked(not status.get('resources') and not status.get('current') and not status.get('pending')
+                and not status.get('transport', {}).get('usbOpen') and not status.get('transport', {}).get('hidOpen'),
+                f'Probe session is still occupied: {status}')
+        checked(not self.invoke('rttcdc', 'summary')['open'], 'Browser CDC port not closed')
+        from probe_stream import Probe
+        probe = Probe(self.args.serial, zynq_only=True)
+        try:
+            streams = {}
+            for name, service in [('rtt', 0x31), ('hss', 0x32)]:
+                rc, words = probe.action(service, 2)
+                checked(not rc and not words[0] & 1, f'{name} still active or unknown: {rc}, {words[0]}')
+                streams[name] = words[0]
+        finally:
+            probe.close()
+        # The direct stream checks cover firmware. Check the PL engines too.
+        from probe_load import probe_state
+        fields = probe_state(self.physical.session)
+        checked('SWD' in fields and 'CAPTURE' in fields, 'Probe PL not configured')
+        return dict(streams=streams, engines=fields)
+
+    def final_state(self):
+        health = self.check_idle()
+        with self.target.link() as (_, mem, chip, clock):
+            final = self.target.state(mem, chip)
+        return {'target': final, 'probe': self.probe_identity(), 'clock': clock, **health}
+
+    def read_clock(self):
+        from zynq_clock import fclk_hz, PLL_REGISTERS
+        from probe_build_info import swd_clock_details
+        # Read Zynq physical registers without injecting DAP traffic into a live stream.
+        registers = (0xf8000170, 0xf8000108, 0xf8000100, 0xf8000104, 0xf800025c, 0x40010008, 0x40010098)
+        reads = ' '.join(f'[physrd -force -value {addr:#x}]' for addr in registers)
+        output = self.physical.run(f'puts "ACCEPT_CLOCK {reads}"')
+        matched = re.search(r'^ACCEPT_CLOCK ([^\r\n]+)', output, re.M)
+        checked(matched, 'No physical clock register readback')
+        values = dict(zip(registers, (int(value, 0) for value in matched[1].split()), strict=True))
+        control = values[registers[0]]
+        cfg = values[0x40010008]
+        pll = values[PLL_REGISTERS[(control >> 4) & 3]]
+        hz = fclk_hz(control, pll, values[0xf800025c])
+        clock = dict(FCLK_Hz=hz, cfg=hex(cfg), jtagSamplingMode=values[0x40010098] & 17,
+                     actual_link_Hz=swd_clock_details(hz, cfg)['SWCLK_Hz'],
+                     basis='physical MEM-AP0 readback of PLL/divider registers')
+        return clock
+
+    def clock(self):
+        return verify_clock(self.read_clock(), self.case['requestedHz'])
+
+    def run(self, case, folder):
+        self.probe_identity()
+        self.case = case
+        if case['feature'] == 'flash' and not self.args.allow_flash:
+            raise Pending('Target Flash/reset was not enabled with --allow-flash')
+        method = getattr(self, case['feature'].replace('-', '_'))
+        if case['feature'] == 'etm':
+            return method(folder)
+        with self.target.link() as (_, mem, _, _):
+            baseline = {}
+            if not self.rv:
+                name, offset = HEARTBEAT[self.args.board]
+                heartbeat = symbol(self.args.target_elf, name) + offset
+                baseline = verify_baseline_rates(self.args.board, mem, heartbeat=heartbeat)
+        with self.target.f103_jtag(folder, case['transport']):
+            result = method(folder)
+        return dict(result, **baseline)
+
+    def arm_cfg(self, folder):
+        path = folder / 'target.cfg'
+        target = 'stm32f1x' if self.args.board == 'f103ze' else 'stm32h7x'
+        tree = ROOT / 'web/app/flash/openocd-cfgs'
+        dependencies = ('target/swj-dp.tcl', 'mem_helper.tcl')
+        body = (tree / f'target/{target}.cfg').read_text(encoding='utf-8')
+        for dependency in dependencies:
+            body = body.replace(f'source [find {dependency}]', (tree / dependency).read_text(encoding='utf-8'))
+        path.write_text('adapter driver cmsis-dap\ntransport select jtag\n' + body +
+                        f'\nadapter speed {self.case["requestedHz"] // 1000}\nreset_config none\n',
+                        encoding='utf-8')
+        return path
+
+    def adopt_config(self, page, prefix, config):
+        expected = f'cfg:{config["sha256"]}:{config["target"]}'
+        selector = f'#{prefix}-chip'
+        if self.web.read(page, selector)['value'] != expected:
+            self.click(page, f'#{prefix}-use-session-target')
+            wait_for(lambda: self.web.read(page, selector)['value'], lambda value: value == expected,
+                     4, f'{page} did not adopt the ARM/JTAG CFG')
+        return expected
+
+    def debug_connect(self, folder):
+        self.web.page('dbg', 'show')
+        if self.case['transport'] == 'jtag' and not self.rv:
+            cfg = self.arm_cfg(folder)
+            result = self.invoke('dbg', 'importCfg', dict(pack_file(cfg), kind='file'))
+            checked(result and result['arch'] == 'arm', 'ARM JTAG CFG not selected')
+        else:
+            self.web.set('dbg', '#d-cfg-core', '')
+            self.web.set('dbg', '#d-backend', 'riscv' if self.rv else 'webusb')
+            self.web.set('dbg', '#d-hpm-target' if self.rv else '#d-arm-target', self.chip)
+            self.web.set('dbg', '#d-clock', str(self.case['requestedHz'] // 1000))
+        self.invoke('dbg', 'loadElfBuffer', dict(pack_file(self.args.target_elf), kind='buffer'),
+                    self.args.target_elf.name)
+        self.invoke('dbg', 'connect')
+        state = self.invoke('dbg', 'summary')
+        checked(state['connected'] and state['backend'] != '模拟目标', f'Debug connect failed: {state}')
+        self.web.save('debug-session-api.json', self.web.page('dbg', 'describe', target='session'))
+        return state
+
+    @contextmanager
+    def web_debug(self, folder):
+        try:
+            state = self.debug_connect(folder)
+            yield state
+        finally:
+            self.close_debug()
+
+    def close_debug(self):
+        if self.invoke('dbg', 'summary')['connected']:
+            try:
+                self.debug_call('bpClear')
+            finally:
+                self.invoke('dbg', 'disconnect')
+
+    def sram(self, folder):
+        addr = SRAM[self.args.board] + 0x3f8
+        length = 2048
+        payload = random.Random(0x61a3).randbytes(length)
+        results = {}
+        with self.target.memory_fixture(folder / 'fixture', [(addr - 8, length + 16)],
+                                        capture_registers=True, keep_halted=True):
+            with self.target.link(self.case['transport'], self.case['requestedHz']) as (_, mem, chip, clock):
+                results['native'] = self.memory_check(addr, payload, mem.read, mem.write)
+                results['native']['clock'] = verify_clock(clock, self.case['requestedHz'])
+            with self.web_debug(folder):
+                self.debug_call('halt')
+                def read(at, size):
+                    return bytes(self.debug_call('memRead', at, size)['$bytes'])
+                def write(at, data):
+                    self.debug_call('memWrite', at, b64(data))
+                clock = self.clock()
+                results['web'] = self.memory_check(addr, payload, read, write)
+                results['web']['clock'] = clock
+                results['web']['targetState'] = 'halted'
+        results['comparison'] = {key: results['web'][key] / results['native'][key]
+                                 for key in ('readMBps', 'writeMBps')}
+        write_json(folder / 'measurements.json', results)
+        return results
+
+    @staticmethod
+    def memory_check(addr, payload, read, write):
+        from statistics import median
+        size = len(payload)
+        guard = read(addr - 8, 8), read(addr + size, 8)
+        rows = []
+        for repeat in range(3):
+            data = bytes((byte + repeat) & 255 for byte in payload)
+            started = time.perf_counter()
+            write(addr, data)
+            written = time.perf_counter()
+            raw = read(addr, size)
+            ended = time.perf_counter()
+            checked(raw == data, 'SRAM block readback differs')
+            rows.append(dict(writeSeconds=written-started, readSeconds=ended-written))
+        for width in (1, 2, 4):
+            at = addr + 1
+            before = read(at - 1, width + 2)
+            value = bytes(range(0xf0, 0xf0 + width))
+            write(at, value)
+            checked(read(at - 1, width + 2) == before[:1] + value + before[-1:], 'SRAM width/guard mismatch')
+        checked(guard == (read(addr - 8, 8), read(addr + size, 8)), 'SRAM guard changed')
+        return dict(address=hex(addr), bytes=size, rows=rows, byteExact=True,
+                    readMBps=size / median(r['readSeconds'] for r in rows) / 1e6,
+                    writeMBps=size / median(r['writeSeconds'] for r in rows) / 1e6)
+
+    def debug(self, folder):
+        elf = self.args.target_elf
+        entry = symbol(elf, self.args.break_symbol or BREAKPOINTS[self.args.board]) & ~1
+        register = 'a0' if self.rv else 'r0'
+        with self.target.link() as (_, mem, chip, _):
+            _, segments = elf_contents(elf)
+            if not any(flags & 1 and start <= entry < start + len(data) and
+                       mem.read(start, len(data)) == data for start, data, flags in segments):
+                raise Pending('Debug breakpoint ELF does not match executable memory on the target')
+        with self.target.memory_fixture(folder / 'fixture', [], capture_registers=True, keep_halted=True):
+            with self.target.link() as (_, mem, chip, _):
+                self.target.reject_debug_breakpoints(mem, chip)
+            t0 = time.perf_counter()
+            with self.web_debug(folder):
+                connected = time.perf_counter() - t0
+                clock = self.clock()
+                t0 = time.perf_counter()
+                self.debug_call('halt')
+                halted = time.perf_counter() - t0
+                # Session is halted already when used with the memory snapshot.
+                self.debug_call('run')
+                self.debug_call('refresh')
+                checked(not self.invoke('dbg', 'summary')['halted'], 'Resume not confirmed')
+                self.debug_call('halt')
+                pc = self.debug_call('readReg', 'pc')
+                t0 = time.perf_counter()
+                self.debug_call('step')
+                stepped = time.perf_counter() - t0
+                self.debug_call('refresh')
+                next_pc = self.debug_call('readReg', 'pc')
+                checked(self.invoke('dbg', 'summary')['halted'] and pc != next_pc, 'Instruction step not confirmed')
+                self.debug_call('bpAdd', entry, 'board acceptance')
+                checked(self.invoke('dbg', 'summary')['bps'], 'Hardware breakpoint not registered')
+                self.debug_call('cont')
+                def refresh():
+                    self.debug_call('refresh')
+                    return self.invoke('dbg', 'summary')
+                state = wait_for(refresh, lambda state: state['halted'], 6, 'Breakpoint not hit')
+                checked(state['pc'] & ~1 == entry, 'Wrong hardware breakpoint PC')
+                self.debug_call('bpClear')
+                checked(not self.invoke('dbg', 'summary')['bps'], 'Breakpoints were not cleared')
+                steps = {}
+                for method in ('stepInto', 'stepOver', 'stepOut'):
+                    before = self.debug_call('readReg', 'pc')
+                    outcome = self.debug_call(method)
+                    after = self.debug_call('readReg', 'pc')
+                    checked(before != after and not any(word in str(outcome) for word in ('没停到', '超时')),
+                            f'{method} did not complete: {outcome}')
+                    steps[method] = dict(before=before, after=after, outcome=outcome)
+                frames = self.debug_call('backtrace', {'maxFrames': 8})
+                checked(frames.get('frames'), 'Debugger returned no backtrace')
+                name = 'g_ticks' if self.rv else 'g_trace.loops'
+                self.invoke('dbg', 'addWatch', name)
+                t0 = time.perf_counter()
+                self.invoke('dbg', 'refreshWatch', {'force': True})
+                watch_s = time.perf_counter() - t0
+                watches = self.invoke('dbg', 'summary')['watch']
+                checked(any(row['expr'] == name and not row['error'] and row['value'] is not None
+                            for row in watches), 'Watch value not available')
+                value = self.debug_call('readReg', register)
+        return dict(clock=clock, pc=pc, steppedPc=next_pc, breakpointPc=entry, sourceSteps=steps,
+                    backtrace=frames, register=value, connectSeconds=connected, haltSeconds=halted,
+                    stepSeconds=stepped, watchSeconds=watch_s)
+
+    def rtt_addresses(self):
+        base = RTT_BASE[self.args.board]
+        return base, base + 0x200, base + 0x1000, base + 0x4000
+
+    @contextmanager
+    def rtt_fixture(self, folder, *, producer=True, batch=1024):
+        base, cb, ring, down = self.rtt_addresses()
+        size = 16384 if self.rv else 8192
+        elf, code = self.target.compile_producer(folder / 'producer') if producer else (None, None)
+        if self.rv and producer:
+            regions = [(RV_CODE, 256), (base, 0x8000)]
+        else:
+            regions = [(base, 0x5000)]
+
+        def setup(mem, chip, saved):
+            if producer:
+                if self.args.board == 'h743':
+                    checked(not int(saved['ccr'], 0) & (1 << 16), 'H743 RTT fixture requires D-cache disabled')
+                entry = RV_CODE if self.rv else base
+                mem.write(entry, code)
+                checked(mem.read(entry, len(code)) == code, 'RTT producer writeback failed')
+                if self.rv:
+                    mem.write(base, bytes(0x8000))
+                    mem.write_word(base + 72, batch)
+                    mem.write_word(base + 64, 1)
+                elif self.args.board == 'h743':
+                    mem.write_word(0xe000ef50, 0)
+            control = (struct.pack('<16sII', b'SEGGER RTT', 1, 1) +
+                       struct.pack('<6I', 0, ring, size, 0, 0, 0) +
+                       struct.pack('<6I', 0, down, 64, 60, 60, 0) + bytes(4))
+            mem.write(cb, control)
+            mem.write(down, bytes([0x6e]) * 64)
+            mem.write(base + 0x4800, struct.pack('<8I', *SCOPE_VALUES))
+            if producer and self.rv:
+                chip.register(0x7b0, (chip.register(0x7b0) & ~7) | 3)
+                chip.register(0x7b1, RV_CODE)
+                chip.resume()
+                wait_for(lambda: mem.word(base), lambda v: v == 0x48504d50, 2, 'RTT producer did not boot')
+            elif producer:
+                from benchmark_rtt_forward import core_write
+                core_write(mem, 16, 0x01000000)
+                core_write(mem, 20, 1)
+                core_write(mem, 15, base | 1)
+                mem.write_word(DHCSR, 0xa05f0001)
+            else:
+                self.target.restore_state(mem, chip, saved)
+
+        with self.target.memory_fixture(folder / 'fixture', regions, setup, capture_registers=producer,
+                                        before_restore=self.check_idle):
+            yield elf
+
+    def viewer_start(self, folder, elf=None):
+        self.web.page('rtt', 'show')
+        self.web.set('rtt', '#r-target', 'riscv' if self.rv else 'swd')
+        self.web.set('rtt', '#r-chip', self.chip)
+        if self.case['transport'] == 'jtag' and not self.rv:
+            cfg = self.arm_cfg(folder)
+            config = self.invoke('dbg', 'importCfg', dict(pack_file(cfg), kind='file'))
+            self.adopt_config('rtt', 'r', config)
+        else:
+            self.web.set('rtt', '#r-usb-clock', str(self.case['requestedHz'] // 1000))
+        self.web.set('rtt', '#r-record-auto', False)
+        self.web.set('rtt', '#r-poll', '5')
+        _, cb, _, _ = self.rtt_addresses()
+        if elf is not None:
+            checked(self.invoke('rtt', 'loadElfFile', dict(pack_file(elf), kind='file')),
+                    'Failed to resolve _SEGGER_RTT from probe fixture ELF')
+            checked(int(self.web.read('rtt', '#r-addr')['value'], 0) == cb, 'Wrong RTT ELF address')
+        else:
+            self.web.set('rtt', '#r-addr', hex(cb))
+        self.click('rtt', '#r-clear')
+        self.invoke('rtt', 'connectProbe')
+        return wait_for(lambda: self.invoke('rtt', 'summary'),
+                        lambda s: s['connected'] and s['running'] and s['controlBlock'] == cb
+                        and s['stats']['bytes'] > 0, 8, 'RTT Viewer has no fresh data')
+
+    def rtt_viewer(self, folder):
+        with self.rtt_fixture(folder) as elf:
+            try:
+                self.viewer_start(folder, elf)
+                clock = self.clock()
+                first = self.invoke('rtt', 'summary')
+                t0 = time.perf_counter()
+                time.sleep(3)
+                last = self.invoke('rtt', 'summary')
+                wall = time.perf_counter() - t0
+                checked(last['stats']['bytes'] > first['stats']['bytes'], 'RTT Viewer stopped making progress')
+                checked(not last['stats'].get('lost') and not last['stats'].get('corrupt'), 'Viewer loss or corruption')
+                wait_for(lambda: self.invoke('rtt', 'summary'),
+                         lambda state: state['bufferedBytes'] > (16384 if self.rv else 8192),
+                         8, 'RTT up ring wrap not observed')
+                self.invoke('rtt', 'writeDown', 0, b64(RTT_DOWN), target='rtt')
+                export = self.invoke('rtt', 'saveRaw')
+                raw = self.web.download('rtt', folder / 'viewer.bin')
+                continuity = sequence(raw)
+                checked(export['bytes'] == len(raw) and not export['truncated'], 'RTT Viewer export incomplete')
+                health = self.invoke('rtt', 'summary')['stats']
+                checked(not health.get('lost') and not health.get('corrupt'), 'RTT Viewer recorded loss/corruption')
+            finally:
+                self.invoke('rtt', 'disconnect')
+            _, cb, _, down = self.rtt_addresses()
+            with self.target.link() as (_, mem, chip, _):
+                ring = mem.read(down, 64)
+                pointer = mem.word(cb + 60)
+                checked(pointer == 4 and ring[60:] + ring[:4] == RTT_DOWN and ring[4:60] == b'n' * 56,
+                        'Downlink wrap, WrOff or guard bytes mismatch')
+        return dict(clock=clock, throughputBps=(last['stats']['bytes']-first['stats']['bytes'])/wall,
+                    seconds=wall, upstream=continuity, downstream=dict(bytes=len(RTT_DOWN), wrOff=pointer),
+                    pollingMs=5, displayed=not last['displaySuppressed'])
+
+    def cdc_start(self, ready_bytes=8):
+        _, cb, _, _ = self.rtt_addresses()
+        self.web.page('rttcdc', 'show')
+        self.web.set('rttcdc', '#h-target', 'riscv' if self.rv else 'swd')
+        self.web.set('rttcdc', '#h-addr', hex(cb))
+        self.web.set('rttcdc', '#h-size', '0x100')
+        self.web.set('rttcdc', '#h-chan', '0')
+        self.web.set('rttcdc', '#c-record-auto', False)
+        self.invoke('rttcdc', 'connect', target='hid')
+        self.invoke('rttcdc', 'applyTargetType', target='hid')
+        self.web.set('rttcdc', '#h-clock', str(self.case['requestedHz'] // 1000))
+        self.invoke('rttcdc', 'refreshPorts')
+        port = self.port()
+        options = self.web.read('rttcdc', '#c-port')['options']
+        chosen = [row['value'] for row in options if re.search(r'(?<!\w)' + re.escape(port) + r'(?!\w)', row['label'], re.I)]
+        checked(len(chosen) == 1, 'No unique browser COM matching the J7 serial')
+        self.web.set('rttcdc', '#c-port', chosen[0])
+        self.invoke('rttcdc', 'connect')
+        checked(self.invoke('rttcdc', 'summary')['open'], f'Web COM open failed: {port}')
+        self.click('rttcdc', '#c-clear')
+        self.click('rttcdc', '#c-statclear')
+        started = time.monotonic()
+        checked(self.invoke('rttcdc', 'start', target='hid') is not False, 'RTT forward START failed')
+        checked(self.invoke('rttcdc', 'summary', target='hid')['connected'], 'RTT control channel did not connect')
+        wait_for(lambda: self.invoke('rttcdc', 'summary'),
+                 lambda state: state['open'] and state['bytes'] >= ready_bytes, 8, 'RTT forward produced no data')
+        self.cdc_start_seconds = time.monotonic() - started
+        return port
+
+    def cdc_stop(self):
+        state = self.invoke('rttcdc', 'summary', target='hid')
+        if not state['connected']:
+            return None
+        self.invoke('rttcdc', 'stop', target='hid')
+        self.invoke('rttcdc', 'refresh', target='hid')
+        engine = self.invoke('rttcdc', 'summary', target='hid')
+        checked(not engine['running'] and not engine['rdErr'] and not engine['wrErr'], f'RTT STOP failure: {engine}')
+        summary = self.invoke('rttcdc', 'summary')
+        if summary['open']:
+            final = wait_for(lambda: self.invoke('rttcdc', 'summary'),
+                             lambda s: s['bytes'] >= engine['moved'], 4, 'Host did not receive the STOP tail')
+            checked(final['bytes'] == engine['moved'], f'RTT STOP tail mismatch: {final["bytes"]} vs {engine["moved"]}')
+        return engine
+
+    def cdc_close(self):
+        try:
+            checked(self.invoke('rttcdc', 'disconnect', target='hid') is not False,
+                    'RTT HID still disconnecting')
+        finally:
+            self.invoke('rttcdc', 'close', target='session')
+
+    def rtt_measured_stop(self, seconds):
+        # A pending captureWindow owns the normal workbench command slot.
+        # The public interrupt path sends the real page STOP while recording
+        # is still active, so the export includes the host's post-STOP bytes.
+        from concurrent.futures import ThreadPoolExecutor
+        with ThreadPoolExecutor(max_workers=1) as pool:
+            future = pool.submit(self.invoke, 'rttcdc', 'captureWindow',
+                                 {'seconds': seconds + 4, 'maxMiB': 32, 'reportProgress': True})
+            wait_for(lambda: self.web.page('rttcdc', 'state')['summary'].get('captureWindow'),
+                     lambda state: state and state['bytes'] > 0, 2, 'Browser RTT recording never started')
+            time.sleep(seconds)
+            dispatch = self.web.page('rttcdc', 'interrupt', selector='#h-stop')
+            checked(dispatch['dispatched'], 'RTT STOP button did not dispatch')
+            window = future.result()
+        return window
+
+    def rtt_forward(self, folder):
+        if self.case['transport'] == 'jtag' and not self.rv:
+            native = self.native_forward(folder)
+            write_json(folder / 'native.json', native)
+            raise Pending('Native ARM JTAG forwarding verified; Web offers ARM/SWD and RISC-V/JTAG')
+        rows = []
+        # Repeat with the same Web page and a fresh target sequence. The
+        # second start exercises reuse of the prior Web/HID/COM session.
+        for repeat in range(2):
+            run = folder / f'web-{repeat + 1}'
+            run.mkdir()
+            with self.rtt_fixture(run):
+                try:
+                    port = self.cdc_start()
+                    clock = self.clock()
+                    window = self.rtt_measured_stop(3)
+                    self.invoke('rttcdc', 'refresh', target='hid')
+                    end = self.invoke('rttcdc', 'summary', target='hid')
+                    host = self.invoke('rttcdc', 'summary')
+                    checked(not end['running'] and not end['rdErr'] and not end['wrErr']
+                            and host['bytes'] == end['moved'], 'RTT STOP or host tail unconfirmed')
+                    data = self.web.download('rttcdc', run / 'forward.bin')
+                    checked(window['complete'] and window['bytes'] == len(data), 'RTT Web recording incomplete')
+                    # The window starts after START. Check aligned complete words.
+                    alignment = self.sequence_window(data)
+                    rows.append(dict(port=port, clock=clock, window=window, sequence=alignment,
+                                     startupSeconds=self.cdc_start_seconds,
+                                     engine=end, hostTailMatch=True))
+                finally:
+                    self.cdc_close()
+                _, cb, _, _ = self.rtt_addresses()
+                with self.target.link() as (_, mem, _, _):
+                    wr, rd = struct.unpack('<2I', mem.read(cb + 36, 8))
+                    rows[-1]['targetRingPending'] = (wr-rd) % (16384 if self.rv else 8192)
+                    rows[-1]['chunk'] = 2048
+            write_json(folder / 'web.json', rows)
+        boundary = self.cdc_boundaries(folder)
+        native = self.native_forward(folder)
+        return dict(web=rows, native=native, boundaries=boundary, restartVerified=True,
+                    webToNativeThroughputRatio=(sum(row['window']['activeBytesPerSecond'] for row in rows)
+                                                / len(rows) / native['throughputBps']))
+
+    @staticmethod
+    def sequence_window(data):
+        for offset in range(4):
+            size = (len(data) - offset) & ~3
+            if size <= 8:
+                continue
+            try:
+                return dict(sequence(data[offset:offset + size], None), alignment=offset)
+            except RuntimeError:
+                continue
+        raise RuntimeError('RTT window sequence is discontinuous')
+
+    def cdc_boundaries(self, folder):
+        # All bytes of these finite fixtures fit under the browser raw buffer
+        # limit. Arm the recording before START and preserve the full session.
+        rows = []
+        for count in (511, 512, 513):
+            run = folder / f'boundary-{count}'
+            run.mkdir()
+            expected = random.Random(count).randbytes(count)
+            with self.rtt_fixture(run, producer=False):
+                _, cb, ring, _ = self.rtt_addresses()
+                with self.target.link() as (_, mem, chip, _):
+                    mem.write(ring, expected)
+                    mem.write_word(cb + 36, count)
+                    mem.write_word(cb + 40, 0)
+                try:
+                    self.cdc_start(count)
+                    end = self.cdc_stop()
+                    self.invoke('rttcdc', 'saveRaw')
+                    raw = self.web.download('rttcdc', run / 'forward.bin')
+                    checked(end['moved'] == count and raw == expected, f'RTT {count} B boundary/tail mismatch')
+                    rows.append(dict(bytes=count, sha256=sha(raw), matched=True))
+                finally:
+                    self.cdc_close()
+            write_json(folder / 'boundaries.json', rows)
+        return rows
+
+    def native_forward(self, folder):
+        import serial
+        from benchmark_rtt_forward import Reader
+        from probe_stream import Probe
+        target_hz = self.case['requestedHz']
+        _, cb, _, _ = self.rtt_addresses()
+        fixture = folder / 'native'
+        fixture.mkdir()
+        port = self.port()
+        with self.rtt_fixture(fixture):
+            # Install the transport without leaving a DAP owner alongside HID.
+            with self.target.link(self.case['transport'], target_hz):
+                pass
+            probe = Probe(self.args.serial, zynq_only=True)
+            try:
+                route = 2 if self.case['transport'] == 'jtag' else 1
+                checked(probe.action(0x31, 12, bytes([route]))[0] == 0, 'Native RTT transport rejected')
+                with serial.Serial(port, 115200, timeout=.025) as com:
+                    com.reset_input_buffer()
+                    reader = Reader(com)
+                    reader.start()
+                    try:
+                        checked(probe.action(0x31, 7, struct.pack('<IHBB', target_hz, 2048, 0, 0xff))[0] == 0,
+                                'Native RTT configuration rejected')
+                        checked(probe.action(0x31, 1, struct.pack('<IIB', cb, 0x100, 0))[0] in (0, -100),
+                                'Native RTT START rejected')
+                        wait_for(lambda: (reader.count, reader.error), lambda x: x[0] > 0 or x[1], 5,
+                                 'Native CDC received no bytes')
+                        clock = self.clock()
+                        t0, start = time.perf_counter(), reader.count
+                        time.sleep(3)
+                        wall, count = time.perf_counter() - t0, reader.count - start
+                    finally:
+                        try:
+                            def stop():
+                                rc, words = probe.action(0x31, 0)
+                                checked(rc in (0, -7), f'Native RTT STOP failed: {rc}')
+                                return rc, words
+                            _, final = wait_for(stop, lambda x: x[0] == 0, 4, 'Native RTT STOP did not finish')
+                            wait_for(lambda: (reader.count, reader.error), lambda x: x[0] >= final[3] or x[1],
+                                     4, 'Native CDC STOP tail missing')
+                        finally:
+                            reader.quit.set()
+                            reader.join(2)
+                    checked(not reader.is_alive() and not reader.error and not reader.pending
+                            and reader.count == final[3] and not final[5] and count > 0,
+                            f'Native RTT loss/error: {reader.count}, {reader.error}, {final}')
+            finally:
+                probe.close()
+            with self.target.link() as (_, mem, chip, _):
+                wr, rd = struct.unpack('<2I', mem.read(cb + 36, 8))
+        return dict(port=port, clock=clock, seconds=wall, bytes=count, throughputBps=count/wall,
+                    received=reader.count, moved=final[3], sequenceContinuous=True,
+                    targetRingPending=(wr-rd) % (16384 if self.rv else 8192), chunk=2048)
+
+    def scope_address(self):
+        return RTT_BASE[self.args.board] + 0x4800
+
+    def scope_start(self, channels, ticks, seconds):
+        self.web.page('scope', 'show')
+        self.click('scope', '#sc-side-capture-tab')
+        self.invoke('scope', 'setMock', False)
+        self.web.set('scope', '#sc-target', 'riscv' if self.rv else 'swd')
+        self.web.set('scope', '#sc-sampling-path', 'probe')
+        self.web.set('scope', '#sc-period', f'{ticks / 24:.6f}')
+        self.web.set('scope', '#sc-seconds', str(seconds))
+        self.web.set('scope', '#sc-raw', True)
+        self.invoke('scope', 'clear')
+        self.click('scope', '#sc-varclear')
+        for index in range(channels):
+            self.invoke('scope', 'toggleVar', dict(name=f'fixture_{index}', addr=self.scope_address() + 4*index,
+                                                   scalar='u32', size=4), True)
+        self.invoke('scope', 'connectHid', False)
+        self.invoke('scope', 'connectUsb', False)
+        self.web.set('scope', '#sc-clock', str(self.case['requestedHz'] // 1000))
+        self.invoke('scope', 'start')
+        return wait_for(lambda: self.invoke('scope', 'summary'),
+                        lambda s: s['running'] and s['definitionReceived'] and s['samples'] > 0,
+                        5, 'Scope did not receive first DEF and data')
+
+    def scope_stop(self):
+        self.invoke('scope', 'stop', 'board acceptance STOP')
+        return self.invoke('scope', 'summary')
+
+    def scope_exports(self, folder, channels, summary):
+        self.invoke('scope', 'saveRaw')
+        data = self.web.download('scope', folder / 'capture.jsp')
+        timestamps = []
+        samples, first_tick, last_tick, period = jsp_data(data, self.scope_address(), channels,
+                                                          self.case['requestedHz'], timestamps)
+        checked(samples == summary['receivedSamples'], 'JSP group count differs from device')
+        # CSV/export replay is exercised in a short checked point. Long
+        # confirmation windows retain every raw frame without a huge CSV.
+        self.invoke('scope', 'exportCsv')
+        raw_csv = self.web.download('scope', folder / 'capture.csv')
+        rows = csv.reader(io.StringIO(raw_csv.decode('utf-8-sig')))
+        checked(len(next(rows)) == channels + 1, 'Scope CSV column count mismatch')
+        first_stamp = last_stamp = None
+        for row, ticks in zip(rows, timestamps, strict=True):
+            stamp = float(row[0])
+            if first_stamp is None:
+                first_stamp = stamp
+            expected_time = (ticks - first_tick) / 24
+            checked(tuple(map(int, row[1:])) == SCOPE_VALUES[:channels] and
+                    (last_stamp is None or stamp > last_stamp) and abs(stamp-first_stamp-expected_time) < 1.1,
+                    'Scope CSV data/timestamp mismatch')
+            last_stamp = stamp
+        checked(last_stamp is not None, 'Scope CSV has no samples')
+        self.invoke('scope', 'disconnect')
+        self.invoke('scope', 'replayFile', dict(b64(data), kind='file', name='capture.jsp'))
+        checked(self.invoke('scope', 'summary')['samples'] == samples, 'Scope JSP replay count mismatch')
+        return dict(groups=samples, firstTick=first_tick, lastTick=last_tick, periodTicks=period)
+
+    def jscope(self, folder):
+        channels = self.case['channels']
+        seed_ticks = SCOPE_PERIODS[(self.args.board, self.case['transport'])][channels == 8]
+        if self.case['transport'] == 'jtag' and not self.rv:
+            return self.native_scope(folder, channels, seed_ticks)
+        address = self.scope_address()
+        values = struct.pack('<8I', *SCOPE_VALUES)
+        rows = []
+        with self.target.memory_fixture(folder / 'fixture', [(address, len(values))],
+                                        lambda mem, chip, state: self.seed_scope(mem, chip, state, address, values),
+                                        before_restore=self.check_idle):
+            def point(ticks, seconds):
+                row = dict(periodTicks=ticks, requestedSeconds=seconds)
+                rows.append(row)
+                try:
+                    self.scope_start(channels, ticks, seconds + 8)
+                    clock = self.clock()
+                    self.invoke('scope', 'readScopeMetrics', {'fresh': True})
+                    before = self.invoke('scope', 'summary')['probeMetrics']
+                    t0 = time.monotonic()
+                    time.sleep(seconds)
+                    self.invoke('scope', 'readScopeMetrics', {'fresh': True})
+                    wall = time.monotonic() - t0
+                    after = self.invoke('scope', 'summary')['probeMetrics']
+                    summary = self.scope_stop()
+                    skip = capture_quality(summary)
+                    groups = after['produced'] - before['produced']
+                    receive_seconds = ((after['tick'] - before['tick']) & 0xffffffff) / after['hz']
+                    skipped = (after['skipped'] - before['skipped']) & 0xffffffff
+                    checked(groups > 0 and receive_seconds > 0, 'Scope counters did not advance')
+                    row.update(clock=clock, summary=summary, groups=groups, groupsPerSecond=groups/receive_seconds,
+                               counterSeconds=receive_seconds, wallSeconds=wall,
+                               windowSkipped=skipped, skipFraction=max(skip, skipped / (groups + skipped)))
+                    if seconds == 60:
+                        checked(receive_seconds >= 59.5, 'Scope sample window shorter than 60 seconds')
+                        self.invoke('scope', 'saveRaw')
+                        data = self.web.download('scope', folder / f'long-{ticks}.jsp')
+                        count, _, _, actual_period = jsp_data(data, address, channels, self.case['requestedHz'])
+                        checked(count == summary['receivedSamples'] and actual_period == ticks, 'Long JSP differs from settings')
+                    return row
+                except Exception as error:
+                    row['error'] = str(error)
+                    raise
+                finally:
+                    self.invoke('scope', 'disconnect')
+                    write_json(folder / 'points.json', rows)
+            candidates = sorted({max(48, round(seed_ticks * scale)) for scale in (.85, 1, 1.2, 1.5, 2)})
+            best = None
+            for ticks in candidates:
+                try:
+                    row = point(ticks, 1.5)
+                except Unsafe:
+                    raise
+                except Exception:
+                    self.check_idle()
+                    continue
+                if row['skipFraction'] < .001:
+                    best = ticks
+                    break
+            checked(best is not None, 'No stable J-Scope short point')
+            long = point(best, 60)
+            if long['skipFraction'] >= .001:
+                long = point(round(best * 1.25), 60)
+            checked(long['skipFraction'] < .001, 'J-Scope failed the 60-second skip threshold')
+            short_ticks = max(2400, long['periodTicks'])
+            try:
+                self.scope_start(channels, short_ticks, 3)
+                time.sleep(.5)
+                stopped = self.scope_stop()
+                checked(capture_quality(stopped) < .001, 'Scope export point unstable')
+                exports = self.scope_exports(folder, channels, stopped)
+            finally:
+                self.invoke('scope', 'disconnect')
+        return {'confirmed': long, 'exports': exports}
+
+    def seed_scope(self, mem, chip, state, address, values):
+        mem.write(address, values)
+        checked(mem.read(address, len(values)) == values, 'Scope fixture write did not verify')
+        self.target.restore_state(mem, chip, state)
+
+    def native_scope(self, folder, channels, seed_ticks):
+        from benchmark_probe_stream import hss_point
+        from probe_stream import Probe
+        from test_probe_board import stop
+        # The existing raw verifier writes and validates its own 4 KiB
+        # fixture at this address, including byte checks for every DATA frame.
+        hz = self.case['requestedHz']
+        rows = []
+        with self.target.memory_fixture(folder / 'fixture', [(0x20004000, 4096)], keep_halted=True,
+                                        before_restore=self.check_idle):
+            with self.target.link('jtag', hz) as (device, mem, _, clock):
+                verify_clock(clock, hz)
+                probe = Probe(self.args.serial, zynq_only=True)
+                try:
+                    checked(probe.action(0x31, 12, b'\x02')[0] == 0, 'ARM/JTAG HSS route rejected')
+                    def point(ticks, seconds):
+                        row = hss_point(probe, mem, device, hz, ticks, channels, seconds, len(rows))
+                        verify_clock(row, hz)
+                        rows.append(row)
+                        write_json(folder / 'native.json', rows)
+                        checked(row['all_frame_sequences_valid'] and row['sample_count_match'], 'Native HSS sequence/tail failed')
+                        return row
+                    candidates = sorted({max(24, round(seed_ticks * scale)) for scale in (.85, 1, 1.2, 1.5, 2)})
+                    best = next((row['period_ticks'] for ticks in candidates
+                                 if (row := point(ticks, 1.5))['skip_percent'] < .1), None)
+                    checked(best is not None, 'No stable native ARM/JTAG scope point')
+                    long = point(best, 60)
+                    if long['skip_percent'] >= .1:
+                        long = point(round(best * 1.25), 60)
+                    checked(long['counter_window_s'] >= 59.5 and long['skip_percent'] < .1, 'Native HSS long window failed')
+                finally:
+                    try:
+                        stop(probe, device)
+                    finally:
+                        probe.close()
+        raise Pending('Native ARM JTAG HSS window verified; Web offers ARM/SWD and RISC-V/JTAG')
+
+    def flash(self, folder):
+        base, capacity, sector = FLASH[self.args.board]
+        elf = self.args.target_elf
+        machine, segments = elf_contents(elf)
+        checked(machine == ('EM_RISCV' if self.rv else 'EM_ARM') and segments, 'Wrong Flash ELF architecture')
+        checked(all(base <= address < address + len(data) <= base + capacity for address, data, _ in segments),
+                'ELF contains a load segment outside the expected target Flash')
+        start = min((address - base) // sector for address, _, _ in segments) * sector + base
+        stop = max((address + len(data) - base + sector - 1) // sector for address, data, _ in segments) * sector + base
+        checked(stop-start <= (1 << 20), 'Flash acceptance fixture exceeds 1 MiB')
+        if self.rv:
+            areas = [(0, 0x20000)]
+        elif self.args.board == 'h743':
+            areas = [(0x24000000, 0x10000), (0x20000000, 0x10000)]
+        else:
+            areas = [(0x20000000, 0x10000)]
+        executable = (self.args.openocd or ROOT / 'prebuilt/golden/host/openocd/openocd.exe').resolve()
+        scripts = (self.args.openocd_scripts or executable.parent / 'scripts').resolve()
+        if self.rv and not (self.args.openocd and self.args.openocd_scripts):
+            raise Pending('HPM target Flash requires matching HPM SDK --openocd and --openocd-scripts for the native comparison')
+        if not executable.is_file() or not scripts.is_dir():
+            raise Pending('Native OpenOCD or matching scripts not found')
+        config = folder / 'native-flash.cfg'
+        options = ['adapter driver cmsis-dap', 'cmsis_dap_backend usb_bulk',
+                   'cmsis_dap_vid_pid 0x0d28 0x0204', f'adapter serial {self.tcl(self.args.serial)}']
+        if self.rv:
+            options.append('source [find hpm6800_all_in_one.cfg]')
+        else:
+            family = 'stm32f1x' if self.args.board == 'f103ze' else 'stm32h7x'
+            options += [f'transport select {self.case["transport"]}', f'source [find target/{family}.cfg]']
+        options += [f'adapter speed {self.case["requestedHz"] // 1000}', 'reset_config none']
+        config.write_text('\n'.join(options) + '\n', encoding='ascii')
+        name, offset = HEARTBEAT[self.args.board]
+        heartbeat = symbol(elf, name) + offset
+
+        def confirm_flash(expected):
+            with self.target.link() as (_, mem, chip, _):
+                current = mem.read(start, stop - start)
+                checked(current == mem.read(start, stop - start), 'Unstable independent Flash readback')
+                return current == expected
+
+        # Restrict the routine to reprogramming a known running baseline. This
+        # bounds recovery to the same sectors and a known executable image.
+        with self.target.link() as (_, mem, chip, _):
+            starting = self.target.state(mem, chip)
+            checked(not starting['halted'], 'Flash test expects a running target application')
+            original = mem.read(start, stop - start)
+            checked(original == mem.read(start, stop - start), 'Unstable Flash backup')
+            for address, data, _ in segments:
+                if original[address-start:address-start+len(data)] != data:
+                    raise Pending(f'Provide the running baseline ELF. Flash differs at {address:#x}')
+            previous = mem.word(heartbeat)
+            wait_for(lambda: mem.word(heartbeat), lambda n: n != previous, 2, 'Baseline heartbeat did not advance')
+        backup = folder / 'flash.private.bin'
+        backup.write_bytes(original)
+        write_json(folder / 'flash-backup.json', dict(address=hex(start), bytes=len(original), sha256=sha(original)))
+        self.web.page('flash', 'show')
+        if self.case['transport'] == 'jtag' and not self.rv:
+            cfg = self.arm_cfg(folder)
+            imported = self.invoke('dbg', 'importCfg', dict(pack_file(cfg), kind='file'))
+            chip = self.adopt_config('flash', 'f', imported)
+            speed = None
+        else:
+            chip = self.chip
+            speed = self.case['requestedHz'] // 1000
+        with self.target.memory_fixture(folder / 'fixture', areas, capture_registers=True, keep_halted=True):
+            try:
+                native = self.native_flash(executable, scripts, config, backup, start, folder / 'native-flash.log',
+                                           folder / 'native-clock.json')
+                checked(confirm_flash(original), 'Native Flash changed baseline or sector neighbors')
+                begin = time.perf_counter()
+                result = self.invoke('flash', 'programFile', dict(pack_file(elf), kind='file'),
+                                     dict(chip=chip, clockKhz=speed, reset=False))
+                web = time.perf_counter() - begin
+                clock = verify_clock(self.read_clock(), self.case['requestedHz'])
+                checked(result['verified'] and confirm_flash(original), 'Web Flash readback differs from backup')
+            except Unsafe:
+                raise
+            except Exception:
+                try:
+                    if not confirm_flash(original):
+                        self.native_flash(executable, scripts, config, backup, start, folder / 'restore-flash.log')
+                    checked(confirm_flash(original), 'Original Flash readback failed after recovery')
+                except Exception as error:
+                    raise Unsafe(f'Flash restoration unconfirmed. Preserve {backup}: {error}') from error
+                raise
+        # Flash and RAM have been restored before this independent boot check.
+        # Use the flasher's normal software reset path only with explicit Flash authorization.
+        reset_started = time.perf_counter()
+        # The CDC48 application disables JTAG during startup. Verify its
+        # reset from SWD after both JTAG programming timings have completed.
+        self.reset_application(folder)
+        with self.target.link() as (_, mem, chip_target, _):
+            state = self.target.state(mem, chip_target)
+            checked(not state['halted'], 'Restored application is halted after reset')
+            tick = mem.word(heartbeat)
+            after = wait_for(lambda: mem.word(heartbeat), lambda v: v != tick, 4, 'Restored application did not boot')
+        return dict(nativeSeconds=native, webSeconds=web, clock=clock, bootSeconds=time.perf_counter()-reset_started,
+                    verified=True, flashRestored=True, affectedSectorBytes=len(original),
+                    nativeInputBytes=len(original), webInputBytes=result['bytes'],
+                    heartbeat={'address': hex(heartbeat), 'before': tick, 'after': after},
+                    detail='Both timings include erase, program and verify over the same affected Flash range')
+
+    def reset_application(self, folder):
+        previous_case = self.case
+        if self.args.board == 'f103ze':
+            self.case = dict(self.case, transport='swd')
+        try:
+            with self.web_debug(folder):
+                self.debug_call('resetRun')
+        finally:
+            self.case = previous_case
+
+    @staticmethod
+    def tcl(value):
+        value = value.as_posix() if isinstance(value, Path) else str(value)
+        checked(not any(char in value for char in '{}\r\n\\'), 'Unsupported character in Tcl argument')
+        return '{' + value + '}'
+
+    def native_flash(self, executable, scripts, config, backup, address, log_path, clock_path=None):
+        import threading
+        import libusb_package
+        import usb.core
+        matches = list(usb.core.find(find_all=True, idVendor=0x0d28, idProduct=0x0204,
+                                     serial_number=self.args.serial, backend=libusb_package.get_libusb1_backend()))
+        checked(len(matches) == 1 and matches[0].manufacturer == 'CherryUSB'
+                and matches[0].product == 'CMSIS-DAP', 'OpenOCD serial is ambiguous or does not identify J7')
+        # OpenOCD is the only writer to the target until it exits. Observe
+        # the physical clock while it owns DAP, independently of its logs.
+        gate = log_path.with_suffix('.go')
+        if clock_path:
+            wait = (f'set n 0; while {{![file exists {self.tcl(gate)}] && $n < 250}} '
+                    '{ sleep 100; incr n }; '
+                    'if {$n >= 250} { error "Timed out waiting for clock verification" }; ')
+        else:
+            wait = ''
+        args = [executable, '-s', scripts, '-f', config, '-c',
+                'gdb_port disabled; telnet_port disabled; tcl_port disabled; init; halt; '
+                f'echo ZL_FLASH_READY; {wait}'
+                f'flash write_image erase {self.tcl(backup)} {address:#x} bin; '
+                f'verify_image {self.tcl(backup)} {address:#x} bin; echo ZL_FLASH_DONE; shutdown']
+        with log_path.open('wb') as log:
+            start = time.perf_counter()
+            verifying_seconds = 0
+            with subprocess.Popen(args, cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as child:
+                ready = threading.Event()
+                def consume():
+                    for line in child.stdout:
+                        log.write(line)
+                        log.flush()
+                        if b'ZL_FLASH_READY' in line:
+                            ready.set()
+                reader = threading.Thread(target=consume, daemon=True)
+                reader.start()
+                try:
+                    if clock_path:
+                        checked(ready.wait(8) and child.poll() is None, 'Native Flash did not reach its clock check')
+                        begin = time.perf_counter()
+                        write_json(clock_path, self.clock())
+                        gate.touch()
+                        verifying_seconds = time.perf_counter()-begin
+                    code = child.wait(240)
+                except BaseException:
+                    # Close the writer before allowing the independent
+                    # rollback path to examine or restore its sectors.
+                    child.kill()
+                    child.wait()
+                    raise
+                finally:
+                    reader.join(5)
+        output = log_path.read_text(encoding='utf-8', errors='replace').lower()
+        checked(code == 0 and ready.is_set() and 'zl_flash_done' in output and 'verified' in output,
+                f'Native Flash did not verify. See {log_path}')
+        if clock_path:
+            checked(clock_path.is_file(), 'Native Flash actual clock was not confirmed')
+        return time.perf_counter() - start - verifying_seconds
+
+    def etm(self, folder):
+        elf = self.args.etm_elf.resolve()
+        import libusb_package
+        import usb.core
+        matches = list(usb.core.find(find_all=True, idVendor=0x0d28, idProduct=0x0204,
+                                     backend=libusb_package.get_libusb1_backend()))
+        if len(matches) != 1 or matches[0].serial_number != self.args.serial:
+            raise Pending('Native ETM capture requires J7 to be the only attached CMSIS-DAP VID/PID')
+        with self.target.link() as (_, mem, chip, _):
+            _, segments = elf_contents(elf)
+            checked(segments, 'ETM ELF is missing loadable code')
+            for address, data, flags in segments:
+                if flags & 1 and mem.read(address, len(data)) != data:
+                    raise Pending('Load the exact running ETM baseline first. H743 uses the CPU60/TRACE20 ELF')
+            name, offset = HEARTBEAT[self.args.board]
+            baseline = verify_baseline_rates(self.args.board, mem, etm=True, heartbeat=symbol(elf, name)+offset)
+        self.web.page('etm', 'show')
+        self.web.page('etm', 'describe')
+        self.web.upload('etm', '#elf-file', elf)
+        self.web.wait('etm', '#elf-label', elf.name)
+        target_cfg = {'seconds': 1, 'entry': None, 'resetToEntry': False, 'swdKhz': 10000, 'decode': True}
+        begin = time.perf_counter()
+        result = self.invoke('etm', 'captureNative', target_cfg)
+        wall = time.perf_counter() - begin
+        root = Path(self.runtime['recordsDirectory']).resolve()
+        record = (root / result['record']).resolve()
+        checked(record.parent == root, 'Invalid ETM record path')
+        metadata = json.loads((record / 'session.json').read_text(encoding='utf-8'))
+        decoded = json.loads((record / 'decoded.json').read_text(encoding='utf-8'))
+        quality, extent = metadata['quality'], metadata.get('captureExtent') or {}
+        checked(result['targetRestored'] and result['captureProof']['restored'], 'ETM target restoration not confirmed')
+        checked(quality['synced'] and quality['ended'] and not quality['loss'] and extent.get('complete')
+                and abs(extent.get('actualSeconds', 0)-1) <= .002, 'ETM capture window or quality invalid')
+        dq = decoded['quality']
+        checked(not any(dq.get(key) for key in ('packetIssues', 'unprocessedBytes', 'unaccountedBytes'))
+                and decoded['summary']['instructions'] > 0, 'ETM decode quality invalid')
+        display = self.invoke('etm', 'measureOpenRecord', result['record'])
+        processing = record / 'decode-performance.json'
+        native = metadata.get('nativeAcceptance') or {}
+        return dict(record=str(record), quality=quality, window=extent, decoded=decoded['summary'],
+                    restored=True, webCaptureSeconds=wall, display=display, targetElf=digest(elf),
+                    captureHostSeconds=native.get('capture_host_seconds'),
+                    captureClocks=result['captureProof'].get('rccCapture'),
+                    processing=json.loads(processing.read_text(encoding='utf-8')) if processing.exists() else None,
+                    **baseline)
+
+    def close_scope(self):
+        try:
+            if self.invoke('scope', 'summary')['running']:
+                self.scope_stop()
+        finally:
+            self.invoke('scope', 'disconnect')
+
+    @contextmanager
+    def stress_business(self, business, folder):
+        folder.mkdir()
+        if business == 'debug':
+            with self.target.memory_fixture(folder / 'fixture', [], capture_registers=True, keep_halted=True):
+                with self.target.link() as (_, mem, chip, _):
+                    self.target.reject_debug_breakpoints(mem, chip)
+                try:
+                    self.debug_connect(folder)
+                    self.debug_call('halt')
+                    pc = self.debug_call('readReg', 'pc')
+                    self.debug_call('step')
+                    stepped = self.debug_call('readReg', 'pc')
+                    checked(pc != stepped, 'Debug stress single-step did not advance')
+                    yield dict(pc=pc, steppedPc=stepped, clock=self.clock())
+                finally:
+                    self.close_debug()
+            return
+        if business in ('rtt-forward', 'jscope') and self.case['transport'] == 'jtag' and not self.rv:
+            raise Pending(f'{business} Web page has no ARM/JTAG stream setting')
+        live_rtt = business in ('rtt-viewer', 'rtt-forward')
+        with self.rtt_fixture(folder, producer=live_rtt):
+            if business == 'rtt-viewer':
+                try:
+                    self.viewer_start(folder)
+                    clock = self.clock()
+                    self.invoke('rtt', 'saveRaw')
+                    data = self.web.download('rtt', folder / 'up.bin')
+                    first = self.invoke('rtt', 'summary')['stats']['bytes']
+                    next_state = wait_for(lambda: self.invoke('rtt', 'summary'),
+                                          lambda s: s['running'] and s['stats']['bytes'] > first,
+                                          4, 'Viewer stopped making progress before disconnect')
+                    yield dict(clock=clock, sequence=sequence(data), received=next_state['stats']['bytes'])
+                finally:
+                    self.invoke('rtt', 'disconnect')
+            elif business == 'rtt-forward':
+                try:
+                    port = self.cdc_start()
+                    clock = self.clock()
+                    self.invoke('rttcdc', 'saveRaw')
+                    data = self.web.download('rttcdc', folder / 'up.bin')
+                    first = self.invoke('rttcdc', 'summary')['bytes']
+                    next_state = wait_for(lambda: self.invoke('rttcdc', 'summary'),
+                                          lambda s: s['open'] and s['bytes'] > first,
+                                          3, 'RTT forwarding stopped before disconnect')
+                    yield dict(clock=clock, port=port, sequence=sequence(data), received=next_state['bytes'])
+                finally:
+                    try:
+                        self.cdc_stop()
+                    finally:
+                        self.cdc_close()
+            else:
+                try:
+                    summary = self.scope_start(1, 2400, 12)
+                    clock = self.clock()
+                    # Capture a short raw prefix while acquisition is active.
+                    self.invoke('scope', 'saveRaw')
+                    data = self.web.download('scope', folder / 'prefix.jsp')
+                    groups, _, _, _ = jsp_data(data, self.scope_address(), 1, self.case['requestedHz'])
+                    checked(self.invoke('scope', 'summary')['running'], 'Scope stopped before the handoff')
+                    yield dict(clock=clock, groups=groups, state=summary['state'])
+                finally:
+                    self.close_scope()
+
+    def stop_stress_business(self, business):
+        if business == 'rtt-viewer':
+            state = self.invoke('rtt', 'summary')
+            checked(not state['stats'].get('lost') and not state['stats'].get('corrupt'), 'Viewer detected loss')
+            self.invoke('rtt', 'disconnect')
+            return state
+        if business == 'rtt-forward':
+            state = self.cdc_stop()
+            self.cdc_close()
+            return state
+        if business == 'jscope':
+            state = self.scope_stop()
+            checked(capture_quality(state) < .001, 'J-Scope stress short window unstable')
+            self.invoke('scope', 'disconnect')
+            return state
+        self.close_debug()
+        return self.invoke('dbg', 'summary')
+
+    def disconnect_topbar(self, page):
+        checked(not self.web.read(page, '#btn-probe-disconnect')['disabled'], 'No top-bar session to disconnect')
+        self.click(page, '#btn-probe-disconnect')
+        wait_for(lambda: self.web.read(page, '#btn-probe-connect'),
+                 lambda x: not x['disabled'], 8, 'Top-bar connection remains busy')
+        checked(self.web.read(page, '#btn-probe-disconnect')['disabled'], 'Top-bar disconnect did not complete')
+        if page == 'rttcdc':
+            # The top bar preserves a standalone serial client; explicitly
+            # release this test's CDC port before reopening it.
+            self.invoke('rttcdc', 'close', target='session')
+
+    def usb_present(self):
+        import hid
+        return any(row.get('serial_number') == self.args.serial and row.get('usage_page') == 0xff00
+                   and row.get('manufacturer_string') == 'CherryUSB'
+                   and row.get('product_string') in ('zynqlinkPRO HID', 'CMSIS-DAP')
+                   for row in hid.enumerate(0x0d28, 0x0204))
+
+    def usb_cycle(self, page):
+        if not self.args.usb_data_cycle:
+            raise Pending('Physical USB data disconnect requires --usb-data-cycle and independent power')
+        print(f'请只断开 J7 {self.args.serial} 的 USB 数据连接，保持供电。', file=sys.stderr, flush=True)
+        self.report.event('operator', id=self.case['id'], action='disconnect-j7-data', serial=self.args.serial)
+        try:
+            wait_for(self.usb_present, lambda present: not present, 60, 'J7 removal not observed')
+        finally:
+            print(f'请接回 J7 {self.args.serial} 的 USB 数据连接。', file=sys.stderr, flush=True)
+            self.report.event('operator', id=self.case['id'], action='reconnect-j7-data', serial=self.args.serial)
+            wait_for(self.usb_present, bool, 60, 'J7 re-enumeration not observed')
+        try:
+            if not self.web.read(page, '#btn-probe-disconnect')['disabled']:
+                self.disconnect_topbar(page)
+            return self.probe_identity()
+        finally:
+            if page == 'rttcdc':
+                self.invoke('rttcdc', 'close', target='session')
+
+    def stress(self, folder):
+        rows = []
+        failures = []
+        pending = []
+        pages = {'rtt-viewer': 'rtt', 'rtt-forward': 'rttcdc', 'jscope': 'scope', 'debug': 'dbg'}
+        for index, action in enumerate(self.case['actions'], 1):
+            business, ending = action['business'], action['ending']
+            page = pages[business]
+            row = dict(action, status='pass')
+            rows.append(row)
+            began = time.monotonic()
+            try:
+                with self.stress_business(business, folder / f'{index:02d}-initial') as initial:
+                    row['initial'] = initial
+                    if ending in ('switch', 'idle-disconnect'):
+                        if ending == 'idle-disconnect':
+                            # Establish explicit top-bar ownership first so the
+                            # idle-disconnect path actually exercises the button.
+                            self.click(page, '#btn-probe-connect')
+                            wait_for(lambda: self.web.read(page, '#btn-probe-connect'),
+                                     lambda x: not x['disabled'], 8, 'Top-bar connect did not complete')
+                        row['stop'] = self.stop_stress_business(business)
+                    if ending in ('idle-disconnect', 'active-disconnect'):
+                        self.disconnect_topbar(page)
+                        if ending == 'active-disconnect' and business == 'jscope':
+                            capture_quality(self.invoke('scope', 'summary'))
+                    if ending == 'usb-disconnect':
+                        row['enumeratedAfter'] = self.usb_cycle(page)
+                if ending != 'switch':
+                    reconnect = time.monotonic()
+                    with self.stress_business(business, folder / f'{index:02d}-reconnected') as state:
+                        row['reconnected'] = state
+                        row['reconnectSeconds'] = time.monotonic() - reconnect
+                        self.stop_stress_business(business)
+                elif index < len(self.case['actions']):
+                    self.web.page(pages[self.case['actions'][index]['business']], 'show')
+            except Pending as error:
+                row.update(status='pending', reason=str(error))
+                pending.append(str(error))
+            except Unsafe as error:
+                row.update(status='fail', error=str(error))
+                raise
+            except Exception as error:
+                row.update(status='fail', error=str(error))
+                failures.append(str(error))
+            finally:
+                row['seconds'] = time.monotonic() - began
+                write_json(folder / 'stress.json', rows)
+                self.report.event('stress-step', id=self.case['id'], step=index, **row)
+            try:
+                self.check_idle()
+            except Exception as error:
+                raise Unsafe(f'Stress {business} recovery unconfirmed: {error}') from error
+        if failures:
+            raise RuntimeError(f'{len(failures)} stress action(s) failed: {failures[0]}')
+        if pending:
+            raise Pending(f'{len(pending)} stress action(s) pending: {pending[0]}')
+        return {'actions': rows}

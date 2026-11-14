@@ -20,9 +20,11 @@ import hid
 
 
 class Probe:
-    def __init__(self, serial=None):
+    def __init__(self, serial=None, *, zynq_only=False):
         matches = [d for d in hid.enumerate(0x0D28, 0x0204)
-                   if d['usage_page'] == 0xFF00 and (not serial or d['serial_number'] == serial)]
+                   if d['usage_page'] == 0xFF00 and (not serial or d['serial_number'] == serial)
+                   and (not zynq_only or d['manufacturer_string'] == 'CherryUSB'
+                        and d['product_string'] in ('zynqlinkPRO HID', 'CMSIS-DAP'))]
         if len(matches) != 1:
             raise RuntimeError(f'Expected one probe HID, found {len(matches)}; use --serial')
         self.device = hid.device()

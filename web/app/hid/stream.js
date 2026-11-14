@@ -248,12 +248,13 @@ export class RttCdcStreamView {
 
   // ---------------- 保存 / 记录 ----------------
   /** Finite CLI recording independent of the 2 MiB display history. */
-  async captureWindow({seconds=1,maxMiB=32}={}){
+  async captureWindow({seconds=1,maxMiB=32,reportProgress=false}={}){
     if(!this.s.isOpen)throw Error('先连接接收串口');
     if(this._windowRecording)throw Error('已有窗口记录正在进行');
     if(!Number.isFinite(seconds)||seconds<.1||seconds>30||!Number.isInteger(maxMiB)||maxMiB<1||maxMiB>64)
       throw Error('记录窗口须为0.1..30秒，缓存须为1..64MiB');
     this._windowRecording=true;
+    this._windowProgress=reportProgress?{bytes:0}:null;
     const chunks=[],limit=maxMiB*1024*1024,started=performance.now();
     let bytes=0,observedBytes=0,closed=false,error=null,firstDataAt=null,lastDataAt=null,firstChunkBytes=0;
     const offData=this.s.on('data',b=>{
@@ -261,17 +262,26 @@ export class RttCdcStreamView {
       observedBytes+=b.length;
       const take=Math.min(b.length,limit-bytes);
       if(take>0){chunks.push(b.slice(0,take));bytes+=take;}
+      if(this._windowProgress)this._windowProgress.bytes=bytes;
     });
     const offClose=this.s.on('close',()=>{closed=true;});
     const offError=this.s.on('error',e=>{error=e?.message||String(e);});
     try{await new Promise(resolve=>setTimeout(resolve,seconds*1000));}
-    finally{offData();offClose();offError();this._windowRecording=false;}
+    finally{offData();offClose();offError();this._windowRecording=false;this._windowProgress=null;}
     const elapsed=(performance.now()-started)/1000,name=`${this.owner}-raw-${fileStamp()}.bin`;
     download(name,new Blob(chunks,{type:'application/octet-stream'}));
     const activeSeconds=firstDataAt!==null&&lastDataAt>firstDataAt?(lastDataAt-firstDataAt)/1000:0;
     return {name,bytes,observedBytes,seconds:elapsed,activeSeconds,firstChunkBytes,
       activeBytesPerSecond:activeSeconds?(observedBytes-firstChunkBytes)/activeSeconds:0,complete:bytes>0&&observedBytes===bytes&&!closed&&!error,
       limitExceeded:observedBytes>bytes,portClosed:closed,error,bytesPerSecond:bytes/elapsed};
+  }
+
+  /** Export a finite, already buffered binary session through the CLI. */
+  saveRaw(){
+    if (this.rx.empty || this.rx.truncated) throw Error('原始缓冲为空或已截断');
+    const name = `${this.owner}-raw-${fileStamp()}.bin`;
+    download(name, new Blob(this.rx.raw.map(row => row.b), {type:'application/octet-stream'}));
+    return {name, bytes:this.rx.bytes};
   }
 
   save(){
@@ -413,6 +423,7 @@ export class RttCdcStreamView {
       recording: this.rec.active,
       recordBytes: this.rec.bytes,
       shown: this.$('c-rx').textContent.length,
+      ...(this._windowProgress && {captureWindow:{bytes:this._windowProgress.bytes}}),
     };
   }
 }

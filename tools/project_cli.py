@@ -33,6 +33,7 @@ ALIASES={
  'probe.flash':'tools/probe_flash.py','probe.ocm-verify':'tools/verify_probe_ocm_code.py',
  'bench.sram':'tools/benchmark_sram_matrix.py','bench.rtt':'tools/benchmark_rtt_forward.py',
  'bench.hss':'tools/benchmark_hss_matrix.py','bench.sota':'tools/run_sota_regression.py',
+ 'board.accept':'tools/run_board_acceptance.py',
  'hpm.web':'tools/validate_hpm6800_web.py','hpm.web-stress':'tools/stress_hpm6800_web.py',
  'hpm.usb-diagnose':'tools/diagnose_hpm6800_usb.py','hpm.usb-fixture':'tools/hpm6800_usb_fixture.py',
  'hpm.cdc-sequence':'tools/validate_hpm6800_cdc_sequence.py','usb.pcap-analyze':'tools/analyze_usbpcap_cdc.py',
