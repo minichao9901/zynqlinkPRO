@@ -53,6 +53,7 @@ export class VendorEpTransport {
     this.stalledInFlight = 0;     // 上一轮 stop() 里 800 ms 没等回来的在飞读笔数
     this.onError = null;          // 数据面不可恢复时的回调（由 start() 传入）
     this._fatal = null;
+    this.hostOverflow = false;
     this.chunks = 0; this.bytes = 0; this.errors = 0; this.lastError = null;
   }
 
@@ -237,6 +238,8 @@ export class VendorEpTransport {
     if (generation !== this.gen) return;
     this.running = true;
     this._fatal = null;
+    this.hostOverflow = false;
+    this.hostQueue = null;
     this.onError = typeof onError === 'function' ? onError : null;
     this.gen++;                                   // 新一轮的代号：上一轮没收干净的 worker 靠它作废
     this.chunks = 0; this.bytes = 0; this.errors = 0;
@@ -254,9 +257,10 @@ export class VendorEpTransport {
   }
 
   /** 数据面出事 → 停掉整条流，并把原因交给页面（只报一次：N 条 worker 会同时撞上）*/
-  _fail(why){
+  _fail(why, code){
     if (this._fatal) return;
     this._fatal = why;
+    this.hostOverflow = code === 'HSS_HOST_OVERFLOW';
     this.errors++; this.lastError = why;
     this.running = false;
     try { this.onError?.(new Error(why)); } catch { /* 页面自己出错不该拖垮这里 */ }
@@ -292,11 +296,12 @@ export class VendorEpTransport {
         /* 读抛异常（USB 抖动、探针复位）以前是直接 break —— 几条 worker 全退出后数据面就停了，
          * 而 `running` 还是 true、页面还显示"采样中"（2026-10 代码审查）。现在上报并整体停下。 */
         if (this.running && g === this.gen){
-          this._fail('数据流中断：' + (e?.message || String(e)) + '（探针掉线了？拔插一次，或改用假探针）');
+          this._fail('数据流中断：' + (e?.message || String(e)), e?.code);
         }
         break;
       }
       if ((!this.running && !this._draining) || g !== this.gen) break;
+      if (r.hssQueue) this.hostQueue = r.hssQueue;
       if (r.status === 'ok' && r.data?.byteLength){
         stalls = 0;
         this.chunks++; this.bytes += r.data.byteLength;
@@ -361,6 +366,12 @@ export class VendorEpTransport {
     this.gen++;
     if (!await this._retireReads()) throw Error('完整采样已接收，但采样端点仍被共享');
     this.workers = [];
+  }
+
+  async drainOverflow(){
+    if (!this.hostOverflow || this.epAddr !== 0x87 || !this.device.drainHssOverflow)
+      throw Error('无法确认 HSS 溢出恢复');
+    await this.device.drainHssOverflow();
   }
 
   async quiesce(timeoutMs){

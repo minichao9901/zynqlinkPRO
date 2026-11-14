@@ -866,7 +866,10 @@ export class ScopeView {
     }}
     catch (e) { failure = e; }
     try { if(drainBeforeQuiesce){
-      if (counted && !failure){
+      if (this.transport.hostOverflow && !failure){
+        await this.transport.drainOverflow();
+        this.metricsError = this.transport.lastError;
+      } else if (counted && !failure){
         const final = await this.readScopeMetrics({fresh:true});
         if (!final || (final.flags & 0x100) || !final.bytes || final.bytes % P.PACKET)
           throw Error('探针未返回有效的停止计数');
@@ -1231,7 +1234,8 @@ export class ScopeView {
     this._capturing=false;this._drainGen=null;
     if(this.transport?.epAddr===0x87 && this.probeMetrics && !(this._captureFlags & P.SCOPE_FLAG.DISCARD)){
       this.tailCountDelta=(this.receivedSamples || 0)-this.probeMetrics.produced;
-      if(this.tailCountDelta!==0)this.metricsError=`样本未完整接收：收到 ${this.receivedSamples || 0}，探针 ${this.probeMetrics.produced}`;
+      if(this.tailCountDelta!==0 && !this.metricsError)
+        this.metricsError=`样本未完整接收：收到 ${this.receivedSamples || 0}，探针 ${this.probeMetrics.produced}`;
     }
     const st = this.store;
     const spanUs = st?.count > 1 ? st.timeAt(st.count - 1) - st.timeAt(0) : 0;
@@ -2146,7 +2150,8 @@ export class ScopeView {
       captureFlags: this._captureFlags || 0,
       supportsMetrics: !!this.supportsMetrics,
       probeMetrics: this.probeMetrics || null,
-      transport: this.transport ? {running:this.transport.running,chunks:this.transport.chunks,bytes:this.transport.bytes,errors:this.transport.errors,lastError:this.transport.lastError} : null,
+      transport: this.transport ? {running:this.transport.running,chunks:this.transport.chunks,bytes:this.transport.bytes,
+        errors:this.transport.errors,lastError:this.transport.lastError,hostQueue:this.transport.hostQueue ?? null} : null,
       raw: this.raw.length,
       running: this.running,
       mockVars: this.mockVars().map(v => v.name),

@@ -152,9 +152,19 @@ class NativeUsbDevice extends EventTarget{
       if(epoch!==this.resourceEpoch)throw Error('USB会话已重新打开；旧读回包已丢弃');
       if(pending)this.commandPending--;
       if(pending&&result.timedOut)throw Error('本地DAP响应超时；未重放命令');
-      const bytes=decoded(result.data);return {status:'ok',data:new DataView(bytes.buffer)};
+      if(result.hssOverflow)throw Object.assign(Error(result.hssOverflow),{code:'HSS_HOST_OVERFLOW'});
+      const bytes=decoded(result.data);
+      return {status:'ok',data:new DataView(bytes.buffer),hssQueue:result.hssQueue};
     });
     this.reads.set(endpoint,next);return next;
+  }
+  async drainHssOverflow(){
+    const previous=this.reads.get(7);
+    if(previous)await previous.catch(()=>{});
+    const epoch=this.resourceEpoch;
+    const result=await this.rpc('read',{endpoint:0x87,length:512,discardOverflow:true});
+    if(epoch!==this.resourceEpoch||result.discardedOverflow!==true)
+      throw Error('HSS 溢出后的 USB 空闲未确认');
   }
 }
 

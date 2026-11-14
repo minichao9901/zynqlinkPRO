@@ -7,7 +7,7 @@ from pathlib import Path
 import usb.core
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[2]/'etm-service/tools'))
-from native_hss import HssReceiver
+from native_hss import HssOverflow, HssReceiver
 
 class Device:
     def __init__(self):self.input=queue.Queue()
@@ -40,7 +40,19 @@ class HssReceiverTests(unittest.TestCase):
     def test_overflow_is_explicit_and_never_a_truncated_success(self):
         device=Device();receiver=HssReceiver(device,capacity=512);self.addCleanup(receiver.close)
         device.input.put(b'a'*1024)
-        with self.assertRaisesRegex(RuntimeError,'队列溢出'):receiver.read(65536)
+        with self.assertRaisesRegex(HssOverflow,'队列溢出'):
+            receiver.read(65536)
+        device.input.put(b't'*512)
+        self.assertEqual(receiver.read(512,discard=True),b'')
+        self.assertEqual((receiver.received,receiver.returned,receiver.queued),(1536,0,0))
+        with self.assertRaises(HssOverflow):
+            receiver.read(512)
+
+    def test_recovery_path_refuses_to_discard_a_healthy_stream(self):
+        receiver=HssReceiver(Device())
+        self.addCleanup(receiver.close)
+        with self.assertRaisesRegex(RuntimeError,'未报告溢出'):
+            receiver.read(512,discard=True)
 
     def test_closed_receiver_cannot_be_reused(self):
         receiver=HssReceiver(Device());receiver.close()

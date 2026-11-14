@@ -15,7 +15,7 @@ import time
 from pathlib import Path
 from flask import abort, jsonify, request
 from native_serial import SerialReceiver
-from native_hss import HssReceiver
+from native_hss import HssOverflow, HssReceiver
 from probe_coordinator import ProbeCoordinator
 from probe_memory import transfer as memory_transfer
 from probe_ownership import Ownership
@@ -450,8 +450,17 @@ class NativeProbe:
                     read_length = length // 512 * 512
                     if read_length:
                         if self.hss_receiver is None:self.hss_receiver=HssReceiver(device)
-                        data.extend(self.hss_receiver.read(read_length))
-                return {'data': self.encode(data), 'timedOut': not data}
+                        if value.get('discardOverflow') is True:
+                            self.hss_receiver.read(read_length,discard=True)
+                            return {'data':'', 'timedOut':True, 'discardedOverflow':True}
+                        try:
+                            data.extend(self.hss_receiver.read(read_length))
+                        except HssOverflow as error:
+                            return {'data':'', 'timedOut':False, 'hssOverflow':str(error)}
+                result = {'data': self.encode(data), 'timedOut': not data}
+                if ep == 0x87 and self.hss_receiver is not None:
+                    result['hssQueue'] = self.hss_receiver.queue_metrics()
+                return result
             raise ValueError('未知USB动作')
 
     def hid_call(self, action, value):

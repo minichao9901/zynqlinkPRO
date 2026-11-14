@@ -50,18 +50,35 @@ class NativeProbeTests(unittest.TestCase):
         import base64
         proxy,device=self._hss_proxy()
         receiver=Mock();receiver.read.return_value=bytes(range(256))*6
+        receiver.queue_metrics.return_value={'highWaterBytes':1536,'capacityBytes':16777216}
         proxy.hss_receiver=receiver
         result=proxy.usb_call('read',dict(owner='a'*32,resourceEpoch='epoch',endpoint=0x87,length=65536))
         self.assertEqual(base64.b64decode(result['data']),bytes(range(256))*6)
         self.assertFalse(result['timedOut'])
+        self.assertEqual(result['hssQueue']['highWaterBytes'],1536)
         receiver.read.assert_called_once_with(65536)
 
     def test_hss_empty_timeout_is_an_empty_completion_for_confirmed_drain(self):
         import usb.core
         proxy,device=self._hss_proxy()
         receiver=Mock();receiver.read.return_value=b'';proxy.hss_receiver=receiver
+        receiver.queue_metrics.return_value={'highWaterBytes':0,'capacityBytes':16777216}
         proxy.usb=device;proxy.usb_owner='a'*32;proxy.usb_epoch='epoch';proxy.claimed={0}
-        self.assertEqual(proxy.usb_call('read',dict(owner='a'*32,resourceEpoch='epoch',endpoint=0x87,length=65536)),{'data':'','timedOut':True})
+        self.assertEqual(proxy.usb_call('read',dict(owner='a'*32,resourceEpoch='epoch',endpoint=0x87,length=65536)),
+                         {'data':'','timedOut':True,'hssQueue':receiver.queue_metrics.return_value})
+
+    def test_hss_overflow_keeps_failed_data_separate_from_quiet_recovery(self):
+        from native_hss import HssOverflow
+        proxy,_=self._hss_proxy()
+        receiver=Mock()
+        receiver.read.side_effect=[HssOverflow('overflow'),b'']
+        proxy.hss_receiver=receiver
+        request=dict(owner='a'*32,resourceEpoch='epoch',endpoint=0x87,length=512)
+        failed=proxy.usb_call('read',request)
+        self.assertEqual(failed,{'data':'','timedOut':False,'hssOverflow':'overflow'})
+        drained=proxy.usb_call('read',dict(request,discardOverflow=True))
+        self.assertEqual(drained,{'data':'','timedOut':True,'discardedOverflow':True})
+        receiver.read.assert_called_with(512,discard=True)
 
     def test_hss_receiver_is_stopped_before_usb_release(self):
         proxy,device=self._hss_proxy();receiver=Mock();proxy.hss_receiver=receiver

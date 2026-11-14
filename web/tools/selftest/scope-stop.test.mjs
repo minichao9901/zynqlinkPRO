@@ -20,3 +20,21 @@ test('a negative STOP reply cannot claim a successful hardware release',async()=
   const {p,calls}=rig([252]);await assert.rejects(p._stopData(),/无法确认采样已停止/);
   assert.equal(p._stopUnconfirmed,true);assert.ok(calls.includes('failed'));assert.ok(!calls.includes('confirmed'));
 });
+test('host overflow keeps the failure visible and confirms STOP only after quiet discard',async()=>{
+  const {p,calls}=rig([249,0]);
+  p.transport.hostOverflow=true;
+  p.transport.lastError='本机HSS接收队列溢出';
+  p.transport.drainOverflow=async()=>calls.push('overflow USB quiet');
+  await p._stopData();
+  assert.deepEqual(calls,['STOP','STOP','overflow USB quiet','retire','confirmed']);
+  assert.equal(p.metricsError,'本机HSS接收队列溢出');
+  assert.equal(p._stopUnconfirmed,false);
+});
+test('failed overflow drain retains the hardware recovery requirement',async()=>{
+  const {p,calls}=rig([0]);
+  p.transport.hostOverflow=true;
+  p.transport.drainOverflow=async()=>{throw Error('USB still active');};
+  await assert.rejects(p._stopData(),/USB still active/);
+  assert.equal(p._stopUnconfirmed,true);
+  assert.ok(!calls.includes('confirmed'));
+});
