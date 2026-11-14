@@ -17,6 +17,7 @@ import { RxBuffer } from '../core/rxview.js';
 import { Counter } from '../core/stats.js';
 import { FileRecorder, recordButtonState } from '../core/recorder.js';
 import { SerialSession } from '../serial/session.js';
+import { isProbeCdcPort } from '../core/cdc-mode.js';
 import { DemoPort, demoEnabled } from '../serial/demo.js';
 import { bytes as fBytes, rate as fRate, fileStamp, download, stamp as stampOf } from '../core/format.js';
 import { AnsiDisplay, BurstGuard, terminalBytes } from '../core/display-stream.js';
@@ -196,6 +197,8 @@ export class RttCdcStreamView {
       await this.s.open(port, {
         baudRate: Number(this.$('c-baud').value) || 115200,
         dataBits: 8, stopBits: 1, parity: 'none', flowControl: 'none',
+        // The probe enables CDC streaming when either control signal is set.
+        rts: isProbeCdcPort(port) && this.owner === 'rtt',
         owner: this.owner,                // 见 session.open 的说明：只对发起方弹提示/起自动记录
       });
     } catch (e){ setStatus(this.$('c-err'), String(e?.message || e), 'err'); }
