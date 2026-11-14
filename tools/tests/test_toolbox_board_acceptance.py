@@ -2,10 +2,14 @@ import contextlib
 import io
 import json
 from pathlib import Path
+import re
 import struct
+import subprocess
+import sys
 import tempfile
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
+from types import SimpleNamespace
 
 from tools.run_board_acceptance import (BOARDS, BUSINESSES, ENDINGS, FEATURES, Pending,
                                         Report, Unsafe, campaign, plan, review, rotation)
@@ -90,14 +94,18 @@ class TestBoardAcceptance(unittest.TestCase):
 
     def test_offline_review_combines_distinct_boards_and_supplemental_etm(self):
         with tempfile.TemporaryDirectory() as temp:
-            def evidence(board, only, serial='12345678', suffix=''):
+            def evidence(board, only, serial='12345678', suffix='', target='application',
+                         etm='trace-application', actual=None, time='00'):
                 cases = plan(board, None, only, 7)
-                files = {name: {'sha256': name} for name in ('bit', 'zynqElf', 'targetElf')}
+                files = {'bit': {'sha256': 'bit'}, 'zynqElf': {'sha256': 'ps'},
+                         'targetElf': {'sha256': target}, 'etmElf': {'sha256': etm}}
                 path = Path(temp) / (board + suffix + '.json')
-                records = [dict(case, status='not-applicable' if 'notApplicable' in case else 'pass')
+                records = [dict(case, status='not-applicable' if 'notApplicable' in case else 'pass',
+                                evidence={'targetElf': {'sha256': actual or (etm if case['feature'] == 'etm' else target),
+                                                        'verifiedLoadBytes': 16}})
                            for case in cases]
                 path.write_text(json.dumps(dict(board=board, revision='abc', probeSerial=serial, files=files,
-                    seed=7, finishedAt='2026-11-14T10:00:00+00:00', status='pass', plan=cases,
+                    seed=7, finishedAt=f'2026-11-14T10:00:{time}+00:00', status='pass', plan=cases,
                     results=[{'id': 'preflight', 'status': 'pass'}, *records,
                              {'id': 'final-state', 'status': 'pass'}])), encoding='utf-8')
                 return path
@@ -106,8 +114,20 @@ class TestBoardAcceptance(unittest.TestCase):
             h7 = evidence('h743', set(FEATURES)-{'etm'})
             hpm = evidence('hpm6800evk', FEATURES)
             self.assertEqual(review([first, h7, hpm])['status'], 'incomplete')
-            etm = evidence('h743', {'etm'}, suffix='-etm')
+            etm = evidence('h743', {'etm'}, suffix='-etm', target='trace-application')
             self.assertTrue(review([first, h7, hpm, etm])['accepted'])
+            conflict = evidence('f103ze', {'debug'}, suffix='-conflict', target='other-application', time='01')
+            with self.assertRaisesRegex(ValueError, 'Conflicting targetElf'):
+                review([first, h7, hpm, etm, conflict])
+            full_retest = evidence('f103ze', FEATURES, suffix='-retest', target='new-application', time='01')
+            self.assertTrue(review([first, h7, hpm, etm, full_retest])['accepted'])
+            wrong_etm = evidence('h743', {'etm'}, suffix='-wrong', actual='other-elf')
+            with self.assertRaisesRegex(ValueError, 'mismatched actual target ELF'):
+                review([first, h7, hpm, wrong_etm])
+            other_etm = evidence('h743', {'etm'}, suffix='-alternate', etm='other-elf', time='01')
+            result = review([first, h7, hpm, etm, other_etm])
+            trace = next(row for row in result['boards']['h743'] if row['id'] == 'etm')
+            self.assertEqual(trace['targetElfSha256'], 'other-elf')
             different_probe = evidence('h743', {'etm'}, serial='other', suffix='-other')
             with self.assertRaisesRegex(ValueError, 'one clean source'):
                 review([first, different_probe])
@@ -132,7 +152,6 @@ class TestBoardAcceptance(unittest.TestCase):
             jsp_data(definition + data, 0xf0404800, 1, 25_000_000)
 
     def test_unknown_browser_write_blocks_further_commands(self):
-        from types import SimpleNamespace
         from tools.board_acceptance import AcceptanceWeb
         web = AcceptanceWeb.__new__(AcceptanceWeb)
         web.target = SimpleNamespace(uncertain=None)
@@ -143,6 +162,170 @@ class TestBoardAcceptance(unittest.TestCase):
             with self.assertRaises(Unsafe):
                 web.call({'action': 'write'})
             request.assert_called_once()
+
+    @staticmethod
+    def driver(board='f103ze'):
+        from tools.board_acceptance import BoardAcceptance
+        return BoardAcceptance(SimpleNamespace(board=board, serial='12345678'), None)
+
+    def test_web_rtt_clock_matches_actual_browser_options_for_all_boards(self):
+        from tools.run_board_acceptance import ROOT
+        source = (ROOT / 'web/app/hid/view.js').read_text(encoding='utf-8')
+        values = set(re.findall(r"\bv: '(\d+)'", source.split('const hex')[0]))
+        for board, (hz, _, _) in BOARDS.items():
+            driver = self.driver(board)
+            driver.case = {'requestedHz': hz}
+            driver.web = Mock()
+            driver.port = Mock(return_value='COM5')
+            driver.invoke = Mock(return_value={'open': True, 'connected': True, 'bytes': 16})
+            driver.web.read.return_value = {'options': [{'label': 'CMSIS-DAP (COM5)', 'value': 'j7'}]}
+            self.assertEqual(driver.cdc_start(), 'COM5')
+            [setting] = [call.args[2] for call in driver.web.set.call_args_list if call.args[1] == '#h-clock']
+            self.assertIn(setting, values)
+            self.assertEqual(int(setting), hz)
+
+    def test_aborted_flash_proves_backup_before_preserving_original_error(self):
+        driver = self.driver()
+        driver.check_idle = Mock()
+        with tempfile.TemporaryDirectory() as temp:
+            folder = Path(temp)
+            for values, needs_rewrite in [([True], False), ([False, True], True)]:
+                matches = Mock(side_effect=values)
+                restore = Mock()
+                with self.assertRaises(KeyboardInterrupt):
+                    with driver.flash_recovery(folder, folder / 'private.bin', matches, restore):
+                        raise KeyboardInterrupt
+                evidence = json.loads((folder / 'flash-recovery.json').read_text())
+                self.assertTrue(evidence['verified'])
+                self.assertEqual(restore.call_count, int(needs_rewrite))
+                self.assertIsNone(driver.target.uncertain)
+
+    def test_failed_or_uncertain_flash_recovery_cannot_resume_target(self):
+        with tempfile.TemporaryDirectory() as temp:
+            folder = Path(temp)
+            for failure, checks, rewrites in [(KeyboardInterrupt(), 2, 1), (Unsafe('busy'), 0, 0)]:
+                driver = self.driver()
+                driver.check_idle = Mock()
+                matches = Mock(return_value=False)
+                restore = Mock()
+                with self.assertRaises(Unsafe):
+                    with driver.flash_recovery(folder, folder / 'private.bin', matches, restore):
+                        raise failure
+                evidence = json.loads((folder / 'flash-recovery.json').read_text())
+                self.assertFalse(evidence['verified'])
+                self.assertEqual((matches.call_count, restore.call_count), (checks, rewrites))
+                # All outer fixture exits use the same native link guard.
+                with self.assertRaises(Unsafe), driver.target.link():
+                    self.fail('target link allowed restoration/resume')
+
+    def test_native_writer_must_reap_before_recovery(self):
+        driver = self.driver()
+        child = Mock()
+        child.poll.return_value = None
+        child.wait.side_effect = subprocess.TimeoutExpired('fake-openocd', 10)
+        with self.assertRaises(Unsafe):
+            driver.stop_flash_writer(child)
+        self.assertEqual([call[0] for call in child.method_calls], ['poll', 'kill', 'wait'])
+        self.assertIn('writer exit unconfirmed', driver.target.uncertain)
+
+    def test_native_writer_is_reaped_on_startup_interrupt(self):
+        driver = self.driver()
+        probe = SimpleNamespace(manufacturer='CherryUSB', product='CMSIS-DAP')
+        child = Mock(stdout=io.BytesIO())
+        child.poll.side_effect = [None, 1]
+        with tempfile.TemporaryDirectory() as temp:
+            folder = Path(temp)
+            with patch('usb.core.find', return_value=[probe]), \
+                 patch('libusb_package.get_libusb1_backend'), \
+                 patch('subprocess.Popen', return_value=child), \
+                 patch('threading.Thread.start', side_effect=KeyboardInterrupt):
+                with self.assertRaises(KeyboardInterrupt):
+                    driver.native_flash('openocd', folder, folder / 'board.cfg', folder / 'private.bin',
+                                        0x08000000, folder / 'writer.log', geometry=(0x08000000, 0x08000800, 0x800))
+        child.kill.assert_called_once()
+        child.wait.assert_called_once_with(timeout=10)
+
+    def test_flash_geometry_parser_uses_actual_erase_sectors(self):
+        from tools.board_acceptance import read_flash_sectors
+        text = ('#0 : flash (stm32f1x) at 0x08000000, size 0x00080000, buswidth 0\n'
+                '  #  0: 0x00000000 (0x800 2kB)\n'
+                '  #  1: 0x00000800 (0x800 2kB)\n'
+                '#1 : flash (stm32h7x) at 0x08100000, size 0x00100000\n'
+                '  #  0: 0x00000000 (0x20000 128kB)\n')
+        self.assertEqual(read_flash_sectors(text), [(0x08000000, 0x800), (0x08000800, 0x800), (0x08100000, 0x20000)])
+
+    def test_target_identity_checks_non_executable_load_segments(self):
+        from tools.run_board_acceptance import ROOT, digest
+        from tools.board_acceptance_target import elf_contents
+        driver = self.driver()
+        elf = ROOT / BOARDS['f103ze'][2]
+        expected = digest(elf)
+        _, segments = elf_contents(elf)
+        contents = {(at, len(data)): data for at, data, _ in segments}
+        memory = SimpleNamespace(read=lambda at, count: contents[at, count])
+        self.assertGreater(driver.verify_target_image(memory, elf, expected)['verifiedLoadBytes'], 0)
+        at, original, _ = next(row for row in segments if not row[2] & 1)
+        contents[at, len(original)] = bytes([original[0] ^ 1]) + original[1:]
+        with self.assertRaises(Pending):
+            driver.verify_target_image(memory, elf, expected)
+
+    def test_live_debug_keeps_application_progress_without_ram_restore_claim(self):
+        driver = self.driver()
+        target = driver.target
+        state = {'halted': False, 'pc': 0x100}
+        target.link = lambda: contextlib.nullcontext((None, object(), None, {}))
+        target.state = Mock(side_effect=lambda *_: state.copy())
+        target.halt = Mock()
+        target.fpb_snapshot = Mock(return_value=b'\0' * 12)
+        target.fpb_restore = Mock()
+        target.restore_state = Mock(side_effect=lambda _, __, saved: dict(state, halted=saved['halted']))
+        target.restore_registers = Mock()
+        with tempfile.TemporaryDirectory() as temp:
+            folder = Path(temp) / 'debug'
+            with target.live_debug(folder, Mock()):
+                state['pc'] = 0x104
+            evidence = json.loads((folder / 'restored.json').read_text())
+            self.assertEqual(evidence['state']['pc'], 0x104)
+            self.assertIsNone(evidence['ramRestored'])
+            self.assertIsNone(evidence['registersRestored'])
+            target.fpb_restore.assert_called_once()
+            target.restore_registers.assert_not_called()
+            target.state.return_value = None
+            state['halted'] = True
+            count = target.halt.call_count
+            with self.assertRaises(Pending), target.live_debug(Path(temp) / 'halted', Mock()):
+                self.fail('a paused application was modified')
+            self.assertEqual(target.halt.call_count, count)
+
+    def test_probe_identity_checks_live_profile_and_restores_usb_on_wrong_cable(self):
+        from tools.board_acceptance import J7_PL_REGISTERS, JTAG_TIMING
+        for same_board, matching_pl in [(True, True), (False, True), (True, False)]:
+            driver = self.driver()
+            driver.cable_serial = 'J7-cable'
+            physical_regs = dict(J7_PL_REGISTERS)
+            if not matching_pl:
+                physical_regs[J7_PL_REGISTERS[0][0]] ^= 1
+            usb_timing = [0]
+            driver.physical = SimpleNamespace(read_words=lambda address: [
+                (usb_timing[0] if same_board else 0) if address == JTAG_TIMING else physical_regs[address]])
+
+            def timing(_tx, _rx, command):
+                if command[1] != 255:
+                    usb_timing[0] = command[1]
+                return bytes([0x89, 0, usb_timing[0]]) + bytes(12)
+
+            fake_dap = SimpleNamespace(open_dap=Mock(return_value=(object(), None, None)),
+                                       drain=Mock(), xfer=timing)
+            with patch.dict(sys.modules, {'dap_pipeline_bench': fake_dap}), patch('usb.util.dispose_resources'):
+                if same_board and matching_pl:
+                    result = driver.verify_live_probe()
+                    self.assertEqual(result['cableSerial'], 'J7-cable')
+                    self.assertTrue(result['restored'])
+                else:
+                    with self.assertRaises(RuntimeError):
+                        driver.verify_live_probe()
+                self.assertEqual(usb_timing[0], 0)
+                self.assertEqual(fake_dap.open_dap.call_count, int(matching_pl))
 
 
 if __name__ == '__main__':

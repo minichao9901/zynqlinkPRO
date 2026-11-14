@@ -23,16 +23,21 @@ def sha(path):
 
 
 class Session:
-    def __init__(self, out, sdk, url):
+    def __init__(self, out, sdk, url, *, cable_serial=None):
         self.out, self.sdk, self.url = out, sdk, url
         self.index = 0
+        if cable_serial is not None and not re.fullmatch(r'[A-Za-z0-9_.:-]+', cable_serial):
+            raise ValueError('Invalid XSCT JTAG cable serial')
+        self.cpu_filter = 'name =~ "ARM Cortex-A9 MPCore #0*"'
+        if cable_serial is not None:
+            self.cpu_filter += f' && jtag_cable_serial == "{cable_serial}"'
 
     def run(self, body):
         self.index += 1
         script = self.out/f'{self.index:03d}.tcl'
         script.write_text('connect -url {'+self.url+'}\nset selected 0\n'
             'for {set n 0} {$n < 50} {incr n} {\n'
-            ' if {![catch {targets -set -filter {name =~ "ARM Cortex-A9 MPCore #0*"}} why]} {set selected 1;break}\n'
+            ' if {![catch {targets -set -filter {'+self.cpu_filter+'}} why]} {set selected 1;break}\n'
             ' after 100\n}\nif {!$selected} {error $why}\n'+body+'\ndisconnect\nexit\n')
         result = subprocess.run([sys.executable, str(ROOT/'tools/run_xsct.py'), str(script), '--sdk', str(self.sdk)],
             capture_output=True, text=True, errors='replace', timeout=1200)

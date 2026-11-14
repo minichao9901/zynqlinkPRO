@@ -8,13 +8,20 @@ import re
 
 
 class PhysicalMemory:
-    def __init__(self,session):self.session=session
+    def __init__(self,session,*,cable_serial=None):
+        self.session=session
+        if cable_serial is not None and not re.fullmatch(r'[A-Za-z0-9_.:-]+', cable_serial):
+            raise ValueError('Invalid XSCT JTAG cable serial')
+        self.cable_serial=cable_serial
 
     def run(self,body):
         # Installed SDK 2018.3 xsdb.tcl documents AP<n> address spaces and
         # requires selecting APU. Do not inject CPU loads or flush dirty CPU
         # cache lines over newly written DMA data during an MMIO command.
-        return self.session.run('''targets -set -filter {name =~ "APU"}
+        selection='name =~ "APU"'
+        if self.cable_serial is not None:
+            selection+=f' && jtag_cable_serial == "{self.cable_serial}"'
+        return self.session.run('targets -set -filter {'+selection+'}\n'+'''
 proc physrd {args} {return [mrd -address-space AP0 {*}$args]}
 proc physwr {args} {return [mwr -address-space AP0 -bypass-cache-sync {*}$args]}
 '''+body)

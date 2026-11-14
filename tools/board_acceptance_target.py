@@ -144,6 +144,12 @@ class Target:
             wait_for(lambda: mem.word(DHCSR), lambda status: status & (1 << 17), 2, 'Halt not confirmed')
 
     def restore_state(self, mem, target, saved):
+        from target_snapshot import same_clock_configuration
+        current = self.state(mem, target)
+        checked((current['clock'] == saved['clock'] if self.rv else
+                 same_clock_configuration(saved['clock'], current['clock'])), 'Target clocks changed')
+        if not self.rv:
+            checked(current['ccr'] == saved['ccr'], 'Target cache control changed')
         if self.rv:
             if saved['halted']:
                 target.halt()
@@ -153,11 +159,6 @@ class Target:
             mem.write_word(DHCSR, 0xa05f0000 | (saved['dhcsr'] & 0x2f))
         current = self.state(mem, target)
         checked(current['halted'] == saved['halted'], 'Original run/halt state was not restored')
-        from target_snapshot import same_clock_configuration
-        checked((current['clock'] == saved['clock'] if self.rv else
-                 same_clock_configuration(saved['clock'], current['clock'])), 'Target clocks changed')
-        if not self.rv:
-            checked(current['ccr'] == saved['ccr'], 'Target cache control changed')
         return current
 
     def registers(self, mem, target):
@@ -195,25 +196,93 @@ class Target:
             mem.write_word(FPB, 2 | (before[0] & 1))
         checked(mem.read(FPB, len(before)) == before, 'FPB comparator/control restore failed')
 
-    def reject_debug_breakpoints(self, mem, target):
-        if self.rv:
-            saved = target.register(0x7a0)
+    def trigger_snapshot(self, target):
+        selected = target.register(0x7a0)
+        slots = []
+        try:
+            for index in range(16):
+                target.register(0x7a0, index)
+                if target.register(0x7a0) != index:
+                    break
+                slots.append((target.register(0x7a1), target.register(0x7a2)))
+            else:
+                raise Pending('RISC-V trigger inventory exceeds the qualified range')
+        finally:
             try:
-                for index in range(16):
-                    target.register(0x7a0, index)
-                    if target.register(0x7a0) != index:
-                        break
-                    value = target.register(0x7a1)
-                    if value >> 28 in (2, 6) and value & 7:
-                        raise Pending('An existing RISC-V address trigger is active')
-            finally:
-                target.register(0x7a0, saved)
-                if target.register(0x7a0) != saved:
-                    raise Unsafe('RISC-V tselect restore was not confirmed')
-        else:
-            fpb = self.fpb_snapshot(mem)
-            if any(item[0] & 1 for item in struct.iter_unpack('<I', fpb[8:])):
-                raise Pending('An existing FPB breakpoint is configured')
+                self.select_trigger(target, selected)
+            except (Exception, KeyboardInterrupt) as error:
+                self.uncertain = f'RISC-V tselect restoration unconfirmed: {error!r}'
+                raise Unsafe(self.uncertain) from error
+        return selected, slots
+
+    @staticmethod
+    def select_trigger(target, selected):
+        target.register(0x7a0, selected)
+        checked(target.register(0x7a0) == selected, 'RISC-V tselect restore was not confirmed')
+
+    def restore_triggers(self, target, before):
+        selected, slots = before
+        _, current = self.trigger_snapshot(target)
+        try:
+            for index, ((control, address), now) in enumerate(zip(slots, current, strict=True)):
+                if (control, address) == now:
+                    continue
+                # Only an inactive address-match trigger is in this fixture's
+                # write set. Keep it disabled while restoring its address.
+                checked(control >> 28 in (2, 6) and not control & 7, 'Unexpected RISC-V trigger change')
+                self.select_trigger(target, index)
+                target.register(0x7a1, control)
+                checked(target.register(0x7a1) == control, 'RISC-V trigger disable unconfirmed')
+                target.register(0x7a2, address)
+        finally:
+            self.select_trigger(target, selected)
+        checked(self.trigger_snapshot(target) == before, 'RISC-V trigger restore failed')
+
+    @contextmanager
+    def live_debug(self, folder, before_restore):
+        """Keep the application's advanced PC, stack and RAM coherent."""
+        folder.mkdir()
+        saved = breakpoint_state = None
+        halt_attempted = False
+        try:
+            with self.link() as (_, mem, target, _):
+                saved = self.state(mem, target)
+                if saved['halted']:
+                    raise Pending('Live debug requires an initially running application')
+                halt_attempted = True
+                self.halt(mem, target)
+                if self.rv:
+                    snapshot = self.trigger_snapshot(target)
+                    if any(control >> 28 not in (0, 2, 6, 15) or
+                           control >> 28 in (2, 6) and control & 7 for control, _ in snapshot[1]):
+                        raise Pending('An existing or unsupported RISC-V trigger is configured')
+                    breakpoint_state = snapshot
+                else:
+                    snapshot = self.fpb_snapshot(mem)
+                    if any(item[0] & 1 for item in struct.iter_unpack('<I', snapshot[8:])):
+                        raise Pending('An existing FPB breakpoint is configured')
+                    breakpoint_state = snapshot
+            write_json(folder / 'before.json', dict(state=saved,
+                breakpoints=breakpoint_state if self.rv else breakpoint_state.hex()))
+            yield
+        finally:
+            if halt_attempted:
+                try:
+                    before_restore()
+                    with self.link() as (_, mem, target, _):
+                        self.halt(mem, target)
+                        if breakpoint_state is not None:
+                            if self.rv:
+                                self.restore_triggers(target, breakpoint_state)
+                            else:
+                                self.fpb_restore(mem, breakpoint_state)
+                        after = self.restore_state(mem, target, saved)
+                    write_json(folder / 'restored.json', dict(state=after, runStateRestored=True,
+                        breakpointsRestored=breakpoint_state is not None, ramRestored=None,
+                        registersRestored=None, applicationProgressPreserved=True))
+                except (Exception, KeyboardInterrupt) as error:
+                    self.uncertain = f'Live debug restoration unconfirmed at {folder}: {error!r}'
+                    raise Unsafe(self.uncertain) from error
 
     @contextmanager
     def f103_jtag(self, folder, transport):
@@ -237,7 +306,7 @@ class Target:
                 self.restore_state(mem, target, saved)
             yield
         finally:
-            if saved is not None:
+            if saved is not None and not self.uncertain:
                 try:
                     with self.link() as (_, mem, target, _):
                         self.halt(mem, target)
@@ -250,8 +319,9 @@ class Target:
                             checked(mem.word(APB2ENR) == apb, 'APB2ENR restore failed')
                         state = self.restore_state(mem, target, saved)
                     write_json(folder / 'afio-restored.json', state)
-                except Exception as error:
-                    raise Unsafe(f'F103 AFIO or target state restoration unconfirmed: {error}') from error
+                except (Exception, KeyboardInterrupt) as error:
+                    self.uncertain = f'F103 AFIO or target state restoration unconfirmed: {error!r}'
+                    raise Unsafe(self.uncertain) from error
 
     @contextmanager
     def memory_fixture(self, folder, regions, setup=None, capture_registers=False, keep_halted=False,
@@ -297,10 +367,11 @@ class Target:
                         if fpb is not None:
                             self.fpb_restore(mem, fpb)
                         after = self.restore_state(mem, target, saved)
-                    write_json(folder / 'restored.json', dict(state=after, ramRestored=True,
+                    write_json(folder / 'restored.json', dict(state=after, ramRestored=True if records else None,
                         registersRestored=bool(registers), fpbRestored=fpb is not None))
-                except Exception as error:
-                    raise Unsafe(f'Target RAM/register restoration unconfirmed at {folder}: {error}') from error
+                except (Exception, KeyboardInterrupt) as error:
+                    self.uncertain = f'Target RAM/register restoration unconfirmed at {folder}: {error!r}'
+                    raise Unsafe(self.uncertain) from error
 
     def compile_producer(self, folder):
         folder.mkdir()

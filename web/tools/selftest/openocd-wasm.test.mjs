@@ -353,6 +353,12 @@ test('Flash preflight resolves an auto-detected bank base and rejects invalid ra
   const opts = { verify:true, progress(){} };
   await assert.rejects(programOpenOcdFlash(probe, [patch,{ ...patch, addr:0x08000004 }],opts), /超出/);
   assert.ok(!lines.some(line => line.startsWith('flash erase_sector')));
+  await assert.rejects(programOpenOcdFlash(probe, [patch], { ...opts,
+    recoveryBounds:{start:0x08000000, end:0x08000002, sectorSize:2} }), /超出已核对/);
+  assert.ok(!lines.some(line => line.startsWith('flash erase_sector')));
+  assert.ok(!lines.some(line => line.startsWith('flash write_bank')));
+  assert.deepEqual(await programOpenOcdFlash(probe,[patch],{ ...opts,
+    recoveryBounds:{start:0x08000000, end:0x08000004, sectorSize:4} }), {bytes:1,sectors:1,verified:true});
   assert.deepEqual(await programOpenOcdFlash(probe,[patch],opts), { bytes:1, sectors:1, verified:true });
   assert.deepEqual(data,Uint8Array.of(1,0xab,3,4));
 });

@@ -139,6 +139,9 @@ def campaign(cases, driver, report, full=True):
     report.event('start', id='preflight')
     try:
         report.result({'id': 'preflight'}, 'pass', started, evidence=driver.preflight())
+    except Pending as error:
+        stop_reason = str(error)
+        report.result({'id': 'preflight'}, 'pending', started, reason=stop_reason)
     except (Exception, KeyboardInterrupt) as error:
         stop_reason = str(error) or type(error).__name__
         report.result({'id': 'preflight'}, 'fail', started, error=stop_reason)
@@ -222,17 +225,31 @@ def review(paths):
             if case_id not in checks and ((row['status'] == 'not-applicable') !=
                                            ('notApplicable' in expected[case_id])):
                 raise ValueError(f'Inconsistent applicability for {board}/{case_id}: {path}')
+            target_sha = None
+            if case_id not in checks and row['status'] != 'not-applicable':
+                is_etm = cases[case_id]['feature'] == 'etm'
+                label = 'etmElf' if is_etm else 'targetElf'
+                target_sha = report['files'].get(label, {}).get('sha256')
+                if row['status'] == 'pass':
+                    actual = row.get('evidence', {}).get('targetElf', {})
+                    if not target_sha or actual.get('sha256') != target_sha or not actual.get('verifiedLoadBytes', 0) > 0:
+                        raise ValueError(f'Missing or mismatched actual target ELF evidence for {board}/{case_id}: {path}')
             key = (report['finishedAt'], str(path))
             prior = by_board[board].get(case_id)
             if prior is None or key > prior[0]:
-                by_board[board][case_id] = (key, row, report['seed'], report['files']['targetElf']['sha256'])
+                by_board[board][case_id] = (key, row, report['seed'], target_sha)
     outputs = {}
     for board, results in by_board.items():
         expected = plan(board, None, FEATURES, 0)
         values = []
+        baselines = {}
         for case_id in ['preflight', *(case['id'] for case in expected), 'final-state']:
             if case_id in results:
                 key, row, seed, target_sha = results[case_id]
+                if target_sha and row['status'] == 'pass':
+                    label = 'etmElf' if case_id == 'etm' else 'targetElf'
+                    if baselines.setdefault(label, target_sha) != target_sha:
+                        raise ValueError(f'Conflicting {label} baselines for {board}: {key[1]}')
                 values.append(dict(id=case_id, status=row['status'], source=key[1], seed=seed,
                                    targetElfSha256=target_sha))
             else:
@@ -268,6 +285,7 @@ def main(argv=None):
     parser.add_argument('--target-elf', type=Path)
     parser.add_argument('--etm-elf', type=Path)
     parser.add_argument('--serial', default='12345678', help='ZynqLinkPRO J7 USB serial')
+    parser.add_argument('--jtag-cable-serial', help='Select the J7 XSCT cable when multiple cables are visible')
     parser.add_argument('--sdk', type=Path, default=Path('E:/Xilinx/SDK/2018.3'))
     parser.add_argument('--rv-gcc', type=Path)
     parser.add_argument('--arm-gcc', type=Path)
@@ -325,6 +343,8 @@ def main(argv=None):
         metadata = {'board': args.board, 'probeSerial': args.serial, 'seed': args.seed, 'plan': cases,
                     'files': {label: digest(path.resolve()) for label, path in (
                         ('bit', args.bit), ('zynqElf', args.zynq_elf), ('targetElf', args.target_elf))}}
+        if any(case['feature'] == 'etm' and 'notApplicable' not in case for case in cases):
+            metadata['files']['etmElf'] = digest(args.etm_elf.resolve())
         git = ['git', '-C', str(ROOT)]
         metadata['revision'] = subprocess.check_output([*git, 'rev-parse', 'HEAD'], text=True).strip()
         metadata['sourceDirty'] = bool(subprocess.check_output([*git, 'status', '--porcelain',

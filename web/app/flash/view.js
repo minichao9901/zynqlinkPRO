@@ -136,13 +136,14 @@ export class FlashView {
     return true;
   }
 
-  async flash(){
+  async flash(recoveryBounds){
     if (this.busy) return;
-    if (!this.file) return await this._flashOnce();
-    return await this._withProbeOwnership(() => this._flashOnce(), '烧录器要使用探针');
+    if (!this.file) return await this._flashOnce(recoveryBounds);
+    return await this._withProbeOwnership(() => this._flashOnce(recoveryBounds), '烧录器要使用探针');
   }
 
-  async programFile(file, { chip, clockKhz = null, base = null, reset = true, prepareOnly = false } = {}){
+  async programFile(file, { chip, clockKhz = null, base = null, reset = true, prepareOnly = false,
+    recoveryBounds } = {}){
     if (!(file instanceof File) || !file.size) throw Error('请选择非空目标固件');
     const binary = /\.bin$/i.test(file.name);
     if (!/\.(elf|axf|out|hex|ihex|bin)$/i.test(file.name)) throw Error('不支持此固件格式');
@@ -166,7 +167,7 @@ export class FlashView {
     const plan = { name:file.name, chip, clockKhz, reset,
       regions:regions.map(({ addr, data }) => ({ address:addr, bytes:data.length })) };
     if (prepareOnly) return { ...plan, prepared:true };
-    const result = await this.flash();
+    const result = await this.flash(recoveryBounds);
     if (!result?.verified || result.reset !== reset) throw Error('本次烧录或读回校验未确认');
     return { ...plan, ...result };
   }
@@ -259,13 +260,13 @@ export class FlashView {
     await this.probe.connect();
   }
 
-  async _program(probe, regions, verify){
+  async _program(probe, regions, verify, recoveryBounds){
     await probe.halt();
     this._status('正在检查 Flash 扇区并烧录…');
-    return programOpenOcdFlash(probe, regions, { verify, progress:fraction => this._bar(fraction * 99) });
+    return programOpenOcdFlash(probe, regions, { verify, recoveryBounds, progress:fraction => this._bar(fraction * 99) });
   }
 
-  async _flashOnce(){
+  async _flashOnce(recoveryBounds){
     if (!this.file){ toast('请选择或拖入固件文件', 'warn'); return; }
     const { name, dataB64 } = this.file;
     const baseText = /\.bin$/i.test(name) ? $('f-base').value.trim() : '';
@@ -280,7 +281,7 @@ export class FlashView {
     this._bar(0);
     try {
       this.lastFlash = await this._usingTarget(true, async probe => {
-        const result = await this._program(probe, regions, verify);
+        const result = await this._program(probe, regions, verify, recoveryBounds);
         if (reset) await resetAfterFlash(probe);
         return { ...result, reset };
       });

@@ -18,7 +18,7 @@ export async function resetAfterFlash(probe){
   throw Error('Flash 写入完成，未确认复位后的核心运行状态');
 }
 
-export async function programOpenOcdFlash(probe, regions, { verify, progress }){
+export async function programOpenOcdFlash(probe, regions, { verify, progress, recoveryBounds }){
   const command = (line, timeout) => probe.command(line, timeout);
   const bankText = await command('capture {flash banks}');
   const banks = Array.from(bankText.matchAll(bankRows),
@@ -65,6 +65,20 @@ export async function programOpenOcdFlash(probe, regions, { verify, progress }){
 
   const plan = banks.flatMap(bank => (bank.sectors || []).filter(s => s.patches.length).map(s => ({ ...s, bank:bank.index })));
   if (!plan.length) throw Error('固件没有可烧录的数据');
+  if (recoveryBounds){
+    const { start, end, sectorSize } = recoveryBounds;
+    if (![start, end, sectorSize].every(Number.isSafeInteger) || start < 0 || end <= start || sectorSize <= 0)
+      throw Error('验收用 Flash 恢复范围无效');
+    for (const bank of banks){
+      for (const sector of bank.sectors || []){
+        if (!sector.patches.length) continue;
+        const address = bank.base + sector.offset;
+        if (address < start || address + sector.length > end ||
+            (address - start) % sectorSize || sector.length !== sectorSize)
+          throw Error('Web Flash 擦除范围超出已核对的恢复扇区');
+      }
+    }
+  }
   async function read(sector){
     await command(`flash read_bank ${sector.bank} /flash-readback.bin ${sector.offset} ${sector.length}`, TIMEOUT);
     const { bytes } = await probe.link.request('flashFile', { read:true });

@@ -45,9 +45,9 @@ def inputs(args):
     return files
 
 
-def probe_state(session):
+def probe_state(session, *, cable_serial=None):
     """Skip fabric accesses when PS reports isolation or reset."""
-    output = PhysicalMemory(session).run('''
+    output = PhysicalMemory(session, cable_serial=cable_serial).run('''
 set part [physrd -force -value 0xf8000530]
 if {($part & 0x0fffffff) != 0x03727093} {error "Expected XC7Z020"}
 puts [format "LOAD_STATE PS_IDCODE %08x" $part]

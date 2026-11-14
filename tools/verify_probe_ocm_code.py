@@ -35,6 +35,7 @@ def main():
     p.add_argument('--require-qspi',action='store_true')
     p.add_argument('--usb-config-cycles',type=int,default=0)
     p.add_argument('--sdk',type=Path,default=Path('E:/Xilinx/SDK/2018.3'))
+    p.add_argument('--cable-serial',help='Restrict physical AP0 to one XSCT JTAG cable serial')
     a=p.parse_args()
     if not 0<=a.usb_config_cycles<=10:p.error('USB cycles must be between 0 and 10')
     try:
@@ -43,7 +44,8 @@ def main():
         p.error(str(error))
     end=max(s[3]+s[5] for s in sections)
     dest=a.out_dir.resolve();dest.mkdir(parents=True,exist_ok=False)
-    session=PhysicalMemory(Session(dest,a.sdk,'tcp:127.0.0.1:3121'))
+    session=PhysicalMemory(Session(dest,a.sdk,'tcp:127.0.0.1:3121',cable_serial=a.cable_serial),
+                           cable_serial=a.cable_serial)
     report=dict(time_UTC=datetime.datetime.now(datetime.timezone.utc).isoformat(),elf=str(a.elf.resolve()),
                 elf_sha256=hashlib.sha256(blob).hexdigest(),downloads=False,probe_reset_or_continue=False,
                 expected_executable_bytes=sum(s[5] for s in sections),cycles=[],passed=False,

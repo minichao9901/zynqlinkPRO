@@ -8,6 +8,8 @@ import json
 from pathlib import Path
 import random
 import re
+import secrets
+import signal
 import struct
 import subprocess
 import sys
@@ -29,6 +31,12 @@ RTT_DOWN = bytes.fromhex('00a5ff31320a8055')
 SCOPE_PERIODS = {('f103ze', 'swd'): (48, 192), ('f103ze', 'jtag'): (74, 440),
                  ('h743', 'swd'): (48, 238), ('h743', 'jtag'): (89, 529),
                  ('hpm6800evk', 'jtag'): (240, 1012)}
+# The RAM and QSPI release directories currently ship the same routed PL.
+# Its existing read-only capability registers identify the qualified profile.
+J7_PL_SHA256 = 'dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6'
+J7_PL_REGISTERS = ((0x4001004c, 0x4450007f), (0x40030048, 0x30f),
+                   (0x40030050, 0x454c4431), (0x40040000, 0x45444d31))
+JTAG_TIMING = 0x40010098
 
 
 class AcceptanceWeb(Web):
@@ -65,6 +73,41 @@ class AcceptanceWeb(Web):
 
 def b64(data):
     return {'$base64': base64.b64encode(data).decode('ascii')}
+
+
+@contextmanager
+def defer_interrupt():
+    """Latch Ctrl+C during a bounded writer/rollback critical section."""
+    interrupted = [False]
+
+    def latch(_signal, _frame):
+        interrupted[0] = True
+        if getattr(previous, '_board_acceptance_interrupt', False):
+            previous(_signal, _frame)
+
+    latch._board_acceptance_interrupt = True
+    previous = signal.signal(signal.SIGINT, latch)
+    try:
+        yield interrupted
+    finally:
+        signal.signal(signal.SIGINT, previous)
+
+
+def read_flash_sectors(text):
+    """Parse the native OpenOCD geometry saved before admitting a writer."""
+    bank = None
+    sectors = []
+    for line in text.splitlines():
+        header = re.search(r'^#\d+\s*:.*\bat\s+(0x[0-9a-f]+),\s*size\s+(0x[0-9a-f]+)', line, re.I)
+        if header:
+            bank = int(header[1], 16)
+            continue
+        row = re.search(r'^\s*#\s*\d+:\s*(0x[0-9a-f]+)\s+\((0x[0-9a-f]+)\s', line, re.I)
+        if row and bank is not None:
+            start, size = map(lambda word: int(word, 16), row.groups())
+            # OpenOCD prints offsets relative to the bank.
+            sectors.append((bank + start, size))
+    return sectors
 
 
 def sequence(data, first=0):
@@ -133,6 +176,7 @@ class BoardAcceptance:
         self.web = None
         self.case = None
         self.physical = None
+        self.cable_serial = None
 
     def preflight(self):
         from probe_flash import Session
@@ -144,38 +188,94 @@ class BoardAcceptance:
         pair = self.runtime.get('nativeCapture', {})
         for key, path in [('bitSha256', self.args.bit), ('elfSha256', self.args.zynq_elf)]:
             checked(pair.get(key) == digest(path)['sha256'], f'Runtime probe pair mismatch: {key}')
+        if pair['bitSha256'] != J7_PL_SHA256:
+            raise Pending('Declared bit has no qualified live PL profile for board.accept')
         checked(self.web.call({'action': 'ping'}).get('ready'), 'Browser worker not ready')
         self.probe_identity()
         inventory = self.cable_inventory()
-        checked(len(inventory) == 1, 'XSCT must resolve exactly one connected Zynq Cortex-A9 #0 for AP0 evidence')
+        if self.args.jtag_cable_serial:
+            inventory = [serial for serial in inventory if serial == self.args.jtag_cable_serial]
+        if len(inventory) != 1:
+            raise Pending('Select one J7 XSCT cable with --jtag-cable-serial')
+        self.cable_serial = inventory[0]
         physical_dir = self.report.folder / 'physical'
         physical_dir.mkdir()
-        self.physical = PhysicalMemory(Session(physical_dir, self.args.sdk, 'tcp:127.0.0.1:3121'))
+        self.physical = PhysicalMemory(Session(physical_dir, self.args.sdk, 'tcp:127.0.0.1:3121',
+                                               cable_serial=self.cable_serial), cable_serial=self.cable_serial)
+        checked(self.check_idle(), 'Probe not idle')
+        identity = self.verify_live_probe()
+        write_json(self.report.folder / 'probe-identity.json', identity)
         with (self.report.folder / 'ocm.log').open('wb') as log:
             subprocess.run([sys.executable, str(ROOT / 'tools/verify_probe_ocm_code.py'),
                             '--elf', self.args.zynq_elf.resolve(), '--sdk', self.args.sdk,
+                            '--cable-serial', self.cable_serial,
                             '--out-dir', self.report.folder / 'ocm'],
                            cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, check=True, timeout=180)
-        checked(self.check_idle(), 'Probe not idle')
         with self.target.link() as (_, mem, chip, clock):
             state = self.target.state(mem, chip)
         for page in ('flash', 'dbg', 'rtt', 'rttcdc', 'scope'):
             self.web.save(f'{page}-api.json', self.web.page(page, 'describe'))
         version = self.web.page('dbg', 'read', selector='#web-build-info')['text']
         return dict(probe=self.probe_identity(), target=state, clock=clock, ocm='ocm/result.json',
-                    jtagCableInventory=inventory,
+                    usbAp0Identity=identity,
                     workbenchBuild=version)
 
     def cable_inventory(self):
         path = self.report.folder / 'xsct-inventory.tcl'
         path.write_text('connect -url tcp:127.0.0.1:3121\n'
-                        'set cpus [targets -filter {name =~ "ARM Cortex-A9 MPCore #0*"}]\n'
-                        'puts $cpus\ndisconnect\nexit\n', encoding='ascii')
+                        'set cpus [targets -target-properties -filter {name =~ "ARM Cortex-A9 MPCore #0*"}]\n'
+                        'foreach cpu $cpus {if {[dict exists $cpu jtag_cable_serial]} {'
+                        'puts "ACCEPT_CABLE [dict get $cpu jtag_cable_serial]"}}\n'
+                        'disconnect\nexit\n', encoding='ascii')
         result = subprocess.run([sys.executable, ROOT / 'tools/run_xsct.py', path, '--sdk', self.args.sdk],
                                 capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=45)
         (self.report.folder / 'xsct-inventory.log').write_text(result.stdout + result.stderr, encoding='utf-8')
         checked(result.returncode == 0, 'XSCT inventory failed')
-        return [line.strip() for line in result.stdout.splitlines() if re.match(r'^\s*\d+\s+\*?\s*ARM Cortex-A9 MPCore #0', line)]
+        return re.findall(r'^ACCEPT_CABLE ([A-Za-z0-9_.:-]+)\s*$', result.stdout, re.M)
+
+    def verify_live_probe(self):
+        from dap_pipeline_bench import drain, open_dap, xfer
+        import usb.util
+        registers = {}
+        for address, expected in J7_PL_REGISTERS:
+            value = self.physical.read_words(address)[0]
+            checked(value == expected, f'Unexpected live PL register {address:#x}: {value:#x}')
+            registers[hex(address)] = hex(value)
+        dev, tx, rx = open_dap(self.args.serial)
+        try:
+            drain(rx)
+            def timing(value):
+                reply = xfer(tx, rx, [0x89, value])
+                checked(len(reply) == 15 and reply[:2] == b'\x89\x00', 'USB probe JTAG timing query failed')
+                return reply[2]
+            original = timing(255)
+            checked(original in (0, 1, 16, 17) and self.physical.read_words(JTAG_TIMING)[0] & 17 == original,
+                    'USB and AP0 JTAG timing initially differ')
+            choices = [value for value in (0, 1, 16, 17) if value != original]
+            challenge = secrets.SystemRandom().sample(choices, len(choices))
+            # Change only the idle probe's sampling mode. No SWJ connect,
+            # target transaction, probe reset or image load is involved.
+            with defer_interrupt() as interrupted:
+                try:
+                    for value in challenge:
+                        checked(timing(value) == value and self.physical.read_words(JTAG_TIMING)[0] & 17 == value,
+                                'Selected USB probe and XSCT cable did not track the same JTAG timing change')
+                finally:
+                    try:
+                        checked(timing(original) == original and timing(255) == original,
+                                'USB probe JTAG timing readback differs')
+                    except Exception as error:
+                        self.target.uncertain = f'USB probe sampling mode restore unconfirmed: {error!r}'
+                        raise Unsafe(self.target.uncertain) from error
+                checked(self.physical.read_words(JTAG_TIMING)[0] & 17 == original,
+                        'AP0 JTAG timing does not match restored USB sampling mode')
+            if interrupted[0]:
+                raise KeyboardInterrupt
+            return dict(usbSerial=self.args.serial, cableSerial=self.cable_serial, challenge=challenge,
+                        originalJtagTiming=original, restored=True, livePlRegisters=registers,
+                        declaredBitSha256=J7_PL_SHA256, plVerification='qualified live register profile')
+        finally:
+            usb.util.dispose_resources(dev)
 
     def probe_identity(self):
         usb = self.web.client.native('usb', 'list', {})
@@ -220,7 +320,7 @@ class BoardAcceptance:
             probe.close()
         # The direct stream checks cover firmware. Check the PL engines too.
         from probe_load import probe_state
-        fields = probe_state(self.physical.session)
+        fields = probe_state(self.physical.session, cable_serial=self.cable_serial)
         checked('SWD' in fields and 'CAPTURE' in fields, 'Probe PL not configured')
         return dict(streams=streams, engines=fields)
 
@@ -260,7 +360,10 @@ class BoardAcceptance:
         method = getattr(self, case['feature'].replace('-', '_'))
         if case['feature'] == 'etm':
             return method(folder)
+        elf = self.args.target_elf
+        expected = self.report.value['files']['targetElf']
         with self.target.link() as (_, mem, _, _):
+            target_evidence = self.verify_target_image(mem, elf, expected)
             baseline = {}
             if not self.rv:
                 name, offset = HEARTBEAT[self.args.board]
@@ -268,7 +371,20 @@ class BoardAcceptance:
                 baseline = verify_baseline_rates(self.args.board, mem, heartbeat=heartbeat)
         with self.target.f103_jtag(folder, case['transport']):
             result = method(folder)
-        return dict(result, **baseline)
+        return dict(result, **baseline, targetElf=target_evidence)
+
+    def verify_target_image(self, mem, elf, expected):
+        checked(digest(elf) == expected, 'Target ELF file changed during acceptance')
+        machine, segments = elf_contents(elf)
+        checked(machine == ('EM_RISCV' if self.rv else 'EM_ARM'), 'Wrong target ELF architecture')
+        origin, size, _ = FLASH[self.args.board]
+        checked(any(flags & 1 for _, _, flags in segments) and
+                all(origin <= start < start + len(data) <= origin + size for start, data, _ in segments),
+                'Target ELF must contain code and only Flash-backed load segments')
+        for start, data, _ in segments:
+            if mem.read(start, len(data)) != data:
+                raise Pending(f'Target Flash load segment differs from the ELF at {start:#x}')
+        return dict(expected, verifiedLoadBytes=sum(len(data) for _, data, _ in segments))
 
     def arm_cfg(self, folder):
         path = folder / 'target.cfg'
@@ -381,14 +497,10 @@ class BoardAcceptance:
         elf = self.args.target_elf
         entry = symbol(elf, self.args.break_symbol or BREAKPOINTS[self.args.board]) & ~1
         register = 'a0' if self.rv else 'r0'
-        with self.target.link() as (_, mem, chip, _):
-            _, segments = elf_contents(elf)
-            if not any(flags & 1 and start <= entry < start + len(data) and
-                       mem.read(start, len(data)) == data for start, data, flags in segments):
-                raise Pending('Debug breakpoint ELF does not match executable memory on the target')
-        with self.target.memory_fixture(folder / 'fixture', [], capture_registers=True, keep_halted=True):
-            with self.target.link() as (_, mem, chip, _):
-                self.target.reject_debug_breakpoints(mem, chip)
+        _, segments = elf_contents(elf)
+        checked(any(flags & 1 and start <= entry < start + len(data) for start, data, flags in segments),
+                'Debug breakpoint must belong to verified executable target code')
+        with self.target.live_debug(folder / 'fixture', self.check_idle):
             t0 = time.perf_counter()
             with self.web_debug(folder):
                 connected = time.perf_counter() - t0
@@ -561,7 +673,7 @@ class BoardAcceptance:
         self.web.set('rttcdc', '#c-record-auto', False)
         self.invoke('rttcdc', 'connect', target='hid')
         self.invoke('rttcdc', 'applyTargetType', target='hid')
-        self.web.set('rttcdc', '#h-clock', str(self.case['requestedHz'] // 1000))
+        self.web.set('rttcdc', '#h-clock', str(self.case['requestedHz']))
         self.invoke('rttcdc', 'refreshPorts')
         port = self.port()
         options = self.web.read('rttcdc', '#c-port')['options']
@@ -964,7 +1076,8 @@ class BoardAcceptance:
         heartbeat = symbol(elf, name) + offset
 
         def confirm_flash(expected):
-            with self.target.link() as (_, mem, chip, _):
+            with self.target.link() as (_, mem, target, _):
+                self.target.halt(mem, target)
                 current = mem.read(start, stop - start)
                 checked(current == mem.read(start, stop - start), 'Unstable independent Flash readback')
                 return current == expected
@@ -994,26 +1107,24 @@ class BoardAcceptance:
             chip = self.chip
             speed = self.case['requestedHz'] // 1000
         with self.target.memory_fixture(folder / 'fixture', areas, capture_registers=True, keep_halted=True):
-            try:
+            with self.flash_recovery(folder, backup, lambda: confirm_flash(original),
+                                     lambda: self.native_flash(executable, scripts, config, backup, start,
+                                                               folder / 'restore-flash.log', geometry=(start, stop, sector))):
                 native = self.native_flash(executable, scripts, config, backup, start, folder / 'native-flash.log',
-                                           folder / 'native-clock.json')
+                                           folder / 'native-clock.json', geometry=(start, stop, sector))
                 checked(confirm_flash(original), 'Native Flash changed baseline or sector neighbors')
                 begin = time.perf_counter()
-                result = self.invoke('flash', 'programFile', dict(pack_file(elf), kind='file'),
-                                     dict(chip=chip, clockKhz=speed, reset=False))
+                # Let the current browser job finish and release its writer
+                # before handling Ctrl+C or issuing any recovery command.
+                with defer_interrupt() as interrupted:
+                    result = self.invoke('flash', 'programFile', dict(pack_file(elf), kind='file'),
+                                         dict(chip=chip, clockKhz=speed, reset=False,
+                                              recoveryBounds=dict(start=start, end=stop, sectorSize=sector)))
+                if interrupted[0]:
+                    raise KeyboardInterrupt
                 web = time.perf_counter() - begin
                 clock = verify_clock(self.read_clock(), self.case['requestedHz'])
                 checked(result['verified'] and confirm_flash(original), 'Web Flash readback differs from backup')
-            except Unsafe:
-                raise
-            except Exception:
-                try:
-                    if not confirm_flash(original):
-                        self.native_flash(executable, scripts, config, backup, start, folder / 'restore-flash.log')
-                    checked(confirm_flash(original), 'Original Flash readback failed after recovery')
-                except Exception as error:
-                    raise Unsafe(f'Flash restoration unconfirmed. Preserve {backup}: {error}') from error
-                raise
         # Flash and RAM have been restored before this independent boot check.
         # Use the flasher's normal software reset path only with explicit Flash authorization.
         reset_started = time.perf_counter()
@@ -1031,6 +1142,33 @@ class BoardAcceptance:
                     heartbeat={'address': hex(heartbeat), 'before': tick, 'after': after},
                     detail='Both timings include erase, program and verify over the same affected Flash range')
 
+    @contextmanager
+    def flash_recovery(self, folder, backup, matches_backup, restore_backup):
+        try:
+            yield
+        except (Exception, KeyboardInterrupt) as operation_error:
+            report = dict(failure=repr(operation_error), backup=str(backup), verified=False, rewriteAttempted=False)
+            try:
+                if isinstance(operation_error, Unsafe) or self.target.uncertain:
+                    raise Unsafe(self.target.uncertain or str(operation_error))
+                with defer_interrupt() as interrupted:
+                    self.check_idle()
+                    if not matches_backup():
+                        report['rewriteAttempted'] = True
+                        restore_backup()
+                        checked(matches_backup(), 'Original Flash readback failed after recovery')
+                report['verified'] = True
+                report['interruptDuringRecovery'] = interrupted[0]
+            except (Exception, KeyboardInterrupt) as recovery_error:
+                self.target.uncertain = f'Flash restoration unconfirmed. Preserve {backup}: {recovery_error!r}'
+                report['recoveryError'] = self.target.uncertain
+                raise Unsafe(self.target.uncertain) from recovery_error
+            finally:
+                write_json(folder / 'flash-recovery.json', report)
+            if interrupted[0]:
+                raise KeyboardInterrupt from operation_error
+            raise
+
     def reset_application(self, folder):
         previous_case = self.case
         if self.args.board == 'f103ze':
@@ -1047,7 +1185,7 @@ class BoardAcceptance:
         checked(not any(char in value for char in '{}\r\n\\'), 'Unsupported character in Tcl argument')
         return '{' + value + '}'
 
-    def native_flash(self, executable, scripts, config, backup, address, log_path, clock_path=None):
+    def native_flash(self, executable, scripts, config, backup, address, log_path, clock_path=None, *, geometry):
         import threading
         import libusb_package
         import usb.core
@@ -1058,21 +1196,31 @@ class BoardAcceptance:
         # OpenOCD is the only writer to the target until it exits. Observe
         # the physical clock while it owns DAP, independently of its logs.
         gate = log_path.with_suffix('.go')
-        if clock_path:
-            wait = (f'set n 0; while {{![file exists {self.tcl(gate)}] && $n < 250}} '
-                    '{ sleep 100; incr n }; '
-                    'if {$n >= 250} { error "Timed out waiting for clock verification" }; ')
-        else:
-            wait = ''
+        wait = (f'set n 0; while {{![file exists {self.tcl(gate)}] && $n < 250}} '
+                '{ sleep 100; incr n }; '
+                'if {$n >= 250} { error "Timed out waiting for Flash verification" }; ')
+        bank_indexes = (0, 1) if self.args.board == 'h743' and geometry[1] > 0x08100000 else (0,)
+        report_geometry = ''.join(
+            f'flash probe {index}; catch {{flash info {index} sectors}} geometry; echo $geometry; '
+            for index in bank_indexes)
         args = [executable, '-s', scripts, '-f', config, '-c',
                 'gdb_port disabled; telnet_port disabled; tcl_port disabled; init; halt; '
-                f'echo ZL_FLASH_READY; {wait}'
+                f'{report_geometry}echo ZL_FLASH_READY; {wait}'
                 f'flash write_image erase {self.tcl(backup)} {address:#x} bin; '
                 f'verify_image {self.tcl(backup)} {address:#x} bin; echo ZL_FLASH_DONE; shutdown']
         with log_path.open('wb') as log:
             start = time.perf_counter()
             verifying_seconds = 0
-            with subprocess.Popen(args, cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as child:
+            # Ctrl+C belongs to the controller. Reap this child explicitly
+            # before touching the target again.
+            options = ({'creationflags': subprocess.CREATE_NEW_PROCESS_GROUP}
+                       if sys.platform == 'win32' else {'start_new_session': True})
+            child = None
+            reader = None
+            try:
+                with defer_interrupt() as interrupted:
+                    child = subprocess.Popen(args, cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                             **options)
                 ready = threading.Event()
                 def consume():
                     for line in child.stdout:
@@ -1082,22 +1230,28 @@ class BoardAcceptance:
                             ready.set()
                 reader = threading.Thread(target=consume, daemon=True)
                 reader.start()
-                try:
-                    if clock_path:
-                        checked(ready.wait(8) and child.poll() is None, 'Native Flash did not reach its clock check')
-                        begin = time.perf_counter()
-                        write_json(clock_path, self.clock())
-                        gate.touch()
-                        verifying_seconds = time.perf_counter()-begin
-                    code = child.wait(240)
-                except BaseException:
-                    # Close the writer before allowing the independent
-                    # rollback path to examine or restore its sectors.
-                    child.kill()
-                    child.wait()
-                    raise
-                finally:
-                    reader.join(5)
+                if interrupted[0]:
+                    raise KeyboardInterrupt
+                checked(ready.wait(15) and child.poll() is None, 'Native Flash did not report bank geometry')
+                begin = time.perf_counter()
+                first, last, size = geometry
+                reported = set(read_flash_sectors(log_path.read_text(encoding='utf-8', errors='replace')))
+                checked(all((at, size) in reported for at in range(first, last, size)),
+                        'Physical Flash sectors differ from the backed-up geometry')
+                if clock_path:
+                    write_json(clock_path, self.clock())
+                gate.touch()
+                verifying_seconds = time.perf_counter()-begin
+                code = child.wait(240)
+            except BaseException:
+                if child is not None:
+                    self.stop_flash_writer(child)
+                raise
+            finally:
+                if child is not None and child.poll() is not None:
+                    if reader is not None and reader.ident is not None:
+                        reader.join(5)
+                    child.stdout.close()
         output = log_path.read_text(encoding='utf-8', errors='replace').lower()
         checked(code == 0 and ready.is_set() and 'zl_flash_done' in output and 'verified' in output,
                 f'Native Flash did not verify. See {log_path}')
@@ -1105,8 +1259,19 @@ class BoardAcceptance:
             checked(clock_path.is_file(), 'Native Flash actual clock was not confirmed')
         return time.perf_counter() - start - verifying_seconds
 
+    def stop_flash_writer(self, child):
+        try:
+            with defer_interrupt():
+                if child.poll() is None:
+                    child.kill()
+                child.wait(timeout=10)
+        except (Exception, KeyboardInterrupt) as error:
+            self.target.uncertain = f'Native Flash writer exit unconfirmed: {error!r}'
+            raise Unsafe(self.target.uncertain) from error
+
     def etm(self, folder):
         elf = self.args.etm_elf.resolve()
+        expected = self.report.value['files']['etmElf']
         import libusb_package
         import usb.core
         matches = list(usb.core.find(find_all=True, idVendor=0x0d28, idProduct=0x0204,
@@ -1114,11 +1279,7 @@ class BoardAcceptance:
         if len(matches) != 1 or matches[0].serial_number != self.args.serial:
             raise Pending('Native ETM capture requires J7 to be the only attached CMSIS-DAP VID/PID')
         with self.target.link() as (_, mem, chip, _):
-            _, segments = elf_contents(elf)
-            checked(segments, 'ETM ELF is missing loadable code')
-            for address, data, flags in segments:
-                if flags & 1 and mem.read(address, len(data)) != data:
-                    raise Pending('Load the exact running ETM baseline first. H743 uses the CPU60/TRACE20 ELF')
+            target_evidence = self.verify_target_image(mem, elf, expected)
             name, offset = HEARTBEAT[self.args.board]
             baseline = verify_baseline_rates(self.args.board, mem, etm=True, heartbeat=symbol(elf, name)+offset)
         self.web.page('etm', 'show')
@@ -1134,6 +1295,8 @@ class BoardAcceptance:
         checked(record.parent == root, 'Invalid ETM record path')
         metadata = json.loads((record / 'session.json').read_text(encoding='utf-8'))
         decoded = json.loads((record / 'decoded.json').read_text(encoding='utf-8'))
+        checked(digest(record / 'firmware.elf')['sha256'] == expected['sha256'],
+                'ETM record used a different ELF from the verified target')
         quality, extent = metadata['quality'], metadata.get('captureExtent') or {}
         checked(result['targetRestored'] and result['captureProof']['restored'], 'ETM target restoration not confirmed')
         checked(quality['synced'] and quality['ended'] and not quality['loss'] and extent.get('complete')
@@ -1145,7 +1308,7 @@ class BoardAcceptance:
         processing = record / 'decode-performance.json'
         native = metadata.get('nativeAcceptance') or {}
         return dict(record=str(record), quality=quality, window=extent, decoded=decoded['summary'],
-                    restored=True, webCaptureSeconds=wall, display=display, targetElf=digest(elf),
+                    restored=True, webCaptureSeconds=wall, display=display, targetElf=target_evidence,
                     captureHostSeconds=native.get('capture_host_seconds'),
                     captureClocks=result['captureProof'].get('rccCapture'),
                     processing=json.loads(processing.read_text(encoding='utf-8')) if processing.exists() else None,
@@ -1162,9 +1325,7 @@ class BoardAcceptance:
     def stress_business(self, business, folder):
         folder.mkdir()
         if business == 'debug':
-            with self.target.memory_fixture(folder / 'fixture', [], capture_registers=True, keep_halted=True):
-                with self.target.link() as (_, mem, chip, _):
-                    self.target.reject_debug_breakpoints(mem, chip)
+            with self.target.live_debug(folder / 'fixture', self.check_idle):
                 try:
                     self.debug_connect(folder)
                     self.debug_call('halt')
