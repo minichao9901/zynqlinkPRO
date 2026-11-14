@@ -119,12 +119,12 @@ Trace五路输入包含ELD1延时单元，默认零tap。RTCK自适应、断开�
 | 产物 | 说明 |
 |---|---|
 | [J7 release-20261106](prebuilt/release-20261106/README.md) | 当前bit/ELF：ELD1、原始SWD序列修复、WebUSB网页入口；F103ZE限定验收 |
-| [J7 QSPI启动包](prebuilt/qspi-release-20261106/README.md) | 同一bit/ELF的固化版本，整片回读、范围外比较、实体冷启动及F103ZE回归通过 |
+| [J7 正式 QSPI 启动包](prebuilt/qspi-release/README.md) | CLI 与本机 Web 手册共用的固定目录，含 BOOT、配套 bit/ELF 和实板验收证据 |
 | [Golden](prebuilt/golden/README.md) | 原已验证比较与回退配对 |
 | [QSPI恢复包](prebuilt/recovery/README.md) | 已验收的历史恢复镜像，身份和适用范围独立记录 |
 | [目标固件](prebuilt/README.md) | F103ZE/H743等目标ELF及来源 |
 
-加载与固化使用同一 manifest 声明的 bit/ELF。用 `python -X utf8 toolbox.py probe-load` 经 JTAG 临时加载默认 J7 配对并读回 OCM 执行代码。写入探针 QSPI 用 `python -X utf8 toolbox.py probe-flash`。[CLI 命令清单](docs/toolbox-cli-ai.md#探针-bit--elf-临时加载) · [正式产物索引](prebuilt/README.md)
+用 `python -X utf8 toolbox.py probe-load` 经 JTAG 临时加载默认 J7 配对并读回 OCM 执行代码。写入探针 QSPI 用 `python -X utf8 toolbox.py probe-flash`，使用固定目录中同一清单声明的 BOOT 与配套 bit/ELF。[CLI 命令清单](docs/toolbox-cli-ai.md#探针-bit--elf-临时加载) · [正式产物索引](prebuilt/README.md)
 
 ## 开发与文档
 

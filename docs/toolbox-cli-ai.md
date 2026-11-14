@@ -8,12 +8,12 @@
 
 ## 探针版本
 
-**当前 J7 日常使用 `prebuilt/release-20261106/` 的正式 bit + PS ELF。** 临时是指经 JTAG 加载后断电丢失。QSPI 启动包内的 bit 和 PS ELF 与这套正式文件的 SHA-256 分别相同，两种启动方式各用自己的初始化文件。
+JTAG 临时加载的默认配对在 `prebuilt/release-20261106/`，断电后丢失。QSPI 固化使用 `prebuilt/qspi-release/` 中的 BOOT、bit 和 PS ELF，两种启动方式各用自己的清单和初始化文件。
 
 | 目录 | 用途 |
 |---|---|
 | [release-20261106](../prebuilt/release-20261106/README.md) | 当前正式 J7 配对。直接加载用同目录的 `probe.bit`、`application.elf` 和 `ps7_init.tcl`。 |
-| [qspi-release-20261106](../prebuilt/qspi-release-20261106/README.md) | 当前正式 J7 QSPI 启动包。固化使用包内的 `BOOT.bin`，其中包含同一 bit/PS ELF 及 QSPI 启动链。 |
+| [qspi-release](../prebuilt/qspi-release/README.md) | J7 正式 QSPI 固定目录。包内的 `BOOT.bin` 包含清单声明的 bit/PS ELF 及 QSPI 启动链。 |
 | [golden](../prebuilt/golden/README.md) | 旧 7020/120 MHz JTAG 基线，用于历史对照和回退。该目录里的 `f103ze-cdc48.elf` 另属目标 MCU 固件。 |
 | [recovery](../prebuilt/recovery/README.md) | 旧 QSPI 恢复包，仅用于匹配原接线的回退。 |
 
@@ -93,7 +93,7 @@
 
 ## 探针 QSPI 固化
 
-硬件操作需要 Zynq JTAG 下载线和空闲探针。写入或校验 BOOT 区要求上电读回 `BOOT_MODE=1`。默认 J7 镜像包为 `prebuilt/qspi-release-20261106/`，默认写入后端限 JEDEC EF4019 的 bank 0。备份留在本机。固化完成后执行实体断电重启，核对探针重新枚举及实际配对。[启动包和冷启动记录](../prebuilt/qspi-release-20261106/README.md)
+硬件操作需要 Zynq JTAG 下载线和空闲探针。写入或校验 BOOT 区要求上电读回 `BOOT_MODE=1`。默认 J7 镜像包固定为 `prebuilt/qspi-release/`，默认写入后端限 JEDEC EF4019 的 bank 0。备份留在本机。固化完成后执行实体断电重启，核对探针重新枚举及实际配对。[启动包和冷启动记录](../prebuilt/qspi-release/README.md)
 
 1. 离线校验默认 BOOT 包并预览固化步骤。
 
@@ -122,7 +122,7 @@
 5. 实体断电重启后检查 QSPI 启动交接、FCLK 和板上 OCM 执行代码。
 
    ```powershell
-   python -X utf8 toolbox.py project run probe.ocm-verify -- --elf prebuilt/release-20261106/application.elf --require-qspi --out-dir build/qspi-cold-boot-new
+   python -X utf8 toolbox.py project run probe.ocm-verify -- --elf prebuilt/qspi-release/application.elf --require-qspi --out-dir build/qspi-cold-boot-new
    ```
 
 6. 为自建 QSPI 包生成 SDK BSP。
@@ -134,13 +134,13 @@
 7. 使用上一步的 BSP 和配对产物编译 QSPI 加载器及读写辅助程序。
 
    ```powershell
-   python -X utf8 toolbox.py project run boot.build -- --bsp build/qspi-bsp-new/bsp --bit prebuilt/release-20261106/probe.bit --elf prebuilt/release-20261106/application.elf --out build/qspi-loader-new
+   python -X utf8 toolbox.py project run boot.build -- --bsp build/qspi-bsp-new/bsp --bit prebuilt/qspi-release/probe.bit --elf prebuilt/qspi-release/application.elf --out build/qspi-loader-new
    ```
 
 8. 使用支持 QSPI 的 PS 初始化 Tcl 生成 BOOT 镜像和 manifest。
 
    ```powershell
-   python -X utf8 toolbox.py project run boot.package -- --loader-dir build/qspi-loader-new --bit prebuilt/release-20261106/probe.bit --elf prebuilt/release-20261106/application.elf --ps-init firmware/boot/hardware/ps7_init.tcl --output-dir build/qspi-package-new
+   python -X utf8 toolbox.py project run boot.package -- --loader-dir build/qspi-loader-new --bit prebuilt/qspi-release/probe.bit --elf prebuilt/qspi-release/application.elf --ps-init firmware/boot/hardware/ps7_init.tcl --output-dir build/qspi-package-new
    ```
 
 9. 离线检查自建 BOOT 包并预览固化步骤。

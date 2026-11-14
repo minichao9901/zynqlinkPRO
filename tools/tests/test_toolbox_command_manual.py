@@ -1,3 +1,6 @@
+from contextlib import redirect_stdout
+from io import StringIO
+import json
 from pathlib import Path
 import sys
 import tempfile
@@ -6,13 +9,25 @@ from unittest.mock import patch
 
 from flask import Flask
 
-from tools import command_manual
+from tools import command_manual, probe_flash
 
 
 ROOT = Path(__file__).resolve().parents[2]
 
 
 class CommandManualTests(unittest.TestCase):
+    def test_qspi_manual_uses_the_pair_from_the_default_boot_package(self):
+        output = StringIO()
+        with redirect_stdout(output):
+            self.assertEqual(probe_flash.main(['--dry-run']), 0)
+        image = Path(json.loads(output.getvalue())['image_dir'])
+        self.assertEqual(image, ROOT / 'prebuilt/qspi-release')
+        elf = (image / 'application.elf').relative_to(ROOT).as_posix()
+        bit = (image / 'probe.bit').relative_to(ROOT).as_posix()
+        self.assertIn(f'--elf {elf} --require-qspi', command_manual.BY_NAME['qspi-cold'].line)
+        for name in ('qspi-build', 'qspi-package'):
+            self.assertIn(f'--bit {bit} --elf {elf}', command_manual.BY_NAME[name].line)
+
     def test_manual_uses_authenticated_fixed_actions_and_blocks_hardware_offline(self):
         with tempfile.TemporaryDirectory() as directory:
             token = Path(directory) / 'cli-token'

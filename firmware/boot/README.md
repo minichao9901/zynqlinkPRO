@@ -1,4 +1,4 @@
-> 当前J7启动包为 `prebuilt/qspi-release-20261106/`。旧 `prebuilt/recovery/` 保留原始验收字节；不能用其历史冷启动结果代替新镜像验收。
+> J7 正式启动包固定在 `prebuilt/qspi-release/`，包含 BOOT、配套 bit/ELF 和验收清单。参见[当前镜像及更新流程](../../prebuilt/qspi-release/README.md)。
 
 # Zynq-7020 QSPI 启动，应用保留在 OCM
 
@@ -15,11 +15,11 @@ QSPI MIO1..6、单片 x4、反馈时钟关闭（MIO8 供现有 USB PHY 复位）
 ```powershell
 python -X utf8 toolbox.py project run boot.bsp -- --out build/qspi-bsp-new
 python -X utf8 toolbox.py project run boot.build -- --bsp build/qspi-bsp-new/bsp `
-  --bit prebuilt/release-20261106/probe.bit `
-  --elf prebuilt/release-20261106/application.elf --out build/qspi-loader-new
+  --bit prebuilt/qspi-release/probe.bit `
+  --elf prebuilt/qspi-release/application.elf --out build/qspi-loader-new
 python -X utf8 toolbox.py project run boot.package -- `
-  --loader-dir build/qspi-loader-new --bit prebuilt/release-20261106/probe.bit `
-  --elf prebuilt/release-20261106/application.elf `
+  --loader-dir build/qspi-loader-new --bit prebuilt/qspi-release/probe.bit `
+  --elf prebuilt/qspi-release/application.elf `
   --ps-init firmware/boot/hardware/ps7_init.tcl --output-dir build/qspi-package-new
 python -X utf8 toolbox.py probe-flash --image-dir build/qspi-package-new --dry-run
 # 以下会写探针QSPI；先确认独占板卡且BOOT_MODE=1：

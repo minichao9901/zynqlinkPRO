@@ -15,6 +15,7 @@ except ImportError:
     from sdk_runtime import prepare
 
 ROOT = Path(__file__).resolve().parents[1]
+QSPI_RELEASE = 'prebuilt/qspi-release'
 
 
 def sha(path):
@@ -110,7 +111,8 @@ class Session:
 
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--image-dir', type=Path, default=ROOT/'prebuilt/qspi-release-20261106')
+    p.add_argument('--image-dir', type=Path, default=ROOT/QSPI_RELEASE,
+                   help=f'boot package directory (default: {QSPI_RELEASE})')
     p.add_argument('--sdk', type=Path, default=Path('E:/Xilinx/SDK/2018.3'))
     p.add_argument('--url', default='tcp:127.0.0.1:3121')
     p.add_argument('--out', type=Path)

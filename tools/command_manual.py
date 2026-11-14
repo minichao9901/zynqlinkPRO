@@ -12,12 +12,12 @@ import uuid
 
 from flask import abort, jsonify, request
 
-
 MANUAL = 'docs/toolbox-cli-first-run.md'
 WEB = 'python -X utf8 toolbox.py --runtime build/first-run-web '
 TARGET = 'target-flash --chip stm32h7 --swd-khz 10000 --file "$Firmware"'
 QSPI_WORK = 'build/qspi-repack-new'
-QSPI_PAIR = '--bit prebuilt/release-20261106/probe.bit --elf prebuilt/release-20261106/application.elf'
+QSPI_RELEASE = 'prebuilt/qspi-release'
+QSPI_PAIR = f'--bit {QSPI_RELEASE}/probe.bit --elf {QSPI_RELEASE}/application.elf'
 
 
 @dataclass(frozen=True)
@@ -55,7 +55,7 @@ COMMANDS = {item.line: item for item in (
     Command('qspi-write-no-backup', 'python -X utf8 toolbox.py probe-flash --skip-backup --out build/first-run-qspi-program-no-backup', True,
             '直接写入正式 BOOT，不备份原镜像。写后读回 BOOT 并复位验证。'),
     Command('qspi-cold', 'python -X utf8 toolbox.py project run probe.ocm-verify -- '
-            '--elf prebuilt/release-20261106/application.elf --require-qspi --out-dir build/first-run-qspi-cold', True),
+            f'--elf {QSPI_RELEASE}/application.elf --require-qspi --out-dir build/first-run-qspi-cold', True),
     Command('qspi-bsp', f'python -X utf8 toolbox.py project run boot.bsp -- --out {QSPI_WORK}/platform'),
     Command('qspi-build', f'python -X utf8 toolbox.py project run boot.build -- --bsp {QSPI_WORK}/platform/bsp {QSPI_PAIR} --out {QSPI_WORK}/loader'),
     Command('qspi-package', f'python -X utf8 toolbox.py project run boot.package -- --loader-dir {QSPI_WORK}/loader {QSPI_PAIR} --ps-init firmware/boot/hardware/ps7_init.tcl --output-dir {QSPI_WORK}/image'),
