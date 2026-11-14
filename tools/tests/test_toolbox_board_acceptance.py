@@ -16,6 +16,26 @@ from tools.run_board_acceptance import (BOARDS, BUSINESSES, ENDINGS, FEATURES, P
 
 
 class TestBoardAcceptance(unittest.TestCase):
+    def test_hpm_native_flash_configuration_selects_j7_with_the_sdk(self):
+        from tools.board_acceptance import BoardAcceptance
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            sdk = root / 'hpm_sdk'
+            scripts = sdk / 'boards' / 'openocd'
+            scripts.mkdir(parents=True)
+            (scripts / 'hpm6800_all_in_one.cfg').touch()
+            executable = root / 'tools' / 'openocd' / 'openocd.exe'
+            interface = executable.parent / 'tcl' / 'interface'
+            interface.mkdir(parents=True)
+            (interface / 'cmsis-dap.cfg').touch()
+            board = BoardAcceptance(SimpleNamespace(board='hpm6800evk', serial='12345678'), None)
+            board.case = {'transport': 'jtag', 'requestedHz': 25000000}
+            cfg = board.native_flash_config(executable, scripts)
+            self.assertIn('adapter serial {12345678}\n', cfg)
+            self.assertIn(f'set HPM_SDK_BASE {{{sdk.as_posix()}}}\n', cfg)
+            self.assertIn('set BOARD hpm6800evk\nset PROBE cmsis_dap\nsource [find hpm6800_all_in_one.cfg]', cfg)
+            self.assertTrue(cfg.endswith('adapter speed 25000\nreset_config none\n'))
+
     def test_plan_uses_one_link_rate_and_two_scope_windows(self):
         for board, (hz, links, _) in BOARDS.items():
             cases = plan(board, None, FEATURES, 14)

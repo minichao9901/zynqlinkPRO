@@ -1127,15 +1127,7 @@ class BoardAcceptance:
         if not executable.is_file() or not scripts.is_dir():
             raise Pending('Native OpenOCD or matching scripts not found')
         config = folder / 'native-flash.cfg'
-        options = ['adapter driver cmsis-dap', 'cmsis_dap_backend usb_bulk',
-                   'cmsis_dap_vid_pid 0x0d28 0x0204', f'adapter serial {self.tcl(self.args.serial)}']
-        if self.rv:
-            options.append('source [find hpm6800_all_in_one.cfg]')
-        else:
-            family = 'stm32f1x' if self.args.board == 'f103ze' else 'stm32h7x'
-            options += [f'transport select {self.case["transport"]}', f'source [find target/{family}.cfg]']
-        options += [f'adapter speed {self.case["requestedHz"] // 1000}', 'reset_config none']
-        config.write_text('\n'.join(options) + '\n', encoding='ascii')
+        config.write_text(self.native_flash_config(executable, scripts), encoding='ascii')
         name, offset = HEARTBEAT[self.args.board]
         heartbeat = symbol(elf, name) + offset
 
@@ -1198,6 +1190,23 @@ class BoardAcceptance:
                     nativeInputBytes=len(original), webInputBytes=result['bytes'],
                     resetMethod=boot['method'], heartbeat=boot['heartbeat'],
                     detail='Both timings include erase, program and verify over the same affected Flash range')
+
+    def native_flash_config(self, executable, scripts):
+        options = ['adapter driver cmsis-dap', 'cmsis_dap_backend usb_bulk',
+                   'cmsis_dap_vid_pid 0x0d28 0x0204', f'adapter serial {self.tcl(self.args.serial)}']
+        if self.rv:
+            sdk = scripts.parent.parent
+            tcl = executable.parent / 'tcl'
+            if not (scripts / 'hpm6800_all_in_one.cfg').is_file() or not (tcl / 'interface/cmsis-dap.cfg').is_file():
+                raise Pending('HPM native Flash requires the SDK boards/openocd and OpenOCD tcl directories')
+            options.extend([f'add_script_search_dir {self.tcl(tcl)}', f'set HPM_SDK_BASE {self.tcl(sdk)}',
+                            'set BOARD hpm6800evk', 'set PROBE cmsis_dap',
+                            'source [find hpm6800_all_in_one.cfg]'])
+        else:
+            family = 'stm32f1x' if self.args.board == 'f103ze' else 'stm32h7x'
+            options += [f'transport select {self.case["transport"]}', f'source [find target/{family}.cfg]']
+        options += [f'adapter speed {self.case["requestedHz"] // 1000}', 'reset_config none']
+        return '\n'.join(options) + '\n'
 
     @contextmanager
     def flash_recovery(self, folder, backup, matches_backup, restore_backup):
