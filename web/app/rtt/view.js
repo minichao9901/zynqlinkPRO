@@ -15,6 +15,7 @@ import { OpenOcdEtmProbe } from '../core/openocd-etm.js';
 import { isZynqDapDevice, openOcdUsbSupported, selectOpenOcdDevice } from '../core/openocd-usb.js';
 import { makeOpenOcdProfile } from '../core/openocd-profile.js';
 import { Hpm6800RttProbe } from './hpm6800-probe.js';
+import { F103JtagRttProbe } from './f103-jtag-probe.js';
 import { HPM_BOARDS, hpmBoard } from '../targets/hpm/porting.js';
 import { selectedHpmBoard, rememberHpmBoard } from '../targets/hpm/select.js';
 import { MockProbe } from './mock.js';
@@ -324,8 +325,11 @@ export class RttView {
         });
         device ??= await selectOpenOcdDevice({ all:$('r-usb-all').checked });
         if (g !== this._sessionGen) return;
-        const Probe = memoryAp ? OpenOcdEtmProbe :
-          cfg.boardId === 'hpm6800evk' && !imported && isZynqDapDevice(device) ? Hpm6800RttProbe : OpenOcdProbe;
+        let Probe = memoryAp ? OpenOcdEtmProbe : OpenOcdProbe;
+        if (isZynqDapDevice(device)){
+          if (memoryAp && cfg.transport === 'jtag') Probe = F103JtagRttProbe;
+          if (cfg.boardId === 'hpm6800evk' && !imported) Probe = Hpm6800RttProbe;
+        }
         this.probe = new Probe(device, cfg, line => console.debug('[OpenOCD]', line), true);
         // Keep a single ARM/JTAG read bounded. A full ring can entail
         // thousands of DAP_JTAG_Sequence round trips through Wasm.

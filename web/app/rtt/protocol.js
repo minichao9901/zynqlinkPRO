@@ -347,7 +347,9 @@ export class Rtt {
 
     /** RdOff 只推进**本轮真读到的**那么多个字节（分块读的关键：留到下一轮继续，不丢也不阻塞）*/
     const newRd = (e.rd + readNow) % e.size;
-    await this.mem.writeMem(this.upBase + ENTRY * ch + 16, u32leBytes(newRd));
+    const cursor = this.upBase + ENTRY * ch + 16;
+    if (this.mem.writeRttReadOffset) await this.mem.writeRttReadOffset(cursor, newRd, e.rd);
+    else await this.mem.writeMem(cursor, u32leBytes(newRd));
     this._backlog.set(ch, n - readNow);
 
     // 过载信号：水位（环形缓冲最多装 size-1）

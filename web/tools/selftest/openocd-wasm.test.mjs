@@ -19,7 +19,7 @@ test('ARM JTAG confirms the selected TAP without reading a SWD DPIDR', async t =
   t.mock.method(OpenOcdTargetSession.prototype,'command',async line => {
     const replies = {'target names':'h743.cpu0', init:'', 'h743.cpu0 curstate':'running',
       'h743.cpu0 cget -chain-position':'h743.cpu',
-      'capture {scan_chain}':'0 h743.cpu Y 0x6ba00477\n1 h743.boundary Y 0x06450041'};
+      'capture {scan_chain}':'0 h743.cpu Y 0x6ba00477 0x6ba00477 4 0x01 0x0f\n1 h743.boundary Y 0x06450041 0x00000000 5 0x01 0x03'};
     assert.ok(Object.hasOwn(replies,line),line);
     return replies[line];
   });
