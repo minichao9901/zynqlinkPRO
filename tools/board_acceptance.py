@@ -1162,34 +1162,64 @@ class BoardAcceptance:
         else:
             chip = self.chip
             speed = self.case['requestedHz'] // 1000
+        firmware = dict(pack_file(elf), kind='file')
+        options = dict(chip=chip, clockKhz=speed, reset=False,
+                       recoveryBounds=dict(start=start, end=stop, sectorSize=sector))
+        writes = []
+        if self.rv:
+            # The SDK ELF is sparse. Match the exact Web erase plan instead
+            # of erasing intervening sectors in the contiguous recovery copy.
+            plan = self.invoke('flash', 'programFile', firmware, dict(options, prepareOnly=True))
+            checked(plan['prepared'], 'Web rejected the Flash comparison plan')
+            for first, last in self.flash_ranges(plan['regions'], start, stop, sector):
+                image = folder / f'native-{first:08x}.private.bin'
+                image.write_bytes(original[first-start:last-start])
+                writes.append((first, image))
+        native_bytes = sum(path.stat().st_size for _, path in writes) if writes else len(original)
         with self.target.memory_fixture(folder / 'fixture', areas, capture_registers=True, keep_halted=True):
             with self.flash_recovery(folder, backup, lambda: confirm_flash(original),
                                      lambda: self.native_flash(executable, scripts, config, backup, start,
                                                                folder / 'restore-flash.log', geometry=(start, stop, sector))):
                 native = self.native_flash(executable, scripts, config, backup, start, folder / 'native-flash.log',
-                                           folder / 'native-clock.json', geometry=(start, stop, sector))
+                                           folder / 'native-clock.json', geometry=(start, stop, sector), writes=writes)
                 checked(confirm_flash(original), 'Native Flash changed baseline or sector neighbors')
                 begin = time.perf_counter()
                 # Let the current browser job finish and release its writer
                 # before handling Ctrl+C or issuing any recovery command.
                 with defer_interrupt() as interrupted:
-                    result = self.invoke('flash', 'programFile', dict(pack_file(elf), kind='file'),
-                                         dict(chip=chip, clockKhz=speed, reset=False,
-                                              recoveryBounds=dict(start=start, end=stop, sectorSize=sector)))
+                    result = self.invoke('flash', 'programFile', firmware, options)
                 if interrupted[0]:
                     raise KeyboardInterrupt
                 web = time.perf_counter() - begin
                 clock = verify_clock(self.read_clock(), self.case['requestedHz'])
+                checked(not writes or result['sectors'] == native_bytes // sector,
+                        'Web and native Flash sector counts differ')
                 checked(result['verified'] and confirm_flash(original), 'Web Flash readback differs from backup')
         # Flash and RAM have been restored before this independent boot check.
         reset_started = time.perf_counter()
         boot = self.reset_application(folder, heartbeat)
         write_json(folder / 'flash-boot.json', boot)
         return dict(nativeSeconds=native, webSeconds=web, clock=clock, bootSeconds=time.perf_counter()-reset_started,
-                    verified=True, flashRestored=True, affectedSectorBytes=len(original),
-                    nativeInputBytes=len(original), webInputBytes=result['bytes'],
+                    verified=True, flashRestored=True,
+                    affectedSectorBytes=native_bytes, recoveryCoverageBytes=len(original),
+                    nativeInputBytes=native_bytes, webInputBytes=result['bytes'],
                     resetMethod=boot['method'], heartbeat=boot['heartbeat'],
                     detail='Both timings include erase, program and verify over the same affected Flash range')
+
+    @staticmethod
+    def flash_ranges(regions, start, stop, sector):
+        ranges = []
+        for region in sorted(regions, key=lambda item: item['address']):
+            address, size = region['address'], region['bytes']
+            checked(start <= address < address+size <= stop, 'Web plan exceeds the Flash backup')
+            first = start + (address-start)//sector*sector
+            last = start + (address+size-start+sector-1)//sector*sector
+            if ranges and first <= ranges[-1][1]:
+                ranges[-1] = (ranges[-1][0], max(last, ranges[-1][1]))
+            else:
+                ranges.append((first, last))
+        checked(ranges, 'Web plan has no Flash sectors')
+        return ranges
 
     def native_flash_config(self, executable, scripts):
         options = ['adapter driver cmsis-dap', 'cmsis_dap_backend usb_bulk',
@@ -1261,7 +1291,8 @@ class BoardAcceptance:
         checked(not any(char in value for char in '{}\r\n\\'), 'Unsupported character in Tcl argument')
         return '{' + value + '}'
 
-    def native_flash(self, executable, scripts, config, backup, address, log_path, clock_path=None, *, geometry):
+    def native_flash(self, executable, scripts, config, backup, address, log_path, clock_path=None, *,
+                     geometry, writes=()):
         import threading
         import libusb_package
         import usb.core
@@ -1287,11 +1318,18 @@ class BoardAcceptance:
         report_geometry = ''.join(
             f'flash probe {index}; catch {{flash info {index} sectors}} geometry; echo $geometry; '
             for index in bank_indexes)
+        first, last, size = geometry
+        program_commands = []
+        for begin, path in writes or [(address, backup)]:
+            length = path.stat().st_size
+            checked(first <= begin < begin+length <= last and not (begin-first)%size and not length%size,
+                    'Native Flash operation exceeds the backed-up sectors')
+            program_commands.append(f'flash write_image erase {self.tcl(path)} {begin:#x} bin; '
+                                    f'verify_image {self.tcl(path)} {begin:#x} bin; ')
+        program = ''.join(program_commands)
         args = [executable, '-s', scripts, '-f', config, '-c',
                 'gdb_port disabled; telnet_port disabled; tcl_port disabled; init; halt; '
-                f'{report_geometry}echo ZL_FLASH_READY; {wait}'
-                f'flash write_image erase {self.tcl(backup)} {address:#x} bin; '
-                f'verify_image {self.tcl(backup)} {address:#x} bin; echo ZL_FLASH_DONE; shutdown']
+                f'{report_geometry}echo ZL_FLASH_READY; {wait}{program}echo ZL_FLASH_DONE; shutdown']
         with log_path.open('wb') as log:
             self.target.prepare_openocd(self.case['transport'])
             start = time.perf_counter()
@@ -1319,7 +1357,6 @@ class BoardAcceptance:
                     raise KeyboardInterrupt
                 checked(ready.wait(15) and child.poll() is None, 'Native Flash did not report bank geometry')
                 begin = time.perf_counter()
-                first, last, size = geometry
                 reported = set(read_flash_sectors(log_path.read_text(encoding='utf-8', errors='replace')))
                 checked(all((at, size) in reported for at in range(first, last, size)),
                         'Physical Flash sectors differ from the backed-up geometry')

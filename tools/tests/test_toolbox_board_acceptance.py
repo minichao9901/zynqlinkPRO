@@ -36,6 +36,15 @@ class TestBoardAcceptance(unittest.TestCase):
             self.assertIn('set BOARD hpm6800evk\nset PROBE cmsis_dap\nsource [find hpm6800_all_in_one.cfg]', cfg)
             self.assertTrue(cfg.endswith('adapter speed 25000\nreset_config none\n'))
 
+    def test_flash_comparison_uses_sparse_web_sector_ranges(self):
+        from tools.board_acceptance import BoardAcceptance
+        regions = [{'address': 0x80003000, 'bytes': 45008},
+                   {'address': 0x80000400, 'bytes': 3216}]
+        ranges = BoardAcceptance.flash_ranges(regions, 0x80000000, 0x8000e000, 0x1000)
+        self.assertEqual(ranges, [(0x80000000, 0x80002000), (0x80003000, 0x8000e000)])
+        with self.assertRaisesRegex(RuntimeError, 'exceeds'):
+            BoardAcceptance.flash_ranges(regions, 0x80000000, 0x8000d000, 0x1000)
+
     def test_plan_uses_one_link_rate_and_two_scope_windows(self):
         for board, (hz, links, _) in BOARDS.items():
             cases = plan(board, None, FEATURES, 14)
@@ -290,6 +299,7 @@ class TestBoardAcceptance(unittest.TestCase):
                 actions = Mock()
                 actions.attach_mock(dispose, 'dispose')
                 actions.attach_mock(popen, 'popen')
+                (folder / 'private.bin').write_bytes(bytes(0x800))
                 with self.assertRaises(KeyboardInterrupt):
                     driver.native_flash('openocd', folder, folder / 'board.cfg', folder / 'private.bin',
                                         0x08000000, folder / 'writer.log', geometry=(0x08000000, 0x08000800, 0x800))
