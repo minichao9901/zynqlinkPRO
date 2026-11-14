@@ -14,8 +14,9 @@
  */
 import { releaseLocalProbeUsers, prepareProbeHandoff } from '../core/probe-users.js';
 import { runProbeOperation } from '../core/probe-manager.js';
-import { waitMs } from '../core/pace.js';
+import { waitMs, yieldTask } from '../core/pace.js';
 import { $, setStatus, seg, esc } from '../ui/dom.js';
+import { toast } from '../ui/toast.js';
 import { store } from '../core/store.js';
 import { webClockKhz } from '../core/target-clock.js';
 import { constrainClockSelect } from '../ui/target-clock.js';
@@ -175,7 +176,7 @@ export class ScopeView {
       this._needDraw = true;
       this.setStatusText('已清除测量游标 A/B', '');
     });
-    $('sc-raw').addEventListener('change', e => { this.captureRaw = e.target.checked; if (!this.captureRaw) this.raw = []; });
+    $('sc-raw').addEventListener('change', e => { e.target.checked = this.setRawCapture(e.target.checked); });
     $('sc-csv').addEventListener('click', () => this.exportCsv());
     $('sc-save').addEventListener('click', () => this.saveRaw());
     $('sc-open').addEventListener('click', () => this.jspInput.click());
@@ -831,6 +832,9 @@ export class ScopeView {
   async _stopData(){
     let failure;
     const drainBeforeQuiesce=this.transport?.epAddr===0x87;
+    const browserHss = drainBeforeQuiesce && !this.transport?.device?.nativeService;
+    const counted = browserHss && this._drainGen != null && this.supportsMetrics &&
+      !(this._captureFlags & P.SCOPE_FLAG.DISCARD);
     if (this._stopUnconfirmed && !this.hid) failure = new Error('探针未连接，不能确认 STOP');
     // Zynq STOP can report busy until its final PL/USB packets are drained.
     // Keep the consumer alive during that handshake, then retire native reads.
@@ -848,9 +852,21 @@ export class ScopeView {
     }}
     catch (e) { failure = e; }
     try { if(drainBeforeQuiesce){
-      if(this.transport?.drain)await this.transport.drain();
+      if (counted && !failure){
+        const final = await this.readScopeMetrics({fresh:true});
+        if (!final || (final.flags & 0x100) || !final.bytes || final.bytes % P.PACKET)
+          throw Error('探针未返回有效的停止计数');
+        const complete = () => this.receivedSamples === final.produced &&
+          this.packets * P.PACKET === final.bytes && !this.stream.buf.length &&
+          !this._awaitDef && !this.defMismatch && !this.lost && !this.decodeErr && !this.stream.resyncs;
+        await this.transport.drainCounted(complete);
+      } else if (browserHss && !failure && this._drainGen == null) {
+        // Retry only the hardware STOP/USB retirement after a failed capture.
+        // The old data is still incomplete and must never be relabelled.
+        await this.transport.drainCounted(() => true);
+      } else if(this.transport?.drain)await this.transport.drain();
       else await this.transport?.quiesce?.();
-    }} catch (e) { failure ||= e; }
+    }} catch (e) { failure ||= e; this.metricsError = e.message; }
     try { await this.transport?.stop(); } catch (e) { failure ||= e; }
     if (failure){
       this._stopUnconfirmed = true;
@@ -1195,7 +1211,8 @@ export class ScopeView {
     else if (!host){
       if (this._stopUnconfirmed && !this.hid) throw new Error('采样停止尚未确认，请先重新连接探针，再点停止');
       if (hadData || this._startTouched || this.transport?.running || this._stopUnconfirmed) await this._stopData();
-      await this.readScopeMetrics({fresh: true}).catch(e => { this.metricsError = e.message; });
+      if (hadData || !this.metricsError)
+        await this.readScopeMetrics({fresh: true}).catch(e => { this.metricsError = e.message; });
     }
     this._capturing=false;this._drainGen=null;
     if(this.transport?.epAddr===0x87 && this.probeMetrics && !(this._captureFlags & P.SCOPE_FLAG.DISCARD)){
@@ -1623,8 +1640,10 @@ export class ScopeView {
           // 所以界面一律用生效值显示（见 web-handoff-riscv-scope.md）
           this.setBackend(d.riscv ? P.BACKEND.RISCV : P.BACKEND.SWD, 'def');
           this.updatePlan();
-          // 探针回报的 span 数 vs 本地计划：不一致就说明两边的合并规则不一样了（改一边忘了另一边）
-          if (d.spans && this.plan && d.spans !== this.plan.spans.length){
+          // Zynq HSS writes the variable count to this legacy DEF field.
+          // Check actual variable definitions below on both transports.
+          const zynq = this.transport?.epAddr === 0x87 && !this._replaying;
+          if (!zynq && !this._replaying && d.spans && this.plan && d.spans !== this.plan.spans.length){
             this.planMismatch = `探针算出 ${d.spans} 个 span，本地计划是 ${this.plan.spans.length} 个`;
           } else {
             this.planMismatch = null;
@@ -1716,7 +1735,7 @@ export class ScopeView {
             this.usbDrop = s.usbErr;
             this.readErrors = s.swdErr;
           }
-          this.swdMhz = s.swdMhz;
+          if (!this.defVars?.length) this.swdMhz = s.swdMhz;
           if (s.periodUs) this.periodActualUs = s.periodUs;
           // STAT 里没有后端位，但 RISC-V 下探针不上报 SWD 时钟（swdMhz=0）—— 只在 DEF 还没到时用它兜底，
           // 避免把"还没收到 DEF"误判成后端变了
@@ -1728,8 +1747,20 @@ export class ScopeView {
     this._needDraw = true;
   }
 
+  captureInProgress(){
+    return !!(this.running || this._capturing || this._starting || this._stopPromise ||
+      this._releasing || this._stopUnconfirmed);
+  }
+
+  setRawCapture(enabled){
+    if (!this.captureInProgress()) this.captureRaw = !!enabled;
+    return this.captureRaw;
+  }
+
   clear(){
-    if(!this._capturing){this.receivedSamples=0;this.tailCountDelta=null;}
+    if (this.captureInProgress() || this._csvExporting) return false;
+    this.receivedSamples = 0;
+    this.tailCountDelta = null;
     this.store?.reset();
     this.stream = new P.PacketStream();
     this.seqT = new P.SeqTracker();
@@ -1807,26 +1838,54 @@ export class ScopeView {
   }
 
   // ================================================================= 导出 / 回放
-  exportCsv(){
+  async exportCsv(){
+    if (this._csvExporting) return false;
     const st = this.store;
-    if (!st?.count){ this.setStatusText('还没有数据可导出', 'warn'); return; }
+    if (!st?.count){ this.setStatusText('还没有数据可导出', 'warn'); return false; }
+
+    // Capture the prefix and its time basis now. Live capture can append to
+    // the same typed arrays. clear() cannot overwrite this prefix until done.
     const n = st.count;
+    const time = Object.assign(Object.create(SampleStore.prototype), {
+      count: n, tsN: st.tsN, tsEvery: st.tsEvery, tsUs: st.tsUs.subarray(0, st.tsN),
+      t0Us: st.t0Us, tLastUs: st.tLastUs,
+    });
     const head = ['t_us', ...st.vars.map(v => v.name)].join(',');
     const parts = [head + '\n'];
-    let buf = '';
-    for (let i = 0; i < n; i++){
-      const row = [st.timeAt(i).toFixed(0)];
-      for (const ch of st.channels) row.push(numToCsv(ch.value(i)));
-      buf += row.join(',') + '\n';
-      if (buf.length > 1 << 20){ parts.push(buf); buf = ''; }      // 1 MB 一块，别一次拼 200 MB 字符串
+    const filename = `scope-${fileStamp()}.csv`;
+    this._csvExporting = true;
+    this.syncDataButtons();
+    try {
+      // Yield to input, rendering and USB delivery between batches.
+      for (let start = 0; start < n; start += 2048){
+        await yieldTask();
+        let rows = '';
+        for (let i = start; i < Math.min(n, start + 2048); i++){
+          const row = [time.timeAt(i).toFixed(0)];
+          for (const ch of st.channels) row.push(numToCsv(ch.value(i)));
+          rows += row.join(',') + '\n';
+        }
+        parts.push(new Blob([rows]));
+      }
+      const blob = new Blob(parts, { type: 'text/csv' });
+      download(filename, blob, 'text/csv');
+      const status = `已导出 CSV：${n} 行 × ${st.vars.length + 1} 列`;
+      if (!this.captureInProgress()) this.setStatusText(status, 'ok');
+      else toast(status, 'ok');
+      return { name: filename, rows: n, columns: st.vars.length + 1, bytes: blob.size };
+    } catch (error){
+      const status = '导出 CSV 失败：' + (error?.message || error);
+      if (!this.captureInProgress()) this.setStatusText(status, 'err');
+      else toast(status, 'err');
+      return false;
+    } finally {
+      this._csvExporting = false;
+      this.syncDataButtons();
     }
-    if (buf) parts.push(buf);
-    const blob = new Blob(parts, { type: 'text/csv' });
-    download(`scope-${fileStamp()}.csv`, blob, 'text/csv');
-    this.setStatusText(`已导出 CSV：${n} 行 × ${st.vars.length + 1} 列`, 'ok');
   }
 
   saveRaw(){
+    if (this.captureInProgress()) return false;
     if (!this.raw.length){ this.setStatusText('没有记录原始包（先勾上「记录原始包」再采样）', 'warn'); return; }
     const blob = new Blob(this.raw, { type: 'application/octet-stream' });
     download(`scope-${fileStamp()}.jsp`, blob, 'application/octet-stream');
@@ -1905,7 +1964,19 @@ export class ScopeView {
     if (kind === 'err'){ const e = $('sc-err'); if (e) e.textContent = text; }
   }
 
+  syncDataButtons(){
+    const busy = this.captureInProgress();
+    for (const [id, disabled] of [
+      ['sc-clear', busy || this._csvExporting], ['sc-raw', busy],
+      ['sc-save', busy], ['sc-csv', this._csvExporting],
+    ]){
+      const button = $(id);
+      if (button) button.disabled = !!disabled;
+    }
+  }
+
   syncButtons(){
+    this.syncDataButtons();
     $('sc-start').disabled = !!(this.running || this._starting || this._stopPromise || this._releasing);
     $('sc-stop').disabled = !!this._stopPromise || (!this.running && !this._starting);
     const target = $('sc-target'); if (target) target.disabled = !!(this.running || this._starting || this._stopPromise || this._releasing);
@@ -1962,7 +2033,7 @@ export class ScopeView {
     this._applyMhzUi();
     const err = $('sc-err');
     if (err){
-      err.textContent = this.planMismatch ? `⚠ ${this.planMismatch}` : this.metricsError ? `⚠ 计数读取失败：${this.metricsError}`
+      err.textContent = this.metricsError ? `⚠ ${this.metricsError}` : this.planMismatch ? `⚠ ${this.planMismatch}`
         : (this.stream.resyncs ? `重同步 ${this.stream.resyncs} 次 / 垃圾 ${this.stream.junk} B` : '');
     }
     const perCol = this.renderer.span / Math.max(2, this.renderer.plotW);
@@ -2065,5 +2136,7 @@ export class ScopeView {
 function numToCsv(v){
   if (Number.isInteger(v)) return String(v);
   if (!Number.isFinite(v)) return '';
-  return v.toPrecision(9).replace(/0+$/, '').replace(/\.$/, '');
+  const [mantissa, exponent] = v.toPrecision(9).split('e');
+  const significant = mantissa.replace(/0+$/, '').replace(/\.$/, '');
+  return exponent === undefined ? significant : significant + 'e' + exponent;
 }

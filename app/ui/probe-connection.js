@@ -1,6 +1,7 @@
 import { authorizedOpenOcdDevices, openOcdUsbSupported, rememberOpenOcdDevice, selectOpenOcdDevice } from '../core/openocd-usb.js';
 import { nativeProbeEnabled } from '../core/native-probe.js';
 import { runProbeOperation } from '../core/probe-manager.js';
+import { withTimeout } from '../core/pace.js';
 import { AkaLinkHid, authorizedHidDevices, PID, rememberHidDevice, selectHidDevice, USAGE_PAGE, VID } from '../hid/probe.js';
 import { toast } from './toast.js';
 
@@ -19,6 +20,7 @@ export function initProbeConnection(tools){
   const usbSupported = openOcdUsbSupported();
   const hidSupported = AkaLinkHid.supported();
   let authorizedUsb = [], authorizedHid = [], usbScan = 0, hidScan = 0;
+  let checkingGrants = !native && !offline;
   const updateUsb = async () => {
     const scan = ++usbScan;
     const devices = await authorizedOpenOcdDevices().catch(() => []);
@@ -26,7 +28,7 @@ export function initProbeConnection(tools){
   };
   const updateHid = async () => {
     const scan = ++hidScan;
-    const devices = await authorizedHidDevices().catch(() => []);
+    const devices = await withTimeout(authorizedHidDevices(), 5000, '枚举已授权 HID').catch(() => []);
     if (scan === hidScan) authorizedHid = devices.filter(d => d.vendorId === VID && d.productId === PID &&
       d.collections?.some(c => c.usagePage === USAGE_PAGE));
   };
@@ -41,7 +43,8 @@ export function initProbeConnection(tools){
       failures.some(failure => failure.owner !== 'serial') || !!(tools.rtt.probe || tools.dbg.session?.connected ||
         tools.hid.dev.connected || tools.scope.hid || tools.scope.transport || tools.etm.probe);
     const usable = !offline && (usbSupported || hidSupported);
-    connect.disabled = busy || !(usable || mock(activeTab()));
+    const mockTab = mock(activeTab());
+    connect.disabled = busy || !mockTab && (!usable || checkingGrants);
     disconnect.disabled = busy || !(hasSession || usb || hid);
     usbButton.disabled = busy || offline || !usbSupported;
     hidButton.disabled = busy || offline || !hidSupported;
@@ -52,7 +55,8 @@ export function initProbeConnection(tools){
     connection.usb = !!usb;
     connection.hid = !!hid;
     const state = `USB ${usb ? '就绪' : '未连接'} · HID ${hid ? '就绪' : '未连接'}`;
-    const detail = offline ? '离线验收模式，硬件访问已禁用' : [message, state].filter(Boolean).join('\n');
+    const detail = offline ? '离线验收模式，硬件访问已禁用'
+      : checkingGrants ? '正在读取浏览器已授权的探针…' : [message, state].filter(Boolean).join('\n');
     if (status.textContent !== detail) status.textContent = detail;
     const finishHid = awaitingHid() && !mock(activeTab());
     const label = finishHid ? '连接 HID' : '连接探针';
@@ -188,8 +192,10 @@ export function initProbeConnection(tools){
     }
   };
   if (!native && !offline){
-    updateUsb();
-    updateHid();
+    Promise.all([updateUsb(), updateHid()]).finally(() => {
+      checkingGrants = false;
+      render();
+    });
     navigator.usb?.addEventListener('connect', updateUsb);
     navigator.hid?.addEventListener('connect', updateHid);
     navigator.usb?.addEventListener('disconnect', ({device}) => {

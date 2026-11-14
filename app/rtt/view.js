@@ -12,8 +12,9 @@ import { FileRecorder, recordButtonState } from '../core/recorder.js';
 import { Rtt } from './protocol.js';
 import { OpenOcdProbe } from '../core/openocd-probe.js';
 import { OpenOcdEtmProbe } from '../core/openocd-etm.js';
-import { openOcdUsbSupported, selectOpenOcdDevice } from '../core/openocd-usb.js';
+import { isZynqDapDevice, openOcdUsbSupported, selectOpenOcdDevice } from '../core/openocd-usb.js';
 import { makeOpenOcdProfile } from '../core/openocd-profile.js';
+import { Hpm6800RttProbe } from './hpm6800-probe.js';
 import { HPM_BOARDS, hpmBoard } from '../targets/hpm/porting.js';
 import { selectedHpmBoard, rememberHpmBoard } from '../targets/hpm/select.js';
 import { MockProbe } from './mock.js';
@@ -323,7 +324,8 @@ export class RttView {
         });
         device ??= await selectOpenOcdDevice({ all:$('r-usb-all').checked });
         if (g !== this._sessionGen) return;
-        const Probe = memoryAp ? OpenOcdEtmProbe : OpenOcdProbe;
+        const Probe = memoryAp ? OpenOcdEtmProbe :
+          cfg.boardId === 'hpm6800evk' && !imported && isZynqDapDevice(device) ? Hpm6800RttProbe : OpenOcdProbe;
         this.probe = new Probe(device, cfg, line => console.debug('[OpenOCD]', line), true);
         this._opening = this.probe.connect();
         try { await this._opening; }
@@ -411,6 +413,7 @@ export class RttView {
     if (failure) throw failure;
     this.rtt = null;
     this._needsRttReconnect = false;
+    this._ringBackpressure = false;
     this.suppManual = false;
     if (this.suppressed) this._setSuppressed(false);
     this._uiConnected(false);
@@ -453,6 +456,8 @@ export class RttView {
       await probe.recoverDebugPort();
       if (!active()) return;
     }
+    await probe.prepareRttScan?.();
+    if (!active()) return;
     const addrText = String($('r-addr').value || '').trim();
     const addr = addrText ? Number(addrText) : 0;
     const ranges = parseRanges($('r-range').value);
@@ -493,6 +498,8 @@ export class RttView {
     $('r-down').textContent = inff.maxDown;
     const nm = await rtt.name('up', 0);
     if (!active()) return;
+    await probe.useRttMemory?.(inff);
+    if (!active()) return;
     this.rtt = rtt;
     this._needsRttReconnect = false;
     $('r-chlabel').textContent = `下行 ch0${nm ? ' · ' + nm : ''}`;
@@ -510,6 +517,7 @@ export class RttView {
 
     this.stats.polls = 0; this.stats.bytes = 0; this.stats.lost = 0;
     this.stats.lastBytes=0;this.stats.lastPolls=0;this._lastStatsAt=performance.now();
+    this._ringBackpressure = false;
     this.fullPolls = 0; this.highPolls = 0; this.peak = 0; this._faults = 0; this._corruptRun = 0;
     this._pollT0 = Date.now(); this._zeroHinted = false; this._zeroHintSet = false;   // 见 _stats 里的"零速率"诊断
 
@@ -521,6 +529,9 @@ export class RttView {
         const { bytes, lost, high, level, corrupt } = await rtt.readUp(0);
         if (!active()) return;
         this._faults = 0;
+        // Protect the polling loop before rendering can hide a high data rate.
+        this._ringBackpressure = Boolean(probe.rttPollLimit && high && bytes.length >= probe.rttPollLimit / 2);
+        if (this._ringBackpressure) this._highspeedGate(this.stats.rate);
         if (bytes.length) this._ingest(bytes, new Date());
         if (lost) this.stats.lost += lost;
         if (high) this.highPolls++;
@@ -771,6 +782,7 @@ export class RttView {
   // ================= 统计 / 保存 =================
   summary(){
     return {connected:!!this.probe,running:this.running,backend:this.backend || 'webusb',
+      transport:this.probe?.name ?? null,
       stats:{...this.stats},controlBlock:this.rtt?.addr??null,
       bufferedBytes:this.recBytes,displaySuppressed:this.suppressed,error:$('r-err').textContent};
   }
@@ -832,18 +844,22 @@ export class RttView {
       this.suppManual = false;
       return;
     }
-    if (!this.suppressed && !this.suppManual && r > RttView.HS_OFF) this._setSuppressed(true, r);
-    else if (this.suppressed && r < RttView.HS_ON){ this._setSuppressed(false); this.suppManual = false; }
+    if (!this.suppressed && !this.suppManual && (this._ringBackpressure || r > RttView.HS_OFF)) this._setSuppressed(true, r);
+    else if (!this._ringBackpressure && r < RttView.HS_ON){
+      if (this.suppressed) this._setSuppressed(false);
+      this.suppManual = false;
+    }
   }
 
   _setSuppressed(on, r = 0){
     if (this.suppressed === on) return;
     this.suppressed = on;
     if (on){
-      setStatus($('r-err'), `高速 ${fRate(r)}：渲染已停（收数/记录不受影响）· 点此恢复显示`, 'err');
+      const reason = this._ringBackpressure ? 'RTT 缓冲积压' : `高速 ${fRate(r)}`;
+      setStatus($('r-err'), `${reason}：渲染已停，继续接收和记录 · 点此恢复显示`, 'warn');
       $('r-err').title = '点击恢复显示。若速率仍高于阈值会再次自动关闭';
 
-      const note = `\r\n[高速 ${fRate(r)}：已停止渲染以省 CPU —— 数据仍在收（统计、计数、记录到文件都照常）· 点状态栏可恢复显示]\r\n`;
+      const note = `\r\n[${reason}：已暂停渲染，继续接收和记录 · 点状态栏可恢复显示]\r\n`;
       if (this.mode === 'term' && this.term) this._termWrite(new TextEncoder().encode(note), new Date());
       else this.tx.push(new TextEncoder().encode(note), new Date());
     } else {

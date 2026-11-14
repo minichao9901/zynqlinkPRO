@@ -61,6 +61,13 @@ export class VendorEpTransport {
   configureReadAhead(wireBps){
     if (this.running) throw new Error('先停止采样再改变预读窗口');
     if (!this._adaptiveReadAhead) return;
+    if (this.epAddr === 0x87){
+      // The probe sends full 512-byte frames without a USB short packet.
+      // A longer WebUSB read can hold the final frames indefinitely.
+      this.chunkBytes = 512;
+      this.inFlight = Math.max(16, Math.min(64, Math.ceil(wireBps * .020 / this.chunkBytes)));
+      return;
+    }
     // Provision at least 30 ms of native reads where the small window no
     // longer covers it. HPM's 8-channel/25 kHz stream is only 0.85 MB/s,
     // but decoding/drawing can pause JS for 25 ms: the old 1 MB/s cutoff
@@ -162,6 +169,10 @@ export class VendorEpTransport {
    *        界面照旧显示"采样中"，而一个字节都不来（2026-10 代码审查）。
    */
   async prepare(){
+    if (this.epAddr === 0x87 && !this.claimed && !dirtyDevices.has(this.device)){
+      await this.open();
+      return;
+    }
     if (!dirtyDevices.has(this.device)) return;
     if (await this._retireReads()){
       await withTimeout(this.open(), 5000, '重开采样数据端点');
@@ -335,6 +346,21 @@ export class VendorEpTransport {
       this.gen++;dirtyDevices.add(this.device);
       throw Error('无法确认采样尾部已排空'+(this._drainError ? '：'+this._drainError.message : ''));
     }
+  }
+
+  async drainCounted(isComplete, timeoutMs=2000){
+    const deadline = performance.now() + timeoutMs;
+    while (!isComplete()){
+      if (this._fatal || performance.now() >= deadline)
+        throw Error('无法确认采样尾部已排空：' + (this._fatal || '未收到探针报告的全部采样包'));
+      await sleep(10);
+    }
+    // A browser can have empty reads parked on the endpoint forever. Close
+    // only this interface/device lease once the final counters agree.
+    this.running = false;
+    this.gen++;
+    if (!await this._retireReads()) throw Error('完整采样已接收，但采样端点仍被共享');
+    this.workers = [];
   }
 
   async quiesce(timeoutMs){

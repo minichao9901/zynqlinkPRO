@@ -3,42 +3,30 @@
  * ELF/HEX 自带地址；BIN 没有地址信息，由调用方给基地址。
  */
 
-/**
- * 相邻（间隔 ≤ 4KB）的段合并成连续段，空隙补 0xFF（flash 擦除后的默认值）。
- *
- * 🚨 **重叠的段直接报错，不合并**（2026-10 代码审查）：老代码遇到 `s.addr < end` 时
- *    `gap` 被 `Math.max(0, …)` 夹成 0，后一段就被**接在前一段末尾**（地址整体抬高），
- *    而不是落到它自己的地址上 —— 既不报错也不提示，数据静默错位。
- *    正常 ELF 的各节不重叠，触发它的是 HEX 里的重复记录（或者坏文件）。
- */
+/** Only merge contiguous records. An address omitted by the image is not a write. */
 function mergeSegs(segs){
   segs.sort((a, b) => a.addr - b.addr);
   const out = [];
-  for (const s of segs){
-    const last = out[out.length - 1];
-    if (last && s.addr < last.addr + last.data.length){
-      const end = last.addr + last.data.length;
-      throw new Error(`固件里有两段重叠的地址：0x${s.addr.toString(16)} 起的 ${s.data.length} B ` +
-        `落在前一段 0x${last.addr.toString(16)}..0x${(end - 1).toString(16)} 里面 —— ` +
-        `文件里有重复/冲突的记录（HEX 重复段、或两个节映射到同一地址），不敢猜哪个对，请先修好文件`);
+  for (let first = 0; first < segs.length;){
+    const start = segs[first].addr;
+    let end = start;
+    let next = first;
+    while (next < segs.length && segs[next].addr <= end){
+      const { addr, data } = segs[next];
+      if (addr < end)
+        throw new Error(`固件区段重叠：0x${addr.toString(16)} 落在 0x${start.toString(16)}..0x${(end - 1).toString(16)}`);
+      end = addr + data.length;
+      if (end > 0x100000000) throw new Error('固件地址范围超过 32 位');
+      next++;
     }
-    if (last && s.addr <= last.addr + last.data.length + 4096){
-      const end = last.addr + last.data.length;
-      const gap = s.addr - end;                        // 上面已保证 ≥ 0
-      const merged = new Uint8Array(end - last.addr + gap + s.data.length);
-      merged.set(last.data);
-      merged.fill(0xff, end - last.addr, end - last.addr + gap);
-      merged.set(s.data, end - last.addr + gap);
-      last.data = merged;
-      // 🚨 空洞被填成 0xFF 了：语义上没错（未编程=0xFF），但**必须记下来**，
-      //    否则这份"填平"的数据既写又校验，一路静默通过，而镜像其实缺了字节。
-      if (gap > 0){
-        out.gaps ||= [];
-        out.gaps.push({ addr: end, length: gap });
-      }
-    } else {
-      out.push({ addr: s.addr, data: s.data });
+    // Allocate the run once, even for a HEX file with thousands of short records.
+    if (next === first + 1) out.push(segs[first]);
+    else {
+      const data = new Uint8Array(end - start);
+      for (let i = first; i < next; i++) data.set(segs[i].data, segs[i].addr - start);
+      out.push({ addr: start, data });
     }
+    first = next;
   }
   return out;
 }
@@ -201,7 +189,7 @@ export function parseIntelHex(text){
     const addr = ((bin[1] << 8) | bin[2]) >>> 0;
     const type = bin[3];
     const data = bin.slice(4, 4 + len);
-    if (type === 0x00) segs.push({ addr: (upper + addr) >>> 0, data });
+    if (type === 0x00){ if (data.length) segs.push({ addr: upper + addr, data }); }
     else if (type === 0x01) break;                             // EOF
     else if (type === 0x04) upper = (((data[0] << 8) | data[1]) << 16) >>> 0;   // 扩展线性地址
     else if (type === 0x02) upper = (((data[0] << 8) | data[1]) << 4) >>> 0;    // 扩展段地址
@@ -214,10 +202,8 @@ export function parseIntelHex(text){
 /**
  * 找出相邻区段之间的"空洞"（没有任何数据记录覆盖的地址区间）。
  * 只报**内部**空洞：首段之前 / 末段之后不算（那是镜像范围之外）。
- * 用途见 view.js：objcopy 的 ihex 输出会省掉整段 0x00，烧这种 hex 会漏字节。
  */
 export function findGaps(regions){
-  if (Array.isArray(regions?.gaps)) return regions.gaps;   // mergeSegs 已经记下来的（准确）
   const out = [];
   const sorted = [...regions].sort((a, b) => a.addr - b.addr);
   for (let i = 1; i < sorted.length; i++){
@@ -232,6 +218,8 @@ export function parseFirmware(name, u8, base){
   const n = String(name || '').toLowerCase();
   if (n.endsWith('.elf') || n.endsWith('.axf') || n.endsWith('.out')) return parseElfImage(u8);
   if (n.endsWith('.hex') || n.endsWith('.ihex')) return parseIntelHex(new TextDecoder().decode(u8));
-  if (!base) throw new Error('.bin 没有地址信息：请填基地址（STM32 通用默认 0x08000000）');
-  return [{ addr: base >>> 0, data: u8 }];
+  if (!Number.isInteger(base) || base < 0 || base > 0xffffffff)
+    throw new Error('BIN 烧录基地址须为有效的 32 位地址');
+  if (base + u8.length > 0x100000000) throw new Error('BIN 地址范围超过 32 位');
+  return [{ addr: base, data: u8 }];
 }

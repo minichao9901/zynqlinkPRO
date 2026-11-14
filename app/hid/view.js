@@ -395,8 +395,8 @@ export class RttCdcView {
       mock: !!this.mock, reason: 'RTT 转发要使用探针',
     });
     try { return await this._activeTask; }
-    catch (e){ this.render({ error: e.message }); return false; }
-    finally { this._activeTask = null; this._starting = false; }
+    catch (e){ this._statusError = e.message; return false; }
+    finally { this._activeTask = null; this._starting = false; this.render({ error:this._statusError }); }
   }
 
   async _startBridgeNow(auto, g){
@@ -462,7 +462,7 @@ export class RttCdcView {
       this.probeManager?.forget('hid');
       return result;
     }
-    finally { this._stopPromise = null; }
+    finally { this._stopPromise = null; this.render({ error:this._statusError }); }
   }
 
   async _stopBridgeNow(fromManager){
@@ -476,15 +476,22 @@ export class RttCdcView {
         });
       }
       return await this._sendStopNow();
-    } catch (e){ this.render({ error: e.message }); throw e; }
+    } catch (e){ this._statusError = e.message; throw e; }
   }
 
   async _sendStopNow(){
     try {
-      const r = await this.dev.stop();
+      const deadline = Date.now() + 3000;
+      let r;
+      do {
+        r = await this.dev.stop();
+        // The probe keeps STOP pending while forwarding its final CDC bytes.
+        if (r?.rc !== -7) break;
+        if (Date.now() >= deadline) throw new Error('停止 RTT 转发超时（探针仍在排空）');
+        await waitMs(20);
+      } while (true);
       if (r?.rc < 0 && r.rc !== START_PENDING) throw new Error(startRcText(r.rc, this.isRiscv));
       this._acceptStatus(r.status);
-      const deadline = Date.now() + 3000;
       while (this.last?.running || this.last?.startRc === START_PENDING){
         if (Date.now() >= deadline) throw new Error('停止 RTT 转发超时（探针还在运行）');
         await waitMs(40);

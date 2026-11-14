@@ -6,6 +6,9 @@ const filter = { vendorId:0x0d28 };
 const readResult = ({ status, data }) => ({ status, data });
 let selectedDevice = null;
 
+export const isZynqDapDevice = device => device?.vendorId === 0x0d28 && device.productId === 0x0204 &&
+  device.manufacturerName === 'CherryUSB' && device.productName === 'CMSIS-DAP';
+
 export function rememberOpenOcdDevice(device){ selectedDevice = device; }
 
 export async function authorizedOpenOcdDevices(){
@@ -22,7 +25,7 @@ async function syncZynqQueue(device){
   }, length);
   const before = await control(0x5b, 32);
   // Older firmware lacks the queue status request.
-  if (before.status === 'stall') return;
+  if (before.status === 'stall') return false;
   if (before.status !== 'ok' || before.data?.byteLength !== 32) throw Error('DAP 队列状态无效');
   const reset = await control(0x5a, 4);
   if (reset.status !== 'ok' || reset.data?.byteLength !== 4 || reset.data.getUint32(0, true) !== 0x504144)
@@ -34,6 +37,7 @@ async function syncZynqQueue(device){
       after.data.getUint32(12, true) === before.data.getUint32(12, true) ||
       [0,4,8].some(offset => after.data.getUint32(offset, true)))
     throw Error('DAP 队列新 epoch 或空闲状态未确认');
+  return true;
 }
 
 export async function selectOpenOcdDevice({ all = false, forcePick = false } = {}){
@@ -56,8 +60,8 @@ export const openOcdUsbSupported = () => nativeProbeEnabled() || !!globalThis.na
 // libusb performs USB calls from the Wasm worker. Keep the actual handle and
 // native-service delivery identity with the workbench's existing USB lease.
 export class OpenOcdUsb {
-  constructor(device){
-    this.lease = new UsbLease(device, 'dap');
+  constructor(device, owner = 'dap'){
+    this.lease = new UsbLease(device, owner);
     this.device = this.lease.device;
     this.zynq = device.nativeService || (device.vendorId === 0x0d28 &&
       device.productId === 0x0204 && device.manufacturerName === 'CherryUSB');
@@ -88,13 +92,14 @@ export class OpenOcdUsb {
             (this.zynq && (iface.interfaceNumber !== 0 || out.endpointNumber !== 2 || input.endpointNumber !== 1)))
           throw Error('USB 接口不是 CMSIS-DAP v2');
         await this.lease.claim(iface.interfaceNumber, [out.endpointNumber, input.endpointNumber | 128]);
-        if (this.zynq && !d.nativeService) await syncZynqQueue(d);
+        this.synchronized = d.nativeService ? d.dapSynchronized : this.zynq && await syncZynqQueue(d);
         this.out = out;
         this.input = input;
         return;
       }
       case 'releaseInterface':
         await this.lease.release(args[0]);
+        this.synchronized = false;
         this.out = this.input = null;
         return;
       case 'transferIn':
@@ -119,6 +124,7 @@ export class OpenOcdUsb {
 
   async close(){
     await this.lease.close();
+    this.synchronized = false;
     this.out = this.input = null;
   }
 }
