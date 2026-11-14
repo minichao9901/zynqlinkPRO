@@ -182,17 +182,20 @@ class TestBoardAcceptance(unittest.TestCase):
         from tools.run_board_acceptance import ROOT
         source = (ROOT / 'web/app/hid/view.js').read_text(encoding='utf-8')
         values = set(re.findall(r"\bv: '(\d+)'", source.split('const hex')[0]))
-        for board, (hz, _, _) in BOARDS.items():
-            driver = self.driver(board)
-            driver.case = {'requestedHz': hz}
-            driver.web = Mock()
-            driver.port = Mock(return_value='COM5')
-            driver.invoke = Mock(return_value={'open': True, 'connected': True, 'bytes': 16})
-            driver.web.read.return_value = {'options': [{'label': 'CMSIS-DAP (COM5)', 'value': 'j7'}]}
-            self.assertEqual(driver.cdc_start(), 'COM5')
-            [setting] = [call.args[2] for call in driver.web.set.call_args_list if call.args[1] == '#h-clock']
-            self.assertIn(setting, values)
-            self.assertEqual(int(setting), hz)
+        for board, (hz, transports, _) in BOARDS.items():
+            for transport in transports:
+                driver = self.driver(board)
+                driver.case = {'requestedHz': hz, 'transport': transport}
+                driver.web = Mock()
+                driver.port = Mock(return_value='COM5')
+                driver.invoke = Mock(return_value={'open': True, 'connected': True, 'bytes': 16})
+                driver.web.read.return_value = {'options': [{'label': 'CMSIS-DAP (COM5)', 'value': 'j7'}]}
+                self.assertEqual(driver.cdc_start(), 'COM5')
+                settings = {call.args[1]: call.args[2] for call in driver.web.set.call_args_list}
+                self.assertIn(settings['#h-clock'], values)
+                self.assertEqual(int(settings['#h-clock']), hz)
+                expected = 'riscv' if board == 'hpm6800evk' else 'arm-jtag' if transport == 'jtag' else 'swd'
+                self.assertEqual(settings['#h-target'], expected)
 
     def test_probe_status_unwraps_the_native_service_response(self):
         driver = self.driver()
@@ -274,22 +277,23 @@ class TestBoardAcceptance(unittest.TestCase):
         child.kill.assert_called_once()
         child.wait.assert_called_once_with(timeout=10)
 
-    def test_f103_openocd_handoff_selects_jtag_and_releases_the_serial_bound_probe(self):
+    def test_arm_openocd_handoff_selects_jtag_and_releases_the_serial_bound_probe(self):
         dev = object()
         with patch('tools.dap_pipeline_bench.open_dap', return_value=(dev, 'out', 'in')) as open_dap, \
              patch('tools.dap_pipeline_bench.drain'), patch('usb.util.dispose_resources') as dispose, \
-             patch('tools.dap_pipeline_bench.xfer', side_effect=[b'\x02\x02', b'\x11\x00',
-                                                                b'\x12\xff', b'\x03\x00']) as transfer:
-            self.driver().target.prepare_f103_openocd('swd')
-            self.driver('h743').target.prepare_f103_openocd('jtag')
+             patch('tools.dap_pipeline_bench.xfer', side_effect=[b'\x02\x02', b'\x11\x00', b'\x12\x00', b'\x03\x00',
+                                                                b'\x02\x02', b'\x11\x00', b'\x12\xff', b'\x03\x00']) as transfer:
+            self.driver().target.prepare_openocd('swd')
+            self.driver('hpm6800evk').target.prepare_openocd('jtag')
             open_dap.assert_not_called()
+            self.driver('h743').target.prepare_openocd('jtag')
             with self.assertRaisesRegex(RuntimeError, 'SWD-to-JTAG'):
-                self.driver().target.prepare_f103_openocd('jtag')
-            open_dap.assert_called_once_with('12345678')
+                self.driver().target.prepare_openocd('jtag')
+            self.assertEqual([call.args for call in open_dap.call_args_list], [('12345678',)] * 2)
             self.assertEqual([call.args[2] for call in transfer.call_args_list], [
                 [2, 2], [0x11, 0x40, 0x42, 0x0f, 0],
-                [0x12, 88] + [0xff] * 8 + [0x3c, 0xe7, 0x1f], [3]])
-            dispose.assert_called_once_with(dev)
+                [0x12, 88] + [0xff] * 8 + [0x3c, 0xe7, 0x1f], [3]] * 2)
+            self.assertEqual([call.args for call in dispose.call_args_list], [(dev,)] * 2)
 
     def test_f103_flash_boot_requires_new_reset_and_releases_nrst_on_error(self):
         from tools.board_acceptance_target import DEMCR, DHCSR, S_RESET_ST

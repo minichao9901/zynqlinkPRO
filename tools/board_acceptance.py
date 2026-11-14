@@ -346,7 +346,8 @@ class BoardAcceptance:
         from zynq_clock import fclk_hz, PLL_REGISTERS
         from probe_build_info import swd_clock_details
         # Read Zynq physical registers without injecting DAP traffic into a live stream.
-        registers = (0xf8000170, 0xf8000108, 0xf8000100, 0xf8000104, 0xf800025c, 0x40010008, 0x40010098)
+        registers = (0xf8000170, 0xf8000108, 0xf8000100, 0xf8000104, 0xf800025c, 0x40010008, 0x40010098,
+                     0x40010080)
         reads = ' '.join(f'[physrd -force -value {addr:#x}]' for addr in registers)
         output = self.physical.run(f'puts "ACCEPT_CLOCK {reads}"')
         matched = re.search(r'^ACCEPT_CLOCK ([^\r\n]+)', output, re.M)
@@ -357,12 +358,25 @@ class BoardAcceptance:
         pll = values[PLL_REGISTERS[(control >> 4) & 3]]
         hz = fclk_hz(control, pll, values[0xf800025c])
         clock = dict(FCLK_Hz=hz, cfg=hex(cfg), jtagSamplingMode=values[0x40010098] & 17,
+                     jtagRoute=values[0x40010080],
                      actual_link_Hz=swd_clock_details(hz, cfg)['SWCLK_Hz'],
                      basis='physical MEM-AP0 readback of PLL/divider registers')
         return clock
 
     def clock(self):
         return verify_clock(self.read_clock(), self.case['requestedHz'])
+
+    def stream_mode(self):
+        return 'riscv' if self.rv else 'arm-jtag' if self.case['transport'] == 'jtag' else 'swd'
+
+    def stream_clock(self, state):
+        clock = self.clock()
+        if self.stream_mode() == 'arm-jtag':
+            tap = state.get('armJtagIdentity') or {}
+            expected = {'f103ze': (0x3ba00477, 0x06414041), 'h743': (0x6ba00477, 0x06450041)}[self.args.board]
+            checked((tap.get('cpu'), tap.get('boundary')) == expected and clock['jtagRoute'] & 7 == 3,
+                    f'ARM/JTAG stream route or TAP not confirmed: {clock}, {tap}')
+        return clock
 
     def run(self, case, folder):
         self.probe_identity()
@@ -543,14 +557,17 @@ class BoardAcceptance:
                 self.debug_call('bpClear')
                 checked(not self.invoke('dbg', 'summary')['bps'], 'Breakpoints were not cleared')
                 steps = {}
-                for method in ('stepInto', 'stepOver', 'stepOut'):
-                    before = self.debug_call('readReg', 'pc')
-                    outcome = self.debug_call(method)
-                    after = self.debug_call('readReg', 'pc')
-                    checked(before != after and not any(word in str(outcome) for word in ('没停到', '超时')),
-                            f'{method} did not complete: {outcome}')
-                    steps[method] = dict(before=before, after=after, outcome=outcome)
-                frames = self.debug_call('backtrace', {'maxFrames': 8})
+                if self.args.board == 'h743':
+                    steps, frames = self.h743_source_steps(elf, refresh)
+                else:
+                    for method in ('stepInto', 'stepOver', 'stepOut'):
+                        before = self.debug_call('readReg', 'pc')
+                        outcome = self.debug_call(method)
+                        after = self.debug_call('readReg', 'pc')
+                        checked(before != after and not any(word in str(outcome) for word in
+                                ('没停到', '超时', '还没回到调用者')), f'{method} did not complete: {outcome}')
+                        steps[method] = dict(before=before, after=after, outcome=outcome)
+                    frames = self.debug_call('backtrace', {'maxFrames': 8})
                 checked(frames.get('frames'), 'Debugger returned no backtrace')
                 name = 'g_ticks' if self.rv else 'g_trace.loops'
                 self.invoke('dbg', 'addWatch', name)
@@ -564,6 +581,72 @@ class BoardAcceptance:
         return dict(clock=clock, pc=pc, steppedPc=next_pc, breakpointPc=entry, sourceSteps=steps,
                     backtrace=frames, register=value, connectSeconds=connected, haltSeconds=halted,
                     stepSeconds=stepped, watchSeconds=watch_s)
+
+    def h743_source_steps(self, elf, refresh):
+        from elftools.elf.elffile import ELFFile
+        from pathlib import PurePosixPath
+
+        # Use the periodic main-loop call that reaches a returning, non-leaf
+        # function. Resolve the instruction from DWARF and verify its target.
+        with elf.open('rb') as stream:
+            image = ELFFile(stream)
+            dwarf = image.get_dwarf_info()
+            addresses = set()
+            for unit in dwarf.iter_CUs():
+                unit_name = unit.get_top_DIE().attributes.get('DW_AT_name')
+                if not unit_name or PurePosixPath(unit_name.value.decode().replace('\\', '/')).name != 'main.c':
+                    continue
+                for row in dwarf.line_program_for_CU(unit).get_entries():
+                    if row.state and not row.state.end_sequence and row.state.line == 480:
+                        addresses.add(row.state.address)
+        mark = symbol(elf, 'trace_hook_mark') & ~1
+        _, segments = elf_contents(elf)
+        calls = set()
+        for address in addresses:
+            for start, data, flags in segments:
+                if not flags & 1 or not start <= address <= start + len(data) - 4:
+                    continue
+                first, second = struct.unpack_from('<HH', data, address - start)
+                if first & 0xf800 != 0xf000 or second & 0xd000 != 0xd000:
+                    continue
+                sign = (first >> 10) & 1
+                i1 = 1 ^ ((second >> 13) & 1) ^ sign
+                i2 = 1 ^ ((second >> 11) & 1) ^ sign
+                offset = (i1 << 23) | (i2 << 22) | ((first & 0x3ff) << 12) | ((second & 0x7ff) << 1)
+                if address + 4 + offset - (sign << 24) == mark:
+                    calls.add(address)
+        checked(len(calls) == 1, 'H743 Golden must have one verified main.c:480 call to trace_hook_mark')
+        call = calls.pop()
+        expected_return = call + 4
+
+        self.debug_call('bpAdd', call, 'H743 source call')
+        self.debug_call('cont')
+        hit = wait_for(refresh, lambda state: state['halted'], 6, 'Source call breakpoint not hit')
+        checked(hit['pc'] & ~1 == call, 'Source call stopped at the wrong PC')
+        self.debug_call('bpClear')
+        stack = self.debug_call('readReg', 'sp')
+        into = self.debug_call('stepInto')
+        into_pc = self.debug_call('readReg', 'pc') & ~1
+        checked(mark <= into_pc < mark + 16 and '单步进入 →' in into and
+                self.debug_call('readReg', 'lr') & ~1 == expected_return,
+                f'H743 did not step into trace_hook_mark: {into}')
+        over = self.debug_call('stepOver')
+        over_pc = self.debug_call('readReg', 'pc') & ~1
+        checked(into_pc < over_pc < mark + 32 and '单步跳过 →' in over,
+                f'H743 did not step over to the next line in trace_hook_mark: {over}')
+        frames = self.debug_call('backtrace', {'maxFrames': 8})
+        stack_frames = frames.get('frames', [])
+        checked(len(stack_frames) >= 2 and stack_frames[0]['name'].startswith('trace_hook_mark')
+                and stack_frames[1]['name'].startswith('main') and stack_frames[1]['pc'] & ~1 == expected_return,
+                'H743 backtrace does not contain the verified caller')
+        out = self.debug_call('stepOut')
+        return_pc = self.debug_call('readReg', 'pc') & ~1
+        return_sp = self.debug_call('readReg', 'sp')
+        checked(return_pc == expected_return and return_sp == stack and '单步跳出 →' in out,
+                f'H743 did not return to the caller: {out}')
+        return dict(stepInto=dict(before=call, after=into_pc, outcome=into),
+                    stepOver=dict(before=into_pc, after=over_pc, outcome=over),
+                    stepOut=dict(before=over_pc, after=return_pc, outcome=out, returnSp=return_sp)), frames
 
     def rtt_addresses(self):
         base = RTT_BASE[self.args.board]
@@ -685,7 +768,7 @@ class BoardAcceptance:
     def cdc_start(self, ready_bytes=8):
         _, cb, _, _ = self.rtt_addresses()
         self.web.page('rttcdc', 'show')
-        self.web.set('rttcdc', '#h-target', 'riscv' if self.rv else 'swd')
+        self.web.set('rttcdc', '#h-target', self.stream_mode())
         self.web.set('rttcdc', '#h-addr', hex(cb))
         self.web.set('rttcdc', '#h-size', '0x100')
         self.web.set('rttcdc', '#h-chan', '0')
@@ -750,10 +833,6 @@ class BoardAcceptance:
         return window
 
     def rtt_forward(self, folder):
-        if self.case['transport'] == 'jtag' and not self.rv:
-            native = self.native_forward(folder)
-            write_json(folder / 'native.json', native)
-            raise Pending('Native ARM JTAG forwarding verified; Web offers ARM/SWD and RISC-V/JTAG')
         rows = []
         # Repeat with the same Web page and a fresh target sequence. The
         # second start exercises reuse of the prior Web/HID/COM session.
@@ -763,7 +842,7 @@ class BoardAcceptance:
             with self.rtt_fixture(run):
                 try:
                     port = self.cdc_start()
-                    clock = self.clock()
+                    clock = self.stream_clock(self.invoke('rttcdc', 'summary', target='hid'))
                     window = self.rtt_measured_stop(3)
                     self.invoke('rttcdc', 'refresh', target='hid')
                     end = self.invoke('rttcdc', 'summary', target='hid')
@@ -891,7 +970,7 @@ class BoardAcceptance:
         self.web.page('scope', 'show')
         self.click('scope', '#sc-side-capture-tab')
         self.invoke('scope', 'setMock', False)
-        self.web.set('scope', '#sc-target', 'riscv' if self.rv else 'swd')
+        self.web.set('scope', '#sc-target', self.stream_mode())
         self.web.set('scope', '#sc-sampling-path', 'probe')
         self.web.set('scope', '#sc-period', f'{ticks / 24:.6f}')
         self.web.set('scope', '#sc-seconds', str(seconds))
@@ -945,8 +1024,6 @@ class BoardAcceptance:
     def jscope(self, folder):
         channels = self.case['channels']
         seed_ticks = SCOPE_PERIODS[(self.args.board, self.case['transport'])][channels == 8]
-        if self.case['transport'] == 'jtag' and not self.rv:
-            return self.native_scope(folder, channels, seed_ticks)
         address = self.scope_address()
         values = struct.pack('<8I', *SCOPE_VALUES)
         rows = []
@@ -957,8 +1034,8 @@ class BoardAcceptance:
                 row = dict(periodTicks=ticks, requestedSeconds=seconds)
                 rows.append(row)
                 try:
-                    self.scope_start(channels, ticks, seconds + 8)
-                    clock = self.clock()
+                    started = self.scope_start(channels, ticks, seconds + 8)
+                    clock = self.stream_clock(started)
                     self.invoke('scope', 'readScopeMetrics', {'fresh': True})
                     before = self.invoke('scope', 'summary')['probeMetrics']
                     t0 = time.monotonic()
@@ -1026,43 +1103,6 @@ class BoardAcceptance:
         mem.write(address, values)
         checked(mem.read(address, len(values)) == values, 'Scope fixture write did not verify')
         self.target.restore_state(mem, chip, state)
-
-    def native_scope(self, folder, channels, seed_ticks):
-        from benchmark_probe_stream import hss_point
-        from probe_stream import Probe
-        from test_probe_board import stop
-        # The existing raw verifier writes and validates its own 4 KiB
-        # fixture at this address, including byte checks for every DATA frame.
-        hz = self.case['requestedHz']
-        rows = []
-        with self.target.memory_fixture(folder / 'fixture', [(0x20004000, 4096)], keep_halted=True,
-                                        before_restore=self.check_idle):
-            with self.target.link('jtag', hz) as (device, mem, _, clock):
-                verify_clock(clock, hz)
-                probe = Probe(self.args.serial, zynq_only=True)
-                try:
-                    checked(probe.action(0x31, 12, b'\x02')[0] == 0, 'ARM/JTAG HSS route rejected')
-                    def point(ticks, seconds):
-                        row = hss_point(probe, mem, device, hz, ticks, channels, seconds, len(rows))
-                        verify_clock(row, hz)
-                        rows.append(row)
-                        write_json(folder / 'native.json', rows)
-                        checked(row['all_frame_sequences_valid'] and row['sample_count_match'], 'Native HSS sequence/tail failed')
-                        return row
-                    candidates = sorted({max(24, round(seed_ticks * scale)) for scale in (.85, 1, 1.2, 1.5, 2)})
-                    best = next((row['period_ticks'] for ticks in candidates
-                                 if (row := point(ticks, 1.5))['skip_percent'] < .1), None)
-                    checked(best is not None, 'No stable native ARM/JTAG scope point')
-                    long = point(best, 60)
-                    if long['skip_percent'] >= .1:
-                        long = point(round(best * 1.25), 60)
-                    checked(long['counter_window_s'] >= 59.5 and long['skip_percent'] < .1, 'Native HSS long window failed')
-                finally:
-                    try:
-                        stop(probe, device)
-                    finally:
-                        probe.close()
-        raise Pending('Native ARM JTAG HSS window verified; Web offers ARM/SWD and RISC-V/JTAG')
 
     def flash(self, folder):
         base, capacity, sector = FLASH[self.args.board]
@@ -1244,7 +1284,7 @@ class BoardAcceptance:
                 f'flash write_image erase {self.tcl(backup)} {address:#x} bin; '
                 f'verify_image {self.tcl(backup)} {address:#x} bin; echo ZL_FLASH_DONE; shutdown']
         with log_path.open('wb') as log:
-            self.target.prepare_f103_openocd(self.case['transport'])
+            self.target.prepare_openocd(self.case['transport'])
             start = time.perf_counter()
             verifying_seconds = 0
             # Ctrl+C belongs to the controller. Reap this child explicitly
@@ -1327,8 +1367,14 @@ class BoardAcceptance:
             baseline = verify_baseline_rates(self.args.board, mem, etm=True, heartbeat=symbol(elf, name)+offset)
         self.web.page('etm', 'show')
         self.web.page('etm', 'describe')
-        self.web.upload('etm', '#elf-file', elf)
-        self.web.wait('etm', '#elf-label', elf.name)
+        # A prior upload can have the same filename and even the same hash.
+        # Require a fresh label and the picker to be ready after that load.
+        upload = pack_file(elf)
+        upload['name'] = f'{elf.stem}-{secrets.token_hex(4)}{elf.suffix}'
+        self.web.page('etm', 'upload', selector='#elf-file', files=[upload])
+        self.web.wait('etm', '#elf-label', f"{upload['name']} · {expected['sha256'][:12]}")
+        wait_for(lambda: self.web.read('etm', '#choose-elf'), lambda button: not button['disabled'],
+                 30, 'ETM ELF picker remained busy after loading the verified file')
         target_cfg = {'seconds': 1, 'entry': None, 'resetToEntry': False, 'swdKhz': 10000, 'decode': True}
         begin = time.perf_counter()
         result = self.invoke('etm', 'captureNative', target_cfg)
@@ -1344,14 +1390,18 @@ class BoardAcceptance:
         checked(result['targetRestored'] and result['captureProof']['restored'], 'ETM target restoration not confirmed')
         checked(quality['synced'] and quality['ended'] and not quality['loss'] and extent.get('complete')
                 and abs(extent.get('actualSeconds', 0)-1) <= .002, 'ETM capture window or quality invalid')
-        dq = decoded['quality']
-        checked(not any(dq.get(key) for key in ('packetIssues', 'unprocessedBytes', 'unaccountedBytes'))
-                and decoded['summary']['instructions'] > 0, 'ETM decode quality invalid')
+        verification = subprocess.run([sys.executable, '-X', 'utf8', str(ROOT / 'toolbox.py'), 'trace', 'verify',
+                                       '--record', str(record), '--require-decoded'], cwd=ROOT, capture_output=True,
+                                      text=True, encoding='utf-8', timeout=60)
+        (folder / 'trace-verify.json').write_text(verification.stdout, encoding='utf-8')
+        checked(verification.returncode == 0 and decoded['summary']['instructions'] > 0,
+                f'ETM decode quality invalid. See {folder / "trace-verify.json"}')
+        verdict = json.loads(verification.stdout)['result']['quality']
         display = self.invoke('etm', 'measureOpenRecord', result['record'])
         processing = record / 'decode-performance.json'
         native = metadata.get('nativeAcceptance') or {}
         return dict(record=str(record), quality=quality, window=extent, decoded=decoded['summary'],
-                    restored=True, webCaptureSeconds=wall, display=display, targetElf=target_evidence,
+                    restored=True, webCaptureSeconds=wall, display=display, targetElf=target_evidence, decodeQuality=verdict,
                     captureHostSeconds=native.get('capture_host_seconds'),
                     captureClocks=result['captureProof'].get('rccCapture'),
                     processing=json.loads(processing.read_text(encoding='utf-8')) if processing.exists() else None,
@@ -1380,8 +1430,6 @@ class BoardAcceptance:
                 finally:
                     self.close_debug()
             return
-        if business in ('rtt-forward', 'jscope') and self.case['transport'] == 'jtag' and not self.rv:
-            raise Pending(f'{business} Web page has no ARM/JTAG stream setting')
         live_rtt = business in ('rtt-viewer', 'rtt-forward')
         with self.rtt_fixture(folder, producer=live_rtt):
             if business == 'rtt-viewer':
@@ -1400,7 +1448,7 @@ class BoardAcceptance:
             elif business == 'rtt-forward':
                 try:
                     port = self.cdc_start()
-                    clock = self.clock()
+                    clock = self.stream_clock(self.invoke('rttcdc', 'summary', target='hid'))
                     window = self.invoke('rttcdc', 'captureWindow', {'seconds': .25, 'maxMiB': 8})
                     data = self.web.download('rttcdc', folder / 'up.bin')
                     checked(window['complete'] and window['bytes'] == len(data), 'RTT stress recording incomplete')
@@ -1417,7 +1465,7 @@ class BoardAcceptance:
             else:
                 try:
                     summary = self.scope_start(1, 2400, 75)
-                    clock = self.clock()
+                    clock = self.stream_clock(summary)
                     observed = wait_for(lambda: self.invoke('scope', 'summary'),
                                         lambda s: s['running'] and s['samples'] > summary['samples'],
                                         5, 'Scope stopped before the handoff')

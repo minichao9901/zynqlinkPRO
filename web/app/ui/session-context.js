@@ -85,7 +85,7 @@ export function initSessionContext(tools){
     }
     if(page==='scope'){
       $('sc-target').value=target.arch==='riscv'?'riscv':'swd';store.set('rtt.target',$('sc-target').value);
-      tools.scope.targetRiscv=target.arch==='riscv';tools.scope._applyBackendUi();
+      tools.scope.targetMode=$('sc-target').value;tools.scope._applyBackendUi();
     }
     localTargets.set(page,{...target});
   };

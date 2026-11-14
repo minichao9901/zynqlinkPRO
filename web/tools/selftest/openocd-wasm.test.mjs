@@ -387,6 +387,44 @@ test('Zynq ARM/JTAG selects SWJ on the claimed interface before OpenOCD owns the
   }
 });
 
+test('ARM/JTAG stream binds the same USB and HID and verifies the complete chain before selecting the route', async () => {
+  const { prepareArmJtagStream } = await import('../../app/hid/probe.js');
+  const bytes = (id, value) => [id, 0, value & 0xff, (value >>> 8) & 0xff, (value >>> 16) & 0xff, value >>> 24];
+  for (const boundary of [0x06450041, 0x06414041]){
+    const events = [];
+    const serialNumber = `j7-${boundary}`;
+    const device = { vendorId:0x0d28, productId:0x0204, manufacturerName:'CherryUSB', productName:'CMSIS-DAP',
+      nativeService:true, dapSynchronized:true, atomicDapSupported:true, opened:true, serialNumber,
+      configuration:{ configurationValue:1, interfaces:[{ interfaceNumber:0, alternate:{ endpoints:[
+        { type:'bulk', direction:'out', endpointNumber:2 }, { type:'bulk', direction:'in', endpointNumber:1 },
+      ] } }] },
+      async claimInterface(){ events.push('claim'); },
+      async releaseInterface(){ events.push('release'); },
+      async close(){ events.push('close'); },
+      async exchangeDap(packet){
+        const [command, arg] = packet;
+        events.push([command,arg]);
+        const reply = command === 0x16 ? bytes(command, arg === 0 ? 0x6ba00477 : boundary)
+          : command === 0x8b ? [command,0,arg] : [command,command === 2 ? 2 : 0];
+        return { status:'ok', data:new DataView(Uint8Array.from(reply).buffer) };
+      },
+    };
+    const hid = { device:{ serialNumber:'different' }, async rtt(action,data){ events.push([action,...data]); return {rc:0}; } };
+    await assert.rejects(prepareArmJtagStream(hid,50_000_000,device), /同一台/);
+    assert.equal(events.length, 0);
+    hid.device.serialNumber = serialNumber;
+    if (boundary === 0x06450041)
+      assert.deepEqual(await prepareArmJtagStream(hid,50_000_000,device),{cpu:0x6ba00477,boundary});
+    else await assert.rejects(prepareArmJtagStream(hid,50_000_000,device), /双 TAP/);
+    const handoff = [
+      'claim',[2,2],[0x11,0x40],[0x12,88],[3,undefined],[2,2],[0x8b,0x0e],[0x15,2],
+      [0x11,0x80],[0x16,0],[0x16,1],[3,undefined],'release','close',
+    ];
+    if (boundary === 0x06450041) handoff.push([12,12,2]);
+    assert.deepEqual(events, handoff);
+  }
+});
+
 test('Flash preflight resolves an auto-detected bank base and rejects invalid ranges before erase', async () => {
   const lines = [];
   const original = Uint8Array.of(1,2,3,4);

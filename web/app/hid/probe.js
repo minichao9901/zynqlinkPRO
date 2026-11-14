@@ -15,6 +15,7 @@
  */
 
 import {nativeProbeEnabled,nativeHidDevices} from '../core/native-probe.js';
+import { OpenOcdUsb, isZynqDapDevice, selectOpenOcdDevice } from '../core/openocd-usb.js';
 
 export const USAGE_PAGE = 0xFF00;   // 厂商自定义页
 export const VID = 0x0d28;          // akaLinkPro：CMSIS-DAP + CDC + HID + WebUSB + DFU 复合设备
@@ -63,12 +64,25 @@ export const RISCV_ACT = {
 /** 0x31 的动作码（api_param.c 的 RTT_ACT_*，与文档一致） */
 export const RTT_ACT = {
   STOP: 0, START: 1, STATUS: 2, AUTOSTART: 3, RAW_DAP: 4, PEEK: 5,
-  RAW_RESULT: 6, CONFIG: 7, BENCH: 8, BENCH_RESULT: 9, TARGET: 10,
+  RAW_RESULT: 6, CONFIG: 7, BENCH: 8, BENCH_RESULT: 9, TARGET: 10, TRANSPORT: 12,
 };
 
 /** action 10：切全局目标类型。Byte[0]=10（action）、Byte[1]=0 SWD/ARM | 1 RISC-V/JTAG。
  *  ⚠️ 这是**0x31** 的动作，不是 0x32 —— J-Scope 那边要发它得用 HID_CMD_RTT（见 scope/protocol.js）。*/
 export function targetTypeData(riscv){ return Uint8Array.of(RTT_ACT.TARGET, riscv ? 1 : 0); }
+
+export const isStreamTarget = value => ['swd', 'arm-jtag', 'riscv'].includes(value);
+
+export async function prepareArmJtagStream(hid, clockHz, usbDevice){
+  const usb = usbDevice ?? await selectOpenOcdDevice();
+  if (!isZynqDapDevice(usb) || !usb.serialNumber || usb.serialNumber !== hid.device?.serialNumber)
+    throw Error('ARM/JTAG 转发和采样需要同一台 zynqlinkPRO 的 USB 与 HID');
+  // Prepare the ARM chain even after RISC-V had previously configured IR=1.
+  const identity = await new OpenOcdUsb(usb, 'ARM/JTAG stream', true).prepareArmJtagStream(clockHz || 50_000_000);
+  const selected = await hid.rtt(RTT_ACT.TRANSPORT, Uint8Array.of(RTT_ACT.TRANSPORT, 2));
+  if (selected.rc !== 0) throw Error(`探针未确认 ARM/JTAG 路由（${selected.rc}）`);
+  return identity;
+}
 
 // ============================================================================
 // 组包 / 解析（导出成纯函数，Node 自测直接测）

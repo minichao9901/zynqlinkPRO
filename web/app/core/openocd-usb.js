@@ -96,6 +96,47 @@ export class OpenOcdUsb {
     }
   }
 
+  async prepareArmJtagStream(clockHz){
+    if (!this.armJtag) throw Error('ARM/JTAG 采样和转发需要支持该模式的 zynqlinkPRO 探针');
+    let connected = false, framed = true;
+    const send = async (packet, expected, length = 2) => {
+      const bytes = Uint8Array.from(packet);
+      framed = false;
+      const write = this.device.atomicDapSupported ? null
+        : await withTimeout(this.device.transferOut(2, bytes), 2000, 'ARM/JTAG 请求');
+      if (write && (write.status !== 'ok' || write.bytesWritten !== bytes.length)) throw Error('ARM/JTAG 准备命令短写');
+      const {status, data} = write ? await withTimeout(this.device.transferIn(1, 4096), 2000, 'ARM/JTAG 应答')
+        : await this.device.exchangeDap(bytes, 4096);
+      framed = status === 'ok' && data?.byteLength >= 2 && data.getUint8(0) === packet[0];
+      if (!framed || data.byteLength !== length || data.getUint8(1) !== expected)
+        throw Error('ARM/JTAG 准备命令未确认');
+      return data;
+    };
+    try {
+      await this.invoke('open', []);
+      await this.invoke('claimInterface', [0]);
+      if (!this.synchronized) throw Error('探针未确认 DAP 队列边界');
+      await send([2, 2], 2);
+      connected = true;
+      const instruction = await send([0x8b, 0x0e], 0, 3);
+      if (instruction.getUint8(2) !== 0x0e) throw Error('ARM/JTAG IDCODE 指令回读不符');
+      // STM32F103ZE and STM32H743 expose the ARM DP and a boundary TAP.
+      await send([0x15, 2, 4, 5], 0);
+      const hz = new Uint8Array(4);
+      new DataView(hz.buffer).setUint32(0, clockHz, true);
+      await send([0x11, ...hz], 0);
+      const cpu = (await send([0x16, 0], 0, 6)).getUint32(2, true);
+      const boundary = (await send([0x16, 1], 0, 6)).getUint32(2, true);
+      if (!((cpu === 0x3ba00477 && boundary === 0x06414041) ||
+            (cpu === 0x6ba00477 && boundary === 0x06450041)))
+        throw Error('ARM/JTAG 未识别到受支持的 STM32F103ZE/H743 双 TAP');
+      return {cpu, boundary};
+    } finally {
+      try { if (connected && framed) await send([3], 0); }
+      finally { await this.close(); }
+    }
+  }
+
   async invoke(method, args){
     const d = this.device;
     switch (method){

@@ -138,8 +138,8 @@ class Target:
         return dict(halted=bool(status & (1 << 17)), clock=clock, dhcsr=status,
                     ccr=hex(mem.word(0xe000ed14)))
 
-    def prepare_f103_openocd(self, transport):
-        if self.args.board != 'f103ze' or transport != 'jtag':
+    def prepare_openocd(self, transport):
+        if self.rv or transport != 'jtag':
             return
         if self.uncertain:
             raise Unsafe(self.uncertain)
