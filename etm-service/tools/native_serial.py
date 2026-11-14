@@ -1,7 +1,25 @@
 """Continuous COM reception, independent of browser/HTTP scheduling."""
 from collections import deque
+import ctypes
 import threading
 import time
+
+
+def configure_windows_probe_read(port):
+    """Wait for data, then return on a gap instead of timing the entire read."""
+    from serial import win32
+
+    timeouts = win32.COMMTIMEOUTS()
+    if not win32.GetCommTimeouts(port._port_handle, ctypes.byref(timeouts)):
+        raise ctypes.WinError()
+    # Milliseconds between received bytes. A zero total timeout leaves the
+    # first byte pending until data or explicit cancel_read() at close.
+    timeouts.ReadIntervalTimeout = 5
+    timeouts.ReadTotalTimeoutMultiplier = 0
+    timeouts.ReadTotalTimeoutConstant = 0
+    if not win32.SetCommTimeouts(port._port_handle, ctypes.byref(timeouts)):
+        raise ctypes.WinError()
+
 
 class SerialReceiver:
     def __init__(self,port,capacity=4*1024*1024):
@@ -54,7 +72,12 @@ class SerialReceiver:
 
     def close(self):
         self.quit.set()
-        if self.thread.is_alive()and hasattr(self.port,'cancel_read'):self.port.cancel_read()
-        self.thread.join(2)
+        end = time.monotonic() + 2
+        while self.thread.is_alive() and time.monotonic() < end:
+            # Cancellation can race with the reader submitting its final
+            # overlapped operation. Retry only during close until it exits.
+            if hasattr(self.port, 'cancel_read'):
+                self.port.cancel_read()
+            self.thread.join(.02)
         if self.thread.is_alive():raise RuntimeError('本地串口旧读取尚未退出，拒绝复用端口')
         with self.condition:self.closed=True;self.condition.notify_all()

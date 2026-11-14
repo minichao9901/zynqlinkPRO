@@ -162,16 +162,57 @@ class NativeProbeTests(unittest.TestCase):
     def test_native_serial_honors_the_web_requested_receive_buffer(self):
         class Port:
             def set_buffer_size(self,**kwargs):self.sizes=kwargs
+            def open(self):self.signals_on_open = (self.dtr, self.rts)
             def read(self,n):return b''
             def close(self):pass
         with tempfile.TemporaryDirectory() as folder:
             token=Path(folder)/'token';token.write_text('c'*64)
             proxy=NativeProbe(SimpleNamespace(),token);port=Port()
             with patch('serial.tools.list_ports.comports',return_value=[SimpleNamespace(device='COM33')]),patch('serial.Serial',return_value=port):
-                proxy.serial_call('open',{'owner':'a'*32,'path':'COM33','options':{'bufferSize':65536}})
+                result = proxy.serial_call('open', {'owner':'a'*32, 'path':'COM33',
+                                          'options':{'bufferSize':65536, 'dtr':True}})
                 self.assertEqual(port.sizes,{'rx_size':65536,'tx_size':65536})
+                self.assertEqual(port.signals_on_open, (True, False))
+                self.assertTrue(result['initialSignals'])
                 self.assertIs(proxy.ports[('a'*32,'COM33')],port)
                 proxy.serial_call('close',{'owner':'a'*32,'path':'COM33'})
+
+    @unittest.skipUnless(sys.platform == 'win32', 'Windows COM timeouts')
+    def test_windows_probe_read_removes_total_deadline_and_keeps_write_timeout(self):
+        from serial import win32
+        from native_serial import configure_windows_probe_read
+
+        def original(handle, timeouts):
+            timeouts._obj.ReadTotalTimeoutConstant = 15
+            timeouts._obj.WriteTotalTimeoutConstant = 2000
+            return True
+
+        with patch.object(win32, 'GetCommTimeouts', side_effect=original), \
+             patch.object(win32, 'SetCommTimeouts', return_value=True) as configure:
+            configure_windows_probe_read(SimpleNamespace(_port_handle=22))
+        handle, timeouts = configure.call_args.args
+        self.assertEqual(handle, 22)
+        values = timeouts._obj
+        self.assertEqual(values.ReadIntervalTimeout, 5)
+        self.assertEqual(values.ReadTotalTimeoutMultiplier, 0)
+        self.assertEqual(values.ReadTotalTimeoutConstant, 0)
+        self.assertEqual(values.WriteTotalTimeoutConstant, 2000)
+
+    def test_silent_serial_reader_is_cancelled_and_joined_at_close(self):
+        from native_serial import SerialReceiver
+
+        reading, cancel = threading.Event(), threading.Event()
+        def read(size):
+            reading.set()
+            self.assertTrue(cancel.wait(1))
+            return b''
+        port = SimpleNamespace(read=read, cancel_read=cancel.set)
+        receiver = SerialReceiver(port)
+        self.assertTrue(reading.wait(1))
+        receiver.close()
+        self.assertTrue(cancel.is_set())
+        self.assertFalse(receiver.thread.is_alive())
+        self.assertIsNone(receiver.error)
 
     def test_http_redelivery_returns_the_original_result_without_hardware_reexecution(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -205,6 +246,7 @@ class NativeProbeTests(unittest.TestCase):
         class Port:
             closed=False
             def __init__(self,data=b''):self.data=data
+            def open(self):pass
             def read(self,n):data,self.data=self.data,b'';return data
             def close(self):self.closed=True
             def set_buffer_size(self,**kw):pass

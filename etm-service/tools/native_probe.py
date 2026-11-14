@@ -10,11 +10,12 @@ import json
 import re
 import secrets
 import struct
+import sys
 import threading
 import time
 from pathlib import Path
 from flask import abort, jsonify, request
-from native_serial import SerialReceiver
+from native_serial import SerialReceiver, configure_windows_probe_read
 from native_hss import HssOverflow, HssReceiver
 from probe_coordinator import ProbeCoordinator
 from probe_memory import transfer as memory_transfer
@@ -539,7 +540,8 @@ class NativeProbe:
                 if key in self.ports:
                     self.serial_receivers[key].close()
                     self.ports.pop(key).close();self.serial_receivers.pop(key)
-                if path not in {p.device for p in serial.tools.list_ports.comports()}:
+                port_info = next((p for p in serial.tools.list_ports.comports() if p.device == path), None)
+                if port_info is None:
                     raise ValueError('串口不存在')
                 if any(p == path for _, p in self.ports):
                     raise ValueError('串口已被另一Web会话使用')
@@ -547,20 +549,30 @@ class NativeProbe:
                 size = int(o.get('bufferSize', 4096))
                 if not 1024 <= size <= 1048576:
                     raise ValueError('串口bufferSize须为1024..1048576')
-                port = serial.Serial(path, baudrate=int(o.get('baudRate', 115200)),
+                probe_rtt = (sys.platform == 'win32' and o.get('owner') == 'rtt'
+                             and (getattr(port_info, 'vid', None), getattr(port_info, 'pid', None))
+                             == (0x0d28, 0x0204))
+                port = serial.Serial(None, baudrate=int(o.get('baudRate', 115200)),
                     bytesize=int(o.get('dataBits', 8)), stopbits=int(o.get('stopBits', 1)),
                     parity={'none': 'N', 'even': 'E', 'odd': 'O'}[o.get('parity', 'none')],
-                    rtscts=o.get('flowControl') == 'hardware', timeout=.015, write_timeout=2)
+                    rtscts=o.get('flowControl') == 'hardware',
+                    timeout=None if probe_rtt else .015, write_timeout=2)
+                port.port = path
+                port.dtr = bool(o.get('dtr'))
+                port.rts = bool(o.get('rts'))
+                port.open()
                 try:
                     if hasattr(port, 'set_buffer_size'):
                         port.set_buffer_size(rx_size=size, tx_size=size)
+                    if probe_rtt:
+                        configure_windows_probe_read(port)
                 except Exception:
                     port.close()
                     raise
                 self.ports[key] = port
                 self.port_epochs[key]=secrets.token_hex(16)
                 self.serial_receivers[key]=SerialReceiver(port)
-                return {'opened': True,'resourceEpoch':self.port_epochs[key]}
+                return {'opened': True,'resourceEpoch':self.port_epochs[key], 'initialSignals': True}
         port = self.ports.get(key)
         if port is None:
             if action == 'close':
