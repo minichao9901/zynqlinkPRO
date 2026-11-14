@@ -86,6 +86,13 @@ def cmd(out, inp, payload):
     return r
 
 
+def select_arm_jtag(out, inp):
+    # ARM SWJ switch to JTAG, TAP reset, then Run-Test/Idle.
+    reply = cmd(out, inp, [0x12, 88] + [0xFF] * 8 + [0x3C, 0xE7, 0x1F])
+    if reply[:2] != b'\x12\x00':
+        raise RuntimeError('ARM SWD-to-JTAG select sequence rejected')
+
+
 def setup(out, inp, speed_khz, transport='swd', jtag_ir_lengths=(4, 5), *, speed_hz=None):
     drain(inp)
     port = 2 if transport == 'jtag' else 1
@@ -100,8 +107,7 @@ def setup(out, inp, speed_khz, transport='swd', jtag_ir_lengths=(4, 5), *, speed
         raise RuntimeError(f'DAP_SWJ_Clock rejected {requested} Hz: '+clock_reply.hex())
     cmd(out, inp, [0x13, 0x00])
     if transport == 'jtag':
-        # ARM SWJ switch to JTAG, TAP reset, then Run-Test/Idle.
-        cmd(out, inp, [0x12, 88] + [0xFF]*8 + [0x3C, 0xE7, 0x1F])
+        select_arm_jtag(out, inp)
         # F103CB has an ARM DAP (IR4) plus its boundary TAP (IR5).
         cmd(out, inp, [0x15, len(jtag_ir_lengths), *jtag_ir_lengths])
     else:

@@ -60,11 +60,40 @@ export const openOcdUsbSupported = () => nativeProbeEnabled() || !!globalThis.na
 // libusb performs USB calls from the Wasm worker. Keep the actual handle and
 // native-service delivery identity with the workbench's existing USB lease.
 export class OpenOcdUsb {
-  constructor(device, owner = 'dap'){
+  constructor(device, owner = 'dap', armJtag = false){
     this.lease = new UsbLease(device, owner);
     this.device = this.lease.device;
     this.zynq = device.nativeService || (device.vendorId === 0x0d28 &&
       device.productId === 0x0204 && device.manufacturerName === 'CherryUSB');
+    this.armJtag = this.zynq && armJtag;
+  }
+
+  async _selectArmJtag(){
+    let synchronized = true;
+    const send = async (packet, expected) => {
+      const bytes = Uint8Array.from(packet);
+      synchronized = false;
+      let reply;
+      if (this.device.atomicDapSupported) reply = await this.device.exchangeDap(bytes, 4096);
+      else {
+        const result = await withTimeout(this.device.transferOut(this.out.endpointNumber, bytes), 2000, 'ARM JTAG 发送');
+        if (result.status !== 'ok' || result.bytesWritten !== bytes.length) throw Error('ARM JTAG 选择命令发送失败');
+        reply = await withTimeout(this.device.transferIn(this.input.endpointNumber, 4096), 2000, 'ARM JTAG 响应');
+      }
+      const { status, data } = reply;
+      synchronized = status === 'ok' && data?.byteLength >= 2 && data.getUint8(0) === bytes[0];
+      if (!synchronized || data.getUint8(1) !== expected) throw Error('ARM JTAG 选择命令未确认');
+    };
+    try {
+      await send([2, 2], 2);
+      // Select SWJ at 1 MHz. OpenOCD sets its configured TCK during init.
+      await send([0x11, 0x40, 0x42, 0x0f, 0], 0);
+      await send([0x12, 88, ...Array(8).fill(0xff), 0x3c, 0xe7, 0x1f], 0);
+    } finally {
+      // A missing reply leaves the stream ambiguous. Close the lease so a
+      // later session can synchronize a new epoch without replaying any write.
+      if (synchronized) await send([3], 0);
+    }
   }
 
   async invoke(method, args){
@@ -95,6 +124,7 @@ export class OpenOcdUsb {
         this.synchronized = d.nativeService ? d.dapSynchronized : this.zynq && await syncZynqQueue(d);
         this.out = out;
         this.input = input;
+        if (this.armJtag) await this._selectArmJtag();
         return;
       }
       case 'releaseInterface':

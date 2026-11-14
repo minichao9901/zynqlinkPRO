@@ -653,9 +653,16 @@ class BoardAcceptance:
                 wall = time.perf_counter() - t0
                 checked(last['stats']['bytes'] > first['stats']['bytes'], 'RTT Viewer stopped making progress')
                 checked(not last['stats'].get('lost') and not last['stats'].get('corrupt'), 'Viewer loss or corruption')
+                wrap_bytes = 16384 if self.rv else 8192
+                rate = (last['stats']['bytes'] - first['stats']['bytes']) / wall
+                # Allow a complete wrap on the slow ARM/JTAG Wasm path, while
+                # keeping the fixed throughput window and an upper wait bound.
+                wrap_timeout = 8
+                if self.case['transport'] == 'jtag' and not self.rv:
+                    wrap_timeout = min(45, max(8, 2 * wrap_bytes / rate))
                 wait_for(lambda: self.invoke('rtt', 'summary'),
-                         lambda state: state['bufferedBytes'] > (16384 if self.rv else 8192),
-                         8, 'RTT up ring wrap not observed')
+                         lambda state: state['bufferedBytes'] > wrap_bytes,
+                         wrap_timeout, 'RTT up ring wrap not observed')
                 self.invoke('rtt', 'writeDown', 0, b64(RTT_DOWN), target='rtt')
                 export = self.invoke('rtt', 'saveRaw')
                 raw = self.web.download('rtt', folder / 'viewer.bin')
@@ -671,7 +678,7 @@ class BoardAcceptance:
                 pointer = mem.word(cb + 60)
                 checked(pointer == 4 and ring[60:] + ring[:4] == RTT_DOWN and ring[4:60] == b'n' * 56,
                         'Downlink wrap, WrOff or guard bytes mismatch')
-        return dict(clock=clock, throughputBps=(last['stats']['bytes']-first['stats']['bytes'])/wall,
+        return dict(clock=clock, throughputBps=rate,
                     seconds=wall, upstream=continuity, downstream=dict(bytes=len(RTT_DOWN), wrOff=pointer),
                     pollingMs=5, displayed=not last['displaySuppressed'])
 
@@ -1143,20 +1150,13 @@ class BoardAcceptance:
                 clock = verify_clock(self.read_clock(), self.case['requestedHz'])
                 checked(result['verified'] and confirm_flash(original), 'Web Flash readback differs from backup')
         # Flash and RAM have been restored before this independent boot check.
-        # Use the flasher's normal software reset path only with explicit Flash authorization.
         reset_started = time.perf_counter()
-        # The CDC48 application disables JTAG during startup. Verify its
-        # reset from SWD after both JTAG programming timings have completed.
-        self.reset_application(folder)
-        with self.target.link() as (_, mem, chip_target, _):
-            state = self.target.state(mem, chip_target)
-            checked(not state['halted'], 'Restored application is halted after reset')
-            tick = mem.word(heartbeat)
-            after = wait_for(lambda: mem.word(heartbeat), lambda v: v != tick, 4, 'Restored application did not boot')
+        boot = self.reset_application(folder, heartbeat)
+        write_json(folder / 'flash-boot.json', boot)
         return dict(nativeSeconds=native, webSeconds=web, clock=clock, bootSeconds=time.perf_counter()-reset_started,
                     verified=True, flashRestored=True, affectedSectorBytes=len(original),
                     nativeInputBytes=len(original), webInputBytes=result['bytes'],
-                    heartbeat={'address': hex(heartbeat), 'before': tick, 'after': after},
+                    resetMethod=boot['method'], heartbeat=boot['heartbeat'],
                     detail='Both timings include erase, program and verify over the same affected Flash range')
 
     @contextmanager
@@ -1186,18 +1186,25 @@ class BoardAcceptance:
                 raise KeyboardInterrupt from operation_error
             raise
 
-    def reset_application(self, folder):
-        previous_case = self.case
+    def reset_application(self, folder, heartbeat):
         if self.args.board == 'f103ze':
-            self.case = dict(self.case, transport='swd')
-        try:
-            # This run deliberately reboots the application. Restore debug
-            # configuration alone, keeping the actual post-reset context.
-            with self.target.live_debug(folder / 'boot-debug', self.check_idle):
-                with self.web_debug(folder):
-                    self.debug_call('resetRun')
-        finally:
-            self.case = previous_case
+            # CDC48 disables JTAG during startup and SYSRESETREQ has not
+            # reliably rebooted this fixture. Confirm J7 NRST over SWD.
+            self.check_idle()
+            with defer_interrupt() as interrupted:
+                evidence = self.target.f103_reset_application(heartbeat)
+            if interrupted[0]:
+                raise KeyboardInterrupt
+            return evidence
+        # Restore debug configuration alone, preserving the post-reset context.
+        with self.target.live_debug(folder / 'boot-debug', self.check_idle):
+            with self.web_debug(folder):
+                self.debug_call('resetRun')
+        with self.target.link() as (_, mem, chip, _):
+            checked(not self.target.state(mem, chip)['halted'], 'Restored application is halted after reset')
+            tick = mem.word(heartbeat)
+            after = wait_for(lambda: mem.word(heartbeat), lambda v: v != tick, 4, 'Restored application did not boot')
+        return dict(method='OpenOCD resetRun', heartbeat=dict(address=hex(heartbeat), before=tick, after=after))
 
     @staticmethod
     def tcl(value):
@@ -1237,6 +1244,7 @@ class BoardAcceptance:
                 f'flash write_image erase {self.tcl(backup)} {address:#x} bin; '
                 f'verify_image {self.tcl(backup)} {address:#x} bin; echo ZL_FLASH_DONE; shutdown']
         with log_path.open('wb') as log:
+            self.target.prepare_f103_openocd(self.case['transport'])
             start = time.perf_counter()
             verifying_seconds = 0
             # Ctrl+C belongs to the controller. Reap this child explicitly

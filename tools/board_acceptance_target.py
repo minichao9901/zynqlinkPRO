@@ -11,6 +11,8 @@ import time
 from tools.run_board_acceptance import Pending, ROOT, Unsafe, write_json
 
 DHCSR = 0xe000edf0
+DEMCR = 0xe000edfc
+S_RESET_ST = 1 << 25
 FPB = 0xe0002000
 ARM_REGISTERS = tuple(range(19)) + (20,)
 RV_REGISTERS = (0x7b0, 0x7b1, 0x300, 0x305, 0x340, 0x341, 0x342, 0x343,
@@ -135,6 +137,84 @@ class Target:
         status = mem.word(DHCSR)
         return dict(halted=bool(status & (1 << 17)), clock=clock, dhcsr=status,
                     ccr=hex(mem.word(0xe000ed14)))
+
+    def prepare_f103_openocd(self, transport):
+        if self.args.board != 'f103ze' or transport != 'jtag':
+            return
+        if self.uncertain:
+            raise Unsafe(self.uncertain)
+        import usb.util
+        from tools.dap_pipeline_bench import drain, le, open_dap, select_arm_jtag, xfer
+        dev, tx, rx = open_dap(self.args.serial)
+        try:
+            drain(rx)
+            checked(xfer(tx, rx, [2, 2]) == b'\x02\x02', 'DAP did not select JTAG')
+            checked(xfer(tx, rx, [0x11, *le(1_000_000)]) == b'\x11\x00', 'DAP rejected SWJ clock')
+            # OpenOCD resets the JTAG TAP but does not switch the ARM SWJ
+            # port. Native snapshots in this suite leave that port in SWD.
+            select_arm_jtag(tx, rx)
+        finally:
+            try:
+                checked(xfer(tx, rx, [3]) == b'\x03\x00', 'Native DAP disconnect failed')
+            finally:
+                usb.util.dispose_resources(dev)
+
+    def f103_reset_application(self, heartbeat):
+        from target_snapshot import same_clock_configuration
+        with self.link('swd', hz=1_000_000) as (_, mem, target, _):
+            before = self.state(mem, target)
+            demcr = mem.word(DEMCR)
+            fpb = self.fpb_snapshot(mem)
+            checked(not before['halted'] and not demcr & 1, 'Expected a running F103 without reset vector catch')
+            checked(not (fpb[0] & 1 and any(fpb[i] & 1 for i in range(8, len(fpb), 4))),
+                    'An active FPB comparator could halt the application at startup')
+            old_tick = mem.word(heartbeat)
+
+            def pins(value, mask):
+                reply = mem.transfer([0x10, value, mask, 0, 0, 0, 0])
+                checked(len(reply) == 2 and reply[0] == 0x10, 'Invalid DAP_SWJ_Pins response')
+                return reply[1]
+
+            nrst = 0x80
+            checked(pins(0, 0) & nrst, 'J7 NRST is low before the pulse')
+            # Reading DHCSR clears the old sticky reset indication.
+            checked(not mem.word(DHCSR) & S_RESET_ST, 'Could not clear the previous reset indication')
+            try:
+                asserted = pins(0, nrst)
+                checked(not asserted & nrst, 'J7 did not assert NRST')
+                time.sleep(.045)
+            finally:
+                try:
+                    released = pins(nrst, nrst)
+                    checked(released & nrst, 'J7 did not release NRST')
+                except (Exception, KeyboardInterrupt) as error:
+                    self.uncertain = f'J7 NRST release unconfirmed: {error!r}'
+                    raise Unsafe(self.uncertain) from error
+            reset_status = mem.word(DHCSR)
+            checked(reset_status & S_RESET_ST, 'J7 NRST caused no fresh core reset indication')
+            first_tick = mem.word(heartbeat)
+            ticks = [first_tick]
+
+            def advances(value):
+                # Ignore the stale pre-startup RAM value when startup clears BSS.
+                elapsed_ticks = (value - ticks[-1]) & 0xffffffff
+                if 0 < elapsed_ticks < 0x80000000:
+                    ticks.append(value)
+                elif value != ticks[-1]:
+                    ticks[:] = [value]
+                return len(ticks) == 3
+
+            wait_for(lambda: mem.word(heartbeat), advances, 4,
+                     'Restored F103 application heartbeat did not advance after NRST')
+            after = self.state(mem, target)
+            checked(not after['halted'] and same_clock_configuration(before['clock'], after['clock'])
+                    and before['ccr'] == after['ccr'], 'Unexpected F103 run, clock or cache state after reboot')
+            checked(mem.word(DEMCR) == demcr and self.fpb_snapshot(mem) == fpb,
+                    'F103 debug configuration changed across NRST')
+        return dict(method='J7 NRST', assertedPins=hex(asserted), releasedPins=hex(released),
+                    resetDhcsr=hex(reset_status),
+                    heartbeat=dict(address=hex(heartbeat), beforeReset=old_tick, firstAfterReset=first_tick,
+                                   advancing=ticks, before=ticks[0], after=ticks[-1]))
 
     def halt(self, mem, target):
         if self.rv:

@@ -331,6 +331,40 @@ test('the Zynq lease synchronizes DAP and terminates aligned OUT packets without
     ['write',2,4096], ['release',0], 'close']);
 });
 
+test('Zynq ARM/JTAG selects SWJ on the claimed interface before OpenOCD owns the TAP', async () => {
+  for (const rejectSequence of [false, true]){
+    const packets = [];
+    const device = {
+      nativeService:true, dapSynchronized:true, opened:true,
+      configuration:{ configurationValue:1, interfaces:[{ interfaceNumber:0, alternate:{ endpoints:[
+        { type:'bulk', direction:'out', endpointNumber:2 }, { type:'bulk', direction:'in', endpointNumber:1 },
+      ] } }] },
+      async claimInterface(number){ assert.equal(number, 0); },
+      async releaseInterface(){},
+      async close(){},
+      async transferOut(endpoint, data){
+        assert.equal(endpoint, 2);
+        packets.push([...data]);
+        return { status:'ok', bytesWritten:data.length };
+      },
+      async transferIn(endpoint){
+        assert.equal(endpoint, 1);
+        const command = packets.at(-1)[0];
+        const status = command === 2 ? 2 : command === 0x12 && rejectSequence ? 0xff : 0;
+        return { status:'ok', data:new DataView(Uint8Array.of(command, status).buffer) };
+      },
+    };
+    const usb = new OpenOcdUsb(device, 'dap', true);
+    try {
+      const claim = usb.invoke('claimInterface', [0]);
+      if (rejectSequence) await assert.rejects(claim, /选择命令未确认/);
+      else await claim;
+    } finally { await usb.close(); }
+    assert.deepEqual(packets, [[2,2], [0x11,0x40,0x42,0x0f,0],
+      [0x12,88,...Array(8).fill(0xff),0x3c,0xe7,0x1f], [3]]);
+  }
+});
+
 test('Flash preflight resolves an auto-detected bank base and rejects invalid ranges before erase', async () => {
   const lines = [];
   const original = Uint8Array.of(1,2,3,4);

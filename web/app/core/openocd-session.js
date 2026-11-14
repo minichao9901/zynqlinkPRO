@@ -16,7 +16,7 @@ export class OpenOcdTargetSession {
   async open(cfg, device){
     if (this.worker) throw new Error('OpenOCD 会话已经打开');
     const worker = this.worker = OpenOcdTargetSession.createWorker();
-    this.usb = device && new OpenOcdUsb(device);
+    this.usb = device && new OpenOcdUsb(device, 'dap', cfg.arch === 'arm' && cfg.transport === 'jtag');
     this.usbQueue = Promise.resolve();
     worker.onmessage = ({ data }) => {
       if (data.usbCall){

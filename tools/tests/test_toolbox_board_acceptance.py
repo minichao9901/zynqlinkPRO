@@ -254,6 +254,7 @@ class TestBoardAcceptance(unittest.TestCase):
 
     def test_native_writer_is_reaped_on_startup_interrupt(self):
         driver = self.driver()
+        driver.case = {'transport': 'swd'}
         probe = SimpleNamespace(manufacturer='CherryUSB', product='CMSIS-DAP', serial_number='12345678')
         child = Mock(stdout=io.BytesIO())
         child.poll.side_effect = [None, 1]
@@ -272,6 +273,56 @@ class TestBoardAcceptance(unittest.TestCase):
                 self.assertEqual([call[0] for call in actions.mock_calls], ['dispose', 'popen'])
         child.kill.assert_called_once()
         child.wait.assert_called_once_with(timeout=10)
+
+    def test_f103_openocd_handoff_selects_jtag_and_releases_the_serial_bound_probe(self):
+        dev = object()
+        with patch('tools.dap_pipeline_bench.open_dap', return_value=(dev, 'out', 'in')) as open_dap, \
+             patch('tools.dap_pipeline_bench.drain'), patch('usb.util.dispose_resources') as dispose, \
+             patch('tools.dap_pipeline_bench.xfer', side_effect=[b'\x02\x02', b'\x11\x00',
+                                                                b'\x12\xff', b'\x03\x00']) as transfer:
+            self.driver().target.prepare_f103_openocd('swd')
+            self.driver('h743').target.prepare_f103_openocd('jtag')
+            open_dap.assert_not_called()
+            with self.assertRaisesRegex(RuntimeError, 'SWD-to-JTAG'):
+                self.driver().target.prepare_f103_openocd('jtag')
+            open_dap.assert_called_once_with('12345678')
+            self.assertEqual([call.args[2] for call in transfer.call_args_list], [
+                [2, 2], [0x11, 0x40, 0x42, 0x0f, 0],
+                [0x12, 88] + [0xff] * 8 + [0x3c, 0xe7, 0x1f], [3]])
+            dispose.assert_called_once_with(dev)
+
+    def test_f103_flash_boot_requires_new_reset_and_releases_nrst_on_error(self):
+        from tools.board_acceptance_target import DEMCR, DHCSR, S_RESET_ST
+        heartbeat = 0x20005400
+        for mode in ('pass', 'stale', 'no-reset', 'assertion-failed', 'release-failed'):
+            with self.subTest(mode=mode):
+                target = self.driver().target
+                mem = Mock()
+                target.link = Mock(return_value=contextlib.nullcontext((None, mem, None, {})))
+                target.state = Mock(return_value=dict(halted=False, clock={}, ccr='0x0'))
+                target.fpb_snapshot = Mock(return_value=bytes(12))
+                status = iter([S_RESET_ST if mode == 'stale' else 0, 0 if mode == 'no-reset' else S_RESET_ST])
+                ticks = iter([90430, 90441, 5, 327, 612])
+                mem.word.side_effect = lambda address: {DHCSR: lambda: next(status), DEMCR: lambda: 0,
+                                                         heartbeat: lambda: next(ticks)}[address]()
+                mem.transfer.side_effect = [b'\x10\x80', b'\x10\x80' if mode == 'assertion-failed' else b'\x10\x00',
+                                            b'\x10\x00' if mode == 'release-failed' else b'\x10\x80']
+                with patch('tools.board_acceptance_target.time.sleep'), \
+                     patch.dict(sys.modules, {'target_snapshot': SimpleNamespace(same_clock_configuration=lambda a, b: a == b)}):
+                    if mode == 'pass':
+                        result = target.f103_reset_application(heartbeat)
+                        self.assertEqual(result['method'], 'J7 NRST')
+                        self.assertEqual(result['heartbeat']['advancing'], [5, 327, 612])
+                    else:
+                        errors = {'stale': 'previous reset', 'no-reset': 'no fresh core reset',
+                                  'assertion-failed': 'did not assert', 'release-failed': 'release unconfirmed'}
+                        with self.assertRaisesRegex(Unsafe if mode == 'release-failed' else RuntimeError, errors[mode]):
+                            target.f103_reset_application(heartbeat)
+                calls = [[0x10, 0, 0, 0, 0, 0, 0]]
+                if mode != 'stale':
+                    calls += [[0x10, 0, 0x80, 0, 0, 0, 0], [0x10, 0x80, 0x80, 0, 0, 0, 0]]
+                self.assertEqual([call.args[0] for call in mem.transfer.call_args_list], calls)
+                self.assertEqual(bool(target.uncertain), mode == 'release-failed')
 
     def test_flash_geometry_parser_uses_actual_erase_sectors(self):
         from tools.board_acceptance import read_flash_sectors

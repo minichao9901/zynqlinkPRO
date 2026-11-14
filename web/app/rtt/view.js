@@ -327,6 +327,12 @@ export class RttView {
         const Probe = memoryAp ? OpenOcdEtmProbe :
           cfg.boardId === 'hpm6800evk' && !imported && isZynqDapDevice(device) ? Hpm6800RttProbe : OpenOcdProbe;
         this.probe = new Probe(device, cfg, line => console.debug('[OpenOCD]', line), true);
+        // Keep a single ARM/JTAG read bounded. A full ring can entail
+        // thousands of DAP_JTAG_Sequence round trips through Wasm.
+        if (memoryAp && cfg.transport === 'jtag'){
+          this.probe.rttPollLimit = 512;
+          this.probe.rttLivePreview = true;
+        }
         this._opening = this.probe.connect();
         try { await this._opening; }
         finally { this._opening = null; }
