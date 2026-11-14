@@ -1,0 +1,4997 @@
+{
+  "localRawDirectory": "build/hpm6800evk-board-20261115/",
+  "testCommit": "2445794c3c953c9bcf98fe7ded130b34c4eb849f",
+  "files": [
+    {
+      "path": "initial-target.json",
+      "sha256": "64cba48ef892f05b5b64e188e6e260040943e7693e4601b55de421f1bba1c4de"
+    },
+    {
+      "path": "matched-elf.json",
+      "sha256": "391907b6de50a9be52ce7a04e3e3cf04b2b6a79d32f475379889dfa99c9ca900"
+    },
+    {
+      "path": "hpm6800evk-dbgstress-live.elf",
+      "sha256": "7cf8c56f4d7616166815f7a5a4306c423000f41c777ed625e4fb599c8e068261"
+    },
+    {
+      "path": "native-geometry.log",
+      "sha256": "b284f327f7d46339a05585dfc0a151e065eadeea7da3a01ee5ef320bec393504"
+    },
+    {
+      "path": "web-prepared.json",
+      "sha256": "56b433772f132bec3c516ff2dc97af5f26831e547ef2cc41198f7a3eaf36c682"
+    },
+    {
+      "path": "first-standard/summary.json",
+      "sha256": "2527325a5beca62bf161ebea07ccf6dd2dfa0870b3a3720f8a55313451b282d7"
+    },
+    {
+      "path": "first-standard/jtag-rtt-viewer/viewer.bin",
+      "sha256": "64081d81adf04ba2b517d4791dcfe8cc6c243c3ea7049aad1c1f1a2e704c6caa"
+    },
+    {
+      "path": "hart-recovery.json",
+      "sha256": "80157aadbe2d00514cbdc7cc308d105d1e94f4c2447ed2dc6037cb93a557df82"
+    },
+    {
+      "path": "normal-web-continue/result.json",
+      "sha256": "2fd75f837de60a434c5b46973beb7fafb768b20fd16175348ce75d3683dac3cf"
+    },
+    {
+      "path": "final-standard/summary.json",
+      "sha256": "e035ae1747a12ca3052d3457051b8f4e03cff6f1df8baa7e6d43f98001bc85d7"
+    },
+    {
+      "path": "final-flash-repeat/summary.json",
+      "sha256": "d9d43af26db60ab393a9c7b4513182da0268f478d52896e140077bba2f08f515"
+    },
+    {
+      "path": "before-retest/result.json",
+      "sha256": "4c8e4565f12332fed11f3f2102fbe51a680124459a081463df80b34c37d04d59"
+    },
+    {
+      "path": "after-retest/result.json",
+      "sha256": "a38120226b619be8b7038aea2300235ec98219ac98b75e8743adaa0c20b4c3e4"
+    },
+    {
+      "path": "review/summary.json",
+      "sha256": "da646befbbe6b8818b4a95d083a2754a77ad0178c19e5083e6bdf9a9d6a493b8"
+    },
+    {
+      "path": "probe-after/result.json",
+      "sha256": "d01adb0795db5a3c1a454a986b153135cae16cb7ed6dda02910149f455c770f8"
+    },
+    {
+      "path": "strict-source-supplement-confirmed/result.json",
+      "sha256": "b95b08b12d55318a964307ae07827eed077a6ab385d717eb2dc5fa81e6b32dc8"
+    },
+    {
+      "path": "final-strict-debug/summary.json",
+      "sha256": "02936550ae9a9e0c8320a9fd666559edb36fcfd3fe1aaf48b7e96160d79a8a0b"
+    },
+    {
+      "path": "after-strict-debug/result.json",
+      "sha256": "b5a43fe459fbb4c7572310336e7d602302b32ce3a6bf22cfd2ddde1ecd272df1"
+    }
+  ],
+  "initial": {
+    "serial": "12345678",
+    "engines": {
+      "PS_IDCODE": "0x23727093",
+      "LEVEL_SHIFTERS": "0xf",
+      "FPGA_RESET": "0x0",
+      "BOOT_MODE": "0x1",
+      "CAPTURE": "0x8",
+      "SWD": "0x0",
+      "PACKET": "0x0",
+      "DDR": "0x0",
+      "CDMA": "0x1002"
+    },
+    "streams": {
+      "rtt": 65536,
+      "hss": 20
+    },
+    "physical": {
+      "gpio": "0x7",
+      "route": "0x2",
+      "jtagMode": "0x4450007f"
+    },
+    "link": {
+      "FCLK_Hz": 49999999,
+      "actual_TCK_Hz": 24999999.5,
+      "JTAG_sampling_mode": 0,
+      "cfg": "0x20011",
+      "dmi_idle_min": 8,
+      "clock_source": "PS FCLK divider and PL half_delay registers",
+      "actual_link_Hz": 24999999.5,
+      "tap": "0x1000563d",
+      "dtmcs": "0x7071",
+      "advertisedIdle": 7
+    },
+    "target": {
+      "halted": false,
+      "clock": {
+        "controls": {
+          "cpu0": "0x3020100",
+          "mchtmr0": "0x1010000",
+          "ahb": "0x5040203"
+        },
+        "basis": "Read-only qualified SYSCTL controls; target frequencies not inferred without qualified PLL outputs"
+      },
+      "dmstatus": "0x400ca2"
+    },
+    "flash": {
+      "start": "0x80000000",
+      "bytes": 131072,
+      "sha256": "e02c28713f8804d31ef4b3ffa4289b9ddb0da57920deefaceff7aba3e82b4c4b",
+      "doubleRead": true
+    },
+    "elf": {
+      "name": "firmware/target/hpm6800_web_validation/dbgstress/fw.elf",
+      "sha256": "f76305dbb023612d114585fb6152a95949a5768988014084a051341a238124da",
+      "machine": "EM_RISCV",
+      "checks": [
+        {
+          "address": "0x80000400",
+          "bytes": 3216,
+          "flags": 4,
+          "expectedSha256": "eb5d4b9babb5bdd85a209a3b52a1ab1914c4edec8f8130b9ef8ea4ee31b51ea9",
+          "liveSha256": "6df0290c3f5852686b940a2f39ca8de49d314a35fba95b57027136f2aaf12e68",
+          "different": 3072,
+          "firstDifference": "0x80000400",
+          "lastDifference": "0x80000fff"
+        },
+        {
+          "address": "0x80003000",
+          "bytes": 72,
+          "flags": 5,
+          "expectedSha256": "329216476ecd6e26d6d970e32059e66efa98b0bfeed417c63e9069e3f9a1c17b",
+          "liveSha256": "329216476ecd6e26d6d970e32059e66efa98b0bfeed417c63e9069e3f9a1c17b",
+          "different": 0,
+          "firstDifference": null,
+          "lastDifference": null
+        },
+        {
+          "address": "0x80003048",
+          "bytes": 1048,
+          "flags": 5,
+          "expectedSha256": "15d77b1ef4e37901468b869f9cf93eed41419004618f096b16dac63f279b748f",
+          "liveSha256": "15d77b1ef4e37901468b869f9cf93eed41419004618f096b16dac63f279b748f",
+          "different": 0,
+          "firstDifference": null,
+          "lastDifference": null
+        },
+        {
+          "address": "0x80003460",
+          "bytes": 43416,
+          "flags": 5,
+          "expectedSha256": "f7c1b02765c6e720f54d11ed732b2f0abf6d004094b16ab980dab945239a06c4",
+          "liveSha256": "f7c1b02765c6e720f54d11ed732b2f0abf6d004094b16ab980dab945239a06c4",
+          "different": 0,
+          "firstDifference": null,
+          "lastDifference": null
+        },
+        {
+          "address": "0x8000ddf8",
+          "bytes": 472,
+          "flags": 6,
+          "expectedSha256": "0aa84b28604e1ce17bfd3100f2bd535e2a16a57d78ee3b979eebea62eef63c47",
+          "liveSha256": "0aa84b28604e1ce17bfd3100f2bd535e2a16a57d78ee3b979eebea62eef63c47",
+          "different": 0,
+          "firstDifference": null,
+          "lastDifference": null
+        }
+      ],
+      "heartbeatAt": "0x1240000",
+      "heartbeat": [
+        2176156,
+        2177668
+      ],
+      "imageMatches": false
+    },
+    "targetAfterRead": {
+      "halted": false,
+      "clock": {
+        "controls": {
+          "cpu0": "0x3020100",
+          "mchtmr0": "0x1010000",
+          "ahb": "0x5040203"
+        },
+        "basis": "Read-only qualified SYSCTL controls; target frequencies not inferred without qualified PLL outputs"
+      },
+      "dmstatus": "0x400ca2"
+    }
+  },
+  "elf": {
+    "originalElf": "firmware/target/hpm6800_web_validation/dbgstress/fw.elf",
+    "originalElfSha": "f76305dbb023612d114585fb6152a95949a5768988014084a051341a238124da",
+    "matchedElf": "hpm6800evk-dbgstress-live.elf",
+    "matchedSha": "7cf8c56f4d7616166815f7a5a4306c423000f41c777ed625e4fb599c8e068261",
+    "originalLiveFlashSha": "e02c28713f8804d31ef4b3ffa4289b9ddb0da57920deefaceff7aba3e82b4c4b",
+    "bootHeaderMatches": true,
+    "changedBytes": 3072,
+    "changedAddress": "0x80000400–0x80000fff",
+    "verifiedPtLoads": [
+      {
+        "address": "0x80000400",
+        "bytes": 3216,
+        "flags": 4,
+        "sha256": "6df0290c3f5852686b940a2f39ca8de49d314a35fba95b57027136f2aaf12e68"
+      },
+      {
+        "address": "0x80003000",
+        "bytes": 72,
+        "flags": 5,
+        "sha256": "329216476ecd6e26d6d970e32059e66efa98b0bfeed417c63e9069e3f9a1c17b"
+      },
+      {
+        "address": "0x80003048",
+        "bytes": 1048,
+        "flags": 5,
+        "sha256": "15d77b1ef4e37901468b869f9cf93eed41419004618f096b16dac63f279b748f"
+      },
+      {
+        "address": "0x80003460",
+        "bytes": 43416,
+        "flags": 5,
+        "sha256": "f7c1b02765c6e720f54d11ed732b2f0abf6d004094b16ab980dab945239a06c4"
+      },
+      {
+        "address": "0x8000ddf8",
+        "bytes": 472,
+        "flags": 6,
+        "sha256": "0aa84b28604e1ce17bfd3100f2bd535e2a16a57d78ee3b979eebea62eef63c47"
+      }
+    ]
+  },
+  "flashGeometry": {
+    "base": "0x80000000",
+    "lastExclusive": "0x8000e000",
+    "sectorBytes": 4096,
+    "sectors": 14,
+    "expectedSha": "83e02782def112304d57c531a40578aaeae67a6e2c489fb0fe728f9ba9e5718a",
+    "fullGuardSha": "e02c28713f8804d31ef4b3ffa4289b9ddb0da57920deefaceff7aba3e82b4c4b",
+    "openocd": "E:\\sdk_env_v1.11.0\\tools\\openocd\\openocd.exe",
+    "sdkScripts": "E:\\sdk_env_v1.11.0\\hpm_sdk\\boards\\openocd",
+    "initialHart": "0x400ca2",
+    "restoredHart": "0x4303a2",
+    "heartbeats": [
+      7386539,
+      7400174
+    ]
+  },
+  "webFlashPrepare": {
+    "chip": "hpm6800evk",
+    "clockKhz": 25000,
+    "name": "hpm6800evk-dbgstress-live.elf",
+    "prepared": true,
+    "regions": [
+      {
+        "address": 2147484672,
+        "bytes": 3216
+      },
+      {
+        "address": 2147495936,
+        "bytes": 45008
+      }
+    ],
+    "reset": false
+  },
+  "first": {
+    "metadata": {
+      "revision": "8d8a2045c258b39520d81589279889a6cb8431f2",
+      "sourceDirty": false,
+      "startedAt": "2026-11-14T23:29:00.252258+00:00",
+      "finishedAt": "2026-11-14T23:34:32.800239+00:00",
+      "status": "fail",
+      "counts": {
+        "pass": 7,
+        "fail": 2,
+        "pending": 0,
+        "not-applicable": 1,
+        "blocked": 3
+      },
+      "seed": 680014,
+      "files": {
+        "bit": {
+          "path": "source/prebuilt/qspi-release/probe.bit",
+          "sha256": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6"
+        },
+        "zynqElf": {
+          "path": "source/prebuilt/qspi-release/application.elf",
+          "sha256": "64d00fe597030175920b994e39ff51db8a683dbb8d5f907c0f8d73f8d55044b9"
+        },
+        "targetElf": {
+          "path": "hpm6800evk-dbgstress-live.elf",
+          "sha256": "7cf8c56f4d7616166815f7a5a4306c423000f41c777ed625e4fb599c8e068261"
+        }
+      }
+    },
+    "cases": {
+      "preflight": {
+        "status": "pass",
+        "seconds": 8.191,
+        "reason": null,
+        "data": {
+          "probe": {
+            "serial": "12345678",
+            "usb": "CMSIS-DAP",
+            "hid": "zynqlinkPRO HID"
+          },
+          "target": {
+            "halted": false,
+            "clock": {
+              "controls": {
+                "cpu0": "0x3020100",
+                "mchtmr0": "0x1010000",
+                "ahb": "0x5040203"
+              },
+              "basis": "Read-only qualified SYSCTL controls; target frequencies not inferred without qualified PLL outputs"
+            },
+            "dmstatus": "0x430ca2"
+          },
+          "clock": {
+            "FCLK_Hz": 119999998,
+            "actual_TCK_Hz": 9999999.833333334,
+            "JTAG_sampling_mode": 0,
+            "cfg": "0x2a011",
+            "dmi_idle_min": 8,
+            "clock_source": "PS FCLK divider and PL half_delay registers",
+            "actual_link_Hz": 9999999.833333334,
+            "tap": "0x1000563d"
+          },
+          "ocm": "ocm/result.json",
+          "usbAp0Identity": {
+            "usbSerial": "12345678",
+            "cableSerial": "210299008529",
+            "challenge": [
+              17,
+              1,
+              16
+            ],
+            "originalJtagTiming": 0,
+            "restored": true,
+            "livePlRegisters": {
+              "0x4001004c": "0x4450007f",
+              "0x40030048": "0x30f",
+              "0x40030050": "0x454c4431",
+              "0x40040000": "0x45444d31"
+            },
+            "declaredBitSha256": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6",
+            "plVerification": "qualified live register profile"
+          },
+          "workbenchBuild": "版本　v1.3.8 (OpenOCD Wasm)\n构建时间　源码模式，未打包"
+        }
+      },
+      "jtag-sram": {
+        "status": "pass",
+        "seconds": 9.334,
+        "reason": null,
+        "data": {
+          "native": {
+            "address": "0xf04063f8",
+            "bytes": 2048,
+            "rows": [
+              {
+                "writeSeconds": 0.001570799999171868,
+                "readSeconds": 0.0015952999965520576
+              },
+              {
+                "writeSeconds": 0.0016608000005362555,
+                "readSeconds": 0.001574800000526011
+              },
+              {
+                "writeSeconds": 0.0015857999969739467,
+                "readSeconds": 0.0015726999990874901
+              }
+            ],
+            "byteExact": true,
+            "readMBps": 1.3004826005308179,
+            "writeMBps": 1.2914617252541505,
+            "clock": {
+              "FCLK_Hz": 49999999,
+              "actual_TCK_Hz": 24999999.5,
+              "JTAG_sampling_mode": 0,
+              "cfg": "0x20011",
+              "dmi_idle_min": 8,
+              "clock_source": "PS FCLK divider and PL half_delay registers",
+              "actual_link_Hz": 24999999.5,
+              "tap": "0x1000563d"
+            }
+          },
+          "web": {
+            "address": "0xf04063f8",
+            "bytes": 2048,
+            "rows": [
+              {
+                "writeSeconds": 0.3589792999991914,
+                "readSeconds": 0.35473560000536963
+              },
+              {
+                "writeSeconds": 0.34059330000309274,
+                "readSeconds": 0.32896910000999924
+              },
+              {
+                "writeSeconds": 0.3422374999936437,
+                "readSeconds": 0.2686060000123689
+              }
+            ],
+            "byteExact": true,
+            "readMBps": 0.006225508717802826,
+            "writeMBps": 0.005984148435043024,
+            "clock": {
+              "FCLK_Hz": 49999999,
+              "cfg": "0x20011",
+              "jtagSamplingMode": 0,
+              "jtagRoute": 263,
+              "actual_link_Hz": 24999999.5,
+              "basis": "physical MEM-AP0 readback of PLL/divider registers"
+            },
+            "targetState": "halted"
+          },
+          "comparison": {
+            "readMBps": 0.004787075748081336,
+            "writeMBps": 0.0046336243018471075
+          },
+          "targetElf": {
+            "path": "hpm6800evk-dbgstress-live.elf",
+            "sha256": "7cf8c56f4d7616166815f7a5a4306c423000f41c777ed625e4fb599c8e068261",
+            "verifiedLoadBytes": 48224
+          },
+          "recovery": {
+            "streams": {
+              "rtt": 65536,
+              "hss": 20
+            },
+            "engines": {
+              "PS_IDCODE": "0x23727093",
+              "LEVEL_SHIFTERS": "0xf",
+              "FPGA_RESET": "0x0",
+              "BOOT_MODE": "0x1",
+              "CAPTURE": "0x8",
+              "SWD": "0x0",
+              "PACKET": "0x0",
+              "DDR": "0x0",
+              "CDMA": "0x1002"
+            }
+          }
+        }
+      },
+      "jtag-flash": {
+        "status": "pass",
+        "seconds": 48.293,
+        "reason": null,
+        "data": {
+          "nativeSeconds": 3.900108099987847,
+          "webSeconds": 30.445409799998743,
+          "clock": {
+            "FCLK_Hz": 49999999,
+            "cfg": "0x20011",
+            "jtagSamplingMode": 0,
+            "jtagRoute": 0,
+            "actual_link_Hz": 24999999.5,
+            "basis": "physical MEM-AP0 readback of PLL/divider registers"
+          },
+          "bootSeconds": 4.473825899985968,
+          "verified": true,
+          "flashRestored": true,
+          "affectedSectorBytes": 53248,
+          "recoveryCoverageBytes": 57344,
+          "nativeInputBytes": 53248,
+          "webInputBytes": 48224,
+          "resetMethod": "OpenOCD resetRun",
+          "heartbeat": {
+            "address": "0x1240000",
+            "before": 13918,
+            "after": 13921
+          },
+          "detail": "Both timings include erase, program and verify over the same affected Flash range",
+          "targetElf": {
+            "path": "hpm6800evk-dbgstress-live.elf",
+            "sha256": "7cf8c56f4d7616166815f7a5a4306c423000f41c777ed625e4fb599c8e068261",
+            "verifiedLoadBytes": 48224
+          },
+          "recovery": {
+            "streams": {
+              "rtt": 65536,
+              "hss": 20
+            },
+            "engines": {
+              "PS_IDCODE": "0x23727093",
+              "LEVEL_SHIFTERS": "0xf",
+              "FPGA_RESET": "0x0",
+              "BOOT_MODE": "0x1",
+              "CAPTURE": "0x8",
+              "SWD": "0x0",
+              "PACKET": "0x0",
+              "DDR": "0x0",
+              "CDMA": "0x1002"
+            }
+          }
+        }
+      },
+      "jtag-debug": {
+        "status": "pass",
+        "seconds": 9.992,
+        "reason": null,
+        "data": {
+          "clock": {
+            "FCLK_Hz": 49999999,
+            "cfg": "0x20011",
+            "jtagSamplingMode": 0,
+            "jtagRoute": 263,
+            "actual_link_Hz": 24999999.5,
+            "basis": "physical MEM-AP0 readback of PLL/divider registers"
+          },
+          "pc": 2147505428,
+          "steppedPc": 2147505430,
+          "breakpointPc": 2147506018,
+          "sourceSteps": {
+            "stepInto": {
+              "before": 2147506018,
+              "after": 2147506020,
+              "outcome": "单步进入（指令级）→ engine.c:7"
+            },
+            "stepOver": {
+              "before": 2147506020,
+              "after": 2147506024,
+              "outcome": "单步跳过 → engine.c:8（0x80005768）"
+            },
+            "stepOut": {
+              "before": 2147506024,
+              "after": 2147506130,
+              "outcome": "单步跳出 → engine.c:29（0x800057d2，按 LR 返回）"
+            }
+          },
+          "backtrace": {
+            "frames": [
+              {
+                "cfa": 556976,
+                "kind": "current",
+                "known": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6,
+                  7,
+                  8,
+                  9,
+                  10,
+                  11,
+                  12,
+                  13,
+                  14,
+                  15,
+                  16,
+                  17,
+                  18,
+                  19,
+                  20,
+                  21,
+                  22,
+                  23,
+                  24,
+                  25,
+                  26,
+                  27,
+                  28,
+                  29,
+                  30,
+                  31,
+                  32
+                ],
+                "loc": {
+                  "addr": 2147506124,
+                  "end": 2147506132,
+                  "file": "E:/web-serial-rtt-tools/tools/target-firmware/hpm6800evk_dbgstress/src/engine.c",
+                  "idx": 1509,
+                  "isStmt": true,
+                  "line": 29,
+                  "prologueEnd": false,
+                  "seq": 6,
+                  "seqEnd": false
+                },
+                "lookup": 2147506130,
+                "name": "engine_linear+0x46",
+                "pc": 2147506130,
+                "regs": [
+                  0,
+                  2147506130,
+                  556928,
+                  18876416,
+                  0,
+                  0,
+                  0,
+                  0,
+                  2147495936,
+                  1310720,
+                  3681624064,
+                  3,
+                  42,
+                  1043,
+                  902527578,
+                  3681624064,
+                  1048576,
+                  0,
+                  752168,
+                  536977436,
+                  0,
+                  770784,
+                  1,
+                  752168,
+                  752180,
+                  772648,
+                  8192,
+                  4096,
+                  0,
+                  46250,
+                  0,
+                  187,
+                  2147506130
+                ],
+                "sp": 556928
+              },
+              {
+                "cfa": 557008,
+                "kind": "cfi",
+                "known": [
+                  8,
+                  9,
+                  18,
+                  19,
+                  20,
+                  21,
+                  22,
+                  23,
+                  24,
+                  25,
+                  26,
+                  27,
+                  1,
+                  32,
+                  2
+                ],
+                "loc": {
+                  "addr": 2147505534,
+                  "end": 2147505558,
+                  "file": "E:/web-serial-rtt-tools/tools/target-firmware/hpm6800evk_dbgstress/src/main.c",
+                  "idx": 1440,
+                  "isStmt": true,
+                  "line": 62,
+                  "prologueEnd": false,
+                  "seq": 2,
+                  "seqEnd": false
+                },
+                "lookup": 2147505553,
+                "name": "stage_run+0x34",
+                "pc": 2147505554,
+                "regs": [
+                  0,
+                  2147505554,
+                  556976,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  2147495936,
+                  1310720,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  752168,
+                  536977436,
+                  0,
+                  770784,
+                  1,
+                  752168,
+                  752180,
+                  772648,
+                  8192,
+                  4096,
+                  0,
+                  0,
+                  0,
+                  0,
+                  2147505554
+                ],
+                "sp": 556976
+              },
+              {
+                "cfa": 557040,
+                "kind": "cfi",
+                "known": [
+                  8,
+                  9,
+                  18,
+                  19,
+                  20,
+                  21,
+                  22,
+                  23,
+                  24,
+                  25,
+                  26,
+                  27,
+                  1,
+                  32,
+                  2
+                ],
+                "loc": {
+                  "addr": 2147505886,
+                  "end": 2147505892,
+                  "file": "E:/web-serial-rtt-tools/tools/target-firmware/hpm6800evk_dbgstress/src/main.c",
+                  "idx": 1473,
+                  "isStmt": true,
+                  "line": 96,
+                  "prologueEnd": false,
+                  "seq": 3,
+                  "seqEnd": false
+                },
+                "lookup": 2147505889,
+                "name": "main+0x86",
+                "pc": 2147505890,
+                "regs": [
+                  0,
+                  2147505890,
+                  557008,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  2147495936,
+                  1310720,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  752168,
+                  536977436,
+                  0,
+                  770784,
+                  1,
+                  752168,
+                  752180,
+                  772648,
+                  8192,
+                  4096,
+                  0,
+                  0,
+                  0,
+                  0,
+                  2147505890
+                ],
+                "sp": 557008
+              },
+              {
+                "cfa": 557056,
+                "kind": "cfi",
+                "known": [
+                  8,
+                  9,
+                  18,
+                  19,
+                  20,
+                  21,
+                  22,
+                  23,
+                  24,
+                  25,
+                  26,
+                  27,
+                  1,
+                  32,
+                  2
+                ],
+                "loc": {
+                  "addr": 2147510398,
+                  "end": 2147510402,
+                  "file": "E:/sdk_env_v1.11.0/hpm_sdk/soc/HPM6800/HPM6880/toolchains/reset.c",
+                  "idx": 2049,
+                  "isStmt": true,
+                  "line": 120,
+                  "prologueEnd": false,
+                  "seq": 37,
+                  "seqEnd": false
+                },
+                "lookup": 2147510401,
+                "name": "reset_handler+0xe",
+                "pc": 2147510402,
+                "regs": [
+                  0,
+                  2147510402,
+                  557040,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  2147495936,
+                  1310720,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  752168,
+                  536977436,
+                  0,
+                  770784,
+                  1,
+                  752168,
+                  752180,
+                  772648,
+                  8192,
+                  4096,
+                  0,
+                  0,
+                  0,
+                  0,
+                  2147510402
+                ],
+                "sp": 557040
+              },
+              {
+                "kind": "cfi",
+                "known": [
+                  8,
+                  9,
+                  18,
+                  19,
+                  20,
+                  21,
+                  22,
+                  23,
+                  24,
+                  25,
+                  26,
+                  27,
+                  1,
+                  32,
+                  2
+                ],
+                "loc": {
+                  "addr": 2147495994,
+                  "end": 2147495998,
+                  "file": "E:/sdk_env_v1.11.0/hpm_sdk/soc/HPM6800/HPM6880/toolchains/gcc/start.S",
+                  "idx": 64,
+                  "isStmt": true,
+                  "line": 141,
+                  "prologueEnd": false,
+                  "seq": 32,
+                  "seqEnd": false
+                },
+                "lookup": 2147495997,
+                "name": "_start+0x3c",
+                "pc": 2147495998,
+                "regs": [
+                  0,
+                  2147495998,
+                  557056,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  2147495936,
+                  1310720,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  752168,
+                  536977436,
+                  0,
+                  770784,
+                  1,
+                  752168,
+                  752180,
+                  772648,
+                  8192,
+                  4096,
+                  0,
+                  0,
+                  0,
+                  0,
+                  2147495998
+                ],
+                "sp": 557056
+              }
+            ],
+            "reason": "ELF 缺少当前函数的 RISC-V DWARF CFI 展开行",
+            "scan": false
+          },
+          "register": 3681624064,
+          "connectSeconds": 2.0911846999952104,
+          "haltSeconds": 0.13381880000815727,
+          "stepSeconds": 0.4498059000034118,
+          "watchSeconds": 0.14147630000661593,
+          "targetElf": {
+            "path": "hpm6800evk-dbgstress-live.elf",
+            "sha256": "7cf8c56f4d7616166815f7a5a4306c423000f41c777ed625e4fb599c8e068261",
+            "verifiedLoadBytes": 48224
+          },
+          "recovery": {
+            "streams": {
+              "rtt": 65536,
+              "hss": 20
+            },
+            "engines": {
+              "PS_IDCODE": "0x23727093",
+              "LEVEL_SHIFTERS": "0xf",
+              "FPGA_RESET": "0x0",
+              "BOOT_MODE": "0x1",
+              "CAPTURE": "0x8",
+              "SWD": "0x0",
+              "PACKET": "0x0",
+              "DDR": "0x0",
+              "CDMA": "0x1002"
+            }
+          }
+        }
+      },
+      "jtag-rtt-viewer": {
+        "status": "fail",
+        "seconds": 11.237,
+        "reason": null,
+        "data": {
+          "error": "RTT sequence gap, duplicate or misalignment",
+          "recovery": {
+            "streams": {
+              "rtt": 65536,
+              "hss": 20
+            },
+            "engines": {
+              "PS_IDCODE": "0x23727093",
+              "LEVEL_SHIFTERS": "0xf",
+              "FPGA_RESET": "0x0",
+              "BOOT_MODE": "0x1",
+              "CAPTURE": "0x8",
+              "SWD": "0x0",
+              "PACKET": "0x0",
+              "DDR": "0x0",
+              "CDMA": "0x1002"
+            }
+          }
+        }
+      },
+      "jtag-rtt-forward": {
+        "status": "pass",
+        "seconds": 46.25,
+        "reason": null,
+        "data": {
+          "web": [
+            {
+              "port": "COM33",
+              "clock": {
+                "FCLK_Hz": 49999999,
+                "cfg": "0x20011",
+                "jtagSamplingMode": 0,
+                "jtagRoute": 263,
+                "actual_link_Hz": 24999999.5,
+                "basis": "physical MEM-AP0 readback of PLL/divider registers"
+              },
+              "window": {
+                "activeBytesPerSecond": 1550457.4877234306,
+                "activeSeconds": 3.1979000000059603,
+                "bytes": 5023744,
+                "bytesPerSecond": 717155.215484945,
+                "complete": true,
+                "error": null,
+                "firstChunkBytes": 65536,
+                "limitExceeded": false,
+                "name": "rtt-raw-20261115-073038.bin",
+                "observedBytes": 5023744,
+                "portClosed": false,
+                "seconds": 7.005100000008941
+              },
+              "sequence": {
+                "bytes": 5023744,
+                "first": 327680,
+                "last": 1583615,
+                "words": 1255936,
+                "alignment": 0
+              },
+              "startupSeconds": 0.2579464000009466,
+              "engine": {
+                "armJtagIdentity": null,
+                "cbAddr": "0xf0400200",
+                "connected": true,
+                "dapYield": 0,
+                "info": "已连接：zynqlinkPRO HID · 12345678 · FW 0.8-nonce32 · SN 12345678",
+                "label": "zynqlinkPRO HID · 12345678",
+                "mock": false,
+                "moved": 6334464,
+                "rdErr": 0,
+                "rescans": 0,
+                "running": false,
+                "stall": 0,
+                "startRc": 0,
+                "state": "未运行（点「启动转发」或「自动搜控制块」）",
+                "supported": true,
+                "swdMhz": 24,
+                "targetMode": "riscv",
+                "wrErr": 0
+              },
+              "hostTailMatch": true,
+              "targetRingPending": 15360,
+              "chunk": 2048
+            },
+            {
+              "port": "COM33",
+              "clock": {
+                "FCLK_Hz": 49999999,
+                "cfg": "0x20011",
+                "jtagSamplingMode": 0,
+                "jtagRoute": 263,
+                "actual_link_Hz": 24999999.5,
+                "basis": "physical MEM-AP0 readback of PLL/divider registers"
+              },
+              "window": {
+                "activeBytesPerSecond": 1550392.0858927912,
+                "activeSeconds": 3.3156000000089407,
+                "bytes": 5206016,
+                "bytesPerSecond": 743047.8283833428,
+                "complete": true,
+                "error": null,
+                "firstChunkBytes": 65536,
+                "limitExceeded": false,
+                "name": "rtt-raw-20261115-073050.bin",
+                "observedBytes": 5206016,
+                "portClosed": false,
+                "seconds": 7.00629999999702
+              },
+              "sequence": {
+                "bytes": 5206016,
+                "first": 311296,
+                "last": 1612799,
+                "words": 1301504,
+                "alignment": 0
+              },
+              "startupSeconds": 0.2931328999984544,
+              "engine": {
+                "armJtagIdentity": null,
+                "cbAddr": "0xf0400200",
+                "connected": true,
+                "dapYield": 0,
+                "info": "已连接：zynqlinkPRO HID · 12345678 · FW 0.8-nonce32 · SN 12345678",
+                "label": "zynqlinkPRO HID · 12345678",
+                "mock": false,
+                "moved": 6451200,
+                "rdErr": 0,
+                "rescans": 0,
+                "running": false,
+                "stall": 0,
+                "startRc": 0,
+                "state": "未运行（点「启动转发」或「自动搜控制块」）",
+                "supported": true,
+                "swdMhz": 24,
+                "targetMode": "riscv",
+                "wrErr": 0
+              },
+              "hostTailMatch": true,
+              "targetRingPending": 15360,
+              "chunk": 2048
+            }
+          ],
+          "native": {
+            "port": "COM33",
+            "clock": {
+              "FCLK_Hz": 49999999,
+              "cfg": "0x20011",
+              "jtagSamplingMode": 0,
+              "jtagRoute": 263,
+              "actual_link_Hz": 24999999.5,
+              "basis": "physical MEM-AP0 readback of PLL/divider registers"
+            },
+            "seconds": 3.0004961999948137,
+            "bytes": 4673536,
+            "throughputBps": 1557587.7083290685,
+            "received": 5322752,
+            "moved": 5322752,
+            "sequenceContinuous": true,
+            "targetRingPending": 15360,
+            "chunk": 2048
+          },
+          "boundaries": [
+            {
+              "bytes": 511,
+              "sha256": "07dc29f110b4ca941e088f56c89a0c4d956116cafcc452a24e976e40d73aa28e",
+              "matched": true
+            },
+            {
+              "bytes": 512,
+              "sha256": "3cbd6ef1f83272b73573b30a0339231e1120bec245de04d958dda71cf2f1db0d",
+              "matched": true
+            },
+            {
+              "bytes": 513,
+              "sha256": "8e016f86c8675068e2b839c0f9e766c448a23df7881e2d04815944be22a427f9",
+              "matched": true
+            }
+          ],
+          "restartVerified": true,
+          "webToNativeThroughputRatio": 0.9954012724402904,
+          "targetElf": {
+            "path": "hpm6800evk-dbgstress-live.elf",
+            "sha256": "7cf8c56f4d7616166815f7a5a4306c423000f41c777ed625e4fb599c8e068261",
+            "verifiedLoadBytes": 48224
+          },
+          "recovery": {
+            "streams": {
+              "rtt": 65536,
+              "hss": 22
+            },
+            "engines": {
+              "PS_IDCODE": "0x23727093",
+              "LEVEL_SHIFTERS": "0xf",
+              "FPGA_RESET": "0x0",
+              "BOOT_MODE": "0x1",
+              "CAPTURE": "0x8",
+              "SWD": "0x0",
+              "PACKET": "0x0",
+              "DDR": "0x0",
+              "CDMA": "0x1002"
+            }
+          }
+        }
+      },
+      "jtag-jscope-1": {
+        "status": "pass",
+        "seconds": 80.084,
+        "reason": null,
+        "data": {
+          "confirmed": {
+            "periodTicks": 204,
+            "requestedSeconds": 60,
+            "clock": {
+              "FCLK_Hz": 49999999,
+              "cfg": "0x20011",
+              "jtagSamplingMode": 0,
+              "jtagRoute": 263,
+              "actual_link_Hz": 24999999.5,
+              "basis": "physical MEM-AP0 readback of PLL/divider registers"
+            },
+            "summary": {
+              "armJtagIdentity": null,
+              "awaitingDefinition": false,
+              "benchUs": null,
+              "blob": null,
+              "capacity": 8800064,
+              "captureFlags": 224,
+              "connectErr": null,
+              "dapYields": 0,
+              "definitionReceived": true,
+              "elf": null,
+              "hostPollSkipped": 0,
+              "lod": true,
+              "lost": 1,
+              "lostGap": 0,
+              "lostProbe": 1,
+              "lostUsb": 0,
+              "metricsError": null,
+              "mockVars": [
+                "mock0.f32",
+                "mock1.f32",
+                "mock2.i32",
+                "mock3.u16",
+                "mock4.i16",
+                "mock5.u8",
+                "mock6.i8",
+                "mock7.f64"
+              ],
+              "mode": "real",
+              "packets": 58069,
+              "plan": {
+                "estHz": 139232,
+                "estUs": 7.18,
+                "frameBytes": 4,
+                "spans": 1
+              },
+              "probeMetrics": {
+                "bytes": 29731328,
+                "errors": 0,
+                "flags": 96,
+                "hz": 24000000,
+                "periodTicks": 204,
+                "produced": 7200147,
+                "skipped": 1,
+                "tick": 1222553245,
+                "tx": 58069,
+                "usb": 0,
+                "yields": 0
+              },
+              "rateHz": 117647,
+              "raw": 1967,
+              "readErrors": 0,
+              "receivedSamples": 7200147,
+              "resyncs": 0,
+              "running": false,
+              "sampleSource": "probe-hss",
+              "samples": 7200147,
+              "stalePackets": 0,
+              "state": "已停止（board acceptance STOP）：7200147 个样本 / 61.201 s，跳拍 1 / USB 丢样本 0 / 读错 0 / 包缺口 0",
+              "supportsMetrics": true,
+              "tailCountDelta": 0,
+              "targetMode": "riscv",
+              "transport": {
+                "bytes": 29731328,
+                "chunks": 1967,
+                "errors": 0,
+                "hostQueue": {
+                  "capacityBytes": 16777216,
+                  "highWaterBytes": 16384
+                },
+                "lastError": null,
+                "running": false
+              },
+              "trigger": {
+                "hit": -1,
+                "hits": 0,
+                "marker": false,
+                "mode": 0
+              },
+              "varCount": 1,
+              "vars": [
+                "fixture_0:u32@0xf0404800"
+              ],
+              "view": {
+                "end": 7200147,
+                "start": 0
+              }
+            },
+            "groups": 7083703,
+            "groupsPerSecond": 117647.05906776662,
+            "counterSeconds": 60.211475375,
+            "wallSeconds": 60.108981099998346,
+            "windowSkipped": 0,
+            "skipFraction": 1.3888603400930093e-07
+          },
+          "exports": {
+            "groups": 8568,
+            "firstTick": 0,
+            "lastTick": 20560800,
+            "periodTicks": 2400
+          },
+          "targetElf": {
+            "path": "hpm6800evk-dbgstress-live.elf",
+            "sha256": "7cf8c56f4d7616166815f7a5a4306c423000f41c777ed625e4fb599c8e068261",
+            "verifiedLoadBytes": 48224
+          },
+          "recovery": {
+            "streams": {
+              "rtt": 65536,
+              "hss": 16777494
+            },
+            "engines": {
+              "PS_IDCODE": "0x23727093",
+              "LEVEL_SHIFTERS": "0xf",
+              "FPGA_RESET": "0x0",
+              "BOOT_MODE": "0x1",
+              "CAPTURE": "0x8",
+              "SWD": "0x0",
+              "PACKET": "0x0",
+              "DDR": "0x0",
+              "CDMA": "0x1002"
+            }
+          }
+        }
+      },
+      "jtag-jscope-8": {
+        "status": "pass",
+        "seconds": 90.08,
+        "reason": null,
+        "data": {
+          "confirmed": {
+            "periodTicks": 1012,
+            "requestedSeconds": 60,
+            "clock": {
+              "FCLK_Hz": 49999999,
+              "cfg": "0x20011",
+              "jtagSamplingMode": 0,
+              "jtagRoute": 263,
+              "actual_link_Hz": 24999999.5,
+              "basis": "physical MEM-AP0 readback of PLL/divider registers"
+            },
+            "summary": {
+              "armJtagIdentity": null,
+              "awaitingDefinition": false,
+              "benchUs": null,
+              "blob": null,
+              "capacity": 1773978,
+              "captureFlags": 224,
+              "connectErr": null,
+              "dapYields": 0,
+              "definitionReceived": true,
+              "elf": null,
+              "hostPollSkipped": 0,
+              "lod": true,
+              "lost": 0,
+              "lostGap": 0,
+              "lostProbe": 0,
+              "lostUsb": 0,
+              "metricsError": null,
+              "mockVars": [
+                "mock0.f32",
+                "mock1.f32",
+                "mock2.i32",
+                "mock3.u16",
+                "mock4.i16",
+                "mock5.u8",
+                "mock6.i8",
+                "mock7.f64"
+              ],
+              "mode": "real",
+              "packets": 96770,
+              "plan": {
+                "estHz": 46865,
+                "estUs": 21.34,
+                "frameBytes": 32,
+                "spans": 1
+              },
+              "probeMetrics": {
+                "bytes": 49546240,
+                "errors": 0,
+                "flags": 96,
+                "hz": 24000000,
+                "periodTicks": 1012,
+                "produced": 1451508,
+                "skipped": 0,
+                "tick": 3296155019,
+                "tx": 96770,
+                "usb": 0,
+                "yields": 0
+              },
+              "rateHz": 23715,
+              "raw": 1969,
+              "readErrors": 0,
+              "receivedSamples": 1451508,
+              "resyncs": 0,
+              "running": false,
+              "sampleSource": "probe-hss",
+              "samples": 1451508,
+              "stalePackets": 0,
+              "state": "已停止（board acceptance STOP）：1451508 个样本 / 61.205 s，跳拍 0 / USB 丢样本 0 / 读错 0 / 包缺口 0",
+              "supportsMetrics": true,
+              "tailCountDelta": 0,
+              "targetMode": "riscv",
+              "transport": {
+                "bytes": 49546240,
+                "chunks": 1969,
+                "errors": 0,
+                "hostQueue": {
+                  "capacityBytes": 16777216,
+                  "highWaterBytes": 26624
+                },
+                "lastError": null,
+                "running": false
+              },
+              "trigger": {
+                "hit": -1,
+                "hits": 0,
+                "marker": false,
+                "mode": 0
+              },
+              "varCount": 8,
+              "vars": [
+                "fixture_0:u32@0xf0404800",
+                "fixture_1:u32@0xf0404804",
+                "fixture_2:u32@0xf0404808",
+                "fixture_3:u32@0xf040480c",
+                "fixture_4:u32@0xf0404810",
+                "fixture_5:u32@0xf0404814",
+                "fixture_6:u32@0xf0404818",
+                "fixture_7:u32@0xf040481c"
+              ],
+              "view": {
+                "end": 1451508,
+                "start": 0
+              }
+            },
+            "groups": 1427917,
+            "groupsPerSecond": 23715.424193773255,
+            "counterSeconds": 60.210476875,
+            "wallSeconds": 60.11826440000732,
+            "windowSkipped": 0,
+            "skipFraction": 0.0
+          },
+          "exports": {
+            "groups": 8218,
+            "firstTick": 0,
+            "lastTick": 19720800,
+            "periodTicks": 2400
+          },
+          "targetElf": {
+            "path": "hpm6800evk-dbgstress-live.elf",
+            "sha256": "7cf8c56f4d7616166815f7a5a4306c423000f41c777ed625e4fb599c8e068261",
+            "verifiedLoadBytes": 48224
+          },
+          "recovery": {
+            "streams": {
+              "rtt": 65536,
+              "hss": 134219798
+            },
+            "engines": {
+              "PS_IDCODE": "0x23727093",
+              "LEVEL_SHIFTERS": "0xf",
+              "FPGA_RESET": "0x0",
+              "BOOT_MODE": "0x1",
+              "CAPTURE": "0x8",
+              "SWD": "0x0",
+              "PACKET": "0x0",
+              "DDR": "0x0",
+              "CDMA": "0x1002"
+            }
+          }
+        }
+      },
+      "jtag-stress-1": {
+        "status": "fail",
+        "seconds": 29.041,
+        "reason": null,
+        "data": {
+          "error": "Live debug restoration unconfirmed at E:\\zynqlinkPRO\\build\\hpm6800evk-board-20261115\\first-standard\\jtag-stress-1\\03-initial\\fixture: RuntimeError('Original run/halt state was not restored')"
+        }
+      },
+      "jtag-stress-2": {
+        "status": "blocked",
+        "seconds": 0.0,
+        "reason": "Live debug restoration unconfirmed at E:\\zynqlinkPRO\\build\\hpm6800evk-board-20261115\\first-standard\\jtag-stress-1\\03-initial\\fixture: RuntimeError('Original run/halt state was not restored')",
+        "data": {}
+      },
+      "jtag-stress-3": {
+        "status": "blocked",
+        "seconds": 0.0,
+        "reason": "Live debug restoration unconfirmed at E:\\zynqlinkPRO\\build\\hpm6800evk-board-20261115\\first-standard\\jtag-stress-1\\03-initial\\fixture: RuntimeError('Original run/halt state was not restored')",
+        "data": {}
+      },
+      "etm": {
+        "status": "not-applicable",
+        "seconds": 0.0,
+        "reason": null,
+        "data": {}
+      },
+      "final-state": {
+        "status": "blocked",
+        "seconds": 0.0,
+        "reason": "Live debug restoration unconfirmed at E:\\zynqlinkPRO\\build\\hpm6800evk-board-20261115\\first-standard\\jtag-stress-1\\03-initial\\fixture: RuntimeError('Original run/halt state was not restored')",
+        "data": {}
+      }
+    }
+  },
+  "hartRecovery": {
+    "resources": {},
+    "live": {
+      "halted": true,
+      "clock": {
+        "controls": {
+          "cpu0": "0x3020100",
+          "mchtmr0": "0x1010000",
+          "ahb": "0x5040203"
+        },
+        "basis": "Read-only qualified SYSCTL controls; target frequencies not inferred without qualified PLL outputs"
+      },
+      "dmstatus": "0x4303a2"
+    },
+    "flashBefore": "e02c28713f8804d31ef4b3ffa4289b9ddb0da57920deefaceff7aba3e82b4c4b",
+    "dcsr": "0x4000b707",
+    "cause": 4,
+    "dpc": "0x80006456",
+    "triggers": [
+      0,
+      [
+        [
+          562036736,
+          0
+        ],
+        [
+          562036736,
+          0
+        ],
+        [
+          562036736,
+          0
+        ],
+        [
+          562036736,
+          0
+        ],
+        [
+          562036736,
+          0
+        ],
+        [
+          562036736,
+          0
+        ],
+        [
+          562036736,
+          0
+        ],
+        [
+          562036736,
+          0
+        ]
+      ]
+    ],
+    "restored": {
+      "halted": false,
+      "clock": {
+        "controls": {
+          "cpu0": "0x3020100",
+          "mchtmr0": "0x1010000",
+          "ahb": "0x5040203"
+        },
+        "basis": "Read-only qualified SYSCTL controls; target frequencies not inferred without qualified PLL outputs"
+      },
+      "dmstatus": "0x430ca2"
+    },
+    "heartbeats": [
+      2370496,
+      2372715
+    ],
+    "flashAfter": "e02c28713f8804d31ef4b3ffa4289b9ddb0da57920deefaceff7aba3e82b4c4b",
+    "reset": false
+  },
+  "ordinaryWebContinue": {
+    "pc": [
+      "0x800059c6",
+      "0x800059ca"
+    ],
+    "haltedDcsr": "0x4000b6c3",
+    "steppedDcsr": "0x4000b707",
+    "dcsrAfterWebContinueAndHalt": "0x4000b6c3",
+    "tickBeforeContinue": 4084779,
+    "tickAfterContinue": 4090006,
+    "idle": {
+      "streams": {
+        "rtt": 65536,
+        "hss": 134219798
+      },
+      "engines": {
+        "PS_IDCODE": "0x23727093",
+        "LEVEL_SHIFTERS": "0xf",
+        "FPGA_RESET": "0x0",
+        "BOOT_MODE": "0x1",
+        "CAPTURE": "0x8",
+        "SWD": "0x0",
+        "PACKET": "0x0",
+        "DDR": "0x0",
+        "CDMA": "0x1002"
+      }
+    }
+  },
+  "final": {
+    "metadata": {
+      "revision": "2445794c3c953c9bcf98fe7ded130b34c4eb849f",
+      "sourceDirty": false,
+      "startedAt": "2026-11-14T23:38:13.984823+00:00",
+      "finishedAt": "2026-11-14T23:45:09.932026+00:00",
+      "status": "incomplete",
+      "counts": {
+        "pass": 9,
+        "fail": 0,
+        "pending": 3,
+        "not-applicable": 1,
+        "blocked": 0
+      },
+      "seed": 680014,
+      "files": {
+        "bit": {
+          "path": "source/prebuilt/qspi-release/probe.bit",
+          "sha256": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6"
+        },
+        "zynqElf": {
+          "path": "source/prebuilt/qspi-release/application.elf",
+          "sha256": "64d00fe597030175920b994e39ff51db8a683dbb8d5f907c0f8d73f8d55044b9"
+        },
+        "targetElf": {
+          "path": "hpm6800evk-dbgstress-live.elf",
+          "sha256": "7cf8c56f4d7616166815f7a5a4306c423000f41c777ed625e4fb599c8e068261"
+        }
+      }
+    },
+    "cases": {
+      "preflight": {
+        "status": "pass",
+        "seconds": 7.902,
+        "reason": null,
+        "data": {
+          "probe": {
+            "serial": "12345678",
+            "usb": "CMSIS-DAP",
+            "hid": "zynqlinkPRO HID"
+          },
+          "target": {
+            "halted": false,
+            "clock": {
+              "controls": {
+                "cpu0": "0x3020100",
+                "mchtmr0": "0x1010000",
+                "ahb": "0x5040203"
+              },
+              "basis": "Read-only qualified SYSCTL controls; target frequencies not inferred without qualified PLL outputs"
+            },
+            "dmstatus": "0x430ca2"
+          },
+          "clock": {
+            "FCLK_Hz": 119999998,
+            "actual_TCK_Hz": 9999999.833333334,
+            "JTAG_sampling_mode": 0,
+            "cfg": "0x2a011",
+            "dmi_idle_min": 8,
+            "clock_source": "PS FCLK divider and PL half_delay registers",
+            "actual_link_Hz": 9999999.833333334,
+            "tap": "0x1000563d"
+          },
+          "ocm": "ocm/result.json",
+          "usbAp0Identity": {
+            "usbSerial": "12345678",
+            "cableSerial": "210299008529",
+            "challenge": [
+              16,
+              17,
+              1
+            ],
+            "originalJtagTiming": 0,
+            "restored": true,
+            "livePlRegisters": {
+              "0x4001004c": "0x4450007f",
+              "0x40030048": "0x30f",
+              "0x40030050": "0x454c4431",
+              "0x40040000": "0x45444d31"
+            },
+            "declaredBitSha256": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6",
+            "plVerification": "qualified live register profile"
+          },
+          "workbenchBuild": "版本　v1.3.8 (OpenOCD Wasm)\n构建时间　源码模式，未打包"
+        }
+      },
+      "jtag-sram": {
+        "status": "pass",
+        "seconds": 9.891,
+        "reason": null,
+        "data": {
+          "native": {
+            "address": "0xf04063f8",
+            "bytes": 2048,
+            "rows": [
+              {
+                "writeSeconds": 0.0016127999988384545,
+                "readSeconds": 0.0015769000019645318
+              },
+              {
+                "writeSeconds": 0.0016747000045143068,
+                "readSeconds": 0.0017324999935226515
+              },
+              {
+                "writeSeconds": 0.0016367999924113974,
+                "readSeconds": 0.0016647000011289492
+              }
+            ],
+            "byteExact": true,
+            "readMBps": 1.2302516961681433,
+            "writeMBps": 1.2512219021841555,
+            "clock": {
+              "FCLK_Hz": 49999999,
+              "actual_TCK_Hz": 24999999.5,
+              "JTAG_sampling_mode": 0,
+              "cfg": "0x20011",
+              "dmi_idle_min": 8,
+              "clock_source": "PS FCLK divider and PL half_delay registers",
+              "actual_link_Hz": 24999999.5,
+              "tap": "0x1000563d"
+            }
+          },
+          "web": {
+            "address": "0xf04063f8",
+            "bytes": 2048,
+            "rows": [
+              {
+                "writeSeconds": 0.3410852000088198,
+                "readSeconds": 0.3274306999956025
+              },
+              {
+                "writeSeconds": 0.3480868000042392,
+                "readSeconds": 0.3522475000063423
+              },
+              {
+                "writeSeconds": 0.34970249999605585,
+                "readSeconds": 0.3762060000008205
+              }
+            ],
+            "byteExact": true,
+            "readMBps": 0.005814093783385617,
+            "writeMBps": 0.005883589955077465,
+            "clock": {
+              "FCLK_Hz": 49999999,
+              "cfg": "0x20011",
+              "jtagSamplingMode": 0,
+              "jtagRoute": 263,
+              "actual_link_Hz": 24999999.5,
+              "basis": "physical MEM-AP0 readback of PLL/divider registers"
+            },
+            "targetState": "halted"
+          },
+          "comparison": {
+            "readMBps": 0.00472593844129192,
+            "writeMBps": 0.004702275387608676
+          },
+          "targetElf": {
+            "path": "hpm6800evk-dbgstress-live.elf",
+            "sha256": "7cf8c56f4d7616166815f7a5a4306c423000f41c777ed625e4fb599c8e068261",
+            "verifiedLoadBytes": 48224
+          },
+          "recovery": {
+            "streams": {
+              "rtt": 65536,
+              "hss": 134219798
+            },
+            "engines": {
+              "PS_IDCODE": "0x23727093",
+              "LEVEL_SHIFTERS": "0xf",
+              "FPGA_RESET": "0x0",
+              "BOOT_MODE": "0x1",
+              "CAPTURE": "0x8",
+              "SWD": "0x0",
+              "PACKET": "0x0",
+              "DDR": "0x0",
+              "CDMA": "0x1002"
+            }
+          }
+        }
+      },
+      "jtag-flash": {
+        "status": "pass",
+        "seconds": 49.769,
+        "reason": null,
+        "data": {
+          "nativeSeconds": 3.856385199993383,
+          "webSeconds": 31.654388900002232,
+          "clock": {
+            "FCLK_Hz": 49999999,
+            "cfg": "0x20011",
+            "jtagSamplingMode": 0,
+            "jtagRoute": 0,
+            "actual_link_Hz": 24999999.5,
+            "basis": "physical MEM-AP0 readback of PLL/divider registers"
+          },
+          "bootSeconds": 4.509681700001238,
+          "verified": true,
+          "flashRestored": true,
+          "affectedSectorBytes": 53248,
+          "recoveryCoverageBytes": 57344,
+          "nativeInputBytes": 53248,
+          "webInputBytes": 48224,
+          "resetMethod": "OpenOCD resetRun",
+          "heartbeat": {
+            "address": "0x1240000",
+            "before": 15371,
+            "after": 15378
+          },
+          "detail": "Both timings include erase, program and verify over the same affected Flash range",
+          "targetElf": {
+            "path": "hpm6800evk-dbgstress-live.elf",
+            "sha256": "7cf8c56f4d7616166815f7a5a4306c423000f41c777ed625e4fb599c8e068261",
+            "verifiedLoadBytes": 48224
+          },
+          "recovery": {
+            "streams": {
+              "rtt": 65536,
+              "hss": 134219798
+            },
+            "engines": {
+              "PS_IDCODE": "0x23727093",
+              "LEVEL_SHIFTERS": "0xf",
+              "FPGA_RESET": "0x0",
+              "BOOT_MODE": "0x1",
+              "CAPTURE": "0x8",
+              "SWD": "0x0",
+              "PACKET": "0x0",
+              "DDR": "0x0",
+              "CDMA": "0x1002"
+            }
+          }
+        }
+      },
+      "jtag-debug": {
+        "status": "pass",
+        "seconds": 10.611,
+        "reason": null,
+        "data": {
+          "clock": {
+            "FCLK_Hz": 49999999,
+            "cfg": "0x20011",
+            "jtagSamplingMode": 0,
+            "jtagRoute": 263,
+            "actual_link_Hz": 24999999.5,
+            "basis": "physical MEM-AP0 readback of PLL/divider registers"
+          },
+          "pc": 2147505964,
+          "steppedPc": 2147505968,
+          "breakpointPc": 2147506018,
+          "sourceSteps": {
+            "stepInto": {
+              "before": 2147506018,
+              "after": 2147506020,
+              "outcome": "单步进入（指令级）→ engine.c:7"
+            },
+            "stepOver": {
+              "before": 2147506020,
+              "after": 2147506024,
+              "outcome": "单步跳过 → engine.c:8（0x80005768）"
+            },
+            "stepOut": {
+              "before": 2147506024,
+              "after": 2147506130,
+              "outcome": "单步跳出 → engine.c:29（0x800057d2，按 LR 返回）"
+            }
+          },
+          "backtrace": {
+            "frames": [
+              {
+                "cfa": 556976,
+                "kind": "current",
+                "known": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6,
+                  7,
+                  8,
+                  9,
+                  10,
+                  11,
+                  12,
+                  13,
+                  14,
+                  15,
+                  16,
+                  17,
+                  18,
+                  19,
+                  20,
+                  21,
+                  22,
+                  23,
+                  24,
+                  25,
+                  26,
+                  27,
+                  28,
+                  29,
+                  30,
+                  31,
+                  32
+                ],
+                "loc": {
+                  "addr": 2147506124,
+                  "end": 2147506132,
+                  "file": "E:/web-serial-rtt-tools/tools/target-firmware/hpm6800evk_dbgstress/src/engine.c",
+                  "idx": 1509,
+                  "isStmt": true,
+                  "line": 29,
+                  "prologueEnd": false,
+                  "seq": 6,
+                  "seqEnd": false
+                },
+                "lookup": 2147506130,
+                "name": "engine_linear+0x46",
+                "pc": 2147506130,
+                "regs": [
+                  0,
+                  2147506130,
+                  556928,
+                  18876416,
+                  0,
+                  0,
+                  0,
+                  0,
+                  2147495936,
+                  1310720,
+                  3681638356,
+                  3,
+                  42,
+                  1043,
+                  902541870,
+                  3681638356,
+                  1048576,
+                  0,
+                  752168,
+                  536977436,
+                  0,
+                  770784,
+                  1,
+                  752168,
+                  752180,
+                  772648,
+                  8192,
+                  4096,
+                  0,
+                  57500,
+                  0,
+                  62,
+                  2147506130
+                ],
+                "sp": 556928
+              },
+              {
+                "cfa": 557008,
+                "kind": "cfi",
+                "known": [
+                  8,
+                  9,
+                  18,
+                  19,
+                  20,
+                  21,
+                  22,
+                  23,
+                  24,
+                  25,
+                  26,
+                  27,
+                  1,
+                  32,
+                  2
+                ],
+                "loc": {
+                  "addr": 2147505534,
+                  "end": 2147505558,
+                  "file": "E:/web-serial-rtt-tools/tools/target-firmware/hpm6800evk_dbgstress/src/main.c",
+                  "idx": 1440,
+                  "isStmt": true,
+                  "line": 62,
+                  "prologueEnd": false,
+                  "seq": 2,
+                  "seqEnd": false
+                },
+                "lookup": 2147505553,
+                "name": "stage_run+0x34",
+                "pc": 2147505554,
+                "regs": [
+                  0,
+                  2147505554,
+                  556976,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  2147495936,
+                  1310720,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  752168,
+                  536977436,
+                  0,
+                  770784,
+                  1,
+                  752168,
+                  752180,
+                  772648,
+                  8192,
+                  4096,
+                  0,
+                  0,
+                  0,
+                  0,
+                  2147505554
+                ],
+                "sp": 556976
+              },
+              {
+                "cfa": 557040,
+                "kind": "cfi",
+                "known": [
+                  8,
+                  9,
+                  18,
+                  19,
+                  20,
+                  21,
+                  22,
+                  23,
+                  24,
+                  25,
+                  26,
+                  27,
+                  1,
+                  32,
+                  2
+                ],
+                "loc": {
+                  "addr": 2147505886,
+                  "end": 2147505892,
+                  "file": "E:/web-serial-rtt-tools/tools/target-firmware/hpm6800evk_dbgstress/src/main.c",
+                  "idx": 1473,
+                  "isStmt": true,
+                  "line": 96,
+                  "prologueEnd": false,
+                  "seq": 3,
+                  "seqEnd": false
+                },
+                "lookup": 2147505889,
+                "name": "main+0x86",
+                "pc": 2147505890,
+                "regs": [
+                  0,
+                  2147505890,
+                  557008,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  2147495936,
+                  1310720,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  752168,
+                  536977436,
+                  0,
+                  770784,
+                  1,
+                  752168,
+                  752180,
+                  772648,
+                  8192,
+                  4096,
+                  0,
+                  0,
+                  0,
+                  0,
+                  2147505890
+                ],
+                "sp": 557008
+              },
+              {
+                "cfa": 557056,
+                "kind": "cfi",
+                "known": [
+                  8,
+                  9,
+                  18,
+                  19,
+                  20,
+                  21,
+                  22,
+                  23,
+                  24,
+                  25,
+                  26,
+                  27,
+                  1,
+                  32,
+                  2
+                ],
+                "loc": {
+                  "addr": 2147510398,
+                  "end": 2147510402,
+                  "file": "E:/sdk_env_v1.11.0/hpm_sdk/soc/HPM6800/HPM6880/toolchains/reset.c",
+                  "idx": 2049,
+                  "isStmt": true,
+                  "line": 120,
+                  "prologueEnd": false,
+                  "seq": 37,
+                  "seqEnd": false
+                },
+                "lookup": 2147510401,
+                "name": "reset_handler+0xe",
+                "pc": 2147510402,
+                "regs": [
+                  0,
+                  2147510402,
+                  557040,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  2147495936,
+                  1310720,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  752168,
+                  536977436,
+                  0,
+                  770784,
+                  1,
+                  752168,
+                  752180,
+                  772648,
+                  8192,
+                  4096,
+                  0,
+                  0,
+                  0,
+                  0,
+                  2147510402
+                ],
+                "sp": 557040
+              },
+              {
+                "kind": "cfi",
+                "known": [
+                  8,
+                  9,
+                  18,
+                  19,
+                  20,
+                  21,
+                  22,
+                  23,
+                  24,
+                  25,
+                  26,
+                  27,
+                  1,
+                  32,
+                  2
+                ],
+                "loc": {
+                  "addr": 2147495994,
+                  "end": 2147495998,
+                  "file": "E:/sdk_env_v1.11.0/hpm_sdk/soc/HPM6800/HPM6880/toolchains/gcc/start.S",
+                  "idx": 64,
+                  "isStmt": true,
+                  "line": 141,
+                  "prologueEnd": false,
+                  "seq": 32,
+                  "seqEnd": false
+                },
+                "lookup": 2147495997,
+                "name": "_start+0x3c",
+                "pc": 2147495998,
+                "regs": [
+                  0,
+                  2147495998,
+                  557056,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  2147495936,
+                  1310720,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  752168,
+                  536977436,
+                  0,
+                  770784,
+                  1,
+                  752168,
+                  752180,
+                  772648,
+                  8192,
+                  4096,
+                  0,
+                  0,
+                  0,
+                  0,
+                  2147495998
+                ],
+                "sp": 557056
+              }
+            ],
+            "reason": "ELF 缺少当前函数的 RISC-V DWARF CFI 展开行",
+            "scan": false
+          },
+          "register": 3681638356,
+          "connectSeconds": 2.134614700000384,
+          "haltSeconds": 0.10705700000107754,
+          "stepSeconds": 0.43393830000422895,
+          "watchSeconds": 0.13815480000630487,
+          "targetElf": {
+            "path": "hpm6800evk-dbgstress-live.elf",
+            "sha256": "7cf8c56f4d7616166815f7a5a4306c423000f41c777ed625e4fb599c8e068261",
+            "verifiedLoadBytes": 48224
+          },
+          "recovery": {
+            "streams": {
+              "rtt": 65536,
+              "hss": 134219798
+            },
+            "engines": {
+              "PS_IDCODE": "0x23727093",
+              "LEVEL_SHIFTERS": "0xf",
+              "FPGA_RESET": "0x0",
+              "BOOT_MODE": "0x1",
+              "CAPTURE": "0x8",
+              "SWD": "0x0",
+              "PACKET": "0x0",
+              "DDR": "0x0",
+              "CDMA": "0x1002"
+            }
+          }
+        }
+      },
+      "jtag-rtt-viewer": {
+        "status": "pass",
+        "seconds": 10.095,
+        "reason": null,
+        "data": {
+          "clock": {
+            "FCLK_Hz": 49999999,
+            "cfg": "0x20081",
+            "jtagSamplingMode": 0,
+            "jtagRoute": 263,
+            "actual_link_Hz": 24999999.5,
+            "basis": "physical MEM-AP0 readback of PLL/divider registers"
+          },
+          "throughputBps": 229794.60952833263,
+          "seconds": 3.1371319000027142,
+          "upstream": {
+            "bytes": 942080,
+            "first": 0,
+            "last": 235519,
+            "words": 235520
+          },
+          "downstream": {
+            "bytes": 8,
+            "wrOff": 4
+          },
+          "pollingMs": 5,
+          "displayed": false,
+          "targetElf": {
+            "path": "hpm6800evk-dbgstress-live.elf",
+            "sha256": "7cf8c56f4d7616166815f7a5a4306c423000f41c777ed625e4fb599c8e068261",
+            "verifiedLoadBytes": 48224
+          },
+          "recovery": {
+            "streams": {
+              "rtt": 65536,
+              "hss": 134219798
+            },
+            "engines": {
+              "PS_IDCODE": "0x23727093",
+              "LEVEL_SHIFTERS": "0xf",
+              "FPGA_RESET": "0x0",
+              "BOOT_MODE": "0x1",
+              "CAPTURE": "0x8",
+              "SWD": "0x0",
+              "PACKET": "0x0",
+              "DDR": "0x0",
+              "CDMA": "0x1002"
+            }
+          }
+        }
+      },
+      "jtag-rtt-forward": {
+        "status": "pass",
+        "seconds": 46.77,
+        "reason": null,
+        "data": {
+          "web": [
+            {
+              "port": "COM33",
+              "clock": {
+                "FCLK_Hz": 49999999,
+                "cfg": "0x20011",
+                "jtagSamplingMode": 0,
+                "jtagRoute": 263,
+                "actual_link_Hz": 24999999.5,
+                "basis": "physical MEM-AP0 readback of PLL/divider registers"
+              },
+              "window": {
+                "activeBytesPerSecond": 1548891.5729857995,
+                "activeSeconds": 3.2288999999910595,
+                "bytes": 5066752,
+                "bytesPerSecond": 723408.3380925186,
+                "complete": true,
+                "error": null,
+                "firstChunkBytes": 65536,
+                "limitExceeded": false,
+                "name": "rtt-raw-20261115-073952.bin",
+                "observedBytes": 5066752,
+                "portClosed": false,
+                "seconds": 7.004
+              },
+              "sequence": {
+                "bytes": 5066752,
+                "first": 376832,
+                "last": 1643519,
+                "words": 1266688,
+                "alignment": 0
+              },
+              "startupSeconds": 0.3981669999920996,
+              "engine": {
+                "armJtagIdentity": null,
+                "cbAddr": "0xf0400200",
+                "connected": true,
+                "dapYield": 0,
+                "info": "已连接：zynqlinkPRO HID · 12345678 · FW 0.8-nonce32 · SN 12345678",
+                "label": "zynqlinkPRO HID · 12345678",
+                "mock": false,
+                "moved": 6574080,
+                "rdErr": 0,
+                "rescans": 0,
+                "running": false,
+                "stall": 0,
+                "startRc": 0,
+                "state": "未运行（点「启动转发」或「自动搜控制块」）",
+                "supported": true,
+                "swdMhz": 24,
+                "targetMode": "riscv",
+                "wrErr": 0
+              },
+              "hostTailMatch": true,
+              "targetRingPending": 15360,
+              "chunk": 2048
+            },
+            {
+              "port": "COM33",
+              "clock": {
+                "FCLK_Hz": 49999999,
+                "cfg": "0x20011",
+                "jtagSamplingMode": 0,
+                "jtagRoute": 263,
+                "actual_link_Hz": 24999999.5,
+                "basis": "physical MEM-AP0 readback of PLL/divider registers"
+              },
+              "window": {
+                "activeBytesPerSecond": 1551896.0510122825,
+                "activeSeconds": 3.340100000008941,
+                "bytes": 5249024,
+                "bytesPerSecond": 748395.8538286168,
+                "complete": true,
+                "error": null,
+                "firstChunkBytes": 65536,
+                "limitExceeded": false,
+                "name": "rtt-raw-20261115-074006.bin",
+                "observedBytes": 5249024,
+                "portClosed": false,
+                "seconds": 7.01370000000298
+              },
+              "sequence": {
+                "bytes": 5249024,
+                "first": 360448,
+                "last": 1672703,
+                "words": 1312256,
+                "alignment": 0
+              },
+              "startupSeconds": 0.29157390000182204,
+              "engine": {
+                "armJtagIdentity": null,
+                "cbAddr": "0xf0400200",
+                "connected": true,
+                "dapYield": 0,
+                "info": "已连接：zynqlinkPRO HID · 12345678 · FW 0.8-nonce32 · SN 12345678",
+                "label": "zynqlinkPRO HID · 12345678",
+                "mock": false,
+                "moved": 6690816,
+                "rdErr": 0,
+                "rescans": 0,
+                "running": false,
+                "stall": 0,
+                "startRc": 0,
+                "state": "未运行（点「启动转发」或「自动搜控制块」）",
+                "supported": true,
+                "swdMhz": 24,
+                "targetMode": "riscv",
+                "wrErr": 0
+              },
+              "hostTailMatch": true,
+              "targetRingPending": 15360,
+              "chunk": 2048
+            }
+          ],
+          "native": {
+            "port": "COM33",
+            "clock": {
+              "FCLK_Hz": 49999999,
+              "cfg": "0x20011",
+              "jtagSamplingMode": 0,
+              "jtagRoute": 263,
+              "actual_link_Hz": 24999999.5,
+              "basis": "physical MEM-AP0 readback of PLL/divider registers"
+            },
+            "seconds": 3.0000616000033915,
+            "bytes": 4685824,
+            "throughputBps": 1561909.2621280518,
+            "received": 5328896,
+            "moved": 5328896,
+            "sequenceContinuous": true,
+            "targetRingPending": 15360,
+            "chunk": 2048
+          },
+          "boundaries": [
+            {
+              "bytes": 511,
+              "sha256": "07dc29f110b4ca941e088f56c89a0c4d956116cafcc452a24e976e40d73aa28e",
+              "matched": true
+            },
+            {
+              "bytes": 512,
+              "sha256": "3cbd6ef1f83272b73573b30a0339231e1120bec245de04d958dda71cf2f1db0d",
+              "matched": true
+            },
+            {
+              "bytes": 513,
+              "sha256": "8e016f86c8675068e2b839c0f9e766c448a23df7881e2d04815944be22a427f9",
+              "matched": true
+            }
+          ],
+          "restartVerified": true,
+          "webToNativeThroughputRatio": 0.9926273245135115,
+          "targetElf": {
+            "path": "hpm6800evk-dbgstress-live.elf",
+            "sha256": "7cf8c56f4d7616166815f7a5a4306c423000f41c777ed625e4fb599c8e068261",
+            "verifiedLoadBytes": 48224
+          },
+          "recovery": {
+            "streams": {
+              "rtt": 65536,
+              "hss": 134219798
+            },
+            "engines": {
+              "PS_IDCODE": "0x23727093",
+              "LEVEL_SHIFTERS": "0xf",
+              "FPGA_RESET": "0x0",
+              "BOOT_MODE": "0x1",
+              "CAPTURE": "0x8",
+              "SWD": "0x0",
+              "PACKET": "0x0",
+              "DDR": "0x0",
+              "CDMA": "0x1002"
+            }
+          }
+        }
+      },
+      "jtag-jscope-1": {
+        "status": "pass",
+        "seconds": 79.603,
+        "reason": null,
+        "data": {
+          "confirmed": {
+            "periodTicks": 204,
+            "requestedSeconds": 60,
+            "clock": {
+              "FCLK_Hz": 49999999,
+              "cfg": "0x20011",
+              "jtagSamplingMode": 0,
+              "jtagRoute": 263,
+              "actual_link_Hz": 24999999.5,
+              "basis": "physical MEM-AP0 readback of PLL/divider registers"
+            },
+            "summary": {
+              "armJtagIdentity": null,
+              "awaitingDefinition": false,
+              "benchUs": null,
+              "blob": null,
+              "capacity": 8800064,
+              "captureFlags": 224,
+              "connectErr": null,
+              "dapYields": 0,
+              "definitionReceived": true,
+              "elf": null,
+              "hostPollSkipped": 0,
+              "lod": true,
+              "lost": 1,
+              "lostGap": 0,
+              "lostProbe": 1,
+              "lostUsb": 0,
+              "metricsError": null,
+              "mockVars": [
+                "mock0.f32",
+                "mock1.f32",
+                "mock2.i32",
+                "mock3.u16",
+                "mock4.i16",
+                "mock5.u8",
+                "mock6.i8",
+                "mock7.f64"
+              ],
+              "mode": "real",
+              "packets": 58139,
+              "plan": {
+                "estHz": 139232,
+                "estUs": 7.18,
+                "frameBytes": 4,
+                "spans": 1
+              },
+              "probeMetrics": {
+                "bytes": 29767168,
+                "errors": 0,
+                "flags": 96,
+                "hz": 24000000,
+                "periodTicks": 204,
+                "produced": 7208854,
+                "skipped": 1,
+                "tick": 1660438505,
+                "tx": 58139,
+                "usb": 0,
+                "yields": 0
+              },
+              "rateHz": 117647,
+              "raw": 1977,
+              "readErrors": 0,
+              "receivedSamples": 7208854,
+              "resyncs": 0,
+              "running": false,
+              "sampleSource": "probe-hss",
+              "samples": 7208854,
+              "stalePackets": 0,
+              "state": "已停止（board acceptance STOP）：7208854 个样本 / 61.275 s，跳拍 1 / USB 丢样本 0 / 读错 0 / 包缺口 0",
+              "supportsMetrics": true,
+              "tailCountDelta": 0,
+              "targetMode": "riscv",
+              "transport": {
+                "bytes": 29767168,
+                "chunks": 1977,
+                "errors": 0,
+                "hostQueue": {
+                  "capacityBytes": 16777216,
+                  "highWaterBytes": 19968
+                },
+                "lastError": null,
+                "running": false
+              },
+              "trigger": {
+                "hit": -1,
+                "hits": 0,
+                "marker": false,
+                "mode": 0
+              },
+              "varCount": 1,
+              "vars": [
+                "fixture_0:u32@0xf0405100"
+              ],
+              "view": {
+                "end": 7208854,
+                "start": 0
+              }
+            },
+            "groups": 7087351,
+            "groupsPerSecond": 117647.07029677051,
+            "counterSeconds": 60.242477625,
+            "wallSeconds": 60.14259239999228,
+            "windowSkipped": 0,
+            "skipFraction": 1.3871828466517914e-07
+          },
+          "exports": {
+            "groups": 8608,
+            "firstTick": 0,
+            "lastTick": 20656800,
+            "periodTicks": 2400
+          },
+          "targetElf": {
+            "path": "hpm6800evk-dbgstress-live.elf",
+            "sha256": "7cf8c56f4d7616166815f7a5a4306c423000f41c777ed625e4fb599c8e068261",
+            "verifiedLoadBytes": 48224
+          },
+          "recovery": {
+            "streams": {
+              "rtt": 65536,
+              "hss": 16777494
+            },
+            "engines": {
+              "PS_IDCODE": "0x23727093",
+              "LEVEL_SHIFTERS": "0xf",
+              "FPGA_RESET": "0x0",
+              "BOOT_MODE": "0x1",
+              "CAPTURE": "0x8",
+              "SWD": "0x0",
+              "PACKET": "0x0",
+              "DDR": "0x0",
+              "CDMA": "0x1002"
+            }
+          }
+        }
+      },
+      "jtag-jscope-8": {
+        "status": "pass",
+        "seconds": 90.495,
+        "reason": null,
+        "data": {
+          "confirmed": {
+            "periodTicks": 1012,
+            "requestedSeconds": 60,
+            "clock": {
+              "FCLK_Hz": 49999999,
+              "cfg": "0x20011",
+              "jtagSamplingMode": 0,
+              "jtagRoute": 263,
+              "actual_link_Hz": 24999999.5,
+              "basis": "physical MEM-AP0 readback of PLL/divider registers"
+            },
+            "summary": {
+              "armJtagIdentity": null,
+              "awaitingDefinition": false,
+              "benchUs": null,
+              "blob": null,
+              "capacity": 1773978,
+              "captureFlags": 224,
+              "connectErr": null,
+              "dapYields": 0,
+              "definitionReceived": true,
+              "elf": null,
+              "hostPollSkipped": 0,
+              "lod": true,
+              "lost": 12,
+              "lostGap": 0,
+              "lostProbe": 12,
+              "lostUsb": 0,
+              "metricsError": null,
+              "mockVars": [
+                "mock0.f32",
+                "mock1.f32",
+                "mock2.i32",
+                "mock3.u16",
+                "mock4.i16",
+                "mock5.u8",
+                "mock6.i8",
+                "mock7.f64"
+              ],
+              "mode": "real",
+              "packets": 96751,
+              "plan": {
+                "estHz": 46865,
+                "estUs": 21.34,
+                "frameBytes": 32,
+                "spans": 1
+              },
+              "probeMetrics": {
+                "bytes": 49536512,
+                "errors": 0,
+                "flags": 96,
+                "hz": 24000000,
+                "periodTicks": 1012,
+                "produced": 1451212,
+                "skipped": 12,
+                "tick": 3727585387,
+                "tx": 96751,
+                "usb": 0,
+                "yields": 0
+              },
+              "rateHz": 23715,
+              "raw": 1973,
+              "readErrors": 0,
+              "receivedSamples": 1451212,
+              "resyncs": 0,
+              "running": false,
+              "sampleSource": "probe-hss",
+              "samples": 1451212,
+              "stalePackets": 0,
+              "state": "已停止（board acceptance STOP）：1451212 个样本 / 61.193 s，跳拍 12 / USB 丢样本 0 / 读错 0 / 包缺口 0",
+              "supportsMetrics": true,
+              "tailCountDelta": 0,
+              "targetMode": "riscv",
+              "transport": {
+                "bytes": 49536512,
+                "chunks": 1973,
+                "errors": 0,
+                "hostQueue": {
+                  "capacityBytes": 16777216,
+                  "highWaterBytes": 36352
+                },
+                "lastError": null,
+                "running": false
+              },
+              "trigger": {
+                "hit": -1,
+                "hits": 0,
+                "marker": false,
+                "mode": 0
+              },
+              "varCount": 8,
+              "vars": [
+                "fixture_0:u32@0xf0405100",
+                "fixture_1:u32@0xf0405104",
+                "fixture_2:u32@0xf0405108",
+                "fixture_3:u32@0xf040510c",
+                "fixture_4:u32@0xf0405110",
+                "fixture_5:u32@0xf0405114",
+                "fixture_6:u32@0xf0405118",
+                "fixture_7:u32@0xf040511c"
+              ],
+              "view": {
+                "end": 1451212,
+                "start": 0
+              }
+            },
+            "groups": 1428522,
+            "groupsPerSecond": 23715.22715679344,
+            "counterSeconds": 60.23648816666667,
+            "wallSeconds": 60.0446484000131,
+            "windowSkipped": 12,
+            "skipFraction": 8.400220085766248e-06
+          },
+          "exports": {
+            "groups": 8268,
+            "firstTick": 0,
+            "lastTick": 19840800,
+            "periodTicks": 2400
+          },
+          "targetElf": {
+            "path": "hpm6800evk-dbgstress-live.elf",
+            "sha256": "7cf8c56f4d7616166815f7a5a4306c423000f41c777ed625e4fb599c8e068261",
+            "verifiedLoadBytes": 48224
+          },
+          "recovery": {
+            "streams": {
+              "rtt": 65536,
+              "hss": 134219798
+            },
+            "engines": {
+              "PS_IDCODE": "0x23727093",
+              "LEVEL_SHIFTERS": "0xf",
+              "FPGA_RESET": "0x0",
+              "BOOT_MODE": "0x1",
+              "CAPTURE": "0x8",
+              "SWD": "0x0",
+              "PACKET": "0x0",
+              "DDR": "0x0",
+              "CDMA": "0x1002"
+            }
+          }
+        }
+      },
+      "jtag-stress-1": {
+        "status": "pending",
+        "seconds": 37.73,
+        "reason": null,
+        "data": {
+          "reason": "1 stress action(s) pending: Physical USB data disconnect requires --usb-data-cycle and independent power",
+          "recovery": {
+            "streams": {
+              "rtt": 65536,
+              "hss": 16777494
+            },
+            "engines": {
+              "PS_IDCODE": "0x23727093",
+              "LEVEL_SHIFTERS": "0xf",
+              "FPGA_RESET": "0x0",
+              "BOOT_MODE": "0x1",
+              "CAPTURE": "0x8",
+              "SWD": "0x0",
+              "PACKET": "0x0",
+              "DDR": "0x0",
+              "CDMA": "0x1002"
+            }
+          }
+        }
+      },
+      "jtag-stress-2": {
+        "status": "pending",
+        "seconds": 35.766,
+        "reason": null,
+        "data": {
+          "reason": "1 stress action(s) pending: Physical USB data disconnect requires --usb-data-cycle and independent power",
+          "recovery": {
+            "streams": {
+              "rtt": 65536,
+              "hss": 16777494
+            },
+            "engines": {
+              "PS_IDCODE": "0x23727093",
+              "LEVEL_SHIFTERS": "0xf",
+              "FPGA_RESET": "0x0",
+              "BOOT_MODE": "0x1",
+              "CAPTURE": "0x8",
+              "SWD": "0x0",
+              "PACKET": "0x0",
+              "DDR": "0x0",
+              "CDMA": "0x1002"
+            }
+          }
+        }
+      },
+      "jtag-stress-3": {
+        "status": "pending",
+        "seconds": 36.588,
+        "reason": null,
+        "data": {
+          "reason": "1 stress action(s) pending: Physical USB data disconnect requires --usb-data-cycle and independent power",
+          "recovery": {
+            "streams": {
+              "rtt": 65536,
+              "hss": 16777494
+            },
+            "engines": {
+              "PS_IDCODE": "0x23727093",
+              "LEVEL_SHIFTERS": "0xf",
+              "FPGA_RESET": "0x0",
+              "BOOT_MODE": "0x1",
+              "CAPTURE": "0x8",
+              "SWD": "0x0",
+              "PACKET": "0x0",
+              "DDR": "0x0",
+              "CDMA": "0x1002"
+            }
+          }
+        }
+      },
+      "etm": {
+        "status": "not-applicable",
+        "seconds": 0.0,
+        "reason": null,
+        "data": {}
+      },
+      "final-state": {
+        "status": "pass",
+        "seconds": 0.707,
+        "reason": null,
+        "data": {
+          "target": {
+            "halted": false,
+            "clock": {
+              "controls": {
+                "cpu0": "0x3020100",
+                "mchtmr0": "0x1010000",
+                "ahb": "0x5040203"
+              },
+              "basis": "Read-only qualified SYSCTL controls; target frequencies not inferred without qualified PLL outputs"
+            },
+            "dmstatus": "0x430ca2"
+          },
+          "probe": {
+            "serial": "12345678",
+            "usb": "CMSIS-DAP",
+            "hid": "zynqlinkPRO HID"
+          },
+          "clock": {
+            "FCLK_Hz": 119999998,
+            "actual_TCK_Hz": 9999999.833333334,
+            "JTAG_sampling_mode": 0,
+            "cfg": "0x2a011",
+            "dmi_idle_min": 8,
+            "clock_source": "PS FCLK divider and PL half_delay registers",
+            "actual_link_Hz": 9999999.833333334,
+            "tap": "0x1000563d"
+          },
+          "streams": {
+            "rtt": 65536,
+            "hss": 16777494
+          },
+          "engines": {
+            "PS_IDCODE": "0x23727093",
+            "LEVEL_SHIFTERS": "0xf",
+            "FPGA_RESET": "0x0",
+            "BOOT_MODE": "0x1",
+            "CAPTURE": "0x8",
+            "SWD": "0x0",
+            "PACKET": "0x0",
+            "DDR": "0x0",
+            "CDMA": "0x1002"
+          }
+        }
+      }
+    }
+  },
+  "stress": [
+    [
+      {
+        "business": "rtt-forward",
+        "ending": "switch",
+        "status": "pass",
+        "initial": {
+          "clock": {
+            "FCLK_Hz": 49999999,
+            "cfg": "0x20011",
+            "jtagSamplingMode": 0,
+            "jtagRoute": 263,
+            "actual_link_Hz": 24999999.5,
+            "basis": "physical MEM-AP0 readback of PLL/divider registers"
+          },
+          "port": "COM33",
+          "sequence": {
+            "bytes": 393216,
+            "first": 360448,
+            "last": 458751,
+            "words": 98304,
+            "alignment": 0
+          },
+          "received": 2752512
+        },
+        "stop": {
+          "armJtagIdentity": null,
+          "cbAddr": "0xf0400200",
+          "connected": true,
+          "dapYield": 0,
+          "info": "已连接：zynqlinkPRO HID · 12345678 · FW 0.8-nonce32 · SN 12345678",
+          "label": "zynqlinkPRO HID · 12345678",
+          "mock": false,
+          "moved": 3033088,
+          "rdErr": 0,
+          "rescans": 0,
+          "running": false,
+          "stall": 0,
+          "startRc": 0,
+          "state": "未运行（点「启动转发」或「自动搜控制块」）",
+          "supported": true,
+          "swdMhz": 24,
+          "targetMode": "riscv",
+          "wrErr": 0
+        },
+        "seconds": 6.439807599992491
+      },
+      {
+        "business": "rtt-viewer",
+        "ending": "idle-disconnect",
+        "status": "pass",
+        "initial": {
+          "clock": {
+            "FCLK_Hz": 49999999,
+            "cfg": "0x20081",
+            "jtagSamplingMode": 0,
+            "jtagRoute": 263,
+            "actual_link_Hz": 24999999.5,
+            "basis": "physical MEM-AP0 readback of PLL/divider registers"
+          },
+          "sequence": {
+            "bytes": 147456,
+            "first": 0,
+            "last": 36863,
+            "words": 36864
+          },
+          "received": 237568
+        },
+        "stop": {
+          "backend": "webusb",
+          "bufferedBytes": 303104,
+          "connected": true,
+          "controlBlock": 4030726656,
+          "displaySuppressed": true,
+          "error": "RTT 缓冲积压：渲染已停，继续接收和记录 · 点此恢复显示",
+          "running": true,
+          "stats": {
+            "bytes": 303104,
+            "corrupt": 0,
+            "hz": 25.932575304363226,
+            "lastBytes": 221184,
+            "lastPolls": 27,
+            "lost": 0,
+            "polls": 37,
+            "rate": 212439.65689334355
+          },
+          "transport": "zynqlinkPRO / JTAG SBA"
+        },
+        "reconnected": {
+          "clock": {
+            "FCLK_Hz": 49999999,
+            "cfg": "0x20081",
+            "jtagSamplingMode": 0,
+            "jtagRoute": 263,
+            "actual_link_Hz": 24999999.5,
+            "basis": "physical MEM-AP0 readback of PLL/divider registers"
+          },
+          "sequence": {
+            "bytes": 147456,
+            "first": 0,
+            "last": 36863,
+            "words": 36864
+          },
+          "received": 253952
+        },
+        "reconnectSeconds": 3.864866999996593,
+        "seconds": 13.450630200008163
+      },
+      {
+        "business": "debug",
+        "ending": "usb-disconnect",
+        "status": "pending",
+        "initial": {
+          "pc": 2147505932,
+          "steppedPc": 2147505936,
+          "clock": {
+            "FCLK_Hz": 49999999,
+            "cfg": "0x20011",
+            "jtagSamplingMode": 0,
+            "jtagRoute": 263,
+            "actual_link_Hz": 24999999.5,
+            "basis": "physical MEM-AP0 readback of PLL/divider registers"
+          }
+        },
+        "reason": "Physical USB data disconnect requires --usb-data-cycle and independent power",
+        "seconds": 5.115868699998828
+      },
+      {
+        "business": "jscope",
+        "ending": "active-disconnect",
+        "status": "pass",
+        "initial": {
+          "clock": {
+            "FCLK_Hz": 49999999,
+            "cfg": "0x20011",
+            "jtagSamplingMode": 0,
+            "jtagRoute": 263,
+            "actual_link_Hz": 24999999.5,
+            "basis": "physical MEM-AP0 readback of PLL/divider registers"
+          },
+          "groups": 8080,
+          "state": "采样中 616.00 ms / 75.000 s（6161 样本 · 实得 10.0 kHz · 缓冲 1%）"
+        },
+        "reconnected": {
+          "clock": {
+            "FCLK_Hz": 49999999,
+            "cfg": "0x20011",
+            "jtagSamplingMode": 0,
+            "jtagRoute": 263,
+            "actual_link_Hz": 24999999.5,
+            "basis": "physical MEM-AP0 readback of PLL/divider registers"
+          },
+          "groups": 9797,
+          "state": "采样中 919.00 ms / 75.000 s（9191 样本 · 实得 10.0 kHz · 缓冲 1%）"
+        },
+        "reconnectSeconds": 2.7992431999882683,
+        "seconds": 9.594853399990825
+      }
+    ],
+    [
+      {
+        "business": "rtt-forward",
+        "ending": "active-disconnect",
+        "status": "pass",
+        "initial": {
+          "clock": {
+            "FCLK_Hz": 49999999,
+            "cfg": "0x20011",
+            "jtagSamplingMode": 0,
+            "jtagRoute": 263,
+            "actual_link_Hz": 24999999.5,
+            "basis": "physical MEM-AP0 readback of PLL/divider registers"
+          },
+          "port": "COM33",
+          "sequence": {
+            "bytes": 393216,
+            "first": 311296,
+            "last": 409599,
+            "words": 98304,
+            "alignment": 0
+          },
+          "received": 2162688
+        },
+        "reconnected": {
+          "clock": {
+            "FCLK_Hz": 49999999,
+            "cfg": "0x20011",
+            "jtagSamplingMode": 0,
+            "jtagRoute": 263,
+            "actual_link_Hz": 24999999.5,
+            "basis": "physical MEM-AP0 readback of PLL/divider registers"
+          },
+          "port": "COM33",
+          "sequence": {
+            "bytes": 393216,
+            "first": 344064,
+            "last": 442367,
+            "words": 98304,
+            "alignment": 0
+          },
+          "received": 2490368
+        },
+        "reconnectSeconds": 4.038856700004544,
+        "seconds": 12.034405300000799
+      },
+      {
+        "business": "jscope",
+        "ending": "usb-disconnect",
+        "status": "pending",
+        "initial": {
+          "clock": {
+            "FCLK_Hz": 49999999,
+            "cfg": "0x20011",
+            "jtagSamplingMode": 0,
+            "jtagRoute": 263,
+            "actual_link_Hz": 24999999.5,
+            "basis": "physical MEM-AP0 readback of PLL/divider registers"
+          },
+          "groups": 8686,
+          "state": "采样中 646.30 ms / 75.000 s（6464 样本 · 实得 10.0 kHz · 缓冲 1%）"
+        },
+        "reason": "Physical USB data disconnect requires --usb-data-cycle and independent power",
+        "seconds": 3.9649386999954004
+      },
+      {
+        "business": "rtt-viewer",
+        "ending": "switch",
+        "status": "pass",
+        "initial": {
+          "clock": {
+            "FCLK_Hz": 49999999,
+            "cfg": "0x20081",
+            "jtagSamplingMode": 0,
+            "jtagRoute": 263,
+            "actual_link_Hz": 24999999.5,
+            "basis": "physical MEM-AP0 readback of PLL/divider registers"
+          },
+          "sequence": {
+            "bytes": 131072,
+            "first": 0,
+            "last": 32767,
+            "words": 32768
+          },
+          "received": 237568
+        },
+        "stop": {
+          "backend": "webusb",
+          "bufferedBytes": 245760,
+          "connected": true,
+          "controlBlock": 4030726656,
+          "displaySuppressed": true,
+          "error": "RTT 缓冲积压：渲染已停，继续接收和记录 · 点此恢复显示",
+          "running": true,
+          "stats": {
+            "bytes": 245760,
+            "corrupt": 0,
+            "hz": 25.979216626389196,
+            "lastBytes": 229376,
+            "lastPolls": 28,
+            "lost": 0,
+            "polls": 30,
+            "rate": 212821.7426033803
+          },
+          "transport": "zynqlinkPRO / JTAG SBA"
+        },
+        "seconds": 5.0785144999972545
+      },
+      {
+        "business": "debug",
+        "ending": "idle-disconnect",
+        "status": "pass",
+        "initial": {
+          "pc": 2147506618,
+          "steppedPc": 2147506620,
+          "clock": {
+            "FCLK_Hz": 49999999,
+            "cfg": "0x20011",
+            "jtagSamplingMode": 0,
+            "jtagRoute": 263,
+            "actual_link_Hz": 24999999.5,
+            "basis": "physical MEM-AP0 readback of PLL/divider registers"
+          }
+        },
+        "stop": {
+          "backend": "OpenOCD Wasm",
+          "bpCap": 8,
+          "bps": [],
+          "clockKhz": 25000,
+          "connected": false,
+          "elf": {
+            "files": 101,
+            "lines": 2795,
+            "name": "hpm6800evk-dbgstress-live.elf",
+            "rtt": null,
+            "source": "dwarf",
+            "symbols": 906,
+            "vars": 51
+          },
+          "halted": false,
+          "lastStepMode": "out",
+          "lastStepOk": null,
+          "memAddr": "0x00000000",
+          "memLen": 0,
+          "outLines": 208,
+          "pc": 2147506620,
+          "regs": 0,
+          "rtt": null,
+          "src": {
+            "cur": {
+              "file": "E:/web-serial-rtt-tools/tools/target-firmware/hpm6800evk_dbgstress/src/engine.c",
+              "line": 115
+            },
+            "files": 0,
+            "ready": false,
+            "shown": 1
+          },
+          "symRows": 300,
+          "watch": [
+            {
+              "addr": 19136512,
+              "error": null,
+              "expr": "g_ticks",
+              "value": "2768655"
+            }
+          ],
+          "watching": false
+        },
+        "reconnected": {
+          "pc": 2147507454,
+          "steppedPc": 2147507456,
+          "clock": {
+            "FCLK_Hz": 49999999,
+            "cfg": "0x20011",
+            "jtagSamplingMode": 0,
+            "jtagRoute": 263,
+            "actual_link_Hz": 24999999.5,
+            "basis": "physical MEM-AP0 readback of PLL/divider registers"
+          }
+        },
+        "reconnectSeconds": 3.8251072999992175,
+        "seconds": 11.37519279999833
+      }
+    ],
+    [
+      {
+        "business": "debug",
+        "ending": "active-disconnect",
+        "status": "pass",
+        "initial": {
+          "pc": 2147505432,
+          "steppedPc": 2147505958,
+          "clock": {
+            "FCLK_Hz": 49999999,
+            "cfg": "0x20011",
+            "jtagSamplingMode": 0,
+            "jtagRoute": 263,
+            "actual_link_Hz": 24999999.5,
+            "basis": "physical MEM-AP0 readback of PLL/divider registers"
+          }
+        },
+        "reconnected": {
+          "pc": 2147505418,
+          "steppedPc": 2147505420,
+          "clock": {
+            "FCLK_Hz": 49999999,
+            "cfg": "0x20011",
+            "jtagSamplingMode": 0,
+            "jtagRoute": 263,
+            "actual_link_Hz": 24999999.5,
+            "basis": "physical MEM-AP0 readback of PLL/divider registers"
+          }
+        },
+        "reconnectSeconds": 3.4506229999969946,
+        "seconds": 9.99114230000123
+      },
+      {
+        "business": "rtt-forward",
+        "ending": "idle-disconnect",
+        "status": "pass",
+        "initial": {
+          "clock": {
+            "FCLK_Hz": 49999999,
+            "cfg": "0x20011",
+            "jtagSamplingMode": 0,
+            "jtagRoute": 263,
+            "actual_link_Hz": 24999999.5,
+            "basis": "physical MEM-AP0 readback of PLL/divider registers"
+          },
+          "port": "COM33",
+          "sequence": {
+            "bytes": 393216,
+            "first": 360448,
+            "last": 458751,
+            "words": 98304,
+            "alignment": 0
+          },
+          "received": 2621440
+        },
+        "stop": {
+          "armJtagIdentity": null,
+          "cbAddr": "0xf0400200",
+          "connected": true,
+          "dapYield": 0,
+          "info": "已连接：zynqlinkPRO HID · 12345678 · FW 0.8-nonce32 · SN 12345678",
+          "label": "zynqlinkPRO HID · 12345678",
+          "mock": false,
+          "moved": 3428352,
+          "rdErr": 0,
+          "rescans": 0,
+          "running": false,
+          "stall": 0,
+          "startRc": 0,
+          "state": "未运行（点「启动转发」或「自动搜控制块」）",
+          "supported": true,
+          "swdMhz": 24,
+          "targetMode": "riscv",
+          "wrErr": 0
+        },
+        "reconnected": {
+          "clock": {
+            "FCLK_Hz": 49999999,
+            "cfg": "0x20011",
+            "jtagSamplingMode": 0,
+            "jtagRoute": 263,
+            "actual_link_Hz": 24999999.5,
+            "basis": "physical MEM-AP0 readback of PLL/divider registers"
+          },
+          "port": "COM33",
+          "sequence": {
+            "bytes": 393216,
+            "first": 327680,
+            "last": 425983,
+            "words": 98304,
+            "alignment": 0
+          },
+          "received": 2621440
+        },
+        "reconnectSeconds": 3.8373772999912035,
+        "seconds": 13.515845699992497
+      },
+      {
+        "business": "jscope",
+        "ending": "switch",
+        "status": "pass",
+        "initial": {
+          "clock": {
+            "FCLK_Hz": 49999999,
+            "cfg": "0x20011",
+            "jtagSamplingMode": 0,
+            "jtagRoute": 263,
+            "actual_link_Hz": 24999999.5,
+            "basis": "physical MEM-AP0 readback of PLL/divider registers"
+          },
+          "groups": 7171,
+          "state": "采样中 626.10 ms / 75.000 s（6262 样本 · 实得 10.0 kHz · 缓冲 1%）"
+        },
+        "stop": {
+          "armJtagIdentity": null,
+          "awaitingDefinition": false,
+          "benchUs": null,
+          "blob": null,
+          "capacity": 825065,
+          "captureFlags": 224,
+          "connectErr": null,
+          "dapYields": 0,
+          "definitionReceived": true,
+          "elf": null,
+          "hostPollSkipped": 0,
+          "lod": false,
+          "lost": 0,
+          "lostGap": 0,
+          "lostProbe": 0,
+          "lostUsb": 0,
+          "metricsError": null,
+          "mockVars": [
+            "mock0.f32",
+            "mock1.f32",
+            "mock2.i32",
+            "mock3.u16",
+            "mock4.i16",
+            "mock5.u8",
+            "mock6.i8",
+            "mock7.f64"
+          ],
+          "mode": "real",
+          "packets": 86,
+          "plan": {
+            "estHz": 139232,
+            "estUs": 7.18,
+            "frameBytes": 4,
+            "spans": 1
+          },
+          "probeMetrics": {
+            "bytes": 44032,
+            "errors": 0,
+            "flags": 96,
+            "hz": 24000000,
+            "periodTicks": 2400,
+            "produced": 8438,
+            "skipped": 0,
+            "tick": 2229201696,
+            "tx": 86,
+            "usb": 0,
+            "yields": 0
+          },
+          "rateHz": 10000,
+          "raw": 27,
+          "readErrors": 0,
+          "receivedSamples": 8438,
+          "resyncs": 0,
+          "running": false,
+          "sampleSource": "probe-hss",
+          "samples": 8438,
+          "stalePackets": 0,
+          "state": "已停止（board acceptance STOP）：8438 个样本 / 843.70 ms，跳拍 0 / USB 丢样本 0 / 读错 0 / 包缺口 0",
+          "supportsMetrics": true,
+          "tailCountDelta": 0,
+          "targetMode": "riscv",
+          "transport": {
+            "bytes": 44032,
+            "chunks": 27,
+            "errors": 0,
+            "hostQueue": {
+              "capacityBytes": 16777216,
+              "highWaterBytes": 2560
+            },
+            "lastError": null,
+            "running": false
+          },
+          "trigger": {
+            "hit": -1,
+            "hits": 0,
+            "marker": false,
+            "mode": 0
+          },
+          "varCount": 1,
+          "vars": [
+            "fixture_0:u32@0xf0405100"
+          ],
+          "view": {
+            "end": 8438,
+            "start": 0
+          }
+        },
+        "seconds": 4.613107900004252
+      },
+      {
+        "business": "rtt-viewer",
+        "ending": "usb-disconnect",
+        "status": "pending",
+        "initial": {
+          "clock": {
+            "FCLK_Hz": 49999999,
+            "cfg": "0x20081",
+            "jtagSamplingMode": 0,
+            "jtagRoute": 263,
+            "actual_link_Hz": 24999999.5,
+            "basis": "physical MEM-AP0 readback of PLL/divider registers"
+          },
+          "sequence": {
+            "bytes": 147456,
+            "first": 0,
+            "last": 36863,
+            "words": 36864
+          },
+          "received": 245760
+        },
+        "reason": "Physical USB data disconnect requires --usb-data-cycle and independent power",
+        "seconds": 5.2113518999976804
+      }
+    ]
+  ],
+  "flashRepeat": {
+    "metadata": {
+      "revision": "2445794c3c953c9bcf98fe7ded130b34c4eb849f",
+      "sourceDirty": false,
+      "startedAt": "2026-11-14T23:45:18.835081+00:00",
+      "finishedAt": "2026-11-14T23:46:17.455163+00:00",
+      "status": "pass",
+      "counts": {
+        "pass": 3,
+        "fail": 0,
+        "pending": 0,
+        "not-applicable": 0,
+        "blocked": 0
+      },
+      "seed": 680014,
+      "files": {
+        "bit": {
+          "path": "source/prebuilt/qspi-release/probe.bit",
+          "sha256": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6"
+        },
+        "zynqElf": {
+          "path": "source/prebuilt/qspi-release/application.elf",
+          "sha256": "64d00fe597030175920b994e39ff51db8a683dbb8d5f907c0f8d73f8d55044b9"
+        },
+        "targetElf": {
+          "path": "hpm6800evk-dbgstress-live.elf",
+          "sha256": "7cf8c56f4d7616166815f7a5a4306c423000f41c777ed625e4fb599c8e068261"
+        }
+      }
+    },
+    "cases": {
+      "preflight": {
+        "status": "pass",
+        "seconds": 8.639,
+        "reason": null,
+        "data": {
+          "probe": {
+            "serial": "12345678",
+            "usb": "CMSIS-DAP",
+            "hid": "zynqlinkPRO HID"
+          },
+          "target": {
+            "halted": false,
+            "clock": {
+              "controls": {
+                "cpu0": "0x3020100",
+                "mchtmr0": "0x1010000",
+                "ahb": "0x5040203"
+              },
+              "basis": "Read-only qualified SYSCTL controls; target frequencies not inferred without qualified PLL outputs"
+            },
+            "dmstatus": "0x430ca2"
+          },
+          "clock": {
+            "FCLK_Hz": 119999998,
+            "actual_TCK_Hz": 9999999.833333334,
+            "JTAG_sampling_mode": 0,
+            "cfg": "0x2a011",
+            "dmi_idle_min": 8,
+            "clock_source": "PS FCLK divider and PL half_delay registers",
+            "actual_link_Hz": 9999999.833333334,
+            "tap": "0x1000563d"
+          },
+          "ocm": "ocm/result.json",
+          "usbAp0Identity": {
+            "usbSerial": "12345678",
+            "cableSerial": "210299008529",
+            "challenge": [
+              16,
+              1,
+              17
+            ],
+            "originalJtagTiming": 0,
+            "restored": true,
+            "livePlRegisters": {
+              "0x4001004c": "0x4450007f",
+              "0x40030048": "0x30f",
+              "0x40030050": "0x454c4431",
+              "0x40040000": "0x45444d31"
+            },
+            "declaredBitSha256": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6",
+            "plVerification": "qualified live register profile"
+          },
+          "workbenchBuild": "版本　v1.3.8 (OpenOCD Wasm)\n构建时间　源码模式，未打包"
+        }
+      },
+      "jtag-flash": {
+        "status": "pass",
+        "seconds": 49.266,
+        "reason": null,
+        "data": {
+          "nativeSeconds": 3.9102635999879567,
+          "webSeconds": 31.36889230000088,
+          "clock": {
+            "FCLK_Hz": 49999999,
+            "cfg": "0x20011",
+            "jtagSamplingMode": 0,
+            "jtagRoute": 0,
+            "actual_link_Hz": 24999999.5,
+            "basis": "physical MEM-AP0 readback of PLL/divider registers"
+          },
+          "bootSeconds": 4.39962569999625,
+          "verified": true,
+          "flashRestored": true,
+          "affectedSectorBytes": 53248,
+          "recoveryCoverageBytes": 57344,
+          "nativeInputBytes": 53248,
+          "webInputBytes": 48224,
+          "resetMethod": "OpenOCD resetRun",
+          "heartbeat": {
+            "address": "0x1240000",
+            "before": 12334,
+            "after": 12338
+          },
+          "detail": "Both timings include erase, program and verify over the same affected Flash range",
+          "targetElf": {
+            "path": "hpm6800evk-dbgstress-live.elf",
+            "sha256": "7cf8c56f4d7616166815f7a5a4306c423000f41c777ed625e4fb599c8e068261",
+            "verifiedLoadBytes": 48224
+          },
+          "recovery": {
+            "streams": {
+              "rtt": 65536,
+              "hss": 16777494
+            },
+            "engines": {
+              "PS_IDCODE": "0x23727093",
+              "LEVEL_SHIFTERS": "0xf",
+              "FPGA_RESET": "0x0",
+              "BOOT_MODE": "0x1",
+              "CAPTURE": "0x8",
+              "SWD": "0x0",
+              "PACKET": "0x0",
+              "DDR": "0x0",
+              "CDMA": "0x1002"
+            }
+          }
+        }
+      },
+      "final-state": {
+        "status": "pass",
+        "seconds": 0.682,
+        "reason": null,
+        "data": {
+          "target": {
+            "halted": false,
+            "clock": {
+              "controls": {
+                "cpu0": "0x3020100",
+                "mchtmr0": "0x1010000",
+                "ahb": "0x5040203"
+              },
+              "basis": "Read-only qualified SYSCTL controls; target frequencies not inferred without qualified PLL outputs"
+            },
+            "dmstatus": "0x430ca2"
+          },
+          "probe": {
+            "serial": "12345678",
+            "usb": "CMSIS-DAP",
+            "hid": "zynqlinkPRO HID"
+          },
+          "clock": {
+            "FCLK_Hz": 119999998,
+            "actual_TCK_Hz": 9999999.833333334,
+            "JTAG_sampling_mode": 0,
+            "cfg": "0x2a011",
+            "dmi_idle_min": 8,
+            "clock_source": "PS FCLK divider and PL half_delay registers",
+            "actual_link_Hz": 9999999.833333334,
+            "tap": "0x1000563d"
+          },
+          "streams": {
+            "rtt": 65536,
+            "hss": 16777494
+          },
+          "engines": {
+            "PS_IDCODE": "0x23727093",
+            "LEVEL_SHIFTERS": "0xf",
+            "FPGA_RESET": "0x0",
+            "BOOT_MODE": "0x1",
+            "CAPTURE": "0x8",
+            "SWD": "0x0",
+            "PACKET": "0x0",
+            "DDR": "0x0",
+            "CDMA": "0x1002"
+          }
+        }
+      }
+    }
+  },
+  "sourceDebugCorrection": {
+    "sameRevisionSupplement": {
+      "call": "0x800056fa",
+      "callee": "0x800063dc",
+      "expectedReturn": "0x800056fe",
+      "entry": "0x800063dc",
+      "ra": "0x800056fe",
+      "entered": "单步进入 → model.c:161（0x800063dc）",
+      "steppedAddress": "0x800063e0",
+      "over": "单步跳过 → model.c:162（0x800063e0）",
+      "frames": {
+        "frames": [
+          {
+            "cfa": 557008,
+            "kind": "current",
+            "known": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15,
+              16,
+              17,
+              18,
+              19,
+              20,
+              21,
+              22,
+              23,
+              24,
+              25,
+              26,
+              27,
+              28,
+              29,
+              30,
+              31,
+              32
+            ],
+            "loc": {
+              "addr": 2147509216,
+              "end": 2147509218,
+              "file": "E:/web-serial-rtt-tools/tools/target-firmware/hpm6800evk_dbgstress/src/model.c",
+              "idx": 1878,
+              "isStmt": true,
+              "line": 162,
+              "prologueEnd": false,
+              "seq": 31,
+              "seqEnd": false
+            },
+            "lookup": 2147509216,
+            "name": "model_checksum+0x4",
+            "pc": 2147509216,
+            "regs": [
+              0,
+              2147505918,
+              556976,
+              18876416,
+              0,
+              0,
+              0,
+              0,
+              2147495936,
+              1310720,
+              332207512,
+              1077870592,
+              1077870592,
+              19136608,
+              11,
+              10,
+              0,
+              0,
+              752168,
+              536977436,
+              0,
+              770784,
+              1,
+              752168,
+              752180,
+              772648,
+              8192,
+              4096,
+              0,
+              31744,
+              0,
+              0,
+              2147509216
+            ],
+            "sp": 556976
+          },
+          {
+            "cfa": 557040,
+            "kind": "cfi",
+            "known": [
+              8,
+              9,
+              18,
+              19,
+              20,
+              21,
+              22,
+              23,
+              24,
+              25,
+              26,
+              27,
+              1,
+              32,
+              2
+            ],
+            "loc": {
+              "addr": 2147505914,
+              "end": 2147505920,
+              "file": "E:/web-serial-rtt-tools/tools/target-firmware/hpm6800evk_dbgstress/src/main.c",
+              "idx": 1477,
+              "isStmt": true,
+              "line": 98,
+              "prologueEnd": false,
+              "seq": 3,
+              "seqEnd": false
+            },
+            "lookup": 2147505917,
+            "name": "main+0xa2",
+            "pc": 2147505918,
+            "regs": [
+              0,
+              2147505918,
+              557008,
+              0,
+              0,
+              0,
+              0,
+              0,
+              2147495936,
+              1310720,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              752168,
+              536977436,
+              0,
+              770784,
+              1,
+              752168,
+              752180,
+              772648,
+              8192,
+              4096,
+              0,
+              0,
+              0,
+              0,
+              2147505918
+            ],
+            "sp": 557008
+          },
+          {
+            "cfa": 557056,
+            "kind": "cfi",
+            "known": [
+              8,
+              9,
+              18,
+              19,
+              20,
+              21,
+              22,
+              23,
+              24,
+              25,
+              26,
+              27,
+              1,
+              32,
+              2
+            ],
+            "loc": {
+              "addr": 2147510398,
+              "end": 2147510402,
+              "file": "E:/sdk_env_v1.11.0/hpm_sdk/soc/HPM6800/HPM6880/toolchains/reset.c",
+              "idx": 2049,
+              "isStmt": true,
+              "line": 120,
+              "prologueEnd": false,
+              "seq": 37,
+              "seqEnd": false
+            },
+            "lookup": 2147510401,
+            "name": "reset_handler+0xe",
+            "pc": 2147510402,
+            "regs": [
+              0,
+              2147510402,
+              557040,
+              0,
+              0,
+              0,
+              0,
+              0,
+              2147495936,
+              1310720,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              752168,
+              536977436,
+              0,
+              770784,
+              1,
+              752168,
+              752180,
+              772648,
+              8192,
+              4096,
+              0,
+              0,
+              0,
+              0,
+              2147510402
+            ],
+            "sp": 557040
+          },
+          {
+            "kind": "cfi",
+            "known": [
+              8,
+              9,
+              18,
+              19,
+              20,
+              21,
+              22,
+              23,
+              24,
+              25,
+              26,
+              27,
+              1,
+              32,
+              2
+            ],
+            "loc": {
+              "addr": 2147495994,
+              "end": 2147495998,
+              "file": "E:/sdk_env_v1.11.0/hpm_sdk/soc/HPM6800/HPM6880/toolchains/gcc/start.S",
+              "idx": 64,
+              "isStmt": true,
+              "line": 141,
+              "prologueEnd": false,
+              "seq": 32,
+              "seqEnd": false
+            },
+            "lookup": 2147495997,
+            "name": "_start+0x3c",
+            "pc": 2147495998,
+            "regs": [
+              0,
+              2147495998,
+              557056,
+              0,
+              0,
+              0,
+              0,
+              0,
+              2147495936,
+              1310720,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              752168,
+              536977436,
+              0,
+              770784,
+              1,
+              752168,
+              752180,
+              772648,
+              8192,
+              4096,
+              0,
+              0,
+              0,
+              0,
+              2147495998
+            ],
+            "sp": 557056
+          }
+        ],
+        "reason": "ELF 缺少当前函数的 RISC-V DWARF CFI 展开行",
+        "scan": false
+      },
+      "backed": "单步跳出 → main.c:98（0x800056fe，按 LR 返回）",
+      "returned": "0x800056fe",
+      "callerSP": "0x87fd0",
+      "restoredSP": "0x87fd0"
+    },
+    "fixedGate": {
+      "metadata": {
+        "revision": "6eb9c1a36212d15073bccc28da84e51d06c80864",
+        "sourceDirty": false,
+        "startedAt": "2026-11-14T23:51:16.476660+00:00",
+        "finishedAt": "2026-11-14T23:51:38.531195+00:00",
+        "status": "pass",
+        "counts": {
+          "pass": 3,
+          "fail": 0,
+          "pending": 0,
+          "not-applicable": 0,
+          "blocked": 0
+        },
+        "seed": 680014,
+        "files": {
+          "bit": {
+            "path": "source/prebuilt/qspi-release/probe.bit",
+            "sha256": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6"
+          },
+          "zynqElf": {
+            "path": "source/prebuilt/qspi-release/application.elf",
+            "sha256": "64d00fe597030175920b994e39ff51db8a683dbb8d5f907c0f8d73f8d55044b9"
+          },
+          "targetElf": {
+            "path": "hpm6800evk-dbgstress-live.elf",
+            "sha256": "7cf8c56f4d7616166815f7a5a4306c423000f41c777ed625e4fb599c8e068261"
+          }
+        }
+      },
+      "cases": {
+        "preflight": {
+          "status": "pass",
+          "seconds": 9.634,
+          "reason": null,
+          "data": {
+            "probe": {
+              "serial": "12345678",
+              "usb": "CMSIS-DAP",
+              "hid": "zynqlinkPRO HID"
+            },
+            "target": {
+              "halted": false,
+              "clock": {
+                "controls": {
+                  "cpu0": "0x3020100",
+                  "mchtmr0": "0x1010000",
+                  "ahb": "0x5040203"
+                },
+                "basis": "Read-only qualified SYSCTL controls; target frequencies not inferred without qualified PLL outputs"
+              },
+              "dmstatus": "0x430ca2"
+            },
+            "clock": {
+              "FCLK_Hz": 119999998,
+              "actual_TCK_Hz": 9999999.833333334,
+              "JTAG_sampling_mode": 0,
+              "cfg": "0x2a011",
+              "dmi_idle_min": 8,
+              "clock_source": "PS FCLK divider and PL half_delay registers",
+              "actual_link_Hz": 9999999.833333334,
+              "tap": "0x1000563d"
+            },
+            "ocm": "ocm/result.json",
+            "usbAp0Identity": {
+              "usbSerial": "12345678",
+              "cableSerial": "210299008529",
+              "challenge": [
+                1,
+                16,
+                17
+              ],
+              "originalJtagTiming": 0,
+              "restored": true,
+              "livePlRegisters": {
+                "0x4001004c": "0x4450007f",
+                "0x40030048": "0x30f",
+                "0x40030050": "0x454c4431",
+                "0x40040000": "0x45444d31"
+              },
+              "declaredBitSha256": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6",
+              "plVerification": "qualified live register profile"
+            },
+            "workbenchBuild": "版本　v1.3.8 (OpenOCD Wasm)\n构建时间　源码模式，未打包"
+          }
+        },
+        "jtag-debug": {
+          "status": "pass",
+          "seconds": 11.742,
+          "reason": null,
+          "data": {
+            "clock": {
+              "FCLK_Hz": 49999999,
+              "cfg": "0x20011",
+              "jtagSamplingMode": 0,
+              "jtagRoute": 263,
+              "actual_link_Hz": 24999999.5,
+              "basis": "physical MEM-AP0 readback of PLL/divider registers"
+            },
+            "pc": 2147505956,
+            "steppedPc": 2147505416,
+            "breakpointPc": 2147506018,
+            "sourceSteps": {
+              "stepInto": {
+                "before": 2147505914,
+                "after": 2147509212,
+                "outcome": "单步进入 → model.c:161（0x800063dc）"
+              },
+              "stepOver": {
+                "before": 2147509212,
+                "after": 2147509216,
+                "outcome": "单步跳过 → model.c:162（0x800063e0）"
+              },
+              "stepOut": {
+                "before": 2147509216,
+                "after": 2147505918,
+                "outcome": "单步跳出 → main.c:98（0x800056fe，按 LR 返回）",
+                "returnSp": 557008
+              }
+            },
+            "backtrace": {
+              "frames": [
+                {
+                  "cfa": 557008,
+                  "kind": "current",
+                  "known": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15,
+                    16,
+                    17,
+                    18,
+                    19,
+                    20,
+                    21,
+                    22,
+                    23,
+                    24,
+                    25,
+                    26,
+                    27,
+                    28,
+                    29,
+                    30,
+                    31,
+                    32
+                  ],
+                  "loc": {
+                    "addr": 2147509216,
+                    "end": 2147509218,
+                    "file": "E:/web-serial-rtt-tools/tools/target-firmware/hpm6800evk_dbgstress/src/model.c",
+                    "idx": 1878,
+                    "isStmt": true,
+                    "line": 162,
+                    "prologueEnd": false,
+                    "seq": 31,
+                    "seqEnd": false
+                  },
+                  "lookup": 2147509216,
+                  "name": "model_checksum+0x4",
+                  "pc": 2147509216,
+                  "regs": [
+                    0,
+                    2147505918,
+                    556976,
+                    18876416,
+                    0,
+                    0,
+                    0,
+                    0,
+                    2147495936,
+                    1310720,
+                    283355656,
+                    1079566336,
+                    1079566336,
+                    19136608,
+                    11,
+                    10,
+                    0,
+                    0,
+                    752168,
+                    536977436,
+                    0,
+                    770784,
+                    1,
+                    752168,
+                    752180,
+                    772648,
+                    8192,
+                    4096,
+                    0,
+                    25472,
+                    0,
+                    0,
+                    2147509216
+                  ],
+                  "sp": 556976
+                },
+                {
+                  "cfa": 557040,
+                  "kind": "cfi",
+                  "known": [
+                    8,
+                    9,
+                    18,
+                    19,
+                    20,
+                    21,
+                    22,
+                    23,
+                    24,
+                    25,
+                    26,
+                    27,
+                    1,
+                    32,
+                    2
+                  ],
+                  "loc": {
+                    "addr": 2147505914,
+                    "end": 2147505920,
+                    "file": "E:/web-serial-rtt-tools/tools/target-firmware/hpm6800evk_dbgstress/src/main.c",
+                    "idx": 1477,
+                    "isStmt": true,
+                    "line": 98,
+                    "prologueEnd": false,
+                    "seq": 3,
+                    "seqEnd": false
+                  },
+                  "lookup": 2147505917,
+                  "name": "main+0xa2",
+                  "pc": 2147505918,
+                  "regs": [
+                    0,
+                    2147505918,
+                    557008,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    2147495936,
+                    1310720,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    752168,
+                    536977436,
+                    0,
+                    770784,
+                    1,
+                    752168,
+                    752180,
+                    772648,
+                    8192,
+                    4096,
+                    0,
+                    0,
+                    0,
+                    0,
+                    2147505918
+                  ],
+                  "sp": 557008
+                },
+                {
+                  "cfa": 557056,
+                  "kind": "cfi",
+                  "known": [
+                    8,
+                    9,
+                    18,
+                    19,
+                    20,
+                    21,
+                    22,
+                    23,
+                    24,
+                    25,
+                    26,
+                    27,
+                    1,
+                    32,
+                    2
+                  ],
+                  "loc": {
+                    "addr": 2147510398,
+                    "end": 2147510402,
+                    "file": "E:/sdk_env_v1.11.0/hpm_sdk/soc/HPM6800/HPM6880/toolchains/reset.c",
+                    "idx": 2049,
+                    "isStmt": true,
+                    "line": 120,
+                    "prologueEnd": false,
+                    "seq": 37,
+                    "seqEnd": false
+                  },
+                  "lookup": 2147510401,
+                  "name": "reset_handler+0xe",
+                  "pc": 2147510402,
+                  "regs": [
+                    0,
+                    2147510402,
+                    557040,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    2147495936,
+                    1310720,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    752168,
+                    536977436,
+                    0,
+                    770784,
+                    1,
+                    752168,
+                    752180,
+                    772648,
+                    8192,
+                    4096,
+                    0,
+                    0,
+                    0,
+                    0,
+                    2147510402
+                  ],
+                  "sp": 557040
+                },
+                {
+                  "kind": "cfi",
+                  "known": [
+                    8,
+                    9,
+                    18,
+                    19,
+                    20,
+                    21,
+                    22,
+                    23,
+                    24,
+                    25,
+                    26,
+                    27,
+                    1,
+                    32,
+                    2
+                  ],
+                  "loc": {
+                    "addr": 2147495994,
+                    "end": 2147495998,
+                    "file": "E:/sdk_env_v1.11.0/hpm_sdk/soc/HPM6800/HPM6880/toolchains/gcc/start.S",
+                    "idx": 64,
+                    "isStmt": true,
+                    "line": 141,
+                    "prologueEnd": false,
+                    "seq": 32,
+                    "seqEnd": false
+                  },
+                  "lookup": 2147495997,
+                  "name": "_start+0x3c",
+                  "pc": 2147495998,
+                  "regs": [
+                    0,
+                    2147495998,
+                    557056,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    2147495936,
+                    1310720,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    752168,
+                    536977436,
+                    0,
+                    770784,
+                    1,
+                    752168,
+                    752180,
+                    772648,
+                    8192,
+                    4096,
+                    0,
+                    0,
+                    0,
+                    0,
+                    2147495998
+                  ],
+                  "sp": 557056
+                }
+              ],
+              "reason": "ELF 缺少当前函数的 RISC-V DWARF CFI 展开行",
+              "scan": false
+            },
+            "register": 2749243052,
+            "connectSeconds": 2.455282499999157,
+            "haltSeconds": 0.16601669999363367,
+            "stepSeconds": 0.389194099989254,
+            "watchSeconds": 0.11947409999265801,
+            "targetElf": {
+              "path": "hpm6800evk-dbgstress-live.elf",
+              "sha256": "7cf8c56f4d7616166815f7a5a4306c423000f41c777ed625e4fb599c8e068261",
+              "verifiedLoadBytes": 48224
+            },
+            "recovery": {
+              "streams": {
+                "rtt": 65536,
+                "hss": 16777494
+              },
+              "engines": {
+                "PS_IDCODE": "0x23727093",
+                "LEVEL_SHIFTERS": "0xf",
+                "FPGA_RESET": "0x0",
+                "BOOT_MODE": "0x1",
+                "CAPTURE": "0x8",
+                "SWD": "0x0",
+                "PACKET": "0x0",
+                "DDR": "0x0",
+                "CDMA": "0x1002"
+              }
+            }
+          }
+        },
+        "final-state": {
+          "status": "pass",
+          "seconds": 0.647,
+          "reason": null,
+          "data": {
+            "target": {
+              "halted": false,
+              "clock": {
+                "controls": {
+                  "cpu0": "0x3020100",
+                  "mchtmr0": "0x1010000",
+                  "ahb": "0x5040203"
+                },
+                "basis": "Read-only qualified SYSCTL controls; target frequencies not inferred without qualified PLL outputs"
+              },
+              "dmstatus": "0x430ca2"
+            },
+            "probe": {
+              "serial": "12345678",
+              "usb": "CMSIS-DAP",
+              "hid": "zynqlinkPRO HID"
+            },
+            "clock": {
+              "FCLK_Hz": 119999998,
+              "actual_TCK_Hz": 9999999.833333334,
+              "JTAG_sampling_mode": 0,
+              "cfg": "0x2a011",
+              "dmi_idle_min": 8,
+              "clock_source": "PS FCLK divider and PL half_delay registers",
+              "actual_link_Hz": 9999999.833333334,
+              "tap": "0x1000563d"
+            },
+            "streams": {
+              "rtt": 65536,
+              "hss": 16777494
+            },
+            "engines": {
+              "PS_IDCODE": "0x23727093",
+              "LEVEL_SHIFTERS": "0xf",
+              "FPGA_RESET": "0x0",
+              "BOOT_MODE": "0x1",
+              "CAPTURE": "0x8",
+              "SWD": "0x0",
+              "PACKET": "0x0",
+              "DDR": "0x0",
+              "CDMA": "0x1002"
+            }
+          }
+        }
+      }
+    }
+  },
+  "review": {
+    "suiteStatus": "incomplete",
+    "accepted": false,
+    "hpmScopeVerified": true,
+    "standardBoardCounts": {
+      "pass": 9,
+      "fail": 0,
+      "pending": 3,
+      "blocked": 0,
+      "not-applicable": 1
+    },
+    "rows": [
+      {
+        "id": "preflight",
+        "status": "pass",
+        "source": "final-flash-repeat/summary.json",
+        "seed": 680014,
+        "targetElfSha256": null
+      },
+      {
+        "id": "jtag-sram",
+        "status": "pass",
+        "source": "final-standard/summary.json",
+        "seed": 680014,
+        "targetElfSha256": "7cf8c56f4d7616166815f7a5a4306c423000f41c777ed625e4fb599c8e068261"
+      },
+      {
+        "id": "jtag-flash",
+        "status": "pass",
+        "source": "final-flash-repeat/summary.json",
+        "seed": 680014,
+        "targetElfSha256": "7cf8c56f4d7616166815f7a5a4306c423000f41c777ed625e4fb599c8e068261"
+      },
+      {
+        "id": "jtag-debug",
+        "status": "pass",
+        "source": "final-standard/summary.json",
+        "seed": 680014,
+        "targetElfSha256": "7cf8c56f4d7616166815f7a5a4306c423000f41c777ed625e4fb599c8e068261"
+      },
+      {
+        "id": "jtag-rtt-viewer",
+        "status": "pass",
+        "source": "final-standard/summary.json",
+        "seed": 680014,
+        "targetElfSha256": "7cf8c56f4d7616166815f7a5a4306c423000f41c777ed625e4fb599c8e068261"
+      },
+      {
+        "id": "jtag-rtt-forward",
+        "status": "pass",
+        "source": "final-standard/summary.json",
+        "seed": 680014,
+        "targetElfSha256": "7cf8c56f4d7616166815f7a5a4306c423000f41c777ed625e4fb599c8e068261"
+      },
+      {
+        "id": "jtag-jscope-1",
+        "status": "pass",
+        "source": "final-standard/summary.json",
+        "seed": 680014,
+        "targetElfSha256": "7cf8c56f4d7616166815f7a5a4306c423000f41c777ed625e4fb599c8e068261"
+      },
+      {
+        "id": "jtag-jscope-8",
+        "status": "pass",
+        "source": "final-standard/summary.json",
+        "seed": 680014,
+        "targetElfSha256": "7cf8c56f4d7616166815f7a5a4306c423000f41c777ed625e4fb599c8e068261"
+      },
+      {
+        "id": "jtag-stress-1",
+        "status": "pending",
+        "source": "final-standard/summary.json",
+        "seed": 680014,
+        "targetElfSha256": "7cf8c56f4d7616166815f7a5a4306c423000f41c777ed625e4fb599c8e068261"
+      },
+      {
+        "id": "jtag-stress-2",
+        "status": "pending",
+        "source": "final-standard/summary.json",
+        "seed": 680014,
+        "targetElfSha256": "7cf8c56f4d7616166815f7a5a4306c423000f41c777ed625e4fb599c8e068261"
+      },
+      {
+        "id": "jtag-stress-3",
+        "status": "pending",
+        "source": "final-standard/summary.json",
+        "seed": 680014,
+        "targetElfSha256": "7cf8c56f4d7616166815f7a5a4306c423000f41c777ed625e4fb599c8e068261"
+      },
+      {
+        "id": "etm",
+        "status": "not-applicable",
+        "source": "final-standard/summary.json",
+        "seed": 680014,
+        "targetElfSha256": null
+      },
+      {
+        "id": "final-state",
+        "status": "pass",
+        "source": "final-flash-repeat/summary.json",
+        "seed": 680014,
+        "targetElfSha256": null
+      }
+    ]
+  },
+  "beforeFinalCampaign": {
+    "target": {
+      "halted": false,
+      "clock": {
+        "controls": {
+          "cpu0": "0x3020100",
+          "mchtmr0": "0x1010000",
+          "ahb": "0x5040203"
+        },
+        "basis": "Read-only qualified SYSCTL controls; target frequencies not inferred without qualified PLL outputs"
+      },
+      "dmstatus": "0x430ca2"
+    },
+    "heartbeats": [
+      3840072,
+      3840579
+    ],
+    "targetClocks": {
+      "applicationCpuHz": 600000000,
+      "mchtmrHz": 24000000
+    },
+    "traps": 0,
+    "cache": {
+      "control": "0x7f03",
+      "instruction": true,
+      "data": true,
+      "pma": {
+        "cf": [
+          3840,
+          0,
+          0,
+          0
+        ],
+        "addr": [
+          0,
+          4816895,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    "trigger": [
+      0,
+      [
+        [
+          562036736,
+          0
+        ],
+        [
+          562036736,
+          0
+        ],
+        [
+          562036736,
+          0
+        ],
+        [
+          562036736,
+          0
+        ],
+        [
+          562036736,
+          0
+        ],
+        [
+          562036736,
+          0
+        ],
+        [
+          562036736,
+          0
+        ],
+        [
+          562036736,
+          0
+        ]
+      ]
+    ],
+    "flash": {
+      "guardSha": "e02c28713f8804d31ef4b3ffa4289b9ddb0da57920deefaceff7aba3e82b4c4b",
+      "sector2Sha": "23a24766855734ba541fd580d0ee8063b1335cb711059e40338b3c0b0b42d8c0",
+      "readTwice": true,
+      "fullBytes": 16777216,
+      "fullSha": "496a76af612db150c8c1d960ee8cffc54ee6219a187876cf0624cb0b440b0bb4",
+      "fullReadSeconds": 51.37322320000385
+    },
+    "probe": {
+      "engines": {
+        "PS_IDCODE": "0x23727093",
+        "LEVEL_SHIFTERS": "0xf",
+        "FPGA_RESET": "0x0",
+        "BOOT_MODE": "0x1",
+        "CAPTURE": "0x8",
+        "SWD": "0x0",
+        "PACKET": "0x0",
+        "DDR": "0x0",
+        "CDMA": "0x1002"
+      },
+      "streams": {
+        "rtt": 65536,
+        "hss": 134219798
+      },
+      "activeResources": {},
+      "gpio": "0xf",
+      "route": "0x0",
+      "tck": {
+        "FCLK_Hz": 49999999,
+        "actual_TCK_Hz": 24999999.5,
+        "JTAG_sampling_mode": 0,
+        "cfg": "0x20011",
+        "dmi_idle_min": 8,
+        "clock_source": "PS FCLK divider and PL half_delay registers",
+        "actual_link_Hz": 24999999.5,
+        "tap": "0x1000563d"
+      },
+      "clock": {
+        "control": 37748992,
+        "source": 0,
+        "pll": 221192,
+        "bootMode": 1,
+        "FCLK_Hz": 49999999
+      }
+    }
+  },
+  "restored": {
+    "target": {
+      "halted": false,
+      "clock": {
+        "controls": {
+          "cpu0": "0x3020100",
+          "mchtmr0": "0x1010000",
+          "ahb": "0x5040203"
+        },
+        "basis": "Read-only qualified SYSCTL controls; target frequencies not inferred without qualified PLL outputs"
+      },
+      "dmstatus": "0x430ca2"
+    },
+    "heartbeats": [
+      3523361,
+      3523872
+    ],
+    "targetClocks": {
+      "applicationCpuHz": 600000000,
+      "mchtmrHz": 24000000
+    },
+    "traps": 0,
+    "cache": {
+      "control": "0x7f03",
+      "instruction": true,
+      "data": true,
+      "pma": {
+        "cf": [
+          3840,
+          0,
+          0,
+          0
+        ],
+        "addr": [
+          0,
+          4816895,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    "trigger": [
+      0,
+      [
+        [
+          562036736,
+          0
+        ],
+        [
+          562036736,
+          0
+        ],
+        [
+          562036736,
+          0
+        ],
+        [
+          562036736,
+          0
+        ],
+        [
+          562036736,
+          0
+        ],
+        [
+          562036736,
+          0
+        ],
+        [
+          562036736,
+          0
+        ],
+        [
+          562036736,
+          0
+        ]
+      ]
+    ],
+    "flash": {
+      "guardSha": "e02c28713f8804d31ef4b3ffa4289b9ddb0da57920deefaceff7aba3e82b4c4b",
+      "sector2Sha": "23a24766855734ba541fd580d0ee8063b1335cb711059e40338b3c0b0b42d8c0",
+      "readTwice": true,
+      "fullBytes": 16777216,
+      "fullSha": "496a76af612db150c8c1d960ee8cffc54ee6219a187876cf0624cb0b440b0bb4",
+      "fullReadSeconds": 51.30122209999536
+    },
+    "probe": {
+      "engines": {
+        "PS_IDCODE": "0x23727093",
+        "LEVEL_SHIFTERS": "0xf",
+        "FPGA_RESET": "0x0",
+        "BOOT_MODE": "0x1",
+        "CAPTURE": "0x8",
+        "SWD": "0x0",
+        "PACKET": "0x0",
+        "DDR": "0x0",
+        "CDMA": "0x1002"
+      },
+      "streams": {
+        "rtt": 65536,
+        "hss": 16777494
+      },
+      "activeResources": {},
+      "gpio": "0xf",
+      "route": "0x0",
+      "tck": {
+        "FCLK_Hz": 49999999,
+        "actual_TCK_Hz": 24999999.5,
+        "JTAG_sampling_mode": 0,
+        "cfg": "0x20011",
+        "dmi_idle_min": 8,
+        "clock_source": "PS FCLK divider and PL half_delay registers",
+        "actual_link_Hz": 24999999.5,
+        "tap": "0x1000563d"
+      },
+      "clock": {
+        "control": 37748992,
+        "source": 0,
+        "pll": 221192,
+        "bootMode": 1,
+        "FCLK_Hz": 49999999
+      }
+    }
+  },
+  "probeOcm": {
+    "time_UTC": "2026-11-14T23:52:51.974313+00:00",
+    "elf": "prebuilt/qspi-release/application.elf",
+    "elf_sha256": "64d00fe597030175920b994e39ff51db8a683dbb8d5f907c0f8d73f8d55044b9",
+    "downloads": false,
+    "probe_reset_or_continue": false,
+    "expected_executable_bytes": 85716,
+    "cycles": [
+      {
+        "cycle": 0,
+        "sections": [
+          {
+            "name": ".text",
+            "bytes": 82736,
+            "address": 0,
+            "equal": true,
+            "expected_sha256": "b1b6d882f4a81787b4ef049058e6812a8a7e620b8c1b03c7418a06d919323cc4",
+            "live_sha256": "b1b6d882f4a81787b4ef049058e6812a8a7e620b8c1b03c7418a06d919323cc4"
+          },
+          {
+            "name": ".ocm_text",
+            "bytes": 2956,
+            "address": 82736,
+            "equal": true,
+            "expected_sha256": "5d7f7afc8467e286592da089d27c5c9eeb43331c6d31b6561eee5909704f5a4d",
+            "live_sha256": "5d7f7afc8467e286592da089d27c5c9eeb43331c6d31b6561eee5909704f5a4d"
+          },
+          {
+            "name": ".init",
+            "bytes": 12,
+            "address": 85692,
+            "equal": true,
+            "expected_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6",
+            "live_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6"
+          },
+          {
+            "name": ".fini",
+            "bytes": 12,
+            "address": 85704,
+            "equal": true,
+            "expected_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6",
+            "live_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6"
+          }
+        ],
+        "differing_addresses": [],
+        "vector_word": "ea000049"
+      }
+    ],
+    "passed": true,
+    "memoryAccess": "physical MEM-AP0; independent of CPU memory/cache context",
+    "boot_mode": 1,
+    "boot_trace": [
+      1398032176,
+      539365425,
+      65544,
+      1,
+      2,
+      1536,
+      0,
+      1
+    ],
+    "clockSnapshot": {
+      "control": 37748992,
+      "source": 0,
+      "pll": 221192,
+      "bootMode": 1,
+      "FCLK_Hz": 49999999
+    },
+    "initial_FCLK_Hz": 49999999
+  },
+  "cleanup": {
+    "runtimesRemoved": [
+      "runtime",
+      "runtime-full",
+      "runtime-final",
+      "runtime-strict"
+    ],
+    "sharedHwServer": 12776,
+    "remainingOwnWorkers": [],
+    "worktreeRemoved": true
+  },
+  "delivery": {
+    "remoteRefs": [
+      "97ac02bc1a3313f81fb4968767109308bde2f51b\trefs/heads/gh-pages",
+      "d340cc3ef6a8b213f1bf8d46e387d972dc5fe229\trefs/heads/main"
+    ],
+    "pages": {
+      "status": 200,
+      "url": "https://minichao9901.github.io/zynqlinkPRO/"
+    },
+    "release": {
+      "url": "https://github.com/minichao9901/zynqlinkPRO/releases/tag/v1.3.8",
+      "published": "2026-11-14T08:28:18Z",
+      "tag": "v1.3.8",
+      "assets": [
+        {
+          "name": "SHA256SUMS.txt",
+          "digest": "sha256:9e315de40344cbb1688d61ef4f6ef2f5d72c8edbf21691626e8db652822969c0",
+          "size": 93
+        },
+        {
+          "name": "zynq-etm-bridge-win64.zip",
+          "digest": "sha256:7ed9bcde00d2ae120d13cd1b9a945beb31234fb4f1ada8a7c9502188e8d7199e",
+          "size": 56200968
+        }
+      ]
+    },
+    "fixed": {
+      "sha256": "03d32e5b288336d805b491476186ef0fbe18129b9c683a26c7810c7fd5a54ca6",
+      "built": "2026-11-14T16:24:18+08:00",
+      "version": "1.3.8",
+      "source": "3255b515ff1d0a512b49f9bd119276c35053b42f"
+    },
+    "publicationExecuted": false,
+    "qspiWritten": false,
+    "physicalColdStart": false
+  }
+}
