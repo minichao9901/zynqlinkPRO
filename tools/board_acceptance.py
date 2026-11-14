@@ -650,7 +650,7 @@ class BoardAcceptance:
 
     def rtt_addresses(self):
         base = RTT_BASE[self.args.board]
-        return base, base + 0x200, base + 0x1000, base + 0x4000
+        return base, base + 0x200, base + 0x1000, base + (0x5000 if self.rv else 0x4000)
 
     @contextmanager
     def rtt_fixture(self, folder, *, producer=True, batch=1024):
@@ -660,7 +660,7 @@ class BoardAcceptance:
         if self.rv and producer:
             regions = [(RV_CODE, 256), (base, 0x8000)]
         else:
-            regions = [(base, 0x5000)]
+            regions = [(base, 0x5200 if self.rv else 0x5000)]
 
         def setup(mem, chip, saved):
             if producer:
@@ -680,7 +680,7 @@ class BoardAcceptance:
                        struct.pack('<6I', 0, down, 64, 60, 60, 0) + bytes(4))
             mem.write(cb, control)
             mem.write(down, bytes([0x6e]) * 64)
-            mem.write(base + 0x4800, struct.pack('<8I', *SCOPE_VALUES))
+            mem.write(self.scope_address(), struct.pack('<8I', *SCOPE_VALUES))
             if producer and self.rv:
                 chip.register(0x7b0, (chip.register(0x7b0) & ~7) | 3)
                 chip.register(0x7b1, RV_CODE)
@@ -964,7 +964,7 @@ class BoardAcceptance:
                     targetRingPending=(wr-rd) % (16384 if self.rv else 8192), chunk=2048)
 
     def scope_address(self):
-        return RTT_BASE[self.args.board] + 0x4800
+        return RTT_BASE[self.args.board] + (0x5100 if self.rv else 0x4800)
 
     def scope_start(self, channels, ticks, seconds):
         self.web.page('scope', 'show')

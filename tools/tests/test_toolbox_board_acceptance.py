@@ -45,6 +45,15 @@ class TestBoardAcceptance(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, 'exceeds'):
             BoardAcceptance.flash_ranges(regions, 0x80000000, 0x8000d000, 0x1000)
 
+    def test_hpm_rtt_downlink_and_scope_do_not_overlap_the_16k_uplink(self):
+        from tools.board_acceptance import BoardAcceptance
+        board = BoardAcceptance(SimpleNamespace(board='hpm6800evk', serial='12345678'), None)
+        base, control, up, down = board.rtt_addresses()
+        self.assertLess(control, up)
+        self.assertLessEqual(up + 16384, down)
+        self.assertLessEqual(down + 64, board.scope_address())
+        self.assertLessEqual(board.scope_address() + 32, base + 0x5200)
+
     def test_plan_uses_one_link_rate_and_two_scope_windows(self):
         for board, (hz, links, _) in BOARDS.items():
             cases = plan(board, None, FEATURES, 14)
