@@ -1,6 +1,6 @@
 # 从接线到验收
 
-下面以 Windows、正式 J7 探针和 STM32H743 为例。先完成临时加载和目标烧录，再按需固化探针。每条命令成功后再执行下一条。换板时需要知道板子的芯片型号和接线，并准备适用于该板的固件。
+下面以 Windows、J7 探针和 STM32H743 为例。首次演练可先临时加载探针并烧录目标，再按需固化探针。已有正式 QSPI 镜像且已冷启动的 J7，可以跳过第 2 节，按第 3 节的 QSPI 配对启动工作台。每条命令成功后再执行下一条。换板时需要知道板子的芯片型号和接线，并准备适用于该板的固件。
 
 从本机启动器打开工作台后，可在顶部选择「可执行手册」。按钮使用当前工作台和仓库，结果显示在对应命令下面。使用源码时，先在终端运行第 3 节的启动命令打开页面。便携版工作台位于仓库的 `dist` 内时会自动找到仓库，独立解压时可在启动 EXE 时用 `--workspace` 指定仓库。执行 CLI 命令需要系统 Python。
 
@@ -24,13 +24,25 @@
    python -m pip install -r etm-service/requirements.txt pefile
    ```
 
-4. 核对随仓库提供的构建依赖文件。结果应有 `"ok": true`。探针 JTAG 操作另需安装 Xilinx SDK 2018.3，默认路径为 `E:/Xilinx/SDK/2018.3`，装在其他位置时向探针命令传入 `--sdk`。[安装与换机说明](dependencies.md)
+4. 核对随仓库提供的构建依赖文件。结果应有 `"ok": true`。探针 JTAG 操作另需 Xilinx SDK 2018.3，默认路径为 `E:/Xilinx/SDK/2018.3`。[安装与换机说明](dependencies.md)
 
    ```powershell
    python -X utf8 tools/verify_dependencies.py
    ```
 
-## 2. 临时加载正式探针
+**SDK 装在其他目录时，在 PowerShell 终端执行相关命令。** Web 手册按钮使用默认 SDK 路径。把以下示例的 `D:/Xilinx Tools/SDK/2018.3` 换成实际安装根目录，保留引号。
+
+先预览临时加载计划，核对输出的 `--sdk` 路径。预览只读取本机文件。
+
+`python -X utf8 toolbox.py probe-load --sdk "D:/Xilinx Tools/SDK/2018.3" --dry-run`
+
+真正临时加载时，去掉 `--dry-run` 并加上第 2 节的输出目录参数。固化和读回时，把同一 `--sdk "D:/Xilinx Tools/SDK/2018.3"` 加在 `probe-flash` 后。冷启动核对和重包中的 `boot.bsp`、`boot.build` 由 `project run` 转交，`--sdk` 放在分隔符 `--` 之后。例如冷启动核对：
+
+`python -X utf8 toolbox.py project run probe.ocm-verify -- --sdk "D:/Xilinx Tools/SDK/2018.3" --elf prebuilt/qspi-release/application.elf --require-qspi --out-dir build/first-run-qspi-cold`
+
+## 2. 临时加载 J7 探针
+
+本节使用默认 JTAG/RAM 配对 `prebuilt/release-20261106/probe.bit` 和 `prebuilt/release-20261106/application.elf`，初始化 Tcl 取同目录的 `ps7_init.tcl`。加载后这套配对运行到断电或再次复位。第 5 节的 QSPI 固化和冷启动核对使用 `prebuilt/qspi-release/` 中的 BOOT 和配套 bit/ELF。
 
 接好 PC 到 **Zynq 探针本体**的 Xilinx JTAG 下载线，以及探针到 PC 的 USB 数据线。给探针供电。若探针已在使用，先停止采集并断开原工作台。目标 MCU 这时可以尚未接入。
 
@@ -56,13 +68,19 @@
 
 ## 3. 启动工作台并读取目标身份
 
-在断电或安全接线的状态下，按 J7 针脚表接好目标 SWDIO、SWCLK 和共地，核对 I/O 电平并给目标供电。计划使用探针硬复位时再接 NRST。若接线期间给 Zynq 断了电，重新执行第 2 节的临时加载步骤。[J7 针脚表](../README.md#硬件与接线)
+在断电或安全接线的状态下，按 J7 针脚表接好目标 SWDIO、SWCLK 和共地，核对 I/O 电平并给目标供电。计划使用探针硬复位时再接 NRST。若接线期间给 Zynq 断了电，按重新上电后的启动方式确认探针配对。继续使用第 2 节的 RAM 配对时，先重新临时加载。[J7 针脚表](../README.md#硬件与接线)
 
-1. 在终端 A 启动本机工作台。自动选择空闲端口并打开浏览器，保持终端和网页运行。如果浏览器没打开，将终端打印的 `browserUrl` 粘到 Chrome 或 Edge。这个 URL 带本机令牌。
+1. 在终端 A 按 J7 **当前实际运行**的配对选择一条命令启动工作台。下面带执行按钮的命令适用于第 2 节默认 RAM 配对，`--j7` 会声明 `prebuilt/release-20261106/` 中的 bit/ELF。本机手册的按钮会检查当前服务是否就绪。终端启动时会自动选择空闲端口并打开浏览器，保持终端和网页运行。如果浏览器没打开，将终端打印的 `browserUrl` 粘到 Chrome 或 Edge。这个 URL 带本机令牌。
 
    ```powershell
    python -X utf8 toolbox.py --runtime build/first-run-web serve --j7 --port 0 --open-browser
    ```
+
+   **已从正式 QSPI 镜像冷启动时，在终端 A 改用这一条：**
+
+   `python -X utf8 toolbox.py --runtime build/first-run-web serve --native-probe --bit prebuilt/qspi-release/probe.bit --zynq-elf prebuilt/qspi-release/application.elf --port 0 --open-browser`
+
+   自选配对也使用 `--native-probe`，把 `--bit` 和 `--zynq-elf` 一起换成实际加载的同一套文件。显式指定配对时省略 `--j7`。这些启动参数用于声明身份，加载或写入走第 2 节或第 5 节。如果无法确认板上配对，先核对上次加载记录或冷启动读回。
 
 2. 打开终端 B，进入同一个仓库目录。
 
@@ -154,7 +172,7 @@
 
 将探针本体实际断电后重新上电。等探针 USB 重新出现，保留 JTAG 下载线。此时可以直接做下列只读检查。
 
-5. 核对板子从 QSPI 走完启动链，并比对正式 PS ELF 的 OCM 执行代码。成功时 `result.json` 显示 `"boot_mode": 1`、`"passed": true` ，并列出与正式 ELF 一致的执行段。
+5. 核对板子从 QSPI 走完启动链。启动所用的 BOOT 包含 `prebuilt/qspi-release/probe.bit` 和 `prebuilt/qspi-release/application.elf`，下面用该包的应用 ELF 核对板上 OCM 执行代码。成功时 `result.json` 显示 `"boot_mode": 1` 和 `"passed": true`，并列出匹配的执行段。
 
    ```powershell
    python -X utf8 toolbox.py project run probe.ocm-verify -- --elf prebuilt/qspi-release/application.elf --require-qspi --out-dir build/first-run-qspi-cold
