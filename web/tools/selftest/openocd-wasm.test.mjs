@@ -11,7 +11,7 @@ import { inspectOpenOcdCfg } from '../../app/dbg/openocd-cfg.js';
 import { programOpenOcdFlash, resetAfterFlash } from '../../app/flash/openocd-program.js';
 import { loadBuiltinFlashCfg } from '../../app/flash/upstream-config.js';
 import { upstreamFlashConfigs, hpmSdkFlashConfigs } from '../../app/flash/openocd-cfgs/catalog.js';
-import { OpenOcdResetSession, pulseTargetReset } from '../../app/flash/target-reset.js';
+import { OpenOcdResetSession, confirmF103ResetRun, pulseTargetReset } from '../../app/flash/target-reset.js';
 
 test('ARM JTAG confirms the selected TAP without reading a SWD DPIDR', async t => {
   t.mock.method(OpenOcdTargetSession.prototype,'open',async()=>{});
@@ -288,6 +288,28 @@ test('reset still releases NRST after a failed assert, and surfaces the first er
   } };
   await assert.rejects(pulseTargetReset(probe), /assert failed/);
   assert.deepEqual(values,[0,0x80]);
+});
+
+test('F103 flash reset checks a fresh reset and resumed instruction retirement', async () => {
+  const reset = 1 << 25, retired = 1 << 24, halted = 1 << 17;
+  const commands = [];
+  const readings = [reset,0,reset | halted,retired];
+  const probe = {
+    async command(line){
+      commands.push(line);
+      return 'Returned data ' + (line.includes('0x10 0 128') ? '2c' : 'ac');
+    },
+    async readDhcsr(){ return readings.shift(); },
+  };
+  assert.deepEqual(await confirmF103ResetRun(probe),
+    {method:'J7 NRST',resetDhcsr:reset | halted,runningDhcsr:retired});
+  assert.deepEqual(commands, ['capture {cmsis-dap cmd 0x10 0 0 0 0 0 0}',
+    'capture {cmsis-dap cmd 0x10 0 128 0 0 0 0}',
+    'capture {cmsis-dap cmd 0x10 128 128 0x50 0xc3 0 0}']);
+  commands.length = 0;
+  readings.push(reset,reset);
+  await assert.rejects(confirmF103ResetRun(probe), /旧的核心复位标志/);
+  assert.equal(commands.length, 1);
 });
 
 test('the Zynq lease synchronizes DAP and terminates aligned OUT packets without touching ETM', async () => {
