@@ -12,6 +12,22 @@ from native_probe import NativeProbe, install,reset_dap_session
 
 
 class NativeProbeTests(unittest.TestCase):
+    def test_selects_zynqlink_usb_and_hid_when_vid_pid_are_shared(self):
+        zynq = SimpleNamespace(manufacturer='CherryUSB', product='CMSIS-DAP')
+        other = SimpleNamespace(manufacturer='ARM', product='akaLinkPro CMSIS-DAP')
+        with patch('usb.core.find', return_value=[other, zynq]):
+            self.assertIs(NativeProbe.find_usb(), zynq)
+        with patch('usb.core.find', return_value=[other]):
+            with self.assertRaisesRegex(ValueError, '当前数量：0'):
+                NativeProbe.find_usb()
+        with patch('usb.core.find', return_value=[zynq, zynq]):
+            with self.assertRaisesRegex(ValueError, '当前数量：2'):
+                NativeProbe.find_usb()
+        own = dict(usage_page=0xff00, manufacturer_string='CherryUSB', product_string='zynqlinkPRO HID')
+        peer = dict(usage_page=0xff00, manufacturer_string='ARM', product_string='akaLinkPro CMSIS-DAP')
+        with patch('hid.enumerate', return_value=[peer, own]):
+            self.assertEqual(NativeProbe.find_hid(), [own])
+
     def test_session_cancel_routes_capture_to_its_existing_stop_transaction(self):
         owner='a'*32
         backend=SimpleNamespace(lock=threading.RLock(),ACTIVE=('armed',),

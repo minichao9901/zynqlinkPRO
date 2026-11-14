@@ -195,7 +195,7 @@ class NativeProbe:
             row['alternates'].append(alternate)
             if 'alternate' not in row:
                 row['alternate'] = alternate
-        return {'vendorId': device.idVendor, 'productId': device.idProduct,
+        return {'vendorId': device.idVendor, 'productId': device.idProduct, 'manufacturerName': device.manufacturer,
                 'productName': device.product, 'serialNumber': device.serial_number,
                 'configuration': {'configurationValue': config.bConfigurationValue, 'interfaces': list(interfaces.values())}}
 
@@ -203,11 +203,19 @@ class NativeProbe:
     def find_usb():
         import libusb_package
         import usb.core
-        devices = list(usb.core.find(find_all=True, idVendor=0x0D28, idProduct=0x0204,
-                                    backend=libusb_package.get_libusb1_backend()))
+        devices = [d for d in usb.core.find(find_all=True, idVendor=0x0D28, idProduct=0x0204,
+                                            backend=libusb_package.get_libusb1_backend())
+                   if d.manufacturer == 'CherryUSB' and d.product == 'CMSIS-DAP']
         if len(devices) != 1:
             raise ValueError('本地探针服务需要唯一的 zynqlinkPRO 探针，当前数量：' + str(len(devices)))
         return devices[0]
+
+    @staticmethod
+    def find_hid():
+        import hid
+        return [d for d in hid.enumerate(0x0D28, 0x0204)
+                if d['usage_page'] == 0xFF00 and d['manufacturer_string'] == 'CherryUSB'
+                and d['product_string'] in ('zynqlinkPRO HID', 'CMSIS-DAP')]
 
     def _stop_hss_receiver(self):
         if self.hss_receiver is not None:
@@ -458,7 +466,7 @@ class NativeProbe:
                 return [{'vendorId': d['vendor_id'], 'productId': d['product_id'],
                          'serialNumber': d['serial_number'], 'productName': d['product_string'],
                          'collections': [{'usagePage': d['usage_page'], 'usage': d['usage']}]} for d in
-                        hid.enumerate(0x0D28, 0x0204) if d['usage_page'] == 0xFF00]
+                        self.find_hid()]
             owner = value.get('owner', '')
             if not re.fullmatch(r'[0-9a-f]{32}', owner):
                 raise ValueError('无效HID会话')
@@ -468,7 +476,7 @@ class NativeProbe:
                 if self.hid is not None:
                     self.hid.close();self.hid=None
                 if self.hid is None:
-                    matches = [d for d in hid.enumerate(0x0D28, 0x0204) if d['usage_page'] == 0xFF00]
+                    matches = self.find_hid()
                     if len(matches) != 1:
                         raise ValueError('需要唯一的 zynqlinkPRO HID 接口')
                     self.hid = hid.device()

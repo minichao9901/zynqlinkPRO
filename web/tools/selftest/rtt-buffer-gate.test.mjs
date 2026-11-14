@@ -8,3 +8,16 @@ test('RTT Viewer keeps raw history while high-speed rendering is suppressed',()=
   assert.equal(v.recBytes,3);assert.equal(v.suppBytes,3);assert.equal(v.stats.bytes,3);
   assert.deepEqual(Array.from(v.records[0].b),[1,2,3]);
 });
+
+test('a full HPM RTT ring pauses display without waiting for a rate estimate',()=>{
+  const v=Object.create(RttView.prototype);
+  Object.assign(v,{probe:{rttPollLimit:8192},mode:'term',_ringBackpressure:true,suppressed:false,
+    _setSuppressed(on){this.suppressed=on;}});
+  v._highspeedGate(0);
+  assert.equal(v.suppressed,true);
+  v._highspeedGate(8000);
+  assert.equal(v.suppressed,true);
+  v._ringBackpressure=false;
+  v._highspeedGate(5000);
+  assert.equal(v.suppressed,false);
+});
