@@ -429,6 +429,8 @@ JTAG 临时加载的默认配对在 `prebuilt/release-20261106/`，断电后丢�
 
 内置烧录默认 SWD 1 MHz、HPM JTAG 10 MHz。调试器、烧录器和 RTT Viewer 的内置 HPM 档最高 25 MHz，其他 ARM/RISC-V 最高 60 MHz。RTT Viewer 默认 10 MHz。导入项使用 CFG 自带频率，实际时钟以板上读回为准。J-Scope 自动模式在采样周期达到 10 ms 时使用 Wasm 轮询，短周期使用探针硬件采样。RTT 转发和硬件采样通过探针私有 HID 控制，数据走 CDC 和 HSS Bulk。[Wasm 迁移与验收范围](validation/openocd-wasm-20261108/README.md)
 
+H743 使用 J7 的 ARM/JTAG 链路时，在 RTT 转发和 J-Scope 的目标类型中选择 ARM/JTAG。页面须能按序列号打开同一探针的 CMSIS-DAP USB 和 HID，以确认 CPU 和边界扫描 TAP。RTT 转发另连接同序列号的 CDC 串口，确认串口已打开后启动转发，停止后再切换或关闭串口。实际时钟和网页实板范围见 [H743 ARM/JTAG 验收](validation/h743-arm-jtag-web-20261115/README.md)。
+
 ## ETM Trace
 
 原生采集可直接从 CLI 操作。这里的 `--elf` 指目标 MCU ELF，`--zynq-elf` 指探针 PS ELF，`--bit` 与 `--zynq-elf` 须填写已加载配对。原生采集的 `--swd-khz` 单位为 kHz，底层 Trace Web 命令的 `--swd-hz` 单位为 Hz。[Trace CLI 参数和结果](Trace-CLI使用说明.md)
