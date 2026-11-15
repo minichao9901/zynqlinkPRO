@@ -77,6 +77,119 @@ class TestBoardAcceptance(unittest.TestCase):
                 self.assertEqual(len([case for case in subset if case['feature'] == 'stress']), 3)
             self.assertEqual('notApplicable' in cases[-1], board == 'hpm6800evk')
 
+    def test_native_scope_reader_checks_first_definition_and_data(self):
+        with patch.object(sys, 'path', [str(Path(__file__).resolve().parents[1]), *sys.path]):
+            from benchmark_probe_stream import HssReader
+        base, value = 0x20004100, b'\x01\x02\x03\x04'
+        definition = bytearray(512)
+        struct.pack_into('<HBBIIHHIIHBBIBB', definition, 0, 0x4a53, 2, 1, 0, 0, 0, 1,
+                         50_000_000, 24, 0, 1, 1, base, 4, 4)
+        data = bytearray(512)
+        struct.pack_into('<HBBIIHH', data, 0, 0x4a53, 2, 2, 1, 24, 1, 4)
+        data[16:20] = value
+        reader = HssReader(None, value, 24, definition=(50_000_000, (base,)))
+        reader.consume(definition+data)
+        self.assertTrue(reader.definition_verified)
+        self.assertEqual((reader.samples, reader.packets, reader.bytes), (1, 2, 1024))
+        missing = HssReader(None, value, 24, definition=(50_000_000, (base,)))
+        with self.assertRaisesRegex(AssertionError, 'Missing first HSS DEF'):
+            missing.consume(data)
+        wrong = HssReader(None, value, 529, definition=(50_000_000, (base,)))
+        with self.assertRaises(AssertionError):
+            wrong.consume(definition)
+        data[4] = 3
+        with self.assertRaisesRegex(AssertionError, 'frame sequence'):
+            reader.consume(data)
+        device = Mock()
+        invalid = HssReader(device, value, 24, definition=(50_000_000, (base,)), drain_after_error=True)
+        def receive(*_args, **_kwargs):
+            if device.read.call_count == 2:
+                invalid.quit.set()
+                return b''
+            return data
+        device.read.side_effect = receive
+        invalid.run()
+        self.assertEqual(device.read.call_count, 2)
+        self.assertIn('Missing first HSS DEF', invalid.error)
+        self.assertEqual(invalid.quiet_reads, 1)
+
+    def test_native_scope_stop_requires_fresh_usb_quiet_and_reports_fixed_window(self):
+        from tools.board_acceptance_scope import native_window
+        case = next(row for row in plan('h743', ['swd'], {'jscope'}, 7) if row['channels']==1)
+        def metrics(tick, count, running, frames=0):
+            return (0x31535348,tick,24_000_000,count,0,0,0,0,frames,frames*512,24,0x100 if running else 0)
+        clock = Mock(return_value={'actual_link_Hz':49_999_999.5})
+        class Reader:
+            error = None
+            definition_verified = True
+            samples = 60_000_001
+            bytes = 1024
+            packets = 2
+            data_frames = 1
+            timeline_skips = 0
+            quit = Mock()
+            start = Mock()
+            join = Mock()
+            is_alive = Mock(return_value=False)
+            quiet = 0
+            @property
+            def quiet_reads(self):
+                self.quiet += 1
+                return self.quiet
+        reader = Reader()
+        snapshots = iter([metrics(1,1,True), metrics(1440000001,60_000_001,True),
+                          metrics(1440000003,60_000_001,False,2)])
+        def dispatch(cmd, action, data=None):
+            if action == 11:
+                return 0, next(snapshots)
+            return (0, ())
+        probe = Mock()
+        probe.action.side_effect = dispatch
+        result = {}
+        script_dir = str(Path(__file__).resolve().parents[1])
+        with patch.object(sys, 'path', [script_dir, *sys.path]), \
+             patch('benchmark_probe_stream.HssReader', return_value=reader), \
+             patch('test_probe_board.drain_hss'), patch('tools.board_acceptance_scope.time.sleep'):
+            native_window(Mock(), probe, case, 0x20004100, b'1234', clock, result)
+        self.assertEqual(result['counterSeconds'],60)
+        self.assertEqual(result['groupsPerSecond'],1_000_000)
+        self.assertEqual(result['tailCountDelta'],0)
+        self.assertEqual(result['droppedUsbFrames'],0)
+        self.assertGreaterEqual(reader.quiet,2)
+        reader.join.assert_called_once_with(2)
+        clock.assert_called_once()
+
+        def stuck(cmd, action, data=None):
+            return (-7 if action==0 else 0), ()
+        probe.action.side_effect = stuck
+        def step(get, predicate, timeout, message):
+            if not predicate(get()):
+                raise RuntimeError(message)
+        with patch.object(sys, 'path', [script_dir, *sys.path]), \
+             patch('benchmark_probe_stream.HssReader', return_value=reader), \
+             patch('test_probe_board.drain_hss'), patch('tools.board_acceptance_scope.wait_for', side_effect=step), \
+             self.assertRaisesRegex(Unsafe, 'STOP or release not confirmed'):
+            native_window(Mock(), probe, case, 0x20004100, b'1234', clock, {})
+
+    def test_h743_sram_slow_retest_keeps_both_attempts_and_the_latest_result(self):
+        from tools.board_acceptance import BoardAcceptance
+        case = next(iter(plan('h743', ['swd'], {'sram'}, 7)))
+        board = BoardAcceptance(SimpleNamespace(board='h743', serial='12345678'), None)
+        board.case = case
+        board.target.state = Mock(return_value={'halted': True, 'ccr': '0x0'})
+        board.clock = Mock(return_value={'actual_link_Hz':49_999_999.5})
+        sample = lambda rate: {'read': {'MB_s':rate,'samples':[{}]*3}, 'write': {'MB_s':3.99,'samples':[{}]*3}}
+        script_dir = str(Path(__file__).resolve().parents[1])
+        with tempfile.TemporaryDirectory() as directory, \
+             patch.object(sys, 'path', [script_dir, *sys.path]), \
+             patch('h743_peak.measure_pipeline', side_effect=[sample(3.0),sample(2.9)]) as measure:
+            result = board.sram_pipeline(Path(directory), Mock(), Mock(), case['pipeline'])
+            rows = json.loads((Path(directory)/'pipeline-attempts.json').read_text())
+        self.assertEqual([row['read']['MB_s'] for row in rows], [3.0,2.9])
+        self.assertEqual(result['read']['MB_s'], 2.9)
+        self.assertTrue(result['historicalVariance'])
+        self.assertEqual(measure.call_args.kwargs, dict(words=512,depth=32,loops=64,repeats=3,soak_seconds=10))
+
     def test_seeded_disconnects_cover_live_rtt_scope_and_debug(self):
         for seed in range(50):
             rows = rotation(seed)
@@ -153,6 +266,26 @@ class TestBoardAcceptance(unittest.TestCase):
                                 evidence={'targetElf': {'sha256': actual or (etm if case['feature'] == 'etm' else target),
                                                         'verifiedLoadBytes': 16}})
                            for case in cases]
+                for case in records:
+                    details = case['evidence']
+                    if profile := case.get('pipeline'):
+                        details['pipeline'] = dict(profile=profile, byteExact=True,
+                            clock={'actual_link_Hz':case['requestedHz']}, attempts=2, historicalVariance=True,
+                            historicalComparison={'read':{'historicalMBps':4.0494,'deltaPercent':-3},
+                                                  'write':{'historicalMBps':3.9894,'deltaPercent':-1}},
+                            soak=dict(elapsed_s=10.02, errors=0),
+                            read=dict(MB_s=4, samples=[{}]*3), write=dict(MB_s=3.98, samples=[{}]*3))
+                    if profile := case.get('native'):
+                        nominal = profile['nominalGroupsPerSecond']
+                        window = dict(clock={'actual_link_Hz': case['requestedHz']}, periodTicks=profile['periodTicks'],
+                                      nominalGroupsPerSecond=nominal, counterSeconds=60,
+                                      groupsPerSecond=round(nominal*60)/60,
+                                      groups=round(nominal*60), windowSkipped=0, skipFraction=0, tailCountDelta=0)
+                        details['native'] = dict(window, **{key:value for key,value in profile.items() if key not in window},
+                            transport=case['transport'], channels=case['channels'], droppedUsbFrames=0,
+                            transferByteDelta=0, finalReadErrors=0, definitionVerified=True, allFramesVerified=True)
+                        details['confirmed'] = dict(window, droppedUsbSamples=0, dataSequenceGaps=0, readErrors=0)
+                        details['exports'] = {'groups': 96}
                 path.write_text(json.dumps(dict(board=board, revision='abc', probeSerial=serial, files=files,
                     seed=7, finishedAt=f'2026-11-14T10:00:{time}+00:00', status='pass', plan=cases,
                     results=[{'id': 'preflight', 'status': 'pass'}, *records,
@@ -165,6 +298,36 @@ class TestBoardAcceptance(unittest.TestCase):
             self.assertEqual(review([first, h7, hpm])['status'], 'incomplete')
             etm = evidence('h743', {'etm'}, suffix='-etm', target='trace-application')
             self.assertTrue(review([first, h7, hpm, etm])['accepted'])
+            accepted = review([first, h7, hpm, etm])
+            first_native = next(row for row in accepted['scopePerformance']
+                                if row['board']=='h743' and row['id']=='swd-jscope-1' and row['path']=='native')
+            self.assertEqual(first_native['nominalGroupsPerSecond'], 1_000_000)
+            from tools.run_board_acceptance import write_performance
+            write_performance(Path(temp), accepted['scopePerformance'], accepted['sramPerformance'])
+            rendered = (Path(temp)/'performance.md').read_text(encoding='utf8')
+            self.assertIn('1.000000 MS/s', rendered)
+            self.assertIn('网页稳定长窗', rendered)
+            self.assertIn('较历史偏低', rendered)
+
+            old = json.loads(h7.read_text(encoding='utf8'))
+            old_case = next(row for row in old['plan'] if row['id']=='swd-jscope-1')
+            del old_case['native']
+            old_path = Path(temp)/'legacy.json'
+            old_path.write_text(json.dumps(old), encoding='utf8')
+            with self.assertRaisesRegex(ValueError, 'Unexpected plan'):
+                review([old_path])
+            wrong = json.loads(h7.read_text(encoding='utf8'))
+            wrong_case = next(row for row in wrong['results'] if row['id']=='swd-jscope-1')
+            wrong_case['evidence']['native']['periodTicks'] = 52
+            old_path.write_text(json.dumps(wrong), encoding='utf8')
+            with self.assertRaisesRegex(ValueError, 'fixed performance evidence'):
+                review([old_path])
+            slow = json.loads(h7.read_text(encoding='utf8'))
+            slow_case = next(row for row in slow['results'] if row['id']=='swd-jscope-1')
+            slow_case['evidence']['native'].update(groupsPerSecond=500_000, groups=30_000_000)
+            old_path.write_text(json.dumps(slow), encoding='utf8')
+            with self.assertRaisesRegex(ValueError, 'fixed performance evidence'):
+                review([old_path])
             conflict = evidence('f103ze', {'debug'}, suffix='-conflict', target='other-application', time='01')
             with self.assertRaisesRegex(ValueError, 'Conflicting targetElf'):
                 review([first, h7, hpm, etm, conflict])

@@ -28,7 +28,7 @@ import { listSampleable } from '../elf/dwarf.js';
 import { arrayElementChannels } from './array-vars.js';
 import * as P from './protocol.js';
 import { SampleStore, Trigger, TRIG, TRIG_NAME, findTrigger, windowFor } from './store.js';
-import { ScopeRenderer, legendRows, fmtTime, fmtVal, fmtHz } from './render.js';
+import { ScopeRenderer, legendRows, fmtTime, fmtVal, fmtHz, fmtSampleRate } from './render.js';
 import { VendorEpTransport, MockTransport } from './transport.js';
 import { OpenOcdEtmProbe } from '../core/openocd-etm.js';
 import { OpenOcdProbe } from '../core/openocd-probe.js';
@@ -2036,8 +2036,12 @@ export class ScopeView {
     this.usedLod = usedLod;
     const st = this.store;
     const rate = st?.rate() || 0;
+    const channels = st?.width || 1;
+    const period = this.periodActualUs || this._periodUs;
+    const actualRate = fmtSampleRate(rate, channels);
     $('sc-samples').textContent = String(st?.count || 0);
-    $('sc-rate').textContent = rate ? `${(rate / 1000).toFixed(2)} kHz` : '0 Hz';
+    $('sc-rate').textContent = `实得 ${actualRate}` +
+      (st && period > 0 ? ` · 标称 ${fmtSampleRate(1e6 / period, channels)}` : '');
     $('sc-packets').textContent = String(this.packets);
     // 🚨 三种"丢"要**分开显示**：探针跳拍是探针 CPU 的账，USB 是主机排空的账，缺口是链路层。
     //    overrun（缓冲满之后还在来的帧）单独算一类 —— 它以前被混进"缺口"，
@@ -2080,7 +2084,7 @@ export class ScopeView {
       const spanUs = st.timeAt(st.count - 1) - st.timeAt(0);
       const lag = this._periodUs && rate && rate < 1e6 / this._periodUs * 0.8;
       this.setStatusText(`采样中 ${fmtTime(spanUs)} / ${fmtTime(this._stopAfterUs)}` +
-        `（${st.count} 样本 · 实得 ${(rate / 1000).toFixed(1)} kHz · 缓冲 ${Math.round(st.count / st.capacity * 100)}%）` +
+        `（${st.count} ${channels > 1 ? '组' : '样本'} · 实得 ${actualRate} · 缓冲 ${Math.round(st.count / st.capacity * 100)}%）` +
         (lag ? `　⚠️ 探针跟不上 ${this._periodUs} µs 的周期，时间轴会有空洞（点「标定真实速率」看它到底要多久）` : ''),
         lag ? 'warn' : '');
     }

@@ -5,6 +5,7 @@ from collections import Counter
 from datetime import datetime, timezone
 import hashlib
 import json
+import math
 from pathlib import Path
 import random
 import subprocess
@@ -24,6 +25,12 @@ FEATURES = ('sram', 'flash', 'debug', 'rtt-viewer', 'rtt-forward', 'jscope', 'st
 BUSINESSES = ('rtt-viewer', 'rtt-forward', 'jscope', 'debug')
 ENDINGS = ('switch', 'idle-disconnect', 'active-disconnect', 'usb-disconnect')
 STATUSES = ('pass', 'fail', 'pending', 'not-applicable', 'blocked')
+SRAM_PIPELINE = {'words': 512, 'depth': 32, 'loops': 64, 'repeats': 3, 'soakSeconds': 10,
+                 'address': 0x24040000, 'backupBytes': 4096}
+SCOPE_TICK_HZ = 24_000_000
+NATIVE_SCOPE_PERIODS = {('h743', 'swd'): (24, 238), ('h743', 'jtag'): (89, 529),
+                        ('f103ze', 'swd'): (24, 416), ('f103ze', 'jtag'): (74, 528),
+                        ('hpm6800evk', 'jtag'): (174, 920)}
 
 
 class Pending(RuntimeError):
@@ -77,7 +84,12 @@ def plan(board, transports, only, seed):
                     result.append(dict(common, id=f'{transport}-stress-{number}', round=number, actions=actions))
             elif feature == 'jscope':
                 for count in (1, 8):
-                    result.append(dict(common, id=f'{transport}-jscope-{count}', channels=count, seconds=60))
+                    ticks = NATIVE_SCOPE_PERIODS[board, transport][count == 8]
+                    result.append(dict(common, id=f'{transport}-jscope-{count}', channels=count, seconds=60,
+                                       native=dict(periodTicks=ticks, timebaseHz=SCOPE_TICK_HZ, seconds=60,
+                                                   nominalGroupsPerSecond=SCOPE_TICK_HZ/ticks)))
+            elif feature == 'sram' and board == 'h743':
+                result.append(dict(common, id=f'{transport}-{feature}', pipeline=SRAM_PIPELINE.copy()))
             else:
                 result.append(dict(common, id=f'{transport}-{feature}'))
     if 'etm' in only:
@@ -128,6 +140,7 @@ class Report:
                           counts={key: counts[key] for key in STATUSES}, finishedAt=utc_now())
         destination = self.folder / 'summary.json'
         write_json(destination, self.value)
+        write_performance(self.folder, scope_performance(self.value['results']), sram_performance(self.value['results']))
         self.event('summary', status=status, scope=coverage, accepted=self.value['accepted'],
                    counts=self.value['counts'], report=str(destination))
         return {'pass': 0, 'fail': 1, 'incomplete': 2}[status]
@@ -166,6 +179,8 @@ def campaign(cases, driver, report, full=True):
             stop_reason = details['error']
         except Exception as error:
             status, details = 'fail', {'error': str(error)}
+            if case.get('feature') == 'jscope' and hasattr(error, 'scope_windows'):
+                details.update(error.scope_windows)
             (folder / 'error.txt').write_text(traceback.format_exc(), encoding='utf-8')
             if isinstance(error, Unsafe):
                 stop_reason = str(error)
@@ -193,6 +208,134 @@ def campaign(cases, driver, report, full=True):
 def digest(path):
     with path.open('rb') as stream:
         return {'path': str(path), 'sha256': hashlib.file_digest(stream, 'sha256').hexdigest()}
+
+
+def scope_performance(results):
+    rows = []
+    for case in results:
+        if case.get('feature') != 'jscope':
+            continue
+        details = case.get('evidence', {})
+        for phase, data in (('native', details.get('native', {})), ('web', details.get('confirmed', {}))):
+            if not all(key in data for key in ('clock','periodTicks','counterSeconds','groups',
+                                              'groupsPerSecond','nominalGroupsPerSecond','windowSkipped','skipFraction')):
+                continue
+            rows.append(dict(id=case['id'], path=phase, transport=case['transport'], channels=case['channels'],
+                             status=data.get('status',case['status']),
+                             actualLinkHz=data['clock']['actual_link_Hz'], periodTicks=data['periodTicks'],
+                             nominalGroupsPerSecond=data['nominalGroupsPerSecond'],
+                             groupsPerSecond=data['groupsPerSecond'], groups=data['groups'],
+                             counterSeconds=data['counterSeconds'], missedSamples=data['windowSkipped'],
+                             skipFraction=data['skipFraction'], stopGroupDelta=data.get('tailCountDelta'),
+                             usbLost=data.get('droppedUsbFrames' if phase == 'native' else 'droppedUsbSamples'),
+                             usbLostUnit='frames' if phase == 'native' else 'groups'))
+    return rows
+
+
+def sram_performance(results):
+    rows = []
+    for case in results:
+        data = case.get('evidence', {}).get('pipeline', {})
+        if 'historicalComparison' in data:
+            rows.append(dict(id=case['id'], transport=case['transport'], actualLinkHz=data['clock']['actual_link_Hz'],
+                             profile=data['profile'], readMBps=data['read']['MB_s'], writeMBps=data['write']['MB_s'],
+                             soakSeconds=data['soak']['elapsed_s'], attempts=data['attempts'],
+                             comparison=data['historicalComparison'], variance=data['historicalVariance']))
+    return rows
+
+
+def write_performance(folder, rows, sram):
+    if not rows and not sram:
+        return
+    def rate(value, channels):
+        if channels != 1:
+            return f'{value/1000:,.3f} k组/s'
+        return f'{value/1e6:,.6f} MS/s' if value >= 999000 else f'{value/1000:,.3f} kS/s'
+    lines = ['# 实板性能计量']
+    if rows:
+        lines.extend(['', '## J-Scope', '',
+                      '| 用例 | 路径 | 结果 | 链路 | 通道 | 标称组速 | 实得组速 | 计数窗 | 窗内生成组数 | 跳拍 | USB 丢失 | STOP 差值 | 周期 ticks |',
+                      '|---|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|'])
+    for row in rows:
+        label = row.get('board', '') + ' ' + row['id']
+        path = '原生固定点' if row['path']=='native' else '网页稳定长窗'
+        channels = row['channels']
+        transport = f'{row["transport"].upper()} {row["actualLinkHz"]/1e6:.6f} MHz'
+        skip = f'{row["missedSamples"]:,}（{100*row["skipFraction"]:.6f}%）'
+        usb = ('待验' if row['usbLost'] is None else
+               f'{row["usbLost"]} ' + ('帧' if row['usbLostUnit']=='frames' else '组'))
+        stop = '待验' if row['stopGroupDelta'] is None else f'{row["stopGroupDelta"]} 组'
+        status = {'pass':'通过','fail':'失败','blocked':'阻塞','pending':'待验'}.get(row['status'],row['status'])
+        lines.append(f'| {label.strip()} | {path} | {status} | {transport} | {channels} | '
+                     f'{rate(row["nominalGroupsPerSecond"],channels)} | {rate(row["groupsPerSecond"],channels)} | '
+                     f'{row["counterSeconds"]:.3f} s | {row["groups"]:,} | {skip} | {usb} | '
+                     f'{stop} | {row["periodTicks"]} |')
+    if sram:
+        lines.extend(['', '## H743 原生 SRAM 流水线', '',
+                      '| 链路 | 读 / 写 MB/s | 历史读 / 写 MB/s | 读 / 写差值 | 交替验证 | 尝试数 | 状态 |',
+                      '|---|---:|---:|---:|---:|---:|---|'])
+        for row in sram:
+            rd, wr = (row['comparison'][direction] for direction in ('read','write'))
+            transport = f'{row["transport"].upper()} {row["actualLinkHz"]/1e6:.6f} MHz'
+            variance = '较历史偏低' if row['variance'] else '在历史对照内'
+            lines.append(f'| {transport} | {row["readMBps"]:.3f} / {row["writeMBps"]:.3f} | '
+                         f'{rd["historicalMBps"]:.4f} / {wr["historicalMBps"]:.4f} | '
+                         f'{rd["deltaPercent"]:+.2f}% / {wr["deltaPercent"]:+.2f}% | '
+                         f'{row["soakSeconds"]:.3f} s | {row["attempts"]} | {variance} |')
+    (folder / 'performance.md').write_text('\n'.join(lines)+'\n', encoding='utf-8')
+
+
+def native_scope_rate_matches(row):
+    groups = row.get('groups', 0)
+    skipped = row.get('windowSkipped', -1)
+    seconds = row.get('counterSeconds', 0)
+    nominal = row.get('nominalGroupsPerSecond', 0)
+    effective = row.get('groupsPerSecond', 0)
+    if groups <= 0 or skipped < 0 or seconds <= 0 or nominal <= 0:
+        return False
+    # Allow the 0.1% scheduling-loss ceiling plus a small allowance for
+    # counter/USB frame boundaries. The host-measured rate must agree with
+    # the probe's counted groups and elapsed hardware ticks.
+    margin = .0011
+    return (math.isclose(effective, groups/seconds, rel_tol=1e-9)
+            and math.isclose(row.get('skipFraction', 1), skipped/(groups+skipped), abs_tol=1e-9)
+            and abs((groups+skipped)/seconds/nominal-1) <= margin
+            and abs(effective/nominal-1) <= margin)
+
+
+def verify_performance_evidence(case, evidence):
+    """Require live performance evidence for the fixed points in this plan."""
+    if 'pipeline' in case:
+        row = evidence.get('pipeline', {})
+        profile = case['pipeline']
+        actual = row.get('clock', {}).get('actual_link_Hz', 0)
+        if not (row.get('profile') == profile and row.get('byteExact') is True
+                and abs(actual-case['requestedHz']) <= case['requestedHz']*.001
+                and row.get('soak', {}).get('elapsed_s', 0) >= profile['soakSeconds']
+                and row.get('soak', {}).get('errors') == 0
+                and all(len(row.get(direction, {}).get('samples', [])) == profile['repeats']
+                        and row[direction].get('MB_s', 0) > 0 for direction in ('read', 'write'))):
+            return False
+    if 'native' in case:
+        row = evidence.get('native', {})
+        profile = case['native']
+        web = evidence.get('confirmed', {})
+        if not (all(row.get(key) == value for key,value in profile.items())
+                and row.get('transport') == case['transport'] and row.get('channels') == case['channels']
+                and row.get('clock', {}).get('actual_link_Hz', 0) >= case['requestedHz']*.999
+                and row.get('clock', {}).get('actual_link_Hz', 0) <= case['requestedHz']*1.001
+                and row.get('counterSeconds', 0) >= profile['seconds']
+                and native_scope_rate_matches(row) and 0 <= row.get('skipFraction', 1) < .001
+                and row.get('definitionVerified') is True and row.get('allFramesVerified') is True
+                and all(row.get(key) == 0 for key in ('tailCountDelta','droppedUsbFrames','transferByteDelta','finalReadErrors'))
+                and web.get('counterSeconds', 0) >= 59.5 and web.get('groupsPerSecond', 0) > 0
+                and web.get('nominalGroupsPerSecond', 0) > 0 and web.get('groups', 0) > 0
+                and web.get('windowSkipped', -1) >= 0
+                and 0 <= web.get('skipFraction', 1) < .001
+                and all(web.get(key) == 0 for key in ('tailCountDelta','droppedUsbSamples','dataSequenceGaps','readErrors'))
+                and evidence.get('exports', {}).get('groups', 0) > 0):
+            return False
+    return True
 
 
 def review(paths):
@@ -234,6 +377,8 @@ def review(paths):
                     actual = row.get('evidence', {}).get('targetElf', {})
                     if not target_sha or actual.get('sha256') != target_sha or not actual.get('verifiedLoadBytes', 0) > 0:
                         raise ValueError(f'Missing or mismatched actual target ELF evidence for {board}/{case_id}: {path}')
+                    if not verify_performance_evidence(cases[case_id], row.get('evidence', {})):
+                        raise ValueError(f'Missing or invalid fixed performance evidence for {board}/{case_id}: {path}')
             key = (report['finishedAt'], str(path))
             prior = by_board[board].get(case_id)
             if prior is None or key > prior[0]:
@@ -264,10 +409,14 @@ def review(paths):
                         row.update(status='pending', reason='Run all three stress rounds in one session')
         outputs[board] = values
     counts = Counter(row['status'] for rows in outputs.values() for row in rows)
+    performance = [dict(row, board=board) for board, records in by_board.items()
+                   for row in scope_performance([entry[1] for entry in records.values()])]
+    memory = sram_performance([entry[1] for entry in by_board['h743'].values()])
     status = 'fail' if counts['fail'] or counts['blocked'] else 'incomplete' if counts['pending'] else 'pass'
     return dict(status=status, accepted=status == 'pass', revision=identity[0], probeSerial=identity[1],
                 bitSha256=identity[2], zynqElfSha256=identity[3], boards=outputs,
-                counts={name: counts[name] for name in STATUSES})
+                counts={name: counts[name] for name in STATUSES}, scopePerformance=performance,
+                sramPerformance=memory)
 
 
 def main(argv=None):
@@ -307,6 +456,7 @@ def main(argv=None):
             if args.out:
                 args.out.mkdir(parents=True, exist_ok=False)
                 write_json(args.out / 'summary.json', result)
+                write_performance(args.out, result['scopePerformance'], result['sramPerformance'])
         except (KeyError, OSError, ValueError) as error:
             parser.error(str(error))
         print(json.dumps(result, ensure_ascii=False, indent=2), flush=True)

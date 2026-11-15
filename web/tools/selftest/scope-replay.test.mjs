@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {ScopeView} from '../../app/scope/view.js';
 import {SampleStore,Trigger} from '../../app/scope/store.js';
+import {fmtSampleRate} from '../../app/scope/render.js';
 import { buildData, buildDef, HOST_POLL, PacketStream, SeqTracker, TimeUnwrap } from '../../app/scope/protocol.js';
 
 function rig(){
@@ -14,6 +15,12 @@ function rig(){
     renderer:{setStore(){},clearMarks(){},fitAll(){},setTrigger(){}}});
   return p;
 }
+
+test('scope output distinguishes single-channel sample rate from aggregate group rate',()=>{
+  assert.equal(fmtSampleRate(1_000_000, 1), '1.000 MS/s');
+  assert.equal(fmtSampleRate(100_840.34, 8), '100.84 k组/s');
+  assert.equal(fmtSampleRate(20, 1), '20 S/s');
+});
 
 test('real F103 mixed-scalar capture replays all values after stop without recording itself',async()=>{
   globalThis.document={getElementById:()=>({value:'60000'})};

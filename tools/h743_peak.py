@@ -31,6 +31,70 @@ def expected(pattern, nbytes):
     return (pattern * (nbytes // len(pattern) + 1))[:nbytes]
 
 
+def measure_pipeline(mem, base, *, words, depth, loops, repeats, soak_seconds):
+    """Measure the existing repeated TAR window over one already-owned DAP."""
+    assert words % 256 == 0, 'keep TAR wrap aligned to 1 KiB'
+    out, inp = mem.out, mem.inp
+    nbytes = words * 4
+    pattern = random.Random(0x743).randbytes(1024)
+    expect = expected(pattern, nbytes)
+    row = dict(words=words, depth=depth, loops=loops)
+    window = pattern * 4
+    mem.write(base, window)
+    assert mem.read(base, len(window)) == window, 'preload mismatch'
+
+    def run(mode):
+        ap_select(out, inp, base)
+        if mode == 'read':
+            request = bytes([6, 0, words & 255, words >> 8, 0x0F])
+        else:
+            request = bytes([6, 0, words & 255, words >> 8, 0x0D]) + expect
+        done = 0
+        t0 = time.perf_counter()
+        while done < loops:
+            n = min(depth, loops - done)
+            for _ in range(n):
+                send(out, request)
+            for _ in range(n):
+                reply = read_exact(inp, 4 + (nbytes if mode == 'read' else 0))
+                assert reply[:4] == bytes([6, words & 255, words >> 8, 1]), reply[:16].hex()
+                if mode == 'read':
+                    assert reply[4:] == expect, 'read data mismatch'
+                else:
+                    assert len(reply) == 4, reply.hex()
+            done += n
+        dt = time.perf_counter() - t0
+        return dt, loops * nbytes / dt / 1e6
+
+    for mode in ('read', 'write'):
+        run(mode)  # warm up
+        samples = []
+        for _ in range(repeats):
+            dt, rate = run(mode)
+            samples.append(dict(MB_s=rate, seconds=dt))
+        rates = sorted(x['MB_s'] for x in samples)
+        row[mode] = dict(MB_s=rates[len(rates) // 2], samples=samples,
+                         blocks=loops, bytes=loops * nbytes)
+        if mode == 'write':
+            assert mem.read(base, len(window)) == window, 'write readback mismatch'
+    if soak_seconds > 0:
+        start = time.monotonic()
+        samples = []
+        while time.monotonic() - start < soak_seconds:
+            sample = {}
+            for mode in ('read', 'write'):
+                dt, rate = run(mode)
+                sample[mode] = dict(MB_s=rate, seconds=dt)
+            samples.append(sample)
+        assert mem.read(base, len(window)) == window, 'soak write readback mismatch'
+        row['soak'] = dict(elapsed_s=time.monotonic()-start, iterations=len(samples),
+                           samples=samples, errors=0)
+        for mode in ('read', 'write'):
+            rates = sorted(s[mode]['MB_s'] for s in samples)
+            row['soak'][mode] = dict(median_MB_s=rates[len(rates)//2], min_MB_s=min(rates), max_MB_s=max(rates))
+    return row
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--speed', type=int, default=60000)
@@ -52,9 +116,6 @@ def main():
     args = ap.parse_args()
     base = int(args.address, 0)
     assert args.words % 256 == 0, 'keep TAR wrap aligned to 1 KiB'
-    nbytes = args.words * 4
-    pattern = random.Random(0x743).randbytes(1024)
-    expect = expected(pattern, nbytes)
     jtag_ir = tuple(int(v) for v in args.jtag_ir.split(','))
     dev, out, inp = open_dap()
     mem = Memory(out, inp)
@@ -80,60 +141,9 @@ def main():
         row.update(FCLK_Hz=hz, cfg=hex(cfg), **swd_clock_details(hz, cfg))
         if args.transport == 'jtag':
             row['JTAG_sampling_mode'] = xfer(out, inp, [0x89, 255])[2]
-        window = pattern * 4
-        mem.write(base, window)
-        assert mem.read(base, len(window)) == window, 'preload mismatch'
+        row.update(measure_pipeline(mem, base, words=args.words, depth=args.depth, loops=args.loops,
+                                    repeats=args.repeats, soak_seconds=args.soak_seconds))
         row['restore_ok'] = True
-
-        def run(mode):
-            ap_select(out, inp, base)
-            if mode == 'read':
-                request = bytes([6, 0, args.words & 255, args.words >> 8, 0x0F])
-            else:
-                request = bytes([6, 0, args.words & 255, args.words >> 8, 0x0D]) + expect
-            done = 0
-            t0 = time.perf_counter()
-            while done < args.loops:
-                n = min(args.depth, args.loops - done)
-                for _ in range(n):
-                    send(out, request)
-                for _ in range(n):
-                    reply = read_exact(inp, 4 + (nbytes if mode == 'read' else 0))
-                    assert reply[:4] == bytes([6, args.words & 255, args.words >> 8, 1]), reply[:16].hex()
-                    if mode == 'read':
-                        assert reply[4:] == expect, 'read data mismatch'
-                    else:
-                        assert len(reply) == 4, reply.hex()
-                done += n
-            dt = time.perf_counter() - t0
-            return dt, args.loops * nbytes / dt / 1e6
-
-        for mode in ('read', 'write'):
-            run(mode)  # warm up
-            samples = []
-            for _ in range(args.repeats):
-                dt, rate = run(mode)
-                samples.append(dict(MB_s=rate, seconds=dt))
-            rates = sorted(x['MB_s'] for x in samples)
-            row[mode] = dict(MB_s=rates[len(rates) // 2], samples=samples,
-                             blocks=args.loops, bytes=args.loops * nbytes)
-            if mode == 'write':
-                assert mem.read(base, len(window)) == window, 'write readback mismatch'
-        if args.soak_seconds > 0:
-            start = time.monotonic()
-            samples = []
-            while time.monotonic() - start < args.soak_seconds:
-                sample = {}
-                for mode in ('read', 'write'):
-                    dt, rate = run(mode)
-                    sample[mode] = dict(MB_s=rate, seconds=dt)
-                samples.append(sample)
-            assert mem.read(base, len(window)) == window, 'soak write readback mismatch'
-            row['soak'] = dict(elapsed_s=time.monotonic()-start, iterations=len(samples),
-                               samples=samples, errors=0)
-            for mode in ('read', 'write'):
-                rates = sorted(s[mode]['MB_s'] for s in samples)
-                row['soak'][mode] = dict(median_MB_s=rates[len(rates)//2], min_MB_s=min(rates), max_MB_s=max(rates))
         row['passed'] = True
     except Exception as exc:
         row['error'] = repr(exc)

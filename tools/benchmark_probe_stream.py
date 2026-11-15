@@ -24,7 +24,8 @@ from probe_build_info import provenance,live_clock_snapshot
 
 
 class HssReader(threading.Thread):
-    def __init__(self, dev, expected, period, allow_duplicate_stat=False):
+    def __init__(self, dev, expected, period, allow_duplicate_stat=False, *,
+                 definition=None, drain_after_error=False):
         super().__init__(daemon=True)
         self.dev, self.expected = dev, expected
         self.quit = threading.Event()
@@ -38,12 +39,27 @@ class HssReader(threading.Thread):
         self.control_sequence_errors=[]
         self.data_frames=0          # kind-2 frames byte-compared against the fixture
         self.stat_frames=0          # kind-3 counter frames
+        self.definition = definition
+        self.definition_verified = False
+        self.drain_after_error = drain_after_error
+        self.quiet_reads = 0
 
     def consume(self, data):
         assert len(data) % 512 == 0, len(data)
         for off in range(0, len(data), 512):
             magic, ver, kind, seq, stamp, n, aux = struct.unpack_from('<HBBIIHH', data, off)
             assert magic == 0x4a53 and ver == 2
+            if self.definition is not None and not self.definition_verified:
+                assert kind == 1 and seq == 0, ('Missing first HSS DEF', seq, kind)
+                speed, addresses = self.definition
+                actual, ticks, flags, channels, spans = struct.unpack_from('<IIHBB', data, off+16)
+                assert abs(actual-speed) <= speed*.001 and ticks == self.period, (actual,ticks)
+                assert channels == spans == aux == len(addresses) and flags & 2 == 0, (channels,spans,aux,flags)
+                entries = [struct.unpack_from('<IBB', data, off+28+8*i) for i in range(channels)]
+                assert entries == [(address,4,4) for address in addresses], entries
+                self.definition_verified = True
+            elif self.definition is not None:
+                assert kind in (2, 3), ('Unexpected HSS packet', kind, seq)
             if self.previous_seq is not None:
                 if seq!=((self.previous_seq+1)&0xffffffff):
                     if self.allow_duplicate_stat and kind==3 and seq==self.previous_seq:
@@ -76,9 +92,19 @@ class HssReader(threading.Thread):
                 try:
                     # PyUSB preserves partial data returned on a libusb timeout.
                     data = bytes(self.dev.read(0x87, 32768, timeout=50))
-                    self.consume(data)
+                    if not data:
+                        self.quiet_reads += 1
+                    elif self.error is None:
+                        try:
+                            self.consume(data)
+                        except Exception as exc:
+                            if not self.drain_after_error:
+                                raise
+                            # An invalid capture must still let the producer
+                            # complete STOP and release its final USB packets.
+                            self.error = repr(exc)
                 except usb.core.USBTimeoutError:
-                    pass
+                    self.quiet_reads += 1
         except BaseException as exc:
             self.error = repr(exc)
 

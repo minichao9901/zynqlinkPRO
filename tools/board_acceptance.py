@@ -473,11 +473,15 @@ class BoardAcceptance:
         length = 2048
         payload = random.Random(0x61a3).randbytes(length)
         results = {}
-        with self.target.memory_fixture(folder / 'fixture', [(addr - 8, length + 16)],
+        pipeline = self.case.get('pipeline')
+        regions = [(pipeline['address'], pipeline['backupBytes'])] if pipeline else [(addr - 8, length + 16)]
+        with self.target.memory_fixture(folder / 'fixture', regions,
                                         capture_registers=True, keep_halted=True):
             with self.target.link(self.case['transport'], self.case['requestedHz']) as (_, mem, chip, clock):
                 results['native'] = self.memory_check(addr, payload, mem.read, mem.write)
                 results['native']['clock'] = verify_clock(clock, self.case['requestedHz'])
+                if pipeline:
+                    results['pipeline'] = self.sram_pipeline(folder, mem, chip, pipeline)
             with self.web_debug(folder):
                 self.debug_call('halt')
                 def read(at, size):
@@ -492,6 +496,27 @@ class BoardAcceptance:
                                  for key in ('readMBps', 'writeMBps')}
         write_json(folder / 'measurements.json', results)
         return results
+
+    def sram_pipeline(self, folder, mem, chip, profile):
+        from h743_peak import measure_pipeline
+        state = self.target.state(mem, chip)
+        checked(state['halted'] and not int(state['ccr'], 0) & (1 << 16),
+                'H743 pipelined AXI SRAM comparison requires a halted core with D-cache disabled')
+        clock = self.clock()
+        historical = {'swd': (4.0494, 3.9894), 'jtag': (3.9771, 2.0076)}
+        attempts = []
+        for _ in range(2):
+            data = measure_pipeline(mem, profile['address'], words=profile['words'], depth=profile['depth'],
+                                    loops=profile['loops'], repeats=profile['repeats'], soak_seconds=profile['soakSeconds'])
+            comparison = {direction: dict(historicalMBps=reference, deltaPercent=100*(data[direction]['MB_s']/reference-1))
+                          for direction, reference in zip(('read','write'),historical[self.case['transport']])}
+            attempts.append(dict(data, historicalComparison=comparison))
+            write_json(folder/'pipeline-attempts.json', attempts)
+            if all(row['deltaPercent'] >= -2 for row in comparison.values()):
+                break
+        return dict(data, profile=profile, clock=clock, target=state, byteExact=True, attempts=len(attempts),
+                    historicalComparison=comparison, historicalVariance=any(row['deltaPercent'] < -2 for row in comparison.values()),
+                    historicalSource='docs/validation/h743-board-rerun-20261115/README.md')
 
     @staticmethod
     def memory_check(addr, payload, read, write):
@@ -1080,6 +1105,71 @@ class BoardAcceptance:
         return dict(groups=samples, firstTick=first_tick, lastTick=last_tick, periodTicks=period)
 
     def jscope(self, folder):
+        native = {}
+        native_error = None
+        if self.case.get('native'):
+            try:
+                self.native_scope(folder, native)
+                native['status'] = 'pass'
+            except Unsafe as error:
+                native['status'] = 'blocked'
+                native_error = str(error)
+                error.scope_windows = {'native': native}
+                raise
+            except Exception as error:
+                native['status'] = 'fail'
+                native_error = str(error)
+                self.check_idle()
+            finally:
+                write_json(folder / 'native-window.json', dict(native, error=native_error))
+            self.report.event('scope-window', id=self.case['id'], path='native', **native, error=native_error)
+        try:
+            result = self.web_scope(folder)
+        except Exception as error:
+            error.scope_windows = {'native':native}
+            raise
+        result['confirmed']['status'] = 'pass'
+        self.report.event('scope-window', id=self.case['id'], path='web',
+                          **{key:value for key,value in result['confirmed'].items() if key!='summary'})
+        if native_error:
+            error = RuntimeError(f'Fixed native J-Scope failed: {native_error}')
+            error.scope_windows = dict(result, native=native)
+            raise error
+        return dict(result, native=native)
+
+    def native_scope(self, folder, result):
+        from probe_stream import Probe
+        from tools.board_acceptance_scope import native_window
+
+        case = self.case
+        base = 0xf0404000 if self.rv else 0x20004000
+        address = base+256
+        seed = 0x68004853 if self.rv else 0x485353
+        values = random.Random(seed).randbytes(4096)[256:256+4*case['channels']]
+        result.update(case['native'], transport=case['transport'], requestedHz=case['requestedHz'],
+                      channels=case['channels'], address=hex(address))
+        with self.target.memory_fixture(folder/'native-fixture', [(address, len(values))], keep_halted=True,
+                                        before_restore=self.check_idle):
+            with self.target.link(case['transport'], case['requestedHz']) as (device, mem, chip, link):
+                result['target'] = self.target.state(mem, chip)
+                checked(result['target']['halted'], 'Native HSS requires the original fixture halt state')
+                mem.write(address, values)
+                checked(mem.read(address,len(values)) == values, 'Native HSS fixture readback mismatch')
+                def stream_clock():
+                    actual = self.clock()
+                    if case['transport']=='jtag':
+                        checked(actual['jtagRoute'] & 7 == (7 if self.rv else 3),
+                                'Native HSS did not retain the planned JTAG route')
+                    return actual
+                if self.rv:
+                    result['minimumDtmIdleCycles'] = link['dmi_idle_min']
+                probe = Probe(self.args.serial, zynq_only=True)
+                try:
+                    native_window(device, probe, case, address, values, stream_clock, result)
+                finally:
+                    probe.close()
+
+    def web_scope(self, folder):
         channels = self.case['channels']
         seed_ticks = SCOPE_PERIODS[(self.args.board, self.case['transport'])][channels == 8]
         address = self.scope_address()
@@ -1089,7 +1179,9 @@ class BoardAcceptance:
                                         lambda mem, chip, state: self.seed_scope(mem, chip, state, address, values),
                                         before_restore=self.check_idle):
             def point(ticks, seconds):
-                row = dict(periodTicks=ticks, requestedSeconds=seconds)
+                row = dict(periodTicks=ticks, requestedSeconds=seconds, transport=self.case['transport'],
+                           requestedHz=self.case['requestedHz'], channels=channels,
+                           nominalGroupsPerSecond=24_000_000/ticks)
                 rows.append(row)
                 try:
                     started = self.scope_start(channels, ticks, seconds + 8)
@@ -1109,7 +1201,9 @@ class BoardAcceptance:
                     checked(groups > 0 and receive_seconds > 0, 'Scope counters did not advance')
                     row.update(clock=clock, summary=summary, groups=groups, groupsPerSecond=groups/receive_seconds,
                                counterSeconds=receive_seconds, wallSeconds=wall,
-                               windowSkipped=skipped, skipFraction=max(skip, skipped / (groups + skipped)))
+                               windowSkipped=skipped, skipFraction=max(skip, skipped / (groups + skipped)),
+                               droppedUsbSamples=summary['lostUsb'], dataSequenceGaps=summary['lostGap'],
+                               readErrors=summary['readErrors'], tailCountDelta=summary['tailCountDelta'])
                     if seconds == 60:
                         checked(receive_seconds >= 59.5, 'Scope sample window shorter than 60 seconds')
                         self.invoke('scope', 'saveRaw')
