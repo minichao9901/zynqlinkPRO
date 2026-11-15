@@ -10,6 +10,7 @@
  */
 import { prepareProbeHandoff } from '../core/probe-users.js';
 import { runProbeOperation } from '../core/probe-manager.js';
+import { isProbeCdcPort } from '../core/cdc-mode.js';
 import { $, setStatus, debounce } from '../ui/dom.js';
 import { toast } from '../ui/toast.js';
 import { store } from '../core/store.js';
@@ -651,8 +652,14 @@ export class RttCdcView {
     // 第二行：桥的状态
     const st = this.last;
     const el = $('h-state');
+    const receiver = globalThis.__tools?.session;
     if (error && dev.connected) setStatus(el, error, 'err');
     else if (!st) setStatus(el, dev.connected ? '未启动' : '—', '');
+    else if (st.running && !st.discard && dev.device?.nativeService && !isProbeCdcPort(receiver?.port)){
+      const port = receiver?.isOpen ? receiver.port?.path : null;
+      setStatus(el, port ? `运行中 · 接收口选错（${port}）。请断开后刷新并连接探针的 CDC 口`
+        : '运行中 · 等待连接探针的 CDC 接收口', 'warn');
+    }
     else if (st.running && !st.cbAddr){
       /**
        * 桥跑起来了但还没找到控制块。原因按概率排，而且**RISC-V 与 SWD 的排查项不一样**：
@@ -676,8 +683,7 @@ export class RttCdcView {
        *   · 打开了还被抢 → RTT Viewer / 桥的另一个会话在搬同一个上行缓冲
        */
       // CDC 转发流的打开状态在另一个视图里（app/hid/stream.js，同面板「端口」那一栏）
-      const sv = (typeof window !== 'undefined' && window.__tools && window.__tools.stream) || null;
-      const portOpen = !!(sv && sv.s && (sv.s.port || sv.s.reader));
+      const portOpen = receiver?.isOpen;
       const stall = (this._stall || 0) >= 2
         ? (portOpen
             ? ' ⚠ 桥在跑但「已搬运」不涨 —— 多半是另一路在抢同一个 RTT 缓冲（RTT Viewer 的 WebUSB / 桥的 RTT 会话），或者目标根本没在写'

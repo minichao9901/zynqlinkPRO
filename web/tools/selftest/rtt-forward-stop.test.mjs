@@ -1,6 +1,33 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {RttCdcView} from '../../app/hid/view.js';
+import {RttCdcStreamView} from '../../app/hid/stream.js';
+import {SerialSession} from '../../app/serial/session.js';
+
+test('RTT forwarding prefers the native probe CDC and rejects an unrelated COM port',async t=>{
+  const uart = {path:'COM5',nativeService:true,getInfo:()=>({usbVendorId:0x1a86,usbProductId:0x7523})};
+  const cdc = {path:'COM33',nativeService:true,getInfo:()=>({usbVendorId:0x0d28,usbProductId:0x0204})};
+  t.mock.method(SerialSession,'listPorts',async()=>[uart,cdc]);
+  globalThis.Option = class { constructor(text,value){Object.assign(this,{text,value});} };
+  t.after(()=>{delete globalThis.Option;});
+  const select = {value:'0',appendChild(){}};
+  const message = {className:'hint',textContent:'',classList:{remove(){},add(){}}};
+  const controls = {'c-port':select,'c-note':message,'c-err':message,'c-baud':{value:'115200'}};
+  let opened;
+  const view = Object.assign(Object.create(RttCdcStreamView.prototype),{
+    owner:'rtt',ports:[uart],$:name=>controls[name],s:{open:async(port,opts)=>{opened={port,opts};}},
+  });
+  await view.refreshPorts();
+  assert.equal(select.value,'1');
+  select.value = '0';
+  await view.connect();
+  assert.match(message.textContent,/接收口选错.*COM5/);
+  assert.equal(opened,undefined);
+  select.value = '1';
+  await view.connect();
+  assert.equal(opened.port,cdc);
+  assert.equal(opened.opts.rts,true);
+});
 
 test('RTT STOP waits for the probe to drain and re-enables the start controls',async t=>{
   globalThis.document={getElementById:()=>null};

@@ -2,6 +2,24 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {initProbeConnection} from '../../app/ui/probe-connection.js';
+import {probeStatus} from '../../app/ui/probe-status.js';
+
+test('steady Viewer DAP polls keep the connected probe status',()=>{
+  const owner = 'viewer';
+  const poll = {owner,operation:'usb/exchange'};
+  const tools = {rtt:{running:true,probe:{device:{owner}}},nativeControl:{current:poll,pending:[poll]}};
+  assert.equal(probeStatus(tools).text,'探针：RTT Viewer');
+  tools.nativeControl.pending = [{owner:'another-owner',operation:'usb/exchange'}];
+  assert.equal(probeStatus(tools).text,'探针：操作中');
+  tools.nativeControl.pending = [];
+  tools.nativeControl.current = {owner,operation:'usb/reset'};
+  assert.equal(probeStatus(tools).text,'探针：操作中');
+  tools.rtt.running = false;
+  tools.nativeControl.current = poll;
+  assert.equal(probeStatus(tools).text,'探针：操作中');
+  tools.nativeControl.transport = {usbError:'USB disconnected'};
+  assert.equal(probeStatus(tools).text,'探针：需重连');
+});
 
 test('connect waits for saved grants before deciding whether to open a chooser',async t=>{
   const elements = new Map();
