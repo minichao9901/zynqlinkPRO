@@ -9,8 +9,8 @@ import { webClockKhz } from '../core/target-clock.js';
 import { constrainClockSelect } from '../ui/target-clock.js';
 import { OpenOcdProbe } from '../core/openocd-probe.js';
 import { OpenOcdEtmProbe } from '../core/openocd-etm.js';
-import { selectOpenOcdDevice } from '../core/openocd-usb.js';
-import { OpenOcdResetSession, pulseTargetReset } from './target-reset.js';
+import { isZynqDapDevice, selectOpenOcdDevice } from '../core/openocd-usb.js';
+import { OpenOcdResetSession, confirmF103ResetRun, pulseTargetReset } from './target-reset.js';
 import { ocdHex } from '../core/openocd-profile.js';
 import { hpmBoard } from '../targets/hpm/porting.js';
 import { rememberHpmBoard } from '../targets/hpm/select.js';
@@ -136,13 +136,14 @@ export class FlashView {
     return true;
   }
 
-  async flash(){
+  async flash(recoveryBounds){
     if (this.busy) return;
-    if (!this.file) return await this._flashOnce();
-    return await this._withProbeOwnership(() => this._flashOnce(), '烧录器要使用探针');
+    if (!this.file) return await this._flashOnce(recoveryBounds);
+    return await this._withProbeOwnership(() => this._flashOnce(recoveryBounds), '烧录器要使用探针');
   }
 
-  async programFile(file, { chip, clockKhz = null, base = null, reset = true, prepareOnly = false } = {}){
+  async programFile(file, { chip, clockKhz = null, base = null, reset = true, prepareOnly = false,
+    recoveryBounds } = {}){
     if (!(file instanceof File) || !file.size) throw Error('请选择非空目标固件');
     const binary = /\.bin$/i.test(file.name);
     if (!/\.(elf|axf|out|hex|ihex|bin)$/i.test(file.name)) throw Error('不支持此固件格式');
@@ -166,7 +167,7 @@ export class FlashView {
     const plan = { name:file.name, chip, clockKhz, reset,
       regions:regions.map(({ addr, data }) => ({ address:addr, bytes:data.length })) };
     if (prepareOnly) return { ...plan, prepared:true };
-    const result = await this.flash();
+    const result = await this.flash(recoveryBounds);
     if (!result?.verified || result.reset !== reset) throw Error('本次烧录或读回校验未确认');
     return { ...plan, ...result };
   }
@@ -259,13 +260,13 @@ export class FlashView {
     await this.probe.connect();
   }
 
-  async _program(probe, regions, verify){
+  async _program(probe, regions, verify, recoveryBounds){
     await probe.halt();
     this._status('正在检查 Flash 扇区并烧录…');
-    return programOpenOcdFlash(probe, regions, { verify, progress:fraction => this._bar(fraction * 99) });
+    return programOpenOcdFlash(probe, regions, { verify, recoveryBounds, progress:fraction => this._bar(fraction * 99) });
   }
 
-  async _flashOnce(){
+  async _flashOnce(recoveryBounds){
     if (!this.file){ toast('请选择或拖入固件文件', 'warn'); return; }
     const { name, dataB64 } = this.file;
     const baseText = /\.bin$/i.test(name) ? $('f-base').value.trim() : '';
@@ -279,13 +280,35 @@ export class FlashView {
     setStatus($('f-result'), '烧录中…', null);
     this._bar(0);
     try {
-      this.lastFlash = await this._usingTarget(true, async probe => {
-        const result = await this._program(probe, regions, verify);
-        if (reset) await resetAfterFlash(probe);
+      let nrstDevice;
+      const programmed = await this._usingTarget(true, async probe => {
+        const result = await this._program(probe, regions, verify, recoveryBounds);
+        if (!reset) return { ...result, reset };
+        if (probe.cfg.stm32f1Flash && isZynqDapDevice(probe.device) &&
+            (await probe._readWord(0xe000ed00) >>> 4 & 0xfff) === 0xc23 &&
+            (await probe._readWord(0xe0042000) & 0xfff) === 0x414){
+          nrstDevice = probe.device;
+          return result;
+        }
+        await resetAfterFlash(probe);
         return { ...result, reset };
       });
+      if (nrstDevice){
+        // CDC48 disables JTAG in startup. Use SWD MEM-AP0 without a core
+        // examiner consuming the fresh DHCSR reset indication.
+        this._status('Flash 已写入，正在确认 J7 NRST 复位运行…');
+        try {
+          this.probe = await OpenOcdEtmProbe.open(nrstDevice, {clockKhz:1000,
+            onLog:line => this._log(line), retain:probe => { this.probe = probe; }});
+          programmed.resetEvidence = await confirmF103ResetRun(this.probe);
+          programmed.reset = true;
+        } catch (error){
+          throw Error('Flash 已写入，复位确认失败：' + error.message, {cause:error});
+        } finally { await this._closeProbe(); }
+      }
+      this.lastFlash = programmed;
       this._bar(100);
-      setStatus($('f-result'), `已烧录 ${fBytes(this.lastFlash.bytes)}${verify ? '，读回校验通过' : ''}`, 'ok');
+      setStatus($('f-result'), `已烧录 ${fBytes(this.lastFlash.bytes)}${verify ? '，读回校验通过' : ''}${reset ? '，已确认复位运行' : ''}`, 'ok');
       return this.lastFlash;
     } catch (error){
       $('f-bar').hidden = true;

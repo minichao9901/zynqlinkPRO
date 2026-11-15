@@ -114,10 +114,10 @@ export function createWorkbenchAutomation(tools,win=globalThis.window){
       disabled:!!e.disabled,hidden:!!e.hidden,
       options:e.tagName==='SELECT'?Array.from(e.options,o=>({value:o.value,label:o.textContent,disabled:o.disabled})):undefined};
   }
-  function locate(root,query,files){
+  function locate(root,query,files,operation){
     if(typeof query!=='string'||!query)throw Error('必须指定控件 selector');
     if(files.has(query))return files.get(query);
-    if(GLOBAL_CONTROLS.some(id=>query==='#'+id)){
+    if(GLOBAL_CONTROLS.some(id=>query==='#'+id) || operation==='read' && query==='#web-build-info'){
       const e=doc.getElementById(query.slice(1));if(e)return e;
     }
     const hits=root.querySelectorAll(query);
@@ -191,7 +191,7 @@ export function createWorkbenchAutomation(tools,win=globalThis.window){
       const errors=tools.errors?.slice(start)||[];
       return {returned:true,value:jsonValue(value,new WeakSet(),0,c.win),errors,verificationRequired:true};
     }
-    const e=locate(root,m.selector,fileControls);
+    const e=locate(root,m.selector,fileControls,m.op);
     if(m.op==='read')return {...control(e,root,m.selector),text:e.textContent.slice(0,100000)};
     if(e.disabled||e.matches(':disabled'))throw Error('控件已禁用：'+m.selector);
     if(m.op==='event'){

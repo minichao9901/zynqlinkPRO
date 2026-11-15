@@ -89,6 +89,8 @@ export class SerialSession extends Bus {
       stopBits: Number(opts.stopBits) || 1,
       parity: opts.parity || 'none',
       flowControl: opts.flowControl || 'none',
+      dtr: !!opts.dtr,
+      rts: !!opts.rts,
       // RTT 是持续的二进制 CDC 流：4 KiB 在页面短暂停顿时会出现缺口。
       // 64 KiB 已用 HPM 序号/CRC 流和 25 ms 主线程停顿验证；读循环仍须
       // 每 8 ms 让出事件循环，避免大缓冲持续兑现 read() 时饿死页面。
@@ -108,7 +110,9 @@ export class SerialSession extends Bus {
     this.isOpen = true;
     this._closing = false;
     // DTR/RTS：默认都不拉（很多开发板靠 DTR/RTS 复位/进下载模式，别乱动）
-    try { await port.setSignals({ dataTerminalReady: !!opts.dtr, requestToSend: !!opts.rts }); } catch {}
+    if (!port.nativeService || !port.initialSignals){
+      try { await port.setSignals({ dataTerminalReady: o.dtr, requestToSend: o.rts }); } catch {}
+    }
     this.emit('open', { opts: o, info: this.info });
     this._readTask = this._readLoop();
   }

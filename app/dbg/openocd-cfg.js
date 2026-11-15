@@ -75,6 +75,7 @@ export async function inspectOpenOcdCfg(text, entry, directory, connection){
     const hash = Array.from(digest,b=>b.toString(16).padStart(2,'0')).join('');
     return { raw, hash, name:entry, transport, clockKhz, cores,
       hasFlash:!!banks.length, flashBase, hpmFlash:banks.some(([, name]) => name === 'hpm_xpi'),
+      stm32f1Flash:banks.some(([, name]) => name === 'stm32f1x'),
       stm32h7Flash:banks.some(([, name]) => name === 'stm32h7x'), ...cores[0] };
   } finally { await session.close(); }
 }

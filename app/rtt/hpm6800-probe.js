@@ -1,7 +1,7 @@
 import { OpenOcdProbe } from '../core/openocd-probe.js';
 import { OpenOcdUsb } from '../core/openocd-usb.js';
 import { u32leBytes } from '../core/bin.js';
-import { withTimeout } from '../core/pace.js';
+import { exchangeRttDap } from './dap-exchange.js';
 import { ENTRY } from './protocol.js';
 
 const USB_PACKET = 4096;
@@ -98,22 +98,8 @@ export class Hpm6800RttProbe extends OpenOcdProbe {
 
   async _exchange(request, expected, length = expected.length){
     if (this.sbaFault) throw this.sbaFault;
-    const usb = this.sbaUsb, device = usb.device;
-    const bytes = Uint8Array.from(request);
     try {
-      let result;
-      if (device.atomicDapSupported) result = await device.exchangeDap(bytes, USB_PACKET);
-      else {
-        // Keep the raw write to one transfer so timeout cannot leave a late ZLP.
-        // Current requests (5 + a multiple of 4 for writes) always end short.
-        const out = await withTimeout(device.transferOut(2, bytes), 2000, 'JTAG SBA 写请求');
-        if (out.status !== 'ok' || out.bytesWritten !== bytes.length) throw Error('DAP 请求短写');
-        result = await withTimeout(device.transferIn(1, USB_PACKET), 2000, 'JTAG SBA 读响应');
-      }
-      const reply = result.data && new Uint8Array(result.data.buffer, result.data.byteOffset, result.data.byteLength);
-      if (result.status !== 'ok' || reply?.length !== length || !expected.every((n, i) => n === reply[i]))
-        throw Error('JTAG SBA 响应状态或长度错误');
-      return reply.subarray(expected.length);
+      return await exchangeRttDap(this.sbaUsb.device, request, expected, length);
     } catch (error){
       this.sbaFault = error;
       throw error;

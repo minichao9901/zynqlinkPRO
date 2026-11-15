@@ -98,6 +98,7 @@ foreach workbench_h7_ap [target names] {
 
   async connect(){
     this._f103HighDensity = undefined;
+    this.jtagTaps = null;
     const link = this.link = new OpenOcdTargetSession(line => this.onLog?.(line));
     try {
       await link.open(this.cfg, this.device);
@@ -124,8 +125,10 @@ foreach workbench_h7_ap [target names] {
       if (this.isRiscv || this.cfg.transport === 'jtag'){
         const tap = await link.command(`${this.cfg.target} cget -chain-position`);
         const chain = await link.command('capture {scan_chain}');
-        const id = [...chain.matchAll(/^\s*\d+\s+(\S+)\s+Y\s+(0x[0-9a-f]{8})\b/gim)].find(row => row[1] === tap);
-        this.idcode = Number(id?.[2] ?? 0);
+        this.jtagTaps = [...chain.matchAll(/^\s*(\d+)\s+(\S+)\s+([yn])\s+(0x[0-9a-f]{8})\s+\S+\s+(\d+)/gim)]
+          .map(([,index,name,enabled,idcode,irLength]) => ({ index:Number(index), name,
+            enabled:enabled.toLowerCase() === 'y', idcode:Number(idcode), irLength:Number(irLength) }));
+        this.idcode = this.jtagTaps.find(row => row.enabled && row.name === tap)?.idcode ?? 0;
         if (!this.idcode || this.idcode === 0xffffffff || this.cfg.tapIdcode != null && this.idcode !== this.cfg.tapIdcode)
           throw Error('OpenOCD 未识别 CFG 中的 JTAG TAP');
         if (this.physical) await link.command(`${this.cfg.target} riscv mem_access sysbus`);
