@@ -50,7 +50,7 @@ python -X utf8 toolbox.py --runtime build/h743-viewer-web serve --native-probe -
 ```
 
 ```powershell
-$h743ViewerElf = 'E:/superlinkPRO/web/tools/target-firmware/stm32h743_rtt_speed/fw.elf'
+$h743ViewerElf = 'build/h743-viewer-mem-ap-20261115/matched-target/stm32h743_rtt_speed.elf'
 python -X utf8 toolbox.py project run board.accept -- --board h743 --only rtt-viewer --runtime build/h743-viewer-web --out build/h743-viewer-new --target-elf $h743ViewerElf --jtag-cable-serial 210299008529 --execute
 ```
 
@@ -68,3 +68,11 @@ python -X utf8 toolbox.py project run board.accept -- --board h743 --only rtt-vi
 | Pages | 公开首页 HTTP 200、`gh-pages` `97ac02bc`，本轮不发布 |
 | Release | 公开 v1.3.8，ZIP SHA-256 `7ed9bcde00d2ae120d13cd1b9a945beb31234fb4f1ada8a7c9502188e8d7199e`，本轮不发布 |
 | 探针 QSPI | 保留正式原配对。运行态启动标记复核通过，实体冷启动和固化不属本轮 |
+
+## Viewer 双板收尾复核
+
+- [x] 本轮签收范围为两块板的 Viewer，F103ZE SWD/JTAG 60 MHz、H743 SWD/JTAG 50 MHz 均实际命中 MEM-AP，并完成完整序号、下行跨环与保护带验收。两板首次故障、修后汇总、60 秒窗口和同条件对照均保留。全板压力、H743 WebUSB 直连和发布均不在这次复验范围。[F103ZE 复验](../f103ze-arm-viewer-20261115/README.md)
+- [x] 复核两板报告中原列的 51 个原始证据 SHA-256、配套 bit/PS ELF、目标 ELF 和长窗 RAM/FPB 备份。H743 匹配 ELF 另存本机 `matched-target/`，其 SHA-256 与标准结果一致。F103ZE ELF 及正式探针配对由仓库 `prebuilt/` 固定路径复用。
+- [x] 复核 H743 最后实板快照，应用心跳前进，Flash/RAM/寄存器恢复，探针路由归零。两板测试服务与浏览器已退出，临时 worktree 已移除，共享 `hw_server`、原 ZL-006 未提交改动和固定安装 `data/` 保留。
+- [x] 复核本地修复与归档、ZL-238/248/251/252、远端 `main` 和 `gh-pages` 指针、固定 EXE 的 SHA-256。公开下载包沿用表中任务期间记录的 v1.3.8 元数据，探针沿用已核验的现有 QSPI。
+- [ ] **待办** 两份工作目录下的 `zynqlinkPRO-work/runtime/xilinx` 是重复的临时运行副本，确认没有本轮进程使用。执行环境拦截了清理命令，目录保留。共享 `hw_server` 使用 `E:/zynqlinkPRO-work/runtime/xilinx/`，清理目标与该共享目录不同。

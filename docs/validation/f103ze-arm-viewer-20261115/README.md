@@ -64,3 +64,5 @@ python -X utf8 toolbox.py project run board.accept -- --board f103ze --only rtt-
 | Pages | 公开首页 HTTP 200，`gh-pages` `97ac02bc`，本轮不发布 |
 | Release | 公开 v1.3.8，ZIP SHA-256 `7ed9bcde00d2ae120d13cd1b9a945beb31234fb4f1ada8a7c9502188e8d7199e`，本轮不发布 |
 | 探针 QSPI | 正式原配对，最终 BOOT_MODE 1 和 85,716 B OCM 已复核，实体冷启动和固化不属本轮 |
+
+后续已完成 H743 Viewer 定向复验。两板的证据哈希、恢复、交付及临时目录状态见[双板收尾复核](../h743-viewer-mem-ap-20261115/README.md#viewer-双板收尾复核)。
