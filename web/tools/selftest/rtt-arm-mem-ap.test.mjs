@@ -11,6 +11,7 @@ function fixture(t, {transport = 'jtag', dp = 0x3ba00477, boundary = 0x06414041,
   const memory = Uint8Array.from({length:65536}, (_, i) => (i * 13 + (i >>> 8)) & 255);
   const requests = [];
   const dpIdentities = [0x01000427, 0x10000000];
+  const apRegisters = new Map([[0xfc,apId], [0xf4,apCfg], [0xf8,0xe00ff003]]);
   let tar, csw, select = 0, short = false, failedAck, mismatchedInstance = false, fallback = 0;
   function read(at, length){
     assert(at >= ram && at + length <= ram + memory.length);
@@ -39,7 +40,14 @@ function fixture(t, {transport = 'jtag', dp = 0x3ba00477, boundary = 0x06414041,
         if (packet[3] === 8){
           select = u32le(packet, 4);
           if (packet[8] === 1){ csw = u32le(packet, 9); tar = u32le(packet, 14); }
-          if (packet[8] === 15) answer.push(...u32leBytes(apId), ...u32leBytes(apCfg));
+          if (select % 256 === 0xf0){
+            for (const request of packet.slice(8)){
+              assert.equal(request & 3, 3);
+              const address = (select & 0xf0) | (request & 0x0c);
+              assert(apRegisters.has(address));
+              answer.push(...u32leBytes(apRegisters.get(address)));
+            }
+          }
           if (packet[8] === 6) answer.push(...u32leBytes(select % 16 === 2 ? dpIdentities[0] :
             mismatchedInstance ? 0 : dpIdentities[1]));
         }

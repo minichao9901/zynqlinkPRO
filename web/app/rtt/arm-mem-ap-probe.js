@@ -60,7 +60,9 @@ class ArmMemAp {
         await this.checkDp();
       }
     }
-    const [idr, cfg] = await this.registers(0xf0, 15, 11);
+    // CMSIS-DAP AP read requests carry A[3:2] in bits 3:2:
+    // 0x0f selects IDR (0xfc) and 0x07 selects CFG (0xf4).
+    const [idr, cfg] = await this.registers(0xf0, 0x0f, 0x07);
     if (idr !== this.port.apId || cfg !== this.port.apCfg) throw Error('MEM-AP 寄存器与 OpenOCD 不一致');
   }
 
