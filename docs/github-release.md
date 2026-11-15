@@ -14,6 +14,14 @@
 
 J7 使用[固定 QSPI 目录](../prebuilt/qspi-release/README.md)。只更新探针镜像时，把验收通过的 BOOT、配套 bit/ELF、辅助程序和清单一起提交并推送到 `main` 的 `prebuilt/qspi-release/`。Pages 链接始终指向该目录，本机 Web 手册和 CLI 使用本机仓库同一路径，用户更新仓库即可选用新镜像。单独更新镜像无需再发布 Pages 或重打 Windows 包。
 
+## v1.3.12 发布验收
+
+2026-11-15（上海时间）。发布源码和 Git 标签为 `0c05d09781140bb533fa2e71133a123dc05f0df0`。匿名 Pages 构建于 22:52:05，静态提交为 `0df0c391b8e92cd63f47744996c055e8f27de213`。RTT Viewer、RTT 转发和 J-Scope 的侧栏在桌面与窄视口通过检查。[Pages](https://minichao9901.github.io/zynqlinkPRO/#download)
+
+固定 EXE 从固定路径启动，并用当前 H743 复测两路 RTT。Viewer 导入 ELF 后实收且顶栏 0 次切换，转发从同一 ELF 定位并经 COM33 收齐。固定程序保留 311 个用户数据文件。于 23:00:52 公开的 ZIP 经匿名完整下载，SHA-256 为 `b2570a9980cca655e46f648126e32c9805269bdcbf4004a11850e6d1f0bf2018`。[Release](https://github.com/minichao9901/zynqlinkPRO/releases/tag/v1.3.12)
+
+正式 QSPI 0.8-nonce32 的公开清单和 15 个文件均一致，本轮只读确认了当前 QSPI 启动及匹配 OCM。[验收及收尾](validation/workbench-v1312-release-20261115/README.md)
+
 ## v1.3.11 发布验收
 
 2026-11-15（上海时间）。构建源码与标签指向 `e98d8be275cc5b6090686ca28ee21515aa9b68b0`，Pages 静态提交为 `0b91ff6`。匿名 Chrome 实际打开 Pages，显示 v1.3.11 和同版本下载链接，构建于 19:13:31。线上清单及按项抽查的 HTML、版本、CFG 和 Viewer 模块与候选一致。ARM/JTAG CFG 仍由 Web 拒绝，ARM/SWD 和 RISC-V/JTAG 可导入。[Pages](https://minichao9901.github.io/zynqlinkPRO/#download)
