@@ -122,6 +122,8 @@ def start_command(command, value, workspace, runtime, folder, python, output, qs
         for argument in args:
             if argument.startswith(QSPI_WORK + '/'):
                 substitutions[argument] = str(qspi_work / argument.removeprefix(QSPI_WORK + '/'))
+        if command.name == 'qspi-rebuilt-write':
+            substitutions[f'{QSPI_WORK}/programmed'] = str(qspi_work / f'programmed-{folder.name}')
     for option in ('--out', '--out-dir'):
         if option in args:
             substitutions.setdefault(args[args.index(option) + 1], str(folder / 'artifacts'))

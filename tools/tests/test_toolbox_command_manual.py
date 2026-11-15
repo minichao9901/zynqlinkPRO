@@ -80,3 +80,35 @@ class CommandManualTests(unittest.TestCase):
             for call, job in zip(launch.call_args_list, ('first', 'second')):
                 argv, = call.args
                 self.assertEqual(argv[argv.index('--out-dir') + 1], str(runtime / job / 'artifacts'))
+
+    def test_rebuilt_qspi_write_reuses_image_and_never_reuses_output(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory).resolve()
+            workspace = root / 'repo with spaces'
+            runtime = root / 'runtime'
+            runtime.mkdir()
+            token = runtime / 'cli-token'
+            token.write_text('a' * 64)
+            app = Flask(__name__)
+            command_manual.install(app, token, workspace, sys.executable)
+            client = app.test_client()
+            headers = {'X-Trace-CLI': 'a' * 64, 'Origin': 'http://localhost'}
+            with patch.object(command_manual.subprocess, 'Popen') as launch:
+                launch.return_value.poll.return_value = 0
+                repack = client.post('/command-manual/run', headers=headers, json={'id': 'qspi-bsp'}).json['job']
+                work = workspace / 'build' / 'qspi-repack' / repack[:12]
+                stale = work / 'programmed'
+                stale.mkdir(parents=True)
+                before = stale / 'result.json'
+                before.write_text('previous attempt')
+                for _ in range(2):
+                    response = client.post('/command-manual/run', headers=headers,
+                                           json={'id': 'qspi-rebuilt-write', 'confirmed': True})
+                    self.assertEqual(response.status_code, 200)
+                    job = response.json['job']
+                    argv, = launch.call_args.args
+                    self.assertEqual(argv[argv.index('--image-dir') + 1], str(work / 'image'))
+                    output = work / f'programmed-{job}'
+                    self.assertEqual(argv[argv.index('--out') + 1], str(output))
+                    output.mkdir()
+                self.assertEqual(before.read_text(), 'previous attempt')
