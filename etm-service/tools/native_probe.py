@@ -20,7 +20,7 @@ from native_hss import HssOverflow, HssReceiver
 from probe_coordinator import ProbeCoordinator
 from probe_memory import transfer as memory_transfer
 from probe_ownership import Ownership
-from probe_hid_control import HidControl
+from probe_hid_control import HidControl, is_zynqlink_hid
 
 
 def drain_dap_replies(device,quiet_ms=80,limit=32):
@@ -214,9 +214,7 @@ class NativeProbe:
     @staticmethod
     def find_hid():
         import hid
-        return [d for d in hid.enumerate(0x0D28, 0x0204)
-                if d['usage_page'] == 0xFF00 and d['manufacturer_string'] == 'CherryUSB'
-                and d['product_string'] in ('zynqlinkPRO HID', 'CMSIS-DAP')]
+        return [d for d in hid.enumerate(0x0D28, 0x0204) if is_zynqlink_hid(d)]
 
     def _stop_hss_receiver(self):
         if self.hss_receiver is not None:

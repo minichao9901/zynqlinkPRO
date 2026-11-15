@@ -14,7 +14,7 @@ import time
 import sys
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'etm-service/tools'))
 from probe_ownership import Ownership
-from probe_hid_control import HidControl
+from probe_hid_control import HidControl, is_zynqlink_hid
 
 import hid
 
@@ -23,8 +23,7 @@ class Probe:
     def __init__(self, serial=None, *, zynq_only=False):
         matches = [d for d in hid.enumerate(0x0D28, 0x0204)
                    if d['usage_page'] == 0xFF00 and (not serial or d['serial_number'] == serial)
-                   and (not zynq_only or d['manufacturer_string'] == 'CherryUSB'
-                        and d['product_string'] in ('zynqlinkPRO HID', 'CMSIS-DAP'))]
+                   and (not zynq_only or is_zynqlink_hid(d))]
         if len(matches) != 1:
             raise RuntimeError(f'Expected one probe HID, found {len(matches)}; use --serial')
         self.device = hid.device()

@@ -4,6 +4,13 @@ import struct
 import time
 
 
+def is_zynqlink_hid(device):
+    # The retained JTAG/RAM image uses the older product string. VID/PID
+    # are filtered by the caller and are also shared by other probe families.
+    return (device.get('usage_page') == 0xff00 and device.get('manufacturer_string') == 'CherryUSB'
+            and device.get('product_string') in ('ZynqLink probe control', 'zynqlinkPRO HID', 'CMSIS-DAP'))
+
+
 class HidControl:
     def __init__(self,device):
         self.device=device;self.sequence=secrets.randbits(32);self.correlated=False;self.stale=0

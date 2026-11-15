@@ -1653,9 +1653,8 @@ class BoardAcceptance:
 
     def usb_present(self):
         import hid
-        return any(row.get('serial_number') == self.args.serial and row.get('usage_page') == 0xff00
-                   and row.get('manufacturer_string') == 'CherryUSB'
-                   and row.get('product_string') in ('zynqlinkPRO HID', 'CMSIS-DAP')
+        from probe_hid_control import is_zynqlink_hid
+        return any(row.get('serial_number') == self.args.serial and is_zynqlink_hid(row)
                    for row in hid.enumerate(0x0d28, 0x0204))
 
     def usb_cycle(self, page):

@@ -24,9 +24,11 @@ class NativeProbeTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, '当前数量：2'):
                 NativeProbe.find_usb()
         own = dict(usage_page=0xff00, manufacturer_string='CherryUSB', product_string='zynqlinkPRO HID')
+        ram = dict(own, product_string='ZynqLink probe control')
         peer = dict(usage_page=0xff00, manufacturer_string='ARM', product_string='akaLinkPro CMSIS-DAP')
-        with patch('hid.enumerate', return_value=[peer, own]):
-            self.assertEqual(NativeProbe.find_hid(), [own])
+        with patch('hid.enumerate', return_value=[peer, ram, own, dict(ram, usage_page=1),
+                                                  dict(ram, manufacturer_string='ARM')]):
+            self.assertEqual(NativeProbe.find_hid(), [ram, own])
 
     def test_session_cancel_routes_capture_to_its_existing_stop_transaction(self):
         owner='a'*32
