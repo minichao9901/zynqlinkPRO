@@ -18,7 +18,8 @@ from types import SimpleNamespace
 
 from toolbox import pack_file
 from tools.board_acceptance_target import (DHCSR, FLASH, RTT_BASE, RV_CODE, SRAM, Target,
-                                           checked, elf_contents, sha, verify_baseline_rates, verify_clock, wait_for)
+                                           checked, elf_contents, sha, verify_baseline_rates, verify_clock,
+                                           verify_h743_viewer_rates, wait_for)
 from tools.f103_stream_acceptance import symbol
 from tools.run_board_acceptance import Pending, ROOT, Unsafe, digest, write_json
 from tools.validate_hpm6800_web import Web, redacted
@@ -391,7 +392,9 @@ class BoardAcceptance:
         with self.target.link() as (_, mem, _, _):
             target_evidence = self.verify_target_image(mem, elf, expected)
             baseline = {}
-            if not self.rv:
+            if self.args.board == 'h743' and case['feature'] == 'rtt-viewer':
+                baseline = verify_h743_viewer_rates(mem)
+            elif not self.rv:
                 name, offset = HEARTBEAT[self.args.board]
                 heartbeat = symbol(self.args.target_elf, name) + offset
                 baseline = verify_baseline_rates(self.args.board, mem, heartbeat=heartbeat)

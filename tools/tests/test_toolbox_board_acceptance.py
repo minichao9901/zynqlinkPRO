@@ -16,6 +16,23 @@ from tools.run_board_acceptance import (BOARDS, BUSINESSES, ENDINGS, FEATURES, P
 
 
 class TestBoardAcceptance(unittest.TestCase):
+    def test_h743_viewer_clock_uses_live_rcc_with_no_target_trace_symbol(self):
+        from tools.board_acceptance_target import verify_h743_viewer_rates
+        registers = {
+            0xe000ed00:0x411fc271,0x5c001000:0x20036450,
+            0x58024400:0x3034025,0x58024410:0x1b,0x58024418:0x48,
+            0x58024428:0x52,0x5802442c:0x70008,0x58024430:0x10102bf,
+        }
+        memory=SimpleNamespace(word=lambda address:registers.get(address,0))
+        evidence=verify_h743_viewer_rates(memory)
+        self.assertEqual((evidence['targetSysclkHz'],evidence['targetHclkHz']), (480_000_000,240_000_000))
+        registers[0x58024418]=0x49
+        with self.assertRaisesRegex(Pending,r'HCLK 1.2e\+08 Hz'):
+            verify_h743_viewer_rates(memory)
+        registers[0x58024400]^=1<<17
+        with self.assertRaisesRegex(Pending,'HSE / integer PLL1P'):
+            verify_h743_viewer_rates(memory)
+
     def test_hpm_native_flash_configuration_selects_j7_with_the_sdk(self):
         from tools.board_acceptance import BoardAcceptance
         with tempfile.TemporaryDirectory() as directory:

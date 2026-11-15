@@ -76,6 +76,39 @@ def verify_baseline_rates(board, mem, *, etm=False, heartbeat):
     return {'targetSysclkHz': hz}
 
 
+def verify_h743_viewer_rates(mem):
+    """Qualify the H743 Viewer RAM workload from live HSE/PLL1 and RCC."""
+    from target_snapshot import snapshot
+
+    registers = snapshot(mem)['registers']
+    def register(address):
+        return int(registers[hex(address)], 16)
+
+    control = register(0x58024400)
+    system = register(0x58024410)
+    domain = register(0x58024418)
+    source = register(0x58024428)
+    pll = register(0x5802442c)
+    divider = register(0x58024430)
+    m = source >> 4 & 63
+    # This board has a 25 MHz HSE. Qualify the integer PLL1P path;
+    # neither an unready oscillator nor fractional PLL can use this check.
+    ready = (1 << 17) | (1 << 25)
+    if (control & ready != ready or (system >> 3) & 7 != 3 or source & 3 != 2
+            or not m or not pll & (1 << 16) or pll & 1):
+        raise Pending('H743 Viewer requires the qualified 25 MHz HSE / integer PLL1P clock')
+    n, p = (divider & 0x1ff) + 1, ((divider >> 9) & 127) + 1
+    bus_dividers = (1,) * 8 + (2, 4, 8, 16, 64, 128, 256, 512)
+    cpu_divisor = m * p * bus_dividers[domain >> 8 & 15]
+    hclk_divisor = cpu_divisor * bus_dividers[domain & 15]
+    source_hz = 25_000_000 * n
+    if source_hz != cpu_divisor * 480_000_000 or source_hz != hclk_divisor * 240_000_000:
+        raise Pending(f'H743 Viewer clock is CPU {source_hz/cpu_divisor:g} Hz, HCLK '
+                      f'{source_hz/hclk_divisor:g} Hz; expected 480/240 MHz')
+    return dict(targetSysclkHz=480_000_000, targetHclkHz=240_000_000,
+                targetClockBasis='H743 25 MHz HSE and live RCC PLL1P/D1 readback')
+
+
 class Target:
     def __init__(self, args):
         self.args = args
