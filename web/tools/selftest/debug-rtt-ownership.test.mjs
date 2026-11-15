@@ -157,8 +157,12 @@ test('RTT reopens the ELF address on the same probe after a read failure', async
   assert.match(fields.get('r-err').textContent,/请载入/);
   view.elfAddress = probe.cbAddr;
   view._needsRttReconnect = true;
+  probe.useRttMemory = async () => {
+    fields.get('r-cb').textContent = '校验中…';
+  };
   await view._startRtt();
   assert.equal(recovered,1);
   assert.equal(view.rtt.addr,probe.cbAddr);
+  assert.equal(fields.get('r-cb').textContent,'0x' + probe.cbAddr.toString(16));
   assert.equal(view._needsRttReconnect,false);
 });

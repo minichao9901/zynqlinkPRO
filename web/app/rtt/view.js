@@ -369,14 +369,14 @@ export class RttView {
     await rtt.init();
     if (!active()) return;
     const inff = rtt.info();
-    $('r-cb').textContent = '0x' + address.toString(16);
-    $('r-up').textContent = inff.maxUp;
-    $('r-down').textContent = inff.maxDown;
     const nm = await rtt.name('up', 0);
     if (!active()) return;
     await probe.useRttMemory?.(inff);
     if (!active()) return;
     this.rtt = rtt;
+    $('r-cb').textContent = '0x' + address.toString(16);
+    $('r-up').textContent = inff.maxUp;
+    $('r-down').textContent = inff.maxDown;
     this._needsRttReconnect = false;
     $('r-chlabel').textContent = `下行 ch0${nm ? ' · ' + nm : ''}`;
     const sz = inff.up[0]?.size || 0;
@@ -683,15 +683,17 @@ export class RttView {
       const errEl = $('r-err');
       if (errEl && !errEl.textContent){
         setStatus(errEl, '控制块在、轮询也在跑，但 4 秒没读到任何字节：' +
-          '① 目标固件没在写 RTT（或没在跑）；② 同一个 RTT 环被别的读者拿走了 —— 本页「RTT 转发」的探针桥在跑就先停它；' +
-          '③ 地址是手填的话清空它重扫一次', 'warn');
+          '请检查目标是否正在输出，或是否有 RTT 转发等其他读取端在使用同一个环。', 'warn');
         this._zeroHintSet = true;
       }
     } else if (this._zeroHintSet && s.bytes > 0){
       this._zeroHintSet = false;
       setStatus($('r-err'), '', null);
     }
-    if (!this.rtt && this.probe) $('r-cb').textContent = '查找中…';
+    if (!this.rtt && this.probe){
+      const status = this._rttStartTask && (this.elfAddress || this._probeMock) ? '校验中…' : '—';
+      if ($('r-cb').textContent !== status) $('r-cb').textContent = status;
+    }
   }
 
   // ================= 高速自动关显示 =================
