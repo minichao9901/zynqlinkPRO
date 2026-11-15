@@ -15,7 +15,7 @@ import { OpenOcdEtmProbe } from '../core/openocd-etm.js';
 import { isZynqDapDevice, openOcdUsbSupported, selectOpenOcdDevice } from '../core/openocd-usb.js';
 import { makeOpenOcdProfile } from '../core/openocd-profile.js';
 import { Hpm6800RttProbe } from './hpm6800-probe.js';
-import { F103JtagRttProbe } from './f103-jtag-probe.js';
+import { ArmMemApRttProbe } from './arm-mem-ap-probe.js';
 import { HPM_BOARDS, hpmBoard } from '../targets/hpm/porting.js';
 import { selectedHpmBoard, rememberHpmBoard } from '../targets/hpm/select.js';
 import { MockProbe } from './mock.js';
@@ -327,7 +327,7 @@ export class RttView {
         if (g !== this._sessionGen) return;
         let Probe = memoryAp ? OpenOcdEtmProbe : OpenOcdProbe;
         if (isZynqDapDevice(device)){
-          if (memoryAp && cfg.transport === 'jtag') Probe = F103JtagRttProbe;
+          if (memoryAp) Probe = ArmMemApRttProbe;
           if (cfg.boardId === 'hpm6800evk' && !imported) Probe = Hpm6800RttProbe;
         }
         this.probe = new Probe(device, cfg, line => console.debug('[OpenOCD]', line), true);
@@ -508,7 +508,7 @@ export class RttView {
     $('r-down').textContent = inff.maxDown;
     const nm = await rtt.name('up', 0);
     if (!active()) return;
-    await probe.useRttMemory?.(inff);
+    await probe.useRttMemory?.(inff, ranges);
     if (!active()) return;
     this.rtt = rtt;
     this._needsRttReconnect = false;

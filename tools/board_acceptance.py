@@ -846,7 +846,7 @@ class BoardAcceptance:
                         'Downlink wrap, WrOff or guard bytes mismatch')
         return dict(clock=clock, throughputBps=rate,
                     seconds=wall, upstream=continuity, downstream=dict(bytes=len(RTT_DOWN), wrOff=pointer),
-                    pollingMs=5, displayed=not last['displaySuppressed'])
+                    pollingMs=5, displayed=not last['displaySuppressed'], viewerTransport=last.get('transport'))
 
     def cdc_start(self, ready_bytes=8):
         _, cb, _, _ = self.rtt_addresses()
