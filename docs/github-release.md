@@ -14,6 +14,12 @@
 
 J7 使用[固定 QSPI 目录](../prebuilt/qspi-release/README.md)。只更新探针镜像时，把验收通过的 BOOT、配套 bit/ELF、辅助程序和清单一起提交并推送到 `main` 的 `prebuilt/qspi-release/`。Pages 链接始终指向该目录，本机 Web 手册和 CLI 使用本机仓库同一路径，用户更新仓库即可选用新镜像。单独更新镜像无需再发布 Pages 或重打 Windows 包。
 
+## v1.3.13 发布验收
+
+2026-11-16（上海时间）。发版源码与 Git 标签为 `4c714c0802c486312a695375e3f7a2c108d66e6a`，Pages 静态提交为 `12d43c6f39340838987b7ca29254c6d34bb4ebcb`。匿名浏览器看到 v1.3.13 与同标签下载。公开 ZIP 已完整下载并核对 1,891 个包内文件及 SHA-256 `4ab31aaa3e2875b349275369a96f3e32c8b2ba26d4a8ac539c74f9e33aa2a190`。[Pages](https://minichao9901.github.io/zynqlinkPRO/#download) · [Release](https://github.com/minichao9901/zynqlinkPRO/releases/tag/v1.3.13)
+
+从固定路径启动 EXE，在隔离工作台实际点击重包第 5 步两次。两次都复用原镜像并分配不同目录，受控失败后预检重试通过。固定程序保留 337 个用户数据文件。正式 QSPI 原目录的清单和 15 个文件匿名核对一致，本轮未访问实板。[验收及收尾](validation/workbench-v1313-release-20261116/README.md)
+
 ## v1.3.12 发布验收
 
 2026-11-15（上海时间）。发布源码和 Git 标签为 `0c05d09781140bb533fa2e71133a123dc05f0df0`。匿名 Pages 构建于 22:52:05，静态提交为 `0df0c391b8e92cd63f47744996c055e8f27de213`。RTT Viewer、RTT 转发和 J-Scope 的侧栏在桌面与窄视口通过检查。[Pages](https://minichao9901.github.io/zynqlinkPRO/#download)
