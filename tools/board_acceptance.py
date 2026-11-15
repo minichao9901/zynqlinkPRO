@@ -29,8 +29,7 @@ BREAKPOINTS = {'f103ze': 'cdc_poll', 'h743': 'HAL_GetTick', 'hpm6800evk': 'engin
 HEARTBEAT = {'f103ze': ('g_trace', 12), 'h743': ('g_trace', 12), 'hpm6800evk': ('g_ticks', 0)}
 SCOPE_VALUES = tuple(0x68002000 + n * 0x10203 for n in range(8))
 RTT_DOWN = bytes.fromhex('00a5ff31320a8055')
-SCOPE_PERIODS = {('f103ze', 'swd'): (48, 192), ('f103ze', 'jtag'): (74, 440),
-                 ('h743', 'swd'): (48, 238), ('h743', 'jtag'): (89, 529),
+SCOPE_PERIODS = {('f103ze', 'swd'): (48, 192), ('h743', 'swd'): (48, 238),
                  ('hpm6800evk', 'jtag'): (240, 1012)}
 # The RAM and QSPI release directories currently ship the same routed PL.
 # Its existing read-only capability registers identify the qualified profile.
@@ -368,16 +367,7 @@ class BoardAcceptance:
         return verify_clock(self.read_clock(), self.case['requestedHz'])
 
     def stream_mode(self):
-        return 'riscv' if self.rv else 'arm-jtag' if self.case['transport'] == 'jtag' else 'swd'
-
-    def stream_clock(self, state):
-        clock = self.clock()
-        if self.stream_mode() == 'arm-jtag':
-            tap = state.get('armJtagIdentity') or {}
-            expected = {'f103ze': (0x3ba00477, 0x06414041), 'h743': (0x6ba00477, 0x06450041)}[self.args.board]
-            checked((tap.get('cpu'), tap.get('boundary')) == expected and clock['jtagRoute'] & 7 == 3,
-                    f'ARM/JTAG stream route or TAP not confirmed: {clock}, {tap}')
-        return clock
+        return 'riscv' if self.rv else 'swd'
 
     def run(self, case, folder):
         self.probe_identity()
@@ -398,8 +388,7 @@ class BoardAcceptance:
                 name, offset = HEARTBEAT[self.args.board]
                 heartbeat = symbol(self.args.target_elf, name) + offset
                 baseline = verify_baseline_rates(self.args.board, mem, heartbeat=heartbeat)
-        with self.target.f103_jtag(folder, case['transport']):
-            result = method(folder)
+        result = method(folder)
         return dict(result, **baseline, targetElf=target_evidence)
 
     def verify_target_image(self, mem, elf, expected):
@@ -415,39 +404,12 @@ class BoardAcceptance:
                 raise Pending(f'Target Flash load segment differs from the ELF at {start:#x}')
         return dict(expected, verifiedLoadBytes=sum(len(data) for _, data, _ in segments))
 
-    def arm_cfg(self, folder):
-        path = folder / 'target.cfg'
-        target = 'stm32f1x' if self.args.board == 'f103ze' else 'stm32h7x'
-        tree = ROOT / 'web/app/flash/openocd-cfgs'
-        dependencies = ('target/swj-dp.tcl', 'mem_helper.tcl')
-        body = (tree / f'target/{target}.cfg').read_text(encoding='utf-8')
-        for dependency in dependencies:
-            body = body.replace(f'source [find {dependency}]', (tree / dependency).read_text(encoding='utf-8'))
-        path.write_text('adapter driver cmsis-dap\ntransport select jtag\n' + body +
-                        f'\nadapter speed {self.case["requestedHz"] // 1000}\nreset_config none\n',
-                        encoding='utf-8')
-        return path
-
-    def adopt_config(self, page, prefix, config):
-        expected = f'cfg:{config["sha256"]}:{config["target"]}'
-        selector = f'#{prefix}-chip'
-        if self.web.read(page, selector)['value'] != expected:
-            self.click(page, f'#{prefix}-use-session-target')
-            wait_for(lambda: self.web.read(page, selector)['value'], lambda value: value == expected,
-                     4, f'{page} did not adopt the ARM/JTAG CFG')
-        return expected
-
     def debug_connect(self, folder):
         self.web.page('dbg', 'show')
-        if self.case['transport'] == 'jtag' and not self.rv:
-            cfg = self.arm_cfg(folder)
-            result = self.invoke('dbg', 'importCfg', dict(pack_file(cfg), kind='file'))
-            checked(result and result['arch'] == 'arm', 'ARM JTAG CFG not selected')
-        else:
-            self.web.set('dbg', '#d-cfg-core', '')
-            self.web.set('dbg', '#d-backend', 'riscv' if self.rv else 'webusb')
-            self.web.set('dbg', '#d-hpm-target' if self.rv else '#d-arm-target', self.chip)
-            self.web.set('dbg', '#d-clock', str(self.case['requestedHz'] // 1000))
+        self.web.set('dbg', '#d-cfg-core', '')
+        self.web.set('dbg', '#d-backend', 'riscv' if self.rv else 'webusb')
+        self.web.set('dbg', '#d-hpm-target' if self.rv else '#d-arm-target', self.chip)
+        self.web.set('dbg', '#d-clock', str(self.case['requestedHz'] // 1000))
         self.invoke('dbg', 'loadElfBuffer', dict(pack_file(self.args.target_elf), kind='buffer'),
                     self.args.target_elf.name)
         self.invoke('dbg', 'connect')
@@ -785,16 +747,11 @@ class BoardAcceptance:
                                         before_restore=self.check_idle):
             yield elf
 
-    def viewer_start(self, folder, elf=None):
+    def viewer_start(self, elf=None):
         self.web.page('rtt', 'show')
         self.web.set('rtt', '#r-target', 'riscv' if self.rv else 'swd')
         self.web.set('rtt', '#r-chip', self.chip)
-        if self.case['transport'] == 'jtag' and not self.rv:
-            cfg = self.arm_cfg(folder)
-            config = self.invoke('dbg', 'importCfg', dict(pack_file(cfg), kind='file'))
-            self.adopt_config('rtt', 'r', config)
-        else:
-            self.web.set('rtt', '#r-usb-clock', str(self.case['requestedHz'] // 1000))
+        self.web.set('rtt', '#r-usb-clock', str(self.case['requestedHz'] // 1000))
         self.web.set('rtt', '#r-record-auto', False)
         self.web.set('rtt', '#r-poll', '5')
         _, cb, _, _ = self.rtt_addresses()
@@ -813,7 +770,7 @@ class BoardAcceptance:
     def rtt_viewer(self, folder):
         with self.rtt_fixture(folder) as elf:
             try:
-                self.viewer_start(folder, elf)
+                self.viewer_start(elf)
                 clock = self.clock()
                 first = self.invoke('rtt', 'summary')
                 t0 = time.perf_counter()
@@ -824,14 +781,9 @@ class BoardAcceptance:
                 checked(not last['stats'].get('lost') and not last['stats'].get('corrupt'), 'Viewer loss or corruption')
                 wrap_bytes = 16384 if self.rv else 8192
                 rate = (last['stats']['bytes'] - first['stats']['bytes']) / wall
-                # Allow a complete wrap on the slow ARM/JTAG Wasm path, while
-                # keeping the fixed throughput window and an upper wait bound.
-                wrap_timeout = 8
-                if self.case['transport'] == 'jtag' and not self.rv:
-                    wrap_timeout = min(45, max(8, 2 * wrap_bytes / rate))
                 wait_for(lambda: self.invoke('rtt', 'summary'),
                          lambda state: state['bufferedBytes'] > wrap_bytes,
-                         wrap_timeout, 'RTT up ring wrap not observed')
+                         8, 'RTT up ring wrap not observed')
                 self.invoke('rtt', 'writeDown', 0, b64(RTT_DOWN), target='rtt')
                 export = self.invoke('rtt', 'saveRaw')
                 raw = self.web.download('rtt', folder / 'viewer.bin')
@@ -928,7 +880,7 @@ class BoardAcceptance:
             with self.rtt_fixture(run):
                 try:
                     port = self.cdc_start()
-                    clock = self.stream_clock(self.invoke('rttcdc', 'summary', target='hid'))
+                    clock = self.clock()
                     window = self.rtt_measured_stop(3)
                     self.invoke('rttcdc', 'refresh', target='hid')
                     end = self.invoke('rttcdc', 'summary', target='hid')
@@ -1187,8 +1139,8 @@ class BoardAcceptance:
                            nominalGroupsPerSecond=24_000_000/ticks)
                 rows.append(row)
                 try:
-                    started = self.scope_start(channels, ticks, seconds + 8)
-                    clock = self.stream_clock(started)
+                    self.scope_start(channels, ticks, seconds + 8)
+                    clock = self.clock()
                     self.invoke('scope', 'readScopeMetrics', {'fresh': True})
                     before = self.invoke('scope', 'summary')['probeMetrics']
                     t0 = time.monotonic()
@@ -1309,16 +1261,8 @@ class BoardAcceptance:
         backup.write_bytes(original)
         write_json(folder / 'flash-backup.json', dict(address=hex(start), bytes=len(original), sha256=sha(original)))
         self.web.page('flash', 'show')
-        if self.case['transport'] == 'jtag' and not self.rv:
-            cfg = self.arm_cfg(folder)
-            imported = self.invoke('dbg', 'importCfg', dict(pack_file(cfg), kind='file'))
-            chip = self.adopt_config('flash', 'f', imported)
-            speed = None
-        else:
-            chip = self.chip
-            speed = self.case['requestedHz'] // 1000
         firmware = dict(pack_file(elf), kind='file')
-        options = dict(chip=chip, clockKhz=speed, reset=False,
+        options = dict(chip=self.chip, clockKhz=self.case['requestedHz'] // 1000, reset=False,
                        recoveryBounds=dict(start=start, end=stop, sectorSize=sector))
         writes = []
         if self.rv:
@@ -1635,7 +1579,7 @@ class BoardAcceptance:
         with self.rtt_fixture(folder, producer=live_rtt):
             if business == 'rtt-viewer':
                 try:
-                    self.viewer_start(folder)
+                    self.viewer_start()
                     clock = self.clock()
                     self.invoke('rtt', 'saveRaw')
                     data = self.web.download('rtt', folder / 'up.bin')
@@ -1649,7 +1593,7 @@ class BoardAcceptance:
             elif business == 'rtt-forward':
                 try:
                     port = self.cdc_start()
-                    clock = self.stream_clock(self.invoke('rttcdc', 'summary', target='hid'))
+                    clock = self.clock()
                     window = self.invoke('rttcdc', 'captureWindow', {'seconds': .25, 'maxMiB': 8})
                     data = self.web.download('rttcdc', folder / 'up.bin')
                     checked(window['complete'] and window['bytes'] == len(data), 'RTT stress recording incomplete')
@@ -1666,7 +1610,7 @@ class BoardAcceptance:
             else:
                 try:
                     summary = self.scope_start(1, 2400, 75)
-                    clock = self.stream_clock(summary)
+                    clock = self.clock()
                     observed = wait_for(lambda: self.invoke('scope', 'summary'),
                                         lambda s: s['running'] and s['samples'] > summary['samples'],
                                         5, 'Scope stopped before the handoff')

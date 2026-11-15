@@ -93,6 +93,24 @@ def select_arm_jtag(out, inp):
         raise RuntimeError('ARM SWD-to-JTAG select sequence rejected')
 
 
+def prepare_arm_jtag(serial):
+    """Select the ARM SWJ port and release the serial-bound probe for OpenOCD."""
+    dev, out, inp = open_dap(serial)
+    try:
+        drain(inp)
+        if xfer(out, inp, [2, 2]) != b'\x02\x02':
+            raise RuntimeError('DAP did not select JTAG')
+        if xfer(out, inp, [0x11, *le(1_000_000)]) != b'\x11\x00':
+            raise RuntimeError('DAP rejected SWJ clock')
+        select_arm_jtag(out, inp)
+    finally:
+        try:
+            if xfer(out, inp, [3]) != b'\x03\x00':
+                raise RuntimeError('Native DAP disconnect failed')
+        finally:
+            usb.util.dispose_resources(dev)
+
+
 def setup(out, inp, speed_khz, transport='swd', jtag_ir_lengths=(4, 5), *, speed_hz=None):
     drain(inp)
     port = 2 if transport == 'jtag' else 1

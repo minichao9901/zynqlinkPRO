@@ -13,20 +13,12 @@ import { loadBuiltinFlashCfg } from '../../app/flash/upstream-config.js';
 import { upstreamFlashConfigs, hpmSdkFlashConfigs } from '../../app/flash/openocd-cfgs/catalog.js';
 import { OpenOcdResetSession, confirmF103ResetRun, pulseTargetReset } from '../../app/flash/target-reset.js';
 
-test('ARM JTAG confirms the selected TAP without reading a SWD DPIDR', async t => {
-  t.mock.method(OpenOcdTargetSession.prototype,'open',async()=>{});
-  t.mock.method(OpenOcdTargetSession.prototype,'close',async()=>{});
-  t.mock.method(OpenOcdTargetSession.prototype,'command',async line => {
-    const replies = {'target names':'h743.cpu0', init:'', 'h743.cpu0 curstate':'running',
-      'h743.cpu0 cget -chain-position':'h743.cpu',
-      'capture {scan_chain}':'0 h743.cpu Y 0x6ba00477 0x6ba00477 4 0x01 0x0f\n1 h743.boundary Y 0x06450041 0x00000000 5 0x01 0x03'};
-    assert.ok(Object.hasOwn(replies,line),line);
-    return replies[line];
-  });
-  const probe = new OpenOcdProbe(null,{target:'h743.cpu0',clockKhz:50000,arch:'arm',transport:'jtag'});
-  await probe.connect();
-  assert.equal(probe.idcode,0x6ba00477);
-  await probe.disconnect();
+test('ARM/JTAG is rejected before allocating a Web worker or a USB lease', async t => {
+  const worker = t.mock.method(OpenOcdTargetSession, 'createWorker', () => {});
+  const session = new OpenOcdTargetSession();
+  await assert.rejects(session.open({arch:'arm',transport:'jtag'}, {}), /原生 OpenOCD CLI/);
+  assert.equal(worker.mock.callCount(), 0);
+  assert.equal(session.usb, undefined);
 });
 
 function serveUpstreamFiles(t){
@@ -147,10 +139,7 @@ test('the bundled Wasm registers ARM, HPM and RP2350 profiles and resolves impor
     'jtag newtap h743 cpu -irlen 4\njtag newtap h743 boundary -irlen 5\n' +
     'dap create h743.dap -chain-position h743.cpu\n' +
     'target create h743.cpu0 cortex_m -dap h743.dap\n';
-  const jtag = await inspectOpenOcdCfg(jtagScript,'h743.cfg');
-  assert.equal(jtag.transport,'jtag');
-  assert.equal(jtag.arch,'arm');
-  assert.equal(jtag.target,'h743.cpu0');
+  await assert.rejects(inspectOpenOcdCfg(jtagScript, 'h743.cfg'), /原生 OpenOCD CLI/);
   assert.match(cfg.hash,/^[0-9a-f]{64}$/);
   const memory = new OpenOcdEtmProbe(null, { ...cfg, memoryAp:true });
   const importedLink = new OpenOcdTargetSession();
@@ -351,82 +340,6 @@ test('the Zynq lease synchronizes DAP and terminates aligned OUT packets without
   assert.deepEqual(calls, ['open', ['claim',0], ['ctrl',0x5b,32], ['ctrl',0x5a,4],
     ['clear','in',1], ['clear','out',2], ['ctrl',0x5b,32], ['write',2,512], ['write',2,0],
     ['write',2,4096], ['release',0], 'close']);
-});
-
-test('Zynq ARM/JTAG selects SWJ on the claimed interface before OpenOCD owns the TAP', async () => {
-  for (const rejectSequence of [false, true]){
-    const packets = [];
-    const device = {
-      nativeService:true, dapSynchronized:true, opened:true,
-      configuration:{ configurationValue:1, interfaces:[{ interfaceNumber:0, alternate:{ endpoints:[
-        { type:'bulk', direction:'out', endpointNumber:2 }, { type:'bulk', direction:'in', endpointNumber:1 },
-      ] } }] },
-      async claimInterface(number){ assert.equal(number, 0); },
-      async releaseInterface(){},
-      async close(){},
-      async transferOut(endpoint, data){
-        assert.equal(endpoint, 2);
-        packets.push([...data]);
-        return { status:'ok', bytesWritten:data.length };
-      },
-      async transferIn(endpoint){
-        assert.equal(endpoint, 1);
-        const command = packets.at(-1)[0];
-        const status = command === 2 ? 2 : command === 0x12 && rejectSequence ? 0xff : 0;
-        return { status:'ok', data:new DataView(Uint8Array.of(command, status).buffer) };
-      },
-    };
-    const usb = new OpenOcdUsb(device, 'dap', true);
-    try {
-      const claim = usb.invoke('claimInterface', [0]);
-      if (rejectSequence) await assert.rejects(claim, /选择命令未确认/);
-      else await claim;
-    } finally { await usb.close(); }
-    assert.deepEqual(packets, [[2,2], [0x11,0x40,0x42,0x0f,0],
-      [0x12,88,...Array(8).fill(0xff),0x3c,0xe7,0x1f], [3]]);
-  }
-});
-
-test('ARM/JTAG stream binds the same USB and HID and verifies the complete chain before selecting the route', async () => {
-  const { prepareArmJtagStream } = await import('../../app/hid/probe.js');
-  const bytes = (id, value) => [id, 0, value & 0xff, (value >>> 8) & 0xff, (value >>> 16) & 0xff, value >>> 24];
-  for (const boundary of [0x06450041, 0x06414041]){
-    const events = [];
-    const serialNumber = `j7-${boundary}`;
-    const device = { vendorId:0x0d28, productId:0x0204, manufacturerName:'CherryUSB', productName:'CMSIS-DAP',
-      nativeService:true, dapSynchronized:true, atomicDapSupported:true, opened:true, serialNumber,
-      configuration:{ configurationValue:1, interfaces:[{ interfaceNumber:0, alternate:{ endpoints:[
-        { type:'bulk', direction:'out', endpointNumber:2 }, { type:'bulk', direction:'in', endpointNumber:1 },
-      ] } }] },
-      async claimInterface(){ events.push('claim'); },
-      async releaseInterface(){ events.push('release'); },
-      async close(){ events.push('close'); },
-      async exchangeDap(packet){
-        const [command, arg] = packet;
-        events.push([command,arg]);
-        if (command === 0x14 && arg === 5)
-          assert.deepEqual([...packet], [0x14,5,0x46,0x3f,1,0,0x41,1,2,0,0x80,...Array(8).fill(0xff)]);
-        const reply = command === 0x16 ? bytes(command, 0x6ba00477)
-          : command === 0x14 && arg === 5 ? [...bytes(command,0x6ba00477), ...bytes(command,boundary).slice(2)]
-          : command === 0x8b ? [command,0,arg] : [command,command === 2 ? 2 : 0];
-        return { status:'ok', data:new DataView(Uint8Array.from(reply).buffer) };
-      },
-    };
-    const hid = { device:{ serialNumber:'different' }, async rtt(action,data){ events.push([action,...data]); return {rc:0}; } };
-    await assert.rejects(prepareArmJtagStream(hid,50_000_000,device), /同一台/);
-    assert.equal(events.length, 0);
-    hid.device.serialNumber = serialNumber;
-    if (boundary === 0x06450041)
-      assert.deepEqual(await prepareArmJtagStream(hid,50_000_000,device),{cpu:0x6ba00477,boundary});
-    else await assert.rejects(prepareArmJtagStream(hid,50_000_000,device), /双 TAP/);
-    const handoff = [
-      'claim',[2,2],[0x11,0x40],[0x12,88],[3,undefined],[2,2],[0x8b,0x0e],[0x11,0x40],[0x14,5],
-    ];
-    if (boundary === 0x06450041) handoff.push([0x14,2],[0x15,2],[0x11,0x80],[0x16,0]);
-    handoff.push([3,undefined],'release','close');
-    if (boundary === 0x06450041) handoff.push([12,12,2]);
-    assert.deepEqual(events, handoff);
-  }
 });
 
 test('Flash preflight resolves an auto-detected bank base and rejects invalid ranges before erase', async () => {

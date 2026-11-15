@@ -122,7 +122,7 @@ foreach workbench_h7_ap [target names] {
         if (!['running', 'halted', 'reset', 'sleeping'].includes(status))
           throw Error('OpenOCD 未识别目标：' + status);
       }
-      if (this.isRiscv || this.cfg.transport === 'jtag'){
+      if (this.isRiscv){
         const tap = await link.command(`${this.cfg.target} cget -chain-position`);
         const chain = await link.command('capture {scan_chain}');
         this.jtagTaps = [...chain.matchAll(/^\s*(\d+)\s+(\S+)\s+([yn])\s+(0x[0-9a-f]{8})\s+\S+\s+(\d+)/gim)]

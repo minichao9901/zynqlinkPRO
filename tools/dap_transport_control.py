@@ -1,4 +1,4 @@
-"""Inspect/recover DAP USB queues through EP0 without reloading bit/ELF.
+"""Inspect/recover DAP USB queues or select ARM/JTAG for native OpenOCD.
 
 Close OpenOCD first so this process can claim the WinUSB DAP interface.
 Recovery discards pending DAP requests/responses. With the matching reset-capable
@@ -29,8 +29,14 @@ def engine_snapshot(dev):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument('action', choices=['state', 'recover'])
+    ap.add_argument('action', choices=['state', 'recover', 'prepare-arm-jtag'])
+    ap.add_argument('--serial', default='12345678', help='Serial of the J7 probe to prepare for ARM/JTAG')
     a = ap.parse_args()
+    if a.action == 'prepare-arm-jtag':
+        from dap_pipeline_bench import prepare_arm_jtag
+        prepare_arm_jtag(a.serial)
+        print(json.dumps({'serial': a.serial, 'transport': 'arm-jtag', 'released': True}))
+        return
     dev, out, inp = open_dap()
     try:
         result = {'before': snapshot(dev), 'engines_before': engine_snapshot(dev)}

@@ -31,6 +31,7 @@ ALIASES={
  'boot.bsp':'tools/build_boot_bsp.py',
  'probe.load':'tools/download_dap_fpga.tcl','probe.load-verify':'tools/probe_load.py',
  'probe.flash':'tools/probe_flash.py','probe.ocm-verify':'tools/verify_probe_ocm_code.py',
+ 'probe.dap':'tools/dap_transport_control.py',
  'bench.sram':'tools/benchmark_sram_matrix.py','bench.rtt':'tools/benchmark_rtt_forward.py',
  'bench.hss':'tools/benchmark_hss_matrix.py','bench.sota':'tools/run_sota_regression.py',
  'board.accept':'tools/run_board_acceptance.py',

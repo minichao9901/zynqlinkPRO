@@ -17,8 +17,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 BOARDS = {
-    'f103ze': (60_000_000, ('swd', 'jtag'), 'prebuilt/golden/f103ze-cdc48.elf'),
-    'h743': (50_000_000, ('swd', 'jtag'), 'prebuilt/targets/stm32h743-cdc-trace-20261101/cpu480-trace20/fw.elf'),
+    'f103ze': (60_000_000, ('swd',), 'prebuilt/golden/f103ze-cdc48.elf'),
+    'h743': (50_000_000, ('swd',), 'prebuilt/targets/stm32h743-cdc-trace-20261101/cpu480-trace20/fw.elf'),
     'hpm6800evk': (25_000_000, ('jtag',), 'firmware/target/hpm6800_web_validation/dbgstress/fw.elf'),
 }
 FEATURES = ('sram', 'flash', 'debug', 'rtt-viewer', 'rtt-forward', 'jscope', 'stress', 'etm')
@@ -28,8 +28,7 @@ STATUSES = ('pass', 'fail', 'pending', 'not-applicable', 'blocked')
 SRAM_PIPELINE = {'words': 512, 'depth': 32, 'loops': 64, 'repeats': 3, 'soakSeconds': 10,
                  'address': 0x24040000, 'backupBytes': 4096}
 SCOPE_TICK_HZ = 24_000_000
-NATIVE_SCOPE_PERIODS = {('h743', 'swd'): (24, 238), ('h743', 'jtag'): (89, 529),
-                        ('f103ze', 'swd'): (24, 416), ('f103ze', 'jtag'): (74, 528),
+NATIVE_SCOPE_PERIODS = {('h743', 'swd'): (24, 238), ('f103ze', 'swd'): (24, 416),
                         ('hpm6800evk', 'jtag'): (174, 920)}
 
 
@@ -73,6 +72,10 @@ def rotation(seed):
 
 def plan(board, transports, only, seed):
     hz, available, _ = BOARDS[board]
+    if transports and any(link not in available for link in transports):
+        if board in ('f103ze', 'h743') and 'jtag' in transports:
+            raise ValueError('ARM/JTAG is native CLI only. Use OpenOCD or the native bench tools.')
+        raise ValueError('Selected board does not support this workbench link')
     result = []
     for transport in transports or available:
         for feature in FEATURES[:-1]:
@@ -442,8 +445,6 @@ def main(argv=None):
     parser.add_argument('--openocd', type=Path, help='Native OpenOCD executable for the matching target')
     parser.add_argument('--openocd-scripts', type=Path)
     parser.add_argument('--allow-flash', action='store_true', help='Permit target MCU Flash program and reset')
-    parser.add_argument('--f103-restore-swj', type=int, choices=(0, 1, 2),
-                        help='Original SWJ_CFG verified from firmware source (required for F103 JTAG)')
     parser.add_argument('--usb-data-cycle', action='store_true',
                         help='Prompt at physical data-only disconnects. Requires independent power.')
     parser.add_argument('--execute', action='store_true', help='Actually access the board')
@@ -463,10 +464,11 @@ def main(argv=None):
         return {'pass': 0, 'fail': 1, 'incomplete': 2}[result['status']]
     available = BOARDS[args.board][1]
     transports = tuple(dict.fromkeys(args.transport or available))
-    if any(link not in available for link in transports):
-        parser.error('Selected board does not support this link')
     only = set(args.only or FEATURES)
-    cases = plan(args.board, transports, only, args.seed)
+    try:
+        cases = plan(args.board, transports, only, args.seed)
+    except ValueError as error:
+        parser.error(str(error))
     if not args.execute:
         print(json.dumps({'execute': False, 'board': args.board, 'seed': args.seed,
                           'cases': cases}, ensure_ascii=False, indent=2))

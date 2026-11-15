@@ -429,9 +429,21 @@ JTAG 临时加载的默认配对在 `prebuilt/release-20261106/`，断电后丢�
 
 内置烧录默认 SWD 1 MHz、HPM JTAG 10 MHz。调试器、烧录器和 RTT Viewer 的内置 HPM 档最高 25 MHz，其他 ARM/RISC-V 最高 60 MHz。RTT Viewer 默认 10 MHz。导入项使用 CFG 自带频率，实际时钟以板上读回为准。J-Scope 自动模式在采样周期达到 10 ms 时使用 Wasm 轮询，短周期使用探针硬件采样。RTT 转发和硬件采样通过探针私有 HID 控制，数据走 CDC 和 HSS Bulk。[Wasm 迁移与验收范围](validation/openocd-wasm-20261108/README.md)
 
-使用 zynqlinkPRO 的 Cortex-M SWD 或 JTAG 时，Viewer 先用 OpenOCD Wasm 定位 RTT。通过 DP、TAP 和 ADIv5 MEM-AP 核对后，上行使用 `DAP_TransferBlock`，沿用该 AP 的访问属性并按 1 KiB TAR 切块。控制块和活动环须位于 Cortex-M SRAM 区或页面设置的 RAM 范围内，目标固件需保证这些地址对调试 AP 可见。连接摘要的 `SWD MEM-AP` / `JTAG MEM-AP` 表示已接管。ADIv6、非小端或接管校验失败时沿用 Wasm。重新扫描会重新确认控制块和通道布局。
+使用 zynqlinkPRO 的 Cortex-M SWD 时，Viewer 先用 OpenOCD Wasm 定位 RTT。通过 DP 和 ADIv5 MEM-AP 核对后，上行使用 `DAP_TransferBlock`，沿用该 AP 的访问属性并按 1 KiB TAR 切块。控制块和活动环须位于 Cortex-M SRAM 区或页面设置的 RAM 范围内，目标固件需保证这些地址对调试 AP 可见。连接摘要的 `SWD MEM-AP` 表示已接管。ADIv6、非小端或接管校验失败时沿用 Wasm。重新扫描会重新确认控制块和通道布局。
 
-H743 使用 J7 的 ARM/JTAG 链路时，在 RTT 转发和 J-Scope 的目标类型中选择 ARM/JTAG。页面须能按序列号打开同一探针的 CMSIS-DAP USB 和 HID，以确认 CPU 和边界扫描 TAP。RTT 转发另连接同序列号的 CDC 串口，确认串口已打开后启动转发，停止后再切换或关闭串口。实际时钟和网页实板范围见 [H743 ARM/JTAG 验收](validation/h743-arm-jtag-web-20261115/README.md)。
+Web 支持 Cortex-M/SWD 和 RISC-V/JTAG。ARM/JTAG 的 CFG 导入会提示转到原生 OpenOCD。`toolbox.py page` 仍驱动同一 Web 工作台，适用链路与页面相同。
+
+## ARM/JTAG 原生 CLI
+
+确认目标、J7 USB 序列号、实际配对和空闲状态，释放工作台对探针的占用。原生 OpenOCD 可用于 ARM/JTAG 调试、内存、烧录及 RTT 读取。以下是 H743、50 MHz 的只读链路探测示例，`--serial` 和 `adapter serial` 使用同一个实物序列号。
+
+```powershell
+python -X utf8 toolbox.py project run probe.dap -- prepare-arm-jtag --serial 12345678
+$ocd = 'prebuilt/golden/host/openocd'
+& "$ocd/openocd.exe" -s "$ocd/scripts" -c 'adapter driver cmsis-dap; cmsis-dap backend usb_bulk; adapter usb vid_pid 0x0d28 0x0204; adapter serial 12345678; transport select jtag' -f target/stm32h7x.cfg -c 'adapter speed 50000; reset_config none; init; scan_chain; shutdown'
+```
+
+F103ZE 的原生档为 60 MHz，使用 `target/stm32f1x.cfg`。运行固件若关闭了目标 JTAG，需按固件源码确认 SWJ_CFG，使用 `tools/run_f103_jtag_fixture.py` 临时切换并恢复。SRAM、RTT 转发和探针采样使用 `bench.sram -- --transport jtag`、`bench.rtt -- --transport jtag`、`bench.hss -- --transports jtag` 等原生入口，搭配相应板卡的夹具和参数。先用 `toolbox.py project run <入口> -- --help` 核对范围。[历史原生实测](validation/h743-workbench-acceptance-20261109/README.md)
 
 ## ETM Trace
 

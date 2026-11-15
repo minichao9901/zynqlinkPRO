@@ -409,8 +409,8 @@ export const SCOPE_FLAG = { ALLOW_60M: 0x01, DISCARD: 0x02, TRIGGER: 0x04, NO_YI
 export const HOST_POLL = 0x100; // Host-generated JSP definition, with one timestamp per sample.
 
 /** 后端（生效值）。JTAG 下 action 3 / flags bit4 / swdHz / blob+clock_delay 都无意义。 */
-export const BACKEND = { SWD: 'swd', ARM_JTAG: 'arm-jtag', RISCV: 'riscv' };
-export const backendName = b => (b === BACKEND.RISCV ? 'RISC-V/JTAG' : b === BACKEND.ARM_JTAG ? 'ARM/JTAG'
+export const BACKEND = { SWD: 'swd', RISCV: 'riscv' };
+export const backendName = b => (b === BACKEND.RISCV ? 'RISC-V/JTAG'
   : b === BACKEND.SWD ? 'SWD/ARM' : '未知');
 
 /**

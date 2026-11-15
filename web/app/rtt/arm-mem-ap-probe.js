@@ -21,7 +21,6 @@ class ArmMemAp {
   constructor(usb, port){
     this.usb = usb;
     this.port = port;
-    this.index = port.tapIndex ?? 0;
     this.select = port.ap * 0x1000000;
     this.csw = port.csw & ~CSW_SIZE_INCREMENT;
   }
@@ -33,33 +32,16 @@ class ArmMemAp {
   }
 
   async open(clockHz){
-    const { taps, dpId } = this.port;
     await this.usb.invoke('open', []);
     await this.usb.invoke('claimInterface', [0]);
     if (!this.usb.synchronized) throw Error('探针未确认 DAP 队列边界');
-    const mode = taps ? 2 : 1;
-    await this.exchange([2, mode], [2, mode]);
+    await this.exchange([2, 1], [2, 1]);
     this.connected = true;
     await this.exchange([0x11, ...u32leBytes(clockHz)], [0x11, 0]);
-    if (taps){
-      await this.exchange([0x8b, 0x0e], [0x8b, 0, 0x0e]);
-      await this.exchange([0x15, taps.length, ...taps.map(tap => tap.irLength)], [0x15, 0]);
-    } else {
-      await this.exchange([0x13, 0], [0x13, 0]);
-      await this.exchange([0x12, 152, ...Array(8).fill(0xff), 0x9e, 0xe7, ...Array(8).fill(0xff), 0], [0x12, 0]);
-    }
-    await this.exchange([0x04, taps ? 15 : 0, 64, 0, 0, 0], [0x04, 0]);
+    await this.exchange([0x13, 0], [0x13, 0]);
+    await this.exchange([0x12, 152, ...Array(8).fill(0xff), 0x9e, 0xe7, ...Array(8).fill(0xff), 0], [0x12, 0]);
+    await this.exchange([0x04, 0, 64, 0, 0, 0], [0x04, 0]);
     await this.checkDp();
-    // Retain the proven F103 60 MHz phase correction as a timing quirk only.
-    if (clockHz === 60_000_000 && dpId === 0x3ba00477 && taps?.length === 2 &&
-        taps[1].idcode === 0x06414041){
-      const [phase] = await this.exchange([0x89, 255], [0x89, 0], 15);
-      if (phase === 17){
-        this.previousPhase = phase;
-        await this.exchange([0x89, 16], [0x89, 0, 16], 15);
-        await this.checkDp();
-      }
-    }
     // CMSIS-DAP AP read requests carry A[3:2] in bits 3:2:
     // 0x0f selects IDR (0xfc) and 0x07 selects CFG (0xf4).
     const [idr, cfg] = await this.registers(0xf0, 0x0f, 0x07);
@@ -68,37 +50,32 @@ class ArmMemAp {
 
   async registers(select, ...requests){
     const count = requests.length + 1;
-    const bytes = await this.exchange([5, this.index, count, ...transfer(8, this.select | select), ...requests],
+    const bytes = await this.exchange([5, 0, count, ...transfer(8, this.select | select), ...requests],
       [5, count, 1], 3 + requests.length * 4);
     return requests.map((_, i) => u32le(bytes, i*4));
   }
 
   async checkDp(){
-    const { taps, dpId, swdIdentity } = this.port;
-    if (taps) await this.exchange([0x16, this.index], [0x16, 0, ...u32leBytes(dpId)]);
-    else {
-      await this.exchange([5, 0, 1, 2], [5, 1, 1, ...u32leBytes(dpId)]);
-      if (swdIdentity){
-        const [target] = await this.registers(2, 6);
-        const [instance] = await this.registers(3, 6);
-        if (target !== swdIdentity[0] || instance !== swdIdentity[1]) throw Error('SWD DP 实例与 OpenOCD 不一致');
-      }
+    const { dpId, swdIdentity } = this.port;
+    await this.exchange([5, 0, 1, 2], [5, 1, 1, ...u32leBytes(dpId)]);
+    if (swdIdentity){
+      const [target] = await this.registers(2, 6);
+      const [instance] = await this.registers(3, 6);
+      if (target !== swdIdentity[0] || instance !== swdIdentity[1]) throw Error('SWD DP 实例与 OpenOCD 不一致');
     }
-    await this.exchange([5, this.index, 3, ...transfer(8, 0), ...transfer(0, 0x1e),
-      ...transfer(4, taps ? 0x50000032 : 0x50000000)], [5, 3, 1]);
+    await this.exchange([5, 0, 3, ...transfer(8, 0), ...transfer(0, 0x1e),
+      ...transfer(4, 0x50000000)], [5, 3, 1]);
   }
 
   async recoverAck(error){
     const reply = error.dapReply;
     // A short/late USB read still requires a new lease and queue epoch.
-    const faultAck = this.port.taps ? 3 : 4;
-    const scalar = reply?.[0] === 5 && reply.length === 3 && reply[2] === faultAck;
-    const block = reply?.[0] === 6 && reply.length >= 4 && reply[3] === faultAck &&
+    const scalar = reply?.[0] === 5 && reply.length === 3 && reply[2] === 4;
+    const block = reply?.[0] === 6 && reply.length >= 4 && reply[3] === 4 &&
       reply.length === 4 + (reply[1] + reply[2] * 256) * 4;
     if (!scalar && !block) throw error;
     this.fault = null;
-    if (this.port.taps) await this.exchange([0x12, 8, 0x7f], [0x12, 0]);
-    else await this.exchange([0x08, this.index, ...u32leBytes(0x1e)], [0x08, 0]);
+    await this.exchange([0x08, 0, ...u32leBytes(0x1e)], [0x08, 0]);
     try { await this.checkDp(); }
     catch (failure){ this.fault = failure; throw failure; }
   }
@@ -106,8 +83,6 @@ class ArmMemAp {
   async close(){
     let failure;
     try {
-      if (this.previousPhase !== undefined && !this.fault)
-        await this.exchange([0x89, this.previousPhase], [0x89, 0, this.previousPhase], 15);
       if (this.connected && !this.fault) await this.exchange([3], [3, 0]);
     } catch (error){ failure = error; }
     await this.usb.close();
@@ -116,7 +91,7 @@ class ArmMemAp {
   }
 
   address(address, csw){
-    return this.exchange([5, this.index, 3, ...transfer(8, this.select), ...transfer(1, this.csw | csw),
+    return this.exchange([5, 0, 3, ...transfer(8, this.select), ...transfer(1, this.csw | csw),
       ...transfer(5, address)], [5, 3, 1]);
   }
 
@@ -129,12 +104,12 @@ class ArmMemAp {
       const readChunk = async () => {
         if (size === 1){
           await this.address(at, 0x10);
-          const value = await this.exchange([5, this.index, 1, 15], [5, 1, 1], 7);
+          const value = await this.exchange([5, 0, 1, 15], [5, 1, 1], 7);
           data[offset] = value[at % 4];
         } else {
           const count = size / 4, lo = count & 255, hi = count >>> 8;
           await this.address(at, 0x12);
-          data.set(await this.exchange([6, this.index, lo, hi, 15], [6, lo, hi, 1], size + 4), offset);
+          data.set(await this.exchange([6, 0, lo, hi, 15], [6, lo, hi, 1], size + 4), offset);
         }
       };
       try { await readChunk(); }
@@ -170,7 +145,7 @@ class ArmMemAp {
   }
 
   async writeReadOffset(address, next, previous){
-    const packet = [5, this.index, 1, ...transfer(13, next)];
+    const packet = [5, 0, 1, ...transfer(13, next)];
     await this.writeAddress(address, 0x12);
     try { await this.exchange(packet, [5, 1, 1]); }
     catch (error){
@@ -192,15 +167,14 @@ class ArmMemAp {
       if (wordAligned){
         const size = Math.min(remaining - remaining % 4, TAR_PAGE - at % TAR_PAGE, 255 * 4);
         const count = size / 4;
-        // Keep write completion on the ordinary DAP_Transfer path. At 60 MHz the block
-        // writer has returned an invalid ACK during the final posted fence.
-        const packet = [5, this.index, count];
+        // Keep write completion on the ordinary DAP_Transfer path.
+        const packet = [5, 0, count];
         for (let i = 0; i < size; i += 4) packet.push(13, ...bytes.subarray(offset + i, offset + i + 4));
         await this.confirmedWrite(at, bytes.subarray(offset, offset + size), 0x12, packet, count);
         offset += size;
       } else {
         // Byte lanes preserve adjacent bytes, including unaligned ring edges.
-        const packet = [5, this.index, 1, ...transfer(13, bytes[offset] << (8 * (at % 4)))];
+        const packet = [5, 0, 1, ...transfer(13, bytes[offset] << (8 * (at % 4)))];
         await this.confirmedWrite(at, bytes.subarray(offset, offset + 1), 0x10, packet, 1);
         offset++;
       }
@@ -217,27 +191,17 @@ export class ArmMemApRttProbe extends OpenOcdEtmProbe {
     const configuredTarget = this.cfg.raw ? this.cfg.target : this.target;
     if (!validId(dpId) || await this.command(`${configuredTarget} cget -endian`) !== 'little') return;
     const ap = uint(await this.command(`${this.target} cget -ap-num`));
-    // ADIv6 AP addresses and address spaces wider than this transport's TAP
-    // and APSEL format stay with OpenOCD.
+    // ADIv6 addresses cannot be represented by the ADIv5 APSEL field.
     if (!Number.isInteger(ap) || ap > 255) return;
-    let taps, tapIndex, swdIdentity;
-    if (this.cfg.transport === 'jtag'){
-      taps = this.jtagTaps;
-      if (!taps?.length || taps.length > 8 || !taps.every((tap, index) => tap.enabled && tap.index === index &&
-          tap.irLength >= 1 && tap.irLength <= 32)) return;
-      const name = await this.command(`${this.cfg.target} cget -chain-position`);
-      tapIndex = taps.findIndex(tap => tap.name === name && tap.idcode === dpId && tap.irLength >= 4);
-      if (tapIndex < 0) return;
-    } else {
-      const version = dpId >>> 12 & 0xf;
-      if (version >= 3) return;
-      if (version === 2){
-        swdIdentity = [];
-        for (const register of [0x24, 0x34]){
-          const value = uint(await this.command(`capture {${dap} dpreg ${register}}`));
-          if (value === undefined) return;
-          swdIdentity.push(value);
-        }
+    const version = dpId >>> 12 & 0xf;
+    if (version >= 3) return;
+    let swdIdentity;
+    if (version === 2){
+      swdIdentity = [];
+      for (const register of [0x24, 0x34]){
+        const value = uint(await this.command(`capture {${dap} dpreg ${register}}`));
+        if (value === undefined) return;
+        swdIdentity.push(value);
       }
     }
     const readAp = async register => uint(await this.command(`capture {${dap} apreg ${ap} ${register}}`));
@@ -246,7 +210,7 @@ export class ArmMemApRttProbe extends OpenOcdEtmProbe {
     const apCfg = await readAp(0xf4);
     const csw = await readAp(0);
     if (apCfg === undefined || (apCfg & 1) || csw === undefined || !(csw & 0x40)) return;
-    return { dpId, taps, tapIndex, swdIdentity, ap, apId, apCfg, csw };
+    return { dpId, swdIdentity, ap, apId, apCfg, csw };
   }
 
   async useRttMemory(info, ranges = []){
@@ -265,7 +229,7 @@ export class ArmMemApRttProbe extends OpenOcdEtmProbe {
     this.wasmDisplay = { name:this.name, pollLimit:this.rttPollLimit, livePreview:this.rttLivePreview };
     await super.disconnect();
     try {
-      const mem = this.memAp = new ArmMemAp(new OpenOcdUsb(this.device, 'RTT Viewer', !!port.taps), port);
+      const mem = this.memAp = new ArmMemAp(new OpenOcdUsb(this.device, 'RTT Viewer'), port);
       await mem.open(this.clockHz);
       const observed = await mem.read(...regions.header);
       if (!headerMatches(observed, info) || (await mem.read(info.addr + 1, 1))[0] !== observed[1])
@@ -273,7 +237,7 @@ export class ArmMemApRttProbe extends OpenOcdEtmProbe {
       this.rttRegions = regions;
       this.rttPollLimit = 8192;
       this.rttLivePreview = false;
-      this.name = `zynqlinkPRO / ${port.taps ? 'JTAG' : 'SWD'} MEM-AP`;
+      this.name = 'zynqlinkPRO / SWD MEM-AP';
       this.onLog?.(`RTT Viewer 使用 ${this.name} AP${port.ap} 块传输`);
     } catch (error){
       await this._closeMemAp();

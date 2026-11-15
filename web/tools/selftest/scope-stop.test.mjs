@@ -4,7 +4,7 @@ import {ScopeView} from '../../app/scope/view.js';
 
 function rig(replies){
   const p=Object.create(ScopeView.prototype),calls=[];
-  Object.assign(p,{hid:{},targetMode:'arm-jtag',_stopUnconfirmed:false,signed:n=>(n<<24)>>24,
+  Object.assign(p,{hid:{},targetMode:'swd',_stopUnconfirmed:false,signed:n=>(n<<24)>>24,
     transport:{epAddr:0x87,drainCounted:async done=>{assert.equal(done(),true);calls.push('release USB');},
       quiesce:async()=>calls.push('quiesce'),stop:async()=>calls.push('retire')},
     hidXfer:async()=>{calls.push('STOP');return Uint8Array.of(3,0x32,replies.shift());},

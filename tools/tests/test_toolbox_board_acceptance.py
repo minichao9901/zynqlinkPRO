@@ -94,6 +94,14 @@ class TestBoardAcceptance(unittest.TestCase):
                 self.assertEqual(len([case for case in subset if case['feature'] == 'stress']), 3)
             self.assertEqual('notApplicable' in cases[-1], board == 'hpm6800evk')
 
+    def test_arm_jtag_is_not_a_workbench_acceptance_link(self):
+        for board in ('f103ze', 'h743'):
+            with self.subTest(board=board):
+                self.assertEqual(BOARDS[board][1], ('swd',))
+                with self.assertRaisesRegex(ValueError, 'ARM/JTAG is native CLI only'):
+                    plan(board, ('jtag',), FEATURES, 14)
+        self.assertEqual(BOARDS['hpm6800evk'][1], ('jtag',))
+
     def test_native_scope_reader_checks_first_definition_and_data(self):
         with patch.object(sys, 'path', [str(Path(__file__).resolve().parents[1]), *sys.path]):
             from benchmark_probe_stream import HssReader
@@ -423,7 +431,7 @@ class TestBoardAcceptance(unittest.TestCase):
                 settings = {call.args[1]: call.args[2] for call in driver.web.set.call_args_list}
                 self.assertIn(settings['#h-clock'], values)
                 self.assertEqual(int(settings['#h-clock']), hz)
-                expected = 'riscv' if board == 'hpm6800evk' else 'arm-jtag' if transport == 'jtag' else 'swd'
+                expected = 'riscv' if board == 'hpm6800evk' else 'swd'
                 self.assertEqual(settings['#h-target'], expected)
 
     def test_probe_status_unwraps_the_native_service_response(self):

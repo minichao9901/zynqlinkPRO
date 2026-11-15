@@ -178,21 +178,8 @@ class Target:
             return
         if self.uncertain:
             raise Unsafe(self.uncertain)
-        import usb.util
-        from tools.dap_pipeline_bench import drain, le, open_dap, select_arm_jtag, xfer
-        dev, tx, rx = open_dap(self.args.serial)
-        try:
-            drain(rx)
-            checked(xfer(tx, rx, [2, 2]) == b'\x02\x02', 'DAP did not select JTAG')
-            checked(xfer(tx, rx, [0x11, *le(1_000_000)]) == b'\x11\x00', 'DAP rejected SWJ clock')
-            # OpenOCD resets the JTAG TAP but does not switch the ARM SWJ
-            # port. Native snapshots in this suite leave that port in SWD.
-            select_arm_jtag(tx, rx)
-        finally:
-            try:
-                checked(xfer(tx, rx, [3]) == b'\x03\x00', 'Native DAP disconnect failed')
-            finally:
-                usb.util.dispose_resources(dev)
+        from tools.dap_pipeline_bench import prepare_arm_jtag
+        prepare_arm_jtag(self.args.serial)
 
     def f103_reset_application(self, heartbeat):
         from target_snapshot import same_clock_configuration
@@ -410,45 +397,6 @@ class Target:
                         dcsrStepRestored=step_before is not None))
                 except (Exception, KeyboardInterrupt) as error:
                     self.uncertain = f'Live debug restoration unconfirmed at {folder}: {error!r}'
-                    raise Unsafe(self.uncertain) from error
-
-    @contextmanager
-    def f103_jtag(self, folder, transport):
-        if self.args.board != 'f103ze' or transport != 'jtag':
-            yield
-            return
-        if self.args.f103_restore_swj is None:
-            raise Pending('Provide --f103-restore-swj verified from the running firmware source')
-        from run_f103_jtag_fixture import APB2ENR, MAPR, SWJ_MASK
-        saved = apb = mapr = None
-        try:
-            with self.link() as (_, mem, target, _):
-                saved = self.state(mem, target)
-                self.halt(mem, target)
-                apb = mem.word(APB2ENR)
-                mem.write_word(APB2ENR, apb | 1)
-                mapr = mem.word(MAPR) & ~SWJ_MASK
-                write_json(folder / 'afio-before.json', dict(apb=apb, maprReadable=mapr, state=saved,
-                                                            swjFromSource=self.args.f103_restore_swj))
-                mem.write_word(MAPR, mapr)
-                self.restore_state(mem, target, saved)
-            yield
-        finally:
-            if saved is not None and not self.uncertain:
-                try:
-                    with self.link() as (_, mem, target, _):
-                        self.halt(mem, target)
-                        if mapr is not None:
-                            mem.write_word(APB2ENR, apb | 1)
-                            mem.write_word(MAPR, mapr | (self.args.f103_restore_swj << 24))
-                            checked(mem.word(MAPR) & ~SWJ_MASK == mapr, 'AFIO MAPR restore failed')
-                        if apb is not None:
-                            mem.write_word(APB2ENR, apb)
-                            checked(mem.word(APB2ENR) == apb, 'APB2ENR restore failed')
-                        state = self.restore_state(mem, target, saved)
-                    write_json(folder / 'afio-restored.json', state)
-                except (Exception, KeyboardInterrupt) as error:
-                    self.uncertain = f'F103 AFIO or target state restoration unconfirmed: {error!r}'
                     raise Unsafe(self.uncertain) from error
 
     @contextmanager

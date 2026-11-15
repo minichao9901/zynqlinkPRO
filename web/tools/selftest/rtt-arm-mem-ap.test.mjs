@@ -5,9 +5,8 @@ import { OpenOcdEtmProbe } from '../../app/core/openocd-etm.js';
 import { u32le, u32leBytes } from '../../app/core/bin.js';
 
 const base = 0x20000000;
-function fixture(t, {transport = 'jtag', dp = 0x3ba00477, boundary = 0x06414041,
-  base: ram = base, clockKhz = 60000, ap = 0, apId = 0x24770011, cswBase = 0x23000040,
-  tapIndex = 0, endian = 'little', apCfg = 0} = {}){
+function fixture(t, {dp = 0x1ba01477, base: ram = base, clockKhz = 60000,
+  ap = 0, apId = 0x24770011, cswBase = 0x23000040, endian = 'little', apCfg = 0} = {}){
   const memory = Uint8Array.from({length:65536}, (_, i) => (i * 13 + (i >>> 8)) & 255);
   const requests = [];
   const dpIdentities = [0x01000427, 0x10000000];
@@ -31,11 +30,8 @@ function fixture(t, {transport = 'jtag', dp = 0x3ba00477, boundary = 0x06414041,
       const op = packet[0];
       let answer = [op, 0];
       if (op === 2) answer[1] = packet[1];
-      else if (op === 0x8b) answer.push(0x0e);
-      else if (op === 0x89) answer.push(packet[1] === 255 ? 17 : packet[1], ...new Uint8Array(12));
-      else if (op === 0x16){ assert.equal(packet[1], tapIndex); answer.push(...u32leBytes(dp)); }
       else if (op === 5){
-        if (packet[3] !== 13) assert.equal(packet[1], transport === 'jtag' ? tapIndex : 0);
+        if (packet[3] !== 13) assert.equal(packet[1], 0);
         answer = [5, packet[2], 1];
         if (packet[3] === 8){
           select = u32le(packet, 4);
@@ -64,18 +60,18 @@ function fixture(t, {transport = 'jtag', dp = 0x3ba00477, boundary = 0x06414041,
             if (csw === (cswBase | 0x10)) memory[tar - ram] = packet[4 + (tar % 4)];
             else for (let i = 0; i < packet[2]; i++) memory.set(packet.subarray(4+i*5, 8+i*5), tar-ram+i*4);
           }
-          if (failure){ answer[2] = 3; failedAck = null; }
+          if (failure){ answer[2] = 4; failedAck = null; }
         }
       } else if (op === 6){
         const size = (packet[2] + packet[3] * 256) * 4;
-        assert.equal(packet[1], transport === 'jtag' ? tapIndex : 0);
+        assert.equal(packet[1], 0);
         assert.equal(select, ap * 0x1000000);
         assert.equal(csw, cswBase | 0x12);
         assert(tar % 1024 + size <= 1024);
         answer = [6, packet[2], packet[3], 1];
         if (packet[4] === 15){
           if (failedAck?.operation === 'read'){
-            answer = [6,1,0,3,...read(tar,4)];
+            answer = [6,1,0,4,...read(tar,4)];
             failedAck = null;
           } else answer.push(...read(tar, size - (short ? 4 : 0)));
         }
@@ -86,11 +82,10 @@ function fixture(t, {transport = 'jtag', dp = 0x3ba00477, boundary = 0x06414041,
   };
   t.mock.method(OpenOcdEtmProbe.prototype, 'readMem', async (at, length) => read(at, length));
   t.mock.method(OpenOcdEtmProbe.prototype, 'connect', async () => { fallback++; });
-  const probe = new ArmMemApRttProbe(usb, {arch:'arm',transport,clockKhz,target:'board.cpu'});
+  const probe = new ArmMemApRttProbe(usb, {arch:'arm',transport:'swd',clockKhz,target:'board.cpu'});
   probe.target = 'workbench.memory';
   const commands = {
     'workbench.memory cget -ap-num':String(ap), 'workbench.memory cget -endian':endian,
-    'board.cpu cget -chain-position':'board.cpu',
     'capture {[workbench.memory cget -dap] dpreg 36}':String(dpIdentities[0]),
     'capture {[workbench.memory cget -dap] dpreg 52}':String(dpIdentities[1]),
     [`capture {[workbench.memory cget -dap] apreg ${ap} 252}`]:String(apId),
@@ -99,9 +94,6 @@ function fixture(t, {transport = 'jtag', dp = 0x3ba00477, boundary = 0x06414041,
   };
   probe.command = async line => { assert(Object.hasOwn(commands, line), line); return commands[line]; };
   probe.idcode = dp;
-  const cpu = {idcode:dp,name:'board.cpu',enabled:true,irLength:4};
-  const peer = {idcode:boundary,name:'board.bs',enabled:true,irLength:5};
-  probe.jtagTaps = (boundary ? tapIndex ? [peer,cpu] : [cpu,peer] : [cpu]).map((tap,index) => ({...tap,index}));
   const info = {addr:ram + 0x200,maxUp:1,maxDown:1,
     up:[{pbuf:ram + 0x400,size:8192,flags:0}],down:[{pbuf:ram + 0x3000,size:64,flags:0}]};
   memory.set(new TextEncoder().encode('SEGGER RTT'), 0x200);
@@ -117,11 +109,11 @@ function fixture(t, {transport = 'jtag', dp = 0x3ba00477, boundary = 0x06414041,
     failAck:(operation, committed) => { failedAck = {operation, committed}; }};
 }
 
-test('F103 JTAG RTT uses AP0 blocks split at 1 KiB and writes only its own bytes', async t => {
+test('F103 SWD RTT uses AP0 blocks split at 1 KiB and writes only its own bytes', async t => {
   const {memory, probe, usb, requests, info} = fixture(t);
   try {
     await probe.useRttMemory(info);
-    assert.match(probe.name, /JTAG MEM-AP/);
+    assert.match(probe.name, /SWD MEM-AP/);
     const start = 0x7f8;
     assert.deepEqual(await probe.readMem(base + start, 1040), memory.slice(start,start+1040));
     assert.deepEqual(requests.slice(-6).filter(r => r[0] === 6).map(r => r.slice(2)), [[2,0,15],[0,1,15],[2,0,15]]);
@@ -134,11 +126,10 @@ test('F103 JTAG RTT uses AP0 blocks split at 1 KiB and writes only its own bytes
     assert.equal(requests.at(-1)[0], 5);
   } finally { await probe.disconnect(); }
   assert.equal(usb.opened, false);
-  assert.deepEqual(requests.filter(r => r[0] === 0x89), [[0x89,255],[0x89,16],[0x89,17]]);
   assert.deepEqual(requests.at(-1), [3]);
 });
 
-test('ARM JTAG ACK recovery retries a read and confirms a write without replaying it', async t => {
+test('ARM SWD FAULT recovery retries a read and confirms a write without replaying it', async t => {
   const {probe, memory, info, requests, failAck} = fixture(t);
   try {
     await probe.useRttMemory(info);
@@ -151,15 +142,15 @@ test('ARM JTAG ACK recovery retries a read and confirms a write without replayin
       failAck('write', committed);
       const write = probe.writeMem(base+at, payload);
       if (committed){ await write; assert.deepEqual(memory.slice(at, at+4), payload); }
-      else await assert.rejects(write, /05 01 03/);
+      else await assert.rejects(write, /05 01 04/);
       assert.equal(requests.slice(first).filter(r => r[0] === 5 && r[3] === 13).length, 1);
       assert.equal(probe._faulted, !committed);
     }
-    assert.equal(requests.filter(r => r[0] === 0x12 && r[1] === 8).length, 3);
+    assert.equal(requests.filter(r => r[0] === 0x08).length, 3);
   } finally { await probe.disconnect(); }
 });
 
-test('ARM JTAG only retries a read cursor that is still at its previous value', async t => {
+test('ARM SWD only retries a read cursor that is still at its previous value', async t => {
   const {probe, memory, info, requests, failAck} = fixture(t);
   const cursor = info.addr + 40;
   try {
@@ -176,7 +167,7 @@ test('ARM JTAG only retries a read cursor that is still at its previous value', 
         await write;
         assert.equal(u32le(memory,cursor-base),next);
       } else {
-        await assert.rejects(write, /05 01 03/);
+        await assert.rejects(write, /05 01 04/);
         assert.equal(u32le(memory,cursor-base),current);
       }
       assert.equal(requests.slice(first).filter(r => r[0] === 5 && r[3] === 13).length,expectedWrites);
@@ -184,12 +175,8 @@ test('ARM JTAG only retries a read cursor that is still at its previous value', 
   } finally { await probe.disconnect(); }
 });
 
-test('F103 JTAG mismatched TAP keeps Wasm and a short block prevents later writes', async t => {
+test('A short block prevents later writes and retires the USB lease', async t => {
   const {probe, usb, requests, info, truncate} = fixture(t);
-  probe.jtagTaps[1].enabled = false;
-  await probe.useRttMemory(info);
-  assert.equal(requests.length, 0);
-  probe.jtagTaps[1].enabled = true;
   await probe.useRttMemory(info);
   truncate();
   await assert.rejects(probe.readMem(base + 0x400, 16), /响应状态或长度错误/);
@@ -201,16 +188,14 @@ test('F103 JTAG mismatched TAP keeps Wasm and a short block prevents later write
   assert.equal(usb.opened, false);
 });
 
-test('H743-style JTAG with AXI RAM and a distinct TAP uses the same fast path', async t => {
+test('H743 SWD with AXI RAM uses the MEM-AP fast path', async t => {
   const ram = 0x24040000;
-  const {probe, requests, memory, info} = fixture(t, {base:ram, dp:0x6ba00477,
-    boundary:0x06450041, clockKhz:50000});
+  const {probe, requests, memory, info} = fixture(t, {base:ram, dp:0x6ba02477, clockKhz:50000});
   try {
     await probe.useRttMemory(info);
-    assert.match(probe.name, /JTAG MEM-AP/);
+    assert.match(probe.name, /SWD MEM-AP/);
     assert.deepEqual(await probe.readMem(ram + 0x7fd, 1032), memory.slice(0x7fd,0x7fd+1032));
     assert(requests.some(r => r[0] === 6 && r[3] === 1));
-    assert.equal(requests.some(r => r[0] === 0x89), false);
     await assert.rejects(probe.writeMem(info.up[0].pbuf, Uint8Array.of(1)), /RTT 地址/);
     await assert.rejects(probe.writeMem(info.addr + 40, u32leBytes(0)), /RTT 地址/);
   } finally { await probe.disconnect(); }
@@ -228,22 +213,20 @@ test('a reconfigured live RTT channel cannot reuse the previous ring and cursor 
   } finally { await probe.disconnect(); }
 });
 
-test('an imported chain can select a nonzero TAP and AP using the configured RAM and CSW', async t => {
+test('an imported SWD target can select a nonzero AP using the configured RAM and CSW', async t => {
   const ram = 0x60000000;
-  const {probe, requests, memory, info} = fixture(t, {base:ram, dp:0x5ba00477,
-    boundary:0x04382093, tapIndex:1, ap:3, cswBase:0x2b000040, clockKhz:20000});
+  const {probe, requests, memory, info} = fixture(t, {base:ram, ap:3, cswBase:0x2b000040, clockKhz:20000});
   try {
     await probe.useRttMemory(info);
     assert.equal(requests.length, 0);
     await probe.useRttMemory(info, [{start:ram,end:ram + memory.length}]);
-    assert.match(probe.name, /JTAG MEM-AP/);
-    assert.deepEqual(requests.find(r => r[0] === 0x15), [0x15,2,5,4]);
+    assert.match(probe.name, /SWD MEM-AP/);
     assert.deepEqual(await probe.readMem(ram + 0x500, 128), memory.slice(0x500,0x580));
   } finally { await probe.disconnect(); }
 });
 
 test('SWD v2 confirms the DP instance and AP before using generic RTT blocks', async t => {
-  const {probe, usb, requests, memory, info} = fixture(t, {transport:'swd', dp:0x6ba02477, clockKhz:50000});
+  const {probe, usb, requests, memory, info} = fixture(t, {dp:0x6ba02477, clockKhz:50000});
   try {
     await probe.useRttMemory(info);
     assert.match(probe.name, /SWD MEM-AP/);
@@ -255,7 +238,7 @@ test('SWD v2 confirms the DP instance and AP before using generic RTT blocks', a
 });
 
 test('a changed SWD instance releases the bulk lease and reconnects Wasm before RAM access', async t => {
-  const {probe, requests, usb, info, mismatchInstance, fallback} = fixture(t, {transport:'swd', dp:0x6ba02477});
+  const {probe, requests, usb, info, mismatchInstance, fallback} = fixture(t, {dp:0x6ba02477});
   mismatchInstance();
   await probe.useRttMemory(info);
   assert.equal(fallback(), 1);
