@@ -22,7 +22,7 @@ import { webClockKhz } from '../core/target-clock.js';
 import { constrainClockSelect } from '../ui/target-clock.js';
 import { supportsRiscvStreamClock,streamClockHz } from '../core/stream-clock.js';
 import { rttConfigData } from '../hid/probe.js';
-import { AkaLinkHid, isStreamTarget, prepareArmJtagStream } from '../hid/probe.js';
+import { AkaLinkHid } from '../hid/probe.js';
 import { Elf } from '../elf/elf.js';
 import { listSampleable } from '../elf/dwarf.js';
 import { arrayElementChannels } from './array-vars.js';
@@ -146,9 +146,7 @@ export class ScopeView {
      * 最容易被当成 bug（"我明明切过了"）。跟随后，`uiBackend()` 立刻按 RISC-V/JTAG 显示（时钟格名字、
      * 置灰、读计划的分档），不必等采样回报。
      */
-    const savedTarget = store.get('rtt.target', 'swd') === 'riscv' ? 'riscv' : store.get('streams.armTransport', 'swd');
-    if (isStreamTarget(savedTarget)) $('sc-target').value = savedTarget;
-    this.targetMode = $('sc-target').value;
+    this.targetMode = $('sc-target').value = store.get('rtt.target', 'swd') === 'riscv' ? 'riscv' : 'swd';
     $('sc-bench').addEventListener('click', () => this.bench());
     $('sc-recc').addEventListener('click', () => this.applyRecPeriod());
     $('sc-period').addEventListener('input', () => this._applyBackendUi());
@@ -276,8 +274,8 @@ export class ScopeView {
 
   onShow(){
     if (!this.running && !this._starting && !this._stopPromise){
-      const saved = store.get('rtt.target', 'swd') === 'riscv' ? 'riscv' : store.get('streams.armTransport', 'swd');
-      if (isStreamTarget(saved) && saved !== this.targetMode){
+      const saved = store.get('rtt.target', 'swd') === 'riscv' ? 'riscv' : 'swd';
+      if (saved !== this.targetMode){
         this.targetMode = $('sc-target').value = saved;
         this._askedAt = performance.now();
         this._applyBackendUi();
@@ -784,7 +782,7 @@ export class ScopeView {
   // ================================================================= 采样
   usesWasmPolling(){
     return !this.usingMock && $('sc-sampling-path')?.value !== 'probe' &&
-      Number($('sc-period')?.value) >= WASM_POLL_MIN_US && this.targetMode !== P.BACKEND.ARM_JTAG;
+      Number($('sc-period')?.value) >= WASM_POLL_MIN_US;
   }
 
   async start(){
@@ -823,12 +821,6 @@ export class ScopeView {
   get targetRiscv(){ return this.targetMode === P.BACKEND.RISCV; }
   async confirmTargetArchitecture(){
     if(this.usingMock)return;
-    this.armJtagIdentity = null;
-    if (this.targetMode === P.BACKEND.ARM_JTAG){
-      const hz = streamClockHz(this._probeInfo, false, Number($('sc-clock').value)*1000);
-      this.armJtagIdentity = await prepareArmJtagStream(this.hid, hz, this.transport?.device);
-      return;
-    }
     const reply=await this.hidXfer(P.HID_CMD_RTT,P.targetTypeData(!!this.targetRiscv));
     if(!reply||reply.length<3)throw Error('目标类型确认回包不完整；未配置或启动采样');
     const rc=this.signed(reply[2]);
@@ -1278,12 +1270,10 @@ export class ScopeView {
     }
     this.targetMode = sel.value;
     store.set('rtt.target', riscv ? 'riscv' : 'swd');
-    if (!riscv) store.set('streams.armTransport', this.targetMode);
     this._askedAt = (globalThis.performance?.now?.() ?? Date.now());   // 见 uiBackend()：请求与生效的先后关系
     // 🚨 **先刷界面再谈连接**：这一格的意思就是"我要走哪条路"，与探针在不在线无关。
     //    老写法把刷新放在 hidXfer 之后，于是"没连探针时切下拉 → 界面一动不动"（用户实测踩到）。
     this._applyBackendUi();
-    if (this.targetMode === P.BACKEND.ARM_JTAG) return;
     if (!this.hid){ this.setStatusText(`已记为「${P.backendName(this.targetMode)}」，但探针没连上——连上后再切一次`, 'warn'); return; }
     try {
       const response = await this.hidXfer(P.HID_CMD_RTT, P.targetTypeData(riscv));
@@ -1309,7 +1299,7 @@ export class ScopeView {
         this.swdMhz = status.swdMhz || 0;
         this._reportedClockSelection = Number($('sc-clock').value) || 0;
       }
-      this.setBackend((w0 & 2) ? P.BACKEND.RISCV : this.armJtagIdentity ? P.BACKEND.ARM_JTAG : P.BACKEND.SWD, '状态字 0');
+      this.setBackend((w0 & 2) ? P.BACKEND.RISCV : P.BACKEND.SWD, '状态字 0');
       this.updatePlan(); // Clock downshift can change advice without changing the backend.
     } catch { /* 回包形状不对就当没看见 */ }
   }
@@ -1660,8 +1650,7 @@ export class ScopeView {
           this._reportedClockSelection = Number($('sc-clock').value) || 0;
           // **生效**后端（DEF flags bit6）：你下发的 flags 只是请求，后端拉不起来时探针会换一条路重试，
           // 所以界面一律用生效值显示（见 web-handoff-riscv-scope.md）
-          if (!this._replaying) this.setBackend(d.riscv ? P.BACKEND.RISCV
-            : this.armJtagIdentity ? P.BACKEND.ARM_JTAG : P.BACKEND.SWD, 'def');
+          if (!this._replaying) this.setBackend(d.riscv ? P.BACKEND.RISCV : P.BACKEND.SWD, 'def');
           this.updatePlan();
           // Zynq HSS writes the variable count to this legacy DEF field.
           // Check actual variable definitions below on both transports.
@@ -2126,7 +2115,6 @@ export class ScopeView {
       samples: st?.count || 0,
       sampleSource: this.sampleSource || null,
       targetMode: this.targetMode,
-      armJtagIdentity: this.armJtagIdentity ?? null,
       hostPollSkipped: this.hostPollSkipped || 0,
       receivedSamples:this.receivedSamples || 0,
       tailCountDelta:this.tailCountDelta ?? null,

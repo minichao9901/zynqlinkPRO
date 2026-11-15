@@ -60,89 +60,11 @@ export const openOcdUsbSupported = () => nativeProbeEnabled() || !!globalThis.na
 // libusb performs USB calls from the Wasm worker. Keep the actual handle and
 // native-service delivery identity with the workbench's existing USB lease.
 export class OpenOcdUsb {
-  constructor(device, owner = 'dap', armJtag = false){
+  constructor(device, owner = 'dap'){
     this.lease = new UsbLease(device, owner);
     this.device = this.lease.device;
     this.zynq = device.nativeService || (device.vendorId === 0x0d28 &&
       device.productId === 0x0204 && device.manufacturerName === 'CherryUSB');
-    this.armJtag = this.zynq && armJtag;
-  }
-
-  async _selectArmJtag(){
-    let synchronized = true;
-    const send = async (packet, expected) => {
-      const bytes = Uint8Array.from(packet);
-      synchronized = false;
-      let reply;
-      if (this.device.atomicDapSupported) reply = await this.device.exchangeDap(bytes, 4096);
-      else {
-        const result = await withTimeout(this.device.transferOut(this.out.endpointNumber, bytes), 2000, 'ARM JTAG 发送');
-        if (result.status !== 'ok' || result.bytesWritten !== bytes.length) throw Error('ARM JTAG 选择命令发送失败');
-        reply = await withTimeout(this.device.transferIn(this.input.endpointNumber, 4096), 2000, 'ARM JTAG 响应');
-      }
-      const { status, data } = reply;
-      synchronized = status === 'ok' && data?.byteLength >= 2 && data.getUint8(0) === bytes[0];
-      if (!synchronized || data.getUint8(1) !== expected) throw Error('ARM JTAG 选择命令未确认');
-    };
-    try {
-      await send([2, 2], 2);
-      // Select SWJ at 1 MHz. OpenOCD sets its configured TCK during init.
-      await send([0x11, 0x40, 0x42, 0x0f, 0], 0);
-      await send([0x12, 88, ...Array(8).fill(0xff), 0x3c, 0xe7, 0x1f], 0);
-    } finally {
-      // A missing reply leaves the stream ambiguous. Close the lease so a
-      // later session can synchronize a new epoch without replaying any write.
-      if (synchronized) await send([3], 0);
-    }
-  }
-
-  async prepareArmJtagStream(clockHz){
-    if (!this.armJtag) throw Error('ARM/JTAG 采样和转发需要支持该模式的 zynqlinkPRO 探针');
-    let connected = false, framed = true;
-    const send = async (packet, expected, length = 2) => {
-      const bytes = Uint8Array.from(packet);
-      framed = false;
-      const write = this.device.atomicDapSupported ? null
-        : await withTimeout(this.device.transferOut(2, bytes), 2000, 'ARM/JTAG 请求');
-      if (write && (write.status !== 'ok' || write.bytesWritten !== bytes.length)) throw Error('ARM/JTAG 准备命令短写');
-      const {status, data} = write ? await withTimeout(this.device.transferIn(1, 4096), 2000, 'ARM/JTAG 应答')
-        : await this.device.exchangeDap(bytes, 4096);
-      framed = status === 'ok' && data?.byteLength >= 2 && data.getUint8(0) === packet[0];
-      if (!framed || data.byteLength !== length || data.getUint8(1) !== expected)
-        throw Error('ARM/JTAG 准备命令未确认');
-      return data;
-    };
-    try {
-      await this.invoke('open', []);
-      await this.invoke('claimInterface', [0]);
-      if (!this.synchronized) throw Error('探针未确认 DAP 队列边界');
-      await send([2, 2], 2);
-      connected = true;
-      const instruction = await send([0x8b, 0x0e], 0, 3);
-      if (instruction.getUint8(2) !== 0x0e) throw Error('ARM/JTAG IDCODE 指令回读不符');
-      await send([0x11, 0x40, 0x42, 0x0f, 0], 0);
-      // STM32F103ZE and STM32H743 expose the ARM DP and a boundary TAP.
-      // The ARM MEM-AP timing calibration runs against the CPU TAP, so
-      // read both reset-default IDCODEs in one raw 64-bit DR scan.
-      // TLR -> Idle -> Select-DR -> Capture-DR -> Shift-DR.
-      const sequence = [0x14, 5, 0x46, 0x3f, 1, 0, 0x41, 1, 2, 0, 0x80, ...Array(8).fill(0xff)];
-      const observed = await send(sequence, 0, 10);
-      const cpu = observed.getUint32(2, true), boundary = observed.getUint32(6, true);
-      if (!((cpu === 0x3ba00477 && boundary === 0x06414041) ||
-            (cpu === 0x6ba00477 && boundary === 0x06450041)))
-        throw Error(`ARM/JTAG 未识别到受支持的 STM32F103ZE/H743 双 TAP（0x${cpu.toString(16)} / 0x${boundary.toString(16)}）`);
-      await send([0x14, 2, 0x46, 0x3f, 1, 0], 0);
-      await send([0x15, 2, 4, 5], 0);
-      const hz = new Uint8Array(4);
-      new DataView(hz.buffer).setUint32(0, clockHz, true);
-      await send([0x11, ...hz], 0);
-      if ((await send([0x16, 0], 0, 6)).getUint32(2, true) !== cpu)
-        throw Error('ARM/JTAG CPU TAP 未在所选 TCK 读回');
-      return {cpu, boundary};
-    } finally {
-      try { if (connected && framed) await send([3], 0); }
-      finally { await this.close(); }
-    }
   }
 
   async invoke(method, args){
@@ -173,7 +95,6 @@ export class OpenOcdUsb {
         this.synchronized = d.nativeService ? d.dapSynchronized : this.zynq && await syncZynqQueue(d);
         this.out = out;
         this.input = input;
-        if (this.armJtag) await this._selectArmJtag();
         return;
       }
       case 'releaseInterface':

@@ -16,7 +16,7 @@ import { store } from '../core/store.js';
 import { supportsRiscvStreamClock,streamClockHz } from '../core/stream-clock.js';
 import { bytes as fBytes } from '../core/format.js';
 import { findSymbol } from '../rtt/elf.js';
-import { AkaLinkHid, isStreamTarget, prepareArmJtagStream, startRcText, START_PENDING } from './probe.js';
+import { AkaLinkHid, startRcText, START_PENDING } from './probe.js';
 import { MockAkaLinkHid } from './mock.js';
 import { waitMs } from '../core/pace.js';
 
@@ -284,10 +284,8 @@ export class RttCdcView {
     }
     const riscv = this.isRiscv;
     store.set('rtt.target', riscv ? 'riscv' : 'swd');
-    if (!riscv) store.set('streams.armTransport', this.targetMode);
     this._selectedTarget = this.targetMode;
     this._applyTargetUi();
-    if (this.targetMode === 'arm-jtag') return;
     /**
      * 切到 RISC-V 时别自作聪明改地址：**HPM 上"盲目大范围搜控制块"不可靠**
      * （2026-10 真机实测：窗口给 0x01200000 + 256 KB 时读错数一直涨、就是搜不到；
@@ -346,8 +344,7 @@ export class RttCdcView {
    * 因为切换要避开引擎运行中（固件会回 -7）。
    */
   syncTargetTypeFromStore(){
-    const saved = store.get('rtt.target', 'swd') === 'riscv' ? 'riscv' : store.get('streams.armTransport', 'swd');
-    if (!isStreamTarget(saved)) return false;
+    const saved = store.get('rtt.target', 'swd') === 'riscv' ? 'riscv' : 'swd';
     this._selectedTarget = saved;
     if ($('h-target').value === saved) return false;
     $('h-target').value = saved;
@@ -422,17 +419,17 @@ export class RttCdcView {
        * 重连分支里还有一处补发（见 _ensure，2026-09 为"烧完固件切过来"加的），两处都留着。
        */
       if (!this.last?.running){
-        if (this.targetMode === 'arm-jtag' && !this.mock){
-          this.armJtagIdentity = await prepareArmJtagStream(this.dev, p.clockHz);
-        } else {
-          this.armJtagIdentity = null;
-          try {
-            await this.dev.setTargetType(this.isRiscv);
-          } catch { /* 旧探针由 START 回报实际初始化结果。 */ }
-        }
+        // A native CLI session may have left the J7 stream on ARM/JTAG.
+        // Require the supported Web mode to be confirmed before START.
+        const target = await this.dev.setTargetType(this.isRiscv).catch(error => {
+          if (supportsRiscvStreamClock(this.info)) throw error;
+          return null; // Older third-party probes report initialization at START.
+        });
+        if (supportsRiscvStreamClock(this.info) && target?.rc !== 0)
+          throw Error(`探针未确认转发目标（${target?.rc ?? '无回包'}），未启动`);
         if (g !== this._engineGen) return;
       }
-      if ((!auto||this.targetMode === 'arm-jtag'||this.isRiscv&&supportsRiscvStreamClock(this.info)) &&
+      if ((!auto||this.isRiscv&&supportsRiscvStreamClock(this.info)) &&
           (p.clockHz || this.isRiscv) && !this.mock){
         const config=await this.dev.configure({ clockHz: p.clockHz });
         if(config.rc!==0)throw new Error(`转发时钟配置被拒（${config.rc}），未启动`);
@@ -712,7 +709,6 @@ export class RttCdcView {
       label: this.dev.connected ? this.dev.label : '',
       running: !!st?.running,
       targetMode: this.targetMode,
-      armJtagIdentity: this.armJtagIdentity ?? null,
       cbAddr: st ? hex(st.cbAddr) : '',
       moved: st?.moved ?? 0,
       startRc: st?.startRc ?? null,
