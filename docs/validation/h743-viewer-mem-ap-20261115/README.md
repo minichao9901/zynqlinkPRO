@@ -75,4 +75,6 @@ python -X utf8 toolbox.py project run board.accept -- --board h743 --only rtt-vi
 - [x] 复核两板报告中原列的 51 个原始证据 SHA-256、配套 bit/PS ELF、目标 ELF 和长窗 RAM/FPB 备份。H743 匹配 ELF 另存本机 `matched-target/`，其 SHA-256 与标准结果一致。F103ZE ELF 及正式探针配对由仓库 `prebuilt/` 固定路径复用。
 - [x] 复核 H743 最后实板快照，应用心跳前进，Flash/RAM/寄存器恢复，探针路由归零。两板测试服务与浏览器已退出，临时 worktree 已移除，共享 `hw_server`、原 ZL-006 未提交改动和固定安装 `data/` 保留。
 - [x] 复核本地修复与归档、ZL-238/248/251/252、远端 `main` 和 `gh-pages` 指针、固定 EXE 的 SHA-256。公开下载包沿用表中任务期间记录的 v1.3.8 元数据，探针沿用已核验的现有 QSPI。
-- [ ] **待办** 两份工作目录下的 `zynqlinkPRO-work/runtime/xilinx` 是重复的临时运行副本，确认没有本轮进程使用。执行环境拦截了清理命令，目录保留。共享 `hw_server` 使用 `E:/zynqlinkPRO-work/runtime/xilinx/`，清理目标与该共享目录不同。
+- [ ] **待办** 两份工作目录下的 `zynqlinkPRO-work/runtime/xilinx` 是重复的临时运行副本，确认没有本轮进程使用。`bootstrap.tcl` 已清，执行环境拦截了剩余 DLL/EXE 的删除操作。共享 `hw_server` 使用 `E:/zynqlinkPRO-work/runtime/xilinx/`，清理目标与该共享目录不同。
+
+本地验收结束后，Viewer 源码已随 v1.3.9 交付远端 `main`、固定 EXE、Pages 和 Release。正式 QSPI 下载与已有实体冷启动证据已经核对。[发布验收](../../github-release.md#v139-发布验收)

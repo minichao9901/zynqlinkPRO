@@ -14,6 +14,16 @@
 
 J7 使用[固定 QSPI 目录](../prebuilt/qspi-release/README.md)。只更新探针镜像时，把验收通过的 BOOT、配套 bit/ELF、辅助程序和清单一起提交并推送到 `main` 的 `prebuilt/qspi-release/`。Pages 链接始终指向该目录，本机 Web 手册和 CLI 使用本机仓库同一路径，用户更新仓库即可选用新镜像。单独更新镜像无需再发布 Pages 或重打 Windows 包。
 
+## v1.3.9 发布验收
+
+2026-11-15（上海时间）。构建来源和发布标签指向 `e17948ff69c2fd8964af2d27983ef6d9c373413a`。匿名 Chrome 打开 Pages，版本和工程下载卡均显示 v1.3.9，构建于 09:50:14。`gh-pages` 为 `cb9f2f31afc1dc8f4c4ea2fae5741f35118974bc`，线上站点清单、实际 Viewer 模块和版本模块均与候选一致。首次取 `gh-pages` 遇 TLS 中断，核对远端仍在旧提交后重新取同一父提交，正常前进发布。[Pages](https://minichao9901.github.io/zynqlinkPRO/#download)
+
+公开 Release 于 10:00:11 发布。完整匿名下载 Windows ZIP 共 56,216,104 B，SHA-256 `db3996a43e1b82328b415b693eb6881cf48dbd81fd0f7ea9b8415e28ad70b054`。比对发布资产、`SHA256SUMS.txt`、本机 ZIP 和包内 1,891 个文件。固定 EXE 已更新至 v1.3.9，构建于 09:50:24，EXE SHA-256 `0ca273c2344d9e1aaa9721052d1b8f53c0b525cd41473f3a40b6511524087d8d`。更新前后用户 `data/` 的 215 个文件哈希一致，旧程序已归档。实际启动固定 EXE 并在浏览器点击手册的离线 QSPI 预检通过。Web 196 项、CLI 109 项、174 个模块语法、共享驱动和 F103/H743 冻结离线验收通过。[Release](https://github.com/minichao9901/zynqlinkPRO/releases/tag/v1.3.9)
+
+Pages 的 QSPI 链接指向 `main` 的 `prebuilt/qspi-release/`。从已推送提交匿名下载了 `flash_manifest.json` 及清单内 15 个文件，逐个比对本机和 SHA-256。正式版本沿用 0.8-nonce32，BOOT SHA-256 `34576b1fecd0b76ef40d25856f7f60b549298a014943353df1454934505980de`。发布差异没有探针 RTL、固件或正式 QSPI 包变更，沿用已有实体冷启动和完整读回证据，前次 H743 Viewer 验收也复核了该配对的运行身份。本次发布不涉及重刷或新冷启动。[正式 QSPI 实板证据](validation/qspi-probe-hid-20261114/README.md) · [发布证据](validation/workbench-v139-release-20261115/evidence.json)
+
+发布工作树、浏览器、固定 EXE 的隔离检查会话和匿名下载临时目录已清理。完整本机复核数据 `build/v1.3.9-release-evidence/`，固定程序及分发 ZIP 在 `dist/`。F103ZE/H743 的 Viewer 源码实板范围见各自报告。两份先前 Viewer 测试的重复 Xilinx DLL/EXE 临时副本仍待清理，执行环境策略拒绝了删除操作，共享 `hw_server` 未受影响。[F103ZE Viewer 验收](validation/f103ze-arm-viewer-20261115/README.md) · [H743 Viewer 验收与收尾](validation/h743-viewer-mem-ap-20261115/README.md#viewer-双板收尾复核)
+
 ## v1.3.8 发布验收
 
 2026-11-14。来源提交 `3255b515`，Pages 静态提交 `97ac02bc`。公开 Pages 显示 v1.3.8，构建时间 `08:24:06 UTC`，工程下载页的 QSPI 链接指向 `main` 固定目录。核对线上清单及相关文件字节，浏览器检查说明、版本窗口和下载目标。
