@@ -14,6 +14,16 @@
 
 J7 使用[固定 QSPI 目录](../prebuilt/qspi-release/README.md)。只更新探针镜像时，把验收通过的 BOOT、配套 bit/ELF、辅助程序和清单一起提交并推送到 `main` 的 `prebuilt/qspi-release/`。Pages 链接始终指向该目录，本机 Web 手册和 CLI 使用本机仓库同一路径，用户更新仓库即可选用新镜像。单独更新镜像无需再发布 Pages 或重打 Windows 包。
 
+## v1.3.10 发布验收
+
+2026-11-15（上海时间）。发行标签和构建来源为 `5afebb4fa45fd4b1064c9fa2a451fc2ad1a1c58b`，Pages 静态提交为 `50af8a60dcc5470580d897616841a37e906d5a3c`。发布前核验网页候选，发布后用匿名 Chrome 打开实际 Pages。页面显示 v1.3.10，构建于 13:02:17，下载卡指向同版 Release。线上清单、HTML、版本模块、CFG 解析模块和 Viewer 模块均与候选匹配。[Pages](https://minichao9901.github.io/zynqlinkPRO/#download)
+
+匿名浏览器复现旧浏览器保存过 ARM/JTAG 偏好的场景。RTT 转发、RTT Viewer 和 J-Scope 的目标选项只含 SWD 和 RISC-V，页面启动选择 SWD。实际通过调试器上传 ARM/JTAG CFG，显示「ARM/JTAG 请使用原生 OpenOCD CLI」，未加入目标列表。ARM/SWD 和 RISC-V/JTAG 的 CFG 均能导入。固定 EXE 打开的工作台独立通过同一组检查。原生接入见 [SWJ 切换和 OpenOCD 命令](toolbox-cli-ai.md#armjtag-原生-cli)。验证范围为主机和浏览器，无新增实板结论。问题表见 ZL-253。
+
+Release 于 13:08:58 发布。匿名完整下载 Windows ZIP 56,213,022 B，SHA-256 `354df8143115e1ec9e759919db1bf58ea39d6dcb733084c84408be39571722ad`，与资产、`SHA256SUMS.txt` 和包内 1,891 个文件的清单一致。固定 EXE 构建于 13:02:27，SHA-256 `49bb9316f30ee96a8e825c39d9c98242222af2b148b02e03de4e469ef3504c95`。固定路径启动和手册 QSPI 预检通过，旧程序与 ZIP 已归档，更新前后 `data/` 里的 215 个文件哈希一致。Web 194 项、CLI 110 项、174 个模块语法、共享驱动及冻结包离线回归通过。[Release](https://github.com/minichao9901/zynqlinkPRO/releases/tag/v1.3.10)
+
+Pages 的 QSPI 链接指向 `main/prebuilt/qspi-release/`。从发布源码提交匿名取回清单及 15 个文件，与本机逐一比对。沿用 0.8-nonce32 的既有实体冷启动证据，本轮无探针固件改动和固化动作。源码推送和 Release 草稿查询遇 TLS 中断，核对远端状态后重试成功。临时发布工作树、浏览器及隔离 EXE 会话已清理，复核输出在 `build/v1.3.10-release-evidence/`。[发布证据](validation/workbench-v1310-release-20261115/evidence.json)
+
 ## v1.3.9 发布验收
 
 2026-11-15（上海时间）。构建来源和发布标签指向 `e17948ff69c2fd8964af2d27983ef6d9c373413a`。匿名 Chrome 打开 Pages，版本和工程下载卡均显示 v1.3.9，构建于 09:50:14。`gh-pages` 为 `cb9f2f31afc1dc8f4c4ea2fae5741f35118974bc`，线上站点清单、实际 Viewer 模块和版本模块均与候选一致。首次取 `gh-pages` 遇 TLS 中断，核对远端仍在旧提交后重新取同一父提交，正常前进发布。[Pages](https://minichao9901.github.io/zynqlinkPRO/#download)
