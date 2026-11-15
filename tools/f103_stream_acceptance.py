@@ -128,7 +128,7 @@ class Streams(Acceptance):
         cb=symbol(self.args.elf,'_SEGGER_RTT')
         self.invoke('rttcdc','connect',target='hid')
         self.set('rttcdc','#h-target','swd');self.set('rttcdc','#h-addr',hex(cb))
-        self.set('rttcdc','#h-size','256');self.set('rttcdc','#h-chan','0')
+        self.set('rttcdc','#h-chan','0')
         self.invoke('rttcdc','refreshPorts')
         desc=self.page('rttcdc','describe')
         ports=next(x for x in desc['controls'] if x['selector']=='#c-port')['options']

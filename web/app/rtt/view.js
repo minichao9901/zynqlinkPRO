@@ -16,65 +16,16 @@ import { isZynqDapDevice, openOcdUsbSupported, selectOpenOcdDevice } from '../co
 import { makeOpenOcdProfile } from '../core/openocd-profile.js';
 import { Hpm6800RttProbe } from './hpm6800-probe.js';
 import { ArmMemApRttProbe } from './arm-mem-ap-probe.js';
-import { HPM_BOARDS, hpmBoard } from '../targets/hpm/porting.js';
-import { selectedHpmBoard, rememberHpmBoard } from '../targets/hpm/select.js';
+import { hpmBoard } from '../targets/hpm/porting.js';
+import { selectedHpmBoard } from '../targets/hpm/select.js';
 import { MockProbe } from './mock.js';
 import { findSymbol } from './elf.js';
-import { parseRanges } from '../core/bin.js';
 import { parseHex, textToBytes } from '../core/hex.js';
 import { waitMs,yieldTask } from '../core/pace.js';
 import { rate as fRate, bytes as fBytes, fileStamp, download, stamp as stampOf } from '../core/format.js';
 
 const EOL = { cr: '\r', crlf: '\r\n', lf: '\n', none: '' };
 const MAX_RAW = 2 * 1024 * 1024;
-
-/**
- * 各目标系列的默认 RAM 扫描范围（RTT 控制块一般在 RAM 起始附近，范围取各系列常见最小值，
- * 宁小勿大：扫到未映射地址轻则读到 0、重则 FAULT）。选目标时自动填入，可手改。
- */
-const OCD_RAM = {
-  stm32c0: '0x20000000-0x20003000',   // 12K
-  stm32f0:  '0x20000000-0x20002000',  // 8K 起
-  stm32f1:  '0x20000000-0x20005000',  // F103C8 20K
-  stm32f103:'0x20000000-0x20005000',
-  stm32f2:  '0x20000000-0x20020000',  // 128K
-  stm32f3:  '0x20000000-0x2000a000',  // 40K 起
-  stm32f4:  '0x20000000-0x20020000',  // 128K
-  stm32f7:  '0x20000000-0x20020000',
-  stm32g0:  '0x20000000-0x20008000',  // 32K
-  stm32g4:  '0x20000000-0x20008000',
-  stm32h7:  '0x20000000-0x20020000',  // DTCM 128K
-  stm32h7b0:'0x20000000-0x20020000',  // H7B0（桥预设名就是这个）：DTCM 128K，RTT 缓冲放这儿
-  stm32h7a3:'0x20000000-0x20020000',  // H7A3/B3 同族，DTCM 也是 128K
-  stm32h7b3:'0x20000000-0x20020000',
-  stm32h5:  '0x20000000-0x20020000',  // H503 128K
-  stm32l0:  '0x20000000-0x20005000',  // 20K
-  stm32l1:  '0x20000000-0x20004000',  // 16K
-  stm32l4:  '0x20000000-0x2000c000',  // 48K
-  stm32l5:  '0x20000000-0x20010000',  // 64K
-  stm32u5:  '0x20000000-0x20020000',
-  stm32wb:  '0x20000000-0x20040000',  // WB55 256K
-  stm32wl:  '0x20000000-0x20010000',  // WLE5 64K
-};
-
-const rvRange = id => hpmBoard(id)?.memory.rttRange || '0x01240000-0x01250000';
-
-
-const chipSel = () => document.getElementById('r-chip');
-const chipArchOf = id => {
-  const o = [...(chipSel()?.options || [])].find(x => x.value === id);
-  return o?.parentElement?.dataset?.arch || 'arm';
-};
-
-const armChipId = () => {
-  const v = chipSel()?.value || '';
-  return chipArchOf(v) === 'arm' ? v : (store.get('rtt.armChip', store.get('rtt.ocdTarget', '')) || 'stm32f103');
-};
-/** 当前 RISC-V 组那颗（RAM 窗口用它；选的是 ARM 时回退到上次选过的 RISC-V 那颗）*/
-const rvChipId = () => {
-  const v = chipSel()?.value || '';
-  return chipArchOf(v) === 'riscv' ? v : (store.get('rtt.rvChip', '') || selectedHpmBoard());
-};
 
 export class RttView {
   constructor(){
@@ -102,19 +53,11 @@ export class RttView {
   }
 
   init(){
-    const group = document.querySelector('#r-chip optgroup[data-arch="riscv"]');
-    if (group) group.replaceChildren(...HPM_BOARDS.map(b => new Option(b.name, b.id)),
-      new Option('其它 RISC-V（自己填 RAM 范围）', 'riscv-other'));
-
     this.tx = new RxBuffer($('r-rx'), { mode: 'ascii', maxLines: 4000, maxRaw: MAX_RAW });
 
     // ---------- 设置 ----------
-    store.bind($('r-range'), 'rtt.range');
-    store.bind($('r-addr'), 'rtt.addr');
     store.bind($('r-poll'), 'rtt.poll');
     store.bind($('r-eol'), 'rtt.eol');
-    // 芯片（合并后的 `#r-chip`）不再用 store.bind：两块选项各有自己的键，
-    // 由下面 applyTarget() / change 处理器显式读写（rtt.ocdTarget = ARM 组那颗、rtt.rvChip = RISC-V 组那颗）
     this._chk($('r-ts'), 'rtt.ts', v => { this.ts = v; this.tx.setTimestamps(v, false); });
     this._chk($('r-autoscroll'), 'rtt.autoscroll', v => { this.tx.setAutoscroll(v); });
     this._chk($('r-hexsend'), 'rtt.hexsend', () => {});
@@ -126,81 +69,14 @@ export class RttView {
     $('r-poll').addEventListener('input', () => { this.interval = Math.max(1, Number($('r-poll').value) || 5); });
 
 
-    const chip = chipSel();                 // 合并后的芯片下拉（ARM 组 + RISC-V 组，见文件头的辅助函数）
-    const applyTarget = () => {
-      const rv = $('r-target').value === 'riscv';
-      const clkLbl = $('r-usb-clock')?.closest('label')?.querySelector('span');
-      if (clkLbl) clkLbl.textContent = rv ? 'JTAG TCK' : 'SWD 时钟';
-      $('r-reset').title = '经 OpenOCD Wasm 复位目标并重新定位 RTT';
-      if (chip) chip.value = rv ? (store.get('rtt.rvChip', '') || selectedHpmBoard())
-                                : (store.get('rtt.armChip', store.get('rtt.ocdTarget', '')) || 'stm32f103');
-      if (chip && !chip.value) chip.value = rv ? selectedHpmBoard() : 'stm32f103';
-      $('r-range').value = rv ? (rvRange(rvChipId()))
-                              : (OCD_RAM[armChipId()] || $('r-range').value);
-      this._applyChipUi(false);
-    };
-    // Restore architecture before deriving chip, range, labels and reset capability.
     store.bind($('r-target'), 'rtt.target');
-    const savedRange = store.get('rtt.range', null);
-    applyTarget();
-    if (savedRange !== null) $('r-range').value = savedRange;
-    this._applyTargetUi = applyTarget;       // 供明确的会话目标沿用入口刷新本地配置
-    const onTargetChanged = () => { applyTarget(); if (this.probe) this.disconnect(); };
-    this._applyImportedTarget = target => {
-      const option = new Option(target.label, target.id);
-      const group = chip.querySelector(`optgroup[data-arch="${target.arch}"]`);
-      const previous = this.importedTarget;
-      if (previous) [...chip.options].find(o => o.value === previous.id)?.remove();
-      group.append(option);
-      this.importedTarget = target;
-      $('r-target').value = target.arch === 'riscv' ? 'riscv' : 'swd';
-      chip.value = target.id;
-      $('r-range').value = '';
-      this._applyChipUi(false);
-    };
-    $('r-target').addEventListener('change', onTargetChanged);
-    /**
-     * 合并后的芯片下拉：换芯片 = ① 记到**那一组自己的键**（两块各自记住上次选的）
-     * ② RAM 窗口跟着换 ③ 跨组时把目标类型也切过去。
-     * RISC-V 只能 JTAG ⇒ 选 RISC-V 那颗就切 RISC-V/JTAG；选 ARM 那颗切回 SWD
-     * （桥侧对 ARM 用 JTAG 是**你自己的 cfg** 的事，这个下拉不管传输）。
-     */
-    chip?.addEventListener('change', () => {
-      const id = chip.value, arch = chipArchOf(id);
-      if (!id.startsWith('cfg:')) store.set(arch === 'riscv' ? 'rtt.rvChip' : 'rtt.armChip', id);
-      if (arch === 'riscv') rememberHpmBoard(id);
-      /**
-       * 🚨 **换芯片必须清掉手填的 RTT 地址**：`#r-addr` 绑的是 `rtt.addr`，它是"上一个目标
-       *    `.bss` 里的地址"，换目标后必然失效；旧值留着会让 locate() 直接去读那一格并抛 FAULT
-       *    （2026-10 现场：HPM6800 的 0x4c0003c0 落到 H743 上）。清空后 locate() 会走
-       *    "按新芯片 RAM 范围自动扫描"，这才是换目标该有的行为。
-       */
-      if (String($('r-addr').value || '').trim()){
-        $('r-addr').value = '';
-        store.set('rtt.addr', '');
-        setStatus($('r-err'), '换了芯片：已清空手填的 RTT 地址（下次连接会按新 RAM 范围自动扫描）');
-      }
-      if (id === this.importedTarget?.id){
-        $('r-target').value = arch === 'riscv' ? 'riscv' : 'swd';
-        $('r-range').value = '';
-        this._applyChipUi(false);
-        return;
-      }
-      const wantRv = arch === 'riscv';
-      if (wantRv !== ($('r-target').value === 'riscv')){
-        $('r-target').value = wantRv ? 'riscv' : 'swd';
-        store.set('rtt.target',$('r-target').value);
-        onTargetChanged();
-      } else {
-        $('r-range').value = wantRv ? (rvRange(id)) : (OCD_RAM[id] || $('r-range').value);
-        this._applyChipUi(true);
-      }
+    $('r-target').addEventListener('change', () => {
+      this.sessionTarget = null;
+      this._clearElf();
+      this._updateTargetUi();
+      if (this.probe) this.disconnect();
     });
 
-    // ---------- 连接按钮 ----------
-    $('r-find').addEventListener('click', () => this._startRtt().catch(e => this._err(e)));
-    $('r-restart').addEventListener('click', () => this._startRtt().catch(e => this._err(e)));
-    $('r-reset').addEventListener('click', () => this.resetTarget());
     $('r-elf').addEventListener('click', () => this._elfInput.click());
     $('r-pause').addEventListener('click', () => this._togglePause());
     $('r-clear').addEventListener('click', () => this._clear());
@@ -209,7 +85,7 @@ export class RttView {
     // 老版本这里是 select（0/1000/500/200/2000/4000/8000/12000/20000）：存过 8000/12000 的要能显示出来
     ensureSelectOption($('r-usb-clock'), store.get('rtt.clockKhz', ''), mhzLabel(store.get('rtt.clockKhz', '')));
     $('r-usb-clock').value=String(store.get('rtt.clockKhz','0'));
-    this._applyClockLimit();
+    this._updateTargetUi();
     store.bind($('r-record-ts'), 'rtt.recordTs', 'checked');
     store.bind($('r-record-auto'), 'rtt.recordAuto', 'checked');
     $('r-record').addEventListener('click', () => this._toggleRecord());
@@ -225,7 +101,7 @@ export class RttView {
 
     this._elfInput = document.createElement('input');
     this._elfInput.type = 'file';
-    this._elfInput.accept = '.elf,.axf,.out,.bin';
+    this._elfInput.accept = '.elf,.axf,.out';
     this._elfInput.style.display = 'none';
     this._elfInput.addEventListener('change', () => this._loadElf());
     document.body.appendChild(this._elfInput);
@@ -261,8 +137,6 @@ export class RttView {
     const q = new URLSearchParams(location.search);
     const b = q.get('backend') === 'mock' ? 'mock' : 'webusb';
     this.backend = b;
-    $('r-mock-box').hidden = b !== 'mock';
-    if (q.get('addr')) $('r-addr').value = q.get('addr');
     this._setMode(mode);                       // 起手就要应用显示模式（否则默认的终端模式没容器，数据看不见）
     // 只有当 URL **明确指定了后端**时才自动连接（否则会拿 localStorage 里上次的后端乱连）
     if (b === 'mock' && q.get('auto') === '1') setTimeout(() => this.connectProbe().catch(() => {}), 150);
@@ -275,21 +149,40 @@ export class RttView {
   }
 
 
-  _applyChipUi(applyRange){
-    this._applyClockLimit();
-    const t = armChipId();
-    const note = $('r-chip-note');
-    if (note) note.hidden = chipArchOf(chipSel()?.value || '') !== 'riscv';
-    if (applyRange && $('r-target').value !== 'riscv' && OCD_RAM[t]) $('r-range').value = OCD_RAM[t];
+  _targetConfig(){
+    const arch = $('r-target').value === 'riscv' ? 'riscv' : 'arm';
+    return this.sessionTarget?.arch === arch ? this.sessionTarget : {
+      id: arch, arch, label: arch === 'arm' ? 'ARM / SWD（未绑定板型）' : 'RISC-V / JTAG（未绑定板型）',
+    };
   }
 
-  _applyClockLimit(){
-    const target=chipSel()?.value;
-    constrainClockSelect($('r-usb-clock'),target,v=>store.set('rtt.clockKhz',v));
-    const imported = this.importedTarget?.id === target ? this.importedTarget.cfg : null;
-    $('r-usb-clock').disabled = !!imported || !!this.probe;
-    $('r-usb-clock').title = imported ? `沿用 CFG 的 ${imported.clockKhz} kHz` :
-      isHpmClockTarget(target) ? 'HPM JTAG TCK 最高 25 MHz；默认 10 MHz' : '调试时钟最高 60 MHz；默认 10 MHz';
+  _applySessionTarget(target){
+    this.sessionTarget = target;
+    $('r-target').value = target.arch === 'riscv' ? 'riscv' : 'swd';
+    store.set('rtt.target', $('r-target').value);
+    this._updateTargetUi();
+  }
+
+  _family(target){
+    return target.id === 'riscv' ? selectedHpmBoard() : target.id;
+  }
+
+  _clearElf(){
+    this.elfAddress = null;
+    this._elfRevision = (this._elfRevision || 0) + 1;
+    setStatus($('r-err'), '请载入与目标匹配的 ELF');
+  }
+
+  _updateTargetUi(){
+    const config = this._targetConfig();
+    const family = this._family(config);
+    const clock = $('r-usb-clock');
+    const label = clock.closest('label')?.querySelector('span');
+    if (label) label.textContent = config.arch === 'riscv' ? 'JTAG TCK' : 'SWD 时钟';
+    constrainClockSelect(clock, family, value => store.set('rtt.clockKhz', value));
+    clock.disabled = !!config.cfg || !!this.probe;
+    clock.title = config.cfg ? `沿用 CFG 的 ${config.cfg.clockKhz} kHz` :
+      isHpmClockTarget(family) ? 'HPM JTAG TCK 最高 25 MHz；默认 10 MHz' : '调试时钟最高 60 MHz；默认 10 MHz';
   }
 
   // ================= 连接 =================
@@ -316,9 +209,9 @@ export class RttView {
         if (g !== this._sessionGen) return;
       }
       if (b === 'webusb'){
-        const family = chipSel()?.value || 'stm32f103';
-        const arch = $('r-target').value === 'riscv' ? 'riscv' : 'arm';
-        const imported = this.importedTarget?.id === family ? this.importedTarget.cfg : null;
+        const target = this._targetConfig();
+        const family = this._family(target);
+        const {arch, cfg:imported} = target;
         const memoryAp = (imported?.arch ?? arch) === 'arm';
         const cfg = imported ? { ...imported, memoryAp } : makeOpenOcdProfile({ memoryAp,
           arch, family, port:hpmBoard(family), clockKhz:webClockKhz($('r-usb-clock').value, family, 10000),
@@ -358,7 +251,7 @@ export class RttView {
           if (g === this._sessionGen && this.probe === probeNow){
             this._err(e);
             setStatus($('r-err'), '探针已连接 · RTT 控制块未就绪：' + (e?.message || e)
-              + ' —— 探针保持连接；点【扫描控制块】或【载入 ELF】可重试', 'warn');
+              + ' —— 探针保持连接；请载入与运行固件匹配的 ELF', 'warn');
           }
         }
       }
@@ -381,7 +274,7 @@ export class RttView {
     this.probeManager?.cancel('rtt');
     this._sessionGen = (this._sessionGen || 0) + 1;
     this.running = false;
-    clearTimeout(this.timer); clearTimeout(this._resetTimer);
+    clearTimeout(this.timer);
     if (this._disconnectPromise) return await this._disconnectPromise;
     this._disconnectPromise = this._disconnectNow();
     try {
@@ -401,8 +294,7 @@ export class RttView {
     // A readUp transaction can still be reading/writing RdOff. Let it retire
     // before DAP_Disconnect and native USB close consume the same reply queue.
     await this._drainRtt();
-    await this._scanTask?.catch(() => {});
-    await this._resetTask?.catch(() => {});
+    await this._rttStartTask?.catch(() => {});
     if (this.rec.active || this.rec.needsClose || this.rec.starting || this.rec.draining){
       const info = await this.rec.stop();
       this._recordBtn();
@@ -425,8 +317,8 @@ export class RttView {
   }
 
   _uiConnected(on){
-    for (const id of ['r-target','r-chip']) $(id).disabled = on;
-    this._applyClockLimit();
+    $('r-target').disabled = on;
+    this._updateTargetUi();
     if (!on){ $('r-cb').textContent = '—'; $('r-up').textContent = '0'; $('r-down').textContent = '0'; }
   }
 
@@ -439,14 +331,14 @@ export class RttView {
   }
 
   async _startRtt(g){
-    if (!this.probe || this._disconnectPromise || this._resetTask) return;
-    if (this._scanTask) return await this._scanTask;
-    this._scanTask = this._scanRtt(g);
-    try { return await this._scanTask; }
-    finally { this._scanTask = null; }
+    if (!this.probe || this._disconnectPromise) return;
+    if (this._rttStartTask) return await this._rttStartTask;
+    this._rttStartTask = this._openRtt(g);
+    try { return await this._rttStartTask; }
+    finally { this._rttStartTask = null; }
   }
 
-  async _scanRtt(g){
+  async _openRtt(g){
     if (g === undefined) g = this._sessionGen = (this._sessionGen || 0) + 1;
     const probe = this.probe;
     const active = () => g === this._sessionGen && this.probe === probe;
@@ -460,55 +352,35 @@ export class RttView {
       await probe.recoverDebugPort();
       if (!active()) return;
     }
+    const address = this._probeMock ? probe.cbAddr : this.elfAddress;
+    if (!address){
+      setStatus($('r-err'), '探针已连接 · 请载入含 _SEGGER_RTT 的 ELF', 'warn');
+      return;
+    }
     await probe.prepareRttScan?.();
     if (!active()) return;
-    const addrText = String($('r-addr').value || '').trim();
-    const addr = addrText ? Number(addrText) : 0;
-    const ranges = parseRanges($('r-range').value);
-    setStatus($('r-err'), '正在查找 RTT 控制块…');
-    const locate = a => Rtt.locate(probe, {
-      addr: a, ranges,
-      onProgress: (p, at) => setStatus($('r-err'), `扫描控制块 ${(p * 100) | 0}%  @0x${at.toString(16)}`),
-    });
-    let found;
-    try {
-      found = await locate(addr);
-    } catch (e){
-      /**
-       * 🚨 手填地址读不通时**不要直接失败**：`#r-addr` 是 store 绑定的（键 `rtt.addr`），
-       *    换固件/换目标后它仍然保留上一次的值。2026-10 现场就是这么翻的车 ——
-       *    同一个 origin 下的老页面留下了 F103 时代的 `0x4c0003c0`（HPM6800 的地址），
-       *    换到 H743 后那格必然读 FAULT，于是"探针好好的却报连接失败"。
-       *    探针本身是好的 ⇒ 退回"按当前 RAM 范围自动扫描"，扫到就把地址回填。
-       */
-      if (!addr || !ranges.length || !active()) throw e;
-      setStatus($('r-err'), `地址 0x${addr.toString(16)} 读不通（${e.message}）—— 改为在 RAM 范围内自动扫描…`, 'warn');
-      found = await locate(0);
-      if (!active()) return;
-      if (found){
-        $('r-addr').value = '0x' + found.toString(16);
-        store.set('rtt.addr', $('r-addr').value);
-        toast(`已自动找回 RTT 控制块 0x${found.toString(16)}（原地址 0x${addr.toString(16)} 无效）`, 'ok');
-      }
-    }
+    $('r-cb').textContent = '—';
+    $('r-up').textContent = $('r-down').textContent = '0';
+    setStatus($('r-err'), '正在验证 ELF 指定的 RTT 控制块…');
+    const check = await Rtt.validate(probe, address);
     if (!active()) return;
-    if (!found) throw new Error('没找到 SEGGER RTT 控制块：固件里编进 RTT 了吗？RAM 范围填对了吗？（也可以载入 .elf 用符号定位）');
-    const rtt = new Rtt(probe, { addr: found });
-    await rtt.init(found);
+    if (!check.ok) throw Error(`0x${address.toString(16)} 处的 RTT 控制块校验失败：${check.reason}`);
+    const rtt = new Rtt(probe, {addr:address});
+    await rtt.init();
     if (!active()) return;
     const inff = rtt.info();
-    $('r-cb').textContent = '0x' + found.toString(16);
+    $('r-cb').textContent = '0x' + address.toString(16);
     $('r-up').textContent = inff.maxUp;
     $('r-down').textContent = inff.maxDown;
     const nm = await rtt.name('up', 0);
     if (!active()) return;
-    await probe.useRttMemory?.(inff, ranges);
+    await probe.useRttMemory?.(inff);
     if (!active()) return;
     this.rtt = rtt;
     this._needsRttReconnect = false;
     $('r-chlabel').textContent = `下行 ch0${nm ? ' · ' + nm : ''}`;
     const sz = inff.up[0]?.size || 0;
-    setStatus($('r-err'), `控制块 0x${found.toString(16)}，上行缓冲 ${sz} B${inff.maxUp > 1 ? `（固件声明 ${inff.maxUp} 个上行通道，本页读 ch0）` : ''}`, 'ok');
+    setStatus($('r-err'), `控制块 0x${address.toString(16)}，上行缓冲 ${sz} B${inff.maxUp > 1 ? `（固件声明 ${inff.maxUp} 个上行通道，本页读 ch0）` : ''}`, 'ok');
     this._startPoll(g);
   }
 
@@ -579,7 +451,7 @@ export class RttView {
     this.running = false;
     clearTimeout(this.timer);
     this._needsRttReconnect = true;
-    setStatus($('r-err'), '读取失败：' + (e?.message || e) + '。重新扫描控制块可重连原探针。', 'err');
+    setStatus($('r-err'), '读取失败：' + (e?.message || e) + '。请重新载入 ELF 或通过顶栏重新连接探针。', 'err');
   }
 
   _err(e){
@@ -736,58 +608,48 @@ export class RttView {
     } catch (e){ this._err(e); }
   }
 
-  async resetTarget(){
-    if (this._resetTask || this._scanTask || this._disconnectPromise) return;
-    this._resetTask = this._resetTargetNow();
-    try { await this._resetTask; }
-    finally { this._resetTask = null; }
-  }
-
-  async _resetTargetNow(){
-    if (!this.probe){ toast('先连接一个后端', 'warn'); return; }
-    if (typeof this.probe.reset !== 'function'){
-      toast('当前会话没有目标复位能力', 'warn', 7000);
-      return;
-    }
-    const probe = this.probe;
-    const generation = this._sessionGen = (this._sessionGen || 0) + 1;
-    this.running = false;
-    clearTimeout(this.timer); clearTimeout(this._resetTimer);
-    try {
-      await this._drainRtt();
-      if (generation !== this._sessionGen || probe !== this.probe) return;
-      const how = await probe.reset();
-      if (generation !== this._sessionGen || probe !== this.probe) return;
-      toast(`已复位目标（${how}），2 秒后重新读取控制块…`, 'ok');
-      const g = generation;
-      clearTimeout(this._resetTimer);
-      this._resetTimer = setTimeout(() => {
-        if (g === this._sessionGen && probe === this.probe) this._startRtt().catch(e => this._err(e));
-      }, 2000);
-    } catch (e){ this._err(e); }
-  }
-
   // ================= ELF =================
-  async _loadElf(){ return await this.loadElfFile(this._elfInput.files?.[0]); }
-  async loadElfFile(f, buffer){
-    if (!f) return false;
+  async _loadElf(){
+    const file = this._elfInput.files?.[0];
+    this._elfInput.value = '';
+    return await this.loadElfFile(file);
+  }
+
+  async loadElfFile(file, buffer){
+    if (!file) return false;
+    const revision = this._elfRevision = (this._elfRevision || 0) + 1;
     try {
-      const buf = buffer || await f.arrayBuffer();
-      const sym = findSymbol(buf, '_SEGGER_RTT');
-      if (!sym){ toast(`${f.name} 里没有 _SEGGER_RTT 符号（strip 过了？）→ 改用扫描`, 'warn', 6000); return; }
-      $('r-addr').value = '0x' + sym.addr.toString(16);
-      store.set('rtt.addr', $('r-addr').value);
-      this.onElfLoaded?.(buf, f.name);
-      toast(`从 ELF 拿到 _SEGGER_RTT = 0x${sym.addr.toString(16)}（${sym.size} B）`, 'ok', 6000);
+      const bytes = buffer || await file.arrayBuffer();
+      if (revision !== this._elfRevision) return false;
+      if (this._connectPromise || this._disconnectPromise || this._rttStartTask)
+        throw Error('探针操作尚未完成，请稍后载入 ELF');
+      const symbol = findSymbol(bytes, '_SEGGER_RTT');
+      if (!symbol?.addr || !Number.isInteger(symbol.addr) || symbol.addr > 0xffffffff)
+        throw Error(`${file.name} 中没有可用的 _SEGGER_RTT 地址，请载入包含符号表的 ELF`);
+      const data = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+      const header = new DataView(data.buffer, data.byteOffset, data.byteLength);
+      const machine = header.getUint16(18, data[5] === 1);
+      if (machine !== (this._targetConfig().arch === 'arm' ? 40 : 243))
+        throw Error('ELF 架构与 Viewer 的目标类型不匹配');
+      this.elfAddress = symbol.addr;
+      this.onElfLoaded?.(bytes, file.name);
+      setStatus($('r-err'), `${file.name} · _SEGGER_RTT 0x${symbol.addr.toString(16)}`, 'ok');
+      if (this.probe && !this._probeMock){
+        try { await this._startRtt(); }
+        catch (error){ this._err(error); }
+      }
       return true;
-    } catch (e){ this._err(e); }
+    } catch (error){
+      this._err(error);
+      return false;
+    }
   }
 
   // ================= 统计 / 保存 =================
   summary(){
     return {connected:!!this.probe,running:this.running,backend:this.backend || 'webusb',
       transport:this.probe?.name ?? null,
-      stats:{...this.stats},controlBlock:this.rtt?.addr??null,
+      stats:{...this.stats},elfControlBlock:this.elfAddress??null,controlBlock:this.rtt?.addr??null,
       bufferedBytes:this.recBytes,displaySuppressed:this.suppressed,error:$('r-err').textContent};
   }
   _stats(){

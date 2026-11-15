@@ -747,20 +747,20 @@ class BoardAcceptance:
                                         before_restore=self.check_idle):
             yield elf
 
-    def viewer_start(self, elf=None):
+    def viewer_start(self, elf):
         self.web.page('rtt', 'show')
         self.web.set('rtt', '#r-target', 'riscv' if self.rv else 'swd')
-        self.web.set('rtt', '#r-chip', self.chip)
+        if self.rv:
+            self.web.set('flash', '#f-chip', self.chip)
+            if not self.web.read('rtt', '#r-use-session-target')['disabled']:
+                self.click('rtt', '#r-use-session-target')
         self.web.set('rtt', '#r-usb-clock', str(self.case['requestedHz'] // 1000))
         self.web.set('rtt', '#r-record-auto', False)
         self.web.set('rtt', '#r-poll', '5')
         _, cb, _, _ = self.rtt_addresses()
-        if elf is not None:
-            checked(self.invoke('rtt', 'loadElfFile', dict(pack_file(elf), kind='file')),
-                    'Failed to resolve _SEGGER_RTT from probe fixture ELF')
-            checked(int(self.web.read('rtt', '#r-addr')['value'], 0) == cb, 'Wrong RTT ELF address')
-        else:
-            self.web.set('rtt', '#r-addr', hex(cb))
+        checked(self.invoke('rtt', 'loadElfFile', dict(pack_file(elf), kind='file')),
+                'Failed to resolve _SEGGER_RTT from probe fixture ELF')
+        checked(self.invoke('rtt', 'summary')['elfControlBlock'] == cb, 'Wrong RTT ELF address')
         self.click('rtt', '#r-clear')
         self.invoke('rtt', 'connectProbe')
         return wait_for(lambda: self.invoke('rtt', 'summary'),
@@ -808,7 +808,6 @@ class BoardAcceptance:
         self.web.page('rttcdc', 'show')
         self.web.set('rttcdc', '#h-target', self.stream_mode())
         self.web.set('rttcdc', '#h-addr', hex(cb))
-        self.web.set('rttcdc', '#h-size', '0x100')
         self.web.set('rttcdc', '#h-chan', '0')
         self.web.set('rttcdc', '#c-record-auto', False)
         self.invoke('rttcdc', 'connect', target='hid')
@@ -1576,10 +1575,10 @@ class BoardAcceptance:
                     self.close_debug()
             return
         live_rtt = business in ('rtt-viewer', 'rtt-forward')
-        with self.rtt_fixture(folder, producer=live_rtt):
+        with self.rtt_fixture(folder, producer=live_rtt) as elf:
             if business == 'rtt-viewer':
                 try:
-                    self.viewer_start()
+                    self.viewer_start(elf)
                     clock = self.clock()
                     self.invoke('rtt', 'saveRaw')
                     data = self.web.download('rtt', folder / 'up.bin')

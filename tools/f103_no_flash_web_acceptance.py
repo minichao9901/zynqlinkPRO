@@ -8,6 +8,7 @@ from pathlib import Path
 import time
 import re
 
+from toolbox import pack_file
 from tools.f103_stream_acceptance import Streams, symbol
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -91,7 +92,7 @@ class NoFlash(Streams):
     def rtt(self):
         self.page('rtt','show')
         self.set('rtt','#r-backend','webusb');self.set('rtt','#r-target','swd')
-        self.set('rtt','#r-usb-clock','1000');self.set('rtt','#r-addr',hex(symbol(self.args.elf,'_SEGGER_RTT')))
+        self.set('rtt','#r-usb-clock','1000');assert self.invoke('rtt','loadElfFile',dict(pack_file(self.args.elf),kind='file'))
         self.invoke('rtt','connectProbe')
         try:
             deadline=time.monotonic()+10
@@ -200,7 +201,7 @@ class NoFlash(Streams):
         self.page('rttcdc','show');self.invoke('rttcdc','connect',target='hid')
         try:
             self.set('rttcdc','#h-target','swd');self.set('rttcdc','#h-addr',hex(symbol(self.args.elf,'_SEGGER_RTT')))
-            self.set('rttcdc','#h-size','256');self.set('rttcdc','#h-chan','0');self.set('rttcdc','#h-clock','20000000')
+            self.set('rttcdc','#h-chan','0');self.set('rttcdc','#h-clock','20000000')
             self.invoke('rttcdc','applyClock',target='hid');self.invoke('rttcdc','refreshPorts')
             ports=next(c for c in self.page('rttcdc','describe')['controls'] if c['selector']=='#c-port')['options']
             matches=[p for p in ports if re.search(r'\b'+re.escape(self.probe_cdc)+r'\b',p['label'])]

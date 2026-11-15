@@ -334,62 +334,15 @@
             </select>
           </label>
           <label class="chk"><input type="checkbox" id="r-usb-all"> 显示所有 USB 设备（非 DAPLink）</label>
-          <p class="hint">支持 CMSIS-DAP v2（bulk）探针：DAPLink、自制 cherrydap 等。<br></p>
         </div>
 
-        <div id="r-mock-box" hidden>
-          <p class="hint">模拟目标：内存里放一个假的 RTT 控制块，每 200ms 吐一行日志，用来演示与自测。</p>
-        </div>
       </fieldset>
 
       <fieldset>
         <legend>RTT 控制块</legend>
 
-        <label class="row" id="r-chip-row"><span>芯片</span>
-          <select id="r-chip" title="选择目标芯片以填入默认 RAM 扫描范围；范围也可手动修改">
-            <optgroup label="ARM / Cortex-M（WebUSB / SWD）" data-arch="arm">
-              <option value="stm32f103">STM32F1（F103 等）</option>
-              <option value="stm32f0">STM32F0</option>
-              <option value="stm32f2">STM32F2</option>
-              <option value="stm32f3">STM32F3</option>
-              <option value="stm32f4">STM32F4</option>
-              <option value="stm32f7">STM32F7</option>
-              <option value="stm32g0">STM32G0</option>
-              <option value="stm32g4">STM32G4</option>
-              <option value="stm32h7">STM32H7（H743 等）</option>
-              <option value="stm32h7b0">STM32H7B0 / H7A3 / H7B3（H7B0VBT6 KIT）</option>
-              <option value="stm32h7a3">STM32H7A3</option>
-              <option value="stm32h7b3">STM32H7B3</option>
-              <option value="stm32h5">STM32H5</option>
-              <option value="stm32l0">STM32L0</option>
-              <option value="stm32l1">STM32L1</option>
-              <option value="stm32l4">STM32L4 / L4+</option>
-              <option value="stm32l5">STM32L5</option>
-              <option value="stm32u5">STM32U5</option>
-              <option value="stm32c0">STM32C0</option>
-              <option value="stm32wb">STM32WB</option>
-              <option value="stm32wl">STM32WL</option>
-              <option value="nrf52">Nordic nRF52</option>
-              <option value="rp2350">Raspberry Pi RP2350</option>
-
-            </optgroup>
-            <optgroup label="RISC-V（只能 JTAG · 控制块要在非缓存区）" data-arch="riscv">
-              <option value="riscv-other">其它 RISC-V（自己填 RAM 范围）</option>
-            </optgroup>
-          </select>
-        </label>
-        <p class="hint" id="r-chip-note">RISC-V 的控制块要放<b>非缓存</b>内存（探针的 SBA 读不旁路 D-cache，放可缓存区会读到陈旧值）—— 窗口按各系列链接脚本推导，<b>以你的链接脚本为准</b>；最稳的是点「载入 ELF…」用 <code>_SEGGER_RTT</code> 直接定地址。</p>
-        <label class="row"><span>RAM 范围</span><input id="r-range" value="0x20000000-0x20020000"></label>
-        <label class="row"><span>地址</span><input id="r-addr" placeholder="留空 = 自动扫描 / 读 ELF"></label>
-        <div class="row btnrow">
-          <button id="r-elf">载入 ELF…</button>
-          <button id="r-find">扫描控制块</button>
-        </div>
+        <button id="r-elf">载入 ELF…</button>
         <label class="row"><span>轮询</span><input id="r-poll" class="num" value="5" inputmode="numeric"> ms</label>
-        <div class="row btnrow">
-          <button id="r-reset">复位目标</button>
-          <button id="r-restart">重连 RTT</button>
-        </div>
       </fieldset>
     </aside>
 
@@ -407,8 +360,8 @@
       </div>
       <div class="rttbox">
         <div class="termbox" id="r-term" hidden></div>
-        <div class="rtt-empty" id="r-empty" hidden>等待 RTT 输出…<br>连接探针并选择 RTT 通道后，目标输出会显示在这里。</div>
-        <pre class="rx" data-empty="连接探针并选择 RTT 通道后，这里显示目标输出。" id="r-rx"></pre>
+        <div class="rtt-empty" id="r-empty" hidden>等待 RTT 输出…<br>载入匹配的 ELF 并连接探针后，目标输出会显示在这里。</div>
+        <pre class="rx" data-empty="载入匹配的 ELF 并连接探针后，这里显示目标输出。" id="r-rx"></pre>
       </div>
       <div class="stats">
         <span>控制块 <b id="r-cb">—</b> · up × <b id="r-up">0</b> / down × <b id="r-down">0</b></span>
@@ -444,14 +397,11 @@
         <legend>探针 · RTT → CDC</legend>
         <p class="hint" id="h-info">未连接</p>
         <label class="row"><span>RTT 地址</span>
-          <input id="h-addr" value="0x20000000" title="控制块搜索起点。Cortex-M7（H743 / H7B3 等）的 DTCM 探针读不到，要给 AXI SRAM（如 0x24000000）">
+          <input id="h-addr" placeholder="载入 ELF 或填写确切地址" title="RTT 控制块的确切地址">
         </label>
         <div class="row btnrow">
-          <button id="h-elf" title="从 ELF 里读 _SEGGER_RTT 符号，顺手把搜索长度收成 0x1000">载入 ELF…</button>
+          <button id="h-elf" title="从 ELF 读取 _SEGGER_RTT 地址">载入 ELF…</button>
         </div>
-        <label class="row"><span>搜索长度</span>
-          <input id="h-size" class="num" value="0" title="0 = 探针默认 64 KB（从上面的地址起搜）">
-        </label>
         <label class="row"><span>通道</span>
           <input id="h-chan" class="num" value="0" title="RTT 上行通道号，0 = channel 0">
         </label>
@@ -469,7 +419,6 @@
           <button id="h-stop">停止</button>
         </div>
         <div class="row btnrow">
-          <button id="h-auto" title="让探针自己从 0x20000000 起扫 64 KB 找 &quot;SEGGER RTT&quot; 签名">自动搜控制块</button>
           <button id="h-refresh">刷新状态</button>
         </div>
         <p class="hint" id="h-state">未启动</p>

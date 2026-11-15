@@ -133,10 +133,10 @@ test('RTT concurrent writes publish distinct offsets and teardown waits for the 
   assert.deepEqual([ring[15], ring[0], ring[1], wr], [65, 66, 67, 2]);
 });
 
-test('RTT rescan reconnects the same probe and validates the control block after a read failure', async t => {
+test('RTT reopens the ELF address on the same probe after a read failure', async t => {
   const view = new RttView();
   const probe = view.probe = new MockProbe();
-  const fields = new Map([['r-addr',{ value:'0x' + probe.cbAddr.toString(16) }],['r-range',{ value:'' }]]);
+  const fields = new Map();
   globalThis.document = { getElementById(id){
     if (!fields.has(id)) fields.set(id,{});
     return fields.get(id);
@@ -146,8 +146,17 @@ test('RTT rescan reconnects the same probe and validates the control block after
   probe.recoverDebugPort = async () => { recovered++; };
   view._startPoll = () => {};
   view._fail(Error('injected read error'));
-  assert.match(fields.get('r-err').textContent,/重新扫描/);
+  assert.match(fields.get('r-err').textContent,/重新载入 ELF/);
   assert.equal(recovered,0);
+  view._needsRttReconnect = false;
+  let reads = 0;
+  const read = probe.readMem.bind(probe);
+  probe.readMem = (...args) => { reads++; return read(...args); };
+  await view._startRtt();
+  assert.equal(reads,0);
+  assert.match(fields.get('r-err').textContent,/请载入/);
+  view.elfAddress = probe.cbAddr;
+  view._needsRttReconnect = true;
   await view._startRtt();
   assert.equal(recovered,1);
   assert.equal(view.rtt.addr,probe.cbAddr);

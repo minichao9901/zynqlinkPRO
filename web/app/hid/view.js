@@ -60,7 +60,6 @@ export class RttCdcView {
 
     $('h-clock').innerHTML = CLOCK_OPTIONS.map(o => `<option value="${o.v}">${o.label}</option>`).join('');
     store.bind($('h-addr'), 'hid.addr');
-    store.bind($('h-size'), 'hid.size');
     store.bind($('h-chan'), 'hid.chan');
     store.bind($('h-clock'), 'hid.clock');
     /**
@@ -84,7 +83,6 @@ export class RttCdcView {
     $('h-elf').addEventListener('click', () => this._elfInput.click());
     this._elfInput.addEventListener('change', () => this.loadElf());
     $('h-start').addEventListener('click', () => this.start());
-    $('h-auto').addEventListener('click', () => this.autostart());
     $('h-stop').addEventListener('click', () => this.stop().catch(e => toast(e.message, 'err')));
     $('h-refresh').addEventListener('click', () => this.refresh());
     $('h-clock').addEventListener('change', debounce(() => this.applyClock(), 60));
@@ -227,8 +225,8 @@ export class RttCdcView {
       return Number.isFinite(n) ? n : dflt;
     };
     return {
-      addr: num('h-addr', 0),
-      size: num('h-size', 0),
+      addr: Number($('h-addr').value.trim()),
+      size: 24, // SEGGER RTT header; only check the supplied address.
       channel: num('h-chan', 0),
       /**
        * 旧软件探针的 RISC-V/JTAG 必须发0；已识别的ZynqLinkPro使用Hz（最高25MHz）。
@@ -242,7 +240,6 @@ export class RttCdcView {
 
   persist(){
     store.set('hid.addr', $('h-addr').value);
-    store.set('hid.size', $('h-size').value);
     store.set('hid.chan', $('h-chan').value);
     store.set('hid.clock', $('h-clock').value);
   }
@@ -287,18 +284,6 @@ export class RttCdcView {
     store.set('rtt.target', riscv ? 'riscv' : 'swd');
     this._selectedTarget = this.targetMode;
     this._applyTargetUi();
-    /**
-     * 切到 RISC-V 时别自作聪明改地址：**HPM 上"盲目大范围搜控制块"不可靠**
-     * （2026-10 真机实测：窗口给 0x01200000 + 256 KB 时读错数一直涨、就是搜不到；
-     *   给准地址 0x01240000 立刻找到）。所以只提示用户走「载入 ELF…」那条确定的路。
-     */
-    if (riscv){
-      const a = String($('h-addr').value || '').trim().toLowerCase();
-      if (!a || a === '0x20000000' || a === '0x24000000'){
-        toast('切到 RISC-V 了：HPM 的控制块地址请点「载入 ELF…」自动填（_SEGGER_RTT），' +
-              '或在 0x01240000 一带手填 —— 对着 STM32 的默认窗口搜是搜不到的', 'warn', 8000);
-      }
-    }
     if (!this.dev.connected){ toast(`已记为 ${riscv ? 'RISC-V/JTAG' : 'SWD/ARM'}，连上探针后再切一次`, 'warn'); return; }
     try {
       await runProbeOperation(this, 'hid', async () => {
@@ -384,15 +369,17 @@ export class RttCdcView {
     }
   }
 
-  async start(){ return await this._startBridge(false); }
-  async autostart(){ return await this._startBridge(true); }
-
-  async _startBridge(auto){
+  async start(){
     if (this._starting || this._stopPromise || this._disconnecting) return;
+    const params = this.params();
+    if (!Number.isInteger(params.addr) || params.addr <= 0 || params.addr > 0xffffffff - params.size || params.addr % 4){
+      setStatus($('h-state'), '请载入 ELF 或填写对齐的 RTT 控制块地址', 'warn');
+      return false;
+    }
     const g = this._engineGen = (this._engineGen || 0) + 1;
     this._starting = true;
     clearInterval(this._timer);
-    this._activeTask = runProbeOperation(this, 'hid', () => this._startBridgeNow(auto, g), {
+    this._activeTask = runProbeOperation(this, 'hid', () => this._startBridgeNow(params, g), {
       mock: !!this.mock, reason: 'RTT 转发要使用探针',
     });
     try { return await this._activeTask; }
@@ -400,14 +387,13 @@ export class RttCdcView {
     finally { this._activeTask = null; this._starting = false; this.render({ error:this._statusError }); }
   }
 
-  async _startBridgeNow(auto, g){
+  async _startBridgeNow(p, g){
     try {
       if (!this.mock){
         await prepareProbeHandoff(this, 'hid', 'RTT 转发要使用探针');
         if (g !== this._engineGen) return;
       }
       if (!await this._ensure() || g !== this._engineGen) return;
-      const p = this.params();
       /**
        * 🚨 **启动前每次都补发目标类型**（2026-10 真机定因，别删）。
        *
@@ -430,8 +416,7 @@ export class RttCdcView {
           throw Error(`探针未确认转发目标（${target?.rc ?? '无回包'}），未启动`);
         if (g !== this._engineGen) return;
       }
-      if ((!auto||this.isRiscv&&supportsRiscvStreamClock(this.info)) &&
-          (p.clockHz || this.isRiscv) && !this.mock){
+      if ((p.clockHz || this.isRiscv) && !this.mock){
         const config=await this.dev.configure({ clockHz: p.clockHz });
         if(config.rc!==0)throw new Error(`转发时钟配置被拒（${config.rc}），未启动`);
       }
@@ -441,7 +426,7 @@ export class RttCdcView {
       // Block new UART writes, then let already submitted writes finish before changing producer.
       await this.probeManager?.cdcMode?.drainWrites();
       if (g !== this._engineGen) return;
-      const response = auto ? await this.dev.autostart() : await this.dev.start(p);
+      const response = await this.dev.start(p);
       if (g !== this._engineGen) return;
       if (response?.rc < 0 && response.rc !== START_PENDING){
         this._bridgeRequested = false;
@@ -600,9 +585,7 @@ export class RttCdcView {
       toast(`转发已启动 · 控制块 ${hex(st.cbAddr)} · 档位 ${st.swdMhz} MHz`, 'ok', 5000);
       this._armAutoRefresh();
     }
-    else if (st?.running) toast(this.isRiscv
-      ? `桥跑起来了，但还没找到控制块（读错 ${st.rdErr}）—— 地址窗口（按 _SEGGER_RTT 填）/ JTAG 接线 / 目标是否被停住，逐项看`
-      : `桥跑起来了，但还没找到控制块（读错 ${st.rdErr}）—— 地址窗口 / SWD 接线 / 目标供电检查一下`, 'warn', 8000);
+    else if (st?.running) this._armAutoRefresh();
     else if (st?.startRc === START_PENDING) toast('启动还在排队（探针还没给出结果，稍后点「刷新状态」看看）', 'warn', 6000);
     else if (st?.startRc) toast('启动失败：' + startRcText(st.startRc, this.isRiscv), 'err', 6000);
   }
@@ -616,15 +599,13 @@ export class RttCdcView {
       const buf = await f.arrayBuffer();
       const sym = findSymbol(buf, '_SEGGER_RTT');
       if (!sym){
-        toast(`${f.name} 里没有 _SEGGER_RTT 符号（strip 过？）→ 只能用「自动搜控制块」`, 'warn', 6000);
+        toast(`${f.name} 里没有 _SEGGER_RTT 符号，请载入包含符号表的 ELF`, 'warn', 6000);
         return;
       }
       $('h-addr').value = hex(sym.addr);
-      // 已知确切地址就不用扫 64 KB：给个 4 KB 窗口，既不越界也留点余量（固件是 512B 重叠窗块读）
-      $('h-size').value = '0x1000';
       this.persist();
       this.render();
-      toast(`从 ELF 拿到 _SEGGER_RTT = ${hex(sym.addr)}（${sym.size} B）→ 搜索长度设为 0x1000`, 'ok', 6000);
+      toast(`从 ELF 拿到 _SEGGER_RTT = ${hex(sym.addr)}（${sym.size} B）`, 'ok', 6000);
     } catch (e){
       toast('读 ELF 失败：' + (e?.message || e), 'err');
     }
@@ -635,7 +616,6 @@ export class RttCdcView {
     const dev = this.dev;
     const engineBusy = this._disconnecting || this._starting || !!this._stopPromise;
     if ($('h-start')) $('h-start').disabled = engineBusy;
-    if ($('h-auto')) $('h-auto').disabled = engineBusy;
     if ($('h-stop')) $('h-stop').disabled = this._disconnecting;
     if ($('h-refresh')) $('h-refresh').disabled = this._disconnecting || this._connecting;
     const target = $('h-target'); if (target) target.disabled = engineBusy;
@@ -661,20 +641,7 @@ export class RttCdcView {
         : '运行中 · 等待连接探针的 CDC 接收口', 'warn');
     }
     else if (st.running && !st.cbAddr){
-      /**
-       * 桥跑起来了但还没找到控制块。原因按概率排，而且**RISC-V 与 SWD 的排查项不一样**：
-       *   · RISC-V：时钟字段必须是 0（页面已自动处理）、窗口要给 HPM 的 SRAM、探针得在 SWD+JTAG 模式
-       *   · SWD：主机侧 DAP 在抢线、窗口要给对（Cortex-M7 是 AXI SRAM）、接线/供电
-       */
-      const riscv = this.isRiscv;
-      const why = riscv
-        ? ' —— ① 探针是不是在 SWD+JTAG 输出模式（烧录器页会自动切，也可 HID SET_CONFIG=1）；'
-          + '② 地址窗口给对了吗（HPM 的控制块一般在 0x01240000 一带的 SRAM，或点「载入 ELF…」自动填）；'
-          + '③ 目标在跑吗 / 查 JTAG 接线与供电'
-        : ' —— ① 是不是同时开着 RTT Viewer 的 WebUSB（它在抢同一根 SWD，先断开）；'
-          + '② 地址窗口给对了吗（Cortex-M7 要给 AXI SRAM）；③ 目标在跑吗 / 查 SWD 接线与供电';
-      setStatus(el, `运行中 · 还没找到 RTT 控制块（读错 ${st.rdErr} / RdOff 错 ${st.wrErr}`
-        + ` · 档位 ${st.swdMhz} MHz${st.dapYield ? ` · 给 DAP 让路 ${st.dapYield} 次` : ''}）` + why, 'err');
+      setStatus(el, `等待地址处的 RTT 控制块 · 读错 ${st.rdErr} · ${st.swdMhz} MHz。请核对 ELF 和目标运行状态`, 'warn');
     }
     else if (st.running){
       /**
@@ -696,11 +663,11 @@ export class RttCdcView {
         + (st.dapYield ? ` · 给 DAP 让路 ${st.dapYield} 次` : '')
         + (st.discard ? ' · 丢弃模式' : '') + stall, stall ? 'warn' : 'ok');
     } else if (st.startRc === START_PENDING){
-      setStatus(el, '正在启动…（探针还在排队搜控制块）', '');
+      setStatus(el, '正在验证 RTT 控制块…', '');
     } else if (st.startRc){
       setStatus(el, `未运行 · 上次启动失败：${startRcText(st.startRc, this.isRiscv)}`, 'err');
     } else {
-      setStatus(el, '未运行（点「启动转发」或「自动搜控制块」）', '');
+      setStatus(el, '未启动', '');
     }
     return this.summary();
   }

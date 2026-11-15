@@ -113,7 +113,7 @@ def main():
                 f.release_hid()
                 w.page('rttcdc','show');w.page('rttcdc','describe')
                 w.set('rttcdc','#h-target','swd');w.set('rttcdc','#h-addr','0x20000200')
-                w.set('rttcdc','#h-size','0x100');w.set('rttcdc','#h-chan','0')
+                w.set('rttcdc','#h-chan','0')
                 w.invoke('rttcdc','connect',target='hid');w.page('rttcdc','describe',target='hid')
                 w.invoke('rttcdc','refreshPorts')
                 options=next(c['options'] for c in w.page('rttcdc','describe')['controls'] if c['selector']=='#c-port')

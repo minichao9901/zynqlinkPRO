@@ -112,9 +112,6 @@ def main():
                 control('reset');row=dict(repeat=repeat);report['rows'].append(row);save()
                 class TimedWeb(Web):
                     worker=None
-                    def set(self,page,selector,value):
-                        if page=='rttcdc' and selector=='#h-size':value='0x100'
-                        return super().set(page,selector,value)
                     def invoke(self,page,method,*args,**kwargs):
                         if page=='rttcdc' and method=='start':
                             self.set('rttcdc','#h-clock','25000000')

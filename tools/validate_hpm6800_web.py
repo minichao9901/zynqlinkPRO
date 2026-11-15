@@ -199,8 +199,11 @@ class Web:
                 self.invoke('scope','stop','HPM cleanup');self.invoke('scope','disconnect')
     def rtt(self):
         self.page('rtt','show');self.set('rtt','#r-target','riscv')
-        self.set('rtt','#r-chip','hpm6800evk');self.set('rtt','#r-usb-clock','10000')
-        self.set('rtt','#r-addr',hex(symbol(self.a.elf,'_SEGGER_RTT')))
+        self.set('flash','#f-chip','hpm6800evk')
+        if not self.read('rtt','#r-use-session-target')['disabled']:
+            self.page('rtt','click',selector='#r-use-session-target')
+        self.set('rtt','#r-usb-clock','10000')
+        assert self.invoke('rtt','loadElfFile',dict(pack_file(self.a.elf),kind='file'))
         self.page('rtt','click',selector='#r-clear')
         left_active=False
         try:
@@ -232,7 +235,7 @@ class Web:
             limit='Repeating text detects corrupt bytes/partial-line gaps; native sequence fixture separately checks full record loss.')
     def rttcdc(self,pattern_check=text_pattern_ok):
         self.page('rttcdc','show');self.set('rttcdc','#h-target','riscv')
-        self.set('rttcdc','#h-addr',hex(symbol(self.a.elf,'_SEGGER_RTT')));self.set('rttcdc','#h-size','0x100')
+        self.set('rttcdc','#h-addr',hex(symbol(self.a.elf,'_SEGGER_RTT')))
         self.set('rttcdc','#h-chan','0') # RISC-V UI deliberately disables this legacy clock control.
         self.invoke('rttcdc','connect',target='hid');self.invoke('rttcdc','applyTargetType',target='hid')
         self.invoke('rttcdc','refreshPorts')

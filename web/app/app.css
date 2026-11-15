@@ -237,6 +237,8 @@ dialog form{margin-top:16px;text-align:right}
 
 /* ---------------- RTT 转发页 ---------------- */
 #tab-rttcdc .side .row>span:first-child{width:var(--label-w)}
+#tab-rttcdc .side :is(.hint,.workspace-help,#h-state,#c-note){font-size:12px;line-height:1.45}
+#tab-rttcdc .side :is(#h-state,#c-note):not(.ok,.warn,.err){color:var(--fg2)}
 #tab-spicdc .side .row>span:first-child{width:var(--label-w)}
 #si-state{white-space:pre-line;font:var(--text-xs)/1.7 var(--mono)}
 

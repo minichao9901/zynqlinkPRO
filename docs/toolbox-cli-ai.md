@@ -233,13 +233,13 @@ JTAG 临时加载的默认配对在 `prebuilt/release-20261106/`，断电后丢�
     python -X utf8 toolbox.py --runtime build/workbench-j7-new page dbg invoke disconnect
     ```
 
-12. 查看 RTT Viewer 的目标、ELF 和控制块设置。
+12. 查看 RTT Viewer 的目标和 ELF 设置。载入含 `_SEGGER_RTT` 的匹配 ELF 后，用 `summary` 查看 `elfControlBlock`。
 
     ```powershell
     python -X utf8 toolbox.py --runtime build/workbench-j7-new page rtt describe
     ```
 
-13. 按 RTT Viewer 已选的目标和控制块设置启动连接。
+13. 连接探针。Viewer 校验 ELF 指定的控制块后开始读取；已连接时载入 ELF 会直接验证该地址。
 
     ```powershell
     python -X utf8 toolbox.py --runtime build/workbench-j7-new page rtt invoke connectProbe
@@ -421,7 +421,7 @@ JTAG 临时加载的默认配对在 `prebuilt/release-20261106/`，断电后丢�
    python -X utf8 toolbox.py --runtime build/workbench-j7-new page flash click '#f-use-session-target'
    ```
 
-7. 让 RTT Viewer 沿用当前导入目标，随后选择匹配的 ELF 或填写控制块地址及 RAM 范围。
+7. 让 RTT Viewer 沿用当前导入目标，随后载入匹配且含 `_SEGGER_RTT` 的 ELF。RTT 转发页接受从 ELF 取得的地址或手填的确切地址。
 
    ```powershell
    python -X utf8 toolbox.py --runtime build/workbench-j7-new page rtt click '#r-use-session-target'

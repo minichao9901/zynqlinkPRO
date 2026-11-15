@@ -150,9 +150,11 @@ class Web(Acceptance):
     def rtt(self):
         import struct
         from f103_ram_fixture import Fixture
+        from tools.board_acceptance_target import Target
         from dap_pipeline_bench import open_dap,setup,xfer
         from test_probe_board import Memory
         import usb.util
+        elf, _ = Target(SimpleNamespace(board="f103ze", arm_gcc=None)).compile_producer(self.out / "viewer-elf")
         rows=[]
         with Fixture(self.out/'fixture') as f:
             up=b'F103_REAL_WEB_RTT_UP_0123456789abcdef\n'*100
@@ -162,7 +164,8 @@ class Web(Acceptance):
             assert xfer(f.tx,f.rx,[3])==b'\x03\x00';f.release_dap()
             self.page('rtt','show');self.page('rtt','describe')
             self.set('rtt','#r-target','swd');self.set('rtt','#r-usb-clock','10000')
-            self.set('rtt','#r-addr','0x20000200');self.set('rtt','#r-poll','5')
+            assert self.invoke('rtt','loadElfFile',dict(pack_file(elf),kind='file'))
+            self.set('rtt','#r-poll','5')
             start=time.perf_counter();self.invoke('rtt','connectProbe')
             try:
                 deadline=time.monotonic()+10

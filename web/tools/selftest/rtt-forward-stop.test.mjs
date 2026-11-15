@@ -4,6 +4,15 @@ import {RttCdcView} from '../../app/hid/view.js';
 import {RttCdcStreamView} from '../../app/hid/stream.js';
 import {SerialSession} from '../../app/serial/session.js';
 
+test('RTT forwarding uses a single exact-address control-block header window',t=>{
+  const fields = {'h-addr':{value:'0x24000014'},'h-chan':{value:'0'},'h-clock':{value:'50000000'},'h-target':{value:'swd'}};
+  globalThis.document={getElementById:id=>fields[id]};
+  t.after(()=>{delete globalThis.document;});
+  const params = new RttCdcView().params();
+  assert.equal(params.addr,0x24000014);
+  assert.equal(params.size,24);
+});
+
 test('RTT forwarding prefers the native probe CDC and rejects an unrelated COM port',async t=>{
   const uart = {path:'COM5',nativeService:true,getInfo:()=>({usbVendorId:0x1a86,usbProductId:0x7523})};
   const cdc = {path:'COM33',nativeService:true,getInfo:()=>({usbVendorId:0x0d28,usbProductId:0x0204})};
