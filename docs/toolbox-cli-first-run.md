@@ -208,8 +208,10 @@
    python -X utf8 toolbox.py probe-flash --image-dir build/qspi-repack-new/image --dry-run
    ```
 
-5. 若要写入这个新包，先按第 5 节第 1 步确认探针空闲且 `BOOT_MODE=0x1`，再执行下列命令。写后按第 5 节断电重上电并核对 OCM，核对命令的 `--elf` 指向本次重包目录的 `application.elf`。
+5. 若要写入这个新包，先结束当前探针操作，在工作台顶栏点击「断开连接」，并退出仍占用探针的其他 CLI 会话。手册页面可以保持打开。再按第 5 节第 1 步确认探针空闲且 `BOOT_MODE=0x1`，然后执行下列命令。写后按第 5 节断电重上电并核对 OCM，核对命令的 `--elf` 指向本次重包目录的 `application.elf`。
 
    ```powershell
    python -X utf8 toolbox.py probe-flash --image-dir build/qspi-repack-new/image --out build/qspi-repack-new/programmed
    ```
+
+如果第 5 步报「另一进程仍持有 Zynq 探针」，释放连接后可直接使用原 `image` 目录。该次失败可能已创建空的 `programmed` 目录。重试时在仓库终端沿用日志中实际的 `--image-dir`，给 `--out` 换一个未使用的目录名。
