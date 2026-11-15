@@ -151,6 +151,8 @@ export class RttCdcStreamView {
 
   // ---------------- 端口 ----------------
   async refreshPorts(){
+    const note = this.$('c-note');
+    note.title = '';
     // 演示模式（?demo=serial）：和串口助手一样，用内置假设备，方便演示/自检
     if (demoEnabled()){
       this.ports = [new DemoPort()];
@@ -178,7 +180,8 @@ export class RttCdcStreamView {
     const preferred = this.owner === 'rtt' && probePorts.length === 1 &&
       (!previous || previous.nativeService && !isProbeCdcPort(previous)) ? probePorts[0] : previous;
     sel.value = String(openedIndex >= 0 ? openedIndex : Math.max(0, this.ports.indexOf(preferred)));
-    setStatus(this.$('c-note'), `已授权 ${this.ports.length} 个串口：${this.ports.map(p => SerialSession.describe(p)).join('，')}`, null);
+    setStatus(note, `已授权 ${this.ports.length} 个串口`, null);
+    note.title = this.ports.map(p => SerialSession.describe(p)).join('\n');
   }
 
   async pickPort(){

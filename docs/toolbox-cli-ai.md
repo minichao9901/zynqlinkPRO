@@ -429,7 +429,7 @@ JTAG 临时加载的默认配对在 `prebuilt/release-20261106/`，断电后丢�
 
 内置烧录默认 SWD 1 MHz、HPM JTAG 10 MHz。调试器、烧录器和 RTT Viewer 的内置 HPM 档最高 25 MHz，其他 ARM/RISC-V 最高 60 MHz。RTT Viewer 默认 10 MHz。导入项使用 CFG 自带频率，实际时钟以板上读回为准。J-Scope 自动模式在采样周期达到 10 ms 时使用 Wasm 轮询，短周期使用探针硬件采样。RTT 转发和硬件采样通过探针私有 HID 控制，数据走 CDC 和 HSS Bulk。[Wasm 迁移与验收范围](validation/openocd-wasm-20261108/README.md)
 
-使用 zynqlinkPRO 的 Cortex-M SWD 时，Viewer 先用 OpenOCD Wasm 定位 RTT。通过 DP 和 ADIv5 MEM-AP 核对后，上行使用 `DAP_TransferBlock`，沿用该 AP 的访问属性并按 1 KiB TAR 切块。控制块和活动环须位于 Cortex-M SRAM 区或页面设置的 RAM 范围内，目标固件需保证这些地址对调试 AP 可见。连接摘要的 `SWD MEM-AP` 表示已接管。ADIv6、非小端或接管校验失败时沿用 Wasm。重新扫描会重新确认控制块和通道布局。
+使用 zynqlinkPRO 的 Cortex-M SWD 时，Viewer 先用 OpenOCD Wasm 校验 ELF 指定的 RTT 控制块。通过 DP 和 ADIv5 MEM-AP 核对后，上行使用 `DAP_TransferBlock`，沿用该 AP 的访问属性并按 1 KiB TAR 切块。快路径要求控制块和活动环位于 Cortex-M SRAM 区，且对调试 AP 可见。连接摘要的 `SWD MEM-AP` 表示已接管。ADIv6、非小端或接管校验失败时沿用 Wasm。重新载入 ELF 会重新确认控制块和通道布局。
 
 Web 支持 Cortex-M/SWD 和 RISC-V/JTAG。ARM/JTAG 的 CFG 导入会提示转到原生 OpenOCD。`toolbox.py page` 仍驱动同一 Web 工作台，适用链路与页面相同。
 
