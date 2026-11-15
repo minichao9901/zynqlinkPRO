@@ -1,6 +1,17 @@
 import { PROBE_FEATURES } from '../core/probe-users.js';
+import { isProbeCdcPort } from '../core/cdc-mode.js';
 import { setFlag } from './dom.js';
 import { nativeProbeEnabled, nativeProbeStatus, nativeProbeCancel } from '../core/native-probe.js';
+
+const RTT_POLL_OPERATIONS = new Set(['usb/exchange', 'usb/memory-read', 'usb/memory-write']);
+
+function foregroundWork(tools){
+  const {current, pending = []} = tools.nativeControl || {};
+  const viewerOwner = tools.rtt?.running && tools.rtt?.probe?.device?.owner;
+  const isForeground = ticket => ticket &&
+    !(viewerOwner && ticket.owner === viewerOwner && RTT_POLL_OPERATIONS.has(ticket.operation));
+  return {current: isForeground(current) ? current : null, pending: pending.filter(isForeground)};
+}
 
 /** Only inspect local connection/lease state; never query hardware from the header. */
 export function probeStatus(tools){
@@ -11,8 +22,9 @@ export function probeStatus(tools){
   if(service?.transport?.usbError)return {text:'探针：需重连',kind:'err',title:service.transport.usbError};
   const failed=Object.entries(service?.resources||{}).filter(([,v])=>v.error);
   if(failed.length)return {text:'探针：需恢复',kind:'err',title:failed.map(([k,v])=>`${k}：${v.error}`).join('\n')};
-  if(service?.current || service?.pending?.length)return {text:'探针：操作中',kind:'warn',
-    title:`当前：${service.current?.operation||'等待'}；排队：${service.pending.length}`};
+  const work = foregroundWork(tools);
+  if(work.current || work.pending.length)return {text:'探针：操作中',kind:'warn',
+    title:`当前：${work.current?.operation||'等待'}；排队：${work.pending.length}`};
   if (failures.length) return { text:'探针：需恢复', kind:'err', title:failures.map(f => `${name(f.owner)}：${f.error}`).join('\n') };
   if (pending.length) return { text:'探针：切换中', kind:'warn', title:pending.map(p => name(p.owner)).join('、') };
   const active = PROBE_FEATURES.filter(f => f.active(tools)).map(f => f.label);
@@ -29,7 +41,12 @@ export function probeStatus(tools){
 export function initProbeStatus(tools){
   const summaryViews = [
     ['scope', () => `探针${tools.scope.hid?.connected||tools.scope.usingMock?'已连接':'未连接'} · 数据${tools.scope.transport||tools.scope.usingMock?'已连接':'未连接'}`],
-    ['rttcdc', () => `转发${tools.hid.last?.running?'运行中':tools.probeManager?.failures.has('hid')?'状态未确认':'未启动'} · 接收口${tools.session.isOpen?'已打开':'未打开'}`],
+    ['rttcdc', () => {
+      const producer = tools.hid.last?.running ? '运行中' : tools.probeManager?.failures.has('hid') ? '状态未确认' : '未启动';
+      const {isOpen, port} = tools.session;
+      const receiver = !isOpen ? '未打开' : port?.nativeService && !isProbeCdcPort(port) ? '选错' : '已打开';
+      return `转发${producer} · 接收口${receiver}`;
+    }],
   ].map(([name, read]) => {
     const side=document.querySelector(`#tab-${name} .side`);
     if(!side)return null;
@@ -57,7 +74,7 @@ export function initProbeStatus(tools){
     el.after(cancel);
     cancel.addEventListener('click',async()=>{
       const status=tools.nativeControl;
-      const owner=status?.current?.owner||status?.resources?.capture?.restoreOwner;if(!owner)return;
+      const owner=foregroundWork(tools).current?.owner||status?.resources?.capture?.restoreOwner;if(!owner)return;
       cancel.disabled=true;
       try{await nativeProbeCancel(owner);}
       catch(error){cancel.title=error.message;}
@@ -69,7 +86,7 @@ export function initProbeStatus(tools){
         tools.nativeControl=await nativeProbeStatus();
         const capture=tools.nativeControl.resources?.capture;
         const capturing=capture?.restoreOwner&&!capture.restoring;
-        cancel.disabled=!tools.nativeControl.current&&!capturing;
+        cancel.disabled=!foregroundWork(tools).current&&!capturing;
         cancel.textContent=capturing?'停止当前采集':'取消当前操作';update();
       }
       catch(error){cancel.title=error.message;}

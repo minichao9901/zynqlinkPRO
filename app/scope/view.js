@@ -663,7 +663,7 @@ export class ScopeView {
     if (wasm){
       const text = 'WASM 主机轮询：每次按计划读内存，按主机时间戳记录样本和错拍。';
       const hint = $('sc-rate-advice');
-      if (hint){ setStatus(hint, text); hint.title = text; }
+      if (hint){ setStatus(hint, 'WASM 主机轮询'); hint.title = text; }
       const detail = $('sc-rate-detail');
       if (detail) detail.textContent = `周期低于 ${WASM_POLL_MIN_US} µs 时，自动模式切换到探针硬件采样。`;
       $('sc-plan').textContent = vars.length ? '读取 ' + plan.spans.length + ' 个连续内存范围，每帧 ' + plan.frameBytes + ' B' : '请选择要轮询的变量';
@@ -714,8 +714,10 @@ export class ScopeView {
           `读取耗时上界 ≤${fmtHz(advice.readCeilingHz)}，不代表持续采样能力。` +
           (fresh ? '依据当前标定。' : '依据粗估，建议先标定。') + (slow ? ` ${slow}` : '稳定性以实采跳拍/USB计数为准。')
         : '采样周期必须是大于 0 的有限数值。';
+      const qualifier = advice.aboveReadCeiling ? ' · 周期过短' : advice.aboveRecommendation ? ' · 高于建议速率' :
+        advice.normalized ? ' · 周期已量化' : fresh ? ' · 已标定' : '';
       const short = advice.valid
-        ? `建议起始：${advice.recommendedUs} µs（${fmtHz(advice.recommendedHz)}）` + (slow ? `；${slow}` : fresh ? ' · 已标定' : ' · 待标定')
+        ? `建议 ${advice.recommendedUs} µs · ${fmtHz(advice.recommendedHz)}${qualifier}`
         : text;
       setStatus(rateHint, short, !advice.valid ? 'err' : slow ? 'warn' : '');
       rateHint.title = text;

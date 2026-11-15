@@ -151,6 +151,8 @@ export class RttCdcStreamView {
 
   // ---------------- 端口 ----------------
   async refreshPorts(){
+    const note = this.$('c-note');
+    note.title = '';
     // 演示模式（?demo=serial）：和串口助手一样，用内置假设备，方便演示/自检
     if (demoEnabled()){
       this.ports = [new DemoPort()];
@@ -160,9 +162,9 @@ export class RttCdcStreamView {
       setStatus(this.$('c-note'), '当前是演示模式（?demo=serial）：这是页面内置的假串口，不是真硬件。', null);
       return;
     }
-    this.ports = await SerialSession.listPorts();
     const sel = this.$('c-port');
-    const prev = sel.value;
+    const previous = sel.value === '' ? null : this.ports?.[Number(sel.value)];
+    this.ports = await SerialSession.listPorts();
     sel.innerHTML = '';
     if (!this.ports.length){
       sel.appendChild(new Option('（没有已授权的串口 → 点「选择…」）', ''));
@@ -173,8 +175,13 @@ export class RttCdcStreamView {
       const alias = store.get('portAlias.' + portKey(p), '');
       sel.appendChild(new Option(`${alias || `串口 ${i + 1}`} · ${SerialSession.describe(p)}`, String(i)));
     });
-    sel.value = (prev !== '' && this.ports[Number(prev)]) ? prev : '0';
-    setStatus(this.$('c-note'), `已授权 ${this.ports.length} 个串口：${this.ports.map(p => SerialSession.describe(p)).join('，')}`, null);
+    const openedIndex = this.s.isOpen ? this.ports.indexOf(this.s.port) : -1;
+    const probePorts = this.ports.filter(port => port.nativeService && isProbeCdcPort(port));
+    const preferred = this.owner === 'rtt' && probePorts.length === 1 &&
+      (!previous || previous.nativeService && !isProbeCdcPort(previous)) ? probePorts[0] : previous;
+    sel.value = String(openedIndex >= 0 ? openedIndex : Math.max(0, this.ports.indexOf(preferred)));
+    setStatus(note, `已授权 ${this.ports.length} 个串口`, null);
+    note.title = this.ports.map(p => SerialSession.describe(p)).join('\n');
   }
 
   async pickPort(){
@@ -193,6 +200,10 @@ export class RttCdcStreamView {
   async connect(){
     const port = this.ports?.[Number(this.$('c-port').value)];
     if (!port){ toast('先点「选择…」授权一个串口（探针那个 CDC 口）', 'warn'); return; }
+    if (this.owner === 'rtt' && port.nativeService && !isProbeCdcPort(port)){
+      setStatus(this.$('c-err'), `接收口选错：请刷新端口并选择探针的 CDC 口（当前 ${port.path}）`, 'err');
+      return;
+    }
     try {
       await this.s.open(port, {
         baudRate: Number(this.$('c-baud').value) || 115200,

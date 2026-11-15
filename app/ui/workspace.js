@@ -34,7 +34,7 @@ export function initWorkspaces(){
     toolbar.prepend(fold);
     if(!['dbg','scope'].includes(name)){
       const summary=document.createElement('span');summary.className='workspace-summary';
-      const fields=({serial:['s-port','s-baud'],terminal:[],rtt:['r-target','r-chip'],rttcdc:['h-target'],flash:['f-chip']})[name]||[];
+      const fields=({serial:['s-port','s-baud'],terminal:[],rtt:['r-target'],rttcdc:['h-target'],flash:['f-chip']})[name]||[];
       const update=()=>{
         const text=fields.map(id=>{
           const el=document.getElementById(id);if(!el)return '';

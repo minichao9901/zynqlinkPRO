@@ -14,7 +14,7 @@ export function initSessionContext(tools){
     const imported=tools[page].importedTarget;
     if(imported?.id===$(prefix[page]+'-chip')?.value&&imported)return imported;
     if(page==='flash'){const id=$('f-chip').value;return {id,arch:hpmBoard(id)?'riscv':'arm',label:option('f-chip')};}
-    if(page==='rtt'){const id=$('r-chip').value;return {id,arch:$('r-target').value==='riscv'?'riscv':'arm',label:option('r-chip')};}
+    if(page==='rtt')return tools.rtt._targetConfig();
     if(page==='dbg'){
       if($('d-backend').value==='mock')return null;
       return tools.dbg._cfgTarget?.() || ($('d-backend').value==='riscv'
@@ -33,7 +33,8 @@ export function initSessionContext(tools){
   };
   const supports=(page,target)=>{
     if(target.cfg)return page==='rtt'||page==='flash'&&target.cfg.hasFlash;
-    if(page==='flash'||page==='rtt')return [...$(prefix[page]+'-chip').options].some(o=>o.value===target.id);
+    if(page==='rtt')return true;
+    if(page==='flash')return [...$('f-chip').options].some(o=>o.value===target.id);
     if(page!=='dbg')return true;
     const select=$(target.arch==='riscv'?'d-hpm-target':'d-arm-target');
     return !select||[...select.options].some(o=>o.value===target.id);
@@ -44,7 +45,7 @@ export function initSessionContext(tools){
   };
   const invalidate=page=>{
     const view=tools[page];view.sharedElfSha=null;elfBindings.delete(page);
-    if(page==='rtt'){$('r-addr').value='';store.set('rtt.addr','');}
+    if(page==='rtt')view._clearElf();
     if(page==='scope'){
       view.selected=[];view.all=[];view.elf=null;view.arrayGroups=[];view.dwarf=null;view.ram=[];view.skipped=[];
       $('sc-arrayexamples').replaceChildren();$('sc-arrayinfo').textContent='请重新载入匹配 ELF';
@@ -59,8 +60,12 @@ export function initSessionContext(tools){
   };
   const applyTarget=async(page,target)=>{
     invalidate(page);
+    if(page==='rtt'){
+      tools.rtt._applySessionTarget(target);
+      localTargets.set(page,{...target});
+      return;
+    }
     if(target.cfg){
-      if(page==='rtt')tools.rtt._applyImportedTarget(target);
       if(page==='flash'){
         const select=$('f-chip'),previous=tools.flash.importedTarget;
         if(previous)[...select.options].find(o=>o.value===previous.id)?.remove();
@@ -72,10 +77,6 @@ export function initSessionContext(tools){
     }
     if(target.arch==='riscv')rememberHpmBoard(target.id);
     if(page==='flash'){$('f-chip').value=target.id;store.set('flash.chip',target.id);tools.flash._applyChip();}
-    if(page==='rtt'){
-      $('r-target').value=target.arch==='riscv'?'riscv':'swd';store.set('rtt.target',$('r-target').value);
-      store.set(target.arch==='riscv'?'rtt.rvChip':'rtt.armChip',target.id);tools.rtt._applyTargetUi();
-    }
     if(page==='dbg'){
       if($('d-cfg-core'))$('d-cfg-core').value='';
       $('d-backend').value=target.arch==='riscv'?'riscv':'webusb';store.set('dbg.backend',$('d-backend').value);
@@ -156,7 +157,7 @@ export function initSessionContext(tools){
       context.publishElf(bytes,name,page,selected).then(elf=>{if(elf){view.sharedElfSha=elf.sha256;elfBindings.set(page,{...elf,targetId:readTarget(page)?.id});render();}})
         .catch(error=>{note.textContent='共享 ELF：'+error.message;});
     };
-    const ids={flash:['f-chip'],dbg:['d-backend','d-arm-target','d-hpm-target'],rtt:['r-target','r-chip'],scope:['sc-target']}[page];
+    const ids={flash:['f-chip'],dbg:['d-backend','d-arm-target','d-hpm-target'],rtt:['r-target'],scope:['sc-target']}[page];
     const targetChanged=()=>{
       const previous=localTargets.get(page),selected=readTarget(page);
       if(selected){
