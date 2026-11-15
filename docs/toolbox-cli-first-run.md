@@ -214,4 +214,4 @@
    python -X utf8 toolbox.py probe-flash --image-dir build/qspi-repack-new/image --out build/qspi-repack-new/programmed
    ```
 
-支持按次分配目录的工作台会为第 5 步的每次点击创建新的 `programmed-<任务编号>` 输出目录，日志显示实际路径。若收到探针占用提示，释放连接后可用同一按钮重试。使用旧版工作台或终端重试时，沿用日志中的 `--image-dir`，并给 `--out` 换一个未使用的目录名。两种重试方式都复用前四步的产物。
+从工作台 v1.3.13 起，第 5 步的每次点击都会创建新的 `programmed-<任务编号>` 输出目录，日志显示实际路径。若收到探针占用提示，释放连接后可用同一按钮重试。使用旧版工作台或终端重试时，沿用日志中的 `--image-dir`，并给 `--out` 换一个未使用的目录名。两种重试方式都复用前四步的产物。
