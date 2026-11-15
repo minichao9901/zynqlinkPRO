@@ -14,6 +14,16 @@
 
 J7 使用[固定 QSPI 目录](../prebuilt/qspi-release/README.md)。只更新探针镜像时，把验收通过的 BOOT、配套 bit/ELF、辅助程序和清单一起提交并推送到 `main` 的 `prebuilt/qspi-release/`。Pages 链接始终指向该目录，本机 Web 手册和 CLI 使用本机仓库同一路径，用户更新仓库即可选用新镜像。单独更新镜像无需再发布 Pages 或重打 Windows 包。
 
+## v1.3.11 发布验收
+
+2026-11-15（上海时间）。构建源码与标签指向 `e98d8be275cc5b6090686ca28ee21515aa9b68b0`，Pages 静态提交为 `0b91ff6`。匿名 Chrome 实际打开 Pages，显示 v1.3.11 和同版本下载链接，构建于 19:13:31。线上清单及按项抽查的 HTML、版本、CFG 和 Viewer 模块与候选一致。ARM/JTAG CFG 仍由 Web 拒绝，ARM/SWD 和 RISC-V/JTAG 可导入。[Pages](https://minichao9901.github.io/zynqlinkPRO/#download)
+
+Release 于 19:21:21 发布。匿名完整下载 Windows ZIP 56,213,933 B，SHA-256 `5a6982730162096234963070bf8bb32362d1230f1d8584fab8cf9d761aa47183`。发布和本地校验和一致，包内 1,891 个文件通过校验。固定 EXE 构建于 19:13:38，SHA-256 `8d35845591f688c741305bc5e958d84dba077eaf1780b75dfdc1ac97eb0fbfa6`。旧程序及 ZIP 已归档，更新前后 `data/` 的 282 个文件哈希一致。Web 194 项、CLI 110 项、174 模块语法、共享驱动和冻结包离线回归通过。发布时连接超时，确认 ZIP 已上传后补传 `SHA256SUMS.txt` 并完成发布，公开下载卡刷新后指向同版资产。[Release](https://github.com/minichao9901/zynqlinkPRO/releases/tag/v1.3.11)
+
+发布后，从固定 EXE 启动隔离工作台，在可执行手册实际执行并确认默认 `probe-load`。J7 `12345678` 在 `BOOT_MODE=0` 下完成 JTAG/RAM 临时加载，物理 MEM-AP0 校验 85,844 B OCM，读回 FCLK 133,333,332 Hz。顶栏「连接探针」显示 `USB + HID 就绪`。USB 实际返回 `DAP_Info` 能力响应 `00 02 33 01`，HID 实读型号 `ZynqLinkPro`、序列号 `12345678`、固件 `0.6-nonce32`。最终手动断开、USB/HID 会话释放，重新检查探针引擎空闲，保留当前 RAM 配对。相关问题 ZL-254。[实板复验](validation/j7-ram-hid-20261115/README.md)
+
+正式 QSPI 仍为已完成实体冷启动和完整读回的 0.8-nonce32。Pages 指向远端固定目录，匿名读取清单和 15 个文件均与本机匹配。这次实板操作仅加载探针 RAM。发布工作树、测试浏览器、隔离 EXE、令牌以及匿名下载副本已清理，共享 `hw_server` 保留。完整本机原始记录 `build/v1.3.11-release-evidence/`。[发布证据](validation/workbench-v1311-release-20261115/evidence.json)
+
 ## v1.3.10 发布验收
 
 2026-11-15（上海时间）。发行标签和构建来源为 `5afebb4fa45fd4b1064c9fa2a451fc2ad1a1c58b`，Pages 静态提交为 `50af8a60dcc5470580d897616841a37e906d5a3c`。发布前核验网页候选，发布后用匿名 Chrome 打开实际 Pages。页面显示 v1.3.10，构建于 13:02:17，下载卡指向同版 Release。线上清单、HTML、版本模块、CFG 解析模块和 Viewer 模块均与候选匹配。[Pages](https://minichao9901.github.io/zynqlinkPRO/#download)

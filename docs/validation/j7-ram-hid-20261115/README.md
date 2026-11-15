@@ -13,3 +13,5 @@
 本轮未重载探针、未写目标 Flash、未写 QSPI，正式 QSPI `0.8-nonce32` 及既有冷启动证据沿用。此次验证针对 RAM 配对的 HID 发现与读取，不增加流吞吐或目标板验收结论。
 
 本机修复 EXE 从干净提交 `c0191c9b` 构建，冻结离线验收及包内 1,891 个文件校验通过。路径 `dist/zynq-etm-bridge-hid-fix/zynq-etm-bridge.exe`，SHA-256 `598a257f862313801370dd4925e342bf1a6036e61ea4e4d2742950b4516eeaf6`。从该路径启动隔离进程，重复网页连接与实际 HID 读取均通过，退出后状态空闲。原固定 EXE 正在运行，原安装和 `data/` 保留。使用修复版时先退出旧 EXE，释放默认端口 8882，再从修复版打开新的工作台。远端 `main`、公开 Pages/Release 未部署本修订。安装清单和实板输出位于 `build/hid-ram-descriptor-20261115/candidate.json` 与 `frozen-browser.json`。
+
+随后修订随 v1.3.11 发布，固定路径已更新。发布后从固定 EXE 的可执行手册实际执行默认 JTAG/RAM 加载，核对 OCM 85,844 B，并从同一工作台完成 USB `DAP_Info` 与 HID 固件识别。顶栏为 `USB + HID 就绪`，最终释放会话并核对引擎空闲。[发布及实板证据](../workbench-v1311-release-20261115/evidence.json)
