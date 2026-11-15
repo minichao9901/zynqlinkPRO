@@ -11,3 +11,5 @@
 用同一物理 J7、同一运行配对，在隔离源码工作台点击顶栏「连接探针」，显示 `USB + HID 就绪`。随后在「版本与构建信息」通过真实 HID 读到 `ZynqLinkPro`、序列号 `12345678`、固件 `0.6-nonce32`。断开后 USB/HID 和事务状态为空闲，原固定 EXE 会话与共享硬件服务仍在。原始记录 `build/hid-ram-descriptor-20261115/result.json`，CLI 110 项、Web 174 模块语法与共享驱动检查通过。
 
 本轮未重载探针、未写目标 Flash、未写 QSPI，正式 QSPI `0.8-nonce32` 及既有冷启动证据沿用。此次验证针对 RAM 配对的 HID 发现与读取，不增加流吞吐或目标板验收结论。
+
+本机修复 EXE 从干净提交 `c0191c9b` 构建，冻结离线验收及包内 1,891 个文件校验通过。路径 `dist/zynq-etm-bridge-hid-fix/zynq-etm-bridge.exe`，SHA-256 `598a257f862313801370dd4925e342bf1a6036e61ea4e4d2742950b4516eeaf6`。从该路径启动隔离进程，重复网页连接与实际 HID 读取均通过，退出后状态空闲。原固定 EXE 正在运行，原安装和 `data/` 保留。使用修复版时先退出旧 EXE，释放默认端口 8882，再从修复版打开新的工作台。远端 `main`、公开 Pages/Release 未部署本修订。安装清单和实板输出位于 `build/hid-ram-descriptor-20261115/candidate.json` 与 `frozen-browser.json`。
