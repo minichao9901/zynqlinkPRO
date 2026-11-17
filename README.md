@@ -31,11 +31,11 @@ zynqlinkPRO 将 FPGA 调试引擎、并行 Trace 采集和主机分析工具整�
 | 工具 | 主要能力 | 使用方式 |
 |---|---|---|
 | 串口助手 / 终端 | HEX/文本收发、ANSI 终端、发送历史与记录 | 浏览器 Web Serial |
-| RTT Viewer | 从 ELF 的 `_SEGGER_RTT` 定位控制块，轮询目标 RAM 并查看日志 | 浏览器连接探针 |
-| RTT 转发 | 用 ELF 或确切地址指定控制块，由探针经 USB/CDC 搬运 RTT 数据 | 浏览器 / 本机工具 |
+| RTT Viewer | 从 ELF 的 `_SEGGER_RTT` 定位控制块，双向收发 RTT | 浏览器连接探针 |
+| RTT 转发 | 用 ELF 或确切地址指定控制块，由探针经 USB/CDC 将板子日志单向送到 PC | 浏览器 / 本机工具 |
 | J-Scope 波形 | 多变量采样、曲线与泳道、游标、原始记录及 CSV | 浏览器连接探针 |
 | 固件烧录 | 目标识别、BIN/HEX/ELF、写入校验；固件字节与 ELF 表查看 | 浏览器连接探针 |
-| 调试器 | 断点、暂停/单步、寄存器、内存、源码及变量查看 | 浏览器连接探针 |
+| 调试器 | RAM 镜像加载、ELF 启动、断点、单步、寄存器、内存、源码及变量查看 | 浏览器连接探针 |
 | ETM 执行轨迹 | ETMv3/v4 解码、源码回放、函数统计、火焰图及记录导入/导出 | **本机 Windows 工作台** |
 | 工程下载 | 正式 Windows 完整包、版本说明及 SHA-256 | [在线下载页](https://minichao9901.github.io/zynqlinkPRO/#download) |
 

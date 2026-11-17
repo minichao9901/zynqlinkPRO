@@ -98,6 +98,7 @@ foreach workbench_h7_ap [target names] {
 
   async connect(){
     this._f103HighDensity = undefined;
+    this.armPart = undefined;
     this.jtagTaps = null;
     const link = this.link = new OpenOcdTargetSession(line => this.onLog?.(line));
     try {
@@ -229,12 +230,12 @@ foreach workbench_h7_ap [target names] {
     return values;
   }
 
+  async readArmPart(){
+    return this.armPart ??= (await this._readWord(0xe000ed00) >>> 4) & 0xfff;
+  }
+
   async _cfbpRegisters(){
-    if (this.armV6m === undefined){
-      const part = (await this._readWord(0xe000ed00) >>> 4) & 0xfff;
-      this.armV6m = [0xc20, 0xc60].includes(part);
-    }
-    return this.armV6m ? ['primask', 'control'] : CFBP;
+    return [0xc20, 0xc60].includes(await this.readArmPart()) ? ['primask', 'control'] : CFBP;
   }
 
   async regRead(selector){

@@ -25,6 +25,7 @@ import { align2, hex32, u32leBytes } from './fmt.js';
 import { backtrace } from './backtrace.js';
 import { DwtWatchpoints } from './dwt.js';
 import { thumbLen, decodeCall, nextAddrsOf, ARM_ARCH } from './thumb.js';
+import { MAX_RAM_BYTES, RAM_BASE, ramDebugPlan, readRamDebugSize } from './ram-debug.js';
 
 // Cortex-M 的调试寄存器（PPB）
 const DHCSR = 0xe000edf0, DFSR = 0xe000ed30, AIRCR = 0xe000ed0c, DEMCR = 0xe000edfc;
@@ -69,6 +70,8 @@ export class DebugSession {
     this.name = '';
     this.idcode = 0;
     this.regs = [];                        // refreshRegs() 的缓存
+    this.ramWindow = null;
+    this.ramCode = null;
     this.busy = false;                     // 正在做一次"用户动作"（按钮据此禁用）
     this.log = null;                       // (text, cls) => void
     /**
@@ -94,6 +97,18 @@ export class DebugSession {
 
   get connected(){ return !!this.probe; }
   get bpCapacity(){ return this.caps.numCode || 0; }
+
+  get canConfigureRamWindow(){
+    return this.probe instanceof OpenOcdProbe && !!this.probe.cfg.raw && this.probe.armPart === 0xc60;
+  }
+
+  configureRamWindow(start, length){
+    if (!this.canConfigureRamWindow) throw Error('请先连接使用原版 CFG 的 Cortex-M0+');
+    if (start !== RAM_BASE || !Number.isInteger(length) || length < 8 || length > MAX_RAM_BYTES)
+      throw Error('Cortex-M0+ RAM 起始地址须为 0x20000000，长度为 8 B 至 64 MiB');
+    if (this.ramWindow?.end !== start + length) this.ramCode = null;
+    return this.ramWindow = Object.freeze({ start, end: start + length });
+  }
 
   _log(t, c){ try { this.log?.(t, c); } catch { /* 日志不影响主流程 */ } }
 
@@ -160,6 +175,7 @@ export class DebugSession {
       this._cStepWorks = null;
       await this.refresh();
       if (!mock && !cfg.raw) await this.verifyClock();
+      if (cfg?.raw) await this.probe.readArmPart();
       await this.bpInit();
       this._log(`已连接：${this.name} · ${this.clockHz / 1000} kHz 请求 · IDCODE ${hex32(this.idcode)}`, 'ok');
       return this;
@@ -218,6 +234,8 @@ export class DebugSession {
     if (p?.disconnect) await p.disconnect();
     this.dwt = new DwtWatchpoints(this);
     this.probe = null;
+    this.ramWindow = null;
+    this.ramCode = null;
     this.halted = false; this.regs = []; this._prev = null;
     this.bps = [];
     this.bpNotes.clear();
@@ -584,15 +602,7 @@ export class DebugSession {
   async _tempBpRun(target, { clearAt = null, what = '临时断点', timeoutMs = 3000 } = {}){
     target = align2(target);
     const go = async () => {
-      const mine = this._bpAt(target) === undefined;
-      if (mine){
-        try { await this.bpAdd(target); }
-        catch (e){
-          throw new Error(`${what}：需要在 0x${target.toString(16)} 放一个临时比较器，但硬件断点已用完`
-            + `（${this.bps.length}/${this.caps.numCode}）—— 先删掉一个用户断点再试`);
-        }
-      }
-      try {
+      const runUntilStop = async () => {
         await this._clearDfsr();
         const pc0 = this.halted ? align2(await this.readReg(this.arch.PC)) : null;
         await this.run();
@@ -603,16 +613,58 @@ export class DebugSession {
           try { this.halted = await this._pollHalted(); } catch { /* 读一次失败不算停 */ }
           if (this.halted) return align2(await this.readReg(this.arch.PC));
         }
-        await this.probe.halt().catch(() => {});
+        await this.probe.halt();
         await this.refresh();
+        if (!this.halted) throw Error(`${what}：超时后未能确认目标暂停`);
         this._log(`${what}：${timeoutMs} ms 内没停下来（已把目标暂停在 0x${((this.pc >>> 0)).toString(16)}）`, 'warn');
         return null;
+      };
+      // Cortex-M3 FPB cannot compare SRAM addresses. Only patch code from a verified RAM download.
+      if (this.ramCode?.some(r => r.start <= target && target + 2 <= r.end))
+        return await this._withRamBreakpoint(target, runUntilStop);
+      const mine = this._bpAt(target) === undefined;
+      if (mine){
+        try { await this.bpAdd(target); }
+        catch (e){
+          throw new Error(`${what}：无法在 ${hex32(target)} 设置临时断点（${e.message}）`);
+        }
+      }
+      try {
+        return await runUntilStop();
       } finally {
-        if (mine) await this.bpDel(target).catch(() => {});
+        if (mine) await this.bpDel(target);
       }
     };
     return clearAt != null ? await this._withBpCleared(clearAt, go) : await go();
   }
+
+  async _withRamBreakpoint(addr, runUntilStop){
+    await this.ensureHalted();
+    if (!this.halted) throw new Error('无法暂停目标以设置 RAM 断点');
+    const patch = await this._ramBreakpointPatch(addr);
+    const original = await this.memRead(addr, patch.length);
+    const replace = async bytes => {
+      await this.memWrite(addr, bytes);
+      const actual = await this.memRead(addr, bytes.length);
+      if (actual.length !== bytes.length || actual.some((b, i) => b !== bytes[i]))
+        throw new Error(`${hex32(addr)} 指令回读不一致`);
+    };
+    if (original.length !== patch.length) throw new Error('读取 RAM 断点原指令时发生短读');
+    try {
+      await replace(patch);
+      return await runUntilStop();
+    } finally {
+      try {
+        await this.ensureHalted();
+        if (!this.halted) throw new Error('目标未停止');
+        await replace(original);
+      } catch (e){
+        throw new Error(`RAM 断点 ${hex32(addr)} 的原指令恢复失败，重新下载 RAM ELF 后再运行（${e.message}）`);
+      }
+    }
+  }
+
+  _ramBreakpointPatch(){ return Uint8Array.of(0x00, 0xbe); } // Thumb BKPT #0
 
   /** 地址 → "文件:行"（没有行号信息时给空串） */
   _locText(addr){ try { return this.sym?.locText?.(addr >>> 0) || ''; } catch { return ''; } }
@@ -875,6 +927,7 @@ export class DebugSession {
   }
 
   async resetHalt(){
+    this.ramCode = null;
     this.clearFrames();
     await this._resetCore();
     await this.probe.halt();
@@ -885,11 +938,54 @@ export class DebugSession {
   }
 
   async resetRun(){
+    this.ramCode = null;
     this.clearFrames();
     await this._resetCore();
     await this.dwt.rearm();
     await this.run();
     return '软件复位（AIRCR.SYSRESETREQ）+ 运行';
+  }
+
+  /** Called with the debug session lock held. Validate silicon and ELF before reset. */
+  async _startRamDebug(buffer, symbols, family){
+    if (this.arch !== ARM_ARCH || !(this.probe instanceof OpenOcdProbe))
+      throw new Error('请先通过 WebUSB 连接 Cortex-M');
+    const custom = family === 'cortex-m0plus';
+    if (custom && (!this.canConfigureRamWindow || !this.ramWindow))
+      throw Error('请先声明当前 Cortex-M0+ 目标的可写 RAM');
+    const size = custom ? this.ramWindow.end - this.ramWindow.start
+      : await readRamDebugSize(addr => this.probe._readWord(addr), family);
+    const { segments, code, sp, entry, main } = ramDebugPlan(buffer, symbols, size);
+    await this.resetHalt();
+    if (!this.halted || ((await this.readReg('XPSR')) & 0x1ff))
+      throw new Error('复位后未停在 Cortex-M 线程模式，未写入 SRAM');
+    const setVector = async () => {
+      const vtor = 0xe000ed08;
+      await this.memWrite(vtor, u32leBytes(RAM_BASE));
+      if ((await this.probe._readWord(vtor)) !== RAM_BASE) throw new Error('RAM 向量表地址回读失败');
+    };
+    if (custom) await setVector(); // VTOR is optional on Cortex-M0+.
+    for (const { addr, data } of segments){
+      for (let offset = 0; offset < data.length; offset += 4096){
+        const chunk = data.subarray(offset, offset + 4096);
+        await this.memWrite(addr + offset, chunk);
+        const actual = await this.memRead(addr + offset, chunk.length);
+        if (actual.length !== chunk.length || actual.some((b, i) => b !== chunk[i]))
+          throw new Error(`RAM 镜像回读校验失败（${hex32(addr + offset)}）`);
+      }
+    }
+    if (!custom) await setVector();
+    await this.writeReg('MSP', sp);
+    await this.writeReg('XPSR', 0x01000000);
+    await this.writeReg('PC', entry);
+    const pc = align2(await this.readReg('PC'));
+    if (pc !== entry || await this.readReg('SP') !== sp || !(await this.readReg('XPSR') & 0x01000000))
+      throw new Error('RAM 启动寄存器回读不一致，目标保持暂停');
+    this.ramCode = code;
+    const hit = entry === main ? pc : await this._tempBpRun(main, { what: '运行到 main', timeoutMs: 8000 });
+    if (hit !== main) throw new Error(`未到达 main（停止位置 ${hex32(this.pc)}）`);
+    this.pc = hit;
+    return hit;
   }
 
   // ------------------------------------------------------------ 寄存器

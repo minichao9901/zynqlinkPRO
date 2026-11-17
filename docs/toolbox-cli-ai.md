@@ -445,6 +445,12 @@ $ocd = 'prebuilt/golden/host/openocd'
 
 F103ZE 的原生档为 60 MHz，使用 `target/stm32f1x.cfg`。运行固件若关闭了目标 JTAG，需按固件源码确认 SWJ_CFG，使用 `tools/run_f103_jtag_fixture.py` 临时切换并恢复。SRAM、RTT 转发和探针采样使用 `bench.sram -- --transport jtag`、`bench.rtt -- --transport jtag`、`bench.hss -- --transports jtag` 等原生入口，搭配相应板卡的夹具和参数。先用 `toolbox.py project run <入口> -- --help` 核对范围。[历史原生实测](validation/h743-workbench-acceptance-20261109/README.md)
 
+### RAM ELF 调试
+
+调试器可直接选择本地镜像。ELF、Intel HEX 和 S19 按文件地址写入，BIN 输入目标地址。自定义 Cortex-M0+ 和通用 RV32 连接后，选择 RAM ELF 会预填建议范围。查看 `page dbg describe` 获取输入框和按钮。也可调用 `page dbg invoke configureRamWindow` 显式声明，用 `launchRamElf` 传入 ELF 文件和停点。通过页面状态及内存回读核对结果。 [调试器用法](../web/docs/dbg-page.md#下载到-ram-并调试)
+
+RTT 转发将板子 RTT 上行经探针 CDC 送到 PC。「暂停显示」时接收和缓存继续。需要向目标发送命令时，停止转发并切到支持双向收发的 RTT Viewer。
+
 ## ETM Trace
 
 原生采集可直接从 CLI 操作。这里的 `--elf` 指目标 MCU ELF，`--zynq-elf` 指探针 PS ELF，`--bit` 与 `--zynq-elf` 须填写已加载配对。原生采集的 `--swd-khz` 单位为 kHz，底层 Trace Web 命令的 `--swd-hz` 单位为 Hz。[Trace CLI 参数和结果](Trace-CLI使用说明.md)

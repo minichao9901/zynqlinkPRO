@@ -13,6 +13,7 @@ import re
 import secrets
 import shutil
 import subprocess
+import threading
 import sys
 import uuid
 import webbrowser
@@ -140,6 +141,105 @@ def preflight(backend, web, service_path):
             'flameHtml':{'selfContained':True,'interactive':True,'tabs':['timeline','cycles'],'defaultTab':'timeline','dragSelectZoom':True},'offlineTraceCli':True}
 
 
+def windows_browser_handoff(url, profile_folder):
+    """Keep the default browser, using a separate profile if Chromium cannot reuse its own."""
+    import ctypes
+    from ctypes import wintypes
+
+    class ShellExecuteInfo(ctypes.Structure):
+        _fields_ = [
+            ('cbSize',wintypes.DWORD),('fMask',wintypes.ULONG),('hwnd',wintypes.HWND),
+            ('lpVerb',wintypes.LPCWSTR),('lpFile',wintypes.LPCWSTR),('lpParameters',wintypes.LPCWSTR),
+            ('lpDirectory',wintypes.LPCWSTR),('nShow',ctypes.c_int),('hInstApp',wintypes.HINSTANCE),
+            ('lpIDList',ctypes.c_void_p),('lpClass',wintypes.LPCWSTR),('hkeyClass',wintypes.HKEY),
+            ('dwHotKey',wintypes.DWORD),('hIcon',wintypes.HANDLE),('hProcess',wintypes.HANDLE),
+        ]
+
+    kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+    shell = ctypes.WinDLL('shell32', use_last_error=True)
+    shell.ShellExecuteExW.argtypes = [ctypes.POINTER(ShellExecuteInfo)]
+    kernel.WaitForSingleObject.argtypes = [wintypes.HANDLE, wintypes.DWORD]
+    kernel.WaitForSingleObject.restype = wintypes.DWORD
+    kernel.GetExitCodeProcess.argtypes = [wintypes.HANDLE, ctypes.POINTER(wintypes.DWORD)]
+    kernel.CloseHandle.argtypes = [wintypes.HANDLE]
+    shell_no_async, shell_process_handle, shell_no_error_ui = 0x100, 0x40, 0x400
+    wait_signaled, wait_timeout = 0, 258
+    profile_in_use = 21
+    chromium_handed_off = (24, 38)  # Existing process notified or browser relaunched without elevation.
+    info = ShellExecuteInfo(cbSize=ctypes.sizeof(ShellExecuteInfo),
+                            fMask=shell_no_async | shell_process_handle | shell_no_error_ui,
+                            lpVerb='open', lpFile=url, nShow=1)
+
+    # Child browser processes should use the Windows DLL search path, not the
+    # private PyInstaller libraries used by the bundled native tools.
+    frozen = getattr(sys,'frozen',False)
+    if frozen:
+        old_directory = ctypes.create_unicode_buffer(32768)
+        kernel.GetDllDirectoryW(len(old_directory), old_directory)
+        if not kernel.SetDllDirectoryW(None):
+            raise ctypes.WinError(ctypes.get_last_error())
+    try:
+        if not shell.ShellExecuteExW(ctypes.byref(info)):
+            return False
+        if not info.hProcess:
+            return True
+        try:
+            status = kernel.WaitForSingleObject(info.hProcess, 2500)
+            if status == wait_timeout:
+                return True
+            code = wintypes.DWORD()
+            if status != wait_signaled or not kernel.GetExitCodeProcess(info.hProcess,ctypes.byref(code)):
+                return False
+        finally:
+            kernel.CloseHandle(info.hProcess)
+        if code.value == 0 or code.value in chromium_handed_off:
+            return True
+        if code.value != profile_in_use:
+            return False
+
+        association = ctypes.WinDLL('shlwapi').AssocQueryStringW
+        association.argtypes = [wintypes.DWORD, wintypes.DWORD, wintypes.LPCWSTR,
+                                wintypes.LPCWSTR, wintypes.LPWSTR, ctypes.POINTER(wintypes.DWORD)]
+        executable = ctypes.create_unicode_buffer(32768)
+        size = wintypes.DWORD(len(executable))
+        if association(0x1000, 2, 'http', 'open', executable, ctypes.byref(size)) != 0:
+            return False
+        browser = Path(executable.value)
+        if browser.name.lower() not in ('chrome.exe','msedge.exe'):
+            return False
+        profile = profile_folder / browser.stem.lower()
+        profile.mkdir(parents=True, exist_ok=True)
+        process = subprocess.Popen([str(browser), '--user-data-dir='+str(profile), '--no-first-run', url])
+        try:
+            opened = process.wait(timeout=2.5) in (0, *chromium_handed_off)
+        except subprocess.TimeoutExpired:
+            opened = True
+        if opened:
+            print('浏览器原有配置目录正在占用，已打开工作台专用浏览器会话。',flush=True)
+        return opened
+    finally:
+        if frozen:
+            kernel.SetDllDirectoryW(old_directory.value or None)
+
+def open_workbench_browser(url, profile_folder, *, background_notice=False):
+    try:
+        opened = windows_browser_handoff(url, profile_folder) if os.name=='nt' and not os.environ.get('BROWSER') else webbrowser.open(url)
+    except OSError:
+        opened = False
+    if not opened:
+        address = url.partition('#')[0].partition('?')[0]
+        message = '工作台已运行，请在浏览器中打开 '+address
+        print(message, file=sys.stderr, flush=True)
+        if os.name=='nt':
+            import ctypes
+            notify = ctypes.windll.user32.MessageBoxW
+            args = (None, message, 'SuperLinkPRO', 0x30)
+            if background_notice:
+                threading.Thread(target=notify, args=args, daemon=True).start()
+            else:
+                notify(*args)
+    return opened
+
 def main(argv=None):
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, 'reconfigure'):
@@ -197,7 +297,7 @@ def main(argv=None):
             if (existing.get('bootId')==state.get('bootId') and existing.get('packageId')==package_id
                     and existing.get('dataDirectory')==str(data) and existing.get('offline')==args.offline
                     and state.get('workspace')==workspace_key):
-                if not args.no_browser:webbrowser.open(state['browserUrl'])
+                if not args.no_browser:open_workbench_browser(state['browserUrl'], data/'browser-profile')
                 print('工作台已经运行：' + url + '/#etm', flush=True)
                 return 0
         except (OSError, ValueError):pass
@@ -234,9 +334,9 @@ def main(argv=None):
         path.write_text(json.dumps(state, ensure_ascii=False, indent=2)+'\n', encoding='utf8')
     print('zynqlinkPRO 工作台 v'+version+'，目标时钟由目标固件负责', flush=True)
     print('数据目录：'+str(data), flush=True)
-    print('工作台：'+browser_url, flush=True)
+    print('工作台：'+url+'/#etm', flush=True)
     print('浏览器中载入ELF → 连接探针 → 选择函数 → 核对时钟 → 联动采集；关闭本窗口停止服务。', flush=True)
-    if not args.no_browser:webbrowser.open(browser_url)
+    if not args.no_browser:open_workbench_browser(browser_url, data/'browser-profile', background_notice=True)
     try:server.run()
     except KeyboardInterrupt:pass
     finally:
