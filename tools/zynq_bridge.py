@@ -233,7 +233,7 @@ def open_workbench_browser(url, profile_folder, *, background_notice=False):
         if os.name=='nt':
             import ctypes
             notify = ctypes.windll.user32.MessageBoxW
-            args = (None, message, 'SuperLinkPRO', 0x30)
+            args = (None, message, 'ZynqLinkPRO', 0x30)
             if background_notice:
                 threading.Thread(target=notify, args=args, daemon=True).start()
             else:
