@@ -14,6 +14,12 @@
 
 J7 使用[固定 QSPI 目录](../prebuilt/qspi-release/README.md)。只更新探针镜像时，把验收通过的 BOOT、配套 bit/ELF、辅助程序和清单一起提交并推送到 `main` 的 `prebuilt/qspi-release/`。Pages 链接始终指向该目录，本机 Web 手册和 CLI 使用本机仓库同一路径，用户更新仓库即可选用新镜像。单独更新镜像无需再发布 Pages 或重打 Windows 包。
 
+## v1.3.14 发布验收
+
+2026-11-17（上海时间）。发版源码和 Git 标签为 `c1f90aef9daee5ca4c96e64849e827b8d1dbc5fe`，Pages 静态提交为 `6c9b748a45f276df0264ae57a36bb4ffd0850241`。匿名浏览器显示 v1.3.14，工程下载指向同版 Release。完整下载核对了 ZIP 的 SHA-256 `75a817c5335d13537691fa8c9b1630751ce1dd62754dca9d09615919722250cf` 与包内 1,892 个文件。[Pages](https://minichao9901.github.io/zynqlinkPRO/#download) · [Release](https://github.com/minichao9901/zynqlinkPRO/releases/tag/v1.3.14)
+
+固定 EXE 自动打开普通权限 Chrome，页面 worker 就绪，二次启动复用原服务。更新前后 `data/` 中 451 个文件的哈希相同。源码、固定 EXE 和在线网页通过镜像侧栏的浏览器模拟验收。问题 ZL-261 实板待验。ZL-262 启动路径通过冻结包复核，异常提示标题待修。正式 QSPI 公开清单及 15 个文件核对一致。[同步及验收记录](validation/workbench-v1314-ram-port-20261117/README.md)
+
 ## v1.3.13 发布验收
 
 2026-11-16（上海时间）。发版源码与 Git 标签为 `4c714c0802c486312a695375e3f7a2c108d66e6a`，Pages 静态提交为 `12d43c6f39340838987b7ca29254c6d34bb4ebcb`。匿名浏览器看到 v1.3.13 与同标签下载。公开 ZIP 已完整下载并核对 1,891 个包内文件及 SHA-256 `4ab31aaa3e2875b349275369a96f3e32c8b2ba26d4a8ac539c74f9e33aa2a190`。[Pages](https://minichao9901.github.io/zynqlinkPRO/#download) · [Release](https://github.com/minichao9901/zynqlinkPRO/releases/tag/v1.3.13)
