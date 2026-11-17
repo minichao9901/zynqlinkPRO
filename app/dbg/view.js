@@ -59,9 +59,17 @@ import { SvdValueState, svdAutoReadReason } from './svd-state.js';
 import { BUNDLED_SVDS } from './svd/bundled.js';
 import { FaultPanel } from './fault-panel.js';
 import { ImageFiles } from './image-files.js';
+import { detectImageType } from './image.js';
+import { suggestRamWindow } from './ram-debug.js';
 
 const on = (id, ev, fn) => { const el = $(id); if (el) el.addEventListener(ev, fn); return el; };
 const baseName = p => String(p || '').replace(/\\/g, '/').split('/').pop();
+
+const imageTypesByExtension = new Map([
+  ['bin', 'bin'], ['elf', 'elf'], ['axf', 'elf'], ['out', 'elf'],
+  ['hex', 'ihex'], ['ihex', 'ihex'], ['ihx', 'ihex'],
+  ['s19', 's19'], ['s28', 's19'], ['s37', 's19'], ['srec', 's19'], ['mot', 's19'],
+]);
 
 export class DbgView {
   constructor(){
@@ -83,6 +91,9 @@ export class DbgView {
     this.watchBusy = false;
     this.src = new SourceStore();          // 源码文件仓（用户授权一次目录）
     this.imageFiles = new ImageFiles();    // load_image / dump_image 的授权工作目录
+    this.imageSelection = null;
+    this.ramFieldSuggestion = null;
+    this.imageLoading = false;
     this.srcCur = null;                    // {file, line, addr} 当前源码位置
     this.srcShown = null;                  // 已经画出来的视图（用于只在位置变化时滚动）
     this.cancelFlag = false;               // Ctrl+C
@@ -155,7 +166,12 @@ export class DbgView {
     }
     on('d-elf-pick', 'click', () => $('d-elf-file')?.click());
     on('d-elf-file', 'change', e => this._loadElfFile(e.target.files?.[0]));
+    on('d-ram-debug', 'click', () => { void this._loadSelectedImage(true); });
+    on('d-ram-apply','click',() => this.configureRamWindow($('d-ram-start').value,$('d-ram-length').value).catch(e => this._out(e.message,'err')));
     on('d-image-pick', 'click', () => this.pickImageDirectory());
+    on('d-image-file', 'change', e => { void this._selectImageFile(e.target); });
+    on('d-image-load', 'click', () => { void this._loadSelectedImage(); });
+
     on('d-svd-pick', 'click', () => $('d-svd-file')?.click());
     on('d-svd-file', 'change', e => this._loadSvdFile(e.target.files?.[0]));
     on('d-svd-default', 'click', () => this.loadBundledSvd());
@@ -510,6 +526,18 @@ export class DbgView {
     return { ...cfg, ...core, sbaFence:hpm ? hpmBoard('hpm6800evk').memory.sbaReadForbidden : undefined };
   }
 
+  _ramDebugFamily(){
+    if (this.session instanceof OpenOcdRiscvSession) return this.session.ramWindow ? 'riscv' : null;
+    if (this.session.backendName !== 'OpenOCD Wasm') return null;
+    const cfg = this._activeCfg();
+    if (cfg){
+      if (cfg.stm32f1Flash) return 'stm32f1';
+      if (cfg.nrf52Flash) return 'nrf52';
+      return this.session.canConfigureRamWindow && this.session.ramWindow ? 'cortex-m0plus' : null;
+    }
+    return ['arm','stm32f103'].includes($('d-arm-target')?.value || 'arm') ? 'stm32f1' : null;
+  }
+
   _cfgTarget(){
     const cfg = this._activeCfg();
     return cfg && { id:'cfg:' + cfg.hash + ':' + cfg.target, arch:cfg.arch, label:cfg.name + ' · ' + cfg.target, cfg };
@@ -567,6 +595,8 @@ export class DbgView {
     this.faultPanel?.sync();
     if(!this.session.connected || !this.session.halted || (this._btSnapshotValid && this.session.pc!==this._btSnapshotPc)) this._invalidateBacktrace();
     const c = connected ?? this.session.connected;
+    this._syncImageControls(c);
+    this._syncRamWindowFields(c);
     for (const id of ['d-backend','d-arm-target','d-hpm-target','d-cfg-pick','d-cfg-dir-pick','d-cfg-entry','d-cfg-core'])
       if ($(id)) $(id).disabled = c || !!this._connecting;
     const h = halted ?? this.session.halted;
@@ -1203,6 +1233,114 @@ export class DbgView {
   }
 
   async runLine(text){
+    return await this._runLine(text);
+  }
+
+  _syncImageControls(connected = this.session.connected){
+    const type = this.imageSelection?.type;
+    if ($('d-image-file')) $('d-image-file').disabled = this.imageLoading;
+    const address = $('d-image-address-row');
+    if (address) address.hidden = type !== 'bin';
+    const load = $('d-image-load');
+    if (load) load.disabled = !connected || !type || this.imageLoading;
+    const launch = $('d-ram-debug');
+    if (launch){
+      launch.hidden = type !== 'elf';
+      launch.disabled = launch.hidden || !connected || this.imageLoading || !this._ramDebugFamily();
+    }
+  }
+
+  _syncRamWindowFields(connected = this.session.connected){
+    const custom = connected && this.session.canConfigureRamWindow;
+    if ($('d-ram-range')) $('d-ram-range').hidden = !custom;
+    const arch = this.session.isRiscv ? 'riscv' : 'arm';
+    const hint = this.imageSelection?.ramSuggestion;
+    const protectedRange = arch === 'riscv' && hint &&
+      this.session.sbaFence?.some(range => hint.start < range.end && hint.start + hint.length > range.start);
+    const suggestion = custom && hint?.arch === arch && !protectedRange ? hint : null;
+    const previous = this.ramFieldSuggestion;
+    if (suggestion !== previous){
+      const update = (id, oldValue, newValue) => {
+        const field = $(id);
+        if (field && (!field.value.trim() || field.value === oldValue)) field.value = newValue;
+      };
+      update('d-ram-start', previous ? hex32(previous.start) : '', suggestion ? hex32(suggestion.start) : '');
+      update('d-ram-length', previous ? String(previous.length) : '', suggestion ? String(suggestion.length) : '');
+      this.ramFieldSuggestion = suggestion;
+    }
+    const status = $('d-ram-range-status');
+    if (!status) return;
+    const declared = this.session.ramWindow;
+    if (declared){
+      status.textContent = `已声明 RAM：${hex32(declared.start)} 起 ${declared.end-declared.start} 字节`;
+    } else if (suggestion){
+      status.textContent = `ELF 建议 ${hex32(suggestion.start)} 起 ${suggestion.length} 字节。可修改，确认后点「声明 RAM」`;
+    } else {
+      status.textContent = '选择 RAM 版 ELF 获取建议，或手动填写板卡的可写范围';
+    }
+  }
+
+  async _selectImageFile(input){
+    this.imageSelection = null;
+    const binAddress = $('d-image-address');
+    if (binAddress) binAddress.value = '';
+    const progress = $('d-image-progress');
+    if (progress) progress.textContent = '';
+    this._syncImageControls();
+    this._syncRamWindowFields();
+    const file = input.files?.[0];
+    if (!file) return;
+    try {
+      const extension = file.name.split('.').at(-1).toLowerCase();
+      const type = imageTypesByExtension.get(extension) ||
+        detectImageType(new Uint8Array(await file.slice(0, 9).arrayBuffer()));
+      if (input.files?.[0] !== file) return;
+      const selection = this.imageSelection = { file, type };
+      if (progress && type === 'bin') progress.textContent = '填写 BIN 的加载地址';
+      this._syncImageControls();
+      if (type === 'elf'){
+        // A flash-linked or unusual ELF can still be inspected or loaded normally.
+        const hint = await file.arrayBuffer().then(suggestRamWindow).catch(() => null);
+        if (this.imageSelection === selection){
+          selection.ramSuggestion = hint;
+          this._syncRamWindowFields();
+        }
+      }
+    } catch (error){
+      if (progress && input.files?.[0] === file) progress.textContent = '读取镜像失败：' + error.message;
+    }
+  }
+
+  async _loadSelectedImage(launch = false){
+    if (!this.imageSelection || !this.session.connected || this.imageLoading) return;
+    const { file, type } = this.imageSelection;
+    if (launch && (type !== 'elf' || !this._ramDebugFamily())) return;
+    const address = type === 'bin' ? $('d-image-address').value.trim() : '0';
+    const offset = Number(address);
+    if (!/^(?:0x[\da-f]+|\d+)$/i.test(address) || offset > 0xffffffff){
+      $('d-image-progress').textContent = '请填写 BIN 的 32 位加载地址（十六进制或十进制）';
+      return;
+    }
+    this.imageLoading = true;
+    this._syncImageControls();
+    try {
+      if (launch){
+        $('d-image-progress').textContent = '正在下载并运行到 main…';
+        const result = await this.launchRamElf(file, 'main');
+        $('d-image-progress').textContent = `已停在 main（${hex32(result.address)}）`;
+      } else {
+        const line = `load_image ${JSON.stringify(file.name)} ${offset} ${type}`;
+        await this._runLine(line, { read: async () => new Uint8Array(await file.arrayBuffer()) });
+      }
+    } catch (error){
+      $('d-image-progress').textContent = '未完成：' + error.message;
+    } finally {
+      this.imageLoading = false;
+      this._syncImageControls();
+    }
+  }
+
+  async _runLine(text, imageFiles){
     const line = String(text || '').trim();
     if (!line) return { lines: [] };
     if (this._disconnecting || this._connecting) return { cancelled: true, lines: [] };
@@ -1211,8 +1349,10 @@ export class DbgView {
     if (/^(c|cont|continue|g|s|step|n|next|si|fin|finish|out|rc|runto|halt|stop|pause|reset|mw|ms|fill_ram|fill_inc|load_image)(\s|$)/i.test(line) || /^(r|reg|regs)\s+\S+\s+\S+/i.test(line))
       this.faultPanel?.invalidate('目标控制或写入命令，现场转为历史记录');
     this._out('> ' + line, 'cmd');
-    if (line !== this.hist[this.hist.length - 1]) this.hist.push(line);
-    this.histIdx = -1;
+    if (!imageFiles){
+      if (line !== this.hist[this.hist.length - 1]) this.hist.push(line);
+      this.histIdx = -1;
+    }
     this.cancelFlag = false;
     let res;
     try {
@@ -1220,14 +1360,14 @@ export class DbgView {
       res = await this.session.exclusive(async () => {
         if (this._disconnecting) throw Object.assign(new Error('已中断'), { cancelled: true });
         const result = await runCmd(line, this.session, {
-          view: this, signal: () => this.cancelFlag,
+          view: this, imageFiles, signal: () => this.cancelFlag,
           onProgress: ({ command, done, total }) => {
             const el = $('d-image-progress'); if (el) el.textContent = `${command}：${done} / ${total} 字节`;
           },
         });
         this.renderRegs(); this.renderBps(); this._syncButtons();
         const changedMem = /^(md|mw|ms|x|fill_ram|fill_inc|load_image)$/.test(line.split(/\s+/)[0].toLowerCase());
-        if (changedMem) await this._readMemLocked({ silent: true });
+        if (changedMem) await this._readMemLocked({ silent: true, auto:/^load_image(?:\s|$)/i.test(line) });
         if (this.session.halted) await this.afterStop();
         else this._startWatch();
         return result;
@@ -1343,43 +1483,81 @@ export class DbgView {
     }
   }
 
+  async configureRamWindow(start,length){
+    const number = v => typeof v === 'string' && !/^(0x[\da-f]+|\d+)$/i.test(v.trim()) ? NaN : Number(v);
+    const range = await this.session.exclusive(() => this.session.configureRamWindow(number(start),number(length)));
+    this._syncButtons();
+    this._out(`已声明可写 RAM：${hex32(range.start)} 起 ${range.end-range.start} 字节`, 'ok');
+    return range;
+  }
+
+  async launchRamElf(file, stop = 'auto'){
+    let result, failure;
+    const ok = await this._act('下载到 RAM 并调试', async () => {
+      try {
+      const family = this._ramDebugFamily();
+      if (this.session.canConfigureRamWindow && !this.session.ramWindow)
+        throw new Error('请先声明当前目标的可写 RAM');
+      if (!this.session.connected || !family)
+        throw new Error('请先通过 WebUSB 连接支持 RAM 调试的目标');
+      const buf = await file.arrayBuffer();
+      const sym = SymTab.fromBuffer(buf);
+      this.faultPanel?.invalidate('RAM 下载将切换正在执行的程序，现场转为历史记录');
+      this._out(`RAM 下载：${file.name}，检查目标与 SRAM 镜像…`);
+      const address = await this.session._startRamDebug(buf, sym, family === 'riscv' ? {stop} : family);
+      this._setElf(buf, file.name, sym);
+      const location = sym.find('main')?.addr === address ? 'main' : '入口';
+      result = { file:file.name, address, location, verified:true };
+      this._out(`RAM 下载已通过逐字节读回校验，停在 ${location}（${hex32(address)}）`, 'ok');
+      await this.session.refreshRegs();
+      this.renderRegs();
+      await this.afterStop();
+      } catch (error){ failure=error; throw error; }
+    });
+    if (!ok) throw failure || Error('当前调试会话正忙，RAM 下载未执行');
+    return result;
+  }
+
   /** 供自测直接喂 ArrayBuffer（页面里也能用 fetch 拿到 fixture） */
   loadElfBuffer(buf, name = '') {
-    this._invalidateBacktrace();
     try {
-      const st = SymTab.fromBuffer(buf);
-      this.sym = st;
-      this.session.sym = st;
-      this.elfName = name;
-      this.faultPanel?.invalidate('ELF 已变更，源码关联保留为历史记录');
-      this._retireStaleMemAddr(st);
-      /**
-       * 把 ELF 的路径列表交给源码仓：如果已经选过目录，就**按这份列表按需索引**
-       * （只对 ELF 引用到的文件做 getFileHandle，不遍历目录树 —— 选 `hpm_sdk` 那种
-       *  33000+ 文件的目录也不用等）。索引完再刷一次建议行，报"能解析几个"。
-       */
-      Promise.resolve(this.src?.setExpectedPaths?.(st.lines?.paths || []))
-        .then(s => { if (this.sym === st && this.src?.ready) this._out('源码：' + s, 'ok'); })
-        .catch(() => {})
-        .finally(() => this._renderSrcSuggest());
-      const info = st.summary();
-      this.renderElfInfo();
-      this._out(`已载入符号：${name || 'ELF'} —— ${info}`, st.note ? 'warn' : 'ok');
-      if (st.lines) this._out(`　${st.lines.summary()}`, 'dim');
-      // 监视项重新解析一遍（换了 ELF 之后地址/类型都可能变）
-      this.watch.resolveAll(st);
-      this.renderRegs(); this.renderBps(); this.renderSyms(); this.renderWatch();
-      this._renderRttSym();
-      this._updatePcStrip();
-      this.renderSource();
-      this._renderSrcSuggest();          // 载入就能说"该选哪个源码目录"（DWARF 里存的是编译路径）
-      this.onElfLoaded?.(buf, name);
-      return st;
+      return this._setElf(buf,name,SymTab.fromBuffer(buf));
     } catch (e){
       this._out('✗ 解析 ELF 失败：' + (e?.message || e), 'err');
       toast('解析 ELF 失败：' + (e?.message || e), 'err', 6000);
       return null;
     }
+  }
+
+  _setElf(buf,name,st){
+    this._invalidateBacktrace();
+    this.sym = st;
+    this.session.sym = st;
+    this.elfName = name;
+    this.faultPanel?.invalidate('ELF 已变更，源码关联保留为历史记录');
+    this._retireStaleMemAddr(st);
+    /**
+     * 把 ELF 的路径列表交给源码仓：如果已经选过目录，就**按这份列表按需索引**
+     * （只对 ELF 引用到的文件做 getFileHandle，不遍历目录树 —— 选 `hpm_sdk` 那种
+     *  33000+ 文件的目录也不用等）。索引完再刷一次建议行，报"能解析几个"。
+     */
+    Promise.resolve(this.src?.setExpectedPaths?.(st.lines?.paths || []))
+      .then(s => { if (this.sym === st && this.src?.ready) this._out('源码：' + s, 'ok'); })
+      .catch(() => {})
+      .finally(() => this._renderSrcSuggest());
+    const info = st.summary();
+    this.renderElfInfo();
+    this._out(`已载入符号：${name || 'ELF'} —— ${info}`, st.note ? 'warn' : 'ok');
+    if (st.lines) this._out(`　${st.lines.summary()}`, 'dim');
+    // 监视项重新解析一遍（换了 ELF 之后地址/类型都可能变）
+    this.watch.resolveAll(st);
+    this.renderRegs(); this.renderBps(); this.renderSyms(); this.renderWatch();
+    this._renderRttSym();
+    this._updatePcStrip();
+    this.renderSource();
+    this._renderSrcSuggest();          // 载入就能说"该选哪个源码目录"（DWARF 里存的是编译路径）
+    this.onElfLoaded?.(buf, name);
+    return st;
   }
 
   /**
@@ -2303,6 +2481,7 @@ export class DbgView {
       lastStepMode: s.lastStepMode || null,     // 原生握手 / 断点兜底 / 源码步进
       lastStepOk: s.lastStepOk ?? null,
       bpCap: s.bpCapacity,
+      ramWindow: s.ramWindow ?? null,
       elf: this.sym ? { name: this.elfName, symbols: this.sym.size, vars: this.sym.varCount, source: this.sym.source,
         lines: this.sym.lines ? this.sym.lines.size : 0, files: this.sym.lines ? this.sym.lines.fileCount : 0,
         rtt: this.sym.rttSym()?.addr ?? null } : null,

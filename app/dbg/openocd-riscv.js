@@ -1,10 +1,48 @@
 import { OpenOcdProbe, isHpm6800BulkSram } from '../core/openocd-probe.js';
 import { hpmBoard } from '../targets/hpm/porting.js';
 import { DebugSession } from './session.js';
+import { elfProgram } from './image.js';
+import { MAX_RAM_BYTES } from './ram-debug.js';
 import { RV_ARCH } from './rv.js';
 
 const REGISTERS = 'zero ra sp gp tp t0 t1 t2 s0 s1 a0 a1 a2 a3 a4 a5 a6 a7 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 t3 t4 t5 t6 pc'.split(' ');
 const openOcdRegName = name => name === 's0' ? 'fp' : name;
+const fits = (range, start, length) => start >= range.start && start + length <= range.end;
+
+function ramPlan(buffer, symbols, window, stop){
+  const bytes = new Uint8Array(buffer);
+  const { wide, little, type, machine, entry, headers, range } = elfProgram(bytes);
+  if (wide || !little || type !== 2 || machine !== 243)
+    throw Error('请选择链接到所声明 RAM 的小端 RISC-V ELF32 可执行文件');
+  if (!['auto','main','entry'].includes(stop)) throw Error('停点只能选择 auto / main / entry');
+
+  const loads = headers.filter(h => h.type === 1 && (h.memory || h.size)).sort((a,b) => a.virtual-b.virtual);
+  const writes = [], code = [];
+  let end = window.start;
+  for (const h of loads){
+    if (h.size) range(h.offset, h.size);
+    if (!fits(window,h.virtual,h.memory) || (h.size && !fits(window,h.physical,h.size)))
+      throw Error('PT_LOAD 超出声明的可写 RAM（含 BSS）');
+    if (h.virtual < end || h.size > h.memory) throw Error('ELF 的 PT_LOAD 运行范围重叠或段长度无效');
+    end = h.virtual + h.memory;
+    if (h.flags & 1){
+      if (h.physical !== h.virtual) throw Error('可执行段的加载和运行地址必须一致');
+      if (h.size) code.push({start:h.physical,end:h.physical+h.size});
+    }
+    if (h.size) writes.push({addr:h.physical,length:h.size,data:bytes.subarray(h.offset,h.offset+h.size)});
+    if (h.memory > h.size) writes.push({addr:h.virtual+h.size,length:h.memory-h.size});
+  }
+  writes.sort((a,b) => a.addr-b.addr);
+  if (writes.some((w,i) => i>0 && w.addr < writes[i-1].addr+writes[i-1].length))
+    throw Error('ELF 的 PT_LOAD 加载区或 BSS 清零区重叠');
+
+  const executable = addr => addr % 2 === 0 && code.some(r => fits(r,addr,2));
+  const main = symbols.find('main');
+  const mainAddr = main?.kind === 'func' && executable(main.addr) ? main.addr : null;
+  if (!executable(entry)) throw Error('ELF 入口必须位于已加载的可执行段内');
+  if (stop === 'main' && mainAddr == null) throw Error('ELF 没有位于可执行加载段内的 main');
+  return {entry,stop:stop === 'entry' ? entry : mainAddr ?? entry,writes,code};
+}
 
 export class OpenOcdRiscvSession extends DebugSession {
   constructor(){
@@ -19,6 +57,9 @@ export class OpenOcdRiscvSession extends DebugSession {
     this.target = cfg.target;
     this.port = hpmBoard(cfg.boardId);
     this.sbaFence = cfg.sbaFence ?? [];
+    const hpm6800 = cfg.boardId === 'hpm6800evk' || (cfg.target === 'hpm6880.cpu0' && (cfg.raw?.hpmSdk || cfg.hpmFlash));
+    this.ramWindow = hpm6800 ? Object.freeze({start:0, end:0x40000}) : null;
+    this.importedRamCfg = !!cfg.raw && !hpm6800;
     const probe = this.probe = new OpenOcdProbe(device, cfg, line => this._log(line, 'dim'));
     try {
       await probe.connect();
@@ -44,6 +85,8 @@ export class OpenOcdRiscvSession extends DebugSession {
     }
     await probe?.disconnect();
     this.probe = null;
+    this.ramWindow = null;
+    this.ramCode = null;
     this.halted = false;
     this.bps = [];
     this.bpNotes.clear();
@@ -88,6 +131,7 @@ export class OpenOcdRiscvSession extends DebugSession {
     if (!this.halted) throw Error('OpenOCD 单步后未确认停机');
   }
   async resetHalt(){
+    this.ramCode = null;
     await this.ensureHalted();
     const breakpoints = this.bps.map(addr => [addr, this.bpNotes.get(addr)]);
     try {
@@ -109,6 +153,52 @@ export class OpenOcdRiscvSession extends DebugSession {
     return 'OpenOCD 系统复位 + 运行';
   }
   async verifyClock(){ return { ok:true, hz:this.clockHz, checked:false }; }
+
+  get canConfigureRamWindow(){ return this.connected && this.importedRamCfg; }
+
+  configureRamWindow(start,length){
+    if (!this.canConfigureRamWindow) throw Error('请先连接使用自定义 CFG 的 RISC-V 目标');
+    if (!Number.isInteger(start) || !Number.isInteger(length) || start < 0 || start % 2 ||
+        length < 2 || length > MAX_RAM_BYTES || start + length > 0x100000000)
+      throw Error('RAM 起始地址须为偶数，长度为 2 B 至 64 MiB，且不能越过 32 位地址空间');
+    const end = start + length;
+    if (this.sbaFence.some(r => start < r.end && end > r.start)) throw Error('RAM 范围与受保护的 Flash/XIP 地址重叠');
+    this.ramCode = null;
+    return this.ramWindow = Object.freeze({start,end});
+  }
+
+  async _startRamDebug(buffer,symbols,{stop='auto'}={}){
+    if (!this.ramWindow) throw Error('请先声明当前 CFG 目标的可写 RAM 起始地址和长度');
+    const plan = ramPlan(buffer,symbols,this.ramWindow,stop);
+    await this.ensureHalted();
+    await this.bpClear();
+    this.ramCode = null;
+    for (const {addr,data,length} of plan.writes){
+      for (let offset=0;offset<length;offset+=4096){
+        const count = Math.min(4096,length-offset);
+        const chunk = data ? data.subarray(offset,offset+count) : new Uint8Array(count);
+        await this.memWrite(addr+offset,chunk);
+        const actual = await this.memRead(addr+offset,count);
+        if (actual.length !== count || actual.some((byte,i) => byte !== chunk[i]))
+          throw Error('RAM 镜像回读校验失败（0x'+(addr+offset).toString(16)+'）');
+      }
+    }
+    await this.writeReg('pc',plan.entry);
+    if (await this.readReg('pc') !== plan.entry) throw Error('RAM 入口 PC 回读不一致');
+    this.ramCode = plan.code;
+    const hit = plan.stop === plan.entry ? plan.entry : await this._tempBpRun(plan.stop, {what:'运行到 main',timeoutMs:8000});
+    if (!this.halted || hit !== plan.stop) throw Error('RAM 程序未停在预期地址');
+    this.pc = hit;
+    return hit;
+  }
+
+  async _ramBreakpointPatch(addr){
+    const first = await this.memRead(addr,2);
+    if (first.length !== 2) throw Error('读取 RISC-V 指令时发生短读');
+    if ((first[0] & 3) !== 3) return Uint8Array.of(0x02,0x90); // C.EBREAK
+    if (!this.ramCode.some(r => fits(r,addr,4))) throw Error('RISC-V 断点跨出已校验代码段');
+    return Uint8Array.of(0x73,0x00,0x10,0x00); // EBREAK
+  }
 
   regInfo(name){
     const key = String(name).trim().toLowerCase();

@@ -73,7 +73,7 @@ export function imageCommand(command, args){
   return { filename, offset, type, min, max: length === null ? Number.MAX_SAFE_INTEGER : min + length };
 }
 
-function detect(bytes){
+export function detectImageType(bytes){
   // OpenOCD probes the first nine bytes, irrespective of filename extension.
   if (bytes.length < 9) return 'bin';
   if (bytes[0] === 0x7f && bytes[1] === 69 && bytes[2] === 76 && bytes[3] === 70) return 'elf';
@@ -125,7 +125,7 @@ function srecord(bytes){
   return sections;
 }
 
-function elf(bytes){
+export function elfProgram(bytes){
   const range = (offset, size) => {
     if (!Number.isSafeInteger(offset) || !Number.isSafeInteger(size) || offset < 0 || size < 0 || offset > bytes.length || size > bytes.length - offset)
       throw new Error('ELF 程序头或数据被截断');
@@ -150,8 +150,14 @@ function elf(bytes){
   for (let i = 0; i < count; i++){
     const at = offset + i * stride;
     headers.push({ type: u32(at), offset: word(at + (wide ? 8 : 4)), virtual: word(at + (wide ? 16 : 8)),
-      physical: word(at + (wide ? 24 : 12)), size: word(at + (wide ? 32 : 16)), memory: word(at + (wide ? 40 : 20)) });
+      physical: word(at + (wide ? 24 : 12)), size: word(at + (wide ? 32 : 16)), memory: word(at + (wide ? 40 : 20)),
+      flags: u32(at + (wide ? 4 : 24)) });
   }
+  return { wide, little, type: u16(16), machine: u16(18), entry: word(24), headers, range };
+}
+
+function elf(bytes){
+  const { headers, range } = elfProgram(bytes);
   const virtual = headers.every(h => h.physical === 0) && headers.filter(h => h.type === 1 && h.memory > 0).length > 1;
   const sections = headers.filter(h => h.type === 1 && h.size > 0).map(h => {
     range(h.offset, h.size);
@@ -162,7 +168,7 @@ function elf(bytes){
 }
 
 export function parseImage(bytes, type = null){
-  type ??= detect(bytes);
+  type ??= detectImageType(bytes);
   if (!IMAGE_TYPES.includes(type)) throw new Error('不支持的镜像格式：' + type);
   const sections = type === 'bin' ? [{ addr: 0, data: bytes }] : type === 'ihex' ? ihex(bytes) : type === 's19' ? srecord(bytes) : elf(bytes);
   return { type, sections };

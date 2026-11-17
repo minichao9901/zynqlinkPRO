@@ -754,7 +754,7 @@
       <fieldset>
         <legend>符号文件</legend>
         <div class="row btnrow">
-          <button id="d-elf-pick">载入 ELF…</button>
+          <button id="d-elf-pick">载入 ELF 符号…</button>
           <input type="file" id="d-elf-file" accept=".elf,.axf,.out,.bin" hidden>
         </div>
         <p class="hint" id="d-elf-info">未载入 ELF</p>
@@ -762,9 +762,27 @@
 
       <fieldset>
         <legend>镜像文件</legend>
+        <div class="row btnrow">
+          <input id="d-image-file" type="file" accept=".elf,.axf,.out,.bin,.hex,.ihex,.ihx,.s19,.s28,.s37,.srec,.mot" aria-label="选择要加载的镜像">
+        </div>
+        <label class="row" id="d-image-address-row" hidden>BIN 加载地址 <input id="d-image-address" size="11" placeholder="0x20000000" aria-label="BIN 加载地址"></label>
+        <div class="row btnrow">
+          <button id="d-image-load" disabled title="按镜像地址写内存，保持目标运行状态">仅写入内存</button>
+          <button id="d-ram-debug" hidden disabled title="将 ELF 下载到可写 RAM，回读校验后运行到 main 并暂停">下载并停在 main</button>
+        </div>
+        <p class="hint" id="d-image-progress" role="status" aria-live="polite"></p>
         <div class="row btnrow"><button id="d-image-pick" title="授权 load_image 和 dump_image 读写此目录下的镜像文件">选择镜像目录…</button></div>
-        <p class="hint" id="d-image-dir">未选择目录</p>
-        <p class="hint" id="d-image-progress" role="status" aria-live="polite">load_image / dump_image 使用此目录下的相对路径；输入 h 查看用法。</p>
+        <p class="hint" id="d-image-dir">当前标签页未选择镜像目录</p>
+      </fieldset>
+
+      <fieldset id="d-ram-range" hidden>
+        <legend>可写 RAM</legend>
+        <div class="row btnrow">
+          <input id="d-ram-start" size="11" placeholder="起始地址" aria-label="可写 RAM 起始地址">
+          <input id="d-ram-length" size="8" placeholder="字节数" aria-label="可写 RAM 字节数">
+          <button id="d-ram-apply">声明 RAM</button>
+        </div>
+        <p id="d-ram-range-status" class="hint" role="status"></p>
       </fieldset>
 
       <fieldset>
