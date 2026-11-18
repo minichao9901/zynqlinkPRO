@@ -3,7 +3,7 @@
 // presents the existing SWD posted-AP-read contract to packet/RTT/HSS engines.
 // DP reads need a scan to collect their response; AP streams need only one
 // 35-bit scan per word. IR is cached, including bypass bits around the DAP.
-module jtag_core (
+module jtag_core #(parameter EXTERNAL_PHY=0) (
     input wire clk,rst_n,start,invalidate,
     input wire [2:0] operation, // 0 memory,1 raw DP/AP,2 IR,3 IDCODE,4 ABORT,5 JTAG seq,6 SWJ seq
     input wire [7:0] request,
@@ -37,7 +37,16 @@ module jtag_core (
     output reg [31:0] stat_transfers,
     output wire debug_valid,
     output wire [31:0] debug_meta,debug_wdata,debug_tx,debug_sense,debug_rx,debug_alternate,debug_samples,
-    output wire [5:0] debug_tx_req
+    output wire [5:0] debug_tx_req,
+    // The isolated SelectIO design owns the segment PHY and its sample phase.
+    input wire [8:0] external_idle_cycles,
+    output wire segment_start,segment_variable_tms,segment_tms,segment_exit,segment_capture,
+    output wire [11:0] segment_count,
+    output wire [1:0] segment_tdi_mode,
+    output wire [255:0] segment_tms_data,segment_tdi_data,
+    input wire segment_done,
+    input wire [63:0] segment_rx,
+    output reg [31:0] stat_dmi_busy,stat_dmi_other
 );
     localparam IDLE=0,ROUTE=1,RESET_TAP=2,IR_NAV=3,IR_PRE=4,IR_VALUE=5,IR_POST=6,IR_EXIT=7,
                DR_NAV=8,DR_PRE=9,DR_VALUE=10,DR_POST=11,DR_EXIT=12,EVALUATE=13,DONE=14,PHY_WAIT=15;
@@ -69,7 +78,8 @@ module jtag_core (
     reg [8:0] dr_count;
     // Bound extended RISC-V idle so a complete scan remains within the
     // shifter's 256-bit capture/index capacity. Legacy ARM idle stays 4-bit.
-    wire [7:0] rv_idle_cycles=idle_cycles<8 ? 8'd8 : idle_cycles>64 ? 8'd64 : idle_cycles;
+    wire [7:0] legacy_rv_idle=idle_cycles<8 ? 8'd8 : idle_cycles>64 ? 8'd64 : idle_cycles;
+    wire [8:0] rv_idle_cycles=EXTERNAL_PHY ? external_idle_cycles : {1'b0,legacy_rv_idle};
     reg [3:0] capture_offset;
     reg phy_slow;
     reg phy_capture_rise;
@@ -126,13 +136,32 @@ module jtag_core (
     assign cached_instruction=ir_cache;
     assign cache_valid=ir_valid;
     assign sequence_result=phy_rx;
-    jtag_shift u_shift(.clk(clk),.rst_n(rst_n),.start(phy_start),.count(phy_count),
-        .half_delay(phy_delay),.variable_tms(phy_variable_tms),.tms_value(phy_tms),
-        .exit_last(phy_exit),.capture(phy_capture),.tdi_mode(phy_tdi_mode),
-        .capture_rise(phy_capture_rise),
-        .tms_data(phy_tms_data),.tdi_data(phy_tdi_data),.tdo(tdo),.tdo_alternate(tdo_alternate),.tdi_sense(tdi_sense),
-        .tck(tck),.tms(tms),.tdi(tdi),.busy(phy_busy),.done(phy_done),.rx_data(phy_rx),
-        .tx_echo(phy_tx_echo),.sense_echo(phy_sense_echo),.rx_alternate(phy_rx_alternate));
+    assign segment_start=phy_start;
+    assign segment_count=phy_count;
+    assign segment_variable_tms=phy_variable_tms;
+    assign segment_tms=phy_tms;
+    assign segment_exit=phy_exit;
+    assign segment_capture=phy_capture;
+    assign segment_tdi_mode=phy_tdi_mode;
+    assign segment_tms_data=phy_tms_data;
+    assign segment_tdi_data=phy_tdi_data;
+    generate if(EXTERNAL_PHY) begin: external
+        assign phy_done=segment_done;
+        assign phy_busy=1'b0;
+        assign phy_rx={192'b0,segment_rx};
+        assign phy_tx_echo=0;
+        assign phy_sense_echo=0;
+        assign phy_rx_alternate=0;
+        assign {tck,tms,tdi}=3'b011;
+    end else begin: legacy
+        jtag_shift u_shift(.clk(clk),.rst_n(rst_n),.start(phy_start),.count(phy_count),
+            .half_delay(phy_delay),.variable_tms(phy_variable_tms),.tms_value(phy_tms),
+            .exit_last(phy_exit),.capture(phy_capture),.tdi_mode(phy_tdi_mode),
+            .capture_rise(phy_capture_rise),
+            .tms_data(phy_tms_data),.tdi_data(phy_tdi_data),.tdo(tdo),.tdo_alternate(tdo_alternate),.tdi_sense(tdi_sense),
+            .tck(tck),.tms(tms),.tdi(tdi),.busy(phy_busy),.done(phy_done),.rx_data(phy_rx),
+            .tx_echo(phy_tx_echo),.sense_echo(phy_sense_echo),.rx_alternate(phy_rx_alternate));
+    end endgenerate
     task shift_segment;
         input [11:0] n;
         input variable_mode,tm,exit_bit,cap;
@@ -188,7 +217,7 @@ module jtag_core (
             fenced_result<=0;fenced_result_valid<=0;
             phy_variable_tms<=0;phy_tms<=0;phy_exit<=0;phy_capture<=0;phy_tdi_mode<=0;
             phy_tms_data<=0;phy_tdi_data<=0;fence_done<=0;fence_error<=0;
-            stat_cycles<=0;stat_bits<=0;stat_transfers<=0;
+            stat_cycles<=0;stat_bits<=0;stat_transfers<=0;stat_dmi_busy<=0;stat_dmi_other<=0;
             dr_tms_bits<=0;dr_tdi_bits<=0;dr_count<=0;capture_offset<=0;
             phy_slow<=0;phy_capture_rise<=0;
             rv_active<=0;rv_collect<=0;rv_cfg_valid<=0;rv_addr_dirty<=1;rv_read<=0;
@@ -284,6 +313,8 @@ module jtag_core (
                     // one scan. A poll/fence must save the response it consumes.
                     // Never replay a possibly completed write on BUSY/FAILED.
                     if(scan_result[1:0]!=0)begin
+                        if(scan_result[1:0]==3) stat_dmi_busy<=stat_dmi_busy+1'b1;
+                        else stat_dmi_other<=stat_dmi_other+1'b1;
                         ack<=4;rv_cfg_valid<=0;rv_addr_dirty<=1;rv_pending_kind<=0;
                         fence_error<=maintenance;state<=DONE;
                     end else if(!rv_collect)begin

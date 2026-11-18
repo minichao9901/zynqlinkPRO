@@ -4,7 +4,8 @@
 module jtag200_wave (
     input wire clk, reset, run,
     output reg done = 0,
-    output reg [8:0] tx_addr = 0, rx_addr = 0,
+    output reg [8:0] tx_addr = 0,
+    output reg [8:0] rx_addr = 0,
     output wire rx_write,
     input wire [24:0] tx_word,
     output wire [23:0] lane_word

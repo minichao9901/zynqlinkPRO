@@ -8,6 +8,9 @@ create_project -force jtag200 $out -part xc7z020clg400-2
 set_param general.maxThreads 8
 set_property target_language Verilog [current_project]
 add_files [glob [file join $here *.v]]
+foreach name {jtag_core jtag_shift dap_transfer_block_engine} {
+    add_files [file join $root fpga rtl $name.v]
+}
 add_files -fileset constrs_1 [list [file join $here pins.xdc] [file join $here timing.xdc]]
 set_property -dict {PROCESSING_ORDER LATE USED_IN_SYNTHESIS false} [get_files timing.xdc]
 
@@ -38,6 +41,7 @@ create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 reset
 create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 axi_bus
 set_property -dict [list CONFIG.NUM_SI 1 CONFIG.NUM_MI 1] [get_bd_cells axi_bus]
 create_bd_cell -type module -reference jtag200_regs regs
+set_property CONFIG.ENABLE_BLOCK 1 [get_bd_cells regs]
 create_bd_cell -type module -reference jtag200_io io
 
 create_bd_intf_port -mode Master -vlnv xilinx.com:interface:ddrx_rtl:1.0 DDR

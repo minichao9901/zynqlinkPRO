@@ -20,7 +20,7 @@ module tb_jtag200;
     reg awvalid = 0, wvalid = 0, arvalid = 0;
     wire awready, wready, arready, bvalid, rvalid;
     wire [1:0] bresp, rresp;
-    jtag200_regs regs (
+    jtag200_regs #(.ENABLE_BLOCK(1)) regs (
         .axi_aclk(axi_clk), .axi_aresetn(axi_resetn),
         .s_axi_awaddr(awaddr), .s_axi_awprot(3'b0), .s_axi_awvalid(awvalid), .s_axi_awready(awready),
         .s_axi_wdata(wdata), .s_axi_wstrb(4'hf), .s_axi_wvalid(wvalid), .s_axi_wready(wready),
@@ -38,9 +38,17 @@ module tb_jtag200;
         .lane_word(lane_word), .rx_word(rx_word), .tck(tck), .tms(tms), .tdi(tdi), .tdo(tdo),
         .ntrst(ntrst), .nsrst(nsrst)
     );
+    reg block_test = 0;
+    wire raw_tdo, block_tdo;
     jtag_dtm_model #(.RETURN_NS(0.80)) tap (
-        .rst_n(axi_resetn && ntrst && nsrst), .tck(tck), .tms(tms), .tdi(tdi), .tdo(tdo)
+        .rst_n(axi_resetn && ntrst && nsrst), .tck(tck && !block_test),
+        .tms(tms), .tdi(tdi), .tdo(raw_tdo)
     );
+    riscv_sba_model #(.RETURN_NS(0.80)) sba (
+        .rst_n(axi_resetn && ntrst && nsrst), .tck(tck && block_test),
+        .tms(tms), .tdi(tdi), .tdo(block_tdo)
+    );
+    assign tdo = block_test ? block_tdo : raw_tdo;
 
     task automatic write_reg(input [13:0] addr, input [31:0] data, input [1:0] response);
         fork
@@ -80,7 +88,7 @@ module tb_jtag200;
     task automatic wait_status(input [4:0] expected);
         reg [31:0] status;
         read_reg(4, status);
-        for (int attempts = 0; status !== expected && attempts < 15000; attempts++)
+        for (int attempts = 0; status !== expected && attempts < 180000; attempts++)
             read_reg(4, status);
         if (status !== expected) $fatal(1, "Status %h expected %h", status, expected);
     endtask
@@ -95,7 +103,7 @@ module tb_jtag200;
     endfunction
 
     always @(posedge tck) begin
-        if ($realtime > 150 && !watching)
+        if ($realtime > 150 && !watching && !block_test)
             $fatal(1, "TCK edge outside scan at %t", $realtime);
         if (watching) begin
             if (rises >= PULSES) $fatal(1, "Extra TCK edge");
@@ -157,6 +165,55 @@ module tb_jtag200;
         $display("J200_PROFILE %0d period=%0.3f ns pulses=%0d", n, period, rises);
     endtask
 
+    task automatic pipeline(input int half, offset, idle, count, input bit fault);
+        reg [31:0] info, word;
+        integer before_scans, before_writes;
+        write_reg(8, 2, 0);
+        #200;
+        write_reg(8, 0, 0);
+        wait_status(5);
+        read_reg(14'h010, info);
+        if (info !== 32'h50495045) $fatal(1,"Missing pipeline capability");
+        write_reg(14'h014, 32'h80020000, 0);
+        write_reg(14'h018, count, 0);
+        write_reg(14'h01c, (idle << 10) | (offset << 3) | half, 0);
+        write_reg(8, 13, 2);
+        write_reg(14'h014, 32'h0105f000, 0);
+        for (int i=0; i<count; i++)
+            write_reg(14'h1004+4*i, 32'h18adb000 ^ (i*32179), 0);
+        before_scans=sba.dmi_scans;
+        before_writes=sba.bus_writes;
+        if (fault) sba.fault_next=1;
+        write_reg(8, 13, 0);
+        wait_status(15);
+        read_reg(14'h020, info);
+        if (info !== (fault ? 32'd4 : 32'd1))
+            $fatal(1,"Block write completion %h fault=%d",info,fault);
+        if (sba.bus_writes-before_writes != count) $fatal(1,"Write lost or replayed");
+        if (sba.dmi_scans-before_scans > count+15) $fatal(1,"Write did not pipeline");
+        for (int i=0; i<count; i++)
+            if(sba.mem['h7000/4+i] !== (32'h18adb000 ^ (i*32179))) $fatal(1,"Target write mismatch %d",i);
+        write_reg(8, 0, 0);
+        wait_status(5);
+        if (!fault) begin
+            before_scans=sba.dmi_scans;
+            write_reg(8, 5, 0);
+            wait_status(15);
+            read_reg(14'h020, info);
+            if (info !== 1) $fatal(1,"Block read completion %h",info);
+            read_reg(14'h2000, info);
+            if (info !== (32'h00010000|count)) $fatal(1,"Block read header %h",info);
+            for (int i=0; i<count; i++) begin
+                read_reg(14'h2004+4*i, word);
+                if(word !== (32'h18adb000 ^ (i*32179))) $fatal(1,"Host read mismatch %d %h",i,word);
+            end
+            if (sba.dmi_scans-before_scans > count+15) $fatal(1,"Read did not pipeline");
+            write_reg(8, 0, 0);
+            wait_status(5);
+        end
+        $display("J200_PIPELINE_PASS half=%0d idle=%0d words=%0d bus_fault=%0d",half,idle,count,fault);
+    endtask
+
     initial begin
         $readmemh("pins.mem", expected_pins);
         #300;
@@ -168,6 +225,10 @@ module tb_jtag200;
         profile(3, 10.0, 10.0);
         profile(4, 12.5, 6.250);
         profile(5, 10.0, 5.0);
+        block_test=1;
+        pipeline(4,28,64,128,0);
+        pipeline(1,29,256,128,0);
+        pipeline(1,29,256,32,1);
         $display("JTAG200_SIM_PASS");
         $finish;
     end
