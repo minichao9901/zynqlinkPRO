@@ -26,6 +26,7 @@ ALIASES={
  'fpga.build':'fpga/build_dma.tcl','fpga.incremental':'fpga/build_incremental.tcl',
  'fpga.verify':'fpga/verify_routed.tcl','fpga.7010':'fpga/implement_7010.tcl',
  'fpga.repair-io':'fpga/repair_probe_io.tcl','sim.cm3':'tools/run_cm3_sim.py','sim.matrix':'tools/run_cm3_matrix.py',
+ 'swd200':'tools/swd200.py',
  'firmware.build':'tools/build_xusbps_daplink.py','firmware.ocm':'tools/report_ocm_elf.py',
  'boot.build':'tools/build_probe_boot.py','boot.package':'tools/package_probe_boot.py',
  'boot.bsp':'tools/build_boot_bsp.py',
