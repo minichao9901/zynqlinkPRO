@@ -273,16 +273,18 @@ module tb_jtag200;
     bit profile_arm = 0;
     int arm_send_words, arm_return_words, arm_idle_words, arm_dr_setup_words;
     always @(posedge word_clk) if (profile_arm) begin
-        case (regs.pipeline.engine.phy.state)
-            regs.pipeline.engine.phy.SEND: arm_send_words++;
-            regs.pipeline.engine.phy.RETURN: arm_return_words++;
-            default: begin
-                arm_idle_words++;
-                if (regs.pipeline.engine.core.state == regs.pipeline.engine.core.DR_NAV ||
-                    regs.pipeline.engine.core.state == regs.pipeline.engine.core.DR_PRE)
-                    arm_dr_setup_words++;
-            end
-        endcase
+        if (regs.pipeline.engine.arm_stream.sending ||
+            regs.pipeline.engine.phy.state == regs.pipeline.engine.phy.SEND)
+            arm_send_words++;
+        else if (regs.pipeline.engine.arm_stream.running ||
+                 regs.pipeline.engine.phy.state == regs.pipeline.engine.phy.RETURN)
+            arm_return_words++;
+        else begin
+            arm_idle_words++;
+            if (regs.pipeline.engine.core.state == regs.pipeline.engine.core.DR_NAV ||
+                regs.pipeline.engine.core.state == regs.pipeline.engine.core.DR_PRE)
+                arm_dr_setup_words++;
+        end
     end
 
     task automatic start_arm_profile;
@@ -298,12 +300,14 @@ module tb_jtag200;
                  arm_idle_words,arm_dr_setup_words);
     endtask
 
-    task automatic arm_pipeline(input int half, offset, idle, count);
-        reg [31:0] word;
+    task automatic arm_pipeline(input int half, offset, idle, count, input bit stream);
+        reg [31:0] word, invert;
         int first_tck;
         realtime started, write_ns, read_ns;
         write_reg(14'h018, count, 0);
-        write_reg(14'h01c, 32'h00200000 | (half == 2 ? 32'h00180000 : 0) |
+        invert = stream ? 32'hffffffff : 0;
+        write_reg(14'h01c, (stream ? 32'h00e00000 : 32'h00200000) |
+                   (half == 2 ? 32'h00180000 : 0) |
                    (idle << 10) | (offset << 3) | half, 0);
         write_reg(14'h014, 32'h08000000, 0);
         write_reg(8, 13, 2);
@@ -315,21 +319,21 @@ module tb_jtag200;
         first_tck=measured_tck;
         start_arm_profile();
         started=$realtime;
-        write_reg(8, 13, 0);
+        write_reg(8, stream ? 29 : 13, 0);
         wait_status(15);
         write_ns=$realtime-started;
         end_arm_profile("write",idle,count,first_tck,write_ns);
         read_reg(14'h020, word);
         if (word !== 1) $fatal(1,"ARM write completion %h",word);
         for (int i=0; i<count; i++)
-            if (arm_dap.mem[i] !== (32'h70420000 ^ (i*65537)))
+            if (arm_dap.mem[i] !== (32'h70420000 ^ (i*65537) ^ invert))
                 $fatal(1,"ARM write differs at word %d",i);
         write_reg(8, 0, 0);
         wait_status(5);
         first_tck=measured_tck;
         start_arm_profile();
         started=$realtime;
-        write_reg(8, 5, 0);
+        write_reg(8, stream ? 21 : 5, 0);
         wait_status(15);
         read_ns=$realtime-started;
         end_arm_profile("read",idle,count,first_tck,read_ns);
@@ -339,12 +343,56 @@ module tb_jtag200;
         if (word !== (32'h00010000|count)) $fatal(1,"ARM read header %h",word);
         for (int i=0; i<count; i++) begin
             read_reg(14'h2004+4*i, word);
-            if (word !== (32'h70420000 ^ (i*65537))) $fatal(1,"ARM read differs at word %d",i);
+            if (word !== (32'h70420000 ^ (i*65537) ^ invert)) $fatal(1,"ARM read differs at word %d",i);
         end
         write_reg(8, 0, 0);
         wait_status(5);
-        $display("J200_ARM_PASS half=%0d idle=%0d words=%0d read_MBps=%0.3f write_MBps=%0.3f",half,
-                 idle,count,count*4000.0/read_ns,count*4000.0/write_ns);
+        $display("J200_ARM_PASS stream=%0d half=%0d idle=%0d words=%0d read_MBps=%0.3f write_MBps=%0.3f",
+                 stream,half,idle,count,count*4000.0/read_ns,count*4000.0/write_ns);
+    endtask
+
+    task automatic check_arm_stream_errors;
+        reg [31:0] word;
+        int before_writes;
+        write_reg(14'h1400, 0, 0);  // corrupt only the last expected word
+        write_reg(8, 21, 0);
+        wait_status(15);
+        read_reg(14'h020, word);
+        if (word !== 8) $fatal(1,"Final posted word mismatch escaped comparison: %h",word);
+        write_reg(8, 0, 0);
+        wait_status(5);
+        before_writes=arm_dap.ap_writes;
+        fork
+            begin
+                wait (regs.pipeline.engine.arm_stream.sending && regs.pipeline.engine.arm_stream.sent == 1);
+                @(negedge tck);
+                arm_dap.wait_scans=1;
+            end
+            write_reg(8, 13, 0);
+        join
+        wait_status(15);
+        read_reg(14'h020, word);
+        if (word !== 2 || arm_dap.ap_writes-before_writes != 3)
+            $fatal(1,"WAIT replayed or issued another write: code %h, writes %0d",
+                   word,arm_dap.ap_writes-before_writes);
+        write_reg(8, 0, 0);
+        wait_status(5);
+        write_reg(14'h01c, 32'h00600000 | (3 << 10) | (29 << 3) | 2, 0);
+        fork
+            begin
+                wait (regs.pipeline.engine.arm_stream.sending && regs.pipeline.engine.arm_stream.sent == 1);
+                @(negedge tck);
+                arm_dap.fault_next=1;
+            end
+            write_reg(8, 5, 0);
+        join
+        wait_status(15);
+        read_reg(14'h020, word);
+        if (word !== 4 || regs.pipeline.engine.arm_stream.status !== 0)
+            $fatal(1,"The final CTRL/STAT fence missed a sticky AP fault: %h",word);
+        write_reg(8, 0, 0);
+        wait_status(5);
+        $display("J200_ARM_STREAM_ERROR_PASS final_compare WAIT_no_replay sticky_fence");
     endtask
 
 `else
@@ -469,16 +517,18 @@ module tb_jtag200;
         pipeline(1,29,256,128,0);
         pipeline(1,29,256,32,1);
         arm_test=1;
-        arm_pipeline(1,29,5,128);
-        arm_pipeline(2,29,5,128);
+        arm_pipeline(1,29,5,128,0);
+        arm_pipeline(2,29,5,128,0);
         write_reg(8, 2, 0);
         #200;
         ref_half = 15.0;
         #300;
         write_reg(8, 0, 0);
         wait_status(5);
-        arm_pipeline(2,29,3,256);
-        arm_pipeline(2,29,5,256);
+        arm_pipeline(2,29,3,256,0);
+        arm_pipeline(2,29,3,256,1);
+        arm_pipeline(2,30,5,256,1);
+        check_arm_stream_errors();
 `endif
         $display("JTAG200_SIM_PASS");
         $finish;

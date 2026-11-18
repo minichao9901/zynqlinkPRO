@@ -61,13 +61,16 @@ def historical_probe(path):
                    cwd=ROOT, check=True)
 
 
-def trial(bench, rate, timing, idle, direction, seconds, *, profile=False):
+def trial(bench, rate, timing, idle, direction, seconds, *, profile=False,
+          stream=False, verify_in_pl=False):
     tap, sample, advance = timing
-    bench.configure(rate, idle, sample, advance_tms=advance, advance_tdi=advance, arm=True)
+    bench.configure(rate, idle, sample, advance_tms=advance, advance_tdi=advance, arm=True,
+                    stream=stream, verify_in_pl=verify_in_pl)
     result = bench.run(direction, seconds, profile=profile)
     del result['dmi_busy'], result['dmi_invalid']
     result.pop('wire_dmi', None)
-    return dict(rate=rate, tap=tap, sample=sample, advance=advance, idle=idle, **result)
+    return dict(rate=rate, tap=tap, sample=sample, advance=advance, idle=idle,
+                stream=stream, verify_in_pl=verify_in_pl, **result)
 
 
 def compare_66(bench, report, archive, seconds):
@@ -118,6 +121,95 @@ def compare_66(bench, report, archive, seconds):
             archive()
             if row['passed']:
                 break
+
+
+def compare_stream_66(bench, report, archive, seconds):
+    rate = '66.667-block'
+    timing = None
+
+    def run(timing, idle, direction, window, stream, verify):
+        select(bench.port, rate, timing[0])
+        row = trial(bench, rate, timing, idle, direction, window, profile=True,
+                    stream=stream, verify_in_pl=verify)
+        print(json.dumps(row), flush=True)
+        return row
+
+    for tap in (16, 8, 24, 0, 31):
+        half, hz = select(bench.port, rate, tap)
+        slots = identify(bench.port, half, 3)
+        control = int(bench.port.command('read_word 0xf8000180'))
+        io_pll = int(bench.port.command('read_word 0xf8000108'))
+        need(control & 0x03F03F30 == 0x00103000 and io_pll >> 12 & 127 == 48,
+             '66 MHz FCLK1/IO PLL registers did not match')
+        report['calibration'].append(dict(rate=rate, tap=tap, slots=sorted(slots), nominal_tck_hz=hz,
+                                          fclk_control=hex(control), io_pll_control=hex(io_pll)))
+        for idle in (3, 5, 9, 17):
+            for phase in sorted(slots, key=lambda phase: abs(phase - 32)):
+                candidate = (tap, phase, False)
+                row = run(candidate, idle, 1, 1, True, False)
+                report['read_tune'].append(row)
+                archive()
+                if row['passed']:
+                    timing, read_idle = candidate, idle
+                    break
+            if timing:
+                break
+        if timing:
+            break
+    need(timing is not None, 'No streaming read at 66.667 MHz with independent A9 comparison')
+
+    for idle, duration, stream, verify in ((3, 2, False, False), (read_idle, 2, True, False),
+                                          (read_idle, seconds, True, True), (1, 2, True, True)):
+        report['long_read'].append(run(timing, idle, 1, duration, stream, verify))
+        archive()
+
+    # Keep the 100 MHz follow-up read-only and use the same saved target data.
+    report['stream100_read'] = []
+    half, _ = select(bench.port, '100', 16)
+    slots = identify(bench.port, half, 3)
+    for idle in (3, 5, 9, 17, 33):
+        for sample in sorted(slots, key=lambda phase: abs(phase - 37)):
+            candidate = (16, sample, True)
+            select(bench.port, '100', 16)
+            probe = trial(bench, '100', candidate, idle, 1, 0, profile=True, stream=True)
+            report['stream100_read'].append(probe)
+            if probe['passed']:
+                select(bench.port, '100', 16)
+                row = trial(bench, '100', candidate, idle, 1, min(seconds, 10),
+                            profile=True, stream=True, verify_in_pl=True)
+                report['stream100_read'].append(row)
+                print(json.dumps(row), flush=True)
+                if row['passed']:
+                    break
+        else:
+            continue
+        break
+    archive()
+
+    pattern = random.Random(0x743666).randbytes(1024)
+    bench.pattern(pattern)
+    report['phase'] = 'write'
+    archive()
+    for stream in (False, True):
+        result = run(timing, 5, 0, 2, stream, False)
+        report['mixed'].append(result)
+        archive()
+    for idle in sorted({5, 7, 9, 13, max(5, read_idle)}):
+        pilot = run(timing, idle, 0, 1, True, True)
+        report['mixed'].append(pilot)
+        archive()
+        if pilot['passed']:
+            result = run(timing, idle, 0, seconds, True, True)
+            report['mixed'].append(result)
+            archive()
+            if result['passed']:
+                break
+    need(any(row['passed'] and row['verify_in_pl'] and row['planned_s'] == seconds
+             for row in report['long_read']), 'Sustained SRAM read failed')
+    need(report['mixed'][-1]['passed'] and report['mixed'][-1]['planned_s'] == seconds,
+         'Sustained alternating SRAM verification failed')
+
+
 
 
 def sweep(bench, report, archive):
@@ -172,7 +264,9 @@ def main():
     parser.add_argument('--cable-serial', required=True)
     parser.add_argument('--serial', required=True)
     parser.add_argument('--seconds', default=60, type=int, choices=range(1, 61), metavar='1..60')
-    parser.add_argument('--compare-66', action='store_true', help='Profile only the 66.667 MHz ARM path')
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument('--compare-66', action='store_true', help='Profile only the 66.667 MHz ARM path')
+    mode.add_argument('--stream-66', action='store_true', help='Compare ARM stream and PL verification at 66.667 MHz')
     parser.add_argument('--execute', action='store_true')
     args = parser.parse_args()
     if not args.execute:
@@ -216,20 +310,26 @@ def main():
                 report['probe'] = port.verify_probe(args.pair)
                 half, _ = select(port, '50', 16)
                 calibrated = identify(port, half, 3)
-                need(36 in calibrated, '50 MHz ARM ID qualification failed')
+                need(calibrated, '50 MHz ARM ID qualification failed')
                 for address in (0x5C001000, 0x58024400, 0x58024410, 0x58024418, 0x58024428, 0x58024430):
                     key = hex(address)
                     expected = 0x20036450 if address == 0x5C001000 else int(
                         report['target_clock_active']['registers'][key], 16)
-                    observed = slow_read(port, half, 0, address, 1, {36})[36]
+                    observed = slow_read(port, half, 0, address, 1, calibrated)
                     mask = 0xFFFF3FFF if address == 0x58024400 else 0xFFFFFFFF
-                    need(all(ack == 2 for ack in observed['acks']) and
-                         (observed['values'][0] >> 3) & mask == expected & mask, f'Clock/identity changed at {key}')
+                    calibrated = {phase for phase in calibrated
+                                  if all(ack == 2 for ack in observed[phase]['acks'])
+                                  and observed[phase]['status'] & 0xA2 == 0
+                                  and (observed[phase]['values'][0] >> 3) & mask == expected & mask}
+                    need(calibrated, f'Clock/identity changed at {key}')
                 report['target_clock_reverified'] = True
+                report['target_clock_probe_slots'] = sorted(calibrated)
                 report['phase'] = 'read'
                 bench = BlockBenchmark(port, args.out)
                 bench.pattern(saved[:1024])
-                if args.compare_66:
+                if args.stream_66:
+                    compare_stream_66(bench, report, archive, args.seconds)
+                elif args.compare_66:
                     compare_66(bench, report, archive, args.seconds)
                 else:
                     results = sweep(bench, report, archive)
@@ -282,7 +382,14 @@ def main():
             historical_probe(args.out / 'restore-probe')
             with low_link(args.serial) as mem:
                 if saved is not None:
-                    if mem.read(BASE, SIZE) != saved:
+                    before_restore = mem.read(BASE, SIZE)
+                    if args.stream_66 and report['mixed'] and report['mixed'][-1]['passed']:
+                        last = report['mixed'][-1]
+                        pattern = random.Random(0x743666).randbytes(1024)
+                        if (last['write_bytes'] // 1024 - 1) & 1:
+                            pattern = bytes(value ^ 255 for value in pattern)
+                        report['independent_final_pattern_match'] = before_restore == pattern + saved[1024:]
+                    if before_restore != saved:
                         mem.write(BASE, saved)
                     restored = mem.read(BASE, SIZE)
                     report['restore_sha256'] = sha(restored)
@@ -308,6 +415,8 @@ def main():
             archive()
     need(all(report.get(key) for key in ('ram_restored', 'guards_match', 'voltage_restored',
                                         'rcc_restored', 'core_state_restored')), 'Restore verification failed')
+    if args.stream_66:
+        need(report.get('independent_final_pattern_match'), 'Independent final data check failed')
 
 
 if __name__ == '__main__':

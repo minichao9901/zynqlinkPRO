@@ -59,12 +59,16 @@ class BlockBenchmark:
         need(len(words) == 29 and words[0] == 0x4A424C4B, "Pipeline runner ELF is not running")
         return words
 
-    def configure(self, rate, idle, phase, *, advance_tms=False, advance_tdi=False, arm=False):
+    def configure(self, rate, idle, phase, *, advance_tms=False, advance_tdi=False, arm=False,
+                  stream=False, verify_in_pl=False):
         _, half, _ = PROFILES[rate]
         need(half == 2 or not (advance_tms or advance_tdi), "TX advance requires a two-slot pulse")
         cfg = (int(advance_tms) << 20) | (int(advance_tdi) << 19) | (idle << 10) | (phase << 3) | half
         if arm:
             cfg |= 1 << 21
+        need(not stream or (arm and half == 2 and idle % 2 == 1), "ARM stream requires two-slot TCK and odd idle")
+        need(not verify_in_pl or stream, "PL verification requires the ARM stream")
+        cfg |= int(stream) << 22 | int(verify_in_pl) << 23
         base = 0x24050000 if arm else BASE
         self.port.command(f"physwr -force 0x40000014 {base:#x}; "
                           f"physwr -force 0x40000018 {BYTES//4}; physwr -force 0x4000001c {cfg:#x}")

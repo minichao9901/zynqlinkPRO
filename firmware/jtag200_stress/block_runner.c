@@ -57,11 +57,11 @@ static int wait_status(unsigned expected)
     return 0;
 }
 
-static unsigned transfer(int write, uint32_t inversion, struct transfer_time *time)
+static unsigned transfer(int write, uint32_t inversion, int resident, struct transfer_time *time)
 {
     if (!wait_status(5))
         return 2;
-    if (write) {
+    if (write && !resident) {
         uint64_t stage = ticks();
         for (unsigned i = 0; i < COUNT; ++i)
             TX[i+1] = PATTERN[i] ^ inversion;
@@ -69,7 +69,7 @@ static unsigned transfer(int write, uint32_t inversion, struct transfer_time *ti
     }
     barrier();
     uint64_t scan = ticks();
-    CTRL = write ? 13 : 5;
+    CTRL = (write ? 13u : 5u) | (resident && inversion ? 16u : 0u);
     if (!wait_status(15))
         return 3;
     time->scan += ticks() - scan;
@@ -86,7 +86,7 @@ static unsigned transfer(int write, uint32_t inversion, struct transfer_time *ti
         if (REQUEST[HEADER] != (0x00010000u | COUNT))
             error = 5;
     }
-    if (!error && !write) {
+    if (!error && !write && !resident) {
         uint64_t compare = ticks();
         for (unsigned i = 0; i < COUNT; ++i) {
             uint32_t result = RX[i+1];
@@ -115,6 +115,14 @@ static unsigned exercise(unsigned seconds, unsigned direction)
     if (seconds > 120 || direction > 2 || REG(0x40000010u) != 0x50495045u ||
         REG(0x40000014u) != base || REG(0x40000018u) != COUNT)
         return 1;
+    int resident = (timing & (1u << 23)) != 0;
+    if (resident) {
+        if (!wait_status(5))
+            return 2;
+        for (unsigned i = 0; i < COUNT; ++i)
+            TX[i+1] = PATTERN[i];
+        barrier();
+    }
     unsigned error;
     unsigned completed = 0;
     uint64_t read_time = 0, write_time = 0;
@@ -126,7 +134,7 @@ static unsigned exercise(unsigned seconds, unsigned direction)
         uint32_t inversion = completed & 1u ? UINT32_MAX : 0;
         if (direction != 1) {
             before = ticks();
-            error = transfer(1, inversion, &write);
+            error = transfer(1, inversion, resident, &write);
             write_time += ticks() - before;
             if (error)
                 break;
@@ -134,7 +142,7 @@ static unsigned exercise(unsigned seconds, unsigned direction)
         }
         if (direction != 2) {
             before = ticks();
-            error = transfer(0, direction == 1 ? 0 : inversion, &read);
+            error = transfer(0, direction == 1 ? 0 : inversion, resident, &read);
             read_time += ticks() - before;
             if (error)
                 break;

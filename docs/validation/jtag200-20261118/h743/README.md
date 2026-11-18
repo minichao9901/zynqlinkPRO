@@ -51,3 +51,11 @@ idle3 实读 29,542,400 B，全部逐字校验。按 1 KiB 块分解，扫描请
 XSim 在相同的 256 字、idle3 下复现 **12,149 个 TCK 和 263.40 µs** 的 PL 用时，距实板扫描用时 0.07%。30 ns 的 `CLKDIV` 下，6,076 拍用于发送（182.28 µs），789 拍等待回采（23.67 µs），1,915 拍在段间停钟及首尾握手（57.45 µs）。停钟中，DR 准备状态占 526 拍（15.78 µs）。idle5 多出的 526 个 TCK 把 263 个 CLKDIV 拍从回采等待移到发送，PL 用时相同。仿真没有 A9 数据校验或真实 H743 内存等待，支持先降低 ARM 块扫描的段间停钟和回采排空，再减少逐字 AXI 读取和比对占用。[XSim 分解](selectio-66-xsim.txt)
 
 复测入口为 `python -X utf8 tools/jtag200_h743_block.py --compare-66 --pair prebuilt/jtag-only-200mhz-arm66-profile-20261118 --out <新的证据目录> --serial 12345678 --cable-serial 210299008529 --seconds 10 --execute`。
+
+## 连续 ARM DRW 流水
+
+ARM 流水保留原来的 `DP CTRL/STAT`、`SELECT`、`CSW`、`TAR` 建链和块尾 `RDBUFF`、`CTRL/STAT`。连续段按当前 H743 扫描链发送固定 DR 帧，发射与回采同时推进。回采的 ACK 属于当前 JTAG 扫描，数据来自上一笔已接受的 AP 访问。遇到 WAIT 时让已开始的帧回到 RTI，目标按协议丢弃该帧的更新，流水停止并返回错误。仿真验证 WAIT 后无重放、最后一字不符时报错、AP sticky fault 由末尾检查捕获。[Arm ADIv5 规范表 B3-8](https://documentation-service.arm.com/static/5f900abff86e16515cdc063b)
+
+块描述符选择两 TCK/serializer 字和奇数 idle。流水可把原始数据留在 RX BRAM 供 A9 逐字复核，也可预装一次基准图案，由 PL 逐字比对。混合测试通过反相位交替写入两种图案。两种模式都完整保留读回数据。
+
+66.667 MHz、idle3、1 KiB 同用例，仿真仍发出 12,149 个 TCK，读用时从 263.40 µs 降至 186.48 µs。扣除 182.24 µs 的物理发钟时间，整块额外时间约 4.24 µs，达到该扫描序列线速预算的 97.7%。idle5 交替读写各 194.16 µs。原始波形档、旧 ARM 路径和 RISC-V 路径仿真通过。[仿真分解](stream-xsim.txt)
