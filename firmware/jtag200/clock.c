@@ -90,6 +90,11 @@ static uint32_t select_clock(uint32_t profile, uint32_t taps)
     return 0;
 }
 
+#ifdef JTAG200_STRESS
+void stress_init(void);
+void stress_poll(void);
+#endif
+
 void jtag200_main(void)
 {
     /* The RAM loader resets the A9 before entry. Keep MMIO and the physical
@@ -99,10 +104,17 @@ void jtag200_main(void)
     MAILBOX[ERROR] = select_clock(0, 0);
     barrier();
     MAILBOX[MAGIC] = SIGNATURE;
+#ifdef JTAG200_STRESS
+    stress_init();
+#endif
     for (;;) {
         uint32_t request = MAILBOX[REQUEST];
-        if (request == MAILBOX[RESPONSE])
+        if (request == MAILBOX[RESPONSE]) {
+#ifdef JTAG200_STRESS
+            stress_poll();
+#endif
             continue;
+        }
         barrier();
         MAILBOX[ERROR] = select_clock(MAILBOX[PROFILE], MAILBOX[TAPS]);
         barrier();
