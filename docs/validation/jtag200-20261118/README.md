@@ -15,7 +15,7 @@
 
 这是可运行时选择的六个预设。FCLK0 的约束为 7.5 ns，FCLK2 给 IDELAYCTRL 提供固定 200 MHz 参考。PS 初始化由 Vivado 生成，IO PLL 为 33.333 MHz 参考 ×48。选档时只调整 FCLK1 的分频（÷32 或 ÷40）。等上一次扫描完成后，PS 先保持 MMCM 和串行器复位，改分频后等待重新锁定。
 
-三个 8:1 DDR OSERDESE2 并行发送 TCK/TMS/TDI。TDO 经 IDELAYE2（0–31 tap）和 ISERDESE2 将每个半拍时隙的样本写回。主机按时隙偏移对齐 TDO，能跨一个或多个 TCK 周期取样。每个事务最多 512 个并行字，包含前导和尾部空闲，ACK 或多条调试事务由上层决定。AXI 与并行时钟间用启动/完成握手，缓冲分时所有权，最后字地址从启动前保持到完成。
+三个 8:1 DDR OSERDESE2 并行发送 TCK/TMS/TDI。TDO 经 IDELAYE2（0–31 tap）和 ISERDESE2 将每个半拍时隙的样本写回。主机按时隙偏移对齐 TDO，能跨一个或多个 TCK 周期取样。每个事务最多 512 个并行字，包含前导和尾部空闲，ACK 或多条调试事务由上层决定。AXI 与并行时钟间用启动/完成握手，缓冲按扫描前后分时归属，最后一字的结束标记随波形写入 TX BRAM。
 
 ## 离线复现
 
@@ -40,7 +40,7 @@ Vivado/XSim 2018.3 的实际 MMCM、OSERDES、ISERDES 和 I/O 延时模型通过
 
 用于该表的 JTAG TAP 行为模型回包延时为 0.8 ns。RX 偏移包含了 FPGA 的串并转换流水延迟。40 MHz 参考的两档会产生 XSim 的 MMCM 参考周期属性提示，实测仿真周期为表值。板上仍需重新扫 tap 与偏移。
 
-首轮构建暴露 PS7 的 FCLK 端口使能需同时设 PCW_EN_CLKx_PORT。输出目录检查还暴露生成的初始化 Tcl 在 *processing_system7* 目录。首轮仿真补齐 XSim secureip 和 timescale 后通过。对应脚本已修正。布线时序和 bit/ELF/初始化 Tcl 哈希见配对 manifest。
+首轮构建暴露 PS7 的 FCLK 端口使能需同时设 PCW_EN_CLKx_PORT。输出目录检查还暴露生成的初始化 Tcl 在 *processing_system7* 目录。首轮仿真补齐 XSim secureip 和 timescale 后通过。对应脚本已修正。首个路由候选的 CDC 报告标出扫描长度的直接跨域，最终实现让结束标记随双时钟 BRAM 过域。布线时序和 bit/ELF/初始化 Tcl 哈希见配对 manifest。
 
 ## 实板待验
 

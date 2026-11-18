@@ -1,9 +1,9 @@
 `timescale 1ns/1ps
 // A 50 or 40 MHz PS FCLK1 reference gives a 200 or 160 MHz I/O clock.
-// FCLK0 is independent; the PS changes FCLK1 only with clock_hold asserted.
+// FCLK0 is independent; the PS changes FCLK1 only with phy_hold asserted.
 module jtag200_io (
     input wire fclk1, delay_ref, axi_clk, axi_resetn,
-    input wire clock_hold,
+    input wire phy_hold,
     (* X_INTERFACE_PARAMETER = "FREQ_HZ 50000000" *) output wire word_clk,
     output wire word_reset, ready,
     input wire delay_load,
@@ -14,7 +14,7 @@ module jtag200_io (
     output wire tck, tms, tdi,
     input wire tdo
 );
-    wire clock_reset = clock_hold || !axi_resetn;
+    wire clock_reset = phy_hold || !axi_resetn;
     wire clock_locked, feedback_raw, feedback, serial_raw, serial_clk, word_raw;
     MMCME2_BASE #(
         .CLKIN1_PERIOD(20.0), .DIVCLK_DIVIDE(1), .CLKFBOUT_MULT_F(20.0),

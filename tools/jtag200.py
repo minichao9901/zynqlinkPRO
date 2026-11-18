@@ -49,6 +49,7 @@ def waveform(tms, tdi, half_slots):
             for lane in range(3):
                 word |= (value >> lane & 1) << (lane * 8 + slot)
         words.append(word)
+    words[-1] |= 1 << 24  # Terminator travels in the TX BRAM, with the waveform.
     return words
 
 
@@ -199,6 +200,7 @@ targets -set -filter {{name =~ "ARM Cortex-A9 MPCore #0*"{select}}}
 rst -processor
 configparams force-mem-access 1
 dow {{{elf.as_posix()}}}
+mwr -force 0x0002ff00 0
 con''')
         memory.run(SCAN_TCL.read_text(encoding="ascii") + f'''
 wait_mask 0x2ff00 0xffffffff 0x4a323030

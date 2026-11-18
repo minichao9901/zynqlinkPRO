@@ -9,7 +9,7 @@ set_param general.maxThreads 8
 set_property target_language Verilog [current_project]
 add_files [glob [file join $here *.v]]
 add_files -fileset constrs_1 [list [file join $here pins.xdc] [file join $here timing.xdc]]
-set_property PROCESSING_ORDER LATE [get_files timing.xdc]
+set_property -dict {PROCESSING_ORDER LATE USED_IN_SYNTHESIS false} [get_files timing.xdc]
 
 create_bd_design jtag200_bd
 create_bd_cell -type ip -vlnv xilinx.com:ip:processing_system7:5.5 processing_system7_0
@@ -35,7 +35,6 @@ foreach {name value} {one 1 zero 0} {
     set_property CONFIG.CONST_VAL $value [get_bd_cells $name]
 }
 create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 reset
-set_property CONFIG.C_EXT_RESET_HIGH 0 [get_bd_cells reset]
 create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 axi_bus
 set_property -dict [list CONFIG.NUM_SI 1 CONFIG.NUM_MI 1] [get_bd_cells axi_bus]
 create_bd_cell -type module -reference jtag200_regs regs
@@ -61,7 +60,7 @@ foreach pin {axi_bus/ARESETN axi_bus/S00_ARESETN axi_bus/M00_ARESETN} {
     connect_bd_net [get_bd_pins reset/interconnect_aresetn] [get_bd_pins $pin]
 }
 connect_bd_net [get_bd_pins reset/peripheral_aresetn] [get_bd_pins regs/axi_aresetn] [get_bd_pins io/axi_resetn]
-foreach pin {word_clk word_reset ready clock_hold lane_word rx_word delay_ready delay_value delay_load} {
+foreach pin {word_clk word_reset ready phy_hold lane_word rx_word delay_ready delay_value delay_load} {
     connect_bd_net [get_bd_pins regs/$pin] [get_bd_pins io/$pin]
 }
 foreach {pin direction} {tck O tms O tdi O tdo I} {
@@ -74,6 +73,9 @@ if {[llength $segment] != 1} { error "Expected one GP0 peripheral: $segment" }
 set_property offset 0x40000000 $segment
 set_property range 16K $segment
 validate_bd_design
+if {[get_property CONFIG.C_EXT_RESET_HIGH [get_bd_cells reset]] != 0} {
+    error "PS FCLK_RESET0_N must propagate an active-low reset"
+}
 foreach {index required} {0 133.333333 1 50 2 200} {
     set actual [get_property CONFIG.PCW_ACT_FPGA${index}_PERIPHERAL_FREQMHZ $ps]
     if {abs($actual - $required) > 0.001} {error "FCLK$index is $actual MHz, expected $required"}

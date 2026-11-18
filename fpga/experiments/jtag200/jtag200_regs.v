@@ -23,7 +23,7 @@ module jtag200_regs (
     output reg [1:0] s_axi_rresp,
     output reg s_axi_rvalid,
     input wire s_axi_rready,
-    output reg clock_hold = 1,
+    output reg phy_hold = 1,
     input wire ready,
     input wire delay_ready,
     output reg delay_load = 0,
@@ -39,13 +39,12 @@ module jtag200_regs (
     reg have_addr = 0, have_data = 0;
     reg reading_rx = 0;
     reg run = 0;
-    reg [8:0] last_word = 0;
     wire done, rx_write;
     (* ASYNC_REG = "TRUE" *) reg [1:0] ready_sync = 0, done_sync = 0, delay_sync = 0;
     wire [8:0] tx_addr, rx_addr;
-    reg [23:0] tx_word;
+    reg [24:0] tx_word;
     reg [7:0] rx_read;
-    (* ram_style = "block" *) reg [23:0] tx_mem [0:511];
+    (* ram_style = "block" *) reg [24:0] tx_mem [0:511];
     (* ram_style = "block" *) reg [7:0] rx_mem [0:511];
 
     wire write_pending = have_addr && have_data && !s_axi_bvalid;
@@ -63,12 +62,12 @@ module jtag200_regs (
         if (rx_write) rx_mem[rx_addr] <= rx_word;
     end
     always @(posedge axi_aclk) begin
-        if (write_tx) tx_mem[write_addr[10:2]] <= write_data[23:0];
+        if (write_tx) tx_mem[write_addr[10:2]] <= write_data[24:0];
         if (read_rx) rx_read <= rx_mem[s_axi_araddr[10:2]];
     end
 
     jtag200_wave wave (
-        .clk(word_clk), .reset(word_reset), .run(run), .last_word(last_word),
+        .clk(word_clk), .reset(word_reset), .run(run),
         .done(done), .tx_addr(tx_addr), .rx_addr(rx_addr), .rx_write(rx_write),
         .tx_word(tx_word), .lane_word(lane_word)
     );
@@ -80,11 +79,10 @@ module jtag200_regs (
             s_axi_rvalid <= 0;
             s_axi_bvalid <= 0;
             reading_rx <= 0;
-            clock_hold <= 1;
+            phy_hold <= 1;
             delay_load <= 0;
             delay_value <= 0;
             run <= 0;
-            last_word <= 0;
             ready_sync <= 0;
             done_sync <= 0;
             delay_sync <= 0;
@@ -113,12 +111,11 @@ module jtag200_regs (
                     // Stop only after the last TCK falling edge and drain.
                     if (!write_data[0] && (!run || done_sync[1])) begin
                         run <= 0;
-                        clock_hold <= write_data[1];
+                        phy_hold <= write_data[1];
                         s_axi_bresp <= 0;
                     end
                     if (write_data[0] && !write_data[1] && !run && !done_sync[1] &&
-                        !clock_hold && ready_sync[1] && delay_sync[1]) begin
-                        last_word <= write_data[16:8];
+                        !phy_hold && ready_sync[1] && delay_sync[1]) begin
                         run <= 1;
                         s_axi_bresp <= 0;
                     end
@@ -144,7 +141,7 @@ module jtag200_regs (
                     s_axi_rvalid <= 1;
                     case (s_axi_araddr)
                         14'h000: s_axi_rdata <= 32'h4a323030; // J200
-                        14'h004: s_axi_rdata <= {27'b0, clock_hold, run, delay_sync[1], done_sync[1], ready_sync[1]};
+                        14'h004: s_axi_rdata <= {27'b0, phy_hold, run, delay_sync[1], done_sync[1], ready_sync[1]};
                         14'h00c: s_axi_rdata <= {27'b0, delay_value};
                         default: begin
                             s_axi_rdata <= 0;

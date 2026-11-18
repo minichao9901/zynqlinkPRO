@@ -27,7 +27,7 @@ proc profile {index taps hz half} {
 proc scan_jtag {tx rx len} {
     wait_mask 0x40000004 0x1f 0x05
     physwr -force -bin -file $tx 0x40001000 $len
-    physwr -force 0x40000008 [expr {1 | (($len - 1) << 8)}]
+    physwr -force 0x40000008 1
     wait_mask 0x40000004 0x1f 0x0f
     set rc [catch {physrd -force -bin -file $rx 0x40002000 $len} result]
     physwr -force 0x40000008 0

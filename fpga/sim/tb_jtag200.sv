@@ -8,7 +8,7 @@ module tb_jtag200;
     end
     always #2.500 delay_ref = !delay_ref;
 
-    wire clock_hold, ready, word_clk, word_reset, delay_load, delay_ready;
+    wire phy_hold, ready, word_clk, word_reset, delay_load, delay_ready;
     wire [4:0] delay_value;
     wire [23:0] lane_word;
     wire [7:0] rx_word;
@@ -27,13 +27,13 @@ module tb_jtag200;
         .s_axi_bresp(bresp), .s_axi_bvalid(bvalid), .s_axi_bready(1'b1),
         .s_axi_araddr(araddr), .s_axi_arprot(3'b0), .s_axi_arvalid(arvalid), .s_axi_arready(arready),
         .s_axi_rdata(rdata), .s_axi_rresp(rresp), .s_axi_rvalid(rvalid), .s_axi_rready(1'b1),
-        .clock_hold(clock_hold), .ready(ready), .delay_ready(delay_ready),
+        .phy_hold(phy_hold), .ready(ready), .delay_ready(delay_ready),
         .delay_load(delay_load), .delay_value(delay_value), .word_clk(word_clk), .word_reset(word_reset),
         .lane_word(lane_word), .rx_word(rx_word)
     );
     jtag200_io io (
         .fclk1(fclk1), .delay_ref(delay_ref), .axi_clk(axi_clk), .axi_resetn(axi_resetn),
-        .clock_hold(clock_hold), .word_clk(word_clk), .word_reset(word_reset), .ready(ready),
+        .phy_hold(phy_hold), .word_clk(word_clk), .word_reset(word_reset), .ready(ready),
         .delay_load(delay_load), .delay_value(delay_value), .delay_ready(delay_ready),
         .lane_word(lane_word), .rx_word(rx_word), .tck(tck), .tms(tms), .tdi(tdi), .tdo(tdo)
     );
@@ -138,7 +138,7 @@ module tb_jtag200;
         rises = 0;
         falls = 0;
         watching = 1;
-        write_reg(8, ((len - 1) << 8) | 1, 0);
+        write_reg(8, 1, 0);
         write_reg(8, 2, 2);
         wait_status(15);
         if (rises != PULSES || falls != PULSES || tck !== 0)
