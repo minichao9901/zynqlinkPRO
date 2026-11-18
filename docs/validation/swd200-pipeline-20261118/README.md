@@ -40,6 +40,14 @@ SWCLK 200 MHz 下，CM3 HCLK 125、100、80、50 MHz 均完成完整读写。HCL
 
 首轮优化版实现仍报结果 BRAM 写使能的 REQP-1840。结果提交改为单独的 CLKDIV 寄存器级，结果可与下一条命令并行提交，最后一次写入先于 AXI 获得批完成标志。加寄存器后，主测试的吞吐、引脚计时和 WAIT 重试次数保持一致。见[首轮 DRC](first-route-drc.rpt)。
 
+## 最终综合布线
+
+XC7Z020-CLG400-2，Vivado 2018.3。AXI 目标 133.333333 MHz，最高档串行时钟 200 MHz，CLKDIV 100 MHz。布线 WNS **+0.997 ns**、WHS **+0.082 ns**，全部 2,188 条可布线网络完成，DRC 零违规。使用 1,010 LUT、1,122 寄存器和 1.5 个 BRAM Tile。构建核对两颗 OSERDESE2、一颗 ISERDESE2、一颗 IOBUF 及 L15、L16、M14 三个 PL 外部管脚。
+
+CDC 报告仍标记同步完成握手下的失败位、复位异步断言的组合入口以及 58 个握手使能控制项。外部 SWDIO/SWCLK 时序和信号完整性待实板签核。本轮交付限实验分支的源码与 bit/ELF 配对。远端 main、固定 EXE、Pages、Release 下载和 QSPI 冷启动均为范围外。
+
+[时序](timing.rpt) · [时钟](clocks.rpt) · [资源](utilization.rpt) · [管脚](io.rpt) · [CDC](cdc.rpt) · [DRC](drc.rpt) · [配对及 SHA-256](../../../prebuilt/swd-only-200mhz-pipeline-20261118/manifest.json)
+
 ## 复现
 
 ```powershell

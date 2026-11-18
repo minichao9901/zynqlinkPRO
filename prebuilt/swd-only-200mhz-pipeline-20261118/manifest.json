@@ -1,0 +1,51 @@
+{
+  "design": "J7 pipelined SWD-only SelectIO experiment",
+  "date": "2026-11-18",
+  "source_commit": "2df5fd3d44169fda15d47f8177983db09d669a76",
+  "source_base": "3b4e2e0d",
+  "part": "xc7z020clg400-2",
+  "vivado": "2018.3 build 2405991",
+  "gcc": "Linaro GCC 7.3.1 (Xilinx SDK 2018.3)",
+  "build": "python -X utf8 toolbox.py project run swd200 -- build",
+  "firmware_options": "-mcpu=cortex-a9 -marm -Os -ffreestanding -nostdlib (low OCM)",
+  "protocols": [
+    "SWD"
+  ],
+  "j7_package_pins": {
+    "swclk": "L15",
+    "swdio": "L16",
+    "nsrst": "M14"
+  },
+  "ddr_serial_width": 4,
+  "swclk_profiles_hz": [
+    50000000,
+    100000000,
+    160000000,
+    200000000
+  ],
+  "default_swclk_hz": 50000000,
+  "timing": {
+    "axi_hz": 133333333,
+    "serializer_hz": 200000000,
+    "word_hz": 100000000,
+    "setup_slack_ns": 0.997,
+    "hold_slack_ns": 0.082,
+    "drc_violations": 0,
+    "routing_errors": 0
+  },
+  "cm3_simulation": {
+    "swclk_hz": 200000000,
+    "hclk_hz": 100000000,
+    "read_MBs": 15.2025,
+    "write_MBs": 15.1788,
+    "bytes_per_round": 1024,
+    "rounds": 3
+  },
+  "hardware_acceptance": "offline experiment, physical validation pending",
+  "evidence": "docs/validation/swd200-pipeline-20261118",
+  "sha256": {
+    "probe.bit": "0cbd5587ace83736c2292dc3f660728a3c2d4c1ae48da12989ef32ccd807282e",
+    "application.elf": "7e3d1961c5d0a6d0fd75c7ec5c405998232deb212d3d91dcd6cd1e270be5cc7a",
+    "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+  }
+}
