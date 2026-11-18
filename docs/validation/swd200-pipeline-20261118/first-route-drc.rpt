@@ -1,0 +1,54 @@
+Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2018.3 (win64) Build 2405991 Thu Dec  6 23:38:27 MST 2018
+| Date         : Wed Nov 18 21:35:15 2026
+| Host         : DESKTOP-0UKCPD3 running 64-bit major release  (build 9200)
+| Command      : report_drc -file E:/zynqlinkPRO-swd200/build/swd200/fpga/drc.rpt
+| Design       : swd200_bd_wrapper
+| Device       : xc7z020clg400-2
+| Speed File   : -2
+| Design State : Fully Routed
+------------------------------------------------------------------------------------
+
+Report DRC
+
+Table of Contents
+-----------------
+1. REPORT SUMMARY
+2. REPORT DETAILS
+
+1. REPORT SUMMARY
+-----------------
+            Netlist: netlist
+          Floorplan: impl_1
+      Design limits: <entire design considered>
+           Ruledeck: default
+             Max violations: <unlimited>
+             Violations found: 4
++-----------+----------+----------------------------+------------+
+| Rule      | Severity | Description                | Violations |
++-----------+----------+----------------------------+------------+
+| REQP-1840 | Warning  | RAMB18 async control check | 4          |
++-----------+----------+----------------------------+------------+
+
+2. REPORT DETAILS
+-----------------
+REQP-1840#1 Warning
+RAMB18 async control check
+The RAMB18E1 swd200_bd_i/regs/inst/results_reg has an input control pin swd200_bd_i/regs/inst/results_reg/WEBWE[0] (net: swd200_bd_i/regs/inst/write_result) which is driven by a register (swd200_bd_i/phy/inst/reset_pipe_reg[3]) that has an active asychronous set or reset. This may cause corruption of the memory contents and/or read values when the set/reset is asserted and is not analyzed by the default static timing analysis. It is suggested to eliminate the use of a set/reset to registers driving this RAMB pin or else use a synchronous reset in which the assertion of the reset is timed by default.
+Related violations: <none>
+
+REQP-1840#2 Warning
+RAMB18 async control check
+The RAMB18E1 swd200_bd_i/regs/inst/results_reg has an input control pin swd200_bd_i/regs/inst/results_reg/WEBWE[1] (net: swd200_bd_i/regs/inst/write_result) which is driven by a register (swd200_bd_i/phy/inst/reset_pipe_reg[3]) that has an active asychronous set or reset. This may cause corruption of the memory contents and/or read values when the set/reset is asserted and is not analyzed by the default static timing analysis. It is suggested to eliminate the use of a set/reset to registers driving this RAMB pin or else use a synchronous reset in which the assertion of the reset is timed by default.
+Related violations: <none>
+
+REQP-1840#3 Warning
+RAMB18 async control check
+The RAMB18E1 swd200_bd_i/regs/inst/results_reg has an input control pin swd200_bd_i/regs/inst/results_reg/WEBWE[2] (net: swd200_bd_i/regs/inst/write_result) which is driven by a register (swd200_bd_i/phy/inst/reset_pipe_reg[3]) that has an active asychronous set or reset. This may cause corruption of the memory contents and/or read values when the set/reset is asserted and is not analyzed by the default static timing analysis. It is suggested to eliminate the use of a set/reset to registers driving this RAMB pin or else use a synchronous reset in which the assertion of the reset is timed by default.
+Related violations: <none>
+
+REQP-1840#4 Warning
+RAMB18 async control check
+The RAMB18E1 swd200_bd_i/regs/inst/results_reg has an input control pin swd200_bd_i/regs/inst/results_reg/WEBWE[3] (net: swd200_bd_i/regs/inst/write_result) which is driven by a register (swd200_bd_i/phy/inst/reset_pipe_reg[3]) that has an active asychronous set or reset. This may cause corruption of the memory contents and/or read values when the set/reset is asserted and is not analyzed by the default static timing analysis. It is suggested to eliminate the use of a set/reset to registers driving this RAMB pin or else use a synchronous reset in which the assertion of the reset is timed by default.
+Related violations: <none>

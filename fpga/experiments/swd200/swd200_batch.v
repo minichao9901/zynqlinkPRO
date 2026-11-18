@@ -10,9 +10,9 @@ module swd200_batch (
     input wire [3:0] idle_cycles,
     output wire [9:0] command_addr,
     input wire [31:0] command_word,
-    output wire write_result,
-    output wire [8:0] result_addr,
-    output wire [31:0] result_word,
+    output reg write_result = 0,
+    output reg [8:0] result_addr,
+    output reg [31:0] result_word,
     output reg [9:0] completed = 0,
     output reg [3:0] error = 0,
     output reg failed = 0,
@@ -37,6 +37,7 @@ module swd200_batch (
     reg [3:0] active_idle;
     wire link_done, parity_error;
     wire [2:0] ack;
+    wire [31:0] link_data;
     wire good = current_header[8] || (ack == 3'b001 && !parity_error);
     wire retire = state == TRANSFER && link_done;
     wire retry = retire && !good && ack == 3'b010 && attempts != 6'd63;
@@ -44,19 +45,26 @@ module swd200_batch (
     wire [8:0] issue_header = retry ? current_header : next_header;
     wire [32:0] issue_word = retry ? current_word : next_word;
     assign command_addr = {fetch_index, fetch != FETCH_OP};
-    assign result_addr = completed[8:0];
-    // The write enable depends only on word-domain registers. The host
-    // invalidates results if the PHY loses its clock during a batch.
-    assign write_result = retire && good;
 
     swd200_link link (
         .clk(clk), .reset(reset), .rate(active_rate),
         .ack_sample(active_ack_sample), .data_sample(active_data_sample),
         .idle_cycles(active_idle), .start(issue_next || retry), .enter_swd(issue_header[8]),
         .header(issue_header[7:0]), .write_packet(issue_word),
-        .done(link_done), .ack(ack), .parity_error(parity_error), .read_data(result_word),
+        .done(link_done), .ack(ack), .parity_error(parity_error), .read_data(link_data),
         .rx_slots(rx_slots), .clk_slots(clk_slots), .data_slots(data_slots), .release_slots(release_slots)
     );
+
+    // Commit in the next word clock, in parallel with issuing the next
+    // request. This keeps the PHY reset out of the BRAM write-enable cone.
+    // A final write lands on the same edge that raises batch completion.
+    always @(posedge clk) begin
+        write_result <= !reset && retire && good;
+        if (retire && good) begin
+            result_addr <= completed[8:0];
+            result_word <= link_data;
+        end
+    end
 
     always @(posedge clk) begin
         if (reset) begin
