@@ -33,10 +33,11 @@
     "scope": "Internal routed clocks; external target I/O delays to be qualified on hardware."
   },
   "simulation": "XSim 2018.3, all six profiles passed with Xilinx primitive models and a modeled JTAG TAP.",
-  "hardware_acceptance": "pending_operator_board_notification",
+  "hardware_acceptance": "J7 pair loaded and OCM verified; external TDO high at 50/10/5 MHz, TAP and RAM validation blocked",
   "sha256": {
     "probe.bit": "09e6e92f60abd592495a028d2466e25c87ed1379ed6e6c8ed6ee11dd451e595d",
     "application.elf": "4835d5fb10c88c329355f0a1e950706f5d38b97a083e5637f81c8bf40b519345",
     "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
-  }
+  },
+  "hardware_evidence": "docs/validation/jtag200-20261118/superlink-dfu-jtag-attempt.json"
 }

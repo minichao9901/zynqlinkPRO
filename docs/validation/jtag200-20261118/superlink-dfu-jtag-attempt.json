@@ -1,0 +1,132 @@
+{
+  "date": "2026-11-18",
+  "target": {
+    "board": "SuperLinkPRO HPM5301EVKLite",
+    "serial": "B4444F2110DDDAFE44800BBB0AE800E0",
+    "runtime": "0d28:0204",
+    "dfu": "0d28:0207",
+    "usb_port_before_and_after": "1-2.3",
+    "entry": "HID ENTER_DFU 0xFF after GET_MODEL identified akaLinkPro",
+    "final_usb_state": "DFU"
+  },
+  "probe_initial": {
+    "cable": "Digilent JTAG-HS3 210299008529",
+    "ps_idcode": "0x23727093",
+    "boot_mode": "JTAG (0)",
+    "pl_level_shifters": 0
+  },
+  "probe_ram_load": {
+    "pair": {
+      "probe.bit": "09e6e92f60abd592495a028d2466e25c87ed1379ed6e6c8ed6ee11dd451e595d",
+      "application.elf": "4835d5fb10c88c329355f0a1e950706f5d38b97a083e5637f81c8bf40b519345",
+      "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+    },
+    "cable_serial": "210299008529",
+    "passed": true,
+    "live_code_sha256": "5378afd3a87cd129b3592a6aa36de820ceaaf4a014cc24d509f155f2b7c4100a",
+    "verified_code_bytes": 592
+  },
+  "probe_fclk1_ctrl": "0x00102000",
+  "first_scan": {
+    "expected_idcode": "0x1000563d",
+    "configured_tck_hz": 50000000,
+    "tap": 0,
+    "rounds": [
+      {
+        "samples": 64,
+        "raw_words": "all 0xff"
+      },
+      {
+        "samples": 64,
+        "raw_words": "all 0xff"
+      },
+      {
+        "samples": 64,
+        "raw_words": "all 0xff"
+      }
+    ],
+    "decoded_idcodes": [
+      "0xffffffff",
+      "0xffffffff",
+      "0xffffffff"
+    ]
+  },
+  "diagnostic_scans": [
+    {
+      "rate_mhz": 50,
+      "tap": 0,
+      "word_histogram": {
+        "255": 53
+      },
+      "idcode_offsets": []
+    },
+    {
+      "rate_mhz": 50,
+      "tap": 16,
+      "word_histogram": {
+        "255": 53
+      },
+      "idcode_offsets": []
+    },
+    {
+      "rate_mhz": 50,
+      "tap": 31,
+      "word_histogram": {
+        "255": 53
+      },
+      "idcode_offsets": []
+    },
+    {
+      "rate_mhz": 10,
+      "tap": 0,
+      "word_histogram": {
+        "255": 229
+      },
+      "idcode_offsets": []
+    },
+    {
+      "rate_mhz": 10,
+      "tap": 16,
+      "word_histogram": {
+        "255": 229
+      },
+      "idcode_offsets": []
+    },
+    {
+      "rate_mhz": 10,
+      "tap": 31,
+      "word_histogram": {
+        "255": 229
+      },
+      "idcode_offsets": []
+    },
+    {
+      "rate_mhz": 5,
+      "tap": 0,
+      "word_histogram": {
+        "255": 449
+      },
+      "idcode_offsets": []
+    },
+    {
+      "rate_mhz": 5,
+      "tap": 16,
+      "word_histogram": {
+        "255": 449
+      },
+      "idcode_offsets": []
+    },
+    {
+      "rate_mhz": 5,
+      "tap": 31,
+      "word_histogram": {
+        "255": 449
+      },
+      "idcode_offsets": []
+    }
+  ],
+  "clock_evidence": "SLCR divider and waveform configuration only; no external scope measurement",
+  "target_ram_operations": 0,
+  "nonvolatile_operations": 0,
+  "blocked": "TDO captured high throughout; J7-to-J5 connection or physical loopback to be verified. Cause not yet isolated."
+}
