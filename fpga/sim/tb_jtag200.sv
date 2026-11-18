@@ -213,6 +213,11 @@ module tb_jtag200;
             if (info !== 1) $fatal(1,"Block read completion %h",info);
             read_reg(14'h2000, info);
             if (info !== (32'h00010000|count)) $fatal(1,"Block read header %h",info);
+            read_reg(14'h27e0, info);
+            if (info[2:0] !== 3'b011) $fatal(1,"Read diagnostics flags %h",info);
+            read_reg(14'h27ec, info);
+            if (info[1:0] !== 0 || info[31:2] !== 30'h18adb000)
+                $fatal(1,"First SBA response diagnosis %h",info);
             for (int i=0; i<count; i++) begin
                 read_reg(14'h2004+4*i, word);
                 if(word !== (32'h18adb000 ^ (i*32179))) $fatal(1,"Host read mismatch %d %h",i,word);

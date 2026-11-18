@@ -18,7 +18,7 @@
 enum {
     MAGIC, SEQ, RESPONSE, DURATION, ERROR, DIRECTION, READ_BYTES, WRITE_BYTES,
     BITS, SEGMENTS, ELAPSED_LO, ELAPSED_HI, READ_LO, READ_HI, WRITE_LO, WRITE_HI,
-    HEADER, BAD_WORD, BAD_VALUE, DMI_BUSY, DMI_OTHER
+    HEADER, BAD_WORD, BAD_VALUE, DMI_BUSY, DMI_OTHER, DIAGNOSTICS
 };
 
 static void barrier(void)
@@ -85,6 +85,9 @@ static unsigned transfer(int write, uint32_t inversion)
             }
         }
     }
+    if (error || REQUEST[DURATION] == 0)
+        for (unsigned i = 0; i < 8; ++i)
+            REQUEST[DIAGNOSTICS+i] = RX[504+i];
     CTRL = 0;
     if (!wait_status(5))
         return 7;
@@ -142,7 +145,7 @@ void stress_poll(void)
     unsigned seq = REQUEST[SEQ];
     if (seq == REQUEST[RESPONSE])
         return;
-    for (unsigned i=READ_BYTES; i<=DMI_OTHER; ++i)
+    for (unsigned i=READ_BYTES; i<DIAGNOSTICS+8; ++i)
         REQUEST[i] = 0;
     REQUEST[ERROR] = exercise(REQUEST[DURATION], REQUEST[DIRECTION]);
     barrier();

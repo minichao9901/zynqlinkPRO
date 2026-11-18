@@ -18,9 +18,10 @@ module jtag200_block (
     output reg [7:0] completion = 0,
     output wire [31:0] bits_sent, segments, busy_errors, other_errors
 );
-    localparam WAIT_RUN=0, INVALIDATE=1, SETUP=2, SETUP_WAIT=3, ARM_BLOCK=4, BLOCK=5, FINISHED=6;
+    localparam WAIT_RUN=0, INVALIDATE=1, SETUP=2, SETUP_WAIT=3, ARM_BLOCK=4, BLOCK=5, DRAIN_PADS=6, FINISHED=7;
     reg [2:0] state = WAIT_RUN;
     reg [1:0] setup_index = 0;
+    reg [2:0] drain_pads = 0;
     // AXI holds the descriptor stable through the request/complete
     // handshake. Register the entire bundle at its word-clock boundary.
     reg active_write = 0;
@@ -39,7 +40,33 @@ module jtag200_block (
     wire packet_active = state == BLOCK;
     wire cmd_en, rsp_en;
     wire [3:0] rsp_we;
-    assign result_enable = rsp_en ? rsp_we : 4'b0;
+    wire [8:0] packet_rx_addr;
+    wire [31:0] packet_word;
+    wire debug_dmi_valid;
+    wire [40:0] debug_dmi_tx, debug_dmi_rx;
+    reg [8:0] previous_dmi = 0, bad_previous_dmi = 0;
+    reg [40:0] first_dmi, first_data_dmi, bad_dmi;
+    reg first_valid = 0, data_valid = 0, bad_valid = 0;
+    reg [31:0] diagnostic_word;
+    wire dumping = state == DRAIN_PADS;
+    assign result_enable = dumping ? 4'hf : rsp_en ? rsp_we : 4'b0;
+    assign rx_addr = dumping ? {6'h3f, (3'd7-drain_pads)} : packet_rx_addr;
+    assign result_word = dumping ? diagnostic_word : packet_word;
+
+    // Keep a few on-wire DMI observations in the same completed RX BRAM
+    // as the payload so the result handshake also owns their clock crossing.
+    always @* begin
+        case (drain_pads)
+            7: diagnostic_word = {29'b0,bad_valid,data_valid,first_valid};
+            6: diagnostic_word = first_dmi[31:0];
+            5: diagnostic_word = {23'b0,first_dmi[40:32]};
+            4: diagnostic_word = first_data_dmi[31:0];
+            3: diagnostic_word = {23'b0,first_data_dmi[40:32]};
+            2: diagnostic_word = bad_dmi[31:0];
+            1: diagnostic_word = {23'b0,bad_dmi[40:32]};
+            0: diagnostic_word = {23'b0,bad_previous_dmi};
+        endcase
+    end
     reg header = 0;
     always @(posedge clk)
         header <= tx_addr == 0;
@@ -72,7 +99,8 @@ module jtag200_block (
         .segment_variable_tms(variable_tms), .segment_tms(tms_value), .segment_exit(exit_last),
         .segment_capture(capture), .segment_count(segment_count), .segment_tdi_mode(tdi_mode),
         .segment_tms_data(tms_data), .segment_tdi_data(tdi_data), .segment_done(segment_done),
-        .segment_rx(segment_rx), .stat_dmi_busy(busy_errors), .stat_dmi_other(other_errors)
+        .segment_rx(segment_rx), .stat_dmi_busy(busy_errors), .stat_dmi_other(other_errors),
+        .debug_valid(debug_dmi_valid), .debug_dmi_tx(debug_dmi_tx), .debug_dmi_rx(debug_dmi_rx)
     );
 
     // Use the release block engine's address+posted-read/final-fence
@@ -82,7 +110,7 @@ module jtag200_block (
     dap_transfer_block_engine #(.ADDR_W(9), .ENABLE_CHAIN(1), .RETRY_MAX(0)) packet (
         .clk(clk), .rst_n(!reset && packet_active), .start(block_start), .packet_len(packet_size),
         .done(packet_done), .error(packet_error), .cmd_en(cmd_en), .cmd_addr(tx_addr),
-        .cmd_data(cmd_word), .rsp_en(rsp_en), .rsp_we(rsp_we), .rsp_addr(rx_addr), .rsp_data(result_word),
+        .cmd_data(cmd_word), .rsp_en(rsp_en), .rsp_we(rsp_we), .rsp_addr(packet_rx_addr), .rsp_data(packet_word),
         .core_start(packet_start), .core_req(packet_req), .core_wdata(packet_value),
         .core_busy(core_busy), .core_result_valid(response_valid), .core_next_ready(next_ready),
         .core_next_valid(next_valid), .core_next_request(next_req), .core_next_wdata(next_value),
@@ -93,6 +121,22 @@ module jtag200_block (
         cfg_start <= 0;
         block_start <= 0;
         request_sync <= reset ? 0 : {request_sync[0],run};
+        if (debug_dmi_valid) begin
+            previous_dmi <= {debug_dmi_tx[40:34],debug_dmi_tx[1:0]};
+            if (!first_valid) begin
+                first_valid <= 1;
+                first_dmi <= debug_dmi_rx;
+            end
+            if (!data_valid && previous_dmi == {7'h3c,2'd1}) begin
+                data_valid <= 1;
+                first_data_dmi <= debug_dmi_rx;
+            end
+            if (!bad_valid && debug_dmi_rx[1:0] != 0) begin
+                bad_valid <= 1;
+                bad_dmi <= debug_dmi_rx;
+                bad_previous_dmi <= previous_dmi;
+            end
+        end
         if (reset) begin
             state <= WAIT_RUN;
             done <= 0;
@@ -106,6 +150,14 @@ module jtag200_block (
                 active_half <= half_slots;
                 active_sample <= sample_offset;
                 completion <= 0;
+                first_valid <= 0;
+                data_valid <= 0;
+                bad_valid <= 0;
+                first_dmi <= 0;
+                first_data_dmi <= 0;
+                bad_dmi <= 0;
+                previous_dmi <= 0;
+                bad_previous_dmi <= 0;
                 setup_index <= 0;
                 state <= INVALIDATE;
             end
@@ -117,7 +169,8 @@ module jtag200_block (
             SETUP_WAIT: if (response_valid) begin
                 if (ack != 1) begin
                     completion <= {5'b0,ack};
-                    state <= FINISHED;
+                    drain_pads <= 7;
+                    state <= DRAIN_PADS;
                 end else if (setup_index == 2)
                     state <= ARM_BLOCK;
                 else begin
@@ -131,8 +184,14 @@ module jtag200_block (
             end
             BLOCK: if (packet_done) begin
                 completion <= packet_error ? 8'd4 : 8'd1;
-                state <= FINISHED;
+                drain_pads <= 7;
+                state <= DRAIN_PADS;
             end
+            // The next segment can fill the same serializer while a prior
+            // word is still in flight. Hold ownership at the block boundary
+            // until the final word has physically exited the serializer.
+            DRAIN_PADS: if (drain_pads != 0) drain_pads <= drain_pads-1'b1;
+                        else state <= FINISHED;
             FINISHED: begin
                 done <= 1;
                 if (!request_sync[1]) begin

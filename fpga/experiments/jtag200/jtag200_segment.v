@@ -15,11 +15,10 @@ module jtag200_segment (
     output reg done = 0,
     output reg [63:0] rx_data = 0
 );
-    localparam IDLE = 0, LEAD = 1, SEND = 2, DRAIN = 3;
+    localparam IDLE = 0, SEND = 1, RETURN = 2;
     reg [1:0] state = IDLE;
     reg [11:0] left = 0;
     reg [255:0] modes = 0, data = 0;
-    reg [2:0] drain_count = 0;
     reg [6:0] sampled = 0, limit = 0;
     reg [7:0] sample_pos = 0;
     wire one_slot = half_slots == 1;
@@ -52,6 +51,9 @@ module jtag200_segment (
         {input_slots[6],input_slots[4],input_slots[2],input_slots[0]} :
         {3'b0,input_slots[0]};
     wire [2:0] taken = one_slot ? 3'd4 - {1'b0,sample_pos[2:1]} : 3'd1;
+    wire sample_word = sampled < limit && sample_pos < 8;
+    wire return_complete = sampled >= limit ||
+                           (sample_word && sampled + {4'b0,taken} >= limit);
 
     always @(posedge clk) begin
         done <= 0;
@@ -66,11 +68,14 @@ module jtag200_segment (
                 modes <= tms_data;
                 data <= tdi_data;
                 left <= count;
-                limit <= !capture ? 7'd0 : count > 64 ? 7'd64 : count[6:0];
+                limit <= !capture ? 7'd0 : count > 44 ? 7'd44 : count[6:0];
                 sampled <= 0;
-                sample_pos <= 8'd8 + {5'b0,half_slots} + {1'b0,sample_offset};
+                // The first emitted word now immediately follows start.
+                // The calibrated pad/serializer offset is independent of the
+                // removed low-clock preamble.
+                sample_pos <= {5'b0,half_slots} + {1'b0,sample_offset};
                 rx_data <= 0;
-                state <= LEAD;
+                state <= SEND;
             end
         end else begin
             if (sampled < limit) begin
@@ -83,21 +88,19 @@ module jtag200_segment (
                 end
             end
             case (state)
-                LEAD: state <= SEND;
                 SEND: begin
                     modes <= modes >> consumed;
                     data <= data >> consumed;
                     left <= left - {9'b0,consumed};
                     if (left <= consumed) begin
-                        drain_count <= 5;
-                        state <= DRAIN;
+                        state <= return_complete ? IDLE : RETURN;
+                        done <= return_complete;
                     end
                 end
-                DRAIN: if (drain_count != 0) drain_count <= drain_count-1'b1;
-                       else if(sampled >= limit) begin
-                           state <= IDLE;
-                           done <= 1;
-                       end
+                RETURN: if (return_complete) begin
+                    state <= IDLE;
+                    done <= 1;
+                end
                 default: state <= IDLE;
             endcase
         end

@@ -54,9 +54,9 @@ class BlockBenchmark:
         self.status()
 
     def status(self):
-        line = self.port.command(f"physrd -force -value {MAILBOX:#x} 21")
+        line = self.port.command(f"physrd -force -value {MAILBOX:#x} 29")
         words = [int(x,0) for x in line.split()]
-        need(len(words) == 21 and words[0] == 0x4A424C4B, "Pipeline runner ELF is not running")
+        need(len(words) == 29 and words[0] == 0x4A424C4B, "Pipeline runner ELF is not running")
         return words
 
     def configure(self, rate, idle, phase):
@@ -100,6 +100,14 @@ class BlockBenchmark:
                  read_bytes=words[6], write_bytes=words[7],
                  tck_cycles=words[8], segments=words[9], completion=words[16],
                  dmi_busy=words[19], dmi_invalid=words[20], passed=words[4]==0)
+        if seconds == 0 or words[4]:
+            diag = words[21:29]
+            row["wire_dmi"] = dict(
+                flags=diag[0],
+                first_response=hex(diag[1] | diag[2]<<32),
+                first_sbdata=hex(diag[3] | diag[4]<<32),
+                first_invalid=hex(diag[5] | diag[6]<<32),
+                preceding_request=hex(diag[7]))
         if words[4]:
             row.update(error=words[4], bad_word=words[17], bad_value=hex(words[18]))
         return row

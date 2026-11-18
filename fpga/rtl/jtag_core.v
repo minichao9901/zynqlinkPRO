@@ -46,7 +46,8 @@ module jtag_core #(parameter EXTERNAL_PHY=0) (
     output wire [255:0] segment_tms_data,segment_tdi_data,
     input wire segment_done,
     input wire [63:0] segment_rx,
-    output reg [31:0] stat_dmi_busy,stat_dmi_other
+    output reg [31:0] stat_dmi_busy,stat_dmi_other,
+    output wire [40:0] debug_dmi_tx,debug_dmi_rx
 );
     localparam IDLE=0,ROUTE=1,RESET_TAP=2,IR_NAV=3,IR_PRE=4,IR_VALUE=5,IR_POST=6,IR_EXIT=7,
                DR_NAV=8,DR_PRE=9,DR_VALUE=10,DR_POST=11,DR_EXIT=12,EVALUATE=13,DONE=14,PHY_WAIT=15;
@@ -124,6 +125,8 @@ module jtag_core #(parameter EXTERNAL_PHY=0) (
     assign result_valid=state==DONE && !maintenance;
     assign next_ready=result_valid && op==0 && ack==1 && !pending_fence;
     assign debug_valid=state==EVALUATE;
+    assign debug_dmi_tx=rv_frame;
+    assign debug_dmi_rx=scan_result;
     assign debug_meta={13'd0,op,phase,req,scan_result[2:0],scan_ack};
     assign debug_wdata=phase==0 ? value : 32'd0;
     assign debug_tx=debug_tx_frame[34:3];
@@ -198,6 +201,25 @@ module jtag_core #(parameter EXTERNAL_PHY=0) (
             // The configured streaming path already owns DMI. Avoid the
             // routing/configuration bubbles on every SRAM word.
             state<=ir_valid && ir_cache==17 && !unknown_tap ? DR_NAV : ROUTE;
+        end
+    endtask
+    wire fast_dmi_phy=EXTERNAL_PHY && rv_active && dr_before==0 && dr_after==0 && !late_return;
+    // Fixed, unpadded DMI frame for the isolated single-TAP serializer:
+    // DR navigation, 41 bits, Exit1/Update and the requested RTI clocks.
+    task launch_dmi_segment;
+        input [40:0] frame;
+        begin
+            capture_offset<=3;
+            shift_segment(12'd46+{3'b0,rv_idle_cycles},1,0,0,1,2,
+                          256'h180000000001,{212'b0,frame,3'b0},EVALUATE);
+        end
+    endtask
+    task rv_finish_word;
+        begin
+            rv_words<=rv_words+1'b1;
+            if(rv_read && !rv_read_ahead)rv_addr_dirty<=1;
+            if(rv_csw[4])rv_tar<=rv_tar+4;
+            ack<=1;state<=DONE;
         end
     endtask
     task memory_request;
@@ -279,7 +301,8 @@ module jtag_core #(parameter EXTERNAL_PHY=0) (
             // A complete DR path is a SINGLE uninterrupted shift segment:
             // navigation, bypass, 35 data bits, Exit1, Update and Idle.
             // This removes FSM bubbles between each part of every word.
-            DR_NAV: begin
+            DR_NAV: if(fast_dmi_phy) launch_dmi_segment(rv_frame);
+                    else begin
                 // Long physical TDO return: sample one scan bit later. Two
                 // dummy bits precede the request, so UPDATE still sees exactly
                 // the same register value. The first extra output bit captures
@@ -323,7 +346,8 @@ module jtag_core #(parameter EXTERNAL_PHY=0) (
                             rdata<=rv_pending_kind==1 ? scan_result[33:2] : rv_posted;
                             rv_pending_kind<=rv_read ? 1 : 2;
                             rv_fast_write<=!rv_read;
-                            state<=RV_DATA;
+                            if(fast_dmi_phy) rv_finish_word();
+                            else state<=RV_DATA;
                         end else begin
                             // The next write payload may arrive from BRAM
                             // after launch. Decide at response time, not before
@@ -460,16 +484,27 @@ module jtag_core #(parameter EXTERNAL_PHY=0) (
                     ack<=4;rv_cfg_valid<=0;rv_addr_dirty<=1;rv_pending_kind<=0;state<=DONE;
                 end else begin rdata<=rv_posted;state<=RV_FINISH;end
             end
-            RV_FINISH:begin
-                rv_words<=rv_words+1'b1;
-                if(rv_read && !rv_read_ahead)rv_addr_dirty<=1;
-                if(rv_csw[4])rv_tar<=rv_tar+4;
-                ack<=1;state<=DONE;
-            end
+            RV_FINISH:rv_finish_word();
             RV_READY:begin ack<=1;state<=DONE;end
             DONE: begin
                 if(maintenance) begin fence_done<=1;fence_error<=ack!=1;state<=IDLE;end
-                else if(next_valid && next_ready) memory_request(next_request,next_wdata);
+                else if(next_valid && next_ready) begin
+                    // A chained DRW of the same direction, mode and address
+                    // stream needs no dispatch, configuration or prefetch
+                    // bubble. End-of-window and direction changes fall back.
+                    if(fast_dmi_phy && ir_valid && ir_cache==17 && !unknown_tap &&
+                       rv_csw[4] && rv_cfg_valid && rv_cfg==rv_wanted_cfg && !rv_addr_dirty &&
+                       req[3:0]==(rv_read ? 4'd15 : 4'd13) &&
+                       next_request[3:0]==req[3:0]) begin
+                        req<=next_request;
+                        rv_frame<={7'h3c,next_wdata,rv_read ? 2'd1 : 2'd2};
+                        rv_single<=1;
+                        rv_collect<=0;
+                        rv_fast_write<=0;
+                        rv_return<=RV_DATA;
+                        launch_dmi_segment({7'h3c,next_wdata,rv_read ? 2'd1 : 2'd2});
+                    end else memory_request(next_request,next_wdata);
+                end
                 else state<=IDLE;
             end
             default: state<=IDLE;
