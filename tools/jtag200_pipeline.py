@@ -59,11 +59,14 @@ class BlockBenchmark:
         need(len(words) == 29 and words[0] == 0x4A424C4B, "Pipeline runner ELF is not running")
         return words
 
-    def configure(self, rate, idle, phase, *, advance_tms=False, advance_tdi=False):
+    def configure(self, rate, idle, phase, *, advance_tms=False, advance_tdi=False, arm=False):
         _, half, _ = PROFILES[rate]
         need(half == 2 or not (advance_tms or advance_tdi), "TX advance requires a two-slot pulse")
         cfg = (int(advance_tms) << 20) | (int(advance_tdi) << 19) | (idle << 10) | (phase << 3) | half
-        self.port.command(f"physwr -force 0x40000014 {BASE:#x}; "
+        if arm:
+            cfg |= 1 << 21
+        base = 0x24050000 if arm else BASE
+        self.port.command(f"physwr -force 0x40000014 {base:#x}; "
                           f"physwr -force 0x40000018 {BYTES//4}; physwr -force 0x4000001c {cfg:#x}")
         actual = int(self.port.command("read_word 0x4000001c"))
         need(cfg == actual, f"Pipeline timing readback {actual:#x} expected {cfg:#x}")

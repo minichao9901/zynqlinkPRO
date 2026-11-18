@@ -56,7 +56,17 @@ module tb_jtag200;
         .tms(tms), .tdi(tdi), .tdo(block_tdo)
     );
 `endif
-    assign tdo = block_test ? block_tdo : raw_tdo;
+    reg arm_test = 0;
+    wire boundary_tdo, arm_tdo;
+`ifndef J200_TEST_HAZARD3
+    // As on H743, the four-bit DAP is nearest TDO and the five-bit
+    // boundary TAP is nearest TDI. The boundary TAP is in BYPASS.
+    jtag_dp_model #(.IRLEN(5),.DUMMY(1),.RETURN_NS(0.2)) boundary (
+        .rst_n(axi_resetn), .tck(tck && arm_test), .tms(tms), .tdi(tdi), .tdo(boundary_tdo));
+    jtag_dp_model #(.RETURN_NS(0.8)) arm_dap (
+        .rst_n(axi_resetn), .tck(tck && arm_test), .tms(tms), .tdi(boundary_tdo), .tdo(arm_tdo));
+`endif
+    assign tdo = arm_test ? arm_tdo : block_test ? block_tdo : raw_tdo;
 
     task automatic write_reg(input [13:0] addr, input [31:0] data, input [1:0] response);
         fork
@@ -260,6 +270,48 @@ module tb_jtag200;
         $display("J200_PIPELINE_PASS half=%0d idle=%0d words=%0d bus_fault=%0d",half,idle,count,fault);
     endtask
 
+    task automatic arm_pipeline(input int half, offset, idle, count);
+        reg [31:0] word;
+        realtime started, write_ns, read_ns;
+        write_reg(14'h018, count, 0);
+        write_reg(14'h01c, 32'h00200000 | (half == 2 ? 32'h00180000 : 0) |
+                   (idle << 10) | (offset << 3) | half, 0);
+        write_reg(14'h014, 32'h08000000, 0);
+        write_reg(8, 13, 2);
+        write_reg(14'h014, 32'h240503fc, 0);
+        write_reg(8, 13, 2);
+        write_reg(14'h014, 32'h24050000, 0);
+        for (int i=0; i<count; i++)
+            write_reg(14'h1004+4*i, 32'h70420000 ^ (i*65537), 0);
+        started=$realtime;
+        write_reg(8, 13, 0);
+        wait_status(15);
+        write_ns=$realtime-started;
+        read_reg(14'h020, word);
+        if (word !== 1) $fatal(1,"ARM write completion %h",word);
+        for (int i=0; i<count; i++)
+            if (arm_dap.mem[i] !== (32'h70420000 ^ (i*65537)))
+                $fatal(1,"ARM write differs at word %d",i);
+        write_reg(8, 0, 0);
+        wait_status(5);
+        started=$realtime;
+        write_reg(8, 5, 0);
+        wait_status(15);
+        read_ns=$realtime-started;
+        read_reg(14'h020, word);
+        if (word !== 1) $fatal(1,"ARM read completion %h",word);
+        read_reg(14'h2000, word);
+        if (word !== (32'h00010000|count)) $fatal(1,"ARM read header %h",word);
+        for (int i=0; i<count; i++) begin
+            read_reg(14'h2004+4*i, word);
+            if (word !== (32'h70420000 ^ (i*65537))) $fatal(1,"ARM read differs at word %d",i);
+        end
+        write_reg(8, 0, 0);
+        wait_status(5);
+        $display("J200_ARM_PASS half=%0d idle=%0d words=%0d read_MBps=%0.3f write_MBps=%0.3f",half,
+                 idle,count,count*4000.0/read_ns,count*4000.0/write_ns);
+    endtask
+
 `else
     task automatic hazard_burst(input int half, offset, idle, count);
         reg [31:0] status, word, scans_wr, bits_wr, scans_total, bits_total, busy, invalid;
@@ -377,6 +429,9 @@ module tb_jtag200;
         pipeline(2,29,64,128,0);
         pipeline(1,29,256,128,0);
         pipeline(1,29,256,32,1);
+        arm_test=1;
+        arm_pipeline(1,29,5,128);
+        arm_pipeline(2,29,5,128);
 `endif
         $display("JTAG200_SIM_PASS");
         $finish;

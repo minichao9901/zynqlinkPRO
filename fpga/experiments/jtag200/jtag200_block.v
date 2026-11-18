@@ -1,9 +1,9 @@
 `timescale 1ns/1ps
-// Connect the existing packet and RISC-V SBA logic to a word-clock PHY.
+// Connect the ARM MEM-AP and RISC-V SBA packet logic to a word-clock PHY.
 // AXI hands over its BRAMs and configuration until this block asserts done.
 module jtag200_block (
     input wire clk, reset, run,
-    input wire write_block,
+    input wire write_block, arm_target,
     input wire [31:0] address,
     input wire [8:0] count, idle_cycles,
     input wire [2:0] half_slots,
@@ -25,7 +25,7 @@ module jtag200_block (
     reg [2:0] drain_pads = 0;
     // AXI holds the descriptor stable through the request/complete
     // handshake. Register the entire bundle at its word-clock boundary.
-    reg active_write = 0;
+    reg active_write = 0, active_arm = 0;
     reg [31:0] active_address = 0;
     reg [8:0] active_count = 0, active_idle = 0;
     reg [2:0] active_half = 0;
@@ -37,8 +37,22 @@ module jtag200_block (
     wire [7:0] packet_req, next_req;
     wire [31:0] packet_value, next_value, response;
     wire [2:0] ack;
-    wire [7:0] setup_req = setup_index == 0 ? 8'h04 : setup_index == 1 ? 8'h01 : 8'h05;
-    wire [31:0] setup_data = setup_index == 1 ? 32'h23000052 : active_address;
+    reg [7:0] setup_req;
+    reg [31:0] setup_data;
+    always @* begin
+        case (setup_index)
+            0: begin setup_req = 8'h04; setup_data = 32'h50000032; end
+            1: begin
+                setup_req = active_arm ? 8'h08 : 8'h01;
+                setup_data = active_arm ? 32'd0 : 32'h23000052;
+            end
+            2: begin
+                setup_req = active_arm ? 8'h01 : 8'h05;
+                setup_data = active_arm ? 32'h23000052 : active_address;
+            end
+            default: begin setup_req = 8'h05; setup_data = active_address; end
+        endcase
+    end
     wire packet_active = state == BLOCK;
     wire cmd_en, rsp_en;
     wire [3:0] rsp_we;
@@ -92,8 +106,9 @@ module jtag200_block (
         .invalidate(state==INVALIDATE), .operation(3'd0),
         .request(packet_active ? packet_req : setup_req), .wdata(packet_active ? packet_value : setup_data),
         .seq_count(9'b0), .seq_data(256'b0), .seq_tms(1'b0),
-        .ir_length(8'd5), .ir_before(11'b0), .ir_after(11'b0), .dr_before(8'b0), .dr_after(8'b0),
-        .idcode_ir(8'd1), .riscv_mode(1'b1), .half_delay(4'b0), .idle_cycles(8'b0),
+        .ir_length(active_arm ? 8'd4 : 8'd5), .ir_before(11'b0), .ir_after(active_arm ? 11'd5 : 11'd0),
+        .dr_before(8'b0), .dr_after(active_arm ? 8'd1 : 8'd0),
+        .idcode_ir(8'd1), .riscv_mode(!active_arm), .half_delay(4'b0), .idle_cycles(active_idle[7:0]),
         .late_return(1'b0), .tdo(1'b0), .tdo_alternate(1'b0), .tdi_sense(1'b0),
         .next_valid(packet_active && next_valid), .next_request(next_req), .next_wdata(next_value),
         .next_ready(next_ready), .result_valid(response_valid), .busy(core_busy), .ack(ack), .rdata(response),
@@ -147,6 +162,7 @@ module jtag200_block (
         end else case (state)
             WAIT_RUN: if (request_sync[1]) begin
                 active_write <= write_block;
+                active_arm <= arm_target;
                 active_address <= address;
                 active_count <= count;
                 active_idle <= idle_cycles;
@@ -176,7 +192,7 @@ module jtag200_block (
                     completion <= {5'b0,ack};
                     drain_pads <= 7;
                     state <= DRAIN_PADS;
-                end else if (setup_index == 2)
+                end else if (setup_index == (active_arm ? 3 : 2))
                     state <= ARM_BLOCK;
                 else begin
                     setup_index <= setup_index + 1'b1;

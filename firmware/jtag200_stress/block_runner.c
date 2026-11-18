@@ -1,6 +1,6 @@
 /* Probe-local batching benchmark for the pure JTAG pipeline.
  * Both host-supplied patterns and all stats live in Zynq RAM. The PL
- * checks the target ILM bounds before it accepts a descriptor. */
+ * checks the target scratch RAM bounds before it accepts a descriptor. */
 #include <stdint.h>
 
 #define REG(addr) (*(volatile uint32_t *)(addr))
@@ -96,8 +96,10 @@ static unsigned transfer(int write, uint32_t inversion)
 
 static unsigned exercise(unsigned seconds, unsigned direction)
 {
+    uint32_t timing = REG(0x4000001cu);
+    uint32_t base = timing & (1u << 21) ? 0x24050000u : 0x0105f000u;
     if (seconds > 120 || direction > 2 || REG(0x40000010u) != 0x50495045u ||
-        REG(0x40000014u) != 0x0105f000u || REG(0x40000018u) != COUNT)
+        REG(0x40000014u) != base || REG(0x40000018u) != COUNT)
         return 1;
     unsigned error;
     unsigned completed = 0;

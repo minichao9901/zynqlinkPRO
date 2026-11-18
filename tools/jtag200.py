@@ -121,7 +121,8 @@ def simulate():
     env = environment()
     run_logged([exe / "xvlog.exe", "--sv", *sorted(RTL.glob("*.v")),
                 *(ROOT / "fpga/rtl" / file for file in ("jtag_core.v", "jtag_shift.v", "dap_transfer_block_engine.v")),
-                source / "jtag_dtm_model.sv", source / "riscv_sba_model.sv", source / "tb_jtag200.sv",
+                source / "jtag_dtm_model.sv", source / "riscv_sba_model.sv", source / "jtag_dp_model.sv",
+                source / "tb_jtag200.sv",
                 VIVADO / "data/verilog/src/glbl.v"], work, work / "compile.log", env)
     run_logged([exe / "xelab.exe", "-L", "unisims_ver", "-L", "secureip", "-s", "jtag200_sim",
                 "tb_jtag200", "glbl"], work, work / "elab.log", env)
@@ -138,7 +139,7 @@ def simulate():
             raise SystemExit(f"{key} MHz: IDCODE/PRBS did not round-trip: {raw.hex()}")
         print(f"PASS {key} MHz: TCK edges/period, TMS/TDI, IDCODE and {len(expected)-32} PRBS bits; RX offsets {offsets}")
     for line in log.splitlines():
-        if "J200_PIPELINE_PASS" in line:
+        if "J200_PIPELINE_PASS" in line or "J200_ARM_PASS" in line:
             print(line)
     print(f"Evidence: {work / 'sim.log'}")
 

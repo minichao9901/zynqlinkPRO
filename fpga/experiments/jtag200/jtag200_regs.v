@@ -42,7 +42,7 @@ module jtag200_regs #(parameter ENABLE_BLOCK=0) (
     reg block_mode = 0, block_write = 0;
     reg [31:0] block_address = 0;
     reg [8:0] block_count = 0;
-    reg [20:0] block_timing = 0;
+    reg [21:0] block_timing = 0;
     wire raw_done, raw_rx_write, block_done;
     wire [8:0] raw_tx_addr, raw_rx_addr, pipeline_tx_addr, pipeline_rx_addr;
     wire [23:0] raw_lanes, pipeline_lanes;
@@ -51,13 +51,16 @@ module jtag200_regs #(parameter ENABLE_BLOCK=0) (
     wire [7:0] completion;
     (* ASYNC_REG = "TRUE" *) reg [1:0] block_mode_sync = 0;
     wire [17:0] end_address = {1'b0,block_address[16:0]} + {7'b0,block_count,2'b0};
-    wire block_valid = ENABLE_BLOCK && block_address[31:17] == 15'h82 &&
+    wire [10:0] arm_end_address = {1'b0,block_address[9:0]} + {block_count,2'b0};
+    wire block_address_valid = block_timing[21] ?
+        block_address[31:10] == 22'h090140 && arm_end_address <= 11'h400 :
+        block_address[31:17] == 15'h82 && end_address <= 18'h1FFFC;
+    wire block_valid = ENABLE_BLOCK && block_address_valid &&
                        block_address[1:0] == 0 && block_count != 0 && block_count <= 9'd256 &&
-                       end_address <= 18'h1FFFC &&
                        (block_timing[2:0] == 1 || block_timing[2:0] == 2 || block_timing[2:0] == 4) &&
                        (block_timing[20:19] == 0 || block_timing[2:0] == 2) &&
                        block_timing[9:3] >= 16 && block_timing[9:3] <= 63 &&
-                       block_timing[18:10] <= 448;
+                       (block_timing[21] ? block_timing[18:10] <= 255 : block_timing[18:10] <= 448);
     reg done = 0;
     (* ASYNC_REG = "TRUE" *) reg [1:0] ready_sync = 0, done_sync = 0, delay_sync = 0;
     wire [8:0] tx_addr = block_mode_sync[1] ? pipeline_tx_addr : raw_tx_addr;
@@ -105,7 +108,7 @@ module jtag200_regs #(parameter ENABLE_BLOCK=0) (
     generate if (ENABLE_BLOCK) begin: pipeline
         jtag200_block engine(
             .clk(word_clk), .reset(word_reset), .run(block_request),
-            .write_block(block_write), .address(block_address), .count(block_count),
+            .write_block(block_write), .arm_target(block_timing[21]), .address(block_address), .count(block_count),
             .idle_cycles(block_timing[18:10]), .half_slots(block_timing[2:0]),
             .sample_offset(block_timing[9:3]), .tx_word(tx_word),
             .advance_tms(block_timing[20]), .advance_tdi(block_timing[19]),
@@ -185,7 +188,7 @@ module jtag200_regs #(parameter ENABLE_BLOCK=0) (
                     case (write_addr)
                         14'h014: begin block_address <= write_data; s_axi_bresp <= 0; end
                         14'h018: if (write_data[31:9] == 0) begin block_count <= write_data[8:0]; s_axi_bresp <= 0; end
-                        14'h01c: if (write_data[31:21] == 0) begin block_timing <= write_data[20:0]; s_axi_bresp <= 0; end
+                        14'h01c: if (write_data[31:22] == 0) begin block_timing <= write_data[21:0]; s_axi_bresp <= 0; end
                         default: ;
                     endcase
                 end
@@ -215,7 +218,7 @@ module jtag200_regs #(parameter ENABLE_BLOCK=0) (
                         14'h010: s_axi_rdata <= ENABLE_BLOCK ? 32'h50495045 : 32'b0; // PIPE
                         14'h014: s_axi_rdata <= block_address;
                         14'h018: s_axi_rdata <= {23'b0,block_count};
-                        14'h01c: s_axi_rdata <= {11'b0,block_timing};
+                        14'h01c: s_axi_rdata <= {10'b0,block_timing};
                         14'h020: s_axi_rdata <= done_sync[1] && block_mode ? {24'b0,completion} : 0;
                         14'h024: s_axi_rdata <= done_sync[1] && block_mode ? bits_sent : 0;
                         14'h028: s_axi_rdata <= done_sync[1] && block_mode ? segments : 0;
