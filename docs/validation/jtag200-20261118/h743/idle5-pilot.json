@@ -1,0 +1,100 @@
+{
+  "rows": [],
+  "phase": "idle5",
+  "data_size": 4096,
+  "address": "0x24050000",
+  "artifacts": {
+    "git_head": "f831b9f4a602be94baa955789f666402c08cac03",
+    "git_dirty": true,
+    "bit": {
+      "path": "E:\\zynqlinkPRO-jtag200\\prebuilt\\release-20261106\\probe.bit",
+      "sha256": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6"
+    },
+    "elf": {
+      "path": "E:\\zynqlinkPRO-jtag200\\prebuilt\\h743-jtag66-20261109\\application.elf",
+      "sha256": "daf4cf7275b7581ba62bf7eba2957e2587432495f96f625a16df3de683534c38"
+    }
+  },
+  "target_before": {
+    "name": "STM32H743/H742/H750/H753",
+    "cpuid": "0x411fc271",
+    "device": "0x20036450",
+    "registers": {
+      "0x58024400": "0x4025",
+      "0x58024410": "0x0",
+      "0x58024418": "0x0",
+      "0x5802441c": "0x0",
+      "0x58024420": "0x0",
+      "0x58024428": "0x2020200",
+      "0x5802442c": "0x1ff0000",
+      "0x58024430": "0x1010280",
+      "0x58024434": "0x0",
+      "0x58024438": "0x1010280",
+      "0x52002000": "0x37"
+    }
+  },
+  "dhcsr_before": "0x10000",
+  "backup_sha256": "291834e6b3e79b113b63d0299f30155cdb54b38776316108ad01b5988e3aea29",
+  "clock_fixture_backup": {
+    "0x58024400": "0x4025",
+    "0x58024410": "0x0",
+    "0x58024418": "0x0",
+    "0x5802441c": "0x0",
+    "0x58024420": "0x0",
+    "0x58024428": "0x2020200",
+    "0x5802442c": "0x1ff0000",
+    "0x58024430": "0x1010280",
+    "0x580244f4": "0x10000",
+    "0x58024818": "0x6000",
+    "0x5802480c": "0x42"
+  },
+  "clock_fixture_overdrive_before": "0x0",
+  "targetSysclkHz": 480000000,
+  "targetHclkHz": 240000000,
+  "targetClockBasis": "H743 25 MHz HSE and live RCC PLL1P/D1 readback",
+  "target_clock_active": {
+    "name": "STM32H743/H742/H750/H753",
+    "cpuid": "0x411fc271",
+    "device": "0x20036450",
+    "registers": {
+      "0x58024400": "0x3034025",
+      "0x58024410": "0x1b",
+      "0x58024418": "0x48",
+      "0x5802441c": "0x440",
+      "0x58024420": "0x50",
+      "0x58024428": "0x2020052",
+      "0x5802442c": "0x1ff0008",
+      "0x58024430": "0x10102bf",
+      "0x58024434": "0x0",
+      "0x58024438": "0x1010280",
+      "0x52002000": "0x37"
+    }
+  },
+  "error": "RuntimeError('write mismatch: 06b50107, after 19 complete rounds')",
+  "restore_sha256": "291834e6b3e79b113b63d0299f30155cdb54b38776316108ad01b5988e3aea29",
+  "ram_restored": true,
+  "guards_match": true,
+  "voltage_restored": true,
+  "supply_after": "0x42",
+  "target_after": {
+    "name": "STM32H743/H742/H750/H753",
+    "cpuid": "0x411fc271",
+    "device": "0x20036450",
+    "registers": {
+      "0x58024400": "0x4025",
+      "0x58024410": "0x0",
+      "0x58024418": "0x0",
+      "0x5802441c": "0x0",
+      "0x58024420": "0x0",
+      "0x58024428": "0x2020200",
+      "0x5802442c": "0x1ff0000",
+      "0x58024430": "0x1010280",
+      "0x58024434": "0x0",
+      "0x58024438": "0x1010280",
+      "0x52002000": "0x37"
+    }
+  },
+  "rcc_restored": true,
+  "dhcsr_after": "0x10000",
+  "core_state_restored": true
+}
