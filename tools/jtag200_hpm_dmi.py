@@ -19,31 +19,33 @@ def need(condition, detail):
         raise RuntimeError(detail)
 
 
-def wire_replay(port, split, expected_dmstatus):
-    """Compare one uninterrupted TAP command with the same segments padded."""
+def wire_replay(port, split, expected_dmstatus, boundaries=None, fill="high", blank_words=None):
+    """Replay the PLL/serializer slots without invoking the hardware DMI FSM."""
     slots = [6] * 8
     positions = []
-
-    def append(tms, tdi, gap):
-        for mode, data in zip(tms, tdi):
-            data = mode << 1 | data << 2
-            slots.extend((data, data | 1))
-        if split:
-            slots.extend([6] * ((-len(slots) % 8) + 8*gap))
-
     mode, data = entry(17)
-    # The RTL's reset segment includes five reset clocks plus Run-Test/Idle.
-    # entry() emits six reset clocks; drop the first for an exact comparison.
+    # Match the RTL's five reset pulses plus the first RTI clock.
     mode, data = mode[1:], data[1:]
     cuts = ((0, 6, 4), (6, 10, 4), (10, 15, 4), (15, 17, 3))
-    for lo, hi, gap in cuts:
-        append(mode[lo:hi], data[lo:hi], gap)
-
+    groups = [(mode[lo:hi], data[lo:hi], gap, None) for lo, hi, gap in cuts]
     for value in ((0x10 << 34) | (1 << 2) | 2, 0, (DMSTATUS << 34) | 1, 0):
         tms, tdi = [], []
         shift = append_data(tms, tdi, value, 41, 256)
-        positions.append(len(slots) + 2 * shift + 1)
-        append(tms, tdi, 4)
+        groups.append((tms,tdi,4,shift))
+    for index, (tms,tdi,gap,shift) in enumerate(groups):
+        if shift is not None:
+            positions.append(len(slots) + 2 * shift + 1)
+        for mode, data in zip(tms, tdi):
+            data = mode << 1 | data << 2
+            slots.extend((data, data | 1))
+        if split and index+1 < len(groups) and (boundaries is None or index in boundaries):
+            side = 6
+            if fill == "next":
+                side = groups[index+1][0][0] << 1 | groups[index+1][1][0] << 2
+            if fill == "hold":
+                side = (tms[-1] << 1) | (tdi[-1] << 2)
+            words_of_gap = gap if blank_words is None else blank_words
+            slots.extend([side] * ((-len(slots) % 8) + 8*words_of_gap))
     slots.extend([6] * (64 + (-len(slots) % 8)))
     words = [sum((slots[start + bit] >> lane & 1) << (lane * 8 + bit)
                  for lane in range(3) for bit in range(8))
@@ -68,12 +70,13 @@ def wire_replay(port, split, expected_dmstatus):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=("snapshot", "diagnose", "verify"))
+    parser.add_argument("action", choices=("snapshot", "diagnose", "boundary", "boundary-controls", "verify"))
     parser.add_argument("--pair", type=Path, required=True)
     parser.add_argument("--backup", type=Path)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--sdk", type=Path, default=Path("E:/Xilinx/SDK/2018.3"))
     parser.add_argument("--cable-serial", required=True)
+    parser.add_argument("--steady",action="store_true",help="Verify three one-second read windows at a passing point per idle")
     parser.add_argument("--execute", action="store_true")
     args = parser.parse_args()
     need(re.fullmatch(r"[A-Za-z0-9_.:-]+",args.cable_serial), "Invalid cable serial")
@@ -116,6 +119,7 @@ def main():
                     baseline=runner.run(1,0)
                     report["at_50"]=baseline
                     need(baseline["passed"], "50 MHz block baseline did not pass")
+                    sustained = set()
                     for tap, calibration in ((24,39), (8,38), (16,39)):
                         SETTINGS["200"]=(tap,calibration,256)
                         target.rearm()
@@ -125,17 +129,50 @@ def main():
                         for split in (False,True):
                             raw_row["split" if split else "contiguous"] = wire_replay(port,split,expected_dmstatus)
                         report.setdefault("raw_replay",[]).append(raw_row)
-                        for sample in range(37,44):
+                        for sample in (calibration, *[i for i in range(37,44) if i != calibration]):
                             for idle in (256,20):
                                 target.rearm()
                                 target.select("200")
                                 runner.configure("200",idle,sample)
                                 row=dict(tap=tap,slot=sample,idle=idle,**runner.run(1,0))
                                 report["rows"].append(row)
+                                if args.steady and row["passed"] and idle not in sustained:
+                                    windows = [runner.run(1,1) for _ in range(3)]
+                                    if all(window["passed"] for window in windows):
+                                        sustained.add(idle)
+                                    report.setdefault("read_windows",[]).append(dict(
+                                        tap=tap,slot=sample,idle=idle,windows=windows))
                                 # No data write follows a mismatched read. Logs
                                 # retain both DMI status and first failing word.
                                 print(json.dumps(row,separators=(",",":")),flush=True)
                     need(runner.status()[1]==runner.status()[2],"Block runner has not released JTAG")
+                elif args.action in ("boundary", "boundary-controls"):
+                    SETTINGS["200"]=(24,39,256)
+                    expected_dmstatus=target.dmi(DMSTATUS)
+                    cases = [("contiguous",frozenset(),"high")]
+                    cases += [(label,frozenset((index,)),"high")
+                              for index,label in enumerate(("after_reset","enter_shift_ir","exit_shift_ir",
+                                                           "after_update_ir","after_dmcontrol",
+                                                           "after_first_nop","after_dmstatus"))]
+                    cases += [("all_gaps",None,"high"),("all_gaps",None,"next"),
+                              ("enter_shift_ir",frozenset((1,)),"next")]
+                    cases = [(label,cuts,fill,None) for label,cuts,fill in cases]
+                    if args.action == "boundary-controls":
+                        cases = [("all_gaps",None,"hold",None),("all_gaps",None,"hold",0)]
+                        cases += [(label,frozenset((index,)),fill,blank)
+                                 for index,label in ((0,"after_reset"),(1,"enter_shift_ir"),
+                                                     (3,"after_update_ir"),(6,"after_dmstatus"))
+                                 for fill,blank in (("next",None),("hold",None),("next",0))]
+                    for label,cuts,fill,blank in cases:
+                        for repeat in range(3):
+                            target.rearm()
+                            target.select("200")
+                            capture=wire_replay(port,True,expected_dmstatus,cuts,fill,blank)
+                            matches=[x["slot"] for x in capture if x["match_dmstatus"]]
+                            report["rows"].append(dict(boundary=label,fill=fill,blank_words=blank,repeat=repeat+1,
+                                                       match_slots=matches,capture=capture))
+                            print(label,fill,blank,repeat+1,matches,flush=True)
+
             finally:
                 if runner is not None:
                     mailbox = runner.status()

@@ -1,0 +1,31 @@
+{
+  "source_revision": "fc173906b7d28d5f27506102b87f762322b34f70",
+  "fpga_entry": "fpga/experiments/jtag200/build.tcl",
+  "fpga_timing": {
+    "FCLK0_Hz": 133333333,
+    "FCLK1_max_Hz": 50000000,
+    "serializer_max_Hz": 200000000,
+    "setup_slack_ns": 2.023,
+    "hold_slack_ns": 0.064
+  },
+  "firmware_flags": [
+    "-mcpu=cortex-a9",
+    "-marm",
+    "-O3",
+    "-g",
+    "-ffreestanding",
+    "-nostdlib",
+    "-DJTAG200_STRESS",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-Wl,--build-id=none"
+  ],
+  "hardware_acceptance": "50 MHz HPM5301 read-only 1 KiB passed; 200 MHz forced-high TMS/TDI boundary diagnostic reproduced the mismatch",
+  "sha256": {
+    "probe.bit": "39e92ac42ae70e11cfb470b3b65c109224baf5a751bebfe8687ea974dd93b565",
+    "application.elf": "d2195106cfcae54ec32c017c9e141f4efb02107a521f596b7e9e1e5ca38028d9",
+    "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+  },
+  "hardware_evidence": "docs/validation/jtag200-20261118/segment-overhead/hpm-forced-high.json"
+}

@@ -105,6 +105,25 @@ module tb_jtag200;
     reg [1:0] expected_pins [0:PULSES-1];
     reg watching = 0;
     integer rises = 0, falls = 0, measured_tck = 0;
+    reg most_recent_tms = 1, most_recent_tdi = 1;
+    // Validate the low-clock boundary on the actual serializer input.
+    always @(posedge word_clk) begin
+        if (word_reset || !regs.block_mode_sync[1]) begin
+            most_recent_tms = 1;
+            most_recent_tdi = 1;
+        end else if (block_test) begin
+            for (integer pair=0; pair<4; pair=pair+1) begin
+                if (lane_word[2*pair+1]) begin
+                    most_recent_tms = lane_word[8+2*pair+1];
+                    most_recent_tdi = lane_word[16+2*pair+1];
+                end else if (lane_word[7:0] != 8'hf0 &&
+                    ({lane_word[8+2*pair+:2],lane_word[16+2*pair+:2]} !==
+                     {{2{most_recent_tms}},{2{most_recent_tdi}}}))
+                    $fatal(1,"TMS/TDI changed in a parked-clock slot");
+            end
+        end
+    end
+
     realtime last_rise = 0, last_fall = 0, expected_period = 0;
     function automatic bit close(input realtime a, b);
         return a >= b - 0.020 && a <= b + 0.020;

@@ -24,24 +24,33 @@ module jtag200_segment (
     wire one_slot = half_slots == 1;
     wire [2:0] consumed = one_slot ? (left >= 4 ? 3'd4 : left[2:0]) : 3'd1;
 
-    // 50 MHz uses one TCK per CLKDIV word. At 160/200 MHz each
-    // two-slot pair is one TCK, giving four parallel TCKs per word.
+    reg idle_tms = 1, idle_tdi = 1;
+    wire [3:0] send_tms, send_tdi;
+    for (genvar bit_no = 0; bit_no < 4; bit_no=bit_no+1) begin: tx_bits
+        assign send_tms[bit_no] = variable_tms ? modes[bit_no] :
+                                   tms_value || (exit_last && left == bit_no+1);
+        assign send_tdi[bit_no] = tdi_mode == 2 ? data[bit_no] : tdi_mode == 1;
+    end
+    wire [1:0] last_bit = consumed[1:0] - 2'd1;
+    wire tail_tms = send_tms[last_bit];
+    wire tail_tdi = send_tdi[last_bit];
+
+    // Keep the last transmitted TMS/TDI while TCK is parked. This also
+    // covers an incomplete serializer word at the end of a segment.
     always @* begin
-        lane_word = 24'hffff00;
+        lane_word = {{8{idle_tdi}}, {8{idle_tms}}, 8'b0};
         if (state == SEND) begin
+            lane_word = {{8{tail_tdi}}, {8{tail_tms}}, 8'b0};
             if (one_slot) begin
                 for (integer bit_no = 0; bit_no < 4; bit_no=bit_no+1) begin
                     if (left > bit_no) begin
                         lane_word[2*bit_no+:2] = 2'b10;
-                        lane_word[8+2*bit_no+:2] = {2{variable_tms ? modes[bit_no] :
-                                                          tms_value || (exit_last && left == bit_no+1)}};
-                        lane_word[16+2*bit_no+:2] = {2{tdi_mode == 2 ? data[bit_no] : tdi_mode == 1}};
+                        lane_word[8+2*bit_no+:2] = {2{send_tms[bit_no]}};
+                        lane_word[16+2*bit_no+:2] = {2{send_tdi[bit_no]}};
                     end
                 end
             end else begin
                 lane_word[7:0] = 8'hf0;
-                lane_word[15:8] = {8{variable_tms ? modes[0] : tms_value || (exit_last && left == 1)}};
-                lane_word[23:16] = {8{tdi_mode == 2 ? data[0] : tdi_mode == 1}};
             end
         end
     end
@@ -59,6 +68,8 @@ module jtag200_segment (
         done <= 0;
         if (reset) begin
             state <= IDLE;
+            idle_tms <= 1;
+            idle_tdi <= 1;
             sample_pos <= 0;
             sampled <= 0;
             limit <= 0;
@@ -89,6 +100,8 @@ module jtag200_segment (
             end
             case (state)
                 SEND: begin
+                    idle_tms <= tail_tms;
+                    idle_tdi <= tail_tdi;
                     modes <= modes >> consumed;
                     data <= data >> consumed;
                     left <= left - {9'b0,consumed};
