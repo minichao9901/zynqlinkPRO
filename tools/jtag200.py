@@ -29,10 +29,12 @@ def bits(value, count):
     return [(value >> bit) & 1 for bit in range(count)]
 
 
-def waveform(tms, tdi, half_slots):
+def waveform(tms, tdi, half_slots, tdi_advance=0):
     """Encode low/high half periods and pad out the receive pipeline."""
     if not tms or len(tms) != len(tdi) or not 1 <= half_slots <= 4:
         raise ValueError("Expected a nonempty pair of JTAG vectors and 1–4 slots")
+    if not 0 <= tdi_advance < half_slots:
+        raise ValueError("TDI advance must leave at least one slot of hold time")
     idle = 0b110
     slots = [idle] * LEAD
     for mode, data in zip(tms, tdi):
@@ -42,6 +44,11 @@ def waveform(tms, tdi, half_slots):
     slots.extend([idle] * (TAIL + (-len(slots) % 8)))
     if len(slots) > 4096:
         raise ValueError("Scan exceeds the 512-word waveform buffer")
+
+    # Compensate TDI/TCK skew independently. Nominal capture remains on TCK rise.
+    if tdi_advance:
+        tdi_levels = slots[tdi_advance:] + [idle] * tdi_advance
+        slots = [(slot & 3) | (data & 4) for slot, data in zip(slots, tdi_levels)]
     words = []
     for start in range(0, len(slots), 8):
         word = 0
@@ -103,7 +110,7 @@ def simulate():
     work.mkdir(parents=True, exist_ok=True)
     modes, data, _, _ = vectors("model")
     for key, (index, half, _) in PROFILES.items():
-        words = waveform(modes, data, half)
+        words = waveform(modes, data, half, tdi_advance=int(half == 2))
         (work / f"tx{index}.mem").write_text(
             f"{len(words):06x}\n" + "".join(f"{word:06x}\n" for word in words), encoding="ascii")
     (work / "pins.mem").write_text(
@@ -243,10 +250,11 @@ def scan(args):
         if args.idcode is None:
             raise ValueError("--idcode is required for a target IDCODE check")
         expected = bits(args.idcode, 32)
-    words = waveform(tms, tdi, half)
+    words = waveform(tms, tdi, half, tdi_advance=args.tdi_advance)
     if not args.execute:
         print(f"{args.kind}: cable {args.cable_serial}, nominal TCK {hz} Hz, "
-              f"{len(tms)} pulses, {len(words)} waveform words, tap {args.taps}. Use --execute for hardware.")
+              f"{len(tms)} pulses, {len(words)} words, tap {args.taps}, TDI advance {args.tdi_advance}. "
+              "Use --execute for hardware.")
         return
 
     out = args.out.resolve()
@@ -283,6 +291,7 @@ def scan(args):
     finally:
         (out / "result.json").write_text(json.dumps({
             "nominal_tck_hz": hz, "target_kind": args.kind, "io_delay_tap": args.taps,
+            "tdi_advance_slots": args.tdi_advance,
             "cable_serial": args.cable_serial, "rounds": results,
         }, indent=2) + "\n", encoding="utf8")
 
@@ -313,6 +322,8 @@ def main():
     capture.add_argument("--mhz", choices=PROFILES, required=True)
     capture.add_argument("--taps", type=int, choices=range(32), default=0, metavar="0..31")
     capture.add_argument("--kind", choices=["loopback", "idcode"], required=True)
+    capture.add_argument("--tdi-advance", type=int, choices=range(4), default=0, metavar="0..3",
+                         help="Advance TDI by serializer slots, less than one TCK half-period")
     capture.add_argument("--idcode", type=lambda value: int(value, 0))
     capture.add_argument("--repeats", type=int, choices=range(1, 101), default=3, metavar="1..100")
     hardware_args(capture)
