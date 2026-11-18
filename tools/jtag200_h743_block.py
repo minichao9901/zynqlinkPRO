@@ -12,9 +12,9 @@ import time
 import usb.util
 
 from dap_pipeline_bench import open_dap, setup, xfer
-from jtag200 import ROOT
+from jtag200 import PROFILES, ROOT
 from jtag200_h743_baseline import BASE, DHCSR, SIZE, SUPPLY, ClockFixture, sha
-from jtag200_h743_scan import IDCODE, identify, select, slow_read
+from jtag200_h743_scan import IDCODE, Scan, identify, select, slow_read
 from jtag200_pipeline import BlockBenchmark, Ownership, PhysicalPort, need
 from target_snapshot import same_clock_configuration, snapshot
 from test_probe_board import Memory
@@ -211,6 +211,146 @@ def compare_stream_66(bench, report, archive, seconds):
          'Sustained alternating SRAM verification failed')
 
 
+def sweep_frequency_limit(bench, saved, rates, report, archive, seconds):
+    """Separate TAP, verified read and alternating SRAM limits on one fixture."""
+    pattern = random.Random(0x743200).randbytes(1024)
+    inverted = bytes(byte ^ 255 for byte in pattern)
+    report['limit'] = points = {}
+    qualified = {}
+    current = saved[:1024]
+
+    def run(rate, tap, slot, advance, idle, seconds, *, mixed=False, pl=True):
+        if mixed and report['phase'] != 'write':
+            report['phase'] = 'write'
+            archive()
+        half, hz = select(bench.port, rate, tap)
+        ctrl = int(bench.port.command('read_word 0xf8000180'))
+        divider = (ctrl >> 8 & 63) * (ctrl >> 20 & 63)
+        need(divider and ctrl & 0x30 == 0 and abs(6.4e9 / divider / half - hz) <= 1,
+             'FCLK1 divider and profile disagree')
+        stream = half == 2
+        bench.configure(rate, idle, slot, arm=True, stream=stream, verify_in_pl=stream and pl,
+                        advance_tms=advance[0], advance_tdi=advance[1])
+        result = bench.run(0 if mixed else 1, seconds, profile=True)
+        result.pop('wire_dmi', None)
+        del result['dmi_busy'], result['dmi_invalid']
+        row = dict(rate=rate, tck_hz=hz, fclk_control=hex(ctrl), tap=tap, slot=slot, advance=advance,
+                   idle=idle, stream=stream, verify_in_pl=stream and pl, **result)
+        return row
+
+    def reset_pattern():
+        # A failed high-speed scan can leave an AP transfer outstanding.
+        # Abort and clear sticky status at the qualified low TCK first.
+        half, _ = select(bench.port, '50', 16)
+        abort = Scan()
+        abort.instruction(8)
+        abort.data(0, 1, 16)
+        abort.transfer(bench.port, half, 0)
+        observed = slow_read(bench.port, half, 0, 0x5C001000, 1, {36})[36]
+        need(observed['values'] == [0x20036450 << 3 | 2] and all(a == 2 for a in observed['acks'])
+             and observed['status'] & 0xA2 == 0, 'Low-speed AP recovery did not identify H743')
+        bench.pattern(pattern)
+        row = run('50', 16, 36, (False, False), 32, 0, mixed=True)
+        report.setdefault('rearms', []).append(row)
+        need(row['passed'], 'Known-good scratch write/read failed')
+        return pattern
+
+    def expected_after(row):
+        return inverted if (row['write_bytes'] // 1024 - 1) & 1 else pattern
+
+    def record_readback(row):
+        expected = expected_after(row)
+        bench.pattern(expected)
+        check = run('50', 16, 36, (False, False), 16, 0, pl=False)
+        report.setdefault('independent', []).append(check)
+        archive()
+        need(check['passed'], 'Independent 50 MHz A9 readback did not match the written pattern')
+        report['limit_expect_inverted'] = expected == inverted
+        return expected
+
+    def confirm(rate, point, config):
+        tap, slot, advance, idle = config
+        bench.pattern(pattern)
+        for _ in range(3):
+            row = run(rate, tap, slot, advance, idle, min(seconds, 20), mixed=True)
+            point['long_mixed'].append(row)
+            print(json.dumps(row), flush=True)
+            archive()
+            if not row['passed']:
+                return reset_pattern()
+        return record_readback(row)
+
+    for rate in rates:
+        point = points[rate] = dict(tap_scan=[], read_trials=[], write_trials=[], long_mixed=[])
+        bench.pattern(current)
+        # Try the previous board's taps first. If the eye is too narrow,
+        # inspect the rest of the 32-tap input delay range.
+        taps = (16, 24, 8, 0, 31, *[tap for tap in range(32) if tap not in (16, 24, 8, 0, 31)])
+        point_half = PROFILES[rate][1]
+        reference = 37 if point_half == 2 else 35
+        launch = ((True, True), (True, False), (False, True), (False, False)) if point_half == 2 else ((False, False),)
+        read_idles = (17, 21, 25, 33) if point_half == 2 else (16, 32, 64)
+        write_idles = (17, 19, 21, 25, 33, 49) if point_half == 2 else (16, 24, 32, 48, 64)
+        for tap in taps:
+            half, _ = select(bench.port, rate, tap)
+            slots = identify(bench.port, half, 3)
+            point['tap_scan'].append(dict(tap=tap, slots=sorted(slots)))
+            for slot in sorted(slots, key=lambda s: abs(s-reference)):
+                for advance in launch:
+                    bench.pattern(current)
+                    for idle in read_idles:
+                        read = run(rate, tap, slot, advance, idle, 0, pl=False)
+                        point['read_trials'].append(read)
+                        if read['passed']:
+                            break
+                    if not read['passed']:
+                        continue
+                    read = run(rate, tap, slot, advance, idle, 1)
+                    point['read_trials'].append(read)
+                    if not read['passed']:
+                        continue
+                    if 'read' not in point or read['read_MBps'] > point['read']['read_MBps']:
+                        point['read'] = read
+                    bench.pattern(pattern)
+                    for write_idle in (n for n in write_idles if n >= idle):
+                        row = run(rate, tap, slot, advance, write_idle, 0, mixed=True)
+                        point['write_trials'].append(row)
+                        if row['passed']:
+                            row = run(rate, tap, slot, advance, write_idle, 2, mixed=True)
+                            point['write_trials'].append(row)
+                            if row['passed']:
+                                qualified[rate] = tap, slot, advance, write_idle
+                                point['mixed'] = row
+                                current = record_readback(row)
+                                break
+                        current = reset_pattern()
+                        bench.pattern(pattern)
+                    if rate in qualified:
+                        break
+                if rate in qualified:
+                    break
+            archive()
+            if rate in qualified:
+                break
+            # Qualify additional apertures at the boundary; once two valid
+            # taps have been tried, preserve the failure and move on.
+            if sum(bool(t['slots']) for t in point['tap_scan']) >= 2:
+                break
+        print(f"{rate} MHz: TAP {any(t['slots'] for t in point['tap_scan'])}, "
+              f"read {point.get('read', {}).get('read_MBps', 0):.3f}, "
+              f"write {point.get('mixed', {}).get('write_MBps', 0):.3f} MB/s", flush=True)
+        archive()
+        if rate == '100' and rate in qualified:
+            current = confirm(rate, point, qualified[rate])
+
+    for rate in reversed(rates):
+        if rate not in qualified or rate == '100':
+            continue
+        current = confirm(rate, points[rate], qualified[rate])
+        if len(points[rate]['long_mixed']) == 3 and all(r['passed'] for r in points[rate]['long_mixed']):
+            break
+    report['limit_expect_current'] = current.hex()
+
 
 
 def sweep(bench, report, archive):
@@ -268,8 +408,13 @@ def main():
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument('--compare-66', action='store_true', help='Profile only the 66.667 MHz ARM path')
     mode.add_argument('--stream-66', action='store_true', help='Compare ARM stream and PL verification at 66.667 MHz')
+    mode.add_argument('--limit', action='store_true', help='Qualify ARM writes and scan TCK boundaries')
+    parser.add_argument('--rates', nargs='+', choices=PROFILES,
+                        help='TCK profiles for --limit in ascending order')
     parser.add_argument('--execute', action='store_true')
     args = parser.parse_args()
+    if args.rates and not args.limit:
+        parser.error('--rates requires --limit')
     if not args.execute:
         print('Temporary H743 480/240 MHz, guarded 1 KiB blocks; restore 4 KiB AXI SRAM at 10 MHz.')
         return
@@ -328,7 +473,10 @@ def main():
                 report['phase'] = 'read'
                 bench = BlockBenchmark(port, args.out)
                 bench.pattern(saved[:1024])
-                if args.stream_66:
+                if args.limit:
+                    sweep_frequency_limit(bench, saved, args.rates or ['100', '160', '200'],
+                                          report, archive, args.seconds)
+                elif args.stream_66:
                     compare_stream_66(bench, report, archive, args.seconds)
                 elif args.compare_66:
                     compare_66(bench, report, archive, args.seconds)
@@ -384,6 +532,9 @@ def main():
             with low_link(args.serial) as mem:
                 if saved is not None:
                     before_restore = mem.read(BASE, SIZE)
+                    if args.limit and 'limit_expect_current' in report:
+                        expected = bytes.fromhex(report['limit_expect_current'])
+                        report['independent_final_pattern_match'] = before_restore == expected + saved[1024:]
                     if args.stream_66 and report['mixed'] and report['mixed'][-1]['passed']:
                         last = report['mixed'][-1]
                         pattern = random.Random(0x743666).randbytes(1024)
@@ -417,6 +568,8 @@ def main():
     need(all(report.get(key) for key in ('ram_restored', 'guards_match', 'voltage_restored',
                                         'rcc_restored', 'core_state_restored')), 'Restore verification failed')
     if args.stream_66:
+        need(report.get('independent_final_pattern_match'), 'Independent final data check failed')
+    if args.limit:
         need(report.get('independent_final_pattern_match'), 'Independent final data check failed')
 
 

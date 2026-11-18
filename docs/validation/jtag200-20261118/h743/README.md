@@ -89,3 +89,9 @@ PL 校验的 60 秒只读窗口已经提交给 A9，XSCT 轮询期间收到 `unk
 66.667 MHz 用 tap16、采样时隙32，100 MHz 用 tap16、时隙37、TMS/TDI 各提前一时隙。66.667 MHz 下 idle1、3、5 的连续只读返回 WAIT，混合在 idle5/7 返回 WAIT。100 MHz 在 idle3、5、9 的筛查主要返回 WAIT，部分采样点返回 ACK 错误。100 MHz 通过的是 10 秒只读窗口。历史 H743 66.667 MHz 经 CMSIS-DAP USB 队列的最佳读/写为 5.0443/4.7756 MB/s，本次选择探针本地持续校验模式。[完整结果与失败点](stream-steady.json)
 
 末轮反相图案由恢复后的历史配对在 JTAG 10 MHz 独立读回，且相邻 3 KiB 一致。完成后恢复新备份的 4 KiB 与两端哨兵，前后 SHA-256 均为 `248a55d02bc9b70b40dee28beed9bf66e17641583e0274d46fb3936820132a2c`。核对 RCC、电压和内核运行态，探针停留在历史配对。H743 Flash 和 Zynq QSPI 写入均为零。[历史配对重载及 OCM 核对](stream-steady-restore.json)
+
+## 100 MHz 写入及更高频率边界
+
+100 MHz 连续扫描在 CPU480/HCLK240 下以 1 KiB 实际写入不同图案，先完成只读验证，再扫 TMS/TDI 发射相位和 idle。tap16、时隙37、提前 TMS/TDI 的只读达 6.279 MB/s，首个写试返回错误。试探其他设置依然出现写错误。首次失败后的 66.667 MHz AP 恢复也回 WAIT，改为在 50 MHz 先发 JTAG ABORT、清 sticky 状态并确认 H743 身份，再以固定页做一块写读恢复。已从历史配对独立确认 SRAM、两侧哨兵和目标状态恢复一致。逐组状态见记录。[首次写试](upper100-first.json) · [相位和 idle 扫描](upper100-phase.json)
+
+为进一步测限，只增加 Zynq PS 的 FCLK1 分频档位。保留经过布线的同一个 FPGA bitstream。XSim 使用实际 SelectIO 原语验证新档位的周期和扫描位、旧档位和协议流水。[XSim 记录](upper-xsim.txt)

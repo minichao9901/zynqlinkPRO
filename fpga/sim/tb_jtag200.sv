@@ -508,6 +508,16 @@ module tb_jtag200;
         profile(4, 12.5, 6.250);
         profile(5, 10.0, 5.0);
         profile(6, 15.0, 15.0);
+        // The firmware uses IO PLL 1.6 GHz and integer FCLK1 dividers.
+        profile(7, 48/3.2, 48/6.4);
+        profile(8, 43/3.2, 43/6.4);
+        profile(9, 39/3.2, 39/6.4);
+        profile(10, 38/3.2, 38/6.4);
+        profile(11, 37/3.2, 37/6.4);
+        profile(12, 36/3.2, 36/6.4);
+        profile(13, 35/3.2, 35/6.4);
+        profile(14, 34/3.2, 34/6.4);
+        profile(15, 33/3.2, 33/6.4);
         write_reg(8, 2, 0);
         #200;
         ref_half = 10.0;
