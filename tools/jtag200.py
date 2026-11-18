@@ -140,7 +140,7 @@ def simulate():
             raise SystemExit(f"{key} MHz: IDCODE/PRBS did not round-trip: {raw.hex()}")
         print(f"PASS {key} MHz: TCK edges/period, TMS/TDI, IDCODE and {len(expected)-32} PRBS bits; RX offsets {offsets}")
     for line in log.splitlines():
-        if "J200_PIPELINE_PASS" in line or "J200_ARM_PASS" in line:
+        if line.startswith(("J200_PIPELINE_PASS", "J200_ARM_PASS", "J200_ARM_BREAKDOWN")):
             print(line)
     print(f"Evidence: {work / 'sim.log'}")
 

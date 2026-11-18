@@ -270,8 +270,37 @@ module tb_jtag200;
         $display("J200_PIPELINE_PASS half=%0d idle=%0d words=%0d bus_fault=%0d",half,idle,count,fault);
     endtask
 
+    bit profile_arm = 0;
+    int arm_send_words, arm_return_words, arm_idle_words, arm_dr_setup_words;
+    always @(posedge word_clk) if (profile_arm) begin
+        case (regs.pipeline.engine.phy.state)
+            regs.pipeline.engine.phy.SEND: arm_send_words++;
+            regs.pipeline.engine.phy.RETURN: arm_return_words++;
+            default: begin
+                arm_idle_words++;
+                if (regs.pipeline.engine.core.state == regs.pipeline.engine.core.DR_NAV ||
+                    regs.pipeline.engine.core.state == regs.pipeline.engine.core.DR_PRE)
+                    arm_dr_setup_words++;
+            end
+        endcase
+    end
+
+    task automatic start_arm_profile;
+        {arm_send_words, arm_return_words, arm_idle_words, arm_dr_setup_words} = 0;
+        profile_arm = 1;
+    endtask
+
+    task automatic end_arm_profile(input string direction, input int idle, count,
+                                   input int first_tck, input realtime ns);
+        profile_arm = 0;
+        $display("J200_ARM_BREAKDOWN direction=%s idle=%0d words=%0d wall_ns=%0.2f tck=%0d send_clkdiv=%0d return_clkdiv=%0d parked_clkdiv=%0d dr_prep_clkdiv=%0d",
+                 direction,idle,count,ns,measured_tck-first_tck,arm_send_words,arm_return_words,
+                 arm_idle_words,arm_dr_setup_words);
+    endtask
+
     task automatic arm_pipeline(input int half, offset, idle, count);
         reg [31:0] word;
+        int first_tck;
         realtime started, write_ns, read_ns;
         write_reg(14'h018, count, 0);
         write_reg(14'h01c, 32'h00200000 | (half == 2 ? 32'h00180000 : 0) |
@@ -283,10 +312,13 @@ module tb_jtag200;
         write_reg(14'h014, 32'h24050000, 0);
         for (int i=0; i<count; i++)
             write_reg(14'h1004+4*i, 32'h70420000 ^ (i*65537), 0);
+        first_tck=measured_tck;
+        start_arm_profile();
         started=$realtime;
         write_reg(8, 13, 0);
         wait_status(15);
         write_ns=$realtime-started;
+        end_arm_profile("write",idle,count,first_tck,write_ns);
         read_reg(14'h020, word);
         if (word !== 1) $fatal(1,"ARM write completion %h",word);
         for (int i=0; i<count; i++)
@@ -294,10 +326,13 @@ module tb_jtag200;
                 $fatal(1,"ARM write differs at word %d",i);
         write_reg(8, 0, 0);
         wait_status(5);
+        first_tck=measured_tck;
+        start_arm_profile();
         started=$realtime;
         write_reg(8, 5, 0);
         wait_status(15);
         read_ns=$realtime-started;
+        end_arm_profile("read",idle,count,first_tck,read_ns);
         read_reg(14'h020, word);
         if (word !== 1) $fatal(1,"ARM read completion %h",word);
         read_reg(14'h2000, word);

@@ -7,6 +7,7 @@ from pathlib import Path
 import random
 import subprocess
 import sys
+import time
 
 import usb.util
 
@@ -26,7 +27,17 @@ SDK = Path('E:/Xilinx/SDK/2018.3')
 
 @contextmanager
 def low_link(serial):
-    device, out, data = open_dap(serial)
+    deadline = time.monotonic() + 10
+    while True:
+        try:
+            device, out, data = open_dap(serial)
+            break
+        except RuntimeError as error:
+            if str(error) != f'Expected one ZynqLinkPRO DAP with serial {serial}, found 0':
+                raise
+            if time.monotonic() >= deadline:
+                raise
+            time.sleep(0.25)
     try:
         need(setup(out, data, 10000, 'jtag') == b'\x16\x00' + IDCODE.to_bytes(4, 'little'),
              'Unexpected ARM TAP, no target write')

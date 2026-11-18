@@ -1,0 +1,32 @@
+{
+  "source_revision": "cb61c7ad7bd09a034c9d817ad7aee04be13534cb",
+  "fpga_entry": "fpga/experiments/jtag200/build.tcl",
+  "fpga_timing": {
+    "FCLK0_Hz": 133333333,
+    "FCLK1_max_Hz": 50000000,
+    "serializer_max_Hz": 200000000,
+    "setup_slack_ns": 2.118,
+    "hold_slack_ns": 0.047
+  },
+  "firmware_flags": [
+    "-mcpu=cortex-a9",
+    "-marm",
+    "-O3",
+    "-g",
+    "-ffreestanding",
+    "-nostdlib",
+    "-DJTAG200_STRESS",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-Wl,--build-id=none"
+  ],
+  "hardware_acceptance": "H743 CPU480/HCLK240; 66.667 MHz 10-second read at idle 3 and 5, and 10-second alternating SRAM at idle 5 verified. Timing profile identifies throughput regression; original target RAM, guard, clocks and run state restored.",
+  "sha256": {
+    "probe.bit": "f7ac720787e3e322aa777dcf918bfb4e4d3855ba201a300eaf90c4f0d1b3fd30",
+    "application.elf": "70b3a56981427c49742a619f5d2e3adb44acf6e8a3aa145782d087eed3af97bb",
+    "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+  },
+  "routed_bit_source_revision": "0e734e9ad3cb9cd6854ca1f68cf7042d36ba6303",
+  "hardware_evidence": "docs/validation/jtag200-20261118/h743/selectio-66.json"
+}

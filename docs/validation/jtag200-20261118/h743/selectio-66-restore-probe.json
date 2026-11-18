@@ -1,0 +1,57 @@
+{
+  "operation": "JTAG/RAM",
+  "dryRun": false,
+  "out": "E:\\zynqlinkPRO-jtag200\\build\\jtag200\\h743-compare66\\restore-probe",
+  "files": {
+    "bit": {
+      "path": "E:\\zynqlinkPRO-jtag200\\prebuilt\\release-20261106\\probe.bit",
+      "sha256": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6"
+    },
+    "zynq_elf": {
+      "path": "E:\\zynqlinkPRO-jtag200\\prebuilt\\h743-jtag66-20261109\\application.elf",
+      "sha256": "daf4cf7275b7581ba62bf7eba2957e2587432495f96f625a16df3de683534c38"
+    },
+    "ps_init": {
+      "path": "E:\\zynqlinkPRO-jtag200\\prebuilt\\release-20261106\\ps7_init.tcl",
+      "sha256": "485a028ff7ad9a256a64313b68527a055ca3800b3b85577ceb0554b0e0609c94"
+    }
+  },
+  "commands": {
+    "load": [
+      "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "-X",
+      "utf8",
+      "E:\\zynqlinkPRO-jtag200\\tools\\run_xsct.py",
+      "E:\\zynqlinkPRO-jtag200\\tools\\download_dap_fpga.tcl",
+      "E:\\zynqlinkPRO-jtag200\\prebuilt\\h743-jtag66-20261109\\application.elf",
+      "E:\\zynqlinkPRO-jtag200\\prebuilt\\release-20261106\\probe.bit",
+      "E:\\zynqlinkPRO-jtag200\\prebuilt\\release-20261106\\ps7_init.tcl",
+      "--sdk",
+      "E:\\Xilinx\\SDK\\2018.3"
+    ],
+    "verify": [
+      "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "-X",
+      "utf8",
+      "E:\\zynqlinkPRO-jtag200\\tools\\verify_probe_ocm_code.py",
+      "--elf",
+      "E:\\zynqlinkPRO-jtag200\\prebuilt\\h743-jtag66-20261109\\application.elf",
+      "--out-dir",
+      "E:\\zynqlinkPRO-jtag200\\build\\jtag200\\h743-compare66\\restore-probe\\ocm",
+      "--sdk",
+      "E:\\Xilinx\\SDK\\2018.3"
+    ]
+  },
+  "stage": "complete",
+  "passed": true,
+  "streams": {},
+  "before": {
+    "PS_IDCODE": "0x23727093",
+    "LEVEL_SHIFTERS": "0xf",
+    "FPGA_RESET": "0x0",
+    "BOOT_MODE": "0x0",
+    "JTAG200": "0x5"
+  },
+  "verifiedBytes": 86172,
+  "FCLK_Hz": 133333332
+}
