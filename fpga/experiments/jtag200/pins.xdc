@@ -1,0 +1,4 @@
+set_property -dict {PACKAGE_PIN L15 IOSTANDARD LVCMOS33 SLEW FAST DRIVE 8} [get_ports tck]
+set_property -dict {PACKAGE_PIN L16 IOSTANDARD LVCMOS33 SLEW FAST DRIVE 8} [get_ports tms]
+set_property -dict {PACKAGE_PIN M15 IOSTANDARD LVCMOS33 SLEW FAST DRIVE 8} [get_ports tdi]
+set_property -dict {PACKAGE_PIN L14 IOSTANDARD LVCMOS33} [get_ports tdo]
