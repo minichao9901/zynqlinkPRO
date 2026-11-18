@@ -1,0 +1,31 @@
+{
+  "backup_sha256": "6d1ce4039377f6bc7b730c942f37906254d8115e6525587782dbd9df495568f0",
+  "recovery_source": "E:\\zynqlinkPRO-jtag200\\build\\jtag200\\h743-stream-board-direct",
+  "collection_error": "RuntimeError('Running J7 executable differs from reset-release candidate')",
+  "restore_sha256": "248a55d02bc9b70b40dee28beed9bf66e17641583e0274d46fb3936820132a2c",
+  "ram_restored": false,
+  "guards_match": false,
+  "voltage_restored": true,
+  "target_after": {
+    "name": "STM32H743/H742/H750/H753",
+    "cpuid": "0x411fc271",
+    "device": "0x20036450",
+    "registers": {
+      "0x58024400": "0x4025",
+      "0x58024410": "0x0",
+      "0x58024418": "0x0",
+      "0x5802441c": "0x0",
+      "0x58024420": "0x0",
+      "0x58024428": "0x2020200",
+      "0x5802442c": "0x1ff0000",
+      "0x58024430": "0x1010280",
+      "0x58024434": "0x0",
+      "0x58024438": "0x1010280",
+      "0x52002000": "0x37"
+    }
+  },
+  "rcc_restored": true,
+  "dhcsr_after": "0x2010000",
+  "core_state_restored": true,
+  "restore_error": "RuntimeError('Recovery readback did not match')"
+}

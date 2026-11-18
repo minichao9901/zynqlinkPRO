@@ -21,11 +21,11 @@
     "-Werror",
     "-Wl,--build-id=none"
   ],
-  "hardware_acceptance": "Short read verified on H743 at 66.667 MHz idle9. The 60-second PL-verified read was submitted before HS3 disconnected. Long result, writes and target cleanup pending.",
+  "hardware_acceptance": "H743 CPU480/HCLK240. Verified 66.667 MHz reads at idle7 for 60 s (5.0125 MB/s), 66.667 MHz alternating SRAM at idle9 for 60 s (4.8331 MB/s each), and 100 MHz reads at idle17 for 10 s (6.2795 MB/s). Independently checked final pattern, restored 4 KiB and guards, and verified original clocks and core state.",
   "sha256": {
     "probe.bit": "d7546ec09b1dd88bfee02c13ee1b6aa5b3a0a2671e341d3fdd515f9ef146017e",
     "application.elf": "f1fa72db70410c5dac255299fbec2edfe91888f56de23f58b73fd24ceca1f1c8",
     "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
   },
-  "hardware_evidence": "docs/validation/jtag200-20261118/h743/stream-direct.json"
+  "hardware_evidence": "docs/validation/jtag200-20261118/h743/stream-steady.json"
 }

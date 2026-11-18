@@ -159,6 +159,7 @@ def compare_stream_66(bench, report, archive, seconds):
     need(timing is not None, 'No streaming read at 66.667 MHz with independent A9 comparison')
 
     for idle, duration, stream, verify in ((3, 2, False, False), (read_idle, 2, True, False),
+                                          (read_idle, 2, True, True),
                                           (read_idle, seconds, True, True), (1, 2, True, True)):
         report['long_read'].append(run(timing, idle, 1, duration, stream, verify))
         archive()
