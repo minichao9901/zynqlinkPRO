@@ -63,3 +63,11 @@ ARM 流水保留原来的 `DP CTRL/STAT`、`SELECT`、`CSW`、`TAR` 建链和块
 补测 66.667 MHz、idle1 的流式仿真为 5.726 MB/s；100 MHz、idle3 为读 8.236、写 8.235 MB/s。H743 实板有效 idle 仍以连续测试判定。
 
 从 `6ca21b98` 构建的配对在 133.333 MHz 约束下路由 WNS +2.116 ns、WHS +0.067 ns。首次上板预检时，旧 CMSIS-DAP 仍可枚举，Windows 显示下载器 `USB\VID_0403&PID_6014\210299008529` 的 `IsPresent=False`，XSCT 报可用目标为空。终止在预检，目标 RAM 和 Flash 写入次数均为零。[预检记录](stream-first-preflight.json) · [路由配对](../../../../prebuilt/jtag-only-200mhz-arm-stream-20261118/manifest.json)
+
+### HS3 直连后的实板短测
+
+HS3 `210299008529` 直连后恢复枚举，探针从 `BOOT_MODE=0` 先临时加载历史配对，CMSIS-DAP 恢复可用。随后临时加载新配对，物理 MEM-AP0 核对 **3016 B** 执行段，重新读回确认 H743 CPU480/HCLK240。当前目标使用 AXI SRAM `0x24050000`、1 KiB、TCK 66.667 MHz，tap16，采样时隙32。[加载身份](stream-direct-load.json) · [实板证据](stream-direct.json)
+
+idle3 和 idle5 在时隙 32、33、34 上均在第二个流式 DRW 帧出现 WAIT。idle9 的两轮独立 A9 逐字读取并比对通过，2 秒从同配对的 2.959 提高到 3.503 MB/s。该轮计时中 PL 扫描 **4.881 MB/s**，根据 93,755,410 个 TCK 和实际档位计算的线速上限为 **4.973 MB/s**，达到 **98.15%**。因此低 idle 下的实板限制需计入目标 AP 等待。
+
+PL 校验的 60 秒只读窗口已经提交给 A9，XSCT 轮询期间收到 `unknown or ambiguous address space AP0`。Windows 随后确认 HS3 缺失，切回历史配对在预检无可用目标。本轮尚未进入写入阶段，长测邮箱、RCC 和内核运行态待重新连接后取证。4 KiB 备份和两端哨兵保留在 `build/jtag200/h743-stream-board-direct`。脚本增加按序号取回既有 A9 测量结果的入口，并补齐 idle7、11、13 读档扫描。[恢复失败证据](stream-direct-restore-attempt.json)

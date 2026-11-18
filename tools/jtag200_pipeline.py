@@ -91,9 +91,15 @@ class BlockBenchmark:
         self.port.command(f"physwr -force {MAILBOX+12:#x} {seconds}; "
                           f"physwr -force {MAILBOX+20:#x} {mode}; "
                           f"physwr -force {MAILBOX+4:#x} {sequence}")
+        return self.collect(sequence, mode, seconds, profile=profile, started=start)
+
+    def collect(self, sequence, mode, seconds, *, profile=False, started=None):
+        """Collect a previously submitted local run, including after reconnect."""
         deadline = time.monotonic()+seconds+10
         while True:
             words = self.status()
+            need(words[1] == sequence and words[3] == seconds and words[5] == mode,
+                 "Pipeline mailbox no longer describes the expected run")
             if words[2] == sequence:
                 break
             if time.monotonic() > deadline:
@@ -102,7 +108,8 @@ class BlockBenchmark:
         def systime(index):
             return (words[index] | words[index+1]<<32)/333333333
         rd,wr,total = systime(12),systime(14),systime(10)
-        row=dict(mode=mode, planned_s=seconds, seconds=total, host_s=time.monotonic()-start,
+        row=dict(mode=mode, planned_s=seconds, seconds=total,
+                 host_s=time.monotonic()-started if started is not None else None,
                  read_MBps=words[6]/rd/1e6 if rd else 0,
                  write_MBps=words[7]/wr/1e6 if wr else 0,
                  read_bytes=words[6], write_bytes=words[7],

@@ -21,11 +21,11 @@
     "-Werror",
     "-Wl,--build-id=none"
   ],
-  "hardware_acceptance": "Pending: initial preflight found no physical XSCT targets; HS3 was absent. Candidate not yet loaded.",
+  "hardware_acceptance": "Short read verified on H743 at 66.667 MHz idle9. The 60-second PL-verified read was submitted before HS3 disconnected. Long result, writes and target cleanup pending.",
   "sha256": {
     "probe.bit": "d7546ec09b1dd88bfee02c13ee1b6aa5b3a0a2671e341d3fdd515f9ef146017e",
     "application.elf": "f1fa72db70410c5dac255299fbec2edfe91888f56de23f58b73fd24ceca1f1c8",
     "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
   },
-  "hardware_evidence": "docs/validation/jtag200-20261118/h743/stream-first-preflight.json"
+  "hardware_evidence": "docs/validation/jtag200-20261118/h743/stream-direct.json"
 }

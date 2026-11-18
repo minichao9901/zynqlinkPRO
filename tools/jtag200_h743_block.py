@@ -143,7 +143,7 @@ def compare_stream_66(bench, report, archive, seconds):
              '66 MHz FCLK1/IO PLL registers did not match')
         report['calibration'].append(dict(rate=rate, tap=tap, slots=sorted(slots), nominal_tck_hz=hz,
                                           fclk_control=hex(control), io_pll_control=hex(io_pll)))
-        for idle in (3, 5, 9, 17):
+        for idle in (3, 5, 7, 9, 11, 13, 17):
             for phase in sorted(slots, key=lambda phase: abs(phase - 32)):
                 candidate = (tap, phase, False)
                 row = run(candidate, idle, 1, 1, True, False)
