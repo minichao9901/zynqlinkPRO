@@ -62,4 +62,27 @@ HPM5301EVKLite（序列号末八位 0AE800E0）在同一 USB 端口 1-2.3 经 HI
 
 按用户要求从 J200 切回 J7 正式 JTAG/RAM 配对 release-20261106。物理 MEM-AP0 核对 85,844 B 执行段通过，ZynqLinkPRO CMSIS-DAP 枚举为 0D28:0204、序列号 12345678。此时 HPM5301 的 USB 序列号在运行态和 DFU 均回查不到，未确认目标 JTAG 引脚已释放，本次对照未发送外部 JTAG 扫描。J7 留在正式 RAM 配对。保留原 J200 全高记录，待 HPM5301 回到 DFU 后用正式链路扫 IDCODE。[正式探针对照证据](production-probe-contrast.json)
 
+## 同接线复测与修复
+
+用户用正式探针在 10 MHz 读到 0x1000563D。原生 CLI 随后独立读到同一 IDCODE 和 DTMCS 0x00007071。切回原实验配对后，50、10、5 MHz 仍全高，AP0 逐字写入波形也复现。加载时曾遇到 XSCT 在系统复位后沿用旧 APU 上下文，改为重选并验证读回后恢复。
+
+新配对在 J7 N15（nTRST）和 M14（nSRST）保持高电平。同接线复测，50 MHz IDCODE 随即通过。两根复位线的旧电平未单独量测。新配对的 200 MHz 内部时序 WNS +2.482 ns、WHS +0.060 ns，XSim 六档继续通过。
+
+80/100 MHz 能读复位后的默认 IDCODE，显式装载 IR 时需要调 TDI。保持 TMS 时序，TDI 提前一个串行时隙后，两档各 10 次显式 IDCODE 通过。CLI 用 --tdi-advance 1 指定该调整。100 MHz 初次 RAM 测试在恢复后的 SBCS 查询收到无效 DMI 响应，随后 200 MHz 核对原值，100 MHz 改 tap、采样时隙和 idle 后复测通过。
+
+| 标称 TCK MHz | IDCODE 样本 | RAM 测试 tap / TDO 时隙 / DMI idle 拍 | RAM 写读与恢复 |
+|---:|---:|---|---|
+| 50 | 3/3 | 0 / 36 / 64 | 通过 |
+| 66.667 | 3/3 | 0 / 36 / 86 | 通过 |
+| 80 | 10/10 | 8 / 35 / 103 | 通过 |
+| 100 | 10/10 | 16 / 36 / 192 | 通过 |
+| 160 | 3/3 | 8 / 37 / 205 | 通过 |
+| 200 | 100/100 | 8 / 39 / 256 | 通过 |
+
+RAM 测试固定为 HPM5301 ILM 的 SBA 系统地址 0x0105FFF0，双读备份 4 字节，写入测试字、读回、还原并逐档核对。当前 J7 留在实验配对的 50 MHz 档，最后复核 IDCODE 三轮通过。本轮证据来自一块 HPM5301EVKLite 和当前接线，TCK 由时钟寄存器与波形时隙推算，引脚示波器量测、长时间吞吐和其他板卡待验。整个过程未执行 Flash/QSPI 写入或擦除。
+
+- [复位释放版配对和 SHA-256](../../../prebuilt/jtag-only-200mhz-reset-release-20261118/manifest.json)
+- [最终硬件结果和失败对照](hpm5301-reset-release-hardware.json)
+- [复位释放版仿真与时序](reset-release-offline-evidence.txt)
+
 固定 EXE、远端 main、Pages、Release 和 QSPI 不属于本轮交付。

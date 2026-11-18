@@ -1,0 +1,1481 @@
+{
+  "date": "2026-11-18",
+  "operator_baseline": "User workstation screenshot: IDCODE 0x1000563D, 10 MHz and examined RV32 core.",
+  "independent_formal_baseline": {
+    "requested_tck": 10000000,
+    "serial": "12345678",
+    "scans": [
+      {
+        "ir": null,
+        "ir_capture": null,
+        "value": "0x1000563D"
+      },
+      {
+        "ir": null,
+        "ir_capture": null,
+        "value": "0x1000563D"
+      },
+      {
+        "ir": 1,
+        "ir_capture": 1,
+        "value": "0x1000563D"
+      },
+      {
+        "ir": 16,
+        "ir_capture": 1,
+        "value": "0x00007071"
+      }
+    ],
+    "passed": true
+  },
+  "same_cabling_first_candidate": {
+    "initial_loader_error": "XSCT Invalid context after rst -system; fixed APU re-selection.",
+    "reloaded": {
+      "pair": {
+        "probe.bit": "09e6e92f60abd592495a028d2466e25c87ed1379ed6e6c8ed6ee11dd451e595d",
+        "application.elf": "4835d5fb10c88c329355f0a1e950706f5d38b97a083e5637f81c8bf40b519345",
+        "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+      },
+      "cable_serial": "210299008529",
+      "passed": true,
+      "live_code_sha256": "5378afd3a87cd129b3592a6aa36de820ceaaf4a014cc24d509f155f2b7c4100a",
+      "verified_code_bytes": 592
+    },
+    "50mhz_raw_sample_histograms": [
+      {
+        "255": 64
+      },
+      {
+        "255": 64
+      },
+      {
+        "255": 64
+      }
+    ],
+    "5_10_50mhz_delay_diagnostics": [
+      {
+        "rate_mhz": 50,
+        "tap": 0,
+        "word_histogram": {
+          "255": 53
+        },
+        "idcode_offsets": []
+      },
+      {
+        "rate_mhz": 50,
+        "tap": 16,
+        "word_histogram": {
+          "255": 53
+        },
+        "idcode_offsets": []
+      },
+      {
+        "rate_mhz": 50,
+        "tap": 31,
+        "word_histogram": {
+          "255": 53
+        },
+        "idcode_offsets": []
+      },
+      {
+        "rate_mhz": 10,
+        "tap": 0,
+        "word_histogram": {
+          "255": 229
+        },
+        "idcode_offsets": []
+      },
+      {
+        "rate_mhz": 10,
+        "tap": 16,
+        "word_histogram": {
+          "255": 229
+        },
+        "idcode_offsets": []
+      },
+      {
+        "rate_mhz": 10,
+        "tap": 31,
+        "word_histogram": {
+          "255": 229
+        },
+        "idcode_offsets": []
+      },
+      {
+        "rate_mhz": 5,
+        "tap": 0,
+        "word_histogram": {
+          "255": 449
+        },
+        "idcode_offsets": []
+      },
+      {
+        "rate_mhz": 5,
+        "tap": 16,
+        "word_histogram": {
+          "255": 449
+        },
+        "idcode_offsets": []
+      },
+      {
+        "rate_mhz": 5,
+        "tap": 31,
+        "word_histogram": {
+          "255": 449
+        },
+        "idcode_offsets": []
+      }
+    ],
+    "individual_AP0_word_writes": {
+      "histogram": {
+        "255": 64
+      },
+      "matching_offsets": []
+    }
+  },
+  "reset_release_candidate": {
+    "pair": {
+      "probe.bit": "78b5e4d2b71c4b816c4e875285f0b09588650214693c27d17e0d6fc48daf407d",
+      "application.elf": "4835d5fb10c88c329355f0a1e950706f5d38b97a083e5637f81c8bf40b519345",
+      "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+    },
+    "cable_serial": "210299008529",
+    "passed": true,
+    "live_code_sha256": "5378afd3a87cd129b3592a6aa36de820ceaaf4a014cc24d509f155f2b7c4100a",
+    "verified_code_bytes": 592
+  },
+  "TDI_timing_diagnostics": {
+    "unshifted_and_lead_only_success_cases": {
+      "80": {
+        "reset_id": 20,
+        "explicit_id": 0,
+        "dtmcs": 0
+      },
+      "100": {
+        "reset_id": 20,
+        "explicit_id": 0,
+        "dtmcs": 0
+      },
+      "200": {
+        "reset_id": 20,
+        "explicit_id": 20,
+        "dtmcs": 20
+      }
+    },
+    "one_slot_tdi_advance_success_cases": [
+      {
+        "rate": "80",
+        "tms_advance": 0,
+        "tdi_advance": 1,
+        "idle_before_dr": 0,
+        "ir": 1,
+        "offsets": [
+          33,
+          34,
+          35,
+          36
+        ],
+        "ir_capture_offsets": [
+          33,
+          34,
+          35,
+          36
+        ]
+      },
+      {
+        "rate": "80",
+        "tms_advance": 0,
+        "tdi_advance": 1,
+        "idle_before_dr": 0,
+        "ir": 16,
+        "offsets": [
+          33,
+          34,
+          35,
+          36
+        ],
+        "ir_capture_offsets": [
+          33,
+          34,
+          35,
+          36
+        ]
+      },
+      {
+        "rate": "100",
+        "tms_advance": 0,
+        "tdi_advance": 1,
+        "idle_before_dr": 0,
+        "ir": 1,
+        "offsets": [
+          35,
+          36,
+          37,
+          38
+        ],
+        "ir_capture_offsets": [
+          34,
+          35,
+          36,
+          37
+        ]
+      },
+      {
+        "rate": "100",
+        "tms_advance": 0,
+        "tdi_advance": 1,
+        "idle_before_dr": 0,
+        "ir": 16,
+        "offsets": [
+          35,
+          36,
+          37,
+          38
+        ],
+        "ir_capture_offsets": [
+          34,
+          35,
+          36,
+          37
+        ]
+      }
+    ]
+  },
+  "100mhz_initial_ram_attempt": {
+    "rate_mhz": "100",
+    "tap": 8,
+    "mode": "ram",
+    "common_offsets": [
+      35,
+      36,
+      37,
+      38
+    ],
+    "tdi_advance_slots": 1,
+    "idle_cycles": 128,
+    "before_dmcontrol": "0x0",
+    "dmstatus": "0x4c0ca2",
+    "sba_initial": {
+      "sbcs": "0x20040407",
+      "sbaddress": "0x0"
+    },
+    "address": "0x105fff0",
+    "original": "0xc1e332ab",
+    "verified_pattern": "0x5a17c3e9",
+    "error": "DMI 0x38: response 0x11",
+    "invalid_responses": [
+      {
+        "slots": 2,
+        "words": 128,
+        "histogram": {
+          "255": 11,
+          "15": 1,
+          "0": 114,
+          "30": 2
+        },
+        "dmi_addr": "0x38",
+        "write": null,
+        "response": "0x11"
+      }
+    ]
+  },
+  "100mhz_initial_ram_restore_followup": "The subsequent 200 MHz and 50 MHz independent RAM reads found the exact original word.",
+  "qualified_short_runs": [
+    {
+      "nominal_tck_hz": 50000000,
+      "idcode_runs": {
+        "nominal_tck_hz": 50000000,
+        "target_kind": "idcode",
+        "io_delay_tap": 0,
+        "tdi_advance_slots": 0,
+        "cable_serial": "210299008529",
+        "rounds": [
+          {
+            "round": 1,
+            "matching_slot_offsets": [
+              33,
+              34,
+              35,
+              36,
+              37,
+              38,
+              39
+            ]
+          },
+          {
+            "round": 2,
+            "matching_slot_offsets": [
+              33,
+              34,
+              35,
+              36,
+              37,
+              38,
+              39
+            ]
+          },
+          {
+            "round": 3,
+            "matching_slot_offsets": [
+              33,
+              34,
+              35,
+              36,
+              37,
+              38,
+              39
+            ]
+          }
+        ]
+      },
+      "ram": {
+        "rate_mhz": "50",
+        "tap": 0,
+        "mode": "ram",
+        "common_offsets": [
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39
+        ],
+        "sample_offset": 36,
+        "tdi_advance_slots": 0,
+        "idle_cycles": 64,
+        "before_dmcontrol": "0x0",
+        "dmstatus": "0x4c0ca2",
+        "sba_initial": {
+          "sbcs": "0x20040407",
+          "sbaddress": "0x0"
+        },
+        "address": "0x105fff0",
+        "original": "0xc1e332ab",
+        "verified_pattern": "0x5a17c3e9",
+        "ram_restored": true,
+        "passed": true,
+        "scan_count": 48
+      }
+    },
+    {
+      "nominal_tck_hz": 66666667,
+      "idcode_runs": {
+        "nominal_tck_hz": 66666667,
+        "target_kind": "idcode",
+        "io_delay_tap": 0,
+        "cable_serial": "210299008529",
+        "rounds": [
+          {
+            "round": 1,
+            "matching_slot_offsets": [
+              34,
+              35,
+              36,
+              37,
+              38
+            ]
+          },
+          {
+            "round": 2,
+            "matching_slot_offsets": [
+              34,
+              35,
+              36,
+              37,
+              38
+            ]
+          },
+          {
+            "round": 3,
+            "matching_slot_offsets": [
+              34,
+              35,
+              36,
+              37,
+              38
+            ]
+          }
+        ]
+      },
+      "ram": {
+        "rate_mhz": "66.667",
+        "tap": 0,
+        "mode": "ram",
+        "common_offsets": [
+          34,
+          35,
+          36,
+          37,
+          38
+        ],
+        "sample_offset": 36,
+        "tdi_advance_slots": 0,
+        "idle_cycles": 86,
+        "before_dmcontrol": "0x0",
+        "dmstatus": "0x4c0ca2",
+        "sba_initial": {
+          "sbcs": "0x20040407",
+          "sbaddress": "0x0"
+        },
+        "address": "0x105fff0",
+        "original": "0xc1e332ab",
+        "verified_pattern": "0x5a17c3e9",
+        "ram_restored": true,
+        "passed": true,
+        "scan_count": 48
+      }
+    },
+    {
+      "nominal_tck_hz": 80000000,
+      "idcode_runs": {
+        "nominal_tck_hz": 80000000,
+        "target_kind": "idcode",
+        "io_delay_tap": 8,
+        "tdi_advance_slots": 1,
+        "cable_serial": "210299008529",
+        "rounds": [
+          {
+            "round": 1,
+            "matching_slot_offsets": [
+              33,
+              34,
+              35,
+              36
+            ]
+          },
+          {
+            "round": 2,
+            "matching_slot_offsets": [
+              33,
+              34,
+              35,
+              36
+            ]
+          },
+          {
+            "round": 3,
+            "matching_slot_offsets": [
+              33,
+              34,
+              35,
+              36
+            ]
+          },
+          {
+            "round": 4,
+            "matching_slot_offsets": [
+              33,
+              34,
+              35,
+              36
+            ]
+          },
+          {
+            "round": 5,
+            "matching_slot_offsets": [
+              33,
+              34,
+              35,
+              36
+            ]
+          },
+          {
+            "round": 6,
+            "matching_slot_offsets": [
+              33,
+              34,
+              35,
+              36
+            ]
+          },
+          {
+            "round": 7,
+            "matching_slot_offsets": [
+              33,
+              34,
+              35,
+              36
+            ]
+          },
+          {
+            "round": 8,
+            "matching_slot_offsets": [
+              33,
+              34,
+              35,
+              36
+            ]
+          },
+          {
+            "round": 9,
+            "matching_slot_offsets": [
+              33,
+              34,
+              35,
+              36
+            ]
+          },
+          {
+            "round": 10,
+            "matching_slot_offsets": [
+              33,
+              34,
+              35,
+              36
+            ]
+          }
+        ]
+      },
+      "ram": {
+        "rate_mhz": "80",
+        "tap": 8,
+        "mode": "ram",
+        "common_offsets": [
+          33,
+          34,
+          35,
+          36
+        ],
+        "sample_offset": 35,
+        "tdi_advance_slots": 1,
+        "idle_cycles": 103,
+        "before_dmcontrol": "0x0",
+        "dmstatus": "0x4c0ca2",
+        "sba_initial": {
+          "sbcs": "0x20040407",
+          "sbaddress": "0x0"
+        },
+        "address": "0x105fff0",
+        "original": "0xc1e332ab",
+        "verified_pattern": "0x5a17c3e9",
+        "ram_restored": true,
+        "passed": true,
+        "scan_count": 48
+      }
+    },
+    {
+      "nominal_tck_hz": 100000000,
+      "idcode_runs": {
+        "nominal_tck_hz": 100000000,
+        "target_kind": "idcode",
+        "io_delay_tap": 8,
+        "tdi_advance_slots": 1,
+        "cable_serial": "210299008529",
+        "rounds": [
+          {
+            "round": 1,
+            "matching_slot_offsets": [
+              35,
+              36,
+              37,
+              38
+            ]
+          },
+          {
+            "round": 2,
+            "matching_slot_offsets": [
+              35,
+              36,
+              37,
+              38
+            ]
+          },
+          {
+            "round": 3,
+            "matching_slot_offsets": [
+              35,
+              36,
+              37,
+              38
+            ]
+          },
+          {
+            "round": 4,
+            "matching_slot_offsets": [
+              35,
+              36,
+              37,
+              38
+            ]
+          },
+          {
+            "round": 5,
+            "matching_slot_offsets": [
+              35,
+              36,
+              37,
+              38
+            ]
+          },
+          {
+            "round": 6,
+            "matching_slot_offsets": [
+              35,
+              36,
+              37,
+              38
+            ]
+          },
+          {
+            "round": 7,
+            "matching_slot_offsets": [
+              35,
+              36,
+              37,
+              38
+            ]
+          },
+          {
+            "round": 8,
+            "matching_slot_offsets": [
+              35,
+              36,
+              37,
+              38
+            ]
+          },
+          {
+            "round": 9,
+            "matching_slot_offsets": [
+              35,
+              36,
+              37,
+              38
+            ]
+          },
+          {
+            "round": 10,
+            "matching_slot_offsets": [
+              35,
+              36,
+              37,
+              38
+            ]
+          }
+        ]
+      },
+      "ram": {
+        "rate_mhz": "100",
+        "tap": 16,
+        "mode": "ram",
+        "common_offsets": [
+          35,
+          36,
+          37,
+          38
+        ],
+        "sample_offset": 36,
+        "tdi_advance_slots": 1,
+        "idle_cycles": 192,
+        "before_dmcontrol": "0x0",
+        "dmstatus": "0x4c0ca2",
+        "sba_initial": {
+          "sbcs": "0x20040407",
+          "sbaddress": "0x0"
+        },
+        "address": "0x105fff0",
+        "original": "0xc1e332ab",
+        "verified_pattern": "0x5a17c3e9",
+        "ram_restored": true,
+        "passed": true,
+        "scan_count": 48
+      }
+    },
+    {
+      "nominal_tck_hz": 160000000,
+      "idcode_runs": {
+        "nominal_tck_hz": 160000000,
+        "target_kind": "idcode",
+        "io_delay_tap": 0,
+        "cable_serial": "210299008529",
+        "rounds": [
+          {
+            "round": 1,
+            "matching_slot_offsets": [
+              36,
+              37
+            ]
+          },
+          {
+            "round": 2,
+            "matching_slot_offsets": [
+              36,
+              37
+            ]
+          },
+          {
+            "round": 3,
+            "matching_slot_offsets": [
+              36,
+              37
+            ]
+          }
+        ]
+      },
+      "ram": {
+        "rate_mhz": "160",
+        "tap": 8,
+        "mode": "ram",
+        "common_offsets": [
+          36,
+          37
+        ],
+        "sample_offset": 37,
+        "tdi_advance_slots": 0,
+        "idle_cycles": 205,
+        "before_dmcontrol": "0x0",
+        "dmstatus": "0x4c0ca2",
+        "sba_initial": {
+          "sbcs": "0x20040407",
+          "sbaddress": "0x0"
+        },
+        "address": "0x105fff0",
+        "original": "0xc1e332ab",
+        "verified_pattern": "0x5a17c3e9",
+        "ram_restored": true,
+        "passed": true,
+        "scan_count": 48
+      }
+    },
+    {
+      "nominal_tck_hz": 200000000,
+      "idcode_runs": {
+        "nominal_tck_hz": 200000000,
+        "target_kind": "idcode",
+        "io_delay_tap": 8,
+        "tdi_advance_slots": 0,
+        "cable_serial": "210299008529",
+        "rounds": [
+          {
+            "round": 1,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 2,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 3,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 4,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 5,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 6,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 7,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 8,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 9,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 10,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 11,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 12,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 13,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 14,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 15,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 16,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 17,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 18,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 19,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 20,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 21,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 22,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 23,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 24,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 25,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 26,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 27,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 28,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 29,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 30,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 31,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 32,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 33,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 34,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 35,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 36,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 37,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 38,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 39,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 40,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 41,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 42,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 43,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 44,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 45,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 46,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 47,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 48,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 49,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 50,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 51,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 52,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 53,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 54,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 55,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 56,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 57,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 58,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 59,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 60,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 61,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 62,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 63,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 64,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 65,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 66,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 67,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 68,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 69,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 70,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 71,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 72,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 73,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 74,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 75,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 76,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 77,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 78,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 79,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 80,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 81,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 82,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 83,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 84,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 85,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 86,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 87,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 88,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 89,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 90,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 91,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 92,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 93,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 94,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 95,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 96,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 97,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 98,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 99,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          },
+          {
+            "round": 100,
+            "matching_slot_offsets": [
+              38,
+              39
+            ]
+          }
+        ]
+      },
+      "ram": {
+        "rate_mhz": "200",
+        "tap": 8,
+        "mode": "ram",
+        "common_offsets": [
+          38,
+          39
+        ],
+        "tdi_advance_slots": 0,
+        "idle_cycles": 256,
+        "before_dmcontrol": "0x0",
+        "dmstatus": "0x4c0ca2",
+        "sba_initial": {
+          "sbcs": "0x20040407",
+          "sbaddress": "0x0"
+        },
+        "address": "0x105fff0",
+        "original": "0xc1e332ab",
+        "verified_pattern": "0x5a17c3e9",
+        "ram_restored": true,
+        "passed": true,
+        "scan_count": 48,
+        "sample_offset": 39
+      }
+    }
+  ],
+  "physical_clock_basis": "SLCR/AP0 divider readback and programmed MMCM/serializer slots. Bench scope frequency and pulse width not measured.",
+  "final_probe": "Experimental reset-release pair at nominal 50 MHz; IDCODE returned correctly in 3 final rounds.",
+  "scope": "One attached HPM5301EVKLite, 4 bytes of ILM via SBA, restoration verified at each tested working point. No flash/QSPI write or erase."
+}
