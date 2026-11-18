@@ -67,7 +67,13 @@ module tb_swd200;
 
     realtime last_rise = 0, last_fall = 0;
     integer adjacent = 0;
+    bit timing_batch = 0;
+    integer timed_edges, ack_gaps, request_gaps, wait_start;
+    realtime batch_start, prev_timed_edge, ack_gap_ns, request_gap_ns;
+    integer total_edges [0:1], total_ack_gaps [0:1], total_request_gaps [0:1], total_waits [0:1];
+    realtime total_ack_ns [0:1], total_request_ns [0:1], total_control_ns [0:1];
     always @(posedge swclk) if (!word_reset) begin
+        realtime extra_ns;
         if (last_fall != 0 && $realtime - last_fall < clock_period / 2.0 - 0.004)
             $fatal(1, "short SWCLK low %.3f ps", 1000.0 * ($realtime - last_fall));
         if (last_rise != 0 && $realtime - last_rise < clock_period - 0.004)
@@ -75,6 +81,20 @@ module tb_swd200;
         if (last_rise != 0 && $realtime - last_rise < clock_period + 0.004) adjacent++;
         last_rise = $realtime;
         tck_count++;
+        if (timing_batch) begin
+            extra_ns = $realtime - prev_timed_edge - clock_period;
+            if (timed_edges && extra_ns > 0.004) begin
+                if (regs.batch.link.state == regs.batch.link.HEADER) begin
+                    request_gaps++;
+                    request_gap_ns += extra_ns;
+                end else begin
+                    ack_gaps++;
+                    ack_gap_ns += extra_ns;
+                end
+            end
+            timed_edges++;
+            prev_timed_edge = $realtime;
+        end
         if (trace && tck_count > 148 && tck_count < 212)
             $display("PIN bit=%0d t=%0.3f T=%b bus=%b targ=%b/%b", tck_count,
                      $realtime, phy.serial_release, swdio, returned_drive, returned_data);
@@ -106,7 +126,7 @@ module tb_swd200;
         if (bresp != 0) $fatal(1, "AXI write rejected addr=%h", address);
     endtask
 
-    task rd(input [13:0] address, output [31:0] data);
+    task rd(input [13:0] address, output [31:0] data, input [1:0] expected_response = 0);
         @(negedge axi_clk);
         araddr = address; arvalid = 1;
         @(posedge axi_clk);
@@ -114,7 +134,7 @@ module tb_swd200;
         @(negedge axi_clk);
         arvalid = 0;
         while (!rvalid) @(negedge axi_clk);
-        if (rresp != 0) $fatal(1, "AXI read rejected addr=%h", address);
+        if (rresp != expected_response) $fatal(1, "AXI read addr=%h resp=%h", address, rresp);
         data = rdata;
     endtask
 
@@ -147,6 +167,27 @@ module tb_swd200;
         end
     endtask
 
+    task timed_batch(input integer count, input integer direction, output realtime elapsed);
+        timed_edges = 0;
+        ack_gaps = 0;
+        request_gaps = 0;
+        wait_start = waits;
+        ack_gap_ns = 0;
+        request_gap_ns = 0;
+        batch_start = $realtime;
+        timing_batch = 1;
+        good_batch(count);
+        timing_batch = 0;
+        elapsed = $realtime - batch_start;
+        total_edges[direction] += timed_edges;
+        total_ack_gaps[direction] += ack_gaps;
+        total_request_gaps[direction] += request_gaps;
+        total_waits[direction] += waits - wait_start;
+        total_ack_ns[direction] += ack_gap_ns;
+        total_request_ns[direction] += request_gap_ns;
+        total_control_ns[direction] += elapsed - timed_edges * clock_period - ack_gap_ns - request_gap_ns;
+    endtask
+
     task xfer(input [3:0] req, input [31:0] data, output [31:0] value);
         put(0, {1'b0, req}, data);
         good_batch(1);
@@ -159,7 +200,7 @@ module tb_swd200;
 
     reg [31:0] value, status;
     integer index, round_no, p;
-    realtime start_time, write_ns, read_ns;
+    realtime batch_ns, write_ns, read_ns;
     initial begin
         ignored = $value$plusargs("mhz=%d", mhz);
         ignored = $value$plusargs("return_ns=%f", return_ns);
@@ -203,14 +244,22 @@ module tb_swd200;
 
         write_ns = 0;
         read_ns = 0;
+        for (p = 0; p < 2; p++) begin
+            total_edges[p] = 0;
+            total_ack_gaps[p] = 0;
+            total_request_gaps[p] = 0;
+            total_waits[p] = 0;
+            total_ack_ns[p] = 0;
+            total_request_ns[p] = 0;
+            total_control_ns[p] = 0;
+        end
         for (round_no = 0; round_no < rounds; round_no++) begin
             put(0, 5'h5, 32'h60000000);
             for (index = 0; index < words; index++)
                 put(index+1, 5'hd, pattern(index, round_no));
             put(words+1, 5'he, 0);
-            start_time = $realtime;
-            good_batch(words+2);
-            write_ns += $realtime - start_time;
+            timed_batch(words+2, 0, batch_ns);
+            write_ns += batch_ns;
             for (index = 0; index < words; index++)
                 if (target.u_sys.mem[index] !== pattern(index, round_no))
                     $fatal(1, "target SRAM write index=%0d stored=%h", index, target.u_sys.mem[index]);
@@ -219,9 +268,8 @@ module tb_swd200;
             // The response to the first posted AP read is stale.
             for (index = 0; index < words; index++) put(index+1, 5'hf, 0);
             put(words+1, 5'he, 0);
-            start_time = $realtime;
-            good_batch(words+2);
-            read_ns += $realtime - start_time;
+            timed_batch(words+2, 1, batch_ns);
+            read_ns += batch_ns;
             for (index = 0; index < words; index++) begin
                 rd(14'h2000 + (index+2)*4, value);
                 if (value !== pattern(index, round_no))
@@ -240,9 +288,15 @@ module tb_swd200;
         parity_edge = -1;
         if (status[15:0] !== 16'h6400 || tck_count - p != 46 + idle_arg)
             $fatal(1, "parity fence summary=%h edges=%0d", status, tck_count - p);
+        rd(14'h2000, value, 2'b10); // A rejected command has no readable result.
         xfer(4'h2, 0, value);
         if (value !== 32'h2ba01477) $fatal(1, "DPIDR after parity fault %h", value);
         if (adjacent < 128) $fatal(1, "missing continuous SWCLK pulses");
+        for (p = 0; p < 2; p++)
+            $display("SWD200_COST dir=%0s batch_ns=%.3f edges=%0d wire_ns=%.3f ack_gaps=%0d ack_gap_ns=%.3f request_gaps=%0d request_gap_ns=%.3f control_ns=%.3f waits=%0d",
+                     p ? "read" : "write", p ? read_ns : write_ns, total_edges[p],
+                     total_edges[p] * clock_period, total_ack_gaps[p], total_ack_ns[p],
+                     total_request_gaps[p], total_request_ns[p], total_control_ns[p], total_waits[p]);
         $display("SWD200_PASS mhz=%0d words=%0d rounds=%0d reads_MBps=%.4f writes_MBps=%.4f waits=%0d edges=%0d",
                  mhz, words, rounds, 4000.0*words*rounds/read_ns, 4000.0*words*rounds/write_ns, waits, tck_count);
         $finish;

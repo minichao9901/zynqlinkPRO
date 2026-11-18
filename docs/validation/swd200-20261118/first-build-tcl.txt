@@ -1,0 +1,18 @@
+"package require msgcat"
+    invoked from within
+"interp eval ::ipgui_xilinx_com_module_ref_swd200_regs_1_0 [list package require msgcat]"
+ERROR: [IP_Flow 19-883] Failed to create TCL scope '::ipgui_xilinx_com_module_ref_swd200_regs_1_0' for IP GUI
+ERROR: [IP_Flow 19-3428] Failed to create Customization object swd200_bd_regs_0
+CRITICAL WARNING: [IP_Flow 19-973] Failed to create IP instance 'swd200_bd_regs_0'. Error during customization.
+ERROR: [BD 41-1712] Create IP failed with errors
+ERROR: [BD 41-1699] Unable to add reference type cell for reference-module 'swd200_regs'
+ERROR: [BD 5-7] Error: running create_bd_cell  -type module -reference swd200_regs -name regs .
+couldn't read file "E:/Xilinx/Vivado/2018.3/tps/tcl/tcl8.5/tm.tcl": no such file or directory
+    while executing
+"package require msgcat"
+    invoked from within
+"interp eval ::ipgui_xilinx_com_module_ref_swd200_regs_1_0 [list package require msgcat]"
+    invoked from within
+"create_bd_cell -type module -reference swd200_regs regs"
+    (file "E:\zynqlinkPRO-swd200\fpga\experiments\swd200\build.tcl" line 40)
+INFO: [Common 17-206] Exiting Vivado at Wed Nov 18 20:39:42 2026...

@@ -16,6 +16,7 @@ SIM = OUT / "sim"
 XBIN = VIVADO / "bin/unwrapped/win64.o"
 SNAPSHOT = "swd200_sim"
 SUCCESS = re.compile(r"^SWD200_PASS .+", re.MULTILINE)
+COST = re.compile(r"^SWD200_COST .+", re.MULTILINE)
 FAILURE = re.compile(r"^\s*(?:Fatal|Error)\b.*", re.MULTILINE | re.IGNORECASE)
 RATES = (50, 100, 160, 200)
 GCC = Path("E:/Xilinx/SDK/2018.3/gnu/aarch32/nt/gcc-arm-none-eabi/bin/arm-none-eabi-gcc.exe")
@@ -77,28 +78,38 @@ def simulate(mhz, return_ns, target_ns, ack, data, tap, idle, words, rounds, tra
                   log=log.name, result=(failure or success).group(0).strip()
                   if failure or success else f"xsim status {rc}")
     print(f"{key} {result['result']}", flush=True)
+    if result["passed"]:
+        result["cost"] = COST.findall(output)
+        if trace:
+            print("\n".join(result["cost"]), flush=True)
     return result
 
 
 def matrix():
-    nominal = [simulate(mhz, 0.8, 10.0, 12, 12, 0, 2, 256, 3) for mhz in RATES]
+    nominal = [simulate(mhz, 0.8, 10.0, 12, 12, 0, 2, 256, 3) for mhz in reversed(RATES)]
+    boundary = simulate(200, 4.0, 10.0, 13, 13, 0, 2, 256, 3)
     margin = [simulate(200, delay, 10.0, sample, sample, 0, 2, 32, 2)
               for delay in (0.0, 0.8, 1.6, 2.0, 2.4, 2.8, 3.2, 4.0)
               for sample in (12, 13, 14)]
     core = [simulate(200, 0.8, period, 12, 12, 0, 2, 256, 3)
             for period in (8.0, 12.5, 20.0)]
     report = dict(snapshot=(SIM / "snapshot.sha256").read_text().strip(), nominal=nominal,
-                  margin=margin, target_clock=core)
+                  boundary=boundary, margin=margin, target_clock=core)
     (SIM / "matrix.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
-    return 0 if all(row["passed"] for row in nominal) else 1
+    expected_pass = [*nominal, boundary, *core, *(row for row in margin if row["ack"] == 13)]
+    return 0 if all(row["passed"] for row in expected_pass) else 1
 
 
 def build(gcc):
     work = OUT / "fpga"
     work.mkdir(parents=True, exist_ok=True)
+    temp = work / "tmp"
+    temp.mkdir(exist_ok=True)
+    env = environment()
+    env.update(TEMP=str(temp), TMP=str(temp))
     checked([VIVADO / "bin/vivado.bat", "-mode", "batch", "-source", RTL / "build.tcl",
              "-log", work / "vivado.log", "-journal", work / "vivado.jou"],
-            work, work / "build.log")
+            work, work / "build.log", env=env)
     firmware = ROOT / "firmware/swd200"
     checked([gcc, "-mcpu=cortex-a9", "-marm", "-Os", "-g", "-ffreestanding", "-nostdlib",
              "-Wall", "-Wextra", "-Werror", "-Wl,--build-id=none",

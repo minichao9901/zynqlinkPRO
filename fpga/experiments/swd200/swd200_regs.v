@@ -39,7 +39,7 @@ module swd200_regs (
     reg [17:0] timing = {4'd2, 6'd12, 6'd12, 2'd2};
     reg [31:0] summary = 0;
     (* ASYNC_REG = "TRUE" *) reg [1:0] ready_sync = 0, done_sync = 0, delay_sync = 0;
-    wire batch_done, write_result;
+    wire batch_done, batch_failed, write_result;
     wire [9:0] cmd_addr, completed;
     wire [8:0] result_addr;
     wire [31:0] result_word;
@@ -56,7 +56,7 @@ module swd200_regs (
     wire write_command = write_pending && aligned_write && idle && write_addr[13:12] == 1;
     wire read_pending = s_axi_arvalid && s_axi_arready;
     wire read_result = read_pending && s_axi_araddr[1:0] == 0 && result_valid &&
-                       s_axi_araddr[13:11] == 3'b100;
+                       s_axi_araddr[13:11] == 3'b100 && {1'b0, s_axi_araddr[10:2]} < summary[9:0];
     assign s_axi_awready = !have_addr && !s_axi_bvalid;
     assign s_axi_wready = !have_data && !s_axi_bvalid;
     assign s_axi_arready = !reading_results && !s_axi_rvalid;
@@ -75,7 +75,8 @@ module swd200_regs (
         .rate(timing[1:0]), .ack_sample(timing[7:2]), .data_sample(timing[13:8]),
         .idle_cycles(timing[17:14]), .command_addr(cmd_addr), .command_word(cmd_q),
         .write_result(write_result), .result_addr(result_addr), .result_word(result_word),
-        .completed(completed), .error(error), .wait_retries(wait_retries), .done(batch_done),
+        .completed(completed), .error(error), .failed(batch_failed),
+        .wait_retries(wait_retries), .done(batch_done),
         .rx_slots(rx_slots), .clk_slots(clk_slots), .data_slots(data_slots), .release_slots(release_slots)
     );
 
@@ -103,7 +104,7 @@ module swd200_regs (
             delay_sync <= {delay_sync[0], delay_ready};
             delay_load <= 0;
             if (run && (!ready || done_sync[1])) begin
-                summary <= ready ? {wait_retries, 1'b0, completed != count, error, completed}
+                summary <= ready ? {wait_retries, 1'b0, batch_failed, error, completed}
                                  : 32'h0000c000;
                 result_valid <= 1;
                 run <= 0;

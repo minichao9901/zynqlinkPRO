@@ -15,6 +15,7 @@ module swd200_batch (
     output wire [31:0] result_word,
     output reg [9:0] completed = 0,
     output reg [3:0] error = 0,
+    output reg failed = 0,
     output reg [15:0] wait_retries = 0,
     output reg done = 0,
     input wire [3:0] rx_slots,
@@ -25,17 +26,24 @@ module swd200_batch (
     (* ASYNC_REG = "TRUE" *) reg [1:0] request_sync = 0;
     reg [4:0] opcode;
     reg [5:0] attempts;
+    reg [9:0] active_count;
+    reg [1:0] active_rate;
+    reg [5:0] active_ack_sample, active_data_sample;
+    reg [3:0] active_idle;
     wire enter_swd = opcode[4];
     wire link_done, parity_error;
     wire [2:0] ack;
     wire good = enter_swd || (ack == 3'b001 && !parity_error);
     assign command_addr = {completed[8:0], state != FETCH_OP};
     assign result_addr = completed[8:0];
-    assign write_result = state == TRANSFER && link_done && good && !reset;
+    // The write enable depends only on word-domain registers. The host
+    // invalidates results if the PHY loses its clock during a batch.
+    assign write_result = state == TRANSFER && link_done && good;
 
     swd200_link link (
-        .clk(clk), .reset(reset), .rate(rate), .ack_sample(ack_sample), .data_sample(data_sample),
-        .idle_cycles(idle_cycles), .start(state == ISSUE), .enter_swd(enter_swd),
+        .clk(clk), .reset(reset), .rate(active_rate),
+        .ack_sample(active_ack_sample), .data_sample(active_data_sample),
+        .idle_cycles(active_idle), .start(state == ISSUE), .enter_swd(enter_swd),
         .request(opcode[3:0]), .write_data(command_word),
         .busy(), .done(link_done), .ack(ack), .parity_error(parity_error), .read_data(result_word),
         .rx_slots(rx_slots), .clk_slots(clk_slots), .data_slots(data_slots), .release_slots(release_slots)
@@ -50,8 +58,16 @@ module swd200_batch (
             request_sync <= {request_sync[0], run};
             case (state)
                 IDLE: if (request_sync[1]) begin
+                    // The AXI domain holds all descriptor fields stable
+                    // until the synchronized completion has returned.
+                    active_count <= count;
+                    active_rate <= rate;
+                    active_ack_sample <= ack_sample;
+                    active_data_sample <= data_sample;
+                    active_idle <= idle_cycles;
                     completed <= 0;
                     error <= 0;
+                    failed <= 0;
                     wait_retries <= 0;
                     state <= FETCH_OP;
                 end
@@ -65,13 +81,14 @@ module swd200_batch (
                 TRANSFER: if (link_done) begin
                     if (good) begin
                         completed <= completed + 10'd1;
-                        state <= completed + 10'd1 == count ? COMPLETE : FETCH_OP;
+                        state <= completed + 10'd1 == active_count ? COMPLETE : FETCH_OP;
                     end else if (ack == 3'b010 && attempts != 6'd63) begin
                         attempts <= attempts + 1'b1;
                         wait_retries <= wait_retries + 1'b1;
                         state <= ISSUE;
                     end else begin
                         error <= {parity_error, ack};
+                        failed <= 1;
                         state <= COMPLETE;
                     end
                 end

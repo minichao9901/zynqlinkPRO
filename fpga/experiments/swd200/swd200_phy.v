@@ -81,7 +81,7 @@ module swd200_phy (
         .IOBDELAY("IFD"), .NUM_CE(1)
     ) data_in (
         .D(1'b0), .DDLY(swdio_delayed), .CLK(serial_clk), .CLKB(~serial_clk),
-        .CLKDIV(word_clk), .RST(word_reset), .CE1(1'b1), .CE2(1'b0),
+        .CLKDIV(word_clk), .RST(word_reset), .CE1(1'b1),
         .Q1(rx_slots[3]), .Q2(rx_slots[2]), .Q3(rx_slots[1]), .Q4(rx_slots[0]),
         .BITSLIP(1'b0), .CLKDIVP(1'b0), .OCLK(1'b0), .OCLKB(1'b0),
         .DYNCLKDIVSEL(1'b0), .DYNCLKSEL(1'b0), .OFB(1'b0),
