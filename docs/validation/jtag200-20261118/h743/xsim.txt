@@ -1,0 +1,13 @@
+J200_PROFILE 0 period=20.000 ns pulses=312
+J200_PROFILE 1 period=15.000 ns pulses=312
+J200_PROFILE 2 period=12.500 ns pulses=312
+J200_PROFILE 3 period=10.000 ns pulses=312
+J200_PROFILE 4 period=6.250 ns pulses=312
+J200_PROFILE 5 period=5.000 ns pulses=312
+J200_PIPELINE_PASS half=4 idle=64 words=128 bus_fault=0
+J200_PIPELINE_PASS half=2 idle=64 words=128 bus_fault=0
+J200_PIPELINE_PASS half=1 idle=256 words=128 bus_fault=0
+J200_PIPELINE_PASS half=1 idle=256 words=32 bus_fault=1
+J200_ARM_PASS half=1 idle=5 words=128 read_MBps=8.360 write_MBps=8.356
+J200_ARM_PASS half=2 idle=5 words=128 read_MBps=5.618 write_MBps=5.615
+JTAG200_SIM_PASS

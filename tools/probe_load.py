@@ -57,16 +57,28 @@ puts [format "LOAD_STATE LEVEL_SHIFTERS %08x" $isolation]
 puts [format "LOAD_STATE FPGA_RESET %08x" $reset]
 puts [format "LOAD_STATE BOOT_MODE %08x" [expr {[physrd -force -value 0xf800025c] & 15}]]
 if {($isolation & 15) == 15 && ($reset & 15) == 0} {
-    set features [physrd -force -value 0x40030048]
-    foreach {name addr} {CAPTURE 0x40030008 SWD 0x40010004} {
-        puts [format "LOAD_STATE %s %08x" $name [physrd -force -value $addr]]
-    }
-    if {[physrd -force -value 0x4001004c] & 4} {
-        puts [format "LOAD_STATE PACKET %08x" [physrd -force -value 0x42020004]]
-    }
-    if {$features & 0x100} {
-        puts [format "LOAD_STATE DDR %08x" [physrd -force -value 0x40040008]]
-        puts [format "LOAD_STATE CDMA %08x" [physrd -force -value 0x40020004]]
+    if {[physrd -force -value 0x2ff00] == 0x4a323030 &&
+        ![catch {physrd -force -value 0x40000000} jtag200] && $jtag200 == 0x4a323030} {
+        puts [format "LOAD_STATE JTAG200 %08x" [physrd -force -value 0x40000004]]
+        if {[physrd -force -value 0x2ff04] != [physrd -force -value 0x2ff10]} {
+            error "JTAG200 clock request still active"
+        }
+        if {[physrd -force -value 0x2ff40] == 0x4a424c4b &&
+            [physrd -force -value 0x2ff44] != [physrd -force -value 0x2ff48]} {
+            error "JTAG200 block benchmark still active"
+        }
+    } else {
+        set features [physrd -force -value 0x40030048]
+        foreach {name addr} {CAPTURE 0x40030008 SWD 0x40010004} {
+            puts [format "LOAD_STATE %s %08x" $name [physrd -force -value $addr]]
+        }
+        if {[physrd -force -value 0x4001004c] & 4} {
+            puts [format "LOAD_STATE PACKET %08x" [physrd -force -value 0x42020004]]
+        }
+        if {$features & 0x100} {
+            puts [format "LOAD_STATE DDR %08x" [physrd -force -value 0x40040008]]
+            puts [format "LOAD_STATE CDMA %08x" [physrd -force -value 0x40020004]]
+        }
     }
 }
 ''')
@@ -74,10 +86,13 @@ if {($isolation & 15) == 15 && ($reset & 15) == 0} {
     if not {'LEVEL_SHIFTERS', 'FPGA_RESET'} <= values.keys():
         raise RuntimeError('未读取到探针 PS/PL 状态')
     if values['LEVEL_SHIFTERS'] & 15 == 15 and values['FPGA_RESET'] & 15 == 0:
-        if not {'CAPTURE', 'SWD'} <= values.keys():
+        if 'JTAG200' in values:
+            busy = values['JTAG200'] & 31 != 5
+        elif not {'CAPTURE', 'SWD'} <= values.keys():
             raise RuntimeError('未读取到已启用 PL 的引擎状态')
-        busy = (values['CAPTURE'] & 1 or values['SWD'] & 1 or values.get('PACKET', 0) & 15
-                or values.get('DDR', 0) & 33 or not values.get('CDMA', 2) & 2)
+        else:
+            busy = (values['CAPTURE'] & 1 or values['SWD'] & 1 or values.get('PACKET', 0) & 15
+                    or values.get('DDR', 0) & 33 or not values.get('CDMA', 2) & 2)
         if busy:
             raise RuntimeError('探针的采集、调试或 DMA 引擎仍在运行')
     return {key: hex(value) for key, value in values.items()}

@@ -51,3 +51,14 @@ class ProbeLoadTests(unittest.TestCase):
         session = Mock()
         session.run.return_value = 'LOAD_STATE LEVEL_SHIFTERS 00000000\nLOAD_STATE FPGA_RESET 0000000f\n'
         self.assertEqual(probe_load.probe_state(session), {'LEVEL_SHIFTERS': '0x0', 'FPGA_RESET': '0xf'})
+
+    def test_pure_jtag_probe_load_requires_idle_serializer(self):
+        session = Mock()
+        header = 'LOAD_STATE LEVEL_SHIFTERS 0000000f\nLOAD_STATE FPGA_RESET 00000000\n'
+        session.run.return_value = header + 'LOAD_STATE JTAG200 00000005\n'
+        self.assertEqual(probe_load.probe_state(session)['JTAG200'], '0x5')
+        for state in (0x0D, 0x0F, 0x15):
+            with self.subTest(state=state):
+                session.run.return_value = header + f'LOAD_STATE JTAG200 {state:08x}\n'
+                with self.assertRaisesRegex(RuntimeError, 'DMA'):
+                    probe_load.probe_state(session)
