@@ -85,4 +85,8 @@ RAM 测试固定为 HPM5301 ILM 的 SBA 系统地址 0x0105FFF0，双读备份 4
 - [最终硬件结果和失败对照](hpm5301-reset-release-hardware.json)
 - [复位释放版仿真与时序](reset-release-offline-evidence.txt)
 
+## 六档 RAM 压力测试
+
+已记录六档实测吞吐、100/200 MHz 长窗对照及失败后的恢复。见[HPM5301 RAM 压力报告](ram-stress/README.md)。
+
 固定 EXE、远端 main、Pages、Release 和 QSPI 不属于本轮交付。

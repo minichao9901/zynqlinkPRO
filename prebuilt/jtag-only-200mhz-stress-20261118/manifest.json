@@ -1,0 +1,96 @@
+{
+  "name": "J7 JTAG stress fixture",
+  "bit_source_revision": "44671aa661e143b5665fa0c3d4d4b36c714bd970",
+  "firmware_source_revision": "f92e64aebb95888f220b93a4e2220208ac6bc8de",
+  "flags": [
+    "-mcpu=cortex-a9",
+    "-marm",
+    "-O3",
+    "-g",
+    "-ffreestanding",
+    "-nostdlib",
+    "-DJTAG200_STRESS",
+    "-Wall",
+    "-Wextra"
+  ],
+  "timing": {
+    "FCLK0_Hz": 133333333,
+    "FCLK1_max_Hz": 50000000,
+    "serializer_max_Hz": 200000000,
+    "setup_slack_ns": 2.482,
+    "hold_slack_ns": 0.06,
+    "min_pulse_width_slack_ns": 0.264,
+    "scope": "Internal routed clocks; external target I/O delays to be qualified on hardware."
+  },
+  "nominal_tck_hz": [
+    50000000,
+    66666667,
+    80000000,
+    100000000,
+    160000000,
+    200000000
+  ],
+  "sha256": {
+    "probe.bit": "78b5e4d2b71c4b816c4e875285f0b09588650214693c27d17e0d6fc48daf407d",
+    "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36",
+    "application.elf": "fdce894b04e2b56cc092459ca7aea4bdd8329f2410fe90a4cde75757f5c6bdb0"
+  },
+  "hardware_evidence": "docs/validation/jtag200-20261118/ram-stress/evidence.json",
+  "host_tool_revision": "d31f55007a78d010a887271a3f05694fe1330b9a",
+  "hardware_summary": [
+    {
+      "rate_MHz": "50",
+      "tap": 0,
+      "TDO_slot": 36,
+      "idle": 64,
+      "passed_windows": 3,
+      "planned_windows": 3,
+      "seconds_per_window": 10
+    },
+    {
+      "rate_MHz": "66.667",
+      "tap": 0,
+      "TDO_slot": 36,
+      "idle": 86,
+      "passed_windows": 3,
+      "planned_windows": 3,
+      "seconds_per_window": 10
+    },
+    {
+      "rate_MHz": "80",
+      "tap": 8,
+      "TDO_slot": 35,
+      "idle": 103,
+      "passed_windows": 3,
+      "planned_windows": 3,
+      "seconds_per_window": 10
+    },
+    {
+      "rate_MHz": "100",
+      "tap": 16,
+      "TDO_slot": 37,
+      "idle": 384,
+      "passed_windows": 2,
+      "planned_windows": 3,
+      "seconds_per_window": 60
+    },
+    {
+      "rate_MHz": "160",
+      "tap": 8,
+      "TDO_slot": 37,
+      "idle": 205,
+      "passed_windows": 3,
+      "planned_windows": 3,
+      "seconds_per_window": 10
+    },
+    {
+      "rate_MHz": "200",
+      "tap": 24,
+      "TDO_slot": 39,
+      "idle": 256,
+      "passed_windows": 3,
+      "planned_windows": 3,
+      "seconds_per_window": 60
+    }
+  ]
+}

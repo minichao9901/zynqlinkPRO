@@ -1,0 +1,2653 @@
+{
+  "date": "2026-11-18",
+  "probe_load": {
+    "pair": {
+      "probe.bit": "78b5e4d2b71c4b816c4e875285f0b09588650214693c27d17e0d6fc48daf407d",
+      "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36",
+      "application.elf": "fdce894b04e2b56cc092459ca7aea4bdd8329f2410fe90a4cde75757f5c6bdb0"
+    },
+    "cable_serial": "210299008529",
+    "passed": true,
+    "live_code_sha256": "8f4870984b048c199996121f5202c513f23fdad2a9024ea4585af6c4b67e99c8",
+    "verified_code_bytes": 2356
+  },
+  "summary": [
+    {
+      "rate_MHz": "50",
+      "profile": "isolated_six",
+      "tap": 0,
+      "TDO_slot": 36,
+      "idle": 64,
+      "passed_windows": 3,
+      "planned_windows": 3,
+      "seconds_per_window": 10,
+      "failed_elapsed_s": [],
+      "read_bytes_in_passed_windows": 803328,
+      "write_bytes_in_passed_windows": 803328,
+      "read_kBps": 56.23860854004824,
+      "write_kBps": 53.27371726557688,
+      "combined_kBps": 53.470484545694916,
+      "waveform_fraction": 0.05657013035498287
+    },
+    {
+      "rate_MHz": "66.667",
+      "profile": "isolated_six",
+      "tap": 0,
+      "TDO_slot": 36,
+      "idle": 86,
+      "passed_windows": 3,
+      "planned_windows": 3,
+      "seconds_per_window": 10,
+      "failed_elapsed_s": [],
+      "read_bytes_in_passed_windows": 932352,
+      "write_bytes_in_passed_windows": 932352,
+      "read_kBps": 65.52864129820611,
+      "write_kBps": 62.083168158077434,
+      "combined_kBps": 62.09146395894484,
+      "waveform_fraction": 0.05599873676973821
+    },
+    {
+      "rate_MHz": "80",
+      "profile": "isolated_six",
+      "tap": 8,
+      "TDO_slot": 35,
+      "idle": 103,
+      "passed_windows": 3,
+      "planned_windows": 3,
+      "seconds_per_window": 10,
+      "failed_elapsed_s": [],
+      "read_bytes_in_passed_windows": 1179648,
+      "write_bytes_in_passed_windows": 1179648,
+      "read_kBps": 83.55535322924128,
+      "write_kBps": 79.15478164446895,
+      "combined_kBps": 78.55430709761292,
+      "waveform_fraction": 0.06585139078092567
+    },
+    {
+      "rate_MHz": "100",
+      "profile": "100_tms_advance_idle384_long",
+      "tap": 16,
+      "TDO_slot": 37,
+      "idle": 384,
+      "passed_windows": 2,
+      "planned_windows": 3,
+      "seconds_per_window": 60,
+      "failed_elapsed_s": [
+        52.400752558400754
+      ],
+      "read_bytes_in_passed_windows": 2510848,
+      "write_bytes_in_passed_windows": 2510848,
+      "read_kBps": 43.774390699122435,
+      "write_kBps": 41.467978624479834,
+      "combined_kBps": 41.838516460141754,
+      "waveform_fraction": 0.06192100435976209
+    },
+    {
+      "rate_MHz": "160",
+      "profile": "isolated_six",
+      "tap": 8,
+      "TDO_slot": 37,
+      "idle": 205,
+      "passed_windows": 3,
+      "planned_windows": 3,
+      "seconds_per_window": 10,
+      "failed_elapsed_s": [],
+      "read_bytes_in_passed_windows": 1479168,
+      "write_bytes_in_passed_windows": 1479168,
+      "read_kBps": 106.10717372139631,
+      "write_kBps": 100.52087376884477,
+      "combined_kBps": 98.56015641443106,
+      "waveform_fraction": 0.06267809242843132
+    },
+    {
+      "rate_MHz": "200",
+      "profile": "200_tap24_long",
+      "tap": 24,
+      "TDO_slot": 39,
+      "idle": 256,
+      "passed_windows": 3,
+      "planned_windows": 3,
+      "seconds_per_window": 60,
+      "failed_elapsed_s": [],
+      "read_bytes_in_passed_windows": 8165376,
+      "write_bytes_in_passed_windows": 8165376,
+      "read_kBps": 97.00948124675406,
+      "write_kBps": 91.8985151277211,
+      "combined_kBps": 90.71444924669424,
+      "waveform_fraction": 0.052968736511769296
+    }
+  ],
+  "comparisons": {
+    "AP0_pilot": {
+      "cable": "210299008529",
+      "base": "0x105f000",
+      "bytes": 1024,
+      "block_bytes": 128,
+      "rates": [
+        {
+          "rate": "50",
+          "round": 1,
+          "planned_seconds": 1,
+          "elapsed_s": 4.220363000000361,
+          "verified_blocks": 8,
+          "bytes": {
+            "write": 1024,
+            "read": 1024
+          },
+          "direction_seconds": {
+            "write": 2.5390760998707265,
+            "read": 1.681230100162793
+          },
+          "MBps": {
+            "write": 0.0004032963013799136,
+            "read": 0.0006090778412192634
+          },
+          "combined_MBps": 0.0004852663147695648,
+          "waveform_frames": 168,
+          "calculated_waveform_seconds": 0.0014872000000000127
+        }
+      ],
+      "probe": {
+        "executable_bytes": 592,
+        "pair_sha256": {
+          "probe.bit": "78b5e4d2b71c4b816c4e875285f0b09588650214693c27d17e0d6fc48daf407d",
+          "application.elf": "4835d5fb10c88c329355f0a1e950706f5d38b97a083e5637f81c8bf40b519345",
+          "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+        }
+      },
+      "debug_before": {
+        "dmcontrol": 0,
+        "dmstatus": 4983970,
+        "sbcs": 537134087,
+        "sbaddress": 0
+      },
+      "backup_sha256": "fa71add868345c2b097971fb0d535f11295d4e479e7db84e22ffb13d32e40f10",
+      "restored_sha256": "fa71add868345c2b097971fb0d535f11295d4e479e7db84e22ffb13d32e40f10",
+      "restored_match": true,
+      "guards_match": true,
+      "debug_state_restored": true
+    },
+    "probe_runner_pilot": {
+      "cable": "210299008529",
+      "base": "0x105f000",
+      "bytes": 1024,
+      "block_bytes": 128,
+      "rates": [
+        {
+          "rate": "50",
+          "round": 1,
+          "planned_seconds": 1,
+          "elapsed_s": 1.0449063280449062,
+          "host_elapsed_s": 1.5104479000438005,
+          "verified_blocks": 304,
+          "bytes": {
+            "read": 38912,
+            "write": 38912
+          },
+          "direction_seconds": {
+            "read": 0.5044718465044719,
+            "write": 0.5297212985297213
+          },
+          "MBps": {
+            "read": 0.07713413596739747,
+            "write": 0.07345749568311298
+          },
+          "combined_MBps": 0.07447940347496432,
+          "waveform_frames": 6080,
+          "calculated_waveform_seconds": 0.0561792
+        }
+      ],
+      "probe": {
+        "executable_bytes": 2356,
+        "pair_sha256": {
+          "probe.bit": "78b5e4d2b71c4b816c4e875285f0b09588650214693c27d17e0d6fc48daf407d",
+          "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36",
+          "application.elf": "fdce894b04e2b56cc092459ca7aea4bdd8329f2410fe90a4cde75757f5c6bdb0"
+        }
+      },
+      "transport": "Zynq OCM/GP0 local runner",
+      "debug_before": {
+        "dmcontrol": 0,
+        "dmstatus": 4983970,
+        "sbcs": 537134087,
+        "sbaddress": 0
+      },
+      "backup_sha256": "fa71add868345c2b097971fb0d535f11295d4e479e7db84e22ffb13d32e40f10",
+      "plan_sha256": {
+        "50": "95c5eed20038fffc2974dd4e4e5c446ec5d93e19f067ae8bac5e4ddac39575f6"
+      },
+      "restored_sha256": "fa71add868345c2b097971fb0d535f11295d4e479e7db84e22ffb13d32e40f10",
+      "restored_match": true,
+      "guards_match": true,
+      "debug_state_restored": true
+    },
+    "packed_six": {
+      "cable": "210299008529",
+      "base": "0x105f000",
+      "bytes": 1024,
+      "block_bytes": 128,
+      "rates": [
+        {
+          "rate": "50",
+          "round": 0,
+          "planned_seconds": 1,
+          "elapsed_s": 1.0449125650449125,
+          "host_elapsed_s": 1.5200769000221044,
+          "verified_blocks": 304,
+          "bytes": {
+            "read": 38912,
+            "write": 38912
+          },
+          "direction_seconds": {
+            "read": 0.5044736915044737,
+            "write": 0.5297265035297265
+          },
+          "MBps": {
+            "read": 0.07713385386650023,
+            "write": 0.07345677390260384
+          },
+          "combined_MBps": 0.0744789589133278,
+          "waveform_frames": 6080,
+          "calculated_waveform_seconds": 0.0561792
+        },
+        {
+          "rate": "50",
+          "round": 1,
+          "planned_seconds": 10,
+          "elapsed_s": 10.00903013200903,
+          "host_elapsed_s": 10.566997300018556,
+          "verified_blocks": 2912,
+          "bytes": {
+            "read": 372736,
+            "write": 372736
+          },
+          "direction_seconds": {
+            "read": 4.832357749832358,
+            "write": 5.0741234450741235
+          },
+          "MBps": {
+            "read": 0.07713336207629305,
+            "write": 0.07345820495594092
+          },
+          "combined_MBps": 0.07447994362770166,
+          "waveform_frames": 58240,
+          "calculated_waveform_seconds": 0.5381376
+        },
+        {
+          "rate": "50",
+          "round": 2,
+          "planned_seconds": 10,
+          "elapsed_s": 10.00890930100891,
+          "host_elapsed_s": 10.591547299991362,
+          "verified_blocks": 2912,
+          "bytes": {
+            "read": 372736,
+            "write": 372736
+          },
+          "direction_seconds": {
+            "read": 4.832334241832334,
+            "write": 5.074058957074059
+          },
+          "MBps": {
+            "read": 0.07713373730925227,
+            "write": 0.07345913856210633
+          },
+          "combined_MBps": 0.07448084277523183,
+          "waveform_frames": 58240,
+          "calculated_waveform_seconds": 0.5381376
+        },
+        {
+          "rate": "50",
+          "round": 3,
+          "planned_seconds": 10,
+          "elapsed_s": 10.008932887008934,
+          "host_elapsed_s": 10.564233599987347,
+          "verified_blocks": 2912,
+          "bytes": {
+            "read": 372736,
+            "write": 372736
+          },
+          "direction_seconds": {
+            "read": 4.8322935078322935,
+            "write": 5.074083968074084
+          },
+          "MBps": {
+            "read": 0.07713438751099469,
+            "write": 0.07345877646984929
+          },
+          "combined_MBps": 0.07448066726150031,
+          "waveform_frames": 58240,
+          "calculated_waveform_seconds": 0.5381376
+        },
+        {
+          "rate": "66.667",
+          "round": 0,
+          "planned_seconds": 1,
+          "elapsed_s": 1.0252582030252582,
+          "host_elapsed_s": 1.5101106999791227,
+          "verified_blocks": 336,
+          "bytes": {
+            "read": 43008,
+            "write": 43008
+          },
+          "direction_seconds": {
+            "read": 0.49413904249413904,
+            "write": 0.5191955015191955
+          },
+          "MBps": {
+            "read": 0.08703623130631317,
+            "write": 0.08283584868157785
+          },
+          "combined_MBps": 0.08389691469543006,
+          "waveform_frames": 6720,
+          "calculated_waveform_seconds": 0.0551443197242784
+        },
+        {
+          "rate": "66.667",
+          "round": 1,
+          "planned_seconds": 10,
+          "elapsed_s": 10.008457627008458,
+          "host_elapsed_s": 10.570346700027585,
+          "verified_blocks": 3280,
+          "bytes": {
+            "read": 419840,
+            "write": 419840
+          },
+          "direction_seconds": {
+            "read": 4.823743528823743,
+            "write": 5.068294934068295
+          },
+          "MBps": {
+            "read": 0.08703613645528473,
+            "write": 0.08283653683567238
+          },
+          "combined_MBps": 0.08389704301031063,
+          "waveform_frames": 65600,
+          "calculated_waveform_seconds": 0.538313597308432
+        },
+        {
+          "rate": "66.667",
+          "round": 2,
+          "planned_seconds": 10,
+          "elapsed_s": 10.008458176008459,
+          "host_elapsed_s": 10.57263020001119,
+          "verified_blocks": 3280,
+          "bytes": {
+            "read": 419840,
+            "write": 419840
+          },
+          "direction_seconds": {
+            "read": 4.823736904823737,
+            "write": 5.06831061506831
+          },
+          "MBps": {
+            "read": 0.08703625597411002,
+            "write": 0.0828362805451973
+          },
+          "combined_MBps": 0.08389703840825545,
+          "waveform_frames": 65600,
+          "calculated_waveform_seconds": 0.538313597308432
+        },
+        {
+          "rate": "66.667",
+          "round": 3,
+          "planned_seconds": 10,
+          "elapsed_s": 10.008458200008459,
+          "host_elapsed_s": 10.575964299961925,
+          "verified_blocks": 3280,
+          "bytes": {
+            "read": 419840,
+            "write": 419840
+          },
+          "direction_seconds": {
+            "read": 4.823731108823731,
+            "write": 5.068300589068301
+          },
+          "MBps": {
+            "read": 0.08703636055335146,
+            "write": 0.08283644441009343
+          },
+          "combined_MBps": 0.08389703820707273,
+          "waveform_frames": 65600,
+          "calculated_waveform_seconds": 0.538313597308432
+        },
+        {
+          "rate": "80",
+          "round": 0,
+          "planned_seconds": 1,
+          "elapsed_s": 1.0091311930091311,
+          "host_elapsed_s": 1.5098787999595515,
+          "verified_blocks": 416,
+          "bytes": {
+            "read": 53248,
+            "write": 53248
+          },
+          "direction_seconds": {
+            "read": 0.4849226194849226,
+            "write": 0.5094740795094741
+          },
+          "MBps": {
+            "read": 0.10980721018243945,
+            "write": 0.10451562138601364
+          },
+          "combined_MBps": 0.10553236361908434,
+          "waveform_frames": 8320,
+          "calculated_waveform_seconds": 0.0639912
+        },
+        {
+          "rate": "80",
+          "round": 1,
+          "planned_seconds": 10,
+          "elapsed_s": 10.013688658013688,
+          "host_elapsed_s": 10.577635399997234,
+          "verified_blocks": 4128,
+          "bytes": {
+            "read": 528384,
+            "write": 528384
+          },
+          "direction_seconds": {
+            "read": 4.811884891811885,
+            "write": 5.055616775055617
+          },
+          "MBps": {
+            "read": 0.10980811301183066,
+            "write": 0.104514250883699
+          },
+          "combined_MBps": 0.10553234038830404,
+          "waveform_frames": 82560,
+          "calculated_waveform_seconds": 0.6349896
+        },
+        {
+          "rate": "80",
+          "round": 2,
+          "planned_seconds": 10,
+          "elapsed_s": 10.013697694013699,
+          "host_elapsed_s": 10.575648700003512,
+          "verified_blocks": 4128,
+          "bytes": {
+            "read": 528384,
+            "write": 528384
+          },
+          "direction_seconds": {
+            "read": 4.811894719811895,
+            "write": 5.0557051100557056
+          },
+          "MBps": {
+            "read": 0.10980788873549074,
+            "write": 0.10451242477514242
+          },
+          "combined_MBps": 0.10553224515972236,
+          "waveform_frames": 82560,
+          "calculated_waveform_seconds": 0.6349896
+        },
+        {
+          "rate": "80",
+          "round": 3,
+          "planned_seconds": 10,
+          "elapsed_s": 10.013692987013693,
+          "host_elapsed_s": 10.564855900011025,
+          "verified_blocks": 4128,
+          "bytes": {
+            "read": 528384,
+            "write": 528384
+          },
+          "direction_seconds": {
+            "read": 4.811899180811899,
+            "write": 5.055610940055611
+          },
+          "MBps": {
+            "read": 0.10980778693514671,
+            "write": 0.1045143715101993
+          },
+          "combined_MBps": 0.10553229476582464,
+          "waveform_frames": 82560,
+          "calculated_waveform_seconds": 0.6349896
+        },
+        {
+          "rate": "100",
+          "round": 0,
+          "planned_seconds": 1,
+          "elapsed_s": 0.11028678011028678,
+          "host_elapsed_s": 0.7571949999546632,
+          "verified_blocks": 33,
+          "bytes": {
+            "read": 4224,
+            "write": 4224
+          },
+          "direction_seconds": {
+            "read": 0.05274387005274387,
+            "write": 0.056373207056373206
+          },
+          "MBps": {
+            "read": 0.0800851358797904,
+            "write": 0.0749292123078256
+          },
+          "combined_MBps": 0.07660029598789629,
+          "waveform_frames": 664,
+          "calculated_waveform_seconds": 0.006275,
+          "error": "runner code 4, frame 24, DMI 0x11",
+          "failed_frame": 24,
+          "raw_failure": "0x11",
+          "baseline_recovery_verified": true
+        },
+        {
+          "rate": "100",
+          "round": 1,
+          "planned_seconds": 60,
+          "elapsed_s": 0.27780523227780524,
+          "host_elapsed_s": 0.7555592000135221,
+          "verified_blocks": 83,
+          "bytes": {
+            "read": 10624,
+            "write": 10752
+          },
+          "direction_seconds": {
+            "read": 0.13360451413360452,
+            "write": 0.1412514841412515
+          },
+          "MBps": {
+            "read": 0.07951827128667224,
+            "write": 0.07611955417932458
+          },
+          "combined_MBps": 0.0769459949502463,
+          "waveform_frames": 1675,
+          "calculated_waveform_seconds": 0.01582324,
+          "error": "runner code 4, frame 75, DMI 0x31",
+          "failed_frame": 75,
+          "raw_failure": "0x31",
+          "baseline_recovery_verified": true
+        },
+        {
+          "rate": "100",
+          "round": 2,
+          "planned_seconds": 60,
+          "elapsed_s": 0.006800139006800139,
+          "host_elapsed_s": 0.7553427999955602,
+          "verified_blocks": 2,
+          "bytes": {
+            "read": 256,
+            "write": 256
+          },
+          "direction_seconds": {
+            "read": 0.003196752003196752,
+            "write": 0.003531372003531372
+          },
+          "MBps": {
+            "read": 0.08008128242165798,
+            "write": 0.07249307060938355
+          },
+          "combined_MBps": 0.0752925785028806,
+          "waveform_frames": 40,
+          "calculated_waveform_seconds": 0.00037784,
+          "error": "runner code 4, frame 40, DMI 0x8000000031",
+          "failed_frame": 40,
+          "raw_failure": "0x8000000031",
+          "baseline_recovery_verified": true
+        },
+        {
+          "rate": "100",
+          "round": 3,
+          "planned_seconds": 60,
+          "elapsed_s": 0.026521281026521282,
+          "host_elapsed_s": 0.756001700006891,
+          "verified_blocks": 7,
+          "bytes": {
+            "read": 896,
+            "write": 1024
+          },
+          "direction_seconds": {
+            "read": 0.012786291012786291,
+            "write": 0.013453617013453618
+          },
+          "MBps": {
+            "read": 0.07007505140497741,
+            "write": 0.07611336036814485
+          },
+          "combined_MBps": 0.07239469307987045,
+          "waveform_frames": 159,
+          "calculated_waveform_seconds": 0.00150596,
+          "error": "runner code 4, frame 159, DMI 0x11",
+          "failed_frame": 159,
+          "raw_failure": "0x11",
+          "baseline_recovery_verified": true
+        },
+        {
+          "rate": "160",
+          "round": 0,
+          "planned_seconds": 1,
+          "elapsed_s": 8.7831000087831e-05,
+          "host_elapsed_s": 0.0015923000173643231,
+          "verified_blocks": 0,
+          "bytes": {
+            "read": 0,
+            "write": 0
+          },
+          "direction_seconds": {
+            "read": 0.0,
+            "write": 8.6103000086103e-05
+          },
+          "MBps": {
+            "read": 0,
+            "write": 0.0
+          },
+          "combined_MBps": 0.0,
+          "waveform_frames": 0,
+          "calculated_waveform_seconds": 0.0,
+          "error": "runner code 4, frame 0, DMI 0x1c8082f8004",
+          "failed_frame": 0,
+          "raw_failure": "0x1c8082f8004",
+          "baseline_recovery_verified": true
+        },
+        {
+          "rate": "160",
+          "round": 1,
+          "planned_seconds": 10,
+          "elapsed_s": 8.7729000087729e-05,
+          "host_elapsed_s": 0.0016858000308275223,
+          "verified_blocks": 0,
+          "bytes": {
+            "read": 0,
+            "write": 0
+          },
+          "direction_seconds": {
+            "read": 0.0,
+            "write": 8.5995000085995e-05
+          },
+          "MBps": {
+            "read": 0,
+            "write": 0.0
+          },
+          "combined_MBps": 0.0,
+          "waveform_frames": 0,
+          "calculated_waveform_seconds": 0.0,
+          "error": "runner code 4, frame 0, DMI 0x1c808278004",
+          "failed_frame": 0,
+          "raw_failure": "0x1c808278004",
+          "baseline_recovery_verified": true
+        },
+        {
+          "rate": "160",
+          "round": 2,
+          "planned_seconds": 10,
+          "elapsed_s": 8.7666000087666e-05,
+          "host_elapsed_s": 0.001592799962963909,
+          "verified_blocks": 0,
+          "bytes": {
+            "read": 0,
+            "write": 0
+          },
+          "direction_seconds": {
+            "read": 0.0,
+            "write": 8.5929000085929e-05
+          },
+          "MBps": {
+            "read": 0,
+            "write": 0.0
+          },
+          "combined_MBps": 0.0,
+          "waveform_frames": 0,
+          "calculated_waveform_seconds": 0.0,
+          "error": "runner code 4, frame 0, DMI 0x1c8082f8004",
+          "failed_frame": 0,
+          "raw_failure": "0x1c8082f8004",
+          "baseline_recovery_verified": true
+        },
+        {
+          "rate": "160",
+          "round": 3,
+          "planned_seconds": 10,
+          "elapsed_s": 8.7603000087603e-05,
+          "host_elapsed_s": 0.0018032999942079186,
+          "verified_blocks": 0,
+          "bytes": {
+            "read": 0,
+            "write": 0
+          },
+          "direction_seconds": {
+            "read": 0.0,
+            "write": 8.5869000085869e-05
+          },
+          "MBps": {
+            "read": 0,
+            "write": 0.0
+          },
+          "combined_MBps": 0.0,
+          "waveform_frames": 0,
+          "calculated_waveform_seconds": 0.0,
+          "error": "runner code 4, frame 0, DMI 0x1c808278004",
+          "failed_frame": 0,
+          "raw_failure": "0x1c808278004",
+          "baseline_recovery_verified": true
+        },
+        {
+          "rate": "200",
+          "round": 0,
+          "planned_seconds": 1,
+          "elapsed_s": 0.000100395000100395,
+          "host_elapsed_s": 0.0018218999612145126,
+          "verified_blocks": 0,
+          "bytes": {
+            "read": 0,
+            "write": 0
+          },
+          "direction_seconds": {
+            "read": 0.0,
+            "write": 9.867000009867e-05
+          },
+          "MBps": {
+            "read": 0,
+            "write": 0.0
+          },
+          "combined_MBps": 0.0,
+          "waveform_frames": 0,
+          "calculated_waveform_seconds": 0.0,
+          "error": "runner code 4, frame 0, DMI 0x1e40417c002",
+          "failed_frame": 0,
+          "raw_failure": "0x1e40417c002",
+          "baseline_recovery_verified": true
+        },
+        {
+          "rate": "200",
+          "round": 1,
+          "planned_seconds": 60,
+          "elapsed_s": 0.000100287000100287,
+          "host_elapsed_s": 0.0016232000198215246,
+          "verified_blocks": 0,
+          "bytes": {
+            "read": 0,
+            "write": 0
+          },
+          "direction_seconds": {
+            "read": 0.0,
+            "write": 9.8565000098565e-05
+          },
+          "MBps": {
+            "read": 0,
+            "write": 0.0
+          },
+          "combined_MBps": 0.0,
+          "waveform_frames": 0,
+          "calculated_waveform_seconds": 0.0,
+          "error": "runner code 4, frame 0, DMI 0x1e40417c002",
+          "failed_frame": 0,
+          "raw_failure": "0x1e40417c002",
+          "baseline_recovery_verified": true
+        },
+        {
+          "rate": "200",
+          "round": 2,
+          "planned_seconds": 60,
+          "elapsed_s": 0.000100404000100404,
+          "host_elapsed_s": 0.015572200005408376,
+          "verified_blocks": 0,
+          "bytes": {
+            "read": 0,
+            "write": 0
+          },
+          "direction_seconds": {
+            "read": 0.0,
+            "write": 9.8676000098676e-05
+          },
+          "MBps": {
+            "read": 0,
+            "write": 0.0
+          },
+          "combined_MBps": 0.0,
+          "waveform_frames": 0,
+          "calculated_waveform_seconds": 0.0,
+          "error": "runner code 4, frame 0, DMI 0x1e40417c002",
+          "failed_frame": 0,
+          "raw_failure": "0x1e40417c002",
+          "baseline_recovery_verified": true
+        },
+        {
+          "rate": "200",
+          "round": 3,
+          "planned_seconds": 60,
+          "elapsed_s": 0.000100395000100395,
+          "host_elapsed_s": 0.0026988000026904047,
+          "verified_blocks": 0,
+          "bytes": {
+            "read": 0,
+            "write": 0
+          },
+          "direction_seconds": {
+            "read": 0.0,
+            "write": 9.8667000098667e-05
+          },
+          "MBps": {
+            "read": 0,
+            "write": 0.0
+          },
+          "combined_MBps": 0.0,
+          "waveform_frames": 0,
+          "calculated_waveform_seconds": 0.0,
+          "error": "runner code 4, frame 0, DMI 0x1e40417c002",
+          "failed_frame": 0,
+          "raw_failure": "0x1e40417c002",
+          "baseline_recovery_verified": true
+        }
+      ],
+      "probe": {
+        "executable_bytes": 2356,
+        "pair_sha256": {
+          "probe.bit": "78b5e4d2b71c4b816c4e875285f0b09588650214693c27d17e0d6fc48daf407d",
+          "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36",
+          "application.elf": "fdce894b04e2b56cc092459ca7aea4bdd8329f2410fe90a4cde75757f5c6bdb0"
+        }
+      },
+      "transport": "Zynq OCM/GP0 local runner",
+      "debug_before": {
+        "dmcontrol": 0,
+        "dmstatus": 4983970,
+        "sbcs": 537134087,
+        "sbaddress": 0
+      },
+      "backup_sha256": "fa71add868345c2b097971fb0d535f11295d4e479e7db84e22ffb13d32e40f10",
+      "plan_sha256": {
+        "50": "95c5eed20038fffc2974dd4e4e5c446ec5d93e19f067ae8bac5e4ddac39575f6",
+        "66.667": "bec77d23c1494e3c9cf5d3d84cbd18154267df944db600ba3e6daedae17f4c7c",
+        "80": "868197c47959ada06bd8843f9a18a16a8779eccf7d5126a00aecf6adb7bc9cb9",
+        "100": "78175da0e6e5616a5ae626be10024bebbe1f51e60e29d97d66ddfbc3ab000fd2",
+        "160": "8e66027be5b0b745a446c4fbde0f13bdcffc4b849d6c0fe6434c9f176ca7be5c",
+        "200": "295ed1cd6e38241b267bc1e80b6c5efd6ea6d5937fc6739203df4d9f2002212c"
+      },
+      "restored_sha256": "fa71add868345c2b097971fb0d535f11295d4e479e7db84e22ffb13d32e40f10",
+      "restored_match": true,
+      "guards_match": true,
+      "debug_state_restored": true
+    },
+    "isolated_six": {
+      "cable": "210299008529",
+      "base": "0x105f000",
+      "bytes": 1024,
+      "block_bytes": 128,
+      "rates": [
+        {
+          "rate": "200",
+          "round": 0,
+          "planned_seconds": 1,
+          "elapsed_s": 1.0046465140046466,
+          "host_elapsed_s": 1.5102334000403062,
+          "verified_blocks": 356,
+          "bytes": {
+            "read": 45568,
+            "write": 45568
+          },
+          "direction_seconds": {
+            "read": 0.4697175484697175,
+            "write": 0.49585824949585827
+          },
+          "MBps": {
+            "read": 0.09701149158351649,
+            "write": 0.09189723080402358
+          },
+          "combined_MBps": 0.090714493833976,
+          "waveform_frames": 26344,
+          "calculated_waveform_seconds": 0.05321488
+        },
+        {
+          "rate": "200",
+          "round": 1,
+          "planned_seconds": 60,
+          "elapsed_s": 3.8596042898596044,
+          "host_elapsed_s": 4.528618899988942,
+          "verified_blocks": 1367,
+          "bytes": {
+            "read": 174976,
+            "write": 175104
+          },
+          "direction_seconds": {
+            "read": 1.804111999804112,
+            "write": 1.905404017905404
+          },
+          "MBps": {
+            "read": 0.0969873267396917,
+            "write": 0.09189862011128248
+          },
+          "combined_MBps": 0.09070359905023694,
+          "waveform_frames": 101206,
+          "calculated_waveform_seconds": 0.20443612,
+          "error": "runner code 4, frame 270, DMI 0x1f01f9cebc8",
+          "failed_frame": 270,
+          "raw_failure": "0x1f01f9cebc8",
+          "baseline_recovery_verified": true
+        },
+        {
+          "rate": "200",
+          "round": 2,
+          "planned_seconds": 60,
+          "elapsed_s": 1.1509753391509754,
+          "host_elapsed_s": 1.5135415999684483,
+          "verified_blocks": 407,
+          "bytes": {
+            "read": 52096,
+            "write": 52224
+          },
+          "direction_seconds": {
+            "read": 0.5379360995379361,
+            "write": 0.5682816365682817
+          },
+          "MBps": {
+            "read": 0.09684421633861015,
+            "write": 0.09189809530951656
+          },
+          "combined_MBps": 0.09063617303647213,
+          "waveform_frames": 30180,
+          "calculated_waveform_seconds": 0.0609636,
+          "error": "runner code 4, frame 284, DMI 0x1f070727430",
+          "failed_frame": 284,
+          "raw_failure": "0x1f070727430",
+          "baseline_recovery_verified": true
+        },
+        {
+          "rate": "200",
+          "round": 3,
+          "planned_seconds": 60,
+          "elapsed_s": 1.4730333554730333,
+          "host_elapsed_s": 1.509017499978654,
+          "verified_blocks": 521,
+          "bytes": {
+            "read": 66688,
+            "write": 66816
+          },
+          "direction_seconds": {
+            "read": 0.6886885596886886,
+            "write": 0.7270610497270611
+          },
+          "MBps": {
+            "read": 0.09683332046367274,
+            "write": 0.0918987477393855
+          },
+          "combined_MBps": 0.09063202778400632,
+          "waveform_frames": 38625,
+          "calculated_waveform_seconds": 0.0780225,
+          "error": "runner code 4, frame 145, DMI 0x1f0e9f23b8c",
+          "failed_frame": 145,
+          "raw_failure": "0x1f0e9f23b8c",
+          "baseline_recovery_verified": true
+        },
+        {
+          "rate": "160",
+          "round": 0,
+          "planned_seconds": 1,
+          "elapsed_s": 1.0077907540077908,
+          "host_elapsed_s": 1.5099812999833375,
+          "verified_blocks": 388,
+          "bytes": {
+            "read": 49664,
+            "write": 49664
+          },
+          "direction_seconds": {
+            "read": 0.46807452346807454,
+            "write": 0.4940907664940908
+          },
+          "MBps": {
+            "read": 0.10610276250890074,
+            "write": 0.1005159443727309
+          },
+          "combined_MBps": 0.09856014217732358,
+          "waveform_frames": 28712,
+          "calculated_waveform_seconds": 0.0631664
+        },
+        {
+          "rate": "160",
+          "round": 1,
+          "planned_seconds": 10,
+          "elapsed_s": 10.005177565005178,
+          "host_elapsed_s": 10.57188890001271,
+          "verified_blocks": 3852,
+          "bytes": {
+            "read": 493056,
+            "write": 493056
+          },
+          "direction_seconds": {
+            "read": 4.646724334646724,
+            "write": 4.9049558179049555
+          },
+          "MBps": {
+            "read": 0.1061082957565817,
+            "write": 0.10052200637570638
+          },
+          "combined_MBps": 0.09856016983137766,
+          "waveform_frames": 285048,
+          "calculated_waveform_seconds": 0.6271056
+        },
+        {
+          "rate": "160",
+          "round": 2,
+          "planned_seconds": 10,
+          "elapsed_s": 10.00517892700518,
+          "host_elapsed_s": 10.556677700020373,
+          "verified_blocks": 3852,
+          "bytes": {
+            "read": 493056,
+            "write": 493056
+          },
+          "direction_seconds": {
+            "read": 4.647029119647029,
+            "write": 4.905253021905253
+          },
+          "MBps": {
+            "read": 0.10610133642490509,
+            "write": 0.10051591585554781
+          },
+          "combined_MBps": 0.09856015641443107,
+          "waveform_frames": 285048,
+          "calculated_waveform_seconds": 0.6271056
+        },
+        {
+          "rate": "160",
+          "round": 3,
+          "planned_seconds": 10,
+          "elapsed_s": 10.005183661005184,
+          "host_elapsed_s": 10.598205399990547,
+          "verified_blocks": 3852,
+          "bytes": {
+            "read": 493056,
+            "write": 493056
+          },
+          "direction_seconds": {
+            "read": 4.646773471646774,
+            "write": 4.905011083905011
+          },
+          "MBps": {
+            "read": 0.1061071737213963,
+            "write": 0.10052087376884476
+          },
+          "combined_MBps": 0.09856010978022656,
+          "waveform_frames": 285048,
+          "calculated_waveform_seconds": 0.6271056
+        },
+        {
+          "rate": "100",
+          "round": 0,
+          "planned_seconds": 1,
+          "elapsed_s": 0.00072756000072756,
+          "host_elapsed_s": 0.7678476999863051,
+          "verified_blocks": 0,
+          "bytes": {
+            "read": 0,
+            "write": 0
+          },
+          "direction_seconds": {
+            "read": 0.0,
+            "write": 0.000708273000708273
+          },
+          "MBps": {
+            "read": 0,
+            "write": 0.0
+          },
+          "combined_MBps": 0.0,
+          "waveform_frames": 12,
+          "calculated_waveform_seconds": 3.84e-05,
+          "error": "runner code 4, frame 12, DMI 0x0",
+          "failed_frame": 12,
+          "raw_failure": "0x0",
+          "baseline_recovery_verified": true
+        },
+        {
+          "rate": "100",
+          "round": 1,
+          "planned_seconds": 60,
+          "elapsed_s": 0.001118763001118763,
+          "host_elapsed_s": 0.7560487000155263,
+          "verified_blocks": 0,
+          "bytes": {
+            "read": 0,
+            "write": 0
+          },
+          "direction_seconds": {
+            "read": 0.0,
+            "write": 0.001089096001089096
+          },
+          "MBps": {
+            "read": 0,
+            "write": 0.0
+          },
+          "combined_MBps": 0.0,
+          "waveform_frames": 19,
+          "calculated_waveform_seconds": 6.08e-05,
+          "error": "runner code 4, frame 19, DMI 0x0",
+          "failed_frame": 19,
+          "raw_failure": "0x0",
+          "baseline_recovery_verified": true
+        },
+        {
+          "rate": "100",
+          "round": 2,
+          "planned_seconds": 60,
+          "elapsed_s": 0.001679049001679049,
+          "host_elapsed_s": 0.7557028000010177,
+          "verified_blocks": 0,
+          "bytes": {
+            "read": 0,
+            "write": 0
+          },
+          "direction_seconds": {
+            "read": 0.0,
+            "write": 0.001634262001634262
+          },
+          "MBps": {
+            "read": 0,
+            "write": 0.0
+          },
+          "combined_MBps": 0.0,
+          "waveform_frames": 29,
+          "calculated_waveform_seconds": 9.28e-05,
+          "error": "runner code 4, frame 29, DMI 0x0",
+          "failed_frame": 29,
+          "raw_failure": "0x0",
+          "baseline_recovery_verified": true
+        },
+        {
+          "rate": "100",
+          "round": 3,
+          "planned_seconds": 60,
+          "elapsed_s": 0.004532526004532526,
+          "host_elapsed_s": 0.7562780000152998,
+          "verified_blocks": 1,
+          "bytes": {
+            "read": 128,
+            "write": 128
+          },
+          "direction_seconds": {
+            "read": 0.001960305001960305,
+            "write": 0.002451606002451606
+          },
+          "MBps": {
+            "read": 0.06529596153251663,
+            "write": 0.05221067327784318
+          },
+          "combined_MBps": 0.05648064671752573,
+          "waveform_frames": 80,
+          "calculated_waveform_seconds": 0.000256,
+          "error": "runner code 4, frame 80, DMI 0x0",
+          "failed_frame": 80,
+          "raw_failure": "0x0",
+          "baseline_recovery_verified": true
+        },
+        {
+          "rate": "50",
+          "round": 0,
+          "planned_seconds": 1,
+          "elapsed_s": 1.0149856930149856,
+          "host_elapsed_s": 1.51689259998966,
+          "verified_blocks": 212,
+          "bytes": {
+            "read": 27136,
+            "write": 27136
+          },
+          "direction_seconds": {
+            "read": 0.48251564148251563,
+            "write": 0.5093618795093618
+          },
+          "MBps": {
+            "read": 0.056238591388717285,
+            "write": 0.05327450107993653
+          },
+          "combined_MBps": 0.05347070443799714,
+          "waveform_frames": 15688,
+          "calculated_waveform_seconds": 0.05741808
+        },
+        {
+          "rate": "50",
+          "round": 1,
+          "planned_seconds": 10,
+          "elapsed_s": 10.015846219015847,
+          "host_elapsed_s": 10.561076799989678,
+          "verified_blocks": 2092,
+          "bytes": {
+            "read": 267776,
+            "write": 267776
+          },
+          "direction_seconds": {
+            "read": 4.761458692761459,
+            "write": 5.026382819026383
+          },
+          "MBps": {
+            "read": 0.05623822808902715,
+            "write": 0.05327409583416262
+          },
+          "combined_MBps": 0.05347046952290599,
+          "waveform_frames": 154808,
+          "calculated_waveform_seconds": 0.56659728
+        },
+        {
+          "rate": "50",
+          "round": 2,
+          "planned_seconds": 10,
+          "elapsed_s": 10.015843405015843,
+          "host_elapsed_s": 10.569153200020082,
+          "verified_blocks": 2092,
+          "bytes": {
+            "read": 267776,
+            "write": 267776
+          },
+          "direction_seconds": {
+            "read": 4.7614264817614265,
+            "write": 5.026430201026431
+          },
+          "MBps": {
+            "read": 0.05623860854004824,
+            "write": 0.053273593642127644
+          },
+          "combined_MBps": 0.05347048454569492,
+          "waveform_frames": 154808,
+          "calculated_waveform_seconds": 0.56659728
+        },
+        {
+          "rate": "50",
+          "round": 3,
+          "planned_seconds": 10,
+          "elapsed_s": 10.015825369015825,
+          "host_elapsed_s": 10.580729600042105,
+          "verified_blocks": 2092,
+          "bytes": {
+            "read": 267776,
+            "write": 267776
+          },
+          "direction_seconds": {
+            "read": 4.761418402761419,
+            "write": 5.0264185370264185
+          },
+          "MBps": {
+            "read": 0.05623870396365532,
+            "write": 0.05327371726557688
+          },
+          "combined_MBps": 0.053470580832683225,
+          "waveform_frames": 154808,
+          "calculated_waveform_seconds": 0.56659728
+        },
+        {
+          "rate": "66.667",
+          "round": 0,
+          "planned_seconds": 1,
+          "elapsed_s": 1.006004170006004,
+          "host_elapsed_s": 1.510298800014425,
+          "verified_blocks": 244,
+          "bytes": {
+            "read": 31232,
+            "write": 31232
+          },
+          "direction_seconds": {
+            "read": 0.4766173474766173,
+            "write": 0.5030698115030698
+          },
+          "MBps": {
+            "read": 0.06552845834368677,
+            "write": 0.06208283479918058
+          },
+          "combined_MBps": 0.06209119391585345,
+          "waveform_frames": 18056,
+          "calculated_waveform_seconds": 0.056334719718326404
+        },
+        {
+          "rate": "66.667",
+          "round": 1,
+          "planned_seconds": 10,
+          "elapsed_s": 10.010522074010522,
+          "host_elapsed_s": 10.568952000001445,
+          "verified_blocks": 2428,
+          "bytes": {
+            "read": 310784,
+            "write": 310784
+          },
+          "direction_seconds": {
+            "read": 4.74272003574272,
+            "write": 5.005904354005905
+          },
+          "MBps": {
+            "read": 0.06552864129820611,
+            "write": 0.062083487422467325
+          },
+          "combined_MBps": 0.062091466898986696,
+          "waveform_frames": 179672,
+          "calculated_waveform_seconds": 0.5605766371971168
+        },
+        {
+          "rate": "66.667",
+          "round": 2,
+          "planned_seconds": 10,
+          "elapsed_s": 10.010524099010524,
+          "host_elapsed_s": 10.557751399988774,
+          "verified_blocks": 2428,
+          "bytes": {
+            "read": 310784,
+            "write": 310784
+          },
+          "direction_seconds": {
+            "read": 4.742717656742718,
+            "write": 5.00593009700593
+          },
+          "MBps": {
+            "read": 0.06552867416810247,
+            "write": 0.062083168158077434
+          },
+          "combined_MBps": 0.062091454338683225,
+          "waveform_frames": 179672,
+          "calculated_waveform_seconds": 0.5605766371971168
+        },
+        {
+          "rate": "66.667",
+          "round": 3,
+          "planned_seconds": 10,
+          "elapsed_s": 10.010522548010522,
+          "host_elapsed_s": 10.561035399965476,
+          "verified_blocks": 2428,
+          "bytes": {
+            "read": 310784,
+            "write": 310784
+          },
+          "direction_seconds": {
+            "read": 4.742728015742728,
+            "write": 5.005943558005944
+          },
+          "MBps": {
+            "read": 0.06552853104129146,
+            "write": 0.06208300121621767
+          },
+          "combined_MBps": 0.06209146395894484,
+          "waveform_frames": 179672,
+          "calculated_waveform_seconds": 0.5605766371971168
+        },
+        {
+          "rate": "80",
+          "round": 0,
+          "planned_seconds": 1,
+          "elapsed_s": 1.0037397520037397,
+          "host_elapsed_s": 1.5102924999664538,
+          "verified_blocks": 308,
+          "bytes": {
+            "read": 39424,
+            "write": 39424
+          },
+          "direction_seconds": {
+            "read": 0.47183362847183363,
+            "write": 0.4980651034980651
+          },
+          "MBps": {
+            "read": 0.08355487532265504,
+            "write": 0.07915431079815283
+          },
+          "combined_MBps": 0.07855422667339595,
+          "waveform_frames": 22792,
+          "calculated_waveform_seconds": 0.0660968
+        },
+        {
+          "rate": "80",
+          "round": 1,
+          "planned_seconds": 10,
+          "elapsed_s": 10.01048965301049,
+          "host_elapsed_s": 10.56211630004691,
+          "verified_blocks": 3072,
+          "bytes": {
+            "read": 393216,
+            "write": 393216
+          },
+          "direction_seconds": {
+            "read": 4.705684642705685,
+            "write": 4.967478349967478
+          },
+          "MBps": {
+            "read": 0.08356191072207249,
+            "write": 0.07915807021133256
+          },
+          "combined_MBps": 0.07856079245469211,
+          "waveform_frames": 227328,
+          "calculated_waveform_seconds": 0.6592512
+        },
+        {
+          "rate": "80",
+          "round": 2,
+          "planned_seconds": 10,
+          "elapsed_s": 10.011316108011316,
+          "host_elapsed_s": 10.575037799950223,
+          "verified_blocks": 3072,
+          "bytes": {
+            "read": 393216,
+            "write": 393216
+          },
+          "direction_seconds": {
+            "read": 4.706053948706054,
+            "write": 4.967684728967685
+          },
+          "MBps": {
+            "read": 0.08355535322924128,
+            "write": 0.07915478164446896
+          },
+          "combined_MBps": 0.07855430709761292,
+          "waveform_frames": 227328,
+          "calculated_waveform_seconds": 0.6592512
+        },
+        {
+          "rate": "80",
+          "round": 3,
+          "planned_seconds": 10,
+          "elapsed_s": 10.011783151011784,
+          "host_elapsed_s": 10.571140499960165,
+          "verified_blocks": 3072,
+          "bytes": {
+            "read": 393216,
+            "write": 393216
+          },
+          "direction_seconds": {
+            "read": 4.706274343706275,
+            "write": 4.967808973967809
+          },
+          "MBps": {
+            "read": 0.08355144032898333,
+            "write": 0.07915280198182355
+          },
+          "combined_MBps": 0.07855064259162703,
+          "waveform_frames": 227328,
+          "calculated_waveform_seconds": 0.6592512
+        }
+      ],
+      "probe": {
+        "executable_bytes": 2356,
+        "pair_sha256": {
+          "probe.bit": "78b5e4d2b71c4b816c4e875285f0b09588650214693c27d17e0d6fc48daf407d",
+          "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36",
+          "application.elf": "fdce894b04e2b56cc092459ca7aea4bdd8329f2410fe90a4cde75757f5c6bdb0"
+        }
+      },
+      "transport": "Zynq OCM/GP0 local runner",
+      "debug_before": {
+        "dmcontrol": 0,
+        "dmstatus": 4983970,
+        "sbcs": 537134087,
+        "sbaddress": 0
+      },
+      "backup_sha256": "fa71add868345c2b097971fb0d535f11295d4e479e7db84e22ffb13d32e40f10",
+      "workload_bytes": 256,
+      "DMI_requests_per_frame": 1,
+      "plan_sha256": {
+        "200": "1ce7ad9b209aa99310cb0759fcd2bfc3b6906a028bee14b400d3e55e8eb43192",
+        "160": "cd1e4dac6b58583ad8029eefb97e943a6e3c72fff9ad56f0edf112901ea0d7d9",
+        "100": "17a6b5314e1e836e0f50cdfd12afab229525a2b2b844f803f9391e6e137b0280",
+        "50": "d717858b381a85b64c370404a99e5386b510b640823a478a094129b1d2dc9517",
+        "66.667": "093a7dba17802b238d1144961bc16310c86ba3da4534772ba380f146447a39b7",
+        "80": "2cde647f99fc7354b36e2332c0bd11ab5308702e75ffae9508aaa62f003dc5ce"
+      },
+      "restored_sha256": "fa71add868345c2b097971fb0d535f11295d4e479e7db84e22ffb13d32e40f10",
+      "restored_match": true,
+      "guards_match": true,
+      "debug_state_restored": true
+    },
+    "isolated_first_high_pilot": {
+      "cable": "210299008529",
+      "base": "0x105f000",
+      "bytes": 1024,
+      "block_bytes": 128,
+      "rates": [
+        {
+          "rate": "100",
+          "round": 1,
+          "planned_seconds": 1,
+          "elapsed_s": 0.004755528004755528,
+          "host_elapsed_s": 0.7558632000000216,
+          "verified_blocks": 1,
+          "bytes": {
+            "read": 128,
+            "write": 128
+          },
+          "direction_seconds": {
+            "read": 0.001960485001960485,
+            "write": 0.00266892000266892
+          },
+          "MBps": {
+            "read": 0.06528996644809831,
+            "write": 0.04795947419630412
+          },
+          "combined_MBps": 0.053832087571348546,
+          "waveform_frames": 84,
+          "calculated_waveform_seconds": 0.0002688,
+          "error": "runner code 4, frame 84, DMI 0x0",
+          "failed_frame": 84,
+          "raw_failure": "0x0",
+          "baseline_recovery_verified": true
+        },
+        {
+          "rate": "160",
+          "round": 1,
+          "planned_seconds": 1,
+          "elapsed_s": 1.0077906010077906,
+          "host_elapsed_s": 1.5096133999759331,
+          "verified_blocks": 388,
+          "bytes": {
+            "read": 49664,
+            "write": 49664
+          },
+          "direction_seconds": {
+            "read": 0.4681261834681262,
+            "write": 0.4941339244941339
+          },
+          "MBps": {
+            "read": 0.1060910535532596,
+            "write": 0.10050716524036103
+          },
+          "combined_MBps": 0.09856015714045357,
+          "waveform_frames": 28712,
+          "calculated_waveform_seconds": 0.0631664,
+          "error": "Post-window verification: 160 MHz DMI 0x38: raw 0x1c808278000",
+          "baseline_recovery_verified": true
+        },
+        {
+          "rate": "200",
+          "round": 1,
+          "planned_seconds": 1,
+          "elapsed_s": 1.0046477110046477,
+          "host_elapsed_s": 1.5093391999835148,
+          "verified_blocks": 356,
+          "bytes": {
+            "read": 45568,
+            "write": 45568
+          },
+          "direction_seconds": {
+            "read": 0.4697234674697235,
+            "write": 0.4958559094958559
+          },
+          "MBps": {
+            "read": 0.0970102691386973,
+            "write": 0.09189766447742785
+          },
+          "combined_MBps": 0.09071438575106493,
+          "waveform_frames": 26344,
+          "calculated_waveform_seconds": 0.05321488,
+          "error": "Post-window verification: 200 MHz DMI 0x38: raw 0x1e40417c002",
+          "baseline_recovery_verified": true
+        }
+      ],
+      "probe": {
+        "executable_bytes": 2356,
+        "pair_sha256": {
+          "probe.bit": "78b5e4d2b71c4b816c4e875285f0b09588650214693c27d17e0d6fc48daf407d",
+          "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36",
+          "application.elf": "fdce894b04e2b56cc092459ca7aea4bdd8329f2410fe90a4cde75757f5c6bdb0"
+        }
+      },
+      "transport": "Zynq OCM/GP0 local runner",
+      "debug_before": {
+        "dmcontrol": 0,
+        "dmstatus": 4983970,
+        "sbcs": 537134087,
+        "sbaddress": 0
+      },
+      "backup_sha256": "fa71add868345c2b097971fb0d535f11295d4e479e7db84e22ffb13d32e40f10",
+      "workload_bytes": 256,
+      "DMI_requests_per_frame": 1,
+      "plan_sha256": {
+        "100": "17a6b5314e1e836e0f50cdfd12afab229525a2b2b844f803f9391e6e137b0280",
+        "160": "cd1e4dac6b58583ad8029eefb97e943a6e3c72fff9ad56f0edf112901ea0d7d9",
+        "200": "1ce7ad9b209aa99310cb0759fcd2bfc3b6906a028bee14b400d3e55e8eb43192"
+      },
+      "restored_sha256": "fa71add868345c2b097971fb0d535f11295d4e479e7db84e22ffb13d32e40f10",
+      "restored_match": true,
+      "guards_match": true,
+      "debug_state_restored": true
+    },
+    "200_tap24_pilot": {
+      "cable": "210299008529",
+      "base": "0x105f000",
+      "bytes": 1024,
+      "block_bytes": 128,
+      "rates": [
+        {
+          "rate": "200",
+          "round": 1,
+          "planned_seconds": 10,
+          "elapsed_s": 10.001313478001313,
+          "host_elapsed_s": 10.590623900003266,
+          "verified_blocks": 3544,
+          "bytes": {
+            "read": 453632,
+            "write": 453632
+          },
+          "direction_seconds": {
+            "read": 4.67612008667612,
+            "write": 4.936250959936251
+          },
+          "MBps": {
+            "read": 0.09701034010921879,
+            "write": 0.0918980829138919
+          },
+          "combined_MBps": 0.09071448485197464,
+          "waveform_frames": 262256,
+          "calculated_waveform_seconds": 0.52975712
+        }
+      ],
+      "settings": {
+        "50": [
+          0,
+          36,
+          64
+        ],
+        "66.667": [
+          0,
+          36,
+          86
+        ],
+        "80": [
+          8,
+          35,
+          103
+        ],
+        "100": [
+          16,
+          36,
+          192
+        ],
+        "160": [
+          8,
+          37,
+          205
+        ],
+        "200": [
+          24,
+          39,
+          256
+        ]
+      },
+      "probe": {
+        "executable_bytes": 2356,
+        "pair_sha256": {
+          "probe.bit": "78b5e4d2b71c4b816c4e875285f0b09588650214693c27d17e0d6fc48daf407d",
+          "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36",
+          "application.elf": "fdce894b04e2b56cc092459ca7aea4bdd8329f2410fe90a4cde75757f5c6bdb0"
+        }
+      },
+      "transport": "Zynq OCM/GP0 local runner",
+      "debug_before": {
+        "dmcontrol": 0,
+        "dmstatus": 4983970,
+        "sbcs": 537134087,
+        "sbaddress": 0
+      },
+      "backup_sha256": "fa71add868345c2b097971fb0d535f11295d4e479e7db84e22ffb13d32e40f10",
+      "workload_bytes": 256,
+      "DMI_requests_per_frame": 1,
+      "plan_sha256": {
+        "200": "1ce7ad9b209aa99310cb0759fcd2bfc3b6906a028bee14b400d3e55e8eb43192"
+      },
+      "restored_sha256": "fa71add868345c2b097971fb0d535f11295d4e479e7db84e22ffb13d32e40f10",
+      "restored_match": true,
+      "guards_match": true,
+      "debug_state_restored": true
+    },
+    "200_tap24_long": {
+      "cable": "210299008529",
+      "base": "0x105f000",
+      "bytes": 1024,
+      "block_bytes": 128,
+      "rates": [
+        {
+          "rate": "200",
+          "round": 0,
+          "planned_seconds": 1,
+          "elapsed_s": 1.0046459200046458,
+          "host_elapsed_s": 1.5093376000295393,
+          "verified_blocks": 356,
+          "bytes": {
+            "read": 45568,
+            "write": 45568
+          },
+          "direction_seconds": {
+            "read": 0.4697311234697311,
+            "write": 0.49584367249584366
+          },
+          "MBps": {
+            "read": 0.09700868799879798,
+            "write": 0.09189993243360783
+          },
+          "combined_MBps": 0.09071454746920045,
+          "waveform_frames": 26344,
+          "calculated_waveform_seconds": 0.05321488
+        },
+        {
+          "rate": "200",
+          "round": 1,
+          "planned_seconds": 60,
+          "elapsed_s": 60.007893576007895,
+          "host_elapsed_s": 60.35479430004489,
+          "verified_blocks": 21264,
+          "bytes": {
+            "read": 2721792,
+            "write": 2721792
+          },
+          "direction_seconds": {
+            "read": 28.05696891705697,
+            "write": 29.617374143617376
+          },
+          "MBps": {
+            "read": 0.09700948124675407,
+            "write": 0.09189849129776934
+          },
+          "combined_MBps": 0.09071446564117411,
+          "waveform_frames": 1573536,
+          "calculated_waveform_seconds": 3.17854272
+        },
+        {
+          "rate": "200",
+          "round": 2,
+          "planned_seconds": 60,
+          "elapsed_s": 60.00790442100791,
+          "host_elapsed_s": 60.40900939999847,
+          "verified_blocks": 21264,
+          "bytes": {
+            "read": 2721792,
+            "write": 2721792
+          },
+          "direction_seconds": {
+            "read": 28.056933640056933,
+            "write": 29.617366463617365
+          },
+          "MBps": {
+            "read": 0.09700960322029249,
+            "write": 0.0918985151277211
+          },
+          "combined_MBps": 0.09071444924669424,
+          "waveform_frames": 1573536,
+          "calculated_waveform_seconds": 3.17854272
+        },
+        {
+          "rate": "200",
+          "round": 3,
+          "planned_seconds": 60,
+          "elapsed_s": 60.00790632300791,
+          "host_elapsed_s": 60.428031100018416,
+          "verified_blocks": 21264,
+          "bytes": {
+            "read": 2721792,
+            "write": 2721792
+          },
+          "direction_seconds": {
+            "read": 28.057084120057084,
+            "write": 29.617283636617284
+          },
+          "MBps": {
+            "read": 0.09700908292370555,
+            "write": 0.09189877212895096
+          },
+          "combined_MBps": 0.09071444637142506,
+          "waveform_frames": 1573536,
+          "calculated_waveform_seconds": 3.17854272
+        }
+      ],
+      "settings": {
+        "50": [
+          0,
+          36,
+          64
+        ],
+        "66.667": [
+          0,
+          36,
+          86
+        ],
+        "80": [
+          8,
+          35,
+          103
+        ],
+        "100": [
+          16,
+          36,
+          192
+        ],
+        "160": [
+          8,
+          37,
+          205
+        ],
+        "200": [
+          24,
+          39,
+          256
+        ]
+      },
+      "probe": {
+        "executable_bytes": 2356,
+        "pair_sha256": {
+          "probe.bit": "78b5e4d2b71c4b816c4e875285f0b09588650214693c27d17e0d6fc48daf407d",
+          "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36",
+          "application.elf": "fdce894b04e2b56cc092459ca7aea4bdd8329f2410fe90a4cde75757f5c6bdb0"
+        }
+      },
+      "transport": "Zynq OCM/GP0 local runner",
+      "debug_before": {
+        "dmcontrol": 0,
+        "dmstatus": 4983970,
+        "sbcs": 537134087,
+        "sbaddress": 0
+      },
+      "backup_sha256": "fa71add868345c2b097971fb0d535f11295d4e479e7db84e22ffb13d32e40f10",
+      "workload_bytes": 256,
+      "DMI_requests_per_frame": 1,
+      "plan_sha256": {
+        "200": "1ce7ad9b209aa99310cb0759fcd2bfc3b6906a028bee14b400d3e55e8eb43192"
+      },
+      "restored_sha256": "fa71add868345c2b097971fb0d535f11295d4e479e7db84e22ffb13d32e40f10",
+      "restored_match": true,
+      "guards_match": true,
+      "debug_state_restored": true
+    },
+    "100_tms_advance_idle192_long": {
+      "cable": "210299008529",
+      "base": "0x105f000",
+      "bytes": 1024,
+      "block_bytes": 128,
+      "rates": [
+        {
+          "rate": "100",
+          "round": 0,
+          "planned_seconds": 1,
+          "elapsed_s": 1.0102896730102897,
+          "host_elapsed_s": 1.517388199979905,
+          "verified_blocks": 244,
+          "bytes": {
+            "read": 31232,
+            "write": 31232
+          },
+          "direction_seconds": {
+            "read": 0.4784323084784323,
+            "write": 0.5050047305050047
+          },
+          "MBps": {
+            "read": 0.06527987229651723,
+            "write": 0.06184496523184645
+          },
+          "combined_MBps": 0.06182781203125671,
+          "waveform_frames": 18056,
+          "calculated_waveform_seconds": 0.0577792
+        },
+        {
+          "rate": "100",
+          "round": 1,
+          "planned_seconds": 60,
+          "elapsed_s": 26.76239034276239,
+          "host_elapsed_s": 27.163767399964854,
+          "verified_blocks": 6462,
+          "bytes": {
+            "read": 827136,
+            "write": 827264
+          },
+          "direction_seconds": {
+            "read": 12.672677184672677,
+            "write": 13.377790516377791
+          },
+          "MBps": {
+            "read": 0.06526923932067036,
+            "write": 0.06183861221232461
+          },
+          "combined_MBps": 0.06181809542462694,
+          "waveform_frames": 478238,
+          "calculated_waveform_seconds": 1.5303616,
+          "error": "runner code 4, frame 198, DMI 0x0",
+          "failed_frame": 198,
+          "raw_failure": "0x0",
+          "baseline_recovery_verified": true
+        },
+        {
+          "rate": "100",
+          "round": 2,
+          "planned_seconds": 60,
+          "elapsed_s": 60.01641933301642,
+          "host_elapsed_s": 60.38309819996357,
+          "verified_blocks": 14492,
+          "bytes": {
+            "read": 1854976,
+            "write": 1854976
+          },
+          "direction_seconds": {
+            "read": 28.420486096420486,
+            "write": 29.998737392998738
+          },
+          "MBps": {
+            "read": 0.06526897512261873,
+            "write": 0.0618351357825121
+          },
+          "combined_MBps": 0.06181561714660757,
+          "waveform_frames": 1072408,
+          "calculated_waveform_seconds": 3.4317056
+        },
+        {
+          "rate": "100",
+          "round": 3,
+          "planned_seconds": 60,
+          "elapsed_s": 20.597425400597427,
+          "host_elapsed_s": 21.13788019999629,
+          "verified_blocks": 4973,
+          "bytes": {
+            "read": 636544,
+            "write": 636672
+          },
+          "direction_seconds": {
+            "read": 9.753587637753588,
+            "write": 10.295923510295923
+          },
+          "MBps": {
+            "read": 0.06526254990892834,
+            "write": 0.06183728923037628
+          },
+          "combined_MBps": 0.061814327530618,
+          "waveform_frames": 368061,
+          "calculated_waveform_seconds": 1.1777952,
+          "error": "runner code 4, frame 133, DMI 0x0",
+          "failed_frame": 133,
+          "raw_failure": "0x0",
+          "baseline_recovery_verified": true
+        }
+      ],
+      "settings": {
+        "50": [
+          0,
+          36,
+          64
+        ],
+        "66.667": [
+          0,
+          36,
+          86
+        ],
+        "80": [
+          8,
+          35,
+          103
+        ],
+        "100": [
+          16,
+          36,
+          192
+        ],
+        "160": [
+          8,
+          37,
+          205
+        ],
+        "200": [
+          8,
+          39,
+          256
+        ]
+      },
+      "tms_advance_slots": 1,
+      "probe": {
+        "executable_bytes": 2356,
+        "pair_sha256": {
+          "probe.bit": "78b5e4d2b71c4b816c4e875285f0b09588650214693c27d17e0d6fc48daf407d",
+          "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36",
+          "application.elf": "fdce894b04e2b56cc092459ca7aea4bdd8329f2410fe90a4cde75757f5c6bdb0"
+        }
+      },
+      "transport": "Zynq OCM/GP0 local runner",
+      "debug_before": {
+        "dmcontrol": 0,
+        "dmstatus": 4983970,
+        "sbcs": 537134087,
+        "sbaddress": 0
+      },
+      "backup_sha256": "fa71add868345c2b097971fb0d535f11295d4e479e7db84e22ffb13d32e40f10",
+      "workload_bytes": 256,
+      "DMI_requests_per_frame": 1,
+      "plan_sha256": {
+        "100": "b10611699f1f1e2d27e3a8c2b34b751a5c2f504ddde2a9d58c7aa90060fe6f11"
+      },
+      "restored_sha256": "fa71add868345c2b097971fb0d535f11295d4e479e7db84e22ffb13d32e40f10",
+      "restored_match": true,
+      "guards_match": true,
+      "debug_state_restored": true
+    },
+    "100_tms_advance_idle384_long": {
+      "cable": "210299008529",
+      "base": "0x105f000",
+      "bytes": 1024,
+      "block_bytes": 128,
+      "rates": [
+        {
+          "rate": "100",
+          "round": 0,
+          "planned_seconds": 1,
+          "elapsed_s": 1.0034852140034851,
+          "host_elapsed_s": 1.509309699991718,
+          "verified_blocks": 164,
+          "bytes": {
+            "read": 20992,
+            "write": 20992
+          },
+          "direction_seconds": {
+            "read": 0.47955219047955217,
+            "write": 0.506225919506226
+          },
+          "MBps": {
+            "read": 0.04377417185605596,
+            "write": 0.04146765147955215
+          },
+          "combined_MBps": 0.041838184971855694,
+          "waveform_frames": 12136,
+          "calculated_waveform_seconds": 0.06213632
+        },
+        {
+          "rate": "100",
+          "round": 1,
+          "planned_seconds": 60,
+          "elapsed_s": 60.01256597101256,
+          "host_elapsed_s": 60.388409000006504,
+          "verified_blocks": 9808,
+          "bytes": {
+            "read": 1255424,
+            "write": 1255424
+          },
+          "direction_seconds": {
+            "read": 28.679256253679256,
+            "write": 30.274451799274452
+          },
+          "MBps": {
+            "read": 0.043774635886484746,
+            "write": 0.04146810017646916
+          },
+          "combined_MBps": 0.04183870426758284,
+          "waveform_frames": 725792,
+          "calculated_waveform_seconds": 3.71605504
+        },
+        {
+          "rate": "100",
+          "round": 2,
+          "planned_seconds": 60,
+          "elapsed_s": 60.013104750013106,
+          "host_elapsed_s": 60.39564880001126,
+          "verified_blocks": 9808,
+          "bytes": {
+            "read": 1255424,
+            "write": 1255424
+          },
+          "direction_seconds": {
+            "read": 28.679577529679577,
+            "write": 30.274629282274628
+          },
+          "MBps": {
+            "read": 0.043774145511760135,
+            "write": 0.041467857072490504
+          },
+          "combined_MBps": 0.04183832865270067,
+          "waveform_frames": 725792,
+          "calculated_waveform_seconds": 3.71605504
+        },
+        {
+          "rate": "100",
+          "round": 3,
+          "planned_seconds": 60,
+          "elapsed_s": 52.400752558400754,
+          "host_elapsed_s": 52.91367069998523,
+          "verified_blocks": 8563,
+          "bytes": {
+            "read": 1096064,
+            "write": 1096192
+          },
+          "direction_seconds": {
+            "read": 25.04147028404147,
+            "write": 26.43473190243473
+          },
+          "MBps": {
+            "read": 0.043769953903166146,
+            "write": 0.04146786901587744
+          },
+          "combined_MBps": 0.041836345719591064,
+          "waveform_frames": 633726,
+          "calculated_waveform_seconds": 3.24467712,
+          "error": "runner code 4, frame 286, DMI 0x0",
+          "failed_frame": 286,
+          "raw_failure": "0x0",
+          "baseline_recovery_verified": true
+        }
+      ],
+      "settings": {
+        "50": [
+          0,
+          36,
+          64
+        ],
+        "66.667": [
+          0,
+          36,
+          86
+        ],
+        "80": [
+          8,
+          35,
+          103
+        ],
+        "100": [
+          16,
+          37,
+          384
+        ],
+        "160": [
+          8,
+          37,
+          205
+        ],
+        "200": [
+          8,
+          39,
+          256
+        ]
+      },
+      "tms_advance_slots": 1,
+      "probe": {
+        "executable_bytes": 2356,
+        "pair_sha256": {
+          "probe.bit": "78b5e4d2b71c4b816c4e875285f0b09588650214693c27d17e0d6fc48daf407d",
+          "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36",
+          "application.elf": "fdce894b04e2b56cc092459ca7aea4bdd8329f2410fe90a4cde75757f5c6bdb0"
+        }
+      },
+      "transport": "Zynq OCM/GP0 local runner",
+      "debug_before": {
+        "dmcontrol": 0,
+        "dmstatus": 4983970,
+        "sbcs": 537134087,
+        "sbaddress": 0
+      },
+      "backup_sha256": "fa71add868345c2b097971fb0d535f11295d4e479e7db84e22ffb13d32e40f10",
+      "workload_bytes": 256,
+      "DMI_requests_per_frame": 1,
+      "plan_sha256": {
+        "100": "be493bd4b304e40f1f572a099b3932cb4f76e06f04e8c8dff8de63e734c04065"
+      },
+      "restored_sha256": "fa71add868345c2b097971fb0d535f11295d4e479e7db84e22ffb13d32e40f10",
+      "restored_match": true,
+      "guards_match": true,
+      "debug_state_restored": true
+    },
+    "ram-stress-tune-100-0-35-512": {
+      "cable": "210299008529",
+      "base": "0x105f000",
+      "bytes": 1024,
+      "block_bytes": 128,
+      "rates": [
+        {
+          "rate": "100",
+          "round": 1,
+          "planned_seconds": 3,
+          "elapsed_s": 0.008058156008058155,
+          "host_elapsed_s": 0.7562464000075124,
+          "verified_blocks": 1,
+          "bytes": {
+            "read": 128,
+            "write": 128
+          },
+          "direction_seconds": {
+            "read": 0.003573018003573018,
+            "write": 0.004367475004367475
+          },
+          "MBps": {
+            "read": 0.0358240568259102,
+            "write": 0.02930755181701097
+          },
+          "combined_MBps": 0.03176905482395725,
+          "waveform_frames": 79,
+          "calculated_waveform_seconds": 0.0005056,
+          "error": "runner code 4, frame 79, DMI 0x0",
+          "failed_frame": 79,
+          "raw_failure": "0x0",
+          "baseline_recovery_verified": true
+        }
+      ],
+      "settings": {
+        "50": [
+          0,
+          36,
+          64
+        ],
+        "66.667": [
+          0,
+          36,
+          86
+        ],
+        "80": [
+          8,
+          35,
+          103
+        ],
+        "100": [
+          0,
+          35,
+          512
+        ],
+        "160": [
+          8,
+          37,
+          205
+        ],
+        "200": [
+          8,
+          39,
+          256
+        ]
+      },
+      "probe": {
+        "executable_bytes": 2356,
+        "pair_sha256": {
+          "probe.bit": "78b5e4d2b71c4b816c4e875285f0b09588650214693c27d17e0d6fc48daf407d",
+          "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36",
+          "application.elf": "fdce894b04e2b56cc092459ca7aea4bdd8329f2410fe90a4cde75757f5c6bdb0"
+        }
+      },
+      "transport": "Zynq OCM/GP0 local runner",
+      "debug_before": {
+        "dmcontrol": 0,
+        "dmstatus": 4983970,
+        "sbcs": 537134087,
+        "sbaddress": 0
+      },
+      "backup_sha256": "fa71add868345c2b097971fb0d535f11295d4e479e7db84e22ffb13d32e40f10",
+      "workload_bytes": 256,
+      "DMI_requests_per_frame": 1,
+      "plan_sha256": {
+        "100": "bf8174ac1bbeb897938ecc9460315e4c6abf99c0e6d11a808a9c52f2570dd2a3"
+      },
+      "restored_sha256": "fa71add868345c2b097971fb0d535f11295d4e479e7db84e22ffb13d32e40f10",
+      "restored_match": true,
+      "guards_match": true,
+      "debug_state_restored": true
+    },
+    "ram-stress-tune-100-16-36-384": {
+      "cable": "210299008529",
+      "base": "0x105f000",
+      "bytes": 1024,
+      "block_bytes": 128,
+      "rates": [
+        {
+          "rate": "100",
+          "round": 1,
+          "planned_seconds": 3,
+          "elapsed_s": 0.004134579004134579,
+          "host_elapsed_s": 0.7580136999604292,
+          "verified_blocks": 0,
+          "bytes": {
+            "read": 0,
+            "write": 128
+          },
+          "direction_seconds": {
+            "read": 0.000974667000974667,
+            "write": 0.003086958003086958
+          },
+          "MBps": {
+            "read": 0.0,
+            "write": 0.0414647688345614
+          },
+          "combined_MBps": 0.030958411937950632,
+          "waveform_frames": 49,
+          "calculated_waveform_seconds": 0.00025088,
+          "error": "runner code 4, frame 49, DMI 0x0",
+          "failed_frame": 49,
+          "raw_failure": "0x0",
+          "baseline_recovery_verified": true
+        }
+      ],
+      "settings": {
+        "50": [
+          0,
+          36,
+          64
+        ],
+        "66.667": [
+          0,
+          36,
+          86
+        ],
+        "80": [
+          8,
+          35,
+          103
+        ],
+        "100": [
+          16,
+          36,
+          384
+        ],
+        "160": [
+          8,
+          37,
+          205
+        ],
+        "200": [
+          8,
+          39,
+          256
+        ]
+      },
+      "probe": {
+        "executable_bytes": 2356,
+        "pair_sha256": {
+          "probe.bit": "78b5e4d2b71c4b816c4e875285f0b09588650214693c27d17e0d6fc48daf407d",
+          "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36",
+          "application.elf": "fdce894b04e2b56cc092459ca7aea4bdd8329f2410fe90a4cde75757f5c6bdb0"
+        }
+      },
+      "transport": "Zynq OCM/GP0 local runner",
+      "debug_before": {
+        "dmcontrol": 0,
+        "dmstatus": 4983970,
+        "sbcs": 537134087,
+        "sbaddress": 0
+      },
+      "backup_sha256": "fa71add868345c2b097971fb0d535f11295d4e479e7db84e22ffb13d32e40f10",
+      "workload_bytes": 256,
+      "DMI_requests_per_frame": 1,
+      "plan_sha256": {
+        "100": "b4a1c1d51d9515f139f3d7ab61beaa8f4a8da9b4a505f7a97fce61a2da5c9106"
+      },
+      "restored_sha256": "fa71add868345c2b097971fb0d535f11295d4e479e7db84e22ffb13d32e40f10",
+      "restored_match": true,
+      "guards_match": true,
+      "debug_state_restored": true
+    },
+    "ram-stress-tune-100-8-37-384": {
+      "cable": "210299008529",
+      "base": "0x105f000",
+      "bytes": 1024,
+      "block_bytes": 128,
+      "rates": [
+        {
+          "rate": "100",
+          "round": 1,
+          "planned_seconds": 3,
+          "elapsed_s": 0.005954145005954145,
+          "host_elapsed_s": 0.7559727999614552,
+          "verified_blocks": 0,
+          "bytes": {
+            "read": 0,
+            "write": 128
+          },
+          "direction_seconds": {
+            "read": 0.002761746002761746,
+            "write": 0.00308733000308733
+          },
+          "MBps": {
+            "read": 0.0,
+            "write": 0.04145977264238031
+          },
+          "combined_MBps": 0.02149762894118299,
+          "waveform_frames": 71,
+          "calculated_waveform_seconds": 0.00036352,
+          "error": "runner code 4, frame 71, DMI 0x0",
+          "failed_frame": 71,
+          "raw_failure": "0x0",
+          "baseline_recovery_verified": true
+        }
+      ],
+      "settings": {
+        "50": [
+          0,
+          36,
+          64
+        ],
+        "66.667": [
+          0,
+          36,
+          86
+        ],
+        "80": [
+          8,
+          35,
+          103
+        ],
+        "100": [
+          8,
+          37,
+          384
+        ],
+        "160": [
+          8,
+          37,
+          205
+        ],
+        "200": [
+          8,
+          39,
+          256
+        ]
+      },
+      "probe": {
+        "executable_bytes": 2356,
+        "pair_sha256": {
+          "probe.bit": "78b5e4d2b71c4b816c4e875285f0b09588650214693c27d17e0d6fc48daf407d",
+          "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36",
+          "application.elf": "fdce894b04e2b56cc092459ca7aea4bdd8329f2410fe90a4cde75757f5c6bdb0"
+        }
+      },
+      "transport": "Zynq OCM/GP0 local runner",
+      "debug_before": {
+        "dmcontrol": 0,
+        "dmstatus": 4983970,
+        "sbcs": 537134087,
+        "sbaddress": 0
+      },
+      "backup_sha256": "fa71add868345c2b097971fb0d535f11295d4e479e7db84e22ffb13d32e40f10",
+      "workload_bytes": 256,
+      "DMI_requests_per_frame": 1,
+      "plan_sha256": {
+        "100": "e42b442e9839e8d97691464f6345a78783625eaba67b2ef0c9058c1effa9426f"
+      },
+      "restored_sha256": "fa71add868345c2b097971fb0d535f11295d4e479e7db84e22ffb13d32e40f10",
+      "restored_match": true,
+      "guards_match": true,
+      "debug_state_restored": true
+    },
+    "ram-stress-tune-tms-100-16-36-192": {
+      "cable": "210299008529",
+      "base": "0x105f000",
+      "bytes": 1024,
+      "block_bytes": 128,
+      "rates": [
+        {
+          "rate": "100",
+          "round": 1,
+          "planned_seconds": 5,
+          "elapsed_s": 5.002565909002566,
+          "host_elapsed_s": 5.2872130000032485,
+          "verified_blocks": 1208,
+          "bytes": {
+            "read": 154624,
+            "write": 154624
+          },
+          "direction_seconds": {
+            "read": 2.3689765883689766,
+            "write": 2.500518005500518
+          },
+          "MBps": {
+            "read": 0.06527037909921157,
+            "write": 0.06183678728162151
+          },
+          "combined_MBps": 0.061817876190992396,
+          "waveform_frames": 89392,
+          "calculated_waveform_seconds": 0.2860544
+        }
+      ],
+      "settings": {
+        "50": [
+          0,
+          36,
+          64
+        ],
+        "66.667": [
+          0,
+          36,
+          86
+        ],
+        "80": [
+          8,
+          35,
+          103
+        ],
+        "100": [
+          16,
+          36,
+          192
+        ],
+        "160": [
+          8,
+          37,
+          205
+        ],
+        "200": [
+          8,
+          39,
+          256
+        ]
+      },
+      "tms_advance_slots": 1,
+      "probe": {
+        "executable_bytes": 2356,
+        "pair_sha256": {
+          "probe.bit": "78b5e4d2b71c4b816c4e875285f0b09588650214693c27d17e0d6fc48daf407d",
+          "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36",
+          "application.elf": "fdce894b04e2b56cc092459ca7aea4bdd8329f2410fe90a4cde75757f5c6bdb0"
+        }
+      },
+      "transport": "Zynq OCM/GP0 local runner",
+      "debug_before": {
+        "dmcontrol": 0,
+        "dmstatus": 4983970,
+        "sbcs": 537134087,
+        "sbaddress": 0
+      },
+      "backup_sha256": "fa71add868345c2b097971fb0d535f11295d4e479e7db84e22ffb13d32e40f10",
+      "workload_bytes": 256,
+      "DMI_requests_per_frame": 1,
+      "plan_sha256": {
+        "100": "b10611699f1f1e2d27e3a8c2b34b751a5c2f504ddde2a9d58c7aa90060fe6f11"
+      },
+      "restored_sha256": "fa71add868345c2b097971fb0d535f11295d4e479e7db84e22ffb13d32e40f10",
+      "restored_match": true,
+      "guards_match": true,
+      "debug_state_restored": true
+    },
+    "ram-stress-tune-tms-100-16-37-384": {
+      "cable": "210299008529",
+      "base": "0x105f000",
+      "bytes": 1024,
+      "block_bytes": 128,
+      "rates": [
+        {
+          "rate": "100",
+          "round": 1,
+          "planned_seconds": 5,
+          "elapsed_s": 5.017466069017466,
+          "host_elapsed_s": 5.2807470000116155,
+          "verified_blocks": 820,
+          "bytes": {
+            "read": 104960,
+            "write": 104960
+          },
+          "direction_seconds": {
+            "read": 2.3977916423977916,
+            "write": 2.5311362785311364
+          },
+          "MBps": {
+            "read": 0.04377361157829377,
+            "write": 0.041467542024608076
+          },
+          "combined_MBps": 0.041837851439841846,
+          "waveform_frames": 60680,
+          "calculated_waveform_seconds": 0.3106816
+        }
+      ],
+      "settings": {
+        "50": [
+          0,
+          36,
+          64
+        ],
+        "66.667": [
+          0,
+          36,
+          86
+        ],
+        "80": [
+          8,
+          35,
+          103
+        ],
+        "100": [
+          16,
+          37,
+          384
+        ],
+        "160": [
+          8,
+          37,
+          205
+        ],
+        "200": [
+          8,
+          39,
+          256
+        ]
+      },
+      "tms_advance_slots": 1,
+      "probe": {
+        "executable_bytes": 2356,
+        "pair_sha256": {
+          "probe.bit": "78b5e4d2b71c4b816c4e875285f0b09588650214693c27d17e0d6fc48daf407d",
+          "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36",
+          "application.elf": "fdce894b04e2b56cc092459ca7aea4bdd8329f2410fe90a4cde75757f5c6bdb0"
+        }
+      },
+      "transport": "Zynq OCM/GP0 local runner",
+      "debug_before": {
+        "dmcontrol": 0,
+        "dmstatus": 4983970,
+        "sbcs": 537134087,
+        "sbaddress": 0
+      },
+      "backup_sha256": "fa71add868345c2b097971fb0d535f11295d4e479e7db84e22ffb13d32e40f10",
+      "workload_bytes": 256,
+      "DMI_requests_per_frame": 1,
+      "plan_sha256": {
+        "100": "be493bd4b304e40f1f572a099b3932cb4f76e06f04e8c8dff8de63e734c04065"
+      },
+      "restored_sha256": "fa71add868345c2b097971fb0d535f11295d4e479e7db84e22ffb13d32e40f10",
+      "restored_match": true,
+      "guards_match": true,
+      "debug_state_restored": true
+    }
+  },
+  "final_probe_load": {
+    "pair": {
+      "probe.bit": "78b5e4d2b71c4b816c4e875285f0b09588650214693c27d17e0d6fc48daf407d",
+      "application.elf": "4835d5fb10c88c329355f0a1e950706f5d38b97a083e5637f81c8bf40b519345",
+      "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+    },
+    "cable_serial": "210299008529",
+    "passed": true,
+    "live_code_sha256": "5378afd3a87cd129b3592a6aa36de820ceaaf4a014cc24d509f155f2b7c4100a",
+    "verified_code_bytes": 592
+  },
+  "final_independent_RAM_readback": {
+    "ram_sha256": "fa71add868345c2b097971fb0d535f11295d4e479e7db84e22ffb13d32e40f10",
+    "probe": {
+      "executable_bytes": 592,
+      "pair_sha256": {
+        "probe.bit": "78b5e4d2b71c4b816c4e875285f0b09588650214693c27d17e0d6fc48daf407d",
+        "application.elf": "4835d5fb10c88c329355f0a1e950706f5d38b97a083e5637f81c8bf40b519345",
+        "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+      }
+    },
+    "target_state_before": {
+      "dmcontrol": 0,
+      "dmstatus": 4983970,
+      "sbcs": 537134087,
+      "sbaddress": 0
+    },
+    "ram_match": true,
+    "guards_match": true,
+    "readback_sha256": "fa71add868345c2b097971fb0d535f11295d4e479e7db84e22ffb13d32e40f10",
+    "debug_state_restored": true
+  },
+  "flash_writes": 0,
+  "flash_erases": 0,
+  "qspi_writes": 0
+}
