@@ -1,0 +1,345 @@
+{
+  "calibration": [],
+  "read_tune": [],
+  "long_read": [],
+  "mixed": [],
+  "phase": "complete",
+  "target_before": {
+    "name": "STM32H743/H742/H750/H753",
+    "cpuid": "0x411fc271",
+    "device": "0x20036450",
+    "registers": {
+      "0x58024400": "0x4025",
+      "0x58024410": "0x0",
+      "0x58024418": "0x0",
+      "0x5802441c": "0x0",
+      "0x58024420": "0x0",
+      "0x58024428": "0x2020200",
+      "0x5802442c": "0x1ff0000",
+      "0x58024430": "0x1010280",
+      "0x58024434": "0x0",
+      "0x58024438": "0x1010280",
+      "0x52002000": "0x37"
+    }
+  },
+  "backup_sha256": "248a55d02bc9b70b40dee28beed9bf66e17641583e0274d46fb3936820132a2c",
+  "dhcsr_before": "0x10000",
+  "clock_fixture_backup": {
+    "0x58024400": "0x4025",
+    "0x58024410": "0x0",
+    "0x58024418": "0x0",
+    "0x5802441c": "0x0",
+    "0x58024420": "0x0",
+    "0x58024428": "0x2020200",
+    "0x5802442c": "0x1ff0000",
+    "0x58024430": "0x1010280",
+    "0x580244f4": "0x10000",
+    "0x58024818": "0x6000",
+    "0x5802480c": "0x42"
+  },
+  "clock_fixture_overdrive_before": "0x0",
+  "targetSysclkHz": 480000000,
+  "targetHclkHz": 240000000,
+  "targetClockBasis": "H743 25 MHz HSE and live RCC PLL1P/D1 readback",
+  "target_clock_active": {
+    "name": "STM32H743/H742/H750/H753",
+    "cpuid": "0x411fc271",
+    "device": "0x20036450",
+    "registers": {
+      "0x58024400": "0x3034025",
+      "0x58024410": "0x1b",
+      "0x58024418": "0x48",
+      "0x5802441c": "0x440",
+      "0x58024420": "0x50",
+      "0x58024428": "0x2020052",
+      "0x5802442c": "0x1ff0008",
+      "0x58024430": "0x10102bf",
+      "0x58024434": "0x0",
+      "0x58024438": "0x1010280",
+      "0x52002000": "0x37"
+    }
+  },
+  "probe": {
+    "executable_bytes": 3016,
+    "pair_sha256": {
+      "probe.bit": "d7546ec09b1dd88bfee02c13ee1b6aa5b3a0a2671e341d3fdd515f9ef146017e",
+      "application.elf": "9cec39561a8f9bd1bb688ffd2e0f197013831558caa886f779f907c9e4a11224",
+      "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+    }
+  },
+  "target_clock_reverified": true,
+  "target_clock_probe_slots": [
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39
+  ],
+  "limit": {
+    "172.973": {
+      "tap_scan": [
+        {
+          "tap": 16,
+          "slots": [
+            35
+          ]
+        }
+      ],
+      "read_trials": [
+        {
+          "rate": "172.973",
+          "tck_hz": 172972973,
+          "fclk_control": "0x102500",
+          "tap": 16,
+          "slot": 35,
+          "advance": [
+            false,
+            false
+          ],
+          "idle": 16,
+          "stream": false,
+          "verify_in_pl": false,
+          "mode": 1,
+          "planned_s": 0,
+          "seconds": 0.000226812000226812,
+          "host_s": 0.002031200041528791,
+          "read_MBps": 4.530211729779949,
+          "write_MBps": 0,
+          "read_bytes": 1024,
+          "write_bytes": 0,
+          "tck_cycles": 15568,
+          "segments": 276,
+          "completion": 65792,
+          "passed": true,
+          "read_timing_s": {
+            "scan": 0.00014232000014232,
+            "bram_read_and_compare": 8.0061000080061e-05,
+            "other": 3.6570000036570096e-06
+          },
+          "write_timing_s": {
+            "scan": 0.0,
+            "bram_load": 0.0,
+            "other": 0.0
+          }
+        },
+        {
+          "rate": "172.973",
+          "tck_hz": 172972973,
+          "fclk_control": "0x102500",
+          "tap": 16,
+          "slot": 35,
+          "advance": [
+            false,
+            false
+          ],
+          "idle": 16,
+          "stream": false,
+          "verify_in_pl": false,
+          "mode": 1,
+          "planned_s": 1,
+          "seconds": 1.0000077820000077,
+          "host_s": 1.010046399955172,
+          "read_MBps": 4.554082348495275,
+          "write_MBps": 0,
+          "read_bytes": 4543488,
+          "write_bytes": 0,
+          "tck_cycles": 69075216,
+          "segments": 1224612,
+          "completion": 65792,
+          "passed": true,
+          "read_timing_s": {
+            "scan": 0.631495998631496,
+            "bram_read_and_compare": 0.35566735535566735,
+            "other": 0.010510305010510368
+          },
+          "write_timing_s": {
+            "scan": 0.0,
+            "bram_load": 0.0,
+            "other": 0.0
+          }
+        }
+      ],
+      "write_trials": [],
+      "long_mixed": [],
+      "long_read": [
+        {
+          "rate": "172.973",
+          "tck_hz": 172972973,
+          "fclk_control": "0x102500",
+          "tap": 16,
+          "slot": 35,
+          "advance": [
+            false,
+            false
+          ],
+          "idle": 16,
+          "stream": false,
+          "verify_in_pl": false,
+          "mode": 1,
+          "planned_s": 20,
+          "seconds": 20.000135693000136,
+          "host_s": 20.09889560000738,
+          "read_MBps": 4.554086316365428,
+          "write_MBps": 0,
+          "read_bytes": 90869760,
+          "write_bytes": 0,
+          "tck_cycles": 1381504320,
+          "segments": 24492240,
+          "completion": 65792,
+          "passed": true,
+          "read_timing_s": {
+            "scan": 12.629918100629919,
+            "bram_read_and_compare": 7.1133007661133005,
+            "other": 0.21023692821023676
+          },
+          "write_timing_s": {
+            "scan": 0.0,
+            "bram_load": 0.0,
+            "other": 0.0
+          }
+        },
+        {
+          "rate": "172.973",
+          "tck_hz": 172972973,
+          "fclk_control": "0x102500",
+          "tap": 16,
+          "slot": 35,
+          "advance": [
+            false,
+            false
+          ],
+          "idle": 16,
+          "stream": false,
+          "verify_in_pl": false,
+          "mode": 1,
+          "planned_s": 20,
+          "seconds": 20.000134652000135,
+          "host_s": 20.12485129997367,
+          "read_MBps": 4.554086802507027,
+          "write_MBps": 0,
+          "read_bytes": 90869760,
+          "write_bytes": 0,
+          "tck_cycles": 1381504320,
+          "segments": 24492240,
+          "completion": 65792,
+          "passed": true,
+          "read_timing_s": {
+            "scan": 12.629917011629917,
+            "bram_read_and_compare": 7.113327820113327,
+            "other": 0.210208833210209
+          },
+          "write_timing_s": {
+            "scan": 0.0,
+            "bram_load": 0.0,
+            "other": 0.0
+          }
+        },
+        {
+          "rate": "172.973",
+          "tck_hz": 172972973,
+          "fclk_control": "0x102500",
+          "tap": 16,
+          "slot": 35,
+          "advance": [
+            false,
+            false
+          ],
+          "idle": 16,
+          "stream": false,
+          "verify_in_pl": false,
+          "mode": 1,
+          "planned_s": 20,
+          "seconds": 20.000135057000136,
+          "host_s": 20.072942900005728,
+          "read_MBps": 4.55408494558362,
+          "write_MBps": 0,
+          "read_bytes": 90869760,
+          "write_bytes": 0,
+          "tck_cycles": 1381504320,
+          "segments": 24492240,
+          "completion": 65792,
+          "passed": true,
+          "read_timing_s": {
+            "scan": 12.629924739629924,
+            "bram_read_and_compare": 7.113352264113352,
+            "other": 0.2101847972101858
+          },
+          "write_timing_s": {
+            "scan": 0.0,
+            "bram_load": 0.0,
+            "other": 0.0
+          }
+        }
+      ],
+      "read": {
+        "rate": "172.973",
+        "tck_hz": 172972973,
+        "fclk_control": "0x102500",
+        "tap": 16,
+        "slot": 35,
+        "advance": [
+          false,
+          false
+        ],
+        "idle": 16,
+        "stream": false,
+        "verify_in_pl": false,
+        "mode": 1,
+        "planned_s": 1,
+        "seconds": 1.0000077820000077,
+        "host_s": 1.010046399955172,
+        "read_MBps": 4.554082348495275,
+        "write_MBps": 0,
+        "read_bytes": 4543488,
+        "write_bytes": 0,
+        "tck_cycles": 69075216,
+        "segments": 1224612,
+        "completion": 65792,
+        "passed": true,
+        "read_timing_s": {
+          "scan": 0.631495998631496,
+          "bram_read_and_compare": 0.35566735535566735,
+          "other": 0.010510305010510368
+        },
+        "write_timing_s": {
+          "scan": 0.0,
+          "bram_load": 0.0,
+          "other": 0.0
+        }
+      }
+    }
+  },
+  "limit_dense_taps": false,
+  "limit_read_only": true,
+  "limit_expect_sha256": "4c0e74f5c7c9892c523ec10d52096827e4e3cce6399556ece421eb492d49a50c",
+  "restore_transport": "jtag",
+  "independent_final_pattern_match": true,
+  "restore_sha256": "248a55d02bc9b70b40dee28beed9bf66e17641583e0274d46fb3936820132a2c",
+  "ram_restored": true,
+  "guards_match": true,
+  "voltage_restored": true,
+  "supply_after": "0x42",
+  "target_after": {
+    "name": "STM32H743/H742/H750/H753",
+    "cpuid": "0x411fc271",
+    "device": "0x20036450",
+    "registers": {
+      "0x58024400": "0x4025",
+      "0x58024410": "0x0",
+      "0x58024418": "0x0",
+      "0x5802441c": "0x0",
+      "0x58024420": "0x0",
+      "0x58024428": "0x2020200",
+      "0x5802442c": "0x1ff0000",
+      "0x58024430": "0x1010280",
+      "0x58024434": "0x0",
+      "0x58024438": "0x1010280",
+      "0x52002000": "0x37"
+    }
+  },
+  "rcc_restored": true,
+  "dhcsr_after": "0x10000",
+  "core_state_restored": true
+}

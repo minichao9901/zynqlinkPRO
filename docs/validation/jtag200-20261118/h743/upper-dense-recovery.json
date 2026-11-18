@@ -1,0 +1,59 @@
+{
+  "attempts": [
+    {
+      "mode": "jtag",
+      "khz": 1000,
+      "error": "RuntimeError('Invalid ARM JTAG IDCODE: 16 00 00 00 00 00')"
+    }
+  ],
+  "backup_sha256": "248a55d02bc9b70b40dee28beed9bf66e17641583e0274d46fb3936820132a2c",
+  "transport": "swd",
+  "recovery_khz": 1000,
+  "identity": "0501017724a06b",
+  "target_live": {
+    "name": "STM32H743/H742/H750/H753",
+    "cpuid": "0x411fc271",
+    "device": "0x20036450",
+    "registers": {
+      "0x58024400": "0x3034025",
+      "0x58024410": "0x1b",
+      "0x58024418": "0x48",
+      "0x5802441c": "0x440",
+      "0x58024420": "0x50",
+      "0x58024428": "0x2020052",
+      "0x5802442c": "0x1ff0008",
+      "0x58024430": "0x10102bf",
+      "0x58024434": "0x0",
+      "0x58024438": "0x1010280",
+      "0x52002000": "0x37"
+    }
+  },
+  "scratch_before": "8b8ae69df33515022d4599553cdbc6d6f5580679fc56d457e338b05ad951a5c0",
+  "guards_before": "cf791e6e0d7cde4f",
+  "independent_final_pattern_match": false,
+  "restore_sha256": "248a55d02bc9b70b40dee28beed9bf66e17641583e0274d46fb3936820132a2c",
+  "ram_restored": true,
+  "guards_match": true,
+  "voltage_restored": true,
+  "target_after": {
+    "name": "STM32H743/H742/H750/H753",
+    "cpuid": "0x411fc271",
+    "device": "0x20036450",
+    "registers": {
+      "0x58024400": "0x4025",
+      "0x58024410": "0x0",
+      "0x58024418": "0x0",
+      "0x5802441c": "0x0",
+      "0x58024420": "0x0",
+      "0x58024428": "0x2020200",
+      "0x5802442c": "0x1ff0000",
+      "0x58024430": "0x1010280",
+      "0x58024434": "0x0",
+      "0x58024438": "0x1010280",
+      "0x52002000": "0x37"
+    }
+  },
+  "rcc_restored": true,
+  "dhcsr_after": "0x10000",
+  "core_state_restored": true
+}

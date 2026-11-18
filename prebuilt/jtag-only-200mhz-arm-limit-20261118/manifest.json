@@ -1,0 +1,31 @@
+{
+  "source_revision": "c90c976f5fbcfff679ebf2ed31b2a93fa1f716d4",
+  "fpga_entry": "fpga/experiments/jtag200/build.tcl",
+  "fpga_timing": {
+    "FCLK0_Hz": 133333333,
+    "FCLK1_max_Hz": 50000000,
+    "serializer_max_Hz": 200000000,
+    "setup_slack_ns": 2.116,
+    "hold_slack_ns": 0.067
+  },
+  "firmware_flags": [
+    "-mcpu=cortex-a9",
+    "-marm",
+    "-O3",
+    "-g",
+    "-ffreestanding",
+    "-nostdlib",
+    "-DJTAG200_STRESS",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-Wl,--build-id=none"
+  ],
+  "hardware_acceptance": "H743 CPU480/HCLK240: 164.103 MHz alternating SRAM verified 3x20 s (4.404/4.673 MB/s); 172.973 MHz verified SRAM reads 3x20 s (4.554 MB/s). TAP only at 177.778 MHz; no stable TAP at 182.857\u2013200 MHz among tested profiles. Final RAM, guards, clocks and run state restored.",
+  "sha256": {
+    "probe.bit": "d7546ec09b1dd88bfee02c13ee1b6aa5b3a0a2671e341d3fdd515f9ef146017e",
+    "application.elf": "9cec39561a8f9bd1bb688ffd2e0f197013831558caa886f779f907c9e4a11224",
+    "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+  },
+  "hardware_evidence": "docs/validation/jtag200-20261118/h743/upper-sweep.json"
+}
