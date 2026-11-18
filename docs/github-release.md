@@ -14,6 +14,12 @@
 
 J7 使用[固定 QSPI 目录](../prebuilt/qspi-release/README.md)。只更新探针镜像时，把验收通过的 BOOT、配套 bit/ELF、辅助程序和清单一起提交并推送到 `main` 的 `prebuilt/qspi-release/`。Pages 链接始终指向该目录，本机 Web 手册和 CLI 使用本机仓库同一路径，用户更新仓库即可选用新镜像。单独更新镜像无需再发布 Pages 或重打 Windows 包。
 
+## v1.3.16 发布验收
+
+2026-11-18（上海时间）。调试器 RTT 支持键盘和粘贴输入，自动等待控制块初始化并持续刷新。构建源码和标签为 `283ad0c54f84b88aca3f88f69c4040af46dd979d`，Pages 静态提交为 `7b312e6f266bb0978e60b025135cb86d8c60e664`。固定 EXE 和公开 Pages 均通过浏览器模拟目标回归。ZL-263 实板待验。 [验收记录](validation/workbench-v1316-debugger-rtt-20261118/README.md)
+
+Release 于 11:18:26 公开。匿名下载核对 Windows ZIP 的 SHA-256 `cbd1a58a905a17eebb1dde9dcc0bfa55f05f99afe760005a3d8c754a6304731a` 及 1,892 个包内文件。工程下载卡指向同版本 ZIP。 [Pages](https://minichao9901.github.io/zynqlinkPRO/#download) · [Release](https://github.com/minichao9901/zynqlinkPRO/releases/tag/v1.3.16)
+
 ## v1.3.15 发布验收
 
 2026-11-17（上海时间）。构建源码和 Git 标签指向 `408d0b5190e4166ea335332fb2bc3073e2bde88a`，Pages 静态提交为 `d92500f3945d250d1006def698ab58a1758df23b`。匿名浏览器显示 v1.3.15，下载卡指向正式 Release。匿名完整下载后核对 ZIP SHA-256 `e429cabc3fa965f719a79eb3b75747f857b31247b16ee80a500a49ffb20b1d7d` 及 1,892 个包内文件。[Pages](https://minichao9901.github.io/zynqlinkPRO/#download) · [Release](https://github.com/minichao9901/zynqlinkPRO/releases/tag/v1.3.15)
