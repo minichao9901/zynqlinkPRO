@@ -40,7 +40,7 @@ Vivado/XSim 2018.3 的实际 MMCM、OSERDES、ISERDES 和 I/O 延时模型通过
 
 用于该表的 JTAG TAP 行为模型回包延时为 0.8 ns。RX 偏移包含了 FPGA 的串并转换流水延迟。40 MHz 参考的两档会产生 XSim 的 MMCM 参考周期属性提示，实测仿真周期为表值。板上仍需重新扫 tap 与偏移。
 
-首轮构建暴露 PS7 的 FCLK 端口使能需同时设 PCW_EN_CLKx_PORT。输出目录检查还暴露生成的初始化 Tcl 在 *processing_system7* 目录。首轮仿真补齐 XSim secureip 和 timescale 后通过。对应脚本已修正。首个路由候选的 CDC 报告标出扫描长度的直接跨域，最终实现让结束标记随双时钟 BRAM 过域。布线时序和 bit/ELF/初始化 Tcl 哈希见配对 manifest。
+首轮构建暴露 PS7 的 FCLK 端口使能需同时设 PCW_EN_CLKx_PORT。输出目录检查还暴露生成的初始化 Tcl 在 *processing_system7* 目录。首轮仿真补齐 XSim secureip 和 timescale 后通过。对应脚本已修正。首个路由候选的 CDC 报告标出扫描长度的直接跨域，最终实现让结束标记随双时钟 BRAM 过域。最终布线通过，WNS +2.482 ns，WHS +0.060 ns，WPWS +0.264 ns。CDC 撤去扫描长度的直接跨域后，报告仍标出锁定丢失和软件保持信号合成的异步复位断言，复位释放由四个 CLKDIV 拍同步。外部引脚建立保持和信号完整性待板测。详见[离线证据](offline-evidence.txt)和[配对 manifest](../../../prebuilt/jtag-only-200mhz-20261118/manifest.json)。
 
 ## 实板待验
 

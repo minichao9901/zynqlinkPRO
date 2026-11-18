@@ -1,0 +1,42 @@
+{
+  "name": "J7-only 50–200 MHz JTAG experimental pair",
+  "source_revision": "7405fa49c6c6394f732969c5813ada04d4166543",
+  "part": "xc7z020clg400-2",
+  "build": {
+    "vivado": "2018.3",
+    "fpga_entry": "fpga/experiments/jtag200/build.tcl",
+    "firmware_entry": "tools/jtag200.py firmware",
+    "compiler": "Xilinx SDK 2018.3 ARM GCC",
+    "paired_ps_init": "Vivado-generated with the actual FPGA block design",
+    "io_pll_feedback_divisor": 48,
+    "initializer_fclk_ctrl": {
+      "F8000170": "0x300400",
+      "F8000180": "0x400800",
+      "F8000190": "0x200400"
+    }
+  },
+  "nominal_tck_hz": [
+    50000000,
+    66666667,
+    80000000,
+    100000000,
+    160000000,
+    200000000
+  ],
+  "timing": {
+    "FCLK0_Hz": 133333333,
+    "FCLK1_max_Hz": 50000000,
+    "serializer_max_Hz": 200000000,
+    "setup_slack_ns": 2.482,
+    "hold_slack_ns": 0.06,
+    "min_pulse_width_slack_ns": 0.264,
+    "scope": "Internal routed clocks; external target I/O delays to be qualified on hardware."
+  },
+  "simulation": "XSim 2018.3, all six profiles passed with Xilinx primitive models and a modeled JTAG TAP.",
+  "hardware_acceptance": "pending_operator_board_notification",
+  "sha256": {
+    "probe.bit": "09e6e92f60abd592495a028d2466e25c87ed1379ed6e6c8ed6ee11dd451e595d",
+    "application.elf": "4835d5fb10c88c329355f0a1e950706f5d38b97a083e5637f81c8bf40b519345",
+    "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+  }
+}
