@@ -58,4 +58,8 @@ HPM5301EVKLite（序列号末八位 0AE800E0）在同一 USB 端口 1-2.3 经 HI
 
 按标称 50 MHz 扫查 IDCODE 三轮，三轮采样全为 0xff。保留原始失败，追加 50 MHz 以及波形加长的 10/5 MHz 对照，每档分别用 IDELAY tap 0、16、31，采样仍全高。频率来自 FCLK1 寄存器和波形时隙计算，未用仪器量测。当前尚未区分接线、目标 JTAG 输出和探针引脚链路。下一步先确认四线共地或用物理短回环定位，再验证目标 IDCODE、DMI 和 RAM。SuperLinkPRO 留在 DFU。本轮没有访问目标 RAM 或执行非易失存储操作。[实板证据](superlink-dfu-jtag-attempt.json)
 
+### 正式探针对照
+
+按用户要求从 J200 切回 J7 正式 JTAG/RAM 配对 release-20261106。物理 MEM-AP0 核对 85,844 B 执行段通过，ZynqLinkPRO CMSIS-DAP 枚举为 0D28:0204、序列号 12345678。此时 HPM5301 的 USB 序列号在运行态和 DFU 均回查不到，未确认目标 JTAG 引脚已释放，本次对照未发送外部 JTAG 扫描。J7 留在正式 RAM 配对。保留原 J200 全高记录，待 HPM5301 回到 DFU 后用正式链路扫 IDCODE。[正式探针对照证据](production-probe-contrast.json)
+
 固定 EXE、远端 main、Pages、Release 和 QSPI 不属于本轮交付。
