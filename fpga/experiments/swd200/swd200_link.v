@@ -111,9 +111,13 @@ module swd200_link (
                 READ_DATA: begin
                     parity_error <= ^captured;
                     read_data <= captured[31:0];
-                    state <= FINISH;
+                    state <= IDLE;
+                    done <= 1;
                 end
-                RESET_LAST, WRITE_DATA, ERROR_TURN: state <= FINISH;
+                RESET_LAST, WRITE_DATA, ERROR_TURN: begin
+                    state <= IDLE;
+                    done <= 1;
+                end
                 default: state <= IDLE;
             endcase
         end else if (state == FINISH) begin
