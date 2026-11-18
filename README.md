@@ -35,7 +35,7 @@ zynqlinkPRO 将 FPGA 调试引擎、并行 Trace 采集和主机分析工具整�
 | RTT 转发 | 用 ELF 或确切地址指定控制块，由探针经 USB/CDC 将板子日志单向送到 PC | 浏览器 / 本机工具 |
 | J-Scope 波形 | 多变量采样、曲线与泳道、游标、原始记录及 CSV | 浏览器连接探针 |
 | 固件烧录 | 目标识别、BIN/HEX/ELF、写入校验；固件字节与 ELF 表查看 | 浏览器连接探针 |
-| 调试器 | RAM 镜像加载、ELF 启动、断点、单步、寄存器、内存、源码及变量查看 | 浏览器连接探针 |
+| 调试器 | RAM 镜像加载、ELF 启动、断点、单步、寄存器、内存、源码、变量与 RTT 交互终端 | 浏览器连接探针 |
 | ETM 执行轨迹 | ETMv3/v4 解码、源码回放、函数统计、火焰图及记录导入/导出 | **本机 Windows 工作台** |
 | 工程下载 | 正式 Windows 完整包、版本说明及 SHA-256 | [在线下载页](https://minichao9901.github.io/zynqlinkPRO/#download) |
 
@@ -60,6 +60,8 @@ zynqlinkPRO 将 FPGA 调试引擎、并行 Trace 采集和主机分析工具整�
 调试器、烧录器和 RTT Viewer 共用 **OpenOCD Wasm**。在调试器导入与目标匹配的 OpenOCD CFG 后，可在烧录器和 RTT Viewer 点击「沿用目标」。可用目标、导入方式及当前验收范围见 [CLI 工作台](docs/toolbox-cli-ai.md#openocd-wasm-目标配置)。
 
 Web 工作台使用 ARM/SWD 和 RISC-V/JTAG。ARM/JTAG 通过[原生 CLI](docs/toolbox-cli-ai.md#armjtag-原生-cli)访问。
+
+在调试器右侧打开「RTT」，载入匹配的 ELF 或填写控制块地址。勾选「连接后自动开始」时，工作台会在目标初始化控制块后自动接入并持续刷新。固件启用了 RTT 下行通道 0 时，点击终端即可输入、退格、粘贴和回车。
 
 ## ETM 执行轨迹
 

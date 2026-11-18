@@ -964,8 +964,8 @@
             </div>
             <div class="toolrow nw"><span>地址</span><input id="d-rtt-addr" class="mono" placeholder="留空 = 用 _SEGGER_RTT 符号"></div>
             <p class="hint mono" id="d-rtt-sym">（载入 .elf 后这里显示 <code>_SEGGER_RTT</code> 的地址）</p>
-            <pre id="d-rtt" class="rx mono"></pre>
-            <p class="hint" id="d-rtt-info">读的是同一个 RTT 环，目标在跑的时候也能看到 printf。</p>
+            <div id="d-rtt" class="termbox" role="group" aria-label="调试器 RTT 终端"></div>
+            <p class="hint" id="d-rtt-info" role="status">定位 RTT 控制块后即可使用终端。</p>
           </div>
         </fieldset>
       </div>
