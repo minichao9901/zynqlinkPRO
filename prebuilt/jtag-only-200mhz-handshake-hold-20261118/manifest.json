@@ -1,0 +1,33 @@
+{
+  "source_revision": "d48added02ddc969a043cf342d278fd0a3b1f3a9",
+  "fpga_entry": "fpga/experiments/jtag200/build.tcl",
+  "fpga_timing": {
+    "FCLK0_Hz": 133333333,
+    "FCLK1_max_Hz": 50000000,
+    "serializer_max_Hz": 200000000,
+    "setup_slack_ns": 2.091,
+    "hold_slack_ns": 0.052
+  },
+  "firmware_flags": [
+    "-mcpu=cortex-a9",
+    "-marm",
+    "-O3",
+    "-g",
+    "-ffreestanding",
+    "-nostdlib",
+    "-DJTAG200_STRESS",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-Wl,--build-id=none"
+  ],
+  "hardware_acceptance": "200 MHz nominal: tap24/slot39/idle256, three 1 s read-only full-data checks; idle20 returns DMI BUSY after valid first response",
+  "sha256": {
+    "probe.bit": "1967b1b51c38c85b677b645ecb040fb6bd89343d1879d583ad3601e7c43a2d1d",
+    "application.elf": "ca011612de5a09eae1fe41a74319a7f5ce7b71ee8c7142d0864f73ff3bf3f0ed",
+    "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+  },
+  "hardware_evidence": "docs/validation/jtag200-20261118/segment-overhead",
+  "read_MBps": 2.009936267694848,
+  "read_total_bytes": 6024192
+}

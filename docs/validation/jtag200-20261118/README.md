@@ -93,4 +93,8 @@ RAM 测试固定为 HPM5301 ILM 的 SBA 系统地址 0x0105FFF0，双读备份 4
 
 见[Hazard3 RTL / HPM5301 对照](pipeline/README.md)。
 
+## 段间加速和 HPM5301 DMI 错位修复
+
+见[Hazard3 A/B 和 HPM5301 只读边界对照](segment-overhead/README.md)。
+
 固定 EXE、远端 main、Pages、Release 和 QSPI 不属于本轮交付。
