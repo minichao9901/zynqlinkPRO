@@ -50,13 +50,63 @@ def historical_probe(path):
                    cwd=ROOT, check=True)
 
 
-def trial(bench, rate, timing, idle, direction, seconds):
+def trial(bench, rate, timing, idle, direction, seconds, *, profile=False):
     tap, sample, advance = timing
     bench.configure(rate, idle, sample, advance_tms=advance, advance_tdi=advance, arm=True)
-    result = bench.run(direction, seconds)
+    result = bench.run(direction, seconds, profile=profile)
     del result['dmi_busy'], result['dmi_invalid']
     result.pop('wire_dmi', None)
     return dict(rate=rate, tap=tap, sample=sample, advance=advance, idle=idle, **result)
+
+
+def compare_66(bench, report, archive, seconds):
+    rate = '66.667-block'
+    timing = None
+    for tap in (16, 0, 8, 24, 31):
+        half, hz = select(bench.port, rate, tap)
+        slots = sorted(identify(bench.port, half, 3))
+        control = int(bench.port.command('read_word 0xf8000180'))
+        io_pll = int(bench.port.command('read_word 0xf8000108'))
+        need(control & 0x03F03F30 == 0x00103000 and io_pll >> 12 & 127 == 48,
+             '66 MHz FCLK1/IO PLL registers did not match')
+        report['calibration'].append(dict(rate=rate, tap=tap, slots=slots, nominal_tck_hz=hz,
+                                          fclk_control=hex(control), io_pll_control=hex(io_pll)))
+        for phase in sorted(slots, key=lambda phase: abs(phase - 34)):
+            for advance in (True, False):
+                candidate = (tap, phase, advance)
+                row = trial(bench, rate, candidate, 3, 1, 1, profile=True)
+                report['read_tune'].append(row)
+                archive()
+                if row['passed'] and (timing is None or row['read_MBps'] > timing[0]):
+                    timing = row['read_MBps'], candidate
+        if timing is not None:
+            break
+    need(timing is not None, 'No 66.667 MHz calibrated ARM block read')
+    tap, phase, advance = timing[1]
+    for idle, window in ((1, 1), (3, seconds), (5, seconds), (8, 1), (12, 1)):
+        select(bench.port, rate, tap)  # Reset the cumulative wire counters for this window.
+        row = trial(bench, rate, timing[1], idle, 1, window, profile=True)
+        report['long_read'].append(row)
+        print(json.dumps(row), flush=True)
+        archive()
+    pattern = random.Random(0x743666).randbytes(1024)
+    bench.pattern(pattern)
+    report['phase'] = 'write'
+    archive()
+    for idle in (5, 8, 12):
+        select(bench.port, rate, tap)
+        row = trial(bench, rate, (tap, phase, advance), idle, 0, 2, profile=True)
+        report['mixed'].append(row)
+        print(json.dumps(row), flush=True)
+        archive()
+        if row['passed']:
+            select(bench.port, rate, tap)
+            row = trial(bench, rate, (tap, phase, advance), idle, 0, seconds, profile=True)
+            report['mixed'].append(row)
+            print(json.dumps(row), flush=True)
+            archive()
+            if row['passed']:
+                break
 
 
 def sweep(bench, report, archive):
@@ -111,6 +161,7 @@ def main():
     parser.add_argument('--cable-serial', required=True)
     parser.add_argument('--serial', required=True)
     parser.add_argument('--seconds', default=60, type=int, choices=range(1, 61), metavar='1..60')
+    parser.add_argument('--compare-66', action='store_true', help='Profile only the 66.667 MHz ARM path')
     parser.add_argument('--execute', action='store_true')
     args = parser.parse_args()
     if not args.execute:
@@ -167,43 +218,46 @@ def main():
                 report['phase'] = 'read'
                 bench = BlockBenchmark(port, args.out)
                 bench.pattern(saved[:1024])
-                results = sweep(bench, report, archive)
-                for rate in ('100', '200', '160', '80', '50'):
-                    for _, timing, idle in sorted(results.get(rate, []), reverse=True)[:3]:
-                        select(port, rate, timing[0])
-                        seconds = min(args.seconds, 10) if rate in ('50', '80') else args.seconds
-                        row = trial(bench, rate, timing, idle, 1, seconds)
-                        report['long_read'].append(row)
-                        archive()
-                        print(json.dumps(row), flush=True)
-                        if row['passed']:
-                            break
-                eligible = [r for r in report['long_read'] if r['passed']]
-                chosen_by_rate = {r['rate']: r for r in eligible}
-                write_rates = ('100', '200', '160') if '100' in chosen_by_rate else ('200', '160', '80')
-                for write_rate in write_rates:
-                    if write_rate not in chosen_by_rate:
-                        continue
-                    chosen = chosen_by_rate[write_rate]
-                    rate = chosen['rate']
-                    timing = (chosen['tap'], chosen['sample'], chosen['advance'])
-                    select(port, rate, timing[0])
-                    pattern = random.Random(0x743100).randbytes(1024)
-                    bench.pattern(pattern)
-                    report['phase'] = 'write'
-                    archive()
-                    for idle in dict.fromkeys((chosen['idle'], 24, 40, 96)):
-                        row = trial(bench, rate, timing, idle, 0, 2)
-                        report['mixed'].append(row)
-                        archive()
-                        print(json.dumps(row), flush=True)
-                        if row['passed']:
-                            row = trial(bench, rate, timing, idle, 0, args.seconds)
-                            report['mixed'].append(row)
+                if args.compare_66:
+                    compare_66(bench, report, archive, args.seconds)
+                else:
+                    results = sweep(bench, report, archive)
+                    for rate in ('100', '200', '160', '80', '50'):
+                        for _, timing, idle in sorted(results.get(rate, []), reverse=True)[:3]:
+                            select(port, rate, timing[0])
+                            seconds = min(args.seconds, 10) if rate in ('50', '80') else args.seconds
+                            row = trial(bench, rate, timing, idle, 1, seconds)
+                            report['long_read'].append(row)
                             archive()
                             print(json.dumps(row), flush=True)
                             if row['passed']:
                                 break
+                    eligible = [r for r in report['long_read'] if r['passed']]
+                    chosen_by_rate = {r['rate']: r for r in eligible}
+                    write_rates = ('100', '200', '160') if '100' in chosen_by_rate else ('200', '160', '80')
+                    for write_rate in write_rates:
+                        if write_rate not in chosen_by_rate:
+                            continue
+                        chosen = chosen_by_rate[write_rate]
+                        rate = chosen['rate']
+                        timing = (chosen['tap'], chosen['sample'], chosen['advance'])
+                        select(port, rate, timing[0])
+                        pattern = random.Random(0x743100).randbytes(1024)
+                        bench.pattern(pattern)
+                        report['phase'] = 'write'
+                        archive()
+                        for idle in dict.fromkeys((chosen['idle'], 24, 40, 96)):
+                            row = trial(bench, rate, timing, idle, 0, 2)
+                            report['mixed'].append(row)
+                            archive()
+                            print(json.dumps(row), flush=True)
+                            if row['passed']:
+                                row = trial(bench, rate, timing, idle, 0, args.seconds)
+                                report['mixed'].append(row)
+                                archive()
+                                print(json.dumps(row), flush=True)
+                                if row['passed']:
+                                    break
                 report['phase'] = 'complete'
             finally:
                 port.close()

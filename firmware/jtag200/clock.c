@@ -26,7 +26,9 @@ static const struct profile profiles[] = {
     {40, 2, 80000000},
     {32, 2, 100000000},
     {40, 1, 160000000},
-    {32, 1, 200000000}
+    {32, 1, 200000000},
+    /* Two complete TCKs per serializer word for the block engine. */
+    {48, 2, 66666667}
 };
 
 static void barrier(void)

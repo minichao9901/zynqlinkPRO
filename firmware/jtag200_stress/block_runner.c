@@ -18,7 +18,14 @@
 enum {
     MAGIC, SEQ, RESPONSE, DURATION, ERROR, DIRECTION, READ_BYTES, WRITE_BYTES,
     BITS, SEGMENTS, ELAPSED_LO, ELAPSED_HI, READ_LO, READ_HI, WRITE_LO, WRITE_HI,
-    HEADER, BAD_WORD, BAD_VALUE, DMI_BUSY, DMI_OTHER, DIAGNOSTICS
+    HEADER, BAD_WORD, BAD_VALUE, DMI_BUSY, DMI_OTHER, DIAGNOSTICS,
+    PROFILE_ID = DIAGNOSTICS + 8,
+    READ_SCAN = PROFILE_ID + 1, READ_COMPARE = READ_SCAN + 2,
+    WRITE_SCAN = READ_COMPARE + 2, WRITE_STAGE = WRITE_SCAN + 2
+};
+
+struct transfer_time {
+    uint64_t scan, payload;
 };
 
 static void barrier(void)
@@ -50,17 +57,22 @@ static int wait_status(unsigned expected)
     return 0;
 }
 
-static unsigned transfer(int write, uint32_t inversion)
+static unsigned transfer(int write, uint32_t inversion, struct transfer_time *time)
 {
     if (!wait_status(5))
         return 2;
-    if (write)
+    if (write) {
+        uint64_t stage = ticks();
         for (unsigned i = 0; i < COUNT; ++i)
             TX[i+1] = PATTERN[i] ^ inversion;
+        time->payload += ticks() - stage;
+    }
     barrier();
+    uint64_t scan = ticks();
     CTRL = write ? 13 : 5;
     if (!wait_status(15))
         return 3;
+    time->scan += ticks() - scan;
     unsigned error = 0;
     REQUEST[BITS] = REG(0x40000024u);
     REQUEST[SEGMENTS] = REG(0x40000028u);
@@ -75,6 +87,7 @@ static unsigned transfer(int write, uint32_t inversion)
             error = 5;
     }
     if (!error && !write) {
+        uint64_t compare = ticks();
         for (unsigned i = 0; i < COUNT; ++i) {
             uint32_t result = RX[i+1];
             if (result != (PATTERN[i] ^ inversion)) {
@@ -84,6 +97,7 @@ static unsigned transfer(int write, uint32_t inversion)
                 break;
             }
         }
+        time->payload += ticks() - compare;
     }
     if (error || REQUEST[DURATION] == 0)
         for (unsigned i = 0; i < 8; ++i)
@@ -104,6 +118,7 @@ static unsigned exercise(unsigned seconds, unsigned direction)
     unsigned error;
     unsigned completed = 0;
     uint64_t read_time = 0, write_time = 0;
+    struct transfer_time read = {0, 0}, write = {0, 0};
     uint64_t start = ticks();
     uint64_t duration = (uint64_t)seconds * 333333333u;
     do {
@@ -111,7 +126,7 @@ static unsigned exercise(unsigned seconds, unsigned direction)
         uint32_t inversion = completed & 1u ? UINT32_MAX : 0;
         if (direction != 1) {
             before = ticks();
-            error = transfer(1, inversion);
+            error = transfer(1, inversion, &write);
             write_time += ticks() - before;
             if (error)
                 break;
@@ -119,7 +134,7 @@ static unsigned exercise(unsigned seconds, unsigned direction)
         }
         if (direction != 2) {
             before = ticks();
-            error = transfer(0, direction == 1 ? 0 : inversion);
+            error = transfer(0, direction == 1 ? 0 : inversion, &read);
             read_time += ticks() - before;
             if (error)
                 break;
@@ -130,6 +145,10 @@ static unsigned exercise(unsigned seconds, unsigned direction)
     save64(ELAPSED_LO, ticks() - start);
     save64(READ_LO, read_time);
     save64(WRITE_LO, write_time);
+    save64(READ_SCAN, read.scan);
+    save64(READ_COMPARE, read.payload);
+    save64(WRITE_SCAN, write.scan);
+    save64(WRITE_STAGE, write.payload);
     return error;
 }
 
@@ -137,6 +156,7 @@ void stress_init(void)
 {
     REQUEST[SEQ] = 0;
     REQUEST[RESPONSE] = 0;
+    REQUEST[PROFILE_ID] = 0x54494d45u; /* TIME */
     GTC[2] |= 1u;
     barrier();
     REQUEST[MAGIC] = 0x4a424c4bu; /* JBLK */
@@ -148,6 +168,8 @@ void stress_poll(void)
     if (seq == REQUEST[RESPONSE])
         return;
     for (unsigned i=READ_BYTES; i<DIAGNOSTICS+8; ++i)
+        REQUEST[i] = 0;
+    for (unsigned i=READ_SCAN; i<WRITE_STAGE+2; ++i)
         REQUEST[i] = 0;
     REQUEST[ERROR] = exercise(REQUEST[DURATION], REQUEST[DIRECTION]);
     barrier();

@@ -79,7 +79,7 @@ class BlockBenchmark:
         self.port.command(f"physrd -force -bin -file {{{check.as_posix()}}} 0x03000000 {len(payload)//4}")
         need(check.read_bytes() == payload, "Pattern upload changed")
 
-    def run(self, mode, seconds):
+    def run(self, mode, seconds, *, profile=False):
         begin = self.status()
         need(begin[1] == begin[2], "Pipeline runner is not idle")
         sequence = (begin[1]+1) & 0xffffffff
@@ -104,6 +104,15 @@ class BlockBenchmark:
                  read_bytes=words[6], write_bytes=words[7],
                  tck_cycles=words[8], segments=words[9], completion=words[16],
                  dmi_busy=words[19], dmi_invalid=words[20], passed=words[4]==0)
+        if profile:
+            raw = self.port.command(f"physrd -force -value {MAILBOX+29*4:#x} 9")
+            fields = [int(word, 0) for word in raw.split()]
+            need(len(fields) == 9 and fields[0] == 0x54494D45, "Expected block timing mailbox")
+            stage = [(fields[i] | fields[i+1] << 32) / 333333333 for i in (1, 3, 5, 7)]
+            row["read_timing_s"] = dict(
+                scan=stage[0], bram_read_and_compare=stage[1], other=rd-stage[0]-stage[1])
+            row["write_timing_s"] = dict(
+                scan=stage[2], bram_load=stage[3], other=wr-stage[2]-stage[3])
         if seconds == 0 or words[4]:
             diag = words[21:29]
             row["wire_dmi"] = dict(
