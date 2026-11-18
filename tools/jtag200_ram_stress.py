@@ -170,9 +170,8 @@ def append_data(tms, tdi, packed, size, idle):
 
 
 @lru_cache(maxsize=4096)
-def compile_frame(half, advance, idle, operations):
-    tms = []
-    tdi = []
+def compile_frame(half, advance, idle, operations, reset_tap=False):
+    tms, tdi = entry(17) if reset_tap else ([], [])
     starts = []
     for address, value in operations:
         request = address << 34 | (1 if value is None else 2) | ((value or 0) << 2)
@@ -196,6 +195,7 @@ class Target:
     def __init__(self, port):
         self.port = port
         self.frames = 0
+        self.isolated = False
         self.waveform_seconds = 0.0
 
     def scan(self, tms, tdi):
@@ -222,9 +222,11 @@ class Target:
 
     def operations(self, *operations):
         values = []
-        for i in range(0, len(operations), 4):
-            batch = operations[i:i+4]
-            payload, words, starts = compile_frame(self.half, self.advance, self.idle, batch)
+        depth = 1 if self.isolated else 4
+        for i in range(0, len(operations), depth):
+            batch = operations[i:i+depth]
+            payload, words, starts = compile_frame(
+                self.half, self.advance, self.idle, batch, reset_tap=self.isolated)
             response = self.port.scan(payload, words)
             self.frames += 1
             self.waveform_seconds += words * 8 / (2 * self.half * self.hz)
@@ -287,6 +289,7 @@ class Target:
 
     def rearm(self):
         """Recover known-good JTAG timing without resetting the target CPU."""
+        self.isolated = False
         self.select(BASELINE, clear_dmi=True)
         self.dmi(DMCONTROL, 1)
         sbcs = self.dmi(SBCS)
@@ -339,18 +342,19 @@ def stress(target, rate, number, seconds, start_block=0):
     return report
 
 
-def make_plan(rate):
+def make_plan(rate, isolated):
     _, half, _ = PROFILES[rate]
     _, phase, idle = SETTINGS[rate]
     plan = [0, 0, 2 * half]
     frame_count = 0
+    depth = 1 if isolated else 4
 
     def add(direction, operations, credit=0):
         nonlocal frame_count
-        for first in range(0, len(operations), 4):
-            batch = operations[first:first+4]
+        for first in range(0, len(operations), depth):
+            batch = operations[first:first+depth]
             payload, length, starts = compile_frame(
-                half, int(half == 2), idle, tuple((a, w) for a, w, _, _ in batch))
+                half, int(half == 2), idle, tuple((a, w) for a, w, _, _ in batch), reset_tap=isolated)
             completed_bytes = credit if first + len(batch) == len(operations) else 0
             plan.extend((length, len(batch), direction, completed_bytes))
             plan.extend(struct.unpack(f"<{length}I", payload))
@@ -373,7 +377,8 @@ def make_plan(rate):
         return (read(SBCS, SBA_ERROR, 0), read(ADDRESS, 0xFFFFFFFF, address))
 
     rng = random.Random(5301)
-    payloads = [rng.randbytes(BLOCK) for _ in range(BYTES//BLOCK)]
+    blocks = 2 if isolated else BYTES // BLOCK
+    payloads = [rng.randbytes(BLOCK) for _ in range(blocks)]
     for invert in (False, True):
         for index, data in enumerate(payloads):
             if invert:
@@ -401,8 +406,8 @@ def runner_status(port):
     return values
 
 
-def upload_plan(port, folder, rate):
-    blob = make_plan(rate)
+def upload_plan(port, folder, rate, isolated):
+    blob = make_plan(rate, isolated)
     source = (folder / f"plan-{rate}.bin").resolve()
     echo = (folder / "plan-upload-echo.bin").resolve()
     source.write_bytes(blob)
@@ -450,7 +455,9 @@ def probe_stress(target, rate, number, seconds, expected):
         if bytes_count["read"] != bytes_count["write"] or not bytes_count["read"]:
             result["error"] = "Unbalanced data counts"
         try:
-            if target.memory() != expected or target.guards() != target.expected_guard:
+            size = 2 * BLOCK if target.isolated else BYTES
+            readback = b"".join(target.read(BASE+offset, BLOCK) for offset in range(0, size, BLOCK))
+            if readback != expected[:size] or target.guards() != target.expected_guard:
                 result["error"] = "Independent post-window readback or guard mismatch"
         except RuntimeError as error:
             result["error"] = f"Post-window verification: {error}"
@@ -494,7 +501,10 @@ def main():
     ap.add_argument("--out", type=Path)
     ap.add_argument("--sdk", type=Path, default=Path("E:/Xilinx/SDK/2018.3"))
     ap.add_argument("--execute", action="store_true")
-    ap.add_argument("--pilot", action="store_true", help="Only 50 MHz, single short round")
+    ap.add_argument("--pilot", action="store_true", help="One short round per selected rate")
+    ap.add_argument("--rate", action="append", choices=PROFILES, help="Select one or more qualified profiles")
+    ap.add_argument("--isolate-dmi", action="store_true", help="Reset TAP and verify one DMI per waveform frame")
+
     args = ap.parse_args()
     if args.prepare_pair:
         prepare(args.prepare_pair.resolve(), args.gcc)
@@ -502,6 +512,7 @@ def main():
     require(args.cable_serial and re.fullmatch(r"[A-Za-z0-9_.:-]+", args.cable_serial),
             "Missing or invalid cable serial")
     require(args.out is not None, "Missing --out")
+    require(not args.isolate_dmi or args.probe_pair, "--isolate-dmi requires the probe runner")
     if not args.execute:
         print(f"HPM5301 ILM {BASE:#x}+{BYTES}; {args.cable_serial}; "
               f"{'50 MHz pilot' if args.pilot else 'six rates; 3x60 s at 100/200 and 3x10 s elsewhere'}")
@@ -541,14 +552,18 @@ def main():
                 print(f"Backup verified, {BYTES} bytes: {report['backup_sha256']}", flush=True)
                 target.expected_guard = guard
                 rng = random.Random(5301)
-                probe_after = bytes(value ^ 0xFF for value in rng.randbytes(BYTES))
-                rates = [BASELINE] if args.pilot else list(PROFILES)
+                run_bytes = 2 * BLOCK if args.isolate_dmi else BYTES
+                probe_after = bytes(value ^ 0xFF for value in rng.randbytes(run_bytes)) + saved[run_bytes:]
+                report["workload_bytes"] = run_bytes
+                report["DMI_requests_per_frame"] = 1 if args.isolate_dmi else 4
+                rates = args.rate or ([BASELINE] if args.pilot else list(PROFILES))
                 for rate in rates:
                     seconds = 1 if args.pilot else 60 if rate in ("100", "200") else 10
                     if args.probe_pair:
-                        report.setdefault("plan_sha256", {})[rate] = upload_plan(port, args.out, rate)
+                        report.setdefault("plan_sha256", {})[rate] = upload_plan(port, args.out, rate, args.isolate_dmi)
                     for number in ((1,) if args.pilot else range(4)):
                         wall_window = seconds if number else 1
+                        target.isolated = args.isolate_dmi
                         target.select(rate)
                         changed = True
                         if args.probe_pair:
@@ -597,7 +612,8 @@ def main():
     finally:
         lease.close()
         save()
+    return int(any(run.get("error") for run in report["rates"]))
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
