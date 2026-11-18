@@ -59,9 +59,10 @@ class BlockBenchmark:
         need(len(words) == 29 and words[0] == 0x4A424C4B, "Pipeline runner ELF is not running")
         return words
 
-    def configure(self, rate, idle, phase):
+    def configure(self, rate, idle, phase, *, advance_tms=False, advance_tdi=False):
         _, half, _ = PROFILES[rate]
-        cfg = (idle << 10) | (phase << 3) | half
+        need(half == 2 or not (advance_tms or advance_tdi), "TX advance requires a two-slot pulse")
+        cfg = (int(advance_tms) << 20) | (int(advance_tdi) << 19) | (idle << 10) | (phase << 3) | half
         self.port.command(f"physwr -force 0x40000014 {BASE:#x}; "
                           f"physwr -force 0x40000018 {BYTES//4}; physwr -force 0x4000001c {cfg:#x}")
         actual = int(self.port.command("read_word 0x4000001c"))
@@ -159,14 +160,15 @@ def measure(args):
                 expected = backup
                 for rate,tap,phase,idle in cases:
                     tap,phase,idle = int(tap),int(phase),int(idle)
-                    need(rate in ("50","160","200") and 0 <= tap <= 31
+                    need(rate in ("50","100","160","200") and 0 <= tap <= 31
                          and 16 <= phase <= 63 and 8 <= idle <= 448, "Unsupported pipeline point")
                     SETTINGS[rate] = (tap,phase,idle)
-                    item = dict(rate=rate,tap=tap,phase=phase,idle=idle,runs=[])
+                    item = dict(rate=rate,tap=tap,phase=phase,idle=idle,runs=[],
+                                advance_tms=rate=="100",advance_tdi=rate=="100")
                     report["rows"].append(item)
                     try:
                         legacy.select(rate)
-                        bench.configure(rate,idle,phase)
+                        bench.configure(rate,idle,phase,advance_tms=rate=="100",advance_tdi=rate=="100")
                         bench.pattern(expected)
                         preflight=bench.run(1,0)
                         item["runs"].append(preflight)
@@ -194,7 +196,7 @@ def measure(args):
                                         need(legacy.memory()==expected and legacy.guards()==guards,
                                              "Independent post-window readback differs")
                                         legacy.select(rate)
-                                        bench.configure(rate,idle,phase)
+                                        bench.configure(rate,idle,phase,advance_tms=rate=="100",advance_tdi=rate=="100")
                             item["passed"]=True
                         else:
                             item["passed"]=True

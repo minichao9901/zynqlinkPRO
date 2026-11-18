@@ -112,14 +112,25 @@ module tb_jtag200;
             most_recent_tms = 1;
             most_recent_tdi = 1;
         end else if (block_test) begin
-            for (integer pair=0; pair<4; pair=pair+1) begin
-                if (lane_word[2*pair+1]) begin
-                    most_recent_tms = lane_word[8+2*pair+1];
-                    most_recent_tdi = lane_word[16+2*pair+1];
-                end else if (lane_word[7:0] != 8'hf0 &&
-                    ({lane_word[8+2*pair+:2],lane_word[16+2*pair+:2]} !==
-                     {{2{most_recent_tms}},{2{most_recent_tdi}}}))
-                    $fatal(1,"TMS/TDI changed in a parked-clock slot");
+            if (regs.pipeline.engine.active_half == 2) begin
+                for (integer group=0; group<2; group=group+1) begin
+                    if (lane_word[4*group+2]) begin
+                        most_recent_tms = lane_word[10+4*group];
+                        most_recent_tdi = lane_word[18+4*group];
+                    end else if ({lane_word[8+4*group+:4],lane_word[16+4*group+:4]} !==
+                                 {{4{most_recent_tms}},{4{most_recent_tdi}}})
+                        $fatal(1,"TMS/TDI changed in a parked-clock 100 MHz slot");
+                end
+            end else begin
+                for (integer pair=0; pair<4; pair=pair+1) begin
+                    if (lane_word[2*pair+1]) begin
+                        most_recent_tms = lane_word[8+2*pair+1];
+                        most_recent_tdi = lane_word[16+2*pair+1];
+                    end else if (lane_word[7:0] != 8'hf0 &&
+                        ({lane_word[8+2*pair+:2],lane_word[16+2*pair+:2]} !==
+                         {{2{most_recent_tms}},{2{most_recent_tdi}}}))
+                        $fatal(1,"TMS/TDI changed in a parked-clock slot");
+                end
             end
         end
     end
@@ -205,7 +216,8 @@ module tb_jtag200;
         if (info !== 32'h50495045) $fatal(1,"Missing pipeline capability");
         write_reg(14'h014, 32'h80020000, 0);
         write_reg(14'h018, count, 0);
-        write_reg(14'h01c, (idle << 10) | (offset << 3) | half, 0);
+        write_reg(14'h01c, (half == 2 ? 32'h00180000 : 0) |
+                   (idle << 10) | (offset << 3) | half, 0);
         write_reg(8, 13, 2);
         write_reg(14'h014, 32'h0105f000, 0);
         for (int i=0; i<count; i++)
@@ -261,7 +273,8 @@ module tb_jtag200;
         wait_status(5);
         write_reg(14'h014, 32'h0105f000, 0);
         write_reg(14'h018, count, 0);
-        write_reg(14'h01c, (idle << 10) | (offset << 3) | half, 0);
+        write_reg(14'h01c, (half == 2 ? 32'h00180000 : 0) |
+                   (idle << 10) | (offset << 3) | half, 0);
         for (int i=0; i<count; i++)
             write_reg(14'h1004+4*i, 32'h906da150 ^ (i*3697), 0);
         cycles_before = measured_tck;
@@ -327,7 +340,15 @@ module tb_jtag200;
         axi_resetn = 1;
 `ifdef J200_TEST_HAZARD3
         block_test=1;
-        if ($test$plusargs("fine")) begin
+        if ($test$plusargs("hundred")) begin
+            hazard_burst(2,29,192,128);
+            hazard_burst(2,29,64,128);
+            hazard_burst(2,29,32,128);
+            hazard_burst(2,29,16,128);
+            hazard_burst(2,29,12,128);
+            hazard_burst(2,29,10,128);
+            hazard_burst(2,29,8,128);
+        end else if ($test$plusargs("fine")) begin
             hazard_burst(1,29,32,128);
             hazard_burst(1,29,28,128);
             hazard_burst(1,29,24,128);
@@ -353,6 +374,7 @@ module tb_jtag200;
         profile(5, 10.0, 5.0);
         block_test=1;
         pipeline(4,28,64,128,0);
+        pipeline(2,29,64,128,0);
         pipeline(1,29,256,128,0);
         pipeline(1,29,256,32,1);
 `endif

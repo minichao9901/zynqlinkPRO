@@ -8,6 +8,7 @@ module jtag200_block (
     input wire [8:0] count, idle_cycles,
     input wire [2:0] half_slots,
     input wire [6:0] sample_offset,
+    input wire advance_tms, advance_tdi,
     input wire [31:0] tx_word,
     output wire [8:0] tx_addr, rx_addr,
     output wire [31:0] result_word,
@@ -29,6 +30,7 @@ module jtag200_block (
     reg [8:0] active_count = 0, active_idle = 0;
     reg [2:0] active_half = 0;
     reg [6:0] active_sample = 0;
+    reg active_advance_tms = 0, active_advance_tdi = 0;
     reg cfg_start = 0, block_start = 0;
     (* ASYNC_REG = "TRUE" *) reg [1:0] request_sync = 0;
     wire packet_start, next_valid, next_ready, core_busy, response_valid, packet_done, packet_error;
@@ -81,6 +83,7 @@ module jtag200_block (
         .variable_tms(variable_tms), .tms_value(tms_value), .exit_last(exit_last),
         .capture(capture), .tdi_mode(tdi_mode), .tms_data(tms_data), .tdi_data(tdi_data),
         .half_slots(active_half), .sample_offset(active_sample), .rx_word(rx_word),
+        .advance_tms(active_advance_tms), .advance_tdi(active_advance_tdi),
         .lane_word(lane_word), .done(segment_done), .rx_data(segment_rx)
     );
 
@@ -149,6 +152,8 @@ module jtag200_block (
                 active_idle <= idle_cycles;
                 active_half <= half_slots;
                 active_sample <= sample_offset;
+                active_advance_tms <= advance_tms;
+                active_advance_tdi <= advance_tdi;
                 completion <= 0;
                 first_valid <= 0;
                 data_valid <= 0;

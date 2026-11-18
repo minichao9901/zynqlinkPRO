@@ -13,7 +13,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--hazard3-root", type=Path, required=True)
     parser.add_argument("--out", type=Path, default=OUT / "hazard3-sim")
-    parser.add_argument('--fine', action='store_true', help='Sweep 200 MHz around the DMI BUSY boundary')
+    sweep = parser.add_mutually_exclusive_group()
+    sweep.add_argument('--fine', action='store_true', help='Sweep 200 MHz around the DMI BUSY boundary')
+    sweep.add_argument('--hundred', action='store_true', help='Sweep the two-TCK, 100 MHz mode and both TX advances')
     args = parser.parse_args()
     root = args.hazard3_root.resolve()
     work = args.out.resolve()
@@ -57,7 +59,8 @@ def main():
                work, work / "compile.log", env)
     run_logged([exe / "xelab.exe", "-L", "unisims_ver", "-L", "secureip", "-s", "jtag200_hazard",
                 "tb_jtag200", "glbl"], work, work / "elab.log", env)
-    plusargs = ["-testplusarg", "fine"] if args.fine else []
+    pattern = "fine" if args.fine else "hundred" if args.hundred else None
+    plusargs = ["-testplusarg", pattern] if pattern else []
     run_logged([exe / "xsim.exe", "jtag200_hazard", "-runall", *plusargs],
                work, work / "sim.log", env)
     text = (work / "sim.log").read_text(encoding="utf8", errors="replace")
