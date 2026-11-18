@@ -169,8 +169,20 @@ def append_data(tms, tdi, packed, size, idle):
     return start
 
 
+def pack(tms, tdi, half, tdi_advance, tms_advance=0):
+    words = waveform(tms, tdi, half, tdi_advance=tdi_advance)
+    require(0 <= tms_advance < half, "TMS advance must leave one TCK slot for hold")
+    if not tms_advance:
+        return words
+    future = words[1:] + [0xFF00]
+    return [(word & ~0xFF00) |
+            ((((word >> 8) & 0xFF) >> tms_advance |
+              ((following & 0xFF00) >> tms_advance)) & 0xFF) << 8
+            for word, following in zip(words, future)]
+
+
 @lru_cache(maxsize=4096)
-def compile_frame(half, advance, idle, operations, reset_tap=False):
+def compile_frame(half, advance, idle, operations, reset_tap=False, tms_advance=0):
     tms, tdi = entry(17) if reset_tap else ([], [])
     starts = []
     for address, value in operations:
@@ -178,7 +190,7 @@ def compile_frame(half, advance, idle, operations, reset_tap=False):
         append_data(tms, tdi, request, 41, idle)
         starts.append(len(tms) + 3)
     append_data(tms, tdi, 0, 41, 0)
-    words = waveform(tms, tdi, half, tdi_advance=advance)
+    words = pack(tms, tdi, half, advance, tms_advance)
     return struct.pack(f"<{len(words)}I", *words), len(words), starts
 
 
@@ -196,10 +208,11 @@ class Target:
         self.port = port
         self.frames = 0
         self.isolated = False
+        self.tms_advance = 0
         self.waveform_seconds = 0.0
 
     def scan(self, tms, tdi):
-        words = waveform(tms, tdi, self.half, tdi_advance=self.advance)
+        words = pack(tms, tdi, self.half, self.advance, self.tms_advance)
         raw = self.port.scan(struct.pack(f"<{len(words)}I", *words), len(words))
         return raw[::4]
 
@@ -226,7 +239,7 @@ class Target:
         for i in range(0, len(operations), depth):
             batch = operations[i:i+depth]
             payload, words, starts = compile_frame(
-                self.half, self.advance, self.idle, batch, reset_tap=self.isolated)
+                self.half, self.advance, self.idle, batch, reset_tap=self.isolated, tms_advance=self.tms_advance)
             response = self.port.scan(payload, words)
             self.frames += 1
             self.waveform_seconds += words * 8 / (2 * self.half * self.hz)
@@ -290,6 +303,7 @@ class Target:
     def rearm(self):
         """Recover known-good JTAG timing without resetting the target CPU."""
         self.isolated = False
+        self.tms_advance = 0
         self.select(BASELINE, clear_dmi=True)
         self.dmi(DMCONTROL, 1)
         sbcs = self.dmi(SBCS)
@@ -342,7 +356,7 @@ def stress(target, rate, number, seconds, start_block=0):
     return report
 
 
-def make_plan(rate, isolated):
+def make_plan(rate, isolated, tms_advance=0):
     _, half, _ = PROFILES[rate]
     _, phase, idle = SETTINGS[rate]
     plan = [0, 0, 2 * half]
@@ -354,7 +368,7 @@ def make_plan(rate, isolated):
         for first in range(0, len(operations), depth):
             batch = operations[first:first+depth]
             payload, length, starts = compile_frame(
-                half, int(half == 2), idle, tuple((a, w) for a, w, _, _ in batch), reset_tap=isolated)
+                half, int(half == 2), idle, tuple((a, w) for a, w, _, _ in batch), reset_tap=isolated, tms_advance=tms_advance)
             completed_bytes = credit if first + len(batch) == len(operations) else 0
             plan.extend((length, len(batch), direction, completed_bytes))
             plan.extend(struct.unpack(f"<{length}I", payload))
@@ -406,8 +420,8 @@ def runner_status(port):
     return values
 
 
-def upload_plan(port, folder, rate, isolated):
-    blob = make_plan(rate, isolated)
+def upload_plan(port, folder, rate, isolated, tms_advance):
+    blob = make_plan(rate, isolated, tms_advance)
     source = (folder / f"plan-{rate}.bin").resolve()
     echo = (folder / "plan-upload-echo.bin").resolve()
     source.write_bytes(blob)
@@ -502,17 +516,31 @@ def main():
     ap.add_argument("--sdk", type=Path, default=Path("E:/Xilinx/SDK/2018.3"))
     ap.add_argument("--execute", action="store_true")
     ap.add_argument("--pilot", action="store_true", help="One short round per selected rate")
+    ap.add_argument("--pilot-seconds", type=int, choices=range(1, 11), default=1, metavar="1..10")
     ap.add_argument("--rate", action="append", choices=PROFILES, help="Select one or more qualified profiles")
     ap.add_argument("--isolate-dmi", action="store_true", help="Reset TAP and verify one DMI per waveform frame")
+    ap.add_argument("--tms-advance", type=int, choices=range(4), default=0)
+    ap.add_argument("--timing", action="append", default=[], metavar="RATE:TAP:SLOT:IDLE",
+                    help="Override IDELAY tap, TDO capture slot and DMI idle on one profile")
 
     args = ap.parse_args()
     if args.prepare_pair:
         prepare(args.prepare_pair.resolve(), args.gcc)
         return
+    for item in args.timing:
+        try:
+            rate, tap, phase, idle = item.split(":")
+            values = (int(tap), int(phase), int(idle))
+            require(rate in PROFILES and 0 <= values[0] <= 31 and -8 <= values[1] < 64
+                    and 1 <= values[2] <= 768, "Outside timing range")
+        except (ValueError, RuntimeError) as error:
+            ap.error(f"{item}: {error}")
+        SETTINGS[rate] = values
     require(args.cable_serial and re.fullmatch(r"[A-Za-z0-9_.:-]+", args.cable_serial),
             "Missing or invalid cable serial")
     require(args.out is not None, "Missing --out")
     require(not args.isolate_dmi or args.probe_pair, "--isolate-dmi requires the probe runner")
+    require(not args.tms_advance or args.isolate_dmi, "--tms-advance requires --isolate-dmi")
     if not args.execute:
         print(f"HPM5301 ILM {BASE:#x}+{BYTES}; {args.cable_serial}; "
               f"{'50 MHz pilot' if args.pilot else 'six rates; 3x60 s at 100/200 and 3x10 s elsewhere'}")
@@ -520,6 +548,8 @@ def main():
 
     args.out.mkdir(parents=True, exist_ok=False)
     report = {"cable": args.cable_serial, "base": hex(BASE), "bytes": BYTES, "block_bytes": BLOCK, "rates": []}
+    report["settings"] = SETTINGS
+    report["tms_advance_slots"] = args.tms_advance
     output = args.out / "result.json"
     def save():
         temp = output.with_suffix(".tmp")
@@ -558,12 +588,13 @@ def main():
                 report["DMI_requests_per_frame"] = 1 if args.isolate_dmi else 4
                 rates = args.rate or ([BASELINE] if args.pilot else list(PROFILES))
                 for rate in rates:
-                    seconds = 1 if args.pilot else 60 if rate in ("100", "200") else 10
+                    seconds = args.pilot_seconds if args.pilot else 60 if rate in ("100", "200") else 10
                     if args.probe_pair:
-                        report.setdefault("plan_sha256", {})[rate] = upload_plan(port, args.out, rate, args.isolate_dmi)
+                        report.setdefault("plan_sha256", {})[rate] = upload_plan(port, args.out, rate, args.isolate_dmi, args.tms_advance)
                     for number in ((1,) if args.pilot else range(4)):
                         wall_window = seconds if number else 1
                         target.isolated = args.isolate_dmi
+                        target.tms_advance = args.tms_advance
                         target.select(rate)
                         changed = True
                         if args.probe_pair:
