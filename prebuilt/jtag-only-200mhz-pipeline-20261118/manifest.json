@@ -1,0 +1,32 @@
+{
+  "source_revision": "51b9ee7d3412d23f7ba5d1decfb34053f2b092d1",
+  "fpga_entry": "fpga/experiments/jtag200/build.tcl",
+  "fpga_timing": {
+    "FCLK0_Hz": 133333333,
+    "FCLK1_max_Hz": 50000000,
+    "serializer_max_Hz": 200000000,
+    "setup_slack_ns": 2.219,
+    "hold_slack_ns": 0.094
+  },
+  "firmware_flags": [
+    "-mcpu=cortex-a9",
+    "-marm",
+    "-O3",
+    "-g",
+    "-ffreestanding",
+    "-nostdlib",
+    "-DJTAG200_STRESS",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-Wl,--build-id=none"
+  ],
+  "hardware_acceptance": "HPM5301EVKLite: 50 MHz 1 KiB read/write/mixed windows pass for idle 64 and 16; 200 MHz pipeline read-only comparison fails across the tested tap/slot combinations; original probe pair and RAM verified after restoration",
+  "sha256": {
+    "probe.bit": "ce06289e4547d7da4f276f456385d3c7b1e394f6ff74f6e7feedfe4a4f93d96c",
+    "application.elf": "b8c464be212aedb66341a172c9ff64476b5180f5ad94bba0e69c9955d338516a",
+    "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+  },
+  "hardware_evidence": "docs/validation/jtag200-20261118/pipeline",
+  "real_target_simulation": "Hazard3 MCU (80 MHz): 200 MHz / idle20, 128 words, 5.405 MB/s read and 5.403 MB/s write"
+}

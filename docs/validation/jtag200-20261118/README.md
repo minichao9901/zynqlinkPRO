@@ -89,4 +89,8 @@ RAM 测试固定为 HPM5301 ILM 的 SBA 系统地址 0x0105FFF0，双读备份 4
 
 已记录六档实测吞吐、100/200 MHz 长窗对照及失败后的恢复。见[HPM5301 RAM 压力报告](ram-stress/README.md)。
 
+## PL 块流水与真实目标仿真
+
+见[Hazard3 RTL / HPM5301 对照](pipeline/README.md)。
+
 固定 EXE、远端 main、Pages、Release 和 QSPI 不属于本轮交付。

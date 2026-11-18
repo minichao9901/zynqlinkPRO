@@ -44,10 +44,18 @@ module tb_jtag200;
         .rst_n(axi_resetn && ntrst && nsrst), .tck(tck && !block_test),
         .tms(tms), .tdi(tdi), .tdo(raw_tdo)
     );
+`ifdef J200_TEST_HAZARD3
+    reg hazard_resetn = 0;
+    jtag200_hazard_target sba (
+        .resetn(hazard_resetn), .tck(tck && block_test),
+        .tms(tms), .tdi(tdi), .tdo(block_tdo)
+    );
+`else
     riscv_sba_model #(.RETURN_NS(0.80)) sba (
         .rst_n(axi_resetn && ntrst && nsrst), .tck(tck && block_test),
         .tms(tms), .tdi(tdi), .tdo(block_tdo)
     );
+`endif
     assign tdo = block_test ? block_tdo : raw_tdo;
 
     task automatic write_reg(input [13:0] addr, input [31:0] data, input [1:0] response);
@@ -96,13 +104,14 @@ module tb_jtag200;
     localparam PULSES = 312;
     reg [1:0] expected_pins [0:PULSES-1];
     reg watching = 0;
-    integer rises = 0, falls = 0;
+    integer rises = 0, falls = 0, measured_tck = 0;
     realtime last_rise = 0, last_fall = 0, expected_period = 0;
     function automatic bit close(input realtime a, b);
         return a >= b - 0.020 && a <= b + 0.020;
     endfunction
 
     always @(posedge tck) begin
+        if (block_test) measured_tck++;
         if ($realtime > 150 && !watching && !block_test)
             $fatal(1, "TCK edge outside scan at %t", $realtime);
         if (watching) begin
@@ -165,6 +174,7 @@ module tb_jtag200;
         $display("J200_PROFILE %0d period=%0.3f ns pulses=%0d", n, period, rises);
     endtask
 
+`ifndef J200_TEST_HAZARD3
     task automatic pipeline(input int half, offset, idle, count, input bit fault);
         reg [31:0] info, word;
         integer before_scans, before_writes;
@@ -214,11 +224,103 @@ module tb_jtag200;
         $display("J200_PIPELINE_PASS half=%0d idle=%0d words=%0d bus_fault=%0d",half,idle,count,fault);
     endtask
 
+`else
+    task automatic hazard_burst(input int half, offset, idle, count);
+        reg [31:0] status, word, scans_wr, bits_wr, scans_total, bits_total, busy, invalid;
+        integer cycles_before, write_tck, read_tck;
+        realtime started, write_ns, read_ns;
+        write_reg(8, 2, 0);
+        hazard_resetn=0;
+        #200;
+        hazard_resetn=1;
+        write_reg(8, 0, 0);
+        wait_status(5);
+        write_reg(14'h014, 32'h0105f000, 0);
+        write_reg(14'h018, count, 0);
+        write_reg(14'h01c, (idle << 10) | (offset << 3) | half, 0);
+        for (int i=0; i<count; i++)
+            write_reg(14'h1004+4*i, 32'h906da150 ^ (i*3697), 0);
+        cycles_before = measured_tck;
+        started=$realtime;
+        write_reg(8, 13, 0);
+        wait_status(15);
+        write_ns=$realtime-started;
+        write_tck=measured_tck-cycles_before;
+        read_reg(14'h020,status);
+        read_reg(14'h024,bits_wr);
+        read_reg(14'h028,scans_wr);
+        read_reg(14'h02c,busy);
+        read_reg(14'h030,invalid);
+        write_reg(8,0,0);
+        wait_status(5);
+        if (status!=1) begin
+            $display("J200_HAZARD3_LIMIT phase=write half=%0d idle=%0d code=%h dmi_busy=%0d dmi_invalid=%0d tck=%0d scans=%0d",
+                     half,idle,status,busy,invalid,write_tck,scans_wr);
+        end else begin
+            if (write_tck != bits_wr) $fatal(1,"Pipeline TX pulse counter differs: %d != %d",write_tck,bits_wr);
+            for (int i=0; i<count; i++) begin
+                if (sba.dut.u_memory.mem['h1f000/4+i] !== (32'h906da150 ^ (i*3697)))
+                    $fatal(1,"Hazard3 SRAM write mismatch %d",i);
+            end
+            cycles_before=measured_tck;
+            started=$realtime;
+            write_reg(8, 5, 0);
+            wait_status(15);
+            read_ns=$realtime-started;
+            read_tck=measured_tck-cycles_before;
+            read_reg(14'h020,status);
+            read_reg(14'h024,bits_total);
+            read_reg(14'h028,scans_total);
+            read_reg(14'h02c,busy);
+            read_reg(14'h030,invalid);
+            if (status!=1) begin
+                $display("J200_HAZARD3_LIMIT phase=read half=%0d idle=%0d code=%h dmi_busy=%0d dmi_invalid=%0d tck=%0d",
+                         half,idle,status,busy,invalid,read_tck);
+            end else begin
+                if (read_tck != bits_total-bits_wr) $fatal(1,"Pipeline RX pulse count differs");
+                read_reg(14'h2000,word);
+                if (word != (32'h00010000 | count)) $fatal(1,"Hazard3 pipeline header differs");
+                for (int i=0; i<count; i++) begin
+                    read_reg(14'h2004+4*i,word);
+                    if (word !== (32'h906da150 ^ (i*3697))) $fatal(1,"Hazard3 SRAM read mismatch %d",i);
+                end
+                $display("J200_HAZARD3_PASS half=%0d idle=%0d words=%0d write_tck=%0d read_tck=%0d write_scans=%0d read_scans=%0d write_ns=%0.2f read_ns=%0.2f write_MBps=%0.3f read_MBps=%0.3f",
+                         half,idle,count,write_tck,read_tck,scans_wr,scans_total-scans_wr,write_ns,read_ns,
+                         count*4000.0/write_ns,count*4000.0/read_ns);
+            end
+            write_reg(8,0,0);
+            wait_status(5);
+        end
+    endtask
+`endif
+
     initial begin
+        `ifndef J200_TEST_HAZARD3
         $readmemh("pins.mem", expected_pins);
+`endif
         #300;
         @(negedge axi_clk);
         axi_resetn = 1;
+`ifdef J200_TEST_HAZARD3
+        block_test=1;
+        if ($test$plusargs("fine")) begin
+            hazard_burst(1,29,32,128);
+            hazard_burst(1,29,28,128);
+            hazard_burst(1,29,24,128);
+            hazard_burst(1,29,20,128);
+            hazard_burst(1,29,18,128);
+            hazard_burst(1,29,16,128);
+        end else begin
+            hazard_burst(4,28,64,128);
+            hazard_burst(4,28,16,128);
+            hazard_burst(1,29,256,128);
+            hazard_burst(1,29,128,128);
+            hazard_burst(1,29,64,128);
+            hazard_burst(1,29,32,128);
+            hazard_burst(1,29,16,128);
+            hazard_burst(1,29,8,128);
+        end
+`else
         profile(0, 10.0, 20.0);
         profile(1, 10.0, 15.0);
         profile(2, 12.5, 12.5);
@@ -229,6 +331,7 @@ module tb_jtag200;
         pipeline(4,28,64,128,0);
         pipeline(1,29,256,128,0);
         pipeline(1,29,256,32,1);
+`endif
         $display("JTAG200_SIM_PASS");
         $finish;
     end

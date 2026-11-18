@@ -1,0 +1,90 @@
+{
+  "cable": "210299008529",
+  "base": "0x105f000",
+  "block_bytes": 1024,
+  "queue_depth": 1,
+  "rows": [
+    {
+      "rate": "50",
+      "tap": 0,
+      "phase": 36,
+      "idle": 64,
+      "runs": [
+        {
+          "mode": 1,
+          "planned_s": 0,
+          "seconds": 0.00075408000075408,
+          "host_s": 0.017039500002283603,
+          "read_MBps": 1.3597529060416054,
+          "write_MBps": 0,
+          "read_bytes": 1024,
+          "write_bytes": 0,
+          "tck_cycles": 29277,
+          "segments": 270,
+          "completion": 65792,
+          "dmi_busy": 0,
+          "dmi_invalid": 0,
+          "passed": true
+        },
+        {
+          "mode": 0,
+          "planned_s": 0,
+          "seconds": 0.001499787001499787,
+          "host_s": 0.025695000018458813,
+          "read_MBps": 1.3598124932454236,
+          "write_MBps": 1.3736687539670724,
+          "read_bytes": 1024,
+          "write_bytes": 1024,
+          "tck_cycles": 87831,
+          "segments": 810,
+          "completion": 65792,
+          "dmi_busy": 0,
+          "dmi_invalid": 0,
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "rate": "200",
+      "tap": 24,
+      "phase": 39,
+      "idle": 256,
+      "runs": [
+        {
+          "mode": 1,
+          "planned_s": 0,
+          "seconds": 5.529000005529e-06,
+          "host_s": 0.002318799961358309,
+          "read_MBps": 0.0,
+          "write_MBps": 0,
+          "read_bytes": 0,
+          "write_bytes": 0,
+          "tck_cycles": 319,
+          "segments": 5,
+          "completion": 4,
+          "dmi_busy": 0,
+          "dmi_invalid": 1,
+          "passed": false,
+          "error": 4,
+          "bad_word": 0,
+          "bad_value": "0x0"
+        }
+      ],
+      "error": "Read-only preflight {'mode': 1, 'planned_s': 0, 'seconds': 5.529000005529e-06, 'host_s': 0.002318799961358309, 'read_MBps': 0.0, 'write_MBps': 0, 'read_bytes': 0, 'write_bytes': 0, 'tck_cycles': 319, 'segments': 5, 'completion': 4, 'dmi_busy': 0, 'dmi_invalid': 1, 'passed': False, 'error': 4, 'bad_word': 0, 'bad_value': '0x0'}",
+      "recovered": true
+    }
+  ],
+  "probe": {
+    "executable_bytes": 2312,
+    "pair_sha256": {
+      "probe.bit": "ce06289e4547d7da4f276f456385d3c7b1e394f6ff74f6e7feedfe4a4f93d96c",
+      "application.elf": "b8c464be212aedb66341a172c9ff64476b5180f5ad94bba0e69c9955d338516a",
+      "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+    }
+  },
+  "backup_sha256": "a358670a636c1bad3d5014b5328db1a9be9290e9dda10271c59a12d74903c88c",
+  "restored": true,
+  "restored_sha256": "a358670a636c1bad3d5014b5328db1a9be9290e9dda10271c59a12d74903c88c",
+  "debug_restored": true
+}

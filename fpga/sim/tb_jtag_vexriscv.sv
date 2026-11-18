@@ -26,7 +26,7 @@ module tb_jtag_vexriscv;
         .request(req),.wdata(wd),.seq_count(seq_count),.seq_data(seq_data),.seq_tms(seq_tms),
         .ir_length(irlen),.ir_before(ib),.ir_after(ia),.dr_before(db),.dr_after(da),
         .idcode_ir(idcode_ir),.riscv_mode(1'b0),
-        .half_delay(delay),.idle_cycles(4'd1),.late_return(late_return),.tdo(tdo_pad),
+        .half_delay(delay),.idle_cycles(8'd1),.late_return(late_return),.tdo(tdo_pad),
         .next_valid(1'b0),.next_request(8'd0),.next_wdata(32'd0),.next_ready(),
         .result_valid(valid),.busy(busy),.ack(ack),.rdata(data),.tck(tck),.tms(tms),.tdi(tdi),
         .sequence_result(seq_result),.fence_req(fence),.fence_done(fd),.fence_error(fe));
@@ -40,7 +40,7 @@ module tb_jtag_vexriscv;
         .dBusAxi_b_payload_id(1'b0),.dBusAxi_b_payload_resp(2'd0),
         .dBusAxi_ar_ready(1'b0),.dBusAxi_r_valid(1'b0),.dBusAxi_r_payload_data(32'd0),
         .dBusAxi_r_payload_id(1'b0),.dBusAxi_r_payload_resp(2'd0),.dBusAxi_r_payload_last(1'b0));
-    integer tck_edges=0, edges_mark=0, edges_last=0, i;
+    integer tck_edges=0, edges_mark=0, edges_last=0, burst_mark=0, i;
     always @(posedge tck) tck_edges<=tck_edges+1;
     task call(input [2:0] operation,input [7:0] request,input [31:0] value,input [2:0] expected_ack);
         integer budget;
@@ -64,10 +64,10 @@ module tb_jtag_vexriscv;
         $display("PASS vexriscv idcode repeat data=%x tck_per_scan=%0d",data,edges_last);
         // Steady-state cost of repeated 32-bit DR exchanges (IR stays loaded when
         // the core can reuse its cache), reported as TCK cycles per exchange.
-        edges_mark=tck_edges;
+        burst_mark=tck_edges;
         for(i=0;i<100;i=i+1) call(3,0,0,1);
-        $display("COST %0d scans in %0d tck (%.2f tck/scan)",100,tck_edges-edges_mark,
-                 (tck_edges-edges_mark)/100.0);
+        $display("COST %0d scans in %0d tck (%.2f tck/scan)",100,tck_edges-burst_mark,
+                 (tck_edges-burst_mark)/100.0);
         $finish;
     end
     initial begin
