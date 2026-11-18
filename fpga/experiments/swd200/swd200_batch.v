@@ -26,8 +26,9 @@ module swd200_batch (
     reg [1:0] state = IDLE, fetch = EMPTY;
     (* ASYNC_REG = "TRUE" *) reg [1:0] request_sync = 0;
     reg [8:0] fetch_index;
-    reg [4:0] next_op, current_op;
-    reg [31:0] next_word, current_word;
+    reg [8:0] next_header, current_header;
+    reg [32:0] next_word, current_word;
+    reg next_last, current_last;
     reg next_valid = 0;
     reg [5:0] attempts;
     reg [9:0] active_count;
@@ -36,13 +37,12 @@ module swd200_batch (
     reg [3:0] active_idle;
     wire link_done, parity_error;
     wire [2:0] ack;
-    wire good = current_op[4] || (ack == 3'b001 && !parity_error);
+    wire good = current_header[8] || (ack == 3'b001 && !parity_error);
     wire retire = state == TRANSFER && link_done;
-    wire has_successor = completed + 10'd1 < active_count;
     wire retry = retire && !good && ack == 3'b010 && attempts != 6'd63;
-    wire issue_next = next_valid && (state == PREFILL || (retire && good && has_successor));
-    wire [4:0] issue_op = retry ? current_op : next_op;
-    wire [31:0] issue_word = retry ? current_word : next_word;
+    wire issue_next = next_valid && (state == PREFILL || (retire && good && !current_last));
+    wire [8:0] issue_header = retry ? current_header : next_header;
+    wire [32:0] issue_word = retry ? current_word : next_word;
     assign command_addr = {fetch_index, fetch != FETCH_OP};
     assign result_addr = completed[8:0];
     // The write enable depends only on word-domain registers. The host
@@ -52,9 +52,9 @@ module swd200_batch (
     swd200_link link (
         .clk(clk), .reset(reset), .rate(active_rate),
         .ack_sample(active_ack_sample), .data_sample(active_data_sample),
-        .idle_cycles(active_idle), .start(issue_next || retry), .enter_swd(issue_op[4]),
-        .request(issue_op[3:0]), .write_data(issue_word),
-        .busy(), .done(link_done), .ack(ack), .parity_error(parity_error), .read_data(result_word),
+        .idle_cycles(active_idle), .start(issue_next || retry), .enter_swd(issue_header[8]),
+        .header(issue_header[7:0]), .write_packet(issue_word),
+        .done(link_done), .ack(ack), .parity_error(parity_error), .read_data(result_word),
         .rx_slots(rx_slots), .clk_slots(clk_slots), .data_slots(data_slots), .release_slots(release_slots)
     );
 
@@ -70,22 +70,26 @@ module swd200_batch (
             case (fetch)
                 FETCH_OP: fetch <= FETCH_DATA;
                 FETCH_DATA: begin
-                    next_op <= command_word[4:0];
+                    // Frame the pending request while the wire is busy.
+                    next_header <= {command_word[4], 1'b1, 1'b0,
+                                    ^command_word[3:0], command_word[3:0], 1'b1};
+                    next_last <= {1'b0, fetch_index} + 10'd1 == active_count;
                     fetch <= FETCH_STORE;
                 end
                 FETCH_STORE: begin
-                    next_word <= command_word;
+                    next_word <= {^command_word, command_word};
                     next_valid <= 1;
                     fetch <= EMPTY;
                 end
                 default: begin end
             endcase
             if (issue_next) begin
-                current_op <= next_op;
+                current_header <= next_header;
                 current_word <= next_word;
+                current_last <= next_last;
                 next_valid <= 0;
                 attempts <= 0;
-                if ({1'b0, fetch_index} + 10'd1 < active_count) begin
+                if (!next_last) begin
                     fetch_index <= fetch_index + 1'b1;
                     fetch <= FETCH_OP;
                 end
@@ -111,7 +115,7 @@ module swd200_batch (
                 TRANSFER: if (link_done) begin
                     if (good) begin
                         completed <= completed + 10'd1;
-                        if (!has_successor) state <= COMPLETE;
+                        if (current_last) state <= COMPLETE;
                         else if (!issue_next) state <= PREFILL;
                     end else if (retry) begin
                         attempts <= attempts + 1'b1;
