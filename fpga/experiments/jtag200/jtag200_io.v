@@ -11,9 +11,12 @@ module jtag200_io (
     output wire delay_ready,
     input wire [23:0] lane_word,
     output wire [7:0] rx_word,
-    output wire tck, tms, tdi,
+    output wire tck, tms, tdi, ntrst, nsrst,
     input wire tdo
 );
+    // Keep the target and its TAP out of reset on a full J7 cable.
+    OBUF trst_release (.I(1'b1), .O(ntrst));
+    OBUF srst_release (.I(1'b1), .O(nsrst));
     wire clock_reset = phy_hold || !axi_resetn;
     wire clock_locked, feedback_raw, feedback, serial_raw, serial_clk, word_raw;
     MMCME2_BASE #(

@@ -189,6 +189,15 @@ def load_pair(args):
         session.run(f'''targets -set -filter {{name =~ "APU"{select}}}
 rst -system
 after 1000
+set ready 0
+for {{set attempt 0}} {{$attempt < 50}} {{incr attempt}} {{
+    if {{![catch {{
+        targets -set -filter {{name =~ "APU"{select}}}
+        mrd -force -value 0xf8007080
+    }} reason]}} {{set ready 1; break}}
+    after 100
+}}
+if {{!$ready}} {{error "APU did not recover after reset: $reason"}}
 source {{{init}}}
 ps7_init
 targets -set -filter {{name =~ "xc7z020"{select}}}

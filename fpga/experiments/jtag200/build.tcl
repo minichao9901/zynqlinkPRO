@@ -63,7 +63,7 @@ connect_bd_net [get_bd_pins reset/peripheral_aresetn] [get_bd_pins regs/axi_ares
 foreach pin {word_clk word_reset ready phy_hold lane_word rx_word delay_ready delay_value delay_load} {
     connect_bd_net [get_bd_pins regs/$pin] [get_bd_pins io/$pin]
 }
-foreach {pin direction} {tck O tms O tdi O tdo I} {
+foreach {pin direction} {tck O tms O tdi O tdo I ntrst O nsrst O} {
     create_bd_port -dir $direction $pin
     connect_bd_net [get_bd_ports $pin] [get_bd_pins io/$pin]
 }

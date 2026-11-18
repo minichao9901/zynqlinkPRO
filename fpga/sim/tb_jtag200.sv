@@ -12,7 +12,7 @@ module tb_jtag200;
     wire [4:0] delay_value;
     wire [23:0] lane_word;
     wire [7:0] rx_word;
-    wire tck, tms, tdi, tdo;
+    wire tck, tms, tdi, tdo, ntrst, nsrst;
 
     reg [13:0] awaddr = 0, araddr = 0;
     reg [31:0] wdata = 0;
@@ -35,10 +35,11 @@ module tb_jtag200;
         .fclk1(fclk1), .delay_ref(delay_ref), .axi_clk(axi_clk), .axi_resetn(axi_resetn),
         .phy_hold(phy_hold), .word_clk(word_clk), .word_reset(word_reset), .ready(ready),
         .delay_load(delay_load), .delay_value(delay_value), .delay_ready(delay_ready),
-        .lane_word(lane_word), .rx_word(rx_word), .tck(tck), .tms(tms), .tdi(tdi), .tdo(tdo)
+        .lane_word(lane_word), .rx_word(rx_word), .tck(tck), .tms(tms), .tdi(tdi), .tdo(tdo),
+        .ntrst(ntrst), .nsrst(nsrst)
     );
     jtag_dtm_model #(.RETURN_NS(0.80)) tap (
-        .rst_n(axi_resetn), .tck(tck), .tms(tms), .tdi(tdi), .tdo(tdo)
+        .rst_n(axi_resetn && ntrst && nsrst), .tck(tck), .tms(tms), .tdi(tdi), .tdo(tdo)
     );
 
     task automatic write_reg(input [13:0] addr, input [31:0] data, input [1:0] response);
@@ -127,6 +128,7 @@ module tb_jtag200;
         #200;
         write_reg(8, 0, 0);
         wait_status(5);
+        if ({ntrst, nsrst} !== 2'b11) $fatal(1, "Target reset held active");
         write_reg(12, 0, 0);
         for (int i = 0; i < len; i++) begin
             if (!$fscanf(fp, "%h", word)) $fatal(1, "Short TX vector");
