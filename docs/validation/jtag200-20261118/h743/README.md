@@ -59,3 +59,7 @@ ARM 流水保留原来的 `DP CTRL/STAT`、`SELECT`、`CSW`、`TAR` 建链和块
 块描述符选择两 TCK/serializer 字和奇数 idle。流水可把原始数据留在 RX BRAM 供 A9 逐字复核，也可预装一次基准图案，由 PL 逐字比对。混合测试通过反相位交替写入两种图案。两种模式都完整保留读回数据。
 
 66.667 MHz、idle3、1 KiB 同用例，仿真仍发出 12,149 个 TCK，读用时从 263.40 µs 降至 186.48 µs。扣除 182.24 µs 的物理发钟时间，整块额外时间约 4.24 µs，达到该扫描序列线速预算的 97.7%。idle5 交替读写各 194.16 µs。原始波形档、旧 ARM 路径和 RISC-V 路径仿真通过。[仿真分解](stream-xsim.txt)
+
+补测 66.667 MHz、idle1 的流式仿真为 5.726 MB/s；100 MHz、idle3 为读 8.236、写 8.235 MB/s。H743 实板有效 idle 仍以连续测试判定。
+
+从 `6ca21b98` 构建的配对在 133.333 MHz 约束下路由 WNS +2.116 ns、WHS +0.067 ns。首次上板预检时，旧 CMSIS-DAP 仍可枚举，Windows 显示下载器 `USB\VID_0403&PID_6014\210299008529` 的 `IsPresent=False`，XSCT 报可用目标为空。终止在预检，目标 RAM 和 Flash 写入次数均为零。[预检记录](stream-first-preflight.json) · [路由配对](../../../../prebuilt/jtag-only-200mhz-arm-stream-20261118/manifest.json)
