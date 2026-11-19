@@ -1,0 +1,393 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1600" viewBox="0 0 1800 1600" role="img"><title>128 MHz JTAG 读写时序</title><desc>真实 SelectIO 与 Cortex-M3 RTL 仿真的一个连续 APACC 读帧和写帧，含 TDO 回采、块尾及采样时刻。</desc><metadata id="simulation">Vivado XSim 2018.3, tb_jtag200, J200_SINGLE_POINT + J200_TEST_CM3, UNISIM. ref_half=15.625 ns, half=1, HCLK=128 MHz, stream=1, idle=17, sample=34, IDELAY load=16. Model return line uses 23.0 ns transport delay from gated CM3 TDO; word i is the bitwise inverse of (0x5a89cdef XOR (i*65537)). Write frame index 4, read frame index 5. Frame time origins 17970.256 ns and 146376.506 ns respectively. Serial capture verified by reconstructing observed RX words from DDLY samples, bit indices 1/3/5/7. J200_CM3_PASS and JTAG200_SIM_PASS.</metadata><g font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif">
+<rect x="0.00" y="0.00" width="1800.00" height="1600.00" rx="0" fill="#ffffff"/>
+<rect x="0.00" y="0.00" width="12.00" height="98.00" rx="0" fill="#006e68"/>
+<text x="38.00" y="48.00" font-size="36" font-weight="700" text-anchor="start" fill="#182d42">128 MHz JTAG 连续读写时序</text>
+<text x="39.00" y="80.00" font-size="20" font-weight="400" text-anchor="start" fill="#486173">STM32F103ZE 实板最高稳定双向档  ·  HCLK 128 MHz  ·  TCK 周期 7.8125 ns  ·  CLKDIV 周期 31.25 ns  ·  IDELAY tap 16  ·  采样时隙 34  ·  idle 17</text>
+<rect x="30.00" y="104.00" width="1740.00" height="46.00" rx="3" fill="#edf4f8"/>
+<text x="47.00" y="134.00" font-size="18" font-weight="400" text-anchor="start" fill="#486173">波形取自 JTAG200 RTL、Xilinx UNISIM 和 Cortex-M3 联合仿真。模型给 TDO 返程额外加 23 ns 传输延时，用于演示实板采样配置。引脚波形尚无示波器捕获。</text>
+<rect x="30.00" y="167.00" width="1740.00" height="292.00" rx="7" fill="#f5f8fa"/>
+<text x="46.00" y="197.00" font-size="23" font-weight="700" text-anchor="start" fill="#182d42">读帧  ·  APACC / DRW</text>
+<text x="46.00" y="222.00" font-size="16" font-weight="400" text-anchor="start" fill="#486173">TDI 发起下一字读取。TDO 移出上笔请求的应答，返回数据为 0xA5723214（本帧索引 5）。</text>
+<path d="M207.94 250V396" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="207.94" y="414.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">0</text>
+<path d="M290.77 250V396" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="290.77" y="414.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">25</text>
+<path d="M373.60 250V396" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="373.60" y="414.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">50</text>
+<path d="M456.42 250V396" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="456.42" y="414.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">75</text>
+<path d="M539.25 250V396" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="539.25" y="414.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">100</text>
+<path d="M622.08 250V396" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="622.08" y="414.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">125</text>
+<path d="M704.90 250V396" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="704.90" y="414.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">150</text>
+<path d="M787.73 250V396" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="787.73" y="414.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">175</text>
+<path d="M870.55 250V396" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="870.55" y="414.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">200</text>
+<path d="M953.38 250V396" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="953.38" y="414.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">225</text>
+<path d="M1036.21 250V396" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="1036.21" y="414.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">250</text>
+<path d="M1119.03 250V396" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="1119.03" y="414.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">275</text>
+<path d="M1201.86 250V396" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="1201.86" y="414.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">300</text>
+<path d="M1284.69 250V396" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="1284.69" y="414.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">325</text>
+<path d="M1367.52 250V396" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="1367.52" y="414.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">350</text>
+<path d="M1450.34 250V396" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="1450.34" y="414.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">375</text>
+<path d="M1533.17 250V396" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="1533.17" y="414.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">400</text>
+<path d="M1615.99 250V396" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="1615.99" y="414.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">425</text>
+<path d="M1698.82 250V396" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="1698.82" y="414.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">450</text>
+<rect x="195.00" y="230.00" width="77.65" height="18.00" rx="0" fill="#e3eaf1"/>
+<text x="233.82" y="244.00" font-size="13" font-weight="600" text-anchor="middle" fill="#486173">导航</text>
+<rect x="272.65" y="230.00" width="983.57" height="18.00" rx="0" fill="#d8eee9"/>
+<text x="764.43" y="244.00" font-size="13" font-weight="600" text-anchor="middle" fill="#486173">Shift-DR  ·  串入请求及数据，同时移出 ACK 与上笔返回值</text>
+<rect x="1256.22" y="230.00" width="51.77" height="18.00" rx="0" fill="#fae6d7"/>
+<text x="1282.10" y="244.00" font-size="13" font-weight="600" text-anchor="middle" fill="#486173">更新</text>
+<rect x="1307.98" y="230.00" width="440.02" height="18.00" rx="0" fill="#e7ebef"/>
+<text x="1527.99" y="244.00" font-size="13" font-weight="600" text-anchor="middle" fill="#486173">附加 idle  ·  17 TCK</text>
+<text x="46.00" y="263.00" font-size="16" font-weight="650" text-anchor="start" fill="#182d42">TCK</text>
+<path d="M195.00 252.50H195.00V263.50H207.94V252.50H220.88V263.50H233.82V252.50H246.77V263.50H259.71V252.50H272.65V263.50H285.59V252.50H298.53V263.50H311.48V252.50H324.42V263.50H337.36V252.50H350.30V263.50H363.24V252.50H376.18V263.50H389.12V252.50H402.07V263.50H415.01V252.50H427.95V263.50H440.89V252.50H453.83V263.50H466.77V252.50H479.72V263.50H492.66V252.50H505.60V263.50H518.54V252.50H531.48V263.50H544.42V252.50H557.37V263.50H570.31V252.50H583.25V263.50H596.19V252.50H609.13V263.50H622.08V252.50H635.02V263.50H647.96V252.50H660.90V263.50H673.84V252.50H686.78V263.50H699.72V252.50H712.67V263.50H725.61V252.50H738.55V263.50H751.49V252.50H764.43V263.50H777.38V252.50H790.32V263.50H803.26V252.50H816.20V263.50H829.14V252.50H842.08V263.50H855.02V252.50H867.97V263.50H880.91V252.50H893.85V263.50H906.79V252.50H919.73V263.50H932.67V252.50H945.62V263.50H958.56V252.50H971.50V263.50H984.44V252.50H997.38V263.50H1010.32V252.50H1023.27V263.50H1036.21V252.50H1049.15V263.50H1062.09V252.50H1075.03V263.50H1087.97V252.50H1100.92V263.50H1113.86V252.50H1126.80V263.50H1139.74V252.50H1152.68V263.50H1165.62V252.50H1178.57V263.50H1191.51V252.50H1204.45V263.50H1217.39V252.50H1230.33V263.50H1243.28V252.50H1256.22V263.50H1269.16V252.50H1282.10V263.50H1295.04V252.50H1307.98V263.50H1320.92V252.50H1333.87V263.50H1346.81V252.50H1359.75V263.50H1372.69V252.50H1385.63V263.50H1398.58V252.50H1411.52V263.50H1424.46V252.50H1437.40V263.50H1450.34V252.50H1463.28V263.50H1476.22V252.50H1489.17V263.50H1502.11V252.50H1515.05V263.50H1527.99V252.50H1540.93V263.50H1553.88V252.50H1566.82V263.50H1579.76V252.50H1592.70V263.50H1605.64V252.50H1618.58V263.50H1631.52V252.50H1644.47V263.50H1657.41V252.50H1670.35V263.50H1683.29V252.50H1696.23V263.50H1709.17V252.50H1722.12V263.50H1735.06V252.50H1748.00" fill="none" stroke="#182d42" stroke-width="1.9" stroke-linejoin="round"/>
+<text x="46.00" y="292.00" font-size="16" font-weight="650" text-anchor="start" fill="#245ba5">TMS</text>
+<path d="M195.00 292.50H195.00V281.50H220.88V292.50H1230.33V281.50H1282.10V292.50H1748.00" fill="none" stroke="#245ba5" stroke-width="1.9" stroke-linejoin="round"/>
+<text x="46.00" y="321.00" font-size="16" font-weight="650" text-anchor="start" fill="#006e68">TDI</text>
+<path d="M195.00 321.50H324.42V310.50H402.07V321.50H1748.00" fill="none" stroke="#006e68" stroke-width="1.9" stroke-linejoin="round"/>
+<text x="46.00" y="350.00" font-size="16" font-weight="650" text-anchor="start" fill="#9d4923">TDO · 目标</text>
+<path d="M195.00 339.50H272.65V350.50H298.53V339.50H324.42V350.50H402.07V339.50H427.95V350.50H453.83V339.50H479.72V350.50H583.25V339.50H609.13V350.50H660.90V339.50H712.67V350.50H790.32V339.50H816.20V350.50H867.97V339.50H945.62V350.50H971.50V339.50H997.38V350.50H1023.27V339.50H1049.15V350.50H1100.92V339.50H1126.80V350.50H1152.68V339.50H1178.57V350.50H1256.22V339.50H1748.00" fill="none" stroke="#9d4923" stroke-width="1.9" stroke-linejoin="round"/>
+<text x="46.00" y="379.00" font-size="16" font-weight="650" text-anchor="start" fill="#7950a3">TDO · DDLY</text>
+<path d="M195.00 368.50H354.97V379.50H380.86V368.50H406.74V379.50H484.39V368.50H510.27V379.50H536.16V368.50H562.04V379.50H665.57V368.50H691.46V379.50H743.22V368.50H794.99V379.50H872.64V368.50H898.52V379.50H950.29V368.50H1027.94V379.50H1053.82V368.50H1079.71V379.50H1105.59V368.50H1131.47V379.50H1183.24V368.50H1209.12V379.50H1235.01V368.50H1260.89V379.50H1338.54V368.50H1748.00" fill="none" stroke="#7950a3" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M362.91 375.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M388.79 364.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M414.68 375.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M440.56 375.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M466.44 375.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M492.33 364.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M518.21 375.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M544.09 364.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M569.98 375.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M595.86 375.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M621.74 375.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M647.63 375.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M673.51 364.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M699.39 375.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M725.28 375.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M751.16 364.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M777.04 364.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M802.93 375.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M828.81 375.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M854.69 375.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M880.58 364.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M906.46 375.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M932.34 375.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M958.23 364.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M984.11 364.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M1009.99 364.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M1035.88 375.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M1061.76 364.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M1087.64 375.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M1113.53 364.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M1139.41 375.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M1165.29 375.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M1191.18 364.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M1217.06 375.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M1242.94 364.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<text x="46.00" y="414.00" font-size="14" font-weight="400" text-anchor="start" fill="#486173">t / ns</text>
+<text x="46.00" y="446.00" font-size="15" font-weight="400" text-anchor="start" fill="#486173">帧起点取导航段首个 TCK 上升沿。60 个 TCK 共 468.75 ns，CLKDIV 域每拍发出 4 个 TCK。</text>
+<rect x="30.00" y="470.00" width="1740.00" height="292.00" rx="7" fill="#f5f8fa"/>
+<text x="46.00" y="500.00" font-size="23" font-weight="700" text-anchor="start" fill="#182d42">写帧  ·  APACC / DRW</text>
+<text x="46.00" y="525.00" font-size="16" font-weight="400" text-anchor="start" fill="#486173">TDI 写入 0xA5723214（本帧索引 4）。TDO 同时送回上笔应答，此写帧的数据返回域为 0。</text>
+<path d="M207.94 553V699" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="207.94" y="717.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">0</text>
+<path d="M290.77 553V699" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="290.77" y="717.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">25</text>
+<path d="M373.60 553V699" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="373.60" y="717.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">50</text>
+<path d="M456.42 553V699" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="456.42" y="717.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">75</text>
+<path d="M539.25 553V699" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="539.25" y="717.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">100</text>
+<path d="M622.08 553V699" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="622.08" y="717.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">125</text>
+<path d="M704.90 553V699" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="704.90" y="717.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">150</text>
+<path d="M787.73 553V699" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="787.73" y="717.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">175</text>
+<path d="M870.55 553V699" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="870.55" y="717.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">200</text>
+<path d="M953.38 553V699" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="953.38" y="717.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">225</text>
+<path d="M1036.21 553V699" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="1036.21" y="717.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">250</text>
+<path d="M1119.03 553V699" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="1119.03" y="717.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">275</text>
+<path d="M1201.86 553V699" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="1201.86" y="717.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">300</text>
+<path d="M1284.69 553V699" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="1284.69" y="717.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">325</text>
+<path d="M1367.52 553V699" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="1367.52" y="717.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">350</text>
+<path d="M1450.34 553V699" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="1450.34" y="717.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">375</text>
+<path d="M1533.17 553V699" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="1533.17" y="717.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">400</text>
+<path d="M1615.99 553V699" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="1615.99" y="717.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">425</text>
+<path d="M1698.82 553V699" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="1698.82" y="717.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">450</text>
+<rect x="195.00" y="533.00" width="77.65" height="18.00" rx="0" fill="#e3eaf1"/>
+<text x="233.82" y="547.00" font-size="13" font-weight="600" text-anchor="middle" fill="#486173">导航</text>
+<rect x="272.65" y="533.00" width="983.57" height="18.00" rx="0" fill="#d8eee9"/>
+<text x="764.43" y="547.00" font-size="13" font-weight="600" text-anchor="middle" fill="#486173">Shift-DR  ·  串入请求及数据，同时移出 ACK 与上笔返回值</text>
+<rect x="1256.22" y="533.00" width="51.77" height="18.00" rx="0" fill="#fae6d7"/>
+<text x="1282.10" y="547.00" font-size="13" font-weight="600" text-anchor="middle" fill="#486173">更新</text>
+<rect x="1307.98" y="533.00" width="440.02" height="18.00" rx="0" fill="#e7ebef"/>
+<text x="1527.99" y="547.00" font-size="13" font-weight="600" text-anchor="middle" fill="#486173">附加 idle  ·  17 TCK</text>
+<text x="46.00" y="566.00" font-size="16" font-weight="650" text-anchor="start" fill="#182d42">TCK</text>
+<path d="M195.00 555.50H195.00V566.50H207.94V555.50H220.88V566.50H233.82V555.50H246.77V566.50H259.71V555.50H272.65V566.50H285.59V555.50H298.53V566.50H311.48V555.50H324.42V566.50H337.36V555.50H350.30V566.50H363.24V555.50H376.18V566.50H389.12V555.50H402.07V566.50H415.01V555.50H427.95V566.50H440.89V555.50H453.83V566.50H466.77V555.50H479.72V566.50H492.66V555.50H505.60V566.50H518.54V555.50H531.48V566.50H544.42V555.50H557.37V566.50H570.31V555.50H583.25V566.50H596.19V555.50H609.13V566.50H622.08V555.50H635.02V566.50H647.96V555.50H660.90V566.50H673.84V555.50H686.78V566.50H699.72V555.50H712.67V566.50H725.61V555.50H738.55V566.50H751.49V555.50H764.43V566.50H777.38V555.50H790.32V566.50H803.26V555.50H816.20V566.50H829.14V555.50H842.08V566.50H855.02V555.50H867.97V566.50H880.91V555.50H893.85V566.50H906.79V555.50H919.73V566.50H932.67V555.50H945.62V566.50H958.56V555.50H971.50V566.50H984.44V555.50H997.38V566.50H1010.32V555.50H1023.27V566.50H1036.21V555.50H1049.15V566.50H1062.09V555.50H1075.03V566.50H1087.97V555.50H1100.92V566.50H1113.86V555.50H1126.80V566.50H1139.74V555.50H1152.68V566.50H1165.62V555.50H1178.57V566.50H1191.51V555.50H1204.45V566.50H1217.39V555.50H1230.33V566.50H1243.28V555.50H1256.22V566.50H1269.16V555.50H1282.10V566.50H1295.04V555.50H1307.98V566.50H1320.92V555.50H1333.87V566.50H1346.81V555.50H1359.75V566.50H1372.69V555.50H1385.63V566.50H1398.58V555.50H1411.52V566.50H1424.46V555.50H1437.40V566.50H1450.34V555.50H1463.28V566.50H1476.22V555.50H1489.17V566.50H1502.11V555.50H1515.05V566.50H1527.99V555.50H1540.93V566.50H1553.88V555.50H1566.82V566.50H1579.76V555.50H1592.70V566.50H1605.64V555.50H1618.58V566.50H1631.52V555.50H1644.47V566.50H1657.41V555.50H1670.35V566.50H1683.29V555.50H1696.23V566.50H1709.17V555.50H1722.12V566.50H1735.06V555.50H1748.00" fill="none" stroke="#182d42" stroke-width="1.9" stroke-linejoin="round"/>
+<text x="46.00" y="595.00" font-size="16" font-weight="650" text-anchor="start" fill="#245ba5">TMS</text>
+<path d="M195.00 595.50H195.00V584.50H220.88V595.50H1230.33V584.50H1282.10V595.50H1748.00" fill="none" stroke="#245ba5" stroke-width="1.9" stroke-linejoin="round"/>
+<text x="46.00" y="624.00" font-size="16" font-weight="650" text-anchor="start" fill="#006e68">TDI</text>
+<path d="M195.00 624.50H350.30V613.50H402.07V624.50H453.83V613.50H479.72V624.50H505.60V613.50H531.48V624.50H635.02V613.50H660.90V624.50H712.67V613.50H764.43V624.50H842.08V613.50H867.97V624.50H919.73V613.50H997.38V624.50H1023.27V613.50H1049.15V624.50H1075.03V613.50H1100.92V624.50H1152.68V613.50H1178.57V624.50H1204.45V613.50H1230.33V624.50H1748.00" fill="none" stroke="#006e68" stroke-width="1.9" stroke-linejoin="round"/>
+<text x="46.00" y="653.00" font-size="16" font-weight="650" text-anchor="start" fill="#9d4923">TDO · 目标</text>
+<path d="M195.00 642.50H272.65V653.50H298.53V642.50H324.42V653.50H1256.22V642.50H1748.00" fill="none" stroke="#9d4923" stroke-width="1.9" stroke-linejoin="round"/>
+<text x="46.00" y="682.00" font-size="16" font-weight="650" text-anchor="start" fill="#7950a3">TDO · DDLY</text>
+<path d="M195.00 671.50H354.97V682.50H380.86V671.50H406.74V682.50H1338.54V671.50H1748.00" fill="none" stroke="#7950a3" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M362.91 678.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M388.79 667.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M414.68 678.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M440.56 678.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M466.44 678.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M492.33 678.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M518.21 678.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M544.09 678.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M569.98 678.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M595.86 678.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M621.74 678.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M647.63 678.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M673.51 678.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M699.39 678.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M725.28 678.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M751.16 678.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M777.04 678.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M802.93 678.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M828.81 678.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M854.69 678.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M880.58 678.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M906.46 678.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M932.34 678.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M958.23 678.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M984.11 678.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M1009.99 678.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M1035.88 678.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M1061.76 678.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M1087.64 678.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M1113.53 678.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M1139.41 678.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M1165.29 678.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M1191.18 678.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M1217.06 678.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M1242.94 678.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<text x="46.00" y="717.00" font-size="14" font-weight="400" text-anchor="start" fill="#486173">t / ns</text>
+<text x="46.00" y="749.00" font-size="15" font-weight="400" text-anchor="start" fill="#486173">两帧来自分开的 256 字写块与读块，各自以本帧首个上升沿为 0 ns。TDI / TDO 均按最低有效位先行。</text>
+<rect x="30.00" y="778.00" width="858.00" height="283.00" rx="7" fill="#f5f8fa"/>
+<text x="46.00" y="808.00" font-size="23" font-weight="700" text-anchor="start" fill="#182d42">读头  ·  RnW = 1</text>
+<text x="46.00" y="833.00" font-size="16" font-weight="400" text-anchor="start" fill="#486173">TDI 依次送出 1、1、1；TDO 在另一条线上并行移出 ACK。</text>
+<path d="M175.69 861V999" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="175.69" y="1017.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">0</text>
+<path d="M249.92 861V999" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="249.92" y="1017.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">10</text>
+<path d="M324.14 861V999" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="324.14" y="1017.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">20</text>
+<path d="M398.37 861V999" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="398.37" y="1017.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">30</text>
+<path d="M472.60 861V999" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="472.60" y="1017.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">40</text>
+<path d="M546.82 861V999" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="546.82" y="1017.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">50</text>
+<path d="M621.05 861V999" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="621.05" y="1017.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">60</text>
+<path d="M695.28 861V999" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="695.28" y="1017.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">70</text>
+<path d="M769.51 861V999" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="769.51" y="1017.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">80</text>
+<path d="M843.73 861V999" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="843.73" y="1017.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">90</text>
+<text x="866.00" y="855.00" font-size="13" font-weight="400" text-anchor="end" fill="#486173">t / ns</text>
+<text x="46.00" y="874.00" font-size="16" font-weight="650" text-anchor="start" fill="#182d42">TCK</text>
+<path d="M146.00 863.50H146.70V874.50H175.69V863.50H204.68V874.50H233.68V863.50H262.68V874.50H291.67V863.50H320.66V874.50H349.66V863.50H378.66V874.50H407.65V863.50H436.64V874.50H465.64V863.50H494.64V874.50H523.63V863.50H552.62V874.50H581.61V863.50H610.62V874.50H639.61V863.50H668.60V874.50H697.59V863.50H726.59V874.50H755.59V863.50H784.58V874.50H813.57V863.50H842.57V874.50H866.00" fill="none" stroke="#182d42" stroke-width="1.9" stroke-linejoin="round"/>
+<text x="46.00" y="901.00" font-size="16" font-weight="650" text-anchor="start" fill="#245ba5">TMS</text>
+<path d="M146.00 901.50H146.70V890.50H204.68V901.50H866.00" fill="none" stroke="#245ba5" stroke-width="1.9" stroke-linejoin="round"/>
+<text x="46.00" y="928.00" font-size="16" font-weight="650" text-anchor="start" fill="#006e68">TDI</text>
+<path d="M146.00 928.50H436.64V917.50H610.62V928.50H866.00" fill="none" stroke="#006e68" stroke-width="1.9" stroke-linejoin="round"/>
+<circle cx="465.64" cy="917.50" r="3.1" fill="#006e68"/>
+<text x="465.64" y="939.00" font-size="12" font-weight="650" text-anchor="middle" fill="#006e68">RnW</text>
+<circle cx="523.63" cy="917.50" r="3.1" fill="#006e68"/>
+<text x="523.63" y="939.00" font-size="12" font-weight="650" text-anchor="middle" fill="#006e68">A2</text>
+<circle cx="581.61" cy="917.50" r="3.1" fill="#006e68"/>
+<text x="581.61" y="939.00" font-size="12" font-weight="650" text-anchor="middle" fill="#006e68">A3</text>
+<text x="46.00" y="955.00" font-size="16" font-weight="650" text-anchor="start" fill="#9d4923">TDO · 目标</text>
+<path d="M146.00 944.50H320.66V955.50H378.66V944.50H436.64V955.50H610.62V944.50H668.60V955.50H726.59V944.50H784.58V955.50H866.00" fill="none" stroke="#9d4923" stroke-width="1.9" stroke-linejoin="round"/>
+<text x="46.00" y="982.00" font-size="16" font-weight="650" text-anchor="start" fill="#7950a3">TDO · DDLY</text>
+<path d="M146.00 971.50H505.10V982.50H563.10V971.50H621.08V982.50H795.05V971.50H853.04V982.50H866.00" fill="none" stroke="#7950a3" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M522.89 978.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<text x="522.89" y="997.00" font-size="12" font-weight="600" text-anchor="middle" fill="#7950a3">ACK0</text>
+<path d="M580.87 967.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<text x="580.87" y="997.00" font-size="12" font-weight="600" text-anchor="middle" fill="#7950a3">ACK1</text>
+<path d="M638.87 978.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<text x="638.87" y="997.00" font-size="12" font-weight="600" text-anchor="middle" fill="#7950a3">ACK2</text>
+<path d="M696.85 978.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<text x="696.85" y="997.00" font-size="12" font-weight="600" text-anchor="middle" fill="#7950a3">D0</text>
+<path d="M754.85 978.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M812.83 967.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<text x="46.00" y="1048.00" font-size="15" font-weight="400" text-anchor="start" fill="#486173">菱形为延迟后 TDO 的选中采样点。ACK0 至 ACK2 对应应答的低位至高位。</text>
+<rect x="912.00" y="778.00" width="858.00" height="283.00" rx="7" fill="#f5f8fa"/>
+<text x="928.00" y="808.00" font-size="23" font-weight="700" text-anchor="start" fill="#182d42">写头  ·  RnW = 0</text>
+<text x="928.00" y="833.00" font-size="16" font-weight="400" text-anchor="start" fill="#486173">TDI 依次送出 0、1、1；写数据 D0 紧随地址位。</text>
+<path d="M1057.69 861V999" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="1057.69" y="1017.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">0</text>
+<path d="M1131.92 861V999" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="1131.92" y="1017.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">10</text>
+<path d="M1206.14 861V999" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="1206.14" y="1017.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">20</text>
+<path d="M1280.37 861V999" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="1280.37" y="1017.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">30</text>
+<path d="M1354.60 861V999" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="1354.60" y="1017.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">40</text>
+<path d="M1428.82 861V999" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="1428.82" y="1017.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">50</text>
+<path d="M1503.05 861V999" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="1503.05" y="1017.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">60</text>
+<path d="M1577.28 861V999" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="1577.28" y="1017.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">70</text>
+<path d="M1651.51 861V999" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="1651.51" y="1017.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">80</text>
+<path d="M1725.73 861V999" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="1725.73" y="1017.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">90</text>
+<text x="1748.00" y="855.00" font-size="13" font-weight="400" text-anchor="end" fill="#486173">t / ns</text>
+<text x="928.00" y="874.00" font-size="16" font-weight="650" text-anchor="start" fill="#182d42">TCK</text>
+<path d="M1028.00 863.50H1028.70V874.50H1057.69V863.50H1086.68V874.50H1115.68V863.50H1144.68V874.50H1173.67V863.50H1202.66V874.50H1231.66V863.50H1260.66V874.50H1289.65V863.50H1318.64V874.50H1347.64V863.50H1376.64V874.50H1405.63V863.50H1434.62V874.50H1463.61V863.50H1492.62V874.50H1521.61V863.50H1550.60V874.50H1579.59V863.50H1608.59V874.50H1637.59V863.50H1666.58V874.50H1695.57V863.50H1724.57V874.50H1748.00" fill="none" stroke="#182d42" stroke-width="1.9" stroke-linejoin="round"/>
+<text x="928.00" y="901.00" font-size="16" font-weight="650" text-anchor="start" fill="#245ba5">TMS</text>
+<path d="M1028.00 901.50H1028.70V890.50H1086.68V901.50H1748.00" fill="none" stroke="#245ba5" stroke-width="1.9" stroke-linejoin="round"/>
+<text x="928.00" y="928.00" font-size="16" font-weight="650" text-anchor="start" fill="#006e68">TDI</text>
+<path d="M1028.00 928.50H1376.64V917.50H1492.62V928.50H1608.59V917.50H1666.58V928.50H1724.57V917.50H1748.00" fill="none" stroke="#006e68" stroke-width="1.9" stroke-linejoin="round"/>
+<circle cx="1347.64" cy="928.50" r="3.1" fill="#006e68"/>
+<text x="1347.64" y="939.00" font-size="12" font-weight="650" text-anchor="middle" fill="#006e68">RnW</text>
+<circle cx="1405.63" cy="917.50" r="3.1" fill="#006e68"/>
+<text x="1405.63" y="939.00" font-size="12" font-weight="650" text-anchor="middle" fill="#006e68">A2</text>
+<circle cx="1463.61" cy="917.50" r="3.1" fill="#006e68"/>
+<text x="1463.61" y="939.00" font-size="12" font-weight="650" text-anchor="middle" fill="#006e68">A3</text>
+<circle cx="1521.61" cy="928.50" r="3.1" fill="#006e68"/>
+<text x="1521.61" y="939.00" font-size="12" font-weight="650" text-anchor="middle" fill="#006e68">D0</text>
+<text x="928.00" y="955.00" font-size="16" font-weight="650" text-anchor="start" fill="#9d4923">TDO · 目标</text>
+<path d="M1028.00 944.50H1202.66V955.50H1260.66V944.50H1318.64V955.50H1748.00" fill="none" stroke="#9d4923" stroke-width="1.9" stroke-linejoin="round"/>
+<text x="928.00" y="982.00" font-size="16" font-weight="650" text-anchor="start" fill="#7950a3">TDO · DDLY</text>
+<path d="M1028.00 971.50H1387.10V982.50H1445.10V971.50H1503.08V982.50H1748.00" fill="none" stroke="#7950a3" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M1404.89 978.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<text x="1404.89" y="997.00" font-size="12" font-weight="600" text-anchor="middle" fill="#7950a3">ACK0</text>
+<path d="M1462.87 967.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<text x="1462.87" y="997.00" font-size="12" font-weight="600" text-anchor="middle" fill="#7950a3">ACK1</text>
+<path d="M1520.87 978.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<text x="1520.87" y="997.00" font-size="12" font-weight="600" text-anchor="middle" fill="#7950a3">ACK2</text>
+<path d="M1578.85 978.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<text x="1578.85" y="997.00" font-size="12" font-weight="600" text-anchor="middle" fill="#7950a3">D0</text>
+<path d="M1636.85 978.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M1694.83 978.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<text x="928.00" y="1048.00" font-size="15" font-weight="400" text-anchor="start" fill="#486173">绿色圆点为目标链入口采 TDI 的上升沿。A2、A3 是 DRW 地址的两个请求位。</text>
+<rect x="30.00" y="1075.00" width="858.00" height="283.00" rx="7" fill="#f5f8fa"/>
+<text x="46.00" y="1105.00" font-size="23" font-weight="700" text-anchor="start" fill="#182d42">读尾  ·  最后一位怎样回到 PL</text>
+<text x="46.00" y="1130.00" font-size="16" font-weight="400" text-anchor="start" fill="#486173">目标移出 D31 后，返回信号经过连线和 IDELAYE2，再进入 ISERDESE2。</text>
+<path d="M170.32 1158V1296" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="170.32" y="1314.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">270</text>
+<path d="M267.62 1158V1296" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="267.62" y="1314.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">290</text>
+<path d="M364.92 1158V1296" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="364.92" y="1314.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">310</text>
+<path d="M462.22 1158V1296" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="462.22" y="1314.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">330</text>
+<path d="M559.51 1158V1296" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="559.51" y="1314.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">350</text>
+<path d="M656.81 1158V1296" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="656.81" y="1314.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">370</text>
+<path d="M754.11 1158V1296" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="754.11" y="1314.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">390</text>
+<path d="M851.41 1158V1296" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="851.41" y="1314.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">410</text>
+<text x="866.00" y="1152.00" font-size="13" font-weight="400" text-anchor="end" fill="#486173">t / ns</text>
+<text x="46.00" y="1171.00" font-size="16" font-weight="650" text-anchor="start" fill="#182d42">TCK</text>
+<path d="M146.00 1171.50H149.04V1160.50H168.04V1171.50H187.04V1160.50H206.05V1171.50H225.05V1160.50H244.06V1171.50H263.06V1160.50H282.07V1171.50H301.07V1160.50H320.07V1171.50H339.07V1160.50H358.08V1171.50H377.08V1160.50H396.08V1171.50H415.09V1160.50H434.09V1171.50H453.09V1160.50H472.10V1171.50H491.10V1160.50H510.11V1171.50H529.11V1160.50H548.11V1171.50H567.11V1160.50H586.12V1171.50H605.12V1160.50H624.12V1171.50H643.13V1160.50H662.13V1171.50H681.14V1160.50H700.14V1171.50H719.14V1160.50H738.15V1171.50H757.15V1160.50H776.15V1171.50H795.15V1160.50H814.16V1171.50H833.16V1160.50H852.16V1171.50H866.00" fill="none" stroke="#182d42" stroke-width="1.9" stroke-linejoin="round"/>
+<text x="46.00" y="1198.00" font-size="16" font-weight="650" text-anchor="start" fill="#245ba5">TMS</text>
+<path d="M146.00 1198.50H358.08V1187.50H434.09V1198.50H866.00" fill="none" stroke="#245ba5" stroke-width="1.9" stroke-linejoin="round"/>
+<text x="46.00" y="1225.00" font-size="16" font-weight="650" text-anchor="start" fill="#006e68">TDI</text>
+<path d="M146.00 1225.50H866.00" fill="none" stroke="#006e68" stroke-width="1.9" stroke-linejoin="round"/>
+<text x="46.00" y="1252.00" font-size="16" font-weight="650" text-anchor="start" fill="#9d4923">TDO · 目标</text>
+<path d="M146.00 1252.50H168.04V1241.50H206.05V1252.50H244.06V1241.50H282.07V1252.50H396.08V1241.50H866.00" fill="none" stroke="#9d4923" stroke-width="1.9" stroke-linejoin="round"/>
+<text x="46.00" y="1279.00" font-size="16" font-weight="650" text-anchor="start" fill="#7950a3">TDO · DDLY</text>
+<path d="M146.00 1279.50H174.91V1268.50H212.91V1279.50H288.92V1268.50H326.93V1279.50H364.94V1268.50H402.95V1279.50H516.97V1268.50H866.00" fill="none" stroke="#7950a3" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M148.55 1275.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M186.56 1264.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M224.57 1275.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M262.57 1275.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M300.58 1264.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M338.59 1275.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M376.59 1264.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<text x="376.59" y="1293.00" font-size="12" font-weight="600" text-anchor="middle" fill="#7950a3">D31</text>
+<path d="M813.67 1159V1285" fill="none" stroke="#7950a3" stroke-width="1.1" stroke-dasharray="4 4"/>
+<text x="808.67" y="1153.00" font-size="13" font-weight="600" text-anchor="end" fill="#7950a3">CLKDIV 拼字</text>
+<text x="46.00" y="1345.00" font-size="15" font-weight="400" text-anchor="start" fill="#486173">D31 在 312.400 ns 取样，完整返回字在 402.244 ns 由 CLKDIV 域解出。</text>
+<rect x="912.00" y="1075.00" width="858.00" height="283.00" rx="7" fill="#f5f8fa"/>
+<text x="928.00" y="1105.00" font-size="23" font-weight="700" text-anchor="start" fill="#182d42">写尾  ·  D31、边界 TAP 与 idle</text>
+<text x="928.00" y="1130.00" font-size="16" font-weight="400" text-anchor="start" fill="#486173">TDI 的 D31 在 304.688 ns 附近采入；随后补移一位，将 D31 推入 DAP。</text>
+<path d="M1052.32 1158V1296" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="1052.32" y="1314.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">270</text>
+<path d="M1149.62 1158V1296" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="1149.62" y="1314.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">290</text>
+<path d="M1246.92 1158V1296" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="1246.92" y="1314.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">310</text>
+<path d="M1344.22 1158V1296" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="1344.22" y="1314.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">330</text>
+<path d="M1441.51 1158V1296" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="1441.51" y="1314.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">350</text>
+<path d="M1538.81 1158V1296" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="1538.81" y="1314.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">370</text>
+<path d="M1636.11 1158V1296" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="1636.11" y="1314.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">390</text>
+<path d="M1733.41 1158V1296" fill="none" stroke="#dce4e9" stroke-width="1" stroke-linejoin="round"/>
+<text x="1733.41" y="1314.00" font-size="14" font-weight="400" text-anchor="middle" fill="#486173">410</text>
+<text x="1748.00" y="1152.00" font-size="13" font-weight="400" text-anchor="end" fill="#486173">t / ns</text>
+<text x="928.00" y="1171.00" font-size="16" font-weight="650" text-anchor="start" fill="#182d42">TCK</text>
+<path d="M1028.00 1171.50H1031.04V1160.50H1050.04V1171.50H1069.04V1160.50H1088.05V1171.50H1107.05V1160.50H1126.06V1171.50H1145.06V1160.50H1164.07V1171.50H1183.07V1160.50H1202.07V1171.50H1221.07V1160.50H1240.08V1171.50H1259.08V1160.50H1278.08V1171.50H1297.09V1160.50H1316.09V1171.50H1335.09V1160.50H1354.10V1171.50H1373.10V1160.50H1392.11V1171.50H1411.11V1160.50H1430.11V1171.50H1449.11V1160.50H1468.12V1171.50H1487.12V1160.50H1506.12V1171.50H1525.13V1160.50H1544.13V1171.50H1563.14V1160.50H1582.14V1171.50H1601.14V1160.50H1620.15V1171.50H1639.15V1160.50H1658.15V1171.50H1677.15V1160.50H1696.16V1171.50H1715.16V1160.50H1734.16V1171.50H1748.00" fill="none" stroke="#182d42" stroke-width="1.9" stroke-linejoin="round"/>
+<text x="928.00" y="1198.00" font-size="16" font-weight="650" text-anchor="start" fill="#245ba5">TMS</text>
+<path d="M1028.00 1198.50H1240.08V1187.50H1316.09V1198.50H1748.00" fill="none" stroke="#245ba5" stroke-width="1.9" stroke-linejoin="round"/>
+<text x="928.00" y="1225.00" font-size="16" font-weight="650" text-anchor="start" fill="#006e68">TDI</text>
+<path d="M1028.00 1214.50H1050.04V1225.50H1126.06V1214.50H1164.07V1225.50H1202.07V1214.50H1240.08V1225.50H1748.00" fill="none" stroke="#006e68" stroke-width="1.9" stroke-linejoin="round"/>
+<circle cx="1183.07" cy="1225.50" r="3.1" fill="#006e68"/>
+<text x="1183.07" y="1236.00" font-size="12" font-weight="650" text-anchor="middle" fill="#006e68">D30</text>
+<circle cx="1221.07" cy="1214.50" r="3.1" fill="#006e68"/>
+<text x="1221.07" y="1236.00" font-size="12" font-weight="650" text-anchor="middle" fill="#006e68">D31</text>
+<text x="928.00" y="1252.00" font-size="16" font-weight="650" text-anchor="start" fill="#9d4923">TDO · 目标</text>
+<path d="M1028.00 1252.50H1278.08V1241.50H1748.00" fill="none" stroke="#9d4923" stroke-width="1.9" stroke-linejoin="round"/>
+<text x="928.00" y="1279.00" font-size="16" font-weight="650" text-anchor="start" fill="#7950a3">TDO · DDLY</text>
+<path d="M1028.00 1279.50H1398.97V1268.50H1748.00" fill="none" stroke="#7950a3" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M1030.55 1275.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M1068.56 1275.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M1106.57 1275.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M1144.57 1275.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M1182.58 1275.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M1220.59 1275.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<path d="M1258.59 1275.80l3.7 3.7 -3.7 3.7 -3.7 -3.7Z" fill="#7950a3"/>
+<text x="928.00" y="1345.00" font-size="15" font-weight="400" text-anchor="start" fill="#486173">TMS 连续两拍为 1，依次进入 Exit1-DR 与 Update-DR，再回到 Run-Test/Idle。</text>
+<rect x="30.00" y="1374.00" width="1740.00" height="195.00" rx="7" fill="#edf4f8"/>
+<text x="48.00" y="1408.00" font-size="23" font-weight="700" text-anchor="start" fill="#182d42">怎样读回采标记</text>
+<text x="48.00" y="1440.00" font-size="19" font-weight="400" text-anchor="start" fill="#182d42">同一帧中，TDI 送出本次请求，TDO 返回前一笔 AP 访问的结果。ACK 在线顺序为 0、1、0，编码 010 表示 OK/FAULT；块尾再查 CTRL/STAT。</text>
+<text x="48.00" y="1472.00" font-size="18" font-weight="400" text-anchor="start" fill="#182d42">探针在 46.775、54.587、62.400 ns 取 ACK 三位，70.212 ns 取 D0。时隙 34 加流水偏移 7 得 41，四位一组，选取 rx_word 的第 1、3、5、7 位。</text>
+<text x="48.00" y="1504.00" font-size="18" font-weight="400" text-anchor="start" fill="#182d42">串行采样与并行解码分开计时。该帧在 152.244 ns 检查 ACK，402.244 ns 拼出 32 位返回字；连续读块最后一字通过 DP RDBUFF 取回。</text>
+<text x="48.00" y="1542.00" font-size="16" font-weight="400" text-anchor="start" fill="#486173">配对源码 2584b076  ·  1 KiB 整块写入、读回和逐字比较通过  ·  图中延时对应本次仿真，实板频率来自时钟树与分频读回。</text>
+</g></svg>

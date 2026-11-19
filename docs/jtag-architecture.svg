@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1480" height="804" viewBox="0 0 1480 804" role="img"><title>ZynqLinkPRO 纯 JTAG 探针架构</title><desc>PS、PL、J7 与 STM32F103ZE 之间的控制、发送、回采和校验路径。</desc><defs>
+<marker id="a0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#182d42"/></marker>
+<marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#486173"/></marker>
+<marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#006e68"/></marker>
+<marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#245ba5"/></marker>
+<marker id="a4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#9d4923"/></marker>
+</defs><g font-family="Microsoft YaHei, Noto Sans CJK SC, PingFang SC, sans-serif">
+<rect x="0" y="0" width="1480" height="804" rx="0" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<rect x="0" y="0" width="12" height="101" rx="0" fill="#006e68" stroke="none" stroke-width="1.5"/>
+<text x="36" y="48" text-anchor="start" font-size="34" fill="#182d42" font-weight="700">ZynqLinkPRO 纯 JTAG 探针架构</text>
+<text x="38" y="81" text-anchor="start" font-size="18" fill="#486173" font-weight="400">XC7Z020-CLG400-2  /  F103ZE 双 TAP  /  四 TCK 连续流水  /  配对源码 2584b076</text>
+<rect x="30" y="125" width="350" height="324" rx="15" fill="#f3f7fb" stroke="#c7d8e7" stroke-width="1.5"/>
+<rect x="405" y="125" width="770" height="324" rx="15" fill="#f3f9f7" stroke="#c4ded6" stroke-width="1.5"/>
+<rect x="1200" y="125" width="250" height="324" rx="15" fill="#fff8f2" stroke="#ecd7c8" stroke-width="1.5"/>
+<text x="48" y="165" text-anchor="start" font-size="22" fill="#182d42" font-weight="700">PS · Cortex-A9</text>
+<text x="424" y="165" text-anchor="start" font-size="22" fill="#182d42" font-weight="700">PL · JTAG 硬件引擎</text>
+<text x="1218" y="165" text-anchor="start" font-size="22" fill="#182d42" font-weight="700">J7 · STM32F103ZE</text>
+<rect x="50" y="202" width="309" height="130" rx="9" fill="#edf4ff" stroke="#245ba5" stroke-width="1.5"/>
+<text x="64" y="232" text-anchor="start" font-size="20" fill="#245ba5" font-weight="700">A9 驻留测试 / OCM</text>
+<text x="64" y="260" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">从 DDR 预装 256 字测试图案</text>
+<text x="64" y="285" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">经 GP0 提交地址、字数与时序</text>
+<text x="64" y="310" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">全局定时器分别统计读、写用时</text>
+<rect x="427" y="202" width="226" height="130" rx="9" fill="#eff8f6" stroke="#006e68" stroke-width="1.5"/>
+<text x="441" y="232" text-anchor="start" font-size="20" fill="#006e68" font-weight="700">AXI4-Lite / BRAM</text>
+<text x="441" y="260" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">检查页地址和块长度</text>
+<text x="441" y="285" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">TX 图案 RAM / RX 结果</text>
+<text x="441" y="310" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">请求与完成跨时钟域握手</text>
+<rect x="687" y="202" width="220" height="130" rx="9" fill="#eff8f6" stroke="#006e68" stroke-width="1.5"/>
+<text x="701" y="232" text-anchor="start" font-size="20" fill="#006e68" font-weight="700">ARM 块引擎</text>
+<text x="701" y="260" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">配置 SELECT、CSW、TAR</text>
+<text x="701" y="285" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">连续发送 APACC / DRW</text>
+<text x="701" y="310" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">遇 WAIT 收尾并上报状态</text>
+<rect x="942" y="202" width="210" height="130" rx="9" fill="#eff8f6" stroke="#006e68" stroke-width="1.5"/>
+<text x="956" y="232" text-anchor="start" font-size="20" fill="#006e68" font-weight="700">JTAG SelectIO</text>
+<text x="956" y="260" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">3 × OSERDESE2 发射</text>
+<text x="956" y="285" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">IDELAYE2 延迟 TDO</text>
+<text x="956" y="310" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">ISERDESE2 八时隙回采</text>
+<rect x="1220" y="202" width="208" height="130" rx="9" fill="#fff3e9" stroke="#9d4923" stroke-width="1.5"/>
+<text x="1234" y="232" text-anchor="start" font-size="18" fill="#9d4923" font-weight="700">JTAG-DP / MEM-AP</text>
+<text x="1234" y="260" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">4 位 DAP + 5 位边界 TAP</text>
+<text x="1234" y="285" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">MEM-AP 自增访问 SRAM</text>
+<text x="1234" y="310" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">测试页 0x20008000</text>
+<path d="M359 270 L425 270" stroke="#006e68" stroke-width="2.5" fill="none" marker-end="url(#a2)"/>
+<path d="M653 270 L685 270" stroke="#006e68" stroke-width="2.5" fill="none" marker-end="url(#a2)"/>
+<path d="M907 270 L940 270" stroke="#006e68" stroke-width="2.5" fill="none" marker-end="url(#a2)"/>
+<path d="M1152 260 L1218 260" stroke="#006e68" stroke-width="2.5" fill="none" marker-end="url(#a2)"/>
+<text x="393" y="249" text-anchor="middle" font-size="14" fill="#006e68" font-weight="700">GP0</text>
+<path d="M1220 307 L1154 307" stroke="#245ba5" stroke-width="2.5" fill="none" marker-end="url(#a3)"/><text x="1186" y="298" font-size="13" font-weight="700" text-anchor="middle" fill="#245ba5">TDO</text><text x="1186" y="249" text-anchor="middle" font-size="12" fill="#006e68" font-weight="700">TCK / TMS</text><text x="1186" y="277" text-anchor="middle" font-size="13" fill="#006e68">TDI</text>
+<path d="M1046 332 L1046 371 L797 371 L797 332" stroke="#245ba5" stroke-width="2.5" fill="none" marker-end="url(#a3)"/>
+<path d="M687 299 L654 299" stroke="#245ba5" stroke-width="2.5" fill="none" marker-end="url(#a3)"/>
+<path d="M539 332 L539 393 L206 393 L206 333" stroke="#245ba5" stroke-width="2.5" fill="none" marker-end="url(#a3)"/>
+<text x="821" y="361" text-anchor="start" font-size="15" fill="#245ba5" font-weight="400">TDO 解帧 · ACK / 读回字</text>
+<text x="280" y="384" text-anchor="start" font-size="15" fill="#245ba5" font-weight="400">完成状态 / 校验结果</text>
+<text x="49" y="428" text-anchor="start" font-size="16" fill="#486173" font-weight="400">FCLK0 ≈ 133.333 MHz</text>
+<text x="686" y="428" text-anchor="start" font-size="16" fill="#486173" font-weight="400">MMCM 输出串行钟 128 MHz，CLKDIV 32 MHz，每拍 4 个 TCK</text>
+<text x="36" y="505" text-anchor="start" font-size="22" fill="#182d42" font-weight="700">一次 1 KiB 传输如何完成</text>
+<rect x="38" y="537" width="433" height="121" rx="9" fill="#f5f8fc" stroke="#245ba5" stroke-width="1.5"/>
+<text x="52" y="567" text-anchor="start" font-size="20" fill="#245ba5" font-weight="700">装入一页数据</text>
+<text x="52" y="595" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">A9 预装写图案，PL 复用同一页进行反相写。</text>
+<text x="52" y="620" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">主机装载与取回经 HS3、XSCT 和物理 AP0。</text>
+<rect x="519" y="537" width="435" height="121" rx="9" fill="#f5f8fc" stroke="#245ba5" stroke-width="1.5"/>
+<text x="533" y="567" text-anchor="start" font-size="20" fill="#245ba5" font-weight="700">每帧同时收发</text>
+<text x="533" y="595" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">TDI 发本次请求，TDO 送回前一笔 AP 应答。</text>
+<text x="533" y="620" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">读块末字从 RDBUFF 取回，再核对 CTRL/STAT。</text>
+<rect x="1002" y="537" width="440" height="121" rx="9" fill="#f5f8fc" stroke="#245ba5" stroke-width="1.5"/>
+<text x="1016" y="567" text-anchor="start" font-size="20" fill="#245ba5" font-weight="700">逐字校验与恢复</text>
+<text x="1016" y="595" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">PL 比对 256 个读回字，A9 确认块完成。</text>
+<text x="1016" y="620" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">低速独立链路复核末轮图案，恢复 SRAM 和哨兵。</text>
+<path d="M471 597 L516 597" stroke="#245ba5" stroke-width="2.5" fill="none" marker-end="url(#a3)"/>
+<path d="M954 597 L999 597" stroke="#245ba5" stroke-width="2.5" fill="none" marker-end="url(#a3)"/>
+<rect x="38" y="695" width="1404" height="80" rx="10" fill="#edf6f5" stroke="none" stroke-width="1.5"/>
+<text x="57" y="726" text-anchor="start" font-size="18" fill="#006e68" font-weight="700">实板工作点</text>
+<text x="196" y="726" text-anchor="start" font-size="20" fill="#182d42" font-weight="650">最快吞吐  ·  TCK 125.490 MHz  ·  HCLK 128 MHz  ·  idle 13  ·  读 8.220 / 写 8.219 MB/s</text>
+<text x="196" y="755" text-anchor="start" font-size="17" fill="#486173" font-weight="400">最高稳定双向频率为 TCK 128.000 MHz，idle 17，读写均 7.872 MB/s。两档均通过 3 × 60 秒交替读写。</text>
+<text x="1218" y="391" font-size="13" fill="#9d4923">TDI → 边界 BYPASS → DAP → TDO</text></g></svg>

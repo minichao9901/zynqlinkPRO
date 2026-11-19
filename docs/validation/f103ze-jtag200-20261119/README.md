@@ -1,6 +1,8 @@
 # F103ZE 原始 HCLK 下的 JTAG200 测试
 
 
+[JTAG 系统框图（SVG）](../../jtag-architecture.svg) · [系统框图（PNG）](../../jtag-architecture.png) · [128 MHz 读写时序（SVG）](../../jtag-128-timing.svg) · [读写时序（PNG）](../../jtag-128-timing.png)
+
 ## 本轮结果
 
 在同一块 F103ZE 和 J7 上，最快持续 SRAM 档为 **HCLK128、TCK 125.490196 MHz、tap16、采样时隙34、idle13**。三轮各 60 秒，方向速率中位数为读 **8.21975**、写 **8.21896 MB/s**，各验证 737,472,512 字节。独立的三轮各 60 秒只读中位数为 8.21678 MB/s。最高持续双向工作频率为 **TCK 128.000 MHz**，同 HCLK/tap/时隙、idle17，读写均 **7.87153 MB/s**。每个 CLKDIV 字并行发出四个 TCK，连续提交 APACC DRW，并对回采数据逐字校验。以上为 A9 探针本地驻留图案的有效载荷吞吐，读写分别以各自方向占用时间计。[通过窗口及字节数](summary.json) · [可复测 bit/ELF 和哈希](../../../prebuilt/jtag-only-f103ze-quad-20261119/manifest.json)
