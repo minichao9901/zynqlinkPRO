@@ -10,7 +10,7 @@ import sys
 import time
 
 from jtag200 import PROFILES, ROOT, load_pair
-from jtag200_f103_fixture import PAGE, SIZE, TAP, guards, low_link
+from jtag200_f103_fixture import PAGE, SIZE, TAP, guards, low_link, write_report
 from jtag200_h743_scan import Scan, identify, select, slow_read
 from jtag200_pipeline import BlockBenchmark, Ownership, PhysicalPort, need
 from probe_flash import Session
@@ -203,9 +203,15 @@ def sweep(port, folder, args, report, save):
                     save()
                 if done[rate]:
                     break
+    if args.seconds and (not args.confirm_inline or args.confirm_upper_read):
+        highest_mixed_hz = max((PROFILES[r][2] for r in qualified if r != '50'), default=0)
         def read_order(rate):
-            return PROFILES[rate][2] if args.read_only else report['points'][rate]['reads'][0]['read_MBps']
+            return PROFILES[rate][2] if args.read_only or args.confirm_upper_read else report['points'][rate]['reads'][0]['read_MBps']
         for rate in sorted(read_points, key=read_order, reverse=True):
+            if args.confirm_upper_read and (rate == '50' or PROFILES[rate][2] <= highest_mixed_hz):
+                break
+            if args.read_only and rate == '50' and rate not in args.rates:
+                continue
             rows = []
             bench.pattern(current)
             for _ in range(3):
@@ -257,9 +263,7 @@ def main(args):
          not state.get('restored') and state['tap']==hex(TAP), 'Live F103 fixture required')
     report = dict(points={}, windows=[], hclk_mhz=state['hclk_mhz'])
     def save():
-        path = folder / 'windows.tmp'
-        path.write_text(json.dumps(report, indent=2)+'\n')
-        path.replace(folder / 'windows.json')
+        write_report(folder/'windows.json', report)
     with low_link() as mem:
         need(mem.word(0xe000edf0) & (1<<17) and mem.read(PAGE,SIZE)==original and
              guards(mem)==state['guards'], 'Fixture changed before selectio test')
@@ -276,10 +280,15 @@ def main(args):
             report['pair'] = port.verify_probe(args.pair)
             report['io_pll'] = hex(int(port.command('read_word 0xf8000108')))
             sweep(port,folder,args,report,save)
+    except BaseException as exc:
+        report['error'] = repr(exc)
+        raise
     finally:
-        save()
-        subprocess.run([sys.executable,'-X','utf8','toolbox.py','probe-load',
-                        '--out',str(folder/'historical-restored')],cwd=ROOT,check=True)
+        try:
+            save()
+        finally:
+            subprocess.run([sys.executable,'-X','utf8','toolbox.py','probe-load',
+                            '--out',str(folder/'historical-restored')],cwd=ROOT,check=True)
     with low_link() as mem:
         live = mem.read(PAGE, SIZE)
         need(sha256(live[:1024]).hexdigest()==report['last_verified_sha256'] and
@@ -298,6 +307,8 @@ if __name__ == '__main__':
     p.add_argument('--seed-record', type=Path, action='append', default=[], help='Recheck a previously passing timing first')
     p.add_argument('--confirm-inline', action='store_true',
                    help='Search in the given order until a rate passes three long mixed windows')
+    p.add_argument('--confirm-upper-read',action='store_true',
+                   help='After inline mixed qualification also confirm faster read-only clock profiles')
     p.add_argument('--read-only', action='store_true', help='Qualify read ceiling above the writable reference page rate')
     p.add_argument('--host-payload', action='store_true', help='Verify and time distinct PC payloads via physical AP0')
     p.add_argument('--quad',action='store_true',help='Enable the four-TCK stream on the corresponding PL pair')

@@ -60,10 +60,23 @@ def guards(mem):
     return [mem.word(PAGE - 4), mem.word(PAGE + SIZE)]
 
 
-def save(folder, data):
-    tmp = folder / 'state.tmp'
+def write_report(path, data):
+    tmp = path.with_suffix('.tmp')
     tmp.write_text(json.dumps(data, indent=2) + '\n')
-    tmp.replace(folder / 'state.json')
+    # Windows readers can briefly deny delete sharing during atomic replacement.
+    deadline = time.monotonic() + 5
+    while True:
+        try:
+            tmp.replace(path)
+            return
+        except PermissionError:
+            if time.monotonic() >= deadline:
+                raise
+            time.sleep(.05)
+
+
+def save(folder, data):
+    write_report(folder/'state.json', data)
 
 
 def restore(folder, st):
@@ -165,9 +178,11 @@ def run(args):
         st['error'] = repr(exc)
         raise
     finally:
-        save(folder, st)
-        if halted:
-            restore(folder, st)
+        try:
+            save(folder, st)
+        finally:
+            if halted:
+                restore(folder, st)
 
 
 if __name__ == '__main__':

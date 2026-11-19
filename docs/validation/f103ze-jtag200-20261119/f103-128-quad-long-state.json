@@ -1,0 +1,57 @@
+{
+  "target": {
+    "name": "STM32F103",
+    "cpuid": "0x411fc231",
+    "device": "0x10036414",
+    "registers": {
+      "0x40021000": "0x3034e83",
+      "0x40021004": "0x51040a"
+    }
+  },
+  "dhcsr": 16842752,
+  "elf_sha256": "e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f",
+  "guards": [
+    2178090203,
+    4120689631
+  ],
+  "ram_sha256": "9ef2d30c6fcb7c37442510c8df47885afcd26f631e9cc9cf3f2f06dae102e6c6",
+  "apb2": 16461,
+  "mapr": 0,
+  "clock_before": {
+    "CR": 50548355,
+    "CFGR": 5309450,
+    "APB1ENR": 276824064,
+    "FLASH_ACR": 49
+  },
+  "clock_active": {
+    "CR": 50548355,
+    "CFGR": 7988490,
+    "APB1ENR": 268435456,
+    "FLASH_ACR": 50
+  },
+  "dwt": {
+    "scratch_backup_sha256": "23af9a40f1f8b6d3342c49978886cb981b2aab09720c391a96edd84bf737f8c5",
+    "elapsed_s": 0.35117709999940416,
+    "cycles": 44960590,
+    "measured_Hz": 128028251.2728657,
+    "method": "DWT CYCCNT in SRAM-only loop; host midpoint-bracketed SWD reads",
+    "scratch_restored": true,
+    "core_registers_restored": true
+  },
+  "tap": "0x3ba00477",
+  "hclk_mhz": 128,
+  "before_restore_sha256": "a0e7f8a15ab70180a5dde1ca99bdc6da87226730c3d6ed9770fad0fd975b4bae",
+  "guard_before_restore": [
+    2178090203,
+    4120689631
+  ],
+  "restored_bytes": 4096,
+  "clock_after": {
+    "CR": 50548355,
+    "CFGR": 5309450,
+    "APB1ENR": 276824064,
+    "FLASH_ACR": 49
+  },
+  "final_dhcsr": "0x1010000",
+  "restored": true
+}

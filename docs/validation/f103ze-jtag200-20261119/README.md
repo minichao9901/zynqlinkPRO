@@ -48,3 +48,9 @@ CM3 HCLK128 下，133.333 MHz/idle21 的 1 KiB 仿真读写均 7.858 MB/s，160 
 实现约束 133.333 MHz，路由 WNS +2.048 ns、WHS +0.018 ns。Vivado DRC 共 22 项 warning（含报告截断、DDR 时钟使能及 BRAM 异步控制检查），零 error。模型运行结果包含真实 CM3、无等待协议模型和 Xilinx 原语回归。协议模型用于比较特定连续扫描序列的上限，CM3 检查目标 AP 在指定 HCLK 下能否接受该序列。[原语回归](quad-xsim.txt) · [CM3 更多频点](f103-cm3-quad-bound.json) · [CM3 临界档](f103-cm3-quad-148.json) · [同协议开销理想对照](f103-quad-wire-budget.json) · [上板身份](quad-load.json)
 
 HCLK96、TCK 100 MHz/idle19 的原两 TCK 配对，实际三轮各 60 秒交替读写和三轮各 60 秒只读通过，方向吞吐约 6.081 MB/s，同条件 CM3 为 6.168 MB/s。HCLK128 的四 TCK 配对在 125.490 MHz/idle13 和 133.333 MHz/idle17 通过短窗，约 8.219 和 8.192 MB/s。后续 32 tap 密扫曾在 148.837 MHz/tap24/slot35/idle17 通过 1 秒混合 9.129 MB/s。188.235 MHz 的该轮整块只读最长达到 152 KiB 后数据不符，200 MHz 在 32 tap 中 22 个可三次读回 ID，扫描到的块读均失败。短窗与持续验收分别保存。另测 PC 经 XSCT/物理 MEM-AP0 向驻留探针写入全新 1 KiB 图案并返回完整 1 KiB，记录 8 组独立时长；此路径包含 PC 文件传输和 XSCT 往返。[96 MHz 持续验收](f103-96-long100-windows.json.gz) · [128 MHz 粗扫](f103-128-quad-pilot-windows.json.gz) · [128 MHz 密扫含失败](f103-128-quad-dense-windows.json.gz)
+
+### 持续读写与报告保存中断
+
+HCLK128、TCK 125.490196 MHz、tap16、采样时隙34、idle13：三轮各 60 秒交替读写和三轮各 60 秒只读均通过。每次混合窗结束后用 50 MHz 段式路径逐字核对末轮图案。PC 实际发收的新载荷与最终独立 USB 读回也通过。同档 A9 本地读写约 8.22 MB/s，无等待协议模型为 8.399 MB/s，约 97.9%。在完整 CM3 的 48/96/128 MHz 时，是否需要 WAIT 还取决于目标 AP 延迟。[125.490 MHz 长窗](f103-128-quad-long-windows.json.gz) · [恢复](f103-128-quad-long-state.json)
+
+重新加载后，148.837 MHz 和 136.170 MHz 的早期通过点均出现未复现的窗口。再扫 133.333 MHz 时末次完成的临时报告比正式报告多 9 个窗口，均可解析；原先保存异常能阻断 finally 中后续重载。HS3 仍在线，独立补跑临时加载并核对正式配对 85,844 字节，SWD 恢复原 4 KiB、哨兵、AFIO、APB2、RCC、Flash 等待周期、运行态；USB 重新枚举。已为 Windows 原子替换增加限时重试，并把探针和目标恢复放入独立 finally。离线持有 JSON 读句柄 200 ms 后释放，报告替换及读回通过。现场原始异常代码尚未确认。[中断窗口](f103-128-quad-inline-windows.json.gz) · [目标恢复](f103-128-quad-inline-state.json) · [重载配对](usb-recovery-load.json)
