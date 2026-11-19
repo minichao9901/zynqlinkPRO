@@ -53,7 +53,8 @@ module swd200_batch (
     swd200_link link (
         .clk(clk), .reset(reset), .rate(active_rate),
         .ack_sample(active_ack_sample), .data_sample(active_data_sample),
-        .idle_cycles(active_idle), .release_guard(active_mode[6:4]),
+        .idle_cycles(current_last && active_idle == 0 ? 4'd2 : active_idle),
+        .release_guard(active_mode[6:4]),
         .start(issue_next || retry), .enter_swd(issue_header[8]),
         .header(issue_header[7:0]), .write_packet(issue_word),
         .done(link_done), .ack(ack), .parity_error(parity_error), .read_data(link_data),

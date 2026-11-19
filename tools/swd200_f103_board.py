@@ -87,7 +87,7 @@ def checked_ram(mem, original, guards, repair):
     assert [mem.word(BASE-4),mem.word(BASE+4096)]==guards
 
 
-def bench_target(board, folder, original, guards, rates, diagnostics=False, guard=None, idle=2):
+def bench_target(board, folder, original, guards, rates, diagnostics=False, guard=None, idle=2, points=None):
     import re
     pattern = (folder/'expected.bin').resolve()
     pattern.write_bytes(original[:1024])
@@ -210,6 +210,22 @@ def bench_target(board, folder, original, guards, rates, diagnostics=False, guar
         f103_check 1
         puts "FINAL [f103_word 0x40021004] [f103_word 0xe000edf0]"
         '''
+    if points:
+        script=fixture+'\nf103_check 0\n'
+        for rate,tap,ack,data,spacing in points:
+            params=f'{rate} {tap} {ack} {data} {spacing}'
+            script+=f'''
+            if {{[f103_window {params} 0 8] && [f103_window {params} 1 4]}} {{
+                set ok 1
+                for {{set n 0}} {{$n<3}} {{incr n}} {{
+                    if {{![f103_window {params} 1 16384]}} {{set ok 0; break}}
+                    f103_check 0
+                }}
+                if {{$ok}} {{puts "STABLE {params}"}}
+            }}
+            f103_check 1
+            '''
+        script+='puts "FINAL [f103_word 0x40021004] [f103_word 0xe000edf0]"'
     offsets = '0 -1 1 -2 2' if guard is not None else '0'
     script='set phase_offsets {'+offsets+'}\n'+script
     idles=' '.join(map(str,dict.fromkeys((idle,2,5,9,15))))
@@ -263,7 +279,7 @@ def run(args):
         try:
             b=Board(folder/'candidate',args.cable)
             b.load((bit,args.elf,init),experimental=True)
-            bench_target(b,folder,orig,guards,args.rates,args.diagnostics,args.guard,args.idle)
+            bench_target(b,folder,orig,guards,args.rates,args.diagnostics,args.guard,args.idle,args.point)
         finally:
             b=Board(folder/'historical-restored',args.cable)
             b.load(hist,experimental=False)
@@ -292,11 +308,12 @@ if __name__=='__main__':
     p.add_argument('--elf',type=Path,required=True)
     p.add_argument('--pair',type=Path,default=PAIR)
     p.add_argument('--guard',type=int,choices=range(8))
-    p.add_argument('--idle',type=int,choices=range(1,16),default=2)
+    p.add_argument('--idle',type=int,choices=range(16),default=2)
     p.add_argument('--guards',nargs=2,type=int,required=True)
     p.add_argument('--out',type=Path,required=True)
     p.add_argument('--cable',required=True)
     p.add_argument('--rates',nargs='+',type=int,required=True)
+    p.add_argument('--point',nargs=5,type=int,action='append',metavar=('PROFILE','TAP','ACK','DATA','IDLE'))
     p.add_argument('--execute',action='store_true')
     p.add_argument('--diagnostics',action='store_true',help='Split ACK/data phases and isolate a low-speed TAR setup from a high-speed TAR write')
     a=p.parse_args()

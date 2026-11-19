@@ -155,7 +155,7 @@ def main():
     sim.add_argument("--ack", type=int, choices=range(64), default=12)
     sim.add_argument("--data", type=int, choices=range(64), default=12)
     sim.add_argument("--tap", type=int, choices=range(32), default=0)
-    sim.add_argument("--idle", type=int, choices=range(1, 16), default=2)
+    sim.add_argument("--idle", type=int, choices=range(16), default=2)
     sim.add_argument("--words", type=int, choices=range(1, 257), default=128)
     sim.add_argument("--rounds", type=int, choices=range(1, 11), default=3)
     sim.add_argument("--trace", action="store_true")

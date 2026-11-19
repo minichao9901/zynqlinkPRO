@@ -51,7 +51,11 @@ static int wait_status(uint32_t mask, uint32_t value)
 static uint32_t apply_profile(uint32_t index, uint32_t timing, uint32_t tap)
 {
     if (index >= sizeof(profiles) / sizeof(profiles[0]) ||
-        tap > 31 || timing >= (1u << 18) || (timing & 3u) || !(timing >> 14))
+        tap > 31 || timing >= (1u << 18) || (timing & 3u)
+#ifndef SWD200_RESIDENT
+        || !(timing >> 14)
+#endif
+        )
         return 1;
     if (SWD_ID != SIGNATURE || !(SWD_STATUS & IDLE))
         return 2;

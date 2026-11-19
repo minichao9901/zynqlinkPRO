@@ -16,3 +16,7 @@ CM3 使用实际 SelectIO 原语，覆盖两个驻留表交替、整块取反、
 177.778 MHz，tap 8、ACK/数据时隙 20、idle 1、guard 1，三轮，每轮读与写各 16 MiB。对照旧配对的 100 MHz，A9 本地读写由 3.65 / 4.37 提升至 7.35 / 7.46 MB/s。100 MHz guard 为 0，改善主要来自预装命令与 PL 比对。历史 USB 全局最高为 5.3605 / 5.2527 MB/s，传输路径与新的本地驻留测试不同。未修改目标 Flash 或探针 QSPI，最终由独立 USB 配对核对原 HCLK、运行态、SRAM 和保护字。
 
 [原始窗口](hclk128-windows.txt) · [时钟与恢复](hclk128-target.json) · [同日历史 USB](hclk128-historical.json) · [CM3 对照](sim.json) · [时序](timing.rpt) · [DRC](drc.rpt) · [配对清单](../../../prebuilt/swd-only-200mhz-resident-20261119/manifest.json)
+
+## 100 MHz 后续候选
+
+一拍 SWCLK 对应一个 CLKDIV 字时，在 ACK 与数据落在同组四个时隙的条件下也可提前输出主机高阻首拍。允许批内零 idle，最后一条保留两拍。CM3 100 MHz、idle0 的同一台架实测模型读写 8.245 / 8.405 MB/s，驻留 bank 误码注入通过。160 MHz、20 ns 返程、guard1 的短测也通过。

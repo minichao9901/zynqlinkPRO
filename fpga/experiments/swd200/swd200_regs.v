@@ -145,7 +145,7 @@ module swd200_regs (
                 else if (!write_command && !write_expected) begin
                     case (write_addr)
                         14'h08: hold <= write_data[0];
-                        14'h0c: if (write_data[1:0] != 3 && write_data[17:14] != 0)
+                        14'h0c: if (write_data[1:0] != 3)
                             timing <= write_data[17:0];
                         else s_axi_bresp <= 2'b10;
                         14'h10: if (ready && write_data > 0 && write_data <= 512 &&

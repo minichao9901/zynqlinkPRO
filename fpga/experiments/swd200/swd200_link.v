@@ -44,21 +44,26 @@ module swd200_link (
     // At either phase, that read sample lands in the first RX word after
     // the ACK decision, before the regular sampler starts with D1.
     wire guarded = release_guard != 0;
-    wire early_clock = !guarded && rate == 2 && ack_sample[5:1] == 5'd6 && data_sample[5:1] == 5'd6;
+    // At one SWCLK per parallel word the turnaround and D0 sample are
+    // exactly one word apart when the two offsets use the same four slots.
+    wire early_single = rate == 1 && ack_sample >= 8 && ack_sample[5:2] == data_sample[5:2];
+    wire early_clock = !guarded && (early_single ||
+                       (rate == 2 && ack_sample[5:1] == 5'd6 && data_sample[5:1] == 5'd6));
     wire [6:0] body_count = (early_clock ? 7'd33 : 7'd34) + idle_count;
     wire [63:0] read_drive = early_clock ? all_drive << 33 : all_drive << 34;
     wire [63:0] write_payload = early_clock ? {31'b0, active_write} : {30'b0, active_write, 1'b0};
     wire [2:0] sampled_ack = captured[32:30];
     wire ack_ok = sampled_ack == 3'b001;
     wire ack_rejected = sampled_ack == 3'b010 || sampled_ack == 3'b100;
-    assign done = segment_done && (state == RESET_LAST || (state == READ_DATA && !guarded) ||
+    wire guard_end = state == GUARD && guard_left == 0;
+    assign done = (guard_end && idle_count == 0) || (segment_done && (state == RESET_LAST || (state == READ_DATA && !guarded) ||
                   state == WRITE_DATA || (state == ERROR_TURN && !guarded) || state == TAIL ||
-                  (state == HEADER && !ack_ok && !ack_rejected));
+                  (state == HEADER && ((!ack_ok && !ack_rejected) || (ack_rejected && early_clock && idle_count == 0)))));
     assign ack = state == HEADER ? sampled_ack : active_ack;
     wire [32:0] read_packet = early_clock ? {captured[32:1], read_seed} : captured;
-    assign parity_error = state == TAIL ? guarded_parity :
+    assign parity_error = state == TAIL || state == GUARD ? guarded_parity :
                           state == READ_DATA && (captured_parity ^ (early_clock && read_seed));
-    assign read_data = state == TAIL ? guarded_value : state == READ_DATA ? read_packet[31:0] : 32'b0;
+    assign read_data = state == TAIL || state == GUARD ? guarded_value : state == READ_DATA ? read_packet[31:0] : 32'b0;
 
     swd200_segment segment (
         .clk(clk), .reset(reset), .start(segment_start), .rate(rate), .count(count),
@@ -100,8 +105,9 @@ module swd200_link (
             else
                 emit((early_clock || (guarded && !header[2])) ? 7'd13 : 7'd12, {56'b0, header},
                      64'hff, 3, header_offset + {2'b0, ack_sample}, HEADER);
-        end else if (state == GUARD && guard_left == 0) begin
-            emit(idle_count, 0, all_drive, 0, 0, TAIL);
+        end else if (guard_end) begin
+            if (idle_count != 0) emit(idle_count, 0, all_drive, 0, 0, TAIL);
+            else next_state = IDLE;
         end else if (segment_done) begin
             next_state = IDLE;
             case (state)
@@ -112,7 +118,7 @@ module swd200_link (
                         next_state = GUARD;
                     else if (ack_rejected && guarded)
                         emit(1, 0, 0, 0, 0, ERROR_TURN);
-                    else if (ack_rejected)
+                    else if (ack_rejected && !(early_clock && idle_count == 0))
                         emit(early_clock ? idle_count : 7'd1 + idle_count, 0,
                              early_clock ? all_drive : all_drive << 1, 0, 0, ERROR_TURN);
                     else if (ack_ok && active_read && guarded)
@@ -148,7 +154,7 @@ module swd200_link (
                 active_write <= write_packet;
             end
             seed_pending <= state == HEADER && segment_done && ack_ok && active_read && early_clock;
-            if (seed_pending) read_seed <= rx_slots[{1'b0, data_sample[0]}];
+            if (seed_pending) read_seed <= rx_slots[data_sample[1:0]];
             if (state == HEADER && segment_done) active_ack <= sampled_ack;
         end
     end

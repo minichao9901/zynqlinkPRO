@@ -41,13 +41,17 @@ proc swd_batch {commands} {
     set count [expr {[llength $commands] / 2}]
     if {$count < 1 || $count > 512 || [llength $commands] % 2} { error "bad command count" }
     swd_wait 0x40000004 33 33
-    physwr -force 0x40001000 $commands
+    for {set i 0} {$i < [llength $commands]} {incr i 64} {
+        physwr -force [expr {0x40001000 + 4*$i}] [lrange $commands $i [expr {$i+63}]]
+    }
     swd_wr 0x40000010 $count
     swd_wait 0x40000004 37 37
     set summary [swd_rd 0x40000014]
     set actual [expr {$summary & 0x3ff}]
     set values {}
-    if {$actual} { set values [physrd -force -value 0x40002000 $actual] }
+    for {set i 0} {$i < $actual} {incr i 64} {
+        lappend values {*}[physrd -force -value [expr {0x40002000+4*$i}] [expr {min(64,$actual-$i)}]]
+    }
     return [linsert $values 0 $summary]
 }
 
