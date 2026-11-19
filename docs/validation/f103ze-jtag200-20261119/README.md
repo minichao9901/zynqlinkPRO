@@ -54,3 +54,14 @@ HCLK96、TCK 100 MHz/idle19 的原两 TCK 配对，实际三轮各 60 秒交替�
 HCLK128、TCK 125.490196 MHz、tap16、采样时隙34、idle13：三轮各 60 秒交替读写和三轮各 60 秒只读均通过。每次混合窗结束后用 50 MHz 段式路径逐字核对末轮图案。PC 实际发收的新载荷与最终独立 USB 读回也通过。同档 A9 本地读写约 8.22 MB/s，无等待协议模型为 8.399 MB/s，约 97.9%。在完整 CM3 的 48/96/128 MHz 时，是否需要 WAIT 还取决于目标 AP 延迟。[125.490 MHz 长窗](f103-128-quad-long-windows.json.gz) · [恢复](f103-128-quad-long-state.json)
 
 重新加载后，148.837 MHz 和 136.170 MHz 的早期通过点均出现未复现的窗口。再扫 133.333 MHz 时末次完成的临时报告比正式报告多 9 个窗口，均可解析；原先保存异常能阻断 finally 中后续重载。HS3 仍在线，独立补跑临时加载并核对正式配对 85,844 字节，SWD 恢复原 4 KiB、哨兵、AFIO、APB2、RCC、Flash 等待周期、运行态；USB 重新枚举。已为 Windows 原子替换增加限时重试，并把探针和目标恢复放入独立 finally。离线持有 JSON 读句柄 200 ms 后释放，报告替换及读回通过。现场原始异常代码尚未确认。[中断窗口](f103-128-quad-inline-windows.json.gz) · [目标恢复](f103-128-quad-inline-state.json) · [重载配对](usb-recovery-load.json)
+
+### HCLK96 及独立核对
+
+HCLK96（DWT 实测 96.031 MHz）、125.490196 MHz TCK/idle21，三轮 60 秒混合的方向速率为读 7.27169、写 7.27154 MB/s。同档 CM3 模型为 7.395/7.395 MB/s，约 98.3%。在 130.612 MHz，一组参数通过首轮 60 秒，第二轮仅 5.7 秒便失败。188.235 MHz 通过单次 1 秒只读，重新确认持续读时失败。保持失败窗口及后续低速 USB 恢复证据。[96 MHz 逐轮](hclk96-quad-confirm.json.gz) · [时钟和 RAM](hclk96-quad-confirm-state.json) · [最终 CM3/96](final-cm3-96.json) · [最终 CM3/128](final-cm3-128.json)
+
+从仓库根目录复测四 TCK 配对，需 J7 和已核对的 CDC48。全程使用一个未被占用的新输出目录。检查探针配对后可用以下夹具命令。HCLK96/128 临时改变 PLL、APB 与等待周期；HCLK48 保持初始时钟。独立恢复入口读取同一目录保存的备份及源状态。
+
+```powershell
+$fixture = 'build/jtag200/f103-new'
+python -X utf8 toolbox.py project run tools/jtag200_f103_fixture.py -- --hclk 128 --out $fixture --execute --command python -X utf8 tools/jtag200_f103_sweep.py --fixture $fixture --pair prebuilt/jtag-only-f103ze-quad-20261119 --cable-serial 210299008529 --rates 125.490 --quad --host-payload --seconds 60 --execute
+```
