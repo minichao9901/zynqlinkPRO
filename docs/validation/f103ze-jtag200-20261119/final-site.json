@@ -1,0 +1,48 @@
+{
+  "target": {
+    "name": "STM32F103",
+    "cpuid": "0x411fc231",
+    "device": "0x10036414",
+    "registers": {
+      "0x40021000": "0x3034e83",
+      "0x40021004": "0x51040a"
+    }
+  },
+  "clock": {
+    "CR": 50548355,
+    "CFGR": 5309450,
+    "APB1ENR": 276824064,
+    "FLASH_ACR": 49
+  },
+  "sram_sha256": "9ef2d30c6fcb7c37442510c8df47885afcd26f631e9cc9cf3f2f06dae102e6c6",
+  "guards": [
+    2178090203,
+    4120689631
+  ],
+  "dhcsr": 16842752,
+  "afio_readable": 0,
+  "apb2": 16461,
+  "checked_image_bytes": 20168,
+  "streams": {
+    "rtt": 65536,
+    "hss": 20
+  },
+  "probe_before": {
+    "PS_IDCODE": "0x23727093",
+    "LEVEL_SHIFTERS": "0xf",
+    "FPGA_RESET": "0x0",
+    "BOOT_MODE": "0x0",
+    "CAPTURE": "0x8",
+    "SWD": "0x2",
+    "PACKET": "0x0",
+    "DDR": "0x0",
+    "CDMA": "0x1002"
+  },
+  "probe_after": {
+    "PS_IDCODE": "0x23727093",
+    "LEVEL_SHIFTERS": "0x0",
+    "FPGA_RESET": "0x1f33f0f",
+    "BOOT_MODE": "0x0"
+  },
+  "passed": true
+}

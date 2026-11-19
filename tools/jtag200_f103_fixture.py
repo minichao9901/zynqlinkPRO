@@ -12,7 +12,7 @@ import usb.util
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from tools.board_acceptance_target import elf_contents
-from dap_pipeline_bench import open_dap, setup, xfer
+from dap_pipeline_bench import open_dap, select_arm_jtag, setup, xfer
 from h743_peak import measure_pipeline
 from jtag200 import ROOT
 from jtag200_pipeline import need
@@ -155,6 +155,15 @@ def run(args):
             tx, rx = mem.out, mem.inp
             tap = setup(tx, rx, 1000, 'jtag')
             need(int.from_bytes(tap[2:], 'little') == TAP, 'F103 JTAG TAP identity mismatch')
+            # TAP reset selects IDCODE on both devices. Capture the chain before
+            # any explicit IR selection puts the boundary TAP into BYPASS.
+            select_arm_jtag(tx, rx)
+            ids = xfer(tx, rx, [0x14, 3, 0x41, 0, 2, 0, 0x80, *([0]*8)])
+            need(len(ids)==10 and ids[:2]==bytes((0x14,0)), 'Dual TAP capture failed')
+            st['chain_tdo_first'] = [hex(int.from_bytes(ids[n:n+4], 'little')) for n in (2,6)]
+            save(folder, st)
+            need(st['chain_tdo_first'] == [hex(TAP), '0x6414041'], 'Unexpected F103 TAP chain')
+            setup(tx, rx, 1000, 'jtag')
             need(mem.read(PAGE, SIZE) == original, 'JTAG low speed SRAM mismatch')
             st['tap'] = hex(TAP)
             st['hclk_mhz'] = args.hclk

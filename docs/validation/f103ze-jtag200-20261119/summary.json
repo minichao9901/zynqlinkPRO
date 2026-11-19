@@ -1,0 +1,190 @@
+{
+  "points": [
+    {
+      "source": "f103-96-long100",
+      "mode": "long_mixed",
+      "hclk": 96,
+      "tck_hz": 100000000,
+      "timing": [
+        "100",
+        16,
+        36,
+        [
+          false,
+          false
+        ],
+        19
+      ],
+      "read_MBps": 6.08102303135886,
+      "write_MBps": 6.081152616212615,
+      "read_bytes": 546044928,
+      "write_bytes": 546044928
+    },
+    {
+      "source": "f103-96-long100",
+      "mode": "long_read",
+      "hclk": 96,
+      "tck_hz": 100000000,
+      "timing": [
+        "100",
+        16,
+        36,
+        [
+          false,
+          false
+        ],
+        19
+      ],
+      "read_MBps": 6.080873304493068,
+      "write_MBps": 0,
+      "read_bytes": 1091091456,
+      "write_bytes": 0
+    },
+    {
+      "source": "f103-96-quad-inline2",
+      "mode": "long_mixed",
+      "hclk": 96,
+      "tck_hz": 125490196,
+      "timing": [
+        "125.490",
+        16,
+        34,
+        [
+          false,
+          false
+        ],
+        21
+      ],
+      "read_MBps": 7.271694474639662,
+      "write_MBps": 7.271540557102738,
+      "read_bytes": 652646400,
+      "write_bytes": 652646400
+    },
+    {
+      "source": "f103-128-quad-long",
+      "mode": "long_mixed",
+      "hclk": 128,
+      "tck_hz": 125490196,
+      "timing": [
+        "125.490",
+        16,
+        34,
+        [
+          false,
+          false
+        ],
+        13
+      ],
+      "read_MBps": 8.219749815415087,
+      "write_MBps": 8.218958183688793,
+      "read_bytes": 737472512,
+      "write_bytes": 737472512
+    },
+    {
+      "source": "f103-128-quad-long",
+      "mode": "long_read",
+      "hclk": 128,
+      "tck_hz": 125490196,
+      "timing": [
+        "125.490",
+        16,
+        34,
+        [
+          false,
+          false
+        ],
+        13
+      ],
+      "read_MBps": 8.216782237714874,
+      "write_MBps": 0,
+      "read_bytes": 1472747520,
+      "write_bytes": 0
+    },
+    {
+      "source": "f103-128-final-bracket",
+      "mode": "long_mixed",
+      "hclk": 128,
+      "tck_hz": 128000000,
+      "timing": [
+        "128.000",
+        16,
+        34,
+        [
+          false,
+          false
+        ],
+        17
+      ],
+      "read_MBps": 7.871534019911409,
+      "write_MBps": 7.871534053860044,
+      "read_bytes": 706329600,
+      "write_bytes": 706329600
+    }
+  ],
+  "fastest_mixed": {
+    "source": "f103-128-quad-long",
+    "mode": "long_mixed",
+    "hclk": 128,
+    "tck_hz": 125490196,
+    "timing": [
+      "125.490",
+      16,
+      34,
+      [
+        false,
+        false
+      ],
+      13
+    ],
+    "read_MBps": 8.219749815415087,
+    "write_MBps": 8.218958183688793,
+    "read_bytes": 737472512,
+    "write_bytes": 737472512
+  },
+  "highest_mixed": {
+    "source": "f103-128-final-bracket",
+    "mode": "long_mixed",
+    "hclk": 128,
+    "tck_hz": 128000000,
+    "timing": [
+      "128.000",
+      16,
+      34,
+      [
+        false,
+        false
+      ],
+      17
+    ],
+    "read_MBps": 7.871534019911409,
+    "write_MBps": 7.871534053860044,
+    "read_bytes": 706329600,
+    "write_bytes": 706329600
+  },
+  "USB_60_MHz": [
+    {
+      "hclk": 48,
+      "read_MBps": 2.4130824001508917,
+      "write_MBps": 2.3897849964748246
+    },
+    {
+      "hclk": 96,
+      "read_MBps": 2.416821053875054,
+      "write_MBps": 2.3936101974006885
+    },
+    {
+      "hclk": 128,
+      "read_MBps": 2.417489690961408,
+      "write_MBps": 2.3955175427762656
+    }
+  ],
+  "HCLK128_idle17": {
+    "read": 7.716712250853435,
+    "write": 7.716712390158203,
+    "cm3": 7.872
+  },
+  "pc_xsct_MBps": {
+    "read": 0.08179150772183222,
+    "write": 0.12720920995887294
+  }
+}
