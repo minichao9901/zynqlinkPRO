@@ -1,0 +1,19 @@
+{
+  "source_commit": "5dad78ec2876a55f2887218bc59709defb8dd924",
+  "timing": {
+    "axi_hz": 133333333,
+    "serializer_hz": 200000000,
+    "word_hz": 100000000,
+    "setup_slack_ns": 0.109,
+    "hold_slack_ns": 0.069
+  },
+  "sha256": {
+    "probe.bit": "bb75fa65ea1daccc308f281b99ca7ba61e9da331c2dac6042c91460be95e17b0",
+    "application.elf": "d4890bcfb7c5f97a75055f5745f9ca5fa0cb7c32511159f3debf2fec222b32af",
+    "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+  },
+  "hardware_evidence": "docs/validation/f103ze-swd200-resident-20261119",
+  "firmware_flags": "tools/swd200.py bench-elf --resident",
+  "part": "xc7z020clg400-2",
+  "build": "python -X utf8 tools/swd200.py build"
+}

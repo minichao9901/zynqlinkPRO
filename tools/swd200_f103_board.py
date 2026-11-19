@@ -18,6 +18,35 @@ BASE = 0x20008000
 REGS = dict(CR=clocks.CR, CFGR=clocks.CFGR, APB1ENR=clocks.APB1ENR, FLASH_ACR=clocks.FLASH)
 
 
+def window_metrics(lines):
+    """Decode successful, wholly verified windows. Preserve failures in the raw log."""
+    rows = []
+    for line in lines:
+        if not line.startswith('WINDOW '):
+            continue
+        fields = [int(token) for token in line.split()[1:]]
+        index, tap, ack, data, idle, mixed, rounds = fields[:7]
+        hz, fclk, pll, timing = fields[7:11]
+        box = fields[11:]
+        if len(box) != 27 or box[5] or box[6] != rounds or box[7] != mixed * rounds:
+            continue
+        def us_per_block(field):
+            ticks = box[field] | (box[field + 1] << 32)
+            return ticks / (333333333 / 1e6) / rounds
+        row = dict(profile=index, swclk_hz=hz, fclk_control=hex(fclk), io_pll=hex(pll),
+                   timing=hex(timing), tap=tap, ack=ack, data=data, idle=idle, mixed=mixed,
+                   rounds=rounds, read_waits=box[11], write_waits=box[12])
+        for name, pos in [('read_scan', 13), ('write_scan', 15), ('read_local', 19), ('write_local', 21)]:
+            us = us_per_block(pos)
+            row[name + '_us'] = us
+            if us:
+                row[name + '_MB_s'] = 1024 / us
+        row['compare_us'] = us_per_block(23)
+        row['guard_us'] = us_per_block(25)
+        rows.append(row)
+    return rows
+
+
 @contextmanager
 def usb_link():
     deadline = time.monotonic()+25
@@ -70,47 +99,67 @@ def bench_target(board, folder, original, guards, rates, diagnostics=False, guar
     script=fixture+'\nf103_check 0\nset winners {}\n'
     script+='foreach rate {'+' '.join(map(str,rates))+'} {\n'+'''
         set candidates {}
+        set responses {}
         foreach tap {8 0 16 24 31} {
             foreach slot {20 19 21 18 22 17 23 16 24 15 25 26 27 28} {
                 swd_config $rate $tap $slot $slot 2
                 set r [swd_batch {16 0 2 0 2 0 2 0}]
+                dict incr responses [format %04x [expr {[lindex $r 0]&65535}]]
                 if {([lindex $r 0]&65535)==4 && [lindex $r 2]==0x1ba01477 &&
                     [lindex $r 3]==0x1ba01477 && [lindex $r 4]==0x1ba01477} {
                     lappend candidates [list $tap $slot]
                 }
             }
         }
+        puts "ID_SUMMARY $rate $responses"
+        if {![llength $candidates] && $rate==3} {
+            foreach tap {0 8 16 24 31} {
+                foreach slot {15 16 17 18 19 20 21 22 23 24 25} {
+                    f103_low
+                    swd_config $rate $tap $slot $slot 2
+                    set r [swd_batch {2 0 2 0 2 0}]
+                    if {([lindex $r 0]&65535)==3 && [lrange $r 1 end] eq [lrepeat 3 [expr {0x1ba01477}]]} {
+                        lappend candidates [list $tap $slot]
+                    }
+                }
+            }
+            puts "SLOW_ENTRY $rate $candidates"
+        }
         puts "CANDIDATES $rate $candidates"
         set ok 0
+        foreach delta $phase_offsets {
         foreach idle {2 5 9 15} {
           foreach pair $candidates {
             lassign $pair tap slot
-            if {![f103_window $rate $tap $slot $slot $idle 0 4]} continue
-            if {![f103_window $rate $tap $slot $slot $idle 1 4]} {f103_check 1;continue}
+            set data [expr {$slot+$delta}]
+            if {![f103_window $rate $tap $slot $data $idle 0 4]} continue
+            if {![f103_window $rate $tap $slot $data $idle 1 4]} {f103_check 1;continue}
             f103_check 0
-            if {[f103_window $rate $tap $slot $slot $idle 1 256]} {
+            if {[f103_window $rate $tap $slot $data $idle 1 256]} {
                 f103_check 0
-                lappend winners [list $rate $tap $slot $idle]
-                puts "QUAL $rate $tap $slot $idle"
+                lappend winners [list $rate $tap $slot $data $idle]
+                puts "QUAL $rate $tap $slot $data $idle"
                 set ok 1; break
             }
             f103_check 1
           }
           if {$ok} break
         }
+        if {$ok} break
+        }
     }
     set best 0
     foreach winner [lreverse $winners] {
-        lassign $winner rate tap slot idle
+        lassign $winner rate tap slot data idle
         # 'rates' is ordered by ascending physical clock.
         if {$best && $rate!=4 && $rate!=1 && $rate!=0} continue
         set rounds [expr {$best ? 1024 : 16384}]
         set ok 1
         for {set n 0} {$n<3} {incr n} {
-            if {![f103_window $rate $tap $slot $slot $idle 1 $rounds]} {f103_check 1; set ok 0;break}
+            if {![f103_window $rate $tap $slot $data $idle 1 $rounds]} {f103_check 1; set ok 0;break}
             f103_check 0
         }
-        if {$ok && !$best} {puts "STABLE $rate $tap $slot $idle";set best 1}
+        if {$ok && !$best} {puts "STABLE $rate $tap $slot $data $idle";set best 1}
     }
     f103_check 1
     puts "FINAL [f103_word 0x40021004] [f103_word 0xe000edf0]"
@@ -161,9 +210,13 @@ def bench_target(board, folder, original, guards, rates, diagnostics=False, guar
         f103_check 1
         puts "FINAL [f103_word 0x40021004] [f103_word 0xe000edf0]"
         '''
-    script=script.replace('foreach idle {2 5 9 15}',f'foreach idle {{{idle} 2 5 9 15}}')
+    offsets = '0 -1 1 -2 2' if guard is not None else '0'
+    script='set phase_offsets {'+offsets+'}\n'+script
+    idles=' '.join(map(str,dict.fromkeys((idle,2,5,9,15))))
+    script=script.replace('foreach idle {2 5 9 15}',f'foreach idle {{{idles}}}')
     output=board.tcl(script)
-    (folder/'windows.txt').write_text('\n'.join(x for x in output.splitlines() if re.match(r'^(QUAL|STABLE|FINAL|WINDOW|CANDIDATES|RECOVERED|DIAG|EXTRA_STABLE) ',x))+'\n')
+    record(folder/'timing.json', window_metrics(output.splitlines()))
+    (folder/'windows.txt').write_text('\n'.join(x.rstrip() for x in output.splitlines() if re.match(r'^(QUAL|STABLE|FINAL|WINDOW|CANDIDATES|RECOVERED|DIAG|EXTRA_STABLE|ID_SUMMARY|SLOW_ENTRY) ',x))+'\n')
     print('\n'.join(x for x in output.splitlines() if x.startswith(('QUAL','STABLE','FINAL'))),flush=True)
 
 

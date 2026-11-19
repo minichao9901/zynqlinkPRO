@@ -15,7 +15,7 @@ proc swd_config {index tap ack data idle} {
     swd_wait 0x2ff00 0xffffffff 0x53323030
     swd_wait 0x40000004 32 32
     if {[info exists ::board_guard]} {
-        swd_wr 0x4000001c [expr {$index==0 ? 0 : ($::board_guard<<4)}]
+        swd_wr 0x4000001c [expr {$index in {0 1 4} ? 0 : ($::board_guard<<4)}]
     }
     if {[swd_rd 0x2ff08]==$index && [swd_rd 0x2ff18]==0 &&
         [swd_rd 0x2ff04]==[swd_rd 0x2ff14]} {

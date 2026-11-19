@@ -1,0 +1,95 @@
+[
+  {
+    "mhz": 100,
+    "return_ns": 0.8,
+    "target_ns": 7.8125,
+    "ack": 12,
+    "data": 12,
+    "tap": 0,
+    "idle": 1,
+    "words": 256,
+    "rounds": 1,
+    "passed": true,
+    "log": "mhz100-return_ns0.8-target_ns7.8125-ack12-data12-tap0-idle1-words256-rounds1.log",
+    "result": "SWD200_PASS mhz=100 words=256 rounds=1 reads_MBps=8.0756 writes_MBps=8.0746 waits=2 edges=24808",
+    "cost": [
+      "SWD200_COST dir=write batch_ns=126817.500 edges=12140 wire_ns=121400.000 ack_gaps=258 ack_gap_ns=5160.000 request_gaps=1 request_gap_ns=30.000 control_ns=227.500 waits=1",
+      "SWD200_COST dir=read batch_ns=126802.500 edges=12140 wire_ns=121400.000 ack_gaps=258 ack_gap_ns=5160.000 request_gaps=1 request_gap_ns=30.000 control_ns=212.500 waits=1"
+    ]
+  },
+  {
+    "mhz": 160,
+    "return_ns": 20.0,
+    "target_ns": 7.8125,
+    "ack": 19,
+    "data": 19,
+    "tap": 0,
+    "idle": 1,
+    "words": 256,
+    "rounds": 1,
+    "guard": 1,
+    "passed": true,
+    "log": "mhz160-return_ns20.0-target_ns7.8125-ack19-data19-tap0-idle1-words256-rounds1-guard1.log",
+    "result": "SWD200_PASS mhz=160 words=256 rounds=1 reads_MBps=9.5900 writes_MBps=11.6925 waits=2 edges=24808",
+    "cost": [
+      "SWD200_COST dir=write batch_ns=87577.500 edges=12140 wire_ns=75875.000 ack_gaps=260 ack_gap_ns=11418.750 request_gaps=2 request_gap_ns=25.000 control_ns=258.750 waits=1",
+      "SWD200_COST dir=read batch_ns=106777.500 edges=12140 wire_ns=75875.000 ack_gaps=260 ack_gap_ns=13018.750 request_gaps=514 request_gap_ns=17625.000 control_ns=258.750 waits=1"
+    ]
+  },
+  {
+    "mhz": 200,
+    "return_ns": 20.0,
+    "target_ns": 7.8125,
+    "ack": 20,
+    "data": 20,
+    "tap": 0,
+    "idle": 1,
+    "words": 256,
+    "rounds": 1,
+    "guard": 2,
+    "passed": true,
+    "log": "mhz200-return_ns20.0-target_ns7.8125-ack20-data20-tap0-idle1-words256-rounds1-guard2.log",
+    "result": "SWD200_PASS mhz=200 words=256 rounds=1 reads_MBps=11.3052 writes_MBps=14.5791 waits=3 edges=24822",
+    "cost": [
+      "SWD200_COST dir=write batch_ns=70237.500 edges=12154 wire_ns=60770.000 ack_gaps=261 ack_gap_ns=9205.000 request_gaps=4 request_gap_ns=60.000 control_ns=202.500 waits=2",
+      "SWD200_COST dir=read batch_ns=90577.500 edges=12140 wire_ns=60700.000 ack_gaps=260 ack_gap_ns=10435.000 request_gaps=514 request_gap_ns=19230.000 control_ns=212.500 waits=1"
+    ]
+  },
+  {
+    "mhz": 200,
+    "return_ns": 0.8,
+    "target_ns": 7.8125,
+    "ack": 12,
+    "data": 12,
+    "tap": 0,
+    "idle": 2,
+    "words": 256,
+    "rounds": 1,
+    "passed": true,
+    "log": "mhz200-return_ns0.8-target_ns7.8125-ack12-data12-tap0-idle2-words256-rounds1.log",
+    "result": "SWD200_PASS mhz=200 words=256 rounds=1 reads_MBps=15.1923 writes_MBps=15.1687 waits=3 edges=25349",
+    "cost": [
+      "SWD200_COST dir=write batch_ns=67507.500 edges=12414 wire_ns=62070.000 ack_gaps=258 ack_gap_ns=3870.000 request_gaps=259 request_gap_ns=1335.000 control_ns=232.500 waits=2",
+      "SWD200_COST dir=read batch_ns=67402.500 edges=12399 wire_ns=61995.000 ack_gaps=258 ack_gap_ns=3870.000 request_gaps=258 request_gap_ns=1310.000 control_ns=227.500 waits=1"
+    ]
+  },
+  {
+    "mhz": 160,
+    "return_ns": 16.0,
+    "target_ns": 7.8125,
+    "ack": 18,
+    "data": 17,
+    "tap": 0,
+    "idle": 1,
+    "words": 32,
+    "rounds": 1,
+    "guard": 2,
+    "passed": true,
+    "log": "mhz160-return_ns16.0-target_ns7.8125-ack18-data17-tap0-idle1-words32-rounds1-guard2.log",
+    "result": "SWD200_PASS mhz=160 words=32 rounds=1 reads_MBps=8.6589 writes_MBps=10.6733 waits=2 edges=3752",
+    "cost": [
+      "SWD200_COST dir=write batch_ns=11992.500 edges=1612 wire_ns=10075.000 ack_gaps=36 ack_gap_ns=1631.250 request_gaps=2 request_gap_ns=37.500 control_ns=248.750 waits=1",
+      "SWD200_COST dir=read batch_ns=14782.500 edges=1612 wire_ns=10075.000 ack_gaps=36 ack_gap_ns=1831.250 request_gaps=66 request_gap_ns=2637.500 control_ns=238.750 waits=1"
+    ]
+  }
+]
