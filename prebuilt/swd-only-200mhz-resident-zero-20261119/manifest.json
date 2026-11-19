@@ -1,0 +1,20 @@
+{
+  "timing": {
+    "axi_hz": 133333333,
+    "serializer_hz": 200000000,
+    "word_hz": 100000000,
+    "setup_slack_ns": 0.524,
+    "hold_slack_ns": 0.066
+  },
+  "sha256": {
+    "probe.bit": "30f7eb93c980aa09218a4ee50306725f8a46f2c3263eaae7491aa5da3fb536b6",
+    "application.elf": "610b2abba3615fcd85734e1cd42669f7ab0dba7996ba2b3b96545daf06928c0e",
+    "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+  },
+  "source_commit": "2de3776e371df0846a045b93271ba74c751708a7",
+  "firmware_options": "tools/swd200.py bench-elf --resident",
+  "hardware_evidence": "docs/validation/f103ze-swd200-resident-20261119",
+  "part": "xc7z020clg400-2",
+  "build": "python -X utf8 tools/swd200.py build",
+  "acceptance": "F103ZE HCLK128, 100 and 177.778 MHz, three 16 MiB mixed windows per point"
+}
