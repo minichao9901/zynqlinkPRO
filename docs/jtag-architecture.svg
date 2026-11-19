@@ -1,75 +1,263 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1480" height="804" viewBox="0 0 1480 804" role="img"><title>ZynqLinkPRO 纯 JTAG 探针架构</title><desc>PS、PL、J7 与 STM32F103ZE 之间的控制、发送、回采和校验路径。</desc><defs>
-<marker id="a0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#182d42"/></marker>
-<marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#486173"/></marker>
-<marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#006e68"/></marker>
-<marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#245ba5"/></marker>
-<marker id="a4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#9d4923"/></marker>
-</defs><g font-family="Microsoft YaHei, Noto Sans CJK SC, PingFang SC, sans-serif">
-<rect x="0" y="0" width="1480" height="804" rx="0" fill="#ffffff" stroke="none" stroke-width="1.5"/>
-<rect x="0" y="0" width="12" height="101" rx="0" fill="#006e68" stroke="none" stroke-width="1.5"/>
-<text x="36" y="48" text-anchor="start" font-size="34" fill="#182d42" font-weight="700">ZynqLinkPRO 纯 JTAG 探针架构</text>
-<text x="38" y="81" text-anchor="start" font-size="18" fill="#486173" font-weight="400">XC7Z020-CLG400-2  /  F103ZE 双 TAP  /  四 TCK 连续流水  /  配对源码 2584b076</text>
-<rect x="30" y="125" width="350" height="324" rx="15" fill="#f3f7fb" stroke="#c7d8e7" stroke-width="1.5"/>
-<rect x="405" y="125" width="770" height="324" rx="15" fill="#f3f9f7" stroke="#c4ded6" stroke-width="1.5"/>
-<rect x="1200" y="125" width="250" height="324" rx="15" fill="#fff8f2" stroke="#ecd7c8" stroke-width="1.5"/>
-<text x="48" y="165" text-anchor="start" font-size="22" fill="#182d42" font-weight="700">PS · Cortex-A9</text>
-<text x="424" y="165" text-anchor="start" font-size="22" fill="#182d42" font-weight="700">PL · JTAG 硬件引擎</text>
-<text x="1218" y="165" text-anchor="start" font-size="22" fill="#182d42" font-weight="700">J7 · STM32F103ZE</text>
-<rect x="50" y="202" width="309" height="130" rx="9" fill="#edf4ff" stroke="#245ba5" stroke-width="1.5"/>
-<text x="64" y="232" text-anchor="start" font-size="20" fill="#245ba5" font-weight="700">A9 驻留测试 / OCM</text>
-<text x="64" y="260" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">从 DDR 预装 256 字测试图案</text>
-<text x="64" y="285" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">经 GP0 提交地址、字数与时序</text>
-<text x="64" y="310" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">全局定时器分别统计读、写用时</text>
-<rect x="427" y="202" width="226" height="130" rx="9" fill="#eff8f6" stroke="#006e68" stroke-width="1.5"/>
-<text x="441" y="232" text-anchor="start" font-size="20" fill="#006e68" font-weight="700">AXI4-Lite / BRAM</text>
-<text x="441" y="260" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">检查页地址和块长度</text>
-<text x="441" y="285" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">TX 图案 RAM / RX 结果</text>
-<text x="441" y="310" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">请求与完成跨时钟域握手</text>
-<rect x="687" y="202" width="220" height="130" rx="9" fill="#eff8f6" stroke="#006e68" stroke-width="1.5"/>
-<text x="701" y="232" text-anchor="start" font-size="20" fill="#006e68" font-weight="700">ARM 块引擎</text>
-<text x="701" y="260" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">配置 SELECT、CSW、TAR</text>
-<text x="701" y="285" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">连续发送 APACC / DRW</text>
-<text x="701" y="310" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">遇 WAIT 收尾并上报状态</text>
-<rect x="942" y="202" width="210" height="130" rx="9" fill="#eff8f6" stroke="#006e68" stroke-width="1.5"/>
-<text x="956" y="232" text-anchor="start" font-size="20" fill="#006e68" font-weight="700">JTAG SelectIO</text>
-<text x="956" y="260" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">3 × OSERDESE2 发射</text>
-<text x="956" y="285" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">IDELAYE2 延迟 TDO</text>
-<text x="956" y="310" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">ISERDESE2 八时隙回采</text>
-<rect x="1220" y="202" width="208" height="130" rx="9" fill="#fff3e9" stroke="#9d4923" stroke-width="1.5"/>
-<text x="1234" y="232" text-anchor="start" font-size="18" fill="#9d4923" font-weight="700">JTAG-DP / MEM-AP</text>
-<text x="1234" y="260" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">4 位 DAP + 5 位边界 TAP</text>
-<text x="1234" y="285" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">MEM-AP 自增访问 SRAM</text>
-<text x="1234" y="310" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">测试页 0x20008000</text>
-<path d="M359 270 L425 270" stroke="#006e68" stroke-width="2.5" fill="none" marker-end="url(#a2)"/>
-<path d="M653 270 L685 270" stroke="#006e68" stroke-width="2.5" fill="none" marker-end="url(#a2)"/>
-<path d="M907 270 L940 270" stroke="#006e68" stroke-width="2.5" fill="none" marker-end="url(#a2)"/>
-<path d="M1152 260 L1218 260" stroke="#006e68" stroke-width="2.5" fill="none" marker-end="url(#a2)"/>
-<text x="393" y="249" text-anchor="middle" font-size="14" fill="#006e68" font-weight="700">GP0</text>
-<path d="M1220 307 L1154 307" stroke="#245ba5" stroke-width="2.5" fill="none" marker-end="url(#a3)"/><text x="1186" y="298" font-size="13" font-weight="700" text-anchor="middle" fill="#245ba5">TDO</text><text x="1186" y="249" text-anchor="middle" font-size="12" fill="#006e68" font-weight="700">TCK / TMS</text><text x="1186" y="277" text-anchor="middle" font-size="13" fill="#006e68">TDI</text>
-<path d="M1046 332 L1046 371 L797 371 L797 332" stroke="#245ba5" stroke-width="2.5" fill="none" marker-end="url(#a3)"/>
-<path d="M687 299 L654 299" stroke="#245ba5" stroke-width="2.5" fill="none" marker-end="url(#a3)"/>
-<path d="M539 332 L539 393 L206 393 L206 333" stroke="#245ba5" stroke-width="2.5" fill="none" marker-end="url(#a3)"/>
-<text x="821" y="361" text-anchor="start" font-size="15" fill="#245ba5" font-weight="400">TDO 解帧 · ACK / 读回字</text>
-<text x="280" y="384" text-anchor="start" font-size="15" fill="#245ba5" font-weight="400">完成状态 / 校验结果</text>
-<text x="49" y="428" text-anchor="start" font-size="16" fill="#486173" font-weight="400">FCLK0 ≈ 133.333 MHz</text>
-<text x="686" y="428" text-anchor="start" font-size="16" fill="#486173" font-weight="400">MMCM 输出串行钟 128 MHz，CLKDIV 32 MHz，每拍 4 个 TCK</text>
-<text x="36" y="505" text-anchor="start" font-size="22" fill="#182d42" font-weight="700">一次 1 KiB 传输如何完成</text>
-<rect x="38" y="537" width="433" height="121" rx="9" fill="#f5f8fc" stroke="#245ba5" stroke-width="1.5"/>
-<text x="52" y="567" text-anchor="start" font-size="20" fill="#245ba5" font-weight="700">装入一页数据</text>
-<text x="52" y="595" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">A9 预装写图案，PL 复用同一页进行反相写。</text>
-<text x="52" y="620" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">主机装载与取回经 HS3、XSCT 和物理 AP0。</text>
-<rect x="519" y="537" width="435" height="121" rx="9" fill="#f5f8fc" stroke="#245ba5" stroke-width="1.5"/>
-<text x="533" y="567" text-anchor="start" font-size="20" fill="#245ba5" font-weight="700">每帧同时收发</text>
-<text x="533" y="595" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">TDI 发本次请求，TDO 送回前一笔 AP 应答。</text>
-<text x="533" y="620" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">读块末字从 RDBUFF 取回，再核对 CTRL/STAT。</text>
-<rect x="1002" y="537" width="440" height="121" rx="9" fill="#f5f8fc" stroke="#245ba5" stroke-width="1.5"/>
-<text x="1016" y="567" text-anchor="start" font-size="20" fill="#245ba5" font-weight="700">逐字校验与恢复</text>
-<text x="1016" y="595" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">PL 比对 256 个读回字，A9 确认块完成。</text>
-<text x="1016" y="620" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">低速独立链路复核末轮图案，恢复 SRAM 和哨兵。</text>
-<path d="M471 597 L516 597" stroke="#245ba5" stroke-width="2.5" fill="none" marker-end="url(#a3)"/>
-<path d="M954 597 L999 597" stroke="#245ba5" stroke-width="2.5" fill="none" marker-end="url(#a3)"/>
-<rect x="38" y="695" width="1404" height="80" rx="10" fill="#edf6f5" stroke="none" stroke-width="1.5"/>
-<text x="57" y="726" text-anchor="start" font-size="18" fill="#006e68" font-weight="700">实板工作点</text>
-<text x="196" y="726" text-anchor="start" font-size="20" fill="#182d42" font-weight="650">最快吞吐  ·  TCK 125.490 MHz  ·  HCLK 128 MHz  ·  idle 13  ·  读 8.220 / 写 8.219 MB/s</text>
-<text x="196" y="755" text-anchor="start" font-size="17" fill="#486173" font-weight="400">最高稳定双向频率为 TCK 128.000 MHz，idle 17，读写均 7.872 MB/s。两档均通过 3 × 60 秒交替读写。</text>
-<text x="1218" y="391" font-size="13" fill="#9d4923">TDI → 边界 BYPASS → DAP → TDO</text></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1190" viewBox="0 0 1800 1190" role="img" aria-labelledby="title desc"><title id="title">ZynqLinkPRO JTAG 系统与 SelectIO 电路</title><desc id="desc">XC7Z020 的 PS、PL、接口引脚及外部 STM32F103ZE。详图显示三路 OSERDESE2 输出，TDO 输入延迟、解串与选相，MMCM 时钟及 IDELAYCTRL 校准。</desc><defs>
+<marker id="a193347" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.8" markerHeight="6.8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#193347"/></marker>
+<marker id="a006d68" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.8" markerHeight="6.8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#006d68"/></marker>
+<marker id="a245da0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.8" markerHeight="6.8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#245da0"/></marker>
+<marker id="a7c4f8b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.8" markerHeight="6.8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#7c4f8b"/></marker>
+</defs><g font-family="Microsoft YaHei, Segoe UI, sans-serif">
+<rect x="0" y="0" width="1800" height="1190" fill="white" stroke="none" stroke-width="1.4" stroke-dasharray="none"/>
+<rect x="38" y="30" width="7" height="68" fill="#006d68" stroke="none" stroke-width="1.4" stroke-dasharray="none"/>
+<text x="63" y="61" text-anchor="start" font-size="37" fill="#193347" font-weight="700">ZynqLinkPRO 高速 JTAG 系统框图</text>
+<text x="64" y="93" text-anchor="start" font-size="19" fill="#435c6c" font-weight="400">XC7Z020-CLG400-2  /  STM32F103ZE  /  四 TCK 连续读写模式</text>
+<path d="M1240 71 L1277 71" fill="none" stroke="#006d68" stroke-width="2.2" marker-end="url(#a006d68)"/>
+<text x="1287" y="77" text-anchor="start" font-size="17" fill="#006d68" font-weight="600">发送</text>
+<path d="M1385 71 L1422 71" fill="none" stroke="#245da0" stroke-width="2.2" marker-end="url(#a245da0)"/>
+<text x="1432" y="77" text-anchor="start" font-size="17" fill="#245da0" font-weight="600">回采</text>
+<path d="M1530 71 L1567 71" fill="none" stroke="#7c4f8b" stroke-width="2.2" marker-end="url(#a7c4f8b)"/>
+<text x="1577" y="77" text-anchor="start" font-size="17" fill="#7c4f8b" font-weight="600">时钟与校准</text>
+<rect x="38" y="126" width="1415" height="203" fill="#f7fafb" stroke="#193347" stroke-width="2.2" stroke-dasharray="none"/>
+<text x="57" y="154" text-anchor="start" font-size="20" fill="#193347" font-weight="750">XC7Z020</text>
+<rect x="58" y="172" width="326" height="139" fill="#eef3f8" stroke="#a3b4c2" stroke-width="1.4" stroke-dasharray="none"/>
+<text x="72" y="195" text-anchor="start" font-size="17" fill="#193347" font-weight="700">PS 处理系统</text>
+<rect x="453" y="172" width="980" height="139" fill="#f0f6f4" stroke="#9bb7ae" stroke-width="1.4" stroke-dasharray="none"/>
+<text x="470" y="195" text-anchor="start" font-size="17" fill="#006d68" font-weight="700">PL 可编程逻辑</text>
+<text x="807" y="195" text-anchor="start" font-size="15" fill="#435c6c" font-weight="500">AXI 时钟 FCLK0 · 133.333 MHz</text>
+<rect x="74" y="212" width="294" height="75" fill="white" stroke="#193347" stroke-width="1.6" stroke-dasharray="none"/>
+<text x="221.0" y="239" text-anchor="middle" font-size="20" fill="#193347" font-weight="700">Cortex-A9 / OCM</text>
+<text x="221.0" y="263" text-anchor="middle" font-size="15" fill="#435c6c" font-weight="400">从 DDR 装载图案 · GTC 计时</text>
+<rect x="475" y="212" width="245" height="75" fill="white" stroke="#193347" stroke-width="1.6" stroke-dasharray="none"/>
+<text x="597.5" y="239" text-anchor="middle" font-size="20" fill="#193347" font-weight="700">AXI4-Lite / 双口 BRAM</text>
+<text x="597.5" y="263" text-anchor="middle" font-size="15" fill="#435c6c" font-weight="400">地址、字数、时序寄存器</text>
+<rect x="780" y="212" width="289" height="75" fill="white" stroke="#193347" stroke-width="1.6" stroke-dasharray="none"/>
+<text x="924.5" y="239" text-anchor="middle" font-size="20" fill="#193347" font-weight="700">JTAG 块引擎</text>
+<text x="924.5" y="263" text-anchor="middle" font-size="15" fill="#435c6c" font-weight="400">TAP 导航 · APACC / DRW · 校验</text>
+<rect x="1143" y="212" width="268" height="75" fill="#e2f2ee" stroke="#006d68" stroke-width="1.6" stroke-dasharray="none"/>
+<text x="1277.0" y="239" text-anchor="middle" font-size="20" fill="#006d68" font-weight="700">SelectIO 接口</text>
+<text x="1277.0" y="263" text-anchor="middle" font-size="15" fill="#435c6c" font-weight="400">三路串行输出 · 一路串行输入</text>
+<path d="M368 237 L473 237" fill="none" stroke="#006d68" stroke-width="2" marker-end="url(#a006d68)"/>
+<path d="M475 270 L370 270" fill="none" stroke="#245da0" stroke-width="2" marker-end="url(#a245da0)"/>
+<text x="421.5" y="227" text-anchor="middle" font-size="15" fill="#006d68" font-weight="600">GP0</text>
+<path d="M720 237 L778 237" fill="none" stroke="#006d68" stroke-width="2" marker-end="url(#a006d68)"/>
+<path d="M780 270 L722 270" fill="none" stroke="#245da0" stroke-width="2" marker-end="url(#a245da0)"/>
+<path d="M1069 237 L1141 237" fill="none" stroke="#006d68" stroke-width="2" marker-end="url(#a006d68)"/>
+<path d="M1143 270 L1071 270" fill="none" stroke="#245da0" stroke-width="2" marker-end="url(#a245da0)"/>
+<text x="1106.0" y="227" text-anchor="middle" font-size="15" fill="#006d68" font-weight="600">24 bit</text>
+<text x="1106" y="292" text-anchor="middle" font-size="14" fill="#245da0" font-weight="500">8 bit</text>
+<rect x="1542" y="160" width="220" height="139" fill="#f6f7f7" stroke="#193347" stroke-width="1.8" stroke-dasharray="none"/>
+<text x="1652" y="188" text-anchor="middle" font-size="22" fill="#193347" font-weight="700">STM32F103ZE</text>
+<text x="1652" y="217" text-anchor="middle" font-size="17" fill="#193347" font-weight="550">JTAG-DP → MEM-AP</text>
+<text x="1652" y="244" text-anchor="middle" font-size="16" fill="#435c6c" font-weight="400">AHB → 片内 SRAM</text>
+<text x="1652" y="275" text-anchor="middle" font-size="15" fill="#435c6c" font-weight="400">HCLK 128 MHz</text>
+<path d="M1411 237 L1540 237" fill="none" stroke="#006d68" stroke-width="2" marker-end="url(#a006d68)"/>
+<path d="M1542 270 L1413 270" fill="none" stroke="#245da0" stroke-width="2" marker-end="url(#a245da0)"/>
+<text x="1494" y="226" text-anchor="middle" font-size="16" fill="#193347" font-weight="700">J7</text>
+<path d="M1276 288 L1276 355" fill="none" stroke="#006d68" stroke-width="1.4" stroke-dasharray="5 5"/>
+<rect x="38" y="355" width="1724" height="545" fill="#fff" stroke="#006d68" stroke-width="2" stroke-dasharray="none"/>
+<rect x="39" y="356" width="1722" height="53" fill="#e6f2ef" stroke="none" stroke-width="1.4" stroke-dasharray="none"/>
+<text x="61" y="391" text-anchor="start" font-size="27" fill="#006d68" font-weight="750">SelectIO 接口展开</text>
+<text x="350" y="390" text-anchor="start" font-size="18" fill="#435c6c" font-weight="500">128 MHz TCK 工作点</text>
+<text x="1735" y="390" text-anchor="end" font-size="16" fill="#435c6c" font-weight="500">LVCMOS33   /   XC7Z020 封装球位 → J7 连接器</text>
+<text x="63" y="441" text-anchor="start" font-size="21" fill="#006d68" font-weight="700">发送数据通路</text>
+<text x="210" y="440" text-anchor="start" font-size="17" fill="#435c6c" font-weight="400">每个 CLKDIV 周期装载一个 24 位并行字</text>
+<text x="663" y="440" text-anchor="start" font-size="19" fill="#006d68" font-weight="700">OSERDESE2 × 3</text>
+<text x="985" y="440" text-anchor="start" font-size="16" fill="#435c6c" font-weight="400">每路 8∶1 DDR，D1 先发，D8 后发</text>
+<text x="1390" y="440" text-anchor="middle" font-size="15" fill="#435c6c" font-weight="600">球位</text>
+<text x="1572" y="440" text-anchor="middle" font-size="15" fill="#435c6c" font-weight="600">J7 引脚</text>
+<text x="235" y="465" text-anchor="middle" font-size="14" fill="#435c6c" font-weight="500" font-family="Consolas, Microsoft YaHei, monospace">0</text>
+<text x="277" y="465" text-anchor="middle" font-size="14" fill="#435c6c" font-weight="500" font-family="Consolas, Microsoft YaHei, monospace">1</text>
+<text x="319" y="465" text-anchor="middle" font-size="14" fill="#435c6c" font-weight="500" font-family="Consolas, Microsoft YaHei, monospace">2</text>
+<text x="361" y="465" text-anchor="middle" font-size="14" fill="#435c6c" font-weight="500" font-family="Consolas, Microsoft YaHei, monospace">3</text>
+<text x="403" y="465" text-anchor="middle" font-size="14" fill="#435c6c" font-weight="500" font-family="Consolas, Microsoft YaHei, monospace">4</text>
+<text x="445" y="465" text-anchor="middle" font-size="14" fill="#435c6c" font-weight="500" font-family="Consolas, Microsoft YaHei, monospace">5</text>
+<text x="487" y="465" text-anchor="middle" font-size="14" fill="#435c6c" font-weight="500" font-family="Consolas, Microsoft YaHei, monospace">6</text>
+<text x="529" y="465" text-anchor="middle" font-size="14" fill="#435c6c" font-weight="500" font-family="Consolas, Microsoft YaHei, monospace">7</text>
+<text x="70" y="464" text-anchor="start" font-size="14" fill="#435c6c" font-weight="400">发送时隙</text>
+<text x="70" y="505" text-anchor="start" font-size="21" fill="#006d68" font-weight="700">TCK</text>
+<text x="128" y="505" text-anchor="start" font-size="17" fill="#435c6c" font-weight="400" font-family="Consolas, Microsoft YaHei, monospace">[7:0]</text>
+<rect x="214" y="483" width="42" height="32" fill="#f0f7f5" stroke="#abc8c0" stroke-width="1" stroke-dasharray="none"/>
+<text x="235" y="505" text-anchor="middle" font-size="17" fill="#193347" font-weight="500" font-family="Consolas, Microsoft YaHei, monospace">0</text>
+<rect x="256" y="483" width="42" height="32" fill="#f0f7f5" stroke="#abc8c0" stroke-width="1" stroke-dasharray="none"/>
+<text x="277" y="505" text-anchor="middle" font-size="17" fill="#193347" font-weight="500" font-family="Consolas, Microsoft YaHei, monospace">1</text>
+<rect x="298" y="483" width="42" height="32" fill="#fff" stroke="#abc8c0" stroke-width="1" stroke-dasharray="none"/>
+<text x="319" y="505" text-anchor="middle" font-size="17" fill="#193347" font-weight="500" font-family="Consolas, Microsoft YaHei, monospace">0</text>
+<rect x="340" y="483" width="42" height="32" fill="#fff" stroke="#abc8c0" stroke-width="1" stroke-dasharray="none"/>
+<text x="361" y="505" text-anchor="middle" font-size="17" fill="#193347" font-weight="500" font-family="Consolas, Microsoft YaHei, monospace">1</text>
+<rect x="382" y="483" width="42" height="32" fill="#f0f7f5" stroke="#abc8c0" stroke-width="1" stroke-dasharray="none"/>
+<text x="403" y="505" text-anchor="middle" font-size="17" fill="#193347" font-weight="500" font-family="Consolas, Microsoft YaHei, monospace">0</text>
+<rect x="424" y="483" width="42" height="32" fill="#f0f7f5" stroke="#abc8c0" stroke-width="1" stroke-dasharray="none"/>
+<text x="445" y="505" text-anchor="middle" font-size="17" fill="#193347" font-weight="500" font-family="Consolas, Microsoft YaHei, monospace">1</text>
+<rect x="466" y="483" width="42" height="32" fill="#fff" stroke="#abc8c0" stroke-width="1" stroke-dasharray="none"/>
+<text x="487" y="505" text-anchor="middle" font-size="17" fill="#193347" font-weight="500" font-family="Consolas, Microsoft YaHei, monospace">0</text>
+<rect x="508" y="483" width="42" height="32" fill="#fff" stroke="#abc8c0" stroke-width="1" stroke-dasharray="none"/>
+<text x="529" y="505" text-anchor="middle" font-size="17" fill="#193347" font-weight="500" font-family="Consolas, Microsoft YaHei, monospace">1</text>
+<path d="M550 499 L664 499" fill="none" stroke="#006d68" stroke-width="2.4" marker-end="url(#a006d68)"/>
+<path d="M597 506 L607 492" fill="none" stroke="#435c6c" stroke-width="1.4"/>
+<text x="610" y="493" text-anchor="start" font-size="13" fill="#435c6c" font-weight="500">8</text>
+<rect x="666" y="479" width="282" height="40" fill="#edf7f3" stroke="#006d68" stroke-width="1.7" stroke-dasharray="none"/>
+<text x="678" y="505" text-anchor="start" font-size="16" fill="#006d68" font-weight="500">D1…D8</text>
+<text x="813" y="505" text-anchor="middle" font-size="19" fill="#193347" font-weight="700">OSERDESE2</text>
+<text x="932" y="505" text-anchor="end" font-size="15" fill="#006d68" font-weight="600">OQ</text>
+<path d="M948 499 L1120 499" fill="none" stroke="#006d68" stroke-width="2"/>
+<polygon points="1120,484 1120,514 1165,499" fill="#fff" stroke="#006d68" stroke-width="2"/>
+<text x="1141" y="480" text-anchor="middle" font-size="13" fill="#006d68" font-weight="500">OBUF</text>
+<path d="M1165 499 L1384 499" fill="none" stroke="#006d68" stroke-width="2"/>
+<rect x="1385" y="494" width="10" height="10" fill="#fff" stroke="#193347" stroke-width="1.5" stroke-dasharray="none"/>
+<text x="1390" y="487" text-anchor="middle" font-size="17" fill="#193347" font-weight="600" font-family="Consolas, Microsoft YaHei, monospace">L15</text>
+<path d="M1396 499 L1566 499" fill="none" stroke="#006d68" stroke-width="2"/>
+<rect x="1567" y="494" width="10" height="10" fill="#fff" stroke="#193347" stroke-width="1.5" stroke-dasharray="none"/>
+<text x="1572" y="487" text-anchor="middle" font-size="17" fill="#193347" font-weight="600" font-family="Consolas, Microsoft YaHei, monospace">29</text>
+<path d="M1578 499 L1653 499" fill="none" stroke="#006d68" stroke-width="2" marker-end="url(#a006d68)"/>
+<text x="1668" y="505" text-anchor="start" font-size="19" fill="#006d68" font-weight="700">TCK</text>
+<text x="70" y="564" text-anchor="start" font-size="21" fill="#006d68" font-weight="700">TMS</text>
+<text x="128" y="564" text-anchor="start" font-size="17" fill="#435c6c" font-weight="400" font-family="Consolas, Microsoft YaHei, monospace">[15:8]</text>
+<rect x="214" y="542" width="42" height="32" fill="#f0f7f5" stroke="#abc8c0" stroke-width="1" stroke-dasharray="none"/>
+<text x="235" y="564" text-anchor="middle" font-size="17" fill="#193347" font-weight="500" font-family="Consolas, Microsoft YaHei, monospace">m0</text>
+<rect x="256" y="542" width="42" height="32" fill="#f0f7f5" stroke="#abc8c0" stroke-width="1" stroke-dasharray="none"/>
+<text x="277" y="564" text-anchor="middle" font-size="17" fill="#193347" font-weight="500" font-family="Consolas, Microsoft YaHei, monospace">m0</text>
+<rect x="298" y="542" width="42" height="32" fill="#fff" stroke="#abc8c0" stroke-width="1" stroke-dasharray="none"/>
+<text x="319" y="564" text-anchor="middle" font-size="17" fill="#193347" font-weight="500" font-family="Consolas, Microsoft YaHei, monospace">m1</text>
+<rect x="340" y="542" width="42" height="32" fill="#fff" stroke="#abc8c0" stroke-width="1" stroke-dasharray="none"/>
+<text x="361" y="564" text-anchor="middle" font-size="17" fill="#193347" font-weight="500" font-family="Consolas, Microsoft YaHei, monospace">m1</text>
+<rect x="382" y="542" width="42" height="32" fill="#f0f7f5" stroke="#abc8c0" stroke-width="1" stroke-dasharray="none"/>
+<text x="403" y="564" text-anchor="middle" font-size="17" fill="#193347" font-weight="500" font-family="Consolas, Microsoft YaHei, monospace">m2</text>
+<rect x="424" y="542" width="42" height="32" fill="#f0f7f5" stroke="#abc8c0" stroke-width="1" stroke-dasharray="none"/>
+<text x="445" y="564" text-anchor="middle" font-size="17" fill="#193347" font-weight="500" font-family="Consolas, Microsoft YaHei, monospace">m2</text>
+<rect x="466" y="542" width="42" height="32" fill="#fff" stroke="#abc8c0" stroke-width="1" stroke-dasharray="none"/>
+<text x="487" y="564" text-anchor="middle" font-size="17" fill="#193347" font-weight="500" font-family="Consolas, Microsoft YaHei, monospace">m3</text>
+<rect x="508" y="542" width="42" height="32" fill="#fff" stroke="#abc8c0" stroke-width="1" stroke-dasharray="none"/>
+<text x="529" y="564" text-anchor="middle" font-size="17" fill="#193347" font-weight="500" font-family="Consolas, Microsoft YaHei, monospace">m3</text>
+<path d="M550 558 L664 558" fill="none" stroke="#006d68" stroke-width="2.4" marker-end="url(#a006d68)"/>
+<path d="M597 565 L607 551" fill="none" stroke="#435c6c" stroke-width="1.4"/>
+<text x="610" y="552" text-anchor="start" font-size="13" fill="#435c6c" font-weight="500">8</text>
+<rect x="666" y="538" width="282" height="40" fill="#edf7f3" stroke="#006d68" stroke-width="1.7" stroke-dasharray="none"/>
+<text x="678" y="564" text-anchor="start" font-size="16" fill="#006d68" font-weight="500">D1…D8</text>
+<text x="813" y="564" text-anchor="middle" font-size="19" fill="#193347" font-weight="700">OSERDESE2</text>
+<text x="932" y="564" text-anchor="end" font-size="15" fill="#006d68" font-weight="600">OQ</text>
+<path d="M948 558 L1120 558" fill="none" stroke="#006d68" stroke-width="2"/>
+<polygon points="1120,543 1120,573 1165,558" fill="#fff" stroke="#006d68" stroke-width="2"/>
+<text x="1141" y="539" text-anchor="middle" font-size="13" fill="#006d68" font-weight="500">OBUF</text>
+<path d="M1165 558 L1384 558" fill="none" stroke="#006d68" stroke-width="2"/>
+<rect x="1385" y="553" width="10" height="10" fill="#fff" stroke="#193347" stroke-width="1.5" stroke-dasharray="none"/>
+<text x="1390" y="546" text-anchor="middle" font-size="17" fill="#193347" font-weight="600" font-family="Consolas, Microsoft YaHei, monospace">L16</text>
+<path d="M1396 558 L1566 558" fill="none" stroke="#006d68" stroke-width="2"/>
+<rect x="1567" y="553" width="10" height="10" fill="#fff" stroke="#193347" stroke-width="1.5" stroke-dasharray="none"/>
+<text x="1572" y="546" text-anchor="middle" font-size="17" fill="#193347" font-weight="600" font-family="Consolas, Microsoft YaHei, monospace">31</text>
+<path d="M1578 558 L1653 558" fill="none" stroke="#006d68" stroke-width="2" marker-end="url(#a006d68)"/>
+<text x="1668" y="564" text-anchor="start" font-size="19" fill="#006d68" font-weight="700">TMS</text>
+<text x="70" y="623" text-anchor="start" font-size="21" fill="#006d68" font-weight="700">TDI</text>
+<text x="128" y="623" text-anchor="start" font-size="17" fill="#435c6c" font-weight="400" font-family="Consolas, Microsoft YaHei, monospace">[23:16]</text>
+<rect x="214" y="601" width="42" height="32" fill="#f0f7f5" stroke="#abc8c0" stroke-width="1" stroke-dasharray="none"/>
+<text x="235" y="623" text-anchor="middle" font-size="17" fill="#193347" font-weight="500" font-family="Consolas, Microsoft YaHei, monospace">d0</text>
+<rect x="256" y="601" width="42" height="32" fill="#f0f7f5" stroke="#abc8c0" stroke-width="1" stroke-dasharray="none"/>
+<text x="277" y="623" text-anchor="middle" font-size="17" fill="#193347" font-weight="500" font-family="Consolas, Microsoft YaHei, monospace">d0</text>
+<rect x="298" y="601" width="42" height="32" fill="#fff" stroke="#abc8c0" stroke-width="1" stroke-dasharray="none"/>
+<text x="319" y="623" text-anchor="middle" font-size="17" fill="#193347" font-weight="500" font-family="Consolas, Microsoft YaHei, monospace">d1</text>
+<rect x="340" y="601" width="42" height="32" fill="#fff" stroke="#abc8c0" stroke-width="1" stroke-dasharray="none"/>
+<text x="361" y="623" text-anchor="middle" font-size="17" fill="#193347" font-weight="500" font-family="Consolas, Microsoft YaHei, monospace">d1</text>
+<rect x="382" y="601" width="42" height="32" fill="#f0f7f5" stroke="#abc8c0" stroke-width="1" stroke-dasharray="none"/>
+<text x="403" y="623" text-anchor="middle" font-size="17" fill="#193347" font-weight="500" font-family="Consolas, Microsoft YaHei, monospace">d2</text>
+<rect x="424" y="601" width="42" height="32" fill="#f0f7f5" stroke="#abc8c0" stroke-width="1" stroke-dasharray="none"/>
+<text x="445" y="623" text-anchor="middle" font-size="17" fill="#193347" font-weight="500" font-family="Consolas, Microsoft YaHei, monospace">d2</text>
+<rect x="466" y="601" width="42" height="32" fill="#fff" stroke="#abc8c0" stroke-width="1" stroke-dasharray="none"/>
+<text x="487" y="623" text-anchor="middle" font-size="17" fill="#193347" font-weight="500" font-family="Consolas, Microsoft YaHei, monospace">d3</text>
+<rect x="508" y="601" width="42" height="32" fill="#fff" stroke="#abc8c0" stroke-width="1" stroke-dasharray="none"/>
+<text x="529" y="623" text-anchor="middle" font-size="17" fill="#193347" font-weight="500" font-family="Consolas, Microsoft YaHei, monospace">d3</text>
+<path d="M550 617 L664 617" fill="none" stroke="#006d68" stroke-width="2.4" marker-end="url(#a006d68)"/>
+<path d="M597 624 L607 610" fill="none" stroke="#435c6c" stroke-width="1.4"/>
+<text x="610" y="611" text-anchor="start" font-size="13" fill="#435c6c" font-weight="500">8</text>
+<rect x="666" y="597" width="282" height="40" fill="#edf7f3" stroke="#006d68" stroke-width="1.7" stroke-dasharray="none"/>
+<text x="678" y="623" text-anchor="start" font-size="16" fill="#006d68" font-weight="500">D1…D8</text>
+<text x="813" y="623" text-anchor="middle" font-size="19" fill="#193347" font-weight="700">OSERDESE2</text>
+<text x="932" y="623" text-anchor="end" font-size="15" fill="#006d68" font-weight="600">OQ</text>
+<path d="M948 617 L1120 617" fill="none" stroke="#006d68" stroke-width="2"/>
+<polygon points="1120,602 1120,632 1165,617" fill="#fff" stroke="#006d68" stroke-width="2"/>
+<text x="1141" y="598" text-anchor="middle" font-size="13" fill="#006d68" font-weight="500">OBUF</text>
+<path d="M1165 617 L1384 617" fill="none" stroke="#006d68" stroke-width="2"/>
+<rect x="1385" y="612" width="10" height="10" fill="#fff" stroke="#193347" stroke-width="1.5" stroke-dasharray="none"/>
+<text x="1390" y="605" text-anchor="middle" font-size="17" fill="#193347" font-weight="600" font-family="Consolas, Microsoft YaHei, monospace">M15</text>
+<path d="M1396 617 L1566 617" fill="none" stroke="#006d68" stroke-width="2"/>
+<rect x="1567" y="612" width="10" height="10" fill="#fff" stroke="#193347" stroke-width="1.5" stroke-dasharray="none"/>
+<text x="1572" y="605" text-anchor="middle" font-size="17" fill="#193347" font-weight="600" font-family="Consolas, Microsoft YaHei, monospace">25</text>
+<path d="M1578 617 L1653 617" fill="none" stroke="#006d68" stroke-width="2" marker-end="url(#a006d68)"/>
+<text x="1668" y="623" text-anchor="start" font-size="19" fill="#006d68" font-weight="700">TDI</text>
+<path d="M61 653 L1739 653" fill="none" stroke="#c2d1d4" stroke-width="1"/>
+<text x="63" y="684" text-anchor="start" font-size="21" fill="#245da0" font-weight="700">TDO 回采通路</text>
+<text x="246" y="684" text-anchor="start" font-size="17" fill="#435c6c" font-weight="400">目标 → J7 → 输入缓冲 → 可调延迟 → 解串 → 取样与组帧</text>
+<rect x="62" y="709" width="385" height="70" fill="#f1f6fb" stroke="#245da0" stroke-width="1.6" stroke-dasharray="none"/>
+<text x="254.5" y="736" text-anchor="middle" font-size="20" fill="#245da0" font-weight="700">相位选择 / 应答组帧</text>
+<text x="254.5" y="760" text-anchor="middle" font-size="15" fill="#435c6c" font-weight="400">每拍取 4 位，抽取 ACK[2:0] 和 DATA[31:0]</text>
+<rect x="589" y="709" width="244" height="70" fill="#f1f6fb" stroke="#245da0" stroke-width="1.6" stroke-dasharray="none"/>
+<text x="711.0" y="736" text-anchor="middle" font-size="20" fill="#245da0" font-weight="700">ISERDESE2</text>
+<text x="711.0" y="760" text-anchor="middle" font-size="15" fill="#435c6c" font-weight="400">1∶8 DDR · NETWORKING</text>
+<rect x="941" y="709" width="202" height="70" fill="#f1f6fb" stroke="#245da0" stroke-width="1.6" stroke-dasharray="none"/>
+<text x="1042.0" y="736" text-anchor="middle" font-size="20" fill="#245da0" font-weight="700">IDELAYE2</text>
+<text x="1042.0" y="760" text-anchor="middle" font-size="15" fill="#435c6c" font-weight="400">VAR_LOAD · IDATAIN</text>
+<path d="M589 738 L449 738" fill="none" stroke="#245da0" stroke-width="2" marker-end="url(#a245da0)"/>
+<path d="M941 738 L835 738" fill="none" stroke="#245da0" stroke-width="2" marker-end="url(#a245da0)"/>
+<path d="M1233 738 L1145 738" fill="none" stroke="#245da0" stroke-width="2" marker-end="url(#a245da0)"/>
+<path d="M1384 738 L1280 738" fill="none" stroke="#245da0" stroke-width="2" marker-end="url(#a245da0)"/>
+<path d="M1566 738 L1398 738" fill="none" stroke="#245da0" stroke-width="2" marker-end="url(#a245da0)"/>
+<path d="M1660 738 L1580 738" fill="none" stroke="#245da0" stroke-width="2" marker-end="url(#a245da0)"/>
+<text x="711" y="801" text-anchor="middle" font-size="14" fill="#435c6c" font-weight="400">CLK / CLKB 互补，双边沿采样</text>
+<path d="M514 745 L524 731" fill="none" stroke="#435c6c" stroke-width="1.4"/>
+<text x="527" y="732" text-anchor="start" font-size="13" fill="#435c6c" font-weight="500">8</text>
+<text x="521" y="766" text-anchor="middle" font-size="15" fill="#245da0" font-weight="400" font-family="Consolas, Microsoft YaHei, monospace">rx_word[7:0]</text>
+<text x="887" y="727" text-anchor="middle" font-size="14" fill="#245da0" font-weight="600">DDLY</text>
+<polygon points="1278,723 1278,753 1233,738" fill="#fff" stroke="#245da0" stroke-width="2"/>
+<text x="1257" y="713" text-anchor="middle" font-size="14" fill="#245da0" font-weight="600">IBUF</text>
+<rect x="1385" y="733" width="10" height="10" fill="#fff" stroke="#193347" stroke-width="1.5" stroke-dasharray="none"/>
+<text x="1390" y="724" text-anchor="middle" font-size="17" fill="#193347" font-weight="600" font-family="Consolas, Microsoft YaHei, monospace">L14</text>
+<rect x="1567" y="733" width="10" height="10" fill="#fff" stroke="#193347" stroke-width="1.5" stroke-dasharray="none"/>
+<text x="1572" y="724" text-anchor="middle" font-size="17" fill="#193347" font-weight="600" font-family="Consolas, Microsoft YaHei, monospace">27</text>
+<text x="1668" y="744" text-anchor="start" font-size="19" fill="#245da0" font-weight="700">TDO</text>
+<text x="63" y="811" text-anchor="start" font-size="18" fill="#245da0" font-weight="600">slot 34 + 流水偏移 7 = 41</text>
+<text x="63" y="838" text-anchor="start" font-size="17" fill="#435c6c" font-weight="400">选取 rx_word[1]、[3]、[5]、[7]。</text>
+<text x="63" y="865" text-anchor="start" font-size="16" fill="#435c6c" font-weight="400">Q8 → 位 0（最早），Q1 → 位 7（最新）。</text>
+<rect x="605" y="814" width="279" height="53" fill="#faf6fc" stroke="#7c4f8b" stroke-width="1.4" stroke-dasharray="none"/>
+<text x="744" y="847" text-anchor="middle" font-size="17" fill="#7c4f8b" font-weight="650">AXI 延迟寄存器  0x00C</text>
+<path d="M884 840 L1042 840 L1042 781" fill="none" stroke="#7c4f8b" stroke-width="2" marker-end="url(#a7c4f8b)"/>
+<text x="959" y="830" text-anchor="middle" font-size="14" fill="#7c4f8b" font-weight="500">LD + tap[4:0]</text>
+<text x="1070" y="814" text-anchor="start" font-size="16" fill="#7c4f8b" font-weight="650">tap = 16</text>
+<text x="1070" y="840" text-anchor="start" font-size="15" fill="#435c6c" font-weight="400">C = FCLK0</text>
+<text x="1331" y="809" text-anchor="start" font-size="16" fill="#193347" font-weight="650">目标扫描链顺序</text>
+<text x="1331" y="836" text-anchor="start" font-size="16" fill="#435c6c" font-weight="400">TDI → 边界 TAP（BYPASS）→ DAP → TDO</text>
+<text x="1331" y="865" text-anchor="start" font-size="15" fill="#435c6c" font-weight="400">nTRST / nSRST 由独立 OBUF 拉高释放。</text>
+<rect x="38" y="922" width="1724" height="191" fill="#faf8fb" stroke="#bdaeC3" stroke-width="1.5" stroke-dasharray="none"/>
+<text x="61" y="955" text-anchor="start" font-size="23" fill="#7c4f8b" font-weight="700">时钟分配与延迟校准</text>
+<text x="397" y="953" text-anchor="start" font-size="16" fill="#435c6c" font-weight="400">以下频率对应上图 128 MHz TCK 档</text>
+<text x="66" y="1002" text-anchor="start" font-size="18" fill="#7c4f8b" font-weight="650">FCLK1</text>
+<text x="66" y="1026" text-anchor="start" font-size="16" fill="#435c6c" font-weight="400">32 MHz</text>
+<path d="M161 1007 L223 1007" fill="none" stroke="#7c4f8b" stroke-width="2" marker-end="url(#a7c4f8b)"/>
+<rect x="225" y="972" width="188" height="76" fill="white" stroke="#7c4f8b" stroke-width="1.4" stroke-dasharray="none"/>
+<text x="319" y="1000" text-anchor="middle" font-size="17" fill="#7c4f8b" font-weight="700">MMCME2_BASE</text>
+<text x="319" y="1026" text-anchor="middle" font-size="15" fill="#435c6c" font-weight="400">VCO = 32 × 20 MHz</text>
+<path d="M413 987 L515 987" fill="none" stroke="#7c4f8b" stroke-width="2" marker-end="url(#a7c4f8b)"/>
+<text x="463" y="981" text-anchor="middle" font-size="14" fill="#7c4f8b" font-weight="600">÷5</text>
+<rect x="517" y="973" width="76" height="28" fill="white" stroke="#7c4f8b" stroke-width="1.4" stroke-dasharray="none"/>
+<text x="555" y="992" text-anchor="middle" font-size="15" fill="#7c4f8b" font-weight="650">BUFG</text>
+<path d="M593 987 L631 987" fill="none" stroke="#7c4f8b" stroke-width="2" marker-end="url(#a7c4f8b)"/>
+<text x="643" y="993" text-anchor="start" font-size="18" fill="#193347" font-weight="600">CLK · 128 MHz</text>
+<path d="M413 1031 L515 1031" fill="none" stroke="#7c4f8b" stroke-width="2" marker-end="url(#a7c4f8b)"/>
+<text x="463" y="1025" text-anchor="middle" font-size="14" fill="#7c4f8b" font-weight="600">÷20</text>
+<rect x="517" y="1017" width="76" height="28" fill="white" stroke="#7c4f8b" stroke-width="1.4" stroke-dasharray="none"/>
+<text x="555" y="1036" text-anchor="middle" font-size="15" fill="#7c4f8b" font-weight="650">BUFG</text>
+<path d="M593 1031 L631 1031" fill="none" stroke="#7c4f8b" stroke-width="2" marker-end="url(#a7c4f8b)"/>
+<text x="643" y="1037" text-anchor="start" font-size="18" fill="#193347" font-weight="600">CLKDIV · 32 MHz</text>
+<text x="66" y="1086" text-anchor="start" font-size="16" fill="#435c6c" font-weight="400">CLK 与 CLKDIV 同源，驱动全部串化器与解串器。MMCM 锁定后，字时钟域同步释放复位。</text>
+<path d="M862 969 L862 1091" fill="none" stroke="#d3c9d8" stroke-width="1"/>
+<text x="892" y="1001" text-anchor="start" font-size="18" fill="#7c4f8b" font-weight="650">FCLK2</text>
+<text x="892" y="1026" text-anchor="start" font-size="16" fill="#435c6c" font-weight="400">200 MHz</text>
+<path d="M985 1007 L1074 1007" fill="none" stroke="#7c4f8b" stroke-width="2" marker-end="url(#a7c4f8b)"/>
+<text x="1030" y="993" text-anchor="middle" font-size="13" fill="#7c4f8b" font-weight="600">REFCLK</text>
+<rect x="1076" y="979" width="175" height="56" fill="white" stroke="#7c4f8b" stroke-width="1.4" stroke-dasharray="none"/>
+<text x="1163" y="1014" text-anchor="middle" font-size="18" fill="#7c4f8b" font-weight="700">IDELAYCTRL</text>
+<path d="M1251 1007 L1365 1007" fill="none" stroke="#7c4f8b" stroke-width="2" marker-end="url(#a7c4f8b)"/>
+<text x="1309" y="995" text-anchor="middle" font-size="14" fill="#7c4f8b" font-weight="600">RDY</text>
+<text x="1380" y="1014" text-anchor="start" font-size="17" fill="#193347" font-weight="600">AXI 状态寄存器</text>
+<text x="892" y="1063" text-anchor="start" font-size="17" fill="#435c6c" font-weight="400">IDELAYCTRL 与 TDO 的 IDELAYE2 同属 JTAG200_TDO 校准组。</text>
+<text x="892" y="1088" text-anchor="start" font-size="16" fill="#435c6c" font-weight="400">软件加载 5 位 tap 值，ISERDESE2 通过 DDLY 采入延迟后的 TDO。</text>
+<path d="M38 1135 L1762 1135" fill="none" stroke="#193347" stroke-width="1"/>
+<text x="40" y="1165" text-anchor="start" font-size="16" fill="#193347" font-weight="650">F103ZE 实板  ·  HCLK 128 MHz</text>
+<text x="366" y="1165" text-anchor="start" font-size="16" fill="#435c6c" font-weight="400">最高稳定 TCK 128.000 MHz  /  idle 17  /  读写 7.872 MB/s</text>
+<text x="950" y="1165" text-anchor="start" font-size="16" fill="#435c6c" font-weight="400">最快吞吐档 TCK 125.490 MHz  /  idle 13  /  读 8.220、写 8.219 MB/s</text>
+<text x="1760" y="1165" text-anchor="end" font-size="15" fill="#435c6c" font-weight="500" font-family="Consolas, Microsoft YaHei, monospace">RTL 2584b076</text>
+</g></svg>
