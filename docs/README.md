@@ -9,6 +9,7 @@
 | CLI发现、Web工作台、构建交付 | [CLI工作台](toolbox-cli-ai.md) |
 | 采集、飞行记录、离线查询与导出 | [Trace CLI](Trace-CLI使用说明.md) |
 | 连接、接线和操作 | [ETM操作说明](Zynq-ETM-Trace操作说明.md) |
+| 纯 SWD 实验探针 | [整体架构](swd-architecture.svg) · [SelectIO 接口详图](validation/f103ze-swd200-resident-20261119/swd-selectio.svg) · [177.778 MHz 实板档位的读写仿真时序](swd-177-timing.svg) |
 | 工具链、SDK、仿真模型 | [依赖与构建](dependencies.md) |
 | 精选业务trace与逐文件SHA | [记录清单](retained-records.json) |
 | 当前能力、限制和主要成果 | [项目能力评估](validation/project-assessment-20261104/README.md) |
