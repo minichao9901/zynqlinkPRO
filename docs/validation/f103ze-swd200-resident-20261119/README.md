@@ -1,6 +1,6 @@
 # F103ZE 驻留命令与 SWDIO 换向
 
-[纯 SWD 探针架构图](swd-architecture.svg) · [SelectIO 接口与换向详图](swd-selectio.svg)
+[纯 SWD 探针架构图](swd-architecture.svg) · [SelectIO 接口与换向详图](swd-selectio.svg) · [177.778 MHz 读写时序与换向放大图](swd-177-timing.svg)
 
 2026-11-19。PL/PS 源码 `5dad78ec`。保持纯 SWD。新增 AXI 寄存器 `0x1c`，位 1:0 选择原始、驻留读、驻留写三个命令 bank，位 2 控制图案取反，位 3 启用读回逐字比对，位 6:4 指定读尾换向等待的 CLKDIV 拍数。特征寄存器 `0x20` 读回 `BNK1`。期望数据窗口从 `0x3000` 起，共 256 字。写 bank 对 DRW 写数据取反，读 bank 校验 posted read 结果及最后的 RDBUFF。校验错误置批次失败位并保留结果。
 
@@ -30,3 +30,5 @@ CM3 使用实际 SelectIO 原语，覆盖两个驻留表交替、整块取反、
 收尾以独立 USB 链路读回 4 KiB SRAM 及两侧哨兵，RCC、Flash 等待周期和原运行态一致。探针恢复开测时的 JTAG 启动与 PL 复位隔离寄存器状态，F103 CDC 仍枚举。实验仅交付本地分支，固定 EXE、远端 main、Pages、Release 和 QSPI 冷启动均为范围外。
 
 [最终硬件窗口](zero-refine-windows.txt) · [频率边界](resident-upper-windows.txt) · [96 MHz HCLK](resident-96-confirm-windows.txt) · [最终恢复](final.json) · [最终配对](../../../prebuilt/swd-only-200mhz-resident-zero-20261119/manifest.json)
+
+时序图使用 22.5 ns 的 FCLK1 参考周期和实板通过的 tap8、时隙20、guard1、idle1。在 XSim 采用 21 ns 附加返程延时，完整 CM3 用例通过。图中 RX 标记将 CLKDIV 选中的位回溯到 DDLY 的串行采样边沿，按全程 3,876 个有效并行位与输入采样逐位核对。读写各取一笔 AP DRW 成功事务，以各自请求的首个 SWCLK 上升沿为零点。附加延时为模型设定，板上边沿仍待仪器采集。
