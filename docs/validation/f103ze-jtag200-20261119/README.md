@@ -42,3 +42,9 @@ python -X utf8 tools/jtag200_f103_fixture.py --out build/jtag200/usb-new --execu
 上一配对在 133.333 MHz 及以上逐段扫描。F103ZE/HCLK128 在 133.333 MHz 单秒交替读写为 3.836/4.038 MB/s，而同板 100 MHz 连续流水为 6.713/6.713 MB/s。四 TCK 路径让 TMS、TDI 每拍前移四位，独立回采每拍四位，按实际采样相位拼接前一 AP 应答；写入、末字、比较、错误停止以及块尾 RDBUFF/CTRLSTAT 沿用已有机制。四 TCK 模式要求每帧的 43+idle 个 TCK 可被四整除。新增 FCLK 分频点细扫 120.755 至 156.098 MHz 区间。
 
 CM3 HCLK128 下，133.333 MHz/idle21 的 1 KiB 仿真读写均 7.858 MB/s，160 MHz/idle25 均 8.889 MB/s，200 MHz/idle29 均 10.511 MB/s。200 MHz 的另一个采样时隙在建链即失败。协议模型在理想应答、200 MHz/idle5 达 15.438/15.441 MB/s。对实板的效率比较使用同 HCLK、相同 idle 和块长度的完整 CM3 台架值。[四 TCK 模型](cm3-quad.json) · [96 MHz 模型](cm3-96-exact.json)
+
+### 四 TCK 配对上板
+
+实现约束 133.333 MHz，路由 WNS +2.048 ns、WHS +0.018 ns。Vivado DRC 共 22 项 warning（含报告截断、DDR 时钟使能及 BRAM 异步控制检查），零 error。模型运行结果包含真实 CM3、无等待协议模型和 Xilinx 原语回归。协议模型用于比较特定连续扫描序列的上限，CM3 检查目标 AP 在指定 HCLK 下能否接受该序列。[原语回归](quad-xsim.txt) · [CM3 更多频点](f103-cm3-quad-bound.json) · [CM3 临界档](f103-cm3-quad-148.json) · [同协议开销理想对照](f103-quad-wire-budget.json) · [上板身份](quad-load.json)
+
+HCLK96、TCK 100 MHz/idle19 的原两 TCK 配对，实际三轮各 60 秒交替读写和三轮各 60 秒只读通过，方向吞吐约 6.081 MB/s，同条件 CM3 为 6.168 MB/s。HCLK128 的四 TCK 配对在 125.490 MHz/idle13 和 133.333 MHz/idle17 通过短窗，约 8.219 和 8.192 MB/s。后续 32 tap 密扫曾在 148.837 MHz/tap24/slot35/idle17 通过 1 秒混合 9.129 MB/s。188.235 MHz 的该轮整块只读最长达到 152 KiB 后数据不符，200 MHz 在 32 tap 中 22 个可三次读回 ID，扫描到的块读均失败。短窗与持续验收分别保存。另测 PC 经 XSCT/物理 MEM-AP0 向驻留探针写入全新 1 KiB 图案并返回完整 1 KiB，记录 8 组独立时长；此路径包含 PC 文件传输和 XSCT 往返。[96 MHz 持续验收](f103-96-long100-windows.json.gz) · [128 MHz 粗扫](f103-128-quad-pilot-windows.json.gz) · [128 MHz 密扫含失败](f103-128-quad-dense-windows.json.gz)

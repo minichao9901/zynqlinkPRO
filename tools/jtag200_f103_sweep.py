@@ -26,6 +26,18 @@ def sweep(port, folder, args, report, save):
     current = PATTERN
     qualified = {}
     read_points = {}
+    seeds = {}
+    for source in args.seed_record:
+        previous = json.loads(source.read_text())
+        previous_state = json.loads((source.parent/'state.json').read_text())
+        need(previous.get('usb_final_payload_verified') and previous_state.get('restored') and
+             previous_state['hclk_mhz'] == report['hclk_mhz'] and
+             previous['pair']['pair_sha256'] == report['pair']['pair_sha256'],
+             'Seed must be a restored run of this pair and target clock')
+        for rate, point in previous['points'].items():
+            trials = point['reads'] if args.read_only else point['mixed']
+            if trials:
+                seeds[rate] = trials[0]['config']
 
     def run(config, seconds, mixed):
         rate, tap, slot, advance, idle = config
@@ -71,6 +83,10 @@ def sweep(port, folder, args, report, save):
         center = 36 if PROFILES[rate][1] == 4 else 35
         half = PROFILES[rate][1]
         taps = list(dict.fromkeys((16, 8, 24, 0, 31, *(range(32) if args.dense else ()))))
+        previous = seeds.get(rate)
+        if previous:
+            taps = list(dict.fromkeys([previous[1], *taps]))
+            center = previous[2]
         point = report['points'][rate] = dict(taps={}, reads=[], mixed=[])
         for tap in taps:
             select(port, rate, tap)
@@ -90,6 +106,8 @@ def sweep(port, folder, args, report, save):
                         idles = (7, 9, 11, 13, 15, 17, 19, 25, 33, 49, 65)
                     else:
                         idles = (4, 12, 24, 40, 64, 96)
+                    if previous and previous[1:3] == [tap,slot] and list(adv)==previous[3]:
+                        idles = tuple(dict.fromkeys((previous[4], *idles)))
                     for idle in idles:
                         config = (rate,tap,slot,adv,idle)
                         bench.pattern(current)
@@ -103,6 +121,10 @@ def sweep(port, folder, args, report, save):
                             if read['passed']:
                                 read_points[rate] = config
                                 point['reads'].append(read)
+                        if args.read_only and rate != '50':
+                            if rate in read_points:
+                                break
+                            continue
                         # Force a different first word even for a single-block pilot.
                         if current == PATTERN:
                             bench.pattern(INVERSE)
@@ -123,14 +145,30 @@ def sweep(port, folder, args, report, save):
                             current = PATTERN
                             continue
                         independent(mix)
+                        if args.confirm_inline and rate != '50':
+                            rows = []
+                            for _ in range(3):
+                                bench.pattern(PATTERN)
+                                check = run(config, args.seconds, True)
+                                rows.append(check)
+                                if not check['passed']:
+                                    rearm()
+                                    current = PATTERN
+                                    break
+                                independent(check)
+                            point.setdefault('confirmation_attempts', []).append(rows)
+                            save()
+                            if len(rows) != 3 or not all(r['passed'] for r in rows):
+                                continue
+                            point['long_mixed'] = rows
                         qualified[rate] = config
                         point['mixed'].append(mix)
                         break
-                    if rate in qualified:
+                    if rate in qualified or (args.read_only and rate in read_points):
                         break
-                if rate in qualified:
+                if rate in qualified or (args.read_only and rate in read_points):
                     break
-            if rate in qualified:
+            if rate in qualified or (args.read_only and rate in read_points):
                 break
             if not args.dense and sum(bool(v) for v in point['taps'].values()) >= 3:
                 break
@@ -138,13 +176,15 @@ def sweep(port, folder, args, report, save):
         print(rate, 'read', point['reads'] and point['reads'][0]['read_MBps'],
               'mixed', [(r['read_MBps'],r['write_MBps']) for r in point['mixed']], flush=True)
         need(low is not None, 'Could not identify/verify the 50 MHz reference page')
+        if args.confirm_inline and rate != '50' and rate in qualified:
+            break
     # Prefer the highest and fastest mixed points, with fallback on a failed long run.
-    if args.seconds:
+    if args.seconds and not args.confirm_inline:
         def metric(rate, key):
             row = report['points'][rate]['mixed'][0]
             return PROFILES[rate][2] if key == 'hz' else row[key]
         done = {}
-        for key in ('hz','write_MBps','read_MBps'):
+        for key in (() if args.read_only else ('hz','write_MBps','read_MBps')):
             for rate in sorted(qualified, key=lambda r:metric(r,key), reverse=True):
                 if rate not in done:
                     bench.pattern(PATTERN)
@@ -163,7 +203,9 @@ def sweep(port, folder, args, report, save):
                     save()
                 if done[rate]:
                     break
-        for rate in sorted(read_points, key=lambda r:report['points'][r]['reads'][0]['read_MBps'], reverse=True):
+        def read_order(rate):
+            return PROFILES[rate][2] if args.read_only else report['points'][rate]['reads'][0]['read_MBps']
+        for rate in sorted(read_points, key=read_order, reverse=True):
             rows = []
             bench.pattern(current)
             for _ in range(3):
@@ -213,7 +255,7 @@ def main(args):
     original = (folder / 'backup.bin').read_bytes()
     need(len(original)==SIZE and sha256(original).hexdigest()==state['ram_sha256'] and
          not state.get('restored') and state['tap']==hex(TAP), 'Live F103 fixture required')
-    report = dict(points={}, windows=[])
+    report = dict(points={}, windows=[], hclk_mhz=state['hclk_mhz'])
     def save():
         path = folder / 'windows.tmp'
         path.write_text(json.dumps(report, indent=2)+'\n')
@@ -253,6 +295,10 @@ if __name__ == '__main__':
     p.add_argument('--pair',type=Path,required=True)
     p.add_argument('--rates',nargs='+',choices=PROFILES,required=True)
     p.add_argument('--seconds',type=int,choices=range(61),default=60)
+    p.add_argument('--seed-record', type=Path, action='append', default=[], help='Recheck a previously passing timing first')
+    p.add_argument('--confirm-inline', action='store_true',
+                   help='Search in the given order until a rate passes three long mixed windows')
+    p.add_argument('--read-only', action='store_true', help='Qualify read ceiling above the writable reference page rate')
     p.add_argument('--host-payload', action='store_true', help='Verify and time distinct PC payloads via physical AP0')
     p.add_argument('--quad',action='store_true',help='Enable the four-TCK stream on the corresponding PL pair')
     p.add_argument('--idles',type=int,nargs='+',help='Specific idle counts for refinement')
@@ -262,6 +308,8 @@ if __name__ == '__main__':
     p.add_argument('--server',default='tcp:127.0.0.1:3121')
     p.add_argument('--execute',action='store_true')
     args=p.parse_args()
+    if args.confirm_inline and (not args.seconds or args.read_only):
+        p.error('Inline confirmation requires mixed transfers and a nonzero duration')
     if args.execute:
         main(args)
     else:

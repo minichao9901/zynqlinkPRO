@@ -327,7 +327,7 @@ module tb_jtag200;
         write_reg(8, 13, 2);
         write_reg(14'h014, 32'h240503fc, 0);
         write_reg(8, 13, 2);
-`ifdef J200_TEST_CM3
+`ifdef J200_SINGLE_POINT
         write_reg(14'h014, 32'h200083fc, 0);
         write_reg(8, 13, 2);
         write_reg(14'h014, 32'h20008400, 0);
@@ -496,7 +496,7 @@ module tb_jtag200;
 
     initial begin
         `ifndef J200_TEST_HAZARD3
-`ifndef J200_TEST_CM3
+`ifndef J200_SINGLE_POINT
         $readmemh("pins.mem", expected_pins);
 `endif
 `endif
@@ -531,7 +531,7 @@ module tb_jtag200;
             hazard_burst(1,29,8,128);
         end
 `else
-`ifdef J200_TEST_CM3
+`ifdef J200_SINGLE_POINT
         begin
             integer half, sample_slot, idle, streaming;
             block_test=1;
@@ -546,7 +546,11 @@ module tb_jtag200;
             write_reg(8,0,0);
             wait_status(5);
             arm_pipeline(half,sample_slot,idle,256,streaming);
+`ifdef J200_TEST_CM3
             $display("J200_CM3_PASS HCLK_MHz=%0.3f ref_half_ns=%0.3f",hclk_mhz,ref_half);
+`else
+            $display("J200_PROTOCOL_PASS ref_half_ns=%0.3f",ref_half);
+`endif
         end
 `else
         profile(0, 10.0, 20.0);
