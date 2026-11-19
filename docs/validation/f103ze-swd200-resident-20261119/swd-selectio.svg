@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1480" height="1110" viewBox="0 0 1480 1110" role="img"><title>SWD 接口实现：从四个时隙到一根双向线</title><desc>信号名与 swd200_phy.v 一致  /  绿色向右发送，蓝色向左接收  /  J7 Bank 35，LVCMOS33</desc><defs>
+<marker id="a0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#182d42"/></marker>
+<marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#486173"/></marker>
+<marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#006e68"/></marker>
+<marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#245ba5"/></marker>
+<marker id="a4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#9d4923"/></marker>
+</defs><g font-family="Microsoft YaHei, Noto Sans CJK SC, PingFang SC, sans-serif">
+<rect x="0" y="0" width="1480" height="1110" rx="0" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<rect x="0" y="0" width="12" height="101" rx="0" fill="#006e68" stroke="none" stroke-width="1.5"/>
+<text x="36" y="48" text-anchor="start" font-size="34" fill="#182d42" font-weight="700">SWD 接口实现：从四个时隙到一根双向线</text>
+<text x="38" y="81" text-anchor="start" font-size="18" fill="#486173" font-weight="400">信号名与 swd200_phy.v 一致  /  绿色向右发送，蓝色向左接收  /  J7 Bank 35，LVCMOS33</text>
+<text x="36" y="137" text-anchor="start" font-size="22" fill="#182d42" font-weight="700">时钟生成</text>
+<rect x="38" y="157" width="250" height="88" rx="9" fill="#edf4ff" stroke="#245ba5" stroke-width="1.5"/>
+<text x="52" y="187" text-anchor="start" font-size="20" fill="#245ba5" font-weight="700">PS IO PLL</text>
+<text x="52" y="215" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">约 1600 MHz</text>
+<rect x="337" y="157" width="270" height="88" rx="9" fill="#edf4ff" stroke="#245ba5" stroke-width="1.5"/>
+<text x="351" y="187" text-anchor="start" font-size="20" fill="#245ba5" font-weight="700">FCLK1 整数分频</text>
+<text x="351" y="215" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">例：除 53 → 30.188679 MHz</text>
+<rect x="656" y="157" width="302" height="88" rx="9" fill="#edf4ff" stroke="#245ba5" stroke-width="1.5"/>
+<text x="670" y="187" text-anchor="start" font-size="20" fill="#245ba5" font-weight="700">MMCME2_BASE</text>
+<text x="670" y="215" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">反馈 ×20 → VCO 603.773585 MHz</text>
+<path d="M288 200 L334 200" stroke="#245ba5" stroke-width="2.5" fill="none" marker-end="url(#a3)"/>
+<path d="M607 200 L653 200" stroke="#245ba5" stroke-width="2.5" fill="none" marker-end="url(#a3)"/>
+<path d="M958 201 L981 201 L981 174 L1010 174" stroke="#245ba5" stroke-width="2.5" fill="none" marker-end="url(#a3)"/>
+<path d="M981 201 L981 230 L1010 230" stroke="#245ba5" stroke-width="2.5" fill="none" marker-end="url(#a3)"/>
+<text x="1022" y="181" text-anchor="start" font-size="20" fill="#245ba5" font-weight="650">÷5 → CLK  120.754717 MHz</text>
+<text x="1022" y="237" text-anchor="start" font-size="20" fill="#245ba5" font-weight="650">÷10 → CLKDIV  60.377358 MHz</text>
+<text x="40" y="278" text-anchor="start" font-size="18" fill="#486173" font-weight="400">CLK 与 CLKDIV 经 BUFG 供收发 SERDES 使用。全速档每个 CLKDIV 字发送 0、1、0、1，产生两个完整 SWCLK 周期。</text>
+<text x="36" y="333" text-anchor="start" font-size="22" fill="#182d42" font-weight="700">收发原语与管脚</text>
+<rect x="38" y="353" width="310" height="405" rx="12" fill="#f5f8fa" stroke="#d0dce2" stroke-width="1.5"/>
+<text x="54" y="387" text-anchor="start" font-size="21" fill="#182d42" font-weight="700">CLKDIV 域</text>
+<text x="54" y="416" text-anchor="start" font-size="16" fill="#486173" font-weight="400">swd200_link → swd200_segment</text>
+<text x="55" y="468" text-anchor="start" font-size="20" fill="#006e68" font-weight="650">clk_slots[3:0]</text>
+<text x="55" y="541" text-anchor="start" font-size="20" fill="#006e68" font-weight="650">data_slots[3:0]</text>
+<text x="55" y="592" text-anchor="start" font-size="20" fill="#006e68" font-weight="650">release_slots[3:0]</text>
+<text x="55" y="631" text-anchor="start" font-size="16" fill="#486173" font-weight="400">每个时隙单独规定驱动或释放</text>
+<text x="55" y="698" text-anchor="start" font-size="20" fill="#245ba5" font-weight="650">rx_slots[3:0]</text>
+<text x="55" y="725" text-anchor="start" font-size="15" fill="#486173" font-weight="400">按 ACK / 数据各自的采样时隙取位</text>
+<rect x="417" y="423" width="267" height="72" rx="9" fill="#eff8f6" stroke="#006e68" stroke-width="1.5"/>
+<text x="431" y="453" text-anchor="start" font-size="20" fill="#006e68" font-weight="700">OSERDESE2 · 时钟</text>
+<text x="431" y="481" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">D1…D4 → OQ</text>
+<rect x="417" y="506" width="267" height="110" rx="9" fill="#eff8f6" stroke="#006e68" stroke-width="1.5"/>
+<text x="431" y="536" text-anchor="start" font-size="20" fill="#006e68" font-weight="700">OSERDESE2 · 数据与方向</text>
+<text x="431" y="564" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">D1…D4 → OQ  串行数据</text>
+<text x="431" y="589" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">T1…T4 → TQ  串行三态</text>
+<path d="M348 461 L415 461" stroke="#006e68" stroke-width="2.5" fill="none" marker-end="url(#a2)"/>
+<path d="M348 534 L415 534" stroke="#006e68" stroke-width="2.5" fill="none" marker-end="url(#a2)"/>
+<path d="M348 585 L415 585" stroke="#006e68" stroke-width="2.5" fill="none" marker-end="url(#a2)"/>
+<rect x="821" y="423" width="167" height="72" rx="9" fill="#eff8f6" stroke="#006e68" stroke-width="1.5"/>
+<text x="835" y="453" text-anchor="start" font-size="20" fill="#006e68" font-weight="700">OBUF</text>
+<text x="835" y="481" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">输出缓冲</text>
+<path d="M684 461 L818 461" stroke="#006e68" stroke-width="2.5" fill="none" marker-end="url(#a2)"/>
+<rect x="821" y="505" width="167" height="118" rx="9" fill="#eff8f6" stroke="#006e68" stroke-width="1.5"/>
+<text x="835" y="535" text-anchor="start" font-size="20" fill="#006e68" font-weight="700">IOBUF</text>
+<text x="835" y="563" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">I  ← OQ</text>
+<text x="835" y="588" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">T ← TQ</text>
+<path d="M684 534 L819 534" stroke="#006e68" stroke-width="2.5" fill="none" marker-end="url(#a2)"/>
+<path d="M684 585 L819 585" stroke="#006e68" stroke-width="2.5" fill="none" marker-end="url(#a2)"/>
+<text x="704" y="524" text-anchor="start" font-size="15" fill="#006e68" font-weight="400">数据</text>
+<text x="704" y="575" text-anchor="start" font-size="15" fill="#006e68" font-weight="400">三态</text>
+<rect x="1144" y="405" width="288" height="346" rx="12" fill="#fff6ee" stroke="#e5c8af" stroke-width="1.5"/>
+<text x="1161" y="438" text-anchor="start" font-size="20" fill="#9d4923" font-weight="700">J7 → F103ZE</text>
+<path d="M988 460 L1140 460" stroke="#006e68" stroke-width="2.5" fill="none" marker-end="url(#a2)"/>
+<text x="1161" y="473" text-anchor="start" font-size="20" fill="#182d42" font-weight="650">SWCLK   29 / L15</text>
+<path d="M990 551 L1140 551" stroke="#182d42" stroke-width="2.5" fill="none" marker-end="url(#a0)" marker-start="url(#a0)"/>
+<text x="1161" y="559" text-anchor="start" font-size="20" fill="#182d42" font-weight="650">SWDIO   31 / L16</text>
+<text x="1161" y="589" text-anchor="start" font-size="16" fill="#486173" font-weight="400">带上拉；同一根线收发</text>
+<text x="1161" y="650" text-anchor="start" font-size="19" fill="#182d42" font-weight="650">nSRST   23 / M14</text>
+<text x="1161" y="679" text-anchor="start" font-size="16" fill="#486173" font-weight="400">独立 OBUF，固定高电平</text>
+<text x="1002" y="530" text-anchor="start" font-size="16" fill="#486173" font-weight="400">双向</text>
+<text x="628" y="642" text-anchor="start" font-size="16" fill="#245ba5" font-weight="400">IOBUF.O  回读</text>
+<rect x="414" y="662" width="245" height="85" rx="9" fill="#eff5ff" stroke="#245ba5" stroke-width="1.5"/>
+<text x="428" y="692" text-anchor="start" font-size="20" fill="#245ba5" font-weight="700">ISERDESE2 · DDR</text>
+<text x="428" y="720" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">DDLY → Q1…Q4</text>
+<rect x="737" y="662" width="248" height="85" rx="9" fill="#eff5ff" stroke="#245ba5" stroke-width="1.5"/>
+<text x="751" y="692" text-anchor="start" font-size="20" fill="#245ba5" font-weight="700">IDELAYE2 · VAR_LOAD</text>
+<text x="751" y="720" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">输入细调 0–31 tap</text>
+<path d="M904 623 L904 632 L1016 632 L1016 704 L987 704" stroke="#245ba5" stroke-width="2.5" fill="none" marker-end="url(#a3)"/>
+<path d="M737 704 L661 704" stroke="#245ba5" stroke-width="2.5" fill="none" marker-end="url(#a3)"/>
+<path d="M414 704 L350 704" stroke="#245ba5" stroke-width="2.5" fill="none" marker-end="url(#a3)"/>
+<text x="419" y="779" text-anchor="start" font-size="16" fill="#486173" font-weight="400">Q1 → rx_slots[3]，Q4 → rx_slots[0]。IDELAYCTRL 使用独立的 FCLK2 200 MHz 校准输入延迟。</text>
+<text x="36" y="835" text-anchor="start" font-size="22" fill="#182d42" font-weight="700">一次成功传输的 SWDIO 归属</text>
+<text x="40" y="866" text-anchor="start" font-size="17" fill="#486173" font-weight="400">TQ = 0：探针驱动。TQ = 1：探针高阻，目标可返回 ACK 或数据。格宽仅示意阶段顺序。</text>
+<text x="39" y="914" text-anchor="start" font-size="20" fill="#182d42" font-weight="700">读事务</text>
+<rect x="134" y="884" width="217" height="47" rx="5" fill="#dff3ed" stroke="none" stroke-width="1.5"/>
+<text x="242.5" y="914" text-anchor="middle" font-size="17" fill="#006e68" font-weight="650">探针 · 请求 8 拍</text>
+<rect x="355" y="884" width="132" height="47" rx="5" fill="#f1f2f3" stroke="none" stroke-width="1.5"/>
+<text x="421.0" y="914" text-anchor="middle" font-size="17" fill="#486173" font-weight="650">换向 1 拍</text>
+<rect x="491" y="884" width="167" height="47" rx="5" fill="#e0edff" stroke="none" stroke-width="1.5"/>
+<text x="574.5" y="914" text-anchor="middle" font-size="17" fill="#245ba5" font-weight="650">目标 · ACK 3 拍</text>
+<rect x="662" y="884" width="422" height="47" rx="5" fill="#e0edff" stroke="none" stroke-width="1.5"/>
+<text x="873.0" y="914" text-anchor="middle" font-size="17" fill="#245ba5" font-weight="650">目标 · 32 位读数据 + 1 位奇偶</text>
+<rect x="1088" y="884" width="153" height="47" rx="5" fill="#f1f2f3" stroke="none" stroke-width="1.5"/>
+<text x="1164.5" y="914" text-anchor="middle" font-size="17" fill="#486173" font-weight="650">换向 1 拍</text>
+<rect x="1245" y="884" width="193" height="47" rx="5" fill="#dff3ed" stroke="none" stroke-width="1.5"/>
+<text x="1341.5" y="914" text-anchor="middle" font-size="17" fill="#006e68" font-weight="650">探针 · idle</text>
+<text x="39" y="972" text-anchor="start" font-size="20" fill="#182d42" font-weight="700">写事务</text>
+<rect x="134" y="942" width="217" height="47" rx="5" fill="#dff3ed" stroke="none" stroke-width="1.5"/>
+<text x="242.5" y="972" text-anchor="middle" font-size="17" fill="#006e68" font-weight="650">探针 · 请求 8 拍</text>
+<rect x="355" y="942" width="132" height="47" rx="5" fill="#f1f2f3" stroke="none" stroke-width="1.5"/>
+<text x="421.0" y="972" text-anchor="middle" font-size="17" fill="#486173" font-weight="650">换向 1 拍</text>
+<rect x="491" y="942" width="167" height="47" rx="5" fill="#e0edff" stroke="none" stroke-width="1.5"/>
+<text x="574.5" y="972" text-anchor="middle" font-size="17" fill="#245ba5" font-weight="650">目标 · ACK 3 拍</text>
+<rect x="662" y="942" width="153" height="47" rx="5" fill="#f1f2f3" stroke="none" stroke-width="1.5"/>
+<text x="738.5" y="972" text-anchor="middle" font-size="17" fill="#486173" font-weight="650">换向 1 拍</text>
+<rect x="819" y="942" width="422" height="47" rx="5" fill="#dff3ed" stroke="none" stroke-width="1.5"/>
+<text x="1030.0" y="972" text-anchor="middle" font-size="17" fill="#006e68" font-weight="650">探针 · 32 位写数据 + 1 位奇偶</text>
+<rect x="1245" y="942" width="193" height="47" rx="5" fill="#dff3ed" stroke="none" stroke-width="1.5"/>
+<text x="1341.5" y="972" text-anchor="middle" font-size="17" fill="#006e68" font-weight="650">探针 · idle</text>
+<rect x="38" y="1010" width="1404" height="76" rx="8" fill="#f4f7fa" stroke="none" stroke-width="1.5"/>
+<text x="55" y="1039" text-anchor="start" font-size="17" fill="#006e68" font-weight="700">换向控制</text>
+<text x="168" y="1039" text-anchor="start" font-size="17" fill="#182d42" font-weight="400">guard 启用时，读尾保持释放直至采到奇偶位，等待指定 CLKDIV 拍数后再接管。</text>
+<text x="168" y="1067" text-anchor="start" font-size="16" fill="#486173" font-weight="400">适用时序档可提前送出主机释放的首拍；写数据仍须等完整 ACK 确认为 OK。WAIT 重试当前命令，FAULT / 奇偶错误结束批次。</text>
+</g></svg>

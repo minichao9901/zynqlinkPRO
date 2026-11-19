@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1480" height="804" viewBox="0 0 1480 804" role="img"><title>ZynqLinkPRO 纯 SWD 探针架构</title><desc>XC7Z020-CLG400-2  /  F103ZE 实板配对  /  源码 2de3776e</desc><defs>
+<marker id="a0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#182d42"/></marker>
+<marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#486173"/></marker>
+<marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#006e68"/></marker>
+<marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#245ba5"/></marker>
+<marker id="a4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#9d4923"/></marker>
+</defs><g font-family="Microsoft YaHei, Noto Sans CJK SC, PingFang SC, sans-serif">
+<rect x="0" y="0" width="1480" height="804" rx="0" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<rect x="0" y="0" width="12" height="101" rx="0" fill="#006e68" stroke="none" stroke-width="1.5"/>
+<text x="36" y="48" text-anchor="start" font-size="34" fill="#182d42" font-weight="700">ZynqLinkPRO 纯 SWD 探针架构</text>
+<text x="38" y="81" text-anchor="start" font-size="18" fill="#486173" font-weight="400">XC7Z020-CLG400-2  /  F103ZE 实板配对  /  源码 2de3776e</text>
+<rect x="30" y="125" width="350" height="324" rx="15" fill="#f3f7fb" stroke="#c7d8e7" stroke-width="1.5"/>
+<rect x="405" y="125" width="770" height="324" rx="15" fill="#f3f9f7" stroke="#c4ded6" stroke-width="1.5"/>
+<rect x="1200" y="125" width="250" height="324" rx="15" fill="#fff8f2" stroke="#ecd7c8" stroke-width="1.5"/>
+<text x="48" y="165" text-anchor="start" font-size="22" fill="#182d42" font-weight="700">PS · Cortex-A9</text>
+<text x="424" y="165" text-anchor="start" font-size="22" fill="#182d42" font-weight="700">PL · SWD 硬件引擎</text>
+<text x="1218" y="165" text-anchor="start" font-size="22" fill="#182d42" font-weight="700">目标 · STM32F103ZE</text>
+<rect x="50" y="202" width="309" height="130" rx="9" fill="#edf4ff" stroke="#245ba5" stroke-width="1.5"/>
+<text x="64" y="232" text-anchor="start" font-size="20" fill="#245ba5" font-weight="700">探针固件 / OCM</text>
+<text x="64" y="260" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">预装读、写命令及期望图案</text>
+<text x="64" y="285" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">提交批次，检查状态与数据</text>
+<text x="64" y="310" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">全局定时器测量批次用时</text>
+<rect x="427" y="202" width="226" height="130" rx="9" fill="#eff8f6" stroke="#006e68" stroke-width="1.5"/>
+<text x="441" y="232" text-anchor="start" font-size="20" fill="#006e68" font-weight="700">AXI4-Lite / BRAM</text>
+<text x="441" y="260" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">原始、驻留读、驻留写</text>
+<text x="441" y="285" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">结果 RAM、期望 RAM</text>
+<text x="441" y="310" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">批启动和完成握手</text>
+<rect x="687" y="202" width="220" height="130" rx="9" fill="#eff8f6" stroke="#006e68" stroke-width="1.5"/>
+<text x="701" y="232" text-anchor="start" font-size="20" fill="#006e68" font-weight="700">swd200_batch</text>
+<text x="701" y="260" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">预取下一条命令</text>
+<text x="701" y="285" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">WAIT 重发当前命令</text>
+<text x="701" y="310" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">错误时隔离后续命令</text>
+<rect x="942" y="202" width="210" height="130" rx="9" fill="#eff8f6" stroke="#006e68" stroke-width="1.5"/>
+<text x="956" y="232" text-anchor="start" font-size="20" fill="#006e68" font-weight="700">SWD 链路 / PHY</text>
+<text x="956" y="260" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">请求、ACK、数据、校验</text>
+<text x="956" y="285" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">时隙生成和 SelectIO</text>
+<text x="956" y="310" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">双向 SWDIO 换手</text>
+<rect x="1220" y="202" width="208" height="130" rx="9" fill="#fff3e9" stroke="#9d4923" stroke-width="1.5"/>
+<text x="1234" y="232" text-anchor="start" font-size="20" fill="#9d4923" font-weight="700">SW-DP → MEM-AP</text>
+<text x="1234" y="260" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">访问目标总线</text>
+<text x="1234" y="285" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">写入、读回 SRAM</text>
+<text x="1234" y="310" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">Cortex-M3 / HCLK</text>
+<path d="M359 270 L425 270" stroke="#006e68" stroke-width="2.5" fill="none" marker-end="url(#a2)"/>
+<path d="M653 270 L685 270" stroke="#006e68" stroke-width="2.5" fill="none" marker-end="url(#a2)"/>
+<path d="M907 270 L940 270" stroke="#006e68" stroke-width="2.5" fill="none" marker-end="url(#a2)"/>
+<path marker-start="url(#a2)" d="M1152 270 L1218 270" stroke="#006e68" stroke-width="2.5" fill="none" marker-end="url(#a2)"/>
+<text x="393" y="249" text-anchor="middle" font-size="14" fill="#006e68" font-weight="700">GP0</text>
+<text x="1186" y="249" text-anchor="middle" font-size="14" fill="#006e68" font-weight="700">J7</text>
+<path d="M1046 332 L1046 371 L797 371 L797 332" stroke="#245ba5" stroke-width="2.5" fill="none" marker-end="url(#a3)"/>
+<path d="M687 299 L654 299" stroke="#245ba5" stroke-width="2.5" fill="none" marker-end="url(#a3)"/>
+<path d="M539 332 L539 393 L206 393 L206 333" stroke="#245ba5" stroke-width="2.5" fill="none" marker-end="url(#a3)"/>
+<text x="870" y="361" text-anchor="start" font-size="15" fill="#245ba5" font-weight="400">ACK / 读数据</text>
+<text x="280" y="384" text-anchor="start" font-size="15" fill="#245ba5" font-weight="400">完成摘要 / 结果</text>
+<text x="49" y="428" text-anchor="start" font-size="16" fill="#486173" font-weight="400">AXI 时钟约 133.333 MHz</text>
+<text x="686" y="428" text-anchor="start" font-size="16" fill="#486173" font-weight="400">批处理、链路和时隙逻辑运行在 CLKDIV 域</text>
+<text x="36" y="505" text-anchor="start" font-size="22" fill="#182d42" font-weight="700">一次 1 KiB 驻留测试怎样搬运数据</text>
+<rect x="38" y="537" width="433" height="121" rx="9" fill="#f5f8fc" stroke="#245ba5" stroke-width="1.5"/>
+<text x="52" y="567" text-anchor="start" font-size="20" fill="#245ba5" font-weight="700">装表一次</text>
+<text x="52" y="595" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">A9 将描述符、写图案和期望值装入 PL。</text>
+<text x="52" y="620" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">每次测量复用同一组表。</text>
+<rect x="519" y="537" width="435" height="121" rx="9" fill="#f5f8fc" stroke="#245ba5" stroke-width="1.5"/>
+<text x="533" y="567" text-anchor="start" font-size="20" fill="#245ba5" font-weight="700">重复写入和读回</text>
+<text x="533" y="595" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">写前核对 TAR，写图案可逐位取反。</text>
+<text x="533" y="620" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">批读处理 AP posted read，以 RDBUFF 收尾。</text>
+<rect x="1002" y="537" width="440" height="121" rx="9" fill="#f5f8fc" stroke="#245ba5" stroke-width="1.5"/>
+<text x="1016" y="567" text-anchor="start" font-size="20" fill="#245ba5" font-weight="700">校验和计时</text>
+<text x="1016" y="595" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">PL 比对 256 个有效返回字，保留读回数据。</text>
+<text x="1016" y="620" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">A9 读完成摘要，并在窗口末复核最后一块。</text>
+<path d="M471 597 L516 597" stroke="#245ba5" stroke-width="2.5" fill="none" marker-end="url(#a3)"/>
+<path d="M954 597 L999 597" stroke="#245ba5" stroke-width="2.5" fill="none" marker-end="url(#a3)"/>
+<rect x="38" y="695" width="1404" height="80" rx="10" fill="#edf6f5" stroke="none" stroke-width="1.5"/>
+<text x="57" y="726" text-anchor="start" font-size="18" fill="#006e68" font-weight="700">实板工作点</text>
+<text x="196" y="726" text-anchor="start" font-size="20" fill="#182d42" font-weight="650">177.778 MHz SWCLK  ·  128 MHz 目标 HCLK  ·  三轮，每轮各读写 16 MiB</text>
+<text x="196" y="755" text-anchor="start" font-size="17" fill="#486173" font-weight="400">A9 本地驻留读 10.129 MB/s、写 12.248 MB/s。计时覆盖批次控制与在线校验，PC USB 回传另计。</text>
+</g></svg>

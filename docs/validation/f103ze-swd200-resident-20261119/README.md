@@ -1,5 +1,7 @@
 # F103ZE 驻留命令与 SWDIO 换向
 
+[纯 SWD 探针架构图](swd-architecture.svg) · [SelectIO 接口与换向详图](swd-selectio.svg)
+
 2026-11-19。PL/PS 源码 `5dad78ec`。保持纯 SWD。新增 AXI 寄存器 `0x1c`，位 1:0 选择原始、驻留读、驻留写三个命令 bank，位 2 控制图案取反，位 3 启用读回逐字比对，位 6:4 指定读尾换向等待的 CLKDIV 拍数。特征寄存器 `0x20` 读回 `BNK1`。期望数据窗口从 `0x3000` 起，共 256 字。写 bank 对 DRW 写数据取反，读 bank 校验 posted read 结果及最后的 RDBUFF。校验错误置批次失败位并保留结果。
 
 CM3 使用实际 SelectIO 原语，覆盖两个驻留表交替、整块取反、故意损坏最后一个期望字、错误隔离和恢复。160 MHz、20 ns 模拟返程延时、时隙 19、guard 3 通过。XC7Z020-CLG400-2 完成布线，WNS +0.109 ns、WHS +0.069 ns，DRC 零违规。使用 1,288 LUT、1,209 寄存器、5 个 BRAM Tile 和三个 PL 管脚。CDC 握手数据和复位入口仍保留报告项。
