@@ -22,7 +22,16 @@ static const struct profile profiles[] = {
     {32, 0,  50000000},
     {32, 1, 100000000},
     {40, 2, 160000000},
-    {32, 2, 200000000}
+    {32, 2, 200000000},
+#ifdef SWD200_BOARD_BENCH
+    {48, 1, 66666667},
+#define FULL_RATE(d) {d, 2, (6400000000ull + (d)/2) / (d)}
+    FULL_RATE(53), FULL_RATE(52), FULL_RATE(51), FULL_RATE(50), FULL_RATE(49),
+    FULL_RATE(48), FULL_RATE(47), FULL_RATE(46), FULL_RATE(45), FULL_RATE(44),
+    FULL_RATE(43), FULL_RATE(42), FULL_RATE(41), FULL_RATE(40), FULL_RATE(39),
+    FULL_RATE(38), FULL_RATE(37), FULL_RATE(36), FULL_RATE(35), FULL_RATE(34), FULL_RATE(33),
+#undef FULL_RATE
+#endif
 };
 
 static void barrier(void)
@@ -86,6 +95,10 @@ static uint32_t apply_profile(uint32_t index, uint32_t timing, uint32_t tap)
     return 0;
 }
 
+#ifdef SWD200_BOARD_BENCH
+void bench_init(void);
+void bench_poll(void);
+#endif
 void swd200_main(void)
 {
     const uint32_t default_timing = (2u << 14) | (12u << 8) | (12u << 2);
@@ -95,7 +108,13 @@ void swd200_main(void)
     MAILBOX[ERROR] = apply_profile(0, default_timing, 0);
     barrier();
     MAILBOX[MAGIC] = SIGNATURE;
+#ifdef SWD200_BOARD_BENCH
+    bench_init();
+#endif
     for (;;) {
+#ifdef SWD200_BOARD_BENCH
+        bench_poll();
+#endif
         uint32_t request = MAILBOX[REQUEST];
         if (request == MAILBOX[RESPONSE])
             continue;
