@@ -1,75 +1,196 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1480" height="804" viewBox="0 0 1480 804" role="img"><title>ZynqLinkPRO 纯 SWD 探针架构</title><desc>XC7Z020-CLG400-2  /  F103ZE 实板配对  /  源码 2de3776e</desc><defs>
-<marker id="a0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#182d42"/></marker>
-<marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#486173"/></marker>
-<marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#006e68"/></marker>
-<marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#245ba5"/></marker>
-<marker id="a4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#9d4923"/></marker>
-</defs><g font-family="Microsoft YaHei, Noto Sans CJK SC, PingFang SC, sans-serif">
-<rect x="0" y="0" width="1480" height="804" rx="0" fill="#ffffff" stroke="none" stroke-width="1.5"/>
-<rect x="0" y="0" width="12" height="101" rx="0" fill="#006e68" stroke="none" stroke-width="1.5"/>
-<text x="36" y="48" text-anchor="start" font-size="34" fill="#182d42" font-weight="700">ZynqLinkPRO 纯 SWD 探针架构</text>
-<text x="38" y="81" text-anchor="start" font-size="18" fill="#486173" font-weight="400">XC7Z020-CLG400-2  /  F103ZE 实板配对  /  源码 2de3776e</text>
-<rect x="30" y="125" width="350" height="324" rx="15" fill="#f3f7fb" stroke="#c7d8e7" stroke-width="1.5"/>
-<rect x="405" y="125" width="770" height="324" rx="15" fill="#f3f9f7" stroke="#c4ded6" stroke-width="1.5"/>
-<rect x="1200" y="125" width="250" height="324" rx="15" fill="#fff8f2" stroke="#ecd7c8" stroke-width="1.5"/>
-<text x="48" y="165" text-anchor="start" font-size="22" fill="#182d42" font-weight="700">PS · Cortex-A9</text>
-<text x="424" y="165" text-anchor="start" font-size="22" fill="#182d42" font-weight="700">PL · SWD 硬件引擎</text>
-<text x="1218" y="165" text-anchor="start" font-size="22" fill="#182d42" font-weight="700">目标 · STM32F103ZE</text>
-<rect x="50" y="202" width="309" height="130" rx="9" fill="#edf4ff" stroke="#245ba5" stroke-width="1.5"/>
-<text x="64" y="232" text-anchor="start" font-size="20" fill="#245ba5" font-weight="700">探针固件 / OCM</text>
-<text x="64" y="260" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">预装读、写命令及期望图案</text>
-<text x="64" y="285" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">提交批次，检查状态与数据</text>
-<text x="64" y="310" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">全局定时器测量批次用时</text>
-<rect x="427" y="202" width="226" height="130" rx="9" fill="#eff8f6" stroke="#006e68" stroke-width="1.5"/>
-<text x="441" y="232" text-anchor="start" font-size="20" fill="#006e68" font-weight="700">AXI4-Lite / BRAM</text>
-<text x="441" y="260" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">原始、驻留读、驻留写</text>
-<text x="441" y="285" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">结果 RAM、期望 RAM</text>
-<text x="441" y="310" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">批启动和完成握手</text>
-<rect x="687" y="202" width="220" height="130" rx="9" fill="#eff8f6" stroke="#006e68" stroke-width="1.5"/>
-<text x="701" y="232" text-anchor="start" font-size="20" fill="#006e68" font-weight="700">swd200_batch</text>
-<text x="701" y="260" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">预取下一条命令</text>
-<text x="701" y="285" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">WAIT 重发当前命令</text>
-<text x="701" y="310" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">错误时隔离后续命令</text>
-<rect x="942" y="202" width="210" height="130" rx="9" fill="#eff8f6" stroke="#006e68" stroke-width="1.5"/>
-<text x="956" y="232" text-anchor="start" font-size="20" fill="#006e68" font-weight="700">SWD 链路 / PHY</text>
-<text x="956" y="260" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">请求、ACK、数据、校验</text>
-<text x="956" y="285" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">时隙生成和 SelectIO</text>
-<text x="956" y="310" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">双向 SWDIO 换手</text>
-<rect x="1220" y="202" width="208" height="130" rx="9" fill="#fff3e9" stroke="#9d4923" stroke-width="1.5"/>
-<text x="1234" y="232" text-anchor="start" font-size="20" fill="#9d4923" font-weight="700">SW-DP → MEM-AP</text>
-<text x="1234" y="260" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">访问目标总线</text>
-<text x="1234" y="285" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">写入、读回 SRAM</text>
-<text x="1234" y="310" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">Cortex-M3 / HCLK</text>
-<path d="M359 270 L425 270" stroke="#006e68" stroke-width="2.5" fill="none" marker-end="url(#a2)"/>
-<path d="M653 270 L685 270" stroke="#006e68" stroke-width="2.5" fill="none" marker-end="url(#a2)"/>
-<path d="M907 270 L940 270" stroke="#006e68" stroke-width="2.5" fill="none" marker-end="url(#a2)"/>
-<path marker-start="url(#a2)" d="M1152 270 L1218 270" stroke="#006e68" stroke-width="2.5" fill="none" marker-end="url(#a2)"/>
-<text x="393" y="249" text-anchor="middle" font-size="14" fill="#006e68" font-weight="700">GP0</text>
-<text x="1186" y="249" text-anchor="middle" font-size="14" fill="#006e68" font-weight="700">J7</text>
-<path d="M1046 332 L1046 371 L797 371 L797 332" stroke="#245ba5" stroke-width="2.5" fill="none" marker-end="url(#a3)"/>
-<path d="M687 299 L654 299" stroke="#245ba5" stroke-width="2.5" fill="none" marker-end="url(#a3)"/>
-<path d="M539 332 L539 393 L206 393 L206 333" stroke="#245ba5" stroke-width="2.5" fill="none" marker-end="url(#a3)"/>
-<text x="870" y="361" text-anchor="start" font-size="15" fill="#245ba5" font-weight="400">ACK / 读数据</text>
-<text x="280" y="384" text-anchor="start" font-size="15" fill="#245ba5" font-weight="400">完成摘要 / 结果</text>
-<text x="49" y="428" text-anchor="start" font-size="16" fill="#486173" font-weight="400">AXI 时钟约 133.333 MHz</text>
-<text x="686" y="428" text-anchor="start" font-size="16" fill="#486173" font-weight="400">批处理、链路和时隙逻辑运行在 CLKDIV 域</text>
-<text x="36" y="505" text-anchor="start" font-size="22" fill="#182d42" font-weight="700">一次 1 KiB 驻留测试怎样搬运数据</text>
-<rect x="38" y="537" width="433" height="121" rx="9" fill="#f5f8fc" stroke="#245ba5" stroke-width="1.5"/>
-<text x="52" y="567" text-anchor="start" font-size="20" fill="#245ba5" font-weight="700">装表一次</text>
-<text x="52" y="595" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">A9 将描述符、写图案和期望值装入 PL。</text>
-<text x="52" y="620" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">每次测量复用同一组表。</text>
-<rect x="519" y="537" width="435" height="121" rx="9" fill="#f5f8fc" stroke="#245ba5" stroke-width="1.5"/>
-<text x="533" y="567" text-anchor="start" font-size="20" fill="#245ba5" font-weight="700">重复写入和读回</text>
-<text x="533" y="595" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">写前核对 TAR，写图案可逐位取反。</text>
-<text x="533" y="620" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">批读处理 AP posted read，以 RDBUFF 收尾。</text>
-<rect x="1002" y="537" width="440" height="121" rx="9" fill="#f5f8fc" stroke="#245ba5" stroke-width="1.5"/>
-<text x="1016" y="567" text-anchor="start" font-size="20" fill="#245ba5" font-weight="700">校验和计时</text>
-<text x="1016" y="595" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">PL 比对 256 个有效返回字，保留读回数据。</text>
-<text x="1016" y="620" text-anchor="start" font-size="16" fill="#182d42" font-weight="400">A9 读完成摘要，并在窗口末复核最后一块。</text>
-<path d="M471 597 L516 597" stroke="#245ba5" stroke-width="2.5" fill="none" marker-end="url(#a3)"/>
-<path d="M954 597 L999 597" stroke="#245ba5" stroke-width="2.5" fill="none" marker-end="url(#a3)"/>
-<rect x="38" y="695" width="1404" height="80" rx="10" fill="#edf6f5" stroke="none" stroke-width="1.5"/>
-<text x="57" y="726" text-anchor="start" font-size="18" fill="#006e68" font-weight="700">实板工作点</text>
-<text x="196" y="726" text-anchor="start" font-size="20" fill="#182d42" font-weight="650">177.778 MHz SWCLK  ·  128 MHz 目标 HCLK  ·  三轮，每轮各读写 16 MiB</text>
-<text x="196" y="755" text-anchor="start" font-size="17" fill="#486173" font-weight="400">A9 本地驻留读 10.129 MB/s、写 12.248 MB/s。计时覆盖批次控制与在线校验，PC USB 回传另计。</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1050" viewBox="0 0 1800 1050" role="img"><title>ZynqLinkPRO 纯 SWD 芯片系统框图</title><desc>XC7Z020 的 PS、PL 和 Bank 35 SelectIO。两颗 OSERDESE2 分别输出时钟以及数据和三态控制，输入经 IOBUF、IDELAYE2 和 ISERDESE2 回到接收逻辑。</desc><defs>
+<marker id="m0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#18344c"/></marker>
+<marker id="m1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#006b60"/></marker>
+<marker id="m2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#285da2"/></marker>
+<marker id="m3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#925514"/></marker>
+<marker id="m4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#526675"/></marker>
+</defs><g font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif">
+<rect x="0" y="0" width="1800" height="1050" fill="white" stroke="none" stroke-width="1.4"/>
+<text x="36" y="51" font-size="36" fill="#18344c" font-weight="700" text-anchor="start">ZynqLinkPRO 纯 SWD 芯片系统框图</text>
+<text x="38" y="82" font-size="20" fill="#526675" font-weight="400" text-anchor="start">XC7Z020-CLG400-2   /   驻留命令版   /   SelectIO 接口展开</text>
+<path d="M1110 61 L1145 61" fill="none" stroke="#006b60" stroke-width="2.2" stroke-dasharray="none" marker-end="url(#m1)"/>
+<text x="1153" y="67" font-size="17" fill="#006b60" font-weight="400" text-anchor="start">发送</text>
+<path d="M1230 61 L1265 61" fill="none" stroke="#285da2" stroke-width="2.2" stroke-dasharray="none" marker-end="url(#m2)"/>
+<text x="1273" y="67" font-size="17" fill="#285da2" font-weight="400" text-anchor="start">回采</text>
+<path d="M1350 61 L1385 61" fill="none" stroke="#925514" stroke-width="2.2" stroke-dasharray="none" marker-end="url(#m3)"/>
+<text x="1393" y="67" font-size="17" fill="#925514" font-weight="400" text-anchor="start">时钟</text>
+<path d="M1470 61 L1505 61" fill="none" stroke="#526675" stroke-width="2.2" stroke-dasharray="none" marker-end="url(#m4)"/>
+<text x="1513" y="67" font-size="17" fill="#526675" font-weight="400" text-anchor="start">控制 / 状态</text>
+<rect x="30" y="115" width="1460" height="680" fill="#fafcfd" stroke="#18344c" stroke-width="2.8"/>
+<rect x="30" y="115" width="1460" height="48" fill="#18344c" stroke="#18344c" stroke-width="1.4"/>
+<text x="51" y="147" font-size="24" fill="white" font-weight="700" text-anchor="start">ZYNQ-7000  /  XC7Z020</text>
+<text x="1466" y="146" font-size="18" fill="white" font-weight="700" text-anchor="end">调试探针</text>
+<rect x="49" y="184" width="262" height="585" fill="#f0f4f7" stroke="#aebfc6" stroke-width="1.4"/>
+<text x="65" y="218" font-size="24" fill="#18344c" font-weight="700" text-anchor="start">PS  处理系统</text>
+<rect x="331" y="184" width="1137" height="585" fill="#fff" stroke="#aebfc6" stroke-width="1.4"/>
+<text x="348" y="218" font-size="24" fill="#18344c" font-weight="700" text-anchor="start">PL  可编程逻辑</text>
+<rect x="64" y="244" width="231" height="88" fill="#fff" stroke="#925514" stroke-width="1.4"/>
+<text x="76" y="270" font-size="20" fill="#925514" font-weight="700" text-anchor="start">PS7 时钟控制</text>
+<text x="76" y="293" font-size="15" fill="#18344c" font-weight="400" text-anchor="start">IO PLL ≈ 1600 MHz</text>
+<text x="76" y="314" font-size="15" fill="#18344c" font-weight="400" text-anchor="start">FCLK1 整数分频</text>
+<path d="M295 275 L350 275" fill="none" stroke="#925514" stroke-width="2.2" stroke-dasharray="none" marker-end="url(#m3)"/>
+<rect x="350" y="240" width="319" height="84" fill="#fff" stroke="#925514" stroke-width="1.4"/>
+<text x="362" y="266" font-size="20" fill="#925514" font-weight="700" text-anchor="start">MMCME2_BASE</text>
+<text x="362" y="289" font-size="15" fill="#18344c" font-weight="400" text-anchor="start">反馈 ×20  ·  CLKOUT0 ÷5</text>
+<text x="362" y="310" font-size="15" fill="#18344c" font-weight="400" text-anchor="start">CLKOUT1 ÷10  ·  BUFG 分配</text>
+<path d="M669 266 L704 266" fill="none" stroke="#925514" stroke-width="2.2" stroke-dasharray="none" marker-end="url(#m3)"/>
+<text x="717" y="262" font-size="18" fill="#925514" font-weight="700" text-anchor="start">CLK → OSERDES / ISERDES 串行端</text>
+<path d="M669 300 L704 300" fill="none" stroke="#925514" stroke-width="2.2" stroke-dasharray="none" marker-end="url(#m3)"/>
+<text x="717" y="297" font-size="18" fill="#925514" font-weight="700" text-anchor="start">CLKDIV → 并行端与协议引擎</text>
+<rect x="1135" y="238" width="308" height="78" fill="#fff8ec" stroke="#925514" stroke-width="1.4"/>
+<text x="1147" y="266" font-size="17" fill="#925514" font-weight="700" text-anchor="start">FCLK2  200 MHz → IDELAYCTRL</text>
+<text x="1147" y="294" font-size="15" fill="#18344c" font-weight="400" text-anchor="start">REFCLK 校准  ·  RDY 返回状态寄存器</text>
+<rect x="64" y="365" width="231" height="93" fill="#fff" stroke="#18344c" stroke-width="1.4"/>
+<text x="76" y="391" font-size="20" fill="#18344c" font-weight="700" text-anchor="start">Cortex-A9</text>
+<text x="76" y="414" font-size="15" fill="#18344c" font-weight="400" text-anchor="start">OCM 裸机固件</text>
+<text x="76" y="435" font-size="15" fill="#18344c" font-weight="400" text-anchor="start">提交批次、选档、读状态</text>
+<rect x="64" y="500" width="231" height="89" fill="#fff" stroke="#18344c" stroke-width="1.4"/>
+<text x="76" y="526" font-size="20" fill="#18344c" font-weight="700" text-anchor="start">M_AXI_GP0</text>
+<text x="76" y="549" font-size="15" fill="#18344c" font-weight="400" text-anchor="start">AXI 互连 → AXI4-Lite</text>
+<text x="76" y="570" font-size="15" fill="#18344c" font-weight="400" text-anchor="start">FCLK0 ≈ 133.333 MHz</text>
+<path d="M180 458 L180 498" fill="none" stroke="#526675" stroke-width="2.2" stroke-dasharray="none" marker-end="url(#m4)" marker-start="url(#m4)"/>
+<path d="M295 549 L350 549" fill="none" stroke="#526675" stroke-width="3" stroke-dasharray="none" marker-end="url(#m4)" marker-start="url(#m4)"/>
+<rect x="351" y="354" width="162" height="303" fill="#f1f5f8" stroke="#526675" stroke-width="1.4"/>
+<text x="364" y="387" font-size="19" fill="#18344c" font-weight="700" text-anchor="start">寄存器 / BRAM</text>
+<rect x="362" y="403" width="140" height="31" fill="white" stroke="#aebfc6" stroke-width="1.4"/>
+<text x="431" y="425" font-size="15" fill="#18344c" font-weight="400" text-anchor="middle">原始命令表</text>
+<rect x="362" y="441" width="140" height="31" fill="white" stroke="#aebfc6" stroke-width="1.4"/>
+<text x="431" y="463" font-size="15" fill="#18344c" font-weight="400" text-anchor="middle">驻留读 / 写表</text>
+<rect x="362" y="479" width="140" height="31" fill="white" stroke="#aebfc6" stroke-width="1.4"/>
+<text x="431" y="501" font-size="15" fill="#18344c" font-weight="400" text-anchor="middle">期望数据 RAM</text>
+<rect x="362" y="517" width="140" height="31" fill="white" stroke="#aebfc6" stroke-width="1.4"/>
+<text x="431" y="539" font-size="15" fill="#18344c" font-weight="400" text-anchor="middle">读回结果 RAM</text>
+<text x="364" y="591" font-size="14" fill="#526675" font-weight="400" text-anchor="start">起址 0x40000000</text>
+<text x="364" y="615" font-size="15" fill="#526675" font-weight="400" text-anchor="start">16 KiB 地址窗口</text>
+<rect x="538" y="354" width="185" height="303" fill="#f3f7f6" stroke="#526675" stroke-width="1.4"/>
+<text x="550" y="388" font-size="20" fill="#18344c" font-weight="700" text-anchor="start">SWD 协议引擎</text>
+<rect x="550" y="405" width="161" height="61" fill="white" stroke="#aebfc6" stroke-width="1.4"/>
+<text x="562" y="429" font-size="18" fill="#18344c" font-weight="700" text-anchor="start">batch</text>
+<text x="562" y="452" font-size="14" fill="#18344c" font-weight="400" text-anchor="start">预取、WAIT 重试</text>
+<rect x="550" y="487" width="161" height="62" fill="white" stroke="#aebfc6" stroke-width="1.4"/>
+<text x="562" y="511" font-size="18" fill="#18344c" font-weight="700" text-anchor="start">link</text>
+<text x="562" y="534" font-size="14" fill="#18344c" font-weight="400" text-anchor="start">请求、ACK、换向</text>
+<rect x="550" y="570" width="161" height="65" fill="white" stroke="#aebfc6" stroke-width="1.4"/>
+<text x="562" y="594" font-size="18" fill="#18344c" font-weight="700" text-anchor="start">segment</text>
+<text x="562" y="617" font-size="14" fill="#18344c" font-weight="400" text-anchor="start">生成 / 选取 DDR 时隙</text>
+<path d="M628 466 L628 485" fill="none" stroke="#526675" stroke-width="2.2" stroke-dasharray="none" marker-end="url(#m4)"/>
+<path d="M628 550 L628 569" fill="none" stroke="#526675" stroke-width="2.2" stroke-dasharray="none" marker-end="url(#m4)"/>
+<path d="M513 427 L548 427" fill="none" stroke="#526675" stroke-width="2.2" stroke-dasharray="none" marker-end="url(#m4)"/>
+<path d="M548 447 L514 447" fill="none" stroke="#285da2" stroke-width="2.2" stroke-dasharray="none" marker-end="url(#m2)"/>
+<text x="65" y="690" font-size="18" fill="#18344c" font-weight="700" text-anchor="start">A9 以块为单位工作</text>
+<text x="65" y="720" font-size="16" fill="#526675" font-weight="400" text-anchor="start">命令预装后可重复提交。</text>
+<text x="351" y="704" font-size="17" fill="#526675" font-weight="700" text-anchor="start">AXI 域 ⇄ CLKDIV 域</text>
+<text x="351" y="732" font-size="15" fill="#526675" font-weight="400" text-anchor="start">请求 / 完成握手，双时钟命令与结果 RAM</text>
+<rect x="750" y="336" width="700" height="414" fill="#f5faf8" stroke="#006b60" stroke-width="2"/>
+<rect x="750" y="336" width="700" height="39" fill="#dceee9" stroke="#006b60" stroke-width="1.4"/>
+<text x="766" y="363" font-size="22" fill="#006b60" font-weight="700" text-anchor="start">SelectIO  /  Bank 35</text>
+<text x="1435" y="362" font-size="16" fill="#006b60" font-weight="700" text-anchor="end">LVCMOS33</text>
+<path d="M711 600 L734 600 L734 426" fill="none" stroke="#006b60" stroke-width="3" stroke-dasharray="none"/>
+<circle cx="734" cy="506" r="4" fill="#006b60"/>
+<circle cx="734" cy="552" r="4" fill="#006b60"/>
+<path d="M734 426 L912 426" fill="none" stroke="#006b60" stroke-width="2.2" stroke-dasharray="none" marker-end="url(#m1)"/>
+<text x="772" y="417" font-size="15" fill="#006b60" font-weight="700" text-anchor="start">clk_slots[3:0]</text>
+<path d="M734 506 L912 506" fill="none" stroke="#006b60" stroke-width="2.2" stroke-dasharray="none" marker-end="url(#m1)"/>
+<text x="772" y="497" font-size="15" fill="#006b60" font-weight="700" text-anchor="start">data_slots[3:0]</text>
+<path d="M734 552 L912 552" fill="none" stroke="#006b60" stroke-width="2.2" stroke-dasharray="none" marker-end="url(#m1)"/>
+<text x="772" y="543" font-size="15" fill="#006b60" font-weight="700" text-anchor="start">release_slots[3:0]</text>
+<rect x="915" y="393" width="218" height="63" fill="white" stroke="#006b60" stroke-width="1.4"/>
+<text x="928" y="416" font-size="17" fill="#006b60" font-weight="700" text-anchor="start">OSERDESE2 · 4:1 DDR</text>
+<text x="928" y="442" font-size="15" fill="#18344c" font-weight="400" text-anchor="start">D1…D4</text>
+<text x="1119" y="440" font-size="15" fill="#006b60" font-weight="700" text-anchor="end">OQ</text>
+<path d="M1133 426 L1220 426" fill="none" stroke="#006b60" stroke-width="2.2" stroke-dasharray="none" marker-end="url(#m1)"/>
+<polygon points="1221,411 1221,441 1252,426" fill="#fff" stroke="#006b60" stroke-width="2.2"/>
+<text x="1235" y="401" font-size="14" fill="#006b60" font-weight="700" text-anchor="middle">OBUF</text>
+<rect x="915" y="472" width="218" height="104" fill="white" stroke="#006b60" stroke-width="1.4"/>
+<text x="928" y="495" font-size="17" fill="#006b60" font-weight="700" text-anchor="start">OSERDESE2 · 4:1 DDR</text>
+<text x="928" y="519" font-size="15" fill="#18344c" font-weight="400" text-anchor="start">D1…D4</text>
+<text x="1119" y="519" font-size="15" fill="#006b60" font-weight="700" text-anchor="end">OQ</text>
+<text x="928" y="561" font-size="15" fill="#18344c" font-weight="400" text-anchor="start">T1…T4</text>
+<text x="1119" y="561" font-size="15" fill="#006b60" font-weight="700" text-anchor="end">TQ</text>
+<rect x="1230" y="469" width="176" height="174" fill="#fff" stroke="#18344c" stroke-width="1.8"/>
+<text x="1242" y="493" font-size="18" fill="#18344c" font-weight="700" text-anchor="start">IOBUF</text>
+<path d="M1133 506 L1264 506 L1264 523 L1290 523" fill="none" stroke="#006b60" stroke-width="2.2" stroke-dasharray="none" marker-end="url(#m1)"/>
+<text x="1194" y="499" font-size="15" fill="#006b60" font-weight="700" text-anchor="start">I</text>
+<polygon points="1291,507 1291,539 1323,523" fill="#fff" stroke="#006b60" stroke-width="2.2"/>
+<path d="M1133 552 L1303 552 L1303 534" fill="none" stroke="#006b60" stroke-width="2.2" stroke-dasharray="none" marker-end="url(#m1)"/>
+<text x="1194" y="545" font-size="15" fill="#006b60" font-weight="700" text-anchor="start">T</text>
+<path d="M1323 523 L1350 523 L1350 543 L1406 543" fill="none" stroke="#18344c" stroke-width="2.2" stroke-dasharray="none"/>
+<circle cx="1350" cy="543" r="4" fill="#18344c"/>
+<path d="M1350 543 L1350 607 L1320 607" fill="none" stroke="#285da2" stroke-width="2.2" stroke-dasharray="none"/>
+<polygon points="1320,594 1320,620 1292,607" fill="#fff" stroke="#285da2" stroke-width="2.2"/>
+<path d="M1292 607 L1210 607 L1210 675 L1185 675" fill="none" stroke="#285da2" stroke-width="2.2" stroke-dasharray="none" marker-end="url(#m2)"/>
+<text x="1240" y="600" font-size="15" fill="#285da2" font-weight="700" text-anchor="start">O</text>
+<rect x="983" y="644" width="201" height="74" fill="white" stroke="#285da2" stroke-width="1.4"/>
+<text x="997" y="668" font-size="18" fill="#285da2" font-weight="700" text-anchor="start">IDELAYE2</text>
+<text x="997" y="690" font-size="14" fill="#18344c" font-weight="400" text-anchor="start">VAR_LOAD  ·  0–31 tap</text>
+<text x="997" y="709" font-size="13" fill="#285da2" font-weight="400" text-anchor="start">IDATAIN → DATAOUT</text>
+<rect x="770" y="644" width="177" height="74" fill="white" stroke="#285da2" stroke-width="1.4"/>
+<text x="781" y="668" font-size="18" fill="#285da2" font-weight="700" text-anchor="start">ISERDESE2</text>
+<text x="781" y="690" font-size="15" fill="#18344c" font-weight="400" text-anchor="start">DDLY → Q1…Q4</text>
+<text x="781" y="709" font-size="14" fill="#285da2" font-weight="400" text-anchor="start">DDR 1:4</text>
+<path d="M983 675 L949 675" fill="none" stroke="#285da2" stroke-width="2.2" stroke-dasharray="none" marker-end="url(#m2)"/>
+<path d="M770 675 L675 675 L675 637" fill="none" stroke="#285da2" stroke-width="2.2" stroke-dasharray="none" marker-end="url(#m2)"/>
+<text x="744" y="698" font-size="14" fill="#285da2" font-weight="700" text-anchor="end">rx_slots[3:0]</text>
+<text x="1238" y="635" font-size="14" fill="#526675" font-weight="400" text-anchor="start">T=1 高阻  /  T=0 驱动</text>
+<rect x="1570" y="333" width="205" height="417" fill="#f7f5f0" stroke="#18344c" stroke-width="2"/>
+<rect x="1570" y="333" width="205" height="42" fill="#18344c" stroke="#18344c" stroke-width="1.4"/>
+<text x="1672" y="361" font-size="22" fill="white" font-weight="700" text-anchor="middle">STM32F103ZE</text>
+<path d="M1252 426 L1566 426" fill="none" stroke="#006b60" stroke-width="2.2" stroke-dasharray="none" marker-end="url(#m1)"/>
+<rect x="1485" y="421" width="10" height="10" fill="white" stroke="#18344c" stroke-width="2"/>
+<text x="1528" y="415" font-size="14" fill="#18344c" font-weight="700" text-anchor="middle">J7-29</text>
+<text x="1478" y="417" font-size="13" fill="#18344c" font-weight="700" text-anchor="end">L15</text>
+<text x="1584" y="422" font-size="19" fill="#18344c" font-weight="700" text-anchor="start">SWCLK</text>
+<text x="1584" y="445" font-size="14" fill="#526675" font-weight="400" text-anchor="start">调试时钟输入</text>
+<path d="M1406 543 L1566 543" fill="none" stroke="#18344c" stroke-width="2.2" stroke-dasharray="none" marker-end="url(#m0)" marker-start="url(#m0)"/>
+<rect x="1485" y="538" width="10" height="10" fill="white" stroke="#18344c" stroke-width="2"/>
+<text x="1528" y="532" font-size="14" fill="#18344c" font-weight="700" text-anchor="middle">J7-31</text>
+<text x="1478" y="534" font-size="13" fill="#18344c" font-weight="700" text-anchor="end">L16</text>
+<text x="1584" y="539" font-size="19" fill="#18344c" font-weight="700" text-anchor="start">SWDIO</text>
+<text x="1584" y="562" font-size="14" fill="#526675" font-weight="400" text-anchor="start">双向调试数据</text>
+<path d="M1728 426 L1750 426 L1750 580 L1682 580 L1682 596" fill="none" stroke="#526675" stroke-width="2.2" stroke-dasharray="none" marker-end="url(#m4)"/>
+<path d="M1728 543 L1738 543 L1738 574 L1658 574 L1658 596" fill="none" stroke="#526675" stroke-width="2.2" stroke-dasharray="none" marker-end="url(#m4)" marker-start="url(#m4)"/>
+<text x="1388" y="565" font-size="13" fill="#18344c" font-weight="700" text-anchor="start">IO</text>
+<text x="1415" y="590" font-size="13" fill="#526675" font-weight="400" text-anchor="start">上拉</text>
+<path d="M1424 543 L1424 572" fill="none" stroke="#526675" stroke-width="1.4" stroke-dasharray="4 3"/>
+<rect x="1583" y="598" width="178" height="48" fill="white" stroke="#aebfc6" stroke-width="1.4"/>
+<text x="1672" y="628" font-size="17" fill="#18344c" font-weight="700" text-anchor="middle">SW-DP → MEM-AP</text>
+<path d="M1672 647 L1672 664" fill="none" stroke="#526675" stroke-width="2.2" stroke-dasharray="none" marker-end="url(#m4)"/>
+<text x="1672" y="687" font-size="18" fill="#18344c" font-weight="700" text-anchor="middle">目标 SRAM</text>
+<text x="1240" y="720" font-size="15" fill="#526675" font-weight="400" text-anchor="start">常 1</text>
+<path d="M1280 715 L1306 715" fill="none" stroke="#526675" stroke-width="2.2" stroke-dasharray="none"/>
+<polygon points="1307,702 1307,728 1333,715" fill="#fff" stroke="#526675" stroke-width="2.2"/>
+<path d="M1333 715 L1566 715" fill="none" stroke="#526675" stroke-width="2.2" stroke-dasharray="none" marker-end="url(#m4)"/>
+<rect x="1485" y="710" width="10" height="10" fill="white" stroke="#18344c" stroke-width="2"/>
+<text x="1478" y="703" font-size="13" fill="#18344c" font-weight="700" text-anchor="end">M14</text>
+<text x="1528" y="703" font-size="14" fill="#18344c" font-weight="700" text-anchor="middle">J7-23</text>
+<text x="1585" y="724" font-size="17" fill="#526675" font-weight="700" text-anchor="start">nSRST</text>
+<rect x="30" y="823" width="552" height="186" fill="#fff" stroke="#aebfc6" stroke-width="1.4"/>
+<rect x="30" y="823" width="552" height="37" fill="#eef3f5" stroke="#aebfc6" stroke-width="1.4"/>
+<text x="44" y="849" font-size="19" fill="#18344c" font-weight="700" text-anchor="start">全速 SWCLK 的生成</text>
+<rect x="603" y="823" width="550" height="186" fill="#fff" stroke="#aebfc6" stroke-width="1.4"/>
+<rect x="603" y="823" width="550" height="37" fill="#eef3f5" stroke="#aebfc6" stroke-width="1.4"/>
+<text x="617" y="849" font-size="19" fill="#18344c" font-weight="700" text-anchor="start">同一 SWDIO 焊盘的方向控制</text>
+<rect x="1174" y="823" width="601" height="186" fill="#fff" stroke="#aebfc6" stroke-width="1.4"/>
+<rect x="1174" y="823" width="601" height="37" fill="#eef3f5" stroke="#aebfc6" stroke-width="1.4"/>
+<text x="1188" y="849" font-size="19" fill="#18344c" font-weight="700" text-anchor="start">实板通过档  ·  F103ZE</text>
+<text x="46" y="894" font-size="17" fill="#18344c" font-weight="400" text-anchor="start">CLKDIV 每拍装入四个时隙；DDR 按 D1 → D4 发出。</text>
+<rect x="48" y="913" width="46" height="35" fill="#e5f3ed" stroke="#006b60" stroke-width="1.4"/>
+<text x="71" y="938" font-size="20" fill="#006b60" font-weight="700" text-anchor="middle">0</text>
+<rect x="97" y="913" width="46" height="35" fill="#e5f3ed" stroke="#006b60" stroke-width="1.4"/>
+<text x="120" y="938" font-size="20" fill="#006b60" font-weight="700" text-anchor="middle">1</text>
+<rect x="146" y="913" width="46" height="35" fill="#e5f3ed" stroke="#006b60" stroke-width="1.4"/>
+<text x="169" y="938" font-size="20" fill="#006b60" font-weight="700" text-anchor="middle">0</text>
+<rect x="195" y="913" width="46" height="35" fill="#e5f3ed" stroke="#006b60" stroke-width="1.4"/>
+<text x="218" y="938" font-size="20" fill="#006b60" font-weight="700" text-anchor="middle">1</text>
+<text x="255" y="937" font-size="17" fill="#006b60" font-weight="700" text-anchor="start">→  两个完整 SWCLK 周期</text>
+<text x="46" y="983" font-size="17" fill="#18344c" font-weight="400" text-anchor="start">177.778 MHz 档：CLKDIV ≈ 88.889 MHz。</text>
+<text x="620" y="894" font-size="17" fill="#18344c" font-weight="400" text-anchor="start">数据和三态位共用串行 CLK 与并行 CLKDIV。</text>
+<text x="620" y="927" font-size="17" fill="#18344c" font-weight="400" text-anchor="start">请求段由探针驱动，ACK 段释放给目标。</text>
+<text x="620" y="960" font-size="17" fill="#18344c" font-weight="400" text-anchor="start">读尾先采奇偶位，经 guard 等待后再驱动 idle。</text>
+<text x="620" y="990" font-size="15" fill="#285da2" font-weight="400" text-anchor="start">Q1 → rx_slots[3]，Q4 → rx_slots[0]。</text>
+<text x="1191" y="894" font-size="19" fill="#18344c" font-weight="700" text-anchor="start">SWCLK 177.778 MHz   ·   HCLK 128 MHz</text>
+<text x="1191" y="926" font-size="16" fill="#18344c" font-weight="400" text-anchor="start">tap 8   /   ACK、数据时隙 20   /   guard 1   /   idle 1</text>
+<text x="1191" y="958" font-size="18" fill="#006b60" font-weight="700" text-anchor="start">驻留块读 10.129 MB/s，写 12.248 MB/s。</text>
+<text x="1191" y="988" font-size="15" fill="#526675" font-weight="400" text-anchor="start">三轮，每轮各 16 MiB；计时覆盖 A9 控制与在线校验。</text>
+<text x="32" y="1035" font-size="15" fill="#526675" font-weight="400" text-anchor="start">配对源码  2de3776e     ·     swd200_regs  /  swd200_batch  /  swd200_link  /  swd200_segment  /  swd200_phy</text>
 </g></svg>
