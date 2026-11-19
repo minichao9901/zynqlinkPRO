@@ -55,3 +55,7 @@ python -X utf8 toolbox.py project run swd200 -- sim --mhz 200 --words 256 --roun
 python -X utf8 toolbox.py project run swd200 -- matrix
 python -X utf8 toolbox.py project run swd200 -- build
 ```
+
+## F103ZE 实板预检（2026-11-19）
+
+Windows 枚举到目标固件的 USB CDC（VID F055、PID 1031、序列号 `F103CDC0001`、COM34）。J7 的 HS3 下载线 `210299008529` 在系统设备记录中为 `Present=False`。连接本机 hw_server 后，XSCT 连续三次查询 `targets` 和 `jtag targets` 均返回空列表。当前实验配对依靠此链路访问探针的物理 MEM-AP0。该轮停于探针枚举，F103 的 DPIDR、芯片及 SRAM 容量、时钟和实板吞吐均待核对，目标写入次数为零。
