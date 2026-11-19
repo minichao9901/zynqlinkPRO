@@ -1,0 +1,30 @@
+{
+  "target": {
+    "name": "STM32F103",
+    "cpuid": "0x411fc231",
+    "device": "0x10036414",
+    "registers": {
+      "0x40021000": "0x3034e83",
+      "0x40021004": "0x51040a"
+    }
+  },
+  "dhcsr": 16842752,
+  "elf_sha256": "e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f",
+  "guards": [
+    2178090203,
+    4120689631
+  ],
+  "ram_sha256": "9ef2d30c6fcb7c37442510c8df47885afcd26f631e9cc9cf3f2f06dae102e6c6",
+  "apb2": 16461,
+  "mapr": 0,
+  "tap": "0x3ba00477",
+  "error": "CalledProcessError(1, ['python', '-X', 'utf8', 'tools/jtag200_f103_sweep.py', '--fixture', 'build/jtag200/f103-48pilot', '--pair', 'prebuilt/jtag-only-f103ze-20261119', '--cable-serial', '210299008529', '--rates', '66.667-block', '80', '100', '--seconds', '0', '--execute'])",
+  "before_restore_sha256": "9ef2d30c6fcb7c37442510c8df47885afcd26f631e9cc9cf3f2f06dae102e6c6",
+  "guard_before_restore": [
+    2178090203,
+    4120689631
+  ],
+  "restored_bytes": 4096,
+  "final_dhcsr": "0x1010000",
+  "restored": true
+}

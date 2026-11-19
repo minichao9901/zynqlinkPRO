@@ -1,0 +1,31 @@
+{
+  "source_revision": "20875c8fded3b661f0faa0f49c8974527f625ecd",
+  "fpga_entry": "fpga/experiments/jtag200/build.tcl",
+  "fpga_timing": {
+    "FCLK0_Hz": 133333333,
+    "FCLK1_max_Hz": 50000000,
+    "serializer_max_Hz": 200000000,
+    "setup_slack_ns": 1.874,
+    "hold_slack_ns": 0.087
+  },
+  "firmware_flags": [
+    "-mcpu=cortex-a9",
+    "-marm",
+    "-O3",
+    "-g",
+    "-ffreestanding",
+    "-nostdlib",
+    "-DJTAG200_STRESS",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-Wl,--build-id=none"
+  ],
+  "hardware_acceptance": "F103ZE USB and local SelectIO 1 KiB, original clock and temporary HCLK96/128. See sustained and pilot evidence for each point.",
+  "sha256": {
+    "probe.bit": "2105a8a0aee9faed7d19ff3d9ad819be05408a2c9eef0292c69f059629104512",
+    "application.elf": "74aeb64e6d2076b86c0ce0762464519e145ec3dcccd25361604a00fc0a7a07a3",
+    "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+  },
+  "hardware_evidence": "docs/validation/f103ze-jtag200-20261119/README.md"
+}

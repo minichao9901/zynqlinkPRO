@@ -1,0 +1,47 @@
+[
+  {
+    "ref": 10.0,
+    "half": 2,
+    "sample": 29,
+    "idle": 17,
+    "hclk": 96.0,
+    "tck_MHz": 100.0,
+    "passed": true,
+    "evidence": [
+      "J200_ARM_BREAKDOWN direction=write idle=17 words=256 wall_ns=160740.00 tck=15831 send_clkdiv=7917 return_clkdiv=1 parked_clkdiv=119 dr_prep_clkdiv=14",
+      "J200_ARM_BREAKDOWN direction=read idle=17 words=256 wall_ns=160740.00 tck=15831 send_clkdiv=7917 return_clkdiv=1 parked_clkdiv=119 dr_prep_clkdiv=14",
+      "J200_ARM_PASS stream=1 half=2 idle=17 words=256 read_MBps=6.371 write_MBps=6.371",
+      "J200_CM3_PASS HCLK_MHz=96.000 ref_half_ns=10.000"
+    ]
+  },
+  {
+    "ref": 10.0,
+    "half": 2,
+    "sample": 29,
+    "idle": 21,
+    "hclk": 96.0,
+    "tck_MHz": 100.0,
+    "passed": true,
+    "evidence": [
+      "J200_ARM_BREAKDOWN direction=write idle=21 words=256 wall_ns=171270.00 tck=16883 send_clkdiv=8443 return_clkdiv=1 parked_clkdiv=119 dr_prep_clkdiv=14",
+      "J200_ARM_BREAKDOWN direction=read idle=21 words=256 wall_ns=171255.00 tck=16883 send_clkdiv=8443 return_clkdiv=1 parked_clkdiv=119 dr_prep_clkdiv=14",
+      "J200_ARM_PASS stream=1 half=2 idle=21 words=256 read_MBps=5.979 write_MBps=5.979",
+      "J200_CM3_PASS HCLK_MHz=96.000 ref_half_ns=10.000"
+    ]
+  },
+  {
+    "ref": 10.0,
+    "half": 1,
+    "sample": 28,
+    "idle": 40,
+    "hclk": 96.0,
+    "tck_MHz": 200.0,
+    "passed": true,
+    "evidence": [
+      "J200_ARM_BREAKDOWN direction=write idle=40 words=256 wall_ns=149160.00 tck=21880 send_clkdiv=5540 return_clkdiv=0 parked_clkdiv=1918 dr_prep_clkdiv=526",
+      "J200_ARM_BREAKDOWN direction=read idle=40 words=256 wall_ns=149115.00 tck=21880 send_clkdiv=5540 return_clkdiv=0 parked_clkdiv=1916 dr_prep_clkdiv=526",
+      "J200_ARM_PASS stream=0 half=1 idle=40 words=256 read_MBps=6.867 write_MBps=6.865",
+      "J200_CM3_PASS HCLK_MHz=96.000 ref_half_ns=10.000"
+    ]
+  }
+]

@@ -17,6 +17,7 @@ from h743_peak import measure_pipeline
 from jtag200 import ROOT
 from jtag200_pipeline import need
 from run_f103_jtag_fixture import DHCSR, APB2ENR, MAPR, SWJ_MASK
+import run_f103_clock_fixture as clocks
 from target_snapshot import snapshot
 from test_probe_board import Memory
 
@@ -50,6 +51,11 @@ def low_link():
             usb.util.dispose_resources(device)
 
 
+def clock_state(mem):
+    return {name: mem.word(addr) for name, addr in (
+        ('CR', clocks.CR), ('CFGR', clocks.CFGR), ('APB1ENR', clocks.APB1ENR), ('FLASH_ACR', clocks.FLASH))}
+
+
 def guards(mem):
     return [mem.word(PAGE - 4), mem.word(PAGE + SIZE)]
 
@@ -79,6 +85,10 @@ def restore(folder, st):
         if 'apb2' in st:
             mem.write_word(APB2ENR, st['apb2'])
             need(mem.word(APB2ENR) == st['apb2'], 'APB2 restore failed')
+        if 'clock_before' in st:
+            clocks.restore(mem, st['clock_before'])
+            st['clock_after'] = clock_state(mem)
+            need(st['clock_after'] == st['clock_before'], 'Clock or Flash wait-state restore failed')
         need(snapshot(mem) == st['target'], 'RCC/target changed')
         if 'previous_sampling' in st:
             need(xfer(mem.out, mem.inp, [0x89, st['previous_sampling']])[2] == st['previous_sampling'],
@@ -121,12 +131,21 @@ def run(args):
             mem.write_word(APB2ENR, st['apb2'] | 1)
             st['mapr'] = mem.word(MAPR) & ~SWJ_MASK
             save(folder, st)
+            if args.hclk != 48:
+                st['clock_before'] = clock_state(mem)
+                need(st['clock_before']['CFGR'] == 0x51040a, 'Expected CDC48 HSE8 x6 at entry')
+                save(folder, st)
+                clocks.set_hse8_clock(mem, st['clock_before'], args.hclk//8, 5, 4)
+                st['clock_active'] = clock_state(mem)
+                st['dwt'] = clocks.dwt_check(mem, folder/'clock.json', args.hclk*1_000_000)
             mem.write_word(MAPR, st['mapr'])
             tx, rx = mem.out, mem.inp
             tap = setup(tx, rx, 1000, 'jtag')
             need(int.from_bytes(tap[2:], 'little') == TAP, 'F103 JTAG TAP identity mismatch')
             need(mem.read(PAGE, SIZE) == original, 'JTAG low speed SRAM mismatch')
             st['tap'] = hex(TAP)
+            st['hclk_mhz'] = args.hclk
+            save(folder, st)
             if args.baseline:
                 st['previous_sampling'] = xfer(tx, rx, [0x89, 255])[2]
                 need(xfer(tx, rx, [0x89, 16])[2] == 16, 'Late TDO sampling rejected')
@@ -153,6 +172,7 @@ def run(args):
 
 if __name__ == '__main__':
     p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument('--hclk', choices=(48,96,128), type=int, default=48)
     p.add_argument('--out', type=Path, required=True)
     mode = p.add_mutually_exclusive_group(required=True)
     mode.add_argument('--baseline', action='store_true')
@@ -163,4 +183,4 @@ if __name__ == '__main__':
     if args.execute:
         run(args)
     else:
-        print('Temporary JTAG fixture on CDC48, guarded 4 KiB backup, original HCLK.')
+        print('Temporary JTAG fixture on CDC48, guarded 4 KiB backup, selected HCLK and verified clock restoration.')

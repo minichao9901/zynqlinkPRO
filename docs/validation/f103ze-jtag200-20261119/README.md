@@ -14,7 +14,7 @@
 
 J7 HS3 `210299008529` 开测时 BOOT_MODE=0，PL 隔离并处于复位。临时加载 `prebuilt/release-20261106` 后经物理 MEM-AP0 核对 85,844 字节。F103ZE CDC48 的两个 ELF 载入段均从目标读取核对。CPUID `0x411fc231`，DBGMCU `0x10036414`，RCC_CFGR `0x51040a`，8 MHz HSE、PLL ×6、AHB /1，HCLK 48 MHz。内核原先运行。先暂停并双读备份 4 KiB 和两端哨兵，再临时开放 AFIO，通过 1 MHz 的 JTAG TAP 和整区读取。
 
-正式配对在推算 TCK 59,999,999 Hz、512 字、深度 32、256 块的三轮中位数为读 **2.4131**、写 **2.3898 MB/s**，另完成 10 秒交替验证。首次块读应答失败后经低速 SWD 恢复，强制 TDO 采样模式 16 重跑通过。两次独立恢复核对 4 KiB、哨兵、RCC、AFIO 可读位、APB2 与运行态。SWJ_CFG 按核对过的 CDC48 源码恢复为 2。[首次 USB](usb-initial.json) · [模式 16](usb-mode16.json)
+正式配对在推算 TCK 59,999,999 Hz、512 字、深度 32、256 块的三轮中位数为读 **2.4131**、写 **2.3898 MB/s**，另完成 10 秒交替验证。首次块读应答失败后经低速 SWD 恢复，请求 TDO 模式 16、切换到 60 MHz 后寄存器实际读回 17，重跑通过。两次独立恢复核对 4 KiB、哨兵、RCC、AFIO 可读位、APB2 与运行态。SWJ_CFG 按核对过的 CDC48 源码恢复为 2。[首次 USB](usb-initial.json) · [模式 16](usb-mode16.json)
 
 复测示例，从工作树根目录运行。Vivado 2018.3，`--rtl` 指向本机授权的 CM3DbgAXI 源码目录。
 
@@ -22,3 +22,17 @@ J7 HS3 `210299008529` 开测时 BOOT_MODE=0，PL 隔离并处于复位。临时�
 python -X utf8 tools/jtag200_cm3_sim.py --rtl <CM3DbgAXI/rtl> --out build/jtag200/cm3-new --point 15 2 29 33 --point 10 2 30 49
 python -X utf8 tools/jtag200_f103_fixture.py --out build/jtag200/usb-new --execute --baseline
 ```
+
+## 提高目标 HCLK 的同板对照
+
+新测试页配对的实板 bit 和 ELF 见 [manifest](../../../prebuilt/jtag-only-f103ze-20261119/manifest.json)，路由 WNS +1.874 ns、WHS +0.087 ns，加载后由 HS3 的物理 MEM-AP0 核对 3,064 字节 OCM 执行段。连续路径以 1 KiB 为单位，图案预驻探针，A9 提交、等待、PL 逐字校验计入方向时间。分方向 MB/s 按该方向占用时间计，交替窗口中的每个方向各约占一半时间。一次性 PC 上传、USB 下载不在此项计时内。频率从探针实际时钟寄存器计算。覆盖范围为本板本接线，无外部频率计读数。
+
+| HCLK MHz | TCK MHz | 混合 idle | 1 秒读 / 写 MB/s | 同页仿真读 / 写 MB/s |
+|---:|---:|---:|---:|---|
+| 48 | 100 | 33 | 4.991 / 4.991 | 5.049 / 5.049 |
+| 96 | 100 | 19 | 6.080 / 6.080 | 同一 idle 另验 |
+| 128 | 100 | 13 | 6.713 / 6.713 | 6.816 / 6.816 |
+
+每轮先用低速 SWD 核对 CDC48 和 RAM 双读备份，再用 1 MHz JTAG 读回，测试过程中不同图案与反相图案实际交替写入。96/128 MHz 临时在目标暂停时调 PLL、APB 分频、USB 门控和 Flash 控制器等待周期，用 SRAM 自循环及 DWT 验证目标 HCLK，随后恢复临时程序、核心寄存器、DWT。每次恢复独立 USB 配对并逐字节检查末轮图案、相邻 3 KiB 和两端哨兵，再复原备份的 4 KiB、映射、时钟及运行状态。开测夹具的首次子程序调度遗漏已读出的 TAP 字段，修正保存顺序后复测；该次在切换高速配对前退出，亦已恢复。
+
+[48 MHz 逐轮](hclk48-windows.json) · [48 MHz 恢复](hclk48-state.json) · [96 MHz 逐轮](hclk96-windows.json) · [96 MHz 恢复](hclk96-state.json) · [128 MHz 逐轮](hclk128-windows.json) · [128 MHz 恢复](hclk128-state.json) · [48 MHz CM3 细测](cm3-fine.json) · [96 MHz CM3](cm3-96.json) · [128 MHz CM3](cm3-128.json)

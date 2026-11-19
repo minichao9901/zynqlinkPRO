@@ -1,0 +1,60 @@
+[
+  {
+    "ref": 10.0,
+    "half": 2,
+    "sample": 29,
+    "idle": 9,
+    "hclk": 128.0,
+    "tck_MHz": 100.0,
+    "passed": false,
+    "evidence": [
+      "J200_ARM_BREAKDOWN direction=write idle=9 words=256 wall_ns=5250.00 tck=348 send_clkdiv=175 return_clkdiv=1 parked_clkdiv=86 dr_prep_clkdiv=8",
+      "Fatal: ARM write completion 00000002"
+    ]
+  },
+  {
+    "ref": 10.0,
+    "half": 2,
+    "sample": 29,
+    "idle": 13,
+    "hclk": 128.0,
+    "tck_MHz": 100.0,
+    "passed": true,
+    "evidence": [
+      "J200_ARM_BREAKDOWN direction=write idle=13 words=256 wall_ns=150225.00 tck=14779 send_clkdiv=7391 return_clkdiv=1 parked_clkdiv=119 dr_prep_clkdiv=14",
+      "J200_ARM_BREAKDOWN direction=read idle=13 words=256 wall_ns=150225.00 tck=14779 send_clkdiv=7391 return_clkdiv=1 parked_clkdiv=119 dr_prep_clkdiv=14",
+      "J200_ARM_PASS stream=1 half=2 idle=13 words=256 read_MBps=6.816 write_MBps=6.816",
+      "J200_CM3_PASS HCLK_MHz=128.000 ref_half_ns=10.000"
+    ]
+  },
+  {
+    "ref": 10.0,
+    "half": 2,
+    "sample": 29,
+    "idle": 17,
+    "hclk": 128.0,
+    "tck_MHz": 100.0,
+    "passed": true,
+    "evidence": [
+      "J200_ARM_BREAKDOWN direction=write idle=17 words=256 wall_ns=160740.00 tck=15831 send_clkdiv=7917 return_clkdiv=1 parked_clkdiv=119 dr_prep_clkdiv=14",
+      "J200_ARM_BREAKDOWN direction=read idle=17 words=256 wall_ns=160740.00 tck=15831 send_clkdiv=7917 return_clkdiv=1 parked_clkdiv=119 dr_prep_clkdiv=14",
+      "J200_ARM_PASS stream=1 half=2 idle=17 words=256 read_MBps=6.371 write_MBps=6.371",
+      "J200_CM3_PASS HCLK_MHz=128.000 ref_half_ns=10.000"
+    ]
+  },
+  {
+    "ref": 10.0,
+    "half": 1,
+    "sample": 28,
+    "idle": 24,
+    "hclk": 128.0,
+    "tck_MHz": 200.0,
+    "passed": true,
+    "evidence": [
+      "J200_ARM_BREAKDOWN direction=write idle=24 words=256 wall_ns=128130.00 tck=17672 send_clkdiv=4488 return_clkdiv=0 parked_clkdiv=1918 dr_prep_clkdiv=526",
+      "J200_ARM_BREAKDOWN direction=read idle=24 words=256 wall_ns=128085.00 tck=17672 send_clkdiv=4488 return_clkdiv=0 parked_clkdiv=1916 dr_prep_clkdiv=526",
+      "J200_ARM_PASS stream=0 half=1 idle=24 words=256 read_MBps=7.995 write_MBps=7.992",
+      "J200_CM3_PASS HCLK_MHz=128.000 ref_half_ns=10.000"
+    ]
+  }
+]

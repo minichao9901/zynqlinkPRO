@@ -51,7 +51,9 @@ def hsi(mem):
     wait_bits(mem, CFGR, 12, 0)
 
 
-def set96(mem, saved):
+def set_hse8_clock(mem, saved, multiplier, apb1, apb2):
+    if not 2 <= multiplier <= 16:
+        raise ValueError("F103 HSE PLL multiplier must be 2..16")
     mem.write_word(FLASH, (saved['FLASH_ACR'] & ~7) | 2)
     mem.write_word(APB1ENR, saved['APB1ENR'] & ~(1 << 23))
     hsi(mem)
@@ -59,15 +61,19 @@ def set96(mem, saved):
     wait_bits(mem, CR, 1 << 25, 0)
     mem.write_word(CR, mem.word(CR) | (1 << 16))
     wait_bits(mem, CR, 1 << 17, 1 << 17)
-    # SYS/HCLK96, APB1 /2, APB2 /1, ADC /8; preserve MCO/USB prescaler.
+    # ADC /8; preserve MCO and USB prescaler.
     mask = 15 | (15 << 4) | (7 << 8) | (7 << 11) | (3 << 14) | (63 << 16)
-    cfg = (saved['CFGR'] & ~mask) | (4 << 8) | (3 << 14) | (1 << 16) | (10 << 18)
+    cfg = (saved['CFGR'] & ~mask) | (apb1 << 8) | (apb2 << 11) | (3 << 14) | (1 << 16) | ((multiplier-2) << 18)
     mem.write_word(CFGR, cfg)
     mem.write_word(CR, mem.word(CR) | (1 << 24))
     wait_bits(mem, CR, 1 << 25, 1 << 25)
     mem.write_word(CFGR, cfg | 2)
     value = wait_bits(mem, CFGR, 12, 8)
-    assert (value >> 18) & 15 == 10 and not value & 0xF0, hex(value)
+    assert (value >> 18) & 15 == multiplier-2 and not value & 0xF0, hex(value)
+
+
+def set96(mem, saved):
+    set_hse8_clock(mem, saved, 12, 4, 0)
 
 
 def restore(mem, saved):
@@ -87,10 +93,11 @@ def restore(mem, saved):
     mem.write_word(CR, saved['CR'])
 
 
-def dwt_check(mem, output):
+def dwt_check(mem, output, expected_hz=96_000_000):
     base = 0x2000F000
     regs = {k: core_read(mem, k) for k in [*range(19), 20]}
     ram = mem.read(base, 4096)
+    assert mem.read(base, 4096) == ram, 'DWT scratch double-read mismatch'
     output.with_suffix('.dwt.backup.bin').write_bytes(ram)
     addresses = [0xE000EDFC, 0xE0001000, 0xE0001004]
     debug = {a: mem.word(a) for a in addresses}
@@ -107,7 +114,7 @@ def dwt_check(mem, output):
         time.sleep(.35)
         t = time.perf_counter(); b = mem.word(addresses[2]); t1 = (t + time.perf_counter()) / 2
         hz = ((b - a) & 0xFFFFFFFF) / (t1 - t0)
-        assert 94_000_000 < hz < 98_000_000, hz
+        assert abs(hz - expected_hz) < expected_hz * 0.025, hz
         result.update(elapsed_s=t1-t0, cycles=(b-a) & 0xFFFFFFFF, measured_Hz=hz,
                       method='DWT CYCCNT in SRAM-only loop; host midpoint-bracketed SWD reads')
     finally:
