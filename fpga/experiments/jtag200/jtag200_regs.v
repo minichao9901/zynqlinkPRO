@@ -53,7 +53,8 @@ module jtag200_regs #(parameter ENABLE_BLOCK=0) (
     wire [17:0] end_address = {1'b0,block_address[16:0]} + {7'b0,block_count,2'b0};
     wire [10:0] arm_end_address = {1'b0,block_address[9:0]} + {block_count,2'b0};
     wire block_address_valid = block_timing[21] ?
-        block_address[31:10] == 22'h090140 && arm_end_address <= 11'h400 :
+        (block_address[31:10] == (32'h24050000 >> 10) ||
+         block_address[31:10] == (32'h20008000 >> 10)) && arm_end_address <= 11'h400 :
         block_address[31:17] == 15'h82 && end_address <= 18'h1FFFC;
     wire block_valid = ENABLE_BLOCK && block_address_valid &&
                        block_address[1:0] == 0 && block_count != 0 && block_count <= 9'd256 &&

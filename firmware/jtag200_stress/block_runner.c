@@ -111,9 +111,11 @@ static unsigned transfer(int write, uint32_t inversion, int resident, struct tra
 static unsigned exercise(unsigned seconds, unsigned direction)
 {
     uint32_t timing = REG(0x4000001cu);
-    uint32_t base = timing & (1u << 21) ? 0x24050000u : 0x0105f000u;
+    uint32_t base = REG(0x40000014u);
+    int valid_page = timing & (1u << 21) ? (base == 0x24050000u || base == 0x20008000u)
+                                         : base == 0x0105f000u;
     if (seconds > 120 || direction > 2 || REG(0x40000010u) != 0x50495045u ||
-        REG(0x40000014u) != base || REG(0x40000018u) != COUNT)
+        !valid_page || REG(0x40000018u) != COUNT)
         return 1;
     int resident = (timing & (1u << 23)) != 0;
     if (resident) {

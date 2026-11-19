@@ -66,7 +66,21 @@ module tb_jtag200;
     jtag_dp_model #(.RETURN_NS(0.8)) arm_dap (
         .rst_n(axi_resetn), .tck(tck && arm_test), .tms(tms), .tdi(boundary_tdo), .tdo(arm_tdo));
 `endif
+`ifdef J200_TEST_CM3
+    reg hclk = 0;
+    real hclk_mhz = 48;
+    initial begin
+        if ($value$plusargs("hclk=%f",hclk_mhz)) begin end
+        forever #(500.0/hclk_mhz) hclk = !hclk;
+    end
+    wire cm3_tdo, cm3_ntdoen;
+    cm3_target #(.WORDS(1024),.ADDR_BITS(10)) cm3 (
+        .clk(hclk),.rst_n(axi_resetn),.dbg_rst_n(axi_resetn),.trst_n(axi_resetn),
+        .swclktck(tck),.swditms(tms),.tdi(boundary_tdo),.tdo(cm3_tdo),.ntdoen(cm3_ntdoen));
+    assign #0.80 tdo = cm3_ntdoen ? 1'b1 : cm3_tdo;
+`else
     assign tdo = arm_test ? arm_tdo : block_test ? block_tdo : raw_tdo;
+`endif
 
     task automatic write_reg(input [13:0] addr, input [31:0] data, input [1:0] response);
         fork
@@ -313,7 +327,15 @@ module tb_jtag200;
         write_reg(8, 13, 2);
         write_reg(14'h014, 32'h240503fc, 0);
         write_reg(8, 13, 2);
+`ifdef J200_TEST_CM3
+        write_reg(14'h014, 32'h200083fc, 0);
+        write_reg(8, 13, 2);
+        write_reg(14'h014, 32'h20008400, 0);
+        write_reg(8, 13, 2);
+        write_reg(14'h014, 32'h20008000, 0);
+`else
         write_reg(14'h014, 32'h24050000, 0);
+`endif
         for (int i=0; i<count; i++)
             write_reg(14'h1004+4*i, 32'h70420000 ^ (i*65537), 0);
         first_tck=measured_tck;
@@ -325,9 +347,15 @@ module tb_jtag200;
         end_arm_profile("write",idle,count,first_tck,write_ns);
         read_reg(14'h020, word);
         if (word !== 1) $fatal(1,"ARM write completion %h",word);
-        for (int i=0; i<count; i++)
-            if (arm_dap.mem[i] !== (32'h70420000 ^ (i*65537) ^ invert))
+        for (int i=0; i<count; i++) begin
+`ifdef J200_TEST_CM3
+            word = cm3.u_sys.mem[i];
+`else
+            word = arm_dap.mem[i];
+`endif
+            if (word !== (32'h70420000 ^ (i*65537) ^ invert))
                 $fatal(1,"ARM write differs at word %d",i);
+        end
         write_reg(8, 0, 0);
         wait_status(5);
         first_tck=measured_tck;
@@ -468,7 +496,9 @@ module tb_jtag200;
 
     initial begin
         `ifndef J200_TEST_HAZARD3
+`ifndef J200_TEST_CM3
         $readmemh("pins.mem", expected_pins);
+`endif
 `endif
         #300;
         @(negedge axi_clk);
@@ -499,6 +529,24 @@ module tb_jtag200;
             hazard_burst(1,29,32,128);
             hazard_burst(1,29,16,128);
             hazard_burst(1,29,8,128);
+        end
+`else
+`ifdef J200_TEST_CM3
+        begin
+            integer half, sample_slot, idle, streaming;
+            block_test=1;
+            arm_test=1;
+            if (!$value$plusargs("ref=%f",ref_half)) ref_half=10.0;
+            if (!$value$plusargs("half=%d",half)) half=2;
+            if (!$value$plusargs("sample=%d",sample_slot)) sample_slot=29;
+            if (!$value$plusargs("idle=%d",idle)) idle=17;
+            if (!$value$plusargs("stream=%d",streaming)) streaming=(half==2);
+            write_reg(8,2,0);
+            #500;
+            write_reg(8,0,0);
+            wait_status(5);
+            arm_pipeline(half,sample_slot,idle,256,streaming);
+            $display("J200_CM3_PASS HCLK_MHz=%0.3f ref_half_ns=%0.3f",hclk_mhz,ref_half);
         end
 `else
         profile(0, 10.0, 20.0);
@@ -541,6 +589,7 @@ module tb_jtag200;
         arm_pipeline(2,29,3,256,1);
         arm_pipeline(2,30,5,256,1);
         check_arm_stream_errors();
+`endif
 `endif
         $display("JTAG200_SIM_PASS");
         $finish;

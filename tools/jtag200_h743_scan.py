@@ -68,7 +68,7 @@ def select(port, rate, tap):
     return half, hz
 
 
-def identify(port, half, rounds):
+def identify(port, half, rounds, expected=IDCODE):
     advance = int(half == 2)
     scan = Scan()
     start = scan.identify()
@@ -76,7 +76,7 @@ def identify(port, half, rounds):
     for _ in range(rounds):
         raw = scan.transfer(port, half, advance)
         identity &= {phase for phase in identity
-                     if value_at(raw, half, start, 32, phase) == IDCODE}
+                     if value_at(raw, half, start, 32, phase) == expected}
         if not identity:
             break
     return identity

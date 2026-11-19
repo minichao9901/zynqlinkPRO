@@ -2,6 +2,7 @@
 set here [file dirname [file normalize [info script]]]
 set root [file normalize [file join $here ../../..]]
 set out [file join $root build jtag200 fpga]
+if {[info exists ::env(JTAG200_FPGA_OUT)]} {set out [file normalize $::env(JTAG200_FPGA_OUT)]}
 file mkdir $out
 source [file join $root fpga diagnostics minimal_swd ps7_config.tcl]
 create_project -force jtag200 $out -part xc7z020clg400-2

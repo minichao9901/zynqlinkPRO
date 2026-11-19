@@ -1,0 +1,73 @@
+[
+  {
+    "ref": 15.0,
+    "half": 2,
+    "sample": 29,
+    "idle": 33,
+    "hclk": 48,
+    "tck_MHz": 66.66666666666667,
+    "passed": true,
+    "evidence": [
+      "J200_ARM_BREAKDOWN direction=write idle=33 words=256 wall_ns=304200.00 tck=20039 send_clkdiv=10021 return_clkdiv=1 parked_clkdiv=118 dr_prep_clkdiv=14",
+      "J200_ARM_BREAKDOWN direction=read idle=33 words=256 wall_ns=304200.00 tck=20039 send_clkdiv=10021 return_clkdiv=1 parked_clkdiv=118 dr_prep_clkdiv=14",
+      "J200_ARM_PASS stream=1 half=2 idle=33 words=256 read_MBps=3.366 write_MBps=3.366",
+      "J200_CM3_PASS HCLK_MHz=48.000 ref_half_ns=15.000"
+    ]
+  },
+  {
+    "ref": 15.0,
+    "half": 2,
+    "sample": 30,
+    "idle": 33,
+    "hclk": 48,
+    "tck_MHz": 66.66666666666667,
+    "passed": true,
+    "evidence": [
+      "J200_ARM_BREAKDOWN direction=write idle=33 words=256 wall_ns=304200.00 tck=20039 send_clkdiv=10021 return_clkdiv=1 parked_clkdiv=118 dr_prep_clkdiv=14",
+      "J200_ARM_BREAKDOWN direction=read idle=33 words=256 wall_ns=304200.00 tck=20039 send_clkdiv=10021 return_clkdiv=1 parked_clkdiv=118 dr_prep_clkdiv=14",
+      "J200_ARM_PASS stream=1 half=2 idle=33 words=256 read_MBps=3.366 write_MBps=3.366",
+      "J200_CM3_PASS HCLK_MHz=48.000 ref_half_ns=15.000"
+    ]
+  },
+  {
+    "ref": 10.0,
+    "half": 2,
+    "sample": 30,
+    "idle": 49,
+    "hclk": 48,
+    "tck_MHz": 100.0,
+    "passed": true,
+    "evidence": [
+      "J200_ARM_BREAKDOWN direction=write idle=49 words=256 wall_ns=244905.00 tck=24247 send_clkdiv=12125 return_clkdiv=1 parked_clkdiv=119 dr_prep_clkdiv=14",
+      "J200_ARM_BREAKDOWN direction=read idle=49 words=256 wall_ns=244905.00 tck=24247 send_clkdiv=12125 return_clkdiv=1 parked_clkdiv=119 dr_prep_clkdiv=14",
+      "J200_ARM_PASS stream=1 half=2 idle=49 words=256 read_MBps=4.181 write_MBps=4.181",
+      "J200_CM3_PASS HCLK_MHz=48.000 ref_half_ns=10.000"
+    ]
+  },
+  {
+    "ref": 10.0,
+    "half": 2,
+    "sample": 31,
+    "idle": 63,
+    "hclk": 48,
+    "tck_MHz": 100.0,
+    "passed": false,
+    "evidence": [
+      "J200_ARM_BREAKDOWN direction=write idle=63 words=256 wall_ns=2130.00 tck=127 send_clkdiv=64 return_clkdiv=0 parked_clkdiv=42 dr_prep_clkdiv=2",
+      "Fatal: ARM write completion 00000002"
+    ]
+  },
+  {
+    "ref": 10.0,
+    "half": 1,
+    "sample": 30,
+    "idle": 64,
+    "hclk": 48,
+    "tck_MHz": 200.0,
+    "passed": false,
+    "evidence": [
+      "J200_ARM_BREAKDOWN direction=write idle=64 words=256 wall_ns=1530.00 tck=128 send_clkdiv=34 return_clkdiv=0 parked_clkdiv=42 dr_prep_clkdiv=2",
+      "Fatal: ARM write completion 00000002"
+    ]
+  }
+]
