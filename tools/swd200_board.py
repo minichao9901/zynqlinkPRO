@@ -91,9 +91,9 @@ if {{[swd_rd 0x2ff18]}} {{error "SWD clock startup error"}}
         return result
 
 
-def candidate():
-    hashes = json.loads((PAIR / "manifest.json").read_text())["sha256"]
+def candidate(pair=PAIR):
+    hashes = json.loads((pair / "manifest.json").read_text())["sha256"]
     for name, digest in hashes.items():
-        if sha(PAIR / name) != digest:
+        if sha(pair / name) != digest:
             raise RuntimeError(f"Candidate SHA-256 differs for {name}")
-    return tuple(PAIR / name for name in ("probe.bit", "application.elf", "ps7_init.tcl"))
+    return tuple(pair / name for name in ("probe.bit", "application.elf", "ps7_init.tcl"))

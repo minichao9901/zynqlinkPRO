@@ -60,16 +60,20 @@ def snapshot(model):
     stamp.write_text(fingerprint + "\n", encoding="ascii")
 
 
-def simulate(mhz, return_ns, target_ns, ack, data, tap, idle, words, rounds, trace=False):
+def simulate(mhz, return_ns, target_ns, ack, data, tap, idle, words, rounds, trace=False, guard=0, banks=False):
     profile = dict(mhz=mhz, return_ns=return_ns, target_ns=target_ns,
                    ack=ack, data=data, tap=tap, idle=idle, words=words, rounds=rounds)
-    key = "-".join(f"{name}{value}" for name, value in profile.items())
+    if guard:
+        profile["guard"] = guard
+    key = "-".join(f"{name}{value}" for name, value in profile.items()) + ("-banks" if banks else "")
     log = SIM / f"{key}.log"
     command = [XBIN / "xsim.exe", SNAPSHOT, "-runall", "-log", SIM / f"{key}.xsim.log"]
     for name, value in profile.items():
         command += ["-testplusarg", f"{name}={value}"]
     if trace:
         command += ["-testplusarg", "trace"]
+    if banks:
+        command += ["-testplusarg", "banks"]
     rc = run(command, SIM, log, env=environment())
     output = log.read_text(encoding="utf-8", errors="replace")
     success = SUCCESS.search(output)
@@ -123,6 +127,23 @@ def build(gcc):
     return 0
 
 
+def bench_elf(gcc, output, resident):
+    """Build the OCM board timing helper for the same GP0 register map."""
+    output = output.resolve()
+    output.parent.mkdir(parents=True, exist_ok=True)
+    source = Path("firmware/swd200")
+    flags = ["-mcpu=cortex-a9", "-marm", "-O2", "-g", "-ffreestanding", "-nostdlib",
+             "-Wall", "-Wextra", "-Werror", "-DSWD200_BOARD_BENCH"]
+    if resident:
+        flags.append("-DSWD200_RESIDENT")
+    subprocess.run([gcc, *flags, "-Wl,--build-id=none", "-T", source / "ocm.ld",
+                    source / "start.S", source / "clock.c", source / "f103_bench.c",
+                    "-o", output], cwd=ROOT, check=True)
+    from verify_probe_ocm_code import read_ocm_code
+    read_ocm_code(output)
+    return 0
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     action = parser.add_subparsers(dest="action", required=True)
@@ -138,18 +159,26 @@ def main():
     sim.add_argument("--words", type=int, choices=range(1, 257), default=128)
     sim.add_argument("--rounds", type=int, choices=range(1, 11), default=3)
     sim.add_argument("--trace", action="store_true")
+    sim.add_argument("--guard", type=int, choices=range(8), default=0)
+    sim.add_argument("--banks", action="store_true")
     scan = action.add_parser("matrix", help="Verify the frequency and return-delay matrix")
     scan.add_argument("--rtl", type=Path, default=DEFAULT_RTL)
     build_args = action.add_parser("build", help="Synthesize, route and build a matching OCM ELF")
     build_args.add_argument("--gcc", type=Path, default=GCC)
+    elf_args = action.add_parser("bench-elf", help="Build the Cortex-A9 F103 SRAM timing helper")
+    elf_args.add_argument("--gcc", type=Path, default=GCC)
+    elf_args.add_argument("--out", type=Path, required=True)
+    elf_args.add_argument("--resident", action="store_true")
     args = parser.parse_args()
     if args.action == "build":
         return build(args.gcc.resolve())
+    if args.action == "bench-elf":
+        return bench_elf(args.gcc, args.out, args.resident)
     snapshot(args.rtl.resolve())
     if args.action == "matrix":
         return matrix()
     return 0 if simulate(args.mhz, args.return_ns, args.target_ns, args.ack, args.data, args.tap,
-                         args.idle, args.words, args.rounds, args.trace)["passed"] else 1
+                         args.idle, args.words, args.rounds, args.trace, args.guard, args.banks)["passed"] else 1
 
 
 if __name__ == "__main__":

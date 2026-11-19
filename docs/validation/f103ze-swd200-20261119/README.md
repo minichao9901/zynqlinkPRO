@@ -21,3 +21,7 @@
 三种 HCLK 均由独立历史 USB 配对最终复核 4 KiB SRAM、两端哨兵、RCC、Flash 等待周期及原运行态。目标 Flash 和探针 QSPI 写入均为零。首轮 96 MHz 在写探针邮箱时遇到 HS3 FT_Write 错误，重连 USB 后独立恢复，重跑通过。交付限本地分支，固定 EXE、远端 main、Pages、Release 与 QSPI 冷启动为范围外。
 
 [128 MHz 逐项数据](hclk128-timing.json) · [128 MHz 全部频点](hclk128-windows.txt) · [128 MHz 恢复](hclk128-target.json) · [实板配对](../../../prebuilt/swd-only-200mhz-f103-bench-20261119/manifest.json)
+
+## 分开扫描 ACK 和数据相位
+
+HCLK 128 MHz 下，120.755 MHz SWCLK 在 tap24、ACK 时隙18、数据时隙17、idle2 通过三轮各 16 MiB 交替写读。tap16 的同档长测在第 496 次写入后读校验失败，tap20 也未通过三轮。160 MHz 试验中，高速写 TAR 后低速独立读回地址成功；先低速设 TAR 再高速连续读时，部分点首个 AP 返回 ACK OK、奇偶出错。已保留 200 MHz 无有效 ID 的点。不能仅凭 DPIDR 通过判定 SRAM 读写档位。[独立收发对照](split-phases-128.txt)

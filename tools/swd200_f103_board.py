@@ -7,7 +7,7 @@ import time
 import usb.util
 
 from pathlib import Path
-from swd200_board import Board, Ownership, RTL, candidate, record, sha
+from swd200_board import Board, Ownership, PAIR, RTL, candidate, record, sha
 from dap_pipeline_bench import open_dap, setup, xfer
 from test_probe_board import Memory
 from h743_peak import measure_pipeline
@@ -58,12 +58,14 @@ def checked_ram(mem, original, guards, repair):
     assert [mem.word(BASE-4),mem.word(BASE+4096)]==guards
 
 
-def bench_target(board, folder, original, guards, rates, diagnostics=False):
+def bench_target(board, folder, original, guards, rates, diagnostics=False, guard=None, idle=2):
     import re
     pattern = (folder/'expected.bin').resolve()
     pattern.write_bytes(original[:1024])
     words=' '.join(map(str,struct.unpack('<1024I',original)))
     fixture=f'set saved {{{words}}}\nset guards {{{guards[0]} {guards[1]}}}\n'+(RTL/'f103ze.tcl').read_text()
+    if guard is not None:
+        fixture=f'set ::board_guard {guard}\n'+fixture
     board.tcl(f'physwr -force -bin -file {{{pattern.as_posix()}}} 0x24000 256')
     script=fixture+'\nf103_check 0\nset winners {}\n'
     script+='foreach rate {'+' '.join(map(str,rates))+'} {\n'+'''
@@ -159,6 +161,7 @@ def bench_target(board, folder, original, guards, rates, diagnostics=False):
         f103_check 1
         puts "FINAL [f103_word 0x40021004] [f103_word 0xe000edf0]"
         '''
+    script=script.replace('foreach idle {2 5 9 15}',f'foreach idle {{{idle} 2 5 9 15}}')
     output=board.tcl(script)
     (folder/'windows.txt').write_text('\n'.join(x for x in output.splitlines() if re.match(r'^(QUAL|STABLE|FINAL|WINDOW|CANDIDATES|RECOVERED|DIAG|EXTRA_STABLE) ',x))+'\n')
     print('\n'.join(x for x in output.splitlines() if x.startswith(('QUAL','STABLE','FINAL'))),flush=True)
@@ -173,7 +176,7 @@ def run(args):
     hist=tuple(args.historical/n for n in ('probe.bit','application.elf','ps7_init.tcl'))
     manifest=json.loads((args.historical/'manifest.json').read_text())
     assert all(sha(p)==manifest['files'][p.name]['sha256'] for p in hist)
-    bit,_,init=candidate()
+    bit,_,init=candidate(args.pair)
     saved=None
     touched=False
     initial=None
@@ -207,7 +210,7 @@ def run(args):
         try:
             b=Board(folder/'candidate',args.cable)
             b.load((bit,args.elf,init),experimental=True)
-            bench_target(b,folder,orig,guards,args.rates,args.diagnostics)
+            bench_target(b,folder,orig,guards,args.rates,args.diagnostics,args.guard,args.idle)
         finally:
             b=Board(folder/'historical-restored',args.cable)
             b.load(hist,experimental=False)
@@ -234,6 +237,9 @@ if __name__=='__main__':
     p.add_argument('--original',type=Path,required=True)
     p.add_argument('--historical',type=Path,required=True)
     p.add_argument('--elf',type=Path,required=True)
+    p.add_argument('--pair',type=Path,default=PAIR)
+    p.add_argument('--guard',type=int,choices=range(8))
+    p.add_argument('--idle',type=int,choices=range(1,16),default=2)
     p.add_argument('--guards',nargs=2,type=int,required=True)
     p.add_argument('--out',type=Path,required=True)
     p.add_argument('--cable',required=True)

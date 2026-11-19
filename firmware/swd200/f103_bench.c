@@ -41,6 +41,7 @@ static unsigned memword(uint32_t addr,uint32_t *value) {
     if (!err) *value=RX[2];
     return err;
 }
+#ifndef SWD200_RESIDENT
 static unsigned block(unsigned write,uint32_t inversion,uint64_t *time,uint64_t *compare,uint64_t *guard) {
     uint64_t ignored=0;
     unsigned err, first=0;
@@ -66,6 +67,39 @@ static unsigned block(unsigned write,uint32_t inversion,uint64_t *time,uint64_t 
     if (!write) *compare+=ticks()-t;
     return 0;
 }
+#endif
+#ifdef SWD200_RESIDENT
+static void prepare_banks(void) {
+    uint32_t guard=A[7]&0x70u;
+    A[7]=guard;
+    cmd(0,5,BASE);cmd(1,7,0);cmd(2,14,0);
+    A[7]=guard|2u;
+    for (unsigned i=0;i<WORDS;i++) cmd(i,13,P[i]);
+    cmd(WORDS,14,0);cmd(WORDS+1,6,0);
+    A[7]=guard|9u;
+    cmd(0,5,BASE);
+    for (unsigned i=0;i<WORDS;i++) {
+        cmd(i+1,15,0);
+        ((volatile uint32_t *)0x40003000u)[i]=P[i];
+    }
+    cmd(WORDS+1,14,0);cmd(WORDS+2,6,0);
+    A[7]=guard;
+}
+static unsigned resident_block(unsigned write,uint32_t inversion,uint64_t *time,uint64_t *guard_time) {
+    unsigned guard=A[7]&0x70u, inv=inversion?4u:0u;
+    if (write) {
+        A[7]=guard;
+        unsigned err=submit(3,guard_time);
+        if (err || RX[2]!=BASE) return 4;
+    }
+    A[7]=guard|inv|(write?2u:9u);
+    unsigned n=WORDS+(write?2u:3u);
+    unsigned err=submit(n,time);
+    if (err) return err;
+    M[write?WRITE_WAIT:READ_WAIT]+=M[SUMMARY]>>16;
+    return (RX[n-1]&0xa00000b2u)==0xa0000000u ? 0 : 5;
+}
+#endif
 void bench_init(void) {
     for (unsigned i=0;i<=GUARD+1;i++) M[i]=0;
     G[2]=1;
@@ -81,22 +115,42 @@ void bench_poll(void) {
     if (rounds==0 || rounds>65536 || mixed>1 || A[0]!=0x53323030) err=7;
     if (!err && (memword(0xe0042000,&id) || memword(0xe000ed00,&cpu) ||
                  id!=0x10036414 || cpu!=0x411fc231)) err=8;
+#ifdef SWD200_RESIDENT
+    if (A[8]!=0x424e4b31u) err=9;
+    if (!err) prepare_banks();
+#endif
     uint64_t start=ticks();
     for (unsigned n=0;n<rounds && !err;n++) {
         uint32_t inversion=mixed && !(n&1u) ? 0xffffffffu : 0;
         if (mixed) {
             uint64_t t=ticks();
+#ifdef SWD200_RESIDENT
+            err=resident_block(1,inversion,&write_time,&guard);
+#else
             err=block(1,inversion,&write_time,&compare,&guard);
+#endif
             write_wall+=ticks()-t;
             if (err) break;
             M[WRITE_OK]++;
         }
         uint64_t t=ticks();
+#ifdef SWD200_RESIDENT
+        err=resident_block(0,inversion,&read_time,&guard);
+#else
         err=block(0,inversion,&read_time,&compare,&guard);
+#endif
         read_wall+=ticks()-t;
         if (!err) M[READ_OK]++;
     }
     save(TOTAL_TIME,ticks()-start);save(READ_TIME,read_time);save(WRITE_TIME,write_time);
+#ifdef SWD200_RESIDENT
+    if (!err) {
+        uint32_t inv=mixed && (rounds&1u) ? 0xffffffffu : 0;
+        for(unsigned i=0;i<WORDS;i++)
+            if(RX[i+2]!=(P[i]^inv)) {err=6;M[BAD_INDEX]=i;M[BAD_VALUE]=RX[i+2];break;}
+    }
+    A[7]&=0x70u;
+#endif
     save(READ_WALL,read_wall);save(WRITE_WALL,write_wall);save(COMPARE,compare);save(GUARD,guard);
     M[ERROR]=err;
     __asm__ volatile("dsb sy" ::: "memory");

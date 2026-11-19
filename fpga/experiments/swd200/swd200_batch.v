@@ -8,6 +8,9 @@ module swd200_batch (
     input wire [1:0] rate,
     input wire [5:0] ack_sample, data_sample,
     input wire [3:0] idle_cycles,
+    input wire [6:0] mode,
+    output reg [6:0] active_mode,
+    output wire begin_batch,
     output wire [9:0] command_addr,
     input wire [31:0] command_word,
     output reg write_result = 0,
@@ -45,11 +48,13 @@ module swd200_batch (
     wire [8:0] issue_header = retry ? current_header : next_header;
     wire [32:0] issue_word = retry ? current_word : next_word;
     assign command_addr = {fetch_index, fetch != FETCH_OP};
+    assign begin_batch = state == IDLE && request_sync[1];
 
     swd200_link link (
         .clk(clk), .reset(reset), .rate(active_rate),
         .ack_sample(active_ack_sample), .data_sample(active_data_sample),
-        .idle_cycles(active_idle), .start(issue_next || retry), .enter_swd(issue_header[8]),
+        .idle_cycles(active_idle), .release_guard(active_mode[6:4]),
+        .start(issue_next || retry), .enter_swd(issue_header[8]),
         .header(issue_header[7:0]), .write_packet(issue_word),
         .done(link_done), .ack(ack), .parity_error(parity_error), .read_data(link_data),
         .rx_slots(rx_slots), .clk_slots(clk_slots), .data_slots(data_slots), .release_slots(release_slots)
@@ -85,7 +90,8 @@ module swd200_batch (
                     fetch <= FETCH_STORE;
                 end
                 FETCH_STORE: begin
-                    next_word <= {^command_word, command_word};
+                    next_word <= {^command_word, command_word ^ {32{active_mode[2] &&
+                                  active_mode[1:0] == 2 && next_header[4:1] == 4'hd}}};
                     next_valid <= 1;
                     fetch <= EMPTY;
                 end
@@ -111,6 +117,7 @@ module swd200_batch (
                     active_ack_sample <= ack_sample;
                     active_data_sample <= data_sample;
                     active_idle <= idle_cycles;
+                    active_mode <= mode;
                     completed <= 0;
                     error <= 0;
                     failed <= 0;

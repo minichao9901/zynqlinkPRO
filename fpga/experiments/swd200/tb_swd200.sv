@@ -201,6 +201,7 @@ module tb_swd200;
     reg [31:0] value, status;
     integer index, round_no, p;
     realtime batch_ns, write_ns, read_ns;
+    integer guard_arg = 0;
     initial begin
         ignored = $value$plusargs("mhz=%d", mhz);
         ignored = $value$plusargs("return_ns=%f", return_ns);
@@ -211,6 +212,7 @@ module tb_swd200;
         ignored = $value$plusargs("idle=%d", idle_arg);
         ignored = $value$plusargs("words=%d", words);
         ignored = $value$plusargs("rounds=%d", rounds);
+        ignored = $value$plusargs("guard=%d", guard_arg);
         trace = $test$plusargs("trace");
         ref_period = mhz == 160 ? 25.0 : 20.0;
         clock_period = 1000.0 / mhz;
@@ -227,6 +229,7 @@ module tb_swd200;
         rd(14'h00, value);
         if (value != 32'h53323030) $fatal(1, "wrong PHY ID %h", value);
         wr(14'h18, tap_arg);
+        wr(14'h1c, guard_arg << 4);
         wr(14'h0c, {14'b0, idle_arg[3:0], data_arg[5:0], ack_arg[5:0], rate});
         put(0, 5'h10, 0);
         good_batch(1);
@@ -278,6 +281,32 @@ module tb_swd200;
             end
         end
 
+        if ($test$plusargs("banks")) begin
+            wr(14'h1c, (guard_arg<<4)|2);
+            put(0,5'h5,32'h60000000);
+            for (index=0;index<256;index++) begin
+                wr(14'h3000+index*4,pattern(index,0));
+                put(index+1,5'hd,pattern(index,0));
+            end
+            put(257,5'he,0);put(258,5'h6,0);
+            wr(14'h1c,(guard_arg<<4)|9);
+            put(0,5'h5,32'h60000000);
+            for (index=0;index<256;index++) put(index+1,5'hf,0);
+            put(257,5'he,0);put(258,5'h6,0);
+            for (p=0;p<2;p++) begin
+                wr(14'h1c,(guard_arg<<4)|2|(p<<2));good_batch(259);
+                wr(14'h1c,(guard_arg<<4)|9|(p<<2));good_batch(259);
+                for (index=0;index<256;index++) begin
+                    rd(14'h2000+(index+2)*4,value);
+                    if(value !== (pattern(index,0)^{32{p[0]}})) $fatal(1,"bank payload");
+                end
+            end
+            wr(14'h33fc,~pattern(255,0));run_batch(259,status);
+            if(status[15:0]!==16'h4103) $fatal(1,"last-word mismatch %h",status);
+            wr(14'h33fc,pattern(255,0));good_batch(259);
+            wr(14'h1c,guard_arg<<4);
+            $display("RESIDENT_BANKS_PASS");
+        end
         // Corrupt the target parity bit on the return wire. The second
         // command would emit 152 clocks and must be fenced by the error.
         put(0, 5'h2, 0);
