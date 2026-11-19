@@ -62,7 +62,9 @@ module jtag200_regs #(parameter ENABLE_BLOCK=0) (
                        (block_timing[20:19] == 0 || block_timing[2:0] == 2) &&
                        block_timing[9:3] >= 16 && block_timing[9:3] <= 63 &&
                        (!block_timing[23] || block_timing[22]) &&
-                       (!block_timing[22] || (block_timing[21] && block_timing[2:0] == 2 && block_timing[10])) &&
+                       (!block_timing[22] || (block_timing[21] &&
+                       ((block_timing[2:0] == 2 && block_timing[10]) ||
+                        (block_timing[2:0] == 1 && block_timing[11:10] == 1)))) &&
                        (block_timing[21] ? block_timing[18:10] <= 255 : block_timing[18:10] <= 448);
     reg done = 0;
     (* ASYNC_REG = "TRUE" *) reg [1:0] ready_sync = 0, done_sync = 0, delay_sync = 0;

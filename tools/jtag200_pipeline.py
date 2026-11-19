@@ -66,7 +66,8 @@ class BlockBenchmark:
         cfg = (int(advance_tms) << 20) | (int(advance_tdi) << 19) | (idle << 10) | (phase << 3) | half
         if arm:
             cfg |= 1 << 21
-        need(not stream or (arm and half == 2 and idle % 2 == 1), "ARM stream requires two-slot TCK and odd idle")
+        aligned_stream = (half == 2 and idle % 2 == 1) or (half == 1 and idle % 4 == 1)
+        need(not stream or (arm and aligned_stream), "ARM stream requires whole serializer words")
         need(not verify_in_pl or stream, "PL verification requires the ARM stream")
         cfg |= int(stream) << 22 | int(verify_in_pl) << 23
         need(not arm or arm_page in (0x24050000, 0x20008000), "Unsupported ARM fixture page")

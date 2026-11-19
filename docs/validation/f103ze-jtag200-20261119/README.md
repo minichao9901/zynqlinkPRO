@@ -30,9 +30,15 @@ python -X utf8 tools/jtag200_f103_fixture.py --out build/jtag200/usb-new --execu
 | HCLK MHz | TCK MHz | 混合 idle | 1 秒读 / 写 MB/s | 同页仿真读 / 写 MB/s |
 |---:|---:|---:|---:|---|
 | 48 | 100 | 33 | 4.991 / 4.991 | 5.049 / 5.049 |
-| 96 | 100 | 19 | 6.080 / 6.080 | 同一 idle 另验 |
+| 96 | 100 | 19 | 6.080 / 6.080 | 6.168 / 6.168 |
 | 128 | 100 | 13 | 6.713 / 6.713 | 6.816 / 6.816 |
 
 每轮先用低速 SWD 核对 CDC48 和 RAM 双读备份，再用 1 MHz JTAG 读回，测试过程中不同图案与反相图案实际交替写入。96/128 MHz 临时在目标暂停时调 PLL、APB 分频、USB 门控和 Flash 控制器等待周期，用 SRAM 自循环及 DWT 验证目标 HCLK，随后恢复临时程序、核心寄存器、DWT。每次恢复独立 USB 配对并逐字节检查末轮图案、相邻 3 KiB 和两端哨兵，再复原备份的 4 KiB、映射、时钟及运行状态。开测夹具的首次子程序调度遗漏已读出的 TAP 字段，修正保存顺序后复测；该次在切换高速配对前退出，亦已恢复。
 
 [48 MHz 逐轮](hclk48-windows.json) · [48 MHz 恢复](hclk48-state.json) · [96 MHz 逐轮](hclk96-windows.json) · [96 MHz 恢复](hclk96-state.json) · [128 MHz 逐轮](hclk128-windows.json) · [128 MHz 恢复](hclk128-state.json) · [48 MHz CM3 细测](cm3-fine.json) · [96 MHz CM3](cm3-96.json) · [128 MHz CM3](cm3-128.json)
+
+## 每个 CLKDIV 周期连续发送四个 TCK
+
+上一配对在 133.333 MHz 及以上逐段扫描。F103ZE/HCLK128 在 133.333 MHz 单秒交替读写为 3.836/4.038 MB/s，而同板 100 MHz 连续流水为 6.713/6.713 MB/s。四 TCK 路径让 TMS、TDI 每拍前移四位，独立回采每拍四位，按实际采样相位拼接前一 AP 应答；写入、末字、比较、错误停止以及块尾 RDBUFF/CTRLSTAT 沿用已有机制。四 TCK 模式要求每帧的 43+idle 个 TCK 可被四整除。新增 FCLK 分频点细扫 120.755 至 156.098 MHz 区间。
+
+CM3 HCLK128 下，133.333 MHz/idle21 的 1 KiB 仿真读写均 7.858 MB/s，160 MHz/idle25 均 8.889 MB/s，200 MHz/idle29 均 10.511 MB/s。200 MHz 的另一个采样时隙在建链即失败。协议模型在理想应答、200 MHz/idle5 达 15.438/15.441 MB/s。对实板的效率比较使用同 HCLK、相同 idle 和块长度的完整 CM3 台架值。[四 TCK 模型](cm3-quad.json) · [96 MHz 模型](cm3-96-exact.json)

@@ -1,0 +1,43 @@
+J200_PROFILE 0 period=20.000 ns pulses=312
+J200_PROFILE 1 period=15.000 ns pulses=312
+J200_PROFILE 2 period=12.500 ns pulses=312
+J200_PROFILE 3 period=10.000 ns pulses=312
+J200_PROFILE 4 period=6.250 ns pulses=312
+J200_PROFILE 5 period=5.000 ns pulses=312
+J200_PROFILE 6 period=15.000 ns pulses=312
+J200_PROFILE 7 period=7.500 ns pulses=312
+J200_PROFILE 8 period=6.719 ns pulses=312
+J200_PROFILE 9 period=6.094 ns pulses=312
+J200_PROFILE 10 period=5.938 ns pulses=312
+J200_PROFILE 11 period=5.781 ns pulses=312
+J200_PROFILE 12 period=5.625 ns pulses=312
+J200_PROFILE 13 period=5.469 ns pulses=312
+J200_PROFILE 14 period=5.312 ns pulses=312
+J200_PROFILE 15 period=5.156 ns pulses=312
+J200_PROFILE 16 period=6.406 ns pulses=312
+J200_PROFILE 17 period=6.562 ns pulses=312
+J200_PROFILE 18 period=6.875 ns pulses=312
+J200_PROFILE 19 period=7.031 ns pulses=312
+J200_PROFILE 20 period=7.188 ns pulses=312
+J200_PROFILE 21 period=7.344 ns pulses=312
+J200_PROFILE 22 period=7.656 ns pulses=312
+J200_PROFILE 23 period=7.812 ns pulses=312
+J200_PROFILE 24 period=7.969 ns pulses=312
+J200_PROFILE 25 period=8.125 ns pulses=312
+J200_PROFILE 26 period=8.281 ns pulses=312
+J200_PIPELINE_PASS half=4 idle=64 words=128 bus_fault=0
+J200_PIPELINE_PASS half=2 idle=64 words=128 bus_fault=0
+J200_PIPELINE_PASS half=1 idle=256 words=128 bus_fault=0
+J200_PIPELINE_PASS half=1 idle=256 words=32 bus_fault=1
+J200_ARM_PASS stream=0 half=1 idle=5 words=128 read_MBps=8.360 write_MBps=8.356
+J200_ARM_PASS stream=1 half=1 idle=5 words=256 read_MBps=15.438 write_MBps=15.441
+J200_ARM_STREAM_ERROR_PASS final_compare WAIT_no_replay sticky_fence
+J200_ARM_PASS stream=1 half=1 idle=9 words=256 read_MBps=14.336 write_MBps=14.336
+J200_ARM_PASS stream=0 half=2 idle=5 words=128 read_MBps=5.618 write_MBps=5.615
+J200_ARM_PASS stream=1 half=2 idle=3 words=256 read_MBps=8.236 write_MBps=8.235
+J200_ARM_PASS stream=0 half=2 idle=3 words=256 read_MBps=3.888 write_MBps=3.887
+J200_ARM_PASS stream=1 half=2 idle=1 words=256 read_MBps=5.726 write_MBps=5.726
+J200_ARM_PASS stream=1 half=2 idle=3 words=256 read_MBps=5.491 write_MBps=5.491
+J200_ARM_PASS stream=1 half=2 idle=5 words=256 read_MBps=5.274 write_MBps=5.274
+J200_ARM_STREAM_ERROR_PASS final_compare WAIT_no_replay sticky_fence
+JTAG200_SIM_PASS

@@ -7,11 +7,14 @@ from pathlib import Path
 import random
 import subprocess
 import sys
+import time
 
 from jtag200 import PROFILES, ROOT, load_pair
 from jtag200_f103_fixture import PAGE, SIZE, TAP, guards, low_link
 from jtag200_h743_scan import Scan, identify, select, slow_read
 from jtag200_pipeline import BlockBenchmark, Ownership, PhysicalPort, need
+from probe_flash import Session
+from probe_load import check_streams, probe_state
 
 PATTERN = random.Random(0xf103200).randbytes(1024)
 INVERSE = bytes(b ^ 255 for b in PATTERN)
@@ -31,7 +34,7 @@ def sweep(port, folder, args, report, save):
         divisor = (control >> 8 & 63) * (control >> 20 & 63)
         need(divisor and not control & 0x30 and abs(6.4e9/divisor/half - hz) < 1,
              'Unexpected TCK divider')
-        stream = half == 2
+        stream = half == 2 or (args.quad and half == 1)
         bench.configure(rate, idle, slot, arm=True, arm_page=PAGE, stream=stream,
                         verify_in_pl=stream, advance_tdi=advance[1], advance_tms=advance[0])
         row = bench.run(0 if mixed else 1, seconds, profile=True)
@@ -79,8 +82,12 @@ def sweep(port, folder, args, report, save):
                 for adv in (((False,False), (True,True), (False,True), (True,False)) if half==2 else ((False,False),)):
                     if low is None:
                         idles = (32, 64)
+                    elif args.idles and rate != '50':
+                        idles = args.idles
+                    elif args.quad and half==1:
+                        idles = (9, 13, 17, 21, 25, 29, 33, 41, 49, 65)
                     elif half==2:
-                        idles = (7, 13, 19, 25, 33, 49, 65)
+                        idles = (7, 9, 11, 13, 15, 17, 19, 25, 33, 49, 65)
                     else:
                         idles = (4, 12, 24, 40, 64, 96)
                     for idle in idles:
@@ -125,7 +132,7 @@ def sweep(port, folder, args, report, save):
                     break
             if rate in qualified:
                 break
-            if not args.dense and sum(bool(v) for v in point['taps'].values()) >= 2:
+            if not args.dense and sum(bool(v) for v in point['taps'].values()) >= 3:
                 break
         save()
         print(rate, 'read', point['reads'] and point['reads'][0]['read_MBps'],
@@ -168,6 +175,35 @@ def sweep(port, folder, args, report, save):
             save()
             if all(r['passed'] for r in rows):
                 break
+    if args.host_payload and qualified:
+        # Measure new host data, including XSCT file transfers and completion checks.
+        rate = max(qualified, key=lambda r: report['points'][r]['mixed'][0]['write_MBps'])
+        rate, tap, slot, advance, idle = qualified[rate]
+        half, _ = select(port, rate, tap)
+        stream = half == 2 or (args.quad and half == 1)
+        bench.configure(rate, idle, slot, arm=True, arm_page=PAGE, stream=stream,
+                        verify_in_pl=stream, advance_tdi=advance[1], advance_tms=advance[0])
+        sendfile, recvfile = folder/'host-tx.bin', folder/'host-rx.bin'
+        rng = random.Random(0xf103)
+        host = report['host_payload'] = dict(rate=rate, samples=[])
+        check = ('if {[read_word 0x40000020] != 1 || [read_word 0x40002000] != 0x10100} '
+                 '{error "Host payload completion failed"}')
+        for _ in range(8):
+            data = rng.randbytes(1024)
+            sendfile.write_bytes(data)
+            start = time.perf_counter()
+            port.command(f'physwr -force -bin -file {{{sendfile.as_posix()}}} 0x40001004 256; '
+                         f'physwr -force 0x40000008 13; wait_mask 0x40000004 31 15; {check}; '
+                         'physwr -force 0x40000008 0; wait_mask 0x40000004 31 5')
+            end_write = time.perf_counter()
+            port.command(f'physwr -force 0x40000008 5; wait_mask 0x40000004 31 15; {check}; '
+                         f'physrd -force -bin -file {{{recvfile.as_posix()}}} 0x40002004 256; '
+                         'physwr -force 0x40000008 0; wait_mask 0x40000004 31 5')
+            need(recvfile.read_bytes()==data, 'New host payload differs from SRAM readback')
+            elapsed_read = time.perf_counter()-end_write
+            host['samples'].append(dict(write_s=end_write-start, read_s=elapsed_read))
+            current = data
+        save()
     report['last_verified_sha256'] = sha256(current).hexdigest()
 
 
@@ -188,6 +224,10 @@ def main(args):
         mem.write(PAGE,PATTERN)
         need(mem.read(PAGE,1024)==PATTERN,'Test pattern preload failed')
     try:
+        with closing(Ownership()):
+            report['streams_before_load'] = check_streams()
+            session = Session(folder, args.sdk, args.server, cable_serial=args.cable_serial)
+            report['probe_before_load'] = probe_state(session)
         args.out = folder / 'candidate'
         load_pair(args)
         with closing(Ownership()), closing(PhysicalPort(folder,args.cable_serial,args.sdk)) as port:
@@ -213,6 +253,9 @@ if __name__ == '__main__':
     p.add_argument('--pair',type=Path,required=True)
     p.add_argument('--rates',nargs='+',choices=PROFILES,required=True)
     p.add_argument('--seconds',type=int,choices=range(61),default=60)
+    p.add_argument('--host-payload', action='store_true', help='Verify and time distinct PC payloads via physical AP0')
+    p.add_argument('--quad',action='store_true',help='Enable the four-TCK stream on the corresponding PL pair')
+    p.add_argument('--idles',type=int,nargs='+',help='Specific idle counts for refinement')
     p.add_argument('--dense',action='store_true')
     p.add_argument('--sdk',type=Path,default=Path('E:/Xilinx/SDK/2018.3'))
     p.add_argument('--cable-serial',required=True)

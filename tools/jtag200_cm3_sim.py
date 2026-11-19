@@ -11,6 +11,7 @@ def main():
     cli = argparse.ArgumentParser(description=__doc__)
     cli.add_argument('--rtl', type=Path, default=DEFAULT_RTL)
     cli.add_argument('--out', type=Path, required=True)
+    cli.add_argument('--four-tck-stream', action='store_true')
     cli.add_argument('--hclk', type=float, default=48)
     cli.add_argument('--point', nargs=4, type=float, action='append', required=True,
                      metavar=('FCLK_HALF_NS', 'TCK_HALF_SLOTS', 'SAMPLE', 'IDLE'))
@@ -36,7 +37,8 @@ def main():
     for ref, half, slot, idle in args.point:
         half, slot, idle = int(half), int(slot), int(idle)
         log = out / f'cm3-{ref}-{half}-{slot}-{idle}.log'
-        params = dict(ref=ref, half=half, sample=slot, idle=idle, hclk=args.hclk)
+        params = dict(ref=ref, half=half, sample=slot, idle=idle, hclk=args.hclk,
+                      stream=int(half == 2 or (args.four_tck_stream and half == 1)))
         cmd = [exe / 'xsim.exe', 'j200_cm3', '-runall']
         for key, value in params.items():
             cmd += ['-testplusarg', f'{key}={value}']

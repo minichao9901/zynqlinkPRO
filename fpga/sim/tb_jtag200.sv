@@ -379,7 +379,7 @@ module tb_jtag200;
                  stream,half,idle,count,count*4000.0/read_ns,count*4000.0/write_ns);
     endtask
 
-    task automatic check_arm_stream_errors;
+    task automatic check_arm_stream_errors(input int half, slot, idle);
         reg [31:0] word;
         int before_writes;
         write_reg(14'h1400, 0, 0);  // corrupt only the last expected word
@@ -405,7 +405,7 @@ module tb_jtag200;
                    word,arm_dap.ap_writes-before_writes);
         write_reg(8, 0, 0);
         wait_status(5);
-        write_reg(14'h01c, 32'h00600000 | (3 << 10) | (29 << 3) | 2, 0);
+        write_reg(14'h01c, 32'h00600000 | (idle << 10) | (slot << 3) | half, 0);
         fork
             begin
                 wait (regs.pipeline.engine.arm_stream.sending && regs.pipeline.engine.arm_stream.sent == 1);
@@ -566,6 +566,17 @@ module tb_jtag200;
         profile(13, 35/3.2, 35/6.4);
         profile(14, 34/3.2, 34/6.4);
         profile(15, 33/3.2, 33/6.4);
+        profile(16, 41/3.2, 41/6.4);
+        profile(17, 42/3.2, 42/6.4);
+        profile(18, 44/3.2, 44/6.4);
+        profile(19, 45/3.2, 45/6.4);
+        profile(20, 46/3.2, 46/6.4);
+        profile(21, 47/3.2, 47/6.4);
+        profile(22, 49/3.2, 49/6.4);
+        profile(23, 50/3.2, 50/6.4);
+        profile(24, 51/3.2, 51/6.4);
+        profile(25, 52/3.2, 52/6.4);
+        profile(26, 53/3.2, 53/6.4);
         write_reg(8, 2, 0);
         #200;
         ref_half = 10.0;
@@ -576,6 +587,9 @@ module tb_jtag200;
         pipeline(1,29,256,32,1);
         arm_test=1;
         arm_pipeline(1,29,5,128,0);
+        arm_pipeline(1,29,5,256,1);
+        check_arm_stream_errors(1,29,5);
+        arm_pipeline(1,28,9,256,1);
         arm_pipeline(2,29,5,128,0);
         arm_pipeline(2,29,3,256,1);
         write_reg(8, 2, 0);
@@ -588,7 +602,7 @@ module tb_jtag200;
         arm_pipeline(2,29,1,256,1);
         arm_pipeline(2,29,3,256,1);
         arm_pipeline(2,30,5,256,1);
-        check_arm_stream_errors();
+        check_arm_stream_errors(2,29,3);
 `endif
 `endif
         $display("JTAG200_SIM_PASS");
