@@ -77,16 +77,23 @@ def capture_combo(args):
             return len(payload)+len(values)
         try:
             native.exchange(6,0,config);active=True;start=time.perf_counter()
-            while time.perf_counter()-start<args.seconds: pull()
+            next_check=start+0.25
+            while time.perf_counter()-start<args.seconds:
+                pull()
+                if time.perf_counter()>=next_check:
+                    state=struct.unpack("<8I",native.exchange(6,4))
+                    if state[1]:break
+                    next_check=time.perf_counter()+0.25
         finally:
             try:
                 if active:
                     native.exchange(6,3)
                     while pull(): pass
                     state=struct.unpack("<8I",native.exchange(6,4))
+                    detail=struct.unpack("<8I",native.exchange(6,6)) if state[1] else ()
                     native.exchange(6,5)
                     if state[1] or not (state[3]==state[4]==received and state[5]==state[6]==samples):
-                        raise RuntimeError(f"probe/host tail mismatch: {state}, {received} RTT bytes, {samples} groups")
+                        raise RuntimeError(f"probe/host tail mismatch: {state}, {received} RTT bytes, {samples} groups, diagnostic={detail}")
                     info.update(rtt_bytes=received,sample_groups=samples,skipped_groups=state[7],
                                 period_ticks=state[2],elapsed_seconds=time.perf_counter()-start)
             finally: cmd(tx,rx,[3])

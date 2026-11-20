@@ -16,7 +16,7 @@
 static uint8_t rtt_bytes[RTT_CAPACITY] __attribute__((aligned(32)));
 static uint32_t groups[GROUP_CAPACITY][9] __attribute__((aligned(32)));
 static uint32_t addresses[8],nvars,ring,size,rd,descriptor,period_ticks;
-static uint32_t skip_count,fail_stage,rhead,ghead;
+static uint32_t skip_count,fail_stage,rhead,ghead,diagnostic[8];
 static volatile uint32_t rtail,gtail;
 static unsigned running,opened;
 static XTime origin,deadline,period,last_rtt,rtt_cost;
@@ -26,11 +26,15 @@ static int sram(uint32_t addr,uint32_t bytes) {
 }
 static int read_words(uint32_t addr,unsigned words,void *data) {
     unsigned count;uint32_t details;
-    return selectio_mem_bulk(0,addr,words,0,data,&count,&details);
+    int rc=selectio_mem_bulk(0,addr,words,0,data,&count,&details);
+    if(rc) {diagnostic[0]=1;diagnostic[1]=addr;diagnostic[2]=words;diagnostic[3]=count;diagnostic[4]=details;}
+    return rc;
 }
 static int write_offset(uint32_t v) {
     unsigned count;uint32_t details;
-    return selectio_mem_bulk(1,descriptor+16U,1,(const uint8_t *)&v,0,&count,&details);
+    int rc=selectio_mem_bulk(1,descriptor+16U,1,(const uint8_t *)&v,0,&count,&details);
+    if(rc) {diagnostic[0]=2;diagnostic[1]=descriptor+16U;diagnostic[2]=1;diagnostic[3]=count;diagnostic[4]=details;diagnostic[5]=v;}
+    return rc;
 }
 int selectio_combo_active(void){return opened!=0;}
 int selectio_combo_stop(void) {
@@ -50,7 +54,7 @@ static int start(const uint8_t *p,unsigned bytes) {
         if((addresses[i]&3U) || !sram(addresses[i],4)) return -1;
     }
     if(selectio_mem_open(p)) return -1;
-    opened=1;fail_stage=1;
+    memset(diagnostic,0,sizeof diagnostic);opened=1;fail_stage=1;
     uint32_t head[6],up[6];
     descriptor=cb+24U+24U*channel;
     if(read_words(cb,6,head) || memcmp(head,"SEGGER RTT",10) ||
@@ -80,7 +84,8 @@ static int sample(XTime now) {
 static int drain_rtt(void) {
     uint32_t wr,available,space=RTT_CAPACITY-(rhead-rtail);
     if(!space) return 0;
-    if(read_words(descriptor+12U,1,&wr) || wr>=size) return -1;
+    if(read_words(descriptor+12U,1,&wr)) return -1;
+    if(wr>=size) {diagnostic[0]=3;diagnostic[5]=size;diagnostic[6]=wr;return -1;}
     if(wr==rd) return 0;
     available=wr>rd?wr-rd:size-rd;
     if(available>space) available=space;
@@ -96,7 +101,8 @@ static int drain_rtt(void) {
     uint32_t next=rd+available,confirmed;
     if(next==size) next=0;
     __sync_synchronize();
-    if(write_offset(next) || read_words(descriptor+16U,1,&confirmed) || confirmed!=next) return -1;
+    if(write_offset(next) || read_words(descriptor+16U,1,&confirmed)) return -1;
+    if(confirmed!=next) {diagnostic[0]=4;diagnostic[5]=next;diagnostic[6]=confirmed;return -1;}
     rd=next;__sync_synchronize();rhead+=available;return 0;
 }
 void selectio_combo_poll(void) {
@@ -139,6 +145,7 @@ int selectio_combo_frame(unsigned op,const uint8_t *request,unsigned bytes,uint8
         *length=n*stride;*consume=n;*source=7;return 0;
     }
     if(op==3) {dap_wait_begin();return selectio_combo_stop();}
+    if(op==6 && capacity>=32) {memcpy(out,diagnostic,32);*length=32;return 0;}
     if(op==4 && capacity>=32) {
         uint32_t stats[]={running,fail_stage,period_ticks,rhead,rtail,ghead,gtail,skip_count};
         memcpy(out,stats,sizeof stats);*length=sizeof stats;return 0;
