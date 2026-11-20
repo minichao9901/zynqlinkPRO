@@ -1,0 +1,56 @@
+{
+  "operation": "JTAG/RAM",
+  "dryRun": false,
+  "out": "E:\\zynqlinkPRO-selectio\\build\\sio-run\\usb-baseline-load",
+  "files": {
+    "bit": {
+      "path": "E:\\zynqlinkPRO-selectio\\prebuilt\\release-20261106\\probe.bit",
+      "sha256": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6"
+    },
+    "zynq_elf": {
+      "path": "E:\\zynqlinkPRO-selectio\\prebuilt\\release-20261106\\application.elf",
+      "sha256": "5895eeb0e79a3681a6b3b966dbea4c82ebfcd01ea7553e094d8a61ed2cf89802"
+    },
+    "ps_init": {
+      "path": "E:\\zynqlinkPRO-selectio\\prebuilt\\release-20261106\\ps7_init.tcl",
+      "sha256": "485a028ff7ad9a256a64313b68527a055ca3800b3b85577ceb0554b0e0609c94"
+    }
+  },
+  "commands": {
+    "load": [
+      "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "-X",
+      "utf8",
+      "E:\\zynqlinkPRO-selectio\\tools\\run_xsct.py",
+      "E:\\zynqlinkPRO-selectio\\tools\\download_dap_fpga.tcl",
+      "E:\\zynqlinkPRO-selectio\\prebuilt\\release-20261106\\application.elf",
+      "E:\\zynqlinkPRO-selectio\\prebuilt\\release-20261106\\probe.bit",
+      "E:\\zynqlinkPRO-selectio\\prebuilt\\release-20261106\\ps7_init.tcl",
+      "--sdk",
+      "E:\\Xilinx\\SDK\\2018.3"
+    ],
+    "verify": [
+      "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "-X",
+      "utf8",
+      "E:\\zynqlinkPRO-selectio\\tools\\verify_probe_ocm_code.py",
+      "--elf",
+      "E:\\zynqlinkPRO-selectio\\prebuilt\\release-20261106\\application.elf",
+      "--out-dir",
+      "E:\\zynqlinkPRO-selectio\\build\\sio-run\\usb-baseline-load\\ocm",
+      "--sdk",
+      "E:\\Xilinx\\SDK\\2018.3"
+    ]
+  },
+  "stage": "complete",
+  "passed": true,
+  "streams": {},
+  "before": {
+    "PS_IDCODE": "0x23727093",
+    "LEVEL_SHIFTERS": "0x0",
+    "FPGA_RESET": "0x1f33f0f",
+    "BOOT_MODE": "0x0"
+  },
+  "verifiedBytes": 85844,
+  "FCLK_Hz": 133333332
+}
