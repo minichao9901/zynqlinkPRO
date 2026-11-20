@@ -1,0 +1,20 @@
+set root [file normalize .]
+set out [file normalize build/live-first-bit]
+file mkdir $out
+set ::env(ZYNQLINK_FPGA_OUT) $out
+set ::env(ZYNQLINK_RAW_TRACE) 4
+set ::env(ZYNQLINK_ETM_DDR) 1
+set ::env(ZYNQLINK_ETM_LANE_DELAY) 1
+open_checkpoint [file normalize build/live-system/system_wrapper_postroute.dcp]
+source [file join $root fpga run_threads.tcl]
+source [file join $root fpga selectio ownership_timing.tcl]
+phys_opt_design -directive AggressiveExplore
+if {[get_property SLACK [get_timing_paths -max_paths 1]]<0} {
+    set critical [get_timing_paths -max_paths 4 -slack_lesser_than 0]
+    set nets [get_nets -of_objects [get_pins -of_objects $critical] -filter {ROUTE_STATUS == ROUTED}]
+    if {[llength $nets]} {route_design -unroute -nets $nets; route_design -preserve}
+}
+set ::zynqlink_verify_checkpoint [file join $out routed.dcp]
+write_checkpoint -force $::zynqlink_verify_checkpoint
+close_design
+source [file join $root fpga verify_routed.tcl]

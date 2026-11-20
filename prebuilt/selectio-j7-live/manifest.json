@@ -1,0 +1,38 @@
+{
+  "role": "F103ZE HCLK48 reference, live JTAG/SWD + auxiliary. Four-bank burst DMA belongs to subsequent image.",
+  "pl_source": "68558586",
+  "physical_optimization": "postroute.tcl.txt; ownership_timing.tcl from 66a7adb0",
+  "ps_source": "8655cc5e",
+  "ps_options": [
+    "--selectio",
+    "--j7-adapter",
+    "--compact-code",
+    "--max-swclk-hz",
+    "10000000"
+  ],
+  "verified_clock": "timing.json",
+  "hashes": {
+    "probe.bit": "cb6a326694a7031698025e04f75978755bb6e7a7e6bbec994d72d2865bb98b98",
+    "application.elf": "fb2310ea2e03e0e87a91b660f365f3cdfb62c60ee98e0aa7a86528744097b98e",
+    "ps7_init.tcl": "aa9747c31f705be7c28af1c6b1cdeaf282f0dcdb01faecee2a9f72e4d3489132"
+  },
+  "bit_features": "0x445003ff",
+  "usb_serial": "12345678",
+  "loader": "HS3 temporary JTAG/RAM",
+  "verified_ocm_bytes": 111276,
+  "swd": {
+    "tap": 8,
+    "slot": 20,
+    "idle": 2
+  },
+  "jtag": {
+    "tap": 16,
+    "slot": 28,
+    "idle": 33
+  },
+  "acceptance": [
+    "../../docs/validation/selectio-integration/running-jtag-long.json",
+    "../../docs/validation/selectio-integration/running-swd-long.json"
+  ],
+  "requires_explicit_swd_profile": true
+}
