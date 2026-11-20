@@ -33,3 +33,14 @@
 ### 同一融合配对的 ETM 回归
 
 跨页配对重新临时加载并核对 OCM 后，使用 F103ZE CDC48 的匹配 ELF、SWD 10 MHz 配置和 1 秒 DDR 窗口，完成采集、下载、解码及建库。硬件窗口完整；解码报告 17,230,006 条已执行指令、2 个 gap、1 个未知执行区间、0 个 packet issue。采集器复核目标 RCC、FPB 和运行态恢复。这份结果与主线基线分开保存。[融合 ETM 结果](integrated-etm.json)
+### 同一条链路同时运行 RTT 和变量采样
+
+`selectio combo` 在一次 AP 会话内安排采样与 RTT 环读取。采样按照硬件计时器计算到期时间，RTT 使用有界事务，PS DDR 中两条 FIFO 各有主机完成指针。上传到 PS 的 RTT 字节确认后更新目标 RdOff；实际 USB IN 完成后释放主机队列槽。普通 J-Scope 单独运行仍有独立 PL 采样器。
+
+分别以 JTAG、SWD 100 MHz 运行 60 秒；四个 SRAM 变量，1 ms 调度周期，每个传输取得 59,994 组、0 跳拍。预置的 255 字节 RTT 数据跨越环尾，两个传输均逐字节正确；所有 CSV 组按时间递增，四个值逐组比对成功，主机字节数和采样数与探针 STOP 尾数相等。目标在本测试期间暂停，持续 RTT 产生日志的压力需另测。[计数、哈希、目标恢复及配对](combo.json)
+
+```powershell
+python -X utf8 toolbox.py selectio combo --transport swd --tap 8 --slot 20 --idle 2 --rtt-address 0x2000b000 --ticks 24000 --var 0x2000c000 --seconds 60 --rtt-out session.rtt --scope-out session.csv
+```
+
+示例控制块和变量地址属于 CDC48 镜像。JTAG 的本板通过参数为 tap16、slot28、idle33，使用 JTAG 前需确保目标允许完整 JTAG。
