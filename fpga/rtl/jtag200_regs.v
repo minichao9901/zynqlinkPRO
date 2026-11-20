@@ -33,6 +33,7 @@ module jtag200_regs #(parameter ENABLE_BLOCK=0) (
     output wire [23:0] lane_word,
     input wire [7:0] rx_word
 );
+    reg [1:0] park=3;
     reg [13:0] write_addr;
     reg [31:0] write_data;
     reg [3:0] write_strobes;
@@ -105,7 +106,7 @@ module jtag200_regs #(parameter ENABLE_BLOCK=0) (
     end
 
     jtag200_wave wave (
-        .clk(word_clk), .reset(word_reset), .run(raw_request),
+        .clk(word_clk), .reset(word_reset), .run(raw_request),.park(park),
         .done(raw_done), .tx_addr(raw_tx_addr), .rx_addr(raw_rx_addr), .rx_write(raw_rx_write),
         .tx_word(tx_word[24:0]), .lane_word(raw_lanes)
     );
@@ -135,7 +136,7 @@ module jtag200_regs #(parameter ENABLE_BLOCK=0) (
             s_axi_rvalid <= 0;
             s_axi_bvalid <= 0;
             reading_rx <= 0;
-            phy_hold <= 1;
+            phy_hold <= 1;park<=3;
             delay_load <= 0;
             delay_value <= 0;
             run <= 0;
@@ -194,6 +195,7 @@ module jtag200_regs #(parameter ENABLE_BLOCK=0) (
                 end
                 if (ENABLE_BLOCK && control_write && !run && !done_sync[1]) begin
                     case (write_addr)
+                        14'h038: begin park<=write_data[1:0];s_axi_bresp<=0;end
                         14'h014: begin block_address <= write_data; s_axi_bresp <= 0; end
                         14'h018: if (write_data[31:9] == 0) begin block_count <= write_data[8:0]; s_axi_bresp <= 0; end
                         14'h01c: if (write_data[31:24] == 0) begin block_timing <= write_data[23:0]; s_axi_bresp <= 0; end
@@ -223,6 +225,7 @@ module jtag200_regs #(parameter ENABLE_BLOCK=0) (
                         14'h000: s_axi_rdata <= 32'h4a323030; // J200
                         14'h004: s_axi_rdata <= {27'b0, phy_hold, run, delay_sync[1], done_sync[1], ready_sync[1]};
                         14'h00c: s_axi_rdata <= {27'b0, delay_value};
+                        14'h038: s_axi_rdata<={30'd0,park};
                         14'h010: s_axi_rdata <= ENABLE_BLOCK ? 32'h50495045 : 32'b0; // PIPE
                         14'h014: s_axi_rdata <= block_address;
                         14'h018: s_axi_rdata <= {23'b0,block_count};

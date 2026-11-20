@@ -128,7 +128,11 @@ int probe_target_claim(uint32_t hz) {
         saved_dr_config=swd_read32(JTAG_DR_CONFIG);saved_operation=swd_read32(JTAG_OPERATION);
         saved_instruction=swd_read32(JTAG_CACHED_IR);saved_ir_valid=(swd_read32(JTAG_TIMING)>>2)&1U;
     }
-    if (!DAP_Data.debug_port && link_ready && link_port==port) {
+    if (!DAP_Data.debug_port && link_ready && link_port==port
+#if DAP_SELECTIO
+        && (saved_route&2U) && !selectio_live_available()
+#endif
+    ) {
         DAP_Data.debug_port = (uint8_t)port;
         if(port==2) memcpy(&DAP_Data.jtag_dev,&cached_jtag.jtag_dev,sizeof(DAP_Data.jtag_dev));
     }

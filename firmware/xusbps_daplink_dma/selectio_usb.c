@@ -34,7 +34,7 @@ void selectio_usb_reset(void) {
     configured=0;
     if(selectio_mem_active()) close_pending=1;
     epoch++;
-    aux_reset=1;aux_commit=0;
+    aux_reset=1;aux_commit=0;selectio_cdc_reset();
     rx_hint=tx_busy=pending_length=session_open=deferred=reply_packets=0;
 }
 void selectio_usb_configured(XUsbPs *usb) {
@@ -113,6 +113,10 @@ static unsigned execute_frame(unsigned length, unsigned active_epoch) {
             memcpy(output+HEADER_SIZE,input+HEADER_SIZE,size);
             reply_size=size;
             status=0;
+        } else if(channel==0 && op==4 && !size) {
+            uint32_t fields[8];selectio_cdc_status(fields);memcpy(output+16,fields,sizeof fields);reply_size=sizeof fields;status=0;
+        } else if(channel==0 && op==3 && size==1) {
+            if(!selectio_cdc_bind(input[16])) status=0;
         } else if (channel==0 && op==2 && size==4) {
             if(!selectio_live_profile(input[16],input[17],input[18],input[19])) status=0;
         } else if (channel==1 && op==1 && size==4) {

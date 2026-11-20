@@ -21,7 +21,7 @@ module tb_selectio_debug;
         serial_clk,quad_clk,octet_clk,phy_reset,js_reset,ss_reset,js_ready,owner,);
     selectio_debug_phy phy(serial_clk,quad_clk,octet_clk,phy_reset,owner,
         1'b0,1'b1,1'b1,1'b0,1'b1,lanes,jrx,sclock,sdata,srelease,srx,
-        axi_clk,jload,sload,jtap,stap,clk_pin,data_pin,tdi_pin,tdo_pin,,, , ,1'b0,4'b0,4'b0,4'b0,);
+        axi_clk,jload,sload,jtap,stap,clk_pin,data_pin,tdi_pin,tdo_pin,,, , ,1'b0,4'b0,4'b0,4'b0,,1'b0,1'b0);
     jtag_dp_model #(.IRLEN(5),.DUMMY(1),.RETURN_NS(0.2)) boundary(
         .rst_n(resetn),.tck(clk_pin),.tms(data_pin),.tdi(tdi_pin),.tdo(boundary_tdo));
     cm3_target #(.WORDS(1024),.ADDR_BITS(10)) cm3(

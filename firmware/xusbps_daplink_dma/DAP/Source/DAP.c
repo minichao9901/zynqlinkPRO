@@ -28,6 +28,9 @@
 #include <string.h>
 #include "DAP_config.h"
 #include "selectio_mode.h"
+#if DAP_SELECTIO
+#include "selectio_aux.h"
+#endif
 #include "DAP.h"
 #include "xil_printf.h"
 #include "swd_dma.h"
@@ -267,6 +270,9 @@ static uint32_t DAP_Connect(const uint8_t *request, uint8_t *response) {
     port = *request;
   }
 
+#if DAP_SELECTIO
+  if(selectio_aux_conflict(port)) {*response=DAP_PORT_DISABLED;return ((1U<<16)|1U);}
+#endif
   switch (port) {
 #if (DAP_SWD != 0)
     case DAP_PORT_SWD:

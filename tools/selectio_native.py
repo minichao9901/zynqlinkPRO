@@ -78,7 +78,7 @@ class NativeStream:
         if len(reply)!=16 or reply[:4]!=b"SIO1":
             raise RuntimeError("unrecognized native firmware interface")
         ref,features,size=struct.unpack_from("<III",reply,4)
-        return dict(protocol="ZLK1",reference_hz=ref,link_hz=ref/2,features=hex(features),
+        return dict(protocol="ZLK1",reference_hz=ref,link_hz=ref/2 if features&0x80 else None,features=hex(features),
                     integrated_pl=bool(features&0x80),max_frame=size)
 
 

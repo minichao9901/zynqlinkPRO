@@ -18,7 +18,7 @@ if {$rtl_debug && ![llength $observation_cells]} {error "Debug instrumentation w
 puts "RTL_OBSERVATION_IMPLEMENTED=[llength $observation_cells] RTL_DEBUG=$rtl_debug"
 set selectio_pads [get_cells -quiet -hier -filter {REF_NAME == OSERDESE2 && NAME =~ *g_selectio*}]
 if {[llength $selectio_pads]} {
-    if {[llength $selectio_pads]!=3 || [llength [get_cells -quiet -hier -filter {REF_NAME == ISERDESE2 && NAME =~ *g_selectio*}]]!=2} {
+    if {[llength $selectio_pads]!=3 || [llength [get_cells -quiet -hier -filter {REF_NAME == ISERDESE2 && NAME =~ *g_selectio*}]]!=3} {
         error "Missing shared debug serializers"
     }
     foreach {port ball} {swclk_0 L15 swdio_0 L16 gpio_rtl_0_tri_io[0] M15 gpio_rtl_0_tri_io[1] L14} {

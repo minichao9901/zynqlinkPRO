@@ -2,7 +2,7 @@
 // The AXI side owns the TX/RX buffers before and after a scan.
 // Addresses and waveforms remain stable until the scan is done.
 module jtag200_wave (
-    input wire clk, reset, run,
+    input wire clk, reset, run, input wire [1:0] park,
     output reg done = 0,
     output reg [8:0] tx_addr = 0,
     output reg [8:0] rx_addr = 0,
@@ -14,9 +14,9 @@ module jtag200_wave (
     reg [2:0] state = IDLE;
     (* ASYNC_REG = "TRUE" *) reg [1:0] run_sync = 0;
     reg [2:0] drain = 0;
-    localparam [23:0] IDLE_WORD = 24'hffff00;  // TDI/TMS high, TCK low
+    wire [23:0] idle_word = {{8{park[1]}},{8{park[0]}},8'd0};  // TDI/TMS high, TCK low
 
-    assign lane_word = state == PLAY ? tx_word[23:0] : IDLE_WORD;
+    assign lane_word = state == PLAY ? tx_word[23:0] : idle_word;
     assign rx_write = state == PLAY;
 
     always @(posedge clk) begin

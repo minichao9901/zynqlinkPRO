@@ -1,5 +1,8 @@
 #include "probe_stream.h"
 #include "selectio_usb.h"
+#if DAP_SELECTIO
+#include "selectio_aux.h"
+#endif
 #include "etm_stream.h"
 /******************************************************************************
 *
@@ -456,6 +459,7 @@ static int UsbIntrExample(XScuGic *IntcInstancePtr, XUsbPs *UsbInstancePtr,
         etm_poll(UsbInstancePtr);
 #if DAP_SELECTIO
         selectio_usb_poll(UsbInstancePtr);
+        selectio_cdc_poll(UsbInstancePtr);
 #endif
 	}
 
@@ -555,7 +559,11 @@ static void XUsbPs_Ep0EventHandler(void *CallBackRef, u8 EpNum,
 	case XUSBPS_EP_EVENT_SETUP_DATA_RECEIVED:
 		Status = XUsbPs_EpGetSetupData(InstancePtr, EpNum, &SetupData);
 		if (XST_SUCCESS == Status) {
-			/* Handle the setup packet. */
+			/* A new SETUP cancels an incomplete EP0 OUT data stage. */
+#if DAP_SELECTIO
+            selectio_cdc_cancel_line();
+#endif
+            /* Handle the setup packet. */
 			(int) XUsbPs_Ch9HandleSetupPacket(InstancePtr,
 							   &SetupData);
 
@@ -571,7 +579,11 @@ static void XUsbPs_Ep0EventHandler(void *CallBackRef, u8 EpNum,
 		Status = XUsbPs_EpBufferReceive(InstancePtr, EpNum,
 					&BufferPtr, &BufferLen, &Handle);
 		if (XST_SUCCESS == Status) {
-			/* Return the buffer. */
+			#if DAP_SELECTIO
+            Xil_DCacheInvalidateRange((UINTPTR)BufferPtr,(BufferLen+31U)&~31U);
+            selectio_cdc_line_data(InstancePtr,BufferPtr,BufferLen);
+#endif
+            /* Return the buffer. */
 			XUsbPs_EpBufferRelease(Handle);
 		}
 		break;
@@ -668,14 +680,21 @@ static void XUsbPs_EpCdcEventHandler(void *CallBackRef, u8 EpNum,
 
 		Xil_DCacheInvalidateRange((unsigned int)BufferPtr, InavalidateLen);
 		if (XST_SUCCESS == Status) {
-			usbd_cdc_acm_bulk_out(InstancePtr, EpNum, BufferLen, BufferPtr);
+			#if DAP_SELECTIO
+            if(selectio_cdc_receiving()) selectio_cdc_receive(BufferPtr,BufferLen);
+            else
+#endif
+            usbd_cdc_acm_bulk_out(InstancePtr, EpNum, BufferLen, BufferPtr);
 			XUsbPs_EpBufferRelease(Handle);
 		}
 		break;
 
 	case XUSBPS_EP_EVENT_DATA_TX:
 		/* CDC Bulk IN - EP 3 */
-		probe_usb_event(InstancePtr,EpNum,EventType,Data);
+		#if DAP_SELECTIO
+        if(selectio_cdc_complete(Data)) break;
+#endif
+        probe_usb_event(InstancePtr,EpNum,EventType,Data);
 		break;
 
 	default:

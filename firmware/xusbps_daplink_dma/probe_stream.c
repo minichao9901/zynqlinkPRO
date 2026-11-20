@@ -3,6 +3,9 @@
 // target access, ownership changes and packet construction run in main.
 #include "probe_stream.h"
 #include "selectio_block.h"
+#if DAP_SELECTIO
+#include "selectio_aux.h"
+#endif
 #include "xil_cache.h"
 #include "xil_exception.h"
 #include "xil_io.h"
@@ -420,7 +423,7 @@ static int sampler_arm(void) {
 }
 int probe_before_dap(void) {
 #if DAP_SELECTIO
-    if(selectio_mem_active()) return -7;
+    if(selectio_mem_active() || selectio_aux_exclusive()) return -7;
 #endif
     int failed=0;
     if(bench_active){bench_active=0;bench_error=-7;}
@@ -721,7 +724,7 @@ end:
 }
 int probe_prepare_link_change(void) {
 #if DAP_SELECTIO
-    if(selectio_mem_active()) return -7;
+    if(selectio_mem_active() || selectio_aux_exclusive()) return -7;
 #endif
     // A line reset/TAP initialization invalidates cached AP state. Do not
     // restart an autonomous stream between the commands of a new handshake.

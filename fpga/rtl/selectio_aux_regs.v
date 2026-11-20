@@ -13,8 +13,8 @@ module selectio_aux_regs(
     input wire s_axi_arvalid,output wire s_axi_arready,
     output reg [31:0] s_axi_rdata,output reg [1:0] s_axi_rresp,
     output reg s_axi_rvalid,input wire s_axi_rready,
-    input wire quad_clk, phy_reset, pad_granted,
-    input wire [3:0] pad_samples,output wire pad_request, spi_selected,
+    input wire quad_clk, phy_reset, pad_granted, uart_granted,
+    input wire [3:0] pad_samples,output wire pad_request, uart_request, spi_selected, monitor_tdi,
     output wire [3:0] clock_slots, select_slots, tx_slots
 );
     // flags[1:0] receive codec: 0 off, 1 UART 8N1, 2 Manchester SWO.
@@ -23,21 +23,39 @@ module selectio_aux_regs(
     reg [31:0] period_q8;
     reg [15:0] min_short,short_limit,long_limit;
     reg [7:0] spi_config;
-    assign pad_request=|flags[3:2];
+    reg [1:0] test_config;
+    (* ASYNC_REG="TRUE" *) reg [1:0] test_meta,test_io;
+    always @(posedge quad_clk) begin
+        if(phy_reset) begin test_meta<=0;test_io<=0;end
+        else begin test_meta<=test_config;test_io<=test_meta;end
+    end
+    assign monitor_tdi=test_io[0];
+    assign pad_request=flags[2] || (test_config[1] && flags[3]);
     (* ASYNC_REG="TRUE" *) reg [3:0] flags_meta,flags_io;
     (* ASYNC_REG="TRUE" *) reg [1:0] grant_sync;
+    wire uart_bypass=test_io[1] && flags_io[3];
+    assign uart_request=flags_io[3] && !uart_bypass;
+    wire granted=(flags_io[2] || uart_bypass) ? pad_granted : uart_granted;
     always @(posedge quad_clk) begin
         if(phy_reset) begin flags_meta<=0;flags_io<=0;end
         else begin flags_meta<=flags;flags_io<=flags_meta;end
     end
-    assign spi_selected=flags_io[2];
+    assign spi_selected=flags_io[2] || uart_bypass;
 
     wire [7:0] uart_byte,manchester_byte,spi_byte;
     wire uart_valid,manchester_valid,spi_valid,uart_error,manchester_error;
     selectio_uart_rx uart_rx(quad_clk,phy_reset,flags_io[1:0]==1,pad_samples,period_q8,
                              uart_valid,uart_byte,uart_error);
-    selectio_manchester_rx manchester_rx(quad_clk,phy_reset,flags_io[1:0]==2,pad_samples,
-                       min_short,short_limit,long_limit,manchester_valid,manchester_byte,manchester_error);
+    wire fast_rate=period_q8>=1023 && period_q8<=1025;
+    wire regular_valid,regular_error,fast_valid,fast_error;
+    wire [7:0] regular_byte,fast_byte;
+    assign manchester_valid=regular_valid || fast_valid;
+    assign manchester_error=regular_error || fast_error;
+    assign manchester_byte=fast_rate ? fast_byte : regular_byte;
+    selectio_manchester_fast fast_decoder(quad_clk,phy_reset,flags_io[1:0]==2 && fast_rate,
+        spi_config[2],pad_samples,fast_valid,fast_byte,fast_error);
+    selectio_manchester_rx manchester_rx(quad_clk,phy_reset,flags_io[1:0]==2 && !fast_rate,pad_samples,
+                       min_short,short_limit,long_limit,regular_valid,regular_byte,regular_error);
     reg launch;
     reg [12:0] tx_length;
     wire launch_io,tx_busy,tx_done,done_spi,done_uart;
@@ -51,19 +69,20 @@ module selectio_aux_regs(
         .host_clk(axi_aclk),.io_clk(quad_clk),.reset(!axi_aresetn || phy_reset),
         .host_start(launch),.host_request({flags[2],spi_config,period_q8,tx_length}),
         .host_busy(tx_busy),.host_done(tx_done),.host_response(),
-        .granted(pad_granted),.io_start(launch_io),.io_request({send_spi,active_spi_config,active_period,active_length}),
+        .granted(granted),.io_start(launch_io),.io_request({send_spi,active_spi_config,active_period,active_length}),
         .io_done(done_spi || done_uart),.io_response(1'b1));
     reg [31:0] tx_q;
-    wire [9:0] tx_address=spi_selected ? spi_addr : uart_addr;
+    wire [9:0] tx_address=flags_io[2] ? spi_addr : uart_addr;
     wire [3:0] spi_sck,spi_cs;
     selectio_spi spi(quad_clk,phy_reset,launch_io && send_spi,active_spi_config[1:0],
                      active_length,active_spi_config[7:2],spi_addr,tx_q,pad_samples,
                      spi_sck,spi_cs,mosi,spi_valid,,spi_byte,,done_spi);
+    wire uart_busy;
     selectio_uart_tx uart_tx(quad_clk,phy_reset,launch_io && !send_spi,
-                             active_length,active_period,tx_q,uart_addr,uart_out,,done_uart);
-    assign clock_slots=spi_sck;
-    assign select_slots=spi_cs;
-    assign tx_slots=spi_selected ? mosi : uart_out;
+                             active_length,active_period,tx_q,uart_addr,uart_out,uart_busy,done_uart);
+    assign clock_slots=uart_bypass ? (uart_busy ? 4'b1100 : 4'b0) : spi_sck;
+    assign select_slots=uart_bypass ? 4'b0 : spi_cs;
+    assign tx_slots=flags_io[2] ? mosi : uart_out;
     reg [16:0] aw;
     reg [31:0] wd;
     reg [3:0] strobe;
@@ -142,10 +161,10 @@ module selectio_aux_regs(
     assign s_axi_arready=!s_axi_rvalid && !ram_pending;
     always @(posedge axi_aclk) begin
         wr_meta<=writer_gray;wr_gray_sync<=wr_meta;writer_view<=from_gray(wr_gray_sync);
-        grant_sync<={grant_sync[0],pad_granted};
+        grant_sync<={grant_sync[0],granted};
         launch<=0;update_reader<=0;snapshot_request<=0;
         if(!axi_aresetn) begin
-            flags<=0;period_q8<=888889;spi_config<=0;
+            flags<=0;period_q8<=888889;spi_config<=0;test_config<=0;
             min_short<=1;short_limit<=3;long_limit<=5;
             have_aw<=0;have_w<=0;s_axi_bvalid<=0;s_axi_rvalid<=0;ram_pending<=0;
             reader_view<=0;completed<=0;grant_sync<=0;
@@ -163,6 +182,7 @@ module selectio_aux_regs(
                     'h0c: if(!flags && wd>=1024) period_q8<=wd;else s_axi_bresp<=2;
                     'h10: if(!flags) begin min_short<=wd[15:0];short_limit<=wd[31:16];end else s_axi_bresp<=2;
                     'h14: if(!flags) long_limit<=wd[15:0];else s_axi_bresp<=2;
+                    'h30: if(!flags && wd<4) test_config<=wd[1:0];else s_axi_bresp<=2;
                     'h18: if(!tx_busy && !launch && wd<256) spi_config<=wd[7:0];else s_axi_bresp<=2;
                     'h1c: if(grant_sync[1] && !tx_busy && !launch && wd!=0 && wd<=4096) begin
                         tx_length<=wd[12:0];launch<=1;completed<=0;

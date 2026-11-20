@@ -59,6 +59,10 @@ typedef struct {
 	u8  bDataBits;
 } CDC_LineCoding;
 
+#if DAP_SELECTIO
+void selectio_cdc_cancel_line(void);
+void selectio_cdc_line_data(XUsbPs *usb,const u8 *bytes,u32 count);
+#endif
 void XUsbPs_ClassReq(XUsbPs *InstancePtr, void *SetupDataPtr);
 void usbd_cdc_acm_set_dtr(XUsbPs *InstancePtr, u8 intf, u8 dtr);
 void usbd_cdc_acm_bulk_out(XUsbPs *InstancePtr, u8 EpNum, u32 nbytes, u8 *Buffer);

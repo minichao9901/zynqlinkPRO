@@ -85,7 +85,7 @@ module swd_controller #(
     // J7 SelectIO option. Clock and transaction engines live on the BD.
     input wire hs_serial_phase, hs_quad_phase, hs_octet_phase, hs_reset,
     input wire [2:0] hs_owner,
-    input wire hs_aux_spi,input wire [3:0] hs_aux_sck,hs_aux_cs,hs_aux_tx,output wire [3:0] hs_aux_rx,
+    input wire hs_monitor_tdi,hs_uart_request,output wire hs_uart_grant, input wire hs_aux_spi,input wire [3:0] hs_aux_sck,hs_aux_cs,hs_aux_tx,output wire [3:0] hs_aux_rx,
     input wire [23:0] hs_jtag_lanes, output wire [7:0] hs_jtag_samples,
     input wire [3:0] hs_swd_ckslots, hs_swd_data, hs_swd_release,
     output wire [3:0] hs_swd_samples,
@@ -164,7 +164,10 @@ module swd_controller #(
     wire [2:0] live_swd_ack;
     wire [31:0] live_swd_rdata;
     (* ASYNC_REG="TRUE" *) reg [1:0] live_jtag_sync=0,live_swd_sync=0;
+    (* ASYNC_REG="TRUE" *) reg [1:0] legacy_jtag_sync=0;
+    assign hs_uart_grant=hs_uart_request && (hs_owner==3 || hs_owner==0 || (hs_owner==1 && !legacy_jtag_sync[1]));
     if (SELECTIO) begin:g_live_select
+        always @(posedge hs_quad_phase) legacy_jtag_sync<={legacy_jtag_sync[0],jtag_enabled};
         always @(posedge hs_octet_phase) live_jtag_sync<={live_jtag_sync[0],hs_live_jtag};
         always @(posedge hs_quad_phase) live_swd_sync<={live_swd_sync[0],hs_live_swd};
     end
@@ -182,7 +185,7 @@ module swd_controller #(
             .swd_samples(hs_swd_samples), .tap_clk(clk), .tdo_load(hs_tdo_load),
             .swdio_load(hs_swdio_load), .tdo_tap(hs_tdo_tap), .swdio_tap(hs_swdio_tap),
             .clock_pin(swclk), .data_pin(swdio), .tdi_pin(gpio_aux[0]), .tdo_pin(gpio_aux[1]),
-            .aux_spi(hs_aux_spi), .aux_sck(hs_aux_sck),.aux_cs(hs_aux_cs),.aux_tx(hs_aux_tx),.aux_rx(hs_aux_rx),
+            .monitor_tdi(hs_monitor_tdi),.uart_sideband(hs_uart_grant),.aux_spi(hs_aux_spi), .aux_sck(hs_aux_sck),.aux_cs(hs_aux_cs),.aux_tx(hs_aux_tx),.aux_rx(hs_aux_rx),
             .clock_level(clock_feedback), .data_level(swdio_i_raw), .tdi_level(gpio_in[0]), .tdo_level(gpio_in[1])
         );
     end else begin:g_legacy_pads
@@ -696,7 +699,7 @@ module swd_controller #(
                     ADDR_CTRL: begin
                         rdata_reg <= {16'd0, xfer_request, 5'd0, ctrl_timestamp_en, ctrl_mode, scalar_status_busy};
                     end
-                    ADDR_FEATURES: rdata_reg <= SELECTIO ? 32'h4450_03ff : 32'h4450_007f; // bit6: manual SWDIO direction; bit5: extended idle.
+                    ADDR_FEATURES: rdata_reg <= SELECTIO ? 32'h4450_1bff : 32'h4450_007f; // bit6: manual SWDIO direction; bit5: extended idle.
                     ADDR_ENGINE_RESET: rdata_reg <= engine_reset_count;
                     ADDR_TRACE_CTRL: rdata_reg <= {trace_frozen,trace_raw_mode,trace_raw_active,trace_raw_armed,8'd0,trace_count,trace_head};
                     ADDR_TRACE_INDEX: rdata_reg <= {28'd0,trace_index};

@@ -1,6 +1,6 @@
 """Native USB CLI for the integrated J7 SelectIO firmware."""
 import argparse
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 import json
 import hashlib
 from pathlib import Path
@@ -51,6 +51,62 @@ def transfer(out_ep, in_ep, transport, address, length, data, tap, slot, idle, n
     return reply[6:]
 
 
+def auxiliary(args):
+    channel=4 if args.action=="spi" else 5
+    tx_data=b""
+    if getattr(args,"file",None):
+        tx_data=args.file.read_bytes()
+    if getattr(args,"hex",None) is not None:
+        tx_data=bytes.fromhex(args.hex)
+    spi=channel==4
+    if spi and not 1<=len(tx_data)<=4079:
+        raise ValueError("SPI supports 1..4079 bytes per continuous chip-select assertion")
+    if not spi and (args.seconds<0 or not 9600<=args.rate<=100000000):
+        raise ValueError("invalid serial rate or observation time")
+    codec=0 if spi else 2 if args.action=="swo" and args.encoding=="manchester" else 1
+    capture_path=args.out
+    if capture_path.exists(): raise ValueError("capture output already exists")
+    started=False
+    total=0
+    target=nullcontext(None)
+    if getattr(args,"configure_f103",False):
+        from selectio_f103_swo import f103_swo
+        target=f103_swo(args.serial,args.encoding,args.rate,args.itm_mask)
+    with target as enable_itm, native_connection(args.serial,enable_itm.device if enable_itm else None) as native, capture_path.open("xb") as sink:
+        info=native.info()
+        if not int(info["features"],16)&0x200: raise RuntimeError("the running PL does not contain the AUX engine")
+        config=struct.pack("<BBBBIB",codec,int(bool(tx_data) and not spi),getattr(args,"mode",0),
+                           getattr(args,"slot",0),100000000 if spi else args.rate,args.tap)
+        def pull():
+            nonlocal total
+            value=native.exchange(channel,1)
+            sink.write(value);total+=len(value)
+            return len(value)
+        try:
+            native.exchange(channel,0,config)
+            started=True
+            if enable_itm:enable_itm.start()
+            t0=time.perf_counter()
+            if spi: native.exchange(channel,2,tx_data)
+            else:
+                chunk=min(4079,max(1,args.rate//100))
+                for i in range(0,len(tx_data),chunk):
+                    native.exchange(channel,2,tx_data[i:i+chunk])
+                    pull()
+                while time.perf_counter()-t0<args.seconds: pull()
+            native.exchange(channel,3)
+            while pull(): pass
+            available,drops,errors,status,reader=struct.unpack("<5I",native.exchange(channel,4))
+            if available or drops or errors or (spi and total!=len(tx_data)):
+                raise RuntimeError(f"incomplete capture: received={total}, remaining={available}, drops={drops}, framing_errors={errors}")
+        finally:
+            if started: native.exchange(channel,5)
+    print(json.dumps(dict(mode=args.action,received=total,transmitted=len(tx_data),
+                          seconds=time.perf_counter()-t0,drops=drops,framing_errors=errors,
+                          clock_source="PS reference and SelectIO divider",output=str(capture_path)),indent=2))
+    return 0
+
+
 def capture(args):
     from probe_stream import variable
     channel=2 if args.action=="rtt" else 3
@@ -59,7 +115,8 @@ def capture(args):
     if channel==3:
         variables=[variable(v) for v in args.var]
     if args.out.exists(): raise ValueError("capture output already exists")
-    with native_connection(args.serial) as native, args.out.open("xb") as output:
+    with connection(args.serial) as (tx,rx), native_connection(args.serial,tx.device) as native, args.out.open("xb") as output:
+        setup(tx,rx,1000,args.transport)
         info=native.info()
         native.exchange(channel,0,b"\x01")
         active=False
@@ -101,7 +158,8 @@ def capture(args):
                     while drain(): pass
                     info.update(bytes=received,status=list(action(2)),seconds=time.monotonic()-start)
             finally:
-                native.exchange(channel,0,b"\x00")
+                try:native.exchange(channel,0,b"\x00")
+                finally:cmd(tx,rx,[3])
     print(json.dumps(info,indent=2))
     return 0
 
@@ -113,6 +171,31 @@ def main():
     commands.add_parser("info", help="read firmware capabilities and PS reference clock")
     test = commands.add_parser("usb-test", help="verify WinUSB transport independently of the target")
     test.add_argument("--seconds", type=float, default=5)
+    sub=commands.add_parser("com",help="bind the physical UART to the probe CDC COM port, release it, or read status")
+    sub.add_argument("operation",choices=("bind","release","status"))
+    sub=commands.add_parser("profile",help="set the live DAP, RTT and scope sampling profile before connecting")
+    sub.add_argument("--transport",choices=PORTS,required=True)
+    sub.add_argument("--tap",type=int,choices=range(32),required=True)
+    sub.add_argument("--slot",type=int,choices=range(64),required=True)
+    sub.add_argument("--idle",type=int,choices=range(256),required=True)
+    for action in ("spi","uart","swo"):
+        sub=commands.add_parser(action,help="native full-duplex SPI, physical UART or CoreSight SWO receiver")
+        sub.add_argument("--out",type=Path,required=True,help="new binary receive file")
+        sub.add_argument("--tap",type=int,choices=range(32),default=0,metavar="0..31")
+        if action!="swo":
+            data=sub.add_mutually_exclusive_group(required=(action=="spi"))
+            data.add_argument("--file",type=Path,help="raw TX payload")
+            data.add_argument("--hex",help="hexadecimal TX bytes")
+        if action=="spi":
+            sub.add_argument("--mode",type=int,choices=range(4),required=True)
+            sub.add_argument("--slot",type=int,choices=range(64),required=True,metavar="0..63")
+        else:
+            sub.add_argument("--rate",type=number,required=True,help="UART baud or Manchester information bits/s")
+            sub.add_argument("--seconds",type=float,required=True)
+        if action=="swo":
+            sub.add_argument("--encoding",choices=["uart","manchester"],required=True)
+            sub.add_argument("--configure-f103",action="store_true",help="configure and restore the CDC48 target ITM/TPIU")
+            sub.add_argument("--itm-mask",type=number,default=1,help="ITM stimulus port bit mask for target setup")
     for action in ("rtt","scope"):
         sub=commands.add_parser(action,help="capture RTT bytes or HSS frames through native WinUSB")
         sub.add_argument("--transport",choices=PORTS,required=True)
@@ -140,6 +223,19 @@ def main():
             sub.add_argument("--file", type=Path, required=True)
     args = parser.parse_args()
     try:
+        if args.action in ("com","profile"):
+            with native_connection(args.serial) as native:
+                native.info()
+                if args.action=="profile":
+                    native.exchange(0,2,bytes((PORTS[args.transport],args.tap,args.slot,args.idle)))
+                    print(json.dumps(dict(transport=args.transport,tap=args.tap,slot=args.slot,idle=args.idle)))
+                else:
+                    if args.operation!="status":
+                        native.exchange(0,3,bytes((int(args.operation=="bind"),)))
+                    values=struct.unpack("<8I",native.exchange(0,4))
+                    print(json.dumps(dict(zip(("bound","claimed","baud","dtr","pending_usb_tx","overflow","framing_errors","rx_available"),values)),indent=2))
+            return 0
+        if args.action in ("spi","uart","swo"): return auxiliary(args)
         if args.action in ("rtt","scope"): return capture(args)
         if args.action in ("info","usb-test"):
             with native_connection(args.serial) as native:

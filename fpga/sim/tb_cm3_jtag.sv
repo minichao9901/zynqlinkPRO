@@ -72,7 +72,7 @@ module tb_cm3_jtag #(parameter integer ENABLE_DIAGNOSTICS=0, FAST_IO=0);
   .rsp_bram_clk(clk),.rsp_bram_rst(1'b0),.rsp_bram_en(1'b0),.rsp_bram_we(4'd0),.rsp_bram_addr(32'd0),.rsp_bram_wrdata(32'd0),
   .pkt_bram_clk(clk),.pkt_bram_rst(1'b0),.pkt_bram_en(pe),.pkt_bram_we(pw),.pkt_bram_addr(pa),.pkt_bram_wrdata(pd),.pkt_bram_rddata(pq),
   .hs_serial_phase(serial_ck),.hs_quad_phase(quad_ck),.hs_octet_phase(octet_ck),.hs_reset(phy_reset),
-  .hs_owner(owner),.hs_jtag_lanes(24'hffff00),.hs_swd_ckslots(4'd0),.hs_swd_data(4'hf),.hs_swd_release(4'hf),
+  .hs_monitor_tdi(1'b0),.hs_uart_request(1'b0),.hs_owner(owner),.hs_jtag_lanes(24'hffff00),.hs_swd_ckslots(4'd0),.hs_swd_data(4'hf),.hs_swd_release(4'hf),
   .hs_tdo_load(1'b0),.hs_swdio_load(1'b0),.hs_tdo_tap(5'd0),.hs_swdio_tap(5'd0),
   .hs_live_config(high_config),.hs_legacy_released(released),.hs_live_jtag(live_jtag),.hs_live_swd(live_swd),
   .swclk(tck),.swdio(tms),.gpio_aux(pads),.gpio_out(aux_out),.gpio_tri(aux_tri),.gpio_in());

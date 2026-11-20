@@ -51,6 +51,9 @@
 
 #include "xusbps.h"
 #include "selectio_usb.h"
+#if DAP_SELECTIO
+#include "selectio_aux.h"
+#endif
 /* Application backpressure, scoped to CMSIS-DAP EP2. */
 extern int chry_dap_rx_ready(void);
 extern volatile u32 dap_rx_deferred;
@@ -335,6 +338,7 @@ static void XUsbPs_IntrHandleRX(XUsbPs *InstancePtr, u32 EpCompl)
         while (!XUsbPs_dTDIsActive(Ep->dTDCurr)) {
 #if DAP_SELECTIO
             if (Index==1 && !selectio_usb_rx_available()) break;
+            if (Index==4 && !selectio_cdc_space()) break;
 #endif
             if (Index==2 && !chry_dap_rx_ready()) {
                 dap_rx_deferred=1;
@@ -479,5 +483,6 @@ static void XUsbPs_IntrHandleEp0Setup(XUsbPs *InstancePtr)
 void XUsbPs_DapResumeRx(XUsbPs *instance) { XUsbPs_IntrHandleRX(instance,1U<<2); }
 
 #if DAP_SELECTIO
+void selectio_cdc_resume_rx(XUsbPs *usb) { XUsbPs_IntrHandleRX(usb,1U<<4); }
 void selectio_usb_resume_rx(XUsbPs *usb) { XUsbPs_IntrHandleRX(usb,1U<<1); }
 #endif

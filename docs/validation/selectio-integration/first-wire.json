@@ -1,0 +1,169 @@
+[
+  {
+    "kind": "spi",
+    "points": [
+      {
+        "tap": 0,
+        "slot": 16,
+        "received": 64,
+        "expected": 64,
+        "errors": 0,
+        "overflow": 0,
+        "prefix": "0fe3ffe2171de3e3fe0f0f038ffc63c7",
+        "expected_prefix": "3dcefb8a5c574f8f7c3c3c0e37d18f1a",
+        "passed": false
+      },
+      {
+        "tap": 0,
+        "slot": 20,
+        "received": 64,
+        "expected": 64,
+        "errors": 0,
+        "overflow": 0,
+        "prefix": "1fc77fc67e2bc7c7fe1e1e071ff0c78e",
+        "expected_prefix": "3dcefb8a5c574f8f7c3c3c0e37d18f1a",
+        "passed": false
+      },
+      {
+        "tap": 0,
+        "slot": 24,
+        "received": 64,
+        "expected": 64,
+        "errors": 0,
+        "overflow": 0,
+        "prefix": "3f8eff887c778f8ffc3c3c0e3fe18f1c",
+        "expected_prefix": "3dcefb8a5c574f8f7c3c3c0e37d18f1a",
+        "passed": false
+      },
+      {
+        "tap": 0,
+        "slot": 28,
+        "received": 64,
+        "expected": 64,
+        "errors": 0,
+        "overflow": 0,
+        "prefix": "7f1fff10f8cf1f1ff078781c7fc31e38",
+        "expected_prefix": "3dcefb8a5c574f8f7c3c3c0e37d18f1a",
+        "passed": false
+      },
+      {
+        "tap": 0,
+        "slot": 12,
+        "received": 64,
+        "expected": 64,
+        "errors": 0,
+        "overflow": 0,
+        "prefix": "07f1dff19f8ef1f1ff878781c7fc31e3",
+        "expected_prefix": "3dcefb8a5c574f8f7c3c3c0e37d18f1a",
+        "passed": false
+      },
+      {
+        "tap": 0,
+        "slot": 32,
+        "received": 64,
+        "expected": 64,
+        "errors": 0,
+        "overflow": 0,
+        "prefix": "fe3bfe23f19e3e3ff0f0f038ff863c70",
+        "expected_prefix": "3dcefb8a5c574f8f7c3c3c0e37d18f1a",
+        "passed": false
+      },
+      {
+        "tap": 0,
+        "slot": 18,
+        "received": 64,
+        "expected": 64,
+        "errors": 0,
+        "overflow": 0,
+        "prefix": "1ee77dc52e2ba7c7be1e1e071be8c78d",
+        "expected_prefix": "3dcefb8a5c574f8f7c3c3c0e37d18f1a",
+        "passed": false
+      },
+      {
+        "tap": 0,
+        "slot": 22,
+        "received": 64,
+        "expected": 64,
+        "errors": 0,
+        "overflow": 0,
+        "prefix": "3dcefb8a5c574f8f7c3c3c0e37d18f1a",
+        "expected_prefix": "3dcefb8a5c574f8f7c3c3c0e37d18f1a",
+        "passed": true
+      }
+    ],
+    "passed": true,
+    "confirmed_bytes": 188416,
+    "transactions": 92,
+    "elapsed": 10.054908300000534
+  },
+  {
+    "kind": "uart",
+    "points": [
+      {
+        "tap": 0,
+        "slot": 20,
+        "received": 64,
+        "expected": 64,
+        "errors": 0,
+        "overflow": 0,
+        "prefix": "78307c8f3f5b24324c5818e5bf173106",
+        "expected_prefix": "78307c8f3f5b24324c5818e5bf173106",
+        "passed": true
+      }
+    ],
+    "passed": true,
+    "confirmed_bytes": 8832,
+    "transactions": 92,
+    "elapsed": 10.044763400001102
+  },
+  {
+    "kind": "manchester",
+    "points": [
+      {
+        "tap": 0,
+        "slot": 20,
+        "received": 0,
+        "expected": 64,
+        "errors": 25,
+        "overflow": 0,
+        "prefix": "",
+        "expected_prefix": "1df16181c9d050697e9c17b203cff1a5",
+        "passed": false
+      },
+      {
+        "tap": 8,
+        "slot": 20,
+        "received": 0,
+        "expected": 64,
+        "errors": 277,
+        "overflow": 0,
+        "prefix": "",
+        "expected_prefix": "1df16181c9d050697e9c17b203cff1a5",
+        "passed": false
+      },
+      {
+        "tap": 16,
+        "slot": 20,
+        "received": 0,
+        "expected": 64,
+        "errors": 235,
+        "overflow": 0,
+        "prefix": "",
+        "expected_prefix": "1df16181c9d050697e9c17b203cff1a5",
+        "passed": false
+      },
+      {
+        "tap": 24,
+        "slot": 20,
+        "received": 0,
+        "expected": 64,
+        "errors": 56,
+        "overflow": 0,
+        "prefix": "",
+        "expected_prefix": "1df16181c9d050697e9c17b203cff1a5",
+        "passed": false
+      }
+    ],
+    "passed": false
+  }
+]

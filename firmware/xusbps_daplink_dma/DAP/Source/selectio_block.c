@@ -133,7 +133,7 @@ int selectio_mem_close(void) {
 
 int selectio_mem_open(const uint8_t fields[4]) {
     unsigned port=fields[0],tap=fields[1],slot=fields[2],idle=fields[3];
-    if ((port!=1 && port!=2) || port!=DAP_Data.debug_port || session.port || tap>31 ||
+    if ((port!=1 && port!=2) || port!=DAP_Data.debug_port || session.port || selectio_aux_conflict(port) || tap>31 ||
         slot>63 || (port==1 && idle>15) || (port==2 && (slot<16 || !(idle&1))) ||
         !(swd_read32(SWD_FEATURES)&0x80U) || etm_ddr_owned() || !probe_session_live() ||
         probe_stream_active() || probe_target_claimed()) return -1;

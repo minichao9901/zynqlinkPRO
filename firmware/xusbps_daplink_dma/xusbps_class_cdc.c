@@ -38,7 +38,24 @@
 #include "xusbps_class_cdc.h"
 #include "xil_cache.h"
 
-static CDC_LineCoding line_coding ALIGNMENT_CACHELINE;
+static CDC_LineCoding line_coding ALIGNMENT_CACHELINE={115200,0,0,8};
+#if DAP_SELECTIO
+#include "selectio_aux.h"
+static u8 line_pending;
+void selectio_cdc_cancel_line(void){line_pending=0;}
+void selectio_cdc_line_data(XUsbPs *usb,const u8 *bytes,u32 count) {
+    if(!line_pending)return;
+    line_pending=0;
+    u32 baud=0;
+    if(count==7) memcpy(&baud,bytes,4);
+    if(count!=7 || baud<9600 || baud>100000000U || bytes[4]!=0 || bytes[5]!=0 || bytes[6]!=8) {
+        XUsbPs_EpStall(usb,0,XUSBPS_EP_DIRECTION_IN);return;
+    }
+    line_coding.dwDTERate=baud;line_coding.bCharFormat=0;
+    line_coding.bParityType=0;line_coding.bDataBits=8;
+    selectio_cdc_line(baud);XUsbPs_EpBufferSend(usb,0,NULL,0);
+}
+#endif
 
 extern void usbd_cdc_acm_set_dtr(XUsbPs *InstancePtr, u8 intf, u8 dtr);
 
@@ -114,7 +131,7 @@ static inline void *fast_memcpy(void *dest, const void *src, size_t n)
 void XUsbPs_ClassReq(XUsbPs *InstancePtr, void *SetupDataPtr)
 {
 	XUsbPs_SetupData *SetupData = (XUsbPs_SetupData *)SetupDataPtr;
-	u8 Reply[CDC_LINE_CODING_SIZE];
+	static u8 Reply[32] ALIGNMENT_CACHELINE;
 	int ReplyLen = 0;
 
     if(SetupData->wIndex==PROBE_HID_INTERFACE) {
@@ -131,6 +148,14 @@ void XUsbPs_ClassReq(XUsbPs *InstancePtr, void *SetupDataPtr)
     }
 	switch (SetupData->bRequest) {
 	case CDC_SET_LINE_CODING:
+#if DAP_SELECTIO
+        if(SetupData->bmRequestType!=0x21 || SetupData->wLength!=7) {
+            XUsbPs_EpStall(InstancePtr,0,XUSBPS_EP_DIRECTION_IN|XUSBPS_EP_DIRECTION_OUT);
+        } else {
+            line_pending=1;XUsbPs_EpPrime(InstancePtr,0,XUSBPS_EP_DIRECTION_OUT);
+        }
+        break;
+#endif
 		line_coding.dwDTERate = 115200;
 		line_coding.bCharFormat = 0;
 		line_coding.bParityType = 0;

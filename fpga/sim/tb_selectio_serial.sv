@@ -7,9 +7,15 @@ module tb_selectio_serial;
     reg [31:0] period;
     reg [15:0] min_short,short_limit,long_limit;
     wire uv,mv,ue,me;
+    wire edge_v,edge_e,fast_v,fast_e;wire [7:0] edge_d,fast_d;
+    wire use_fast=(period==1024);
     wire [7:0] ud,md;
     selectio_uart_rx uart(clk,reset,en&&!man,samples,period,uv,ud,ue);
-    selectio_manchester_rx manch(clk,reset,en&&man,samples,min_short,short_limit,long_limit,mv,md,me);
+    selectio_manchester_rx manch(clk,reset,en&&man&&!use_fast,samples,min_short,short_limit,long_limit,edge_v,edge_d,edge_e);
+    selectio_manchester_fast fast(clk,reset,en&&man&&use_fast,1'b0,samples,fast_v,fast_d,fast_e);
+    assign mv=use_fast?fast_v:edge_v;
+    assign md=use_fast?fast_d:edge_d;
+    assign me=use_fast?fast_e:edge_e;
     reg [7:0] expected[0:1023];
     integer received=0,errors=0,queued=0;
     always @(negedge clk) begin

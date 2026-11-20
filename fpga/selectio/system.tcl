@@ -38,6 +38,9 @@ foreach pins {
     {sio_clock/jtag_ready sio_jtag/ready}
     {sio_clock/swd_reset sio_swd/word_reset}
     {swd_controller_0/hs_legacy_released sio_clock/legacy_released}
+    {sio_aux/monitor_tdi swd_controller_0/hs_monitor_tdi}
+    {sio_aux/uart_request swd_controller_0/hs_uart_request}
+    {swd_controller_0/hs_uart_grant sio_aux/uart_granted}
     {sio_aux/pad_request sio_clock/aux_request}
     {sio_clock/aux_granted sio_aux/pad_granted}
     {sio_aux/spi_selected swd_controller_0/hs_aux_spi}
