@@ -110,7 +110,7 @@ def captured(port,cfg,data,op=2,raw=None,source=None):
     finally:port.exchange(4,5)
 
 
-def sparse_waveform(data,advance):
+def sparse_waveform(data,advance,duty=2):
     symbols=[]
     for first in range(0,len(data),8):
         symbols.extend((1,0))
@@ -128,7 +128,14 @@ def sparse_waveform(data,advance):
     slots=8*((end+40+7)//8)
     c=[0]*slots;d=[0]*slots;prior_fall=0;prior_rise=0
     for i,(fall,out) in enumerate(events):
-        width=2 if fall-prior_fall>=4 else 1
+        gap=fall-prior_fall
+        if gap<4:width=1
+        elif duty==4:
+            # Falling edges define target TDO transitions. Move the
+            # neighboring rising edges apart around a short start pulse.
+            following=events[i+1][0]-fall if i+1<len(events) else 8
+            width=3 if following==2 else 1 if i>=2 and prior_fall-events[i-2][0]==2 else 2
+        else:width=min(duty,gap-1)
         rise=fall-width;c[rise:fall]=[1]*width
         begin=prior_rise+1 if advance else prior_fall
         bit=events[i+1][1] if i+1<len(events) else 0
@@ -181,7 +188,7 @@ def extended_tests(tx,rx,port,seconds,rows,save,only=None,features=0):
         if only and kind not in only:continue
         row=dict(kind=kind,rate=rate,mode=mode,passed=False,points=[])
         rows.append(row)
-        def attempt(tap,slot,iteration,probe):
+        def attempt(tap,slot,iteration,probe,stimulus):
             install_bypass(tx,rx)
             n=64 if probe else 2048 if codec==0 else 96 if codec==1 else 32
             if codec==2: n=32
@@ -189,7 +196,7 @@ def extended_tests(tx,rx,port,seconds,rows,save,only=None,features=0):
             op=2
             if kind in ("manchester100-sparse-remote","manchester100-mixed-remote"):
                 if kind=="manchester100-sparse-remote":sample=b"\xaa"*32
-                wire=sparse_waveform(sample,True)
+                wire=sparse_waveform(sample,stimulus[0],stimulus[1])
                 op=8
             elif kind=="manchester100-tdi-pad":
                 wire=pad_waveform(encode(sample,True))
@@ -231,33 +238,34 @@ def extended_tests(tx,rx,port,seconds,rows,save,only=None,features=0):
             else:ok=got==sample
             return ok and not any(status[:3]) and not (training and training["reference_errors"]),len(got),delay,status,got[:12].hex()
         winner=None
-        for tap in (0,8,16,24,4,12,20,28):
-            slots=(22,20,24,18,26,16,28,19,21,23,25,27,29,30,12,13,14,15,17,31,32,33,34,35) if codec==0 else (20,21) if codec==2 else (20,)
-            for slot in slots:
-                ok,n,delay,status,head=attempt(tap,slot,0,True)
-                row["points"].append(dict(tap=tap,slot=slot,ok=ok,bytes=n,returned_delay=delay,
-                                          overflow=status[1],framing=status[2],prefix=head))
-                save()
-                if ok:
-                    checks=8 if codec==2 else 2
-                    for seed in range(1,checks+1):
-                        more_ok,_,more_delay,_,_=attempt(tap,slot,seed,True)
-                        if not more_ok or more_delay!=delay:break
-                    else:
-                        winner=(tap,slot,delay)
-                        break
-            if winner:break
+        external=kind in ("manchester100-sparse-remote","manchester100-mixed-remote")
+        stimuli=[(advance,duty) for duty in (2,4,3,1) for advance in (True,False)] if external else [(True,2)]
+        slots=(22,20,24,18,26,16,28,19,21,23,25,27,29,30,12,13,14,15,17,31,32,33,34,35) if codec==0 else (20,21) if codec==2 else (20,)
+        candidates=((tap,slot,stimulus) for tap in (0,8,16,24,4,12,20,28) for stimulus in stimuli for slot in slots)
+        for tap,slot,stimulus in candidates:
+            ok,n,delay,status,head=attempt(tap,slot,0,True,stimulus)
+            row["points"].append(dict(tap=tap,slot=slot,source_advance=stimulus[0],source_duty=stimulus[1],
+                                      ok=ok,bytes=n,returned_delay=delay,overflow=status[1],framing=status[2],prefix=head))
+            save()
+            if ok:
+                checks=8 if codec==2 else 2
+                for seed in range(1,checks+1):
+                    more_ok,_,more_delay,_,_=attempt(tap,slot,seed,True,stimulus)
+                    if not more_ok or more_delay!=delay:break
+                else:
+                    winner=(tap,slot,delay,stimulus)
+                    break
         if not winner:
             print(kind,"no matching physical return",flush=True)
             continue
         first=time.monotonic();cycles=total=0;row["passed"]=True
         while time.monotonic()-first<seconds:
-            ok,n,delay,status,head=attempt(winner[0],winner[1],cycles+1,False)
+            ok,n,delay,status,head=attempt(winner[0],winner[1],cycles+1,False,winner[3])
             if not ok or delay!=winner[2]:
                 row.update(passed=False,failure=dict(cycle=cycles,status=status,prefix=head));break
             total+=n;cycles+=1
         row.update(tap=winner[0],slot=winner[1],transactions=cycles,confirmed_bytes=total,
-                   elapsed=time.monotonic()-first,returned_delay=winner[2]);save()
+                   elapsed=time.monotonic()-first,returned_delay=winner[2],source_advance=winner[3][0],source_duty=winner[3][1]);save()
         print(kind,row["passed"],total,flush=True)
 
 

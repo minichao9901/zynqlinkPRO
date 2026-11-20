@@ -2,7 +2,7 @@
 import argparse
 import hashlib
 import json
-from contextlib import nullcontext
+from contextlib import contextmanager,nullcontext
 from dap_pipeline_bench import setup,cmd
 from selectio_cli import connection
 import struct
@@ -16,14 +16,43 @@ from selectio_f103_fixture import low_link
 from selectio_native import native_connection
 
 
+@contextmanager
+def concurrent_streams(native,base,slot,expected,report):
+    config=struct.pack("<4BIIBB2xI",1,8,slot,2,base+0x240,24000,1,0,base+0x200)
+    received=bytearray()
+    samples=[]
+    def pull():
+        chunk=native.exchange(6,1)
+        received.extend(chunk)
+        wave=native.exchange(6,2)
+        samples.extend(struct.iter_unpack("<II",wave))
+        return len(chunk)+len(wave)
+    native.exchange(6,0,config)
+    try:yield pull
+    finally:
+        native.exchange(6,3)
+        while pull():pass
+        state=struct.unpack("<8I",native.exchange(6,4))
+        native.exchange(6,5)
+        if received!=expected or state[1] or state[3]!=len(received) or state[4]!=len(received):
+            raise RuntimeError("RTT content or completion counters differ while CDC is active")
+        values=[g[1] for g in samples]
+        if not values or values!=sorted(values) or values[-1]<=values[0] or values[-1]>256 or state[5]!=len(samples) or state[6]!=len(samples):
+            raise RuntimeError("CDC target counter differs from simultaneous scope samples")
+        report["concurrent_native"]=dict(rtt_bytes=len(received),sample_groups=len(samples),skipped=state[7],
+                                         first_sample=values[0],last_sample=values[-1],rtt_sha256=hashlib.sha256(received).hexdigest())
+
+
 def main():
     ap=argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--serial",default="12345678")
     ap.add_argument("--binary",required=True,type=Path)
     ap.add_argument("--out",required=True,type=Path)
+    ap.add_argument("--combo",action="store_true",help="run RTT plus 1 kHz sampling on SWD while Windows exchanges physical CDC bytes")
     ap.add_argument("--swd-slot",type=int,help="perform 100 MHz SRAM reads during physical CDC TX and RX")
     ap.add_argument("--execute",action="store_true")
     a=ap.parse_args()
+    if a.combo and a.swd_slot is None:ap.error("--combo requires --swd-slot")
     if not a.execute:
         print("Requires the guarded F103ZE fixture. Use PA15 for target UART RX and PB3 for target UART TX.")
         return
@@ -32,6 +61,7 @@ def main():
     APB=0x40021018;MAPR=0x40010004;AH=0x40010804;BL=0x40010c00;BO=0x40010c0c;DBG=0xe0042004
     code=a.binary.read_bytes()
     if not 0<len(code)<512:raise ValueError("echo code must fit below the fixture status words")
+    seed=hashlib.shake_256(b"RTT during physical CDC").digest(96)
     register_ids=[*range(17),20]
     report=dict(passed=False,binary_sha256=hashlib.sha256(code).hexdigest())
     registers=peripherals=page=None
@@ -53,6 +83,9 @@ def main():
             m.write_word(BL,(peripherals[BL]&~(15<<12))|(3<<12))
             m.write_word(DEMCR,peripherals[DEMCR]|(1<<24));m.write_word(DWT,peripherals[DWT]|1)
             m.write(BASE,code);assert m.read(BASE,len(code))==code
+            if a.combo:
+                m.write(BASE+0x240,struct.pack("<16sII6I",b"SEGGER RTT",1,0,0,BASE+0x300,256,len(seed),0,0))
+                m.write(BASE+0x300,seed)
             core_write(m,16,0x01000000);core_write(m,20,1);core_write(m,15,BASE+1)
             m.write_word(DHCSR,0xa05f0001)
             if m.word(BASE+0x208)!=0x4543484f:raise RuntimeError("echo producer did not start")
@@ -76,16 +109,18 @@ def main():
                     if state[:3]!=(1,1,115200):raise RuntimeError(f"CDC binding failed {state}")
                     port.reset_input_buffer()
                     data=hashlib.shake_256(b"J7 physical CDC").digest(256)
-                    guard=n.memory(1,8,a.swd_slot,2) if a.swd_slot is not None else nullcontext()
-                    with guard:
+                    guard=(concurrent_streams(n,BASE,a.swd_slot,seed,report) if a.combo else
+                           n.memory(1,8,a.swd_slot,2) if a.swd_slot is not None else nullcontext())
+                    with guard as service:
                         for i,b in enumerate(data):
                             port.write(bytes([b]))
-                            if a.swd_slot is not None and n.bulk(BASE,4)!=code[:4]:
+                            if a.combo: service()
+                            elif a.swd_slot is not None and n.bulk(BASE,4)!=code[:4]:
                                 raise RuntimeError("concurrent 100 MHz SWD SRAM value differs")
                             value=port.read(1)
                             if value!=bytes([b^0xa5]):
                                 raise RuntimeError(f"target reply differs at {i}: {value.hex()}")
-                    report["concurrent_swd_reads"]=len(data) if a.swd_slot is not None else 0
+                    report["concurrent_swd_reads"]=len(data) if a.swd_slot is not None and not a.combo else 0
                     report["bytes_each"]=len(data)
                     report["end_status"]=struct.unpack("<8I",n.exchange(0,4))
             finally:

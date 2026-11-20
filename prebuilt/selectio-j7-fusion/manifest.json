@@ -43,7 +43,7 @@
     "10000000"
   ],
   "validation": "../../docs/validation/selectio-fusion-20261121/README.md",
-  "qualification": "F103ZE RAM, real RTT and HSS, CDC, native and standard SWO, and ETM measured. External 100 Mbit/s Manchester source limits and follow-up verification are recorded in the linked report.",
+  "qualification": "Listed F103ZE hardware and recovery cases passed on the same pair; see qualification.json for complete attempts and external Manchester/source and commercial comparison boundaries.",
   "selectio_reference_hz": 199999998,
   "nominal_wire_hz": 100000000,
   "calculated_wire_hz": 99999999,
@@ -58,5 +58,6 @@
   "board": "XC7Z020, HS3 210299008529, STM32F103ZE CDC48",
   "trace_clk_hz": 24000000,
   "fpga_timing_file": "verified_clock.json",
-  "ps_build": "ps-build.json"
+  "ps_build": "ps-build.json",
+  "qualification_report": "../../docs/validation/selectio-fusion-20261121/qualification.json"
 }

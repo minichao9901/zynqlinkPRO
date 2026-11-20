@@ -1,0 +1,40 @@
+{
+  "operation": "check",
+  "dryRun": false,
+  "out": "E:\\zynqlinkPRO-selectio-streams\\build\\final-j7-state\\check",
+  "files": {
+    "bit": {
+      "path": "E:\\zynqlinkPRO-selectio-streams\\prebuilt\\selectio-j7-fusion\\probe.bit",
+      "sha256": "cf96fef427d986bcbab27f4711844ea457032b02e5dec2602cb323ec3dbac724"
+    },
+    "zynq_elf": {
+      "path": "E:\\zynqlinkPRO-selectio-streams\\prebuilt\\selectio-j7-fusion\\application.elf",
+      "sha256": "c7de59414067b98c92e43701fbb6b7dc06688112d0d3d7f76176320880efb82e"
+    },
+    "ps_init": {
+      "path": "E:\\zynqlinkPRO-selectio-streams\\prebuilt\\selectio-j7-fusion\\ps7_init.tcl",
+      "sha256": "aa9747c31f705be7c28af1c6b1cdeaf282f0dcdb01faecee2a9f72e4d3489132"
+    }
+  },
+  "stage": "complete",
+  "passed": true,
+  "streams": {
+    "rtt": 65536,
+    "hss": 20
+  },
+  "before": {
+    "PS_IDCODE": "0x23727093",
+    "LEVEL_SHIFTERS": "0xf",
+    "FPGA_RESET": "0x0",
+    "BOOT_MODE": "0x0",
+    "CAPTURE": "0x8",
+    "SWD": "0x2",
+    "JQUEUE": "0x14",
+    "SQUEUE": "0x3c",
+    "AUX": "0x4",
+    "AUXFLAGS": "0x0",
+    "PACKET": "0x0",
+    "DDR": "0x0",
+    "CDMA": "0x1002"
+  }
+}

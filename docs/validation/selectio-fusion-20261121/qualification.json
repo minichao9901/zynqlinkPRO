@@ -1,0 +1,198 @@
+{
+  "hashes": {
+    "probe.bit": "cf96fef427d986bcbab27f4711844ea457032b02e5dec2602cb323ec3dbac724",
+    "application.elf": "c7de59414067b98c92e43701fbb6b7dc06688112d0d3d7f76176320880efb82e",
+    "ps7_init.tcl": "aa9747c31f705be7c28af1c6b1cdeaf282f0dcdb01faecee2a9f72e4d3489132"
+  },
+  "hardware_cases": {
+    "load": {
+      "report": "etm-acceptance.json",
+      "passed": true,
+      "restored": null,
+      "wall_seconds": 10.1120164999993
+    },
+    "info": {
+      "report": "etm-acceptance.json",
+      "passed": true,
+      "restored": null,
+      "wall_seconds": 0.4150448000000324
+    },
+    "usb-1": {
+      "report": "full-first-attempt.json",
+      "passed": true,
+      "restored": null,
+      "wall_seconds": 60.40578330000062
+    },
+    "usb-2": {
+      "report": "full-first-attempt.json",
+      "passed": true,
+      "restored": null,
+      "wall_seconds": 60.447334699998464
+    },
+    "usb-3": {
+      "report": "full-first-attempt.json",
+      "passed": true,
+      "restored": null,
+      "wall_seconds": 60.45084660000066
+    },
+    "switch": {
+      "report": "full-first-attempt.json",
+      "passed": true,
+      "restored": true,
+      "wall_seconds": 14.87561579999965
+    },
+    "host-loss": {
+      "report": "full-first-attempt.json",
+      "passed": true,
+      "restored": true,
+      "wall_seconds": 12.382616700000654
+    },
+    "debug-swd": {
+      "report": "full-first-attempt.json",
+      "passed": true,
+      "restored": true,
+      "wall_seconds": 4.373642499998823
+    },
+    "memory-swd": {
+      "report": "full-first-attempt.json",
+      "passed": true,
+      "restored": true,
+      "wall_seconds": 542.5844007999985
+    },
+    "rtt-swd": {
+      "report": "full-first-attempt.json",
+      "passed": true,
+      "restored": true,
+      "wall_seconds": 63.80335009999908
+    },
+    "combo-swd": {
+      "report": "full-first-attempt.json",
+      "passed": true,
+      "restored": true,
+      "wall_seconds": 63.56978009999875
+    },
+    "debug-jtag": {
+      "report": "full-first-attempt.json",
+      "passed": true,
+      "restored": true,
+      "wall_seconds": 4.194306100001995
+    },
+    "memory-jtag": {
+      "report": "full-first-attempt.json",
+      "passed": true,
+      "restored": true,
+      "wall_seconds": 542.7748544999995
+    },
+    "rtt-jtag": {
+      "report": "full-first-attempt.json",
+      "passed": true,
+      "restored": true,
+      "wall_seconds": 63.683974900002795
+    },
+    "combo-jtag": {
+      "report": "full-first-attempt.json",
+      "passed": true,
+      "restored": true,
+      "wall_seconds": 63.35408760000064
+    },
+    "services": {
+      "report": "full-first-attempt.json",
+      "passed": true,
+      "restored": true,
+      "wall_seconds": 267.1280028999972
+    },
+    "wire": {
+      "report": "wire-acceptance.json",
+      "passed": true,
+      "restored": true,
+      "wall_seconds": 548.300357600001
+    },
+    "spi-target": {
+      "report": "wire-acceptance.json",
+      "passed": true,
+      "restored": true,
+      "wall_seconds": 242.08507180000015
+    },
+    "cdc": {
+      "report": "full-first-attempt.json",
+      "passed": true,
+      "restored": true,
+      "wall_seconds": 2.429475499997352
+    },
+    "cdc-100m": {
+      "report": "full-first-attempt.json",
+      "passed": true,
+      "restored": true,
+      "wall_seconds": 61.83298039999863
+    },
+    "itm-native": {
+      "report": "full-first-attempt.json",
+      "passed": true,
+      "restored": true,
+      "wall_seconds": 26.41257200000109
+    },
+    "itm-cmsis-dap": {
+      "report": "full-first-attempt.json",
+      "passed": true,
+      "restored": true,
+      "wall_seconds": 26.38723310000205
+    },
+    "etm": {
+      "report": "etm-acceptance.json",
+      "passed": true,
+      "restored": true,
+      "wall_seconds": 8.595569699999032
+    },
+    "manchester-bursts": {
+      "report": "wire-acceptance.json",
+      "passed": true,
+      "restored": true,
+      "wall_seconds": 61.77923550000196
+    },
+    "external-manchester": {
+      "report": "wire-acceptance.json",
+      "passed": true,
+      "restored": true,
+      "wall_seconds": 62.70561549999911
+    },
+    "etm-verify": {
+      "report": "etm-acceptance.json",
+      "passed": true,
+      "restored": null,
+      "wall_seconds": 0.7999766000029922
+    }
+  },
+  "all_listed_cases_passed": true,
+  "attempts": [
+    {
+      "report": "full-first-attempt.json",
+      "failed": [
+        "wire"
+      ]
+    },
+    {
+      "report": "wire-intermediate-summary.json",
+      "failed": [
+        "wire"
+      ]
+    },
+    {
+      "report": "wire-acceptance.json",
+      "failed": []
+    },
+    {
+      "report": "etm-acceptance.json",
+      "failed": []
+    }
+  ],
+  "remaining_measurement": "Independent arbitrary external 100 Mbit/s Manchester on L14. The F103 TAP mixed source produced 190–198 of the required 382 transitions. Product decoder checked at 100 Mbit/s with mixed data on an electrically loaded TDI pad, independently sourced F103 ITM up to 24 Mbit/s on L14, and alternating 100 Mbit/s on L14.",
+  "external_frequency_meter": false,
+  "commercial_probe_same_rig": false,
+  "additional_verified": {
+    "concurrent_physical_CDC_native_RTT_and_scope": "cdc-rtt-scope.json",
+    "flight_decode": "flight-verify.json",
+    "target_program_and_Rcc": "final-target.json",
+    "final_probe_ownership": "final-probe-state.json",
+    "final_physical_OCM_readback": "final-ocm.json"
+  }
+}

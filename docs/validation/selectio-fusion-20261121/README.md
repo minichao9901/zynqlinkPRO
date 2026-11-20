@@ -6,7 +6,7 @@
 
 FCLK0 按 7.5 ns 实现；高速路径使用 ARM PLL /10，寄存器读回约 133.333 MHz。读回的 FCLK1 为 199,999,998 Hz，MMCM 产生 200 MHz 输出串行时钟、100 MHz 四时隙时钟、50 MHz 八时隙时钟及 400 MHz 输入串行时钟。TDO 和 TDI 的 ISERDESE2 为 8 位 DDR，Manchester 100 Mbit/s 使用每个信息位的八个采样。SWDIO 使用四采样。由时钟树推算的 100 MHz 档为 99,999,999 Hz。没有外接示波器或频率计。[布线时序](timing.rpt) · [时钟间约束](clock-interaction.rpt) · [资源占用](utilization.rpt) · [综合输入哈希](rtl-inputs.json)
 
-融合配置的 setup 余量为 +0.177 ns、hold 余量为 +0.027 ns。静态时序、Cortex-M3/UNISIM 仿真、真实探针 I/O、真实目标外设和 PC 文件吞吐分别取证。
+融合配置的 setup 余量为 +0.177 ns、hold 余量为 +0.027 ns。整机占用 26,527 个 LUT（49.86%）、28,875 个寄存器（27.14%）、67.5 个 BRAM tile（48.21%）和 1 个 DSP。静态时序、Cortex-M3/UNISIM 仿真、真实探针 I/O、真实目标外设和 PC 文件吞吐分别取证。
 
 ## USB 与模式切换
 
@@ -63,7 +63,7 @@ Windows 实际打开 COM43，提交 100,000,000 baud、8N1，通过 F103 双 BYP
 
 100 Mbit/s Manchester 的信息位宽为 10 ns。M15 的真实带负载引脚回读进入 8 倍采样解码器。在一次持续开启的 60 秒接收会话中，发送 31,143 个不同的 112 B 载荷，3,488,016 B 全部一致，零帧错、零溢出。每次原始发生器的 RAM 重新装载产生间隔；这些数据验证 100 Mbit/s 的物理突发，不代表整分钟的连续线速流量。[混合数据长窗](manchester-bursts.json)
 
-L14 的外部证据分列。F103 TDO 作为码源时，50 Mbit/s 任意字节返回正确；100 Mbit/s 的交替数据通过独立 60 秒窗口。一次完整套件中，相同交替夹具没有收到字节，该次失败保留。其后 3 次独立 RAM 加载及 128 次在 M15 和 L14 间切换均成功。任意 100 Mbit/s Manchester 码流的部分相邻边沿间距为 5 ns，在 F103 的 TAP 上生成这些边沿需要局部 200 MHz 移位。首个混合图案应有 382 个跳变，L14 的原始抽样仅观察到 190–198 个；设置 PB3 为高速复用输出也没有恢复正确波形。独立外部 200 Msymbol/s 混合码源的完整验证留待具备该信号源的现场。[完整套件首次记录](wire-first-attempt.json) · [独立 L14 长窗](external-sparse-retest.json) · [重载与切换](restarts-and-switches.json) · [混合源原始跳变](external-mixed-source.json) · [PB3 对照](external-mixed-gpio-fast.json)
+L14 的外部证据分列。F103 TDO 作为码源时，50 Mbit/s 任意字节返回正确；100 Mbit/s 的交替数据通过独立 60 秒窗口。一次完整套件中，相同交替夹具没有收到字节，该次失败保留。其后 3 次独立 RAM 加载及 128 次在 M15 和 L14 间切换均成功。任意 100 Mbit/s Manchester 码流的部分相邻边沿间距为 5 ns，在 F103 的 TAP 上生成这些边沿需要局部 200 MHz 移位。首个混合图案应有 382 个跳变，L14 的原始抽样仅观察到 190–198 个；扩展到 128 个源端驱动边沿和采样组合后，观察范围为 73–233 个。设置 PB3 为高速复用输出也没有恢复正确波形。独立外部 200 Msymbol/s 混合码源的完整验证留待具备该信号源的现场。[完整套件首次记录](wire-first-attempt.json) · [独立 L14 长窗](external-sparse-retest.json) · [重载与切换](restarts-and-switches.json) · [混合源原始跳变](external-mixed-source.json) · [PB3 对照](external-mixed-gpio-fast.json)
 
 SPI 100 MHz 的模式 0 通过真实两级 TAP 的 TDI→TDO 数据返回。模式 0–3 分别验证了带负载 MOSI 引脚的已知载荷，同时另用与探针异步的 F103 TIM2_CH2 在 PB3 输出 12 MHz，逐事务检查物理 MISO 位流的每个边沿间隔、频率和数据量，每种模式各 60 秒。数字仿真中的四模式 SPI 从机覆盖单个 CS 下 1、5、4,096 B 双向数据。此处的外部器件是 TAP 和目标定时器，未接专用高速 SPI Flash。[独立物理 MISO](spi-target.json) · [ST RM0008 引脚复用](https://www.st.com/resource/en/reference_manual/rm0008-stm32f101xx-stm32f102xx-stm32f103xx-stm32f105xx-and-stm32f107xx-advanced-arm-based-32-bit-mcus-stmicroelectronics.pdf)
 
@@ -78,3 +78,10 @@ SPI 100 MHz 的模式 0 通过真实两级 TAP 的 TDI→TDO 数据返回。模�
 ### 交付范围
 
 本轮交付本地源码、固定 bit/PS ELF、PS 初始化 Tcl、CLI 与 README。探针用 HS3 JTAG/RAM 临时加载，目标 Flash 和探针 QSPI 保持原内容。远端 main、固定 Windows EXE、Web、Pages、公开 Release 与 QSPI 冷启动不在本轮交付范围。实板验收范围为 F103ZE CDC48；其他目标的可用档位须按各自的时钟、TAP 和布线取证。[逐项目标恢复](target-restore.json)
+
+
+## 最终逐项判定
+
+同一 bit、ELF 与 PS 初始化 Tcl 上，首次整套实板验收、增加在独立 SWJ 夹具中检查外部码源后的完整串行/SPI 复验，以及运行态 ETM 严格复验，逐项列在[判定表](qualification.json)。首次外部交替码未取得数据的失败记录保留。串行与 SPI 对照在同一配对完成。外部源单独保存和恢复目标状态；在同一次引脚所有权内，每次先用 25 MHz 参考扫描检查 F103 两级 BYPASS，再发送 100 Mbit/s 波形。参考检查共 34,038 位、零差异；60 秒外部交替码共 17,568 B 匹配。独立带负载混合源复验共 3,462,032 B、零差异。[全部回送点](wire-qualified.json) · [复验清单](wire-acceptance.json) · [混合源](manchester-bursts-qualified.json)
+
+实际同时使用三个通道时，物理 Windows CDC 完成 256 B 变换回送，原生 RTT 精确取得预置的 96 B，原生变量采样取得 102 组、零跳拍，观测到目标 UART 计数从 0 增至 255。实板结束后确认 F103ZE 运行、RCC_CFGR=0x0051040a，原 ELF 的 20,168 B 全匹配；COM33 对应目标 F103CDC0001，COM43 对应探针 12345678。HS3 通过物理 MEM-AP0 再次核对 115,300 B 探针 OCM 可执行内容，探针保持本次 JTAG/RAM 配对，独占引擎已释放。[三通道并发](cdc-rtt-scope.json) · [目标现场](final-target.json) · [探针状态](final-probe-state.json) · [最终 OCM](final-ocm.json) · [ETM 恢复](etm-restore.json)

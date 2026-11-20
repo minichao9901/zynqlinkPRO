@@ -118,12 +118,21 @@ def main(argv=None):
     if "scope" in selected:test("services","selectio_services_accept.py",["--swd-slot",identity["swd"]["slot"],
                        "--jtag-slot",identity["jtag"]["slot"],"--confirm-seconds",args.seconds])
     if "wire" in selected:
-        test("wire","selectio_wire_test.py",["--extended","--seconds",args.seconds])
+        # External Manchester uses the F103 TAP as a timed source. Give
+        # it its own guarded SWJ handoff, as for the independent PWM source.
+        pad_cases=["spi-mode0",*(f"spi-pad-mode{i}" for i in range(4)),
+                   "uart-tx-remote","uart-rx-remote","manchester50-remote","manchester100-tdi-pad"]
+        selected_cases=[arg for name in pad_cases for arg in ("--only",name)]
+        test("wire","selectio_wire_test.py",["--extended","--seconds",args.seconds,*selected_cases])
+        test("external-manchester","selectio_wire_test.py",["--extended","--only","manchester100-sparse-remote",
+             "--seconds",args.seconds])
         test("spi-target","selectio_spi_target_test.py",["--seconds",args.seconds])
         if int(identity["bit_features"],16)&0x4000:
             test("manchester-bursts","selectio_manchester_stress.py",["--seconds",args.seconds])
-    if "cdc" in selected:test("cdc","selectio_cdc_test.py",["--binary",fixture("selectio_f103_uart_echo.S","echo"),
-                       "--swd-slot",identity["swd"]["slot"]])
+    if "cdc" in selected:
+        cdc_options=["--binary",fixture("selectio_f103_uart_echo.S","echo"),"--swd-slot",identity["swd"]["slot"]]
+        test("cdc","selectio_cdc_test.py",cdc_options)
+        test("cdc-rtt-scope","selectio_cdc_test.py",[*cdc_options,"--combo"])
     if "cdc" in selected and identity.get("cdc_bypass_qualification"):
         test("cdc-100m","selectio_cdc_wire_test.py",["--seconds",args.seconds])
     if "itm" in selected:

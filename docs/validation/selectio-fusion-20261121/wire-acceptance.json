@@ -1,0 +1,66 @@
+{
+  "board": "f103ze",
+  "operation": "HS3 JTAG/RAM, guarded F103ZE SRAM",
+  "suites": [
+    "wire"
+  ],
+  "serial": "12345678",
+  "seconds": 60.0,
+  "rounds": 3,
+  "pair": "E:\\zynqlinkPRO-selectio-streams\\prebuilt\\selectio-j7-fusion",
+  "out": "E:\\zynqlinkPRO-selectio-streams\\build\\accept800-fixtures",
+  "cases": [
+    {
+      "name": "load",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 9.950858799998969,
+      "log": "load.log"
+    },
+    {
+      "name": "info",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 0.42584849999911967,
+      "log": "info.log"
+    },
+    {
+      "name": "wire",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 548.300357600001,
+      "log": "wire.log",
+      "restored": true
+    },
+    {
+      "name": "external-manchester",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 62.70561549999911,
+      "log": "external-manchester.log",
+      "restored": true
+    },
+    {
+      "name": "spi-target",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 242.08507180000015,
+      "log": "spi-target.log",
+      "restored": true
+    },
+    {
+      "name": "manchester-bursts",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 61.77923550000196,
+      "log": "manchester-bursts.log",
+      "restored": true
+    }
+  ],
+  "hashes": {
+    "probe.bit": "cf96fef427d986bcbab27f4711844ea457032b02e5dec2602cb323ec3dbac724",
+    "application.elf": "c7de59414067b98c92e43701fbb6b7dc06688112d0d3d7f76176320880efb82e",
+    "ps7_init.tcl": "aa9747c31f705be7c28af1c6b1cdeaf282f0dcdb01faecee2a9f72e4d3489132"
+  },
+  "passed": true
+}
