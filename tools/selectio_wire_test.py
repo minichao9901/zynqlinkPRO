@@ -1,5 +1,6 @@
 """Qualify J7 SPI and serial reception through the two real F103 BYPASS cells."""
 import argparse
+from contextlib import contextmanager,nullcontext
 import hashlib
 import json
 from pathlib import Path
@@ -9,6 +10,28 @@ import time
 from dap_pipeline_bench import cmd, setup
 from selectio_cli import connection
 from selectio_native import native_connection
+
+
+@contextmanager
+def fast_f103_tdo(serial):
+    from selectio_f103_fixture import low_link
+    enable,crl,dbg=0x40021018,0x40010c00,0xe0042004
+    with low_link(serial) as mem:
+        if not mem.word(0xe000edf0)&(1<<17):raise RuntimeError("guarded F103 expected")
+        apb=mem.word(enable)
+        mem.write_word(enable,apb|8)
+        gpio=mem.word(crl);trace=mem.word(dbg)
+    try:
+        with low_link(serial) as mem:
+            mem.write_word(dbg,trace&~0xe0)
+            mem.write_word(crl,(gpio&~0xf000)|0xb000)
+        yield
+    finally:
+        with low_link(serial) as mem:
+            mem.write_word(crl,gpio);mem.write_word(dbg,trace)
+            if mem.word(crl)!=gpio or mem.word(dbg)!=trace:raise RuntimeError("TDO GPIO restoration differs")
+            mem.write_word(enable,apb)
+            if mem.word(enable)!=apb:raise RuntimeError("TDO GPIO clock restoration differs")
 
 
 def install_bypass(tx,rx):
@@ -43,9 +66,34 @@ def encode(data,manchester):
     return bytes(sum(bit<<(7-j) for j,bit in enumerate(bits[i:i+8])) for i in range(0,len(bits),8))
 
 
-def captured(port,cfg,data,op=2,raw=None):
+def qualify_bypass_source(port):
+    # Prepare and identify the two TAPs after the final pin handoff. Both
+    # the 25 MHz reference and the following waveform use the same owner.
+    steps=[(8,1,0),(1,0,0),(2,1,0),(2,0,0),(8,0,1),(1,1,1),
+           (1,1,0),(1,0,0),(1,1,0),(2,0,0)]
+    wave=bytearray()
+    def clock(tms,tdi):
+        wave.extend((0,255*tms,255*tdi,255,255*tms,255*tdi))
+    for n,tms,tdi in steps:
+        for _ in range(n):clock(tms,tdi)
+    pattern=[(b>>i)&1 for b in bytes.fromhex("591f86cbe27a3504") for i in range(8)]
+    start=len(wave)//6
+    for bit in pattern+[0]*12:clock(0,bit)
+    port.exchange(4,8,wave)
+    raw=port.exchange(4,7)
+    levels=[(b>>i)&1 for b in raw for i in range(8)]
+    errors,delay=min((sum(levels[16*(start+i)+8+lag]!=pattern[i-2] for i in range(2,64)),lag)
+                     for lag in range(64))
+    while port.exchange(4,1):pass
+    initial=struct.unpack("<5I",port.exchange(4,4))
+    return dict(reference_bits=62,reference_errors=errors,return_delay=delay,
+                initialization_drops=initial[1],initialization_framing=initial[2])
+
+
+def captured(port,cfg,data,op=2,raw=None,source=None):
     port.exchange(4,0,cfg)
     try:
+        if source is not None:source.update(qualify_bypass_source(port))
         port.exchange(4,op,data)
         if raw is not None:raw.extend(port.exchange(4,7))
         port.exchange(4,3)
@@ -55,6 +103,9 @@ def captured(port,cfg,data,op=2,raw=None):
             if not part:break
             output.extend(part)
         status=struct.unpack("<5I",port.exchange(4,4))
+        if source is not None:
+            status=(status[0],status[1]-source["initialization_drops"],
+                    status[2]-source["initialization_framing"],*status[3:])
         return bytes(output),status
     finally:port.exchange(4,5)
 
@@ -107,7 +158,9 @@ def raw_alignment(data,observed):
             errors=sum(levels[i]!=raw[i+lag] for i in range(begin,end))
             scores.append((errors,lag))
     errors,delay=min(scores)
-    return dict(compared_ddr_slots=end-begin,delta_slots=delay,different_samples=errors)
+    center_errors,phase=min((sum(levels[i]!=raw[i+delay] for i in range(begin+phase,end,2)),phase) for phase in (0,1))
+    return dict(compared_ddr_slots=end-begin,delta_slots=delay,different_samples=errors,
+                symbols=(end-begin)//2,center_phase=phase,center_errors=center_errors)
 
 
 def extended_tests(tx,rx,port,seconds,rows,save,only=None,features=0):
@@ -122,6 +175,8 @@ def extended_tests(tx,rx,port,seconds,rows,save,only=None,features=0):
         ("manchester100-tdi-pad",2,2,0,100000000,1),
         ("manchester100-sparse-remote",2,2,0,100000000,0),
     ])
+    if only and "manchester100-mixed-remote" in only:
+        cases.append(("manchester100-mixed-remote",2,2,0,100000000,0))
     for kind,codec,drive,mode,rate,flags in cases:
         if only and kind not in only:continue
         row=dict(kind=kind,rate=rate,mode=mode,passed=False,points=[])
@@ -132,8 +187,8 @@ def extended_tests(tx,rx,port,seconds,rows,save,only=None,features=0):
             if codec==2: n=32
             sample=hashlib.shake_256(kind.encode()+struct.pack("<I",iteration)).digest(n)
             op=2
-            if kind=="manchester100-sparse-remote":
-                sample=b"\xaa"*32
+            if kind in ("manchester100-sparse-remote","manchester100-mixed-remote"):
+                if kind=="manchester100-sparse-remote":sample=b"\xaa"*32
                 wire=sparse_waveform(sample,True)
                 op=8
             elif kind=="manchester100-tdi-pad":
@@ -142,10 +197,28 @@ def extended_tests(tx,rx,port,seconds,rows,save,only=None,features=0):
             elif codec==0 or drive==3: wire=sample
             else: wire=encode(sample,codec==2)
             cfg=struct.pack("<BBBBIBB",codec,drive,mode,slot,rate,tap,flags)
-            raw=bytearray() if kind=="manchester100-tdi-pad" and features&0x2000 else None
-            got,status=captured(port,cfg,wire,op,raw)
-            if raw is not None and (probe or got!=sample or any(status[:3])):
-                row["applied_waveform"]=raw_alignment(wire,raw)
+            local=kind=="manchester100-tdi-pad"
+            remote=kind in ("manchester100-sparse-remote","manchester100-mixed-remote")
+            raw=bytearray() if (local and features&0x2000) or remote else None
+            training={} if remote else None
+            got,status=captured(port,cfg,wire,op,raw,training)
+            if training is not None:
+                row["source_training"]=training
+                if not probe:
+                    row["qualification_bits"]=row.get("qualification_bits",0)+training["reference_bits"]
+                    row["qualification_errors"]=row.get("qualification_errors",0)+training["reference_errors"]
+            if remote and raw is not None:
+                bits=[(b>>i)&1 for b in raw for i in range(8)]
+                row["raw_remote"]=dict(high=sum(bits),slots=len(bits),transitions=sum(a!=b for a,b in zip(bits,bits[1:])),
+                                       head=raw[:32].hex())
+                if probe:
+                    row.setdefault("raw_points",[]).append(dict(tap=tap,slot=slot,**row["raw_remote"]))
+            if local and raw is not None:
+                applied=raw_alignment(wire,raw)
+                row["applied_waveform"]=applied
+                if not probe:
+                    row["confirmed_source_symbols"]=row.get("confirmed_source_symbols",0)+applied["symbols"]
+                    row["source_center_differences"]=row.get("source_center_differences",0)+applied["center_errors"]
             if kind.startswith("spi-pad"):
                 return got==sample and not any(status[:3]),len(got),0,status,got[:12].hex()
             delay=0
@@ -156,7 +229,7 @@ def extended_tests(tx,rx,port,seconds,rows,save,only=None,features=0):
                 else:delay=-1
                 ok=delay>0
             else:ok=got==sample
-            return ok and not any(status[:3]),len(got),delay,status,got[:12].hex()
+            return ok and not any(status[:3]) and not (training and training["reference_errors"]),len(got),delay,status,got[:12].hex()
         winner=None
         for tap in (0,8,16,24,4,12,20,28):
             slots=(22,20,24,18,26,16,28,19,21,23,25,27,29,30,12,13,14,15,17,31,32,33,34,35) if codec==0 else (20,21) if codec==2 else (20,)
@@ -196,6 +269,7 @@ def main():
     parser.add_argument("--execute",action="store_true")
     parser.add_argument("--extended",action="store_true",help="qualify all four SPI modes, dedicated UART TX and loaded-pad Manchester at 100 Mbit/s")
     parser.add_argument("--only",action="append",help="select one named extended wire test")
+    parser.add_argument("--fast-f103-tdo",action="store_true",help="temporarily select PB3 AF push-pull 50 MHz in the guarded F103 fixture")
     args=parser.parse_args()
     if not args.execute:
         print("Select the BYPASS instruction on both F103 TAPs, clock known symbols through TDI/TDO, then restore debug routing.")
@@ -204,7 +278,8 @@ def main():
     rows=[]
     def save():
         (args.out/"wire.json").write_text(json.dumps(rows,indent=2)+"\n")
-    with connection(args.serial) as (tx,rx), native_connection(args.serial,tx.device) as port:
+    drive=fast_f103_tdo(args.serial) if args.fast_f103_tdo else nullcontext()
+    with drive,connection(args.serial) as (tx,rx), native_connection(args.serial,tx.device) as port:
         features=int(port.info()["features"],16)
         try:
             if args.extended:

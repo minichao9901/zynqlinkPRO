@@ -1,0 +1,35 @@
+Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+-------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2018.3 (win64) Build 2405991 Thu Dec  6 23:38:27 MST 2018
+| Date         : Sat Nov 21 04:48:53 2026
+| Host         : DESKTOP-0UKCPD3 running 64-bit major release  (build 9200)
+| Command      : report_clock_interaction -file E:/zynqlinkPRO-selectio-streams/build/fusion-rx800/clock_interaction.rpt
+| Design       : system_wrapper
+| Device       : 7z020-clg400
+| Speed File   : -2  PRODUCTION 1.11 2014-09-11
+-------------------------------------------------------------------------------------------------------------------------
+
+Clock Interaction Report
+
+Clock Interaction Table
+-----------------------
+
+                              WNS                            TNS Failing  TNS Total    WNS Path         Clock-Pair           Inter-Clock              
+From Clock     To Clock       Clock Edges  WNS(ns)  TNS(ns)    Endpoints    Endpoints  Requirement(ns)  Classification       Constraints              
+-------------  -------------  -----------  -------  -------  -----------  -----------  ---------------  -------------------  -----------------------  
+clk_delay_ref  clk_delay_ref  rise - rise     0.18     0.00            0         3144             5.00  Clean                Timed                    
+clk_delay_ref  clk_fpga_0                                              0          489                   Ignored              Asynchronous Groups      
+clk_fpga_0     clk_delay_ref                                           0          355                   Ignored              Asynchronous Groups      
+clk_fpga_0     clk_fpga_0     rise - rise     0.18     0.00            0        60084             7.50  Clean                Partial False Path       
+clk_fpga_0     octet_raw      rise - rise     1.76     0.00            0          756             7.50  Ignored              Max Delay Datapath Only  
+clk_fpga_0     quad_raw       rise - rise     0.21     0.00            0          579             2.50  No Common Clock      Timed (unsafe)           
+octet_raw      clk_fpga_0     rise - rise     2.67     0.00            0           99             7.50  Ignored              Max Delay Datapath Only  
+octet_raw      octet_raw      rise - rise     8.21     0.00            0         5671            20.00  Clean                Timed                    
+octet_raw      quad_raw       rise - rise     0.84     0.00            0           13            10.00  Clean                Timed                    
+pad_swclk      clk_fpga_0                                              0            2                   Ignored              Asynchronous Groups      
+quad_raw       clk_fpga_0     rise - rise     2.00     0.00            0          164             7.50  Ignored              Max Delay Datapath Only  
+quad_raw       octet_raw      rise - rise     3.41     0.00            0           37            10.00  Clean                Timed                    
+quad_raw       quad_raw       rise - rise     0.19     0.00            0         4361            10.00  Clean                Timed                    
+trace_clk      clk_delay_ref                                           0            5                   Ignored              False Path               
+
+

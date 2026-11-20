@@ -17,6 +17,12 @@ def main():
     if os.name=='nt' and shutil.which('clang'):
         mingw=Path(shutil.which('gcc')).parent.parent;libs=list((mingw/'lib/gcc/x86_64-w64-mingw32').glob('*'))
         cc=['clang','--target=x86_64-w64-windows-gnu','-isystem',str(mingw/'include'),'-L'+str(mingw/'lib'),'-L'+str(libs[-1])]
+    bounds=a.out/('selectio_swo_bounds.exe' if os.name=='nt' else 'selectio_swo_bounds')
+    dap_root=ROOT/'firmware/xusbps_daplink_dma/DAP'
+    subprocess.run([*cc,'-std=c11','-DDAP_SELECTIO=1','-I',str(dap_root/'Include'),
+                    str(dap_root/'Source/dap_request.c'),str(ROOT/'tools/tests/selectio_swo_bounds_test.c'),
+                    '-o',str(bounds)],check=True)
+    subprocess.run([str(bounds.resolve())],check=True,timeout=15)
     exe=a.out/'dap_request_test.exe'
     subprocess.run([*cc,'-std=c11','-O2','-Wall','-Wextra','-I'+str(a.out.resolve()),'-I'+str(ROOT/'firmware/xusbps_daplink_dma/DAP/Include'),str(ROOT/'tools/tests/dap_request_test.c'),str(ROOT/'firmware/xusbps_daplink_dma/DAP/Source/dap_request.c'),'-o',str(exe)],check=True)
     subprocess.run([str(exe.resolve())],check=True,timeout=15)

@@ -1,0 +1,269 @@
+{
+  "board": "f103ze",
+  "operation": "HS3 JTAG/RAM, guarded F103ZE SRAM",
+  "suites": [
+    "usb",
+    "switch",
+    "debug",
+    "memory",
+    "rtt",
+    "scope",
+    "combo",
+    "wire",
+    "cdc",
+    "itm",
+    "etm"
+  ],
+  "serial": "12345678",
+  "seconds": 60.0,
+  "rounds": 3,
+  "pair": "E:\\zynqlinkPRO-selectio-streams\\build\\final-800-pair",
+  "out": "E:\\zynqlinkPRO-selectio-streams\\build\\accept800-full",
+  "cases": [
+    {
+      "name": "load",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 9.911946899999748,
+      "log": "load.log"
+    },
+    {
+      "name": "info",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 0.4072768999976688,
+      "log": "info.log"
+    },
+    {
+      "name": "usb-1",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 60.40578330000062,
+      "log": "usb-1.log"
+    },
+    {
+      "name": "usb-2",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 60.447334699998464,
+      "log": "usb-2.log"
+    },
+    {
+      "name": "usb-3",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 60.45084660000066,
+      "log": "usb-3.log"
+    },
+    {
+      "name": "switch",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 14.87561579999965,
+      "log": "switch.log",
+      "restored": true
+    },
+    {
+      "name": "host-loss",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 12.382616700000654,
+      "log": "host-loss.log",
+      "restored": true
+    },
+    {
+      "name": "debug-swd",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 4.373642499998823,
+      "log": "debug-swd.log",
+      "restored": true
+    },
+    {
+      "name": "memory-swd",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 542.5844007999985,
+      "log": "memory-swd.log",
+      "restored": true
+    },
+    {
+      "name": "rtt-swd",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 63.80335009999908,
+      "log": "rtt-swd.log",
+      "restored": true
+    },
+    {
+      "name": "combo-swd",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 63.56978009999875,
+      "log": "combo-swd.log",
+      "restored": true
+    },
+    {
+      "name": "debug-jtag",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 4.194306100001995,
+      "log": "debug-jtag.log",
+      "restored": true
+    },
+    {
+      "name": "memory-jtag",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 542.7748544999995,
+      "log": "memory-jtag.log",
+      "restored": true
+    },
+    {
+      "name": "rtt-jtag",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 63.683974900002795,
+      "log": "rtt-jtag.log",
+      "restored": true
+    },
+    {
+      "name": "combo-jtag",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 63.35408760000064,
+      "log": "combo-jtag.log",
+      "restored": true
+    },
+    {
+      "name": "services",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 267.1280028999972,
+      "log": "services.log",
+      "restored": true
+    },
+    {
+      "name": "wire",
+      "passed": false,
+      "exit_code": 1,
+      "seconds": 550.2087008000017,
+      "log": "wire.log",
+      "restored": true
+    },
+    {
+      "name": "spi-target",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 242.04309889999786,
+      "log": "spi-target.log",
+      "restored": true
+    },
+    {
+      "name": "cdc",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 2.429475499997352,
+      "log": "cdc.log",
+      "restored": true
+    },
+    {
+      "name": "cdc-100m",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 61.83298039999863,
+      "log": "cdc-100m.log",
+      "restored": true
+    },
+    {
+      "name": "itm-native",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 26.41257200000109,
+      "log": "itm-native.log",
+      "restored": true
+    },
+    {
+      "name": "itm-cmsis-dap",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 26.38723310000205,
+      "log": "itm-cmsis-dap.log",
+      "restored": true
+    },
+    {
+      "name": "etm",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 9.103731200000766,
+      "log": "etm.log"
+    }
+  ],
+  "hashes": {
+    "probe.bit": "cf96fef427d986bcbab27f4711844ea457032b02e5dec2602cb323ec3dbac724",
+    "application.elf": "c7de59414067b98c92e43701fbb6b7dc06688112d0d3d7f76176320880efb82e",
+    "ps7_init.tcl": "aa9747c31f705be7c28af1c6b1cdeaf282f0dcdb01faecee2a9f72e4d3489132"
+  },
+  "etm_record": "E:\\zynqlinkPRO\\build\\selectio-baseline-20261121\\accept800-etm",
+  "etm_decode": {
+    "packets": 3845112,
+    "ranges": 19145090,
+    "instructions": 19145090,
+    "executed": 17231642,
+    "sourceMapped": 19145090,
+    "exceptions": 997,
+    "gaps": 2,
+    "packetIssues": 0,
+    "unknownExecution": 1,
+    "functions": {
+      "cdc_poll": 8611140,
+      "main": 8610505,
+      "HAL_IncTick": 6979,
+      "SysTick_Handler": 2991,
+      "trace_hook_mark": 23,
+      "HAL_GPIO_WritePin": 4
+    }
+  },
+  "etm_window": {
+    "transport": "ddr-usb/1",
+    "captureId": 1,
+    "captureNonce": 14789492062017532107,
+    "loss": false,
+    "synced": true,
+    "bufferFull": false,
+    "bufferCapacityBytes": 104857600,
+    "captureComplete": true,
+    "requestedWindowComplete": true,
+    "completionReason": "time",
+    "ended": true,
+    "records": 961441,
+    "hardwareTicks": 199999998,
+    "requestedTicks": 199999998,
+    "refClockHz": 199999998,
+    "hardwareSeconds": 1.0,
+    "hardwareStartBracketUnix": [
+      1795210773.8542387,
+      1795210773.8548477
+    ],
+    "stopReason": 0,
+    "formatterBytes": 15383061,
+    "tailBytes": 5,
+    "tailAmbiguous": false,
+    "usbSeconds": 0.40533090000099037,
+    "usbPayloadMBps": 37.95185859247942,
+    "diagnostics": {
+      "implemented": true,
+      "frameDrops": 0,
+      "parserErrors": 0,
+      "idelayReadyLosses": 0,
+      "frameHighwater": 1,
+      "syncAcquisitions": 1,
+      "observedFrames": 961441,
+      "capacityReached": false,
+      "writerError": 0
+    },
+    "fclk": 133333332,
+    "tckKhz": 9523.809428571429
+  },
+  "passed": false
+}

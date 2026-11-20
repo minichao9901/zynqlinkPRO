@@ -17,7 +17,7 @@ IF4 使用有序帧协议。流读取与队列提交停等确认，高速 SRAM �
 
 ## 已验证的 USB 边界
 
-Windows 自动为 MI_04 加载 WinUSB。主线 PL 加上新 PS 固件的接口试验中，IF4 对 0 至 4,079 B 的边界载荷逐字节回环成功。三轮各 60 秒，新载荷停等回环双向合计 18.26、18.20、18.36 MB/s，并在 IF0 插入 2,098、2,092、2,109 次 CMSIS-DAP 能力查询。重复帧号均被拒绝。这个测试包含 PC 生成图案与回环校验，未访问目标 SRAM。[真实描述符及吞吐](validation/selectio-integration/native-usb.json)
+Windows 自动为 MI_04 加载 WinUSB。其 DeviceInterfaceGUID 为 `{9DC2A831-F0DC-4F2E-9739-4E94B89DC8BB}`。主线 PL 加上新 PS 固件的接口试验中，IF4 对 0 至 4,079 B 的边界载荷逐字节回环成功。三轮各 60 秒，新载荷停等回环双向合计 18.26、18.20、18.36 MB/s，并在 IF0 插入 2,098、2,092、2,109 次 CMSIS-DAP 能力查询。重复帧号均被拒绝。这个测试包含 PC 生成图案与回环校验，未访问目标 SRAM。[真实描述符及吞吐](validation/selectio-integration/native-usb.json)
 
 主线 PL 与后续启用原生流路由的 PS 配对，在 SWD 实际约 50 MHz 的 F103ZE 上，从 IF4 采集 Flash 首字 1 秒，收到 52,224 B，状态报告生成 10,002 组、跳拍 0。此处验证原生传输通路；100 MHz 融合 PHY 的验证见集成报告。
 

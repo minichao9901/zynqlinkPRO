@@ -1,0 +1,68 @@
+{
+  "operation": "JTAG/RAM",
+  "dryRun": false,
+  "out": "E:\\zynqlinkPRO-selectio-streams\\build\\accept800-full\\load",
+  "files": {
+    "bit": {
+      "path": "E:\\zynqlinkPRO-selectio-streams\\build\\final-800-pair\\probe.bit",
+      "sha256": "cf96fef427d986bcbab27f4711844ea457032b02e5dec2602cb323ec3dbac724"
+    },
+    "zynq_elf": {
+      "path": "E:\\zynqlinkPRO-selectio-streams\\build\\final-800-pair\\application.elf",
+      "sha256": "c7de59414067b98c92e43701fbb6b7dc06688112d0d3d7f76176320880efb82e"
+    },
+    "ps_init": {
+      "path": "E:\\zynqlinkPRO-selectio-streams\\build\\final-800-pair\\ps7_init.tcl",
+      "sha256": "aa9747c31f705be7c28af1c6b1cdeaf282f0dcdb01faecee2a9f72e4d3489132"
+    }
+  },
+  "commands": {
+    "load": [
+      "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "-X",
+      "utf8",
+      "E:\\zynqlinkPRO-selectio-streams\\tools\\run_xsct.py",
+      "E:\\zynqlinkPRO-selectio-streams\\tools\\download_dap_fpga.tcl",
+      "E:\\zynqlinkPRO-selectio-streams\\build\\final-800-pair\\application.elf",
+      "E:\\zynqlinkPRO-selectio-streams\\build\\final-800-pair\\probe.bit",
+      "E:\\zynqlinkPRO-selectio-streams\\build\\final-800-pair\\ps7_init.tcl",
+      "--sdk",
+      "E:\\Xilinx\\SDK\\2018.3"
+    ],
+    "verify": [
+      "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "-X",
+      "utf8",
+      "E:\\zynqlinkPRO-selectio-streams\\tools\\verify_probe_ocm_code.py",
+      "--elf",
+      "E:\\zynqlinkPRO-selectio-streams\\build\\final-800-pair\\application.elf",
+      "--out-dir",
+      "E:\\zynqlinkPRO-selectio-streams\\build\\accept800-full\\load\\ocm",
+      "--sdk",
+      "E:\\Xilinx\\SDK\\2018.3"
+    ]
+  },
+  "stage": "complete",
+  "passed": true,
+  "streams": {
+    "rtt": 65536,
+    "hss": 16777492
+  },
+  "before": {
+    "PS_IDCODE": "0x23727093",
+    "LEVEL_SHIFTERS": "0xf",
+    "FPGA_RESET": "0x0",
+    "BOOT_MODE": "0x0",
+    "CAPTURE": "0x8",
+    "SWD": "0x2",
+    "JQUEUE": "0x14",
+    "SQUEUE": "0x3c",
+    "AUX": "0x4",
+    "AUXFLAGS": "0x0",
+    "PACKET": "0x0",
+    "DDR": "0x0",
+    "CDMA": "0x1002"
+  },
+  "verifiedBytes": 115300,
+  "FCLK_Hz": 99999999
+}

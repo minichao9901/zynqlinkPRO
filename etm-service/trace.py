@@ -164,6 +164,7 @@ def capture(argv):
     parser.add_argument('--entry-timeout', type=float, default=5)
     parser.add_argument('--usb-reconnect', action='store_true')
     parser.add_argument('--ready-file')
+    parser.add_argument('--running-window',action='store_true',help='F103ZE DDR：先启动目标 ETM，再开始指定时长的硬件窗口')
     parser.add_argument('--flight',action='store_true',help='F103ZE环形飞行记录；seconds为触发后窗口')
     parser.add_argument('--ring-bytes',type=int,default=8<<20,help='环形容量，128字节对齐，最多100MiB')
     parser.add_argument('--trigger',choices=('manual','fault','after'),default='manual')
@@ -176,6 +177,8 @@ def capture(argv):
     parser.add_argument('--no-decode', action='store_true')
     parser.add_argument('--json-out')
     args = parser.parse_args(argv)
+    if args.running_window and (args.entry or args.reset_to_entry or args.transport=='legacy'):
+        return fail('capture','运行态窗口要求 DDR 采集且不设置入口断点',2,started)
     if args.flight:
         if args.transport=='legacy' or not 0<args.arm_timeout<=86400 or not 0<=args.trigger_after or (args.trigger=='after' and args.trigger_after>=args.arm_timeout):
             return fail('capture','无效飞行记录传输/等待时间',2,started)
@@ -228,6 +231,7 @@ def capture(argv):
                '--trace-id', str(args.trace_id),
                '--speed-khz', str(args.swd_khz),
                '--gpio-speed', str(args.gpio_speed),'--transport',args.transport,'--wasm-target-control']
+    if args.running_window:command.append('--running-window')
     if args.entry is not None:
         command += ['--entry', args.entry, '--entry-timeout', str(args.entry_timeout)]
         if args.reset_to_entry:

@@ -14,7 +14,9 @@ SUITES=("usb","switch","debug","memory","rtt","scope","combo","wire","cdc","itm"
 
 def main(argv=None):
     ap=argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--board",choices=("f103ze",),required=True)
+    mode=ap.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--board",choices=("f103ze",))
+    mode.add_argument("--review",type=Path,nargs="+",help="review saved summary.json reports without accessing hardware")
     ap.add_argument("--pair",type=Path,default=ROOT/"prebuilt/selectio-j7-fusion")
     ap.add_argument("--serial",default="12345678")
     ap.add_argument("--out",type=Path)
@@ -24,6 +26,21 @@ def main(argv=None):
     ap.add_argument("--only",action="append",choices=SUITES)
     ap.add_argument("--execute",action="store_true")
     args=ap.parse_args(argv)
+    if args.review:
+        if args.execute:ap.error("--review is offline")
+        verdicts=[]
+        for supplied in args.review:
+            path=supplied/"summary.json" if supplied.is_dir() else supplied
+            summary=json.loads(path.read_text(encoding="utf8"))
+            if summary.get("board")!="f103ze" or "probe.bit" not in summary.get("hashes",{}):
+                ap.error(f"not a SelectIO board report: {path}")
+            cases=summary.get("cases",[])
+            failed=[c["name"] for c in cases if not c.get("passed") or c.get("restored") is False]
+            verdicts.append(dict(report=str(path.resolve()),bit=summary["hashes"]["probe.bit"],
+                elf=summary["hashes"]["application.elf"],suites=summary["suites"],cases=len(cases),
+                failed=failed,complete="passed" in summary,passed=bool(cases and summary.get("passed") and not failed)))
+        print(json.dumps(verdicts,indent=2))
+        return 0 if all(v["passed"] for v in verdicts) else 1
     if args.seconds<=0 or args.rounds<=0:ap.error("positive durations and round counts required")
     selected=args.only or SUITES
     pair=args.pair.resolve()
@@ -93,7 +110,7 @@ def main(argv=None):
         common=["--transport",transport,"--slot",cfg["slot"]]
         if "debug" in selected:test("debug-"+transport,"selectio_debug_test.py",common)
         if "memory" in selected:
-            test("memory-"+transport,"selectio_pipeline_bench.py",[*common,"--tap",cfg["tap"],"--idle",cfg["idle"],
+            test("memory-"+transport,"selectio_pipeline_bench.py",[*common,"--tap",cfg["tap"],"--idle",cfg.get("bulk_idle",cfg["idle"]),
                  "--bytes",4032,"--depth",4,"--seconds",args.seconds,"--rounds",args.rounds])
         for service in ("rtt","combo"):
             if service in selected:test(service+"-"+transport,"selectio_running_test.py",
@@ -103,6 +120,8 @@ def main(argv=None):
     if "wire" in selected:
         test("wire","selectio_wire_test.py",["--extended","--seconds",args.seconds])
         test("spi-target","selectio_spi_target_test.py",["--seconds",args.seconds])
+        if int(identity["bit_features"],16)&0x4000:
+            test("manchester-bursts","selectio_manchester_stress.py",["--seconds",args.seconds])
     if "cdc" in selected:test("cdc","selectio_cdc_test.py",["--binary",fixture("selectio_f103_uart_echo.S","echo"),
                        "--swd-slot",identity["swd"]["slot"]])
     if "cdc" in selected and identity.get("cdc_bypass_qualification"):
@@ -114,18 +133,27 @@ def main(argv=None):
     if "etm" in selected:
         dest=args.etm_out or (out/"etm")
         ok=run("etm",[*cli,"trace","capture","--elf",ROOT/"prebuilt/golden/f103ze-cdc48.elf","--bit",pair/"probe.bit",
-            "--zynq-elf",pair/"application.elf","--swd-khz",10000,"--seconds",1,"--out",dest,"--json-out",out/"etm.json"])
+            "--zynq-elf",pair/"application.elf","--swd-khz",10000,"--running-window","--seconds",1,"--out",dest,"--json-out",out/"etm.json"])
         if ok:
             result=json.loads((out/"etm.json").read_text(encoding="utf8"))
             capture=result["result"]
             window=capture.get("quality",{})
             diag=window.get("diagnostics",{})
             decode=capture.get("summary",{})
-            passed=(window.get("requestedWindowComplete") and window.get("captureComplete") and
-                    window.get("loss")==0 and not window.get("tailAmbiguous") and
+            proof=json.loads((dest/"acceptance.json").read_text(encoding="utf8"))
+            framing=json.loads((dest/"ddr/demux/result.json").read_text(encoding="utf8"))
+            capture_row=summary["cases"][-1]
+            verified=run("etm-verify",[*cli,"trace","verify","--record",dest,"--require-decoded"])
+            tail=window.get("tailBytes")
+            passed=(verified and proof.get("restored") and proof.get("fpb_restored") and
+                    window.get("synced") and window.get("ended") and abs(window.get("hardwareSeconds",0)-1)<=.002 and
+                    isinstance(tail,int) and 0<=tail<16 and window.get("formatterBytes",0)%16==tail and
+                    framing.get("trailingFrameBytes")==tail and window.get("requestedWindowComplete") and window.get("captureComplete") and
+                    window.get("loss")==0 and
                     all(diag.get(key)==0 for key in ("parserErrors","frameDrops","idelayReadyLosses","writerError")) and
                     decode.get("executed",0)>0 and decode.get("packetIssues")==0)
-            summary["cases"][-1]["passed"]=bool(passed)
+            capture_row["passed"]=bool(passed)
+            capture_row["restored"]=bool(proof.get("restored") and proof.get("fpb_restored"))
             summary["etm_record"]=str(dest)
             summary["etm_decode"]=decode
             summary["etm_window"]=window

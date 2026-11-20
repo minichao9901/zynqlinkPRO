@@ -51,6 +51,7 @@ def main():
     ap.add_argument('--gpio-speed', type=int, choices=(1, 2, 3),
                     help='Temporary PE2..PE6 output mode (1=10,2=2,3=50MHz); restored')
     ap.add_argument('--trace-id', type=int, choices=range(1, 112), default=2, metavar='1..111')
+    ap.add_argument('--running-window',action='store_true',help='F103 DDR: resume ETM output before starting the finite acquisition window')
     ap.add_argument('--entry', help='采集起点函数名或0x地址')
     ap.add_argument('--reset-to-entry', action='store_true')
     ap.add_argument('--entry-timeout', type=float, default=5)
@@ -71,6 +72,8 @@ def main():
     ap.add_argument('--raw', action='store_true', help='Capture diagnostic sampled DDR bytes, not decoded ETM')
     ap.add_argument('--raw-samples', action='store_true', help='RAW_DIAGNOSTIC=3: preserve packed 200MHz five-line samples')
     args = ap.parse_args()
+    if args.running_window and (args.entry is not None or args.reset_to_entry or args.transport=='legacy'):
+        ap.error('--running-window requires a DDR window without an entry breakpoint')
     if args.flight:
         if args.transport=='legacy' or args.ddr_physical or args.raw or args.raw_samples:
             ap.error('flight recording requires the DDR USB framed path')
@@ -187,6 +190,7 @@ def main():
                                        **swd_clock_details(live_fclk, live_cfg))
         report['cpuid'] = hex(mem.word(0xe000ed00))
         if (int(report['cpuid'], 16) >> 4) & 0xfff == 0xc27:
+            if args.running_window:raise RuntimeError('--running-window is qualified on F103ZE')
             if args.flight:raise RuntimeError('本轮飞行记录目标范围为F103ZE；H743尚未验收')
             from h743_trace_capture import capture
             capture(args, dev, out, inp, mem, report)
@@ -272,7 +276,21 @@ def main():
                       ctrl=mem.word(REG['etmcr']) & ~0x400,
                       ccer=mem.word(0xe00411e8), traceid=mem.word(REG['etmtraceidr']))
         report['config'] = config
+        if args.running_window and not (args.ddr_physical or ddr_usb):
+            raise RuntimeError('running-window capture requires the DDR receiver')
         if args.ddr_physical or ddr_usb:
+            def enable_etm_output():
+                mem.write_word(REG['etmcr'], cr & ~0x400)
+                wait_program(0)
+                usb_reconnect.restore()
+            if args.running_window:
+                enable_etm_output()
+                mem.write_word(0xe000edf0,0xa05f0001)
+                resumed=time.monotonic()
+                time.sleep(.02)
+                if mem.word(0xe000edf0)&(1<<17):
+                    raise RuntimeError('F103 halted before the running ETM window')
+                report['running_window']=dict(resumedBeforeArm=True,minimumPrearmSeconds=time.monotonic()-resumed)
             def resume_ddr_target():
                 if probe_clock is not None:
                     # Verify the shipping clock lock through the ordinary DAP
@@ -285,11 +303,9 @@ def main():
                     report['capture_clock_lock']=dict(requestedSWCLKHz=25000000,rejected=changed[:2]==bytes([0x11,0xff]),
                         FCLK_Hz=struct.unpack_from('<I',clock_after,4)[0],configurationUnchanged=clock_before[4:12]==clock_after[4:12])
                     if not locked:raise RuntimeError('Capture permitted a shared FCLK/serializer clock change')
-                mem.write_word(REG['etmcr'], cr & ~0x400)
-                wait_program(0)
-                usb_reconnect.restore()
+                if not args.running_window:enable_etm_output()
                 if args.ready_file:args.ready_file.write_text(json.dumps(dict(armed=True,monotonic=time.monotonic(),unix=time.time())))
-                mem.write_word(0xe000edf0, 0xa05f0001)
+                if not args.running_window:mem.write_word(0xe000edf0, 0xa05f0001)
             if ddr_usb:
                 from etm_ddr_usb_capture import capture as capture_ddr
                 etm,ddr=capture_ddr(work,args.elf,dev,out,inp,args.milliseconds/1000,

@@ -1,0 +1,62 @@
+{
+  "source_revision": "f13c744a9a2602c5424d981b8bd1ae124ea6da65",
+  "hashes": {
+    "probe.bit": "cf96fef427d986bcbab27f4711844ea457032b02e5dec2602cb323ec3dbac724",
+    "application.elf": "c7de59414067b98c92e43701fbb6b7dc06688112d0d3d7f76176320880efb82e",
+    "ps7_init.tcl": "aa9747c31f705be7c28af1c6b1cdeaf282f0dcdb01faecee2a9f72e4d3489132"
+  },
+  "bit_features": "0x44507fff",
+  "swd": {
+    "tap": 8,
+    "slot": 24,
+    "idle": 2
+  },
+  "jtag": {
+    "tap": 16,
+    "slot": 28,
+    "idle": 33,
+    "bulk_idle": 29
+  },
+  "cdc_bypass_qualification": true,
+  "native_stream_lease_seconds": 5,
+  "timing": {
+    "FCLK_max_Hz": 133333333,
+    "SWCLK_max_Hz": 66666666,
+    "setup_slack_ns": 0.177,
+    "hold_slack_ns": 0.027,
+    "requested_FCLK_Hz": 133333333,
+    "RTL_DEBUG": 0,
+    "optional_observation_cells": 0,
+    "formal_product_acceptance": false
+  },
+  "target": "STM32F103ZE CDC48 HCLK48",
+  "probe_usb_serial": "12345678",
+  "physical_configuration": "Volatile HS3 JTAG/RAM",
+  "pl_options": [
+    "--selectio"
+  ],
+  "ps_options": [
+    "--selectio",
+    "--j7-adapter",
+    "--compact-code",
+    "--max-swclk-hz",
+    "10000000"
+  ],
+  "validation": "../../docs/validation/selectio-fusion-20261121/README.md",
+  "qualification": "F103ZE RAM, real RTT and HSS, CDC, native and standard SWO, and ETM measured. External 100 Mbit/s Manchester source limits and follow-up verification are recorded in the linked report.",
+  "selectio_reference_hz": 199999998,
+  "nominal_wire_hz": 100000000,
+  "calculated_wire_hz": 99999999,
+  "external_frequency_counter": false,
+  "serial_sample_hz": 799999992,
+  "profile_clock_source": "PS FCLK1 readback and MMCM ratios",
+  "serial_ddr_bytes": 2097152,
+  "serial_pl_bytes": 65536,
+  "hss_ddr_bytes": 4194304,
+  "rtt_ddr_bytes": 2097152,
+  "toolchain": "Vivado and SDK 2018.3",
+  "board": "XC7Z020, HS3 210299008529, STM32F103ZE CDC48",
+  "trace_clk_hz": 24000000,
+  "fpga_timing_file": "verified_clock.json",
+  "ps_build": "ps-build.json"
+}

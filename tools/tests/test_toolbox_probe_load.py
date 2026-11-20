@@ -26,6 +26,19 @@ class ProbeLoadTests(unittest.TestCase):
                          [files[key]['path'] for key in ('zynq_elf', 'bit', 'ps_init')])
         self.assertEqual(plan['commands']['verify'][5], files['zynq_elf']['path'])
 
+    def test_selectio_alias_previews_exact_manifest_pair(self):
+        root=probe_load.ROOT/'prebuilt/selectio-j7-fusion'
+        expected=json.loads((root/'manifest.json').read_text(encoding='utf8'))['hashes']
+        with tempfile.TemporaryDirectory() as directory:
+            out=Path(directory)/'unused'
+            stdout=io.StringIO()
+            with patch.object(probe_load,'execute') as execute,contextlib.redirect_stdout(stdout):
+                self.assertEqual(probe_load.main(['--selectio','--dry-run','--out',str(out)]),0)
+            actual={Path(v['path']).name:v['sha256'] for v in json.loads(stdout.getvalue())['files'].values()}
+            self.assertEqual(actual,expected)
+            execute.assert_not_called()
+            self.assertFalse(out.exists())
+
     def test_target_mcu_elf_rejected_before_hardware(self):
         elf = probe_load.ROOT / 'prebuilt/golden/f103ze-cdc48.elf'
         bit = probe_load.RELEASE / 'probe.bit'

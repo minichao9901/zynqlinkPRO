@@ -21,12 +21,12 @@ MAPR = 0x40010004
 SWJ_MASK = 7 << 24
 
 
-def connect():
-    dev, out, inp = open_dap()
-    probe = Probe()
+def connect(serial=None,swd_khz=50000):
+    dev, out, inp = open_dap(serial)
+    probe = Probe(serial)
     try:
         stop(probe, dev)
-        setup(out, inp, 50000, 'swd')
+        setup(out, inp, swd_khz, 'swd')
         return dev, probe, out, inp, Memory(out, inp)
     except BaseException:
         probe.close()
@@ -43,6 +43,9 @@ def close(dev, probe):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--serial',help='J7 USB serial number')
+    parser.add_argument('--swd-khz',type=int,default=50000,help='SWD setup/recovery frequency in kHz')
+    parser.add_argument('--run-during-child',action='store_true',help='resume a target which was running before the fixture')
     parser.add_argument('--restore-swj', type=int, choices=[0, 1, 2], required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('command', nargs=argparse.REMAINDER)
@@ -54,7 +57,7 @@ def main():
     state = dict(command=command, restore_swj_from_target_source=args.restore_swj)
     initial = enabled = mapr = None
     try:
-        dev, probe, out, inp, mem = connect()
+        dev, probe, out, inp, mem = connect(args.serial,args.swd_khz)
         try:
             initial = mem.word(DHCSR)
             mem.write_word(DHCSR, 0xA05F0003)
@@ -70,14 +73,18 @@ def main():
             identity = setup(out, inp, 1000, 'jtag')
             state['JTAG_IDCODE'] = hex(int.from_bytes(identity[2:6], 'little'))
             assert mem.word(0xE000ED00) & 0xFF0FFFF0 == 0x410FC230
-            setup(out, inp, 50000, 'swd')
+            setup(out, inp, args.swd_khz, 'swd')
+            if args.run_during_child and not initial & (1 << 17):
+                mem.write_word(DHCSR,0xa05f0001)
+                if mem.word(DHCSR)&(1 << 17):
+                    raise RuntimeError('target did not resume before child')
         finally:
             close(dev, probe)
         result = subprocess.run(command, cwd=Path(__file__).resolve().parents[1])
         state['returncode'] = result.returncode
     finally:
         if initial is not None:
-            dev, probe, out, inp, mem = connect()
+            dev, probe, out, inp, mem = connect(args.serial,args.swd_khz)
             try:
                 mem.write_word(DHCSR, 0xA05F0003)
                 if mapr is not None:

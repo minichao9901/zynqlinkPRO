@@ -1,0 +1,110 @@
+{
+  "board": "f103ze",
+  "operation": "HS3 JTAG/RAM, guarded F103ZE SRAM",
+  "suites": [
+    "etm"
+  ],
+  "serial": "12345678",
+  "seconds": 60,
+  "rounds": 3,
+  "pair": "E:\\zynqlinkPRO-selectio-streams\\prebuilt\\selectio-j7-fusion",
+  "out": "E:\\zynqlinkPRO-selectio-streams\\build\\accept800-etm-running",
+  "cases": [
+    {
+      "name": "load",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 10.1120164999993,
+      "log": "load.log"
+    },
+    {
+      "name": "info",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 0.4150448000000324,
+      "log": "info.log"
+    },
+    {
+      "name": "etm",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 8.595569699999032,
+      "log": "etm.log",
+      "restored": true
+    },
+    {
+      "name": "etm-verify",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 0.7999766000029922,
+      "log": "etm-verify.log"
+    }
+  ],
+  "hashes": {
+    "probe.bit": "cf96fef427d986bcbab27f4711844ea457032b02e5dec2602cb323ec3dbac724",
+    "application.elf": "c7de59414067b98c92e43701fbb6b7dc06688112d0d3d7f76176320880efb82e",
+    "ps7_init.tcl": "aa9747c31f705be7c28af1c6b1cdeaf282f0dcdb01faecee2a9f72e4d3489132"
+  },
+  "etm_record": "E:\\zynqlinkPRO-selectio-streams\\build\\accept800-etm-running\\etm",
+  "etm_decode": {
+    "packets": 3854629,
+    "ranges": 19189729,
+    "instructions": 19189729,
+    "executed": 17271819,
+    "sourceMapped": 19189729,
+    "exceptions": 1000,
+    "gaps": 1,
+    "packetIssues": 0,
+    "unknownExecution": 1,
+    "functions": {
+      "cdc_poll": 8631215,
+      "main": 8630579,
+      "HAL_IncTick": 7000,
+      "SysTick_Handler": 3000,
+      "trace_hook_mark": 23,
+      "HAL_GPIO_WritePin": 2
+    }
+  },
+  "etm_window": {
+    "transport": "ddr-usb/1",
+    "captureId": 1,
+    "captureNonce": 5903755905766653734,
+    "loss": false,
+    "synced": true,
+    "bufferFull": false,
+    "bufferCapacityBytes": 104857600,
+    "captureComplete": true,
+    "requestedWindowComplete": true,
+    "completionReason": "time",
+    "ended": true,
+    "records": 963469,
+    "hardwareTicks": 199999998,
+    "requestedTicks": 199999998,
+    "refClockHz": 199999998,
+    "hardwareSeconds": 1.0,
+    "hardwareStartBracketUnix": [
+      1795210795.1919765,
+      1795210795.1925547
+    ],
+    "stopReason": 0,
+    "formatterBytes": 15415504,
+    "tailBytes": 0,
+    "tailAmbiguous": true,
+    "usbSeconds": 0.41110289999778615,
+    "usbPayloadMBps": 37.497920837053236,
+    "diagnostics": {
+      "implemented": true,
+      "frameDrops": 0,
+      "parserErrors": 0,
+      "idelayReadyLosses": 0,
+      "frameHighwater": 1,
+      "syncAcquisitions": 1,
+      "observedFrames": 963469,
+      "capacityReached": false,
+      "writerError": 0
+    },
+    "fclk": 133333332,
+    "tckKhz": 9523.809428571429
+  },
+  "passed": true
+}
