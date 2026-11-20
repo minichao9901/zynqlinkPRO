@@ -8,3 +8,15 @@
 - [HS3 与 J7 恢复](hs3.md)。主线正式配对临时加载后，比对目标 ELF 的 20,168 字节，CPU ID 411fc231、器件 ID 10036414，RCC_CFGR 0051040a。ETM 主线对照完成 1 秒 DDR 窗口，10 MHz SWD 配置，丢帧、解析错误、校准丢失、USB 读取错误均为零；解码 2 个 gap、1 个 unknown execution，目标 RCC 及 FPB 恢复。[主线采集](baseline-etm.json)
 - 第一次 ETM 窗口的原始 15,372,291 字节成功下载，随后原生 deformatter 在新的兄弟 worktree 创建输出目录遭拒。同一输入在主仓库本轮专用输出目录成功解复用，源 ID 2 为 3,894,373 字节。随后使用主仓库本轮专用目录复跑了上列完整采集和解码。
 - 构建中 RAW4 的 TRACECLK 在 opt_design 之前仍绑定 BUFIO shape，直接把该端口移到 J16 会失败。布局前、逻辑优化后再绑定 J7 端口。新配对的路由时序、实板速率以及完整 CLI 能力按后续记录验收。
+## 100 MHz 双链路的首份实板配对
+
+在同一份 [bit/ELF](../../../prebuilt/selectio-j7-100mhz-bringup/manifest.json) 上，F103ZE 保持 CDC48 的 HCLK 48 MHz。通过 USB 从主机发送每次重新生成的载荷，交替写和读 1 KiB。SWD 使用 tap8、slot20、idle2；JTAG 使用 tap16、slot28、idle33。两条通路均为 3 × 60 秒，逐次比较每一字节，每轮后独立低速读回末轮数据与哨兵。参考时钟从实际 PS 时钟寄存器读回约 200 MHz，线速换算为 99,999,999 Hz；未外接频率计。
+
+| 链路 | 实际 PC 读 MB/s | 实际 PC 写 MB/s | 证据 |
+|---|---:|---:|---|
+| SWD | 0.1062–0.1064 | 0.1395–0.1398 | [原始三轮](first-swd.json) |
+| JTAG | 0.0844 | 0.0834–0.0835 | [原始三轮](first-jtag.json) |
+
+这一实现每个块都以 1 MHz 链路备份并恢复 DP/AP 上下文，GP0/GP1 的寄存器搬运也跟随低速 FCLK0。验证通过的范围为双协议共享引脚、数据正确和低速接管。性能差距保留为待优化项。完成第三轮后测试程序重新加载正式配对，首次等候 Windows 出现 CMSIS-DAP 超时；再调同一备份的恢复入口成功，已复核 4 KiB SRAM、两侧哨兵、AFIO、APB2、RCC、Flash 等待周期和目标运行状态。[独立恢复](first-restore.json)
+
+该配对采用 133.333 MHz 约束，路由 setup +0.101 ns、hold +0.027 ns，bitgen DRC 通过。对 GP1 布线检查点实施的两条 I/O 改接见[原始 Tcl](first-iofix.tcl.txt)。兼容 SWD 回到高电平时钟前先以手动方式保持 SWDIO 低，重建链路后再恢复 AP。先前直接交还的版本会在恢复 SELECT 时返回错误。

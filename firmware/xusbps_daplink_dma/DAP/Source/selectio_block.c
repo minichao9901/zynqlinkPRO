@@ -93,6 +93,8 @@ uint32_t selectio_block(const uint8_t *req, uint8_t *rsp) {
     if (probe_target_claim(0)) goto done;
     uint32_t route=swd_read32(JTAG_ROUTE);
     uint32_t base=port==2?JQUEUE:SQUEUE;
+    uint32_t pins=swd_read32(JTAG_PINS);
+    if (port==1) swd_write32(JTAG_PINS,0x100U); /* park SWCLK and SWDIO low */
     swd_write32(JTAG_ROUTE,route&~2U);
     if (swd_read32(JTAG_ROUTE)!=(route&~2U)) goto restore_route;
     swd_write32(base+8U,0U);
@@ -118,6 +120,19 @@ restore_route:
         XTime start,now;
         XTime_GetTime(&start);
         do { XTime_GetTime(&now); } while(now-start < COUNTS_PER_SECOND/1000000U);
+    }
+    if (port==1) {
+        /* The legacy SWD core parks its clock high. Raise it with SWDIO
+         * low first, so reconnecting the serializer cannot create START. */
+        swd_write32(JTAG_PINS,0x101U);
+        XTime start,now;
+        XTime_GetTime(&start);
+        do { XTime_GetTime(&now); } while(now-start < COUNTS_PER_SECOND/1000000U);
+        swd_write32(JTAG_PINS,pins&0x300U);
+        static const uint8_t reset_sequence[9]={255,255,255,255,255,255,255,255,0};
+        SWJ_Sequence(72,reset_sequence);
+        uint32_t id=0;
+        if (SWD_Transfer(2,&id)!=DAP_TRANSFER_OK || !(id&1U)) result=-1;
     }
     if (probe_target_release()==0 && !result && probe_session_live()) {
         rsp[0]=DAP_OK;

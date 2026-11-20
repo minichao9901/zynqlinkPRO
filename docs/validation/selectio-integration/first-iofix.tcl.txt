@@ -1,0 +1,34 @@
+set root [file normalize .]
+set out [file normalize build/selectio-iofix]
+file mkdir $out
+set ::env(ZYNQLINK_FPGA_OUT) $out
+set ::env(ZYNQLINK_RAW_TRACE) 4
+set ::env(ZYNQLINK_ETM_DDR) 1
+set ::env(ZYNQLINK_ETM_LANE_DELAY) 1
+open_checkpoint [file normalize build/selectio-gp1/system_wrapper_verified.dcp]
+source [file join $root fpga run_threads.tcl]
+foreach lane {tdo data} {
+    set rx [get_cells -hier -filter "NAME =~ *g_selectio.phy/${lane}_rx/shift && REF_NAME == ISERDESE2"]
+    set pad [get_cells -hier -filter "NAME =~ *g_selectio.phy/${lane}_pad"]
+    set raw [get_nets -of_objects [get_pins $pad/O]]
+    set loads [get_pins -leaf -of_objects [get_nets -segments $raw] -filter {DIRECTION==IN && REF_PIN_NAME!=IDATAIN}]
+    puts "SIO_RAW $lane $raw sinks=$loads"
+    if {[llength $rx]!=1 || [llength $pad]!=1 || ![llength $loads]} {error "missing RX pad or loads"}
+    set n [create_net fix_${lane}_fabric_level]
+    foreach pin $loads {
+        disconnect_net -net [get_nets -of_objects $pin] -objects $pin
+        connect_net -hierarchical -net $n -objects $pin
+    }
+    set dpin [get_pins $rx/D]
+    set constant [get_nets -of_objects $dpin]
+    if {[llength $constant]} {disconnect_net -net $constant -objects $dpin}
+    connect_net -hierarchical -net $raw -objects $dpin
+    connect_net -hierarchical -net $n -objects [get_pins $rx/O]
+}
+route_design -preserve
+report_route_status -file [file join $out route_status.rpt]
+report_drc -file [file join $out drc.rpt]
+set ::zynqlink_verify_checkpoint [file join $out routed.dcp]
+write_checkpoint -force $::zynqlink_verify_checkpoint
+close_design
+source [file join $root fpga verify_routed.tcl]
