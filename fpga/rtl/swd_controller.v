@@ -699,7 +699,7 @@ module swd_controller #(
                     ADDR_CTRL: begin
                         rdata_reg <= {16'd0, xfer_request, 5'd0, ctrl_timestamp_en, ctrl_mode, scalar_status_busy};
                     end
-                    ADDR_FEATURES: rdata_reg <= SELECTIO ? 32'h4450_1bff : 32'h4450_007f; // bit6: manual SWDIO direction; bit5: extended idle.
+                    ADDR_FEATURES: rdata_reg <= SELECTIO ? 32'h4450_1fff : 32'h4450_007f; // bit6: manual SWDIO direction; bit5: extended idle.
                     ADDR_ENGINE_RESET: rdata_reg <= engine_reset_count;
                     ADDR_TRACE_CTRL: rdata_reg <= {trace_frozen,trace_raw_mode,trace_raw_active,trace_raw_armed,8'd0,trace_count,trace_head};
                     ADDR_TRACE_INDEX: rdata_reg <= {28'd0,trace_index};

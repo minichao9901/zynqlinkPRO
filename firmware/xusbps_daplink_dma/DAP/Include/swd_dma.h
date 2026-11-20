@@ -4,6 +4,7 @@
 /* Aligned, private buffers: cache maintenance cannot touch USB-owned data. */
 extern uint32_t swd_dma_cmd[1024];
 extern uint32_t swd_dma_rsp[1024];
+int selectio_dma_payload(unsigned upload,unsigned bank_address,uint8_t *buffer,unsigned words);
 int swd_dma_upload(uint32_t words);
 int swd_dma_download(uint32_t first, uint32_t words);
 /* Destination must own the complete cache lines and be 32-byte aligned. */

@@ -84,6 +84,27 @@ fail:
     return -1;
 }
 
+#if DAP_SELECTIO
+/* CDMA bursts over the dedicated PL payload BRAM port. Only cache-line
+ * exclusive host buffers can use the direct path. Other callers bounce. */
+static uint8_t payload_bounce[1024] __attribute__((aligned(64)));
+int selectio_dma_payload(unsigned upload,unsigned bank_address,uint8_t *buffer,unsigned words) {
+    unsigned size=4U*words;
+    if(!words || words>256 || (bank_address&1023U) ||
+       bank_address<0x45000000U || bank_address>=0x45004000U) return -1;
+    uint8_t *dma_buffer=(((uintptr_t)buffer|size)&31U)?payload_bounce:buffer;
+    if(upload) {
+        if(dma_buffer!=buffer) memcpy(dma_buffer,buffer,size);
+        Xil_DCacheFlushRange((UINTPTR)dma_buffer,(size+31U)&~31U);
+        return copy((uint32_t)(uintptr_t)dma_buffer,bank_address,size);
+    }
+    Xil_DCacheInvalidateRange((UINTPTR)dma_buffer,(size+31U)&~31U);
+    if(copy(bank_address,(uint32_t)(uintptr_t)dma_buffer,size)) return -1;
+    Xil_DCacheInvalidateRange((UINTPTR)dma_buffer,(size+31U)&~31U);
+    if(dma_buffer!=buffer) memcpy(buffer,dma_buffer,size);
+    return 0;
+}
+#endif
 int swd_dma_upload(uint32_t words) {
     XTime start, end;
     XTime metric_start=dap_metric_start();

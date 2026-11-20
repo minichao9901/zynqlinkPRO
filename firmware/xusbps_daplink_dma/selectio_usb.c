@@ -139,14 +139,16 @@ static unsigned execute_frame(unsigned length, unsigned active_epoch) {
             uint64_t values[7];
             selectio_mem_stats(values);memcpy(output+16,values,sizeof values);
             reply_size=sizeof values;status=0;
-        } else if(channel==1 && op==3 && size>=8) {
+        } else if(channel==1 && (op==3 || op==6) && size>=8) {
+            unsigned header=op==6?16U:8U;
             unsigned write=input[16],words=input[18]|((unsigned)input[19]<<8),completed=0;
             uint32_t detail=0;
             if(write<=1 && !input[17] && words && words<=1008 &&
-               size==8+(write?4U*words:0U)) {
-                int rc=selectio_mem_bulk(write,read32(input+20),words,input+24,output+24,&completed,&detail);
+               size==header+(write?4U*words:0U)) {
+                int rc=selectio_mem_bulk(write,read32(input+20),words,input+16+header,output+16+header,&completed,&detail);
                 write32(output+16,completed);write32(output+20,detail);
-                reply_size=8U+(!write && !rc?4U*words:0U);
+                if(header==16U) memset(output+24,0,8);
+                reply_size=header+(!write && !rc?4U*words:0U);
                 if(!rc) status=0;
             }
         } else if (channel==1 && op==0 && size && input[16]==0x8e) {

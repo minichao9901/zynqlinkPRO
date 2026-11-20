@@ -17,6 +17,7 @@ LIMIT = 4079
 class NativeStream:
     device: object
     sequence: int
+    dma: bool = False
 
     def exchange(self, channel, op, payload=b""):
         if len(payload)>LIMIT:
@@ -52,11 +53,12 @@ class NativeStream:
         if size<=0 or size%4 or size>4032 or (data is not None and len(data)!=size):
             raise ValueError("native block requires 4..4032 aligned bytes")
         payload=struct.pack("<BBHI",int(data is not None),0,size//4,address)
-        reply=self.exchange(1,3,payload+(data if data is not None else b""))
-        expected=8+(size if data is None else 0)
+        header=16 if self.dma else 8
+        reply=self.exchange(1,6 if self.dma else 3,payload.ljust(header,b"\0")+(data if data is not None else b""))
+        expected=header+(size if data is None else 0)
         if len(reply)!=expected or struct.unpack_from("<I",reply)[0]!=size//4:
             raise RuntimeError("incomplete MEM-AP transfer")
-        return reply[8:]
+        return reply[header:]
 
     def memory_stats(self):
         hz,rb,wb,rq,wq,rt,wt=struct.unpack("<7Q",self.exchange(1,4))
@@ -78,6 +80,7 @@ class NativeStream:
         if len(reply)!=16 or reply[:4]!=b"SIO1":
             raise RuntimeError("unrecognized native firmware interface")
         ref,features,size=struct.unpack_from("<III",reply,4)
+        self.dma=bool(features&0x400)
         return dict(protocol="ZLK1",reference_hz=ref,link_hz=ref/2 if features&0x80 else None,features=hex(features),
                     integrated_pl=bool(features&0x80),max_frame=size)
 

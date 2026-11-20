@@ -38,6 +38,22 @@ module tb_selectio_debug;
     wire arready=arr[use_swd], rvalid=rr[use_swd];
     wire [1:0] bresp=bresponse[use_swd],rresp=rresponse[use_swd];
     wire [31:0] rdata=rvalues[use_swd];
+    wire [9:0] jpa,jra,spa,sra;
+    wire [31:0] jpd,jrd,spd,srd;
+    wire jwe,swe;
+    reg dma_en=0;reg [3:0] dma_we=0;reg [31:0] dma_addr=0,dma_data=0;
+    wire [31:0] dma_result;
+    selectio_payload_ram payload(axi_clk,!resetn,dma_en,dma_we,dma_addr,dma_data,dma_result,
+        octet_clk,quad_clk,jpa,spa,jpd,spd,jwe,swe,jra,sra,jrd,srd);
+    task automatic load_payload(input int address,input reg [31:0] value);
+        @(negedge axi_clk);dma_en=1;dma_we=15;dma_addr=address;dma_data=value;
+        @(negedge axi_clk);dma_en=0;dma_we=0;
+    endtask
+    task automatic check_payload(input int address,input reg [31:0] value);
+        @(negedge axi_clk);dma_en=1;dma_we=0;dma_addr=address;
+        @(negedge axi_clk);if(dma_result!==value)$fatal(1,"DMA payload %h got %h expected %h",address,dma_result,value);
+        dma_en=0;
+    endtask
     jtag200_regs #(.ENABLE_BLOCK(1)) jtag(
         .axi_aclk(axi_clk),.axi_aresetn(resetn),
         .s_axi_awaddr(awaddr),.s_axi_awprot(3'b0),.s_axi_awvalid(awvalid && use_swd==0),.s_axi_awready(awr[0]),
@@ -45,6 +61,7 @@ module tb_selectio_debug;
         .s_axi_bresp(bresponse[0]),.s_axi_bvalid(br[0]),.s_axi_bready(1'b1),
         .s_axi_araddr(araddr),.s_axi_arprot(3'b0),.s_axi_arvalid(arvalid && use_swd==0),.s_axi_arready(arr[0]),
         .s_axi_rdata(rvalues[0]),.s_axi_rresp(rresponse[0]),.s_axi_rvalid(rr[0]),.s_axi_rready(1'b1),
+        .payload_tx_addr(jpa),.payload_rx_addr(jra),.payload_tx_data(jpd),.payload_rx_data(jrd),.payload_rx_write(jwe),
         .phy_hold(jhold), .ready(js_ready), .delay_ready(calibrated), .delay_load(jload),
         .delay_value(jtap), .word_clk(octet_clk), .word_reset(js_reset), .lane_word(lanes), .rx_word(jrx));
     swd200_regs swd(
@@ -54,6 +71,7 @@ module tb_selectio_debug;
         .s_axi_bresp(bresponse[1]),.s_axi_bvalid(br[1]),.s_axi_bready(1'b1),
         .s_axi_araddr(araddr),.s_axi_arprot(3'b0),.s_axi_arvalid(arvalid && use_swd==1),.s_axi_arready(arr[1]),
         .s_axi_rdata(rvalues[1]),.s_axi_rresp(rresponse[1]),.s_axi_rvalid(rr[1]),.s_axi_rready(1'b1),
+        .payload_tx_addr(spa),.payload_rx_addr(sra),.payload_tx_data(spd),.payload_rx_data(srd),.payload_rx_write(swe),
         .hold(shold), .delay_ready(calibrated), .delay_load(sload), .delay_value(stap),
         .word_clk(quad_clk), .word_reset(ss_reset), .rx_slots(srx), .clk_slots(sclock),
         .data_slots(sdata), .release_slots(srelease));
@@ -139,7 +157,11 @@ module tb_selectio_debug;
             write_reg('h018,256,0);
             write_reg('h01c,32'h00780000 | (33<<10) | (jslot<<3) | 2,0);
             write_reg('h014,32'h20008000,0);
-            for (i=0;i<256;i++) write_reg('h1004+4*i,pattern(i),0);
+            write_reg('h034,6,0);
+            for (i=0;i<256;i++) begin
+                write_reg('h1004+4*i,~pattern(i),0);
+                load_payload('h800+4*i,pattern(i));
+            end
             write_reg(8,13,0); wait_status(15);
             read_reg('h020,value);
             if (value!==1) $fatal(1,"JTAG write ACK %h, slot %d",value,jslot);
@@ -148,6 +170,7 @@ module tb_selectio_debug;
             write_reg(8,5,0); wait_status(15);
             read_reg('h020,value); if (value!==1) $fatal(1,"JTAG read ACK %h",value);
             for (i=0;i<256;i++) begin
+                check_payload('h1800+4*i,pattern(i));
                 read_reg('h2004+4*i,value);
                 if (value!==pattern(i)) $fatal(1,"JTAG read %d",i);
             end
@@ -166,13 +189,20 @@ module tb_selectio_debug;
         put(0,0,'h1e); put(1,4,'h50000000); batch(2);
         put(0,8,0); put(1,1,'h23000052); batch(2);
         put(0,5,'h20008000);
-        for(i=0;i<256;i++) put(i+1,'hd,~pattern(i));
-        put(257,'he,0); batch(258);
+        write_reg('h2c,5,0);write_reg('h1c,2,0);
+        put(0,5,'h20008000);
+        for(i=0;i<256;i++) begin
+            put(i+1,'hd,pattern(i));
+            load_payload('h2400+4*i,~pattern(i));
+        end
+        put(257,'he,0); put(258,'h6,0); batch(259);
         for(i=0;i<256;i++) if(cm3.u_sys.mem[i]!==~pattern(i)) $fatal(1,"SWD write %d",i);
         put(0,5,'h20008000);
+        write_reg('h1c,1,0);put(0,5,'h20008000);
         for(i=0;i<256;i++) put(i+1,'hf,0);
-        put(257,'he,0); batch(258);
+        put(257,'he,0); put(258,'h6,0); batch(259);
         for(i=0;i<256;i++) begin
+            check_payload('h3400+4*i,~pattern(i));
             read_reg('h2008+4*i,value); if(value!==~pattern(i)) $fatal(1,"SWD read %d",i);
         end
         if (adjacent<256) $fatal(1,"missing continuous SWD");

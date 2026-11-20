@@ -31,9 +31,12 @@ module jtag200_regs #(parameter ENABLE_BLOCK=0) (
     input wire word_clk,
     input wire word_reset,
     output wire [23:0] lane_word,
-    input wire [7:0] rx_word
+    input wire [7:0] rx_word,
+    output wire [9:0] payload_tx_addr,payload_rx_addr, input wire [31:0] payload_tx_data,
+    output wire [31:0] payload_rx_data,output wire payload_rx_write
 );
     reg [1:0] park=3;
+    reg [2:0] payload_config=0;
     reg [13:0] write_addr;
     reg [31:0] write_data;
     reg [3:0] write_strobes;
@@ -73,6 +76,11 @@ module jtag200_regs #(parameter ENABLE_BLOCK=0) (
     wire [8:0] rx_addr = block_mode_sync[1] ? pipeline_rx_addr : raw_rx_addr;
     wire [31:0] rx_value = block_mode_sync[1] ? block_word : {24'b0,rx_word};
     wire [3:0] rx_enable = block_mode_sync[1] ? block_rx_enable : {4{raw_rx_write}};
+    assign payload_tx_addr={payload_config[1:0],pipeline_tx_addr[7:0]-8'd1};
+    assign payload_rx_addr={payload_config[1:0],pipeline_rx_addr[7:0]-8'd1};
+    assign payload_rx_data=block_word;
+    assign payload_rx_write=payload_config[2] && !block_write && (&block_rx_enable) &&
+        pipeline_rx_addr!=0 && pipeline_rx_addr<=block_count;
     assign lane_word = block_mode_sync[1] ? pipeline_lanes : raw_lanes;
     reg [31:0] tx_word, rx_read;
     (* ram_style = "block" *) reg [31:0] tx_mem [0:511];
@@ -117,7 +125,7 @@ module jtag200_regs #(parameter ENABLE_BLOCK=0) (
             .write_block(block_write), .arm_target(block_timing[21]), .address(block_address), .count(block_count),
             .stream_mode(block_timing[22]), .verify_block(block_timing[23]), .invert_pattern(block_invert),
             .idle_cycles(block_timing[18:10]), .half_slots(block_timing[2:0]),
-            .sample_offset(block_timing[9:3]), .tx_word(tx_word),
+            .sample_offset(block_timing[9:3]), .tx_word(payload_config[2] ? payload_tx_data : tx_word),
             .advance_tms(block_timing[20]), .advance_tdi(block_timing[19]),
             .tx_addr(pipeline_tx_addr), .rx_addr(pipeline_rx_addr), .result_word(block_word),
             .result_enable(block_rx_enable), .rx_word(rx_word), .lane_word(pipeline_lanes),
@@ -137,6 +145,7 @@ module jtag200_regs #(parameter ENABLE_BLOCK=0) (
             s_axi_bvalid <= 0;
             reading_rx <= 0;
             phy_hold <= 1;park<=3;
+            payload_config <= 0;
             delay_load <= 0;
             delay_value <= 0;
             run <= 0;
@@ -196,6 +205,7 @@ module jtag200_regs #(parameter ENABLE_BLOCK=0) (
                 if (ENABLE_BLOCK && control_write && !run && !done_sync[1]) begin
                     case (write_addr)
                         14'h038: begin park<=write_data[1:0];s_axi_bresp<=0;end
+                        14'h034: begin payload_config <= write_data[2:0]; s_axi_bresp <= 0; end
                         14'h014: begin block_address <= write_data; s_axi_bresp <= 0; end
                         14'h018: if (write_data[31:9] == 0) begin block_count <= write_data[8:0]; s_axi_bresp <= 0; end
                         14'h01c: if (write_data[31:24] == 0) begin block_timing <= write_data[23:0]; s_axi_bresp <= 0; end
@@ -226,6 +236,7 @@ module jtag200_regs #(parameter ENABLE_BLOCK=0) (
                         14'h004: s_axi_rdata <= {27'b0, phy_hold, run, delay_sync[1], done_sync[1], ready_sync[1]};
                         14'h00c: s_axi_rdata <= {27'b0, delay_value};
                         14'h038: s_axi_rdata<={30'd0,park};
+                        14'h034: s_axi_rdata <= {29'd0,payload_config};
                         14'h010: s_axi_rdata <= ENABLE_BLOCK ? 32'h50495045 : 32'b0; // PIPE
                         14'h014: s_axi_rdata <= block_address;
                         14'h018: s_axi_rdata <= {23'b0,block_count};

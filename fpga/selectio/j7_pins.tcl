@@ -9,3 +9,4 @@ set_property -dict {DRIVE 8 SLEW FAST} [get_ports swclk_0]
 
 source [file join [file dirname [info script]] queue_timing.tcl]
 source [file join [file dirname [info script]] ownership_timing.tcl]
+source [file join [file dirname [info script]] payload_timing.tcl]

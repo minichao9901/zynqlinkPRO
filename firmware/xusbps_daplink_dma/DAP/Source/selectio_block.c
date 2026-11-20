@@ -4,6 +4,7 @@
 #include "probe_stream.h"
 #include "selectio_block.h"
 #include "xtime_l.h"
+#include "swd_dma.h"
 #include "etm_ddr_usb.h"
 #include <string.h>
 
@@ -11,7 +12,7 @@
 #define SQUEUE 0x80010000U
 
 static struct {
-    unsigned port, poisoned;
+    unsigned port, poisoned, dma,bank;
     uint32_t route,pins,clock;
     uint8_t profile[4];
     unsigned words[2];
@@ -56,7 +57,7 @@ static int swd_block(unsigned write, uint32_t address, unsigned count,
         swd_descriptor(count+2U,6U,0);
         session.words[write]=count;
     } else swd_write32(SQUEUE+0x1004U,address);
-    if(write) for(i=0;i<count;i++)
+    if(write && !session.dma) for(i=0;i<count;i++)
         swd_write32(SQUEUE+0x100cU+8U*i,load32(payload+4U*i));
     XTime start,stop;XTime_GetTime(&start);
     swd_write32(SQUEUE+0x10U,count+3U);
@@ -65,7 +66,7 @@ static int swd_block(unsigned write, uint32_t address, unsigned count,
     *detail=swd_read32(SQUEUE+0x14U);
     if ((*detail&0xffffU)!=count+3U) return -1;
     if (swd_read32(SQUEUE+0x2000U+4U*(count+2U))&0xb2U) return -1;
-    if (!write) for(i=0;i<count;i++) {
+    if (!write && !session.dma) for(i=0;i<count;i++) {
         uint32_t value=swd_read32(SQUEUE+0x2008U+4U*i);
         memcpy(reply+4U*i,&value,4);
     }
@@ -78,7 +79,7 @@ static int jtag_block(unsigned write, uint32_t address, unsigned count,
     swd_write32(JQUEUE+0x14U,address);
     swd_write32(JQUEUE+0x18U,count);
     swd_write32(JQUEUE+0x1cU,0x780002U|(session.profile[2]<<3)|(session.profile[3]<<10));
-    if (write) for(i=0;i<count;i++)
+    if (write && !session.dma) for(i=0;i<count;i++)
         swd_write32(JQUEUE+0x1004U+4U*i,load32(payload+4U*i));
     XTime start,stop;XTime_GetTime(&start);
     swd_write32(JQUEUE+8U,write?13U:5U);
@@ -86,7 +87,7 @@ static int jtag_block(unsigned write, uint32_t address, unsigned count,
     XTime_GetTime(&stop);session.queue_ticks[write]+=stop-start;
     *detail=swd_read32(JQUEUE+0x20U);
     if (*detail!=1U || swd_read32(JQUEUE+0x2000U)!=(0x10000U|count)) return -1;
-    if (!write) for(i=0;i<count;i++) {
+    if (!write && !session.dma) for(i=0;i<count;i++) {
         uint32_t value=swd_read32(JQUEUE+0x2004U+4U*i);
         memcpy(reply+4U*i,&value,4);
     }
@@ -108,6 +109,7 @@ int selectio_mem_close(void) {
         session.poisoned=1;
         probe_target_invalidate();return -1;
     }
+    if(session.dma) swd_write32(base+(port==2?0x34U:0x2cU),0);
     swd_write32(base+8U,port==2?2U:1U);
     if (wait_queue(base,0x11U,0x10U)) {session.poisoned=1;return -1;}
     Xil_Out32(XSLCR_UNLOCK_ADDR,XSLCR_UNLOCK_CODE);
@@ -143,7 +145,8 @@ int selectio_mem_open(const uint8_t fields[4]) {
     session.route=swd_read32(JTAG_ROUTE);
     session.pins=swd_read32(JTAG_PINS);
     session.clock=Xil_In32(SLCR_FPGA0_CLK_CTRL);
-    session.port=port;session.poisoned=0;
+    session.port=port;session.poisoned=0;session.bank=0;
+    session.dma=!!(swd_read32(SWD_FEATURES)&0x400U);
     session.words[0]=session.words[1]=0;
     memset(session.bytes,0,sizeof session.bytes);
     memset(session.queue_ticks,0,sizeof session.queue_ticks);
@@ -180,8 +183,17 @@ int selectio_mem_bulk(unsigned write,uint32_t address,unsigned words,const uint8
     while(*completed<words) {
         unsigned count=(1024U-(address&1023U))/4U;
         if(count>words-*completed) count=words-*completed;
+        unsigned bank=session.bank++&3U;
+        unsigned window=0x45000000U+(session.port==1?0x2000U:0U)+bank*1024U;
+        if(session.dma) {
+            swd_write32(session.port==2?JQUEUE+0x34U:SQUEUE+0x2cU,4U|bank);
+            if(write && selectio_dma_payload(1,window,(uint8_t *)payload,count)) {
+                session.poisoned=1;return -1;
+            }
+        }
         int rc=session.port==2 ? jtag_block(write,address,count,payload,reply,detail):
                                  swd_block(write,address,count,payload,reply,detail);
+        if(!rc && session.dma && !write) rc=selectio_dma_payload(0,window+0x1000U,reply,count);
         if(rc) {session.poisoned=1;return rc;}
         *completed+=count;
         address+=4U*count;
