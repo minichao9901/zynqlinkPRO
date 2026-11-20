@@ -157,7 +157,7 @@ module tb_cm3_jtag #(parameter integer ENABLE_DIAGNOSTICS=0, FAST_IO=0);
   write_reg('h08,1|((cfg_idle&15)<<4));write_reg('h8c,0);
   write_reg('h98,(late_mode ? 16 : 0)|(q1_mode ? 1 : 0));
   if(FAST_IO) begin
-    high_config=(33<<18)|(2<<14)|(21<<7)|(12<<1)|1;
+    high_config=(33<<18)|(2<<14)|(21<<7)|(16<<1)|1;
     wait(owner==(select_swd ? 3 : 2));
     repeat(16) @(posedge clk);
     if(select_swd) begin

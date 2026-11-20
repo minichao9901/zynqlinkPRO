@@ -8,7 +8,7 @@ module selectio_debug_phy (
     input wire [23:0] jtag_lanes,
     output reg [7:0] jtag_samples,
     input wire [3:0] swd_clock, swd_data, swd_release,
-    output wire [3:0] swd_samples,
+    output reg [3:0] swd_samples,
     input wire tap_clk, tdo_load, swdio_load,
     input wire [4:0] tdo_tap, swdio_tap,
     inout wire clock_pin, data_pin, tdi_pin, input wire tdo_pin,
@@ -59,7 +59,11 @@ module selectio_debug_phy (
     IOBUF data_pad(.I(data_out),.T(data_tri),.IO(data_pin),.O(swdio_input));
     IOBUF tdi_pad(.I(tdi_out),.T(tdi_tri),.IO(tdi_pin),.O(tdi_input));
     IBUF tdo_pad(.I(tdo_pin),.O(tdo_input));
-    selectio_rx data_rx(serial_clk, quad_clk, reset, swdio_input, tap_clk, swdio_load, swdio_tap, swd_samples, data_level);
+    wire [3:0] captured_swd;
+    // Register the ILOGIC return before evaluating ACK and preparing the
+    // next OSERDES word. Sample offsets include this additional quartet.
+    always @(posedge quad_clk) swd_samples<=captured_swd;
+    selectio_rx data_rx(serial_clk, quad_clk, reset, swdio_input, tap_clk, swdio_load, swdio_tap, captured_swd, data_level);
     selectio_rx tdi_rx(serial_clk,quad_clk,reset,tdi_input,tap_clk,tdo_load,tdo_tap,tdi_samples,tdi_level);
     selectio_rx tdo_rx(serial_clk, quad_clk, reset, tdo_input, tap_clk, tdo_load, tdo_tap, tdo_samples, tdo_level);
 endmodule

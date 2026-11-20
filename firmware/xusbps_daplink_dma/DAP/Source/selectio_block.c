@@ -12,14 +12,14 @@
 #define SQUEUE 0x80010000U
 
 static struct {
-    unsigned port, poisoned, dma,bank;
+    unsigned port, poisoned, dma,bank,use_dma,jtag_backoffs,jtag_idle;
     uint32_t route,pins,clock;
     uint8_t profile[4];
     unsigned words[2];
     uint64_t bytes[2],queue_ticks[2],total_ticks[2];
 } session;
 
-int selectio_mem_active(void) {return session.port!=0;}
+unsigned selectio_mem_port(void) {return session.port;}
 
 static uint32_t load32(const uint8_t *p) {
     uint32_t value;
@@ -50,14 +50,21 @@ static int swd_block(unsigned write, uint32_t address, unsigned count,
     unsigned i;
     unsigned bank=write?2U:1U;
     swd_write32(SQUEUE+0x1cU,bank);
-    if(session.words[write]!=count) {
+    unsigned old=session.words[write];
+    if(!old) {
+        for(i=1;i<=256;i++) swd_descriptor(i,write?13U:15U,0);
         swd_descriptor(0,5U,address);
-        for(i=0;i<count;i++) swd_descriptor(i+1U,write?13U:15U,0);
+    } else swd_write32(SQUEUE+0x1004U,address);
+    if(old!=count) {
+        /* The template contains DRW everywhere except the two current
+         * fences. A change of TAR page length repairs at most four entries. */
+        if(old) for(i=old+1U;i<=old+2U && i<=256U;i++)
+            swd_descriptor(i,write?13U:15U,0);
         swd_descriptor(count+1U,14U,0);
         swd_descriptor(count+2U,6U,0);
         session.words[write]=count;
-    } else swd_write32(SQUEUE+0x1004U,address);
-    if(write && !session.dma) for(i=0;i<count;i++)
+    }
+    if(write && !session.use_dma) for(i=0;i<count;i++)
         swd_write32(SQUEUE+0x100cU+8U*i,load32(payload+4U*i));
     XTime start,stop;XTime_GetTime(&start);
     swd_write32(SQUEUE+0x10U,count+3U);
@@ -66,7 +73,7 @@ static int swd_block(unsigned write, uint32_t address, unsigned count,
     *detail=swd_read32(SQUEUE+0x14U);
     if ((*detail&0xffffU)!=count+3U) return -1;
     if (swd_read32(SQUEUE+0x2000U+4U*(count+2U))&0xb2U) return -1;
-    if (!write && !session.dma) for(i=0;i<count;i++) {
+    if (!write && !session.use_dma) for(i=0;i<count;i++) {
         uint32_t value=swd_read32(SQUEUE+0x2008U+4U*i);
         memcpy(reply+4U*i,&value,4);
     }
@@ -78,16 +85,22 @@ static int jtag_block(unsigned write, uint32_t address, unsigned count,
     unsigned i;
     swd_write32(JQUEUE+0x14U,address);
     swd_write32(JQUEUE+0x18U,count);
-    swd_write32(JQUEUE+0x1cU,0x780002U|(session.profile[2]<<3)|(session.profile[3]<<10));
-    if (write && !session.dma) for(i=0;i<count;i++)
+    swd_write32(JQUEUE+0x1cU,0x780002U|(session.profile[2]<<3)|(session.jtag_idle<<10));
+    if (write && !session.use_dma) for(i=0;i<count;i++)
         swd_write32(JQUEUE+0x1004U+4U*i,load32(payload+4U*i));
     XTime start,stop;XTime_GetTime(&start);
     swd_write32(JQUEUE+8U,write?13U:5U);
     if (wait_queue(JQUEUE,15U,15U)) return -1;
     XTime_GetTime(&stop);session.queue_ticks[write]+=stop-start;
     *detail=swd_read32(JQUEUE+0x20U);
-    if (*detail!=1U || swd_read32(JQUEUE+0x2000U)!=(0x10000U|count)) return -1;
-    if (!write && !session.dma) for(i=0;i<count;i++) {
+    if (*detail!=1U || swd_read32(JQUEUE+0x2000U)!=(0x10000U|count)) {
+        /* DONE leaves RUN asserted; the queue rejects all configuration
+         * writes until GO is withdrawn and its completion has drained. */
+        swd_write32(JQUEUE+8U,0);
+        (void)wait_queue(JQUEUE,15U,5U);
+        return -1;
+    }
+    if (!write && !session.use_dma) for(i=0;i<count;i++) {
         uint32_t value=swd_read32(JQUEUE+0x2004U+4U*i);
         memcpy(reply+4U*i,&value,4);
     }
@@ -109,9 +122,9 @@ int selectio_mem_close(void) {
         session.poisoned=1;
         probe_target_invalidate();return -1;
     }
-    if(session.dma) swd_write32(base+(port==2?0x34U:0x2cU),0);
     swd_write32(base+8U,port==2?2U:1U);
-    if (wait_queue(base,0x11U,0x10U)) {session.poisoned=1;return -1;}
+    if (wait_queue(base,port==2?0x1bU:0x33U,port==2?0x10U:0x30U)) {session.poisoned=1;return -1;}
+    if(session.dma) swd_write32(base+(port==2?0x34U:0x2cU),0);
     Xil_Out32(XSLCR_UNLOCK_ADDR,XSLCR_UNLOCK_CODE);
     Xil_Out32(SLCR_FPGA0_CLK_CTRL,session.clock);
     Xil_Out32(SLCR_LOCK_ADDR,0x767b);
@@ -145,7 +158,7 @@ int selectio_mem_open(const uint8_t fields[4]) {
     session.route=swd_read32(JTAG_ROUTE);
     session.pins=swd_read32(JTAG_PINS);
     session.clock=Xil_In32(SLCR_FPGA0_CLK_CTRL);
-    session.port=port;session.poisoned=0;session.bank=0;
+    session.port=port;session.poisoned=0;session.bank=0;session.use_dma=0;session.jtag_backoffs=0;session.jtag_idle=idle;
     session.dma=!!(swd_read32(SWD_FEATURES)&0x400U);
     session.words[0]=session.words[1]=0;
     memset(session.bytes,0,sizeof session.bytes);
@@ -165,11 +178,12 @@ failed:
     (void)selectio_mem_close();return -1;
 }
 
-void selectio_mem_stats(uint64_t values[7]) {
+void selectio_mem_stats(uint64_t values[9]) {
     values[0]=COUNTS_PER_SECOND;
     memcpy(values+1,session.bytes,16);
     memcpy(values+3,session.queue_ticks,16);
     memcpy(values+5,session.total_ticks,16);
+    values[7]=session.jtag_backoffs;values[8]=session.jtag_idle;
 }
 
 /* Continuous host payload, automatically split at the ADIv5 1 KiB TAR
@@ -181,19 +195,30 @@ int selectio_mem_bulk(unsigned write,uint32_t address,unsigned words,const uint8
        (address&3U) || (address>>16)!=0x2000U || 4U*words>0x20010000U-address) return -1;
     XTime start,stop;XTime_GetTime(&start);
     while(*completed<words) {
+        if(!probe_session_live()) {session.poisoned=1;return -1;}
         unsigned count=(1024U-(address&1023U))/4U;
         if(count>words-*completed) count=words-*completed;
         unsigned bank=session.bank++&3U;
         unsigned window=0x45000000U+(session.port==1?0x2000U:0U)+bank*1024U;
+        session.use_dma=session.dma && count>=16U;
         if(session.dma) {
-            swd_write32(session.port==2?JQUEUE+0x34U:SQUEUE+0x2cU,4U|bank);
-            if(write && selectio_dma_payload(1,window,(uint8_t *)payload,count)) {
+            swd_write32(session.port==2?JQUEUE+0x34U:SQUEUE+0x2cU,session.use_dma?(4U|bank):0);
+            if(session.use_dma && write && selectio_dma_payload(1,window,(uint8_t *)payload,count)) {
                 session.poisoned=1;return -1;
             }
         }
         int rc=session.port==2 ? jtag_block(write,address,count,payload,reply,detail):
                                  swd_block(write,address,count,payload,reply,detail);
-        if(!rc && session.dma && !write) rc=selectio_dma_payload(0,window+0x1000U,reply,count);
+        /* An AP read may safely be restarted at its original TAR. A write
+         * that posted before WAIT never enters this read-only retry path. */
+        while(rc && !write && session.port==2 && *detail==2U && session.jtag_idle<255U &&
+              (swd_read32(JQUEUE+4U)&15U)==5U) {
+            unsigned idle=2U*session.jtag_idle+1U;
+            session.jtag_idle=idle>255U?255U:idle;
+            session.jtag_backoffs++;
+            rc=jtag_block(0,address,count,payload,reply,detail);
+        }
+        if(!rc && session.use_dma && !write) rc=selectio_dma_payload(0,window+0x1000U,reply,count);
         if(rc) {session.poisoned=1;return rc;}
         *completed+=count;
         address+=4U*count;
@@ -202,6 +227,26 @@ int selectio_mem_bulk(unsigned write,uint32_t address,unsigned words,const uint8
     XTime_GetTime(&stop);
     session.bytes[write]+=4U*words;session.total_ticks[write]+=stop-start;
     return 0;
+}
+
+/* Only the RTT consumer owns this SRAM RdOff. An ambiguous posted write
+ * must be read back before retrying. All other memory writes remain fail-stop. */
+int selectio_commit_rtt_offset(uint32_t addr,uint32_t old,uint32_t next,uint32_t *detail) {
+    unsigned completed;
+    for(unsigned attempt=0;attempt<5;attempt++) {
+        int failed=selectio_mem_bulk(1,addr,1,(const uint8_t *)&next,0,&completed,detail);
+        if(failed) {
+            if(session.port!=2 || *detail!=2U || (swd_read32(JQUEUE+4U)&15U)!=5U) return -1;
+            unsigned idle=2U*session.jtag_idle+1U;
+            session.jtag_idle=idle>255U?255U:idle;
+            session.jtag_backoffs++;session.poisoned=0;
+        }
+        uint32_t actual;
+        if(selectio_mem_bulk(0,addr,1,0,(uint8_t *)&actual,&completed,detail))return -1;
+        if(actual==next)return 0;
+        if(!failed || actual!=old) {session.poisoned=1;*detail=actual;return -1;}
+    }
+    session.poisoned=1;return -1;
 }
 
 uint32_t selectio_block(const uint8_t *req, uint8_t *rsp) {

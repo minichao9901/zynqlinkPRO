@@ -1,0 +1,126 @@
+# J7 SelectIO 多协议探针 CLI
+
+这套固件在同一块 Zynq-7020 上提供 CMSIS-DAP、RTT、变量采样、四线 SPI、串口、SWO 和四位并行 ETM。以下命令在本工作树根目录运行。带有输出路径的命令使用新文件。示例目标是 STM32F103ZE CDC48，目标 HCLK 为 48 MHz。
+
+## 架构和引脚
+
+PS 负责 USB、会话、DMA、错误恢复和 RTT/变量并发调度。PL 的固定事务引擎负责 TAP 状态转换、APACC、SWD 换向、ACK、批量传输、串行编解码和采样。主机可以提交有限长度的事务描述符，PS 可以重用并修补描述符。逐边沿时序由 SelectIO 产生。这个实现不需要通用微码解释器。ETM 延用主线的独立采集时钟、DDR 窗口、USB 下载及离线解码。
+
+| J7 信号对应的 Zynq 球位 | 调试 | SPI 主机 | 串行 |
+|---|---|---|---|
+| L15 | TCK / SWCLK | SCK | — |
+| L16 | TMS / SWDIO | CS，低有效 | — |
+| M15 | TDI | MOSI | 探针 TX，接目标 RX |
+| L14 | TDO | MISO | 探针 RX，接目标 UART TX / CoreSight SWO |
+| J16、K16、M18、M17、L17 | TRACECLK、TRACED[0..3] | — | ETM |
+
+SWD 只需 L15、L16，可与使用 L14 的被动监听共存。JTAG 占用 TDI/TDO，SPI 切换时取得四根线的独占权。F103 的 PB3 可切换 JTDO 与 TRACESWO，PA15 用作 JTDI 或测试目标的串口接收。目标串口、ITM 和四位 ETM 各自需要正确的目标引脚配置。
+
+## USB 接口分配
+
+同一 VID/PID 及序列号下保留现有 CMSIS-DAP、CDC 和控制 HID，另设一个厂商专用 WinUSB 接口。PC 读取序列号选择设备，COM 号由 Windows 分配。
+
+| 接口 | 端点（十六进制） | CLI 用途 |
+|---|---|---|
+| IF0，CMSIS-DAP v2 | 02 OUT、81 IN；87 IN；82 IN | 标准调试；原有 HSS 数据；ETM 下载 |
+| IF1/2，CDC ACM | 85 通知、04 OUT、83 IN | 物理 8N1 串口，可显式切换为兼容 RTT 转发 |
+| IF3，HID | 06 OUT、86 IN | 主线探针控制与状态 |
+| IF4，WinUSB，FF/53/01 | 01 OUT、84 IN | 高速 SRAM、RTT、变量、SPI、UART/SWO 和并发流 |
+
+历史 RTT 上行可走 CDC。历史变量波形走专用 EP87，载荷是 HSS 帧。现在 RTT 和变量使用 IF4 的独立通道和队列，普通串口软件可以继续使用 CDC。协议头包含长度、序号和状态；消费指针在对应 IN 完成后推进。内存读写可设队列深度 1–4。物理 SWO 由本 CLI 配置和接收，第三方软件通过标准 CMSIS-DAP 查询的 SWO 能力以其实际能力位为准。[描述符与协议](../selectio-native.md)
+
+## 识别、临时加载及调试
+
+按本分支验收记录中的 manifest 选择相配的 bit、Zynq ELF、PS 初始化 Tcl。加载命令在写入探针易失配置前检查占用，在加载后核对 OCM。目标 MCU ELF 与探针 ELF 分开传入。
+
+```powershell
+python -X utf8 toolbox.py probe-load --bit "$pair/probe.bit" --zynq-elf "$pair/application.elf" --ps-init "$pair/ps7_init.tcl" --out build/my-load
+python -X utf8 toolbox.py selectio --serial 12345678 info
+python -X utf8 toolbox.py selectio usb-test --seconds 60
+python -X utf8 toolbox.py selectio --help
+```
+
+下例的时隙值用于通过验证的特定版次。更换 bit 后按对应 manifest 选择 slot。tap 是输入 IDELAY 档位，slot 单位为 2.5 ns 的 DDR 时隙，idle 是事务间的空闲周期。F103 上电后的应用可能关闭完整 JTAG，使用 JTAG 前须确认目标的 AFIO 配置。示例先在 1 MHz 识别，再切到 100 MHz。退出 GDB 可用 `detach`。
+
+```powershell
+$transport = 'swd'
+$tap = 8
+$slot = 24
+$idle = 2
+# JTAG 对应参数
+# $transport = 'jtag'; $tap = 16; $slot = 28; $idle = 33
+python -X utf8 toolbox.py selectio profile --transport $transport --tap $tap --slot $slot --idle $idle
+openocd -f interface/cmsis-dap.cfg -c "adapter serial 12345678" -c "transport select $transport" -f target/stm32f1x.cfg -c "adapter speed 1000" -c "init" -c "adapter speed 100000"
+arm-none-eabi-gdb prebuilt/golden/f103ze-cdc48.elf -ex "target extended-remote localhost:3333"
+```
+
+运行独占的原生会话前退出占用接口的调试服务器。以下用 PowerShell 数组传递吞吐参数。读写地址和长度按 4 B 对齐，原生优化窗口为 F103 的 64 KiB SRAM。写示例把刚读出的文件写回，执行前确认区域由调用方独占。主机深度和 1 KiB TAR 分割由 CLI 管理。
+
+```powershell
+$link = @('--transport', $transport, '--tap', $tap, '--slot', $slot, '--idle', $idle)
+python -X utf8 toolbox.py selectio read @link --address 0x20008020 --bytes 4032 --out page.bin --queue-depth 4
+python -X utf8 toolbox.py selectio write @link --address 0x20008020 --file page.bin --queue-depth 4
+```
+
+## RTT 和 J-Scope
+
+以下地址仅作 CDC48 示例；其他固件从目标 ELF 符号表取得 RTT 控制块或变量地址。RTT 下行需要目标定义 DOWN 通道。独立采样使用硬件 HSS 采样器，支持 1–8 个变量。周期单位为 24 MHz tick，`24000` 表示 1 ms。`--var` 的格式为地址、字节宽度、类型码，用冒号分隔。类型码 0–7 依次对应 u8、i8、u16、i16、u32、i32、f32、f64。
+
+```powershell
+python -X utf8 toolbox.py selectio rtt --transport $transport --clock 100000000 --address 0x2000b000 --size 256 --channel 0 --seconds 10 --out log.rtt
+python -X utf8 toolbox.py selectio rtt-send @link --address 0x2000b000 --channel 0 --text "help`n"
+python -X utf8 toolbox.py selectio rtt-terminal @link --address 0x2000b000 --channel 0 --up-channel 0
+python -X utf8 toolbox.py selectio scope --transport $transport --clock 100000000 --var 0x2000c000:4:4 --var 0x2000c004:4:4 --period 24000 --seconds 10 --out scope.hss
+python -X utf8 toolbox.py selectio scope-export --in scope.hss --csv scope.csv
+python -X utf8 toolbox.py selectio combo @link --rtt-address 0x2000b000 --channel 0 --var 0x2000c000 --var 0x2000c004 --ticks 24000 --seconds 60 --rtt-out combined.rtt --scope-out combined.csv
+```
+
+`combo` 在一个 AP 会话内同时取得 RTT UP 字节及 1–8 个对齐的 u32 变量，分别输出原始字节与带时间戳的 CSV。终端支持双向输入输出。独立采样的二进制记录可通过 `scope-export` 检查定义、帧序号、样本数、跳拍数和结束状态。100 MHz 是 SWCLK/TCK 线速；采样率取决于变量数量、地址布局和目标响应。
+
+## 物理串口、SWO 和 SPI
+
+`com bind` 将 CDC 分配给物理 UART，打开 Windows 串口并置 DTR 后开始工作。配置为 8N1，波特率由 CDC SET_LINE_CODING 提交。串口号可以用 `python -m serial.tools.list_ports -v` 按 USB 序列号查找。单独运行 `uart` 可以用文件或十六进制载荷发送并保存收到的原始字节。
+
+```powershell
+python -X utf8 toolbox.py selectio com bind
+python -X utf8 toolbox.py selectio com status
+python -m serial.tools.miniterm COM43 115200
+python -X utf8 toolbox.py selectio com release
+python -X utf8 toolbox.py selectio uart --rate 115200 --hex 550d0a --seconds 2 --out uart.bin
+python -X utf8 toolbox.py selectio swo --encoding uart --rate 48000000 --configure-f103 --itm-mask 1 --seconds 2 --out itm-uart.bin
+python -X utf8 toolbox.py selectio swo --encoding manchester --rate 24000000 --configure-f103 --seconds 2 --out itm-manchester.bin
+python -X utf8 toolbox.py selectio swo --encoding manchester --rate 100000000 --seconds 2 --out external-manchester.bin
+python -X utf8 toolbox.py selectio spi --mode 0 --slot 22 --tap 0 --hex 9f000000 --out spi-rx.bin
+```
+
+关闭串口终端后执行 release。F103 配置选项会保存并恢复 TPIU、ITM 和相关 GPIO 配置，要求该目标的实际 HCLK 和 TPIU 分频可产生请求码率。目标需要主动写 ITM 激励端口才会产生有效包。已配置的外部源可直接被动接收。Manchester 的 rate 表示信息位率，100 Mbit/s 对应 200 Msymbol/s。SPI 固定 100 MHz、MSB first、模式 0–3，由一次命令在同一次 CS 低电平下交换 1–4,079 B，文件发送可用 `--file`。
+
+## ETM
+
+```powershell
+python -X utf8 toolbox.py trace doctor --offline
+python -X utf8 toolbox.py trace capture --elf prebuilt/golden/f103ze-cdc48.elf --bit "$pair/probe.bit" --zynq-elf "$pair/application.elf" --swd-khz 10000 --seconds 1 --out build/my-etm --json-out build/my-etm.json
+python -X utf8 toolbox.py trace query --record build/my-etm --view summary
+```
+
+F103 保持 CDC48 时 TRACECLK 为 24 MHz。按采集 JSON 核对实际 SWD 配置频率、窗口长度、frameDrops、parserErrors、USB 完成状态、解码 gap 与目标恢复。进一步的导出及符号查询见 [Trace CLI](../Trace-CLI使用说明.md)。
+
+## 构建与复测
+
+```powershell
+$env:ZYNQLINK_FPGA_OUT = "$PWD/build/selectio"
+python -X utf8 tools/run_vivado.py -mode batch -nojournal -source fpga/build_dma.tcl -tclargs --selectio
+python -X utf8 tools/build_xusbps_daplink.py --selectio --j7-adapter --compact-code --max-swclk-hz 10000000 --timing build/selectio/verified_clock.json --out build/selectio-ps
+python -X utf8 tools/selectio_cm3.py
+python -X utf8 tools/selectio_cm3.py --services --sample-ticks 64 --out build/cm3-jtag-services
+python -X utf8 tools/selectio_cm3.py --services --swd-only --sample-ticks 32 --out build/cm3-swd-services
+python -X utf8 toolbox.py project run board.accept -- --board f103ze
+```
+
+PS 构建参数中的 10 MHz 约束兼容初始化速率。100 MHz 模式使用独立的 SelectIO 参考时钟。对有写入的实板压力测试，`selectio_f103_fixture.py` 会核对目标映像、保存 4 KiB SRAM、两侧哨兵及初始运行状态，并在独立进程中读回恢复结果。下列示例仅用于该 F103 实验夹具。
+
+```powershell
+python -X utf8 tools/selectio_f103_fixture.py --out build/my-guard --execute -- python -X utf8 tools/selectio_pipeline_bench.py @link --bytes 4032 --depth 4 --seconds 60 --rounds 3 --out build/my-pipeline --execute
+```
+
+各配对的时序、真实目标读写、序列校验和恢复数据分别归档在[板测报告](../validation/selectio-integration/README.md)。与商用探针对照时，分别比较目标 RAM 写入 MB/s、目标运行时 RTT MB/s、变量采样组/s 和物理 SWO 信息位率。公开参照值包括 J-Trace PRO 的 4.0 MB/s RAM 下载、SEGGER 所列约 3.5 MB/s RTT 背景传输，以及 ULINKpro 的 100 Mbit/s Manchester。测试目标与传输方式会影响结果。[SEGGER J-Trace](https://www.segger.com/products/debug-probes/j-trace/) · [SEGGER RTT](https://kb.segger.com/General_information_about_RTT) · [Arm ULINKpro](https://support.arm.com/tools-and-software/ulinkpro)

@@ -16,3 +16,11 @@ foreach run [get_runs -filter {IS_IMPLEMENTATION}] {
     set_property STEPS.INIT_DESIGN.TCL.PRE $hook $run
     set_property STEPS.OPT_DESIGN.TCL.PRE [file join [file dirname [info script]] probe_io_timing.tcl] $run
 }
+
+if {[info exists ::env(ZYNQLINK_SELECTIO)] && $::env(ZYNQLINK_SELECTIO)==1} {
+    set run [get_runs impl_1]
+    set_property STEPS.PLACE_DESIGN.ARGS.DIRECTIVE Explore $run
+    set_property STEPS.PHYS_OPT_DESIGN.IS_ENABLED true $run
+    set_property STEPS.PHYS_OPT_DESIGN.ARGS.DIRECTIVE AggressiveExplore $run
+    set_property STEPS.ROUTE_DESIGN.ARGS.DIRECTIVE Explore $run
+}

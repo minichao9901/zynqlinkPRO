@@ -883,6 +883,7 @@ static void control(const uint8_t *req, uint8_t *res) {
         return;
     }
 #if DAP_SELECTIO
+    if(cmd==0x31 && act==1 && !(native_route&1U) && selectio_cdc_receiving()) {res[3]=(uint8_t)-7;return;}
     if(selectio_mem_active() && act!=2 && act!=11) {res[3]=(uint8_t)-7;return;}
 #endif
     switch (act) {
@@ -1108,6 +1109,7 @@ void probe_poll(XUsbPs *usb) {
 /* A route change is a quiescent boundary. The legacy queues stay readable
  * through STOP. Native IN completion releases each slot exactly once. */
 int probe_stream_active(void) {return mode || stopping || bench_active;}
+int probe_uses_legacy_cdc(void) {return !(native_route&1U) && (mode==1 || cdc.busy || cdc.out!=cdc.in || cdc_needs_zlp);}
 int probe_native_route(unsigned channel, unsigned enabled) {
     tx_queue *q=channel==2 ? &cdc : &hss;
     unsigned bit=channel==2 ? 1U : 2U;

@@ -13,7 +13,7 @@ SWD / JTAG · RTT · 实时变量波形 · 固件烧录 · 源码调试 · ETM �
 
 [**在线工作台**](https://minichao9901.github.io/zynqlinkPRO/) · [**工程下载**](https://minichao9901.github.io/zynqlinkPRO/#download) · [**Windows 完整包**](https://github.com/minichao9901/zynqlinkPRO/releases/latest/download/zynq-etm-bridge-win64.zip) · [发布记录](https://github.com/minichao9901/zynqlinkPRO/releases)
 
-[功能总览](#功能总览) · [快速开始](#快速开始) · [ETM 执行轨迹](#etm-执行轨迹) · [实测性能](#实测性能) · [硬件与接线](#硬件与接线) · [开发与文档](#开发与文档)
+[**J7 SelectIO 固件与完整 CLI 手册**](docs/selectio/README.md) · [功能总览](#功能总览) · [快速开始](#快速开始) · [ETM 执行轨迹](#etm-执行轨迹) · [实测性能](#实测性能) · [硬件与接线](#硬件与接线) · [开发与文档](#开发与文档)
 
 </div>
 

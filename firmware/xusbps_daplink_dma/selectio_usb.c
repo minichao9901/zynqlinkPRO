@@ -18,8 +18,11 @@
  */
 #define FRAME_SIZE 4096U
 #define HEADER_SIZE 16U
+static u8 arrival[FRAME_SIZE] __attribute__((aligned(32)));
 static u8 input[FRAME_SIZE] __attribute__((aligned(32)));
-static u8 output[FRAME_SIZE] __attribute__((aligned(4096)));
+static u8 reply_bank[2][FRAME_SIZE] __attribute__((aligned(4096)));
+static u8 *output,*in_flight;
+static volatile unsigned tx_channel,tx_packets;
 static volatile unsigned epoch, configured, rx_hint, tx_busy;
 static volatile unsigned received_length, deferred, reply_channel, reply_packets;
 static volatile unsigned aux_commit,aux_reset;
@@ -37,7 +40,7 @@ void selectio_usb_reset(void) {
     selectio_combo_reset();
     epoch++;
     aux_reset=1;aux_commit=0;selectio_cdc_reset();
-    rx_hint=tx_busy=pending_length=session_open=deferred=reply_packets=0;
+    rx_hint=tx_busy=pending_length=session_open=deferred=reply_packets=tx_packets=0;
 }
 void selectio_usb_configured(XUsbPs *usb) {
     selectio_usb_reset();
@@ -73,22 +76,23 @@ void selectio_usb_event(void *ref,u8 ep,u8 event,void *data) {
         if (XUsbPs_EpBufferReceive(usb,ep,&buffer,&length,&handle)!=XST_SUCCESS) return;
         if (length>FRAME_SIZE) length=0;
         Xil_DCacheInvalidateRange((UINTPTR)buffer,(length+31U)&~31U);
-        memcpy(input,buffer,length);
+        memcpy(arrival,buffer,length);
         received_length=length;
         __sync_synchronize();
         rx_hint=1;
         XUsbPs_EpBufferRelease(handle);
     }
-    if (ep==4 && event==XUSBPS_EP_EVENT_DATA_TX && tx_busy && data==output) {
-        if(reply_packets && reply_channel>=6) selectio_combo_commit(reply_channel,reply_packets);
-        else if(reply_packets && reply_channel>=4) aux_commit=reply_packets;
-        else if (reply_packets) probe_native_commit(reply_channel,reply_packets);
-        reply_packets=0;
+    if (ep==4 && event==XUSBPS_EP_EVENT_DATA_TX && tx_busy && data==in_flight) {
+        if(tx_packets && tx_channel>=6) selectio_combo_commit(tx_channel,tx_packets);
+        else if(tx_packets && tx_channel>=4) aux_commit=tx_packets;
+        else if (tx_packets) probe_native_commit(tx_channel,tx_packets);
+        tx_packets=0;
         tx_busy=0;
     }
 }
 
 static unsigned execute_frame(unsigned length, unsigned active_epoch) {
+    if(!configured || epoch!=active_epoch) return 0;
     unsigned size=0, sequence=0, reply_size=0;
     unsigned channel=0, op=0, status=1;
     if (length>=HEADER_SIZE) {
@@ -97,9 +101,8 @@ static unsigned execute_frame(unsigned length, unsigned active_epoch) {
     if (length<HEADER_SIZE || memcmp(input,"ZLK1",4) || input[6] || input[7] ||
         size>FRAME_SIZE-HEADER_SIZE-1 || length!=HEADER_SIZE+size+((HEADER_SIZE+size)%512U==0U))
         goto reply;
-    XTime_GetTime(&last_activity);
     if (channel==0 && op==0 && !size) {
-        if (selectio_mem_active()) {dap_wait_begin(); if(selectio_mem_close()) goto reply;}
+        if (selectio_mem_active()) {status=2;goto reply;}
         if(selectio_combo_active()) selectio_combo_reset();
         session_open=1;
         next_sequence=sequence+1U;
@@ -112,7 +115,7 @@ static unsigned execute_frame(unsigned length, unsigned active_epoch) {
     } else if (!session_open || sequence!=next_sequence) {
         status=2;
     } else {
-        next_sequence++;
+        next_sequence++;XTime_GetTime(&last_activity);
         if (channel==0 && op==1) {
             memcpy(output+HEADER_SIZE,input+HEADER_SIZE,size);
             reply_size=size;
@@ -136,7 +139,7 @@ static unsigned execute_frame(unsigned length, unsigned active_epoch) {
             dap_wait_begin();
             if(!selectio_mem_close()) status=0;
         } else if(channel==1 && op==4 && !size) {
-            uint64_t values[7];
+            uint64_t values[9];
             selectio_mem_stats(values);memcpy(output+16,values,sizeof values);
             reply_size=sizeof values;status=0;
         } else if(channel==1 && (op==3 || op==6) && size>=8) {
@@ -207,29 +210,34 @@ void selectio_usb_poll(XUsbPs *usb) {
         else return;
     }
     if(configured) selectio_combo_poll();
-    if (!configured || tx_busy || (!rx_hint && !pending_length)) return;
-    flags=mfcpsr();
-    mtcpsr(flags|0x80U);
+    if (!configured || (!rx_hint && !pending_length)) return;
+    flags=mfcpsr();mtcpsr(flags|0x80U);
     active_epoch=epoch;
-    if (pending_length) {
+    if(pending_length && !tx_busy) {
+        in_flight=output;tx_channel=reply_channel;tx_packets=reply_packets;
         tx_busy=1;
-        if (XUsbPs_EpBufferSend(usb,4,output,pending_length)==XST_SUCCESS) pending_length=0;
+        if (XUsbPs_EpBufferSend(usb,4,in_flight,pending_length)==XST_SUCCESS) pending_length=0;
         else tx_busy=0;
-        mtcpsr(flags);
-        return;
     }
-    length=received_length;
+    if(pending_length || !rx_hint) {mtcpsr(flags);return;}
+    /* A data block or echo may execute while a previous IN payload is
+     * being transmitted. Queue peeks and control remain stop-and-wait, so
+     * an uncommitted ring slot cannot be included in two replies. */
+    int pipelined=received_length>=HEADER_SIZE &&
+                  ((arrival[4]==1 && (arrival[5]==3 || arrival[5]==6)) ||
+                   (arrival[4]==0 && arrival[5]==1));
+    if((tx_busy || aux_commit) && !pipelined) {mtcpsr(flags);return;}
+    length=received_length;memcpy(input,arrival,length);
+    output=in_flight==reply_bank[0] ? reply_bank[1] : reply_bank[0];
+    reply_packets=0;rx_hint=0;
+    if(deferred) {deferred=0;selectio_usb_resume_rx(usb);}
     mtcpsr(flags);
     unsigned response=execute_frame(length,active_epoch);
     flags=mfcpsr();mtcpsr(flags|0x80U);
     if (configured && epoch==active_epoch) {
         Xil_DCacheFlushRange((UINTPTR)output,(response+31U)&~31U);
         pending_length=response;
-        rx_hint=0;
-        if (deferred) {
-            deferred=0;
-            selectio_usb_resume_rx(usb);
-        }
+
     }
     mtcpsr(flags);
 }

@@ -49,3 +49,18 @@ python -X utf8 toolbox.py selectio combo --transport swd --tap 8 --slot 20 --idl
 JTAG 与 SWD 各有四个 1 KiB 的 TX/RX bank。CDMA 在 0x45000000 的 BRAM 端口突发搬运新载荷，GP1 负责描述符与完成状态。原语 CM3 仿真故意让原命令 BRAM 的写值与 DMA 载荷相反，验证两条链路实际使用 DMA 输入及写回最后一字。SWD 描述符以 RDBUFF 和 CTRL/STAT 结束；结果区排除最后的状态字。
 
 同 F103ZE HCLK48、4,032 B 跨页载荷、100 MHz 线频及每轮 60 秒的 3 轮交替校验通过。主机方向吞吐 SWD 读 4.08、写约 4.03 MB/s，JTAG 读约 3.80、写约 3.72 MB/s。计时包含按帧的主机请求和应答，按方向逐项统计，未把读和写速率相加。目标 SRAM 和寄存器经独立正式配对恢复。[SWD](dma-swd.json) · [JTAG](dma-jtag.json) · [恢复](dma-restore.json) · [配对](../../../prebuilt/selectio-j7-payload-dma/manifest.json)
+
+### F103ZE 运行态并发、串口和 USB 流水
+
+J7 序列号 12345678，F103 HCLK48，JTAG/SWD 线速按 PS 参考时钟读回均为 99,999,999 Hz。运行态夹具用 SRAM 代码持续产生递增 u32，PC 检查每一个数，同时在 1 kHz 读取运行计数与固定哨兵。
+
+| 实际运行目标，60 s | 连续 RTT 字节 | RTT MB/s | 双变量组 | 跳拍 |
+|---|---:|---:|---:|---:|
+| SWD，tap8/slot20/idle2 | 245,607,080 | 4.093 | 59,995 | 0 |
+| JTAG，tap16/slot28/idle33 | 122,741,396 | 2.046 | 59,994 | 0 |
+
+JTAG 遇到一次 WAIT，探针将事务间隔调至 67 个 TCK，主机校验 30,685,349 个连续 u32。重复读取从原 TAR 重新开始，写 RTT RdOff 时先核对是否已提交。测试后恢复完整寄存器及 4 KiB SRAM，外层夹具复核 RCC 和运行状态。[JTAG](running-jtag-long.json) · [SWD](running-swd-long.json) · [JTAG 恢复](running-jtag-restored.json) · [SWD 恢复](running-swd-restored.json)
+
+物理 CDC 115200 8N1 向目标 PA15 发送 256 B。F103 在 PB3 发回每字节异或 0xA5 的结果，逐字节匹配，目标错误数为零。真实 ITM 源分别以 UART 3/48 Mbaud、Manchester 1.5/24 Mbit/s 产生各 500,000 个值，主机每档收到 2,500,000 B，全部等于预期端口包，硬件溢出与帧错均为零。该 SWD 配置路径维持 FCLK0 约 133.333 MHz；10 MHz 上限请求对应 SWCLK 9.524 MHz，同时完成一秒 ETM 窗口。[CDC](cdc-target-echo.json) · [真实 ITM](itm-half-million.json) · [ETM](steady-etm.json)
+
+独立 DMA 配对在 IF4 上使用深度四的主机请求、双回复缓冲，10 秒各方向得到 SWD 读 6.342、写 6.269 MB/s；JTAG 读 4.478、写 4.362 MB/s。读返回与预期数据逐字节比对，独立低速通路读回最后写入和哨兵；计时包含主机生成载荷。各阶段的参考数值以各自的 bit/ELF、测试窗口为准。[SWD](pipeline-swd.json) · [JTAG](pipeline-jtag.json) · [独立 RTT/HSS](scope-rtt-services.json)

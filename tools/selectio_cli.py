@@ -51,6 +51,62 @@ def transfer(out_ep, in_ep, transport, address, length, data, tap, slot, idle, n
     return reply[6:]
 
 
+def rtt_terminal(args):
+    import queue
+    import sys
+    import threading
+    from selectio_rtt import Ring
+    if args.action=="rtt-send":
+        initial=args.file.read_bytes() if args.file else args.text.encode("utf8")
+    else: initial=b""
+    inbox=queue.Queue(maxsize=8)
+    def read_input():
+        try:
+            if sys.stdin.isatty() and sys.platform=="win32":
+                import msvcrt
+                while True:
+                    char=msvcrt.getwch()
+                    if char=="\x03":break
+                    if char in ("\x00","\xe0"):msvcrt.getwch();continue
+                    inbox.put(char.encode("utf8"))
+            else:
+                while data:=sys.stdin.buffer.read1(256):inbox.put(data)
+        finally:inbox.put(None)
+    total=received=0
+    with connection(args.serial) as (tx,rx),native_connection(args.serial,tx.device) as native:
+        native.info();setup(tx,rx,1000,args.transport)
+        try:
+            with native.memory(PORTS[args.transport],args.tap,args.slot,args.idle):
+                down=Ring(native,args.address,args.channel,True)
+                if args.action=="rtt-terminal":
+                    up=Ring(native,args.address,args.up_channel,False)
+                    threading.Thread(target=read_input,daemon=True).start()
+                pending=initial
+                last_progress=time.monotonic();start=last_progress
+                while True:
+                    n=0
+                    if args.action=="rtt-terminal":
+                        received+=up.receive(sys.stdout.buffer)
+                        if args.seconds and time.monotonic()-start>=args.seconds:break
+                        if not pending:
+                            try:item=inbox.get_nowait()
+                            except queue.Empty:item=b""
+                            if item is None:break
+                            pending=item
+                            if item:last_progress=time.monotonic()
+                    elif not pending:break
+                    if pending:
+                        n=down.send(pending)
+                        if n:total+=n;pending=pending[n:];last_progress=time.monotonic()
+                        elif time.monotonic()-last_progress>=args.timeout:
+                            raise RuntimeError(f"RTT DOWN is full; {total} bytes were published")
+                    if not pending or not n:time.sleep(.001)
+        finally:cmd(tx,rx,[3])
+    print(json.dumps(dict(published_bytes=total,received_bytes=received)),
+          file=sys.stderr if args.action=="rtt-terminal" else sys.stdout)
+    return 0
+
+
 def auxiliary(args):
     channel=4 if args.action=="spi" else 5
     tx_data=b""
@@ -91,8 +147,10 @@ def auxiliary(args):
             else:
                 chunk=min(4079,max(1,args.rate//100))
                 for i in range(0,len(tx_data),chunk):
-                    native.exchange(channel,2,tx_data[i:i+chunk])
-                    pull()
+                    native.exchange(channel,9,tx_data[i:i+chunk])
+                    while True:
+                        pull()
+                        if not struct.unpack("<5I",native.exchange(channel,4))[3]&2:break
                 while time.perf_counter()-t0<args.seconds: pull()
             native.exchange(channel,3)
             while pull(): pass
@@ -146,6 +204,7 @@ def capture_combo(args):
                     state=struct.unpack("<8I",native.exchange(6,4))
                     detail=struct.unpack("<8I",native.exchange(6,6)) if state[1] else ()
                     native.exchange(6,5)
+                    info["memory"]=native.memory_stats()
                     if state[1] or not (state[3]==state[4]==received and state[5]==state[6]==samples):
                         raise RuntimeError(f"probe/host tail mismatch: {state}, {received} RTT bytes, {samples} groups, diagnostic={detail}")
                     info.update(rtt_bytes=received,sample_groups=samples,skipped_groups=state[7],
@@ -226,6 +285,9 @@ def main():
     sub.add_argument("--tap",type=int,choices=range(32),required=True)
     sub.add_argument("--slot",type=int,choices=range(64),required=True)
     sub.add_argument("--idle",type=int,choices=range(256),required=True)
+    sub=commands.add_parser("scope-export",help="validate native HSS frames and export a time-stamped CSV")
+    sub.add_argument("--in",dest="record",required=True,type=Path)
+    sub.add_argument("--csv",type=Path,help="new CSV file; omit for a summary")
     for action in ("spi","uart","swo"):
         sub=commands.add_parser(action,help="native full-duplex SPI, physical UART or CoreSight SWO receiver")
         sub.add_argument("--out",type=Path,required=True,help="new binary receive file")
@@ -257,6 +319,21 @@ def main():
     sub.add_argument("--seconds",type=float,required=True)
     sub.add_argument("--rtt-out",type=Path,required=True)
     sub.add_argument("--scope-out",type=Path,required=True)
+    for action in ("rtt-send","rtt-terminal"):
+        sub=commands.add_parser(action,help="write to an RTT DOWN ring or open a bidirectional terminal")
+        sub.add_argument("--transport",choices=PORTS,required=True)
+        sub.add_argument("--tap",type=int,choices=range(32),required=True,metavar="0..31")
+        sub.add_argument("--slot",type=int,choices=range(64),required=True,metavar="0..63")
+        sub.add_argument("--idle",type=int,required=True)
+        sub.add_argument("--address",type=number,required=True,help="RTT control-block address")
+        sub.add_argument("--channel",type=int,default=0,help="DOWN channel")
+        sub.add_argument("--timeout",type=float,default=2,help="maximum wait for DOWN ring space")
+        if action=="rtt-send":
+            group=sub.add_mutually_exclusive_group(required=True)
+            group.add_argument("--file",type=Path);group.add_argument("--text")
+        else:
+            sub.add_argument("--up-channel",type=int,default=0)
+            sub.add_argument("--seconds",type=float,help="terminal window, or use Ctrl-C")
     for action in ("rtt","scope"):
         sub=commands.add_parser(action,help="capture RTT bytes or HSS frames through native WinUSB")
         sub.add_argument("--transport",choices=PORTS,required=True)
@@ -274,6 +351,7 @@ def main():
         sub = commands.add_parser(action, help=f"{action} one block of aligned F103 SRAM")
         sub.add_argument("--transport", required=True, choices=PORTS)
         sub.add_argument("--address", type=number, default=PAGE)
+        sub.add_argument("--queue-depth",type=int,choices=range(1,5),default=4)
         sub.add_argument("--tap", type=int, required=True, choices=range(32), metavar="0..31")
         sub.add_argument("--slot", type=int, required=True)
         sub.add_argument("--idle", type=int, required=True)
@@ -284,6 +362,9 @@ def main():
             sub.add_argument("--file", type=Path, required=True)
     args = parser.parse_args()
     try:
+        if args.action=="scope-export":
+            from selectio_scope import export_scope
+            print(json.dumps(export_scope(args.record,args.csv),indent=2));return 0
         if args.action in ("com","profile"):
             with native_connection(args.serial) as native:
                 native.info()
@@ -298,6 +379,7 @@ def main():
             return 0
         if args.action in ("spi","uart","swo"): return auxiliary(args)
 
+        if args.action in ("rtt-send","rtt-terminal"):return rtt_terminal(args)
         if args.action=="combo": return capture_combo(args)
         if args.action in ("rtt","scope"): return capture(args)
         if args.action in ("info","usb-test"):
@@ -343,12 +425,14 @@ def main():
                 result=bytearray()
                 offset=0
                 with native.memory(PORTS[args.transport],args.tap,args.slot,args.idle):
+                    requests=[]
                     while offset<size:
                         address=args.address+offset
                         n=min(size-offset,4032)
                         chunk=None if payload is None else payload[offset:offset+n]
-                        result.extend(native.bulk(address,n,chunk))
+                        requests.append((address,n,chunk))
                         offset+=n
+                    for block in native.bulk_many(requests,args.queue_depth): result.extend(block)
                 elapsed=time.perf_counter()-started
             finally:
                 cmd(tx, rx, [3])

@@ -510,6 +510,15 @@ static uint32_t DAP_SWJ_Clock(const uint8_t *request, uint8_t *response) {
     if (target_fclk > DAP_MAX_SWCLK_HZ * 2U) target_fclk = DAP_MAX_SWCLK_HZ * 2U;
   }
   int fclk_hz;
+#if DAP_SELECTIO
+  /* The auxiliary RX FIFO and USB bridge share the GP0 clock. A slow
+   * SWD connection must not starve a simultaneous passive trace drain. */
+  if (DAP_Data.debug_port == DAP_PORT_SWD && (swd_read32(SWD_FEATURES) & 0x80U) &&
+      ps_fixed_half_period(133333333U, clock)) {
+    fclk_hz = etm_ddr_owned() ? -1 : ps_fixed133_select();
+    if (fclk_hz > 0) divisor = ps_fixed_half_period((uint32_t)fclk_hz, clock);
+  } else
+#endif
 #if DAP_MAX_SWCLK_HZ >= 66666666U
   /* The IO-PLL integer tree tops out at 64.286MHz TCK below this request.
    * The separately timing-qualified 133.333MHz profile uses ARM PLL /10.

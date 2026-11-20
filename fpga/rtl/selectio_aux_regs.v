@@ -44,18 +44,30 @@ module selectio_aux_regs(
 
     wire [7:0] uart_byte,manchester_byte,spi_byte;
     wire uart_valid,manchester_valid,spi_valid,uart_error,manchester_error;
-    selectio_uart_rx uart_rx(quad_clk,phy_reset,flags_io[1:0]==1,pad_samples,period_q8,
+    reg fast_rate;
+    reg [31:0] rx_period;
+    reg [15:0] rx_min_short,rx_short_limit,rx_long_limit;
+    reg rx_phase;
+    always @(posedge quad_clk) begin
+        if(!flags_io[1:0]) begin
+            fast_rate<=period_q8>=1023 && period_q8<=1025;
+            rx_period<=period_q8;
+            rx_min_short<=min_short;rx_short_limit<=short_limit;rx_long_limit<=long_limit;
+            rx_phase<=spi_config[2];
+        end
+    end
+    selectio_uart_rx uart_rx(quad_clk,phy_reset,flags_io[1:0]==1,pad_samples,rx_period,
                              uart_valid,uart_byte,uart_error);
-    wire fast_rate=period_q8>=1023 && period_q8<=1025;
+
     wire regular_valid,regular_error,fast_valid,fast_error;
     wire [7:0] regular_byte,fast_byte;
     assign manchester_valid=regular_valid || fast_valid;
     assign manchester_error=regular_error || fast_error;
     assign manchester_byte=fast_rate ? fast_byte : regular_byte;
     selectio_manchester_fast fast_decoder(quad_clk,phy_reset,flags_io[1:0]==2 && fast_rate,
-        spi_config[2],pad_samples,fast_valid,fast_byte,fast_error);
+        rx_phase,pad_samples,fast_valid,fast_byte,fast_error);
     selectio_manchester_rx manchester_rx(quad_clk,phy_reset,flags_io[1:0]==2 && !fast_rate,pad_samples,
-                       min_short,short_limit,long_limit,regular_valid,regular_byte,regular_error);
+                       rx_min_short,rx_short_limit,rx_long_limit,regular_valid,regular_byte,regular_error);
     reg launch;
     reg [12:0] tx_length;
     wire launch_io,tx_busy,tx_done,done_spi,done_uart;
@@ -114,9 +126,12 @@ module selectio_aux_regs(
     // SPI results take the ring only in SPI mode with the optional serial
     // monitor disabled. A serial monitor can observe MISO during a test.
     wire spi_capture=flags_io[2] && flags_io[1:0]==0;
-    wire produced=spi_capture ? spi_valid : uart_valid || manchester_valid;
-    wire [7:0] produced_byte=spi_capture ? spi_byte :
-                              flags_io[1:0]==1 ? uart_byte : manchester_byte;
+    reg produced;
+    reg [7:0] produced_byte;
+    always @(posedge quad_clk) begin
+        produced<=!phy_reset && (spi_capture ? spi_valid : uart_valid || manchester_valid);
+        produced_byte<=spi_capture ? spi_byte : flags_io[1:0]==1 ? uart_byte : manchester_byte;
+    end
     wire accepted=produced && !full;
     wire [16:0] next_writer=writer+1'b1;
     always @(posedge quad_clk) begin

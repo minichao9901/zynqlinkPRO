@@ -7,7 +7,7 @@
 #define SREG 0x80010000U
 #define JREG 0x80000000U
 #define LIVE (SREG+0x24U)
-static uint32_t profile=(33U<<18)|(2U<<14)|(28U<<7)|(20U<<1);
+static uint32_t profile=(33U<<18)|(2U<<14)|(28U<<7)|(24U<<1);
 static uint8_t jtap=16, stap=8;
 
 uint32_t selectio_live_hz(void) {return ps_fclk_decode(0xf8000180U)/2U;}

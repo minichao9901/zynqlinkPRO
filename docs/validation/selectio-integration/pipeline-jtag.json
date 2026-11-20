@@ -1,0 +1,92 @@
+{
+  "transport": "jtag",
+  "bytes": 4032,
+  "address": "0x20008020",
+  "depth": 4,
+  "windows": [
+    {
+      "round": 1,
+      "direction": "read",
+      "requests": 11120,
+      "payload_bytes": 44835840,
+      "wall_seconds": 10.012329200002569,
+      "USB_seconds": 10.002974499966513,
+      "wall_MBps": 4.478062906679946,
+      "USB_MBps": 4.482250754528075,
+      "probe": {
+        "timer_hz": 333333343,
+        "read_bytes": 44839872,
+        "write_bytes": 4032,
+        "queue_s": [
+          8.902240874835014,
+          0.0008007719767776127
+        ],
+        "probe_s": [
+          9.243990748924269,
+          0.0008339699758148707
+        ]
+      }
+    },
+    {
+      "round": 1,
+      "direction": "write",
+      "requests": 10832,
+      "payload_bytes": 43674624,
+      "wall_seconds": 10.0133722999999,
+      "USB_seconds": 9.833554499997263,
+      "wall_MBps": 4.361629897652006,
+      "USB_MBps": 4.4413872928667,
+      "probe": {
+        "timer_hz": 333333343,
+        "read_bytes": 4032,
+        "write_bytes": 43678656,
+        "queue_s": [
+          0.0008004839767859647,
+          8.674110489450795
+        ],
+        "probe_s": [
+          0.0008320139758715947,
+          9.034661200994826
+        ]
+      }
+    },
+    {
+      "round": 1,
+      "direction": "mixed",
+      "requests": 10720,
+      "payload_bytes": 43223040,
+      "wall_seconds": 10.009838499998295,
+      "USB_seconds": 9.913183800035767,
+      "wall_MBps": 4.318055680919064,
+      "USB_MBps": 4.360157228179714,
+      "probe": {
+        "timer_hz": 333333343,
+        "read_bytes": 21615552,
+        "write_bytes": 21615552,
+        "queue_s": [
+          4.291184236555657,
+          4.291198912555232
+        ],
+        "probe_s": [
+          4.456777730753446,
+          4.468065410426103
+        ]
+      }
+    }
+  ],
+  "info": {
+    "protocol": "ZLK1",
+    "reference_hz": 199999998,
+    "link_hz": 99999999.0,
+    "features": "0x445004ff",
+    "integrated_pl": true,
+    "max_frame": 4096
+  },
+  "guards": [
+    381236969,
+    1429512524
+  ],
+  "backup_sha256": "16f66c0e119a9d07d6357c44bf3c0a4597a5e0e478d128e42cfd7d01d9c9e524",
+  "passed": true,
+  "restored": true
+}

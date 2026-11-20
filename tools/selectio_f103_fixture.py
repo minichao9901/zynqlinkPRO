@@ -127,7 +127,11 @@ def main():
     finally:
         try:save(directory/"state.json",state)
         finally:
-            if halted:restore(directory,state)
+            if halted:
+                # WinUSB may retain the old device instance in this process
+                # across a JTAG reload. Reopen using a fresh libusb context.
+                subprocess.run([sys.executable,"-X","utf8",str(Path(__file__).resolve()),
+                                "--restore","--execute","--serial",args.serial,"--out",str(directory)],check=True)
 
 
 if __name__=="__main__":

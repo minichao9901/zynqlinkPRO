@@ -93,7 +93,7 @@ static int bypass_preamble(void) {
     return run_raw(i);
 }
 static int configure(unsigned ch,const uint8_t *p,unsigned size) {
-    if((size!=9 && size!=10) || active_channel || selectio_mem_active() ||
+    if((size!=9 && size!=10) || active_channel ||
         (swd_read32(SWD_FEATURES)&0x200U)==0 || RD(0)!=0x41555831U) return -1;
     unsigned codec=p[0],drive=p[1],mode=p[2],sample=p[3],rate=word(p+4),tap=p[8];
     unsigned test=size==10?p[9]:0;
@@ -103,6 +103,7 @@ static int configure(unsigned ch,const uint8_t *p,unsigned size) {
        (ch==5 && !codec) || (ch==5 && drive && codec!=1)) return -1;
     unsigned sideband=!!(swd_read32(SWD_FEATURES)&0x800U);
     unsigned claim=ch==4 || (drive && !sideband);
+    if (selectio_mem_port() && (claim || selectio_mem_port()==DAP_PORT_JTAG)) return -1;
     uint32_t route=swd_read32(JTAG_ROUTE);
     if((claim && (probe_stream_active() || probe_target_claimed() || etm_ddr_owned())) ||
        (!claim && (route&3U)==3U) || selectio_live_active() && claim) return -1;
@@ -150,13 +151,20 @@ static unsigned peek(uint8_t *out,unsigned capacity) {
     if(n>65536) return 0;
     if(n>capacity) n=capacity;
     unsigned k=0;
-    while(k<n) {
-        unsigned offset=(ptr+k)&65535U;
-        uint32_t v=RD(0x10000U+(offset&~3U));
-        unsigned begin=offset&3U,bytes=4U-begin;
-        if(bytes>n-k) bytes=n-k;
-        memcpy(out+k,((uint8_t *)&v)+begin,bytes);
-        k+=bytes;
+    if((ptr&3U) && n) {
+        uint32_t first=RD(0x10000U+(ptr&65532U));
+        unsigned skip=ptr&3U;
+        k=4U-skip;
+        if(k>n) k=n;
+        memcpy(out,((uint8_t *)&first)+skip,k);
+    }
+    for(;k+4U<=n;k+=4U) {
+        uint32_t v=RD(0x10000U+((ptr+k)&65532U));
+        memcpy(out+k,&v,4);
+    }
+    if(k<n) {
+        uint32_t last=RD(0x10000U+((ptr+k)&65532U));
+        memcpy(out+k,&last,n-k);
     }
     return n;
 }
@@ -167,7 +175,7 @@ void selectio_aux_consume(unsigned bytes) {
     (void)aux_wait(8,0,20);
 }
 static int transmit_start(const uint8_t *data,unsigned size) {
-    if(!size || size>4079 || !exclusive || read_only_stop || aux_wait(2,0,20)) return -1;
+    if(!size || size>4079 || !(flags&12U) || read_only_stop || aux_wait(3,1,20)) return -1;
     for(unsigned i=0;i<size;i+=4) {
         uint32_t v=0;unsigned take=size-i<4?size-i:4;
         memcpy(&v,data+i,take);WR(0x1000U+i,v);
@@ -205,9 +213,19 @@ int selectio_aux_frame(unsigned ch,unsigned op,const uint8_t *in,unsigned size,
     if(op==0) return configure(ch,in,size);
     if(!active_channel || active_channel!=ch) return -1;
     if(op==1 && !size) {*consume=*length=peek(out,capacity);return 0;}
+    if(op==8 && raw_test && !read_only_stop && size && size%3U==0 && size<=512U*3U) {
+        unsigned words=size/3U;
+        for(unsigned i=0;i<words;i++) {
+            uint32_t bits=in[3*i]|((uint32_t)in[3*i+1]<<8)|((uint32_t)in[3*i+2]<<16);
+            if(i+1==words) bits|=1U<<24;
+            swd_write32(0x80001000U+4U*i,bits);
+        }
+        return run_raw(words);
+    }
     if(op==7 && raw_test && !size && capacity>=bypass_count) {
         memcpy(out,bypass_samples,bypass_count);*length=bypass_count;return 0;
     }
+    if(op==9 && ch==5) return transmit_start(in,size);
     if(op==2) return transmit(in,size);
     if(op==3 && !size) {
         if(aux_wait(2,0,400)) return -1;
@@ -232,7 +250,7 @@ void selectio_cdc_status(uint32_t values[8]) {
     }
 }
 int selectio_cdc_bind(unsigned enable) {
-    if(enable>1 || (enable && (active_channel || !(swd_read32(SWD_FEATURES)&0x200U)))) return -1;
+    if(enable>1 || (enable && (active_channel || probe_uses_legacy_cdc() || !(swd_read32(SWD_FEATURES)&0x200U)))) return -1;
     cdc_bound=enable;
     return 0;
 }

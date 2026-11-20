@@ -14,7 +14,13 @@ module jtag200_wave (
     reg [2:0] state = IDLE;
     (* ASYNC_REG = "TRUE" *) reg [1:0] run_sync = 0;
     reg [2:0] drain = 0;
-    wire [23:0] idle_word = {{8{park[1]}},{8{park[0]}},8'd0};  // TDI/TMS high, TCK low
+    // AXI writes the idle levels only while the raw player is parked.
+    (* ASYNC_REG = "TRUE" *) reg [1:0] park_meta=3, park_sync=3;
+    always @(posedge clk) begin
+        park_meta <= park;
+        park_sync <= park_meta;
+    end
+    wire [23:0] idle_word = {{8{park_sync[1]}},{8{park_sync[0]}},8'd0};  // TDI/TMS high, TCK low
 
     assign lane_word = state == PLAY ? tx_word[23:0] : idle_word;
     assign rx_write = state == PLAY;

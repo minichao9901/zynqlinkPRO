@@ -41,10 +41,13 @@ module probe_rtt_engine # (parameter TIMEOUT=262143, RETRIES=64) (
     assign active = (state!=IDLE && state!=DMA) || (enable && !fault);
     assign core_next_valid = state==RESULT && !core_parity_err && core_ack==1 &&
                              (phase==PRIME || phase==DRW);
-    assign core_next_req = (phase==PRIME && words==1) || (phase==DRW && index+1==words-1) ? 8'h0e : 8'h0f;
+    // Decide the posted read fence during the preceding AP transaction.
+    // This keeps the SRAM index comparator off the JTAG request path.
+    reg next_is_last;
+    assign core_next_req = next_is_last ? 8'h0e : 8'h0f;
     always @(posedge clk or negedge rst_n) begin
         if(!rst_n) begin
-            state<=IDLE;phase<=SELECT;ready<=0;fault<=0;length<=0;
+            state<=IDLE;phase<=SELECT;ready<=0;fault<=0;length<=0;next_is_last<=0;
             drained<=0;polls<=0;errors<=0;initialized<=0;was_enabled<=0;
             rd<=0;new_rd<=0;address<=0;watchdog<=0;available_count<=0;remaining<=0;offset<=0;
             words<=0;index<=0;desc_base<=0;retry<=RETRIES;payload<=0;committing<=0;stage<=0;
@@ -93,8 +96,9 @@ module probe_rtt_engine # (parameter TIMEOUT=262143, RETRIES=64) (
                     case(phase)
                     SELECT: begin phase<=CSW;state<=ISSUE;end
                     CSW: begin initialized<=1;phase<=committing ? WR_TAR : TAR;state<=ISSUE;end
-                    TAR: begin phase<=PRIME;state<=ISSUE;end
+                    TAR: begin phase<=PRIME;state<=ISSUE;next_is_last<=words==1;end
                     PRIME: begin
+                        next_is_last<=words==2;
                         phase<=words==1 ? LAST : DRW;
                         state<=core_next_ready ? RESULT : ISSUE;
                     end
@@ -106,7 +110,8 @@ module probe_rtt_engine # (parameter TIMEOUT=262143, RETRIES=64) (
                         index<=index+1'b1;
                         if(phase==LAST) state<=SEGMENT;
                         else begin
-                            if(index+1==words-1) phase<=LAST;
+                            if(next_is_last) phase<=LAST;
+                            next_is_last<=index+3==words;
                             state<=core_next_ready ? RESULT : ISSUE;
                         end
                     end

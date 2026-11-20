@@ -61,7 +61,7 @@ module dap_transfer_block_engine #(
     reg last_transfer;
     wire [10:0] index_next={1'b0,index}+11'd1;
     wire [10:0] index_after_next={1'b0,index}+11'd2;
-    wire [12:0] write_packet_bytes={1'b0,cmd_data[17:8],2'b00}+13'd4;
+    wire [12:0] write_packet_bytes={1'b0,hdr[17:8],2'b00}+13'd4;
     reg [7:0] request;
     reg is_read, is_ap;
     reg seen_core_busy;
@@ -149,26 +149,29 @@ module dap_transfer_block_engine #(
                 end
                 ST_HDR_WAIT: begin
                     // BRAM read latency is one cycle.
+                    state <= ST_FETCH_HDR;
+                end
+                ST_FETCH_HDR: begin
+                    hdr <= cmd_data;
                     state <= ST_DECODE;
                 end
                 ST_DECODE: begin
-                    hdr <= cmd_data;
-                    // cmd_data is the first four packet bytes in little endian.
-                    if (cmd_data[7:0] != 8'h06 || packet_len < 4 ||
-                        cmd_data[23:8] == 0 || cmd_data[23:18] != 0 ||
-                        (cmd_data[31:24] & 8'hF0) != 0 || !cmd_data[24] ||
-                        (!cmd_data[25] && packet_len < {3'd0,write_packet_bytes})) begin
+                    // hdr is the first four packet bytes in little endian.
+                    if (hdr[7:0] != 8'h06 || packet_len < 4 ||
+                        hdr[23:8] == 0 || hdr[23:18] != 0 ||
+                        (hdr[31:24] & 8'hF0) != 0 || !hdr[24] ||
+                        (!hdr[25] && packet_len < {3'd0,write_packet_bytes})) begin
                         error <= 1; status_code <= 8'h07; state <= ST_WRITE_HEADER;
                     end else begin
-                        count <= cmd_data[17:8];
-                        last_transfer<=cmd_data[17:8]==1;
-                        request <= cmd_data[31:24];
-                        is_read <= cmd_data[25];
-                        is_ap <= cmd_data[24];
+                        count <= hdr[17:8];
+                        last_transfer<=hdr[17:8]==1;
+                        request <= hdr[31:24];
+                        is_read <= hdr[25];
+                        is_ap <= hdr[24];
                         index <= 0;
                         result_index <= 0;
                         // AP reads have one posted dummy and a final RDBUFF.
-                        need_final_read <= cmd_data[25] && cmd_data[24];
+                        need_final_read <= hdr[25] && hdr[24];
                         final_phase <= 0;
                         status_code <= 8'h01;
                         state <= ST_WRITE_HEADER;

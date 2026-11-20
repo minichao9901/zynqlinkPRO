@@ -12,7 +12,9 @@
  * are in private storage. USB IOC advances the independent host tails. */
 #define RTT_CAPACITY 16384U
 #define GROUP_CAPACITY 1024U
-#define MAX_RTT_CHUNK 256U
+#define MAX_RTT_CHUNK 1024U
+static uint32_t rtt_payload[MAX_RTT_CHUNK/4U+1U] __attribute__((aligned(32)));
+static unsigned burst_limit;
 static uint8_t rtt_bytes[RTT_CAPACITY] __attribute__((aligned(32)));
 static uint32_t groups[GROUP_CAPACITY][9] __attribute__((aligned(32)));
 static uint32_t addresses[8],nvars,ring,size,rd,descriptor,period_ticks;
@@ -31,9 +33,9 @@ static int read_words(uint32_t addr,unsigned words,void *data) {
     return rc;
 }
 static int write_offset(uint32_t v) {
-    unsigned count;uint32_t details;
-    int rc=selectio_mem_bulk(1,descriptor+16U,1,(const uint8_t *)&v,0,&count,&details);
-    if(rc) {diagnostic[0]=2;diagnostic[1]=descriptor+16U;diagnostic[2]=1;diagnostic[3]=count;diagnostic[4]=details;diagnostic[5]=v;}
+    uint32_t detail=0;
+    int rc=selectio_commit_rtt_offset(descriptor+16U,rd,v,&detail);
+    if(rc) {diagnostic[0]=2;diagnostic[1]=descriptor+16U;diagnostic[2]=1;diagnostic[4]=detail;diagnostic[5]=v;}
     return rc;
 }
 int selectio_combo_active(void){return opened!=0;}
@@ -62,6 +64,11 @@ static int start(const uint8_t *p,unsigned bytes) {
     ring=up[1];size=up[2];rd=up[4];
     if(size<2 || !sram(ring,size) || rd>=size || up[3]>=size) goto failed;
     nvars=n;period_ticks=ticks;
+    /* Keep transfers short for high-rate sampling, use a full MEM-AP
+     * page when the period has room for a longer contiguous read. */
+    burst_limit=ticks/16U;
+    if(burst_limit<16U) burst_limit=16U;
+    if(burst_limit>MAX_RTT_CHUNK) burst_limit=MAX_RTT_CHUNK;
     period=((uint64_t)ticks*COUNTS_PER_SECOND+12000000U)/24000000U;
     rhead=rtail=ghead=gtail=skip_count=0;fail_stage=0;
     XTime_GetTime(&origin);deadline=origin;last_rtt=origin;
@@ -89,20 +96,19 @@ static int drain_rtt(void) {
     if(wr==rd) return 0;
     available=wr>rd?wr-rd:size-rd;
     if(available>space) available=space;
-    if(available>MAX_RTT_CHUNK) available=MAX_RTT_CHUNK;
-    uint32_t at=ring+rd,first=at&~3U,values[65];
+    if(available>burst_limit) available=burst_limit;
+    uint32_t at=ring+rd,first=at&~3U;
     unsigned prefix=at-first,words=(available+prefix+3U)/4U;
-    if(read_words(first,words,values)) return -1;
+    if(read_words(first,words,rtt_payload)) return -1;
     unsigned index=rhead%RTT_CAPACITY;
     unsigned part=RTT_CAPACITY-index;
     if(part>available) part=available;
-    memcpy(rtt_bytes+index,(uint8_t *)values+prefix,part);
-    memcpy(rtt_bytes,(uint8_t *)values+prefix+part,available-part);
-    uint32_t next=rd+available,confirmed;
+    memcpy(rtt_bytes+index,(uint8_t *)rtt_payload+prefix,part);
+    memcpy(rtt_bytes,(uint8_t *)rtt_payload+prefix+part,available-part);
+    uint32_t next=rd+available;
     if(next==size) next=0;
     __sync_synchronize();
-    if(write_offset(next) || read_words(descriptor+16U,1,&confirmed)) return -1;
-    if(confirmed!=next) {diagnostic[0]=4;diagnostic[5]=next;diagnostic[6]=confirmed;return -1;}
+    if(write_offset(next)) return -1;
     rd=next;__sync_synchronize();rhead+=available;return 0;
 }
 void selectio_combo_poll(void) {

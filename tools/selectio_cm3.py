@@ -10,7 +10,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, default=ROOT / "build/selectio-cm3")
     parser.add_argument("--jtag-slot", type=int, default=21)
-    parser.add_argument("--swd-slot", type=int, default=12)
+    parser.add_argument("--swd-slot", type=int, default=16)
     parser.add_argument("--swd-only", action="store_true")
     parser.add_argument("--services", action="store_true", help="verify the autonomous RTT and sample engines through the live transport")
     parser.add_argument("--sample-ticks",type=int,default=32)

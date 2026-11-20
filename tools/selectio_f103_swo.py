@@ -43,6 +43,7 @@ def f103_swo(serial,encoding,rate,stimulus_mask):
             if mem.word(0xe0000e00)!=stimulus_mask:raise RuntimeError("ITM TER readback differs")
         class Stimulus:
             device=dev
+            memory=mem
             def start(self):
                 enable()
             def send_word(self,port,value):

@@ -61,6 +61,15 @@ if {($isolation & 15) == 15 && ($reset & 15) == 0} {
     foreach {name addr} {CAPTURE 0x40030008 SWD 0x40010004} {
         puts [format "LOAD_STATE %s %08x" $name [physrd -force -value $addr]]
     }
+    set debug_features [physrd -force -value 0x4001004c]
+    if {($debug_features & 0xffff0080)==0x44500080} {
+        puts [format "LOAD_STATE JQUEUE %08x" [physrd -force -value 0x80000004]]
+        puts [format "LOAD_STATE SQUEUE %08x" [physrd -force -value 0x80010004]]
+        if {$debug_features & 0x200} {
+            puts [format "LOAD_STATE AUX %08x" [physrd -force -value 0x80020004]]
+            puts [format "LOAD_STATE AUXFLAGS %08x" [physrd -force -value 0x80020008]]
+        }
+    }
     if {[physrd -force -value 0x4001004c] & 4} {
         puts [format "LOAD_STATE PACKET %08x" [physrd -force -value 0x42020004]]
     }
@@ -78,6 +87,10 @@ if {($isolation & 15) == 15 && ($reset & 15) == 0} {
             raise RuntimeError('未读取到已启用 PL 的引擎状态')
         busy = (values['CAPTURE'] & 1 or values['SWD'] & 1 or values.get('PACKET', 0) & 15
                 or values.get('DDR', 0) & 33 or not values.get('CDMA', 2) & 2)
+        if "JQUEUE" in values:
+            busy = busy or values["JQUEUE"]&8 or not values["JQUEUE"]&16 or values["SQUEUE"]&2 or not values["SQUEUE"]&16
+        if "AUX" in values:
+            busy = busy or values["AUX"]&2 or values["AUXFLAGS"]!=0
         if busy:
             raise RuntimeError('探针的采集、调试或 DMA 引擎仍在运行')
     return {key: hex(value) for key, value in values.items()}
@@ -94,9 +107,13 @@ def check_streams():
         status = {}
         for name, service in [('rtt', 0x31), ('hss', 0x32)]:
             rc, words = probe.action(service, 2)
-            if rc or words[0] & 1:
+            # A validated status packet carries the previous operation's
+            # result. Its active bit and physical PL state establish idleness.
+            signature = (1<<16) if name=="rtt" else (1<<2)
+            if not words[0]&signature or words[0] & 1:
                 raise RuntimeError(f'{name.upper()} 正在运行或无法确认状态，状态码 {rc}')
             status[name] = words[0]
+            if rc: status[name+"_last_result"]=rc
         return status
     finally:
         probe.close()
