@@ -7,7 +7,7 @@ import struct
 import time
 
 from dap_pipeline_bench import cmd, setup
-from selectio_cli import PAGE, capabilities, connection, transfer
+from selectio_cli import PAGE, PORTS, connection, transfer
 from test_probe_board import Memory
 from selectio_native import native_connection
 
@@ -16,6 +16,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--serial", default="12345678")
     parser.add_argument("--transport", required=True, choices=("swd","jtag"))
+    parser.add_argument("--bytes",type=int,default=1024)
+    parser.add_argument("--offset",type=int,default=0)
     parser.add_argument("--tap", type=int, required=True)
     parser.add_argument("--slot", type=int, required=True)
     parser.add_argument("--idle", type=int, required=True)
@@ -29,6 +31,10 @@ def main():
     if not args.execute:
         print("Read/alternate 1 KiB at 0x20008000, then restore from an independent 1 MHz readback.")
         return
+    size=args.bytes
+    address=PAGE+args.offset
+    if size<=0 or size>4032 or size%4 or args.offset<0 or args.offset%4 or args.offset+size>4096:
+        parser.error("block and guards must fit the backed-up four KiB fixture")
     args.out.mkdir(parents=True, exist_ok=False)
     report = dict(transport=args.transport, tap=args.tap, slot=args.slot, idle=args.idle, windows=[])
     def save():
@@ -41,36 +47,39 @@ def main():
         before = None
         dirty = False
         def block(data=None):
-            return transfer(tx,rx,args.transport,PAGE,1024,data,args.tap,args.slot,args.idle,native)
+            return native.bulk(address,size,data)
         try:
             if mem.word(0xe0042000)!=0x10036414 or not mem.word(0xe000edf0)&(1<<17):
                 raise RuntimeError("requires halted F103ZE fixture")
-            before=mem.read(PAGE,1024)
-            if mem.read(PAGE,1024)!=before:
+            before=mem.read(address,size)
+            if mem.read(address,size)!=before:
                 raise RuntimeError("unstable low-speed backup")
-            guards=[mem.word(PAGE-4),mem.word(PAGE+1024)]
+            guards=[mem.word(address-4),mem.word(address+size)]
             (args.out/"page.bin").write_bytes(before)
             report.update(guards=guards,backup_sha256=hashlib.sha256(before).hexdigest())
             save()
-            if block()!=before:
-                raise RuntimeError("100 MHz read did not match independent backup")
+            with native.memory(PORTS[args.transport],args.tap,args.slot,args.idle):
+                if block()!=before:
+                    raise RuntimeError("100 MHz read did not match independent backup")
             seq=0
             for _ in range(args.rounds):
                 started=time.perf_counter()
                 reads=writes=n=0
-                while time.perf_counter()-started<args.seconds:
-                    seq+=1
-                    payload=hashlib.shake_256(struct.pack("<Q",seq)).digest(1024)
-                    dirty=True
-                    t0=time.perf_counter();block(payload);t1=time.perf_counter()
-                    actual=block();t2=time.perf_counter()
-                    if actual!=payload:
-                        raise RuntimeError(f"payload mismatch at sequence {seq}")
-                    reads+=t2-t1;writes+=t1-t0;n+=1024
-                if mem.read(PAGE,1024)!=payload or [mem.word(PAGE-4),mem.word(PAGE+1024)]!=guards:
+                with native.memory(PORTS[args.transport],args.tap,args.slot,args.idle):
+                    while time.perf_counter()-started<args.seconds:
+                        seq+=1
+                        payload=hashlib.shake_256(struct.pack("<Q",seq)).digest(size)
+                        dirty=True
+                        t0=time.perf_counter();block(payload);t1=time.perf_counter()
+                        actual=block();t2=time.perf_counter()
+                        if actual!=payload:
+                            raise RuntimeError(f"payload mismatch at sequence {seq}")
+                        reads+=t2-t1;writes+=t1-t0;n+=size
+                stats=native.memory_stats()
+                if mem.read(address,size)!=payload or [mem.word(address-4),mem.word(address+size)]!=guards:
                     raise RuntimeError("independent pattern or guard mismatch")
                 report["windows"].append(dict(seconds=time.perf_counter()-started,bytes_each=n,
-                     read_MBps=n/reads/1e6,write_MBps=n/writes/1e6))
+                     read_MBps=n/reads/1e6,write_MBps=n/writes/1e6,probe=stats))
                 save()
             report["passed"]=True
         except Exception as error:
@@ -80,8 +89,8 @@ def main():
             try:
                 if dirty:
                     setup(tx,rx,1000,args.transport)
-                    mem.write(PAGE,before)
-                    report["restored"]=mem.read(PAGE,1024)==before and [mem.word(PAGE-4),mem.word(PAGE+1024)]==guards
+                    mem.write(address,before)
+                    report["restored"]=mem.read(address,size)==before and [mem.word(address-4),mem.word(address+size)]==guards
                     if not report["restored"]:
                         raise RuntimeError("page recovery failed")
             finally:

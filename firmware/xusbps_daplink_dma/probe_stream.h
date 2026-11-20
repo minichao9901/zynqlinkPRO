@@ -32,6 +32,7 @@ int probe_target_read(uint32_t addr, uint8_t *out, uint32_t size);
 int probe_target_write_word(uint32_t addr, uint32_t value);
 uint32_t probe_target_fclk(void);
 #if DAP_SELECTIO
+int probe_stream_active(void);
 int probe_native_route(unsigned channel,unsigned enabled);
 int probe_native_control(unsigned channel,const uint8_t *request,uint8_t *response);
 unsigned probe_native_peek(unsigned channel,uint8_t *data,unsigned capacity,unsigned *packets);

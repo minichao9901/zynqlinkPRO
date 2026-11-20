@@ -40,6 +40,29 @@ class NativeStream:
             raise RuntimeError(f"native channel {ch} operation {op} status {status}, detail {reply[16:24].hex()}")
         return reply[16:total]
 
+    @contextmanager
+    def memory(self,port,tap,slot,idle):
+        self.exchange(1,1,bytes((port,tap,slot,idle)))
+        try:
+            yield
+        finally:
+            self.exchange(1,2)
+
+    def bulk(self,address,size,data=None):
+        if size<=0 or size%4 or size>4032 or (data is not None and len(data)!=size):
+            raise ValueError("native block requires 4..4032 aligned bytes")
+        payload=struct.pack("<BBHI",int(data is not None),0,size//4,address)
+        reply=self.exchange(1,3,payload+(data if data is not None else b""))
+        expected=8+(size if data is None else 0)
+        if len(reply)!=expected or struct.unpack_from("<I",reply)[0]!=size//4:
+            raise RuntimeError("incomplete MEM-AP transfer")
+        return reply[8:]
+
+    def memory_stats(self):
+        hz,rb,wb,rq,wq,rt,wt=struct.unpack("<7Q",self.exchange(1,4))
+        return dict(timer_hz=hz,read_bytes=rb,write_bytes=wb,queue_s=[rq/hz,wq/hz],
+                    probe_s=[rt/hz,wt/hz])
+
     def control(self,channel,action,data=b""):
         command={2:0x31,3:0x32}[channel]
         if len(data)>56:

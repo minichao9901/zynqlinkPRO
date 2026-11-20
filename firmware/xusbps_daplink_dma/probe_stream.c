@@ -2,6 +2,7 @@
 // Probe-side RTT bridge and HSS transport. USB IRQs only move bounded messages;
 // target access, ownership changes and packet construction run in main.
 #include "probe_stream.h"
+#include "selectio_block.h"
 #include "xil_cache.h"
 #include "xil_exception.h"
 #include "xil_io.h"
@@ -418,6 +419,9 @@ static int sampler_arm(void) {
     return 0;
 }
 int probe_before_dap(void) {
+#if DAP_SELECTIO
+    if(selectio_mem_active()) return -7;
+#endif
     int failed=0;
     if(bench_active){bench_active=0;bench_error=-7;}
     if(pl_packets && mode==1 && rtt_pl_running) {
@@ -716,6 +720,9 @@ end:
         result = 0;
 }
 int probe_prepare_link_change(void) {
+#if DAP_SELECTIO
+    if(selectio_mem_active()) return -7;
+#endif
     // A line reset/TAP initialization invalidates cached AP state. Do not
     // restart an autonomous stream between the commands of a new handshake.
     // STOP may need the host receiver to drain; failure rejects the original
@@ -872,6 +879,9 @@ static void control(const uint8_t *req, uint8_t *res) {
         res[3] = (uint8_t)-9;
         return;
     }
+#if DAP_SELECTIO
+    if(selectio_mem_active() && act!=2 && act!=11) {res[3]=(uint8_t)-7;return;}
+#endif
     switch (act) {
     case 0:
         rc = stop();
@@ -1094,6 +1104,7 @@ void probe_poll(XUsbPs *usb) {
 #if DAP_SELECTIO
 /* A route change is a quiescent boundary. The legacy queues stay readable
  * through STOP. Native IN completion releases each slot exactly once. */
+int probe_stream_active(void) {return mode || stopping || bench_active;}
 int probe_native_route(unsigned channel, unsigned enabled) {
     tx_queue *q=channel==2 ? &cdc : &hss;
     unsigned bit=channel==2 ? 1U : 2U;

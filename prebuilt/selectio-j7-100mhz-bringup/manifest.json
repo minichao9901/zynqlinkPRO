@@ -1,0 +1,39 @@
+{
+  "status": "local JTAG/RAM bring-up, F103ZE HCLK48",
+  "pl_source": "fe06e433 with the pad-level netlist edit in first-iofix.tcl.txt; RTL equivalent 9d54d33e",
+  "ps_source": "1ec0c475 with the SWD return handoff recorded alongside this manifest",
+  "compiler": [
+    "-mcpu=cortex-a9",
+    "-mfpu=vfpv3",
+    "-mfloat-abi=hard",
+    "-mthumb",
+    "-ffunction-sections",
+    "-fdata-sections",
+    "-DDAP_SELECTIO=1",
+    "-DDAP_J7_ADAPTER=1",
+    "-DDAP_ALLOW_ZERO_IDLE=0",
+    "-DDAP_VALIDATION_FAULTS=0",
+    "-DDAP_ENABLE_TRACE=0",
+    "-DDAP_MMIO_DIAGNOSTICS=0",
+    "-DDAP_FIXED_FCLK0_TEST=0",
+    "-DDAP_MAX_SWCLK_HZ=10000000",
+    "-O3"
+  ],
+  "bsp_sha256": "b31bd5a75096dfdba14dca67c78629983985ba55a9984c0afa6062d1030859e5",
+  "ps_code_verified_bytes": 91508,
+  "timing": {
+    "FCLK_max_Hz": 133333333,
+    "SWCLK_max_Hz": 66666666,
+    "setup_slack_ns": 0.101,
+    "hold_slack_ns": 0.027,
+    "requested_FCLK_Hz": 133333333,
+    "RTL_DEBUG": 0,
+    "optional_observation_cells": 0,
+    "formal_product_acceptance": false
+  },
+  "files": {
+    "application.elf": "91dcb2fb7bf07a6257ab8a33151a4f1e289f439135f6e27ca11b6e0e01075674",
+    "probe.bit": "26282edfd71171008e51072ea9c94c1933cd610a1b22d53bed1ae1f11dffb236",
+    "ps7_init.tcl": "aa9747c31f705be7c28af1c6b1cdeaf282f0dcdb01faecee2a9f72e4d3489132"
+  }
+}

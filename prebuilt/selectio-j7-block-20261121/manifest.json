@@ -1,0 +1,50 @@
+{
+  "status": "F103ZE JTAG/RAM native bulk transfers",
+  "pl_source": "9d54d33e",
+  "ps_source": "same Git checkpoint as this manifest",
+  "fclk_constraint_hz": 133333333,
+  "timing": {
+    "FCLK_max_Hz": 133333333,
+    "SWCLK_max_Hz": 66666666,
+    "setup_slack_ns": 0.022,
+    "hold_slack_ns": 0.05,
+    "requested_FCLK_Hz": 133333333,
+    "RTL_DEBUG": 0,
+    "optional_observation_cells": 0,
+    "formal_product_acceptance": false
+  },
+  "hardware": {
+    "target": "F103ZE CDC48",
+    "target_hclk_hz": 48000000,
+    "debug_reference_hz": 199999998,
+    "wire_hz_from_dividers": 99999999,
+    "external_frequency_measurement": false,
+    "stress_seconds": 60,
+    "repeats": 3,
+    "host_payload_bytes": 4032,
+    "transfer_address": "0x20008020"
+  },
+  "files": {
+    "application.elf": "8fd98af632ab98df839cbc1d391821cfcca15aa2fe2d83ccdbd47c5268a2c819",
+    "probe.bit": "bc53d090b288b7933532cd1e26eb55c79125f8f05d8c7270608f9edf89543e4c",
+    "ps7_init.tcl": "aa9747c31f705be7c28af1c6b1cdeaf282f0dcdb01faecee2a9f72e4d3489132"
+  },
+  "bsp_sha256": "b31bd5a75096dfdba14dca67c78629983985ba55a9984c0afa6062d1030859e5",
+  "firmware_build_flags": [
+    "-mcpu=cortex-a9",
+    "-mfpu=vfpv3",
+    "-mfloat-abi=hard",
+    "-mthumb",
+    "-ffunction-sections",
+    "-fdata-sections",
+    "-DDAP_SELECTIO=1",
+    "-DDAP_J7_ADAPTER=1",
+    "-DDAP_ALLOW_ZERO_IDLE=0",
+    "-DDAP_VALIDATION_FAULTS=0",
+    "-DDAP_ENABLE_TRACE=0",
+    "-DDAP_MMIO_DIAGNOSTICS=0",
+    "-DDAP_FIXED_FCLK0_TEST=0",
+    "-DDAP_MAX_SWCLK_HZ=10000000",
+    "-O3"
+  ]
+}
