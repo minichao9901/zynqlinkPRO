@@ -82,6 +82,15 @@ int dap_validate_one(const uint8_t *p, uint32_t length, uint32_t capacity,
         if(length<2)return 0;
         in=2+p[1];out=2;break;
     case 0x16: in=2;out=6;break;
+#if DAP_SELECTIO
+    case 0x8e:
+        if(length<12)return 0;
+        n=p[2]|((uint32_t)p[3]<<8);
+        if(n==0 || n>256)return 0;
+        in=12;out=6;
+        if(p[1]&128U)in+=4*n;else out+=4*n;
+        break;
+#endif
     default:
         /* Nested Execute/Queue, disabled SWO/UART and unknown commands are
          * rejected. Extensions must supply bounds before being enabled. */

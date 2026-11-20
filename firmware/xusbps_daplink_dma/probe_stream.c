@@ -75,6 +75,12 @@ static volatile uint8_t configured, reset_pending;
 static uint32_t current_epoch;
 static uint8_t stopping;
 static uint8_t hss_fault_handled;
+#if DAP_SELECTIO
+static uint8_t native_route; /* bit 0: RTT UP, bit 1: scope sample packets */
+#define RTT_CONSUMER_READY() ((native_route&1U) || usbd_cdc_acm_get_dtr())
+#else
+#define RTT_CONSUMER_READY() usbd_cdc_acm_get_dtr()
+#endif
 static uint8_t mode; // 0 stopped, 1 RTT, 2 HSS
 static int8_t result;
 static uint32_t requested_hz = 50000000, actual_hz;
@@ -203,6 +209,9 @@ void probe_usb_event(void *ref, u8 ep, u8 event, void *data) {
 }
 void probe_usb_reset(void) {
     configured = 0;
+#if DAP_SELECTIO
+    native_route=0;
+#endif
     epoch++;
     reset_pending = 1;
 }
@@ -431,7 +440,7 @@ void probe_after_dap(void) {
     if(pl_packets && mode==1 && rtt_pl_running && !stopping && probe_session_live()) {
         int rc=probe_target_claim(requested_hz);
         if(rc && rc!=-7) { mode=0;result=-4; }
-        else if(!rc && (discard || usbd_cdc_acm_get_dtr())) { PW(0,2);rtt_paused=0; }
+        else if(!rc && (discard || RTT_CONSUMER_READY())) { PW(0,2);rtt_paused=0; }
     }
     if (mode == 2 && !stopping && probe_session_live()) {
         int rc=sampler_arm();
@@ -588,7 +597,7 @@ static void rtt_poll(void) {
     uint32_t size, wr, rd, n, a, i;
     int rc = 0;
     if(pl_packets && rtt_pl_running) {
-        if(!stopping && !discard && !usbd_cdc_acm_get_dtr()) {
+        if(!stopping && !discard && !RTT_CONSUMER_READY()) {
             if(!rtt_paused) { PW(0,0);rtt_paused=1; }
             if(dma_pending) packet_poll();
             return;
@@ -608,7 +617,7 @@ static void rtt_poll(void) {
     }
     if (backoff && (int32_t)(now() - backoff) < 0)
         return;
-    if (!discard && (!usbd_cdc_acm_get_dtr() || !space(&cdc)))
+    if (!discard && (!RTT_CONSUMER_READY() || !space(&cdc)))
         return;
     // Keep the SWD context claimed between polls.  probe_before_dap() still
     // releases it when a real DAP command arrives, so ownership remains
@@ -1038,8 +1047,13 @@ void probe_poll(XUsbPs *usb) {
         }
     }
     kick(usb, &hid);
+#if DAP_SELECTIO
+    if (!(native_route&2U)) kick(usb, &hss);
+    if (!(native_route&1U)) kick(usb, &cdc);
+#else
     kick(usb, &hss);
     kick(usb, &cdc);
+#endif
     if (rx_in != rx_out && space(&hid)) {
         uint8_t req[64];
         uint32_t f = irq_save();
@@ -1061,6 +1075,53 @@ void probe_poll(XUsbPs *usb) {
     }
     if(stopping && mode==1) stop();
     kick(usb, &hid);
+#if DAP_SELECTIO
+    if (!(native_route&2U)) kick(usb, &hss);
+    if (!(native_route&1U)) kick(usb, &cdc);
+#else
     kick(usb, &hss);
     kick(usb, &cdc);
+#endif
 }
+
+#if DAP_SELECTIO
+/* A route change is a quiescent boundary. The legacy queues stay readable
+ * through STOP. Native IN completion releases each slot exactly once. */
+int probe_native_route(unsigned channel, unsigned enabled) {
+    tx_queue *q=channel==2 ? &cdc : &hss;
+    unsigned bit=channel==2 ? 1U : 2U;
+    if ((channel!=2 && channel!=3) || enabled>1) return -1;
+    if (!!(native_route&bit)==enabled) return 0;
+    if (mode || stopping || q->busy || q->out!=q->in || (channel==2 && cdc_needs_zlp)) return -1;
+    if (enabled) native_route|=bit; else native_route&=(uint8_t)~bit;
+    return 0;
+}
+int probe_native_control(unsigned channel,const uint8_t *req,uint8_t *res) {
+    if ((channel!=2 && channel!=3) || req[0]!=1 || req[1]<2 || req[1]>58 ||
+        req[2]!=(channel==2 ? 0x31 : 0x32)) return -1;
+    control(req,res);
+    return 0;
+}
+unsigned probe_native_peek(unsigned channel,uint8_t *out,unsigned capacity,unsigned *packets) {
+    tx_queue *q=channel==2 ? &cdc : &hss;
+    unsigned length=0;
+    *packets=0;
+    if (!(native_route&(channel==2 ? 1U : 2U))) return 0;
+    while (*packets<q->in-q->out) {
+        unsigned index=(q->out+*packets)%QSIZE;
+        unsigned bytes=q->len[index];
+        if(bytes>capacity-length) break;
+        memcpy(out+length,q->data+index*q->stride,bytes);
+        length+=bytes;
+        (*packets)++;
+    }
+    return length;
+}
+void probe_native_commit(unsigned channel,unsigned packets) {
+    tx_queue *q=channel==2 ? &cdc : &hss;
+    if ((native_route&(channel==2 ? 1U : 2U)) && packets<=q->in-q->out) {
+        q->out+=packets;
+        q->completed+=packets;
+    }
+}
+#endif

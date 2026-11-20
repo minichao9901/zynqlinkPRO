@@ -38,6 +38,7 @@
 
 #include <string.h>
 #include "probe_stream.h"
+#include "selectio_usb.h"
 #include "etm_stream.h"
 
 #include "xparameters.h"	/* XPAR parameters */
@@ -296,7 +297,7 @@ u32 XUsbPs_Ch9SetupDevDescReply(u8 *BufPtr, u32 BufLen)
 		USB_ENDPOINT0_MAXP,		/* bMaxPacketSize0: 64 */
 		be2les(DAPLINK_VID),		/* idVendor: 0x0D28 (ARM) */
 		be2les(DAPLINK_PID),		/* idProduct: 0x0204 (CMSIS-DAP) */
-		be2les(0x0102),			/* bcdDevice: 1.02, refresh cached Windows descriptors */
+		be2les(DAP_SELECTIO ? 0x0201 : 0x0102),			/* bcdDevice: 1.02, refresh cached Windows descriptors */
 		0x01,				/* iManufacturer */
 		0x02,				/* iProduct */
 		0x03,				/* iSerialNumber */
@@ -356,7 +357,7 @@ u32 XUsbPs_Ch9SetupCfgDescReply(u8 *BufPtr, u32 BufLen)
 	u16 totalLengthOffset = offset;
 	configDesc[offset++] = 0x00;
 	configDesc[offset++] = 0x00;
-	configDesc[offset++] = 0x04;		/* bNumInterfaces: 4 */
+	configDesc[offset++] = DAP_SELECTIO ? 5 : 4; /* bNumInterfaces */
 	configDesc[offset++] = 0x01;		/* bConfigurationValue */
 	configDesc[offset++] = 0x00;		/* iConfiguration */
 	configDesc[offset++] = 0x80;		/* bmAttributes: Bus powered */
@@ -495,7 +496,17 @@ u32 XUsbPs_Ch9SetupCfgDescReply(u8 *BufPtr, u32 BufLen)
       configDesc[offset+17]=(u8)(probe_hid_report_size>>8);
       offset+=sizeof(hid); }
 
-	/* Update wTotalLength */
+	#if DAP_SELECTIO
+    { const u8 native[] = {
+        9,4,4,0,2,0xff,0x53,1,5,
+        7,5,0x01,2,0,2,0,
+        7,5,0x84,2,0,2,0
+      };
+      memcpy(configDesc+offset,native,sizeof native);
+      offset+=sizeof native;
+    }
+#endif
+    /* Update wTotalLength */
 	wTotalLength = offset;
 	configDesc[totalLengthOffset] = wTotalLength & 0xFF;
 	configDesc[totalLengthOffset + 1] = (wTotalLength >> 8) & 0xFF;
@@ -539,6 +550,9 @@ u32 XUsbPs_Ch9SetupStrDescReply(u8 *BufPtr, u32 BufLen, u8 Index)
 		"CMSIS-DAP",            /* iProduct */
 		"12345678",             /* iSerialNumber */
         "zynqlinkPRO HID",
+#if DAP_SELECTIO
+        "ZynqLink native stream",
+#endif
 	};
 	char *String;
 	u32 StringLen;
@@ -652,6 +666,9 @@ void XUsbPs_SetConfiguration(XUsbPs *InstancePtr, int ConfigIdx)
 	if (0 == ConfigIdx) {
         unsigned ep;
         probe_usb_reset();
+#if DAP_SELECTIO
+        selectio_usb_reset();
+#endif
         etm_usb_reset();
         for(ep=1;ep<8;ep++) {
             XUsbPs_EpDisable(InstancePtr,ep,XUSBPS_EP_DIRECTION_IN|XUSBPS_EP_DIRECTION_OUT);
@@ -665,6 +682,9 @@ void XUsbPs_SetConfiguration(XUsbPs *InstancePtr, int ConfigIdx)
 	xil_printf("[DAP] SET_CONFIGURATION 1\r\n");
 
 	probe_usb_configured(InstancePtr);
+#if DAP_SELECTIO
+    selectio_usb_configured(InstancePtr);
+#endif
     etm_usb_configured(InstancePtr);
 	/* Enable DAP Endpoints */
 	XUsbPs_EpEnable(InstancePtr, DAP_BULKOUT_EP, XUSBPS_EP_DIRECTION_OUT);

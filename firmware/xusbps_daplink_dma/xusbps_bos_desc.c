@@ -24,6 +24,13 @@
  * BOS (Binary Object Store) Descriptor
  * Required for USB 2.1+ devices to support Microsoft OS 2.0 descriptors
  */
+/* The additional WinUSB function has its own GUID for independent discovery. */
+#if DAP_SELECTIO
+#define OS_SET_LENGTH 338U
+#else
+#define OS_SET_LENGTH 178U
+#endif
+#define OS_LE16(n) ((n)&255U), ((n)>>8)
 const u8 USBD_BinaryObjectStoreDescriptor[] = {
 	/* BOS Descriptor Header */
 	0x05,				/* bLength */
@@ -43,7 +50,7 @@ const u8 USBD_BinaryObjectStoreDescriptor[] = {
 	0x9C, 0xD2,			/* UUID bytes 8-9 */
 	0x65, 0x9D, 0x9E, 0x64, 0x8A, 0x9F,	/* UUID bytes 10-15 */
 	0x00, 0x00, 0x03, 0x06,		/* dwWindowsVersion: Windows 8.1 (0x06030000) */
-	0xB2, 0x00,			/* wMSOSDescriptorSetTotalLength: 178 bytes */
+	OS_LE16(OS_SET_LENGTH),			/* wMSOSDescriptorSetTotalLength: 178 bytes */
 	MS_OS_20_VENDOR_CODE,		/* bMS_VendorCode: 0x20 */
 	0x00,				/* bAltEnumCode: 0 */
 
@@ -78,14 +85,14 @@ const u8 USBD_WinUSBDescriptorSetDescriptor[] = {
 	0x0A, 0x00,			/* wLength: 10 bytes */
 	0x00, 0x00,			/* wDescriptorType: MS_OS_20_SET_HEADER_DESCRIPTOR */
 	0x00, 0x00, 0x03, 0x06,		/* dwWindowsVersion: Windows 8.1 (0x06030000) */
-	0xB2, 0x00,			/* wTotalLength: 178 bytes */
+	OS_LE16(OS_SET_LENGTH),			/* wTotalLength: 178 bytes */
 
 	/* Microsoft OS 2.0 Configuration Subset Header */
 	0x08, 0x00,			/* wLength: 8 bytes */
 	0x01, 0x00,			/* wDescriptorType: MS_OS_20_SUBSET_HEADER_CONFIGURATION */
 	0x00,				/* bConfigurationValue: 0 */
 	0x00,				/* bReserved: 0 */
-	0xA8, 0x00,			/* wTotalLength: 168 bytes (subset) */
+	OS_LE16(OS_SET_LENGTH-10U),			/* wTotalLength: 168 bytes (subset) */
 
 	/* Microsoft OS 2.0 Function Subset Header (DAP Interface) */
 	0x08, 0x00,			/* wLength: 8 bytes */
@@ -123,6 +130,41 @@ const u8 USBD_WinUSBDescriptorSetDescriptor[] = {
 	'3', 0x00, '7', 0x00, '7', 0x00, '6', 0x00,
 	'}', 0x00,
 	0x00, 0x00, 0x00, 0x00
+
+#if DAP_SELECTIO
+    ,/* Microsoft OS 2.0 Function Subset Header (native stream interface) */
+	0x08, 0x00,			/* wLength: 8 bytes */
+	0x02, 0x00,			/* wDescriptorType: MS_OS_20_SUBSET_HEADER_FUNCTION */
+	0x04,                /* bFirstInterface: native stream */
+	0x00,				/* bReserved: 0 */
+	0xA0, 0x00,			/* wSubsetLength: 160 bytes */
+
+	/* Microsoft OS 2.0 Compatible ID Feature Descriptor */
+	0x14, 0x00,			/* wLength: 20 bytes */
+	0x03, 0x00,			/* wDescriptorType: MS_OS_20_FEATURE_COMPATIBLE_ID */
+	'W', 'I', 'N', 'U', 'S', 'B', 0x00, 0x00,	/* CompatibleID: "WINUSB\0\0" */
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,	/* SubCompatibleID: empty */
+
+	/* Microsoft OS 2.0 Registry Property Feature Descriptor */
+	0x84, 0x00,			/* wLength: 132 bytes */
+	0x04, 0x00,			/* wDescriptorType: MS_OS_20_FEATURE_REG_PROPERTY */
+	0x07, 0x00,			/* wPropertyDataType: REG_MULTI_SZ */
+	0x2A, 0x00,			/* wPropertyNameLength: 42 bytes */
+	/* Property Name: "DeviceInterfaceGUID" (Unicode) */
+	'D', 0x00, 'e', 0x00, 'v', 0x00, 'i', 0x00,
+	'c', 0x00, 'e', 0x00, 'I', 0x00, 'n', 0x00,
+	't', 0x00, 'e', 0x00, 'r', 0x00, 'f', 0x00,
+	'a', 0x00, 'c', 0x00, 'e', 0x00, 'G', 0x00,
+	'U', 0x00, 'I', 0x00, 'D', 0x00, 's', 0x00,
+	0x00, 0x00,
+	0x50, 0x00,			/* wPropertyDataLength: 80 bytes */
+	/* DeviceInterfaceGUIDs, UTF-16LE MULTI_SZ */
+	'{', 0, '9', 0, 'D', 0, 'C', 0, '2', 0, 'A', 0, '8', 0, '3', 0,
+	'1', 0, '-', 0, 'F', 0, '0', 0, 'D', 0, 'C', 0, '-', 0, '4', 0,
+	'F', 0, '2', 0, 'E', 0, '-', 0, '9', 0, '7', 0, '3', 0, '9', 0,
+	'-', 0, '4', 0, 'E', 0, '9', 0, '4', 0, 'B', 0, '8', 0, '9', 0,
+	'D', 0, 'C', 0, '8', 0, 'B', 0, 'B', 0, '}', 0, 0, 0, 0, 0
+#endif
 };
 
 const u32 USBD_WinUSBDescriptorSetDescriptorLen = sizeof(USBD_WinUSBDescriptorSetDescriptor);

@@ -479,6 +479,9 @@ static uint32_t DAP_SWJ_Clock(const uint8_t *request, uint8_t *response) {
     if (divisor > 16U) divisor = 16U;
     target_fclk = clock * 2U * divisor;
   }
+#if DAP_SELECTIO
+  if (swd_read32(SWD_FEATURES)&0x80U) narrow=0; /* compatibility levels must survive resampling */
+#endif
   if (narrow) {
     divisor = DAP_MAX_SWCLK_HZ / clock;
     if (divisor < 2U) divisor = 2U;

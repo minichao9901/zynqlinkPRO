@@ -311,6 +311,7 @@ def parser():
     c.add_argument('--target', default='view', help='以describe返回的targets为准')
     c.add_argument('--args', default='[]', help='JSON位置参数数组；大参数可用--args-file')
     c.add_argument('--args-file')
+    sub.add_parser('selectio',help='Native USB CLI for the J7 integration firmware')
     sub.add_parser('project',help='全项目非Web工具的清单/描述/执行；project --help')
     sub.add_parser('bridge-build',help='AI：构建便携Windows工作台EXE；bridge-build --help')
     sub.add_parser('trace', help='原样转交全部现有ETM Trace CLI参数（trace之后的--help）')
@@ -337,6 +338,8 @@ def parser():
 
 def main(argv=None):
     argv = list(sys.argv[1:] if argv is None else argv)
+    if argv and argv[0] == 'selectio':
+        return subprocess.call([sys.executable, '-X', 'utf8', str(ROOT/'tools/selectio_cli.py'), *argv[1:]])
     if argv and argv[0] == 'bridge-build':
         from tools.build_bridge import main as build_bridge
         return build_bridge(argv[1:])

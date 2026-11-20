@@ -31,6 +31,7 @@
 #include "dap_metrics.h"
 #include "etm_ddr_usb.h"
 #include "xtime_l.h"
+#include "selectio_block.h"
 #include <string.h>
 
 int dap_vendor_bounds(uint8_t command,dap_request_plan *p) {
@@ -46,6 +47,9 @@ int dap_vendor_bounds(uint8_t command,dap_request_plan *p) {
   case 0x89:p->response_bytes=15;break;
   case 0x8a:p->response_bytes=8;break;
   case 0x8c:p->request_bytes=28;p->response_bytes=2+4*ETM_DDR_REPLY_WORDS;break;
+#if DAP_SELECTIO
+  case 0x8f:p->response_bytes=18;break;
+#endif
   case 0x8d:p->response_bytes=4;break;
   default:return 0;
   }
@@ -284,8 +288,22 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
         num=(2U<<16)|4U;
       }
       break;
-    case ID_DAP_Vendor14: break;
-    case ID_DAP_Vendor15: break;
+    case ID_DAP_Vendor14:
+#if DAP_SELECTIO
+      num=selectio_block(request,response);
+#endif
+      break;
+    case ID_DAP_Vendor15:
+#if DAP_SELECTIO
+      {
+        uint32_t fields[3]={ps_fclk_decode(0xf8000180U),0x20000000U,65536U};
+        *response++=(*request==0 && (swd_read32(SWD_FEATURES)&0x80U)) ? DAP_OK : DAP_ERROR;
+        memcpy(response,"SIO1",4);
+        memcpy(response+4,fields,sizeof fields);
+        num=(2U<<16)|18U;
+      }
+#endif
+      break;
     case ID_DAP_Vendor16: break;
     case ID_DAP_Vendor17: break;
     case ID_DAP_Vendor18: break;

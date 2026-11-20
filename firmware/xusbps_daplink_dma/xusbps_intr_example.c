@@ -1,4 +1,5 @@
 #include "probe_stream.h"
+#include "selectio_usb.h"
 #include "etm_stream.h"
 /******************************************************************************
 *
@@ -327,6 +328,15 @@ static int UsbIntrExample(XScuGic *IntcInstancePtr, XUsbPs *UsbInstancePtr,
     DeviceConfig.EpCfg[7].In.Type=XUSBPS_EP_TYPE_BULK;
     DeviceConfig.EpCfg[7].In.NumBufs=16;
     DeviceConfig.EpCfg[7].In.MaxPacketSize=512;
+#if DAP_SELECTIO
+    DeviceConfig.EpCfg[1].Out.Type=XUSBPS_EP_TYPE_BULK;
+    DeviceConfig.EpCfg[1].Out.NumBufs=8;
+    DeviceConfig.EpCfg[1].Out.BufSize=4096;
+    DeviceConfig.EpCfg[1].Out.MaxPacketSize=512;
+    DeviceConfig.EpCfg[4].In.Type=XUSBPS_EP_TYPE_BULK;
+    DeviceConfig.EpCfg[4].In.NumBufs=8;
+    DeviceConfig.EpCfg[4].In.MaxPacketSize=512;
+#endif
     DeviceConfig.NumEndpoints = NumEndpoints;
 
     /* SDK 2018.3 XUsbPs_ConfigureDevice reserves one alignment quantum,
@@ -392,6 +402,10 @@ static int UsbIntrExample(XScuGic *IntcInstancePtr, XUsbPs *UsbInstancePtr,
 				XUSBPS_EP_DIRECTION_IN,
 				XUsbPs_EpCdcEventHandler, UsbInstancePtr);
 
+#if DAP_SELECTIO
+    if(XUsbPs_EpSetHandler(UsbInstancePtr,1,XUSBPS_EP_DIRECTION_OUT,selectio_usb_event,UsbInstancePtr)!=XST_SUCCESS ||
+       XUsbPs_EpSetHandler(UsbInstancePtr,4,XUSBPS_EP_DIRECTION_IN,selectio_usb_event,UsbInstancePtr)!=XST_SUCCESS) goto out;
+#endif
     if(XUsbPs_EpSetHandler(UsbInstancePtr,6,XUSBPS_EP_DIRECTION_IN,probe_usb_event,UsbInstancePtr)!=XST_SUCCESS ||
        XUsbPs_EpSetHandler(UsbInstancePtr,6,XUSBPS_EP_DIRECTION_OUT,probe_usb_event,UsbInstancePtr)!=XST_SUCCESS ||
        XUsbPs_EpSetHandler(UsbInstancePtr,7,XUSBPS_EP_DIRECTION_IN,probe_usb_event,UsbInstancePtr)!=XST_SUCCESS) goto out;
@@ -440,6 +454,9 @@ static int UsbIntrExample(XScuGic *IntcInstancePtr, XUsbPs *UsbInstancePtr,
 		chry_dap_handle();
         probe_poll(UsbInstancePtr);
         etm_poll(UsbInstancePtr);
+#if DAP_SELECTIO
+        selectio_usb_poll(UsbInstancePtr);
+#endif
 	}
 
 	ReturnStatus = XST_SUCCESS;
@@ -489,6 +506,9 @@ static void UsbIntrHandler(void *CallBackRef, u32 Mask)
         extern int chry_dap_usb_session_reset(void);
         chry_dap_usb_session_reset();
         probe_usb_reset();
+#if DAP_SELECTIO
+        selectio_usb_reset();
+#endif
         etm_usb_reset();
     }
 	NumIrqs++;

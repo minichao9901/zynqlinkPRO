@@ -15,6 +15,7 @@ def main():
     ap.add_argument('--compact-code', action='store_true', help='Thumb code and unused section removal; preserve production queues and DDR buffers')
     ap.add_argument('--j7-adapter', action='store_true',
                     help='J7 adapter pinout: GPIO2 is nSRST and must stay released on JTAG connect')
+    ap.add_argument('--selectio', action='store_true', help='Enable shared SelectIO block transfers in the J7 integration image')
     ap.add_argument('--validation-faults',action='store_true',help='Diagnostic ELF only: one-shot PS fault injection via JTAG, absent by default')
     ap.add_argument('--out', help='Separate output directory for clock/optimization profiles (default: build/<project>/<optimization>)')
     ap.add_argument('--project', choices=['xusbps_daplink_dma'], default='xusbps_daplink_dma')
@@ -35,6 +36,8 @@ def main():
     args = ap.parse_args()
     if args.compact_code and args.project != 'xusbps_daplink_dma':
         ap.error('--compact-code requires the DMA project')
+    if args.selectio and not args.j7_adapter:
+        ap.error('--selectio requires the J7 adapter build')
     src = ROOT / 'firmware' / args.project
     if args.bsp:
         bsp = Path(args.bsp)
@@ -52,6 +55,8 @@ def main():
         flags += ['-mthumb', '-ffunction-sections', '-fdata-sections']
     verified_clock = None
     if args.project == 'xusbps_daplink_dma':
+        if args.selectio:
+            flags.append('-DDAP_SELECTIO=1')
         if args.j7_adapter:
             flags.append('-DDAP_J7_ADAPTER=1')
         flags += ['-DDAP_ALLOW_ZERO_IDLE='+str(int(args.experimental_zero_idle)), '-DDAP_VALIDATION_FAULTS='+str(int(args.validation_faults))]

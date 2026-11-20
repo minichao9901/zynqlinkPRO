@@ -1,0 +1,136 @@
+{
+  "device": [
+    3368,
+    516,
+    513,
+    "12345678"
+  ],
+  "interfaces": [
+    {
+      "number": 0,
+      "cls": 255,
+      "eps": [
+        [
+          "0x2",
+          2,
+          512
+        ],
+        [
+          "0x81",
+          2,
+          512
+        ],
+        [
+          "0x87",
+          2,
+          512
+        ],
+        [
+          "0x82",
+          2,
+          512
+        ]
+      ]
+    },
+    {
+      "number": 1,
+      "cls": 2,
+      "eps": [
+        [
+          "0x85",
+          3,
+          64
+        ]
+      ]
+    },
+    {
+      "number": 2,
+      "cls": 10,
+      "eps": [
+        [
+          "0x4",
+          2,
+          512
+        ],
+        [
+          "0x83",
+          2,
+          512
+        ]
+      ]
+    },
+    {
+      "number": 3,
+      "cls": 3,
+      "eps": [
+        [
+          "0x86",
+          3,
+          64
+        ],
+        [
+          "0x6",
+          3,
+          64
+        ]
+      ]
+    },
+    {
+      "number": 4,
+      "cls": 255,
+      "eps": [
+        [
+          "0x1",
+          2,
+          512
+        ],
+        [
+          "0x84",
+          2,
+          512
+        ]
+      ]
+    }
+  ],
+  "winusb_functions": [
+    [
+      0,
+      "{CDB3B5AD-293B-4663-AA36-1AAE46463776}"
+    ],
+    [
+      4,
+      "{9DC2A831-F0DC-4F2E-9739-4E94B89DC8BB}"
+    ]
+  ],
+  "windows": [
+    {
+      "seconds": 60.00029660000109,
+      "frames": 134302,
+      "bytes_per_direction": 547817858,
+      "aggregate_MBps": 18.26050499890329,
+      "cmsis_checks": 2098
+    },
+    {
+      "seconds": 60.00011629999972,
+      "frames": 133893,
+      "bytes_per_direction": 546149547,
+      "aggregate_MBps": 18.204949612739423,
+      "cmsis_checks": 2092
+    },
+    {
+      "seconds": 60.00021970000125,
+      "frames": 135027,
+      "bytes_per_direction": 550775133,
+      "aggregate_MBps": 18.35910387508093,
+      "cmsis_checks": 2109
+    }
+  ],
+  "info": {
+    "protocol": "ZLK1",
+    "reference_hz": 199999998,
+    "link_hz": 99999999.0,
+    "features": "0x4450007f",
+    "integrated_pl": false,
+    "max_frame": 4096
+  }
+}
