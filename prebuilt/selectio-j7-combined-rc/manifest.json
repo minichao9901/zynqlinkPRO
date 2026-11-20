@@ -1,0 +1,43 @@
+{
+  "hashes": {
+    "probe.bit": "c05d3f968d8903a046b16bd46d031b2f20e0e289865f25c96ccb72aa8561cbca",
+    "application.elf": "dcba700b0241628fefaafa69c6a3300a4624d6273cfd39804b0223531b9e4e3e",
+    "ps7_init.tcl": "aa9747c31f705be7c28af1c6b1cdeaf282f0dcdb01faecee2a9f72e4d3489132"
+  },
+  "bit_features": "0x44501fff",
+  "swd": {
+    "tap": 8,
+    "slot": 24,
+    "idle": 2
+  },
+  "jtag": {
+    "tap": 16,
+    "slot": 28,
+    "idle": 33
+  },
+  "pl_source": "8655cc5e",
+  "ps_source": "60393e40",
+  "startup": "volatile JTAG/RAM, HS3",
+  "ps_options": [
+    "--selectio",
+    "--j7-adapter",
+    "--compact-code",
+    "--max-swclk-hz",
+    "10000000"
+  ],
+  "pl_options": [
+    "--selectio"
+  ],
+  "timing": {
+    "FCLK_max_Hz": 133333333,
+    "SWCLK_max_Hz": 66666666,
+    "setup_slack_ns": 0.093,
+    "hold_slack_ns": 0.035,
+    "requested_FCLK_Hz": 133333333,
+    "RTL_DEBUG": 0,
+    "optional_observation_cells": 0,
+    "formal_product_acceptance": false
+  },
+  "acceptance": "../../docs/validation/selectio-integration/fusion-first-suite.json",
+  "status": "Engineering reference. Mixed 100 Mbit/s Manchester, stale stream transport preference and long CMSIS SWO reported in ZL-277/283/286."
+}

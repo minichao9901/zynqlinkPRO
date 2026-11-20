@@ -1,0 +1,227 @@
+{
+  "board": "f103ze",
+  "operation": "HS3 JTAG/RAM, guarded F103ZE SRAM",
+  "suites": [
+    "usb",
+    "debug",
+    "memory",
+    "rtt",
+    "combo",
+    "scope",
+    "cdc",
+    "itm",
+    "etm"
+  ],
+  "serial": "12345678",
+  "seconds": 60.0,
+  "rounds": 3,
+  "pair": "E:\\zynqlinkPRO-selectio-streams\\build\\fusion-pair",
+  "out": "E:\\zynqlinkPRO-selectio-streams\\build\\final-test\\full",
+  "cases": [
+    {
+      "name": "load",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 10.025254100000893,
+      "log": "load.log"
+    },
+    {
+      "name": "info",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 0.41453220000039437,
+      "log": "info.log"
+    },
+    {
+      "name": "usb-1",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 60.41131409999798,
+      "log": "usb-1.log"
+    },
+    {
+      "name": "usb-2",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 60.441629199998715,
+      "log": "usb-2.log"
+    },
+    {
+      "name": "usb-3",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 60.41346370000247,
+      "log": "usb-3.log"
+    },
+    {
+      "name": "debug-swd",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 3.210454199997912,
+      "log": "debug-swd.log",
+      "restored": true
+    },
+    {
+      "name": "memory-swd",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 542.6233293000005,
+      "log": "memory-swd.log",
+      "restored": true
+    },
+    {
+      "name": "rtt-swd",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 63.9749038000009,
+      "log": "rtt-swd.log",
+      "restored": true
+    },
+    {
+      "name": "combo-swd",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 63.51790070000061,
+      "log": "combo-swd.log",
+      "restored": true
+    },
+    {
+      "name": "debug-jtag",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 5.59342050000123,
+      "log": "debug-jtag.log",
+      "restored": true
+    },
+    {
+      "name": "memory-jtag",
+      "passed": false,
+      "exit_code": 1,
+      "seconds": 2.046688800000993,
+      "log": "memory-jtag.log",
+      "restored": true
+    },
+    {
+      "name": "rtt-jtag",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 63.93251500000042,
+      "log": "rtt-jtag.log",
+      "restored": true
+    },
+    {
+      "name": "combo-jtag",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 63.518553099998826,
+      "log": "combo-jtag.log",
+      "restored": true
+    },
+    {
+      "name": "services",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 455.646573500002,
+      "log": "services.log",
+      "restored": true
+    },
+    {
+      "name": "cdc",
+      "passed": false,
+      "exit_code": 1,
+      "seconds": 2.489645000001474,
+      "log": "cdc.log",
+      "restored": true
+    },
+    {
+      "name": "itm-native",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 26.767312600000878,
+      "log": "itm-native.log",
+      "restored": true
+    },
+    {
+      "name": "itm-cmsis-dap",
+      "passed": false,
+      "exit_code": 1,
+      "seconds": 25.520745999998326,
+      "log": "itm-cmsis-dap.log",
+      "restored": true
+    },
+    {
+      "name": "etm",
+      "passed": false,
+      "exit_code": 0,
+      "seconds": 14.101932399997168,
+      "log": "etm.log"
+    }
+  ],
+  "hashes": {
+    "probe.bit": "c05d3f968d8903a046b16bd46d031b2f20e0e289865f25c96ccb72aa8561cbca",
+    "application.elf": "dcba700b0241628fefaafa69c6a3300a4624d6273cfd39804b0223531b9e4e3e",
+    "ps7_init.tcl": "aa9747c31f705be7c28af1c6b1cdeaf282f0dcdb01faecee2a9f72e4d3489132"
+  },
+  "etm_record": "E:\\zynqlinkPRO\\build\\selectio-baseline-20261121\\fusion-final",
+  "etm_decode": {
+    "packets": 3842800,
+    "ranges": 19133562,
+    "instructions": 19133562,
+    "executed": 17221265,
+    "sourceMapped": 19133562,
+    "exceptions": 997,
+    "gaps": 2,
+    "packetIssues": 0,
+    "unknownExecution": 1,
+    "functions": {
+      "cdc_poll": 8605955,
+      "main": 8605315,
+      "HAL_IncTick": 6979,
+      "SysTick_Handler": 2991,
+      "trace_hook_mark": 23,
+      "HAL_GPIO_WritePin": 2
+    }
+  },
+  "etm_window": {
+    "transport": "ddr-usb/1",
+    "captureId": 1,
+    "captureNonce": 12165025157818326198,
+    "loss": false,
+    "synced": true,
+    "bufferFull": false,
+    "bufferCapacityBytes": 104857600,
+    "captureComplete": true,
+    "requestedWindowComplete": true,
+    "completionReason": "time",
+    "ended": true,
+    "records": 960619,
+    "hardwareTicks": 199999998,
+    "requestedTicks": 199999998,
+    "refClockHz": 199999998,
+    "hardwareSeconds": 1.0,
+    "hardwareStartBracketUnix": [
+      1795206573.1570444,
+      1795206573.1577463
+    ],
+    "stopReason": 0,
+    "formatterBytes": 15369915,
+    "tailBytes": 11,
+    "tailAmbiguous": true,
+    "usbSeconds": 0.4287988000032783,
+    "usbPayloadMBps": 35.84411850005758,
+    "diagnostics": {
+      "implemented": true,
+      "frameDrops": 0,
+      "parserErrors": 0,
+      "idelayReadyLosses": 0,
+      "frameHighwater": 1,
+      "syncAcquisitions": 1,
+      "observedFrames": 960619,
+      "capacityReached": false,
+      "writerError": 0
+    },
+    "fclk": 133333332,
+    "tckKhz": 9523.809428571429
+  },
+  "passed": false
+}
