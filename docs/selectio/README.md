@@ -27,13 +27,14 @@ SWD 只需 L15、L16，可与使用 L14 的被动监听共存。JTAG 占用 TDI/
 | IF3，HID | 06 OUT、86 IN | 主线探针控制与状态 |
 | IF4，WinUSB，FF/53/01 | 01 OUT、84 IN | 高速 SRAM、RTT、变量、SPI、UART/SWO 和并发流 |
 
-历史 RTT 上行可走 CDC。历史变量波形走专用 EP87，载荷是 HSS 帧。现在 RTT 和变量使用 IF4 的独立通道和队列，普通串口软件可以继续使用 CDC。协议头包含长度、序号和状态；消费指针在对应 IN 完成后推进。内存读写可设队列深度 1–4。物理 SWO 由本 CLI 配置和接收，第三方软件通过标准 CMSIS-DAP 查询的 SWO 能力以其实际能力位为准。[描述符与协议](../selectio-native.md)
+历史 RTT 上行可走 CDC。历史变量波形走专用 EP87，载荷是 HSS 帧。现在 RTT 和变量使用 IF4 的独立通道和队列，普通串口软件可以继续使用 CDC。协议头包含长度、序号和状态；消费指针在对应 IN 完成后推进。内存读写可设队列深度 1–4。物理 SWO 可走 IF4，也可走标准 CMSIS-DAP 的 SWO_Transport=1、SWO_Data 轮询。固件声明 UART 与 Manchester 能力、64 KiB 接收缓冲和测试域时间戳。EP87 继续给 HSS 使用。[描述符与协议](../selectio-native.md)
 
 ## 识别、临时加载及调试
 
 按本分支验收记录中的 manifest 选择相配的 bit、Zynq ELF、PS 初始化 Tcl。加载命令在写入探针易失配置前检查占用，在加载后核对 OCM。目标 MCU ELF 与探针 ELF 分开传入。
 
 ```powershell
+$pair = 'prebuilt/selectio-j7-fusion'
 python -X utf8 toolbox.py probe-load --bit "$pair/probe.bit" --zynq-elf "$pair/application.elf" --ps-init "$pair/ps7_init.tcl" --out build/my-load
 python -X utf8 toolbox.py selectio --serial 12345678 info
 python -X utf8 toolbox.py selectio usb-test --seconds 60
@@ -50,6 +51,7 @@ $idle = 2
 # JTAG 对应参数
 # $transport = 'jtag'; $tap = 16; $slot = 28; $idle = 33
 python -X utf8 toolbox.py selectio profile --transport $transport --tap $tap --slot $slot --idle $idle
+python -X utf8 toolbox.py selectio identify --transport $transport --clock 1000000
 openocd -f interface/cmsis-dap.cfg -c "adapter serial 12345678" -c "transport select $transport" -f target/stm32f1x.cfg -c "adapter speed 1000" -c "init" -c "adapter speed 100000"
 arm-none-eabi-gdb prebuilt/golden/f103ze-cdc48.elf -ex "target extended-remote localhost:3333"
 ```
@@ -89,6 +91,7 @@ python -X utf8 toolbox.py selectio com release
 python -X utf8 toolbox.py selectio uart --rate 115200 --hex 550d0a --seconds 2 --out uart.bin
 python -X utf8 toolbox.py selectio swo --encoding uart --rate 48000000 --configure-f103 --itm-mask 1 --seconds 2 --out itm-uart.bin
 python -X utf8 toolbox.py selectio swo --encoding manchester --rate 24000000 --configure-f103 --seconds 2 --out itm-manchester.bin
+python -X utf8 toolbox.py selectio swo --usb-path cmsis-dap --encoding uart --rate 48000000 --configure-f103 --seconds 2 --out standard-swo.bin
 python -X utf8 toolbox.py selectio swo --encoding manchester --rate 100000000 --seconds 2 --out external-manchester.bin
 python -X utf8 toolbox.py selectio spi --mode 0 --slot 22 --tap 0 --hex 9f000000 --out spi-rx.bin
 ```
@@ -114,7 +117,8 @@ python -X utf8 tools/build_xusbps_daplink.py --selectio --j7-adapter --compact-c
 python -X utf8 tools/selectio_cm3.py
 python -X utf8 tools/selectio_cm3.py --services --sample-ticks 64 --out build/cm3-jtag-services
 python -X utf8 tools/selectio_cm3.py --services --swd-only --sample-ticks 32 --out build/cm3-swd-services
-python -X utf8 toolbox.py project run board.accept -- --board f103ze
+python -X utf8 toolbox.py project run board.accept -- --selectio --board f103ze
+python -X utf8 toolbox.py project run board.accept -- --selectio --board f103ze --pair $pair --out build/accept-new --execute
 ```
 
 PS 构建参数中的 10 MHz 约束兼容初始化速率。100 MHz 模式使用独立的 SelectIO 参考时钟。对有写入的实板压力测试，`selectio_f103_fixture.py` 会核对目标映像、保存 4 KiB SRAM、两侧哨兵及初始运行状态，并在独立进程中读回恢复结果。下列示例仅用于该 F103 实验夹具。

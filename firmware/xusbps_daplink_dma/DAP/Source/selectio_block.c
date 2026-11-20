@@ -108,6 +108,15 @@ static int jtag_block(unsigned write, uint32_t address, unsigned count,
     return wait_queue(JQUEUE,15U,5U);
 }
 
+static void extend_jtag_idle(void) {
+    /* Keep the odd RTI count required by the two-slot ARM stream. Small
+     * increases avoid paying twice the idle time after a single target WAIT. */
+    unsigned step=2U+2U*(session.jtag_idle/32U);
+    unsigned idle=session.jtag_idle+step;
+    session.jtag_idle=idle>255U?255U:idle;
+    session.jtag_backoffs++;
+}
+
 static void settle(void) {
     XTime start,now;XTime_GetTime(&start);
     do { XTime_GetTime(&now); } while(now-start<COUNTS_PER_SECOND/500000U);
@@ -213,9 +222,7 @@ int selectio_mem_bulk(unsigned write,uint32_t address,unsigned words,const uint8
          * that posted before WAIT never enters this read-only retry path. */
         while(rc && !write && session.port==2 && *detail==2U && session.jtag_idle<255U &&
               (swd_read32(JQUEUE+4U)&15U)==5U) {
-            unsigned idle=2U*session.jtag_idle+1U;
-            session.jtag_idle=idle>255U?255U:idle;
-            session.jtag_backoffs++;
+            extend_jtag_idle();
             rc=jtag_block(0,address,count,payload,reply,detail);
         }
         if(!rc && session.use_dma && !write) rc=selectio_dma_payload(0,window+0x1000U,reply,count);
@@ -237,9 +244,7 @@ int selectio_commit_rtt_offset(uint32_t addr,uint32_t old,uint32_t next,uint32_t
         int failed=selectio_mem_bulk(1,addr,1,(const uint8_t *)&next,0,&completed,detail);
         if(failed) {
             if(session.port!=2 || *detail!=2U || (swd_read32(JQUEUE+4U)&15U)!=5U) return -1;
-            unsigned idle=2U*session.jtag_idle+1U;
-            session.jtag_idle=idle>255U?255U:idle;
-            session.jtag_backoffs++;session.poisoned=0;
+            extend_jtag_idle();session.poisoned=0;
         }
         uint32_t actual;
         if(selectio_mem_bulk(0,addr,1,0,(uint8_t *)&actual,&completed,detail))return -1;

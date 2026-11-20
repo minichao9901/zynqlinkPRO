@@ -423,6 +423,11 @@ def review(paths):
 
 
 def main(argv=None):
+    argv=list(sys.argv[1:] if argv is None else argv)
+    if "--selectio" in argv:
+        from tools.selectio_accept import main as selectio_accept
+        argv.remove("--selectio")
+        return selectio_accept(argv)
     parser = argparse.ArgumentParser(description=__doc__)
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument('--board', choices=BOARDS)

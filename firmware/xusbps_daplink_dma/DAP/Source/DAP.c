@@ -149,6 +149,9 @@ static uint8_t DAP_Info(uint8_t id, uint8_t *info) {
                 ((SWO_STREAM != 0U)      ? (1U << 6) : 0U) |
                 ((DAP_UART != 0U)        ? (1U << 7) : 0U);
 
+#if DAP_SELECTIO
+      if(swd_read32(SWD_FEATURES)&0x200U) info[0]|=0x0cU;
+#endif
       info[1] = ((DAP_UART_USB_COM_PORT != 0) ? (1U << 0) : 0U);
       length = 2U;
       break;
@@ -180,6 +183,11 @@ static uint8_t DAP_Info(uint8_t id, uint8_t *info) {
 #endif
       break;
     case DAP_ID_SWO_BUFFER_SIZE:
+#if DAP_SELECTIO
+      if(swd_read32(SWD_FEATURES)&0x200U) {
+        info[0]=0;info[1]=0;info[2]=1;info[3]=0;length=4;
+      }
+#endif
 #if ((SWO_UART != 0) || (SWO_MANCHESTER != 0))
       info[0] = (uint8_t)(SWO_BUFFER_SIZE >>  0);
       info[1] = (uint8_t)(SWO_BUFFER_SIZE >>  8);
@@ -306,6 +314,7 @@ static uint32_t DAP_Connect(const uint8_t *request, uint8_t *response) {
 static uint32_t DAP_Disconnect(uint8_t *response) {
 
 #if DAP_SELECTIO
+  selectio_swo_reset();
   if (selectio_live_active()) (void)selectio_live_set(0);
 #endif
   DAP_Data.debug_port = DAP_PORT_DISABLED;
@@ -2204,7 +2213,13 @@ static uint32_t DAP_ProcessCommand(const uint8_t *request, uint8_t *response) {
       num = DAP_WriteAbort(request, response);
       break;
 
-#if ((SWO_UART != 0) || (SWO_MANCHESTER != 0))
+#if DAP_SELECTIO
+    case ID_DAP_SWO_Transport: case ID_DAP_SWO_Mode: case ID_DAP_SWO_Baudrate:
+    case ID_DAP_SWO_Control: case ID_DAP_SWO_Status: case ID_DAP_SWO_Data:
+    case ID_DAP_SWO_ExtendedStatus:
+      num=selectio_swo_command(request[-1],request,response);
+      break;
+#elif ((SWO_UART != 0) || (SWO_MANCHESTER != 0))
     case ID_DAP_SWO_Transport:
       num = SWO_Transport(request, response);
       break;

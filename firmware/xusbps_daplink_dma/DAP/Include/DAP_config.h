@@ -742,8 +742,18 @@ default, the DWT timer is used.  The frequency of this timer is configured with 
 /** Get timestamp of Test Domain Timer.
 \return Current timestamp value.
 */
+#if DAP_SELECTIO
+#include "xtime_l.h"
+#endif
 __STATIC_INLINE uint32_t TIMESTAMP_GET (void) {
-  return 0U;  // TODO: Implement using ZYNQ timer if needed
+#if DAP_SELECTIO
+  XTime t;
+  XTime_GetTime(&t);
+  return (uint32_t)(t/COUNTS_PER_SECOND)*TIMESTAMP_CLOCK +
+         (uint32_t)((t%COUNTS_PER_SECOND)*TIMESTAMP_CLOCK/COUNTS_PER_SECOND);
+#else
+  return 0U;
+#endif
 }
 
 ///@}

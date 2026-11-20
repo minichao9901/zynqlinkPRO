@@ -7,6 +7,7 @@ from pathlib import Path
 import struct
 import subprocess
 import sys
+import time
 
 import numpy as np
 
@@ -20,6 +21,7 @@ def main():
     ap.add_argument("--transport", choices=("jtag", "swd"), required=True)
     ap.add_argument("--slot", type=int, required=True)
     ap.add_argument("--seconds", type=float, default=60)
+    ap.add_argument("--service",choices=("combo","rtt"),default="combo")
     ap.add_argument("--binary", required=True, type=Path)
     ap.add_argument("--out", required=True, type=Path)
     ap.add_argument("--execute", action="store_true")
@@ -57,10 +59,20 @@ def main():
                "combo", "--transport", args.transport, "--tap", tap, "--slot", args.slot, "--idle", idle,
                "--rtt-address", hex(BASE+0x200), "--ticks", 24000, "--var", hex(BASE+0x230),
                "--var", hex(BASE+0x820), "--seconds", args.seconds, "--rtt-out", rtt, "--scope-out", scope]
+        if args.service=="rtt":
+            prefix=cmd[:cmd.index("combo")]
+            subprocess.run(list(map(str,[*prefix,"profile","--transport",args.transport,"--tap",tap,"--idle",idle,"--slot",args.slot])),
+                           check=True,capture_output=True)
+            cmd=[*prefix,"rtt","--transport",args.transport,"--clock",100000000,"--address",hex(BASE+0x200),
+                 "--size",48,"--seconds",args.seconds,"--out",rtt]
+        started=time.perf_counter()
         p = subprocess.run(list(map(str, cmd)), capture_output=True)
         (args.out/"cli.log").write_bytes(p.stdout+p.stderr)
         p.check_returncode()
         report.update(json.loads(p.stdout))
+        if args.service=="rtt":
+            report["rtt_bytes"]=rtt.stat().st_size
+            report["elapsed_seconds"]=time.perf_counter()-started
         with low_link(args.serial) as mem:
             mem.write_word(DHCSR, 0xa05f0003)
             wr, rd, produced = (mem.word(BASE+i) for i in (0x224,0x228,0x230))
@@ -75,18 +87,19 @@ def main():
                 count += len(words)
         if count < 256 or count*4 != report["rtt_bytes"] or rd != count*4 % 1024 or abs(count*4+(wr-rd)%1024-4*produced) > 4:
             raise RuntimeError("target ring, probe and host counts differ")
-        last = -1
-        groups = 0
-        with scope.open(newline="") as f:
-            rows = csv.reader(f)
-            next(rows)
-            for tick, value, guard in rows:
-                if int(value) < last or int(guard) != 0x13579bdf:
-                    raise RuntimeError("variable value mismatch")
-                last = int(value)
-                groups += 1
-        if groups != report["sample_groups"] or last <= 0:
-            raise RuntimeError("sample count differs")
+        if args.service=="combo":
+            last = -1
+            groups = 0
+            with scope.open(newline="") as f:
+                rows = csv.reader(f)
+                next(rows)
+                for tick, value, guard in rows:
+                    if int(value) < last or int(guard) != 0x13579bdf:
+                        raise RuntimeError("variable value mismatch")
+                    last = int(value)
+                    groups += 1
+            if groups != report["sample_groups"] or last <= 0:
+                raise RuntimeError("sample count differs")
         report.update(sequence_words=count, sha256=digest.hexdigest(), producer_counter=produced,
                       RTT_MBps=count*4/report["elapsed_seconds"]/1e6, passed=True)
     finally:

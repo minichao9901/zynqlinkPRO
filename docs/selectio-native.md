@@ -11,7 +11,7 @@
 | 3，HID | 06 OUT、86 IN | 已有探针控制和状态 |
 | 4，厂商自定义，WinUSB | 01 OUT、84 IN | 原生 CLI 命令、数据、容量和错误。RTT 上行和 HSS 采样各有独立通道编号 |
 
-同一号码的 IN 和 OUT 使用不同方向的硬件队列。所有数据 Bulk 端点的高速最大包为 512 B。IF4 与 IF0 分别使用 MS OS 2.0 功能子集。CMSIS-DAP 的 SWO_UART、SWO_MANCHESTER 和 SWO_STREAM 能力位在历史版本均为 0；旧 HSS 数据使用自己的采样帧格式。
+同一号码的 IN 和 OUT 使用不同方向的硬件队列。所有数据 Bulk 端点的高速最大包为 512 B。IF4 与 IF0 分别使用 MS OS 2.0 功能子集。CMSIS-DAP 的 SWO_UART、SWO_MANCHESTER 和 SWO_STREAM 能力位在历史版本均为 0；旧 HSS 数据使用自己的采样帧格式。融合固件在 PL 具有 AUX 时通过 IF0 声明 UART/Manchester，SWO_STREAM 保持 0。标准主机可通过 SWO_Transport=1 在 IF0 取数；原生 CLI 可选 IF4。
 
 IF4 使用有序帧协议。流读取与队列提交停等确认，高速 SRAM 和回环支持多个请求在途。16 字节小端头依次为 `ZLK1`、通道、操作、状态、保留字节、32 位序号、32 位载荷长度。最大载荷 4,079 B。帧恰好为最大包的整数倍时，额外传一个零字节。HELLO 开始新会话，其后的命令检查序号；重复请求被拒绝。RTT 与采样数据在 IN 完成后释放相应队列槽。物理引脚使用权、内存事务耗时与 USB 端点使用权分别管理。
 

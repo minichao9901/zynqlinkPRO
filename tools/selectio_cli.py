@@ -107,7 +107,38 @@ def rtt_terminal(args):
     return 0
 
 
+def standard_swo(args):
+    from contextlib import ExitStack
+    from selectio_cmsis_swo import cmsis_swo
+    from selectio_f103_swo import f103_swo
+    if not 9600<=args.rate<=100000000 or args.seconds<0 or args.tap:
+        raise ValueError("standard SWO uses the default tap, a positive rate and a nonnegative window")
+    with ExitStack() as stack:
+        if args.configure_f103:
+            target=stack.enter_context(f103_swo(args.serial,args.encoding,args.rate,args.itm_mask))
+            tx,rx=target.endpoints
+        else:
+            target=None
+            tx,rx=stack.enter_context(connection(args.serial))
+        sink=stack.enter_context(args.out.open("xb"))
+        source=stack.enter_context(cmsis_swo(tx,rx,args.encoding,args.rate))
+        if target:target.start()
+        received=0
+        end=time.perf_counter()+args.seconds
+        while time.perf_counter()<end:
+            received+=sink.write(source.pull())
+        source.stop()
+        while data:=source.pull():
+            received+=sink.write(data)
+        state=source.status()
+        if state["status"] or state["pending"] or state["index"]!=received&0xffffffff:
+            raise RuntimeError(f"CMSIS-DAP SWO tail differs: {state}, received={received}")
+        print(json.dumps(dict(encoding=args.encoding,baud=source.rate,received=received,**state),indent=2))
+    return 0
+
+
 def auxiliary(args):
+    if getattr(args,"usb_path","native")=="cmsis-dap": return standard_swo(args)
     channel=4 if args.action=="spi" else 5
     tx_data=b""
     if getattr(args,"file",None):
@@ -275,6 +306,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--serial", default="12345678", help="J7 USB serial number")
     commands = parser.add_subparsers(dest="action", required=True)
+    sub=commands.add_parser("identify",help="select SWD or JTAG on the target SWJ-DP and verify its Cortex identity")
+    sub.add_argument("--transport",choices=PORTS,required=True)
+    sub.add_argument("--clock",type=number,default=1000000,help="requested CMSIS-DAP clock in Hz")
     commands.add_parser("info", help="read firmware capabilities and PS reference clock")
     test = commands.add_parser("usb-test", help="verify WinUSB transport independently of the target")
     test.add_argument("--seconds", type=float, default=5)
@@ -303,6 +337,7 @@ def main():
             sub.add_argument("--rate",type=number,required=True,help="UART baud or Manchester information bits/s")
             sub.add_argument("--seconds",type=float,required=True)
         if action=="swo":
+            sub.add_argument("--usb-path",choices=("native","cmsis-dap"),default="native")
             sub.add_argument("--encoding",choices=["uart","manchester"],required=True)
             sub.add_argument("--configure-f103",action="store_true",help="configure and restore the CDC48 target ITM/TPIU")
             sub.add_argument("--itm-mask",type=number,default=1,help="ITM stimulus port bit mask for target setup")
@@ -380,6 +415,20 @@ def main():
         if args.action in ("spi","uart","swo"): return auxiliary(args)
 
         if args.action in ("rtt-send","rtt-terminal"):return rtt_terminal(args)
+        if args.action=="identify":
+            from test_probe_board import Memory
+            with connection(args.serial) as (tx,rx):
+                try:
+                    reply=setup(tx,rx,1000,args.transport)
+                    rate=cmd(tx,rx,b"\x11"+struct.pack("<I",args.clock))
+                    if rate!=b"\x11\0":raise RuntimeError("DAP_SWJ_Clock rejected")
+                    cpu=Memory(tx,rx).word(0xe000ed00)
+                    if cpu>>24!=0x41:raise RuntimeError(f"unexpected Arm CPUID {cpu:#x}")
+                    offset=2 if args.transport=="jtag" else 3
+                    print(json.dumps(dict(transport=args.transport,requested_hz=args.clock,
+                        dp_id=hex(int.from_bytes(reply[offset:offset+4],"little")),cpuid=hex(cpu)),indent=2))
+                finally:cmd(tx,rx,[3])
+            return 0
         if args.action=="combo": return capture_combo(args)
         if args.action in ("rtt","scope"): return capture(args)
         if args.action in ("info","usb-test"):

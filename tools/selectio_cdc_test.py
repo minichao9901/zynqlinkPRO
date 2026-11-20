@@ -2,6 +2,9 @@
 import argparse
 import hashlib
 import json
+from contextlib import nullcontext
+from dap_pipeline_bench import setup,cmd
+from selectio_cli import connection
 import struct
 import time
 from pathlib import Path
@@ -18,6 +21,7 @@ def main():
     ap.add_argument("--serial",default="12345678")
     ap.add_argument("--binary",required=True,type=Path)
     ap.add_argument("--out",required=True,type=Path)
+    ap.add_argument("--swd-slot",type=int,help="perform 100 MHz SRAM reads during physical CDC TX and RX")
     ap.add_argument("--execute",action="store_true")
     a=ap.parse_args()
     if not a.execute:
@@ -55,8 +59,10 @@ def main():
         ports=[x.device for x in serial.tools.list_ports.comports() if x.vid==0xd28 and x.pid==0x204 and x.serial_number==a.serial]
         if len(ports)!=1:raise RuntimeError("CDC COM mapping is not unique")
         report["com"]=ports[0]
-        with native_connection(a.serial) as n:
-            n.info();n.exchange(0,3,b"\x01")
+        with connection(a.serial) as (tx,rx),native_connection(a.serial,tx.device) as n:
+            n.info()
+            if a.swd_slot is not None:setup(tx,rx,1000,"swd")
+            n.exchange(0,3,b"\x01")
             try:
                 with serial.Serial(ports[0],57600,timeout=1,write_timeout=1) as port:
                     time.sleep(.03)
@@ -70,9 +76,16 @@ def main():
                     if state[:3]!=(1,1,115200):raise RuntimeError(f"CDC binding failed {state}")
                     port.reset_input_buffer()
                     data=hashlib.shake_256(b"J7 physical CDC").digest(256)
-                    for i,b in enumerate(data):
-                        port.write(bytes([b]));value=port.read(1)
-                        if value!=bytes([b^0xa5]):raise RuntimeError(f"target reply differs at {i}: {value.hex()}")
+                    guard=n.memory(1,8,a.swd_slot,2) if a.swd_slot is not None else nullcontext()
+                    with guard:
+                        for i,b in enumerate(data):
+                            port.write(bytes([b]))
+                            if a.swd_slot is not None and n.bulk(BASE,4)!=code[:4]:
+                                raise RuntimeError("concurrent 100 MHz SWD SRAM value differs")
+                            value=port.read(1)
+                            if value!=bytes([b^0xa5]):
+                                raise RuntimeError(f"target reply differs at {i}: {value.hex()}")
+                    report["concurrent_swd_reads"]=len(data) if a.swd_slot is not None else 0
                     report["bytes_each"]=len(data)
                     report["end_status"]=struct.unpack("<8I",n.exchange(0,4))
             finally:
@@ -80,6 +93,7 @@ def main():
                 for _ in range(100):
                     if not struct.unpack("<8I",n.exchange(0,4))[1]:break
                     time.sleep(.01)
+                if a.swd_slot is not None:cmd(tx,rx,[3])
         with low_link(a.serial) as m:
             m.write_word(DHCSR,0xa05f0003)
             report["target_count"]=m.word(BASE+0x200);report["target_errors"]=m.word(BASE+0x204)

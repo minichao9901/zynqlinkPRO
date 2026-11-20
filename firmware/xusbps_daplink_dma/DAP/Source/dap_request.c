@@ -83,6 +83,16 @@ int dap_validate_one(const uint8_t *p, uint32_t length, uint32_t capacity,
         in=2+p[1];out=2;break;
     case 0x16: in=2;out=6;break;
 #if DAP_SELECTIO
+    case 0x17: case 0x18: case 0x1a: in=2;out=2;break;
+    case 0x19: in=5;out=5;break;
+    case 0x1b: out=6;break;
+    case 0x1c:
+        if(length<3)return 0;
+        n=p[1]|((uint32_t)p[2]<<8);
+        in=3;out=4+(n>4092U?4092U:n);break;
+    case 0x1e:
+        if(length<2 || (p[1]&~7U))return 0;
+        in=2;out=1+(p[1]&1U)+((p[1]&2U)?4U:0U)+((p[1]&4U)?8U:0U);break;
     case 0x8e:
         if(length<12)return 0;
         n=p[2]|((uint32_t)p[3]<<8);

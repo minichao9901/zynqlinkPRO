@@ -14,6 +14,9 @@
 #define RD(off) swd_read32(AUX+(off))
 #define WR(off,value) swd_write32(AUX+(off),(value))
 static unsigned active_channel,exclusive,flags,read_only_stop,raw_test;
+enum { CMSIS_SWO_CHANNEL=8 };
+static uint8_t swo_transport,swo_mode,swo_running;
+static uint32_t swo_rate,swo_consumed,swo_drops,swo_errors;
 static volatile unsigned cdc_bound,cdc_owns,cdc_baud=115200,cdc_deferred;
 static unsigned cdc_running_baud;
 static uint8_t bypass_samples[512];
@@ -39,7 +42,7 @@ static void settle(void) {
     do {XTime_GetTime(&now);} while(now-start<COUNTS_PER_SECOND/500000U);
 }
 int selectio_aux_exclusive(void){return exclusive!=0;}
-int selectio_aux_conflict(unsigned port) {return exclusive || (active_channel==5 && port==2);}
+int selectio_aux_conflict(unsigned port) {return exclusive || ((active_channel==5 || active_channel==CMSIS_SWO_CHANNEL) && port==2);}
 static int restore(void) {
     if(!active_channel) return 0;
     if(aux_wait(2,0,400)) return -1;
@@ -59,7 +62,12 @@ static int restore(void) {
     flags=active_channel=exclusive=read_only_stop=raw_test=0;
     return 0;
 }
-void selectio_aux_reset(void){(void)restore();}
+void selectio_swo_reset(void) {
+    if(active_channel==CMSIS_SWO_CHANNEL) (void)restore();
+    swo_transport=swo_mode=swo_running=0;
+    swo_rate=swo_consumed=swo_drops=swo_errors=0;
+}
+void selectio_aux_reset(void){(void)restore();selectio_swo_reset();}
 
 /* CONFIG payload: codec (0=raw SPI,1=8N1,2=Manchester), claim TX,
  * SPI mode, capture slot, little-endian information rate, input delay tap.
@@ -238,6 +246,72 @@ int selectio_aux_frame(unsigned ch,unsigned op,const uint8_t *in,unsigned size,
     }
     if(op==5 && !size) return restore();
     return -1;
+}
+
+/* Standard CMSIS-DAP polled transport. The native interface and CDC use
+ * the same hardware receiver and cannot take ownership of a live SWO FIFO. */
+uint32_t selectio_swo_command(uint8_t cmd,const uint8_t *p,uint8_t *r) {
+    unsigned available=0, status=swo_running?1U:0U, n=0;
+    if(cmd==0x1b || cmd==0x1c || cmd==0x1e) {
+        if(active_channel==CMSIS_SWO_CHANNEL) {
+            WR(0x28,1);
+            if(aux_wait(16,0,20)) status|=0x40U;
+            else {
+                uint32_t drops=RD(0x28),errors=RD(0x2c);
+                if(drops!=swo_drops) status|=0x80U;
+                if(errors!=swo_errors) status|=0x40U;
+                if(cmd!=0x1e || (p[0]&1U)) {swo_drops=drops;swo_errors=errors;}
+            }
+            available=RD(0x24);
+        }
+        if(cmd==0x1b) {r[0]=status;put(r+1,available);return 5;}
+        if(cmd==0x1e) {
+            if(p[0]&1U) r[n++]=status;
+            if(p[0]&2U) {put(r+n,available);n+=4;}
+            if(p[0]&4U) {
+                put(r+n,swo_consumed+available);put(r+n+4,TIMESTAMP_GET());n+=8;
+            }
+            return (1U<<16)|n;
+        }
+        unsigned limit=p[0]|((unsigned)p[1]<<8);
+        if(limit>DAP_PACKET_SIZE-4U) limit=DAP_PACKET_SIZE-4U;
+        if(swo_transport==1 && active_channel==CMSIS_SWO_CHANNEL && available && limit) {
+            n=peek(r+3,limit);selectio_aux_consume(n);swo_consumed+=n;
+        }
+        r[0]=status;r[1]=(uint8_t)n;r[2]=(uint8_t)(n>>8);
+        return (2U<<16)|(3U+n);
+    }
+    r[0]=DAP_ERROR;
+    if(cmd==0x19) {
+        uint32_t request=word(p);
+        uint32_t accepted=0;
+        if(!swo_running && request>=9600U && request<=100000000U && (swd_read32(SWD_FEATURES)&0x200U)) {
+            uint64_t f=2ULL*ps_fclk_decode(0xf8000180U);
+            uint32_t period=(uint32_t)((f*256U+request/2U)/request);
+            if(period>=1024U) {swo_rate=request;accepted=(uint32_t)((f*256U+period/2U)/period);}
+        }
+        put(r,accepted);return (4U<<16)|4U;
+    }
+    if(cmd==0x17 && !swo_running && p[0]<=1) {
+        if(!p[0]) selectio_swo_reset();
+        swo_transport=p[0];r[0]=DAP_OK;
+    } else if(cmd==0x18 && !swo_running && p[0]<=2) {
+        if(active_channel==CMSIS_SWO_CHANNEL && restore()) return (1U<<16)|1U;
+        swo_mode=p[0];r[0]=DAP_OK;
+    } else if(cmd==0x1a && p[0]<=1) {
+        if(p[0]==swo_running) r[0]=DAP_OK;
+        else if(!p[0] && active_channel==CMSIS_SWO_CHANNEL) {
+            WR(8,0);settle();read_only_stop=1;swo_running=0;r[0]=DAP_OK;
+        } else if(p[0] && swo_transport==1 && swo_mode && swo_rate) {
+            uint8_t config[9]={swo_mode,0,0,0,0,0,0,0,0};
+            if(active_channel==CMSIS_SWO_CHANNEL && restore()) return (1U<<16)|1U;
+            put(config+4,swo_rate);
+            if(!configure(CMSIS_SWO_CHANNEL,config,sizeof config)) {
+                swo_consumed=swo_drops=swo_errors=0;swo_running=1;r[0]=DAP_OK;
+            }
+        }
+    }
+    return (1U<<16)|1U;
 }
 
 void selectio_cdc_status(uint32_t values[8]) {

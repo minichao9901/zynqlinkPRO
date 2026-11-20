@@ -17,5 +17,7 @@ int selectio_aux_frame(unsigned channel,unsigned op,const uint8_t *in,unsigned s
                        uint8_t *out,unsigned capacity,unsigned *length,unsigned *consume);
 void selectio_aux_consume(unsigned bytes);
 void selectio_aux_reset(void);
+void selectio_swo_reset(void);
+uint32_t selectio_swo_command(uint8_t command,const uint8_t *request,uint8_t *response);
 int selectio_aux_exclusive(void);
 #endif

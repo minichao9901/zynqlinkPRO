@@ -1,5 +1,7 @@
 """Compare a finite stream of real F103 ITM packets with the target producer."""
 import argparse,hashlib,json,struct,time
+from contextlib import ExitStack
+from selectio_cmsis_swo import cmsis_swo
 from pathlib import Path
 from benchmark_rtt_forward import core_read,core_write
 from selectio_f103_fixture import BASE,DHCSR
@@ -13,6 +15,7 @@ def main():
     ap.add_argument("--binary",type=Path,required=True)
     ap.add_argument("--out",type=Path,required=True)
     ap.add_argument("--words",type=int,default=16384)
+    ap.add_argument("--usb-path",choices=("native","cmsis-dap"),default="native")
     ap.add_argument("--execute",action="store_true")
     args=ap.parse_args()
     if not args.execute:return print("Run the SRAM ITM producer in the halted and backed-up F103 fixture.")
@@ -23,11 +26,13 @@ def main():
     report=[]
     expected=b"".join(b"\x03"+struct.pack("<I",i) for i in range(args.words))
     for encoding,rate in (("uart",3000000),("manchester",1500000),("uart",48000000),("manchester",24000000)):
-        result=dict(encoding=encoding,rate=rate,words=args.words)
-        with f103_swo(args.serial,encoding,rate,1) as target,native_connection(args.serial,target.device) as native:
+        result=dict(encoding=encoding,rate=rate,words=args.words,usb_path=args.usb_path)
+        with f103_swo(args.serial,encoding,rate,1) as target,ExitStack() as session:
             m=target.memory
             if not m.word(DHCSR)&(1<<17):raise RuntimeError("target must be halted")
-            native.info()
+            if args.usb_path=="native":
+                native=session.enter_context(native_connection(args.serial,target.device))
+                native.info()
             regs={i:core_read(m,i) for i in [*range(17),20]}
             image=m.read(BASE,1024)
             active=False;received=bytearray()
@@ -35,19 +40,33 @@ def main():
                 m.write(BASE,code);m.write(BASE+0x200,struct.pack("<2I",args.words,0))
                 if m.read(BASE,len(code))!=code:raise RuntimeError("ITM producer differs")
                 cfg=struct.pack("<BBBBIB",1 if encoding=="uart" else 2,0,0,0,rate,0)
-                native.exchange(5,0,cfg);active=True
+                if args.usb_path=="native":
+                    native.exchange(5,0,cfg)
+                    active=True
+                    pull=lambda: native.exchange(5,1)
+                    stop=lambda: native.exchange(5,3)
+                else:
+                    standard=session.enter_context(cmsis_swo(*target.endpoints,encoding,rate))
+                    pull=standard.pull
+                    stop=standard.stop
                 target.start()
                 core_write(m,16,0x01000000);core_write(m,20,1);core_write(m,15,BASE+1)
                 start=time.perf_counter()
                 m.write_word(DHCSR,0xa05f0001)
                 deadline=start+max(2.0,len(expected)*20/rate+1.0)
                 while len(received)<len(expected) and time.perf_counter()<deadline:
-                    received.extend(native.exchange(5,1))
+                    received.extend(pull())
                 result["collect_seconds"]=time.perf_counter()-start
                 m.write_word(DHCSR,0xa05f0003)
-                native.exchange(5,3)
-                while part:=native.exchange(5,1):received.extend(part)
-                result["status"]=list(struct.unpack("<5I",native.exchange(5,4)))
+                stop()
+                while part:=pull():received.extend(part)
+                if args.usb_path=="native":
+                    result["status"]=list(struct.unpack("<5I",native.exchange(5,4)))
+                else:
+                    state=standard.status()
+                    result["cmsis_tail"]=state
+                    result["status"]=[state["pending"],state["status"]&128,state["status"]&64]
+                    if state["index"]!=len(received):raise RuntimeError("CMSIS trace index differs")
                 result["producer_words"]=m.word(BASE+0x204)
                 result["bytes"]=len(received)
                 result["sha256"]=hashlib.sha256(received).hexdigest()
