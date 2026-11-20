@@ -3,6 +3,7 @@
 #include "DAP_config.h"
 #include "DAP.h"
 #include "selectio_block.h"
+#include "selectio_combo.h"
 #include "probe_stream.h"
 #include "xil_cache.h"
 #include "xtime_l.h"
@@ -30,6 +31,7 @@ static void write32(u8 *p,u32 v) {memcpy(p,&v,4);}
 void selectio_usb_reset(void) {
     configured=0;
     if(selectio_mem_active()) close_pending=1;
+    selectio_combo_reset();
     epoch++;
     rx_hint=tx_busy=pending_length=session_open=deferred=reply_packets=0;
 }
@@ -74,7 +76,8 @@ void selectio_usb_event(void *ref,u8 ep,u8 event,void *data) {
         XUsbPs_EpBufferRelease(handle);
     }
     if (ep==4 && event==XUSBPS_EP_EVENT_DATA_TX && tx_busy && data==output) {
-        if (reply_packets) probe_native_commit(reply_channel,reply_packets);
+        if(reply_packets && reply_channel>=6) selectio_combo_commit(reply_channel,reply_packets);
+        else if (reply_packets) probe_native_commit(reply_channel,reply_packets);
         reply_packets=0;
         tx_busy=0;
     }
@@ -92,6 +95,7 @@ static unsigned execute_frame(unsigned length, unsigned active_epoch) {
     XTime_GetTime(&last_activity);
     if (channel==0 && op==0 && !size) {
         if (selectio_mem_active()) {dap_wait_begin(); if(selectio_mem_close()) goto reply;}
+        if(selectio_combo_active()) selectio_combo_reset();
         session_open=1;
         next_sequence=sequence+1U;
         memcpy(output+16,"SIO1",4);
@@ -108,7 +112,13 @@ static unsigned execute_frame(unsigned length, unsigned active_epoch) {
             memcpy(output+HEADER_SIZE,input+HEADER_SIZE,size);
             reply_size=size;
             status=0;
-        } else if (channel==1 && op==1 && size==4) {
+        } else if(channel==6) {
+            unsigned n=0,source=0;
+            if(!selectio_combo_frame(op,input+16,size,output+16,FRAME_SIZE-HEADER_SIZE-1,&reply_size,&n,&source)) {
+                reply_packets=n;reply_channel=source;status=0;
+            }
+        } else if(channel==1 && selectio_combo_active()) status=2;
+        else if (channel==1 && op==1 && size==4) {
             dap_wait_begin();
             if(!selectio_mem_open(input+16)) status=0;
         } else if (channel==1 && op==2 && !size) {
@@ -173,9 +183,10 @@ void selectio_usb_poll(XUsbPs *usb) {
     }
     if(close_pending) {
         dap_wait_begin();
-        if(!selectio_mem_close()) close_pending=0;
+        if(!selectio_mem_close()) {close_pending=0;selectio_combo_reset();}
         else return;
     }
+    if(configured) selectio_combo_poll();
     if (!configured || tx_busy || (!rx_hint && !pending_length)) return;
     flags=mfcpsr();
     mtcpsr(flags|0x80U);

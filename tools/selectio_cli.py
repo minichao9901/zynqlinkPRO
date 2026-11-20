@@ -51,6 +51,49 @@ def transfer(out_ep, in_ep, transport, address, length, data, tap, slot, idle, n
     return reply[6:]
 
 
+def capture_combo(args):
+    import csv
+    if not 1<=len(args.var)<=8 or args.seconds<=0 or args.ticks<=0:
+        raise ValueError("choose 1..8 word addresses, a positive period and a positive window")
+    if args.rtt_out.exists() or args.scope_out.exists() or args.rtt_out.resolve()==args.scope_out.resolve():
+        raise ValueError("provide two distinct new output paths")
+    config=struct.pack("<4BIIBB2x",PORTS[args.transport],args.tap,args.slot,args.idle,
+                       args.rtt_address,args.ticks,len(args.var),args.channel)
+    config+=struct.pack("<"+"I"*len(args.var),*args.var)
+    layout=struct.Struct("<"+"I"*(1+len(args.var)))
+    received=samples=0
+    with connection(args.serial) as (tx,rx), native_connection(args.serial,tx.device) as native, \
+         args.rtt_out.open("xb") as rtt,args.scope_out.open("x",newline="",encoding="utf8") as wave:
+        info=native.info()
+        setup(tx,rx,1000,args.transport)
+        writer=csv.writer(wave); writer.writerow(["tick_24mhz",*(f"u32_{a:08x}" for a in args.var)])
+        active=False
+        def pull():
+            nonlocal received,samples
+            payload=native.exchange(6,1);rtt.write(payload);received+=len(payload)
+            values=native.exchange(6,2)
+            if len(values)%layout.size: raise RuntimeError("partial sample group")
+            writer.writerows(layout.iter_unpack(values));samples+=len(values)//layout.size
+            return len(payload)+len(values)
+        try:
+            native.exchange(6,0,config);active=True;start=time.perf_counter()
+            while time.perf_counter()-start<args.seconds: pull()
+        finally:
+            try:
+                if active:
+                    native.exchange(6,3)
+                    while pull(): pass
+                    state=struct.unpack("<8I",native.exchange(6,4))
+                    native.exchange(6,5)
+                    if state[1] or not (state[3]==state[4]==received and state[5]==state[6]==samples):
+                        raise RuntimeError(f"probe/host tail mismatch: {state}, {received} RTT bytes, {samples} groups")
+                    info.update(rtt_bytes=received,sample_groups=samples,skipped_groups=state[7],
+                                period_ticks=state[2],elapsed_seconds=time.perf_counter()-start)
+            finally: cmd(tx,rx,[3])
+    print(json.dumps(info,indent=2))
+    return 0
+
+
 def capture(args):
     from probe_stream import variable
     channel=2 if args.action=="rtt" else 3
@@ -113,6 +156,18 @@ def main():
     commands.add_parser("info", help="read firmware capabilities and PS reference clock")
     test = commands.add_parser("usb-test", help="verify WinUSB transport independently of the target")
     test.add_argument("--seconds", type=float, default=5)
+    sub=commands.add_parser("combo",help="simultaneously drain RTT and sample 1..8 SRAM words on one link")
+    sub.add_argument("--transport",choices=PORTS,required=True)
+    sub.add_argument("--tap",type=int,choices=range(32),required=True,metavar="0..31")
+    sub.add_argument("--slot",type=int,choices=range(64),required=True,metavar="0..63")
+    sub.add_argument("--idle",type=int,required=True)
+    sub.add_argument("--rtt-address",type=number,required=True)
+    sub.add_argument("--channel",type=int,default=0)
+    sub.add_argument("--ticks",type=number,required=True,help="requested sample period in 24 MHz ticks")
+    sub.add_argument("--var",type=number,action="append",required=True,help="aligned u32 SRAM address")
+    sub.add_argument("--seconds",type=float,required=True)
+    sub.add_argument("--rtt-out",type=Path,required=True)
+    sub.add_argument("--scope-out",type=Path,required=True)
     for action in ("rtt","scope"):
         sub=commands.add_parser(action,help="capture RTT bytes or HSS frames through native WinUSB")
         sub.add_argument("--transport",choices=PORTS,required=True)
@@ -140,6 +195,7 @@ def main():
             sub.add_argument("--file", type=Path, required=True)
     args = parser.parse_args()
     try:
+        if args.action=="combo": return capture_combo(args)
         if args.action in ("rtt","scope"): return capture(args)
         if args.action in ("info","usb-test"):
             with native_connection(args.serial) as native:
