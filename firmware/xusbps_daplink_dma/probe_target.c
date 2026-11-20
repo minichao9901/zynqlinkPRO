@@ -1,3 +1,4 @@
+#include "selectio_mode.h"
 // SWD ownership adapter. All calls run in main, including HID requests.
 #include "DAP.h"
 #include "DAP_config.h"
@@ -15,6 +16,9 @@ static void publish_context(void) {
         probe_context_restore_failures,probe_context_first_failure,saved_select,saved_csw,saved_tar);
 }
 static uint32_t saved_clock, saved_cfg;
+#if DAP_SELECTIO
+static uint32_t saved_live;
+#endif
 static DAP_Data_t saved_dap;
 static DAP_Data_t cached_jtag;
 static uint8_t preferred_port,link_port=1,has_jtag,saved_ir_valid;
@@ -28,6 +32,9 @@ static void restore_clock(void) {
         swd_write32(JTAG_IR_CONFIG,saved_ir_config);swd_write32(JTAG_DR_CONFIG,saved_dr_config);
         swd_write32(JTAG_OPERATION,saved_operation);swd_write32(JTAG_ROUTE,saved_route);
     }
+#if DAP_SELECTIO
+    if(selectio_live_available()) (void)selectio_live_set(saved_live);
+#endif
     DAP_Data = saved_dap;
     if(has_jtag) DAP_JTAG_ClockChanged();
 }
@@ -107,6 +114,12 @@ int probe_target_claim(uint32_t hz) {
     has_jtag=(swd_read32(0x4001004cU)&8U)!=0;
     if(port==2 && !has_jtag) return -10;
     if(port==2 && DAP_Data.debug_port==2 && !(swd_read32(JTAG_TIMING)&4U)) return -7;
+#if DAP_SELECTIO
+    saved_live=selectio_live_config();
+    int fast=hz==100000000U;
+    if(fast && !selectio_live_available()) return -10;
+    if(fast) hz=1000000U;
+#endif
     saved_dap = DAP_Data;
     saved_clock = Xil_In32(SLCR_FPGA0_CLK_CTRL);
     saved_cfg = swd_read32(SWD_CFG);
@@ -173,6 +186,12 @@ int probe_target_claim(uint32_t hz) {
         probe_target_release();
         return -4;
     }
+#if DAP_SELECTIO
+    if (fast && clock_set(100000000U)) {
+        (void)probe_target_release();
+        return -4;
+    }
+#endif
     return 0;
 init_failed:
     restore_clock();

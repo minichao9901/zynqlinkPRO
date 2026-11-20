@@ -2,6 +2,8 @@
 #if DAP_SELECTIO
 #include "DAP_config.h"
 #include "DAP.h"
+#include "selectio_mode.h"
+#include "selectio_aux.h"
 #include "probe_stream.h"
 #include "xil_cache.h"
 #include "xusbps_endpoint.h"
@@ -17,6 +19,7 @@ static u8 input[FRAME_SIZE] __attribute__((aligned(32)));
 static u8 output[FRAME_SIZE] __attribute__((aligned(4096)));
 static volatile unsigned epoch, configured, rx_hint, tx_busy;
 static volatile unsigned received_length, deferred, reply_channel, reply_packets;
+static volatile unsigned aux_commit,aux_reset;
 static unsigned pending_length, next_sequence, session_open;
 
 static u32 read32(const u8 *p) {u32 v;memcpy(&v,p,4);return v;}
@@ -25,6 +28,7 @@ static void write32(u8 *p,u32 v) {memcpy(p,&v,4);}
 void selectio_usb_reset(void) {
     configured=0;
     epoch++;
+    aux_reset=1;aux_commit=0;
     rx_hint=tx_busy=pending_length=session_open=deferred=reply_packets=0;
 }
 void selectio_usb_configured(XUsbPs *usb) {
@@ -68,7 +72,8 @@ void selectio_usb_event(void *ref,u8 ep,u8 event,void *data) {
         XUsbPs_EpBufferRelease(handle);
     }
     if (ep==4 && event==XUSBPS_EP_EVENT_DATA_TX && tx_busy && data==output) {
-        if (reply_packets) probe_native_commit(reply_channel,reply_packets);
+        if(reply_packets && reply_channel>=4) aux_commit=reply_packets;
+        else if (reply_packets) probe_native_commit(reply_channel,reply_packets);
         reply_packets=0;
         tx_busy=0;
     }
@@ -100,6 +105,8 @@ static unsigned execute_frame(unsigned length, unsigned active_epoch) {
             memcpy(output+HEADER_SIZE,input+HEADER_SIZE,size);
             reply_size=size;
             status=0;
+        } else if (channel==0 && op==2 && size==4) {
+            if(!selectio_live_profile(input[16],input[17],input[18],input[19])) status=0;
         } else if (channel==1 && op==0 && size && input[16]==0x8e) {
             dap_request_plan plan;
             if (DAP_ValidateCommand(input+16,size,FRAME_SIZE-HEADER_SIZE-1,&plan) &&
@@ -125,6 +132,11 @@ static unsigned execute_frame(unsigned length, unsigned active_epoch) {
             } else if (op==2 && size==64 && !probe_native_control(channel,input+16,output+16)) {
                 reply_size=64;status=0;
             }
+        } else if(channel==4 || channel==5) {
+            unsigned consume=0;
+            if(!selectio_aux_frame(channel,op,input+16,size,output+16,FRAME_SIZE-HEADER_SIZE-1,&reply_size,&consume)) {
+                reply_channel=channel;reply_packets=consume;status=0;
+            }
         } else status=3;
     }
 reply:
@@ -138,6 +150,8 @@ reply:
 
 void selectio_usb_poll(XUsbPs *usb) {
     u32 length,active_epoch,flags;
+    if(aux_reset) {aux_reset=0;selectio_aux_reset();}
+    if(aux_commit) {unsigned n=aux_commit;aux_commit=0;selectio_aux_consume(n);}
     if (!configured || tx_busy || (!rx_hint && !pending_length)) return;
     flags=mfcpsr();
     mtcpsr(flags|0x80U);

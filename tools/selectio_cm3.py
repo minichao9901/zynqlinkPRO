@@ -12,6 +12,9 @@ def main():
     parser.add_argument("--jtag-slot", type=int, default=21)
     parser.add_argument("--swd-slot", type=int, default=12)
     parser.add_argument("--swd-only", action="store_true")
+    parser.add_argument("--services", action="store_true", help="verify the autonomous RTT and sample engines through the live transport")
+    parser.add_argument("--sample-ticks",type=int,default=32)
+    parser.add_argument("--wiretrace",action="store_true")
     args = parser.parse_args()
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=True)
@@ -30,17 +33,29 @@ def main():
     sim = ROOT / "fpga/sim"
     run("xvlog", ["--relax", "-i", DEFAULT_RTL, *sorted(DEFAULT_RTL.glob("*.v")), sim / "axi3_sram.v",
                   VIVADO / "data/verilog/src/glbl.v"], "model.log")
-    run("xvlog", ["--sv", *sorted(dut.glob("selectio_*.v")), *sorted(dut.glob("jtag200_*.v")),
-                  *sorted(dut.glob("swd200_*.v")), dut / "jtag_core.v", dut / "jtag_shift.v",
-                  dut / "dap_transfer_block_engine.v", sim / "cm3_target.sv", sim / "jtag_dp_model.sv",
-                  sim / "tb_selectio_debug.sv"], "compile.log")
-    run("xelab", ["--mt", "2", "-L", "unisims_ver", "-L", "secureip", "-s", "fusion",
-                  "tb_selectio_debug", "glbl"], "elab.log")
-    switches = ["-testplusarg", "swd_only"] if args.swd_only else []
+    if args.services:
+        run("xvlog",["--relax",*sorted(dut.glob("*.v"))],"dut.log")
+        sources=[sim/"xpm_memory_tdpram.sv", sim/"cm3_target.sv",
+                 sim/"jtag_dp_model.sv", sim/"tb_cm3_jtag.sv", sim/"tb_selectio_services.sv"]
+        top="tb_selectio_services"
+    else:
+        sources=[*sorted(dut.glob("selectio_*.v")), *sorted(dut.glob("jtag200_*.v")),
+                 *sorted(dut.glob("swd200_*.v")), dut/"jtag_core.v", dut/"jtag_shift.v",
+                 dut/"dap_transfer_block_engine.v",sim/"cm3_target.sv",sim/"jtag_dp_model.sv",sim/"tb_selectio_debug.sv"]
+        top="tb_selectio_debug"
+    run("xvlog",["--sv","-i",sim,*sources],"compile.log")
+    run("xelab", ["--mt","2","-L","unisims_ver","-L","secureip","-s","fusion",top,"glbl"],"elab.log")
+    switches=[]
+    if args.services:
+        for opt in ("bypass","clk_ns=7.5","target_clk_ns=20.833",f"service_ticks={args.sample_ticks}"):
+            switches.extend(["-testplusarg",opt])
+        if args.swd_only: switches.extend(["-testplusarg","swd"])
+    elif args.swd_only: switches.extend(["-testplusarg","swd_only"])
+    if args.wiretrace: switches.extend(["-testplusarg","wiretrace"])
     output = run("xsim", ["fusion", "-runall", "-testplusarg", f"jslot={args.jtag_slot}",
                           "-testplusarg", f"sslot={args.swd_slot}", *switches], "run.log")
     print(output[-1600:])
-    return 0 if "SELECTIO_PASS" in output and "Fatal:" not in output else 1
+    return 0 if ("SELECTIO_SERVICES_PASS" if args.services else "SELECTIO_PASS") in output and "Fatal:" not in output else 1
 
 
 if __name__ == "__main__":

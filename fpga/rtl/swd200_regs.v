@@ -22,6 +22,7 @@ module swd200_regs (
     output reg s_axi_rvalid = 0,
     input wire s_axi_rready,
     output reg hold = 1,
+    output reg [25:0] live_config=0,
     input wire delay_ready,
     output reg delay_load = 0,
     output reg [4:0] delay_value = 0,
@@ -99,6 +100,7 @@ module swd200_regs (
     always @(posedge axi_aclk) begin
         if (!axi_aresetn) begin
             hold <= 1;
+            live_config <= 0;
             delay_load <= 0;
             delay_value <= 0;
             timing <= {4'd2, 6'd12, 6'd12, 2'd2};
@@ -144,6 +146,7 @@ module swd200_regs (
                 if (!aligned_write || !idle) s_axi_bresp <= 2'b10;
                 else if (!write_command && !write_expected) begin
                     case (write_addr)
+                        14'h24: live_config <= write_data[25:0];
                         14'h08: hold <= write_data[0];
                         14'h0c: if (write_data[1:0] != 3)
                             timing <= write_data[17:0];
@@ -175,6 +178,7 @@ module swd200_regs (
                 end else begin
                     s_axi_rvalid <= 1;
                     case (s_axi_araddr)
+                        14'h24: s_axi_rdata <= {6'b0,live_config};
                         14'h00: s_axi_rdata <= 32'h53323030;
                         14'h04: s_axi_rdata <= {26'b0, idle, hold, delay_sync[1], result_valid, run, ready};
                         14'h08: s_axi_rdata <= {31'b0, hold};

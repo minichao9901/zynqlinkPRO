@@ -84,12 +84,14 @@ module swd_controller #(
 
     // J7 SelectIO option. Clock and transaction engines live on the BD.
     input wire hs_serial_phase, hs_quad_phase, hs_octet_phase, hs_reset,
-    input wire [1:0] hs_owner,
+    input wire [2:0] hs_owner,
+    input wire hs_aux_spi,input wire [3:0] hs_aux_sck,hs_aux_cs,hs_aux_tx,output wire [3:0] hs_aux_rx,
     input wire [23:0] hs_jtag_lanes, output wire [7:0] hs_jtag_samples,
     input wire [3:0] hs_swd_ckslots, hs_swd_data, hs_swd_release,
     output wire [3:0] hs_swd_samples,
     input wire hs_tdo_load, hs_swdio_load, input wire [4:0] hs_tdo_tap, hs_swdio_tap,
-    output wire hs_legacy_released,
+    input wire [25:0] hs_live_config,
+    output wire hs_legacy_released, hs_live_jtag, hs_live_swd,
     // SWD Physical Interface
     inout  wire                                    swclk,
     inout  wire                                    swdio,
@@ -152,7 +154,20 @@ module swd_controller #(
     wire swdio_i_raw;
     wire legacy_data = manual_pins[8] ? manual_pins[1] : jtag_enabled ? jtag_tms : swdio_o;
     wire legacy_release = !jtag_config[1] || (manual_pins[8] ? manual_pins[9] : !jtag_enabled && swdio_t);
-    assign hs_legacy_released = !jtag_config[1];
+    wire live=SELECTIO && hs_live_config[0] && jtag_config[1];
+    assign hs_live_jtag=live && jtag_enabled;
+    assign hs_live_swd=live && !jtag_enabled;
+    assign hs_legacy_released=!jtag_config[1] || live;
+    wire [23:0] live_jtag_lanes;
+    wire [3:0] live_swd_clk,live_swd_data,live_swd_release;
+    wire live_swd_busy,live_swd_valid,live_swd_parity;
+    wire [2:0] live_swd_ack;
+    wire [31:0] live_swd_rdata;
+    (* ASYNC_REG="TRUE" *) reg [1:0] live_jtag_sync=0,live_swd_sync=0;
+    if (SELECTIO) begin:g_live_select
+        always @(posedge hs_octet_phase) live_jtag_sync<={live_jtag_sync[0],hs_live_jtag};
+        always @(posedge hs_quad_phase) live_swd_sync<={live_swd_sync[0],hs_live_swd};
+    end
     if (SELECTIO) begin:g_selectio
         selectio_debug_phy phy(
             .serial_clk(hs_serial_phase), .quad_clk(hs_quad_phase), .octet_clk(hs_octet_phase),
@@ -160,11 +175,14 @@ module swd_controller #(
             .legacy_data(legacy_data), .legacy_release(legacy_release),
             .legacy_tdi(jtag_enabled ? (manual_pins[8] ? manual_pins[2] : jtag_tdi) : gpio_out[0]),
             .legacy_tdi_release(!jtag_config[1] || (!jtag_enabled && gpio_tri[0])),
-            .jtag_lanes(hs_jtag_lanes), .jtag_samples(hs_jtag_samples),
-            .swd_clock(hs_swd_ckslots), .swd_data(hs_swd_data), .swd_release(hs_swd_release),
+            .jtag_lanes(live_jtag_sync[1] ? live_jtag_lanes : hs_jtag_lanes), .jtag_samples(hs_jtag_samples),
+            .swd_clock(live_swd_sync[1] ? live_swd_clk : hs_swd_ckslots),
+            .swd_data(live_swd_sync[1] ? live_swd_data : hs_swd_data),
+            .swd_release(live_swd_sync[1] ? live_swd_release : hs_swd_release),
             .swd_samples(hs_swd_samples), .tap_clk(clk), .tdo_load(hs_tdo_load),
             .swdio_load(hs_swdio_load), .tdo_tap(hs_tdo_tap), .swdio_tap(hs_swdio_tap),
             .clock_pin(swclk), .data_pin(swdio), .tdi_pin(gpio_aux[0]), .tdo_pin(gpio_aux[1]),
+            .aux_spi(hs_aux_spi), .aux_sck(hs_aux_sck),.aux_cs(hs_aux_cs),.aux_tx(hs_aux_tx),.aux_rx(hs_aux_rx),
             .clock_level(clock_feedback), .data_level(swdio_i_raw), .tdi_level(gpio_in[0]), .tdo_level(gpio_in[1])
         );
     end else begin:g_legacy_pads
@@ -354,13 +372,13 @@ module swd_controller #(
         ((write_addr==8'h80 && s_axi_wdata!=jtag_config) ||
          (write_addr==8'h84 && s_axi_wdata!=jtag_ir_config) ||
          (write_addr==8'h88 && s_axi_wdata!=jtag_dr_config) || write_addr==8'h94);
-    assign core_busy=jtag_enabled ? jtag_busy : swd_busy;
-    assign core_ack=jtag_enabled ? jtag_ack : swd_ack;
-    assign core_parity_err=jtag_enabled ? 1'b0 : swd_parity_err;
-    assign core_rdata=jtag_enabled ? jtag_rdata : swd_rdata;
-    assign core_result_valid=jtag_enabled ? jtag_result_valid : swd_result_valid;
-    assign core_next_ready=jtag_enabled ? jtag_next_ready : swd_next_ready;
-    assign core_timestamp=jtag_enabled ? jtag_timestamp : swd_timestamp;
+    assign core_busy=jtag_enabled ? jtag_busy : hs_live_swd ? live_swd_busy : swd_busy;
+    assign core_ack=jtag_enabled ? jtag_ack : hs_live_swd ? live_swd_ack : swd_ack;
+    assign core_parity_err=jtag_enabled ? 1'b0 : hs_live_swd ? live_swd_parity : swd_parity_err;
+    assign core_rdata=jtag_enabled ? jtag_rdata : hs_live_swd ? live_swd_rdata : swd_rdata;
+    assign core_result_valid=jtag_enabled ? jtag_result_valid : hs_live_swd ? live_swd_valid : swd_result_valid;
+    assign core_next_ready=jtag_enabled ? jtag_next_ready : hs_live_swd ? 1'b0 : swd_next_ready;
+    assign core_timestamp=(jtag_enabled || hs_live_swd) ? jtag_timestamp : swd_timestamp;
 
     // ADDR_CFG (0x08) bit definition:
     //   [3:0]   turnaround_fixed      SWD turnaround cycles (fixed to 1)
@@ -678,7 +696,7 @@ module swd_controller #(
                     ADDR_CTRL: begin
                         rdata_reg <= {16'd0, xfer_request, 5'd0, ctrl_timestamp_en, ctrl_mode, scalar_status_busy};
                     end
-                    ADDR_FEATURES: rdata_reg <= SELECTIO ? 32'h4450_00ff : 32'h4450_007f; // bit6: manual SWDIO direction; bit5: extended idle.
+                    ADDR_FEATURES: rdata_reg <= SELECTIO ? 32'h4450_03ff : 32'h4450_007f; // bit6: manual SWDIO direction; bit5: extended idle.
                     ADDR_ENGINE_RESET: rdata_reg <= engine_reset_count;
                     ADDR_TRACE_CTRL: rdata_reg <= {trace_frozen,trace_raw_mode,trace_raw_active,trace_raw_armed,8'd0,trace_count,trace_head};
                     ADDR_TRACE_INDEX: rdata_reg <= {28'd0,trace_index};
@@ -875,8 +893,8 @@ module swd_controller #(
     swd_core u_swd_core (
         .clk           (clk),
         .rst_n         (engine_rst_n),
-        .start         (core_start_sel && !jtag_enabled),
-        .next_valid    (core_next_valid_sel && !jtag_enabled),
+        .start         (core_start_sel && !jtag_enabled && !hs_live_swd),
+        .next_valid    (core_next_valid_sel && !jtag_enabled && !hs_live_swd),
         .next_request  (core_next_req_sel),
         .next_wdata    (core_next_wdata_sel),
         .next_ready    (swd_next_ready),
@@ -905,8 +923,38 @@ module swd_controller #(
         .swdio_i_fall  (swdio_i_fall),
         .swdio_t      (swdio_t)
     );
-    jtag_core u_jtag_core (
-        .clk(clk),.rst_n(engine_rst_n),.start(core_start_sel && jtag_enabled),.invalidate(jtag_invalidate),
+    wire seg_start,seg_variable,seg_tms,seg_exit,seg_capture,seg_done;
+    wire [11:0] seg_count;
+    wire [1:0] seg_drive;
+    wire [255:0] seg_tms_data,seg_tdi_data;
+    wire [63:0] seg_response;
+    reg last_live;
+    always @(posedge clk) last_live<=hs_live_jtag;
+    if (SELECTIO) begin:g_live_link
+        selectio_live_swd swd_link(
+            .host_clk(clk),.quad_clk(hs_quad_phase),.reset(!engine_rst_n || !hs_live_swd),
+            .granted(hs_owner==3 && live_swd_sync[1]),.start(core_start_sel && hs_live_swd),
+            .mode(core_mode_sel),.request(core_req_sel),.wdata(core_wdata_sel),
+            .seq_data(core_swj_data_sel),.seq_count(core_swj_count_sel),
+            .sample_slot(hs_live_config[6:1]),.idle(hs_live_config[17:14]),
+            .busy(live_swd_busy),.valid(live_swd_valid),.ack(live_swd_ack),.parity(live_swd_parity),
+            .rdata(live_swd_rdata),.rx(hs_swd_samples),.clocks(live_swd_clk),
+            .data(live_swd_data),.release_bits(live_swd_release));
+        selectio_live_jtag jtag_link(
+            .host_clk(clk),.octet_clk(hs_octet_phase),.reset(!engine_rst_n || !hs_live_jtag),
+            .granted(hs_owner==2 && live_jtag_sync[1]),.start(seg_start && hs_live_jtag),.count(seg_count),
+            .variable_tms(seg_variable),.tms(seg_tms),.exit_last(seg_exit),.capture(seg_capture),
+            .tdi_mode(seg_drive),.tms_data(seg_tms_data),.tdi_data(seg_tdi_data),
+            .sample_slot(hs_live_config[13:7]),.done(seg_done),.received(seg_response),
+            .rx(hs_jtag_samples),.lanes(live_jtag_lanes));
+    end
+    jtag_core #(.EXTERNAL_PHY(SELECTIO ? 2 : 0)) u_jtag_core (
+        .use_external(hs_live_jtag),.external_idle_cycles({1'b0,hs_live_config[25:18]}),
+        .segment_start(seg_start),.segment_variable_tms(seg_variable),.segment_tms(seg_tms),
+        .segment_exit(seg_exit),.segment_capture(seg_capture),.segment_count(seg_count),
+        .segment_tdi_mode(seg_drive),.segment_tms_data(seg_tms_data),.segment_tdi_data(seg_tdi_data),
+        .segment_done(seg_done),.segment_rx(seg_response),
+        .clk(clk),.rst_n(engine_rst_n),.start(core_start_sel && jtag_enabled),.invalidate(jtag_invalidate || (SELECTIO && last_live!=hs_live_jtag)),
         .operation(!core_mode_sel ? 3'd6 : stream_active || packet_active || batch_active ? 3'd0 : jtag_operation),
         .request(core_req_sel),.wdata(core_wdata_sel),.seq_count(swj_count==0 ? 9'd256 : {1'b0,swj_count}),
         .seq_data(swj_data),.seq_tms(jtag_seq_tms),.ir_length(jtag_ir_config[7:0]),
@@ -917,7 +965,7 @@ module swd_controller #(
         .idcode_ir(jtag_config[15:8]==0 ? 8'h0e : jtag_config[15:8]),
         .riscv_mode(jtag_config[2]),
         .half_delay(cfg_delay_fast[3:0]),
-        .idle_cycles(jtag_config[2] && jtag_config[23:16]!=0 ?
+        .idle_cycles(hs_live_jtag ? hs_live_config[25:18] : jtag_config[2] && jtag_config[23:16]!=0 ?
                      (jtag_config[23:16]>64 ? 8'd64 : jtag_config[23:16]) : {4'd0,cfg_idle_cycles}),
         .late_return(jtag_return_late),
         // Both phases use the IOB IDDR. Q1 is consumed one FCLK after its

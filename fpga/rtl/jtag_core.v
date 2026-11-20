@@ -40,6 +40,7 @@ module jtag_core #(parameter EXTERNAL_PHY=0) (
     output wire [5:0] debug_tx_req,
     // The isolated SelectIO design owns the segment PHY and its sample phase.
     input wire [8:0] external_idle_cycles,
+    input wire use_external,
     output wire segment_start,segment_variable_tms,segment_tms,segment_exit,segment_capture,
     output wire [11:0] segment_count,
     output wire [1:0] segment_tdi_mode,
@@ -79,8 +80,9 @@ module jtag_core #(parameter EXTERNAL_PHY=0) (
     reg [8:0] dr_count;
     // Bound extended RISC-V idle so a complete scan remains within the
     // shifter's 256-bit capture/index capacity. Legacy ARM idle stays 4-bit.
+    wire external_active=EXTERNAL_PHY==1 || (EXTERNAL_PHY==2 && use_external);
     wire [7:0] legacy_rv_idle=idle_cycles<8 ? 8'd8 : idle_cycles>64 ? 8'd64 : idle_cycles;
-    wire [8:0] rv_idle_cycles=EXTERNAL_PHY ? external_idle_cycles : {1'b0,legacy_rv_idle};
+    wire [8:0] rv_idle_cycles=external_active ? external_idle_cycles : {1'b0,legacy_rv_idle};
     reg [3:0] capture_offset;
     reg phy_slow;
     reg phy_capture_rise;
@@ -148,7 +150,7 @@ module jtag_core #(parameter EXTERNAL_PHY=0) (
     assign segment_tdi_mode=phy_tdi_mode;
     assign segment_tms_data=phy_tms_data;
     assign segment_tdi_data=phy_tdi_data;
-    generate if(EXTERNAL_PHY) begin: external
+    generate if(EXTERNAL_PHY==1) begin: external
         assign phy_done=segment_done;
         assign phy_busy=1'b0;
         assign phy_rx={192'b0,segment_rx};
@@ -157,13 +159,22 @@ module jtag_core #(parameter EXTERNAL_PHY=0) (
         assign phy_rx_alternate=0;
         assign {tck,tms,tdi}=3'b011;
     end else begin: legacy
-        jtag_shift u_shift(.clk(clk),.rst_n(rst_n),.start(phy_start),.count(phy_count),
+        wire legacy_busy,legacy_done;
+        wire [255:0] legacy_rx;
+        wire [63:0] legacy_echo,legacy_sense,legacy_alternate;
+        assign phy_busy=external_active ? 1'b0 : legacy_busy;
+        assign phy_done=external_active ? segment_done : legacy_done;
+        assign phy_rx=external_active ? {192'b0,segment_rx} : legacy_rx;
+        assign phy_tx_echo=external_active ? 64'b0 : legacy_echo;
+        assign phy_sense_echo=external_active ? 64'b0 : legacy_sense;
+        assign phy_rx_alternate=external_active ? 64'b0 : legacy_alternate;
+        jtag_shift u_shift(.clk(clk),.rst_n(rst_n),.start(phy_start && !external_active),.count(phy_count),
             .half_delay(phy_delay),.variable_tms(phy_variable_tms),.tms_value(phy_tms),
             .exit_last(phy_exit),.capture(phy_capture),.tdi_mode(phy_tdi_mode),
             .capture_rise(phy_capture_rise),
             .tms_data(phy_tms_data),.tdi_data(phy_tdi_data),.tdo(tdo),.tdo_alternate(tdo_alternate),.tdi_sense(tdi_sense),
-            .tck(tck),.tms(tms),.tdi(tdi),.busy(phy_busy),.done(phy_done),.rx_data(phy_rx),
-            .tx_echo(phy_tx_echo),.sense_echo(phy_sense_echo),.rx_alternate(phy_rx_alternate));
+            .tck(tck),.tms(tms),.tdi(tdi),.busy(legacy_busy),.done(legacy_done),.rx_data(legacy_rx),
+            .tx_echo(legacy_echo),.sense_echo(legacy_sense),.rx_alternate(legacy_alternate));
     end endgenerate
     task shift_segment;
         input [11:0] n;
@@ -203,7 +214,7 @@ module jtag_core #(parameter EXTERNAL_PHY=0) (
             state<=ir_valid && ir_cache==17 && !unknown_tap ? DR_NAV : ROUTE;
         end
     endtask
-    wire fast_dmi_phy=EXTERNAL_PHY && rv_active && dr_before==0 && dr_after==0 && !late_return;
+    wire fast_dmi_phy=external_active && rv_active && dr_before==0 && dr_after==0 && !late_return;
     // Fixed, unpadded DMI frame for the isolated single-TAP serializer:
     // DR navigation, 41 bits, Exit1/Update and the requested RTI clocks.
     task launch_dmi_segment;

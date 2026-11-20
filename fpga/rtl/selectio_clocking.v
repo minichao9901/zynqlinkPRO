@@ -1,12 +1,12 @@
 `timescale 1ns/1ps
 module selectio_clocking (
     (* X_INTERFACE_PARAMETER="FREQ_HZ 200000000" *) input wire ref_clk,
-    input wire resetn, calibrated, jtag_hold, swd_hold, legacy_released,
+    input wire resetn, calibrated, jtag_hold, swd_hold, legacy_released, live_jtag, live_swd, aux_request,
     (* X_INTERFACE_PARAMETER="FREQ_HZ 200000000" *) output wire serial_clk,
     (* X_INTERFACE_PARAMETER="FREQ_HZ 100000000" *) output wire quad_clk,
     (* X_INTERFACE_PARAMETER="FREQ_HZ 50000000" *) output wire octet_clk,
     output wire phy_reset, jtag_reset, swd_reset, jtag_ready,
-    output reg [1:0] owner = 0
+    output reg [2:0] owner = 0, output wire aux_granted
 );
     wire feedback, feedback_raw, locked, serial_raw, quad_raw, octet_raw;
     MMCME2_BASE #(.CLKIN1_PERIOD(5.0), .DIVCLK_DIVIDE(1), .CLKFBOUT_MULT_F(5.0),
@@ -26,20 +26,22 @@ module selectio_clocking (
         else reset_pipe <= {reset_pipe[2:0], 1'b0};
     assign phy_reset = reset_pipe[3];
 
-    (* ASYNC_REG="TRUE" *) reg [3:0] meta = 0, synced = 0;
-    wire [1:0] requested = !synced[2] ? 2'd1 :
+    (* ASYNC_REG="TRUE" *) reg [4:0] meta = 0, synced = 0;
+    assign aux_granted=owner==4;
+    wire [2:0] requested = !synced[2] ? 3'd1 :
+                           synced[4] && synced[1:0]==0 ? 3'd4 :
                            synced[3] && synced[1:0]==2'b01 ? 2'd2 :
                            synced[3] && synced[1:0]==2'b10 ? 2'd3 : 2'd0;
     reg [2:0] park_count = 0;
     always @(posedge quad_clk) begin
-        meta <= {calibrated, legacy_released, !swd_hold, !jtag_hold};
+        meta <= {aux_request, calibrated, legacy_released, (!swd_hold || live_swd), (!jtag_hold || live_jtag)};
         synced <= meta;
         if (phy_reset) begin owner <= 0; park_count <= 0; end
         else if (owner != 0) begin
             // Another engine requesting the pins cannot interrupt a running
             // transfer. The AXI engines only accept HOLD at transaction end.
             if ((owner==1 && synced[2]) || (owner==2 && !synced[0]) ||
-                (owner==3 && !synced[1])) begin owner <= 0; park_count <= 0; end
+                (owner==3 && !synced[1]) || (owner==4 && !synced[4])) begin owner <= 0; park_count <= 0; end
         end else if (park_count != 7) park_count <= park_count + 1'b1;
         else owner <= requested;
     end

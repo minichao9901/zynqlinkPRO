@@ -3,7 +3,7 @@
 // producer launches eight slots on the same MMCM; neither clock is gated.
 module selectio_debug_phy (
     input wire serial_clk, quad_clk, octet_clk, reset,
-    input wire [1:0] owner, // 0 park, 1 compatibility, 2 JTAG, 3 SWD
+    input wire [2:0] owner, // 0 park, 1 compatibility, 2 JTAG, 3 SWD
     input wire legacy_clock, legacy_data, legacy_release, legacy_tdi, legacy_tdi_release,
     input wire [23:0] jtag_lanes,
     output reg [7:0] jtag_samples,
@@ -12,7 +12,9 @@ module selectio_debug_phy (
     input wire tap_clk, tdo_load, swdio_load,
     input wire [4:0] tdo_tap, swdio_tap,
     inout wire clock_pin, data_pin, tdi_pin, input wire tdo_pin,
-    output wire clock_level, data_level, tdi_level, tdo_level
+    output wire clock_level, data_level, tdi_level, tdo_level,
+    input wire aux_spi, input wire [3:0] aux_sck,aux_cs,aux_tx,
+    output wire [3:0] aux_rx
 );
     // Aligned rising edges: observe the toggle on the intervening quartet
     // edge. At the next shared edge the serializer consumes the upper half.
@@ -24,6 +26,7 @@ module selectio_debug_phy (
     wire [3:0] jdata = first_half ? jtag_lanes[11:8] : jtag_lanes[15:12];
     wire [3:0] jtdi = first_half ? jtag_lanes[19:16] : jtag_lanes[23:20];
     wire [3:0] tdo_samples;
+    assign aux_rx=tdo_samples;
     reg [3:0] previous_samples;
     always @(posedge quad_clk) previous_samples <= tdo_samples;
     always @(posedge octet_clk) jtag_samples <= {tdo_samples, previous_samples};
@@ -36,20 +39,21 @@ module selectio_debug_phy (
         legacy_meta <= {legacy_clock,legacy_data,legacy_release,legacy_tdi,legacy_tdi_release};
         legacy_sync <= legacy_meta;
     end
+    wire aux = owner==4;
     wire legacy = owner == 1;
     wire jtag = owner == 2;
     wire swd = owner == 3;
-    wire [3:0] clock_word = legacy ? {4{legacy_sync[4]}} : jtag ? jclock : swd ? swd_clock : 4'b0;
-    wire [3:0] data_word = legacy ? {4{legacy_sync[3]}} : jtag ? jdata : swd_data;
-    wire [3:0] release_word = legacy ? {4{legacy_sync[2]}} : jtag ? 4'b0 : swd ? swd_release : 4'hf;
-    wire [3:0] tdi_word = jtag ? jtdi : {4{legacy_sync[1]}};
+    wire [3:0] clock_word = legacy ? {4{legacy_sync[4]}} : jtag ? jclock : swd ? swd_clock : aux && aux_spi ? aux_sck : 4'b0;
+    wire [3:0] data_word = legacy ? {4{legacy_sync[3]}} : jtag ? jdata : aux ? aux_cs : swd_data;
+    wire [3:0] release_word = legacy ? {4{legacy_sync[2]}} : jtag ? 4'b0 : swd ? swd_release : aux && aux_spi ? 4'h0 : 4'hf;
+    wire [3:0] tdi_word = jtag ? jtdi : aux ? aux_tx : {4{legacy_sync[1]}};
 
     wire swdio_input, tdo_input;
     wire clock_out, data_out, tdi_out, clock_tri, data_tri, tdi_tri;
-    selectio_tx clock_tx(serial_clk, quad_clk, reset, clock_word, {4{owner==0}}, clock_out, clock_tri);
+    selectio_tx clock_tx(serial_clk, quad_clk, reset, clock_word, {4{owner==0 || (aux && !aux_spi)}}, clock_out, clock_tri);
     selectio_tx data_tx(serial_clk, quad_clk, reset, data_word, release_word, data_out, data_tri);
     selectio_tx tdi_tx(serial_clk, quad_clk, reset, tdi_word,
-                      {4{!jtag && !(legacy && !legacy_sync[0])}}, tdi_out, tdi_tri);
+                      {4{!jtag && !aux && !(legacy && !legacy_sync[0])}}, tdi_out, tdi_tri);
     IOBUF clock_pad(.I(clock_out),.T(clock_tri),.IO(clock_pin),.O(clock_level));
     IOBUF data_pad(.I(data_out),.T(data_tri),.IO(data_pin),.O(swdio_input));
     IOBUF tdi_pad(.I(tdi_out),.T(tdi_tri),.IO(tdi_pin),.O(tdi_level));

@@ -27,6 +27,7 @@
 
 #include <string.h>
 #include "DAP_config.h"
+#include "selectio_mode.h"
 #include "DAP.h"
 #include "xil_printf.h"
 #include "swd_dma.h"
@@ -298,6 +299,9 @@ static uint32_t DAP_Connect(const uint8_t *request, uint8_t *response) {
 //   return:   number of bytes in response
 static uint32_t DAP_Disconnect(uint8_t *response) {
 
+#if DAP_SELECTIO
+  if (selectio_live_active()) (void)selectio_live_set(0);
+#endif
   DAP_Data.debug_port = DAP_PORT_DISABLED;
   PORT_OFF();
 
@@ -453,6 +457,16 @@ static uint32_t DAP_SWJ_Clock(const uint8_t *request, uint8_t *response) {
   /* DAP_SWJ_Clock is a maximum rate. Low SWD rates use a faster FCLK and
    * an extended half-period divider so the pad can emit a narrow high
    * pulse while retaining the requested bit period. */
+#if DAP_SELECTIO
+  if (clock==100000000U) {
+    *response=selectio_live_clock() ? DAP_ERROR : DAP_OK;
+    if (*response==DAP_OK) Set_Clock_Delay(clock);
+    return (4U<<16)|1U;
+  }
+  if (selectio_live_active() && selectio_live_set(0)) {
+    *response=DAP_ERROR;return (4U<<16)|1U;
+  }
+#endif
   if ((clock > DAP_MAX_SWCLK_HZ) || (clock < 250000U)) {
     *response = DAP_ERROR;
     return ((4U << 16) | 1U);

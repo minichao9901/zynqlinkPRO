@@ -6,7 +6,7 @@ module tb_selectio_debug;
     always #10.417 hclk = !hclk;
     wire serial_clk, quad_clk, octet_clk, phy_reset, js_reset, ss_reset, js_ready;
     wire jhold, shold, calibrated, jload, sload;
-    wire [1:0] owner;
+    wire [2:0] owner;
     wire [4:0] jtap, stap;
     wire [23:0] lanes;
     wire [7:0] jrx;
@@ -17,11 +17,11 @@ module tb_selectio_debug;
     wire #0.8 tdo_pin = tdo_disabled ? 1'b1 : target_tdo;
     assign #0.8 data_pin = target_drive ? target_swd : 1'bz;
     IDELAYCTRL calibration(.REFCLK(ref_clk), .RST(!resetn), .RDY(calibrated));
-    selectio_clocking clocks(ref_clk,resetn,calibrated,jhold,shold,released,
-        serial_clk,quad_clk,octet_clk,phy_reset,js_reset,ss_reset,js_ready,owner);
+    selectio_clocking clocks(ref_clk,resetn,calibrated,jhold,shold,released,1'b0,1'b0,1'b0,
+        serial_clk,quad_clk,octet_clk,phy_reset,js_reset,ss_reset,js_ready,owner,);
     selectio_debug_phy phy(serial_clk,quad_clk,octet_clk,phy_reset,owner,
         1'b0,1'b1,1'b1,1'b0,1'b1,lanes,jrx,sclock,sdata,srelease,srx,
-        axi_clk,jload,sload,jtap,stap,clk_pin,data_pin,tdi_pin,tdo_pin,,, ,);
+        axi_clk,jload,sload,jtap,stap,clk_pin,data_pin,tdi_pin,tdo_pin,,, , ,1'b0,4'b0,4'b0,4'b0,);
     jtag_dp_model #(.IRLEN(5),.DUMMY(1),.RETURN_NS(0.2)) boundary(
         .rst_n(resetn),.tck(clk_pin),.tms(data_pin),.tdi(tdi_pin),.tdo(boundary_tdo));
     cm3_target #(.WORDS(1024),.ADDR_BITS(10)) cm3(

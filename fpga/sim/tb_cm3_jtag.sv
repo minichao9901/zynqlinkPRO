@@ -1,9 +1,10 @@
 `timescale 1ns/1ps
 // Real AXI controller, physical pad mux, sampler, packet BRAM and RTT engine.
 // The external debug port is the encrypted Cortex-M3 DesignStart RTL.
-module tb_cm3_jtag #(parameter integer ENABLE_DIAGNOSTICS=0);
+module tb_cm3_jtag #(parameter integer ENABLE_DIAGNOSTICS=0, FAST_IO=0);
  real clk_ns=8.333333;
- integer cfg_idle=1;
+ integer cfg_idle=1,service_ticks=32;
+ initial if($value$plusargs("service_ticks=%d",service_ticks)) begin end
  reg clk=0;
  real target_clk_ns=8.333333;
  reg target_clk=0;
@@ -16,7 +17,7 @@ module tb_cm3_jtag #(parameter integer ENABLE_DIAGNOSTICS=0);
  reg rst_n=0;reg [7:0] aw=0,ar=0;reg av=0,wv=0,rv=0;
  reg [31:0] wd=0;wire awr,wr,bv,arr,rdv;wire [31:0] rd;
  reg pe=0;reg [3:0] pw=0;reg [31:0] pa=0,pd=0;wire [31:0] pq;
- wire tck;tri tms;tri [3:0] pads;wire tdo,target_tdo;reg late_tdo=1;
+ tri tck;tri tms;tri [3:0] pads;wire tdo,target_tdo;reg late_tdo=1;
  wire late_mode=$test$plusargs("late");
  wire q1_mode=$test$plusargs("q1");
  real tdo_ns=16;
@@ -25,7 +26,44 @@ module tb_cm3_jtag #(parameter integer ENABLE_DIAGNOSTICS=0);
  assign tdo=(late_mode || $test$plusargs("delay_tdo")) ? late_tdo : target_tdo;
  reg [3:0] aux_out=4'hc,aux_tri=4'hb;
  assign pads[1]=tdo;
- swd_controller #(.ENABLE_DIAGNOSTICS(ENABLE_DIAGNOSTICS)) dut(.clk(clk),.rst_n(rst_n),
+ wire bypass_tdo;
+ wire cm3_tdo,cm3_ntdoen,cm3_swdo,cm3_swdoen,cm3_jtagnsw;
+ wire select_swd=FAST_IO && $test$plusargs("swd");
+ reg [25:0] high_config=0;
+ wire serial_ck,quad_ck,octet_ck,phy_reset,released,live_jtag,live_swd;
+ wire [2:0] owner;
+ if(FAST_IO) begin:g_io_clocks
+   pullup(tms);pulldown(tck);
+   reg ref_clk=0;
+   always #2.5 ref_clk=!ref_clk;
+   wire calibrated;
+   IDELAYCTRL cal(.REFCLK(ref_clk),.RST(!rst_n),.RDY(calibrated));
+   always @(posedge tck) if($test$plusargs("wiretrace") && $time<3400)
+       $display("PAD t=%t tck=%b tms=%b tdi=%b upstream=%b do=%b oe=%b jmode=%b",$time,tck,tms,pads[0],bypass_tdo,cm3_tdo,cm3_ntdoen,cm3_jtagnsw);
+   always @(posedge octet_ck) if ($test$plusargs("wiretrace") && !select_swd && $time<4500 &&
+      (dut.g_live_link.jtag_link.launch || dut.g_live_link.jtag_link.complete))
+       $display("JSEG t=%0t launch=%b complete=%b count=%h cap=%b tdo=%b rxw=%h lanes=%h rx=%h ctl=%h/%b rst=%b",
+          $time,dut.g_live_link.jtag_link.launch,dut.g_live_link.jtag_link.complete,
+          dut.g_live_link.jtag_link.length,dut.g_live_link.jtag_link.sense,tdo,dut.hs_jtag_samples,dut.live_jtag_lanes,
+          dut.g_live_link.jtag_link.bits_out,dut.u_jtag_core.state,dut.u_jtag_core.use_external,dut.g_live_link.jtag_link.reset);
+   always @(posedge clk) if($test$plusargs("wiretrace") && select_swd && dut.core_start_sel)
+       $display("SRC t=%0t req=%h busy=%b tag=%b acktag=%b reset=%b",$time,dut.core_req_sel,dut.live_swd_busy,
+         dut.g_live_link.swd_link.crossing.request_tag,dut.g_live_link.swd_link.crossing.response_tag,dut.g_live_link.swd_link.reset);
+   always @(posedge quad_ck) if($test$plusargs("wiretrace") && (
+       dut.g_live_link.swd_link.launch || dut.g_live_link.swd_link.link_done ||
+       dut.g_live_link.swd_link.transaction.segment_start))
+       $display("LIVE_SWD launch=%b done=%b op=%h state=%d next=%d cnt=%d ack=%b",dut.g_live_link.swd_link.launch,
+         dut.g_live_link.swd_link.link_done,dut.g_live_link.swd_link.op,dut.g_live_link.swd_link.transaction.state,
+         dut.g_live_link.swd_link.transaction.next_state,dut.g_live_link.swd_link.transaction.count,dut.g_live_link.swd_link.link_ack);
+   always @(posedge clk) if($test$plusargs("wiretrace") && dut.jtag_debug_valid)
+       $display("LIVE_JTAG req=%h rx=%h scan=%h ack=%b mem=%h",dut.u_jtag_core.req,
+            dut.u_jtag_core.phy_rx[47:0],dut.u_jtag_core.scan_result,dut.u_jtag_core.scan_ack,target.u_sys.mem[4096]);
+   selectio_clocking io(.ref_clk(ref_clk),.resetn(rst_n),.calibrated(calibrated),
+     .jtag_hold(1'b1),.swd_hold(1'b1),.legacy_released(released),
+     .live_jtag(live_jtag),.live_swd(live_swd),.aux_request(1'b0),.serial_clk(serial_ck),.quad_clk(quad_ck),
+     .octet_clk(octet_ck),.phy_reset(phy_reset),.owner(owner));
+ end
+ swd_controller #(.SELECTIO(FAST_IO),.ENABLE_DIAGNOSTICS(ENABLE_DIAGNOSTICS)) dut(.clk(clk),.rst_n(rst_n),
   .s_axi_awaddr(aw),.s_axi_awprot(3'd0),.s_axi_awvalid(av),.s_axi_awready(awr),
   .s_axi_wdata(wd),.s_axi_wstrb(4'hf),.s_axi_wvalid(wv),.s_axi_wready(wr),.s_axi_bvalid(bv),.s_axi_bready(1'b1),
   .s_axi_araddr(ar),.s_axi_arprot(3'd0),.s_axi_arvalid(rv),.s_axi_arready(arr),
@@ -33,14 +71,19 @@ module tb_cm3_jtag #(parameter integer ENABLE_DIAGNOSTICS=0);
   .cmd_bram_clk(clk),.cmd_bram_rst(1'b0),.cmd_bram_en(1'b0),.cmd_bram_we(4'd0),.cmd_bram_addr(32'd0),.cmd_bram_wrdata(32'd0),
   .rsp_bram_clk(clk),.rsp_bram_rst(1'b0),.rsp_bram_en(1'b0),.rsp_bram_we(4'd0),.rsp_bram_addr(32'd0),.rsp_bram_wrdata(32'd0),
   .pkt_bram_clk(clk),.pkt_bram_rst(1'b0),.pkt_bram_en(pe),.pkt_bram_we(pw),.pkt_bram_addr(pa),.pkt_bram_wrdata(pd),.pkt_bram_rddata(pq),
+  .hs_serial_phase(serial_ck),.hs_quad_phase(quad_ck),.hs_octet_phase(octet_ck),.hs_reset(phy_reset),
+  .hs_owner(owner),.hs_jtag_lanes(24'hffff00),.hs_swd_ckslots(4'd0),.hs_swd_data(4'hf),.hs_swd_release(4'hf),
+  .hs_tdo_load(1'b0),.hs_swdio_load(1'b0),.hs_tdo_tap(5'd0),.hs_swdio_tap(5'd0),
+  .hs_live_config(high_config),.hs_legacy_released(released),.hs_live_jtag(live_jtag),.hs_live_swd(live_swd),
   .swclk(tck),.swdio(tms),.gpio_aux(pads),.gpio_out(aux_out),.gpio_tri(aux_tri),.gpio_in());
- wire cm3_tdo,cm3_ntdoen,cm3_swdo,cm3_swdoen,cm3_jtagnsw;
- wire bypass_tdo;
+
+ assign #(0.8) tms=select_swd && (cm3_swdoen===1'b1) ? cm3_swdo : 1'bz;
+
  wire bypass_mode=$test$plusargs("bypass");
  jtag_dp_model #(.IRLEN(5),.DUMMY(1)) boundary_tap(
   .rst_n(rst_n),.tck(tck),.tms(tms),.tdi(pads[0]),.tdo(bypass_tdo));
  wire [31:0] cm3_sysout; wire [15:0] cm3_writes;
- assign target_tdo = cm3_ntdoen ? 1'bz : cm3_tdo;
+ assign target_tdo = cm3_ntdoen ? (FAST_IO ? 1'b1 : 1'bz) : cm3_tdo;
  cm3_target #(.WORDS(8192),.ADDR_BITS(13)) target(
   .clk(target_clk),.rst_n(rst_n),.dbg_rst_n(rst_n),.trst_n(rst_n),
   .swclktck(tck),.swditms(tms),.tdi(bypass_mode ? bypass_tdo : pads[0]),
@@ -73,7 +116,7 @@ module tb_cm3_jtag #(parameter integer ENABLE_DIAGNOSTICS=0);
    while(s[0] && n<2000)begin read_reg(4,s);n=n+1;end
    retries=retries+1;
   end
-  if(s[0] || s[3:1]!=1)$fatal(1,"scalar failed req=%h status=%h",req,s);
+  if(s[0]!==0 || s[3:1]!==1)$fatal(1,"scalar failed req=%h status=%h",req,s);
  endtask
  task wait_packet;
   reg [31:0] d;integer n;
@@ -95,7 +138,10 @@ module tb_cm3_jtag #(parameter integer ENABLE_DIAGNOSTICS=0);
     $signed(dut.u_probe_stream.produced-safe_at_fault)>0)$fatal(1,"unvalidated HSS bank published");
  initial begin
   for(i=0;i<8192;i=i+1)target.u_sys.mem[i]=32'h12340000+i;
+  if(FAST_IO) #250;
   repeat(6)@(negedge clk);rst_n=1;
+  if(FAST_IO) begin wait(owner==1);repeat(12)@(negedge clk);end
+  if(!FAST_IO) begin
   aux_tri=4'ha;aux_out=4'hc;repeat(2)@(negedge clk);
   if(pads[0]!==0)$fatal(1,"GPIO TDI pad cannot drive low");
   aux_out=4'hd;repeat(2)@(negedge clk);
@@ -105,10 +151,31 @@ module tb_cm3_jtag #(parameter integer ENABLE_DIAGNOSTICS=0);
   write_reg('h94,'h107);
   if(pads[0]!==1)$fatal(1,"JTAG manual TDI cannot drive high");
   write_reg('h94,0);
-  write_reg('h80,3);write_reg('h84,4|(bypass_mode ? (5<<19) : 0));
+  end
+  write_reg('h80,select_swd ? 2 : 3);write_reg('h84,4|(bypass_mode ? (5<<19) : 0));
   write_reg('h88,bypass_mode ? 'h100 : 0);
   write_reg('h08,1|((cfg_idle&15)<<4));write_reg('h8c,0);
   write_reg('h98,(late_mode ? 16 : 0)|(q1_mode ? 1 : 0));
+  if(FAST_IO) begin
+    high_config=(33<<18)|(2<<14)|(21<<7)|(12<<1)|1;
+    wait(owner==(select_swd ? 3 : 2));
+    repeat(16) @(posedge clk);
+    if(select_swd) begin
+      write_reg(12,152);
+      write_reg(16,32'hffffffff);write_reg(20,32'hffffffff);
+      write_reg(24,32'hffffe79e);write_reg(28,32'hffffffff);
+      write_reg(32,32'h0000ffff);write_reg(0,1);
+      wait(dut.core_busy);wait(!dut.core_busy);
+      transfer(2,0);read_reg(24,d);
+      if(d!==32'h2ba01477)$fatal(1,"live SWD DPIDR %h",d);
+    end
+    if(!select_swd) begin
+      write_reg(12,88);write_reg(16,32'hffffffff);write_reg(20,32'hffffffff);
+      write_reg(24,32'h001fe73c);write_reg(0,1);
+      wait(dut.core_busy);wait(!dut.core_busy);
+    end
+    transfer(0,'h1e);transfer(4,'h50000000);transfer(8,0);
+  end else begin
   // Earliest legal status poll: AR is accepted on the very edge where the
   // serial backend consumes the registered start pulse. Busy must include
   // that pulse, or a fast PS can consume the previous command's ACK/data.
@@ -121,7 +188,8 @@ module tb_cm3_jtag #(parameter integer ENABLE_DIAGNOSTICS=0);
   @(negedge clk);wait(!dut.core_busy);repeat(3)@(negedge clk);
   transfer(0,'h1e);transfer(4,'h50000000);transfer(8,0);
   // Multi-word AP write: the board corrupts every fourth word from the third on.
-  transfer(1,'h50000032);          // AP CSW: 32-bit, single increment (4 is DP CTRL/STAT)
+  end
+  transfer(1,FAST_IO ? 32'h23000052 : 32'h50000032);          // AP CSW: 32-bit, single increment (4 is DP CTRL/STAT)
   transfer(5,'h60004000);
   if($test$plusargs("benchmark"))begin run_transport_benchmark(clk_ns);$finish;end
   for(i=0;i<8;i=i+1)transfer(8'h0d,32'h11110000+i);
@@ -176,9 +244,9 @@ module tb_cm3_jtag #(parameter integer ENABLE_DIAGNOSTICS=0);
   end else if(d!==0)$fatal(1,"compact build exposed diagnostic history %h",d);
   if($test$plusargs("writes_only"))begin $display("PASS JTAG scalar, batch and packet writes");$finish;end
   // No AXI operations per sample: configure once, then PL fills a bank.
-  cfg(0,4);cfg(1,2);cfg(2,32);cfg(5,1);
+  cfg(0,4);cfg(1,2);cfg(2,service_ticks);cfg(5,1);
   for(i=0;i<4;i=i+1)cfg(16+i,i);
-  write_reg('h78,120000000);write_reg('h68,0);write_reg('h6c,'h60000000);write_reg('h70,32);
+  write_reg('h78,FAST_IO?133333333:120000000);write_reg('h68,0);write_reg('h6c,'h60000000);write_reg('h70,service_ticks);
   hss_t0=$time;hss_total=0;
   put(0,1);write_reg('h60,'h101);samples=0;packets=0;
   while(samples!=124 && packets<8)begin
@@ -208,6 +276,7 @@ module tb_cm3_jtag #(parameter integer ENABLE_DIAGNOSTICS=0);
   end
   put(0,0);put(12,1);wait(target.u_sys.mem['h2408/4]==2050);wait(!dut.rtt_active);
   $display("JTAG_PERF clk_ns=%f hss_samples=%0d hss_cycles=%0d rtt_bytes=%0d rtt_cycles=%0d",clk_ns,hss_total,(hss_t1-hss_t0)/clk_ns,2048,(rtt_t1-rtt_t0)/clk_ns);
+  if(FAST_IO) $display("SELECTIO_SERVICES_PASS swd=%0d physical=100MHz",select_swd);
   $display("PASS JTAG full pipeline: physical pad mux, AXI setup, autonomous HSS, posted timestamps/data, packet sticky-error fence/drop, immutable banks, RTT unaligned 1KiB split, DDR-before-RdOff");$finish;
  end
  initial begin #(clk_ns*4000000);$fatal(1,"JTAG pipeline watchdog");end

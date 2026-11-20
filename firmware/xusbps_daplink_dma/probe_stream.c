@@ -1,3 +1,4 @@
+#include "selectio_mode.h"
 // Probe-side RTT bridge and HSS transport. USB IRQs only move bounded messages;
 // target access, ownership changes and packet construction run in main.
 #include "probe_stream.h"
@@ -10,7 +11,9 @@
 #include "xusbps_endpoint.h"
 #include <string.h>
 #include "dap_wait.h"
-#if defined(DAP_MAX_SWCLK_HZ)
+#if DAP_SELECTIO
+#define PROBE_MAX_LINK_HZ 100000000U
+#elif defined(DAP_MAX_SWCLK_HZ)
 // Share the explicitly timing-verified build limit with DAP_SWJ_Clock.
 #define PROBE_MAX_LINK_HZ DAP_MAX_SWCLK_HZ
 #elif defined(DAP_FIXED_FCLK0_TEST) && DAP_FIXED_FCLK0_TEST
@@ -30,6 +33,9 @@ __attribute__((weak)) int probe_target_claimed(void) { return 0; }
 #define PR(n) Xil_In32(PK(n))
 #define PW(n,v) Xil_Out32(PK(n),(v))
 static uint32_t link_clock(uint32_t fclk) {
+#if DAP_SELECTIO
+    if(selectio_live_active()) return selectio_live_hz();
+#endif
     uint32_t cfg = Xil_In32(0x40010008U);
     uint32_t half_cycles = 1U + ((cfg >> 13) & 15U) + (((cfg >> 28) & 15U) << 4);
     return fclk / (2U * half_cycles);
@@ -83,7 +89,8 @@ static uint8_t native_route; /* bit 0: RTT UP, bit 1: scope sample packets */
 #endif
 static uint8_t mode; // 0 stopped, 1 RTT, 2 HSS
 static int8_t result;
-static uint32_t requested_hz = 50000000, actual_hz;
+#define INITIAL_STREAM_HZ (PROBE_MAX_LINK_HZ<50000000U ? PROBE_MAX_LINK_HZ : 50000000U)
+static uint32_t requested_hz = INITIAL_STREAM_HZ, actual_hz;
 static uint32_t swd_errors, yields;
 static uint32_t irq_save(void) {
     uint32_t v = mfcpsr();
@@ -989,7 +996,7 @@ static void control(const uint8_t *req, uint8_t *res) {
         break;
     }
     if (requested_hz < 1000000 || requested_hz > PROBE_MAX_LINK_HZ) {
-        requested_hz = 50000000;
+        requested_hz = INITIAL_STREAM_HZ;
         rc = -6;
     }
     if (act != 2 && act != 9 && act != 11)

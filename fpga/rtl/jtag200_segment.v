@@ -98,7 +98,7 @@ module jtag200_segment (
                 modes <= tms_data;
                 data <= tdi_data;
                 left <= count;
-                limit <= !capture ? 7'd0 : count > 44 ? 7'd44 : count[6:0];
+                limit <= !capture ? 7'd0 : count > 64 ? 7'd64 : count[6:0];
                 sampled <= 0;
                 // The first emitted word now immediately follows start.
                 // The calibrated pad/serializer offset is independent of the

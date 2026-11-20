@@ -1,3 +1,4 @@
+#include "selectio_mode.h"
 // CMSIS-DAP JTAG glue. All TCK/TMS/TDI/TDO cycles execute in PL.
 #include "DAP_config.h"
 #include "DAP.h"
@@ -163,6 +164,9 @@ int DAP_JTAG_Select(uint32_t index) {
     if(swd_read32(JTAG_DR_CONFIG)!=dr) {swd_write32(JTAG_DR_CONFIG,dr);timing_dirty=1;}
     DAP_Data.jtag_dev.index=(uint8_t)index;
     swd_write32(JTAG_OPERATION,0);
+#if DAP_SELECTIO
+    if(selectio_live_active()) {timing_dirty=0;return 0;}
+#endif
     return timing_dirty ? calibrate() : 0;
 }
 static uint8_t run(uint32_t op,uint32_t request,uint32_t *value) {

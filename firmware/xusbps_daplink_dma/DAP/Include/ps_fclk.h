@@ -20,7 +20,7 @@ static inline uint32_t ps_fclk_decode(uint32_t control_address) {
 
 static inline uint32_t ps_fclk0_hz(void) { return ps_fclk_decode(0xf8000170U); }
 
-#if DAP_FIXED_FCLK0_TEST || (defined(DAP_MAX_SWCLK_HZ) && DAP_MAX_SWCLK_HZ >= 66666666U)
+#if DAP_SELECTIO || DAP_FIXED_FCLK0_TEST || (defined(DAP_MAX_SWCLK_HZ) && DAP_MAX_SWCLK_HZ >= 66666666U)
 /* Explicit 133MHz profile: fixed-SWD experiment or opt-in RISC-V top rate.
  * Never retune any PLL, CPU/DDR clock or FCLK1. */
 static inline int ps_fixed133_select(void) {

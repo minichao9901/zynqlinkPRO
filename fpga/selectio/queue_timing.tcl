@@ -3,7 +3,7 @@
 # DONE crosses back, and the worker holds the results until the next request.
 # Bound the physical crossing to one fastest AXI cycle. Do not relax the pad,
 # compatibility, clock gearbox, trace receiver, or either intra-domain path.
-foreach {engine divided} {sio_jtag octet_raw sio_swd quad_raw} {
+foreach {engine divided} {sio_jtag octet_raw sio_swd quad_raw sio_aux quad_raw} {
     set fast_regs [filter [all_registers -clock [get_clocks clk_fpga_0]] "NAME =~ */$engine/inst/* && REF_NAME =~ FD*"]
     set link_regs [filter [all_registers -clock [get_clocks $divided]] "NAME =~ */$engine/inst/* && REF_NAME =~ FD*"]
     if {![llength $fast_regs] || ![llength $link_regs]} {error "Missing queue domains for $engine"}
@@ -16,3 +16,13 @@ foreach {engine divided} {sio_jtag octet_raw sio_swd quad_raw} {
 set meta [get_cells -hier -filter {NAME =~ *g_selectio*legacy_meta_reg* && REF_NAME =~ FD*}]
 if {[llength $meta]!=5} {error "Missing five compatibility input synchronizers"}
 set_max_delay -datapath_only 7.500 -from [get_clocks clk_fpga_0] -to $meta
+
+# Live DAP descriptors remain stable until the corresponding completion toggle.
+# These constraints apply only to the two handoff engines, not the serializer.
+foreach {link divided} {swd_link quad_raw jtag_link octet_raw} {
+    set io_regs [filter [all_registers -clock [get_clocks $divided]] "NAME =~ *g_live_link.$link/* && REF_NAME =~ FD*"]
+    set host_regs [filter [all_registers -clock [get_clocks clk_fpga_0]] "NAME =~ *g_live_link.$link/crossing/* && REF_NAME =~ FD*"]
+    if {![llength $io_regs] || ![llength $host_regs]} {error "Missing live $link crossing"}
+    set_max_delay -datapath_only 7.500 -from [get_clocks clk_fpga_0] -to $io_regs
+    set_max_delay -datapath_only 7.500 -from [get_clocks $divided] -to $host_regs
+}
