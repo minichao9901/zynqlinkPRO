@@ -6,6 +6,23 @@
 
 PS 负责 USB、会话、DMA、错误恢复和 RTT/变量并发调度。PL 的固定事务引擎负责 TAP 状态转换、APACC、SWD 换向、ACK、批量传输、串行编解码和采样。主机可以提交有限长度的事务描述符，PS 可以重用并修补描述符。逐边沿时序由 SelectIO 产生。这个实现不需要通用微码解释器。ETM 延用主线的独立采集时钟、DDR 窗口、USB 下载及离线解码。
 
+```mermaid
+flowchart LR
+    Host[PC CLI / CMSIS-DAP / CDC] <--> USB[Zynq PS USB 2.0 HS]
+    USB <--> PS[PS 会话、错误恢复和 DDR 队列]
+    PS <--> DMA[CDMA 与分组 BRAM]
+    DMA <--> AP[JTAG / SWD 批量事务]
+    PS <--> Live[CMSIS-DAP / RTT / HSS 引擎]
+    AP <--> PHY[共享 SelectIO 引脚]
+    Live <--> PHY
+    PS <--> AUX[SPI / UART / Manchester]
+    PHY <--> AUX
+    ETM[四位 ETM 输入] --> DDR[主线 ETM DDR 采集窗口]
+    DDR --> USB
+```
+
+高速内存路径在 GP1 配置队列，CDMA 对每种协议的四个 TX/RX bank 搬运数据。标准 DAP、独立 RTT 和独立变量采样复用实时 AP 事务通道；并发采集由 PS 在单次 AP 会话内安排采样和有界的 RTT 读取。串口接收的 FPGA 环有 64 KiB，PS 在前台转入 2 MiB DDR。完整 SWO 缓冲容量以 IF0 的 DAP_Info 或 IF4 的 info 为准。
+
 | J7 信号对应的 Zynq 球位 | 调试 | SPI 主机 | 串行 |
 |---|---|---|---|
 | L15 | TCK / SWCLK | SCK | — |
@@ -27,7 +44,7 @@ SWD 只需 L15、L16，可与使用 L14 的被动监听共存。JTAG 占用 TDI/
 | IF3，HID | 06 OUT、86 IN | 主线探针控制与状态 |
 | IF4，WinUSB，FF/53/01 | 01 OUT、84 IN | 高速 SRAM、RTT、变量、SPI、UART/SWO 和并发流 |
 
-历史 RTT 上行可走 CDC。历史变量波形走专用 EP87，载荷是 HSS 帧。现在 RTT 和变量使用 IF4 的独立通道和队列，普通串口软件可以继续使用 CDC。协议头包含长度、序号和状态；消费指针在对应 IN 完成后推进。内存读写可设队列深度 1–4。物理 SWO 可走 IF4，也可走标准 CMSIS-DAP 的 SWO_Transport=1、SWO_Data 轮询。固件声明 UART 与 Manchester 能力、64 KiB 接收缓冲和测试域时间戳。EP87 继续给 HSS 使用。[描述符与协议](../selectio-native.md)
+历史 RTT 上行可走 CDC。历史变量波形走专用 EP87，载荷是 HSS 帧。现在 RTT 和变量使用 IF4 的独立通道和队列，普通串口软件可以继续使用 CDC。协议头包含长度、序号和状态；消费指针在对应 IN 完成后推进。内存读写可设队列深度 1–4。物理 SWO 可走 IF4，也可走标准 CMSIS-DAP 的 SWO_Transport=1、SWO_Data 轮询。固件声明 UART 与 Manchester 能力、接收缓冲容量和测试域时间戳。EP87 继续给 HSS 使用。[描述符与协议](../selectio-native.md)
 
 ## 识别、临时加载及调试
 
@@ -40,6 +57,8 @@ python -X utf8 toolbox.py selectio --serial 12345678 info
 python -X utf8 toolbox.py selectio usb-test --seconds 60
 python -X utf8 toolbox.py selectio --help
 ```
+
+info 同时显示实际枚举的五个接口、各端点、PS 固件 ABI、队列深度、原生块头大小和 PL 特性字。link_hz 是由真实参考寄存器换算的高速模式线速。兼容 DAP 使用不超过 10 MHz 的初始化档，显式请求 100 MHz 切换到专用 PHY。
 
 下例的时隙值用于通过验证的特定版次。更换 bit 后按对应 manifest 选择 slot。tap 是输入 IDELAY 档位，slot 单位为 2.5 ns 的 DDR 时隙，idle 是事务间的空闲周期。F103 上电后的应用可能关闭完整 JTAG，使用 JTAG 前须确认目标的 AFIO 配置。示例先在 1 MHz 识别，再切到 100 MHz。退出 GDB 可用 `detach`。
 

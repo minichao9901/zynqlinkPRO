@@ -43,10 +43,11 @@ def encode(data,manchester):
     return bytes(sum(bit<<(7-j) for j,bit in enumerate(bits[i:i+8])) for i in range(0,len(bits),8))
 
 
-def captured(port,cfg,data):
+def captured(port,cfg,data,op=2,raw=None):
     port.exchange(4,0,cfg)
     try:
-        port.exchange(4,2,data)
+        port.exchange(4,op,data)
+        if raw is not None:raw.extend(port.exchange(4,7))
         port.exchange(4,3)
         output=bytearray()
         while True:
@@ -58,12 +59,143 @@ def captured(port,cfg,data):
     finally:port.exchange(4,5)
 
 
+def sparse_waveform(data,advance):
+    symbols=[]
+    for first in range(0,len(data),8):
+        symbols.extend((1,0))
+        for v in data[first:first+8]:
+            for j in range(8):
+                bit=(v>>j)&1
+                symbols.extend((bit,1-bit))
+        symbols.extend([0]*12)
+    events=[(8+i*8,0) for i in range(8)]
+    previous=0
+    for i,level in enumerate(symbols):
+        if previous!=level:events.append((100+i*2,level));previous=level
+    end=100+len(symbols)*2
+    events.extend([(end+8,0),(end+16,0)])
+    slots=8*((end+40+7)//8)
+    c=[0]*slots;d=[0]*slots;prior_fall=0;prior_rise=0
+    for i,(fall,out) in enumerate(events):
+        width=2 if fall-prior_fall>=4 else 1
+        rise=fall-width;c[rise:fall]=[1]*width
+        begin=prior_rise+1 if advance else prior_fall
+        bit=events[i+1][1] if i+1<len(events) else 0
+        d[begin:fall]=[bit]*(fall-begin)
+        prior_rise=rise;prior_fall=fall
+    result=bytearray()
+    for at in range(0,slots,8):
+        result.extend((sum(c[at+i]<<i for i in range(8)),0,sum(d[at+i]<<i for i in range(8))))
+    return bytes(result)
+
+def pad_waveform(encoded):
+    # Apply two identical 2.5 ns DDR slots per Manchester half-bit. TCK
+    # remains low, independently isolating pad reception from the target TAP.
+    bits=[(b>>i)&1 for b in encoded for i in range(7,-1,-1) for _ in range(2)]
+    return bytes(v for i in range(0,len(bits),8) for v in (0,0,sum(bits[i+j]<<j for j in range(8))))
+
+
+def raw_alignment(data,observed):
+    # A 32-symbol idle guard at each end accommodates actual gearbox latency.
+    # Check the complete encoded frames between those guards.
+    levels=[(data[i]>>j)&1 for i in range(2,len(data),3) for j in range(8)]
+    raw=[(b>>j)&1 for b in observed for j in range(8)]
+    begin,end=64,len(levels)-64
+    scores=[]
+    for lag in range(64):
+        if end+lag<=len(raw):
+            errors=sum(levels[i]!=raw[i+lag] for i in range(begin,end))
+            scores.append((errors,lag))
+    errors,delay=min(scores)
+    return dict(compared_ddr_slots=end-begin,delta_slots=delay,different_samples=errors)
+
+
+def extended_tests(tx,rx,port,seconds,rows,save,only=None,features=0):
+    # In SPI tests the remote target contains two single-bit BYPASS cells.
+    # The returned bit offset includes the orientation of the sampling edge.
+    cases=[("spi-mode0",0,0,0,100000000,0)]
+    cases.extend((f"spi-pad-mode{mode}",0,0,mode,100000000,1) for mode in range(4))
+    cases.extend([
+        ("uart-tx-remote",1,3,0,100000000,2),
+        ("uart-rx-remote",1,0,0,100000000,0),
+        ("manchester50-remote",2,2,0,50000000,0),
+        ("manchester100-tdi-pad",2,2,0,100000000,1),
+        ("manchester100-sparse-remote",2,2,0,100000000,0),
+    ])
+    for kind,codec,drive,mode,rate,flags in cases:
+        if only and kind not in only:continue
+        row=dict(kind=kind,rate=rate,mode=mode,passed=False,points=[])
+        rows.append(row)
+        def attempt(tap,slot,iteration,probe):
+            install_bypass(tx,rx)
+            n=64 if probe else 2048 if codec==0 else 96 if codec==1 else 32
+            if codec==2: n=32
+            sample=hashlib.shake_256(kind.encode()+struct.pack("<I",iteration)).digest(n)
+            op=2
+            if kind=="manchester100-sparse-remote":
+                sample=b"\xaa"*32
+                wire=sparse_waveform(sample,True)
+                op=8
+            elif kind=="manchester100-tdi-pad":
+                wire=pad_waveform(encode(sample,True))
+                op=8
+            elif codec==0 or drive==3: wire=sample
+            else: wire=encode(sample,codec==2)
+            cfg=struct.pack("<BBBBIBB",codec,drive,mode,slot,rate,tap,flags)
+            raw=bytearray() if kind=="manchester100-tdi-pad" and features&0x2000 else None
+            got,status=captured(port,cfg,wire,op,raw)
+            if raw is not None and (probe or got!=sample or any(status[:3])):
+                row["applied_waveform"]=raw_alignment(wire,raw)
+            if kind.startswith("spi-pad"):
+                return got==sample and not any(status[:3]),len(got),0,status,got[:12].hex()
+            delay=0
+            if codec==0:
+                source=int.from_bytes(sample,"big")
+                for delay in range(1,5):
+                    if got==(source>>delay).to_bytes(n,"big"):break
+                else:delay=-1
+                ok=delay>0
+            else:ok=got==sample
+            return ok and not any(status[:3]),len(got),delay,status,got[:12].hex()
+        winner=None
+        for tap in (0,8,16,24,4,12,20,28):
+            slots=(22,20,24,18,26,16,28,19,21,23,25,27,29,30,12,13,14,15,17,31,32,33,34,35) if codec==0 else (20,21) if codec==2 else (20,)
+            for slot in slots:
+                ok,n,delay,status,head=attempt(tap,slot,0,True)
+                row["points"].append(dict(tap=tap,slot=slot,ok=ok,bytes=n,returned_delay=delay,
+                                          overflow=status[1],framing=status[2],prefix=head))
+                save()
+                if ok:
+                    checks=8 if codec==2 else 2
+                    for seed in range(1,checks+1):
+                        more_ok,_,more_delay,_,_=attempt(tap,slot,seed,True)
+                        if not more_ok or more_delay!=delay:break
+                    else:
+                        winner=(tap,slot,delay)
+                        break
+            if winner:break
+        if not winner:
+            print(kind,"no matching physical return",flush=True)
+            continue
+        first=time.monotonic();cycles=total=0;row["passed"]=True
+        while time.monotonic()-first<seconds:
+            ok,n,delay,status,head=attempt(winner[0],winner[1],cycles+1,False)
+            if not ok or delay!=winner[2]:
+                row.update(passed=False,failure=dict(cycle=cycles,status=status,prefix=head));break
+            total+=n;cycles+=1
+        row.update(tap=winner[0],slot=winner[1],transactions=cycles,confirmed_bytes=total,
+                   elapsed=time.monotonic()-first,returned_delay=winner[2]);save()
+        print(kind,row["passed"],total,flush=True)
+
+
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--serial",default="12345678")
     parser.add_argument("--out",required=True,type=Path)
     parser.add_argument("--seconds",type=float,default=10)
     parser.add_argument("--execute",action="store_true")
+    parser.add_argument("--extended",action="store_true",help="qualify all four SPI modes, dedicated UART TX and loaded-pad Manchester at 100 Mbit/s")
+    parser.add_argument("--only",action="append",help="select one named extended wire test")
     args=parser.parse_args()
     if not args.execute:
         print("Select the BYPASS instruction on both F103 TAPs, clock known symbols through TDI/TDO, then restore debug routing.")
@@ -73,8 +205,11 @@ def main():
     def save():
         (args.out/"wire.json").write_text(json.dumps(rows,indent=2)+"\n")
     with connection(args.serial) as (tx,rx), native_connection(args.serial,tx.device) as port:
-        port.info()
+        features=int(port.info()["features"],16)
         try:
+            if args.extended:
+                extended_tests(tx,rx,port,args.seconds,rows,save,args.only,features)
+                return 0 if all(r.get("passed") for r in rows) else 1
             for kind in ("spi","uart","manchester"):
                 result=dict(kind=kind,points=[])
                 rows.append(result)

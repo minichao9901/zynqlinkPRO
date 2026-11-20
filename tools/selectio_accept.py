@@ -9,7 +9,7 @@ import sys
 import time
 
 ROOT=Path(__file__).resolve().parents[1]
-SUITES=("usb","debug","memory","rtt","scope","combo","wire","cdc","itm","etm")
+SUITES=("usb","switch","debug","memory","rtt","scope","combo","wire","cdc","itm","etm")
 
 
 def main(argv=None):
@@ -79,6 +79,11 @@ def main(argv=None):
     if "usb" in selected:
         for i in range(args.rounds):
             run("usb-"+str(i+1),[*cli,"selectio","--serial",args.serial,"usb-test","--seconds",args.seconds])
+    if "switch" in selected:
+        test("switch","selectio_mode_switch_test.py",["--swd-slot",identity["swd"]["slot"],
+             "--jtag-slot",identity["jtag"]["slot"],"--rounds",64])
+        if identity.get("native_stream_lease_seconds"):
+            test("host-loss","selectio_abandon_test.py",[])
     producer=None
     if "rtt" in selected or "combo" in selected:
         producer=fixture("probe_rtt_ram.S","producer",["-Wa,--defsym,FIXTURE_BASE=0x20008000",
@@ -95,9 +100,13 @@ def main(argv=None):
                 [*common,"--seconds",args.seconds,"--service",service,"--binary",producer])
     if "scope" in selected:test("services","selectio_services_accept.py",["--swd-slot",identity["swd"]["slot"],
                        "--jtag-slot",identity["jtag"]["slot"],"--confirm-seconds",args.seconds])
-    if "wire" in selected:test("wire","selectio_wire_test.py",["--extended","--seconds",args.seconds])
+    if "wire" in selected:
+        test("wire","selectio_wire_test.py",["--extended","--seconds",args.seconds])
+        test("spi-target","selectio_spi_target_test.py",["--seconds",args.seconds])
     if "cdc" in selected:test("cdc","selectio_cdc_test.py",["--binary",fixture("selectio_f103_uart_echo.S","echo"),
                        "--swd-slot",identity["swd"]["slot"]])
+    if "cdc" in selected and identity.get("cdc_bypass_qualification"):
+        test("cdc-100m","selectio_cdc_wire_test.py",["--seconds",args.seconds])
     if "itm" in selected:
         binary=fixture("selectio_f103_itm_words.S","itm_words")
         for path in ("native","cmsis-dap"):

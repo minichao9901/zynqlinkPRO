@@ -14,7 +14,8 @@ module selectio_debug_phy (
     inout wire clock_pin, data_pin, tdi_pin, input wire tdo_pin,
     output wire clock_level, data_level, tdi_level, tdo_level,
     input wire aux_spi, input wire [3:0] aux_sck,aux_cs,aux_tx,
-    output wire [3:0] aux_rx, input wire uart_sideband, monitor_tdi
+    output wire [3:0] aux_rx, input wire uart_sideband, monitor_tdi,
+    input wire serial_rx_clk, output wire [7:0] aux_wide_rx
 );
     // Aligned rising edges: observe the toggle on the intervening quartet
     // edge. At the next shared edge the serializer consumes the upper half.
@@ -25,12 +26,15 @@ module selectio_debug_phy (
     wire [3:0] jclock = first_half ? jtag_lanes[3:0] : jtag_lanes[7:4];
     wire [3:0] jdata = first_half ? jtag_lanes[11:8] : jtag_lanes[15:12];
     wire [3:0] jtdi = first_half ? jtag_lanes[19:16] : jtag_lanes[23:20];
-    wire [3:0] tdo_samples;
-    wire [3:0] tdi_samples;
-    assign aux_rx=monitor_tdi ? tdi_samples : tdo_samples;
+    wire [7:0] tdo_wide,tdi_wide;
+    assign aux_wide_rx=monitor_tdi ? tdi_wide : tdo_wide;
+    // Preserve the 400 MS/s quad interface for JTAG, SPI and UART.
+    assign aux_rx={aux_wide_rx[6],aux_wide_rx[4],aux_wide_rx[2],aux_wide_rx[0]};
     reg [3:0] previous_samples;
-    always @(posedge quad_clk) previous_samples <= tdo_samples;
-    always @(posedge octet_clk) jtag_samples <= {tdo_samples, previous_samples};
+    // The qualification mode can capture the same loaded TDI pad used by
+    // the auxiliary decoder, so the applied symbols can be checked separately.
+    always @(posedge quad_clk) previous_samples <= aux_rx;
+    always @(posedge octet_clk) jtag_samples <= {aux_rx, previous_samples};
 
     // The compatibility controller has a programmable FCLK. Its low-rate
     // pin levels cross into the fixed quartet clock while each SWJ half bit
@@ -64,8 +68,8 @@ module selectio_debug_phy (
     // next OSERDES word. Sample offsets include this additional quartet.
     always @(posedge quad_clk) swd_samples<=captured_swd;
     selectio_rx data_rx(serial_clk, quad_clk, reset, swdio_input, tap_clk, swdio_load, swdio_tap, captured_swd, data_level);
-    selectio_rx tdi_rx(serial_clk,quad_clk,reset,tdi_input,tap_clk,tdo_load,tdo_tap,tdi_samples,tdi_level);
-    selectio_rx tdo_rx(serial_clk, quad_clk, reset, tdo_input, tap_clk, tdo_load, tdo_tap, tdo_samples, tdo_level);
+    selectio_rx #(.WIDTH(8)) tdi_rx(serial_rx_clk,quad_clk,reset,tdi_input,tap_clk,tdo_load,tdo_tap,tdi_wide,tdi_level);
+    selectio_rx #(.WIDTH(8)) tdo_rx(serial_rx_clk, quad_clk, reset, tdo_input, tap_clk, tdo_load, tdo_tap, tdo_wide, tdo_level);
 endmodule
 
 module selectio_tx(input wire serial_clk, quad_clk, reset, input wire [3:0] data, release_bits,
@@ -80,21 +84,23 @@ module selectio_tx(input wire serial_clk, quad_clk, reset, input wire [3:0] data
     );
 endmodule
 
-module selectio_rx(input wire serial_clk, quad_clk, reset, pad, tap_clk, load,
-                   input wire [4:0] tap, output wire [3:0] samples, output wire pad_level);
+module selectio_rx #(parameter WIDTH=4)(input wire serial_clk, quad_clk, reset, pad, tap_clk, load,
+                   input wire [4:0] tap, output wire [WIDTH-1:0] samples, output wire pad_level);
     wire delayed;
+    wire [7:0] q;
+    assign samples=q[7 -: WIDTH];
     (* IODELAY_GROUP="ORBTRACE_INPUTS" *)
     IDELAYE2 #(.DELAY_SRC("IDATAIN"), .IDELAY_TYPE("VAR_LOAD"), .IDELAY_VALUE(0),
                .REFCLK_FREQUENCY(200.0), .HIGH_PERFORMANCE_MODE("TRUE"), .SIGNAL_PATTERN("DATA")) delay_line (
         .IDATAIN(pad), .DATAIN(1'b0), .DATAOUT(delayed), .C(tap_clk), .LD(load), .CNTVALUEIN(tap),
         .CE(1'b0), .INC(1'b0), .LDPIPEEN(1'b0), .REGRST(1'b0), .CINVCTRL(1'b0)
     );
-    ISERDESE2 #(.DATA_RATE("DDR"), .DATA_WIDTH(4), .INTERFACE_TYPE("NETWORKING"),
+    ISERDESE2 #(.DATA_RATE("DDR"), .DATA_WIDTH(WIDTH), .INTERFACE_TYPE("NETWORKING"),
                 .IOBDELAY("IFD"), .NUM_CE(1)) shift (
         .D(pad), .O(pad_level), .DDLY(delayed), .CLK(serial_clk), .CLKB(~serial_clk), .CLKDIV(quad_clk),
         .RST(reset), .CE1(1'b1), .CE2(1'b0), .BITSLIP(1'b0), .CLKDIVP(1'b0),
         .OCLK(1'b0), .OCLKB(1'b0), .DYNCLKDIVSEL(1'b0), .DYNCLKSEL(1'b0),
         .OFB(1'b0), .SHIFTIN1(1'b0), .SHIFTIN2(1'b0),
-        .Q1(samples[3]), .Q2(samples[2]), .Q3(samples[1]), .Q4(samples[0])
+        .Q1(q[7]), .Q2(q[6]), .Q3(q[5]), .Q4(q[4]), .Q5(q[3]), .Q6(q[2]), .Q7(q[1]), .Q8(q[0])
     );
 endmodule

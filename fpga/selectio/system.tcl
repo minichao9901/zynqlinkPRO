@@ -30,6 +30,7 @@ foreach pins {
     {rst_ps7_0_50M/peripheral_aresetn sio_clock/resetn}
     {orbtrace_0/io_calibrated sio_clock/calibrated sio_jtag/delay_ready sio_swd/delay_ready}
     {sio_clock/serial_clk swd_controller_0/hs_serial_phase}
+    {sio_clock/serial_rx_clk swd_controller_0/hs_serial_rx_phase}
     {sio_clock/quad_clk sio_swd/word_clk swd_controller_0/hs_quad_phase sio_aux/quad_clk}
     {sio_clock/octet_clk sio_jtag/word_clk swd_controller_0/hs_octet_phase}
     {sio_clock/phy_reset swd_controller_0/hs_reset sio_aux/phy_reset}
@@ -48,6 +49,7 @@ foreach pins {
     {sio_aux/select_slots swd_controller_0/hs_aux_cs}
     {sio_aux/tx_slots swd_controller_0/hs_aux_tx}
     {swd_controller_0/hs_aux_rx sio_aux/pad_samples}
+    {swd_controller_0/hs_aux_wide_rx sio_aux/wide_samples}
     {sio_swd/live_config swd_controller_0/hs_live_config}
     {swd_controller_0/hs_live_jtag sio_clock/live_jtag}
     {swd_controller_0/hs_live_swd sio_clock/live_swd}

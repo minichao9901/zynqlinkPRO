@@ -83,9 +83,9 @@ module swd_controller #(
     output wire [31:0] pkt_bram_rddata,
 
     // J7 SelectIO option. Clock and transaction engines live on the BD.
-    input wire hs_serial_phase, hs_quad_phase, hs_octet_phase, hs_reset,
+    input wire hs_serial_rx_phase, hs_serial_phase, hs_quad_phase, hs_octet_phase, hs_reset,
     input wire [2:0] hs_owner,
-    input wire hs_monitor_tdi,hs_uart_request,output wire hs_uart_grant, input wire hs_aux_spi,input wire [3:0] hs_aux_sck,hs_aux_cs,hs_aux_tx,output wire [3:0] hs_aux_rx,
+    input wire hs_monitor_tdi,hs_uart_request,output wire hs_uart_grant, input wire hs_aux_spi,input wire [3:0] hs_aux_sck,hs_aux_cs,hs_aux_tx,output wire [3:0] hs_aux_rx, output wire [7:0] hs_aux_wide_rx,
     input wire [23:0] hs_jtag_lanes, output wire [7:0] hs_jtag_samples,
     input wire [3:0] hs_swd_ckslots, hs_swd_data, hs_swd_release,
     output wire [3:0] hs_swd_samples,
@@ -173,6 +173,7 @@ module swd_controller #(
     end
     if (SELECTIO) begin:g_selectio
         selectio_debug_phy phy(
+            .serial_rx_clk(hs_serial_rx_phase),.aux_wide_rx(hs_aux_wide_rx),
             .serial_clk(hs_serial_phase), .quad_clk(hs_quad_phase), .octet_clk(hs_octet_phase),
             .reset(hs_reset), .owner(hs_owner), .legacy_clock(clock_drive),
             .legacy_data(legacy_data), .legacy_release(legacy_release),
@@ -699,7 +700,7 @@ module swd_controller #(
                     ADDR_CTRL: begin
                         rdata_reg <= {16'd0, xfer_request, 5'd0, ctrl_timestamp_en, ctrl_mode, scalar_status_busy};
                     end
-                    ADDR_FEATURES: rdata_reg <= SELECTIO ? 32'h4450_1fff : 32'h4450_007f; // bit6: manual SWDIO direction; bit5: extended idle.
+                    ADDR_FEATURES: rdata_reg <= SELECTIO ? 32'h4450_7fff : 32'h4450_007f; // bit6: manual SWDIO direction; bit5: extended idle.
                     ADDR_ENGINE_RESET: rdata_reg <= engine_reset_count;
                     ADDR_TRACE_CTRL: rdata_reg <= {trace_frozen,trace_raw_mode,trace_raw_active,trace_raw_armed,8'd0,trace_count,trace_head};
                     ADDR_TRACE_INDEX: rdata_reg <= {28'd0,trace_index};

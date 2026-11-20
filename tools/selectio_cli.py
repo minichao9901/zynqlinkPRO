@@ -111,7 +111,7 @@ def standard_swo(args):
     from contextlib import ExitStack
     from selectio_cmsis_swo import cmsis_swo
     from selectio_f103_swo import f103_swo
-    if not 9600<=args.rate<=100000000 or args.seconds<0 or args.tap:
+    if not 9600<=args.rate<=100000000 or args.seconds<0 or args.tap or args.phase:
         raise ValueError("standard SWO uses the default tap, a positive rate and a nonnegative window")
     with ExitStack() as stack:
         if args.configure_f103:
@@ -163,7 +163,7 @@ def auxiliary(args):
         info=native.info()
         if not int(info["features"],16)&0x200: raise RuntimeError("the running PL does not contain the AUX engine")
         config=struct.pack("<BBBBIB",codec,int(bool(tx_data) and not spi),getattr(args,"mode",0),
-                           getattr(args,"slot",0),100000000 if spi else args.rate,args.tap)
+                           getattr(args,"slot",getattr(args,"phase",0)),100000000 if spi else args.rate,args.tap)
         def pull():
             nonlocal total
             value=native.exchange(channel,1)
@@ -337,6 +337,7 @@ def main():
             sub.add_argument("--rate",type=number,required=True,help="UART baud or Manchester information bits/s")
             sub.add_argument("--seconds",type=float,required=True)
         if action=="swo":
+            sub.add_argument("--phase",type=int,choices=(0,1),default=0,help="100 Mbit/s native Manchester sample phase")
             sub.add_argument("--usb-path",choices=("native","cmsis-dap"),default="native")
             sub.add_argument("--encoding",choices=["uart","manchester"],required=True)
             sub.add_argument("--configure-f103",action="store_true",help="configure and restore the CDC48 target ITM/TPIU")
@@ -434,6 +435,7 @@ def main():
         if args.action in ("info","usb-test"):
             with native_connection(args.serial) as native:
                 info=native.info()
+                if args.action=="info": info["usb"]=native.usb_descriptors()
                 if args.action=="usb-test":
                     if args.seconds<=0: parser.error("positive window required")
                     for n in (0,1,495,496,497,1008,2032,4079):

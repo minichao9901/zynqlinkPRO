@@ -185,7 +185,8 @@ static uint8_t DAP_Info(uint8_t id, uint8_t *info) {
     case DAP_ID_SWO_BUFFER_SIZE:
 #if DAP_SELECTIO
       if(swd_read32(SWD_FEATURES)&0x200U) {
-        info[0]=0;info[1]=0;info[2]=1;info[3]=0;length=4;
+        uint32_t bytes=SELECTIO_SERIAL_BUFFER_BYTES;
+        memcpy(info,&bytes,sizeof bytes);length=4;
       }
 #endif
 #if ((SWO_UART != 0) || (SWO_MANCHESTER != 0))

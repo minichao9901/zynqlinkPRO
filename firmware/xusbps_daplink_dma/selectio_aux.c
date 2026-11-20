@@ -14,6 +14,8 @@
 #define RD(off) swd_read32(AUX+(off))
 #define WR(off,value) swd_write32(AUX+(off),(value))
 static unsigned active_channel,exclusive,flags,read_only_stop,raw_test;
+static uint8_t rx_ddr[SELECTIO_SERIAL_DDR_BYTES] __attribute__((aligned(32)));
+static uint32_t rx_head,rx_tail,rx_fault;
 enum { CMSIS_SWO_CHANNEL=8 };
 static uint8_t swo_transport,swo_mode,swo_running;
 static uint32_t swo_rate,swo_consumed,swo_drops,swo_errors;
@@ -67,7 +69,20 @@ void selectio_swo_reset(void) {
     swo_transport=swo_mode=swo_running=0;
     swo_rate=swo_consumed=swo_drops=swo_errors=0;
 }
-void selectio_aux_reset(void){(void)restore();selectio_swo_reset();}
+int selectio_aux_native_owner(void) {
+    return !cdc_owns && (active_channel==4 || active_channel==5);
+}
+int selectio_aux_release_native(void) {
+    if(!selectio_aux_native_owner())return 0;
+    return (RD(4)&2U)?-1:restore();
+}
+int selectio_aux_reset(void) {
+    /* USB reset may occur partway through the slowest physical UART TX.
+     * Keep the cleanup pending until the pin sequencer has released it. */
+    if(active_channel && (RD(4)&2U)) return -1;
+    if(restore()) return -1;
+    selectio_swo_reset();return 0;
+}
 
 /* CONFIG payload: codec (0=raw SPI,1=8N1,2=Manchester), claim TX,
  * SPI mode, capture slot, little-endian information rate, input delay tap.
@@ -120,6 +135,7 @@ static int configure(unsigned ch,const uint8_t *p,unsigned size) {
     uint64_t sample_hz=2ULL*ref;
     uint32_t period=(uint32_t)((sample_hz*256U+rate/2U)/rate);
     if(period<1024) period=1024;
+    rx_head=rx_tail=rx_fault=0;
     active_channel=ch;exclusive=claim;saved_route=route;
     saved_fclk=Xil_In32(SLCR_FPGA0_CLK_CTRL);
     if(claim) {
@@ -154,10 +170,7 @@ static int configure(unsigned ch,const uint8_t *p,unsigned size) {
 failed:
     (void)restore();return -1;
 }
-static unsigned peek(uint8_t *out,unsigned capacity) {
-    uint32_t ptr=RD(0x20),n=RD(0x24);
-    if(n>65536) return 0;
-    if(n>capacity) n=capacity;
+static void copy_from_fpga(uint8_t *out,uint32_t ptr,unsigned n) {
     unsigned k=0;
     if((ptr&3U) && n) {
         uint32_t first=RD(0x10000U+(ptr&65532U));
@@ -174,16 +187,47 @@ static unsigned peek(uint8_t *out,unsigned capacity) {
         uint32_t last=RD(0x10000U+((ptr+k)&65532U));
         memcpy(out+k,&last,n-k);
     }
+}
+
+/* Free the PL ring after copying into private DDR. The host-visible tail
+ * remains outstanding until USB completion. Short polling gaps therefore
+ * do not exhaust the 64 KiB hardware receiver. */
+static void fill_rx(unsigned flush) {
+    if(!active_channel || rx_fault) return;
+    unsigned n=RD(0x24);
+    if(n>65536U) {rx_fault=1;return;}
+    if(!n || (!flush && n<256U)) return;
+    unsigned room=SELECTIO_SERIAL_DDR_BYTES-(rx_head-rx_tail);
+    unsigned index=rx_head&(SELECTIO_SERIAL_DDR_BYTES-1U);
+    unsigned contiguous=SELECTIO_SERIAL_DDR_BYTES-index;
+    if(n>room)n=room;
+    if(n>contiguous)n=contiguous;
+    if(n>4096U)n=4096U;
+    if(!n)return;
+    if(aux_wait(8,0,20)) {rx_fault=1;return;}
+    copy_from_fpga(rx_ddr+index,RD(0x20),n);
+    WR(0x20,n);
+    if(aux_wait(8,0,20)) {rx_fault=1;return;}
+    rx_head+=n;
+}
+void selectio_aux_poll(void) {fill_rx(0);}
+static unsigned buffered_bytes(void) {return rx_head-rx_tail+RD(0x24);}
+static unsigned peek(uint8_t *out,unsigned capacity) {
+    fill_rx(1);
+    unsigned n=rx_head-rx_tail;
+    if(n>capacity)n=capacity;
+    unsigned index=rx_tail&(SELECTIO_SERIAL_DDR_BYTES-1U);
+    unsigned first=SELECTIO_SERIAL_DDR_BYTES-index;
+    if(first>n)first=n;
+    memcpy(out,rx_ddr+index,first);
+    if(first<n)memcpy(out+first,rx_ddr,n-first);
     return n;
 }
 void selectio_aux_consume(unsigned bytes) {
-    if (!active_channel || !bytes) return;
-    if(aux_wait(8,0,20)) return;
-    WR(0x20,bytes);
-    (void)aux_wait(8,0,20);
+    if(active_channel && bytes<=rx_head-rx_tail)rx_tail+=bytes;
 }
 static int transmit_start(const uint8_t *data,unsigned size) {
-    if(!size || size>4079 || !(flags&12U) || read_only_stop || aux_wait(3,1,20)) return -1;
+    if(!size || size>4096 || !(flags&12U) || read_only_stop || aux_wait(3,1,20)) return -1;
     for(unsigned i=0;i<size;i+=4) {
         uint32_t v=0;unsigned take=size-i<4?size-i:4;
         memcpy(&v,data+i,take);WR(0x1000U+i,v);
@@ -241,7 +285,7 @@ int selectio_aux_frame(unsigned ch,unsigned op,const uint8_t *in,unsigned size,
     }
     if(op==4 && !size && capacity>=20) {
         WR(0x28,1);if(aux_wait(16,0,20)) return -1;
-        put(out,RD(0x24));put(out+4,RD(0x28));put(out+8,RD(0x2c));
+        put(out,buffered_bytes());put(out+4,RD(0x28));put(out+8,RD(0x2c)+rx_fault);
         put(out+12,RD(4));put(out+16,RD(0x20));*length=20;return 0;
     }
     if(op==5 && !size) return restore();
@@ -262,7 +306,8 @@ uint32_t selectio_swo_command(uint8_t cmd,const uint8_t *p,uint8_t *r) {
                 if(errors!=swo_errors) status|=0x40U;
                 if(cmd!=0x1e || (p[0]&1U)) {swo_drops=drops;swo_errors=errors;}
             }
-            available=RD(0x24);
+            available=buffered_bytes();
+            if(rx_fault)status|=0x40U;
         }
         if(cmd==0x1b) {r[0]=status;put(r+1,available);return 5;}
         if(cmd==0x1e) {
@@ -319,12 +364,12 @@ void selectio_cdc_status(uint32_t values[8]) {
     values[4]=cdc_in-cdc_out;values[5]=values[6]=values[7]=0;
     if(cdc_owns) {
         WR(0x28,1);
-        if(!aux_wait(16,0,20)) {values[5]=RD(0x28);values[6]=RD(0x2c);}
-        values[7]=RD(0x24);
+        if(!aux_wait(16,0,20)) {values[5]=RD(0x28);values[6]=RD(0x2c)+rx_fault;}
+        values[7]=buffered_bytes();
     }
 }
 int selectio_cdc_bind(unsigned enable) {
-    if(enable>1 || (enable && (active_channel || probe_uses_legacy_cdc() || !(swd_read32(SWD_FEATURES)&0x200U)))) return -1;
+    if(enable>2 || (enable==2 && !(swd_read32(SWD_FEATURES)&0x1000U)) || (enable && (active_channel || probe_uses_legacy_cdc() || !(swd_read32(SWD_FEATURES)&0x200U)))) return -1;
     cdc_bound=enable;
     return 0;
 }
@@ -371,9 +416,12 @@ void selectio_cdc_poll(XUsbPs *usb) {
         static XTime retry_after;
         XTime now;XTime_GetTime(&now);
         if(now<retry_after)return;
-        uint8_t cfg[9]={1,1,0,0,0,0,0,0,0};
+        /* Mode 2 is an explicit two-TAP board qualification. UART TX
+         * crosses the real BYPASS chain to RX while Windows owns the CDC. */
+        unsigned bypass=cdc_bound==2;
+        uint8_t cfg[10]={1,bypass?3U:1U,0,0,0,0,0,0,0,bypass?2U:0U};
         put(cfg+4,cdc_baud);
-        if(configure(5,cfg,sizeof cfg)) {retry_after=now+COUNTS_PER_SECOND/20U;return;}
+        if(configure(bypass?4U:5U,cfg,sizeof cfg)) {retry_after=now+COUNTS_PER_SECOND/20U;return;}
         cdc_running_baud=cdc_baud;cdc_owns=1;
     }
     if(!cdc_sending && cdc_in!=cdc_out) {

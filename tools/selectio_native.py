@@ -13,11 +13,18 @@ HEADER = struct.Struct("<4sBBBBII")
 LIMIT = 4079
 
 
+class NativeStatusError(RuntimeError):
+    def __init__(self,channel,operation,status,detail):
+        super().__init__(f"native channel {channel} operation {operation} status {status}, detail {detail.hex()}")
+        self.status=status
+
+
 @dataclass
 class NativeStream:
     device: object
     sequence: int
     dma: bool = False
+    max_depth: int = 1
 
     def _write(self,channel,op,payload):
         if len(payload)>LIMIT: raise ValueError("native frame exceeds its data capacity")
@@ -29,17 +36,23 @@ class NativeStream:
         self.sequence=(seq+1)&0xffffffff
         return seq
 
-    def _read(self,channel,op,seq):
-        reply=bytes(self.device.read(0x84,4096,timeout=3000))
-        if len(reply)<HEADER.size: raise RuntimeError("truncated native IN header")
-        magic,ch,operation,status,reserved,returned,size=HEADER.unpack_from(reply)
-        total=HEADER.size+size
-        if ((magic,ch,operation,reserved,returned)!=(b"ZLK1",channel,op,0,seq) or
-                size>LIMIT or len(reply)!=total+int(total%512==0)):
-            raise RuntimeError("native frame identity or length mismatch")
-        if status:
-            raise RuntimeError(f"native channel {ch} operation {op} status {status}, detail {reply[16:24].hex()}")
-        return reply[16:total]
+    def _read(self,channel,op,seq,synchronize=False):
+        # A closed WinUSB handle may have left complete IN frames in the
+        # endpoint. Only a fresh HELLO can retire them and resynchronize.
+        for _ in range(5 if synchronize else 1):
+            reply=bytes(self.device.read(0x84,4096,timeout=3000))
+            if len(reply)<HEADER.size:raise RuntimeError("truncated native IN header")
+            magic,ch,operation,status,reserved,returned,size=HEADER.unpack_from(reply)
+            total=HEADER.size+size
+            if (magic!=b"ZLK1" or reserved or size>LIMIT or len(reply)!=total+int(total%512==0)):
+                raise RuntimeError("invalid native frame header or length")
+            if (ch,operation,returned)!=(channel,op,seq):
+                if synchronize:continue
+                raise RuntimeError("native response sequence or command mismatch")
+            if status:
+                raise NativeStatusError(ch,op,status,reply[16:24])
+            return reply[16:total]
+        raise RuntimeError("unable to synchronize native reply sequence")
 
     def exchange(self,channel,op,payload=b""):
         return self._read(channel,op,self._write(channel,op,payload))
@@ -59,6 +72,7 @@ class NativeStream:
             if (not 0x20000000<=address<address+size<=0x20010000 or address%4 or
                 size<=0 or size%4 or size>4032 or (data is not None and len(data)!=size)):
                 raise ValueError("invalid F103 SRAM range, alignment or payload length")
+        depth=min(depth,self.max_depth)
         header=16 if self.dma else 8
         op=6 if self.dma else 3
         result=[]
@@ -99,14 +113,45 @@ class NativeStream:
             raise RuntimeError("invalid stream control reply")
         return struct.unpack_from("b",reply,3)[0],struct.unpack_from("<12I",reply,4)
 
+    def usb_descriptors(self):
+        device=self.device
+        config=device.get_active_configuration()
+        interfaces=[]
+        for interface in config:
+            endpoints=[dict(address=f"0x{ep.bEndpointAddress:02x}",attributes=ep.bmAttributes,
+                            max_packet_bytes=ep.wMaxPacketSize) for ep in interface]
+            interfaces.append(dict(number=interface.bInterfaceNumber,alternate=interface.bAlternateSetting,
+                usb_class=interface.bInterfaceClass,subclass=interface.bInterfaceSubClass,
+                protocol=interface.bInterfaceProtocol,endpoints=endpoints))
+        return dict(vid=f"{device.idVendor:04x}",pid=f"{device.idProduct:04x}",serial=device.serial_number,
+                    bcdDevice=f"0x{device.bcdDevice:04x}",configuration=config.bConfigurationValue,
+                    interfaces=interfaces)
+
     def info(self):
-        reply=self.exchange(0,0)
+        reply=self._read(0,0,self._write(0,0,b""),synchronize=True)
         if len(reply)!=16 or reply[:4]!=b"SIO1":
             raise RuntimeError("unrecognized native firmware interface")
         ref,features,size=struct.unpack_from("<III",reply,4)
-        self.dma=bool(features&0x400)
-        return dict(protocol="ZLK1",reference_hz=ref,link_hz=ref/2 if features&0x80 else None,features=hex(features),
-                    integrated_pl=bool(features&0x80),max_frame=size)
+        info=dict(protocol="ZLK1",reference_hz=ref,link_hz=ref/2 if features&0x80 else None,features=hex(features),
+                  integrated_pl=bool(features&0x80),max_frame=size)
+        try:
+            extended=self.exchange(0,5)
+        except NativeStatusError as err:
+            if err.status!=1:raise
+            # The first probe protocol only guaranteed one in-flight legacy bulk request.
+            self.dma=False
+            self.max_depth=1
+        else:
+            if len(extended)!=24 or extended[:4]!=b"CAP1":
+                raise RuntimeError("invalid probe capability record")
+            abi,depth,header,capacity,fclk=struct.unpack_from("<5I",extended,4)
+            if abi!=1 or not 1<=depth<=4 or header not in (8,16):
+                raise RuntimeError("unsupported SRAM protocol")
+            self.dma=header==16
+            self.max_depth=depth
+            info.update(firmware_abi=abi,bulk_header_bytes=header,serial_buffer_bytes=capacity,fclk0_hz=fclk)
+        info["max_queue_depth"]=self.max_depth
+        return info
 
 
 @contextmanager

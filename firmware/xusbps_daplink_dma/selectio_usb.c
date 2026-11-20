@@ -31,6 +31,7 @@ static XTime last_activity;
 static unsigned watchdog_div;
 static unsigned pending_length, next_sequence, session_open;
 
+static unsigned abandon_native;
 static u32 read32(const u8 *p) {u32 v;memcpy(&v,p,4);return v;}
 static void write32(u8 *p,u32 v) {memcpy(p,&v,4);}
 
@@ -38,7 +39,7 @@ void selectio_usb_reset(void) {
     configured=0;
     if(selectio_mem_active()) close_pending=1;
     selectio_combo_reset();
-    epoch++;
+    epoch++;abandon_native=0;
     aux_reset=1;aux_commit=0;selectio_cdc_reset();
     rx_hint=tx_busy=pending_length=session_open=deferred=reply_packets=tx_packets=0;
 }
@@ -102,7 +103,7 @@ static unsigned execute_frame(unsigned length, unsigned active_epoch) {
         size>FRAME_SIZE-HEADER_SIZE-1 || length!=HEADER_SIZE+size+((HEADER_SIZE+size)%512U==0U))
         goto reply;
     if (channel==0 && op==0 && !size) {
-        if (selectio_mem_active()) {status=2;goto reply;}
+        if (selectio_mem_active() || selectio_aux_native_owner() || probe_native_owns_stream()) {status=2;goto reply;}
         if(selectio_combo_active()) selectio_combo_reset();
         session_open=1;
         next_sequence=sequence+1U;
@@ -120,6 +121,15 @@ static unsigned execute_frame(unsigned length, unsigned active_epoch) {
             memcpy(output+HEADER_SIZE,input+HEADER_SIZE,size);
             reply_size=size;
             status=0;
+        } else if(channel==0 && op==5 && !size) {
+            uint32_t pl=swd_read32(SWD_FEATURES);
+            memcpy(output+16,"CAP1",4);
+            write32(output+20,1U);
+            write32(output+24,4U);
+            write32(output+28,(pl&0x400U)?16U:8U);
+            write32(output+32,(pl&0x200U)?SELECTIO_SERIAL_BUFFER_BYTES:0U);
+            write32(output+36,ps_fclk0_hz());
+            reply_size=24;status=0;
         } else if(channel==0 && op==4 && !size) {
             uint32_t fields[8];selectio_cdc_status(fields);memcpy(output+16,fields,sizeof fields);reply_size=sizeof fields;status=0;
         } else if(channel==0 && op==3 && size==1) {
@@ -198,11 +208,24 @@ reply:
 
 void selectio_usb_poll(XUsbPs *usb) {
     u32 length,active_epoch,flags;
-    if(aux_reset) {aux_reset=0;selectio_aux_reset();}
+    if(aux_reset) {if(selectio_aux_reset())return;aux_reset=0;}
     if(aux_commit) {unsigned n=aux_commit;aux_commit=0;selectio_aux_consume(n);}
-    if(selectio_mem_active() && (++watchdog_div&4095U)==0) {
+    selectio_aux_poll();
+    if((++watchdog_div&1023U)==0) {
         XTime now;XTime_GetTime(&now);
-        if(now-last_activity>2U*(uint64_t)COUNTS_PER_SECOND) close_pending=1;
+        if(selectio_mem_active() && now-last_activity>2ULL*COUNTS_PER_SECOND) close_pending=1;
+        if((selectio_aux_native_owner() || probe_native_owns_stream()) &&
+           now-last_activity>5ULL*COUNTS_PER_SECOND) abandon_native=1;
+    }
+    if(abandon_native) {
+        /* An outstanding response can still complete after a new host opens
+         * the interface. Its old queue cursor must never consume new data. */
+        flags=mfcpsr();mtcpsr(flags|0x80U);
+        tx_packets=reply_packets=aux_commit=0;session_open=0;
+        mtcpsr(flags);
+        if(selectio_aux_release_native())return;
+        if(probe_native_abandon())return;
+        abandon_native=0;
     }
     if(close_pending) {
         dap_wait_begin();

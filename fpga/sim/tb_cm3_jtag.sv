@@ -30,7 +30,7 @@ module tb_cm3_jtag #(parameter integer ENABLE_DIAGNOSTICS=0, FAST_IO=0);
  wire cm3_tdo,cm3_ntdoen,cm3_swdo,cm3_swdoen,cm3_jtagnsw;
  wire select_swd=FAST_IO && $test$plusargs("swd");
  reg [25:0] high_config=0;
- wire serial_ck,quad_ck,octet_ck,phy_reset,released,live_jtag,live_swd;
+ wire serial_rx_ck,serial_ck,quad_ck,octet_ck,phy_reset,released,live_jtag,live_swd;
  wire [2:0] owner;
  if(FAST_IO) begin:g_io_clocks
    pullup(tms);pulldown(tck);
@@ -60,7 +60,7 @@ module tb_cm3_jtag #(parameter integer ENABLE_DIAGNOSTICS=0, FAST_IO=0);
             dut.u_jtag_core.phy_rx[47:0],dut.u_jtag_core.scan_result,dut.u_jtag_core.scan_ack,target.u_sys.mem[4096]);
    selectio_clocking io(.ref_clk(ref_clk),.resetn(rst_n),.calibrated(calibrated),
      .jtag_hold(1'b1),.swd_hold(1'b1),.legacy_released(released),
-     .live_jtag(live_jtag),.live_swd(live_swd),.aux_request(1'b0),.serial_clk(serial_ck),.quad_clk(quad_ck),
+     .live_jtag(live_jtag),.live_swd(live_swd),.aux_request(1'b0),.serial_rx_clk(serial_rx_ck),.serial_clk(serial_ck),.quad_clk(quad_ck),
      .octet_clk(octet_ck),.phy_reset(phy_reset),.owner(owner));
  end
  swd_controller #(.SELECTIO(FAST_IO),.ENABLE_DIAGNOSTICS(ENABLE_DIAGNOSTICS)) dut(.clk(clk),.rst_n(rst_n),
@@ -71,7 +71,7 @@ module tb_cm3_jtag #(parameter integer ENABLE_DIAGNOSTICS=0, FAST_IO=0);
   .cmd_bram_clk(clk),.cmd_bram_rst(1'b0),.cmd_bram_en(1'b0),.cmd_bram_we(4'd0),.cmd_bram_addr(32'd0),.cmd_bram_wrdata(32'd0),
   .rsp_bram_clk(clk),.rsp_bram_rst(1'b0),.rsp_bram_en(1'b0),.rsp_bram_we(4'd0),.rsp_bram_addr(32'd0),.rsp_bram_wrdata(32'd0),
   .pkt_bram_clk(clk),.pkt_bram_rst(1'b0),.pkt_bram_en(pe),.pkt_bram_we(pw),.pkt_bram_addr(pa),.pkt_bram_wrdata(pd),.pkt_bram_rddata(pq),
-  .hs_serial_phase(serial_ck),.hs_quad_phase(quad_ck),.hs_octet_phase(octet_ck),.hs_reset(phy_reset),
+  .hs_serial_rx_phase(serial_rx_ck),.hs_serial_phase(serial_ck),.hs_quad_phase(quad_ck),.hs_octet_phase(octet_ck),.hs_reset(phy_reset),
   .hs_monitor_tdi(1'b0),.hs_uart_request(1'b0),.hs_owner(owner),.hs_jtag_lanes(24'hffff00),.hs_swd_ckslots(4'd0),.hs_swd_data(4'hf),.hs_swd_release(4'hf),
   .hs_tdo_load(1'b0),.hs_swdio_load(1'b0),.hs_tdo_tap(5'd0),.hs_swdio_tap(5'd0),
   .hs_live_config(high_config),.hs_legacy_released(released),.hs_live_jtag(live_jtag),.hs_live_swd(live_swd),

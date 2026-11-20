@@ -19,6 +19,7 @@ void probe_after_dap(void);
 void probe_target_observe(uint32_t request, uint32_t data, uint8_t ack);
 uint32_t probe_target_dp_select(void);
 int probe_target_claim(uint32_t hz);
+int probe_target_claim_on(uint32_t hz,uint32_t requested_port);
 int probe_target_claimed(void);
 int probe_target_transport(uint32_t port); // 0 auto, 1 SWD, 2 JTAG
 int probe_target_architecture(uint32_t riscv); // Web legacy target selector.
@@ -34,6 +35,8 @@ uint32_t probe_target_fclk(void);
 #if DAP_SELECTIO
 int probe_stream_active(void);
 int probe_uses_legacy_cdc(void);
+int probe_native_owns_stream(void);
+int probe_native_abandon(void);
 int probe_native_route(unsigned channel,unsigned enabled);
 int probe_native_control(unsigned channel,const uint8_t *request,uint8_t *response);
 unsigned probe_native_peek(unsigned channel,uint8_t *data,unsigned capacity,unsigned *packets);

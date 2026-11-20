@@ -14,7 +14,7 @@ module selectio_aux_regs(
     output reg [31:0] s_axi_rdata,output reg [1:0] s_axi_rresp,
     output reg s_axi_rvalid,input wire s_axi_rready,
     input wire quad_clk, phy_reset, pad_granted, uart_granted,
-    input wire [3:0] pad_samples,output wire pad_request, uart_request, spi_selected, monitor_tdi,
+    input wire [7:0] wide_samples, input wire [3:0] pad_samples,output wire pad_request, uart_request, spi_selected, monitor_tdi,
     output wire [3:0] clock_slots, select_slots, tx_slots
 );
     // flags[1:0] receive codec: 0 off, 1 UART 8N1, 2 Manchester SWO.
@@ -29,10 +29,10 @@ module selectio_aux_regs(
         if(phy_reset) begin test_meta<=0;test_io<=0;end
         else begin test_meta<=test_config;test_io<=test_meta;end
     end
-    assign monitor_tdi=test_io[0];
     assign pad_request=flags[2] || (test_config[1] && flags[3]);
     (* ASYNC_REG="TRUE" *) reg [3:0] flags_meta,flags_io;
     (* ASYNC_REG="TRUE" *) reg [1:0] grant_sync;
+    assign monitor_tdi=test_io[0] && (|flags_io);
     wire uart_bypass=test_io[1] && flags_io[3];
     assign uart_request=flags_io[3] && !uart_bypass;
     wire granted=(flags_io[2] || uart_bypass) ? pad_granted : uart_granted;
@@ -65,7 +65,7 @@ module selectio_aux_regs(
     assign manchester_error=regular_error || fast_error;
     assign manchester_byte=fast_rate ? fast_byte : regular_byte;
     selectio_manchester_fast fast_decoder(quad_clk,phy_reset,flags_io[1:0]==2 && fast_rate,
-        rx_phase,pad_samples,fast_valid,fast_byte,fast_error);
+        rx_phase,wide_samples,fast_valid,fast_byte,fast_error);
     selectio_manchester_rx manchester_rx(quad_clk,phy_reset,flags_io[1:0]==2 && !fast_rate,pad_samples,
                        rx_min_short,rx_short_limit,rx_long_limit,regular_valid,regular_byte,regular_error);
     reg launch;

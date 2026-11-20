@@ -6,16 +6,18 @@ module selectio_clocking (
     (* X_INTERFACE_PARAMETER="FREQ_HZ 100000000" *) output wire quad_clk,
     (* X_INTERFACE_PARAMETER="FREQ_HZ 50000000" *) output wire octet_clk,
     output wire phy_reset, jtag_reset, swd_reset, jtag_ready,
-    output reg [2:0] owner = 0, output wire aux_granted
+    output reg [2:0] owner = 0, output wire aux_granted,
+    (* X_INTERFACE_PARAMETER="FREQ_HZ 400000000" *) output wire serial_rx_clk
 );
-    wire feedback, feedback_raw, locked, serial_raw, quad_raw, octet_raw;
-    MMCME2_BASE #(.CLKIN1_PERIOD(5.0), .DIVCLK_DIVIDE(1), .CLKFBOUT_MULT_F(5.0),
-        .CLKOUT0_DIVIDE_F(5.0), .CLKOUT1_DIVIDE(10), .CLKOUT2_DIVIDE(20)) mmcm (
+    wire feedback, feedback_raw, locked, serial_raw, quad_raw, octet_raw, rx_raw;
+    MMCME2_BASE #(.CLKIN1_PERIOD(5.0), .DIVCLK_DIVIDE(1), .CLKFBOUT_MULT_F(4.0),
+        .CLKOUT0_DIVIDE_F(4.0), .CLKOUT1_DIVIDE(8), .CLKOUT2_DIVIDE(16), .CLKOUT3_DIVIDE(2)) mmcm (
         .CLKIN1(ref_clk), .CLKFBIN(feedback), .CLKFBOUT(feedback_raw), .RST(!resetn),
-        .PWRDWN(1'b0), .LOCKED(locked), .CLKOUT0(serial_raw), .CLKOUT1(quad_raw), .CLKOUT2(octet_raw)
+        .PWRDWN(1'b0), .LOCKED(locked), .CLKOUT0(serial_raw), .CLKOUT1(quad_raw), .CLKOUT2(octet_raw), .CLKOUT3(rx_raw)
     );
     BUFG feedback_buf(.I(feedback_raw), .O(feedback));
     BUFG serial_buf(.I(serial_raw), .O(serial_clk));
+    BUFG rx_buf(.I(rx_raw),.O(serial_rx_clk));
     BUFG quad_buf(.I(quad_raw), .O(quad_clk));
     BUFG octet_buf(.I(octet_raw), .O(octet_clk));
 

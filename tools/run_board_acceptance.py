@@ -428,7 +428,7 @@ def main(argv=None):
         from tools.selectio_accept import main as selectio_accept
         argv.remove("--selectio")
         return selectio_accept(argv)
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description=__doc__,epilog="For the CLI-only SelectIO firmware suite use --selectio --board f103ze --help.")
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument('--board', choices=BOARDS)
     mode.add_argument('--review', type=Path, nargs='+', help='Offline verdict for completed board summaries')

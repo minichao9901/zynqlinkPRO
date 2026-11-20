@@ -102,13 +102,17 @@ uint32_t probe_target_fclk(void) {
     return ps_fclk0_hz();
 }
 int probe_target_claim(uint32_t hz) {
+    return probe_target_claim_on(hz,0);
+}
+int probe_target_claim_on(uint32_t hz,uint32_t requested_port) {
     uint32_t v = 0, i;
     if (!probe_session_live())
         return -4;
     if(context_invalid)return -4;
     if (claimed)
-        return 0;
-    uint32_t port=preferred_port ? preferred_port : (DAP_Data.debug_port==DAP_PORT_JTAG ? 2U : 1U);
+        return !requested_port || requested_port==link_port ? 0 : -7;
+    uint32_t port=requested_port ? requested_port : preferred_port;
+    if(!port) port=DAP_Data.debug_port==DAP_PORT_JTAG ? 2U : 1U;
     // Do not silently switch a connected debugger's wire protocol.
     if(DAP_Data.debug_port && DAP_Data.debug_port!=port) return -7;
     has_jtag=(swd_read32(0x4001004cU)&8U)!=0;

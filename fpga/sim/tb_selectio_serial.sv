@@ -3,16 +3,18 @@ module tb_selectio_serial;
     bit clk=0,reset=1,en=0,man=0;
     always #5 clk=!clk;
     reg line=1;
-    reg [3:0] samples, captured;
+    reg [3:0] samples;
+    reg [7:0] captured,wide_samples;
     reg [31:0] period;
     reg [15:0] min_short,short_limit,long_limit;
     wire uv,mv,ue,me;
     wire edge_v,edge_e,fast_v,fast_e;wire [7:0] edge_d,fast_d;
-    wire use_fast=(period==1024);
+    bit sample_phase=0;
+    wire use_fast=(period>=1023 && period<=1025);
     wire [7:0] ud,md;
     selectio_uart_rx uart(clk,reset,en&&!man,samples,period,uv,ud,ue);
     selectio_manchester_rx manch(clk,reset,en&&man&&!use_fast,samples,min_short,short_limit,long_limit,edge_v,edge_d,edge_e);
-    selectio_manchester_fast fast(clk,reset,en&&man&&use_fast,1'b0,samples,fast_v,fast_d,fast_e);
+    selectio_manchester_fast fast(clk,reset,en&&man&&use_fast,sample_phase,wide_samples,fast_v,fast_d,fast_e);
     assign mv=use_fast?fast_v:edge_v;
     assign md=use_fast?fast_d:edge_d;
     assign me=use_fast?fast_e:edge_e;
@@ -30,8 +32,9 @@ module tb_selectio_serial;
     initial begin
         #0.4;
         forever begin
-            for(integer i=0;i<4;i++) begin captured[i]=line;#2.5;end
-            samples=captured;
+            for(integer i=0;i<8;i++) begin captured[i]=line;#1.25;end
+            wide_samples=captured;
+            samples={captured[6],captured[4],captured[2],captured[0]};
         end
     end
     task automatic run(input bit is_manchester,input real bit_ns,input integer blocks);
@@ -69,7 +72,12 @@ module tb_selectio_serial;
     endtask
     initial begin
         run(0,10,64);run(0,41.6667,64);run(0,8680.5556,4);
-        run(1,10,64);run(1,41.6667,64);run(1,80,64);
+        run(1,10,64);
+        sample_phase=1;
+        run(1,9.995,128);run(1,10.005,128);
+        sample_phase=0;
+        run(1,9.995,128);run(1,10.005,128);
+        run(1,41.6667,64);run(1,80,64);
         $finish;
     end
 endmodule

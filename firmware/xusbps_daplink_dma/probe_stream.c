@@ -48,16 +48,26 @@ extern int swd_dma_packet_to(uint32_t bank, uint32_t bytes, uint8_t *destination
 static uint8_t pl_packets, rtt_pl_running, rtt_paused, dma_pending;
 static uint32_t dma_tail, dma_length;
 #define QSIZE 8U
+#if defined(__arm__) && DAP_SELECTIO
+/* Four MiB of DDR absorbs host pauses at the 4 MB/s sample rate.
+ * This is separate from the ETM capture reservation and the USB dTDs. */
+#define STREAM_SLOTS 8192U
+#define CDC_SLOTS 1024U
+#else
+#define STREAM_SLOTS QSIZE
+#define CDC_SLOTS QSIZE
+#endif
 typedef struct {
 #ifdef __arm__
     uint8_t *data;
-    uint32_t stride;
+    uint16_t *len;
+    uint32_t stride,slot_mask;
 #else
     // Keep the deterministic host harness layout intact; the ARM build uses
     // right-sized endpoint storage below to avoid wasting OCM on HSS/HID.
     uint8_t data[QSIZE][1024];
-#endif
     uint16_t len[QSIZE];
+#endif
     volatile uint32_t in, out;
     volatile uint8_t busy;
     uint8_t zlp;
@@ -66,13 +76,14 @@ typedef struct {
     uint8_t ep;
 } tx_queue;
 #define CDC_SLOT_SIZE 2048U
-static uint8_t cdc_data[QSIZE][CDC_SLOT_SIZE] __attribute__((aligned(32)));
-static uint8_t hss_data[QSIZE][512] __attribute__((aligned(32)));
+static uint8_t cdc_data[CDC_SLOTS][CDC_SLOT_SIZE] __attribute__((aligned(32)));
+static uint8_t hss_data[STREAM_SLOTS][512] __attribute__((aligned(32)));
 static uint8_t hid_data[QSIZE][64] __attribute__((aligned(32)));
 #ifdef __arm__
-static tx_queue cdc = {.data = &cdc_data[0][0], .stride = CDC_SLOT_SIZE, .ep = 3};
-static tx_queue hss = {.data = &hss_data[0][0], .stride = 512, .ep = 7};
-static tx_queue hid = {.data = &hid_data[0][0], .stride = 64, .ep = 6};
+static uint16_t cdc_length[CDC_SLOTS],hss_length[STREAM_SLOTS],hid_length[QSIZE];
+static tx_queue cdc = {.data = &cdc_data[0][0], .len=cdc_length, .stride = CDC_SLOT_SIZE, .slot_mask=CDC_SLOTS-1U, .ep = 3};
+static tx_queue hss = {.data = &hss_data[0][0], .len=hss_length, .stride = 512, .slot_mask=STREAM_SLOTS-1U, .ep = 7};
+static tx_queue hid = {.data = &hid_data[0][0], .len=hid_length, .stride = 64, .slot_mask=QSIZE-1U, .ep = 6};
 #else
 static tx_queue cdc = {.ep = 3}, hss = {.ep = 7}, hid = {.ep = 6};
 #endif
@@ -120,12 +131,19 @@ static uint32_t now(void) {
                       ((t % COUNTS_PER_SECOND) * 24000000ULL) / COUNTS_PER_SECOND);
 }
 int probe_session_live(void) { return configured && !reset_pending && current_epoch == epoch; }
-static int space(tx_queue *q) { return (uint32_t)(q->in - q->out) < QSIZE; }
+static inline unsigned queue_mask(const tx_queue *q) {
+#ifdef __arm__
+    return q->slot_mask;
+#else
+    (void)q;return QSIZE-1U;
+#endif
+}
+static int space(tx_queue *q) { return (uint32_t)(q->in-q->out)<=queue_mask(q); }
 static uint8_t *slot(tx_queue *q) {
 #ifdef __arm__
-    return q->data + (q->in % QSIZE) * q->stride;
+    return q->data + (q->in & queue_mask(q)) * q->stride;
 #else
-    return q->data[q->in % QSIZE];
+    return q->data[q->in & queue_mask(q)];
 #endif
 }
 static int publish(tx_queue *q, uint32_t len) {
@@ -134,7 +152,7 @@ static int publish(tx_queue *q, uint32_t len) {
         irq_restore(f);
         return -7;
     }
-    q->len[q->in % QSIZE] = (uint16_t)len;
+    q->len[q->in & queue_mask(q)] = (uint16_t)len;
     __sync_synchronize();
     q->in++;
     irq_restore(f);
@@ -160,11 +178,11 @@ static void kick(XUsbPs *usb, tx_queue *q) {
         irq_restore(f);return;
     }
 #ifdef __arm__
-    p = q->data + (q->out % QSIZE) * q->stride;
+    p = q->data + (q->out & queue_mask(q)) * q->stride;
 #else
-    p = q->data[q->out % QSIZE];
+    p = q->data[q->out & queue_mask(q)];
 #endif
-    len = q->len[q->out % QSIZE];
+    len = q->len[q->out & queue_mask(q)];
     q->final = (uintptr_t)p;
     q->busy = 1;
     q->zlp=0;
@@ -1110,6 +1128,20 @@ void probe_poll(XUsbPs *usb) {
  * through STOP. Native IN completion releases each slot exactly once. */
 int probe_stream_active(void) {return mode || stopping || bench_active;}
 int probe_uses_legacy_cdc(void) {return !(native_route&1U) && (mode==1 || cdc.busy || cdc.out!=cdc.in || cdc_needs_zlp);}
+int probe_native_owns_stream(void) {return native_route!=0;}
+int probe_native_abandon(void) {
+    /* No host is receiving this native stream. Drop only its private
+     * DDR slots so a pending STOP can drain the hardware and restore AP. */
+    if(native_route&1U) cdc.out=cdc.in;
+    if(native_route&2U) hss.out=hss.in;
+    if((mode==1 && (native_route&1U)) || (mode==2 && (native_route&2U))) {
+        int rc=stop();
+        if(rc)return rc;
+    }
+    if(native_route&1U) cdc.out=cdc.in;
+    if(native_route&2U) hss.out=hss.in;
+    native_route=0;return 0;
+}
 int probe_native_route(unsigned channel, unsigned enabled) {
     tx_queue *q=channel==2 ? &cdc : &hss;
     unsigned bit=channel==2 ? 1U : 2U;
@@ -1131,7 +1163,7 @@ unsigned probe_native_peek(unsigned channel,uint8_t *out,unsigned capacity,unsig
     *packets=0;
     if (!(native_route&(channel==2 ? 1U : 2U))) return 0;
     while (*packets<q->in-q->out) {
-        unsigned index=(q->out+*packets)%QSIZE;
+        unsigned index=(q->out+*packets)&queue_mask(q);
         unsigned bytes=q->len[index];
         if(bytes>capacity-length) break;
         memcpy(out+length,q->data+index*q->stride,bytes);

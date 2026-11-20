@@ -163,7 +163,7 @@ int selectio_mem_open(const uint8_t fields[4]) {
         probe_stream_active() || probe_target_claimed()) return -1;
     if (port==2 && (DAP_Data.jtag_dev.count!=2 || DAP_Data.jtag_dev.index ||
         DAP_Data.jtag_dev.ir_length[0]!=4 || DAP_Data.jtag_dev.ir_length[1]!=5)) return -1;
-    if (probe_target_claim(0)) return -1;
+    if (probe_target_claim_on(0,port)) return -1;
     session.route=swd_read32(JTAG_ROUTE);
     session.pins=swd_read32(JTAG_PINS);
     session.clock=Xil_In32(SLCR_FPGA0_CLK_CTRL);
