@@ -1,0 +1,47 @@
+{
+  "serial": "12345678",
+  "command": [
+    "python",
+    "-X",
+    "utf8",
+    "tools/selectio_pipeline_bench.py",
+    "--transport",
+    "jtag",
+    "--idle",
+    "29",
+    "--tap",
+    "16",
+    "--slot",
+    "28",
+    "--seconds",
+    "3",
+    "--rounds",
+    "3",
+    "--directions",
+    "read",
+    "write",
+    "--out",
+    "build/compare100-20261121-065441/jtag-29",
+    "--execute"
+  ],
+  "elf_sha256": "e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f",
+  "target": {
+    "name": "STM32F103",
+    "cpuid": "0x411fc231",
+    "device": "0x10036414",
+    "registers": {
+      "0x40021000": "0x3034e83",
+      "0x40021004": "0x51040a"
+    }
+  },
+  "dhcsr": 16842753,
+  "backup_sha256": "9e85e138244bf0cca8d47b98663e95de705c3308573154d94e211bb9c8f6b1bb",
+  "guards": [
+    2177041619,
+    4257003999
+  ],
+  "apb2": 16461,
+  "mapr": 0,
+  "restored": true,
+  "final_dhcsr": "0x1010001"
+}
