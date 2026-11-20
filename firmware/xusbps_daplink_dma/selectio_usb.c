@@ -2,8 +2,10 @@
 #if DAP_SELECTIO
 #include "DAP_config.h"
 #include "DAP.h"
+#include "selectio_block.h"
 #include "probe_stream.h"
 #include "xil_cache.h"
+#include "xtime_l.h"
 #include "xusbps_endpoint.h"
 #include <string.h>
 
@@ -17,6 +19,9 @@ static u8 input[FRAME_SIZE] __attribute__((aligned(32)));
 static u8 output[FRAME_SIZE] __attribute__((aligned(4096)));
 static volatile unsigned epoch, configured, rx_hint, tx_busy;
 static volatile unsigned received_length, deferred, reply_channel, reply_packets;
+static volatile unsigned close_pending;
+static XTime last_activity;
+static unsigned watchdog_div;
 static unsigned pending_length, next_sequence, session_open;
 
 static u32 read32(const u8 *p) {u32 v;memcpy(&v,p,4);return v;}
@@ -24,6 +29,7 @@ static void write32(u8 *p,u32 v) {memcpy(p,&v,4);}
 
 void selectio_usb_reset(void) {
     configured=0;
+    if(selectio_mem_active()) close_pending=1;
     epoch++;
     rx_hint=tx_busy=pending_length=session_open=deferred=reply_packets=0;
 }
@@ -83,7 +89,9 @@ static unsigned execute_frame(unsigned length, unsigned active_epoch) {
     if (length<HEADER_SIZE || memcmp(input,"ZLK1",4) || input[6] || input[7] ||
         size>FRAME_SIZE-HEADER_SIZE-1 || length!=HEADER_SIZE+size+((HEADER_SIZE+size)%512U==0U))
         goto reply;
+    XTime_GetTime(&last_activity);
     if (channel==0 && op==0 && !size) {
+        if (selectio_mem_active()) {dap_wait_begin(); if(selectio_mem_close()) goto reply;}
         session_open=1;
         next_sequence=sequence+1U;
         memcpy(output+16,"SIO1",4);
@@ -100,6 +108,26 @@ static unsigned execute_frame(unsigned length, unsigned active_epoch) {
             memcpy(output+HEADER_SIZE,input+HEADER_SIZE,size);
             reply_size=size;
             status=0;
+        } else if (channel==1 && op==1 && size==4) {
+            dap_wait_begin();
+            if(!selectio_mem_open(input+16)) status=0;
+        } else if (channel==1 && op==2 && !size) {
+            dap_wait_begin();
+            if(!selectio_mem_close()) status=0;
+        } else if(channel==1 && op==4 && !size) {
+            uint64_t values[7];
+            selectio_mem_stats(values);memcpy(output+16,values,sizeof values);
+            reply_size=sizeof values;status=0;
+        } else if(channel==1 && op==3 && size>=8) {
+            unsigned write=input[16],words=input[18]|((unsigned)input[19]<<8),completed=0;
+            uint32_t detail=0;
+            if(write<=1 && !input[17] && words && words<=1008 &&
+               size==8+(write?4U*words:0U)) {
+                int rc=selectio_mem_bulk(write,read32(input+20),words,input+24,output+24,&completed,&detail);
+                write32(output+16,completed);write32(output+20,detail);
+                reply_size=8U+(!write && !rc?4U*words:0U);
+                if(!rc) status=0;
+            }
         } else if (channel==1 && op==0 && size && input[16]==0x8e) {
             dap_request_plan plan;
             if (DAP_ValidateCommand(input+16,size,FRAME_SIZE-HEADER_SIZE-1,&plan) &&
@@ -109,10 +137,11 @@ static unsigned execute_frame(unsigned length, unsigned active_epoch) {
                 if (epoch!=active_epoch) {mtcpsr(flags);goto reply;}
                 dap_wait_begin();
                 mtcpsr(flags);
-                if (!probe_before_dap()) {
+                int exclusive=selectio_mem_active();
+                if (exclusive || !probe_before_dap()) {
                     reply_size=DAP_ExecuteCommand(input+16,size,output+16,FRAME_SIZE-HEADER_SIZE-1)&0xffffU;
                     if (reply_size>=2 && output[17]==DAP_OK && !dap_wait_command_error()) status=0;
-                    probe_after_dap();
+                    if(!exclusive) probe_after_dap();
                 }
             }
         } else if (channel==2 || channel==3) {
@@ -138,6 +167,15 @@ reply:
 
 void selectio_usb_poll(XUsbPs *usb) {
     u32 length,active_epoch,flags;
+    if(selectio_mem_active() && (++watchdog_div&4095U)==0) {
+        XTime now;XTime_GetTime(&now);
+        if(now-last_activity>2U*(uint64_t)COUNTS_PER_SECOND) close_pending=1;
+    }
+    if(close_pending) {
+        dap_wait_begin();
+        if(!selectio_mem_close()) close_pending=0;
+        else return;
+    }
     if (!configured || tx_busy || (!rx_hint && !pending_length)) return;
     flags=mfcpsr();
     mtcpsr(flags|0x80U);

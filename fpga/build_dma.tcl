@@ -106,5 +106,14 @@ if {[lsearch -exact $argv --synth-only] >= 0} {
 launch_runs impl_1 -to_step route_design -jobs $::zynqlink_jobs
 wait_on_run impl_1
 if {[get_property PROGRESS [get_runs impl_1]] != "100%"} {error "Implementation failed"}
+if {$selectio} {
+    open_run impl_1
+    if {[get_property SLACK [get_timing_paths -delay_type max -max_paths 1]]<0} {
+        phys_opt_design -directive AggressiveExplore
+        set ::zynqlink_verify_checkpoint [file join $out system_wrapper_postroute.dcp]
+        write_checkpoint -force $::zynqlink_verify_checkpoint
+    }
+    close_design
+}
 source [file join $root fpga verify_routed.tcl]
 puts "DMA_BITSTREAM_READY $out/system_wrapper.bit"

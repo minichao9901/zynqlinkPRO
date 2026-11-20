@@ -183,12 +183,13 @@ def main():
                 started = time.perf_counter()
                 result=bytearray()
                 offset=0
-                while offset<size:
-                    address=args.address+offset
-                    n=min(size-offset,1024-(address&1023))
-                    chunk=None if payload is None else payload[offset:offset+n]
-                    result.extend(transfer(tx,rx,args.transport,address,n,chunk,args.tap,args.slot,args.idle,native))
-                    offset+=n
+                with native.memory(PORTS[args.transport],args.tap,args.slot,args.idle):
+                    while offset<size:
+                        address=args.address+offset
+                        n=min(size-offset,4032)
+                        chunk=None if payload is None else payload[offset:offset+n]
+                        result.extend(native.bulk(address,n,chunk))
+                        offset+=n
                 elapsed=time.perf_counter()-started
             finally:
                 cmd(tx, rx, [3])
