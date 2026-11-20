@@ -27,8 +27,11 @@ module swd200_regs (
     output reg [4:0] delay_value = 0,
     input wire word_clk, word_reset,
     input wire [3:0] rx_slots,
-    output wire [3:0] clk_slots, data_slots, release_slots
+    output wire [3:0] clk_slots, data_slots, release_slots,
+    output wire [9:0] payload_tx_addr,payload_rx_addr, input wire [31:0] payload_tx_data,
+    output wire [31:0] payload_rx_data,output wire payload_rx_write
 );
+    reg [2:0] payload_config=0;
     reg have_addr = 0, have_data = 0, reading_results = 0;
     reg [13:0] write_addr;
     reg [31:0] write_data;
@@ -66,6 +69,11 @@ module swd200_regs (
     assign s_axi_wready = !have_data && !s_axi_bvalid;
     assign s_axi_arready = !reading_results && !s_axi_rvalid;
 
+    assign payload_tx_addr={payload_config[1:0],cmd_addr[8:1]-8'd1};
+    assign payload_rx_addr={payload_config[1:0],result_addr[7:0]-8'd2};
+    assign payload_rx_data=result_word;
+    assign payload_rx_write=payload_config[2] && active_mode[1:0]==1 && write_result &&
+                            result_addr>=2 && {1'b0,result_addr}+10'd1<count;
     reg [31:0] expected_q, actual_q;
     reg check_word = 0, mismatch = 0;
     reg [1:0] completed_pipe = 0;
@@ -89,7 +97,7 @@ module swd200_regs (
         .clk(word_clk), .reset(word_reset), .run(run), .count(count),
         .mode(mode), .active_mode(active_mode), .begin_batch(begin_batch),
         .rate(timing[1:0]), .ack_sample(timing[7:2]), .data_sample(timing[13:8]),
-        .idle_cycles(timing[17:14]), .command_addr(cmd_addr), .command_word(cmd_q),
+        .idle_cycles(timing[17:14]), .command_addr(cmd_addr), .command_word(cmd_q), .payload_enabled(payload_config[2]), .payload_data(payload_tx_data),
         .write_result(write_result), .result_addr(result_addr), .result_word(result_word),
         .completed(completed), .error(error), .failed(batch_failed),
         .wait_retries(wait_retries), .done(batch_done),
@@ -99,6 +107,7 @@ module swd200_regs (
     always @(posedge axi_aclk) begin
         if (!axi_aresetn) begin
             hold <= 1;
+            payload_config <= 0;
             delay_load <= 0;
             delay_value <= 0;
             timing <= {4'd2, 6'd12, 6'd12, 2'd2};
@@ -144,6 +153,7 @@ module swd200_regs (
                 if (!aligned_write || !idle) s_axi_bresp <= 2'b10;
                 else if (!write_command && !write_expected) begin
                     case (write_addr)
+                        14'h2c: payload_config <= write_data[2:0];
                         14'h08: hold <= write_data[0];
                         14'h0c: if (write_data[1:0] != 3)
                             timing <= write_data[17:0];
@@ -175,6 +185,7 @@ module swd200_regs (
                 end else begin
                     s_axi_rvalid <= 1;
                     case (s_axi_araddr)
+                        14'h2c: s_axi_rdata <= {29'd0,payload_config};
                         14'h00: s_axi_rdata <= 32'h53323030;
                         14'h04: s_axi_rdata <= {26'b0, idle, hold, delay_sync[1], result_valid, run, ready};
                         14'h08: s_axi_rdata <= {31'b0, hold};

@@ -53,5 +53,6 @@ foreach pins {
     foreach pin $pins {lappend endpoints [get_bd_pins $pin]}
     connect_bd_net {*}$endpoints
 }
+source [file join $root fpga selectio payload_bd.tcl]
 validate_bd_design
 save_bd_design

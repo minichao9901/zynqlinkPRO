@@ -33,3 +33,8 @@
 ### 同一融合配对的 ETM 回归
 
 跨页配对重新临时加载并核对 OCM 后，使用 F103ZE CDC48 的匹配 ELF、SWD 10 MHz 配置和 1 秒 DDR 窗口，完成采集、下载、解码及建库。硬件窗口完整；解码报告 17,230,006 条已执行指令、2 个 gap、1 个未知执行区间、0 个 packet issue。采集器复核目标 RCC、FPB 和运行态恢复。这份结果与主线基线分开保存。[融合 ETM 结果](integrated-etm.json)
+### CDMA 载荷窗口
+
+JTAG 与 SWD 各有四个 1 KiB 的 TX/RX bank。CDMA 在 0x45000000 的 BRAM 端口突发搬运新载荷，GP1 负责描述符与完成状态。原语 CM3 仿真故意让原命令 BRAM 的写值与 DMA 载荷相反，验证两条链路实际使用 DMA 输入及写回最后一字。SWD 描述符以 RDBUFF 和 CTRL/STAT 结束；结果区排除最后的状态字。
+
+同 F103ZE HCLK48、4,032 B 跨页载荷、100 MHz 线频及每轮 60 秒的 3 轮交替校验通过。主机方向吞吐 SWD 读 4.08、写约 4.03 MB/s，JTAG 读约 3.80、写约 3.72 MB/s。计时包含按帧的主机请求和应答，按方向逐项统计，未把读和写速率相加。目标 SRAM 和寄存器经独立正式配对恢复。[SWD](dma-swd.json) · [JTAG](dma-jtag.json) · [恢复](dma-restore.json) · [配对](../../../prebuilt/selectio-j7-payload-dma/manifest.json)

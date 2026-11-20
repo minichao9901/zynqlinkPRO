@@ -13,6 +13,7 @@ module swd200_batch (
     output wire begin_batch,
     output wire [9:0] command_addr,
     input wire [31:0] command_word,
+    input wire payload_enabled,input wire [31:0] payload_data,
     output reg write_result = 0,
     output reg [8:0] result_addr,
     output reg [31:0] result_word,
@@ -64,6 +65,8 @@ module swd200_batch (
     // Commit in the next word clock, in parallel with issuing the next
     // request. This keeps the PHY reset out of the BRAM write-enable cone.
     // A final write lands on the same edge that raises batch completion.
+    wire [31:0] store_data=(payload_enabled && active_mode[1:0]==2 && next_header[4:1]==4'hd) ? payload_data : command_word;
+
     always @(posedge clk) begin
         write_result <= !reset && retire && good;
         if (retire && good) begin
@@ -91,7 +94,7 @@ module swd200_batch (
                     fetch <= FETCH_STORE;
                 end
                 FETCH_STORE: begin
-                    next_word <= {^command_word, command_word ^ {32{active_mode[2] &&
+                    next_word <= {^store_data, store_data ^ {32{active_mode[2] &&
                                   active_mode[1:0] == 2 && next_header[4:1] == 4'hd}}};
                     next_valid <= 1;
                     fetch <= EMPTY;
