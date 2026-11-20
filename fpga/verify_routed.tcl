@@ -16,6 +16,15 @@ set observation_cells [get_cells -quiet -hier -filter {NAME =~ *swd_controller_0
 if {!$rtl_debug && [llength $observation_cells]} {error "Release retains optional observation registers"}
 if {$rtl_debug && ![llength $observation_cells]} {error "Debug instrumentation was not implemented"}
 puts "RTL_OBSERVATION_IMPLEMENTED=[llength $observation_cells] RTL_DEBUG=$rtl_debug"
+set selectio_pads [get_cells -quiet -hier -filter {REF_NAME == OSERDESE2 && NAME =~ *g_selectio*}]
+if {[llength $selectio_pads]} {
+    if {[llength $selectio_pads]!=3 || [llength [get_cells -quiet -hier -filter {REF_NAME == ISERDESE2 && NAME =~ *g_selectio*}]]!=2} {
+        error "Missing shared debug serializers"
+    }
+    foreach {port ball} {swclk_0 L15 swdio_0 L16 gpio_rtl_0_tri_io[0] M15 gpio_rtl_0_tri_io[1] L14} {
+        if {[get_property PACKAGE_PIN [get_ports $port]] ne $ball} {error "Unexpected J7 pad $port"}
+    }
+} else {
 set swclk_launch [get_cells -quiet -hier -filter {NAME =~ *short_core_clock_reg}]
 if {[llength $swclk_launch] != 1} {error "SWCLK launch register missing"}
 set swclk_path [get_timing_paths -from $swclk_launch -to [get_ports swclk_0] -max_paths 1]
@@ -24,6 +33,7 @@ if {![llength $swclk_path] || [get_property REQUIREMENT $swclk_path] > 7.001 || 
 }
 report_timing -from $swclk_launch -to [get_ports swclk_0] -max_paths 2 -file [file join $out swclk_launch.rpt]
 puts "SWCLK_LAUNCH_VERIFIED slack=[get_property SLACK $swclk_path]"
+}
 # A forward reference inside a generate block can become an undriven local
 # net in Vivado 2018.3, silently tying every GPIO IOBUF's T pin high. Reject
 # that netlist even if internal STA passes; the two-wire loopback caught it.
@@ -42,6 +52,7 @@ foreach pad [get_cells -hier -filter {REF_NAME == IOBUF && NAME =~ *g_aux*}] {
 set packet_bram [get_cells -hier -filter {REF_NAME =~ RAMB* && NAME =~ *u_packet_bram*}]
 if {[llength $packet_bram] < 4} {error "PL packet banks did not implement in block RAM"}
 puts "PACKET_BRAM_VERIFIED count=[llength $packet_bram]"
+if {![llength $selectio_pads]} {
 set tdo_ddr [get_cells -hier -filter {REF_NAME == IDDR && NAME =~ *u_tdo_iddr}]
 if {[llength $tdo_ddr] != 1} {error "JTAG TDO IDDR missing from implemented design"}
 foreach phase {Q1 Q2} {
@@ -72,6 +83,7 @@ if {[info exists ::env(ZYNQLINK_VERIFY_TDO_INPUT_ONLY)] && $::env(ZYNQLINK_VERIF
     }
     if {$tdo_input_buffers!=1 || $tdo_disabled_outputs>1} {error "Unexpected TDO primitive topology"}
     puts "TDO_INPUT_ISOLATION_VERIFIED inputBuffers=1 outputEnable=constant0"
+}
 }
 set trace_ddr [get_cells -hier -filter {REF_NAME == IDDR && NAME =~ *orbtrace_0*}]
 if {[info exists ::env(ZYNQLINK_RAW_TRACE)] && $::env(ZYNQLINK_RAW_TRACE) in {2 3 4}} {

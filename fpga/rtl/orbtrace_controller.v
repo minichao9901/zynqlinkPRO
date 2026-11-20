@@ -7,12 +7,14 @@ module orbtrace_controller #(
   parameter FIFO_ADDR_BITS=12,
   parameter RAW_DIAGNOSTIC=0,
   parameter ENABLE_DDR=0,
-  parameter ENABLE_LANE_DELAY=0
+  parameter ENABLE_LANE_DELAY=0,
+  parameter SHARED_CALIBRATION=0
 )(
   (* X_INTERFACE_PARAMETER="ASSOCIATED_BUSIF s_axi, ASSOCIATED_RESET rst_n" *)
   input wire clk,input wire rst_n,
   (* X_INTERFACE_PARAMETER="FREQ_HZ 200000000" *)
   input wire ref_clk,
+  output wire io_calibrated,
   input wire trace_clk,input wire [3:0] trace_data,
   input wire ddr_hold,input wire ddr_prepare,
   input wire ddr_sampler_gate,input wire ddr_parser_enable,input wire ddr_parser_clear,
@@ -51,8 +53,13 @@ module orbtrace_controller #(
   wire delay_ref_clock,delay_ready,delay_calibrated;
   (* ASYNC_REG="TRUE" *) reg [1:0] delay_ready_sync;
   BUFG delay_reference_buffer(.I(ref_clk),.O(delay_ref_clock));
+  assign io_calibrated=delay_calibrated;
+  reg [4:0] calibration_reset = 0;
+  always @(posedge delay_ref_clock or negedge rst_n)
+    if (!rst_n) calibration_reset <= 0;
+    else if (!calibration_reset[4]) calibration_reset <= calibration_reset+1'b1;
   (* IODELAY_GROUP="ORBTRACE_INPUTS" *)
-  IDELAYCTRL delay_control(.REFCLK(delay_ref_clock),.RST(!rst_n || clear_count!=0),.RDY(delay_calibrated));
+  IDELAYCTRL delay_control(.REFCLK(delay_ref_clock),.RST(SHARED_CALIBRATION ? !calibration_reset[4] : (!rst_n || clear_count!=0)),.RDY(delay_calibrated));
   always @(posedge clk or negedge rst_n)
     if(!rst_n)delay_ready_sync<=0;else delay_ready_sync<={delay_ready_sync[0],delay_calibrated};
   assign delay_ready=delay_ready_sync[1];

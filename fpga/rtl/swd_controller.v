@@ -11,7 +11,8 @@ module swd_controller #(
     // Set to zero in the compact production BD; retain the diagnostic build
     // for protocol investigations and the real-CM3 diagnostic testbench.
     parameter integer ENABLE_DIAGNOSTICS = 1,
-    parameter integer SWDIO_IN_DELAY_NS = 0
+    parameter integer SWDIO_IN_DELAY_NS = 0,
+    parameter integer SELECTIO = 0
 )(
     input  wire                                    clk,
     input  wire                                    rst_n,
@@ -81,6 +82,14 @@ module swd_controller #(
     (* X_INTERFACE_INFO = "xilinx.com:interface:bram:1.0 PKT_BRAM DOUT" *)
     output wire [31:0] pkt_bram_rddata,
 
+    // J7 SelectIO option. Clock and transaction engines live on the BD.
+    input wire hs_serial_phase, hs_quad_phase, hs_octet_phase, hs_reset,
+    input wire [1:0] hs_owner,
+    input wire [23:0] hs_jtag_lanes, output wire [7:0] hs_jtag_samples,
+    input wire [3:0] hs_swd_ckslots, hs_swd_data, hs_swd_release,
+    output wire [3:0] hs_swd_samples,
+    input wire hs_tdo_load, hs_swdio_load, input wire [4:0] hs_tdo_tap, hs_swdio_tap,
+    output wire hs_legacy_released,
     // SWD Physical Interface
     inout  wire                                    swclk,
     inout  wire                                    swdio,
@@ -141,12 +150,29 @@ module swd_controller #(
     wire        swdio_i_iddr;
     
     wire swdio_i_raw;
-    IOBUF u_swdio_iobuf (
-        .IO(swdio),
-        .I (manual_pins[8] ? manual_pins[1] : jtag_enabled ? jtag_tms : swdio_o),
-        .O (swdio_i_raw),
-        .T (!jtag_config[1] || (manual_pins[8] ? manual_pins[9] : !jtag_enabled && swdio_t))
-    );
+    wire legacy_data = manual_pins[8] ? manual_pins[1] : jtag_enabled ? jtag_tms : swdio_o;
+    wire legacy_release = !jtag_config[1] || (manual_pins[8] ? manual_pins[9] : !jtag_enabled && swdio_t);
+    assign hs_legacy_released = !jtag_config[1];
+    if (SELECTIO) begin:g_selectio
+        selectio_debug_phy phy(
+            .serial_clk(hs_serial_phase), .quad_clk(hs_quad_phase), .octet_clk(hs_octet_phase),
+            .reset(hs_reset), .owner(hs_owner), .legacy_clock(clock_drive),
+            .legacy_data(legacy_data), .legacy_release(legacy_release),
+            .legacy_tdi(jtag_enabled ? (manual_pins[8] ? manual_pins[2] : jtag_tdi) : gpio_out[0]),
+            .legacy_tdi_release(!jtag_config[1] || (!jtag_enabled && gpio_tri[0])),
+            .jtag_lanes(hs_jtag_lanes), .jtag_samples(hs_jtag_samples),
+            .swd_clock(hs_swd_ckslots), .swd_data(hs_swd_data), .swd_release(hs_swd_release),
+            .swd_samples(hs_swd_samples), .tap_clk(clk), .tdo_load(hs_tdo_load),
+            .swdio_load(hs_swdio_load), .tdo_tap(hs_tdo_tap), .swdio_tap(hs_swdio_tap),
+            .clock_pin(swclk), .data_pin(swdio), .tdi_pin(gpio_aux[0]), .tdo_pin(gpio_aux[1]),
+            .clock_level(clock_feedback), .data_level(swdio_i_raw), .tdi_level(gpio_in[0]), .tdo_level(gpio_in[1])
+        );
+    end else begin:g_legacy_pads
+        IOBUF u_swdio_iobuf(.IO(swdio), .I(legacy_data), .O(swdio_i_raw), .T(legacy_release));
+        IOBUF u_clock_iobuf(.IO(swclk), .I(clock_drive), .T(1'b0), .O(clock_feedback));
+        assign hs_jtag_samples=0;
+        assign hs_swd_samples=0;
+    end
     `ifndef SYNTHESIS
         assign #(SWDIO_IN_DELAY_NS) swdio_i = swdio_i_raw;
         assign swdio_i_iddr = swdio_i;
@@ -164,7 +190,13 @@ module swd_controller #(
         if (core_swclk) swdio_early <= swdio_i_raw;
     end
 
-    IDDR #(
+    if (SELECTIO) begin:g_swdio_fabric_samples
+        reg rising, falling;
+        always @(posedge clk) rising <= swdio_i_iddr;
+        always @(negedge clk) falling <= swdio_i_iddr;
+        assign swdio_i_rise_raw = rising;
+        assign swdio_i_fall_raw = falling;
+    end else IDDR #(
         .DDR_CLK_EDGE("OPPOSITE_EDGE"),
         .INIT_Q1(1'b0),
         .INIT_Q2(1'b0),
@@ -183,7 +215,7 @@ module swd_controller #(
     // earlier FCLK falling-edge sample. This gives one selectable phase step.
     assign swdio_i_fall = cfg_sample_rise ? swdio_i_rise_raw : swdio_i_fall_raw;
     assign clock_drive = manual_pins[8] ? manual_pins[0] : jtag_enabled ? jtag_tck : swclk_buf;
-    IOBUF u_clock_iobuf(.IO(swclk),.I(clock_drive),.T(1'b0),.O(clock_feedback));
+
     // Read-only, asynchronous pad observer; software snapshots it after the
     // transaction has stopped. It never controls a protocol clock or data.
     generate if (ENABLE_DIAGNOSTICS) begin:g_clock_diagnostics
@@ -212,7 +244,7 @@ module swd_controller #(
         wire pin_o=gi==0 && jtag_enabled ? (manual_pins[8] ? manual_pins[2] : jtag_tdi) : gpio_out[gi];
         // GPIO1 is the target's TDO input in both SWD and JTAG modes.
         wire pin_t=!jtag_config[1] || gi==1 || (!(gi==0 && jtag_enabled) && gpio_tri[gi]);
-        IOBUF u_pin(.IO(gpio_aux[gi]),.I(pin_o),.T(pin_t),.O(gpio_in[gi]));
+        if (!SELECTIO || gi>=2) IOBUF u_pin(.IO(gpio_aux[gi]),.I(pin_o),.T(pin_t),.O(gpio_in[gi]));
     end
 
     //=========================================================================
@@ -306,7 +338,13 @@ module swd_controller #(
     reg [15:0] jtag_timestamp;
     always @(posedge clk or negedge rst_n)
         if(!rst_n) jtag_timestamp<=0;else jtag_timestamp<=jtag_timestamp+1'b1;
-    IDDR #(.DDR_CLK_EDGE("OPPOSITE_EDGE"),.INIT_Q1(0),.INIT_Q2(0),.SRTYPE("SYNC")) u_tdo_iddr(
+    if (SELECTIO) begin:g_tdo_fabric_samples
+        reg rising, falling;
+        always @(posedge clk) rising <= gpio_in[1];
+        always @(negedge clk) falling <= gpio_in[1];
+        assign jtag_tdo_rise = rising;
+        assign jtag_tdo_fall = falling;
+    end else IDDR #(.DDR_CLK_EDGE("OPPOSITE_EDGE"),.INIT_Q1(0),.INIT_Q2(0),.SRTYPE("SYNC")) u_tdo_iddr(
         .C(clk),.CE(1'b1),.D(gpio_in[1]),.Q1(jtag_tdo_rise),.Q2(jtag_tdo_fall),.R(1'b0),.S(1'b0));
     // Scan statistics reported by jtag_core: PHY wait cycles, bits scanned and
     // completed scans. Software divides them to recover the half-cycle delay

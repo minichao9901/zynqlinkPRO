@@ -2,7 +2,16 @@ set root [file normalize [file join [file dirname [info script]] ..]]
 set ::zynqlink_no_pipeline [expr {[lsearch -exact $argv --no-pipeline] >= 0}]
 set out [file join $root build fpga_dma_global]
 if {[info exists ::env(ZYNQLINK_FPGA_OUT)]} {set out [file normalize $::env(ZYNQLINK_FPGA_OUT)]}
-if {[file exists [file join $out zynqlink_dma.xpr]] && [lsearch -exact $argv --recreate] < 0} {
+set selectio [expr {[lsearch -exact $argv --selectio] >= 0}]
+if {$selectio} {
+    if {![info exists ::env(ZYNQLINK_FPGA_OUT)]} {set out [file join $root build selectio]}
+    set ::env(ZYNQLINK_FPGA_OUT) $out
+    set ::env(ZYNQLINK_SELECTIO) 1
+    set ::env(ZYNQLINK_RAW_TRACE) 4
+    set ::env(ZYNQLINK_ETM_DDR) 1
+    set ::env(ZYNQLINK_ETM_LANE_DELAY) 1
+}
+if {!$selectio && [file exists [file join $out zynqlink_dma.xpr]] && [lsearch -exact $argv --recreate] < 0} {
     source [file join $root fpga build_incremental.tcl]
     exit
 }
@@ -72,6 +81,7 @@ source [file join $root fpga probe_jtag_bd.tcl]
 source [file join $root fpga orbtrace_bd.tcl]
 source [file join $root fpga orbtrace_ddr_bd.tcl]
 source [file join $root fpga compact_config.tcl]
+if {$selectio} {source [file join $root fpga selectio system.tcl]}
 source [file join $root fpga axi_pipeline.tcl]
 write_bd_tcl -force [file join $out system_dma.tcl]
 set_property synth_checkpoint_mode Hierarchical [get_files system.bd]
