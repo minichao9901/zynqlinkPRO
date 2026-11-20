@@ -28,19 +28,27 @@ module selectio_debug_phy (
     always @(posedge quad_clk) previous_samples <= tdo_samples;
     always @(posedge octet_clk) jtag_samples <= {tdo_samples, previous_samples};
 
+    // The compatibility controller has a programmable FCLK. Its low-rate
+    // pin levels cross into the fixed quartet clock while each SWJ half bit
+    // is held for at least five quartet cycles (10 MHz maximum).
+    (* ASYNC_REG="TRUE" *) reg [4:0] legacy_meta = 5'b00101, legacy_sync = 5'b00101;
+    always @(posedge quad_clk) begin
+        legacy_meta <= {legacy_clock,legacy_data,legacy_release,legacy_tdi,legacy_tdi_release};
+        legacy_sync <= legacy_meta;
+    end
     wire legacy = owner == 1;
     wire jtag = owner == 2;
     wire swd = owner == 3;
-    wire [3:0] clock_word = legacy ? {4{legacy_clock}} : jtag ? jclock : swd ? swd_clock : 4'b0;
-    wire [3:0] data_word = legacy ? {4{legacy_data}} : jtag ? jdata : swd_data;
-    wire [3:0] release_word = legacy ? {4{legacy_release}} : jtag ? 4'b0 : swd ? swd_release : 4'hf;
-    wire [3:0] tdi_word = jtag ? jtdi : {4{legacy_tdi}};
+    wire [3:0] clock_word = legacy ? {4{legacy_sync[4]}} : jtag ? jclock : swd ? swd_clock : 4'b0;
+    wire [3:0] data_word = legacy ? {4{legacy_sync[3]}} : jtag ? jdata : swd_data;
+    wire [3:0] release_word = legacy ? {4{legacy_sync[2]}} : jtag ? 4'b0 : swd ? swd_release : 4'hf;
+    wire [3:0] tdi_word = jtag ? jtdi : {4{legacy_sync[1]}};
 
     wire clock_out, data_out, tdi_out, clock_tri, data_tri, tdi_tri;
     selectio_tx clock_tx(serial_clk, quad_clk, reset, clock_word, {4{owner==0}}, clock_out, clock_tri);
     selectio_tx data_tx(serial_clk, quad_clk, reset, data_word, release_word, data_out, data_tri);
     selectio_tx tdi_tx(serial_clk, quad_clk, reset, tdi_word,
-                      {4{!jtag && !(legacy && !legacy_tdi_release)}}, tdi_out, tdi_tri);
+                      {4{!jtag && !(legacy && !legacy_sync[0])}}, tdi_out, tdi_tri);
     IOBUF clock_pad(.I(clock_out),.T(clock_tri),.IO(clock_pin),.O(clock_level));
     IOBUF data_pad(.I(data_out),.T(data_tri),.IO(data_pin),.O(data_level));
     IOBUF tdi_pad(.I(tdi_out),.T(tdi_tri),.IO(tdi_pin),.O(tdi_level));

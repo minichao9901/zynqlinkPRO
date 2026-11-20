@@ -1,12 +1,19 @@
 # Add the two AXI transaction queues to the existing USB/DDR/ETM system.
-set bus [get_bd_cells ps7_0_axi_periph]
-set_property CONFIG.NUM_MI 10 $bus
+# Keep the main command/DDR and ETM fabric on GP0. The extra engines
+# have their own GP1 decoder and register slices.
+set ps [get_bd_cells processing_system7_0]
+set_property CONFIG.PCW_USE_M_AXI_GP1 1 $ps
+set bus [create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 sio_bus]
+set_property -dict {CONFIG.NUM_SI 1 CONFIG.NUM_MI 2 CONFIG.ENABLE_ADVANCED_OPTIONS 1 CONFIG.XBAR_DATA_WIDTH 32 CONFIG.S00_HAS_REGSLICE 4 CONFIG.M00_HAS_REGSLICE 4 CONFIG.M01_HAS_REGSLICE 4} $bus
+connect_bd_intf_net [get_bd_intf_pins $ps/M_AXI_GP1] [get_bd_intf_pins $bus/S00_AXI]
+connect_bd_net [get_bd_pins $ps/FCLK_CLK0] [get_bd_pins $ps/M_AXI_GP1_ACLK] [get_bd_pins $bus/ACLK] [get_bd_pins $bus/S00_ACLK]
+connect_bd_net [get_bd_pins rst_ps7_0_50M/peripheral_aresetn] [get_bd_pins $bus/ARESETN] [get_bd_pins $bus/S00_ARESETN]
 set_property CONFIG.SELECTIO 1 [get_bd_cells swd_controller_0]
 set_property CONFIG.SHARED_CALIBRATION 1 [get_bd_cells orbtrace_0]
 create_bd_cell -type module -reference selectio_clocking sio_clock
 foreach {engine module master offset} {
-    sio_jtag jtag200_regs M08 0x40050000
-    sio_swd  swd200_regs  M09 0x40060000
+    sio_jtag jtag200_regs M00 0x80000000
+    sio_swd  swd200_regs  M01 0x80010000
 } {
     create_bd_cell -type module -reference $module $engine
     connect_bd_intf_net [get_bd_intf_pins $bus/${master}_AXI] [get_bd_intf_pins $engine/S_AXI]

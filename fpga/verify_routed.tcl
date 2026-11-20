@@ -138,7 +138,13 @@ if {[info exists ::env(ZYNQLINK_RAW_TRACE)] && $::env(ZYNQLINK_RAW_TRACE) in {2 
 # it for each frequency. Keep the highest rate that meets BOTH setup and hold.
 # Preserve a direct report at the requested work point, even if a higher
 # exploratory frequency passes first or the script later falls back to 100MHz.
-create_clock -name clk_fpga_0 -period [expr {floor(1e12/$requested_fclk)/1000.0}] [get_pins {system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]}]
+if {[llength $selectio_pads]} {
+    # Recreating a primary clock discards generated-clock/CDC references.
+    set period [get_property PERIOD [get_clocks clk_fpga_0]]
+    if {abs($period-7.5)>0.001 || $requested_fclk!=133333333} {error "SelectIO requires the routed 7.5 ns AXI constraint"}
+} else {
+    create_clock -name clk_fpga_0 -period [expr {floor(1e12/$requested_fclk)/1000.0}] [get_pins {system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]}]
+}
 report_timing_summary -report_unconstrained -file [file join $out timing_target.rpt]
 report_timing -delay_type max -max_paths 60 -file [file join $out setup_target.rpt]
 report_timing -delay_type min -max_paths 60 -file [file join $out hold_target.rpt]
@@ -179,7 +185,11 @@ foreach rate $rates {
     # Do not promote a release above the explicitly implemented work point.
     # Higher-frequency exploration requires a separately authorized build.
     if {$rate>$requested_fclk} {continue}
-    create_clock -name clk_fpga_0 -period [expr {floor(1e12/$rate)/1000.0}] [get_pins {system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]}]
+    if {[llength $selectio_pads]} {
+        if {$rate!=$requested_fclk} {continue}
+    } else {
+        create_clock -name clk_fpga_0 -period [expr {floor(1e12/$rate)/1000.0}] [get_pins {system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]}]
+    }
     set setup [get_property SLACK [get_timing_paths -max_paths 1 -delay_type max]]
     set h [get_property SLACK [get_timing_paths -max_paths 1 -delay_type min]]
     puts $fd "$rate,$setup,$h"

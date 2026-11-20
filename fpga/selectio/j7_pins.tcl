@@ -6,3 +6,5 @@ set j7_pads {swclk_0 L15 swdio_0 L16 gpio_rtl_0_tri_io[0] M15
 foreach {port ball} $j7_pads {reset_property PACKAGE_PIN [get_ports $port]}
 foreach {port ball} $j7_pads {set_property PACKAGE_PIN $ball [get_ports $port]}
 set_property -dict {DRIVE 8 SLEW FAST} [get_ports swclk_0]
+
+source [file join [file dirname [info script]] queue_timing.tcl]
