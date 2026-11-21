@@ -36,6 +36,8 @@ RTT 的理想数是只读数据时的上界。对完整 1 KiB 页内的 255 个�
 
 50 MHz SWD 的 8,048 B 理想纯 DRW 需要 92,552 个时钟；实际多出 4,090 个，包括环描述符、换页、确认和 WAIT。以实际时钟数量计算，持续打钟阶段相当于 4.164 MB/s。消费与停钟合计约 202 µs，解释了到 3.770 MB/s 的差距。复现命令为 `python tools/selectio_cm3.py --services --rtt-window --swd-only --half-rate --idle 0 --out build/rtt50-model`。
 
+实板运行态验收入口另支持 1 KiB / 8 KiB 生产者对照。以 Unicorn 2.1.4 执行同一份 56 B Cortex-M3 程序，用非整字的消费步长使环反复写满、停写、续写和跨环尾；1 KiB 环逐字节核对了 67,236 B，8 KiB 环核对了 78,494 B，两侧哨兵一致。这项测试验证目标夹具语义，真实连续 RTT 吞吐仍由在线目标给出。[执行结果](producer-rings.json)
+
 ### J-Scope 的稳定与超额请求窗口
 
 ARM 双 TAP 的 IR 导航、指令、BYPASS 与返回 RTI 现合并为一次跨时钟域启动。在同一页的连续多字 JTAG 计划中，最后一次 APACC 在收回上组末字的同时，写入下组 TAR。每包仍由 CTRL/STAT 确认后才发布。单独注入 fence 错误时，未确认的整包和计数均被撤销。100 MHz、8 字、超额请求下由 74,037 提升到 103,355 组/s，物理时钟由 1,018.6 减为 775.7 TCK/组；50 MHz 同负载从 49,155 提升到 67,346 组/s。短窗计数另列暖机与稳定期。[逐档计数](sample-windows.json)

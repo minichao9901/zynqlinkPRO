@@ -16,8 +16,14 @@
 producer:
     cpsid i
     ldr r0, =FIXTURE_BASE + 0x200
+.ifdef RTT_FROM_DESCRIPTOR
+    ldr r1, [r0, #28]
+    ldr r7, [r0, #32]
+    subs r7, #1
+.else
     ldr r1, =FIXTURE_BASE + RTT_RING_OFFSET
     movw r7, #RTT_RING_MASK
+.endif
     movs r3, #0
     movs r4, #0
 1:
@@ -38,3 +44,7 @@ producer:
     mov r3, r6
     str r4, [r0, #48]
     b 1b
+.ifdef RTT_FROM_DESCRIPTOR
+    .ltorg
+    .ascii "RTTD"
+.endif

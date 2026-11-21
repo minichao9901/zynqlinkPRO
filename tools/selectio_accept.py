@@ -29,6 +29,8 @@ def main(argv=None):
     ap.add_argument("--frame",type=int,choices=(4096,16384),default=4096,
                     help="negotiated SRAM frame size and guarded fixture extent")
     ap.add_argument("--schedule",choices=("grouped","sliding"),default="sliding")
+    ap.add_argument("--rtt-ring-bytes",type=int,choices=(1024,8192),default=1024,
+                    help="target producer ring size for running RTT and combo measurements")
     ap.add_argument("--execute",action="store_true")
     args=ap.parse_args(argv)
     if args.review:
@@ -52,7 +54,8 @@ def main(argv=None):
     out=(args.out or ROOT/"build"/("selectio-accept-"+datetime.now().strftime("%Y%m%d-%H%M%S"))).resolve()
     summary=dict(board=args.board,operation="HS3 JTAG/RAM, guarded F103ZE SRAM",suites=selected,
                  serial=args.serial,seconds=args.seconds,rounds=args.rounds,pair=str(pair),out=str(out),
-                 debug_service_hz=args.clock,memory_frame=args.frame,schedule=args.schedule,cases=[])
+                 debug_service_hz=args.clock,memory_frame=args.frame,schedule=args.schedule,
+                 rtt_ring_bytes=args.rtt_ring_bytes,cases=[])
     if not args.execute:
         print(json.dumps(summary,indent=2));return 0
     identity=json.loads((pair/"manifest.json").read_text(encoding="utf8"))
@@ -119,7 +122,7 @@ def main(argv=None):
     producer=None
     if "rtt" in selected or "combo" in selected:
         producer=fixture("probe_rtt_ram.S","producer",["-Wa,--defsym,FIXTURE_BASE=0x20008000",
-                             "-Wa,--defsym,RTT_RING_OFFSET=0x400","-Wa,--defsym,RTT_RING_MASK=1023"])
+                             "-Wa,--defsym,RTT_FROM_DESCRIPTOR=1"])
     for transport in ("swd","jtag"):
         cfg=profiles[transport]
         common=["--transport",transport,"--slot",cfg["slot"]]
@@ -130,7 +133,8 @@ def main(argv=None):
                  "--depth",4,"--seconds",args.seconds,"--rounds",args.rounds],args.frame)
         for service in ("rtt","combo"):
             if service in selected:test(service+"-"+transport,"selectio_running_test.py",
-                [*common,"--clock",args.clock,"--idle",cfg["idle"],"--seconds",args.seconds,"--service",service,"--binary",producer])
+                [*common,"--clock",args.clock,"--idle",cfg["idle"],"--seconds",args.seconds,"--service",service,
+                 "--binary",producer,"--ring-bytes",args.rtt_ring_bytes],16384 if args.rtt_ring_bytes==8192 else 4096)
     if "scope" in selected:test("services","selectio_services_accept.py",["--swd-slot",profiles["swd"]["slot"],
                        "--jtag-slot",profiles["jtag"]["slot"],"--swd-idle",profiles["swd"]["idle"],
                        "--jtag-idle",profiles["jtag"]["idle"],"--clock",args.clock,"--confirm-seconds",args.seconds])
