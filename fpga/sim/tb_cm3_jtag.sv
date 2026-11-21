@@ -160,7 +160,7 @@ module tb_cm3_jtag #(parameter integer ENABLE_DIAGNOSTICS=0, FAST_IO=0);
  end
  task measure_rtt_window;
   localparam integer BASE='h3f1, SIZE=8191, INITIAL_RD=6143, WR=6000, TOTAL=SIZE-INITIAL_RD+WR;
-  integer rd_off,n,bank,count,packets,idx,lane;
+  integer rd_off,n,bank,count,packets,idx,lane,chunk;
   reg [31:0] value;
   realtime started,ready_time,ack_time,sink_ns;
   begin
@@ -168,12 +168,14 @@ module tb_cm3_jtag #(parameter integer ENABLE_DIAGNOSTICS=0, FAST_IO=0);
      target.u_sys.mem[(BASE+idx)/4][8*((BASE+idx)%4)+:8]=(idx*37+(idx>>8))&255;
    target.u_sys.mem['h23fc/4]='h60000000+BASE;target.u_sys.mem['h2400/4]=SIZE;
    target.u_sys.mem['h2404/4]=WR;target.u_sys.mem['h2408/4]=INITIAL_RD;
-   put(32,'h600023f8);put(36,'h60000000+BASE);put(40,SIZE);put(44,INITIAL_RD);put(48,2048);
+   if(!$value$plusargs("rtt_chunk=%d",chunk))chunk=2048;
+   if(chunk!=1024 && chunk!=2048)$fatal(1,"unsupported RTT chunk");
+   put(32,'h600023f8);put(36,'h60000000+BASE);put(40,SIZE);put(44,INITIAL_RD);put(48,chunk);
    rd_off=INITIAL_RD;count=0;packets=0;sink_ns=0;started=$realtime;rtt_meter=1;put(0,2);
    while(count<TOTAL)begin
     wait_packet();ready_time=$realtime;get(8,value);
     n=value[11:0];bank=4096+2048*value[18:16];
-    if(n!=((TOTAL-count)>2048 ? 2048 : TOTAL-count) || rd_off+n>SIZE)
+    if(n!=((TOTAL-count)>chunk ? chunk : TOTAL-count) || rd_off+n>SIZE)
       $fatal(1,"RTT packet size or ring boundary n=%0d rd=%0d",n,rd_off);
     for(idx=0;idx<n;idx=idx+4)begin
      get(bank+idx,value);

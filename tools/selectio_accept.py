@@ -31,6 +31,7 @@ def main(argv=None):
     ap.add_argument("--schedule",choices=("grouped","sliding"),default="sliding")
     ap.add_argument("--rtt-ring-bytes",type=int,choices=(1024,8192),default=1024,
                     help="target producer ring size for running RTT and combo measurements")
+    ap.add_argument("--rtt-chunk",type=int,choices=(1024,2048),help="maximum bytes per target-side RTT commit in standalone mode")
     ap.add_argument("--execute",action="store_true")
     args=ap.parse_args(argv)
     if args.review:
@@ -55,7 +56,7 @@ def main(argv=None):
     summary=dict(board=args.board,operation="HS3 JTAG/RAM, guarded F103ZE SRAM",suites=selected,
                  serial=args.serial,seconds=args.seconds,rounds=args.rounds,pair=str(pair),out=str(out),
                  debug_service_hz=args.clock,memory_frame=args.frame,schedule=args.schedule,
-                 rtt_ring_bytes=args.rtt_ring_bytes,cases=[])
+                 rtt_ring_bytes=args.rtt_ring_bytes,rtt_chunk=args.rtt_chunk,cases=[])
     if not args.execute:
         print(json.dumps(summary,indent=2));return 0
     identity=json.loads((pair/"manifest.json").read_text(encoding="utf8"))
@@ -132,8 +133,9 @@ def main(argv=None):
                  "--clock",args.clock,"--frame",args.frame,"--bytes",args.frame-64,"--schedule",args.schedule,
                  "--depth",4,"--seconds",args.seconds,"--rounds",args.rounds],args.frame)
         for service in ("rtt","combo"):
+            chunk=["--rtt-chunk",args.rtt_chunk] if service=="rtt" and args.rtt_chunk else []
             if service in selected:test(service+"-"+transport,"selectio_running_test.py",
-                [*common,"--clock",args.clock,"--idle",cfg["idle"],"--seconds",args.seconds,"--service",service,
+                [*common,*chunk,"--clock",args.clock,"--idle",cfg["idle"],"--seconds",args.seconds,"--service",service,
                  "--binary",producer,"--ring-bytes",args.rtt_ring_bytes],16384 if args.rtt_ring_bytes==8192 else 4096)
     if "scope" in selected:test("services","selectio_services_accept.py",["--swd-slot",profiles["swd"]["slot"],
                        "--jtag-slot",profiles["jtag"]["slot"],"--swd-idle",profiles["swd"]["idle"],

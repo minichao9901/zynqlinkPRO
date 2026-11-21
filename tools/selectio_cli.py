@@ -272,7 +272,8 @@ def capture(args):
         try:
             action(12,bytes([PORTS[args.transport]]))
             if channel==2:
-                action(7,struct.pack("<IHBB",args.clock,1024,0,1))
+                chunk=args.chunk or (2048 if native.frame_size>=16384 else 1024)
+                action(7,struct.pack("<IHBB",args.clock,chunk,0,1))
                 cfg=struct.pack("<IIB",args.address,args.size,args.channel)
             else:
                 action(3,struct.pack("<I",args.clock))
@@ -295,6 +296,10 @@ def capture(args):
                         drain()
                     while drain(): pass
                     info.update(bytes=received,status=list(action(2)),seconds=time.monotonic()-start)
+                    if channel==2:
+                        applied=info["status"][11]&0xffff
+                        if applied!=chunk:raise RuntimeError(f"RTT chunk readback {applied} differs from {chunk}")
+                        info["rtt_chunk_bytes"]=applied
             finally:
                 try:native.exchange(channel,0,b"\x00")
                 finally:cmd(tx,rx,[3])
@@ -379,6 +384,7 @@ def main():
         sub.add_argument("--seconds",type=float,required=True)
         sub.add_argument("--out",type=Path,required=True)
         if action=="rtt":
+            sub.add_argument("--chunk",type=int,choices=(1024,2048),help="maximum target RTT bytes per confirmed RdOff update")
             sub.add_argument("--address",type=number,required=True,help="RTT control block or scan base")
             sub.add_argument("--size",type=number,default=256)
             sub.add_argument("--channel",type=int,default=0)

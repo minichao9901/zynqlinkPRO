@@ -115,6 +115,8 @@ python -X utf8 toolbox.py project run board.accept -- --selectio --board f103ze 
 
 运行态 RTT 默认使用与 100 MHz 历史成绩相同的 1,024 B 目标环。给同一入口加 `--rtt-ring-bytes 8192` 可测大环并减少环尾截断。两种容量使用同一个 Cortex-M3 生产者，每次运行都从真实 RTT 描述符取环地址和大小。大环占用的区域由 16 KiB SRAM 夹具备份和复原。请分别保存两次的报告，以便区分环长和 USB 帧长带来的变化。
 
+独立 RTT 的 `--chunk 1024` 或 `--chunk 2048` 控制每次确认目标 RdOff 之前最多搬运多少字节。CLI 默认在协商到 16 KiB 的 IF4 上使用 2,048 B，旧接口沿用 1,024 B。STOP 返回的状态字给出实际设置。统一验收入口的对应参数是 `--rtt-chunk`，例如固定 `--only rtt --clock 50000000 --rtt-ring-bytes 8192`，分别用两个块长运行。报告中的 `stream_MBps` 使用从服务启动确认到 STOP 尾部排空的窗口，`cli_process_MBps` 包含启动 CLI、连接与退出耗时，二者均使用已验证的主机有效字节。
+
 在相同线速做小帧对照时，用 `--frame 4096 --bytes 4032`；比较队列策略用相同帧长、字节数和深度，仅调整 `--schedule`。报告中的 `clock` 给出时钟树、队列分频及采样 tap 的来源。`wall_MBps` 包含主机载荷生成和校验，`probe` 中的计时覆盖队列与 PS 块函数。[分层基线和数字模型](../validation/efficiency-20261122/README.md)
 
 以下地址仅作 CDC48 示例；其他固件从目标 ELF 符号表取得 RTT 控制块或变量地址。RTT 下行需要目标定义 DOWN 通道。本项目的 J-Scope 指主线 HSS 硬件变量采样，CLI 可导出 CSV。独立采样支持 1–8 个变量。周期单位为 24 MHz tick，`24000` 表示 1 ms。`--var` 的格式为地址、字节宽度、类型码，用冒号分隔。类型码 0–7 依次对应 u8、i8、u16、i16、u32、i32、f32、f64。

@@ -78,8 +78,13 @@ def main():
                                 "--seconds",seconds,"--out",dest],name)
                     verified=export_scope(dest,expected=expected)
                     skipped=verified["stat"]["skipped"];groups=verified["groups"]
+                    period=verified["definition"]["period_ticks"]
+                    gaps=verified["timeline_skips"]
+                    timeline_ticks=(groups-1+gaps)*period if groups>1 else 0
                     row=dict(transport=transport,channels=channels,requested_ticks=ticks,
-                             ticks=verified["definition"]["period_ticks"],seconds=seconds,stage=kind,
+                             ticks=period,seconds=seconds,stage=kind,stream_seconds=status["seconds"],
+                             host_groups_s=groups/status["seconds"],timeline_ticks=timeline_ticks,
+                             timeline_skips=gaps,timeline_groups_s=(groups-1)*24000000/timeline_ticks if timeline_ticks else None,
                              actual_link_hz=status["status"][1],groups=groups,skipped=skipped,
                              skipped_fraction=skipped/max(1,skipped+groups),frames=verified["packets"],
                              tail_match=groups==status["status"][2],read_errors=verified["stat"]["read_errors"])

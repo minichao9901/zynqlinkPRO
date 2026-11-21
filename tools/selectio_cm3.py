@@ -20,7 +20,8 @@ def main():
     parser.add_argument("--jtag-idle",type=int,default=33)
     parser.add_argument("--service-words",type=int,choices=(1,8),default=1)
     parser.add_argument("--meter",action="store_true")
-    parser.add_argument("--rtt-window", action="store_true", help="time four verified RTT packets through the final target RdOff commit")
+    parser.add_argument("--rtt-window", action="store_true", help="time 8048 verified RTT bytes through the final target RdOff commit")
+    parser.add_argument("--rtt-chunk", type=int, choices=(1024,2048), default=2048)
     args = parser.parse_args()
     if args.rtt_window and not args.services:
         parser.error("--rtt-window requires --services")
@@ -62,7 +63,7 @@ def main():
     elif args.swd_only: switches.extend(["-testplusarg","swd_only"])
     switches.extend(["-testplusarg",f"service_words={args.service_words}"])
     if args.meter:switches.extend(["-testplusarg","meter"])
-    if args.rtt_window:switches.extend(["-testplusarg","rtt_window"])
+    if args.rtt_window:switches.extend(["-testplusarg","rtt_window","-testplusarg",f"rtt_chunk={args.rtt_chunk}"])
     if args.half_rate: switches.extend(["-testplusarg","half_rate"])
     if args.wiretrace: switches.extend(["-testplusarg","wiretrace"])
     output = run("xsim", ["fusion", "-runall", "-testplusarg", f"jslot={args.jtag_slot}",
