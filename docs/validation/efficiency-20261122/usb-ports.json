@@ -1,0 +1,38 @@
+{
+  "query": "Windows USB hub IOCTL_USB_GET_NODE_CONNECTION_INFORMATION_EX",
+  "probe_driver_snapshot": {
+    "HS3": "oem7.inf",
+    "J7 composite": "usb.inf"
+  },
+  "ports": [
+    {
+      "path": "HS3 last upstream hub",
+      "parent": "USB\\ROOT_HUB30\\5&26163371&0&0",
+      "port": 2,
+      "last_hub": "05e3:0608",
+      "present_descriptor": "unavailable",
+      "connection_status": "DeviceFailedEnumeration",
+      "windows_problem_code": 43
+    },
+    {
+      "path": "J7 last port",
+      "parent": "USB\\VID_05E3&PID_0610\\6&18B5DD39&0&2",
+      "port": 2,
+      "connection_status": "NoDeviceConnected"
+    },
+    {
+      "path": "F103 active port",
+      "parent": "USB\\VID_05E3&PID_0610\\6&18B5DD39&0&2",
+      "port": 4,
+      "connection_status": "DeviceConnected",
+      "vid_pid": "f055:1031",
+      "serial": "F103CDC0001"
+    }
+  ],
+  "recovery": [
+    "PnP scan complete",
+    "Targeted restart of descriptor-failure device instance succeeded; Code 43 persisted",
+    "IOCTL_USB_HUB_CYCLE_PORT on failed HS3 upstream root port 2 returned success, Win32 0, USB status 0; the three port states above persisted six seconds later"
+  ],
+  "observed_target_operations": 0
+}
