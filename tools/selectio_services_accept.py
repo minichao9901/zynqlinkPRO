@@ -66,7 +66,8 @@ def main():
                 if ring[500:]+ring[:25]!=down or ring[25:500]!=contents[0x601+25:0x601+500]:
                     raise RuntimeError("RTT DOWN data or guard mismatch")
             report[transport+"_rtt"]=dict(up_bytes=len(data),down_bytes=len(down),status=up_status["status"]);save()
-            for channels,periods in [(1,[12,14,16,20,24,32,48,64,96,128,192,256]),(8,[112,144,168,192,240,320,416,600,960,1440,1920])]:
+            for channels,periods in [(1,[12,14,16,20,24,26,28,32,48,64,72,80,96,128,192,256]),
+                                     (8,[112,144,160,168,192,240,264,288,320,384,416,448,576,600,960,1440,1920])]:
                 plan=[]
                 for i in range(channels):plan.extend(["--var",f"{BASE+0xa00+4*i:#x}:4:4"])
                 expected=struct.pack("<"+"I"*channels,*sample[:channels])
@@ -77,7 +78,8 @@ def main():
                                 "--seconds",seconds,"--out",dest],name)
                     verified=export_scope(dest,expected=expected)
                     skipped=verified["stat"]["skipped"];groups=verified["groups"]
-                    row=dict(transport=transport,channels=channels,ticks=ticks,seconds=seconds,stage=kind,
+                    row=dict(transport=transport,channels=channels,requested_ticks=ticks,
+                             ticks=verified["definition"]["period_ticks"],seconds=seconds,stage=kind,
                              actual_link_hz=status["status"][1],groups=groups,skipped=skipped,
                              skipped_fraction=skipped/max(1,skipped+groups),frames=verified["packets"],
                              tail_match=groups==status["status"][2],read_errors=verified["stat"]["read_errors"])
