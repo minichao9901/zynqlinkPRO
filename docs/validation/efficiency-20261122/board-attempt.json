@@ -1,0 +1,33 @@
+{
+  "board": "f103ze",
+  "operation": "HS3 JTAG/RAM, guarded F103ZE SRAM",
+  "suites": [
+    "memory",
+    "rtt",
+    "scope",
+    "usb-ddr"
+  ],
+  "serial": "12345678",
+  "seconds": 3.0,
+  "rounds": 3,
+  "pair": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-efficiency",
+  "out": "E:\\zynqlinkPRO-efficiency\\build\\efficiency-board-first",
+  "debug_service_hz": 50000000,
+  "memory_frame": 16384,
+  "schedule": "sliding",
+  "rtt_ring_bytes": 1024,
+  "cases": [
+    {
+      "name": "load",
+      "passed": false,
+      "exit_code": 1,
+      "seconds": 158.23102209999706,
+      "log": "load.log"
+    }
+  ],
+  "hashes": {
+    "probe.bit": "3caf4831d2ab52302d2077f2948ef9540ed84e31811e0ad6e5f8e9e5a947a5cc",
+    "application.elf": "08a8e8355baae019b27332ac63ed83873713ed50cebf55692ef007e39b6b799b",
+    "ps7_init.tcl": "aa9747c31f705be7c28af1c6b1cdeaf282f0dcdb01faecee2a9f72e4d3489132"
+  }
+}

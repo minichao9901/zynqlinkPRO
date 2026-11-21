@@ -1,0 +1,63 @@
+{
+  "source_revision": "499c79f51c8841859cf41fc8c014be49aaa1739e",
+  "hashes": {
+    "probe.bit": "3caf4831d2ab52302d2077f2948ef9540ed84e31811e0ad6e5f8e9e5a947a5cc",
+    "application.elf": "08a8e8355baae019b27332ac63ed83873713ed50cebf55692ef007e39b6b799b",
+    "ps7_init.tcl": "aa9747c31f705be7c28af1c6b1cdeaf282f0dcdb01faecee2a9f72e4d3489132"
+  },
+  "bit_features": "0x4450ffff",
+  "status": "routed and digitally verified candidate; physical qualification pending",
+  "board_verified": false,
+  "external_frequency_counter": false,
+  "max_native_frame": 16384,
+  "swd": {
+    "tap": 8,
+    "slot": 24,
+    "idle": 2
+  },
+  "jtag": {
+    "tap": 16,
+    "slot": 28,
+    "idle": 33,
+    "bulk_idle": 29
+  },
+  "profiles_50mhz": {
+    "swd": {
+      "tap": 8,
+      "slot": 16,
+      "idle": 0
+    },
+    "jtag": {
+      "tap": 16,
+      "slot": 21,
+      "idle": 17,
+      "bulk_idle": 17
+    }
+  },
+  "profile_status": "100 MHz settings from cf544741; 50 MHz starting values are unqualified on this board",
+  "cdc_bypass_qualification": true,
+  "native_stream_lease_seconds": 5,
+  "timing": {
+    "FCLK_max_Hz": 133333333,
+    "SWCLK_max_Hz": 66666666,
+    "setup_slack_ns": 0.025,
+    "hold_slack_ns": 0.042,
+    "requested_FCLK_Hz": 133333333,
+    "RTL_DEBUG": 0,
+    "optional_observation_cells": 0,
+    "formal_product_acceptance": false
+  },
+  "pl_options": [
+    "--selectio",
+    "--etm400"
+  ],
+  "ps_options": [
+    "--selectio",
+    "--j7-adapter",
+    "--compact-code",
+    "--max-swclk-hz",
+    "10000000"
+  ],
+  "ps_build_manifest": "ps-build.json",
+  "validation": "../../docs/validation/efficiency-20261122/README.md"
+}

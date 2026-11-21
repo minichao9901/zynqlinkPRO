@@ -1,0 +1,126 @@
+{
+  "elf": "E:\\zynqlinkPRO-efficiency\\build\\efficiency-final-ps\\xusbps_daplink_dma.elf",
+  "banks": [
+    {
+      "name": "low",
+      "start": 0,
+      "limit": 196608,
+      "sections": [
+        {
+          "name": ".text",
+          "address": 0,
+          "size": 113448,
+          "end": 113448
+        },
+        {
+          "name": ".ocm_text",
+          "address": 113448,
+          "size": 2956,
+          "end": 116404
+        },
+        {
+          "name": ".init",
+          "address": 116404,
+          "size": 12,
+          "end": 116416
+        },
+        {
+          "name": ".fini",
+          "address": 116416,
+          "size": 12,
+          "end": 116428
+        },
+        {
+          "name": ".rodata",
+          "address": 116428,
+          "size": 1914,
+          "end": 118342
+        },
+        {
+          "name": ".data",
+          "address": 118368,
+          "size": 3144,
+          "end": 121512
+        },
+        {
+          "name": ".mmu_tbl",
+          "address": 131072,
+          "size": 16384,
+          "end": 147456
+        },
+        {
+          "name": ".ARM.exidx",
+          "address": 147456,
+          "size": 8,
+          "end": 147464
+        },
+        {
+          "name": ".init_array",
+          "address": 147464,
+          "size": 4,
+          "end": 147468
+        },
+        {
+          "name": ".fini_array",
+          "address": 147468,
+          "size": 4,
+          "end": 147472
+        },
+        {
+          "name": ".ocm_bss",
+          "address": 147488,
+          "size": 97,
+          "end": 147585
+        },
+        {
+          "name": ".heap",
+          "address": 147585,
+          "size": 8207,
+          "end": 155792
+        },
+        {
+          "name": ".stack",
+          "address": 155792,
+          "size": 14336,
+          "end": 170128
+        }
+      ],
+      "span_bytes": 170128,
+      "free_bytes": 26480
+    },
+    {
+      "name": "high",
+      "start": 4294901760,
+      "limit": 4294966784,
+      "sections": [],
+      "span_bytes": 0,
+      "free_bytes": 65024
+    }
+  ],
+  "ddr_sections": [
+    {
+      "name": ".dap_debug",
+      "address": 1048576,
+      "size": 228,
+      "end": 1048804
+    },
+    {
+      "name": ".dap_trace",
+      "address": 956301312,
+      "size": 248,
+      "end": 956301560
+    },
+    {
+      "name": ".bss",
+      "address": 1052672,
+      "size": 9305652,
+      "end": 10358324
+    }
+  ],
+  "ddr_section_bytes": 9306128,
+  "executable_bytes": 116428,
+  "span_bytes": 170128,
+  "free_bytes": 91504,
+  "reserved_bytes": 512,
+  "hardware_validation": "not performed"
+}

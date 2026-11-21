@@ -24,9 +24,9 @@ def main():
     ap.add_argument("--out",required=True,type=Path)
     ap.add_argument("--execute",action="store_true")
     a=ap.parse_args()
-    if not a.execute:return print("Read-only, alternating 100 MHz JTAG and SWD SRAM reads after opposite stream selection.")
+    if not a.execute:return print(f"Alternating {a.clock//1000000} MHz JTAG and SWD SRAM reads after opposite stream selection.")
     a.out.mkdir(parents=True,exist_ok=False)
-    report=dict(passed=False,completed=0)
+    report=dict(passed=False,completed=0,requested_hz=a.clock)
     try:
         with connection(a.serial) as (tx,rx),native_connection(a.serial,tx.device) as native:
             native.info();setup(tx,rx,1000,"swd")
