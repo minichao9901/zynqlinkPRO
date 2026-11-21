@@ -851,8 +851,11 @@ static int configure_hss(const uint8_t *req) {
         step = p;
         period = p * 24;
     } else {
-        if (p < 24)
-            p = 24;
+        unsigned minimum=24;
+#if DAP_SELECTIO
+        if(selectio_dual_rate())minimum=8;
+#endif
+        if(p<minimum)p=minimum;
         if (p > 24000000)
             p = 24000000;
         step = period = p;

@@ -3,7 +3,8 @@
 // The external debug port is the encrypted Cortex-M3 DesignStart RTL.
 module tb_cm3_jtag #(parameter integer ENABLE_DIAGNOSTICS=0, FAST_IO=0);
  real clk_ns=8.333333;
- integer cfg_idle=1,service_ticks=32;
+ integer cfg_idle=1,service_ticks=32,service_words=1;
+ initial if($value$plusargs("service_words=%d",service_words))begin end
  initial if($value$plusargs("service_ticks=%d",service_ticks)) begin end
  reg clk=0;
  real target_clk_ns=8.333333;
@@ -29,7 +30,8 @@ module tb_cm3_jtag #(parameter integer ENABLE_DIAGNOSTICS=0, FAST_IO=0);
  wire bypass_tdo;
  wire cm3_tdo,cm3_ntdoen,cm3_swdo,cm3_swdoen,cm3_jtagnsw;
  wire select_swd=FAST_IO && $test$plusargs("swd");
- reg [25:0] high_config=0;
+ reg [26:0] high_config=0;
+ integer live_jslot=21,live_sslot=16;
  wire serial_rx_ck,serial_ck,quad_ck,octet_ck,phy_reset,released,live_jtag,live_swd;
  wire [2:0] owner;
  if(FAST_IO) begin:g_io_clocks
@@ -127,6 +129,16 @@ module tb_cm3_jtag #(parameter integer ENABLE_DIAGNOSTICS=0, FAST_IO=0);
  reg [31:0] dbg_meta,dbg_front,dbg_latched,dbg_tx,dbg_sense;
  integer diag_n,k;
  integer hss_t0,hss_t1,rtt_t0,rtt_t1,hss_total;
+ integer hss_full,hss_prev,hss_first_count,hss_last_count,hss_edges=0,first_edges,last_edges;
+ integer live_jidle=33,live_sidle=2;
+ bit metering=0;
+ realtime first_sample,last_sample;
+ always @(posedge tck) if(metering)hss_edges++;
+ always @(posedge clk) if(metering && dut.u_probe_sampler.head!=hss_prev)begin
+    hss_prev=dut.u_probe_sampler.head;
+    if(hss_prev==4)begin first_sample=$realtime;hss_first_count=hss_prev;first_edges=hss_edges;end
+    last_sample=$realtime;hss_last_count=hss_prev;last_edges=hss_edges;
+ end
  integer i,j,bank_base,samples,packets;
  task perf_write(input [7:0] a,input [31:0] v);write_reg(a,v);endtask
  task perf_read(input [7:0] a,output [31:0] v);read_reg(a,v);endtask
@@ -157,7 +169,11 @@ module tb_cm3_jtag #(parameter integer ENABLE_DIAGNOSTICS=0, FAST_IO=0);
   write_reg('h08,1|((cfg_idle&15)<<4));write_reg('h8c,0);
   write_reg('h98,(late_mode ? 16 : 0)|(q1_mode ? 1 : 0));
   if(FAST_IO) begin
-    high_config=(33<<18)|(2<<14)|(21<<7)|(16<<1)|1;
+    if ($value$plusargs("jslot=%d",live_jslot)) begin end
+    if ($value$plusargs("sslot=%d",live_sslot)) begin end
+    if($value$plusargs("jidle=%d",live_jidle))begin end
+    if($value$plusargs("idle=%d",live_sidle))begin end
+    high_config=($test$plusargs("half_rate")<<26)|(live_jidle<<18)|(live_sidle<<14)|(live_jslot<<7)|(live_sslot<<1)|1;
     wait(owner==(select_swd ? 3 : 2));
     repeat(16) @(posedge clk);
     if(select_swd) begin
@@ -244,21 +260,32 @@ module tb_cm3_jtag #(parameter integer ENABLE_DIAGNOSTICS=0, FAST_IO=0);
   end else if(d!==0)$fatal(1,"compact build exposed diagnostic history %h",d);
   if($test$plusargs("writes_only"))begin $display("PASS JTAG scalar, batch and packet writes");$finish;end
   // No AXI operations per sample: configure once, then PL fills a bank.
-  cfg(0,4);cfg(1,2);cfg(2,service_ticks);cfg(5,1);
-  for(i=0;i<4;i=i+1)cfg(16+i,i);
-  write_reg('h78,FAST_IO?133333333:120000000);write_reg('h68,0);write_reg('h6c,'h60000000);write_reg('h70,service_ticks);
+  if(service_words!=1 && service_words!=8)$fatal(1,"unsupported sample width");
+  hss_full=496/(4*service_words);
+  for(i=0;i<service_words;i=i+1)target.u_sys.mem[i]=32'h12340000+i;
+  cfg(0,4*service_words);cfg(1,2);cfg(2,service_ticks);cfg(5,service_words);
+  for(i=0;i<4*service_words;i=i+1)cfg(16+i,i);
+  write_reg('h78,FAST_IO?133333333:120000000);for(i=0;i<service_words;i=i+1)begin write_reg('h68,i);write_reg('h6c,'h60000000+4*i);end
+  write_reg('h70,service_ticks);
   hss_t0=$time;hss_total=0;
-  put(0,1);write_reg('h60,'h101);samples=0;packets=0;
-  while(samples!=124 && packets<8)begin
+  metering=1;hss_prev=dut.u_probe_sampler.head;put(0,1);write_reg('h60,(service_words<<8)|1);samples=0;packets=0;
+  while($test$plusargs("meter") ? (hss_total<128 && packets<512) : (samples!=hss_full && packets<8))begin
    wait_packet();get(8,d);bank_base=4096+((d>>16)&7)*2048;
    get(bank_base,d);if(d!='h02024a53)$fatal(1,"JTAG HSS header %h",d);
-   get(bank_base+12,d);samples=d[15:0];if(samples<1 || samples>124)$fatal(1,"HSS count %h",d);hss_total=hss_total+samples;
-   for(i=0;i<samples;i=i+1)begin get(bank_base+16+4*i,d);if(d!='h12340000)$fatal(1,"HSS posted data %d %h",i,d);end
+   get(bank_base+12,d);samples=d[15:0];if(samples<1 || samples>hss_full)$fatal(1,"HSS count %h",d);hss_total=hss_total+samples;
+   for(i=0;i<samples*service_words;i=i+1)begin get(bank_base+16+4*i,d);if(d!=('h12340000+(i%service_words)))$fatal(1,"HSS posted data %d %h",i,d);end
    $display("JTAG HSS bank=%d samples=%d skips=%d scans=%d tick=%d",bank_base,samples,dut.u_probe_sampler.skipped,0,dut.u_probe_sampler.tick);
-   packets=packets+1;if(samples!=124)put(12,1);
+   packets=packets+1;if($test$plusargs("meter") ? hss_total<128 : samples!=hss_full)put(12,1);
   end
   hss_t1=$time;
-  if(samples!=124)$fatal(1,"JTAG cannot sustain requested HSS period");
+  metering=0;
+  if($test$plusargs("meter"))begin
+   if(hss_total<128 || last_sample<=first_sample)$fatal(1,"incomplete meter");
+   $display("HSS_METER words=%d groups_s=%f edges_group=%f skips=%d",service_words,
+     (hss_last_count-hss_first_count)*1.0e9/(last_sample-first_sample),
+     (last_edges-first_edges)*1.0/(hss_last_count-hss_first_count),dut.u_probe_sampler.skipped);
+  end
+  if(!$test$plusargs("meter") && samples!=hss_full)$fatal(1,"JTAG cannot sustain requested HSS period");
   // No fault injection on the CM3 target: it has no hook to force an AP error.
   get(bank_base+16,d);if(d!='h12340000)$fatal(1,"validated bank changed");
   write_reg('h60,0);wait(!dut.sampler_active);write_reg('h60,2);
@@ -276,7 +303,7 @@ module tb_cm3_jtag #(parameter integer ENABLE_DIAGNOSTICS=0, FAST_IO=0);
   end
   put(0,0);put(12,1);wait(target.u_sys.mem['h2408/4]==2050);wait(!dut.rtt_active);
   $display("JTAG_PERF clk_ns=%f hss_samples=%0d hss_cycles=%0d rtt_bytes=%0d rtt_cycles=%0d",clk_ns,hss_total,(hss_t1-hss_t0)/clk_ns,2048,(rtt_t1-rtt_t0)/clk_ns);
-  if(FAST_IO) $display("SELECTIO_SERVICES_PASS swd=%0d physical=100MHz",select_swd);
+  if(FAST_IO) $display("SELECTIO_SERVICES_PASS swd=%0d physical=%0dMHz",select_swd,$test$plusargs("half_rate")?50:100);
   $display("PASS JTAG full pipeline: physical pad mux, AXI setup, autonomous HSS, posted timestamps/data, packet sticky-error fence/drop, immutable banks, RTT unaligned 1KiB split, DDR-before-RdOff");$finish;
  end
  initial begin #(clk_ns*4000000);$fatal(1,"JTAG pipeline watchdog");end

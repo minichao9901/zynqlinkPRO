@@ -56,15 +56,17 @@ def save(path,state):
 
 
 def restore(directory,state):
+    size=state.get("size",SIZE)
+    if size not in (4096,16384): raise RuntimeError("unknown saved SRAM extent")
     with low_link(state["serial"]) as mem:
         if not mem.word(DHCSR)&(1<<17):
             raise RuntimeError("fixture recovery expects a halted target; restore any test producer core registers first")
         if "backup_sha256" in state:
             data=(directory/"backup.bin").read_bytes()
-            if len(data)!=SIZE or hashlib.sha256(data).hexdigest()!=state["backup_sha256"]:
+            if len(data)!=size or hashlib.sha256(data).hexdigest()!=state["backup_sha256"]:
                 raise RuntimeError("saved SRAM backup identity differs")
-            if mem.read(BASE,SIZE)!=data:mem.write(BASE,data)
-            if mem.read(BASE,SIZE)!=data or [mem.word(BASE-4),mem.word(BASE+SIZE)]!=state["guards"]:
+            if mem.read(BASE,size)!=data:mem.write(BASE,data)
+            if mem.read(BASE,size)!=data or [mem.word(BASE-4),mem.word(BASE+size)]!=state["guards"]:
                 raise RuntimeError("SRAM or guards differ after recovery")
         if "mapr" in state:
             mem.write_word(MAPR,state["mapr"]|(2<<24))
@@ -87,11 +89,13 @@ def main():
     parser.add_argument("--restore",action="store_true")
     parser.add_argument("--execute",action="store_true")
     parser.add_argument("command",nargs=argparse.REMAINDER)
+    parser.add_argument("--size",type=int,choices=(4096,16384),default=SIZE)
     args=parser.parse_args()
+    size=args.size
     cmd=args.command[1:] if args.command[:1]==["--"] else args.command
     directory=args.out.resolve()
     if not args.execute:
-        print(f"F103ZE CDC48 guarded SRAM {BASE:#x} + {SIZE}; backup and restore RCC/AFIO/core run state; child {cmd}")
+        print(f"F103ZE CDC48 guarded SRAM {BASE:#x} + {size}; backup and restore RCC/AFIO/core run state; child {cmd}")
         return
     if args.restore:
         state=json.loads((directory/"state.json").read_text(encoding="utf8"))
@@ -99,7 +103,7 @@ def main():
         return restore(directory,state)
     if not cmd:parser.error("supply a child command following --")
     directory.mkdir(parents=True,exist_ok=False)
-    state=dict(serial=args.serial,command=cmd,elf_sha256=hashlib.sha256(ELF.read_bytes()).hexdigest())
+    state=dict(size=size,serial=args.serial,command=cmd,elf_sha256=hashlib.sha256(ELF.read_bytes()).hexdigest())
     halted=False
     try:
         with low_link(args.serial) as mem:
@@ -111,10 +115,10 @@ def main():
             save(directory/"state.json",state)
             mem.write_word(DHCSR,0xa05f0003);halted=True
             if not mem.word(DHCSR)&(1<<17):raise RuntimeError("halt not confirmed")
-            data=mem.read(BASE,SIZE)
-            if mem.read(BASE,SIZE)!=data:raise RuntimeError("unstable fixture SRAM")
+            data=mem.read(BASE,size)
+            if mem.read(BASE,size)!=data:raise RuntimeError("unstable fixture SRAM")
             (directory/"backup.bin").write_bytes(data)
-            state.update(backup_sha256=hashlib.sha256(data).hexdigest(),guards=[mem.word(BASE-4),mem.word(BASE+SIZE)],apb2=mem.word(APB2ENR))
+            state.update(backup_sha256=hashlib.sha256(data).hexdigest(),guards=[mem.word(BASE-4),mem.word(BASE+size)],apb2=mem.word(APB2ENR))
             save(directory/"state.json",state)
             mem.write_word(APB2ENR,state["apb2"]|1)
             state["mapr"]=mem.word(MAPR)&~SWJ_MASK

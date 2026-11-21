@@ -76,7 +76,7 @@ def rtt_terminal(args):
     with connection(args.serial) as (tx,rx),native_connection(args.serial,tx.device) as native:
         native.info();setup(tx,rx,1000,args.transport)
         try:
-            with native.memory(PORTS[args.transport],args.tap,args.slot,args.idle):
+            with native.memory(PORTS[args.transport],args.tap,args.slot,args.idle,args.clock):
                 down=Ring(native,args.address,args.channel,True)
                 if args.action=="rtt-terminal":
                     up=Ring(native,args.address,args.up_channel,False)
@@ -200,8 +200,8 @@ def capture_combo(args):
         raise ValueError("choose 1..8 word addresses, a positive period and a positive window")
     if args.rtt_out.exists() or args.scope_out.exists() or args.rtt_out.resolve()==args.scope_out.resolve():
         raise ValueError("provide two distinct new output paths")
-    config=struct.pack("<4BIIBB2x",PORTS[args.transport],args.tap,args.slot,args.idle,
-                       args.rtt_address,args.ticks,len(args.var),args.channel)
+    config=struct.pack("<4BIIBBBB",PORTS[args.transport],args.tap,args.slot,args.idle,
+                       args.rtt_address,args.ticks,len(args.var),args.channel,int(args.clock==50000000),0)
     config+=struct.pack("<"+"I"*len(args.var),*args.var)
     layout=struct.Struct("<"+"I"*(1+len(args.var)))
     received=samples=0
@@ -344,6 +344,7 @@ def main():
             sub.add_argument("--itm-mask",type=number,default=1,help="ITM stimulus port bit mask for target setup")
 
     sub=commands.add_parser("combo",help="simultaneously drain RTT and sample 1..8 SRAM words on one link")
+    sub.add_argument("--clock",type=number,choices=(50000000,100000000),default=100000000)
     sub.add_argument("--transport",choices=PORTS,required=True)
     sub.add_argument("--tap",type=int,choices=range(32),required=True,metavar="0..31")
     sub.add_argument("--slot",type=int,choices=range(64),required=True,metavar="0..63")
@@ -357,6 +358,7 @@ def main():
     sub.add_argument("--scope-out",type=Path,required=True)
     for action in ("rtt-send","rtt-terminal"):
         sub=commands.add_parser(action,help="write to an RTT DOWN ring or open a bidirectional terminal")
+        sub.add_argument("--clock",type=number,choices=(50000000,100000000),default=100000000)
         sub.add_argument("--transport",choices=PORTS,required=True)
         sub.add_argument("--tap",type=int,choices=range(32),required=True,metavar="0..31")
         sub.add_argument("--slot",type=int,choices=range(64),required=True,metavar="0..63")
@@ -385,6 +387,7 @@ def main():
             sub.add_argument("--var",action="append",required=True,help="address:size:type")
     for action in ("read", "write"):
         sub = commands.add_parser(action, help=f"{action} one block of aligned F103 SRAM")
+        sub.add_argument("--clock",type=number,choices=(50000000,100000000),default=100000000)
         sub.add_argument("--transport", required=True, choices=PORTS)
         sub.add_argument("--address", type=number, default=PAGE)
         sub.add_argument("--queue-depth",type=int,choices=range(1,5),default=4)
@@ -475,15 +478,16 @@ def main():
                 started = time.perf_counter()
                 result=bytearray()
                 offset=0
-                with native.memory(PORTS[args.transport],args.tap,args.slot,args.idle):
+                with native.memory(PORTS[args.transport],args.tap,args.slot,args.idle,args.clock):
                     requests=[]
                     while offset<size:
                         address=args.address+offset
-                        n=min(size-offset,4032)
+                        n=min(size-offset,native.max_bulk)
                         chunk=None if payload is None else payload[offset:offset+n]
                         requests.append((address,n,chunk))
                         offset+=n
                     for block in native.bulk_many(requests,args.queue_depth): result.extend(block)
+                info["memory_clock_hz"]=info["reference_hz"]//(4 if args.clock==50000000 else 2)
                 elapsed=time.perf_counter()-started
             finally:
                 cmd(tx, rx, [3])

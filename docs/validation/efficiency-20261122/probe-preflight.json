@@ -1,0 +1,49 @@
+{
+  "operation": "JTAG/RAM",
+  "dryRun": false,
+  "out": "E:\\zynqlinkPRO-efficiency\\build\\baseline-load",
+  "files": {
+    "bit": {
+      "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-j7-fusion\\probe.bit",
+      "sha256": "cf96fef427d986bcbab27f4711844ea457032b02e5dec2602cb323ec3dbac724"
+    },
+    "zynq_elf": {
+      "path": "E:\\zynqlinkPRO-efficiency\\build\\baseline-ps\\xusbps_daplink_dma.elf",
+      "sha256": "2844ca49fbeba5e4415f3432fc02b106b2c166644111b9f115361849f9805b75"
+    },
+    "ps_init": {
+      "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-j7-fusion\\ps7_init.tcl",
+      "sha256": "aa9747c31f705be7c28af1c6b1cdeaf282f0dcdb01faecee2a9f72e4d3489132"
+    }
+  },
+  "commands": {
+    "load": [
+      "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "-X",
+      "utf8",
+      "E:\\zynqlinkPRO-efficiency\\tools\\run_xsct.py",
+      "E:\\zynqlinkPRO-efficiency\\tools\\download_dap_fpga.tcl",
+      "E:\\zynqlinkPRO-efficiency\\build\\baseline-ps\\xusbps_daplink_dma.elf",
+      "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-j7-fusion\\probe.bit",
+      "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-j7-fusion\\ps7_init.tcl",
+      "--sdk",
+      "E:\\Xilinx\\SDK\\2018.3"
+    ],
+    "verify": [
+      "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "-X",
+      "utf8",
+      "E:\\zynqlinkPRO-efficiency\\tools\\verify_probe_ocm_code.py",
+      "--elf",
+      "E:\\zynqlinkPRO-efficiency\\build\\baseline-ps\\xusbps_daplink_dma.elf",
+      "--out-dir",
+      "E:\\zynqlinkPRO-efficiency\\build\\baseline-load\\ocm",
+      "--sdk",
+      "E:\\Xilinx\\SDK\\2018.3"
+    ]
+  },
+  "stage": "preflight",
+  "passed": false,
+  "streams": {},
+  "error": "no targets found with \"name =~ \"ARM Cortex-A9 MPCore #0*\"\". available targets: none\n    while executing\n\"error $why\"\n    invoked from within\n\"if {!$selected} {error $why}\"\n    (file \"E:\\zynqlinkPRO-efficiency\\build\\baseline-load\\001.tcl\" line 7)\n    invoked from within\n\"source $script\"\n    (file \"E:\\zynqlinkPRO-work\\runtime\\xilinx\\bootstrap.tcl\" line 5)\n"
+}

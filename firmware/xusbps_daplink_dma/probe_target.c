@@ -120,7 +120,7 @@ int probe_target_claim_on(uint32_t hz,uint32_t requested_port) {
     if(port==2 && DAP_Data.debug_port==2 && !(swd_read32(JTAG_TIMING)&4U)) return -7;
 #if DAP_SELECTIO
     saved_live=selectio_live_config();
-    int fast=hz==100000000U;
+    uint32_t fast=(hz==100000000U || (hz==50000000U && (swd_read32(SWD_FEATURES)&0x8000U))) ? hz : 0U;
     if(fast && !selectio_live_available()) return -10;
     if(fast) hz=1000000U;
 #endif
@@ -195,7 +195,7 @@ int probe_target_claim_on(uint32_t hz,uint32_t requested_port) {
         return -4;
     }
 #if DAP_SELECTIO
-    if (fast && clock_set(100000000U)) {
+    if (fast && clock_set(fast)) {
         (void)probe_target_release();
         return -4;
     }

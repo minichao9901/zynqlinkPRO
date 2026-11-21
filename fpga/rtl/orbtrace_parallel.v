@@ -3,7 +3,7 @@
 // 1 = one pin, 2 = two pins, 3 = four pins. Hold it stable until next reset.
 // The consumer receives unformatted bytes tagged with CoreSight source ID.
 // No USB/ORBFlow framing is added here.
-module orbtrace_parallel #(parameter USE_IO_CLOCK=0,USE_INPUT_DELAY=0,INPUT_DELAY_VALUE=16,RAW_DIAGNOSTIC=0,SEPARATE_DIAGNOSTIC_RESET=0,ENABLE_DDR_TAP=0) (
+module orbtrace_parallel #(parameter USE_IO_CLOCK=0,USE_INPUT_DELAY=0,INPUT_DELAY_VALUE=16,RAW_DIAGNOSTIC=0,SEPARATE_DIAGNOSTIC_RESET=0,ENABLE_DDR_TAP=0,DOUBLE_SAMPLE=0) (
     input wire trace_clk,input wire [3:0] trace_data,input wire [1:0] width,
     input wire trace_io_clk,input wire trace_pad_clk,input wire sample_clk,
     input wire clk,input wire rst,
@@ -85,22 +85,56 @@ module orbtrace_parallel #(parameter USE_IO_CLOCK=0,USE_INPUT_DELAY=0,INPUT_DELA
       wire parsed_tail_ambiguous;
       always @(posedge sample_clk or posedge rst)
         if(rst)sample_reset<=3;else sample_reset<={sample_reset[0],1'b0};
-      always @(posedge sample_clk or posedge sample_reset[1])
-        if(sample_reset[1])begin
-          pad_meta<=0;pad_sync<=0;previous<=0;filtered<=0;
-          stable_clock<=0;half<=0;low_nibble<=0;sampled_byte<=0;byte_toggle<=0;
-        end else begin
-          pad_meta<={trace_pad_clk,trace_data};pad_sync<=pad_meta;
-          previous<=pad_sync;
-          filtered<=(pad_sync & previous) | ((pad_sync | previous) & filtered);
-          stable_clock<=filtered[4];
-          if(ENABLE_DDR_TAP && ddr_mode_ref[1] && ddr_parser_clear)begin
-            half<=0;low_nibble<=0;sampled_byte<=0;byte_toggle<=0;
-          end else if((!ddr_mode_ref[1] || ddr_sampler_gate) && filtered[4]!=stable_clock)begin
-            half<=!half;
-            if(!half)low_nibble<=filtered[3:0];
-            else begin sampled_byte<={filtered[3:0],low_nibble};byte_toggle<=!byte_toggle;end
+      wire nibble_event;
+      wire [3:0] nibble;
+      if (DOUBLE_SAMPLE) begin: double_sample
+        wire [4:0] pads={trace_pad_clk,trace_data};
+        wire [4:0] rising,falling;
+        for(genvar i=0;i<5;i=i+1) begin: lane
+          IDDR #(.DDR_CLK_EDGE("SAME_EDGE_PIPELINED"),.SRTYPE("SYNC")) input_ff(
+            .C(sample_clk),.CE(1'b1),.D(pads[i]),.R(1'b0),.S(1'b0),.Q1(rising[i]),.Q2(falling[i]));
+        end
+        (* ASYNC_REG="TRUE" *) reg [4:0] first,second;
+        reg previous_clock,stable;
+        reg event_pipe;
+        reg [3:0] nibble_pipe;
+        // Qualify an edge with two consecutive 2.5 ns samples. At most
+        // one edge can qualify in a pair. Use the data sampled at the
+        // confirmation instant, giving positive setup after the pad edge.
+        wire accept_first=first[4]==previous_clock && first[4]!=stable;
+        wire accept_second=second[4]==first[4] && second[4]!=stable;
+        always @(posedge sample_clk) begin
+          first<=rising;second<=falling;
+          previous_clock<=second[4];
+          if(sample_reset[1]) begin stable<=0;event_pipe<=0;end
+          else begin
+            event_pipe<=accept_first || accept_second;
+            if(accept_first || accept_second)stable<=first[4];
+            nibble_pipe<=accept_first ? first[3:0] : second[3:0];
           end
+        end
+        assign nibble_event=event_pipe;
+        assign nibble=nibble_pipe;
+      end else begin: single_sample
+        always @(posedge sample_clk or posedge sample_reset[1])
+          if(sample_reset[1])begin pad_meta<=0;pad_sync<=0;previous<=0;filtered<=0;stable_clock<=0;end
+          else begin
+            pad_meta<={trace_pad_clk,trace_data};pad_sync<=pad_meta;
+            previous<=pad_sync;
+            filtered<=(pad_sync & previous) | ((pad_sync | previous) & filtered);
+            stable_clock<=filtered[4];
+          end
+        assign nibble_event=filtered[4]!=stable_clock;
+        assign nibble=filtered[3:0];
+      end
+      always @(posedge sample_clk or posedge sample_reset[1])
+        if(sample_reset[1])begin half<=0;low_nibble<=0;sampled_byte<=0;byte_toggle<=0;end
+        else if(ENABLE_DDR_TAP && ddr_mode_ref[1] && ddr_parser_clear)begin
+          half<=0;low_nibble<=0;sampled_byte<=0;byte_toggle<=0;
+        end else if((!ddr_mode_ref[1] || ddr_sampler_gate) && nibble_event)begin
+          half<=!half;
+          if(!half)low_nibble<=nibble;
+          else begin sampled_byte<={nibble,low_nibble};byte_toggle<=!byte_toggle;end
         end
       orbtrace_tpiu_stream #(.GATED(ENABLE_DDR_TAP)) parser(.clk(sample_clk),.rst(sample_reset[1]),
         .byte_in(sampled_byte),.byte_toggle(byte_toggle),

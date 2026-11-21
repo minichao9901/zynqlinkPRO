@@ -334,7 +334,7 @@ static int UsbIntrExample(XScuGic *IntcInstancePtr, XUsbPs *UsbInstancePtr,
 #if DAP_SELECTIO
     DeviceConfig.EpCfg[1].Out.Type=XUSBPS_EP_TYPE_BULK;
     DeviceConfig.EpCfg[1].Out.NumBufs=8;
-    DeviceConfig.EpCfg[1].Out.BufSize=4096;
+    DeviceConfig.EpCfg[1].Out.BufSize=16384;
     DeviceConfig.EpCfg[1].Out.MaxPacketSize=512;
     DeviceConfig.EpCfg[4].In.Type=XUSBPS_EP_TYPE_BULK;
     DeviceConfig.EpCfg[4].In.NumBufs=8;

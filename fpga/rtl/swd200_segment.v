@@ -32,7 +32,7 @@ module swd200_segment (
     wire send_tail = state == SEND && complete_cycle && remaining <= emitted;
     // At full rate the first two cycles can go straight to the PHY while
     // the remainder is loaded. A preceding final TX word keeps its slot.
-    wire first_word = state != SEND && start && !half_word && count > 2 &&
+    wire first_word = state != SEND && start && count > 2 &&
                       (capture_count == 0 || capture_start >= 4);
 
     always @* begin
@@ -40,7 +40,7 @@ module swd200_segment (
         data_slots = {4{park_data}};
         release_slots = {4{park_release}};
         if (first_word) begin
-            clk_slots = two_cycles ? 4'b1010 : 4'b1100;
+            clk_slots = half_word ? 4'b0000 : two_cycles ? 4'b1010 : 4'b1100;
             data_slots = two_cycles ? {{2{bits_out[1]}}, {2{bits_out[0]}}} : {4{bits_out[0]}};
             release_slots = two_cycles ? {{2{!drive[1]}}, {2{!drive[0]}}} : {4{!drive[0]}};
         end else if (state == SEND) begin
@@ -83,10 +83,11 @@ module swd200_segment (
             end
             if (start) begin
                 state <= SEND;
-                remaining <= first_word ? count - (two_cycles ? 7'd2 : 7'd1) : count;
-                data_shift <= first_word ? (two_cycles ? bits_out >> 2 : bits_out >> 1) : bits_out;
-                drive_shift <= first_word ? (two_cycles ? drive >> 2 : drive >> 1) : drive;
-                high_half <= 0;
+                remaining <= first_word && !half_word ? count - (two_cycles ? 7'd2 : 7'd1) : count;
+                data_shift <= first_word && !half_word ? (two_cycles ? bits_out >> 2 : bits_out >> 1) : bits_out;
+                drive_shift <= first_word && !half_word ? (two_cycles ? drive >> 2 : drive >> 1) : drive;
+                // At 50 MHz the first quartet is the complete low half.
+                high_half <= first_word && half_word;
                 sample_slot <= first_word ? capture_start - 8'd4 : capture_start;
                 samples_left <= capture_count;
                 samples <= 0;

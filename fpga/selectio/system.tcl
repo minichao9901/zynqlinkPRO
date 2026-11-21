@@ -1,6 +1,9 @@
 # Add the two AXI transaction queues to the existing USB/DDR/ETM system.
 # Keep the main command/DDR and ETM fabric on GP0. The extra engines
 # have their own GP1 decoder and register slices.
+if {$::env(ZYNQLINK_ETM_DOUBLE_SAMPLE)} {
+    set_property CONFIG.DOUBLE_SAMPLE 1 [get_bd_cells orbtrace_0]
+}
 set ps [get_bd_cells processing_system7_0]
 set_property CONFIG.PCW_USE_M_AXI_GP1 1 $ps
 set bus [create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 sio_bus]

@@ -8,6 +8,7 @@ module orbtrace_controller #(
   parameter RAW_DIAGNOSTIC=0,
   parameter ENABLE_DDR=0,
   parameter ENABLE_LANE_DELAY=0,
+  parameter DOUBLE_SAMPLE=0,
   parameter SHARED_CALIBRATION=0
 )(
   (* X_INTERFACE_PARAMETER="ASSOCIATED_BUSIF s_axi, ASSOCIATED_RESET rst_n" *)
@@ -75,7 +76,7 @@ module orbtrace_controller #(
   wire [FIFO_ADDR_BITS:0] level;
   wire fifo_full=level==(1<<FIFO_ADDR_BITS);
   wire receiver_reset=!rst_n || !(enable || ddr_owned) || clear_count!=0 || !delay_ready || !lane_ready;
-  orbtrace_parallel #(.USE_IO_CLOCK(1),.USE_INPUT_DELAY(!LANE_DELAY_ENABLED),.RAW_DIAGNOSTIC(RAW_DIAGNOSTIC),.SEPARATE_DIAGNOSTIC_RESET(1),.ENABLE_DDR_TAP(ENABLE_DDR)) receiver(.trace_clk(trace_clock),.trace_io_clk(trace_io_clock),.trace_pad_clk(sampled_pads[4]),.sample_clk(delay_ref_clock),.trace_data(sampled_pads[3:0]),.width(width),
+  orbtrace_parallel #(.DOUBLE_SAMPLE(DOUBLE_SAMPLE),.USE_IO_CLOCK(1),.USE_INPUT_DELAY(!LANE_DELAY_ENABLED),.RAW_DIAGNOSTIC(RAW_DIAGNOSTIC),.SEPARATE_DIAGNOSTIC_RESET(1),.ENABLE_DDR_TAP(ENABLE_DDR)) receiver(.trace_clk(trace_clock),.trace_io_clk(trace_io_clock),.trace_pad_clk(sampled_pads[4]),.sample_clk(delay_ref_clock),.trace_data(sampled_pads[3:0]),.width(width),
     .clk(clk),.rst(receiver_reset),.data(byte_data),.channel(source_id),
     .valid(byte_valid),.ready(!fifo_full && !receiver_reset),
     .synced(receiver_synced),.overflow(receiver_overflow),.diagnostic_reset(!rst_n || clear_count!=0 || clear),
@@ -194,7 +195,7 @@ module orbtrace_controller #(
           16:s_axi_rdata<=sync_acquisitions;
           17:s_axi_rdata<=RAW_DIAGNOSTIC;
           // Bit8 proves the optional DDR CSR slave is present before PS probes it.
-          18:s_axi_rdata<=32'hb | ((RAW_DIAGNOSTIC==2 || RAW_DIAGNOSTIC==4) ? 32'h4 : 0) | (ENABLE_DDR ? 32'h100 : 0) | (LANE_DELAY_ENABLED ? 32'h200 : 0);
+          18:s_axi_rdata<=(DOUBLE_SAMPLE ? 32'h400 : 0) | 32'hb | ((RAW_DIAGNOSTIC==2 || RAW_DIAGNOSTIC==4) ? 32'h4 : 0) | (ENABLE_DDR ? 32'h100 : 0) | (LANE_DELAY_ENABLED ? 32'h200 : 0);
           20:s_axi_rdata<=LANE_DELAY_ENABLED ? 32'h454c4431 : 0; // ELD1
           21:s_axi_rdata<={6'd0,lane_applied};
           22:s_axi_rdata<=lane_status;

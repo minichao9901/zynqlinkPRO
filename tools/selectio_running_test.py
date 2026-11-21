@@ -25,6 +25,8 @@ def main():
     ap.add_argument("--binary", required=True, type=Path)
     ap.add_argument("--out", required=True, type=Path)
     ap.add_argument("--execute", action="store_true")
+    ap.add_argument("--clock",type=int,choices=(50000000,100000000),default=100000000)
+    ap.add_argument("--idle",type=int,help="RTI/SWD idle cycles for this timing profile")
     args = ap.parse_args()
     if not args.execute:
         print("Run inside selectio_f103_fixture.py. Save core registers, run the SRAM producer and recover.")
@@ -55,15 +57,16 @@ def main():
             core_write(mem, 15, BASE+1)
             mem.write_word(DHCSR, 0xa05f0001)
         tap, idle = (16, 33) if args.transport == "jtag" else (8, 2)
+        if args.idle is not None:idle=args.idle
         cmd = [sys.executable, "-X", "utf8", ROOT/"toolbox.py", "selectio", "--serial", args.serial,
-               "combo", "--transport", args.transport, "--tap", tap, "--slot", args.slot, "--idle", idle,
+               "combo", "--clock",args.clock, "--transport", args.transport, "--tap", tap, "--slot", args.slot, "--idle", idle,
                "--rtt-address", hex(BASE+0x200), "--ticks", 24000, "--var", hex(BASE+0x230),
                "--var", hex(BASE+0x820), "--seconds", args.seconds, "--rtt-out", rtt, "--scope-out", scope]
         if args.service=="rtt":
             prefix=cmd[:cmd.index("combo")]
             subprocess.run(list(map(str,[*prefix,"profile","--transport",args.transport,"--tap",tap,"--idle",idle,"--slot",args.slot])),
                            check=True,capture_output=True)
-            cmd=[*prefix,"rtt","--transport",args.transport,"--clock",100000000,"--address",hex(BASE+0x200),
+            cmd=[*prefix,"rtt","--transport",args.transport,"--clock",args.clock,"--address",hex(BASE+0x200),
                  "--size",48,"--seconds",args.seconds,"--out",rtt]
         started=time.perf_counter()
         p = subprocess.run(list(map(str, cmd)), capture_output=True)

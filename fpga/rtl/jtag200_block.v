@@ -125,7 +125,7 @@ module jtag200_block (
     jtag200_arm_stream arm_stream (
         .clk(clk), .reset(reset), .start(state == STREAM_START),
         .write_block(active_write), .verify(active_verify), .invert(active_invert),
-        .four_tck(active_half == 1), .count(active_count), .idle_cycles(active_idle[7:0]), .sample_offset(active_sample),
+        .one_tck(active_half == 4),.four_tck(active_half == 1), .count(active_count), .idle_cycles(active_idle[7:0]), .sample_offset(active_sample),
         .advance_tms(active_advance_tms), .advance_tdi(active_advance_tdi),
         .rx_word(rx_word), .tx_word(tx_word), .tx_addr(stream_tx_addr),
         .lane_word(stream_lanes), .data_valid(stream_data_valid),

@@ -19,6 +19,9 @@ def main():
     ap.add_argument("--jtag-slot",type=int,default=28)
     ap.add_argument("--confirm-seconds",type=float,default=5)
     ap.add_argument("--execute",action="store_true")
+    ap.add_argument("--clock",type=int,choices=(50000000,100000000),default=100000000)
+    ap.add_argument("--swd-idle",type=int,default=2)
+    ap.add_argument("--jtag-idle",type=int,default=33)
     args=ap.parse_args()
     if not args.execute:
         print("RTT UP/DOWN ring wrap and HSS rates on both physical transports.");return
@@ -41,7 +44,7 @@ def main():
     sample=[0x13579bdf^(i*0x1234567) for i in range(8)]
     (args.out/"down.bin").write_bytes(down)
     try:
-        for transport,tap,slot,idle in (("swd",8,args.swd_slot,2),("jtag",16,args.jtag_slot,33)):
+        for transport,tap,slot,idle in (("swd",8,args.swd_slot,args.swd_idle),("jtag",16,args.jtag_slot,args.jtag_idle)):
             profile=["--transport",transport,"--tap",tap,"--slot",slot,"--idle",idle]
             cli(["profile",*profile],transport+"-profile")
             contents=bytearray(original)
@@ -53,24 +56,24 @@ def main():
             with low_link(args.serial) as m:
                 m.write(BASE,contents);assert m.read(BASE,4096)==contents
             target=args.out/(transport+"-up.bin")
-            up_status=cli(["rtt","--transport",transport,"--clock",100000000,"--address",hex(BASE),"--size",48,
+            up_status=cli(["rtt","--transport",transport,"--clock",args.clock,"--address",hex(BASE),"--size",48,
                            "--seconds",1,"--out",target],transport+"-up")
             if target.read_bytes()!=data:raise RuntimeError(transport+" RTT UP data mismatch")
-            cli(["rtt-send",*profile,"--address",hex(BASE),"--file",args.out/"down.bin"],transport+"-down")
+            cli(["rtt-send",*profile,"--clock",args.clock,"--address",hex(BASE),"--file",args.out/"down.bin"],transport+"-down")
             with low_link(args.serial) as m:
                 if m.word(BASE+40)!=254 or m.word(BASE+60)!=25:raise RuntimeError("RTT pointer mismatch")
                 ring=m.read(BASE+0x601,512)
                 if ring[500:]+ring[:25]!=down or ring[25:500]!=contents[0x601+25:0x601+500]:
                     raise RuntimeError("RTT DOWN data or guard mismatch")
             report[transport+"_rtt"]=dict(up_bytes=len(data),down_bytes=len(down),status=up_status["status"]);save()
-            for channels,periods in [(1,[24,32,48,64,96,128]),(8,[144,192,240,320,416,600,960])]:
+            for channels,periods in [(1,[12,14,16,20,24,32,48,64,96,128,192,256]),(8,[112,144,168,192,240,320,416,600,960,1440,1920])]:
                 plan=[]
                 for i in range(channels):plan.extend(["--var",f"{BASE+0xa00+4*i:#x}:4:4"])
                 expected=struct.pack("<"+"I"*channels,*sample[:channels])
                 def point(ticks,seconds,kind):
                     name=f"{transport}-{channels}-{ticks}-{kind}"
                     dest=args.out/(name+".hss")
-                    status=cli(["scope","--transport",transport,"--clock",100000000,"--period",ticks,*plan,
+                    status=cli(["scope","--transport",transport,"--clock",args.clock,"--period",ticks,*plan,
                                 "--seconds",seconds,"--out",dest],name)
                     verified=export_scope(dest,expected=expected)
                     skipped=verified["stat"]["skipped"];groups=verified["groups"]

@@ -16,10 +16,14 @@
  * OUT descriptors supply bounded backpressure while the foreground is busy.
  * Header: magic, channel/op/status/reserved, sequence and payload bytes (LE).
  */
-#define FRAME_SIZE 4096U
+#define FRAME_SIZE 16384U
+#define LEGACY_FRAME_SIZE 4096U
 #define HEADER_SIZE 16U
-static u8 arrival[FRAME_SIZE] __attribute__((aligned(32)));
-static u8 input[FRAME_SIZE] __attribute__((aligned(32)));
+static u8 request_bank[2][FRAME_SIZE] __attribute__((aligned(32)));
+static u8 *volatile arrival=request_bank[0];
+static u8 *input;
+static unsigned frame_limit=LEGACY_FRAME_SIZE;
+static u8 transport_test_ram[65536] __attribute__((aligned(32)));
 static u8 reply_bank[2][FRAME_SIZE] __attribute__((aligned(4096)));
 static u8 *output,*in_flight;
 static volatile unsigned tx_channel,tx_packets;
@@ -100,11 +104,12 @@ static unsigned execute_frame(unsigned length, unsigned active_epoch) {
         channel=input[4];op=input[5];sequence=read32(input+8);size=read32(input+12);
     }
     if (length<HEADER_SIZE || memcmp(input,"ZLK1",4) || input[6] || input[7] ||
-        size>FRAME_SIZE-HEADER_SIZE-1 || length!=HEADER_SIZE+size+((HEADER_SIZE+size)%512U==0U))
+        size>frame_limit-HEADER_SIZE-1 || length!=HEADER_SIZE+size+((HEADER_SIZE+size)%512U==0U))
         goto reply;
     if (channel==0 && op==0 && !size) {
         if (selectio_mem_active() || selectio_aux_native_owner() || probe_native_owns_stream()) {status=2;goto reply;}
         if(selectio_combo_active()) selectio_combo_reset();
+        frame_limit=LEGACY_FRAME_SIZE;
         session_open=1;
         next_sequence=sequence+1U;
         memcpy(output+16,"SIO1",4);
@@ -121,6 +126,26 @@ static unsigned execute_frame(unsigned length, unsigned active_epoch) {
             memcpy(output+HEADER_SIZE,input+HEADER_SIZE,size);
             reply_size=size;
             status=0;
+        } else if(channel==0 && op==8 && size==4 && !selectio_mem_active() &&
+                  !selectio_aux_native_owner() && !probe_native_owns_stream()) {
+            unsigned requested=read32(input+16);
+            if(requested==LEGACY_FRAME_SIZE || requested==FRAME_SIZE) {
+                frame_limit=requested;write32(output+16,requested);reply_size=4;status=0;
+            }
+        } else if(channel==7 && op==6 && size>=16) {
+            // Isolated DDR loopback with exactly the SRAM bulk wire format.
+            // The address is an offset within this buffer, never a physical pointer.
+            unsigned wr=input[16],words=input[18]|((unsigned)input[19]<<8);
+            uint32_t addr=read32(input+20);
+            unsigned n=4U*words;
+            if(wr<=1 && !input[17] && words && n<=frame_limit-33U &&
+               addr>=0x20000000U && addr-0x20000000U<=sizeof transport_test_ram-n &&
+               !(addr&3U) && size==16U+(wr?n:0U)) {
+                u8 *ram=transport_test_ram+(addr-0x20000000U);
+                if(wr)memcpy(ram,input+32,n);else memcpy(output+32,ram,n);
+                memset(output+16,0,16);write32(output+16,words);
+                reply_size=16U+(wr?0U:n);status=0;
+            }
         } else if(channel==0 && op==5 && !size) {
             uint32_t pl=swd_read32(SWD_FEATURES);
             memcpy(output+16,"CAP1",4);
@@ -138,13 +163,13 @@ static unsigned execute_frame(unsigned length, unsigned active_epoch) {
             if(!selectio_live_profile(input[16],input[17],input[18],input[19])) status=0;
         } else if(channel==6) {
             unsigned n=0,source=0;
-            if(!selectio_combo_frame(op,input+16,size,output+16,FRAME_SIZE-HEADER_SIZE-1,&reply_size,&n,&source)) {
+            if(!selectio_combo_frame(op,input+16,size,output+16,frame_limit-HEADER_SIZE-1,&reply_size,&n,&source)) {
                 reply_packets=n;reply_channel=source;status=0;
             }
         } else if(channel==1 && selectio_combo_active()) status=2;
-        else if (channel==1 && op==1 && size==4) {
+        else if (channel==1 && op==1 && (size==4 || size==8)) {
             dap_wait_begin();
-            if(!selectio_mem_open(input+16)) status=0;
+            if(!selectio_mem_open_at(input+16,size==8 ? read32(input+20) : 100000000U)) status=0;
         } else if (channel==1 && op==2 && !size) {
             dap_wait_begin();
             if(!selectio_mem_close()) status=0;
@@ -156,7 +181,7 @@ static unsigned execute_frame(unsigned length, unsigned active_epoch) {
             unsigned header=op==6?16U:8U;
             unsigned write=input[16],words=input[18]|((unsigned)input[19]<<8),completed=0;
             uint32_t detail=0;
-            if(write<=1 && !input[17] && words && words<=1008 &&
+            if(write<=1 && !input[17] && words && 4U*words<=frame_limit-HEADER_SIZE-header-1U &&
                size==header+(write?4U*words:0U)) {
                 int rc=selectio_mem_bulk(write,read32(input+20),words,input+16+header,output+16+header,&completed,&detail);
                 write32(output+16,completed);write32(output+20,detail);
@@ -166,7 +191,7 @@ static unsigned execute_frame(unsigned length, unsigned active_epoch) {
             }
         } else if (channel==1 && op==0 && size && input[16]==0x8e) {
             dap_request_plan plan;
-            if (DAP_ValidateCommand(input+16,size,FRAME_SIZE-HEADER_SIZE-1,&plan) &&
+            if (DAP_ValidateCommand(input+16,size,frame_limit-HEADER_SIZE-1,&plan) &&
                 plan.request_bytes==size && !probe_target_context_invalid()) {
                 u32 flags=mfcpsr();
                 mtcpsr(flags|0x80U);
@@ -175,7 +200,7 @@ static unsigned execute_frame(unsigned length, unsigned active_epoch) {
                 mtcpsr(flags);
                 int exclusive=selectio_mem_active();
                 if (exclusive || !probe_before_dap()) {
-                    reply_size=DAP_ExecuteCommand(input+16,size,output+16,FRAME_SIZE-HEADER_SIZE-1)&0xffffU;
+                    reply_size=DAP_ExecuteCommand(input+16,size,output+16,frame_limit-HEADER_SIZE-1)&0xffffU;
                     if (reply_size>=2 && output[17]==DAP_OK && !dap_wait_command_error()) status=0;
                     if(!exclusive) probe_after_dap();
                 }
@@ -185,14 +210,14 @@ static unsigned execute_frame(unsigned length, unsigned active_epoch) {
                 if (!probe_native_route(channel,input[16])) status=0;
             } else if (op==1 && !size) {
                 unsigned packets;
-                reply_size=probe_native_peek(channel,output+HEADER_SIZE,FRAME_SIZE-HEADER_SIZE-1,&packets);
+                reply_size=probe_native_peek(channel,output+HEADER_SIZE,frame_limit-HEADER_SIZE-1,&packets);
                 reply_channel=channel;reply_packets=packets;status=0;
             } else if (op==2 && size==64 && !probe_native_control(channel,input+16,output+16)) {
                 reply_size=64;status=0;
             }
         } else if(channel==4 || channel==5) {
             unsigned consume=0;
-            if(!selectio_aux_frame(channel,op,input+16,size,output+16,FRAME_SIZE-HEADER_SIZE-1,&reply_size,&consume)) {
+            if(!selectio_aux_frame(channel,op,input+16,size,output+16,frame_limit-HEADER_SIZE-1,&reply_size,&consume)) {
                 reply_channel=channel;reply_packets=consume;status=0;
             }
         } else status=3;
@@ -248,9 +273,13 @@ void selectio_usb_poll(XUsbPs *usb) {
      * an uncommitted ring slot cannot be included in two replies. */
     int pipelined=received_length>=HEADER_SIZE &&
                   ((arrival[4]==1 && (arrival[5]==3 || arrival[5]==6)) ||
-                   (arrival[4]==0 && arrival[5]==1));
+                   (arrival[4]==0 && arrival[5]==1) || (arrival[4]==7 && arrival[5]==6));
     if((tx_busy || aux_commit) && !pipelined) {mtcpsr(flags);return;}
-    length=received_length;memcpy(input,arrival,length);
+    length=received_length;
+    // The OUT interrupt can now fill the alternate bank while the worker
+    // uses this one. No 4/16 KiB memcpy with interrupts disabled.
+    input=arrival;
+    arrival=input==request_bank[0]?request_bank[1]:request_bank[0];
     output=in_flight==reply_bank[0] ? reply_bank[1] : reply_bank[0];
     reply_packets=0;rx_hint=0;
     if(deferred) {deferred=0;selectio_usb_resume_rx(usb);}

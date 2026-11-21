@@ -12,7 +12,7 @@
 #define SQUEUE 0x80010000U
 
 static struct {
-    unsigned port, poisoned, dma,bank,use_dma,jtag_backoffs,jtag_idle;
+    unsigned port, poisoned, dma,bank,use_dma,jtag_backoffs,jtag_idle,rate_hz;
     uint32_t route,pins,clock;
     uint8_t profile[4];
     unsigned words[2];
@@ -85,7 +85,7 @@ static int jtag_block(unsigned write, uint32_t address, unsigned count,
     unsigned i;
     swd_write32(JQUEUE+0x14U,address);
     swd_write32(JQUEUE+0x18U,count);
-    swd_write32(JQUEUE+0x1cU,0x780002U|(session.profile[2]<<3)|(session.jtag_idle<<10));
+    swd_write32(JQUEUE+0x1cU,(session.rate_hz==50000000U ? 0x600004U : 0x780002U)|(session.profile[2]<<3)|(session.jtag_idle<<10));
     if (write && !session.use_dma) for(i=0;i<count;i++)
         swd_write32(JQUEUE+0x1004U+4U*i,load32(payload+4U*i));
     XTime start,stop;XTime_GetTime(&start);
@@ -155,8 +155,10 @@ int selectio_mem_close(void) {
     return failed?-1:0;
 }
 
-int selectio_mem_open(const uint8_t fields[4]) {
+int selectio_mem_open(const uint8_t fields[4]) {return selectio_mem_open_at(fields,100000000U);}
+int selectio_mem_open_at(const uint8_t fields[4],unsigned rate_hz) {
     unsigned port=fields[0],tap=fields[1],slot=fields[2],idle=fields[3];
+    if(rate_hz!=100000000U && !(rate_hz==50000000U && (port==1 || (swd_read32(SWD_FEATURES)&0x8000U)))) return -1;
     if ((port!=1 && port!=2) || port!=DAP_Data.debug_port || session.port || selectio_aux_conflict(port) || tap>31 ||
         slot>63 || (port==1 && idle>15) || (port==2 && (slot<16 || !(idle&1))) ||
         !(swd_read32(SWD_FEATURES)&0x80U) || etm_ddr_owned() || !probe_session_live() ||
@@ -167,7 +169,7 @@ int selectio_mem_open(const uint8_t fields[4]) {
     session.route=swd_read32(JTAG_ROUTE);
     session.pins=swd_read32(JTAG_PINS);
     session.clock=Xil_In32(SLCR_FPGA0_CLK_CTRL);
-    session.port=port;session.poisoned=0;session.bank=0;session.use_dma=0;session.jtag_backoffs=0;session.jtag_idle=idle;
+    session.rate_hz=rate_hz;session.port=port;session.poisoned=0;session.bank=0;session.use_dma=0;session.jtag_backoffs=0;session.jtag_idle=idle;
     session.dma=!!(swd_read32(SWD_FEATURES)&0x400U);
     session.words[0]=session.words[1]=0;
     memset(session.bytes,0,sizeof session.bytes);
@@ -181,7 +183,7 @@ int selectio_mem_open(const uint8_t fields[4]) {
     swd_write32(base+8U,0U);
     if(wait_queue(base,port==2?7U:0x21U,port==2?5U:0x21U)) goto failed;
     swd_write32(base+(port==2?12U:24U),tap);
-    if(port==1) swd_write32(base+12U,1U|(slot<<2)|(slot<<8)|(idle<<14));
+    if(port==1) swd_write32(base+12U,(rate_hz==100000000U ? 1U : 0U)|(slot<<2)|(slot<<8)|(idle<<14));
     return 0;
 failed:
     (void)selectio_mem_close();return -1;
@@ -200,7 +202,7 @@ void selectio_mem_stats(uint64_t values[9]) {
 int selectio_mem_bulk(unsigned write,uint32_t address,unsigned words,const uint8_t *payload,
                      uint8_t *reply,unsigned *completed,uint32_t *detail) {
     *completed=0;*detail=0;
-    if(!session.port || session.poisoned || write>1 || !words || words>1008 ||
+    if(!session.port || session.poisoned || write>1 || !words || words>4088 ||
        (address&3U) || (address>>16)!=0x2000U || 4U*words>0x20010000U-address) return -1;
     XTime start,stop;XTime_GetTime(&start);
     while(*completed<words) {

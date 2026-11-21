@@ -85,9 +85,12 @@ if {[info exists ::env(ZYNQLINK_VERIFY_TDO_INPUT_ONLY)] && $::env(ZYNQLINK_VERIF
     puts "TDO_INPUT_ISOLATION_VERIFIED inputBuffers=1 outputEnable=constant0"
 }
 }
+set wide_trace [expr {[info exists ::env(ZYNQLINK_ETM_DOUBLE_SAMPLE)] && $::env(ZYNQLINK_ETM_DOUBLE_SAMPLE)}]
 set trace_ddr [get_cells -hier -filter {REF_NAME == IDDR && NAME =~ *orbtrace_0*}]
 if {[info exists ::env(ZYNQLINK_RAW_TRACE)] && $::env(ZYNQLINK_RAW_TRACE) in {2 3 4}} {
-    if {[llength $trace_ddr] != 0} {error "Oversample mode must bypass normal TRACE IDDRs"}
+    if {$wide_trace} {
+        if {[llength [filter $trace_ddr {NAME =~ *double_sample*input_ff}]]!=5} {error "Missing five oversampling IDDRs"}
+    } elseif {[llength $trace_ddr] != 0} {error "Oversample mode must bypass normal TRACE IDDRs"}
     puts "ORBTRACE_IDDR_BYPASS_VERIFIED mode=$::env(ZYNQLINK_RAW_TRACE)"
 } elseif {[llength $trace_ddr] != 4} {error "Parallel TRACE must retain four input IDDRs"}
 set trace_bufio [get_cells -hier -filter {REF_NAME == BUFIO && NAME =~ *orbtrace_0*}]
@@ -111,7 +114,7 @@ if {[info exists ::env(ZYNQLINK_ETM_LANE_DELAY)] && $::env(ZYNQLINK_ETM_LANE_DEL
         # DATAOUT now crosses module ports directly. A local net segment has
         # no leaf load inside this hierarchy; follow it to the actual sampler.
         set endpoints [all_fanout -flat -endpoints_only -from [get_pins $cell/DATAOUT]]
-        set users [filter $endpoints {NAME =~ *raw_oversample_filtered*pad_meta_reg*/D}]
+        set users [filter $endpoints {NAME =~ *raw_oversample_filtered*pad_meta_reg*/D || NAME =~ *double_sample*input_ff/D}]
         if {![llength $users]} {error "Input delay output is unused: $cell"}
         foreach sink $users {lappend trace_sampling_sinks $sink}
         puts "ORBTRACE_LANE_ENDPOINT $cell -> $users"
@@ -127,12 +130,18 @@ if {[info exists ::env(ZYNQLINK_ETM_LANE_DELAY)] && $::env(ZYNQLINK_ETM_LANE_DEL
     puts "ORBTRACE_DELAY_VERIFIED IDELAYE2=4 IDELAYCTRL=1 REFCLK=200MHz"
 }
 if {[info exists ::env(ZYNQLINK_RAW_TRACE)] && $::env(ZYNQLINK_RAW_TRACE) in {2 3 4}} {
+    if {$wide_trace} {
+        foreach stage {first second} {
+            if {[llength [get_cells -hier -filter "ASYNC_REG == TRUE && NAME =~ *double_sample*${stage}_reg*"]]!=5} {error "Missing DDR metastability recovery registers"}
+        }
+    } else {
     set os_meta [get_cells -quiet -hier -filter {NAME =~ *raw_oversample*pad_meta_reg*}]
     set os_sync [get_cells -quiet -hier -filter {NAME =~ *raw_oversample*pad_sync_reg*}]
     if {[llength $os_meta] != 5 || [llength $os_sync] != 5} {
         error "Raw oversampling synchronizers missing: meta=[llength $os_meta] sync=[llength $os_sync]"
     }
     puts "ORBTRACE_OVERSAMPLE_VERIFIED META=[llength $os_meta] SYNC=[llength $os_sync]"
+    }
 }
 # Evaluate realizable PLL divisors on this routed netlist, without rebuilding
 # it for each frequency. Keep the highest rate that meets BOTH setup and hold.

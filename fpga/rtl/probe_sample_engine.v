@@ -5,6 +5,7 @@
 module probe_sample_engine #(
     parameter integer FIFO_SAMPLES=16,
     parameter integer RETRIES=64,
+    parameter integer MIN_PERIOD=24,
     parameter integer TIMEOUT=262143
 )(
     input wire clk, rst_n,
@@ -172,7 +173,7 @@ module probe_sample_engine #(
                 case(waddr)
                 2: plan_index<=wdata[4:0];
                 3: if(plan_index<24) plan[plan_index]<={wdata[31:2],2'b00};
-                4: period<=wdata<24 ? 24 : (wdata>24000000 ? 24000000 : wdata);
+                4: period<=wdata<MIN_PERIOD ? MIN_PERIOD : (wdata>24000000 ? 24000000 : wdata);
                 6: begin clock_hz<=wdata<24000000 ? 24000000 : wdata; fraction<=0; end
                 // Rebase elapsed time after FCLK changes, retaining the
                 // nominal sampling grid for a resume (CTRL bit2).

@@ -90,7 +90,7 @@ module swd_controller #(
     input wire [3:0] hs_swd_ckslots, hs_swd_data, hs_swd_release,
     output wire [3:0] hs_swd_samples,
     input wire hs_tdo_load, hs_swdio_load, input wire [4:0] hs_tdo_tap, hs_swdio_tap,
-    input wire [25:0] hs_live_config,
+    input wire [26:0] hs_live_config,
     output wire hs_legacy_released, hs_live_jtag, hs_live_swd,
     // SWD Physical Interface
     inout  wire                                    swclk,
@@ -381,7 +381,8 @@ module swd_controller #(
     assign core_parity_err=jtag_enabled ? 1'b0 : hs_live_swd ? live_swd_parity : swd_parity_err;
     assign core_rdata=jtag_enabled ? jtag_rdata : hs_live_swd ? live_swd_rdata : swd_rdata;
     assign core_result_valid=jtag_enabled ? jtag_result_valid : hs_live_swd ? live_swd_valid : swd_result_valid;
-    assign core_next_ready=jtag_enabled ? jtag_next_ready : hs_live_swd ? 1'b0 : swd_next_ready;
+    wire live_swd_ready=live_swd_valid && !live_swd_busy && live_swd_ack==1 && !live_swd_parity;
+    assign core_next_ready=jtag_enabled ? jtag_next_ready : hs_live_swd ? live_swd_ready : swd_next_ready;
     assign core_timestamp=(jtag_enabled || hs_live_swd) ? jtag_timestamp : swd_timestamp;
 
     // ADDR_CFG (0x08) bit definition:
@@ -492,7 +493,7 @@ module swd_controller #(
     assign stream_next_wdata = 0;
     wire stream_wr = s_axi_wvalid && s_axi_wready && !write_addr[7] && write_addr[6:5]==2'b11 && &s_axi_wstrb;
     wire stream_rd = s_axi_arvalid && s_axi_arready && !s_axi_araddr[7] && s_axi_araddr[6:5]==2'b11;
-    probe_sample_engine u_probe_sampler (
+    probe_sample_engine #(.MIN_PERIOD(SELECTIO ? 8 : 24)) u_probe_sampler (
         .clk(clk), .rst_n(engine_rst_n), .wr(stream_wr), .rd(stream_rd),
         .waddr(write_addr[4:2]), .raddr(s_axi_araddr[4:2]),
         .wdata(s_axi_wdata), .rdata(stream_rdata),
@@ -700,7 +701,7 @@ module swd_controller #(
                     ADDR_CTRL: begin
                         rdata_reg <= {16'd0, xfer_request, 5'd0, ctrl_timestamp_en, ctrl_mode, scalar_status_busy};
                     end
-                    ADDR_FEATURES: rdata_reg <= SELECTIO ? 32'h4450_7fff : 32'h4450_007f; // bit6: manual SWDIO direction; bit5: extended idle.
+                    ADDR_FEATURES: rdata_reg <= SELECTIO ? 32'h4450_ffff : 32'h4450_007f; // bit6: manual SWDIO direction; bit5: extended idle.
                     ADDR_ENGINE_RESET: rdata_reg <= engine_reset_count;
                     ADDR_TRACE_CTRL: rdata_reg <= {trace_frozen,trace_raw_mode,trace_raw_active,trace_raw_armed,8'd0,trace_count,trace_head};
                     ADDR_TRACE_INDEX: rdata_reg <= {28'd0,trace_index};
@@ -935,12 +936,14 @@ module swd_controller #(
     reg last_live;
     always @(posedge clk) last_live<=hs_live_jtag;
     if (SELECTIO) begin:g_live_link
+        wire chain_swd=live_swd_ready && core_next_valid_sel;
         selectio_live_swd swd_link(
             .host_clk(clk),.quad_clk(hs_quad_phase),.reset(!engine_rst_n || !hs_live_swd),
-            .granted(hs_owner==3 && live_swd_sync[1]),.start(core_start_sel && hs_live_swd),
-            .mode(core_mode_sel),.request(core_req_sel),.wdata(core_wdata_sel),
+            .granted(hs_owner==3 && live_swd_sync[1]),.start((core_start_sel || chain_swd) && hs_live_swd),
+            .mode(chain_swd ? 1'b1 : core_mode_sel),.request(chain_swd ? core_next_req_sel : core_req_sel),
+            .wdata(chain_swd ? core_next_wdata_sel : core_wdata_sel),
             .seq_data(core_swj_data_sel),.seq_count(core_swj_count_sel),
-            .sample_slot(hs_live_config[6:1]),.idle(hs_live_config[17:14]),
+            .half_rate(hs_live_config[26]),.sample_slot(hs_live_config[6:1]),.idle(hs_live_config[17:14]),
             .busy(live_swd_busy),.valid(live_swd_valid),.ack(live_swd_ack),.parity(live_swd_parity),
             .rdata(live_swd_rdata),.rx(hs_swd_samples),.clocks(live_swd_clk),
             .data(live_swd_data),.release_bits(live_swd_release));
@@ -949,7 +952,7 @@ module swd_controller #(
             .granted(hs_owner==2 && live_jtag_sync[1]),.start(seg_start && hs_live_jtag),.count(seg_count),
             .variable_tms(seg_variable),.tms(seg_tms),.exit_last(seg_exit),.capture(seg_capture),
             .tdi_mode(seg_drive),.tms_data(seg_tms_data),.tdi_data(seg_tdi_data),
-            .sample_slot(hs_live_config[13:7]),.done(seg_done),.received(seg_response),
+            .half_rate(hs_live_config[26]),.sample_slot(hs_live_config[13:7]),.done(seg_done),.received(seg_response),
             .rx(hs_jtag_samples),.lanes(live_jtag_lanes));
     end
     jtag_core #(.EXTERNAL_PHY(SELECTIO ? 2 : 0)) u_jtag_core (

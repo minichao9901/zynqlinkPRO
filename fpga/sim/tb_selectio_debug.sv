@@ -123,19 +123,27 @@ module tb_selectio_debug;
         write_reg('h1000+index*8, req, 0);
         write_reg('h1004+index*8, data, 0);
     endtask
+    integer block_idle=2, jtag_idle=33,swd_batches=0;
+    realtime jtag_start;
     task automatic batch(input int count);
+        realtime started;
         reg [31:0] status;
+        started=$realtime;
         write_reg('h10,count,0);
         do read_reg(4,status); while (!(status[2] && status[5]));
         read_reg('h14,status);
+        if(count==259)begin
+            $display("QUEUE_MBPS swd %s %f",swd_batches==0?"write":"read ",1024000.0/($realtime-started));swd_batches++;
+        end
         if (status[15:0]!==count[15:0]) $fatal(1,"SWD batch summary %h",status);
     endtask
     integer jslot=29, sslot=12, skip_jtag=0;
     integer i, edges=0, adjacent=0;
     realtime last_edge;
+    real expected_period;
     always @(posedge clk_pin) if (owner>=2 && clk_pin===1) begin
-        if (last_edge!=0 && $realtime-last_edge < 9.995) $fatal(1,"short clock");
-        if (last_edge!=0 && $realtime-last_edge < 10.005) adjacent++;
+        if (last_edge!=0 && $realtime-last_edge < expected_period-0.005) $fatal(1,"short clock");
+        if (last_edge!=0 && $realtime-last_edge < expected_period+0.005) adjacent++;
         last_edge=$realtime;
         edges++;
     end
@@ -146,6 +154,9 @@ module tb_selectio_debug;
         pattern=32'h379db26a ^ (32'h9e3779b9*i);
     endfunction
     initial begin
+        if($value$plusargs("idle=%d",block_idle))begin end
+        if($value$plusargs("jidle=%d",jtag_idle))begin end
+        expected_period=$test$plusargs("half_rate") ? 20.0 : 10.0;
         if ($value$plusargs("jslot=%d",jslot)) begin end
         if ($value$plusargs("sslot=%d",sslot)) begin end
         skip_jtag=$test$plusargs("swd_only");
@@ -155,19 +166,21 @@ module tb_selectio_debug;
         if (!skip_jtag) begin
             write_reg(8,0,0); wait_status(5);
             write_reg('h018,256,0);
-            write_reg('h01c,32'h00780000 | (33<<10) | (jslot<<3) | 2,0);
+            write_reg('h01c,($test$plusargs("half_rate") ? 32'h00600004 : 32'h00780002) | (jtag_idle<<10) | (jslot<<3),0);
             write_reg('h014,32'h20008000,0);
             write_reg('h034,6,0);
             for (i=0;i<256;i++) begin
                 write_reg('h1004+4*i,~pattern(i),0);
                 load_payload('h800+4*i,pattern(i));
             end
-            write_reg(8,13,0); wait_status(15);
+            jtag_start=$realtime;write_reg(8,13,0); wait_status(15);
+            $display("QUEUE_MBPS jtag write %f",1024000.0/($realtime-jtag_start));
             read_reg('h020,value);
             if (value!==1) $fatal(1,"JTAG write ACK %h, slot %d",value,jslot);
             for (i=0;i<256;i++) if (cm3.u_sys.mem[i]!==pattern(i)) $fatal(1,"JTAG write %d",i);
             write_reg(8,0,0); wait_status(5);
-            write_reg(8,5,0); wait_status(15);
+            jtag_start=$realtime;write_reg(8,5,0); wait_status(15);
+            $display("QUEUE_MBPS jtag read %f",1024000.0/($realtime-jtag_start));
             read_reg('h020,value); if (value!==1) $fatal(1,"JTAG read ACK %h",value);
             for (i=0;i<256;i++) begin
                 check_payload('h1800+4*i,pattern(i));
@@ -177,12 +190,12 @@ module tb_selectio_debug;
             write_reg(8,2,0);
             wait(owner==0);
             if (adjacent<256) $fatal(1,"missing continuous JTAG");
-            $display("JTAG_100_PASS words=256 edges=%d slot=%d",edges,jslot);
+            $display("JTAG_PASS %0d MHz words=256 edges=%d slot=%d",$test$plusargs("half_rate")?50:100,edges,jslot);
         end
         adjacent=0; last_edge=0;
         use_swd=1; write_reg(8,0,0);
         do read_reg(4,value); while (!value[0]);
-        write_reg('h0c,(2<<14)|(sslot<<8)|(sslot<<2)|1,0);
+        write_reg('h0c,(block_idle<<14)|(sslot<<8)|(sslot<<2)|(!$test$plusargs("half_rate")),0);
         put(0,5'h10,0); batch(1);
         put(0,2,0); batch(1); read_reg('h2000,value);
         if(value!==32'h2ba01477) $fatal(1,"SWD DPIDR %h",value);
@@ -207,7 +220,7 @@ module tb_selectio_debug;
         end
         if (adjacent<256) $fatal(1,"missing continuous SWD");
         write_reg(8,1,0); wait(owner==0); released=0; wait(owner==1);
-        $display("SELECTIO_PASS SWD 100 MHz words=256 slot=%d",sslot);
+        $display("SELECTIO_PASS SWD %0d MHz words=256 slot=%d",$test$plusargs("half_rate")?50:100,sslot);
         $finish;
     end
     initial begin #3_000_000; $fatal(1,"deadline owner=%d",owner); end

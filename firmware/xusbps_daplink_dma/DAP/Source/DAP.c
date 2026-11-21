@@ -474,8 +474,8 @@ static uint32_t DAP_SWJ_Clock(const uint8_t *request, uint8_t *response) {
    * an extended half-period divider so the pad can emit a narrow high
    * pulse while retaining the requested bit period. */
 #if DAP_SELECTIO
-  if (clock==100000000U) {
-    *response=selectio_live_clock() ? DAP_ERROR : DAP_OK;
+  if (clock==100000000U || (clock==50000000U && (swd_read32(SWD_FEATURES)&0x8000U))) {
+    *response=selectio_live_clock(clock) ? DAP_ERROR : DAP_OK;
     if (*response==DAP_OK) Set_Clock_Delay(clock);
     return (4U<<16)|1U;
   }

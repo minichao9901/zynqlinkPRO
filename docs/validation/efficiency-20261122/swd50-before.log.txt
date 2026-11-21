@@ -1,0 +1,19 @@
+
+****** xsim v2018.3 (64-bit)
+  **** SW Build 2405991 on Thu Dec  6 23:38:27 MST 2018
+  **** IP Build 2404404 on Fri Dec  7 01:43:56 MST 2018
+    ** Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+
+source xsim.dir/fusion/xsim_script.tcl
+# xsim {fusion} -testplusarg swd_only -testplusarg jslot=21 -testplusarg sslot=16 -testplusarg idle=0 -testplusarg half_rate -autoloadwcfg -runall
+Vivado Simulator 2018.3
+Time resolution is 1 ps
+run -all
+WARNING: File  referenced on E:/zynqlinkPRO-efficiency/fpga/rtl/swd200_regs.v at line 75 cannot be opened for reading. Please ensure that this file is available in the current working directory.
+QUEUE_MBPS swd write 4.147428
+QUEUE_MBPS swd read  4.109479
+SELECTIO_PASS SWD 50 MHz words=256 slot=         16
+$finish called at time : 550837500 ps : File "E:/zynqlinkPRO-efficiency/fpga/sim/tb_selectio_debug.sv" Line 224
+run: Time (s): cpu = 00:00:00 ; elapsed = 00:00:35 . Memory (MB): peak = 218.559 ; gain = 0.000
+exit
+INFO: [Common 17-206] Exiting xsim at Sun Nov 22 02:43:14 2026...

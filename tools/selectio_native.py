@@ -1,4 +1,5 @@
 """Native WinUSB stream framing for interface 4 of a J7 integration probe."""
+from collections import deque
 from contextlib import contextmanager
 from dataclasses import dataclass
 import secrets
@@ -10,7 +11,6 @@ import usb.util
 
 
 HEADER = struct.Struct("<4sBBBBII")
-LIMIT = 4079
 
 
 class NativeStatusError(RuntimeError):
@@ -25,9 +25,16 @@ class NativeStream:
     sequence: int
     dma: bool = False
     max_depth: int = 1
+    frame_size: int = 4096
+    advertised_frame: int = 4096
+    sliding: bool = True
+
+    @property
+    def max_bulk(self):
+        return ((self.frame_size-33)//32)*32
 
     def _write(self,channel,op,payload):
-        if len(payload)>LIMIT: raise ValueError("native frame exceeds its data capacity")
+        if len(payload)>self.frame_size-17: raise ValueError("native frame exceeds its data capacity")
         seq=self.sequence
         request=HEADER.pack(b"ZLK1",channel,op,0,0,seq,len(payload))+payload
         if len(request)%512==0:request+=b"\0"
@@ -39,12 +46,13 @@ class NativeStream:
     def _read(self,channel,op,seq,synchronize=False):
         # A closed WinUSB handle may have left complete IN frames in the
         # endpoint. Only a fresh HELLO can retire them and resynchronize.
+        capacity=16384 if synchronize else self.frame_size
         for _ in range(5 if synchronize else 1):
-            reply=bytes(self.device.read(0x84,4096,timeout=3000))
+            reply=bytes(self.device.read(0x84,capacity,timeout=3000))
             if len(reply)<HEADER.size:raise RuntimeError("truncated native IN header")
             magic,ch,operation,status,reserved,returned,size=HEADER.unpack_from(reply)
             total=HEADER.size+size
-            if (magic!=b"ZLK1" or reserved or size>LIMIT or len(reply)!=total+int(total%512==0)):
+            if (magic!=b"ZLK1" or reserved or size>capacity-17 or len(reply)!=total+int(total%512==0)):
                 raise RuntimeError("invalid native frame header or length")
             if (ch,operation,returned)!=(channel,op,seq):
                 if synchronize:continue
@@ -58,40 +66,51 @@ class NativeStream:
         return self._read(channel,op,self._write(channel,op,payload))
 
     @contextmanager
-    def memory(self,port,tap,slot,idle):
-        self.exchange(1,1,bytes((port,tap,slot,idle)))
+    def memory(self,port,tap,slot,idle,clock=100000000):
+        if clock not in (50000000,100000000):raise ValueError("unsupported SelectIO clock")
+        profile=bytes((port,tap,slot,idle))
+        self.exchange(1,1,profile if clock==100000000 else profile+struct.pack("<I",clock))
         try:
             yield
         finally:
             self.exchange(1,2)
 
-    def bulk_many(self,requests,depth=4):
+    def bulk_many(self,requests,depth=4,*,transport_only=False):
         """Submit ordered requests. Retire all submitted replies before raising a device error."""
         if not 1<=depth<=4: raise ValueError("native queue depth must be 1..4")
         for address,size,data in requests:
             if (not 0x20000000<=address<address+size<=0x20010000 or address%4 or
-                size<=0 or size%4 or size>4032 or (data is not None and len(data)!=size)):
+                size<=0 or size%4 or size>self.max_bulk or (data is not None and len(data)!=size)):
                 raise ValueError("invalid F103 SRAM range, alignment or payload length")
         depth=min(depth,self.max_depth)
-        header=16 if self.dma else 8
-        op=6 if self.dma else 3
+        channel=7 if transport_only else 1
+        header=16 if self.dma or transport_only else 8
+        op=6 if header==16 else 3
         result=[]
-        for index in range(0,len(requests),depth):
-            pending=[]
-            for address,size,data in requests[index:index+depth]:
-                payload=struct.pack("<BBHI",int(data is not None),0,size//4,address).ljust(header,b"\0")
-                seq=self._write(1,op,payload+(data if data is not None else b""))
-                pending.append((seq,size,data is None))
-            error=None
-            for seq,size,read in pending:
-                try:
-                    reply=self._read(1,op,seq)
-                    if len(reply)!=header+(size if read else 0) or struct.unpack_from("<I",reply)[0]!=size//4:
-                        raise RuntimeError("incomplete MEM-AP transfer")
-                    result.append(reply[header:])
-                except RuntimeError as exc:
-                    error=error or exc
-            if error:raise error
+        pending=deque()
+        error=None
+        def retire():
+            nonlocal error
+            seq,size,read=pending.popleft()
+            try:
+                reply=self._read(channel,op,seq)
+                if len(reply)!=header+(size if read else 0) or struct.unpack_from("<I",reply)[0]!=size//4:
+                    raise RuntimeError("incomplete MEM-AP transfer")
+                result.append(reply[header:])
+            except RuntimeError as exc:
+                if error is None:error=exc
+
+        for address,size,data in requests:
+            payload=struct.pack("<BBHI",int(data is not None),0,size//4,address).ljust(header,b"\0")
+            seq=self._write(channel,op,payload+(data if data is not None else b""))
+            pending.append((seq,size,data is None))
+            if len(pending)==depth:
+                retire()
+                if not self.sliding:
+                    while pending:retire()
+                if error:break
+        while pending:retire()
+        if error:raise error
         return result
 
     def bulk(self,address,size,data=None):
@@ -112,6 +131,13 @@ class NativeStream:
         if len(reply)!=64 or reply[2]!=command:
             raise RuntimeError("invalid stream control reply")
         return struct.unpack_from("b",reply,3)[0],struct.unpack_from("<12I",reply,4)
+
+    def set_frame_size(self,size):
+        if size not in (4096,16384) or size>self.advertised_frame:raise ValueError("unsupported frame size")
+        if size==self.frame_size:return
+        if self.exchange(0,8,struct.pack("<I",size))!=struct.pack("<I",size):
+            raise RuntimeError("frame negotiation failed")
+        self.frame_size=size
 
     def usb_descriptors(self):
         device=self.device
@@ -150,6 +176,10 @@ class NativeStream:
             self.dma=header==16
             self.max_depth=depth
             info.update(firmware_abi=abi,bulk_header_bytes=header,serial_buffer_bytes=capacity,fclk0_hz=fclk)
+        self.advertised_frame=size
+        self.frame_size=4096
+        if size>=16384:self.set_frame_size(16384)
+        info["negotiated_frame"]=self.frame_size
         info["max_queue_depth"]=self.max_depth
         return info
 

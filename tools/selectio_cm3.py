@@ -15,6 +15,11 @@ def main():
     parser.add_argument("--services", action="store_true", help="verify the autonomous RTT and sample engines through the live transport")
     parser.add_argument("--sample-ticks",type=int,default=32)
     parser.add_argument("--wiretrace",action="store_true")
+    parser.add_argument("--half-rate", action="store_true", help="exercise the 50 MHz profile")
+    parser.add_argument("--idle",type=int,default=2)
+    parser.add_argument("--jtag-idle",type=int,default=33)
+    parser.add_argument("--service-words",type=int,choices=(1,8),default=1)
+    parser.add_argument("--meter",action="store_true")
     args = parser.parse_args()
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=True)
@@ -45,12 +50,15 @@ def main():
         top="tb_selectio_debug"
     run("xvlog",["--sv","-i",sim,*sources],"compile.log")
     run("xelab", ["--mt","2","-L","unisims_ver","-L","secureip","-s","fusion",top,"glbl"],"elab.log")
-    switches=[]
+    switches=["-testplusarg",f"idle={args.idle}","-testplusarg",f"jidle={args.jtag_idle}"]
     if args.services:
         for opt in ("bypass","clk_ns=7.5","target_clk_ns=20.833",f"service_ticks={args.sample_ticks}"):
             switches.extend(["-testplusarg",opt])
         if args.swd_only: switches.extend(["-testplusarg","swd"])
     elif args.swd_only: switches.extend(["-testplusarg","swd_only"])
+    switches.extend(["-testplusarg",f"service_words={args.service_words}"])
+    if args.meter:switches.extend(["-testplusarg","meter"])
+    if args.half_rate: switches.extend(["-testplusarg","half_rate"])
     if args.wiretrace: switches.extend(["-testplusarg","wiretrace"])
     output = run("xsim", ["fusion", "-runall", "-testplusarg", f"jslot={args.jtag_slot}",
                           "-testplusarg", f"sslot={args.swd_slot}", *switches], "run.log")

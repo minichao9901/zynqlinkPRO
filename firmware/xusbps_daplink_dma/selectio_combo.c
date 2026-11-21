@@ -49,13 +49,13 @@ static int start(const uint8_t *p,unsigned bytes) {
     if(opened || bytes<20 || selectio_mem_active()) return -1;
     unsigned n=p[12],channel=p[13];
     uint32_t cb=get_u32(p+4),ticks=get_u32(p+8);
-    if(!n || n>8 || bytes!=16U+4U*n || channel>=16 || p[14] || p[15] ||
+    if(!n || n>8 || bytes!=16U+4U*n || channel>=16 || p[14]>1 || p[15] ||
        !ticks || ticks>24000000U || (cb&3U) || !sram(cb,24U+(channel+1U)*24U)) return -1;
     for(unsigned i=0;i<n;i++) {
         addresses[i]=get_u32(p+16+4U*i);
         if((addresses[i]&3U) || !sram(addresses[i],4)) return -1;
     }
-    if(selectio_mem_open(p)) return -1;
+    if(selectio_mem_open_at(p,p[14]?50000000U:100000000U)) return -1;
     memset(diagnostic,0,sizeof diagnostic);opened=1;fail_stage=1;
     uint32_t head[6],up[6];
     descriptor=cb+24U+24U*channel;
