@@ -46,4 +46,11 @@ def main():
     exe=a.out/'dap_wait_test.exe'
     subprocess.run([*cc,'-std=c11','-O2','-Wall','-Wextra','-I'+str(a.out.resolve()),'-I'+str(ROOT/'tools/tests'),'-I'+str(ROOT/'firmware/xusbps_daplink_dma/DAP/Include'),str(ROOT/'tools/tests/dap_wait_test.c'),'-o',str(exe)],check=True)
     subprocess.run([str(exe.resolve())],check=True,timeout=15)
+    (a.out/'xusbps_endpoint.h').write_text('#include "probe_host_platform.h"\n',encoding='utf8')
+    exe=a.out/'selectio_usb_frame_test.exe'
+    subprocess.run([*cc,'-std=c11','-O2','-Wall','-DDAP_SELECTIO=1','-I'+str(a.out.resolve()),
+        '-I'+str(ROOT/'tools/tests'),'-I'+str(dap_root.parent),'-I'+str(dap_root/'Include'),
+        str(ROOT/'tools/tests/selectio_usb_frame_test.c'),'-o',str(exe)],check=True)
+    subprocess.run([str(exe.resolve())],check=True,timeout=15)
+
 if __name__=='__main__':main()

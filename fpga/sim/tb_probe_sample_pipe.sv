@@ -6,7 +6,7 @@ module tb_probe_sample_pipe;
     wire active,start,nvalid,busy,valid,nready,parity;
     wire [7:0] req,nreq;wire [31:0] cw;wire [2:0] ack;
     probe_sample_engine dut(.clk(clk),.rst_n(rst_n),.wr(wr),.rd(rd),.waddr(wa),.raddr(ra),.wdata(wd),.rdata(data),
-        .available(!busy),.stream_pop(1'b0),.active(active),.core_start(start),.core_req(req),.core_wdata(cw),
+        .packet_arm_jtag(1'b0),.available(!busy),.stream_pop(1'b0),.active(active),.core_start(start),.core_req(req),.core_wdata(cw),
         .core_next_valid(nvalid),.core_next_req(nreq),.core_busy(busy),.core_result_valid(valid),.core_next_ready(nready),
         .core_ack(ack),.core_parity_err(parity),.core_rdata(cr));
     probe_ap_model ap(.clk(clk),.rst_n(rst_n),.start(start),.next_valid(nvalid),.chain_enable(chain),.req(req),.next_req(nreq),

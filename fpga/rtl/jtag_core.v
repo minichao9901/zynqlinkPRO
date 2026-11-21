@@ -298,7 +298,14 @@ module jtag_core #(parameter EXTERNAL_PHY=0) (
                 unknown_tap<=0;ir_valid<=0;
                 shift_segment(6,1,0,0,0,1,256'h1f,0,ROUTE);
             end
-            IR_NAV: shift_segment(4,1,0,0,0,1,3,0,IR_PRE);
+            IR_NAV: if(external_active && !rv_active && ir_before==0 && ir_length==4 && ir_after==5) begin
+                // One handoff for the F103 4+5 IR chain: navigate, shift
+                // the DP instruction and five BYPASS ones, Update, RTI.
+                ir_cache<=desired_ir;ir_valid<=1;
+                if(op==2)ack<=1;
+                shift_segment(15,1,0,0,0,2,256'h3003,
+                    {243'b0,5'b11111,desired_ir[3:0],4'b1111},op==2 ? DONE : DR_NAV);
+            end else shift_segment(4,1,0,0,0,1,3,0,IR_PRE);
             IR_PRE: if(ir_before!=0) shift_segment({1'b0,ir_before},0,0,0,0,1,0,0,IR_VALUE);
                     else state<=IR_VALUE;
             IR_VALUE: shift_segment({4'd0,ir_length},0,0,ir_after==0,0,2,0,{224'd0,desired_ir},IR_POST);

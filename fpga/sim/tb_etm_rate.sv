@@ -1,13 +1,13 @@
 `timescale 1ns/1ps
 // Independent TRACECLK. Data leaves the target with the matching edge;
 // fixed per-lane board delays span 0.2..1.4 ns and clock delay is 1.6 ns.
-module tb_etm_rate;
+module tb_etm_rate #(parameter integer CLOCK_DELAY_PS=1600);
     reg refclk=0,hostclk=0,rst=1;
     always #2.5 refclk=~refclk;
     always #3.75 hostclk=~hostclk;
     reg [4:0] drive=0;
     wire [4:0] pins;
-    assign #1.6 pins[4]=drive[4];
+    assign #(CLOCK_DELAY_PS/1000.0) pins[4]=drive[4];
     for(genvar i=0;i<4;i=i+1)assign #(0.2+0.4*i) pins[i]=drive[i];
     wire [127:0] frame[2];
     wire [1:0] seen,malformed;
@@ -36,18 +36,20 @@ module tb_etm_rate;
             end
         end
     end
-    realtime half_period;
+    realtime high_time,low_time;
     task send_byte(input [7:0] data);
         begin
-            drive={1'b1,data[3:0]};#(half_period);
-            drive={1'b0,data[7:4]};#(half_period);
+            drive={1'b1,data[3:0]};#(high_time);
+            drive={1'b0,data[7:4]};#(low_time);
         end
     endtask
-    integer freq=64,phase=0,frames=128;
+    integer freq=64,phase=0,frames=128,duty=50;
     initial begin
         if($value$plusargs("mhz=%d",freq))begin end
         if($value$plusargs("phase_ps=%d",phase))begin end
-        half_period=500.0/freq;
+        if($value$plusargs("duty=%d",duty))begin end
+        high_time=10.0*duty/freq;
+        low_time=10.0*(100-duty)/freq;
         #120;rst=0;
         repeat(20)@(negedge refclk);
         #(phase/1000.0);

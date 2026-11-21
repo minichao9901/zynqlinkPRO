@@ -173,6 +173,13 @@ static unsigned execute_frame(unsigned length, unsigned active_epoch) {
         } else if (channel==1 && op==2 && !size) {
             dap_wait_begin();
             if(!selectio_mem_close()) status=0;
+        } else if(channel==1 && op==5 && !size && selectio_mem_active()) {
+            unsigned port=selectio_mem_port();
+            uint32_t queue=port==1 ? 0x80010000U : 0x80000000U;
+            write32(output+16,ps_fclk_decode(0xf8000180U));write32(output+20,port);
+            write32(output+24,swd_read32(queue+(port==1 ? 0x0cU : 0x1cU)));
+            write32(output+28,swd_read32(queue+(port==1 ? 0x18U : 0x0cU)));
+            reply_size=16;status=0;
         } else if(channel==1 && op==4 && !size) {
             uint64_t values[9];
             selectio_mem_stats(values);memcpy(output+16,values,sizeof values);
@@ -287,9 +294,9 @@ void selectio_usb_poll(XUsbPs *usb) {
     unsigned response=execute_frame(length,active_epoch);
     flags=mfcpsr();mtcpsr(flags|0x80U);
     if (configured && epoch==active_epoch) {
-        Xil_DCacheFlushRange((UINTPTR)output,(response+31U)&~31U);
+        /* XUsbPs_EpBufferSend flushes the payload in EpQueueRequest
+         * immediately before giving its descriptor to the controller. */
         pending_length=response;
-
     }
     mtcpsr(flags);
 }

@@ -11,6 +11,16 @@ from f103_ram_image import plan
 
 
 class RamImageTests(unittest.TestCase):
+    def test_capture_rejects_flash_as_ram(self):
+        with tempfile.TemporaryDirectory() as folder:
+            output=Path(folder)/'record'
+            result=subprocess.run([sys.executable,str(ROOT/'etm-service/trace.py'),'capture','--ram-image',
+                '--elf',str(ROOT/'prebuilt/golden/f103ze-cdc48.elf'),'--out',str(output),
+                '--bit','unused.bit','--zynq-elf','unused.elf'],capture_output=True)
+            self.assertNotEqual(result.returncode,0)
+            self.assertIn(b'SRAM',result.stdout+result.stderr)
+            self.assertFalse(output.exists())
+
     def test_ram_commands_reject_flash_elf_before_creating_a_hardware_run(self):
         golden=ROOT/'prebuilt/golden/f103ze-cdc48.elf'
         with tempfile.TemporaryDirectory() as folder:
@@ -29,7 +39,7 @@ class RamImageTests(unittest.TestCase):
             plan(ROOT/'prebuilt/golden/f103ze-cdc48.elf')
 
     def test_out_of_range_ram_segment_and_vector_entry_are_rejected(self):
-        source=ROOT/'prebuilt/f103ze-cdc-ram-clock-20261101/cpu72.elf'
+        source=ROOT/'prebuilt/targets/f103ze-sram-etm72/fw.elf'
         raw=source.read_bytes();valid=plan(source)
         self.assertEqual(valid['stack'],0x20010000)
         self.assertEqual(valid['payloads'][0][0],0x20000000)

@@ -23,7 +23,12 @@ def main(argv=None):
     ap.add_argument("--etm-out",type=Path,help="new native ETM record directory")
     ap.add_argument("--seconds",type=float,default=60)
     ap.add_argument("--rounds",type=int,default=3,help="read/write/mixed SRAM windows per transport")
-    ap.add_argument("--only",action="append",choices=SUITES)
+    ap.add_argument("--only",action="append",choices=(*SUITES,"usb-ddr"))
+    ap.add_argument("--clock",type=int,choices=(50000000,100000000),default=100000000,
+                    help="debug, memory, running RTT, scope and combo clock in Hz")
+    ap.add_argument("--frame",type=int,choices=(4096,16384),default=4096,
+                    help="negotiated SRAM frame size and guarded fixture extent")
+    ap.add_argument("--schedule",choices=("grouped","sliding"),default="sliding")
     ap.add_argument("--execute",action="store_true")
     args=ap.parse_args(argv)
     if args.review:
@@ -46,10 +51,15 @@ def main(argv=None):
     pair=args.pair.resolve()
     out=(args.out or ROOT/"build"/("selectio-accept-"+datetime.now().strftime("%Y%m%d-%H%M%S"))).resolve()
     summary=dict(board=args.board,operation="HS3 JTAG/RAM, guarded F103ZE SRAM",suites=selected,
-                 serial=args.serial,seconds=args.seconds,rounds=args.rounds,pair=str(pair),out=str(out),cases=[])
+                 serial=args.serial,seconds=args.seconds,rounds=args.rounds,pair=str(pair),out=str(out),
+                 debug_service_hz=args.clock,memory_frame=args.frame,schedule=args.schedule,cases=[])
     if not args.execute:
         print(json.dumps(summary,indent=2));return 0
     identity=json.loads((pair/"manifest.json").read_text(encoding="utf8"))
+    profiles=identity if args.clock==100000000 else identity.get("profiles_50mhz")
+    if profiles is None:ap.error("selected pair does not supply 50 MHz sampling profiles")
+    if (args.frame==16384 or "usb-ddr" in selected) and identity.get("max_native_frame",4096)<16384:
+        ap.error("selected pair does not advertise negotiated 16 KiB frames")
     for name in ("probe.bit","application.elf","ps7_init.tcl"):
         if hashlib.sha256((pair/name).read_bytes()).hexdigest()!=identity["hashes"][name]:
             raise ValueError(f"artifact hash differs for {name}")
@@ -59,11 +69,12 @@ def main(argv=None):
     cli=[*py,ROOT/"toolbox.py"]
     def save():
         (out/"summary.json").write_text(json.dumps(summary,indent=2)+"\n",encoding="utf8")
-    def run(name,cmd,guard=False):
+    def run(name,cmd,guard=False,guard_size=4096):
         start=time.monotonic()
         state=out/(name+"-guard")
         if guard:
-            cmd=[*py,ROOT/"tools/selectio_f103_fixture.py","--serial",args.serial,"--out",state,"--execute","--",*cmd]
+            cmd=[*py,ROOT/"tools/selectio_f103_fixture.py","--serial",args.serial,"--out",state,
+                 "--size",guard_size,"--execute","--",*cmd]
         log=out/(name+".log")
         with log.open("xb") as stream:
             p=subprocess.run(list(map(str,cmd)),stdout=stream,stderr=subprocess.STDOUT,cwd=ROOT)
@@ -75,8 +86,8 @@ def main(argv=None):
         if guard and not row["restored"]:
             raise RuntimeError(f"{name}: inspect {state}; recovery not confirmed")
         return row["passed"]
-    def test(name,script,options):
-        return run(name,[*py,ROOT/"tools"/script,"--serial",args.serial,"--out",out/name,*options,"--execute"],True)
+    def test(name,script,options,guard_size=4096):
+        return run(name,[*py,ROOT/"tools"/script,"--serial",args.serial,"--out",out/name,*options,"--execute"],True,guard_size)
     def fixture(src,entry,parameters=()):
         binary=out/(entry+".bin")
         elf=out/(entry+".elf")
@@ -96,9 +107,13 @@ def main(argv=None):
     if "usb" in selected:
         for i in range(args.rounds):
             run("usb-"+str(i+1),[*cli,"selectio","--serial",args.serial,"usb-test","--seconds",args.seconds])
+    if "usb-ddr" in selected:
+        run("usb-ddr",[*py,ROOT/"tools/selectio_transport_bench.py","--serial",args.serial,
+                       "--seconds",args.seconds,"--schedule",args.schedule,"--out",out/"usb-ddr"])
     if "switch" in selected:
-        test("switch","selectio_mode_switch_test.py",["--swd-slot",identity["swd"]["slot"],
-             "--jtag-slot",identity["jtag"]["slot"],"--rounds",64])
+        test("switch","selectio_mode_switch_test.py",["--swd-slot",profiles["swd"]["slot"],
+             "--jtag-slot",profiles["jtag"]["slot"],"--swd-idle",profiles["swd"]["idle"],
+             "--jtag-idle",profiles["jtag"]["idle"],"--clock",args.clock,"--rounds",64])
         if identity.get("native_stream_lease_seconds"):
             test("host-loss","selectio_abandon_test.py",[])
     producer=None
@@ -106,17 +121,19 @@ def main(argv=None):
         producer=fixture("probe_rtt_ram.S","producer",["-Wa,--defsym,FIXTURE_BASE=0x20008000",
                              "-Wa,--defsym,RTT_RING_OFFSET=0x400","-Wa,--defsym,RTT_RING_MASK=1023"])
     for transport in ("swd","jtag"):
-        cfg=identity[transport]
+        cfg=profiles[transport]
         common=["--transport",transport,"--slot",cfg["slot"]]
-        if "debug" in selected:test("debug-"+transport,"selectio_debug_test.py",common)
+        if "debug" in selected:test("debug-"+transport,"selectio_debug_test.py",[*common,"--clock",args.clock,"--idle",cfg["idle"]])
         if "memory" in selected:
             test("memory-"+transport,"selectio_pipeline_bench.py",[*common,"--tap",cfg["tap"],"--idle",cfg.get("bulk_idle",cfg["idle"]),
-                 "--bytes",4032,"--depth",4,"--seconds",args.seconds,"--rounds",args.rounds])
+                 "--clock",args.clock,"--frame",args.frame,"--bytes",args.frame-64,"--schedule",args.schedule,
+                 "--depth",4,"--seconds",args.seconds,"--rounds",args.rounds],args.frame)
         for service in ("rtt","combo"):
             if service in selected:test(service+"-"+transport,"selectio_running_test.py",
-                [*common,"--seconds",args.seconds,"--service",service,"--binary",producer])
-    if "scope" in selected:test("services","selectio_services_accept.py",["--swd-slot",identity["swd"]["slot"],
-                       "--jtag-slot",identity["jtag"]["slot"],"--confirm-seconds",args.seconds])
+                [*common,"--clock",args.clock,"--idle",cfg["idle"],"--seconds",args.seconds,"--service",service,"--binary",producer])
+    if "scope" in selected:test("services","selectio_services_accept.py",["--swd-slot",profiles["swd"]["slot"],
+                       "--jtag-slot",profiles["jtag"]["slot"],"--swd-idle",profiles["swd"]["idle"],
+                       "--jtag-idle",profiles["jtag"]["idle"],"--clock",args.clock,"--confirm-seconds",args.seconds])
     if "wire" in selected:
         # External Manchester uses the F103 TAP as a timed source. Give
         # it its own guarded SWJ handoff, as for the independent PWM source.

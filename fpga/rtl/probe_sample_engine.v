@@ -14,6 +14,7 @@ module probe_sample_engine #(
     input wire [31:0] wdata,
     output reg [31:0] rdata,
     input wire available,
+    input wire packet_arm_jtag,
     input wire stream_pop,
     output wire stream_empty,
     output wire [31:0] stream_data,
@@ -85,6 +86,12 @@ module probe_sample_engine #(
     // DRW read.  CSW keeps TAR fixed, so the posted result is returned by the
     // next sample's DRW exactly like superlinkPRO's swd_read_word_pipe().
     reg fixed_pipe;
+    reg arm_packet_plan,tar_primed;
+    reg [31:0] group_base;
+    // On JTAG the APACC scan that posts TAR also receives the pending
+    // read. Only enable this path for the packetizer with its sticky-error
+    // publication fence, a contiguous single-page plan and >1 word.
+    wire rewind_tar=arm_packet_plan && fast_span && count>1;
     reg pending;
     reg [31:0] pending_time, launch_time;
     // A JTAG CTRL/STAT fence also validates the outstanding single-word AP
@@ -129,8 +136,8 @@ module probe_sample_engine #(
     assign core_next_valid = (state==WAIT) && core_result_valid &&
                              core_ack==3'd1 && !core_parity_err &&
                              count>1 && ((phase==3) || (phase==FAST_DRW));
-    assign core_next_req = (phase==3 ? span_end : next_span_end) ? 8'h0e : 8'h0f;
-    assign core_next_wdata = 0;
+    assign core_next_req = (phase==3 ? span_end : next_span_end) ? (rewind_tar ? 8'h05 : 8'h0e) : 8'h0f;
+    assign core_next_wdata = rewind_tar ? group_base : 0;
     always @* begin
         case(raddr)
         0: rdata={16'h4853,3'd0,count,7'd0,enabled};
@@ -149,6 +156,7 @@ module probe_sample_engine #(
     end
     always @(posedge clk or negedge rst_n) begin
         if(!rst_n) begin
+            arm_packet_plan<=0;tar_primed<=0;group_base<=0;
             state<=IDLE; enabled<=0; fault<=0; fault_drain<=0; count<=0; plan_index<=0; fast_span<=0;span_last<=24'hffffff;
             item<=0; head<=0; tail<=0; read_word<=0; tick<=0; deadline<=0;
             deadline_gap<=0;
@@ -188,6 +196,7 @@ module probe_sample_engine #(
                 end
                 if(!wdata[0]) begin enabled<=0;resume_catchup<=0;end
                 else if(!active && wdata[12:8]!=0 && wdata[12:8]<=24 && available) begin
+                    arm_packet_plan<=packet_arm_jtag;tar_primed<=0;group_base<=plan[0];
                     enabled<=1; count<=wdata[12:8]; setup_needed<=1; fixed_pipe<=0; pending<=0;
                     fast_span<=1;
                     if ({1'b0,plan[0][9:0]} + (wdata[12:8]*4) > 1024) fast_span<=0;
@@ -232,7 +241,7 @@ module probe_sample_engine #(
                     sample_time<=pending ? pending_time : deadline;
                     launch_time<=deadline; item<=0;
                     phase<=setup_needed ? 0 :
-                           ((fast_span && count==1 && fixed_pipe) ? FAST_DRW : 2);
+                           ((fast_span && count==1 && fixed_pipe) ? FAST_DRW : (rewind_tar && tar_primed ? 3 : 2));
                     retries<=RETRIES; state<=ISSUE;
                 end else skipped<=skipped+1'b1;
             end
@@ -249,7 +258,7 @@ module probe_sample_engine #(
                 3: begin core_req<=8'h0f; core_wdata<=0; end // prime posted DRW
                 4: begin core_req<=8'h0e; core_wdata<=0; end // RDBUFF
                 FAST_DRW: begin core_req<=8'h0f; core_wdata<=0; end
-                FAST_LAST: begin core_req<=8'h0e; core_wdata<=0; end
+                FAST_LAST: begin core_req<=rewind_tar ? 8'h05 : 8'h0e; core_wdata<=rewind_tar ? group_base : 0; end
                 default: ;
                 endcase
                 core_start<=1; watchdog<=TIMEOUT; state<=WAIT;
@@ -281,7 +290,7 @@ module probe_sample_engine #(
                                 state<=core_next_ready ? WAIT : ISSUE;
                             end
                         end else if (phase==FAST_LAST) begin
-                            pending<=0;
+                            tar_primed<=rewind_tar;pending<=0;
                             if(item+1==count) state<=COMMIT;
                             else begin item<=item+1'b1;phase<=2;state<=ISSUE;end
                         end else state<=ADVANCE;

@@ -11,7 +11,7 @@ module tb_probe_sample;
     reg inject_wait=0,inject_fault=0,inject_parity=0,hang=0;
     probe_sample_engine #(.FIFO_SAMPLES(4),.TIMEOUT(64),.RETRIES(3)) dut(
         .clk(clk),.rst_n(rst_n),.wr(wr),.rd(rd),.waddr(waddr),.raddr(addr),.wdata(wdata),.rdata(rdata),
-        .available(available),.active(active),.core_start(start),.core_req(req),.core_wdata(wd),
+        .packet_arm_jtag(1'b0),.available(available),.active(active),.core_start(start),.core_req(req),.core_wdata(wd),
         .stream_pop(1'b0),.core_next_ready(1'b0),
         .core_busy(busy),.core_result_valid(valid),.core_ack(ack),.core_parity_err(parity),.core_rdata(data));
     always @(posedge clk) begin

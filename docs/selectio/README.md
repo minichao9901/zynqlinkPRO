@@ -96,6 +96,25 @@ python -X utf8 toolbox.py selectio write @bulkLink --address 0x20008020 --file p
 
 ## RTT 和 J-Scope
 
+双频效率候选在内存读写、RTT 和变量采样入口接受 `--clock 50000000` 与 `--clock 100000000`。下列 A/B 命令使用候选 bit/ELF，F103ZE 保持 CDC48。50 MHz 示例的采样相位仍待用实板校准。每次测试使用新的输出目录。
+
+```powershell
+# 以同一 SRAM 帧格式读写探针私有 DDR，逐项测纯 USB、队列深度和传输方向
+python -X utf8 tools/selectio_transport_bench.py --serial 12345678 --seconds 10 --schedule sliding --out build/usb-sliding
+python -X utf8 tools/selectio_transport_bench.py --serial 12345678 --seconds 10 --schedule grouped --out build/usb-grouped
+
+# 真实目标 SRAM，先备份 16 KiB，分别计读、写、混合，最后恢复目标
+python -X utf8 tools/selectio_f103_fixture.py --serial 12345678 --size 16384 --out build/swd50-state --execute -- python -X utf8 tools/selectio_pipeline_bench.py --transport swd --clock 50000000 --tap 8 --slot 16 --idle 0 --frame 16384 --bytes 16320 --depth 4 --seconds 60 --rounds 3 --out build/swd50-pc --execute
+```
+
+统一板卡入口支持按所选配对的 50 / 100 MHz 参数串行运行实际调试、内存、RTT、变量采样及 USB 对照。下例先打印计划；添加 `--execute` 后经 HS3 临时加载对应 bit/ELF、检查身份、备份目标 SRAM，然后逐项测试并复核恢复。每个 SRAM 窗口的复算例见效率报告。
+
+```powershell
+python -X utf8 toolbox.py project run board.accept -- --selectio --board f103ze --pair prebuilt/selectio-efficiency --clock 50000000 --frame 16384 --only switch --only debug --only memory --only rtt --only scope --only combo --only usb-ddr
+```
+
+在相同线速做小帧对照时，用 `--frame 4096 --bytes 4032`；比较队列策略用相同帧长、字节数和深度，仅调整 `--schedule`。报告中的 `clock` 给出时钟树、队列分频及采样 tap 的来源。`wall_MBps` 包含主机载荷生成和校验，`probe` 中的计时覆盖队列与 PS 块函数。[分层基线和数字模型](../validation/efficiency-20261122/README.md)
+
 以下地址仅作 CDC48 示例；其他固件从目标 ELF 符号表取得 RTT 控制块或变量地址。RTT 下行需要目标定义 DOWN 通道。本项目的 J-Scope 指主线 HSS 硬件变量采样，CLI 可导出 CSV。独立采样支持 1–8 个变量。周期单位为 24 MHz tick，`24000` 表示 1 ms。`--var` 的格式为地址、字节宽度、类型码，用冒号分隔。类型码 0–7 依次对应 u8、i8、u16、i16、u32、i32、f32、f64。
 
 ```powershell

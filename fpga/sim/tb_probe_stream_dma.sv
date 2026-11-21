@@ -7,11 +7,14 @@ module tb_probe_stream_dma;
     wire pop,active,start,nvalid,busy,valid,nready,parity;
     wire [7:0] req,nreq;wire [31:0] cw,cr;wire [2:0] ack;
     reg chain=1;
+    reg jtag=0,fence_done=0,fence_error=0;
+    wire fence_req;
     probe_stream_engine dut(.clk(clk),.rst_n(rst_n),.host_en(en),.host_we(we),.host_addr(addr),.host_wdata(wd),.host_rdata(data),
         .sample_empty(fi==fo),.sample_data(fifo[fo]),.tick(tick),.sampler_active(sampling),.sample_pop(pop),
         .rtt_active(active),.core_start(start),.core_req(req),.core_wdata(cw),.core_next_valid(nvalid),.core_next_req(nreq),
         .core_available(1'b1),.core_busy(busy),.core_result_valid(valid),.core_next_ready(nready),
-        .core_ack(ack),.core_parity_err(parity),.core_rdata(cr),.transport_jtag(1'b0),.fence_done(1'b0),.fence_error(1'b0));
+        .core_ack(ack),.core_parity_err(parity),.core_rdata(cr),.transport_jtag(jtag),
+        .fence_req(fence_req),.fence_done(fence_done),.fence_error(fence_error),.sample_validation_count(32'd0));
     probe_ap_model ap(.clk(clk),.rst_n(rst_n),.start(start),.next_valid(nvalid),.chain_enable(chain),.req(req),.next_req(nreq),
         .wdata(cw),.busy(busy),.result_valid(valid),.next_ready(nready),.ack(ack),.parity(parity),.rdata(cr));
     always @(posedge clk) begin tick<=tick+1;if(pop) begin if(fi==fo) $fatal(1,"empty pop");fo<=fo+1;end end
@@ -58,6 +61,14 @@ module tb_probe_stream_dma;
         wait_packet();rd(4096+2048+8,d);if(d!=178956970) $fatal(1,"v1 convert %d",d);wr(12,1);
         sampling=0;wr(0,0);wait_packet();rd(4096+4096+8,d);
         if(d!=178956976) $fatal(1,"v1 timer wrap %d",d);wr(12,1);
+        // Delayed AP faults must discard the complete JTAG bank, including
+        // results received while posting the following group's TAR.
+        wr(0,256);cfg(0,4);cfg(1,2);jtag=1;sampling=1;wr(0,1);
+        for(i=0;i<124;i=i+1) sample(1000+48*i,32'h12340000+i);
+        wait(fence_req);rd(8,d);if(d!=0) $fatal(1,"unfenced packet became visible");
+        @(negedge clk);fence_done=1;fence_error=1;@(negedge clk);fence_done=0;fence_error=0;
+        rd(8,d);if(d!=0 || !dut.hss_transport_fault || dut.produced!=0) $fatal(1,"faulted JTAG packet published");
+        sampling=0;jtag=0;
         // RTT wrap, descriptor and data 1 KiB AP boundaries, unaligned bytes.
         wr(0,256);wr(32,32'h200023f8);wr(36,32'h200003f1);wr(40,4093);wr(44,2);wr(48,2048);
         ap.mem['h23fc/4]=32'h200003f1;ap.mem['h2400/4]=4093;ap.mem['h2404/4]=2500;ap.mem['h2408/4]=2;

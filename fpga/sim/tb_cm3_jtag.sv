@@ -125,18 +125,22 @@ module tb_cm3_jtag #(parameter integer ENABLE_DIAGNOSTICS=0, FAST_IO=0);
   n=0;d=0;while(d==0 && n<200000)begin get(8,d);n=n+1;end
   if(d==0)$fatal(1,"packet timeout core=%d sampler=%d packet=%d",dut.u_jtag_core.state,dut.u_probe_sampler.state,dut.u_probe_stream.state);
  endtask
- reg [31:0] d,head_before,expected,safe_at_fault;reg checking_fault=0;
+ reg [31:0] d,expected;
  reg [31:0] dbg_meta,dbg_front,dbg_latched,dbg_tx,dbg_sense;
  integer diag_n,k;
  integer hss_t0,hss_t1,rtt_t0,rtt_t1,hss_total;
  integer hss_full,hss_prev,hss_first_count,hss_last_count,hss_edges=0,first_edges,last_edges;
+ integer first_skips,last_skips;
  integer live_jidle=33,live_sidle=2;
  bit metering=0;
  realtime first_sample,last_sample;
  always @(posedge tck) if(metering)hss_edges++;
  always @(posedge clk) if(metering && dut.u_probe_sampler.head!=hss_prev)begin
     hss_prev=dut.u_probe_sampler.head;
-    if(hss_prev==4)begin first_sample=$realtime;hss_first_count=hss_prev;first_edges=hss_edges;end
+    if(hss_prev==4)begin
+       first_sample=$realtime;hss_first_count=hss_prev;first_edges=hss_edges;first_skips=dut.u_probe_sampler.skipped;
+    end
+    last_skips=dut.u_probe_sampler.skipped;
     last_sample=$realtime;hss_last_count=hss_prev;last_edges=hss_edges;
  end
  integer i,j,bank_base,samples,packets;
@@ -145,9 +149,55 @@ module tb_cm3_jtag #(parameter integer ENABLE_DIAGNOSTICS=0, FAST_IO=0);
  task perf_put(input integer a,input [31:0] v);put(a,v);endtask
  task perf_get(input integer a,output [31:0] v);get(a,v);endtask
  task perf_scalar(input [7:0] req,input [31:0] v,output [31:0] q);transfer(req,v);read_reg(24,q);endtask
+ bit rtt_meter=0;
+ integer rtt_edges=0,rtt_payload_ops=0,rtt_desc_ops=0,rtt_commit_ops=0,rtt_waits=0;
+ always @(posedge tck) if(rtt_meter)rtt_edges++;
+ always @(posedge clk) if(rtt_meter && dut.core_result_valid)begin
+  if(dut.u_probe_stream.u_rtt.committing)rtt_commit_ops++;
+  else if(dut.u_probe_stream.u_rtt.payload)rtt_payload_ops++;
+  else rtt_desc_ops++;
+  if(dut.core_ack==2)rtt_waits++;
+ end
+ task measure_rtt_window;
+  localparam integer BASE='h3f1, SIZE=8191, INITIAL_RD=6143, WR=6000, TOTAL=SIZE-INITIAL_RD+WR;
+  integer rd_off,n,bank,count,packets,idx,lane;
+  reg [31:0] value;
+  realtime started,ready_time,ack_time,sink_ns;
+  begin
+   for(idx=0;idx<SIZE;idx=idx+1)
+     target.u_sys.mem[(BASE+idx)/4][8*((BASE+idx)%4)+:8]=(idx*37+(idx>>8))&255;
+   target.u_sys.mem['h23fc/4]='h60000000+BASE;target.u_sys.mem['h2400/4]=SIZE;
+   target.u_sys.mem['h2404/4]=WR;target.u_sys.mem['h2408/4]=INITIAL_RD;
+   put(32,'h600023f8);put(36,'h60000000+BASE);put(40,SIZE);put(44,INITIAL_RD);put(48,2048);
+   rd_off=INITIAL_RD;count=0;packets=0;sink_ns=0;started=$realtime;rtt_meter=1;put(0,2);
+   while(count<TOTAL)begin
+    wait_packet();ready_time=$realtime;get(8,value);
+    n=value[11:0];bank=4096+2048*value[18:16];
+    if(n!=((TOTAL-count)>2048 ? 2048 : TOTAL-count) || rd_off+n>SIZE)
+      $fatal(1,"RTT packet size or ring boundary n=%0d rd=%0d",n,rd_off);
+    for(idx=0;idx<n;idx=idx+4)begin
+     get(bank+idx,value);
+     for(lane=0;lane<4 && idx+lane<n;lane=lane+1)
+      if(value[lane*8+:8]!==((37*(rd_off+idx+lane)+((rd_off+idx+lane)>>8))&255))
+       $fatal(1,"RTT flow payload mismatch at ring byte %0d",rd_off+idx+lane);
+    end
+    if(target.u_sys.mem['h2408/4]!==rd_off)$fatal(1,"RdOff changed before consumer ACK");
+    count=count+n;packets=packets+1;rd_off=(rd_off+n)%SIZE;
+    if(count==TOTAL)put(0,0);
+    put(12,1);ack_time=$realtime;sink_ns=sink_ns+(ack_time-ready_time);
+    wait(!dut.u_probe_stream.rtt_announced);
+    if(target.u_sys.mem['h2408/4]!==rd_off || dut.u_probe_stream.u_rtt.drained!=count)
+     $fatal(1,"RTT commit count or RdOff mismatch");
+   end
+   wait(!dut.rtt_active);
+   rtt_meter=0;
+   $display("RTT_COST edges=%0d payload_ops=%0d descriptor_ops=%0d commit_ops=%0d waits=%0d",
+            rtt_edges,rtt_payload_ops,rtt_desc_ops,rtt_commit_ops,rtt_waits);
+   $display("RTT_WINDOW packets=%0d bytes=%0d ns=%f consumer_ns=%f MBps=%f",packets,count,
+            $realtime-started,sink_ns,1000.0*count/($realtime-started));
+  end
+ endtask
  `include "cm3_perf_tasks.svh"
- always @(posedge clk)if(checking_fault && dut.u_probe_stream.state==6 &&
-    $signed(dut.u_probe_stream.produced-safe_at_fault)>0)$fatal(1,"unvalidated HSS bank published");
  initial begin
   for(i=0;i<8192;i=i+1)target.u_sys.mem[i]=32'h12340000+i;
   if(FAST_IO) #250;
@@ -259,6 +309,11 @@ module tb_cm3_jtag #(parameter integer ENABLE_DIAGNOSTICS=0, FAST_IO=0);
   $display("JTAG_DIAG_DONE scans=%0d",diag_n);
   end else if(d!==0)$fatal(1,"compact build exposed diagnostic history %h",d);
   if($test$plusargs("writes_only"))begin $display("PASS JTAG scalar, batch and packet writes");$finish;end
+  if($test$plusargs("rtt_window"))begin
+   measure_rtt_window();
+   $display("SELECTIO_SERVICES_PASS swd=%0d physical=%0dMHz",select_swd,$test$plusargs("half_rate")?50:100);
+   $finish;
+  end
   // No AXI operations per sample: configure once, then PL fills a bank.
   if(service_words!=1 && service_words!=8)$fatal(1,"unsupported sample width");
   hss_full=496/(4*service_words);
@@ -284,6 +339,8 @@ module tb_cm3_jtag #(parameter integer ENABLE_DIAGNOSTICS=0, FAST_IO=0);
    $display("HSS_METER words=%d groups_s=%f edges_group=%f skips=%d",service_words,
      (hss_last_count-hss_first_count)*1.0e9/(last_sample-first_sample),
      (last_edges-first_edges)*1.0/(hss_last_count-hss_first_count),dut.u_probe_sampler.skipped);
+   $display("HSS_WINDOW first=%0d last=%0d warm_skips=%0d window_skips=%0d",
+            hss_first_count,hss_last_count,first_skips,last_skips-first_skips);
   end
   if(!$test$plusargs("meter") && samples!=hss_full)$fatal(1,"JTAG cannot sustain requested HSS period");
   // No fault injection on the CM3 target: it has no hook to force an AP error.
@@ -304,7 +361,7 @@ module tb_cm3_jtag #(parameter integer ENABLE_DIAGNOSTICS=0, FAST_IO=0);
   put(0,0);put(12,1);wait(target.u_sys.mem['h2408/4]==2050);wait(!dut.rtt_active);
   $display("JTAG_PERF clk_ns=%f hss_samples=%0d hss_cycles=%0d rtt_bytes=%0d rtt_cycles=%0d",clk_ns,hss_total,(hss_t1-hss_t0)/clk_ns,2048,(rtt_t1-rtt_t0)/clk_ns);
   if(FAST_IO) $display("SELECTIO_SERVICES_PASS swd=%0d physical=%0dMHz",select_swd,$test$plusargs("half_rate")?50:100);
-  $display("PASS JTAG full pipeline: physical pad mux, AXI setup, autonomous HSS, posted timestamps/data, packet sticky-error fence/drop, immutable banks, RTT unaligned 1KiB split, DDR-before-RdOff");$finish;
+  $display("PASS CM3 service pipeline: pad mux, AXI setup, posted samples, immutable banks, RTT unaligned 1KiB split and DDR-before-RdOff");$finish;
  end
  initial begin #(clk_ns*4000000);$fatal(1,"JTAG pipeline watchdog");end
 endmodule

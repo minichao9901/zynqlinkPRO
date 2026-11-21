@@ -153,7 +153,8 @@ def capture(argv):
     started = time.perf_counter()
     import argparse
     parser = argparse.ArgumentParser(prog='trace.py capture', description='Zynq FPGA ETM capture + native decode')
-    parser.add_argument('--elf', required=True, help='目标 ELF（必须与 Flash 匹配）')
+    parser.add_argument('--elf', required=True, help='与目标实际运行程序匹配的 ELF')
+    parser.add_argument('--ram-image', action='store_true', help='按 F103ZE SRAM ELF 校验已运行的目标程序')
     parser.add_argument('--out', required=True, help='新记录目录（必须不存在）')
     parser.add_argument('--seconds', type=float, default=0.05, help='采集时长0..2 s；DDR固件默认采后下载，旧固件最多1秒')
     parser.add_argument('--transport',choices=('auto','ddr','legacy'),default='auto')
@@ -177,6 +178,15 @@ def capture(argv):
     parser.add_argument('--no-decode', action='store_true')
     parser.add_argument('--json-out')
     args = parser.parse_args(argv)
+    if args.ram_image:
+        if args.entry or args.reset_to_entry or args.flight:
+            return fail('capture', 'SRAM 实验使用普通采集窗口，入口由 SRAM 夹具控制', 2, started)
+        sys.path.insert(0, str(REPO / 'tools'))
+        from f103_ram_image import plan
+        try:
+            plan(args.elf)
+        except (ValueError, OSError) as error:
+            return fail('capture', str(error), 2, started)
     if args.running_window and (args.entry or args.reset_to_entry or args.transport=='legacy'):
         return fail('capture','运行态窗口要求 DDR 采集且不设置入口断点',2,started)
     if args.flight:
@@ -232,6 +242,7 @@ def capture(argv):
                '--speed-khz', str(args.swd_khz),
                '--gpio-speed', str(args.gpio_speed),'--transport',args.transport,'--wasm-target-control']
     if args.running_window:command.append('--running-window')
+    if args.ram_image:command.append('--ram-image')
     if args.entry is not None:
         command += ['--entry', args.entry, '--entry-timeout', str(args.entry_timeout)]
         if args.reset_to_entry:

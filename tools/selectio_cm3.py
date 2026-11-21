@@ -20,14 +20,18 @@ def main():
     parser.add_argument("--jtag-idle",type=int,default=33)
     parser.add_argument("--service-words",type=int,choices=(1,8),default=1)
     parser.add_argument("--meter",action="store_true")
+    parser.add_argument("--rtt-window", action="store_true", help="time four verified RTT packets through the final target RdOff commit")
     args = parser.parse_args()
+    if args.rtt_window and not args.services:
+        parser.error("--rtt-window requires --services")
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=True)
     exe = VIVADO / "bin/unwrapped/win64.o"
 
     def run(name, arguments, log):
         result = subprocess.run([exe / (name + ".exe"), *map(str, arguments)], cwd=out,
-                                env=environment(), capture_output=True, text=True, errors="replace", timeout=300)
+                                env=environment(), capture_output=True, text=True, errors="replace",
+                                timeout=1200 if name=="xsim" else 300)
         output = result.stdout + result.stderr
         (out / log).write_text(output, encoding="utf-8")
         if result.returncode:
@@ -58,6 +62,7 @@ def main():
     elif args.swd_only: switches.extend(["-testplusarg","swd_only"])
     switches.extend(["-testplusarg",f"service_words={args.service_words}"])
     if args.meter:switches.extend(["-testplusarg","meter"])
+    if args.rtt_window:switches.extend(["-testplusarg","rtt_window"])
     if args.half_rate: switches.extend(["-testplusarg","half_rate"])
     if args.wiretrace: switches.extend(["-testplusarg","wiretrace"])
     output = run("xsim", ["fusion", "-runall", "-testplusarg", f"jslot={args.jtag_slot}",

@@ -17,6 +17,9 @@ def main():
     ap.add_argument("--serial",default="12345678")
     ap.add_argument("--swd-slot",type=int,default=24)
     ap.add_argument("--jtag-slot",type=int,default=28)
+    ap.add_argument("--clock",type=int,choices=(50000000,100000000),default=100000000)
+    ap.add_argument("--swd-idle",type=int,default=2)
+    ap.add_argument("--jtag-idle",type=int,default=33)
     ap.add_argument("--rounds",type=int,default=64)
     ap.add_argument("--out",required=True,type=Path)
     ap.add_argument("--execute",action="store_true")
@@ -34,11 +37,11 @@ def main():
             started=time.perf_counter()
             try:
                 for k in range(a.rounds):
-                    for name,port,tap,slot,idle in (("jtag",2,16,a.jtag_slot,33),("swd",1,8,a.swd_slot,2)):
+                    for name,port,tap,slot,idle in (("jtag",2,16,a.jtag_slot,a.jtag_idle),("swd",1,8,a.swd_slot,a.swd_idle)):
                         rc,_=native.control(2,12,bytes([3-port]))
                         if rc:raise RuntimeError(f"previous stream selection failed {rc}")
                         setup(tx,rx,1000,name)
-                        with native.memory(port,tap,slot,idle):
+                        with native.memory(port,tap,slot,idle,a.clock):
                             offset=4*(k%256)
                             if native.bulk(BASE+offset,2048)!=image[offset:offset+2048]:
                                 raise RuntimeError(f"{name} memory data differs after transport switch")

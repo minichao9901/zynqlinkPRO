@@ -487,7 +487,7 @@ def main():
                         requests.append((address,n,chunk))
                         offset+=n
                     for block in native.bulk_many(requests,args.queue_depth): result.extend(block)
-                info["memory_clock_hz"]=info["reference_hz"]//(4 if args.clock==50000000 else 2)
+                    clock=native.memory_clock(PORTS[args.transport],info["reference_hz"],args.clock)
                 elapsed=time.perf_counter()-started
             finally:
                 cmd(tx, rx, [3])
@@ -495,7 +495,7 @@ def main():
             with args.out.open("xb") as file:
                 file.write(result)
         print(json.dumps(dict(transport=args.transport, direction=args.action, address=hex(args.address),
-                              bytes=size, wire_hz=info["link_hz"], usb_seconds=elapsed,
+                              bytes=size, wire_hz=clock["wire_hz"], clock=clock, usb_seconds=elapsed,
                               usb_MBps=size/elapsed/1e6), indent=2))
         return 0
     except (RuntimeError, OSError, ValueError) as error:

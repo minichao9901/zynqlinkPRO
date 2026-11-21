@@ -14,10 +14,12 @@ module probe_stream_engine (
     input wire core_available,core_busy,core_result_valid,core_next_ready,
     input wire [2:0] core_ack,input wire core_parity_err,input wire [31:0] core_rdata,
     input wire transport_jtag,output wire fence_req,input wire fence_done,fence_error,
+    output wire validating_jtag_samples,
     input wire [31:0] sample_validation_count
 );
     reg [1:0] mode;
     reg hss_session;
+    assign validating_jtag_samples=mode==1 && transport_jtag;
     reg packet_validated,hss_transport_fault,watermark_safe;
     reg [31:0] validated_count;
     reg [31:0] head,tail,packet_seq,produced;

@@ -12,21 +12,26 @@ def main():
     ap=argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--out",type=Path,required=True)
     ap.add_argument("--jobs",type=int,choices=range(1,5),default=2)
+    ap.add_argument("--mhz", nargs="+", type=int, default=[24,36,48,50,52,56,60,64,72,80,88,96,100,104,112])
+    ap.add_argument("--duty", nargs="+", type=int, default=[50], help="TRACECLK high time as a percentage")
+    ap.add_argument("--clock-delay-ps", type=int, default=1600, help="clock path delay, relative to data lane delays of 200..1400 ps")
     args=ap.parse_args()
+    if min(args.mhz)<=0 or any(not 0<d<100 for d in args.duty) or args.clock_delay_ps<0:
+        ap.error("frequency and duty must be positive, duty below 100, and clock delay nonnegative")
     out=args.out.resolve()
     out.mkdir(parents=True,exist_ok=False)
     model=out/"rate.vvp"
-    subprocess.run(["iverilog","-g2012","-s","tb_etm_rate","-o",model,
+    subprocess.run(["iverilog","-g2012","-s","tb_etm_rate",f"-Ptb_etm_rate.CLOCK_DELAY_PS={args.clock_delay_ps}","-o",model,
                     ROOT/"fpga/sim/tb_etm_rate.sv",ROOT/"fpga/sim/sim_primitives.v",
                     *sorted((ROOT/"fpga/rtl").glob("orbtrace*.v"))],check=True)
-    points=[(f,p) for f in (24,36,48,50,52,56,60,64,72,80,88,96,100,104,112)
+    points=[(f,p,d) for f in args.mhz for d in args.duty
             for p in (90,690,1290,1890,2490,3090,3690,4290)]
     def run(point):
-        f,p=point
-        proc=subprocess.run(["vvp",model,f"+mhz={f}",f"+phase_ps={p}"],capture_output=True,text=True,check=True,timeout=90)
+        f,p,d=point
+        proc=subprocess.run(["vvp",model,f"+mhz={f}",f"+phase_ps={p}",f"+duty={d}"],capture_output=True,text=True,check=True,timeout=90)
         _,mf,mp,count0,bad0,count1,bad1=next(l for l in proc.stdout.splitlines() if l.startswith("ETM_RATE ")).split()
-        assert (int(mf),int(mp))==point
-        return dict(mhz=f,phase_ps=p,legacy_frames=int(count0),legacy_errors=int(bad0),
+        assert (int(mf),int(mp))==(f,p)
+        return dict(mhz=f,phase_ps=p,duty=d,clock_delay_ps=args.clock_delay_ps,legacy_frames=int(count0),legacy_errors=int(bad0),
                     ddr_frames=int(count1),ddr_errors=int(bad1))
     with ThreadPoolExecutor(max_workers=args.jobs) as pool:
         rows=list(pool.map(run,points))

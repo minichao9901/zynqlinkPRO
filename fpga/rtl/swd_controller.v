@@ -471,7 +471,8 @@ module swd_controller #(
     wire stream_active, sampler_active, sampler_start;
     wire [7:0] sampler_req;
     wire [31:0] sampler_wdata;
-    wire sampler_next_valid;
+    wire sampler_next_valid,validating_jtag_samples;
+    wire [31:0] sampler_next_wdata;
     wire [7:0] sampler_next_req;
     wire rtt_active,rtt_start,rtt_next_valid;
     wire [7:0] rtt_req,rtt_next_req;
@@ -490,7 +491,7 @@ module swd_controller #(
     assign stream_wdata = rtt_active ? rtt_wdata : sampler_wdata;
     assign stream_next_valid = rtt_active ? rtt_next_valid : sampler_next_valid;
     assign stream_next_req = rtt_active ? rtt_next_req : sampler_next_req;
-    assign stream_next_wdata = 0;
+    assign stream_next_wdata = rtt_active ? 0 : sampler_next_wdata;
     wire stream_wr = s_axi_wvalid && s_axi_wready && !write_addr[7] && write_addr[6:5]==2'b11 && &s_axi_wstrb;
     wire stream_rd = s_axi_arvalid && s_axi_arready && !s_axi_araddr[7] && s_axi_araddr[6:5]==2'b11;
     probe_sample_engine #(.MIN_PERIOD(SELECTIO ? 8 : 24)) u_probe_sampler (
@@ -499,10 +500,10 @@ module swd_controller #(
         .wdata(s_axi_wdata), .rdata(stream_rdata),
         .available(!core_busy && !rtt_active && !batch_active && !packet_active && !start_pulse),
         .stream_pop(sample_pop),.stream_empty(sample_empty),.stream_data(sample_data),.timer_tick(sample_tick),
-        .validation_count(sample_validation_count),
+        .packet_arm_jtag(hs_live_jtag && !jtag_config[2] && validating_jtag_samples),.validation_count(sample_validation_count),
         .active(sampler_active), .core_start(sampler_start), .core_req(sampler_req),
         .core_wdata(sampler_wdata), .core_next_valid(sampler_next_valid),
-        .core_next_req(sampler_next_req), .core_next_wdata(), .core_busy(core_busy),.core_next_ready(core_next_ready),
+        .core_next_req(sampler_next_req), .core_next_wdata(sampler_next_wdata), .core_busy(core_busy),.core_next_ready(core_next_ready),
         .core_result_valid(core_result_valid), .core_ack(core_ack),
         .core_parity_err(core_parity_err), .core_rdata(core_rdata)
     );
@@ -517,7 +518,7 @@ module swd_controller #(
         .core_busy(core_busy),.core_result_valid(core_result_valid),.core_next_ready(core_next_ready),
         .core_ack(core_ack),.core_parity_err(core_parity_err),.core_rdata(core_rdata),
         .transport_jtag(jtag_enabled),.fence_req(jtag_fence_req),.fence_done(jtag_fence_done),.fence_error(jtag_fence_error),
-        .sample_validation_count(sample_validation_count)
+        .validating_jtag_samples(validating_jtag_samples),.sample_validation_count(sample_validation_count)
     );
     wire        start_req;
     assign start_req = (s_axi_wvalid && s_axi_wready && 

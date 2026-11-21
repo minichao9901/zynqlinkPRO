@@ -1,4 +1,4 @@
-"""Exercise standard OpenOCD over the live 100 MHz CMSIS-DAP link on F103ZE."""
+"""Exercise standard OpenOCD over the selected live CMSIS-DAP link on F103ZE."""
 import argparse
 import json
 from pathlib import Path
@@ -14,12 +14,14 @@ def main():
     ap.add_argument("--serial",default="12345678")
     ap.add_argument("--transport",choices=("swd","jtag"),required=True)
     ap.add_argument("--slot",type=int,required=True)
+    ap.add_argument("--clock",type=int,choices=(50000000,100000000),default=100000000)
+    ap.add_argument("--idle",type=int)
     ap.add_argument("--out",required=True,type=Path)
     ap.add_argument("--execute",action="store_true")
     a=ap.parse_args()
     if not a.execute:return print("Run OpenOCD inside the halted F103ZE guard; step two SRAM instructions.")
     a.out.mkdir(parents=True,exist_ok=False)
-    report={"transport":a.transport,"passed":False}
+    report={"transport":a.transport,"requested_hz":a.clock,"passed":False}
     with low_link(a.serial) as m:
         if not m.word(DHCSR)&(1<<17):raise RuntimeError("requires halted target")
         scratch=m.word(0xe000edf8)
@@ -36,6 +38,7 @@ def main():
             m.write(BASE,bytes.fromhex("2a200130fee700bf"))
             core_write(m,16,0x01000000);core_write(m,20,1);core_write(m,15,BASE+1)
         tap,idle=(8,2) if a.transport=="swd" else (16,33)
+        if a.idle is not None:idle=a.idle
         subprocess.run([sys.executable,"-X","utf8",str(ROOT/"toolbox.py"),"selectio","--serial",a.serial,"profile",
                         "--transport",a.transport,"--tap",str(tap),"--slot",str(a.slot),"--idle",str(idle)],check=True)
         subprocess.run([sys.executable,"-X","utf8",str(ROOT/"toolbox.py"),"selectio","--serial",a.serial,
@@ -43,7 +46,7 @@ def main():
         commands=[
             'gdb port disabled','tcl port disabled','telnet port disabled','reset_config none',
             'stm32f1x.cpu configure -event examine-end {}','adapter speed 1000','init',
-            'poll','halt','wait_halt 2000','poll','adapter speed 100000','set id [lindex [read_memory 0xe000ed00 32 1] 0]',
+            'poll','halt','wait_halt 2000','poll',f'adapter speed {a.clock//1000}','set id [lindex [read_memory 0xe000ed00 32 1] 0]',
             'if {$id != 0x411fc231} {error "Cortex identity differs"}',
             'echo BEFORE_STEP','stm32f1x.cpu curstate','mdw 0xe000edf0','reg pc force',
             'step','wait_halt 2000','poll','echo AFTER_FIRST','reg pc force',

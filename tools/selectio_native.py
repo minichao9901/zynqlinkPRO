@@ -78,6 +78,7 @@ class NativeStream:
     def bulk_many(self,requests,depth=4,*,transport_only=False):
         """Submit ordered requests. Retire all submitted replies before raising a device error."""
         if not 1<=depth<=4: raise ValueError("native queue depth must be 1..4")
+        requests = tuple(requests)
         for address,size,data in requests:
             if (not 0x20000000<=address<address+size<=0x20010000 or address%4 or
                 size<=0 or size%4 or size>self.max_bulk or (data is not None and len(data)!=size)):
@@ -121,6 +122,27 @@ class NativeStream:
         hz,rb,wb,rq,wq,rt,wt=struct.unpack_from("<7Q",data)
         return dict(timer_hz=hz,read_bytes=rb,write_bytes=wb,queue_s=[rq/hz,wq/hz],
                     probe_s=[rt/hz,wt/hz],jtag_retry_profile=list(struct.unpack_from("<2Q",data,56)) if len(data)==72 else None)
+
+    def memory_clock(self, port, reference_hz, requested_hz):
+        # Earlier firmware programs a fixed profile and lacks queue readback.
+        if self.advertised_frame >= 16384:
+            try:
+                raw = self.exchange(1, 5)
+            except NativeStatusError as error:
+                if error.status not in (1, 3):
+                    raise
+            else:
+                if len(raw) != 16:
+                    raise RuntimeError("invalid memory clock record")
+                ref, active_port, timing, tap = struct.unpack("<4I", raw)
+                divider = {0: 4, 1: 2, 2: 1}.get(timing & 3) if port == 1 else timing & 7
+                if active_port != port or divider not in (1, 2, 4) or not ref:
+                    raise RuntimeError("invalid queue clock readback")
+                return dict(wire_hz=ref//divider, reference_hz=ref, divider=divider,
+                            timing=hex(timing), tap=tap, source="PS clock tree and PL queue registers")
+        divider = 4 if requested_hz == 50000000 else 2
+        return dict(wire_hz=reference_hz//divider, reference_hz=reference_hz, divider=divider,
+                    source="PS clock tree and requested profile")
 
     def control(self,channel,action,data=b""):
         command={2:0x31,3:0x32}[channel]

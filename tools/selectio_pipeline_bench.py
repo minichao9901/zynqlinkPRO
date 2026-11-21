@@ -57,7 +57,8 @@ def main():
     n=args.bytes;address=PAGE+32
     if n<=0 or n%4 or n>16320 or args.seconds<=0 or args.rounds<1:ap.error("invalid window or payload")
     args.out.mkdir(parents=True,exist_ok=False)
-    report=dict(transport=args.transport,requested_hz=args.clock,bytes=n,address=hex(address),depth=args.depth,windows=[])
+    report=dict(transport=args.transport,requested_hz=args.clock,tap=args.tap,slot=args.slot,idle=args.idle,
+                bytes=n,address=hex(address),depth=args.depth,windows=[])
     def save(): (args.out/"result.json").write_text(json.dumps(report,indent=2)+"\n")
     with connection(args.serial) as (tx,rx),native_connection(args.serial,tx.device) as native:
         report["info"]=native.info()
@@ -82,14 +83,21 @@ def main():
                         expected=hashlib.shake_256(struct.pack("<II",index,seq)).digest(n)
                         dirty=True;native.bulk(address,n,expected)
                         if native.bulk(address,n)!=expected:raise RuntimeError("prefill failed")
+                        before=native.memory_stats()
                         count,elapsed,active_time,seq,expected=measure_window(native,direction,address,n,args.depth,
                             args.seconds,index,seq,expected)
                         probe=native.memory_stats()
+                        clock=native.memory_clock(PORTS[args.transport],report["info"]["reference_hz"],args.clock)
+                    delta={k:probe[k]-before[k] for k in ("read_bytes","write_bytes")}
+                    for key in ("queue_s","probe_s"):
+                        delta[key]=[a-b for a,b in zip(probe[key],before[key])]
+                    if delta["read_bytes"]+delta["write_bytes"]!=count*n:
+                        raise RuntimeError("probe window byte counters differ from verified host payload")
                     if mem.read(address,n)!=expected or [mem.word(address-4),mem.word(address+n)]!=guards:
                         raise RuntimeError("final image or SRAM guard differs")
                     report["windows"].append(dict(round=index+1,direction=direction,requests=count,
                           payload_bytes=count*n,wall_seconds=elapsed,USB_seconds=active_time,
-                          wall_MBps=count*n/elapsed/1e6,USB_MBps=count*n/active_time/1e6,probe=probe))
+                          wall_MBps=count*n/elapsed/1e6,USB_MBps=count*n/active_time/1e6,probe=probe,probe_delta=delta,clock=clock))
                     save();print(report["windows"][-1],flush=True)
             report["passed"]=True
         except Exception as exc:
