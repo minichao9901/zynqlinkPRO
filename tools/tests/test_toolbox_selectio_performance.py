@@ -3,6 +3,7 @@ import io
 import json
 from pathlib import Path
 import tempfile
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
@@ -28,6 +29,30 @@ class SelectioPerformanceTests(unittest.TestCase):
         self.assertEqual(plan["rounds"], 3)
         self.assertEqual(plan["etm36_rounds"], 3)
         self.assertFalse(plan["swd50_historical"])
+
+    def test_calibration_trims_the_pass_interval_without_losing_failures(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            args = SimpleNamespace(out=Path(temporary) / "calibration", serial="mock")
+            profile = performance.CAL_POINTS[0]
+
+            def run(command, log):
+                output = Path(command[command.index("--out") + 1])
+                tap = int(command[command.index("--tap") + 1])
+                slot = int(command[command.index("--slot") + 1])
+                passed = slot == profile.slot and abs(tap-profile.tap) <= 2
+                report = dict(passed=passed, restored=True, error=None if passed else "mock ACK",
+                              windows=[{"clock": {"wire_hz": 49_999_999}}] if passed else [])
+                output.mkdir()
+                (output / "result.json").write_text(json.dumps(report), encoding="utf-8")
+                return int(not passed)
+
+            with patch.object(performance, "run", side_effect=run):
+                self.assertEqual(performance.calibrate(profile, args), 0)
+            report = json.loads((args.out / "summary.json").read_text(encoding="utf-8"))
+            self.assertEqual(report["recommended"], {"tap": 8, "slot": 24, "idle": 0})
+            self.assertEqual(len(report["probes"]), 9)
+            self.assertEqual(sum(row["passed"] for row in report["probes"]), 5)
+            self.assertTrue(all(row["restored"] for row in report["probes"]))
 
     def test_unconfirmed_recovery_stops_before_the_next_case(self):
         with tempfile.TemporaryDirectory() as temporary:

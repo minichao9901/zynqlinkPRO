@@ -1,6 +1,6 @@
 """Confirm selected J7/F103ZE performance cases after a checked JTAG/RAM load."""
 import argparse
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 import json
 from pathlib import Path
 import subprocess
@@ -24,6 +24,7 @@ class Point:
     rtt: bool = False
     scope: bool = False
     edge_idle: int | None = None
+    calibration_offsets: tuple[int, ...] = ()
 
 
 POINTS = (
@@ -31,6 +32,20 @@ POINTS = (
     Point("DBG-04", "swd", 128, 100_000_000, 8, 25, 1, ("read", "write", "mixed"), True, True, 0),
     Point("DBG-07", "jtag", 96, 100_000_000, 16, 28, 33, scope=True),
     Point("DBG-08", "jtag", 128, 100_000_000, 16, 28, 29, ("read", "write", "mixed"), True, True, 25),
+)
+
+
+COARSE_AND_NEAR = (0, -4, 4, -8, 8, -1, 1, -2, 2)
+SECOND_HCLK = (0, -2, 2)
+CAL_POINTS = (
+    Point("CAL-SWD50-HCLK96", "swd", 96, 50_000_000, 8, 24, 0, calibration_offsets=COARSE_AND_NEAR),
+    Point("CAL-SWD73-HCLK128", "swd", 128, 73_000_000, 8, 22, 0, calibration_offsets=COARSE_AND_NEAR),
+    Point("CAL-SWD100-HCLK128", "swd", 128, 100_000_000, 8, 25, 2, calibration_offsets=COARSE_AND_NEAR),
+    Point("CAL-SWD100-HCLK96", "swd", 96, 100_000_000, 8, 25, 2, calibration_offsets=SECOND_HCLK),
+    Point("CAL-JTAG50-HCLK96", "jtag", 96, 50_000_000, 16, 28, 17, calibration_offsets=COARSE_AND_NEAR),
+    Point("CAL-JTAG73-HCLK128", "jtag", 128, 73_000_000, 16, 28, 25, calibration_offsets=COARSE_AND_NEAR),
+    Point("CAL-JTAG100-HCLK128", "jtag", 128, 100_000_000, 16, 28, 33, calibration_offsets=COARSE_AND_NEAR),
+    Point("CAL-JTAG100-HCLK96", "jtag", 96, 100_000_000, 16, 28, 33, calibration_offsets=SECOND_HCLK),
 )
 
 
@@ -54,6 +69,44 @@ def read_json(path):
 
 def save(path, value):
     path.write_text(json.dumps(value, indent=2) + "\n", encoding="utf-8")
+
+
+def calibrate(point, args):
+    rows = []
+    far_and_near = point.calibration_offsets
+    out = args.out
+    out.mkdir()
+    results = dict(point=asdict(point), probes=rows)
+    for slot in (point.slot, point.slot-1, point.slot+1):
+        nearby = (0, -2, 2) if slot == point.slot and far_and_near == SECOND_HCLK else (0, -1, 1, -2, 2)
+        offsets = far_and_near if slot == point.slot else COARSE_AND_NEAR
+        for offset in offsets:
+            tap = point.tap + offset
+            if not 0 <= tap <= 31:
+                continue
+            candidate = replace(point, tap=tap, slot=slot)
+            out_name = out / f"slot{slot}-tap{tap}"
+            rc = run(memory_command(candidate, args, out_name, point.idle, 0.25, 1, ("mixed",)),
+                     out_name.with_suffix(".log"))
+            evidence = out_name / "result.json"
+            data = read_json(evidence) if evidence.is_file() else {}
+            windows = data.get("windows", [])
+            row = dict(tap=tap, slot=slot, passed=rc == 0 and data.get("passed") is True,
+                       restored=data.get("restored") is True, error=data.get("error"),
+                       clock=windows[0]["clock"] if windows else None)
+            rows.append(row)
+            save(out/"summary.json", results)
+            if not row["restored"]:
+                return 1
+        passed = {row["tap"] for row in rows if row["slot"] == slot and row["passed"]}
+        if all(point.tap + offset in passed for offset in nearby):
+            results["recommended"] = dict(tap=point.tap, slot=slot, idle=point.idle)
+            results["passed"] = True
+            save(out/"summary.json", results)
+            return 0
+    results["passed"] = False
+    save(out/"summary.json", results)
+    return 1
 
 
 def inside_clock_guard(point, args):
@@ -113,25 +166,28 @@ def main():
     parser.add_argument("--seconds", type=float, default=60)
     parser.add_argument("--rounds", type=int, default=3)
     parser.add_argument("--execute", action="store_true")
-    parser.add_argument("--only", action="append", choices=["DBG-01", *(p.name for p in POINTS), "ETM-02"],
+    case_names = ["CAL-01", "DBG-01", *(p.name for p in POINTS), "ETM-02"]
+    parser.add_argument("--only", action="append", choices=case_names,
                         help="repeat to confirm selected cases")
-    parser.add_argument("--worker", choices=[p.name for p in POINTS], help=argparse.SUPPRESS)
+    parser.add_argument("--worker", choices=[p.name for p in (*CAL_POINTS, *POINTS)], help=argparse.SUPPRESS)
     args = parser.parse_args()
     args.pair = args.pair.resolve()
     args.out = args.out.resolve()
     if args.seconds <= 0 or args.rounds < 1:
         parser.error("positive duration and rounds required")
-    selected = set(args.only or [point.name for point in POINTS] + ["DBG-01", "ETM-02"])
+    selected = set(args.only or case_names)
     if not args.execute:
         print(json.dumps({"operation": "temporary JTAG/RAM load and guarded F103ZE SRAM",
                           "pair": str(args.pair), "out": str(args.out), "serial": args.serial,
                           "points": [asdict(point) for point in POINTS if point.name in selected],
+                          "calibration": [asdict(point) for point in CAL_POINTS] if "CAL-01" in selected else [],
                           "seconds": args.seconds, "rounds": args.rounds,
                           "swd50_historical": "DBG-01" in selected,
                           "etm36_rounds": 3 if "ETM-02" in selected else 0}, indent=2))
         return 0
     if args.worker:
-        return inside_clock_guard(next(p for p in POINTS if p.name == args.worker), args)
+        point = next(p for p in (*CAL_POINTS, *POINTS) if p.name == args.worker)
+        return calibrate(point, args) if point.calibration_offsets else inside_clock_guard(point, args)
 
     manifest = read_json(args.pair / "manifest.json")
     args.out.mkdir()
@@ -162,18 +218,23 @@ def main():
         if not restored:
             raise RuntimeError(f"{name}: target recovery or pair identity unconfirmed; inspect {dest}")
 
-    if "DBG-01" in selected:
-        guard("DBG-01-historical", 96, ["--only", "historical", "--historical-clock", 50_000_000,
-                                        "--swd-tap", 8, "--swd-slot", 24, "--swd-idle", 0,
-                                        "--rtt-cdc-seconds", args.seconds, "--rtt-cdc-rounds", args.rounds])
-    for point in POINTS:
-        if point.name not in selected:
-            continue
+    def run_point(point):
         args_for_worker = [*PYTHON, Path(__file__).resolve(), "--pair", args.pair, "--serial", args.serial,
                            "--out", args.out/point.name, "--worker", point.name, "--seconds", args.seconds,
                            "--rounds", args.rounds, "--execute"]
         jtag = ["--enable-jtag"] if point.transport == "jtag" else []
         guard(point.name, point.hclk_mhz, [*jtag, "--command", *args_for_worker])
+
+    if "CAL-01" in selected:
+        for point in CAL_POINTS:
+            run_point(point)
+    if "DBG-01" in selected:
+        guard("DBG-01-historical", 96, ["--only", "historical", "--historical-clock", 50_000_000,
+                                        "--swd-tap", 8, "--swd-slot", 24, "--swd-idle", 0,
+                                        "--rtt-cdc-seconds", args.seconds, "--rtt-cdc-rounds", args.rounds])
+    for point in POINTS:
+        if point.name in selected:
+            run_point(point)
     if "ETM-02" in selected:
         for repeat in range(1, 4):
             guard(f"ETM-02-36-{repeat}", 72, ["--only", "etm", "--trace-seconds", 1])
