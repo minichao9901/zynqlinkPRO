@@ -17,7 +17,10 @@ def live_clock_snapshot():
     output=run('targets -set -filter {name =~ "APU"}\n'
                'puts [format "LIVECLK %08X %08X %08X %08X %08X %08X %08X %08X" [mrd -address-space AP0 -force -value 0xf8000170] [mrd -address-space AP0 -force -value 0xf8000108] [mrd -address-space AP0 -force -value 0x40010008] [mrd -address-space AP0 -force -value 0x40010098] [mrd -address-space AP0 -force -value 0x40010080] [mrd -address-space AP0 -force -value 0xf8000100] [mrd -address-space AP0 -force -value 0xf8000104] [mrd -address-space AP0 -force -value 0xf800025c]]\n'
                'if {([mrd -address-space AP0 -force -value 0x4001004c] & 0xffff0080) == 0x44500080} {\n'
-               ' puts [format "SELECTIOCLK %08X %08X %08X %08X %08X" [mrd -address-space AP0 -force -value 0xf8000180] [mrd -address-space AP0 -force -value 0x80010024] [mrd -address-space AP0 -force -value 0x80010004] [mrd -address-space AP0 -force -value 0x8001000c] [mrd -address-space AP0 -force -value 0x80010014]]\n} \n')
+               ' puts [format "SELECTIOCLK %08X %08X %08X %08X %08X" [mrd -address-space AP0 -force -value 0xf8000180] [mrd -address-space AP0 -force -value 0x80010024] [mrd -address-space AP0 -force -value 0x80010004] [mrd -address-space AP0 -force -value 0x8001000c] [mrd -address-space AP0 -force -value 0x80010014]]\n'
+               ' if {![catch {mrd -address-space AP0 -force -value 0x80010038} ctl] && ($ctl >> 8) == 0x53494f} {\n'
+               '  puts [format "SELECTIOREF %08X" [mrd -address-space AP0 -force -value 0xf8000190]]\n'
+               ' }\n} \n')
     match=re.search(r'LIVECLK '+r'([0-9A-Fa-f]{8}) '*7+r'([0-9A-Fa-f]{8})',output)
     assert match,output
     control,io_pll,cfg,timing,route,arm_pll,ddr_pll,boot=[int(v,16) for v in match.groups()]
@@ -45,7 +48,14 @@ def live_clock_snapshot():
         if div:
             pll={0:io_pll,1:io_pll,2:arm_pll,3:ddr_pll}[(ctrl>>4)&3]
             ref=fclk_hz(ctrl,pll,boot)
-            result.update(selectio_ref_hz=ref,selectio_config=hex(live),selectio_divider=div,actual_link_Hz=ref/div)
+            fixed=re.search(r'SELECTIOREF ([0-9A-Fa-f]{8})',output)
+            serial=ref*4 if fixed else ref
+            if fixed:
+                fixed_control=int(fixed.group(1),16)
+                fixed_pll={0:io_pll,1:io_pll,2:arm_pll,3:ddr_pll}[(fixed_control>>4)&3]
+                result["etm_idelay_ref_hz"]=fclk_hz(fixed_control,fixed_pll,boot)
+            result.update(selectio_ref_hz=ref,selectio_serial_hz=serial,selectio_quad_hz=serial/2,
+                          selectio_config=hex(live),selectio_divider=div,actual_link_Hz=serial/div)
     return result
 
 
