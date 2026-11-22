@@ -1,0 +1,143 @@
+{
+  "transport": "swd",
+  "requested_kHz": 50000.0,
+  "requested_Hz": 50000000,
+  "words": 512,
+  "depth": 32,
+  "loops": 256,
+  "artifacts": {
+    "git_head": "758b16b3287a72d27b13dbdf3a8f210c36858fc9",
+    "git_dirty": true,
+    "bit": {
+      "path": "E:\\zynqlinkPRO-efficiency\\build\\vclk-rtfix-pairs\\swd\\probe.bit",
+      "sha256": "6c3a77cf7c101ef20527f8994b64631338fee9f9b286a6675fbf007867119907"
+    },
+    "elf": {
+      "path": "E:\\zynqlinkPRO-efficiency\\build\\vclk-rtfix-pairs\\swd\\application.elf",
+      "sha256": "d0f42ede2296cb581363190fbd7316592b8117d287e96508aab125766c85a62c"
+    }
+  },
+  "RCC_before": {
+    "name": "STM32F103",
+    "cpuid": "0x411fc231",
+    "device": "0x10036414",
+    "registers": {
+      "0x40021000": "0x3034e83",
+      "0x40021004": "0x79e50a"
+    }
+  },
+  "target_halted": true,
+  "backup_sha256": "10b22365963a7139bc0954b5ccb8bd3da122520cfce32c020cd73d818c2b1b0a",
+  "FCLK_Hz": 133333332,
+  "cfg": "0xa01",
+  "SWCLK_Hz": 66666666.0,
+  "half_period_fclk": 1,
+  "short_high": false,
+  "intended_high_ns": 7.500000075000001,
+  "live_clock": {
+    "FCLK_Hz": 133333332,
+    "cfg": "0xa01",
+    "waveform": {
+      "SWCLK_Hz": 66666666.0,
+      "half_period_fclk": 1,
+      "short_high": false,
+      "intended_high_ns": 7.500000075000001
+    },
+    "clockSource": 2,
+    "clockControl": 1051168,
+    "sourcePllControl": 163848,
+    "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+    "JTAG_sampling_mode": 0,
+    "RISC_V_SBA_enabled": false,
+    "actual_link_Hz": 49999999.0,
+    "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+    "swd_queue_status": "0x38",
+    "swd_queue_summary": "0x0",
+    "etm_idelay_ref_hz": 199999998,
+    "selectio_ref_hz": 49999999,
+    "selectio_serial_hz": 199999996,
+    "selectio_quad_hz": 99999998.0,
+    "selectio_config": "0x4840e31",
+    "selectio_divider": 4
+  },
+  "actual_link_Hz": 49999999.0,
+  "read": {
+    "MB_s": 3.7618830653911877,
+    "samples": [
+      {
+        "MB_s": 3.7618830653911877,
+        "seconds": 0.13936850000027334
+      },
+      {
+        "MB_s": 3.7609169874954396,
+        "seconds": 0.1394043000000238
+      },
+      {
+        "MB_s": 3.762828034912559,
+        "seconds": 0.13933349999933853
+      }
+    ],
+    "blocks": 256,
+    "bytes": 524288,
+    "errors": 0
+  },
+  "write": {
+    "MB_s": 3.8160148189557885,
+    "samples": [
+      {
+        "MB_s": 3.831808760343394,
+        "seconds": 0.13682520000111253
+      },
+      {
+        "MB_s": 3.815137338603288,
+        "seconds": 0.13742310000088764
+      },
+      {
+        "MB_s": 3.8160148189557885,
+        "seconds": 0.13739150000037625
+      }
+    ],
+    "blocks": 256,
+    "bytes": 524288,
+    "errors": 0
+  },
+  "live_clock_after": {
+    "FCLK_Hz": 133333332,
+    "cfg": "0xa01",
+    "waveform": {
+      "SWCLK_Hz": 66666666.0,
+      "half_period_fclk": 1,
+      "short_high": false,
+      "intended_high_ns": 7.500000075000001
+    },
+    "clockSource": 2,
+    "clockControl": 1051168,
+    "sourcePllControl": 163848,
+    "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+    "JTAG_sampling_mode": 0,
+    "RISC_V_SBA_enabled": false,
+    "actual_link_Hz": 49999999.0,
+    "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+    "swd_queue_status": "0x3c",
+    "swd_queue_summary": "0x103",
+    "etm_idelay_ref_hz": 199999998,
+    "selectio_ref_hz": 49999999,
+    "selectio_serial_hz": 199999996,
+    "selectio_quad_hz": 99999998.0,
+    "selectio_config": "0x4840e31",
+    "selectio_divider": 4
+  },
+  "restore_ok": true,
+  "passed": true,
+  "restore_match": true,
+  "restore_sha256": "10b22365963a7139bc0954b5ccb8bd3da122520cfce32c020cd73d818c2b1b0a",
+  "RCC_after": {
+    "name": "STM32F103",
+    "cpuid": "0x411fc231",
+    "device": "0x10036414",
+    "registers": {
+      "0x40021000": "0x3034e83",
+      "0x40021004": "0x79e50a"
+    }
+  }
+}

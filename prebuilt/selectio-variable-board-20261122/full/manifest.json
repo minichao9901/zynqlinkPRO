@@ -1,0 +1,124 @@
+{
+  "source_revision": "758b16b3287a72d27b13dbdf3a8f210c36858fc9",
+  "hashes": {
+    "probe.bit": "70ea6b84b7db416e2ddfa53e4e46b3384c4c5051716282abc3dd56b59c270129",
+    "application.elf": "17dd4252ff4d858ce80c733fe39c0901fc55308c376225326125582b84396aae",
+    "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+  },
+  "mode": "SWD, JTAG, AUX and ETM",
+  "status": "RAM-loaded board measurement in the scope described in the report",
+  "board_verified": true,
+  "pcap_runtime_switch": false,
+  "clock_init_registers": {
+    "0xF8000108": "0x30000",
+    "0xF8000170": "0x300400",
+    "0xF8000180": "0x400800",
+    "0xF8000190": "0x200400"
+  },
+  "selectio_clock_range_requested_hz": [
+    50000000,
+    100000000
+  ],
+  "timing": {
+    "FCLK_max_Hz": 133333333,
+    "SWCLK_max_Hz": 66666666,
+    "setup_slack_ns": 0.062,
+    "hold_slack_ns": 0.023,
+    "requested_FCLK_Hz": 133333333,
+    "RTL_DEBUG": 0,
+    "optional_observation_cells": 0,
+    "formal_product_acceptance": false
+  },
+  "utilization": {
+    "lut": 26240.0,
+    "registers": 28320.0,
+    "bram": 67.5,
+    "dsp": 1.0,
+    "mmcm": 1.0
+  },
+  "pl_options": [
+    "--selectio",
+    "--selectio-variable",
+    "--etm400"
+  ],
+  "ps_options": [
+    "--selectio",
+    "--selectio-variable",
+    "--selectio-slice",
+    "full",
+    "--j7-adapter",
+    "--compact-code",
+    "--opt",
+    "s",
+    "--experimental-zero-idle",
+    "--timing",
+    "verified_clock.json"
+  ],
+  "ps_build_manifest": "ps-build.json",
+  "validation": "../../../docs/validation/selectio-variable-board-20261122/README.md",
+  "pl_source_revision": "9b1a20057c7af71944f9c5bc8ba21caaf0c74350",
+  "ps_source_revision": "758b16b3287a72d27b13dbdf3a8f210c36858fc9",
+  "verified_ocm_executable_bytes": 79732,
+  "qualification_scope": [
+    {
+      "transport": "swd",
+      "nominal_MHz": 50,
+      "actual_Hz": 49999999.0,
+      "profile": {
+        "tap": 8,
+        "slot": 24,
+        "idle": 0
+      },
+      "rtt_window_s": [
+        60.00284979999924,
+        60.001573650000864
+      ],
+      "errors": 0
+    },
+    {
+      "transport": "swd",
+      "nominal_MHz": 72.727,
+      "actual_Hz": 72727272.0,
+      "profile": {
+        "tap": 8,
+        "slot": 22,
+        "idle": 0
+      },
+      "rtt_window_s": [
+        12.002360449998378,
+        12.001951250000275
+      ],
+      "errors": 0
+    },
+    {
+      "transport": "swd",
+      "nominal_MHz": 100,
+      "actual_Hz": 99999998.0,
+      "profile": {
+        "tap": 8,
+        "slot": 25,
+        "idle": 2
+      },
+      "rtt_window_s": [
+        12.002111549998517,
+        12.001925250000568
+      ],
+      "errors": 0
+    },
+    {
+      "transport": "jtag",
+      "nominal_MHz": 100,
+      "actual_Hz": 99999998.0,
+      "profile": {
+        "tap": 16,
+        "slot": 28,
+        "idle": 33
+      },
+      "rtt_window_s": [
+        8.001984349999475,
+        8.002108599999701
+      ],
+      "errors": 0
+    }
+  ]
+}

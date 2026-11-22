@@ -1,0 +1,43 @@
+{
+  "transport": "swd",
+  "requested_kHz": 100000.0,
+  "requested_Hz": 100000000,
+  "words": 512,
+  "depth": 32,
+  "loops": 256,
+  "artifacts": {
+    "git_head": "758b16b3287a72d27b13dbdf3a8f210c36858fc9",
+    "git_dirty": true,
+    "bit": {
+      "path": "E:\\zynqlinkPRO-efficiency\\build\\vclk-rtfix-pairs\\full\\probe.bit",
+      "sha256": "70ea6b84b7db416e2ddfa53e4e46b3384c4c5051716282abc3dd56b59c270129"
+    },
+    "elf": {
+      "path": "E:\\zynqlinkPRO-efficiency\\build\\vclk-rtfix-pairs\\full\\application.elf",
+      "sha256": "17dd4252ff4d858ce80c733fe39c0901fc55308c376225326125582b84396aae"
+    }
+  },
+  "RCC_before": {
+    "name": "STM32F103",
+    "cpuid": "0x411fc231",
+    "device": "0x10036414",
+    "registers": {
+      "0x40021000": "0x3034e83",
+      "0x40021004": "0x79e50a"
+    }
+  },
+  "target_halted": true,
+  "backup_sha256": "10b22365963a7139bc0954b5ccb8bd3da122520cfce32c020cd73d818c2b1b0a",
+  "error": "RuntimeError('IDCODE read failed: 05 00 03')",
+  "restore_match": true,
+  "restore_sha256": "10b22365963a7139bc0954b5ccb8bd3da122520cfce32c020cd73d818c2b1b0a",
+  "RCC_after": {
+    "name": "STM32F103",
+    "cpuid": "0x411fc231",
+    "device": "0x10036414",
+    "registers": {
+      "0x40021000": "0x3034e83",
+      "0x40021004": "0x79e50a"
+    }
+  }
+}
