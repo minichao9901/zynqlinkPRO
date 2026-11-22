@@ -188,3 +188,7 @@ CDC OUT 防护配对在 F103ZE 上完成八组短窗，六组覆盖 50/73/100 MH
 ## DBG-01 的 50 MHz 历史口径复测
 
 CDC OUT 防护配对，HCLK96 的 DWT 回读约 96.067 MHz，SWCLK 寄存器换算 49,999,999 Hz，tap8/slot24/idle0。标准 CMSIS-DAP 使用 2 KiB、深度 32、每轮 256 块，三轮中位读／写 **3.761 / 3.820 MB/s**，零校验错误。RTT→CDC 使用 8 KiB 环、2 KiB 搬运，三轮各 60 秒，每轮约 223.8 MB 有效窗口载荷，中位 **3.730 MB/s**，序号、发布量、尾差和目标恢复均通过。 [读写及 RTT 逐轮数据](rx-guard-dbg01-historical.json)
+
+## DBG-03 的 100 MHz／HCLK96 长窗
+
+实际 SWCLK 99,999,998 Hz，HCLK 的 DWT 回读 96.059 MHz，tap8/slot25/idle2。4,032 B 跨页、深度 4 的三轮 60 秒原生 SRAM 读，中位 **6.678 MB/s**。同条件的三轮 60 秒 RTT→CDC 中位 **6.502 MB/s**，2 KiB 搬运，序号和发布量对账通过。J-Scope 单变量／八变量三轮中位 **1,499,800／149,980 组/s**，16／160 tick，跳拍分别 [4, 4, 4]／[1, 1, 1]，每轮低于 0.1%。样值、尾帧和恢复均通过。 [逐轮数据](rx-guard-dbg03-hclk96.json)
