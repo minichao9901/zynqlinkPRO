@@ -32,7 +32,7 @@ class SpiCdcCaptureTests(unittest.TestCase):
         self.assertEqual(port.requests, [1, 65535, 65536])
         self.assertEqual(result["bytes"], len(payload))
         self.assertEqual(result["sha256"], hashlib.sha256(payload).hexdigest())
-        self.assertGreater(result["pc_receive_mbps"], 0)
+        self.assertGreater(result["pc_receive_MBps"], 0)
 
     def test_mismatch_reports_absolute_offset(self):
         payload = bytes(65540)

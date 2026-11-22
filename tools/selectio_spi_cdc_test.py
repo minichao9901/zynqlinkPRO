@@ -151,7 +151,7 @@ def capture(port, expected, timeout):
         raise RuntimeError("expected payload is empty")
     elapsed = end-first
     return dict(bytes=total, sha256=digest.hexdigest(), receive_seconds=elapsed,
-                pc_receive_mbps=total/elapsed/1e6 if elapsed else None,
+                pc_receive_MBps=total/elapsed/1e6 if elapsed else None,
                 command_window_seconds=end-start)
 
 
