@@ -1,0 +1,458 @@
+{
+  "hashes": {
+    "probe.bit": "f3c4ccfd78c9148649897a0902fb93eadb209494e0295956981c973bbac92c66",
+    "application.elf": "e1f21ea8d5aa6403f4f2ab78da0a3215cea11862cb852dd9e37e413248068b90",
+    "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+  },
+  "serial": "12345678",
+  "case": {
+    "name": "DBG-01-historical",
+    "exit": 0,
+    "restored": true,
+    "hclk_dwt_hz": 96066728.86013086,
+    "error": null
+  },
+  "hclk_dwt_hz": 96066728.86013086,
+  "rcc_cfgr": "0x69e50a",
+  "swd_profile": {
+    "tap": 8,
+    "slot": 24,
+    "idle": 0
+  },
+  "measurements": {
+    "cmsis_dap_read_MBps": 3.760617550118021,
+    "cmsis_dap_write_MBps": 3.8204890162646192,
+    "rtt_cdc_median_MBps": 3.729934836205844
+  },
+  "cmsis_dap": {
+    "transport": "swd",
+    "requested_kHz": 50000.0,
+    "requested_Hz": 50000000,
+    "words": 512,
+    "depth": 32,
+    "loops": 256,
+    "artifacts": {
+      "git_head": "f9e9dbecdc41be09a41ffb6d20ad41ece9bc2a5b",
+      "git_dirty": true,
+      "bit": {
+        "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-spi-cdc-rx-guard-20261123\\probe.bit",
+        "sha256": "f3c4ccfd78c9148649897a0902fb93eadb209494e0295956981c973bbac92c66"
+      },
+      "elf": {
+        "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-spi-cdc-rx-guard-20261123\\application.elf",
+        "sha256": "e1f21ea8d5aa6403f4f2ab78da0a3215cea11862cb852dd9e37e413248068b90"
+      }
+    },
+    "RCC_before": {
+      "name": "STM32F103",
+      "cpuid": "0x411fc231",
+      "device": "0x10036414",
+      "registers": {
+        "0x40021000": "0x3034e83",
+        "0x40021004": "0x69e50a"
+      }
+    },
+    "target_halted": true,
+    "backup_sha256": "10b22365963a7139bc0954b5ccb8bd3da122520cfce32c020cd73d818c2b1b0a",
+    "FCLK_Hz": 133333332,
+    "cfg": "0xa01",
+    "SWCLK_Hz": 66666666.0,
+    "half_period_fclk": 1,
+    "short_high": false,
+    "intended_high_ns": 7.500000075000001,
+    "live_clock": {
+      "FCLK_Hz": 133333332,
+      "cfg": "0xa01",
+      "waveform": {
+        "SWCLK_Hz": 66666666.0,
+        "half_period_fclk": 1,
+        "short_high": false,
+        "intended_high_ns": 7.500000075000001
+      },
+      "clockSource": 2,
+      "clockControl": 1051168,
+      "sourcePllControl": 163848,
+      "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+      "JTAG_sampling_mode": 0,
+      "RISC_V_SBA_enabled": false,
+      "actual_link_Hz": 49999999.0,
+      "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+      "swd_queue_status": "0x3c",
+      "swd_queue_summary": "0x100fb",
+      "etm_idelay_ref_hz": 199999998,
+      "selectio_ref_hz": 49999999,
+      "selectio_serial_hz": 199999996,
+      "selectio_quad_hz": 99999998.0,
+      "selectio_config": "0x4840e31",
+      "selectio_divider": 4
+    },
+    "actual_link_Hz": 49999999.0,
+    "read": {
+      "MB_s": 3.760617550118021,
+      "samples": [
+        {
+          "MB_s": 3.7603289484894935,
+          "seconds": 0.13942609999867273
+        },
+        {
+          "MB_s": 3.761704924348143,
+          "seconds": 0.1393750999995973
+        },
+        {
+          "MB_s": 3.760617550118021,
+          "seconds": 0.13941540000087116
+        }
+      ],
+      "blocks": 256,
+      "bytes": 524288,
+      "errors": 0
+    },
+    "write": {
+      "MB_s": 3.8204890162646192,
+      "samples": [
+        {
+          "MB_s": 3.8186997477778983,
+          "seconds": 0.1372948999996879
+        },
+        {
+          "MB_s": 3.8232917669598856,
+          "seconds": 0.13712999999916065
+        },
+        {
+          "MB_s": 3.8204890162646192,
+          "seconds": 0.13723060000120313
+        }
+      ],
+      "blocks": 256,
+      "bytes": 524288,
+      "errors": 0
+    },
+    "live_clock_after": {
+      "FCLK_Hz": 133333332,
+      "cfg": "0xa01",
+      "waveform": {
+        "SWCLK_Hz": 66666666.0,
+        "half_period_fclk": 1,
+        "short_high": false,
+        "intended_high_ns": 7.500000075000001
+      },
+      "clockSource": 2,
+      "clockControl": 1051168,
+      "sourcePllControl": 163848,
+      "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+      "JTAG_sampling_mode": 0,
+      "RISC_V_SBA_enabled": false,
+      "actual_link_Hz": 49999999.0,
+      "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+      "swd_queue_status": "0x3c",
+      "swd_queue_summary": "0x103",
+      "etm_idelay_ref_hz": 199999998,
+      "selectio_ref_hz": 49999999,
+      "selectio_serial_hz": 199999996,
+      "selectio_quad_hz": 99999998.0,
+      "selectio_config": "0x4840e31",
+      "selectio_divider": 4
+    },
+    "restore_ok": true,
+    "passed": true,
+    "restore_match": true,
+    "restore_sha256": "10b22365963a7139bc0954b5ccb8bd3da122520cfce32c020cd73d818c2b1b0a",
+    "RCC_after": {
+      "name": "STM32F103",
+      "cpuid": "0x411fc231",
+      "device": "0x10036414",
+      "registers": {
+        "0x40021000": "0x3034e83",
+        "0x40021004": "0x69e50a"
+      }
+    }
+  },
+  "rtt_cdc": {
+    "artifacts": {
+      "git_head": "f9e9dbecdc41be09a41ffb6d20ad41ece9bc2a5b",
+      "git_dirty": true,
+      "bit": {
+        "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-spi-cdc-rx-guard-20261123\\probe.bit",
+        "sha256": "f3c4ccfd78c9148649897a0902fb93eadb209494e0295956981c973bbac92c66"
+      },
+      "elf": {
+        "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-spi-cdc-rx-guard-20261123\\application.elf",
+        "sha256": "e1f21ea8d5aa6403f4f2ab78da0a3215cea11862cb852dd9e37e413248068b90"
+      }
+    },
+    "kind": "continuous RAM producer RTT->CDC",
+    "transport": "swd",
+    "rows": [
+      {
+        "speed_hz": 50000000,
+        "chunk": 2048,
+        "repeat": 0,
+        "FCLK_Hz": 133333332,
+        "cfg": "0xa01",
+        "waveform": {
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001
+        },
+        "clockSource": 2,
+        "clockControl": 1051168,
+        "sourcePllControl": 163848,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 49999999.0,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+        "swd_queue_status": "0xb",
+        "swd_queue_summary": "0x10009",
+        "swd_queue_timing": "0x1860",
+        "etm_idelay_ref_hz": 199999998,
+        "selectio_ref_hz": 49999999,
+        "selectio_serial_hz": 199999996,
+        "selectio_quad_hz": 99999998.0,
+        "selectio_config": "0x4840e30",
+        "selectio_divider": 4,
+        "window_s": 60.00207615000181,
+        "host_bytes": 223805440,
+        "host_MB_s": 3.7299616006702667,
+        "probe_bytes": 223854592,
+        "probe_MB_s": 3.73078077232488,
+        "session_bytes": 226588668,
+        "sequence_exact": true,
+        "all_published_received": true,
+        "dap_handoff_cpuid": null,
+        "errors": 0,
+        "s0": [
+          65537,
+          536871424,
+          536871448,
+          2719744,
+          87033136,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          822085632
+        ],
+        "s1": [
+          65537,
+          536871424,
+          536871448,
+          226574336,
+          2955456552,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          822085632
+        ]
+      },
+      {
+        "speed_hz": 50000000,
+        "chunk": 2048,
+        "repeat": 1,
+        "FCLK_Hz": 133333332,
+        "cfg": "0xa01",
+        "waveform": {
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001
+        },
+        "clockSource": 2,
+        "clockControl": 1051168,
+        "sourcePllControl": 163848,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 49999999.0,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+        "swd_queue_status": "0xb",
+        "swd_queue_summary": "0x10103",
+        "swd_queue_timing": "0x1860",
+        "etm_idelay_ref_hz": 199999998,
+        "selectio_ref_hz": 49999999,
+        "selectio_serial_hz": 199999996,
+        "selectio_quad_hz": 99999998.0,
+        "selectio_config": "0x4840e30",
+        "selectio_divider": 4,
+        "window_s": 60.002506699998776,
+        "host_bytes": 223805440,
+        "host_MB_s": 3.729934836205844,
+        "probe_bytes": 223862784,
+        "probe_MB_s": 3.7308905296119,
+        "session_bytes": 226793468,
+        "sequence_exact": true,
+        "all_published_received": true,
+        "dap_handoff_cpuid": null,
+        "errors": 0,
+        "s0": [
+          65537,
+          536871424,
+          536871448,
+          2914304,
+          93259151,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          822085632
+        ],
+        "s1": [
+          65537,
+          536871424,
+          536871448,
+          226777088,
+          2961944715,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          822085632
+        ]
+      },
+      {
+        "speed_hz": 50000000,
+        "chunk": 2048,
+        "repeat": 2,
+        "FCLK_Hz": 133333332,
+        "cfg": "0xa01",
+        "waveform": {
+          "SWCLK_Hz": 66666666.0,
+          "half_period_fclk": 1,
+          "short_high": false,
+          "intended_high_ns": 7.500000075000001
+        },
+        "clockSource": 2,
+        "clockControl": 1051168,
+        "sourcePllControl": 163848,
+        "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+        "JTAG_sampling_mode": 0,
+        "RISC_V_SBA_enabled": false,
+        "actual_link_Hz": 49999999.0,
+        "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+        "swd_queue_status": "0xb",
+        "swd_queue_summary": "0x10103",
+        "swd_queue_timing": "0x1860",
+        "etm_idelay_ref_hz": 199999998,
+        "selectio_ref_hz": 49999999,
+        "selectio_serial_hz": 199999996,
+        "selectio_quad_hz": 99999998.0,
+        "selectio_config": "0x4840e30",
+        "selectio_divider": 4,
+        "window_s": 60.00275959999635,
+        "host_bytes": 223805440,
+        "host_MB_s": 3.729919115253719,
+        "probe_bytes": 223856640,
+        "probe_MB_s": 3.7307724093412133,
+        "session_bytes": 226863100,
+        "sequence_exact": true,
+        "all_published_received": true,
+        "dap_handoff_cpuid": null,
+        "errors": 0,
+        "s0": [
+          65537,
+          536871424,
+          536871448,
+          2988032,
+          95618483,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          822085632
+        ],
+        "s1": [
+          65537,
+          536871424,
+          536871448,
+          226844672,
+          2964107436,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          822085632
+        ]
+      }
+    ],
+    "backup_sha256": "a16da8823f08eb51cd18651b6f0806a69903305fea007ce5f51998e92e358122",
+    "registers_before": {
+      "0": 754445,
+      "1": 536871272,
+      "2": 754447,
+      "3": 536871069,
+      "4": 536871251,
+      "5": 536871255,
+      "6": 646952329,
+      "7": 3040397510,
+      "8": 4294962943,
+      "9": 4259299324,
+      "10": 968574952,
+      "11": 2329090040,
+      "12": 10,
+      "13": 536871936,
+      "14": 536871245,
+      "15": 536871246,
+      "16": 16777216,
+      "17": 536871936,
+      "18": 37207788,
+      "20": 1
+    },
+    "RCC_before": {
+      "name": "STM32F103",
+      "cpuid": "0x411fc231",
+      "device": "0x10036414",
+      "registers": {
+        "0x40021000": "0x3034e83",
+        "0x40021004": "0x69e50a"
+      }
+    },
+    "fixture_base": "0x20000000",
+    "restore_match": true,
+    "registers_after": {
+      "0": 754445,
+      "1": 536871272,
+      "2": 754447,
+      "3": 536871069,
+      "4": 536871251,
+      "5": 536871255,
+      "6": 646952329,
+      "7": 3040397510,
+      "8": 4294962943,
+      "9": 4259299324,
+      "10": 968574952,
+      "11": 2329090040,
+      "12": 10,
+      "13": 536871936,
+      "14": 536871245,
+      "15": 536871246,
+      "16": 16777216,
+      "17": 536871936,
+      "18": 37207788,
+      "20": 1
+    },
+    "registers_match": true,
+    "RCC_after": {
+      "name": "STM32F103",
+      "cpuid": "0x411fc231",
+      "device": "0x10036414",
+      "registers": {
+        "0x40021000": "0x3034e83",
+        "0x40021004": "0x69e50a"
+      }
+    }
+  }
+}
