@@ -1,0 +1,67 @@
+Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+-------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2018.3 (win64) Build 2405991 Thu Dec  6 23:38:27 MST 2018
+| Date         : Mon Nov 23 01:10:40 2026
+| Host         : DESKTOP-0UKCPD3 running 64-bit major release  (build 9200)
+| Command      : report_timing -delay_type min -max_paths 60 -file E:/zynqlinkPRO-efficiency/build/spi-cdc-fusion-v1/hold_target.rpt
+| Design       : system_wrapper
+| Device       : 7z020-clg400
+| Speed File   : -2  PRODUCTION 1.11 2014-09-11
+-------------------------------------------------------------------------------------------------------------------------------------
+
+Timing Report
+
+Slack (VIOLATED) :        -1.073ns  (arrival time - required time)
+  Source:                 swclk_0
+                            (clock source 'pad_swclk'  {rise@0.000ns fall@7.500ns period=15.000ns})
+  Destination:            system_i/swd_controller_0/inst/g_selectio.phy/clock_rx/shift/DDLY
+                            (falling edge-triggered cell ISERDESE2 clocked by serial_raw  {rise@0.000ns fall@2.500ns period=5.000ns})
+  Path Group:             serial_raw
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (serial_raw fall@7.500ns - pad_swclk fall@7.500ns)
+  Data Path Delay:        2.037ns  (logic 2.037ns (100.000%)  route 0.000ns (0.000%))
+  Logic Levels:           2  (IBUF=1 IDELAYE2=1)
+  Clock Path Skew:        2.859ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.859ns = ( 10.359 - 7.500 )
+    Source Clock Delay      (SCD):    0.000ns = ( 7.500 - 7.500 )
+    Clock Pessimism Removal (CPR):    -0.000ns
+  Clock Uncertainty:      0.119ns  ((TSJ^2 + DJ^2)^1/2) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Discrete Jitter          (DJ):    0.045ns
+    Phase Error              (PE):    0.077ns
+  Clock Domain Crossing:  Inter clock paths are considered valid unless explicitly excluded by timing constraints such as set_clock_groups or set_false_path.
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock pad_swclk fall edge)
+                                                      7.500     7.500 f
+    L15                                               0.000     7.500 f  swclk_0 (INOUT)
+                         net (fo=1, unset)            0.000     7.500    system_i/swd_controller_0/inst/g_selectio.phy/clock_pad/IO
+    L15                  IBUF (Prop_ibuf_I_O)         1.382     8.882 f  system_i/swd_controller_0/inst/g_selectio.phy/clock_pad/IBUF/O
+                         net (fo=2, routed)           0.000     8.882    system_i/swd_controller_0/inst/g_selectio.phy/clock_rx/clock_input
+    IDELAY_X1Y105        IDELAYE2 (Prop_idelaye2_IDATAIN_DATAOUT)
+                                                      0.655     9.537 f  system_i/swd_controller_0/inst/g_selectio.phy/clock_rx/delay_line/DATAOUT
+                         net (fo=1, routed)           0.000     9.537    system_i/swd_controller_0/inst/g_selectio.phy/clock_rx/delayed
+    ILOGIC_X1Y105        ISERDESE2                                    f  system_i/swd_controller_0/inst/g_selectio.phy/clock_rx/shift/DDLY
+  -------------------------------------------------------------------    -------------------
+
+                         (clock serial_raw fall edge)
+                                                      7.500     7.500 f
+    PS7_X0Y0             PS7                          0.000     7.500 f  system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]
+                         net (fo=1, routed)           0.994     8.494    system_i/processing_system7_0/inst/FCLK_CLK_unbuffered[1]
+    BUFGCTRL_X0Y18       BUFG (Prop_bufg_I_O)         0.085     8.579 f  system_i/processing_system7_0/inst/buffer_fclk_clk_1.FCLK_CLK_1_BUFG/O
+                         net (fo=1, routed)           1.552    10.131    system_i/sio_clock/inst/ref_clk
+    MMCME2_ADV_X1Y0      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKOUT0)
+                                                     -3.232     6.899 f  system_i/sio_clock/inst/mmcm/CLKOUT0
+                         net (fo=1, routed)           1.597     8.496    system_i/sio_clock/inst/serial_raw
+    BUFGCTRL_X0Y1        BUFG (Prop_bufg_I_O)         0.085     8.581 f  system_i/sio_clock/inst/serial_buf/O
+                         net (fo=7, routed)           1.778    10.359    system_i/swd_controller_0/inst/g_selectio.phy/clock_rx/CLKB0
+    ILOGIC_X1Y105        ISERDESE2                                    r  system_i/swd_controller_0/inst/g_selectio.phy/clock_rx/shift/CLKB  (IS_INVERTED)
+                         clock pessimism              0.000    10.359
+                         clock uncertainty            0.119    10.478
+    ILOGIC_X1Y105        ISERDESE2 (Hold_iserdese2_CLKB_DDLY)
+                                                      0.132    10.610    system_i/swd_controller_0/inst/g_selectio.phy/clock_rx/shift
+  -------------------------------------------------------------------
+                         required time                        -10.610
+                         arrival time                           9.537
+  -------------------------------------------------------------------

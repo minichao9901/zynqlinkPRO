@@ -5,6 +5,7 @@ if {[info exists ::zynqlink_verify_out]} {set out [file normalize $::zynqlink_ve
 set routed_checkpoint [file join $out zynqlink_dma.runs impl_1 system_wrapper_routed.dcp]
 if {[info exists ::zynqlink_verify_checkpoint]} {set routed_checkpoint [file normalize $::zynqlink_verify_checkpoint]}
 open_checkpoint $routed_checkpoint
+source [file join $root fpga selectio spi_slave_timing.tcl]
 source [file join $root fpga rtl_debug_profile.tcl]
 set rtl_debug [zynqlink_rtl_debug_mode $argv]
 set requested_fclk 133333333
