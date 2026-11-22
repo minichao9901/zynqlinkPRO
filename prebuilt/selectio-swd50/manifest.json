@@ -1,0 +1,70 @@
+{
+  "source_revision": "8521daf5700e4d38ac79f7415673213dfd571039",
+  "hashes": {
+    "probe.bit": "3caf4831d2ab52302d2077f2948ef9540ed84e31811e0ad6e5f8e9e5a947a5cc",
+    "application.elf": "84d5d3e2ffef646b51026681bb1c71921de628f72750e32d3e64c57f76e64dd7",
+    "ps7_init.tcl": "aa9747c31f705be7c28af1c6b1cdeaf282f0dcdb01faecee2a9f72e4d3489132"
+  },
+  "bit_features": "0x4450ffff",
+  "status": "Verified on F103ZE for native SRAM and queued RTT at SWD 50 MHz and target HCLK128",
+  "board_verified": false,
+  "external_frequency_counter": false,
+  "max_native_frame": 16384,
+  "swd": {
+    "tap": 8,
+    "slot": 24,
+    "idle": 2
+  },
+  "jtag": {
+    "tap": 16,
+    "slot": 28,
+    "idle": 33,
+    "bulk_idle": 29
+  },
+  "profiles_50mhz": {
+    "swd": {
+      "tap": 8,
+      "slot": 22,
+      "idle": 0
+    },
+    "jtag": {
+      "tap": 16,
+      "slot": 21,
+      "idle": 17,
+      "bulk_idle": 17
+    }
+  },
+  "profile_status": "SWD 50 MHz tap 8 slot 22 idle 0 verified on F103ZE HCLK128. Other paths inherit the earlier candidate scope.",
+  "cdc_bypass_qualification": true,
+  "native_stream_lease_seconds": 5,
+  "timing": {
+    "FCLK_max_Hz": 133333333,
+    "SWCLK_max_Hz": 66666666,
+    "setup_slack_ns": 0.025,
+    "hold_slack_ns": 0.042,
+    "requested_FCLK_Hz": 133333333,
+    "RTL_DEBUG": 0,
+    "optional_observation_cells": 0,
+    "formal_product_acceptance": false
+  },
+  "pl_options": [
+    "--selectio",
+    "--etm400"
+  ],
+  "ps_options": [
+    "--selectio",
+    "--j7-adapter",
+    "--compact-code",
+    "--max-swclk-hz",
+    "10000000"
+  ],
+  "ps_build_manifest": "ps-build.json",
+  "validation": "../../docs/validation/swd50-recovery-20261122/README.md",
+  "pl_source_revision": "499c79f51c8841859cf41fc8c014be49aaa1739e",
+  "ps_build_base_revision": "6d5869adf6b6d3a7290ef168d945b05ff13c3c9e",
+  "qualification_scope": [
+    "F103ZE HCLK128, SWD native read/write, fresh payloads, core halted",
+    "F103ZE HCLK128, SWD RTT SRAM queue to PC, three 60 s running windows",
+    "Probe private DDR USB read/write and mixed payloads"
+  ]
+}
