@@ -1,6 +1,6 @@
 # J7 SelectIO 多协议探针 CLI
 
-这套固件在同一块 Zynq-7020 上提供 CMSIS-DAP、RTT、变量采样、四线 SPI、串口、SWO 和四位并行 ETM。以下命令在本工作树根目录运行。带有输出路径的命令使用新文件。示例目标是 STM32F103ZE CDC48，目标 HCLK 为 48 MHz。固定配对和构建身份见[产物清单](../../prebuilt/selectio-j7-fusion/manifest.json)。Windows 主机依赖、Vivado/SDK 和 OpenOCD 的安装位置见[依赖说明](../dependencies.md)。标准串口示例需要 pyserial，验收脚本另用 NumPy 校验连续样本。
+这套固件在同一块 Zynq-7020 上提供 CMSIS-DAP、RTT、变量采样、四线 SPI、串口、SWO 和四位并行 ETM。以下命令在本工作树根目录运行。带有输出路径的命令使用新文件。示例目标是 STM32F103ZE CDC48，目标 HCLK 为 48 MHz。SPI 从机和 HSS STOP 修正使用[当前融合配对](../../prebuilt/selectio-spi-cdc-phase-drift-20261123/README.md)，可在其清单核对 bit、PS ELF、初始化脚本和验证范围。Windows 主机依赖、Vivado/SDK 和 OpenOCD 的安装位置见[依赖说明](../dependencies.md)。标准串口示例需要 pyserial，验收脚本另用 NumPy 校验连续样本。
 
 ## 架构和引脚
 

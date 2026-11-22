@@ -85,3 +85,7 @@ DBG-06 原清单 slot22 邻域没有通过点。按 Case 表修正到 slot28 后
 与同一份 F103ZE SRAM 循环 ELF 配对，固定低频 SWD 配置。按目标 HCLK 得出 TRACECLK，HCLK 用 RCC 和 DWT 对照。**36 MHz TRACECLK** 的三轮 1 秒严格验收通过，formatter 字节为 33,235,768 / 32,788,138 / 33,235,774，零 FPGA parser 错误，已知两支交替执行序列通过。24 和 32 MHz 各通过一轮 1 秒。36 MHz 是本组实板严格通过的最高档。
 
 40 MHz 的短窗 FPGA parser 错误为零，严格核验发现 638 个解码缺口。44 MHz 和四路数据 tap12 的 48 MHz 窗口也无 FPGA parser 错误，原生 OpenCSD 在窗口前段退出。默认 tap 的 48 / 64 MHz 各记录 192,594 / 86,124 个 FPGA parser 错误。48 MHz 两个其他设置也保留原始失败。所有点核对了采集和夹具恢复。 [逐窗计数与质量](etm-physical-boundary-v1.json)
+
+## 修正配对首次实板
+
+新版的 bit 为 `f3c4ccfd…`，PS ELF 为 `32f75ae7…`。Vivado 按 133.333 MHz 约束完成布线，setup/hold 为 +0.012/+0.021 ns。真实 JTAG/RAM 加载后，MEM-AP0 核对了 80,268 B OCM 执行段，USB 描述符与首版完全相同。F103 GPIO 四模式各 16,384 B 全匹配，零溢出、帧错及尾差，夹具恢复。全套与最高物理速率分别跟踪。 [新配对](../../../prebuilt/selectio-spi-cdc-phase-drift-20261123/manifest.json) · [首轮硬件证据](phase-drift-smoke.json)

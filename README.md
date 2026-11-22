@@ -34,6 +34,7 @@ zynqlinkPRO 将 FPGA 调试引擎、并行 Trace 采集和主机分析工具整�
 | RTT Viewer | 从 ELF 的 `_SEGGER_RTT` 定位控制块，双向收发 RTT | 浏览器连接探针 |
 | RTT 转发 | 用 ELF 或确切地址指定控制块，由探针经 USB/CDC 将板子日志单向送到 PC | 浏览器 / 本机工具 |
 | J-Scope 波形 | 多变量采样、曲线与泳道、游标、原始记录及 CSV | 浏览器连接探针 |
+| SelectIO SPI | 四线 SPI 主机交换。融合固件支持从机接收 MOSI 并转发到现有 CDC COM | [本机 CLI 与接线](docs/selectio/README.md#物理串口swo-和-spi) |
 | 固件烧录 | 目标识别、BIN/HEX/ELF、写入校验；固件字节与 ELF 表查看 | 浏览器连接探针 |
 | 调试器 | RAM 镜像加载、ELF 启动、断点、单步、寄存器、内存、源码、变量与 RTT 交互终端 | 浏览器连接探针 |
 | ETM 执行轨迹 | ETMv3/v4 解码、源码回放、函数统计、火焰图及记录导入/导出 | **本机 Windows 工作台** |
