@@ -1,0 +1,4457 @@
+{
+  "hashes": {
+    "probe.bit": "d7c583241eea37cc032a5a8e951f9b1150d8e9ddee11bab4e84ca29a18590aa3",
+    "application.elf": "47ee10307887b6bc98e65229a39641583facf48299479eb609cf952798ad799e",
+    "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+  },
+  "serial": "12345678",
+  "initial_campaign": [
+    {
+      "case": "DBG-01",
+      "exit": 0,
+      "restored": true
+    },
+    {
+      "case": "DBG-02",
+      "exit": 0,
+      "restored": true
+    },
+    {
+      "case": "DBG-03",
+      "exit": 0,
+      "restored": true
+    },
+    {
+      "case": "DBG-04",
+      "exit": 0,
+      "restored": true
+    },
+    {
+      "case": "DBG-05",
+      "exit": 0,
+      "restored": true
+    },
+    {
+      "case": "DBG-06",
+      "exit": 1,
+      "restored": true
+    },
+    {
+      "case": "DBG-07",
+      "exit": 0,
+      "restored": true
+    },
+    {
+      "case": "DBG-08",
+      "exit": 1,
+      "restored": true
+    }
+  ],
+  "cases": [
+    {
+      "case": "DBG-01",
+      "transport": "swd",
+      "requested_hz": 50000000,
+      "hclk": 96,
+      "calibration": [
+        {
+          "slot": 24,
+          "tap": 8,
+          "passed": true
+        },
+        {
+          "slot": 24,
+          "tap": 6,
+          "passed": true
+        },
+        {
+          "slot": 24,
+          "tap": 10,
+          "passed": true
+        }
+      ],
+      "passed": true,
+      "memory": {
+        "0": true,
+        "1": true
+      },
+      "rtt_exit": 0,
+      "scope_exit": 0,
+      "tap": 8,
+      "slot": 24,
+      "service_idle": 0,
+      "hclk_dwt_hz": 96051035.09779146,
+      "rcc_cfgr": "0x69e50a",
+      "restored": true,
+      "sram": [
+        {
+          "idle": 0,
+          "passed": true,
+          "windows": [
+            {
+              "direction": "read",
+              "wall_seconds": 3.002873699999327,
+              "payload_bytes": 11483136,
+              "wall_MBps": 3.824048943517862,
+              "clock": {
+                "wire_hz": 49999999,
+                "reference_hz": 199999996,
+                "divider": 4,
+                "timing": "0x1860",
+                "tap": 8,
+                "source": "PS clock tree and PL queue registers"
+              },
+              "probe_delta": {
+                "read_bytes": 11483136,
+                "write_bytes": 0,
+                "queue_s": [
+                  2.8570689431450007,
+                  0.0
+                ],
+                "probe_s": [
+                  2.9279183660903674,
+                  0.0
+                ]
+              }
+            },
+            {
+              "direction": "write",
+              "wall_seconds": 3.004047200000059,
+              "payload_bytes": 11418624,
+              "wall_MBps": 3.8010800895537775,
+              "clock": {
+                "wire_hz": 49999999,
+                "reference_hz": 199999996,
+                "divider": 4,
+                "timing": "0x1860",
+                "tap": 8,
+                "source": "PS clock tree and PL queue registers"
+              },
+              "probe_delta": {
+                "read_bytes": 0,
+                "write_bytes": 11418624,
+                "queue_s": [
+                  0.0,
+                  2.7839695982648816
+                ],
+                "probe_s": [
+                  0.0,
+                  2.8599924310602196
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "idle": 1,
+          "passed": true,
+          "windows": [
+            {
+              "direction": "read",
+              "wall_seconds": 3.0162860000018554,
+              "payload_bytes": 11547648,
+              "wall_MBps": 3.828432714932502,
+              "clock": {
+                "wire_hz": 49999999,
+                "reference_hz": 199999996,
+                "divider": 4,
+                "timing": "0x5860",
+                "tap": 8,
+                "source": "PS clock tree and PL queue registers"
+              },
+              "probe_delta": {
+                "read_bytes": 11547648,
+                "write_bytes": 0,
+                "queue_s": [
+                  2.8731128316797276,
+                  0.0
+                ],
+                "probe_s": [
+                  2.9444134996120086,
+                  0.0
+                ]
+              }
+            },
+            {
+              "direction": "write",
+              "wall_seconds": 3.008297300002596,
+              "payload_bytes": 11225088,
+              "wall_MBps": 3.7313758849533634,
+              "clock": {
+                "wire_hz": 49999999,
+                "reference_hz": 199999996,
+                "divider": 4,
+                "timing": "0x5860",
+                "tap": 8,
+                "source": "PS clock tree and PL queue registers"
+              },
+              "probe_delta": {
+                "read_bytes": 0,
+                "write_bytes": 11225088,
+                "queue_s": [
+                  0.0,
+                  2.7928018230087472
+                ],
+                "probe_s": [
+                  0.0,
+                  2.867563590840656
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "rtt_cdc": [
+        {
+          "speed_hz": 50000000,
+          "chunk": 2048,
+          "repeat": 0,
+          "FCLK_Hz": 133333332,
+          "cfg": "0xa01",
+          "waveform": {
+            "SWCLK_Hz": 66666666.0,
+            "half_period_fclk": 1,
+            "short_high": false,
+            "intended_high_ns": 7.500000075000001
+          },
+          "clockSource": 2,
+          "clockControl": 1051168,
+          "sourcePllControl": 163848,
+          "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+          "JTAG_sampling_mode": 0,
+          "RISC_V_SBA_enabled": false,
+          "actual_link_Hz": 49999999.0,
+          "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+          "swd_queue_status": "0xb",
+          "swd_queue_summary": "0x10009",
+          "swd_queue_timing": "0x1860",
+          "etm_idelay_ref_hz": 199999998,
+          "selectio_ref_hz": 49999999,
+          "selectio_serial_hz": 199999996,
+          "selectio_quad_hz": 99999998.0,
+          "selectio_config": "0x4840e30",
+          "selectio_divider": 4,
+          "window_s": 3.0020708000010927,
+          "host_bytes": 11206656,
+          "host_MB_s": 3.732975251614959,
+          "probe_bytes": 11206656,
+          "probe_MB_s": 3.732975251614959,
+          "session_bytes": 14426108,
+          "sequence_exact": true,
+          "all_published_received": true,
+          "dap_handoff_cpuid": null,
+          "errors": 0,
+          "s0": [
+            65537,
+            536871424,
+            536871448,
+            3203072,
+            102499868,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            822085632
+          ],
+          "s1": [
+            65537,
+            536871424,
+            536871448,
+            14409728,
+            461118332,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            822085632
+          ]
+        }
+      ],
+      "hss_short": [
+        {
+          "transport": "swd",
+          "channels": 1,
+          "requested_ticks": 12,
+          "ticks": 12,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.553479399997741,
+          "host_groups_s": 51201.54426725848,
+          "timeline_ticks": 9606972,
+          "timeline_skips": 772243,
+          "timeline_groups_s": 70793.58615805271,
+          "actual_link_hz": 49999999,
+          "groups": 28339,
+          "skipped": 772253,
+          "skipped_fraction": 0.9646024441912985,
+          "frames": 28341,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 1,
+          "requested_ticks": 14,
+          "ticks": 14,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5549851999967359,
+          "host_groups_s": 52680.68409783172,
+          "timeline_ticks": 9605918,
+          "timeline_skips": 656901,
+          "timeline_groups_s": 73044.97081903052,
+          "actual_link_hz": 49999999,
+          "groups": 29237,
+          "skipped": 656905,
+          "skipped_fraction": 0.9573892867657132,
+          "frames": 29239,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 1,
+          "requested_ticks": 16,
+          "ticks": 16,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5553614999989804,
+          "host_groups_s": 52753.02663229947,
+          "timeline_ticks": 9603200,
+          "timeline_skips": 570904,
+          "timeline_groups_s": 73215.59480173276,
+          "actual_link_hz": 49999999,
+          "groups": 29297,
+          "skipped": 570912,
+          "skipped_fraction": 0.9511886692802007,
+          "frames": 29299,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 1,
+          "requested_ticks": 20,
+          "ticks": 20,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5574784000018553,
+          "host_groups_s": 52495.30744133334,
+          "timeline_ticks": 9608600,
+          "timeline_skips": 451166,
+          "timeline_groups_s": 73094.51949295423,
+          "actual_link_hz": 49999999,
+          "groups": 29265,
+          "skipped": 451168,
+          "skipped_fraction": 0.9390861993243594,
+          "frames": 29267,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 1,
+          "requested_ticks": 24,
+          "ticks": 24,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5579219999999623,
+          "host_groups_s": 51578.89454081743,
+          "timeline_ticks": 9608208,
+          "timeline_skips": 371566,
+          "timeline_groups_s": 71878.54384501251,
+          "actual_link_hz": 49999999,
+          "groups": 28777,
+          "skipped": 371568,
+          "skipped_fraction": 0.9281194969338945,
+          "frames": 28779,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 1,
+          "requested_ticks": 26,
+          "ticks": 26,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5553717999973742,
+          "host_groups_s": 262001.0594716692,
+          "timeline_ticks": 9611550,
+          "timeline_skips": 224168,
+          "timeline_groups_s": 363330.36815081857,
+          "actual_link_hz": 49999999,
+          "groups": 145508,
+          "skipped": 224169,
+          "skipped_fraction": 0.6063915255750291,
+          "frames": 29171,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 1,
+          "requested_ticks": 28,
+          "ticks": 28,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.40095690000089235,
+          "host_groups_s": 855298.9111778268,
+          "timeline_ticks": 9602348,
+          "timeline_skips": 4,
+          "timeline_groups_s": 857132.8595880924,
+          "actual_link_hz": 49999999,
+          "groups": 342938,
+          "skipped": 4,
+          "skipped_fraction": 1.1663779881146084e-05,
+          "frames": 2769,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 1,
+          "requested_ticks": 28,
+          "ticks": 28,
+          "seconds": 3.0,
+          "stage": "confirm",
+          "stream_seconds": 3.0014265999998315,
+          "host_groups_s": 856736.5931920988,
+          "timeline_ticks": 72000180,
+          "timeline_skips": 4,
+          "timeline_groups_s": 857141.5238128571,
+          "actual_link_hz": 49999999,
+          "groups": 2571432,
+          "skipped": 4,
+          "skipped_fraction": 1.5555510617413772e-06,
+          "frames": 20741,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 8,
+          "requested_ticks": 112,
+          "ticks": 112,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5447762999974657,
+          "host_groups_s": 52507.790812730054,
+          "timeline_ticks": 9610944,
+          "timeline_skips": 57208,
+          "timeline_groups_s": 71428.57142857143,
+          "actual_link_hz": 49999999,
+          "groups": 28605,
+          "skipped": 57208,
+          "skipped_fraction": 0.6666588978359922,
+          "frames": 28607,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 8,
+          "requested_ticks": 144,
+          "ticks": 144,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5552059000001464,
+          "host_groups_s": 52629.12371787169,
+          "timeline_ticks": 9603072,
+          "timeline_skips": 37469,
+          "timeline_groups_s": 73024.13227767115,
+          "actual_link_hz": 49999999,
+          "groups": 29220,
+          "skipped": 37470,
+          "skipped_fraction": 0.5618533513270355,
+          "frames": 29222,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 8,
+          "requested_ticks": 160,
+          "ticks": 160,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.555032599997503,
+          "host_groups_s": 51789.75072838842,
+          "timeline_ticks": 9609280,
+          "timeline_skips": 31314,
+          "timeline_groups_s": 71790.60241766293,
+          "actual_link_hz": 49999999,
+          "groups": 28745,
+          "skipped": 31314,
+          "skipped_fraction": 0.5213873024858888,
+          "frames": 28747,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 8,
+          "requested_ticks": 168,
+          "ticks": 168,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5479000000013912,
+          "host_groups_s": 52193.83099092424,
+          "timeline_ticks": 9608256,
+          "timeline_skips": 28596,
+          "timeline_groups_s": 71428.57142857143,
+          "actual_link_hz": 49999999,
+          "groups": 28597,
+          "skipped": 28597,
+          "skipped_fraction": 0.5,
+          "frames": 28599,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 8,
+          "requested_ticks": 192,
+          "ticks": 192,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.4734258000025875,
+          "host_groups_s": 52821.37137406395,
+          "timeline_ticks": 9602304,
+          "timeline_skips": 25006,
+          "timeline_groups_s": 62500.0,
+          "actual_link_hz": 49999999,
+          "groups": 25007,
+          "skipped": 25006,
+          "skipped_fraction": 0.4999900025993242,
+          "frames": 25009,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 8,
+          "requested_ticks": 240,
+          "ticks": 240,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.40191970000159927,
+          "host_groups_s": 49840.80153304327,
+          "timeline_ticks": 9614880,
+          "timeline_skips": 20031,
+          "timeline_groups_s": 50000.0,
+          "actual_link_hz": 49999999,
+          "groups": 20032,
+          "skipped": 20031,
+          "skipped_fraction": 0.4999875196565409,
+          "frames": 20034,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 8,
+          "requested_ticks": 264,
+          "ticks": 264,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.40103090000047814,
+          "host_groups_s": 90718.69524257763,
+          "timeline_ticks": 9604584,
+          "timeline_skips": 1,
+          "timeline_groups_s": 90906.59210227117,
+          "actual_link_hz": 49999999,
+          "groups": 36381,
+          "skipped": 1,
+          "skipped_fraction": 2.748611950964763e-05,
+          "frames": 2429,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 8,
+          "requested_ticks": 264,
+          "ticks": 264,
+          "seconds": 3.0,
+          "stage": "confirm",
+          "stream_seconds": 3.001389000000927,
+          "host_groups_s": 90863.2636422389,
+          "timeline_ticks": 71997024,
+          "timeline_skips": 1,
+          "timeline_groups_s": 90908.75756197923,
+          "actual_link_hz": 49999999,
+          "groups": 272716,
+          "skipped": 1,
+          "skipped_fraction": 3.666804782980159e-06,
+          "frames": 18184,
+          "tail_match": true,
+          "read_errors": 0
+        }
+      ],
+      "hss_failure": null
+    },
+    {
+      "case": "DBG-02",
+      "transport": "swd",
+      "requested_hz": 73000000,
+      "hclk": 128,
+      "calibration": [
+        {
+          "slot": 22,
+          "tap": 8,
+          "passed": true
+        },
+        {
+          "slot": 22,
+          "tap": 6,
+          "passed": true
+        },
+        {
+          "slot": 22,
+          "tap": 10,
+          "passed": true
+        }
+      ],
+      "passed": true,
+      "memory": {
+        "0": true,
+        "1": true
+      },
+      "rtt_exit": 0,
+      "scope_exit": 0,
+      "tap": 8,
+      "slot": 22,
+      "service_idle": 0,
+      "hclk_dwt_hz": 128049232.01209219,
+      "rcc_cfgr": "0x79e50a",
+      "restored": true,
+      "sram": [
+        {
+          "idle": 0,
+          "passed": true,
+          "windows": [
+            {
+              "direction": "read",
+              "wall_seconds": 3.0042476000016904,
+              "payload_bytes": 15482880,
+              "wall_MBps": 5.153663100202289,
+              "clock": {
+                "wire_hz": 72727272,
+                "reference_hz": 145454544,
+                "divider": 2,
+                "timing": "0x1659",
+                "tap": 8,
+                "source": "PS clock tree and PL queue registers"
+              },
+              "probe_delta": {
+                "read_bytes": 15482880,
+                "write_bytes": 0,
+                "queue_s": [
+                  2.813569691406479,
+                  0.0
+                ],
+                "probe_s": [
+                  2.909834630614796,
+                  0.0
+                ]
+              }
+            },
+            {
+              "direction": "write",
+              "wall_seconds": 3.0033870000006573,
+              "payload_bytes": 15676416,
+              "wall_MBps": 5.219579095200376,
+              "clock": {
+                "wire_hz": 72727272,
+                "reference_hz": 145454544,
+                "divider": 2,
+                "timing": "0x1659",
+                "tap": 8,
+                "source": "PS clock tree and PL queue registers"
+              },
+              "probe_delta": {
+                "read_bytes": 0,
+                "write_bytes": 15676416,
+                "queue_s": [
+                  0.0,
+                  2.6871862860715976
+                ],
+                "probe_s": [
+                  0.0,
+                  2.7927329700107437
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "idle": 1,
+          "passed": true,
+          "windows": [
+            {
+              "direction": "read",
+              "wall_seconds": 3.0051748999976553,
+              "payload_bytes": 15482880,
+              "wall_MBps": 5.1520728460803,
+              "clock": {
+                "wire_hz": 72727272,
+                "reference_hz": 145454544,
+                "divider": 2,
+                "timing": "0x5659",
+                "tap": 8,
+                "source": "PS clock tree and PL queue registers"
+              },
+              "probe_delta": {
+                "read_bytes": 15482880,
+                "write_bytes": 0,
+                "queue_s": [
+                  2.814169592389082,
+                  0.0
+                ],
+                "probe_s": [
+                  2.9104435285971375,
+                  0.0
+                ]
+              }
+            },
+            {
+              "direction": "write",
+              "wall_seconds": 3.0077973999977985,
+              "payload_bytes": 15418368,
+              "wall_MBps": 5.126132498156719,
+              "clock": {
+                "wire_hz": 72727272,
+                "reference_hz": 145454544,
+                "divider": 2,
+                "timing": "0x5659",
+                "tap": 8,
+                "source": "PS clock tree and PL queue registers"
+              },
+              "probe_delta": {
+                "read_bytes": 0,
+                "write_bytes": 15418368,
+                "queue_s": [
+                  0.0,
+                  2.6964967828015936
+                ],
+                "probe_s": [
+                  0.0,
+                  2.8003355217902697
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "rtt_cdc": [
+        {
+          "speed_hz": 73000000,
+          "chunk": 2048,
+          "repeat": 0,
+          "FCLK_Hz": 133333332,
+          "cfg": "0xa01",
+          "waveform": {
+            "SWCLK_Hz": 66666666.0,
+            "half_period_fclk": 1,
+            "short_high": false,
+            "intended_high_ns": 7.500000075000001
+          },
+          "clockSource": 2,
+          "clockControl": 1051168,
+          "sourcePllControl": 163848,
+          "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+          "JTAG_sampling_mode": 0,
+          "RISC_V_SBA_enabled": false,
+          "actual_link_Hz": 72727272.0,
+          "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+          "swd_queue_status": "0xb",
+          "swd_queue_summary": "0x10009",
+          "swd_queue_timing": "0x1659",
+          "etm_idelay_ref_hz": 199999998,
+          "selectio_ref_hz": 36363636,
+          "selectio_serial_hz": 145454544,
+          "selectio_quad_hz": 72727272.0,
+          "selectio_config": "0x840e2c",
+          "selectio_divider": 2,
+          "window_s": 3.0021929499998805,
+          "host_bytes": 15073280,
+          "host_MB_s": 5.020756577288145,
+          "probe_bytes": 15071232,
+          "probe_MB_s": 5.020074409274926,
+          "session_bytes": 19267580,
+          "sequence_exact": true,
+          "all_published_received": true,
+          "dap_handoff_cpuid": null,
+          "errors": 0,
+          "s0": [
+            65537,
+            536871424,
+            536871448,
+            4177920,
+            133695480,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1207961600
+          ],
+          "s1": [
+            65537,
+            536871424,
+            536871448,
+            19249152,
+            615982263,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1207961600
+          ]
+        }
+      ],
+      "hss_short": [
+        {
+          "transport": "swd",
+          "channels": 1,
+          "requested_ticks": 12,
+          "ticks": 12,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5553099999997357,
+          "host_groups_s": 52597.64816051196,
+          "timeline_ticks": 9612300,
+          "timeline_skips": 771818,
+          "timeline_groups_s": 72924.06604038576,
+          "actual_link_hz": 72727272,
+          "groups": 29208,
+          "skipped": 771822,
+          "skipped_fraction": 0.963536946181791,
+          "frames": 29210,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 1,
+          "requested_ticks": 14,
+          "ticks": 14,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5555555000028107,
+          "host_groups_s": 52362.005235935605,
+          "timeline_ticks": 9607038,
+          "timeline_skips": 657128,
+          "timeline_groups_s": 72669.22437488017,
+          "actual_link_hz": 72727272,
+          "groups": 29090,
+          "skipped": 657131,
+          "skipped_fraction": 0.957608408952801,
+          "frames": 29092,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 1,
+          "requested_ticks": 16,
+          "ticks": 16,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5566480000015872,
+          "host_groups_s": 52577.21216983902,
+          "timeline_ticks": 9613504,
+          "timeline_skips": 571578,
+          "timeline_groups_s": 73062.22580237134,
+          "actual_link_hz": 72727272,
+          "groups": 29267,
+          "skipped": 571585,
+          "skipped_fraction": 0.9512908336828371,
+          "frames": 29269,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 1,
+          "requested_ticks": 20,
+          "ticks": 20,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.4010644999980286,
+          "host_groups_s": 1197271.261860275,
+          "timeline_ticks": 9603720,
+          "timeline_skips": 4,
+          "timeline_groups_s": 1199990.003873499,
+          "actual_link_hz": 72727272,
+          "groups": 480183,
+          "skipped": 4,
+          "skipped_fraction": 8.330088069856119e-06,
+          "frames": 3876,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 1,
+          "requested_ticks": 20,
+          "ticks": 20,
+          "seconds": 3.0,
+          "stage": "confirm",
+          "stream_seconds": 3.0010425000000396,
+          "host_groups_s": 1199528.8303980874,
+          "timeline_ticks": 71996800,
+          "timeline_skips": 4,
+          "timeline_groups_s": 1199998.6666074048,
+          "actual_link_hz": 72727272,
+          "groups": 3599837,
+          "skipped": 4,
+          "skipped_fraction": 1.1111601873527193e-06,
+          "frames": 29034,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 8,
+          "requested_ticks": 112,
+          "ticks": 112,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5570898999976635,
+          "host_groups_s": 52314.71617080517,
+          "timeline_ticks": 9617440,
+          "timeline_skips": 56727,
+          "timeline_groups_s": 72725.38222229616,
+          "actual_link_hz": 72727272,
+          "groups": 29144,
+          "skipped": 56727,
+          "skipped_fraction": 0.6606071898545492,
+          "frames": 29146,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 8,
+          "requested_ticks": 144,
+          "ticks": 144,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5539614000008442,
+          "host_groups_s": 52680.5658299577,
+          "timeline_ticks": 9602496,
+          "timeline_skips": 37502,
+          "timeline_groups_s": 72936.03663047608,
+          "actual_link_hz": 72727272,
+          "groups": 29183,
+          "skipped": 37502,
+          "skipped_fraction": 0.5623753467796356,
+          "frames": 29185,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 8,
+          "requested_ticks": 160,
+          "ticks": 160,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5558937000023434,
+          "host_groups_s": 52436.28413107959,
+          "timeline_ticks": 9615360,
+          "timeline_skips": 30948,
+          "timeline_groups_s": 72753.59424920128,
+          "actual_link_hz": 72727272,
+          "groups": 29149,
+          "skipped": 30948,
+          "skipped_fraction": 0.5149674692580328,
+          "frames": 29151,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 8,
+          "requested_ticks": 168,
+          "ticks": 168,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5426138999973773,
+          "host_groups_s": 52683.86969102372,
+          "timeline_ticks": 9604896,
+          "timeline_skips": 28586,
+          "timeline_groups_s": 71428.57142857143,
+          "actual_link_hz": 72727272,
+          "groups": 28587,
+          "skipped": 28587,
+          "skipped_fraction": 0.5,
+          "frames": 28589,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 8,
+          "requested_ticks": 192,
+          "ticks": 192,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.48506459999771323,
+          "host_groups_s": 51560.14271113148,
+          "timeline_ticks": 9603456,
+          "timeline_skips": 25009,
+          "timeline_groups_s": 62500.0,
+          "actual_link_hz": 72727272,
+          "groups": 25010,
+          "skipped": 25010,
+          "skipped_fraction": 0.5,
+          "frames": 25012,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 8,
+          "requested_ticks": 240,
+          "ticks": 240,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.4011019999998098,
+          "host_groups_s": 99745.20196862388,
+          "timeline_ticks": 9601920,
+          "timeline_skips": 1,
+          "timeline_groups_s": 99997.50049990002,
+          "actual_link_hz": 72727272,
+          "groups": 40008,
+          "skipped": 1,
+          "skipped_fraction": 2.4994376265340298e-05,
+          "frames": 2671,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 8,
+          "requested_ticks": 240,
+          "ticks": 240,
+          "seconds": 3.0,
+          "stage": "confirm",
+          "stream_seconds": 3.0012845000019297,
+          "host_groups_s": 99955.86889540366,
+          "timeline_ticks": 71999040,
+          "timeline_skips": 1,
+          "timeline_groups_s": 99999.66666222217,
+          "actual_link_hz": 72727272,
+          "groups": 299996,
+          "skipped": 1,
+          "skipped_fraction": 3.3333666670000034e-06,
+          "frames": 20003,
+          "tail_match": true,
+          "read_errors": 0
+        }
+      ],
+      "hss_failure": null
+    },
+    {
+      "case": "DBG-03",
+      "transport": "swd",
+      "requested_hz": 100000000,
+      "hclk": 96,
+      "calibration": [
+        {
+          "slot": 25,
+          "tap": 8,
+          "passed": true
+        },
+        {
+          "slot": 25,
+          "tap": 6,
+          "passed": true
+        },
+        {
+          "slot": 25,
+          "tap": 10,
+          "passed": true
+        }
+      ],
+      "passed": true,
+      "memory": {
+        "2": true
+      },
+      "rtt_exit": 0,
+      "scope_exit": 0,
+      "tap": 8,
+      "slot": 25,
+      "service_idle": 2,
+      "hclk_dwt_hz": 96045835.96871842,
+      "rcc_cfgr": "0x69e50a",
+      "restored": true,
+      "sram": [
+        {
+          "idle": 2,
+          "passed": true,
+          "windows": [
+            {
+              "direction": "read",
+              "wall_seconds": 3.0011903999984497,
+              "payload_bytes": 20063232,
+              "wall_MBps": 6.6850913557534914,
+              "clock": {
+                "wire_hz": 99999998,
+                "reference_hz": 199999996,
+                "divider": 2,
+                "timing": "0x9965",
+                "tap": 8,
+                "source": "PS clock tree and PL queue registers"
+              },
+              "probe_delta": {
+                "read_bytes": 20063232,
+                "write_bytes": 0,
+                "queue_s": [
+                  2.7562412200690045,
+                  0.0
+                ],
+                "probe_s": [
+                  2.8800549094784076,
+                  0.0
+                ]
+              }
+            },
+            {
+              "direction": "write",
+              "wall_seconds": 3.0004346999994596,
+              "payload_bytes": 19805184,
+              "wall_MBps": 6.600771548203855,
+              "clock": {
+                "wire_hz": 99999998,
+                "reference_hz": 199999996,
+                "divider": 2,
+                "timing": "0x9965",
+                "tap": 8,
+                "source": "PS clock tree and PL queue registers"
+              },
+              "probe_delta": {
+                "read_bytes": 0,
+                "write_bytes": 19805184,
+                "queue_s": [
+                  0.0,
+                  2.62139828897945
+                ],
+                "probe_s": [
+                  0.0,
+                  2.753363896152447
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "rtt_cdc": [
+        {
+          "speed_hz": 100000000,
+          "chunk": 2048,
+          "repeat": 0,
+          "FCLK_Hz": 133333332,
+          "cfg": "0xa01",
+          "waveform": {
+            "SWCLK_Hz": 66666666.0,
+            "half_period_fclk": 1,
+            "short_high": false,
+            "intended_high_ns": 7.500000075000001
+          },
+          "clockSource": 2,
+          "clockControl": 1051168,
+          "sourcePllControl": 163848,
+          "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+          "JTAG_sampling_mode": 0,
+          "RISC_V_SBA_enabled": false,
+          "actual_link_Hz": 99999998.0,
+          "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+          "swd_queue_status": "0xb",
+          "swd_queue_summary": "0x10009",
+          "swd_queue_timing": "0x9965",
+          "etm_idelay_ref_hz": 199999998,
+          "selectio_ref_hz": 49999999,
+          "selectio_serial_hz": 199999996,
+          "selectio_quad_hz": 99999998.0,
+          "selectio_config": "0x848e32",
+          "selectio_divider": 2,
+          "window_s": 3.001791349997802,
+          "host_bytes": 19529728,
+          "host_MB_s": 6.50602447768873,
+          "probe_bytes": 19544064,
+          "probe_MB_s": 6.510800292636698,
+          "session_bytes": 24590332,
+          "sequence_exact": true,
+          "all_published_received": true,
+          "dap_handoff_cpuid": null,
+          "errors": 0,
+          "s0": [
+            65537,
+            536871424,
+            536871448,
+            5025792,
+            160827798,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1660946432
+          ],
+          "s1": [
+            65537,
+            536871424,
+            536871448,
+            24569856,
+            786247389,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1660946432
+          ]
+        }
+      ],
+      "hss_short": [
+        {
+          "transport": "swd",
+          "channels": 1,
+          "requested_ticks": 12,
+          "ticks": 12,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5543303999984346,
+          "host_groups_s": 52798.8362176829,
+          "timeline_ticks": 9606780,
+          "timeline_skips": 771298,
+          "timeline_groups_s": 73115.86192251722,
+          "actual_link_hz": 99999998,
+          "groups": 29268,
+          "skipped": 771309,
+          "skipped_fraction": 0.9634413679133924,
+          "frames": 29270,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 1,
+          "requested_ticks": 14,
+          "ticks": 14,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5560473000005004,
+          "host_groups_s": 52416.40414398878,
+          "timeline_ticks": 9608144,
+          "timeline_skips": 657151,
+          "timeline_groups_s": 72800.74070496862,
+          "actual_link_hz": 99999998,
+          "groups": 29146,
+          "skipped": 657160,
+          "skipped_fraction": 0.9575320629573397,
+          "frames": 29148,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 1,
+          "requested_ticks": 16,
+          "ticks": 16,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.40107029999853694,
+          "host_groups_s": 1496976.963894335,
+          "timeline_ticks": 9606336,
+          "timeline_skips": 4,
+          "timeline_groups_s": 1499990.006595647,
+          "actual_link_hz": 99999998,
+          "groups": 600393,
+          "skipped": 4,
+          "skipped_fraction": 6.662258472310821e-06,
+          "frames": 4845,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 1,
+          "requested_ticks": 16,
+          "ticks": 16,
+          "seconds": 3.0,
+          "stage": "confirm",
+          "stream_seconds": 3.0010570000013104,
+          "host_groups_s": 1499367.056339828,
+          "timeline_ticks": 71995024,
+          "timeline_skips": 4,
+          "timeline_groups_s": 1499998.6665745121,
+          "actual_link_hz": 99999998,
+          "groups": 4499686,
+          "skipped": 4,
+          "skipped_fraction": 8.889501276754621e-07,
+          "frames": 36291,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 8,
+          "requested_ticks": 112,
+          "ticks": 112,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5543410999998741,
+          "host_groups_s": 52898.837917676785,
+          "timeline_ticks": 9616992,
+          "timeline_skips": 56543,
+          "timeline_groups_s": 73177.97498427783,
+          "actual_link_hz": 99999998,
+          "groups": 29324,
+          "skipped": 56544,
+          "skipped_fraction": 0.658499091629012,
+          "frames": 29326,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 8,
+          "requested_ticks": 144,
+          "ticks": 144,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5539543000013509,
+          "host_groups_s": 52684.85143978272,
+          "timeline_ticks": 9612288,
+          "timeline_skips": 37568,
+          "timeline_groups_s": 72866.7305848514,
+          "actual_link_hz": 99999998,
+          "groups": 29185,
+          "skipped": 37568,
+          "skipped_fraction": 0.5627911854148877,
+          "frames": 29187,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 8,
+          "requested_ticks": 160,
+          "ticks": 160,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.4014428999980737,
+          "host_groups_s": 149530.605723225,
+          "timeline_ticks": 9604480,
+          "timeline_skips": 1,
+          "timeline_groups_s": 149997.50116612247,
+          "actual_link_hz": 99999998,
+          "groups": 60028,
+          "skipped": 1,
+          "skipped_fraction": 1.665861500274867e-05,
+          "frames": 4005,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 8,
+          "requested_ticks": 160,
+          "ticks": 160,
+          "seconds": 3.0,
+          "stage": "confirm",
+          "stream_seconds": 3.001000699998258,
+          "host_groups_s": 149946.3162405331,
+          "timeline_ticks": 71998240,
+          "timeline_skips": 1,
+          "timeline_groups_s": 149999.6666585183,
+          "actual_link_hz": 99999998,
+          "groups": 449989,
+          "skipped": 1,
+          "skipped_fraction": 2.2222716060356897e-06,
+          "frames": 30003,
+          "tail_match": true,
+          "read_errors": 0
+        }
+      ],
+      "hss_failure": null
+    },
+    {
+      "case": "DBG-04",
+      "transport": "swd",
+      "requested_hz": 100000000,
+      "hclk": 128,
+      "calibration": [
+        {
+          "slot": 25,
+          "tap": 8,
+          "passed": true
+        },
+        {
+          "slot": 25,
+          "tap": 6,
+          "passed": true
+        },
+        {
+          "slot": 25,
+          "tap": 10,
+          "passed": true
+        }
+      ],
+      "passed": true,
+      "memory": {
+        "2": true,
+        "1": true,
+        "4": true
+      },
+      "rtt_exit": 0,
+      "scope_exit": 0,
+      "tap": 8,
+      "slot": 25,
+      "service_idle": 1,
+      "hclk_dwt_hz": 128063465.55130085,
+      "rcc_cfgr": "0x79e50a",
+      "restored": true,
+      "sram": [
+        {
+          "idle": 1,
+          "passed": true,
+          "windows": [
+            {
+              "direction": "read",
+              "wall_seconds": 3.0079548000030627,
+              "payload_bytes": 20127744,
+              "wall_MBps": 6.691504805849977,
+              "clock": {
+                "wire_hz": 99999998,
+                "reference_hz": 199999996,
+                "divider": 2,
+                "timing": "0x5965",
+                "tap": 8,
+                "source": "PS clock tree and PL queue registers"
+              },
+              "probe_delta": {
+                "read_bytes": 20127744,
+                "write_bytes": 0,
+                "queue_s": [
+                  2.7641245958403866,
+                  0.0
+                ],
+                "probe_s": [
+                  2.8884448322351,
+                  0.0
+                ]
+              }
+            },
+            {
+              "direction": "write",
+              "wall_seconds": 3.0016856999973243,
+              "payload_bytes": 20127744,
+              "wall_MBps": 6.705480190686834,
+              "clock": {
+                "wire_hz": 99999998,
+                "reference_hz": 199999996,
+                "divider": 2,
+                "timing": "0x5965",
+                "tap": 8,
+                "source": "PS clock tree and PL queue registers"
+              },
+              "probe_delta": {
+                "read_bytes": 0,
+                "write_bytes": 20127744,
+                "queue_s": [
+                  0.0,
+                  2.612646413233254
+                ],
+                "probe_s": [
+                  0.0,
+                  2.746822183342157
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "idle": 2,
+          "passed": true,
+          "windows": [
+            {
+              "direction": "read",
+              "wall_seconds": 3.008929999999964,
+              "payload_bytes": 20127744,
+              "wall_MBps": 6.689336076279687,
+              "clock": {
+                "wire_hz": 99999998,
+                "reference_hz": 199999996,
+                "divider": 2,
+                "timing": "0x9965",
+                "tap": 8,
+                "source": "PS clock tree and PL queue registers"
+              },
+              "probe_delta": {
+                "read_bytes": 20127744,
+                "write_bytes": 0,
+                "queue_s": [
+                  2.764982712815501,
+                  0.0
+                ],
+                "probe_s": [
+                  2.889066246217079,
+                  0.0
+                ]
+              }
+            },
+            {
+              "direction": "write",
+              "wall_seconds": 3.006429400000343,
+              "payload_bytes": 19805184,
+              "wall_MBps": 6.587609873691942,
+              "clock": {
+                "wire_hz": 99999998,
+                "reference_hz": 199999996,
+                "divider": 2,
+                "timing": "0x9965",
+                "tap": 8,
+                "source": "PS clock tree and PL queue registers"
+              },
+              "probe_delta": {
+                "read_bytes": 0,
+                "write_bytes": 19805184,
+                "queue_s": [
+                  0.0,
+                  2.6214656719774956
+                ],
+                "probe_s": [
+                  0.0,
+                  2.753424631150686
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "idle": 4,
+          "passed": true,
+          "windows": [
+            {
+              "direction": "read",
+              "wall_seconds": 3.002661700000317,
+              "payload_bytes": 20063232,
+              "wall_MBps": 6.681815670409318,
+              "clock": {
+                "wire_hz": 99999998,
+                "reference_hz": 199999996,
+                "divider": 2,
+                "timing": "0x11965",
+                "tap": 8,
+                "source": "PS clock tree and PL queue registers"
+              },
+              "probe_delta": {
+                "read_bytes": 20063232,
+                "write_bytes": 0,
+                "queue_s": [
+                  2.7569758780476996,
+                  0.0
+                ],
+                "probe_s": [
+                  2.8808309374559027,
+                  0.0
+                ]
+              }
+            },
+            {
+              "direction": "write",
+              "wall_seconds": 3.00683890000073,
+              "payload_bytes": 19160064,
+              "wall_MBps": 6.372161807536595,
+              "clock": {
+                "wire_hz": 99999998,
+                "reference_hz": 199999996,
+                "divider": 2,
+                "timing": "0x11965",
+                "tap": 8,
+                "source": "PS clock tree and PL queue registers"
+              },
+              "probe_delta": {
+                "read_bytes": 0,
+                "write_bytes": 19160064,
+                "queue_s": [
+                  0.0,
+                  2.6334965056286013
+                ],
+                "probe_s": [
+                  0.0,
+                  2.7612359469241574
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "rtt_cdc": [
+        {
+          "speed_hz": 100000000,
+          "chunk": 2048,
+          "repeat": 0,
+          "FCLK_Hz": 133333332,
+          "cfg": "0xa01",
+          "waveform": {
+            "SWCLK_Hz": 66666666.0,
+            "half_period_fclk": 1,
+            "short_high": false,
+            "intended_high_ns": 7.500000075000001
+          },
+          "clockSource": 2,
+          "clockControl": 1051168,
+          "sourcePllControl": 163848,
+          "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+          "JTAG_sampling_mode": 0,
+          "RISC_V_SBA_enabled": false,
+          "actual_link_Hz": 99999998.0,
+          "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+          "swd_queue_status": "0xb",
+          "swd_queue_summary": "0x10103",
+          "swd_queue_timing": "0x5965",
+          "etm_idelay_ref_hz": 199999998,
+          "selectio_ref_hz": 49999999,
+          "selectio_serial_hz": 199999996,
+          "selectio_quad_hz": 99999998.0,
+          "selectio_config": "0x844e32",
+          "selectio_divider": 2,
+          "window_s": 3.001915649998409,
+          "host_bytes": 19529728,
+          "host_MB_s": 6.50575508342826,
+          "probe_bytes": 19546112,
+          "probe_MB_s": 6.511212931652613,
+          "session_bytes": 24442876,
+          "sequence_exact": true,
+          "all_published_received": true,
+          "dap_handoff_cpuid": null,
+          "errors": 0,
+          "s0": [
+            65537,
+            536871424,
+            536871448,
+            4876288,
+            156043597,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1660946432
+          ],
+          "s1": [
+            65537,
+            536871424,
+            536871448,
+            24422400,
+            781528725,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1660946432
+          ]
+        }
+      ],
+      "hss_short": [
+        {
+          "transport": "swd",
+          "channels": 1,
+          "requested_ticks": 12,
+          "ticks": 12,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5566349000000628,
+          "host_groups_s": 52578.44953666523,
+          "timeline_ticks": 9612684,
+          "timeline_skips": 771791,
+          "timeline_groups_s": 73068.45829947182,
+          "actual_link_hz": 99999998,
+          "groups": 29267,
+          "skipped": 771795,
+          "skipped_fraction": 0.9634647505436533,
+          "frames": 29269,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 1,
+          "requested_ticks": 14,
+          "ticks": 14,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5589696999995795,
+          "host_groups_s": 51594.925449486254,
+          "timeline_ticks": 9608298,
+          "timeline_skips": 657468,
+          "timeline_groups_s": 72035.23454414091,
+          "actual_link_hz": 99999998,
+          "groups": 28840,
+          "skipped": 657472,
+          "skipped_fraction": 0.9579782955856811,
+          "frames": 28842,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 1,
+          "requested_ticks": 16,
+          "ticks": 16,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.40108589999726973,
+          "host_groups_s": 1496853.9158421846,
+          "timeline_ticks": 9605920,
+          "timeline_skips": 4,
+          "timeline_groups_s": 1499990.0061628663,
+          "actual_link_hz": 99999998,
+          "groups": 600367,
+          "skipped": 4,
+          "skipped_fraction": 6.662546991776751e-06,
+          "frames": 4845,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 1,
+          "requested_ticks": 16,
+          "ticks": 16,
+          "seconds": 3.0,
+          "stage": "confirm",
+          "stream_seconds": 3.001143499997852,
+          "host_groups_s": 1499356.4952836214,
+          "timeline_ticks": 71996592,
+          "timeline_skips": 4,
+          "timeline_groups_s": 1499998.6666035526,
+          "actual_link_hz": 99999998,
+          "groups": 4499784,
+          "skipped": 4,
+          "skipped_fraction": 8.889307674050422e-07,
+          "frames": 36292,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 8,
+          "requested_ticks": 112,
+          "ticks": 112,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5540961000006064,
+          "host_groups_s": 50238.57774846193,
+          "timeline_ticks": 9613744,
+          "timeline_skips": 58001,
+          "timeline_groups_s": 69490.51274924733,
+          "actual_link_hz": 99999998,
+          "groups": 27837,
+          "skipped": 58001,
+          "skipped_fraction": 0.6757030685710291,
+          "frames": 27839,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 8,
+          "requested_ticks": 144,
+          "ticks": 144,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5541107999997621,
+          "host_groups_s": 51294.79519260806,
+          "timeline_ticks": 9608256,
+          "timeline_skips": 38302,
+          "timeline_groups_s": 70993.94520712187,
+          "actual_link_hz": 99999998,
+          "groups": 28423,
+          "skipped": 38303,
+          "skipped_fraction": 0.5740341096424183,
+          "frames": 28425,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 8,
+          "requested_ticks": 160,
+          "ticks": 160,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.4009626000006392,
+          "host_groups_s": 149702.24155545756,
+          "timeline_ticks": 9604000,
+          "timeline_skips": 1,
+          "timeline_groups_s": 149997.5010412328,
+          "actual_link_hz": 99999998,
+          "groups": 60025,
+          "skipped": 1,
+          "skipped_fraction": 1.665944757271849e-05,
+          "frames": 4005,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "swd",
+          "channels": 8,
+          "requested_ticks": 160,
+          "ticks": 160,
+          "seconds": 3.0,
+          "stage": "confirm",
+          "stream_seconds": 3.0011861999992107,
+          "host_groups_s": 149931.05059596713,
+          "timeline_ticks": 71995360,
+          "timeline_skips": 1,
+          "timeline_groups_s": 149999.6666451838,
+          "actual_link_hz": 99999998,
+          "groups": 449971,
+          "skipped": 1,
+          "skipped_fraction": 2.2223605024312623e-06,
+          "frames": 30001,
+          "tail_match": true,
+          "read_errors": 0
+        }
+      ],
+      "hss_failure": null
+    },
+    {
+      "case": "DBG-05",
+      "transport": "jtag",
+      "requested_hz": 50000000,
+      "hclk": 96,
+      "calibration": [
+        {
+          "slot": 28,
+          "tap": 16,
+          "passed": true
+        },
+        {
+          "slot": 28,
+          "tap": 14,
+          "passed": true
+        },
+        {
+          "slot": 28,
+          "tap": 18,
+          "passed": true
+        }
+      ],
+      "passed": true,
+      "memory": {
+        "17": true,
+        "13": true,
+        "21": true
+      },
+      "rtt_exit": 0,
+      "scope_exit": 0,
+      "tap": 16,
+      "slot": 28,
+      "service_idle": 13,
+      "hclk_dwt_hz": 95938527.61187838,
+      "rcc_cfgr": "0x69e50a",
+      "restored": true,
+      "sram": [
+        {
+          "idle": 13,
+          "passed": true,
+          "windows": [
+            {
+              "direction": "read",
+              "wall_seconds": 3.001208300000144,
+              "payload_bytes": 9805824,
+              "wall_MBps": 3.267292043674386,
+              "clock": {
+                "wire_hz": 49999999,
+                "reference_hz": 199999996,
+                "divider": 4,
+                "timing": "0x6034e4",
+                "tap": 16,
+                "source": "PS clock tree and PL queue registers"
+              },
+              "probe_delta": {
+                "read_bytes": 9805824,
+                "write_bytes": 0,
+                "queue_s": [
+                  2.858425009105675,
+                  0.0
+                ],
+                "probe_s": [
+                  2.9337782029204322,
+                  0.0
+                ]
+              }
+            },
+            {
+              "direction": "write",
+              "wall_seconds": 3.02002100000027,
+              "payload_bytes": 9676800,
+              "wall_MBps": 3.2042161296226537,
+              "clock": {
+                "wire_hz": 49999999,
+                "reference_hz": 199999996,
+                "divider": 4,
+                "timing": "0x6034e4",
+                "tap": 16,
+                "source": "PS clock tree and PL queue registers"
+              },
+              "probe_delta": {
+                "read_bytes": 0,
+                "write_bytes": 9676800,
+                "queue_s": [
+                  0.0,
+                  2.8208296341959405
+                ],
+                "probe_s": [
+                  0.0,
+                  2.900791964877033
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "idle": 17,
+          "passed": true,
+          "windows": [
+            {
+              "direction": "read",
+              "wall_seconds": 3.006278499997279,
+              "payload_bytes": 9225216,
+              "wall_MBps": 3.0686498273557654,
+              "clock": {
+                "wire_hz": 49999999,
+                "reference_hz": 199999996,
+                "divider": 4,
+                "timing": "0x6044e4",
+                "tap": 16,
+                "source": "PS clock tree and PL queue registers"
+              },
+              "probe_delta": {
+                "read_bytes": 9225216,
+                "write_bytes": 0,
+                "queue_s": [
+                  2.8780846475355455,
+                  0.0
+                ],
+                "probe_s": [
+                  2.9488278134839936,
+                  0.0
+                ]
+              }
+            },
+            {
+              "direction": "write",
+              "wall_seconds": 3.004539699999441,
+              "payload_bytes": 9031680,
+              "wall_MBps": 3.0060112036468283,
+              "clock": {
+                "wire_hz": 49999999,
+                "reference_hz": 199999996,
+                "divider": 4,
+                "timing": "0x6044e4",
+                "tap": 16,
+                "source": "PS clock tree and PL queue registers"
+              },
+              "probe_delta": {
+                "read_bytes": 0,
+                "write_bytes": 9031680,
+                "queue_s": [
+                  0.0,
+                  2.8177751692845203
+                ],
+                "probe_s": [
+                  0.0,
+                  2.892371223121234
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "idle": 21,
+          "passed": true,
+          "windows": [
+            {
+              "direction": "read",
+              "wall_seconds": 3.018096699997841,
+              "payload_bytes": 8709120,
+              "wall_MBps": 2.8856331873018615,
+              "clock": {
+                "wire_hz": 49999999,
+                "reference_hz": 199999996,
+                "divider": 4,
+                "timing": "0x6054e4",
+                "tap": 16,
+                "source": "PS clock tree and PL queue registers"
+              },
+              "probe_delta": {
+                "read_bytes": 8709120,
+                "write_bytes": 0,
+                "queue_s": [
+                  2.89646172600261,
+                  0.0
+                ],
+                "probe_s": [
+                  2.9633531440627587,
+                  0.0
+                ]
+              }
+            },
+            {
+              "direction": "write",
+              "wall_seconds": 3.007431000001816,
+              "payload_bytes": 8515584,
+              "wall_MBps": 2.831514338980631,
+              "clock": {
+                "wire_hz": 49999999,
+                "reference_hz": 199999996,
+                "divider": 4,
+                "timing": "0x6054e4",
+                "tap": 16,
+                "source": "PS clock tree and PL queue registers"
+              },
+              "probe_delta": {
+                "read_bytes": 0,
+                "write_bytes": 8515584,
+                "queue_s": [
+                  0.0,
+                  2.8321440078678237
+                ],
+                "probe_s": [
+                  0.0,
+                  2.9024929978277028
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "rtt_cdc": [
+        {
+          "speed_hz": 50000000,
+          "chunk": 2048,
+          "repeat": 0,
+          "FCLK_Hz": 133333332,
+          "cfg": "0x1",
+          "waveform": {
+            "SWCLK_Hz": 66666666.0,
+            "half_period_fclk": 1,
+            "short_high": false,
+            "intended_high_ns": 7.500000075000001
+          },
+          "clockSource": 2,
+          "clockControl": 1051168,
+          "sourcePllControl": 163848,
+          "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+          "JTAG_sampling_mode": 0,
+          "RISC_V_SBA_enabled": false,
+          "actual_link_Hz": 49999999.0,
+          "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+          "swd_queue_status": "0x3c",
+          "swd_queue_summary": "0x10004",
+          "etm_idelay_ref_hz": 199999998,
+          "selectio_ref_hz": 49999999,
+          "selectio_serial_hz": 199999996,
+          "selectio_quad_hz": 99999998.0,
+          "selectio_config": "0x4344e33",
+          "selectio_divider": 4,
+          "window_s": 3.0018383500027994,
+          "host_bytes": 8257536,
+          "host_MB_s": 2.7508263394637154,
+          "probe_bytes": 8261632,
+          "probe_MB_s": 2.7521908366559096,
+          "session_bytes": 10530812,
+          "sequence_exact": true,
+          "all_published_received": true,
+          "dap_handoff_cpuid": null,
+          "errors": 0,
+          "s0": [
+            65537,
+            536871424,
+            536871448,
+            2252800,
+            72090701,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            822085632
+          ],
+          "s1": [
+            65537,
+            536871424,
+            536871448,
+            10514432,
+            336466959,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            822085632
+          ]
+        }
+      ],
+      "hss_short": [
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 12,
+          "ticks": 12,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5563829999991867,
+          "host_groups_s": 52573.49703359513,
+          "timeline_ticks": 9606132,
+          "timeline_skips": 771261,
+          "timeline_groups_s": 73078.32122231924,
+          "actual_link_hz": 49999999,
+          "groups": 29251,
+          "skipped": 771286,
+          "skipped_fraction": 0.96346077695347,
+          "frames": 29253,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 14,
+          "ticks": 14,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5604975000023842,
+          "host_groups_s": 52085.87014192894,
+          "timeline_ticks": 9611770,
+          "timeline_skips": 657362,
+          "timeline_groups_s": 72893.12998542412,
+          "actual_link_hz": 49999999,
+          "groups": 29194,
+          "skipped": 657372,
+          "skipped_fraction": 0.9574782322456982,
+          "frames": 29196,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 16,
+          "ticks": 16,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5615242000021681,
+          "host_groups_s": 52191.87347559881,
+          "timeline_ticks": 9603920,
+          "timeline_skips": 570939,
+          "timeline_groups_s": 73235.09566926838,
+          "actual_link_hz": 49999999,
+          "groups": 29307,
+          "skipped": 570942,
+          "skipped_fraction": 0.9511752622661596,
+          "frames": 29309,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 20,
+          "ticks": 20,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5560123000032036,
+          "host_groups_s": 52542.0031172542,
+          "timeline_ticks": 9608020,
+          "timeline_skips": 451188,
+          "timeline_groups_s": 72971.5383606612,
+          "actual_link_hz": 49999999,
+          "groups": 29214,
+          "skipped": 451190,
+          "skipped_fraction": 0.939188682858594,
+          "frames": 29216,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 24,
+          "ticks": 24,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5562030999972194,
+          "host_groups_s": 52737.9297241361,
+          "timeline_ticks": 9610008,
+          "timeline_skips": 371085,
+          "timeline_groups_s": 73253.63308750627,
+          "actual_link_hz": 49999999,
+          "groups": 29333,
+          "skipped": 371087,
+          "skipped_fraction": 0.9267444183607212,
+          "frames": 29335,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 26,
+          "ticks": 26,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5722381000014138,
+          "host_groups_s": 47593.82501782512,
+          "timeline_ticks": 9611966,
+          "timeline_skips": 342457,
+          "timeline_groups_s": 68000.24053351833,
+          "actual_link_hz": 49999999,
+          "groups": 27235,
+          "skipped": 342458,
+          "skipped_fraction": 0.9263307663385566,
+          "frames": 27237,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 28,
+          "ticks": 28,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5591395999981614,
+          "host_groups_s": 52020.99797634731,
+          "timeline_ticks": 9608956,
+          "timeline_skips": 314091,
+          "timeline_groups_s": 72647.22619189847,
+          "actual_link_hz": 49999999,
+          "groups": 29087,
+          "skipped": 314092,
+          "skipped_fraction": 0.9152424827859513,
+          "frames": 29089,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 32,
+          "ticks": 32,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5588696999984677,
+          "host_groups_s": 51158.61532675396,
+          "timeline_ticks": 9607616,
+          "timeline_skips": 271648,
+          "timeline_groups_s": 71418.34144911704,
+          "actual_link_hz": 49999999,
+          "groups": 28591,
+          "skipped": 271649,
+          "skipped_fraction": 0.9047728483879564,
+          "frames": 28593,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 48,
+          "ticks": 48,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.4012882000024547,
+          "host_groups_s": 490831.7762615376,
+          "timeline_ticks": 9605712,
+          "timeline_skips": 3155,
+          "timeline_groups_s": 492117.1902717883,
+          "actual_link_hz": 49999999,
+          "groups": 196965,
+          "skipped": 3155,
+          "skipped_fraction": 0.015765540675594644,
+          "frames": 3155,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 64,
+          "ticks": 64,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.40114030000040657,
+          "host_groups_s": 371194.3177981596,
+          "timeline_ticks": 9606016,
+          "timeline_skips": 1194,
+          "timeline_groups_s": 372016.86942849145,
+          "actual_link_hz": 49999999,
+          "groups": 148901,
+          "skipped": 1194,
+          "skipped_fraction": 0.007954961857490256,
+          "frames": 2387,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 72,
+          "ticks": 72,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.4011596999989706,
+          "host_groups_s": 329998.2525670941,
+          "timeline_ticks": 9607896,
+          "timeline_skips": 1062,
+          "timeline_groups_s": 330680.51527618535,
+          "actual_link_hz": 49999999,
+          "groups": 132382,
+          "skipped": 1062,
+          "skipped_fraction": 0.007958394532537993,
+          "frames": 2123,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 80,
+          "ticks": 80,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.4010240999996313,
+          "host_groups_s": 296982.1514470315,
+          "timeline_ticks": 9604080,
+          "timeline_skips": 955,
+          "timeline_groups_s": 297613.51425644103,
+          "actual_link_hz": 49999999,
+          "groups": 119097,
+          "skipped": 955,
+          "skipped_fraction": 0.007954886215973078,
+          "frames": 1909,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 96,
+          "ticks": 96,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.4009832000010647,
+          "host_groups_s": 247489.17161551033,
+          "timeline_ticks": 9603168,
+          "timeline_skips": 795,
+          "timeline_groups_s": 248013.15565863266,
+          "actual_link_hz": 49999999,
+          "groups": 99239,
+          "skipped": 795,
+          "skipped_fraction": 0.00794729791870764,
+          "frames": 1591,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 128,
+          "ticks": 128,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.4013042000005953,
+          "host_groups_s": 186977.85869145824,
+          "timeline_ticks": 9604480,
+          "timeline_skips": 1,
+          "timeline_groups_s": 187497.50116612247,
+          "actual_link_hz": 49999999,
+          "groups": 75035,
+          "skipped": 1,
+          "skipped_fraction": 1.3326936403859481e-05,
+          "frames": 609,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 128,
+          "ticks": 128,
+          "seconds": 3.0,
+          "stage": "confirm",
+          "stream_seconds": 3.0014867000027152,
+          "host_groups_s": 187407.79361090992,
+          "timeline_ticks": 72000256,
+          "timeline_skips": 1,
+          "timeline_groups_s": 187499.66666785185,
+          "actual_link_hz": 49999999,
+          "groups": 562502,
+          "skipped": 1,
+          "skipped_fraction": 1.777768296346864e-06,
+          "frames": 4540,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 8,
+          "requested_ticks": 112,
+          "ticks": 112,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.4839438000017253,
+          "host_groups_s": 50689.77017561242,
+          "timeline_ticks": 9615872,
+          "timeline_skips": 61326,
+          "timeline_groups_s": 61223.776689207174,
+          "actual_link_hz": 49999999,
+          "groups": 24531,
+          "skipped": 61328,
+          "skipped_fraction": 0.7142873781432348,
+          "frames": 24533,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 8,
+          "requested_ticks": 144,
+          "ticks": 144,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.4283076000028814,
+          "host_groups_s": 51960.320106041276,
+          "timeline_ticks": 9613728,
+          "timeline_skips": 44508,
+          "timeline_groups_s": 55555.555555555555,
+          "actual_link_hz": 49999999,
+          "groups": 22255,
+          "skipped": 44509,
+          "skipped_fraction": 0.6666616739560242,
+          "frames": 22257,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 8,
+          "requested_ticks": 160,
+          "ticks": 160,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.46272529999987455,
+          "host_groups_s": 51944.42577487446,
+          "timeline_ticks": 9614080,
+          "timeline_skips": 36053,
+          "timeline_groups_s": 59999.50073225935,
+          "actual_link_hz": 49999999,
+          "groups": 24036,
+          "skipped": 36054,
+          "skipped_fraction": 0.6,
+          "frames": 24038,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 8,
+          "requested_ticks": 168,
+          "ticks": 168,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.43615529999806313,
+          "host_groups_s": 52453.793408223166,
+          "timeline_ticks": 9608424,
+          "timeline_skips": 34316,
+          "timeline_groups_s": 57142.35758122248,
+          "actual_link_hz": 49999999,
+          "groups": 22878,
+          "skipped": 34317,
+          "skipped_fraction": 0.6,
+          "frames": 22880,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 8,
+          "requested_ticks": 192,
+          "ticks": 192,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.47707420000006096,
+          "host_groups_s": 52453.05656855224,
+          "timeline_ticks": 9609024,
+          "timeline_skips": 25024,
+          "timeline_groups_s": 62498.75117389654,
+          "actual_link_hz": 49999999,
+          "groups": 25024,
+          "skipped": 25024,
+          "skipped_fraction": 0.5,
+          "frames": 25026,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 8,
+          "requested_ticks": 240,
+          "ticks": 240,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.4019527999989805,
+          "host_groups_s": 49796.89157545555,
+          "timeline_ticks": 9607200,
+          "timeline_skips": 20015,
+          "timeline_groups_s": 50000.0,
+          "actual_link_hz": 49999999,
+          "groups": 20016,
+          "skipped": 20015,
+          "skipped_fraction": 0.499987509679998,
+          "frames": 20018,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 8,
+          "requested_ticks": 264,
+          "ticks": 264,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.401859699999477,
+          "host_groups_s": 45291.92651072921,
+          "timeline_ticks": 9609600,
+          "timeline_skips": 18200,
+          "timeline_groups_s": 45454.545454545456,
+          "actual_link_hz": 49999999,
+          "groups": 18201,
+          "skipped": 18200,
+          "skipped_fraction": 0.49998626411362324,
+          "frames": 18203,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 8,
+          "requested_ticks": 288,
+          "ticks": 288,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.40178779999769176,
+          "host_groups_s": 41526.89554062083,
+          "timeline_ticks": 9609984,
+          "timeline_skips": 16684,
+          "timeline_groups_s": 41666.666666666664,
+          "actual_link_hz": 49999999,
+          "groups": 16685,
+          "skipped": 16684,
+          "skipped_fraction": 0.49998501603284484,
+          "frames": 16687,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 8,
+          "requested_ticks": 320,
+          "ticks": 320,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.4011672000015096,
+          "host_groups_s": 70165.25777754033,
+          "timeline_ticks": 9608000,
+          "timeline_skips": 1878,
+          "timeline_groups_s": 70308.90924229809,
+          "actual_link_hz": 49999999,
+          "groups": 28148,
+          "skipped": 1878,
+          "skipped_fraction": 0.06254579364550723,
+          "frames": 1881,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 8,
+          "requested_ticks": 384,
+          "ticks": 384,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.4009645999976783,
+          "host_groups_s": 62379.571663296025,
+          "timeline_ticks": 9604608,
+          "timeline_skips": 1,
+          "timeline_groups_s": 62497.501199424274,
+          "actual_link_hz": 49999999,
+          "groups": 25012,
+          "skipped": 1,
+          "skipped_fraction": 3.9979210810378605e-05,
+          "frames": 1671,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 8,
+          "requested_ticks": 384,
+          "ticks": 384,
+          "seconds": 3.0,
+          "stage": "confirm",
+          "stream_seconds": 3.0010024000002886,
+          "host_groups_s": 62477.124310191146,
+          "timeline_ticks": 71997696,
+          "timeline_skips": 1,
+          "timeline_groups_s": 62499.66665599966,
+          "actual_link_hz": 49999999,
+          "groups": 187494,
+          "skipped": 1,
+          "skipped_fraction": 5.333475559348249e-06,
+          "frames": 12503,
+          "tail_match": true,
+          "read_errors": 0
+        }
+      ],
+      "hss_failure": null
+    },
+    {
+      "case": "DBG-06",
+      "transport": "jtag",
+      "requested_hz": 73000000,
+      "hclk": 128,
+      "calibration": [
+        {
+          "slot": 28,
+          "tap": 16,
+          "passed": true
+        },
+        {
+          "slot": 28,
+          "tap": 14,
+          "passed": true
+        },
+        {
+          "slot": 28,
+          "tap": 18,
+          "passed": true
+        }
+      ],
+      "passed": true,
+      "memory": {
+        "25": true,
+        "21": true,
+        "29": true
+      },
+      "rtt_exit": 0,
+      "scope_exit": 0,
+      "tap": 16,
+      "slot": 28,
+      "service_idle": 21,
+      "hclk_dwt_hz": 128053331.30529545,
+      "rcc_cfgr": "0x79e50a",
+      "restored": true,
+      "sram": [
+        {
+          "idle": 21,
+          "passed": true,
+          "windows": [
+            {
+              "direction": "read",
+              "wall_seconds": 3.0143290999985766,
+              "payload_bytes": 12321792,
+              "wall_MBps": 4.087739457515046,
+              "clock": {
+                "wire_hz": 72727272,
+                "reference_hz": 145454544,
+                "divider": 2,
+                "timing": "0x7854e2",
+                "tap": 16,
+                "source": "PS clock tree and PL queue registers"
+              },
+              "probe_delta": {
+                "read_bytes": 12321792,
+                "write_bytes": 0,
+                "queue_s": [
+                  2.838940657670721,
+                  0.0
+                ],
+                "probe_s": [
+                  2.9334797359290876,
+                  0.0
+                ]
+              }
+            },
+            {
+              "direction": "write",
+              "wall_seconds": 3.002417499999865,
+              "payload_bytes": 11934720,
+              "wall_MBps": 3.975036782859325,
+              "clock": {
+                "wire_hz": 72727272,
+                "reference_hz": 145454544,
+                "divider": 2,
+                "timing": "0x7854e2",
+                "tap": 16,
+                "source": "PS clock tree and PL queue registers"
+              },
+              "probe_delta": {
+                "read_bytes": 0,
+                "write_bytes": 11934720,
+                "queue_s": [
+                  0.0,
+                  2.749818838255254
+                ],
+                "probe_s": [
+                  0.0,
+                  2.8485922243908255
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "idle": 25,
+          "passed": true,
+          "windows": [
+            {
+              "direction": "read",
+              "wall_seconds": 3.014154700002109,
+              "payload_bytes": 11676672,
+              "wall_MBps": 3.873945819699244,
+              "clock": {
+                "wire_hz": 72727272,
+                "reference_hz": 145454544,
+                "divider": 2,
+                "timing": "0x7864e2",
+                "tap": 16,
+                "source": "PS clock tree and PL queue registers"
+              },
+              "probe_delta": {
+                "read_bytes": 11676672,
+                "write_bytes": 0,
+                "queue_s": [
+                  2.851481692307031,
+                  0.0
+                ],
+                "probe_s": [
+                  2.941197649705268,
+                  0.0
+                ]
+              }
+            },
+            {
+              "direction": "write",
+              "wall_seconds": 3.0163940000020375,
+              "payload_bytes": 11354112,
+              "wall_MBps": 3.7641342609726482,
+              "clock": {
+                "wire_hz": 72727272,
+                "reference_hz": 145454544,
+                "divider": 2,
+                "timing": "0x7864e2",
+                "tap": 16,
+                "source": "PS clock tree and PL queue registers"
+              },
+              "probe_delta": {
+                "read_bytes": 0,
+                "write_bytes": 11354112,
+                "queue_s": [
+                  0.0,
+                  2.772666489592672
+                ],
+                "probe_s": [
+                  0.0,
+                  2.8666247018678837
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "idle": 29,
+          "passed": true,
+          "windows": [
+            {
+              "direction": "read",
+              "wall_seconds": 3.002745199999481,
+              "payload_bytes": 11031552,
+              "wall_MBps": 3.6738222077590557,
+              "clock": {
+                "wire_hz": 72727272,
+                "reference_hz": 145454544,
+                "divider": 2,
+                "timing": "0x7874e2",
+                "tap": 16,
+                "source": "PS clock tree and PL queue registers"
+              },
+              "probe_delta": {
+                "read_bytes": 11031552,
+                "write_bytes": 0,
+                "queue_s": [
+                  2.8458872324692703,
+                  0.0
+                ],
+                "probe_s": [
+                  2.9304983540155476,
+                  0.0
+                ]
+              }
+            },
+            {
+              "direction": "write",
+              "wall_seconds": 3.0146945000014966,
+              "payload_bytes": 10773504,
+              "wall_MBps": 3.573663600074452,
+              "clock": {
+                "wire_hz": 72727272,
+                "reference_hz": 145454544,
+                "divider": 2,
+                "timing": "0x7874e2",
+                "tap": 16,
+                "source": "PS clock tree and PL queue registers"
+              },
+              "probe_delta": {
+                "read_bytes": 0,
+                "write_bytes": 10773504,
+                "queue_s": [
+                  0.0,
+                  2.779333206399337
+                ],
+                "probe_s": [
+                  0.0,
+                  2.8685131208131196
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "rtt_cdc": [
+        {
+          "speed_hz": 73000000,
+          "chunk": 2048,
+          "repeat": 0,
+          "FCLK_Hz": 133333332,
+          "cfg": "0x1",
+          "waveform": {
+            "SWCLK_Hz": 66666666.0,
+            "half_period_fclk": 1,
+            "short_high": false,
+            "intended_high_ns": 7.500000075000001
+          },
+          "clockSource": 2,
+          "clockControl": 1051168,
+          "sourcePllControl": 163848,
+          "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+          "JTAG_sampling_mode": 0,
+          "RISC_V_SBA_enabled": false,
+          "actual_link_Hz": 72727272.0,
+          "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+          "swd_queue_status": "0x3c",
+          "swd_queue_summary": "0x10004",
+          "etm_idelay_ref_hz": 199999998,
+          "selectio_ref_hz": 36363636,
+          "selectio_serial_hz": 145454544,
+          "selectio_quad_hz": 72727272.0,
+          "selectio_config": "0x544e33",
+          "selectio_divider": 2,
+          "window_s": 3.0020709999989776,
+          "host_bytes": 9437184,
+          "host_MB_s": 3.143557897199371,
+          "probe_bytes": 9478144,
+          "probe_MB_s": 3.157201811683744,
+          "session_bytes": 12120060,
+          "sequence_exact": true,
+          "all_published_received": true,
+          "dap_handoff_cpuid": null,
+          "errors": 0,
+          "s0": [
+            65537,
+            536871424,
+            536871448,
+            2625536,
+            84018435,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1207961600
+          ],
+          "s1": [
+            65537,
+            536871424,
+            536871448,
+            12103680,
+            387323671,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1207961600
+          ]
+        }
+      ],
+      "hss_short": [
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 12,
+          "ticks": 12,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5603900000023714,
+          "host_groups_s": 51483.78807594338,
+          "timeline_ticks": 9612708,
+          "timeline_skips": 772209,
+          "timeline_groups_s": 72029.65074981992,
+          "actual_link_hz": 72727272,
+          "groups": 28851,
+          "skipped": 772214,
+          "skipped_fraction": 0.9639841960390231,
+          "frames": 28853,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 14,
+          "ticks": 14,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5678425999976753,
+          "host_groups_s": 49772.595434220166,
+          "timeline_ticks": 9614192,
+          "timeline_skips": 658466,
+          "timeline_groups_s": 70550.70254473803,
+          "actual_link_hz": 72727272,
+          "groups": 28263,
+          "skipped": 658469,
+          "skipped_fraction": 0.9588442070560277,
+          "frames": 28265,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 16,
+          "ticks": 16,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5665085000000545,
+          "host_groups_s": 50805.94554185371,
+          "timeline_ticks": 9604080,
+          "timeline_skips": 571474,
+          "timeline_groups_s": 71921.93317839918,
+          "actual_link_hz": 72727272,
+          "groups": 28782,
+          "skipped": 571482,
+          "skipped_fraction": 0.9520510975170925,
+          "frames": 28784,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 20,
+          "ticks": 20,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5610792999978003,
+          "host_groups_s": 50971.40457705733,
+          "timeline_ticks": 9614880,
+          "timeline_skips": 452146,
+          "timeline_groups_s": 71384.35425091108,
+          "actual_link_hz": 72727272,
+          "groups": 28599,
+          "skipped": 452148,
+          "skipped_fraction": 0.9405113292438643,
+          "frames": 28601,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 24,
+          "ticks": 24,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5578792000014801,
+          "host_groups_s": 52269.38018109053,
+          "timeline_ticks": 9611760,
+          "timeline_skips": 371331,
+          "timeline_groups_s": 72808.30982046992,
+          "actual_link_hz": 72727272,
+          "groups": 29160,
+          "skipped": 371332,
+          "skipped_fraction": 0.9271895568450805,
+          "frames": 29162,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 26,
+          "ticks": 26,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5574143999983789,
+          "host_groups_s": 52417.01685511707,
+          "timeline_ticks": 9606844,
+          "timeline_skips": 340277,
+          "timeline_groups_s": 72990.46388179094,
+          "actual_link_hz": 72727272,
+          "groups": 29218,
+          "skipped": 340281,
+          "skipped_fraction": 0.920925361097053,
+          "frames": 29220,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 28,
+          "ticks": 28,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5566145999982837,
+          "host_groups_s": 52720.49996548866,
+          "timeline_ticks": 9605736,
+          "timeline_skips": 313718,
+          "timeline_groups_s": 73316.19357433933,
+          "actual_link_hz": 72727272,
+          "groups": 29345,
+          "skipped": 313719,
+          "skipped_fraction": 0.9144620245785043,
+          "frames": 29347,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 32,
+          "ticks": 32,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5581420000016806,
+          "host_groups_s": 216801.45912623606,
+          "timeline_ticks": 9611648,
+          "timeline_skips": 179359,
+          "timeline_groups_s": 302145.8963124742,
+          "actual_link_hz": 72727272,
+          "groups": 121006,
+          "skipped": 179359,
+          "skipped_fraction": 0.5971368168728047,
+          "frames": 29169,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 48,
+          "ticks": 48,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.4009937999981048,
+          "host_groups_s": 491187.14553923503,
+          "timeline_ticks": 9605520,
+          "timeline_skips": 3153,
+          "timeline_groups_s": 492122.02983284614,
+          "actual_link_hz": 72727272,
+          "groups": 196963,
+          "skipped": 3153,
+          "skipped_fraction": 0.015755861600271842,
+          "frames": 3155,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 64,
+          "ticks": 64,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.4009405999968294,
+          "host_groups_s": 371331.81324409985,
+          "timeline_ticks": 9604800,
+          "timeline_skips": 1194,
+          "timeline_groups_s": 372016.49175412295,
+          "actual_link_hz": 72727272,
+          "groups": 148882,
+          "skipped": 1194,
+          "skipped_fraction": 0.007955968975718968,
+          "frames": 2387,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 72,
+          "ticks": 72,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.4015117000017199,
+          "host_groups_s": 329591.8898488715,
+          "timeline_ticks": 9604368,
+          "timeline_skips": 1060,
+          "timeline_groups_s": 330684.5385349666,
+          "actual_link_hz": 72727272,
+          "groups": 132335,
+          "skipped": 1060,
+          "skipped_fraction": 0.007946324824768545,
+          "frames": 2121,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 80,
+          "ticks": 80,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.4008623000008811,
+          "host_groups_s": 297099.52769252245,
+          "timeline_ticks": 9603920,
+          "timeline_skips": 954,
+          "timeline_groups_s": 297615.9734774967,
+          "actual_link_hz": 72727272,
+          "groups": 119096,
+          "skipped": 954,
+          "skipped_fraction": 0.007946688879633486,
+          "frames": 1909,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 96,
+          "ticks": 96,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.4012058000007528,
+          "host_groups_s": 247449.06479371365,
+          "timeline_ticks": 9607008,
+          "timeline_skips": 796,
+          "timeline_groups_s": 248011.45164030258,
+          "actual_link_hz": 72727272,
+          "groups": 99278,
+          "skipped": 796,
+          "skipped_fraction": 0.007954113955672802,
+          "frames": 1593,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 128,
+          "ticks": 128,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.40096730000004754,
+          "host_groups_s": 187169.8764462616,
+          "timeline_ticks": 9606272,
+          "timeline_skips": 1,
+          "timeline_groups_s": 187497.5016322669,
+          "actual_link_hz": 72727272,
+          "groups": 75049,
+          "skipped": 1,
+          "skipped_fraction": 1.3324450366422385e-05,
+          "frames": 609,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 128,
+          "ticks": 128,
+          "seconds": 3.0,
+          "stage": "confirm",
+          "stream_seconds": 3.000906000001123,
+          "host_groups_s": 187430.06278763464,
+          "timeline_ticks": 71994880,
+          "timeline_skips": 1,
+          "timeline_groups_s": 187499.66664296127,
+          "actual_link_hz": 72727272,
+          "groups": 562460,
+          "skipped": 1,
+          "skipped_fraction": 1.7779010455836049e-06,
+          "frames": 4539,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 8,
+          "requested_ticks": 112,
+          "ticks": 112,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5413173000015377,
+          "host_groups_s": 52824.84044001323,
+          "timeline_ticks": 9607696,
+          "timeline_skips": 57189,
+          "timeline_groups_s": 71427.73876275853,
+          "actual_link_hz": 72727272,
+          "groups": 28595,
+          "skipped": 57191,
+          "skipped_fraction": 0.6666705523045718,
+          "frames": 28597,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 8,
+          "requested_ticks": 144,
+          "ticks": 144,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5102928000014799,
+          "host_groups_s": 52283.70849034638,
+          "timeline_ticks": 9604512,
+          "timeline_skips": 40019,
+          "timeline_groups_s": 66666.16690155627,
+          "actual_link_hz": 72727272,
+          "groups": 26680,
+          "skipped": 40020,
+          "skipped_fraction": 0.6,
+          "frames": 26682,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 8,
+          "requested_ticks": 160,
+          "ticks": 160,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.4647957999986829,
+          "host_groups_s": 51687.214041237195,
+          "timeline_ticks": 9609280,
+          "timeline_skips": 36035,
+          "timeline_groups_s": 59999.50048286656,
+          "actual_link_hz": 72727272,
+          "groups": 24024,
+          "skipped": 36036,
+          "skipped_fraction": 0.6,
+          "frames": 24026,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 8,
+          "requested_ticks": 168,
+          "ticks": 168,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5570598999984213,
+          "host_groups_s": 51335.59245618118,
+          "timeline_ticks": 9608424,
+          "timeline_skips": 28597,
+          "timeline_groups_s": 71427.32252448477,
+          "actual_link_hz": 72727272,
+          "groups": 28597,
+          "skipped": 28598,
+          "skipped_fraction": 0.5000087420229041,
+          "frames": 28599,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 8,
+          "requested_ticks": 192,
+          "ticks": 192,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.485563700000057,
+          "host_groups_s": 51591.58314346204,
+          "timeline_ticks": 9619200,
+          "timeline_skips": 25050,
+          "timeline_groups_s": 62500.0,
+          "actual_link_hz": 72727272,
+          "groups": 25051,
+          "skipped": 25050,
+          "skipped_fraction": 0.49999002015927824,
+          "frames": 25053,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 8,
+          "requested_ticks": 240,
+          "ticks": 240,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.4013739000001806,
+          "host_groups_s": 49871.20487901927,
+          "timeline_ticks": 9607680,
+          "timeline_skips": 20016,
+          "timeline_groups_s": 50000.0,
+          "actual_link_hz": 72727272,
+          "groups": 20017,
+          "skipped": 20016,
+          "skipped_fraction": 0.4999875103039992,
+          "frames": 20019,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 8,
+          "requested_ticks": 264,
+          "ticks": 264,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.4018864999998186,
+          "host_groups_s": 45276.464872565295,
+          "timeline_ticks": 9606960,
+          "timeline_skips": 18195,
+          "timeline_groups_s": 45454.545454545456,
+          "actual_link_hz": 72727272,
+          "groups": 18196,
+          "skipped": 18196,
+          "skipped_fraction": 0.5,
+          "frames": 18198,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 8,
+          "requested_ticks": 288,
+          "ticks": 288,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.40093680000063614,
+          "host_groups_s": 77969.89450694075,
+          "timeline_ticks": 9603360,
+          "timeline_skips": 2085,
+          "timeline_groups_s": 78122.6570700255,
+          "actual_link_hz": 72727272,
+          "groups": 31261,
+          "skipped": 2085,
+          "skipped_fraction": 0.06252624002878907,
+          "frames": 2088,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 8,
+          "requested_ticks": 320,
+          "ticks": 320,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.4009308999993664,
+          "host_groups_s": 70179.17551389645,
+          "timeline_ticks": 9604160,
+          "timeline_skips": 1877,
+          "timeline_groups_s": 70309.5325359011,
+          "actual_link_hz": 72727272,
+          "groups": 28137,
+          "skipped": 1877,
+          "skipped_fraction": 0.06253748250816285,
+          "frames": 1880,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 8,
+          "requested_ticks": 384,
+          "ticks": 384,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.4009957999987819,
+          "host_groups_s": 62369.73055597085,
+          "timeline_ticks": 9603456,
+          "timeline_skips": 0,
+          "timeline_groups_s": 62500.0,
+          "actual_link_hz": 72727272,
+          "groups": 25010,
+          "skipped": 0,
+          "skipped_fraction": 0.0,
+          "frames": 1670,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 8,
+          "requested_ticks": 384,
+          "ticks": 384,
+          "seconds": 3.0,
+          "stage": "confirm",
+          "stream_seconds": 3.001300700001593,
+          "host_groups_s": 62472.58063808817,
+          "timeline_ticks": 71999232,
+          "timeline_skips": 0,
+          "timeline_groups_s": 62500.0,
+          "actual_link_hz": 72727272,
+          "groups": 187499,
+          "skipped": 0,
+          "skipped_fraction": 0.0,
+          "frames": 12502,
+          "tail_match": true,
+          "read_errors": 0
+        }
+      ],
+      "hss_failure": null,
+      "first_attempt": {
+        "case": "DBG-06",
+        "transport": "jtag",
+        "requested_hz": 73000000,
+        "hclk": 128,
+        "calibration": [
+          {
+            "slot": 22,
+            "tap": 16,
+            "passed": false
+          },
+          {
+            "slot": 22,
+            "tap": 14,
+            "passed": false
+          },
+          {
+            "slot": 22,
+            "tap": 18,
+            "passed": false
+          },
+          {
+            "slot": 21,
+            "tap": 16,
+            "passed": false
+          },
+          {
+            "slot": 21,
+            "tap": 14,
+            "passed": false
+          },
+          {
+            "slot": 21,
+            "tap": 18,
+            "passed": false
+          },
+          {
+            "slot": 23,
+            "tap": 16,
+            "passed": false
+          },
+          {
+            "slot": 23,
+            "tap": 14,
+            "passed": false
+          },
+          {
+            "slot": 23,
+            "tap": 18,
+            "passed": false
+          }
+        ],
+        "passed": false,
+        "error": "receive margin did not pass at the sampled tap neighborhood"
+      }
+    },
+    {
+      "case": "DBG-07",
+      "transport": "jtag",
+      "requested_hz": 100000000,
+      "hclk": 96,
+      "calibration": [
+        {
+          "slot": 28,
+          "tap": 16,
+          "passed": true
+        },
+        {
+          "slot": 28,
+          "tap": 14,
+          "passed": true
+        },
+        {
+          "slot": 28,
+          "tap": 18,
+          "passed": true
+        }
+      ],
+      "passed": true,
+      "memory": {
+        "33": true
+      },
+      "rtt_exit": 0,
+      "scope_exit": 0,
+      "tap": 16,
+      "slot": 28,
+      "service_idle": 33,
+      "hclk_dwt_hz": 96050203.03285663,
+      "rcc_cfgr": "0x69e50a",
+      "restored": true,
+      "sram": [
+        {
+          "idle": 33,
+          "passed": true,
+          "windows": [
+            {
+              "direction": "read",
+              "wall_seconds": 3.006739100001141,
+              "payload_bytes": 14192640,
+              "wall_MBps": 4.720276528147924,
+              "clock": {
+                "wire_hz": 99999998,
+                "reference_hz": 199999996,
+                "divider": 2,
+                "timing": "0x7884e2",
+                "tap": 16,
+                "source": "PS clock tree and PL queue registers"
+              },
+              "probe_delta": {
+                "read_bytes": 14192640,
+                "write_bytes": 0,
+                "queue_s": [
+                  2.8101271585063126,
+                  0.0
+                ],
+                "probe_s": [
+                  2.919316229339829,
+                  0.0
+                ]
+              }
+            },
+            {
+              "direction": "write",
+              "wall_seconds": 3.001270199998544,
+              "payload_bytes": 13676544,
+              "wall_MBps": 4.556918600666689,
+              "clock": {
+                "wire_hz": 99999998,
+                "reference_hz": 199999996,
+                "divider": 2,
+                "timing": "0x7884e2",
+                "tap": 16,
+                "source": "PS clock tree and PL queue registers"
+              },
+              "probe_delta": {
+                "read_bytes": 0,
+                "write_bytes": 13676544,
+                "queue_s": [
+                  0.0,
+                  2.708505350453345
+                ],
+                "probe_s": [
+                  0.0,
+                  2.8223452431519878
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "rtt_cdc": [
+        {
+          "speed_hz": 100000000,
+          "chunk": 2048,
+          "repeat": 0,
+          "FCLK_Hz": 133333332,
+          "cfg": "0x1",
+          "waveform": {
+            "SWCLK_Hz": 66666666.0,
+            "half_period_fclk": 1,
+            "short_high": false,
+            "intended_high_ns": 7.500000075000001
+          },
+          "clockSource": 2,
+          "clockControl": 1051168,
+          "sourcePllControl": 163848,
+          "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+          "JTAG_sampling_mode": 0,
+          "RISC_V_SBA_enabled": false,
+          "actual_link_Hz": 99999998.0,
+          "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+          "swd_queue_status": "0x3c",
+          "swd_queue_summary": "0x10004",
+          "etm_idelay_ref_hz": 199999998,
+          "selectio_ref_hz": 49999999,
+          "selectio_serial_hz": 199999996,
+          "selectio_quad_hz": 99999998.0,
+          "selectio_config": "0x844e33",
+          "selectio_divider": 2,
+          "window_s": 3.0020274500020605,
+          "host_bytes": 12124160,
+          "host_MB_s": 4.038657274766651,
+          "probe_bytes": 12113920,
+          "probe_MB_s": 4.035246246662963,
+          "session_bytes": 15286268,
+          "sequence_exact": true,
+          "all_published_received": true,
+          "dap_handoff_cpuid": null,
+          "errors": 0,
+          "s0": [
+            65537,
+            536871424,
+            536871448,
+            3153920,
+            100926981,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1660946432
+          ],
+          "s1": [
+            65537,
+            536871424,
+            536871448,
+            15267840,
+            488578336,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1660946432
+          ]
+        }
+      ],
+      "hss_short": [
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 12,
+          "ticks": 12,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5616493000015907,
+          "host_groups_s": 52041.37172416527,
+          "timeline_ticks": 9618060,
+          "timeline_skips": 772277,
+          "timeline_groups_s": 72932.79517906938,
+          "actual_link_hz": 99999998,
+          "groups": 29229,
+          "skipped": 772281,
+          "skipped_fraction": 0.9635325822510012,
+          "frames": 29231,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 14,
+          "ticks": 14,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.560186499998963,
+          "host_groups_s": 51950.55575251077,
+          "timeline_ticks": 9613828,
+          "timeline_skips": 657601,
+          "timeline_groups_s": 72647.85681624427,
+          "actual_link_hz": 99999998,
+          "groups": 29102,
+          "skipped": 657604,
+          "skipped_fraction": 0.9576208741441025,
+          "frames": 29104,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 16,
+          "ticks": 16,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5562715999985812,
+          "host_groups_s": 49891.09636384598,
+          "timeline_ticks": 9608512,
+          "timeline_skips": 572780,
+          "timeline_groups_s": 69318.53756336049,
+          "actual_link_hz": 99999998,
+          "groups": 27753,
+          "skipped": 572783,
+          "skipped_fraction": 0.9537862842527343,
+          "frames": 27755,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 20,
+          "ticks": 20,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5568577000012738,
+          "host_groups_s": 51118.98425744115,
+          "timeline_ticks": 9610000,
+          "timeline_skips": 452035,
+          "timeline_groups_s": 71088.44953173777,
+          "actual_link_hz": 99999998,
+          "groups": 28466,
+          "skipped": 452037,
+          "skipped_fraction": 0.9407579141025134,
+          "frames": 28468,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 24,
+          "ticks": 24,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5630763000008301,
+          "host_groups_s": 215881.9328744982,
+          "timeline_ticks": 9603360,
+          "timeline_skips": 278583,
+          "timeline_groups_s": 303786.17483880644,
+          "actual_link_hz": 99999998,
+          "groups": 121558,
+          "skipped": 278583,
+          "skipped_fraction": 0.6962120852399529,
+          "frames": 29303,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 26,
+          "ticks": 26,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5573212999988755,
+          "host_groups_s": 247212.87343634272,
+          "timeline_ticks": 9615372,
+          "timeline_skips": 232046,
+          "timeline_groups_s": 343889.3471828235,
+          "actual_link_hz": 99999998,
+          "groups": 137777,
+          "skipped": 232046,
+          "skipped_fraction": 0.6274515105874973,
+          "frames": 29394,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 28,
+          "ticks": 28,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.557765699999436,
+          "host_groups_s": 247930.26892858386,
+          "timeline_ticks": 9611672,
+          "timeline_skips": 204988,
+          "timeline_groups_s": 345295.17861200427,
+          "actual_link_hz": 99999998,
+          "groups": 138287,
+          "skipped": 204990,
+          "skipped_fraction": 0.5971562324303696,
+          "frames": 29210,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 32,
+          "ticks": 32,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.40124529999957304,
+          "host_groups_s": 736452.2400644056,
+          "timeline_ticks": 9607296,
+          "timeline_skips": 4731,
+          "timeline_groups_s": 738181.482073624,
+          "actual_link_hz": 99999998,
+          "groups": 295498,
+          "skipped": 4731,
+          "skipped_fraction": 0.0157579714151531,
+          "frames": 4731,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 48,
+          "ticks": 48,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.40125860000262037,
+          "host_groups_s": 494865.4059967893,
+          "timeline_ticks": 9607632,
+          "timeline_skips": 1591,
+          "timeline_groups_s": 496025.6596006175,
+          "actual_link_hz": 99999998,
+          "groups": 198569,
+          "skipped": 1591,
+          "skipped_fraction": 0.007948641087130295,
+          "frames": 3181,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 64,
+          "ticks": 64,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.4018280999989656,
+          "host_groups_s": 370954.6445367651,
+          "timeline_ticks": 9616192,
+          "timeline_skips": 1194,
+          "timeline_groups_s": 372020.02622243814,
+          "actual_link_hz": 99999998,
+          "groups": 149060,
+          "skipped": 1194,
+          "skipped_fraction": 0.007946543852409919,
+          "frames": 2389,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 72,
+          "ticks": 72,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.40130210000279476,
+          "host_groups_s": 329943.45157694886,
+          "timeline_ticks": 9609624,
+          "timeline_skips": 1061,
+          "timeline_groups_s": 330683.48980147403,
+          "actual_link_hz": 99999998,
+          "groups": 132407,
+          "skipped": 1061,
+          "skipped_fraction": 0.007949471034255402,
+          "frames": 2123,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 80,
+          "ticks": 80,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.40132250000169734,
+          "host_groups_s": 299126.01461291674,
+          "timeline_ticks": 9603680,
+          "timeline_skips": 1,
+          "timeline_groups_s": 299997.50095796614,
+          "actual_link_hz": 99999998,
+          "groups": 120046,
+          "skipped": 1,
+          "skipped_fraction": 8.330070722300432e-06,
+          "frames": 972,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 80,
+          "ticks": 80,
+          "seconds": 3.0,
+          "stage": "confirm",
+          "stream_seconds": 3.00115039999946,
+          "host_groups_s": 299880.6724248681,
+          "timeline_ticks": 71998960,
+          "timeline_skips": 1,
+          "timeline_groups_s": 299999.6666618518,
+          "actual_link_hz": 99999998,
+          "groups": 899987,
+          "skipped": 1,
+          "skipped_fraction": 1.1111259261234594e-06,
+          "frames": 7261,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 8,
+          "requested_ticks": 112,
+          "ticks": 112,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5763726000004681,
+          "host_groups_s": 50089.12637411382,
+          "timeline_ticks": 9618448,
+          "timeline_skips": 57010,
+          "timeline_groups_s": 72034.07452013048,
+          "actual_link_hz": 99999998,
+          "groups": 28870,
+          "skipped": 57011,
+          "skipped_fraction": 0.6638371700376102,
+          "frames": 28872,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 8,
+          "requested_ticks": 144,
+          "ticks": 144,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5562214000019594,
+          "host_groups_s": 50792.723904367,
+          "timeline_ticks": 9605952,
+          "timeline_skips": 38457,
+          "timeline_groups_s": 70583.73808238893,
+          "actual_link_hz": 99999998,
+          "groups": 28252,
+          "skipped": 38457,
+          "skipped_fraction": 0.5764889295297486,
+          "frames": 28254,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 8,
+          "requested_ticks": 160,
+          "ticks": 160,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5580248999976902,
+          "host_groups_s": 52700.15728710623,
+          "timeline_ticks": 9613120,
+          "timeline_skips": 30675,
+          "timeline_groups_s": 73417.16321027928,
+          "actual_link_hz": 99999998,
+          "groups": 29408,
+          "skipped": 30676,
+          "skipped_fraction": 0.5105518940150456,
+          "frames": 29410,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 8,
+          "requested_ticks": 168,
+          "ticks": 168,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5499092999998538,
+          "host_groups_s": 52024.94302243589,
+          "timeline_ticks": 9612288,
+          "timeline_skips": 28608,
+          "timeline_groups_s": 71428.57142857143,
+          "actual_link_hz": 99999998,
+          "groups": 28609,
+          "skipped": 28609,
+          "skipped_fraction": 0.5,
+          "frames": 28611,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 8,
+          "requested_ticks": 192,
+          "ticks": 192,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.4881146000006993,
+          "host_groups_s": 51276.89276240486,
+          "timeline_ticks": 9610752,
+          "timeline_skips": 25028,
+          "timeline_groups_s": 62500.0,
+          "actual_link_hz": 99999998,
+          "groups": 25029,
+          "skipped": 25028,
+          "skipped_fraction": 0.4999900113870188,
+          "frames": 25031,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 8,
+          "requested_ticks": 240,
+          "ticks": 240,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.4013128999977198,
+          "host_groups_s": 93515.55855845459,
+          "timeline_ticks": 9607440,
+          "timeline_skips": 2503,
+          "timeline_groups_s": 93747.34580699957,
+          "actual_link_hz": 99999998,
+          "groups": 37529,
+          "skipped": 2503,
+          "skipped_fraction": 0.0625249800159872,
+          "frames": 2506,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 8,
+          "requested_ticks": 264,
+          "ticks": 264,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.4010318000000552,
+          "host_groups_s": 90713.5045150908,
+          "timeline_ticks": 9604056,
+          "timeline_skips": 1,
+          "timeline_groups_s": 90906.59196489483,
+          "actual_link_hz": 99999998,
+          "groups": 36379,
+          "skipped": 1,
+          "skipped_fraction": 2.748763056624519e-05,
+          "frames": 2429,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 8,
+          "requested_ticks": 264,
+          "ticks": 264,
+          "seconds": 3.0,
+          "stage": "confirm",
+          "stream_seconds": 3.0011425000011513,
+          "host_groups_s": 90872.39276372094,
+          "timeline_ticks": 71998344,
+          "timeline_skips": 1,
+          "timeline_groups_s": 90908.75756809073,
+          "actual_link_hz": 99999998,
+          "groups": 272721,
+          "skipped": 1,
+          "skipped_fraction": 3.6667375569261008e-06,
+          "frames": 18185,
+          "tail_match": true,
+          "read_errors": 0
+        }
+      ],
+      "hss_failure": null
+    },
+    {
+      "case": "DBG-08",
+      "transport": "jtag",
+      "requested_hz": 100000000,
+      "hclk": 128,
+      "calibration": [
+        {
+          "slot": 28,
+          "tap": 16,
+          "passed": true
+        },
+        {
+          "slot": 28,
+          "tap": 14,
+          "passed": true
+        },
+        {
+          "slot": 28,
+          "tap": 18,
+          "passed": true
+        }
+      ],
+      "passed": false,
+      "memory": {
+        "33": true,
+        "29": true,
+        "37": true
+      },
+      "rtt_exit": 0,
+      "scope_exit": 1,
+      "tap": 16,
+      "slot": 28,
+      "service_idle": 29,
+      "hclk_dwt_hz": 128083936.21807879,
+      "rcc_cfgr": "0x79e50a",
+      "restored": true,
+      "sram": [
+        {
+          "idle": 29,
+          "passed": true,
+          "windows": [
+            {
+              "direction": "read",
+              "wall_seconds": 3.0048593999999866,
+              "payload_bytes": 14902272,
+              "wall_MBps": 4.959390778816495,
+              "clock": {
+                "wire_hz": 99999998,
+                "reference_hz": 199999996,
+                "divider": 2,
+                "timing": "0x7874e2",
+                "tap": 16,
+                "source": "PS clock tree and PL queue registers"
+              },
+              "probe_delta": {
+                "read_bytes": 14902272,
+                "write_bytes": 0,
+                "queue_s": [
+                  2.7969857548874133,
+                  0.0
+                ],
+                "probe_s": [
+                  2.911783931558266,
+                  0.0
+                ]
+              }
+            },
+            {
+              "direction": "write",
+              "wall_seconds": 3.010544900000241,
+              "payload_bytes": 14386176,
+              "wall_MBps": 4.778595396467546,
+              "clock": {
+                "wire_hz": 99999998,
+                "reference_hz": 199999996,
+                "divider": 2,
+                "timing": "0x7874e2",
+                "tap": 16,
+                "source": "PS clock tree and PL queue registers"
+              },
+              "probe_delta": {
+                "read_bytes": 0,
+                "write_bytes": 14386176,
+                "queue_s": [
+                  0.0,
+                  2.7008511926753154
+                ],
+                "probe_s": [
+                  0.0,
+                  2.8204030552083115
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "idle": 33,
+          "passed": true,
+          "windows": [
+            {
+              "direction": "read",
+              "wall_seconds": 3.006687500001135,
+              "payload_bytes": 14192640,
+              "wall_MBps": 4.720357536323493,
+              "clock": {
+                "wire_hz": 99999998,
+                "reference_hz": 199999996,
+                "divider": 2,
+                "timing": "0x7884e2",
+                "tap": 16,
+                "source": "PS clock tree and PL queue registers"
+              },
+              "probe_delta": {
+                "read_bytes": 14192640,
+                "write_bytes": 0,
+                "queue_s": [
+                  2.8101999145042025,
+                  0.0
+                ],
+                "probe_s": [
+                  2.9195680883325252,
+                  0.0
+                ]
+              }
+            },
+            {
+              "direction": "write",
+              "wall_seconds": 3.000198600002477,
+              "payload_bytes": 13676544,
+              "wall_MBps": 4.558546224236191,
+              "clock": {
+                "wire_hz": 99999998,
+                "reference_hz": 199999996,
+                "divider": 2,
+                "timing": "0x7884e2",
+                "tap": 16,
+                "source": "PS clock tree and PL queue registers"
+              },
+              "probe_delta": {
+                "read_bytes": 0,
+                "write_bytes": 13676544,
+                "queue_s": [
+                  0.0,
+                  2.708580311451171
+                ],
+                "probe_s": [
+                  0.0,
+                  2.8222382841550897
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "idle": 37,
+          "passed": true,
+          "windows": [
+            {
+              "direction": "read",
+              "wall_seconds": 3.0021131000030437,
+              "payload_bytes": 13353984,
+              "wall_MBps": 4.448194839823477,
+              "clock": {
+                "wire_hz": 99999998,
+                "reference_hz": 199999996,
+                "divider": 2,
+                "timing": "0x7894e2",
+                "tap": 16,
+                "source": "PS clock tree and PL queue registers"
+              },
+              "probe_delta": {
+                "read_bytes": 13353984,
+                "write_bytes": 0,
+                "queue_s": [
+                  2.781296166342411,
+                  0.0
+                ],
+                "probe_s": [
+                  2.883992046364231,
+                  0.0
+                ]
+              }
+            },
+            {
+              "direction": "write",
+              "wall_seconds": 3.001207699999213,
+              "payload_bytes": 13095936,
+              "wall_MBps": 4.363555378057784,
+              "clock": {
+                "wire_hz": 99999998,
+                "reference_hz": 199999996,
+                "divider": 2,
+                "timing": "0x7894e2",
+                "tap": 16,
+                "source": "PS clock tree and PL queue registers"
+              },
+              "probe_delta": {
+                "read_bytes": 0,
+                "write_bytes": 13095936,
+                "queue_s": [
+                  0.0,
+                  2.7276721548975074
+                ],
+                "probe_s": [
+                  0.0,
+                  2.836262476748388
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "rtt_cdc": [
+        {
+          "speed_hz": 100000000,
+          "chunk": 2048,
+          "repeat": 0,
+          "FCLK_Hz": 133333332,
+          "cfg": "0x1",
+          "waveform": {
+            "SWCLK_Hz": 66666666.0,
+            "half_period_fclk": 1,
+            "short_high": false,
+            "intended_high_ns": 7.500000075000001
+          },
+          "clockSource": 2,
+          "clockControl": 1051168,
+          "sourcePllControl": 163848,
+          "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+          "JTAG_sampling_mode": 0,
+          "RISC_V_SBA_enabled": false,
+          "actual_link_Hz": 99999998.0,
+          "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+          "swd_queue_status": "0x3c",
+          "swd_queue_summary": "0x10004",
+          "etm_idelay_ref_hz": 199999998,
+          "selectio_ref_hz": 49999999,
+          "selectio_serial_hz": 199999996,
+          "selectio_quad_hz": 99999998.0,
+          "selectio_config": "0x744e33",
+          "selectio_divider": 2,
+          "window_s": 3.0021554500017373,
+          "host_bytes": 12648448,
+          "host_MB_s": 4.213122275194871,
+          "probe_bytes": 12646400,
+          "probe_MB_s": 4.212440098660675,
+          "session_bytes": 16191484,
+          "sequence_exact": true,
+          "all_published_received": true,
+          "dap_handoff_cpuid": null,
+          "errors": 0,
+          "s0": [
+            65537,
+            536871424,
+            536871448,
+            3524608,
+            112789178,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1660946432
+          ],
+          "s1": [
+            65537,
+            536871424,
+            536871448,
+            16171008,
+            517480153,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1660946432
+          ]
+        }
+      ],
+      "hss_short": [
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 12,
+          "ticks": 12,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5586929000019154,
+          "host_groups_s": 52527.96303640048,
+          "timeline_ticks": 9617292,
+          "timeline_skips": 772095,
+          "timeline_groups_s": 73233.08889862135,
+          "actual_link_hz": 99999998,
+          "groups": 29347,
+          "skipped": 772100,
+          "skipped_fraction": 0.9633824819357987,
+          "frames": 29349,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 14,
+          "ticks": 14,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5572385000014037,
+          "host_groups_s": 51918.52321748609,
+          "timeline_ticks": 9609292,
+          "timeline_skips": 657448,
+          "timeline_groups_s": 72255.06312015495,
+          "actual_link_hz": 99999998,
+          "groups": 28931,
+          "skipped": 657451,
+          "skipped_fraction": 0.9578500018939891,
+          "frames": 28933,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 16,
+          "ticks": 16,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5591201999995974,
+          "host_groups_s": 52475.29958678139,
+          "timeline_ticks": 9616640,
+          "timeline_skips": 571701,
+          "timeline_groups_s": 73220.58432051112,
+          "actual_link_hz": 99999998,
+          "groups": 29340,
+          "skipped": 571704,
+          "skipped_fraction": 0.9511849382075189,
+          "frames": 29342,
+          "tail_match": true,
+          "read_errors": 0
+        },
+        {
+          "transport": "jtag",
+          "channels": 1,
+          "requested_ticks": 20,
+          "ticks": 20,
+          "seconds": 0.4,
+          "stage": "trial",
+          "stream_seconds": 0.5611085999989882,
+          "host_groups_s": 52294.68947731849,
+          "timeline_ticks": 9610140,
+          "timeline_skips": 451165,
+          "timeline_groups_s": 73277.6005344355,
+          "actual_link_hz": 99999998,
+          "groups": 29343,
+          "skipped": 451172,
+          "skipped_fraction": 0.9389342684411517,
+          "frames": 29345,
+          "tail_match": true,
+          "read_errors": 0
+        }
+      ],
+      "hss_failure": "HSS STOP totals differ: groups=118459, frames=29172, STAT=None"
+    }
+  ]
+}
