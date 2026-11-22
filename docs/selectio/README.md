@@ -63,7 +63,7 @@ python -X utf8 toolbox.py selectio --help
 
 info 同时显示实际枚举的五个接口、各端点、PS 固件 ABI、队列深度、原生块头大小和 PL 特性字。link_hz 是由真实参考寄存器换算的高速模式线速。兼容 DAP 使用不超过 10 MHz 的初始化档，显式请求 100 MHz 切换到专用 PHY。
 
-下例的时隙值用于通过验证的特定版次。更换 bit 后按对应 manifest 选择 slot。tap 是输入 IDELAY 档位，slot 单位为 2.5 ns 的 DDR 时隙，idle 是事务间的空闲周期。F103 上电后的应用可能关闭完整 JTAG，使用 JTAG 前须确认目标的 AFIO 配置。示例先在 1 MHz 识别，再切到 100 MHz。在一个终端启动 OpenOCD，在第二个终端运行 GDB。退出 GDB 可用 `detach`。
+下例的时隙值用于通过验证的特定版次。更换 bit 后按对应 manifest 选择 tap/slot。tap 是 SWDIO 或 TDO 的输入 IDELAY 档位，slot 选择反串化后的采样位置，idle 设置事务所用的额外空闲钟数。变频融合版的 SWD/JTAG slot 在 50 和 100 MHz 档间隔约 2.5 ns，在 72.727 MHz 档间隔约 3.4375 ns。校准顺序见 [精简性能用例](fusion-performance-cases.md#case-表)。F103 上电后的应用可能关闭完整 JTAG，使用 JTAG 前须确认目标的 AFIO 配置。示例先在 1 MHz 识别，再切到 100 MHz。在一个终端启动 OpenOCD，在第二个终端运行 GDB。退出 GDB 可用 `detach`。
 
 ```powershell
 $transport = 'swd'
