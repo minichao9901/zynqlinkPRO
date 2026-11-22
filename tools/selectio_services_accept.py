@@ -18,11 +18,15 @@ def main():
     ap.add_argument("--swd-slot",type=int,default=20)
     ap.add_argument("--jtag-slot",type=int,default=28)
     ap.add_argument("--confirm-seconds",type=float,default=5)
+    ap.add_argument("--confirm-rounds",type=int,default=1)
+    ap.add_argument("--transport",choices=("both","swd","jtag"),default="both")
     ap.add_argument("--execute",action="store_true")
     ap.add_argument("--clock",type=int,choices=(50000000,73000000,100000000),default=100000000)
     ap.add_argument("--swd-idle",type=int,default=2)
     ap.add_argument("--jtag-idle",type=int,default=33)
     args=ap.parse_args()
+    if args.confirm_seconds<=0 or args.confirm_rounds<1:
+        ap.error("confirmation duration and round count must be positive")
     if not args.execute:
         print("RTT UP/DOWN ring wrap and HSS rates on both physical transports.");return
     args.out.mkdir(parents=True,exist_ok=False)
@@ -45,6 +49,8 @@ def main():
     (args.out/"down.bin").write_bytes(down)
     try:
         for transport,tap,slot,idle in (("swd",8,args.swd_slot,args.swd_idle),("jtag",16,args.jtag_slot,args.jtag_idle)):
+            if args.transport not in ("both",transport):
+                continue
             profile=["--transport",transport,"--tap",tap,"--slot",slot,"--idle",idle]
             cli(["profile",*profile],transport+"-profile")
             contents=bytearray(original)
@@ -92,7 +98,10 @@ def main():
                     if not row["tail_match"] or not groups:raise RuntimeError(name+" empty or mismatched STOP")
                     return row["skipped_fraction"]<0.001
                 for t in periods:
-                    if point(t,0.4,"trial") and point(t,args.confirm_seconds,"confirm"):break
+                    if point(t,0.4,"trial") and all(
+                        point(t,args.confirm_seconds,"confirm" if args.confirm_rounds==1 else f"confirm-{round_no}")
+                        for round_no in range(1,args.confirm_rounds+1)
+                    ):break
                 else:raise RuntimeError(f"no sustained {transport} {channels}-channel point")
         report["passed"]=True
     except BaseException as ex:

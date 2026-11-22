@@ -138,7 +138,7 @@ def main():
         args.rtt_cdc_seconds<=0 or args.rtt_cdc_rounds<1):ap.error("invalid window length or count")
     suites=["command"] if args.command else args.only or ["memory","rtt","etm"]
     needs_halt=any(s in suites for s in ("memory","rtt","historical","command"))
-    backup_bytes=20480 if "historical" in suites else SIZE
+    backup_bytes=20480 if any(s in suites for s in ("historical","command")) else SIZE
     pair=args.pair.resolve()
     manifest=json.loads((pair/"manifest.json").read_text("utf8"))
     for name,sha in manifest["hashes"].items():

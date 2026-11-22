@@ -22,7 +22,7 @@ def main(argv=None):
     ap.add_argument("--out",type=Path)
     ap.add_argument("--etm-out",type=Path,help="new native ETM record directory")
     ap.add_argument("--seconds",type=float,default=60)
-    ap.add_argument("--rounds",type=int,default=3,help="read/write/mixed SRAM windows per transport")
+    ap.add_argument("--rounds",type=int,default=3,help="SRAM, RTT and HSS confirmation rounds per transport")
     ap.add_argument("--only",action="append",choices=(*SUITES,"usb-ddr","spi-cdc"))
     ap.add_argument("--clock",type=int,choices=(50000000,73000000,100000000),default=100000000,
                     help="debug, memory, running RTT, scope and combo clock in Hz")
@@ -139,12 +139,20 @@ def main(argv=None):
                  "--depth",4,"--seconds",args.seconds,"--rounds",args.rounds],args.frame)
         for service in ("rtt","combo"):
             chunk=["--rtt-chunk",args.rtt_chunk] if service=="rtt" and args.rtt_chunk else []
-            if service in selected:test(service+"-"+transport,"selectio_running_test.py",
-                [*common,*chunk,"--clock",args.clock,"--idle",cfg["idle"],"--seconds",args.seconds,"--service",service,
-                 "--binary",producer,"--ring-bytes",args.rtt_ring_bytes],16384 if args.rtt_ring_bytes==8192 else 4096)
-    if "scope" in selected:test("services","selectio_services_accept.py",["--swd-slot",profiles["swd"]["slot"],
-                       "--jtag-slot",profiles["jtag"]["slot"],"--swd-idle",profiles["swd"]["idle"],
-                       "--jtag-idle",profiles["jtag"]["idle"],"--clock",args.clock,"--confirm-seconds",args.seconds])
+            if service in selected:
+                repeats=args.rounds if service=="rtt" else 1
+                for i in range(repeats):
+                    label=service+"-"+transport
+                    if repeats>1:label+=f"-{i+1}"
+                    test(label,"selectio_running_test.py",
+                         [*common,*chunk,"--clock",args.clock,"--idle",cfg["idle"],"--seconds",args.seconds,"--service",service,
+                          "--binary",producer,"--ring-bytes",args.rtt_ring_bytes],16384 if args.rtt_ring_bytes==8192 else 4096)
+    if "scope" in selected:
+        for transport in ("swd","jtag"):
+            test("services-"+transport,"selectio_services_accept.py",
+                 ["--transport",transport,"--swd-slot",profiles["swd"]["slot"],"--jtag-slot",profiles["jtag"]["slot"],
+                  "--swd-idle",profiles["swd"]["idle"],"--jtag-idle",profiles["jtag"]["idle"],"--clock",args.clock,
+                  "--confirm-seconds",args.seconds,"--confirm-rounds",args.rounds])
     if "wire" in selected:
         # External Manchester uses the F103 TAP as a timed source. Give
         # it its own guarded SWJ handoff, as for the independent PWM source.

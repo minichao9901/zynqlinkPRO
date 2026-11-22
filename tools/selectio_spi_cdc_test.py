@@ -176,6 +176,7 @@ def main():
     with args.out.open("x", encoding="utf-8") as evidence:
         try:
             with native_connection(args.serial) as native:
+                native.info()
                 if cdc_status(native)["bound"]:
                     raise RuntimeError("the probe COM already has a binding")
                 fixture = f103_source(args, report) if args.f103_source else nullcontext(args.expected)
