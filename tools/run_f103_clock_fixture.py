@@ -87,7 +87,7 @@ def restore(mem, saved):
     mem.write_word(CR, saved['CR'])
 
 
-def dwt_check(mem, output):
+def dwt_check(mem, output, expected_hz=96_000_000):
     base = 0x2000F000
     regs = {k: core_read(mem, k) for k in [*range(19), 20]}
     ram = mem.read(base, 4096)
@@ -107,7 +107,7 @@ def dwt_check(mem, output):
         time.sleep(.35)
         t = time.perf_counter(); b = mem.word(addresses[2]); t1 = (t + time.perf_counter()) / 2
         hz = ((b - a) & 0xFFFFFFFF) / (t1 - t0)
-        assert 94_000_000 < hz < 98_000_000, hz
+        assert abs(hz-expected_hz)<2_000_000, hz
         result.update(elapsed_s=t1-t0, cycles=(b-a) & 0xFFFFFFFF, measured_Hz=hz,
                       method='DWT CYCCNT in SRAM-only loop; host midpoint-bracketed SWD reads')
     finally:

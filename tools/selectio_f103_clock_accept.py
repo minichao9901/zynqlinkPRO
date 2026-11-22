@@ -99,7 +99,11 @@ def main():
     ap.add_argument("--rtt-cdc-seconds",type=float,default=3)
     ap.add_argument("--rtt-cdc-rounds",type=int,default=2)
     ap.add_argument("--rtt-cdc-check-handoff",action="store_true")
-    ap.add_argument("--swd-slot",type=int,default=22)
+    ap.add_argument("--swd-slot",type=int,choices=range(64),default=22)
+    ap.add_argument("--swd-idle",type=int,choices=range(16),default=0)
+    ap.add_argument("--swd-tap",type=int,choices=range(32),default=8)
+    ap.add_argument("--historical-clock",type=int,default=50000000,help="requested SWD Hz for the CMSIS-DAP / CDC comparison")
+    ap.add_argument("--historical-stage",choices=("both","sram","rtt"),default="both")
     ap.add_argument("--memory-page-aligned",action="store_true")
     ap.add_argument("--memory-bytes",type=int,help="override the native SRAM block size for a geometry comparison")
     ap.add_argument("--rtt-queue",action="store_true")
@@ -219,22 +223,25 @@ def main():
                 "--ring-bytes",8192,*(["--rtt-queue"] if args.rtt_queue else ["--rtt-chunk",2048]),
                 "--out",folder/"rtt","--execute"])
         if "historical" in suites:
-            common=["--transport","swd","--bootstrap-speed-khz",1000,"--bit",pair/"probe.bit","--elf",pair/"application.elf"]
+            common=["--serial",args.serial,"--transport","swd","--bootstrap-speed-khz",1000,"--bit",pair/"probe.bit","--elf",pair/"application.elf"]
             cli=[*py,ROOT/"toolbox.py","selectio","--serial",args.serial]
-            run("profile",[*cli,"profile","--transport","swd","--tap",8,"--slot",args.swd_slot,"--idle",0])
-            run("cmsis-peak",[*py,ROOT/"tools/h743_peak.py",*common,"--speed",50000,"--address","0x20008000",
-                "--words",512,"--depth",32,"--loops",256,"--repeats",3,"--observe-link","--output",folder/"cmsis-peak.json"])
-            run("com-before",[*cli,"com","status"])
-            bound=json.loads((folder/"com-before.log").read_text("utf8"))["bound"]
-            if bound not in (0,1):raise RuntimeError("unexpected CDC binding")
-            try:
-                if bound:run("com-rtt",[*cli,"com","release"])
-                run("rtt-cdc",[*py,ROOT/"tools/benchmark_rtt_forward.py",*common,"--serialized-control","--speeds",50000000,
-                    "--chunks",2048,"--seconds",args.rtt_cdc_seconds,"--repeats",args.rtt_cdc_rounds,
-                    *(["--check-dap-handoff"] if args.rtt_cdc_check_handoff else []),
-                    "--output",folder/"rtt-cdc.json"])
-            finally:
-                if bound:run("com-restore",[*cli,"com","bind"])
+            run("profile",[*cli,"profile","--transport","swd","--tap",args.swd_tap,"--slot",args.swd_slot,"--idle",args.swd_idle])
+            if args.historical_stage!="rtt":
+                run("cmsis-peak",[*py,ROOT/"tools/h743_peak.py",*common,"--speed-hz",args.historical_clock,
+                    "--address","0x20008000","--words",512,"--depth",32,"--loops",256,"--repeats",3,
+                    "--observe-link","--output",folder/"cmsis-peak.json"])
+            if args.historical_stage!="sram":
+                run("com-before",[*cli,"com","status"])
+                bound=json.loads((folder/"com-before.log").read_text("utf8"))["bound"]
+                if bound not in (0,1):raise RuntimeError("unexpected CDC binding")
+                try:
+                    if bound:run("com-rtt",[*cli,"com","release"])
+                    run("rtt-cdc",[*py,ROOT/"tools/benchmark_rtt_forward.py",*common,"--serialized-control",
+                        "--speeds",args.historical_clock,"--chunks",2048,"--seconds",args.rtt_cdc_seconds,
+                        "--repeats",args.rtt_cdc_rounds,*(["--check-dap-handoff"] if args.rtt_cdc_check_handoff else []),
+                        "--output",folder/"rtt-cdc.json"])
+                finally:
+                    if bound:run("com-restore",[*cli,"com","bind"])
         if "etm" in suites:
             if taps is not None:
                 tap_dir=folder/"lane";tap_dir.mkdir()

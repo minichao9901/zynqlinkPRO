@@ -123,9 +123,14 @@ int probe_target_claim_on(uint32_t hz,uint32_t requested_port) {
     if(port==2 && DAP_Data.debug_port==2 && !(swd_read32(JTAG_TIMING)&4U)) return -7;
 #if DAP_SELECTIO
     saved_live=selectio_live_config();
-    uint32_t fast=(hz==100000000U || (hz==50000000U && (swd_read32(SWD_FEATURES)&0x8000U))) ? hz : 0U;
+    unsigned divisor,half_rate;
+    uint32_t fast=selectio_clock_plan(hz,&divisor,&half_rate) ? 0U : hz;
     if(fast && !selectio_live_available()) return -10;
-    if(fast) hz=1000000U;
+    // A connected host may already have qualified this wire profile. Take
+    // its AP context without parking SelectIO and changing transport clocks.
+    int keep_live=fast && DAP_Data.debug_port==port && (saved_live&1U) &&
+                  ((saved_live>>26)&1U)==half_rate && selectio_clock_divisor()==divisor;
+    if(fast) hz=keep_live ? 0U : 1000000U;
 #endif
     saved_dap = DAP_Data;
     saved_clock = Xil_In32(SLCR_FPGA0_CLK_CTRL);
@@ -198,7 +203,7 @@ int probe_target_claim_on(uint32_t hz,uint32_t requested_port) {
         return -4;
     }
 #if DAP_SELECTIO
-    if (fast && clock_set(fast)) {
+    if (fast && !keep_live && clock_set(fast)) {
         (void)probe_target_release();
         return -4;
     }

@@ -1,0 +1,77 @@
+{
+  "artifacts": {
+    "git_head": "9dbab8fba5bca28841f768c53a37163a50a5bed4",
+    "git_dirty": true,
+    "bit": {
+      "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-variable-20261122\\full\\probe.bit",
+      "sha256": "70ea6b84b7db416e2ddfa53e4e46b3384c4c5051716282abc3dd56b59c270129"
+    },
+    "elf": {
+      "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-variable-20261122\\full\\application.elf",
+      "sha256": "5ef9fc83bc45c68a54585a0627e1150bb5806b5663e06138265a271cb611e9ec"
+    }
+  },
+  "kind": "continuous RAM producer RTT->CDC",
+  "transport": "swd",
+  "rows": [],
+  "backup_sha256": "65067195cf0be84ee12cb903ae306dd0e8b4d09d8d257452b73827d19edb74d3",
+  "registers_before": {
+    "0": 1001906,
+    "1": 536871272,
+    "2": 3,
+    "3": 536877048,
+    "4": 536871251,
+    "5": 536871255,
+    "6": 646952329,
+    "7": 3040397510,
+    "8": 4294962943,
+    "9": 4259299324,
+    "10": 968574952,
+    "11": 2329090040,
+    "12": 10,
+    "13": 536871936,
+    "14": 536871241,
+    "15": 536871244,
+    "16": 16777216,
+    "17": 536871936,
+    "18": 37207788,
+    "20": 1
+  },
+  "RCC_before": {
+    "name": "STM32F103",
+    "cpuid": "0x411fc231",
+    "device": "0x10036414",
+    "registers": {
+      "0x40021000": "0x3034e83",
+      "0x40021004": "0x79e50a"
+    }
+  },
+  "fixture_base": "0x20000000",
+  "failure": "AssertionError()",
+  "failure_clock": {
+    "FCLK_Hz": 133333332,
+    "cfg": "0xa01",
+    "waveform": {
+      "SWCLK_Hz": 66666666.0,
+      "half_period_fclk": 1,
+      "short_high": false,
+      "intended_high_ns": 7.500000075000001
+    },
+    "clockSource": 2,
+    "clockControl": 1051168,
+    "sourcePllControl": 163848,
+    "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+    "JTAG_sampling_mode": 0,
+    "RISC_V_SBA_enabled": false,
+    "actual_link_Hz": 49999999.0,
+    "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+    "swd_queue_status": "0x3c",
+    "swd_queue_summary": "0x103",
+    "etm_idelay_ref_hz": 199999998,
+    "selectio_ref_hz": 49999999,
+    "selectio_serial_hz": 199999996,
+    "selectio_quad_hz": 99999998.0,
+    "selectio_config": "0x4840e2d",
+    "selectio_divider": 4
+  }
+}

@@ -170,6 +170,8 @@ def point(probe, mem, port, code, speed, chunk, seconds, repeat, activate_transp
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument('--serial')
+    ap.add_argument('--bootstrap-transport',choices=('swd','jtag'),default='swd')
     ap.add_argument('--seconds', type=float, default=3)
     ap.add_argument('--serialized-control',action='store_true',help='release the forwarding owner before target run/halt; same timed CDC window')
     ap.add_argument('--check-dap-handoff',action='store_true',help='exercise a CMSIS-DAP CPUID read during the CDC window')
@@ -197,10 +199,11 @@ def main():
                     f'-Wl,-Ttext={base:#x}', f'-Wa,--defsym,FIXTURE_BASE={base:#x}', '-Wl,-e,producer',
                     str(root/'firmware/target/probe_rtt_ram.S'), '-o', str(elf)], check=True)
     subprocess.run([str(objcopy), '-O', 'binary', str(elf), str(binary)], check=True)
+    ir_lengths=tuple(map(int,args.jtag_ir.split(',')))
     code = binary.read_bytes()
     assert len(code) < 512
-    probe = Probe()
-    dev, out, inp = open_dap()
+    probe = Probe(args.serial)
+    dev, out, inp = open_dap(args.serial)
     mem = Memory(out, inp)
     backup, regs, initial = None, None, None
     report = {'artifacts':provenance(args.bit,args.elf),'kind': 'continuous RAM producer RTT->CDC', 'transport':args.transport, 'rows': []}
@@ -210,7 +213,7 @@ def main():
         # exchange; retry the setup instead of failing the whole run.
         for attempt in range(4):
             try:
-                setup(out, inp, args.bootstrap_speed_khz, 'swd')
+                setup(out, inp, args.bootstrap_speed_khz,args.bootstrap_transport,jtag_ir_lengths=ir_lengths)
                 break
             except RuntimeError as exc:
                 if attempt == 3:
@@ -227,13 +230,17 @@ def main():
         report['registers_before'] = regs
         report['RCC_before'] = snapshot(mem)
         report['fixture_base'] = hex(base)
-        port = next(p.device for p in serial.tools.list_ports.comports() if p.vid == 0xd28 and p.pid == 0x204)
+        ports = [p.device for p in serial.tools.list_ports.comports()
+                 if p.vid==0xd28 and p.pid==0x204 and (not args.serial or p.serial_number==args.serial)]
+        if len(ports)!=1:
+            raise RuntimeError(f"Expected one matching probe CDC port, found {ports}")
+        port = ports[0]
         for speed in map(int, args.speeds.split(',')):
             for chunk in map(int, args.chunks.split(',')):
                 for repeat in range(args.repeats):
-                    setup(out,inp,args.bootstrap_speed_khz,'swd')
+                    setup(out,inp,args.bootstrap_speed_khz,args.bootstrap_transport,jtag_ir_lengths=ir_lengths)
                     row = point(probe, mem, port, code, speed, chunk, args.seconds, repeat,
-                                lambda:setup(out,inp,speed//1000,args.transport,jtag_ir_lengths=tuple(map(int,args.jtag_ir.split(','))),speed_hz=speed),base=base,
+                                lambda:setup(out,inp,speed//1000,args.transport,jtag_ir_lengths=ir_lengths,speed_hz=speed),base=base,
                                 serialized_control=args.serialized_control,check_dap_handoff=args.check_dap_handoff)
                     report['rows'].append(row)
                     args.output.write_text(json.dumps(report, indent=2))
@@ -249,7 +256,7 @@ def main():
         try:
             try:stop(probe,dev)
             except RuntimeError:recover(dev,inp);stop(probe,dev)
-            setup(out, inp, args.bootstrap_speed_khz, 'swd')
+            setup(out, inp, args.bootstrap_speed_khz,args.bootstrap_transport,jtag_ir_lengths=ir_lengths)
             mem.write_word(DHCSR, 0xa05f0003)
             if backup is not None:
                 mem.write(base, backup)

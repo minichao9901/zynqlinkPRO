@@ -74,7 +74,7 @@ def measure_pipeline(mem, base, *, words, depth, loops, repeats, soak_seconds):
             samples.append(dict(MB_s=rate, seconds=dt))
         rates = sorted(x['MB_s'] for x in samples)
         row[mode] = dict(MB_s=rates[len(rates) // 2], samples=samples,
-                         blocks=loops, bytes=loops * nbytes)
+                         blocks=loops, bytes=loops * nbytes, errors=0)
         if mode == 'write':
             assert mem.read(base, len(window)) == window, 'write readback mismatch'
     if soak_seconds > 0:
@@ -97,6 +97,8 @@ def measure_pipeline(mem, base, *, words, depth, loops, repeats, soak_seconds):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument('--serial')
+    ap.add_argument('--bootstrap-transport',choices=('swd','jtag'),default='swd')
     ap.add_argument('--speed', type=int, default=60000)
     ap.add_argument('--speed-hz',type=int,help='Exact Hz request, including non-whole-kHz fixed-FCLK divisors')
     ap.add_argument('--bootstrap-speed-khz',type=int,default=50000)
@@ -118,14 +120,14 @@ def main():
     base = int(args.address, 0)
     assert args.words % 256 == 0, 'keep TAR wrap aligned to 1 KiB'
     jtag_ir = tuple(int(v) for v in args.jtag_ir.split(','))
-    dev, out, inp = open_dap()
+    dev, out, inp = open_dap(args.serial)
     mem = Memory(out, inp)
     row = dict(transport=args.transport, requested_kHz=args.speed if args.speed_hz is None else args.speed_hz/1000, requested_Hz=args.speed*1000 if args.speed_hz is None else args.speed_hz, words=args.words,
                depth=args.depth, loops=args.loops, artifacts=provenance(args.bit,args.elf))
     saved = None
     initial = None
     try:
-        setup(out, inp, args.bootstrap_speed_khz)
+        setup(out, inp, args.bootstrap_speed_khz,args.bootstrap_transport,jtag_ir_lengths=jtag_ir)
         initial = mem.word(0xE000EDF0)
         row['RCC_before'] = snapshot(mem)
         if not args.no_halt and not initial & (1 << 17):
@@ -157,7 +159,7 @@ def main():
     finally:
         try:
             recover(dev, inp)
-            setup(out, inp, args.bootstrap_speed_khz)
+            setup(out, inp, args.bootstrap_speed_khz,args.bootstrap_transport,jtag_ir_lengths=jtag_ir)
             if saved is not None:
                 mem.write(base, saved)
                 restored = mem.read(base, len(saved))
