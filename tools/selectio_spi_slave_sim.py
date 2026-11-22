@@ -19,22 +19,30 @@ def main():
         rtl / "selectio_debug_phy.v",
         rtl / "selectio_spi_slave_rx.v",
         ROOT / "fpga/sim/tb_selectio_spi_slave.sv",
+        ROOT / "fpga/sim/tb_selectio_spi_slave_offset.sv",
         VIVADO / "data/verilog/src/glbl.v",
     ]
-    steps = [
-        ("xvlog", ["--sv", *sources]),
-        ("xelab", ["-L", "unisims_ver", "-L", "secureip", "-s", "spi_slave", "tb_selectio_spi_slave", "glbl"]),
-        ("xsim", ["spi_slave", "-runall"]),
-    ]
-    for name, options in steps:
+
+    def run(name, options, log):
         result = subprocess.run(
             [binaries / (name + ".exe"), *options], cwd=out, env=environment(),
             stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
             errors="replace", timeout=300)
-        (out / (name + ".txt")).write_text(result.stdout, encoding="utf-8")
-        if result.returncode or (name == "xsim" and "SPI_SLAVE_PASS" not in result.stdout):
+        (out / log).write_text(result.stdout, encoding="utf-8")
+        if result.returncode:
             raise SystemExit(result.stdout[-4000:])
-    print(next(line for line in result.stdout.splitlines() if line.startswith("SPI_SLAVE_PASS")))
+        return result.stdout
+
+    run("xvlog", ["--sv", *sources], "xvlog.txt")
+    for suffix, marker in (("", "SPI_SLAVE_PASS"), ("_offset", "SPI_SLAVE_OFFSET_PASS")):
+        entry = "spi_slave" + suffix
+        run("xelab", ["-L", "unisims_ver", "-L", "secureip", "-s", entry, "tb_selectio_" + entry, "glbl"],
+            f"xelab{suffix}.txt")
+        output = run("xsim", [entry, "-runall"], f"xsim{suffix}.txt")
+        match = next((line for line in output.splitlines() if line.startswith(marker)), None)
+        if match is None or "Fatal:" in output:
+            raise SystemExit(output[-4000:])
+        print(match, flush=True)
 
 
 if __name__ == "__main__":

@@ -132,7 +132,10 @@ def capture(port, expected, timeout):
         while want := stream.read(65536):
             received = bytearray()
             while len(received) < len(want):
-                data = port.read(min(len(want) - len(received), port.in_waiting or 1))
+                # Timestamp the first byte, then issue bulk COM reads. Polling
+                # in_waiting before every read adds a Windows serial IOCTL.
+                size = 1 if first is None else len(want) - len(received)
+                data = port.read(size)
                 if data and first is None:
                     first = time.monotonic()
                 received.extend(data)
@@ -144,7 +147,11 @@ def capture(port, expected, timeout):
             total += len(received)
             digest.update(received)
     end = time.monotonic()
-    return dict(bytes=total, sha256=digest.hexdigest(), receive_seconds=end-first,
+    if first is None:
+        raise RuntimeError("expected payload is empty")
+    elapsed = end-first
+    return dict(bytes=total, sha256=digest.hexdigest(), receive_seconds=elapsed,
+                pc_receive_mbps=total/elapsed/1e6 if elapsed else None,
                 command_window_seconds=end-start)
 
 
@@ -188,6 +195,8 @@ def main():
             with fixture as expected, native_connection(args.serial) as native:
                 native.info()
                 with serial.Serial(matches[0], baudrate=115200, timeout=0.05) as port:
+                    if hasattr(port, "set_buffer_size"):
+                        port.set_buffer_size(rx_size=1048576, tx_size=4096)
                     source_started = time.monotonic()
                     try:
                         native.exchange(0, 3, bytes((3, args.mode, args.tap)))

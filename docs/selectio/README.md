@@ -181,6 +181,8 @@ python -X utf8 toolbox.py selectio com release
 python -X utf8 tools/selectio_spi_cdc_test.py --serial 12345678 --mode 0 --tap 0 --expected build/known-mosi.bin --seconds 65 --out build/spi-slave-wire.json --execute
 ```
 
+持续 100 MHz 满载对应每轮 60 秒 **750,000,000 B**，确认三轮。报告的 `pc_receive_mbps` 取 COM 首字节至收齐的主机计时。SCK 频率、源发送窗与帧间间隙由独立主机记录，与 COM 字节数及 SHA-256 对拍。Windows 采集端建议驱动使用 1 MiB 接收缓冲，并按块读取。
+
 ## 频率与参数速查
 
 | 功能 | CLI 与主要配置 |

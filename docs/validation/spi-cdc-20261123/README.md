@@ -50,3 +50,7 @@ CDC48 的 24 MHz TRACECLK 运行态 ETM，完整 1.000 秒窗口、19,389,488 B 
 补跑已通过 128 次 SWD/JTAG 切换、SPI/HSS 主机退出与重新接管、SWD 单步与断点。SWD SRAM 同一 100 MHz/slot25/idle2 配置，4,032 B 跨页、深度 4，读、写、交替各 3×60 秒。PC 读/写/交替的中位数为 **6.673/6.610/6.575 MB/s**，全部载荷或末块与保护字校验通过，目标恢复。 [SWD 长窗](swd-sram-100.json)
 
 复现入口见 [CLI](../../selectio/README.md#spi-从机接收转发到-com) 与 [Case 表](../../selectio/fusion-performance-cases.md)。时序收敛、目标和探针恢复以及全部功能用例以同一份 bit/ELF 的后续实测记录为准。
+
+## 100 MHz 异步参考漂移复测
+
+上面的实板记录属于 `d7c58324…` 配对。后续在数字台架用精确 100 MHz SCK 和 2.502 ns 采样间隔复现错误。相位漂移使同一个四点采样字偶尔包含两个有效边沿，旧接收器会报帧错并丢弃它们。接收器改为按顺序处理两个边沿，保留字内的 CS 间隙。四种模式连续 8,192 B 匹配，观察到 53 个双边沿字，另核对同字 CS 间隙跨过两帧。新配对需要重新构建与板测，100 MHz 独立源长窗仍待验证。 [旧 RTL 失败](spi-slave-offset-before.txt) · [修正后结果](spi-slave-offset-after.txt)
