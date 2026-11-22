@@ -41,6 +41,10 @@ if {$variable_clock} {
     set_property -dict [list CONFIG.PCW_FPGA0_PERIPHERAL_FREQMHZ 133.333333 CONFIG.PCW_EN_CLK1_PORT 1 CONFIG.PCW_FPGA_FCLK1_ENABLE 1 \
         CONFIG.PCW_FPGA1_PERIPHERAL_FREQMHZ 50 CONFIG.PCW_EN_CLK2_PORT 1 \
         CONFIG.PCW_FPGA_FCLK2_ENABLE 1 CONFIG.PCW_FPGA2_PERIPHERAL_FREQMHZ 200] $ps
+    # Keep the PS-to-MMCM connection on the global network, as in the
+    # standalone SelectIO design. The JTAG slice also owns IDELAYCTRL.
+    set_property CONFIG.PCW_FCLK_CLK1_BUF TRUE $ps
+    if {$slice==1} {set_property CONFIG.PCW_FCLK_CLK2_BUF TRUE $ps}
     if {[get_property CONFIG.PCW_IOPLL_CTRL_FBDIV $ps]!=48 ||
         abs([get_property CONFIG.PCW_ACT_FPGA1_PERIPHERAL_FREQMHZ $ps]-50.0)>0.001 ||
         abs([get_property CONFIG.PCW_ACT_FPGA2_PERIPHERAL_FREQMHZ $ps]-200.0)>0.001} {

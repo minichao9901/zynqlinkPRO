@@ -10,6 +10,8 @@ FCLK0 按 133.333 MHz 实现。FCLK1 单独给 SelectIO，采用约 1600 MHz IO 
 
 初次构建使用 BD 的 100 MHz FCLK0 默认值，Vivado 生成的 IO PLL 为 1800 MHz，虽然两路参考在默认频率附近可用，不能匹配调频表。最终配置把 FCLK0 目标指定为 133.333333 MHz，离线核对 IO PLL 反馈系数为 48，FCLK1/FCLK2 从相应整数分频得到 50/200 MHz。运行时配置读取 SLCR 实际值，BD 生成时核对 PLL 和两路参考，路由验证核对 A 布局和派生时钟。
 
+首轮放置被 REQP-1578 拒绝，原融合版的 MMCM 输入经过共享参考上的 BUFG，迁移后需在 PS 端显式打开 FCLK1 全局缓冲。JTAG 裁剪版独立使用 FCLK2 驱动 IDELAYCTRL，也打开该输出的全局缓冲。修正后的融合版已通过放置前 DRC。[失败原始证据](first-placement.txt)
+
 ## 台架口径
 
 - Cortex-M3 DesignStart HCLK128，SWDIO 模拟返回延时 16 ns，idle 0。50 和 72.727 MHz 使用 slot22，100 MHz 使用 slot24。使用实际 Xilinx 7 系列时钟及 SelectIO 原语。
@@ -62,5 +64,7 @@ python -X utf8 tools/selectio_cm3.py @bench --variable-clock 32 --swd-slot 24 --
 python -X utf8 tools/selectio_cm3.py --variable-clock 32 --jtag-only --target-clk-ns 7.8125 --jtag-slot 21 --out build/vclk-sim-jtag-full
 python -X utf8 tools/selectio_cm3.py --variable-clock 32 --jtag-only --target-clk-ns 7.8125 --jtag-slot 21 --slice jtag --out build/vclk-sim-jtag-slice
 ```
+
+可变参考的例子为 --clock 73000000，实际档位约 72.727 MHz。原生读写和批量测速 CLI 支持该参数。已有接口的时钟回读字段仍使用串行时钟作为计算基数，探针寄存器观察另报 FCLK1、FCLK2 和 quad 的结果。
 
 逐笔时序用 --swd50-faults 替换 --wire-budget --swd50-windows，在相同 FCLK1 分频、SWD 档和 slot 下执行。50 MHz 的提前边沿单独用 --early-swd50，对应仍是仿真候选。
