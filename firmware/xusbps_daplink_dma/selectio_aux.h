@@ -8,6 +8,7 @@ void selectio_aux_poll(void);
 void selectio_cdc_status(uint32_t values[8]);
 int selectio_aux_conflict(unsigned port);
 int selectio_cdc_bind(unsigned enable);
+int selectio_cdc_bind_spi(unsigned mode,unsigned tap);
 int selectio_cdc_receiving(void);
 int selectio_cdc_space(void);
 void selectio_cdc_receive(const uint8_t *data,unsigned length);

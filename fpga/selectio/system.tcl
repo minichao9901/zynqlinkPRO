@@ -85,6 +85,10 @@ foreach pins {
     {sio_aux/pad_request sio_clock/aux_request}
     {sio_clock/aux_granted sio_aux/pad_granted}
     {sio_aux/spi_selected swd_controller_0/hs_aux_spi}
+    {sio_aux/spi_slave_selected swd_controller_0/hs_aux_spi_slave}
+    {swd_controller_0/hs_slave_sck sio_aux/slave_sck}
+    {swd_controller_0/hs_slave_cs_n sio_aux/slave_cs_n}
+    {swd_controller_0/hs_slave_mosi sio_aux/slave_mosi}
     {sio_aux/clock_slots swd_controller_0/hs_aux_sck}
     {sio_aux/select_slots swd_controller_0/hs_aux_cs}
     {sio_aux/tx_slots swd_controller_0/hs_aux_tx}

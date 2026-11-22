@@ -132,6 +132,8 @@ Trace五路输入包含ELD1延时单元，默认零tap。RTCK自适应、断开�
 
 ## 开发与文档
 
+本工作区的融合探针配置、CLI、SPI 从机转发和定向实板用例见 [SelectIO 工作手册](docs/selectio/README.md)。
+
 | 路径 | 内容 |
 |---|---|
 | `fpga/` | PL RTL、约束、仿真与实现 |

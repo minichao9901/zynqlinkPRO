@@ -15,7 +15,9 @@ module selectio_debug_phy (
     output wire clock_level, data_level, tdi_level, tdo_level,
     input wire aux_spi, input wire [3:0] aux_sck,aux_cs,aux_tx,
     output wire [3:0] aux_rx, input wire uart_sideband, monitor_tdi,
-    input wire serial_rx_clk, output wire [7:0] aux_wide_rx
+    input wire serial_rx_clk, output wire [7:0] aux_wide_rx,
+    input wire aux_spi_slave,
+    output wire [3:0] slave_sck, slave_cs_n, slave_mosi
 );
     // Aligned rising edges: observe the toggle on the intervening quartet
     // edge. At the next shared edge the serializer consumes the upper half.
@@ -45,29 +47,37 @@ module selectio_debug_phy (
         legacy_sync <= legacy_meta;
     end
     wire aux = owner==4;
+    wire spi_listener = aux && aux_spi_slave;
+    wire spi_driver = aux && aux_spi && !aux_spi_slave;
     wire legacy = owner == 1;
     wire jtag = owner == 2;
     wire swd = owner == 3;
-    wire [3:0] clock_word = legacy ? {4{legacy_sync[4]}} : jtag ? jclock : swd ? swd_clock : aux && aux_spi ? aux_sck : 4'b0;
+    wire [3:0] clock_word = legacy ? {4{legacy_sync[4]}} : jtag ? jclock : swd ? swd_clock : spi_driver ? aux_sck : 4'b0;
     wire [3:0] data_word = legacy ? {4{legacy_sync[3]}} : jtag ? jdata : aux ? aux_cs : swd_data;
-    wire [3:0] release_word = legacy ? {4{legacy_sync[2]}} : jtag ? 4'b0 : swd ? swd_release : aux && aux_spi ? 4'h0 : 4'hf;
+    wire [3:0] release_word = legacy ? {4{legacy_sync[2]}} : jtag ? 4'b0 : swd ? swd_release : spi_driver ? 4'h0 : 4'hf;
     wire [3:0] tdi_word = jtag ? jtdi : (aux || uart_sideband) ? aux_tx : {4{legacy_sync[1]}};
 
     wire swdio_input, tdo_input, tdi_input;
     wire clock_out, data_out, tdi_out, clock_tri, data_tri, tdi_tri;
-    selectio_tx clock_tx(serial_clk, quad_clk, reset, clock_word, {4{owner==0 || (aux && !aux_spi)}}, clock_out, clock_tri);
+    selectio_tx clock_tx(serial_clk, quad_clk, reset, clock_word,
+                         {4{owner==0 || (aux && !spi_driver)}}, clock_out, clock_tri);
     selectio_tx data_tx(serial_clk, quad_clk, reset, data_word, release_word, data_out, data_tri);
     selectio_tx tdi_tx(serial_clk, quad_clk, reset, tdi_word,
-                      {4{!jtag && !aux && !uart_sideband && !(legacy && !legacy_sync[0])}}, tdi_out, tdi_tri);
-    IOBUF clock_pad(.I(clock_out),.T(clock_tri),.IO(clock_pin),.O(clock_level));
+                      {4{spi_listener || (!jtag && !spi_driver && !uart_sideband && !(legacy && !legacy_sync[0]))}},
+                      tdi_out, tdi_tri);
+    wire clock_input;
+    IOBUF clock_pad(.I(clock_out),.T(clock_tri),.IO(clock_pin),.O(clock_input));
     IOBUF data_pad(.I(data_out),.T(data_tri),.IO(data_pin),.O(swdio_input));
     IOBUF tdi_pad(.I(tdi_out),.T(tdi_tri),.IO(tdi_pin),.O(tdi_input));
     IBUF tdo_pad(.I(tdo_pin),.O(tdo_input));
     wire [3:0] captured_swd;
+    assign slave_cs_n = captured_swd;
+    assign slave_mosi = {tdi_wide[6],tdi_wide[4],tdi_wide[2],tdi_wide[0]};
     // Register the ILOGIC return before evaluating ACK and preparing the
     // next OSERDES word. Sample offsets include this additional quartet.
     always @(posedge quad_clk) swd_samples<=captured_swd;
     selectio_rx data_rx(serial_clk, quad_clk, reset, swdio_input, tap_clk, swdio_load, swdio_tap, captured_swd, data_level);
+    selectio_rx clock_rx(serial_clk, quad_clk, reset, clock_input, tap_clk, swdio_load, swdio_tap, slave_sck, clock_level);
     selectio_rx #(.WIDTH(8)) tdi_rx(serial_rx_clk,quad_clk,reset,tdi_input,tap_clk,tdo_load,tdo_tap,tdi_wide,tdi_level);
     selectio_rx #(.WIDTH(8)) tdo_rx(serial_rx_clk, quad_clk, reset, tdo_input, tap_clk, tdo_load, tdo_tap, tdo_wide, tdo_level);
 endmodule

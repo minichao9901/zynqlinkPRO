@@ -212,6 +212,8 @@ def capture_combo(args):
     config=struct.pack("<4BIIBBBB",PORTS[args.transport],args.tap,args.slot,args.idle,
                        args.rtt_address,args.ticks,len(args.var),args.channel,int(args.clock==50000000),0)
     config+=struct.pack("<"+"I"*len(args.var),*args.var)
+    if args.clock not in (50000000,100000000):
+        config+=struct.pack("<I",args.clock)
     layout=struct.Struct("<"+"I"*(1+len(args.var)))
     received=samples=0
     with connection(args.serial) as (tx,rx), native_connection(args.serial,tx.device) as native, \
@@ -269,6 +271,8 @@ def capture(args):
     with connection(args.serial) as (tx,rx), native_connection(args.serial,tx.device) as native, args.out.open("xb") as output:
         setup(tx,rx,1000,args.transport)
         info=native.info()
+        if args.tap is not None:
+            native.exchange(0,2,bytes((PORTS[args.transport],args.tap,args.slot,args.idle)))
         native.exchange(channel,0,b"\x01")
         active=False
         received=0
@@ -330,8 +334,10 @@ def main():
     commands.add_parser("info", help="read firmware capabilities and PS reference clock")
     test = commands.add_parser("usb-test", help="verify WinUSB transport independently of the target")
     test.add_argument("--seconds", type=float, default=5)
-    sub=commands.add_parser("com",help="bind the physical UART to the probe CDC COM port, release it, or read status")
-    sub.add_argument("operation",choices=("bind","release","status"))
+    sub=commands.add_parser("com",help="select physical UART or SPI slave reception on the probe CDC COM port")
+    sub.add_argument("operation",choices=("bind","bind-spi","release","status"))
+    sub.add_argument("--mode",type=int,choices=range(4),help="SPI CPOL/CPHA mode for bind-spi")
+    sub.add_argument("--tap",type=int,choices=range(32),help="SPI MOSI delay tap for bind-spi")
     sub=commands.add_parser("profile",help="set the live DAP, RTT and scope sampling profile before connecting")
     sub.add_argument("--transport",choices=PORTS,required=True)
     sub.add_argument("--tap",type=int,choices=range(32),required=True)
@@ -362,7 +368,7 @@ def main():
             sub.add_argument("--itm-mask",type=number,default=1,help="ITM stimulus port bit mask for target setup")
 
     sub=commands.add_parser("combo",help="simultaneously drain RTT and sample 1..8 SRAM words on one link")
-    sub.add_argument("--clock",type=number,choices=(50000000,100000000),default=100000000)
+    sub.add_argument("--clock",type=selectio_clock_number,default=100000000)
     sub.add_argument("--transport",choices=PORTS,required=True)
     sub.add_argument("--tap",type=int,choices=range(32),required=True,metavar="0..31")
     sub.add_argument("--slot",type=int,choices=range(64),required=True,metavar="0..63")
@@ -405,6 +411,9 @@ def main():
         sub.add_argument("--clock",type=number,required=True,help="requested link rate, Hz")
         sub.add_argument("--seconds",type=float,required=True)
         sub.add_argument("--out",type=Path,required=True)
+        sub.add_argument("--tap",type=int,choices=range(32),help="apply tap together with --slot and --idle")
+        sub.add_argument("--slot",type=int,choices=range(64))
+        sub.add_argument("--idle",type=int,choices=range(256))
         if action=="rtt":
             sub.add_argument("--chunk",type=int,choices=(1024,2048),help="maximum target RTT bytes per confirmed RdOff update")
             sub.add_argument("--address",type=number,required=True,help="RTT control block or scan base")
@@ -428,6 +437,12 @@ def main():
         else:
             sub.add_argument("--file", type=Path, required=True)
     args = parser.parse_args()
+    if args.action in ("rtt","scope"):
+        profile = (args.tap,args.slot,args.idle)
+        if any(value is not None for value in profile) and any(value is None for value in profile):
+            parser.error("--tap, --slot and --idle must be supplied together")
+    if args.action=="com" and args.operation!="bind-spi" and (args.mode is not None or args.tap is not None):
+        parser.error("--mode and --tap require com bind-spi")
     try:
         if args.action=="scope-export":
             from selectio_scope import export_scope
@@ -439,10 +454,16 @@ def main():
                     native.exchange(0,2,bytes((PORTS[args.transport],args.tap,args.slot,args.idle)))
                     print(json.dumps(dict(transport=args.transport,tap=args.tap,slot=args.slot,idle=args.idle)))
                 else:
-                    if args.operation!="status":
+                    if args.operation=="bind-spi":
+                        native.exchange(0,3,bytes((3,args.mode or 0,args.tap or 0)))
+                    elif args.operation!="status":
                         native.exchange(0,3,bytes((int(args.operation=="bind"),)))
                     values=struct.unpack("<8I",native.exchange(0,4))
-                    print(json.dumps(dict(zip(("bound","claimed","baud","dtr","pending_usb_tx","overflow","framing_errors","rx_available"),values)),indent=2))
+                    status=dict(zip(("bound","claimed","baud","dtr","pending_usb_tx","overflow","framing_errors","rx_available"),values))
+                    status["binding"]=("unbound","uart","uart-bypass","spi-slave")[values[0]] if values[0]<4 else "unknown"
+                    if args.operation=="bind-spi":
+                        status.update(spi_mode=args.mode or 0,mosi_tap=args.tap or 0,max_sck_hz=100000000)
+                    print(json.dumps(status,indent=2))
             return 0
         if args.action in ("spi","uart","swo"): return auxiliary(args)
 

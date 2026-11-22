@@ -10,7 +10,7 @@ import time
 from benchmark_rtt_forward import core_read, core_write
 from f103_ram_image import plan
 from run_f103_clock_fixture import APB1ENR, CFGR, CR, FLASH, hsi, restore as restore_clocks, wait_bits
-from selectio_f103_fixture import DHCSR, ROOT, low_link, save
+from selectio_f103_fixture import APB2ENR, DHCSR, MAPR, ROOT, SWJ_MASK, low_link, save
 
 BASE, SIZE = 0x20000000, 1024
 WORK_BASE, WORK_SIZE = BASE+0x8000, 16384
@@ -59,6 +59,15 @@ def recover(folder,state):
             restore_clocks(mem,state["clocks"])
         if clocks(mem)!=state["clocks"]:
             raise RuntimeError("clock recovery failed; core held")
+        if "mapr" in state:
+            mem.write_word(APB2ENR,state["apb2"]|1)
+            mem.write_word(MAPR,state["mapr"]|0x02000000)
+            if mem.word(MAPR)&~SWJ_MASK!=state["mapr"]:
+                raise RuntimeError("AFIO recovery failed; core held")
+        if "apb2" in state:
+            mem.write_word(APB2ENR,state["apb2"])
+            if mem.word(APB2ENR)!=state["apb2"]:
+                raise RuntimeError("APB2 recovery failed; core held")
         mem.write(BASE,backup)
         if work is not None:
             mem.write(WORK_BASE,work)
@@ -113,7 +122,11 @@ def main():
     ap.add_argument("--serial",default="12345678")
     ap.add_argument("--execute",action="store_true")
     ap.add_argument("--restore",action="store_true")
+    ap.add_argument("--enable-jtag",action="store_true",help="temporarily enable full JTAG for a guarded child")
+    ap.add_argument("--command",nargs=argparse.REMAINDER,help="run one child with the verified HCLK and halted SRAM guard")
     args=ap.parse_args()
+    if args.command == [] or (args.command and args.only) or (args.enable_jtag and not args.command):
+        ap.error("--command requires a child and is separate from --only; --enable-jtag requires --command")
     folder=args.out.resolve()
     if not args.execute:
         print(f"SRAM-only F103ZE loop, HCLK {args.hclk_mhz} MHz, TRACECLK {args.hclk_mhz/2:g} MHz");return
@@ -123,8 +136,8 @@ def main():
         recover(folder,state);return
     if (not 0<args.trace_seconds<=2 or args.seconds<=0 or args.rounds<1 or
         args.rtt_cdc_seconds<=0 or args.rtt_cdc_rounds<1):ap.error("invalid window length or count")
-    suites=args.only or ["memory","rtt","etm"]
-    needs_halt=any(s in suites for s in ("memory","rtt","historical"))
+    suites=["command"] if args.command else args.only or ["memory","rtt","etm"]
+    needs_halt=any(s in suites for s in ("memory","rtt","historical","command"))
     backup_bytes=20480 if "historical" in suites else SIZE
     pair=args.pair.resolve()
     manifest=json.loads((pair/"manifest.json").read_text("utf8"))
@@ -206,7 +219,16 @@ def main():
                 raise RuntimeError("DWT or SRAM workload check failed")
             if needs_halt:
                 mem.write_word(DHCSR,0xa05f0003);wait_bits(mem,DHCSR,1<<17,1<<17)
+            if args.enable_jtag:
+                state["apb2"]=mem.word(APB2ENR)
+                save(folder/"state.json",state)
+                mem.write_word(APB2ENR,state["apb2"]|1)
+                state["mapr"]=mem.word(MAPR)&~SWJ_MASK
+                save(folder/"state.json",state)
+                mem.write_word(MAPR,state["mapr"])
         py=[sys.executable,"-X","utf8"]
+        if args.command:
+            run("command",args.command)
         if "memory" in suites:
             size=args.memory_bytes or (15360 if args.memory_page_aligned else 16320)
             address=WORK_BASE if args.memory_page_aligned else WORK_BASE+32

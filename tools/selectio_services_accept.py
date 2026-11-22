@@ -19,7 +19,7 @@ def main():
     ap.add_argument("--jtag-slot",type=int,default=28)
     ap.add_argument("--confirm-seconds",type=float,default=5)
     ap.add_argument("--execute",action="store_true")
-    ap.add_argument("--clock",type=int,choices=(50000000,100000000),default=100000000)
+    ap.add_argument("--clock",type=int,choices=(50000000,73000000,100000000),default=100000000)
     ap.add_argument("--swd-idle",type=int,default=2)
     ap.add_argument("--jtag-idle",type=int,default=33)
     args=ap.parse_args()

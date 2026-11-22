@@ -15,7 +15,9 @@ module selectio_aux_regs #(parameter SELECTIO_SLICE=0)(
     output reg s_axi_rvalid,input wire s_axi_rready,
     input wire quad_clk, phy_reset, pad_granted, uart_granted,
     input wire [7:0] wide_samples, input wire [3:0] pad_samples,output wire pad_request, uart_request, spi_selected, monitor_tdi,
-    output wire [3:0] clock_slots, select_slots, tx_slots
+    output wire [3:0] clock_slots, select_slots, tx_slots,
+    input wire [3:0] slave_sck, slave_cs_n, slave_mosi,
+    output wire spi_slave_selected
 );
     // flags[1:0] receive codec: 0 off, 1 UART 8N1, 2 Manchester SWO.
     // flags[2] owns the SPI pins, flags[3] owns UART TX on TDI.
@@ -42,6 +44,8 @@ module selectio_aux_regs #(parameter SELECTIO_SLICE=0)(
         else begin flags_meta<=flags;flags_io<=flags_meta;end
     end
     assign spi_selected=flags_io[2] || uart_bypass;
+    // Codec 3 requires exclusive SPI pad ownership and enables receive only.
+    assign spi_slave_selected=flags_io[2] && flags_io[1:0]==3;
 
     wire [7:0] uart_byte,manchester_byte,spi_byte;
     wire uart_valid,manchester_valid,spi_valid,uart_error,manchester_error;
@@ -127,11 +131,22 @@ module selectio_aux_regs #(parameter SELECTIO_SLICE=0)(
     // SPI results take the ring only in SPI mode with the optional serial
     // monitor disabled. A serial monitor can observe MISO during a test.
     wire spi_capture=flags_io[2] && flags_io[1:0]==0;
+    wire slave_valid,slave_error;
+    wire [7:0] slave_byte;
+    reg [1:0] slave_mode;
+    always @(posedge quad_clk)
+        if(!spi_slave_selected) slave_mode<=spi_config[1:0];
+    selectio_spi_slave_rx slave_rx(
+        .clk(quad_clk),.reset(phy_reset),.enable(spi_slave_selected && pad_granted),
+        .mode(slave_mode),.sck(slave_sck),.cs_n(slave_cs_n),.mosi(slave_mosi),
+        .valid(slave_valid),.error(slave_error),.data(slave_byte));
     reg produced;
     reg [7:0] produced_byte;
     always @(posedge quad_clk) begin
-        produced<=!phy_reset && (spi_capture ? spi_valid : uart_valid || manchester_valid);
-        produced_byte<=spi_capture ? spi_byte : flags_io[1:0]==1 ? uart_byte : manchester_byte;
+        produced<=!phy_reset && (spi_slave_selected ? slave_valid :
+                                 spi_capture ? spi_valid : uart_valid || manchester_valid);
+        produced_byte<=spi_slave_selected ? slave_byte :
+                       spi_capture ? spi_byte : flags_io[1:0]==1 ? uart_byte : manchester_byte;
     end
     wire accepted=produced && !full;
     wire [16:0] next_writer=writer+1'b1;
@@ -142,7 +157,7 @@ module selectio_aux_regs #(parameter SELECTIO_SLICE=0)(
             if(apply_reader) reader<=new_reader;
             if(accepted) begin writer<=next_writer;writer_gray<=next_writer^(next_writer>>1);end
             if(produced && full && !(&drops)) drops<=drops+1'b1;
-            if((uart_error || manchester_error) && !(&errors)) errors<=errors+1'b1;
+            if((uart_error || manchester_error || slave_error) && !(&errors)) errors<=errors+1'b1;
         end
     end
     (* ASYNC_REG="TRUE" *) reg [16:0] wr_meta,wr_gray_sync;
@@ -194,13 +209,16 @@ module selectio_aux_regs #(parameter SELECTIO_SLICE=0)(
                 have_aw<=0;have_w<=0;s_axi_bvalid<=1;s_axi_bresp<=0;
                 if(!aligned) s_axi_bresp<=2;
                 else if(!tx_write) case(aw)
-                    'h08: if(!tx_busy && !launch && wd<16 && wd[1:0]!=3 && wd[3:2]!=3 && !(wd[3:0]&~FLAG_MASK)) flags<=wd[3:0]&FLAG_MASK;else s_axi_bresp<=2;
+                    'h08: if(!tx_busy && !launch && wd<16 &&
+                             (wd[1:0]!=3 || (wd==7 && SELECTIO_SLICE==0)) &&
+                             wd[3:2]!=3 && !(wd[3:0]&~FLAG_MASK)) flags<=wd[3:0]&FLAG_MASK;
+                          else s_axi_bresp<=2;
                     'h0c: if(!flags && wd>=1024) period_q8<=wd;else s_axi_bresp<=2;
                     'h10: if(!flags) begin min_short<=wd[15:0];short_limit<=wd[31:16];end else s_axi_bresp<=2;
                     'h14: if(!flags) long_limit<=wd[15:0];else s_axi_bresp<=2;
                     'h30: if(!flags && wd<4 && (SELECTIO_SLICE==0 || wd==0)) test_config<=SELECTIO_SLICE==0 ? wd[1:0] : 2'b0;else s_axi_bresp<=2;
-                    'h18: if(!tx_busy && !launch && wd<256) spi_config<=wd[7:0];else s_axi_bresp<=2;
-                    'h1c: if(grant_sync[1] && !tx_busy && !launch && wd!=0 && wd<=4096) begin
+                    'h18: if(!tx_busy && !launch && flags!=7 && wd<256) spi_config<=wd[7:0];else s_axi_bresp<=2;
+                    'h1c: if(grant_sync[1] && flags!=7 && !tx_busy && !launch && wd!=0 && wd<=4096) begin
                         tx_length<=wd[12:0];launch<=1;completed<=0;
                     end else s_axi_bresp<=2;
                     'h20: if(!ack_busy && !update_reader && !ack_done && wd!=0 && wd<=available) begin
@@ -228,6 +246,7 @@ module selectio_aux_regs #(parameter SELECTIO_SLICE=0)(
                         'h24:s_axi_rdata<={15'd0,available};
                         'h28:s_axi_rdata<=snapshot[31:0];
                         'h2c:s_axi_rdata<=snapshot[63:32];
+                        'h34:s_axi_rdata<=SELECTIO_SLICE==0 ? 32'h53504952 : 0; // SPIR
                         default: begin s_axi_rdata<=0;s_axi_rresp<=2;end
                     endcase
                 end

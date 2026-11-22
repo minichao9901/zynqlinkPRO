@@ -17,7 +17,7 @@ def main():
     ap.add_argument("--serial",default="12345678")
     ap.add_argument("--swd-slot",type=int,default=24)
     ap.add_argument("--jtag-slot",type=int,default=28)
-    ap.add_argument("--clock",type=int,choices=(50000000,100000000),default=100000000)
+    ap.add_argument("--clock",type=int,choices=(50000000,73000000,100000000),default=100000000)
     ap.add_argument("--swd-idle",type=int,default=2)
     ap.add_argument("--jtag-idle",type=int,default=33)
     ap.add_argument("--rounds",type=int,default=64)

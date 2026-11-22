@@ -79,7 +79,7 @@ int main(void) {
     // Validate USB report contract, exact request lengths and unsupported actions.
     assert(probe_hid_descriptor(res,64,1)==29);
     command_req(req,0x13,0,1);put32(req+60,0x12345678);control(req,res);
-    assert(get32(res+60)==0x12345678 && !memcmp(res+3,"0.7-nonce32",11));
+    assert(get32(res+60)==0x12345678 && !memcmp(res+3,"0.8-nonce32",11));
     command_req(req,0x16,0,1);put32(req+60,0x456789ab);control(req,res);
     assert(res[1]==21 && res[2]==0x16 && res[14]==' ' && res[17]==':' && res[20]==':');
     assert(get32(res+60)==0x456789ab);

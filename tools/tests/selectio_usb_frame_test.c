@@ -38,6 +38,12 @@ static int cdc_owns_swd_queue;
 #define selectio_aux_consume(n) ((void)(n),unexpected())
 #define selectio_aux_frame(...) unexpected()
 #define selectio_cdc_bind(...) unexpected()
+static unsigned spi_commands;
+static int capture_spi_bind(unsigned mode,unsigned tap) {
+    spi_commands++;
+    return mode>3 || tap>31 ? -1 : 0;
+}
+#define selectio_cdc_bind_spi(mode,tap) capture_spi_bind(mode,tap)
 #define selectio_cdc_reset() ((void)0)
 #define selectio_cdc_status(...) unexpected()
 #define selectio_live_profile(...) unexpected()
@@ -85,6 +91,10 @@ static void inject(u8 ch,u8 op,u32 seq,const u8 *payload,u32 length) {
     selectio_usb_poll(&device);
 }
 static void check(u32 seq,u8 status,u32 length,const u8 *payload) {
+    if(!tx_data || read32(tx_data+8)!=seq || tx_data[6]!=status)
+        fprintf(stderr,"IF4 expected seq=%lu status=%u, response=%d seq=%lu status=%d\n",
+                (unsigned long)seq,status,tx_data!=NULL,
+                (unsigned long)(tx_data?read32(tx_data+8):0),tx_data?tx_data[6]:-1);
     assert(tx_data && read32(tx_data+8)==seq && tx_data[6]==status);
     assert(read32(tx_data+12)==length && tx_size==16+length+((16+length)%512==0));
     if(payload) assert(!memcmp(tx_data+16,payload,length));
@@ -120,7 +130,12 @@ int main(void) {
     cdc_owns_swd_queue=0;
     inject(0,0,99,NULL,0);check(99,0,16,NULL);complete();
     inject(0,1,100,expected,4080);check(100,1,0,NULL);complete();
-    assert(released==12 && !tx_busy && !pending_length);
+    const u8 spi[]={3,2,31};
+    inject(0,3,100,spi,sizeof(spi));check(100,0,0,NULL);complete();
+    const u8 bad_spi[]={3,4,31};
+    inject(0,3,101,bad_spi,sizeof(bad_spi));check(101,1,0,NULL);complete();
+    inject(0,3,102,spi,2);check(102,3,0,NULL);complete();
+    assert(spi_commands==2 && released==15 && !tx_busy && !pending_length);
     puts("PASS IF4 negotiated frames, dTD recycling, three ordered in-flight echoes, DDR bounds and legacy reset");
     return 0;
 }

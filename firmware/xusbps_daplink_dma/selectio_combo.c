@@ -56,15 +56,19 @@ void selectio_combo_reset(void) {running=opened=0;rhead=rtail=ghead=gtail=0;}
 static int start(const uint8_t *p,unsigned bytes) {
     if(opened || bytes<16 || selectio_mem_active()) return -1;
     unsigned n=p[12],channel=p[13];
+    unsigned plan_bytes=16U+4U*n;
     uint32_t cb=get_u32(p+4),ticks=get_u32(p+8);
-    if(n>8 || bytes!=16U+4U*n || channel>=16 || p[14]>1 || p[15] ||
+    if(n>8 || (bytes!=plan_bytes && (bytes!=plan_bytes+4U || !n)) ||
+       channel>=16 || p[14]>1 || p[15] ||
        (n ? (!ticks || ticks>24000000U) : (ticks || p[0]!=1 || !p[14])) ||
        (cb&3U) || !sram(cb,24U+(channel+1U)*24U)) return -1;
+    uint32_t clock=bytes==plan_bytes ? (p[14]?50000000U:100000000U) : get_u32(p+plan_bytes);
+    if(clock<50000000U || clock>100000000U) return -1;
     for(unsigned i=0;i<n;i++) {
         addresses[i]=get_u32(p+16+4U*i);
         if((addresses[i]&3U) || !sram(addresses[i],4)) return -1;
     }
-    if(selectio_mem_open_at(p,p[14]?50000000U:100000000U)) return -1;
+    if(selectio_mem_open_at(p,clock)) return -1;
     memset(diagnostic,0,sizeof diagnostic);opened=1;fail_stage=1;
     uint32_t head[6],up[6];
     descriptor=cb+24U+24U*channel;

@@ -25,7 +25,7 @@ def main():
     ap.add_argument("--binary", required=True, type=Path)
     ap.add_argument("--out", required=True, type=Path)
     ap.add_argument("--execute", action="store_true")
-    ap.add_argument("--clock",type=int,choices=(50000000,100000000),default=100000000)
+    ap.add_argument("--clock",type=int,choices=(50000000,73000000,100000000),default=100000000)
     ap.add_argument("--idle",type=int,help="RTI/SWD idle cycles for this timing profile")
     ap.add_argument("--ring-bytes",type=int,choices=(1024,8192),default=1024)
     ap.add_argument("--rtt-chunk",type=int,choices=(1024,2048))

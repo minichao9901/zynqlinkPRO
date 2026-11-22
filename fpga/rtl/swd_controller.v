@@ -88,6 +88,7 @@ module swd_controller #(
     input wire hs_serial_rx_phase, hs_serial_phase, hs_quad_phase, hs_octet_phase, hs_reset,
     input wire [2:0] hs_owner,
     input wire hs_monitor_tdi,hs_uart_request,output wire hs_uart_grant, input wire hs_aux_spi,input wire [3:0] hs_aux_sck,hs_aux_cs,hs_aux_tx,output wire [3:0] hs_aux_rx, output wire [7:0] hs_aux_wide_rx,
+    input wire hs_aux_spi_slave, output wire [3:0] hs_slave_sck, hs_slave_cs_n, hs_slave_mosi,
     input wire [23:0] hs_jtag_lanes, output wire [7:0] hs_jtag_samples,
     input wire [3:0] hs_swd_ckslots, hs_swd_data, hs_swd_release,
     output wire [3:0] hs_swd_samples,
@@ -203,6 +204,7 @@ module swd_controller #(
             .swdio_load(hs_swdio_load), .tdo_tap(hs_tdo_tap), .swdio_tap(hs_swdio_tap),
             .clock_pin(swclk), .data_pin(swdio), .tdi_pin(gpio_aux[0]), .tdo_pin(gpio_aux[1]),
             .monitor_tdi(hs_monitor_tdi),.uart_sideband(hs_uart_grant),.aux_spi(hs_aux_spi), .aux_sck(hs_aux_sck),.aux_cs(hs_aux_cs),.aux_tx(hs_aux_tx),.aux_rx(hs_aux_rx),
+            .aux_spi_slave(hs_aux_spi_slave),.slave_sck(hs_slave_sck),.slave_cs_n(hs_slave_cs_n),.slave_mosi(hs_slave_mosi),
             .clock_level(clock_feedback), .data_level(swdio_i_raw), .tdi_level(gpio_in[0]), .tdo_level(gpio_in[1])
         );
     end else begin:g_legacy_pads

@@ -23,8 +23,8 @@ def main(argv=None):
     ap.add_argument("--etm-out",type=Path,help="new native ETM record directory")
     ap.add_argument("--seconds",type=float,default=60)
     ap.add_argument("--rounds",type=int,default=3,help="read/write/mixed SRAM windows per transport")
-    ap.add_argument("--only",action="append",choices=(*SUITES,"usb-ddr"))
-    ap.add_argument("--clock",type=int,choices=(50000000,100000000),default=100000000,
+    ap.add_argument("--only",action="append",choices=(*SUITES,"usb-ddr","spi-cdc"))
+    ap.add_argument("--clock",type=int,choices=(50000000,73000000,100000000),default=100000000,
                     help="debug, memory, running RTT, scope and combo clock in Hz")
     ap.add_argument("--frame",type=int,choices=(4096,16384),default=4096,
                     help="negotiated SRAM frame size and guarded fixture extent")
@@ -50,8 +50,10 @@ def main(argv=None):
         print(json.dumps(verdicts,indent=2))
         return 0 if all(v["passed"] for v in verdicts) else 1
     if args.seconds<=0 or args.rounds<=0:ap.error("positive durations and round counts required")
-    selected=args.only or SUITES
     pair=args.pair.resolve()
+    manifest=pair/"manifest.json"
+    identity=json.loads(manifest.read_text(encoding="utf8")) if manifest.is_file() else {}
+    selected=args.only or (*SUITES, *(("spi-cdc",) if identity.get("spi_slave_cdc") else ()))
     out=(args.out or ROOT/"build"/("selectio-accept-"+datetime.now().strftime("%Y%m%d-%H%M%S"))).resolve()
     summary=dict(board=args.board,operation="HS3 JTAG/RAM, guarded F103ZE SRAM",suites=selected,
                  serial=args.serial,seconds=args.seconds,rounds=args.rounds,pair=str(pair),out=str(out),
@@ -59,9 +61,12 @@ def main(argv=None):
                  rtt_ring_bytes=args.rtt_ring_bytes,rtt_chunk=args.rtt_chunk,cases=[])
     if not args.execute:
         print(json.dumps(summary,indent=2));return 0
-    identity=json.loads((pair/"manifest.json").read_text(encoding="utf8"))
-    profiles=identity if args.clock==100000000 else identity.get("profiles_50mhz")
-    if profiles is None:ap.error("selected pair does not supply 50 MHz sampling profiles")
+    if not identity:
+        ap.error("the selected pair must supply a manifest")
+    if "spi-cdc" in selected and not identity.get("spi_slave_cdc"):
+        ap.error("the selected pair does not provide SPI slave CDC")
+    profiles=identity if args.clock==100000000 else identity.get(f"profiles_{args.clock//1000000}mhz")
+    if profiles is None:ap.error("selected pair does not supply sampling profiles for the requested clock")
     if (args.frame==16384 or "usb-ddr" in selected) and identity.get("max_native_frame",4096)<16384:
         ap.error("selected pair does not advertise negotiated 16 KiB frames")
     for name in ("probe.bit","application.elf","ps7_init.tcl"):
@@ -158,6 +163,10 @@ def main(argv=None):
         test("cdc-rtt-scope","selectio_cdc_test.py",[*cdc_options,"--combo"])
     if "cdc" in selected and identity.get("cdc_bypass_qualification"):
         test("cdc-100m","selectio_cdc_wire_test.py",["--seconds",args.seconds])
+    if "spi-cdc" in selected:
+        for spi_mode in range(4):
+            test(f"spi-cdc-mode{spi_mode}","selectio_spi_cdc_test.py",
+                 ["--mode",spi_mode,"--f103-source",16384,"--seconds",10])
     if "itm" in selected:
         binary=fixture("selectio_f103_itm_words.S","itm_words")
         for path in ("native","cmsis-dap"):

@@ -38,7 +38,7 @@ module tb_swd50_edges #(parameter VARIABLE_CLOCK=0);
         batch_mode ? batch_clk : clocks_out, batch_mode ? batch_data : data_out,
         batch_mode ? batch_release : release_out,rx,
         quad_clk,1'b0,1'b0,5'b0,5'b0,clk_pin,data_pin,tdi_pin,1'b1,,, , ,
-        1'b0,4'b0,4'b0,4'b0,,1'b0,1'b0,serial_rx_clk,);
+        1'b0,4'b0,4'b0,4'b0,,1'b0,1'b0,serial_rx_clk,,1'b0,,,);
     swd200_link link(.clk(quad_clk),.reset(swd_reset),.rate(rate),
         .ack_sample(sample_slot[5:0]),.data_sample(sample_slot[5:0]),
         .idle_cycles(idle[3:0]),.release_guard(3'd0),.start(start),.enter_swd(1'b0),

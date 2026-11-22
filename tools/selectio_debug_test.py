@@ -14,7 +14,7 @@ def main():
     ap.add_argument("--serial",default="12345678")
     ap.add_argument("--transport",choices=("swd","jtag"),required=True)
     ap.add_argument("--slot",type=int,required=True)
-    ap.add_argument("--clock",type=int,choices=(50000000,100000000),default=100000000)
+    ap.add_argument("--clock",type=int,choices=(50000000,73000000,100000000),default=100000000)
     ap.add_argument("--idle",type=int)
     ap.add_argument("--out",required=True,type=Path)
     ap.add_argument("--execute",action="store_true")

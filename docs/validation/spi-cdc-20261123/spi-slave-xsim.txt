@@ -1,0 +1,16 @@
+
+****** xsim v2018.3 (64-bit)
+  **** SW Build 2405991 on Thu Dec  6 23:38:27 MST 2018
+  **** IP Build 2404404 on Fri Dec  7 01:43:56 MST 2018
+    ** Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+
+source xsim.dir/spi_slave/xsim_script.tcl
+# xsim {spi_slave} -autoloadwcfg -runall
+Vivado Simulator 2018.3
+Time resolution is 1 ps
+run -all
+SPI_SLAVE_PASS bytes=9424 modes=4 rates=50,72.727,100MHz phases=8 partial=4
+$finish called at time : 1116738920 ps : File "E:/zynqlinkPRO-efficiency/fpga/sim/tb_selectio_spi_slave.sv" Line 111
+run: Time (s): cpu = 00:00:00 ; elapsed = 00:00:57 . Memory (MB): peak = 218.125 ; gain = 0.000
+exit
+INFO: [Common 17-206] Exiting xsim at Mon Nov 23 00:38:57 2026...

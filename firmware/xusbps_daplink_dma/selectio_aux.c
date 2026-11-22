@@ -17,16 +17,19 @@ static unsigned active_channel,exclusive,flags,read_only_stop,raw_test;
 static uint8_t rx_ddr[SELECTIO_SERIAL_DDR_BYTES] __attribute__((aligned(32)));
 static uint32_t rx_head,rx_tail,rx_fault;
 enum { CMSIS_SWO_CHANNEL=8 };
+enum { CDC_UART=1, CDC_UART_BYPASS=2, CDC_SPI_RX=3 };
+enum { SPI_RX_CODEC=3 };
 static uint8_t swo_transport,swo_mode,swo_running;
 static uint32_t swo_rate,swo_consumed,swo_drops,swo_errors;
 static volatile unsigned cdc_bound,cdc_owns,cdc_baud=115200,cdc_deferred;
-static unsigned cdc_running_baud;
+static unsigned cdc_running_baud,cdc_running_mode,cdc_spi_mode,cdc_spi_tap;
+static XTime cdc_rx_due;
 static uint8_t bypass_samples[512];
 static unsigned bypass_count,raw_half,raw_advance;
 static uint8_t cdc_tx_ring[4][4096] __attribute__((aligned(32)));
 static uint16_t cdc_tx_length[4];
 static volatile unsigned cdc_in,cdc_out,cdc_sending,cdc_ack_bytes,cdc_usb_bytes;
-static uint8_t cdc_in_data[2048] __attribute__((aligned(2048)));
+static uint8_t cdc_in_data[4096] __attribute__((aligned(4096)));
 static uint32_t saved_route,saved_fclk;
 static uint32_t word(const uint8_t *p){uint32_t value;memcpy(&value,p,4);return value;}
 static void put(uint8_t *p,uint32_t v){memcpy(p,&v,4);}
@@ -85,7 +88,7 @@ int selectio_aux_reset(void) {
     selectio_swo_reset();return 0;
 }
 
-/* CONFIG payload: codec (0=raw SPI,1=8N1,2=Manchester), claim TX,
+/* CONFIG payload: codec (0=SPI master,1=8N1,2=Manchester,3=SPI RX), claim TX,
  * SPI mode, capture slot, little-endian information rate, input delay tap.
  * SPI may monitor its return line with either serial decoder for pad testing. */
 static int run_raw(unsigned words) {
@@ -121,9 +124,11 @@ static int configure(unsigned ch,const uint8_t *p,unsigned size) {
         (swd_read32(SWD_FEATURES)&0x200U)==0 || RD(0)!=0x41555831U) return -1;
     unsigned codec=p[0],drive=p[1],mode=p[2],sample=p[3],rate=word(p+4),tap=p[8];
     unsigned test=size==10?p[9]:0;
+    unsigned slave=codec==SPI_RX_CODEC;
+    if(slave && (ch!=4 || drive || sample || test || RD(0x34)!=0x53504952U)) return -1;
     if(test>7 || ((test&3U) && !(swd_read32(SWD_FEATURES)&0x1000U)) ||
        (test && ch!=4) || (drive==3 && (!(test&2U) || codec!=1))) return -1;
-    if(codec>2 || drive>3 || (drive==2 && (ch!=4 || codec==0)) || mode>3 || sample>63 || tap>31 || rate<9600 || rate>100000000U ||
+    if(codec>SPI_RX_CODEC || drive>3 || (drive==2 && (ch!=4 || codec==0)) || mode>3 || sample>63 || tap>31 || rate<9600 || rate>100000000U ||
        (ch==5 && !codec) || (ch==5 && drive && codec!=1)) return -1;
     unsigned sideband=!!(swd_read32(SWD_FEATURES)&0x800U);
     unsigned claim=ch==4 || (drive && !sideband);
@@ -135,7 +140,7 @@ static int configure(unsigned ch,const uint8_t *p,unsigned size) {
         (DAP_SELECTIO_SLICE && test)) return -1;
     // SPI owns these pins exclusively. Its existing /1, /2 and /4
     // waveform presets assume the 100 MHz quad clock.
-    if (DAP_SELECTIO_VARIABLE && ch==4 && !codec && selectio_clock_apply(32)) return -1;
+    if (DAP_SELECTIO_VARIABLE && ch==4 && (!codec || slave) && selectio_clock_apply(32)) return -1;
     uint32_t ref=selectio_serial_hz();
     if (!ref || (!DAP_SELECTIO_VARIABLE && (ref<199000000 || ref>201000000))) return -1;
     uint64_t sample_hz=2ULL*ref;
@@ -174,6 +179,7 @@ static int configure(unsigned ch,const uint8_t *p,unsigned size) {
     }
     flags=codec|(raw_test?0U:(test&2U)?8U:ch==4?4U:(drive?8U:0U));
     WR(8,flags);settle();read_only_stop=0;
+    if(slave && RD(8)!=flags) goto failed;
     if(!raw_test && (claim || drive) && aux_wait(1,1,20)) goto failed;
     return 0;
 failed:
@@ -236,7 +242,8 @@ void selectio_aux_consume(unsigned bytes) {
     if(active_channel && bytes<=rx_head-rx_tail)rx_tail+=bytes;
 }
 static int transmit_start(const uint8_t *data,unsigned size) {
-    if(!size || size>4096 || !(flags&12U) || read_only_stop || aux_wait(3,1,20)) return -1;
+    if(!size || size>4096 || !(flags&12U) || (flags&3U)==SPI_RX_CODEC ||
+       read_only_stop || aux_wait(3,1,20)) return -1;
     for(unsigned i=0;i<size;i+=4) {
         uint32_t v=0;unsigned take=size-i<4?size-i:4;
         memcpy(&v,data+i,take);WR(0x1000U+i,v);
@@ -378,17 +385,26 @@ void selectio_cdc_status(uint32_t values[8]) {
     }
 }
 int selectio_cdc_bind(unsigned enable) {
-    if(enable>2 || (enable==2 && !(swd_read32(SWD_FEATURES)&0x1000U)) || (enable && (active_channel || probe_uses_legacy_cdc() || !(swd_read32(SWD_FEATURES)&0x200U)))) return -1;
+    if(enable>CDC_UART_BYPASS || (enable==CDC_UART_BYPASS && !(swd_read32(SWD_FEATURES)&0x1000U)) ||
+       (enable && (active_channel || probe_uses_legacy_cdc() || !(swd_read32(SWD_FEATURES)&0x200U)))) return -1;
     cdc_bound=enable;
+    return 0;
+}
+int selectio_cdc_bind_spi(unsigned mode,unsigned tap) {
+    if(mode>3 || tap>31 || active_channel || cdc_bound || probe_uses_legacy_cdc() ||
+       !(swd_read32(SWD_FEATURES)&0x200U) || RD(0x34)!=0x53504952U) return -1;
+    cdc_spi_mode=mode;
+    cdc_spi_tap=tap;
+    cdc_bound=CDC_SPI_RX;
     return 0;
 }
 int selectio_cdc_receiving(void){return cdc_bound!=0;}
 int selectio_cdc_space(void){
-    if(!cdc_bound || cdc_in-cdc_out<4) return 1;
+    if(!cdc_bound || cdc_bound==CDC_SPI_RX || cdc_in-cdc_out<4) return 1;
     cdc_deferred=1;return 0;
 }
 void selectio_cdc_receive(const uint8_t *p,unsigned n) {
-    if(!cdc_bound || !n || n>4096 || cdc_in-cdc_out>=4) return;
+    if(!cdc_bound || cdc_bound==CDC_SPI_RX || !n || n>4096 || cdc_in-cdc_out>=4) return;
     unsigned index=cdc_in&3U;
     memcpy(cdc_tx_ring[index],p,n);
     cdc_tx_length[index]=(uint16_t)n;
@@ -402,6 +418,7 @@ void selectio_cdc_line(unsigned baud){cdc_baud=baud;}
 void selectio_cdc_reset(void) {
     cdc_bound=cdc_owns=cdc_deferred=cdc_sending=cdc_ack_bytes=cdc_usb_bytes=0;
     cdc_in=cdc_out=0;cdc_baud=115200;
+    cdc_running_mode=0;cdc_rx_due=0;
 }
 void selectio_cdc_poll(XUsbPs *usb) {
     if(!cdc_bound && !cdc_owns) return;
@@ -415,7 +432,8 @@ void selectio_cdc_poll(XUsbPs *usb) {
             selectio_cdc_resume_rx(usb);mtcpsr(f);
         }
     }
-    if(!cdc_bound || !usbd_cdc_acm_get_dtr() || cdc_baud!=cdc_running_baud) {
+    if(!cdc_bound || !usbd_cdc_acm_get_dtr() || (cdc_owns &&
+        (cdc_bound!=cdc_running_mode || (cdc_running_mode!=CDC_SPI_RX && cdc_baud!=cdc_running_baud)))) {
         if(cdc_owns && !cdc_sending && !cdc_usb_bytes && !cdc_ack_bytes) {
             if(!restore()) cdc_owns=0;
         }
@@ -427,24 +445,38 @@ void selectio_cdc_poll(XUsbPs *usb) {
         if(now<retry_after)return;
         /* Mode 2 is an explicit two-TAP board qualification. UART TX
          * crosses the real BYPASS chain to RX while Windows owns the CDC. */
-        unsigned bypass=cdc_bound==2;
+        unsigned binding=cdc_bound;
+        unsigned bypass=binding==CDC_UART_BYPASS,spi=binding==CDC_SPI_RX;
         uint8_t cfg[10]={1,bypass?3U:1U,0,0,0,0,0,0,0,bypass?2U:0U};
-        put(cfg+4,cdc_baud);
-        if(configure(bypass?4U:5U,cfg,sizeof cfg)) {retry_after=now+COUNTS_PER_SECOND/20U;return;}
-        cdc_running_baud=cdc_baud;cdc_owns=1;
+        if(spi) {
+            cfg[0]=SPI_RX_CODEC;cfg[1]=0;cfg[2]=(uint8_t)cdc_spi_mode;cfg[8]=(uint8_t)cdc_spi_tap;
+        }
+        put(cfg+4,spi?100000000U:cdc_baud);
+        if(configure(bypass||spi?4U:5U,cfg,sizeof cfg)) {retry_after=now+COUNTS_PER_SECOND/20U;return;}
+        cdc_running_mode=binding;cdc_running_baud=cdc_baud;cdc_rx_due=0;cdc_owns=1;
     }
-    if(!cdc_sending && cdc_in!=cdc_out) {
+    if(cdc_running_mode!=CDC_SPI_RX && !cdc_sending && cdc_in!=cdc_out) {
         unsigned index=cdc_out&3U;
         if(!transmit_start(cdc_tx_ring[index],cdc_tx_length[index])) cdc_sending=1;
     }
     if(!cdc_usb_bytes && !cdc_ack_bytes) {
         /* Short transfer or explicit ZLP lets the CDC driver publish promptly. */
-        unsigned n=peek(cdc_in_data,sizeof cdc_in_data);
+        unsigned capacity=2048;
+        if(cdc_running_mode==CDC_SPI_RX) {
+            unsigned pending=buffered_bytes();
+            if(!pending) {cdc_rx_due=0;return;}
+            XTime now;XTime_GetTime(&now);
+            if(!cdc_rx_due) cdc_rx_due=now+COUNTS_PER_SECOND/2000U;
+            if(pending<sizeof cdc_in_data && now<cdc_rx_due) return;
+            capacity=sizeof cdc_in_data;
+        }
+        unsigned n=peek(cdc_in_data,capacity);
         if(n) {
             unsigned f=mfcpsr();mtcpsr(f|0x80U);
             cdc_usb_bytes=n;
             Xil_DCacheFlushRange((UINTPTR)cdc_in_data,(n+31U)&~31U);
             if(XUsbPs_EpBufferSendWithZLT(usb,3,cdc_in_data,n)!=XST_SUCCESS) cdc_usb_bytes=0;
+            else cdc_rx_due=0;
             mtcpsr(f);
         }
     }

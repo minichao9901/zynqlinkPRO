@@ -182,6 +182,8 @@ static unsigned execute_frame(unsigned length, unsigned active_epoch) {
             uint32_t fields[8];selectio_cdc_status(fields);memcpy(output+16,fields,sizeof fields);reply_size=sizeof fields;status=0;
         } else if(channel==0 && op==3 && size==1) {
             if(!selectio_cdc_bind(input[16])) status=0;
+        } else if(channel==0 && op==3 && size==3 && input[16]==3) {
+            if(!selectio_cdc_bind_spi(input[17],input[18])) status=0;
         } else if (channel==0 && op==2 && size==4) {
             if(!selectio_live_profile(input[16],input[17],input[18],input[19])) status=0;
         } else if(channel==6) {

@@ -69,7 +69,7 @@ module tb_selectio_debug #(parameter integer QUAD_DMA=0, VARIABLE_CLOCK=0, SELEC
     selectio_debug_phy phy(serial_clk,quad_clk,octet_clk,phy_reset,owner,
         1'b0,1'b1,1'b1,1'b0,1'b1,lanes,jrx,live_sync[1]?live_clock:sclock,
         live_sync[1]?live_data:sdata,live_sync[1]?live_release:srelease,srx,
-        bus_clk,jload,sload,jtap,stap,clk_pin,data_pin,tdi_pin,tdo_pin,,, , ,1'b0,4'b0,4'b0,4'b0,,1'b0,1'b0,serial_rx_clk,);
+        bus_clk,jload,sload,jtap,stap,clk_pin,data_pin,tdi_pin,tdo_pin,,, , ,1'b0,4'b0,4'b0,4'b0,,1'b0,1'b0,serial_rx_clk,,1'b0,,,);
     jtag_dp_model #(.IRLEN(5),.DUMMY(1),.RETURN_NS(0.2)) boundary(
         .rst_n(resetn),.tck(clk_pin),.tms(data_pin),.tdi(tdi_pin),.tdo(boundary_tdo));
     localparam SRAM_ADDR_BITS=12;

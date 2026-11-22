@@ -42,7 +42,7 @@ JTAG 占用 TDI/TDO，SPI 切换时取得四根线的独占权。F103 的 PB3 �
 | 接口 | 端点（十六进制） | CLI 用途 |
 |---|---|---|
 | IF0，CMSIS-DAP v2 | 02 OUT、81 IN；87 IN；82 IN | 标准调试；原有 HSS 数据；ETM 下载 |
-| IF1/2，CDC ACM | 85 通知、04 OUT、83 IN | 物理 8N1 串口，可显式切换为兼容 RTT 转发 |
+| IF1/2，CDC ACM | 85 通知、04 OUT、83 IN | 物理 8N1 串口、SPI 从机接收转发，或兼容 RTT 转发 |
 | IF3，HID | 06 OUT、86 IN | 主线探针控制与状态 |
 | IF4，WinUSB，FF/53/01 | 01 OUT、84 IN | 高速 SRAM、RTT、变量、SPI、UART/SWO 和并发流 |
 
@@ -96,7 +96,7 @@ python -X utf8 toolbox.py selectio write @bulkLink --address 0x20008020 --file p
 
 ## RTT 和 J-Scope
 
-双频效率候选在内存读写、RTT 和变量采样入口接受 `--clock 50000000` 与 `--clock 100000000`。下列 A/B 命令使用候选 bit/ELF，F103ZE 保持 CDC48。50 MHz 示例的采样相位仍待用实板校准。每次测试使用新的输出目录。
+变频融合配对在高速内存、RTT 和变量采样入口接受 50–100 MHz 的时钟请求。下列 A/B 命令使用候选 bit/ELF，F103ZE 保持 CDC48。50 MHz 示例的采样相位以实际配对为准。每次测试使用新的输出目录。
 
 ```powershell
 # 以同一 SRAM 帧格式读写探针私有 DDR，逐项测纯 USB、队列深度和传输方向
@@ -159,6 +159,41 @@ python -X utf8 toolbox.py selectio spi --mode 0 --slot 22 --tap 0 --hex 9f000000
 ```
 
 关闭串口终端后执行 release。F103 配置选项会保存并恢复 TPIU、ITM 和相关 GPIO 配置，要求该目标的实际 HCLK 和 TPIU 分频可产生请求码率。目标需要主动写 ITM 激励端口才会产生有效包。已配置的外部源可直接被动接收。Manchester 的 rate 表示信息位率，100 Mbit/s 对应 200 Msymbol/s。原生 Manchester 100 Mbit/s 可用 `--tap 0..31` 和 `--phase 0|1` 调整接收采样位置。SPI 固定 100 MHz、MSB first、模式 0–3，由一次命令在同一次 CS 低电平下交换 1–4,079 B，文件发送可用 `--file`。
+
+### SPI 从机接收转发到 COM
+
+外部 SPI 主机驱动 J7-29 SCK、J7-31 低有效 CS 和 J7-25 MOSI，并与探针共地。探针在监听时释放这三根线，按选择的 CPOL/CPHA 接收 MSB-first 字节。CDC 返回连续原始字节，片选结束时丢弃不足八位的尾字节并累计帧错误。桥接方向为 MOSI → COM，J7-27 保持输入，COM 写入不驱动 MISO。
+
+先让主机保持 CS 为高，并在探针完成占用前保持三根信号高阻。执行绑定并打开同一探针的 COM，让终端置 DTR，然后用 `com status` 确认 `binding=spi-slave`、`claimed=1` 后开始打钟。测试结束先停外部主机，让三根信号进入高阻，确认 COM 收齐、`rx_available=0` 后关闭终端并释放。CDC 波特率参数只用于打开串口，实际 SCK 由外部主机给出。SPI 绑定独占复用引脚，与物理串口、RTT→CDC 和使用同一引脚的调试会话分时使用。
+
+```powershell
+python -X utf8 toolbox.py selectio com bind-spi --mode 0 --tap 0
+python -X utf8 toolbox.py selectio com status
+python -m serial.tools.list_ports -v
+python -X utf8 toolbox.py selectio com release
+```
+
+100 MHz 是接收设计目标，连续满载对应 12.5 MB/s MOSI 有效载荷。确认最高档时应使用独立 SPI 主机和已知数据，逐字节对拍，并保留 SCK 实测值、COM 实收速率、溢出和帧错误。已有 F103 夹具用于较低速度的实际引脚和 CDC 端到端测试。两种物理测试和原语仿真的判定分别记录。 [Case 表](fusion-performance-cases.md#case-表)
+
+## 频率与参数速查
+
+| 功能 | CLI 与主要配置 |
+|---|---|
+| USB 枚举、时钟核对 | `info`，`usb-test --seconds`。按 USB 序列号选设备 |
+| SWD / JTAG 识别和标准命令 | `identify --transport --clock`，`profile --transport --tap --slot --idle`。先低速识别，空闲再换到高速 |
+| SRAM 原生块 | `read/write --address --clock --tap --slot --idle --queue-depth`。地址与载荷按 4 B 对齐，硬件按 1 KiB TAR 页拆分 |
+| RTT 转发与交互 | `rtt --address --size --channel --chunk --clock`，`rtt-send`，`rtt-terminal --up-channel --timeout`。RTT→CDC 使用 [标准压力入口](../../tools/benchmark_rtt_forward.py) 的 `--speeds` 和 `--chunks` |
+| J-Scope / HSS | `scope --clock --period --var --seconds`，`scope-export`。周期为 24 MHz ticks，分别回读实际周期、实收组数、跳拍和 STOP 尾部 |
+| RTT＋HSS 同时运行 | `combo --clock --tap --slot --idle --rtt-address --var --ticks`。新固件支持 50–100 MHz 请求，包括 73 MHz |
+| 50 MHz SWD RTT 批队列 | `rtt-queue --tap --slot --idle --address --channel --seconds`，使用独立的 50 MHz 路径 |
+| COM / 物理 UART | `com bind/status/release`，模式随 Windows COM 的 DTR 和 SET_LINE_CODING。原生 `uart --rate --seconds --tap` |
+| SWO | `swo --encoding --rate --seconds --usb-path`，编码选 `uart` 或 `manchester`。原生 Manchester 支持 `--tap`、`--phase`。F103 ITM 夹具支持 `--configure-f103 --itm-mask` |
+| SPI 主机 / 从机接收 | 主机 `spi --mode --slot --tap`，用 `--hex` 或 `--file` 提交载荷，固定 100 MHz。从机 `com bind-spi --mode --tap`，SCK 由外部主机提供 |
+| ETM | `trace capture --swd-khz --seconds --elf --bit --zynq-elf`，以及 `trace verify/query/export`。TRACECLK 由目标配置提供 |
+
+高速请求使用 Hz，例如 `--clock 50000000`、`73000000`、`100000000`，73 MHz 在当前时钟树上约为 **72.727 MHz**。以结果中的实际频率和时钟树为准。tap 范围 0–31，slot 范围 0–63。SWD idle 为 0–15，ARM JTAG 原生块需要 slot≥16 且 idle 为奇数。JTAG 实时路径的 idle 范围为 0–255。独立 `rtt` 和 `scope` 可以一起传入 `--tap --slot --idle`，省略时使用既有 profile。 [精简性能用例与校准](fusion-performance-cases.md)
+
+统一实板入口支持 50/73/100 MHz，需要配对清单提供相应采样档。HCLK96/128 的定向压测使用 `selectio_f103_clock_accept.py --pair ... --hclk-mhz ... --out ... --execute --command <子命令>`，由外层夹具核对时钟、暂停并备份 SRAM，子命令退出后恢复。需要完整 JTAG 时加 `--enable-jtag`。这些 HCLK 是 F103 实验档。
 
 ## ETM
 
