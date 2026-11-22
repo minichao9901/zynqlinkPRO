@@ -1,0 +1,84 @@
+{
+  "source_revision": "bdc39b39c90d1b0fdb92a3353e95f493f13d7830",
+  "hashes": {
+    "probe.bit": "d7c583241eea37cc032a5a8e951f9b1150d8e9ddee11bab4e84ca29a18590aa3",
+    "application.elf": "47ee10307887b6bc98e65229a39641583facf48299479eb609cf952798ad799e",
+    "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+  },
+  "mode": "Fused SWD, JTAG, SPI master and slave RX, UART, SWO and ETM",
+  "status": "Routed and RAM-loaded; F103ZE SPI CDC four-mode functional verification",
+  "board_verified": true,
+  "pcap_runtime_switch": false,
+  "spi_slave_cdc": true,
+  "spi_slave_design_sck_hz": 100000000,
+  "pl_options": [
+    "--selectio",
+    "--selectio-variable",
+    "--etm400"
+  ],
+  "ps_options": [
+    "--selectio",
+    "--selectio-variable",
+    "--j7-adapter",
+    "--compact-code",
+    "--opt",
+    "s",
+    "--experimental-zero-idle",
+    "--timing",
+    "verified_clock.json"
+  ],
+  "ps_build_manifest": "ps-build.json",
+  "timing": {
+    "FCLK_max_Hz": 133333333,
+    "SWCLK_max_Hz": 66666666,
+    "setup_slack_ns": 0.165,
+    "hold_slack_ns": 0.051,
+    "requested_FCLK_Hz": 133333333,
+    "RTL_DEBUG": 0,
+    "optional_observation_cells": 0,
+    "formal_product_acceptance": false
+  },
+  "bit_features": "0x4450ffff",
+  "max_native_frame": 16384,
+  "cdc_bypass_qualification": true,
+  "native_stream_lease_seconds": 5,
+  "swd": {
+    "tap": 8,
+    "slot": 25,
+    "idle": 2
+  },
+  "jtag": {
+    "tap": 16,
+    "slot": 28,
+    "idle": 33
+  },
+  "profiles_50mhz": {
+    "swd": {
+      "tap": 8,
+      "slot": 24,
+      "idle": 0
+    },
+    "jtag": {
+      "tap": 16,
+      "slot": 28,
+      "idle": 17
+    }
+  },
+  "profiles_73mhz": {
+    "swd": {
+      "tap": 8,
+      "slot": 22,
+      "idle": 0
+    },
+    "jtag": {
+      "tap": 16,
+      "slot": 22,
+      "idle": 25
+    }
+  },
+  "validation": "../../docs/validation/spi-cdc-20261123/README.md",
+  "spi_slave_board_verified_sck": "F103 GPIO, DWT average 1.35–1.64 MHz",
+  "spi_slave_100mhz_board_verified": false,
+  "verified_ocm_executable_bytes": 80228,
+  "board_qualification": "F103ZE SPI CDC four modes; full suite recorded separately"
+}

@@ -1,0 +1,71 @@
+{
+  "board": "f103ze",
+  "operation": "HS3 JTAG/RAM, guarded F103ZE SRAM",
+  "suites": [
+    "spi-cdc"
+  ],
+  "serial": "12345678",
+  "seconds": 60,
+  "rounds": 3,
+  "pair": "E:\\zynqlinkPRO-efficiency\\build\\spi-cdc-board-pair",
+  "out": "E:\\zynqlinkPRO-efficiency\\build\\spi-cdc-board-first",
+  "debug_service_hz": 100000000,
+  "memory_frame": 4096,
+  "schedule": "sliding",
+  "rtt_ring_bytes": 1024,
+  "rtt_chunk": null,
+  "cases": [
+    {
+      "name": "load",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 9.98206189999837,
+      "log": "load.log"
+    },
+    {
+      "name": "info",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 0.46096590000161086,
+      "log": "info.log"
+    },
+    {
+      "name": "spi-cdc-mode0",
+      "passed": false,
+      "exit_code": 1,
+      "seconds": 62.057149899999786,
+      "log": "spi-cdc-mode0.log",
+      "restored": true
+    },
+    {
+      "name": "spi-cdc-mode1",
+      "passed": false,
+      "exit_code": 1,
+      "seconds": 61.98450089999824,
+      "log": "spi-cdc-mode1.log",
+      "restored": true
+    },
+    {
+      "name": "spi-cdc-mode2",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 4.538286499999231,
+      "log": "spi-cdc-mode2.log",
+      "restored": true
+    },
+    {
+      "name": "spi-cdc-mode3",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 4.509817499998462,
+      "log": "spi-cdc-mode3.log",
+      "restored": true
+    }
+  ],
+  "hashes": {
+    "probe.bit": "d7c583241eea37cc032a5a8e951f9b1150d8e9ddee11bab4e84ca29a18590aa3",
+    "application.elf": "47ee10307887b6bc98e65229a39641583facf48299479eb609cf952798ad799e",
+    "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+  },
+  "passed": false
+}

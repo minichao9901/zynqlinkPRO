@@ -1,0 +1,31 @@
+Traceback (most recent call last):
+  File "E:\zynqlinkPRO-efficiency\tools\selectio_spi_cdc_test.py", line 225, in <module>
+    main()
+    ~~~~^^
+  File "E:\zynqlinkPRO-efficiency\tools\selectio_spi_cdc_test.py", line 184, in main
+    with serial.Serial(matches[0], baudrate=115200, timeout=0.05) as port, fixture as expected:
+                                                                           ^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "E:\zynqlinkPRO-efficiency\tools\selectio_spi_cdc_test.py", line 39, in f103_source
+    with low_link(args.serial) as target:
+         ~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "E:\zynqlinkPRO-efficiency\tools\selectio_f103_fixture.py", line 31, in low_link
+    device,tx,rx=open_dap(serial)
+                 ~~~~~~~~^^^^^^^^
+  File "E:\zynqlinkPRO-efficiency\tools\dap_pipeline_bench.py", line 36, in open_dap
+    raise RuntimeError(f'Expected one ZynqLinkPRO DAP with serial {serial}, found {len(matches)}')
+RuntimeError: Expected one ZynqLinkPRO DAP with serial 12345678, found 0
+Traceback (most recent call last):
+  File "E:\zynqlinkPRO-efficiency\tools\selectio_f103_fixture.py", line 142, in <module>
+    main()
+    ~~~~^^
+  File "E:\zynqlinkPRO-efficiency\tools\selectio_f103_fixture.py", line 127, in main
+    subprocess.run(cmd,cwd=ROOT,check=True)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\subprocess.py", line 577, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe', '-X', 'utf8', 'E:\\zynqlinkPRO-efficiency\\tools\\selectio_spi_cdc_test.py', '--serial', '12345678', '--out', 'E:\\zynqlinkPRO-efficiency\\build\\spi-cdc-board-first\\spi-cdc-mode0', '--mode', '0', '--f103-source', '16384', '--seconds', '10', '--execute']' returned non-zero exit status 1.

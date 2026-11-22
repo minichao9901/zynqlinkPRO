@@ -1,0 +1,123 @@
+{
+  "protocol": "ZLK1",
+  "reference_hz": 199999996,
+  "link_hz": 99999998.0,
+  "features": "0x4450ffff",
+  "integrated_pl": true,
+  "max_frame": 16384,
+  "firmware_abi": 1,
+  "bulk_header_bytes": 16,
+  "serial_buffer_bytes": 2162688,
+  "fclk0_hz": 133333332,
+  "negotiated_frame": 16384,
+  "max_queue_depth": 4,
+  "usb": {
+    "vid": "0d28",
+    "pid": "0204",
+    "serial": "12345678",
+    "bcdDevice": "0x0201",
+    "configuration": 1,
+    "interfaces": [
+      {
+        "number": 0,
+        "alternate": 0,
+        "usb_class": 255,
+        "subclass": 0,
+        "protocol": 0,
+        "endpoints": [
+          {
+            "address": "0x02",
+            "attributes": 2,
+            "max_packet_bytes": 512
+          },
+          {
+            "address": "0x81",
+            "attributes": 2,
+            "max_packet_bytes": 512
+          },
+          {
+            "address": "0x87",
+            "attributes": 2,
+            "max_packet_bytes": 512
+          },
+          {
+            "address": "0x82",
+            "attributes": 2,
+            "max_packet_bytes": 512
+          }
+        ]
+      },
+      {
+        "number": 1,
+        "alternate": 0,
+        "usb_class": 2,
+        "subclass": 2,
+        "protocol": 1,
+        "endpoints": [
+          {
+            "address": "0x85",
+            "attributes": 3,
+            "max_packet_bytes": 64
+          }
+        ]
+      },
+      {
+        "number": 2,
+        "alternate": 0,
+        "usb_class": 10,
+        "subclass": 0,
+        "protocol": 0,
+        "endpoints": [
+          {
+            "address": "0x04",
+            "attributes": 2,
+            "max_packet_bytes": 512
+          },
+          {
+            "address": "0x83",
+            "attributes": 2,
+            "max_packet_bytes": 512
+          }
+        ]
+      },
+      {
+        "number": 3,
+        "alternate": 0,
+        "usb_class": 3,
+        "subclass": 0,
+        "protocol": 0,
+        "endpoints": [
+          {
+            "address": "0x86",
+            "attributes": 3,
+            "max_packet_bytes": 64
+          },
+          {
+            "address": "0x06",
+            "attributes": 3,
+            "max_packet_bytes": 64
+          }
+        ]
+      },
+      {
+        "number": 4,
+        "alternate": 0,
+        "usb_class": 255,
+        "subclass": 83,
+        "protocol": 1,
+        "endpoints": [
+          {
+            "address": "0x01",
+            "attributes": 2,
+            "max_packet_bytes": 512
+          },
+          {
+            "address": "0x84",
+            "attributes": 2,
+            "max_packet_bytes": 512
+          }
+        ]
+      }
+    ]
+  }
+}

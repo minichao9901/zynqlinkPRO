@@ -180,8 +180,14 @@ def main():
                 native.info()
                 if cdc_status(native)["bound"]:
                     raise RuntimeError("the probe COM already has a binding")
-                fixture = f103_source(args, report) if args.f103_source else nullcontext(args.expected)
-                with serial.Serial(matches[0], baudrate=115200, timeout=0.05) as port, fixture as expected:
+            # Windows exposes different composite children for CMSIS-DAP and
+            # WinUSB. Finish DAP setup before opening the capture handles.
+            with serial.Serial(matches[0], baudrate=115200, timeout=0.05):
+                pass
+            fixture = f103_source(args, report) if args.f103_source else nullcontext(args.expected)
+            with fixture as expected, native_connection(args.serial) as native:
+                native.info()
+                with serial.Serial(matches[0], baudrate=115200, timeout=0.05) as port:
                     source_started = time.monotonic()
                     try:
                         native.exchange(0, 3, bytes((3, args.mode, args.tap)))
