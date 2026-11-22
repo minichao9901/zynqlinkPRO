@@ -1,6 +1,6 @@
 # J7 SelectIO 多协议探针 CLI
 
-这套固件在同一块 Zynq-7020 上提供 CMSIS-DAP、RTT、变量采样、四线 SPI、串口、SWO 和四位并行 ETM。以下命令在本工作树根目录运行。带有输出路径的命令使用新文件。示例目标是 STM32F103ZE CDC48，目标 HCLK 为 48 MHz。SPI 从机和 HSS STOP 修正使用[当前融合配对](../../prebuilt/selectio-spi-cdc-phase-drift-20261123/README.md)，可在其清单核对 bit、PS ELF、初始化脚本和验证范围。Windows 主机依赖、Vivado/SDK 和 OpenOCD 的安装位置见[依赖说明](../dependencies.md)。标准串口示例需要 pyserial，验收脚本另用 NumPy 校验连续样本。
+这套固件在同一块 Zynq-7020 上提供 CMSIS-DAP、RTT、变量采样、四线 SPI、串口、SWO 和四位并行 ETM。以下命令在本工作树根目录运行。带有输出路径的命令使用新文件。示例目标是 STM32F103ZE CDC48，目标 HCLK 为 48 MHz。SPI 从机、HSS STOP 修正和 CDC OUT 防护使用[当前融合配对](../../prebuilt/selectio-spi-cdc-rx-guard-20261123/README.md)，可在其清单核对 bit、PS ELF、初始化脚本和验证范围。Windows 主机依赖、Vivado/SDK 和 OpenOCD 的安装位置见[依赖说明](../dependencies.md)。标准串口示例需要 pyserial，验收脚本另用 NumPy 校验连续样本。
 
 ## 架构和引脚
 
@@ -55,7 +55,7 @@ JTAG 占用 TDI/TDO，SPI 切换时取得四根线的独占权。F103 的 PB3 �
 按本分支验收记录选择配对目录。`probe-load --pair` 按清单逐一核对 bit、Zynq ELF 和 PS 初始化 Tcl 的 SHA-256，在写入探针易失配置前检查占用，加载后核对 OCM。目标 MCU ELF 与探针 ELF 分开传入。
 
 ```powershell
-$pair = 'prebuilt/selectio-spi-cdc-phase-drift-20261123'
+$pair = 'prebuilt/selectio-spi-cdc-rx-guard-20261123'
 python -X utf8 toolbox.py probe-load --pair $pair --dry-run
 python -X utf8 toolbox.py probe-load --pair $pair --out build/my-load
 python -X utf8 toolbox.py selectio --serial 12345678 info

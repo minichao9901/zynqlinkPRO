@@ -157,3 +157,13 @@ F103ZE CDC48，实际 SWCLK/TCK 均为 99,999,998 Hz。SWD 使用 tap8/slot25/id
 ## CDC OUT 防护配对的物理线路回归
 
 SPI 主机 100 MHz 四个模式的 MOSI 分别核对 1,128,448／1,128,448／1,126,400／1,128,448 B，模式 0 的实体 TAP 回送核对 1,128,448 B。UART 的 100 Mbaud 发送及接收突发各通过 52,896 B。Manchester 的 50 Mbit/s 远端、100 Mbit/s TDI pad 和 100 Mbit/s 受控 F103 TAP 稀疏码型均核对 17,632 B。每组使用各自的物理源与采样设定，两套夹具回读恢复。 [逐点数据](rx-guard-wire.json)
+
+## CDC OUT 防护配对的完整实板复验
+
+使用 bit `f3c4ccfd…`、PS ELF `e1f21ea8…` 和初始化 Tcl `ec37b1f5…`，F103ZE CDC48 标准全功能套件 **36/36 项通过**。核对了配对哈希、原 USB 描述符、目标恢复以及各项数据门槛。 [原始套件及测量核对](rx-guard-full-board.json)
+
+- CDC 100 Mbaud 回环 60 秒，每方向 **268,238,848 B**、约 **4.471 MB/s**，逐字节匹配。SPI 从机四模式各完成 16 KiB 的 GPIO 源转发，零溢出、帧错或尾差。
+- SPI 主机四模式使用 100 MHz TCK 档，核对独立 12 MHz 的 MISO 波形。两条 USB 路径均通过 NRZ 和 Manchester 各两档 ITM。M15 pad 带目标负载的 100 Mbit/s Manchester 突发共核对 **3,714,368 B**。
+- 24 MHz TRACECLK 的 ETM 硬件窗口为 **1.000 秒**，核对 **19,385,728 B** formatter、零硬件错误、严格解码及目标恢复。
+
+CAL-01 与 HCLK96/128 的长窗在同一配对上继续运行。连续 100 MHz SPI 从机、独立高速四线 SPI 从机回包以及任意码型连续 100 Mbit/s Manchester 保留为独立源用例。 [当前配对清单](../../../prebuilt/selectio-spi-cdc-rx-guard-20261123/manifest.json)
