@@ -1,0 +1,238 @@
+{
+  "hashes": {
+    "probe.bit": "f3c4ccfd78c9148649897a0902fb93eadb209494e0295956981c973bbac92c66",
+    "application.elf": "e1f21ea8d5aa6403f4f2ab78da0a3215cea11862cb852dd9e37e413248068b90",
+    "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+  },
+  "serial": "12345678",
+  "windows": [
+    {
+      "case": {
+        "name": "ETM-02-36-1",
+        "exit": 0,
+        "restored": true,
+        "hclk_dwt_hz": 72022505.2752704,
+        "error": null
+      },
+      "hclk_dwt_hz": 72022505.2752704,
+      "trace_hz_from_hclk": 36000000,
+      "quality": {
+        "transport": "ddr-usb/1",
+        "captureId": 1,
+        "captureNonce": 11007800466027548802,
+        "loss": false,
+        "synced": true,
+        "bufferFull": false,
+        "bufferCapacityBytes": 104857600,
+        "captureComplete": true,
+        "requestedWindowComplete": true,
+        "completionReason": "time",
+        "ended": true,
+        "records": 2077236,
+        "hardwareTicks": 199999998,
+        "requestedTicks": 199999998,
+        "refClockHz": 199999998,
+        "hardwareSeconds": 1.0,
+        "hardwareStartBracketUnix": [
+          1795383600.2200315,
+          1795383600.2205796
+        ],
+        "stopReason": 0,
+        "formatterBytes": 33235778,
+        "tailBytes": 2,
+        "tailAmbiguous": false,
+        "usbSeconds": 0.8731133000037516,
+        "usbPayloadMBps": 38.065824904805815,
+        "diagnostics": {
+          "implemented": true,
+          "frameDrops": 0,
+          "parserErrors": 0,
+          "idelayReadyLosses": 0,
+          "frameHighwater": 1,
+          "syncAcquisitions": 1,
+          "observedFrames": 2077236,
+          "capacityReached": false,
+          "writerError": 0
+        },
+        "fclk": 133333332,
+        "tckKhz": 995.0248656716418
+      },
+      "execution": {
+        "packets": 12500321,
+        "ranges": 23540800,
+        "instructions": 23540800,
+        "executed": 22156047,
+        "sourceMapped": 23540800,
+        "exceptions": 0,
+        "gaps": 1,
+        "packetIssues": 0,
+        "unknownExecution": 0,
+        "functions": {
+          "trace_loop": 16617035,
+          "trace_odd": 2769506,
+          "trace_even": 2769506
+        }
+      },
+      "strict": {
+        "passed": true,
+        "failures": {},
+        "terminalBoundaryPackets": [],
+        "note": "尾部INCOMPLETE_EOT单列保留；初始化未同步/条件未知不视作已证实执行；字节核算不等于无损证明"
+      },
+      "restored": true,
+      "fpb_restored": true
+    },
+    {
+      "case": {
+        "name": "ETM-02-36-2",
+        "exit": 0,
+        "restored": true,
+        "hclk_dwt_hz": 72052514.76377693,
+        "error": null
+      },
+      "hclk_dwt_hz": 72052514.76377693,
+      "trace_hz_from_hclk": 36000000,
+      "quality": {
+        "transport": "ddr-usb/1",
+        "captureId": 2,
+        "captureNonce": 13885826094812947577,
+        "loss": false,
+        "synced": true,
+        "bufferFull": false,
+        "bufferCapacityBytes": 104857600,
+        "captureComplete": true,
+        "requestedWindowComplete": true,
+        "completionReason": "time",
+        "ended": true,
+        "records": 2077236,
+        "hardwareTicks": 199999998,
+        "requestedTicks": 199999998,
+        "refClockHz": 199999998,
+        "hardwareSeconds": 1.0,
+        "hardwareStartBracketUnix": [
+          1795383616.070628,
+          1795383616.071324
+        ],
+        "stopReason": 0,
+        "formatterBytes": 33235781,
+        "tailBytes": 5,
+        "tailAmbiguous": true,
+        "usbSeconds": 0.8789661999981035,
+        "usbPayloadMBps": 37.81235387671529,
+        "diagnostics": {
+          "implemented": true,
+          "frameDrops": 0,
+          "parserErrors": 0,
+          "idelayReadyLosses": 0,
+          "frameHighwater": 1,
+          "syncAcquisitions": 1,
+          "observedFrames": 2077236,
+          "capacityReached": false,
+          "writerError": 0
+        },
+        "fclk": 133333332,
+        "tckKhz": 995.0248656716418
+      },
+      "execution": {
+        "packets": 12499734,
+        "ranges": 23539619,
+        "instructions": 23539619,
+        "executed": 22154936,
+        "sourceMapped": 23539619,
+        "exceptions": 0,
+        "gaps": 1,
+        "packetIssues": 0,
+        "unknownExecution": 0,
+        "functions": {
+          "trace_loop": 16616202,
+          "trace_odd": 2769368,
+          "trace_even": 2769366
+        }
+      },
+      "strict": {
+        "passed": true,
+        "failures": {},
+        "terminalBoundaryPackets": [],
+        "note": "尾部INCOMPLETE_EOT单列保留；初始化未同步/条件未知不视作已证实执行；字节核算不等于无损证明"
+      },
+      "restored": true,
+      "fpb_restored": true
+    },
+    {
+      "case": {
+        "name": "ETM-02-36-3",
+        "exit": 0,
+        "restored": true,
+        "hclk_dwt_hz": 72077438.26410969,
+        "error": null
+      },
+      "hclk_dwt_hz": 72077438.26410969,
+      "trace_hz_from_hclk": 36000000,
+      "quality": {
+        "transport": "ddr-usb/1",
+        "captureId": 3,
+        "captureNonce": 14062762704640961691,
+        "loss": false,
+        "synced": true,
+        "bufferFull": false,
+        "bufferCapacityBytes": 104857600,
+        "captureComplete": true,
+        "requestedWindowComplete": true,
+        "completionReason": "time",
+        "ended": true,
+        "records": 2077236,
+        "hardwareTicks": 199999998,
+        "requestedTicks": 199999998,
+        "refClockHz": 199999998,
+        "hardwareSeconds": 1.0,
+        "hardwareStartBracketUnix": [
+          1795383631.2212396,
+          1795383631.221933
+        ],
+        "stopReason": 0,
+        "formatterBytes": 33235788,
+        "tailBytes": 12,
+        "tailAmbiguous": false,
+        "usbSeconds": 0.8598643000004813,
+        "usbPayloadMBps": 38.6523640997555,
+        "diagnostics": {
+          "implemented": true,
+          "frameDrops": 0,
+          "parserErrors": 0,
+          "idelayReadyLosses": 0,
+          "frameHighwater": 1,
+          "syncAcquisitions": 1,
+          "observedFrames": 2077236,
+          "capacityReached": false,
+          "writerError": 0
+        },
+        "fclk": 133333332,
+        "tckKhz": 995.0248656716418
+      },
+      "execution": {
+        "packets": 12500430,
+        "ranges": 23541021,
+        "instructions": 23541021,
+        "executed": 22156255,
+        "sourceMapped": 23541021,
+        "exceptions": 0,
+        "gaps": 1,
+        "packetIssues": 0,
+        "unknownExecution": 0,
+        "functions": {
+          "trace_loop": 16617191,
+          "trace_even": 2769532,
+          "trace_odd": 2769532
+        }
+      },
+      "strict": {
+        "passed": true,
+        "failures": {},
+        "terminalBoundaryPackets": [],
+        "note": "尾部INCOMPLETE_EOT单列保留；初始化未同步/条件未知不视作已证实执行；字节核算不等于无损证明"
+      },
+      "restored": true,
+      "fpb_restored": true
+    }
+  ]
+}
