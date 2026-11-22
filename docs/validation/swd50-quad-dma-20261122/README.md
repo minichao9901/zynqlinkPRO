@@ -49,6 +49,10 @@ B 的 1 KiB 上／下行相对 A 的 133 MHz 各增加 1.058 / 1.059 µs，约 1
 
 ## 实现和恢复证据
 
-B 的 133.333333 MHz FCLK0 实现约束保留，最终 setup +0.020 ns、hold +0.019 ns。布线后核对 GP1/HP0、CDMA、SWD 的 TX、RX BRAM 均在 `quad_raw`，GP0/HP1 仍在 `clk_fpga_0`。ETM 双沿五线仍接到五个独立输入采样端点。A/B 的 OCM 均由 MEM-AP0 读回 124,460 B，并使用同一个 ELF SHA-256。B 现场返回 `CDMA_BASE=0x80040000`。调试引脚仿真覆盖使用共用 AXI 时钟的 SWD、实时与队列 AP 状态交接，以及 JTAG 队列 SRAM 数据回读。[布线检查](routed-checks.txt) · [时序](timing.rpt) · [A OCM](a-load.json) · [B OCM](b-load.json) · [B 现场](b-state.json) · [仿真](swd50-quad-shared-pads-regression.txt)
+B 的 133.333333 MHz FCLK0 实现约束保留，最终 setup +0.020 ns、hold +0.019 ns。布线后核对 GP1/HP0、CDMA、SWD 的 TX、RX BRAM 均在 `quad_raw`，GP0/HP1 仍在 `clk_fpga_0`。ETM 双沿五线仍接到五个独立输入采样端点。A/B 的 OCM 均由 MEM-AP0 读回 124,460 B，并使用完全相同的 ELF 与 PS 初始化 Tcl。B 现场返回 `CDMA_BASE=0x80040000`。调试引脚仿真覆盖使用共用 AXI 时钟的 SWD、实时与队列 AP 状态交接，以及 JTAG 队列 SRAM 数据回读。[布线检查](routed-checks.txt) · [时序](timing.rpt) · [A OCM](a-load.json) · [B OCM](b-load.json) · [B 现场](b-state.json) · [仿真](swd50-quad-shared-pads-regression.txt)
 
 前两次 GP1 地址验证分别暴露窗口起点和 AUX 区段冲突，随后在块设计中复核新地址。最初的短突发诊断尝试从写入型 TX aperture 读回，返回失败；最终诊断将上／下行分别落在真实 TX、RX 窗口。最终图案验证和 A/B 使用相同诊断版本。
+
+## 切回 A 复测
+
+同一 ELF 再加载 A 后，标准 SRAM 读／写为 3.840 / 3.869 MB/s，RTT 两轮 60 秒的中位数为 3.810 MB/s。A 与 A2 的波动小于两者与 B 的差距。A2 目标恢复通过，最终物理读回 `CDMA_BASE=0x40020000`、`CDMA=0x1002`。探针留在 A 布局，B 作为可复测配对归档。[A2 SRAM](a2-cmsis.json) · [A2 RTT](a2-rtt.json) · [A2 目标恢复](a2-target.json) · [最终探针状态](a2-final-state.json)

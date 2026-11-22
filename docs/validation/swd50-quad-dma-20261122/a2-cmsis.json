@@ -1,0 +1,135 @@
+{
+  "transport": "swd",
+  "requested_kHz": 50000,
+  "requested_Hz": 50000000,
+  "words": 512,
+  "depth": 32,
+  "loops": 256,
+  "artifacts": {
+    "git_head": "a03d7adb63ad1a6a088376ad3730f9feeb0b8b66",
+    "git_dirty": true,
+    "bit": {
+      "path": "E:\\zynqlinkPRO-efficiency\\build\\swd50-quad-exact-A\\probe.bit",
+      "sha256": "3caf4831d2ab52302d2077f2948ef9540ed84e31811e0ad6e5f8e9e5a947a5cc"
+    },
+    "elf": {
+      "path": "E:\\zynqlinkPRO-efficiency\\build\\swd50-quad-exact-A\\application.elf",
+      "sha256": "f225fbd7efbd8104629bd80328774b4ac082a9c29e8687c0e8b92993ac8848ce"
+    }
+  },
+  "RCC_before": {
+    "name": "STM32F103",
+    "cpuid": "0x411fc231",
+    "device": "0x10036414",
+    "registers": {
+      "0x40021000": "0x3034e83",
+      "0x40021004": "0x79e50a"
+    }
+  },
+  "target_halted": true,
+  "backup_sha256": "b89fd4d9a89e271b60f68ef52ce36b380adfe62a831a6f32796c64348b201d02",
+  "FCLK_Hz": 133333332,
+  "cfg": "0xa11",
+  "SWCLK_Hz": 66666666.0,
+  "half_period_fclk": 1,
+  "short_high": false,
+  "intended_high_ns": 7.500000075000001,
+  "live_clock": {
+    "FCLK_Hz": 133333332,
+    "cfg": "0xa11",
+    "waveform": {
+      "SWCLK_Hz": 66666666.0,
+      "half_period_fclk": 1,
+      "short_high": false,
+      "intended_high_ns": 7.500000075000001
+    },
+    "clockSource": 2,
+    "clockControl": 1051168,
+    "sourcePllControl": 163848,
+    "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+    "JTAG_sampling_mode": 0,
+    "RISC_V_SBA_enabled": false,
+    "actual_link_Hz": 49999999.5,
+    "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+    "swd_queue_status": "0x38",
+    "swd_queue_summary": "0x0",
+    "selectio_ref_hz": 199999998,
+    "selectio_config": "0x4840e2d",
+    "selectio_divider": 4
+  },
+  "actual_link_Hz": 49999999.5,
+  "read": {
+    "MB_s": 3.8399700002195245,
+    "samples": [
+      {
+        "MB_s": 3.8389381061336456,
+        "seconds": 0.13657110000349348
+      },
+      {
+        "MB_s": 3.8399700002195245,
+        "seconds": 0.13653440000052797
+      },
+      {
+        "MB_s": 3.8427817012067864,
+        "seconds": 0.13643449999653967
+      }
+    ],
+    "blocks": 256,
+    "bytes": 524288
+  },
+  "write": {
+    "MB_s": 3.8689700467004817,
+    "samples": [
+      {
+        "MB_s": 3.8689700467004817,
+        "seconds": 0.13551100000040606
+      },
+      {
+        "MB_s": 3.8728711834386065,
+        "seconds": 0.1353744999942137
+      },
+      {
+        "MB_s": 3.862770162560671,
+        "seconds": 0.13572849999764003
+      }
+    ],
+    "blocks": 256,
+    "bytes": 524288
+  },
+  "live_clock_after": {
+    "FCLK_Hz": 133333332,
+    "cfg": "0xa11",
+    "waveform": {
+      "SWCLK_Hz": 66666666.0,
+      "half_period_fclk": 1,
+      "short_high": false,
+      "intended_high_ns": 7.500000075000001
+    },
+    "clockSource": 2,
+    "clockControl": 1051168,
+    "sourcePllControl": 163848,
+    "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+    "JTAG_sampling_mode": 0,
+    "RISC_V_SBA_enabled": false,
+    "actual_link_Hz": 49999999.5,
+    "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+    "swd_queue_status": "0x3c",
+    "swd_queue_summary": "0x103",
+    "selectio_ref_hz": 199999998,
+    "selectio_config": "0x4840e2d",
+    "selectio_divider": 4
+  },
+  "restore_ok": true,
+  "passed": true,
+  "restore_match": true,
+  "restore_sha256": "b89fd4d9a89e271b60f68ef52ce36b380adfe62a831a6f32796c64348b201d02",
+  "RCC_after": {
+    "name": "STM32F103",
+    "cpuid": "0x411fc231",
+    "device": "0x10036414",
+    "registers": {
+      "0x40021000": "0x3034e83",
+      "0x40021004": "0x79e50a"
+    }
+  }
+}
