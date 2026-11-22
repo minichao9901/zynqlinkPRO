@@ -236,7 +236,7 @@ def capture_combo(args):
             next_check=start+0.25
             while time.perf_counter()-start<args.seconds:
                 pulled=pull()
-                if rtt_only and pulled and "clock" not in info:
+                if pulled and "clock" not in info:
                     info["clock"]=native.memory_clock(PORTS[args.transport],info["reference_hz"],args.clock)
                 if time.perf_counter()>=next_check:
                     state=struct.unpack("<8I",native.exchange(6,4))
