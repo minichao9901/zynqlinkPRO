@@ -6,8 +6,8 @@
     "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
   },
   "mode": "Fused SWD, JTAG, SPI master and slave RX, UART, SWO and ETM",
-  "status": "Routed and board-tested with the four-mode F103ZE GPIO SPI CDC fixture. Full board campaign and continuous external 100 MHz pending.",
-  "board_verified": false,
+  "status": "Complete 36-case F103ZE CDC48 board suite passed with restored fixtures. Continuous 100 MHz external SPI remains unverified.",
+  "board_verified": true,
   "pcap_runtime_switch": false,
   "spi_slave_cdc": true,
   "spi_slave_design_sck_hz": 100000000,
@@ -81,5 +81,7 @@
   "spi_slave_board_verified_sck": "F103 GPIO DWT average 1.35-1.64 MHz",
   "spi_slave_100mhz_board_verified": false,
   "rtl_source_hashes": "rtl-inputs.json",
-  "board_validation": "../../docs/validation/spi-cdc-20261123/phase-drift-smoke.json"
+  "board_validation": "../../docs/validation/spi-cdc-20261123/phase-drift-full-board.json",
+  "board_test_scope": "F103ZE CDC48 standard selectio acceptance: 36 passed cases",
+  "spi_slave_smoke_validation": "../../docs/validation/spi-cdc-20261123/phase-drift-smoke.json"
 }

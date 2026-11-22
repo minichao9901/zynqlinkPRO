@@ -117,3 +117,14 @@ F103ZE CDC48，SWCLK 实际回读 99,999,998 Hz，tap8/slot25/idle2。单 u32 �
 ## 修正配对的物理线路回归
 
 100 MHz SPI 主机模式 0 经实体 TAP 回送 1,128,448 B。四种 CPOL/CPHA 的 MOSI pad 校验分别为 1,130,496／1,128,448／1,130,496／1,128,448 B。UART 100 Mbaud 的物理突发发送／接收分别核对 52,992／52,896 B。Manchester 的远端 50 Mbit/s、带目标负载的 TDI pad 100 Mbit/s、远端 100 Mbit/s 稀疏码型分别核对 17,440／17,632／17,632 B。后者使用受控的 F103 TAP 源。各项通过，目标恢复。独立器件的连续 100 MHz SPI 从机转发仍单独验收。 [逐点物理证据](phase-drift-physical-wire.json)
+
+## 双边沿修正配对的完整实板回归
+
+bit `f3c4ccfd…`、PS ELF `32f75ae7…`、初始化脚本 `ec37b1f5…` 的 F103ZE CDC48 全功能套件 **36/36 项通过**。独立核对了哈希、恢复记录、SWD/JTAG 长窗计数、HSS 尾帧与实收量、物理接口以及 ETM 解码边界。 [全功能原始汇总与测量核对](phase-drift-full-board.json)
+
+- CDC 100 Mbaud 档物理回环 60 秒，每方向 **268,238,848 B**，约 **4.471 MB/s/方向**，载荷全匹配。UART、CDC 经 RTT 和 J-Scope 并发用例也均通过。
+- SPI 主机以 100 MHz 连续发起四模式事务，用 F103 TIM2_CH2 的独立 12 MHz 波形检查 MISO。SPI 从机使用 F103 GPIO 源，四模式各收齐 **16 KiB**，零溢出、帧错或尾差。
+- SWO NRZ 与 Manchester 分别通过原生 IF4 和标准 CMSIS-DAP 两条路径，各编码两档、每档 **2,500,000 B**。M15 实体 pad 的 100 Mbit/s Manchester 混合码型在一分钟会话中逐字节核对 **3,689,952 B** 的物理突发。
+- 24 MHz TRACECLK 的 ETM 跑完整 **1 秒**硬件窗口，核对 **19,389,696 B** formatter、零硬件错误、严格解码及目标恢复。
+
+CDC OUT 接收防护使用另一份 PS ELF，实板证据按该 ELF 的 SHA-256 单独记录。独立源的 SPI 从机持续 100 MHz 与独立高速 SWO/SPI 源用例仍保留待验状态。 [后续配对](../../../prebuilt/selectio-spi-cdc-rx-guard-20261123/manifest.json)
