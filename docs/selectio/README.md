@@ -173,7 +173,7 @@ python -m serial.tools.list_ports -v
 python -X utf8 toolbox.py selectio com release
 ```
 
-100 MHz 是接收设计目标，连续满载对应 12.5 MB/s MOSI 有效载荷。确认最高档时应使用独立 SPI 主机和已知数据，逐字节对拍，并保留 SCK 实测值、COM 实收速率、溢出和帧错误。已有 F103 夹具用于较低速度的实际引脚和 CDC 端到端测试。两种物理测试和原语仿真的判定分别记录。 [Case 表](fusion-performance-cases.md#case-表)
+100 MHz 是接收设计目标，连续满载对应 12.5 MB/s MOSI 有效载荷。`--tap` 调 MOSI，外部 SCK 与 CS 共用最近一次载入的 SWDIO 延迟值。确认最高档时应使用独立 SPI 主机和已知数据，逐字节对拍，并保留 SCK 实测值、COM 实收速率、溢出和帧错误。已有 F103 夹具用于较低速度的实际引脚和 CDC 端到端测试。两种物理测试和原语仿真的判定分别记录。 [Case 表](fusion-performance-cases.md#case-表)
 
 ## 频率与参数速查
 

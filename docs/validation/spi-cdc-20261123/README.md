@@ -17,15 +17,17 @@
 
 SPI 同步引脚经 SelectIO 在 100 MHz 并行域得到每拍四个样本。接收器使用外部 SCK 的指定边沿，依 CS 边界重新对齐 MSB-first 字节。AUX 板载 64 KiB 环在数据复制到 PS DDR 后释放，DDR 消费指针在 USB IN 完成后确认。SPI CDC 短包在有待发数据约 0.5 ms 后提交，连续流优先聚合到 4 KiB。DTR、引脚所有权和 CDC 的实际排空分别核对。
 
-## SWD HSS 长窗
+## SWD 与 JTAG HSS 长窗
 
-同一融合配对，F103ZE CDC48、实际 SWCLK 99,999,998 Hz、tap8/slot25/idle2。修复 CLI 会话入口后，兼容 RTT UP/DOWN 环尾各 257/37 B 全匹配。HSS 每种宽度三轮 60 秒，全部样值、帧序号和 STOP 计数通过，目标已恢复。
+同一融合配对，F103ZE CDC48，实际 SWCLK/TCK 均为 99,999,998 Hz。SWD 用 tap8/slot25/idle2，JTAG 用 tap16/slot28/idle33。修复 CLI 会话入口后，两条链路的 RTT UP/DOWN 环尾各 257/37 B 全匹配。HSS 每种宽度三轮 60 秒，全部样值、帧序号和 STOP 计数通过，目标已恢复。
 
-| 变量 | 周期 | PC 实收中位组/s | 三轮跳拍 |
-|---|---:|---:|---|
-| 单 u32 | 16 tick | 1,499,801.76 | 5 / 4 / 4 |
-| 八个连续 u32 | 160 tick | 149,980.20 | 1 / 1 / 1 |
+| 链路 | 变量 | 周期 | PC 实收中位组/s | 三轮跳拍 |
+|---|---|---:|---:|---|
+| SWD | 单 u32 | 16 tick | 1,499,801.76 | 5 / 4 / 4 |
+| SWD | 八个连续 u32 | 160 tick | 149,980.20 | 1 / 1 / 1 |
+| JTAG | 单 u32 | 80 tick | 299,960.12 | 1 / 1 / 1 |
+| JTAG | 八个连续 u32 | 264 tick | 90,897.30 | 1 / 1 / 1 |
 
-[逐轮数据和短窗探索](swd-hss-100.json) · [首轮 CLI 会话错误](first-cli-context-failure.txt)
+[SWD 逐轮数据](swd-hss-100.json) · [JTAG 逐轮数据](jtag-hss-100.json) · [首轮 CLI 会话错误](first-cli-context-failure.txt)
 
 复现入口见 [CLI](../../selectio/README.md#spi-从机接收转发到-com) 与 [Case 表](../../selectio/fusion-performance-cases.md)。时序收敛、目标和探针恢复以及全部功能用例以同一份 bit/ELF 的后续实测记录为准。
