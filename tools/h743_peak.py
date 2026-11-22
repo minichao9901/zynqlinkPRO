@@ -100,6 +100,7 @@ def main():
     ap.add_argument('--speed', type=int, default=60000)
     ap.add_argument('--speed-hz',type=int,help='Exact Hz request, including non-whole-kHz fixed-FCLK divisors')
     ap.add_argument('--bootstrap-speed-khz',type=int,default=50000)
+    ap.add_argument('--observe-link',action='store_true',help='record live PS clock tree and SelectIO divider via HS3 before timing')
     ap.add_argument('--transport', choices=['swd', 'jtag'], default='swd')
     ap.add_argument('--words', type=int, default=1024)
     ap.add_argument('--depth', type=int, default=8)
@@ -139,6 +140,10 @@ def main():
         diag = xfer(out, inp, [0x80, 255])
         hz, cfg = struct.unpack_from('<II', diag, 4)
         row.update(FCLK_Hz=hz, cfg=hex(cfg), **swd_clock_details(hz, cfg))
+        if args.observe_link:
+            from probe_build_info import live_clock_snapshot
+            row["live_clock"]=live_clock_snapshot()
+            row["actual_link_Hz"]=row["live_clock"]["actual_link_Hz"]
         if args.transport == 'jtag':
             row['JTAG_sampling_mode'] = xfer(out, inp, [0x89, 255])[2]
         row.update(measure_pipeline(mem, base, words=args.words, depth=args.depth, loops=args.loops,

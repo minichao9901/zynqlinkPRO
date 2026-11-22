@@ -1,0 +1,68 @@
+{
+  "operation": "JTAG/RAM",
+  "dryRun": false,
+  "out": "E:\\zynqlinkPRO-efficiency\\build\\swd50-final-load",
+  "files": {
+    "bit": {
+      "path": "E:\\zynqlinkPRO-efficiency\\build\\swd50-final-pair\\probe.bit",
+      "sha256": "3caf4831d2ab52302d2077f2948ef9540ed84e31811e0ad6e5f8e9e5a947a5cc"
+    },
+    "zynq_elf": {
+      "path": "E:\\zynqlinkPRO-efficiency\\build\\swd50-final-pair\\application.elf",
+      "sha256": "84d5d3e2ffef646b51026681bb1c71921de628f72750e32d3e64c57f76e64dd7"
+    },
+    "ps_init": {
+      "path": "E:\\zynqlinkPRO-efficiency\\build\\swd50-final-pair\\ps7_init.tcl",
+      "sha256": "aa9747c31f705be7c28af1c6b1cdeaf282f0dcdb01faecee2a9f72e4d3489132"
+    }
+  },
+  "commands": {
+    "load": [
+      "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "-X",
+      "utf8",
+      "E:\\zynqlinkPRO-efficiency\\tools\\run_xsct.py",
+      "E:\\zynqlinkPRO-efficiency\\tools\\download_dap_fpga.tcl",
+      "E:\\zynqlinkPRO-efficiency\\build\\swd50-final-pair\\application.elf",
+      "E:\\zynqlinkPRO-efficiency\\build\\swd50-final-pair\\probe.bit",
+      "E:\\zynqlinkPRO-efficiency\\build\\swd50-final-pair\\ps7_init.tcl",
+      "--sdk",
+      "E:\\Xilinx\\SDK\\2018.3"
+    ],
+    "verify": [
+      "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "-X",
+      "utf8",
+      "E:\\zynqlinkPRO-efficiency\\tools\\verify_probe_ocm_code.py",
+      "--elf",
+      "E:\\zynqlinkPRO-efficiency\\build\\swd50-final-pair\\application.elf",
+      "--out-dir",
+      "E:\\zynqlinkPRO-efficiency\\build\\swd50-final-load\\ocm",
+      "--sdk",
+      "E:\\Xilinx\\SDK\\2018.3"
+    ]
+  },
+  "stage": "complete",
+  "passed": true,
+  "streams": {
+    "rtt": 65536,
+    "hss": 20
+  },
+  "before": {
+    "PS_IDCODE": "0x23727093",
+    "LEVEL_SHIFTERS": "0xf",
+    "FPGA_RESET": "0x0",
+    "BOOT_MODE": "0x0",
+    "CAPTURE": "0x8",
+    "SWD": "0x2",
+    "JQUEUE": "0x14",
+    "SQUEUE": "0x3c",
+    "AUX": "0x0",
+    "AUXFLAGS": "0x0",
+    "PACKET": "0x0",
+    "DDR": "0x0",
+    "CDMA": "0x1002"
+  },
+  "verifiedBytes": 118700,
+  "FCLK_Hz": 99999999
+}

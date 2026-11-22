@@ -166,7 +166,7 @@ static unsigned execute_frame(unsigned length, unsigned active_epoch) {
             if(!selectio_combo_frame(op,input+16,size,output+16,frame_limit-HEADER_SIZE-1,&reply_size,&n,&source)) {
                 reply_packets=n;reply_channel=source;status=0;
             }
-        } else if(channel==1 && selectio_combo_active()) status=2;
+        } else if(channel==1 && selectio_combo_active() && op!=5) status=2;
         else if (channel==1 && op==1 && (size==4 || size==8)) {
             dap_wait_begin();
             if(!selectio_mem_open_at(input+16,size==8 ? read32(input+20) : 100000000U)) status=0;

@@ -29,6 +29,7 @@ def main():
     ap.add_argument("--idle",type=int,help="RTI/SWD idle cycles for this timing profile")
     ap.add_argument("--ring-bytes",type=int,choices=(1024,8192),default=1024)
     ap.add_argument("--rtt-chunk",type=int,choices=(1024,2048))
+    ap.add_argument("--rtt-queue",action="store_true")
     args = ap.parse_args()
     if not args.execute:
         print("Run inside selectio_f103_fixture.py. Save core registers, run the SRAM producer and recover.")
@@ -38,6 +39,8 @@ def main():
         ap.error("invalid SRAM producer or duration")
     if args.ring_bytes!=1024 and not code.endswith(b"RTTD"):
         ap.error("large rings require the descriptor-driven SRAM producer")
+    if args.rtt_queue and (args.service!="rtt" or args.transport!="swd" or args.clock!=50000000 or args.rtt_chunk):
+        ap.error("--rtt-queue requires standalone 50 MHz SWD RTT and uses its own 4096-byte chunk limit")
     ring_offset=0x1000 if args.ring_bytes==8192 else 0x400
     extent=16384 if args.ring_bytes==8192 else 4096
     args.out.mkdir(parents=True, exist_ok=False)
@@ -76,6 +79,9 @@ def main():
             cmd=[*prefix,"rtt","--transport",args.transport,"--clock",args.clock,"--address",hex(BASE+0x200),
                  "--size",48,"--seconds",args.seconds,"--out",rtt]
             if args.rtt_chunk:cmd.extend(["--chunk",args.rtt_chunk])
+            if args.rtt_queue:
+                cmd=[*prefix,"rtt-queue","--tap",tap,"--slot",args.slot,"--idle",idle,
+                     "--address",hex(BASE+0x200),"--seconds",args.seconds,"--out",rtt]
         started=time.perf_counter()
         p = subprocess.run(list(map(str, cmd)), capture_output=True)
         process_seconds=time.perf_counter()-started
@@ -84,10 +90,10 @@ def main():
         report.update(json.loads(p.stdout))
         if args.service=="rtt":
             report["rtt_bytes"]=rtt.stat().st_size
-            if report["bytes"]!=report["rtt_bytes"] or report["status"][3]!=(report["rtt_bytes"]&0xffffffff):
+            if not args.rtt_queue and (report["bytes"]!=report["rtt_bytes"] or report["status"][3]!=(report["rtt_bytes"]&0xffffffff)):
                 raise RuntimeError("RTT file, CLI byte count and STOP drained counter differ")
-            report["elapsed_seconds"]=process_seconds
-        stream_seconds=report["seconds"] if args.service=="rtt" else report["elapsed_seconds"]
+            if not args.rtt_queue:report["elapsed_seconds"]=process_seconds
+        stream_seconds=report["seconds"] if args.service=="rtt" and not args.rtt_queue else report["elapsed_seconds"]
         report.update(stream_seconds=stream_seconds,cli_process_seconds=process_seconds,
                       stream_MBps=report["rtt_bytes"]/stream_seconds/1e6,
                       cli_process_MBps=report["rtt_bytes"]/process_seconds/1e6)

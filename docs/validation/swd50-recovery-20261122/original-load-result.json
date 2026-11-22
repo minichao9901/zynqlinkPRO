@@ -1,0 +1,56 @@
+{
+  "operation": "JTAG/RAM",
+  "dryRun": false,
+  "out": "E:\\zynqlinkPRO-efficiency\\build\\replug-efficiency-load",
+  "files": {
+    "bit": {
+      "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-efficiency\\probe.bit",
+      "sha256": "3caf4831d2ab52302d2077f2948ef9540ed84e31811e0ad6e5f8e9e5a947a5cc"
+    },
+    "zynq_elf": {
+      "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-efficiency\\application.elf",
+      "sha256": "08a8e8355baae019b27332ac63ed83873713ed50cebf55692ef007e39b6b799b"
+    },
+    "ps_init": {
+      "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-efficiency\\ps7_init.tcl",
+      "sha256": "aa9747c31f705be7c28af1c6b1cdeaf282f0dcdb01faecee2a9f72e4d3489132"
+    }
+  },
+  "commands": {
+    "load": [
+      "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "-X",
+      "utf8",
+      "E:\\zynqlinkPRO-efficiency\\tools\\run_xsct.py",
+      "E:\\zynqlinkPRO-efficiency\\tools\\download_dap_fpga.tcl",
+      "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-efficiency\\application.elf",
+      "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-efficiency\\probe.bit",
+      "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-efficiency\\ps7_init.tcl",
+      "--sdk",
+      "E:\\Xilinx\\SDK\\2018.3"
+    ],
+    "verify": [
+      "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "-X",
+      "utf8",
+      "E:\\zynqlinkPRO-efficiency\\tools\\verify_probe_ocm_code.py",
+      "--elf",
+      "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-efficiency\\application.elf",
+      "--out-dir",
+      "E:\\zynqlinkPRO-efficiency\\build\\replug-efficiency-load\\ocm",
+      "--sdk",
+      "E:\\Xilinx\\SDK\\2018.3"
+    ]
+  },
+  "stage": "complete",
+  "passed": true,
+  "streams": {},
+  "before": {
+    "PS_IDCODE": "0x23727093",
+    "LEVEL_SHIFTERS": "0x0",
+    "FPGA_RESET": "0x1f33f0f",
+    "BOOT_MODE": "0x0"
+  },
+  "verifiedBytes": 116428,
+  "FCLK_Hz": 99999999
+}

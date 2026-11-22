@@ -1,0 +1,129 @@
+{
+  "transport": "swd",
+  "requested_hz": 50000000,
+  "tap": 8,
+  "slot": 22,
+  "idle": 0,
+  "bytes": 16320,
+  "address": "0x20008020",
+  "depth": 4,
+  "windows": [
+    {
+      "round": 1,
+      "direction": "read",
+      "requests": 2464,
+      "payload_bytes": 40212480,
+      "wall_seconds": 10.052629799996794,
+      "USB_seconds": 10.04718320005486,
+      "wall_MBps": 4.000195053438935,
+      "USB_MBps": 4.00236356790831,
+      "probe": {
+        "timer_hz": 333333343,
+        "read_bytes": 40228800,
+        "write_bytes": 16320,
+        "queue_s": [
+          9.802426173729641,
+          0.00393677688583347
+        ],
+        "probe_s": [
+          9.896769099993696,
+          0.004078376881727071
+        ],
+        "jtag_retry_profile": [
+          0,
+          0
+        ]
+      },
+      "probe_delta": {
+        "read_bytes": 40212480,
+        "write_bytes": 0,
+        "queue_s": [
+          9.798449193844974,
+          0.0
+        ],
+        "probe_s": [
+          9.892652275113084,
+          0.0
+        ]
+      },
+      "clock": {
+        "wire_hz": 49999999,
+        "reference_hz": 199999998,
+        "divider": 4,
+        "timing": "0x1658",
+        "tap": 8,
+        "source": "PS clock tree and PL queue registers"
+      }
+    },
+    {
+      "round": 1,
+      "direction": "write",
+      "requests": 2208,
+      "payload_bytes": 36034560,
+      "wall_seconds": 10.050113400000555,
+      "USB_seconds": 9.899659399983648,
+      "wall_MBps": 3.5854879010616947,
+      "USB_MBps": 3.6399797754718226,
+      "probe": {
+        "timer_hz": 333333343,
+        "read_bytes": 16320,
+        "write_bytes": 36050880,
+        "queue_s": [
+          0.003977012884666627,
+          8.697539882771343
+        ],
+        "probe_s": [
+          0.004116740880614514,
+          8.785632267216664
+        ],
+        "jtag_retry_profile": [
+          0,
+          0
+        ]
+      },
+      "probe_delta": {
+        "read_bytes": 0,
+        "write_bytes": 36034560,
+        "queue_s": [
+          0.0,
+          8.69360308188551
+        ],
+        "probe_s": [
+          0.0,
+          8.781554454334922
+        ]
+      },
+      "clock": {
+        "wire_hz": 49999999,
+        "reference_hz": 199999998,
+        "divider": 4,
+        "timing": "0x1658",
+        "tap": 8,
+        "source": "PS clock tree and PL queue registers"
+      }
+    }
+  ],
+  "info": {
+    "protocol": "ZLK1",
+    "reference_hz": 199999998,
+    "link_hz": 99999999.0,
+    "features": "0x4450ffff",
+    "integrated_pl": true,
+    "max_frame": 16384,
+    "firmware_abi": 1,
+    "bulk_header_bytes": 16,
+    "serial_buffer_bytes": 2162688,
+    "fclk0_hz": 133333332,
+    "negotiated_frame": 16384,
+    "max_queue_depth": 4
+  },
+  "frame": 16384,
+  "schedule": "sliding",
+  "guards": [
+    380188392,
+    645658484
+  ],
+  "backup_sha256": "bfea36ede4319977b3574b8edc1f26e685e2148084bc3b94de227a7c655e5b4f",
+  "passed": true,
+  "restored": true
+}

@@ -45,8 +45,7 @@ static void swd_descriptor(unsigned index, unsigned op, uint32_t data) {
 
 /* The caller claims MEM-AP0 and sets CSW before handing the pads over.
  * Include the final posted result and a DP status fence in the batch. */
-static int swd_block(unsigned write, uint32_t address, unsigned count,
-                     const uint8_t *payload, uint8_t *reply, uint32_t *detail) {
+static void swd_prepare(unsigned write, uint32_t address, unsigned count, const uint8_t *payload) {
     unsigned i;
     unsigned bank=write?2U:1U;
     swd_write32(SQUEUE+0x1cU,bank);
@@ -66,16 +65,59 @@ static int swd_block(unsigned write, uint32_t address, unsigned count,
     }
     if(write && !session.use_dma) for(i=0;i<count;i++)
         swd_write32(SQUEUE+0x100cU+8U*i,load32(payload+4U*i));
-    XTime start,stop;XTime_GetTime(&start);
-    swd_write32(SQUEUE+0x10U,count+3U);
+}
+
+static int swd_complete(unsigned write, unsigned count, uint8_t *reply, uint32_t *detail, XTime start) {
+    XTime stop;
     if (wait_queue(SQUEUE,0x27U,0x25U)) return -1;
     XTime_GetTime(&stop);session.queue_ticks[write]+=stop-start;
     *detail=swd_read32(SQUEUE+0x14U);
     if ((*detail&0xffffU)!=count+3U) return -1;
     if (swd_read32(SQUEUE+0x2000U+4U*(count+2U))&0xb2U) return -1;
-    if (!write && !session.use_dma) for(i=0;i<count;i++) {
+    if (!write && !session.use_dma) for(unsigned i=0;i<count;i++) {
         uint32_t value=swd_read32(SQUEUE+0x2008U+4U*i);
         memcpy(reply+4U*i,&value,4);
+    }
+    return 0;
+}
+
+static int swd_block(unsigned write, uint32_t address, unsigned count,
+                     const uint8_t *payload, uint8_t *reply, uint32_t *detail) {
+    swd_prepare(write,address,count,payload);
+    XTime start;XTime_GetTime(&start);
+    swd_write32(SQUEUE+0x10U,count+3U);
+    return swd_complete(write,count,reply,detail,start);
+}
+
+/* The CDMA uses the other page bank while the PHY is running. Never
+ * change the active bank or publish a page before its DP fence passes. */
+static int swd_aligned_pages(unsigned write,uint32_t address,unsigned pages,
+                            const uint8_t *payload,uint8_t *reply,unsigned *completed,uint32_t *detail) {
+    const uint32_t tx=0x45002000U,rx=0x45003000U;
+    unsigned bank=session.bank++&1U;
+    session.use_dma=1;
+    if(write && selectio_dma_payload(1,tx+bank*1024U,(uint8_t *)payload,256))return -1;
+    for(unsigned page=0;page<pages;page++) {
+        if(!probe_session_live())return -1;
+        swd_write32(SQUEUE+0x2cU,4U|bank);
+        swd_prepare(write,address+page*1024U,256,0);
+        XTime start;XTime_GetTime(&start);
+        swd_write32(SQUEUE+0x10U,259);
+        int dma_ok=0;
+        unsigned other=bank^1U;
+        if(write && page+1<pages)
+            dma_ok=selectio_dma_payload(1,tx+other*1024U,(uint8_t *)payload+(page+1)*1024U,256);
+        if(!write && page)
+            dma_ok=selectio_dma_payload(0,rx+other*1024U,reply+(page-1)*1024U,256);
+        if(!write && page && !dma_ok)*completed+=256;
+        int ret=swd_complete(write,256,0,detail,start);
+        if(write && !ret)*completed+=256;
+        if(ret || dma_ok)return -1;
+        bank=other;
+    }
+    if(!write) {
+        if(selectio_dma_payload(0,rx+(bank^1U)*1024U,reply+(pages-1)*1024U,256)) return -1;
+        *completed+=256;
     }
     return 0;
 }
@@ -207,6 +249,15 @@ int selectio_mem_bulk(unsigned write,uint32_t address,unsigned words,const uint8
     XTime start,stop;XTime_GetTime(&start);
     while(*completed<words) {
         if(!probe_session_live()) {session.poisoned=1;return -1;}
+        unsigned pages=(words-*completed)/256U;
+        if(session.port==1 && session.dma && pages>=2 && !(address&1023U)) {
+            if(swd_aligned_pages(write,address,pages,payload,reply,completed,detail)) {
+                session.poisoned=1;return -1;
+            }
+            address+=1024U*pages;
+            if(write)payload+=1024U*pages;else reply+=1024U*pages;
+            continue;
+        }
         unsigned count=(1024U-(address&1023U))/4U;
         if(count>words-*completed) count=words-*completed;
         unsigned bank=session.bank++&3U;

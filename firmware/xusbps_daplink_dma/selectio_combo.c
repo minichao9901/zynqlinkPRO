@@ -13,7 +13,8 @@
 #define RTT_CAPACITY 16384U
 #define GROUP_CAPACITY 1024U
 #define MAX_RTT_CHUNK 1024U
-static uint32_t rtt_payload[MAX_RTT_CHUNK/4U+1U] __attribute__((aligned(32)));
+#define RTT_ONLY_CHUNK 4096U
+static uint32_t rtt_payload[RTT_ONLY_CHUNK/4U+1U] __attribute__((aligned(32)));
 static unsigned burst_limit;
 static uint8_t rtt_bytes[RTT_CAPACITY] __attribute__((aligned(32)));
 static uint32_t groups[GROUP_CAPACITY][9] __attribute__((aligned(32)));
@@ -34,7 +35,14 @@ static int read_words(uint32_t addr,unsigned words,void *data) {
 }
 static int write_offset(uint32_t v) {
     uint32_t detail=0;
-    int rc=selectio_commit_rtt_offset(descriptor+16U,rd,v,&detail);
+    int rc;
+    if(nvars) rc=selectio_commit_rtt_offset(descriptor+16U,rd,v,&detail);
+    else {
+        /* Standalone SWD has an unambiguous ACK and the memory queue
+         * already verifies the posted write with RDBUFF and CTRL/STAT. */
+        unsigned completed;
+        rc=selectio_mem_bulk(1,descriptor+16U,1,(const uint8_t *)&v,0,&completed,&detail);
+    }
     if(rc) {diagnostic[0]=2;diagnostic[1]=descriptor+16U;diagnostic[2]=1;diagnostic[4]=detail;diagnostic[5]=v;}
     return rc;
 }
@@ -46,11 +54,12 @@ int selectio_combo_stop(void) {
 }
 void selectio_combo_reset(void) {running=opened=0;rhead=rtail=ghead=gtail=0;}
 static int start(const uint8_t *p,unsigned bytes) {
-    if(opened || bytes<20 || selectio_mem_active()) return -1;
+    if(opened || bytes<16 || selectio_mem_active()) return -1;
     unsigned n=p[12],channel=p[13];
     uint32_t cb=get_u32(p+4),ticks=get_u32(p+8);
-    if(!n || n>8 || bytes!=16U+4U*n || channel>=16 || p[14]>1 || p[15] ||
-       !ticks || ticks>24000000U || (cb&3U) || !sram(cb,24U+(channel+1U)*24U)) return -1;
+    if(n>8 || bytes!=16U+4U*n || channel>=16 || p[14]>1 || p[15] ||
+       (n ? (!ticks || ticks>24000000U) : (ticks || p[0]!=1 || !p[14])) ||
+       (cb&3U) || !sram(cb,24U+(channel+1U)*24U)) return -1;
     for(unsigned i=0;i<n;i++) {
         addresses[i]=get_u32(p+16+4U*i);
         if((addresses[i]&3U) || !sram(addresses[i],4)) return -1;
@@ -69,6 +78,7 @@ static int start(const uint8_t *p,unsigned bytes) {
     burst_limit=ticks/16U;
     if(burst_limit<16U) burst_limit=16U;
     if(burst_limit>MAX_RTT_CHUNK) burst_limit=MAX_RTT_CHUNK;
+    if(!n)burst_limit=RTT_ONLY_CHUNK;
     period=((uint64_t)ticks*COUNTS_PER_SECOND+12000000U)/24000000U;
     rhead=rtail=ghead=gtail=skip_count=0;fail_stage=0;
     XTime_GetTime(&origin);deadline=origin;last_rtt=origin;
@@ -113,6 +123,10 @@ static int drain_rtt(void) {
 }
 void selectio_combo_poll(void) {
     if(!running) return;
+    if(!nvars) {
+        if(drain_rtt()) {fail_stage=3;running=0;}
+        return;
+    }
     XTime now;XTime_GetTime(&now);
     if(now>=deadline) {
         XTime missed=(now-deadline)/period;

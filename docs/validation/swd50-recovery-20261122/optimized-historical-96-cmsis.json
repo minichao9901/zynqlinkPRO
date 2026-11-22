@@ -1,0 +1,110 @@
+{
+  "transport": "swd",
+  "requested_kHz": 50000,
+  "requested_Hz": 50000000,
+  "words": 512,
+  "depth": 32,
+  "loops": 256,
+  "artifacts": {
+    "git_head": "6d5869adf6b6d3a7290ef168d945b05ff13c3c9e",
+    "git_dirty": true,
+    "bit": {
+      "path": "E:\\zynqlinkPRO-efficiency\\build\\swd50-final-pair\\probe.bit",
+      "sha256": "3caf4831d2ab52302d2077f2948ef9540ed84e31811e0ad6e5f8e9e5a947a5cc"
+    },
+    "elf": {
+      "path": "E:\\zynqlinkPRO-efficiency\\build\\swd50-final-pair\\application.elf",
+      "sha256": "84d5d3e2ffef646b51026681bb1c71921de628f72750e32d3e64c57f76e64dd7"
+    }
+  },
+  "RCC_before": {
+    "name": "STM32F103",
+    "cpuid": "0x411fc231",
+    "device": "0x10036414",
+    "registers": {
+      "0x40021000": "0x3034e83",
+      "0x40021004": "0x69e50a"
+    }
+  },
+  "target_halted": true,
+  "backup_sha256": "f2e5054fcc84299c0d0f81ac369c94d33d5cbb94b1d3df17fc62a547b3c11924",
+  "FCLK_Hz": 133333332,
+  "cfg": "0xa11",
+  "SWCLK_Hz": 66666666.0,
+  "half_period_fclk": 1,
+  "short_high": false,
+  "intended_high_ns": 7.500000075000001,
+  "live_clock": {
+    "FCLK_Hz": 133333332,
+    "cfg": "0xa11",
+    "waveform": {
+      "SWCLK_Hz": 66666666.0,
+      "half_period_fclk": 1,
+      "short_high": false,
+      "intended_high_ns": 7.500000075000001
+    },
+    "clockSource": 2,
+    "clockControl": 1051168,
+    "sourcePllControl": 163848,
+    "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+    "JTAG_sampling_mode": 0,
+    "RISC_V_SBA_enabled": false,
+    "actual_link_Hz": 49999999.5,
+    "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+    "selectio_ref_hz": 199999998,
+    "selectio_config": "0x4840e2d",
+    "selectio_divider": 4
+  },
+  "actual_link_Hz": 49999999.5,
+  "read": {
+    "MB_s": 3.747998352860235,
+    "samples": [
+      {
+        "MB_s": 3.747968880252125,
+        "seconds": 0.13988590000371914
+      },
+      {
+        "MB_s": 3.747998352860235,
+        "seconds": 0.13988480000261916
+      },
+      {
+        "MB_s": 3.7511304447124854,
+        "seconds": 0.13976800000091316
+      }
+    ],
+    "blocks": 256,
+    "bytes": 524288
+  },
+  "write": {
+    "MB_s": 3.7469938673876504,
+    "samples": [
+      {
+        "MB_s": 3.7484726572901077,
+        "seconds": 0.13986709999880986
+      },
+      {
+        "MB_s": 3.742396187610231,
+        "seconds": 0.14009420000365935
+      },
+      {
+        "MB_s": 3.7469938673876504,
+        "seconds": 0.13992229999712436
+      }
+    ],
+    "blocks": 256,
+    "bytes": 524288
+  },
+  "restore_ok": true,
+  "passed": true,
+  "restore_match": true,
+  "restore_sha256": "f2e5054fcc84299c0d0f81ac369c94d33d5cbb94b1d3df17fc62a547b3c11924",
+  "RCC_after": {
+    "name": "STM32F103",
+    "cpuid": "0x411fc231",
+    "device": "0x10036414",
+    "registers": {
+      "0x40021000": "0x3034e83",
+      "0x40021004": "0x69e50a"
+    }
+  }
+}

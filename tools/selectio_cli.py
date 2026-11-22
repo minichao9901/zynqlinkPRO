@@ -196,9 +196,11 @@ def auxiliary(args):
 
 def capture_combo(args):
     import csv
-    if not 1<=len(args.var)<=8 or args.seconds<=0 or args.ticks<=0:
+    rtt_only=args.action=="rtt-queue"
+    if args.seconds<=0 or (not rtt_only and (not 1<=len(args.var)<=8 or args.ticks<=0)):
         raise ValueError("choose 1..8 word addresses, a positive period and a positive window")
-    if args.rtt_out.exists() or args.scope_out.exists() or args.rtt_out.resolve()==args.scope_out.resolve():
+    if args.rtt_out.exists() or (args.scope_out is not None and
+       (args.scope_out.exists() or args.rtt_out.resolve()==args.scope_out.resolve())):
         raise ValueError("provide two distinct new output paths")
     config=struct.pack("<4BIIBBBB",PORTS[args.transport],args.tap,args.slot,args.idle,
                        args.rtt_address,args.ticks,len(args.var),args.channel,int(args.clock==50000000),0)
@@ -206,14 +208,16 @@ def capture_combo(args):
     layout=struct.Struct("<"+"I"*(1+len(args.var)))
     received=samples=0
     with connection(args.serial) as (tx,rx), native_connection(args.serial,tx.device) as native, \
-         args.rtt_out.open("xb") as rtt,args.scope_out.open("x",newline="",encoding="utf8") as wave:
+         args.rtt_out.open("xb") as rtt, (nullcontext() if rtt_only else args.scope_out.open("x",newline="",encoding="utf8")) as wave:
         info=native.info()
         setup(tx,rx,1000,args.transport)
-        writer=csv.writer(wave); writer.writerow(["tick_24mhz",*(f"u32_{a:08x}" for a in args.var)])
+        if not rtt_only:
+            writer=csv.writer(wave); writer.writerow(["tick_24mhz",*(f"u32_{a:08x}" for a in args.var)])
         active=False
         def pull():
             nonlocal received,samples
             payload=native.exchange(6,1);rtt.write(payload);received+=len(payload)
+            if rtt_only:return len(payload)
             values=native.exchange(6,2)
             if len(values)%layout.size: raise RuntimeError("partial sample group")
             writer.writerows(layout.iter_unpack(values));samples+=len(values)//layout.size
@@ -222,7 +226,9 @@ def capture_combo(args):
             native.exchange(6,0,config);active=True;start=time.perf_counter()
             next_check=start+0.25
             while time.perf_counter()-start<args.seconds:
-                pull()
+                pulled=pull()
+                if rtt_only and pulled and "clock" not in info:
+                    info["clock"]=native.memory_clock(PORTS[args.transport],info["reference_hz"],args.clock)
                 if time.perf_counter()>=next_check:
                     state=struct.unpack("<8I",native.exchange(6,4))
                     if state[1]:break
@@ -377,6 +383,15 @@ def main():
         else:
             sub.add_argument("--up-channel",type=int,default=0)
             sub.add_argument("--seconds",type=float,help="terminal window, or use Ctrl-C")
+    sub=commands.add_parser("rtt-queue",help="capture F103 SRAM RTT via the 50 MHz SWD memory queue")
+    sub.set_defaults(transport="swd",clock=50000000,scope_out=None,var=(),ticks=0)
+    sub.add_argument("--tap",type=int,required=True)
+    sub.add_argument("--slot",type=int,required=True)
+    sub.add_argument("--idle",type=int,default=0)
+    sub.add_argument("--address",dest="rtt_address",type=number,required=True)
+    sub.add_argument("--channel",type=int,default=0)
+    sub.add_argument("--seconds",type=float,required=True)
+    sub.add_argument("--out",dest="rtt_out",type=Path,required=True)
     for action in ("rtt","scope"):
         sub=commands.add_parser(action,help="capture RTT bytes or HSS frames through native WinUSB")
         sub.add_argument("--transport",choices=PORTS,required=True)
@@ -439,7 +454,7 @@ def main():
                         dp_id=hex(int.from_bytes(reply[offset:offset+4],"little")),cpuid=hex(cpu)),indent=2))
                 finally:cmd(tx,rx,[3])
             return 0
-        if args.action=="combo": return capture_combo(args)
+        if args.action in ("combo","rtt-queue"): return capture_combo(args)
         if args.action in ("rtt","scope"): return capture(args)
         if args.action in ("info","usb-test"):
             with native_connection(args.serial) as native:

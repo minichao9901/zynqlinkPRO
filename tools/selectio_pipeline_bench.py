@@ -42,6 +42,7 @@ def main():
     ap.add_argument("--slot",type=int,required=True)
     ap.add_argument("--idle",type=int,required=True)
     ap.add_argument("--bytes",type=int,default=4032)
+    ap.add_argument("--address",type=lambda value:int(value,0),default=PAGE+32)
     ap.add_argument("--depth",type=int,choices=range(1,5),default=4)
     ap.add_argument("--seconds",type=float,default=10)
     ap.add_argument("--rounds",type=int,default=3)
@@ -54,8 +55,9 @@ def main():
     args=ap.parse_args()
     if not args.execute:
         print("Verify fresh USB payloads and restore the backed-up F103 SRAM page.");return
-    n=args.bytes;address=PAGE+32
-    if n<=0 or n%4 or n>16320 or args.seconds<=0 or args.rounds<1:ap.error("invalid window or payload")
+    n=args.bytes;address=args.address
+    if (n<=0 or n%4 or n>16320 or address%4 or not PAGE<=address<=PAGE+16384-n or
+        args.seconds<=0 or args.rounds<1):ap.error("invalid window or guarded SRAM payload")
     args.out.mkdir(parents=True,exist_ok=False)
     report=dict(transport=args.transport,requested_hz=args.clock,tap=args.tap,slot=args.slot,idle=args.idle,
                 bytes=n,address=hex(address),depth=args.depth,windows=[])
