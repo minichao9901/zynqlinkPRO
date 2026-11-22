@@ -95,13 +95,15 @@ def main():
                     delta={k:probe[k]-before[k] for k in ("read_bytes","write_bytes")}
                     for key in ("queue_s","probe_s"):
                         delta[key]=[a-b for a,b in zip(probe[key],before[key])]
-                    if delta["read_bytes"]+delta["write_bytes"]!=count*n:
-                        raise RuntimeError("probe window byte counters differ from verified host payload")
+                    payload_bytes = count * n
+                    written = {"read": 0, "write": payload_bytes, "mixed": payload_bytes // 2}[direction]
+                    if (delta["read_bytes"], delta["write_bytes"]) != (payload_bytes - written, written):
+                        raise RuntimeError(f"{direction}: probe read/write counters differ from host payload: {delta}")
                     if mem.read(address,n)!=expected or [mem.word(address-4),mem.word(address+n)]!=guards:
                         raise RuntimeError("final image or SRAM guard differs")
                     report["windows"].append(dict(round=index+1,direction=direction,requests=count,
-                          payload_bytes=count*n,wall_seconds=elapsed,USB_seconds=active_time,
-                          wall_MBps=count*n/elapsed/1e6,USB_MBps=count*n/active_time/1e6,probe=probe,probe_delta=delta,clock=clock))
+                          payload_bytes=payload_bytes,wall_seconds=elapsed,USB_seconds=active_time,
+                          wall_MBps=payload_bytes/elapsed/1e6,USB_MBps=payload_bytes/active_time/1e6,probe=probe,probe_delta=delta,clock=clock))
                     save();print(report["windows"][-1],flush=True)
             report["passed"]=True
         except Exception as exc:

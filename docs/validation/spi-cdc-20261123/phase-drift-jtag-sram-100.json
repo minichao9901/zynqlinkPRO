@@ -1,0 +1,481 @@
+{
+  "hashes": {
+    "probe.bit": "f3c4ccfd78c9148649897a0902fb93eadb209494e0295956981c973bbac92c66",
+    "application.elf": "32f75ae7a4d82fe3b98a541f5cb4adeede9b5bdf42ab961fdf7cd33c9749da9d",
+    "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+  },
+  "serial": "12345678",
+  "case": {
+    "name": "memory-jtag",
+    "passed": true,
+    "exit_code": 0,
+    "seconds": 542.7233969999979,
+    "log": "memory-jtag.log",
+    "restored": true
+  },
+  "restored": true,
+  "hclk_mhz": 48,
+  "median_pc_MBps": {
+    "read": 4.7131292365004995,
+    "write": 4.565657759139271,
+    "mixed": 4.603916807778962
+  },
+  "raw": {
+    "transport": "jtag",
+    "requested_hz": 100000000,
+    "tap": 16,
+    "slot": 28,
+    "idle": 33,
+    "bytes": 4032,
+    "address": "0x20008020",
+    "depth": 4,
+    "windows": [
+      {
+        "round": 1,
+        "direction": "read",
+        "requests": 70144,
+        "payload_bytes": 282820608,
+        "wall_seconds": 60.00697070000024,
+        "USB_seconds": 59.953345899964916,
+        "wall_MBps": 4.7131292365004995,
+        "USB_MBps": 4.717344857981738,
+        "probe": {
+          "timer_hz": 333333343,
+          "read_bytes": 282824640,
+          "write_bytes": 4032,
+          "queue_s": [
+            55.99975990700696,
+            0.0007985489768420797
+          ],
+          "probe_s": [
+            58.17234596600197,
+            0.0008321939758663747
+          ],
+          "jtag_retry_profile": [
+            0,
+            33
+          ]
+        },
+        "probe_delta": {
+          "read_bytes": 282820608,
+          "write_bytes": 0,
+          "queue_s": [
+            55.998961571030115,
+            0.0
+          ],
+          "probe_s": [
+            58.17151631602603,
+            0.0
+          ]
+        },
+        "clock": {
+          "wire_hz": 99999998,
+          "reference_hz": 199999996,
+          "divider": 2,
+          "timing": "0x7884e2",
+          "tap": 16,
+          "source": "PS clock tree and PL queue registers"
+        }
+      },
+      {
+        "round": 1,
+        "direction": "write",
+        "requests": 67952,
+        "payload_bytes": 273982464,
+        "wall_seconds": 60.006608899999264,
+        "USB_seconds": 59.02094199989733,
+        "wall_MBps": 4.565871476866666,
+        "USB_MBps": 4.642122858704569,
+        "probe": {
+          "timer_hz": 333333343,
+          "read_bytes": 4032,
+          "write_bytes": 273986496,
+          "queue_s": [
+            0.0007986119768402526,
+            54.25760842652936
+          ],
+          "probe_s": [
+            0.0008298569759341477,
+            56.53764792440821
+          ],
+          "jtag_retry_profile": [
+            0,
+            33
+          ]
+        },
+        "probe_delta": {
+          "read_bytes": 0,
+          "write_bytes": 273982464,
+          "queue_s": [
+            0.0,
+            54.25681018355251
+          ],
+          "probe_s": [
+            0.0,
+            56.53681570643235
+          ]
+        },
+        "clock": {
+          "wire_hz": 99999998,
+          "reference_hz": 199999996,
+          "divider": 2,
+          "timing": "0x7884e2",
+          "tap": 16,
+          "source": "PS clock tree and PL queue registers"
+        }
+      },
+      {
+        "round": 1,
+        "direction": "mixed",
+        "requests": 68528,
+        "payload_bytes": 276304896,
+        "wall_seconds": 60.00913000000219,
+        "USB_seconds": 59.442894900050305,
+        "wall_MBps": 4.604380966696067,
+        "USB_MBps": 4.648240911964168,
+        "probe": {
+          "timer_hz": 333333343,
+          "read_bytes": 138156480,
+          "write_bytes": 138156480,
+          "queue_s": [
+            27.352072864789886,
+            27.353434735750394
+          ],
+          "probe_s": [
+            28.417369704896277,
+            28.498243525550937
+          ],
+          "jtag_retry_profile": [
+            0,
+            33
+          ]
+        },
+        "probe_delta": {
+          "read_bytes": 138152448,
+          "write_bytes": 138152448,
+          "queue_s": [
+            27.351274357813043,
+            27.352636312773548
+          ],
+          "probe_s": [
+            28.41653988992034,
+            28.49741175757506
+          ]
+        },
+        "clock": {
+          "wire_hz": 99999998,
+          "reference_hz": 199999996,
+          "divider": 2,
+          "timing": "0x7884e2",
+          "tap": 16,
+          "source": "PS clock tree and PL queue registers"
+        }
+      },
+      {
+        "round": 2,
+        "direction": "read",
+        "requests": 70144,
+        "payload_bytes": 282820608,
+        "wall_seconds": 60.0020156999999,
+        "USB_seconds": 59.95015519997469,
+        "wall_MBps": 4.713518449347702,
+        "USB_MBps": 4.717595927093103,
+        "probe": {
+          "timer_hz": 333333343,
+          "read_bytes": 282824640,
+          "write_bytes": 4032,
+          "queue_s": [
+            55.99916045002435,
+            0.0007983629768474736
+          ],
+          "probe_s": [
+            58.1680759521258,
+            0.0008319569758732477
+          ],
+          "jtag_retry_profile": [
+            0,
+            33
+          ]
+        },
+        "probe_delta": {
+          "read_bytes": 282820608,
+          "write_bytes": 0,
+          "queue_s": [
+            55.9983619460475,
+            0.0
+          ],
+          "probe_s": [
+            58.16724617314986,
+            0.0
+          ]
+        },
+        "clock": {
+          "wire_hz": 99999998,
+          "reference_hz": 199999996,
+          "divider": 2,
+          "timing": "0x7884e2",
+          "tap": 16,
+          "source": "PS clock tree and PL queue registers"
+        }
+      },
+      {
+        "round": 2,
+        "direction": "write",
+        "requests": 67936,
+        "payload_bytes": 273917952,
+        "wall_seconds": 60.00338240000201,
+        "USB_seconds": 59.01371319998725,
+        "wall_MBps": 4.565041853373766,
+        "USB_MBps": 4.641598319220137,
+        "probe": {
+          "timer_hz": 333333343,
+          "read_bytes": 4032,
+          "write_bytes": 273921984,
+          "queue_s": [
+            0.0007984589768446897,
+            54.245909164868635
+          ],
+          "probe_s": [
+            0.0008297969759358877,
+            56.52895470766031
+          ],
+          "jtag_retry_profile": [
+            0,
+            33
+          ]
+        },
+        "probe_delta": {
+          "read_bytes": 0,
+          "write_bytes": 273917952,
+          "queue_s": [
+            0.0,
+            54.245110780891785
+          ],
+          "probe_s": [
+            0.0,
+            56.52812302368443
+          ]
+        },
+        "clock": {
+          "wire_hz": 99999998,
+          "reference_hz": 199999996,
+          "divider": 2,
+          "timing": "0x7884e2",
+          "tap": 16,
+          "source": "PS clock tree and PL queue registers"
+        }
+      },
+      {
+        "round": 2,
+        "direction": "mixed",
+        "requests": 68512,
+        "payload_bytes": 276240384,
+        "wall_seconds": 60.01015879999977,
+        "USB_seconds": 59.44126120004876,
+        "wall_MBps": 4.603227012290477,
+        "USB_MBps": 4.647283358781987,
+        "probe": {
+          "timer_hz": 333333343,
+          "read_bytes": 138124224,
+          "write_bytes": 138124224,
+          "queue_s": [
+            27.349363510868457,
+            27.347970163908865
+          ],
+          "probe_s": [
+            28.412325562042557,
+            28.492204582726067
+          ],
+          "jtag_retry_profile": [
+            0,
+            33
+          ]
+        },
+        "probe_delta": {
+          "read_bytes": 138120192,
+          "write_bytes": 138120192,
+          "queue_s": [
+            27.34856505189161,
+            27.34717171993202
+          ],
+          "probe_s": [
+            28.411495711066625,
+            28.491372898750186
+          ]
+        },
+        "clock": {
+          "wire_hz": 99999998,
+          "reference_hz": 199999996,
+          "divider": 2,
+          "timing": "0x7884e2",
+          "tap": 16,
+          "source": "PS clock tree and PL queue registers"
+        }
+      },
+      {
+        "round": 3,
+        "direction": "read",
+        "requests": 70144,
+        "payload_bytes": 282820608,
+        "wall_seconds": 60.009481099998084,
+        "USB_seconds": 59.95937239995328,
+        "wall_MBps": 4.712932070329284,
+        "USB_MBps": 4.716870718950694,
+        "probe": {
+          "timer_hz": 333333343,
+          "read_bytes": 282824640,
+          "write_bytes": 4032,
+          "queue_s": [
+            55.99979906000583,
+            0.0007982399768510407
+          ],
+          "probe_s": [
+            58.171177040035865,
+            0.0008317469758793377
+          ],
+          "jtag_retry_profile": [
+            0,
+            33
+          ]
+        },
+        "probe_delta": {
+          "read_bytes": 282820608,
+          "write_bytes": 0,
+          "queue_s": [
+            55.999000988028975,
+            0.0
+          ],
+          "probe_s": [
+            58.170347747059914,
+            0.0
+          ]
+        },
+        "clock": {
+          "wire_hz": 99999998,
+          "reference_hz": 199999996,
+          "divider": 2,
+          "timing": "0x7884e2",
+          "tap": 16,
+          "source": "PS clock tree and PL queue registers"
+        }
+      },
+      {
+        "round": 3,
+        "direction": "write",
+        "requests": 67952,
+        "payload_bytes": 273982464,
+        "wall_seconds": 60.00941779999994,
+        "USB_seconds": 59.02372820009259,
+        "wall_MBps": 4.565657759139271,
+        "USB_MBps": 4.641903728466447,
+        "probe": {
+          "timer_hz": 333333343,
+          "read_bytes": 4032,
+          "write_bytes": 273986496,
+          "queue_s": [
+            0.0007985099768432107,
+            54.258000256517995
+          ],
+          "probe_s": [
+            0.0008297669759367577,
+            56.53665353543705
+          ],
+          "jtag_retry_profile": [
+            0,
+            33
+          ]
+        },
+        "probe_delta": {
+          "read_bytes": 0,
+          "write_bytes": 273982464,
+          "queue_s": [
+            0.0,
+            54.25720177354115
+          ],
+          "probe_s": [
+            0.0,
+            56.53582168946117
+          ]
+        },
+        "clock": {
+          "wire_hz": 99999998,
+          "reference_hz": 199999996,
+          "divider": 2,
+          "timing": "0x7884e2",
+          "tap": 16,
+          "source": "PS clock tree and PL queue registers"
+        }
+      },
+      {
+        "round": 3,
+        "direction": "mixed",
+        "requests": 68512,
+        "payload_bytes": 276240384,
+        "wall_seconds": 60.00116759999946,
+        "USB_seconds": 59.434405000061815,
+        "wall_MBps": 4.603916807778962,
+        "USB_MBps": 4.6478194574289535,
+        "probe": {
+          "timer_hz": 333333343,
+          "read_bytes": 138124224,
+          "write_bytes": 138124224,
+          "queue_s": [
+            27.34881144488447,
+            27.348695407887835
+          ],
+          "probe_s": [
+            28.412510698037188,
+            28.492786408709193
+          ],
+          "jtag_retry_profile": [
+            0,
+            33
+          ]
+        },
+        "probe_delta": {
+          "read_bytes": 138120192,
+          "write_bytes": 138120192,
+          "queue_s": [
+            27.34801314490762,
+            27.34789691591099
+          ],
+          "probe_s": [
+            28.41168106306125,
+            28.491954613733316
+          ]
+        },
+        "clock": {
+          "wire_hz": 99999998,
+          "reference_hz": 199999996,
+          "divider": 2,
+          "timing": "0x7884e2",
+          "tap": 16,
+          "source": "PS clock tree and PL queue registers"
+        }
+      }
+    ],
+    "info": {
+      "protocol": "ZLK1",
+      "reference_hz": 199999996,
+      "link_hz": 99999998.0,
+      "features": "0x4450ffff",
+      "integrated_pl": true,
+      "max_frame": 16384,
+      "firmware_abi": 1,
+      "bulk_header_bytes": 16,
+      "serial_buffer_bytes": 2162688,
+      "fclk0_hz": 133333332,
+      "negotiated_frame": 16384,
+      "max_queue_depth": 4
+    },
+    "frame": 4096,
+    "schedule": "sliding",
+    "guards": [
+      381237193,
+      1429643596
+    ],
+    "backup_sha256": "6aecb2fdd503b4318b7934122638a3694917a8776ceb3d6e85734a2e59bcf59f",
+    "passed": true,
+    "restored": true
+  }
+}
