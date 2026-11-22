@@ -47,3 +47,5 @@ slot 22 的长窗每方向 3 × 60 秒。50 MHz SRAM 的理想连续 DRW 为 4.3
 重放原 16,320 B 非对齐窗口时，第一次 10 秒写入为 3.585 MB/s，同窗内 PS 块速度仍为 4.103 MB/s。三秒复测为 3.953 MB/s，PS 块速率几乎相同。数据、哨兵和恢复均通过，首次差异落在 PS 计时边界外，确切来源待定位。[首次](final-unaligned-first-memory.json) · [不同块长复测](geometry-short-windows.json)
 
 最终配对在历史标准 CMSIS-DAP 两方向为 3.748 / 3.747 MB/s，CDC 为 3.711 MB/s。这三个值均来自 HCLK96、实际 SWCLK 50 MHz 的旧口径重放。[标准 CMSIS-DAP](optimized-historical-96-cmsis.json) · [RTT→CDC](optimized-historical-96-rtt.json)
+
+最终配对的非对齐 16,320 B 再各跑两轮 30 秒，读为 4.0038 / 4.0037 MB/s，写为 3.9537 / 3.9545 MB/s。两轮跨 TAR 页、逐字比对和完整恢复均通过，首次低写入值保留。[长窗复测](final-unaligned-30s-memory.json) · [最终目标恢复](final-unaligned-30s-state.json)
