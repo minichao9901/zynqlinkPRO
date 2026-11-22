@@ -291,7 +291,8 @@ module tb_selectio_debug #(parameter integer QUAD_DMA=0, VARIABLE_CLOCK=0, SELEC
             write_reg(8,2,0);
             wait(owner==0);
             if (adjacent<256) $fatal(1,"missing continuous JTAG");
-            $display("JTAG_PASS %0d MHz words=256 edges=%d slot=%d",$test$plusargs("half_rate")?50:100,edges,jslot);
+            $display("JTAG_PASS %0.3f MHz period_ns=%0.3f words=256 edges=%d slot=%d",
+                     1000.0/expected_period,expected_period,edges,jslot);
         end
         if($test$plusargs("jtag_only")) begin
             $display("SELECTIO_JTAG_ONLY_PASS");
@@ -354,7 +355,8 @@ module tb_selectio_debug #(parameter integer QUAD_DMA=0, VARIABLE_CLOCK=0, SELEC
             $display("LIVE_RAW_QUEUE_PASS SWD scalar and queued DRW share TAR, sample phase and pad owner");
         end
         write_reg(8,1,0); wait(owner==0); released=0; wait(owner==1);
-        $display("SELECTIO_PASS SWD %0d MHz words=256 slot=%d",$test$plusargs("half_rate")?50:100,sslot);
+        $display("SELECTIO_PASS SWD %0.3f MHz period_ns=%0.3f words=256 slot=%d",
+                 1000.0/expected_period,expected_period,sslot);
         $finish;
     end
     initial begin #8_000_000; $fatal(1,"deadline owner=%d",owner); end
