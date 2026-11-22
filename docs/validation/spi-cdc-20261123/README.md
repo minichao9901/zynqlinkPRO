@@ -91,3 +91,7 @@ DBG-06 原清单 slot22 邻域没有通过点。按 Case 表修正到 slot28 后
 ## 修正配对首次实板
 
 新版的 bit 为 `f3c4ccfd…`，PS ELF 为 `32f75ae7…`。Vivado 按 133.333 MHz 约束完成布线，setup/hold 为 +0.012/+0.021 ns。真实 JTAG/RAM 加载后，MEM-AP0 核对了 80,268 B OCM 执行段，USB 描述符与首版完全相同。F103 GPIO 四模式各 16,384 B 全匹配，零溢出、帧错及尾差，夹具恢复。全套与最高物理速率分别跟踪。 [新配对](../../../prebuilt/selectio-spi-cdc-phase-drift-20261123/manifest.json) · [首轮硬件证据](phase-drift-smoke.json)
+
+## 修正配对的 USB 与 SWD SRAM 长窗
+
+IF4 的 4,079 B 回环每轮 60 秒，三轮双向逐字节核对，合计 **21.453 / 20.987 / 21.521 MB/s**。F103ZE 保持 CDC48，SWCLK 回读 99,999,998 Hz，tap8/slot25/idle2。原生 SRAM 每请求跨 TAR 页 4,032 B，深度 4，读、写、交替各 3×60 秒。PC 有效载荷中位数分别为 **6.673 / 6.610 / 6.574 MB/s**。各窗口主机与探针字节数对账通过，SRAM 及保护字逐项复核，目标已恢复。 [新版逐轮数据](phase-drift-swd-and-usb.json)
