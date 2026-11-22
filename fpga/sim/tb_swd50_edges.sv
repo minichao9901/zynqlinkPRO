@@ -1,7 +1,9 @@
 `timescale 1ns/1ps
-module tb_swd50_edges;
+module tb_swd50_edges #(parameter VARIABLE_CLOCK=0);
     bit ref_clk=0, resetn=0, released=0, start=0;
-    always #2.5 ref_clk = ~ref_clk;
+    realtime ref_ns=5.0, nominal_period=20.0;
+    reg [1:0] rate=0;
+    always #(ref_ns/2) ref_clk = ~ref_clk;
     wire serial_rx_clk, serial_clk, quad_clk, octet_clk, phy_reset, swd_reset;
     wire [2:0] owner;
     wire [3:0] clocks_out, data_out, release_out, rx;
@@ -29,22 +31,22 @@ module tb_swd50_edges;
     always @(posedge quad_clk)
         command_word <= command_addr[0] ? HOST_DATA : command_addr[9:1]==0 ? 32'd15 : 32'd13;
 
-    selectio_clocking clocks(ref_clk,resetn,1'b1,1'b1,1'b0,released,1'b0,1'b0,1'b0,
-        serial_clk,quad_clk,octet_clk,phy_reset,,swd_reset,,owner,,serial_rx_clk);
+    selectio_clocking #(.VARIABLE_CLOCK(VARIABLE_CLOCK)) clocks(ref_clk,resetn,1'b1,1'b1,1'b0,released,1'b0,1'b0,1'b0,
+        serial_clk,quad_clk,octet_clk,phy_reset,,swd_reset,,owner,,serial_rx_clk,2'b0,1'b0,);
     selectio_debug_phy phy(serial_clk,quad_clk,octet_clk,phy_reset,owner,
         1'b0,1'b1,1'b1,1'b0,1'b1,24'b0,,
         batch_mode ? batch_clk : clocks_out, batch_mode ? batch_data : data_out,
         batch_mode ? batch_release : release_out,rx,
         quad_clk,1'b0,1'b0,5'b0,5'b0,clk_pin,data_pin,tdi_pin,1'b1,,, , ,
         1'b0,4'b0,4'b0,4'b0,,1'b0,1'b0,serial_rx_clk,);
-    swd200_link link(.clk(quad_clk),.reset(swd_reset),.rate(2'd0),
+    swd200_link link(.clk(quad_clk),.reset(swd_reset),.rate(rate),
         .ack_sample(sample_slot[5:0]),.data_sample(sample_slot[5:0]),
         .idle_cycles(idle[3:0]),.release_guard(3'd0),.start(start),.enter_swd(1'b0),
         .header(header),.write_packet({^HOST_DATA,HOST_DATA}),
         .done(done),.ack(ack),.parity_error(parity_error),.read_data(read_data),
         .rx_slots(rx),.clk_slots(clocks_out),.data_slots(data_out),.release_slots(release_out));
     swd200_batch #(.SAME_CLOCK(1)) scheduler(.clk(quad_clk),.reset(swd_reset),.run(run_batch),
-        .count(10'd2),.rate(2'd0),.ack_sample(sample_slot[5:0]),.data_sample(sample_slot[5:0]),
+        .count(10'd2),.rate(rate),.ack_sample(sample_slot[5:0]),.data_sample(sample_slot[5:0]),
         .idle_cycles(idle[3:0]),.mode(7'd0),.command_addr(command_addr),.command_word(command_word),
         .payload_enabled(1'b0),.payload_data(32'b0),.write_result(batch_write),
         .result_addr(result_index),.result_word(batch_result),.completed(retired),.error(batch_error),
@@ -90,7 +92,7 @@ module tb_swd50_edges;
         if(testing && (target_oe || delayed_oe) && phy.data_tri===1'b0)
             $fatal(1,"SWDIO overlap after edge %0d",edges);
     always @(posedge clk_pin) if(testing && clk_pin===1'b1) begin
-        if(last_rise!=0 && $realtime-last_rise<19.999)
+        if(last_rise!=0 && $realtime-last_rise<nominal_period-0.010)
             $fatal(1,"short SWCLK at edge %0d",edges+1);
         last_rise=$realtime;
         if(edges==limit) begin
@@ -129,8 +131,8 @@ module tb_swd50_edges;
             $fatal(1,"read data got=%h expected=%h",read_data,data);
         repeat(6) @(negedge quad_clk);
         if(edges!=limit) $fatal(1,"read=%b ACK=%b edges=%0d expected=%0d",rd,result,edges,limit);
-        $display("SWD50_EDGE slot=%0d idle=%0d read=%b ack=%03b parity_error=%b d0=%b rises=%0d ack_to_next_ns=%0.3f",
-                 sample_slot,idle,rd,result,corrupt,data[0],edges,first_after_ack-ack_rise);
+        $display("SWD50_EDGE period_ns=%0.3f slot=%0d idle=%0d read=%b ack=%03b parity_error=%b d0=%b rises=%0d ack_to_next_ns=%0.3f",
+                 nominal_period,sample_slot,idle,rd,result,corrupt,data[0],edges,first_after_ack-ack_rise);
         testing=0;
     endtask
 
@@ -159,6 +161,12 @@ module tb_swd50_edges;
     endtask
 
     initial begin
+        if(VARIABLE_CLOCK) begin
+            ref_ns=20.0;
+            if($value$plusargs("fclk1_ns=%f",ref_ns)) begin end
+            if(!$test$plusargs("half_rate")) rate=1;
+            nominal_period=rate==0 ? ref_ns : ref_ns/2;
+        end
         if($value$plusargs("sslot=%d",sample_slot)) begin end
         if($value$plusargs("idle=%d",idle)) begin end
         if($value$plusargs("return_ns=%f",return_ns)) begin end

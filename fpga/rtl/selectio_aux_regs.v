@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 // GP1 peripheral for SPI, UART and SWO. TX uses synchronous dual-port RAM.
 // The producer owns each RX byte until software acknowledges its USB delivery.
-module selectio_aux_regs(
+module selectio_aux_regs #(parameter SELECTIO_SLICE=0)(
     (* X_INTERFACE_PARAMETER="ASSOCIATED_BUSIF S_AXI, ASSOCIATED_RESET axi_aresetn" *)
     input wire axi_aclk, axi_aresetn,
     input wire [16:0] s_axi_awaddr, input wire [2:0] s_axi_awprot,
@@ -19,6 +19,7 @@ module selectio_aux_regs(
 );
     // flags[1:0] receive codec: 0 off, 1 UART 8N1, 2 Manchester SWO.
     // flags[2] owns the SPI pins, flags[3] owns UART TX on TDI.
+    localparam [3:0] FLAG_MASK=SELECTIO_SLICE==1 ? 4'b0100 : SELECTIO_SLICE==2 ? 4'b1011 : 4'b1111;
     reg [3:0] flags;
     reg [31:0] period_q8;
     reg [15:0] min_short,short_limit,long_limit;
@@ -193,11 +194,11 @@ module selectio_aux_regs(
                 have_aw<=0;have_w<=0;s_axi_bvalid<=1;s_axi_bresp<=0;
                 if(!aligned) s_axi_bresp<=2;
                 else if(!tx_write) case(aw)
-                    'h08: if(!tx_busy && !launch && wd<16 && wd[1:0]!=3 && wd[3:2]!=3) flags<=wd[3:0];else s_axi_bresp<=2;
+                    'h08: if(!tx_busy && !launch && wd<16 && wd[1:0]!=3 && wd[3:2]!=3 && !(wd[3:0]&~FLAG_MASK)) flags<=wd[3:0]&FLAG_MASK;else s_axi_bresp<=2;
                     'h0c: if(!flags && wd>=1024) period_q8<=wd;else s_axi_bresp<=2;
                     'h10: if(!flags) begin min_short<=wd[15:0];short_limit<=wd[31:16];end else s_axi_bresp<=2;
                     'h14: if(!flags) long_limit<=wd[15:0];else s_axi_bresp<=2;
-                    'h30: if(!flags && wd<4) test_config<=wd[1:0];else s_axi_bresp<=2;
+                    'h30: if(!flags && wd<4 && (SELECTIO_SLICE==0 || wd==0)) test_config<=SELECTIO_SLICE==0 ? wd[1:0] : 2'b0;else s_axi_bresp<=2;
                     'h18: if(!tx_busy && !launch && wd<256) spi_config<=wd[7:0];else s_axi_bresp<=2;
                     'h1c: if(grant_sync[1] && !tx_busy && !launch && wd!=0 && wd<=4096) begin
                         tx_length<=wd[12:0];launch<=1;completed<=0;

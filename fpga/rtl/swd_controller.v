@@ -13,7 +13,8 @@ module swd_controller #(
     parameter integer ENABLE_DIAGNOSTICS = 1,
     parameter integer SWDIO_IN_DELAY_NS = 0,
     parameter integer SELECTIO = 0,
-    parameter integer QUAD_AXI = 0
+    parameter integer QUAD_AXI = 0,
+    parameter integer SELECTIO_SLICE = 0
 )(
     input  wire                                    clk,
     input  wire                                    rst_n,
@@ -110,7 +111,8 @@ module swd_controller #(
     reg jtag_return_late;
     // Cache the route decode on the same AXI write as jtag_config. This
     // preserves cycle semantics and removes a LUT from busy/owner -> RX CE.
-    reg jtag_enabled;
+    reg programmed_jtag_enabled;
+    wire jtag_enabled=SELECTIO_SLICE==1 || (SELECTIO_SLICE==0 && programmed_jtag_enabled);
     wire jtag_tck,jtag_tms,jtag_tdi,jtag_busy,jtag_result_valid,jtag_next_ready;
     wire [2:0] core_ack;
     wire core_parity_err,core_busy,core_result_valid,core_next_ready;
@@ -606,7 +608,7 @@ module swd_controller #(
             engine_reset_count <= 0;
             trace_index <= 0;
             diag_index <= 0;
-            jtag_config<=2;jtag_enabled<=0;jtag_ir_config<=4;jtag_dr_config<=0;jtag_operation<=0;
+            jtag_config<=2;programmed_jtag_enabled<=0;jtag_ir_config<=4;jtag_dr_config<=0;jtag_operation<=0;
             jtag_seq_tms<=0;jtag_sample_early<=0;jtag_return_late<=0;manual_pins<=0;
             swj_data <= 256'd0;
             swj_count <= 8'd0;
@@ -680,7 +682,7 @@ module swd_controller #(
                     ADDR_TRACE_INDEX: if(ENABLE_DIAGNOSTICS) trace_index<=s_axi_wdata[3:0];
                     8'hd0:if(ENABLE_DIAGNOSTICS)diag_index<=s_axi_wdata[4:0];
                     8'h80: if(!core_busy && !stream_active && !packet_active && !batch_active)begin
-                        jtag_config<=s_axi_wdata;jtag_enabled<=s_axi_wdata[0] && s_axi_wdata[1];
+                        jtag_config<=s_axi_wdata;programmed_jtag_enabled<=s_axi_wdata[0] && s_axi_wdata[1];
                     end
                     8'h84: if(!core_busy && !stream_active && !packet_active && !batch_active) jtag_ir_config<=s_axi_wdata;
                     8'h88: if(!core_busy && !stream_active && !packet_active && !batch_active) jtag_dr_config<=s_axi_wdata;

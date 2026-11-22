@@ -49,10 +49,12 @@ def main():
     ap.add_argument("--directions",nargs="+",choices=("read","write","mixed"),default=["read","write","mixed"])
     ap.add_argument("--out",type=Path,required=True)
     ap.add_argument("--execute",action="store_true")
-    ap.add_argument("--clock",type=int,choices=(50000000,100000000),default=100000000)
+    ap.add_argument("--clock",type=int,default=100000000,help='50 to 100 MHz; intermediate rates require adjustable-clock firmware')
     ap.add_argument("--frame",type=int,choices=(4096,16384),help="cap the negotiated WinUSB frame")
     ap.add_argument("--schedule",choices=("sliding","grouped"),default="sliding")
     args=ap.parse_args()
+    if not 50000000<=args.clock<=100000000:
+        ap.error("SelectIO clock must be 50 to 100 MHz")
     if not args.execute:
         print("Verify fresh USB payloads and restore the backed-up F103 SRAM page.");return
     n=args.bytes;address=args.address

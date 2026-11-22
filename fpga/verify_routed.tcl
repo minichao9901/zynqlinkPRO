@@ -16,7 +16,26 @@ set observation_cells [get_cells -quiet -hier -filter {NAME =~ *swd_controller_0
 if {!$rtl_debug && [llength $observation_cells]} {error "Release retains optional observation registers"}
 if {$rtl_debug && ![llength $observation_cells]} {error "Debug instrumentation was not implemented"}
 puts "RTL_OBSERVATION_IMPLEMENTED=[llength $observation_cells] RTL_DEBUG=$rtl_debug"
+set sio_slice [expr {[info exists ::env(ZYNQLINK_SELECTIO_SLICE)] ? $::env(ZYNQLINK_SELECTIO_SLICE) : 0}]
 set selectio_pads [get_cells -quiet -hier -filter {REF_NAME == OSERDESE2 && NAME =~ *g_selectio*}]
+if {[info exists ::env(ZYNQLINK_SELECTIO_VARIABLE)] && $::env(ZYNQLINK_SELECTIO_VARIABLE)} {
+    foreach {clock period} {clk_fpga_0 7.5 clk_selectio_ref 20.0 clk_delay_ref 5.0 quad_raw 10.0 serial_raw 5.0 rx_raw 2.5 octet_raw 20.0} {
+        set clock_obj [get_clocks -quiet $clock]
+        if {[llength $clock_obj]!=1 || abs([get_property PERIOD $clock_obj]-$period)>0.005} {
+            error "Unexpected operating period for $clock"
+        }
+        puts "SELECTIO_ROUTED_CLOCK $clock period=$period ns"
+    }
+    set axi_ports {MAXIGP0ACLK MAXIGP1ACLK SAXIHP0ACLK}
+    if {$sio_slice!=1} {lappend axi_ports SAXIHP1ACLK}
+    foreach pin $axi_ports {
+        set target [get_pins -hier -filter "NAME =~ */PS7_i/$pin"]
+        if {[llength $target]!=1 || "clk_fpga_0" ni [get_clocks -of_objects $target]} {
+            error "Unexpected A-layout AXI clock on $pin"
+        }
+        puts "SELECTIO_ROUTED_AXI $pin clk_fpga_0"
+    }
+}
 if {[info exists ::env(ZYNQLINK_QUAD_DMA)] && $::env(ZYNQLINK_QUAD_DMA)} {
     foreach {pin clock} {MAXIGP1ACLK quad_raw SAXIHP0ACLK quad_raw MAXIGP0ACLK clk_fpga_0 SAXIHP1ACLK clk_fpga_0} {
         set aclk [get_pins -hier -filter "NAME =~ */PS7_i/$pin"]
@@ -37,7 +56,7 @@ if {[info exists ::env(ZYNQLINK_QUAD_DMA)] && $::env(ZYNQLINK_QUAD_DMA)} {
     puts "QUAD_DMA_ROUTED_SWDBRAM=2 CDMA=quad_raw"
 }
 if {[llength $selectio_pads]} {
-    if {[llength $selectio_pads]!=3 || [llength [get_cells -quiet -hier -filter {REF_NAME == ISERDESE2 && NAME =~ *g_selectio*}]]!=3} {
+    if {[llength $selectio_pads]!=3 || [llength [get_cells -quiet -hier -filter {REF_NAME == ISERDESE2 && NAME =~ *g_selectio*}]] < ($sio_slice ? 1 : 3)} {
         error "Missing shared debug serializers"
     }
     foreach {port ball} {swclk_0 L15 swdio_0 L16 gpio_rtl_0_tri_io[0] M15 gpio_rtl_0_tri_io[1] L14} {
@@ -104,6 +123,12 @@ if {[info exists ::env(ZYNQLINK_VERIFY_TDO_INPUT_ONLY)] && $::env(ZYNQLINK_VERIF
     puts "TDO_INPUT_ISOLATION_VERIFIED inputBuffers=1 outputEnable=constant0"
 }
 }
+if {$sio_slice==1} {
+    if {[llength [get_cells -hier -filter {NAME =~ *etm_ddr_0* || NAME =~ *orbtrace_0*}]] ||
+        ![llength [get_cells -hier -filter {REF_NAME == IDELAYCTRL && NAME =~ *sio_clock*}]]} {
+        error "JTAG slice retained ETM or lost SelectIO delay calibration"
+    }
+} else {
 set wide_trace [expr {[info exists ::env(ZYNQLINK_ETM_DOUBLE_SAMPLE)] && $::env(ZYNQLINK_ETM_DOUBLE_SAMPLE)}]
 set trace_ddr [get_cells -hier -filter {REF_NAME == IDDR && NAME =~ *orbtrace_0*}]
 if {[info exists ::env(ZYNQLINK_RAW_TRACE)] && $::env(ZYNQLINK_RAW_TRACE) in {2 3 4}} {
@@ -161,6 +186,7 @@ if {[info exists ::env(ZYNQLINK_RAW_TRACE)] && $::env(ZYNQLINK_RAW_TRACE) in {2 
     }
     puts "ORBTRACE_OVERSAMPLE_VERIFIED META=[llength $os_meta] SYNC=[llength $os_sync]"
     }
+}
 }
 # Evaluate realizable PLL divisors on this routed netlist, without rebuilding
 # it for each frequency. Keep the highest rate that meets BOTH setup and hold.

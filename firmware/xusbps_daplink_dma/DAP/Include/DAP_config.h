@@ -71,6 +71,12 @@ This information includes:
 
 /// Indicate that Serial Wire Debug (SWD) communication mode is available at the Debug Access Port.
 /// This information is returned by the command \ref DAP_Info as part of <b>Capabilities</b>.
+#ifndef DAP_SELECTIO_VARIABLE
+#define DAP_SELECTIO_VARIABLE 0
+#endif
+#ifndef DAP_SELECTIO_SLICE
+#define DAP_SELECTIO_SLICE 0
+#endif
 #define DAP_SWD                 1               ///< SWD Mode:  1 = available, 0 = not available.
 
 /// Indicate that JTAG communication mode is available at the Debug Port.
@@ -84,7 +90,7 @@ This information includes:
 
 /// Default communication mode on the Debug Access Port.
 /// Used for the command \ref DAP_Connect when Port Default mode is selected.
-#define DAP_DEFAULT_PORT        1U              ///< Default JTAG/SWJ Port Mode: 1 = SWD, 2 = JTAG.
+#define DAP_DEFAULT_PORT        (DAP_SELECTIO_SLICE==1 ? 2U : 1U)              ///< Default JTAG/SWJ Port Mode: 1 = SWD, 2 = JTAG.
 
 /// Default communication speed on the Debug Access Port for SWD and JTAG mode.
 /// Used to initialize the default SWD/JTAG clock frequency.

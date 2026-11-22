@@ -1,3 +1,4 @@
+#include "DAP_config.h"
 #include "probe_stream.h"
 #include "selectio_usb.h"
 #if DAP_SELECTIO
@@ -155,7 +156,7 @@ int main(void)
 	int Status;
 	probe_boot_record(1U,0);
 	printf("hello cdc acm test!\n");
-    xil_printf("[ETM] independent FCLK1 reference=%u Hz\r\n",etm_reference_init());
+    xil_printf("[PROBE] fixed FCLK%u reference=%u Hz\r\n",DAP_SELECTIO_VARIABLE ? 2U : 1U,etm_reference_init());
     extern uint32_t etm_ddr_init(void);
     xil_printf("[ETM] bounded DDR USB=%u\r\n",etm_ddr_init());
 	extern int swd_dma_selftest(void);

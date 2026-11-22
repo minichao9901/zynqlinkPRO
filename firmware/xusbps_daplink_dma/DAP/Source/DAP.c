@@ -153,7 +153,9 @@ static uint8_t DAP_Info(uint8_t id, uint8_t *info) {
                 ((DAP_UART != 0U)        ? (1U << 7) : 0U);
 
 #if DAP_SELECTIO
-      if(swd_read32(SWD_FEATURES)&0x200U) info[0]|=0x0cU;
+      if(DAP_SELECTIO_SLICE==1) info[0]&=~0x4dU; // SWD and SWO.
+      else if(swd_read32(SWD_FEATURES)&0x200U) info[0]|=0x0cU;
+      if(DAP_SELECTIO_SLICE==2) info[0]&=~2U;
 #endif
       info[1] = ((DAP_UART_USB_COM_PORT != 0) ? (1U << 0) : 0U);
       length = 2U;
@@ -283,7 +285,8 @@ static uint32_t DAP_Connect(const uint8_t *request, uint8_t *response) {
   }
 
 #if DAP_SELECTIO
-  if(selectio_aux_conflict(port)) {*response=DAP_PORT_DISABLED;return ((1U<<16)|1U);}
+  if((DAP_SELECTIO_SLICE==1 && port!=DAP_PORT_JTAG) ||
+     (DAP_SELECTIO_SLICE==2 && port!=DAP_PORT_SWD) || selectio_aux_conflict(port)) {*response=DAP_PORT_DISABLED;return ((1U<<16)|1U);}
 #endif
   switch (port) {
 #if (DAP_SWD != 0)
@@ -477,9 +480,10 @@ static uint32_t DAP_SWJ_Clock(const uint8_t *request, uint8_t *response) {
    * an extended half-period divider so the pad can emit a narrow high
    * pulse while retaining the requested bit period. */
 #if DAP_SELECTIO
-  if (clock==100000000U || (clock==50000000U && (swd_read32(SWD_FEATURES)&0x8000U))) {
+  unsigned divisor_profile,half_profile;
+  if (!selectio_clock_plan(clock,&divisor_profile,&half_profile)) {
     *response=selectio_live_clock(clock) ? DAP_ERROR : DAP_OK;
-    if (*response==DAP_OK) Set_Clock_Delay(clock);
+    if (*response==DAP_OK) Set_Clock_Delay(selectio_live_hz());
     return (4U<<16)|1U;
   }
   if (selectio_live_active() && selectio_live_set(0)) {

@@ -17,6 +17,13 @@ def main():
     if os.name=='nt' and shutil.which('clang'):
         mingw=Path(shutil.which('gcc')).parent.parent;libs=list((mingw/'lib/gcc/x86_64-w64-mingw32').glob('*'))
         cc=['clang','--target=x86_64-w64-windows-gnu','-isystem',str(mingw/'include'),'-L'+str(mingw/'lib'),'-L'+str(libs[-1])]
+    selectio=(ROOT/'firmware/xusbps_daplink_dma/DAP/Source/selectio_mode.c').read_text()
+    plan=function(selectio,'int selectio_clock_plan(')
+    (a.out/'selectio_clock_under_test.h').write_text(plan,encoding='utf8')
+    exe=a.out/('selectio_clock_plan_test.exe' if os.name=='nt' else 'selectio_clock_plan_test')
+    subprocess.run([*cc,'-std=c11','-I',str(a.out.resolve()),
+                    str(ROOT/'tools/tests/selectio_clock_plan_test.c'),'-o',str(exe)],check=True)
+    subprocess.run([str(exe.resolve())],check=True,timeout=15)
     bounds=a.out/('selectio_swo_bounds.exe' if os.name=='nt' else 'selectio_swo_bounds')
     dap_root=ROOT/'firmware/xusbps_daplink_dma/DAP'
     subprocess.run([*cc,'-std=c11','-DDAP_SELECTIO=1','-I',str(dap_root/'Include'),

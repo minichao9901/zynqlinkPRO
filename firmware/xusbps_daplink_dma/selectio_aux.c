@@ -44,6 +44,7 @@ static void settle(void) {
     do {XTime_GetTime(&now);} while(now-start<COUNTS_PER_SECOND/500000U);
 }
 int selectio_aux_exclusive(void){return exclusive!=0;}
+int selectio_aux_busy_for_clock(void){return active_channel!=0;}
 int selectio_aux_conflict(unsigned port) {return exclusive || ((active_channel==5 || active_channel==CMSIS_SWO_CHANNEL) && port==2);}
 static int restore(void) {
     if(!active_channel) return 0;
@@ -130,11 +131,19 @@ static int configure(unsigned ch,const uint8_t *p,unsigned size) {
     uint32_t route=swd_read32(JTAG_ROUTE);
     if((claim && (probe_stream_active() || probe_target_claimed() || etm_ddr_owned())) ||
        (!claim && (route&3U)==3U) || selectio_live_active() && claim) return -1;
-    uint32_t ref=ps_fclk_decode(0xf8000180U);
-    if(ref<199000000 || ref>201000000) return -1;
+    if ((DAP_SELECTIO_SLICE==1 && ch!=4) || (DAP_SELECTIO_SLICE==2 && ch==4) ||
+        (DAP_SELECTIO_SLICE && test)) return -1;
+    // SPI owns these pins exclusively. Its existing /1, /2 and /4
+    // waveform presets assume the 100 MHz quad clock.
+    if (DAP_SELECTIO_VARIABLE && ch==4 && !codec && selectio_clock_apply(32)) return -1;
+    uint32_t ref=selectio_serial_hz();
+    if (!ref || (!DAP_SELECTIO_VARIABLE && (ref<199000000 || ref>201000000))) return -1;
     uint64_t sample_hz=2ULL*ref;
     uint32_t period=(uint32_t)((sample_hz*256U+rate/2U)/rate);
-    if(period<1024) period=1024;
+    if(period<1024) {
+        if(codec) return -1;
+        period=1024;
+    }
     rx_head=rx_tail=rx_fault=0;
     active_channel=ch;exclusive=claim;saved_route=route;
     saved_fclk=Xil_In32(SLCR_FPGA0_CLK_CTRL);
@@ -330,8 +339,8 @@ uint32_t selectio_swo_command(uint8_t cmd,const uint8_t *p,uint8_t *r) {
     if(cmd==0x19) {
         uint32_t request=word(p);
         uint32_t accepted=0;
-        if(!swo_running && request>=9600U && request<=100000000U && (swd_read32(SWD_FEATURES)&0x200U)) {
-            uint64_t f=2ULL*ps_fclk_decode(0xf8000180U);
+        if(DAP_SELECTIO_SLICE!=1 && !swo_running && request>=9600U && request<=100000000U && (swd_read32(SWD_FEATURES)&0x200U)) {
+            uint64_t f=2ULL*selectio_serial_hz();
             uint32_t period=(uint32_t)((f*256U+request/2U)/request);
             if(period>=1024U) {swo_rate=request;accepted=(uint32_t)((f*256U+period/2U)/period);}
         }

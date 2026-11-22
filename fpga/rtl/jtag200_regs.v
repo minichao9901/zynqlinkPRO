@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 // AXI4-Lite register bank and dual-clock waveform buffers for the PS.
-module jtag200_regs #(parameter ENABLE_BLOCK=0) (
+module jtag200_regs #(parameter ENABLE_BLOCK=0, ENABLE_ENGINE=1) (
     (* X_INTERFACE_PARAMETER = "ASSOCIATED_BUSIF S_AXI, ASSOCIATED_RESET axi_aresetn" *)
     input wire axi_aclk,
     input wire axi_aresetn,
@@ -88,9 +88,9 @@ module jtag200_regs #(parameter ENABLE_BLOCK=0) (
 
     wire write_pending = have_addr && have_data && !s_axi_bvalid;
     wire control_write = write_strobes == 4'hf && write_addr[1:0] == 0;
-    wire write_tx = write_pending && control_write && write_addr[13:11] == 3'b010 && !run && !done_sync[1];
+    wire write_tx = ENABLE_ENGINE && write_pending && control_write && write_addr[13:11] == 3'b010 && !run && !done_sync[1];
     wire valid_read = s_axi_arvalid && s_axi_arready && s_axi_araddr[1:0] == 0;
-    wire read_rx = valid_read && s_axi_araddr[13:11] == 3'b100 && done_sync[1];
+    wire read_rx = ENABLE_ENGINE && valid_read && s_axi_araddr[13:11] == 3'b100 && done_sync[1];
 
     assign s_axi_awready = !have_addr && !s_axi_bvalid;
     assign s_axi_wready = !have_data && !s_axi_bvalid;
@@ -113,13 +113,18 @@ module jtag200_regs #(parameter ENABLE_BLOCK=0) (
         if (read_rx) rx_read <= rx_mem[s_axi_araddr[10:2]];
     end
 
+    if (ENABLE_ENGINE) begin:g_raw
     jtag200_wave wave (
         .clk(word_clk), .reset(word_reset), .run(raw_request),.park(park),
         .done(raw_done), .tx_addr(raw_tx_addr), .rx_addr(raw_rx_addr), .rx_write(raw_rx_write),
         .tx_word(tx_word[24:0]), .lane_word(raw_lanes)
     );
 
-    generate if (ENABLE_BLOCK) begin: pipeline
+    end else begin:g_disabled
+        assign {raw_done, raw_tx_addr, raw_rx_addr, raw_rx_write, raw_lanes}=0;
+    end
+
+    generate if (ENABLE_BLOCK && ENABLE_ENGINE) begin: pipeline
         jtag200_block engine(
             .clk(word_clk), .reset(word_reset), .run(block_request),
             .write_block(block_write), .arm_target(block_timing[21]), .address(block_address), .count(block_count),

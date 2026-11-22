@@ -67,7 +67,7 @@ class NativeStream:
 
     @contextmanager
     def memory(self,port,tap,slot,idle,clock=100000000):
-        if clock not in (50000000,100000000):raise ValueError("unsupported SelectIO clock")
+        if not 50000000<=clock<=100000000:raise ValueError("SelectIO clock must be 50 to 100 MHz")
         profile=bytes((port,tap,slot,idle))
         self.exchange(1,1,profile if clock==100000000 else profile+struct.pack("<I",clock))
         try:
@@ -140,6 +140,8 @@ class NativeStream:
                     raise RuntimeError("invalid queue clock readback")
                 return dict(wire_hz=ref//divider, reference_hz=ref, divider=divider,
                             timing=hex(timing), tap=tap, source="PS clock tree and PL queue registers")
+        if requested_hz not in (50000000,100000000):
+            raise RuntimeError("adjustable clock requires queue clock readback")
         divider = 4 if requested_hz == 50000000 else 2
         return dict(wire_hz=reference_hz//divider, reference_hz=reference_hz, divider=divider,
                     source="PS clock tree and requested profile")

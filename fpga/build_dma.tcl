@@ -5,6 +5,19 @@ if {[info exists ::env(ZYNQLINK_FPGA_OUT)]} {set out [file normalize $::env(ZYNQ
 set selectio [expr {[lsearch -exact $argv --selectio] >= 0}]
 set quad_dma [expr {[lsearch -exact $argv --quad-dma] >= 0}]
 if {$quad_dma && !$selectio} {error "--quad-dma requires --selectio"}
+set variable_clock [expr {[lsearch -exact $argv --selectio-variable]>=0}]
+set slice 0
+if {[lsearch -exact $argv --selectio-jtag]>=0} {set slice 1}
+if {[lsearch -exact $argv --selectio-swd]>=0} {
+    if {$slice} {error "Choose one SelectIO slice"}
+    set slice 2
+}
+if {($variable_clock || $slice) && (!$selectio || $quad_dma)} {
+    error "Variable-clock and cropped SelectIO builds require --selectio and FCLK0 DMA"
+}
+if {$slice && !$variable_clock} {error "Cropped SelectIO builds require --selectio-variable"}
+set ::env(ZYNQLINK_SELECTIO_SLICE) $slice
+set ::env(ZYNQLINK_SELECTIO_VARIABLE) $variable_clock
 set ::env(ZYNQLINK_QUAD_DMA) $quad_dma
 if {$selectio} {
     if {![info exists ::env(ZYNQLINK_FPGA_OUT)]} {set out [file join $root build selectio]}
@@ -29,7 +42,24 @@ set_property target_language Verilog [current_project]
 set_property XPM_LIBRARIES {XPM_MEMORY} [current_project]
 add_files [glob [file join $root fpga rtl *.v]]
 add_files -fileset constrs_1 [file join $root fpga constraints dap_pins.xdc]
-add_files -fileset constrs_1 [file join $root fpga constraints orbtrace_pins.xdc]
+if {$variable_clock} {
+    set timing_file [file join $out selectio_references.xdc]
+    set timing_fd [open $timing_file w]
+    if {$slice!=1} {
+        set trace_fd [open [file join $root fpga constraints orbtrace_pins.xdc] r]
+        puts $timing_fd [string map {{FCLKCLK[1]} {FCLKCLK[2]}} [read $trace_fd]]
+        close $trace_fd
+    } else {
+        puts $timing_fd {create_clock -name clk_delay_ref -period 5.000 [get_pins {system_i/processing_system7_0/inst/PS7_i/FCLKCLK[2]}]}
+        puts $timing_fd {set_clock_groups -asynchronous -group [get_clocks clk_delay_ref] -group [get_clocks clk_fpga_0]}
+    }
+    puts $timing_fd {create_clock -name clk_selectio_ref -period 20.000 [get_pins {system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]}]}
+    puts $timing_fd {set_clock_groups -asynchronous -group [get_clocks clk_delay_ref] -group [get_clocks -include_generated_clocks clk_selectio_ref]}
+    close $timing_fd
+    add_files -fileset constrs_1 $timing_file
+} else {
+    add_files -fileset constrs_1 [file join $root fpga constraints orbtrace_pins.xdc]
+}
 set_property PROCESSING_ORDER LATE [get_files dap_pins.xdc]
 source [file join $root fpga bd legacy_system.tcl]
 set ps [get_bd_cells processing_system7_0]
@@ -82,8 +112,10 @@ validate_bd_design
 save_bd_design
 source [file join $root fpga probe_stream_bd.tcl]
 source [file join $root fpga probe_jtag_bd.tcl]
-source [file join $root fpga orbtrace_bd.tcl]
-source [file join $root fpga orbtrace_ddr_bd.tcl]
+if {$slice!=1} {
+    source [file join $root fpga orbtrace_bd.tcl]
+    source [file join $root fpga orbtrace_ddr_bd.tcl]
+}
 source [file join $root fpga compact_config.tcl]
 if {$selectio} {source [file join $root fpga selectio system.tcl]}
 if {$quad_dma} {source [file join $root fpga selectio quad_dma_bd.tcl]}

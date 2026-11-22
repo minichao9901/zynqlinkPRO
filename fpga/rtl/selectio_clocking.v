@@ -1,18 +1,26 @@
 `timescale 1ns/1ps
-module selectio_clocking (
-    (* X_INTERFACE_PARAMETER="FREQ_HZ 200000000" *) input wire ref_clk,
+module selectio_clocking #(parameter VARIABLE_CLOCK = 0, LOCAL_CALIBRATION = 0) (
+    input wire ref_clk,
     input wire resetn, calibrated, jtag_hold, swd_hold, legacy_released, live_jtag, live_swd, aux_request,
     (* X_INTERFACE_PARAMETER="FREQ_HZ 200000000" *) output wire serial_clk,
     (* X_INTERFACE_PARAMETER="FREQ_HZ 100000000" *) output wire quad_clk,
     (* X_INTERFACE_PARAMETER="FREQ_HZ 50000000" *) output wire octet_clk,
     output wire phy_reset, jtag_reset, swd_reset, jtag_ready,
     output reg [2:0] owner = 0, output wire aux_granted,
-    (* X_INTERFACE_PARAMETER="FREQ_HZ 400000000" *) output wire serial_rx_clk
+    (* X_INTERFACE_PARAMETER="FREQ_HZ 400000000" *) output wire serial_rx_clk,
+    input wire [1:0] clock_control,
+    input wire delay_ref, output wire local_calibrated
 );
     wire feedback, feedback_raw, locked, serial_raw, quad_raw, octet_raw, rx_raw;
-    MMCME2_BASE #(.CLKIN1_PERIOD(5.0), .DIVCLK_DIVIDE(1), .CLKFBOUT_MULT_F(4.0),
-        .CLKOUT0_DIVIDE_F(4.0), .CLKOUT1_DIVIDE(8), .CLKOUT2_DIVIDE(16), .CLKOUT3_DIVIDE(2)) mmcm (
-        .CLKIN1(ref_clk), .CLKFBIN(feedback), .CLKFBOUT(feedback_raw), .RST(!resetn),
+    // The adjustable profile starts at FCLK1=50 MHz and preserves the
+    // output ratios for all certified PS divisors. The delay reference is separate.
+    MMCME2_BASE #(.CLKIN1_PERIOD(VARIABLE_CLOCK ? 20.0 : 5.0), .DIVCLK_DIVIDE(1),
+        .CLKFBOUT_MULT_F(VARIABLE_CLOCK ? 24.0 : 4.0),
+        .CLKOUT0_DIVIDE_F(VARIABLE_CLOCK ? 6.0 : 4.0),
+        .CLKOUT1_DIVIDE(VARIABLE_CLOCK ? 12 : 8),
+        .CLKOUT2_DIVIDE(VARIABLE_CLOCK ? 24 : 16),
+        .CLKOUT3_DIVIDE(VARIABLE_CLOCK ? 3 : 2)) mmcm (
+        .CLKIN1(ref_clk), .CLKFBIN(feedback), .CLKFBOUT(feedback_raw), .RST(!resetn || (VARIABLE_CLOCK && clock_control[1])),
         .PWRDWN(1'b0), .LOCKED(locked), .CLKOUT0(serial_raw), .CLKOUT1(quad_raw), .CLKOUT2(octet_raw), .CLKOUT3(rx_raw)
     );
     BUFG feedback_buf(.I(feedback_raw), .O(feedback));
@@ -21,7 +29,16 @@ module selectio_clocking (
     BUFG quad_buf(.I(quad_raw), .O(quad_clk));
     BUFG octet_buf(.I(octet_raw), .O(octet_clk));
 
-    wire reset_request = !resetn || !locked;
+    if (LOCAL_CALIBRATION) begin:g_delay_cal
+        (* ASYNC_REG = "TRUE" *) reg [3:0] delay_reset = 4'hf;
+        always @(posedge delay_ref or negedge resetn)
+            if (!resetn) delay_reset <= 4'hf;
+            else delay_reset <= (delay_reset == 0) ? 0 : delay_reset - 1'b1;
+        (* IODELAY_GROUP="ORBTRACE_INPUTS" *) IDELAYCTRL calibration(
+            .REFCLK(delay_ref), .RST(|delay_reset), .RDY(local_calibrated));
+    end else assign local_calibrated=1'b0;
+
+    wire reset_request = !resetn || !locked || (VARIABLE_CLOCK && clock_control[0]);
     (* ASYNC_REG="TRUE" *) reg [3:0] reset_pipe = 4'hf;
     always @(posedge quad_clk or posedge reset_request)
         if (reset_request) reset_pipe <= 4'hf;

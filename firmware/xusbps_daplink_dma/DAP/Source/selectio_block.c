@@ -14,7 +14,7 @@
 #define SQUEUE 0x80010000U
 
 static struct {
-    unsigned port, poisoned, dma,bank,use_dma,jtag_backoffs,jtag_idle,rate_hz;
+    unsigned port, poisoned, dma,bank,use_dma,jtag_backoffs,jtag_idle,half_rate,previous_divisor;
     uint32_t route,pins,clock;
     uint8_t profile[4];
     unsigned words[2];
@@ -135,7 +135,7 @@ static int jtag_block(unsigned write, uint32_t address, unsigned count,
     unsigned i;
     swd_write32(JQUEUE+0x14U,address);
     swd_write32(JQUEUE+0x18U,count);
-    swd_write32(JQUEUE+0x1cU,(session.rate_hz==50000000U ? 0x600004U : 0x780002U)|(session.profile[2]<<3)|(session.jtag_idle<<10));
+    swd_write32(JQUEUE+0x1cU,(session.half_rate ? 0x600004U : 0x780002U)|(session.profile[2]<<3)|(session.jtag_idle<<10));
     if (write && !session.use_dma) for(i=0;i<count;i++)
         swd_write32(JQUEUE+0x1004U+4U*i,load32(payload+4U*i));
     XTime start,stop;XTime_GetTime(&start);
@@ -176,12 +176,13 @@ int selectio_swd50_batch_available(void) {
     return !session.port && DAP_Data.debug_port==DAP_PORT_SWD &&
            DAP_Data.swd_conf.turnaround==1 && !DAP_Data.swd_conf.data_phase &&
            (swd_read32(SWD_FEATURES)&0x8400U)==0x8400U &&
-           (selectio_live_config()&0x04000001U)==0x04000001U;
+           (DAP_SELECTIO_VARIABLE ? selectio_live_active() :
+            (selectio_live_config()&0x04000001U)==0x04000001U);
 }
 
 static int swd50_queue_take(uint32_t live) {
     unsigned slot=(live>>1)&63U, idle=(live>>14)&15U;
-    swd_write32(SQUEUE+0x0cU,(slot<<2)|(slot<<8)|(idle<<14));
+    swd_write32(SQUEUE+0x0cU,((live&(1U<<26)) ? 0U : 1U)|(slot<<2)|(slot<<8)|(idle<<14));
     swd_write32(SQUEUE+8U,0);
     settle();
     return selectio_live_set(live&~1U) || wait_queue(SQUEUE,0x29U,0x29U);
@@ -202,7 +203,7 @@ int selectio_swd50_rtt_attach(void) {
        etm_ddr_owned() || (swd_read32(SQUEUE+4U)&0x38U)!=0x38U)return -1;
     uint32_t live=selectio_live_config();
     rtt_live=live;
-    session.port=1; session.dma=1; session.rate_hz=50000000U;
+    session.port=1; session.dma=1; session.half_rate=(live>>26)&1U;
     session.poisoned=0;session.bank=0;
     if(swd50_queue_take(live) || !probe_session_live()) {
         (void)selectio_swd50_rtt_detach();
@@ -305,31 +306,36 @@ int selectio_mem_close(void) {
     swd_write32(base+8U,port==2?2U:1U);
     if (wait_queue(base,port==2?0x1bU:0x33U,port==2?0x10U:0x30U)) {session.poisoned=1;return -1;}
     if(session.dma) swd_write32(base+(port==2?0x34U:0x2cU),0);
+    int failed=selectio_clock_apply(session.previous_divisor);
     Xil_Out32(XSLCR_UNLOCK_ADDR,XSLCR_UNLOCK_CODE);
     Xil_Out32(SLCR_FPGA0_CLK_CTRL,session.clock);
     Xil_Out32(SLCR_LOCK_ADDR,0x767b);
     swd_write32(JTAG_ROUTE,session.route);
     settle();
-    int failed=0;
-    if (port==1) {
+    if (port==1 && !failed) {
         swd_write32(JTAG_PINS,0x101U);settle();
         swd_write32(JTAG_PINS,session.pins&0x300U);
         if (probe_session_live()) {
             static const uint8_t reset_sequence[9]={255,255,255,255,255,255,255,255,0};
             uint32_t id=0;
             SWJ_Sequence(72,reset_sequence);
-            failed=SWD_Transfer(2,&id)!=DAP_TRANSFER_OK || !(id&1U);
+            failed|=SWD_Transfer(2,&id)!=DAP_TRANSFER_OK || !(id&1U);
         }
     }
     session.port=0;
     if(probe_target_release()) failed=1;
+    if(failed) probe_target_invalidate();
     return failed?-1:0;
 }
 
 int selectio_mem_open(const uint8_t fields[4]) {return selectio_mem_open_at(fields,100000000U);}
 int selectio_mem_open_at(const uint8_t fields[4],unsigned rate_hz) {
     unsigned port=fields[0],tap=fields[1],slot=fields[2],idle=fields[3];
-    if(rate_hz!=100000000U && !(rate_hz==50000000U && (port==1 || (swd_read32(SWD_FEATURES)&0x8000U)))) return -1;
+    unsigned divisor,half_rate;
+    if ((DAP_SELECTIO_SLICE==1 && port!=2) || (DAP_SELECTIO_SLICE==2 && port!=1)) return -1;
+    if (!DAP_SELECTIO_VARIABLE && port==1 && rate_hz==50000000U) {
+        divisor=0;half_rate=1;
+    } else if (selectio_clock_plan(rate_hz,&divisor,&half_rate)) return -1;
     if ((port!=1 && port!=2) || port!=DAP_Data.debug_port || session.port || selectio_aux_conflict(port) || tap>31 ||
         slot>63 || (port==1 && idle>15) || (port==2 && (slot<16 || !(idle&1))) ||
         !(swd_read32(SWD_FEATURES)&0x80U) || etm_ddr_owned() || !probe_session_live() ||
@@ -340,7 +346,7 @@ int selectio_mem_open_at(const uint8_t fields[4],unsigned rate_hz) {
     session.route=swd_read32(JTAG_ROUTE);
     session.pins=swd_read32(JTAG_PINS);
     session.clock=Xil_In32(SLCR_FPGA0_CLK_CTRL);
-    session.rate_hz=rate_hz;session.port=port;session.poisoned=0;session.bank=0;session.use_dma=0;session.jtag_backoffs=0;session.jtag_idle=idle;
+    session.half_rate=half_rate;session.previous_divisor=selectio_clock_divisor();session.port=port;session.poisoned=0;session.bank=0;session.use_dma=0;session.jtag_backoffs=0;session.jtag_idle=idle;
     session.dma=!!(swd_read32(SWD_FEATURES)&0x400U);
     session.words[0]=session.words[1]=0;
     memset(session.bytes,0,sizeof session.bytes);
@@ -349,12 +355,12 @@ int selectio_mem_open_at(const uint8_t fields[4],unsigned rate_hz) {
     memcpy(session.profile,fields,4);
     if (port==1) swd_write32(JTAG_PINS,0x100U);
     swd_write32(JTAG_ROUTE,session.route&~2U);
-    if (swd_read32(JTAG_ROUTE)!=(session.route&~2U) || ps_fixed133_select()<0) goto failed;
+    if (swd_read32(JTAG_ROUTE)!=(session.route&~2U) || ps_fixed133_select()<0 || selectio_clock_apply(divisor)) goto failed;
     uint32_t base=port==2?JQUEUE:SQUEUE;
     swd_write32(base+8U,0U);
     if(wait_queue(base,port==2?7U:0x21U,port==2?5U:0x21U)) goto failed;
     swd_write32(base+(port==2?12U:24U),tap);
-    if(port==1) swd_write32(base+12U,(rate_hz==100000000U ? 1U : 0U)|(slot<<2)|(slot<<8)|(idle<<14));
+    if(port==1) swd_write32(base+12U,(!half_rate)|(slot<<2)|(slot<<8)|(idle<<14));
     return 0;
 failed:
     (void)selectio_mem_close();return -1;

@@ -25,4 +25,5 @@ int selectio_aux_release_native(void);
 void selectio_swo_reset(void);
 uint32_t selectio_swo_command(uint8_t command,const uint8_t *request,uint8_t *response);
 int selectio_aux_exclusive(void);
+int selectio_aux_busy_for_clock(void);
 #endif

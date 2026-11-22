@@ -115,7 +115,7 @@ static unsigned execute_frame(unsigned length, unsigned active_epoch) {
         session_open=1;
         next_sequence=sequence+1U;
         memcpy(output+16,"SIO1",4);
-        write32(output+20,ps_fclk_decode(0xf8000180U));
+        write32(output+20,selectio_serial_hz());
         write32(output+24,swd_read32(SWD_FEATURES));
         write32(output+28,FRAME_SIZE);
         reply_size=16;
@@ -141,7 +141,7 @@ static unsigned execute_frame(unsigned length, unsigned active_epoch) {
                 unsigned fixed=read32(input+24);
                 uint32_t original=Xil_In32(SLCR_FPGA0_CLK_CTRL);
                 int hz=fixed ? ps_fixed133_select() : (int)ps_fclk0_hz();
-                uint32_t ref=ps_fclk_decode(0xf8000180U);
+                uint32_t ref=selectio_serial_hz();
                 int measured=hz>0 ? selectio_dma_measure(read32(input+16),read32(input+20),values) : -1;
                 if(Xil_In32(SLCR_FPGA0_CLK_CTRL)!=original) {
                     Xil_Out32(XSLCR_UNLOCK_ADDR,XSLCR_UNLOCK_CODE);
@@ -199,7 +199,7 @@ static unsigned execute_frame(unsigned length, unsigned active_epoch) {
         } else if(channel==1 && op==5 && !size && selectio_mem_active()) {
             unsigned port=selectio_mem_port();
             uint32_t queue=port==1 ? 0x80010000U : 0x80000000U;
-            write32(output+16,ps_fclk_decode(0xf8000180U));write32(output+20,port);
+            write32(output+16,selectio_serial_hz());write32(output+20,port);
             write32(output+24,swd_read32(queue+(port==1 ? 0x0cU : 0x1cU)));
             write32(output+28,swd_read32(queue+(port==1 ? 0x18U : 0x0cU)));
             reply_size=16;status=0;

@@ -1,5 +1,5 @@
 `timescale 1ns/1ps
-module swd200_regs #(parameter integer SAME_CLOCK = 0)(
+module swd200_regs #(parameter integer SAME_CLOCK = 0, VARIABLE_CLOCK = 0, ENABLE_BATCH = 1)(
     (* X_INTERFACE_PARAMETER = "ASSOCIATED_BUSIF S_AXI, ASSOCIATED_RESET axi_aresetn" *)
     input wire axi_aclk, axi_aresetn,
     input wire [13:0] s_axi_awaddr,
@@ -30,8 +30,10 @@ module swd200_regs #(parameter integer SAME_CLOCK = 0)(
     input wire [3:0] rx_slots,
     output wire [3:0] clk_slots, data_slots, release_slots,
     output wire [9:0] payload_tx_addr,payload_rx_addr, input wire [31:0] payload_tx_data,
-    output wire [31:0] payload_rx_data,output wire payload_rx_write
+    output wire [31:0] payload_rx_data,output wire payload_rx_write,
+    output reg [1:0] clock_control = 0, input wire phy_reset
 );
+    (* ASYNC_REG = "TRUE" *) reg [1:0] phy_ready_sync=0;
     reg [2:0] payload_config=0;
     reg have_addr = 0, have_data = 0, reading_results = 0;
     reg [13:0] write_addr;
@@ -95,6 +97,7 @@ module swd200_regs #(parameter integer SAME_CLOCK = 0)(
         if (read_result) result_q <= results[s_axi_araddr[10:2]];
     end
 
+    if (ENABLE_BATCH) begin:g_batch
     swd200_batch #(.SAME_CLOCK(SAME_CLOCK)) batch (
         .clk(word_clk), .reset(word_reset), .run(run), .count(count),
         .mode(mode), .active_mode(active_mode), .begin_batch(begin_batch),
@@ -106,8 +109,17 @@ module swd200_regs #(parameter integer SAME_CLOCK = 0)(
         .rx_slots(rx_slots), .clk_slots(clk_slots), .data_slots(data_slots), .release_slots(release_slots)
     );
 
+    end else begin:g_disabled
+        assign {batch_done,batch_failed,write_result,begin_batch}=0;
+        assign {clk_slots,data_slots,cmd_addr,completed,error,wait_retries,result_addr,result_word}=0;
+        assign release_slots=4'hf;
+        assign active_mode=0;
+    end
+
     always @(posedge axi_aclk) begin
         if (!axi_aresetn) begin
+            clock_control <= 0;
+            phy_ready_sync <= 0;
             hold <= 1;
             live_config <= 0;
             payload_config <= 0;
@@ -128,6 +140,7 @@ module swd200_regs #(parameter integer SAME_CLOCK = 0)(
             delay_sync <= 0;
             summary <= 0;
         end else begin
+            phy_ready_sync <= {phy_ready_sync[0], !phy_reset};
             ready_sync <= {ready_sync[0], !word_reset};
             done_sync <= {done_sync[0], completed_pipe[1]};
             delay_sync <= {delay_sync[0], delay_ready};
@@ -156,13 +169,17 @@ module swd200_regs #(parameter integer SAME_CLOCK = 0)(
                 if (!aligned_write || !idle) s_axi_bresp <= 2'b10;
                 else if (!write_command && !write_expected) begin
                     case (write_addr)
+                        14'h38: if (VARIABLE_CLOCK && write_data < 4 &&
+                                    (!write_data[1] || (write_data[0] && clock_control[0] && !phy_ready_sync[1])))
+                            clock_control <= write_data[1:0];
+                        else s_axi_bresp <= 2'b10;
                         14'h24: live_config <= write_data[26:0];
                         14'h2c: payload_config <= write_data[2:0];
                         14'h08: hold <= write_data[0];
                         14'h0c: if (write_data[1:0] != 3)
                             timing <= write_data[17:0];
                         else s_axi_bresp <= 2'b10;
-                        14'h10: if (ready && write_data > 0 && write_data <= 512 &&
+                        14'h10: if (ENABLE_BATCH && ready && write_data > 0 && write_data <= 512 &&
                                     (!mode[3] || write_data == 259)) begin
                             count <= write_data[9:0];
                             run <= 1;
@@ -189,6 +206,7 @@ module swd200_regs #(parameter integer SAME_CLOCK = 0)(
                 end else begin
                     s_axi_rvalid <= 1;
                     case (s_axi_araddr)
+                        14'h38: s_axi_rdata <= VARIABLE_CLOCK ? {24'h53494f,5'b0,phy_ready_sync[1],clock_control} : 0;
                         14'h24: s_axi_rdata <= {5'b0,live_config};
                         14'h2c: s_axi_rdata <= {29'd0,payload_config};
                         14'h00: s_axi_rdata <= 32'h53323030;

@@ -1,3 +1,4 @@
+#include "DAP_config.h"
 // The only trace data endpoint is EP2 IN. EP2 OUT remains CMSIS-DAP.
 // EP0 requests only enqueue state changes; MMIO draining runs in main.
 #include "etm_stream.h"
@@ -11,6 +12,7 @@
 #define ETM_BASE 0x40030000U
 #define ER(n) Xil_In32(ETM_BASE+4U*(n))
 #define EW(n,v) Xil_Out32(ETM_BASE+4U*(n),(v))
+#if DAP_SELECTIO_SLICE!=1
 #define QSIZE 8U
 #define RECORDS 240U
 static uint8_t packets[QSIZE][512] __attribute__((aligned(32)));
@@ -25,6 +27,12 @@ static volatile uint32_t fill_count;
 static uint32_t fill_activity;
 static uint8_t flush_zero[32] __attribute__((aligned(32)));
 static uint32_t now_us(void){XTime t;XTime_GetTime(&t);return (uint32_t)(t/(COUNTS_PER_SECOND/1000000ULL));}
+#endif
+#if DAP_SELECTIO_VARIABLE
+#define ETM_REFERENCE_CTL 0xf8000190U
+#else
+#define ETM_REFERENCE_CTL 0xf8000180U
+#endif
 static uint32_t reference_hz;
 uint32_t etm_reference_init(void){
   uint32_t pll=Xil_In32(0xf8000108U),locked=Xil_In32(0xf800010cU);
@@ -36,9 +44,14 @@ uint32_t etm_reference_init(void){
     if(value>=190000000U && value<=210000000U && delta<error){best=value;error=delta;d0=a;d1=b;}
   }
   if(!best)return 0;
-  // Only FCLK1's divider changes; PLLs, CPU clocks and DAP's FCLK0 are untouched.
+  // A matching generated PS setup already runs IDELAYCTRL. Preserve
+  // its clock when the two cascaded dividers have the correct product.
+  uint32_t control=Xil_In32(ETM_REFERENCE_CTL);
+  if (!(control&0x30U) && ((control>>8)&63U)*((control>>20)&63U)==d0*d1) {
+    reference_hz=best;return best;
+  }
   Xil_Out32(0xf8000008U,0xdf0dU);
-  Xil_Out32(0xf8000180U,1U|(d0<<8)|(d1<<20));
+  Xil_Out32(ETM_REFERENCE_CTL,1U|(d0<<8)|(d1<<20));
   Xil_Out32(0xf8000004U,0x767bU);
   reference_hz=best;return best;
 }
@@ -46,6 +59,7 @@ void etm_reference_snapshot(uint32_t reply[4]){
   reply[0]=reference_hz;reply[1]=Xil_In32(0xf8000180U);
   reply[2]=Xil_In32(0xf8000108U);reply[3]=((ER(2)>>3)&1U)|(ER(8)==0x45544431U ? 0x100U : 0U)|(etm_ddr_available() ? 0x200U : 0U);
 }
+#if DAP_SELECTIO_SLICE!=1
 void etm_diagnostics_snapshot(uint32_t reply[16]){
   unsigned i;
   for(i=0;i<16;i++)reply[i]=0;
@@ -170,3 +184,13 @@ void etm_poll(XUsbPs *usb){
   }
   irq_restore(f);kick(usb);
 }
+
+#else
+void etm_diagnostics_snapshot(uint32_t reply[16]) {memset(reply,0,16*sizeof *reply);}
+unsigned etm_stream_claim_ddr(XUsbPs *usb) {(void)usb;return 0;}
+void etm_usb_reset(void) {}
+void etm_usb_configured(XUsbPs *usb) {(void)usb;}
+void etm_usb_event(void *ref,u8 ep,u8 event,void *data) {(void)ref;(void)ep;(void)event;(void)data;}
+void etm_control(uint16_t action,uint32_t reply[8]) {(void)action;memset(reply,0,8*sizeof *reply);}
+void etm_poll(XUsbPs *usb) {(void)usb;}
+#endif

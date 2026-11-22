@@ -21,6 +21,13 @@ def number(text):
 
 
 @contextmanager
+def selectio_clock_number(text):
+    clock=number(text)
+    if not 50000000<=clock<=100000000:
+        raise argparse.ArgumentTypeError("SelectIO clock must be 50 to 100 MHz")
+    return clock
+
+
 def connection(serial):
     device, out_ep, in_ep = open_dap(serial)
     try:
@@ -369,7 +376,7 @@ def main():
     sub.add_argument("--scope-out",type=Path,required=True)
     for action in ("rtt-send","rtt-terminal"):
         sub=commands.add_parser(action,help="write to an RTT DOWN ring or open a bidirectional terminal")
-        sub.add_argument("--clock",type=number,choices=(50000000,100000000),default=100000000)
+        sub.add_argument("--clock",type=selectio_clock_number,default=100000000)
         sub.add_argument("--transport",choices=PORTS,required=True)
         sub.add_argument("--tap",type=int,choices=range(32),required=True,metavar="0..31")
         sub.add_argument("--slot",type=int,choices=range(64),required=True,metavar="0..63")
@@ -408,7 +415,7 @@ def main():
             sub.add_argument("--var",action="append",required=True,help="address:size:type")
     for action in ("read", "write"):
         sub = commands.add_parser(action, help=f"{action} one block of aligned F103 SRAM")
-        sub.add_argument("--clock",type=number,choices=(50000000,100000000),default=100000000)
+        sub.add_argument("--clock",type=selectio_clock_number,default=100000000)
         sub.add_argument("--transport", required=True, choices=PORTS)
         sub.add_argument("--address", type=number, default=PAGE)
         sub.add_argument("--queue-depth",type=int,choices=range(1,5),default=4)

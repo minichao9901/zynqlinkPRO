@@ -12,6 +12,8 @@
 #include "etm_ddr_usb.h"
 #include <string.h>
 
+uint32_t selectio_serial_hz(void) {return 145454544U;}
+
 static int unexpected(void) { abort(); }
 #define selectio_mem_port() 0U
 #define selectio_mem_active() 0
@@ -94,7 +96,7 @@ static void complete(void) {
 }
 int main(void) {
     selectio_usb_configured(&device);
-    inject(0,0,30,NULL,0);check(30,0,16,NULL);assert(read32(tx_data+28)==FRAME_SIZE);complete();
+    inject(0,0,30,NULL,0);check(30,0,16,NULL);assert(read32(tx_data+20)==145454544U && read32(tx_data+28)==FRAME_SIZE);complete();
     for(unsigned i=0;i<sizeof(expected);i++)expected[i]=(u8)(i*37+(i>>3));
     inject(0,1,31,expected,6000);check(31,1,0,NULL);complete();
     /* A malformed length did not consume sequence 31. */

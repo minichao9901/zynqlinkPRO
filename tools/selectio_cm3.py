@@ -54,8 +54,17 @@ def main():
     parser.add_argument("--early-swd50", action="store_true", help="simulate one early released SWCLK edge after ACK")
     parser.add_argument("--swd50-faults", action="store_true", help="verify ACK, parity and wire ownership against a scripted target")
     parser.add_argument("--swd50-windows", action="store_true", help="measure standard 512-word SRAM and queued RTT through RdOff confirmation")
+    parser.add_argument("--variable-clock", type=int, choices=range(32,64), metavar="DIV", help="use adjustable FCLK1 MMCM and exercise divider DIV")
+    parser.add_argument("--slice", choices=("full", "jtag", "swd"), default="full")
+    parser.add_argument("--jtag-only", action="store_true")
     args = parser.parse_args()
-    if (args.early_swd50 or args.swd50_faults or args.swd50_windows) and (
+    if args.variable_clock is not None and (args.services or args.quad_dma):
+        parser.error("--variable-clock uses the A-layout shared pad simulation")
+    if args.slice=="jtag" and not args.jtag_only or args.slice=="swd" and not args.swd_only:
+        parser.error("exercise the transport included in this slice")
+    if args.jtag_only and (args.swd_only or args.services or args.wire_budget):
+        parser.error("--jtag-only is a separate pad benchmark")
+    if (args.early_swd50 or ((args.swd50_faults or args.swd50_windows) and args.variable_clock is None)) and (
         not args.half_rate or not args.swd_only or args.services or args.quad_dma
     ):
         parser.error("SWD 50 MHz experiments require --half-rate --swd-only and the reference queue layout")
@@ -69,8 +78,8 @@ def main():
         parser.error("--target-clk-ns must be positive")
     if args.return_ns is not None and args.return_ns<0:
         parser.error("--return-ns cannot be negative")
-    if args.wire_budget and (not args.swd_only or not args.half_rate or args.rtt_window):
-        parser.error("--wire-budget requires --swd-only --half-rate")
+    if args.wire_budget and (not args.swd_only or (not args.half_rate and args.variable_clock is None) or args.rtt_window):
+        parser.error("--wire-budget requires --swd-only and an explicit SWD timing profile")
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=True)
     exe = VIVADO / "bin/unwrapped/win64.o"
@@ -112,6 +121,10 @@ def main():
         sources = [link if path == dut / "swd200_link.v" else path for path in sources]
     run("xvlog",["--sv","-i",sim,*sources],"compile.log")
     generic=["--generic_top","QUAD_DMA=1"] if args.quad_dma else []
+    if args.variable_clock is not None:
+        generic+=["--generic_top","VARIABLE_CLOCK=1"]
+    if args.slice!="full":
+        generic+=["--generic_top",f"SELECTIO_SLICE={('full','jtag','swd').index(args.slice)}"]
     run("xelab", ["--mt","2","-L","unisims_ver","-L","secureip",*generic,"-s","fusion",top,"glbl"],"elab.log")
     switches=["-testplusarg",f"idle={args.idle}","-testplusarg",f"jidle={args.jtag_idle}"]
     if args.services:
@@ -130,6 +143,9 @@ def main():
     switches.extend(["-testplusarg",f"service_words={args.service_words}"])
     if args.meter:switches.extend(["-testplusarg","meter"])
     if args.rtt_window:switches.extend(["-testplusarg","rtt_window","-testplusarg",f"rtt_chunk={args.rtt_chunk}"])
+    if args.variable_clock is not None:
+        switches.extend(["-testplusarg",f"fclk1_ns={args.variable_clock*0.625}"])
+    if args.jtag_only: switches.extend(["-testplusarg","jtag_only"])
     if args.half_rate: switches.extend(["-testplusarg","half_rate"])
     if args.wiretrace: switches.extend(["-testplusarg","wiretrace"])
     output = run("xsim", ["fusion", "-runall", "-testplusarg", f"jslot={args.jtag_slot}",
@@ -137,6 +153,7 @@ def main():
     print(output[-1600:])
     expected="SELECTIO_SERVICES_PASS" if args.services else "SELECTIO_PASS"
     if args.wire_budget and args.services:expected="PASS SWD wire budgets and payloads"
+    if args.jtag_only: expected = "SELECTIO_JTAG_ONLY_PASS"
     if args.swd50_faults: expected = "SWD50_EDGES_PASS"
     if args.swd50_windows: expected = "SWD50_WINDOWS_PASS"
     return 0 if expected in output and "Fatal:" not in output else 1

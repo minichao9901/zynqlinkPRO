@@ -1,8 +1,10 @@
 `timescale 1ns/1ps
-module tb_selectio_debug #(parameter integer QUAD_DMA=0);
-    bit axi_clk=0, resetn=0, ref_clk=0, hclk=0, use_swd=0, released=0;
+module tb_selectio_debug #(parameter integer QUAD_DMA=0, VARIABLE_CLOCK=0, SELECTIO_SLICE=0);
+    bit axi_clk=0, resetn=0, ref_clk=0, delay_ref=0, hclk=0, use_swd=0, released=0;
     always #3.75 axi_clk = !axi_clk;
-    always #2.5 ref_clk = !ref_clk;
+    realtime ref_ns=VARIABLE_CLOCK ? 20.0 : 5.0, requested_ref_ns;
+    always #(ref_ns/2) ref_clk = !ref_clk;
+    always #2.5 delay_ref = !delay_ref;
     real hclk_ns=20.834;
     real swd_return_ns=0.8;
     initial begin
@@ -12,6 +14,9 @@ module tb_selectio_debug #(parameter integer QUAD_DMA=0);
     end
     wire serial_rx_clk,serial_clk, quad_clk, octet_clk, phy_reset, js_reset, ss_reset, js_ready;
     wire jhold, shold, calibrated, jload, sload;
+    wire shared_calibrated, local_calibrated;
+    wire [1:0] clock_control;
+    assign calibrated=SELECTIO_SLICE==1 ? local_calibrated : shared_calibrated;
     wire bus_clk=QUAD_DMA ? quad_clk : axi_clk;
     wire [2:0] owner;
     wire [4:0] jtap, stap;
@@ -45,13 +50,15 @@ module tb_selectio_debug #(parameter integer QUAD_DMA=0);
     assign data_pin=delayed_oe ? delayed_data : 1'bz;
     wire wire_budget_pin=clk_pin;
     `include "swd_wire_budget.svh"
+    if (SELECTIO_SLICE!=1) begin:g_wire_budget
     always @(posedge quad_clk)
-        wire_budget_link(swd.batch.link.state==4 && swd.batch.link.segment.state==2,
-                         swd.batch.link.state==5 && swd.batch.link.segment.state==2,
-                         swd.batch.link_done,swd.batch.issue_next || swd.batch.retry);
-    IDELAYCTRL calibration(.REFCLK(ref_clk), .RST(!resetn), .RDY(calibrated));
-    selectio_clocking clocks(ref_clk,resetn,calibrated,jhold,shold,released,1'b0,host_profile[0],1'b0,
-        serial_clk,quad_clk,octet_clk,phy_reset,js_reset,ss_reset,js_ready,owner,,serial_rx_clk);
+        wire_budget_link(swd.g_batch.batch.link.state==4 && swd.g_batch.batch.link.segment.state==2,
+                         swd.g_batch.batch.link.state==5 && swd.g_batch.batch.link.segment.state==2,
+                         swd.g_batch.batch.link_done,swd.g_batch.batch.issue_next || swd.g_batch.batch.retry);
+    end
+    IDELAYCTRL calibration(.REFCLK(delay_ref), .RST(!resetn), .RDY(shared_calibrated));
+    selectio_clocking #(.VARIABLE_CLOCK(VARIABLE_CLOCK),.LOCAL_CALIBRATION(SELECTIO_SLICE==1)) clocks(ref_clk,resetn,calibrated,jhold,shold,released,1'b0,host_profile[0],1'b0,
+        serial_clk,quad_clk,octet_clk,phy_reset,js_reset,ss_reset,js_ready,owner,,serial_rx_clk,clock_control,delay_ref,local_calibrated);
     always @(posedge quad_clk) live_sync<={live_sync[0],host_profile[0]};
     selectio_live_swd live(
         .host_clk(axi_clk),.quad_clk(quad_clk),.reset(!resetn || !host_profile[0]),
@@ -85,7 +92,7 @@ module tb_selectio_debug #(parameter integer QUAD_DMA=0);
     wire jwe,swe;
     reg dma_en=0;reg [3:0] dma_we=0;reg [31:0] dma_addr=0,dma_data=0;
     wire [31:0] dma_result;
-    selectio_payload_ram payload(bus_clk,!resetn,dma_en,dma_we,dma_addr,dma_data,dma_result,
+    selectio_payload_ram #(.SELECTIO_SLICE(SELECTIO_SLICE)) payload(bus_clk,!resetn,dma_en,dma_we,dma_addr,dma_data,dma_result,
         octet_clk,quad_clk,jpa,spa,jpd,spd,jwe,swe,jra,sra,jrd,srd);
     task automatic load_payload(input int address,input reg [31:0] value);
         @(negedge bus_clk);dma_en=1;dma_we=15;dma_addr=address;dma_data=value;
@@ -96,7 +103,7 @@ module tb_selectio_debug #(parameter integer QUAD_DMA=0);
         @(negedge bus_clk);if(dma_result!==value)$fatal(1,"DMA payload %h got %h expected %h",address,dma_result,value);
         dma_en=0;
     endtask
-    jtag200_regs #(.ENABLE_BLOCK(1)) jtag(
+    jtag200_regs #(.ENABLE_BLOCK(SELECTIO_SLICE!=2),.ENABLE_ENGINE(SELECTIO_SLICE!=2)) jtag(
         .axi_aclk(bus_clk),.axi_aresetn(resetn),
         .s_axi_awaddr(awaddr),.s_axi_awprot(3'b0),.s_axi_awvalid(awvalid && use_swd==0),.s_axi_awready(awr[0]),
         .s_axi_wdata(wdata),.s_axi_wstrb(4'hf),.s_axi_wvalid(wvalid && use_swd==0),.s_axi_wready(wr[0]),
@@ -106,7 +113,7 @@ module tb_selectio_debug #(parameter integer QUAD_DMA=0);
         .payload_tx_addr(jpa),.payload_rx_addr(jra),.payload_tx_data(jpd),.payload_rx_data(jrd),.payload_rx_write(jwe),
         .phy_hold(jhold), .ready(js_ready), .delay_ready(calibrated), .delay_load(jload),
         .delay_value(jtap), .word_clk(octet_clk), .word_reset(js_reset), .lane_word(lanes), .rx_word(jrx));
-    swd200_regs #(.SAME_CLOCK(QUAD_DMA)) swd(
+    swd200_regs #(.SAME_CLOCK(QUAD_DMA),.VARIABLE_CLOCK(VARIABLE_CLOCK),.ENABLE_BATCH(SELECTIO_SLICE!=1)) swd(
         .axi_aclk(bus_clk),.axi_aresetn(resetn),
         .s_axi_awaddr(awaddr),.s_axi_awprot(3'b0),.s_axi_awvalid(awvalid && use_swd==1),.s_axi_awready(awr[1]),
         .s_axi_wdata(wdata),.s_axi_wstrb(4'hf),.s_axi_wvalid(wvalid && use_swd==1),.s_axi_wready(wr[1]),
@@ -116,7 +123,7 @@ module tb_selectio_debug #(parameter integer QUAD_DMA=0);
         .payload_tx_addr(spa),.payload_rx_addr(sra),.payload_tx_data(spd),.payload_rx_data(srd),.payload_rx_write(swe),
         .hold(shold), .live_config(live_config), .delay_ready(calibrated), .delay_load(sload), .delay_value(stap),
         .word_clk(quad_clk), .word_reset(ss_reset), .rx_slots(srx), .clk_slots(sclock),
-        .data_slots(sdata), .release_slots(srelease));
+        .data_slots(sdata), .release_slots(srelease),.clock_control(clock_control),.phy_reset(phy_reset));
     task automatic write_reg(input [13:0] addr, input [31:0] data, input [1:0] response);
         fork
             begin
@@ -150,6 +157,36 @@ module tb_selectio_debug #(parameter integer QUAD_DMA=0);
         do @(posedge bus_clk); while (!rvalid);
         if (rresp !== 0) $fatal(1, "AXI read response addr=%h got=%b", addr, rresp);
         data = rdata;
+    endtask
+
+    task automatic wait_clock_control(input [2:0] status);
+        reg [31:0] ctl;
+        for(int k=0;k<5000;k++) begin
+            read_reg('h38,ctl);
+            if(ctl[31:8]!==24'h53494f) $fatal(1,"missing variable-clock control");
+            if(ctl[2:0]==status) return;
+        end
+        $fatal(1,"clock handshake stuck, got %h expected %b",ctl,status);
+    endtask
+
+    task automatic switch_reference;
+        use_swd=1;
+        wait_clock_control(4);
+        write_reg('h38,3,2); // Reject reset until the PHY acknowledges park.
+        write_reg('h38,1,0);
+        wait_clock_control(1);
+        if(owner!=0 || phy.clock_tri!==1'b1 || phy.data_tri!==1'b1)
+            $fatal(1,"pins were not parked before reference change");
+        write_reg('h38,3,0);
+        wait_clock_control(3);
+        ref_ns=requested_ref_ns;
+        #500;
+        if(!calibrated) $fatal(1,"fixed FCLK2 calibration lost during relock");
+        write_reg('h38,0,0);
+        wait_clock_control(4);
+        wait(owner==1);
+        use_swd=0;
+        $display("SELECTIO_CLOCK_SWITCH_PASS FCLK1_period_ns=%0.3f FCLK2_period_ns=5.000",ref_ns);
     endtask
 
     task automatic wait_status(input [4:0] expected);
@@ -198,8 +235,8 @@ module tb_selectio_debug #(parameter integer QUAD_DMA=0);
     realtime last_edge;
     real expected_period;
     always @(posedge clk_pin) if (owner>=2 && clk_pin===1) begin
-        if (last_edge!=0 && $realtime-last_edge < expected_period-0.005) $fatal(1,"short clock");
-        if (last_edge!=0 && $realtime-last_edge < expected_period+0.005) adjacent++;
+        if (last_edge!=0 && $realtime-last_edge < expected_period-0.010) $fatal(1,"short clock");
+        if (last_edge!=0 && $realtime-last_edge < expected_period+0.010) adjacent++;
         last_edge=$realtime;
         edges++;
     end
@@ -214,12 +251,18 @@ module tb_selectio_debug #(parameter integer QUAD_DMA=0);
         swd50_windows=$test$plusargs("swd50_windows");
         if($value$plusargs("idle=%d",block_idle))begin end
         if($value$plusargs("jidle=%d",jtag_idle))begin end
-        expected_period=$test$plusargs("half_rate") ? 20.0 : 10.0;
+        requested_ref_ns=ref_ns;
+        if($value$plusargs("fclk1_ns=%f",requested_ref_ns))begin end
+        expected_period=(VARIABLE_CLOCK ? requested_ref_ns/2.0 : 10.0) *
+                        ($test$plusargs("half_rate") ? 2.0 : 1.0);
+        wire_budget_period=expected_period;
+        if(VARIABLE_CLOCK) wire_budget_tolerance=0.010;
         if ($value$plusargs("jslot=%d",jslot)) begin end
         if ($value$plusargs("sslot=%d",sslot)) begin end
         skip_jtag=$test$plusargs("swd_only");
         #300; resetn=1;
         wait(owner==1);
+        if(VARIABLE_CLOCK) switch_reference();
         released=1;
         if (!skip_jtag) begin
             write_reg(8,0,0); wait_status(5);
@@ -250,6 +293,10 @@ module tb_selectio_debug #(parameter integer QUAD_DMA=0);
             if (adjacent<256) $fatal(1,"missing continuous JTAG");
             $display("JTAG_PASS %0d MHz words=256 edges=%d slot=%d",$test$plusargs("half_rate")?50:100,edges,jslot);
         end
+        if($test$plusargs("jtag_only")) begin
+            $display("SELECTIO_JTAG_ONLY_PASS");
+            $finish;
+        end
         adjacent=0; last_edge=0;
         use_swd=1; write_reg(8,0,0);
         do read_reg(4,value); while (!value[0]);
@@ -262,7 +309,7 @@ module tb_selectio_debug #(parameter integer QUAD_DMA=0);
         if(swd50_windows) begin
             standard_sram();
             queued_rtt();
-            $display("SWD50_WINDOWS_PASS SWD=50 MHz SRAM=512 words RTT=8192 bytes");
+            $display("SWD50_WINDOWS_PASS SWD_period_ns=%0.3f SRAM=512 words RTT=8192 bytes",expected_period);
             $finish;
         end
         put(0,5,'h20008000);

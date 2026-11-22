@@ -27,6 +27,7 @@
 
 #include "DAP_config.h"
 #include "DAP.h"
+#include "selectio_mode.h"
 #include "swd_dma.h"
 #include "dap_metrics.h"
 #include "etm_ddr_usb.h"
@@ -296,7 +297,7 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
     case ID_DAP_Vendor15:
 #if DAP_SELECTIO
       {
-        uint32_t fields[3]={ps_fclk_decode(0xf8000180U),0x20000000U,65536U};
+        uint32_t fields[3]={selectio_serial_hz(),0x20000000U,65536U};
         *response++=(*request==0 && (swd_read32(SWD_FEATURES)&0x80U)) ? DAP_OK : DAP_ERROR;
         memcpy(response,"SIO1",4);
         memcpy(response+4,fields,sizeof fields);

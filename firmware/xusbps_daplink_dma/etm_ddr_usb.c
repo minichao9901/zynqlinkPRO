@@ -1,3 +1,4 @@
+#include "DAP_config.h"
 // Bounded PL capture is independent of USB. Only completed immutable DDR
 // records can be downloaded. EP2 header binds every range to capture identity.
 #include "etm_ddr_usb.h"
@@ -7,6 +8,7 @@
 #include "xil_mmu.h"
 #include <string.h>
 
+#if DAP_SELECTIO_SLICE!=1
 #define LEGACY_BASE 0x40030000U
 #define DDR_CSR 0x40040000U
 #define DDR_BASE 0x39c00000U
@@ -175,3 +177,17 @@ unsigned etm_ddr_poll(XUsbPs *usb){
   irq_restore(f);
   return 1;
 }
+
+#else
+uint32_t etm_ddr_init(void) {return 0;}
+unsigned etm_ddr_available(void) {return 0;}
+unsigned etm_ddr_owned(void) {return 0;}
+void etm_ddr_usb_reset(void) {}
+void etm_ddr_usb_configured(XUsbPs *usb) {(void)usb;}
+unsigned etm_ddr_usb_event(u8 ep,u8 event,void *data) {(void)ep;(void)event;(void)data;return 0;}
+unsigned etm_ddr_poll(XUsbPs *usb) {(void)usb;return 0;}
+void etm_ddr_snapshot(uint32_t reply[ETM_DDR_REPLY_WORDS]) {memset(reply,0,ETM_DDR_REPLY_WORDS*sizeof *reply);}
+unsigned etm_ddr_command(unsigned op,const uint32_t args[6],uint32_t reply[ETM_DDR_REPLY_WORDS]) {
+    (void)op;(void)args;etm_ddr_snapshot(reply);return 1;
+}
+#endif

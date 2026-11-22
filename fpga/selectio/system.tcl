@@ -1,7 +1,9 @@
 # Add the two AXI transaction queues to the existing USB/DDR/ETM system.
 # Keep the main command/DDR and ETM fabric on GP0. The extra engines
 # have their own GP1 decoder and register slices.
-if {$::env(ZYNQLINK_ETM_DOUBLE_SAMPLE)} {
+set slice [expr {[info exists ::env(ZYNQLINK_SELECTIO_SLICE)] ? $::env(ZYNQLINK_SELECTIO_SLICE) : 0}]
+set variable_clock [expr {[info exists ::env(ZYNQLINK_SELECTIO_VARIABLE)] && $::env(ZYNQLINK_SELECTIO_VARIABLE)}]
+if {$slice!=1 && $::env(ZYNQLINK_ETM_DOUBLE_SAMPLE)} {
     set_property CONFIG.DOUBLE_SAMPLE 1 [get_bd_cells orbtrace_0]
 }
 set ps [get_bd_cells processing_system7_0]
@@ -12,7 +14,7 @@ connect_bd_intf_net [get_bd_intf_pins $ps/M_AXI_GP1] [get_bd_intf_pins $bus/S00_
 connect_bd_net [get_bd_pins $ps/FCLK_CLK0] [get_bd_pins $ps/M_AXI_GP1_ACLK] [get_bd_pins $bus/ACLK] [get_bd_pins $bus/S00_ACLK]
 connect_bd_net [get_bd_pins rst_ps7_0_50M/peripheral_aresetn] [get_bd_pins $bus/ARESETN] [get_bd_pins $bus/S00_ARESETN]
 set_property CONFIG.SELECTIO 1 [get_bd_cells swd_controller_0]
-set_property CONFIG.SHARED_CALIBRATION 1 [get_bd_cells orbtrace_0]
+if {$slice!=1} {set_property CONFIG.SHARED_CALIBRATION 1 [get_bd_cells orbtrace_0]}
 create_bd_cell -type module -reference selectio_clocking sio_clock
 foreach {engine module master offset} {
     sio_jtag jtag200_regs M00 0x80000000
@@ -27,11 +29,42 @@ foreach {engine module master offset} {
     create_bd_addr_seg -range $aperture -offset $offset [get_bd_addr_spaces processing_system7_0/Data] \
         [get_bd_addr_segs -of_objects [get_bd_intf_pins $engine/S_AXI]] SEG_${engine}
 }
-set_property CONFIG.ENABLE_BLOCK 1 [get_bd_cells sio_jtag]
+set_property CONFIG.ENABLE_BLOCK [expr {$slice!=2}] [get_bd_cells sio_jtag]
+set_property CONFIG.SELECTIO_SLICE $slice [get_bd_cells swd_controller_0]
+set_property CONFIG.ENABLE_ENGINE [expr {$slice!=2}] [get_bd_cells sio_jtag]
+set_property CONFIG.ENABLE_BATCH [expr {$slice!=1}] [get_bd_cells sio_swd]
+set_property CONFIG.SELECTIO_SLICE $slice [get_bd_cells sio_aux]
+set_property CONFIG.VARIABLE_CLOCK $variable_clock [get_bd_cells {sio_clock sio_swd}]
+if {$variable_clock} {
+    # 133.333/50/200 MHz together select the same IO PLL x48 used
+    # by the independent variable-clock experiments.
+    set_property -dict [list CONFIG.PCW_FPGA0_PERIPHERAL_FREQMHZ 133.333333 CONFIG.PCW_EN_CLK1_PORT 1 CONFIG.PCW_FPGA_FCLK1_ENABLE 1 \
+        CONFIG.PCW_FPGA1_PERIPHERAL_FREQMHZ 50 CONFIG.PCW_EN_CLK2_PORT 1 \
+        CONFIG.PCW_FPGA_FCLK2_ENABLE 1 CONFIG.PCW_FPGA2_PERIPHERAL_FREQMHZ 200] $ps
+    if {[get_property CONFIG.PCW_IOPLL_CTRL_FBDIV $ps]!=48 ||
+        abs([get_property CONFIG.PCW_ACT_FPGA1_PERIPHERAL_FREQMHZ $ps]-50.0)>0.001 ||
+        abs([get_property CONFIG.PCW_ACT_FPGA2_PERIPHERAL_FREQMHZ $ps]-200.0)>0.001} {
+        error "Expected IO PLL x48, FCLK1=50 MHz and FCLK2=200 MHz"
+    }
+    connect_bd_net [get_bd_pins $ps/FCLK_CLK1] [get_bd_pins sio_clock/ref_clk]
+    connect_bd_net [get_bd_pins sio_swd/clock_control] [get_bd_pins sio_clock/clock_control]
+    connect_bd_net [get_bd_pins sio_clock/phy_reset] [get_bd_pins sio_swd/phy_reset]
+    if {$slice==1} {
+        set_property CONFIG.LOCAL_CALIBRATION 1 [get_bd_cells sio_clock]
+        connect_bd_net [get_bd_pins $ps/FCLK_CLK2] [get_bd_pins sio_clock/delay_ref]
+    } else {
+        set etm_ref [get_bd_pins orbtrace_0/ref_clk]
+        disconnect_bd_net [get_bd_nets -of_objects $etm_ref] $etm_ref
+        connect_bd_net [get_bd_pins $ps/FCLK_CLK2] $etm_ref
+    }
+} else {
+    connect_bd_net [get_bd_pins orbtrace_0/ddr_ref_clk] [get_bd_pins sio_clock/ref_clk]
+}
+set calibrated [expr {$slice==1 ? "sio_clock/local_calibrated" : "orbtrace_0/io_calibrated"}]
+connect_bd_net [get_bd_pins $calibrated] [get_bd_pins sio_clock/calibrated] \
+    [get_bd_pins sio_jtag/delay_ready] [get_bd_pins sio_swd/delay_ready]
 foreach pins {
-    {orbtrace_0/ddr_ref_clk sio_clock/ref_clk}
     {rst_ps7_0_50M/peripheral_aresetn sio_clock/resetn}
-    {orbtrace_0/io_calibrated sio_clock/calibrated sio_jtag/delay_ready sio_swd/delay_ready}
     {sio_clock/serial_clk swd_controller_0/hs_serial_phase}
     {sio_clock/serial_rx_clk swd_controller_0/hs_serial_rx_phase}
     {sio_clock/quad_clk sio_swd/word_clk swd_controller_0/hs_quad_phase sio_aux/quad_clk}

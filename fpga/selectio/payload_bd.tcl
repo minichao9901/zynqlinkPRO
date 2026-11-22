@@ -1,5 +1,6 @@
 # CDMA needs a burst-capable payload aperture. Control and status stay on GP1.
 create_bd_cell -type module -reference selectio_payload_ram sio_payload
+set_property CONFIG.SELECTIO_SLICE $slice [get_bd_cells sio_payload]
 create_bd_cell -type ip -vlnv xilinx.com:ip:axi_bram_ctrl:4.1 sio_payload_bram
 set_property -dict {CONFIG.DATA_WIDTH 32 CONFIG.SINGLE_PORT_BRAM 1 CONFIG.SUPPORTS_NARROW_BURST 0} [get_bd_cells sio_payload_bram]
 set_property CONFIG.NUM_MI 5 [get_bd_cells dma_bus]

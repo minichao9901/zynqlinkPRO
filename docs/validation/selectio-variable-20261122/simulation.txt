@@ -1,0 +1,166 @@
+[ack-50]
+# xsim {fusion} -testplusarg jslot=21 -testplusarg sslot=22 -testplusarg idle=0 -testplusarg jidle=33 -testplusarg swd_only -testplusarg return_ns=16.0 -testplusarg service_words=1 -testplusarg fclk1_ns=20.0 -testplusarg half_rate -autoloadwcfg -runall
+SWD50_EDGE period_ns=20.000 slot=22 idle=0 read=1 ack=001 parity_error=0 d0=1 rises=46 ack_to_next_ns=50.000
+SWD50_EDGE period_ns=20.000 slot=22 idle=0 read=0 ack=010 parity_error=0 d0=0 rises=13 ack_to_next_ns=60.000
+SWD50_EDGE period_ns=20.000 slot=22 idle=0 read=0 ack=001 parity_error=0 d0=0 rises=46 ack_to_next_ns=50.000
+SWD50_EDGE period_ns=20.000 slot=22 idle=0 read=1 ack=100 parity_error=0 d0=0 rises=13 ack_to_next_ns=60.000
+SWD50_EDGE period_ns=20.000 slot=22 idle=0 read=1 ack=001 parity_error=1 d0=0 rises=46 ack_to_next_ns=50.000
+SWD50_EDGE period_ns=20.000 slot=22 idle=0 read=1 ack=010 parity_error=0 d0=0 rises=13 ack_to_next_ns=60.000
+SWD50_EDGE period_ns=20.000 slot=22 idle=0 read=0 ack=100 parity_error=0 d0=0 rises=13 ack_to_next_ns=60.000
+SWD50_EDGE period_ns=20.000 slot=22 idle=0 read=1 ack=001 parity_error=0 d0=0 rises=46 ack_to_next_ns=50.000
+SWD50_BATCH first_ack=010 parity_error=0 retries=1 retired=2 error=0
+SWD50_BATCH first_ack=100 parity_error=0 retries=0 retired=0 error=4
+SWD50_BATCH first_ack=001 parity_error=1 retries=0 retired=0 error=9
+SWD50_EDGES_PASS
+$finish called at time : 11687500 ps : File "E:/zynqlinkPRO-efficiency/fpga/sim/tb_swd50_edges.sv" Line 187
+
+[ack-72727]
+# xsim {fusion} -testplusarg jslot=21 -testplusarg sslot=22 -testplusarg idle=0 -testplusarg jidle=33 -testplusarg swd_only -testplusarg return_ns=16.0 -testplusarg service_words=1 -testplusarg fclk1_ns=27.5 -autoloadwcfg -runall
+SWD50_EDGE period_ns=13.750 slot=22 idle=0 read=1 ack=001 parity_error=0 d0=1 rises=46 ack_to_next_ns=13.749
+SWD50_EDGE period_ns=13.750 slot=22 idle=0 read=0 ack=010 parity_error=0 d0=0 rises=13 ack_to_next_ns=13.751
+SWD50_EDGE period_ns=13.750 slot=22 idle=0 read=0 ack=001 parity_error=0 d0=0 rises=46 ack_to_next_ns=13.749
+SWD50_EDGE period_ns=13.750 slot=22 idle=0 read=1 ack=100 parity_error=0 d0=0 rises=13 ack_to_next_ns=13.751
+SWD50_EDGE period_ns=13.750 slot=22 idle=0 read=1 ack=001 parity_error=1 d0=0 rises=46 ack_to_next_ns=13.749
+SWD50_EDGE period_ns=13.750 slot=22 idle=0 read=1 ack=010 parity_error=0 d0=0 rises=13 ack_to_next_ns=13.751
+SWD50_EDGE period_ns=13.750 slot=22 idle=0 read=0 ack=100 parity_error=0 d0=0 rises=13 ack_to_next_ns=13.749
+SWD50_EDGE period_ns=13.750 slot=22 idle=0 read=1 ack=001 parity_error=0 d0=0 rises=46 ack_to_next_ns=13.751
+SWD50_BATCH first_ack=010 parity_error=0 retries=1 retired=2 error=0
+SWD50_BATCH first_ack=100 parity_error=0 retries=0 retired=0 error=4
+SWD50_BATCH first_ack=001 parity_error=1 retries=0 retired=0 error=9
+SWD50_EDGES_PASS
+$finish called at time : 10555624 ps : File "E:/zynqlinkPRO-efficiency/fpga/sim/tb_swd50_edges.sv" Line 187
+
+[ack-100]
+# xsim {fusion} -testplusarg jslot=21 -testplusarg sslot=24 -testplusarg idle=0 -testplusarg jidle=33 -testplusarg swd_only -testplusarg return_ns=16.0 -testplusarg service_words=1 -testplusarg fclk1_ns=20.0 -autoloadwcfg -runall
+SWD50_EDGE period_ns=10.000 slot=24 idle=0 read=1 ack=001 parity_error=0 d0=1 rises=46 ack_to_next_ns=10.000
+SWD50_EDGE period_ns=10.000 slot=24 idle=0 read=0 ack=010 parity_error=0 d0=0 rises=13 ack_to_next_ns=10.000
+SWD50_EDGE period_ns=10.000 slot=24 idle=0 read=0 ack=001 parity_error=0 d0=0 rises=46 ack_to_next_ns=10.000
+SWD50_EDGE period_ns=10.000 slot=24 idle=0 read=1 ack=100 parity_error=0 d0=0 rises=13 ack_to_next_ns=10.000
+SWD50_EDGE period_ns=10.000 slot=24 idle=0 read=1 ack=001 parity_error=1 d0=0 rises=46 ack_to_next_ns=10.000
+SWD50_EDGE period_ns=10.000 slot=24 idle=0 read=1 ack=010 parity_error=0 d0=0 rises=13 ack_to_next_ns=10.000
+SWD50_EDGE period_ns=10.000 slot=24 idle=0 read=0 ack=100 parity_error=0 d0=0 rises=13 ack_to_next_ns=10.000
+SWD50_EDGE period_ns=10.000 slot=24 idle=0 read=1 ack=001 parity_error=0 d0=0 rises=46 ack_to_next_ns=10.000
+SWD50_BATCH first_ack=010 parity_error=0 retries=1 retired=2 error=0
+SWD50_BATCH first_ack=100 parity_error=0 retries=0 retired=0 error=4
+SWD50_BATCH first_ack=001 parity_error=1 retries=0 retired=0 error=9
+SWD50_EDGES_PASS
+$finish called at time : 7937500 ps : File "E:/zynqlinkPRO-efficiency/fpga/sim/tb_swd50_edges.sv" Line 187
+
+[sim-50]
+# xsim {fusion} -testplusarg jslot=21 -testplusarg sslot=22 -testplusarg idle=0 -testplusarg jidle=33 -testplusarg swd_only -testplusarg target_clk_ns=7.8125 -testplusarg return_ns=16.0 -testplusarg swd50_windows -testplusarg wire_budget -testplusarg service_words=1 -testplusarg fclk1_ns=20.0 -testplusarg half_rate -autoloadwcfg -runall
+SELECTIO_CLOCK_SWITCH_PASS FCLK1_period_ns=20.000 FCLK2_period_ns=5.000
+WIRE_BUDGET work=0 bytes=2048 ns=493350.000 rises=23858 lead_ns=133.850 tail_ns=146.150 extended=525 extra_ns=15930.000 short=0 deficit_ns=0.000
+LINK_BUDGET work=0 ack_drain_cycles=2080 read_drain_cycles=8 handoffs=519 handoff_ns=280.000
+WIRE_BUDGET work=1 bytes=2048 ns=497865.000 rises=23832 lead_ns=136.350 tail_ns=148.650 extended=1035 extra_ns=20960.000 short=0 deficit_ns=0.000
+LINK_BUDGET work=1 ack_drain_cycles=2072 read_drain_cycles=1032 handoffs=517 handoff_ns=270.000
+STANDARD_SRAM_PASS words=512 batch_words=256 tar_after_write=20008800
+RTT_PACKET packet=1 bytes=2048 old_rd=6144 confirmed_rd=0
+RTT_PACKET packet=2 bytes=2048 old_rd=0 confirmed_rd=2048
+RTT_PACKET packet=3 bytes=2048 old_rd=2048 confirmed_rd=4096
+RTT_PACKET packet=4 bytes=2048 old_rd=4096 confirmed_rd=6144
+WIRE_BUDGET work=3 bytes=8192 ns=2082007.500 rises=97944 lead_ns=341.350 tail_ns=156.150 extended=4243 extra_ns=122650.000 short=0 deficit_ns=0.000
+LINK_BUDGET work=3 ack_drain_cycles=8560 read_drain_cycles=4176 handoffs=2139 handoff_ns=37560.000
+SWD50_WINDOWS_PASS SWD_period_ns=20.000 SRAM=512 words RTT=8192 bytes
+$finish called at time : 3143561250 ps : File "E:/zynqlinkPRO-efficiency/fpga/sim/tb_selectio_debug.sv" Line 310
+
+[sim-72727]
+# xsim {fusion} -testplusarg jslot=21 -testplusarg sslot=22 -testplusarg idle=0 -testplusarg jidle=33 -testplusarg swd_only -testplusarg target_clk_ns=7.8125 -testplusarg return_ns=16.0 -testplusarg swd50_windows -testplusarg wire_budget -testplusarg service_words=1 -testplusarg fclk1_ns=27.5 -autoloadwcfg -runall
+SELECTIO_CLOCK_SWITCH_PASS FCLK1_period_ns=27.500 FCLK2_period_ns=5.000
+WIRE_BUDGET work=0 bytes=2048 ns=350355.000 rises=23858 lead_ns=160.099 tail_ns=202.401 extended=525 extra_ns=21958.750 short=0 deficit_ns=0.000
+LINK_BUDGET work=0 ack_drain_cycles=2080 read_drain_cycles=20 handoffs=519 handoff_ns=330.000
+WIRE_BUDGET work=1 bytes=2048 ns=371025.000 rises=23832 lead_ns=150.099 tail_ns=202.401 extended=1035 extra_ns=42996.250 short=0 deficit_ns=0.000
+LINK_BUDGET work=1 ack_drain_cycles=2072 read_drain_cycles=2068 handoffs=517 handoff_ns=330.000
+STANDARD_SRAM_PASS words=512 batch_words=256 tar_after_write=20008800
+RTT_PACKET packet=1 bytes=2048 old_rd=6144 confirmed_rd=0
+RTT_PACKET packet=2 bytes=2048 old_rd=0 confirmed_rd=2048
+RTT_PACKET packet=3 bytes=2048 old_rd=2048 confirmed_rd=4096
+RTT_PACKET packet=4 bytes=2048 old_rd=4096 confirmed_rd=6144
+WIRE_BUDGET work=3 bytes=8192 ns=1560255.000 rises=97944 lead_ns=363.850 tail_ns=201.150 extended=4243 extra_ns=212973.748 short=0 deficit_ns=0.000
+LINK_BUDGET work=3 ack_drain_cycles=8560 read_drain_cycles=8384 handoffs=2139 handoff_ns=38362.502
+SWD50_WINDOWS_PASS SWD_period_ns=13.750 SRAM=512 words RTT=8192 bytes
+$finish called at time : 2348501250 ps : File "E:/zynqlinkPRO-efficiency/fpga/sim/tb_selectio_debug.sv" Line 310
+
+[sim-100]
+# xsim {fusion} -testplusarg jslot=21 -testplusarg sslot=24 -testplusarg idle=0 -testplusarg jidle=33 -testplusarg swd_only -testplusarg target_clk_ns=7.8125 -testplusarg return_ns=16.0 -testplusarg swd50_windows -testplusarg wire_budget -testplusarg service_words=1 -testplusarg fclk1_ns=20.0 -autoloadwcfg -runall
+SELECTIO_CLOCK_SWITCH_PASS FCLK1_period_ns=20.000 FCLK2_period_ns=5.000
+WIRE_BUDGET work=0 bytes=2048 ns=260310.000 rises=23871 lead_ns=128.850 tail_ns=181.150 extended=526 extra_ns=21300.000 short=0 deficit_ns=0.000
+LINK_BUDGET work=0 ack_drain_cycles=2605 read_drain_cycles=26 handoffs=520 handoff_ns=280.000
+WIRE_BUDGET work=1 bytes=2048 ns=280290.000 rises=23832 lead_ns=131.350 tail_ns=178.650 extended=1035 extra_ns=41670.000 short=0 deficit_ns=0.000
+LINK_BUDGET work=1 ack_drain_cycles=2590 read_drain_cycles=2586 handoffs=517 handoff_ns=290.000
+STANDARD_SRAM_PASS words=512 batch_words=256 tar_after_write=20008800
+RTT_PACKET packet=1 bytes=2048 old_rd=6144 confirmed_rd=0
+RTT_PACKET packet=2 bytes=2048 old_rd=0 confirmed_rd=2048
+RTT_PACKET packet=3 bytes=2048 old_rd=2048 confirmed_rd=4096
+RTT_PACKET packet=4 bytes=2048 old_rd=4096 confirmed_rd=6144
+WIRE_BUDGET work=3 bytes=8192 ns=1187115.000 rises=97957 lead_ns=341.350 tail_ns=173.650 extended=4244 extra_ns=207040.000 short=0 deficit_ns=0.000
+LINK_BUDGET work=3 ack_drain_cycles=10705 read_drain_cycles=10488 handoffs=2140 handoff_ns=37580.000
+SWD50_WINDOWS_PASS SWD_period_ns=10.000 SRAM=512 words RTT=8192 bytes
+$finish called at time : 1790523750 ps : File "E:/zynqlinkPRO-efficiency/fpga/sim/tb_selectio_debug.sv" Line 310
+
+[sim-jtag-full]
+# xsim {fusion} -testplusarg jslot=21 -testplusarg sslot=16 -testplusarg idle=2 -testplusarg jidle=33 -testplusarg target_clk_ns=7.8125 -testplusarg service_words=1 -testplusarg fclk1_ns=20.0 -testplusarg jtag_only -autoloadwcfg -runall
+SELECTIO_CLOCK_SWITCH_PASS FCLK1_period_ns=20.000 FCLK2_period_ns=5.000
+QUEUE_MBPS jtag write 5.063448
+QUEUE_MBPS jtag read 5.063917
+JTAG_PASS 100 MHz words=256 edges=      40078 slot=         21
+SELECTIO_JTAG_ONLY_PASS
+$finish called at time : 430780 ns : File "E:/zynqlinkPRO-efficiency/fpga/sim/tb_selectio_debug.sv" Line 295
+
+[sim-jtag-slice]
+# xsim {fusion} -testplusarg jslot=21 -testplusarg sslot=16 -testplusarg idle=2 -testplusarg jidle=33 -testplusarg target_clk_ns=7.8125 -testplusarg service_words=1 -testplusarg fclk1_ns=20.0 -testplusarg jtag_only -autoloadwcfg -runall
+SELECTIO_CLOCK_SWITCH_PASS FCLK1_period_ns=20.000 FCLK2_period_ns=5.000
+QUEUE_MBPS jtag write 5.063448
+QUEUE_MBPS jtag read 5.063917
+JTAG_PASS 100 MHz words=256 edges=      40078 slot=         21
+SELECTIO_JTAG_ONLY_PASS
+$finish called at time : 430780 ns : File "E:/zynqlinkPRO-efficiency/fpga/sim/tb_selectio_debug.sv" Line 297
+
+[sim-swd-slice100]
+# xsim {fusion} -testplusarg jslot=21 -testplusarg sslot=24 -testplusarg idle=0 -testplusarg jidle=33 -testplusarg swd_only -testplusarg target_clk_ns=7.8125 -testplusarg return_ns=16.0 -testplusarg swd50_windows -testplusarg wire_budget -testplusarg service_words=1 -testplusarg fclk1_ns=20.0 -autoloadwcfg -runall
+SELECTIO_CLOCK_SWITCH_PASS FCLK1_period_ns=20.000 FCLK2_period_ns=5.000
+WIRE_BUDGET work=0 bytes=2048 ns=260310.000 rises=23871 lead_ns=128.850 tail_ns=181.150 extended=526 extra_ns=21300.000 short=0 deficit_ns=0.000
+LINK_BUDGET work=0 ack_drain_cycles=2605 read_drain_cycles=26 handoffs=520 handoff_ns=280.000
+WIRE_BUDGET work=1 bytes=2048 ns=280290.000 rises=23832 lead_ns=131.350 tail_ns=178.650 extended=1035 extra_ns=41670.000 short=0 deficit_ns=0.000
+LINK_BUDGET work=1 ack_drain_cycles=2590 read_drain_cycles=2586 handoffs=517 handoff_ns=290.000
+STANDARD_SRAM_PASS words=512 batch_words=256 tar_after_write=20008800
+RTT_PACKET packet=1 bytes=2048 old_rd=6144 confirmed_rd=0
+RTT_PACKET packet=2 bytes=2048 old_rd=0 confirmed_rd=2048
+RTT_PACKET packet=3 bytes=2048 old_rd=2048 confirmed_rd=4096
+RTT_PACKET packet=4 bytes=2048 old_rd=4096 confirmed_rd=6144
+WIRE_BUDGET work=3 bytes=8192 ns=1187115.000 rises=97957 lead_ns=341.350 tail_ns=173.650 extended=4244 extra_ns=207040.000 short=0 deficit_ns=0.000
+LINK_BUDGET work=3 ack_drain_cycles=10705 read_drain_cycles=10488 handoffs=2140 handoff_ns=37580.000
+SWD50_WINDOWS_PASS SWD_period_ns=10.000 SRAM=512 words RTT=8192 bytes
+$finish called at time : 1790523750 ps : File "E:/zynqlinkPRO-efficiency/fpga/sim/tb_selectio_debug.sv" Line 310
+
+[ack-50-early]
+# xsim {fusion} -testplusarg jslot=21 -testplusarg sslot=22 -testplusarg idle=0 -testplusarg jidle=33 -testplusarg swd_only -testplusarg return_ns=16.0 -testplusarg early_swd50 -testplusarg service_words=1 -testplusarg fclk1_ns=20.0 -testplusarg half_rate -autoloadwcfg -runall
+SWD50_EDGE period_ns=20.000 slot=22 idle=0 read=1 ack=001 parity_error=0 d0=1 rises=46 ack_to_next_ns=20.000
+SWD50_EDGE period_ns=20.000 slot=22 idle=0 read=0 ack=010 parity_error=0 d0=0 rises=13 ack_to_next_ns=20.000
+SWD50_EDGE period_ns=20.000 slot=22 idle=0 read=0 ack=001 parity_error=0 d0=0 rises=46 ack_to_next_ns=20.000
+SWD50_EDGE period_ns=20.000 slot=22 idle=0 read=1 ack=100 parity_error=0 d0=0 rises=13 ack_to_next_ns=20.000
+SWD50_EDGE period_ns=20.000 slot=22 idle=0 read=1 ack=001 parity_error=1 d0=0 rises=46 ack_to_next_ns=20.000
+SWD50_EDGE period_ns=20.000 slot=22 idle=0 read=1 ack=010 parity_error=0 d0=0 rises=13 ack_to_next_ns=20.000
+SWD50_EDGE period_ns=20.000 slot=22 idle=0 read=0 ack=100 parity_error=0 d0=0 rises=13 ack_to_next_ns=20.000
+SWD50_EDGE period_ns=20.000 slot=22 idle=0 read=1 ack=001 parity_error=0 d0=0 rises=46 ack_to_next_ns=20.000
+SWD50_BATCH first_ack=010 parity_error=0 retries=1 retired=2 error=0
+SWD50_BATCH first_ack=100 parity_error=0 retries=0 retired=0 error=4
+SWD50_BATCH first_ack=001 parity_error=1 retries=0 retired=0 error=9
+SWD50_EDGES_PASS
+$finish called at time : 11417500 ps : File "E:/zynqlinkPRO-efficiency/fpga/sim/tb_swd50_edges.sv" Line 187
+
+[sim-50-early]
+# xsim {fusion} -testplusarg jslot=21 -testplusarg sslot=22 -testplusarg idle=0 -testplusarg jidle=33 -testplusarg swd_only -testplusarg target_clk_ns=7.8125 -testplusarg return_ns=16.0 -testplusarg early_swd50 -testplusarg swd50_windows -testplusarg wire_budget -testplusarg service_words=1 -testplusarg fclk1_ns=20.0 -testplusarg half_rate -autoloadwcfg -runall
+SELECTIO_CLOCK_SWITCH_PASS FCLK1_period_ns=20.000 FCLK2_period_ns=5.000
+WIRE_BUDGET work=0 bytes=2048 ns=482940.000 rises=23858 lead_ns=133.850 tail_ns=166.150 extended=525 extra_ns=5500.000 short=0 deficit_ns=0.000
+LINK_BUDGET work=0 ack_drain_cycles=1040 read_drain_cycles=8 handoffs=519 handoff_ns=270.000
+WIRE_BUDGET work=1 bytes=2048 ns=487530.000 rises=23832 lead_ns=136.350 tail_ns=153.650 extended=1035 extra_ns=10620.000 short=0 deficit_ns=0.000
+LINK_BUDGET work=1 ack_drain_cycles=1036 read_drain_cycles=1032 handoffs=517 handoff_ns=290.000
+STANDARD_SRAM_PASS words=512 batch_words=256 tar_after_write=20008800
+RTT_PACKET packet=1 bytes=2048 old_rd=6144 confirmed_rd=0
+RTT_PACKET packet=2 bytes=2048 old_rd=0 confirmed_rd=2048
+RTT_PACKET packet=3 bytes=2048 old_rd=2048 confirmed_rd=4096
+RTT_PACKET packet=4 bytes=2048 old_rd=4096 confirmed_rd=6144
+WIRE_BUDGET work=3 bytes=8192 ns=2039085.000 rises=97944 lead_ns=346.350 tail_ns=158.650 extended=4243 extra_ns=79720.000 short=0 deficit_ns=0.000
+LINK_BUDGET work=3 ack_drain_cycles=4280 read_drain_cycles=4176 handoffs=2139 handoff_ns=37590.000
+SWD50_WINDOWS_PASS SWD_period_ns=20.000 SRAM=512 words RTT=8192 bytes
+$finish called at time : 3079593750 ps : File "E:/zynqlinkPRO-efficiency/fpga/sim/tb_selectio_debug.sv" Line 313

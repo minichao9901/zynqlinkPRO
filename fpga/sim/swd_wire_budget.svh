@@ -1,5 +1,6 @@
-// Pin-clock accounting for the marked 50 MHz diagnostic windows.
+// Pin-clock accounting for marked diagnostic windows.
 bit wire_budget_active=0;
+realtime wire_budget_period=20.0, wire_budget_tolerance=0.001;
 integer wire_rises, wire_extended, wire_short;
 realtime wire_start, wire_first, wire_last, wire_extra, wire_deficit;
 integer ack_drain_cycles, read_drain_cycles, handoffs;
@@ -19,12 +20,12 @@ endtask
 
 always @(posedge wire_budget_pin) if(wire_budget_active && wire_budget_pin===1'b1) begin
     if(!wire_rises) wire_first=$realtime;
-    else if($realtime-wire_last>20.001) begin
+    else if($realtime-wire_last>wire_budget_period+wire_budget_tolerance) begin
         wire_extended++;
-        wire_extra=wire_extra+($realtime-wire_last)-20.0;
-    end else if($realtime-wire_last<19.999) begin
+        wire_extra=wire_extra+($realtime-wire_last)-wire_budget_period;
+    end else if($realtime-wire_last<wire_budget_period-wire_budget_tolerance) begin
         wire_short++;
-        wire_deficit=wire_deficit+20.0-($realtime-wire_last);
+        wire_deficit=wire_deficit+wire_budget_period-($realtime-wire_last);
     end
     wire_last=$realtime;
     wire_rises++;
