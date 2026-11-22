@@ -240,6 +240,7 @@ python -X utf8 tools/selectio_cm3.py --services --sample-ticks 64 --out build/cm
 python -X utf8 tools/selectio_cm3.py --services --swd-only --sample-ticks 32 --out build/cm3-swd-services
 python -X utf8 tools/selectio_spi_slave_sim.py --out build/spi-cdc-xsim
 python -X utf8 tools/selectio_spi_slave_sim.py --ring-only --out build/spi-cdc-ring
+python -X utf8 tools/selectio_spi_slave_sim.py --pump-only --out build/spi-cdc-pump
 python -X utf8 toolbox.py project run board.accept -- --selectio --board f103ze --pair $pair --clock 100000000 --seconds 60 --rounds 3 --rtt-ring-bytes 8192 --rtt-chunk 2048
 python -X utf8 toolbox.py project run board.accept -- --selectio --board f103ze --pair $pair --clock 100000000 --seconds 60 --rounds 3 --rtt-ring-bytes 8192 --rtt-chunk 2048 --out build/accept-new --execute
 python -X utf8 toolbox.py project run board.accept -- --selectio --review build/accept-new/summary.json

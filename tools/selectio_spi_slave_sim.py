@@ -1,4 +1,4 @@
-"""Exercise SelectIO SPI reception at the pads and the AUX receive ring."""
+"""Check SelectIO SPI reception, the AUX receive ring and the firmware CDC pump."""
 import argparse
 from pathlib import Path
 import subprocess
@@ -28,17 +28,47 @@ def run_ring(out, rtl):
     print(output, end="", flush=True)
 
 
+def run_pump(out):
+    tests = ROOT / "tools/tests"
+    firmware = ROOT / "firmware/xusbps_daplink_dma"
+    mock_headers = out / "include"
+    mock_headers.mkdir()
+    for name in ("DAP_config.h", "DAP.h", "xusbps.h", "xtime_l.h", "xil_types.h"):
+        (mock_headers / name).write_text('#include "probe_host_platform.h"\n', encoding="ascii")
+    image = out / "spi_cdc_pump.exe"
+    command = ["gcc", "-std=gnu11", "-O2", "-DDAP_SELECTIO=1", "-DDAP_SELECTIO_VARIABLE=1",
+               "-DDAP_SELECTIO_SLICE=0"]
+    for directory in (mock_headers, firmware, firmware / "DAP/Include", tests):
+        command.extend(("-I", directory))
+    command.extend((tests / "selectio_spi_cdc_pump_test.c", "-o", image))
+    with (out / "gcc.txt").open("w", encoding="utf-8") as log:
+        subprocess.run(command, stdout=log, stderr=subprocess.STDOUT, check=True, timeout=90)
+    result = subprocess.run([image], capture_output=True, text=True, timeout=30)
+    output = result.stdout + result.stderr
+    (out / "pump.txt").write_text(output, encoding="utf-8")
+    markers = ("SPI_CDC_PUMP_PASS", "SPI_CDC_PUMP_REARM_PASS")
+    if result.returncode or not all(marker in output for marker in markers):
+        raise SystemExit(output[-4000:])
+    print(output, end="", flush=True)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, required=True)
-    parser.add_argument("--ring-only", action="store_true",
-                        help="run the digital AUX receive-ring case with Icarus Verilog")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--ring-only", action="store_true",
+                      help="run the digital AUX receive-ring case with Icarus Verilog")
+    mode.add_argument("--pump-only", action="store_true",
+                      help="run the firmware CDC pump model with a host GCC compiler")
     args = parser.parse_args()
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=False)
     rtl = ROOT / "fpga/rtl"
     if args.ring_only:
         run_ring(out, rtl)
+        return
+    if args.pump_only:
+        run_pump(out)
         return
     binaries = VIVADO / "bin/unwrapped/win64.o"
     sources = [
