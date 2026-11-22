@@ -1,0 +1,44 @@
+{
+  "protocol": "trace-cli/1",
+  "runId": "20261123-015623-fe858dd1",
+  "command": "query",
+  "ok": true,
+  "result": {
+    "event": {
+      "kind": "instruction",
+      "seq": 47,
+      "offset": 757,
+      "pc": 134226542,
+      "size": 2,
+      "bytes": "0120",
+      "mnemonic": "movs",
+      "operands": "r0, #1",
+      "executed": null,
+      "function": "usb_device_is_configured",
+      "file": "E:/zynqlinkPRO/build/f103-target-source-zip/firmware/stm32f103_cdc_trace/cherryusb/core/usbd_core.c",
+      "line": 1461,
+      "cycleCount": 0,
+      "cycleSpan": 0,
+      "flow": "linear",
+      "conditional": false,
+      "executionState": "unknown",
+      "executionReason": "IT 非分支条件指令：当前 trace 未记录条件结果",
+      "callPath": [
+        "采集前调用栈未知",
+        "main",
+        "cdc_poll",
+        "usb_device_is_configured"
+      ],
+      "cycles": 0
+    },
+    "callPath": [
+      "采集前调用栈未知",
+      "main",
+      "cdc_poll",
+      "usb_device_is_configured"
+    ],
+    "stackBasis": "历史 trace 重建，包含未证实祖先；不是当前寄存器快照"
+  },
+  "exitCode": 0,
+  "elapsedSeconds": 0.6328500999989046
+}

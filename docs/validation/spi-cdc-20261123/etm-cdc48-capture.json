@@ -1,0 +1,84 @@
+{
+  "protocol": "trace-cli/1",
+  "runId": "20261123-015424-d07c2318",
+  "command": "capture",
+  "ok": true,
+  "exitCode": 0,
+  "elapsedSeconds": 10.414,
+  "result": {
+    "record": "E:\\zynqlinkPRO-efficiency\\build\\spi-cdc-board-full\\etm",
+    "etmBytes": 4593613,
+    "etmSha256": "d1eb80023d0c7e8a0e872139a6dd7cca9337d63522ce74938252df81fb2afcea",
+    "quality": {
+      "transport": "ddr-usb/1",
+      "captureId": 1,
+      "captureNonce": 1886713489226192473,
+      "loss": false,
+      "synced": true,
+      "bufferFull": false,
+      "bufferCapacityBytes": 104857600,
+      "captureComplete": true,
+      "requestedWindowComplete": true,
+      "completionReason": "time",
+      "ended": true,
+      "records": 1211843,
+      "hardwareTicks": 199999998,
+      "requestedTicks": 199999998,
+      "refClockHz": 199999998,
+      "hardwareSeconds": 1.0,
+      "hardwareStartBracketUnix": [
+        1795370055.021422,
+        1795370055.0222452
+      ],
+      "stopReason": 0,
+      "formatterBytes": 19389488,
+      "tailBytes": 0,
+      "tailAmbiguous": true,
+      "usbSeconds": 0.6756299000007857,
+      "usbPayloadMBps": 28.69838649825511,
+      "diagnostics": {
+        "implemented": true,
+        "frameDrops": 0,
+        "parserErrors": 0,
+        "idelayReadyLosses": 0,
+        "frameHighwater": 1,
+        "syncAcquisitions": 1,
+        "observedFrames": 1211843,
+        "capacityReached": false,
+        "writerError": 0
+      },
+      "fclk": 133333332,
+      "tckKhz": 9523.809428571429
+    },
+    "summary": {
+      "packets": 3941634,
+      "ranges": 18408550,
+      "instructions": 18408550,
+      "executed": 16900541,
+      "sourceMapped": 18408550,
+      "exceptions": 1000,
+      "gaps": 1,
+      "packetIssues": 0,
+      "unknownExecution": 301602,
+      "functions": {
+        "cdc_poll": 8445691,
+        "cdc_tx_poll": 3619218,
+        "main": 2714418,
+        "usb_device_is_configured": 2111214,
+        "HAL_IncTick": 7000,
+        "SysTick_Handler": 3000
+      }
+    },
+    "targetControl": "openocd-wasm/mem-ap0",
+    "config": {
+      "protocol": "ETMv3",
+      "idr": 1091891777,
+      "ctrl": 2064,
+      "ccer": 100352,
+      "traceid": 2
+    },
+    "captureSeconds": 1.0,
+    "clockPolicy": "target-firmware-owned",
+    "gpioSpeed": 1
+  }
+}

@@ -41,4 +41,10 @@ SPI 同步引脚经 SelectIO 在 100 MHz 并行域得到每拍四个样本。接
 
 SPI 主机的 mode 0/2 的通过 slot 为 16，mode 1/3 为 18。其他短测采样设置的失败保留。每项的发送源、tap/slot、结果和持续窗由独立夹具记录，目标恢复通过。 [物理线原始数据](wire.json) · [USB 三轮数据](usb-echo.json)
 
+实物 CDC 100 Mbaud 回环 60 秒，每个方向 **268,017,664 B** 全匹配，约 4.467 MB/s/方向。物理 CDC 与 IF4 RTT/HSS 并行时收到 96 B RTT、111 组 HSS，跳拍 0。原生 IF4 和标准 IF0 的真实 ITM 各跑了 NRZ 3/48 Mbaud、Manchester 1.5/24 Mbit/s 四档，每个档位每接口均为 2,500,000 B，全匹配并排空。另用 F103 TIM2_CH2 12 MHz 在四模式下验证外部 MISO，SPI 主机 SCK 为 100 MHz；Manchester 100 Mbit/s 的带载突发累计 3,675,952 B。 [CDC 回环](uart-cdc-100m.json) · [并发](cdc-rtt-hss.json) · [ITM IF4](itm-if4.json) · [ITM IF0](itm-if0.json) · [外部 MISO](spi-master-external-miso.json) · [Manchester](manchester-hardware-bursts.json)
+
+CDC48 的 24 MHz TRACECLK 运行态 ETM，完整 1.000 秒窗口、19,389,488 B formatter、0 个硬件丢帧/解析错/写错，严格解码核验和现场恢复通过。报告保留 301,602 个条件执行未知，全部按函数统计集中在 `usb_device_is_configured`，数量等于调用次数。事件样本 PC 0x0800226E 对应 `IT NE` 下的 `MOVNE`，TraceStore 给出的未知原因是 trace 没记录该非分支条件结果。 [采集](etm-cdc48-capture.json) · [严格核验](etm-cdc48-verify.json) · [谓词事件](etm-predicated-example.json)
+
+首轮统一入口共 36 项，22 项通过。前部 14 项中的错误来自本分支旧 CLI 会话入口，夹具恢复均通过；后部使用修正的 CLI。首轮原样归档，SWD/JTAG 切换、丢失主机句柄、调试、SRAM、运行 RTT 和并发单独补跑，使用相同哈希的配对。 [首轮统一报告](first-full-board-summary.json)
+
 复现入口见 [CLI](../../selectio/README.md#spi-从机接收转发到-com) 与 [Case 表](../../selectio/fusion-performance-cases.md)。时序收敛、目标和探针恢复以及全部功能用例以同一份 bit/ELF 的后续实测记录为准。

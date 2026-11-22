@@ -1,0 +1,131 @@
+{
+  "protocol": "trace-cli/1",
+  "runId": "20261123-015424-2f6403a3",
+  "command": "verify",
+  "ok": true,
+  "result": {
+    "recordDir": "E:\\zynqlinkPRO-efficiency\\build\\spi-cdc-board-full\\etm",
+    "extent": {
+      "known": false,
+      "complete": null,
+      "reason": "该原始格式没有KVDAT采样头；不从请求参数猜测实际时长"
+    },
+    "raw": {
+      "bytes": 4593613,
+      "sha256": "d1eb80023d0c7e8a0e872139a6dd7cca9337d63522ce74938252df81fb2afcea"
+    },
+    "elf": {
+      "bytes": 1216624,
+      "sha256": "e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f"
+    },
+    "inputManifestVerified": false,
+    "passed": true,
+    "storeInputVerification": {
+      "verified": true,
+      "skipped": false,
+      "reason": "",
+      "declared": 7,
+      "present": 5,
+      "blockingHashed": 5,
+      "hashed": 7,
+      "hashedBytes": 5834511,
+      "hashSeconds": 0.008272,
+      "unverified": [],
+      "unbound": [],
+      "excluded": [],
+      "metadata": [
+        {
+          "name": "session.json",
+          "bytes": 3368,
+          "expectedSha256": "8aef08fbe375f7b116e182fe33380ddbd679a7984c53c2e6eab28569e993935d",
+          "sha256": "8aef08fbe375f7b116e182fe33380ddbd679a7984c53c2e6eab28569e993935d",
+          "seconds": 0.000477,
+          "status": "ok"
+        },
+        {
+          "name": "sources.json",
+          "bytes": 548,
+          "expectedSha256": "92b9a473dffadba6ed06597177343cd6238d307efd116ebfb299c2ed34429a4a",
+          "sha256": "92b9a473dffadba6ed06597177343cd6238d307efd116ebfb299c2ed34429a4a",
+          "seconds": 0.000399,
+          "status": "ok"
+        }
+      ],
+      "metadataChanged": [],
+      "inputs": [
+        {
+          "name": "etm.bin",
+          "bytes": 4593613,
+          "expectedSha256": "d1eb80023d0c7e8a0e872139a6dd7cca9337d63522ce74938252df81fb2afcea",
+          "sha256": "d1eb80023d0c7e8a0e872139a6dd7cca9337d63522ce74938252df81fb2afcea",
+          "seconds": 0.004714,
+          "status": "ok"
+        },
+        {
+          "name": "native-config.txt",
+          "bytes": 190,
+          "expectedSha256": "25521c229e3c4b56ad6807c80daf63222337f9854a467060b340df2e8bc559cc",
+          "sha256": "25521c229e3c4b56ad6807c80daf63222337f9854a467060b340df2e8bc559cc",
+          "seconds": 0.00041,
+          "status": "ok"
+        },
+        {
+          "name": "firmware.elf",
+          "bytes": 1216624,
+          "expectedSha256": "e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f",
+          "sha256": "e379b4680925a1aa06208620494028a65b99de0367df23645becaae8954f676f",
+          "seconds": 0.001427,
+          "status": "ok"
+        },
+        {
+          "name": "image-0.bin",
+          "bytes": 20040,
+          "expectedSha256": "b5b09d9a0446795acc1981aff62ed55f36f10fa71a47544b77c3d0fe1a0610d1",
+          "sha256": "b5b09d9a0446795acc1981aff62ed55f36f10fa71a47544b77c3d0fe1a0610d1",
+          "seconds": 0.000458,
+          "status": "ok"
+        },
+        {
+          "name": "image-1.bin",
+          "bytes": 128,
+          "expectedSha256": "496d8b1d85d4a90921e45cc77629b2c80dcaae957a6ed79710200efa1d4cf341",
+          "sha256": "496d8b1d85d4a90921e45cc77629b2c80dcaae957a6ed79710200efa1d4cf341",
+          "seconds": 0.000386,
+          "status": "ok"
+        }
+      ],
+      "problems": [],
+      "elapsedSeconds": 0.009273,
+      "generation": "g-20261123T015418-ec2f56c9",
+      "storeCheckSeconds": 0.355843,
+      "openSeconds": 0.365946
+    },
+    "quality": {
+      "passed": true,
+      "failures": {},
+      "terminalBoundaryPackets": [],
+      "note": "尾部INCOMPLETE_EOT单列保留；初始化未同步/条件未知不视作已证实执行；字节核算不等于无损证明"
+    },
+    "summary": {
+      "packets": 3941634,
+      "ranges": 18408550,
+      "instructions": 18408550,
+      "executed": 16900541,
+      "sourceMapped": 18408550,
+      "exceptions": 1000,
+      "gaps": 1,
+      "packetIssues": 0,
+      "unknownExecution": 301602,
+      "functions": {
+        "cdc_poll": 8445691,
+        "cdc_tx_poll": 3619218,
+        "main": 2714418,
+        "usb_device_is_configured": 2111214,
+        "HAL_IncTick": 7000,
+        "SysTick_Handler": 3000
+      }
+    }
+  },
+  "exitCode": 0,
+  "elapsedSeconds": 0.42742789999829256
+}

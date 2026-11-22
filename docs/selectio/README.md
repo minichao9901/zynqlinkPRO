@@ -175,6 +175,12 @@ python -X utf8 toolbox.py selectio com release
 
 100 MHz 是接收设计目标，连续满载对应 12.5 MB/s MOSI 有效载荷。`--tap` 调 MOSI，外部 SCK 与 CS 共用最近一次载入的 SWDIO 延迟值。确认最高档时应使用独立 SPI 主机和已知数据，逐字节对拍，并保留 SCK 实测值、COM 实收速率、溢出和帧错误。已有 F103 夹具用于较低速度的实际引脚和 CDC 端到端测试。两种物理测试和原语仿真的判定分别记录。 [Case 表](fusion-performance-cases.md#case-表)
 
+独立 SPI 主机应在测试工具显示 `ARMED` 后发送 `--expected` 指定的二进制载荷。工具按探针序列号定位 COM，逐块比对，核对尾包后释放：
+
+```powershell
+python -X utf8 tools/selectio_spi_cdc_test.py --serial 12345678 --mode 0 --tap 0 --expected build/known-mosi.bin --seconds 65 --out build/spi-slave-wire.json --execute
+```
+
 ## 频率与参数速查
 
 | 功能 | CLI 与主要配置 |
