@@ -26,10 +26,11 @@ task perf_sram(input integer is_read);
     perf_scalar(1,32'h23000052,v);perf_scalar(5,32'h60000000,v);
     perf_write('h38,0);perf_write('h3c,((is_read?32'h0f:32'h0d)<<24)|(256<<8)|6);
     if(!is_read)for(n=0;n<256;n=n+1)perf_write('h3c,32'h87654321^(32'h9e3779b9*n));
-    perf_write('h44,is_read?4:1028);w0=perf_waits;t0=$realtime;
+    perf_write('h44,is_read?4:1028);w0=perf_waits;t0=$realtime;wire_budget_begin();
     perf_write('h40,1);s=1;tries=0;
     while(s[0] && tries<20000000)begin perf_read('h48,s);tries=tries+1;end
     t1=$realtime;
+    wire_budget_end(is_read,1024);
     if(s[0] || !s[1] || s[2])$fatal(1,"benchmark SRAM status %h",s);
     perf_write('h38,32'h10000);perf_read('h3c,v);
     if(v!==32'h00010100)$fatal(1,"benchmark SRAM header %h",v);
@@ -47,7 +48,8 @@ task perf_rtt;
     target.u_sys.mem['h23fc/4]=32'h60001000;
     target.u_sys.mem['h2400/4]=4096;target.u_sys.mem['h2404/4]=1024;target.u_sys.mem['h2408/4]=0;
     perf_put(32,32'h600023f8);perf_put(36,32'h60001000);perf_put(40,4096);perf_put(44,0);perf_put(48,1024);
-    w0=perf_waits;t0=$realtime;perf_put(0,2);perf_wait_bank(s);t1=$realtime;
+    w0=perf_waits;t0=$realtime;wire_budget_begin();perf_put(0,2);perf_wait_bank(s);t1=$realtime;
+    wire_budget_end(2,1024);
     if(s[11:0]!=1024)$fatal(1,"benchmark RTT length %h",s);
     for(n=0;n<256;n=n+1)begin
       perf_get(4096+4*n,v);
@@ -99,6 +101,9 @@ task run_transport_benchmark(input real fclk_ns);
     for(n=0;n<4096;n=n+1)target.u_sys.mem[n]=32'h12340000+n;
     if(!$test$plusargs("skip_sram"))begin perf_sram(0);perf_sram(1);end
     perf_rtt;
+    if($test$plusargs("wire_budget"))begin
+        $display("PASS SWD wire budgets and payloads");return;
+    end
     perf_hss(24,fclk_ns,peak);
     clock_rate=(1e9/fclk_ns<24e6)?1e9/fclk_ns:24e6;
     period=$rtoi($ceil(clock_rate/peak*1.10));if(period<24)period=24;

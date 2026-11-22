@@ -12,6 +12,9 @@ def main():
     parser.add_argument("--jtag-slot", type=int, default=21)
     parser.add_argument("--swd-slot", type=int, default=16)
     parser.add_argument("--swd-only", action="store_true")
+    parser.add_argument("--target-clk-ns",type=float,help="target model HCLK period in ns")
+    parser.add_argument("--return-ns",type=float,help="model-only SWDIO return delay in ns")
+    parser.add_argument("--wire-budget",action="store_true",help="count 50 MHz pin clocks and gaps in SWD windows")
     parser.add_argument("--services", action="store_true", help="verify the autonomous RTT and sample engines through the live transport")
     parser.add_argument("--sample-ticks",type=int,default=32)
     parser.add_argument("--wiretrace",action="store_true")
@@ -28,6 +31,12 @@ def main():
         parser.error("--quad-dma is available for the queue and shared-pad simulation")
     if args.rtt_window and not args.services:
         parser.error("--rtt-window requires --services")
+    if args.target_clk_ns is not None and args.target_clk_ns<=0:
+        parser.error("--target-clk-ns must be positive")
+    if args.return_ns is not None and args.return_ns<0:
+        parser.error("--return-ns cannot be negative")
+    if args.wire_budget and (not args.swd_only or not args.half_rate or args.rtt_window):
+        parser.error("--wire-budget requires --swd-only --half-rate")
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=True)
     exe = VIVADO / "bin/unwrapped/win64.o"
@@ -61,10 +70,16 @@ def main():
     run("xelab", ["--mt","2","-L","unisims_ver","-L","secureip",*generic,"-s","fusion",top,"glbl"],"elab.log")
     switches=["-testplusarg",f"idle={args.idle}","-testplusarg",f"jidle={args.jtag_idle}"]
     if args.services:
-        for opt in ("bypass","clk_ns=7.5","target_clk_ns=20.833",f"service_ticks={args.sample_ticks}"):
+        for opt in ("bypass","clk_ns=7.5",f"service_ticks={args.sample_ticks}"):
             switches.extend(["-testplusarg",opt])
         if args.swd_only: switches.extend(["-testplusarg","swd"])
     elif args.swd_only: switches.extend(["-testplusarg","swd_only"])
+    if args.target_clk_ns is not None or args.services:
+        target_ns=args.target_clk_ns if args.target_clk_ns is not None else 20.833
+        switches.extend(["-testplusarg",f"target_clk_ns={target_ns}"])
+    if args.return_ns is not None:switches.extend(["-testplusarg",f"return_ns={args.return_ns}"])
+    if args.wire_budget:switches.extend(["-testplusarg","wire_budget"])
+    if args.wire_budget and args.services:switches.extend(["-testplusarg","benchmark"])
     switches.extend(["-testplusarg",f"service_words={args.service_words}"])
     if args.meter:switches.extend(["-testplusarg","meter"])
     if args.rtt_window:switches.extend(["-testplusarg","rtt_window","-testplusarg",f"rtt_chunk={args.rtt_chunk}"])
@@ -73,7 +88,9 @@ def main():
     output = run("xsim", ["fusion", "-runall", "-testplusarg", f"jslot={args.jtag_slot}",
                           "-testplusarg", f"sslot={args.swd_slot}", *switches], "run.log")
     print(output[-1600:])
-    return 0 if ("SELECTIO_SERVICES_PASS" if args.services else "SELECTIO_PASS") in output and "Fatal:" not in output else 1
+    expected="SELECTIO_SERVICES_PASS" if args.services else "SELECTIO_PASS"
+    if args.wire_budget and args.services:expected="PASS SWD wire budgets and payloads"
+    return 0 if expected in output and "Fatal:" not in output else 1
 
 
 if __name__ == "__main__":

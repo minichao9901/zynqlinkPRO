@@ -79,7 +79,14 @@ module tb_cm3_jtag #(parameter integer ENABLE_DIAGNOSTICS=0, FAST_IO=0);
   .hs_live_config(high_config),.hs_legacy_released(released),.hs_live_jtag(live_jtag),.hs_live_swd(live_swd),
   .swclk(tck),.swdio(tms),.gpio_aux(pads),.gpio_out(aux_out),.gpio_tri(aux_tri),.gpio_in());
 
- assign #(0.8) tms=select_swd && (cm3_swdoen===1'b1) ? cm3_swdo : 1'bz;
+ real swd_return_ns=0.8;
+ reg swd_delayed_oe=0,swd_delayed_data=1;
+ initial if($value$plusargs("return_ns=%f",swd_return_ns))begin end
+ always @(cm3_swdoen or cm3_swdo)begin
+    swd_delayed_oe<=#(swd_return_ns)(cm3_swdoen===1'b1);
+    swd_delayed_data<=#(swd_return_ns)cm3_swdo;
+ end
+ assign tms=select_swd && swd_delayed_oe ? swd_delayed_data : 1'bz;
 
  wire bypass_mode=$test$plusargs("bypass");
  jtag_dp_model #(.IRLEN(5),.DUMMY(1)) boundary_tap(
@@ -199,6 +206,16 @@ module tb_cm3_jtag #(parameter integer ENABLE_DIAGNOSTICS=0, FAST_IO=0);
             $realtime-started,sink_ns,1000.0*count/($realtime-started));
   end
  endtask
+ wire wire_budget_pin=tck;
+ `include "swd_wire_budget.svh"
+ if(FAST_IO)begin:g_wire_budget
+    always @(posedge quad_ck)
+        wire_budget_link(dut.g_live_link.swd_link.transaction.state==4 &&
+                         dut.g_live_link.swd_link.transaction.segment.state==2,
+                         dut.g_live_link.swd_link.transaction.state==5 &&
+                         dut.g_live_link.swd_link.transaction.segment.state==2,
+                         dut.g_live_link.swd_link.link_done,dut.g_live_link.swd_link.launch);
+ end
  `include "cm3_perf_tasks.svh"
  initial begin
   for(i=0;i<8192;i=i+1)target.u_sys.mem[i]=32'h12340000+i;

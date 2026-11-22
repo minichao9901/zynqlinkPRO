@@ -1,0 +1,74 @@
+历史 HCLK96 / idle 1 / 16 ns
+swd50-budget-history/xsim.log
+WIRE_BUDGET work=0 bytes=1024 ns=242020.000 rises=12092 lead_ns=115.000 tail_ns=55.000 extended=1 extra_ns=30.000 short=0 deficit_ns=0.000
+SIM_SRAM read=0 bytes=1024 elapsed_ns=242020.000000 MBps=4.231055 waits=1
+WIRE_BUDGET work=1 bytes=1024 ns=242020.000 rises=12092 lead_ns=95.000 tail_ns=75.000 extended=1 extra_ns=30.000 short=0 deficit_ns=0.000
+SIM_SRAM read=1 bytes=1024 elapsed_ns=242020.000000 MBps=4.231055 waits=1
+WIRE_BUDGET work=2 bytes=1024 ns=253130.000 rises=12635 lead_ns=65.000 tail_ns=115.000 extended=10 extra_ns=270.000 short=0 deficit_ns=0.000
+SIM_RTT bytes=1024 elapsed_ns=253130.000000 MBps=4.045352 waits=4
+PASS SWD wire budgets and payloads
+
+历史 HCLK128 / idle 1 / 16 ns
+swd50-budget-history128/xsim.log
+WIRE_BUDGET work=0 bytes=1024 ns=242020.000 rises=12092 lead_ns=115.000 tail_ns=55.000 extended=1 extra_ns=30.000 short=0 deficit_ns=0.000
+SIM_SRAM read=0 bytes=1024 elapsed_ns=242020.000000 MBps=4.231055 waits=1
+WIRE_BUDGET work=1 bytes=1024 ns=242020.000 rises=12092 lead_ns=95.000 tail_ns=75.000 extended=1 extra_ns=30.000 short=0 deficit_ns=0.000
+SIM_SRAM read=1 bytes=1024 elapsed_ns=242020.000000 MBps=4.231055 waits=1
+WIRE_BUDGET work=2 bytes=1024 ns=253130.000 rises=12635 lead_ns=65.000 tail_ns=115.000 extended=10 extra_ns=270.000 short=0 deficit_ns=0.000
+SIM_RTT bytes=1024 elapsed_ns=253130.000000 MBps=4.045352 waits=4
+PASS SWD wire budgets and payloads
+
+队列 HCLK96 / slot 22 / idle 0 / 16 ns
+swd50-stage-queue-22/run.log
+WIRE_BUDGET work=0 bytes=1024 ns=246630.000 rises=11929 lead_ns=106.350 tail_ns=143.650 extended=261 extra_ns=7820.000 short=0 deficit_ns=0.000
+LINK_BUDGET work=0 ack_drain_cycles=1040 read_drain_cycles=2 handoffs=259 handoff_ns=0.000
+QUEUE_MBPS swd write 4.151969
+WIRE_BUDGET work=1 bytes=1024 ns=249180.000 rises=11929 lead_ns=106.350 tail_ns=133.650 extended=517 extra_ns=10380.000 short=0 deficit_ns=0.000
+LINK_BUDGET work=1 ack_drain_cycles=1040 read_drain_cycles=514 handoffs=259 handoff_ns=0.000
+QUEUE_MBPS swd read  4.109479
+LIVE_RAW_QUEUE_PASS SWD scalar and queued DRW share TAR, sample phase and pad owner
+SELECTIO_PASS SWD 50 MHz words=256 slot=         22
+
+队列 HCLK96 / slot 24 / idle 0 / 16 ns
+swd50-stage-queue-24/run.log
+WIRE_BUDGET work=0 bytes=1024 ns=249240.000 rises=11929 lead_ns=106.350 tail_ns=143.650 extended=261 extra_ns=10430.000 short=0 deficit_ns=0.000
+LINK_BUDGET work=0 ack_drain_cycles=1300 read_drain_cycles=3 handoffs=259 handoff_ns=0.000
+QUEUE_MBPS swd write 4.108490
+WIRE_BUDGET work=1 bytes=1024 ns=254340.000 rises=11929 lead_ns=106.350 tail_ns=123.650 extended=517 extra_ns=15550.000 short=0 deficit_ns=0.000
+LINK_BUDGET work=1 ack_drain_cycles=1300 read_drain_cycles=771 handoffs=259 handoff_ns=0.000
+QUEUE_MBPS swd read  4.026107
+LIVE_RAW_QUEUE_PASS SWD scalar and queued DRW share TAR, sample phase and pad owner
+SELECTIO_PASS SWD 50 MHz words=256 slot=         24
+
+实时 HCLK96 / slot 22 / idle 0 / 16 ns
+swd50-stage-live-22/run.log
+WIRE_BUDGET work=0 bytes=1024 ns=257520.000 rises=11835 lead_ns=140.100 tail_ns=79.900 extended=515 extra_ns=20620.000 short=0 deficit_ns=0.000
+LINK_BUDGET work=0 ack_drain_cycles=1032 read_drain_cycles=2 handoffs=257 handoff_ns=15440.000
+SIM_SRAM read=0 bytes=1024 elapsed_ns=257520.000000 MBps=3.976390 waits=1
+WIRE_BUDGET work=1 bytes=1024 ns=262605.000 rises=11835 lead_ns=117.600 tail_ns=77.400 extended=515 extra_ns=25730.000 short=0 deficit_ns=0.000
+LINK_BUDGET work=1 ack_drain_cycles=1032 read_drain_cycles=514 handoffs=257 handoff_ns=15430.000
+SIM_SRAM read=1 bytes=1024 elapsed_ns=262605.000000 MBps=3.899393 waits=1
+WIRE_BUDGET work=2 bytes=1024 ns=274605.000 rises=12367 lead_ns=90.100 tail_ns=114.900 extended=541 extra_ns=27080.000 short=0 deficit_ns=0.000
+LINK_BUDGET work=2 ack_drain_cycles=1084 read_drain_cycles=526 handoffs=270 handoff_ns=16380.000
+SIM_RTT bytes=1024 elapsed_ns=274605.000000 MBps=3.728993 waits=4
+PASS SWD wire budgets and payloads
+
+队列 HCLK128 / slot 22 / idle 0 / 16 ns
+swd50-stage-queue128/run.log
+WIRE_BUDGET work=0 bytes=1024 ns=246630.000 rises=11929 lead_ns=106.350 tail_ns=143.650 extended=261 extra_ns=7820.000 short=0 deficit_ns=0.000
+LINK_BUDGET work=0 ack_drain_cycles=1040 read_drain_cycles=2 handoffs=259 handoff_ns=0.000
+QUEUE_MBPS swd write 4.151969
+WIRE_BUDGET work=1 bytes=1024 ns=249180.000 rises=11929 lead_ns=106.350 tail_ns=133.650 extended=517 extra_ns=10380.000 short=0 deficit_ns=0.000
+LINK_BUDGET work=1 ack_drain_cycles=1040 read_drain_cycles=514 handoffs=259 handoff_ns=0.000
+QUEUE_MBPS swd read  4.109479
+LIVE_RAW_QUEUE_PASS SWD scalar and queued DRW share TAR, sample phase and pad owner
+SELECTIO_PASS SWD 50 MHz words=256 slot=         22
+
+首次仪表台架退出，改用整数阶段编号后可复现通过。
+Vivado 2018.3 XSim
+swd50-review-legacy/xsim.log
+FATAL_ERROR: Vivado Simulator kernel has discovered an exceptional condition from which it cannot recover. Process will terminate. For technical support on this issue, please open a WebCase with this project attached at http://www.xilinx.com/support.
+Time: 287110 ns  Iteration: 0  Process: /tb_cm3_swd/wire_budget_end
+swd50-review-queue/xsim.log
+FATAL_ERROR: Vivado Simulator kernel has discovered an exceptional condition from which it cannot recover. Process will terminate. For technical support on this issue, please open a WebCase with this project attached at http://www.xilinx.com/support.
+Time: 275996250 ps  Iteration: 0  Process: /tb_selectio_debug/wire_budget_end

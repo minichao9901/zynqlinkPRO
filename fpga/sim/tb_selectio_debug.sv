@@ -3,7 +3,13 @@ module tb_selectio_debug #(parameter integer QUAD_DMA=0);
     bit axi_clk=0, resetn=0, ref_clk=0, hclk=0, use_swd=0, released=0;
     always #3.75 axi_clk = !axi_clk;
     always #2.5 ref_clk = !ref_clk;
-    always #10.417 hclk = !hclk;
+    real hclk_ns=20.834;
+    real swd_return_ns=0.8;
+    initial begin
+        if($value$plusargs("target_clk_ns=%f",hclk_ns))begin end
+        if($value$plusargs("return_ns=%f",swd_return_ns))begin end
+        forever #(hclk_ns/2) hclk=!hclk;
+    end
     wire serial_rx_clk,serial_clk, quad_clk, octet_clk, phy_reset, js_reset, ss_reset, js_ready;
     wire jhold, shold, calibrated, jload, sload;
     wire bus_clk=QUAD_DMA ? quad_clk : axi_clk;
@@ -31,7 +37,18 @@ module tb_selectio_debug #(parameter integer QUAD_DMA=0);
     tri1 data_pin;
     wire target_tdo, tdo_disabled, target_swd, target_drive, boundary_tdo;
     wire #0.8 tdo_pin = tdo_disabled ? 1'b1 : target_tdo;
-    assign #0.8 data_pin = target_drive ? target_swd : 1'bz;
+    reg delayed_oe=0,delayed_data=1;
+    always @(target_drive or target_swd)begin
+        delayed_oe<=#(swd_return_ns) (target_drive===1'b1);
+        delayed_data<=#(swd_return_ns) target_swd;
+    end
+    assign data_pin=delayed_oe ? delayed_data : 1'bz;
+    wire wire_budget_pin=clk_pin;
+    `include "swd_wire_budget.svh"
+    always @(posedge quad_clk)
+        wire_budget_link(swd.batch.link.state==4 && swd.batch.link.segment.state==2,
+                         swd.batch.link.state==5 && swd.batch.link.segment.state==2,
+                         swd.batch.link_done,swd.batch.issue_next || swd.batch.retry);
     IDELAYCTRL calibration(.REFCLK(ref_clk), .RST(!resetn), .RDY(calibrated));
     selectio_clocking clocks(ref_clk,resetn,calibrated,jhold,shold,released,1'b0,host_profile[0],1'b0,
         serial_clk,quad_clk,octet_clk,phy_reset,js_reset,ss_reset,js_ready,owner,,serial_rx_clk);
@@ -164,10 +181,12 @@ module tb_selectio_debug #(parameter integer QUAD_DMA=0);
         realtime started;
         reg [31:0] status;
         started=$realtime;
+        if(count==259)wire_budget_begin();
         write_reg('h10,count,0);
         do read_reg(4,status); while (!(status[2] && status[5]));
         read_reg('h14,status);
         if(count==259)begin
+            wire_budget_end(swd_batches==0 ? 0 : 1,1024);
             $display("QUEUE_MBPS swd %s %f",swd_batches==0?"write":"read ",1024000.0/($realtime-started));swd_batches++;
         end
         if (status[15:0]!==count[15:0]) $fatal(1,"SWD batch summary %h",status);

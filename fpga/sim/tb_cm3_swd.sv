@@ -61,6 +61,8 @@ module tb_cm3_swd #(
   end
   wire physical_clock=clock_high_cycles>0 ? short_clock : swclk;
   wire target_swclk=physical_clock && !coupled_clock_drop;
+  wire wire_budget_pin=target_swclk;
+  `include "swd_wire_budget.svh"
   real pad_high_start=0;
   reg narrow_at_rise=0;
   integer narrow_pulses=0;
