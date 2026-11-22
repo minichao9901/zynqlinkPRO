@@ -205,5 +205,21 @@ int main(void)
     drain(3);
     close_com();
     puts("SPI_CDC_PUMP_REARM_PASS mode=3 bytes=3");
+
+    arm(1, 0);
+    /* At 12.5 MB/s the software cursors wrap during a six-minute session.
+       Place an empty pipeline near the boundary, then send ordinary data. */
+    uint32_t start = UINT32_MAX - 1212U;
+    produced = acknowledged = delivered = rx_head = rx_tail = start;
+    const uint32_t across_wrap = 4099;
+    for (uint32_t remaining = across_wrap; remaining; ) {
+        uint32_t count = remaining < SPI_BYTES_PER_POLL ? remaining : SPI_BYTES_PER_POLL;
+        feed(count);
+        tick();
+        remaining -= count;
+    }
+    drain(start + across_wrap);
+    close_com();
+    puts("SPI_CDC_PUMP_COUNTER_PASS bytes=4099 wrap=uint32");
     return 0;
 }

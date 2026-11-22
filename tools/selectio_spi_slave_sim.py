@@ -46,7 +46,7 @@ def run_pump(out):
     result = subprocess.run([image], capture_output=True, text=True, timeout=30)
     output = result.stdout + result.stderr
     (out / "pump.txt").write_text(output, encoding="utf-8")
-    markers = ("SPI_CDC_PUMP_PASS", "SPI_CDC_PUMP_REARM_PASS")
+    markers = ("SPI_CDC_PUMP_PASS", "SPI_CDC_PUMP_REARM_PASS", "SPI_CDC_PUMP_COUNTER_PASS")
     if result.returncode or not all(marker in output for marker in markers):
         raise SystemExit(output[-4000:])
     print(output, end="", flush=True)
