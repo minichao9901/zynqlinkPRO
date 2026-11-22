@@ -51,7 +51,7 @@ IDELAYCTRL 用固定 200 MHz 参考校准延迟单元，tap 的标称步进约 7
 - **定向入口** SRAM 用 [流水测速](../../tools/selectio_pipeline_bench.py) 的 `--clock 73000000` 等请求，CMSIS-DAP 用 [标准块测速](../../tools/h743_peak.py) 的 `--speed-hz`。CDC RTT 用 [转发压力工具](../../tools/benchmark_rtt_forward.py) 的 `--speeds` 与 `--chunks 2048`。HSS 用 `toolbox.py selectio profile` 先设 tap/slot/idle，调用 `scope --clock … --period … --var …`，再由 [HSS 导出器](../../tools/selectio_scope.py) 核对原始帧、预置样值和尾部。COM、SWO、SPI 入口见 [物理串口、SWO 和 SPI](README.md#物理串口swo-和-spi)。ETM 用 [Trace CLI](../Trace-CLI使用说明.md) 的 `capture --running-window` 和 `verify --require-decoded`。时钟夹具直接支持 48/64/72/80/88/96/128 MHz HCLK，对应 24/32/36/40/44/48/64 MHz TRACECLK。独立源子项按表中硬件能力准备。
 - 每个结果以 Case ID、协议、实际时钟、HCLK、tap/slot/idle 和轮次命名，记录配对哈希、目标/探针序列号、全部原始计数和恢复结果。固定 EXE、Pages、Release 和 QSPI 沿用主线既有交付。
 
-纯 PHY 的驻留图案数据可用于判断探针侧上限。独立分支在 HCLK128、100 MHz 的 A9 读/写为 SWD **7.485/7.759**（idle0）和 JTAG **6.713/6.713**（idle13，短窗）。这些窗口的图案预装在探针，置于 PC 成绩旁作机制对照。 [纯 PHY 历史与计时边界](../validation/selectio-fusion-20261121/compare100/README.md)
+纯 PHY 的驻留图案数据可用于判断探针侧上限。独立分支在 HCLK128、100 MHz 的 A9 读/写为 SWD **7.485/7.759**（idle0）和 JTAG **约 6.95/6.95**（tap16/slot36、idle11、1 秒交替短窗）。早期 idle13 为 6.713/6.713。这些窗口的图案预装在探针，置于 PC 成绩旁作机制对照。 [纯 PHY 历史与计时边界](../validation/selectio-fusion-20261121/compare100/README.md)
 
 ### 可直接复用的离线起点
 

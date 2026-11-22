@@ -2,6 +2,8 @@
 
 本轮在融合分支上增加 SPI MOSI → 原有 CDC COM 的接收转发。USB 接口、端点地址和 VID/PID 沿用现有融合版。SPI 主机、SWD/JTAG、RTT、HSS、UART/SWO 与 ETM 依然使用这一个融合镜像。
 
+[融合版验收地图（SVG）](fusion-acceptance-map.svg)汇总当前配对、历史短筛和独立源待测项。 [JTAG 100 MHz 分层对照](../selectio-fusion-20261121/compare100/README.md#2026-11-23-的-jtag-100-mhz-原始数据复核)
+
 | 验证 | 范围 | 结果 |
 |---|---|---|
 | SPI 接收原语仿真 | 50、72.727、100 MHz，CPOL/CPHA 四模式，每档每模式八个输入初相，带 pad 偏斜模型 | 9,424 字节逐字通过，四次不足八位的片选中断正确报错并恢复，监听期间 SCK、CS、MOSI 高阻 |
