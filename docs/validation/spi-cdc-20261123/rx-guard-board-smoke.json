@@ -1,0 +1,668 @@
+{
+  "board": "f103ze",
+  "operation": "HS3 JTAG/RAM, guarded F103ZE SRAM",
+  "suites": [
+    "switch",
+    "cdc",
+    "spi-cdc"
+  ],
+  "serial": "12345678",
+  "seconds": 60.0,
+  "rounds": 3,
+  "pair": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-spi-cdc-rx-guard-20261123",
+  "out": "E:\\zynqlinkPRO-efficiency\\build\\spi-cdc-rx-guard-board-smoke",
+  "debug_service_hz": 100000000,
+  "memory_frame": 4096,
+  "schedule": "sliding",
+  "rtt_ring_bytes": 8192,
+  "rtt_chunk": 2048,
+  "cases": [
+    {
+      "name": "load",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 9.970021100001759,
+      "log": "load.log"
+    },
+    {
+      "name": "info",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 0.4197041999977955,
+      "log": "info.log"
+    },
+    {
+      "name": "switch",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 14.827874700000393,
+      "log": "switch.log",
+      "restored": true
+    },
+    {
+      "name": "host-loss",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 12.299441799998021,
+      "log": "host-loss.log",
+      "restored": true
+    },
+    {
+      "name": "cdc",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 2.4167526999990514,
+      "log": "cdc.log",
+      "restored": true
+    },
+    {
+      "name": "cdc-rtt-scope",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 2.4076960000020335,
+      "log": "cdc-rtt-scope.log",
+      "restored": true
+    },
+    {
+      "name": "cdc-100m",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 61.815576100001635,
+      "log": "cdc-100m.log",
+      "restored": true
+    },
+    {
+      "name": "spi-cdc-mode0",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 4.483248699998512,
+      "log": "spi-cdc-mode0.log",
+      "restored": true
+    },
+    {
+      "name": "spi-cdc-mode1",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 4.459156000000803,
+      "log": "spi-cdc-mode1.log",
+      "restored": true
+    },
+    {
+      "name": "spi-cdc-mode2",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 4.47671519999858,
+      "log": "spi-cdc-mode2.log",
+      "restored": true
+    },
+    {
+      "name": "spi-cdc-mode3",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 4.491498600000341,
+      "log": "spi-cdc-mode3.log",
+      "restored": true
+    }
+  ],
+  "hashes": {
+    "probe.bit": "f3c4ccfd78c9148649897a0902fb93eadb209494e0295956981c973bbac92c66",
+    "application.elf": "e1f21ea8d5aa6403f4f2ab78da0a3215cea11862cb852dd9e37e413248068b90",
+    "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+  },
+  "passed": true,
+  "measurements": {
+    "usb": {
+      "vid": "0d28",
+      "pid": "0204",
+      "serial": "12345678",
+      "bcdDevice": "0x0201",
+      "configuration": 1,
+      "interfaces": [
+        {
+          "number": 0,
+          "alternate": 0,
+          "usb_class": 255,
+          "subclass": 0,
+          "protocol": 0,
+          "endpoints": [
+            {
+              "address": "0x02",
+              "attributes": 2,
+              "max_packet_bytes": 512
+            },
+            {
+              "address": "0x81",
+              "attributes": 2,
+              "max_packet_bytes": 512
+            },
+            {
+              "address": "0x87",
+              "attributes": 2,
+              "max_packet_bytes": 512
+            },
+            {
+              "address": "0x82",
+              "attributes": 2,
+              "max_packet_bytes": 512
+            }
+          ]
+        },
+        {
+          "number": 1,
+          "alternate": 0,
+          "usb_class": 2,
+          "subclass": 2,
+          "protocol": 1,
+          "endpoints": [
+            {
+              "address": "0x85",
+              "attributes": 3,
+              "max_packet_bytes": 64
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "alternate": 0,
+          "usb_class": 10,
+          "subclass": 0,
+          "protocol": 0,
+          "endpoints": [
+            {
+              "address": "0x04",
+              "attributes": 2,
+              "max_packet_bytes": 512
+            },
+            {
+              "address": "0x83",
+              "attributes": 2,
+              "max_packet_bytes": 512
+            }
+          ]
+        },
+        {
+          "number": 3,
+          "alternate": 0,
+          "usb_class": 3,
+          "subclass": 0,
+          "protocol": 0,
+          "endpoints": [
+            {
+              "address": "0x86",
+              "attributes": 3,
+              "max_packet_bytes": 64
+            },
+            {
+              "address": "0x06",
+              "attributes": 3,
+              "max_packet_bytes": 64
+            }
+          ]
+        },
+        {
+          "number": 4,
+          "alternate": 0,
+          "usb_class": 255,
+          "subclass": 83,
+          "protocol": 1,
+          "endpoints": [
+            {
+              "address": "0x01",
+              "attributes": 2,
+              "max_packet_bytes": 512
+            },
+            {
+              "address": "0x84",
+              "attributes": 2,
+              "max_packet_bytes": 512
+            }
+          ]
+        }
+      ]
+    },
+    "ocm": {
+      "time_UTC": "2026-11-22T19:41:49.299962+00:00",
+      "elf": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-spi-cdc-rx-guard-20261123\\application.elf",
+      "elf_sha256": "e1f21ea8d5aa6403f4f2ab78da0a3215cea11862cb852dd9e37e413248068b90",
+      "downloads": false,
+      "probe_reset_or_continue": false,
+      "expected_executable_bytes": 80260,
+      "cycles": [
+        {
+          "cycle": 0,
+          "sections": [
+            {
+              "name": ".text",
+              "bytes": 78408,
+              "address": 0,
+              "equal": true,
+              "expected_sha256": "e76df4a323334b875ae98975771d601921b7aa1aeb46933ae43b6197608583fe",
+              "live_sha256": "e76df4a323334b875ae98975771d601921b7aa1aeb46933ae43b6197608583fe"
+            },
+            {
+              "name": ".ocm_text",
+              "bytes": 1828,
+              "address": 78408,
+              "equal": true,
+              "expected_sha256": "f80973b2e8c94a45f27cfdcd459d23c33d9ac79d6b736e43ac8e3c0f16feed53",
+              "live_sha256": "f80973b2e8c94a45f27cfdcd459d23c33d9ac79d6b736e43ac8e3c0f16feed53"
+            },
+            {
+              "name": ".init",
+              "bytes": 12,
+              "address": 80236,
+              "equal": true,
+              "expected_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6",
+              "live_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6"
+            },
+            {
+              "name": ".fini",
+              "bytes": 12,
+              "address": 80248,
+              "equal": true,
+              "expected_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6",
+              "live_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6"
+            }
+          ],
+          "differing_addresses": [],
+          "vector_word": "ea000049"
+        }
+      ],
+      "passed": true,
+      "memoryAccess": "physical MEM-AP0; independent of CPU memory/cache context",
+      "boot_mode": 0,
+      "boot_trace": [
+        2030568458,
+        2995477824,
+        69279321,
+        2483373620,
+        981626944,
+        3141267488,
+        580043009,
+        2452326973
+      ],
+      "clockSnapshot": {
+        "control": 3146752,
+        "source": 0,
+        "pll": 196616,
+        "bootMode": 0,
+        "FCLK_Hz": 133333332
+      },
+      "initial_FCLK_Hz": 133333332
+    },
+    "switch": {
+      "passed": true,
+      "completed": 128,
+      "requested_hz": 100000000,
+      "sha256": "10b22365963a7139bc0954b5ccb8bd3da122520cfce32c020cd73d818c2b1b0a",
+      "elapsed": 12.944998499999201
+    },
+    "host_loss": {
+      "spi": {
+        "passed": true,
+        "reacquire_seconds": 5.244288599998981
+      },
+      "scope": {
+        "passed": true,
+        "reacquire_seconds": 5.238720500001364
+      },
+      "passed": true
+    },
+    "cdc": [
+      {
+        "passed": true,
+        "binary_sha256": "271489f6e352cdfe284d3991f8f85b3405277cee635b80a7c5884abc2fd11585",
+        "registers": {
+          "0": 1,
+          "1": 131072,
+          "2": 0,
+          "3": 1,
+          "4": 0,
+          "5": 4286577983,
+          "6": 646952329,
+          "7": 3040397510,
+          "8": 4294962943,
+          "9": 4259299324,
+          "10": 968574952,
+          "11": 2329090040,
+          "12": 10,
+          "13": 536936424,
+          "14": 134219185,
+          "15": 134219194,
+          "16": 553648128,
+          "20": 1
+        },
+        "peripherals": {
+          "1073807364": 0,
+          "1073809412": 2290370740,
+          "1073810432": 1145586500,
+          "1073810444": 16,
+          "3758366724": 0,
+          "3758157308": 16777216,
+          "3758100480": 1073741825,
+          "1073877016": 16461
+        },
+        "com": "COM34",
+        "coding_57600": [
+          1,
+          1,
+          57600,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        "coding_115200": [
+          1,
+          1,
+          115200,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        "concurrent_swd_reads": 256,
+        "bytes_each": 256,
+        "end_status": [
+          1,
+          1,
+          115200,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        "target_count": 256,
+        "target_errors": 0,
+        "restored": true
+      },
+      {
+        "passed": true,
+        "binary_sha256": "271489f6e352cdfe284d3991f8f85b3405277cee635b80a7c5884abc2fd11585",
+        "registers": {
+          "0": 1,
+          "1": 131072,
+          "2": 0,
+          "3": 1,
+          "4": 0,
+          "5": 4286577983,
+          "6": 646952329,
+          "7": 3040397510,
+          "8": 4294962943,
+          "9": 4259299324,
+          "10": 968574952,
+          "11": 2329090040,
+          "12": 10,
+          "13": 536936424,
+          "14": 134219185,
+          "15": 134219194,
+          "16": 553648128,
+          "20": 1
+        },
+        "peripherals": {
+          "1073807364": 0,
+          "1073809412": 2290370740,
+          "1073810432": 1145586500,
+          "1073810444": 16,
+          "3758366724": 0,
+          "3758157308": 16777216,
+          "3758100480": 1073741825,
+          "1073877016": 16461
+        },
+        "com": "COM34",
+        "coding_57600": [
+          1,
+          1,
+          57600,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        "coding_115200": [
+          1,
+          1,
+          115200,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        "concurrent_native": {
+          "rtt_bytes": 96,
+          "sample_groups": 100,
+          "skipped": 0,
+          "first_sample": 0,
+          "last_sample": 255,
+          "rtt_sha256": "195ba6b154bfa590cb2946df2b7392b740cd698c86a2e6a6c1d0c7ca20ad8298"
+        },
+        "concurrent_swd_reads": 0,
+        "bytes_each": 256,
+        "end_status": [
+          1,
+          1,
+          115200,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        "target_count": 256,
+        "target_errors": 0,
+        "restored": true
+      }
+    ],
+    "cdc_100m": {
+      "port": "COM34",
+      "requested_baud": 100000000,
+      "passed": true,
+      "bytes_each": 267866112,
+      "line_coding": [
+        2,
+        1,
+        100000000,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "status": [
+        2,
+        1,
+        100000000,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": "2411df1802007cda72c6bcc6cf593b0e7effbe926d65c8e3fde5b64b156bd0fa",
+      "elapsed": 60.001121799999964
+    },
+    "spi_cdc": [
+      {
+        "serial": "12345678",
+        "com": "COM34",
+        "mode": 0,
+        "tap": 0,
+        "passed": true,
+        "target_restored": true,
+        "armed": {
+          "bound": 3,
+          "claimed": 1,
+          "baud": 115200,
+          "dtr": 1,
+          "pending_out": 0,
+          "overflow": 0,
+          "framing_errors": 0,
+          "rx_available": 0
+        },
+        "bytes": 16384,
+        "sha256": "08ff376915ceb8d5ab5d65dc57cc73c17d0b088ae3acb076e5e4039468380c9e",
+        "receive_seconds": 0.09702670000115177,
+        "pc_receive_MBps": 0.1688607362695579,
+        "command_window_seconds": 2.073921600000176,
+        "final": {
+          "bound": 3,
+          "claimed": 1,
+          "baud": 115200,
+          "dtr": 1,
+          "pending_out": 0,
+          "overflow": 0,
+          "framing_errors": 0,
+          "rx_available": 0
+        },
+        "released": {
+          "bound": 0,
+          "claimed": 0,
+          "baud": 115200,
+          "dtr": 1,
+          "pending_out": 0,
+          "overflow": 0,
+          "framing_errors": 0,
+          "rx_available": 0
+        },
+        "source_average_sck_hz": 1352110.0607878892
+      },
+      {
+        "serial": "12345678",
+        "com": "COM34",
+        "mode": 1,
+        "tap": 0,
+        "passed": true,
+        "target_restored": true,
+        "armed": {
+          "bound": 3,
+          "claimed": 1,
+          "baud": 115200,
+          "dtr": 1,
+          "pending_out": 0,
+          "overflow": 0,
+          "framing_errors": 0,
+          "rx_available": 0
+        },
+        "bytes": 16384,
+        "sha256": "08ff376915ceb8d5ab5d65dc57cc73c17d0b088ae3acb076e5e4039468380c9e",
+        "receive_seconds": 0.07947100000092178,
+        "pc_receive_MBps": 0.20616325451812564,
+        "command_window_seconds": 2.0574029000017617,
+        "final": {
+          "bound": 3,
+          "claimed": 1,
+          "baud": 115200,
+          "dtr": 1,
+          "pending_out": 0,
+          "overflow": 0,
+          "framing_errors": 0,
+          "rx_available": 0
+        },
+        "released": {
+          "bound": 0,
+          "claimed": 0,
+          "baud": 115200,
+          "dtr": 1,
+          "pending_out": 0,
+          "overflow": 0,
+          "framing_errors": 0,
+          "rx_available": 0
+        },
+        "source_average_sck_hz": 1641021.7887171302
+      },
+      {
+        "serial": "12345678",
+        "com": "COM34",
+        "mode": 2,
+        "tap": 0,
+        "passed": true,
+        "target_restored": true,
+        "armed": {
+          "bound": 3,
+          "claimed": 1,
+          "baud": 115200,
+          "dtr": 1,
+          "pending_out": 0,
+          "overflow": 0,
+          "framing_errors": 0,
+          "rx_available": 0
+        },
+        "bytes": 16384,
+        "sha256": "08ff376915ceb8d5ab5d65dc57cc73c17d0b088ae3acb076e5e4039468380c9e",
+        "receive_seconds": 0.09699160000309348,
+        "pc_receive_MBps": 0.16892184477292305,
+        "command_window_seconds": 2.073640200000227,
+        "final": {
+          "bound": 3,
+          "claimed": 1,
+          "baud": 115200,
+          "dtr": 1,
+          "pending_out": 0,
+          "overflow": 0,
+          "framing_errors": 0,
+          "rx_available": 0
+        },
+        "released": {
+          "bound": 0,
+          "claimed": 0,
+          "baud": 115200,
+          "dtr": 1,
+          "pending_out": 0,
+          "overflow": 0,
+          "framing_errors": 0,
+          "rx_available": 0
+        },
+        "source_average_sck_hz": 1352110.0607878892
+      },
+      {
+        "serial": "12345678",
+        "com": "COM34",
+        "mode": 3,
+        "tap": 0,
+        "passed": true,
+        "target_restored": true,
+        "armed": {
+          "bound": 3,
+          "claimed": 1,
+          "baud": 115200,
+          "dtr": 1,
+          "pending_out": 0,
+          "overflow": 0,
+          "framing_errors": 0,
+          "rx_available": 0
+        },
+        "bytes": 16384,
+        "sha256": "08ff376915ceb8d5ab5d65dc57cc73c17d0b088ae3acb076e5e4039468380c9e",
+        "receive_seconds": 0.0797500000007858,
+        "pc_receive_MBps": 0.20544200626756817,
+        "command_window_seconds": 2.056706100000156,
+        "final": {
+          "bound": 3,
+          "claimed": 1,
+          "baud": 115200,
+          "dtr": 1,
+          "pending_out": 0,
+          "overflow": 0,
+          "framing_errors": 0,
+          "rx_available": 0
+        },
+        "released": {
+          "bound": 0,
+          "claimed": 0,
+          "baud": 115200,
+          "dtr": 1,
+          "pending_out": 0,
+          "overflow": 0,
+          "framing_errors": 0,
+          "rx_available": 0
+        },
+        "source_average_sck_hz": 1641021.7887171302
+      }
+    ]
+  }
+}

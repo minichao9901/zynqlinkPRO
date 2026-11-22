@@ -6,7 +6,7 @@
     "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
   },
   "mode": "Fused SWD, JTAG, SPI master and slave RX, UART, SWO and ETM",
-  "status": "Built candidate with unchanged routed FPGA image and CDC receive callback fix. Board qualification pending.",
+  "status": "Directed F103ZE board smoke passed (11 cases). Full suite and external continuous 100 MHz SPI verification pending.",
   "board_verified": false,
   "pcap_runtime_switch": false,
   "spi_slave_cdc": true,
@@ -80,5 +80,8 @@
   "spi_slave_100mhz_board_verified": false,
   "rtl_source_hashes": "rtl-inputs.json",
   "reused_pl_source_revision": "0dc979091ccf215dc50a47388c1dc4dcbd1849cc",
-  "cdc_rx_guard_host_evidence": "../../docs/validation/spi-cdc-20261123/cdc-rx-receive-error-model.txt"
+  "cdc_rx_guard_host_evidence": "../../docs/validation/spi-cdc-20261123/cdc-rx-receive-error-model.txt",
+  "verified_ocm_executable_bytes": 80260,
+  "board_smoke_validation": "../../docs/validation/spi-cdc-20261123/rx-guard-board-smoke.json",
+  "spi_slave_board_verified_sck": "F103 GPIO DWT average about 1.35-1.64 MHz"
 }

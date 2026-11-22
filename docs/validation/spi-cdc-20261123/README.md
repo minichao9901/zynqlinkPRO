@@ -128,3 +128,7 @@ bit `f3c4ccfd…`、PS ELF `32f75ae7…`、初始化脚本 `ec37b1f5…` 的 F10
 - 24 MHz TRACECLK 的 ETM 跑完整 **1 秒**硬件窗口，核对 **19,389,696 B** formatter、零硬件错误、严格解码及目标恢复。
 
 CDC OUT 接收防护使用另一份 PS ELF，实板证据按该 ELF 的 SHA-256 单独记录。独立源的 SPI 从机持续 100 MHz 与独立高速 SWO/SPI 源用例仍保留待验状态。 [后续配对](../../../prebuilt/selectio-spi-cdc-rx-guard-20261123/manifest.json)
+
+## CDC OUT 防护配对的首次实板
+
+采用原 FPGA bit、新 PS ELF `e1f21ea8…` 临时加载，物理 OCM 核对 **80,260 B**，五个 USB 接口及端点描述符逐项一致。定向 **11/11** 项通过，包括 128 次 SWD/JTAG 切换、异常失去主机后的 SPI/HSS 重获、CDC 与原生 RTT/HSS 并发、SPI 从机四模式各 16 KiB。CDC 100 Mbaud 回环一分钟，每方向 **267,866,112 B**、约 **4.464 MB/s**，逐字节匹配。各夹具确认恢复。生产回调的空描述符返回由离线故障注入覆盖，实板定向验收覆盖正常收发及应用恢复。 [定向报告](rx-guard-board-smoke.json)
