@@ -1,0 +1,70 @@
+{
+  "source_revision": "7fd3840b332d1716e44be84d8146b8eede0a5f88",
+  "hashes": {
+    "probe.bit": "3caf4831d2ab52302d2077f2948ef9540ed84e31811e0ad6e5f8e9e5a947a5cc",
+    "application.elf": "483598cb82f7de9574e37bd5350f5b0f3f8d8cbff8bcfc233a7284f2264f274a",
+    "ps7_init.tcl": "aa9747c31f705be7c28af1c6b1cdeaf282f0dcdb01faecee2a9f72e4d3489132"
+  },
+  "bit_features": "0x4450ffff",
+  "status": "50 MHz SWD on F103ZE HCLK128 board verified, CMSIS-DAP TransferBlock and RTT CDC",
+  "board_verified": true,
+  "external_frequency_counter": false,
+  "max_native_frame": 16384,
+  "swd": {
+    "tap": 8,
+    "slot": 24,
+    "idle": 2
+  },
+  "jtag": {
+    "tap": 16,
+    "slot": 28,
+    "idle": 33,
+    "bulk_idle": 29
+  },
+  "profiles_50mhz": {
+    "swd": {
+      "tap": 8,
+      "slot": 22,
+      "idle": 0
+    },
+    "jtag": {
+      "tap": 16,
+      "slot": 21,
+      "idle": 17,
+      "bulk_idle": 17
+    }
+  },
+  "cdc_bypass_qualification": true,
+  "native_stream_lease_seconds": 5,
+  "timing": {
+    "FCLK_max_Hz": 133333333,
+    "SWCLK_max_Hz": 66666666,
+    "setup_slack_ns": 0.025,
+    "hold_slack_ns": 0.042,
+    "requested_FCLK_Hz": 133333333,
+    "RTL_DEBUG": 0,
+    "optional_observation_cells": 0,
+    "formal_product_acceptance": false
+  },
+  "pl_options": [
+    "--selectio",
+    "--etm400"
+  ],
+  "ps_options": [
+    "--selectio",
+    "--j7-adapter",
+    "--compact-code",
+    "--max-swclk-hz",
+    "10000000"
+  ],
+  "ps_build_manifest": "ps-build.json",
+  "validation": "../../docs/validation/swd50-standard-20261122/README.md",
+  "pl_source_revision": "499c79f51c8841859cf41fc8c014be49aaa1739e",
+  "ps_build_base_revision": "f5cb47d8bcd777c62082755e19c07ab37454aca8",
+  "qualification_scope": [
+    "F103ZE HCLK128, actual 50 MHz SWD, standard CMSIS-DAP SRAM 2 KiB depth32",
+    "F103ZE HCLK128, actual 50 MHz SWD, RTT CDC 8 KiB ring 2 KiB burst, 2 x 60s",
+    "CMSIS-DAP CPUID read during active CDC and subsequent complete RTT data",
+    "Native SRAM and queued RTT short sanity windows"
+  ]
+}
