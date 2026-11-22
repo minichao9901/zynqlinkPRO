@@ -43,13 +43,23 @@ DAP 安全回归和 24 个定向 Python 测试通过。旧全套 probe_host 测�
 
 100 Mbit/s 所需的采样预算来自 SelectIO 时钟。50 和 100 MHz SWD 档均为 N=32，窄接收 400 Msample/s、宽接收 800 Msample/s，具有融合版既有高速解码条件。72.727 MHz 档为 N=44，分别为 290.909/581.818 Msample/s，以当前配置约 72.727 Mbit/s 为上限，固件拒绝越界请求。这里列出时钟与解码预算，尚无新镜像的目标板 SWO 信号验收。JTAG/SPI 镜像关闭 SWO。
 
-## 融合镜像
+## 三套镜像的布线结果
 
-融合版完成 Vivado 布线和 bitgen。时序为 setup / hold **+0.062 / +0.023 ns**，使用 26,240 LUT、28,320 寄存器和 67.5 个 BRAM tile。路由核对 GP0、GP1、HP0、HP1 均使用 7.5 ns 的 FCLK0，SelectIO 和 ETM 参考周期分别为 20 ns 与 5 ns。配套 ELF 已链接，加载入口通过 --dry-run 文件预检。
+三套均在同一 FCLK0 7.5 ns、quad 10 ns 的约束下通过静态时序和 bitgen。各自的 bit、ELF、PS 初始化脚本与加载入口 --dry-run 预检一致。融合版和 SWD 裁剪版的 GP0、GP1、HP0、HP1 均位于 FCLK0。JTAG 裁剪版保留同域的 GP0、GP1、HP0。
 
-[STA](full/timing_verified.rpt) · [利用率](full/utilization.rpt) · [实际时钟连接检查](full/routed-checks.txt) · [镜像配对清单](../../../prebuilt/selectio-variable-20261122/full/manifest.json)
+| 镜像 | LUT | 寄存器 | BRAM tile | setup / hold，ns |
+|---|---:|---:|---:|---:|
+| 融合版 | 26,240 | 28,320 | 67.5 | +0.062 / +0.023 |
+| JTAG/HSS/RTT + SPI | 19,199 | 21,200 | 26.5 | +0.065 / +0.052 |
+| SWD/HSS/RTT + SWO/ETM | 21,365 | 24,673 | 64.5 | +0.055 / +0.043 |
 
-JTAG 裁剪初次布线发现 Vivado 留下了停用的实时 SWD 模块。该路径在 133.333 MHz AXI 和 quad 两域之间出现 −0.339 ns setup。后续在 RTL elaboration 阶段显式去掉镜像没有启用的实时链路，并在布线检查中检查缺席实例。共用实时路径的 Cortex-M3 service 回归通过。[初轮 JTAG 时序证据](first-jtag-timing.txt)
+JTAG 裁剪初次布线发现 Vivado 留下了停用的实时 SWD 模块，133.333 MHz AXI 到 quad 的路径出现 −0.339 ns setup。SWD 裁剪首轮 setup/hold 是 +0.071/+0.045 ns，网表仍有停用的实时 JTAG 模块。两套都改用显式 RTL elaboration 裁剪，重跑后核对不存在对方实时执行器。共用实时路径的 Cortex-M3 service 回归通过。[初轮 JTAG 时序证据](first-jtag-timing.txt) · [融合 STA](full/timing_verified.rpt) · [JTAG STA](jtag/timing_verified.rpt) · [SWD STA](swd/timing_verified.rpt)
+
+## PCAP 取舍
+
+初版保留融合镜像和现有运行时引脚所有权切换。JTAG 裁剪节约 26.8% LUT 和 41 个 BRAM tile，SWD 裁剪节约 18.6% LUT 和 3 个 BRAM tile。三套都能按同一约束收敛，100 MHz 的协议吞吐一致，融合版仍有约一半 LUT 和 BRAM 可用。当前证据支持把裁剪包留作离线对照。PCAP 运行时切换还会引入队列及采集状态恢复，现阶段没有与之相称的吞吐或时序收益。
+
+[三套 bit/ELF/PS 初始化配对](../../../prebuilt/selectio-variable-20261122/README.md)
 
 ## 复现
 

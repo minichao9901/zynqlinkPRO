@@ -1,0 +1,59 @@
+{
+  "source_revision": "2d21624dab8e4a1efff788aa1d15df80c6661bfd",
+  "hashes": {
+    "probe.bit": "9de8433567a576d1095f3121ac133e34a5c358d27356a4860ceab5ea5fa0d0f3",
+    "application.elf": "7e5f616a4230beed8895c44498e700470aa20998ab235329766e66e48470bd87",
+    "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+  },
+  "mode": "JTAG, JTAG HSS/RTT and SPI",
+  "status": "offline routed candidate",
+  "board_verified": false,
+  "pcap_runtime_switch": false,
+  "clock_init_registers": {
+    "0xF8000108": "0x30000",
+    "0xF8000170": "0x300400",
+    "0xF8000180": "0x400800",
+    "0xF8000190": "0x200400"
+  },
+  "selectio_clock_range_requested_hz": [
+    50000000,
+    100000000
+  ],
+  "timing": {
+    "FCLK_max_Hz": 133333333,
+    "SWCLK_max_Hz": 66666666,
+    "setup_slack_ns": 0.065,
+    "hold_slack_ns": 0.052,
+    "requested_FCLK_Hz": 133333333,
+    "RTL_DEBUG": 0,
+    "optional_observation_cells": 0,
+    "formal_product_acceptance": false
+  },
+  "utilization": {
+    "lut": 19199.0,
+    "registers": 21200.0,
+    "bram": 26.5,
+    "dsp": 1.0,
+    "mmcm": 1.0
+  },
+  "pl_options": [
+    "--selectio",
+    "--selectio-variable",
+    "--selectio-jtag"
+  ],
+  "ps_options": [
+    "--selectio",
+    "--selectio-variable",
+    "--selectio-slice",
+    "jtag",
+    "--j7-adapter",
+    "--compact-code",
+    "--opt",
+    "s",
+    "--experimental-zero-idle",
+    "--timing",
+    "verified_clock.json"
+  ],
+  "ps_build_manifest": "ps-build.json",
+  "validation": "../../../docs/validation/selectio-variable-20261122/README.md"
+}

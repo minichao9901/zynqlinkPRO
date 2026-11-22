@@ -1,0 +1,85 @@
+Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+---------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2018.3 (win64) Build 2405991 Thu Dec  6 23:38:27 MST 2018
+| Date         : Sun Nov 22 23:04:19 2026
+| Host         : DESKTOP-0UKCPD3 running 64-bit major release  (build 9200)
+| Command      : report_clocks -file E:/zynqlinkPRO-efficiency/build/vclk2-swd/clocks_verified.rpt
+| Design       : system_wrapper
+| Device       : 7z020-clg400
+| Speed File   : -2  PRODUCTION 1.11 2014-09-11
+---------------------------------------------------------------------------------------------------
+
+Clock Report
+
+
+Attributes
+  P: Propagated
+  G: Generated
+  A: Auto-derived
+  R: Renamed
+  V: Virtual
+  I: Inverted
+  S: Pin phase-shifted with Latency mode
+
+Clock             Period(ns)  Waveform(ns)    Attributes  Sources
+clk_fpga_0        7.500       {0.000 3.750}   P           {system_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]}
+trace_clk         20.000      {0.000 10.000}  P           {trace_clk}
+clk_delay_ref     5.000       {0.000 2.500}   P           {system_i/processing_system7_0/inst/PS7_i/FCLKCLK[2]}
+clk_selectio_ref  20.000      {0.000 10.000}  P           {system_i/processing_system7_0/inst/PS7_i/FCLKCLK[1]}
+feedback_raw      20.000      {0.000 10.000}  P,G,A       {system_i/sio_clock/inst/mmcm/CLKFBOUT}
+serial_raw        5.000       {0.000 2.500}   P,G,A       {system_i/sio_clock/inst/mmcm/CLKOUT0}
+quad_raw          10.000      {0.000 5.000}   P,G,A       {system_i/sio_clock/inst/mmcm/CLKOUT1}
+octet_raw         20.000      {0.000 10.000}  P,G,A       {system_i/sio_clock/inst/mmcm/CLKOUT2}
+rx_raw            2.500       {0.000 1.250}   P,G,A       {system_i/sio_clock/inst/mmcm/CLKOUT3}
+pad_swclk         15.000      {0.000 7.500}   P           {swclk_0}
+
+
+====================================================
+Generated Clocks
+====================================================
+
+Generated Clock     : feedback_raw
+Master Source       : system_i/sio_clock/inst/mmcm/CLKIN1
+Master Clock        : clk_selectio_ref
+Multiply By         : 1
+Generated Sources   : {system_i/sio_clock/inst/mmcm/CLKFBOUT}
+
+Generated Clock     : serial_raw
+Master Source       : system_i/sio_clock/inst/mmcm/CLKIN1
+Master Clock        : clk_selectio_ref
+Multiply By         : 4
+Generated Sources   : {system_i/sio_clock/inst/mmcm/CLKOUT0}
+
+Generated Clock     : quad_raw
+Master Source       : system_i/sio_clock/inst/mmcm/CLKIN1
+Master Clock        : clk_selectio_ref
+Multiply By         : 2
+Generated Sources   : {system_i/sio_clock/inst/mmcm/CLKOUT1}
+
+Generated Clock     : octet_raw
+Master Source       : system_i/sio_clock/inst/mmcm/CLKIN1
+Master Clock        : clk_selectio_ref
+Multiply By         : 1
+Generated Sources   : {system_i/sio_clock/inst/mmcm/CLKOUT2}
+
+Generated Clock     : rx_raw
+Master Source       : system_i/sio_clock/inst/mmcm/CLKIN1
+Master Clock        : clk_selectio_ref
+Multiply By         : 8
+Generated Sources   : {system_i/sio_clock/inst/mmcm/CLKOUT3}
+
+
+
+====================================================
+User Uncertainty
+====================================================
+
+
+
+====================================================
+User Jitter
+====================================================
+
+Clock       Jitter(ns)
+clk_fpga_0  0.225
+
