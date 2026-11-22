@@ -30,4 +30,15 @@ SPI 同步引脚经 SelectIO 在 100 MHz 并行域得到每拍四个样本。接
 
 [SWD 逐轮数据](swd-hss-100.json) · [JTAG 逐轮数据](jtag-hss-100.json) · [首轮 CLI 会话错误](first-cli-context-failure.txt)
 
+## 原有 USB 和物理线回归
+
+| 项目 | 当前配对实板结果 |
+|---|---|
+| IF4 USB 回环 | 三轮各 60 秒，每轮双向逐字节校验，合计速率 21.398 / 21.483 / 21.585 MB/s |
+| 100 MHz SPI 主机 | 双 TAP 的 mode 0 传输 1,128,448 B；MOSI 实际 pad 的 CPOL/CPHA 四模式各 1,128,448 B |
+| 物理 UART 突发 | 按 100 Mbaud 发送/接收，各 52,896 B 逐字通过 |
+| Manchester 源与接收 | 50 Mbit/s 外返、100 Mbit/s 带负载的 TDI pad 各 17,632 B 匹配。按位率记录物理突发，连续主机速率另计 |
+
+SPI 主机的 mode 0/2 的通过 slot 为 16，mode 1/3 为 18。其他短测采样设置的失败保留。每项的发送源、tap/slot、结果和持续窗由独立夹具记录，目标恢复通过。 [物理线原始数据](wire.json) · [USB 三轮数据](usb-echo.json)
+
 复现入口见 [CLI](../../selectio/README.md#spi-从机接收转发到-com) 与 [Case 表](../../selectio/fusion-performance-cases.md)。时序收敛、目标和探针恢复以及全部功能用例以同一份 bit/ELF 的后续实测记录为准。
