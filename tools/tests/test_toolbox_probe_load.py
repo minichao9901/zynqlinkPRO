@@ -39,6 +39,30 @@ class ProbeLoadTests(unittest.TestCase):
             execute.assert_not_called()
             self.assertFalse(out.exists())
 
+    def test_pair_directory_checks_manifest_before_hardware(self):
+        root = probe_load.ROOT / 'prebuilt/selectio-spi-cdc-phase-drift-20261123'
+        manifest = json.loads((root / 'manifest.json').read_text(encoding='utf8'))
+        with tempfile.TemporaryDirectory() as directory:
+            pair = Path(directory)
+            for name in manifest['hashes']:
+                (pair / name).write_bytes((root / name).read_bytes())
+            (pair / 'manifest.json').write_text(json.dumps(manifest), encoding='utf8')
+            stdout = io.StringIO()
+            with patch.object(probe_load, 'execute') as execute, contextlib.redirect_stdout(stdout):
+                self.assertEqual(probe_load.main(['--pair', str(pair), '--dry-run']), 0)
+            actual = {Path(v['path']).name: v['sha256'] for v in json.loads(stdout.getvalue())['files'].values()}
+            self.assertEqual(actual, manifest['hashes'])
+            execute.assert_not_called()
+            (pair / 'ps7_init.tcl').write_bytes(b'changed')
+            stderr = io.StringIO()
+            with patch.object(probe_load, 'execute') as execute, contextlib.redirect_stderr(stderr):
+                with self.assertRaises(SystemExit) as result:
+                    probe_load.main(['--pair', str(pair)])
+            self.assertEqual(result.exception.code, 2)
+            self.assertIn('SHA-256', stderr.getvalue())
+            self.assertIn('ps7_init.tcl', stderr.getvalue())
+            execute.assert_not_called()
+
     def test_target_mcu_elf_rejected_before_hardware(self):
         elf = probe_load.ROOT / 'prebuilt/golden/f103ze-cdc48.elf'
         bit = probe_load.RELEASE / 'probe.bit'

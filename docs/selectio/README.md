@@ -52,12 +52,12 @@ JTAG 占用 TDI/TDO，SPI 切换时取得四根线的独占权。F103 的 PB3 �
 
 ## 识别、临时加载及调试
 
-按本分支验收记录中的 manifest 选择相配的 bit、Zynq ELF、PS 初始化 Tcl。加载命令在写入探针易失配置前检查占用，在加载后核对 OCM。目标 MCU ELF 与探针 ELF 分开传入。
+按本分支验收记录选择配对目录。`probe-load --pair` 按清单逐一核对 bit、Zynq ELF 和 PS 初始化 Tcl 的 SHA-256，在写入探针易失配置前检查占用，加载后核对 OCM。目标 MCU ELF 与探针 ELF 分开传入。
 
 ```powershell
-$pair = 'prebuilt/selectio-j7-fusion'
-python -X utf8 toolbox.py probe-load --selectio --dry-run
-python -X utf8 toolbox.py probe-load --selectio --out build/my-load
+$pair = 'prebuilt/selectio-spi-cdc-phase-drift-20261123'
+python -X utf8 toolbox.py probe-load --pair $pair --dry-run
+python -X utf8 toolbox.py probe-load --pair $pair --out build/my-load
 python -X utf8 toolbox.py selectio --serial 12345678 info
 python -X utf8 toolbox.py selectio usb-test --seconds 60
 python -X utf8 toolbox.py selectio --help
@@ -65,18 +65,28 @@ python -X utf8 toolbox.py selectio --help
 
 info 同时显示实际枚举的五个接口、各端点、PS 固件 ABI、队列深度、原生块头大小和 PL 特性字。link_hz 是由真实参考寄存器换算的高速模式线速。兼容 DAP 使用不超过 10 MHz 的初始化档，显式请求 100 MHz 切换到专用 PHY。
 
-下例的时隙值用于通过验证的特定版次。更换 bit 后按对应 manifest 选择 tap/slot。tap 是 SWDIO 或 TDO 的输入 IDELAY 档位，slot 选择反串化后的采样位置，idle 设置事务所用的额外空闲钟数。变频融合版的 SWD/JTAG slot 在 50 和 100 MHz 档间隔约 2.5 ns，在 72.727 MHz 档间隔约 3.4375 ns。校准顺序见 [精简性能用例](fusion-performance-cases.md#case-表)。F103 上电后的应用可能关闭完整 JTAG，使用 JTAG 前须确认目标的 AFIO 配置。示例先在 1 MHz 识别，再切到 100 MHz。在一个终端启动 OpenOCD，在第二个终端运行 GDB。退出 GDB 可用 `detach`。
+下例的时隙值用于通过验证的特定版次。更换 bit 后按对应 manifest 选择 tap/slot。tap 是 SWDIO 或 TDO 的输入 IDELAY 档位，slot 选择反串化后的采样位置，idle 设置事务所用的额外空闲钟数。变频融合版的 SWD/JTAG slot 在 50 和 100 MHz 档间隔约 2.5 ns，在 72.727 MHz 档间隔约 3.4375 ns。下表列出当前配对的起始配置。换档时同时更新时钟、tap、slot 和 idle。校准顺序见 [精简性能用例](fusion-performance-cases.md#case-表)。
+
+| 请求 MHz | 预计实际 MHz | SWD tap / slot / idle | JTAG tap / slot / idle |
+|---:|---:|---|---|
+| 50 | 50 | 8 / 24 / 0 | 16 / 28 / 17 |
+| 73 | 72.727 | 8 / 22 / 0 | 16 / 28 / 25 |
+| 100 | 100 | 8 / 25 / 2 | 16 / 28 / 33 |
+
+F103 上电后的应用可能关闭完整 JTAG，使用 JTAG 前须确认目标的 AFIO 配置。示例先在 1 MHz 识别，再切到 `$clock` 指定的高速档。在一个终端启动 OpenOCD，在第二个终端运行 GDB。退出 GDB 可用 `detach`。
 
 ```powershell
 $transport = 'swd'
+$clock = 100000000
+$adapterKHz = [int]($clock / 1000)
 $tap = 8
-$slot = 24
+$slot = 25
 $idle = 2
 # JTAG 对应参数
 # $transport = 'jtag'; $tap = 16; $slot = 28; $idle = 33
 python -X utf8 toolbox.py selectio profile --transport $transport --tap $tap --slot $slot --idle $idle
 python -X utf8 toolbox.py selectio identify --transport $transport --clock 1000000
-openocd -f interface/cmsis-dap.cfg -c "adapter serial 12345678" -c "transport select $transport" -f target/stm32f1x.cfg -c "adapter speed 1000" -c "init" -c "adapter speed 100000"
+openocd -f interface/cmsis-dap.cfg -c "adapter serial 12345678" -c "transport select $transport" -f target/stm32f1x.cfg -c "adapter speed 1000" -c "init" -c "adapter speed $adapterKHz"
 arm-none-eabi-gdb prebuilt/golden/f103ze-cdc48.elf -ex "target extended-remote localhost:3333"
 ```
 
@@ -89,11 +99,9 @@ python -X utf8 tools/run_f103_jtag_fixture.py --serial 12345678 --swd-khz 1000 -
 运行独占的原生会话前退出占用接口的调试服务器。以下用 PowerShell 数组传递吞吐参数。读写地址和长度按 4 B 对齐，原生优化窗口为 F103 的 64 KiB SRAM。写示例把刚读出的文件写回，执行前确认区域由调用方独占。主机深度和 1 KiB TAR 分割由 CLI 管理。
 
 ```powershell
-$link = @('--transport', $transport, '--tap', $tap, '--slot', $slot, '--idle', $idle)
-$bulkIdle = if ($transport -eq 'jtag') { 29 } else { 2 }
-$bulkLink = @('--transport', $transport, '--tap', $tap, '--slot', $slot, '--idle', $bulkIdle)
-python -X utf8 toolbox.py selectio read @bulkLink --address 0x20008020 --bytes 4032 --out page.bin --queue-depth 4
-python -X utf8 toolbox.py selectio write @bulkLink --address 0x20008020 --file page.bin --queue-depth 4
+$link = @('--transport', $transport, '--clock', $clock, '--tap', $tap, '--slot', $slot, '--idle', $idle)
+python -X utf8 toolbox.py selectio read @link --address 0x20008020 --bytes 4032 --out page.bin --queue-depth 4
+python -X utf8 toolbox.py selectio write @link --address 0x20008020 --file page.bin --queue-depth 4
 ```
 
 ## RTT 和 J-Scope
@@ -106,13 +114,13 @@ python -X utf8 tools/selectio_transport_bench.py --serial 12345678 --seconds 10 
 python -X utf8 tools/selectio_transport_bench.py --serial 12345678 --seconds 10 --schedule grouped --out build/usb-grouped
 
 # 真实目标 SRAM，先备份 16 KiB，分别计读、写、混合，最后恢复目标
-python -X utf8 tools/selectio_f103_fixture.py --serial 12345678 --size 16384 --out build/swd50-state --execute -- python -X utf8 tools/selectio_pipeline_bench.py --transport swd --clock 50000000 --tap 8 --slot 16 --idle 0 --frame 16384 --bytes 16320 --depth 4 --seconds 60 --rounds 3 --out build/swd50-pc --execute
+python -X utf8 tools/selectio_f103_fixture.py --serial 12345678 --size 16384 --out build/swd50-state --execute -- python -X utf8 tools/selectio_pipeline_bench.py --transport swd --clock 50000000 --tap 8 --slot 24 --idle 0 --frame 16384 --bytes 16320 --depth 4 --seconds 60 --rounds 3 --out build/swd50-pc --execute
 ```
 
-统一板卡入口支持按所选配对的 50 / 100 MHz 参数串行运行实际调试、内存、RTT、变量采样及 USB 对照。下例先打印计划；添加 `--execute` 后经 HS3 临时加载对应 bit/ELF、检查身份、备份目标 SRAM，然后逐项测试并复核恢复。每个 SRAM 窗口的复算例见效率报告。
+统一板卡入口支持按所选配对的 50 / 73 / 100 MHz 参数串行运行实际调试、内存、RTT、变量采样及 USB 对照。下例先打印计划；添加 `--execute` 后经 HS3 临时加载对应 bit/ELF、检查身份、备份目标 SRAM，然后逐项测试并复核恢复。每个 SRAM 窗口的复算例见效率报告。
 
 ```powershell
-python -X utf8 toolbox.py project run board.accept -- --selectio --board f103ze --pair prebuilt/selectio-efficiency --clock 50000000 --frame 16384 --only switch --only debug --only memory --only rtt --only scope --only combo --only usb-ddr
+python -X utf8 toolbox.py project run board.accept -- --selectio --board f103ze --pair $pair --clock 50000000 --frame 16384 --only switch --only debug --only memory --only rtt --only scope --only combo --only usb-ddr
 ```
 
 运行态 RTT 默认使用与 100 MHz 历史成绩相同的 1,024 B 目标环。给同一入口加 `--rtt-ring-bytes 8192` 可测大环并减少环尾截断。两种容量使用同一个 Cortex-M3 生产者，每次运行都从真实 RTT 描述符取环地址和大小。大环占用的区域由 16 KiB SRAM 夹具备份和复原。请分别保存两次的报告，以便区分环长和 USB 帧长带来的变化。
@@ -133,15 +141,15 @@ python -X utf8 tools/selectio_f103_clock_accept.py --pair prebuilt/selectio-swd5
 以下地址仅作 CDC48 示例；其他固件从目标 ELF 符号表取得 RTT 控制块或变量地址。RTT 下行需要目标定义 DOWN 通道。本项目的 J-Scope 指主线 HSS 硬件变量采样，CLI 可导出 CSV。独立采样支持 1–8 个变量。周期单位为 24 MHz tick，`24000` 表示 1 ms。`--var` 的格式为地址、字节宽度、类型码，用冒号分隔。类型码 0–7 依次对应 u8、i8、u16、i16、u32、i32、f32、f64。
 
 ```powershell
-python -X utf8 toolbox.py selectio rtt --transport $transport --clock 100000000 --address 0x2000b000 --size 256 --channel 0 --seconds 10 --out log.rtt
+python -X utf8 toolbox.py selectio rtt @link --address 0x2000b000 --size 256 --channel 0 --seconds 10 --out log.rtt
 python -X utf8 toolbox.py selectio rtt-send @link --address 0x2000b000 --channel 0 --text "help`n"
 python -X utf8 toolbox.py selectio rtt-terminal @link --address 0x2000b000 --channel 0 --up-channel 0
-python -X utf8 toolbox.py selectio scope --transport $transport --clock 100000000 --var 0x2000c000:4:4 --var 0x2000c004:4:4 --period 24000 --seconds 10 --out scope.hss
+python -X utf8 toolbox.py selectio scope @link --var 0x2000c000:4:4 --var 0x2000c004:4:4 --period 24000 --seconds 10 --out scope.hss
 python -X utf8 toolbox.py selectio scope-export --in scope.hss --csv scope.csv
 python -X utf8 toolbox.py selectio combo @link --rtt-address 0x2000b000 --channel 0 --var 0x2000c000 --var 0x2000c004 --ticks 24000 --seconds 60 --rtt-out combined.rtt --scope-out combined.csv
 ```
 
-`combo` 在一个 AP 会话内同时取得 RTT UP 字节及 1–8 个对齐的 u32 变量，分别输出原始字节与带时间戳的 CSV。终端支持双向输入输出。独立采样的二进制记录可通过 `scope-export` 检查定义、帧序号、样本数、跳拍数和结束状态。100 MHz 是 SWCLK/TCK 线速；采样率取决于变量数量、地址布局和目标响应。
+`combo` 在一个 AP 会话内同时取得 RTT UP 字节及 1–8 个对齐的 u32 变量，分别输出原始字节与带时间戳的 CSV。终端支持双向输入输出。`scope` 收尾时校验最终统计帧。用 `scope-export` 可继续核对定义、帧序号、样本数、跳拍数并导出 CSV。100 MHz 是 SWCLK/TCK 线速；采样率取决于变量数量、地址布局和目标响应。
 
 ## 物理串口、SWO 和 SPI
 
@@ -201,7 +209,7 @@ python -X utf8 tools/selectio_spi_cdc_test.py --serial 12345678 --mode 0 --tap 0
 | SPI 主机 / 从机接收 | 主机 `spi --mode --slot --tap`，用 `--hex` 或 `--file` 提交载荷，固定 100 MHz。从机 `com bind-spi --mode --tap`，SCK 由外部主机提供 |
 | ETM | `trace capture --swd-khz --seconds --elf --bit --zynq-elf`，以及 `trace verify/query/export`。TRACECLK 由目标配置提供 |
 
-高速请求使用 Hz，例如 `--clock 50000000`、`73000000`、`100000000`，73 MHz 在当前时钟树上约为 **72.727 MHz**。以结果中的实际频率和时钟树为准。tap 范围 0–31，slot 范围 0–63。SWD idle 为 0–15，ARM JTAG 原生块需要 slot≥16 且 idle 为奇数。JTAG 实时路径的 idle 范围为 0–255。独立 `rtt` 和 `scope` 可以一起传入 `--tap --slot --idle`，省略时使用既有 profile。 [精简性能用例与校准](fusion-performance-cases.md)
+高速请求使用 Hz，例如 `--clock 50000000`、`73000000`、`100000000`，73 MHz 在当前时钟树上约为 **72.727 MHz**。以结果中的实际频率和时钟树为准。tap 范围 0–31，slot 范围 0–63。SWD idle 为 0–15，JTAG 的 slot 范围是 16–63。原生块、RTT 下行与并发读数要求 JTAG idle 为奇数。JTAG 实时路径的 idle 范围为 0–255。独立 `rtt` 和 `scope` 可以一起传入 `--tap --slot --idle`，省略时使用既有 profile。 [精简性能用例与校准](fusion-performance-cases.md)
 
 统一实板入口支持 50/73/100 MHz，需要配对清单提供相应采样档。HCLK96/128 的定向压测使用 `selectio_f103_clock_accept.py --pair ... --hclk-mhz ... --out ... --execute --command <子命令>`，由外层夹具核对时钟、暂停并备份 SRAM，子命令退出后恢复。需要完整 JTAG 时加 `--enable-jtag`。这些 HCLK 是 F103 实验档。
 
@@ -224,18 +232,20 @@ F103 保持 CDC48 时 TRACECLK 为 24 MHz。默认窗口从目标恢复执行开
 融合版三档调试时钟、SRAM、采集和物理接口的定向性能验收见 [精简性能用例](fusion-performance-cases.md)。
 
 ```powershell
-$env:ZYNQLINK_FPGA_OUT = "$PWD/build/selectio"
-python -X utf8 tools/run_vivado.py -mode batch -nojournal -source fpga/build_dma.tcl -tclargs --selectio
-python -X utf8 tools/build_xusbps_daplink.py --selectio --j7-adapter --compact-code --max-swclk-hz 10000000 --timing build/selectio/verified_clock.json --out build/selectio-ps
+$env:ZYNQLINK_FPGA_OUT = Join-Path $PWD 'build/fusion-pl-new'
+python -X utf8 tools/run_vivado.py -mode batch -nojournal -source fpga/build_dma.tcl -tclargs --selectio --selectio-variable --etm400
+python -X utf8 tools/build_xusbps_daplink.py --selectio --selectio-variable --j7-adapter --compact-code --opt s --experimental-zero-idle --timing build/fusion-pl-new/verified_clock.json --out build/fusion-ps-new
 python -X utf8 tools/selectio_cm3.py
 python -X utf8 tools/selectio_cm3.py --services --sample-ticks 64 --out build/cm3-jtag-services
 python -X utf8 tools/selectio_cm3.py --services --swd-only --sample-ticks 32 --out build/cm3-swd-services
-python -X utf8 toolbox.py project run board.accept -- --selectio --board f103ze
-python -X utf8 toolbox.py project run board.accept -- --selectio --board f103ze --pair $pair --out build/accept-new --execute
+python -X utf8 tools/selectio_spi_slave_sim.py --out build/spi-cdc-xsim
+python -X utf8 tools/selectio_spi_slave_sim.py --ring-only --out build/spi-cdc-ring
+python -X utf8 toolbox.py project run board.accept -- --selectio --board f103ze --pair $pair --clock 100000000 --seconds 60 --rounds 3 --rtt-ring-bytes 8192 --rtt-chunk 2048
+python -X utf8 toolbox.py project run board.accept -- --selectio --board f103ze --pair $pair --clock 100000000 --seconds 60 --rounds 3 --rtt-ring-bytes 8192 --rtt-chunk 2048 --out build/accept-new --execute
 python -X utf8 toolbox.py project run board.accept -- --selectio --review build/accept-new/summary.json
 ```
 
-PS 构建参数中的 10 MHz 约束兼容初始化速率。100 MHz 模式使用独立的 SelectIO 参考时钟。对有写入的实板压力测试，`selectio_f103_fixture.py` 会核对目标映像、保存 4 KiB SRAM、两侧哨兵及初始运行状态，并在独立进程中读回恢复结果。下列示例仅用于该 F103 实验夹具。
+构建后的新配对使用验证过的 bit、PS ELF、同一工程的 ps7_init.tcl 及对应清单。上例中 `$pair` 指仓库归档配对，验收自己构建的版本时改为相应目录。高速模式使用独立的 SelectIO 参考时钟。对有写入的实板压力测试，`selectio_f103_fixture.py` 会核对目标映像、保存 4 KiB SRAM、两侧哨兵及初始运行状态，并在独立进程中读回恢复结果。下列示例仅用于该 F103 实验夹具。
 
 ```powershell
 python -X utf8 tools/selectio_f103_fixture.py --out build/my-guard --execute -- python -X utf8 tools/selectio_pipeline_bench.py @link --bytes 4032 --depth 4 --seconds 60 --rounds 3 --out build/my-pipeline --execute

@@ -1,11 +1,13 @@
 """Exercise framed WinUSB request ordering without claiming a USB interface."""
 import argparse
+import contextlib
+import io
 from collections import deque
 import struct
 import unittest
 from unittest.mock import Mock, patch
 
-from selectio_cli import connection, selectio_clock_number
+from selectio_cli import connection, main, selectio_clock_number
 from selectio_native import HEADER, NativeStatusError, NativeStream
 from selectio_scope import verify_scope_tail
 
@@ -21,6 +23,34 @@ class NativeCliTests(unittest.TestCase):
         frame[3] = 2
         with self.assertRaisesRegex(ValueError, "terminal STAT"):
             verify_scope_tail(frame, 5 * 512, 20)
+
+    def test_invalid_stream_and_memory_timing_fail_without_usb(self):
+        cases = (
+            (["profile", "--transport", "swd", "--tap", "8", "--slot", "24", "--idle", "16"], "SWD idle"),
+            (["scope", "--transport", "jtag", "--clock", "73000000", "--tap", "16", "--slot", "15",
+              "--idle", "25", "--period", "264", "--var", "0x20008a00:4:4", "--seconds", "1",
+              "--out", "unused.hss"], "JTAG sample slot"),
+            (["rtt-send", "--transport", "jtag", "--tap", "16", "--slot", "28", "--idle", "28",
+              "--address", "0x20008000", "--text", "probe"], "require odd idle"),
+        )
+        for argv, reason in cases:
+            with self.subTest(argv=argv), patch("sys.argv", ["selectio", *argv]), \
+                    patch("selectio_cli.connection") as dap, patch("selectio_cli.native_connection") as native, \
+                    contextlib.redirect_stderr(io.StringIO()) as diagnostics:
+                with self.assertRaises(SystemExit) as error:
+                    main()
+                self.assertEqual(error.exception.code, 2)
+                self.assertIn(reason, diagnostics.getvalue())
+                dap.assert_not_called()
+                native.assert_not_called()
+
+    def test_live_jtag_still_accepts_even_idle(self):
+        argv = ["selectio", "profile", "--transport", "jtag", "--tap", "16", "--slot", "28", "--idle", "28"]
+        with patch("sys.argv", argv), patch("selectio_cli.native_connection") as native, \
+                contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(main(), 0)
+        device = native.return_value.__enter__.return_value
+        device.exchange.assert_called_once_with(0, 2, bytes((2, 16, 28, 28)))
 
     def test_clock_parser_returns_hertz(self):
         self.assertEqual(selectio_clock_number("73000000"), 73000000)

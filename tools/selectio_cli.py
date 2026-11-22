@@ -447,6 +447,19 @@ def main():
         profile = (args.tap,args.slot,args.idle)
         if any(value is not None for value in profile) and any(value is None for value in profile):
             parser.error("--tap, --slot and --idle must be supplied together")
+    bulk_actions = ("read", "write", "rtt-send", "rtt-terminal", "combo", "rtt-queue")
+    if args.action in (*bulk_actions, "profile", "rtt", "scope") and args.tap is not None:
+        if not (0 <= args.tap <= 31 and 0 <= args.slot <= 63 and 0 <= args.idle <= 255):
+            parser.error("tap must be 0..31, slot 0..63 and idle 0..255")
+        if args.transport == "swd" and args.idle > 15:
+            parser.error("SWD idle must be 0..15")
+        if args.transport == "jtag":
+            if args.slot < 16:
+                parser.error("JTAG sample slot must be 16..63")
+            if args.action in bulk_actions and args.idle % 2 == 0:
+                parser.error("JTAG native memory transactions require odd idle")
+    if args.action in ("rtt", "scope") and not 0 < args.clock <= 100000000:
+        parser.error("stream clock must be 1..100000000 Hz")
     if args.action=="com" and args.operation!="bind-spi" and (args.mode is not None or args.tap is not None):
         parser.error("--mode and --tap require com bind-spi")
     try:
@@ -511,19 +524,12 @@ def main():
             print(json.dumps(info,indent=2))
             return 0
         payload = args.file.read_bytes() if args.action == "write" else None
-        if args.action != "info":
-            size = len(payload) if payload is not None else args.bytes
-            if (size <= 0 or size % 4 or args.address % 4 or
-                    not 0x20000000 <= args.address < args.address+size <= 0x20010000):
-                parser.error("the F103 profile supports aligned words in its 64 KiB SRAM")
-            if not 0 <= args.slot <= 63 or not 0 <= args.idle <= 255:
-                parser.error("invalid timing fields")
-            if args.transport == "jtag" and (args.slot < 16 or args.idle % 2 != 1):
-                parser.error("JTAG needs a sample slot >=16 and odd idle")
-            if args.transport == "swd" and args.idle > 15:
-                parser.error("SWD idle must be 0..15")
-            if args.action == "read" and args.out.exists():
-                parser.error("output file already exists")
+        size = len(payload) if payload is not None else args.bytes
+        if (size <= 0 or size % 4 or args.address % 4 or
+                not 0x20000000 <= args.address < args.address+size <= 0x20010000):
+            parser.error("the F103 profile supports aligned words in its 64 KiB SRAM")
+        if args.action == "read" and args.out.exists():
+            parser.error("output file already exists")
         with connection(args.serial) as (tx, rx), native_connection(args.serial,tx.device) as native:
             info=native.info()
             if not info["integrated_pl"]:

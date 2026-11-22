@@ -6,7 +6,7 @@ F103ZE 的 GPIO 源四模式各 16,384 B 到 COM34，字节匹配，零溢出、
 
 ```powershell
 $pair = 'prebuilt/selectio-spi-cdc-phase-drift-20261123'
-python -X utf8 toolbox.py probe-load --dry-run --bit "$pair/probe.bit" --zynq-elf "$pair/application.elf" --ps-init "$pair/ps7_init.tcl"
+python -X utf8 toolbox.py probe-load --pair $pair --dry-run
 python -X utf8 toolbox.py project run board.accept -- --selectio --board f103ze --pair $pair --only spi-cdc
 ```
 

@@ -106,8 +106,7 @@ def main(argv=None):
         subprocess.run(["arm-none-eabi-objcopy","-O","binary","-j",".text",elf,binary],check=True)
         return binary
     save()
-    if not run("load",[*cli,"probe-load","--bit",pair/"probe.bit","--zynq-elf",pair/"application.elf",
-               "--ps-init",pair/"ps7_init.tcl","--out",out/"load"]):
+    if not run("load",[*cli,"probe-load","--pair",pair,"--out",out/"load"]):
         return 1
     if not run("info",[*cli,"selectio","--serial",args.serial,"info"]):return 1
     info=json.loads((out/"info.log").read_text(encoding="utf8"))

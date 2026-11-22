@@ -28,9 +28,12 @@ def inputs(args):
     if bool(args.bit) != bool(args.elf) or (args.ps_init and not args.elf):
         raise ValueError('自选配对须同时传 --bit 和 --zynq-elf，可用 --ps-init 指定初始化 Tcl')
     selectio = getattr(args, 'selectio', False)
-    if selectio and (args.bit or args.elf or args.ps_init):
-        raise ValueError('--selectio 使用固定融合配对；自选文件时请传 --bit 和 --zynq-elf')
-    package = ROOT / 'prebuilt/selectio-j7-fusion' if selectio else RELEASE
+    pair = getattr(args, 'pair', None)
+    if (selectio or pair) and args.bit:
+        option = '--selectio' if selectio else '--pair'
+        raise ValueError(f'{option} 从配对目录读取 bit、ELF 和初始化 Tcl。请只选择一套输入')
+    package = pair if pair is not None else (
+        ROOT / 'prebuilt/selectio-j7-fusion' if selectio else RELEASE)
     bit = (args.bit or package / 'probe.bit').resolve()
     elf = (args.elf or package / 'application.elf').resolve()
     init = (args.ps_init or elf.with_name('ps7_init.tcl')).resolve()
@@ -41,11 +44,13 @@ def inputs(args):
         files[key] = {'path': str(path), 'sha256': sha(path)}
     if not args.bit:
         manifest = json.loads((package / 'manifest.json').read_text(encoding='utf8'))
+        expected_hashes = manifest.get('hashes')
+        if expected_hashes is None:
+            expected_hashes = {name: value['sha256'] for name, value in manifest['files'].items()}
         for file in files.values():
             name = Path(file['path']).name
-            expected = manifest['hashes'][name] if selectio else manifest['files'][name]['sha256']
-            if expected != file['sha256']:
-                raise ValueError('正式配对 SHA-256 不匹配：' + name)
+            if expected_hashes.get(name) != file['sha256']:
+                raise ValueError('配对 SHA-256 不匹配：' + name)
     read_ocm_code(elf)
     return files
 
@@ -165,7 +170,9 @@ def execute(plan, out, sdk):
 def main(argv=None):
     parser = argparse.ArgumentParser(prog='toolbox.py probe-load', description=__doc__,
         epilog='默认使用正式 J7 配对。需要断电后自动启动时，请使用 toolbox.py probe-flash --help。')
-    parser.add_argument('--selectio', action='store_true', help='临时加载本分支固定 SelectIO bit/ELF，并校验 manifest SHA-256')
+    bundle = parser.add_mutually_exclusive_group()
+    bundle.add_argument('--selectio', action='store_true', help='选择本分支固定 SelectIO 配对并校验 manifest SHA-256')
+    bundle.add_argument('--pair', type=Path, help='从指定配对目录读取 bit、ELF 和初始化 Tcl，并校验 manifest SHA-256')
     parser.add_argument('--bit', type=Path, help='探针 FPGA bitstream')
     parser.add_argument('--zynq-elf', '--elf', dest='elf', type=Path, help='探针 Zynq PS ELF')
     parser.add_argument('--ps-init', type=Path, help='配套初始化 Tcl，自选时默认取 ELF 同目录 ps7_init.tcl')
