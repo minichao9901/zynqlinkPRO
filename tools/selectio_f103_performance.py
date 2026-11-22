@@ -137,6 +137,18 @@ def inside_clock_guard(point, args):
                                 "profile", "--transport", point.transport, "--tap", point.tap,
                                 "--slot", point.slot, "--idle", point.idle], out/"profile.log")
         if tests["profile"] == 0:
+            if point.hclk_mhz == 128 and point.clock_hz == 100_000_000:
+                standard = out / "cmsis-peak.json"
+                tests["cmsis-peak"] = run(
+                    [*PYTHON, TOOLS/"h743_peak.py", "--serial", args.serial,
+                     "--transport", point.transport, "--bootstrap-speed-khz", 1000,
+                     "--bit", args.pair/"probe.bit", "--elf", args.pair/"application.elf",
+                     "--speed-hz", point.clock_hz, "--address", "0x20008000",
+                     "--words", 512, "--depth", 32, "--loops", 256, "--repeats", 3,
+                     "--observe-link", "--output", standard], out/"cmsis-peak.log")
+                if not standard.is_file() or read_json(standard).get("restore_match") is not True:
+                    save(out/"summary.json", tests)
+                    return 1
             tests["rtt-cdc"] = run([*PYTHON, TOOLS/"benchmark_rtt_forward.py", "--serial", args.serial,
                                     "--transport", point.transport, "--bootstrap-speed-khz", 1000,
                                     "--bit", args.pair/"probe.bit", "--elf", args.pair/"application.elf",

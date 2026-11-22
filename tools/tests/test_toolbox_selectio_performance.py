@@ -54,6 +54,31 @@ class SelectioPerformanceTests(unittest.TestCase):
             self.assertEqual(sum(row["passed"] for row in report["probes"]), 5)
             self.assertTrue(all(row["restored"] for row in report["probes"]))
 
+    def test_high_hclk_adds_standard_sram_comparison(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            folder = Path(temporary)
+            args = SimpleNamespace(out=folder / "output", pair=folder / "pair", serial="mock",
+                                   seconds=60, rounds=3)
+            point = next(point for point in performance.POINTS if point.name == "DBG-08")
+            commands = {}
+
+            def run(command, log):
+                commands[log.name] = command
+                if log.name == "cmsis-peak.log":
+                    output = command[command.index("--output") + 1]
+                    Path(output).write_text('{"restore_match": true}', encoding="utf-8")
+                return 0
+
+            with patch.object(performance, "run", side_effect=run):
+                self.assertEqual(performance.inside_clock_guard(point, args), 0)
+            standard = commands["cmsis-peak.log"]
+            self.assertEqual(standard[standard.index("--transport") + 1], "jtag")
+            self.assertEqual(standard[standard.index("--speed-hz") + 1], 100_000_000)
+            self.assertEqual(standard[standard.index("--words") + 1:standard.index("--repeats") + 2],
+                             [512, "--depth", 32, "--loops", 256, "--repeats", 3])
+            self.assertIn("rtt-cdc.log", commands)
+            self.assertIn("hss.log", commands)
+
     def test_unconfirmed_recovery_stops_before_the_next_case(self):
         with tempfile.TemporaryDirectory() as temporary:
             pair = Path(temporary) / "pair"
