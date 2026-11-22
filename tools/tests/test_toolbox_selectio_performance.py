@@ -64,9 +64,9 @@ class SelectioPerformanceTests(unittest.TestCase):
 
             def run(command, log):
                 commands[log.name] = command
-                if log.name == "cmsis-peak.log":
+                if log.name in ("cmsis-peak.log", "rtt-cdc.log"):
                     output = command[command.index("--output") + 1]
-                    Path(output).write_text('{"restore_match": true}', encoding="utf-8")
+                    Path(output).write_text('{"restore_match": true, "registers_match": true}', encoding="utf-8")
                 return 0
 
             with patch.object(performance, "run", side_effect=run):
@@ -78,6 +78,27 @@ class SelectioPerformanceTests(unittest.TestCase):
                              [512, "--depth", 32, "--loops", 256, "--repeats", 3])
             self.assertIn("rtt-cdc.log", commands)
             self.assertIn("hss.log", commands)
+
+    def test_failed_rtt_prevents_hss_route_change_even_with_sram_restored(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            folder = Path(temporary)
+            args = SimpleNamespace(out=folder / "output", pair=folder / "pair", serial="mock",
+                                   seconds=60, rounds=3)
+            point = next(point for point in performance.POINTS if point.name == "DBG-03")
+            commands = []
+
+            def run(command, log):
+                commands.append(log.name)
+                if log.name == "rtt-cdc.log":
+                    output = command[command.index("--output") + 1]
+                    Path(output).write_text('{"restore_match": true, "registers_match": true}', encoding="utf-8")
+                    return 1
+                return 0
+
+            with patch.object(performance, "run", side_effect=run):
+                self.assertEqual(performance.inside_clock_guard(point, args), 1)
+            self.assertIn("rtt-cdc.log", commands)
+            self.assertNotIn("hss.log", commands)
 
     def test_unconfirmed_recovery_stops_before_the_next_case(self):
         with tempfile.TemporaryDirectory() as temporary:

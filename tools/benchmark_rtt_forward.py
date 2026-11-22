@@ -52,6 +52,7 @@ class Reader(threading.Thread):
         super().__init__(daemon=True)
         self.com = com
         self.quit = threading.Event()
+        self.failed = threading.Event()
         self.count = 0
         self.next_word = 0
         self.pending = b''
@@ -72,10 +73,27 @@ class Reader(threading.Thread):
                 self.pending = data[n:]
         except BaseException as exc:
             self.error = repr(exc)
+            self.failed.set()
+
+
+def stop_rtt_capture(probe, *, attempts=None, timeout=4.0):
+    """Retry only asynchronous STOP busy while the caller keeps CDC draining."""
+    deadline = time.monotonic() + timeout
+    while True:
+        rc, status = probe.action(0x31, 0)
+        if attempts is not None:
+            attempts.append(dict(rc=rc, status=status))
+        if rc == 0:
+            return status
+        if rc != -7 or time.monotonic() >= deadline:
+            raise RuntimeError(f"RTT STOP failed: {rc}, status={status}")
+        time.sleep(.005)
 
 
 def point(probe, mem, port, code, speed, chunk, seconds, repeat, activate_transport=None,
-          base=0x20000000, serialized_control=False, check_dap_handoff=False):
+          base=0x20000000, serialized_control=False, check_dap_handoff=False, evidence=None):
+    evidence = evidence if evidence is not None else {}
+    evidence.update(speed_hz=speed, chunk=chunk, repeat=repeat)
     mem.write_word(DHCSR, 0xa05f0003)
     mem.write(base, code)
     mem.write(base+0x200, struct.pack('<16sII6II', b'SEGGER RTT', 1, 0, 0, base+0x1000, 8192, 0, 0, 0, 0))
@@ -105,26 +123,28 @@ def point(probe, mem, port, code, speed, chunk, seconds, repeat, activate_transp
             t0 = (t0+time.perf_counter())/2
             assert rc == 0 and s0[1] == base+0x200 and s0[3]>0, (rc, s0)
             count0 = reader.count
+            evidence.update(s0=s0, host_bytes_at_start=count0)
             dap_handoff_before=dap_handoff_during=None
             if check_dap_handoff:
-                time.sleep(seconds/2)
+                if reader.failed.wait(seconds/2):
+                    raise RuntimeError(f"CDC reader failed: {reader.error}")
                 dap_handoff_before=reader.count
                 dap_handoff_during=mem.word(0xe000ed00)
                 if dap_handoff_during!=cpuid:
                     raise RuntimeError("CMSIS-DAP CPUID read disagrees while RTT is active")
-                time.sleep(seconds/2)
-            else:
-                time.sleep(seconds)
+            if reader.failed.wait(seconds/2 if check_dap_handoff else seconds):
+                raise RuntimeError(f"CDC reader failed: {reader.error}")
             t1 = time.perf_counter()
             rc, s1 = probe.action(0x31, 2)
             t1 = (t1+time.perf_counter())/2
             count1 = reader.count
+            evidence.update(s0=s0, s1=s1, host_bytes_window=count1-count0, host_bytes_at_stop=count1,
+                            reader_error=reader.error, window_s=t1-t0)
             if check_dap_handoff and not count1>dap_handoff_before:
                 raise RuntimeError("CDC payload stopped after the CMSIS-DAP read")
             assert rc == 0 and s1[5] == 0, (rc, s1)
             if serialized_control:
-                rc,stopped=probe.action(0x31,0)
-                assert rc==0,(rc,stopped)
+                stopped=stop_rtt_capture(probe, attempts=evidence.setdefault("measurement_stop", []))
                 until=time.monotonic()+4
                 while reader.count<stopped[3] and not reader.error and time.monotonic()<until:
                     time.sleep(.005)
@@ -145,7 +165,7 @@ def point(probe, mem, port, code, speed, chunk, seconds, repeat, activate_transp
                 if reader.count == published:
                     break
                 time.sleep(0.02)
-            assert probe.action(0x31, 0)[0] == 0
+            stop_rtt_capture(probe, attempts=evidence.setdefault("tail_stop", []))
             time.sleep(0.05)
             reader.quit.set()
             reader.join(2)
@@ -160,12 +180,27 @@ def point(probe, mem, port, code, speed, chunk, seconds, repeat, activate_transp
                     'session_bytes': published, 'sequence_exact': True,
                     'all_published_received': True,'dap_handoff_cpuid':dap_handoff_during,
                     'errors': s1[5], 's0': s0, 's1': s1}
+        except BaseException as error:
+            evidence["capture_error"] = repr(error)
+            raise
         finally:
-            if serialized_control:probe.action(0x31,0)
-            mem.write_word(DHCSR, 0xa05f0003)
-            if not serialized_control:probe.action(0x31, 0)
-            reader.quit.set()
-            reader.join(2)
+            try:
+                try:
+                    if serialized_control:
+                        stop_rtt_capture(probe, attempts=evidence.setdefault("cleanup_stop", []))
+                finally:
+                    mem.write_word(DHCSR, 0xa05f0003)
+                    if not serialized_control:
+                        stop_rtt_capture(probe, attempts=evidence.setdefault("cleanup_stop", []))
+            except BaseException as error:
+                evidence["cleanup_error"] = repr(error)
+                if "capture_error" not in evidence:
+                    raise
+            finally:
+                reader.quit.set()
+                reader.join(2)
+                evidence.update(reader_bytes=reader.count, reader_error=reader.error,
+                                reader_pending_bytes=len(reader.pending))
 
 
 def main():
@@ -239,10 +274,15 @@ def main():
             for chunk in map(int, args.chunks.split(',')):
                 for repeat in range(args.repeats):
                     setup(out,inp,args.bootstrap_speed_khz,args.bootstrap_transport,jtag_ir_lengths=ir_lengths)
+                    attempt = {}
+                    report['point_in_progress'] = attempt
                     row = point(probe, mem, port, code, speed, chunk, args.seconds, repeat,
                                 lambda:setup(out,inp,speed//1000,args.transport,jtag_ir_lengths=ir_lengths,speed_hz=speed),base=base,
-                                serialized_control=args.serialized_control,check_dap_handoff=args.check_dap_handoff)
+                                serialized_control=args.serialized_control,check_dap_handoff=args.check_dap_handoff,
+                                evidence=attempt)
+                    row['stop_attempts'] = {k: attempt[k] for k in ('measurement_stop','tail_stop','cleanup_stop') if k in attempt}
                     report['rows'].append(row)
+                    del report['point_in_progress']
                     args.output.write_text(json.dumps(report, indent=2))
                     print(json.dumps({k:v for k,v in row.items() if k not in ('s0','s1')}), flush=True)
     except BaseException as exc:

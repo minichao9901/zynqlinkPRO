@@ -35,6 +35,9 @@ POINTS = (
 )
 
 
+STREAMS_RETEST = replace(POINTS[-1], name="DBG-08-STREAMS", directions=(), edge_idle=None)
+
+
 COARSE_AND_NEAR = (0, -4, 4, -8, 8, -1, 1, -2, 2)
 SECOND_HCLK = (0, -2, 2)
 CAL_POINTS = (
@@ -137,7 +140,7 @@ def inside_clock_guard(point, args):
                                 "profile", "--transport", point.transport, "--tap", point.tap,
                                 "--slot", point.slot, "--idle", point.idle], out/"profile.log")
         if tests["profile"] == 0:
-            if point.hclk_mhz == 128 and point.clock_hz == 100_000_000:
+            if point.directions and point.hclk_mhz == 128 and point.clock_hz == 100_000_000:
                 standard = out / "cmsis-peak.json"
                 tests["cmsis-peak"] = run(
                     [*PYTHON, TOOLS/"h743_peak.py", "--serial", args.serial,
@@ -155,11 +158,11 @@ def inside_clock_guard(point, args):
                                     "--speeds", point.clock_hz, "--chunks", 2048, "--seconds", args.seconds,
                                     "--repeats", args.rounds, "--serialized-control",
                                     "--output", out/"rtt-cdc.json"], out/"rtt-cdc.log")
-            if (out/"rtt-cdc.json").is_file():
-                check = read_json(out/"rtt-cdc.json")
-                if not (check.get("restore_match") and check.get("registers_match")):
-                    save(out/"summary.json", tests)
-                    return 1
+            evidence = out/"rtt-cdc.json"
+            check = read_json(evidence) if evidence.is_file() else {}
+            if tests["rtt-cdc"] or not (check.get("restore_match") and check.get("registers_match")):
+                save(out/"summary.json", tests)
+                return 1
     if point.scope:
         tests["hss"] = run([*PYTHON, TOOLS/"selectio_services_accept.py", "--serial", args.serial,
                             "--transport", point.transport, "--clock", point.clock_hz,
@@ -178,27 +181,28 @@ def main():
     parser.add_argument("--seconds", type=float, default=60)
     parser.add_argument("--rounds", type=int, default=3)
     parser.add_argument("--execute", action="store_true")
-    case_names = ["CAL-01", "DBG-01", *(p.name for p in POINTS), "ETM-02"]
-    parser.add_argument("--only", action="append", choices=case_names,
+    default_cases = ["CAL-01", "DBG-01", *(p.name for p in POINTS), "ETM-02"]
+    points = (*POINTS, STREAMS_RETEST)
+    parser.add_argument("--only", action="append", choices=[*default_cases, STREAMS_RETEST.name],
                         help="repeat to confirm selected cases")
-    parser.add_argument("--worker", choices=[p.name for p in (*CAL_POINTS, *POINTS)], help=argparse.SUPPRESS)
+    parser.add_argument("--worker", choices=[p.name for p in (*CAL_POINTS, *points)], help=argparse.SUPPRESS)
     args = parser.parse_args()
     args.pair = args.pair.resolve()
     args.out = args.out.resolve()
     if args.seconds <= 0 or args.rounds < 1:
         parser.error("positive duration and rounds required")
-    selected = set(args.only or case_names)
+    selected = set(args.only or default_cases)
     if not args.execute:
         print(json.dumps({"operation": "temporary JTAG/RAM load and guarded F103ZE SRAM",
                           "pair": str(args.pair), "out": str(args.out), "serial": args.serial,
-                          "points": [asdict(point) for point in POINTS if point.name in selected],
+                          "points": [asdict(point) for point in points if point.name in selected],
                           "calibration": [asdict(point) for point in CAL_POINTS] if "CAL-01" in selected else [],
                           "seconds": args.seconds, "rounds": args.rounds,
                           "swd50_historical": "DBG-01" in selected,
                           "etm36_rounds": 3 if "ETM-02" in selected else 0}, indent=2))
         return 0
     if args.worker:
-        point = next(p for p in (*CAL_POINTS, *POINTS) if p.name == args.worker)
+        point = next(p for p in (*CAL_POINTS, *points) if p.name == args.worker)
         return calibrate(point, args) if point.calibration_offsets else inside_clock_guard(point, args)
 
     manifest = read_json(args.pair / "manifest.json")
@@ -244,7 +248,7 @@ def main():
         guard("DBG-01-historical", 96, ["--only", "historical", "--historical-clock", 50_000_000,
                                         "--swd-tap", 8, "--swd-slot", 24, "--swd-idle", 0,
                                         "--rtt-cdc-seconds", args.seconds, "--rtt-cdc-rounds", args.rounds])
-    for point in POINTS:
+    for point in points:
         if point.name in selected:
             run_point(point)
     if "ETM-02" in selected:
