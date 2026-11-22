@@ -662,7 +662,6 @@ static void XUsbPs_EpCdcEventHandler(void *CallBackRef, u8 EpNum,
 	int Status;
 	u8	*BufferPtr;
 	u32	BufferLen;
-	u32 InavalidateLen;
 	u32	Handle;
 
 	Xil_AssertVoid(NULL != CallBackRef);
@@ -674,13 +673,8 @@ static void XUsbPs_EpCdcEventHandler(void *CallBackRef, u8 EpNum,
 		/* CDC Bulk OUT - EP 4 */
 		Status = XUsbPs_EpBufferReceive(InstancePtr, EpNum,
 					&BufferPtr, &BufferLen, &Handle);
-		InavalidateLen = BufferLen;
-		if (BufferLen % 32) {
-			InavalidateLen = (BufferLen/32) * 32 + 32;
-		}
-
-		Xil_DCacheInvalidateRange((unsigned int)BufferPtr, InavalidateLen);
 		if (XST_SUCCESS == Status) {
+			Xil_DCacheInvalidateRange((UINTPTR)BufferPtr, (BufferLen + 31U) & ~31U);
 			#if DAP_SELECTIO
             if(selectio_cdc_receiving()) selectio_cdc_receive(BufferPtr,BufferLen);
             else

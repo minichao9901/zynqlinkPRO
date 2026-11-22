@@ -1,6 +1,7 @@
 """Check SelectIO SPI reception, the AUX receive ring and the firmware CDC pump."""
 import argparse
 from pathlib import Path
+import re
 import subprocess
 
 from run_cm3_sim import ROOT, VIVADO, environment
@@ -35,21 +36,33 @@ def run_pump(out):
     mock_headers.mkdir()
     for name in ("DAP_config.h", "DAP.h", "xusbps.h", "xtime_l.h", "xil_types.h"):
         (mock_headers / name).write_text('#include "probe_host_platform.h"\n', encoding="ascii")
-    image = out / "spi_cdc_pump.exe"
-    command = ["gcc", "-std=gnu11", "-O2", "-DDAP_SELECTIO=1", "-DDAP_SELECTIO_VARIABLE=1",
-               "-DDAP_SELECTIO_SLICE=0"]
+    source = (firmware / "xusbps_intr_example.c").read_text(encoding="utf-8")
+    handler = re.search(r"^static void XUsbPs_EpCdcEventHandler\([^;]*?\)\s*\{.*?^}",
+                        source, re.MULTILINE | re.DOTALL)
+    if handler is None:
+        raise SystemExit("CDC endpoint callback not found")
+    (mock_headers / "cdc_event_under_test.h").write_text(handler.group() + "\n", encoding="utf-8")
+
+    compiler = ["gcc", "-std=gnu11", "-O2", "-DDAP_SELECTIO=1", "-DDAP_SELECTIO_VARIABLE=1",
+                "-DDAP_SELECTIO_SLICE=0"]
     for directory in (mock_headers, firmware, firmware / "DAP/Include", tests):
-        command.extend(("-I", directory))
-    command.extend((tests / "selectio_spi_cdc_pump_test.c", "-o", image))
-    with (out / "gcc.txt").open("w", encoding="utf-8") as log:
-        subprocess.run(command, stdout=log, stderr=subprocess.STDOUT, check=True, timeout=90)
-    result = subprocess.run([image], capture_output=True, text=True, timeout=30)
-    output = result.stdout + result.stderr
-    (out / "pump.txt").write_text(output, encoding="utf-8")
-    markers = ("SPI_CDC_PUMP_PASS", "SPI_CDC_PUMP_REARM_PASS", "SPI_CDC_PUMP_COUNTER_PASS")
-    if result.returncode or not all(marker in output for marker in markers):
-        raise SystemExit(output[-4000:])
-    print(output, end="", flush=True)
+        compiler.extend(("-I", directory))
+    cases = (
+        ("pump", "selectio_spi_cdc_pump_test.c",
+         ("SPI_CDC_PUMP_PASS", "SPI_CDC_PUMP_REARM_PASS", "SPI_CDC_PUMP_COUNTER_PASS")),
+        ("cdc_event", "selectio_cdc_event_test.c", ("CDC_EVENT_PASS",)),
+    )
+    for name, filename, markers in cases:
+        image = out / (name + ".exe")
+        with (out / (name + "_gcc.txt")).open("w", encoding="utf-8") as log:
+            subprocess.run([*compiler, tests / filename, "-o", image], stdout=log,
+                           stderr=subprocess.STDOUT, check=True, timeout=90)
+        result = subprocess.run([image], capture_output=True, text=True, timeout=30)
+        output = result.stdout + result.stderr
+        (out / (name + ".txt")).write_text(output, encoding="utf-8")
+        if result.returncode or not all(marker in output for marker in markers):
+            raise SystemExit(output[-4000:])
+        print(output, end="", flush=True)
 
 
 def main():

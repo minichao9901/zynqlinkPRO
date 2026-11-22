@@ -1,0 +1,3 @@
+SDK 2018.3 usbps_v2_4 XUsbPs_EpBufferReceive returns XST_USB_NO_BUF before writing BufferPtr, BufferLenPtr or Handle when the descriptor is active.
+Old production callback: Assertion failed: receive_result == RECEIVE_OK, file tools/tests/selectio_cdc_event_test.c, line 13
+Corrected production callback: CDC_EVENT_PASS empty_descriptor=2 RX_lengths=12 TX_routes=2
