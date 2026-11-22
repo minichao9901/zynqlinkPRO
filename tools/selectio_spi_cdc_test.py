@@ -10,6 +10,7 @@ import time
 
 import serial
 from serial.tools.list_ports import comports
+import usb.core
 
 from selectio_native import native_connection
 from selectio_f103_fixture import BASE, ROOT, low_link
@@ -182,8 +183,8 @@ def main():
                 fixture = f103_source(args, report) if args.f103_source else nullcontext(args.expected)
                 with serial.Serial(matches[0], baudrate=115200, timeout=0.05) as port, fixture as expected:
                     source_started = time.monotonic()
-                    native.exchange(0, 3, bytes((3, args.mode, args.tap)))
                     try:
+                        native.exchange(0, 3, bytes((3, args.mode, args.tap)))
                         report["armed"] = wait_for_claim(native, 1)
                         print(f"ARMED {matches[0]} mode={args.mode}. Send the expected SPI payload now.", flush=True)
                         report.update(capture(port, expected, args.seconds))
@@ -201,8 +202,15 @@ def main():
                                 time.sleep(remaining)
                         raise
                     finally:
-                        native.exchange(0, 3, b"\0")
-                        report["released"] = wait_for_claim(native, 0)
+                        try:
+                            port.dtr = False
+                        finally:
+                            try:
+                                native.exchange(0, 3, b"\0")
+                            except (RuntimeError, usb.core.USBError):
+                                native.info()
+                                native.exchange(0, 3, b"\0")
+                            report["released"] = wait_for_claim(native, 0)
             report["passed"] = True
         except Exception as error:
             report["error"] = str(error)
