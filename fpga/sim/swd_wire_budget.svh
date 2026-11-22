@@ -47,7 +47,7 @@ task automatic wire_budget_link(input bit ack_drain, input bit read_drain,
     end
 endtask
 
-// 0 = SRAM write, 1 = SRAM read, 2 = first RTT buffer.
+// 0 = SRAM write, 1 = SRAM read, 2 = first RTT buffer, 3 = RTT through last RdOff.
 task automatic wire_budget_end(input integer workload,input integer bytes);
     if(wire_budget_active) begin
         wire_budget_active=0;

@@ -1,0 +1,95 @@
+2026-11-22 / 7209431e reference RTL / XSim 2018.3
+swd200_link reference SHA-256 c502f40b58df9c8b8042a21b6b365956c3f30bb0cc8c10e5826a83a92fc7ddfb
+swd200_link candidate SHA-256 2e7a8fd269d062e01ed479453f445d7e2be1449f07292f7604cc59c84cb5ab34
+
+[edges reference]
+# xsim {fusion} -testplusarg jslot=21 -testplusarg sslot=22 -testplusarg idle=0 -testplusarg jidle=33 -testplusarg swd_only -testplusarg return_ns=16.0 -testplusarg service_words=1 -testplusarg half_rate -autoloadwcfg -runall
+Vivado Simulator 2018.3
+SWD50_EDGE slot=22 idle=0 read=1 ack=001 parity_error=0 d0=1 rises=46 ack_to_next_ns=50.000
+SWD50_EDGE slot=22 idle=0 read=0 ack=010 parity_error=0 d0=0 rises=13 ack_to_next_ns=60.000
+SWD50_EDGE slot=22 idle=0 read=0 ack=001 parity_error=0 d0=0 rises=46 ack_to_next_ns=50.000
+SWD50_EDGE slot=22 idle=0 read=1 ack=100 parity_error=0 d0=0 rises=13 ack_to_next_ns=60.000
+SWD50_EDGE slot=22 idle=0 read=1 ack=001 parity_error=1 d0=0 rises=46 ack_to_next_ns=50.000
+SWD50_EDGE slot=22 idle=0 read=1 ack=010 parity_error=0 d0=0 rises=13 ack_to_next_ns=60.000
+SWD50_EDGE slot=22 idle=0 read=0 ack=100 parity_error=0 d0=0 rises=13 ack_to_next_ns=60.000
+SWD50_EDGE slot=22 idle=0 read=1 ack=001 parity_error=0 d0=0 rises=46 ack_to_next_ns=50.000
+SWD50_BATCH first_ack=010 parity_error=0 retries=1 retired=2 error=0
+SWD50_BATCH first_ack=100 parity_error=0 retries=0 retired=0 error=4
+SWD50_BATCH first_ack=001 parity_error=1 retries=0 retired=0 error=9
+SWD50_EDGES_PASS
+$finish called at time : 10082500 ps : File "E:/zynqlinkPRO-efficiency/fpga/sim/tb_swd50_edges.sv" Line 179
+
+[edges candidate]
+# xsim {fusion} -testplusarg jslot=21 -testplusarg sslot=22 -testplusarg idle=0 -testplusarg jidle=33 -testplusarg swd_only -testplusarg return_ns=16.0 -testplusarg early_swd50 -testplusarg service_words=1 -testplusarg half_rate -autoloadwcfg -runall
+Vivado Simulator 2018.3
+SWD50_EDGE slot=22 idle=0 read=1 ack=001 parity_error=0 d0=1 rises=46 ack_to_next_ns=20.000
+SWD50_EDGE slot=22 idle=0 read=0 ack=010 parity_error=0 d0=0 rises=13 ack_to_next_ns=20.000
+SWD50_EDGE slot=22 idle=0 read=0 ack=001 parity_error=0 d0=0 rises=46 ack_to_next_ns=20.000
+SWD50_EDGE slot=22 idle=0 read=1 ack=100 parity_error=0 d0=0 rises=13 ack_to_next_ns=20.000
+SWD50_EDGE slot=22 idle=0 read=1 ack=001 parity_error=1 d0=0 rises=46 ack_to_next_ns=20.000
+SWD50_EDGE slot=22 idle=0 read=1 ack=010 parity_error=0 d0=0 rises=13 ack_to_next_ns=20.000
+SWD50_EDGE slot=22 idle=0 read=0 ack=100 parity_error=0 d0=0 rises=13 ack_to_next_ns=20.000
+SWD50_EDGE slot=22 idle=0 read=1 ack=001 parity_error=0 d0=0 rises=46 ack_to_next_ns=20.000
+SWD50_BATCH first_ack=010 parity_error=0 retries=1 retired=2 error=0
+SWD50_BATCH first_ack=100 parity_error=0 retries=0 retired=0 error=4
+SWD50_BATCH first_ack=001 parity_error=1 retries=0 retired=0 error=9
+SWD50_EDGES_PASS
+$finish called at time : 9812500 ps : File "E:/zynqlinkPRO-efficiency/fpga/sim/tb_swd50_edges.sv" Line 179
+
+[edges candidate slot 24 idle 2]
+# xsim {fusion} -testplusarg jslot=21 -testplusarg sslot=24 -testplusarg idle=2 -testplusarg jidle=33 -testplusarg swd_only -testplusarg return_ns=16.0 -testplusarg early_swd50 -testplusarg service_words=1 -testplusarg half_rate -autoloadwcfg -runall
+Vivado Simulator 2018.3
+SWD50_EDGE slot=24 idle=2 read=1 ack=001 parity_error=0 d0=1 rises=48 ack_to_next_ns=20.000
+SWD50_EDGE slot=24 idle=2 read=0 ack=010 parity_error=0 d0=0 rises=15 ack_to_next_ns=20.000
+SWD50_EDGE slot=24 idle=2 read=0 ack=001 parity_error=0 d0=0 rises=48 ack_to_next_ns=20.000
+SWD50_EDGE slot=24 idle=2 read=1 ack=100 parity_error=0 d0=0 rises=15 ack_to_next_ns=20.000
+SWD50_EDGE slot=24 idle=2 read=1 ack=001 parity_error=1 d0=0 rises=48 ack_to_next_ns=20.000
+SWD50_EDGE slot=24 idle=2 read=1 ack=010 parity_error=0 d0=0 rises=15 ack_to_next_ns=20.000
+SWD50_EDGE slot=24 idle=2 read=0 ack=100 parity_error=0 d0=0 rises=15 ack_to_next_ns=20.000
+SWD50_EDGE slot=24 idle=2 read=1 ack=001 parity_error=0 d0=0 rises=48 ack_to_next_ns=20.000
+SWD50_BATCH first_ack=010 parity_error=0 retries=1 retired=2 error=0
+SWD50_BATCH first_ack=100 parity_error=0 retries=0 retired=0 error=4
+SWD50_BATCH first_ack=001 parity_error=1 retries=0 retired=0 error=9
+SWD50_EDGES_PASS
+$finish called at time : 10342500 ps : File "E:/zynqlinkPRO-efficiency/fpga/sim/tb_swd50_edges.sv" Line 179
+
+[windows reference]
+# xsim {fusion} -testplusarg jslot=21 -testplusarg sslot=22 -testplusarg idle=0 -testplusarg jidle=33 -testplusarg swd_only -testplusarg target_clk_ns=7.8125 -testplusarg return_ns=16.0 -testplusarg swd50_windows -testplusarg wire_budget -testplusarg service_words=1 -testplusarg half_rate -autoloadwcfg -runall
+Vivado Simulator 2018.3
+WIRE_BUDGET work=0 bytes=2048 ns=493365.000 rises=23858 lead_ns=136.350 tail_ns=158.650 extended=525 extra_ns=15930.000 short=0 deficit_ns=0.000
+LINK_BUDGET work=0 ack_drain_cycles=2080 read_drain_cycles=8 handoffs=519 handoff_ns=280.000
+WIRE_BUDGET work=1 bytes=2048 ns=497880.000 rises=23832 lead_ns=133.850 tail_ns=166.150 extended=1035 extra_ns=20960.000 short=0 deficit_ns=0.000
+LINK_BUDGET work=1 ack_drain_cycles=2072 read_drain_cycles=1032 handoffs=517 handoff_ns=270.000
+STANDARD_SRAM_PASS words=512 batch_words=256 tar_after_write=20008800
+RTT_PACKET packet=1 bytes=2048 old_rd=6144 confirmed_rd=0
+RTT_PACKET packet=2 bytes=2048 old_rd=0 confirmed_rd=2048
+RTT_PACKET packet=3 bytes=2048 old_rd=2048 confirmed_rd=4096
+RTT_PACKET packet=4 bytes=2048 old_rd=4096 confirmed_rd=6144
+WIRE_BUDGET work=3 bytes=8192 ns=2082037.500 rises=97944 lead_ns=343.850 tail_ns=153.650 extended=4243 extra_ns=122680.000 short=0 deficit_ns=0.000
+LINK_BUDGET work=3 ack_drain_cycles=8560 read_drain_cycles=4176 handoffs=2139 handoff_ns=37590.000
+SWD50_WINDOWS_PASS SWD=50 MHz SRAM=512 words RTT=8192 bytes
+$finish called at time : 3139466250 ps : File "E:/zynqlinkPRO-efficiency/fpga/sim/tb_selectio_debug.sv" Line 266
+
+[windows candidate]
+# xsim {fusion} -testplusarg jslot=21 -testplusarg sslot=22 -testplusarg idle=0 -testplusarg jidle=33 -testplusarg swd_only -testplusarg target_clk_ns=7.8125 -testplusarg return_ns=16.0 -testplusarg early_swd50 -testplusarg swd50_windows -testplusarg wire_budget -testplusarg service_words=1 -testplusarg half_rate -autoloadwcfg -runall
+Vivado Simulator 2018.3
+WIRE_BUDGET work=0 bytes=2048 ns=482925.000 rises=23858 lead_ns=136.350 tail_ns=148.650 extended=525 extra_ns=5500.000 short=0 deficit_ns=0.000
+LINK_BUDGET work=0 ack_drain_cycles=1040 read_drain_cycles=8 handoffs=519 handoff_ns=270.000
+WIRE_BUDGET work=1 bytes=2048 ns=487530.000 rises=23832 lead_ns=133.850 tail_ns=166.150 extended=1035 extra_ns=10610.000 short=0 deficit_ns=0.000
+LINK_BUDGET work=1 ack_drain_cycles=1036 read_drain_cycles=1032 handoffs=517 handoff_ns=280.000
+STANDARD_SRAM_PASS words=512 batch_words=256 tar_after_write=20008800
+RTT_PACKET packet=1 bytes=2048 old_rd=6144 confirmed_rd=0
+RTT_PACKET packet=2 bytes=2048 old_rd=0 confirmed_rd=2048
+RTT_PACKET packet=3 bytes=2048 old_rd=2048 confirmed_rd=4096
+RTT_PACKET packet=4 bytes=2048 old_rd=4096 confirmed_rd=6144
+WIRE_BUDGET work=3 bytes=8192 ns=2039092.500 rises=97944 lead_ns=343.850 tail_ns=158.650 extended=4243 extra_ns=79730.000 short=0 deficit_ns=0.000
+LINK_BUDGET work=3 ack_drain_cycles=4280 read_drain_cycles=4176 handoffs=2139 handoff_ns=37600.000
+SWD50_WINDOWS_PASS SWD=50 MHz SRAM=512 words RTT=8192 bytes
+$finish called at time : 3075431250 ps : File "E:/zynqlinkPRO-efficiency/fpga/sim/tb_selectio_debug.sv" Line 266
+
+[shared pads default regression]
+# xsim {fusion} -testplusarg jslot=21 -testplusarg sslot=16 -testplusarg idle=2 -testplusarg jidle=33 -testplusarg service_words=1 -autoloadwcfg -runall
+Vivado Simulator 2018.3
+JTAG_PASS 100 MHz words=256 edges=      40078 slot=         21
+SELECTIO_PASS SWD 100 MHz words=256 slot=         16
+$finish called at time : 737247500 ps : File "E:/zynqlinkPRO-efficiency/fpga/sim/tb_selectio_debug.sv" Line 311

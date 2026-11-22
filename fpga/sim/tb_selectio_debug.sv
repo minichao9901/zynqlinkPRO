@@ -65,7 +65,8 @@ module tb_selectio_debug #(parameter integer QUAD_DMA=0);
         bus_clk,jload,sload,jtap,stap,clk_pin,data_pin,tdi_pin,tdo_pin,,, , ,1'b0,4'b0,4'b0,4'b0,,1'b0,1'b0,serial_rx_clk,);
     jtag_dp_model #(.IRLEN(5),.DUMMY(1),.RETURN_NS(0.2)) boundary(
         .rst_n(resetn),.tck(clk_pin),.tms(data_pin),.tdi(tdi_pin),.tdo(boundary_tdo));
-    cm3_target #(.WORDS(1024),.ADDR_BITS(10)) cm3(
+    localparam SRAM_ADDR_BITS=12;
+    cm3_target #(.WORDS(1<<SRAM_ADDR_BITS),.ADDR_BITS(SRAM_ADDR_BITS)) cm3(
         .clk(hclk),.rst_n(resetn),.dbg_rst_n(resetn),.trst_n(resetn),.swclktck(clk_pin),
         .swditms(data_pin),.tdi(boundary_tdo),.tdo(target_tdo),.ntdoen(tdo_disabled),
         .swdo(target_swd),.swdoen(target_drive));
@@ -177,15 +178,16 @@ module tb_selectio_debug #(parameter integer QUAD_DMA=0);
     endtask
     integer block_idle=2, jtag_idle=33,swd_batches=0;
     realtime jtag_start;
+    bit swd50_windows;
     task automatic batch(input int count);
         realtime started;
         reg [31:0] status;
         started=$realtime;
-        if(count==259)wire_budget_begin();
+        if(count==259 && !swd50_windows)wire_budget_begin();
         write_reg('h10,count,0);
         do read_reg(4,status); while (!(status[2] && status[5]));
         read_reg('h14,status);
-        if(count==259)begin
+        if(count==259 && !swd50_windows)begin
             wire_budget_end(swd_batches==0 ? 0 : 1,1024);
             $display("QUEUE_MBPS swd %s %f",swd_batches==0?"write":"read ",1024000.0/($realtime-started));swd_batches++;
         end
@@ -207,7 +209,9 @@ module tb_selectio_debug #(parameter integer QUAD_DMA=0);
     function automatic [31:0] pattern(input int i);
         pattern=32'h379db26a ^ (32'h9e3779b9*i);
     endfunction
+    `include "swd50_queue_windows.svh"
     initial begin
+        swd50_windows=$test$plusargs("swd50_windows");
         if($value$plusargs("idle=%d",block_idle))begin end
         if($value$plusargs("jidle=%d",jtag_idle))begin end
         expected_period=$test$plusargs("half_rate") ? 20.0 : 10.0;
@@ -255,6 +259,12 @@ module tb_selectio_debug #(parameter integer QUAD_DMA=0);
         if(value!==32'h2ba01477) $fatal(1,"SWD DPIDR %h",value);
         put(0,0,'h1e); put(1,4,'h50000000); batch(2);
         put(0,8,0); put(1,1,'h23000052); batch(2);
+        if(swd50_windows) begin
+            standard_sram();
+            queued_rtt();
+            $display("SWD50_WINDOWS_PASS SWD=50 MHz SRAM=512 words RTT=8192 bytes");
+            $finish;
+        end
         put(0,5,'h20008000);
         write_reg('h2c,5,0);write_reg('h1c,2,0);
         put(0,5,'h20008000);
@@ -300,5 +310,5 @@ module tb_selectio_debug #(parameter integer QUAD_DMA=0);
         $display("SELECTIO_PASS SWD %0d MHz words=256 slot=%d",$test$plusargs("half_rate")?50:100,sslot);
         $finish;
     end
-    initial begin #3_000_000; $fatal(1,"deadline owner=%d",owner); end
+    initial begin #8_000_000; $fatal(1,"deadline owner=%d",owner); end
 endmodule
