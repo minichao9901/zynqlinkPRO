@@ -1,0 +1,155 @@
+{
+  "board": "f103ze",
+  "operation": "HS3 JTAG/RAM, guarded F103ZE SRAM",
+  "suites": [
+    "switch",
+    "debug",
+    "memory",
+    "rtt",
+    "combo"
+  ],
+  "serial": "12345678",
+  "seconds": 60.0,
+  "rounds": 3,
+  "pair": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-spi-cdc-20261123",
+  "out": "E:\\zynqlinkPRO-efficiency\\build\\spi-cdc-board-cli-retest",
+  "debug_service_hz": 100000000,
+  "memory_frame": 4096,
+  "schedule": "sliding",
+  "rtt_ring_bytes": 8192,
+  "rtt_chunk": 2048,
+  "cases": [
+    {
+      "name": "load",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 10.051575600002252,
+      "log": "load.log"
+    },
+    {
+      "name": "info",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 0.4236602999990282,
+      "log": "info.log"
+    },
+    {
+      "name": "switch",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 14.821301799998764,
+      "log": "switch.log",
+      "restored": true
+    },
+    {
+      "name": "host-loss",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 12.274747300001764,
+      "log": "host-loss.log",
+      "restored": true
+    },
+    {
+      "name": "debug-swd",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 4.334213800000725,
+      "log": "debug-swd.log",
+      "restored": true
+    },
+    {
+      "name": "memory-swd",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 542.5383733999988,
+      "log": "memory-swd.log",
+      "restored": true
+    },
+    {
+      "name": "rtt-swd-1",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 64.91923730000053,
+      "log": "rtt-swd-1.log",
+      "restored": true
+    },
+    {
+      "name": "rtt-swd-2",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 65.10877640000035,
+      "log": "rtt-swd-2.log",
+      "restored": true
+    },
+    {
+      "name": "rtt-swd-3",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 64.93605860000025,
+      "log": "rtt-swd-3.log",
+      "restored": true
+    },
+    {
+      "name": "combo-swd",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 64.45274190000055,
+      "log": "combo-swd.log",
+      "restored": true
+    },
+    {
+      "name": "debug-jtag",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 4.182437700001174,
+      "log": "debug-jtag.log",
+      "restored": true
+    },
+    {
+      "name": "memory-jtag",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 542.9687444999981,
+      "log": "memory-jtag.log",
+      "restored": true
+    },
+    {
+      "name": "rtt-jtag-1",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 66.1484993999984,
+      "log": "rtt-jtag-1.log",
+      "restored": true
+    },
+    {
+      "name": "rtt-jtag-2",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 65.29716840000037,
+      "log": "rtt-jtag-2.log",
+      "restored": true
+    },
+    {
+      "name": "rtt-jtag-3",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 64.92057410000052,
+      "log": "rtt-jtag-3.log",
+      "restored": true
+    },
+    {
+      "name": "combo-jtag",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 64.55216970000038,
+      "log": "combo-jtag.log",
+      "restored": true
+    }
+  ],
+  "hashes": {
+    "probe.bit": "d7c583241eea37cc032a5a8e951f9b1150d8e9ddee11bab4e84ca29a18590aa3",
+    "application.elf": "47ee10307887b6bc98e65229a39641583facf48299479eb609cf952798ad799e",
+    "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+  },
+  "passed": true
+}

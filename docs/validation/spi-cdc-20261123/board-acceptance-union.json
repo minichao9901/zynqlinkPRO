@@ -1,0 +1,349 @@
+{
+  "hashes": {
+    "probe.bit": "d7c583241eea37cc032a5a8e951f9b1150d8e9ddee11bab4e84ca29a18590aa3",
+    "application.elf": "47ee10307887b6bc98e65229a39641583facf48299479eb609cf952798ad799e",
+    "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+  },
+  "cases": [
+    {
+      "name": "load",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 10.051575600002252,
+      "log": "load.log",
+      "evidence": "retest"
+    },
+    {
+      "name": "info",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 0.4236602999990282,
+      "log": "info.log",
+      "evidence": "retest"
+    },
+    {
+      "name": "usb-1",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 60.45742210000026,
+      "log": "usb-1.log",
+      "evidence": "initial"
+    },
+    {
+      "name": "usb-2",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 60.46184100000028,
+      "log": "usb-2.log",
+      "evidence": "initial"
+    },
+    {
+      "name": "usb-3",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 60.4190466,
+      "log": "usb-3.log",
+      "evidence": "initial"
+    },
+    {
+      "name": "switch",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 14.821301799998764,
+      "log": "switch.log",
+      "restored": true,
+      "evidence": "retest"
+    },
+    {
+      "name": "host-loss",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 12.274747300001764,
+      "log": "host-loss.log",
+      "restored": true,
+      "evidence": "retest"
+    },
+    {
+      "name": "debug-swd",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 4.334213800000725,
+      "log": "debug-swd.log",
+      "restored": true,
+      "evidence": "retest"
+    },
+    {
+      "name": "memory-swd",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 542.5383733999988,
+      "log": "memory-swd.log",
+      "restored": true,
+      "evidence": "retest"
+    },
+    {
+      "name": "rtt-swd-1",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 64.91923730000053,
+      "log": "rtt-swd-1.log",
+      "restored": true,
+      "evidence": "retest"
+    },
+    {
+      "name": "rtt-swd-2",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 65.10877640000035,
+      "log": "rtt-swd-2.log",
+      "restored": true,
+      "evidence": "retest"
+    },
+    {
+      "name": "rtt-swd-3",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 64.93605860000025,
+      "log": "rtt-swd-3.log",
+      "restored": true,
+      "evidence": "retest"
+    },
+    {
+      "name": "combo-swd",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 64.45274190000055,
+      "log": "combo-swd.log",
+      "restored": true,
+      "evidence": "retest"
+    },
+    {
+      "name": "debug-jtag",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 4.182437700001174,
+      "log": "debug-jtag.log",
+      "restored": true,
+      "evidence": "retest"
+    },
+    {
+      "name": "memory-jtag",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 542.9687444999981,
+      "log": "memory-jtag.log",
+      "restored": true,
+      "evidence": "retest"
+    },
+    {
+      "name": "rtt-jtag-1",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 66.1484993999984,
+      "log": "rtt-jtag-1.log",
+      "restored": true,
+      "evidence": "retest"
+    },
+    {
+      "name": "rtt-jtag-2",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 65.29716840000037,
+      "log": "rtt-jtag-2.log",
+      "restored": true,
+      "evidence": "retest"
+    },
+    {
+      "name": "rtt-jtag-3",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 64.92057410000052,
+      "log": "rtt-jtag-3.log",
+      "restored": true,
+      "evidence": "retest"
+    },
+    {
+      "name": "combo-jtag",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 64.55216970000038,
+      "log": "combo-jtag.log",
+      "restored": true,
+      "evidence": "retest"
+    },
+    {
+      "name": "services-swd",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 380.3506913000019,
+      "log": "services-swd.log",
+      "restored": true,
+      "evidence": "initial"
+    },
+    {
+      "name": "services-jtag",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 390.5225272000025,
+      "log": "services-jtag.log",
+      "restored": true,
+      "evidence": "initial"
+    },
+    {
+      "name": "wire",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 548.4642418000003,
+      "log": "wire.log",
+      "restored": true,
+      "evidence": "initial"
+    },
+    {
+      "name": "external-manchester",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 62.69462770000246,
+      "log": "external-manchester.log",
+      "restored": true,
+      "evidence": "initial"
+    },
+    {
+      "name": "spi-target",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 242.07200139999986,
+      "log": "spi-target.log",
+      "restored": true,
+      "evidence": "initial"
+    },
+    {
+      "name": "manchester-bursts",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 61.803797500000655,
+      "log": "manchester-bursts.log",
+      "restored": true,
+      "evidence": "initial"
+    },
+    {
+      "name": "cdc",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 2.401649700001144,
+      "log": "cdc.log",
+      "restored": true,
+      "evidence": "initial"
+    },
+    {
+      "name": "cdc-rtt-scope",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 2.4360328000002482,
+      "log": "cdc-rtt-scope.log",
+      "restored": true,
+      "evidence": "initial"
+    },
+    {
+      "name": "cdc-100m",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 61.75587450000239,
+      "log": "cdc-100m.log",
+      "restored": true,
+      "evidence": "initial"
+    },
+    {
+      "name": "spi-cdc-mode0",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 4.452449799999158,
+      "log": "spi-cdc-mode0.log",
+      "restored": true,
+      "evidence": "initial"
+    },
+    {
+      "name": "spi-cdc-mode1",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 4.4178709000007075,
+      "log": "spi-cdc-mode1.log",
+      "restored": true,
+      "evidence": "initial"
+    },
+    {
+      "name": "spi-cdc-mode2",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 4.429302900000039,
+      "log": "spi-cdc-mode2.log",
+      "restored": true,
+      "evidence": "initial"
+    },
+    {
+      "name": "spi-cdc-mode3",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 4.420629899999767,
+      "log": "spi-cdc-mode3.log",
+      "restored": true,
+      "evidence": "initial"
+    },
+    {
+      "name": "itm-native",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 26.35329659999843,
+      "log": "itm-native.log",
+      "restored": true,
+      "evidence": "initial"
+    },
+    {
+      "name": "itm-cmsis-dap",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 26.388923099999374,
+      "log": "itm-cmsis-dap.log",
+      "restored": true,
+      "evidence": "initial"
+    },
+    {
+      "name": "etm",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 10.668646800000715,
+      "log": "etm.log",
+      "restored": true,
+      "evidence": "initial"
+    },
+    {
+      "name": "etm-verify",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 0.778986299999815,
+      "log": "etm-verify.log",
+      "evidence": "initial"
+    }
+  ],
+  "initial_terminal": true,
+  "retest_terminal": true,
+  "pending_or_failed": [],
+  "verified_union": true,
+  "performance": {
+    "swd": {
+      "sram_pc_median": {
+        "read": 6.672742256397354,
+        "write": 6.6095636397014985,
+        "mixed": 6.574601857863859
+      },
+      "rtt_if4_median": 6.156400180279796
+    },
+    "jtag": {
+      "sram_pc_median": {
+        "read": 4.715824339066514,
+        "write": 4.56562338539042,
+        "mixed": 4.603059082768928
+      },
+      "rtt_if4_median": 3.9966835562881866
+    }
+  }
+}
