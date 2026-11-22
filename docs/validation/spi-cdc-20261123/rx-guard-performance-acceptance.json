@@ -1,0 +1,151 @@
+{
+  "hashes": {
+    "probe.bit": "f3c4ccfd78c9148649897a0902fb93eadb209494e0295956981c973bbac92c66",
+    "application.elf": "e1f21ea8d5aa6403f4f2ab78da0a3215cea11862cb852dd9e37e413248068b90",
+    "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+  },
+  "serial": "12345678",
+  "standard_board_cases": 36,
+  "first_performance_run": [
+    {
+      "name": "CAL-SWD50-HCLK96",
+      "exit": 0,
+      "restored": true,
+      "hclk_dwt_hz": 96064081.60785085,
+      "error": null
+    },
+    {
+      "name": "CAL-SWD73-HCLK128",
+      "exit": 0,
+      "restored": true,
+      "hclk_dwt_hz": 128092081.38551123,
+      "error": null
+    },
+    {
+      "name": "CAL-SWD100-HCLK128",
+      "exit": 0,
+      "restored": true,
+      "hclk_dwt_hz": 128081703.46067193,
+      "error": null
+    },
+    {
+      "name": "CAL-SWD100-HCLK96",
+      "exit": 0,
+      "restored": true,
+      "hclk_dwt_hz": 96040826.2033877,
+      "error": null
+    },
+    {
+      "name": "CAL-JTAG50-HCLK96",
+      "exit": 0,
+      "restored": true,
+      "hclk_dwt_hz": 96043319.74588884,
+      "error": null
+    },
+    {
+      "name": "CAL-JTAG73-HCLK128",
+      "exit": 0,
+      "restored": true,
+      "hclk_dwt_hz": 128227358.2452172,
+      "error": null
+    },
+    {
+      "name": "CAL-JTAG100-HCLK128",
+      "exit": 0,
+      "restored": true,
+      "hclk_dwt_hz": 128173956.04108183,
+      "error": null
+    },
+    {
+      "name": "CAL-JTAG100-HCLK96",
+      "exit": 0,
+      "restored": true,
+      "hclk_dwt_hz": 96039072.92107406,
+      "error": null
+    },
+    {
+      "name": "DBG-01-historical",
+      "exit": 0,
+      "restored": true,
+      "hclk_dwt_hz": 96066728.86013086,
+      "error": null
+    },
+    {
+      "name": "DBG-03",
+      "exit": 0,
+      "restored": true,
+      "hclk_dwt_hz": 96059078.48313604,
+      "error": null
+    },
+    {
+      "name": "DBG-04",
+      "exit": 0,
+      "restored": true,
+      "hclk_dwt_hz": 128039187.79519816,
+      "error": null
+    },
+    {
+      "name": "DBG-07",
+      "exit": 0,
+      "restored": true,
+      "hclk_dwt_hz": 96051869.35261203,
+      "error": null
+    },
+    {
+      "name": "DBG-08",
+      "exit": 1,
+      "restored": true,
+      "hclk_dwt_hz": 128107975.50765145,
+      "error": "Command '['C:\\\\Users\\\\Administrator\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python313\\\\python.exe', '-X', 'utf8', 'E:\\\\zynqlinkPRO-efficiency\\\\tools\\\\selectio_f103_performance.py', '--pair', 'E:\\\\zynqlinkPRO-efficiency\\\\prebuilt\\\\selectio-spi-cdc-rx-guard-20261123', '--serial', '12345678', '--out', 'E:\\\\zynqlinkPRO-efficiency\\\\build\\\\spi-cdc-rx-guard-long-hclk\\\\DBG-08', '--worker', 'DBG-08', '--seconds', '60.0', '--rounds', '3', '--execute']' returned non-zero exit status 1."
+    },
+    {
+      "name": "ETM-02-36-1",
+      "exit": 0,
+      "restored": true,
+      "hclk_dwt_hz": 72022505.2752704,
+      "error": null
+    },
+    {
+      "name": "ETM-02-36-2",
+      "exit": 0,
+      "restored": true,
+      "hclk_dwt_hz": 72052514.76377693,
+      "error": null
+    },
+    {
+      "name": "ETM-02-36-3",
+      "exit": 0,
+      "restored": true,
+      "hclk_dwt_hz": 72077438.26410969,
+      "error": null
+    }
+  ],
+  "targeted_stream_retest": [
+    {
+      "name": "DBG-08-STREAMS",
+      "exit": 0,
+      "restored": true,
+      "hclk_dwt_hz": 128141588.48894234,
+      "error": null
+    }
+  ],
+  "evidence": {
+    "calibration": "rx-guard-cal-01.json",
+    "swd_50_historical": "rx-guard-dbg01-historical.json",
+    "swd_100_hclk96": "rx-guard-dbg03-hclk96.json",
+    "swd_100_hclk128": "rx-guard-dbg04-hclk128.json",
+    "swd_100_hclk128_idle0_write": "rx-guard-swd-idle0-write.json",
+    "jtag_100_hclk96": "rx-guard-dbg07-hclk96.json",
+    "jtag_100_hclk128_initial": "rx-guard-dbg08-attempt1.json",
+    "jtag_100_hclk128_streams_retest": "rx-guard-dbg08-streams-retest.json",
+    "jtag_100_hclk128_idle25": "rx-guard-jtag-idle25-long.json",
+    "etm_36": "rx-guard-etm36-long.json",
+    "all_supported_features": "rx-guard-full-board.json"
+  },
+  "final_target_restored": true,
+  "external_source_pending": [
+    "SPI slave 100 MHz continuous CDC",
+    "external four-mode full-speed SPI slave MISO",
+    "external continuous mixed-code 100 Mbit/s Manchester"
+  ]
+}

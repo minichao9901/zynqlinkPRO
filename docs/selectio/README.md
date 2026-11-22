@@ -237,7 +237,7 @@ F103 保持 CDC48 时 TRACECLK 为 24 MHz。默认窗口从目标恢复执行开
 
 ## 构建与复测
 
-融合版三档调试时钟、SRAM、采集和物理接口的定向性能验收见 [精简性能用例](fusion-performance-cases.md)。
+融合版三档调试时钟、SRAM、采集和物理接口的定向性能验收见 [精简性能用例](fusion-performance-cases.md) 与 [已确认结果](fusion-performance-cases.md#已确认结果)。
 
 ```powershell
 $env:ZYNQLINK_FPGA_OUT = Join-Path $PWD 'build/fusion-pl-new'

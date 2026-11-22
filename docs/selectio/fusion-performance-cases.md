@@ -67,3 +67,24 @@ python -X utf8 tools/selectio_etm_sweep.py --mhz 64 72 --duty 45 55 --clock-dela
 ```
 
 2026-11-23 定向离线抽查通过。SWD 72.727 MHz 完成 512 字 SRAM 与四包 RTT，JTAG 50/72.727/100 MHz 完成 256 字读写。两种协议的 72.727 MHz 摘要均核对为 13.750 ns。SPI 台架通过四个模式及三种长度。ETM 合并两个时钟相对延迟的 32 个样本，64 MHz 通过 32/32，72 MHz 通过 16/32。实板 Case 保留待执行。
+
+## 已确认结果
+
+以下在当前 CDC OUT 防护配对上复验，使用同一份 bit、PS ELF 和初始化 Tcl。F103ZE CDC48 全功能套件 **36/36** 通过，CAL-01 八组共 60 点、59 点通过。HCLK 长窗保留 DBG-08 首轮失败，并以同条件复验确认 RTT→CDC 和采样。 [全功能报告](../validation/spi-cdc-20261123/rx-guard-full-board.json) · [性能验收索引](../validation/spi-cdc-20261123/rx-guard-performance-acceptance.json)
+
+| Case | 指标 | 本轮已确认值 | 条件与证据 |
+|---|---|---:|---|
+| DBG-01 | 50 MHz 标准 SWD SRAM 读／写 | 3.761 / 3.820 MB/s | HCLK96，tap8/slot24/idle0，2 KiB、深度 32、每轮 256 块。 [标准对照](../validation/spi-cdc-20261123/rx-guard-dbg01-historical.json) |
+| DBG-01 | 50 MHz SWD RTT→CDC | 3.730 MB/s | 同条件三轮各 60 秒。 [逐轮数据](../validation/spi-cdc-20261123/rx-guard-dbg01-historical.json) |
+| DBG-04 | SWD 原生 SRAM 读／写／交替 | **6.682 / 6.852 / 6.641 MB/s** | 100 MHz、HCLK128、tap8/slot25，读和交替用 idle1，写用 idle0。4,032 B、深度 4，每方向 3×60 秒。 [idle1](../validation/spi-cdc-20261123/rx-guard-dbg04-hclk128.json) · [idle0 写入](../validation/spi-cdc-20261123/rx-guard-swd-idle0-write.json) |
+| DBG-03/04 | SWD RTT→CDC | **6.502 MB/s** | 100 MHz、HCLK96/idle2 和 HCLK128/idle1，均为 8 KiB 环、2 KiB 搬运、3×60 秒。 [HCLK96](../validation/spi-cdc-20261123/rx-guard-dbg03-hclk96.json) · [HCLK128](../validation/spi-cdc-20261123/rx-guard-dbg04-hclk128.json) |
+| DBG-03/04 | SWD J-Scope 单／八变量 | **约 1,499,800 / 149,980 组/s** | 100 MHz、16／160 tick，HCLK96/128 两组各 3×60 秒，逐样本、STOP 尾帧和跳拍率 <0.1% 均通过。 [HCLK96](../validation/spi-cdc-20261123/rx-guard-dbg03-hclk96.json) · [HCLK128](../validation/spi-cdc-20261123/rx-guard-dbg04-hclk128.json) |
+| DBG-08 | JTAG 原生 SRAM 读／写／交替 | **5.213 / 5.036 / 4.836 MB/s** | 100 MHz、HCLK128、tap16/slot28，读写用 idle25，交替用 idle29，每方向 3×60 秒。 [idle25](../validation/spi-cdc-20261123/rx-guard-jtag-idle25-long.json) · [idle29](../validation/spi-cdc-20261123/rx-guard-dbg08-attempt1.json) |
+| DBG-08 | JTAG RTT→CDC | **4.215 MB/s** | 100 MHz、HCLK128、idle29，重跑的 3×60 秒序号、尾量和恢复通过。 [定向复验](../validation/spi-cdc-20261123/rx-guard-dbg08-streams-retest.json) |
+| DBG-07/08 | JTAG J-Scope 单／八变量 | **约 299,959 / 90,897 组/s** | 100 MHz、80／264 tick，HCLK96/idle33、HCLK128/idle29 各 3×60 秒，尾帧匹配且每轮跳 1 拍。 [HCLK96](../validation/spi-cdc-20261123/rx-guard-dbg07-hclk96.json) · [HCLK128](../validation/spi-cdc-20261123/rx-guard-dbg08-streams-retest.json) |
+| IO-01/02/03 | COM、NRZ、Manchester | **CDC 100 Mbaud 双向回环每向 4.471 MB/s** | 原生 IF4 和标准 CMSIS-DAP 的 NRZ 3/48 Mbaud、Manchester 1.5/24 Mbit/s 均全匹配。100 Mbit/s 混合码型已通过 M15 pad 物理突发，独立源连续输入待验。 [串行证据](../validation/spi-cdc-20261123/rx-guard-full-board.json) |
+| SPI-02 | SPI 主机四模式 | **100 MHz SCK 档** | MOSI 实体校验及独立 12 MHz MISO 通过，独立高速从机的全速回包待验。 [线路记录](../validation/spi-cdc-20261123/rx-guard-wire.json) · [四模式](../validation/spi-cdc-20261123/rx-guard-full-board.json) |
+| SPI-03/04 | SPI 从机 → CDC | **F103 GPIO 四模式各 16 KiB 通过** | 100 MHz 通过 pad 原语和接收环模型。连续 100 MHz 的端到端逐字节实测待独立 SPI 主机。 [硬件与仿真证据](../validation/spi-cdc-20261123/README.md) |
+| ETM-02/03 | 实板高档 TRACECLK | **36 MHz，3×1 秒** | F103 SRAM 循环与严格解码通过。首版测得 40 MHz 起出现解码或成帧问题，数字台架的 64 MHz 结果单独记录。 [36 MHz](../validation/spi-cdc-20261123/rx-guard-etm36-long.json) · [此前的物理边界](../validation/spi-cdc-20261123/etm-physical-boundary-v1.json) |
+
+吞吐以十进制 MB/s 或实收组/s 计，列出的读写最优值限于已验收组合。主机端 STOP 忙状态修正已有离线注入证据，同条件实板复验未复现首轮的忙返回。 [首轮保留记录](../validation/spi-cdc-20261123/rx-guard-dbg08-attempt1.json)
