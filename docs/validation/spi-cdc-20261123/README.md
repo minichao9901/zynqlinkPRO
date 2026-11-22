@@ -197,7 +197,7 @@ CDC OUT 防护配对，HCLK96 的 DWT 回读约 96.067 MHz，SWCLK 寄存器换�
 
 实际 SWCLK 99,999,998 Hz，HCLK 的 DWT 回读 128.039 MHz，tap8/slot25/idle1。原生 SRAM 4,032 B 跨页、深度 4，读／写／交替各 3×60 秒，PC 中位 **6.682 / 6.738 / 6.641 MB/s**。标准 CMSIS-DAP 的 2 KiB、深度 32、256 块对照读／写 **6.515 / 6.821 MB/s**。RTT→CDC 的三个 60 秒窗口全量核对，中位 **6.502 MB/s**。
 
-J-Scope 单／八变量三轮各 60 秒，用 16／160 tick，PC 中位 **1,499,800／149,980 组/s**。每轮跳拍率低于 0.1%，样值和 STOP 尾帧匹配。全部目标状态和时钟恢复通过。idle0 写入短测为 6.861 MB/s，单独排队确认。 [长窗与 idle 短筛原始数据](rx-guard-dbg04-hclk128.json)
+J-Scope 单／八变量三轮各 60 秒，用 16／160 tick，PC 中位 **1,499,800／149,980 组/s**。每轮跳拍率低于 0.1%，样值和 STOP 尾帧匹配。全部目标状态和时钟恢复通过。idle0 写入短测为 6.861 MB/s，三轮长窗结果见后文。 [长窗与 idle 短筛原始数据](rx-guard-dbg04-hclk128.json)
 
 ## DBG-07 的 JTAG 100 MHz／HCLK96 采样长窗
 
@@ -212,3 +212,7 @@ RTT→CDC 前两轮约 4.216／4.215 MB/s，第三轮 STOP 首次返回忙 `-7` 
 ## ETM-02 的 36 MHz TRACECLK 复验
 
 在 CDC OUT 防护配对上，目标 HCLK 约 72 MHz，按目标配置换算 TRACECLK 为 **36 MHz**。三轮各 1 秒硬件窗口，formatter 分别为 **33,235,778／33,235,781／33,235,788 B**。各轮硬件 parser、FIFO、写入和校准状态错误均为零，严格解码通过，两路交替分支、目标和 FPB 恢复均核对。解码窗口各保留一个边界 gap。更高档位的首版现象及测试条件见 [原边界记录](etm-physical-boundary-v1.json)。 [本配对三轮记录](rx-guard-etm36-long.json)
+
+## SWD idle0 的 HCLK128 写入复验
+
+同一 CDC OUT 防护配对，物理 OCM 再核对 80,260 B。HCLK128、SWCLK 实际 99,999,998 Hz、tap8/slot25，跨页 4,032 B、深度 4。idle0 三轮各 60 秒的原生写入中位 **6.852 MB/s**，在已验证的 100 MHz／HCLK128 写入条件中领先 idle1 的 **6.738 MB/s**。每轮分方向字节数、末块、保护字和目标时钟恢复均通过。 [逐轮数据](rx-guard-swd-idle0-write.json)
