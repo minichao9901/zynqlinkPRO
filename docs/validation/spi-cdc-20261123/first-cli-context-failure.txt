@@ -1,0 +1,33 @@
+{"transport": "swd", "tap": 8, "slot": 25, "idle": 2}
+Traceback (most recent call last):
+  File "E:\zynqlinkPRO-efficiency\tools\selectio_cli.py", line 555, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "E:\zynqlinkPRO-efficiency\tools\selectio_cli.py", line 473, in main
+    with connection(args.serial) as (tx,rx):
+         ~~~~~~~~~~^^^^^^^^^^^^^
+TypeError: 'generator' object does not support the context manager protocol
+Traceback (most recent call last):
+  File "E:\zynqlinkPRO-efficiency\tools\selectio_debug_test.py", line 86, in <module>
+    main()
+    ~~~~^^
+  File "E:\zynqlinkPRO-efficiency\tools\selectio_debug_test.py", line 44, in main
+    subprocess.run([sys.executable,"-X","utf8",str(ROOT/"toolbox.py"),"selectio","--serial",a.serial,
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                    "identify","--transport",a.transport,"--clock","1000000"],check=True)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\subprocess.py", line 577, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe', '-X', 'utf8', 'E:\\zynqlinkPRO-efficiency\\toolbox.py', 'selectio', '--serial', '12345678', 'identify', '--transport', 'swd', '--clock', '1000000']' returned non-zero exit status 1.
+Traceback (most recent call last):
+  File "E:\zynqlinkPRO-efficiency\tools\selectio_f103_fixture.py", line 142, in <module>
+    main()
+    ~~~~^^
+  File "E:\zynqlinkPRO-efficiency\tools\selectio_f103_fixture.py", line 127, in main
+    subprocess.run(cmd,cwd=ROOT,check=True)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\subprocess.py", line 577, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe', '-X', 'utf8', 'E:\\zynqlinkPRO-efficiency\\tools\\selectio_debug_test.py', '--serial', '12345678', '--out', 'E:\\zynqlinkPRO-efficiency\\build\\spi-cdc-board-full\\debug-swd', '--transport', 'swd', '--slot', '25', '--clock', '100000000', '--idle', '2', '--execute']' returned non-zero exit status 1.

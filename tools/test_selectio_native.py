@@ -1,10 +1,30 @@
 """Exercise framed WinUSB request ordering without claiming a USB interface."""
+import argparse
 from collections import deque
 import struct
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
+from selectio_cli import connection, selectio_clock_number
 from selectio_native import HEADER, NativeStatusError, NativeStream
+
+
+class NativeCliTests(unittest.TestCase):
+    def test_clock_parser_returns_hertz(self):
+        self.assertEqual(selectio_clock_number("73000000"), 73000000)
+        with self.assertRaises(argparse.ArgumentTypeError):
+            selectio_clock_number("100000001")
+
+    def test_dap_context_releases_handle_on_command_error(self):
+        device, transmit, receive = object(), object(), object()
+        with patch("selectio_cli.open_dap", return_value=(device, transmit, receive)) as open_dap, \
+                patch("selectio_cli.usb.util.dispose_resources") as dispose:
+            with self.assertRaisesRegex(RuntimeError, "failed command"):
+                with connection("12345678") as endpoints:
+                    self.assertEqual(endpoints, (transmit, receive))
+                    raise RuntimeError("failed command")
+            open_dap.assert_called_once_with("12345678")
+            dispose.assert_called_once_with(device)
 
 
 class Endpoint:

@@ -20,7 +20,6 @@ def number(text):
     return int(text, 0)
 
 
-@contextmanager
 def selectio_clock_number(text):
     clock=number(text)
     if not 50000000<=clock<=100000000:
@@ -28,6 +27,7 @@ def selectio_clock_number(text):
     return clock
 
 
+@contextmanager
 def connection(serial):
     device, out_ep, in_ep = open_dap(serial)
     try:
@@ -411,9 +411,9 @@ def main():
         sub.add_argument("--clock",type=number,required=True,help="requested link rate, Hz")
         sub.add_argument("--seconds",type=float,required=True)
         sub.add_argument("--out",type=Path,required=True)
-        sub.add_argument("--tap",type=int,choices=range(32),help="apply tap together with --slot and --idle")
-        sub.add_argument("--slot",type=int,choices=range(64))
-        sub.add_argument("--idle",type=int,choices=range(256))
+        sub.add_argument("--tap",type=int,choices=range(32),metavar="0..31",help="apply tap together with --slot and --idle")
+        sub.add_argument("--slot",type=int,choices=range(64),metavar="0..63")
+        sub.add_argument("--idle",type=int,choices=range(256),metavar="0..255",help="SWD accepts 0..15")
         if action=="rtt":
             sub.add_argument("--chunk",type=int,choices=(1024,2048),help="maximum target RTT bytes per confirmed RdOff update")
             sub.add_argument("--address",type=number,required=True,help="RTT control block or scan base")
