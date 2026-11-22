@@ -213,6 +213,13 @@ python -X utf8 tools/selectio_spi_cdc_test.py --serial 12345678 --mode 0 --tap 0
 
 统一实板入口支持 50/73/100 MHz，需要配对清单提供相应采样档。HCLK96/128 的定向压测使用 `selectio_f103_clock_accept.py --pair ... --hclk-mhz ... --out ... --execute --command <子命令>`，由外层夹具核对时钟、暂停并备份 SRAM，子命令退出后恢复。需要完整 JTAG 时加 `--enable-jtag`。这些 HCLK 是 F103 实验档。
 
+候选长窗可从同一个入口复跑。默认使用 DBG-01 的历史口径、DBG-03/04/07/08 的 100 MHz 性能候选，以及 36 MHz TRACECLK 的三轮 1 秒确认。`--only` 可重复使用。下面先预览，再临时加载并验证指定配对。每个测试点有单独的目标恢复记录。
+
+```powershell
+python -X utf8 toolbox.py project run board.selectio-performance -- --pair $pair --out build/perf-preview
+python -X utf8 toolbox.py project run board.selectio-performance -- --pair $pair --out build/perf-128 --only DBG-04 --only DBG-08 --execute
+```
+
 ## ETM
 
 ```powershell
