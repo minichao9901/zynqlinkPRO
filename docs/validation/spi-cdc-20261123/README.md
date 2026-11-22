@@ -79,3 +79,9 @@ CDC48 的 24 MHz TRACECLK 运行态 ETM，完整 1.000 秒窗口、19,389,488 B 
 | DBG-08 JTAG | 100 / 128 | 4.959 / 4.779，idle29 | 4.213 | 超额试点缺 STOP 终帧，待新配对复验 |
 
 DBG-06 原清单 slot22 邻域没有通过点。按 Case 表修正到 slot28 后，tap14/16/18 均通过回读；idle21/25/29 的跨页 SRAM 校验通过，idle21 的 3 秒 RTT 和单变量及八变量确认通过。归档清单的 73 MHz JTAG 预设改为 slot28，保留较稳健的 idle25。数据、所有通过点的跳拍和第一次失败保留在同一份报告。 [逐点记录](sparse-debug-screen-v1.json)
+
+## 首版配对的 ETM 实板边界
+
+与同一份 F103ZE SRAM 循环 ELF 配对，固定低频 SWD 配置。按目标 HCLK 得出 TRACECLK，HCLK 用 RCC 和 DWT 对照。**36 MHz TRACECLK** 的三轮 1 秒严格验收通过，formatter 字节为 33,235,768 / 32,788,138 / 33,235,774，零 FPGA parser 错误，已知两支交替执行序列通过。24 和 32 MHz 各通过一轮 1 秒。36 MHz 是本组实板严格通过的最高档。
+
+40 MHz 的短窗 FPGA parser 错误为零，严格核验发现 638 个解码缺口。44 MHz 和四路数据 tap12 的 48 MHz 窗口也无 FPGA parser 错误，原生 OpenCSD 在窗口前段退出。默认 tap 的 48 / 64 MHz 各记录 192,594 / 86,124 个 FPGA parser 错误。48 MHz 两个其他设置也保留原始失败。所有点核对了采集和夹具恢复。 [逐窗计数与质量](etm-physical-boundary-v1.json)

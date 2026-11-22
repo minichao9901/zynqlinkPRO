@@ -100,7 +100,7 @@ def main():
     ap=argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--out",required=True,type=Path)
     ap.add_argument("--pair",type=Path,default=ROOT/"prebuilt/selectio-efficiency")
-    ap.add_argument("--hclk-mhz",type=int,choices=(48,64,72,96,128),default=128)
+    ap.add_argument("--hclk-mhz",type=int,choices=(48,64,72,80,88,96,128),default=128)
     ap.add_argument("--only",choices=("memory","rtt","etm","historical"),action="append")
     ap.add_argument("--trace-seconds",type=float,default=0.1)
     ap.add_argument("--seconds",type=float,default=60,help="seconds per directional SRAM window or running RTT capture")
