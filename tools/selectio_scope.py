@@ -8,6 +8,19 @@ from pathlib import Path
 FORMATS=("B","b","H","h","I","i","f","d")
 
 
+def verify_scope_tail(frame, received_bytes, reported_groups):
+    if len(frame) != 512 or received_bytes % 512:
+        raise ValueError("HSS STOP did not return a complete terminal frame")
+    magic, version, kind, seq, _, count, size = struct.unpack_from("<HBBIIHH", frame)
+    if (magic, version, kind, count, size) != (0x4a53, 2, 3, 0, 0):
+        raise ValueError("HSS STOP did not return a terminal STAT frame")
+    produced, _, frames = struct.unpack_from("<III", frame, 16)
+    read_errors = struct.unpack_from("<H", frame, 30)[0]
+    if produced != reported_groups or frames != seq + 1 or frames != received_bytes // 512 or read_errors:
+        raise ValueError(f"HSS STOP count mismatch: groups={produced}/{reported_groups}, "
+                         f"frames={frames}/{received_bytes // 512}, read errors={read_errors}")
+
+
 def export_scope(record,csv_path=None,expected=None):
     record=Path(record)
     groups=packets=missing=0

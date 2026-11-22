@@ -7,9 +7,21 @@ from unittest.mock import Mock, patch
 
 from selectio_cli import connection, selectio_clock_number
 from selectio_native import HEADER, NativeStatusError, NativeStream
+from selectio_scope import verify_scope_tail
 
 
 class NativeCliTests(unittest.TestCase):
+    def test_scope_stop_requires_a_matching_terminal_stat(self):
+        frame = bytearray(512)
+        struct.pack_into("<HBBIIHH", frame, 0, 0x4a53, 2, 3, 4, 0, 0, 0)
+        struct.pack_into("<III", frame, 16, 20, 0, 5)
+        verify_scope_tail(frame, 5 * 512, 20)
+        with self.assertRaisesRegex(ValueError, "count mismatch"):
+            verify_scope_tail(frame, 5 * 512, 21)
+        frame[3] = 2
+        with self.assertRaisesRegex(ValueError, "terminal STAT"):
+            verify_scope_tail(frame, 5 * 512, 20)
+
     def test_clock_parser_returns_hertz(self):
         self.assertEqual(selectio_clock_number("73000000"), 73000000)
         with self.assertRaises(argparse.ArgumentTypeError):

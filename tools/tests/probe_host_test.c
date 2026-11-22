@@ -209,6 +209,26 @@ int main(void) {
     assert(hss.data[0][28]==0 && hss.data[0][29]==0 && hss.data[0][30]==3);
     assert(hss.data[0][36]==60);
     for(unsigned k=37;k<512;k++)assert(hss.data[0][k]==0);
-    puts("PASS production probe C: HID, 8 variables, HSS DEF/DATA/gaps, backpressure, RTT wrap/RdOff retry, DAP handoff, ZLP, reset, plan benchmark, explicit clock limits, STAT reuse");
+    // STOP retains ownership until the terminal STAT actually enters the
+    // transmit queue. Test the PS sampler and the PL packet producer paths.
+    for (unsigned packetized = 0; packetized < 2; packetized++) {
+        pl_packets = packetized;
+        mode = 2; stopping = 0; flags = 0; samples = 0; fill_count = 0;
+        dma_pending = 0; packet_regs[1] = packet_regs[2] = 0;
+        packet_regs[4] = produced = 123;
+        packet_regs[5] = seq = 42;
+        hss.out = 0; hss.in = queue_mask(&hss) + 1;
+        before = release_calls;
+        assert(stop() == -7);
+        assert(mode == 2 && stopping && release_calls == before && seq == 42);
+        assert(hss.in == queue_mask(&hss) + 1);
+        hss.out++;
+        assert(stop() == 0);
+        assert(mode == 0 && !stopping && release_calls == before + 1 && seq == 43);
+        assert(hss.in == queue_mask(&hss) + 2);
+        assert(hss.data[0][3] == 3 && get32(hss.data[0] + 4) == 42);
+        assert(get32(hss.data[0] + 16) == 123);
+    }
+    puts("PASS production probe C: HID, 8 variables, HSS DEF/DATA/gaps, backpressure, RTT wrap/RdOff retry, DAP handoff, ZLP, reset, plan benchmark, explicit clock limits, STAT reuse and full-queue STOP retry");
     return 0;
 }

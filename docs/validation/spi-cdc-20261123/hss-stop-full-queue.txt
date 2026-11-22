@@ -1,0 +1,39 @@
+F103ZE, HCLK128, JTAG 99,999,998 Hz, tap16/slot28/idle29, requested 24 ticks.
+Pair d7c58324, actual short sample window requested 0.4 s.
+{
+  "protocol": "ZLK1",
+  "reference_hz": 199999996,
+  "link_hz": 99999998.0,
+  "features": "0x4450ffff",
+  "integrated_pl": true,
+  "max_frame": 16384,
+  "firmware_abi": 1,
+  "bulk_header_bytes": 16,
+  "serial_buffer_bytes": 2162688,
+  "fclk0_hz": 1999999,
+  "negotiated_frame": 16384,
+  "max_queue_depth": 4,
+  "bytes": 14936064,
+  "status": [
+    16777492,
+    99999998,
+    118459,
+    282051,
+    59392,
+    0,
+    29172,
+    19907,
+    1499406727,
+    1911816192,
+    0,
+    1661075480
+  ],
+  "seconds": 0.5582350999975461
+}
+RAW validation: 118459 groups, 29172 frames, STAT=None. Target restored.
+
+Full queue production C host test, before:
+Assertion failed: stop() == -7, file build/spi-cdc-hss-stop-model/before.c, line 222
+
+Full queue production C host test, after:
+PASS production probe C: HID, 8 variables, HSS DEF/DATA/gaps, backpressure, RTT wrap/RdOff retry, DAP handoff, ZLP, reset, plan benchmark, explicit clock limits, STAT reuse and full-queue STOP retry

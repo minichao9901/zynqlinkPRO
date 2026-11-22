@@ -276,15 +276,18 @@ def capture(args):
         native.exchange(channel,0,b"\x01")
         active=False
         received=0
+        last_scope_frame=b""
         def action(op,data=b""):
             rc,words=native.control(channel,op,data)
             if rc: raise RuntimeError(f"stream action {op} failed: {rc}")
             return words
         def drain():
-            nonlocal received
+            nonlocal received,last_scope_frame
             block=native.exchange(channel,1)
             output.write(block)
             received+=len(block)
+            if channel==3 and block:
+                last_scope_frame=block[-512:]
             return len(block)
         try:
             action(12,bytes([PORTS[args.transport]]))
@@ -317,6 +320,9 @@ def capture(args):
                         applied=info["status"][11]&0xffff
                         if applied!=chunk:raise RuntimeError(f"RTT chunk readback {applied} differs from {chunk}")
                         info["rtt_chunk_bytes"]=applied
+                    else:
+                        from selectio_scope import verify_scope_tail
+                        verify_scope_tail(last_scope_frame,received,info["status"][2])
             finally:
                 try:native.exchange(channel,0,b"\x00")
                 finally:cmd(tx,rx,[3])

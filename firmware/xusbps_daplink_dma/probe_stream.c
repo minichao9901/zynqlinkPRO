@@ -389,10 +389,12 @@ static void definition(void) {
     publish(&hss, 512);
     formatted += 512;
 }
-static void stat_packet(void) {
+static int stat_packet(void) {
     uint8_t *p, *q;
-    if (!space(&hss) || (flags & 2))
-        return;
+    if ((flags & 2) || !probe_session_live())
+        return 0;
+    if (!space(&hss))
+        return -7;
     p = slot(&hss);
     header(p, 3, fill_time, 0, 0);
     q = p + 16;
@@ -405,8 +407,12 @@ static void stat_packet(void) {
     put16(q + 14, swd_errors);
     put32(q + 16, step);
     q[20] = (uint8_t)(actual_hz / 1000000);
-    publish(&hss, 512);
+    if (publish(&hss, 512)) {
+        seq--;
+        return -7;
+    }
     formatted += 512;
+    return 0;
 }
 static int sampler_arm(void) {
     unsigned i;
@@ -600,16 +606,15 @@ static int stop(void) {
             produced=PR(4);
             seq=PR(5);
         }
-        if(mode==2) stat_packet();
+        if(mode==2 && stat_packet()) return -7;
         rc=probe_target_release();mode=0;stopping=0;rtt_pl_running=0;return rc;
     }
     if (mode == 2) {
         stopping = 1;
         rc = sampler_stop();
         hss_poll();
-        if (flush_data() || (R(1) >> 16))
+        if (flush_data() || (R(1) >> 16) || stat_packet())
             return -7;
-        stat_packet();
     }
     if (mode == 1 && pending_len) {
         if (probe_target_claim(requested_hz))
