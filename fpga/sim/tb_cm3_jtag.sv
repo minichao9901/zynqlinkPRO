@@ -43,20 +43,20 @@ module tb_cm3_jtag #(parameter integer ENABLE_DIAGNOSTICS=0, FAST_IO=0);
    always @(posedge tck) if($test$plusargs("wiretrace") && $time<3400)
        $display("PAD t=%t tck=%b tms=%b tdi=%b upstream=%b do=%b oe=%b jmode=%b",$time,tck,tms,pads[0],bypass_tdo,cm3_tdo,cm3_ntdoen,cm3_jtagnsw);
    always @(posedge octet_ck) if ($test$plusargs("wiretrace") && !select_swd && $time<4500 &&
-      (dut.g_live_link.jtag_link.launch || dut.g_live_link.jtag_link.complete))
+      (dut.g_live_link.g_jtag.jtag_link.launch || dut.g_live_link.g_jtag.jtag_link.complete))
        $display("JSEG t=%0t launch=%b complete=%b count=%h cap=%b tdo=%b rxw=%h lanes=%h rx=%h ctl=%h/%b rst=%b",
-          $time,dut.g_live_link.jtag_link.launch,dut.g_live_link.jtag_link.complete,
-          dut.g_live_link.jtag_link.length,dut.g_live_link.jtag_link.sense,tdo,dut.hs_jtag_samples,dut.live_jtag_lanes,
-          dut.g_live_link.jtag_link.bits_out,dut.u_jtag_core.state,dut.u_jtag_core.use_external,dut.g_live_link.jtag_link.reset);
+          $time,dut.g_live_link.g_jtag.jtag_link.launch,dut.g_live_link.g_jtag.jtag_link.complete,
+          dut.g_live_link.g_jtag.jtag_link.length,dut.g_live_link.g_jtag.jtag_link.sense,tdo,dut.hs_jtag_samples,dut.live_jtag_lanes,
+          dut.g_live_link.g_jtag.jtag_link.bits_out,dut.u_jtag_core.state,dut.u_jtag_core.use_external,dut.g_live_link.g_jtag.jtag_link.reset);
    always @(posedge clk) if($test$plusargs("wiretrace") && select_swd && dut.core_start_sel)
        $display("SRC t=%0t req=%h busy=%b tag=%b acktag=%b reset=%b",$time,dut.core_req_sel,dut.live_swd_busy,
-         dut.g_live_link.swd_link.crossing.request_tag,dut.g_live_link.swd_link.crossing.response_tag,dut.g_live_link.swd_link.reset);
+         dut.g_live_link.g_swd.swd_link.crossing.request_tag,dut.g_live_link.g_swd.swd_link.crossing.response_tag,dut.g_live_link.g_swd.swd_link.reset);
    always @(posedge quad_ck) if($test$plusargs("wiretrace") && (
-       dut.g_live_link.swd_link.launch || dut.g_live_link.swd_link.link_done ||
-       dut.g_live_link.swd_link.transaction.segment_start))
-       $display("LIVE_SWD launch=%b done=%b op=%h state=%d next=%d cnt=%d ack=%b",dut.g_live_link.swd_link.launch,
-         dut.g_live_link.swd_link.link_done,dut.g_live_link.swd_link.op,dut.g_live_link.swd_link.transaction.state,
-         dut.g_live_link.swd_link.transaction.next_state,dut.g_live_link.swd_link.transaction.count,dut.g_live_link.swd_link.link_ack);
+       dut.g_live_link.g_swd.swd_link.launch || dut.g_live_link.g_swd.swd_link.link_done ||
+       dut.g_live_link.g_swd.swd_link.transaction.segment_start))
+       $display("LIVE_SWD launch=%b done=%b op=%h state=%d next=%d cnt=%d ack=%b",dut.g_live_link.g_swd.swd_link.launch,
+         dut.g_live_link.g_swd.swd_link.link_done,dut.g_live_link.g_swd.swd_link.op,dut.g_live_link.g_swd.swd_link.transaction.state,
+         dut.g_live_link.g_swd.swd_link.transaction.next_state,dut.g_live_link.g_swd.swd_link.transaction.count,dut.g_live_link.g_swd.swd_link.link_ack);
    always @(posedge clk) if($test$plusargs("wiretrace") && dut.jtag_debug_valid)
        $display("LIVE_JTAG req=%h rx=%h scan=%h ack=%b mem=%h",dut.u_jtag_core.req,
             dut.u_jtag_core.phy_rx[47:0],dut.u_jtag_core.scan_result,dut.u_jtag_core.scan_ack,target.u_sys.mem[4096]);
@@ -210,11 +210,11 @@ module tb_cm3_jtag #(parameter integer ENABLE_DIAGNOSTICS=0, FAST_IO=0);
  `include "swd_wire_budget.svh"
  if(FAST_IO)begin:g_wire_budget
     always @(posedge quad_ck)
-        wire_budget_link(dut.g_live_link.swd_link.transaction.state==4 &&
-                         dut.g_live_link.swd_link.transaction.segment.state==2,
-                         dut.g_live_link.swd_link.transaction.state==5 &&
-                         dut.g_live_link.swd_link.transaction.segment.state==2,
-                         dut.g_live_link.swd_link.link_done,dut.g_live_link.swd_link.launch);
+        wire_budget_link(dut.g_live_link.g_swd.swd_link.transaction.state==4 &&
+                         dut.g_live_link.g_swd.swd_link.transaction.segment.state==2,
+                         dut.g_live_link.g_swd.swd_link.transaction.state==5 &&
+                         dut.g_live_link.g_swd.swd_link.transaction.segment.state==2,
+                         dut.g_live_link.g_swd.swd_link.link_done,dut.g_live_link.g_swd.swd_link.launch);
  end
  `include "cm3_perf_tasks.svh"
  initial begin

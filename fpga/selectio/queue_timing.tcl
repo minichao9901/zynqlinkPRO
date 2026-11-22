@@ -31,8 +31,8 @@ set_max_delay -datapath_only 7.500 -from [get_clocks clk_fpga_0] -to $meta
 # These constraints apply only to the two handoff engines, not the serializer.
 foreach {link divided} {swd_link quad_raw jtag_link octet_raw} {
     if {($sio_slice==1 && $link eq "swd_link") || ($sio_slice==2 && $link eq "jtag_link")} {continue}
-    set io_regs [filter [all_registers -clock [get_clocks $divided]] "NAME =~ *g_live_link.$link/* && REF_NAME =~ FD*"]
-    set host_regs [filter [all_registers -clock [get_clocks clk_fpga_0]] "NAME =~ *g_live_link.$link/crossing/* && REF_NAME =~ FD*"]
+    set io_regs [filter [all_registers -clock [get_clocks $divided]] "NAME =~ *g_live_link*$link/* && REF_NAME =~ FD*"]
+    set host_regs [filter [all_registers -clock [get_clocks clk_fpga_0]] "NAME =~ *g_live_link*$link/crossing/* && REF_NAME =~ FD*"]
     if {![llength $io_regs] || ![llength $host_regs]} {error "Missing live $link crossing"}
     set_max_delay -datapath_only 7.500 -from [get_clocks clk_fpga_0] -to $io_regs
     set_max_delay -datapath_only 7.500 -from [get_clocks $divided] -to $host_regs

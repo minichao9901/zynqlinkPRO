@@ -1,0 +1,15 @@
+JTAG/SPI slice before explicit elaboration-time removal of disabled realtime SWD link.
+Initial routed WNS=-0.339 ns, TNS=-43.259 ns, WHS=+0.044 ns.
+
+Slack (VIOLATED) :        -0.339ns  (required time - arrival time)
+  Source:                 system_i/swd_controller_0/inst/u_swd_batch_engine/state_reg[1]/C
+                            (rising edge-triggered cell FDCE clocked by clk_fpga_0  {rise@0.000ns fall@3.750ns period=7.500ns})
+  Destination:            system_i/swd_controller_0/inst/g_live_link.swd_link/shifting_reg[2]/D
+                            (rising edge-triggered cell FDRE clocked by quad_raw  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             quad_raw
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            2.500ns  (quad_raw rise@10.000ns - clk_fpga_0 rise@7.500ns)
+  Data Path Delay:        2.432ns  (logic 0.589ns (24.220%)  route 1.843ns (75.780%))
+  Logic Levels:           2  (LUT5=2)
+  Clock Path Skew:        -0.241ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.275ns = ( 12.275 - 10.000 )

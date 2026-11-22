@@ -18,6 +18,14 @@ if {$rtl_debug && ![llength $observation_cells]} {error "Debug instrumentation w
 puts "RTL_OBSERVATION_IMPLEMENTED=[llength $observation_cells] RTL_DEBUG=$rtl_debug"
 set sio_slice [expr {[info exists ::env(ZYNQLINK_SELECTIO_SLICE)] ? $::env(ZYNQLINK_SELECTIO_SLICE) : 0}]
 set selectio_pads [get_cells -quiet -hier -filter {REF_NAME == OSERDESE2 && NAME =~ *g_selectio*}]
+if {$sio_slice} {
+    set disabled [expr {$sio_slice==1 ? "swd_link" : "jtag_link"}]
+    if {[llength [get_cells -quiet -hier -filter "NAME =~ *g_live_link*$disabled/*"]]} {
+        error "Cropped image retained the disabled live link $disabled"
+    }
+    puts "SELECTIO_ROUTED_CROP removed_live_link=$disabled"
+}
+
 if {[info exists ::env(ZYNQLINK_SELECTIO_VARIABLE)] && $::env(ZYNQLINK_SELECTIO_VARIABLE)} {
     foreach {clock period} {clk_fpga_0 7.5 clk_selectio_ref 20.0 clk_delay_ref 5.0 quad_raw 10.0 serial_raw 5.0 rx_raw 2.5 octet_raw 20.0} {
         set clock_obj [get_clocks -quiet $clock]

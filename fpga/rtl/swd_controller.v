@@ -953,24 +953,34 @@ module swd_controller #(
     reg last_live;
     always @(posedge clk) last_live<=hs_live_jtag;
     if (SELECTIO) begin:g_live_link
-        wire chain_swd=live_swd_ready && core_next_valid_sel;
-        selectio_live_swd swd_link(
-            .host_clk(clk),.quad_clk(hs_quad_phase),.reset(!engine_rst_n || !hs_live_swd),
-            .granted(hs_owner==3 && live_swd_sync[1]),.start((core_start_sel || chain_swd) && hs_live_swd),
-            .mode(chain_swd ? 1'b1 : core_mode_sel),.request(chain_swd ? core_next_req_sel : core_req_sel),
-            .wdata(chain_swd ? core_next_wdata_sel : core_wdata_sel),
-            .seq_data(core_swj_data_sel),.seq_count(core_swj_count_sel),
-            .half_rate(live_config_host[26]),.sample_slot(live_config_host[6:1]),.idle(live_config_host[17:14]),
-            .busy(live_swd_busy),.valid(live_swd_valid),.ack(live_swd_ack),.parity(live_swd_parity),
-            .rdata(live_swd_rdata),.rx(hs_swd_samples),.clocks(live_swd_clk),
-            .data(live_swd_data),.release_bits(live_swd_release));
-        selectio_live_jtag jtag_link(
-            .host_clk(clk),.octet_clk(hs_octet_phase),.reset(!engine_rst_n || !hs_live_jtag),
-            .granted(hs_owner==2 && live_jtag_sync[1]),.start(seg_start && hs_live_jtag),.count(seg_count),
-            .variable_tms(seg_variable),.tms(seg_tms),.exit_last(seg_exit),.capture(seg_capture),
-            .tdi_mode(seg_drive),.tms_data(seg_tms_data),.tdi_data(seg_tdi_data),
-            .half_rate(live_config_host[26]),.sample_slot(live_config_host[13:7]),.done(seg_done),.received(seg_response),
-            .rx(hs_jtag_samples),.lanes(live_jtag_lanes));
+        if (SELECTIO_SLICE!=1) begin:g_swd
+            wire chain_swd=live_swd_ready && core_next_valid_sel;
+            selectio_live_swd swd_link(
+                .host_clk(clk),.quad_clk(hs_quad_phase),.reset(!engine_rst_n || !hs_live_swd),
+                .granted(hs_owner==3 && live_swd_sync[1]),.start((core_start_sel || chain_swd) && hs_live_swd),
+                .mode(chain_swd ? 1'b1 : core_mode_sel),.request(chain_swd ? core_next_req_sel : core_req_sel),
+                .wdata(chain_swd ? core_next_wdata_sel : core_wdata_sel),
+                .seq_data(core_swj_data_sel),.seq_count(core_swj_count_sel),
+                .half_rate(live_config_host[26]),.sample_slot(live_config_host[6:1]),.idle(live_config_host[17:14]),
+                .busy(live_swd_busy),.valid(live_swd_valid),.ack(live_swd_ack),.parity(live_swd_parity),
+                .rdata(live_swd_rdata),.rx(hs_swd_samples),.clocks(live_swd_clk),
+                .data(live_swd_data),.release_bits(live_swd_release));
+        end else begin:g_no_swd
+            assign {live_swd_busy,live_swd_valid,live_swd_parity,live_swd_ack,live_swd_rdata}=0;
+            assign {live_swd_clk,live_swd_data}=0;
+            assign live_swd_release=4'hf;
+        end
+        if (SELECTIO_SLICE!=2) begin:g_jtag
+            selectio_live_jtag jtag_link(
+                .host_clk(clk),.octet_clk(hs_octet_phase),.reset(!engine_rst_n || !hs_live_jtag),
+                .granted(hs_owner==2 && live_jtag_sync[1]),.start(seg_start && hs_live_jtag),.count(seg_count),
+                .variable_tms(seg_variable),.tms(seg_tms),.exit_last(seg_exit),.capture(seg_capture),
+                .tdi_mode(seg_drive),.tms_data(seg_tms_data),.tdi_data(seg_tdi_data),
+                .half_rate(live_config_host[26]),.sample_slot(live_config_host[13:7]),.done(seg_done),.received(seg_response),
+                .rx(hs_jtag_samples),.lanes(live_jtag_lanes));
+        end else begin:g_no_jtag
+            assign {seg_done,seg_response,live_jtag_lanes}=0;
+        end
     end
     jtag_core #(.EXTERNAL_PHY(SELECTIO ? 2 : 0)) u_jtag_core (
         .use_external(hs_live_jtag),.external_idle_cycles({1'b0,live_config_host[25:18]}),

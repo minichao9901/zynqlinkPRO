@@ -49,6 +49,8 @@ DAP 安全回归和 24 个定向 Python 测试通过。旧全套 probe_host 测�
 
 [STA](full/timing_verified.rpt) · [利用率](full/utilization.rpt) · [实际时钟连接检查](full/routed-checks.txt) · [镜像配对清单](../../../prebuilt/selectio-variable-20261122/full/manifest.json)
 
+JTAG 裁剪初次布线发现 Vivado 留下了停用的实时 SWD 模块。该路径在 133.333 MHz AXI 和 quad 两域之间出现 −0.339 ns setup。后续在 RTL elaboration 阶段显式去掉镜像没有启用的实时链路，并在布线检查中检查缺席实例。共用实时路径的 Cortex-M3 service 回归通过。[初轮 JTAG 时序证据](first-jtag-timing.txt)
+
 ## 复现
 
 在仓库根目录使用 Vivado 2018.3 与 SDK 2018.3。每套实现选择独立的 ZYNQLINK_FPGA_OUT，并保持 FCLK0 的 7.5 ns 约束。
