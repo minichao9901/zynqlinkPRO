@@ -147,5 +147,58 @@
     "SPI slave 100 MHz continuous CDC",
     "external four-mode full-speed SPI slave MISO",
     "external continuous mixed-code 100 Mbit/s Manchester"
-  ]
+  ],
+  "final_probe_idle": {
+    "operation": "check",
+    "dryRun": false,
+    "out": "E:\\zynqlinkPRO-efficiency\\build\\spi-cdc-rx-guard-final-idle",
+    "files": {
+      "bit": {
+        "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-spi-cdc-rx-guard-20261123\\probe.bit",
+        "sha256": "f3c4ccfd78c9148649897a0902fb93eadb209494e0295956981c973bbac92c66"
+      },
+      "zynq_elf": {
+        "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-spi-cdc-rx-guard-20261123\\application.elf",
+        "sha256": "e1f21ea8d5aa6403f4f2ab78da0a3215cea11862cb852dd9e37e413248068b90"
+      },
+      "ps_init": {
+        "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-spi-cdc-rx-guard-20261123\\ps7_init.tcl",
+        "sha256": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+      }
+    },
+    "stage": "complete",
+    "passed": true,
+    "streams": {
+      "rtt": 65536,
+      "hss": 134219796
+    },
+    "before": {
+      "PS_IDCODE": "0x23727093",
+      "LEVEL_SHIFTERS": "0xf",
+      "FPGA_RESET": "0x0",
+      "BOOT_MODE": "0x0",
+      "CAPTURE": "0x8",
+      "SWD": "0x2",
+      "JQUEUE": "0x14",
+      "SQUEUE": "0x38",
+      "AUX": "0x0",
+      "AUXFLAGS": "0x0",
+      "PACKET": "0x0",
+      "DDR": "0x0",
+      "CDMA_BASE": "0x40020000",
+      "CDMA": "0x1002"
+    }
+  },
+  "offline_checks": {
+    "toolbox_cli": 118,
+    "selectio": 14,
+    "web": 207,
+    "web_modules": 177,
+    "pump_rc": [
+      "SPI_CDC_PUMP_PASS",
+      "SPI_CDC_PUMP_REARM_PASS",
+      "SPI_CDC_PUMP_COUNTER_PASS",
+      "CDC_EVENT_PASS"
+    ]
+  }
 }
