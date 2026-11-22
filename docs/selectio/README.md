@@ -41,12 +41,14 @@ JTAG 占用 TDI/TDO，SPI 切换时取得四根线的独占权。F103 的 PB3 �
 
 | 接口 | 端点（十六进制） | CLI 用途 |
 |---|---|---|
-| IF0，CMSIS-DAP v2 | 02 OUT、81 IN；87 IN；82 IN | 标准调试；原有 HSS 数据；ETM 下载 |
+| IF0，CMSIS-DAP v2 | `0x02` OUT、`0x81` IN；`0x87` IN；`0x82` IN | 标准调试命令和回复；HSS/J-Scope；并行 ETM 下载 |
 | IF1/2，CDC ACM | 85 通知、04 OUT、83 IN | 物理 8N1 串口、SPI 从机接收转发，或兼容 RTT 转发 |
 | IF3，HID | 06 OUT、86 IN | 主线探针控制与状态 |
 | IF4，WinUSB，FF/53/01 | 01 OUT、84 IN | 高速 SRAM、RTT、变量、SPI、UART/SWO 和并发流 |
 
-历史 RTT 上行可走 CDC。历史变量波形走专用 EP87，载荷是 HSS 帧。现在 RTT 和变量使用 IF4 的独立通道和队列。先绑定物理 CDC 并打开终端，再启动 SWD 的原生 RTT/变量采样；实板已同时核对这三个通道。当前配置的 IN 端点 1–7 均有用途；在 IF4 的 Bulk 对上按通道号分流，使 RTT、采样和其他原生数据共用带宽，每类数据仍有自己的消费指针。协议头包含长度、序号和状态；消费指针在对应 IN 完成后推进。内存读写可设队列深度 1–4。物理 SWO 可走 IF4，也可走标准 CMSIS-DAP 的 SWO_Transport=1、SWO_Data 轮询。固件声明 UART 与 Manchester 能力、接收缓冲容量和测试域时间戳。EP87 继续给 HSS 使用。[描述符与协议](../selectio-native.md)
+历史 RTT 上行可走 CDC。历史变量波形走专用 EP87，载荷是 HSS 帧。现在 RTT 和变量使用 IF4 的独立通道和队列。先绑定物理 CDC 并打开终端，再启动 SWD 的原生 RTT/变量采样；实板已同时核对这三个通道。当前配置的 IN 端点 1–7 均有用途；在 IF4 的 Bulk 对上按通道号分流，使 RTT、采样和其他原生数据共用带宽，每类数据仍有自己的消费指针。协议头包含长度、序号和状态；消费指针在对应 IN 完成后推进。内存读写可设队列深度 1–4。物理 SWO 可走 IF4，也可走标准 CMSIS-DAP 的 `SWO_Transport=1`，通过 `0x02` / `0x81` 轮询 `SWO_Data`。固件声明 UART 与 Manchester 能力、接收缓冲容量和测试域时间戳，`SWO_STREAM=0`。
+
+早期 akaLinkPro 的 HSS 借用了 CMSIS-DAP v2 预留给 SWO Streaming 的 `0x83`。ZynqLinkPRO 在同一个 IF0 接口上为 HSS 和 ETM 分配了各自的 Bulk IN。这里的 `0x83` 属于 IF2，负责 CDC 数据上行。[描述符与协议](../selectio-native.md) · [早期 HSS 设计](../../web/docs/scope-page.md)
 
 ## 识别、临时加载及调试
 

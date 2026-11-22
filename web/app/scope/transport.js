@@ -1,8 +1,8 @@
 import { waitMs, withTimeout } from '../core/pace.js';
 /**
  * 数据面传输：把"512 B 包流"从探针搬到页面。两种实现**同形**，页面不用管用的是哪个：
- *   · `VendorEpTransport` —— 真家伙：WebUSB 认领 interface 0，走**空闲的 bulk IN 端点 0x83**
- *     （SWO 端点，固件里从没写过；见 docs/scope-page.md §4）。
+ *   · `VendorEpTransport` —— WebUSB 从 IF0 的 HSS Bulk IN 读取采样。
+ *     akaLinkPro 使用原先为 SWO Streaming 预留的 0x83，ZynqLinkPRO 使用 0x87。
  *   · `MockTransport`      —— 假探针：不需要硬件，波形确定性生成（自测/演示用）。
  *
  * 收流的两条纪律（都是踩过的坑换来的）：
@@ -16,7 +16,7 @@ import { UsbLease, isUsbResourceConflict } from '../core/usb-device.js';
 import { authorizedOpenOcdDevices } from '../core/openocd-usb.js';
 import {nativeProbeEnabled,nativeUsbDevices} from '../core/native-probe.js';
 
-/** 探针上那个空闲的 bulk IN 端点（SWO 端点，SWO_STREAM=0 所以没人用）*/
+/** akaLinkPro 的 HSS Bulk IN 端点地址。 */
 export const EP_SCOPE = 0x83;
 export function findScopeEndpoint(configuration){
   // akaLinkPro publishes HSS on IN3; ZynqDAP reserves IN2 for ETM and uses IN7.
