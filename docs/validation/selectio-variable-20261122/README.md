@@ -43,6 +43,12 @@ DAP 安全回归和 24 个定向 Python 测试通过。旧全套 probe_host 测�
 
 100 Mbit/s 所需的采样预算来自 SelectIO 时钟。50 和 100 MHz SWD 档均为 N=32，窄接收 400 Msample/s、宽接收 800 Msample/s，具有融合版既有高速解码条件。72.727 MHz 档为 N=44，分别为 290.909/581.818 Msample/s，以当前配置约 72.727 Mbit/s 为上限，固件拒绝越界请求。这里列出时钟与解码预算，尚无新镜像的目标板 SWO 信号验收。JTAG/SPI 镜像关闭 SWO。
 
+## 融合镜像
+
+融合版完成 Vivado 布线和 bitgen。时序为 setup / hold **+0.062 / +0.023 ns**，使用 26,240 LUT、28,320 寄存器和 67.5 个 BRAM tile。路由核对 GP0、GP1、HP0、HP1 均使用 7.5 ns 的 FCLK0，SelectIO 和 ETM 参考周期分别为 20 ns 与 5 ns。配套 ELF 已链接，加载入口通过 --dry-run 文件预检。
+
+[STA](full/timing_verified.rpt) · [利用率](full/utilization.rpt) · [实际时钟连接检查](full/routed-checks.txt) · [镜像配对清单](../../../prebuilt/selectio-variable-20261122/full/manifest.json)
+
 ## 复现
 
 在仓库根目录使用 Vivado 2018.3 与 SDK 2018.3。每套实现选择独立的 ZYNQLINK_FPGA_OUT，并保持 FCLK0 的 7.5 ns 约束。
