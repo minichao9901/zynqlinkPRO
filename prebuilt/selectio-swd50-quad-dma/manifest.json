@@ -1,0 +1,80 @@
+{
+  "source_revision": "4e2e00c50d77e463482cb15cdb45c52b92c1e18a",
+  "hashes": {
+    "probe.bit": "29c56c0b15fa55f33449480c9ea9d033d91c163dccac2545db9dc97e0b923c2d",
+    "application.elf": "f225fbd7efbd8104629bd80328774b4ac082a9c29e8687c0e8b92993ac8848ce",
+    "ps7_init.tcl": "aa9747c31f705be7c28af1c6b1cdeaf282f0dcdb01faecee2a9f72e4d3489132"
+  },
+  "bit_features": "0x4450ffff",
+  "status": "board-verified 100 MHz quad-clock debug DMA A/B candidate",
+  "board_verified": true,
+  "external_frequency_counter": false,
+  "max_native_frame": 16384,
+  "swd": {
+    "tap": 8,
+    "slot": 24,
+    "idle": 2
+  },
+  "jtag": {
+    "tap": 16,
+    "slot": 28,
+    "idle": 33,
+    "bulk_idle": 29
+  },
+  "profiles_50mhz": {
+    "swd": {
+      "tap": 8,
+      "slot": 22,
+      "idle": 0
+    },
+    "jtag": {
+      "tap": 16,
+      "slot": 21,
+      "idle": 17,
+      "bulk_idle": 17
+    }
+  },
+  "cdc_bypass_qualification": true,
+  "native_stream_lease_seconds": 5,
+  "timing": {
+    "FCLK_max_Hz": 133333333,
+    "SWCLK_max_Hz": 66666666,
+    "setup_slack_ns": 0.02,
+    "hold_slack_ns": 0.019,
+    "requested_FCLK_Hz": 133333333,
+    "RTL_DEBUG": 0,
+    "optional_observation_cells": 0,
+    "formal_product_acceptance": false
+  },
+  "pl_options": [
+    "--selectio",
+    "--etm400",
+    "--quad-dma"
+  ],
+  "ps_options": [
+    "--selectio",
+    "--j7-adapter",
+    "--compact-code",
+    "--max-swclk-hz",
+    "10000000"
+  ],
+  "ps_build_manifest": "ps-build.json",
+  "validation": "../../docs/validation/swd50-quad-dma-20261122/README.md",
+  "pl_source_revision": "4e2e00c50d77e463482cb15cdb45c52b92c1e18a",
+  "ps_build_base_revision": "a03d7adb63ad1a6a088376ad3730f9feeb0b8b66",
+  "qualification_scope": [
+    "DDR/PL TX and RX payload DMA latency",
+    "F103ZE HCLK128 SWD 50 MHz standard CMSIS-DAP SRAM",
+    "F103ZE HCLK128 SWD 50 MHz 2 x 60 s RTT CDC"
+  ],
+  "cdma_axi_hz": 100000000,
+  "cdma_control_base": "0x80040000",
+  "baseline": {
+    "bit": "prebuilt/selectio-swd50-standard/probe.bit",
+    "hashes": {
+      "probe.bit": "3caf4831d2ab52302d2077f2948ef9540ed84e31811e0ad6e5f8e9e5a947a5cc",
+      "application.elf": "f225fbd7efbd8104629bd80328774b4ac082a9c29e8687c0e8b92993ac8848ce",
+      "ps7_init.tcl": "aa9747c31f705be7c28af1c6b1cdeaf282f0dcdb01faecee2a9f72e4d3489132"
+    }
+  }
+}
