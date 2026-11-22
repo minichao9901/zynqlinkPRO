@@ -16,13 +16,18 @@ def main():
     ap=argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--serial",default="12345678");ap.add_argument("--out",type=Path,required=True)
     ap.add_argument("--execute",action="store_true")
+    ap.add_argument("--clock",type=int,choices=(50000000,73000000,100000000),default=100000000)
+    ap.add_argument("--tap",type=int,choices=range(32),default=8)
+    ap.add_argument("--slot",type=int,choices=range(64),default=24)
+    ap.add_argument("--idle",type=int,choices=range(16),default=2)
     a=ap.parse_args()
     if not a.execute:return print("Drop native SPI and HSS leases, then reacquire and verify SRAM.")
     a.out.mkdir(parents=True,exist_ok=False)
     result={}
     def configure_scope(port):
+        port.exchange(0,2,bytes((1,a.tap,a.slot,a.idle)))
         port.exchange(3,0,b"\1")
-        for op,data in [(12,b"\1"),(3,struct.pack("<I",100000000)),
+        for op,data in [(12,b"\1"),(3,struct.pack("<I",a.clock)),
                         (10,struct.pack("<IBBIBB",24000,0,1,BASE,4,4)),(1,b"")]:
             rc,_=port.control(3,op,data)
             if rc:raise RuntimeError(f"HSS action {op} failed with {rc}")

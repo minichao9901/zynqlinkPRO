@@ -124,7 +124,9 @@ def main(argv=None):
              "--jtag-slot",profiles["jtag"]["slot"],"--swd-idle",profiles["swd"]["idle"],
              "--jtag-idle",profiles["jtag"]["idle"],"--clock",args.clock,"--rounds",64])
         if identity.get("native_stream_lease_seconds"):
-            test("host-loss","selectio_abandon_test.py",[])
+            swd=profiles["swd"]
+            test("host-loss","selectio_abandon_test.py",
+                 ["--clock",args.clock,"--tap",swd["tap"],"--slot",swd["slot"],"--idle",swd["idle"]])
     producer=None
     if "rtt" in selected or "combo" in selected:
         producer=fixture("probe_rtt_ram.S","producer",["-Wa,--defsym,FIXTURE_BASE=0x20008000",
