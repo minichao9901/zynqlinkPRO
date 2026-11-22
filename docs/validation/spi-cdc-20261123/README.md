@@ -47,4 +47,6 @@ CDC48 的 24 MHz TRACECLK 运行态 ETM，完整 1.000 秒窗口、19,389,488 B 
 
 首轮统一入口共 36 项，22 项通过。前部 14 项中的错误来自本分支旧 CLI 会话入口，夹具恢复均通过；后部使用修正的 CLI。首轮原样归档，SWD/JTAG 切换、丢失主机句柄、调试、SRAM、运行 RTT 和并发单独补跑，使用相同哈希的配对。 [首轮统一报告](first-full-board-summary.json)
 
+补跑已通过 128 次 SWD/JTAG 切换、SPI/HSS 主机退出与重新接管、SWD 单步与断点。SWD SRAM 同一 100 MHz/slot25/idle2 配置，4,032 B 跨页、深度 4，读、写、交替各 3×60 秒。PC 读/写/交替的中位数为 **6.673/6.610/6.575 MB/s**，全部载荷或末块与保护字校验通过，目标恢复。 [SWD 长窗](swd-sram-100.json)
+
 复现入口见 [CLI](../../selectio/README.md#spi-从机接收转发到-com) 与 [Case 表](../../selectio/fusion-performance-cases.md)。时序收敛、目标和探针恢复以及全部功能用例以同一份 bit/ELF 的后续实测记录为准。
