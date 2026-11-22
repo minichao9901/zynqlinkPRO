@@ -29,6 +29,9 @@
 #include "DAP_config.h"
 #include "selectio_mode.h"
 #if DAP_SELECTIO
+#include "selectio_block.h"
+#endif
+#if DAP_SELECTIO
 #include "selectio_aux.h"
 #endif
 #include "DAP.h"
@@ -1672,6 +1675,14 @@ static uint32_t DAP_SWD_TransferBlock(const uint8_t *request, uint8_t *response)
   if (req & (DAP_TRANSFER_MATCH_VALUE | DAP_TRANSFER_MATCH_MASK | DAP_TRANSFER_TIMESTAMP))
     return DAP_SWD_TransferBlock_Legacy(head, response);
 
+#if DAP_SELECTIO
+  if (selectio_swd50_drw(req,remaining,request,out,&completed,&ack)) {
+    response[0]=(uint8_t)completed;
+    response[1]=(uint8_t)(completed>>8);
+    response[2]=(uint8_t)ack;
+    return 3U+((req & DAP_TRANSFER_RnW) ? 4U*completed : 0U);
+  }
+#endif
   /* Fast packet-engine path.  The RTL receives a compact four-byte header
    * {0x06,count_lo,count_hi,request}; the DAP index is fixed to zero by this
    * single-target device.  The old DMA batch path remains the fallback. */

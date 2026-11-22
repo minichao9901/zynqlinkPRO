@@ -7,6 +7,13 @@
  * Response: status, u32 hardware result, then verified-length read payload.
  */
 uint32_t selectio_block(const uint8_t *request, uint8_t *response);
+/* Returns zero when the caller must use its normal packet engine. */
+int selectio_swd50_batch_available(void);
+int selectio_swd50_drw(unsigned request, unsigned count, const uint8_t *input, uint8_t *output,
+                      unsigned *completed, unsigned *status);
+int selectio_swd50_rtt_attach(void);
+int selectio_swd50_rtt_attached(void);
+int selectio_swd50_rtt_detach(void);
 void selectio_mem_stats(uint64_t values[9]);
 int selectio_mem_bulk(unsigned write,uint32_t address,unsigned words,const uint8_t *payload,uint8_t *reply,unsigned *completed,uint32_t *detail);
 int selectio_commit_rtt_offset(uint32_t addr,uint32_t old,uint32_t next,uint32_t *detail);

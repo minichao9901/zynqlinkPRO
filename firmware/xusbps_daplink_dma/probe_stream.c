@@ -38,7 +38,7 @@ __attribute__((weak)) int probe_target_claimed(void) { return 0; }
 #define PW(n,v) Xil_Out32(PK(n),(v))
 static uint32_t link_clock(uint32_t fclk) {
 #if DAP_SELECTIO
-    if(selectio_live_active()) return selectio_live_hz();
+    if(selectio_live_active() || selectio_swd50_rtt_attached()) return selectio_live_hz();
 #endif
     uint32_t cfg = Xil_In32(0x40010008U);
     uint32_t half_cycles = 1U + ((cfg >> 13) & 15U) + (((cfg >> 28) & 15U) << 4);
@@ -441,6 +441,7 @@ static int sampler_arm(void) {
 }
 int probe_before_dap(void) {
 #if DAP_SELECTIO
+    if(selectio_swd50_rtt_detach())return -4;
     if(selectio_mem_active() || selectio_aux_exclusive()) return -7;
 #endif
     int failed=0;
@@ -573,7 +574,7 @@ static int rtt_commit(void) {
 static int stop(void) {
     if(bench_active){bench_active=0;bench_error=-7;}
     int rc = 0;
-    if(pl_packets && mode) {
+    if(pl_packets && (mode==2 || (mode==1 && rtt_pl_running))) {
         stopping=1;PW(0,0);
         if(mode==2) { W(0,0);hss_poll(); }
         else if(rtt_pl_running) {
@@ -615,10 +616,16 @@ static int stop(void) {
             return -4;
         rc = rtt_commit();
         if (rc) {
+#if DAP_SELECTIO
+            if(selectio_swd50_rtt_detach())return -4;
+#endif
             probe_target_release();
             return rc;
         }
     }
+#if DAP_SELECTIO
+    if(selectio_swd50_rtt_detach())return -4;
+#endif
     if(probe_target_release())rc=-4;
     mode = 0;
     stopping = 0;
@@ -715,7 +722,15 @@ static void rtt_poll(void) {
         n = chunk;
     if (!n)
         goto end;
+#if DAP_SELECTIO
+    if(!(native_route&1U) && !selectio_swd50_rtt_attached() &&
+       selectio_swd50_batch_available() && up>=0x20000000U && up<=0x20010000U-24U &&
+       a>=0x20000000U && a<0x20010000U && size<=0x20010000U-a)
+        if(selectio_swd50_rtt_attach()) {rc=-4;goto end;}
+    if(pl_packets && !selectio_swd50_rtt_attached()) {
+#else
     if(pl_packets) {
+#endif
         PW(0,0x100);PW(8,up);PW(9,a);PW(10,size);PW(11,rd);PW(12,chunk);
         PW(0,2);rtt_pl_running=1;rtt_paused=0;goto end;
     }
@@ -731,8 +746,12 @@ static void rtt_poll(void) {
         pending_rd = 0;
     rc = rtt_commit();
 end:
-    if (rc)
+    if (rc) {
+#if DAP_SELECTIO
+        if(selectio_swd50_rtt_detach())rc=-4;
+#endif
         probe_target_release();
+    }
     if (rc) {
         swd_errors++;
         result = (int8_t)rc;
@@ -742,7 +761,7 @@ end:
 }
 int probe_prepare_link_change(void) {
 #if DAP_SELECTIO
-    if(selectio_mem_active() || selectio_aux_exclusive()) return -7;
+    if((selectio_mem_active() && !selectio_swd50_rtt_attached()) || selectio_aux_exclusive()) return -7;
 #endif
     // A line reset/TAP initialization invalidates cached AP state. Do not
     // restart an autonomous stream between the commands of a new handshake.
@@ -905,7 +924,8 @@ static void control(const uint8_t *req, uint8_t *res) {
     }
 #if DAP_SELECTIO
     if(cmd==0x31 && act==1 && !(native_route&1U) && selectio_cdc_receiving()) {res[3]=(uint8_t)-7;return;}
-    if(selectio_mem_active() && act!=2 && act!=11) {res[3]=(uint8_t)-7;return;}
+    if(selectio_mem_active() && act!=2 && act!=11 &&
+       !(act==0 && selectio_swd50_rtt_attached())) {res[3]=(uint8_t)-7;return;}
 #endif
     switch (act) {
     case 0:

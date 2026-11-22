@@ -3,6 +3,8 @@
 #include "DAP.h"
 #include "probe_stream.h"
 #include "selectio_block.h"
+#include "selectio_mode.h"
+#include "dap_wait.h"
 #include "xtime_l.h"
 #include "swd_dma.h"
 #include "etm_ddr_usb.h"
@@ -18,6 +20,8 @@ static struct {
     unsigned words[2];
     uint64_t bytes[2],queue_ticks[2],total_ticks[2];
 } session;
+static unsigned swd_leading_op[2];
+static uint32_t rtt_live;
 
 unsigned selectio_mem_port(void) {return session.port;}
 
@@ -45,15 +49,19 @@ static void swd_descriptor(unsigned index, unsigned op, uint32_t data) {
 
 /* The caller claims MEM-AP0 and sets CSW before handing the pads over.
  * Include the final posted result and a DP status fence in the batch. */
-static void swd_prepare(unsigned write, uint32_t address, unsigned count, const uint8_t *payload) {
+static void swd_prepare(unsigned write, unsigned first_op, uint32_t first_data,
+                        unsigned count, const uint8_t *payload) {
     unsigned i;
     unsigned bank=write?2U:1U;
     swd_write32(SQUEUE+0x1cU,bank);
     unsigned old=session.words[write];
     if(!old) {
         for(i=1;i<=256;i++) swd_descriptor(i,write?13U:15U,0);
-        swd_descriptor(0,5U,address);
-    } else swd_write32(SQUEUE+0x1004U,address);
+    }
+    if(!old || swd_leading_op[write]!=first_op) {
+        swd_descriptor(0,first_op,first_data);
+        swd_leading_op[write]=first_op;
+    } else if(first_op==5U) swd_write32(SQUEUE+0x1004U,first_data);
     if(old!=count) {
         /* The template contains DRW everywhere except the two current
          * fences. A change of TAR page length repairs at most four entries. */
@@ -83,7 +91,7 @@ static int swd_complete(unsigned write, unsigned count, uint8_t *reply, uint32_t
 
 static int swd_block(unsigned write, uint32_t address, unsigned count,
                      const uint8_t *payload, uint8_t *reply, uint32_t *detail) {
-    swd_prepare(write,address,count,payload);
+    swd_prepare(write,5U,address,count,payload);
     XTime start;XTime_GetTime(&start);
     swd_write32(SQUEUE+0x10U,count+3U);
     return swd_complete(write,count,reply,detail,start);
@@ -100,7 +108,7 @@ static int swd_aligned_pages(unsigned write,uint32_t address,unsigned pages,
     for(unsigned page=0;page<pages;page++) {
         if(!probe_session_live())return -1;
         swd_write32(SQUEUE+0x2cU,4U|bank);
-        swd_prepare(write,address+page*1024U,256,0);
+        swd_prepare(write,5U,address+page*1024U,256,0);
         XTime start;XTime_GetTime(&start);
         swd_write32(SQUEUE+0x10U,259);
         int dma_ok=0;
@@ -164,7 +172,128 @@ static void settle(void) {
     do { XTime_GetTime(&now); } while(now-start<COUNTS_PER_SECOND/500000U);
 }
 
+int selectio_swd50_batch_available(void) {
+    return !session.port && DAP_Data.debug_port==DAP_PORT_SWD &&
+           DAP_Data.swd_conf.turnaround==1 && !DAP_Data.swd_conf.data_phase &&
+           (swd_read32(SWD_FEATURES)&0x8400U)==0x8400U &&
+           (selectio_live_config()&0x04000001U)==0x04000001U;
+}
+
+static int swd50_queue_take(uint32_t live) {
+    unsigned slot=(live>>1)&63U, idle=(live>>14)&15U;
+    swd_write32(SQUEUE+0x0cU,(slot<<2)|(slot<<8)|(idle<<14));
+    swd_write32(SQUEUE+8U,0);
+    settle();
+    return selectio_live_set(live&~1U) || wait_queue(SQUEUE,0x29U,0x29U);
+}
+
+static int swd50_queue_release(uint32_t live) {
+    if(wait_queue(SQUEUE,0x20U,0x20U) || selectio_live_set(live)) {
+        probe_target_invalidate();return -1;
+    }
+    swd_write32(SQUEUE+8U,1U);
+    swd_write32(SQUEUE+0x2cU,0);
+    return 0;
+}
+
+int selectio_swd50_rtt_attached(void) {return rtt_live!=0;}
+int selectio_swd50_rtt_attach(void) {
+    if(!selectio_swd50_batch_available() || !probe_target_claimed() ||
+       etm_ddr_owned() || (swd_read32(SQUEUE+4U)&0x38U)!=0x38U)return -1;
+    uint32_t live=selectio_live_config();
+    rtt_live=live;
+    session.port=1; session.dma=1; session.rate_hz=50000000U;
+    session.poisoned=0;session.bank=0;
+    if(swd50_queue_take(live) || !probe_session_live()) {
+        (void)selectio_swd50_rtt_detach();
+        return -1;
+    }
+    return 0;
+}
+int selectio_swd50_rtt_detach(void) {
+    if(!rtt_live)return 0;
+    if(swd50_queue_release(rtt_live))return -1;
+    rtt_live=0;session.port=0;session.use_dma=0;
+    return 0;
+}
+
+int selectio_swd50_drw(unsigned request,unsigned count,const uint8_t *input,uint8_t *output,
+                     unsigned *completed,unsigned *status) {
+    if ((request!=0x0fU && request!=0x0dU) || count<16 || count>1023U ||
+        !selectio_swd50_batch_available() || !probe_session_live() || etm_ddr_owned() ||
+        (swd_read32(SQUEUE+4U)&0x38U)!=0x38U) return 0;
+    const unsigned write=request==0x0dU;
+    const uint32_t live=selectio_live_config();
+    const uint32_t payload_window=write?0x45002000U:0x45003000U;
+    unsigned transferred=0, pending=0, pending_bank=0, bank=0;
+    unsigned result=DAP_TRANSFER_ERROR;
+    *completed=0;*status=DAP_TRANSFER_ERROR;
+    if(dap_wait_command_error())return 1;
+
+    // Both producers use pad owner 3. Request the queue before changing the
+    // lane mux; keep SWJ-DP, SELECT, CSW and the host's live TAR untouched.
+    if(swd50_queue_take(live))goto release;
+    session.use_dma=1;
+    unsigned first=count>256U?256U:count;
+    if(write && selectio_dma_payload(1,payload_window,(uint8_t *)input,first))goto release;
+    while(transferred<count) {
+        unsigned words=count-transferred;
+        if(words>256U)words=256U;
+        if(dap_wait_command_error() || !probe_session_live())break;
+        swd_write32(SQUEUE+0x2cU,4U|bank);
+        // The leading DP RDBUFF occupies the queue's TAR slot. It never
+        // advances TAR. A successful AP read primes the posted pipeline;
+        // the final RDBUFF supplies the last requested data word.
+        swd_prepare(write,14U,0,words,0);
+        swd_write32(SQUEUE+0x10U,words+3U);
+        int dma_error=0;
+        unsigned next=count-transferred-words;
+        if(next>256U)next=256U;
+        if(write && next)
+            dma_error=selectio_dma_payload(1,payload_window+1024U*(bank^1U),
+                                         (uint8_t *)input+4U*(transferred+words),next);
+        if(!write && pending) {
+            dma_error=selectio_dma_payload(0,payload_window+1024U*pending_bank,
+                                         output+4U*(*completed),pending);
+            if(!dma_error)*completed+=pending;
+            pending=0;
+        }
+        if(wait_queue(SQUEUE,0x27U,0x25U)) {
+            probe_target_invalidate();
+            break;
+        }
+        uint32_t summary=swd_read32(SQUEUE+0x14U);
+        unsigned ack=(summary>>10)&7U;
+        unsigned retired=summary&1023U;
+        unsigned prefix=write?1U:2U;
+        unsigned done=retired>prefix?retired-prefix:0U;
+        if(done>words)done=words;
+        if(write)*completed+=done;
+        else if(!dma_error) {pending=done;pending_bank=bank;}
+        transferred+=done;
+        if(dma_error || dap_wait_command_error() || !probe_session_live())break;
+        if(retired!=words+3U || (summary&0xc000U)) {
+            result=(summary&0x2000U) || !ack || ack==DAP_TRANSFER_OK ? DAP_TRANSFER_ERROR:ack;
+            break;
+        }
+        if(transferred==count)result=DAP_TRANSFER_OK;
+        bank^=1U;
+    }
+    if(pending) {
+        if(selectio_dma_payload(0,payload_window+1024U*pending_bank,output+4U*(*completed),pending))
+            result=DAP_TRANSFER_ERROR;
+        else
+            *completed+=pending;
+    }
+    *status=result;
+release:
+    session.use_dma=0;
+    if(swd50_queue_release(live))*status=DAP_TRANSFER_ERROR;
+    return 1;
+}
+
 int selectio_mem_close(void) {
+    if(rtt_live)return selectio_swd50_rtt_detach();
     unsigned port=session.port;
     if (!port) return 0;
     uint32_t base=port==2?JQUEUE:SQUEUE;

@@ -1,0 +1,73 @@
+{
+  "artifacts": {
+    "git_head": "f5cb47d8bcd777c62082755e19c07ab37454aca8",
+    "git_dirty": true,
+    "bit": {
+      "path": "E:\\zynqlinkPRO-efficiency\\build\\swd50-standard-v2-pair\\probe.bit",
+      "sha256": "3caf4831d2ab52302d2077f2948ef9540ed84e31811e0ad6e5f8e9e5a947a5cc"
+    },
+    "elf": {
+      "path": "E:\\zynqlinkPRO-efficiency\\build\\swd50-standard-v2-pair\\application.elf",
+      "sha256": "dc9bf09900506871fb0ea38a8a07a8c135dc9874c984af3a595468353cc1fb25"
+    }
+  },
+  "kind": "continuous RAM producer RTT->CDC",
+  "transport": "swd",
+  "rows": [],
+  "backup_sha256": "46c04eba08397dce082c2d91d54d9c81f449eb0f4a64de8464cd37ec8c78f549",
+  "registers_before": {
+    "0": 1004800,
+    "1": 536871272,
+    "2": 3323688449,
+    "3": 536877048,
+    "4": 536871251,
+    "5": 536871255,
+    "6": 579843465,
+    "7": 3040398030,
+    "8": 4219465471,
+    "9": 4259299324,
+    "10": 968574952,
+    "11": 2328958712,
+    "12": 10,
+    "13": 536871936,
+    "14": 536871245,
+    "15": 536871236,
+    "16": 1090519040,
+    "17": 536871936,
+    "18": 1110949612,
+    "20": 1
+  },
+  "RCC_before": {
+    "name": "STM32F103",
+    "cpuid": "0x411fc231",
+    "device": "0x10036414",
+    "registers": {
+      "0x40021000": "0x3034e83",
+      "0x40021004": "0x79e50a"
+    }
+  },
+  "fixture_base": "0x20000000",
+  "failure": "AssertionError((-7, (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)))",
+  "failure_clock": {
+    "FCLK_Hz": 133333332,
+    "cfg": "0x40044a11",
+    "waveform": {
+      "SWCLK_Hz": 995024.8656716418,
+      "half_period_fclk": 67,
+      "short_high": false,
+      "intended_high_ns": 502.50000502500006
+    },
+    "clockSource": 2,
+    "clockControl": 1051168,
+    "sourcePllControl": 163848,
+    "frequencyBasis": "read-back PLL/source/divisors, rounded PS_REF; not a frequency-counter measurement",
+    "JTAG_sampling_mode": 0,
+    "RISC_V_SBA_enabled": false,
+    "actual_link_Hz": 49999999.5,
+    "clock_observation": "physical MEM-AP0 read; no CPU debug context or DAP command during stream",
+    "swd_queue_timing": "0x1658",
+    "selectio_ref_hz": 199999998,
+    "selectio_config": "0x4840e2c",
+    "selectio_divider": 4
+  }
+}

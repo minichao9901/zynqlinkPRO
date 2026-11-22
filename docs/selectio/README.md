@@ -117,6 +117,8 @@ python -X utf8 toolbox.py project run board.accept -- --selectio --board f103ze 
 
 F103ZE HCLK128 的 50 MHz SWD 优化包见 [候选配对](../../prebuilt/selectio-swd50/README.md)。在已经加载该配对、目标 RTT 控制块和上行环均位于 SRAM 的条件下，可使用 `rtt-queue` 启动专用队列路径。它连续读完整 TAR 页，每次最多 4 KiB，并在落入探针 DDR 后检查 RdOff 写入的 SWD 应答和 DP 状态。以下地址是本仓库 SRAM 夹具的示例。
 
+标准 CMSIS-DAP 与 RTT→CDC 共用 50 MHz SWD 批次队列的验证配对是 [selectio-swd50-standard](../../prebuilt/selectio-swd50-standard/README.md)。CMSIS-DAP 使用现有 TransferBlock 命令。CDC 转发继续使用 J7 串口，启动后借用同一队列，并在 STOP 或调试器接管时交还 AP。[实测与复测入口](../validation/swd50-standard-20261122/README.md)
+
 ```powershell
 python -X utf8 toolbox.py selectio --serial 12345678 rtt-queue --tap 8 --slot 22 --idle 0 --address 0x20008200 --seconds 60 --out build/rtt-queue.bin
 python -X utf8 tools/selectio_f103_clock_accept.py --pair prebuilt/selectio-swd50 --hclk-mhz 128 --only memory --only rtt --rtt-queue --memory-page-aligned --seconds 60 --rounds 3 --out build/swd50-accept --execute

@@ -96,6 +96,9 @@ def main():
     ap.add_argument("--trace-seconds",type=float,default=0.1)
     ap.add_argument("--seconds",type=float,default=60,help="seconds per directional SRAM window or running RTT capture")
     ap.add_argument("--rounds",type=int,default=3,help="windows per SRAM direction")
+    ap.add_argument("--rtt-cdc-seconds",type=float,default=3)
+    ap.add_argument("--rtt-cdc-rounds",type=int,default=2)
+    ap.add_argument("--rtt-cdc-check-handoff",action="store_true")
     ap.add_argument("--swd-slot",type=int,default=22)
     ap.add_argument("--memory-page-aligned",action="store_true")
     ap.add_argument("--memory-bytes",type=int,help="override the native SRAM block size for a geometry comparison")
@@ -114,7 +117,8 @@ def main():
         state=json.loads((folder/"state.json").read_text("utf8"))
         if state.get("restored"):ap.error("fixture already restored")
         recover(folder,state);return
-    if not 0<args.trace_seconds<=2 or args.seconds<=0 or args.rounds<1:ap.error("invalid window length or count")
+    if (not 0<args.trace_seconds<=2 or args.seconds<=0 or args.rounds<1 or
+        args.rtt_cdc_seconds<=0 or args.rtt_cdc_rounds<1):ap.error("invalid window length or count")
     suites=args.only or ["memory","rtt","etm"]
     needs_halt=any(s in suites for s in ("memory","rtt","historical"))
     backup_bytes=20480 if "historical" in suites else SIZE
@@ -226,7 +230,9 @@ def main():
             try:
                 if bound:run("com-rtt",[*cli,"com","release"])
                 run("rtt-cdc",[*py,ROOT/"tools/benchmark_rtt_forward.py",*common,"--serialized-control","--speeds",50000000,
-                    "--chunks",2048,"--seconds",3,"--repeats",2,"--output",folder/"rtt-cdc.json"])
+                    "--chunks",2048,"--seconds",args.rtt_cdc_seconds,"--repeats",args.rtt_cdc_rounds,
+                    *(["--check-dap-handoff"] if args.rtt_cdc_check_handoff else []),
+                    "--output",folder/"rtt-cdc.json"])
             finally:
                 if bound:run("com-restore",[*cli,"com","bind"])
         if "etm" in suites:

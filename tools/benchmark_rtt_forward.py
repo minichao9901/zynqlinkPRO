@@ -74,12 +74,14 @@ class Reader(threading.Thread):
             self.error = repr(exc)
 
 
-def point(probe, mem, port, code, speed, chunk, seconds, repeat, activate_transport=None, base=0x20000000, serialized_control=False):
+def point(probe, mem, port, code, speed, chunk, seconds, repeat, activate_transport=None,
+          base=0x20000000, serialized_control=False, check_dap_handoff=False):
     mem.write_word(DHCSR, 0xa05f0003)
     mem.write(base, code)
     mem.write(base+0x200, struct.pack('<16sII6II', b'SEGGER RTT', 1, 0, 0, base+0x1000, 8192, 0, 0, 0, 0))
     assert mem.read(base,len(code))==code,'producer code did not verify'
-    if (mem.word(0xe000ed00)>>4)&0xfff == 0xc27:
+    cpuid=mem.word(0xe000ed00)
+    if (cpuid>>4)&0xfff == 0xc27:
         assert not mem.word(0xe000ed14)&(1<<16), 'RAM fixture requires D-cache disabled'
         mem.write_word(0xe000ef50, 0)  # ICIALLU: invalidate stale instructions after RAM writes.
     core_write(mem, 16, 0x01000000)  # Clear inherited IT/condition state for the RAM entry.
@@ -103,11 +105,22 @@ def point(probe, mem, port, code, speed, chunk, seconds, repeat, activate_transp
             t0 = (t0+time.perf_counter())/2
             assert rc == 0 and s0[1] == base+0x200 and s0[3]>0, (rc, s0)
             count0 = reader.count
-            time.sleep(seconds)
+            dap_handoff_before=dap_handoff_during=None
+            if check_dap_handoff:
+                time.sleep(seconds/2)
+                dap_handoff_before=reader.count
+                dap_handoff_during=mem.word(0xe000ed00)
+                if dap_handoff_during!=cpuid:
+                    raise RuntimeError("CMSIS-DAP CPUID read disagrees while RTT is active")
+                time.sleep(seconds/2)
+            else:
+                time.sleep(seconds)
             t1 = time.perf_counter()
             rc, s1 = probe.action(0x31, 2)
             t1 = (t1+time.perf_counter())/2
             count1 = reader.count
+            if check_dap_handoff and not count1>dap_handoff_before:
+                raise RuntimeError("CDC payload stopped after the CMSIS-DAP read")
             assert rc == 0 and s1[5] == 0, (rc, s1)
             if serialized_control:
                 rc,stopped=probe.action(0x31,0)
@@ -145,7 +158,8 @@ def point(probe, mem, port, code, speed, chunk, seconds, repeat, activate_transp
                     'probe_bytes': (s1[3]-s0[3]) & 0xffffffff,
                     'probe_MB_s': ((s1[3]-s0[3]) & 0xffffffff)/(t1-t0)/1e6,
                     'session_bytes': published, 'sequence_exact': True,
-                    'all_published_received': True, 'errors': s1[5], 's0': s0, 's1': s1}
+                    'all_published_received': True,'dap_handoff_cpuid':dap_handoff_during,
+                    'errors': s1[5], 's0': s0, 's1': s1}
         finally:
             if serialized_control:probe.action(0x31,0)
             mem.write_word(DHCSR, 0xa05f0003)
@@ -158,6 +172,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--seconds', type=float, default=3)
     ap.add_argument('--serialized-control',action='store_true',help='release the forwarding owner before target run/halt; same timed CDC window')
+    ap.add_argument('--check-dap-handoff',action='store_true',help='exercise a CMSIS-DAP CPUID read during the CDC window')
     ap.add_argument('--speeds', default='50000000,60000000')
     ap.add_argument('--chunks', default='128,256,512,1024')
     ap.add_argument('--repeats', type=int, default=1)
@@ -219,7 +234,7 @@ def main():
                     setup(out,inp,args.bootstrap_speed_khz,'swd')
                     row = point(probe, mem, port, code, speed, chunk, args.seconds, repeat,
                                 lambda:setup(out,inp,speed//1000,args.transport,jtag_ir_lengths=tuple(map(int,args.jtag_ir.split(','))),speed_hz=speed),base=base,
-                                serialized_control=args.serialized_control)
+                                serialized_control=args.serialized_control,check_dap_handoff=args.check_dap_handoff)
                     report['rows'].append(row)
                     args.output.write_text(json.dumps(report, indent=2))
                     print(json.dumps({k:v for k,v in row.items() if k not in ('s0','s1')}), flush=True)

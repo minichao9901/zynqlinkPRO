@@ -7,6 +7,9 @@
 #include <string.h>
 #include "dap_wait.h"
 #include "swd_dma.h"
+#if DAP_SELECTIO
+#include "selectio_block.h"
+#endif
 static uint32_t select_shadow, saved_select, saved_csw, saved_tar;
 static int claimed, saved, link_ready;
 static int context_invalid;
@@ -295,12 +298,28 @@ static int read_words(uint32_t addr, uint8_t *out, uint32_t count) {
 int probe_target_read(uint32_t addr, uint8_t *out, uint32_t size) {
     if (size && addr > UINT32_MAX - (size - 1))
         return -6;
+#if DAP_SELECTIO
+    if(selectio_swd50_rtt_attached() && size && !(addr&3U) && !(size&3U)) {
+        unsigned completed;
+        uint32_t detail;
+        return selectio_mem_bulk(0,addr,size/4U,0,out,&completed,&detail)?-4:0;
+    }
+#endif
     while (size) {
         uint32_t base = addr & ~3U, off = addr & 3U;
         uint32_t n = 1024 - (base & 1023);
         if (size < n - off)
             n = (size + off + 3) & ~3U;
-        if (read_words(base, scratch, n / 4))
+        int rc;
+#if DAP_SELECTIO
+        if(selectio_swd50_rtt_attached()) {
+            unsigned completed;
+            uint32_t detail;
+            rc=selectio_mem_bulk(0,base,n/4U,0,scratch,&completed,&detail);
+        } else
+#endif
+            rc=read_words(base, scratch, n/4U);
+        if (rc)
             return -4;
         n -= off;
         if (n > size)
@@ -313,6 +332,13 @@ int probe_target_read(uint32_t addr, uint8_t *out, uint32_t size) {
     return 0;
 }
 int probe_target_write_word(uint32_t addr, uint32_t value) {
+#if DAP_SELECTIO
+    if(selectio_swd50_rtt_attached()) {
+        unsigned completed;
+        uint32_t detail;
+        return selectio_mem_bulk(1,addr,1,(const uint8_t *)&value,0,&completed,&detail)?-4:0;
+    }
+#endif
     uint32_t dummy = 0;
     return context_invalid || (addr & 3) || write_reg(8, 0) || write_reg(1, 0x23000052) || write_reg(5, addr) ||
                    write_reg(13, value) || xfer(14, &dummy)

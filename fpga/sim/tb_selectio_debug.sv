@@ -11,16 +11,33 @@ module tb_selectio_debug;
     wire [23:0] lanes;
     wire [7:0] jrx;
     wire [3:0] sclock, sdata, srelease, srx;
+    wire [26:0] live_config;
+    reg [1:0] live_sync=0;
+    reg live_start=0;
+    reg [7:0] live_req=0;
+    reg [31:0] live_wdata=0;
+    wire live_done, live_parity;
+    wire [2:0] live_ack;
+    wire [31:0] live_rdata;
+    wire [3:0] live_clock,live_data,live_release;
     wire clk_pin, tdi_pin;
     tri1 data_pin;
     wire target_tdo, tdo_disabled, target_swd, target_drive, boundary_tdo;
     wire #0.8 tdo_pin = tdo_disabled ? 1'b1 : target_tdo;
     assign #0.8 data_pin = target_drive ? target_swd : 1'bz;
     IDELAYCTRL calibration(.REFCLK(ref_clk), .RST(!resetn), .RDY(calibrated));
-    selectio_clocking clocks(ref_clk,resetn,calibrated,jhold,shold,released,1'b0,1'b0,1'b0,
+    selectio_clocking clocks(ref_clk,resetn,calibrated,jhold,shold,released,1'b0,live_config[0],1'b0,
         serial_clk,quad_clk,octet_clk,phy_reset,js_reset,ss_reset,js_ready,owner,,serial_rx_clk);
+    always @(posedge quad_clk) live_sync<={live_sync[0],live_config[0]};
+    selectio_live_swd live(
+        .host_clk(axi_clk),.quad_clk(quad_clk),.reset(!resetn || !live_config[0]),
+        .granted(owner==3 && live_sync[1]),.start(live_start),.mode(1'b1),.request(live_req),.wdata(live_wdata),
+        .seq_data(256'b0),.seq_count(8'b0),.sample_slot(live_config[6:1]),.idle(live_config[17:14]),
+        .half_rate(live_config[26]),.busy(),.valid(live_done),.ack(live_ack),.parity(live_parity),.rdata(live_rdata),
+        .rx(srx),.clocks(live_clock),.data(live_data),.release_bits(live_release));
     selectio_debug_phy phy(serial_clk,quad_clk,octet_clk,phy_reset,owner,
-        1'b0,1'b1,1'b1,1'b0,1'b1,lanes,jrx,sclock,sdata,srelease,srx,
+        1'b0,1'b1,1'b1,1'b0,1'b1,lanes,jrx,live_sync[1]?live_clock:sclock,
+        live_sync[1]?live_data:sdata,live_sync[1]?live_release:srelease,srx,
         axi_clk,jload,sload,jtap,stap,clk_pin,data_pin,tdi_pin,tdo_pin,,, , ,1'b0,4'b0,4'b0,4'b0,,1'b0,1'b0,serial_rx_clk,);
     jtag_dp_model #(.IRLEN(5),.DUMMY(1),.RETURN_NS(0.2)) boundary(
         .rst_n(resetn),.tck(clk_pin),.tms(data_pin),.tdi(tdi_pin),.tdo(boundary_tdo));
@@ -72,7 +89,7 @@ module tb_selectio_debug;
         .s_axi_araddr(araddr),.s_axi_arprot(3'b0),.s_axi_arvalid(arvalid && use_swd==1),.s_axi_arready(arr[1]),
         .s_axi_rdata(rvalues[1]),.s_axi_rresp(rresponse[1]),.s_axi_rvalid(rr[1]),.s_axi_rready(1'b1),
         .payload_tx_addr(spa),.payload_rx_addr(sra),.payload_tx_data(spd),.payload_rx_data(srd),.payload_rx_write(swe),
-        .hold(shold), .delay_ready(calibrated), .delay_load(sload), .delay_value(stap),
+        .hold(shold), .live_config(live_config), .delay_ready(calibrated), .delay_load(sload), .delay_value(stap),
         .word_clk(quad_clk), .word_reset(ss_reset), .rx_slots(srx), .clk_slots(sclock),
         .data_slots(sdata), .release_slots(srelease));
     task automatic write_reg(input [13:0] addr, input [31:0] data, input [1:0] response);
@@ -122,6 +139,17 @@ module tb_selectio_debug;
     task automatic put(input int index, input [4:0] req, input [31:0] data);
         write_reg('h1000+index*8, req, 0);
         write_reg('h1004+index*8, data, 0);
+    endtask
+    task automatic scalar(input [7:0] request,input [31:0] data,output [31:0] reply);
+        for(int attempt=0;attempt<64;attempt++)begin
+            @(negedge axi_clk);live_req=request;live_wdata=data;live_start=1;
+            @(negedge axi_clk);live_start=0;
+            do @(negedge axi_clk); while(!live_done);
+            if(live_ack!=2)break;
+        end
+        if(owner!=3 || live_ack!=1 || live_parity)
+            $fatal(1,"live SWD req=%h owner=%d ack=%d parity=%b",request,owner,live_ack,live_parity);
+        reply=live_rdata;
     endtask
     integer block_idle=2, jtag_idle=33,swd_batches=0;
     realtime jtag_start;
@@ -219,6 +247,29 @@ module tb_selectio_debug;
             read_reg('h2008+4*i,value); if(value!==~pattern(i)) $fatal(1,"SWD read %d",i);
         end
         if (adjacent<256) $fatal(1,"missing continuous SWD");
+        if ($test$plusargs("half_rate")) begin
+            write_reg('h24,'h04000001|(sslot<<1)|(block_idle<<14),0);
+            write_reg(8,1,0);repeat(30)@(posedge quad_clk);
+            scalar(5,'h20008020,value);
+            scalar(14,0,value);
+            write_reg(8,0,0);
+            write_reg('h24,'h04000000|(sslot<<1)|(block_idle<<14),0);
+            repeat(30)@(posedge quad_clk);
+            put(0,14,0);put(33,14,0);put(34,6,0);batch(35);
+            for(i=0;i<32;i++) check_payload('h3400+4*i,~pattern(i+8));
+            write_reg('h24,'h04000001|(sslot<<1)|(block_idle<<14),0);
+            write_reg(8,1,0);repeat(30)@(posedge quad_clk);
+            scalar(7,0,value);scalar(14,0,value);
+            if(value!='h200080a0)$fatal(1,"host TAR changed unexpectedly %h",value);
+            scalar(15,0,value);scalar(14,0,value);
+            if(value!==~pattern(40))$fatal(1,"host posted read %h",value);
+            write_reg(8,0,0);
+            write_reg('h24,0,0);repeat(30)@(posedge quad_clk);
+            write_reg('h1c,2,0);
+            put(0,14,0);put(17,14,0);put(18,6,0);batch(19);
+            for (i=0;i<16;i++) if(cm3.u_sys.mem[41+i]!==~pattern(i))$fatal(1,"raw SWD write %d",i);
+            $display("LIVE_RAW_QUEUE_PASS SWD scalar and queued DRW share TAR, sample phase and pad owner");
+        end
         write_reg(8,1,0); wait(owner==0); released=0; wait(owner==1);
         $display("SELECTIO_PASS SWD %0d MHz words=256 slot=%d",$test$plusargs("half_rate")?50:100,sslot);
         $finish;

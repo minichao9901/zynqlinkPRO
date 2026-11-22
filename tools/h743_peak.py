@@ -148,6 +148,8 @@ def main():
             row['JTAG_sampling_mode'] = xfer(out, inp, [0x89, 255])[2]
         row.update(measure_pipeline(mem, base, words=args.words, depth=args.depth, loops=args.loops,
                                     repeats=args.repeats, soak_seconds=args.soak_seconds))
+        if args.observe_link:
+            row["live_clock_after"]=live_clock_snapshot()
         row['restore_ok'] = True
         row['passed'] = True
     except Exception as exc:

@@ -166,7 +166,7 @@ static unsigned execute_frame(unsigned length, unsigned active_epoch) {
             if(!selectio_combo_frame(op,input+16,size,output+16,frame_limit-HEADER_SIZE-1,&reply_size,&n,&source)) {
                 reply_packets=n;reply_channel=source;status=0;
             }
-        } else if(channel==1 && selectio_combo_active() && op!=5) status=2;
+        } else if(channel==1 && ((selectio_combo_active() && op!=5) || selectio_swd50_rtt_attached())) status=2;
         else if (channel==1 && op==1 && (size==4 || size==8)) {
             dap_wait_begin();
             if(!selectio_mem_open_at(input+16,size==8 ? read32(input+20) : 100000000U)) status=0;
@@ -205,7 +205,7 @@ static unsigned execute_frame(unsigned length, unsigned active_epoch) {
                 if (epoch!=active_epoch) {mtcpsr(flags);goto reply;}
                 dap_wait_begin();
                 mtcpsr(flags);
-                int exclusive=selectio_mem_active();
+                int exclusive=selectio_mem_active() && !selectio_swd50_rtt_attached();
                 if (exclusive || !probe_before_dap()) {
                     reply_size=DAP_ExecuteCommand(input+16,size,output+16,frame_limit-HEADER_SIZE-1)&0xffffU;
                     if (reply_size>=2 && output[17]==DAP_OK && !dap_wait_command_error()) status=0;
@@ -245,7 +245,8 @@ void selectio_usb_poll(XUsbPs *usb) {
     selectio_aux_poll();
     if((++watchdog_div&1023U)==0) {
         XTime now;XTime_GetTime(&now);
-        if(selectio_mem_active() && now-last_activity>2ULL*COUNTS_PER_SECOND) close_pending=1;
+        if(selectio_mem_active() && !selectio_swd50_rtt_attached() &&
+           now-last_activity>2ULL*COUNTS_PER_SECOND) close_pending=1;
         if((selectio_aux_native_owner() || probe_native_owns_stream()) &&
            now-last_activity>5ULL*COUNTS_PER_SECOND) abandon_native=1;
     }

@@ -13,6 +13,8 @@
 static int unexpected(void) { abort(); }
 #define selectio_mem_port() 0U
 #define selectio_mem_active() 0
+static int cdc_owns_swd_queue;
+#define selectio_swd50_rtt_attached() cdc_owns_swd_queue
 #define selectio_mem_close() unexpected()
 #define selectio_mem_open_at(...) unexpected()
 #define selectio_mem_bulk(...) unexpected()
@@ -106,9 +108,12 @@ int main(void) {
     bulk[0]=0;inject(7,6,36,bulk,16);check(36,0,16+bytes,NULL);
     assert(read32(tx_data+16)==bytes/4 && !memcmp(tx_data+32,expected,bytes));complete();
     write32(bulk+4,0x20010004U-bytes);inject(7,6,37,bulk,16);check(37,1,0,NULL);complete();
+    cdc_owns_swd_queue=1;
+    inject(1,6,38,bulk,16);check(38,2,0,NULL);complete();
+    cdc_owns_swd_queue=0;
     inject(0,0,99,NULL,0);check(99,0,16,NULL);complete();
     inject(0,1,100,expected,4080);check(100,1,0,NULL);complete();
-    assert(released==11 && !tx_busy && !pending_length);
+    assert(released==12 && !tx_busy && !pending_length);
     puts("PASS IF4 negotiated frames, dTD recycling, three ordered in-flight echoes, DDR bounds and legacy reset");
     return 0;
 }
