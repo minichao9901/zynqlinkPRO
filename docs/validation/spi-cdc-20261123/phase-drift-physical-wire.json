@@ -1,0 +1,625 @@
+{
+  "hashes": {
+    "probe.bit": "f3c4ccfd78c9148649897a0902fb93eadb209494e0295956981c973bbac92c66",
+    "application.elf": "32f75ae7a4d82fe3b98a541f5cb4adeede9b5bdf42ab961fdf7cd33c9749da9d",
+    "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+  },
+  "serial": "12345678",
+  "cases": [
+    {
+      "name": "wire",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 548.4008771999979,
+      "log": "wire.log",
+      "restored": true
+    },
+    {
+      "name": "external-manchester",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 62.75387690000207,
+      "log": "external-manchester.log",
+      "restored": true
+    }
+  ],
+  "wire": [
+    {
+      "kind": "spi-mode0",
+      "rate": 100000000,
+      "mode": 0,
+      "passed": true,
+      "points": [
+        {
+          "tap": 0,
+          "slot": 22,
+          "source_advance": true,
+          "source_duty": 2,
+          "ok": true,
+          "bytes": 64,
+          "returned_delay": 2,
+          "overflow": 0,
+          "framing": 0,
+          "prefix": "12face20726715212c847e1c"
+        }
+      ],
+      "tap": 0,
+      "slot": 22,
+      "transactions": 551,
+      "confirmed_bytes": 1128448,
+      "elapsed": 60.05551660000128,
+      "returned_delay": 2,
+      "source_advance": true,
+      "source_duty": 2
+    },
+    {
+      "kind": "spi-pad-mode0",
+      "rate": 100000000,
+      "mode": 0,
+      "passed": true,
+      "points": [
+        {
+          "tap": 0,
+          "slot": 22,
+          "source_advance": true,
+          "source_duty": 2,
+          "ok": false,
+          "bytes": 64,
+          "returned_delay": 0,
+          "overflow": 0,
+          "framing": 0,
+          "prefix": "e60004c40240f0efc22dc33c"
+        },
+        {
+          "tap": 0,
+          "slot": 20,
+          "source_advance": true,
+          "source_duty": 2,
+          "ok": false,
+          "bytes": 64,
+          "returned_delay": 0,
+          "overflow": 0,
+          "framing": 0,
+          "prefix": "7300026201207877e116e19e"
+        },
+        {
+          "tap": 0,
+          "slot": 24,
+          "source_advance": true,
+          "source_duty": 2,
+          "ok": false,
+          "bytes": 64,
+          "returned_delay": 0,
+          "overflow": 0,
+          "framing": 0,
+          "prefix": "e60004c40240f0efc22dc33c"
+        },
+        {
+          "tap": 0,
+          "slot": 18,
+          "source_advance": true,
+          "source_duty": 2,
+          "ok": false,
+          "bytes": 64,
+          "returned_delay": 0,
+          "overflow": 0,
+          "framing": 0,
+          "prefix": "7300026201207877e116e19e"
+        },
+        {
+          "tap": 0,
+          "slot": 26,
+          "source_advance": true,
+          "source_duty": 2,
+          "ok": false,
+          "bytes": 64,
+          "returned_delay": 0,
+          "overflow": 0,
+          "framing": 0,
+          "prefix": "cc0009880481e1df845b8678"
+        },
+        {
+          "tap": 0,
+          "slot": 16,
+          "source_advance": true,
+          "source_duty": 2,
+          "ok": true,
+          "bytes": 64,
+          "returned_delay": 0,
+          "overflow": 0,
+          "framing": 0,
+          "prefix": "3980013100903c3bf08b70cf"
+        }
+      ],
+      "tap": 0,
+      "slot": 16,
+      "transactions": 552,
+      "confirmed_bytes": 1130496,
+      "elapsed": 60.101098600000114,
+      "returned_delay": 0,
+      "source_advance": true,
+      "source_duty": 2
+    },
+    {
+      "kind": "spi-pad-mode1",
+      "rate": 100000000,
+      "mode": 1,
+      "passed": true,
+      "points": [
+        {
+          "tap": 0,
+          "slot": 22,
+          "source_advance": true,
+          "source_duty": 2,
+          "ok": false,
+          "bytes": 64,
+          "returned_delay": 0,
+          "overflow": 0,
+          "framing": 0,
+          "prefix": "277c56b7ae23c11613f2e5d4"
+        },
+        {
+          "tap": 0,
+          "slot": 20,
+          "source_advance": true,
+          "source_duty": 2,
+          "ok": false,
+          "bytes": 64,
+          "returned_delay": 0,
+          "overflow": 0,
+          "framing": 0,
+          "prefix": "377c7fffbe33c19f1bf3e7de"
+        },
+        {
+          "tap": 0,
+          "slot": 24,
+          "source_advance": true,
+          "source_duty": 2,
+          "ok": false,
+          "bytes": 64,
+          "returned_delay": 0,
+          "overflow": 0,
+          "framing": 0,
+          "prefix": "6ef8ffff7c67833e37e7cfbd"
+        },
+        {
+          "tap": 0,
+          "slot": 18,
+          "source_advance": true,
+          "source_duty": 2,
+          "ok": true,
+          "bytes": 64,
+          "returned_delay": 0,
+          "overflow": 0,
+          "framing": 0,
+          "prefix": "13be2b5bd711e08b09f972ea"
+        }
+      ],
+      "tap": 0,
+      "slot": 18,
+      "transactions": 551,
+      "confirmed_bytes": 1128448,
+      "elapsed": 60.04486099999849,
+      "returned_delay": 0,
+      "source_advance": true,
+      "source_duty": 2
+    },
+    {
+      "kind": "spi-pad-mode2",
+      "rate": 100000000,
+      "mode": 2,
+      "passed": true,
+      "points": [
+        {
+          "tap": 0,
+          "slot": 22,
+          "source_advance": true,
+          "source_duty": 2,
+          "ok": false,
+          "bytes": 64,
+          "returned_delay": 0,
+          "overflow": 0,
+          "framing": 0,
+          "prefix": "cc6efb9cf01d807c0cc7ec37"
+        },
+        {
+          "tap": 0,
+          "slot": 20,
+          "source_advance": true,
+          "source_duty": 2,
+          "ok": false,
+          "bytes": 64,
+          "returned_delay": 0,
+          "overflow": 0,
+          "framing": 0,
+          "prefix": "44277d8c500e803c04436413"
+        },
+        {
+          "tap": 0,
+          "slot": 24,
+          "source_advance": true,
+          "source_duty": 2,
+          "ok": false,
+          "bytes": 64,
+          "returned_delay": 0,
+          "overflow": 0,
+          "framing": 0,
+          "prefix": "884efb18a01d00780886c827"
+        },
+        {
+          "tap": 0,
+          "slot": 18,
+          "source_advance": true,
+          "source_duty": 2,
+          "ok": false,
+          "bytes": 64,
+          "returned_delay": 0,
+          "overflow": 0,
+          "framing": 0,
+          "prefix": "66377dce780ec03e0663f61b"
+        },
+        {
+          "tap": 0,
+          "slot": 26,
+          "source_advance": true,
+          "source_duty": 2,
+          "ok": false,
+          "bytes": 64,
+          "returned_delay": 0,
+          "overflow": 0,
+          "framing": 0,
+          "prefix": "98ddf739e03b00f8198fd86e"
+        },
+        {
+          "tap": 0,
+          "slot": 16,
+          "source_advance": true,
+          "source_duty": 2,
+          "ok": true,
+          "bytes": 64,
+          "returned_delay": 0,
+          "overflow": 0,
+          "framing": 0,
+          "prefix": "2213bec62807401e0221b209"
+        }
+      ],
+      "tap": 0,
+      "slot": 16,
+      "transactions": 552,
+      "confirmed_bytes": 1130496,
+      "elapsed": 60.084393300003285,
+      "returned_delay": 0,
+      "source_advance": true,
+      "source_duty": 2
+    },
+    {
+      "kind": "spi-pad-mode3",
+      "rate": 100000000,
+      "mode": 3,
+      "passed": true,
+      "points": [
+        {
+          "tap": 0,
+          "slot": 22,
+          "source_advance": true,
+          "source_duty": 2,
+          "ok": false,
+          "bytes": 64,
+          "returned_delay": 0,
+          "overflow": 0,
+          "framing": 0,
+          "prefix": "ec1c417d300acdab477e24cd"
+        },
+        {
+          "tap": 0,
+          "slot": 20,
+          "source_advance": true,
+          "source_duty": 2,
+          "ok": false,
+          "bytes": 64,
+          "returned_delay": 0,
+          "overflow": 0,
+          "framing": 0,
+          "prefix": "ec1c417d300acdab477e24cd"
+        },
+        {
+          "tap": 0,
+          "slot": 24,
+          "source_advance": true,
+          "source_duty": 2,
+          "ok": false,
+          "bytes": 64,
+          "returned_delay": 0,
+          "overflow": 0,
+          "framing": 0,
+          "prefix": "d83882fa60159b568efc499b"
+        },
+        {
+          "tap": 0,
+          "slot": 18,
+          "source_advance": true,
+          "source_duty": 2,
+          "ok": true,
+          "bytes": 64,
+          "returned_delay": 0,
+          "overflow": 0,
+          "framing": 0,
+          "prefix": "f60e20be980566d5a3bf1266"
+        }
+      ],
+      "tap": 0,
+      "slot": 18,
+      "transactions": 551,
+      "confirmed_bytes": 1128448,
+      "elapsed": 60.01340020000134,
+      "returned_delay": 0,
+      "source_advance": true,
+      "source_duty": 2
+    },
+    {
+      "kind": "uart-tx-remote",
+      "rate": 100000000,
+      "mode": 0,
+      "passed": true,
+      "points": [
+        {
+          "tap": 0,
+          "slot": 20,
+          "source_advance": true,
+          "source_duty": 2,
+          "ok": true,
+          "bytes": 64,
+          "returned_delay": 0,
+          "overflow": 0,
+          "framing": 0,
+          "prefix": "0c3534ec7f14241ca5ed75a7"
+        }
+      ],
+      "tap": 0,
+      "slot": 20,
+      "transactions": 552,
+      "confirmed_bytes": 52992,
+      "elapsed": 60.090708100000484,
+      "returned_delay": 0,
+      "source_advance": true,
+      "source_duty": 2
+    },
+    {
+      "kind": "uart-rx-remote",
+      "rate": 100000000,
+      "mode": 0,
+      "passed": true,
+      "points": [
+        {
+          "tap": 0,
+          "slot": 20,
+          "source_advance": true,
+          "source_duty": 2,
+          "ok": false,
+          "bytes": 0,
+          "returned_delay": 0,
+          "overflow": 0,
+          "framing": 1,
+          "prefix": ""
+        },
+        {
+          "tap": 8,
+          "slot": 20,
+          "source_advance": true,
+          "source_duty": 2,
+          "ok": true,
+          "bytes": 64,
+          "returned_delay": 0,
+          "overflow": 0,
+          "framing": 0,
+          "prefix": "2919d9ffed49f82cadde8af7"
+        }
+      ],
+      "tap": 8,
+      "slot": 20,
+      "transactions": 551,
+      "confirmed_bytes": 52896,
+      "elapsed": 60.0032910000009,
+      "returned_delay": 0,
+      "source_advance": true,
+      "source_duty": 2
+    },
+    {
+      "kind": "manchester50-remote",
+      "rate": 50000000,
+      "mode": 0,
+      "passed": true,
+      "points": [
+        {
+          "tap": 0,
+          "slot": 20,
+          "source_advance": true,
+          "source_duty": 2,
+          "ok": true,
+          "bytes": 32,
+          "returned_delay": 0,
+          "overflow": 0,
+          "framing": 0,
+          "prefix": "f652e22df3bee08849131698"
+        }
+      ],
+      "tap": 0,
+      "slot": 20,
+      "transactions": 545,
+      "confirmed_bytes": 17440,
+      "elapsed": 60.059905699999945,
+      "returned_delay": 0,
+      "source_advance": true,
+      "source_duty": 2
+    },
+    {
+      "kind": "manchester100-tdi-pad",
+      "rate": 100000000,
+      "mode": 0,
+      "passed": true,
+      "points": [
+        {
+          "tap": 0,
+          "slot": 20,
+          "source_advance": true,
+          "source_duty": 2,
+          "ok": false,
+          "bytes": 0,
+          "returned_delay": 0,
+          "overflow": 0,
+          "framing": 43,
+          "prefix": ""
+        },
+        {
+          "tap": 0,
+          "slot": 21,
+          "source_advance": true,
+          "source_duty": 2,
+          "ok": true,
+          "bytes": 32,
+          "returned_delay": 0,
+          "overflow": 0,
+          "framing": 0,
+          "prefix": "e7c75f1bd246cbfa59b153fd"
+        }
+      ],
+      "applied_waveform": {
+        "compared_ddr_slots": 1104,
+        "delta_slots": 22,
+        "different_samples": 163,
+        "symbols": 552,
+        "center_phase": 0,
+        "center_errors": 24
+      },
+      "confirmed_source_symbols": 304152,
+      "source_center_differences": 9884,
+      "tap": 0,
+      "slot": 21,
+      "transactions": 551,
+      "confirmed_bytes": 17632,
+      "elapsed": 60.04043790000287,
+      "returned_delay": 0,
+      "source_advance": true,
+      "source_duty": 2
+    }
+  ],
+  "external_manchester": [
+    {
+      "kind": "manchester100-sparse-remote",
+      "rate": 100000000,
+      "mode": 0,
+      "passed": true,
+      "points": [
+        {
+          "tap": 0,
+          "slot": 20,
+          "source_advance": true,
+          "source_duty": 2,
+          "ok": true,
+          "bytes": 32,
+          "returned_delay": 0,
+          "overflow": 0,
+          "framing": 0,
+          "prefix": "aaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      ],
+      "source_training": {
+        "reference_bits": 62,
+        "reference_errors": 0,
+        "return_delay": 21,
+        "initialization_drops": 0,
+        "initialization_framing": 3
+      },
+      "raw_remote": {
+        "high": 394,
+        "slots": 1280,
+        "transitions": 264,
+        "head": "0000000000000000000000000000000086838383838383838383838383838383"
+      },
+      "raw_points": [
+        {
+          "tap": 0,
+          "slot": 20,
+          "high": 470,
+          "slots": 1280,
+          "transitions": 264,
+          "head": "0000000000000000000000000000000086c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3"
+        },
+        {
+          "tap": 0,
+          "slot": 20,
+          "high": 457,
+          "slots": 1280,
+          "transitions": 264,
+          "head": "0000000000000000000000000000000086c3c3c383c3c3c3c3c3c3c3c3838383"
+        },
+        {
+          "tap": 0,
+          "slot": 20,
+          "high": 458,
+          "slots": 1280,
+          "transitions": 264,
+          "head": "0000000000000000000000000000000086c3c3c3c3c3c3c3c3c3c383c38383c3"
+        },
+        {
+          "tap": 0,
+          "slot": 20,
+          "high": 455,
+          "slots": 1280,
+          "transitions": 264,
+          "head": "0000000000000000000000000000000086c3c38383c3c3c3c383c38383838383"
+        },
+        {
+          "tap": 0,
+          "slot": 20,
+          "high": 465,
+          "slots": 1280,
+          "transitions": 264,
+          "head": "0000000000000000000000000000000086c3c3c3c38383c38383c3c3c3c3c383"
+        },
+        {
+          "tap": 0,
+          "slot": 20,
+          "high": 465,
+          "slots": 1280,
+          "transitions": 264,
+          "head": "0000000000000000000000000000000086c3c3c3c3c3c3c3c3c383c383838383"
+        },
+        {
+          "tap": 0,
+          "slot": 20,
+          "high": 469,
+          "slots": 1280,
+          "transitions": 264,
+          "head": "0000000000000000000000000000000086c3c3c3c3c3c3c383c38383c3c3c3c3"
+        },
+        {
+          "tap": 0,
+          "slot": 20,
+          "high": 467,
+          "slots": 1280,
+          "transitions": 264,
+          "head": "0000000000000000000000000000000086c3c3c38383c3c3c3c3c38383838383"
+        },
+        {
+          "tap": 0,
+          "slot": 20,
+          "high": 465,
+          "slots": 1280,
+          "transitions": 264,
+          "head": "0000000000000000000000000000000086c3c3c383c3c3c3c3c3c3c3c3c3c3c3"
+        }
+      ],
+      "qualification_bits": 34162,
+      "qualification_errors": 0,
+      "tap": 0,
+      "slot": 20,
+      "transactions": 551,
+      "confirmed_bytes": 17632,
+      "elapsed": 60.08487089999835,
+      "returned_delay": 0,
+      "source_advance": true,
+      "source_duty": 2
+    }
+  ]
+}
