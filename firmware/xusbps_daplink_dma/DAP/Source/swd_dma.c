@@ -5,7 +5,8 @@
 #include "xil_cache.h"
 #include "xtime_l.h"
 
-#define CDMA 0x40020000U
+static uint32_t cdma_base=0x40020000U;
+#define CDMA cdma_base
 #define CMD_RAM 0x42000000U
 #define RSP_RAM 0x42010000U
 #define CR 0x00U
@@ -104,6 +105,49 @@ int selectio_dma_payload(unsigned upload,unsigned bank_address,uint8_t *buffer,u
     if(dma_buffer!=buffer) memcpy(buffer,dma_buffer,size);
     return 0;
 }
+
+/* Time the production payload path without target traffic or USB in the
+ * timed interval. Bank 3 is scratch while all debug services are idle. */
+int selectio_dma_measure(unsigned bytes,unsigned repeats,uint64_t values[7]) {
+    static uint32_t tx[256] __attribute__((aligned(32)));
+    static uint32_t rx[256] __attribute__((aligned(32)));
+    static uint32_t expected[256] __attribute__((aligned(32)));
+    const uint32_t tx_bank=0x45002c00U,rx_bank=0x45003c00U;
+    if(!bytes || (bytes&3U) || bytes>sizeof tx || !repeats || repeats>256U)return -1;
+    unsigned words=bytes/4U;
+    /* These apertures are directional. Validate repeated RX downloads
+     * against a snapshot; the end-to-end SRAM test checks TX consumption. */
+    if(selectio_dma_payload(0,rx_bank,(uint8_t *)expected,words))return -1;
+    values[0]=COUNTS_PER_SECOND;
+    for(unsigned direction=0;direction<2;direction++) {
+        values[1+3*direction]=0;
+        values[2+3*direction]=UINT64_MAX;
+        values[3+3*direction]=0;
+    }
+    for(unsigned n=0;n<repeats+2U;n++) {
+        for(unsigned i=0;i<words;i++) {
+            tx[i]=0xa5628c1dU^(n*257U+i);
+            rx[i]=~expected[i];
+        }
+        for(unsigned direction=0;direction<2;direction++) {
+            XTime start,end;
+            XTime_GetTime(&start);
+            int error=selectio_dma_payload(direction==0,direction==0?tx_bank:rx_bank,
+                        (uint8_t *)(direction==0?tx:rx),words);
+            XTime_GetTime(&end);
+            if(error)return -1;
+            if(n>=2U) {
+                uint64_t *stats=values+1+3*direction;
+                uint64_t elapsed=end-start;
+                stats[0]+=elapsed;
+                if(elapsed<stats[1])stats[1]=elapsed;
+                if(elapsed>stats[2])stats[2]=elapsed;
+            }
+        }
+        for(unsigned i=0;i<words;i++)if(rx[i]!=expected[i])return -1;
+    }
+    return 0;
+}
 #endif
 int swd_dma_upload(uint32_t words) {
     XTime start, end;
@@ -174,6 +218,11 @@ int swd_dma_packet_to(uint32_t bank, uint32_t bytes, uint8_t *destination) {
 }
 
 int swd_dma_selftest(void) {
+#if DAP_SELECTIO
+    if((swd_read32(SWD_FEATURES)&0xffff0080U)==0x44500080U &&
+       swd_read32(0x80010020U)==0x424e4b32U)
+        cdma_base=0x80040000U;
+#endif
     uint32_t n;
     for (n=0; n<1024U; n++) swd_dma_cmd[n] = 0xCDA00000U ^ (n*0x10203U);
     if (swd_dma_upload(1024U)) return -1;

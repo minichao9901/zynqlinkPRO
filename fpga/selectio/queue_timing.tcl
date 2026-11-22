@@ -3,12 +3,21 @@
 # DONE crosses back, and the worker holds the results until the next request.
 # Bound the physical crossing to one fastest AXI cycle. Do not relax the pad,
 # compatibility, clock gearbox, trace receiver, or either intra-domain path.
+set quad_dma [expr {[info exists ::env(ZYNQLINK_QUAD_DMA)] && $::env(ZYNQLINK_QUAD_DMA)}]
+if {!$quad_dma} {
 foreach {engine divided} {sio_jtag octet_raw sio_swd quad_raw sio_aux quad_raw} {
     set fast_regs [filter [all_registers -clock [get_clocks clk_fpga_0]] "NAME =~ */$engine/inst/* && REF_NAME =~ FD*"]
     set link_regs [filter [all_registers -clock [get_clocks $divided]] "NAME =~ */$engine/inst/* && REF_NAME =~ FD*"]
     if {![llength $fast_regs] || ![llength $link_regs]} {error "Missing queue domains for $engine"}
     set_max_delay -datapath_only 7.500 -from [get_clocks clk_fpga_0] -to $link_regs
     set_max_delay -datapath_only 7.500 -from [get_clocks $divided] -to $fast_regs
+}
+} else {
+    # The JTAG octet clock and the GP1 quad clock are related MMCM outputs.
+    # These queue and payload paths use normal generated-clock timing.
+    set config_meta [get_cells -hier -filter {NAME =~ *g_quad_config.config_meta_reg* && ASYNC_REG == TRUE}]
+    if {![llength $config_meta]} {error "Missing AXI-to-host live-profile synchronizers"}
+    set_max_delay -datapath_only 7.500 -from [get_clocks quad_raw] -to $config_meta
 }
 
 # Only the first synchronizer stage samples an asynchronous compatibility

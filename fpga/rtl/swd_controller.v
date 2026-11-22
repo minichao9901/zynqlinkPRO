@@ -12,7 +12,8 @@ module swd_controller #(
     // for protocol investigations and the real-CM3 diagnostic testbench.
     parameter integer ENABLE_DIAGNOSTICS = 1,
     parameter integer SWDIO_IN_DELAY_NS = 0,
-    parameter integer SELECTIO = 0
+    parameter integer SELECTIO = 0,
+    parameter integer QUAD_AXI = 0
 )(
     input  wire                                    clk,
     input  wire                                    rst_n,
@@ -154,7 +155,20 @@ module swd_controller #(
     wire swdio_i_raw;
     wire legacy_data = manual_pins[8] ? manual_pins[1] : jtag_enabled ? jtag_tms : swdio_o;
     wire legacy_release = !jtag_config[1] || (manual_pins[8] ? manual_pins[9] : !jtag_enabled && swdio_t);
-    wire live=SELECTIO && hs_live_config[0] && jtag_config[1];
+    wire [26:0] live_config_host;
+    if (QUAD_AXI) begin:g_quad_config
+        // A profile is written atomically while the wire is idle. Firmware
+        // leaves it stable during the handoff before issuing the next SWJ/AP.
+        (* ASYNC_REG="TRUE" *) reg [26:0] config_meta=0, config_sync=0;
+        always @(posedge clk) begin
+            config_meta<=hs_live_config;
+            config_sync<=config_meta;
+        end
+        assign live_config_host=config_sync;
+    end else begin:g_host_config
+        assign live_config_host=hs_live_config;
+    end
+    wire live=SELECTIO && live_config_host[0] && jtag_config[1];
     assign hs_live_jtag=live && jtag_enabled;
     assign hs_live_swd=live && !jtag_enabled;
     assign hs_legacy_released=!jtag_config[1] || live;
@@ -183,7 +197,7 @@ module swd_controller #(
             .swd_clock(live_swd_sync[1] ? live_swd_clk : hs_swd_ckslots),
             .swd_data(live_swd_sync[1] ? live_swd_data : hs_swd_data),
             .swd_release(live_swd_sync[1] ? live_swd_release : hs_swd_release),
-            .swd_samples(hs_swd_samples), .tap_clk(clk), .tdo_load(hs_tdo_load),
+            .swd_samples(hs_swd_samples), .tap_clk(QUAD_AXI ? hs_quad_phase : clk), .tdo_load(hs_tdo_load),
             .swdio_load(hs_swdio_load), .tdo_tap(hs_tdo_tap), .swdio_tap(hs_swdio_tap),
             .clock_pin(swclk), .data_pin(swdio), .tdi_pin(gpio_aux[0]), .tdo_pin(gpio_aux[1]),
             .monitor_tdi(hs_monitor_tdi),.uart_sideband(hs_uart_grant),.aux_spi(hs_aux_spi), .aux_sck(hs_aux_sck),.aux_cs(hs_aux_cs),.aux_tx(hs_aux_tx),.aux_rx(hs_aux_rx),
@@ -944,7 +958,7 @@ module swd_controller #(
             .mode(chain_swd ? 1'b1 : core_mode_sel),.request(chain_swd ? core_next_req_sel : core_req_sel),
             .wdata(chain_swd ? core_next_wdata_sel : core_wdata_sel),
             .seq_data(core_swj_data_sel),.seq_count(core_swj_count_sel),
-            .half_rate(hs_live_config[26]),.sample_slot(hs_live_config[6:1]),.idle(hs_live_config[17:14]),
+            .half_rate(live_config_host[26]),.sample_slot(live_config_host[6:1]),.idle(live_config_host[17:14]),
             .busy(live_swd_busy),.valid(live_swd_valid),.ack(live_swd_ack),.parity(live_swd_parity),
             .rdata(live_swd_rdata),.rx(hs_swd_samples),.clocks(live_swd_clk),
             .data(live_swd_data),.release_bits(live_swd_release));
@@ -953,11 +967,11 @@ module swd_controller #(
             .granted(hs_owner==2 && live_jtag_sync[1]),.start(seg_start && hs_live_jtag),.count(seg_count),
             .variable_tms(seg_variable),.tms(seg_tms),.exit_last(seg_exit),.capture(seg_capture),
             .tdi_mode(seg_drive),.tms_data(seg_tms_data),.tdi_data(seg_tdi_data),
-            .half_rate(hs_live_config[26]),.sample_slot(hs_live_config[13:7]),.done(seg_done),.received(seg_response),
+            .half_rate(live_config_host[26]),.sample_slot(live_config_host[13:7]),.done(seg_done),.received(seg_response),
             .rx(hs_jtag_samples),.lanes(live_jtag_lanes));
     end
     jtag_core #(.EXTERNAL_PHY(SELECTIO ? 2 : 0)) u_jtag_core (
-        .use_external(hs_live_jtag),.external_idle_cycles({1'b0,hs_live_config[25:18]}),
+        .use_external(hs_live_jtag),.external_idle_cycles({1'b0,live_config_host[25:18]}),
         .segment_start(seg_start),.segment_variable_tms(seg_variable),.segment_tms(seg_tms),
         .segment_exit(seg_exit),.segment_capture(seg_capture),.segment_count(seg_count),
         .segment_tdi_mode(seg_drive),.segment_tms_data(seg_tms_data),.segment_tdi_data(seg_tdi_data),
@@ -973,7 +987,7 @@ module swd_controller #(
         .idcode_ir(jtag_config[15:8]==0 ? 8'h0e : jtag_config[15:8]),
         .riscv_mode(jtag_config[2]),
         .half_delay(cfg_delay_fast[3:0]),
-        .idle_cycles(hs_live_jtag ? hs_live_config[25:18] : jtag_config[2] && jtag_config[23:16]!=0 ?
+        .idle_cycles(hs_live_jtag ? live_config_host[25:18] : jtag_config[2] && jtag_config[23:16]!=0 ?
                      (jtag_config[23:16]>64 ? 8'd64 : jtag_config[23:16]) : {4'd0,cfg_idle_cycles}),
         .late_return(jtag_return_late),
         // Both phases use the IOB IDDR. Q1 is consumed one FCLK after its

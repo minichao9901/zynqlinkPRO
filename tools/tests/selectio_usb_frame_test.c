@@ -8,6 +8,8 @@
 #include "selectio_mode.h"
 #include "selectio_combo.h"
 #include "probe_stream.h"
+#include "swd_dma.h"
+#include "etm_ddr_usb.h"
 #include <string.h>
 
 static int unexpected(void) { abort(); }
@@ -19,6 +21,9 @@ static int cdc_owns_swd_queue;
 #define selectio_mem_open_at(...) unexpected()
 #define selectio_mem_bulk(...) unexpected()
 #define selectio_mem_stats(...) unexpected()
+#define selectio_dma_measure(...) unexpected()
+#define probe_stream_active() 0
+#define etm_ddr_owned() 0U
 #define selectio_combo_active() 0
 #define selectio_combo_reset() ((void)0)
 #define selectio_combo_poll() ((void)0)

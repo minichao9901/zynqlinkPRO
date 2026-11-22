@@ -3,6 +3,9 @@ set ::zynqlink_no_pipeline [expr {[lsearch -exact $argv --no-pipeline] >= 0}]
 set out [file join $root build fpga_dma_global]
 if {[info exists ::env(ZYNQLINK_FPGA_OUT)]} {set out [file normalize $::env(ZYNQLINK_FPGA_OUT)]}
 set selectio [expr {[lsearch -exact $argv --selectio] >= 0}]
+set quad_dma [expr {[lsearch -exact $argv --quad-dma] >= 0}]
+if {$quad_dma && !$selectio} {error "--quad-dma requires --selectio"}
+set ::env(ZYNQLINK_QUAD_DMA) $quad_dma
 if {$selectio} {
     if {![info exists ::env(ZYNQLINK_FPGA_OUT)]} {set out [file join $root build selectio]}
     set ::env(ZYNQLINK_FPGA_OUT) $out
@@ -83,6 +86,7 @@ source [file join $root fpga orbtrace_bd.tcl]
 source [file join $root fpga orbtrace_ddr_bd.tcl]
 source [file join $root fpga compact_config.tcl]
 if {$selectio} {source [file join $root fpga selectio system.tcl]}
+if {$quad_dma} {source [file join $root fpga selectio quad_dma_bd.tcl]}
 source [file join $root fpga axi_pipeline.tcl]
 write_bd_tcl -force [file join $out system_dma.tcl]
 set_property synth_checkpoint_mode Hierarchical [get_files system.bd]

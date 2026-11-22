@@ -1,17 +1,24 @@
 `timescale 1ns/1ps
-module tb_selectio_debug;
+module tb_selectio_debug #(parameter integer QUAD_DMA=0);
     bit axi_clk=0, resetn=0, ref_clk=0, hclk=0, use_swd=0, released=0;
     always #3.75 axi_clk = !axi_clk;
     always #2.5 ref_clk = !ref_clk;
     always #10.417 hclk = !hclk;
     wire serial_rx_clk,serial_clk, quad_clk, octet_clk, phy_reset, js_reset, ss_reset, js_ready;
     wire jhold, shold, calibrated, jload, sload;
+    wire bus_clk=QUAD_DMA ? quad_clk : axi_clk;
     wire [2:0] owner;
     wire [4:0] jtap, stap;
     wire [23:0] lanes;
     wire [7:0] jrx;
     wire [3:0] sclock, sdata, srelease, srx;
     wire [26:0] live_config;
+    reg [26:0] profile_meta=0, profile_sync=0;
+    always @(posedge axi_clk) begin
+        profile_meta<=live_config;
+        profile_sync<=profile_meta;
+    end
+    wire [26:0] host_profile=QUAD_DMA ? profile_sync : live_config;
     reg [1:0] live_sync=0;
     reg live_start=0;
     reg [7:0] live_req=0;
@@ -26,19 +33,19 @@ module tb_selectio_debug;
     wire #0.8 tdo_pin = tdo_disabled ? 1'b1 : target_tdo;
     assign #0.8 data_pin = target_drive ? target_swd : 1'bz;
     IDELAYCTRL calibration(.REFCLK(ref_clk), .RST(!resetn), .RDY(calibrated));
-    selectio_clocking clocks(ref_clk,resetn,calibrated,jhold,shold,released,1'b0,live_config[0],1'b0,
+    selectio_clocking clocks(ref_clk,resetn,calibrated,jhold,shold,released,1'b0,host_profile[0],1'b0,
         serial_clk,quad_clk,octet_clk,phy_reset,js_reset,ss_reset,js_ready,owner,,serial_rx_clk);
-    always @(posedge quad_clk) live_sync<={live_sync[0],live_config[0]};
+    always @(posedge quad_clk) live_sync<={live_sync[0],host_profile[0]};
     selectio_live_swd live(
-        .host_clk(axi_clk),.quad_clk(quad_clk),.reset(!resetn || !live_config[0]),
+        .host_clk(axi_clk),.quad_clk(quad_clk),.reset(!resetn || !host_profile[0]),
         .granted(owner==3 && live_sync[1]),.start(live_start),.mode(1'b1),.request(live_req),.wdata(live_wdata),
-        .seq_data(256'b0),.seq_count(8'b0),.sample_slot(live_config[6:1]),.idle(live_config[17:14]),
-        .half_rate(live_config[26]),.busy(),.valid(live_done),.ack(live_ack),.parity(live_parity),.rdata(live_rdata),
+        .seq_data(256'b0),.seq_count(8'b0),.sample_slot(host_profile[6:1]),.idle(host_profile[17:14]),
+        .half_rate(host_profile[26]),.busy(),.valid(live_done),.ack(live_ack),.parity(live_parity),.rdata(live_rdata),
         .rx(srx),.clocks(live_clock),.data(live_data),.release_bits(live_release));
     selectio_debug_phy phy(serial_clk,quad_clk,octet_clk,phy_reset,owner,
         1'b0,1'b1,1'b1,1'b0,1'b1,lanes,jrx,live_sync[1]?live_clock:sclock,
         live_sync[1]?live_data:sdata,live_sync[1]?live_release:srelease,srx,
-        axi_clk,jload,sload,jtap,stap,clk_pin,data_pin,tdi_pin,tdo_pin,,, , ,1'b0,4'b0,4'b0,4'b0,,1'b0,1'b0,serial_rx_clk,);
+        bus_clk,jload,sload,jtap,stap,clk_pin,data_pin,tdi_pin,tdo_pin,,, , ,1'b0,4'b0,4'b0,4'b0,,1'b0,1'b0,serial_rx_clk,);
     jtag_dp_model #(.IRLEN(5),.DUMMY(1),.RETURN_NS(0.2)) boundary(
         .rst_n(resetn),.tck(clk_pin),.tms(data_pin),.tdi(tdi_pin),.tdo(boundary_tdo));
     cm3_target #(.WORDS(1024),.ADDR_BITS(10)) cm3(
@@ -60,19 +67,19 @@ module tb_selectio_debug;
     wire jwe,swe;
     reg dma_en=0;reg [3:0] dma_we=0;reg [31:0] dma_addr=0,dma_data=0;
     wire [31:0] dma_result;
-    selectio_payload_ram payload(axi_clk,!resetn,dma_en,dma_we,dma_addr,dma_data,dma_result,
+    selectio_payload_ram payload(bus_clk,!resetn,dma_en,dma_we,dma_addr,dma_data,dma_result,
         octet_clk,quad_clk,jpa,spa,jpd,spd,jwe,swe,jra,sra,jrd,srd);
     task automatic load_payload(input int address,input reg [31:0] value);
-        @(negedge axi_clk);dma_en=1;dma_we=15;dma_addr=address;dma_data=value;
-        @(negedge axi_clk);dma_en=0;dma_we=0;
+        @(negedge bus_clk);dma_en=1;dma_we=15;dma_addr=address;dma_data=value;
+        @(negedge bus_clk);dma_en=0;dma_we=0;
     endtask
     task automatic check_payload(input int address,input reg [31:0] value);
-        @(negedge axi_clk);dma_en=1;dma_we=0;dma_addr=address;
-        @(negedge axi_clk);if(dma_result!==value)$fatal(1,"DMA payload %h got %h expected %h",address,dma_result,value);
+        @(negedge bus_clk);dma_en=1;dma_we=0;dma_addr=address;
+        @(negedge bus_clk);if(dma_result!==value)$fatal(1,"DMA payload %h got %h expected %h",address,dma_result,value);
         dma_en=0;
     endtask
     jtag200_regs #(.ENABLE_BLOCK(1)) jtag(
-        .axi_aclk(axi_clk),.axi_aresetn(resetn),
+        .axi_aclk(bus_clk),.axi_aresetn(resetn),
         .s_axi_awaddr(awaddr),.s_axi_awprot(3'b0),.s_axi_awvalid(awvalid && use_swd==0),.s_axi_awready(awr[0]),
         .s_axi_wdata(wdata),.s_axi_wstrb(4'hf),.s_axi_wvalid(wvalid && use_swd==0),.s_axi_wready(wr[0]),
         .s_axi_bresp(bresponse[0]),.s_axi_bvalid(br[0]),.s_axi_bready(1'b1),
@@ -81,8 +88,8 @@ module tb_selectio_debug;
         .payload_tx_addr(jpa),.payload_rx_addr(jra),.payload_tx_data(jpd),.payload_rx_data(jrd),.payload_rx_write(jwe),
         .phy_hold(jhold), .ready(js_ready), .delay_ready(calibrated), .delay_load(jload),
         .delay_value(jtap), .word_clk(octet_clk), .word_reset(js_reset), .lane_word(lanes), .rx_word(jrx));
-    swd200_regs swd(
-        .axi_aclk(axi_clk),.axi_aresetn(resetn),
+    swd200_regs #(.SAME_CLOCK(QUAD_DMA)) swd(
+        .axi_aclk(bus_clk),.axi_aresetn(resetn),
         .s_axi_awaddr(awaddr),.s_axi_awprot(3'b0),.s_axi_awvalid(awvalid && use_swd==1),.s_axi_awready(awr[1]),
         .s_axi_wdata(wdata),.s_axi_wstrb(4'hf),.s_axi_wvalid(wvalid && use_swd==1),.s_axi_wready(wr[1]),
         .s_axi_bresp(bresponse[1]),.s_axi_bvalid(br[1]),.s_axi_bready(1'b1),
@@ -95,34 +102,34 @@ module tb_selectio_debug;
     task automatic write_reg(input [13:0] addr, input [31:0] data, input [1:0] response);
         fork
             begin
-                repeat (addr[2] ? 2 : 1) @(negedge axi_clk);
+                repeat (addr[2] ? 2 : 1) @(negedge bus_clk);
                 awaddr = addr;
                 awvalid = 1;
-                do @(posedge axi_clk); while (!awready);
-                @(negedge axi_clk);
+                do @(posedge bus_clk); while (!awready);
+                @(negedge bus_clk);
                 awvalid = 0;
             end
             begin
-                repeat (addr[2] ? 1 : 2) @(negedge axi_clk);
+                repeat (addr[2] ? 1 : 2) @(negedge bus_clk);
                 wdata = data;
                 wvalid = 1;
-                do @(posedge axi_clk); while (!wready);
-                @(negedge axi_clk);
+                do @(posedge bus_clk); while (!wready);
+                @(negedge bus_clk);
                 wvalid = 0;
             end
         join
-        do @(posedge axi_clk); while (!bvalid);
+        do @(posedge bus_clk); while (!bvalid);
         if (bresp !== response) $fatal(1, "AXI write response addr=%h got=%b expected=%b", addr, bresp, response);
     endtask
 
     task automatic read_reg(input [13:0] addr, output [31:0] data);
-        @(negedge axi_clk);
+        @(negedge bus_clk);
         araddr = addr;
         arvalid = 1;
-        do @(posedge axi_clk); while (!arready);
-        @(negedge axi_clk);
+        do @(posedge bus_clk); while (!arready);
+        @(negedge bus_clk);
         arvalid = 0;
-        do @(posedge axi_clk); while (!rvalid);
+        do @(posedge bus_clk); while (!rvalid);
         if (rresp !== 0) $fatal(1, "AXI read response addr=%h got=%b", addr, rresp);
         data = rdata;
     endtask

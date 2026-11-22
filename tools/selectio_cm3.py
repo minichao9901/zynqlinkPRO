@@ -22,7 +22,10 @@ def main():
     parser.add_argument("--meter",action="store_true")
     parser.add_argument("--rtt-window", action="store_true", help="time 8048 verified RTT bytes through the final target RdOff commit")
     parser.add_argument("--rtt-chunk", type=int, choices=(1024,2048), default=2048)
+    parser.add_argument("--quad-dma",action="store_true",help="clock the queue AXI and BRAM ports with the SelectIO quad clock")
     args = parser.parse_args()
+    if args.quad_dma and args.services:
+        parser.error("--quad-dma is available for the queue and shared-pad simulation")
     if args.rtt_window and not args.services:
         parser.error("--rtt-window requires --services")
     out = args.out.resolve()
@@ -54,7 +57,8 @@ def main():
                  dut/"dap_transfer_block_engine.v",sim/"cm3_target.sv",sim/"jtag_dp_model.sv",sim/"tb_selectio_debug.sv"]
         top="tb_selectio_debug"
     run("xvlog",["--sv","-i",sim,*sources],"compile.log")
-    run("xelab", ["--mt","2","-L","unisims_ver","-L","secureip","-s","fusion",top,"glbl"],"elab.log")
+    generic=["--generic_top","QUAD_DMA=1"] if args.quad_dma else []
+    run("xelab", ["--mt","2","-L","unisims_ver","-L","secureip",*generic,"-s","fusion",top,"glbl"],"elab.log")
     switches=["-testplusarg",f"idle={args.idle}","-testplusarg",f"jidle={args.jtag_idle}"]
     if args.services:
         for opt in ("bypass","clk_ns=7.5","target_clk_ns=20.833",f"service_ticks={args.sample_ticks}"):

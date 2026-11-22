@@ -67,9 +67,11 @@ if {($isolation & 15) == 15 && ($reset & 15) == 0} {
         puts [format "LOAD_STATE %s %08x" $name [physrd -force -value $addr]]
     }
     set debug_features [physrd -force -value 0x4001004c]
+    set cdma 0x40020000
     if {($debug_features & 0xffff0080)==0x44500080} {
         puts [format "LOAD_STATE JQUEUE %08x" [physrd -force -value 0x80000004]]
         puts [format "LOAD_STATE SQUEUE %08x" [physrd -force -value 0x80010004]]
+        if {[physrd -force -value 0x80010020] == 0x424e4b32} {set cdma 0x80040000}
         if {$debug_features & 0x200} {
             puts [format "LOAD_STATE AUX %08x" [physrd -force -value 0x80020004]]
             puts [format "LOAD_STATE AUXFLAGS %08x" [physrd -force -value 0x80020008]]
@@ -80,7 +82,8 @@ if {($isolation & 15) == 15 && ($reset & 15) == 0} {
     }
     if {$features & 0x100} {
         puts [format "LOAD_STATE DDR %08x" [physrd -force -value 0x40040008]]
-        puts [format "LOAD_STATE CDMA %08x" [physrd -force -value 0x40020004]]
+        puts [format "LOAD_STATE CDMA_BASE %08x" $cdma]
+        puts [format "LOAD_STATE CDMA %08x" [physrd -force -value [expr {$cdma+4}]]]
     }
 }
 ''')

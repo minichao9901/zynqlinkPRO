@@ -25,6 +25,8 @@ Windows 自动为 MI_04 加载 WinUSB。其 DeviceInterfaceGUID 为 `{9DC2A831-F
 
 ## 命令
 
+性能验证固件的通道 7 操作 7 测量探针端 CDMA 与 SWD 载荷 BRAM 的短突发。请求为三个小端 u32，依次为字节数（4–1024 且按字对齐）、重复次数（1–256）、时钟选项（0 使用当前 FCLK0，1 临时选择约 133.333 MHz 并恢复）。回复依次为七个小端 u64（定时器 Hz、上传总／最小／最大 tick、下载总／最小／最大 tick），再接三个 u32（FCLK0 Hz、SelectIO 参考 Hz、队列签名）。测量期间独占 CDMA，忙时返回状态 2。CLI 为 `python -X utf8 tools/selectio_dma_latency.py --out build/dma-latency`。
+
 在融合工作树运行。info 与 usb-test 只使用 MI_04。后者校验每个响应。
 
 ```powershell

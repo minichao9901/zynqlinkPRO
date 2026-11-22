@@ -17,6 +17,25 @@ if {!$rtl_debug && [llength $observation_cells]} {error "Release retains optiona
 if {$rtl_debug && ![llength $observation_cells]} {error "Debug instrumentation was not implemented"}
 puts "RTL_OBSERVATION_IMPLEMENTED=[llength $observation_cells] RTL_DEBUG=$rtl_debug"
 set selectio_pads [get_cells -quiet -hier -filter {REF_NAME == OSERDESE2 && NAME =~ *g_selectio*}]
+if {[info exists ::env(ZYNQLINK_QUAD_DMA)] && $::env(ZYNQLINK_QUAD_DMA)} {
+    foreach {pin clock} {MAXIGP1ACLK quad_raw SAXIHP0ACLK quad_raw MAXIGP0ACLK clk_fpga_0 SAXIHP1ACLK clk_fpga_0} {
+        set aclk [get_pins -hier -filter "NAME =~ */PS7_i/$pin"]
+        if {[llength $aclk]!=1 || [lsearch -exact [get_clocks -of_objects $aclk] $clock]<0} {
+            error "Unexpected routed AXI clock on PS7 $pin"
+        }
+        puts "QUAD_DMA_ROUTED_PS7 $pin $clock"
+    }
+    set quad_registers [all_registers -clock [get_clocks quad_raw]]
+    foreach pattern {*system_i/cdma/* *sio_swd/inst/*} {
+        if {![llength [filter $quad_registers "NAME =~ $pattern"]]} {error "No quad clock registers in $pattern"}
+    }
+    set bram [get_cells -hier -filter {NAME =~ */sio_payload/inst/swd/* && REF_NAME =~ RAMB*}]
+    if {[llength $bram]!=2} {error "SWD payload banks absent"}
+    foreach pin [get_pins -of_objects $bram -filter {REF_PIN_NAME == CLKARDCLK || REF_PIN_NAME == CLKBWRCLK}] {
+        if {[lsearch -exact [get_clocks -of_objects $pin] quad_raw]<0} {error "SWD payload clock on $pin"}
+    }
+    puts "QUAD_DMA_ROUTED_SWDBRAM=2 CDMA=quad_raw"
+}
 if {[llength $selectio_pads]} {
     if {[llength $selectio_pads]!=3 || [llength [get_cells -quiet -hier -filter {REF_NAME == ISERDESE2 && NAME =~ *g_selectio*}]]!=3} {
         error "Missing shared debug serializers"

@@ -5,6 +5,8 @@
 #include "selectio_mode.h"
 #include "selectio_aux.h"
 #include "selectio_block.h"
+#include "swd_dma.h"
+#include "etm_ddr_usb.h"
 #include "selectio_combo.h"
 #include "probe_stream.h"
 #include "xil_cache.h"
@@ -132,6 +134,27 @@ static unsigned execute_frame(unsigned length, unsigned active_epoch) {
             if(requested==LEGACY_FRAME_SIZE || requested==FRAME_SIZE) {
                 frame_limit=requested;write32(output+16,requested);reply_size=4;status=0;
             }
+        } else if(channel==7 && op==7 && size==12) {
+            if(!selectio_mem_active() && !probe_stream_active() && !etm_ddr_owned() &&
+               (swd_read32(SWD_FEATURES)&0x400U) && read32(input+24)<=1U) {
+                uint64_t values[7];
+                unsigned fixed=read32(input+24);
+                uint32_t original=Xil_In32(SLCR_FPGA0_CLK_CTRL);
+                int hz=fixed ? ps_fixed133_select() : (int)ps_fclk0_hz();
+                uint32_t ref=ps_fclk_decode(0xf8000180U);
+                int measured=hz>0 ? selectio_dma_measure(read32(input+16),read32(input+20),values) : -1;
+                if(Xil_In32(SLCR_FPGA0_CLK_CTRL)!=original) {
+                    Xil_Out32(XSLCR_UNLOCK_ADDR,XSLCR_UNLOCK_CODE);
+                    Xil_Out32(SLCR_FPGA0_CLK_CTRL,original);
+                    Xil_Out32(SLCR_LOCK_ADDR,0x767bU);
+                }
+                if(!measured && Xil_In32(SLCR_FPGA0_CLK_CTRL)==original) {
+                    memcpy(output+16,values,sizeof values);
+                    write32(output+72,(uint32_t)hz);write32(output+76,ref);
+                    write32(output+80,swd_read32(0x80010020U));
+                    reply_size=68;status=0;
+                }
+            } else status=2;
         } else if(channel==7 && op==6 && size>=16) {
             // Isolated DDR loopback with exactly the SRAM bulk wire format.
             // The address is an offset within this buffer, never a physical pointer.

@@ -74,7 +74,11 @@ def physical_snapshot():
         body += f'puts [format "SNAP {name} %08X" [mrd -address-space AP0 -force -value {address:#x}]]\n'
     body += 'if {[mrd -address-space AP0 -force -value 0x40030048] & 0x100} {\n'
     body += 'puts [format "SNAP DDR_STATUS %08X" [mrd -address-space AP0 -force -value 0x40040008]]\n'
-    body += 'puts [format "SNAP CDMA_STATUS %08X" [mrd -address-space AP0 -force -value 0x40020004]]\n}\n'
+    body += ('set cdma_status 0x40020004\n'
+             'if {([mrd -address-space AP0 -force -value 0x4001004c] & 0xffff0080)==0x44500080} {\n'
+             ' if {[mrd -address-space AP0 -force -value 0x80010020] == 0x424e4b32} {set cdma_status 0x80040004}\n'
+             '}\n'
+             'puts [format "SNAP CDMA_STATUS %08X" [mrd -address-space AP0 -force -value $cdma_status]]\n}\n')
     log = xsct(body)
     values = {k: int(v, 16) for k, v in re.findall(r'SNAP (\w+) ([0-9A-Fa-f]{8})', log)}
     assert len(values) == len(addresses) + (2 if values['FEATURES'] & 0x100 else 0), log

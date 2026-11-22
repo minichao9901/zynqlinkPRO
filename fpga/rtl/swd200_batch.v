@@ -2,7 +2,7 @@
 // One PS-owned command buffer crosses by request/completion handshake.
 // A WAIT can be retried because the target declined the transfer. FAULT,
 // malformed ACK and read parity errors terminate the batch at that command.
-module swd200_batch (
+module swd200_batch #(parameter integer SAME_CLOCK = 0)(
     input wire clk, reset, run,
     input wire [9:0] count,
     input wire [1:0] rate,
@@ -49,7 +49,8 @@ module swd200_batch (
     wire [8:0] issue_header = retry ? current_header : next_header;
     wire [32:0] issue_word = retry ? current_word : next_word;
     assign command_addr = {fetch_index, fetch != FETCH_OP};
-    assign begin_batch = state == IDLE && request_sync[1];
+    wire requested=SAME_CLOCK ? run : request_sync[1];
+    assign begin_batch = state == IDLE && requested;
 
     swd200_link link (
         .clk(clk), .reset(reset), .rate(active_rate),
@@ -113,7 +114,7 @@ module swd200_batch (
                 end
             end
             case (state)
-                IDLE: if (request_sync[1]) begin
+                IDLE: if (requested) begin
                     // The AXI domain holds all descriptor fields stable
                     // until the synchronized completion has returned.
                     active_count <= count;
@@ -148,8 +149,8 @@ module swd200_batch (
                     end
                 end
                 COMPLETE: begin
-                    done <= request_sync[1];
-                    if (!request_sync[1]) state <= IDLE;
+                    done <= requested;
+                    if (!requested) state <= IDLE;
                 end
                 default: state <= IDLE;
             endcase

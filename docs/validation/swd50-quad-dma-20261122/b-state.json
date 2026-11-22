@@ -1,0 +1,41 @@
+{
+  "operation": "check",
+  "dryRun": false,
+  "out": "E:\\zynqlinkPRO-efficiency\\build\\swd50-quad-B-state",
+  "files": {
+    "bit": {
+      "path": "E:\\zynqlinkPRO-efficiency\\build\\swd50-quad-exact-B\\probe.bit",
+      "sha256": "29c56c0b15fa55f33449480c9ea9d033d91c163dccac2545db9dc97e0b923c2d"
+    },
+    "zynq_elf": {
+      "path": "E:\\zynqlinkPRO-efficiency\\build\\swd50-quad-exact-B\\application.elf",
+      "sha256": "f225fbd7efbd8104629bd80328774b4ac082a9c29e8687c0e8b92993ac8848ce"
+    },
+    "ps_init": {
+      "path": "E:\\zynqlinkPRO-efficiency\\build\\swd50-quad-exact-B\\ps7_init.tcl",
+      "sha256": "aa9747c31f705be7c28af1c6b1cdeaf282f0dcdb01faecee2a9f72e4d3489132"
+    }
+  },
+  "stage": "complete",
+  "passed": true,
+  "streams": {
+    "rtt": 65536,
+    "hss": 20
+  },
+  "before": {
+    "PS_IDCODE": "0x23727093",
+    "LEVEL_SHIFTERS": "0xf",
+    "FPGA_RESET": "0x0",
+    "BOOT_MODE": "0x0",
+    "CAPTURE": "0x8",
+    "SWD": "0x2",
+    "JQUEUE": "0x14",
+    "SQUEUE": "0x3c",
+    "AUX": "0x0",
+    "AUXFLAGS": "0x0",
+    "PACKET": "0x0",
+    "DDR": "0x0",
+    "CDMA_BASE": "0x80040000",
+    "CDMA": "0x1002"
+  }
+}

@@ -1,5 +1,5 @@
 `timescale 1ns/1ps
-module swd200_regs (
+module swd200_regs #(parameter integer SAME_CLOCK = 0)(
     (* X_INTERFACE_PARAMETER = "ASSOCIATED_BUSIF S_AXI, ASSOCIATED_RESET axi_aresetn" *)
     input wire axi_aclk, axi_aresetn,
     input wire [13:0] s_axi_awaddr,
@@ -57,7 +57,9 @@ module swd200_regs (
     (* ram_style = "block" *) reg [31:0] expected [0:255];
     (* ram_style = "block" *) reg [31:0] results [0:511];
 
-    wire idle = !run && !done_sync[1];
+    reg [1:0] completed_pipe = 0;
+    wire retired = SAME_CLOCK ? completed_pipe[1] : done_sync[1];
+    wire idle = !run && !retired;
     wire ready = ready_sync[1] && delay_sync[1] && !hold;
     wire aligned_write = write_strobes == 4'hf && write_addr[1:0] == 0;
     wire write_pending = have_addr && have_data && !s_axi_bvalid;
@@ -77,7 +79,6 @@ module swd200_regs (
                             result_addr>=2 && {1'b0,result_addr}+10'd1<count;
     reg [31:0] expected_q, actual_q;
     reg check_word = 0, mismatch = 0;
-    reg [1:0] completed_pipe = 0;
     always @(posedge word_clk) begin
         cmd_q <= commands[{active_mode[1:0], cmd_addr}];
         if (write_result) results[result_addr] <= result_word;
@@ -94,7 +95,7 @@ module swd200_regs (
         if (read_result) result_q <= results[s_axi_araddr[10:2]];
     end
 
-    swd200_batch batch (
+    swd200_batch #(.SAME_CLOCK(SAME_CLOCK)) batch (
         .clk(word_clk), .reset(word_reset), .run(run), .count(count),
         .mode(mode), .active_mode(active_mode), .begin_batch(begin_batch),
         .rate(timing[1:0]), .ack_sample(timing[7:2]), .data_sample(timing[13:8]),
@@ -131,7 +132,7 @@ module swd200_regs (
             done_sync <= {done_sync[0], completed_pipe[1]};
             delay_sync <= {delay_sync[0], delay_ready};
             delay_load <= 0;
-            if (run && (!ready || done_sync[1])) begin
+            if (run && (!ready || retired)) begin
                 summary <= ready ? {wait_retries, 1'b0, batch_failed || mismatch, error, completed}
                                  : 32'h0000c000;
                 result_valid <= 1;
@@ -198,7 +199,7 @@ module swd200_regs (
                         14'h14: s_axi_rdata <= summary;
                         14'h18: s_axi_rdata <= {27'b0, delay_value};
                         14'h1c: s_axi_rdata <= {25'b0, mode};
-                        14'h20: s_axi_rdata <= 32'h424e4b31;
+                        14'h20: s_axi_rdata <= SAME_CLOCK ? 32'h424e4b32 : 32'h424e4b31;
                         default: begin
                             s_axi_rdata <= 0;
                             s_axi_rresp <= 2'b10;
