@@ -229,6 +229,10 @@ RTT→CDC 前两轮约 4.216／4.215 MB/s，第三轮 STOP 首次返回忙 `-7` 
 
 首轮的忙状态本次实板未复现，保留首轮失败和无缓冲回调、STOP 忙的离线故障注入。 [同条件复验记录](rx-guard-dbg08-streams-retest.json)
 
+## H743 换板复验
+
+H743 的标准调试接线已用于 ETM 定向复测。物理窗口仍有成帧错误，三项独立码源验收保留待测。 [H743 逐点记录](h743-follow-up/README.md)
+
 ## 收尾核对
 
 当前配对的 Git 文件哈希、USB 描述符、完整 36 项实板验证和 HCLK 性能复验均已核对。最后一个夹具完成目标状态恢复，探针空闲检查通过。最终离线回归通过 Toolbox CLI 118 项、SelectIO 14 项、Web 207 项，Web 语法检查覆盖 177 个模块。生产固件的 SPI→CDC 缓冲、重试、回卷及 CDC OUT 收包异常模型均通过。独立源测试项及其通过条件保留在用例表。 [验收索引与空闲状态](rx-guard-performance-acceptance.json) · [用例与实测值](../../selectio/fusion-performance-cases.md#已确认结果)

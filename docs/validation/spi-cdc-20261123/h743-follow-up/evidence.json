@@ -1,0 +1,2792 @@
+{
+  "date": "2026-11-23",
+  "probe_usb_serial": "12345678",
+  "hs3_serial": "210299008529",
+  "wiring": "User confirmed standard debug wiring only; no dedicated SPI connections.",
+  "target": {
+    "name": "STM32H743/H742/H750/H753",
+    "cpuid": "0x411fc271",
+    "device": "0x20036450",
+    "registers": {
+      "0x58024400": "0x4025",
+      "0x58024410": "0x0",
+      "0x58024418": "0x0",
+      "0x5802441c": "0x0",
+      "0x58024420": "0x0",
+      "0x58024428": "0x2020200",
+      "0x5802442c": "0x1ff0000",
+      "0x58024430": "0x1010280",
+      "0x58024434": "0x0",
+      "0x58024438": "0x1010280",
+      "0x52002000": "0x37"
+    },
+    "extra": {
+      "DHCSR": "0x10001",
+      "CCR": "0x40200",
+      "DBGMCU_CR": "0x0",
+      "RCC_D1CCIPR": "0x0",
+      "RCC_D2CCIP1R": "0x0",
+      "RCC_PLL2DIVR": "0x1010280",
+      "RCC_PLL3DIVR": "0x1010280",
+      "RCC_AHB4ENR": "0x0"
+    },
+    "matches": [
+      {
+        "path": "prebuilt/targets/stm32h743-cdc-trace-20261101/cpu480-trace20/fw.elf",
+        "sha256": "db5d66656846eeffedb1e1c405afec9345a7a5d8561eb53f987508aa1ee9dc19",
+        "passed": false,
+        "segments": [
+          {
+            "address": "0x8000000",
+            "size": 31612,
+            "passed": false
+          },
+          {
+            "address": "0x8007b7c",
+            "size": 144,
+            "passed": false
+          }
+        ]
+      },
+      {
+        "path": "prebuilt/targets/stm32h743-cdc-trace-20261101/cpu60-trace20/fw.elf",
+        "sha256": "246640bf79c8b1e568441a286812326dfb0ae68a0df061a0c023262c07cf221b",
+        "passed": false,
+        "segments": [
+          {
+            "address": "0x8000000",
+            "size": 31608,
+            "passed": false
+          },
+          {
+            "address": "0x8007b78",
+            "size": 144,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "path": "prebuilt/targets/stm32h743-cdc-trace-20261101/cpu60-trace30/fw.elf",
+        "sha256": "daace2b094b054ffb8d004127cbfbbaf70b9a5d1961a172038a5554b291ea962",
+        "passed": false,
+        "segments": [
+          {
+            "address": "0x8000000",
+            "size": 31608,
+            "passed": false
+          },
+          {
+            "address": "0x8007b78",
+            "size": 144,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "path": "E:/superlinkPRO/web/tools/target-firmware/stm32h743_dbgstress/fw.elf",
+        "sha256": "a9ba8d95d39c6a7af757224dfe2703d8a2c29afde8e1618c3b3814699154c7db",
+        "passed": true,
+        "segments": [
+          {
+            "address": "0x8000000",
+            "size": 7640,
+            "passed": true
+          },
+          {
+            "address": "0x8001dd8",
+            "size": 100,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "path": "E:/superlinkPRO/web/tools/target-firmware/stm32h743_fault/fw.elf",
+        "sha256": "5af7def25b8343cc4e2321f485ea51b6a5d30d6803c232ab7302ffc235112960",
+        "passed": false,
+        "segments": [
+          {
+            "address": "0x8000000",
+            "size": 4892,
+            "passed": false
+          },
+          {
+            "address": "0x800131c",
+            "size": 100,
+            "passed": false
+          }
+        ]
+      },
+      {
+        "path": "E:/superlinkPRO/web/tools/target-firmware/stm32h743_rtt_speed/fw-seq.elf",
+        "sha256": "449c54330429570dfd781975f760daa54967bc402e2b6b798e18f7467e9f210f",
+        "passed": false,
+        "segments": [
+          {
+            "address": "0x8000000",
+            "size": 1196,
+            "passed": false
+          }
+        ]
+      },
+      {
+        "path": "E:/superlinkPRO/web/tools/target-firmware/stm32h743_rtt_speed/fw.elf",
+        "sha256": "d0079519c3644ceab8bf5514980ac5ed30ac38f335a45d8680174d908a99073e",
+        "passed": false,
+        "segments": [
+          {
+            "address": "0x8000000",
+            "size": 1192,
+            "passed": false
+          }
+        ]
+      },
+      {
+        "path": "E:/superlinkPRO/web/tools/target-firmware/stm32h743_scope/fw.elf",
+        "sha256": "a4bceb12d5ac54c7f1eb254b31144d84708f16a62cacda96264f160c9d4dd3b6",
+        "passed": false,
+        "segments": [
+          {
+            "address": "0x8000000",
+            "size": 1236,
+            "passed": false
+          },
+          {
+            "address": "0x80004d4",
+            "size": 4,
+            "passed": false
+          }
+        ]
+      },
+      {
+        "path": "E:/h743_uboot_linux/artifacts/stage1.elf",
+        "sha256": "6b94e44632f8e8675c3abdfafd8ce0bac3f243569dd403c500ddd5207538ca02",
+        "passed": false,
+        "segments": [
+          {
+            "address": "0x8000000",
+            "size": 7568,
+            "passed": false
+          },
+          {
+            "address": "0x8001d90",
+            "size": 16,
+            "passed": false
+          }
+        ]
+      },
+      {
+        "path": "E:/h743_uboot_linux/artifacts/nand/stage1.elf",
+        "sha256": "7e08c12930bd941fd259624e2ff0174247df1cc684fbce0ac8623e0bf9ff8471",
+        "passed": false,
+        "segments": [
+          {
+            "address": "0x8000000",
+            "size": 7440,
+            "passed": false
+          },
+          {
+            "address": "0x8001d10",
+            "size": 16,
+            "passed": false
+          }
+        ]
+      }
+    ],
+    "flash_vector": "0000022089080008850800088508000885080008850800088508000800000000",
+    "ICSR": "0x0",
+    "VTOR": "0x8000000",
+    "CFSR": "0x0",
+    "HFSR": "0x0"
+  },
+  "etm_initial_rcc": {
+    "name": "STM32H743/H742/H750/H753",
+    "cpuid": "0x411fc271",
+    "device": "0x20036450",
+    "registers": {
+      "0x58024400": "0x4025",
+      "0x58024410": "0x0",
+      "0x58024418": "0x0",
+      "0x5802441c": "0x0",
+      "0x58024420": "0x0",
+      "0x58024428": "0x2020200",
+      "0x5802442c": "0x1ff0000",
+      "0x58024430": "0x1010280",
+      "0x58024434": "0x0",
+      "0x58024438": "0x1010280",
+      "0x52002000": "0x37"
+    }
+  },
+  "probe_pair_hashes": {
+    "probe.bit": "f3c4ccfd78c9148649897a0902fb93eadb209494e0295956981c973bbac92c66",
+    "application.elf": "e1f21ea8d5aa6403f4f2ab78da0a3215cea11862cb852dd9e37e413248068b90",
+    "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+  },
+  "boot_mode": "0x0",
+  "probe_first_and_retry": [
+    {
+      "verified_OCM_bytes": 80260,
+      "passed": true,
+      "cpu_pc": "0x6128",
+      "pc_symbol": "_exit",
+      "USB_enumerated": false
+    },
+    {
+      "verified_OCM_bytes": 80260,
+      "passed": true,
+      "cpu_pc": "0xab6e",
+      "pc_symbol": "chry_dap_handle",
+      "USB_enumerated": true
+    }
+  ],
+  "measured_trace_pin_frequency": false,
+  "windows": [
+    {
+      "name": "etm-hsi-gpio1",
+      "gpio_speed": 1,
+      "taps": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "trace_nominal_hz": null,
+      "actual_window_seconds": 0.0500000005,
+      "formatter_bytes": 134257,
+      "diagnostics": {
+        "implemented": true,
+        "frameDrops": 0,
+        "parserErrors": 9,
+        "idelayReadyLosses": 0,
+        "frameHighwater": 1,
+        "syncAcquisitions": 10,
+        "observedFrames": 8391,
+        "capacityReached": false,
+        "writerError": 0
+      },
+      "target_restored": true,
+      "usb_released": true,
+      "passed": false,
+      "raw_record_sha256": "5198a423b2e96085a5b3ec112f696f1fa295095892d61a62162b609897ca4b24"
+    },
+    {
+      "name": "etm-hsi-first",
+      "gpio_speed": 2,
+      "taps": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "trace_nominal_hz": null,
+      "actual_window_seconds": 0.0500000005,
+      "formatter_bytes": 155536,
+      "diagnostics": {
+        "implemented": true,
+        "frameDrops": 0,
+        "parserErrors": 400,
+        "idelayReadyLosses": 0,
+        "frameHighwater": 1,
+        "syncAcquisitions": 401,
+        "observedFrames": 9721,
+        "capacityReached": false,
+        "writerError": 0
+      },
+      "target_restored": true,
+      "usb_released": true,
+      "passed": false,
+      "raw_record_sha256": "96ba56c4276b085f0af1973ee20bce7d02ddedae8c00aa346c2dcbde46bb5a38"
+    },
+    {
+      "name": "etm-hsi-gpio3",
+      "gpio_speed": 3,
+      "taps": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "trace_nominal_hz": null,
+      "actual_window_seconds": 0.0500000005,
+      "formatter_bytes": 132560,
+      "diagnostics": {
+        "implemented": true,
+        "frameDrops": 0,
+        "parserErrors": 6,
+        "idelayReadyLosses": 0,
+        "frameHighwater": 1,
+        "syncAcquisitions": 7,
+        "observedFrames": 8285,
+        "capacityReached": false,
+        "writerError": 0
+      },
+      "target_restored": true,
+      "usb_released": true,
+      "passed": false,
+      "raw_record_sha256": "d2934312488876e0576185004bdf556e451b2438b865f97e5539230284c33c2a"
+    },
+    {
+      "name": "trace-pll-sweep/r16-g2-short",
+      "r": 16,
+      "trace_nominal_hz": 20000000.0,
+      "gpio_speed": 2,
+      "planned_seconds": 0.05,
+      "exit_code": 4,
+      "target_restored": true,
+      "usb_released": true,
+      "diagnostics": {
+        "implemented": true,
+        "frameDrops": 0,
+        "parserErrors": 135,
+        "idelayReadyLosses": 0,
+        "frameHighwater": 1,
+        "syncAcquisitions": 136,
+        "observedFrames": 9216,
+        "capacityReached": false,
+        "writerError": 0
+      },
+      "formatter_bytes": 147469,
+      "actual_window_seconds": 0.0500000005,
+      "passed": false,
+      "raw_record_sha256": "4a67c9fe3ed5fb704052a9acace37f3f50920904aad75477b771c90349b1a08b",
+      "taps": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "trace-pll-sweep/r16-g1-short",
+      "r": 16,
+      "trace_nominal_hz": 20000000.0,
+      "gpio_speed": 1,
+      "planned_seconds": 0.05,
+      "exit_code": 4,
+      "target_restored": true,
+      "usb_released": true,
+      "diagnostics": {
+        "implemented": true,
+        "frameDrops": 0,
+        "parserErrors": 131,
+        "idelayReadyLosses": 0,
+        "frameHighwater": 1,
+        "syncAcquisitions": 132,
+        "observedFrames": 8403,
+        "capacityReached": false,
+        "writerError": 0
+      },
+      "formatter_bytes": 134448,
+      "actual_window_seconds": 0.0500000005,
+      "passed": false,
+      "raw_record_sha256": "bf4f0d15f5fdb6361123ea67cecdab3899f9f33c6f34a7323dd378d89f83a5a3",
+      "taps": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "trace-pll-sweep/r16-g3-short",
+      "r": 16,
+      "trace_nominal_hz": 20000000.0,
+      "gpio_speed": 3,
+      "planned_seconds": 0.05,
+      "exit_code": 4,
+      "target_restored": true,
+      "usb_released": true,
+      "diagnostics": {
+        "implemented": true,
+        "frameDrops": 0,
+        "parserErrors": 280,
+        "idelayReadyLosses": 0,
+        "frameHighwater": 1,
+        "syncAcquisitions": 280,
+        "observedFrames": 10016,
+        "capacityReached": false,
+        "writerError": 0
+      },
+      "formatter_bytes": 160256,
+      "actual_window_seconds": 0.0500000005,
+      "passed": false,
+      "raw_record_sha256": "db6ab511af93e0a6da92aecb7d09b770b458b7dc2e0d2b8d03eeb4f1aaa71323",
+      "taps": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "trace-margin/r32-g2-tap0-short",
+      "r": 32,
+      "trace_nominal_hz": 10000000.0,
+      "gpio_speed": 2,
+      "planned_seconds": 0.05,
+      "exit_code": 4,
+      "target_restored": true,
+      "usb_released": true,
+      "diagnostics": {
+        "implemented": true,
+        "frameDrops": 0,
+        "parserErrors": 1233,
+        "idelayReadyLosses": 0,
+        "frameHighwater": 1,
+        "syncAcquisitions": 1234,
+        "observedFrames": 7943,
+        "capacityReached": false,
+        "writerError": 0
+      },
+      "formatter_bytes": 127088,
+      "actual_window_seconds": 0.0500000005,
+      "passed": false,
+      "taps": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "raw_record_sha256": "b6bf29dffd96b33643d5bce7a8e98498fd50fd91b4fd00d5b7aefd979178bc66"
+    },
+    {
+      "name": "trace-margin/r32-g2-tap1-short",
+      "r": 32,
+      "trace_nominal_hz": 10000000.0,
+      "gpio_speed": 2,
+      "planned_seconds": 0.05,
+      "exit_code": 4,
+      "target_restored": true,
+      "usb_released": true,
+      "diagnostics": {
+        "implemented": true,
+        "frameDrops": 0,
+        "parserErrors": 1266,
+        "idelayReadyLosses": 0,
+        "frameHighwater": 1,
+        "syncAcquisitions": 1267,
+        "observedFrames": 8227,
+        "capacityReached": false,
+        "writerError": 0
+      },
+      "formatter_bytes": 131632,
+      "actual_window_seconds": 0.0500000005,
+      "passed": false,
+      "taps": [
+        0,
+        0,
+        0,
+        0,
+        8
+      ],
+      "raw_record_sha256": "63e7f35828db234c5b4848b0b2eefa4dc8d4f591b8565af6dd48f7af5e107e6c"
+    },
+    {
+      "name": "trace-margin/r32-g2-tap2-short",
+      "r": 32,
+      "trace_nominal_hz": 10000000.0,
+      "gpio_speed": 2,
+      "planned_seconds": 0.05,
+      "exit_code": 4,
+      "target_restored": true,
+      "usb_released": true,
+      "diagnostics": {
+        "implemented": true,
+        "frameDrops": 0,
+        "parserErrors": 1286,
+        "idelayReadyLosses": 0,
+        "frameHighwater": 1,
+        "syncAcquisitions": 1287,
+        "observedFrames": 8172,
+        "capacityReached": false,
+        "writerError": 0
+      },
+      "formatter_bytes": 130765,
+      "actual_window_seconds": 0.0500000005,
+      "passed": false,
+      "taps": [
+        8,
+        8,
+        8,
+        8,
+        0
+      ],
+      "raw_record_sha256": "90a1c76f0ad1174565a41abaae531906396e586007a30a5082e2b90161b4df77"
+    },
+    {
+      "name": "trace-margin/r24-g2-tap0-short",
+      "r": 24,
+      "trace_nominal_hz": 13333333.333333334,
+      "gpio_speed": 2,
+      "planned_seconds": 0.05,
+      "exit_code": 4,
+      "target_restored": true,
+      "usb_released": true,
+      "diagnostics": {
+        "implemented": true,
+        "frameDrops": 0,
+        "parserErrors": 1781,
+        "idelayReadyLosses": 0,
+        "frameHighwater": 1,
+        "syncAcquisitions": 1782,
+        "observedFrames": 15489,
+        "capacityReached": false,
+        "writerError": 0
+      },
+      "formatter_bytes": 247827,
+      "actual_window_seconds": 0.0500000005,
+      "passed": false,
+      "taps": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "raw_record_sha256": "a77945719ef8162ed0ff44843365f5e78396ff0d0094079290ab24d2095d9f6a"
+    },
+    {
+      "name": "trace-margin/r24-g2-tap1-short",
+      "r": 24,
+      "trace_nominal_hz": 13333333.333333334,
+      "gpio_speed": 2,
+      "planned_seconds": 0.05,
+      "exit_code": 4,
+      "target_restored": true,
+      "usb_released": true,
+      "diagnostics": {
+        "implemented": true,
+        "frameDrops": 0,
+        "parserErrors": 1415,
+        "idelayReadyLosses": 0,
+        "frameHighwater": 1,
+        "syncAcquisitions": 1415,
+        "observedFrames": 9088,
+        "capacityReached": false,
+        "writerError": 0
+      },
+      "formatter_bytes": 145408,
+      "actual_window_seconds": 0.0500000005,
+      "passed": false,
+      "taps": [
+        0,
+        0,
+        0,
+        0,
+        8
+      ],
+      "raw_record_sha256": "a32b5a19afe63a892a42010163eec4e7517ac191dce949000d92d2393c6bb63d"
+    },
+    {
+      "name": "trace-margin/r24-g2-tap2-short",
+      "r": 24,
+      "trace_nominal_hz": 13333333.333333334,
+      "gpio_speed": 2,
+      "planned_seconds": 0.05,
+      "exit_code": 4,
+      "target_restored": true,
+      "usb_released": true,
+      "diagnostics": {
+        "implemented": true,
+        "frameDrops": 0,
+        "parserErrors": 1759,
+        "idelayReadyLosses": 0,
+        "frameHighwater": 1,
+        "syncAcquisitions": 1760,
+        "observedFrames": 15561,
+        "capacityReached": false,
+        "writerError": 0
+      },
+      "formatter_bytes": 248983,
+      "actual_window_seconds": 0.0500000005,
+      "passed": false,
+      "taps": [
+        8,
+        8,
+        8,
+        8,
+        0
+      ],
+      "raw_record_sha256": "bc7c7c0c35e0436d92cb71cc92b8989f758e740580619295a57df2803b956916"
+    },
+    {
+      "name": "trace-margin/r24-g2-tap3-short",
+      "r": 24,
+      "trace_nominal_hz": 13333333.333333334,
+      "gpio_speed": 2,
+      "planned_seconds": 0.05,
+      "exit_code": 4,
+      "target_restored": true,
+      "usb_released": true,
+      "diagnostics": {
+        "implemented": true,
+        "frameDrops": 0,
+        "parserErrors": 1462,
+        "idelayReadyLosses": 0,
+        "frameHighwater": 1,
+        "syncAcquisitions": 1462,
+        "observedFrames": 8717,
+        "capacityReached": false,
+        "writerError": 0
+      },
+      "formatter_bytes": 139472,
+      "actual_window_seconds": 0.0500000005,
+      "passed": false,
+      "taps": [
+        0,
+        0,
+        0,
+        0,
+        16
+      ],
+      "raw_record_sha256": "0e5ced3bd5ec8d38c79d6c797e9277d2aa1178afce3a3c833d7dfd0bf74327be"
+    },
+    {
+      "name": "trace-margin/r16-g3-tap0-short",
+      "r": 16,
+      "trace_nominal_hz": 20000000.0,
+      "gpio_speed": 3,
+      "planned_seconds": 0.05,
+      "exit_code": 4,
+      "target_restored": true,
+      "usb_released": true,
+      "diagnostics": {
+        "implemented": true,
+        "frameDrops": 0,
+        "parserErrors": 264,
+        "idelayReadyLosses": 0,
+        "frameHighwater": 1,
+        "syncAcquisitions": 265,
+        "observedFrames": 9772,
+        "capacityReached": false,
+        "writerError": 0
+      },
+      "formatter_bytes": 156361,
+      "actual_window_seconds": 0.0500000005,
+      "passed": false,
+      "taps": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "raw_record_sha256": "e57e8c2377ccd349a8ce06c626715e6b6558d00719cdaa1f7d3deec79f439d9d"
+    },
+    {
+      "name": "trace-margin/r16-g3-tap1-short",
+      "r": 16,
+      "trace_nominal_hz": 20000000.0,
+      "gpio_speed": 3,
+      "planned_seconds": 0.05,
+      "exit_code": 4,
+      "target_restored": true,
+      "usb_released": true,
+      "diagnostics": {
+        "implemented": true,
+        "frameDrops": 0,
+        "parserErrors": 239,
+        "idelayReadyLosses": 0,
+        "frameHighwater": 1,
+        "syncAcquisitions": 240,
+        "observedFrames": 9995,
+        "capacityReached": false,
+        "writerError": 0
+      },
+      "formatter_bytes": 159927,
+      "actual_window_seconds": 0.0500000005,
+      "passed": false,
+      "taps": [
+        0,
+        0,
+        0,
+        0,
+        8
+      ],
+      "raw_record_sha256": "fc00c2654401e11279761dcdb010e801dda95278f5c540c0e4e3a23f47b29326"
+    },
+    {
+      "name": "trace-margin/r16-g3-tap2-short",
+      "r": 16,
+      "trace_nominal_hz": 20000000.0,
+      "gpio_speed": 3,
+      "planned_seconds": 0.05,
+      "exit_code": 4,
+      "target_restored": true,
+      "usb_released": true,
+      "diagnostics": {
+        "implemented": true,
+        "frameDrops": 0,
+        "parserErrors": 486,
+        "idelayReadyLosses": 0,
+        "frameHighwater": 1,
+        "syncAcquisitions": 487,
+        "observedFrames": 8427,
+        "capacityReached": false,
+        "writerError": 0
+      },
+      "formatter_bytes": 134832,
+      "actual_window_seconds": 0.0500000005,
+      "passed": false,
+      "taps": [
+        8,
+        8,
+        8,
+        8,
+        0
+      ],
+      "raw_record_sha256": "f57914695d967872f95f69f7f62a712bf38fcdfa3c4e06794e6e926f577a70fd"
+    },
+    {
+      "name": "trace-margin/r16-g3-tap3-short",
+      "r": 16,
+      "trace_nominal_hz": 20000000.0,
+      "gpio_speed": 3,
+      "planned_seconds": 0.05,
+      "exit_code": 4,
+      "target_restored": true,
+      "usb_released": true,
+      "diagnostics": {
+        "implemented": true,
+        "frameDrops": 0,
+        "parserErrors": 200,
+        "idelayReadyLosses": 0,
+        "frameHighwater": 1,
+        "syncAcquisitions": 201,
+        "observedFrames": 9397,
+        "capacityReached": false,
+        "writerError": 0
+      },
+      "formatter_bytes": 150365,
+      "actual_window_seconds": 0.0500000005,
+      "passed": false,
+      "taps": [
+        0,
+        0,
+        0,
+        0,
+        16
+      ],
+      "raw_record_sha256": "ff0368e3acfb41af26d97ea3d442bc7949da15ab46f8ddfe56e49a0ec4d415f1"
+    },
+    {
+      "name": "trace-margin/r16-g3-tap4-short",
+      "r": 16,
+      "trace_nominal_hz": 20000000.0,
+      "gpio_speed": 3,
+      "planned_seconds": 0.05,
+      "exit_code": 4,
+      "target_restored": true,
+      "usb_released": true,
+      "diagnostics": {
+        "implemented": true,
+        "frameDrops": 0,
+        "parserErrors": 459,
+        "idelayReadyLosses": 0,
+        "frameHighwater": 1,
+        "syncAcquisitions": 460,
+        "observedFrames": 8761,
+        "capacityReached": false,
+        "writerError": 0
+      },
+      "formatter_bytes": 140177,
+      "actual_window_seconds": 0.0500000005,
+      "passed": false,
+      "taps": [
+        16,
+        16,
+        16,
+        16,
+        0
+      ],
+      "raw_record_sha256": "1ba6293897147ba40c9da782dbe40edfbd8ca1d8cb19c78f32e523476c87b459"
+    },
+    {
+      "name": "trace-margin/r16-g3-tap5-short",
+      "r": 16,
+      "trace_nominal_hz": 20000000.0,
+      "gpio_speed": 3,
+      "planned_seconds": 0.05,
+      "exit_code": 4,
+      "target_restored": true,
+      "usb_released": true,
+      "diagnostics": {
+        "implemented": true,
+        "frameDrops": 0,
+        "parserErrors": 224,
+        "idelayReadyLosses": 0,
+        "frameHighwater": 1,
+        "syncAcquisitions": 225,
+        "observedFrames": 9631,
+        "capacityReached": false,
+        "writerError": 0
+      },
+      "formatter_bytes": 154097,
+      "actual_window_seconds": 0.0500000005,
+      "passed": false,
+      "taps": [
+        12,
+        18,
+        6,
+        4,
+        16
+      ],
+      "raw_record_sha256": "402520915b13ae25a7e64f24288cc5ea005a075838d0509d06fdc5a24b80bf51"
+    },
+    {
+      "name": "trace-margin/r13-g3-tap0-short",
+      "r": 13,
+      "trace_nominal_hz": 24615384.615384616,
+      "gpio_speed": 3,
+      "planned_seconds": 0.05,
+      "exit_code": 4,
+      "target_restored": true,
+      "usb_released": true,
+      "diagnostics": {
+        "implemented": true,
+        "frameDrops": 0,
+        "parserErrors": 372,
+        "idelayReadyLosses": 0,
+        "frameHighwater": 1,
+        "syncAcquisitions": 373,
+        "observedFrames": 8626,
+        "capacityReached": false,
+        "writerError": 0
+      },
+      "formatter_bytes": 138028,
+      "actual_window_seconds": 0.0500000005,
+      "passed": false,
+      "taps": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "raw_record_sha256": "887664ffa967424b07a64c31b7acfecc737595a7f392ac6687c9afcb63266aa5"
+    },
+    {
+      "name": "trace-margin/r13-g3-tap1-short",
+      "r": 13,
+      "trace_nominal_hz": 24615384.615384616,
+      "gpio_speed": 3,
+      "planned_seconds": 0.05,
+      "exit_code": 4,
+      "target_restored": true,
+      "usb_released": true,
+      "diagnostics": {
+        "implemented": true,
+        "frameDrops": 0,
+        "parserErrors": 344,
+        "idelayReadyLosses": 0,
+        "frameHighwater": 1,
+        "syncAcquisitions": 344,
+        "observedFrames": 8540,
+        "capacityReached": false,
+        "writerError": 0
+      },
+      "formatter_bytes": 136640,
+      "actual_window_seconds": 0.0500000005,
+      "passed": false,
+      "taps": [
+        0,
+        0,
+        0,
+        0,
+        8
+      ],
+      "raw_record_sha256": "c86a78bc7e875af515f83d3dc9e4d8758a82f7a7d03cd12a7950fb94a36dc050"
+    },
+    {
+      "name": "trace-margin/r13-g3-tap2-short",
+      "r": 13,
+      "trace_nominal_hz": 24615384.615384616,
+      "gpio_speed": 3,
+      "planned_seconds": 0.05,
+      "exit_code": 4,
+      "target_restored": true,
+      "usb_released": true,
+      "diagnostics": {
+        "implemented": true,
+        "frameDrops": 0,
+        "parserErrors": 364,
+        "idelayReadyLosses": 0,
+        "frameHighwater": 1,
+        "syncAcquisitions": 365,
+        "observedFrames": 8648,
+        "capacityReached": false,
+        "writerError": 0
+      },
+      "formatter_bytes": 138380,
+      "actual_window_seconds": 0.0500000005,
+      "passed": false,
+      "taps": [
+        8,
+        8,
+        8,
+        8,
+        0
+      ],
+      "raw_record_sha256": "fd9a7654299d155a964a6a3ad7dbdc6dd85ff5a8a799e14d828da4e7782f374a"
+    },
+    {
+      "name": "trace-hsi-margin/g3-tap0-short",
+      "r": null,
+      "trace_nominal_hz": null,
+      "gpio_speed": 3,
+      "planned_seconds": 0.05,
+      "exit_code": 4,
+      "target_restored": true,
+      "usb_released": true,
+      "diagnostics": {
+        "implemented": true,
+        "frameDrops": 0,
+        "parserErrors": 8,
+        "idelayReadyLosses": 0,
+        "frameHighwater": 1,
+        "syncAcquisitions": 9,
+        "observedFrames": 8352,
+        "capacityReached": false,
+        "writerError": 0
+      },
+      "formatter_bytes": 133645,
+      "actual_window_seconds": 0.0500000005,
+      "passed": false,
+      "taps": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "raw_record_sha256": "a1238e98e6892d224ae95a87176fb24b16823924de11f816fec9f32632f1eba0"
+    },
+    {
+      "name": "trace-hsi-margin/g3-tap1-short",
+      "r": null,
+      "trace_nominal_hz": null,
+      "gpio_speed": 3,
+      "planned_seconds": 0.05,
+      "exit_code": 4,
+      "target_restored": true,
+      "usb_released": true,
+      "diagnostics": {
+        "implemented": true,
+        "frameDrops": 0,
+        "parserErrors": 422,
+        "idelayReadyLosses": 0,
+        "frameHighwater": 1,
+        "syncAcquisitions": 423,
+        "observedFrames": 9536,
+        "capacityReached": false,
+        "writerError": 0
+      },
+      "formatter_bytes": 152589,
+      "actual_window_seconds": 0.0500000005,
+      "passed": false,
+      "taps": [
+        0,
+        0,
+        0,
+        0,
+        8
+      ],
+      "raw_record_sha256": "b32529f99fd1b854e135873b1117b7eef63971335c3caf3a604433a07b541f72"
+    },
+    {
+      "name": "trace-hsi-margin/g3-tap2-short",
+      "r": null,
+      "trace_nominal_hz": null,
+      "gpio_speed": 3,
+      "planned_seconds": 0.05,
+      "exit_code": 4,
+      "target_restored": true,
+      "usb_released": true,
+      "diagnostics": {
+        "implemented": true,
+        "frameDrops": 0,
+        "parserErrors": 467,
+        "idelayReadyLosses": 0,
+        "frameHighwater": 1,
+        "syncAcquisitions": 468,
+        "observedFrames": 9436,
+        "capacityReached": false,
+        "writerError": 0
+      },
+      "formatter_bytes": 150976,
+      "actual_window_seconds": 0.0500000005,
+      "passed": false,
+      "taps": [
+        8,
+        8,
+        8,
+        8,
+        0
+      ],
+      "raw_record_sha256": "ceccd11505d542c72e0454deb15844cf13434d94e52b25e9f0dea19a25c64e4b"
+    },
+    {
+      "name": "trace-hsi-margin/g3-tap3-short",
+      "r": null,
+      "trace_nominal_hz": null,
+      "gpio_speed": 3,
+      "planned_seconds": 0.05,
+      "exit_code": 4,
+      "target_restored": true,
+      "usb_released": true,
+      "diagnostics": {
+        "implemented": true,
+        "frameDrops": 0,
+        "parserErrors": 430,
+        "idelayReadyLosses": 0,
+        "frameHighwater": 1,
+        "syncAcquisitions": 431,
+        "observedFrames": 9722,
+        "capacityReached": false,
+        "writerError": 0
+      },
+      "formatter_bytes": 155564,
+      "actual_window_seconds": 0.0500000005,
+      "passed": false,
+      "taps": [
+        0,
+        0,
+        0,
+        0,
+        16
+      ],
+      "raw_record_sha256": "8f06e59b597314d38358c160c4117732bc7b692072a4b9b331555c014fbf79d6"
+    },
+    {
+      "name": "trace-hsi-margin/g3-tap4-short",
+      "r": null,
+      "trace_nominal_hz": null,
+      "gpio_speed": 3,
+      "planned_seconds": 0.05,
+      "exit_code": 4,
+      "target_restored": true,
+      "usb_released": true,
+      "diagnostics": {
+        "implemented": true,
+        "frameDrops": 0,
+        "parserErrors": 456,
+        "idelayReadyLosses": 0,
+        "frameHighwater": 1,
+        "syncAcquisitions": 457,
+        "observedFrames": 9349,
+        "capacityReached": false,
+        "writerError": 0
+      },
+      "formatter_bytes": 149597,
+      "actual_window_seconds": 0.0500000005,
+      "passed": false,
+      "taps": [
+        16,
+        16,
+        16,
+        16,
+        0
+      ],
+      "raw_record_sha256": "7e9afe05209799c7544787436e511a987c5001cbd3a941cd78ec961cc93270fc"
+    },
+    {
+      "name": "trace-hsi-margin/g3-tap5-short",
+      "r": null,
+      "trace_nominal_hz": null,
+      "gpio_speed": 3,
+      "planned_seconds": 0.05,
+      "exit_code": 4,
+      "target_restored": true,
+      "usb_released": true,
+      "diagnostics": {
+        "implemented": true,
+        "frameDrops": 0,
+        "parserErrors": 17,
+        "idelayReadyLosses": 0,
+        "frameHighwater": 1,
+        "syncAcquisitions": 18,
+        "observedFrames": 8368,
+        "capacityReached": false,
+        "writerError": 0
+      },
+      "formatter_bytes": 133900,
+      "actual_window_seconds": 0.0500000005,
+      "passed": false,
+      "taps": [
+        12,
+        18,
+        6,
+        4,
+        16
+      ],
+      "raw_record_sha256": "59e47a40774ce9fe4e30748142474c8f464c771398f53e52feb135da58f4a685"
+    }
+  ],
+  "clock_and_tap_campaigns": {
+    "trace-pll-sweep": {
+      "windows": [
+        {
+          "name": "r16-g2-short",
+          "r": 16,
+          "trace_nominal_hz": 20000000.0,
+          "gpio_speed": 2,
+          "planned_seconds": 0.05,
+          "exit_code": 4,
+          "target_restored": true,
+          "usb_released": true,
+          "diagnostics": {
+            "implemented": true,
+            "frameDrops": 0,
+            "parserErrors": 135,
+            "idelayReadyLosses": 0,
+            "frameHighwater": 1,
+            "syncAcquisitions": 136,
+            "observedFrames": 9216,
+            "capacityReached": false,
+            "writerError": 0
+          },
+          "formatter_bytes": 147469,
+          "actual_window_seconds": 0.0500000005,
+          "passed": false
+        },
+        {
+          "name": "r16-g1-short",
+          "r": 16,
+          "trace_nominal_hz": 20000000.0,
+          "gpio_speed": 1,
+          "planned_seconds": 0.05,
+          "exit_code": 4,
+          "target_restored": true,
+          "usb_released": true,
+          "diagnostics": {
+            "implemented": true,
+            "frameDrops": 0,
+            "parserErrors": 131,
+            "idelayReadyLosses": 0,
+            "frameHighwater": 1,
+            "syncAcquisitions": 132,
+            "observedFrames": 8403,
+            "capacityReached": false,
+            "writerError": 0
+          },
+          "formatter_bytes": 134448,
+          "actual_window_seconds": 0.0500000005,
+          "passed": false
+        },
+        {
+          "name": "r16-g3-short",
+          "r": 16,
+          "trace_nominal_hz": 20000000.0,
+          "gpio_speed": 3,
+          "planned_seconds": 0.05,
+          "exit_code": 4,
+          "target_restored": true,
+          "usb_released": true,
+          "diagnostics": {
+            "implemented": true,
+            "frameDrops": 0,
+            "parserErrors": 280,
+            "idelayReadyLosses": 0,
+            "frameHighwater": 1,
+            "syncAcquisitions": 280,
+            "observedFrames": 10016,
+            "capacityReached": false,
+            "writerError": 0
+          },
+          "formatter_bytes": 160256,
+          "actual_window_seconds": 0.0500000005,
+          "passed": false
+        }
+      ],
+      "restored": true,
+      "cpu_nominal_hz": 64000000,
+      "pll1_vco_nominal_hz": 640000000,
+      "initial_clock": {
+        "name": "STM32H743/H742/H750/H753",
+        "cpuid": "0x411fc271",
+        "device": "0x20036450",
+        "registers": {
+          "0x58024400": "0x4025",
+          "0x58024410": "0x0",
+          "0x58024418": "0x0",
+          "0x5802441c": "0x0",
+          "0x58024420": "0x0",
+          "0x58024428": "0x2020200",
+          "0x5802442c": "0x1ff0000",
+          "0x58024430": "0x1010280",
+          "0x58024434": "0x0",
+          "0x58024438": "0x1010280",
+          "0x52002000": "0x37"
+        }
+      },
+      "saved": {
+        "0x58024400": "0x4025",
+        "0x58024410": "0x0",
+        "0x58024428": "0x2020200",
+        "0x5802442c": "0x1ff0000",
+        "0x58024430": "0x1010280",
+        "0x58024434": "0x0"
+      },
+      "initial_halted": false,
+      "profiles": {
+        "16": {
+          "0x58024400": "0x3004025",
+          "0x58024410": "0x1b",
+          "0x58024428": "0x2020140",
+          "0x5802442c": "0x1fd0004",
+          "0x58024430": "0xf0112c7",
+          "0x58024434": "0x0"
+        }
+      },
+      "final_clock": {
+        "name": "STM32H743/H742/H750/H753",
+        "cpuid": "0x411fc271",
+        "device": "0x20036450",
+        "registers": {
+          "0x58024400": "0x4025",
+          "0x58024410": "0x0",
+          "0x58024418": "0x0",
+          "0x5802441c": "0x0",
+          "0x58024420": "0x0",
+          "0x58024428": "0x2020200",
+          "0x5802442c": "0x1ff0000",
+          "0x58024430": "0x1010280",
+          "0x58024434": "0x0",
+          "0x58024438": "0x1010280",
+          "0x52002000": "0x37"
+        }
+      },
+      "final_halted": false
+    },
+    "trace-margin": {
+      "windows": [
+        {
+          "name": "r32-g2-tap0-short",
+          "r": 32,
+          "trace_nominal_hz": 10000000.0,
+          "gpio_speed": 2,
+          "planned_seconds": 0.05,
+          "exit_code": 4,
+          "target_restored": true,
+          "usb_released": true,
+          "diagnostics": {
+            "implemented": true,
+            "frameDrops": 0,
+            "parserErrors": 1233,
+            "idelayReadyLosses": 0,
+            "frameHighwater": 1,
+            "syncAcquisitions": 1234,
+            "observedFrames": 7943,
+            "capacityReached": false,
+            "writerError": 0
+          },
+          "formatter_bytes": 127088,
+          "actual_window_seconds": 0.0500000005,
+          "passed": false,
+          "taps": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "r32-g2-tap1-short",
+          "r": 32,
+          "trace_nominal_hz": 10000000.0,
+          "gpio_speed": 2,
+          "planned_seconds": 0.05,
+          "exit_code": 4,
+          "target_restored": true,
+          "usb_released": true,
+          "diagnostics": {
+            "implemented": true,
+            "frameDrops": 0,
+            "parserErrors": 1266,
+            "idelayReadyLosses": 0,
+            "frameHighwater": 1,
+            "syncAcquisitions": 1267,
+            "observedFrames": 8227,
+            "capacityReached": false,
+            "writerError": 0
+          },
+          "formatter_bytes": 131632,
+          "actual_window_seconds": 0.0500000005,
+          "passed": false,
+          "taps": [
+            0,
+            0,
+            0,
+            0,
+            8
+          ]
+        },
+        {
+          "name": "r32-g2-tap2-short",
+          "r": 32,
+          "trace_nominal_hz": 10000000.0,
+          "gpio_speed": 2,
+          "planned_seconds": 0.05,
+          "exit_code": 4,
+          "target_restored": true,
+          "usb_released": true,
+          "diagnostics": {
+            "implemented": true,
+            "frameDrops": 0,
+            "parserErrors": 1286,
+            "idelayReadyLosses": 0,
+            "frameHighwater": 1,
+            "syncAcquisitions": 1287,
+            "observedFrames": 8172,
+            "capacityReached": false,
+            "writerError": 0
+          },
+          "formatter_bytes": 130765,
+          "actual_window_seconds": 0.0500000005,
+          "passed": false,
+          "taps": [
+            8,
+            8,
+            8,
+            8,
+            0
+          ]
+        },
+        {
+          "name": "r24-g2-tap0-short",
+          "r": 24,
+          "trace_nominal_hz": 13333333.333333334,
+          "gpio_speed": 2,
+          "planned_seconds": 0.05,
+          "exit_code": 4,
+          "target_restored": true,
+          "usb_released": true,
+          "diagnostics": {
+            "implemented": true,
+            "frameDrops": 0,
+            "parserErrors": 1781,
+            "idelayReadyLosses": 0,
+            "frameHighwater": 1,
+            "syncAcquisitions": 1782,
+            "observedFrames": 15489,
+            "capacityReached": false,
+            "writerError": 0
+          },
+          "formatter_bytes": 247827,
+          "actual_window_seconds": 0.0500000005,
+          "passed": false,
+          "taps": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "r24-g2-tap1-short",
+          "r": 24,
+          "trace_nominal_hz": 13333333.333333334,
+          "gpio_speed": 2,
+          "planned_seconds": 0.05,
+          "exit_code": 4,
+          "target_restored": true,
+          "usb_released": true,
+          "diagnostics": {
+            "implemented": true,
+            "frameDrops": 0,
+            "parserErrors": 1415,
+            "idelayReadyLosses": 0,
+            "frameHighwater": 1,
+            "syncAcquisitions": 1415,
+            "observedFrames": 9088,
+            "capacityReached": false,
+            "writerError": 0
+          },
+          "formatter_bytes": 145408,
+          "actual_window_seconds": 0.0500000005,
+          "passed": false,
+          "taps": [
+            0,
+            0,
+            0,
+            0,
+            8
+          ]
+        },
+        {
+          "name": "r24-g2-tap2-short",
+          "r": 24,
+          "trace_nominal_hz": 13333333.333333334,
+          "gpio_speed": 2,
+          "planned_seconds": 0.05,
+          "exit_code": 4,
+          "target_restored": true,
+          "usb_released": true,
+          "diagnostics": {
+            "implemented": true,
+            "frameDrops": 0,
+            "parserErrors": 1759,
+            "idelayReadyLosses": 0,
+            "frameHighwater": 1,
+            "syncAcquisitions": 1760,
+            "observedFrames": 15561,
+            "capacityReached": false,
+            "writerError": 0
+          },
+          "formatter_bytes": 248983,
+          "actual_window_seconds": 0.0500000005,
+          "passed": false,
+          "taps": [
+            8,
+            8,
+            8,
+            8,
+            0
+          ]
+        },
+        {
+          "name": "r24-g2-tap3-short",
+          "r": 24,
+          "trace_nominal_hz": 13333333.333333334,
+          "gpio_speed": 2,
+          "planned_seconds": 0.05,
+          "exit_code": 4,
+          "target_restored": true,
+          "usb_released": true,
+          "diagnostics": {
+            "implemented": true,
+            "frameDrops": 0,
+            "parserErrors": 1462,
+            "idelayReadyLosses": 0,
+            "frameHighwater": 1,
+            "syncAcquisitions": 1462,
+            "observedFrames": 8717,
+            "capacityReached": false,
+            "writerError": 0
+          },
+          "formatter_bytes": 139472,
+          "actual_window_seconds": 0.0500000005,
+          "passed": false,
+          "taps": [
+            0,
+            0,
+            0,
+            0,
+            16
+          ]
+        },
+        {
+          "name": "r16-g3-tap0-short",
+          "r": 16,
+          "trace_nominal_hz": 20000000.0,
+          "gpio_speed": 3,
+          "planned_seconds": 0.05,
+          "exit_code": 4,
+          "target_restored": true,
+          "usb_released": true,
+          "diagnostics": {
+            "implemented": true,
+            "frameDrops": 0,
+            "parserErrors": 264,
+            "idelayReadyLosses": 0,
+            "frameHighwater": 1,
+            "syncAcquisitions": 265,
+            "observedFrames": 9772,
+            "capacityReached": false,
+            "writerError": 0
+          },
+          "formatter_bytes": 156361,
+          "actual_window_seconds": 0.0500000005,
+          "passed": false,
+          "taps": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "r16-g3-tap1-short",
+          "r": 16,
+          "trace_nominal_hz": 20000000.0,
+          "gpio_speed": 3,
+          "planned_seconds": 0.05,
+          "exit_code": 4,
+          "target_restored": true,
+          "usb_released": true,
+          "diagnostics": {
+            "implemented": true,
+            "frameDrops": 0,
+            "parserErrors": 239,
+            "idelayReadyLosses": 0,
+            "frameHighwater": 1,
+            "syncAcquisitions": 240,
+            "observedFrames": 9995,
+            "capacityReached": false,
+            "writerError": 0
+          },
+          "formatter_bytes": 159927,
+          "actual_window_seconds": 0.0500000005,
+          "passed": false,
+          "taps": [
+            0,
+            0,
+            0,
+            0,
+            8
+          ]
+        },
+        {
+          "name": "r16-g3-tap2-short",
+          "r": 16,
+          "trace_nominal_hz": 20000000.0,
+          "gpio_speed": 3,
+          "planned_seconds": 0.05,
+          "exit_code": 4,
+          "target_restored": true,
+          "usb_released": true,
+          "diagnostics": {
+            "implemented": true,
+            "frameDrops": 0,
+            "parserErrors": 486,
+            "idelayReadyLosses": 0,
+            "frameHighwater": 1,
+            "syncAcquisitions": 487,
+            "observedFrames": 8427,
+            "capacityReached": false,
+            "writerError": 0
+          },
+          "formatter_bytes": 134832,
+          "actual_window_seconds": 0.0500000005,
+          "passed": false,
+          "taps": [
+            8,
+            8,
+            8,
+            8,
+            0
+          ]
+        },
+        {
+          "name": "r16-g3-tap3-short",
+          "r": 16,
+          "trace_nominal_hz": 20000000.0,
+          "gpio_speed": 3,
+          "planned_seconds": 0.05,
+          "exit_code": 4,
+          "target_restored": true,
+          "usb_released": true,
+          "diagnostics": {
+            "implemented": true,
+            "frameDrops": 0,
+            "parserErrors": 200,
+            "idelayReadyLosses": 0,
+            "frameHighwater": 1,
+            "syncAcquisitions": 201,
+            "observedFrames": 9397,
+            "capacityReached": false,
+            "writerError": 0
+          },
+          "formatter_bytes": 150365,
+          "actual_window_seconds": 0.0500000005,
+          "passed": false,
+          "taps": [
+            0,
+            0,
+            0,
+            0,
+            16
+          ]
+        },
+        {
+          "name": "r16-g3-tap4-short",
+          "r": 16,
+          "trace_nominal_hz": 20000000.0,
+          "gpio_speed": 3,
+          "planned_seconds": 0.05,
+          "exit_code": 4,
+          "target_restored": true,
+          "usb_released": true,
+          "diagnostics": {
+            "implemented": true,
+            "frameDrops": 0,
+            "parserErrors": 459,
+            "idelayReadyLosses": 0,
+            "frameHighwater": 1,
+            "syncAcquisitions": 460,
+            "observedFrames": 8761,
+            "capacityReached": false,
+            "writerError": 0
+          },
+          "formatter_bytes": 140177,
+          "actual_window_seconds": 0.0500000005,
+          "passed": false,
+          "taps": [
+            16,
+            16,
+            16,
+            16,
+            0
+          ]
+        },
+        {
+          "name": "r16-g3-tap5-short",
+          "r": 16,
+          "trace_nominal_hz": 20000000.0,
+          "gpio_speed": 3,
+          "planned_seconds": 0.05,
+          "exit_code": 4,
+          "target_restored": true,
+          "usb_released": true,
+          "diagnostics": {
+            "implemented": true,
+            "frameDrops": 0,
+            "parserErrors": 224,
+            "idelayReadyLosses": 0,
+            "frameHighwater": 1,
+            "syncAcquisitions": 225,
+            "observedFrames": 9631,
+            "capacityReached": false,
+            "writerError": 0
+          },
+          "formatter_bytes": 154097,
+          "actual_window_seconds": 0.0500000005,
+          "passed": false,
+          "taps": [
+            12,
+            18,
+            6,
+            4,
+            16
+          ]
+        },
+        {
+          "name": "r13-g3-tap0-short",
+          "r": 13,
+          "trace_nominal_hz": 24615384.615384616,
+          "gpio_speed": 3,
+          "planned_seconds": 0.05,
+          "exit_code": 4,
+          "target_restored": true,
+          "usb_released": true,
+          "diagnostics": {
+            "implemented": true,
+            "frameDrops": 0,
+            "parserErrors": 372,
+            "idelayReadyLosses": 0,
+            "frameHighwater": 1,
+            "syncAcquisitions": 373,
+            "observedFrames": 8626,
+            "capacityReached": false,
+            "writerError": 0
+          },
+          "formatter_bytes": 138028,
+          "actual_window_seconds": 0.0500000005,
+          "passed": false,
+          "taps": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "r13-g3-tap1-short",
+          "r": 13,
+          "trace_nominal_hz": 24615384.615384616,
+          "gpio_speed": 3,
+          "planned_seconds": 0.05,
+          "exit_code": 4,
+          "target_restored": true,
+          "usb_released": true,
+          "diagnostics": {
+            "implemented": true,
+            "frameDrops": 0,
+            "parserErrors": 344,
+            "idelayReadyLosses": 0,
+            "frameHighwater": 1,
+            "syncAcquisitions": 344,
+            "observedFrames": 8540,
+            "capacityReached": false,
+            "writerError": 0
+          },
+          "formatter_bytes": 136640,
+          "actual_window_seconds": 0.0500000005,
+          "passed": false,
+          "taps": [
+            0,
+            0,
+            0,
+            0,
+            8
+          ]
+        },
+        {
+          "name": "r13-g3-tap2-short",
+          "r": 13,
+          "trace_nominal_hz": 24615384.615384616,
+          "gpio_speed": 3,
+          "planned_seconds": 0.05,
+          "exit_code": 4,
+          "target_restored": true,
+          "usb_released": true,
+          "diagnostics": {
+            "implemented": true,
+            "frameDrops": 0,
+            "parserErrors": 364,
+            "idelayReadyLosses": 0,
+            "frameHighwater": 1,
+            "syncAcquisitions": 365,
+            "observedFrames": 8648,
+            "capacityReached": false,
+            "writerError": 0
+          },
+          "formatter_bytes": 138380,
+          "actual_window_seconds": 0.0500000005,
+          "passed": false,
+          "taps": [
+            8,
+            8,
+            8,
+            8,
+            0
+          ]
+        }
+      ],
+      "restored": true,
+      "cpu_nominal_hz": 64000000,
+      "pll1_vco_nominal_hz": 640000000,
+      "initial_taps": {
+        "enabled": false,
+        "taps": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "busy": false,
+        "ready": true,
+        "loaded": true,
+        "fault": false,
+        "rejectedSticky": false,
+        "accepted": 0,
+        "rejected": 0,
+        "loadFailures": 0,
+        "raw": [
+          1162626097,
+          0,
+          12,
+          0,
+          0,
+          0
+        ]
+      },
+      "initial_clock": {
+        "name": "STM32H743/H742/H750/H753",
+        "cpuid": "0x411fc271",
+        "device": "0x20036450",
+        "registers": {
+          "0x58024400": "0x4025",
+          "0x58024410": "0x0",
+          "0x58024418": "0x0",
+          "0x5802441c": "0x0",
+          "0x58024420": "0x0",
+          "0x58024428": "0x2020200",
+          "0x5802442c": "0x1ff0000",
+          "0x58024430": "0x1010280",
+          "0x58024434": "0x0",
+          "0x58024438": "0x1010280",
+          "0x52002000": "0x37"
+        }
+      },
+      "saved": {
+        "0x58024400": "0x4025",
+        "0x58024410": "0x0",
+        "0x58024428": "0x2020200",
+        "0x5802442c": "0x1ff0000",
+        "0x58024430": "0x1010280",
+        "0x58024434": "0x0"
+      },
+      "initial_halted": false,
+      "profiles": {
+        "32": {
+          "0x58024400": "0x3004025",
+          "0x58024410": "0x1b",
+          "0x58024428": "0x2020140",
+          "0x5802442c": "0x1fd0004",
+          "0x58024430": "0x1f0112c7",
+          "0x58024434": "0x0"
+        },
+        "24": {
+          "0x58024400": "0x3004025",
+          "0x58024410": "0x1b",
+          "0x58024428": "0x2020140",
+          "0x5802442c": "0x1fd0004",
+          "0x58024430": "0x170112c7",
+          "0x58024434": "0x0"
+        },
+        "16": {
+          "0x58024400": "0x3004025",
+          "0x58024410": "0x1b",
+          "0x58024428": "0x2020140",
+          "0x5802442c": "0x1fd0004",
+          "0x58024430": "0xf0112c7",
+          "0x58024434": "0x0"
+        },
+        "13": {
+          "0x58024400": "0x3004025",
+          "0x58024410": "0x1b",
+          "0x58024428": "0x2020140",
+          "0x5802442c": "0x1fd0004",
+          "0x58024430": "0xc0112c7",
+          "0x58024434": "0x0"
+        }
+      },
+      "tap_settings": [
+        {
+          "enabled": false,
+          "taps": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "busy": false,
+          "ready": true,
+          "loaded": true,
+          "fault": false,
+          "rejectedSticky": false,
+          "accepted": 1,
+          "rejected": 0,
+          "loadFailures": 0,
+          "raw": [
+            1162626097,
+            0,
+            12,
+            1,
+            0,
+            0
+          ]
+        },
+        {
+          "enabled": true,
+          "taps": [
+            0,
+            0,
+            0,
+            0,
+            8
+          ],
+          "busy": false,
+          "ready": true,
+          "loaded": true,
+          "fault": false,
+          "rejectedSticky": false,
+          "accepted": 2,
+          "rejected": 0,
+          "loadFailures": 0,
+          "raw": [
+            1162626097,
+            41943040,
+            13,
+            2,
+            0,
+            0
+          ]
+        },
+        {
+          "enabled": true,
+          "taps": [
+            8,
+            8,
+            8,
+            8,
+            0
+          ],
+          "busy": false,
+          "ready": true,
+          "loaded": true,
+          "fault": false,
+          "rejectedSticky": false,
+          "accepted": 3,
+          "rejected": 0,
+          "loadFailures": 0,
+          "raw": [
+            1162626097,
+            33825032,
+            13,
+            3,
+            0,
+            0
+          ]
+        },
+        {
+          "enabled": false,
+          "taps": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "busy": false,
+          "ready": true,
+          "loaded": true,
+          "fault": false,
+          "rejectedSticky": false,
+          "accepted": 4,
+          "rejected": 0,
+          "loadFailures": 0,
+          "raw": [
+            1162626097,
+            0,
+            12,
+            4,
+            0,
+            0
+          ]
+        },
+        {
+          "enabled": true,
+          "taps": [
+            0,
+            0,
+            0,
+            0,
+            8
+          ],
+          "busy": false,
+          "ready": true,
+          "loaded": true,
+          "fault": false,
+          "rejectedSticky": false,
+          "accepted": 5,
+          "rejected": 0,
+          "loadFailures": 0,
+          "raw": [
+            1162626097,
+            41943040,
+            13,
+            5,
+            0,
+            0
+          ]
+        },
+        {
+          "enabled": true,
+          "taps": [
+            8,
+            8,
+            8,
+            8,
+            0
+          ],
+          "busy": false,
+          "ready": true,
+          "loaded": true,
+          "fault": false,
+          "rejectedSticky": false,
+          "accepted": 6,
+          "rejected": 0,
+          "loadFailures": 0,
+          "raw": [
+            1162626097,
+            33825032,
+            13,
+            6,
+            0,
+            0
+          ]
+        },
+        {
+          "enabled": true,
+          "taps": [
+            0,
+            0,
+            0,
+            0,
+            16
+          ],
+          "busy": false,
+          "ready": true,
+          "loaded": true,
+          "fault": false,
+          "rejectedSticky": false,
+          "accepted": 7,
+          "rejected": 0,
+          "loadFailures": 0,
+          "raw": [
+            1162626097,
+            50331648,
+            13,
+            7,
+            0,
+            0
+          ]
+        },
+        {
+          "enabled": false,
+          "taps": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "busy": false,
+          "ready": true,
+          "loaded": true,
+          "fault": false,
+          "rejectedSticky": false,
+          "accepted": 8,
+          "rejected": 0,
+          "loadFailures": 0,
+          "raw": [
+            1162626097,
+            0,
+            12,
+            8,
+            0,
+            0
+          ]
+        },
+        {
+          "enabled": true,
+          "taps": [
+            0,
+            0,
+            0,
+            0,
+            8
+          ],
+          "busy": false,
+          "ready": true,
+          "loaded": true,
+          "fault": false,
+          "rejectedSticky": false,
+          "accepted": 9,
+          "rejected": 0,
+          "loadFailures": 0,
+          "raw": [
+            1162626097,
+            41943040,
+            13,
+            9,
+            0,
+            0
+          ]
+        },
+        {
+          "enabled": true,
+          "taps": [
+            8,
+            8,
+            8,
+            8,
+            0
+          ],
+          "busy": false,
+          "ready": true,
+          "loaded": true,
+          "fault": false,
+          "rejectedSticky": false,
+          "accepted": 10,
+          "rejected": 0,
+          "loadFailures": 0,
+          "raw": [
+            1162626097,
+            33825032,
+            13,
+            10,
+            0,
+            0
+          ]
+        },
+        {
+          "enabled": true,
+          "taps": [
+            0,
+            0,
+            0,
+            0,
+            16
+          ],
+          "busy": false,
+          "ready": true,
+          "loaded": true,
+          "fault": false,
+          "rejectedSticky": false,
+          "accepted": 11,
+          "rejected": 0,
+          "loadFailures": 0,
+          "raw": [
+            1162626097,
+            50331648,
+            13,
+            11,
+            0,
+            0
+          ]
+        },
+        {
+          "enabled": true,
+          "taps": [
+            16,
+            16,
+            16,
+            16,
+            0
+          ],
+          "busy": false,
+          "ready": true,
+          "loaded": true,
+          "fault": false,
+          "rejectedSticky": false,
+          "accepted": 12,
+          "rejected": 0,
+          "loadFailures": 0,
+          "raw": [
+            1162626097,
+            34095632,
+            13,
+            12,
+            0,
+            0
+          ]
+        },
+        {
+          "enabled": true,
+          "taps": [
+            12,
+            18,
+            6,
+            4,
+            16
+          ],
+          "busy": false,
+          "ready": true,
+          "loaded": true,
+          "fault": false,
+          "rejectedSticky": false,
+          "accepted": 13,
+          "rejected": 0,
+          "loadFailures": 0,
+          "raw": [
+            1162626097,
+            50469452,
+            13,
+            13,
+            0,
+            0
+          ]
+        },
+        {
+          "enabled": false,
+          "taps": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "busy": false,
+          "ready": true,
+          "loaded": true,
+          "fault": false,
+          "rejectedSticky": false,
+          "accepted": 14,
+          "rejected": 0,
+          "loadFailures": 0,
+          "raw": [
+            1162626097,
+            0,
+            12,
+            14,
+            0,
+            0
+          ]
+        },
+        {
+          "enabled": true,
+          "taps": [
+            0,
+            0,
+            0,
+            0,
+            8
+          ],
+          "busy": false,
+          "ready": true,
+          "loaded": true,
+          "fault": false,
+          "rejectedSticky": false,
+          "accepted": 15,
+          "rejected": 0,
+          "loadFailures": 0,
+          "raw": [
+            1162626097,
+            41943040,
+            13,
+            15,
+            0,
+            0
+          ]
+        },
+        {
+          "enabled": true,
+          "taps": [
+            8,
+            8,
+            8,
+            8,
+            0
+          ],
+          "busy": false,
+          "ready": true,
+          "loaded": true,
+          "fault": false,
+          "rejectedSticky": false,
+          "accepted": 16,
+          "rejected": 0,
+          "loadFailures": 0,
+          "raw": [
+            1162626097,
+            33825032,
+            13,
+            16,
+            0,
+            0
+          ]
+        }
+      ],
+      "final_taps": {
+        "enabled": false,
+        "taps": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "busy": false,
+        "ready": true,
+        "loaded": true,
+        "fault": false,
+        "rejectedSticky": false,
+        "accepted": 17,
+        "rejected": 0,
+        "loadFailures": 0,
+        "raw": [
+          1162626097,
+          0,
+          12,
+          17,
+          0,
+          0
+        ]
+      },
+      "final_clock": {
+        "name": "STM32H743/H742/H750/H753",
+        "cpuid": "0x411fc271",
+        "device": "0x20036450",
+        "registers": {
+          "0x58024400": "0x4025",
+          "0x58024410": "0x0",
+          "0x58024418": "0x0",
+          "0x5802441c": "0x0",
+          "0x58024420": "0x0",
+          "0x58024428": "0x2020200",
+          "0x5802442c": "0x1ff0000",
+          "0x58024430": "0x1010280",
+          "0x58024434": "0x0",
+          "0x58024438": "0x1010280",
+          "0x52002000": "0x37"
+        }
+      },
+      "final_halted": false
+    },
+    "trace-hsi-margin": {
+      "windows": [
+        {
+          "name": "g3-tap0-short",
+          "r": null,
+          "trace_nominal_hz": null,
+          "gpio_speed": 3,
+          "planned_seconds": 0.05,
+          "exit_code": 4,
+          "target_restored": true,
+          "usb_released": true,
+          "diagnostics": {
+            "implemented": true,
+            "frameDrops": 0,
+            "parserErrors": 8,
+            "idelayReadyLosses": 0,
+            "frameHighwater": 1,
+            "syncAcquisitions": 9,
+            "observedFrames": 8352,
+            "capacityReached": false,
+            "writerError": 0
+          },
+          "formatter_bytes": 133645,
+          "actual_window_seconds": 0.0500000005,
+          "passed": false,
+          "taps": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "g3-tap1-short",
+          "r": null,
+          "trace_nominal_hz": null,
+          "gpio_speed": 3,
+          "planned_seconds": 0.05,
+          "exit_code": 4,
+          "target_restored": true,
+          "usb_released": true,
+          "diagnostics": {
+            "implemented": true,
+            "frameDrops": 0,
+            "parserErrors": 422,
+            "idelayReadyLosses": 0,
+            "frameHighwater": 1,
+            "syncAcquisitions": 423,
+            "observedFrames": 9536,
+            "capacityReached": false,
+            "writerError": 0
+          },
+          "formatter_bytes": 152589,
+          "actual_window_seconds": 0.0500000005,
+          "passed": false,
+          "taps": [
+            0,
+            0,
+            0,
+            0,
+            8
+          ]
+        },
+        {
+          "name": "g3-tap2-short",
+          "r": null,
+          "trace_nominal_hz": null,
+          "gpio_speed": 3,
+          "planned_seconds": 0.05,
+          "exit_code": 4,
+          "target_restored": true,
+          "usb_released": true,
+          "diagnostics": {
+            "implemented": true,
+            "frameDrops": 0,
+            "parserErrors": 467,
+            "idelayReadyLosses": 0,
+            "frameHighwater": 1,
+            "syncAcquisitions": 468,
+            "observedFrames": 9436,
+            "capacityReached": false,
+            "writerError": 0
+          },
+          "formatter_bytes": 150976,
+          "actual_window_seconds": 0.0500000005,
+          "passed": false,
+          "taps": [
+            8,
+            8,
+            8,
+            8,
+            0
+          ]
+        },
+        {
+          "name": "g3-tap3-short",
+          "r": null,
+          "trace_nominal_hz": null,
+          "gpio_speed": 3,
+          "planned_seconds": 0.05,
+          "exit_code": 4,
+          "target_restored": true,
+          "usb_released": true,
+          "diagnostics": {
+            "implemented": true,
+            "frameDrops": 0,
+            "parserErrors": 430,
+            "idelayReadyLosses": 0,
+            "frameHighwater": 1,
+            "syncAcquisitions": 431,
+            "observedFrames": 9722,
+            "capacityReached": false,
+            "writerError": 0
+          },
+          "formatter_bytes": 155564,
+          "actual_window_seconds": 0.0500000005,
+          "passed": false,
+          "taps": [
+            0,
+            0,
+            0,
+            0,
+            16
+          ]
+        },
+        {
+          "name": "g3-tap4-short",
+          "r": null,
+          "trace_nominal_hz": null,
+          "gpio_speed": 3,
+          "planned_seconds": 0.05,
+          "exit_code": 4,
+          "target_restored": true,
+          "usb_released": true,
+          "diagnostics": {
+            "implemented": true,
+            "frameDrops": 0,
+            "parserErrors": 456,
+            "idelayReadyLosses": 0,
+            "frameHighwater": 1,
+            "syncAcquisitions": 457,
+            "observedFrames": 9349,
+            "capacityReached": false,
+            "writerError": 0
+          },
+          "formatter_bytes": 149597,
+          "actual_window_seconds": 0.0500000005,
+          "passed": false,
+          "taps": [
+            16,
+            16,
+            16,
+            16,
+            0
+          ]
+        },
+        {
+          "name": "g3-tap5-short",
+          "r": null,
+          "trace_nominal_hz": null,
+          "gpio_speed": 3,
+          "planned_seconds": 0.05,
+          "exit_code": 4,
+          "target_restored": true,
+          "usb_released": true,
+          "diagnostics": {
+            "implemented": true,
+            "frameDrops": 0,
+            "parserErrors": 17,
+            "idelayReadyLosses": 0,
+            "frameHighwater": 1,
+            "syncAcquisitions": 18,
+            "observedFrames": 8368,
+            "capacityReached": false,
+            "writerError": 0
+          },
+          "formatter_bytes": 133900,
+          "actual_window_seconds": 0.0500000005,
+          "passed": false,
+          "taps": [
+            12,
+            18,
+            6,
+            4,
+            16
+          ]
+        }
+      ],
+      "restored": true,
+      "cpu_nominal_hz": 64000000,
+      "pll1_vco_nominal_hz": 640000000,
+      "initial_taps": {
+        "enabled": false,
+        "taps": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "busy": false,
+        "ready": true,
+        "loaded": true,
+        "fault": false,
+        "rejectedSticky": false,
+        "accepted": 17,
+        "rejected": 0,
+        "loadFailures": 0,
+        "raw": [
+          1162626097,
+          0,
+          12,
+          17,
+          0,
+          0
+        ]
+      },
+      "initial_clock": {
+        "name": "STM32H743/H742/H750/H753",
+        "cpuid": "0x411fc271",
+        "device": "0x20036450",
+        "registers": {
+          "0x58024400": "0x4025",
+          "0x58024410": "0x0",
+          "0x58024418": "0x0",
+          "0x5802441c": "0x0",
+          "0x58024420": "0x0",
+          "0x58024428": "0x2020200",
+          "0x5802442c": "0x1ff0000",
+          "0x58024430": "0x1010280",
+          "0x58024434": "0x0",
+          "0x58024438": "0x1010280",
+          "0x52002000": "0x37"
+        }
+      },
+      "saved": {
+        "0x58024400": "0x4025",
+        "0x58024410": "0x0",
+        "0x58024428": "0x2020200",
+        "0x5802442c": "0x1ff0000",
+        "0x58024430": "0x1010280",
+        "0x58024434": "0x0"
+      },
+      "initial_halted": false,
+      "tap_settings": [
+        {
+          "enabled": false,
+          "taps": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "busy": false,
+          "ready": true,
+          "loaded": true,
+          "fault": false,
+          "rejectedSticky": false,
+          "accepted": 18,
+          "rejected": 0,
+          "loadFailures": 0,
+          "raw": [
+            1162626097,
+            0,
+            12,
+            18,
+            0,
+            0
+          ]
+        },
+        {
+          "enabled": true,
+          "taps": [
+            0,
+            0,
+            0,
+            0,
+            8
+          ],
+          "busy": false,
+          "ready": true,
+          "loaded": true,
+          "fault": false,
+          "rejectedSticky": false,
+          "accepted": 19,
+          "rejected": 0,
+          "loadFailures": 0,
+          "raw": [
+            1162626097,
+            41943040,
+            13,
+            19,
+            0,
+            0
+          ]
+        },
+        {
+          "enabled": true,
+          "taps": [
+            8,
+            8,
+            8,
+            8,
+            0
+          ],
+          "busy": false,
+          "ready": true,
+          "loaded": true,
+          "fault": false,
+          "rejectedSticky": false,
+          "accepted": 20,
+          "rejected": 0,
+          "loadFailures": 0,
+          "raw": [
+            1162626097,
+            33825032,
+            13,
+            20,
+            0,
+            0
+          ]
+        },
+        {
+          "enabled": true,
+          "taps": [
+            0,
+            0,
+            0,
+            0,
+            16
+          ],
+          "busy": false,
+          "ready": true,
+          "loaded": true,
+          "fault": false,
+          "rejectedSticky": false,
+          "accepted": 21,
+          "rejected": 0,
+          "loadFailures": 0,
+          "raw": [
+            1162626097,
+            50331648,
+            13,
+            21,
+            0,
+            0
+          ]
+        },
+        {
+          "enabled": true,
+          "taps": [
+            16,
+            16,
+            16,
+            16,
+            0
+          ],
+          "busy": false,
+          "ready": true,
+          "loaded": true,
+          "fault": false,
+          "rejectedSticky": false,
+          "accepted": 22,
+          "rejected": 0,
+          "loadFailures": 0,
+          "raw": [
+            1162626097,
+            34095632,
+            13,
+            22,
+            0,
+            0
+          ]
+        },
+        {
+          "enabled": true,
+          "taps": [
+            12,
+            18,
+            6,
+            4,
+            16
+          ],
+          "busy": false,
+          "ready": true,
+          "loaded": true,
+          "fault": false,
+          "rejectedSticky": false,
+          "accepted": 23,
+          "rejected": 0,
+          "loadFailures": 0,
+          "raw": [
+            1162626097,
+            50469452,
+            13,
+            23,
+            0,
+            0
+          ]
+        }
+      ],
+      "final_taps": {
+        "enabled": false,
+        "taps": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "busy": false,
+        "ready": true,
+        "loaded": true,
+        "fault": false,
+        "rejectedSticky": false,
+        "accepted": 24,
+        "rejected": 0,
+        "loadFailures": 0,
+        "raw": [
+          1162626097,
+          0,
+          12,
+          24,
+          0,
+          0
+        ]
+      },
+      "final_clock": {
+        "name": "STM32H743/H742/H750/H753",
+        "cpuid": "0x411fc271",
+        "device": "0x20036450",
+        "registers": {
+          "0x58024400": "0x4025",
+          "0x58024410": "0x0",
+          "0x58024418": "0x0",
+          "0x5802441c": "0x0",
+          "0x58024420": "0x0",
+          "0x58024428": "0x2020200",
+          "0x5802442c": "0x1ff0000",
+          "0x58024430": "0x1010280",
+          "0x58024434": "0x0",
+          "0x58024438": "0x1010280",
+          "0x52002000": "0x37"
+        }
+      },
+      "final_halted": false
+    }
+  },
+  "final_probe_status": {
+    "PS_IDCODE": "0x23727093",
+    "LEVEL_SHIFTERS": "0xf",
+    "FPGA_RESET": "0x0",
+    "BOOT_MODE": "0x0",
+    "CAPTURE": "0xe",
+    "SWD": "0x2",
+    "JQUEUE": "0x14",
+    "SQUEUE": "0x38",
+    "AUX": "0x0",
+    "AUXFLAGS": "0x0",
+    "PACKET": "0x0",
+    "DDR": "0x6",
+    "CDMA_BASE": "0x40020000",
+    "CDMA": "0x1002"
+  },
+  "final_streams": {
+    "rtt": 65536,
+    "hss": 20
+  },
+  "target_flash_writes": false,
+  "probe_qspi_writes": false
+}
