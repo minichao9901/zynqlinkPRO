@@ -32,3 +32,20 @@ PS 曾允许整个 H743 AXI SRAM，PL JTAG 队列的 AXI SRAM 窗口为 `0x24050
 修正后，越界页请求在启动队列前返回 ZLK 参数错误。JTAG 50 MHz、tap16/slot28/idle33、目标 HCLK60 的 DTCM 双向 4,032 B 独立读回通过，RTT UP 257 B、DOWN 14 B 环绕通过。按公开 CLI 重新连接后，独立单变量和八变量采样各 3,001 组，均为零跳拍和零读错误。RTT/HSS 并发短窗中收到 1,757,184 B 和 751 组，载荷序列正确、零跳拍，夹具恢复通过。
 
 [结构化证据](baseline-evidence.json)
+
+## 最终 RAW4 配对功能清单
+
+| 功能 | 同一配对的实板结果 |
+|---|---|
+| SWD/JTAG SRAM | 实际连线时钟 49,999,999 Hz；SWD AXI SRAM、JTAG DTCM 各 4,032 B 双向通过，低速 DAP 独立核对。JTAG 越界返回参数错误，随后传输正常。 |
+| SWD/JTAG RTT | 两条链路 UP 257 B、DOWN 14 B 跨环，逐字节通过。 |
+| SWD/JTAG J-Scope | 1 k 组/s 一变量／八变量，SWD 为 3,001／3,001 组，JTAG 为 3,021／3,001 组。值、序号与 STOP 计数一致，零跳拍。 |
+| SWD/JTAG 并发 | 250 组/s 八变量，SWD 752 组、RTT 2,121,728 B；JTAG 751 组、RTT 1,775,616 B。均零跳拍，取流尾部和原始序列一致，EP8 未读时 EP5 仍有响应。 |
+| COM 双向 | COM34 TX 115,200 baud，H743 PA15 独立接收 256 B。RX 250,000 baud，H743 PB3 独立发送 73,728 B。全量一致，零帧错误。 |
+| SWO | 标准 IF0 EP2，NRZ 250 kbaud 和 Manchester 500 kbit/s，两档分别逐字节匹配 73,728 B，无待收数据和诊断错误。 |
+| SPI 主机 | 配置 SCK 100 MHz，四模式各通过独立 15 MHz 和 30 MHz MISO PWM 的边沿间隔与样本长度检查。100 MHz 四模式全双工 1/5/4,096 B 通过 RTL 模型。四模式双向独立实板对拍尚需高速 SPI 从机夹具。 |
+| ETM | H743 20 MHz TRACECLK，EP9 连续采集和严格解码 12/12。 |
+
+在旧 ETM400 加地址保护的配对上，如果沿用同一个已执行原生内存和 RTT 的低速 JTAG DAP 会话，HSS 首次启动返回 `-7`。按独立 CLI 的连接流程重新连接后复验通过。最终配对的功能验收也使用该流程，直接跨服务的长寿命 DAP 会话继续跟踪。
+
+临时 SRAM、GPIO、定时器、目标时钟和核心状态均有恢复回执。JTAG 验收可用 `python -X utf8 tools/verify_selectio_usb_split_h743.py --transport jtag --execute --seconds 3 --out build/h743-raw4-jtag-new` 复测，SWD 将 transport 改为 `swd`。 [功能计数与哈希](raw4-functional-evidence.json)

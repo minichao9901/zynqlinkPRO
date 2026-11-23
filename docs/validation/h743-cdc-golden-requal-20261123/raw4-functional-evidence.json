@@ -1,0 +1,819 @@
+{
+  "loaded": {
+    "probe.bit": "9b8a3d9215c81dfa5fd0f756b7a11ff7d458acc82610f107cf4adf20ea39c6cc",
+    "application.elf": "1379081a1caa1868fcb129686b74ce6a58825e9176a1921bcc42a1041f70ac49",
+    "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+  },
+  "swd": {
+    "transport": "swd",
+    "requested_hz": 50000000,
+    "tap": 8,
+    "slot": 24,
+    "idle": 4,
+    "target": {
+      "name": "STM32H743/H742/H750/H753",
+      "cpuid": "0x411fc271",
+      "device": "0x20036450",
+      "registers": {
+        "0x58024400": "0x3303c025",
+        "0x58024410": "0x1b",
+        "0x58024418": "0x40",
+        "0x5802441c": "0x440",
+        "0x58024420": "0x50",
+        "0x58024428": "0x1920052",
+        "0x5802442c": "0x1ff0309",
+        "0x58024430": "0xb010e5f",
+        "0x58024434": "0x0",
+        "0x58024438": "0x1010280",
+        "0x52002000": "0x32"
+      }
+    },
+    "usb": {
+      "vid": "0d28",
+      "pid": "0204",
+      "serial": "12345678",
+      "bcdDevice": "0x0202",
+      "configuration": 1,
+      "interfaces": [
+        {
+          "number": 0,
+          "alternate": 0,
+          "usb_class": 255,
+          "subclass": 0,
+          "protocol": 0,
+          "endpoints": [
+            {
+              "address": "0x01",
+              "attributes": 2,
+              "max_packet_bytes": 512
+            },
+            {
+              "address": "0x81",
+              "attributes": 2,
+              "max_packet_bytes": 512
+            },
+            {
+              "address": "0x82",
+              "attributes": 2,
+              "max_packet_bytes": 512
+            }
+          ]
+        },
+        {
+          "number": 1,
+          "alternate": 0,
+          "usb_class": 2,
+          "subclass": 2,
+          "protocol": 1,
+          "endpoints": [
+            {
+              "address": "0x83",
+              "attributes": 3,
+              "max_packet_bytes": 64
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "alternate": 0,
+          "usb_class": 10,
+          "subclass": 0,
+          "protocol": 0,
+          "endpoints": [
+            {
+              "address": "0x04",
+              "attributes": 2,
+              "max_packet_bytes": 512
+            },
+            {
+              "address": "0x84",
+              "attributes": 2,
+              "max_packet_bytes": 512
+            }
+          ]
+        },
+        {
+          "number": 3,
+          "alternate": 0,
+          "usb_class": 255,
+          "subclass": 83,
+          "protocol": 2,
+          "endpoints": [
+            {
+              "address": "0x05",
+              "attributes": 2,
+              "max_packet_bytes": 512
+            },
+            {
+              "address": "0x85",
+              "attributes": 2,
+              "max_packet_bytes": 512
+            },
+            {
+              "address": "0x06",
+              "attributes": 2,
+              "max_packet_bytes": 512
+            },
+            {
+              "address": "0x86",
+              "attributes": 2,
+              "max_packet_bytes": 512
+            },
+            {
+              "address": "0x07",
+              "attributes": 2,
+              "max_packet_bytes": 512
+            },
+            {
+              "address": "0x87",
+              "attributes": 2,
+              "max_packet_bytes": 512
+            },
+            {
+              "address": "0x88",
+              "attributes": 2,
+              "max_packet_bytes": 512
+            },
+            {
+              "address": "0x89",
+              "attributes": 2,
+              "max_packet_bytes": 512
+            },
+            {
+              "address": "0x0a",
+              "attributes": 2,
+              "max_packet_bytes": 512
+            },
+            {
+              "address": "0x8a",
+              "attributes": 2,
+              "max_packet_bytes": 512
+            }
+          ]
+        }
+      ]
+    },
+    "memory": {
+      "address": "0x24043020",
+      "read_write_bytes": 4032,
+      "rtt_down": 14,
+      "clock": {
+        "wire_hz": 49999999,
+        "reference_hz": 199999996,
+        "divider": 4,
+        "timing": "0x11860",
+        "tap": 8,
+        "source": "PS clock tree and PL queue registers"
+      },
+      "invalid_axi_status": null
+    },
+    "rtt_up": {
+      "bytes": 257,
+      "sha256": "52e6c13ba6b22edca23bb19363f14d929a4ba891c2f35fd92b177fdeebfed5fb",
+      "stop": [
+        65536,
+        604242432,
+        604242456,
+        257,
+        131105,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        822084608
+      ]
+    },
+    "scope_single": {
+      "definition": {
+        "link_hz": 49999999,
+        "period_ticks": 24000,
+        "flags": 0,
+        "variables": [
+          {
+            "address": "0x24040800",
+            "size": 4,
+            "type": 4
+          }
+        ]
+      },
+      "packets": 275,
+      "groups": 3001,
+      "timeline_skips": 0,
+      "stat": {
+        "produced": 3001,
+        "skipped": 0,
+        "frame_count": 275,
+        "read_errors": 0
+      },
+      "requested_ticks": 24000,
+      "window_seconds": 3.000079600009485,
+      "host_groups_per_second": 1000.3067918566268,
+      "skipped_fraction": 0.0
+    },
+    "scope": {
+      "definition": {
+        "link_hz": 49999999,
+        "period_ticks": 24000,
+        "flags": 0,
+        "variables": [
+          {
+            "address": "0x24040800",
+            "size": 4,
+            "type": 4
+          },
+          {
+            "address": "0x24040804",
+            "size": 4,
+            "type": 4
+          },
+          {
+            "address": "0x24040808",
+            "size": 4,
+            "type": 4
+          },
+          {
+            "address": "0x2404080c",
+            "size": 4,
+            "type": 4
+          },
+          {
+            "address": "0x24040810",
+            "size": 4,
+            "type": 4
+          },
+          {
+            "address": "0x24040814",
+            "size": 4,
+            "type": 4
+          },
+          {
+            "address": "0x24040818",
+            "size": 4,
+            "type": 4
+          },
+          {
+            "address": "0x2404081c",
+            "size": 4,
+            "type": 4
+          }
+        ]
+      },
+      "packets": 275,
+      "groups": 3001,
+      "timeline_skips": 0,
+      "stat": {
+        "produced": 3001,
+        "skipped": 0,
+        "frame_count": 275,
+        "read_errors": 0
+      },
+      "requested_ticks": 24000,
+      "window_seconds": 3.0000213000021176,
+      "host_groups_per_second": 1000.326231016387,
+      "skipped_fraction": 0.0
+    },
+    "combo": {
+      "bytes": 2121728,
+      "groups": 752,
+      "skipped": 0,
+      "sample_hz": 250,
+      "skipped_fraction": 0.0,
+      "duration_seconds": 3.009633000008762,
+      "control_while_scope_unread": true,
+      "stop": [
+        0,
+        0,
+        96000,
+        2121728,
+        2121728,
+        752,
+        752,
+        0
+      ]
+    },
+    "passed": true,
+    "restored": true
+  },
+  "jtag": {
+    "transport": "jtag",
+    "requested_hz": 50000000,
+    "tap": 16,
+    "slot": 28,
+    "idle": 33,
+    "target": {
+      "name": "STM32H743/H742/H750/H753",
+      "cpuid": "0x411fc271",
+      "device": "0x20036450",
+      "registers": {
+        "0x58024400": "0x3303c025",
+        "0x58024410": "0x1b",
+        "0x58024418": "0x40",
+        "0x5802441c": "0x440",
+        "0x58024420": "0x50",
+        "0x58024428": "0x1920052",
+        "0x5802442c": "0x1ff0309",
+        "0x58024430": "0xb010e5f",
+        "0x58024434": "0x0",
+        "0x58024438": "0x1010280",
+        "0x52002000": "0x32"
+      }
+    },
+    "usb": {
+      "vid": "0d28",
+      "pid": "0204",
+      "serial": "12345678",
+      "bcdDevice": "0x0202",
+      "configuration": 1,
+      "interfaces": [
+        {
+          "number": 0,
+          "alternate": 0,
+          "usb_class": 255,
+          "subclass": 0,
+          "protocol": 0,
+          "endpoints": [
+            {
+              "address": "0x01",
+              "attributes": 2,
+              "max_packet_bytes": 512
+            },
+            {
+              "address": "0x81",
+              "attributes": 2,
+              "max_packet_bytes": 512
+            },
+            {
+              "address": "0x82",
+              "attributes": 2,
+              "max_packet_bytes": 512
+            }
+          ]
+        },
+        {
+          "number": 1,
+          "alternate": 0,
+          "usb_class": 2,
+          "subclass": 2,
+          "protocol": 1,
+          "endpoints": [
+            {
+              "address": "0x83",
+              "attributes": 3,
+              "max_packet_bytes": 64
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "alternate": 0,
+          "usb_class": 10,
+          "subclass": 0,
+          "protocol": 0,
+          "endpoints": [
+            {
+              "address": "0x04",
+              "attributes": 2,
+              "max_packet_bytes": 512
+            },
+            {
+              "address": "0x84",
+              "attributes": 2,
+              "max_packet_bytes": 512
+            }
+          ]
+        },
+        {
+          "number": 3,
+          "alternate": 0,
+          "usb_class": 255,
+          "subclass": 83,
+          "protocol": 2,
+          "endpoints": [
+            {
+              "address": "0x05",
+              "attributes": 2,
+              "max_packet_bytes": 512
+            },
+            {
+              "address": "0x85",
+              "attributes": 2,
+              "max_packet_bytes": 512
+            },
+            {
+              "address": "0x06",
+              "attributes": 2,
+              "max_packet_bytes": 512
+            },
+            {
+              "address": "0x86",
+              "attributes": 2,
+              "max_packet_bytes": 512
+            },
+            {
+              "address": "0x07",
+              "attributes": 2,
+              "max_packet_bytes": 512
+            },
+            {
+              "address": "0x87",
+              "attributes": 2,
+              "max_packet_bytes": 512
+            },
+            {
+              "address": "0x88",
+              "attributes": 2,
+              "max_packet_bytes": 512
+            },
+            {
+              "address": "0x89",
+              "attributes": 2,
+              "max_packet_bytes": 512
+            },
+            {
+              "address": "0x0a",
+              "attributes": 2,
+              "max_packet_bytes": 512
+            },
+            {
+              "address": "0x8a",
+              "attributes": 2,
+              "max_packet_bytes": 512
+            }
+          ]
+        }
+      ]
+    },
+    "memory": {
+      "address": "0x2000b020",
+      "read_write_bytes": 4032,
+      "rtt_down": 14,
+      "clock": {
+        "wire_hz": 49999999,
+        "reference_hz": 199999996,
+        "divider": 4,
+        "timing": "0x6084e4",
+        "tap": 16,
+        "source": "PS clock tree and PL queue registers"
+      },
+      "invalid_axi_status": 1
+    },
+    "rtt_up": {
+      "bytes": 257,
+      "sha256": "52e6c13ba6b22edca23bb19363f14d929a4ba891c2f35fd92b177fdeebfed5fb",
+      "stop": [
+        65536,
+        536904192,
+        536904216,
+        257,
+        131111,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        822084608
+      ]
+    },
+    "scope_single": {
+      "definition": {
+        "link_hz": 49999999,
+        "period_ticks": 24000,
+        "flags": 0,
+        "variables": [
+          {
+            "address": "0x20008800",
+            "size": 4,
+            "type": 4
+          }
+        ]
+      },
+      "packets": 277,
+      "groups": 3021,
+      "timeline_skips": 0,
+      "stat": {
+        "produced": 3021,
+        "skipped": 0,
+        "frame_count": 277,
+        "read_errors": 0
+      },
+      "requested_ticks": 24000,
+      "window_seconds": 3.0001410999975633,
+      "host_groups_per_second": 1006.9526396616658,
+      "skipped_fraction": 0.0
+    },
+    "scope": {
+      "definition": {
+        "link_hz": 49999999,
+        "period_ticks": 24000,
+        "flags": 0,
+        "variables": [
+          {
+            "address": "0x20008800",
+            "size": 4,
+            "type": 4
+          },
+          {
+            "address": "0x20008804",
+            "size": 4,
+            "type": 4
+          },
+          {
+            "address": "0x20008808",
+            "size": 4,
+            "type": 4
+          },
+          {
+            "address": "0x2000880c",
+            "size": 4,
+            "type": 4
+          },
+          {
+            "address": "0x20008810",
+            "size": 4,
+            "type": 4
+          },
+          {
+            "address": "0x20008814",
+            "size": 4,
+            "type": 4
+          },
+          {
+            "address": "0x20008818",
+            "size": 4,
+            "type": 4
+          },
+          {
+            "address": "0x2000881c",
+            "size": 4,
+            "type": 4
+          }
+        ]
+      },
+      "packets": 275,
+      "groups": 3001,
+      "timeline_skips": 0,
+      "stat": {
+        "produced": 3001,
+        "skipped": 0,
+        "frame_count": 275,
+        "read_errors": 0
+      },
+      "requested_ticks": 24000,
+      "window_seconds": 3.0001123000110965,
+      "host_groups_per_second": 1000.2958889201915,
+      "skipped_fraction": 0.0
+    },
+    "combo": {
+      "bytes": 1775616,
+      "groups": 751,
+      "skipped": 0,
+      "sample_hz": 250,
+      "skipped_fraction": 0.0,
+      "duration_seconds": 3.006563000002643,
+      "control_while_scope_unread": true,
+      "stop": [
+        0,
+        0,
+        96000,
+        1775616,
+        1775616,
+        751,
+        751,
+        0
+      ]
+    },
+    "passed": true,
+    "restored": true
+  },
+  "com_tx": {
+    "port": "COM34",
+    "physical": "J7 M15 -> H743 PA15",
+    "baud": 115200,
+    "state": 2,
+    "bytes": 256,
+    "errors": 0,
+    "expected_sha256": "459d0fb7f3bd3455c6c1fef1971408dabe430ee43760b178fa9b62407198173e",
+    "observed_sha256": "459d0fb7f3bd3455c6c1fef1971408dabe430ee43760b178fa9b62407198173e",
+    "passed": true,
+    "restored": true
+  },
+  "com_rx_swo": [
+    {
+      "source": "H743 GPIO PB3 over J7 L14",
+      "encoding": "uart",
+      "path": "cdc",
+      "requested_rate": 250000,
+      "symbols": 761856,
+      "restored": true,
+      "passed": true,
+      "negotiated_rate": 250000,
+      "status": {
+        "port": "COM34",
+        "drop": 0,
+        "errors": 0,
+        "pending": 0
+      },
+      "payload_bytes": 73728,
+      "source_count": 384,
+      "source_ticks": 182845450,
+      "source_done": "0x53574f44",
+      "sha256": "6808fe26e50e481e2faad4128947ac819a6dc59f3b1dd8718668158671ddfb7a",
+      "expected_sha256": "6808fe26e50e481e2faad4128947ac819a6dc59f3b1dd8718668158671ddfb7a",
+      "nominal_symbols_hz": 249999.9863272507
+    },
+    {
+      "source": "H743 GPIO PB3 over J7 L14",
+      "encoding": "uart",
+      "path": "if0",
+      "requested_rate": 250000,
+      "symbols": 761856,
+      "restored": true,
+      "passed": true,
+      "negotiated_rate": 250000,
+      "status": {
+        "status": 0,
+        "pending": 0,
+        "index": 73728,
+        "timestamp": 3088849264
+      },
+      "payload_bytes": 73728,
+      "source_count": 384,
+      "source_ticks": 182845454,
+      "source_done": "0x53574f44",
+      "sha256": "1207c64921ec453da466ae922458a96e78b5a7d847dfea0a75cf5623b497cec6",
+      "expected_sha256": "1207c64921ec453da466ae922458a96e78b5a7d847dfea0a75cf5623b497cec6",
+      "nominal_symbols_hz": 249999.9808581514
+    },
+    {
+      "source": "H743 GPIO PB3 over J7 L14",
+      "encoding": "manchester",
+      "path": "if0",
+      "requested_rate": 500000,
+      "symbols": 1296384,
+      "restored": true,
+      "passed": true,
+      "negotiated_rate": 500000,
+      "status": {
+        "status": 0,
+        "pending": 0,
+        "index": 73728,
+        "timestamp": 3338460250
+      },
+      "payload_bytes": 73728,
+      "source_count": 384,
+      "source_ticks": 77783076,
+      "source_done": "0x53574f44",
+      "sha256": "ed3e3f0f62fa95a8753e995f198d8bf78d5176197a0b64a849bc9af3c0a6fe9f",
+      "expected_sha256": "ed3e3f0f62fa95a8753e995f198d8bf78d5176197a0b64a849bc9af3c0a6fe9f",
+      "nominal_symbols_hz": 999999.5371743848
+    }
+  ],
+  "spi_miso": {
+    "modes": [
+      {
+        "pwm_nominal_hz": 15000000,
+        "spi_nominal_hz": 100000000,
+        "mode": 0,
+        "bytes": 3311616,
+        "low_run": 3,
+        "high_run": 4,
+        "hz_min": 15000915.806825813,
+        "hz_max": 15002747.755999267,
+        "passed": true,
+        "elapsed_s": 3.000867199996719
+      },
+      {
+        "pwm_nominal_hz": 15000000,
+        "spi_nominal_hz": 100000000,
+        "mode": 1,
+        "bytes": 3309568,
+        "low_run": 3,
+        "high_run": 4,
+        "hz_min": 15000915.806825813,
+        "hz_max": 15002747.755999267,
+        "passed": true,
+        "elapsed_s": 3.000491899991175
+      },
+      {
+        "pwm_nominal_hz": 15000000,
+        "spi_nominal_hz": 100000000,
+        "mode": 2,
+        "bytes": 3162112,
+        "low_run": 3,
+        "high_run": 4,
+        "hz_min": 15000915.806825813,
+        "hz_max": 15002747.755999267,
+        "passed": true,
+        "elapsed_s": 3.0011521999986144
+      },
+      {
+        "pwm_nominal_hz": 15000000,
+        "spi_nominal_hz": 100000000,
+        "mode": 3,
+        "bytes": 3293184,
+        "low_run": 3,
+        "high_run": 4,
+        "hz_min": 15000915.806825813,
+        "hz_max": 15002747.755999267,
+        "passed": true,
+        "elapsed_s": 3.0003857999981847
+      },
+      {
+        "pwm_nominal_hz": 30000000,
+        "spi_nominal_hz": 100000000,
+        "mode": 0,
+        "bytes": 3272704,
+        "low_run": 1,
+        "high_run": 2,
+        "hz_min": 30002441.70430961,
+        "hz_max": 30005493.834696617,
+        "passed": true,
+        "elapsed_s": 3.000141500000609
+      },
+      {
+        "pwm_nominal_hz": 30000000,
+        "spi_nominal_hz": 100000000,
+        "mode": 1,
+        "bytes": 3266560,
+        "low_run": 1,
+        "high_run": 2,
+        "hz_min": 30002441.70430961,
+        "hz_max": 30005493.834696617,
+        "passed": true,
+        "elapsed_s": 3.000289100004011
+      },
+      {
+        "pwm_nominal_hz": 30000000,
+        "spi_nominal_hz": 100000000,
+        "mode": 2,
+        "bytes": 3262464,
+        "low_run": 1,
+        "high_run": 2,
+        "hz_min": 30002441.70430961,
+        "hz_max": 30005493.834696617,
+        "passed": true,
+        "elapsed_s": 3.0002043999993475
+      },
+      {
+        "pwm_nominal_hz": 30000000,
+        "spi_nominal_hz": 100000000,
+        "mode": 3,
+        "bytes": 3215360,
+        "low_run": 1,
+        "high_run": 2,
+        "hz_min": 30002441.70430961,
+        "hz_max": 30005493.834696617,
+        "passed": true,
+        "elapsed_s": 3.001647099998081
+      }
+    ],
+    "restored": true,
+    "baseline": {
+      "gates": [
+        1,
+        0
+      ],
+      "gpio": {
+        "0": 4294966975,
+        "4": 0,
+        "8": 192,
+        "12": 256,
+        "32": 0
+      },
+      "timer": {
+        "0": 0,
+        "4": 0,
+        "8": 0,
+        "12": 0,
+        "16": 0,
+        "24": 0,
+        "32": 0,
+        "36": 0,
+        "40": 0,
+        "44": 4294967295,
+        "56": 0
+      },
+      "rcc": {
+        "0x58024400": "0x3303c025",
+        "0x58024410": "0x1b",
+        "0x58024418": "0x40",
+        "0x5802441c": "0x440",
+        "0x58024420": "0x50",
+        "0x58024428": "0x1920052",
+        "0x5802442c": "0x1ff0309",
+        "0x58024430": "0xb010e5f",
+        "0x58024434": "0x0",
+        "0x58024438": "0x1010280",
+        "0x52002000": "0x32"
+      }
+    }
+  },
+  "spi_master_model": "SPI_PASS CPOL/CPHA 0..3: full duplex 1, 5, 4096 bytes at 100 MHz",
+  "failed_predecessor_single_dap_connection": {
+    "error": "HSS action 1 failed: -7, (16777492, 49999999, 0, 0, 0, 0, 0, 0, 755031629, 0, 4294967289, 822238656)",
+    "restored": true
+  }
+}
