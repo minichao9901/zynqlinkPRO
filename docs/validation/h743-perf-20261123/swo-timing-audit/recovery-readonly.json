@@ -1,0 +1,158 @@
+{
+  "probe_after_cold_power": {
+    "operation": "check",
+    "dryRun": false,
+    "out": "E:\\zynqlinkPRO-efficiency\\build\\h743-400-20261123\\replug3-precheck",
+    "files": {
+      "bit": {
+        "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-spi-cdc-rx-guard-20261123\\probe.bit",
+        "sha256": "f3c4ccfd78c9148649897a0902fb93eadb209494e0295956981c973bbac92c66"
+      },
+      "zynq_elf": {
+        "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-spi-cdc-rx-guard-20261123\\application.elf",
+        "sha256": "e1f21ea8d5aa6403f4f2ab78da0a3215cea11862cb852dd9e37e413248068b90"
+      },
+      "ps_init": {
+        "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-spi-cdc-rx-guard-20261123\\ps7_init.tcl",
+        "sha256": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+      }
+    },
+    "stage": "complete",
+    "passed": true,
+    "streams": {},
+    "before": {
+      "PS_IDCODE": "0x23727093",
+      "LEVEL_SHIFTERS": "0x0",
+      "FPGA_RESET": "0x1f33f0f",
+      "BOOT_MODE": "0x0"
+    }
+  },
+  "probe_ram_load": {
+    "operation": "JTAG/RAM",
+    "dryRun": false,
+    "out": "E:\\zynqlinkPRO-efficiency\\build\\h743-400-20261123\\replug3-load",
+    "files": {
+      "bit": {
+        "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-spi-cdc-rx-guard-20261123\\probe.bit",
+        "sha256": "f3c4ccfd78c9148649897a0902fb93eadb209494e0295956981c973bbac92c66"
+      },
+      "zynq_elf": {
+        "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-spi-cdc-rx-guard-20261123\\application.elf",
+        "sha256": "e1f21ea8d5aa6403f4f2ab78da0a3215cea11862cb852dd9e37e413248068b90"
+      },
+      "ps_init": {
+        "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-spi-cdc-rx-guard-20261123\\ps7_init.tcl",
+        "sha256": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+      }
+    },
+    "commands": {
+      "load": [
+        "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "E:\\zynqlinkPRO-efficiency\\tools\\run_xsct.py",
+        "E:\\zynqlinkPRO-efficiency\\tools\\download_dap_fpga.tcl",
+        "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-spi-cdc-rx-guard-20261123\\application.elf",
+        "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-spi-cdc-rx-guard-20261123\\probe.bit",
+        "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-spi-cdc-rx-guard-20261123\\ps7_init.tcl",
+        "--sdk",
+        "E:\\Xilinx\\SDK\\2018.3"
+      ],
+      "verify": [
+        "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "E:\\zynqlinkPRO-efficiency\\tools\\verify_probe_ocm_code.py",
+        "--elf",
+        "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-spi-cdc-rx-guard-20261123\\application.elf",
+        "--out-dir",
+        "E:\\zynqlinkPRO-efficiency\\build\\h743-400-20261123\\replug3-load\\ocm",
+        "--sdk",
+        "E:\\Xilinx\\SDK\\2018.3"
+      ]
+    },
+    "stage": "complete",
+    "passed": true,
+    "streams": {},
+    "before": {
+      "PS_IDCODE": "0x23727093",
+      "LEVEL_SHIFTERS": "0x0",
+      "FPGA_RESET": "0x1f33f0f",
+      "BOOT_MODE": "0x0"
+    },
+    "verifiedBytes": 80260,
+    "FCLK_Hz": 133333332
+  },
+  "target_readonly": {
+    "target_memory_writes": false,
+    "verified_running": true,
+    "dpidr": "0501017724a06b",
+    "regs": {
+      "cpuid": "0x411fc271",
+      "dhcsr": "0x2010000",
+      "demcr": "0x0",
+      "rcc_cr": "0x4025",
+      "cfgr": "0x0",
+      "d1cfgr": "0x0",
+      "d2cfgr": "0x0",
+      "d3cfgr": "0x0",
+      "gpio_clock_gate": "0x0"
+    },
+    "dbg_id": "0x20036450",
+    "dbg_cr": "0x0",
+    "verified_flash_bytes": 7740,
+    "target_elf_sha256": "a9ba8d95d39c6a7af757224dfe2703d8a2c29afde8e1618c3b3814699154c7db",
+    "counters": {
+      "g_ticks": [
+        1355972,
+        1357497
+      ],
+      "g_loops": [
+        447801,
+        448307
+      ]
+    },
+    "hsiclk64_confirmed_by_registers": true
+  },
+  "probe_final_idle": {
+    "operation": "check",
+    "dryRun": false,
+    "out": "E:\\zynqlinkPRO-efficiency\\build\\h743-400-20261123\\replug3-final-idle",
+    "files": {
+      "bit": {
+        "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-spi-cdc-rx-guard-20261123\\probe.bit",
+        "sha256": "f3c4ccfd78c9148649897a0902fb93eadb209494e0295956981c973bbac92c66"
+      },
+      "zynq_elf": {
+        "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-spi-cdc-rx-guard-20261123\\application.elf",
+        "sha256": "e1f21ea8d5aa6403f4f2ab78da0a3215cea11862cb852dd9e37e413248068b90"
+      },
+      "ps_init": {
+        "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-spi-cdc-rx-guard-20261123\\ps7_init.tcl",
+        "sha256": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+      }
+    },
+    "stage": "complete",
+    "passed": true,
+    "streams": {
+      "rtt": 65536,
+      "hss": 20
+    },
+    "before": {
+      "PS_IDCODE": "0x23727093",
+      "LEVEL_SHIFTERS": "0xf",
+      "FPGA_RESET": "0x0",
+      "BOOT_MODE": "0x0",
+      "CAPTURE": "0x8",
+      "SWD": "0x2",
+      "JQUEUE": "0x14",
+      "SQUEUE": "0x38",
+      "AUX": "0x0",
+      "AUXFLAGS": "0x0",
+      "PACKET": "0x0",
+      "DDR": "0x0",
+      "CDMA_BASE": "0x40020000",
+      "CDMA": "0x1002"
+    }
+  }
+}

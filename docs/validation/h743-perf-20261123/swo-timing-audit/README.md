@@ -25,3 +25,7 @@ ST DS12110 Rev 11 表 206 对 H743 rev. V 给出 2.7–3.6 V 条件下额定 TCK
 ## H743 原生码源与现场恢复
 
 冷上电后由 HS3 重新临时加载融合配对，物理 OCM 80,260 B 核对通过。目标保持 HSI。经 AP2 能读到 `DBGMCU_ID=0x20036450`，打开调试时钟后 SWO 的 PIDR0 为 `0x14`、LSR 为 `0`。第一次读取 `SWO_CODR` 在 `0xe00e3010` 返回 WAIT。没有编程分频器或发送 ITM 载荷。随后调试时钟门回写未能确认。`CPUID` 和 HSI 配置曾在 SWD 上恢复可读，后续只读核对又未完成。J7 端采集、RTT/HSS、DDR 与调试队列均空闲。目标 Flash 和探针 QSPI 无写入。H743 完整现场恢复仍待再次上电后的只读核对。 [实板寄存器和恢复状态](evidence.json)
+
+## 后续冷上电恢复确认
+
+用户再次断电重上电，排线原样。J7 初始为 JTAG 启动且 PL 处于复位，经 HS3 临时加载同一融合配对，物理 OCM 80,260 B 相符。H743 经 SWD 只读核对原 Flash 的 7,740 B 装载段，`g_ticks` 和 `g_loops` 均前进，RCC 回到 HSI 64 MHz，AP2 `DBGMCU_CR=0`，`DEMCR` 和 AHB4 GPIO 时钟门为零。J7 探针回到空闲。恢复核对未访问 SWO 分频寄存器。 [冷上电恢复证据](recovery-readonly.json)
