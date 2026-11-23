@@ -75,9 +75,10 @@ def zynq_status():
         for cfg in device:
             for intf in cfg:
                 endpoints.extend(ep.bEndpointAddress for ep in intf)
-        if 0x82 not in endpoints:
-            return {'ok': False, 'ready': False, 'message': '当前探针没有 ETM bulk-in 0x82（可能是 akaLinkPro）'}
-        return {'ok': True, 'ready': True, 'message': 'ZynqDAP 已连接，ETM bulk-in 0x82 存在'}
+        endpoint = 0x89 if device.bcdDevice>=0x0202 else 0x82
+        if endpoint not in endpoints:
+            return {'ok': False, 'ready': False, 'message': f'当前探针没有 ETM bulk-in {endpoint:#04x}'}
+        return {'ok': True, 'ready': True, 'message': f'ZynqDAP 已连接，ETM bulk-in {endpoint:#04x} 存在'}
     except Exception as error:
         return {'ready': False, 'message': str(error)}
 
@@ -256,7 +257,8 @@ def capture(argv):
         command += ['--flight','--ring-bytes',str(args.ring_bytes),'--trigger',args.trigger,
                     '--trigger-after',str(args.trigger_after),'--arm-timeout',str(args.arm_timeout),
                     '--trigger-file',str(trigger_file)]
-    completed = subprocess.run(command, cwd=str(REPO), text=True, capture_output=True)
+    completed = subprocess.run(command, cwd=str(REPO), encoding='utf-8', errors='replace', capture_output=True,
+                               env={**os.environ, 'PYTHONIOENCODING': 'utf-8'})
     if completed.returncode:
         detail = (completed.stderr or completed.stdout or '').strip()[-1200:]
         return fail('capture', '上板采集失败', 4, started, {'command': command, 'output': detail})

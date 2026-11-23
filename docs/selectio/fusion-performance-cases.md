@@ -1,5 +1,7 @@
 # J7 SelectIO 融合版精简性能用例
 
+本表使用 ABI 1 的历史配对与计时口径。独立端点 ABI 2 的 RTT 使用 EP7，H743 的定向验收、端点重连与结果见 [ABI 2 验收](../validation/usb-split-20261123/README.md)。本表的 RTT→CDC 成绩保留为历史对照。
+
 2026-11-23。基线为 `codex/selectio-efficiency` 的 [F103ZE 实测融合配对](../../prebuilt/selectio-variable-board-20261122/full/manifest.json)，由匹配的 bit、PS ELF 和 PS 初始化脚本组成。本表适用于融合版单镜像和 JTAG/RAM 临时加载。F103ZE 的 96/128 MHz 是 SRAM 夹具的临时实验 HCLK，额定上限为 72 MHz。测试前由 RCC 和 DWT 分别核对配置与实际 HCLK。 [ST 数据手册](https://www.st.com/resource/en/datasheet/stm32f103ze.pdf)
 
 ## 本轮选点

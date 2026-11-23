@@ -51,10 +51,11 @@
 
 #include "xusbps.h"
 #include "selectio_usb.h"
+#include "usb_pipes.h"
 #if DAP_SELECTIO
 #include "selectio_aux.h"
 #endif
-/* Application backpressure, scoped to CMSIS-DAP EP2. */
+/* Backpressure for CMSIS-DAP requests. */
 extern int chry_dap_rx_ready(void);
 extern volatile u32 dap_rx_deferred;
 #include "xusbps_endpoint.h"
@@ -337,10 +338,10 @@ static void XUsbPs_IntrHandleRX(XUsbPs *InstancePtr, u32 EpCompl)
 		/* Handle all finished dTDs */
         while (!XUsbPs_dTDIsActive(Ep->dTDCurr)) {
 #if DAP_SELECTIO
-            if (Index==1 && !selectio_usb_rx_available()) break;
+            if (!selectio_usb_rx_available(Index)) break;
             if (Index==4 && !selectio_cdc_space()) break;
 #endif
-            if (Index==2 && !chry_dap_rx_ready()) {
+            if (Index==USB_DAP_OUT && !chry_dap_rx_ready()) {
                 dap_rx_deferred=1;
                 break; // Leave this completed descriptor pending; do not recycle it.
             }
@@ -479,10 +480,10 @@ static void XUsbPs_IntrHandleEp0Setup(XUsbPs *InstancePtr)
 
 /** @} */
 
-/* Resume a deferred EP2 list from the main loop with IRQs masked. */
-void XUsbPs_DapResumeRx(XUsbPs *instance) { XUsbPs_IntrHandleRX(instance,1U<<2); }
+/* Resume a deferred OUT list with IRQs masked. */
+void XUsbPs_DapResumeRx(XUsbPs *instance) { XUsbPs_IntrHandleRX(instance,1U<<USB_DAP_OUT); }
 
 #if DAP_SELECTIO
 void selectio_cdc_resume_rx(XUsbPs *usb) { XUsbPs_IntrHandleRX(usb,1U<<4); }
-void selectio_usb_resume_rx(XUsbPs *usb) { XUsbPs_IntrHandleRX(usb,1U<<1); }
+void selectio_usb_resume_rx(XUsbPs *usb,unsigned ep) { XUsbPs_IntrHandleRX(usb,1U<<ep); }
 #endif

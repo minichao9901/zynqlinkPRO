@@ -9,7 +9,7 @@ import time
 
 import usb.util
 from dap_pipeline_bench import cmd, open_dap, setup
-from selectio_native import native_connection
+from selectio_native import native_connection, sram_range
 
 
 PAGE = 0x20008000
@@ -83,7 +83,7 @@ def rtt_terminal(args):
     with connection(args.serial) as (tx,rx),native_connection(args.serial,tx.device) as native:
         native.info();setup(tx,rx,1000,args.transport)
         try:
-            with native.memory(PORTS[args.transport],args.tap,args.slot,args.idle,args.clock):
+            with native.memory(PORTS[args.transport],args.tap,args.slot,args.idle,args.clock,rtt=True):
                 down=Ring(native,args.address,args.channel,True)
                 if args.action=="rtt-terminal":
                     up=Ring(native,args.address,args.up_channel,False)
@@ -135,9 +135,14 @@ def standard_swo(args):
         while time.perf_counter()<end:
             received+=sink.write(source.pull())
         source.stop()
-        while data:=source.pull():
-            received+=sink.write(data)
-        state=source.status()
+        drain_end=time.monotonic()+3
+        while True:
+            received+=sink.write(source.pull())
+            state=source.status()
+            if not state["pending"] and state["index"]==received&0xffffffff:
+                break
+            if time.monotonic()>=drain_end or state["status"]&0xc0:
+                break
         if state["status"] or state["pending"] or state["index"]!=received&0xffffffff:
             raise RuntimeError(f"CMSIS-DAP SWO tail differs: {state}, received={received}")
         print(json.dumps(dict(encoding=args.encoding,baud=source.rate,received=received,**state),indent=2))
@@ -168,6 +173,8 @@ def auxiliary(args):
         target=f103_swo(args.serial,args.encoding,args.rate,args.itm_mask)
     with target as enable_itm, native_connection(args.serial,enable_itm.device if enable_itm else None) as native, capture_path.open("xb") as sink:
         info=native.info()
+        if native.split and not spi:
+            raise ValueError("use the physical COM port or standard CMSIS-DAP SWO on the split-endpoint firmware")
         if not int(info["features"],16)&0x200: raise RuntimeError("the running PL does not contain the AUX engine")
         config=struct.pack("<BBBBIB",codec,int(bool(tx_data) and not spi),getattr(args,"mode",0),
                            getattr(args,"slot",getattr(args,"phase",0)),100000000 if spi else args.rate,args.tap)
@@ -225,9 +232,9 @@ def capture_combo(args):
         active=False
         def pull():
             nonlocal received,samples
-            payload=native.exchange(6,1);rtt.write(payload);received+=len(payload)
+            payload,values=native.pull_combo(not rtt_only)
+            rtt.write(payload);received+=len(payload)
             if rtt_only:return len(payload)
-            values=native.exchange(6,2)
             if len(values)%layout.size: raise RuntimeError("partial sample group")
             writer.writerows(layout.iter_unpack(values));samples+=len(values)//layout.size
             return len(payload)+len(values)
@@ -368,7 +375,7 @@ def main():
             sub.add_argument("--seconds",type=float,required=True)
         if action=="swo":
             sub.add_argument("--phase",type=int,choices=(0,1),default=0,help="100 Mbit/s native Manchester sample phase")
-            sub.add_argument("--usb-path",choices=("native","cmsis-dap"),default="native")
+            sub.add_argument("--usb-path",choices=("cmsis-dap","native"),default="cmsis-dap",help="standard SWO uses dedicated Bulk IN on split-endpoint firmware")
             sub.add_argument("--encoding",choices=["uart","manchester"],required=True)
             sub.add_argument("--configure-f103",action="store_true",help="configure and restore the CDC48 target ITM/TPIU")
             sub.add_argument("--itm-mask",type=number,default=1,help="ITM stimulus port bit mask for target setup")
@@ -429,7 +436,7 @@ def main():
             sub.add_argument("--period",type=number,required=True,help="sample period in 24 MHz timer ticks")
             sub.add_argument("--var",action="append",required=True,help="address:size:type")
     for action in ("read", "write"):
-        sub = commands.add_parser(action, help=f"{action} one block of aligned F103 SRAM")
+        sub = commands.add_parser(action, help=f"{action} aligned F103 SRAM or H743 AXI SRAM")
         sub.add_argument("--clock",type=selectio_clock_number,default=100000000)
         sub.add_argument("--transport", required=True, choices=PORTS)
         sub.add_argument("--address", type=number, default=PAGE)
@@ -526,8 +533,8 @@ def main():
         payload = args.file.read_bytes() if args.action == "write" else None
         size = len(payload) if payload is not None else args.bytes
         if (size <= 0 or size % 4 or args.address % 4 or
-                not 0x20000000 <= args.address < args.address+size <= 0x20010000):
-            parser.error("the F103 profile supports aligned words in its 64 KiB SRAM")
+            not sram_range(args.address,size)):
+            parser.error("address and size must be aligned within supported F103 SRAM or H743 AXI SRAM")
         if args.action == "read" and args.out.exists():
             parser.error("output file already exists")
         with connection(args.serial) as (tx, rx), native_connection(args.serial,tx.device) as native:

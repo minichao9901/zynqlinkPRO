@@ -1,0 +1,137 @@
+{
+  "artifacts": {
+    "git_head": "64622f44c7246ebb6f283ee611d62c2b091ee35a",
+    "git_dirty": true,
+    "bit": {
+      "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-spi-cdc-rx-guard-20261123\\probe.bit",
+      "sha256": "f3c4ccfd78c9148649897a0902fb93eadb209494e0295956981c973bbac92c66"
+    },
+    "elf": {
+      "path": "E:\\zynqlinkPRO-efficiency\\build\\selectio-usb-split-ps-v5\\xusbps_daplink_dma.elf",
+      "sha256": "61267ceeb63c5b8192adaa23f253ed2f7ea53a8c6fbddd8cecc3a45ca2e599eb"
+    }
+  },
+  "target_elf": "E:\\superlinkPRO\\web\\tools\\target-firmware\\stm32h743_dbgstress\\fw.elf",
+  "target_elf_sha256": "a9ba8d95d39c6a7af757224dfe2703d8a2c29afde8e1618c3b3814699154c7db",
+  "milliseconds": 50.0,
+  "hardware_full_test": false,
+  "periodic_sync": false,
+  "hclk_div": 1,
+  "raw_diagnostic": false,
+  "target_control": "openocd-wasm/mem-ap0",
+  "IDCODE": "6ba02477",
+  "control_clock": {
+    "fclk_hz": 133333332,
+    "cfg": "0x4ca01",
+    "SWCLK_Hz": 9523809.42857143,
+    "half_period_fclk": 7,
+    "short_high": false,
+    "intended_high_ns": 52.500000525000004
+  },
+  "cpuid": "0x411fc271",
+  "target_profile": "stm32h743",
+  "rcc_before": {
+    "name": "STM32H743/H742/H750/H753",
+    "cpuid": "0x411fc271",
+    "device": "0x20036450",
+    "registers": {
+      "0x58024400": "0x4025",
+      "0x58024410": "0x0",
+      "0x58024418": "0x0",
+      "0x5802441c": "0x0",
+      "0x58024420": "0x0",
+      "0x58024428": "0x2020200",
+      "0x5802442c": "0x1ff0000",
+      "0x58024430": "0x1010280",
+      "0x58024434": "0x0",
+      "0x58024438": "0x1010280",
+      "0x52002000": "0x37"
+    }
+  },
+  "flash": [
+    {
+      "address": 134217728,
+      "bytes": 7640,
+      "sha256": "50c49c7ebb2204d24268934fc17358ba96edd9ded2b336ab62557ce0c9dfc0eb"
+    },
+    {
+      "address": 134225368,
+      "bytes": 100,
+      "sha256": "74a23c86b9d29f2144fc42142de197c7f3950eb2c3ccf7c0962483ad14810a20"
+    }
+  ],
+  "transport": "ddr-usb",
+  "locks_before": {
+    "0xe0041000": "0x0",
+    "0x5c013000": "0x3",
+    "0x5c014000": "0x3",
+    "0x5c015000": "0x3"
+  },
+  "oslock_before": false,
+  "config": {
+    "protocol": "ETMv4",
+    "idr0": 134219489,
+    "idr1": 1090581505,
+    "idr2": 4,
+    "idr8": 1,
+    "idr9": 0,
+    "idr10": 0,
+    "idr11": 0,
+    "idr12": 1,
+    "idr13": 0,
+    "config": 4113,
+    "traceid": 2
+  },
+  "gpio_speed": 3,
+  "rcc_capture": {
+    "name": "STM32H743/H742/H750/H753",
+    "cpuid": "0x411fc271",
+    "device": "0x20036450",
+    "registers": {
+      "0x58024400": "0x4025",
+      "0x58024410": "0x0",
+      "0x58024418": "0x0",
+      "0x5802441c": "0x0",
+      "0x58024420": "0x0",
+      "0x58024428": "0x2020200",
+      "0x5802442c": "0x1ff0000",
+      "0x58024430": "0x1010280",
+      "0x58024434": "0x0",
+      "0x58024438": "0x1010280",
+      "0x52002000": "0x37"
+    }
+  },
+  "reference": [
+    199999998,
+    4196352,
+    196616,
+    769
+  ],
+  "capture_error": "RuntimeError('DDR hardware quality/window failed; raw data retained')",
+  "restored": true,
+  "oslock_restored": true,
+  "locks_restored": true,
+  "rcc_after": {
+    "name": "STM32H743/H742/H750/H753",
+    "cpuid": "0x411fc271",
+    "device": "0x20036450",
+    "registers": {
+      "0x58024400": "0x4025",
+      "0x58024410": "0x0",
+      "0x58024418": "0x0",
+      "0x5802441c": "0x0",
+      "0x58024420": "0x0",
+      "0x58024428": "0x2020200",
+      "0x5802442c": "0x1ff0000",
+      "0x58024430": "0x1010280",
+      "0x58024434": "0x0",
+      "0x58024438": "0x1010280",
+      "0x52002000": "0x37"
+    }
+  },
+  "rcc_configuration_unchanged": true,
+  "run_halt_restored": true,
+  "fpb_restored": true,
+  "error": "RuntimeError('DDR hardware quality/window failed; raw data retained')",
+  "usb_reader_errors": []
+}

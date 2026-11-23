@@ -25,7 +25,8 @@ static unsigned running,opened;
 static XTime origin,deadline,period,last_rtt,rtt_cost;
 static uint32_t get_u32(const uint8_t *p){uint32_t v;memcpy(&v,p,4);return v;}
 static int sram(uint32_t addr,uint32_t bytes) {
-    return bytes && addr>=0x20000000U && addr<0x20010000U && bytes<=0x20010000U-addr;
+    return bytes && ((addr>=0x20000000U && addr<0x20010000U && bytes<=0x20010000U-addr) ||
+                     (addr>=0x24000000U && addr<0x24080000U && bytes<=0x24080000U-addr));
 }
 static int read_words(uint32_t addr,unsigned words,void *data) {
     unsigned count;uint32_t details;

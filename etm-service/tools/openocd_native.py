@@ -29,8 +29,8 @@ class WasmMemory:
         self.process = None
         self.sequence = 0
         self.lock = threading.Lock()
-        if (out.bEndpointAddress, inp.bEndpointAddress) != (2, 0x81):
-            raise ValueError('Zynq DAP 端点须为 OUT2 / IN1')
+        if out.bEndpointAddress not in (1, 2) or inp.bEndpointAddress != 0x81:
+            raise ValueError('Zynq DAP 接口须提供已知的命令 OUT 和响应 IN')
 
     def _start(self):
         self.lines = Queue()
@@ -80,7 +80,7 @@ class WasmMemory:
         if method == 'open':
             return self.dev.get_active_configuration().bConfigurationValue
         if method == 'close':
-            return None  # The outer capture still owns the handle and EP2 IN.
+            return None  # The outer capture still owns the handle and trace IN.
         if method == 'configuration' and args == [1]:
             if self.dev.get_active_configuration().bConfigurationValue != 1:
                 raise ValueError('OpenOCD 不能切换采集 USB 配置')
@@ -92,7 +92,7 @@ class WasmMemory:
                 if error.backend_error_code != -9:  # Legacy firmware lacks the epoch request.
                     raise
             else:
-                reset_dap_session(self.dev)
+                reset_dap_session(self.dev, self.out.bEndpointAddress)
             return None
         if method == 'release' and args == [0]:
             return None
@@ -102,7 +102,7 @@ class WasmMemory:
                     setup['value'] >> 8 not in (1,2,3) or not 1 <= length <= 4096:
                 raise ValueError('只允许读取标准 USB 描述符')
             return bytes(self.dev.ctrl_transfer(0x80,6,setup['value'],setup['index'],length,timeout=2000)).hex()
-        if method == 'write' and args[0] == 2:
+        if method == 'write' and args[0] == self.out.bEndpointAddress:
             data = bytes.fromhex(args[1])
             written = self.out.write(data, timeout=2000)
             if written != len(data):

@@ -1,6 +1,7 @@
 """Byte-accurate RTT DOWN writes for a native MEM-AP session."""
 import time
 import struct
+from selectio_native import sram_range
 
 
 def read_bytes(native,address,size):
@@ -39,7 +40,7 @@ class Ring:
 
     def state(self):
         _,base,size,wr,rd,_=struct.unpack("<6I",read_bytes(self.native,self.desc,24))
-        if size<2 or not 0x20000000<=base<base+size<=0x20010000 or max(rd,wr)>=size:
+        if size<2 or not sram_range(base, size) or max(rd,wr)>=size:
             raise RuntimeError("invalid RTT ring or offsets")
         return base,size,wr,rd
 

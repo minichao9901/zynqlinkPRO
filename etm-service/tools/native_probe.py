@@ -34,12 +34,12 @@ def drain_dap_replies(device,quiet_ms=80,limit=32):
     raise ValueError('DAP队列未静默，拒绝把旧响应交给新会话')
 
 
-def reset_dap_session(device):
+def reset_dap_session(device, out_endpoint=2):
     """One acknowledged DAP-only epoch boundary, without resetting USB/target.
 
     Native ownership is exclusive before this call. A quiet host read alone
     cannot prove the device TX descriptor and software queues have retired.
-    Existing firmware EP0 0x5a rebuilds only EP1 IN / EP2 OUT and aborts DAP
+    Firmware EP0 0x5a rebuilds only the command/response pair and aborts DAP
     engines; it does not touch target Flash/RCC or the DDR trace endpoint.
     """
     def snapshot():
@@ -49,7 +49,7 @@ def reset_dap_session(device):
     before=snapshot()
     result=bytes(device.ctrl_transfer(0xc0,0x5a,0x4441,0x5052,4,timeout=2000))
     if result!=b'DAP\0':raise ValueError('DAP专用会话复位未确认；没有重放命令')
-    device.clear_halt(0x81);device.clear_halt(2)
+    device.clear_halt(0x81);device.clear_halt(out_endpoint)
     after=snapshot()
     if after[3]==before[3] or any(after[:3]):raise ValueError('DAP会话epoch或空闲队列未确认')
     return dict(syncProtocol='zynq-dap-epoch/1',queueEpoch=after[3],queueState=list(after[:3]))

@@ -37,25 +37,18 @@ JTAG 占用 TDI/TDO，SPI 切换时取得四根线的独占权。F103 的 PB3 �
 
 ## USB 接口分配
 
-同一 VID/PID 及序列号下保留现有 CMSIS-DAP、CDC 和控制 HID，另设一个厂商专用 WinUSB 接口。PC 读取序列号选择设备，COM 号由 Windows 分配。
+独立端点版保留标准 CMSIS-DAP、标准 SWO Bulk IN 和物理 CDC COM。原生 WinUSB 使用 IF3。控制、SRAM、RTT、J-Scope、ETM 和 SPI 分别使用 EP5–10。RTT 和 J-Scope 的 IN 队列独立，组合采集在同一个目标 AP 会话中调度。完整地址与 ABI 见 [原生 USB 协议](../selectio-native.md)。
 
-| 接口 | 端点（十六进制） | CLI 用途 |
-|---|---|---|
-| IF0，CMSIS-DAP v2 | `0x02` OUT、`0x81` IN；`0x87` IN；`0x82` IN | 标准调试命令和回复；HSS/J-Scope；并行 ETM 下载 |
-| IF1/2，CDC ACM | 85 通知、04 OUT、83 IN | 物理 8N1 串口、SPI 从机接收转发，或兼容 RTT 转发 |
-| IF3，HID | 06 OUT、86 IN | 主线探针控制与状态 |
-| IF4，WinUSB，FF/53/01 | 01 OUT、84 IN | 高速 SRAM、RTT、变量、SPI、UART/SWO 和并发流 |
-
-历史 RTT 上行可走 CDC。历史变量波形走专用 EP87，载荷是 HSS 帧。现在 RTT 和变量使用 IF4 的独立通道和队列。先绑定物理 CDC 并打开终端，再启动 SWD 的原生 RTT/变量采样；实板已同时核对这三个通道。当前配置的 IN 端点 1–7 均有用途；在 IF4 的 Bulk 对上按通道号分流，使 RTT、采样和其他原生数据共用带宽，每类数据仍有自己的消费指针。协议头包含长度、序号和状态；消费指针在对应 IN 完成后推进。内存读写可设队列深度 1–4。物理 SWO 可走 IF4，也可走标准 CMSIS-DAP 的 `SWO_Transport=1`，通过 `0x02` / `0x81` 轮询 `SWO_Data`。固件声明 UART 与 Manchester 能力、接收缓冲容量和测试域时间戳，`SWO_STREAM=0`。
-
-早期 akaLinkPro 的 HSS 借用了 CMSIS-DAP v2 预留给 SWO Streaming 的 `0x83`。ZynqLinkPRO 在同一个 IF0 接口上为 HSS 和 ETM 分配了各自的 Bulk IN。这里的 `0x83` 属于 IF2，负责 CDC 数据上行。[描述符与协议](../selectio-native.md) · [早期 HSS 设计](../../web/docs/scope-page.md)
+`selectio info` 输出实际枚举和 `dedicated_pipes`。新配对的 SWO 命令默认使用标准 CMSIS-DAP，物理 UART 通过 `selectio com bind` 和系统串口读写。旧报告中的 MI_04、HID、RTT→CDC 和 EP87 上的 HSS 属于各自历史配对。
 
 ## 识别、临时加载及调试
+
+独立端点版配对及 H743 验收入口见 [配对说明](../../prebuilt/selectio-usb-split-20261123/README.md)。临时加载后，以 `selectio info` 中的 ABI 和枚举为准。
 
 按本分支验收记录选择配对目录。`probe-load --pair` 按清单逐一核对 bit、Zynq ELF 和 PS 初始化 Tcl 的 SHA-256，在写入探针易失配置前检查占用，加载后核对 OCM。目标 MCU ELF 与探针 ELF 分开传入。
 
 ```powershell
-$pair = 'prebuilt/selectio-spi-cdc-rx-guard-20261123'
+$pair = 'prebuilt/selectio-usb-split-20261123'
 python -X utf8 toolbox.py probe-load --pair $pair --dry-run
 python -X utf8 toolbox.py probe-load --pair $pair --out build/my-load
 python -X utf8 toolbox.py selectio --serial 12345678 info
@@ -63,7 +56,7 @@ python -X utf8 toolbox.py selectio usb-test --seconds 60
 python -X utf8 toolbox.py selectio --help
 ```
 
-info 同时显示实际枚举的五个接口、各端点、PS 固件 ABI、队列深度、原生块头大小和 PL 特性字。link_hz 是由真实参考寄存器换算的高速模式线速。兼容 DAP 使用不超过 10 MHz 的初始化档，显式请求 100 MHz 切换到专用 PHY。
+info 同时显示实枚举接口、各端点、PS 固件 ABI、队列深度、原生块头大小和 PL 特性字。link_hz 是由真实参考寄存器换算的高速模式线速。兼容 DAP 使用不超过 10 MHz 的初始化档，显式请求 100 MHz 切换到专用 PHY。
 
 下例的时隙值用于通过验证的特定版次。更换 bit 后按对应 manifest 选择 tap/slot。tap 是 SWDIO 或 TDO 的输入 IDELAY 档位，slot 选择反串化后的采样位置，idle 设置事务所用的额外空闲钟数。变频融合版的 SWD/JTAG slot 在 50 和 100 MHz 档间隔约 2.5 ns，在 72.727 MHz 档间隔约 3.4375 ns。下表列出当前配对的起始配置。换档时同时更新时钟、tap、slot 和 idle。校准顺序见 [精简性能用例](fusion-performance-cases.md#case-表)。
 
@@ -160,19 +153,17 @@ python -X utf8 toolbox.py selectio com bind
 python -X utf8 toolbox.py selectio com status
 python -m serial.tools.miniterm COM43 115200
 python -X utf8 toolbox.py selectio com release
-python -X utf8 toolbox.py selectio uart --rate 115200 --hex 550d0a --seconds 2 --out uart.bin
 python -X utf8 toolbox.py selectio swo --encoding uart --rate 48000000 --configure-f103 --itm-mask 1 --seconds 2 --out itm-uart.bin
 python -X utf8 toolbox.py selectio swo --encoding manchester --rate 24000000 --configure-f103 --seconds 2 --out itm-manchester.bin
-python -X utf8 toolbox.py selectio swo --usb-path cmsis-dap --encoding uart --rate 48000000 --configure-f103 --seconds 2 --out standard-swo.bin
 python -X utf8 toolbox.py selectio swo --encoding manchester --rate 100000000 --seconds 2 --out external-manchester.bin
 python -X utf8 toolbox.py selectio spi --mode 0 --slot 22 --tap 0 --hex 9f000000 --out spi-rx.bin
 ```
 
-关闭串口终端后执行 release。F103 配置选项会保存并恢复 TPIU、ITM 和相关 GPIO 配置，要求该目标的实际 HCLK 和 TPIU 分频可产生请求码率。目标需要主动写 ITM 激励端口才会产生有效包。已配置的外部源可直接被动接收。Manchester 的 rate 表示信息位率，100 Mbit/s 对应 200 Msymbol/s。原生 Manchester 100 Mbit/s 可用 `--tap 0..31` 和 `--phase 0|1` 调整接收采样位置。SPI 固定 100 MHz、MSB first、模式 0–3，由一次命令在同一次 CS 低电平下交换 1–4,079 B，文件发送可用 `--file`。
+关闭串口终端后执行 release。F103 配置选项会保存并恢复 TPIU、ITM 和相关 GPIO 配置，要求该目标的实际 HCLK 和 TPIU 分频可产生请求码率。目标需要主动写 ITM 激励端口才会产生有效包。已配置的外部源可直接被动接收。Manchester 的 rate 表示信息位率，100 Mbit/s 对应 200 Msymbol/s。标准 SWO 使用固件默认采样设置。SPI 固定 100 MHz、MSB first、模式 0–3，由一次命令在同一次 CS 低电平下交换 1–4,079 B，文件发送可用 `--file`。
 
-### SPI 从机接收转发到 COM
+### 历史 ABI 1 的 SPI 从机接收转发
 
-外部 SPI 主机驱动 J7-29 SCK、J7-31 低有效 CS 和 J7-25 MOSI，并与探针共地。探针在监听时释放这三根线，按选择的 CPOL/CPHA 接收 MSB-first 字节。CDC 返回连续原始字节，片选结束时丢弃不足八位的尾字节并累计帧错误。桥接方向为 MOSI → COM，J7-27 保持输入，COM 写入不驱动 MISO。
+以下从机转发用例对应 [历史 CDC 配对](../../prebuilt/selectio-spi-cdc-rx-guard-20261123/README.md)。外部 SPI 主机驱动 J7-29 SCK、J7-31 低有效 CS 和 J7-25 MOSI，并与探针共地。探针在监听时释放这三根线，按选择的 CPOL/CPHA 接收 MSB-first 字节。CDC 返回连续原始字节，片选结束时丢弃不足八位的尾字节并累计帧错误。桥接方向为 MOSI → COM，J7-27 保持输入，COM 写入不驱动 MISO。
 
 先让主机保持 CS 为高，并在探针完成占用前保持三根信号高阻。执行绑定并打开同一探针的 COM，让终端置 DTR，然后用 `com status` 确认 `binding=spi-slave`、`claimed=1` 后开始打钟。测试结束先停外部主机，让三根信号进入高阻，确认 COM 收齐、`rx_available=0` 后关闭终端并释放。CDC 波特率参数只用于打开串口，实际 SCK 由外部主机给出。SPI 绑定独占复用引脚，与物理串口、RTT→CDC 和使用同一引脚的调试会话分时使用。
 
@@ -200,13 +191,13 @@ python -X utf8 tools/selectio_spi_cdc_test.py --serial 12345678 --mode 0 --tap 0
 | USB 枚举、时钟核对 | `info`，`usb-test --seconds`。按 USB 序列号选设备 |
 | SWD / JTAG 识别和标准命令 | `identify --transport --clock`，`profile --transport --tap --slot --idle`。先低速识别，空闲再换到高速 |
 | SRAM 原生块 | `read/write --address --clock --tap --slot --idle --queue-depth`。地址与载荷按 4 B 对齐，硬件按 1 KiB TAR 页拆分 |
-| RTT 转发与交互 | `rtt --address --size --channel --chunk --clock`，`rtt-send`，`rtt-terminal --up-channel --timeout`。RTT→CDC 使用 [标准压力入口](../../tools/benchmark_rtt_forward.py) 的 `--speeds` 和 `--chunks` |
+| RTT 转发与交互 | `rtt --address --size --channel --chunk --clock`，`rtt-send`，`rtt-terminal --up-channel --timeout`。独立端点版使用 EP7 |
 | J-Scope / HSS | `scope --clock --period --var --seconds`，`scope-export`。周期为 24 MHz ticks，分别回读实际周期、实收组数、跳拍和 STOP 尾部 |
 | RTT＋HSS 同时运行 | `combo --clock --tap --slot --idle --rtt-address --var --ticks`。新固件支持 50–100 MHz 请求，包括 73 MHz |
 | 50 MHz SWD RTT 批队列 | `rtt-queue --tap --slot --idle --address --channel --seconds`，使用独立的 50 MHz 路径 |
-| COM / 物理 UART | `com bind/status/release`，模式随 Windows COM 的 DTR 和 SET_LINE_CODING。原生 `uart --rate --seconds --tap` |
-| SWO | `swo --encoding --rate --seconds --usb-path`，编码选 `uart` 或 `manchester`。原生 Manchester 支持 `--tap`、`--phase`。F103 ITM 夹具支持 `--configure-f103 --itm-mask` |
-| SPI 主机 / 从机接收 | 主机 `spi --mode --slot --tap`，用 `--hex` 或 `--file` 提交载荷，固定 100 MHz。从机 `com bind-spi --mode --tap`，SCK 由外部主机提供 |
+| COM / 物理 UART | `com bind/status/release`，模式随 Windows COM 的 DTR 和 SET_LINE_CODING |
+| SWO | `swo --encoding --rate --seconds`，编码选 `uart` 或 `manchester`，独立端点版走标准 EP2 IN。F103 ITM 夹具支持 `--configure-f103 --itm-mask` |
+| SPI 主机 | `spi --mode --slot --tap`，用 `--hex` 或 `--file` 提交载荷，固定 100 MHz |
 | ETM | `trace capture --swd-khz --seconds --elf --bit --zynq-elf`，以及 `trace verify/query/export`。TRACECLK 由目标配置提供 |
 
 高速请求使用 Hz，例如 `--clock 50000000`、`73000000`、`100000000`，73 MHz 在当前时钟树上约为 **72.727 MHz**。以结果中的实际频率和时钟树为准。tap 范围 0–31，slot 范围 0–63。SWD idle 为 0–15，JTAG 的 slot 范围是 16–63。原生块、RTT 下行与并发读数要求 JTAG idle 为奇数。JTAG 实时路径的 idle 范围为 0–255。独立 `rtt` 和 `scope` 可以一起传入 `--tap --slot --idle`，省略时使用既有 profile。 [精简性能用例与校准](fusion-performance-cases.md)

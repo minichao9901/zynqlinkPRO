@@ -1,0 +1,38 @@
+{
+  "operation": "check",
+  "dryRun": false,
+  "out": "E:\\zynqlinkPRO-efficiency\\build\\usb-split-h743-final\\final-idle",
+  "files": {
+    "bit": {
+      "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-spi-cdc-rx-guard-20261123\\probe.bit",
+      "sha256": "f3c4ccfd78c9148649897a0902fb93eadb209494e0295956981c973bbac92c66"
+    },
+    "zynq_elf": {
+      "path": "E:\\zynqlinkPRO-efficiency\\build\\selectio-usb-split-ps-v5\\xusbps_daplink_dma.elf",
+      "sha256": "61267ceeb63c5b8192adaa23f253ed2f7ea53a8c6fbddd8cecc3a45ca2e599eb"
+    },
+    "ps_init": {
+      "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-spi-cdc-rx-guard-20261123\\ps7_init.tcl",
+      "sha256": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+    }
+  },
+  "stage": "complete",
+  "passed": true,
+  "streams": {},
+  "before": {
+    "PS_IDCODE": "0x23727093",
+    "LEVEL_SHIFTERS": "0xf",
+    "FPGA_RESET": "0x0",
+    "BOOT_MODE": "0x0",
+    "CAPTURE": "0xe",
+    "SWD": "0x2",
+    "JQUEUE": "0x14",
+    "SQUEUE": "0x3c",
+    "AUX": "0x4",
+    "AUXFLAGS": "0x0",
+    "PACKET": "0x0",
+    "DDR": "0x6",
+    "CDMA_BASE": "0x40020000",
+    "CDMA": "0x1002"
+  }
+}

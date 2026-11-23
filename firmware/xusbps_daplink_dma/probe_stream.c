@@ -2,6 +2,7 @@
 // Probe-side RTT bridge and HSS transport. USB IRQs only move bounded messages;
 // target access, ownership changes and packet construction run in main.
 #include "probe_stream.h"
+#include "usb_pipes.h"
 #include "selectio_block.h"
 #if DAP_SELECTIO
 #include "selectio_aux.h"
@@ -261,7 +262,8 @@ static void reset_in(XUsbPs *usb, unsigned ep) {
 }
 void probe_usb_configured(XUsbPs *usb) {
     probe_usb_reset();
-    reset_in(usb, 3);
+    reset_in(usb, USB_CDC_IN);
+#if !DAP_SELECTIO
     reset_in(usb, 6);
     reset_in(usb, 7);
     XUsbPs_EpFlush(usb, 6, XUSBPS_EP_DIRECTION_OUT);
@@ -274,6 +276,7 @@ void probe_usb_configured(XUsbPs *usb) {
                        XUSBPS_EPCR_RXR_MASK);
     XUsbPs_SetBits(usb, XUSBPS_EPCRn_OFFSET(7), XUSBPS_EPCR_TXT_BULK_MASK | XUSBPS_EPCR_TXR_MASK);
     XUsbPs_EpPrime(usb, 6, XUSBPS_EP_DIRECTION_OUT);
+#endif
     configured = 1;
 }
 
@@ -1113,14 +1116,10 @@ void probe_poll(XUsbPs *usb) {
             if(!bench_active && probe_target_release())bench_error=-4;
         }
     }
+#if !DAP_SELECTIO
     kick(usb, &hid);
-#if DAP_SELECTIO
-    if (!(native_route&2U)) kick(usb, &hss);
-    if (!(native_route&1U)) kick(usb, &cdc);
-#else
     kick(usb, &hss);
     kick(usb, &cdc);
-#endif
     if (rx_in != rx_out && space(&hid)) {
         uint8_t req[64];
         uint32_t f = irq_save();
@@ -1131,6 +1130,7 @@ void probe_poll(XUsbPs *usb) {
         publish(&hid, 64);
         XUsbPs_EpPrime(usb, 6, XUSBPS_EP_DIRECTION_OUT);
     }
+#endif
     if (!probe_session_live())
         return;
     if (mode == 1)
@@ -1141,11 +1141,8 @@ void probe_poll(XUsbPs *usb) {
             stop();
     }
     if(stopping && mode==1) stop();
+#if !DAP_SELECTIO
     kick(usb, &hid);
-#if DAP_SELECTIO
-    if (!(native_route&2U)) kick(usb, &hss);
-    if (!(native_route&1U)) kick(usb, &cdc);
-#else
     kick(usb, &hss);
     kick(usb, &cdc);
 #endif
@@ -1155,7 +1152,7 @@ void probe_poll(XUsbPs *usb) {
 /* A route change is a quiescent boundary. The legacy queues stay readable
  * through STOP. Native IN completion releases each slot exactly once. */
 int probe_stream_active(void) {return mode || stopping || bench_active;}
-int probe_uses_legacy_cdc(void) {return !(native_route&1U) && (mode==1 || cdc.busy || cdc.out!=cdc.in || cdc_needs_zlp);}
+int probe_uses_legacy_cdc(void) {return 0;}
 int probe_native_owns_stream(void) {return native_route!=0;}
 int probe_native_abandon(void) {
     /* No host is receiving this native stream. Drop only its private

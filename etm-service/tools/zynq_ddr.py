@@ -17,6 +17,17 @@ class DdrError(RuntimeError):
     pass
 
 
+def download_endpoint(dev):
+    if getattr(dev,"bcdDevice",0)<0x0202:
+        return 0x82
+    config=dev.get_active_configuration()
+    for interface in config:
+        if (interface.bInterfaceClass,interface.bInterfaceSubClass,interface.bInterfaceProtocol)==(0xff,0x53,2):
+            if any(endpoint.bEndpointAddress==0x89 for endpoint in interface):
+                return 0x89
+    raise DdrError("split-endpoint probe did not expose its ETM data endpoint")
+
+
 def flight_options(value):
     if value is None:return None
     if not isinstance(value,dict):raise ValueError('飞行记录参数必须为对象')
@@ -47,6 +58,7 @@ def unpack(data):
 class Transport:
     def __init__(self,dev,out,inp):
         self.dev,self.out,self.inp=dev,out,inp
+        self.endpoint=download_endpoint(dev)
         self.capture_id=None;self.nonce=None;self.ref_hz=None;self.requested_ticks=None
         self.command_lock=threading.Lock()
         self.flight=False
@@ -147,7 +159,7 @@ class Transport:
     def _read_exact(self,count):
         data=bytearray()
         while len(data)<count:
-            part=bytes(self.dev.read(0x82,count-len(data),timeout=5000))
+            part=bytes(self.dev.read(self.endpoint,count-len(data),timeout=5000))
             if not part:raise DdrError('unexpected short/empty DDR USB read')
             data.extend(part)
         return bytes(data)

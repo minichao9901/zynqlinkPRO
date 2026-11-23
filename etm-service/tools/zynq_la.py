@@ -22,7 +22,7 @@ import usb.util
 
 from dap_pipeline_bench import open_dap, setup, xfer, le
 
-TRACE_EP = 0x82
+from zynq_ddr import download_endpoint
 CTRL_REQUEST = 0x60
 CTRL_REFERENCE = 0x61
 CTRL_DIAGNOSTICS = 0x62
@@ -297,9 +297,10 @@ class Session:
         seq = None
         pending = b""
         try:
+            endpoint = download_endpoint(self.dev)
             while self.running:
                 try:
-                    chunk = bytes(self.dev.read(TRACE_EP, 8192, timeout=300))
+                    chunk = bytes(self.dev.read(endpoint, 8192, timeout=300))
                 except usb.core.USBTimeoutError:
                     continue
                 pending += chunk

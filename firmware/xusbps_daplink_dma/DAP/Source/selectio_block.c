@@ -380,7 +380,9 @@ int selectio_mem_bulk(unsigned write,uint32_t address,unsigned words,const uint8
                      uint8_t *reply,unsigned *completed,uint32_t *detail) {
     *completed=0;*detail=0;
     if(!session.port || session.poisoned || write>1 || !words || words>4088 ||
-       (address&3U) || (address>>16)!=0x2000U || 4U*words>0x20010000U-address) return -1;
+       (address&3U) ||
+       !((address>=0x20000000U && address<0x20010000U && 4U*words<=0x20010000U-address) ||
+         (address>=0x24000000U && address<0x24080000U && 4U*words<=0x24080000U-address))) return -1;
     XTime start,stop;XTime_GetTime(&start);
     while(*completed<words) {
         if(!probe_session_live()) {session.poisoned=1;return -1;}

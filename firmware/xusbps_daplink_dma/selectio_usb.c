@@ -1,4 +1,5 @@
 #include "selectio_usb.h"
+#include "usb_pipes.h"
 #if DAP_SELECTIO
 #include "DAP_config.h"
 #include "DAP.h"
@@ -14,116 +15,198 @@
 #include "xusbps_endpoint.h"
 #include <string.h>
 
-/* One completed request owns the IN buffer until its USB IOC callback.
- * OUT descriptors supply bounded backpressure while the foreground is busy.
- * Header: magic, channel/op/status/reserved, sequence and payload bytes (LE).
- */
+/* Each endpoint owns its DMA buffer through the final IOC, independently
+ * of the other endpoints. Request sequence numbers are scoped to OUT pipes. */
 #define FRAME_SIZE 16384U
-#define LEGACY_FRAME_SIZE 4096U
+#define INITIAL_FRAME_SIZE 4096U
 #define HEADER_SIZE 16U
-static u8 request_bank[2][FRAME_SIZE] __attribute__((aligned(32)));
-static u8 *volatile arrival=request_bank[0];
-static u8 *input;
-static unsigned frame_limit=LEGACY_FRAME_SIZE;
+#define PIPE_COUNT 5U
+#define OUT_PIPE_COUNT 4U
+enum { CONTROL_PIPE, MEMORY_PIPE, RTT_PIPE, SPI_PIPE, SCOPE_PIPE };
+static const u8 endpoints[PIPE_COUNT] = {
+    USB_NATIVE_CONTROL, USB_NATIVE_MEMORY, USB_NATIVE_RTT, USB_NATIVE_SPI, USB_NATIVE_SCOPE
+};
+typedef struct {
+    u8 bank[2][FRAME_SIZE] __attribute__((aligned(32)));
+    unsigned length;
+    u32 next_sequence;
+    volatile unsigned ready, deferred, next_bank;
+} request_pipe;
+typedef struct {
+    u8 bank[2][FRAME_SIZE] __attribute__((aligned(32)));
+    u8 *queued, *active;
+    unsigned length, pending_channel, pending_count, active_channel, active_count;
+    volatile unsigned busy;
+} reply_pipe;
+static request_pipe requests[OUT_PIPE_COUNT];
+static reply_pipe replies[PIPE_COUNT];
 static u8 transport_test_ram[65536] __attribute__((aligned(32)));
-static u8 reply_bank[2][FRAME_SIZE] __attribute__((aligned(4096)));
-static u8 *output,*in_flight;
-static volatile unsigned tx_channel,tx_packets;
-static volatile unsigned epoch, configured, rx_hint, tx_busy;
-static volatile unsigned received_length, deferred, reply_channel, reply_packets;
-static volatile unsigned aux_commit,aux_reset;
-static volatile unsigned close_pending;
+static const u8 *input;
+static u8 *output;
+static unsigned frame_limit, reply_channel, reply_packets;
+static volatile unsigned epoch, configured, aux_commit, aux_reset, close_pending;
+static unsigned watchdog_div, session_open, abandon_native, next_pipe;
 static XTime last_activity;
-static unsigned watchdog_div;
-static unsigned pending_length, next_sequence, session_open;
 
-static unsigned abandon_native;
 static u32 read32(const u8 *p) {u32 v;memcpy(&v,p,4);return v;}
 static void write32(u8 *p,u32 v) {memcpy(p,&v,4);}
+static int pipe_index(unsigned ep) {
+    for(unsigned i=0;i<PIPE_COUNT;i++) if(endpoints[i]==ep) return (int)i;
+    return -1;
+}
+
+static unsigned receive_pipe(unsigned channel, unsigned op) {
+    if(channel==8 || (channel==2 && op==1) || (channel==6 && op==1)) return RTT_PIPE;
+    if(channel==4) return SPI_PIPE;
+    if((channel==1 && (op==0 || op==3 || op==6)) || (channel==7 && op==6)) return MEMORY_PIPE;
+    return CONTROL_PIPE;
+}
+static unsigned transmit_pipe(unsigned rx, unsigned channel, unsigned op) {
+    if(rx==CONTROL_PIPE && ((channel==3 && op==1) || (channel==6 && op==2))) return SCOPE_PIPE;
+    return rx;
+}
+
+void selectio_usb_setup(XUsbPs_DeviceConfig *config) {
+    for(unsigned i=0;i<PIPE_COUNT;i++) {
+        XUsbPs_EpConfig *ep=&config->EpCfg[endpoints[i]];
+        ep->In=(XUsbPs_EpSetup){.Type=XUSBPS_EP_TYPE_BULK,.NumBufs=8,.MaxPacketSize=512};
+        if(i!=SCOPE_PIPE)
+            ep->Out=(XUsbPs_EpSetup){.Type=XUSBPS_EP_TYPE_BULK,.NumBufs=4,.MaxPacketSize=512,.BufSize=FRAME_SIZE};
+    }
+}
+int selectio_usb_handlers(XUsbPs *usb) {
+    for(unsigned i=0;i<PIPE_COUNT;i++) {
+        unsigned ep=endpoints[i];
+        if(XUsbPs_EpSetHandler(usb,ep,XUSBPS_EP_DIRECTION_IN,selectio_usb_event,usb)!=XST_SUCCESS ||
+           (i!=SCOPE_PIPE && XUsbPs_EpSetHandler(usb,ep,XUSBPS_EP_DIRECTION_OUT,selectio_usb_event,usb)!=XST_SUCCESS))
+            return XST_FAILURE;
+    }
+    return XST_SUCCESS;
+}
 
 void selectio_usb_reset(void) {
     configured=0;
     if(selectio_mem_active()) close_pending=1;
     selectio_combo_reset();
     epoch++;abandon_native=0;
-    aux_reset=1;aux_commit=0;selectio_cdc_reset();
-    rx_hint=tx_busy=pending_length=session_open=deferred=reply_packets=tx_packets=0;
+    aux_reset=1;aux_commit=0;selectio_cdc_reset();selectio_swo_usb_reset();
+    frame_limit=INITIAL_FRAME_SIZE;session_open=0;
+    for(unsigned i=0;i<PIPE_COUNT;i++) {
+        if(i<OUT_PIPE_COUNT) requests[i].ready=requests[i].deferred=requests[i].next_bank=0;
+        replies[i].length=replies[i].busy=replies[i].active_count=0;
+        replies[i].active=0;
+    }
 }
-void selectio_usb_configured(XUsbPs *usb) {
-    selectio_usb_reset();
-    XUsbPs_EpFlush(usb,1,XUSBPS_EP_DIRECTION_OUT);
-    XUsbPs_EpFlush(usb,4,XUSBPS_EP_DIRECTION_IN);
-    XUsbPs_ReconfigureEp(usb,&usb->DeviceConfig,1,XUSBPS_EP_DIRECTION_OUT,0);
-    for(unsigned i=0;i<usb->DeviceConfig.EpCfg[4].In.NumBufs;i++) {
-        XUsbPs_dTD *td=&usb->DeviceConfig.Ep[4].In.dTDs[i];
+static void reset_in(XUsbPs *usb,unsigned ep,int reset_toggle) {
+    XUsbPs_EpIn *in=&usb->DeviceConfig.Ep[ep].In;
+    XUsbPs_EpFlush(usb,ep,XUSBPS_EP_DIRECTION_IN);
+    XUsbPs_WriteReg(usb->Config.BaseAddress,XUSBPS_EPCOMPL_OFFSET,1U<<(16U+ep));
+    for(unsigned i=0;i<usb->DeviceConfig.EpCfg[ep].In.NumBufs;i++) {
+        XUsbPs_dTD *td=&in->dTDs[i];
         XUsbPs_dTDInvalidateCache(td);
         XUsbPs_WritedTD(td,XUSBPS_dTDTOKEN,0);
         XUsbPs_dTDFlushCache(td);
     }
-    XUsbPs_ReconfigureEp(usb,&usb->DeviceConfig,4,XUSBPS_EP_DIRECTION_IN,0);
-    XUsbPs_EpEnable(usb,1,XUSBPS_EP_DIRECTION_OUT);
-    XUsbPs_EpEnable(usb,4,XUSBPS_EP_DIRECTION_IN);
-    XUsbPs_SetBits(usb,XUSBPS_EPCRn_OFFSET(1),XUSBPS_EPCR_RXT_BULK_MASK|XUSBPS_EPCR_RXR_MASK);
-    XUsbPs_SetBits(usb,XUSBPS_EPCRn_OFFSET(4),XUSBPS_EPCR_TXT_BULK_MASK|XUSBPS_EPCR_TXR_MASK);
+    XUsbPs_ReconfigureEp(usb,&usb->DeviceConfig,ep,XUSBPS_EP_DIRECTION_IN,0);
+    XUsbPs_dQHInvalidateCache(in->dQH);
+    XUsbPs_WritedQH(in->dQH,XUSBPS_dQHdTDTOKEN,0);
+    XUsbPs_WritedQH(in->dQH,XUSBPS_dQHdTDNLP,1);
+    XUsbPs_dQHFlushCache(in->dQH);
+    XUsbPs_EpEnable(usb,ep,XUSBPS_EP_DIRECTION_IN);
+    XUsbPs_SetBits(usb,XUSBPS_EPCRn_OFFSET(ep),XUSBPS_EPCR_TXT_BULK_MASK|(reset_toggle?XUSBPS_EPCR_TXR_MASK:0U));
+}
+void selectio_usb_enable_in(XUsbPs *usb,unsigned ep) {reset_in(usb,ep,1);}
+static void reset_out(XUsbPs *usb,unsigned ep) {
+    XUsbPs_EpFlush(usb,ep,XUSBPS_EP_DIRECTION_OUT);
+    XUsbPs_WriteReg(usb->Config.BaseAddress,XUSBPS_EPCOMPL_OFFSET,1U<<ep);
+    XUsbPs_ReconfigureEp(usb,&usb->DeviceConfig,ep,XUSBPS_EP_DIRECTION_OUT,0);
+    XUsbPs_dQH *qh=usb->DeviceConfig.Ep[ep].Out.dQH;
+    XUsbPs_dQHInvalidateCache(qh);
+    XUsbPs_WritedQH(qh,XUSBPS_dQHdTDTOKEN,0);
+    XUsbPs_dQHFlushCache(qh);
+}
+void selectio_usb_configured(XUsbPs *usb) {
+    selectio_usb_reset();
+    for(unsigned i=0;i<PIPE_COUNT;i++) {
+        unsigned ep=endpoints[i];
+        selectio_usb_enable_in(usb,ep);
+        if(i==SCOPE_PIPE) continue;
+        reset_out(usb,ep);
+        XUsbPs_EpEnable(usb,ep,XUSBPS_EP_DIRECTION_OUT);
+        XUsbPs_SetBits(usb,XUSBPS_EPCRn_OFFSET(ep),XUSBPS_EPCR_RXT_BULK_MASK|XUSBPS_EPCR_RXR_MASK);
+    }
+    selectio_usb_enable_in(usb,USB_SWO_IN);
     configured=1;
-    XUsbPs_EpPrime(usb,1,XUSBPS_EP_DIRECTION_OUT);
+    for(unsigned i=0;i<PIPE_COUNT;i++)
+        if(i!=SCOPE_PIPE) XUsbPs_EpPrime(usb,endpoints[i],XUSBPS_EP_DIRECTION_OUT);
 }
 
-int selectio_usb_rx_available(void) {
-    if (rx_hint) {deferred=1;return 0;}
+int selectio_usb_rx_available(unsigned ep) {
+    int pipe=pipe_index(ep);
+    if(pipe>=0 && pipe<(int)OUT_PIPE_COUNT && requests[pipe].ready) {requests[pipe].deferred=1;return 0;}
     return 1;
 }
-
 void selectio_usb_event(void *ref,u8 ep,u8 event,void *data) {
     XUsbPs *usb=(XUsbPs *)ref;
-    if (!configured) return;
-    if (ep==1 && event==XUSBPS_EP_EVENT_DATA_RX) {
+    int pipe=pipe_index(ep);
+    if (!configured || pipe<0) return;
+    if (event==XUSBPS_EP_EVENT_DATA_RX && (unsigned)pipe<OUT_PIPE_COUNT) {
+        request_pipe *rx=&requests[pipe];
         u8 *buffer;
         u32 length,handle;
-        if (XUsbPs_EpBufferReceive(usb,ep,&buffer,&length,&handle)!=XST_SUCCESS) return;
+        if (rx->ready || XUsbPs_EpBufferReceive(usb,ep,&buffer,&length,&handle)!=XST_SUCCESS) return;
         if (length>FRAME_SIZE) length=0;
         Xil_DCacheInvalidateRange((UINTPTR)buffer,(length+31U)&~31U);
-        memcpy(arrival,buffer,length);
-        received_length=length;
+        memcpy(rx->bank[rx->next_bank],buffer,length);
+        rx->length=length;
         __sync_synchronize();
-        rx_hint=1;
+        rx->ready=1;
         XUsbPs_EpBufferRelease(handle);
-    }
-    if (ep==4 && event==XUSBPS_EP_EVENT_DATA_TX && tx_busy && data==in_flight) {
-        if(tx_packets && tx_channel>=6) selectio_combo_commit(tx_channel,tx_packets);
-        else if(tx_packets && tx_channel>=4) aux_commit=tx_packets;
-        else if (tx_packets) probe_native_commit(tx_channel,tx_packets);
-        tx_packets=0;
-        tx_busy=0;
+    } else if(event==XUSBPS_EP_EVENT_DATA_TX) {
+        reply_pipe *tx=&replies[pipe];
+        if(!tx->busy || data!=tx->active) return;
+        if(tx->active_count && tx->active_channel>=6) selectio_combo_commit(tx->active_channel,tx->active_count);
+        else if(tx->active_count && tx->active_channel>=4) aux_commit=tx->active_count;
+        else if(tx->active_count) probe_native_commit(tx->active_channel,tx->active_count);
+        tx->active_count=0;
+        tx->busy=0;
     }
 }
-
-static unsigned execute_frame(unsigned length, unsigned active_epoch) {
+static unsigned execute_frame(unsigned length, unsigned active_epoch, unsigned rx_pipe) {
     if(!configured || epoch!=active_epoch) return 0;
     unsigned size=0, sequence=0, reply_size=0;
-    unsigned channel=0, op=0, status=1;
+    unsigned channel=0, wire_channel=0, op=0, status=1;
     if (length>=HEADER_SIZE) {
-        channel=input[4];op=input[5];sequence=read32(input+8);size=read32(input+12);
+        wire_channel=input[4];op=input[5];sequence=read32(input+8);size=read32(input+12);
+        channel=wire_channel==8 ? 1 : wire_channel;
     }
     if (length<HEADER_SIZE || memcmp(input,"ZLK1",4) || input[6] || input[7] ||
-        size>frame_limit-HEADER_SIZE-1 || length!=HEADER_SIZE+size+((HEADER_SIZE+size)%512U==0U))
+        receive_pipe(wire_channel,op)!=rx_pipe || size>frame_limit-HEADER_SIZE-1 || length!=HEADER_SIZE+size+((HEADER_SIZE+size)%512U==0U))
         goto reply;
     if (channel==0 && op==0 && !size) {
         if (selectio_mem_active() || selectio_aux_native_owner() || probe_native_owns_stream()) {status=2;goto reply;}
         if(selectio_combo_active()) selectio_combo_reset();
-        frame_limit=LEGACY_FRAME_SIZE;
+        unsigned flags=mfcpsr();mtcpsr(flags|0x80U);
+        if(epoch!=active_epoch) {mtcpsr(flags);return 0;}
+        /* Leave USB DMA and data toggles intact on an application HELLO.
+         * The host can still retire previously queued replies. They must
+         * not commit cursors belonging to the newly started session. */
+        for(unsigned i=1;i<PIPE_COUNT;i++)
+            replies[i].active_count=replies[i].pending_count=0;
+        frame_limit=INITIAL_FRAME_SIZE;
         session_open=1;
-        next_sequence=sequence+1U;
-        memcpy(output+16,"SIO1",4);
+        for(unsigned i=0;i<OUT_PIPE_COUNT;i++) requests[i].next_sequence=sequence+1U;
+        mtcpsr(flags);
+        memcpy(output+16,"SIO2",4);
         write32(output+20,selectio_serial_hz());
         write32(output+24,swd_read32(SWD_FEATURES));
         write32(output+28,FRAME_SIZE);
         reply_size=16;
         status=0;
-    } else if (!session_open || sequence!=next_sequence) {
+    } else if (!session_open || sequence!=requests[rx_pipe].next_sequence) {
         status=2;
     } else {
-        next_sequence++;XTime_GetTime(&last_activity);
+        requests[rx_pipe].next_sequence++;XTime_GetTime(&last_activity);
         if (channel==0 && op==1) {
             memcpy(output+HEADER_SIZE,input+HEADER_SIZE,size);
             reply_size=size;
@@ -131,7 +214,7 @@ static unsigned execute_frame(unsigned length, unsigned active_epoch) {
         } else if(channel==0 && op==8 && size==4 && !selectio_mem_active() &&
                   !selectio_aux_native_owner() && !probe_native_owns_stream()) {
             unsigned requested=read32(input+16);
-            if(requested==LEGACY_FRAME_SIZE || requested==FRAME_SIZE) {
+            if(requested==INITIAL_FRAME_SIZE || requested==FRAME_SIZE) {
                 frame_limit=requested;write32(output+16,requested);reply_size=4;status=0;
             }
         } else if(channel==7 && op==7 && size==12) {
@@ -171,8 +254,8 @@ static unsigned execute_frame(unsigned length, unsigned active_epoch) {
             }
         } else if(channel==0 && op==5 && !size) {
             uint32_t pl=swd_read32(SWD_FEATURES);
-            memcpy(output+16,"CAP1",4);
-            write32(output+20,1U);
+            memcpy(output+16,"CAP2",4);
+            write32(output+20,2U);
             write32(output+24,4U);
             write32(output+28,(pl&0x400U)?16U:8U);
             write32(output+32,(pl&0x200U)?SELECTIO_SERIAL_BUFFER_BYTES:0U);
@@ -182,10 +265,14 @@ static unsigned execute_frame(unsigned length, unsigned active_epoch) {
             uint32_t fields[8];selectio_cdc_status(fields);memcpy(output+16,fields,sizeof fields);reply_size=sizeof fields;status=0;
         } else if(channel==0 && op==3 && size==1) {
             if(!selectio_cdc_bind(input[16])) status=0;
-        } else if(channel==0 && op==3 && size==3 && input[16]==3) {
-            if(!selectio_cdc_bind_spi(input[17],input[18])) status=0;
         } else if (channel==0 && op==2 && size==4) {
             if(!selectio_live_profile(input[16],input[17],input[18],input[19])) status=0;
+        } else if(channel==9 && op==0 && size==28 && input[16]==0x8c) {
+            dap_request_plan plan;
+            if(DAP_ValidateCommand(input+16,size,frame_limit-HEADER_SIZE-1,&plan) && plan.request_bytes==size) {
+                reply_size=DAP_ExecuteCommand(input+16,size,output+16,frame_limit-HEADER_SIZE-1)&0xffffU;
+                status=0;
+            }
         } else if(channel==6) {
             unsigned n=0,source=0;
             if(!selectio_combo_frame(op,input+16,size,output+16,frame_limit-HEADER_SIZE-1,&reply_size,&n,&source)) {
@@ -247,7 +334,7 @@ static unsigned execute_frame(unsigned length, unsigned active_epoch) {
             } else if (op==2 && size==64 && !probe_native_control(channel,input+16,output+16)) {
                 reply_size=64;status=0;
             }
-        } else if(channel==4 || channel==5) {
+        } else if(channel==4) {
             unsigned consume=0;
             if(!selectio_aux_frame(channel,op,input+16,size,output+16,frame_limit-HEADER_SIZE-1,&reply_size,&consume)) {
                 reply_channel=channel;reply_packets=consume;status=0;
@@ -256,15 +343,58 @@ static unsigned execute_frame(unsigned length, unsigned active_epoch) {
     }
 reply:
     memcpy(output,"ZLK1",4);
-    output[4]=(u8)channel;output[5]=(u8)op;output[6]=(u8)status;output[7]=0;
+    output[4]=(u8)wire_channel;output[5]=(u8)op;output[6]=(u8)status;output[7]=0;
     write32(output+8,sequence);write32(output+12,reply_size);
     length=HEADER_SIZE+reply_size;
     if (length%512U==0U) output[length++]=0;
     return length;
 }
 
+static void send_replies(XUsbPs *usb) {
+    for(unsigned i=0;i<PIPE_COUNT;i++) {
+        reply_pipe *tx=&replies[i];
+        if(!tx->length || tx->busy) continue;
+        tx->active=tx->queued;tx->active_channel=tx->pending_channel;
+        tx->active_count=tx->pending_count;tx->busy=1;
+        if(XUsbPs_EpBufferSend(usb,endpoints[i],tx->active,tx->length)==XST_SUCCESS) tx->length=0;
+        else tx->busy=0;
+    }
+}
+static void run_request(XUsbPs *usb) {
+    u32 flags=mfcpsr();mtcpsr(flags|0x80U);
+    unsigned active_epoch=epoch;
+    if(!configured) {mtcpsr(flags);return;}
+    send_replies(usb);
+    for(unsigned offset=0;offset<OUT_PIPE_COUNT;offset++) {
+        unsigned i=(next_pipe+offset)%OUT_PIPE_COUNT;
+        request_pipe *rx=&requests[i];
+        if(!rx->ready) continue;
+        unsigned length=rx->length;
+        const u8 *frame=rx->bank[rx->next_bank];
+        unsigned channel=length>=HEADER_SIZE?frame[4]:0,op=length>=HEADER_SIZE?frame[5]:0;
+        reply_pipe *tx=&replies[transmit_pipe(i,channel,op)];
+        /* Multiple bulk memory requests can execute ahead of IOC. A FIFO
+         * peek waits for its own endpoint's prior cursor to be committed. */
+        unsigned pipeline=i==MEMORY_PIPE && (op==3 || op==6);
+        if(tx->length || (tx->busy && !pipeline) || (i==SPI_PIPE && aux_commit)) continue;
+        input=frame;
+        output=tx->active==tx->bank[0]?tx->bank[1]:tx->bank[0];
+        rx->next_bank^=1U;rx->ready=0;reply_channel=reply_packets=0;
+        if(rx->deferred) {rx->deferred=0;selectio_usb_resume_rx(usb,endpoints[i]);}
+        next_pipe=(i+1)%OUT_PIPE_COUNT;
+        mtcpsr(flags);
+        unsigned response=execute_frame(length,active_epoch,i);
+        flags=mfcpsr();mtcpsr(flags|0x80U);
+        if(configured && epoch==active_epoch) {
+            tx->queued=output;tx->pending_channel=reply_channel;tx->pending_count=reply_packets;
+            tx->length=response;
+        }
+        mtcpsr(flags);
+        return;
+    }
+    mtcpsr(flags);
+}
 void selectio_usb_poll(XUsbPs *usb) {
-    u32 length,active_epoch,flags;
     if(aux_reset) {if(selectio_aux_reset())return;aux_reset=0;}
     if(aux_commit) {unsigned n=aux_commit;aux_commit=0;selectio_aux_consume(n);}
     selectio_aux_poll();
@@ -276,13 +406,11 @@ void selectio_usb_poll(XUsbPs *usb) {
            now-last_activity>5ULL*COUNTS_PER_SECOND) abandon_native=1;
     }
     if(abandon_native) {
-        /* An outstanding response can still complete after a new host opens
-         * the interface. Its old queue cursor must never consume new data. */
-        flags=mfcpsr();mtcpsr(flags|0x80U);
-        tx_packets=reply_packets=aux_commit=0;session_open=0;
+        u32 flags=mfcpsr();mtcpsr(flags|0x80U);
+        for(unsigned i=0;i<PIPE_COUNT;i++) replies[i].active_count=replies[i].pending_count=0;
+        aux_commit=0;session_open=0;
         mtcpsr(flags);
-        if(selectio_aux_release_native())return;
-        if(probe_native_abandon())return;
+        if(selectio_aux_release_native() || probe_native_abandon()) return;
         abandon_native=0;
     }
     if(close_pending) {
@@ -291,39 +419,6 @@ void selectio_usb_poll(XUsbPs *usb) {
         else return;
     }
     if(configured) selectio_combo_poll();
-    if (!configured || (!rx_hint && !pending_length)) return;
-    flags=mfcpsr();mtcpsr(flags|0x80U);
-    active_epoch=epoch;
-    if(pending_length && !tx_busy) {
-        in_flight=output;tx_channel=reply_channel;tx_packets=reply_packets;
-        tx_busy=1;
-        if (XUsbPs_EpBufferSend(usb,4,in_flight,pending_length)==XST_SUCCESS) pending_length=0;
-        else tx_busy=0;
-    }
-    if(pending_length || !rx_hint) {mtcpsr(flags);return;}
-    /* A data block or echo may execute while a previous IN payload is
-     * being transmitted. Queue peeks and control remain stop-and-wait, so
-     * an uncommitted ring slot cannot be included in two replies. */
-    int pipelined=received_length>=HEADER_SIZE &&
-                  ((arrival[4]==1 && (arrival[5]==3 || arrival[5]==6)) ||
-                   (arrival[4]==0 && arrival[5]==1) || (arrival[4]==7 && arrival[5]==6));
-    if((tx_busy || aux_commit) && !pipelined) {mtcpsr(flags);return;}
-    length=received_length;
-    // The OUT interrupt can now fill the alternate bank while the worker
-    // uses this one. No 4/16 KiB memcpy with interrupts disabled.
-    input=arrival;
-    arrival=input==request_bank[0]?request_bank[1]:request_bank[0];
-    output=in_flight==reply_bank[0] ? reply_bank[1] : reply_bank[0];
-    reply_packets=0;rx_hint=0;
-    if(deferred) {deferred=0;selectio_usb_resume_rx(usb);}
-    mtcpsr(flags);
-    unsigned response=execute_frame(length,active_epoch);
-    flags=mfcpsr();mtcpsr(flags|0x80U);
-    if (configured && epoch==active_epoch) {
-        /* XUsbPs_EpBufferSend flushes the payload in EpQueueRequest
-         * immediately before giving its descriptor to the controller. */
-        pending_length=response;
-    }
-    mtcpsr(flags);
+    run_request(usb);
 }
 #endif

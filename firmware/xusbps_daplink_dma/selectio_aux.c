@@ -8,6 +8,8 @@
 #include "etm_ddr_usb.h"
 #include "xtime_l.h"
 #include "xusbps_class_cdc.h"
+#include "selectio_usb.h"
+#include "usb_pipes.h"
 #include <string.h>
 
 #define AUX 0x80020000U
@@ -21,6 +23,9 @@ enum { CDC_UART=1, CDC_UART_BYPASS=2, CDC_SPI_RX=3 };
 enum { SPI_RX_CODEC=3 };
 static uint8_t swo_transport,swo_mode,swo_running;
 static uint32_t swo_rate,swo_consumed,swo_drops,swo_errors;
+static XUsbPs *swo_usb;
+static uint8_t swo_in_data[4096] __attribute__((aligned(4096)));
+static volatile unsigned swo_pending,swo_ack;
 static volatile unsigned cdc_bound,cdc_owns,cdc_baud=115200,cdc_deferred;
 static unsigned cdc_running_baud,cdc_running_mode,cdc_spi_mode,cdc_spi_tap;
 static XTime cdc_rx_due;
@@ -69,6 +74,12 @@ static int restore(void) {
     return 0;
 }
 void selectio_swo_reset(void) {
+    if(swo_pending && swo_usb) {
+        unsigned f=mfcpsr();mtcpsr(f|0x80U);
+        selectio_usb_enable_in(swo_usb,USB_SWO_IN);
+        swo_pending=swo_ack=0;
+        mtcpsr(f);
+    }
     if(active_channel==CMSIS_SWO_CHANNEL) (void)restore();
     swo_transport=swo_mode=swo_running=0;
     swo_rate=swo_consumed=swo_drops=swo_errors=0;
@@ -353,17 +364,17 @@ uint32_t selectio_swo_command(uint8_t cmd,const uint8_t *p,uint8_t *r) {
         }
         put(r,accepted);return (4U<<16)|4U;
     }
-    if(cmd==0x17 && !swo_running && p[0]<=1) {
+    if(cmd==0x17 && !swo_running && p[0]<=2) {
         if(!p[0]) selectio_swo_reset();
         swo_transport=p[0];r[0]=DAP_OK;
-    } else if(cmd==0x18 && !swo_running && p[0]<=2) {
+    } else if(cmd==0x18 && !swo_running && !swo_pending && p[0]<=2) {
         if(active_channel==CMSIS_SWO_CHANNEL && restore()) return (1U<<16)|1U;
         swo_mode=p[0];r[0]=DAP_OK;
     } else if(cmd==0x1a && p[0]<=1) {
         if(p[0]==swo_running) r[0]=DAP_OK;
         else if(!p[0] && active_channel==CMSIS_SWO_CHANNEL) {
             WR(8,0);settle();read_only_stop=1;swo_running=0;r[0]=DAP_OK;
-        } else if(p[0] && swo_transport==1 && swo_mode && swo_rate) {
+        } else if(p[0] && swo_transport && swo_mode && swo_rate && !swo_pending) {
             uint8_t config[9]={swo_mode,0,0,0,0,0,0,0,0};
             if(active_channel==CMSIS_SWO_CHANNEL && restore()) return (1U<<16)|1U;
             put(config+4,swo_rate);
@@ -475,10 +486,43 @@ void selectio_cdc_poll(XUsbPs *usb) {
             unsigned f=mfcpsr();mtcpsr(f|0x80U);
             cdc_usb_bytes=n;
             Xil_DCacheFlushRange((UINTPTR)cdc_in_data,(n+31U)&~31U);
-            if(XUsbPs_EpBufferSendWithZLT(usb,3,cdc_in_data,n)!=XST_SUCCESS) cdc_usb_bytes=0;
+            if(XUsbPs_EpBufferSendWithZLT(usb,USB_CDC_IN,cdc_in_data,n)!=XST_SUCCESS) cdc_usb_bytes=0;
             else cdc_rx_due=0;
             mtcpsr(f);
         }
+    }
+}
+
+void selectio_swo_usb_reset(void) {
+    swo_usb=0;swo_pending=swo_ack=0;
+}
+void selectio_swo_event(void *ref,u8 ep,u8 event,void *data) {
+    (void)ref;
+    unsigned n=swo_pending;
+    if(ep!=USB_SWO_IN || event!=XUSBPS_EP_EVENT_DATA_TX || !n) return;
+    unsigned zlp=n<sizeof swo_in_data && n%512U==0U;
+    if(data==swo_in_data+(zlp?n:0U)) swo_ack=n;
+}
+void selectio_swo_poll(XUsbPs *usb) {
+    if(active_channel!=CMSIS_SWO_CHANNEL || swo_transport!=2) return;
+    if(swo_ack) {
+        unsigned f=mfcpsr();mtcpsr(f|0x80U);
+        unsigned n=swo_ack;swo_pending=swo_ack=0;
+        if(n) {selectio_aux_consume(n);swo_consumed+=n;}
+        mtcpsr(f);
+    }
+    if(swo_pending) return;
+    unsigned n=peek(swo_in_data,sizeof swo_in_data);
+    if(n) {
+        unsigned f=mfcpsr();mtcpsr(f|0x80U);
+        if(swo_transport==2 && active_channel==CMSIS_SWO_CHANNEL) {
+            swo_usb=usb;swo_pending=n;
+            int rc=n<sizeof swo_in_data && n%512U==0U
+                ? XUsbPs_EpBufferSendWithZLT(usb,USB_SWO_IN,swo_in_data,n)
+                : XUsbPs_EpBufferSend(usb,USB_SWO_IN,swo_in_data,n);
+            if(rc!=XST_SUCCESS) swo_pending=0;
+        }
+        mtcpsr(f);
     }
 }
 #endif

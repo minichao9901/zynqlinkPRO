@@ -2,7 +2,8 @@
 #define ZYNQLINK_ETM_STREAM_H
 #include "xusbps.h"
 #include <stdint.h>
-#define ETM_BULKIN_EP 2
+#include "usb_pipes.h"
+#define ETM_BULKIN_EP USB_ETM_IN
 uint32_t etm_reference_init(void);
 void etm_reference_snapshot(uint32_t reply[4]);
 void etm_diagnostics_snapshot(uint32_t reply[16]);

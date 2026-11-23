@@ -1,6 +1,7 @@
 #include "DAP_config.h"
 #include "probe_stream.h"
 #include "selectio_usb.h"
+#include "usb_pipes.h"
 #if DAP_SELECTIO
 #include "selectio_aux.h"
 #endif
@@ -205,15 +206,7 @@ static int UsbIntrExample(XScuGic *IntcInstancePtr, XUsbPs *UsbInstancePtr,
 	u8	*MemPtr = NULL;
 	int	ReturnStatus = XST_FAILURE;
 
-	/* DAPLink endpoint configuration:
-	 *   Endpoint 0 (default control endpoint)
-	 *   Endpoint 1 (Bulk IN for DAP)
-	 *   Endpoint 2 (Bulk OUT for DAP)
-	 *   Endpoint 3 (Bulk IN for CDC)
-	 *   Endpoint 4 (Bulk OUT for CDC)
-	 *   Endpoint 5 (Interrupt IN for CDC notifications)
-	 */
-	const u8 NumEndpoints = 8;
+	const u8 NumEndpoints = USB_ENDPOINT_COUNT;
 
 	XUsbPs_Config		*UsbConfigPtr;
 	XUsbPs_DeviceConfig	DeviceConfig = {0};
@@ -269,15 +262,6 @@ static int UsbIntrExample(XScuGic *IntcInstancePtr, XUsbPs *UsbInstancePtr,
 	 * XUsbPs_ConfigureDevice() function.
 	 */
 
-	/*
-	 * DAPLink endpoint configuration:
-	 *   Endpoint 0 (default control endpoint)
-	 *   Endpoint 1 (Bulk IN for DAP: 0x81)
-	 *   Endpoint 2 (Bulk OUT for DAP: 0x02)
-	 *   Endpoint 3 (Bulk IN for CDC: 0x83)
-	 *   Endpoint 4 (Bulk OUT for CDC: 0x04)
-	 *   Endpoint 5 (Interrupt IN for CDC: 0x85)
-	 */
 
 	/* Endpoint 0: Control Endpoint */
 	DeviceConfig.EpCfg[0].Out.Type		= XUSBPS_EP_TYPE_CONTROL;
@@ -288,58 +272,20 @@ static int UsbIntrExample(XScuGic *IntcInstancePtr, XUsbPs *UsbInstancePtr,
 	DeviceConfig.EpCfg[0].In.NumBufs	= 2;
 	DeviceConfig.EpCfg[0].In.MaxPacketSize	= 64;
 
-	/* Endpoint 1: DAP Bulk IN (0x81) */
-	DeviceConfig.EpCfg[1].In.Type		= XUSBPS_EP_TYPE_BULK;
-	DeviceConfig.EpCfg[1].In.NumBufs	= 16;
-	DeviceConfig.EpCfg[1].In.MaxPacketSize	= 512;
-
-	/* Endpoint 2: DAP Bulk OUT (0x02) */
-	DeviceConfig.EpCfg[2].Out.Type		= XUSBPS_EP_TYPE_BULK;
-	DeviceConfig.EpCfg[2].Out.NumBufs	= 16;
-	DeviceConfig.EpCfg[2].Out.BufSize	= 4096;
-	DeviceConfig.EpCfg[2].Out.MaxPacketSize	= 512;
-    DeviceConfig.EpCfg[2].In.Type=XUSBPS_EP_TYPE_BULK;
-    DeviceConfig.EpCfg[2].In.NumBufs=16;
-    DeviceConfig.EpCfg[2].In.MaxPacketSize=512;
-
-	/* Endpoint 3: CDC Bulk IN (0x83) */
-	DeviceConfig.EpCfg[3].In.Type		= XUSBPS_EP_TYPE_BULK;
-	DeviceConfig.EpCfg[3].In.NumBufs	= 16;
-	DeviceConfig.EpCfg[3].In.MaxPacketSize	= 512;
-
-	/* Endpoint 4: CDC Bulk OUT (0x04) */
-	DeviceConfig.EpCfg[4].Out.Type		= XUSBPS_EP_TYPE_BULK;
-	DeviceConfig.EpCfg[4].Out.NumBufs	= 16;
-	DeviceConfig.EpCfg[4].Out.BufSize	= 4096;
-	DeviceConfig.EpCfg[4].Out.MaxPacketSize	= 512;
-
-	/* Endpoint 5: CDC Interrupt IN (0x85) */
-	DeviceConfig.EpCfg[5].Out.Type		= XUSBPS_EP_TYPE_INTERRUPT;
-	DeviceConfig.EpCfg[5].Out.NumBufs	= 2;
-	DeviceConfig.EpCfg[5].Out.BufSize	= 64;
-	DeviceConfig.EpCfg[5].Out.MaxPacketSize	= 64;
-	DeviceConfig.EpCfg[5].In.Type		= XUSBPS_EP_TYPE_INTERRUPT;
-	DeviceConfig.EpCfg[5].In.NumBufs	= 2;
-	DeviceConfig.EpCfg[5].In.MaxPacketSize	= 64;
-
-    DeviceConfig.EpCfg[6].In.Type=XUSBPS_EP_TYPE_INTERRUPT;
-    DeviceConfig.EpCfg[6].In.NumBufs=2;
-    DeviceConfig.EpCfg[6].In.MaxPacketSize=64;
-    DeviceConfig.EpCfg[6].Out.Type=XUSBPS_EP_TYPE_INTERRUPT;
-    DeviceConfig.EpCfg[6].Out.NumBufs=2;
-    DeviceConfig.EpCfg[6].Out.BufSize=64;
-    DeviceConfig.EpCfg[6].Out.MaxPacketSize=64;
-    DeviceConfig.EpCfg[7].In.Type=XUSBPS_EP_TYPE_BULK;
-    DeviceConfig.EpCfg[7].In.NumBufs=16;
-    DeviceConfig.EpCfg[7].In.MaxPacketSize=512;
+    DeviceConfig.EpCfg[USB_DAP_IN].In = (XUsbPs_EpSetup){.Type=XUSBPS_EP_TYPE_BULK,.NumBufs=16,.MaxPacketSize=512};
+    DeviceConfig.EpCfg[USB_DAP_OUT].Out = (XUsbPs_EpSetup){.Type=XUSBPS_EP_TYPE_BULK,.NumBufs=16,.BufSize=4096,.MaxPacketSize=512};
+    DeviceConfig.EpCfg[USB_CDC_IN].In = DeviceConfig.EpCfg[USB_DAP_IN].In;
+    DeviceConfig.EpCfg[USB_CDC_OUT].Out = DeviceConfig.EpCfg[USB_DAP_OUT].Out;
+    DeviceConfig.EpCfg[USB_CDC_NOTIFY].In = (XUsbPs_EpSetup){.Type=XUSBPS_EP_TYPE_INTERRUPT,.NumBufs=2,.MaxPacketSize=64};
+    DeviceConfig.EpCfg[ETM_BULKIN_EP].In = DeviceConfig.EpCfg[USB_DAP_IN].In;
 #if DAP_SELECTIO
-    DeviceConfig.EpCfg[1].Out.Type=XUSBPS_EP_TYPE_BULK;
-    DeviceConfig.EpCfg[1].Out.NumBufs=8;
-    DeviceConfig.EpCfg[1].Out.BufSize=16384;
-    DeviceConfig.EpCfg[1].Out.MaxPacketSize=512;
-    DeviceConfig.EpCfg[4].In.Type=XUSBPS_EP_TYPE_BULK;
-    DeviceConfig.EpCfg[4].In.NumBufs=8;
-    DeviceConfig.EpCfg[4].In.MaxPacketSize=512;
+    DeviceConfig.EpCfg[USB_SWO_IN].In = DeviceConfig.EpCfg[USB_DAP_IN].In;
+    selectio_usb_setup(&DeviceConfig);
+#else
+    DeviceConfig.EpCfg[5].Out = (XUsbPs_EpSetup){.Type=XUSBPS_EP_TYPE_INTERRUPT,.NumBufs=2,.BufSize=64,.MaxPacketSize=64};
+    DeviceConfig.EpCfg[6].In = DeviceConfig.EpCfg[5].In;
+    DeviceConfig.EpCfg[6].Out = DeviceConfig.EpCfg[5].Out;
+    DeviceConfig.EpCfg[7].In = DeviceConfig.EpCfg[USB_DAP_IN].In;
 #endif
     DeviceConfig.NumEndpoints = NumEndpoints;
 
@@ -389,30 +335,31 @@ static int UsbIntrExample(XScuGic *IntcInstancePtr, XUsbPs *UsbInstancePtr,
 				XUsbPs_Ep0EventHandler, UsbInstancePtr);
 
 	/* DAP Endpoint Handlers */
-	Status = XUsbPs_EpSetHandler(UsbInstancePtr, 2,
+	Status = XUsbPs_EpSetHandler(UsbInstancePtr, USB_DAP_OUT,
 				XUSBPS_EP_DIRECTION_OUT,
 				XUsbPs_EpDapEventHandler, UsbInstancePtr);
 
-	Status = XUsbPs_EpSetHandler(UsbInstancePtr, 1,
+	Status = XUsbPs_EpSetHandler(UsbInstancePtr, USB_DAP_IN,
 				XUSBPS_EP_DIRECTION_IN,
 				XUsbPs_EpDapEventHandler, UsbInstancePtr);
 
 	/* CDC Endpoint Handlers */
-	Status = XUsbPs_EpSetHandler(UsbInstancePtr, 4,
+	Status = XUsbPs_EpSetHandler(UsbInstancePtr, USB_CDC_OUT,
 				XUSBPS_EP_DIRECTION_OUT,
 				XUsbPs_EpCdcEventHandler, UsbInstancePtr);
 
-	Status = XUsbPs_EpSetHandler(UsbInstancePtr, 3,
+	Status = XUsbPs_EpSetHandler(UsbInstancePtr, USB_CDC_IN,
 				XUSBPS_EP_DIRECTION_IN,
 				XUsbPs_EpCdcEventHandler, UsbInstancePtr);
 
 #if DAP_SELECTIO
-    if(XUsbPs_EpSetHandler(UsbInstancePtr,1,XUSBPS_EP_DIRECTION_OUT,selectio_usb_event,UsbInstancePtr)!=XST_SUCCESS ||
-       XUsbPs_EpSetHandler(UsbInstancePtr,4,XUSBPS_EP_DIRECTION_IN,selectio_usb_event,UsbInstancePtr)!=XST_SUCCESS) goto out;
-#endif
+    if(selectio_usb_handlers(UsbInstancePtr)!=XST_SUCCESS ||
+       XUsbPs_EpSetHandler(UsbInstancePtr,USB_SWO_IN,XUSBPS_EP_DIRECTION_IN,selectio_swo_event,UsbInstancePtr)!=XST_SUCCESS) goto out;
+#else
     if(XUsbPs_EpSetHandler(UsbInstancePtr,6,XUSBPS_EP_DIRECTION_IN,probe_usb_event,UsbInstancePtr)!=XST_SUCCESS ||
        XUsbPs_EpSetHandler(UsbInstancePtr,6,XUSBPS_EP_DIRECTION_OUT,probe_usb_event,UsbInstancePtr)!=XST_SUCCESS ||
        XUsbPs_EpSetHandler(UsbInstancePtr,7,XUSBPS_EP_DIRECTION_IN,probe_usb_event,UsbInstancePtr)!=XST_SUCCESS) goto out;
+#endif
     if(XUsbPs_EpSetHandler(UsbInstancePtr,ETM_BULKIN_EP,XUSBPS_EP_DIRECTION_IN,etm_usb_event,UsbInstancePtr)!=XST_SUCCESS)goto out;
 
 	/* Enable the interrupts. */
@@ -461,6 +408,7 @@ static int UsbIntrExample(XScuGic *IntcInstancePtr, XUsbPs *UsbInstancePtr,
 #if DAP_SELECTIO
         selectio_usb_poll(UsbInstancePtr);
         selectio_cdc_poll(UsbInstancePtr);
+        selectio_swo_poll(UsbInstancePtr);
 #endif
 	}
 
@@ -634,7 +582,7 @@ static void XUsbPs_EpDapEventHandler(void *CallBackRef, u8 EpNum,
 
 	switch (EventType) {
 	case XUSBPS_EP_EVENT_DATA_RX:
-		/* DAP Bulk OUT - EP 2 */
+		/* DAP bulk request */
 		Status = XUsbPs_EpBufferReceive(InstancePtr, EpNum,
 					&BufferPtr, &BufferLen, &Handle);
         if (XST_SUCCESS == Status) {
@@ -646,7 +594,7 @@ static void XUsbPs_EpDapEventHandler(void *CallBackRef, u8 EpNum,
 		break;
 
 	case XUSBPS_EP_EVENT_DATA_TX:
-		/* DAP Bulk IN - EP 1 */
+		/* DAP response completion */
 		usbd_dap_bulk_in(InstancePtr, EpNum, Data);
 		break;
 

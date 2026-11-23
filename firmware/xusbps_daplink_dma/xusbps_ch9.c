@@ -316,6 +316,7 @@ static u8  	Reply[XUSBPS_REQ_REPLY_LEN];
 			}
 			break;
 
+#if !DAP_SELECTIO
         case 0x21:
         case 0x22:
             if(SetupData->wIndex!=PROBE_HID_INTERFACE) {
@@ -326,6 +327,7 @@ static u8  	Reply[XUSBPS_REQ_REPLY_LEN];
             if(ReplyLen>SetupData->wLength) ReplyLen=SetupData->wLength;
             XUsbPs_EpBufferSend(InstancePtr,0,Reply,ReplyLen);
             break;
+#endif
         case XUSBPS_TYPE_CONFIG_DESC:
 
 			/* Set up the reply buffer with the configuration

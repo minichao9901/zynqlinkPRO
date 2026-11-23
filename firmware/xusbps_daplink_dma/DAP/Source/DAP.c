@@ -154,7 +154,7 @@ static uint8_t DAP_Info(uint8_t id, uint8_t *info) {
 
 #if DAP_SELECTIO
       if(DAP_SELECTIO_SLICE==1) info[0]&=~0x4dU; // SWD and SWO.
-      else if(swd_read32(SWD_FEATURES)&0x200U) info[0]|=0x0cU;
+      else if(swd_read32(SWD_FEATURES)&0x200U) info[0]|=0x4cU;
       if(DAP_SELECTIO_SLICE==2) info[0]&=~2U;
 #endif
       info[1] = ((DAP_UART_USB_COM_PORT != 0) ? (1U << 0) : 0U);

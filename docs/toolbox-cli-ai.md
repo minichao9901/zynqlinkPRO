@@ -433,6 +433,25 @@ JTAG 临时加载的默认配对在 `prebuilt/release-20261106/`，断电后丢�
 
 Web 支持 Cortex-M/SWD 和 RISC-V/JTAG。ARM/JTAG 的 CFG 导入会提示转到原生 OpenOCD。`toolbox.py page` 仍驱动同一 Web 工作台，适用链路与页面相同。
 
+## SelectIO 独立 USB 端点
+
+在融合开发工作树使用 [配对目录](../prebuilt/selectio-usb-split-20261123/README.md) 中的 bit、PS ELF 和初始化 Tcl。命令以 `selectio --help` 和对应子命令帮助为准。完整接口、时钟档和引脚见 [原生 CLI](selectio/README.md)。
+
+```powershell
+python -X utf8 toolbox.py probe-load --pair prebuilt/selectio-usb-split-20261123 --dry-run
+python -X utf8 toolbox.py selectio --serial 12345678 info
+python -X utf8 toolbox.py selectio identify --transport swd --clock 1000000
+python -X utf8 toolbox.py selectio read --help
+python -X utf8 toolbox.py selectio rtt --help
+python -X utf8 toolbox.py selectio scope --help
+python -X utf8 toolbox.py selectio combo --help
+python -X utf8 toolbox.py selectio swo --help
+python -X utf8 toolbox.py selectio spi --help
+python -X utf8 tools/verify_selectio_usb_split_h743.py --out build/h743-split-check
+```
+
+独立端点版的 `info` 返回 ABI 2 和 `dedicated_pipes=true`。SWO 默认使用标准 Bulk IN。RTT 与变量组合采集分别输出两个文件。H743 的 SRAM 验收夹具在加 `--execute` 后才写临时 AXI SRAM，并复核原内存、寄存器、时钟、运行态的恢复。ETM 仍用 `toolbox.py trace`，其下载端点根据枚举核对。
+
 ## ARM/JTAG 原生 CLI
 
 确认目标、J7 USB 序列号、实际配对和空闲状态，释放工作台对探针的占用。原生 OpenOCD 可用于 ARM/JTAG 调试、内存、烧录及 RTT 读取。以下是 H743、50 MHz 的只读链路探测示例，`--serial` 和 `adapter serial` 使用同一个实物序列号。

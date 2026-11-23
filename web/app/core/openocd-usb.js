@@ -19,7 +19,7 @@ export async function authorizedOpenOcdDevices(){
   return devices.includes(selectedDevice) ? [selectedDevice] : devices;
 }
 
-async function syncZynqQueue(device){
+async function syncZynqQueue(device, out){
   const control = (request, length) => device.controlTransferIn({
     requestType:'vendor', recipient:'device', request, value:0x4441, index:0x5052,
   }, length);
@@ -31,7 +31,7 @@ async function syncZynqQueue(device){
   if (reset.status !== 'ok' || reset.data?.byteLength !== 4 || reset.data.getUint32(0, true) !== 0x504144)
     throw Error('DAP 队列复位未确认');
   await device.clearHalt('in', 1);
-  await device.clearHalt('out', 2);
+  await device.clearHalt('out', out);
   const after = await control(0x5b, 32);
   if (after.status !== 'ok' || after.data?.byteLength !== 32 ||
       after.data.getUint32(12, true) === before.data.getUint32(12, true) ||
@@ -89,10 +89,10 @@ export class OpenOcdUsb {
         const endpoints = iface?.alternate.endpoints.filter(e => e.type === 'bulk') || [];
         const [out, input] = endpoints;
         if (out?.direction !== 'out' || input?.direction !== 'in' ||
-            (this.zynq && (iface.interfaceNumber !== 0 || out.endpointNumber !== 2 || input.endpointNumber !== 1)))
+            (this.zynq && (iface.interfaceNumber !== 0 || ![1,2].includes(out.endpointNumber) || input.endpointNumber !== 1)))
           throw Error('USB 接口不是 CMSIS-DAP v2');
         await this.lease.claim(iface.interfaceNumber, [out.endpointNumber, input.endpointNumber | 128]);
-        this.synchronized = d.nativeService ? d.dapSynchronized : this.zynq && await syncZynqQueue(d);
+        this.synchronized = d.nativeService ? d.dapSynchronized : this.zynq && await syncZynqQueue(d, out.endpointNumber);
         this.out = out;
         this.input = input;
         return;

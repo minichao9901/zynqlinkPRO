@@ -135,7 +135,7 @@ const u8 USBD_WinUSBDescriptorSetDescriptor[] = {
     ,/* Microsoft OS 2.0 Function Subset Header (native stream interface) */
 	0x08, 0x00,			/* wLength: 8 bytes */
 	0x02, 0x00,			/* wDescriptorType: MS_OS_20_SUBSET_HEADER_FUNCTION */
-	0x04,                /* bFirstInterface: native stream */
+	0x03,                /* bFirstInterface: native data */
 	0x00,				/* bReserved: 0 */
 	0xA0, 0x00,			/* wSubsetLength: 160 bytes */
 

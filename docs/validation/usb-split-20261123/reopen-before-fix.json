@@ -1,0 +1,147 @@
+{
+  "target": {
+    "name": "STM32H743/H742/H750/H753",
+    "cpuid": "0x411fc271",
+    "device": "0x20036450",
+    "registers": {
+      "0x58024400": "0x4025",
+      "0x58024410": "0x0",
+      "0x58024418": "0x0",
+      "0x5802441c": "0x0",
+      "0x58024420": "0x0",
+      "0x58024428": "0x2020200",
+      "0x5802442c": "0x1ff0000",
+      "0x58024430": "0x1010280",
+      "0x58024434": "0x0",
+      "0x58024438": "0x1010280",
+      "0x52002000": "0x37"
+    }
+  },
+  "usb": {
+    "vid": "0d28",
+    "pid": "0204",
+    "serial": "12345678",
+    "bcdDevice": "0x0202",
+    "configuration": 1,
+    "interfaces": [
+      {
+        "number": 0,
+        "alternate": 0,
+        "usb_class": 255,
+        "subclass": 0,
+        "protocol": 0,
+        "endpoints": [
+          {
+            "address": "0x01",
+            "attributes": 2,
+            "max_packet_bytes": 512
+          },
+          {
+            "address": "0x81",
+            "attributes": 2,
+            "max_packet_bytes": 512
+          },
+          {
+            "address": "0x82",
+            "attributes": 2,
+            "max_packet_bytes": 512
+          }
+        ]
+      },
+      {
+        "number": 1,
+        "alternate": 0,
+        "usb_class": 2,
+        "subclass": 2,
+        "protocol": 1,
+        "endpoints": [
+          {
+            "address": "0x83",
+            "attributes": 3,
+            "max_packet_bytes": 64
+          }
+        ]
+      },
+      {
+        "number": 2,
+        "alternate": 0,
+        "usb_class": 10,
+        "subclass": 0,
+        "protocol": 0,
+        "endpoints": [
+          {
+            "address": "0x04",
+            "attributes": 2,
+            "max_packet_bytes": 512
+          },
+          {
+            "address": "0x84",
+            "attributes": 2,
+            "max_packet_bytes": 512
+          }
+        ]
+      },
+      {
+        "number": 3,
+        "alternate": 0,
+        "usb_class": 255,
+        "subclass": 83,
+        "protocol": 2,
+        "endpoints": [
+          {
+            "address": "0x05",
+            "attributes": 2,
+            "max_packet_bytes": 512
+          },
+          {
+            "address": "0x85",
+            "attributes": 2,
+            "max_packet_bytes": 512
+          },
+          {
+            "address": "0x06",
+            "attributes": 2,
+            "max_packet_bytes": 512
+          },
+          {
+            "address": "0x86",
+            "attributes": 2,
+            "max_packet_bytes": 512
+          },
+          {
+            "address": "0x07",
+            "attributes": 2,
+            "max_packet_bytes": 512
+          },
+          {
+            "address": "0x87",
+            "attributes": 2,
+            "max_packet_bytes": 512
+          },
+          {
+            "address": "0x88",
+            "attributes": 2,
+            "max_packet_bytes": 512
+          },
+          {
+            "address": "0x89",
+            "attributes": 2,
+            "max_packet_bytes": 512
+          },
+          {
+            "address": "0x0a",
+            "attributes": 2,
+            "max_packet_bytes": 512
+          },
+          {
+            "address": "0x8a",
+            "attributes": 2,
+            "max_packet_bytes": 512
+          }
+        ]
+      }
+    ]
+  },
+  "failure": "native response on 0x86: expected (1, 6, 3878851673), got (1, 6, 2222497731)",
+  "restored": true
+}

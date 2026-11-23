@@ -133,6 +133,8 @@ Trace五路输入包含ELD1延时单元，默认零tap。RTCK自适应、断开�
 
 ## 开发与文档
 
+融合实验分支提供 [SelectIO 独立 USB 端点配对](prebuilt/selectio-usb-split-20261123/README.md)。原生控制、SRAM、RTT、J-Scope、ETM 和 SPI 使用独立端点，标准 SWO 走 CMSIS-DAP Bulk IN。 [端点与协议](docs/selectio-native.md) · [CLI](docs/selectio/README.md)
+
 本工作区的融合探针配置、CLI、SPI 从机转发和定向实板用例见 [SelectIO 工作手册](docs/selectio/README.md)。
 
 | 路径 | 内容 |

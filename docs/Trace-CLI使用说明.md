@@ -1,5 +1,7 @@
 # Trace CLI
 
+SelectIO 独立端点配对通过 IF3 的 EP9 IN 下载 ETM DDR 数据。Trace CLI 根据设备枚举选择相应端点，目标控制仍走 IF0 的标准 DAP 会话。 [独立端点协议](selectio-native.md) · [H743 复验](validation/usb-split-20261123/README.md)
+
 F103ZE新增环形飞行记录：`capture --flight --ring-bytes 8388608 --seconds 0.02 --trigger manual --arm-timeout 60`，其中seconds为触发后窗口；`trace trigger --record <记录目录>`从另一终端请求触发，`--cancel`请求停止。需要匹配的新bit/ELF；Fault模式为主机轮询，可错过短暂异常。覆盖/帧对齐移除及起点未知显式保留，详情与范围见[飞行记录验收](validation/session-flight-recorder-20261105/README.md)。
 
 统一入口`python -X utf8 toolbox.py trace`，转交`etm-service/trace.py`。该入口的`capture/doctor`是Zynq原生路径；离线decode/query/export等转交`etm-service/tools/cli_entry.py`及`trace_cli.py`，沿用原生二进制/TraceStore协议。

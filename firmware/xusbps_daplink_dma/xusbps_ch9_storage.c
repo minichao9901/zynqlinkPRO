@@ -40,6 +40,7 @@
 #include "probe_stream.h"
 #include "selectio_usb.h"
 #include "etm_stream.h"
+#include "usb_pipes.h"
 
 #include "xparameters.h"	/* XPAR parameters */
 #include "xusbps_endpoint.h"
@@ -236,15 +237,6 @@ typedef struct {
 
 #define USB_ENDPOINT0_MAXP		0x40
 
-/* DAPLink Endpoint Definitions */
-#define DAP_BULKIN_EP			1	/* EP 1 IN for DAP */
-#define DAP_BULKOUT_EP			2	/* EP 2 OUT for DAP */
-
-/* CDC ACM Endpoint Definitions */
-#define CDC_INT_EP			5	/* EP 5 IN for CDC notifications */
-#define CDC_BULKIN_EP			3	/* EP 3 IN for CDC data */
-#define CDC_BULKOUT_EP			4	/* EP 4 OUT for CDC data */
-
 #define USB_DEVICE_DESC			0x01
 #define USB_CONFIG_DESC			0x02
 #define USB_STRING_DESC			0x03
@@ -297,7 +289,7 @@ u32 XUsbPs_Ch9SetupDevDescReply(u8 *BufPtr, u32 BufLen)
 		USB_ENDPOINT0_MAXP,		/* bMaxPacketSize0: 64 */
 		be2les(DAPLINK_VID),		/* idVendor: 0x0D28 (ARM) */
 		be2les(DAPLINK_PID),		/* idProduct: 0x0204 (CMSIS-DAP) */
-		be2les(DAP_SELECTIO ? 0x0201 : 0x0102),			/* bcdDevice: 1.02, refresh cached Windows descriptors */
+		be2les(DAP_SELECTIO ? 0x0202 : 0x0102),			/* bcdDevice: 1.02, refresh cached Windows descriptors */
 		0x01,				/* iManufacturer */
 		0x02,				/* iProduct */
 		0x03,				/* iSerialNumber */
@@ -357,7 +349,7 @@ u32 XUsbPs_Ch9SetupCfgDescReply(u8 *BufPtr, u32 BufLen)
 	u16 totalLengthOffset = offset;
 	configDesc[offset++] = 0x00;
 	configDesc[offset++] = 0x00;
-	configDesc[offset++] = DAP_SELECTIO ? 5 : 4; /* bNumInterfaces */
+	configDesc[offset++] = 4; /* bNumInterfaces */
 	configDesc[offset++] = 0x01;		/* bConfigurationValue */
 	configDesc[offset++] = 0x00;		/* iConfiguration */
 	configDesc[offset++] = 0x80;		/* bmAttributes: Bus powered */
@@ -369,7 +361,7 @@ u32 XUsbPs_Ch9SetupCfgDescReply(u8 *BufPtr, u32 BufLen)
 	configDesc[offset++] = USB_INTERFACE_CFG_DESC;	/* bDescriptorType */
 	configDesc[offset++] = 0x00;		/* bInterfaceNumber: 0 */
 	configDesc[offset++] = 0x00;		/* bAlternateSetting */
-	configDesc[offset++] = 0x04;		/* DAP IN/OUT + HSS IN + ETM IN */
+	configDesc[offset++] = DAP_SELECTIO ? 3 : 4; /* IF0 endpoint count */
 	configDesc[offset++] = USB_CLASS_VENDOR;	/* bInterfaceClass: Vendor Specific */
 	configDesc[offset++] = 0x00;		/* bInterfaceSubClass */
 	configDesc[offset++] = 0x00;		/* bInterfaceProtocol */
@@ -378,7 +370,7 @@ u32 XUsbPs_Ch9SetupCfgDescReply(u8 *BufPtr, u32 BufLen)
 	/* DAP Bulk OUT Endpoint Descriptor (EP 2 OUT: 0x02) */
 	configDesc[offset++] = 0x07;		/* bLength */
 	configDesc[offset++] = USB_ENDPOINT_CFG_DESC;	/* bDescriptorType */
-	configDesc[offset++] = 0x02;		/* bEndpointAddress: OUT EP2 */
+	configDesc[offset++] = USB_DAP_OUT;
 	configDesc[offset++] = 0x02;		/* bmAttributes: Bulk */
 	configDesc[offset++] = 0x00;		/* wMaxPacketSize LSB: 512 */
 	configDesc[offset++] = 0x02;		/* wMaxPacketSize MSB: 512 */
@@ -387,16 +379,22 @@ u32 XUsbPs_Ch9SetupCfgDescReply(u8 *BufPtr, u32 BufLen)
 	/* DAP Bulk IN Endpoint Descriptor (EP 1 IN: 0x81) */
 	configDesc[offset++] = 0x07;		/* bLength */
 	configDesc[offset++] = USB_ENDPOINT_CFG_DESC;	/* bDescriptorType */
-	configDesc[offset++] = 0x81;		/* bEndpointAddress: IN EP1 */
+	configDesc[offset++] = USB_IN_ADDRESS(USB_DAP_IN);
 	configDesc[offset++] = 0x02;		/* bmAttributes: Bulk */
 	configDesc[offset++] = 0x00;		/* wMaxPacketSize LSB: 512 */
 	configDesc[offset++] = 0x02;		/* wMaxPacketSize MSB: 512 */
 	configDesc[offset++] = 0x00;		/* bInterval */
 
+#if DAP_SELECTIO
+    { const u8 swo[] = {7,5,USB_IN_ADDRESS(USB_SWO_IN),2,0,2,0};
+      memcpy(configDesc+offset,swo,sizeof(swo)); offset+=sizeof(swo); }
+#else
     { const u8 hss[] = {7,5,0x87,2,0,2,0};
       memcpy(configDesc+offset,hss,sizeof(hss)); offset+=sizeof(hss); }
     { const u8 etm[] = {7,5,0x82,2,0,2,0};
       memcpy(configDesc+offset,etm,sizeof(etm));offset+=sizeof(etm); }
+
+#endif
 
 	/* ==================== CDC ACM Interface (Interfaces 1 & 2) ==================== */
 	/* IAD (Interface Association Descriptor) for CDC */
@@ -450,7 +448,7 @@ u32 XUsbPs_Ch9SetupCfgDescReply(u8 *BufPtr, u32 BufLen)
 	/* CDC Interrupt IN Endpoint Descriptor (EP 4 IN: 0x84) */
 	configDesc[offset++] = 0x07;		/* bLength */
 	configDesc[offset++] = USB_ENDPOINT_CFG_DESC;	/* bDescriptorType */
-	configDesc[offset++] = 0x85;		/* bEndpointAddress: IN EP5 */
+	configDesc[offset++] = USB_IN_ADDRESS(USB_CDC_NOTIFY);
 	configDesc[offset++] = 0x03;		/* bmAttributes: Interrupt */
 	configDesc[offset++] = 0x40;		/* wMaxPacketSize LSB: 64 */
 	configDesc[offset++] = 0x00;		/* wMaxPacketSize MSB */
@@ -470,7 +468,7 @@ u32 XUsbPs_Ch9SetupCfgDescReply(u8 *BufPtr, u32 BufLen)
 	/* CDC Bulk OUT Endpoint Descriptor (EP 4 OUT: 0x04) */
 	configDesc[offset++] = 0x07;		/* bLength */
 	configDesc[offset++] = USB_ENDPOINT_CFG_DESC;	/* bDescriptorType */
-	configDesc[offset++] = 0x04;		/* bEndpointAddress: OUT EP4 */
+	configDesc[offset++] = USB_CDC_OUT;
 	configDesc[offset++] = 0x02;		/* bmAttributes: Bulk */
 	configDesc[offset++] = 0x00;		/* wMaxPacketSize LSB: 512 */
 	configDesc[offset++] = 0x02;		/* wMaxPacketSize MSB: 512 */
@@ -479,12 +477,27 @@ u32 XUsbPs_Ch9SetupCfgDescReply(u8 *BufPtr, u32 BufLen)
 	/* CDC Bulk IN Endpoint Descriptor (EP 3 IN: 0x83) */
 	configDesc[offset++] = 0x07;		/* bLength */
 	configDesc[offset++] = USB_ENDPOINT_CFG_DESC;	/* bDescriptorType */
-	configDesc[offset++] = 0x83;		/* bEndpointAddress: IN EP3 */
+	configDesc[offset++] = USB_IN_ADDRESS(USB_CDC_IN);
 	configDesc[offset++] = 0x02;		/* bmAttributes: Bulk */
 	configDesc[offset++] = 0x00;		/* wMaxPacketSize LSB: 512 */
 	configDesc[offset++] = 0x02;		/* wMaxPacketSize MSB: 512 */
 	configDesc[offset++] = 0x00;		/* bInterval */
 
+#if DAP_SELECTIO
+#define BULK_ENDPOINT(address) 7,5,address,2,0,2,0
+    { const u8 native[] = {
+        9,4,USB_NATIVE_INTERFACE,0,10,0xff,0x53,2,4,
+        BULK_ENDPOINT(USB_NATIVE_CONTROL), BULK_ENDPOINT(USB_IN_ADDRESS(USB_NATIVE_CONTROL)),
+        BULK_ENDPOINT(USB_NATIVE_MEMORY), BULK_ENDPOINT(USB_IN_ADDRESS(USB_NATIVE_MEMORY)),
+        BULK_ENDPOINT(USB_NATIVE_RTT), BULK_ENDPOINT(USB_IN_ADDRESS(USB_NATIVE_RTT)),
+        BULK_ENDPOINT(USB_IN_ADDRESS(USB_NATIVE_SCOPE)), BULK_ENDPOINT(USB_IN_ADDRESS(USB_ETM_IN)),
+        BULK_ENDPOINT(USB_NATIVE_SPI), BULK_ENDPOINT(USB_IN_ADDRESS(USB_NATIVE_SPI))
+      };
+      memcpy(configDesc+offset,native,sizeof native);
+      offset+=sizeof native;
+    }
+#undef BULK_ENDPOINT
+#else
     { const u8 hid[] = {
         9,4,PROBE_HID_INTERFACE,0,2,3,0,0,4,
         9,0x21,0x11,1,0,1,0x22,0,0,
@@ -496,15 +509,6 @@ u32 XUsbPs_Ch9SetupCfgDescReply(u8 *BufPtr, u32 BufLen)
       configDesc[offset+17]=(u8)(probe_hid_report_size>>8);
       offset+=sizeof(hid); }
 
-	#if DAP_SELECTIO
-    { const u8 native[] = {
-        9,4,4,0,2,0xff,0x53,1,5,
-        7,5,0x01,2,0,2,0,
-        7,5,0x84,2,0,2,0
-      };
-      memcpy(configDesc+offset,native,sizeof native);
-      offset+=sizeof native;
-    }
 #endif
     /* Update wTotalLength */
 	wTotalLength = offset;
@@ -549,9 +553,10 @@ u32 XUsbPs_Ch9SetupStrDescReply(u8 *BufPtr, u32 BufLen, u8 Index)
 		"CherryUSB",            /* iManufacturer */
 		"CMSIS-DAP",            /* iProduct */
 		"12345678",             /* iSerialNumber */
-        "zynqlinkPRO HID",
 #if DAP_SELECTIO
-        "ZynqLink native stream",
+        "ZynqLink native data",
+#else
+        "zynqlinkPRO HID",
 #endif
 	};
 	char *String;
@@ -613,15 +618,15 @@ u32 XUsbPs_Ch9SetupStrDescReply(u8 *BufPtr, u32 BufLen, u8 Index)
 ******************************************************************************/
 int XUsbPs_DapResetEndpoints(XUsbPs *InstancePtr)
 {
-    u32 flush = (1U << DAP_BULKOUT_EP) | (1U << (16 + DAP_BULKIN_EP));
+    u32 flush = (1U << USB_DAP_OUT) | (1U << (16 + USB_DAP_IN));
     u32 timeout = 1000000U;
     u32 td;
     int engine_status;
-    XUsbPs_EpIn *in = &InstancePtr->DeviceConfig.Ep[DAP_BULKIN_EP].In;
+    XUsbPs_EpIn *in = &InstancePtr->DeviceConfig.Ep[USB_DAP_IN].In;
     extern int chry_dap_usb_session_reset(void);
 
-    XUsbPs_EpDisable(InstancePtr, DAP_BULKOUT_EP, XUSBPS_EP_DIRECTION_OUT);
-    XUsbPs_EpDisable(InstancePtr, DAP_BULKIN_EP, XUSBPS_EP_DIRECTION_IN);
+    XUsbPs_EpDisable(InstancePtr, USB_DAP_OUT, XUSBPS_EP_DIRECTION_OUT);
+    XUsbPs_EpDisable(InstancePtr, USB_DAP_IN, XUSBPS_EP_DIRECTION_IN);
     XUsbPs_WriteReg(InstancePtr->Config.BaseAddress, XUSBPS_EPFLUSH_OFFSET, flush);
     while ((XUsbPs_ReadReg(InstancePtr->Config.BaseAddress,
                           XUSBPS_EPFLUSH_OFFSET) & flush) && --timeout) {}
@@ -632,30 +637,30 @@ int XUsbPs_DapResetEndpoints(XUsbPs *InstancePtr)
      * SDK 2018.3 ReconfigureEp only restores IN links/termination. A transfer
      * abandoned by the host would therefore make the next send fail forever.
      * Clear tokens after DMA is quiescent, before rebuilding either ring. */
-    for (td = 0; td < InstancePtr->DeviceConfig.EpCfg[DAP_BULKIN_EP].In.NumBufs; ++td) {
+    for (td = 0; td < InstancePtr->DeviceConfig.EpCfg[USB_DAP_IN].In.NumBufs; ++td) {
         XUsbPs_dTDInvalidateCache(&in->dTDs[td]);
         XUsbPs_WritedTD(&in->dTDs[td], XUSBPS_dTDTOKEN, 0U);
         XUsbPs_dTDFlushCache(&in->dTDs[td]);
     }
     if (XUsbPs_ReconfigureEp(InstancePtr, &InstancePtr->DeviceConfig,
-            DAP_BULKOUT_EP, XUSBPS_EP_DIRECTION_OUT, 0) != XST_SUCCESS ||
+            USB_DAP_OUT, XUSBPS_EP_DIRECTION_OUT, 0) != XST_SUCCESS ||
         XUsbPs_ReconfigureEp(InstancePtr, &InstancePtr->DeviceConfig,
-            DAP_BULKIN_EP, XUSBPS_EP_DIRECTION_IN, 0) != XST_SUCCESS)
+            USB_DAP_IN, XUSBPS_EP_DIRECTION_IN, 0) != XST_SUCCESS)
         return XST_FAILURE;
     XUsbPs_dQHInvalidateCache(in->dQH);
     XUsbPs_WritedQH(in->dQH, XUSBPS_dQHdTDTOKEN, 0U);
     XUsbPs_WritedQH(in->dQH, XUSBPS_dQHdTDNLP, 1U);
     XUsbPs_dQHFlushCache(in->dQH);
-    XUsbPs_dQHInvalidateCache(InstancePtr->DeviceConfig.Ep[DAP_BULKOUT_EP].Out.dQH);
-    XUsbPs_WritedQH(InstancePtr->DeviceConfig.Ep[DAP_BULKOUT_EP].Out.dQH,
+    XUsbPs_dQHInvalidateCache(InstancePtr->DeviceConfig.Ep[USB_DAP_OUT].Out.dQH);
+    XUsbPs_WritedQH(InstancePtr->DeviceConfig.Ep[USB_DAP_OUT].Out.dQH,
                    XUSBPS_dQHdTDTOKEN, 0U);
-    XUsbPs_dQHFlushCache(InstancePtr->DeviceConfig.Ep[DAP_BULKOUT_EP].Out.dQH);
+    XUsbPs_dQHFlushCache(InstancePtr->DeviceConfig.Ep[USB_DAP_OUT].Out.dQH);
     engine_status=chry_dap_usb_session_reset();
-    XUsbPs_EpEnable(InstancePtr, DAP_BULKOUT_EP, XUSBPS_EP_DIRECTION_OUT);
-    XUsbPs_EpEnable(InstancePtr, DAP_BULKIN_EP, XUSBPS_EP_DIRECTION_IN);
-    XUsbPs_SetBits(InstancePtr, XUSBPS_EPCRn_OFFSET(DAP_BULKOUT_EP), XUSBPS_EPCR_RXR_MASK);
-    XUsbPs_SetBits(InstancePtr, XUSBPS_EPCRn_OFFSET(DAP_BULKIN_EP), XUSBPS_EPCR_TXR_MASK);
-    XUsbPs_EpPrime(InstancePtr, DAP_BULKOUT_EP, XUSBPS_EP_DIRECTION_OUT);
+    XUsbPs_EpEnable(InstancePtr, USB_DAP_OUT, XUSBPS_EP_DIRECTION_OUT);
+    XUsbPs_EpEnable(InstancePtr, USB_DAP_IN, XUSBPS_EP_DIRECTION_IN);
+    XUsbPs_SetBits(InstancePtr, XUSBPS_EPCRn_OFFSET(USB_DAP_OUT), XUSBPS_EPCR_RXR_MASK);
+    XUsbPs_SetBits(InstancePtr, XUSBPS_EPCRn_OFFSET(USB_DAP_IN), XUSBPS_EPCR_TXR_MASK);
+    XUsbPs_EpPrime(InstancePtr, USB_DAP_OUT, XUSBPS_EP_DIRECTION_OUT);
     return engine_status<0 ? XST_FAILURE : XST_SUCCESS;
 }
 
@@ -670,7 +675,7 @@ void XUsbPs_SetConfiguration(XUsbPs *InstancePtr, int ConfigIdx)
         selectio_usb_reset();
 #endif
         etm_usb_reset();
-        for(ep=1;ep<8;ep++) {
+        for(ep=1;ep<USB_ENDPOINT_COUNT;ep++) {
             XUsbPs_EpDisable(InstancePtr,ep,XUSBPS_EP_DIRECTION_IN|XUSBPS_EP_DIRECTION_OUT);
             XUsbPs_EpFlush(InstancePtr,ep,XUSBPS_EP_DIRECTION_IN|XUSBPS_EP_DIRECTION_OUT);
         }
@@ -687,49 +692,49 @@ void XUsbPs_SetConfiguration(XUsbPs *InstancePtr, int ConfigIdx)
 #endif
     etm_usb_configured(InstancePtr);
 	/* Enable DAP Endpoints */
-	XUsbPs_EpEnable(InstancePtr, DAP_BULKOUT_EP, XUSBPS_EP_DIRECTION_OUT);
-	XUsbPs_EpEnable(InstancePtr, DAP_BULKIN_EP, XUSBPS_EP_DIRECTION_IN);
+	XUsbPs_EpEnable(InstancePtr, USB_DAP_OUT, XUSBPS_EP_DIRECTION_OUT);
+	XUsbPs_EpEnable(InstancePtr, USB_DAP_IN, XUSBPS_EP_DIRECTION_IN);
 
 	/* Enable CDC Endpoints */
-	XUsbPs_EpEnable(InstancePtr, CDC_INT_EP, XUSBPS_EP_DIRECTION_IN);  /* CDC INT EP */
-	XUsbPs_EpEnable(InstancePtr, CDC_BULKOUT_EP, XUSBPS_EP_DIRECTION_OUT);
-	XUsbPs_EpEnable(InstancePtr, CDC_BULKIN_EP, XUSBPS_EP_DIRECTION_IN);
+	XUsbPs_EpEnable(InstancePtr, USB_CDC_NOTIFY, XUSBPS_EP_DIRECTION_IN);  /* CDC INT EP */
+	XUsbPs_EpEnable(InstancePtr, USB_CDC_OUT, XUSBPS_EP_DIRECTION_OUT);
+	XUsbPs_EpEnable(InstancePtr, USB_CDC_IN, XUSBPS_EP_DIRECTION_IN);
 
 	/* Configure DAP Bulk OUT Endpoint */
-	XUsbPs_SetBits(InstancePtr, XUSBPS_EPCRn_OFFSET(DAP_BULKOUT_EP),
+	XUsbPs_SetBits(InstancePtr, XUSBPS_EPCRn_OFFSET(USB_DAP_OUT),
 					XUSBPS_EPCR_RXT_BULK_MASK |
 					XUSBPS_EPCR_RXR_MASK);
 
 	/* Configure DAP Bulk IN Endpoint */
-	XUsbPs_SetBits(InstancePtr, XUSBPS_EPCRn_OFFSET(DAP_BULKIN_EP),
+	XUsbPs_SetBits(InstancePtr, XUSBPS_EPCRn_OFFSET(USB_DAP_IN),
 					XUSBPS_EPCR_TXT_BULK_MASK |
 					XUSBPS_EPCR_TXR_MASK);
 
 	/* Configure CDC Interrupt IN Endpoint */
-	XUsbPs_SetBits(InstancePtr, XUSBPS_EPCRn_OFFSET(CDC_INT_EP),
+	XUsbPs_SetBits(InstancePtr, XUSBPS_EPCRn_OFFSET(USB_CDC_NOTIFY),
 					XUSBPS_EPCR_TXT_INTR_MASK |
 					XUSBPS_EPCR_TXR_MASK);
 
 	/* Configure CDC Bulk OUT Endpoint */
-	XUsbPs_SetBits(InstancePtr, XUSBPS_EPCRn_OFFSET(CDC_BULKOUT_EP),
+	XUsbPs_SetBits(InstancePtr, XUSBPS_EPCRn_OFFSET(USB_CDC_OUT),
 					XUSBPS_EPCR_RXT_BULK_MASK |
 					XUSBPS_EPCR_RXR_MASK);
 
 	/* Configure CDC Bulk IN Endpoint */
-	XUsbPs_SetBits(InstancePtr, XUSBPS_EPCRn_OFFSET(CDC_BULKIN_EP),
+	XUsbPs_SetBits(InstancePtr, XUSBPS_EPCRn_OFFSET(USB_CDC_IN),
 					XUSBPS_EPCR_TXT_BULK_MASK |
 					XUSBPS_EPCR_TXR_MASK);
 
 	/* Prime DAP Bulk OUT endpoint for receiving data */
 	{
-		int ps = XUsbPs_EpPrime(InstancePtr, DAP_BULKOUT_EP, XUSBPS_EP_DIRECTION_OUT);
-		xil_printf("[DAP] PRIME ep2=%d epcr2=0x%08x epstat=0x%08x eprdy=0x%08x\r\n",
+		int ps = XUsbPs_EpPrime(InstancePtr, USB_DAP_OUT, XUSBPS_EP_DIRECTION_OUT);
+		xil_printf("[DAP] PRIME DAP=%d epcr=0x%08x epstat=0x%08x eprdy=0x%08x\r\n",
 			ps,
-			XUsbPs_ReadReg(InstancePtr->Config.BaseAddress, XUSBPS_EPCRn_OFFSET(2)),
+			XUsbPs_ReadReg(InstancePtr->Config.BaseAddress, XUSBPS_EPCRn_OFFSET(USB_DAP_OUT)),
 			XUsbPs_ReadReg(InstancePtr->Config.BaseAddress, XUSBPS_EPSTAT_OFFSET),
 			XUsbPs_ReadReg(InstancePtr->Config.BaseAddress, XUSBPS_EPRDY_OFFSET));
 	}
 
 	/* Prime CDC Bulk OUT endpoint for receiving data */
-	XUsbPs_EpPrime(InstancePtr, CDC_BULKOUT_EP, XUSBPS_EP_DIRECTION_OUT);
+	XUsbPs_EpPrime(InstancePtr, USB_CDC_OUT, XUSBPS_EP_DIRECTION_OUT);
 }

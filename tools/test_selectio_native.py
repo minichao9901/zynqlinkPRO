@@ -113,6 +113,35 @@ class Endpoint:
 
 
 class NativeFrameTests(unittest.TestCase):
+    def test_split_pipe_routing_and_sequence_spaces(self):
+        usb = Mock()
+        usb.write.side_effect = lambda endpoint, data, timeout: len(data)
+        native = NativeStream(usb, 90, split=True)
+        requests = [(6, 2), (6, 4), (6, 1), (1, 6), (8, 6), (4, 2)]
+        expected = [(5, 0x88, 90), (5, 0x85, 91), (7, 0x87, 90),
+                    (6, 0x86, 90), (7, 0x87, 91), (10, 0x8a, 90)]
+        pending = [native._write(channel, operation, b"") for channel, operation in requests]
+        for call, (out, _, seq) in zip(usb.write.call_args_list, expected):
+            endpoint, frame = call.args
+            self.assertEqual(endpoint, out)
+            self.assertEqual(HEADER.unpack_from(frame)[5], seq)
+        for (channel, operation), (_, inp, seq), pending_seq in zip(requests, expected, pending):
+            usb.read.return_value = HEADER.pack(b"ZLK1", channel, operation, 0, 0, seq, 0)
+            self.assertEqual(native._read(channel, operation, pending_seq), b"")
+            self.assertEqual(usb.read.call_args.args[0], inp)
+
+    def test_split_session_discards_stale_frames_once_per_in_pipe(self):
+        usb = Mock()
+        native = NativeStream(usb, 15, split=True)
+        native.unsynchronized_in = {0x86, 0x87}
+        stale = HEADER.pack(b"ZLK1", 1, 6, 0, 0, 10, 0)
+        current = HEADER.pack(b"ZLK1", 1, 6, 0, 0, 15, 0)
+        usb.read.side_effect = [stale, current, stale]
+        self.assertEqual(native._read(1, 6, 15), b"")
+        self.assertEqual(native.unsynchronized_in, {0x87})
+        with self.assertRaisesRegex(RuntimeError, "expected"):
+            native._read(1, 6, 16)
+
     def test_negotiation_and_previous_session(self):
         for advertised in (4096, 16384):
             with self.subTest(advertised=advertised):
