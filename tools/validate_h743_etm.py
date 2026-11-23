@@ -1,7 +1,8 @@
 """H743 continuous CDC load plus 10/200/500/1000 ms native ETMv4 captures.
 
-The firmware/clock profile must already be programmed and verified. Never
-programs Flash or alters target PLLs. Preserve failed captures; do not retry.
+Start with the programmed and verified target firmware and clock profile.
+This test leaves Flash and target PLLs alone, records failed windows, and
+continues only after confirming target recovery.
 """
 import argparse
 from datetime import datetime, timezone
@@ -91,12 +92,35 @@ def main():
                 row['echoInsideWindow']=sum(r['exact'] and lo<=r['sentUnix']<=r['receivedUnix']<=hi for r in stimulus['rows'])
             row.update(echoPackets=len(stimulus['rows']),echoExact=all(r['exact'] for r in stimulus['rows']),
                        echoError=stimulus['error'],echoThreadStopped=stimulus['threadStopped'])
-            rows.append(row);(a.out/'summary.json').write_text(json.dumps(rows,indent=2)+'\n')
-            assert completed.returncode==0 and row['ok'] and row['echoExact'] and not row['echoError'], row
-            assert window<200 or row.get('echoInsideWindow',0)>0, 'No echo proven inside hardware window'
-            assert q.get('requestedWindowComplete') and not q.get('loss'),q
-            assert row['result']['summary']['packetIssues']==0,row
-            print('PASS',label,round(elapsed,3),'echoInside',row.get('echoInsideWindow'),flush=True)
+            if completed.returncode == 0 and row['ok']:
+                verification = subprocess.run(
+                    [sys.executable, '-X', 'utf8', 'toolbox.py', 'trace', 'verify',
+                     '--record', str(record), '--require-decoded'],
+                    cwd=ROOT, capture_output=True)
+                (a.out/(label+'-verify.json')).write_bytes(verification.stdout)
+                try:
+                    verified = json.loads(verification.stdout)
+                except ValueError:
+                    verified = {'error': verification.stderr.decode('utf8', errors='replace') or
+                                         'trace verify returned no valid JSON'}
+                row['verification'] = dict(passed=verification.returncode == 0 and verified.get('ok') is True,
+                                           quality=(verified.get('result') or {}).get('quality'),
+                                           error=verified.get('error'))
+            row['passed'] = bool(row.get('verification', {}).get('passed') and
+                                 q.get('requestedWindowComplete') and not q.get('loss') and
+                                 row['echoExact'] and not row['echoError'] and row['echoThreadStopped'] and
+                                 (window < 200 or row.get('echoInsideWindow', 0) > 0))
+            receipt = record / 'acceptance.json'
+            restored = json.loads(receipt.read_text(encoding='utf8')) if receipt.is_file() else {}
+            row['restored'] = all(restored.get(key) is True for key in
+                                  ('restored', 'rcc_configuration_unchanged', 'run_halt_restored'))
+            rows.append(row)
+            (a.out/'summary.json').write_text(json.dumps(rows,indent=2)+'\n')
+            if not row['restored']:
+                raise RuntimeError(f'{label}: target restoration unconfirmed; remaining windows blocked')
+            print('PASS' if row['passed'] else 'FAIL',label,round(elapsed,3),
+                  'echoInside',row.get('echoInsideWindow'),flush=True)
+    return int(not all(row['passed'] for row in rows))
 
 
-if __name__=='__main__':main()
+if __name__=='__main__':raise SystemExit(main())

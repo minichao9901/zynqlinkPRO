@@ -1,4 +1,4 @@
-"""Check the split USB pipes with a guarded H743 AXI-SRAM fixture."""
+"""Check the split USB pipes with guarded H743 AXI SRAM and DTCM fixtures."""
 import argparse
 import csv
 import hashlib
@@ -14,20 +14,20 @@ import usb.util
 
 from benchmark_rtt_forward import core_read, core_write
 from dap_pipeline_bench import cmd, open_dap, setup
-from selectio_native import native_connection
+from selectio_native import NativeStatusError, native_connection
 from selectio_rtt import Ring
 from selectio_scope import export_scope
 from target_snapshot import same_clock_configuration, snapshot
 from test_probe_board import Memory
 
-BASE = 0x24040000
+AXI_BASE = 0x24040000
+DTCM_BASE = 0x20008000
 SIZE = 0x5000
-CONTROL_BLOCK = BASE + 0x200
-SAMPLES = BASE + 0x800
+CONTROL_OFFSET = 0x200
+SAMPLES_OFFSET = 0x800
 VALUES = tuple(0x13579bdf ^ (i * 0x1234567) for i in range(8))
 DHCSR, CCR = 0xe000edf0, 0xe000ed14
-PROFILE = (1, 8, 24, 4)
-HZ = 50_000_000
+DEFAULT_PROFILES = {"swd": (1, 8, 24, 4), "jtag": (2, 16, 28, 33)}
 
 
 def require(condition, message):
@@ -43,18 +43,17 @@ def halt(mem):
     raise RuntimeError("H743 core did not halt")
 
 
-def fixture(producer=b""):
+def fixture(base, running=False):
     data = bytearray(SIZE)
-    data[:len(producer)] = producer
-    struct.pack_into("<16sII", data, 0x200, b"SEGGER RTT", 1, int(not producer))
-    struct.pack_into("<6I", data, 0x218, 0, BASE + 0x1000, 8192, 0, 0, 0)
-    if not producer:
-        struct.pack_into("<6I", data, 0x230, 0, BASE + 0x3000, 128, 126, 126, 0)
+    struct.pack_into("<16sII", data, 0x200, b"SEGGER RTT", 1, int(not running))
+    struct.pack_into("<6I", data, 0x218, 0, base + 0x1000, 8192, 0, 0, 0)
+    if not running:
+        struct.pack_into("<6I", data, 0x230, 0, base + 0x3000, 128, 126, 126, 0)
     struct.pack_into("<8I", data, 0x800, *VALUES)
     return data
 
 
-def build_producer(folder):
+def build_producer(folder, code_base, data_base):
     gcc = shutil.which("arm-none-eabi-gcc")
     require(gcc is not None, "arm-none-eabi-gcc missing")
     gcc = Path(gcc)
@@ -62,7 +61,7 @@ def build_producer(folder):
     elf, binary = folder / "producer.elf", folder / "producer.bin"
     source = Path(__file__).resolve().parents[1] / "firmware/target/probe_rtt_ram.S"
     subprocess.run([gcc, "-mcpu=cortex-m3", "-mthumb", "-nostdlib", "-Wl,--build-id=none",
-                    f"-Wl,-Ttext={BASE:#x}", f"-Wa,--defsym,FIXTURE_BASE={BASE:#x}",
+                    f"-Wl,-Ttext={code_base:#x}", f"-Wa,--defsym,FIXTURE_BASE={data_base:#x}",
                     "-Wa,--defsym,RTT_FROM_DESCRIPTOR=1", "-Wl,-e,producer", source, "-o", elf], check=True)
     subprocess.run([objcopy, "-O", "binary", "-j", ".text", elf, binary], check=True)
     data = binary.read_bytes()
@@ -70,30 +69,70 @@ def build_producer(folder):
     return data
 
 
-def memory_and_down(native, mem):
-    addr = BASE + 0x3020
+def memory_and_down(native, mem, profile, clock_hz, base):
+    addr = base + 0x3020
     size = 4032
     pattern = hashlib.shake_256(b"split-axi-sram").digest(size)
-    with native.memory(*PROFILE, HZ):
+    denied = None
+    with native.memory(*profile, clock_hz):
+        if profile[0] == 2:
+            request = struct.pack("<BBHI", 0, 0, 1, 0x24043000).ljust(16, b"\0")
+            try:
+                native.exchange(1, 6, request)
+            except NativeStatusError as error:
+                denied = error.status
+            require(denied == 1, "JTAG invalid AXI page was not rejected")
         require(native.bulk(addr, size, pattern) == b"", "missing write completion")
         require(native.bulk(addr, size) == pattern, "native SRAM read mismatch")
-        clock = native.memory_clock(1, 200_000_000, HZ)
+        clock = native.memory_clock(profile[0], 200_000_000, clock_hz)
     require(mem.read(addr, size) == pattern, "independent SRAM readback mismatch")
     # The two directions of EP7 carry the terminal transactions, including wrap.
-    with native.memory(*PROFILE, HZ, rtt=True):
-        down = Ring(native, CONTROL_BLOCK, 0, True)
+    with native.memory(*profile, clock_hz, rtt=True):
+        down = Ring(native, base + CONTROL_OFFSET, 0, True)
         payload = b"split-RTT-DOWN"
         sent = down.send(payload)
         sent += down.send(payload[sent:])
-    require(sent == len(payload) and mem.read(BASE + 0x307e, 2) + mem.read(BASE + 0x3000, 12) == payload,
+    require(sent == len(payload) and mem.read(base + 0x307e, 2) + mem.read(base + 0x3000, 12) == payload,
             "RTT DOWN wrap mismatch")
-    return dict(read_write_bytes=size, rtt_down=sent, clock=clock)
+    return dict(address=hex(addr), read_write_bytes=size, rtt_down=sent, clock=clock, invalid_axi_status=denied)
 
 
-def scope_only(native, folder, seconds):
-    native.exchange(0, 2, bytes(PROFILE))
+def rtt_only(native, mem, profile, clock_hz, base):
+    payload = hashlib.shake_256(b"H743 isolated RTT UP").digest(257)
+    ring, length, tail = base + 0x1000, 8192, 129
+    mem.write(ring + length - tail, payload[:tail])
+    mem.write(ring, payload[tail:])
+    mem.write(base + CONTROL_OFFSET + 36, struct.pack("<II", len(payload) - tail, length - tail))
+    native.exchange(0, 2, bytes(profile))
+    channel = 2
+    native.exchange(channel, 0, b"\1")
+    started = False
+    try:
+        for op, data in ((12, bytes((profile[0],))), (7, struct.pack("<IHBB", clock_hz, 1024, 0, 1)),
+                         (1, struct.pack("<IIB", base + CONTROL_OFFSET, 256, 0))):
+            rc, _ = native.control(channel, op, data)
+            require(rc == 0, f"RTT UP control {op}: {rc}")
+        started = True
+        received = bytearray()
+        until = time.monotonic() + 3
+        while len(received) < len(payload) and time.monotonic() < until:
+            received.extend(native.exchange(channel, 1))
+        require(received == payload, "RTT UP wrap mismatch")
+        rc, status = native.control(channel, 0)
+        require(rc == 0 and status[3] == len(payload), f"RTT UP STOP: {rc}, {status}")
+        started = False
+        require(not native.exchange(channel, 1), "unexpected RTT UP tail")
+        return dict(bytes=len(received), sha256=hashlib.sha256(received).hexdigest(), stop=list(status))
+    finally:
+        if started:
+            native.control(channel, 0)
+        native.exchange(channel, 0, b"\0")
+
+
+def scope_only(native, folder, seconds, profile, clock_hz, count, base):
+    native.exchange(0, 2, bytes(profile))
     channel = 3
-    record = folder / "scope.hss"
+    record = folder / f"scope-{count}.hss"
 
     def control(op, data=b"", busy=False):
         rc, state = native.control(channel, op, data)
@@ -103,10 +142,10 @@ def scope_only(native, folder, seconds):
     native.exchange(channel, 0, b"\1")
     started = False
     try:
-        control(12, b"\1")
-        control(3, struct.pack("<I", HZ))
-        plan = struct.pack("<IBB", 24000, 0, 8)
-        plan += b"".join(struct.pack("<IBB", SAMPLES + 4*i, 4, 4) for i in range(8))
+        control(12, bytes((profile[0],)))
+        control(3, struct.pack("<I", clock_hz))
+        plan = struct.pack("<IBB", 24000, 0, count)
+        plan += b"".join(struct.pack("<IBB", base + SAMPLES_OFFSET + 4*i, 4, 4) for i in range(count))
         control(10, plan)
         control(1)
         started = True
@@ -122,7 +161,7 @@ def scope_only(native, folder, seconds):
             while data := native.exchange(channel, 1):
                 fh.write(data)
         state = control(2)[1]
-        check = export_scope(record, expected=struct.pack("<8I", *VALUES))
+        check = export_scope(record, expected=struct.pack(f"<{count}I", *VALUES[:count]))
         require(state[2] == check["groups"] and check["groups"] > 0, "HSS STOP group total mismatch")
         return check
     finally:
@@ -131,9 +170,12 @@ def scope_only(native, folder, seconds):
         native.exchange(channel, 0, b"\0")
 
 
-def combo(native, mem, folder, seconds, sample_hz):
-    args = struct.pack("<4BIIBBBB8I", *PROFILE, CONTROL_BLOCK, 24_000_000 // sample_hz, 8, 0, 1, 0,
-                       *(SAMPLES + 4*i for i in range(8)))
+def combo(native, mem, folder, seconds, sample_hz, profile, clock_hz, base):
+    args = struct.pack("<4BIIBBBB8I", *profile, base + CONTROL_OFFSET, 24_000_000 // sample_hz, 8, 0,
+                       int(clock_hz == 50_000_000), 0,
+                       *(base + SAMPLES_OFFSET + 4*i for i in range(8)))
+    if clock_hz not in (50_000_000, 100_000_000):
+        args += struct.pack("<I", clock_hz)
     groups = received = 0
     layout = struct.Struct("<9I")
     data = folder / "rtt.bin"
@@ -197,20 +239,33 @@ def main():
     parser.add_argument("--serial", default="12345678")
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--seconds", type=float, default=5)
+    parser.add_argument("--transport", choices=DEFAULT_PROFILES, default="swd")
+    parser.add_argument("--clock", type=int, default=50_000_000, help="requested debug wire clock in Hz")
+    parser.add_argument("--tap", type=int, choices=range(32))
+    parser.add_argument("--slot", type=int, choices=range(64))
+    parser.add_argument("--idle", type=int, choices=range(256))
     parser.add_argument("--combo-hz", type=int, default=250, help="combined RTT/HSS sample groups per second")
     parser.add_argument("--execute", action="store_true")
     args = parser.parse_args()
-    if args.seconds <= 0 or not 1<=args.combo_hz<=24000:
-        parser.error("seconds must be positive and combo-hz must be 1..24000")
+    if args.seconds <= 0 or not 1 <= args.combo_hz <= 24000 or not 50_000_000 <= args.clock <= 100_000_000:
+        parser.error("seconds must be positive, combo-hz must be 1..24000, clock must be 50..100 MHz")
+    port, tap, slot, idle = DEFAULT_PROFILES[args.transport]
+    profile = (port, tap if args.tap is None else args.tap,
+               slot if args.slot is None else args.slot, idle if args.idle is None else args.idle)
+    if port == 1 and profile[3] > 15 or port == 2 and (profile[2] < 16 or profile[3] % 2 == 0):
+        parser.error("SWD requires idle 0..15; JTAG requires slot >=16 and odd idle")
     if not args.execute:
-        print("H743 AXI SRAM read/write, RTT DOWN wrap, eight-variable HSS, concurrent RTT/HSS and STOP, with state restoration.")
+        print("H743 SRAM read/write, RTT UP/DOWN wrap, one/eight-variable HSS and concurrent RTT/HSS with state restoration.")
         return 0
     args.out.mkdir(parents=True, exist_ok=False)
-    producer = build_producer(args.out)
-    report = {}
+    base = AXI_BASE if port == 1 else DTCM_BASE
+    # Execute the producer from AXI SRAM while JTAG serves DTCM data.
+    code_base = base if port == 1 else 0x24050000
+    producer = build_producer(args.out, code_base, base)
+    report = dict(transport=args.transport, requested_hz=args.clock, tap=profile[1], slot=profile[2], idle=profile[3])
     dev, out, inp = open_dap(args.serial)
     mem = Memory(out, inp)
-    original = registers = clocks = None
+    original = original_code = registers = clocks = None
     initial = dcrdr = None
     try:
         setup(out, inp, 1000, "swd")
@@ -222,25 +277,43 @@ def main():
         dcrdr = mem.word(0xe000edf8)
         registers = {i: core_read(mem, i) for i in (*range(19), 20)}
         require(not registers[16] & 0x1ff, "fixture requires Thread mode")
-        original = mem.read(BASE - 4, SIZE + 8)
-        require(original == mem.read(BASE - 4, SIZE + 8), "unstable backup")
+        original = mem.read(base - 4, SIZE + 8)
+        require(original == mem.read(base - 4, SIZE + 8), "unstable backup")
         (args.out / "backup.bin").write_bytes(original)
-        recovery = dict(base=BASE-4, sha256=hashlib.sha256(original).hexdigest(),
+        recovery = dict(base=base-4, sha256=hashlib.sha256(original).hexdigest(),
                         registers=registers, dhcsr=initial, dcrdr=dcrdr, clocks=clocks)
+        if code_base != base:
+            original_code = mem.read(code_base, 512)
+            require(original_code == mem.read(code_base, 512), "unstable producer backup")
+            (args.out / "backup-code.bin").write_bytes(original_code)
+            recovery.update(code_base=code_base, code_sha256=hashlib.sha256(original_code).hexdigest())
         (args.out / "recovery.json").write_text(json.dumps(recovery, indent=2)+"\n", encoding="utf8")
         with native_connection(args.serial, dev) as native:
             native.info()
             require(native.split, "expected split-endpoint firmware")
             report["usb"] = native.usb_descriptors()
-            mem.write(BASE, fixture())
-            report["memory"] = memory_and_down(native, mem)
-            report["scope"] = scope_only(native, args.out, args.seconds)
-            mem.write(BASE, fixture(producer))
+            mem.write(base, fixture(base))
+            if port == 2:
+                setup(out, inp, 1000, "jtag")
+            report["memory"] = memory_and_down(native, mem, profile, args.clock, base)
+            report["rtt_up"] = rtt_only(native, mem, profile, args.clock, base)
+            # Match the public CLI's fresh DAP connection for each standalone scope session.
+            cmd(out, inp, [3])
+            setup(out, inp, 1000, args.transport)
+            report["scope_single"] = scope_only(native, args.out, args.seconds, profile, args.clock, 1, base)
+            cmd(out, inp, [3])
+            setup(out, inp, 1000, args.transport)
+            report["scope"] = scope_only(native, args.out, args.seconds, profile, args.clock, 8, base)
+            mem.write(base, fixture(base, running=True))
+            mem.write(code_base, producer)
+            require(mem.read(code_base, len(producer)) == producer, "RTT producer readback differs")
+            if mem.word(CCR) & (1 << 17):
+                mem.write_word(0xe000ef50, 0)
             core_write(mem, 16, 0x01000000)
             core_write(mem, 20, 1)
-            core_write(mem, 15, BASE + 1)
+            core_write(mem, 15, code_base + 1)
             mem.write_word(DHCSR, 0xa05f0001)
-            report["combo"] = combo(native, mem, args.out, args.seconds, args.combo_hz)
+            report["combo"] = combo(native, mem, args.out, args.seconds, args.combo_hz, profile, args.clock, base)
         report["passed"] = True
     except BaseException as error:
         report["failure"] = str(error)
@@ -251,8 +324,13 @@ def main():
                 setup(out, inp, 1000, "swd")
                 halt(mem)
                 if original is not None:
-                    mem.write(BASE - 4, original)
-                    require(mem.read(BASE - 4, SIZE + 8) == original, "SRAM restoration differs")
+                    mem.write(base - 4, original)
+                    require(mem.read(base - 4, SIZE + 8) == original, "SRAM restoration differs")
+                if original_code is not None:
+                    mem.write(code_base, original_code)
+                    require(mem.read(code_base, len(original_code)) == original_code, "producer SRAM restoration differs")
+                if original is not None and mem.word(CCR) & (1 << 17):
+                    mem.write_word(0xe000ef50, 0)
                 if registers is not None:
                     for i, value in registers.items():
                         core_write(mem, i, value)

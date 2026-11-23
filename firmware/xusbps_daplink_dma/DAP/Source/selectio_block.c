@@ -383,6 +383,12 @@ int selectio_mem_bulk(unsigned write,uint32_t address,unsigned words,const uint8
        (address&3U) ||
        !((address>=0x20000000U && address<0x20010000U && 4U*words<=0x20010000U-address) ||
          (address>=0x24000000U && address<0x24080000U && 4U*words<=0x24080000U-address))) return -1;
+    /* The JTAG queue has a stricter hardware address decoder: outside the
+     * lower 64 KiB SRAM aliases it accepts only the qualified H743 AXI page.
+     * Reject before asserting GO, whose invalid AXI write is a CPU abort. */
+    if(session.port==2 && address>=0x24000000U &&
+       (address<0x24050000U || address>=0x24050400U || 4U*words>0x24050400U-address))
+        return -1;
     XTime start,stop;XTime_GetTime(&start);
     while(*completed<words) {
         if(!probe_session_live()) {session.poisoned=1;return -1;}

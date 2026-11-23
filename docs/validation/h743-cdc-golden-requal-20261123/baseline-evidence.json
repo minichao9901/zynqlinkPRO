@@ -1,0 +1,798 @@
+{
+  "target": {
+    "elf": "prebuilt/targets/stm32h743-cdc-trace-20261101/cpu60-trace20/fw.elf",
+    "elf_sha256": "246640bf79c8b1e568441a286812326dfb0ae68a0df061a0c023262c07cf221b",
+    "historical_elf_sha256": "246640bf79c8b1e568441a286812326dfb0ae68a0df061a0c023262c07cf221b",
+    "clock_Hz": {
+      "core": 60000000,
+      "hclk": 60000000,
+      "traceclk": 20000000
+    },
+    "probe_usb_serial": "12345678",
+    "target_cdc_port": "COM43",
+    "flash_sha256": "b112a607c2abefd1fab17ff1959ffa8d45900e83cccf6afd516e17a95183c37f",
+    "clock": {
+      "name": "STM32H743/H742/H750/H753",
+      "cpuid": "0x411fc271",
+      "device": "0x20036450",
+      "registers": {
+        "0x58024400": "0x3303c025",
+        "0x58024410": "0x1b",
+        "0x58024418": "0x40",
+        "0x5802441c": "0x440",
+        "0x58024420": "0x50",
+        "0x58024428": "0x1920052",
+        "0x5802442c": "0x1ff0309",
+        "0x58024430": "0xb010e5f",
+        "0x58024434": "0x0",
+        "0x58024438": "0x1010280",
+        "0x52002000": "0x32"
+      }
+    },
+    "trace_diag": [
+      [
+        877806420,
+        60000000,
+        1,
+        76504550,
+        72,
+        1003854454,
+        74608091,
+        0,
+        0,
+        0
+      ],
+      [
+        877806420,
+        60000000,
+        1,
+        76593912,
+        73,
+        1078358838,
+        74504384,
+        0,
+        0,
+        0
+      ]
+    ]
+  },
+  "main": {
+    "bit_sha256": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6",
+    "application_sha256": "5895eeb0e79a3681a6b3b966dbea4c82ebfcd01ea7553e094d8a61ed2cf89802",
+    "source": "03b6a1da",
+    "early_short_matrix": [
+      {
+        "windowMs": 10,
+        "repeat": 1,
+        "echoInsideWindow": 2,
+        "echoExact": true,
+        "error": null,
+        "quality": {
+          "captureComplete": true,
+          "requestedWindowComplete": true,
+          "hardwareSeconds": 0.010000000100000002,
+          "refClockHz": 199999998,
+          "diagnostics": {
+            "implemented": true,
+            "frameDrops": 0,
+            "parserErrors": 0,
+            "idelayReadyLosses": 0,
+            "frameHighwater": 1,
+            "syncAcquisitions": 1,
+            "observedFrames": 1294,
+            "capacityReached": false,
+            "writerError": 0
+          }
+        },
+        "summary": {
+          "instructions": 161709,
+          "packetIssues": 0,
+          "unknownExecution": 111
+        },
+        "etmSha256": "221d0b98bde6207f4803143ab7470c8d5c98234c35097018bac3159aac501041"
+      },
+      {
+        "windowMs": 10,
+        "repeat": 2,
+        "echoInsideWindow": 1,
+        "echoExact": true,
+        "error": null,
+        "quality": {
+          "captureComplete": true,
+          "requestedWindowComplete": true,
+          "hardwareSeconds": 0.010000000100000002,
+          "refClockHz": 199999998,
+          "diagnostics": {
+            "implemented": true,
+            "frameDrops": 0,
+            "parserErrors": 0,
+            "idelayReadyLosses": 0,
+            "frameHighwater": 1,
+            "syncAcquisitions": 1,
+            "observedFrames": 1329,
+            "capacityReached": false,
+            "writerError": 0
+          }
+        },
+        "summary": {
+          "instructions": 166050,
+          "packetIssues": 0,
+          "unknownExecution": 111
+        },
+        "etmSha256": "e0691a1bf3b1dbfe8616b5da9f911054daf570a13a961534e7d395235f3e29f0"
+      },
+      {
+        "windowMs": 10,
+        "repeat": 3,
+        "echoInsideWindow": 1,
+        "echoExact": true,
+        "error": null,
+        "quality": {
+          "captureComplete": true,
+          "requestedWindowComplete": true,
+          "hardwareSeconds": 0.010000000100000002,
+          "refClockHz": 199999998,
+          "diagnostics": {
+            "implemented": true,
+            "frameDrops": 0,
+            "parserErrors": 0,
+            "idelayReadyLosses": 0,
+            "frameHighwater": 1,
+            "syncAcquisitions": 1,
+            "observedFrames": 1324,
+            "capacityReached": false,
+            "writerError": 0
+          }
+        },
+        "summary": {
+          "instructions": 165403,
+          "packetIssues": 0,
+          "unknownExecution": 113
+        },
+        "etmSha256": "f0912f2355324edfdff5f70873d8d189c70903c1ca42e4fb26074a119dfd1591"
+      },
+      {
+        "windowMs": 200,
+        "repeat": 1,
+        "echoInsideWindow": 36,
+        "echoExact": true,
+        "error": null,
+        "quality": {
+          "captureComplete": true,
+          "requestedWindowComplete": true,
+          "hardwareSeconds": 0.200000002,
+          "refClockHz": 199999998,
+          "diagnostics": {
+            "implemented": true,
+            "frameDrops": 0,
+            "parserErrors": 0,
+            "idelayReadyLosses": 0,
+            "frameHighwater": 1,
+            "syncAcquisitions": 1,
+            "observedFrames": 29167,
+            "capacityReached": false,
+            "writerError": 0
+          }
+        },
+        "summary": {
+          "instructions": 3660741,
+          "packetIssues": 0,
+          "unknownExecution": 1759
+        },
+        "etmSha256": "6689e56296f9f1320306519704dc748d4eae0e7289f4271631158956590ec4a2"
+      },
+      {
+        "windowMs": 200,
+        "repeat": 2,
+        "echoInsideWindow": 36,
+        "echoExact": true,
+        "error": null,
+        "quality": {
+          "captureComplete": true,
+          "requestedWindowComplete": true,
+          "hardwareSeconds": 0.200000002,
+          "refClockHz": 199999998,
+          "diagnostics": {
+            "implemented": true,
+            "frameDrops": 0,
+            "parserErrors": 0,
+            "idelayReadyLosses": 0,
+            "frameHighwater": 1,
+            "syncAcquisitions": 1,
+            "observedFrames": 29125,
+            "capacityReached": false,
+            "writerError": 0
+          }
+        },
+        "summary": {
+          "instructions": 3657457,
+          "packetIssues": 0,
+          "unknownExecution": 1722
+        },
+        "etmSha256": "82a045d4a32dcbcfe25c4f2beed583a13a9fe05629d8caddc0fd90ac3aa1e138"
+      },
+      {
+        "windowMs": 200,
+        "repeat": 3,
+        "echoInsideWindow": 37,
+        "echoExact": true,
+        "error": null,
+        "quality": {
+          "captureComplete": true,
+          "requestedWindowComplete": true,
+          "hardwareSeconds": 0.200000002,
+          "refClockHz": 199999998,
+          "diagnostics": {
+            "implemented": true,
+            "frameDrops": 0,
+            "parserErrors": 0,
+            "idelayReadyLosses": 0,
+            "frameHighwater": 1,
+            "syncAcquisitions": 1,
+            "observedFrames": 29155,
+            "capacityReached": false,
+            "writerError": 0
+          }
+        },
+        "summary": {
+          "instructions": 3660483,
+          "packetIssues": 0,
+          "unknownExecution": 1760
+        },
+        "etmSha256": "0b017c7413845e1e85bccc2749af8baa7d91ce6b34dd95b9727de8f63b2aac7d"
+      },
+      {
+        "windowMs": 500,
+        "repeat": 1,
+        "echoInsideWindow": 105,
+        "echoExact": true,
+        "error": null,
+        "quality": {
+          "captureComplete": true,
+          "requestedWindowComplete": true,
+          "hardwareSeconds": 0.5,
+          "refClockHz": 199999998,
+          "diagnostics": {
+            "implemented": true,
+            "frameDrops": 0,
+            "parserErrors": 0,
+            "idelayReadyLosses": 0,
+            "frameHighwater": 1,
+            "syncAcquisitions": 1,
+            "observedFrames": 73061,
+            "capacityReached": false,
+            "writerError": 0
+          }
+        },
+        "summary": {
+          "instructions": 9174654,
+          "packetIssues": 0,
+          "unknownExecution": 4305
+        },
+        "etmSha256": "96dd6b51428ec0a89d1956c9d70578fc2d6b838a9fc75f58f1911d3b691308d1"
+      },
+      {
+        "windowMs": 500,
+        "repeat": 2,
+        "echoInsideWindow": 106,
+        "echoExact": true,
+        "error": null,
+        "quality": {
+          "captureComplete": true,
+          "requestedWindowComplete": true,
+          "hardwareSeconds": 0.5,
+          "refClockHz": 199999998,
+          "diagnostics": {
+            "implemented": true,
+            "frameDrops": 0,
+            "parserErrors": 0,
+            "idelayReadyLosses": 0,
+            "frameHighwater": 1,
+            "syncAcquisitions": 1,
+            "observedFrames": 73070,
+            "capacityReached": false,
+            "writerError": 0
+          }
+        },
+        "summary": {
+          "instructions": 9173692,
+          "packetIssues": 0,
+          "unknownExecution": 4379
+        },
+        "etmSha256": "c10b99663811467425690a8857f2712579be2199c813215210718714134f5a59"
+      },
+      {
+        "windowMs": 500,
+        "repeat": 3,
+        "echoInsideWindow": 106,
+        "echoExact": true,
+        "error": null,
+        "quality": {
+          "captureComplete": true,
+          "requestedWindowComplete": true,
+          "hardwareSeconds": 0.5,
+          "refClockHz": 199999998,
+          "diagnostics": {
+            "implemented": true,
+            "frameDrops": 0,
+            "parserErrors": 0,
+            "idelayReadyLosses": 0,
+            "frameHighwater": 1,
+            "syncAcquisitions": 1,
+            "observedFrames": 73020,
+            "capacityReached": false,
+            "writerError": 0
+          }
+        },
+        "summary": {
+          "instructions": 9168397,
+          "packetIssues": 0,
+          "unknownExecution": 4378
+        },
+        "etmSha256": "be1b86e1be75bd39dffcd0c6e8d986a2c6524373437815f97d3d5946711ff1e9"
+      },
+      {
+        "windowMs": 1000,
+        "repeat": 1,
+        "echoInsideWindow": 221,
+        "echoExact": true,
+        "error": null,
+        "quality": {
+          "captureComplete": true,
+          "requestedWindowComplete": true,
+          "hardwareSeconds": 1.0,
+          "refClockHz": 199999998,
+          "diagnostics": {
+            "implemented": true,
+            "frameDrops": 0,
+            "parserErrors": 0,
+            "idelayReadyLosses": 0,
+            "frameHighwater": 1,
+            "syncAcquisitions": 1,
+            "observedFrames": 146220,
+            "capacityReached": false,
+            "writerError": 0
+          }
+        },
+        "summary": {
+          "instructions": 18358111,
+          "packetIssues": 0,
+          "unknownExecution": 8684
+        },
+        "etmSha256": "55aa1b815532a79eafd8d62c330bf57f504b0615716150a980713eddaee617b2"
+      },
+      {
+        "windowMs": 1000,
+        "repeat": 2,
+        "echoInsideWindow": 220,
+        "echoExact": true,
+        "error": null,
+        "quality": {
+          "captureComplete": true,
+          "requestedWindowComplete": true,
+          "hardwareSeconds": 1.0,
+          "refClockHz": 199999998,
+          "diagnostics": {
+            "implemented": true,
+            "frameDrops": 0,
+            "parserErrors": 0,
+            "idelayReadyLosses": 0,
+            "frameHighwater": 1,
+            "syncAcquisitions": 1,
+            "observedFrames": 146243,
+            "capacityReached": false,
+            "writerError": 0
+          }
+        },
+        "summary": {
+          "instructions": 18365369,
+          "packetIssues": 1,
+          "unknownExecution": 8647
+        },
+        "etmSha256": "76ac68384a2cedfc42257fd07dc664c638e230a5809b0f26c254057d7f494a30"
+      }
+    ],
+    "strict_1s": [
+      {
+        "windowMs": 1000,
+        "repeat": 1,
+        "passed": true,
+        "restored": true,
+        "echoInsideWindow": 214,
+        "echoExact": true,
+        "error": null,
+        "verification": {
+          "passed": true,
+          "quality": {
+            "passed": true,
+            "failures": {},
+            "terminalBoundaryPackets": [],
+            "note": "尾部INCOMPLETE_EOT单列保留；初始化未同步/条件未知不视作已证实执行；字节核算不等于无损证明"
+          },
+          "error": null
+        },
+        "quality": {
+          "captureComplete": true,
+          "requestedWindowComplete": true,
+          "hardwareSeconds": 1.0,
+          "refClockHz": 199999998,
+          "diagnostics": {
+            "implemented": true,
+            "frameDrops": 0,
+            "parserErrors": 0,
+            "idelayReadyLosses": 0,
+            "frameHighwater": 1,
+            "syncAcquisitions": 1,
+            "observedFrames": 146069,
+            "capacityReached": false,
+            "writerError": 0
+          }
+        },
+        "summary": {
+          "instructions": 18347632,
+          "packetIssues": 0,
+          "unknownExecution": 8426
+        },
+        "etmSha256": "14786bc634fe6752ddc69b375a0ddc6b96fcab7ac0cc11a5d8d6de1e3ab69489"
+      },
+      {
+        "windowMs": 1000,
+        "repeat": 2,
+        "passed": true,
+        "restored": true,
+        "echoInsideWindow": 214,
+        "echoExact": true,
+        "error": null,
+        "verification": {
+          "passed": true,
+          "quality": {
+            "passed": true,
+            "failures": {},
+            "terminalBoundaryPackets": [],
+            "note": "尾部INCOMPLETE_EOT单列保留；初始化未同步/条件未知不视作已证实执行；字节核算不等于无损证明"
+          },
+          "error": null
+        },
+        "quality": {
+          "captureComplete": true,
+          "requestedWindowComplete": true,
+          "hardwareSeconds": 1.0,
+          "refClockHz": 199999998,
+          "diagnostics": {
+            "implemented": true,
+            "frameDrops": 0,
+            "parserErrors": 0,
+            "idelayReadyLosses": 0,
+            "frameHighwater": 1,
+            "syncAcquisitions": 1,
+            "observedFrames": 146030,
+            "capacityReached": false,
+            "writerError": 0
+          }
+        },
+        "summary": {
+          "instructions": 18338324,
+          "packetIssues": 0,
+          "unknownExecution": 8426
+        },
+        "etmSha256": "343403ed7c7254f1f5adcf3827556e7ff63023aed18e9e301a9931413c7f0c21"
+      },
+      {
+        "windowMs": 1000,
+        "repeat": 3,
+        "passed": true,
+        "restored": true,
+        "echoInsideWindow": 216,
+        "echoExact": true,
+        "error": null,
+        "verification": {
+          "passed": true,
+          "quality": {
+            "passed": true,
+            "failures": {},
+            "terminalBoundaryPackets": [
+              {
+                "category": "packet",
+                "startSeq": null,
+                "endSeq": null,
+                "records": 0,
+                "offset": 2172790,
+                "bytes": 1,
+                "reason": "包问题：I_INCOMPLETE_EOT"
+              }
+            ],
+            "note": "尾部INCOMPLETE_EOT单列保留；初始化未同步/条件未知不视作已证实执行；字节核算不等于无损证明"
+          },
+          "error": null
+        },
+        "quality": {
+          "captureComplete": true,
+          "requestedWindowComplete": true,
+          "hardwareSeconds": 1.0,
+          "refClockHz": 199999998,
+          "diagnostics": {
+            "implemented": true,
+            "frameDrops": 0,
+            "parserErrors": 0,
+            "idelayReadyLosses": 0,
+            "frameHighwater": 1,
+            "syncAcquisitions": 1,
+            "observedFrames": 146070,
+            "capacityReached": false,
+            "writerError": 0
+          }
+        },
+        "summary": {
+          "instructions": 18342068,
+          "packetIssues": 1,
+          "unknownExecution": 8497
+        },
+        "etmSha256": "dff7a73d5974c9a85f46969dbed2b510bec7346e0fb11857ac16272974aa6ba9"
+      }
+    ]
+  },
+  "etm400_abi1": [
+    {
+      "case": "1000ms-1",
+      "passed": false,
+      "actualWindowSeconds": 1.0,
+      "referenceHz": 199999998,
+      "droppedFrames": 0,
+      "parserErrors": 2140,
+      "readyLosses": 0,
+      "stopReason": 0,
+      "sha256": "d6ce2c0de8231bd17c1c1ab89f4428035d9ea3da45fd78c56957e0d736fdb846",
+      "error": "DDR hardware quality/window failed; raw data retained",
+      "usbOwnerReleased": true
+    },
+    {
+      "case": "1000ms-2",
+      "passed": false,
+      "actualWindowSeconds": 1.0,
+      "referenceHz": 199999998,
+      "droppedFrames": 0,
+      "parserErrors": 2094,
+      "readyLosses": 0,
+      "stopReason": 0,
+      "sha256": "e19c369cd587d028a068bff09497e5b01b5bf7d3576179ca7eb4c06d2efb8ec2",
+      "error": "DDR hardware quality/window failed; raw data retained",
+      "usbOwnerReleased": true
+    },
+    {
+      "case": "10ms-1",
+      "passed": false,
+      "actualWindowSeconds": 0.010000000100000002,
+      "referenceHz": 199999998,
+      "droppedFrames": 0,
+      "parserErrors": 24,
+      "readyLosses": 0,
+      "stopReason": 0,
+      "sha256": "b37be81c355a94e8def8e438c461fa51dff0ea1ab0f07c6d32fc992667eccb39",
+      "error": "DDR hardware quality/window failed; raw data retained",
+      "usbOwnerReleased": true
+    },
+    {
+      "case": "10ms-2",
+      "passed": false,
+      "actualWindowSeconds": 0.010000000100000002,
+      "referenceHz": 199999998,
+      "droppedFrames": 0,
+      "parserErrors": 1,
+      "readyLosses": 0,
+      "stopReason": 0,
+      "sha256": "025569d41a8bf45d5058e1be8f7fec8cff657aa1281e38b3cc2e728547e3f7ec",
+      "error": "DDR hardware quality/window failed; raw data retained",
+      "usbOwnerReleased": true
+    }
+  ],
+  "etm400_abi2": [
+    {
+      "case": "10ms-1",
+      "passed": false,
+      "actualWindowSeconds": 0.010000000100000002,
+      "referenceHz": 199999998,
+      "droppedFrames": 0,
+      "parserErrors": 1,
+      "readyLosses": 0,
+      "stopReason": 0,
+      "sha256": "6a94c335d2550fec0f571e6b3a897c33f5b3cac4f3d9e3b125a53f998d642f16",
+      "error": "DDR hardware quality/window failed; raw data retained",
+      "usbOwnerReleased": true
+    }
+  ],
+  "jtag": {
+    "invalid_GO_before_fix": {
+      "address": "0x24043020",
+      "pc": "0x00001c0c",
+      "handler": "Xil_DataAbortHandler",
+      "cpsr": "0x200f01d7",
+      "jtag_queue_status": 5,
+      "cdma_status": 4098
+    },
+    "target_restoration": {
+      "restored": true,
+      "bytes": 20488,
+      "sha256": "688cfdae33b19b3be0ca90466a85fd4a3f45c00d5b70d2bb03c50ec2fef5750c",
+      "heartbeat": [
+        533495751,
+        533582198
+      ],
+      "rcc": {
+        "name": "STM32H743/H742/H750/H753",
+        "cpuid": "0x411fc271",
+        "device": "0x20036450",
+        "registers": {
+          "0x58024400": "0x3303c025",
+          "0x58024410": "0x1b",
+          "0x58024418": "0x40",
+          "0x5802441c": "0x440",
+          "0x58024420": "0x50",
+          "0x58024428": "0x1920052",
+          "0x5802442c": "0x1ff0309",
+          "0x58024430": "0xb010e5f",
+          "0x58024434": "0x0",
+          "0x58024438": "0x1010280",
+          "0x52002000": "0x32"
+        }
+      }
+    },
+    "guard_reconnect": {
+      "target": {
+        "name": "STM32H743/H742/H750/H753",
+        "cpuid": "0x411fc271",
+        "device": "0x20036450",
+        "registers": {
+          "0x58024400": "0x3303c025",
+          "0x58024410": "0x1b",
+          "0x58024418": "0x40",
+          "0x5802441c": "0x440",
+          "0x58024420": "0x50",
+          "0x58024428": "0x1920052",
+          "0x5802442c": "0x1ff0309",
+          "0x58024430": "0xb010e5f",
+          "0x58024434": "0x0",
+          "0x58024438": "0x1010280",
+          "0x52002000": "0x32"
+        }
+      },
+      "requested_hz": 50000000,
+      "tap": 16,
+      "slot": 28,
+      "idle": 33,
+      "memory": {
+        "address": "0x2000b020",
+        "read_write_bytes": 4032,
+        "rtt_down": 14,
+        "clock": {
+          "wire_hz": 49999999,
+          "reference_hz": 199999996,
+          "divider": 4,
+          "timing": "0x6084e4",
+          "tap": 16,
+          "source": "PS clock tree and PL queue registers"
+        },
+        "invalid_axi_status": 1
+      },
+      "rtt_up": {
+        "bytes": 257,
+        "sha256": "52e6c13ba6b22edca23bb19363f14d929a4ba891c2f35fd92b177fdeebfed5fb",
+        "stop": [
+          65536,
+          536904192,
+          536904216,
+          257,
+          131093,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          822084608
+        ]
+      },
+      "scope_single": {
+        "definition": {
+          "link_hz": 49999999,
+          "period_ticks": 24000,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x20008800",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 275,
+        "groups": 3001,
+        "timeline_skips": 0,
+        "stat": {
+          "produced": 3001,
+          "skipped": 0,
+          "frame_count": 275,
+          "read_errors": 0
+        }
+      },
+      "scope": {
+        "definition": {
+          "link_hz": 49999999,
+          "period_ticks": 24000,
+          "flags": 0,
+          "variables": [
+            {
+              "address": "0x20008800",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008804",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008808",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2000880c",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008810",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008814",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x20008818",
+              "size": 4,
+              "type": 4
+            },
+            {
+              "address": "0x2000881c",
+              "size": 4,
+              "type": 4
+            }
+          ]
+        },
+        "packets": 275,
+        "groups": 3001,
+        "timeline_skips": 0,
+        "stat": {
+          "produced": 3001,
+          "skipped": 0,
+          "frame_count": 275,
+          "read_errors": 0
+        }
+      },
+      "combo": {
+        "bytes": 1757184,
+        "groups": 751,
+        "skipped": 0,
+        "sample_hz": 250,
+        "skipped_fraction": 0.0,
+        "duration_seconds": 3.004548099997919,
+        "control_while_scope_unread": true,
+        "stop": [
+          0,
+          0,
+          96000,
+          1757184,
+          1757184,
+          751,
+          751,
+          0
+        ]
+      },
+      "passed": true,
+      "restored": true
+    }
+  }
+}
