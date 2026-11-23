@@ -1,0 +1,1037 @@
+{
+  "target": "STM32H743, dbgstress, HSI64, unchanged PLL/AHB/APB",
+  "target_elf": "E:/superlinkPRO/web/tools/target-firmware/stm32h743_dbgstress/fw.elf",
+  "probe_serial": "12345678",
+  "hs3_serial": "210299008529",
+  "cases": [
+    {
+      "case": "split-abi2",
+      "pair": "split ABI 2",
+      "cli": "efficiency",
+      "gpio_speed": 3,
+      "window_ms": 50,
+      "probe_reference_hz": 199999998,
+      "target_clock": {
+        "name": "STM32H743/H742/H750/H753",
+        "cpuid": "0x411fc271",
+        "device": "0x20036450",
+        "registers": {
+          "0x58024400": "0x4025",
+          "0x58024410": "0x0",
+          "0x58024418": "0x0",
+          "0x5802441c": "0x0",
+          "0x58024420": "0x0",
+          "0x58024428": "0x2020200",
+          "0x5802442c": "0x1ff0000",
+          "0x58024430": "0x1010280",
+          "0x58024434": "0x0",
+          "0x58024438": "0x1010280",
+          "0x52002000": "0x37"
+        }
+      },
+      "formatter_bytes": 132924,
+      "parser_errors": 7,
+      "frame_drops": 0,
+      "writer_errors": 0,
+      "idelay_ready_losses": 0,
+      "usb_submit_errors": 0,
+      "usb_sha256": "d593df8aa34048489da32b4a6ccda737278980b6831fb185060c419fcd76be13",
+      "physical_sha256": "d593df8aa34048489da32b4a6ccda737278980b6831fb185060c419fcd76be13",
+      "restored": true,
+      "raw_evidence": "build\\usb-split-h743-final\\etm-physical"
+    },
+    {
+      "case": "main-ram-1",
+      "pair": "main-ram",
+      "cli": "efficiency",
+      "gpio_speed": 3,
+      "window_ms": 50,
+      "probe_reference_hz": 199999998,
+      "target_clock": {
+        "name": "STM32H743/H742/H750/H753",
+        "cpuid": "0x411fc271",
+        "device": "0x20036450",
+        "registers": {
+          "0x58024400": "0x4025",
+          "0x58024410": "0x0",
+          "0x58024418": "0x0",
+          "0x5802441c": "0x0",
+          "0x58024420": "0x0",
+          "0x58024428": "0x2020200",
+          "0x5802442c": "0x1ff0000",
+          "0x58024430": "0x1010280",
+          "0x58024434": "0x0",
+          "0x58024438": "0x1010280",
+          "0x52002000": "0x37"
+        }
+      },
+      "formatter_bytes": 180397,
+      "parser_errors": 237,
+      "frame_drops": 0,
+      "writer_errors": 0,
+      "idelay_ready_losses": 0,
+      "usb_submit_errors": 0,
+      "usb_sha256": "ac29429030d69c547149f6313567d334a0ddc571ef9060454678291d3783d93e",
+      "physical_sha256": "ac29429030d69c547149f6313567d334a0ddc571ef9060454678291d3783d93e",
+      "restored": true,
+      "raw_evidence": "build\\etm-h743-abi2-regression-audit\\main-ram-1"
+    },
+    {
+      "case": "main-ram-2",
+      "pair": "main-ram",
+      "cli": "efficiency",
+      "gpio_speed": 3,
+      "window_ms": 50,
+      "probe_reference_hz": 199999998,
+      "target_clock": {
+        "name": "STM32H743/H742/H750/H753",
+        "cpuid": "0x411fc271",
+        "device": "0x20036450",
+        "registers": {
+          "0x58024400": "0x4025",
+          "0x58024410": "0x0",
+          "0x58024418": "0x0",
+          "0x5802441c": "0x0",
+          "0x58024420": "0x0",
+          "0x58024428": "0x2020200",
+          "0x5802442c": "0x1ff0000",
+          "0x58024430": "0x1010280",
+          "0x58024434": "0x0",
+          "0x58024438": "0x1010280",
+          "0x52002000": "0x37"
+        }
+      },
+      "formatter_bytes": 183293,
+      "parser_errors": 251,
+      "frame_drops": 0,
+      "writer_errors": 0,
+      "idelay_ready_losses": 0,
+      "usb_submit_errors": 0,
+      "usb_sha256": "c6c4a51ee5db392a70540d44b6b118bc3243c6fee29f71b3b9cefb639fe8b0cb",
+      "physical_sha256": "c6c4a51ee5db392a70540d44b6b118bc3243c6fee29f71b3b9cefb639fe8b0cb",
+      "restored": true,
+      "raw_evidence": "build\\etm-h743-abi2-regression-audit\\main-ram-2"
+    },
+    {
+      "case": "main-ram-3",
+      "pair": "main-ram",
+      "cli": "efficiency",
+      "gpio_speed": 3,
+      "window_ms": 50,
+      "probe_reference_hz": 199999998,
+      "target_clock": {
+        "name": "STM32H743/H742/H750/H753",
+        "cpuid": "0x411fc271",
+        "device": "0x20036450",
+        "registers": {
+          "0x58024400": "0x4025",
+          "0x58024410": "0x0",
+          "0x58024418": "0x0",
+          "0x5802441c": "0x0",
+          "0x58024420": "0x0",
+          "0x58024428": "0x2020200",
+          "0x5802442c": "0x1ff0000",
+          "0x58024430": "0x1010280",
+          "0x58024434": "0x0",
+          "0x58024438": "0x1010280",
+          "0x52002000": "0x37"
+        }
+      },
+      "formatter_bytes": 181532,
+      "parser_errors": 246,
+      "frame_drops": 0,
+      "writer_errors": 0,
+      "idelay_ready_losses": 0,
+      "usb_submit_errors": 0,
+      "usb_sha256": "1ba10e35da035e9ed93ef62d433b72f3298c92b55f9b04504ba9193d1e88f06e",
+      "physical_sha256": "1ba10e35da035e9ed93ef62d433b72f3298c92b55f9b04504ba9193d1e88f06e",
+      "restored": true,
+      "raw_evidence": "build\\etm-h743-abi2-regression-audit\\main-ram-3"
+    },
+    {
+      "case": "fusion-abi1-1",
+      "pair": "fusion-abi1",
+      "cli": "efficiency",
+      "gpio_speed": 3,
+      "window_ms": 50,
+      "probe_reference_hz": 199999998,
+      "target_clock": {
+        "name": "STM32H743/H742/H750/H753",
+        "cpuid": "0x411fc271",
+        "device": "0x20036450",
+        "registers": {
+          "0x58024400": "0x4025",
+          "0x58024410": "0x0",
+          "0x58024418": "0x0",
+          "0x5802441c": "0x0",
+          "0x58024420": "0x0",
+          "0x58024428": "0x2020200",
+          "0x5802442c": "0x1ff0000",
+          "0x58024430": "0x1010280",
+          "0x58024434": "0x0",
+          "0x58024438": "0x1010280",
+          "0x52002000": "0x37"
+        }
+      },
+      "formatter_bytes": 133856,
+      "parser_errors": 15,
+      "frame_drops": 0,
+      "writer_errors": 0,
+      "idelay_ready_losses": 0,
+      "usb_submit_errors": 0,
+      "usb_sha256": "abd88bd2e67b3855c96b3f0fd17e1c6f88dd69a06bea85a8af0beb692db94d4c",
+      "physical_sha256": "abd88bd2e67b3855c96b3f0fd17e1c6f88dd69a06bea85a8af0beb692db94d4c",
+      "restored": true,
+      "raw_evidence": "build\\etm-h743-abi2-regression-audit\\fusion-abi1-1"
+    },
+    {
+      "case": "fusion-abi1-2",
+      "pair": "fusion-abi1",
+      "cli": "efficiency",
+      "gpio_speed": 3,
+      "window_ms": 50,
+      "probe_reference_hz": 199999998,
+      "target_clock": {
+        "name": "STM32H743/H742/H750/H753",
+        "cpuid": "0x411fc271",
+        "device": "0x20036450",
+        "registers": {
+          "0x58024400": "0x4025",
+          "0x58024410": "0x0",
+          "0x58024418": "0x0",
+          "0x5802441c": "0x0",
+          "0x58024420": "0x0",
+          "0x58024428": "0x2020200",
+          "0x5802442c": "0x1ff0000",
+          "0x58024430": "0x1010280",
+          "0x58024434": "0x0",
+          "0x58024438": "0x1010280",
+          "0x52002000": "0x37"
+        }
+      },
+      "formatter_bytes": 152176,
+      "parser_errors": 476,
+      "frame_drops": 0,
+      "writer_errors": 0,
+      "idelay_ready_losses": 0,
+      "usb_submit_errors": 0,
+      "usb_sha256": "9c8682cbfdc76ef3b27c505b2351c218f705d60b25355171f6eed9d8d563a64f",
+      "physical_sha256": "9c8682cbfdc76ef3b27c505b2351c218f705d60b25355171f6eed9d8d563a64f",
+      "restored": true,
+      "raw_evidence": "build\\etm-h743-abi2-regression-audit\\fusion-abi1-2"
+    },
+    {
+      "case": "fusion-abi1-3",
+      "pair": "fusion-abi1",
+      "cli": "efficiency",
+      "gpio_speed": 3,
+      "window_ms": 50,
+      "probe_reference_hz": 199999998,
+      "target_clock": {
+        "name": "STM32H743/H742/H750/H753",
+        "cpuid": "0x411fc271",
+        "device": "0x20036450",
+        "registers": {
+          "0x58024400": "0x4025",
+          "0x58024410": "0x0",
+          "0x58024418": "0x0",
+          "0x5802441c": "0x0",
+          "0x58024420": "0x0",
+          "0x58024428": "0x2020200",
+          "0x5802442c": "0x1ff0000",
+          "0x58024430": "0x1010280",
+          "0x58024434": "0x0",
+          "0x58024438": "0x1010280",
+          "0x52002000": "0x37"
+        }
+      },
+      "formatter_bytes": 135312,
+      "parser_errors": 15,
+      "frame_drops": 0,
+      "writer_errors": 0,
+      "idelay_ready_losses": 0,
+      "usb_submit_errors": 0,
+      "usb_sha256": "b7f2878f661810ad9c72b21dcbf5fe9ea5445332368811bb5e50e2354603e412",
+      "physical_sha256": "b7f2878f661810ad9c72b21dcbf5fe9ea5445332368811bb5e50e2354603e412",
+      "restored": true,
+      "raw_evidence": "build\\etm-h743-abi2-regression-audit\\fusion-abi1-3"
+    },
+    {
+      "case": "frozen-main-gpio1-1",
+      "pair": "main-ram",
+      "cli": "main 03b6a1da",
+      "gpio_speed": 1,
+      "window_ms": 50,
+      "probe_reference_hz": 199999998,
+      "target_clock": {
+        "name": "STM32H743/H742/H750/H753",
+        "cpuid": "0x411fc271",
+        "device": "0x20036450",
+        "registers": {
+          "0x58024400": "0x4025",
+          "0x58024410": "0x0",
+          "0x58024418": "0x0",
+          "0x5802441c": "0x0",
+          "0x58024420": "0x0",
+          "0x58024428": "0x2020200",
+          "0x5802442c": "0x1ff0000",
+          "0x58024430": "0x1010280",
+          "0x58024434": "0x0",
+          "0x58024438": "0x1010280",
+          "0x52002000": "0x37"
+        }
+      },
+      "formatter_bytes": 152444,
+      "parser_errors": 125,
+      "frame_drops": 0,
+      "writer_errors": 0,
+      "idelay_ready_losses": 0,
+      "usb_submit_errors": 0,
+      "usb_sha256": "28a4842b9a755aed64dad23c3e9434a0adf18db60b2eca7d89c8106c1a1c9357",
+      "physical_sha256": "28a4842b9a755aed64dad23c3e9434a0adf18db60b2eca7d89c8106c1a1c9357",
+      "restored": true,
+      "raw_evidence": "build\\etm-h743-abi2-regression-audit\\frozen-main-gpio1-1"
+    },
+    {
+      "case": "frozen-main-gpio1-2",
+      "pair": "main-ram",
+      "cli": "main 03b6a1da",
+      "gpio_speed": 1,
+      "window_ms": 50,
+      "probe_reference_hz": 199999998,
+      "target_clock": {
+        "name": "STM32H743/H742/H750/H753",
+        "cpuid": "0x411fc271",
+        "device": "0x20036450",
+        "registers": {
+          "0x58024400": "0x4025",
+          "0x58024410": "0x0",
+          "0x58024418": "0x0",
+          "0x5802441c": "0x0",
+          "0x58024420": "0x0",
+          "0x58024428": "0x2020200",
+          "0x5802442c": "0x1ff0000",
+          "0x58024430": "0x1010280",
+          "0x58024434": "0x0",
+          "0x58024438": "0x1010280",
+          "0x52002000": "0x37"
+        }
+      },
+      "formatter_bytes": 169217,
+      "parser_errors": 184,
+      "frame_drops": 0,
+      "writer_errors": 0,
+      "idelay_ready_losses": 0,
+      "usb_submit_errors": 0,
+      "usb_sha256": "1a0f29fe6d19b3905d256b7ab90d9e13bb0d3969c22d27c0bcf69eeeeec13dbc",
+      "physical_sha256": "1a0f29fe6d19b3905d256b7ab90d9e13bb0d3969c22d27c0bcf69eeeeec13dbc",
+      "restored": true,
+      "raw_evidence": "build\\etm-h743-abi2-regression-audit\\frozen-main-gpio1-2"
+    },
+    {
+      "case": "frozen-main-gpio1-3",
+      "pair": "main-ram",
+      "cli": "main 03b6a1da",
+      "gpio_speed": 1,
+      "window_ms": 50,
+      "probe_reference_hz": 199999998,
+      "target_clock": {
+        "name": "STM32H743/H742/H750/H753",
+        "cpuid": "0x411fc271",
+        "device": "0x20036450",
+        "registers": {
+          "0x58024400": "0x4025",
+          "0x58024410": "0x0",
+          "0x58024418": "0x0",
+          "0x5802441c": "0x0",
+          "0x58024420": "0x0",
+          "0x58024428": "0x2020200",
+          "0x5802442c": "0x1ff0000",
+          "0x58024430": "0x1010280",
+          "0x58024434": "0x0",
+          "0x58024438": "0x1010280",
+          "0x52002000": "0x37"
+        }
+      },
+      "formatter_bytes": 159872,
+      "parser_errors": 158,
+      "frame_drops": 0,
+      "writer_errors": 0,
+      "idelay_ready_losses": 0,
+      "usb_submit_errors": 0,
+      "usb_sha256": "8a32d12205ab8f97259f7200c8ad9acee99db6b534868e031b71da7fad4601e5",
+      "physical_sha256": "8a32d12205ab8f97259f7200c8ad9acee99db6b534868e031b71da7fad4601e5",
+      "restored": true,
+      "raw_evidence": "build\\etm-h743-abi2-regression-audit\\frozen-main-gpio1-3"
+    },
+    {
+      "case": "frozen-main-gpio2-1",
+      "pair": "main-ram",
+      "cli": "main 03b6a1da",
+      "gpio_speed": 2,
+      "window_ms": 50,
+      "probe_reference_hz": 199999998,
+      "target_clock": {
+        "name": "STM32H743/H742/H750/H753",
+        "cpuid": "0x411fc271",
+        "device": "0x20036450",
+        "registers": {
+          "0x58024400": "0x4025",
+          "0x58024410": "0x0",
+          "0x58024418": "0x0",
+          "0x5802441c": "0x0",
+          "0x58024420": "0x0",
+          "0x58024428": "0x2020200",
+          "0x5802442c": "0x1ff0000",
+          "0x58024430": "0x1010280",
+          "0x58024434": "0x0",
+          "0x58024438": "0x1010280",
+          "0x52002000": "0x37"
+        }
+      },
+      "formatter_bytes": 182918,
+      "parser_errors": 231,
+      "frame_drops": 0,
+      "writer_errors": 0,
+      "idelay_ready_losses": 0,
+      "usb_submit_errors": 0,
+      "usb_sha256": "bd2d28d3306aad7a19b210b771415161fe8e3ce2672fdbd029a1eb9c3ee42d32",
+      "physical_sha256": "bd2d28d3306aad7a19b210b771415161fe8e3ce2672fdbd029a1eb9c3ee42d32",
+      "restored": true,
+      "raw_evidence": "build\\etm-h743-abi2-regression-audit\\frozen-main-gpio2-1"
+    },
+    {
+      "case": "frozen-main-gpio2-2",
+      "pair": "main-ram",
+      "cli": "main 03b6a1da",
+      "gpio_speed": 2,
+      "window_ms": 50,
+      "probe_reference_hz": 199999998,
+      "target_clock": {
+        "name": "STM32H743/H742/H750/H753",
+        "cpuid": "0x411fc271",
+        "device": "0x20036450",
+        "registers": {
+          "0x58024400": "0x4025",
+          "0x58024410": "0x0",
+          "0x58024418": "0x0",
+          "0x5802441c": "0x0",
+          "0x58024420": "0x0",
+          "0x58024428": "0x2020200",
+          "0x5802442c": "0x1ff0000",
+          "0x58024430": "0x1010280",
+          "0x58024434": "0x0",
+          "0x58024438": "0x1010280",
+          "0x52002000": "0x37"
+        }
+      },
+      "formatter_bytes": 168652,
+      "parser_errors": 197,
+      "frame_drops": 0,
+      "writer_errors": 0,
+      "idelay_ready_losses": 0,
+      "usb_submit_errors": 0,
+      "usb_sha256": "31a5fad1036bd8c2b6c7ae8ea304c6c6b0bab689a13efa87fa31ec35bdfeb9c9",
+      "physical_sha256": "31a5fad1036bd8c2b6c7ae8ea304c6c6b0bab689a13efa87fa31ec35bdfeb9c9",
+      "restored": true,
+      "raw_evidence": "build\\etm-h743-abi2-regression-audit\\frozen-main-gpio2-2"
+    },
+    {
+      "case": "frozen-main-gpio2-3",
+      "pair": "main-ram",
+      "cli": "main 03b6a1da",
+      "gpio_speed": 2,
+      "window_ms": 50,
+      "probe_reference_hz": 199999998,
+      "target_clock": {
+        "name": "STM32H743/H742/H750/H753",
+        "cpuid": "0x411fc271",
+        "device": "0x20036450",
+        "registers": {
+          "0x58024400": "0x4025",
+          "0x58024410": "0x0",
+          "0x58024418": "0x0",
+          "0x5802441c": "0x0",
+          "0x58024420": "0x0",
+          "0x58024428": "0x2020200",
+          "0x5802442c": "0x1ff0000",
+          "0x58024430": "0x1010280",
+          "0x58024434": "0x0",
+          "0x58024438": "0x1010280",
+          "0x52002000": "0x37"
+        }
+      },
+      "formatter_bytes": 167872,
+      "parser_errors": 215,
+      "frame_drops": 0,
+      "writer_errors": 0,
+      "idelay_ready_losses": 0,
+      "usb_submit_errors": 0,
+      "usb_sha256": "393f99e0004a24b2b80df83b6030da7d62958d06ba0d50261c0f6cdc1d6b4bfc",
+      "physical_sha256": "393f99e0004a24b2b80df83b6030da7d62958d06ba0d50261c0f6cdc1d6b4bfc",
+      "restored": true,
+      "raw_evidence": "build\\etm-h743-abi2-regression-audit\\frozen-main-gpio2-3"
+    },
+    {
+      "case": "frozen-main-window5-1",
+      "pair": "main-ram",
+      "cli": "main 03b6a1da",
+      "gpio_speed": 2,
+      "window_ms": 5,
+      "probe_reference_hz": 199999998,
+      "target_clock": {
+        "name": "STM32H743/H742/H750/H753",
+        "cpuid": "0x411fc271",
+        "device": "0x20036450",
+        "registers": {
+          "0x58024400": "0x4025",
+          "0x58024410": "0x0",
+          "0x58024418": "0x0",
+          "0x5802441c": "0x0",
+          "0x58024420": "0x0",
+          "0x58024428": "0x2020200",
+          "0x5802442c": "0x1ff0000",
+          "0x58024430": "0x1010280",
+          "0x58024434": "0x0",
+          "0x58024438": "0x1010280",
+          "0x52002000": "0x37"
+        }
+      },
+      "formatter_bytes": 12737,
+      "parser_errors": 14,
+      "frame_drops": 0,
+      "writer_errors": 0,
+      "idelay_ready_losses": 0,
+      "usb_submit_errors": 0,
+      "usb_sha256": "ef756398d4cea95bc9af5ad417e7abffb3284f9c21d8db2aff1f3250a598de6b",
+      "physical_sha256": "ef756398d4cea95bc9af5ad417e7abffb3284f9c21d8db2aff1f3250a598de6b",
+      "restored": true,
+      "raw_evidence": "build\\etm-h743-abi2-regression-audit\\frozen-main-window5-1"
+    },
+    {
+      "case": "frozen-main-window5-2",
+      "pair": "main-ram",
+      "cli": "main 03b6a1da",
+      "gpio_speed": 2,
+      "window_ms": 5,
+      "probe_reference_hz": 199999998,
+      "target_clock": {
+        "name": "STM32H743/H742/H750/H753",
+        "cpuid": "0x411fc271",
+        "device": "0x20036450",
+        "registers": {
+          "0x58024400": "0x4025",
+          "0x58024410": "0x0",
+          "0x58024418": "0x0",
+          "0x5802441c": "0x0",
+          "0x58024420": "0x0",
+          "0x58024428": "0x2020200",
+          "0x5802442c": "0x1ff0000",
+          "0x58024430": "0x1010280",
+          "0x58024434": "0x0",
+          "0x58024438": "0x1010280",
+          "0x52002000": "0x37"
+        }
+      },
+      "formatter_bytes": 15212,
+      "parser_errors": 20,
+      "frame_drops": 0,
+      "writer_errors": 0,
+      "idelay_ready_losses": 0,
+      "usb_submit_errors": 0,
+      "usb_sha256": "4ba633807e5e949f3f2356dabc22753c2627fd9fb8e993fed391beb4546047d9",
+      "physical_sha256": "4ba633807e5e949f3f2356dabc22753c2627fd9fb8e993fed391beb4546047d9",
+      "restored": true,
+      "raw_evidence": "build\\etm-h743-abi2-regression-audit\\frozen-main-window5-2"
+    },
+    {
+      "case": "frozen-main-window200-1",
+      "pair": "main-ram",
+      "cli": "main 03b6a1da",
+      "gpio_speed": 2,
+      "window_ms": 200,
+      "probe_reference_hz": 199999998,
+      "target_clock": {
+        "name": "STM32H743/H742/H750/H753",
+        "cpuid": "0x411fc271",
+        "device": "0x20036450",
+        "registers": {
+          "0x58024400": "0x4025",
+          "0x58024410": "0x0",
+          "0x58024418": "0x0",
+          "0x5802441c": "0x0",
+          "0x58024420": "0x0",
+          "0x58024428": "0x2020200",
+          "0x5802442c": "0x1ff0000",
+          "0x58024430": "0x1010280",
+          "0x58024434": "0x0",
+          "0x58024438": "0x1010280",
+          "0x52002000": "0x37"
+        }
+      },
+      "formatter_bytes": 656108,
+      "parser_errors": 789,
+      "frame_drops": 0,
+      "writer_errors": 0,
+      "idelay_ready_losses": 0,
+      "usb_submit_errors": 0,
+      "usb_sha256": "18801041bb37ac3f3820390fb113c2a58f6a32dfa610c86219428121bb17dd8a",
+      "physical_sha256": "18801041bb37ac3f3820390fb113c2a58f6a32dfa610c86219428121bb17dd8a",
+      "restored": true,
+      "raw_evidence": "build\\etm-h743-abi2-regression-audit\\frozen-main-window200-1"
+    },
+    {
+      "case": "frozen-main-window200-2",
+      "pair": "main-ram",
+      "cli": "main 03b6a1da",
+      "gpio_speed": 2,
+      "window_ms": 200,
+      "probe_reference_hz": 199999998,
+      "target_clock": {
+        "name": "STM32H743/H742/H750/H753",
+        "cpuid": "0x411fc271",
+        "device": "0x20036450",
+        "registers": {
+          "0x58024400": "0x4025",
+          "0x58024410": "0x0",
+          "0x58024418": "0x0",
+          "0x5802441c": "0x0",
+          "0x58024420": "0x0",
+          "0x58024428": "0x2020200",
+          "0x5802442c": "0x1ff0000",
+          "0x58024430": "0x1010280",
+          "0x58024434": "0x0",
+          "0x58024438": "0x1010280",
+          "0x52002000": "0x37"
+        }
+      },
+      "formatter_bytes": 736717,
+      "parser_errors": 969,
+      "frame_drops": 0,
+      "writer_errors": 0,
+      "idelay_ready_losses": 0,
+      "usb_submit_errors": 0,
+      "usb_sha256": "0651b3baed63f32eeb8262d7b8d20d4dc785cdd1b2df009c3d35a673dc9e29db",
+      "physical_sha256": "0651b3baed63f32eeb8262d7b8d20d4dc785cdd1b2df009c3d35a673dc9e29db",
+      "restored": true,
+      "raw_evidence": "build\\etm-h743-abi2-regression-audit\\frozen-main-window200-2"
+    },
+    {
+      "case": "frozen-main-clktap8",
+      "pair": "main-ram",
+      "cli": "main 03b6a1da",
+      "gpio_speed": 1,
+      "window_ms": 50,
+      "probe_reference_hz": 199999998,
+      "target_clock": {
+        "name": "STM32H743/H742/H750/H753",
+        "cpuid": "0x411fc271",
+        "device": "0x20036450",
+        "registers": {
+          "0x58024400": "0x4025",
+          "0x58024410": "0x0",
+          "0x58024418": "0x0",
+          "0x5802441c": "0x0",
+          "0x58024420": "0x0",
+          "0x58024428": "0x2020200",
+          "0x5802442c": "0x1ff0000",
+          "0x58024430": "0x1010280",
+          "0x58024434": "0x0",
+          "0x58024438": "0x1010280",
+          "0x52002000": "0x37"
+        }
+      },
+      "formatter_bytes": 150845,
+      "parser_errors": 134,
+      "frame_drops": 0,
+      "writer_errors": 0,
+      "idelay_ready_losses": 0,
+      "usb_submit_errors": 0,
+      "usb_sha256": "e4ffc2825cbc3a7ee9bccefdcdd1a30a975f21872f51502ff30f1bdff62ac3f7",
+      "physical_sha256": "e4ffc2825cbc3a7ee9bccefdcdd1a30a975f21872f51502ff30f1bdff62ac3f7",
+      "restored": true,
+      "raw_evidence": "build\\etm-h743-abi2-regression-audit\\frozen-main-clktap8",
+      "clock_tap": 8
+    },
+    {
+      "case": "frozen-main-clktap16",
+      "pair": "main-ram",
+      "cli": "main 03b6a1da",
+      "gpio_speed": 1,
+      "window_ms": 50,
+      "probe_reference_hz": 199999998,
+      "target_clock": {
+        "name": "STM32H743/H742/H750/H753",
+        "cpuid": "0x411fc271",
+        "device": "0x20036450",
+        "registers": {
+          "0x58024400": "0x4025",
+          "0x58024410": "0x0",
+          "0x58024418": "0x0",
+          "0x5802441c": "0x0",
+          "0x58024420": "0x0",
+          "0x58024428": "0x2020200",
+          "0x5802442c": "0x1ff0000",
+          "0x58024430": "0x1010280",
+          "0x58024434": "0x0",
+          "0x58024438": "0x1010280",
+          "0x52002000": "0x37"
+        }
+      },
+      "formatter_bytes": 149340,
+      "parser_errors": 112,
+      "frame_drops": 0,
+      "writer_errors": 0,
+      "idelay_ready_losses": 0,
+      "usb_submit_errors": 0,
+      "usb_sha256": "085c8e003dc2d18f9e596700fc404fbfdaeb2078f9348353c7fa1eca4737ea72",
+      "physical_sha256": "085c8e003dc2d18f9e596700fc404fbfdaeb2078f9348353c7fa1eca4737ea72",
+      "restored": true,
+      "raw_evidence": "build\\etm-h743-abi2-regression-audit\\frozen-main-clktap16",
+      "clock_tap": 16
+    },
+    {
+      "case": "frozen-main-clktap24",
+      "pair": "main-ram",
+      "cli": "main 03b6a1da",
+      "gpio_speed": 1,
+      "window_ms": 50,
+      "probe_reference_hz": 199999998,
+      "target_clock": {
+        "name": "STM32H743/H742/H750/H753",
+        "cpuid": "0x411fc271",
+        "device": "0x20036450",
+        "registers": {
+          "0x58024400": "0x4025",
+          "0x58024410": "0x0",
+          "0x58024418": "0x0",
+          "0x5802441c": "0x0",
+          "0x58024420": "0x0",
+          "0x58024428": "0x2020200",
+          "0x5802442c": "0x1ff0000",
+          "0x58024430": "0x1010280",
+          "0x58024434": "0x0",
+          "0x58024438": "0x1010280",
+          "0x52002000": "0x37"
+        }
+      },
+      "formatter_bytes": 176893,
+      "parser_errors": 198,
+      "frame_drops": 0,
+      "writer_errors": 0,
+      "idelay_ready_losses": 0,
+      "usb_submit_errors": 0,
+      "usb_sha256": "5ac9cc831dcba1c0d915712cd9e0986fbbb6ef1cb3f83a914ff496660a9a323f",
+      "physical_sha256": "5ac9cc831dcba1c0d915712cd9e0986fbbb6ef1cb3f83a914ff496660a9a323f",
+      "restored": true,
+      "raw_evidence": "build\\etm-h743-abi2-regression-audit\\frozen-main-clktap24",
+      "clock_tap": 24
+    }
+  ],
+  "tap_restore": {
+    "initial": {
+      "enabled": false,
+      "taps": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "busy": false,
+      "ready": true,
+      "loaded": true,
+      "fault": false,
+      "rejectedSticky": false,
+      "accepted": 0,
+      "rejected": 0,
+      "loadFailures": 0,
+      "raw": [
+        1162626097,
+        0,
+        12,
+        0,
+        0,
+        0
+      ]
+    },
+    "samples": [
+      {
+        "taps": [
+          0,
+          0,
+          0,
+          0,
+          8
+        ],
+        "parserErrors": 134,
+        "usbMatchesPhysical": true,
+        "restored": true,
+        "settings_after_capture": {
+          "enabled": true,
+          "taps": [
+            0,
+            0,
+            0,
+            0,
+            8
+          ],
+          "busy": false,
+          "ready": true,
+          "loaded": true,
+          "fault": false,
+          "rejectedSticky": false,
+          "accepted": 1,
+          "rejected": 0,
+          "loadFailures": 0,
+          "raw": [
+            1162626097,
+            41943040,
+            13,
+            1,
+            0,
+            0
+          ]
+        }
+      },
+      {
+        "taps": [
+          0,
+          0,
+          0,
+          0,
+          16
+        ],
+        "parserErrors": 112,
+        "usbMatchesPhysical": true,
+        "restored": true,
+        "settings_after_capture": {
+          "enabled": true,
+          "taps": [
+            0,
+            0,
+            0,
+            0,
+            16
+          ],
+          "busy": false,
+          "ready": true,
+          "loaded": true,
+          "fault": false,
+          "rejectedSticky": false,
+          "accepted": 2,
+          "rejected": 0,
+          "loadFailures": 0,
+          "raw": [
+            1162626097,
+            50331648,
+            13,
+            2,
+            0,
+            0
+          ]
+        }
+      },
+      {
+        "taps": [
+          0,
+          0,
+          0,
+          0,
+          24
+        ],
+        "parserErrors": 198,
+        "usbMatchesPhysical": true,
+        "restored": true,
+        "settings_after_capture": {
+          "enabled": true,
+          "taps": [
+            0,
+            0,
+            0,
+            0,
+            24
+          ],
+          "busy": false,
+          "ready": true,
+          "loaded": true,
+          "fault": false,
+          "rejectedSticky": false,
+          "accepted": 3,
+          "rejected": 0,
+          "loadFailures": 0,
+          "raw": [
+            1162626097,
+            58720256,
+            13,
+            3,
+            0,
+            0
+          ]
+        }
+      }
+    ],
+    "tap_restored": true
+  },
+  "offline_redecode": {
+    "raw": {
+      "bytes": 2176688,
+      "sha256": "974e5c2cf6bdaf44a33c67615f9813e83c388e7b0d4ae211ee88429fe13bf2b9"
+    },
+    "elf": {
+      "bytes": 2179000,
+      "sha256": "246640bf79c8b1e568441a286812326dfb0ae68a0df061a0c023262c07cf221b"
+    },
+    "quality": {
+      "passed": true,
+      "failures": {},
+      "terminalBoundaryPackets": [],
+      "note": "尾部INCOMPLETE_EOT单列保留；初始化未同步/条件未知不视作已证实执行；字节核算不等于无损证明"
+    },
+    "summary": {
+      "packets": 2020196,
+      "ranges": 4322285,
+      "instructions": 18373686,
+      "executed": 16227666,
+      "sourceMapped": 18154689,
+      "exceptions": 2268,
+      "gaps": 1,
+      "packetIssues": 0,
+      "unknownExecution": 8759,
+      "functions": {
+        "main": 14095245,
+        "HAL_GetTick": 1568088,
+        "USBD_IRQHandler": 85156,
+        "_svfprintf_r": 44461,
+        "usb_memcpy": 43658,
+        "usbd_ep_start_write": 32376,
+        "dwc2_ep_write": 34254,
+        "dwc2_tx_fifo_empty_procecss": 30516,
+        "memmove": 26208,
+        "usbd_ep_start_read": 21996,
+        "__ssputs_r": 20597,
+        "_printf_i": 17550,
+        "handle_command": 16146,
+        "(未知函数)": 15210,
+        "memcpy": 18954,
+        "dwc2_ep_read": 17082,
+        "strlen": 17700,
+        "_printf_common": 11701,
+        "dwc2_get_inep_intstatus": 9656,
+        "strcmp": 7020,
+        "OTG_FS_IRQHandler": 8890,
+        "dwc2_get_glb_intstatus": 8890,
+        "_vsnprintf_r": 6552,
+        "cdc_write": 7100,
+        "HAL_IncTick": 6993,
+        "SEGGER_RTT_WriteNoLock": 5616,
+        "trace_log_printf": 5382,
+        "dwc2_get_ineps_intstatus": 5112,
+        "usbd_cdc_acm_bulk_in": 5112,
+        "SEGGER_RTT_Write": 3999,
+        "_WriteNoCheck": 3510,
+        "usbd_cdc_acm_bulk_out": 3510,
+        "usbd_event_ep_in_complete_handler": 3124,
+        "usbd_get_ep_mps": 3124,
+        "SysTick_Handler": 2997,
+        "usbd_event_ep_out_complete_handler": 2574,
+        "dwc2_get_outep_intstatus": 2574,
+        "strncmp": 2340,
+        "vsnprintf": 2340,
+        "dwc2_get_outeps_intstatus": 2106,
+        "_GetAvailWriteSpace": 1872,
+        "cdc_puts": 350,
+        "trace_hook_mark": 23,
+        "HAL_GPIO_WritePin": 2
+      }
+    }
+  },
+  "loads": {
+    "main-ram-load": {
+      "bit": {
+        "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\release-20261106\\probe.bit",
+        "sha256": "dd69106c46a4bd1a52badecbf9125e51beca8435c25d2742cca62323efaaf4e6"
+      },
+      "zynq_elf": {
+        "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\release-20261106\\application.elf",
+        "sha256": "5895eeb0e79a3681a6b3b966dbea4c82ebfcd01ea7553e094d8a61ed2cf89802"
+      },
+      "ps_init": {
+        "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\release-20261106\\ps7_init.tcl",
+        "sha256": "485a028ff7ad9a256a64313b68527a055ca3800b3b85577ceb0554b0e0609c94"
+      }
+    },
+    "fusion-abi1-load": {
+      "bit": {
+        "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-spi-cdc-rx-guard-20261123\\probe.bit",
+        "sha256": "f3c4ccfd78c9148649897a0902fb93eadb209494e0295956981c973bbac92c66"
+      },
+      "zynq_elf": {
+        "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-spi-cdc-rx-guard-20261123\\application.elf",
+        "sha256": "e1f21ea8d5aa6403f4f2ab78da0a3215cea11862cb852dd9e37e413248068b90"
+      },
+      "ps_init": {
+        "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-spi-cdc-rx-guard-20261123\\ps7_init.tcl",
+        "sha256": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+      }
+    },
+    "final-reload": {
+      "bit": {
+        "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-20261123\\probe.bit",
+        "sha256": "f3c4ccfd78c9148649897a0902fb93eadb209494e0295956981c973bbac92c66"
+      },
+      "zynq_elf": {
+        "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-20261123\\application.elf",
+        "sha256": "61267ceeb63c5b8192adaa23f253ed2f7ea53a8c6fbddd8cecc3a45ca2e599eb"
+      },
+      "ps_init": {
+        "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-20261123\\ps7_init.tcl",
+        "sha256": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+      }
+    }
+  },
+  "final_h743": {
+    "transport": "swd",
+    "requested_hz": 1000000,
+    "dp_id": "0x6ba02477",
+    "cpuid": "0x411fc271"
+  },
+  "final_probe": {
+    "operation": "check",
+    "dryRun": false,
+    "out": "E:\\zynqlinkPRO-efficiency\\build\\etm-h743-abi2-regression-audit\\final-idle",
+    "files": {
+      "bit": {
+        "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-20261123\\probe.bit",
+        "sha256": "f3c4ccfd78c9148649897a0902fb93eadb209494e0295956981c973bbac92c66"
+      },
+      "zynq_elf": {
+        "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-20261123\\application.elf",
+        "sha256": "61267ceeb63c5b8192adaa23f253ed2f7ea53a8c6fbddd8cecc3a45ca2e599eb"
+      },
+      "ps_init": {
+        "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-20261123\\ps7_init.tcl",
+        "sha256": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+      }
+    },
+    "stage": "complete",
+    "passed": true,
+    "streams": {},
+    "before": {
+      "PS_IDCODE": "0x23727093",
+      "LEVEL_SHIFTERS": "0xf",
+      "FPGA_RESET": "0x0",
+      "BOOT_MODE": "0x0",
+      "CAPTURE": "0x8",
+      "SWD": "0x2",
+      "JQUEUE": "0x14",
+      "SQUEUE": "0x38",
+      "AUX": "0x0",
+      "AUXFLAGS": "0x0",
+      "PACKET": "0x0",
+      "DDR": "0x0",
+      "CDMA_BASE": "0x40020000",
+      "CDMA": "0x1002"
+    }
+  }
+}
