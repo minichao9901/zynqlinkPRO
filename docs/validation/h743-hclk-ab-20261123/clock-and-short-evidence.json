@@ -1,0 +1,1845 @@
+{
+  "artifacts": {
+    "probe.bit": "9b8a3d9215c81dfa5fd0f756b7a11ff7d458acc82610f107cf4adf20ea39c6cc",
+    "application.elf": "1379081a1caa1868fcb129686b74ce6a58825e9176a1921bcc42a1041f70ac49",
+    "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+  },
+  "preflight": {
+    "probe": {
+      "PS_IDCODE": "0x23727093",
+      "LEVEL_SHIFTERS": "0xf",
+      "FPGA_RESET": "0x0",
+      "BOOT_MODE": "0x0",
+      "CAPTURE": "0x8",
+      "SWD": "0x2",
+      "JQUEUE": "0x14",
+      "SQUEUE": "0x38",
+      "AUX": "0x0",
+      "AUXFLAGS": "0x0",
+      "PACKET": "0x0",
+      "DDR": "0x0",
+      "CDMA_BASE": "0x40020000",
+      "CDMA": "0x1002"
+    },
+    "target": {
+      "name": "STM32H743/H742/H750/H753",
+      "cpuid": "0x411fc271",
+      "device": "0x20036450",
+      "registers": {
+        "0x58024400": "0x3303c025",
+        "0x58024410": "0x1b",
+        "0x58024418": "0x40",
+        "0x5802441c": "0x440",
+        "0x58024420": "0x50",
+        "0x58024428": "0x1920052",
+        "0x5802442c": "0x1ff0309",
+        "0x58024430": "0xb010e5f",
+        "0x58024434": "0x0",
+        "0x58024438": "0x1010280",
+        "0x52002000": "0x32"
+      }
+    },
+    "registers": {
+      "0x58024818": "0xe000",
+      "0x5802480c": "0x5000042",
+      "0x58024804": "0xe000",
+      "0x580244f4": "0x10000",
+      "0x5800042c": "0x0",
+      "0xe000edf0": "0x1010001",
+      "0xe000ed14": "0x60200",
+      "0xe0001000": "0x40000001",
+      "0xe000edfc": "0x1000000"
+    }
+  },
+  "initial_ocm": {
+    "time_UTC": "2026-11-23T14:49:24.394399+00:00",
+    "elf": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\application.elf",
+    "elf_sha256": "1379081a1caa1868fcb129686b74ce6a58825e9176a1921bcc42a1041f70ac49",
+    "downloads": false,
+    "probe_reset_or_continue": false,
+    "expected_executable_bytes": 80668,
+    "cycles": [
+      {
+        "cycle": 0,
+        "sections": [
+          {
+            "name": ".text",
+            "bytes": 78816,
+            "address": 0,
+            "equal": true,
+            "expected_sha256": "90837010f608e56b7bfb2ef8b3a2d9f4bda9face3e19d7ed654773ddb3e9350f",
+            "live_sha256": "90837010f608e56b7bfb2ef8b3a2d9f4bda9face3e19d7ed654773ddb3e9350f"
+          },
+          {
+            "name": ".ocm_text",
+            "bytes": 1828,
+            "address": 78816,
+            "equal": true,
+            "expected_sha256": "e881a808f7080af2b96a17888756ef1871634732af9e5d5e50353a13ac13e42c",
+            "live_sha256": "e881a808f7080af2b96a17888756ef1871634732af9e5d5e50353a13ac13e42c"
+          },
+          {
+            "name": ".init",
+            "bytes": 12,
+            "address": 80644,
+            "equal": true,
+            "expected_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6",
+            "live_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6"
+          },
+          {
+            "name": ".fini",
+            "bytes": 12,
+            "address": 80656,
+            "equal": true,
+            "expected_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6",
+            "live_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6"
+          }
+        ],
+        "differing_addresses": [],
+        "vector_word": "ea000049"
+      }
+    ],
+    "passed": true,
+    "memoryAccess": "physical MEM-AP0; independent of CPU memory/cache context",
+    "boot_mode": 0,
+    "boot_trace": [
+      2038973450,
+      3147529585,
+      2250612313,
+      4243973684,
+      981627204,
+      4219203618,
+      982701537,
+      3677326143
+    ],
+    "clockSnapshot": {
+      "control": 1051168,
+      "source": 2,
+      "pll": 163848,
+      "bootMode": 0,
+      "FCLK_Hz": 133333332
+    },
+    "initial_FCLK_Hz": 133333332
+  },
+  "quick": {
+    "phase": "quick",
+    "restored": true,
+    "windows": [
+      {
+        "name": "hclk60-swd-read",
+        "hclk_MHz": 60,
+        "port": "swd",
+        "idle": 4,
+        "seconds_requested": 2,
+        "running": true,
+        "result": {
+          "direction": "read",
+          "total_bytes": 1612800,
+          "requests": 400,
+          "seconds": 2.0234608000027947,
+          "host_MBps": 0.7970502813782072,
+          "usb_call_seconds": 2.0229817000072217,
+          "clock": {
+            "wire_hz": 99999998,
+            "reference_hz": 199999996,
+            "divider": 2,
+            "timing": "0x11965",
+            "tap": 8,
+            "source": "PS clock tree and PL queue registers"
+          },
+          "queue_seconds": [
+            1.9997811980063451,
+            0.0
+          ],
+          "probe_seconds": [
+            2.0096781827193326,
+            0.0
+          ],
+          "jtag_read_retries": null,
+          "effective_idle": 4
+        },
+        "passed": true
+      },
+      {
+        "name": "hclk60-swd-write",
+        "hclk_MHz": 60,
+        "port": "swd",
+        "idle": 4,
+        "seconds_requested": 2,
+        "running": true,
+        "result": {
+          "direction": "write",
+          "total_bytes": 1612800,
+          "requests": 400,
+          "seconds": 2.0666436000028625,
+          "host_MBps": 0.7803958069972811,
+          "usb_call_seconds": 2.0596911999600707,
+          "clock": {
+            "wire_hz": 99999998,
+            "reference_hz": 199999996,
+            "divider": 2,
+            "timing": "0x11965",
+            "tap": 8,
+            "source": "PS clock tree and PL queue registers"
+          },
+          "queue_seconds": [
+            0.0,
+            2.0311371280970234
+          ],
+          "probe_seconds": [
+            0.0,
+            2.0417801317883764
+          ],
+          "jtag_read_retries": null,
+          "effective_idle": 4
+        },
+        "passed": true
+      },
+      {
+        "name": "hclk60-swd-wait",
+        "hclk_MHz": 60,
+        "port": "swd",
+        "idle": 4,
+        "seconds_requested": 2,
+        "running": true,
+        "result": [
+          {
+            "repeat": 1,
+            "direction": "read",
+            "successful_transactions": 259,
+            "payload_words": 256,
+            "wait_retries": 5377,
+            "register": "0x15010103"
+          },
+          {
+            "repeat": 1,
+            "direction": "write",
+            "successful_transactions": 259,
+            "payload_words": 256,
+            "wait_retries": 5472,
+            "register": "0x15600103"
+          },
+          {
+            "repeat": 2,
+            "direction": "read",
+            "successful_transactions": 259,
+            "payload_words": 256,
+            "wait_retries": 5377,
+            "register": "0x15010103"
+          },
+          {
+            "repeat": 2,
+            "direction": "write",
+            "successful_transactions": 259,
+            "payload_words": 256,
+            "wait_retries": 5473,
+            "register": "0x15610103"
+          },
+          {
+            "repeat": 3,
+            "direction": "read",
+            "successful_transactions": 259,
+            "payload_words": 256,
+            "wait_retries": 5377,
+            "register": "0x15010103"
+          },
+          {
+            "repeat": 3,
+            "direction": "write",
+            "successful_transactions": 259,
+            "payload_words": 256,
+            "wait_retries": 5473,
+            "register": "0x15610103"
+          }
+        ],
+        "passed": true
+      },
+      {
+        "name": "hclk60-swd-rtt",
+        "hclk_MHz": 60,
+        "port": "swd",
+        "idle": 4,
+        "seconds_requested": 2,
+        "running": true,
+        "result": {
+          "bytes": 1511424,
+          "window_bytes": 1509376,
+          "seconds": 2.000050300004659,
+          "chunk_bytes": 2048,
+          "MBps": 0.7546690200723871,
+          "sha256": "35f19926c7c24ff3d6b1eff1c439410dbe048efadc31a4476be3df6e05b0d7d2",
+          "stop": [
+            65536,
+            604242432,
+            604242456,
+            1511424,
+            48366306,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1660946432
+          ],
+          "produced_bytes": 1519612,
+          "wr": 4092,
+          "rd": 4096
+        },
+        "passed": true
+      },
+      {
+        "name": "hclk60-jtag-read",
+        "hclk_MHz": 60,
+        "port": "jtag",
+        "idle": 65,
+        "seconds_requested": 2,
+        "running": true,
+        "passed": false,
+        "error": "native channel 1 operation 6 status 1, detail 0000000002000000",
+        "link_recovered": true
+      },
+      {
+        "name": "hclk60-jtag-write",
+        "hclk_MHz": 60,
+        "port": "jtag",
+        "idle": 65,
+        "seconds_requested": 2,
+        "running": true,
+        "passed": false,
+        "error": "native channel 1 operation 6 status 1, detail 0000000002000000",
+        "link_recovered": true
+      },
+      {
+        "name": "hclk60-jtag-rtt",
+        "hclk_MHz": 60,
+        "port": "jtag",
+        "idle": 65,
+        "seconds_requested": 2,
+        "running": true,
+        "result": {
+          "bytes": 1249280,
+          "window_bytes": 1247232,
+          "seconds": 2.0001645000011194,
+          "chunk_bytes": 2048,
+          "MBps": 0.6235647118021053,
+          "sha256": "fce20b35e2d22c30b06c59841c1390d8225762ab59b9b351fd0339aa3e2ff458",
+          "stop": [
+            65536,
+            536904192,
+            536904216,
+            1249280,
+            39977570,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1660946432
+          ],
+          "produced_bytes": 1257468,
+          "wr": 4092,
+          "rd": 4096
+        },
+        "passed": true
+      },
+      {
+        "name": "hclk240-swd-read",
+        "hclk_MHz": 240,
+        "port": "swd",
+        "idle": 4,
+        "seconds_requested": 2,
+        "running": true,
+        "result": {
+          "direction": "read",
+          "total_bytes": 9870336,
+          "requests": 2448,
+          "seconds": 2.003700699991896,
+          "host_MBps": 4.926053077707624,
+          "usb_call_seconds": 2.002009600008023,
+          "clock": {
+            "wire_hz": 99999998,
+            "reference_hz": 199999996,
+            "divider": 2,
+            "timing": "0x11965",
+            "tap": 8,
+            "source": "PS clock tree and PL queue registers"
+          },
+          "queue_seconds": [
+            1.8740429756527537,
+            0.0
+          ],
+          "probe_seconds": [
+            1.9349781698856332,
+            0.0
+          ],
+          "jtag_read_retries": null,
+          "effective_idle": 4
+        },
+        "passed": true
+      },
+      {
+        "name": "hclk240-swd-write",
+        "hclk_MHz": 240,
+        "port": "swd",
+        "idle": 4,
+        "seconds_requested": 2,
+        "running": true,
+        "result": {
+          "direction": "write",
+          "total_bytes": 9547776,
+          "requests": 2368,
+          "seconds": 2.000468300000648,
+          "host_MBps": 4.772770455796229,
+          "usb_call_seconds": 1.967288300031214,
+          "clock": {
+            "wire_hz": 99999998,
+            "reference_hz": 199999996,
+            "divider": 2,
+            "timing": "0x11965",
+            "tap": 8,
+            "source": "PS clock tree and PL queue registers"
+          },
+          "queue_seconds": [
+            0.0,
+            1.8170576713053277
+          ],
+          "probe_seconds": [
+            0.0,
+            1.880765141457811
+          ],
+          "jtag_read_retries": null,
+          "effective_idle": 4
+        },
+        "passed": true
+      },
+      {
+        "name": "hclk240-swd-wait",
+        "hclk_MHz": 240,
+        "port": "swd",
+        "idle": 4,
+        "seconds_requested": 2,
+        "running": true,
+        "result": [
+          {
+            "repeat": 1,
+            "direction": "read",
+            "successful_transactions": 259,
+            "payload_words": 256,
+            "wait_retries": 257,
+            "register": "0x1010103"
+          },
+          {
+            "repeat": 1,
+            "direction": "write",
+            "successful_transactions": 259,
+            "payload_words": 256,
+            "wait_retries": 259,
+            "register": "0x1030103"
+          },
+          {
+            "repeat": 2,
+            "direction": "read",
+            "successful_transactions": 259,
+            "payload_words": 256,
+            "wait_retries": 257,
+            "register": "0x1010103"
+          },
+          {
+            "repeat": 2,
+            "direction": "write",
+            "successful_transactions": 259,
+            "payload_words": 256,
+            "wait_retries": 259,
+            "register": "0x1030103"
+          },
+          {
+            "repeat": 3,
+            "direction": "read",
+            "successful_transactions": 259,
+            "payload_words": 256,
+            "wait_retries": 257,
+            "register": "0x1010103"
+          },
+          {
+            "repeat": 3,
+            "direction": "write",
+            "successful_transactions": 259,
+            "payload_words": 256,
+            "wait_retries": 259,
+            "register": "0x1030103"
+          }
+        ],
+        "passed": true
+      },
+      {
+        "name": "hclk240-swd-rtt",
+        "hclk_MHz": 240,
+        "port": "swd",
+        "idle": 4,
+        "seconds_requested": 2,
+        "running": true,
+        "result": {
+          "bytes": 8603648,
+          "window_bytes": 8599552,
+          "seconds": 2.0001926999975694,
+          "chunk_bytes": 2048,
+          "MBps": 4.299361756499986,
+          "sha256": "4434b2a1963642b505b26e2d446ad625cca529336e6f8b77f142b2c0348c3b2e",
+          "stop": [
+            65536,
+            604242432,
+            604242456,
+            8603648,
+            275320937,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1660946432
+          ],
+          "produced_bytes": 8611836,
+          "wr": 2044,
+          "rd": 2048
+        },
+        "passed": true
+      },
+      {
+        "name": "hclk240-jtag-idle65-read",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 65,
+        "seconds_requested": 2,
+        "running": true,
+        "result": {
+          "direction": "read",
+          "total_bytes": 6838272,
+          "requests": 1696,
+          "seconds": 2.0131221000046935,
+          "host_MBps": 3.3968491031835857,
+          "usb_call_seconds": 2.0118867000273895,
+          "clock": {
+            "wire_hz": 99999998,
+            "reference_hz": 199999996,
+            "divider": 2,
+            "timing": "0x7904e2",
+            "tap": 16,
+            "source": "PS clock tree and PL queue registers"
+          },
+          "queue_seconds": [
+            1.9163282174264817,
+            0.0
+          ],
+          "probe_seconds": [
+            1.96874792990631,
+            0.0
+          ],
+          "jtag_read_retries": 0,
+          "effective_idle": 65
+        },
+        "passed": true
+      },
+      {
+        "name": "hclk240-jtag-idle65-write",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 65,
+        "seconds_requested": 2,
+        "running": true,
+        "result": {
+          "direction": "write",
+          "total_bytes": 6709248,
+          "requests": 1664,
+          "seconds": 2.0181750999909127,
+          "host_MBps": 3.324413228579725,
+          "usb_call_seconds": 1.9964189000311308,
+          "clock": {
+            "wire_hz": 99999998,
+            "reference_hz": 199999996,
+            "divider": 2,
+            "timing": "0x7904e2",
+            "tap": 16,
+            "source": "PS clock tree and PL queue registers"
+          },
+          "queue_seconds": [
+            0.0,
+            1.8802997454713073
+          ],
+          "probe_seconds": [
+            0.0,
+            1.9355302058696242
+          ],
+          "jtag_read_retries": 0,
+          "effective_idle": 65
+        },
+        "passed": true
+      },
+      {
+        "name": "hclk240-jtag-idle65-rtt",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 65,
+        "seconds_requested": 2,
+        "running": true,
+        "result": {
+          "bytes": 6045696,
+          "window_bytes": 6041600,
+          "seconds": 2.0001323000033153,
+          "chunk_bytes": 2048,
+          "MBps": 3.020600187292603,
+          "sha256": "e1535ad0d8cb56f8750860ad0dadde51be03816ae9350a83e571b146df2fd336",
+          "stop": [
+            65536,
+            536904192,
+            536904216,
+            6045696,
+            193465224,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1660946432
+          ],
+          "produced_bytes": 6053884,
+          "wr": 8188,
+          "rd": 0
+        },
+        "passed": true
+      },
+      {
+        "name": "hclk240-jtag-idle49-running",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 49,
+        "seconds_requested": 0.35,
+        "running": true,
+        "passed": false,
+        "error": "native channel 1 operation 6 status 1, detail 0000000002000000",
+        "link_recovered": true
+      },
+      {
+        "name": "hclk240-jtag-idle33-running",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 33,
+        "seconds_requested": 0.35,
+        "running": true,
+        "passed": false,
+        "error": "native channel 1 operation 6 status 1, detail 0000000002000000",
+        "link_recovered": true
+      },
+      {
+        "name": "hclk240-jtag-idle25-running",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 25,
+        "seconds_requested": 0.35,
+        "running": true,
+        "passed": false,
+        "error": "native channel 1 operation 6 status 1, detail 0000000002000000",
+        "link_recovered": true
+      },
+      {
+        "name": "hclk240-jtag-idle17-running",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 17,
+        "seconds_requested": 0.35,
+        "running": true,
+        "passed": false,
+        "error": "native channel 1 operation 6 status 1, detail 0000000002000000",
+        "link_recovered": true
+      },
+      {
+        "name": "hclk240-jtag-idle11-running",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 11,
+        "seconds_requested": 0.35,
+        "running": true,
+        "passed": false,
+        "error": "native channel 1 operation 6 status 1, detail 0000000002000000",
+        "link_recovered": true
+      },
+      {
+        "name": "hclk240-jtag-idle7-running",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 7,
+        "seconds_requested": 0.35,
+        "running": true,
+        "passed": false,
+        "error": "native channel 1 operation 6 status 1, detail 0000000002000000",
+        "link_recovered": true
+      },
+      {
+        "name": "hclk240-jtag-idle21-running",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 21,
+        "seconds_requested": 0.35,
+        "running": true,
+        "passed": false,
+        "error": "native channel 1 operation 6 status 1, detail 0000000002000000",
+        "link_recovered": true
+      },
+      {
+        "name": "hclk240-jtag-idle29-running",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 29,
+        "seconds_requested": 0.35,
+        "running": true,
+        "passed": false,
+        "error": "native channel 1 operation 6 status 1, detail 0000000002000000",
+        "link_recovered": true
+      },
+      {
+        "name": "hclk240-jtag-idle41-running",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 41,
+        "seconds_requested": 0.35,
+        "running": true,
+        "passed": false,
+        "error": "native channel 1 operation 6 status 1, detail 0000000002000000",
+        "link_recovered": true
+      },
+      {
+        "name": "hclk240-jtag-idle57-running",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 57,
+        "seconds_requested": 0.35,
+        "running": true,
+        "passed": false,
+        "error": "native channel 1 operation 6 status 1, detail 0000000002000000",
+        "link_recovered": true
+      },
+      {
+        "name": "hclk240-jtag-idle77-running",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 77,
+        "seconds_requested": 0.35,
+        "running": true,
+        "passed": false,
+        "error": "native channel 1 operation 6 status 1, detail f800000004000000",
+        "link_recovered": true
+      },
+      {
+        "name": "hclk240-jtag-idle97-running",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 97,
+        "seconds_requested": 0.35,
+        "running": true,
+        "passed": false,
+        "error": "native channel 1 operation 6 status 1, detail 0000000004000000",
+        "link_recovered": true
+      },
+      {
+        "name": "hclk240-jtag-idle129-running",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 129,
+        "seconds_requested": 0.35,
+        "running": true,
+        "passed": false,
+        "error": "native channel 1 operation 6 status 1, detail 0000000004000000",
+        "link_recovered": true
+      },
+      {
+        "name": "hclk240-jtag-idle193-running",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 193,
+        "seconds_requested": 0.35,
+        "running": true,
+        "passed": false,
+        "error": "native channel 1 operation 6 status 1, detail f802000004000000",
+        "link_recovered": true
+      },
+      {
+        "name": "hclk240-jtag-idle255-running",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 255,
+        "seconds_requested": 0.35,
+        "running": true,
+        "passed": false,
+        "error": "native channel 1 operation 6 status 1, detail f801000004000000",
+        "link_recovered": true
+      }
+    ],
+    "producer_sha256": {
+      "1": "3887038fca630e0d5af102bc6a5156a2e8dd5507185215a78de619da4ab12b1c",
+      "2": "407481fd931b6cb87d749a736894cdde3f71b7e1e6a82d7f301559c1a3a38acd"
+    },
+    "target_segments_before": [
+      [
+        "0x8000000",
+        31608,
+        "8c44763d2bab0017e3fb2b8edae2ce138628e0a9b2c83919b1d040245f716798"
+      ],
+      [
+        "0x8007b78",
+        144,
+        "96b68c9cac1f6cc3d0e744f80440b4d89e779b6df4ae111d69e8968c402bfd5d"
+      ]
+    ],
+    "original_registers": {
+      "0x58024400": "0x3303c025",
+      "0x58024410": "0x1b",
+      "0x58024418": "0x40",
+      "0x58024430": "0xb010e5f",
+      "0x52002000": "0x32",
+      "0x58024818": "0xe000",
+      "0x58024804": "0xe000",
+      "0x5802480c": "0x5000042",
+      "0x580244f4": "0x10000"
+    },
+    "sram_backups": {
+      "0x2403fffc": "e01a711b15a4e65d798b9e025f3030a842866153b0617e16224a0025b16f6e31",
+      "0x20007ffc": "db9511fd9f8fe436ed8fe63616a1c1dc8f2ffbceed776eca375a209e42fe140f",
+      "0x24050000": "16475ec714beadc8bd53fbbed4f4a25ceb955e45d630bb4a84f55ebdbde930f6"
+    },
+    "cpu60": {
+      "cpu_DWT_Hz": [
+        59980836.3200474,
+        60011001.0068189,
+        59988259.23277765
+      ],
+      "rcc": {
+        "name": "STM32H743/H742/H750/H753",
+        "cpuid": "0x411fc271",
+        "device": "0x20036450",
+        "registers": {
+          "0x58024400": "0x3303c025",
+          "0x58024410": "0x1b",
+          "0x58024418": "0x40",
+          "0x5802441c": "0x440",
+          "0x58024420": "0x50",
+          "0x58024428": "0x1920052",
+          "0x5802442c": "0x1ff0309",
+          "0x58024430": "0xb010e5f",
+          "0x58024434": "0x0",
+          "0x58024438": "0x1010280",
+          "0x52002000": "0x32"
+        }
+      },
+      "power": {
+        "0x58024818": "0xe000",
+        "0x58024804": "0xe000",
+        "0x5802480c": "0x5000042",
+        "0x580244f4": "0x10000",
+        "0x5800042c": "0x0"
+      }
+    },
+    "native": {
+      "protocol": "ZLK1",
+      "reference_hz": 199999996,
+      "link_hz": 99999998.0,
+      "features": "0x4450ffff",
+      "integrated_pl": true,
+      "max_frame": 16384,
+      "firmware_abi": 2,
+      "bulk_header_bytes": 16,
+      "serial_buffer_bytes": 2162688,
+      "fclk0_hz": 133333332,
+      "negotiated_frame": 16384,
+      "max_queue_depth": 4,
+      "dedicated_pipes": true
+    },
+    "oden_register": 0,
+    "cpu480": {
+      "cpu_DWT_Hz": [
+        479303504.5636078,
+        480424509.61529195,
+        479849989.4928007
+      ],
+      "rcc": {
+        "name": "STM32H743/H742/H750/H753",
+        "cpuid": "0x411fc271",
+        "device": "0x20036450",
+        "registers": {
+          "0x58024400": "0x3303c025",
+          "0x58024410": "0x1b",
+          "0x58024418": "0x48",
+          "0x5802441c": "0x440",
+          "0x58024420": "0x50",
+          "0x58024428": "0x1920052",
+          "0x5802442c": "0x1ff0309",
+          "0x58024430": "0x170302bf",
+          "0x58024434": "0x0",
+          "0x58024438": "0x1010280",
+          "0x52002000": "0x34"
+        }
+      },
+      "power": {
+        "0x58024818": "0xe000",
+        "0x58024804": "0xe000",
+        "0x5802480c": "0x5000042",
+        "0x580244f4": "0x10002",
+        "0x5800042c": "0x81"
+      }
+    },
+    "finished": true,
+    "target_segments_after": [
+      [
+        "0x8000000",
+        31608,
+        "8c44763d2bab0017e3fb2b8edae2ce138628e0a9b2c83919b1d040245f716798"
+      ],
+      [
+        "0x8007b78",
+        144,
+        "96b68c9cac1f6cc3d0e744f80440b4d89e779b6df4ae111d69e8968c402bfd5d"
+      ]
+    ],
+    "restored_rcc": {
+      "name": "STM32H743/H742/H750/H753",
+      "cpuid": "0x411fc271",
+      "device": "0x20036450",
+      "registers": {
+        "0x58024400": "0x3303c025",
+        "0x58024410": "0x1b",
+        "0x58024418": "0x40",
+        "0x5802441c": "0x440",
+        "0x58024420": "0x50",
+        "0x58024428": "0x1920052",
+        "0x5802442c": "0x1ff0309",
+        "0x58024430": "0xb010e5f",
+        "0x58024434": "0x0",
+        "0x58024438": "0x1010280",
+        "0x52002000": "0x32"
+      }
+    },
+    "restored_power": {
+      "0x58024818": "0xe000",
+      "0x58024804": "0xe000",
+      "0x5802480c": "0x5000042",
+      "0x580244f4": "0x10000",
+      "0x5800042c": "0x0"
+    }
+  },
+  "tune": {
+    "phase": "tune",
+    "restored": true,
+    "windows": [
+      {
+        "name": "hclk60-jtag50-idle223",
+        "hclk_MHz": 60,
+        "port": "jtag",
+        "idle": 223,
+        "seconds_requested": 0.4,
+        "running": true,
+        "wire_requested_Hz": 50000000,
+        "tap": 16,
+        "slot": 28,
+        "passed": false,
+        "error": "native channel 1 operation 6 status 1, detail 0000000002000000",
+        "link_recovered": true
+      },
+      {
+        "name": "hclk60-jtag50-idle191",
+        "hclk_MHz": 60,
+        "port": "jtag",
+        "idle": 191,
+        "seconds_requested": 0.4,
+        "running": true,
+        "wire_requested_Hz": 50000000,
+        "tap": 16,
+        "slot": 28,
+        "passed": false,
+        "error": "native channel 1 operation 6 status 1, detail 0000000002000000",
+        "link_recovered": true
+      },
+      {
+        "name": "hclk60-jtag50-idle255",
+        "hclk_MHz": 60,
+        "port": "jtag",
+        "idle": 255,
+        "seconds_requested": 0.4,
+        "running": true,
+        "wire_requested_Hz": 50000000,
+        "tap": 16,
+        "slot": 28,
+        "result": {
+          "direction": "mixed",
+          "total_bytes": 258048,
+          "requests": 64,
+          "seconds": 0.4017368999921018,
+          "host_MBps": 0.6423308389273508,
+          "usb_call_seconds": 0.40092539999750443,
+          "clock": {
+            "wire_hz": 49999999,
+            "reference_hz": 199999996,
+            "divider": 4,
+            "timing": "0x63fce4",
+            "tap": 16,
+            "source": "PS clock tree and PL queue registers"
+          },
+          "queue_seconds": [
+            0.19799257525821534,
+            0.1979920832582296
+          ],
+          "probe_seconds": [
+            0.19898382922946894,
+            0.1990520312274911
+          ],
+          "jtag_read_retries": 0,
+          "effective_idle": 255
+        },
+        "passed": true
+      },
+      {
+        "name": "hclk60-jtag50-idle255-read",
+        "hclk_MHz": 60,
+        "port": "jtag",
+        "idle": 255,
+        "seconds_requested": 2,
+        "running": true,
+        "wire_requested_Hz": 50000000,
+        "tap": 16,
+        "slot": 28,
+        "result": {
+          "direction": "read",
+          "total_bytes": 1290240,
+          "requests": 320,
+          "seconds": 2.0026751999976113,
+          "host_MBps": 0.6442582401787065,
+          "usb_call_seconds": 2.0023030000011204,
+          "clock": {
+            "wire_hz": 49999999,
+            "reference_hz": 199999996,
+            "divider": 4,
+            "timing": "0x63fce4",
+            "tap": 16,
+            "source": "PS clock tree and PL queue registers"
+          },
+          "queue_seconds": [
+            1.9799389915817693,
+            0.0
+          ],
+          "probe_seconds": [
+            1.9898284372949753,
+            0.0
+          ],
+          "jtag_read_retries": 0,
+          "effective_idle": 255
+        },
+        "passed": true
+      },
+      {
+        "name": "hclk60-jtag50-idle255-write",
+        "hclk_MHz": 60,
+        "port": "jtag",
+        "idle": 255,
+        "seconds_requested": 2,
+        "running": true,
+        "wire_requested_Hz": 50000000,
+        "tap": 16,
+        "slot": 28,
+        "result": {
+          "direction": "write",
+          "total_bytes": 1290240,
+          "requests": 320,
+          "seconds": 2.0106131000065943,
+          "host_MBps": 0.6417147088098493,
+          "usb_call_seconds": 2.004996600022423,
+          "clock": {
+            "wire_hz": 49999999,
+            "reference_hz": 199999996,
+            "divider": 4,
+            "timing": "0x63fce4",
+            "tap": 16,
+            "source": "PS clock tree and PL queue registers"
+          },
+          "queue_seconds": [
+            0.0,
+            1.9799289115820615
+          ],
+          "probe_seconds": [
+            0.0,
+            1.990546031274165
+          ],
+          "jtag_read_retries": 0,
+          "effective_idle": 255
+        },
+        "passed": true
+      },
+      {
+        "name": "hclk60-jtag50-idle255-rtt",
+        "hclk_MHz": 60,
+        "port": "jtag",
+        "idle": 255,
+        "seconds_requested": 2,
+        "running": true,
+        "wire_requested_Hz": 50000000,
+        "tap": 16,
+        "slot": 28,
+        "result": {
+          "bytes": 1245184,
+          "window_bytes": 1243136,
+          "seconds": 2.0000662000093143,
+          "chunk_bytes": 2048,
+          "MBps": 0.621547426777279,
+          "sha256": "63d9c3833e3596234f04805633048452f328a559abfd672607c35cbf5dc8c041",
+          "stop": [
+            65536,
+            536904192,
+            536904216,
+            1245184,
+            39846496,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            822085632
+          ],
+          "produced_bytes": 1253372,
+          "wr": 8188,
+          "rd": 0
+        },
+        "passed": true
+      },
+      {
+        "name": "hclk240-jtag50-idle255-read",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 255,
+        "seconds_requested": 2,
+        "running": true,
+        "wire_requested_Hz": 50000000,
+        "tap": 16,
+        "slot": 28,
+        "result": {
+          "direction": "read",
+          "total_bytes": 1290240,
+          "requests": 320,
+          "seconds": 2.002290100004757,
+          "host_MBps": 0.644382150217361,
+          "usb_call_seconds": 2.0019158000068273,
+          "clock": {
+            "wire_hz": 49999999,
+            "reference_hz": 199999996,
+            "divider": 4,
+            "timing": "0x63fce4",
+            "tap": 16,
+            "source": "PS clock tree and PL queue registers"
+          },
+          "queue_seconds": [
+            1.979930309582021,
+            0.0
+          ],
+          "probe_seconds": [
+            1.9898075602955807,
+            0.0
+          ],
+          "jtag_read_retries": 0,
+          "effective_idle": 255
+        },
+        "passed": true
+      },
+      {
+        "name": "hclk240-jtag50-idle255-write",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 255,
+        "seconds_requested": 2,
+        "running": true,
+        "wire_requested_Hz": 50000000,
+        "tap": 16,
+        "slot": 28,
+        "result": {
+          "direction": "write",
+          "total_bytes": 1290240,
+          "requests": 320,
+          "seconds": 2.0140153000102146,
+          "host_MBps": 0.6406306843813233,
+          "usb_call_seconds": 2.0072691999957897,
+          "clock": {
+            "wire_hz": 49999999,
+            "reference_hz": 199999996,
+            "divider": 4,
+            "timing": "0x63fce4",
+            "tap": 16,
+            "source": "PS clock tree and PL queue registers"
+          },
+          "queue_seconds": [
+            0.0,
+            1.9799171935824014
+          ],
+          "probe_seconds": [
+            0.0,
+            1.990515614275047
+          ],
+          "jtag_read_retries": 0,
+          "effective_idle": 255
+        },
+        "passed": true
+      },
+      {
+        "name": "hclk240-jtag50-idle255-rtt",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 255,
+        "seconds_requested": 2,
+        "running": true,
+        "wire_requested_Hz": 50000000,
+        "tap": 16,
+        "slot": 28,
+        "result": {
+          "bytes": 1247232,
+          "window_bytes": 1245184,
+          "seconds": 2.0000207999983104,
+          "chunk_bytes": 2048,
+          "MBps": 0.6225855251110648,
+          "sha256": "1347b63823edddf12b8b5a1877c9aeedbe34e5f35536e867dc93261acba1c57e",
+          "stop": [
+            65536,
+            536904192,
+            536904216,
+            1247232,
+            39912033,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            822085632
+          ],
+          "produced_bytes": 1255420,
+          "wr": 2044,
+          "rd": 2048
+        },
+        "passed": true
+      },
+      {
+        "name": "hclk240-jtag100-slot28-idle65",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 65,
+        "seconds_requested": 0.6,
+        "running": true,
+        "wire_requested_Hz": 100000000,
+        "tap": 16,
+        "slot": 28,
+        "passed": false,
+        "error": "native channel 1 operation 6 status 1, detail 0000000004000000",
+        "link_recovered": true
+      },
+      {
+        "name": "hclk240-jtag100-slot28-idle63",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 63,
+        "seconds_requested": 0.6,
+        "running": true,
+        "wire_requested_Hz": 100000000,
+        "tap": 16,
+        "slot": 28,
+        "passed": false,
+        "error": "native channel 1 operation 6 status 1, detail 0000000002000000",
+        "link_recovered": true
+      },
+      {
+        "name": "hclk240-jtag100-slot28-idle61",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 61,
+        "seconds_requested": 0.6,
+        "running": true,
+        "wire_requested_Hz": 100000000,
+        "tap": 16,
+        "slot": 28,
+        "passed": false,
+        "error": "native channel 1 operation 6 status 1, detail 0000000002000000",
+        "link_recovered": true
+      },
+      {
+        "name": "hclk240-jtag100-slot28-idle67",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 67,
+        "seconds_requested": 0.6,
+        "running": true,
+        "wire_requested_Hz": 100000000,
+        "tap": 16,
+        "slot": 28,
+        "passed": false,
+        "error": "native channel 1 operation 6 status 1, detail 0000000004000000",
+        "link_recovered": true
+      },
+      {
+        "name": "hclk240-jtag100-slot28-idle69",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 69,
+        "seconds_requested": 0.6,
+        "running": true,
+        "wire_requested_Hz": 100000000,
+        "tap": 16,
+        "slot": 28,
+        "passed": false,
+        "error": "native channel 1 operation 6 status 1, detail 0000000004000000",
+        "link_recovered": true
+      },
+      {
+        "name": "hclk240-jtag100-slot28-idle71",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 71,
+        "seconds_requested": 0.6,
+        "running": true,
+        "wire_requested_Hz": 100000000,
+        "tap": 16,
+        "slot": 28,
+        "passed": false,
+        "error": "native channel 1 operation 6 status 1, detail 0000000004000000",
+        "link_recovered": true
+      },
+      {
+        "name": "hclk240-jtag100-slot28-idle73",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 73,
+        "seconds_requested": 0.6,
+        "running": true,
+        "wire_requested_Hz": 100000000,
+        "tap": 16,
+        "slot": 28,
+        "passed": false,
+        "error": "native channel 1 operation 6 status 1, detail f801000004000000",
+        "link_recovered": true
+      },
+      {
+        "name": "hclk240-jtag100-slot28-idle75",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 75,
+        "seconds_requested": 0.6,
+        "running": true,
+        "wire_requested_Hz": 100000000,
+        "tap": 16,
+        "slot": 28,
+        "passed": false,
+        "error": "native channel 1 operation 6 status 1, detail f802000004000000",
+        "link_recovered": true
+      },
+      {
+        "name": "hclk240-jtag100-slot27-idle65",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 65,
+        "seconds_requested": 0.6,
+        "running": true,
+        "wire_requested_Hz": 100000000,
+        "tap": 16,
+        "slot": 27,
+        "passed": false,
+        "error": "native channel 1 operation 6 status 1, detail f801000004000000",
+        "link_recovered": true
+      },
+      {
+        "name": "hclk240-jtag100-slot29-idle65",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 65,
+        "seconds_requested": 0.6,
+        "running": true,
+        "wire_requested_Hz": 100000000,
+        "tap": 16,
+        "slot": 29,
+        "passed": false,
+        "error": "native channel 1 operation 6 status 1, detail 0000000004000000",
+        "link_recovered": true
+      },
+      {
+        "name": "hclk240-jtag100-slot30-idle65",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 65,
+        "seconds_requested": 0.6,
+        "running": true,
+        "wire_requested_Hz": 100000000,
+        "tap": 16,
+        "slot": 30,
+        "passed": false,
+        "error": "native channel 1 operation 6 status 1, detail 0000000003000000",
+        "link_recovered": true
+      },
+      {
+        "name": "hclk240-jtag100-slot31-idle65",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 65,
+        "seconds_requested": 0.6,
+        "running": true,
+        "wire_requested_Hz": 100000000,
+        "tap": 16,
+        "slot": 31,
+        "passed": false,
+        "error": "native channel 1 operation 6 status 1, detail 0000000002000000",
+        "link_recovered": true
+      },
+      {
+        "name": "hclk240-jtag100-slot32-idle65",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 65,
+        "seconds_requested": 0.6,
+        "running": true,
+        "wire_requested_Hz": 100000000,
+        "tap": 16,
+        "slot": 32,
+        "passed": false,
+        "error": "native channel 1 operation 6 status 1, detail 0000000002000000",
+        "link_recovered": true
+      },
+      {
+        "name": "hclk240-jtag100-slot29-idle61",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 61,
+        "seconds_requested": 0.6,
+        "running": true,
+        "wire_requested_Hz": 100000000,
+        "tap": 16,
+        "slot": 29,
+        "passed": false,
+        "error": "native channel 1 operation 6 status 1, detail 0000000002000000",
+        "link_recovered": true
+      },
+      {
+        "name": "hclk240-jtag100-slot30-idle61",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 61,
+        "seconds_requested": 0.6,
+        "running": true,
+        "wire_requested_Hz": 100000000,
+        "tap": 16,
+        "slot": 30,
+        "passed": false,
+        "error": "native channel 1 operation 6 status 1, detail 0000000003000000",
+        "link_recovered": true
+      },
+      {
+        "name": "hclk240-jtag100-slot29-idle69",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 69,
+        "seconds_requested": 0.6,
+        "running": true,
+        "wire_requested_Hz": 100000000,
+        "tap": 16,
+        "slot": 29,
+        "passed": false,
+        "error": "native channel 1 operation 6 status 1, detail f800000004000000",
+        "link_recovered": true
+      },
+      {
+        "name": "hclk240-jtag100-slot30-idle69",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 69,
+        "seconds_requested": 0.6,
+        "running": true,
+        "wire_requested_Hz": 100000000,
+        "tap": 16,
+        "slot": 30,
+        "passed": false,
+        "error": "native channel 1 operation 6 status 1, detail 0000000003000000",
+        "link_recovered": true
+      },
+      {
+        "name": "hclk240-jtag50-idle49",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 49,
+        "seconds_requested": 0.55,
+        "running": true,
+        "wire_requested_Hz": 50000000,
+        "tap": 16,
+        "slot": 28,
+        "result": {
+          "direction": "mixed",
+          "total_bytes": 1161216,
+          "requests": 288,
+          "seconds": 0.5762010000034934,
+          "host_MBps": 2.0152967453943327,
+          "usb_call_seconds": 0.5734691999678034,
+          "clock": {
+            "wire_hz": 49999999,
+            "reference_hz": 199999996,
+            "divider": 4,
+            "timing": "0x60c4e4",
+            "tap": 16,
+            "source": "PS clock tree and PL queue registers"
+          },
+          "queue_seconds": [
+            0.2763253959865635,
+            0.27630054998728404
+          ],
+          "probe_seconds": [
+            0.28078335985728253,
+            0.28107291084888564
+          ],
+          "jtag_read_retries": 0,
+          "effective_idle": 49
+        },
+        "passed": true
+      },
+      {
+        "name": "hclk240-jtag50-idle41",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 41,
+        "seconds_requested": 0.55,
+        "running": true,
+        "wire_requested_Hz": 50000000,
+        "tap": 16,
+        "slot": 28,
+        "result": {
+          "direction": "mixed",
+          "total_bytes": 1225728,
+          "requests": 304,
+          "seconds": 0.5578147000051104,
+          "host_MBps": 2.1973748629944145,
+          "usb_call_seconds": 0.5551200000190875,
+          "clock": {
+            "wire_hz": 49999999,
+            "reference_hz": 199999996,
+            "divider": 4,
+            "timing": "0x60a4e4",
+            "tap": 16,
+            "source": "PS clock tree and PL queue registers"
+          },
+          "queue_seconds": [
+            0.26648220127201616,
+            0.2664769782721676
+          ],
+          "probe_seconds": [
+            0.27118431113565494,
+            0.2715063281263165
+          ],
+          "jtag_read_retries": 0,
+          "effective_idle": 41
+        },
+        "passed": true
+      },
+      {
+        "name": "hclk240-jtag50-idle57",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 57,
+        "seconds_requested": 0.55,
+        "running": true,
+        "wire_requested_Hz": 50000000,
+        "tap": 16,
+        "slot": 28,
+        "result": {
+          "direction": "mixed",
+          "total_bytes": 1032192,
+          "requests": 256,
+          "seconds": 0.5545907000050647,
+          "host_MBps": 1.8611779822318941,
+          "usb_call_seconds": 0.5520955000101821,
+          "clock": {
+            "wire_hz": 49999999,
+            "reference_hz": 199999996,
+            "divider": 4,
+            "timing": "0x60e4e4",
+            "tap": 16,
+            "source": "PS clock tree and PL queue registers"
+          },
+          "queue_seconds": [
+            0.2668599372610618,
+            0.2668570902611444
+          ],
+          "probe_seconds": [
+            0.27081890214625187,
+            0.2710923041383232
+          ],
+          "jtag_read_retries": 0,
+          "effective_idle": 57
+        },
+        "passed": true
+      },
+      {
+        "name": "hclk240-jtag50-idle65",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 65,
+        "seconds_requested": 0.55,
+        "running": true,
+        "wire_requested_Hz": 50000000,
+        "tap": 16,
+        "slot": 28,
+        "result": {
+          "direction": "mixed",
+          "total_bytes": 967680,
+          "requests": 240,
+          "seconds": 0.5596672000101535,
+          "host_MBps": 1.7290275363331002,
+          "usb_call_seconds": 0.557366000051843,
+          "clock": {
+            "wire_hz": 49999999,
+            "reference_hz": 199999996,
+            "divider": 4,
+            "timing": "0x6104e4",
+            "tap": 16,
+            "source": "PS clock tree and PL queue registers"
+          },
+          "queue_seconds": [
+            0.27006565616809597,
+            0.27005137916850996
+          ],
+          "probe_seconds": [
+            0.2737809100603536,
+            0.2740253920532636
+          ],
+          "jtag_read_retries": 0,
+          "effective_idle": 65
+        },
+        "passed": true
+      },
+      {
+        "name": "hclk240-jtag50-idle77",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 77,
+        "seconds_requested": 0.55,
+        "running": true,
+        "wire_requested_Hz": 50000000,
+        "tap": 16,
+        "slot": 28,
+        "result": {
+          "direction": "mixed",
+          "total_bytes": 903168,
+          "requests": 224,
+          "seconds": 0.5782498000044143,
+          "host_MBps": 1.5618993728888542,
+          "usb_call_seconds": 0.5760419000289403,
+          "clock": {
+            "wire_hz": 49999999,
+            "reference_hz": 199999996,
+            "divider": 4,
+            "timing": "0x6134e4",
+            "tap": 16,
+            "source": "PS clock tree and PL queue registers"
+          },
+          "queue_seconds": [
+            0.27990957688262225,
+            0.2798946758830544
+          ],
+          "probe_seconds": [
+            0.2833766347820776,
+            0.28360180277554775
+          ],
+          "jtag_read_retries": 0,
+          "effective_idle": 77
+        },
+        "passed": true
+      },
+      {
+        "name": "hclk240-jtag50-idle89",
+        "hclk_MHz": 240,
+        "port": "jtag",
+        "idle": 89,
+        "seconds_requested": 0.55,
+        "running": true,
+        "wire_requested_Hz": 50000000,
+        "tap": 16,
+        "slot": 28,
+        "result": {
+          "direction": "mixed",
+          "total_bytes": 838656,
+          "requests": 208,
+          "seconds": 0.5887938999949256,
+          "host_MBps": 1.4243625825729984,
+          "usb_call_seconds": 0.586605900010909,
+          "clock": {
+            "wire_hz": 49999999,
+            "reference_hz": 199999996,
+            "divider": 4,
+            "timing": "0x6164e4",
+            "tap": 16,
+            "source": "PS clock tree and PL queue registers"
+          },
+          "queue_seconds": [
+            0.2857694857126849,
+            0.28576190171290483
+          ],
+          "probe_seconds": [
+            0.28898819761934225,
+            0.28920366661309366
+          ],
+          "jtag_read_retries": 0,
+          "effective_idle": 89
+        },
+        "passed": true
+      }
+    ],
+    "producer_sha256": {
+      "1": "3887038fca630e0d5af102bc6a5156a2e8dd5507185215a78de619da4ab12b1c",
+      "2": "407481fd931b6cb87d749a736894cdde3f71b7e1e6a82d7f301559c1a3a38acd"
+    },
+    "target_segments_before": [
+      [
+        "0x8000000",
+        31608,
+        "8c44763d2bab0017e3fb2b8edae2ce138628e0a9b2c83919b1d040245f716798"
+      ],
+      [
+        "0x8007b78",
+        144,
+        "96b68c9cac1f6cc3d0e744f80440b4d89e779b6df4ae111d69e8968c402bfd5d"
+      ]
+    ],
+    "original_registers": {
+      "0x58024400": "0x3303c025",
+      "0x58024410": "0x1b",
+      "0x58024418": "0x40",
+      "0x58024430": "0xb010e5f",
+      "0x52002000": "0x32",
+      "0x58024818": "0xe000",
+      "0x58024804": "0xe000",
+      "0x5802480c": "0x5000042",
+      "0x580244f4": "0x10000"
+    },
+    "sram_backups": {
+      "0x2403fffc": "50c69c6fbe367077454a78e71cb87b8311ac538ad9cb6efc17af037dc6732779",
+      "0x20007ffc": "db9511fd9f8fe436ed8fe63616a1c1dc8f2ffbceed776eca375a209e42fe140f",
+      "0x24050000": "16475ec714beadc8bd53fbbed4f4a25ceb955e45d630bb4a84f55ebdbde930f6"
+    },
+    "cpu60": {
+      "cpu_DWT_Hz": [
+        59955933.431566454,
+        59978821.61515957,
+        59984054.49005402
+      ],
+      "rcc": {
+        "name": "STM32H743/H742/H750/H753",
+        "cpuid": "0x411fc271",
+        "device": "0x20036450",
+        "registers": {
+          "0x58024400": "0x3303c025",
+          "0x58024410": "0x1b",
+          "0x58024418": "0x40",
+          "0x5802441c": "0x440",
+          "0x58024420": "0x50",
+          "0x58024428": "0x1920052",
+          "0x5802442c": "0x1ff0309",
+          "0x58024430": "0xb010e5f",
+          "0x58024434": "0x0",
+          "0x58024438": "0x1010280",
+          "0x52002000": "0x32"
+        }
+      },
+      "power": {
+        "0x58024818": "0xe000",
+        "0x58024804": "0xe000",
+        "0x5802480c": "0x5000042",
+        "0x580244f4": "0x10000",
+        "0x5800042c": "0x0"
+      }
+    },
+    "native": {
+      "protocol": "ZLK1",
+      "reference_hz": 199999996,
+      "link_hz": 99999998.0,
+      "features": "0x4450ffff",
+      "integrated_pl": true,
+      "max_frame": 16384,
+      "firmware_abi": 2,
+      "bulk_header_bytes": 16,
+      "serial_buffer_bytes": 2162688,
+      "fclk0_hz": 133333332,
+      "negotiated_frame": 16384,
+      "max_queue_depth": 4,
+      "dedicated_pipes": true
+    },
+    "oden_register": 0,
+    "cpu480": {
+      "cpu_DWT_Hz": [
+        479982184.98426896,
+        479671252.70884556,
+        479331727.78640515
+      ],
+      "rcc": {
+        "name": "STM32H743/H742/H750/H753",
+        "cpuid": "0x411fc271",
+        "device": "0x20036450",
+        "registers": {
+          "0x58024400": "0x3303c025",
+          "0x58024410": "0x1b",
+          "0x58024418": "0x48",
+          "0x5802441c": "0x440",
+          "0x58024420": "0x50",
+          "0x58024428": "0x1920052",
+          "0x5802442c": "0x1ff0309",
+          "0x58024430": "0x170302bf",
+          "0x58024434": "0x0",
+          "0x58024438": "0x1010280",
+          "0x52002000": "0x34"
+        }
+      },
+      "power": {
+        "0x58024818": "0xe000",
+        "0x58024804": "0xe000",
+        "0x5802480c": "0x5000042",
+        "0x580244f4": "0x10002",
+        "0x5800042c": "0x81"
+      }
+    },
+    "finished": true,
+    "target_segments_after": [
+      [
+        "0x8000000",
+        31608,
+        "8c44763d2bab0017e3fb2b8edae2ce138628e0a9b2c83919b1d040245f716798"
+      ],
+      [
+        "0x8007b78",
+        144,
+        "96b68c9cac1f6cc3d0e744f80440b4d89e779b6df4ae111d69e8968c402bfd5d"
+      ]
+    ],
+    "restored_rcc": {
+      "name": "STM32H743/H742/H750/H753",
+      "cpuid": "0x411fc271",
+      "device": "0x20036450",
+      "registers": {
+        "0x58024400": "0x3303c025",
+        "0x58024410": "0x1b",
+        "0x58024418": "0x40",
+        "0x5802441c": "0x440",
+        "0x58024420": "0x50",
+        "0x58024428": "0x1920052",
+        "0x5802442c": "0x1ff0309",
+        "0x58024430": "0xb010e5f",
+        "0x58024434": "0x0",
+        "0x58024438": "0x1010280",
+        "0x52002000": "0x32"
+      }
+    },
+    "restored_power": {
+      "0x58024818": "0xe000",
+      "0x58024804": "0xe000",
+      "0x5802480c": "0x5000042",
+      "0x580244f4": "0x10000",
+      "0x5800042c": "0x0"
+    }
+  }
+}

@@ -48,6 +48,8 @@ idle61 的短窗读约 3.52 MB/s，持续写发生 FAULT。idle65 在前一轮�
 
 H743 先前 CPU480/HCLK240 的 6.508／6.722 MB/s SRAM 和 4.359 MB/s RTT 是标准 CMSIS-DAP 深度 32 与 RTT→CDC。它们是独立的已取证成绩。完整性能签收还需要把目标 HCLK 档与实际业务的 SRAM 区和运行状态同时对齐。 [H743 历史吞吐](../h743-perf-20261123/README.md)
 
+同一 RAW4 配对、目标 AXI SRAM 和 EP7 路径的后续对照已测得 HCLK240 运行态 RTT 4.299 MB/s，SWD 1 KiB 读写的 WAIT 同时下降约 95%。 [同板 HCLK60／240 A/B](../h743-hclk-ab-20261123/README.md)
+
 ## 收尾与复核
 
 已收尾核对 H743 历史 CDC Flash 装载段、HCLK、实际运行状态、COM43 回显。探针恢复 RAW4 + ABI 2 RAM 配对，物理 OCM 核对和引擎空闲检查通过。试验不改 H743 PLL、Flash 或探针 QSPI。各点数据和临时夹具的恢复判据见 [证据](evidence.json)，本机详细运行日志与诊断驱动保存在 `build/h743-throughput-audit-20261123`。
