@@ -233,6 +233,10 @@ RTT→CDC 前两轮约 4.216／4.215 MB/s，第三轮 STOP 首次返回忙 `-7` 
 
 H743 的标准调试接线已用于 ETM 定向复测。物理窗口仍有成帧错误，三项独立码源验收保留待测。 [H743 逐点记录](h743-follow-up/README.md)
 
+## H743 原排线 SWO 与 SPI
+
+不改线完成四模式 GPIO SPI→CDC，100 MHz SPI MOSI 长窗及 H743 静态 MISO 四模式。L14 的 H743 GPIO NRZ 与 Manchester 各经 IF0、IF4 逐字节校验。 [原排线记录](h743-norewire/README.md)
+
 ## 收尾核对
 
 当前配对的 Git 文件哈希、USB 描述符、完整 36 项实板验证和 HCLK 性能复验均已核对。最后一个夹具完成目标状态恢复，探针空闲检查通过。最终离线回归通过 Toolbox CLI 118 项、SelectIO 14 项、Web 207 项，Web 语法检查覆盖 177 个模块。生产固件的 SPI→CDC 缓冲、重试、回卷及 CDC OUT 收包异常模型均通过。独立源测试项及其通过条件保留在用例表。 [验收索引与空闲状态](rx-guard-performance-acceptance.json) · [用例与实测值](../../selectio/fusion-performance-cases.md#已确认结果)
