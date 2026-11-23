@@ -1,0 +1,43 @@
+{
+  "source_revision": "6aba43555c622dbbc952f984213b022d1fb2d7af",
+  "pl_source_revision": "4cd1eb21",
+  "pl_build_options": [
+    "--selectio",
+    "--selectio-variable"
+  ],
+  "trace_receiver": {
+    "raw_diagnostic": 4,
+    "double_sample": false,
+    "reference_hz": 200000000,
+    "destination": "PS DDR"
+  },
+  "hashes": {
+    "probe.bit": "9b8a3d9215c81dfa5fd0f756b7a11ff7d458acc82610f107cf4adf20ea39c6cc",
+    "application.elf": "1379081a1caa1868fcb129686b74ce6a58825e9176a1921bcc42a1041f70ac49",
+    "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+  },
+  "timing": {
+    "FCLK_max_Hz": 133333333,
+    "SWCLK_max_Hz": 66666666,
+    "setup_slack_ns": 0.057,
+    "hold_slack_ns": 0.039,
+    "requested_FCLK_Hz": 133333333,
+    "RTL_DEBUG": 0,
+    "optional_observation_cells": 0,
+    "formal_product_acceptance": false
+  },
+  "firmware_abi": 2,
+  "bcdDevice": "0x0202",
+  "native_interface": 3,
+  "reserved_endpoint_number": 11,
+  "ps_build_manifest": "ps-build.json",
+  "ocm_layout": "ocm-layout.json",
+  "ram_loaded_verified_ocm_bytes": 80668,
+  "actual_fclk0_hz": 133333332,
+  "probe_usb_serial": "12345678",
+  "board_verified": true,
+  "board_verified_scope": "H743 historical CDC Golden, CPU/HCLK60, TRACECLK20, SWD10, 12 native ETMv4 windows",
+  "etm_strict_capture_passed": true,
+  "physical_configuration": "Volatile HS3 JTAG/RAM",
+  "validation": "../../docs/validation/h743-cdc-golden-requal-20261123/README.md"
+}

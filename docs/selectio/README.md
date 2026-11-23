@@ -43,12 +43,12 @@ JTAG 占用 TDI/TDO，SPI 切换时取得四根线的独占权。F103 的 PB3 �
 
 ## 识别、临时加载及调试
 
-独立端点版配对及 H743 验收入口见 [配对说明](../../prebuilt/selectio-usb-split-20261123/README.md)。临时加载后，以 `selectio info` 中的 ABI 和枚举为准。
+独立端点版配对及 H743 验收入口见 [RAW4 配对说明](../../prebuilt/selectio-usb-split-raw4-20261123/README.md)。临时加载后，以 `selectio info` 中的 ABI 和枚举为准。
 
 按本分支验收记录选择配对目录。`probe-load --pair` 按清单逐一核对 bit、Zynq ELF 和 PS 初始化 Tcl 的 SHA-256，在写入探针易失配置前检查占用，加载后核对 OCM。目标 MCU ELF 与探针 ELF 分开传入。
 
 ```powershell
-$pair = 'prebuilt/selectio-usb-split-20261123'
+$pair = 'prebuilt/selectio-usb-split-raw4-20261123'
 python -X utf8 toolbox.py probe-load --pair $pair --dry-run
 python -X utf8 toolbox.py probe-load --pair $pair --out build/my-load
 python -X utf8 toolbox.py selectio --serial 12345678 info
@@ -232,7 +232,7 @@ F103 保持 CDC48 时 TRACECLK 为 24 MHz。默认窗口从目标恢复执行开
 
 ```powershell
 $env:ZYNQLINK_FPGA_OUT = Join-Path $PWD 'build/fusion-pl-new'
-python -X utf8 tools/run_vivado.py -mode batch -nojournal -source fpga/build_dma.tcl -tclargs --selectio --selectio-variable --etm400
+python -X utf8 tools/run_vivado.py -mode batch -nojournal -source fpga/build_dma.tcl -tclargs --selectio --selectio-variable
 python -X utf8 tools/build_xusbps_daplink.py --selectio --selectio-variable --j7-adapter --compact-code --opt s --experimental-zero-idle --timing build/fusion-pl-new/verified_clock.json --out build/fusion-ps-new
 python -X utf8 tools/selectio_cm3.py
 python -X utf8 tools/selectio_cm3.py --services --sample-ticks 64 --out build/cm3-jtag-services
@@ -244,6 +244,8 @@ python -X utf8 toolbox.py project run board.accept -- --selectio --board f103ze 
 python -X utf8 toolbox.py project run board.accept -- --selectio --board f103ze --pair $pair --clock 100000000 --seconds 60 --rounds 3 --rtt-ring-bytes 8192 --rtt-chunk 2048 --out build/accept-new --execute
 python -X utf8 toolbox.py project run board.accept -- --selectio --review build/accept-new/summary.json
 ```
+
+以上构建使用已复验的 RAW4 ETM 接收路径。`--etm400` 属于独立的双沿采样实验，在相同 H743 历史 CDC 工况复现了 TPIU 成帧错误。[H743 同板对照](../validation/h743-cdc-golden-requal-20261123/README.md)
 
 构建后的新配对使用验证过的 bit、PS ELF、同一工程的 ps7_init.tcl 及对应清单。上例中 `$pair` 指仓库归档配对，验收自己构建的版本时改为相应目录。高速模式使用独立的 SelectIO 参考时钟。对有写入的实板压力测试，`selectio_f103_fixture.py` 会核对目标映像、保存 4 KiB SRAM、两侧哨兵及初始运行状态，并在独立进程中读回恢复结果。下列示例仅用于该 F103 实验夹具。
 
