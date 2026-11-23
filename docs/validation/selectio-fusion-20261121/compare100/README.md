@@ -34,3 +34,5 @@ F103ZE、HCLK128，实际 TCK 约 100 MHz。各数值均为有效载荷 MB/s。
 融合版每方向取三个长窗的中位数。PL 队列和 PS 分别按 `payload_bytes / probe_delta.queue_s` 和 `payload_bytes / probe_delta.probe_s` 折算，PC 直接取 `wall_MBps`。PS 内存服务到 PC 的差额覆盖计时范围内的固件帧处理、USB 和主机处理，共享流水下各计时差额不能直接当作单项延迟。 [融合版逐轮数据](../../spi-cdc-20261123/rx-guard-jtag-idle25-long.json)
 
 以稳态每字 43+idle 个 TCK 计算，100 MHz 时 idle11、25 的理想值为 7.407、5.882 MB/s，后者低约 20.6%。同一融合配对下将 idle29 降至 idle25 后，PC 读写各提升约 5%。此前在 HCLK48、TCK100、idle33 下，独立版扫描段约 5.043 / 5.043 MB/s，融合版队列约 5.037 / 5.035 MB/s。两种证据一起支持优先比较 idle 和计时边界。融合版在 HCLK128、idle11 能否实现同样的短窗或长窗仍待同配对验证。 [融合版验收地图](../../spi-cdc-20261123/fusion-acceptance-map.svg)
+
+同日后续实板复测已在融合配对确认 slot28/idle11。1 KiB 队列与独立版扫描段相当，4,032 B 跨页的 PC 成绩与分层时间见 [同条件复测](../../spi-cdc-20261123/jtag100-ab/README.md)。
