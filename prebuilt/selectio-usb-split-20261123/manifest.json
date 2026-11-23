@@ -1,0 +1,33 @@
+{
+  "source_revision": "beeb8da46979a22f3fce39d9429a45160942251d",
+  "reused_pl_source_revision": "0dc979091ccf215dc50a47388c1dc4dcbd1849cc",
+  "reused_pl_pair": "../selectio-spi-cdc-rx-guard-20261123",
+  "hashes": {
+    "probe.bit": "f3c4ccfd78c9148649897a0902fb93eadb209494e0295956981c973bbac92c66",
+    "application.elf": "61267ceeb63c5b8192adaa23f253ed2f7ea53a8c6fbddd8cecc3a45ca2e599eb",
+    "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+  },
+  "timing": {
+    "FCLK_max_Hz": 133333333,
+    "SWCLK_max_Hz": 66666666,
+    "setup_slack_ns": 0.012,
+    "hold_slack_ns": 0.021,
+    "requested_FCLK_Hz": 133333333,
+    "RTL_DEBUG": 0,
+    "optional_observation_cells": 0,
+    "formal_product_acceptance": false
+  },
+  "firmware_abi": 2,
+  "bcdDevice": "0x0202",
+  "native_interface": 3,
+  "reserved_endpoint_number": 11,
+  "ps_build_manifest": "ps-build.json",
+  "ocm_layout": "ocm-layout.json",
+  "ram_loaded_verified_ocm_bytes": 80620,
+  "probe_usb_serial": "12345678",
+  "board_verified": true,
+  "board_verified_scope": "H743 HSI64, split USB enumeration, DAP, AXI SRAM, RTT including DOWN, HSS, physical SWO and COM RX, SPI waveform, ETM USB vs physical DDR",
+  "etm_strict_capture_passed": false,
+  "physical_configuration": "Volatile HS3 JTAG/RAM",
+  "validation": "../../docs/validation/usb-split-20261123/README.md"
+}
