@@ -293,6 +293,7 @@ def main():
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--performance", action="store_true", help="time verified SRAM and standalone RTT")
     mode.add_argument("--scope-only", action="store_true", help="validate only the guarded single/eight-variable HSS streams")
+    mode.add_argument("--data-only", action="store_true", help="time only verified SRAM and standalone RTT")
     parser.add_argument("--rtt-chunk", type=int, choices=(1024, 2048), default=1024,
                         help="standalone performance RTT maximum reads per dequeue in bytes")
     parser.add_argument("--scope-ticks", type=int, nargs=2, default=(24000, 24000), metavar=("ONE", "EIGHT"),
@@ -311,6 +312,7 @@ def main():
     if not args.execute:
         print("H743 SRAM read/write, RTT UP/DOWN wrap, one/eight-variable HSS and concurrent RTT/HSS with state restoration.")
         return 0
+    performance = args.performance or args.data_only
     args.out.mkdir(parents=True, exist_ok=False)
     base = AXI_BASE if port == 1 else DTCM_BASE
     # Execute the producer from AXI SRAM while JTAG serves DTCM data.
@@ -351,17 +353,14 @@ def main():
                 setup(out, inp, 1000, "jtag")
             if not args.scope_only:
                 report["memory"] = memory_and_down(native, mem, profile, args.clock, base)
-            if args.performance:
+            if performance:
                 report["sram_performance"] = sram_throughput(native, mem, profile, args.clock, base, args.seconds)
-            # Match the public CLI's fresh DAP connection for each standalone scope session.
-            cmd(out, inp, [3])
-            setup(out, inp, 1000, args.transport)
-            report["scope_single"] = scope_only(native, args.out, args.seconds, profile, args.clock, 1, base,
-                                                args.scope_ticks[0])
-            cmd(out, inp, [3])
-            setup(out, inp, 1000, args.transport)
-            report["scope"] = scope_only(native, args.out, args.seconds, profile, args.clock, 8, base,
-                                         args.scope_ticks[1])
+            if not args.data_only:
+                # Match the public CLI's fresh DAP connection for each standalone scope session.
+                for count, key, ticks in zip((1, 8), ("scope_single", "scope"), args.scope_ticks):
+                    cmd(out, inp, [3])
+                    setup(out, inp, 1000, args.transport)
+                    report[key] = scope_only(native, args.out, args.seconds, profile, args.clock, count, base, ticks)
             if producer is None:
                 report["passed"] = True
                 return 0
@@ -377,7 +376,7 @@ def main():
             core_write(mem, 20, 1)
             core_write(mem, 15, code_base + 1)
             mem.write_word(DHCSR, 0xa05f0001)
-            if args.performance:
+            if performance:
                 rate, data = capture_rtt(native, profile, args.clock, base, args.seconds, chunk=args.rtt_chunk)
                 require(len(data) >= 4096 and len(data) % 4 == 0, "insufficient continuous RTT data")
                 words = np.frombuffer(data, dtype="<u4")

@@ -1,6 +1,6 @@
 {
   "source_revision": "6aba43555c622dbbc952f984213b022d1fb2d7af",
-  "pl_source_revision": "4cd1eb21",
+  "pl_source_revision": "4cd1eb2167e7c172522ab0591718659e7aefbf93",
   "pl_build_options": [
     "--selectio",
     "--selectio-variable"
@@ -36,8 +36,12 @@
   "actual_fclk0_hz": 133333332,
   "probe_usb_serial": "12345678",
   "board_verified": true,
-  "board_verified_scope": "H743 historical CDC Golden, CPU/HCLK60, TRACECLK20, SWD10, 12 native ETMv4 windows; SWD/JTAG at 50 MHz SRAM/RTT/HSS, COM TX/RX, SWO NRZ/Manchester, SPI mode0..3 with 15/30 MHz independent MISO PWM",
+  "board_verified_scope": "H743 historical CDC Golden, CPU/HCLK60, TRACECLK20, SWD10, 12 native ETMv4 windows; SWD/JTAG at 50 MHz SRAM/RTT/HSS, COM TX/RX, SWO NRZ/Manchester, SPI mode0..3 with 15/30 MHz independent MISO PWM; both 100 MHz transports with 60 s SRAM and RTT, and 3x60 s per HSS width",
   "etm_strict_capture_passed": true,
   "physical_configuration": "Volatile HS3 JTAG/RAM",
-  "validation": "../../docs/validation/h743-cdc-golden-requal-20261123/README.md"
+  "validation": "../../docs/validation/h743-cdc-golden-requal-20261123/README.md",
+  "performance_evidence": [
+    "../../docs/validation/h743-cdc-golden-requal-20261123/raw4-hss-60s.json",
+    "../../docs/validation/h743-cdc-golden-requal-20261123/raw4-sustained-evidence.json"
+  ]
 }

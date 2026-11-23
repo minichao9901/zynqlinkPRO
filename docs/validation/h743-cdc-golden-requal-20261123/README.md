@@ -79,3 +79,30 @@ HCLK60、SWD tap8/slot25/idle4、JTAG tap16/slot28/idle65。各宽度独立跑 3
 | JTAG | 8 | 416 | 57,692.31 | 0 / 0 / 0 | 0% |
 
 最差跳拍率小于验收上限 0.1%。原始 `.hss` 保存于本机 `build/h743-cdc-golden-requal-20261123/scope-raw4-confirm`，每窗 SHA-256、实际组数和计时见 [长窗证据](raw4-hss-60s.json)。
+
+## SRAM、RTT 及串行接口持续结果
+
+SRAM 每方向和 RTT 各一轮 60 秒，调试线实速 99,999,998 Hz，目标 HCLK60。方法与短筛相同，RTT chunk 为 2,048 B。下表载荷时间排除 STOP 尾部，尾部另作总量和序列核对。
+
+| 路径 | 60 秒 SRAM 读／写 MB/s | 60 秒独立 RTT MB/s | SRAM 读／写载荷 B | RTT 窗口载荷 B |
+|---|---:|---:|---:|---:|
+| SWD AXI SRAM，tap8/slot25/idle4 | **4.927 / 4.732** | **0.755** | 295,658,496 / 283,917,312 | 45,289,472 |
+| JTAG DTCM，tap16/slot28/idle65 | **3.392 / 3.320** | **0.624** | 203,535,360 / 199,213,056 | 37,462,016 |
+
+| 串行接口 | 本夹具逐字节通过的最高试档 | 边界 |
+|---|---|---|
+| COM34 接收 | 1 Mbaud，73,728 B | 请求 1.5 Mbaud 时实际平均频率匹配，载荷不完整。具体波形误差待独立码源对照。 |
+| COM34 发送 | 500 kbaud，256 B | H743 的软件接收在 750 kbaud 和 1 Mbaud 出现帧错误，需独立接收夹具划出探针上限。 |
+| SWO NRZ | 1 Mbaud，73,728 B | 1.5 Mbaud 载荷不完整；2 Mbaud 时 H743 源平均仅约 1.75 Msymbol/s。 |
+| SWO Manchester | 750 kbit/s，协商 750,002 bit/s，73,728 B | 1 Mbit/s 要求 2 Msymbol/s，本夹具实测约 1.75 Msymbol/s。 |
+| SPI 四模式 | Probe 100 MHz 配置下，15/30 MHz PWM 各通过；四模式 100 MHz 全双工模型通过 | 全速双向实板对拍待独立高速从机；SPI 从机到 CDC 的 100 MHz 物理验收也需独立高速主机。 |
+| ETM | 20 MHz TRACECLK，12 窗严格通过 | 同配对最高频率待独立匹配工况。历史不同目标配置曾连续通过 25 MHz。[历史灰排线证据](../h743-etm-ribbon-20261111/README.md) |
+
+以上为本次 H743 工况。原定 HCLK96/128、标准 CMSIS-DAP 和旧 RTT→CDC 的历史成绩按各自负载与入口留档。 [持续吞吐、接口及最终现场证据](raw4-sustained-evidence.json) · [历史参考和用例](../../selectio/fusion-performance-cases.md#已确认结果)
+
+## 交接
+
+- [x] 保存 ETM 12 窗、功能对拍、SWD/JTAG 三档通过和失败短筛、J-Scope 12 个长窗、SRAM/RTT 60 秒结果。完成 TPIU 回放、DDR RTL 回归、SPI 四模式仿真和 118 项 CLI 测试。原始 ETM 记录与目标 ELF 在本机 `build/h743-cdc-golden-requal-20261123`。
+- [x] H743 保留用户指定的历史 CDC Flash 镜像。收尾逐字节核对 31,752 B ELF 装载段，原 HCLK60 时钟、心跳和 COM43 回显正常。所有 SRAM、核心及外设夹具恢复。物理 MEM-AP0 复核探针 OCM 的 80,668 B，采集、RTT/HSS、DDR/CDMA 空闲。
+- [x] 问题表同步 ZL-063、ZL-242、ZL-316、ZL-318–322。配对的 bit、PS ELF、初始化 Tcl、构建时序与 SHA-256 均纳入 Git。命令与配对可通过 [SelectIO CLI](../../selectio/README.md) 和 `probe-load --pair ... --dry-run` 核对。
+- [x] 本轮交付到本地 `codex/selectio-efficiency`。本地与远端 `main` 均冻结在 `03b6a1da`。固定 EXE、Pages、Release 和探针 QSPI 冷启动为本轮不适用，探针保留 JTAG/RAM 临时配对。保留共享 `hw_server`、失败证据及私有 Flash 备份。

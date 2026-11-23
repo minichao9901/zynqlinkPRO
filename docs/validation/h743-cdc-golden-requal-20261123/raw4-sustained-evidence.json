@@ -1,0 +1,634 @@
+{
+  "loaded_hashes": {
+    "probe.bit": "9b8a3d9215c81dfa5fd0f756b7a11ff7d458acc82610f107cf4adf20ea39c6cc",
+    "application.elf": "1379081a1caa1868fcb129686b74ce6a58825e9176a1921bcc42a1041f70ac49",
+    "ps7_init.tcl": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+  },
+  "hclk_hz": 60000000,
+  "sram_and_rtt": {
+    "swd": {
+      "transport": "swd",
+      "requested_hz": 100000000,
+      "tap": 8,
+      "slot": 25,
+      "idle": 4,
+      "memory": {
+        "address": "0x24043020",
+        "read_write_bytes": 4032,
+        "rtt_down": 14,
+        "clock": {
+          "wire_hz": 99999998,
+          "reference_hz": 199999996,
+          "divider": 2,
+          "timing": "0x11965",
+          "tap": 8,
+          "source": "PS clock tree and PL queue registers"
+        },
+        "invalid_axi_status": null
+      },
+      "sram_performance": {
+        "read": {
+          "clock": {
+            "wire_hz": 99999998,
+            "reference_hz": 199999996,
+            "divider": 2,
+            "timing": "0x11965",
+            "tap": 8,
+            "source": "PS clock tree and PL queue registers"
+          },
+          "requests": 73328,
+          "transaction_bytes": 4032,
+          "depth": 4,
+          "seconds": 60.007513399992604,
+          "MBps": 4.927024621554081
+        },
+        "write": {
+          "clock": {
+            "wire_hz": 99999998,
+            "reference_hz": 199999996,
+            "divider": 2,
+            "timing": "0x11965",
+            "tap": 8,
+            "source": "PS clock tree and PL queue registers"
+          },
+          "requests": 70416,
+          "transaction_bytes": 4032,
+          "depth": 4,
+          "seconds": 60.0041554000054,
+          "MBps": 4.731627503250791
+        }
+      },
+      "rtt_performance": {
+        "bytes": 45291520,
+        "window_bytes": 45289472,
+        "seconds": 60.00008519999392,
+        "chunk_bytes": 2048,
+        "MBps": 0.7548234614840945,
+        "sha256": "90c16912b54932c421255020e8f2020ef57ffe9d2dee982e1997d6ffa0a6c9a1",
+        "stop": [
+          65536,
+          604242432,
+          604242456,
+          45291520,
+          1449350755,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1660946432
+        ]
+      },
+      "passed": true,
+      "restored": true
+    },
+    "jtag": {
+      "transport": "jtag",
+      "requested_hz": 100000000,
+      "tap": 16,
+      "slot": 28,
+      "idle": 65,
+      "memory": {
+        "address": "0x2000b020",
+        "read_write_bytes": 4032,
+        "rtt_down": 14,
+        "clock": {
+          "wire_hz": 99999998,
+          "reference_hz": 199999996,
+          "divider": 2,
+          "timing": "0x7904e2",
+          "tap": 16,
+          "source": "PS clock tree and PL queue registers"
+        },
+        "invalid_axi_status": 1
+      },
+      "sram_performance": {
+        "read": {
+          "clock": {
+            "wire_hz": 99999998,
+            "reference_hz": 199999996,
+            "divider": 2,
+            "timing": "0x7904e2",
+            "tap": 16,
+            "source": "PS clock tree and PL queue registers"
+          },
+          "requests": 50480,
+          "transaction_bytes": 4032,
+          "depth": 4,
+          "seconds": 60.007400899994536,
+          "MBps": 3.3918376224826385
+        },
+        "write": {
+          "clock": {
+            "wire_hz": 99999998,
+            "reference_hz": 199999996,
+            "divider": 2,
+            "timing": "0x7904e2",
+            "tap": 16,
+            "source": "PS clock tree and PL queue registers"
+          },
+          "requests": 49408,
+          "transaction_bytes": 4032,
+          "depth": 4,
+          "seconds": 60.00404410000192,
+          "MBps": 3.319993826882639
+        }
+      },
+      "rtt_performance": {
+        "bytes": 37464064,
+        "window_bytes": 37462016,
+        "seconds": 60.00004830000398,
+        "chunk_bytes": 2048,
+        "MBps": 0.6243664307183152,
+        "sha256": "28235495c5c23c9c341cce26e5471d5f2a1d3803a39626dbb0c606239cceb21c",
+        "stop": [
+          65536,
+          536904192,
+          536904216,
+          37464064,
+          1198868341,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1660946432
+        ]
+      },
+      "passed": true,
+      "restored": true
+    }
+  },
+  "com_rx_and_swo": [
+    {
+      "source": "H743 GPIO PB3 over J7 L14",
+      "encoding": "uart",
+      "path": "cdc",
+      "requested_rate": 500000,
+      "symbols": 761856,
+      "restored": true,
+      "passed": true,
+      "negotiated_rate": 500000,
+      "status": {
+        "port": "COM34",
+        "drop": 0,
+        "errors": 0,
+        "pending": 0
+      },
+      "payload_bytes": 73728,
+      "source_count": 384,
+      "source_ticks": 91422732,
+      "source_done": "0x53574f44",
+      "sha256": "6f280f5c835f87312407596f794178362e5311a34ba260c61b4592bde7764c0c",
+      "expected_sha256": "6f280f5c835f87312407596f794178362e5311a34ba260c61b4592bde7764c0c",
+      "nominal_symbols_hz": 499999.93437080836
+    },
+    {
+      "source": "H743 GPIO PB3 over J7 L14",
+      "encoding": "uart",
+      "path": "if0",
+      "requested_rate": 500000,
+      "symbols": 761856,
+      "restored": true,
+      "passed": true,
+      "negotiated_rate": 500000,
+      "status": {
+        "status": 0,
+        "pending": 0,
+        "index": 73728,
+        "timestamp": 3882126479
+      },
+      "payload_bytes": 73728,
+      "source_count": 384,
+      "source_ticks": 91422734,
+      "source_done": "0x53574f44",
+      "sha256": "9fb4f293baa2d0a0cab0bab1cae7f216f5b62d83be1b26bf445738dea24cd88f",
+      "expected_sha256": "9fb4f293baa2d0a0cab0bab1cae7f216f5b62d83be1b26bf445738dea24cd88f",
+      "nominal_symbols_hz": 499999.9234326114
+    },
+    {
+      "source": "H743 GPIO PB3 over J7 L14",
+      "encoding": "uart",
+      "path": "cdc",
+      "requested_rate": 1000000,
+      "symbols": 761856,
+      "restored": true,
+      "passed": true,
+      "negotiated_rate": 1000000,
+      "status": {
+        "port": "COM34",
+        "drop": 0,
+        "errors": 0,
+        "pending": 0
+      },
+      "payload_bytes": 73728,
+      "source_count": 384,
+      "source_ticks": 45711396,
+      "source_done": "0x53574f44",
+      "sha256": "ad1763af192704565c57b26dbd8a9fc488a2782838d75bd0e874444c6114c8e3",
+      "expected_sha256": "ad1763af192704565c57b26dbd8a9fc488a2782838d75bd0e874444c6114c8e3",
+      "nominal_symbols_hz": 999999.212450217
+    },
+    {
+      "source": "H743 GPIO PB3 over J7 L14",
+      "encoding": "uart",
+      "path": "if0",
+      "requested_rate": 1000000,
+      "symbols": 761856,
+      "restored": true,
+      "passed": true,
+      "negotiated_rate": 1000000,
+      "status": {
+        "status": 0,
+        "pending": 0,
+        "index": 73728,
+        "timestamp": 4275679335
+      },
+      "payload_bytes": 73728,
+      "source_count": 384,
+      "source_ticks": 45711390,
+      "source_done": "0x53574f44",
+      "sha256": "6f4d4291b9be4f128a7a81545590b9c3d5a3d2928458b6768eea355345cda985",
+      "expected_sha256": "6f4d4291b9be4f128a7a81545590b9c3d5a3d2928458b6768eea355345cda985",
+      "nominal_symbols_hz": 999999.3437084281
+    },
+    {
+      "source": "H743 GPIO PB3 over J7 L14",
+      "encoding": "uart",
+      "path": "cdc",
+      "requested_rate": 2000000,
+      "symbols": 761856,
+      "restored": true,
+      "passed": false,
+      "negotiated_rate": 2000000,
+      "status": {
+        "port": "COM34",
+        "drop": 0,
+        "errors": 38400,
+        "pending": 0
+      },
+      "payload_bytes": 35328,
+      "source_count": 384,
+      "source_ticks": 26102095,
+      "source_done": "0x53574f44",
+      "sha256": "dae028ef73db63c1ebabd7177c526a9429e1fbbbdbbcc9f3a0511f76cb147e24",
+      "expected_sha256": "995ef7eff8a9eb080a3bcb4c6bda479136f965ccef1664de465fe6a91c95ac29",
+      "nominal_symbols_hz": 1751252.5335610034,
+      "head": "1c802fc61edbcb8d9f578923f4ed3a201b7e5c93b121af7b51b3f3f463dccdc6",
+      "wanted_head": "2616168e57c03a973be68eed5b386ce55ecdcfab48c993055c2c1bfaed9a908d"
+    },
+    {
+      "source": "H743 GPIO PB3 over J7 L14",
+      "encoding": "uart",
+      "path": "if0",
+      "requested_rate": 2000000,
+      "symbols": 761856,
+      "restored": true,
+      "passed": false,
+      "negotiated_rate": 2000000,
+      "status": {
+        "status": 64,
+        "pending": 0,
+        "index": 35328,
+        "timestamp": 374661899
+      },
+      "payload_bytes": 35328,
+      "source_count": 384,
+      "source_ticks": 26102087,
+      "source_done": "0x53574f44",
+      "sha256": "442c363102c8ce5dbe80bede19e6e33deffffcb3c5ba2035de19ebed87969b68",
+      "expected_sha256": "4b3ccdd780ab827ecce3431e8bed503bb04a63a738536f4587ee80752b136d4d",
+      "nominal_symbols_hz": 1751253.0703004706,
+      "head": "c2dcc4dc8c736336042290c5bc2138d737768b14ecdbefa2317ff832a7879310",
+      "wanted_head": "39e2ec53c415ec1255011e2a37ccbbb148963237618492c849e541de3e2d910a"
+    },
+    {
+      "source": "H743 GPIO PB3 over J7 L14",
+      "encoding": "manchester",
+      "path": "if0",
+      "requested_rate": 1000000,
+      "symbols": 1296384,
+      "restored": true,
+      "passed": false,
+      "negotiated_rate": 1000000,
+      "status": {
+        "status": 64,
+        "pending": 0,
+        "index": 0,
+        "timestamp": 553275549
+      },
+      "payload_bytes": 0,
+      "source_count": 384,
+      "source_ticks": 44409671,
+      "source_done": "0x53574f44",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "expected_sha256": "7a5e2eb4aab77247c0e6d88670cfce5f19a42de0ef7c0feed5451e52a2362f3a",
+      "nominal_symbols_hz": 1751488.7691917375,
+      "head": "",
+      "wanted_head": "259228232275d268ea2f14407c50629a1a60b489155c8d10f52b407753843dd0"
+    },
+    {
+      "source": "H743 GPIO PB3 over J7 L14",
+      "encoding": "manchester",
+      "path": "if0",
+      "requested_rate": 1500000,
+      "symbols": 1296384,
+      "restored": true,
+      "passed": false,
+      "negotiated_rate": 1499993,
+      "error": "AssertionError()"
+    },
+    {
+      "source": "H743 GPIO PB3 over J7 L14",
+      "encoding": "uart",
+      "path": "cdc",
+      "requested_rate": 1500000,
+      "symbols": 761856,
+      "restored": true,
+      "passed": false,
+      "negotiated_rate": 1500000,
+      "status": {
+        "port": "COM34",
+        "drop": 0,
+        "errors": 12242,
+        "pending": 0
+      },
+      "payload_bytes": 57601,
+      "source_count": 384,
+      "source_ticks": 30474299,
+      "source_done": "0x53574f44",
+      "sha256": "d2cdf9ddb92f151cd52d7f63ce9f0b2608f7327d8c8dfc821234b8b60e80f1dd",
+      "expected_sha256": "ef783df56327fe0a77499231817a23ba19c6a651604a477c09f8ff3fa60f5e99",
+      "nominal_symbols_hz": 1499997.0959135105,
+      "head": "3f75ee20deca60178a7430a40ac42020788c4a10a2e8169c1e7fba445c797e77",
+      "wanted_head": "3d75ee22deea68178a7438a40ac42020788c4a104d13a3c508ff169cdbf34448"
+    },
+    {
+      "source": "H743 GPIO PB3 over J7 L14",
+      "encoding": "uart",
+      "path": "if0",
+      "requested_rate": 1500000,
+      "symbols": 761856,
+      "restored": true,
+      "passed": false,
+      "negotiated_rate": 1499993,
+      "status": {
+        "status": 64,
+        "pending": 0,
+        "index": 57187,
+        "timestamp": 3551278213
+      },
+      "payload_bytes": 57187,
+      "source_count": 384,
+      "source_ticks": 30474300,
+      "source_done": "0x53574f44",
+      "sha256": "f40ba26386bc33f46de3bcf7f94329e6920852616c7668e604da21fbfd54eda6",
+      "expected_sha256": "fc5a2929893ea6488de6d3bd1bc57c4887e2a7dc52a46e58f926b4caeb9d7000",
+      "nominal_symbols_hz": 1499997.0466918026,
+      "head": "58cf73fec27b069f80ed819f24737f793475cea49359578d30e6a072ec3cf646",
+      "wanted_head": "58ef7bfec27b069da1400480ed819f26c9cdf7db6d1d79347b31ba78ddeea491"
+    },
+    {
+      "source": "H743 GPIO PB3 over J7 L14",
+      "encoding": "manchester",
+      "path": "if0",
+      "requested_rate": 750000,
+      "symbols": 1296384,
+      "restored": true,
+      "passed": true,
+      "negotiated_rate": 750002,
+      "status": {
+        "status": 0,
+        "pending": 0,
+        "index": 73728,
+        "timestamp": 3710514236
+      },
+      "payload_bytes": 73728,
+      "source_count": 384,
+      "source_ticks": 51855416,
+      "source_done": "0x53574f44",
+      "sha256": "2e550755353a38502a769467d5964ab39dca466c762d1f8c5d75299fa329d439",
+      "expected_sha256": "2e550755353a38502a769467d5964ab39dca466c762d1f8c5d75299fa329d439",
+      "nominal_symbols_hz": 1499998.3801113465
+    }
+  ],
+  "com_tx": [
+    {
+      "port": "COM34",
+      "physical": "J7 M15 -> H743 PA15",
+      "baud": 500000,
+      "state": 2,
+      "bytes": 256,
+      "errors": 0,
+      "expected_sha256": "459d0fb7f3bd3455c6c1fef1971408dabe430ee43760b178fa9b62407198173e",
+      "observed_sha256": "459d0fb7f3bd3455c6c1fef1971408dabe430ee43760b178fa9b62407198173e",
+      "passed": true,
+      "restored": true
+    },
+    {
+      "port": "COM34",
+      "physical": "J7 M15 -> H743 PA15",
+      "baud": 750000,
+      "state": 1,
+      "bytes": 239,
+      "errors": 137,
+      "expected_sha256": "459d0fb7f3bd3455c6c1fef1971408dabe430ee43760b178fa9b62407198173e",
+      "observed_sha256": "023bb8473f4270cc349fc9c88a471e27e838be385ffa1aed847d4ca57338fb9f",
+      "failure": "",
+      "restored": true
+    },
+    {
+      "port": "COM34",
+      "physical": "J7 M15 -> H743 PA15",
+      "baud": 1000000,
+      "state": 1,
+      "bytes": 230,
+      "errors": 145,
+      "expected_sha256": "459d0fb7f3bd3455c6c1fef1971408dabe430ee43760b178fa9b62407198173e",
+      "observed_sha256": "b73e699d1c41a323b59057cb74cd72ab7d0a5cbf90feac369603de17c5f107c7",
+      "failure": "",
+      "restored": true
+    }
+  ],
+  "final_idle_and_target": {
+    "target_clock": {
+      "name": "STM32H743/H742/H750/H753",
+      "cpuid": "0x411fc271",
+      "device": "0x20036450",
+      "registers": {
+        "0x58024400": "0x3303c025",
+        "0x58024410": "0x1b",
+        "0x58024418": "0x40",
+        "0x5802441c": "0x440",
+        "0x58024420": "0x50",
+        "0x58024428": "0x1920052",
+        "0x5802442c": "0x1ff0309",
+        "0x58024430": "0xb010e5f",
+        "0x58024434": "0x0",
+        "0x58024438": "0x1010280",
+        "0x52002000": "0x32"
+      }
+    },
+    "target_running": true,
+    "heartbeat": [
+      2037769350,
+      2037813284
+    ],
+    "elf": "246640bf79c8b1e568441a286812326dfb0ae68a0df061a0c023262c07cf221b",
+    "target_flash_segments": [
+      {
+        "address": "0x8000000",
+        "bytes": 31608,
+        "sha256": "8c44763d2bab0017e3fb2b8edae2ce138628e0a9b2c83919b1d040245f716798"
+      },
+      {
+        "address": "0x8007b78",
+        "bytes": 144,
+        "sha256": "96b68c9cac1f6cc3d0e744f80440b4d89e779b6df4ae111d69e8968c402bfd5d"
+      }
+    ],
+    "usb_capabilities": {
+      "protocol": "ZLK1",
+      "reference_hz": 199999996,
+      "link_hz": 99999998.0,
+      "features": "0x4450ffff",
+      "integrated_pl": true,
+      "max_frame": 16384,
+      "firmware_abi": 2,
+      "bulk_header_bytes": 16,
+      "serial_buffer_bytes": 2162688,
+      "fclk0_hz": 133333332,
+      "negotiated_frame": 16384,
+      "max_queue_depth": 4,
+      "dedicated_pipes": true
+    },
+    "RTT": [
+      65536,
+      536904192,
+      536904216,
+      37464064,
+      1198868341,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1660946432
+    ],
+    "HSS": [
+      134219796,
+      99999998,
+      3461169,
+      0,
+      46592,
+      0,
+      230747,
+      0,
+      873686789,
+      2237333504,
+      0,
+      1661075872
+    ],
+    "aux": [
+      0,
+      0,
+      750000,
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    "cdc_port": "COM43",
+    "cdc_echo_passed": true,
+    "probe_idle": {
+      "PS_IDCODE": "0x23727093",
+      "LEVEL_SHIFTERS": "0xf",
+      "FPGA_RESET": "0x0",
+      "BOOT_MODE": "0x0",
+      "CAPTURE": "0xa",
+      "SWD": "0x2",
+      "JQUEUE": "0x14",
+      "SQUEUE": "0x3c",
+      "AUX": "0x4",
+      "AUXFLAGS": "0x0",
+      "PACKET": "0x0",
+      "DDR": "0x2",
+      "CDMA_BASE": "0x40020000",
+      "CDMA": "0x1002"
+    }
+  },
+  "final_ocm": {
+    "time_UTC": "2026-11-23T10:04:16.373667+00:00",
+    "elf": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-usb-split-raw4-20261123\\application.elf",
+    "elf_sha256": "1379081a1caa1868fcb129686b74ce6a58825e9176a1921bcc42a1041f70ac49",
+    "downloads": false,
+    "probe_reset_or_continue": false,
+    "expected_executable_bytes": 80668,
+    "cycles": [
+      {
+        "cycle": 0,
+        "sections": [
+          {
+            "name": ".text",
+            "bytes": 78816,
+            "address": 0,
+            "equal": true,
+            "expected_sha256": "90837010f608e56b7bfb2ef8b3a2d9f4bda9face3e19d7ed654773ddb3e9350f",
+            "live_sha256": "90837010f608e56b7bfb2ef8b3a2d9f4bda9face3e19d7ed654773ddb3e9350f"
+          },
+          {
+            "name": ".ocm_text",
+            "bytes": 1828,
+            "address": 78816,
+            "equal": true,
+            "expected_sha256": "e881a808f7080af2b96a17888756ef1871634732af9e5d5e50353a13ac13e42c",
+            "live_sha256": "e881a808f7080af2b96a17888756ef1871634732af9e5d5e50353a13ac13e42c"
+          },
+          {
+            "name": ".init",
+            "bytes": 12,
+            "address": 80644,
+            "equal": true,
+            "expected_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6",
+            "live_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6"
+          },
+          {
+            "name": ".fini",
+            "bytes": 12,
+            "address": 80656,
+            "equal": true,
+            "expected_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6",
+            "live_sha256": "cd2a3d6d55cc695e84bbfa8517cc6ca0c2f328c3b6ebfa39a8e149765857aae6"
+          }
+        ],
+        "differing_addresses": [],
+        "vector_word": "ea000049"
+      }
+    ],
+    "passed": true,
+    "memoryAccess": "physical MEM-AP0; independent of CPU memory/cache context",
+    "boot_mode": 0,
+    "boot_trace": [
+      2038973450,
+      3147529585,
+      2250612313,
+      4243973684,
+      981627204,
+      4219203618,
+      982701537,
+      3677326143
+    ],
+    "clockSnapshot": {
+      "control": 1051168,
+      "source": 2,
+      "pll": 163848,
+      "bootMode": 0,
+      "FCLK_Hz": 133333332
+    },
+    "initial_FCLK_Hz": 133333332
+  }
+}
