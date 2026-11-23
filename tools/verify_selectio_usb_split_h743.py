@@ -266,7 +266,7 @@ def sram_throughput(native, mem, profile, clock_hz, base, seconds):
             native.bulk(address, n, expected)
             require(native.bulk(address, n) == expected, "speed test prefill failed")
             before = native.memory_stats()
-            count, elapsed, _, _, expected = measure_window(
+            count, elapsed, usb_elapsed, _, expected = measure_window(
                 native, direction, address, n, depth, seconds, 0, 0, expected)
             after = native.memory_stats()
             clock = native.memory_clock(profile[0], 200_000_000, clock_hz)
@@ -274,8 +274,13 @@ def sram_throughput(native, mem, profile, clock_hz, base, seconds):
                 "SRAM counter differs from host")
         require(mem.read(address, n) == expected, "SRAM performance readback differs")
         require((mem.word(address - 4), mem.word(address + n)) == guards, "SRAM performance guard differs")
+        index = int(direction == "write")
         rows[direction] = dict(clock=clock, requests=count, transaction_bytes=n, depth=depth,
-                               seconds=elapsed, MBps=count * n / elapsed / 1e6)
+                               seconds=elapsed, MBps=count * n / elapsed / 1e6,
+                               usb_call_seconds=usb_elapsed,
+                               queue_seconds=after["queue_s"][index] - before["queue_s"][index],
+                               probe_seconds=after["probe_s"][index] - before["probe_s"][index],
+                               jtag_retry_profile=after["jtag_retry_profile"] if profile[0] == 2 else None)
     return rows
 
 

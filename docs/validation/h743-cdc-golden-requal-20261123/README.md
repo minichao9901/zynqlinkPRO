@@ -52,6 +52,8 @@ PS 曾允许整个 H743 AXI SRAM，PL JTAG 队列的 AXI SRAM 窗口为 `0x24050
 
 ## H743 HCLK60 短窗性能
 
+后续同板对照已补测停核／运行、AXI SRAM／DTCM、旧版／独立端点、USB/DDR 回环和目标 WAIT。本文数字用于记录原工况，JTAG idle65 的写入重复性和 RTT 运行态瓶颈见 [吞吐差异定位](../h743-throughput-audit-20261123/README.md)。
+
 SRAM 使用 4,032 B 跨 1 KiB 页、WinUSB 队列深度 4，每方向约 2 秒，回读最终数据和前后保护字。RTT 是运行态序号源、8 KiB 环和 EP7 独立转发，逐字校验，主机吞吐不含 STOP 尾部。吞吐以十进制 MB/s 计。J-Scope 的速率按 24 MHz 计时和通过的请求周期列出。以下均为单点短筛，链路用寄存器实际读回。
 
 | 调试链路实速 | tap / slot / idle | SRAM 读／写 MB/s | RTT MB/s | J-Scope 单／八变量合格短窗 |
