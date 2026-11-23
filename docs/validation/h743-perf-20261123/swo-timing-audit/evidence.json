@@ -1,0 +1,968 @@
+{
+  "tap_edges": [
+    {
+      "mode": "sparse",
+      "duty": 2,
+      "fall_intervals_ns": {
+        "5.0": 4,
+        "10.0": 256,
+        "65.0": 3
+      },
+      "data_match": true,
+      "sampled_mismatches": 0,
+      "compared_chips": 568
+    },
+    {
+      "mode": "sparse",
+      "duty": 3,
+      "fall_intervals_ns": {
+        "5.0": 4,
+        "10.0": 256,
+        "65.0": 3
+      },
+      "data_match": false,
+      "sampled_mismatches": 153,
+      "compared_chips": 568
+    },
+    {
+      "mode": "sparse",
+      "duty": 4,
+      "fall_intervals_ns": {
+        "5.0": 4,
+        "10.0": 256,
+        "65.0": 3
+      },
+      "data_match": true,
+      "sampled_mismatches": 0,
+      "compared_chips": 568
+    },
+    {
+      "mode": "mixed-a",
+      "duty": 2,
+      "fall_intervals_ns": {
+        "5.0": 278,
+        "10.0": 120,
+        "65.0": 2,
+        "60.0": 1
+      },
+      "data_match": false,
+      "sampled_mismatches": 301,
+      "compared_chips": 568
+    },
+    {
+      "mode": "mixed-a",
+      "duty": 3,
+      "fall_intervals_ns": {
+        "5.0": 278,
+        "10.0": 120,
+        "65.0": 2,
+        "60.0": 1
+      },
+      "data_match": false,
+      "sampled_mismatches": 305,
+      "compared_chips": 568
+    },
+    {
+      "mode": "mixed-a",
+      "duty": 4,
+      "fall_intervals_ns": {
+        "5.0": 278,
+        "10.0": 120,
+        "65.0": 2,
+        "60.0": 1
+      },
+      "data_match": false,
+      "sampled_mismatches": 303,
+      "compared_chips": 568
+    },
+    {
+      "mode": "mixed-b",
+      "duty": 2,
+      "fall_intervals_ns": {
+        "5.0": 234,
+        "10.0": 142,
+        "60.0": 2,
+        "65.0": 1
+      },
+      "data_match": false,
+      "sampled_mismatches": 301,
+      "compared_chips": 568
+    },
+    {
+      "mode": "mixed-b",
+      "duty": 3,
+      "fall_intervals_ns": {
+        "5.0": 234,
+        "10.0": 142,
+        "60.0": 2,
+        "65.0": 1
+      },
+      "data_match": false,
+      "sampled_mismatches": 304,
+      "compared_chips": 568
+    },
+    {
+      "mode": "mixed-b",
+      "duty": 4,
+      "fall_intervals_ns": {
+        "5.0": 234,
+        "10.0": 142,
+        "60.0": 2,
+        "65.0": 1
+      },
+      "data_match": false,
+      "sampled_mismatches": 304,
+      "compared_chips": 568
+    }
+  ],
+  "timing_model": {
+    "source": "ideal digital source with fixed bit period and shifted start; receiver programmed 100 nominal",
+    "results": [
+      {
+        "encoding": "nrz",
+        "phase": 0,
+        "bit_ns": 9.9,
+        "initial_offset_ns": 0.05,
+        "expected_bytes": 128,
+        "received_bytes": 128,
+        "framing_errors": 0,
+        "mismatches": 0,
+        "passed": true
+      },
+      {
+        "encoding": "nrz",
+        "phase": 0,
+        "bit_ns": 9.9,
+        "initial_offset_ns": 0.6,
+        "expected_bytes": 128,
+        "received_bytes": 128,
+        "framing_errors": 0,
+        "mismatches": 0,
+        "passed": true
+      },
+      {
+        "encoding": "nrz",
+        "phase": 0,
+        "bit_ns": 9.9,
+        "initial_offset_ns": 1.15,
+        "expected_bytes": 128,
+        "received_bytes": 128,
+        "framing_errors": 0,
+        "mismatches": 0,
+        "passed": true
+      },
+      {
+        "encoding": "nrz",
+        "phase": 0,
+        "bit_ns": 9.95,
+        "initial_offset_ns": 0.05,
+        "expected_bytes": 128,
+        "received_bytes": 128,
+        "framing_errors": 0,
+        "mismatches": 0,
+        "passed": true
+      },
+      {
+        "encoding": "nrz",
+        "phase": 0,
+        "bit_ns": 9.95,
+        "initial_offset_ns": 0.6,
+        "expected_bytes": 128,
+        "received_bytes": 128,
+        "framing_errors": 0,
+        "mismatches": 0,
+        "passed": true
+      },
+      {
+        "encoding": "nrz",
+        "phase": 0,
+        "bit_ns": 9.95,
+        "initial_offset_ns": 1.15,
+        "expected_bytes": 128,
+        "received_bytes": 128,
+        "framing_errors": 0,
+        "mismatches": 0,
+        "passed": true
+      },
+      {
+        "encoding": "nrz",
+        "phase": 0,
+        "bit_ns": 9.98,
+        "initial_offset_ns": 0.05,
+        "expected_bytes": 128,
+        "received_bytes": 128,
+        "framing_errors": 0,
+        "mismatches": 0,
+        "passed": true
+      },
+      {
+        "encoding": "nrz",
+        "phase": 0,
+        "bit_ns": 9.98,
+        "initial_offset_ns": 0.6,
+        "expected_bytes": 128,
+        "received_bytes": 128,
+        "framing_errors": 0,
+        "mismatches": 0,
+        "passed": true
+      },
+      {
+        "encoding": "nrz",
+        "phase": 0,
+        "bit_ns": 9.98,
+        "initial_offset_ns": 1.15,
+        "expected_bytes": 128,
+        "received_bytes": 128,
+        "framing_errors": 0,
+        "mismatches": 0,
+        "passed": true
+      },
+      {
+        "encoding": "nrz",
+        "phase": 0,
+        "bit_ns": 10.0,
+        "initial_offset_ns": 0.05,
+        "expected_bytes": 128,
+        "received_bytes": 128,
+        "framing_errors": 0,
+        "mismatches": 0,
+        "passed": true
+      },
+      {
+        "encoding": "nrz",
+        "phase": 0,
+        "bit_ns": 10.0,
+        "initial_offset_ns": 0.6,
+        "expected_bytes": 128,
+        "received_bytes": 128,
+        "framing_errors": 0,
+        "mismatches": 0,
+        "passed": true
+      },
+      {
+        "encoding": "nrz",
+        "phase": 0,
+        "bit_ns": 10.0,
+        "initial_offset_ns": 1.15,
+        "expected_bytes": 128,
+        "received_bytes": 128,
+        "framing_errors": 0,
+        "mismatches": 0,
+        "passed": true
+      },
+      {
+        "encoding": "nrz",
+        "phase": 0,
+        "bit_ns": 10.02,
+        "initial_offset_ns": 0.05,
+        "expected_bytes": 128,
+        "received_bytes": 128,
+        "framing_errors": 0,
+        "mismatches": 0,
+        "passed": true
+      },
+      {
+        "encoding": "nrz",
+        "phase": 0,
+        "bit_ns": 10.02,
+        "initial_offset_ns": 0.6,
+        "expected_bytes": 128,
+        "received_bytes": 128,
+        "framing_errors": 0,
+        "mismatches": 0,
+        "passed": true
+      },
+      {
+        "encoding": "nrz",
+        "phase": 0,
+        "bit_ns": 10.02,
+        "initial_offset_ns": 1.15,
+        "expected_bytes": 128,
+        "received_bytes": 128,
+        "framing_errors": 0,
+        "mismatches": 0,
+        "passed": true
+      },
+      {
+        "encoding": "nrz",
+        "phase": 0,
+        "bit_ns": 10.05,
+        "initial_offset_ns": 0.05,
+        "expected_bytes": 128,
+        "received_bytes": 128,
+        "framing_errors": 0,
+        "mismatches": 0,
+        "passed": true
+      },
+      {
+        "encoding": "nrz",
+        "phase": 0,
+        "bit_ns": 10.05,
+        "initial_offset_ns": 0.6,
+        "expected_bytes": 128,
+        "received_bytes": 128,
+        "framing_errors": 0,
+        "mismatches": 0,
+        "passed": true
+      },
+      {
+        "encoding": "nrz",
+        "phase": 0,
+        "bit_ns": 10.05,
+        "initial_offset_ns": 1.15,
+        "expected_bytes": 128,
+        "received_bytes": 128,
+        "framing_errors": 0,
+        "mismatches": 0,
+        "passed": true
+      },
+      {
+        "encoding": "nrz",
+        "phase": 0,
+        "bit_ns": 10.1,
+        "initial_offset_ns": 0.05,
+        "expected_bytes": 128,
+        "received_bytes": 128,
+        "framing_errors": 0,
+        "mismatches": 0,
+        "passed": true
+      },
+      {
+        "encoding": "nrz",
+        "phase": 0,
+        "bit_ns": 10.1,
+        "initial_offset_ns": 0.6,
+        "expected_bytes": 128,
+        "received_bytes": 128,
+        "framing_errors": 0,
+        "mismatches": 0,
+        "passed": true
+      },
+      {
+        "encoding": "nrz",
+        "phase": 0,
+        "bit_ns": 10.1,
+        "initial_offset_ns": 1.15,
+        "expected_bytes": 128,
+        "received_bytes": 128,
+        "framing_errors": 0,
+        "mismatches": 0,
+        "passed": true
+      },
+      {
+        "encoding": "manchester",
+        "phase": 0,
+        "bit_ns": 9.9,
+        "initial_offset_ns": 0.05,
+        "expected_bytes": 576,
+        "received_bytes": 114,
+        "framing_errors": 209,
+        "mismatches": 108,
+        "passed": false
+      },
+      {
+        "encoding": "manchester",
+        "phase": 0,
+        "bit_ns": 9.9,
+        "initial_offset_ns": 0.6,
+        "expected_bytes": 576,
+        "received_bytes": 137,
+        "framing_errors": 193,
+        "mismatches": 133,
+        "passed": false
+      },
+      {
+        "encoding": "manchester",
+        "phase": 0,
+        "bit_ns": 9.9,
+        "initial_offset_ns": 1.15,
+        "expected_bytes": 576,
+        "received_bytes": 138,
+        "framing_errors": 201,
+        "mismatches": 129,
+        "passed": false
+      },
+      {
+        "encoding": "manchester",
+        "phase": 0,
+        "bit_ns": 9.95,
+        "initial_offset_ns": 0.05,
+        "expected_bytes": 576,
+        "received_bytes": 399,
+        "framing_errors": 51,
+        "mismatches": 369,
+        "passed": false
+      },
+      {
+        "encoding": "manchester",
+        "phase": 0,
+        "bit_ns": 9.95,
+        "initial_offset_ns": 0.6,
+        "expected_bytes": 576,
+        "received_bytes": 399,
+        "framing_errors": 48,
+        "mismatches": 370,
+        "passed": false
+      },
+      {
+        "encoding": "manchester",
+        "phase": 0,
+        "bit_ns": 9.95,
+        "initial_offset_ns": 1.15,
+        "expected_bytes": 576,
+        "received_bytes": 404,
+        "framing_errors": 47,
+        "mismatches": 383,
+        "passed": false
+      },
+      {
+        "encoding": "manchester",
+        "phase": 0,
+        "bit_ns": 9.98,
+        "initial_offset_ns": 0.05,
+        "expected_bytes": 576,
+        "received_bytes": 576,
+        "framing_errors": 0,
+        "mismatches": 0,
+        "passed": true
+      },
+      {
+        "encoding": "manchester",
+        "phase": 0,
+        "bit_ns": 9.98,
+        "initial_offset_ns": 0.6,
+        "expected_bytes": 576,
+        "received_bytes": 576,
+        "framing_errors": 0,
+        "mismatches": 0,
+        "passed": true
+      },
+      {
+        "encoding": "manchester",
+        "phase": 0,
+        "bit_ns": 9.98,
+        "initial_offset_ns": 1.15,
+        "expected_bytes": 576,
+        "received_bytes": 576,
+        "framing_errors": 0,
+        "mismatches": 0,
+        "passed": true
+      },
+      {
+        "encoding": "manchester",
+        "phase": 0,
+        "bit_ns": 10.0,
+        "initial_offset_ns": 0.05,
+        "expected_bytes": 576,
+        "received_bytes": 576,
+        "framing_errors": 0,
+        "mismatches": 0,
+        "passed": true
+      },
+      {
+        "encoding": "manchester",
+        "phase": 0,
+        "bit_ns": 10.0,
+        "initial_offset_ns": 0.6,
+        "expected_bytes": 576,
+        "received_bytes": 576,
+        "framing_errors": 0,
+        "mismatches": 0,
+        "passed": true
+      },
+      {
+        "encoding": "manchester",
+        "phase": 0,
+        "bit_ns": 10.0,
+        "initial_offset_ns": 1.15,
+        "expected_bytes": 576,
+        "received_bytes": 576,
+        "framing_errors": 0,
+        "mismatches": 0,
+        "passed": true
+      },
+      {
+        "encoding": "manchester",
+        "phase": 0,
+        "bit_ns": 10.02,
+        "initial_offset_ns": 0.05,
+        "expected_bytes": 576,
+        "received_bytes": 576,
+        "framing_errors": 0,
+        "mismatches": 0,
+        "passed": true
+      },
+      {
+        "encoding": "manchester",
+        "phase": 0,
+        "bit_ns": 10.02,
+        "initial_offset_ns": 0.6,
+        "expected_bytes": 576,
+        "received_bytes": 568,
+        "framing_errors": 1,
+        "mismatches": 0,
+        "passed": false
+      },
+      {
+        "encoding": "manchester",
+        "phase": 0,
+        "bit_ns": 10.02,
+        "initial_offset_ns": 1.15,
+        "expected_bytes": 576,
+        "received_bytes": 576,
+        "framing_errors": 0,
+        "mismatches": 0,
+        "passed": true
+      },
+      {
+        "encoding": "manchester",
+        "phase": 0,
+        "bit_ns": 10.05,
+        "initial_offset_ns": 0.05,
+        "expected_bytes": 576,
+        "received_bytes": 211,
+        "framing_errors": 141,
+        "mismatches": 205,
+        "passed": false
+      },
+      {
+        "encoding": "manchester",
+        "phase": 0,
+        "bit_ns": 10.05,
+        "initial_offset_ns": 0.6,
+        "expected_bytes": 576,
+        "received_bytes": 171,
+        "framing_errors": 184,
+        "mismatches": 160,
+        "passed": false
+      },
+      {
+        "encoding": "manchester",
+        "phase": 0,
+        "bit_ns": 10.05,
+        "initial_offset_ns": 1.15,
+        "expected_bytes": 576,
+        "received_bytes": 207,
+        "framing_errors": 145,
+        "mismatches": 200,
+        "passed": false
+      },
+      {
+        "encoding": "manchester",
+        "phase": 0,
+        "bit_ns": 10.1,
+        "initial_offset_ns": 0.05,
+        "expected_bytes": 576,
+        "received_bytes": 64,
+        "framing_errors": 334,
+        "mismatches": 62,
+        "passed": false
+      },
+      {
+        "encoding": "manchester",
+        "phase": 0,
+        "bit_ns": 10.1,
+        "initial_offset_ns": 0.6,
+        "expected_bytes": 576,
+        "received_bytes": 73,
+        "framing_errors": 331,
+        "mismatches": 68,
+        "passed": false
+      },
+      {
+        "encoding": "manchester",
+        "phase": 0,
+        "bit_ns": 10.1,
+        "initial_offset_ns": 1.15,
+        "expected_bytes": 576,
+        "received_bytes": 74,
+        "framing_errors": 314,
+        "mismatches": 71,
+        "passed": false
+      },
+      {
+        "encoding": "manchester",
+        "phase": 1,
+        "bit_ns": 9.9,
+        "initial_offset_ns": 0.05,
+        "expected_bytes": 576,
+        "received_bytes": 63,
+        "framing_errors": 325,
+        "mismatches": 60,
+        "passed": false
+      },
+      {
+        "encoding": "manchester",
+        "phase": 1,
+        "bit_ns": 9.9,
+        "initial_offset_ns": 0.6,
+        "expected_bytes": 576,
+        "received_bytes": 58,
+        "framing_errors": 325,
+        "mismatches": 57,
+        "passed": false
+      },
+      {
+        "encoding": "manchester",
+        "phase": 1,
+        "bit_ns": 9.9,
+        "initial_offset_ns": 1.15,
+        "expected_bytes": 576,
+        "received_bytes": 60,
+        "framing_errors": 327,
+        "mismatches": 57,
+        "passed": false
+      },
+      {
+        "encoding": "manchester",
+        "phase": 1,
+        "bit_ns": 9.95,
+        "initial_offset_ns": 0.05,
+        "expected_bytes": 576,
+        "received_bytes": 146,
+        "framing_errors": 186,
+        "mismatches": 135,
+        "passed": false
+      },
+      {
+        "encoding": "manchester",
+        "phase": 1,
+        "bit_ns": 9.95,
+        "initial_offset_ns": 0.6,
+        "expected_bytes": 576,
+        "received_bytes": 187,
+        "framing_errors": 150,
+        "mismatches": 176,
+        "passed": false
+      },
+      {
+        "encoding": "manchester",
+        "phase": 1,
+        "bit_ns": 9.95,
+        "initial_offset_ns": 1.15,
+        "expected_bytes": 576,
+        "received_bytes": 159,
+        "framing_errors": 167,
+        "mismatches": 151,
+        "passed": false
+      },
+      {
+        "encoding": "manchester",
+        "phase": 1,
+        "bit_ns": 9.98,
+        "initial_offset_ns": 0.05,
+        "expected_bytes": 576,
+        "received_bytes": 576,
+        "framing_errors": 0,
+        "mismatches": 0,
+        "passed": true
+      },
+      {
+        "encoding": "manchester",
+        "phase": 1,
+        "bit_ns": 9.98,
+        "initial_offset_ns": 0.6,
+        "expected_bytes": 576,
+        "received_bytes": 576,
+        "framing_errors": 0,
+        "mismatches": 0,
+        "passed": true
+      },
+      {
+        "encoding": "manchester",
+        "phase": 1,
+        "bit_ns": 9.98,
+        "initial_offset_ns": 1.15,
+        "expected_bytes": 576,
+        "received_bytes": 568,
+        "framing_errors": 1,
+        "mismatches": 467,
+        "passed": false
+      },
+      {
+        "encoding": "manchester",
+        "phase": 1,
+        "bit_ns": 10.0,
+        "initial_offset_ns": 0.05,
+        "expected_bytes": 576,
+        "received_bytes": 576,
+        "framing_errors": 0,
+        "mismatches": 0,
+        "passed": true
+      },
+      {
+        "encoding": "manchester",
+        "phase": 1,
+        "bit_ns": 10.0,
+        "initial_offset_ns": 0.6,
+        "expected_bytes": 576,
+        "received_bytes": 576,
+        "framing_errors": 0,
+        "mismatches": 0,
+        "passed": true
+      },
+      {
+        "encoding": "manchester",
+        "phase": 1,
+        "bit_ns": 10.0,
+        "initial_offset_ns": 1.15,
+        "expected_bytes": 576,
+        "received_bytes": 576,
+        "framing_errors": 0,
+        "mismatches": 0,
+        "passed": true
+      },
+      {
+        "encoding": "manchester",
+        "phase": 1,
+        "bit_ns": 10.02,
+        "initial_offset_ns": 0.05,
+        "expected_bytes": 576,
+        "received_bytes": 576,
+        "framing_errors": 0,
+        "mismatches": 0,
+        "passed": true
+      },
+      {
+        "encoding": "manchester",
+        "phase": 1,
+        "bit_ns": 10.02,
+        "initial_offset_ns": 0.6,
+        "expected_bytes": 576,
+        "received_bytes": 576,
+        "framing_errors": 0,
+        "mismatches": 0,
+        "passed": true
+      },
+      {
+        "encoding": "manchester",
+        "phase": 1,
+        "bit_ns": 10.02,
+        "initial_offset_ns": 1.15,
+        "expected_bytes": 576,
+        "received_bytes": 576,
+        "framing_errors": 0,
+        "mismatches": 0,
+        "passed": true
+      },
+      {
+        "encoding": "manchester",
+        "phase": 1,
+        "bit_ns": 10.05,
+        "initial_offset_ns": 0.05,
+        "expected_bytes": 576,
+        "received_bytes": 452,
+        "framing_errors": 31,
+        "mismatches": 387,
+        "passed": false
+      },
+      {
+        "encoding": "manchester",
+        "phase": 1,
+        "bit_ns": 10.05,
+        "initial_offset_ns": 0.6,
+        "expected_bytes": 576,
+        "received_bytes": 452,
+        "framing_errors": 35,
+        "mismatches": 422,
+        "passed": false
+      },
+      {
+        "encoding": "manchester",
+        "phase": 1,
+        "bit_ns": 10.05,
+        "initial_offset_ns": 1.15,
+        "expected_bytes": 576,
+        "received_bytes": 465,
+        "framing_errors": 35,
+        "mismatches": 442,
+        "passed": false
+      },
+      {
+        "encoding": "manchester",
+        "phase": 1,
+        "bit_ns": 10.1,
+        "initial_offset_ns": 0.05,
+        "expected_bytes": 576,
+        "received_bytes": 154,
+        "framing_errors": 189,
+        "mismatches": 144,
+        "passed": false
+      },
+      {
+        "encoding": "manchester",
+        "phase": 1,
+        "bit_ns": 10.1,
+        "initial_offset_ns": 0.6,
+        "expected_bytes": 576,
+        "received_bytes": 153,
+        "framing_errors": 193,
+        "mismatches": 147,
+        "passed": false
+      },
+      {
+        "encoding": "manchester",
+        "phase": 1,
+        "bit_ns": 10.1,
+        "initial_offset_ns": 1.15,
+        "expected_bytes": 576,
+        "received_bytes": 159,
+        "framing_errors": 180,
+        "mismatches": 146,
+        "passed": false
+      }
+    ]
+  },
+  "stock_serial_sim": [
+    "SERIAL_PASS manchester=0 bit_ns=10.000 bytes=         64",
+    "SERIAL_PASS manchester=0 bit_ns=41.667 bytes=         64",
+    "SERIAL_PASS manchester=0 bit_ns=8680.556 bytes=          4",
+    "SERIAL_PASS manchester=1 bit_ns=10.000 bytes=        288",
+    "SERIAL_PASS manchester=1 bit_ns=9.995 bytes=        576",
+    "SERIAL_PASS manchester=1 bit_ns=10.005 bytes=        576",
+    "SERIAL_PASS manchester=1 bit_ns=9.995 bytes=        576",
+    "SERIAL_PASS manchester=1 bit_ns=10.005 bytes=        576",
+    "SERIAL_PASS manchester=1 bit_ns=41.667 bytes=        288",
+    "SERIAL_PASS manchester=1 bit_ns=80.000 bytes=        288"
+  ],
+  "native_ap2": {
+    "restored": false,
+    "diagnostics": [
+      {
+        "register": "swo_peripheral_id",
+        "address": "0xe00e3fe0",
+        "value": "0x14"
+      },
+      {
+        "register": "swo_lock",
+        "address": "0xe00e3fb4",
+        "value": "0x0"
+      }
+    ],
+    "dev_id": "0x20036450",
+    "previous_dbg_cr": "0x0",
+    "error": "RuntimeError('AP2 req 0xf: 050102')",
+    "recovery_error": "RuntimeError('AP2 req 0x1: 050104')"
+  },
+  "probe_load": {
+    "operation": "JTAG/RAM",
+    "dryRun": false,
+    "out": "E:\\zynqlinkPRO-efficiency\\build\\h743-400-20261123\\replug2-load",
+    "files": {
+      "bit": {
+        "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-spi-cdc-rx-guard-20261123\\probe.bit",
+        "sha256": "f3c4ccfd78c9148649897a0902fb93eadb209494e0295956981c973bbac92c66"
+      },
+      "zynq_elf": {
+        "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-spi-cdc-rx-guard-20261123\\application.elf",
+        "sha256": "e1f21ea8d5aa6403f4f2ab78da0a3215cea11862cb852dd9e37e413248068b90"
+      },
+      "ps_init": {
+        "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-spi-cdc-rx-guard-20261123\\ps7_init.tcl",
+        "sha256": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+      }
+    },
+    "commands": {
+      "load": [
+        "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "E:\\zynqlinkPRO-efficiency\\tools\\run_xsct.py",
+        "E:\\zynqlinkPRO-efficiency\\tools\\download_dap_fpga.tcl",
+        "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-spi-cdc-rx-guard-20261123\\application.elf",
+        "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-spi-cdc-rx-guard-20261123\\probe.bit",
+        "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-spi-cdc-rx-guard-20261123\\ps7_init.tcl",
+        "--sdk",
+        "E:\\Xilinx\\SDK\\2018.3"
+      ],
+      "verify": [
+        "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "E:\\zynqlinkPRO-efficiency\\tools\\verify_probe_ocm_code.py",
+        "--elf",
+        "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-spi-cdc-rx-guard-20261123\\application.elf",
+        "--out-dir",
+        "E:\\zynqlinkPRO-efficiency\\build\\h743-400-20261123\\replug2-load\\ocm",
+        "--sdk",
+        "E:\\Xilinx\\SDK\\2018.3"
+      ]
+    },
+    "stage": "complete",
+    "passed": true,
+    "streams": {},
+    "before": {
+      "PS_IDCODE": "0x23727093",
+      "LEVEL_SHIFTERS": "0x0",
+      "FPGA_RESET": "0x1f33f0f",
+      "BOOT_MODE": "0x0"
+    },
+    "verifiedBytes": 80260,
+    "FCLK_Hz": 133333332
+  },
+  "recovery_readbacks": [
+    {
+      "port": "swd",
+      "setup": "0501017724a06b",
+      "abort": "0800",
+      "dp_ctrl": "050101400000f8",
+      "cpuid": "0x411fc271",
+      "dhcsr": "0x2010000",
+      "cfgr": "0x0",
+      "error": "AssertionError('06000002')"
+    },
+    {
+      "port": "jtag",
+      "error": "RuntimeError('Invalid ARM JTAG IDCODE: 16 00 00 00 00 00')"
+    }
+  ],
+  "target_readonly": {
+    "verified_running": false,
+    "dpidr": "0501017724a06b",
+    "dp_abort": "0800",
+    "error": "AssertionError()"
+  },
+  "probe_final": {
+    "operation": "check",
+    "dryRun": false,
+    "out": "E:\\zynqlinkPRO-efficiency\\build\\h743-400-20261123\\replug2-final-probe",
+    "files": {
+      "bit": {
+        "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-spi-cdc-rx-guard-20261123\\probe.bit",
+        "sha256": "f3c4ccfd78c9148649897a0902fb93eadb209494e0295956981c973bbac92c66"
+      },
+      "zynq_elf": {
+        "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-spi-cdc-rx-guard-20261123\\application.elf",
+        "sha256": "e1f21ea8d5aa6403f4f2ab78da0a3215cea11862cb852dd9e37e413248068b90"
+      },
+      "ps_init": {
+        "path": "E:\\zynqlinkPRO-efficiency\\prebuilt\\selectio-spi-cdc-rx-guard-20261123\\ps7_init.tcl",
+        "sha256": "ec37b1f5075a78cd6a981dfedc122445cc2359277a9641baeb4f148c7a311d36"
+      }
+    },
+    "stage": "complete",
+    "passed": true,
+    "streams": {
+      "rtt": 65536,
+      "hss": 20
+    },
+    "before": {
+      "PS_IDCODE": "0x23727093",
+      "LEVEL_SHIFTERS": "0xf",
+      "FPGA_RESET": "0x0",
+      "BOOT_MODE": "0x0",
+      "CAPTURE": "0x8",
+      "SWD": "0x4",
+      "JQUEUE": "0x14",
+      "SQUEUE": "0x38",
+      "AUX": "0x0",
+      "AUXFLAGS": "0x0",
+      "PACKET": "0x0",
+      "DDR": "0x0",
+      "CDMA_BASE": "0x40020000",
+      "CDMA": "0x1002"
+    }
+  },
+  "inspect_only": true,
+  "probe_firmware_changed": false
+}
