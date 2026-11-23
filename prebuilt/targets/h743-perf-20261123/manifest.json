@@ -1,0 +1,20 @@
+{
+  "elf_sha256": "d904ce6777dd7347ab709cf17faba13ac7f7f5d6e53b8c77fec1f20d716db368",
+  "load_kind": "RAM",
+  "entry": "0x24070001",
+  "mailbox": "0x24071000",
+  "source": "profile.c",
+  "allowed_cpus_mhz": [
+    400,
+    480
+  ],
+  "build_options": [
+    "-mcpu=cortex-m7",
+    "-mthumb",
+    "-Os",
+    "-ffreestanding",
+    "-nostdlib",
+    "-Wl,-Ttext=0x24070000,-e,h743_perf_entry,--build-id=none"
+  ],
+  "probe_changes": false
+}
